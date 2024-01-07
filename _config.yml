@@ -1,15 +1,15 @@
 # Site Settings
 lang: en
-title: Bulma Clean Theme
+title: Bulma Clean Theme_Hawk
 tagline: Bulma Clean Theme
-email: your-email@domain.com
+email: hawking90a@gmail.com
 description: >
   The demo site for Bulma Clean Theme, made for Jekyll and GitHub pages websites
 baseurl: "/bulma-clean-theme"
-url: "https://www.csrhymes.com"
+url: "https://hawk90.github.io"
 permalink: pretty
 #favicon: /path/to/favicon.png
-gh_sponsor: chrisrhymes
+gh_sponsor: hawk90
 remote_theme: chrisrhymes/bulma-clean-theme
 #hide_share_buttons: true
 #theme_color: '#eeeeee'
