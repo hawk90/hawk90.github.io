@@ -11,7 +11,7 @@ toc: true
 
 Call outs allow you to create a section on a page that has items with an icon, title, subtitle, description and a link. You can use them to promote features or links to important pages in your site and create a landing page.
 
-[View the example landing page](/bulma-clean-theme/landing/) 
+[View the example landing page](/landing/) 
 
 ## Create a callout data file
 
