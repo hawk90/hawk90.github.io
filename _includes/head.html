@@ -1,38 +1,22 @@
 <head>
-  <meta charset="UTF-8">
-  <link href="http://gmpg.org/xfn/11" rel="profile">
-
-  <!-- Enable responsiveness on mobile devices-->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-
-  <meta property="og:title" content="{{ site.title }}">
-  <meta property="og:site_name" content="{{ site.brand_name }}">
-  <meta property="og:url" content="{{site.url }}{{ site.baseurl }}">
-  <meta property="og:description" content="{{ site.description }}">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="{{site.url }}{{ site.baseurl }}/assets/{{ site.meta_image }}">
-
-  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.0.1/css/unicons.css">
-
-  <title>
-    {% if page.title == "Home" %}
-      {{ site.title }} | {{ site.tagline }}
-    {% else %}
-      {{ page.title }} | {{ site.title }}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content={{ site.theme_color | default: '#ffffff' }}>
+    <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/app.css">
+    <link rel="shortcut icon" type="image/png"
+          {% if site.favicon %} href="{{ site.favicon | relative_url }}" {% else %} href="{{ site.baseurl }}/favicon.png" {% endif %}
+    />
+    <script defer src="https://unpkg.com/alpinejs@3.9.0/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+    {% unless site.hide_share_buttons %}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-social@1/bin/bulma-social.min.css">
+    {% endunless %}
+    {% seo %}
+    {% if site.feed %}
+    {% feed_meta %}
     {% endif %}
-  </title>
-
-
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="{{ site.baseurl }}/css/styles.css">
-  <link rel="stylesheet" href="{{ site.url }}{{ site.baseurl }}/css/styles.css">
-
-
-
-  <!-- Icons -->
-  <link rel="shortcut icon" href="{{ site.url }}{{ site.baseurl }}/public/favicon.ico">
-
-  <!-- RSS -->
-  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ site.baseurl }}atom.xml">
+    {%- if site.google_analytics -%}
+      {%- include google-analytics.html -%}
+    {%- endif -%}
+    {%- include head-scripts.html -%}
 </head>
