@@ -28,7 +28,7 @@ remote_theme: chrisrhymes/bulma-clean-theme
 
 ## Documentation
 
-For full instructions, please see the [Documentation](/bulma-clean-theme/docs/)
+For full instructions, please see the [Documentation](/docs/)
 
 ## Page Layouts
 
