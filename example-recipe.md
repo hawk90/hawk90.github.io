@@ -6,8 +6,8 @@ description: An example recipe page
 author: CS Rhymes
 date: 2021-03-02
 show_sidebar: false
-image: /bulma-clan-theme/img/recipe-example.jpg
-hero_image: /bulma-clean-theme/img/recipe-example.jpg
+image: /img/recipe-example.jpg
+hero_image: /img/recipe-example.jpg
 hero_darken: true
 ingredients:
     - 1tsp vegetable oil
@@ -57,8 +57,8 @@ subtitle: Tastes great and easy to cook
 author: CS Rhymes
 date: 2021-03-02
 show_sidebar: false
-image: /bulma-clan-theme/img/recipe-example.jpg
-hero_image: /bulma-clean-theme/img/recipe-example.jpg
+image: /img/recipe-example.jpg
+hero_image: /img/recipe-example.jpg
 ingredients:
     - 1tsp vegetable oil
     - 2 Carrots, finely diced
