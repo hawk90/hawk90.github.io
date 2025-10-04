@@ -9,8 +9,9 @@
   <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content=#ffffff>
+  <meta name="theme-color" content=#6B46C1>
   <link rel="stylesheet" href="/assets/css/app.css" />
+  <link rel="stylesheet" href="/assets/css/purple-theme.css" />
   <link
     rel="shortcut icon"
     type="image/png"
@@ -35,14 +36,14 @@
 <meta property="og:locale" content="en" />
 <meta name="description" content="Hawks’ GitHub pages websites" />
 <meta property="og:description" content="Hawks’ GitHub pages websites" />
-<link rel="canonical" href="http://localhost:4000/blog/" />
-<meta property="og:url" content="http://localhost:4000/blog/" />
+<link rel="canonical" href="http://0.0.0.0:4000/blog/" />
+<meta property="og:url" content="http://0.0.0.0:4000/blog/" />
 <meta property="og:site_name" content="Hawk" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Blog" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","description":"Hawks’ GitHub pages websites","headline":"Blog","url":"http://localhost:4000/blog/"}</script>
+{"@context":"https://schema.org","@type":"WebPage","description":"Hawks’ GitHub pages websites","headline":"Blog","url":"http://0.0.0.0:4000/blog/"}</script>
 <!-- End Jekyll SEO tag -->
  <!-- head scripts --></head>
 
@@ -61,7 +62,6 @@
         </div>
         <div class="navbar-menu" id="navMenu" :class="{ 'is-active': openNav }">
             <div class="navbar-start">
-                <a href="/" class="navbar-item ">Home</a>
                 
                 
                     
@@ -90,7 +90,7 @@
   <div class="hero-body ">
     <div class="container">
       <h1 class="title is-2">Blog</h1>
-      <p class="subtitle is-3"></p>
+      <p class="subtitle is-3">System & Firmware Development</p>
       
     </div>
   </div>
@@ -101,7 +101,7 @@
       <div class="container">
         <div class="columns is-multiline">
           
-          <div class="column is-12">
+          <div class="column is-8">
             
  
  
@@ -141,6 +141,259 @@
 </div>
 </div>
 
+          </div>
+          
+          <div class="column is-4-desktop is-4-tablet">
+            <aside class="menu">
+  <!-- 검색 박스 -->
+  <div class="field">
+    <p class="control has-icons-left">
+      <input class="input" type="text" id="search-box" placeholder="검색...">
+      <span class="icon is-small is-left">
+        <i>🔍</i>
+      </span>
+    </p>
+  </div>
+
+  <!-- 검색 결과 -->
+  <div id="search-results" class="is-hidden mb-3">
+    <p class="menu-label">검색 결과</p>
+    <ul class="menu-list" id="search-results-list"></ul>
+  </div>
+
+  <!-- 카테고리 트리 -->
+  <p class="menu-label">Categories</p>
+  <div id="category-tree" class="menu-list">
+    <!-- JavaScript로 동적 생성 -->
+  </div>
+</aside>
+
+<!-- 포스트 데이터를 JavaScript로 전달 -->
+<script>
+const posts = [
+  
+];
+
+// 폴더 구조를 트리로 변환
+function buildCategoryTree(posts) {
+  const tree = {};
+
+  posts.forEach(post => {
+    const pathParts = post.path.split('/').slice(1, -1); // _posts 제거, 파일명 제거
+
+    let current = tree;
+    pathParts.forEach((part, index) => {
+      if (!current[part]) {
+        current[part] = {
+          name: part,
+          posts: [],
+          children: {}
+        };
+      }
+
+      if (index === pathParts.length - 1) {
+        current[part].posts.push(post);
+      }
+
+      current = current[part].children;
+    });
+  });
+
+  return tree;
+}
+
+// HTML 생성
+function renderTree(tree, level = 0) {
+  let html = '<ul class="menu-list">';
+
+  Object.keys(tree).sort().forEach(key => {
+    const node = tree[key];
+    const id = key.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    const hasChildren = Object.keys(node.children).length > 0;
+    const hasPosts = node.posts.length > 0;
+
+    if (level === 0) {
+      // 메인 카테고리
+      html += `
+        <li>
+          <a href="#" class="has-text-weight-semibold category-toggle" data-category="${id}">
+            📁 ${node.name}
+          </a>
+          <ul class="is-hidden" id="posts-${id}">
+      `;
+
+      // 서브 카테고리
+      if (hasChildren) {
+        Object.keys(node.children).sort().forEach(childKey => {
+          const child = node.children[childKey];
+          const childId = childKey.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
+          html += `
+            <li>
+              <a href="#" class="category-toggle pl-3" data-category="${id}-${childId}">
+                📂 ${child.name}
+              </a>
+              <ul class="is-hidden pl-3" id="posts-${id}-${childId}">
+          `;
+
+          // 서브 카테고리의 포스트들
+          child.posts.forEach(post => {
+            html += `<li><a href="${post.url}" class="is-size-7">${post.title.substring(0, 30)}${post.title.length > 30 ? '...' : ''}</a></li>`;
+          });
+
+          html += `</ul></li>`;
+        });
+      }
+
+      // 메인 카테고리 직속 포스트들
+      node.posts.forEach(post => {
+        html += `<li><a href="${post.url}" class="is-size-7">${post.title.substring(0, 30)}${post.title.length > 30 ? '...' : ''}</a></li>`;
+      });
+
+      html += `</ul></li>`;
+    }
+  });
+
+  html += '</ul>';
+  return html;
+}
+
+// 검색 기능
+function searchPosts(query) {
+  if (!query || query.length < 1) return [];
+
+  // 특수문자 이스케이프 처리
+  const escapeRegex = (str) => {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  };
+
+  const lowerQuery = query.toLowerCase();
+  const escapedQuery = escapeRegex(lowerQuery);
+
+  return posts.filter(post => {
+    try {
+      // 제목에서 검색
+      const titleMatch = post.title.toLowerCase().includes(lowerQuery);
+
+      // 경로에서 검색 (C++ 같은 경우 처리)
+      const pathMatch = post.path.toLowerCase().includes(lowerQuery) ||
+                       post.path.toLowerCase().includes(escapedQuery);
+
+      // 태그에서 검색
+      const tagMatch = post.tags && Array.isArray(post.tags) &&
+                      post.tags.some(tag =>
+                        tag && typeof tag === 'string' &&
+                        tag.toLowerCase().includes(lowerQuery)
+                      );
+
+      return titleMatch || pathMatch || tagMatch;
+    } catch (e) {
+      return false;
+    }
+  }).sort((a, b) => {
+    // 제목 매칭을 우선순위로 정렬
+    const aTitle = a.title.toLowerCase().includes(lowerQuery) ? 0 : 1;
+    const bTitle = b.title.toLowerCase().includes(lowerQuery) ? 0 : 1;
+    return aTitle - bTitle;
+  });
+}
+
+// 검색 결과 표시
+function displaySearchResults(results) {
+  const resultsDiv = document.getElementById('search-results');
+  const resultsList = document.getElementById('search-results-list');
+  const categoryTree = document.getElementById('category-tree');
+
+  if (results.length === 0 && document.getElementById('search-box').value.length > 0) {
+    resultsDiv.classList.remove('is-hidden');
+    categoryTree.classList.add('is-hidden');
+    resultsList.innerHTML = '<li><span class="has-text-grey">검색 결과가 없습니다.</span></li>';
+  } else if (results.length > 0) {
+    resultsDiv.classList.remove('is-hidden');
+    categoryTree.classList.add('is-hidden');
+
+    let html = '';
+    results.forEach(post => {
+      const category = post.path.split('/').slice(1, -1).join(' > ');
+      html += `
+        <li>
+          <a href="${post.url}">
+            <strong>${highlightText(post.title, document.getElementById('search-box').value)}</strong>
+            <br>
+            <span class="is-size-7 has-text-grey">${category}</span>
+          </a>
+        </li>
+      `;
+    });
+    resultsList.innerHTML = html;
+  } else {
+    resultsDiv.classList.add('is-hidden');
+    categoryTree.classList.remove('is-hidden');
+  }
+}
+
+// 텍스트 하이라이트
+function highlightText(text, query) {
+  if (!query) return text;
+  try {
+    // 특수문자 이스케이프
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
+  } catch (e) {
+    return text;
+  }
+}
+
+// 페이지 로드 시 실행
+document.addEventListener('DOMContentLoaded', function() {
+  // 카테고리 트리 초기화
+  const tree = buildCategoryTree(posts);
+  const treeHtml = renderTree(tree);
+  document.getElementById('category-tree').innerHTML = treeHtml;
+
+  // 검색 이벤트 설정
+  const searchBox = document.getElementById('search-box');
+  if (searchBox) {
+    let searchTimeout;
+
+    searchBox.addEventListener('input', function(e) {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const query = e.target.value.trim();
+
+        if (query && query.length >= 1) {  // 1글자부터 검색
+          const results = searchPosts(query);
+          displaySearchResults(results);
+        } else {
+          displaySearchResults([]);
+        }
+      }, 200); // 200ms로 줄임
+    });
+
+    // ESC 키로 검색 초기화
+    searchBox.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        this.value = '';
+        displaySearchResults([]);
+      }
+    });
+  }
+
+  // 토글 기능 - 이벤트 위임 사용
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('category-toggle')) {
+      e.preventDefault();
+      const category = e.target.dataset.category;
+      const postsList = document.getElementById('posts-' + category);
+
+      if (postsList) {
+        postsList.classList.toggle('is-hidden');
+      }
+    }
+  });
+});
+</script>
           </div>
           
         </div>
