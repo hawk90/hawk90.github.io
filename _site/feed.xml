@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-05T17:36:01+09:00</updated><id>http://0.0.0.0:4000/feed.xml</id><title type="html">Hawk</title><subtitle>Hawks&apos; GitHub pages websites
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-05T17:49:07+09:00</updated><id>http://0.0.0.0:4000/feed.xml</id><title type="html">Hawk</title><subtitle>Hawks&apos; GitHub pages websites
 </subtitle><entry><title type="html">항목 1: 템플릿 타입 추론 규칙을 이해하라</title><link href="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction/" rel="alternate" type="text/html" title="항목 1: 템플릿 타입 추론 규칙을 이해하라" /><published>2025-01-05T00:00:00+09:00</published><updated>2025-01-05T00:00:00+09:00</updated><id>http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction</id><content type="html" xml:base="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction/"><![CDATA[<h2 id="개요">개요</h2>
 
 <p>C++의 템플릿 타입 추론(template type deduction)은 복잡해 보이지만, 세 가지 경우로 나누어 생각하면 명확해집니다. <code class="language-plaintext highlighter-rouge">auto</code> 타입 추론도 거의 동일한 규칙을 따르므로, 이 규칙을 확실히 이해하는 것이 중요합니다.</p>
@@ -24,14 +24,14 @@
 <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">ptr1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>      <span class="c1">// "ptr1이 가리키는 int가 const"</span>
 <span class="kt">int</span> <span class="k">const</span><span class="o">*</span> <span class="n">ptr1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>      <span class="c1">// 위와 완전히 동일!</span>
 
-<span class="o">*</span><span class="n">ptr1</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>                 <span class="c1">// ❌ 에러! 가리키는 값 수정 불가</span>
-<span class="n">ptr1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>                  <span class="c1">// ✅ OK! 포인터는 다른 곳을 가리킬 수 있음</span>
+<span class="o">*</span><span class="n">ptr1</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>                 <span class="c1">// 에러! 가리키는 값 수정 불가</span>
+<span class="n">ptr1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>                  <span class="c1">// OK! 포인터는 다른 곳을 가리킬 수 있음</span>
 
 <span class="c1">// 2. const가 * 뒤에 있으면 → 포인터 자체가 const</span>
 <span class="kt">int</span><span class="o">*</span> <span class="k">const</span> <span class="n">ptr2</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>      <span class="c1">// "ptr2라는 포인터가 const"</span>
 
-<span class="o">*</span><span class="n">ptr2</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span>                 <span class="c1">// ✅ OK! 가리키는 값은 변경 가능</span>
-<span class="n">ptr2</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>                  <span class="c1">// ❌ 에러! 포인터는 다른 곳을 가리킬 수 없음</span>
+<span class="o">*</span><span class="n">ptr2</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span>                 <span class="c1">// OK! 가리키는 값은 변경 가능</span>
+<span class="n">ptr2</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>                  <span class="c1">// 에러! 포인터는 다른 곳을 가리킬 수 없음</span>
 
 <span class="c1">// 3. 둘 다 const</span>
 <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="k">const</span> <span class="n">ptr3</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span> <span class="c1">// 포인터도, 가리키는 값도 모두 const</span>
@@ -500,4 +500,1075 @@
   <li><strong>배열과 함수</strong>: 참조가 아닌 파라미터에서는 포인터로 decay됨</li>
 </ol>
 
-<p>템플릿 타입 추론을 이해하면 <code class="language-plaintext highlighter-rouge">auto</code>, <code class="language-plaintext highlighter-rouge">decltype</code>, 그리고 Modern C++의 많은 기능들을 더 잘 활용할 수 있습니다.</p>]]></content><author><name>Hawk</name></author><category term="C++" /><category term="Effective Modern C++" /><category term="C++" /><category term="Template" /><category term="Type Deduction" /><summary type="html"><![CDATA[개요]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://via.placeholder.com/1200x800" /><media:content medium="image" url="https://via.placeholder.com/1200x800" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p>템플릿 타입 추론을 이해하면 <code class="language-plaintext highlighter-rouge">auto</code>, <code class="language-plaintext highlighter-rouge">decltype</code>, 그리고 Modern C++의 많은 기능들을 더 잘 활용할 수 있습니다.</p>]]></content><author><name>Hawk</name></author><category term="C++" /><category term="Effective Modern C++" /><category term="C++" /><category term="Template" /><category term="Type Deduction" /><summary type="html"><![CDATA[개요]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://via.placeholder.com/1200x800" /><media:content medium="image" url="https://via.placeholder.com/1200x800" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">항목 2: auto의 타입 추론 규칙을 이해하라</title><link href="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item02-understand-auto-type-deduction/" rel="alternate" type="text/html" title="항목 2: auto의 타입 추론 규칙을 이해하라" /><published>2025-01-05T00:00:00+09:00</published><updated>2025-01-05T00:00:00+09:00</updated><id>http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item02-understand-auto-type-deduction</id><content type="html" xml:base="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item02-understand-auto-type-deduction/"><![CDATA[<h2 id="개요">개요</h2>
+
+<p>좋은 소식! <code class="language-plaintext highlighter-rouge">auto</code> 타입 추론은 템플릿 타입 추론과 거의 같습니다. 항목 1을 이해했다면 이미 대부분을 아는 셈이죠. 하지만 한 가지 특별한 예외가 있습니다.</p>
+
+<h2 id="auto--템플릿-타입-추론-거의">auto = 템플릿 타입 추론 (거의)</h2>
+
+<p><code class="language-plaintext highlighter-rouge">auto</code>를 사용하면 컴파일러가 템플릿처럼 타입을 추론합니다:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>        <span class="c1">// int</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>  <span class="c1">// const int</span>
+<span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">rx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="c1">// const int&amp;</span>
+
+<span class="c1">// 이건 마치 이런 템플릿과 같습니다:</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">func_for_x</span><span class="p">(</span><span class="n">T</span> <span class="n">param</span><span class="p">);</span>   <span class="c1">// auto x = 27과 같은 추론</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">func_for_cx</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span> <span class="n">param</span><span class="p">);</span>  <span class="c1">// const auto cx = x와 같은 추론</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">func_for_rx</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">);</span> <span class="c1">// const auto&amp; rx = x와 같은 추론</span>
+</code></pre></div></div>
+
+<h2 id="auto와-템플릿의-세-가지-경우">auto와 템플릿의 세 가지 경우</h2>
+
+<p>항목 1에서 배운 세 가지 경우가 그대로 적용됩니다:</p>
+
+<h3 id="경우-1-auto에-참조나-포인터가-있을-때">경우 1: auto에 참조나 포인터가 있을 때</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">cx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">rx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>   <span class="c1">// int&amp;</span>
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">cx</span><span class="p">;</span>  <span class="c1">// const int&amp;</span>
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">v3</span> <span class="o">=</span> <span class="n">rx</span><span class="p">;</span>  <span class="c1">// const int&amp; (rx의 참조성은 무시)</span>
+
+<span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">v4</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>  <span class="c1">// const int&amp;</span>
+
+<span class="k">auto</span><span class="o">*</span> <span class="n">v5</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>  <span class="c1">// int*</span>
+<span class="k">auto</span><span class="o">*</span> <span class="n">v6</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">cx</span><span class="p">;</span> <span class="c1">// const int*</span>
+</code></pre></div></div>
+
+<h3 id="경우-2-auto-보편-참조">경우 2: auto&amp;&amp; (보편 참조)</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">uref1</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>   <span class="c1">// x는 lvalue → int&amp;</span>
+<span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">uref2</span> <span class="o">=</span> <span class="n">cx</span><span class="p">;</span>  <span class="c1">// cx는 lvalue → const int&amp;</span>
+<span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">uref3</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>  <span class="c1">// 27은 rvalue → int&amp;&amp;</span>
+</code></pre></div></div>
+
+<h3 id="경우-3-auto만-값-복사">경우 3: auto만 (값 복사)</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>   <span class="c1">// int (const 무시)</span>
+<span class="k">auto</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">cx</span><span class="p">;</span>  <span class="c1">// int (const 무시)</span>
+<span class="k">auto</span> <span class="n">v3</span> <span class="o">=</span> <span class="n">rx</span><span class="p">;</span>  <span class="c1">// int (참조와 const 모두 무시)</span>
+</code></pre></div></div>
+
+<h2 id="특별한-예외-중괄호-초기화">특별한 예외: 중괄호 초기화</h2>
+
+<p><strong>여기가 템플릿과 다른 유일한 부분입니다!</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// C++11/14에서</span>
+<span class="k">auto</span> <span class="n">x1</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>      <span class="c1">// int</span>
+<span class="k">auto</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>       <span class="c1">// int</span>
+<span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span><span class="mi">27</span><span class="p">};</span>    <span class="c1">// std::initializer_list&lt;int&gt; (!)</span>
+<span class="k">auto</span> <span class="n">x4</span><span class="p">{</span><span class="mi">27</span><span class="p">};</span>       <span class="c1">// std::initializer_list&lt;int&gt; (!)</span>
+
+<span class="c1">// C++17부터</span>
+<span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="p">{</span><span class="mi">27</span><span class="p">};</span>    <span class="c1">// std::initializer_list&lt;int&gt;</span>
+<span class="k">auto</span> <span class="n">x4</span><span class="p">{</span><span class="mi">27</span><span class="p">};</span>       <span class="c1">// int (바뀜!)</span>
+</code></pre></div></div>
+
+<p><strong>템플릿은 중괄호를 추론할 수 없습니다:</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">f</span><span class="p">(</span><span class="n">T</span> <span class="n">param</span><span class="p">);</span>
+
+<span class="n">f</span><span class="p">({</span><span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">9</span><span class="p">});</span>    <span class="c1">// 에러! T를 추론할 수 없음</span>
+
+<span class="c1">// 하지만 auto는 가능</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="mi">11</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">9</span><span class="p">};</span>  <span class="c1">// std::initializer_list&lt;int&gt;</span>
+</code></pre></div></div>
+
+<p><strong>실제 사용 시 주의사항:</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 실수하기 쉬운 경우</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">resetV</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="n">v</span><span class="p">](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">newValue</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">newValue</span><span class="p">;</span>  <span class="c1">// newValue가 뭘까요?</span>
+<span class="p">};</span>
+
+<span class="n">resetV</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">});</span>  <span class="c1">// 에러! auto는 중괄호 추론 불가</span>
+
+<span class="c1">// 해결책: std::initializer_list를 명시</span>
+<span class="k">auto</span> <span class="n">resetV</span> <span class="o">=</span> <span class="p">[</span><span class="o">&amp;</span><span class="n">v</span><span class="p">](</span><span class="n">std</span><span class="o">::</span><span class="n">initializer_list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">newValue</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">newValue</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h2 id="함수-반환-타입에서의-auto">함수 반환 타입에서의 auto</h2>
+
+<p>C++14부터 함수 반환 타입에 <code class="language-plaintext highlighter-rouge">auto</code>를 쓸 수 있지만, 여기서는 <strong>템플릿 타입 추론</strong>을 사용합니다:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="nf">createInitList</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>  <span class="c1">// 에러! 중괄호 추론 불가</span>
+<span class="p">}</span>
+
+<span class="c1">// 해결책: 명시적 타입</span>
+<span class="n">std</span><span class="o">::</span><span class="n">initializer_list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">createInitList</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>  <span class="c1">// OK</span>
+<span class="p">}</span>
+
+<span class="c1">// 또는 일반 컨테이너 사용</span>
+<span class="k">auto</span> <span class="nf">createVector</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>  <span class="c1">// OK</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="람다에서의-auto">람다에서의 auto</h2>
+
+<p>C++14 람다 매개변수에서도 마찬가지:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// C++14</span>
+<span class="k">auto</span> <span class="n">lambda</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">};</span>
+
+<span class="c1">// 이건 템플릿과 같음</span>
+<span class="k">class</span> <span class="nc">Lambda</span> <span class="p">{</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+    <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// 따라서</span>
+<span class="n">lambda</span><span class="p">({</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">});</span>  <span class="c1">// 에러! 중괄호 추론 불가</span>
+</code></pre></div></div>
+
+<h2 id="정리하면">정리하면</h2>
+
+<p><strong>auto 타입 추론 = 템플릿 타입 추론</strong>
+단 하나의 예외: <strong>중괄호 초기화는 std::initializer_list로 추론</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 요약</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">27</span><span class="p">;</span>       <span class="c1">// int (템플릿과 같음)</span>
+<span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="p">{</span><span class="mi">27</span><span class="p">};</span>     <span class="c1">// std::initializer_list&lt;int&gt; (auto만의 특별 규칙!)</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">f</span><span class="p">(</span><span class="n">T</span> <span class="n">param</span><span class="p">);</span>
+<span class="n">f</span><span class="p">(</span><span class="mi">27</span><span class="p">);</span>             <span class="c1">// T는 int</span>
+<span class="n">f</span><span class="p">({</span><span class="mi">27</span><span class="p">});</span>           <span class="c1">// 에러! (템플릿은 중괄호 추론 불가)</span>
+</code></pre></div></div>
+
+<h2 id="실전-팁">실전 팁</h2>
+
+<ol>
+  <li><strong>중괄호 초기화 조심하기</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">};</span>   <span class="c1">// std::initializer_list&lt;int&gt; - 의도한 건가요?</span>
+<span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">};</span>    <span class="c1">// int - 아마 이걸 원했을 듯</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>C++17 변경사항 인지</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">x</span><span class="p">{</span><span class="mi">1</span><span class="p">};</span>      <span class="c1">// C++11/14: std::initializer_list&lt;int&gt;</span>
+                <span class="c1">// C++17: int</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>함수 반환/람다는 템플릿 규칙</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="nf">f</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span> <span class="p">}</span>  <span class="c1">// 에러!</span>
+<span class="c1">// 템플릿 타입 추론이므로 중괄호 불가</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p>auto는 편리하지만 중괄호 초기화의 함정을 조심하세요!</p>]]></content><author><name>Hawk</name></author><category term="C++" /><category term="Effective Modern C++" /><category term="C++" /><category term="auto" /><category term="Type Deduction" /><summary type="html"><![CDATA[개요]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://via.placeholder.com/1200x800" /><media:content medium="image" url="https://via.placeholder.com/1200x800" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">항목 3: decltype의 작동 방식을 이해하라</title><link href="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item03-understand-decltype/" rel="alternate" type="text/html" title="항목 3: decltype의 작동 방식을 이해하라" /><published>2025-01-05T00:00:00+09:00</published><updated>2025-01-05T00:00:00+09:00</updated><id>http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item03-understand-decltype</id><content type="html" xml:base="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item03-understand-decltype/"><![CDATA[<h2 id="개요">개요</h2>
+
+<p><code class="language-plaintext highlighter-rouge">decltype</code>은 주어진 이름이나 표현식의 타입을 <strong>있는 그대로</strong> 알려줍니다. <code class="language-plaintext highlighter-rouge">auto</code>와 달리 추론 규칙이 없어서 더 예측 가능합니다. 하지만 하나의 함정이 있죠.</p>
+
+<h2 id="decltype의-기본-동작">decltype의 기본 동작</h2>
+
+<p><strong>decltype = “이것의 타입이 뭐야?”</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>           <span class="c1">// decltype(i)는 const int</span>
+
+<span class="kt">bool</span> <span class="nf">f</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>   <span class="c1">// decltype(f)는 bool(const Widget&amp;)</span>
+                           <span class="c1">// decltype(w)는 const Widget&amp;</span>
+
+<span class="n">Widget</span> <span class="n">w</span><span class="p">;</span>                   <span class="c1">// decltype(w)는 Widget</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">w</span><span class="p">))</span> <span class="p">...</span>              <span class="c1">// decltype(f(w))는 bool</span>
+
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">;</span>             <span class="c1">// decltype(v)는 vector&lt;int&gt;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">...</span>         <span class="c1">// decltype(v[0])는 int&amp;</span>
+</code></pre></div></div>
+
+<p>보시다시피 <code class="language-plaintext highlighter-rouge">decltype</code>은 타입을 그대로 보고합니다. const도, 참조(&amp;)도 모두 유지됩니다.</p>
+
+<h2 id="c11-함수-반환-타입에-사용">C++11: 함수 반환 타입에 사용</h2>
+
+<p>C++11에서는 후행 반환 타입(trailing return type)과 함께 사용됩니다:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 문제: c[i]의 타입을 어떻게 표현할까?</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Index</span><span class="p">&gt;</span>
+<span class="k">auto</span> <span class="nf">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">authenticateUser</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="c1">// decltype(c[i])가 필요한 이유:</span>
+<span class="c1">// - vector&lt;int&gt;의 operator[]는 int&amp; 반환</span>
+<span class="c1">// - deque&lt;bool&gt;의 operator[]는 bool&amp; 반환</span>
+<span class="c1">// - 타입을 미리 알 수 없음!</span>
+</code></pre></div></div>
+
+<h2 id="c14-decltypeauto">C++14: decltype(auto)</h2>
+
+<p>C++14에서는 더 편해졌습니다:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// C++14 버전</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Index</span><span class="p">&gt;</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">authenticateUser</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>  <span class="c1">// decltype(c[i])를 반환 타입으로</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>decltype(auto) = “auto처럼 추론하되, decltype 규칙을 사용해”</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Widget</span> <span class="n">w</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">cw</span> <span class="o">=</span> <span class="n">w</span><span class="p">;</span>
+
+<span class="k">auto</span> <span class="n">myWidget1</span> <span class="o">=</span> <span class="n">cw</span><span class="p">;</span>           <span class="c1">// Widget (const와 &amp; 제거)</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">myWidget2</span> <span class="o">=</span> <span class="n">cw</span><span class="p">;</span> <span class="c1">// const Widget&amp; (그대로 유지)</span>
+</code></pre></div></div>
+
+<h2 id="왜-decltypeauto가-필요한가">왜 decltype(auto)가 필요한가?</h2>
+
+<p><strong>auto만 쓰면 참조가 사라집니다:</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Index</span><span class="p">&gt;</span>
+<span class="k">auto</span> <span class="nf">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// auto만 사용</span>
+    <span class="n">authenticateUser</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>  <span class="c1">// int&amp; → int로 복사됨!</span>
+<span class="p">}</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
+<span class="n">authAndAccess</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>  <span class="c1">// 에러! rvalue에 대입 불가</span>
+</code></pre></div></div>
+
+<p><strong>decltype(auto)를 쓰면 참조가 유지됩니다:</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Index</span><span class="p">&gt;</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">authenticateUser</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>  <span class="c1">// int&amp; 그대로 반환</span>
+<span class="p">}</span>
+
+<span class="n">authAndAccess</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>  <span class="c1">// OK! 참조를 통해 수정 가능</span>
+</code></pre></div></div>
+
+<h2 id="보편-참조와-완벽한-전달">보편 참조와 완벽한 전달</h2>
+
+<p>rvalue 컨테이너도 받고 싶다면?</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Index</span><span class="p">&gt;</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 보편 참조</span>
+    <span class="n">authenticateUser</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">];</span>  <span class="c1">// 완벽한 전달</span>
+<span class="p">}</span>
+
+<span class="c1">// 이제 임시 객체도 가능</span>
+<span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">makeVector</span><span class="p">(),</span> <span class="mi">5</span><span class="p">);</span>  <span class="c1">// rvalue 컨테이너 OK</span>
+</code></pre></div></div>
+
+<h2 id="decltype의-함정">decltype의 함정</h2>
+
+<p><strong>주의: decltype은 이름과 표현식을 다르게 처리합니다!</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>    <span class="c1">// int (이름)</span>
+<span class="k">decltype</span><span class="p">((</span><span class="n">x</span><span class="p">))</span>  <span class="c1">// int&amp; (표현식!)</span>
+</code></pre></div></div>
+
+<p><strong>규칙:</strong></p>
+<ul>
+  <li><strong>이름</strong>에 대한 decltype → 선언된 타입</li>
+  <li><strong>표현식</strong>에 대한 decltype → lvalue면 T&amp;, rvalue면 T</li>
+</ul>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f1</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">;</span>     <span class="c1">// decltype(x) → int</span>
+<span class="p">}</span>
+
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">f2</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">);</span>   <span class="c1">// decltype((x)) → int&amp; (지역 변수 참조!)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>위험한 실수:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">dangerous</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">);</span>  <span class="c1">// int&amp; 반환 - 지역 변수의 참조!</span>
+<span class="p">}</span>                <span class="c1">// x는 소멸됨</span>
+
+<span class="kt">int</span><span class="o">&amp;</span> <span class="n">ref</span> <span class="o">=</span> <span class="n">dangerous</span><span class="p">();</span>  <span class="c1">// 댕글링 참조!</span>
+<span class="n">ref</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>               <span class="c1">// 정의되지 않은 동작</span>
+</code></pre></div></div>
+
+<h2 id="실전-예제">실전 예제</h2>
+
+<p><strong>컨테이너 접근자 완성본:</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Index</span><span class="p">&gt;</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">authenticateUser</span><span class="p">();</span>
+    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="c1">// 사용</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">makeVec</span><span class="p">();</span>
+
+<span class="k">auto</span> <span class="n">s</span> <span class="o">=</span> <span class="n">authAndAccess</span><span class="p">(</span><span class="n">makeVec</span><span class="p">(),</span> <span class="mi">5</span><span class="p">);</span>  <span class="c1">// rvalue 컨테이너</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
+<span class="n">authAndAccess</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>              <span class="c1">// lvalue 컨테이너 수정</span>
+</code></pre></div></div>
+
+<h2 id="핵심-정리">핵심 정리</h2>
+
+<ol>
+  <li><strong>decltype은 타입을 그대로 알려줌</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">int</span><span class="o">&amp;</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1">// const int&amp;</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>decltype(auto)는 decltype 규칙으로 추론</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>      <span class="c1">// int</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="mi">42</span><span class="p">);</span>    <span class="c1">// int (prvalue)</span>
+<span class="kt">int</span> <span class="n">z</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">r1</span> <span class="o">=</span> <span class="n">z</span><span class="p">;</span>      <span class="c1">// int</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">r2</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span><span class="p">);</span>    <span class="c1">// int&amp; (lvalue 표현식!)</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>이름 vs 표현식 구분 중요</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
+<span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>    <span class="c1">// int (이름)</span>
+<span class="k">decltype</span><span class="p">((</span><span class="n">x</span><span class="p">))</span>  <span class="c1">// int&amp; (표현식)</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>함수 반환 타입에 유용</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Container</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Index</span><span class="p">&gt;</span>
+<span class="k">decltype</span><span class="p">(</span><span class="k">auto</span><span class="p">)</span> <span class="n">getElement</span><span class="p">(</span><span class="n">Container</span><span class="o">&amp;&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="n">Index</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">)[</span><span class="n">i</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p><strong>기억하세요:</strong> decltype은 거짓말을 하지 않습니다. 하지만 괄호 하나가 큰 차이를 만들 수 있어요!</p>]]></content><author><name>Hawk</name></author><category term="C++" /><category term="Effective Modern C++" /><category term="C++" /><category term="decltype" /><category term="Type Deduction" /><summary type="html"><![CDATA[개요]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://via.placeholder.com/1200x800" /><media:content medium="image" url="https://via.placeholder.com/1200x800" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">항목 4: 추론된 타입을 확인하는 방법을 알아두라</title><link href="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item04-know-how-to-view-deduced-types/" rel="alternate" type="text/html" title="항목 4: 추론된 타입을 확인하는 방법을 알아두라" /><published>2025-01-05T00:00:00+09:00</published><updated>2025-01-05T00:00:00+09:00</updated><id>http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item04-know-how-to-view-deduced-types</id><content type="html" xml:base="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item04-know-how-to-view-deduced-types/"><![CDATA[<h2 id="개요">개요</h2>
+
+<p><code class="language-plaintext highlighter-rouge">auto</code>나 템플릿을 쓰다 보면 “도대체 이게 무슨 타입으로 추론됐지?” 싶을 때가 있습니다. 다행히 확인하는 방법이 여러 가지 있어요. IDE부터 런타임까지, 상황에 맞는 방법을 골라 쓰세요.</p>
+
+<h2 id="방법-1-ide의-도움">방법 1: IDE의 도움</h2>
+
+<p>가장 쉬운 방법입니다. 마우스를 올려보세요!</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">const</span> <span class="kt">int</span> <span class="n">theAnswer</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">theAnswer</span><span class="p">;</span>  <span class="c1">// 마우스 호버 → "int"</span>
+<span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">theAnswer</span><span class="p">;</span> <span class="c1">// 마우스 호버 → "const int*"</span>
+</code></pre></div></div>
+
+<p><strong>장점:</strong> 빠르고 편리함
+<strong>단점:</strong> 복잡한 타입은 보기 어려울 수 있음</p>
+
+<h2 id="방법-2-컴파일러-에러-메시지-활용">방법 2: 컴파일러 에러 메시지 활용</h2>
+
+<p><strong>정의하지 않은 템플릿으로 에러 유발:</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>  <span class="c1">// 선언만!</span>
+<span class="k">class</span> <span class="nc">TD</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="kt">int</span> <span class="n">theAnswer</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="n">theAnswer</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">theAnswer</span><span class="p">;</span>
+
+    <span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">xType</span><span class="p">;</span>  <span class="c1">// 에러: TD&lt;int&gt; 정의 없음</span>
+    <span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">yType</span><span class="p">;</span>  <span class="c1">// 에러: TD&lt;const int*&gt; 정의 없음</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>컴파일러 에러 메시지:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>error: incomplete type 'TD&lt;int&gt;' used in nested name specifier
+error: incomplete type 'TD&lt;const int*&gt;' used in nested name specifier
+</code></pre></div></div>
+
+<p><strong>장점:</strong> 컴파일 시점에 정확한 타입 확인
+<strong>단점:</strong> 프로그램이 컴파일되지 않음</p>
+
+<h2 id="방법-3-typeid와-stdtype_infoname">방법 3: typeid와 std::type_info::name</h2>
+
+<p>런타임에 타입을 확인하는 표준 방법:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;typeinfo&gt;</span><span class="cp">
+</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">f</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"T = "</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">T</span><span class="p">).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"param = "</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">param</span><span class="p">).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="kt">int</span> <span class="n">theAnswer</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+    <span class="n">f</span><span class="p">(</span><span class="n">theAnswer</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>문제: 컴파일러마다 다른 출력!</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// GNU/Clang 출력</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">i</span>         <span class="c1">// i = int</span>
+<span class="n">param</span> <span class="o">=</span> <span class="n">i</span>
+
+<span class="c1">// MSVC 출력</span>
+<span class="n">T</span> <span class="o">=</span> <span class="kt">int</span>
+<span class="n">param</span> <span class="o">=</span> <span class="kt">int</span>
+</code></pre></div></div>
+
+<p><strong>더 큰 문제: 정확하지 않음!</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">f</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"T = "</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">T</span><span class="p">).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"param = "</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="n">param</span><span class="p">).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">px</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">f</span><span class="p">(</span><span class="n">px</span><span class="p">);</span>
+
+<span class="c1">// 출력:</span>
+<span class="c1">// T = PKi (pointer to const int)</span>
+<span class="c1">// param = PKi (잘못됨! 실제로는 const PKi&amp;여야 함)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">std::type_info::name</code>은 참조(&amp;)와 const를 무시합니다!</p>
+
+<h2 id="방법-4-boosttypeindex-사용">방법 4: Boost.TypeIndex 사용</h2>
+
+<p>가장 정확한 런타임 방법:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;boost/type_index.hpp&gt;</span><span class="cp">
+</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">f</span><span class="p">(</span><span class="k">const</span> <span class="n">T</span><span class="o">&amp;</span> <span class="n">param</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">boost</span><span class="o">::</span><span class="n">typeindex</span><span class="o">::</span><span class="n">type_id_with_cvr</span><span class="p">;</span>  <span class="c1">// cvr = const, volatile, reference</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"T = "</span>
+              <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"param = "</span>
+              <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">px</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
+<span class="n">f</span><span class="p">(</span><span class="n">px</span><span class="p">);</span>
+
+<span class="c1">// 정확한 출력:</span>
+<span class="c1">// T = int const*</span>
+<span class="c1">// param = int const* const&amp;</span>
+</code></pre></div></div>
+
+<p><strong>장점:</strong> 정확하고 읽기 쉬운 출력
+<strong>단점:</strong> Boost 라이브러리 필요</p>
+
+<h2 id="방법-5-직접-만든-타입-출력-함수">방법 5: 직접 만든 타입 출력 함수</h2>
+
+<p>컴파일러별 demangle 함수 활용:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;cxxabi.h&gt;</span><span class="c1">  // GCC/Clang</span><span class="cp">
+#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="nf">type_name</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">status</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">char</span><span class="p">,</span> <span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">result</span><span class="p">{</span>
+        <span class="n">abi</span><span class="o">::</span><span class="n">__cxa_demangle</span><span class="p">(</span><span class="k">typeid</span><span class="p">(</span><span class="n">T</span><span class="p">).</span><span class="n">name</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">status</span><span class="p">),</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">free</span>
+    <span class="p">};</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">?</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">get</span><span class="p">())</span> <span class="o">:</span> <span class="s">"error"</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 사용</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">type_name</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>  <span class="c1">// "int"</span>
+</code></pre></div></div>
+
+<h2 id="실전-예제-복잡한-타입-추론">실전 예제: 복잡한 타입 추론</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span>
+<span class="c1">// 어떤 타입일까요?</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">vw</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
+<span class="k">auto</span> <span class="n">lambda</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span> <span class="p">};</span>
+
+<span class="c1">// 컴파일러 에러로 확인</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span> <span class="k">class</span> <span class="nc">TD</span><span class="p">;</span>
+
+<span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">vw</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">vwType</span><span class="p">;</span>      <span class="c1">// const std::vector&lt;int&gt;</span>
+<span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">lambda</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">lambdaType</span><span class="p">;</span>  <span class="c1">// 람다는 유일한 클로저 타입</span>
+
+<span class="c1">// Boost로 확인</span>
+<span class="k">using</span> <span class="n">boost</span><span class="o">::</span><span class="n">typeindex</span><span class="o">::</span><span class="n">type_id_with_cvr</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">type_id_with_cvr</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">vw</span><span class="p">)</span><span class="o">&gt;</span><span class="p">().</span><span class="n">pretty_name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+<span class="c1">// 출력: std::vector&lt;int, std::allocator&lt;int&gt; &gt; const</span>
+</code></pre></div></div>
+
+<h2 id="각-방법의-사용-시기">각 방법의 사용 시기</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>상황</th>
+      <th>추천 방법</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>코드 작성 중 빠른 확인</td>
+      <td>IDE 호버</td>
+    </tr>
+    <tr>
+      <td>정확한 타입이 필요할 때</td>
+      <td>컴파일러 에러 메시지</td>
+    </tr>
+    <tr>
+      <td>런타임 디버깅</td>
+      <td>Boost.TypeIndex</td>
+    </tr>
+    <tr>
+      <td>Boost 없이 런타임 확인</td>
+      <td>typeid (부정확함 주의)</td>
+    </tr>
+    <tr>
+      <td>템플릿 개발 중</td>
+      <td>TD 템플릿 트릭</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="실용적인-팁">실용적인 팁</h2>
+
+<p><strong>1. 매크로로 편하게:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define SHOW_TYPE(x) \
+    template&lt;typename T&gt; class TD; \
+    TD&lt;decltype(x)&gt; td;
+</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
+<span class="n">SHOW_TYPE</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>  <span class="c1">// 에러: TD&lt;std::initializer_list&lt;int&gt;&gt;</span>
+</code></pre></div></div>
+
+<p><strong>2. static_assert로 컴파일 타임 체크:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="kt">int</span><span class="o">&gt;</span><span class="p">);</span>  <span class="c1">// OK</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="kt">double</span><span class="o">&gt;</span><span class="p">);</span>  <span class="c1">// 컴파일 에러</span>
+</code></pre></div></div>
+
+<p><strong>3. 개념(Concepts) 활용 (C++20):</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;concepts&gt;</span><span class="cp">
+</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span><span class="p">);</span>  <span class="c1">// OK</span>
+</code></pre></div></div>
+
+<h2 id="핵심-정리">핵심 정리</h2>
+
+<ol>
+  <li><strong>IDE가 가장 편함</strong> - 하지만 항상 정확하진 않음</li>
+  <li><strong>컴파일러 에러가 가장 정확함</strong> - TD 템플릿 트릭 활용</li>
+  <li><strong>typeid는 조심</strong> - const, volatile, &amp; 무시됨</li>
+  <li><strong>Boost.TypeIndex 추천</strong> - 런타임에 정확한 타입 확인</li>
+</ol>
+
+<p><strong>기억하세요:</strong> 타입 추론이 헷갈릴 때는 확인하는 습관을 들이세요. 추측보다는 확인이 낫습니다!</p>]]></content><author><name>Hawk</name></author><category term="C++" /><category term="Effective Modern C++" /><category term="C++" /><category term="Type Deduction" /><category term="Debugging" /><summary type="html"><![CDATA[개요]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://via.placeholder.com/1200x800" /><media:content medium="image" url="https://via.placeholder.com/1200x800" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">항목 5: 명시적 타입 선언보다는 auto를 선호하라</title><link href="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/" rel="alternate" type="text/html" title="항목 5: 명시적 타입 선언보다는 auto를 선호하라" /><published>2025-01-05T00:00:00+09:00</published><updated>2025-01-05T00:00:00+09:00</updated><id>http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto</id><content type="html" xml:base="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/"><![CDATA[<h2 id="개요">개요</h2>
+
+<p>“auto를 쓰면 타입을 모르잖아요!” 맞아요. 하지만 그게 장점입니다. auto는 더 짧고, 더 안전하고, 더 유연한 코드를 만들어줍니다.</p>
+
+<h2 id="auto의-장점들">auto의 장점들</h2>
+
+<h3 id="1-초기화-강제--더-안전한-코드">1. 초기화 강제 = 더 안전한 코드</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x1</span><span class="p">;</span>         <span class="c1">// 초기화 안 됨! 쓰레기값</span>
+<span class="k">auto</span> <span class="n">x2</span><span class="p">;</span>        <span class="c1">// 에러! auto는 초기화 필수</span>
+<span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>    <span class="c1">// OK</span>
+</code></pre></div></div>
+
+<h3 id="2-긴-타입명에서-해방">2. 긴 타입명에서 해방</h3>
+
+<p><strong>Before (auto 없이):</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Customer</span><span class="o">&gt;&gt;::</span><span class="n">iterator</span> <span class="n">iter</span>
+    <span class="o">=</span> <span class="n">customerMap</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+<span class="c1">// 눈 아프죠?</span>
+</code></pre></div></div>
+
+<p><strong>After (auto 사용):</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">customerMap</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+<span class="c1">// 깔끔!</span>
+</code></pre></div></div>
+
+<h3 id="3-타입-불일치-문제-해결">3. 타입 불일치 문제 해결</h3>
+
+<p><strong>숨어있는 버그:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>  <span class="c1">// 문제! size()는 std::size_t 반환</span>
+                         <span class="c1">// 32비트: unsigned = size_t (OK)</span>
+                         <span class="c1">// 64비트: unsigned ≠ size_t (위험!)</span>
+</code></pre></div></div>
+
+<p><strong>auto로 해결:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>  <span class="c1">// 항상 올바른 타입!</span>
+</code></pre></div></div>
+
+<h3 id="4-숨은-형변환-방지">4. 숨은 형변환 방지</h3>
+
+<p><strong>성능 문제 예제:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">m</span><span class="p">;</span>
+
+<span class="c1">// 나쁜 예 - 숨은 복사 발생!</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">p</span> <span class="o">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 실제 타입은 std::pair&lt;const std::string, int&gt;</span>
+    <span class="c1">// const가 빠져서 임시 객체 생성됨!</span>
+<span class="p">}</span>
+
+<span class="c1">// 좋은 예 - auto 사용</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p</span> <span class="o">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 정확한 타입으로 추론, 복사 없음</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="5-람다-저장이-가능">5. 람다 저장이 가능</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 람다는 타입을 쓸 수 없음</span>
+<span class="k">auto</span> <span class="n">derefUPLess</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span> <span class="n">p1</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span> <span class="n">p2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">*</span><span class="n">p1</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">p2</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// std::function은 가능하지만...</span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">,</span>
+                   <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span>
+    <span class="n">derefUPLess2</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p1</span><span class="p">,</span> <span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p2</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">*</span><span class="n">p1</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">p2</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="c1">// 더 느리고, 메모리도 더 씀!</span>
+</code></pre></div></div>
+
+<p><strong>성능 차이:</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">auto</code> 람다: 인라인 가능, 크기 = 람다 크기</li>
+  <li><code class="language-plaintext highlighter-rouge">std::function</code>: 간접 호출, 힙 할당 가능, 더 큰 메모리</li>
+</ul>
+
+<h3 id="6-리팩토링이-쉬워짐">6. 리팩토링이 쉬워짐</h3>
+
+<p><strong>타입 변경 시나리오:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 원래 코드</span>
+<span class="kt">int</span> <span class="nf">makeValue</span><span class="p">();</span>
+<span class="kt">int</span> <span class="n">val</span> <span class="o">=</span> <span class="n">makeValue</span><span class="p">();</span>
+
+<span class="c1">// 나중에 long으로 변경</span>
+<span class="kt">long</span> <span class="nf">makeValue</span><span class="p">();</span>
+<span class="kt">int</span> <span class="n">val</span> <span class="o">=</span> <span class="n">makeValue</span><span class="p">();</span>  <span class="c1">// 타입 불일치! 수정 필요</span>
+
+<span class="c1">// auto를 썼다면?</span>
+<span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">makeValue</span><span class="p">();</span>  <span class="c1">// 자동으로 long이 됨!</span>
+</code></pre></div></div>
+
+<h2 id="실전-예제">실전 예제</h2>
+
+<h3 id="반복자와-auto">반복자와 auto</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 복잡한 타입</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">It</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">dwim</span><span class="p">(</span><span class="n">It</span> <span class="n">b</span><span class="p">,</span> <span class="n">It</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">b</span> <span class="o">!=</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 현재 요소 타입을 직접 쓰기 어려움</span>
+        <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;::</span><span class="n">value_type</span>
+            <span class="n">currValue</span> <span class="o">=</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>  <span class="c1">// 복잡함</span>
+
+        <span class="c1">// auto로 간단히!</span>
+        <span class="k">auto</span> <span class="n">currValue</span> <span class="o">=</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>  <span class="c1">// 간단함</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="컨테이너와-auto">컨테이너와 auto</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 인덱스 타입 실수 방지</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
+
+<span class="c1">// 위험: int는 음수 가능, size()는 unsigned</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+
+<span class="c1">// 안전: 정확한 타입</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0u</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+
+<span class="c1">// 더 나은 방법: range-for</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="n">elem</span> <span class="o">:</span> <span class="n">v</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="auto를-쓰면-안-되는-경우">auto를 쓰면 안 되는 경우?</h2>
+
+<h3 id="1-프록시-타입-문제-항목-6에서-자세히">1. 프록시 타입 문제 (항목 6에서 자세히)</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">features</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>
+
+<span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// bool이 아님!</span>
+<span class="c1">// std::vector&lt;bool&gt;::reference 타입 (프록시)</span>
+
+<span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// 명시적 변환</span>
+</code></pre></div></div>
+
+<h3 id="2-가독성이-중요할-때">2. 가독성이 중요할 때</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">calculate</span><span class="p">();</span>  <span class="c1">// calculate()가 뭘 반환하지?</span>
+
+<span class="c1">// 때로는 명시적이 나음</span>
+<span class="n">Money</span> <span class="n">result</span> <span class="o">=</span> <span class="n">calculate</span><span class="p">();</span>  <span class="c1">// 아, 돈을 반환하는구나</span>
+</code></pre></div></div>
+
+<h2 id="auto-사용-가이드라인">auto 사용 가이드라인</h2>
+
+<h3 id="auto를-쓸-때">auto를 쓸 때</h3>
+<ol>
+  <li>긴 타입명 (특히 템플릿)</li>
+  <li>람다 표현식</li>
+  <li>반복자</li>
+  <li>타입을 정확히 모를 때</li>
+  <li>리팩토링이 잦은 코드</li>
+</ol>
+
+<h3 id="auto를-피할-때">auto를 피할 때</h3>
+<ol>
+  <li>프록시 타입</li>
+  <li>타입이 중요한 비즈니스 로직</li>
+  <li>명시적 형변환이 필요할 때</li>
+</ol>
+
+<h2 id="성능-비교">성능 비교</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// std::function vs auto 람다</span>
+<span class="k">auto</span> <span class="n">lambda1</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span> <span class="p">};</span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">lambda2</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span> <span class="p">};</span>
+
+<span class="c1">// 크기 차이</span>
+<span class="k">sizeof</span><span class="p">(</span><span class="n">lambda1</span><span class="p">);</span>  <span class="c1">// 1 (캡처 없는 람다)</span>
+<span class="k">sizeof</span><span class="p">(</span><span class="n">lambda2</span><span class="p">);</span>  <span class="c1">// 32~64 바이트 (구현에 따라)</span>
+
+<span class="c1">// 호출 속도</span>
+<span class="n">lambda1</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>  <span class="c1">// 인라인 가능</span>
+<span class="n">lambda2</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>  <span class="c1">// 간접 호출</span>
+</code></pre></div></div>
+
+<h2 id="핵심-정리">핵심 정리</h2>
+
+<p><strong>auto의 장점:</strong></p>
+<ol>
+  <li><strong>초기화 강제</strong> → 더 안전</li>
+  <li><strong>타입 추론</strong> → 실수 방지</li>
+  <li><strong>짧은 코드</strong> → 가독성 향상</li>
+  <li><strong>정확한 타입</strong> → 이식성 향상</li>
+  <li><strong>리팩토링 용이</strong> → 유지보수 향상</li>
+</ol>
+
+<p><strong>기억하세요:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 이전 방식</span>
+<span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;::</span><span class="n">const_iterator</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">m</span><span class="p">.</span><span class="n">cbegin</span><span class="p">();</span>
+
+<span class="c1">// 현대적 방식</span>
+<span class="k">auto</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">m</span><span class="p">.</span><span class="n">cbegin</span><span class="p">();</span>
+
+<span class="c1">// 둘 다 같은 일을 하지만, 어느 게 읽기 쉬운가요?</span>
+</code></pre></div></div>
+
+<p><strong>결론:</strong> auto는 단순히 타이핑을 줄이는 게 아니라, 더 정확하고 유지보수하기 쉬운 코드를 만듭니다!</p>]]></content><author><name>Hawk</name></author><category term="C++" /><category term="Effective Modern C++" /><category term="C++" /><category term="auto" /><category term="Modern C++" /><summary type="html"><![CDATA[개요]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://via.placeholder.com/1200x800" /><media:content medium="image" url="https://via.placeholder.com/1200x800" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">항목 6: auto가 원치 않은 타입으로 추론될 때는 명시적 타입의 초기치를 사용하라</title><link href="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item06-use-explicit-typed-initializer/" rel="alternate" type="text/html" title="항목 6: auto가 원치 않은 타입으로 추론될 때는 명시적 타입의 초기치를 사용하라" /><published>2025-01-05T00:00:00+09:00</published><updated>2025-01-05T00:00:00+09:00</updated><id>http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item06-use-explicit-typed-initializer</id><content type="html" xml:base="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item06-use-explicit-typed-initializer/"><![CDATA[<h2 id="개요">개요</h2>
+
+<p>auto는 훌륭하지만 가끔 예상과 다른 타입으로 추론됩니다. 대부분 “프록시 타입” 때문인데요, 이럴 때는 명시적 타입 변환이 답입니다.</p>
+
+<h2 id="필수-개념-임시-객체란">필수 개념: 임시 객체란?</h2>
+
+<p><strong>임시 객체(Temporary Object) = 이름 없는 객체 = 금방 사라지는 객체</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 이름 있는 객체</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="s">"hello"</span><span class="p">;</span>  <span class="c1">// s는 이름이 있음, 계속 사용 가능</span>
+
+<span class="c1">// 임시 객체</span>
+<span class="s">"world"</span>                    <span class="c1">// 문자열 리터럴 (임시)</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"temp"</span><span class="p">)</span>        <span class="c1">// 임시 string 객체</span>
+<span class="n">getVector</span><span class="p">()</span>                <span class="c1">// 함수 반환값 (대부분 임시)</span>
+<span class="n">a</span> <span class="o">+</span> <span class="n">b</span>                      <span class="c1">// 연산 결과 (임시)</span>
+</code></pre></div></div>
+
+<p><strong>임시 객체의 수명:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 한 문장이 끝나면 임시 객체는 소멸</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"hello"</span><span class="p">)</span> <span class="o">+</span> <span class="s">" world"</span><span class="p">;</span>
+<span class="c1">//              ^^^^^^^^^^^^^^^^^^^^^ 임시 객체</span>
+<span class="c1">//              문장 끝(;)에서 소멸</span>
+
+<span class="c1">// 위험한 경우</span>
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"danger"</span><span class="p">).</span><span class="n">c_str</span><span class="p">();</span>
+<span class="c1">//                ^^^^^^^^^^^^^^^^^^^^^ 임시 객체</span>
+<span class="c1">// 문장이 끝나면 임시 객체 소멸 → ptr은 댕글링 포인터!</span>
+</code></pre></div></div>
+
+<p><strong>댕글링 포인터(Dangling Pointer)란?</strong></p>
+<ul>
+  <li><strong>댕글링 = 매달려 있는, 주인 없는</strong></li>
+  <li>이미 소멸된 객체를 가리키는 포인터</li>
+  <li>마치 철거된 건물의 주소를 들고 있는 것과 같음</li>
+</ul>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 댕글링 포인터 예시</span>
+<span class="kt">int</span><span class="o">*</span> <span class="nf">createDangling</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">local</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">local</span><span class="p">;</span>  <span class="c1">// 지역 변수의 주소 반환</span>
+<span class="p">}</span>                   <span class="c1">// 함수 끝 → local 소멸</span>
+
+<span class="kt">int</span><span class="o">*</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">createDangling</span><span class="p">();</span>  <span class="c1">// ptr은 소멸된 메모리를 가리킴</span>
+<span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>  <span class="c1">// 정의되지 않은 동작! 프로그램 크래시 가능</span>
+</code></pre></div></div>
+
+<h2 id="문제-보이지-않는-프록시-타입">문제: 보이지 않는 프록시 타입</h2>
+
+<h3 id="예제-1-stdvectorbool의-함정">예제 1: std::vector&lt;bool&gt;의 함정</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">features</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>
+
+<span class="n">Widget</span> <span class="n">w</span><span class="p">;</span>
+<span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// bool 복사</span>
+<span class="k">auto</span> <span class="n">highPriority2</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span> <span class="c1">// bool이 아님!</span>
+
+<span class="c1">// auto가 추론한 타입은?</span>
+<span class="c1">// std::vector&lt;bool&gt;::reference (프록시 클래스!)</span>
+</code></pre></div></div>
+
+<p><strong>왜 문제인가?</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// 프록시 객체</span>
+
+<span class="c1">// features(w)는 임시 객체</span>
+<span class="c1">// [5]는 임시 객체의 5번째 비트를 가리키는 프록시 반환</span>
+<span class="c1">// 문장이 끝나면 임시 객체 소멸</span>
+<span class="c1">// highPriority는 소멸된 메모리를 참조!</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">highPriority</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>  <span class="c1">// 정의되지 않은 동작!</span>
+</code></pre></div></div>
+
+<h3 id="stdvectorbool이-특별한-이유">std::vector&lt;bool&gt;이 특별한 이유</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 일반 vector</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v1</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
+<span class="n">v1</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>  <span class="c1">// int&amp; 반환</span>
+
+<span class="c1">// vector&lt;bool&gt;은 특수화</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">v2</span> <span class="p">{</span><span class="nb">true</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="nb">true</span><span class="p">};</span>
+<span class="n">v2</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>  <span class="c1">// std::vector&lt;bool&gt;::reference 반환 (프록시!)</span>
+<span class="c1">// 이유: 메모리 절약을 위해 비트로 저장</span>
+</code></pre></div></div>
+
+<h3 id="예제-2-표현식-템플릿">예제 2: 표현식 템플릿</h3>
+
+<p>행렬 라이브러리 예제:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Matrix</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="n">m3</span> <span class="o">+</span> <span class="n">m4</span><span class="p">;</span>  <span class="c1">// 정상 작동</span>
+
+<span class="k">auto</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="n">m3</span> <span class="o">+</span> <span class="n">m4</span><span class="p">;</span>    <span class="c1">// Sum&lt;Sum&lt;Sum&lt;Matrix&gt;&gt;&gt; 같은 타입!</span>
+<span class="c1">// 표현식 템플릿 (프록시)</span>
+</code></pre></div></div>
+
+<h2 id="해결책-static_cast로-명시적-변환">해결책: static_cast로 명시적 변환</h2>
+
+<h3 id="기본-해결-방법">기본 해결 방법</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 문제 있는 코드</span>
+<span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// 프록시 타입</span>
+
+<span class="c1">// 해결책 1: 명시적 타입</span>
+<span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// 프록시 → bool 변환</span>
+
+<span class="c1">// 해결책 2: static_cast</span>
+<span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">]);</span>
+</code></pre></div></div>
+
+<h3 id="일반적인-패턴">일반적인 패턴</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 프록시를 실제 타입으로 변환하는 일반 공식</span>
+<span class="k">auto</span> <span class="n">variable</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">ActualType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">expression_returning_proxy</span><span class="p">);</span>
+
+<span class="c1">// 예시들</span>
+<span class="k">auto</span> <span class="n">isReady</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">]);</span>
+<span class="k">auto</span> <span class="n">matrix</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Matrix</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="n">m3</span><span class="p">);</span>
+<span class="k">auto</span> <span class="n">value</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">proxy_returning_double</span><span class="p">());</span>
+</code></pre></div></div>
+
+<h2 id="프록시-타입을-알아채는-방법">프록시 타입을 알아채는 방법</h2>
+
+<h3 id="1-문서-확인">1. 문서 확인</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// std::vector&lt;bool&gt;::operator[] 문서</span>
+<span class="n">reference</span> <span class="k">operator</span><span class="p">[](</span><span class="n">size_type</span> <span class="n">pos</span><span class="p">);</span>  <span class="c1">// reference는 프록시!</span>
+<span class="c1">// 일반 vector는 T&amp; 반환</span>
+</code></pre></div></div>
+
+<h3 id="2-타입-확인-항목-4-기법">2. 타입 확인 (항목 4 기법)</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="k">class</span> <span class="nc">TD</span><span class="p">;</span>
+
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">container</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="n">TD</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">td</span><span class="p">;</span>  <span class="c1">// 컴파일 에러로 타입 확인</span>
+</code></pre></div></div>
+
+<h3 id="3-의심스러운-패턴들">3. 의심스러운 패턴들</h3>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">SomethingProxy</code>라는 이름</li>
+  <li><code class="language-plaintext highlighter-rouge">reference</code>라는 중첩 타입</li>
+  <li>표현식 템플릿을 사용하는 라이브러리</li>
+  <li>비트 조작을 하는 컨테이너</li>
+</ul>
+
+<h2 id="실전-예제">실전 예제</h2>
+
+<h3 id="안전한-bool-처리">안전한 bool 처리</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Features</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">;</span>
+<span class="nl">public:</span>
+    <span class="kt">bool</span> <span class="n">isHighPriority</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">]);</span>  <span class="c1">// 명시적 변환</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 또는 프록시를 피하는 방법</span>
+    <span class="kt">bool</span> <span class="k">operator</span><span class="p">[](</span><span class="kt">size_t</span> <span class="n">index</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">];</span>  <span class="c1">// 반환 타입이 bool이므로 자동 변환</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="표현식-템플릿-대처">표현식 템플릿 대처</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Eigen 라이브러리 예제</span>
+<span class="n">MatrixXd</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">,</span> <span class="n">m3</span><span class="p">;</span>
+
+<span class="c1">// 잘못된 방법</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="n">m3</span><span class="p">;</span>  <span class="c1">// 표현식 템플릿 타입</span>
+
+<span class="c1">// 올바른 방법들</span>
+<span class="n">MatrixXd</span> <span class="n">result</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="n">m3</span><span class="p">;</span>  <span class="c1">// 명시적 타입</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">MatrixXd</span><span class="p">(</span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="n">m3</span><span class="p">);</span>  <span class="c1">// 명시적 생성</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">MatrixXd</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="n">m3</span><span class="p">);</span>  <span class="c1">// cast</span>
+<span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span> <span class="o">+</span> <span class="n">m3</span><span class="p">).</span><span class="n">eval</span><span class="p">();</span>  <span class="c1">// Eigen의 eval() 메서드</span>
+</code></pre></div></div>
+
+<h2 id="프록시-타입의-장단점">프록시 타입의 장단점</h2>
+
+<h3 id="장점">장점</h3>
+<ul>
+  <li><strong>성능</strong>: 지연 평가(lazy evaluation)</li>
+  <li><strong>메모리</strong>: 공간 절약 (vector&lt;bool&gt;)</li>
+  <li><strong>표현력</strong>: 복잡한 연산 최적화</li>
+</ul>
+
+<h3 id="단점">단점</h3>
+<ul>
+  <li><strong>auto와 충돌</strong>: 예상치 못한 타입</li>
+  <li><strong>수명 문제</strong>: 댕글링 참조 위험</li>
+  <li><strong>디버깅 어려움</strong>: 복잡한 타입 이름</li>
+</ul>
+
+<h2 id="가이드라인">가이드라인</h2>
+
+<h3 id="언제-static_cast를-쓸까">언제 static_cast를 쓸까?</h3>
+
+<ol>
+  <li><strong>프록시 타입을 반환하는 함수</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="n">vec_bool</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>표현식 템플릿 라이브러리</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Matrix</span><span class="o">&gt;</span><span class="p">(</span><span class="n">complex_expression</span><span class="p">);</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>의도를 명확히 하고 싶을 때</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">index</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">container</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="과도한-cast는-피하기">과도한 cast는 피하기</h3>
+
+<p><strong>왜 cast를 피해야 할까요?</strong></p>
+
+<ol>
+  <li><strong>타입 시스템 우회 = 안전장치 해제</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 컴파일러는 타입 검사로 실수를 막아줍니다</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>  <span class="c1">// 에러! 타입이 안 맞음</span>
+
+<span class="c1">// cast는 이 안전장치를 무시합니다</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>  <span class="c1">// 컴파일 에러지만</span>
+<span class="c1">// 프로그래머가 "내가 책임질게"라고 하는 것</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>코드 의도가 불분명해짐</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">value</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">getData</span><span class="p">());</span>
+<span class="c1">// getData()가 뭘 반환하길래 int로 바꾸지?</span>
+<span class="c1">// 실수인가? 의도적인가?</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>유지보수 어려움</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 나중에 getData()의 반환 타입이 바뀌어도</span>
+<span class="c1">// cast 때문에 조용히 변환됨 → 버그 가능성</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>성능 손실 가능성</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 불필요한 변환은 CPU 사이클 낭비</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">intValue</span><span class="p">);</span>  <span class="c1">// int → double</span>
+<span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>            <span class="c1">// double → int</span>
+<span class="c1">// 원래 intValue를 그냥 쓰면 됐는데...</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p><strong>언제 cast가 정당한가?</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 불필요한 cast (피하세요)</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>  <span class="c1">// 그냥 auto x = 42;</span>
+
+<span class="c1">// 의미 있는 cast (OK)</span>
+<span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">3.14</span><span class="p">);</span>  <span class="c1">// 의도적인 소수점 제거</span>
+<span class="k">auto</span> <span class="n">flag</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="n">vec_bool</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>  <span class="c1">// 프록시 타입 해결</span>
+</code></pre></div></div>
+
+<p><strong>핵심:</strong> cast는 “나는 컴파일러보다 더 잘 안다”는 선언입니다. 정말 그런지 확인하세요!</p>
+
+<h2 id="디버깅-팁">디버깅 팁</h2>
+
+<p>프록시 타입 문제 진단:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 1. 타입 출력</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="k">typeid</span><span class="p">(</span><span class="k">decltype</span><span class="p">(</span><span class="n">suspicious_var</span><span class="p">)).</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+
+<span class="c1">// 2. 개념(concept) 체크 (C++20)</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">same_as</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">var</span><span class="p">),</span> <span class="kt">bool</span><span class="o">&gt;</span><span class="p">);</span>  <span class="c1">// 실패하면 프록시</span>
+
+<span class="c1">// 3. 크기 확인</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">suspicious_var</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="sc">'\n'</span><span class="p">;</span>
+<span class="c1">// bool은 1바이트, 프록시는 보통 더 큼</span>
+</code></pre></div></div>
+
+<h2 id="핵심-정리">핵심 정리</h2>
+
+<ol>
+  <li><strong>auto는 “보이지 않는” 프록시 타입도 추론함</strong></li>
+  <li><strong>프록시 타입은 예상치 못한 동작을 일으킴</strong></li>
+  <li><strong>static_cast로 원하는 타입 강제</strong></li>
+  <li><strong>std::vector&lt;bool&gt;이 대표적인 예</strong></li>
+</ol>
+
+<p><strong>기억하세요:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 프록시 타입 의심될 때</span>
+<span class="k">auto</span> <span class="n">suspicious</span> <span class="o">=</span> <span class="n">some_expression</span><span class="p">;</span>     <span class="c1">// 위험할 수 있음</span>
+<span class="k">auto</span> <span class="n">safe</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">ExpectedType</span><span class="o">&gt;</span><span class="p">(</span><span class="n">some_expression</span><span class="p">);</span>  <span class="c1">// 안전</span>
+
+<span class="c1">// 특히 이런 경우 조심</span>
+<span class="k">auto</span> <span class="n">flag</span> <span class="o">=</span> <span class="n">flags</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>           <span class="c1">// vector&lt;bool&gt;이면 위험</span>
+<span class="k">auto</span> <span class="n">flag</span> <span class="o">=</span> <span class="kt">bool</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>     <span class="c1">// 안전</span>
+</code></pre></div></div>
+
+<p><strong>결론:</strong> auto는 좋지만, 프록시 타입을 만나면 명시적 타입 변환으로 의도를 분명히 하세요!</p>]]></content><author><name>Hawk</name></author><category term="C++" /><category term="Effective Modern C++" /><category term="C++" /><category term="auto" /><category term="Proxy Types" /><summary type="html"><![CDATA[개요]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://via.placeholder.com/1200x800" /><media:content medium="image" url="https://via.placeholder.com/1200x800" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>

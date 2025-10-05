@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+ 
+
+<html
+  dir="ltr"
+  lang="en"
+  
+>
+  <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content=#6B46C1>
+  <link rel="stylesheet" href="/assets/css/app.css" />
+  <link rel="stylesheet" href="/assets/css/purple-theme.css" />
+  <link
+    rel="shortcut icon"
+    type="image/png"
+    
+    href="/favicon.png"
+    
+  />
+  <script defer src="https://unpkg.com/alpinejs@3.9.0/dist/cdn.min.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"
+  />
+  
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulma-social@1/bin/bulma-social.min.css"
+  />
+   <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>항목 5: 명시적 타입 선언보다는 auto를 선호하라 | Hawk</title>
+<meta name="generator" content="Jekyll v4.3.3" />
+<meta property="og:title" content="항목 5: 명시적 타입 선언보다는 auto를 선호하라" />
+<meta name="author" content="Hawk" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="개요" />
+<meta property="og:description" content="개요" />
+<link rel="canonical" href="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/" />
+<meta property="og:url" content="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/" />
+<meta property="og:site_name" content="Hawk" />
+<meta property="og:image" content="https://via.placeholder.com/1200x800" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-01-05T00:00:00+09:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://via.placeholder.com/1200x800" />
+<meta property="twitter:title" content="항목 5: 명시적 타입 선언보다는 auto를 선호하라" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Hawk"},"dateModified":"2025-01-05T00:00:00+09:00","datePublished":"2025-01-05T00:00:00+09:00","description":"개요","headline":"항목 5: 명시적 타입 선언보다는 auto를 선호하라","image":"https://via.placeholder.com/1200x800","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/"},"url":"http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/"}</script>
+<!-- End Jekyll SEO tag -->
+ <!-- head scripts --></head>
+
+  <body>
+    <nav class="navbar is-primary " x-data="{ openNav: false }">
+    <div class="container">
+        <div class="navbar-brand">
+            <a href="/" class="navbar-item">
+                Hawk
+            </a>
+            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navMenu" :class="{ 'is-active': openNav }" x-on:click="openNav = !openNav">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="navbar-menu" id="navMenu" :class="{ 'is-active': openNav }">
+            <div class="navbar-start">
+                
+                
+                    
+                    <a href="/blog/" class="navbar-item ">Blog</a>
+                    
+                
+                
+            </div>
+
+            <!-- <div class="navbar-end"> -->
+            <!--      -->
+            <!--     <a class="navbar-item" href="https://github.com/sponsors/hawk90"> -->
+            <!--         <span class="icon gh-sponsor"><i class="fas fa-heart"></i></span> -->
+            <!--         <span>Sponsor</span> -->
+            <!--     </a> -->
+            <!--      -->
+            <!-- </div> -->
+
+        </div>
+    </div>
+</nav>
+  <section
+  class="hero  is-medium  is-bold is-primary"
+  
+>
+  <div class="hero-body ">
+    <div class="container">
+      <h1 class="title is-2">항목 5: 명시적 타입 선언보다는 auto를 선호하라</h1>
+      <p class="subtitle is-3"></p>
+      
+    </div>
+  </div>
+</section>
+  
+
+    <section class="section">
+      <div class="container">
+        <div class="columns is-multiline">
+          
+          <div class="column is-8">
+            
+ 
+ 
+ 
+ <div class="content">
+  <p>Published: Jan 5, 2025 by Hawk</p>
+
+   <h2 id="개요">개요</h2>
+
+<p>“auto를 쓰면 타입을 모르잖아요!” 맞아요. 하지만 그게 장점입니다. auto는 더 짧고, 더 안전하고, 더 유연한 코드를 만들어줍니다.</p>
+
+<h2 id="auto의-장점들">auto의 장점들</h2>
+
+<h3 id="1-초기화-강제--더-안전한-코드">1. 초기화 강제 = 더 안전한 코드</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x1</span><span class="p">;</span>         <span class="c1">// 초기화 안 됨! 쓰레기값</span>
+<span class="k">auto</span> <span class="n">x2</span><span class="p">;</span>        <span class="c1">// 에러! auto는 초기화 필수</span>
+<span class="k">auto</span> <span class="n">x3</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>    <span class="c1">// OK</span>
+</code></pre></div></div>
+
+<h3 id="2-긴-타입명에서-해방">2. 긴 타입명에서 해방</h3>
+
+<p><strong>Before (auto 없이):</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Customer</span><span class="o">&gt;&gt;::</span><span class="n">iterator</span> <span class="n">iter</span>
+    <span class="o">=</span> <span class="n">customerMap</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+<span class="c1">// 눈 아프죠?</span>
+</code></pre></div></div>
+
+<p><strong>After (auto 사용):</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">customerMap</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+
+<span class="c1">// 깔끔!</span>
+</code></pre></div></div>
+
+<h3 id="3-타입-불일치-문제-해결">3. 타입 불일치 문제 해결</h3>
+
+<p><strong>숨어있는 버그:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>  <span class="c1">// 문제! size()는 std::size_t 반환</span>
+                         <span class="c1">// 32비트: unsigned = size_t (OK)</span>
+                         <span class="c1">// 64비트: unsigned ≠ size_t (위험!)</span>
+</code></pre></div></div>
+
+<p><strong>auto로 해결:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">sz</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>  <span class="c1">// 항상 올바른 타입!</span>
+</code></pre></div></div>
+
+<h3 id="4-숨은-형변환-방지">4. 숨은 형변환 방지</h3>
+
+<p><strong>성능 문제 예제:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">m</span><span class="p">;</span>
+
+<span class="c1">// 나쁜 예 - 숨은 복사 발생!</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">p</span> <span class="o">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 실제 타입은 std::pair&lt;const std::string, int&gt;</span>
+    <span class="c1">// const가 빠져서 임시 객체 생성됨!</span>
+<span class="p">}</span>
+
+<span class="c1">// 좋은 예 - auto 사용</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p</span> <span class="o">:</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 정확한 타입으로 추론, 복사 없음</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="5-람다-저장이-가능">5. 람다 저장이 가능</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 람다는 타입을 쓸 수 없음</span>
+<span class="k">auto</span> <span class="n">derefUPLess</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span> <span class="n">p1</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span> <span class="n">p2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">*</span><span class="n">p1</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">p2</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// std::function은 가능하지만...</span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">,</span>
+                   <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;&amp;</span><span class="p">)</span><span class="o">&gt;</span>
+    <span class="n">derefUPLess2</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p1</span><span class="p">,</span> <span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">p2</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">*</span><span class="n">p1</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">p2</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="c1">// 더 느리고, 메모리도 더 씀!</span>
+</code></pre></div></div>
+
+<p><strong>성능 차이:</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">auto</code> 람다: 인라인 가능, 크기 = 람다 크기</li>
+  <li><code class="language-plaintext highlighter-rouge">std::function</code>: 간접 호출, 힙 할당 가능, 더 큰 메모리</li>
+</ul>
+
+<h3 id="6-리팩토링이-쉬워짐">6. 리팩토링이 쉬워짐</h3>
+
+<p><strong>타입 변경 시나리오:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 원래 코드</span>
+<span class="kt">int</span> <span class="nf">makeValue</span><span class="p">();</span>
+<span class="kt">int</span> <span class="n">val</span> <span class="o">=</span> <span class="n">makeValue</span><span class="p">();</span>
+
+<span class="c1">// 나중에 long으로 변경</span>
+<span class="kt">long</span> <span class="nf">makeValue</span><span class="p">();</span>
+<span class="kt">int</span> <span class="n">val</span> <span class="o">=</span> <span class="n">makeValue</span><span class="p">();</span>  <span class="c1">// 타입 불일치! 수정 필요</span>
+
+<span class="c1">// auto를 썼다면?</span>
+<span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">makeValue</span><span class="p">();</span>  <span class="c1">// 자동으로 long이 됨!</span>
+</code></pre></div></div>
+
+<h2 id="실전-예제">실전 예제</h2>
+
+<h3 id="반복자와-auto">반복자와 auto</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 복잡한 타입</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">It</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">dwim</span><span class="p">(</span><span class="n">It</span> <span class="n">b</span><span class="p">,</span> <span class="n">It</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">b</span> <span class="o">!=</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// 현재 요소 타입을 직접 쓰기 어려움</span>
+        <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">iterator_traits</span><span class="o">&lt;</span><span class="n">It</span><span class="o">&gt;::</span><span class="n">value_type</span>
+            <span class="n">currValue</span> <span class="o">=</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>  <span class="c1">// 복잡함</span>
+
+        <span class="c1">// auto로 간단히!</span>
+        <span class="k">auto</span> <span class="n">currValue</span> <span class="o">=</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>  <span class="c1">// 간단함</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="컨테이너와-auto">컨테이너와 auto</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 인덱스 타입 실수 방지</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
+
+<span class="c1">// 위험: int는 음수 가능, size()는 unsigned</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+
+<span class="c1">// 안전: 정확한 타입</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0u</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+
+<span class="c1">// 더 나은 방법: range-for</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="n">elem</span> <span class="o">:</span> <span class="n">v</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="auto를-쓰면-안-되는-경우">auto를 쓰면 안 되는 경우?</h2>
+
+<h3 id="1-프록시-타입-문제-항목-6에서-자세히">1. 프록시 타입 문제 (항목 6에서 자세히)</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">features</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>
+
+<span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// bool이 아님!</span>
+<span class="c1">// std::vector&lt;bool&gt;::reference 타입 (프록시)</span>
+
+<span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// 명시적 변환</span>
+</code></pre></div></div>
+
+<h3 id="2-가독성이-중요할-때">2. 가독성이 중요할 때</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">calculate</span><span class="p">();</span>  <span class="c1">// calculate()가 뭘 반환하지?</span>
+
+<span class="c1">// 때로는 명시적이 나음</span>
+<span class="n">Money</span> <span class="n">result</span> <span class="o">=</span> <span class="n">calculate</span><span class="p">();</span>  <span class="c1">// 아, 돈을 반환하는구나</span>
+</code></pre></div></div>
+
+<h2 id="auto-사용-가이드라인">auto 사용 가이드라인</h2>
+
+<h3 id="auto를-쓸-때">auto를 쓸 때</h3>
+<ol>
+  <li>긴 타입명 (특히 템플릿)</li>
+  <li>람다 표현식</li>
+  <li>반복자</li>
+  <li>타입을 정확히 모를 때</li>
+  <li>리팩토링이 잦은 코드</li>
+</ol>
+
+<h3 id="auto를-피할-때">auto를 피할 때</h3>
+<ol>
+  <li>프록시 타입</li>
+  <li>타입이 중요한 비즈니스 로직</li>
+  <li>명시적 형변환이 필요할 때</li>
+</ol>
+
+<h2 id="성능-비교">성능 비교</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// std::function vs auto 람다</span>
+<span class="k">auto</span> <span class="n">lambda1</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span> <span class="p">};</span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">lambda2</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span> <span class="p">};</span>
+
+<span class="c1">// 크기 차이</span>
+<span class="k">sizeof</span><span class="p">(</span><span class="n">lambda1</span><span class="p">);</span>  <span class="c1">// 1 (캡처 없는 람다)</span>
+<span class="k">sizeof</span><span class="p">(</span><span class="n">lambda2</span><span class="p">);</span>  <span class="c1">// 32~64 바이트 (구현에 따라)</span>
+
+<span class="c1">// 호출 속도</span>
+<span class="n">lambda1</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>  <span class="c1">// 인라인 가능</span>
+<span class="n">lambda2</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>  <span class="c1">// 간접 호출</span>
+</code></pre></div></div>
+
+<h2 id="핵심-정리">핵심 정리</h2>
+
+<p><strong>auto의 장점:</strong></p>
+<ol>
+  <li><strong>초기화 강제</strong> → 더 안전</li>
+  <li><strong>타입 추론</strong> → 실수 방지</li>
+  <li><strong>짧은 코드</strong> → 가독성 향상</li>
+  <li><strong>정확한 타입</strong> → 이식성 향상</li>
+  <li><strong>리팩토링 용이</strong> → 유지보수 향상</li>
+</ol>
+
+<p><strong>기억하세요:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 이전 방식</span>
+<span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;::</span><span class="n">const_iterator</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">m</span><span class="p">.</span><span class="n">cbegin</span><span class="p">();</span>
+
+<span class="c1">// 현대적 방식</span>
+<span class="k">auto</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">m</span><span class="p">.</span><span class="n">cbegin</span><span class="p">();</span>
+
+<span class="c1">// 둘 다 같은 일을 하지만, 어느 게 읽기 쉬운가요?</span>
+</code></pre></div></div>
+
+<p><strong>결론:</strong> auto는 단순히 타이핑을 줄이는 게 아니라, 더 정확하고 유지보수하기 쉬운 코드를 만듭니다!</p>
+
+</div>
+
+<div class="tags">
+   <span
+  class="tag  is-primary "
+>
+  C++
+</span>
+  <span
+  class="tag  is-primary "
+>
+  auto
+</span>
+  <span
+  class="tag  is-primary "
+>
+  Modern C++
+</span>
+ 
+</div>
+
+ <p><strong>Share</strong></p>
+<div class="buttons ">
+  <a
+    class="button is-medium is-facebook"
+    onclick="window.open('https://www.facebook.com/share.php?u=http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/');"
+  >
+    <span class="icon"><i class="fab fa-facebook fa-lg"></i></span>
+  </a>
+  <a
+    class="button is-medium is-twitter"
+    onclick="window.open('https://twitter.com/intent/tweet?text=http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/');"
+  >
+    <span class="icon"><i class="fab fa-twitter fa-lg"></i></span>
+  </a>
+  <a
+    class="button is-medium is-linkedin"
+    onclick="window.open('https://www.linkedin.com/shareArticle?mini=true&url=http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/&title=%ED%95%AD%EB%AA%A9+5%3A+%EB%AA%85%EC%8B%9C%EC%A0%81+%ED%83%80%EC%9E%85+%EC%84%A0%EC%96%B8%EB%B3%B4%EB%8B%A4%EB%8A%94+auto%EB%A5%BC+%EC%84%A0%ED%98%B8%ED%95%98%EB%9D%BC&summary=&source=');"
+  >
+    <span class="icon"><i class="fab fa-linkedin fa-lg"></i></span>
+  </a>
+  <a
+    class="button is-medium is-reddit"
+    onclick="window.open('https://reddit.com/submit?url=http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/');"
+  >
+    <span class="icon"><i class="fab fa-reddit fa-lg"></i></span>
+  </a>
+</div>
+  
+
+          </div>
+          
+          <div class="column is-4-desktop is-4-tablet">
+            <aside class="menu">
+  <!-- 검색 박스 -->
+  <div class="field">
+    <p class="control has-icons-left">
+      <input class="input" type="text" id="search-box" placeholder="검색...">
+      <span class="icon is-small is-left">
+        <i>🔍</i>
+      </span>
+    </p>
+  </div>
+
+  <!-- 검색 결과 -->
+  <div id="search-results" class="is-hidden mb-3">
+    <p class="menu-label">검색 결과</p>
+    <ul class="menu-list" id="search-results-list"></ul>
+  </div>
+
+  <!-- 카테고리 트리 -->
+  <p class="menu-label">Categories</p>
+  <div id="category-tree" class="menu-list">
+    <!-- JavaScript로 동적 생성 -->
+  </div>
+</aside>
+
+<!-- 포스트 데이터를 JavaScript로 전달 -->
+<script>
+const posts = [
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item06-use-explicit-typed-initializer.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item06-use-explicit-typed-initializer/",
+    title: "항목 6: auto가 원치 않은 타입으로 추론될 때는 명시적 타입의 초기치를 사용하라",
+    date: "2025-01-05",
+    tags: ["C++","auto","Proxy Types"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item05-prefer-auto.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/",
+    title: "항목 5: 명시적 타입 선언보다는 auto를 선호하라",
+    date: "2025-01-05",
+    tags: ["C++","auto","Modern C++"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item04-know-how-to-view-deduced-types.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item04-know-how-to-view-deduced-types/",
+    title: "항목 4: 추론된 타입을 확인하는 방법을 알아두라",
+    date: "2025-01-05",
+    tags: ["C++","Type Deduction","Debugging"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item03-understand-decltype.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item03-understand-decltype/",
+    title: "항목 3: decltype의 작동 방식을 이해하라",
+    date: "2025-01-05",
+    tags: ["C++","decltype","Type Deduction"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item02-understand-auto-type-deduction.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item02-understand-auto-type-deduction/",
+    title: "항목 2: auto의 타입 추론 규칙을 이해하라",
+    date: "2025-01-05",
+    tags: ["C++","auto","Type Deduction"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item01-understand-template-type-deduction.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction/",
+    title: "항목 1: 템플릿 타입 추론 규칙을 이해하라",
+    date: "2025-01-05",
+    tags: ["C++","Template","Type Deduction"]
+  }
+  
+];
+
+// 폴더 구조를 트리로 변환
+function buildCategoryTree(posts) {
+  const tree = {};
+
+  posts.forEach(post => {
+    const pathParts = post.path.split('/').slice(1, -1); // _posts 제거, 파일명 제거
+
+    let current = tree;
+    pathParts.forEach((part, index) => {
+      if (!current[part]) {
+        current[part] = {
+          name: part,
+          posts: [],
+          children: {}
+        };
+      }
+
+      if (index === pathParts.length - 1) {
+        current[part].posts.push(post);
+      }
+
+      current = current[part].children;
+    });
+  });
+
+  return tree;
+}
+
+// HTML 생성
+function renderTree(tree, level = 0) {
+  let html = '<ul class="menu-list">';
+
+  Object.keys(tree).sort().forEach(key => {
+    const node = tree[key];
+    const id = key.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    const hasChildren = Object.keys(node.children).length > 0;
+    const hasPosts = node.posts.length > 0;
+
+    if (level === 0) {
+      // 메인 카테고리
+      html += `
+        <li>
+          <a href="#" class="has-text-weight-semibold category-toggle" data-category="${id}">
+            📁 ${node.name}
+          </a>
+          <ul class="is-hidden" id="posts-${id}">
+      `;
+
+      // 서브 카테고리
+      if (hasChildren) {
+        Object.keys(node.children).sort().forEach(childKey => {
+          const child = node.children[childKey];
+          const childId = childKey.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
+          html += `
+            <li>
+              <a href="#" class="category-toggle pl-3" data-category="${id}-${childId}">
+                📂 ${child.name}
+              </a>
+              <ul class="is-hidden pl-3" id="posts-${id}-${childId}">
+          `;
+
+          // 서브 카테고리의 포스트들
+          child.posts.forEach(post => {
+            html += `<li><a href="${post.url}" class="is-size-7">${post.title.substring(0, 30)}${post.title.length > 30 ? '...' : ''}</a></li>`;
+          });
+
+          html += `</ul></li>`;
+        });
+      }
+
+      // 메인 카테고리 직속 포스트들
+      node.posts.forEach(post => {
+        html += `<li><a href="${post.url}" class="is-size-7">${post.title.substring(0, 30)}${post.title.length > 30 ? '...' : ''}</a></li>`;
+      });
+
+      html += `</ul></li>`;
+    }
+  });
+
+  html += '</ul>';
+  return html;
+}
+
+// 검색 기능
+function searchPosts(query) {
+  if (!query || query.length < 1) return [];
+
+  // 특수문자 이스케이프 처리
+  const escapeRegex = (str) => {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  };
+
+  const lowerQuery = query.toLowerCase();
+  const escapedQuery = escapeRegex(lowerQuery);
+
+  return posts.filter(post => {
+    try {
+      // 제목에서 검색
+      const titleMatch = post.title.toLowerCase().includes(lowerQuery);
+
+      // 경로에서 검색 (C++ 같은 경우 처리)
+      const pathMatch = post.path.toLowerCase().includes(lowerQuery) ||
+                       post.path.toLowerCase().includes(escapedQuery);
+
+      // 태그에서 검색
+      const tagMatch = post.tags && Array.isArray(post.tags) &&
+                      post.tags.some(tag =>
+                        tag && typeof tag === 'string' &&
+                        tag.toLowerCase().includes(lowerQuery)
+                      );
+
+      return titleMatch || pathMatch || tagMatch;
+    } catch (e) {
+      return false;
+    }
+  }).sort((a, b) => {
+    // 제목 매칭을 우선순위로 정렬
+    const aTitle = a.title.toLowerCase().includes(lowerQuery) ? 0 : 1;
+    const bTitle = b.title.toLowerCase().includes(lowerQuery) ? 0 : 1;
+    return aTitle - bTitle;
+  });
+}
+
+// 검색 결과 표시
+function displaySearchResults(results) {
+  const resultsDiv = document.getElementById('search-results');
+  const resultsList = document.getElementById('search-results-list');
+  const categoryTree = document.getElementById('category-tree');
+
+  if (results.length === 0 && document.getElementById('search-box').value.length > 0) {
+    resultsDiv.classList.remove('is-hidden');
+    categoryTree.classList.add('is-hidden');
+    resultsList.innerHTML = '<li><span class="has-text-grey">검색 결과가 없습니다.</span></li>';
+  } else if (results.length > 0) {
+    resultsDiv.classList.remove('is-hidden');
+    categoryTree.classList.add('is-hidden');
+
+    let html = '';
+    results.forEach(post => {
+      const category = post.path.split('/').slice(1, -1).join(' > ');
+      html += `
+        <li>
+          <a href="${post.url}">
+            <strong>${highlightText(post.title, document.getElementById('search-box').value)}</strong>
+            <br>
+            <span class="is-size-7 has-text-grey">${category}</span>
+          </a>
+        </li>
+      `;
+    });
+    resultsList.innerHTML = html;
+  } else {
+    resultsDiv.classList.add('is-hidden');
+    categoryTree.classList.remove('is-hidden');
+  }
+}
+
+// 텍스트 하이라이트
+function highlightText(text, query) {
+  if (!query) return text;
+  try {
+    // 특수문자 이스케이프
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
+  } catch (e) {
+    return text;
+  }
+}
+
+// 페이지 로드 시 실행
+document.addEventListener('DOMContentLoaded', function() {
+  // 카테고리 트리 초기화
+  const tree = buildCategoryTree(posts);
+  const treeHtml = renderTree(tree);
+  document.getElementById('category-tree').innerHTML = treeHtml;
+
+  // 검색 이벤트 설정
+  const searchBox = document.getElementById('search-box');
+  if (searchBox) {
+    let searchTimeout;
+
+    searchBox.addEventListener('input', function(e) {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const query = e.target.value.trim();
+
+        if (query && query.length >= 1) {  // 1글자부터 검색
+          const results = searchPosts(query);
+          displaySearchResults(results);
+        } else {
+          displaySearchResults([]);
+        }
+      }, 200); // 200ms로 줄임
+    });
+
+    // ESC 키로 검색 초기화
+    searchBox.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        this.value = '';
+        displaySearchResults([]);
+      }
+    });
+  }
+
+  // 토글 기능 - 이벤트 위임 사용
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('category-toggle')) {
+      e.preventDefault();
+      const category = e.target.dataset.category;
+      const postsList = document.getElementById('posts-' + category);
+
+      if (postsList) {
+        postsList.classList.toggle('is-hidden');
+      }
+    }
+  });
+});
+</script>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+     <footer class="footer">
+  <div class="container">
+    
+    <div class="columns is-multiline">
+      
+      <div class="column has-text-centered">
+        <div>
+          <a href="/" class="link"
+            >Home</a
+          >
+        </div>
+      </div>
+      
+      <div class="column has-text-centered">
+        <div>
+          <a href="/blog/" class="link"
+            >Blog</a
+          >
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <div class="content is-small has-text-centered">
+      <p class="">
+        Theme built by <a href="https://www.csrhymes.com">C.S. Rhymes</a>
+      </p>
+    </div>
+  </div>
+</footer>
+ 
+    <script
+      src="/assets/js/app.js"
+      type="text/javascript"
+    ></script><!-- footer scripts -->
+</body>
+</html>

@@ -138,14 +138,14 @@
 <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="n">ptr1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>      <span class="c1">// "ptr1이 가리키는 int가 const"</span>
 <span class="kt">int</span> <span class="k">const</span><span class="o">*</span> <span class="n">ptr1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>      <span class="c1">// 위와 완전히 동일!</span>
 
-<span class="o">*</span><span class="n">ptr1</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>                 <span class="c1">// ❌ 에러! 가리키는 값 수정 불가</span>
-<span class="n">ptr1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>                  <span class="c1">// ✅ OK! 포인터는 다른 곳을 가리킬 수 있음</span>
+<span class="o">*</span><span class="n">ptr1</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>                 <span class="c1">// 에러! 가리키는 값 수정 불가</span>
+<span class="n">ptr1</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>                  <span class="c1">// OK! 포인터는 다른 곳을 가리킬 수 있음</span>
 
 <span class="c1">// 2. const가 * 뒤에 있으면 → 포인터 자체가 const</span>
 <span class="kt">int</span><span class="o">*</span> <span class="k">const</span> <span class="n">ptr2</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span>      <span class="c1">// "ptr2라는 포인터가 const"</span>
 
-<span class="o">*</span><span class="n">ptr2</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span>                 <span class="c1">// ✅ OK! 가리키는 값은 변경 가능</span>
-<span class="n">ptr2</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>                  <span class="c1">// ❌ 에러! 포인터는 다른 곳을 가리킬 수 없음</span>
+<span class="o">*</span><span class="n">ptr2</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span>                 <span class="c1">// OK! 가리키는 값은 변경 가능</span>
+<span class="n">ptr2</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">y</span><span class="p">;</span>                  <span class="c1">// 에러! 포인터는 다른 곳을 가리킬 수 없음</span>
 
 <span class="c1">// 3. 둘 다 const</span>
 <span class="k">const</span> <span class="kt">int</span><span class="o">*</span> <span class="k">const</span> <span class="n">ptr3</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">;</span> <span class="c1">// 포인터도, 가리키는 값도 모두 const</span>
@@ -696,6 +696,46 @@
 <!-- 포스트 데이터를 JavaScript로 전달 -->
 <script>
 const posts = [
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item06-use-explicit-typed-initializer.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item06-use-explicit-typed-initializer/",
+    title: "항목 6: auto가 원치 않은 타입으로 추론될 때는 명시적 타입의 초기치를 사용하라",
+    date: "2025-01-05",
+    tags: ["C++","auto","Proxy Types"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item05-prefer-auto.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item05-prefer-auto/",
+    title: "항목 5: 명시적 타입 선언보다는 auto를 선호하라",
+    date: "2025-01-05",
+    tags: ["C++","auto","Modern C++"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item04-know-how-to-view-deduced-types.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item04-know-how-to-view-deduced-types/",
+    title: "항목 4: 추론된 타입을 확인하는 방법을 알아두라",
+    date: "2025-01-05",
+    tags: ["C++","Type Deduction","Debugging"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item03-understand-decltype.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item03-understand-decltype/",
+    title: "항목 3: decltype의 작동 방식을 이해하라",
+    date: "2025-01-05",
+    tags: ["C++","decltype","Type Deduction"]
+  },
+  
+  {
+    path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item02-understand-auto-type-deduction.md",
+    url: "/c++/effective%20modern%20c++/2025/01/05/item02-understand-auto-type-deduction/",
+    title: "항목 2: auto의 타입 추론 규칙을 이해하라",
+    date: "2025-01-05",
+    tags: ["C++","auto","Type Deduction"]
+  },
   
   {
     path: "_posts/programming-languages/cpp/이펙티브 모던 C++/2025-01-05-item01-understand-template-type-deduction.md",

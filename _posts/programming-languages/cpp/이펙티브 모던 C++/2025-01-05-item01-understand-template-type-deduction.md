@@ -33,14 +33,14 @@ birth_year = 1999;  // 에러! const는 절대 수정 불가
 const int* ptr1 = &x;      // "ptr1이 가리키는 int가 const"
 int const* ptr1 = &x;      // 위와 완전히 동일!
 
-*ptr1 = 30;                 // ❌ 에러! 가리키는 값 수정 불가
-ptr1 = &y;                  // ✅ OK! 포인터는 다른 곳을 가리킬 수 있음
+*ptr1 = 30;                 // 에러! 가리키는 값 수정 불가
+ptr1 = &y;                  // OK! 포인터는 다른 곳을 가리킬 수 있음
 
 // 2. const가 * 뒤에 있으면 → 포인터 자체가 const
 int* const ptr2 = &x;      // "ptr2라는 포인터가 const"
 
-*ptr2 = 40;                 // ✅ OK! 가리키는 값은 변경 가능
-ptr2 = &y;                  // ❌ 에러! 포인터는 다른 곳을 가리킬 수 없음
+*ptr2 = 40;                 // OK! 가리키는 값은 변경 가능
+ptr2 = &y;                  // 에러! 포인터는 다른 곳을 가리킬 수 없음
 
 // 3. 둘 다 const
 const int* const ptr3 = &x; // 포인터도, 가리키는 값도 모두 const
