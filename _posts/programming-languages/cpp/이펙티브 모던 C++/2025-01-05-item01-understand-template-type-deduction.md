@@ -10,7 +10,20 @@ tags: [C++, Template, Type Deduction]
 
 C++의 템플릿 타입 추론(template type deduction)은 복잡해 보이지만, 세 가지 경우로 나누어 생각하면 명확해집니다. `auto` 타입 추론도 거의 동일한 규칙을 따르므로, 이 규칙을 확실히 이해하는 것이 중요합니다.
 
+## 템플릿 함수 기본 형태
+
+```cpp
+template<typename T>
+void f(ParamType param);
+
+f(expr);  // expr로 T와 ParamType을 추론
+```
+
 ## 필수 개념: const와 volatile
+
+> **초보자를 위한 배경 지식**
+
+<br>
 
 템플릿 타입 추론을 이해하려면 먼저 타입 한정자(type qualifier)를 알아야 합니다.
 
@@ -56,8 +69,7 @@ int * const     // *(포인터)가 const
 
 **volatile = 변덕스러운 = 언제든 바뀔 수 있는 값**
 
-**컴파일러 최적화란?**
-컴파일러는 코드를 더 빠르게 실행하기 위해 똑똑한 변경을 합니다:
+컴파일러는 코드를 더 빠르게 실행하기 위해 똑똑한 변경(최적화)를 합니다:
 
 ```cpp
 int x = 5;
@@ -104,6 +116,10 @@ const volatile int cv_val = 42;
 - 참조나 포인터 전달에서는 const가 유지됩니다
 
 ## 필수 개념: Value Categories (값 분류)
+
+> **초보자를 위한 배경 지식**
+
+<br>
 
 C++11부터 값(expression)의 분류가 더 세밀해졌습니다. 템플릿 타입 추론을 이해하려면 이 개념이 필수입니다.
 

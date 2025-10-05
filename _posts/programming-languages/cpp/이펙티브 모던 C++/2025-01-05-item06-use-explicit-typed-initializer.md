@@ -10,7 +10,41 @@ tags: [C++, auto, Proxy Types]
 
 auto는 훌륭하지만 가끔 예상과 다른 타입으로 추론됩니다. 대부분 "프록시 타입" 때문인데요, 이럴 때는 명시적 타입 변환이 답입니다.
 
-## 필수 개념: 임시 객체란?
+## 문제: 보이지 않는 프록시 타입
+
+### 예제 1: std::vector&lt;bool&gt;의 함정
+
+```cpp
+std::vector<bool> features(const Widget& w);
+
+Widget w;
+bool highPriority = features(w)[5];  // bool 복사
+auto highPriority2 = features(w)[5]; // bool이 아님!
+
+// auto가 추론한 타입은?
+// std::vector<bool>::reference (프록시 클래스!)
+```
+
+**왜 문제인가?**
+
+```cpp
+auto highPriority = features(w)[5];  // 프록시 객체
+
+// features(w)는 임시 객체
+// [5]는 임시 객체의 5번째 비트를 가리키는 프록시 반환
+// 문장이 끝나면 임시 객체 소멸
+// highPriority는 소멸된 메모리를 참조!
+
+if (highPriority) { }  // 정의되지 않은 동작!
+```
+
+---
+
+### 필수 개념: 임시 객체와 댕글링 포인터
+
+> **초보자를 위한 배경 지식**
+
+<br>
 
 **임시 객체(Temporary Object) = 이름 없는 객체 = 금방 사라지는 객체**
 
@@ -52,34 +86,6 @@ int* createDangling() {
 
 int* ptr = createDangling();  // ptr은 소멸된 메모리를 가리킴
 *ptr = 100;  // 정의되지 않은 동작! 프로그램 크래시 가능
-```
-
-## 문제: 보이지 않는 프록시 타입
-
-### 예제 1: std::vector&lt;bool&gt;의 함정
-
-```cpp
-std::vector<bool> features(const Widget& w);
-
-Widget w;
-bool highPriority = features(w)[5];  // bool 복사
-auto highPriority2 = features(w)[5]; // bool이 아님!
-
-// auto가 추론한 타입은?
-// std::vector<bool>::reference (프록시 클래스!)
-```
-
-**왜 문제인가?**
-
-```cpp
-auto highPriority = features(w)[5];  // 프록시 객체
-
-// features(w)는 임시 객체
-// [5]는 임시 객체의 5번째 비트를 가리키는 프록시 반환
-// 문장이 끝나면 임시 객체 소멸
-// highPriority는 소멸된 메모리를 참조!
-
-if (highPriority) { }  // 정의되지 않은 동작!
 ```
 
 ### std::vector&lt;bool&gt;이 특별한 이유
@@ -223,7 +229,9 @@ auto result = (m1 + m2 + m3).eval();  // Eigen의 eval() 메서드
 
 ### 과도한 cast는 피하기
 
-**왜 cast를 피해야 할까요?**
+> **초보자를 위한 배경 지식: 왜 cast를 피해야 할까요?**
+
+<br>
 
 1. **타입 시스템 우회 = 안전장치 해제**
    ```cpp
@@ -256,6 +264,63 @@ auto result = (m1 + m2 + m3).eval();  // Eigen의 eval() 메서드
    // 원래 intValue를 그냥 쓰면 됐는데...
    ```
 
+**핵심:** cast는 "나는 컴파일러보다 더 잘 안다"는 선언입니다. 정말 그런지 확인하세요!
+
+<br>
+
+> **임베디드 환경에서의 cast 제약**
+
+<br>
+
+**왜 임베디드에서는 cast 사용이 제한적일까요?**
+
+1. **dynamic_cast는 거의 사용 불가**
+   ```cpp
+   // dynamic_cast는 RTTI(Run-Time Type Information) 필요
+   Base* b = new Derived();
+   Derived* d = dynamic_cast<Derived*>(b);  // RTTI 필요!
+
+   // 많은 임베디드 컴파일러는 RTTI를 비활성화
+   // -fno-rtti 옵션 사용 → dynamic_cast 불가능
+   ```
+
+2. **메모리 오버헤드**
+   ```cpp
+   // RTTI 정보는 메모리를 차지함
+   // 작은 MCU에서는 몇 KB도 아까움
+   // 예: STM32F103 (20KB RAM) vs PC (16GB RAM)
+   ```
+
+3. **예측 불가능한 실행 시간**
+   ```cpp
+   // dynamic_cast는 실행 시간이 일정하지 않음
+   // 실시간 시스템에서는 치명적
+   // 인터럽트 핸들러에서는 절대 사용 금지
+   ```
+
+4. **컴파일러 최적화 방해**
+   ```cpp
+   // cast는 컴파일러의 타입 추론을 방해
+   // 임베디드에서는 모든 최적화가 중요
+   int16_t value = 100;
+   int32_t result = static_cast<int32_t>(value) * 2;  // 불필요한 변환
+   ```
+
+**임베디드에서 권장되는 방법:**
+```cpp
+// 1. 템플릿으로 타입 안전성 확보
+template<typename T>
+T safe_convert(T value) { return value; }
+
+// 2. 컴파일 타임 체크 활용
+static_assert(sizeof(int) == 4, "int must be 32-bit");
+
+// 3. C 스타일 캐스트 (불가피한 경우만)
+volatile uint32_t* reg = (volatile uint32_t*)0x40000000;  // 레지스터 접근
+```
+
+---
+
 **언제 cast가 정당한가?**
 
 ```cpp
@@ -266,8 +331,6 @@ auto x = static_cast<int>(42);  // 그냥 auto x = 42;
 auto x = static_cast<int>(3.14);  // 의도적인 소수점 제거
 auto flag = static_cast<bool>(vec_bool[0]);  // 프록시 타입 해결
 ```
-
-**핵심:** cast는 "나는 컴파일러보다 더 잘 안다"는 선언입니다. 정말 그런지 확인하세요!
 
 ## 디버깅 팁
 

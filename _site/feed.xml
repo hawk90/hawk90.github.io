@@ -1,9 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-05T17:49:07+09:00</updated><id>http://0.0.0.0:4000/feed.xml</id><title type="html">Hawk</title><subtitle>Hawks&apos; GitHub pages websites
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-05T18:50:50+09:00</updated><id>http://0.0.0.0:4000/feed.xml</id><title type="html">Hawk</title><subtitle>Hawks&apos; GitHub pages websites
 </subtitle><entry><title type="html">항목 1: 템플릿 타입 추론 규칙을 이해하라</title><link href="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction/" rel="alternate" type="text/html" title="항목 1: 템플릿 타입 추론 규칙을 이해하라" /><published>2025-01-05T00:00:00+09:00</published><updated>2025-01-05T00:00:00+09:00</updated><id>http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction</id><content type="html" xml:base="http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction/"><![CDATA[<h2 id="개요">개요</h2>
 
 <p>C++의 템플릿 타입 추론(template type deduction)은 복잡해 보이지만, 세 가지 경우로 나누어 생각하면 명확해집니다. <code class="language-plaintext highlighter-rouge">auto</code> 타입 추론도 거의 동일한 규칙을 따르므로, 이 규칙을 확실히 이해하는 것이 중요합니다.</p>
 
+<h2 id="템플릿-함수-기본-형태">템플릿 함수 기본 형태</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">f</span><span class="p">(</span><span class="n">ParamType</span> <span class="n">param</span><span class="p">);</span>
+
+<span class="n">f</span><span class="p">(</span><span class="n">expr</span><span class="p">);</span>  <span class="c1">// expr로 T와 ParamType을 추론</span>
+</code></pre></div></div>
+
 <h2 id="필수-개념-const와-volatile">필수 개념: const와 volatile</h2>
+
+<blockquote>
+  <p><strong>초보자를 위한 배경 지식</strong></p>
+</blockquote>
+
+<p><br /></p>
 
 <p>템플릿 타입 추론을 이해하려면 먼저 타입 한정자(type qualifier)를 알아야 합니다.</p>
 
@@ -46,8 +60,7 @@
 
 <p><strong>volatile = 변덕스러운 = 언제든 바뀔 수 있는 값</strong></p>
 
-<p><strong>컴파일러 최적화란?</strong>
-컴파일러는 코드를 더 빠르게 실행하기 위해 똑똑한 변경을 합니다:</p>
+<p>컴파일러는 코드를 더 빠르게 실행하기 위해 똑똑한 변경(최적화)를 합니다:</p>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
 <span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
@@ -95,6 +108,12 @@
 </ul>
 
 <h2 id="필수-개념-value-categories-값-분류">필수 개념: Value Categories (값 분류)</h2>
+
+<blockquote>
+  <p><strong>초보자를 위한 배경 지식</strong></p>
+</blockquote>
+
+<p><br /></p>
 
 <p>C++11부터 값(expression)의 분류가 더 세밀해졌습니다. 템플릿 타입 추론을 이해하려면 이 개념이 필수입니다.</p>
 
@@ -1285,7 +1304,41 @@ error: incomplete type 'TD&lt;const int*&gt;' used in nested name specifier
 
 <p>auto는 훌륭하지만 가끔 예상과 다른 타입으로 추론됩니다. 대부분 “프록시 타입” 때문인데요, 이럴 때는 명시적 타입 변환이 답입니다.</p>
 
-<h2 id="필수-개념-임시-객체란">필수 개념: 임시 객체란?</h2>
+<h2 id="문제-보이지-않는-프록시-타입">문제: 보이지 않는 프록시 타입</h2>
+
+<h3 id="예제-1-stdvectorbool의-함정">예제 1: std::vector&lt;bool&gt;의 함정</h3>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">features</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>
+
+<span class="n">Widget</span> <span class="n">w</span><span class="p">;</span>
+<span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// bool 복사</span>
+<span class="k">auto</span> <span class="n">highPriority2</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span> <span class="c1">// bool이 아님!</span>
+
+<span class="c1">// auto가 추론한 타입은?</span>
+<span class="c1">// std::vector&lt;bool&gt;::reference (프록시 클래스!)</span>
+</code></pre></div></div>
+
+<p><strong>왜 문제인가?</strong></p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// 프록시 객체</span>
+
+<span class="c1">// features(w)는 임시 객체</span>
+<span class="c1">// [5]는 임시 객체의 5번째 비트를 가리키는 프록시 반환</span>
+<span class="c1">// 문장이 끝나면 임시 객체 소멸</span>
+<span class="c1">// highPriority는 소멸된 메모리를 참조!</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">highPriority</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>  <span class="c1">// 정의되지 않은 동작!</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="필수-개념-임시-객체와-댕글링-포인터">필수 개념: 임시 객체와 댕글링 포인터</h3>
+
+<blockquote>
+  <p><strong>초보자를 위한 배경 지식</strong></p>
+</blockquote>
+
+<p><br /></p>
 
 <p><strong>임시 객체(Temporary Object) = 이름 없는 객체 = 금방 사라지는 객체</strong></p>
 
@@ -1326,32 +1379,6 @@ error: incomplete type 'TD&lt;const int*&gt;' used in nested name specifier
 
 <span class="kt">int</span><span class="o">*</span> <span class="n">ptr</span> <span class="o">=</span> <span class="n">createDangling</span><span class="p">();</span>  <span class="c1">// ptr은 소멸된 메모리를 가리킴</span>
 <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>  <span class="c1">// 정의되지 않은 동작! 프로그램 크래시 가능</span>
-</code></pre></div></div>
-
-<h2 id="문제-보이지-않는-프록시-타입">문제: 보이지 않는 프록시 타입</h2>
-
-<h3 id="예제-1-stdvectorbool의-함정">예제 1: std::vector&lt;bool&gt;의 함정</h3>
-
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">features</span><span class="p">(</span><span class="k">const</span> <span class="n">Widget</span><span class="o">&amp;</span> <span class="n">w</span><span class="p">);</span>
-
-<span class="n">Widget</span> <span class="n">w</span><span class="p">;</span>
-<span class="kt">bool</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// bool 복사</span>
-<span class="k">auto</span> <span class="n">highPriority2</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span> <span class="c1">// bool이 아님!</span>
-
-<span class="c1">// auto가 추론한 타입은?</span>
-<span class="c1">// std::vector&lt;bool&gt;::reference (프록시 클래스!)</span>
-</code></pre></div></div>
-
-<p><strong>왜 문제인가?</strong></p>
-
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">highPriority</span> <span class="o">=</span> <span class="n">features</span><span class="p">(</span><span class="n">w</span><span class="p">)[</span><span class="mi">5</span><span class="p">];</span>  <span class="c1">// 프록시 객체</span>
-
-<span class="c1">// features(w)는 임시 객체</span>
-<span class="c1">// [5]는 임시 객체의 5번째 비트를 가리키는 프록시 반환</span>
-<span class="c1">// 문장이 끝나면 임시 객체 소멸</span>
-<span class="c1">// highPriority는 소멸된 메모리를 참조!</span>
-
-<span class="k">if</span> <span class="p">(</span><span class="n">highPriority</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>  <span class="c1">// 정의되지 않은 동작!</span>
 </code></pre></div></div>
 
 <h3 id="stdvectorbool이-특별한-이유">std::vector&lt;bool&gt;이 특별한 이유</h3>
@@ -1493,7 +1520,11 @@ error: incomplete type 'TD&lt;const int*&gt;' used in nested name specifier
 
 <h3 id="과도한-cast는-피하기">과도한 cast는 피하기</h3>
 
-<p><strong>왜 cast를 피해야 할까요?</strong></p>
+<blockquote>
+  <p><strong>초보자를 위한 배경 지식: 왜 cast를 피해야 할까요?</strong></p>
+</blockquote>
+
+<p><br /></p>
 
 <ol>
   <li><strong>타입 시스템 우회 = 안전장치 해제</strong>
@@ -1525,6 +1556,63 @@ error: incomplete type 'TD&lt;const int*&gt;' used in nested name specifier
   </li>
 </ol>
 
+<p><strong>핵심:</strong> cast는 “나는 컴파일러보다 더 잘 안다”는 선언입니다. 정말 그런지 확인하세요!</p>
+
+<p><br /></p>
+
+<blockquote>
+  <p><strong>임베디드 환경에서의 cast 제약</strong></p>
+</blockquote>
+
+<p><br /></p>
+
+<p><strong>왜 임베디드에서는 cast 사용이 제한적일까요?</strong></p>
+
+<ol>
+  <li><strong>dynamic_cast는 거의 사용 불가</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// dynamic_cast는 RTTI(Run-Time Type Information) 필요</span>
+<span class="n">Base</span><span class="o">*</span> <span class="n">b</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Derived</span><span class="p">();</span>
+<span class="n">Derived</span><span class="o">*</span> <span class="n">d</span> <span class="o">=</span> <span class="k">dynamic_cast</span><span class="o">&lt;</span><span class="n">Derived</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>  <span class="c1">// RTTI 필요!</span>
+
+<span class="c1">// 많은 임베디드 컴파일러는 RTTI를 비활성화</span>
+<span class="c1">// -fno-rtti 옵션 사용 → dynamic_cast 불가능</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>메모리 오버헤드</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// RTTI 정보는 메모리를 차지함</span>
+<span class="c1">// 작은 MCU에서는 몇 KB도 아까움</span>
+<span class="c1">// 예: STM32F103 (20KB RAM) vs PC (16GB RAM)</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>예측 불가능한 실행 시간</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// dynamic_cast는 실행 시간이 일정하지 않음</span>
+<span class="c1">// 실시간 시스템에서는 치명적</span>
+<span class="c1">// 인터럽트 핸들러에서는 절대 사용 금지</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>컴파일러 최적화 방해</strong>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// cast는 컴파일러의 타입 추론을 방해</span>
+<span class="c1">// 임베디드에서는 모든 최적화가 중요</span>
+<span class="kt">int16_t</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+<span class="kt">int32_t</span> <span class="n">result</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>  <span class="c1">// 불필요한 변환</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p><strong>임베디드에서 권장되는 방법:</strong></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 1. 템플릿으로 타입 안전성 확보</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="n">T</span> <span class="nf">safe_convert</span><span class="p">(</span><span class="n">T</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">value</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="c1">// 2. 컴파일 타임 체크 활용</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="s">"int must be 32-bit"</span><span class="p">);</span>
+
+<span class="c1">// 3. C 스타일 캐스트 (불가피한 경우만)</span>
+<span class="k">volatile</span> <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">reg</span> <span class="o">=</span> <span class="p">(</span><span class="k">volatile</span> <span class="kt">uint32_t</span><span class="o">*</span><span class="p">)</span><span class="mh">0x40000000</span><span class="p">;</span>  <span class="c1">// 레지스터 접근</span>
+</code></pre></div></div>
+
+<hr />
+
 <p><strong>언제 cast가 정당한가?</strong></p>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 불필요한 cast (피하세요)</span>
@@ -1534,8 +1622,6 @@ error: incomplete type 'TD&lt;const int*&gt;' used in nested name specifier
 <span class="k">auto</span> <span class="n">x</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">3.14</span><span class="p">);</span>  <span class="c1">// 의도적인 소수점 제거</span>
 <span class="k">auto</span> <span class="n">flag</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="n">vec_bool</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>  <span class="c1">// 프록시 타입 해결</span>
 </code></pre></div></div>
-
-<p><strong>핵심:</strong> cast는 “나는 컴파일러보다 더 잘 안다”는 선언입니다. 정말 그런지 확인하세요!</p>
 
 <h2 id="디버깅-팁">디버깅 팁</h2>
 

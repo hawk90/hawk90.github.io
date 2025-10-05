@@ -12,6 +12,7 @@
   <meta name="theme-color" content=#6B46C1>
   <link rel="stylesheet" href="/assets/css/app.css" />
   <link rel="stylesheet" href="/assets/css/purple-theme.css" />
+  <link rel="stylesheet" href="/assets/css/code-style.css" />
   <link
     rel="shortcut icon"
     type="image/png"
@@ -49,7 +50,8 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Hawk"},"dateModified":"2025-01-05T00:00:00+09:00","datePublished":"2025-01-05T00:00:00+09:00","description":"개요","headline":"항목 1: 템플릿 타입 추론 규칙을 이해하라","image":"https://via.placeholder.com/1200x800","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction/"},"url":"http://0.0.0.0:4000/c++/effective%20modern%20c++/2025/01/05/item01-understand-template-type-deduction/"}</script>
 <!-- End Jekyll SEO tag -->
- <!-- head scripts --></head>
+ <!-- head scripts --><script defer src="/assets/js/code-copy.js"></script>
+</head>
 
   <body>
     <nav class="navbar is-primary " x-data="{ openNav: false }">
@@ -117,7 +119,21 @@
 
 <p>C++의 템플릿 타입 추론(template type deduction)은 복잡해 보이지만, 세 가지 경우로 나누어 생각하면 명확해집니다. <code class="language-plaintext highlighter-rouge">auto</code> 타입 추론도 거의 동일한 규칙을 따르므로, 이 규칙을 확실히 이해하는 것이 중요합니다.</p>
 
+<h2 id="템플릿-함수-기본-형태">템플릿 함수 기본 형태</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">f</span><span class="p">(</span><span class="n">ParamType</span> <span class="n">param</span><span class="p">);</span>
+
+<span class="n">f</span><span class="p">(</span><span class="n">expr</span><span class="p">);</span>  <span class="c1">// expr로 T와 ParamType을 추론</span>
+</code></pre></div></div>
+
 <h2 id="필수-개념-const와-volatile">필수 개념: const와 volatile</h2>
+
+<blockquote>
+  <p><strong>초보자를 위한 배경 지식</strong></p>
+</blockquote>
+
+<p><br /></p>
 
 <p>템플릿 타입 추론을 이해하려면 먼저 타입 한정자(type qualifier)를 알아야 합니다.</p>
 
@@ -160,8 +176,7 @@
 
 <p><strong>volatile = 변덕스러운 = 언제든 바뀔 수 있는 값</strong></p>
 
-<p><strong>컴파일러 최적화란?</strong>
-컴파일러는 코드를 더 빠르게 실행하기 위해 똑똑한 변경을 합니다:</p>
+<p>컴파일러는 코드를 더 빠르게 실행하기 위해 똑똑한 변경(최적화)를 합니다:</p>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
 <span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
@@ -209,6 +224,12 @@
 </ul>
 
 <h2 id="필수-개념-value-categories-값-분류">필수 개념: Value Categories (값 분류)</h2>
+
+<blockquote>
+  <p><strong>초보자를 위한 배경 지식</strong></p>
+</blockquote>
+
+<p><br /></p>
 
 <p>C++11부터 값(expression)의 분류가 더 세밀해졌습니다. 템플릿 타입 추론을 이해하려면 이 개념이 필수입니다.</p>
 

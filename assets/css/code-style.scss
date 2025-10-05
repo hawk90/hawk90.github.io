@@ -1,0 +1,127 @@
+---
+---
+
+// 코드 블록 스타일링
+.highlighter-rouge {
+  margin: 1.5rem 0;
+}
+
+// 코드 헤더 (복사 버튼 컨테이너)
+.code-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+// 복사 버튼
+.copy-code-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  &.copied {
+    background: rgba(40, 167, 69, 0.3);
+    border-color: rgba(40, 167, 69, 0.5);
+  }
+}
+
+// 코드 블록 본체
+pre.highlight {
+  margin-top: 0 !important;
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: #282c34 !important;
+  padding: 1.25rem !important;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// 인라인 코드
+code.highlighter-rouge {
+  background: #f0f0f5;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  color: #e83e8c;
+  font-size: 0.875em;
+}
+
+// Syntax Highlighting (One Dark 테마 기반)
+.highlight {
+  .c, .cm, .cp, .c1, .cs { color: #5c6370; font-style: italic; } // 주석
+  .k, .kc, .kd, .kp, .kr, .kt, .kv { color: #c678dd; } // 키워드
+  .n, .na, .nb, .nc, .no, .nd, .ni, .ne, .nf, .nl, .nn, .nx, .py, .nt { color: #e06c75; } // 이름
+  .o, .ow { color: #56b6c2; } // 연산자
+  .p { color: #abb2bf; } // 구두점
+  .s, .sb, .sc, .sd, .s2, .sh, .sx, .s1 { color: #98c379; } // 문자열
+  .sr { color: #d19a66; } // 정규표현식
+  .si { color: #56b6c2; } // 문자열 삽입
+  .se { color: #d19a66; } // 이스케이프
+  .m, .mf, .mh, .mi, .il, .mo, .mb, .mx { color: #d19a66; } // 숫자
+  .bp { color: #e06c75; } // 내장 의사 변수
+  .vc, .vg, .vi, .vm { color: #e06c75; } // 변수
+}
+
+// C++ 특별 하이라이팅
+.language-cpp {
+  .n { color: #abb2bf; } // 일반 이름은 기본 색상
+  .nc { color: #e5c07b; } // 클래스 이름
+  .nf { color: #61afef; } // 함수 이름
+  .k { color: #c678dd; } // 키워드
+  .kt { color: #e5c07b; } // 타입 키워드
+  .o { color: #56b6c2; } // 연산자
+  .s { color: #98c379; } // 문자열
+  .c1, .cm { color: #5c6370; font-style: italic; } // 주석
+  .mi { color: #d19a66; } // 정수
+  .mf { color: #d19a66; } // 부동소수점
+  .nb { color: #61afef; } // 내장 이름
+  .nl { color: #e06c75; } // 라벨
+
+  // C++ 특수 키워드
+  .n.std { color: #56b6c2; } // std namespace
+}
+
+// 라인 넘버 (필요한 경우)
+.highlight .lineno {
+  color: #5c6370;
+  margin-right: 1rem;
+  padding-right: 0.5rem;
+  border-right: 1px solid #3e4451;
+  user-select: none;
+}
+
+// 다크모드 대응 (나중에 필요하면)
+@media (prefers-color-scheme: dark) {
+  code.highlighter-rouge {
+    background: #2c313c;
+    color: #e06c75;
+  }
+}
+
+// 반응형
+@media screen and (max-width: 768px) {
+  pre.highlight {
+    font-size: 0.8rem;
+    padding: 1rem !important;
+  }
+
+  .copy-code-button {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
