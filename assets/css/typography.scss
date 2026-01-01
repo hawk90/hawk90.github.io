@@ -1,0 +1,188 @@
+---
+---
+
+// 기본 타이포그래피 개선
+.content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #24292e;
+
+  // 제목 스타일
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #24292e;
+  }
+
+  h1 {
+    font-size: 2rem;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #eaecef;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #eaecef;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  h4 {
+    font-size: 1rem;
+  }
+
+  h5 {
+    font-size: 0.875rem;
+  }
+
+  h6 {
+    font-size: 0.85rem;
+    color: #6a737d;
+  }
+
+  // 문단
+  p {
+    margin-bottom: 1rem;
+    margin-top: 0;
+  }
+
+  // 링크
+  a {
+    color: #6B46C1;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // 목록
+  ul, ol {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+    margin-top: 0;
+
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  // 인용문
+  blockquote {
+    padding: 0 1rem;
+    margin: 1.5rem 0;
+    color: #6a737d;
+    border-left: 0.25rem solid #dfe2e5;
+    background-color: transparent;
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+
+    p {
+      margin-bottom: 0.5rem;
+    }
+
+    strong {
+      color: #24292e;
+    }
+  }
+
+  // 수평선
+  hr {
+    height: 0.25rem;
+    padding: 0;
+    margin: 2rem 0;
+    background-color: #e1e4e8;
+    border: 0;
+  }
+
+  // 표
+  table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    margin-bottom: 1rem;
+
+    thead {
+      background-color: #f6f8fa;
+    }
+
+    th {
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      text-align: left;
+      border: 1px solid #dfe2e5;
+    }
+
+    td {
+      padding: 0.5rem 1rem;
+      border: 1px solid #dfe2e5;
+    }
+
+    tr {
+      background-color: #fff;
+      border-top: 1px solid #dfe2e5;
+
+      &:nth-child(2n) {
+        background-color: #f6f8fa;
+      }
+    }
+  }
+
+  // 강조
+  strong {
+    font-weight: 600;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  // 이미지
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1rem auto;
+  }
+
+  // 키보드 입력
+  kbd {
+    display: inline-block;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.875rem;
+    color: #444d56;
+    vertical-align: middle;
+    background-color: #fafbfc;
+    border: 1px solid #d1d5da;
+    border-radius: 0.25rem;
+    box-shadow: inset 0 -1px 0 #d1d5da;
+  }
+}
+
+// 포스트 메타 정보
+.post-meta {
+  color: #6a737d;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+// 포스트 제목
+.post-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  color: #24292e;
+}

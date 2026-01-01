@@ -8,48 +8,71 @@
 
 // 코드 헤더 (복사 버튼 컨테이너)
 .code-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem 0.5rem 0 0;
+  background: #f7f8fa;
+  border: 1px solid #e1e4e8;
+  border-bottom: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem 0.375rem 0 0;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 0;
+  font-size: 0.75rem;
+  color: #586069;
+}
+
+// 언어 라벨
+.language-label {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 // 복사 버튼
 .copy-code-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 0.25rem 0.75rem;
+  background: transparent;
+  border: 1px solid #d1d5da;
+  color: #586069;
+  padding: 0.125rem 0.5rem;
   border-radius: 0.25rem;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+    background: #f6f8fa;
+    border-color: #6B46C1;
+    color: #6B46C1;
   }
 
   &.copied {
-    background: rgba(40, 167, 69, 0.3);
-    border-color: rgba(40, 167, 69, 0.5);
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
   }
 }
 
 // 코드 블록 본체
 pre.highlight {
   margin-top: 0 !important;
-  border-radius: 0 0 0.5rem 0.5rem;
-  background: #282c34 !important;
-  padding: 1.25rem !important;
+  border-radius: 0 0 0.375rem 0.375rem;
+  background: #f6f8fa !important;
+  padding: 1rem !important;
   overflow-x: auto;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  border: 1px solid #e1e4e8;
+  border-top: none;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+  code {
+    background: transparent !important;
+    padding: 0 !important;
+    font-size: inherit;
+    color: #24292e;
+  }
 }
 
 // 인라인 코드
@@ -61,49 +84,90 @@ code.highlighter-rouge {
   font-size: 0.875em;
 }
 
-// Syntax Highlighting (One Dark 테마 기반)
+// Syntax Highlighting (GitHub Light 테마)
 .highlight {
-  .c, .cm, .cp, .c1, .cs { color: #5c6370; font-style: italic; } // 주석
-  .k, .kc, .kd, .kp, .kr, .kt, .kv { color: #c678dd; } // 키워드
-  .n, .na, .nb, .nc, .no, .nd, .ni, .ne, .nf, .nl, .nn, .nx, .py, .nt { color: #e06c75; } // 이름
-  .o, .ow { color: #56b6c2; } // 연산자
-  .p { color: #abb2bf; } // 구두점
-  .s, .sb, .sc, .sd, .s2, .sh, .sx, .s1 { color: #98c379; } // 문자열
-  .sr { color: #d19a66; } // 정규표현식
-  .si { color: #56b6c2; } // 문자열 삽입
-  .se { color: #d19a66; } // 이스케이프
-  .m, .mf, .mh, .mi, .il, .mo, .mb, .mx { color: #d19a66; } // 숫자
-  .bp { color: #e06c75; } // 내장 의사 변수
-  .vc, .vg, .vi, .vm { color: #e06c75; } // 변수
+  .c, .cm, .cp, .c1, .cs { color: #6a737d; font-style: italic; } // 주석
+  .k, .kc, .kd, .kn, .kp, .kr, .kt, .kv { color: #d73a49; font-weight: 500; } // 키워드
+  .n { color: #24292e; } // 이름 기본
+  .na, .nb { color: #005cc5; } // 속성, 내장
+  .nc { color: #6f42c1; } // 클래스 이름
+  .nd { color: #6f42c1; } // 데코레이터
+  .ne { color: #005cc5; } // 예외
+  .nf { color: #6f42c1; } // 함수 이름
+  .nl { color: #005cc5; } // 라벨
+  .nn { color: #6f42c1; } // 네임스페이스
+  .nx { color: #24292e; } // 기타 이름
+  .nt { color: #22863a; } // 태그
+  .o, .ow { color: #d73a49; } // 연산자
+  .p { color: #24292e; } // 구두점
+  .s, .sb, .sc, .sd, .s2, .sh, .sx, .s1 { color: #032f62; } // 문자열
+  .sr { color: #032f62; } // 정규표현식
+  .si { color: #005cc5; } // 문자열 삽입
+  .se { color: #032f62; } // 이스케이프
+  .m, .mf, .mh, .mi, .il, .mo, .mb, .mx { color: #005cc5; } // 숫자
+  .bp { color: #005cc5; } // 내장 의사 변수
+  .vc, .vg, .vi, .vm { color: #005cc5; } // 변수
+  .gd { color: #d73a49; background-color: #ffeef0; } // 삭제된 줄
+  .gi { color: #22863a; background-color: #f0fff4; } // 추가된 줄
 }
 
 // C++ 특별 하이라이팅
 .language-cpp {
-  .n { color: #abb2bf; } // 일반 이름은 기본 색상
-  .nc { color: #e5c07b; } // 클래스 이름
-  .nf { color: #61afef; } // 함수 이름
-  .k { color: #c678dd; } // 키워드
-  .kt { color: #e5c07b; } // 타입 키워드
-  .o { color: #56b6c2; } // 연산자
-  .s { color: #98c379; } // 문자열
-  .c1, .cm { color: #5c6370; font-style: italic; } // 주석
-  .mi { color: #d19a66; } // 정수
-  .mf { color: #d19a66; } // 부동소수점
-  .nb { color: #61afef; } // 내장 이름
-  .nl { color: #e06c75; } // 라벨
+  .n { color: #24292e; } // 일반 이름
+  .nc { color: #6f42c1; font-weight: 500; } // 클래스 이름
+  .nf { color: #6f42c1; } // 함수 이름
+  .k { color: #d73a49; font-weight: 500; } // 키워드 (if, else, for 등)
+  .kt { color: #d73a49; } // 타입 키워드 (int, char, bool 등)
+  .o { color: #d73a49; } // 연산자
+  .s, .s1, .s2 { color: #032f62; } // 문자열
+  .c1, .cm { color: #6a737d; font-style: italic; } // 주석
+  .mi { color: #005cc5; } // 정수
+  .mf { color: #005cc5; } // 부동소수점
+  .mh { color: #005cc5; } // 16진수
+  .nb { color: #005cc5; } // 내장 이름
+  .nl { color: #005cc5; } // 라벨
+  .p { color: #24292e; } // 괄호, 세미콜론 등
 
-  // C++ 특수 키워드
-  .n.std { color: #56b6c2; } // std namespace
+  // C++ 특수 처리
+  .n.std { color: #6f42c1; } // std namespace
+  span.o:contains("::") { color: #24292e; } // :: 연산자는 기본색
 }
 
-// 라인 넘버 (필요한 경우)
-.highlight .lineno {
-  color: #5c6370;
-  margin-right: 1rem;
-  padding-right: 0.5rem;
-  border-right: 1px solid #3e4451;
-  user-select: none;
-}
+// 라인 넘버 스타일 (제거됨)
+// 필요시 아래 주석 해제
+// .highlight.has-line-numbers {
+//   code {
+//     display: block;
+//     line-height: 1.4;
+//
+//     .line {
+//       display: block;
+//       position: relative;
+//       line-height: 1.4;
+//       min-height: auto;
+//
+//       &:hover {
+//         background-color: rgba(0, 0, 0, 0.02);
+//       }
+//     }
+//
+//     .line-number {
+//       display: inline-block;
+//       width: 2.5em;
+//       padding-right: 0.75em;
+//       color: #959da5;
+//       text-align: right;
+//       user-select: none;
+//       border-right: 1px solid #e1e4e8;
+//       margin-right: 0.75em;
+//       font-size: 0.85em;
+//     }
+//
+//     .line-content {
+//       display: inline;
+//     }
+//   }
+// }
 
 // 다크모드 대응 (나중에 필요하면)
 @media (prefers-color-scheme: dark) {
