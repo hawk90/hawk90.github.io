@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d0b14"/>
+      <stop offset="100%" style="stop-color:#16131f"/>
+    </linearGradient>
+    <linearGradient id="cppGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#659AD2"/>
+      <stop offset="100%" style="stop-color:#004482"/>
+    </linearGradient>
+    <linearGradient id="purpleGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9d7cd8"/>
+      <stop offset="100%" style="stop-color:#bb9af7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="225" fill="url(#bgGrad)"/>
+
+  <!-- Grid pattern -->
+  <g stroke="#2a2536" stroke-width="0.5" opacity="0.4">
+    <line x1="50" y1="0" x2="50" y2="225"/>
+    <line x1="100" y1="0" x2="100" y2="225"/>
+    <line x1="150" y1="0" x2="150" y2="225"/>
+    <line x1="200" y1="0" x2="200" y2="225"/>
+    <line x1="250" y1="0" x2="250" y2="225"/>
+    <line x1="300" y1="0" x2="300" y2="225"/>
+    <line x1="350" y1="0" x2="350" y2="225"/>
+    <line x1="0" y1="50" x2="400" y2="50"/>
+    <line x1="0" y1="100" x2="400" y2="100"/>
+    <line x1="0" y1="150" x2="400" y2="150"/>
+    <line x1="0" y1="200" x2="400" y2="200"/>
+  </g>
+
+  <!-- C++ Logo -->
+  <g transform="translate(200, 112.5)">
+    <!-- Hexagon background -->
+    <polygon points="0,-55 48,-27.5 48,27.5 0,55 -48,27.5 -48,-27.5" fill="url(#cppGrad)" opacity="0.9"/>
+
+    <!-- C letter -->
+    <text x="-20" y="12" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white">C</text>
+
+    <!-- ++ symbols -->
+    <g fill="white">
+      <rect x="18" y="-8" width="20" height="6"/>
+      <rect x="25" y="-15" width="6" height="20"/>
+      <rect x="42" y="-8" width="20" height="6"/>
+      <rect x="49" y="-15" width="6" height="20"/>
+    </g>
+  </g>
+
+  <!-- Decorative code snippets -->
+  <g font-family="monospace" font-size="10" opacity="0.4">
+    <text x="20" y="30" fill="#7dcfff">#include &lt;memory&gt;</text>
+    <text x="20" y="45" fill="#bb9af7">template&lt;typename T&gt;</text>
+    <text x="280" y="200" fill="#9ece6a">constexpr</text>
+    <text x="280" y="215" fill="#e0af68">auto</text>
+  </g>
+
+  <!-- Accent glow -->
+  <circle cx="340" cy="40" r="30" fill="#9d7cd8" opacity="0.12"/>
+  <circle cx="60" cy="185" r="25" fill="#bb9af7" opacity="0.1"/>
+</svg>

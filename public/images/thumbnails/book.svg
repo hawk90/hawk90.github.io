@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <defs>
+    <linearGradient id="bgGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d0b14"/>
+      <stop offset="100%" style="stop-color:#16131f"/>
+    </linearGradient>
+    <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9d7cd8"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="225" fill="url(#bgGrad3)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="350" cy="50" r="60" fill="#9d7cd8" opacity="0.06"/>
+  <circle cx="50" cy="175" r="40" fill="#bb9af7" opacity="0.05"/>
+
+  <!-- Book stack -->
+  <g transform="translate(200, 112.5)">
+    <!-- Bottom book -->
+    <g transform="rotate(-5)">
+      <rect x="-70" y="10" width="140" height="25" rx="2" fill="#f38ba8" opacity="0.8"/>
+      <rect x="-70" y="10" width="8" height="25" rx="1" fill="#f5c2e7"/>
+    </g>
+
+    <!-- Middle book -->
+    <g transform="rotate(3)">
+      <rect x="-65" y="-15" width="130" height="22" rx="2" fill="#7dcfff" opacity="0.85"/>
+      <rect x="-65" y="-15" width="7" height="22" rx="1" fill="#89dceb"/>
+    </g>
+
+    <!-- Top book (open) -->
+    <g transform="translate(0, -35)">
+      <!-- Left page -->
+      <path d="M-60,0 Q-60,-10 0,-15 L0,35 Q-60,30 -60,0 Z" fill="#eeeef0"/>
+      <!-- Right page -->
+      <path d="M60,0 Q60,-10 0,-15 L0,35 Q60,30 60,0 Z" fill="#a8a5b5"/>
+      <!-- Spine shadow -->
+      <rect x="-3" y="-15" width="6" height="50" fill="#6e6a7c" opacity="0.5"/>
+      <!-- Page lines -->
+      <g stroke="#6e6a7c" stroke-width="0.5" opacity="0.6">
+        <line x1="-50" y1="0" x2="-10" y2="-5"/>
+        <line x1="-50" y1="8" x2="-10" y2="3"/>
+        <line x1="-50" y1="16" x2="-10" y2="11"/>
+        <line x1="50" y1="0" x2="10" y2="-5"/>
+        <line x1="50" y1="8" x2="10" y2="3"/>
+        <line x1="50" y1="16" x2="10" y2="11"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Stars decoration -->
+  <g fill="#e0af68" opacity="0.6">
+    <polygon points="320,140 322,146 328,146 323,150 325,156 320,152 315,156 317,150 312,146 318,146" transform="scale(0.8)"/>
+    <polygon points="100,60 102,66 108,66 103,70 105,76 100,72 95,76 97,70 92,66 98,66" transform="scale(0.7)"/>
+    <polygon points="360,180 362,186 368,186 363,190 365,196 360,192 355,196 357,190 352,186 358,186" transform="scale(0.6)"/>
+  </g>
+
+  <!-- Reading glasses icon -->
+  <g transform="translate(80, 160)" stroke="#6e6a7c" stroke-width="2" fill="none" opacity="0.5">
+    <circle cx="0" cy="0" r="12"/>
+    <circle cx="30" cy="0" r="12"/>
+    <path d="M12,0 L18,0"/>
+    <path d="M-12,-4 L-20,-8"/>
+    <path d="M42,-4 L50,-8"/>
+  </g>
+</svg>
