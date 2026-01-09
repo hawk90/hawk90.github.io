@@ -1,0 +1,107 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  seriesName: string;
+  posts: CollectionEntry<'blog'>[];
+  currentSlug: string;
+}
+
+const { seriesName, posts, currentSlug } = Astro.props;
+const currentIndex = posts.findIndex((p) => p.slug === currentSlug);
+---
+
+<nav class="mb-8">
+  <button
+    type="button"
+    class="w-full flex items-center justify-between text-left group"
+    data-series-toggle
+    aria-expanded="false"
+  >
+    <h3 class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
+      {seriesName}
+    </h3>
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-[var(--color-text-muted)]">{currentIndex + 1}/{posts.length}</span>
+      <svg
+        class="w-4 h-4 text-[var(--color-text-muted)] transition-transform duration-200"
+        data-chevron
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </button>
+
+  <ol class="hidden mt-3 space-y-1" data-series-list>
+    {posts.map((post, index) => {
+      const isCurrent = post.slug === currentSlug;
+      return (
+        <li>
+          <a
+            href={`/blog/${post.slug}`}
+            class:list={[
+              'flex items-start gap-2 py-1.5 text-sm transition-colors rounded-md px-2 -mx-2',
+              isCurrent
+                ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]',
+            ]}
+          >
+            <span class:list={[
+              'shrink-0 w-5 h-5 flex items-center justify-center rounded text-xs',
+              isCurrent
+                ? 'bg-[var(--color-accent)] text-white'
+                : 'bg-[var(--color-bg-tertiary)]'
+            ]}>
+              {index + 1}
+            </span>
+            <span class="line-clamp-2 leading-tight">{post.data.title}</span>
+          </a>
+        </li>
+      );
+    })}
+  </ol>
+</nav>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function initSeriesSidebar() {
+    cleanup?.();
+
+    const toggles = document.querySelectorAll('[data-series-toggle]');
+    if (toggles.length === 0) return;
+
+    const handlers: Array<{ toggle: Element; handler: (e: Event) => void }> = [];
+
+    toggles.forEach((toggle) => {
+      function handleClick(e: Event) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const nav = toggle.closest('nav');
+        const list = nav?.querySelector('[data-series-list]');
+        const chevron = toggle.querySelector('[data-chevron]');
+
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!isExpanded));
+        list?.classList.toggle('hidden');
+        chevron?.classList.toggle('rotate-180');
+      }
+
+      toggle.addEventListener('click', handleClick);
+      handlers.push({ toggle, handler: handleClick });
+    });
+
+    cleanup = () => {
+      handlers.forEach(({ toggle, handler }) => {
+        toggle.removeEventListener('click', handler);
+      });
+    };
+  }
+
+  initSeriesSidebar();
+  document.addEventListener('astro:page-load', initSeriesSidebar);
+</script>

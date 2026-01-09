@@ -1,0 +1,15 @@
+---
+interface Props {
+  tag: string;
+  count?: number;
+}
+
+const { tag, count } = Astro.props;
+---
+
+<span class="tag">
+  {tag}
+  {count !== undefined && (
+    <span class="ml-1 opacity-70">({count})</span>
+  )}
+</span>

@@ -1,0 +1,44 @@
+---
+
+---
+
+<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function initScrollProgress() {
+    cleanup?.();
+
+    const progressBar = document.getElementById('scroll-progress');
+    if (!progressBar) return;
+
+    function updateProgress() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressBar.style.width = `${progress}%`;
+    }
+
+    let ticking = false;
+    function handleScroll() {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateProgress();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    updateProgress();
+
+    cleanup = () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }
+
+  initScrollProgress();
+  document.addEventListener('astro:page-load', initScrollProgress);
+</script>

@@ -1,0 +1,96 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{filteredHeadings.length > 0 && (
+  <nav class="text-sm" aria-label="Table of contents">
+    <h2 class="text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-4">
+      On this page
+    </h2>
+    <ul class="space-y-2" id="toc-list">
+      {filteredHeadings.map((heading) => (
+        <li
+          style={`padding-left: ${(heading.depth - 2) * 0.75}rem`}
+        >
+          <a
+            href={`#${heading.slug}`}
+            class="block py-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors toc-link"
+            data-heading={heading.slug}
+          >
+            {heading.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function initTableOfContents() {
+    cleanup?.();
+
+    const tocLinks = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+    if (tocLinks.length === 0) return;
+
+    const headingElements: HTMLElement[] = [];
+
+    tocLinks.forEach((link) => {
+      const id = link.dataset.heading;
+      if (id) {
+        const heading = document.getElementById(id);
+        if (heading) headingElements.push(heading);
+      }
+    });
+
+    function updateTocHighlight() {
+      const scrollY = window.scrollY;
+      let currentId = '';
+
+      for (const heading of headingElements) {
+        if (heading.offsetTop - 100 <= scrollY) {
+          currentId = heading.id;
+        }
+      }
+
+      tocLinks.forEach((link) => {
+        const isActive = link.dataset.heading === currentId;
+        link.classList.toggle('text-[var(--color-accent)]', isActive);
+        link.classList.toggle('font-medium', isActive);
+      });
+    }
+
+    let ticking = false;
+    function handleScroll() {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateTocHighlight();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    updateTocHighlight();
+
+    cleanup = () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }
+
+  initTableOfContents();
+  document.addEventListener('astro:page-load', initTableOfContents);
+</script>

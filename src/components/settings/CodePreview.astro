@@ -1,0 +1,101 @@
+---
+---
+
+<div class="code-preview">
+  <div class="flex gap-2 mb-3">
+    <button
+      type="button"
+      data-lang="cpp"
+      class="lang-tab px-3 py-1.5 text-sm rounded-lg transition-colors bg-[var(--color-accent)] text-white"
+    >
+      C++
+    </button>
+    <button
+      type="button"
+      data-lang="python"
+      class="lang-tab px-3 py-1.5 text-sm rounded-lg transition-colors bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]"
+    >
+      Python
+    </button>
+    <button
+      type="button"
+      data-lang="typescript"
+      class="lang-tab px-3 py-1.5 text-sm rounded-lg transition-colors bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]"
+    >
+      TypeScript
+    </button>
+    <button
+      type="button"
+      data-lang="rust"
+      class="lang-tab px-3 py-1.5 text-sm rounded-lg transition-colors bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)]"
+    >
+      Rust
+    </button>
+  </div>
+
+  <div class="code-panels">
+    <div data-panel="cpp" class="code-panel">
+      <slot name="cpp" />
+    </div>
+    <div data-panel="python" class="code-panel hidden">
+      <slot name="python" />
+    </div>
+    <div data-panel="typescript" class="code-panel hidden">
+      <slot name="typescript" />
+    </div>
+    <div data-panel="rust" class="code-panel hidden">
+      <slot name="rust" />
+    </div>
+  </div>
+</div>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function initCodePreview() {
+    cleanup?.();
+
+    const tabs = document.querySelectorAll('.lang-tab');
+    const panels = document.querySelectorAll('.code-panel');
+
+    if (tabs.length === 0) return;
+
+    const handlers: Array<{ tab: Element; handler: () => void }> = [];
+
+    tabs.forEach(tab => {
+      function handleClick() {
+        const lang = tab.getAttribute('data-lang');
+
+        tabs.forEach(t => {
+          if (t.getAttribute('data-lang') === lang) {
+            t.classList.remove('bg-[var(--color-bg-tertiary)]', 'text-[var(--color-text-secondary)]');
+            t.classList.add('bg-[var(--color-accent)]', 'text-white');
+          } else {
+            t.classList.remove('bg-[var(--color-accent)]', 'text-white');
+            t.classList.add('bg-[var(--color-bg-tertiary)]', 'text-[var(--color-text-secondary)]');
+          }
+        });
+
+        panels.forEach(p => {
+          if (p.getAttribute('data-panel') === lang) {
+            p.classList.remove('hidden');
+          } else {
+            p.classList.add('hidden');
+          }
+        });
+      }
+
+      tab.addEventListener('click', handleClick);
+      handlers.push({ tab, handler: handleClick });
+    });
+
+    cleanup = () => {
+      handlers.forEach(({ tab, handler }) => {
+        tab.removeEventListener('click', handler);
+      });
+    };
+  }
+
+  initCodePreview();
+  document.addEventListener('astro:page-load', initCodePreview);
+</script>

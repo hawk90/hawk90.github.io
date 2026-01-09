@@ -1,0 +1,109 @@
+---
+// Giscus configuration
+// Get your repo, repoId, category, and categoryId from https://giscus.app/
+const config = {
+  repo: 'hawk90/hawk90.github.io',
+  repoId: '', // Fill this in from giscus.app
+  category: 'Announcements',
+  categoryId: '', // Fill this in from giscus.app
+  mapping: 'pathname',
+  strict: '0',
+  reactionsEnabled: '1',
+  emitMetadata: '0',
+  inputPosition: 'top',
+  lang: 'ko',
+};
+---
+
+<div class="giscus-wrapper">
+  <div class="giscus"></div>
+  <div class="giscus-error hidden p-4 text-center text-sm text-[var(--color-text-muted)] border border-[var(--color-border)] rounded-lg">
+    <p>댓글 기능을 사용하려면 Giscus 설정이 필요합니다.</p>
+    <a href="https://giscus.app" target="_blank" rel="noopener noreferrer" class="text-[var(--color-accent)] hover:underline">
+      giscus.app에서 설정하기 →
+    </a>
+  </div>
+</div>
+
+<script define:vars={{ config }}>
+  let observer = null;
+
+  function loadGiscus() {
+    const wrapper = document.querySelector('.giscus-wrapper');
+    const errorEl = wrapper?.querySelector('.giscus-error');
+    if (!wrapper) return;
+
+    // 설정이 비어있으면 오류 메시지 표시
+    if (!config.repoId || !config.categoryId) {
+      errorEl?.classList.remove('hidden');
+      console.warn('Giscus: repoId or categoryId is not configured');
+      return;
+    }
+
+    // 이미 로드된 경우 스킵
+    if (wrapper.querySelector('script[src*="giscus"]')) return;
+
+    errorEl?.classList.add('hidden');
+
+    const theme = document.documentElement.classList.contains('light')
+      ? 'light'
+      : 'dark_dimmed';
+
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', config.repo);
+    script.setAttribute('data-repo-id', config.repoId);
+    script.setAttribute('data-category', config.category);
+    script.setAttribute('data-category-id', config.categoryId);
+    script.setAttribute('data-mapping', config.mapping);
+    script.setAttribute('data-strict', config.strict);
+    script.setAttribute('data-reactions-enabled', config.reactionsEnabled);
+    script.setAttribute('data-emit-metadata', config.emitMetadata);
+    script.setAttribute('data-input-position', config.inputPosition);
+    script.setAttribute('data-theme', theme);
+    script.setAttribute('data-lang', config.lang);
+    script.crossOrigin = 'anonymous';
+    script.async = true;
+
+    wrapper.appendChild(script);
+  }
+
+  function initGiscus() {
+    // 이전 observer 정리
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
+
+    loadGiscus();
+
+    // Update theme when toggled
+    observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const iframe = document.querySelector('.giscus-frame');
+          if (iframe) {
+            const theme = document.documentElement.classList.contains('light')
+              ? 'light'
+              : 'dark_dimmed';
+            iframe.contentWindow?.postMessage(
+              { giscus: { setConfig: { theme } } },
+              'https://giscus.app'
+            );
+          }
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+  }
+
+  // Load giscus on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGiscus);
+  } else {
+    initGiscus();
+  }
+
+  document.addEventListener('astro:page-load', initGiscus);
+</script>

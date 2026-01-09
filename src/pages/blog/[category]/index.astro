@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/blog/PostCard.astro';
+import BlogSidebar from '../../../components/blog/BlogSidebar.astro';
+import Breadcrumb from '../../../components/common/Breadcrumb.astro';
+import { CATEGORIES } from '../../../consts/categories';
+import { getPublishedPosts, filterByCategory } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  return CATEGORIES.map((cat) => ({
+    params: { category: cat.id },
+    props: { categoryInfo: cat },
+  }));
+}
+
+const { category } = Astro.params;
+const { categoryInfo } = Astro.props;
+
+const allPosts = await getPublishedPosts();
+const categoryPosts = filterByCategory(allPosts, category!);
+---
+
+<BaseLayout title={`${categoryInfo.name} - Blog`} description={categoryInfo.description}>
+  <section class="py-16">
+    <div class="container">
+      <div class="lg:flex lg:gap-12">
+        <!-- Main Content -->
+        <div class="flex-1 min-w-0">
+          <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: categoryInfo.name }]} />
+
+          <div class="mb-8">
+            <h1 class="text-4xl font-bold mb-4 flex items-center gap-3">
+              <span>{categoryInfo.icon}</span>
+              {categoryInfo.name}
+            </h1>
+            <p class="text-lg text-[var(--color-text-secondary)]">
+              {categoryInfo.description}
+            </p>
+          </div>
+
+          {categoryPosts.length > 0 ? (
+            <div class="grid gap-6 md:grid-cols-2">
+              {categoryPosts.map((post) => (
+                <PostCard post={post} />
+              ))}
+            </div>
+          ) : (
+            <p class="text-[var(--color-text-muted)] text-center py-12">
+              No posts in this category yet.
+            </p>
+          )}
+        </div>
+
+        <!-- Sidebar -->
+        <BlogSidebar activeFilter={{ type: 'category', value: category! }} />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/blog/PostCard.astro';
+import BlogSidebar from '../../components/blog/BlogSidebar.astro';
+import Breadcrumb from '../../components/common/Breadcrumb.astro';
+import { getPublishedPosts, getAllTags, filterByTag, type BlogPost } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const allPosts = await getPublishedPosts();
+  const allTags = getAllTags(allPosts);
+
+  return allTags.map((tag) => ({
+    params: { tag: tag.toLowerCase() },
+    props: {
+      tag,
+      posts: filterByTag(allPosts, tag),
+    },
+  }));
+}
+
+interface Props {
+  tag: string;
+  posts: BlogPost[];
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`#${tag} - Tags`} description={`${tag} 태그가 붙은 글`}>
+  <section class="py-16">
+    <div class="container">
+      <div class="lg:flex lg:gap-12">
+        <!-- Main Content -->
+        <div class="flex-1 min-w-0">
+          <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: `#${tag}` }]} />
+
+          <div class="mb-8">
+            <h1 class="text-4xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-[var(--color-accent)]">#</span>{tag}
+            </h1>
+            <p class="text-lg text-[var(--color-text-secondary)]">
+              {posts.length}개의 포스트
+            </p>
+          </div>
+
+          <div class="grid gap-6 md:grid-cols-2">
+            {posts.map((post) => (
+              <PostCard post={post} />
+            ))}
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <BlogSidebar activeFilter={{ type: 'tag', value: tag }} />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

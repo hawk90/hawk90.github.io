@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagBadge from '../../components/blog/TagBadge.astro';
+import BlogSidebar from '../../components/blog/BlogSidebar.astro';
+import Breadcrumb from '../../components/common/Breadcrumb.astro';
+import { toSlug, getTagUrl } from '../../lib/utils';
+import { getPublishedPosts, getAllSeries, getAllTags, type BlogPost } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const allPosts = await getPublishedPosts();
+  const allSeries = getAllSeries(allPosts);
+
+  return allSeries.map((series) => ({
+    params: { series: toSlug(series) },
+    props: {
+      seriesName: series,
+      posts: allPosts
+        .filter((p) => p.data.series === series)
+        .sort((a, b) => (a.data.seriesOrder || 0) - (b.data.seriesOrder || 0)),
+    },
+  }));
+}
+
+interface Props {
+  seriesName: string;
+  posts: BlogPost[];
+}
+
+const { seriesName, posts } = Astro.props;
+const allTags = getAllTags(posts);
+---
+
+<BaseLayout title={`${seriesName} - Series`} description={`${seriesName} 시리즈의 모든 글`}>
+  <section class="py-16">
+    <div class="container">
+      <div class="lg:flex lg:gap-12">
+        <!-- Main Content -->
+        <div class="flex-1 min-w-0">
+          <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: seriesName }]} />
+
+          <div class="mb-8">
+            <div class="text-sm text-[var(--color-accent)] font-medium mb-2">
+              Series · {posts.length} posts
+            </div>
+            <h1 class="text-4xl font-bold mb-4">{seriesName}</h1>
+            <div class="flex flex-wrap gap-2">
+              {allTags.map((tag) => (
+                <a href={getTagUrl(tag)}>
+                  <TagBadge tag={tag} />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            {posts.map((post, index) => (
+              <a
+                href={`/blog/${post.slug}`}
+                class="block p-6 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-accent)] transition-colors group"
+              >
+                <div class="flex items-start gap-4">
+                  <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-[var(--color-accent)] text-white font-bold rounded-lg">
+                    {post.data.seriesOrder || index + 1}
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h2 class="text-lg font-semibold group-hover:text-[var(--color-accent)] transition-colors">
+                      {post.data.title}
+                    </h2>
+                    {post.data.description && (
+                      <p class="text-sm text-[var(--color-text-secondary)] mt-1 line-clamp-2">
+                        {post.data.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <BlogSidebar activeFilter={{ type: 'series', value: seriesName }} />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

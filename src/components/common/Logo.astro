@@ -1,0 +1,18 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<a
+  href="/"
+  class:list={[
+    'group flex items-baseline font-bold text-xl transition-colors',
+    className,
+  ]}
+>
+  <span class="text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">Hawk</span>
+  <span class="text-[var(--color-accent)]">.dev</span>
+</a>

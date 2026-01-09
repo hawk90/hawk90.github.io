@@ -1,0 +1,121 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagBadge from '../../components/blog/TagBadge.astro';
+import TableOfContents from '../../components/blog/TableOfContents.astro';
+import SeriesNav from '../../components/blog/SeriesNav.astro';
+import SeriesSidebar from '../../components/blog/SeriesSidebar.astro';
+import Giscus from '../../components/blog/Giscus.astro';
+import { formatDate, getTagUrl } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+type Props = { post: CollectionEntry<'blog'> };
+
+const { post } = Astro.props;
+const { Content, headings } = await post.render();
+
+let seriesPosts: CollectionEntry<'blog'>[] = [];
+if (post.data.series) {
+  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+  seriesPosts = allPosts
+    .filter((p) => p.data.series === post.data.series)
+    .sort((a, b) => (a.data.seriesOrder || 0) - (b.data.seriesOrder || 0));
+}
+
+const formattedDate = formatDate(post.data.date);
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  image={`/og/${post.slug}.png`}
+  type="article"
+  showProgress={true}
+  publishedTime={post.data.date}
+  author={post.data.author}
+>
+  <article class="py-16">
+    <div class="container">
+      <div class="lg:flex lg:gap-12">
+        <!-- Main Content -->
+        <div class="flex-1 min-w-0">
+          <!-- Header -->
+          <header class="container-narrow mb-12">
+            {post.data.series && (
+              <div class="text-sm text-[var(--color-accent)] font-medium mb-2">
+                {post.data.series} · {post.data.seriesOrder}/{seriesPosts.length}
+              </div>
+            )}
+            <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-4">
+              {post.data.title}
+            </h1>
+            <div class="flex flex-wrap items-center gap-4 text-[var(--color-text-muted)]">
+              <time datetime={post.data.date.toISOString()}>
+                {formattedDate}
+              </time>
+              <span>·</span>
+              <span>{post.data.author}</span>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-4">
+              {post.data.tags.map((tag) => (
+                <a href={getTagUrl(tag)}>
+                  <TagBadge tag={tag} />
+                </a>
+              ))}
+            </div>
+          </header>
+
+          <!-- Series Navigation (Top) -->
+          {seriesPosts.length > 1 && (
+            <div class="container-narrow mb-8">
+              <SeriesNav posts={seriesPosts} currentSlug={post.slug} />
+            </div>
+          )}
+
+          <!-- Content -->
+          <div class="container-narrow prose">
+            <Content />
+          </div>
+
+          <!-- Series Navigation (Bottom) -->
+          {seriesPosts.length > 1 && (
+            <div class="container-narrow mt-12">
+              <SeriesNav posts={seriesPosts} currentSlug={post.slug} showAll />
+            </div>
+          )}
+
+          <!-- Comments -->
+          <div class="container-narrow mt-16">
+            <Giscus />
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="hidden lg:block w-64 shrink-0">
+          <div class="sticky top-24">
+            {seriesPosts.length > 1 && (
+              <SeriesSidebar
+                seriesName={post.data.series!}
+                posts={seriesPosts}
+                currentSlug={post.slug}
+              />
+            )}
+            <TableOfContents headings={headings} />
+          </div>
+        </aside>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<script>
+  import { setupPostNavigation } from '../../lib/keyboard';
+  setupPostNavigation();
+</script>
