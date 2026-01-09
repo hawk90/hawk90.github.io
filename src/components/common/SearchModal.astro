@@ -1,0 +1,343 @@
+---
+// Search Modal Component
+---
+
+<div
+  id="search-modal"
+  class="fixed inset-0 z-[100] hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="search-title"
+>
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-search-backdrop></div>
+
+  <!-- Modal -->
+  <div class="relative flex items-start justify-center pt-[15vh] px-4">
+    <div class="w-full max-w-xl bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-xl shadow-2xl overflow-hidden">
+      <!-- Filter -->
+      <div id="filter-container" class="hidden px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+        <div class="flex items-center gap-2">
+          <span id="filter-label" class="text-sm text-[var(--color-text-muted)]"></span>
+          <button
+            id="filter-badge"
+            class="inline-flex items-center gap-1 px-2 py-1 text-sm bg-[var(--color-accent)] text-white rounded-full hover:bg-[var(--color-accent-hover)] transition-colors"
+          >
+            <span id="filter-name"></span>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Input -->
+      <div class="flex items-center gap-3 px-4 border-b border-[var(--color-border)]">
+        <svg class="w-5 h-5 text-[var(--color-text-muted)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          id="search-input"
+          data-search-input
+          placeholder="검색어를 입력하세요..."
+          class="flex-1 py-4 bg-transparent text-lg outline-none focus:outline-none placeholder:text-[var(--color-text-muted)]"
+          style="outline: none !important;"
+          autocomplete="off"
+        />
+        <button
+          id="search-close-btn"
+          class="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
+          aria-label="닫기"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div id="search-results" class="max-h-[60vh] overflow-y-auto" role="listbox" aria-label="검색 결과">
+        <div class="p-8 text-center text-[var(--color-text-muted)]" data-search-empty>
+          검색어를 입력하면 결과가 표시됩니다
+        </div>
+      </div>
+
+      <!-- Keyboard hint -->
+      <div class="px-4 py-2 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-xs text-[var(--color-text-muted)] flex items-center justify-between">
+        <span><kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)]">↵</kbd> 선택</span>
+        <span><kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)]">esc</kbd> 닫기</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { searchPosts, highlightMatch, type SearchItem } from '../../lib/search';
+  import { isInputElement } from '../../lib/keyboard';
+
+  let searchIndex: SearchItem[] = [];
+  let isLoaded = false;
+  let loadRetries = 0;
+  let currentFilter: { type: 'tag' | 'series'; value: string } | null = null;
+  let cleanup: (() => void) | null = null;
+  let selectedIndex = -1;
+
+  const MAX_RETRIES = 3;
+  const EMPTY_MESSAGE = '<div class="p-8 text-center text-[var(--color-text-muted)]">검색어를 입력하면 결과가 표시됩니다</div>';
+  const NO_RESULTS_MESSAGE = '<div class="p-8 text-center text-[var(--color-text-muted)]">검색 결과가 없습니다</div>';
+  const LOADING_MESSAGE = '<div class="p-8 text-center text-[var(--color-text-muted)]">검색 인덱스 로딩 중...</div>';
+  const ERROR_MESSAGE = '<div class="p-8 text-center text-[var(--color-text-muted)]">검색 인덱스를 불러올 수 없습니다. 다시 시도해주세요.</div>';
+
+  async function loadSearchIndex(): Promise<boolean> {
+    if (isLoaded) return true;
+    if (loadRetries >= MAX_RETRIES) return false;
+
+    try {
+      const res = await fetch('/search.json');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      searchIndex = await res.json();
+      isLoaded = true;
+      loadRetries = 0;
+      return true;
+    } catch (e) {
+      loadRetries++;
+      console.error(`Failed to load search index (attempt ${loadRetries}/${MAX_RETRIES}):`, e);
+      return false;
+    }
+  }
+
+  function initSearchModal() {
+    cleanup?.();
+
+    const modal = document.getElementById('search-modal');
+    const input = document.getElementById('search-input') as HTMLInputElement;
+    const results = document.getElementById('search-results');
+    const backdrop = document.querySelector('[data-search-backdrop]');
+    const triggers = document.querySelectorAll('[data-search-trigger]');
+    const filterContainer = document.getElementById('filter-container');
+    const filterLabel = document.getElementById('filter-label');
+    const filterName = document.getElementById('filter-name');
+    const filterBadge = document.getElementById('filter-badge');
+    const closeBtn = document.getElementById('search-close-btn');
+
+    if (!modal || !input || !results) return;
+
+    function setFilter(filter: { type: 'tag' | 'series'; value: string } | null) {
+      currentFilter = filter;
+      if (filter && filterContainer && filterLabel && filterName) {
+        filterContainer.classList.remove('hidden');
+        filterLabel.textContent = filter.type === 'tag' ? '태그:' : '시리즈:';
+        filterName.textContent = filter.value;
+      } else if (filterContainer) {
+        filterContainer.classList.add('hidden');
+      }
+    }
+
+    function openModal(filter?: { type: 'tag' | 'series'; value: string }) {
+      setFilter(filter || null);
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      input.focus();
+      selectedIndex = -1;
+      results.innerHTML = LOADING_MESSAGE;
+
+      loadSearchIndex().then((success) => {
+        if (success) {
+          renderResults(input.value || '');
+        } else {
+          results.innerHTML = ERROR_MESSAGE;
+        }
+      });
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+      input.value = '';
+      setFilter(null);
+      selectedIndex = -1;
+      results.innerHTML = EMPTY_MESSAGE;
+
+      // 포커스를 트리거 버튼으로 복원
+      const trigger = document.querySelector('[data-search-trigger]') as HTMLElement;
+      trigger?.focus();
+    }
+
+    function updateSelection(newIndex: number) {
+      const items = results.querySelectorAll('a[role="option"]');
+      if (items.length === 0) return;
+
+      // 범위 체크
+      if (newIndex < 0) newIndex = items.length - 1;
+      if (newIndex >= items.length) newIndex = 0;
+
+      // 이전 선택 해제
+      items.forEach((item) => item.classList.remove('bg-[var(--color-bg-secondary)]'));
+
+      // 새 선택
+      selectedIndex = newIndex;
+      const selected = items[selectedIndex] as HTMLElement;
+      selected.classList.add('bg-[var(--color-bg-secondary)]');
+      selected.scrollIntoView({ block: 'nearest' });
+    }
+
+    function selectCurrent() {
+      const items = results.querySelectorAll('a[role="option"]');
+      if (selectedIndex >= 0 && selectedIndex < items.length) {
+        (items[selectedIndex] as HTMLAnchorElement).click();
+      }
+    }
+
+    function renderResults(query: string) {
+      const q = query.trim();
+      selectedIndex = -1;
+
+      if (!q && currentFilter) {
+        const options = currentFilter.type === 'tag'
+          ? { filterTag: currentFilter.value }
+          : { filterSeries: currentFilter.value };
+        const matches = searchPosts(searchIndex, options);
+        results.innerHTML = matches.length === 0 ? NO_RESULTS_MESSAGE : renderMatchList(matches, '');
+        return;
+      }
+
+      if (!q) {
+        results.innerHTML = EMPTY_MESSAGE;
+        return;
+      }
+
+      const options: { query: string; filterTag?: string; filterSeries?: string } = { query: q };
+      if (currentFilter) {
+        if (currentFilter.type === 'tag') options.filterTag = currentFilter.value;
+        else options.filterSeries = currentFilter.value;
+      }
+
+      const matches = searchPosts(searchIndex, options);
+      results.innerHTML = matches.length === 0 ? NO_RESULTS_MESSAGE : renderMatchList(matches, q);
+    }
+
+    function escapeAttr(str: string): string {
+      return str.replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function renderMatchList(matches: SearchItem[], query: string): string {
+      return matches
+        .map(
+          (item, index) => `
+          <a href="/blog/${encodeURI(item.slug)}" role="option" aria-selected="false" class="block px-4 py-3 hover:bg-[var(--color-bg-secondary)] transition-colors border-b border-[var(--color-border)] last:border-0">
+            <div class="font-medium mb-1">${query ? highlightMatch(item.title, query) : highlightMatch(item.title, '')}</div>
+            ${item.description ? `<div class="text-sm text-[var(--color-text-secondary)] line-clamp-1">${query ? highlightMatch(item.description, query) : highlightMatch(item.description, '')}</div>` : ''}
+            <div class="flex gap-2 mt-2">
+              ${item.tags.slice(0, 3).map((tag) => `<span class="text-xs px-2 py-0.5 bg-[var(--color-accent-muted)] text-[var(--color-accent)] rounded-full">${highlightMatch(tag, '')}</span>`).join('')}
+            </div>
+          </a>
+        `
+        )
+        .join('');
+    }
+
+    // Event handlers
+    function handleFilterBadgeClick() {
+      setFilter(null);
+      renderResults(input.value || '');
+    }
+
+    function handleTriggerClick() {
+      openModal();
+    }
+
+    function handleBackdropClick() {
+      closeModal();
+    }
+
+    function handleKeydown(e: KeyboardEvent) {
+      // 모달이 닫혀있을 때 '/' 키로 열기
+      if (e.key === '/' && modal.classList.contains('hidden')) {
+        if (!isInputElement(e.target)) {
+          e.preventDefault();
+          openModal();
+        }
+        return;
+      }
+
+      // 모달이 열려있을 때만 처리
+      if (modal.classList.contains('hidden')) return;
+
+      switch (e.key) {
+        case 'Escape':
+          closeModal();
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          updateSelection(selectedIndex + 1);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          updateSelection(selectedIndex - 1);
+          break;
+        case 'Enter':
+          if (selectedIndex >= 0) {
+            e.preventDefault();
+            selectCurrent();
+          }
+          break;
+        case 'Tab':
+          // 포커스 트랩: 모달 내부에 포커스 유지
+          e.preventDefault();
+          if (e.shiftKey) {
+            closeBtn?.focus();
+          } else {
+            input.focus();
+          }
+          break;
+      }
+    }
+
+    function handleInput(e: Event) {
+      renderResults((e.target as HTMLInputElement).value);
+    }
+
+    function handleDocumentClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+
+      const tagTrigger = target.closest('[data-search-tag]');
+      if (tagTrigger) {
+        e.preventDefault();
+        const tag = tagTrigger.getAttribute('data-search-tag');
+        if (tag) openModal({ type: 'tag', value: tag });
+        return;
+      }
+
+      const seriesTrigger = target.closest('[data-search-series]');
+      if (seriesTrigger) {
+        e.preventDefault();
+        const series = seriesTrigger.getAttribute('data-search-series');
+        if (series) openModal({ type: 'series', value: series });
+      }
+    }
+
+    // Attach listeners
+    filterBadge?.addEventListener('click', handleFilterBadgeClick);
+    triggers.forEach((trigger) => trigger.addEventListener('click', handleTriggerClick));
+    backdrop?.addEventListener('click', handleBackdropClick);
+    closeBtn?.addEventListener('click', handleBackdropClick);
+    document.addEventListener('keydown', handleKeydown);
+    input.addEventListener('input', handleInput);
+    document.addEventListener('click', handleDocumentClick);
+
+    // Cleanup function
+    cleanup = () => {
+      filterBadge?.removeEventListener('click', handleFilterBadgeClick);
+      triggers.forEach((trigger) => trigger.removeEventListener('click', handleTriggerClick));
+      backdrop?.removeEventListener('click', handleBackdropClick);
+      closeBtn?.removeEventListener('click', handleBackdropClick);
+      document.removeEventListener('keydown', handleKeydown);
+      input.removeEventListener('input', handleInput);
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }
+
+  initSearchModal();
+  document.addEventListener('astro:page-load', initSearchModal);
+</script>

@@ -1,0 +1,79 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  currentSlug: string;
+  showAll?: boolean;
+}
+
+const { posts, currentSlug, showAll = false } = Astro.props;
+
+const currentIndex = posts.findIndex((p) => p.slug === currentSlug);
+const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+---
+
+<div class="card">
+  {!showAll ? (
+    <!-- Compact navigation -->
+    <div class="flex items-center justify-between gap-4">
+      {prevPost ? (
+        <a
+          href={`/blog/${prevPost.slug}`}
+          class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+          data-prev-post
+        >
+          <span>←</span>
+          <span class="truncate max-w-[200px]">{prevPost.data.title}</span>
+        </a>
+      ) : (
+        <div></div>
+      )}
+
+      <div class="text-sm text-[var(--color-text-muted)]">
+        {currentIndex + 1} / {posts.length}
+      </div>
+
+      {nextPost ? (
+        <a
+          href={`/blog/${nextPost.slug}`}
+          class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+          data-next-post
+        >
+          <span class="truncate max-w-[200px]">{nextPost.data.title}</span>
+          <span>→</span>
+        </a>
+      ) : (
+        <div></div>
+      )}
+    </div>
+  ) : (
+    <!-- Full series list -->
+    <div>
+      <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">
+        {posts[0]?.data.series}
+      </h3>
+      <ol class="space-y-2">
+        {posts.map((post, index) => (
+          <li>
+            <a
+              href={`/blog/${post.slug}`}
+              class:list={[
+                'flex items-start gap-3 py-2 text-sm transition-colors',
+                post.slug === currentSlug
+                  ? 'text-[var(--color-accent)] font-medium'
+                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
+              ]}
+            >
+              <span class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-[var(--color-bg-tertiary)] text-xs">
+                {index + 1}
+              </span>
+              <span class="line-clamp-2">{post.data.title}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )}
+</div>

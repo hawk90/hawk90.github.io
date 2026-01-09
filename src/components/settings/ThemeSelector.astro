@@ -1,0 +1,155 @@
+---
+import { CODE_THEMES } from '../../lib/theme';
+---
+
+<div class="space-y-4">
+  <!-- Mode Selector -->
+  <div>
+    <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+      Mode
+    </label>
+    <div class="flex gap-2">
+      <button
+        type="button"
+        id="modeDark"
+        class="mode-btn flex-1 px-4 py-2.5 rounded-lg border transition-colors text-sm font-medium"
+      >
+        Dark Mode
+      </button>
+      <button
+        type="button"
+        id="modeLight"
+        class="mode-btn flex-1 px-4 py-2.5 rounded-lg border transition-colors text-sm font-medium"
+      >
+        Light Mode
+      </button>
+    </div>
+  </div>
+
+  <!-- Theme Selector -->
+  <div>
+    <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+      Theme
+    </label>
+
+    <!-- Dark themes -->
+    <select
+      id="darkThemeSelect"
+      class="hidden w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
+    >
+      {CODE_THEMES.dark.map((theme) => (
+        <option value={theme.id}>{theme.name}</option>
+      ))}
+    </select>
+
+    <!-- Light themes -->
+    <select
+      id="lightThemeSelect"
+      class="hidden w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
+    >
+      {CODE_THEMES.light.map((theme) => (
+        <option value={theme.id}>{theme.name}</option>
+      ))}
+    </select>
+  </div>
+
+  <p class="text-sm text-[var(--color-text-muted)]">
+    Settings are saved automatically and applied across the site.
+  </p>
+</div>
+
+<style>
+  .mode-btn {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+  }
+  .mode-btn:hover {
+    border-color: var(--color-border-hover);
+  }
+  .mode-btn.active {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+  }
+</style>
+
+<script>
+  import { getStoredCodeTheme, setStoredCodeTheme } from '../../lib/theme';
+
+  let cleanup: (() => void) | null = null;
+
+  function initThemeSelector() {
+    cleanup?.();
+
+    const modeDark = document.getElementById('modeDark') as HTMLButtonElement;
+    const modeLight = document.getElementById('modeLight') as HTMLButtonElement;
+    const darkSelect = document.getElementById('darkThemeSelect') as HTMLSelectElement;
+    const lightSelect = document.getElementById('lightThemeSelect') as HTMLSelectElement;
+
+    if (!modeDark || !modeLight || !darkSelect || !lightSelect) return;
+
+    let currentMode: 'dark' | 'light' = 'dark';
+
+    // Load saved themes
+    darkSelect.value = getStoredCodeTheme('dark');
+    lightSelect.value = getStoredCodeTheme('light');
+
+    function setMode(mode: 'dark' | 'light') {
+      currentMode = mode;
+
+      // Update button states
+      modeDark.classList.toggle('active', mode === 'dark');
+      modeLight.classList.toggle('active', mode === 'light');
+
+      // Show/hide theme selects
+      darkSelect.classList.toggle('hidden', mode !== 'dark');
+      lightSelect.classList.toggle('hidden', mode !== 'light');
+
+      // Apply preview
+      applyPreview();
+    }
+
+    function applyPreview() {
+      const html = document.documentElement;
+
+      if (currentMode === 'light') {
+        html.classList.add('light');
+        html.setAttribute('data-code-theme', lightSelect.value);
+      } else {
+        html.classList.remove('light');
+        html.setAttribute('data-code-theme', darkSelect.value);
+      }
+    }
+
+    function handleDarkChange() {
+      setStoredCodeTheme('dark', darkSelect.value);
+      applyPreview();
+    }
+
+    function handleLightChange() {
+      setStoredCodeTheme('light', lightSelect.value);
+      applyPreview();
+    }
+
+    // Event listeners
+    modeDark.addEventListener('click', () => setMode('dark'));
+    modeLight.addEventListener('click', () => setMode('light'));
+    darkSelect.addEventListener('change', handleDarkChange);
+    lightSelect.addEventListener('change', handleLightChange);
+
+    // Initialize based on current page mode
+    const isLight = document.documentElement.classList.contains('light');
+    setMode(isLight ? 'light' : 'dark');
+
+    cleanup = () => {
+      modeDark.removeEventListener('click', () => setMode('dark'));
+      modeLight.removeEventListener('click', () => setMode('light'));
+      darkSelect.removeEventListener('change', handleDarkChange);
+      lightSelect.removeEventListener('change', handleLightChange);
+    };
+  }
+
+  initThemeSelector();
+  document.addEventListener('astro:page-load', initThemeSelector);
+</script>

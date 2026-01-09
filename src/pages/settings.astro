@@ -1,0 +1,207 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ThemeSelector from '../components/settings/ThemeSelector.astro';
+import { Code } from 'astro-expressive-code/components';
+
+const codeExamples = {
+  typescript: {
+    label: 'TypeScript',
+    code: `interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+async function fetchUser(id: number): Promise<User> {
+  const response = await fetch(\`/api/users/\${id}\`);
+  if (!response.ok) {
+    throw new Error('User not found');
+  }
+  return response.json();
+}
+
+const user = await fetchUser(1);
+console.log(user.name);`,
+    lang: 'typescript',
+    title: 'example.ts',
+  },
+  python: {
+    label: 'Python',
+    code: `from dataclasses import dataclass
+from typing import Optional
+import httpx
+
+@dataclass
+class User:
+    id: int
+    name: str
+    email: str
+
+async def fetch_user(user_id: int) -> Optional[User]:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"/api/users/{user_id}")
+        if response.status_code != 200:
+            return None
+        data = response.json()
+        return User(**data)
+
+user = await fetch_user(1)
+print(user.name)`,
+    lang: 'python',
+    title: 'example.py',
+  },
+  rust: {
+    label: 'Rust',
+    code: `use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+struct User {
+    id: u32,
+    name: String,
+    email: String,
+}
+
+async fn fetch_user(id: u32) -> Result<User, reqwest::Error> {
+    let url = format!("/api/users/{}", id);
+    let user = reqwest::get(&url)
+        .await?
+        .json::<User>()
+        .await?;
+    Ok(user)
+}
+
+#[tokio::main]
+async fn main() {
+    let user = fetch_user(1).await.unwrap();
+    println!("{}", user.name);
+}`,
+    lang: 'rust',
+    title: 'example.rs',
+  },
+  cpp: {
+    label: 'C++',
+    code: `#include <iostream>
+#include <string>
+#include <optional>
+
+struct User {
+    int id;
+    std::string name;
+    std::string email;
+};
+
+std::optional<User> fetch_user(int id) {
+    // Simulated API call
+    if (id <= 0) {
+        return std::nullopt;
+    }
+    return User{id, "John Doe", "john@example.com"};
+}
+
+int main() {
+    if (auto user = fetch_user(1)) {
+        std::cout << user->name << std::endl;
+    }
+    return 0;
+}`,
+    lang: 'cpp',
+    title: 'example.cpp',
+  },
+};
+---
+
+<BaseLayout title="Settings - Hawk" description="Customize your experience">
+  <section class="py-16">
+    <div class="container">
+      <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-8">Settings</h1>
+
+      <div class="lg:grid lg:grid-cols-2 lg:gap-12">
+        <!-- Left: Settings -->
+        <div class="space-y-8">
+          <div>
+            <h2 class="text-lg font-semibold mb-4">Code Theme</h2>
+            <ThemeSelector />
+          </div>
+
+          <div>
+            <h2 class="text-lg font-semibold mb-4">Code Display</h2>
+            <label class="flex items-center justify-between p-4 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg cursor-pointer hover:border-[var(--color-border-hover)] transition-colors">
+              <div>
+                <span class="font-medium">Show Line Numbers</span>
+                <p class="text-sm text-[var(--color-text-muted)] mt-1">Display line numbers in code blocks</p>
+              </div>
+              <input
+                type="checkbox"
+                id="lineNumbersToggle"
+                class="w-5 h-5 accent-[var(--color-accent)] cursor-pointer"
+                checked
+              />
+            </label>
+          </div>
+        </div>
+
+        <!-- Right: Preview -->
+        <div class="mt-8 lg:mt-0">
+          <div class="lg:sticky lg:top-24 space-y-4">
+            <div class="flex items-center justify-between gap-4">
+              <h3 class="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
+                Preview
+              </h3>
+              <select
+                id="langSelect"
+                class="px-3 py-1.5 text-sm bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
+              >
+                {Object.entries(codeExamples).map(([key, example]) => (
+                  <option value={key}>{example.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {Object.entries(codeExamples).map(([key, example]) => (
+              <div data-lang={key} class:list={['code-preview', key !== 'typescript' && 'hidden']}>
+                <Code code={example.code} lang={example.lang} title={example.title} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { STORAGE_KEYS } from '../consts/config';
+
+  function initSettingsPage() {
+    const langSelect = document.getElementById('langSelect') as HTMLSelectElement;
+    const previews = document.querySelectorAll('.code-preview');
+    const lineNumbersToggle = document.getElementById('lineNumbersToggle') as HTMLInputElement;
+
+    // Language selector
+    if (langSelect && previews.length > 0) {
+      langSelect.addEventListener('change', () => {
+        const selected = langSelect.value;
+        previews.forEach((preview) => {
+          const lang = (preview as HTMLElement).dataset.lang;
+          preview.classList.toggle('hidden', lang !== selected);
+        });
+      });
+    }
+
+    // Line numbers toggle
+    if (lineNumbersToggle) {
+      const stored = localStorage.getItem(STORAGE_KEYS.showLineNumbers);
+      const showLineNumbers = stored !== 'false';
+      lineNumbersToggle.checked = showLineNumbers;
+
+      lineNumbersToggle.addEventListener('change', () => {
+        const show = lineNumbersToggle.checked;
+        localStorage.setItem(STORAGE_KEYS.showLineNumbers, show ? 'true' : 'false');
+        document.documentElement.setAttribute('data-show-line-numbers', show ? 'true' : 'false');
+      });
+    }
+  }
+
+  initSettingsPage();
+  document.addEventListener('astro:page-load', initSettingsPage);
+</script>

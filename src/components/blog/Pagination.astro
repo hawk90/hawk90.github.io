@@ -1,0 +1,107 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  baseUrl: string;
+}
+
+const { currentPage, totalPages, baseUrl } = Astro.props;
+
+const prevPage = currentPage > 1 ? currentPage - 1 : null;
+const nextPage = currentPage < totalPages ? currentPage + 1 : null;
+
+function getPageUrl(page: number): string {
+  if (page === 1) return baseUrl;
+  return `${baseUrl}/${page}`;
+}
+
+// Generate page numbers to show
+import { UI_CONFIG } from '../../consts/config';
+
+function getPageNumbers(): (number | 'ellipsis')[] {
+  const pages: (number | 'ellipsis')[] = [];
+  const delta = UI_CONFIG.paginationDelta;
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 ||
+      i === totalPages ||
+      (i >= currentPage - delta && i <= currentPage + delta)
+    ) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== 'ellipsis') {
+      pages.push('ellipsis');
+    }
+  }
+
+  return pages;
+}
+
+const pageNumbers = getPageNumbers();
+---
+
+{totalPages > 1 && (
+  <nav class="flex items-center justify-center gap-2" aria-label="Pagination">
+    <!-- Previous -->
+    {prevPage ? (
+      <a
+        href={getPageUrl(prevPage)}
+        class="flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
+        aria-label="이전 페이지"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="hidden sm:inline">이전</span>
+      </a>
+    ) : (
+      <span class="flex items-center gap-1 px-3 py-2 text-sm text-[var(--color-text-muted)] cursor-not-allowed">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="hidden sm:inline">이전</span>
+      </span>
+    )}
+
+    <!-- Page Numbers -->
+    <div class="flex items-center gap-1">
+      {pageNumbers.map((page) =>
+        page === 'ellipsis' ? (
+          <span class="px-2 text-[var(--color-text-muted)]">...</span>
+        ) : page === currentPage ? (
+          <span class="w-10 h-10 flex items-center justify-center text-sm font-medium bg-[var(--color-accent)] text-white rounded-lg">
+            {page}
+          </span>
+        ) : (
+          <a
+            href={getPageUrl(page)}
+            class="w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
+          >
+            {page}
+          </a>
+        )
+      )}
+    </div>
+
+    <!-- Next -->
+    {nextPage ? (
+      <a
+        href={getPageUrl(nextPage)}
+        class="flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
+        aria-label="다음 페이지"
+      >
+        <span class="hidden sm:inline">다음</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    ) : (
+      <span class="flex items-center gap-1 px-3 py-2 text-sm text-[var(--color-text-muted)] cursor-not-allowed">
+        <span class="hidden sm:inline">다음</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </span>
+    )}
+  </nav>
+)}

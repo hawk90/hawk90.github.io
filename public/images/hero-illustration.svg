@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" fill="none">
+  <defs>
+    <!-- Gradient definitions - Elegant Purple Theme -->
+    <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9d7cd8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#bb9af7;stop-opacity:0.8" />
+    </linearGradient>
+    <linearGradient id="purpleDeep" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#9d7cd8;stop-opacity:0.7" />
+    </linearGradient>
+    <linearGradient id="lavenderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4b5fd;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#ddd6fe;stop-opacity:0.5" />
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Soft glow -->
+    <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Code editor window -->
+  <g transform="translate(80, 60)">
+    <!-- Window frame - deeper purple-black -->
+    <rect x="0" y="0" width="440" height="320" rx="12" ry="12" fill="#16131f" stroke="#2a2536" stroke-width="2"/>
+
+    <!-- Title bar -->
+    <rect x="0" y="0" width="440" height="36" rx="12" ry="12" fill="#0d0b14"/>
+    <rect x="0" y="24" width="440" height="12" fill="#0d0b14"/>
+
+    <!-- Window controls -->
+    <circle cx="20" cy="18" r="6" fill="#f38ba8"/>
+    <circle cx="40" cy="18" r="6" fill="#f9e2af"/>
+    <circle cx="60" cy="18" r="6" fill="#a6e3a1"/>
+
+    <!-- File tab -->
+    <rect x="90" y="8" width="100" height="24" rx="4" fill="#211d2d"/>
+    <text x="105" y="24" font-family="monospace" font-size="11" fill="#a8a5b5">main.cpp</text>
+
+    <!-- Code content -->
+    <g transform="translate(20, 50)">
+      <!-- Line numbers -->
+      <text x="0" y="20" font-family="monospace" font-size="13" fill="#6e6a7c">1</text>
+      <text x="0" y="44" font-family="monospace" font-size="13" fill="#6e6a7c">2</text>
+      <text x="0" y="68" font-family="monospace" font-size="13" fill="#6e6a7c">3</text>
+      <text x="0" y="92" font-family="monospace" font-size="13" fill="#6e6a7c">4</text>
+      <text x="0" y="116" font-family="monospace" font-size="13" fill="#6e6a7c">5</text>
+      <text x="0" y="140" font-family="monospace" font-size="13" fill="#6e6a7c">6</text>
+      <text x="0" y="164" font-family="monospace" font-size="13" fill="#6e6a7c">7</text>
+      <text x="0" y="188" font-family="monospace" font-size="13" fill="#6e6a7c">8</text>
+      <text x="0" y="212" font-family="monospace" font-size="13" fill="#6e6a7c">9</text>
+      <text x="0" y="236" font-family="monospace" font-size="13" fill="#6e6a7c">10</text>
+
+      <!-- Code lines -->
+      <g transform="translate(30, 0)">
+        <!-- #include <iostream> -->
+        <text y="20" font-family="monospace" font-size="13">
+          <tspan fill="#bb9af7">#include</tspan>
+          <tspan fill="#7dcfff"> &lt;iostream&gt;</tspan>
+        </text>
+
+        <!-- #include <memory> -->
+        <text y="44" font-family="monospace" font-size="13">
+          <tspan fill="#bb9af7">#include</tspan>
+          <tspan fill="#7dcfff"> &lt;memory&gt;</tspan>
+        </text>
+
+        <!-- Empty line -->
+
+        <!-- template<typename T> -->
+        <text y="92" font-family="monospace" font-size="13">
+          <tspan fill="#bb9af7">template</tspan>
+          <tspan fill="#e0af68">&lt;</tspan>
+          <tspan fill="#bb9af7">typename</tspan>
+          <tspan fill="#9ece6a"> T</tspan>
+          <tspan fill="#e0af68">&gt;</tspan>
+        </text>
+
+        <!-- auto make_unique -->
+        <text y="116" font-family="monospace" font-size="13">
+          <tspan fill="#bb9af7">auto</tspan>
+          <tspan fill="#7dcfff"> make_unique</tspan>
+          <tspan fill="#e0af68">(</tspan>
+          <tspan fill="#9ece6a">T</tspan>
+          <tspan fill="#e0af68">&amp;&amp;</tspan>
+          <tspan fill="#eeeef0"> value</tspan>
+          <tspan fill="#e0af68">)</tspan>
+          <tspan fill="#eeeef0"> {</tspan>
+        </text>
+
+        <!-- return statement -->
+        <text x="32" y="140" font-family="monospace" font-size="13">
+          <tspan fill="#bb9af7">return</tspan>
+          <tspan fill="#eeeef0"> std::</tspan>
+          <tspan fill="#7dcfff">make_unique</tspan>
+          <tspan fill="#e0af68">&lt;</tspan>
+          <tspan fill="#9ece6a">T</tspan>
+          <tspan fill="#e0af68">&gt;(</tspan>
+        </text>
+
+        <!-- forward -->
+        <text x="64" y="164" font-family="monospace" font-size="13">
+          <tspan fill="#eeeef0">std::</tspan>
+          <tspan fill="#7dcfff">forward</tspan>
+          <tspan fill="#e0af68">&lt;</tspan>
+          <tspan fill="#9ece6a">T</tspan>
+          <tspan fill="#e0af68">&gt;(</tspan>
+          <tspan fill="#eeeef0">value</tspan>
+          <tspan fill="#e0af68">)</tspan>
+        </text>
+
+        <!-- ); -->
+        <text x="32" y="188" font-family="monospace" font-size="13">
+          <tspan fill="#e0af68">);</tspan>
+        </text>
+
+        <!-- } -->
+        <text y="212" font-family="monospace" font-size="13">
+          <tspan fill="#eeeef0">}</tspan>
+        </text>
+      </g>
+    </g>
+
+    <!-- Cursor blink indicator -->
+    <rect x="50" y="296" width="2" height="16" fill="#bb9af7" filter="url(#glow)">
+      <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+
+  <!-- Floating elements -->
+  <g filter="url(#glow)">
+    <!-- C++ badge -->
+    <g transform="translate(460, 140)">
+      <rect x="0" y="0" width="80" height="36" rx="8" fill="url(#purpleGradient)" opacity="0.95"/>
+      <text x="40" y="24" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="white">C++20</text>
+    </g>
+
+    <!-- Modern badge -->
+    <g transform="translate(480, 260)">
+      <rect x="0" y="0" width="90" height="32" rx="6" fill="url(#purpleDeep)" opacity="0.9"/>
+      <text x="45" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="white">Modern</text>
+    </g>
+
+    <!-- Terminal icon floating -->
+    <g transform="translate(40, 340)">
+      <rect x="0" y="0" width="60" height="44" rx="6" fill="#16131f" stroke="#9d7cd8" stroke-width="2"/>
+      <text x="8" y="28" font-family="monospace" font-size="14" fill="#9ece6a">$_</text>
+    </g>
+  </g>
+
+</svg>

@@ -1,0 +1,132 @@
+---
+import TagBadge from './TagBadge.astro';
+import { CATEGORIES } from '../../consts/categories';
+import { BLOG_CONFIG } from '../../consts/config';
+import { getPublishedPosts, getTagsWithCount, getAllSeries, type BlogPost } from '../../lib/posts';
+import { toSlug, getTagUrl } from '../../lib/utils';
+
+interface Props {
+  activeFilter?: {
+    type: 'tag' | 'series' | 'category';
+    value: string;
+  };
+}
+
+const { activeFilter } = Astro.props;
+
+const allPosts = await getPublishedPosts();
+const sortedTags = getTagsWithCount(allPosts);
+const { maxTagsInSidebar } = BLOG_CONFIG;
+
+function isActiveTag(tag: string): boolean {
+  return activeFilter?.type === 'tag' && activeFilter.value.toLowerCase() === tag.toLowerCase();
+}
+
+function isActiveSeries(series: string): boolean {
+  return activeFilter?.type === 'series' && activeFilter.value === series;
+}
+
+function isActiveCategory(categoryId: string): boolean {
+  return activeFilter?.type === 'category' && activeFilter.value === categoryId;
+}
+---
+
+<aside class="hidden lg:block w-72 shrink-0">
+  <div class="sticky top-24 space-y-6">
+    <!-- All Posts Link -->
+    <div>
+      <a
+        href="/blog"
+        class:list={[
+          'inline-flex items-center gap-2 text-sm font-medium transition-colors',
+          !activeFilter
+            ? 'text-[var(--color-accent)]'
+            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
+        ]}
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0l-4-4m4 4l-4 4" />
+        </svg>
+        All Posts
+      </a>
+    </div>
+
+    <!-- Category Tree -->
+    <div>
+      <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Browse</h3>
+      <nav class="space-y-1">
+        {CATEGORIES.map((cat) => {
+          const catPosts = allPosts.filter((p) => p.slug.startsWith(cat.id + '/'));
+          const catSeries = [...new Set(catPosts.filter((p) => p.data.series).map((p) => p.data.series))];
+          const count = catPosts.length;
+          const isCatActive = isActiveCategory(cat.id);
+
+          return (
+            <div class="group">
+              <a
+                href={`/blog/${cat.id}`}
+                class:list={[
+                  'flex items-center justify-between py-2 px-3 font-medium rounded-lg transition-colors',
+                  isCatActive
+                    ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
+                    : 'hover:bg-[var(--color-bg-secondary)]',
+                ]}
+              >
+                <span class="flex items-center gap-2">
+                  <span>{cat.icon}</span>
+                  <span>{cat.name}</span>
+                </span>
+                {count > 0 && <span class="text-xs text-[var(--color-text-muted)]">{count}</span>}
+              </a>
+              {catSeries.length > 0 && (
+                <ul class="ml-6 mt-1 space-y-1 border-l border-[var(--color-border)] pl-3">
+                  {catSeries.map((series) => {
+                    const seriesCount = catPosts.filter((p) => p.data.series === series).length;
+                    const seriesSlug = toSlug(series || '');
+                    const isSeriesActive = isActiveSeries(series || '');
+                    return (
+                      <li>
+                        <a
+                          href={`/series/${seriesSlug}`}
+                          class:list={[
+                            'flex items-center justify-between w-full py-1.5 px-2 rounded text-sm transition-colors text-left',
+                            isSeriesActive
+                              ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
+                              : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
+                          ]}
+                        >
+                          <span class="truncate">{series}</span>
+                          <span class="text-xs text-[var(--color-text-muted)]">{seriesCount}</span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </nav>
+    </div>
+
+    <!-- Tags -->
+    <div>
+      <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Tags</h3>
+      <div class="flex flex-wrap gap-2">
+        {sortedTags.slice(0, maxTagsInSidebar).map(([tag]) => {
+          const isTagActive = isActiveTag(tag);
+          return (
+            <a
+              href={getTagUrl(tag)}
+              class:list={[
+                isTagActive && 'ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg-primary)] rounded-full',
+              ]}
+            >
+              <TagBadge tag={tag} />
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</aside>

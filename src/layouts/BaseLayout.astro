@@ -1,0 +1,151 @@
+---
+import '../styles/global.css';
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+import ScrollProgress from '../components/ui/ScrollProgress.astro';
+import SearchModal from '../components/common/SearchModal.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  showProgress?: boolean;
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  author?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title,
+  description = 'Developer blog about C++, tech books, and software engineering',
+  image = '/og-default.png',
+  type = 'website',
+  showProgress = false,
+  publishedTime,
+  modifiedTime,
+  author = 'Hawk',
+  noIndex = false,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL(image, Astro.site);
+---
+
+<!doctype html>
+<html lang="ko" data-code-theme="github-dark-dimmed">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <meta name="author" content={author} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:site_name" content="Hawk's Blog" />
+    <meta property="og:locale" content="ko_KR" />
+
+    {type === 'article' && publishedTime && (
+      <meta property="article:published_time" content={publishedTime.toISOString()} />
+    )}
+    {type === 'article' && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime.toISOString()} />
+    )}
+    {type === 'article' && author && (
+      <meta property="article:author" content={author} />
+    )}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- KaTeX CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+      integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+      crossorigin="anonymous"
+    />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+
+    <!-- Theme initialization (prevent flash) -->
+    <script is:inline>
+      (function() {
+        try {
+          const theme = localStorage.getItem('theme');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light');
+          } else if (theme === 'dark') {
+            document.documentElement.classList.remove('light');
+          } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.documentElement.classList.add('light');
+          }
+
+          // Code theme initialization
+          const isLight = document.documentElement.classList.contains('light');
+          const darkCodeTheme = localStorage.getItem('code-theme-dark') || 'github-dark-dimmed';
+          const lightCodeTheme = localStorage.getItem('code-theme-light') || 'github-light';
+          document.documentElement.setAttribute('data-code-theme', isLight ? lightCodeTheme : darkCodeTheme);
+
+          // Line numbers initialization (default: true)
+          const showLineNumbers = localStorage.getItem('show-line-numbers');
+          document.documentElement.setAttribute('data-show-line-numbers', showLineNumbers !== 'false' ? 'true' : 'false');
+        } catch {
+          // Access to localStorage might be restricted; fall back to system preference
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.documentElement.classList.add('light');
+          }
+          document.documentElement.setAttribute('data-code-theme', document.documentElement.classList.contains('light') ? 'github-light' : 'github-dark-dimmed');
+          document.documentElement.setAttribute('data-show-line-numbers', 'true');
+        }
+      })();
+    </script>
+
+    <!-- View Transitions -->
+    <meta name="view-transition" content="same-origin" />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    {showProgress && <ScrollProgress />}
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+    <SearchModal />
+
+    <!-- Keyboard shortcuts -->
+    <script>
+      document.addEventListener('keydown', (e) => {
+        // Ignore if typing in input/textarea
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+        // Escape - Close modals, blur search
+        if (e.key === 'Escape') {
+          const activeElement = document.activeElement as HTMLElement;
+          activeElement?.blur();
+        }
+      });
+    </script>
+  </body>
+</html>

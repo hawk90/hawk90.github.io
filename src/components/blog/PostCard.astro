@@ -1,0 +1,70 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import TagBadge from './TagBadge.astro';
+import { formatDate } from '../../lib/utils';
+import { BLOG_CONFIG } from '../../consts/config';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  showImage?: boolean;
+}
+
+const { post, showImage = true } = Astro.props;
+const formattedDate = formatDate(post.data.date, 'short');
+
+// Default thumbnail based on post type or tags
+const getDefaultThumbnail = () => {
+  const tags = post.data.tags;
+  if (tags.includes('C++') || tags.includes('cpp')) return '/images/thumbnails/cpp.svg';
+  if (tags.includes('TypeScript') || tags.includes('JavaScript')) return '/images/thumbnails/code.svg';
+  if (post.data.type === 'book-review') return '/images/thumbnails/book.svg';
+  return '/images/thumbnails/default.svg';
+};
+
+const thumbnail = post.data.image || getDefaultThumbnail();
+---
+
+<article class="card group overflow-hidden">
+  <a href={`/blog/${post.slug}`} class="block">
+    {showImage && (
+      <div class="relative aspect-[16/9] -mx-5 -mt-5 mb-4 overflow-hidden bg-[var(--color-bg-tertiary)]">
+        <img
+          src={thumbnail}
+          alt={post.data.title}
+          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
+        {post.data.series && (
+          <div class="absolute top-3 left-3 text-xs font-medium px-2 py-1 bg-[var(--color-accent)] text-white rounded">
+            {post.data.series}
+          </div>
+        )}
+      </div>
+    )}
+    {!showImage && post.data.series && (
+      <div class="text-xs text-[var(--color-accent)] font-medium mb-2">
+        {post.data.series}
+      </div>
+    )}
+    <h3 class="text-lg font-semibold mb-2 group-hover:text-[var(--color-accent)] transition-colors line-clamp-2">
+      {post.data.title}
+    </h3>
+    {post.data.description && (
+      <p class="text-sm text-[var(--color-text-secondary)] mb-4 line-clamp-2">
+        {post.data.description}
+      </p>
+    )}
+    <div class="flex items-center justify-between">
+      <time class="text-xs text-[var(--color-text-muted)]" datetime={post.data.date.toISOString()}>
+        {formattedDate}
+      </time>
+      <div class="flex gap-1">
+        {post.data.tags.slice(0, BLOG_CONFIG.maxTagsInCard).map((tag) => (
+          <span class="text-xs px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded text-[var(--color-text-muted)]">
+            {tag}
+          </span>
+        ))}
+      </div>
+    </div>
+  </a>
+</article>

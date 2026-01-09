@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// You can move this to a content collection or JSON file later
+const experience = [
+  {
+    company: 'Your Company',
+    position: 'Software Engineer',
+    period: '2023 - Present',
+    description: 'Building amazing software with C++ and modern technologies.',
+    highlights: [
+      'Led development of core systems',
+      'Improved performance by 40%',
+      'Mentored junior developers',
+    ],
+  },
+];
+
+const skills = {
+  'Languages': ['C++', 'TypeScript', 'Python', 'Rust'],
+  'Frameworks': ['Qt', 'Boost', 'React', 'Astro'],
+  'Tools': ['Git', 'Docker', 'CMake', 'Vim'],
+};
+
+const education = [
+  {
+    institution: 'University Name',
+    degree: 'Bachelor of Science',
+    field: 'Computer Science',
+    period: '2015 - 2019',
+  },
+];
+---
+
+<BaseLayout title="Resume - Hawk" description="Software Engineer with expertise in C++ and modern software development">
+  <section class="py-16">
+    <div class="container-narrow">
+      <!-- Header -->
+      <header class="mb-16 text-center">
+        <h1 class="text-4xl font-bold mb-4">Hawk</h1>
+        <p class="text-xl text-[var(--color-text-secondary)] mb-6">
+          Software Engineer
+        </p>
+        <div class="flex justify-center gap-4">
+          <a href="https://github.com/hawk90" class="btn btn-ghost" target="_blank" rel="noopener">
+            GitHub
+          </a>
+          <a href="mailto:hawking90a@gmail.com" class="btn btn-ghost">
+            Email
+          </a>
+          <button onclick="window.print()" class="btn btn-primary no-print">
+            Print Resume
+          </button>
+        </div>
+      </header>
+
+      <!-- Experience -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
+          Experience
+        </h2>
+        <div class="space-y-8">
+          {experience.map((job) => (
+            <div class="card">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-4">
+                <div>
+                  <h3 class="text-lg font-semibold">{job.position}</h3>
+                  <p class="text-[var(--color-accent)]">{job.company}</p>
+                </div>
+                <span class="text-sm text-[var(--color-text-muted)]">{job.period}</span>
+              </div>
+              <p class="text-[var(--color-text-secondary)] mb-4">{job.description}</p>
+              <ul class="list-disc list-inside space-y-1 text-[var(--color-text-secondary)]">
+                {job.highlights.map((highlight) => (
+                  <li>{highlight}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Skills -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
+          Skills
+        </h2>
+        <div class="grid gap-6 md:grid-cols-3">
+          {Object.entries(skills).map(([category, items]) => (
+            <div class="card">
+              <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">
+                {category}
+              </h3>
+              <div class="flex flex-wrap gap-2">
+                {items.map((skill) => (
+                  <span class="tag">{skill}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Education -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
+          Education
+        </h2>
+        <div class="space-y-6">
+          {education.map((edu) => (
+            <div class="card">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+                <div>
+                  <h3 class="text-lg font-semibold">{edu.degree}</h3>
+                  <p class="text-[var(--color-accent)]">{edu.institution}</p>
+                  <p class="text-[var(--color-text-secondary)]">{edu.field}</p>
+                </div>
+                <span class="text-sm text-[var(--color-text-muted)]">{edu.period}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  </section>
+</BaseLayout>

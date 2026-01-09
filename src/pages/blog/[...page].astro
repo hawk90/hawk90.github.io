@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/blog/PostCard.astro';
+import BlogSidebar from '../../components/blog/BlogSidebar.astro';
+import Pagination from '../../components/blog/Pagination.astro';
+import { BLOG_CONFIG } from '../../consts/config';
+import { getPublishedPosts, type BlogPost } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const { postsPerPage } = BLOG_CONFIG;
+  const sortedPosts = await getPublishedPosts();
+  const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+
+  const paths = [];
+
+  paths.push({
+    params: { page: undefined },
+    props: {
+      posts: sortedPosts.slice(0, postsPerPage),
+      currentPage: 1,
+      totalPages,
+    },
+  });
+
+  for (let i = 2; i <= totalPages; i++) {
+    const start = (i - 1) * postsPerPage;
+    paths.push({
+      params: { page: String(i) },
+      props: {
+        posts: sortedPosts.slice(start, start + postsPerPage),
+        currentPage: i,
+        totalPages,
+      },
+    });
+  }
+
+  return paths;
+}
+
+interface Props {
+  posts: BlogPost[];
+  currentPage: number;
+  totalPages: number;
+}
+
+const { posts, currentPage, totalPages } = Astro.props;
+---
+
+<BaseLayout title="Blog - Hawk" description="Tech articles, book reviews, and presentations">
+  <section class="py-16">
+    <div class="container">
+      <div class="lg:flex lg:gap-12">
+        <!-- Main Content -->
+        <div class="flex-1 min-w-0">
+          <!-- Header -->
+          <div class="mb-8">
+            <h1 class="text-4xl font-bold mb-4">Blog</h1>
+            <p class="text-lg text-[var(--color-text-secondary)]">
+              Tech articles, book reviews, and presentations.
+            </p>
+          </div>
+
+          <!-- Posts Grid -->
+          <div class="grid gap-6 md:grid-cols-2">
+            {posts.map((post) => (
+              <PostCard post={post} />
+            ))}
+          </div>
+
+          <!-- Pagination -->
+          <div class="mt-12">
+            <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl="/blog" />
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <BlogSidebar />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
