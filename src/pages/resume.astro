@@ -1,43 +1,297 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// You can move this to a content collection or JSON file later
+const coreCompetency = [
+  'Research Large Scale Resource Virtualization Platform',
+  'Parallelizing and Optimizing AI Applications',
+  'Parallelizing and Optimizing with CUDA or MPI',
+  'Experience in Software Design, Development and Maintenance',
+  'Experience to Collaborate with Front-end',
+  'Team Leader Experience',
+  'Developed embedded firmware for performance-critical system using FPGA',
+];
+
 const experience = [
   {
-    company: 'Your Company',
-    position: 'Software Engineer',
-    period: '2023 - Present',
-    description: 'Building amazing software with C++ and modern technologies.',
-    highlights: [
-      'Led development of core systems',
-      'Improved performance by 40%',
-      'Mentored junior developers',
+    company: 'MetisX',
+    position: 'Software Engineer / Firmware',
+    period: '2023.08 ~ 2024.11',
+    projects: [
+      {
+        name: 'Firmware Development (SDK)',
+        period: '2023.08 ~ 2024.03',
+        role: 'SDK refactoring',
+        skills: ['C++'],
+        highlights: [
+          'Refactored SDK to enhance code maintainability and modularity',
+          'Documented SDK structure and usage for seamless onboarding',
+          'Developed NVMe Driver',
+          'Improve MU print function performance without using MBOX',
+          'Add Test Cases for MU Kernel',
+        ],
+      },
+      {
+        name: 'Low-Level Driver Verifier',
+        period: '2024.03 ~ 2024.11',
+        role: 'Hardware IP Driver Development',
+        skills: ['C++', 'Arm M0+', 'Arm A53', 'Zebu', 'HAPS'],
+        highlights: [
+          'Developed and verified third-party IP drivers for I2C(SMBUS), UART, and SPI',
+          'Developed and verified MetisX IP drivers for GMON, RAU, GDMA, CMDS, MBOX, and MU',
+          'Established driver verification framework leveraging Zebu and HAPS platform',
+          'Collaborated with the SoC team for IP verification',
+        ],
+      },
+      {
+        name: 'Arm M0+, Arm A53 Bring-up',
+        period: '2024.03 ~ 2024.09',
+        role: 'ROM/RAM code develop and porting SDK',
+        skills: ['C++', 'Python', 'Arm M0+', 'Arm A53', 'Zebu', 'HAPS'],
+        highlights: [
+          'Developed an automated deployment script for Zebu and HAPS platform',
+          'Developed ROM/RAM code on ARM',
+          'Porting SDK on ARM',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'ICT COG Academy',
+    position: 'Lecturer',
+    period: '2022.07 ~ 2022.09',
+    projects: [
+      {
+        name: 'ICT-COG Lecturer',
+        period: '2022.07 ~ 2022.09',
+        role: 'Lecturer',
+        skills: ['Python', 'TensorFlow', 'Docker', 'Git'],
+        highlights: [
+          'Teach How to Co-Work using Coding Style and Git',
+          'Implemented and Teach State of The Art Architecture',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'Marine Information Technology',
+    position: 'Software Engineer / Alternative Military Service',
+    period: '2021.01 ~ 2022.05',
+    projects: [
+      {
+        name: 'Automatically Observe Tsunami using Intelligent CCTV',
+        period: '2021.06 ~ 2022.05',
+        role: 'Team Leader and Develop Deep Learning',
+        skills: ['Python', 'TensorFlow', 'Flask'],
+        highlights: [
+          'Wrote an R&D proposal',
+          'Developed to Observe Sea Level using Deep Learning',
+          'Researched Video Enhancement using Deep Learning',
+          'Developed Tsunami Detection Algorithm with Anomaly Detection',
+        ],
+      },
+      {
+        name: 'Hydrodynamics Simulator Feature Improvements',
+        period: '2021.03 ~ 2021.05',
+        role: 'Feature Improvement and Build Cluster with MPI',
+        skills: ['Fortran', 'MPI'],
+        highlights: [
+          'Developed Water Gate, Wheel Module for Hydrodynamics Simulator using MPI with Fortran',
+          'Built a Cluster with MPI',
+        ],
+      },
+      {
+        name: 'Deep Learning Application Deployment',
+        period: '2021.01 ~ 2021.05',
+        role: 'System Engineer',
+        skills: ['Python', 'TensorFlow', 'Docker'],
+        highlights: [
+          'Performance Improvement with Refactoring Legacy Code',
+          'Built and Deployed Deep Learning Application with Docker',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'Future Systems',
+    position: 'Software Engineer / Alternative Military Service',
+    period: '2019.01 ~ 2021.01',
+    projects: [
+      {
+        name: 'Next-generation VPN Development',
+        period: '2019.01 ~ 2020.06',
+        role: 'Develop VPN Modules',
+        skills: ['C/C++', 'SVN', 'Redis', 'Docker'],
+        highlights: [
+          'Developed Thread-safe Runtime for VPN with C/C++',
+          'Developed Microservice Controller for Security Apps (FW, VPN, IDS, Anti-Virus) with Docker',
+          'Researched and Developed Network Anomaly Detect using New Features with TensorFlow',
+          'Developed Kernel Module of Firewall',
+        ],
+      },
+      {
+        name: 'Web UI Maintenance',
+        period: '2020.06 ~ 2021.01',
+        role: 'Maintain Web UI',
+        skills: ['JavaScript', 'Python'],
+        highlights: [
+          'Maintenance Web UI of VPN',
+          'Developed New Features',
+        ],
+      },
+      {
+        name: 'Visualization Threat Intelligence',
+        period: '2020.06 ~ 2020.07',
+        role: 'Develop Web UI',
+        skills: ['JavaScript'],
+        highlights: [
+          'Visualized Cyber Security',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'Korea University',
+    position: 'Integrated Ph.D. Course',
+    period: '2013.03 ~ 2018.12',
+    projects: [
+      {
+        name: 'PaaS based on Heterogeneous Cloud Environment',
+        period: '2013.03 ~ 2015.12',
+        role: 'Research Assistant',
+        skills: ['Ubuntu', 'Java', 'JSP', 'RESTful', 'OpenStack', 'Eucalyptus'],
+        highlights: [
+          'Developed a Cloud Resource Management System on OpenStack and Eucalyptus',
+          'Developed a Web UI with JSP',
+          'Developed Cloud Resource Schedule',
+        ],
+      },
+      {
+        name: 'Active Contents Collaboration Platform',
+        period: '2013.03 ~ 2015.07',
+        role: 'Research Assistant',
+        skills: ['Ubuntu', 'Java', 'RESTful', 'OpenStack'],
+        highlights: [
+          'Developed a Cloud Resource Management System',
+          'Developed to Deploy Distributed Framework MPI, Map-Reduce on Virtual Environment',
+          'Developed Volume Rendering with CUDA',
+        ],
+      },
+      {
+        name: 'Development Deep Learning Inference Framework',
+        period: '2017.06 ~ 2018.12',
+        role: 'Framework Design and Develop',
+        skills: ['Ubuntu', 'Python', 'Docker', 'GPU', 'Xeon Phi'],
+        highlights: [
+          'Wrote an R&D proposal',
+          'Developed Runtime System for Deep Learning Inference based on GPU, Xeon Phi using Docker',
+        ],
+      },
+      {
+        name: 'System for Searching Similar Weather Map based on AI',
+        period: '2017.06 ~ 2017.12',
+        role: 'Team Leader',
+        skills: ['Ubuntu', 'Python', 'GPU'],
+        highlights: [
+          'Wrote an R&D proposal',
+          'Optimized Deep Learning Training with GPU Profiling',
+          'Reduced GPU IDLE',
+          'Accelerated GPU with Memory format',
+        ],
+      },
     ],
   },
 ];
 
 const skills = {
-  'Languages': ['C++', 'TypeScript', 'Python', 'Rust'],
-  'Frameworks': ['Qt', 'Boost', 'React', 'Astro'],
-  'Tools': ['Git', 'Docker', 'CMake', 'Vim'],
+  'Programming Languages': ['C/C++', 'Python'],
+  'Framework': ['TensorFlow', 'CUDA', 'MPI'],
+  'Infra': ['Docker'],
+  'OS': ['Linux (Ubuntu, CentOS)'],
+  'Cloud': ['OpenStack', 'Eucalyptus'],
+  'Data/DB': ['MySQL', 'MongoDB'],
+  'Tools': ['Git', 'SVN', 'VIM'],
 };
 
 const education = [
   {
-    institution: 'University Name',
-    degree: 'Bachelor of Science',
-    field: 'Computer Science',
-    period: '2015 - 2019',
+    institution: 'Korea University',
+    degree: 'Integrated Ph.D. Candidate',
+    field: 'School of Electrical Engineering',
+    period: '2013.03 ~ 2018.12',
+    gpa: '3.96/4.5',
+    description: 'Research Area: Parallel/Distributed System, Deep Learning Optimization (Advisor: Prof. Chang-Sung Jeong)',
   },
+  {
+    institution: 'Sangmyung University',
+    degree: 'B.S.',
+    field: 'Department of Computer System Engineering',
+    period: '2009.03 ~ 2013.02',
+    gpa: '4.22/4.5',
+  },
+];
+
+const publications = [
+  {
+    type: 'paper',
+    title: 'Improving HDFS performance using local caching system',
+    authors: 'Sang-Deok Yoon, In-Yong Jung, Ki-Hyun Kim, Chang-Sung Jeong',
+    venue: 'Second International Conference on Future Generation Communication Technologies (FGCT 2013)',
+    year: '2013',
+  },
+  {
+    type: 'paper',
+    title: 'Cloud based Distributed Active Content Repository',
+    authors: 'Ki-Hyun Kim, In-Yong Jung, Sang-Deok Yoon, Yoon-Ki Kim, Chang-Sung Jeong',
+    venue: '대한전자공학회 학술대회',
+    year: '2014',
+  },
+  {
+    type: 'paper',
+    title: 'Active Content Repository based Distribution Local Cache System',
+    authors: 'Sang-Deok Yoon, Chang-Sung Jeong',
+    venue: '대한전자공학회 학술대회',
+    year: '2015',
+  },
+  {
+    type: 'patent',
+    title: 'Method for volume rendering using parallel shear-warp factorization',
+    authors: 'Chang-Sung Jeong, Ki-Hyun Kim, Su-Hyun Kim, Yoon-Ki Kim, In-Kyu Son, Sang-Deok Yoon, et al.',
+    venue: 'KR Patent 10-2013-0147491',
+    year: '2013',
+  },
+  {
+    type: 'patent',
+    title: 'Data comparing processing method and system in cloud computing environment',
+    authors: 'Chang-Sung Jeong, Ki-Hyun Kim, Su-Hyun Kim, Yoon-Ki Kim, In-Kyu Son, Sang-Deok Yoon, et al.',
+    venue: 'KR Patent 10-2013-0147492',
+    year: '2013',
+  },
+  {
+    type: 'patent',
+    title: 'Face Recognition Method and System for Intelligent Surveillance',
+    authors: 'Chang-Sung Jeong, Ki-Hyun Kim, Su-Hyun Kim, Yoon-Ki Kim, In-Kyu Son, Sang-Deok Yoon, et al.',
+    venue: 'KR Patent 10-2013-0147498',
+    year: '2013',
+  },
+];
+
+const additionalExperience = [
+  { role: 'Teaching Assistant', course: 'KECE208: Data Structure and Algorithm', period: '2015 Semester 2' },
+  { role: 'Teaching Assistant', course: 'KECE317: Parallel Computing', period: '2016 Semester 1' },
+  { role: 'Teaching Assistant', course: 'KECE208: Data Structure and Algorithm', period: '2016 Semester 2' },
+  { role: 'Teaching Assistant', course: 'KECE317: Parallel Computing', period: '2017 Semester 1' },
+  { role: 'Teaching Assistant', course: 'KECE208: Data Structure and Algorithm', period: '2017 Semester 2' },
+  { role: 'Presenter', course: 'How to Train Deep Learning Model on Distributed and/or Multi-GPU Environment', period: '2017 Feb.', link: 'https://www.youtube.com/watch?v=DEfWtVJjtws' },
 ];
 ---
 
-<BaseLayout title="Resume - Hawk" description="Software Engineer with expertise in C++ and modern software development">
+<BaseLayout title="Resume - Sang-Deok Yoon" description="Software Engineer with expertise in C++, CUDA, and parallel computing">
   <section class="py-16">
     <div class="container-narrow">
       <!-- Header -->
       <header class="mb-16 text-center">
-        <h1 class="text-4xl font-bold mb-4">Hawk</h1>
+        <h1 class="text-4xl font-bold mb-2">윤상덕</h1>
+        <p class="text-2xl text-[var(--color-text-secondary)] mb-2">Sang-Deok Yoon</p>
         <p class="text-xl text-[var(--color-text-secondary)] mb-6">
           Software Engineer
         </p>
@@ -54,30 +308,16 @@ const education = [
         </div>
       </header>
 
-      <!-- Experience -->
+      <!-- Core Competency -->
       <section class="mb-16">
         <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
-          Experience
+          Core Competency
         </h2>
-        <div class="space-y-8">
-          {experience.map((job) => (
-            <div class="card">
-              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-4">
-                <div>
-                  <h3 class="text-lg font-semibold">{job.position}</h3>
-                  <p class="text-[var(--color-accent)]">{job.company}</p>
-                </div>
-                <span class="text-sm text-[var(--color-text-muted)]">{job.period}</span>
-              </div>
-              <p class="text-[var(--color-text-secondary)] mb-4">{job.description}</p>
-              <ul class="list-disc list-inside space-y-1 text-[var(--color-text-secondary)]">
-                {job.highlights.map((highlight) => (
-                  <li>{highlight}</li>
-                ))}
-              </ul>
-            </div>
+        <ul class="list-disc list-inside space-y-2 text-[var(--color-text-secondary)]">
+          {coreCompetency.map((item) => (
+            <li>{item}</li>
           ))}
-        </div>
+        </ul>
       </section>
 
       <!-- Skills -->
@@ -85,15 +325,56 @@ const education = [
         <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
           Skills
         </h2>
-        <div class="grid gap-6 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Object.entries(skills).map(([category, items]) => (
             <div class="card">
-              <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">
+              <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
                 {category}
               </h3>
               <div class="flex flex-wrap gap-2">
                 {items.map((skill) => (
                   <span class="tag">{skill}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Experience -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
+          Experience
+        </h2>
+        <div class="space-y-10">
+          {experience.map((job) => (
+            <div class="card">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-6">
+                <div>
+                  <h3 class="text-xl font-semibold">{job.company}</h3>
+                  <p class="text-[var(--color-accent)]">{job.position}</p>
+                </div>
+                <span class="text-sm text-[var(--color-text-muted)] whitespace-nowrap">{job.period}</span>
+              </div>
+              <div class="space-y-6">
+                {job.projects.map((project) => (
+                  <div class="border-l-2 border-[var(--color-border)] pl-4">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-1 mb-2">
+                      <h4 class="font-semibold">{project.name}</h4>
+                      <span class="text-xs text-[var(--color-text-muted)]">{project.period}</span>
+                    </div>
+                    <p class="text-sm text-[var(--color-text-muted)] mb-2">Role: {project.role}</p>
+                    <div class="flex flex-wrap gap-1 mb-3">
+                      {project.skills.map((skill) => (
+                        <span class="text-xs px-2 py-0.5 bg-[var(--color-bg-secondary)] rounded">{skill}</span>
+                      ))}
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-[var(--color-text-secondary)]">
+                      {project.highlights.map((highlight) => (
+                        <li>{highlight}</li>
+                      ))}
+                    </ul>
+                  </div>
                 ))}
               </div>
             </div>
@@ -114,9 +395,53 @@ const education = [
                   <h3 class="text-lg font-semibold">{edu.degree}</h3>
                   <p class="text-[var(--color-accent)]">{edu.institution}</p>
                   <p class="text-[var(--color-text-secondary)]">{edu.field}</p>
+                  {edu.gpa && <p class="text-sm text-[var(--color-text-muted)]">GPA: {edu.gpa}</p>}
+                  {edu.description && <p class="text-sm text-[var(--color-text-secondary)] mt-2">{edu.description}</p>}
                 </div>
-                <span class="text-sm text-[var(--color-text-muted)]">{edu.period}</span>
+                <span class="text-sm text-[var(--color-text-muted)] whitespace-nowrap">{edu.period}</span>
               </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Publications -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
+          Publications & Patents
+        </h2>
+        <div class="space-y-4">
+          {publications.map((pub) => (
+            <div class="card">
+              <span class={`inline-block text-xs px-2 py-0.5 rounded mb-2 ${pub.type === 'paper' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}`}>
+                {pub.type === 'paper' ? 'Paper' : 'Patent'}
+              </span>
+              <h3 class="font-semibold mb-1">{pub.title}</h3>
+              <p class="text-sm text-[var(--color-text-secondary)]">{pub.authors}</p>
+              <p class="text-sm text-[var(--color-text-muted)]">{pub.venue} ({pub.year})</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Additional Experience -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
+          Additional Experience
+        </h2>
+        <div class="space-y-3">
+          {additionalExperience.map((exp) => (
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-1 py-2 border-b border-[var(--color-border)] last:border-0">
+              <div>
+                <span class="font-semibold">{exp.role}</span>
+                <span class="text-[var(--color-text-secondary)]"> - {exp.course}</span>
+                {exp.link && (
+                  <a href={exp.link} target="_blank" rel="noopener" class="ml-2 text-[var(--color-accent)] text-sm hover:underline">
+                    [Video]
+                  </a>
+                )}
+              </div>
+              <span class="text-sm text-[var(--color-text-muted)]">{exp.period}</span>
             </div>
           ))}
         </div>
