@@ -9,7 +9,9 @@ export const RESUME_DATA = {
   nameEn: 'Sang-Deok Yoon',
   title: 'Software Engineer',
   github: 'https://github.com/hawk90',
-  email: 'hawking90a@gmail.com',
+  // Email is split to deter spam bot harvesting. Joined at render time.
+  emailUser: 'hawking90a',
+  emailDomain: 'gmail.com',
 
   // Core Competency
   coreCompetency: [

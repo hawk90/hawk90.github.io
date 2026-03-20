@@ -74,6 +74,9 @@ const jsonLd = type === 'article'
     <link rel="manifest" href="/manifest.json" />
     <link rel="canonical" href={canonicalURL} />
 
+    <!-- Security: Referrer Policy -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
     <!-- Primary Meta Tags -->
     <title>{title}</title>
     <meta name="title" content={title} />
@@ -113,7 +116,7 @@ const jsonLd = type === 'article'
     <!-- Analytics -->
     {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' && ANALYTICS_CONFIG.id && (
       <>
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${ANALYTICS_CONFIG.id}`}></script>
+        <script async crossorigin="anonymous" src={`https://www.googletagmanager.com/gtag/js?id=${ANALYTICS_CONFIG.id}`}></script>
         <script define:vars={{ gaId: ANALYTICS_CONFIG.id }}>
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
@@ -123,10 +126,10 @@ const jsonLd = type === 'article'
       </>
     )}
     {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' && ANALYTICS_CONFIG.id && (
-      <script async defer data-website-id={ANALYTICS_CONFIG.id} src={ANALYTICS_CONFIG.src || 'https://analytics.umami.is/script.js'}></script>
+      <script async defer crossorigin="anonymous" data-website-id={ANALYTICS_CONFIG.id} src={ANALYTICS_CONFIG.src || 'https://analytics.umami.is/script.js'}></script>
     )}
     {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' && ANALYTICS_CONFIG.id && (
-      <script async defer data-domain={ANALYTICS_CONFIG.id} src="https://plausible.io/js/script.js"></script>
+      <script async defer crossorigin="anonymous" data-domain={ANALYTICS_CONFIG.id} src="https://plausible.io/js/script.js"></script>
     )}
 
     <!-- KaTeX CSS -->
@@ -142,6 +145,7 @@ const jsonLd = type === 'article'
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+      crossorigin="anonymous"
     />
 
     <!-- Theme initialization (prevent flash) -->
