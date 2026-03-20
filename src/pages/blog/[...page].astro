@@ -58,6 +58,11 @@ const { posts, currentPage, totalPages } = Astro.props;
             <p class="text-lg text-[var(--color-text-secondary)]">
               Tech articles, book reviews, and presentations.
             </p>
+            {currentPage > 1 && (
+              <p class="text-sm text-[var(--color-text-muted)] mt-2">
+                페이지 {currentPage} / {totalPages}
+              </p>
+            )}
           </div>
 
           <!-- Posts Grid -->

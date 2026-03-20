@@ -72,10 +72,37 @@ const formattedDate = formatDate(post.data.date);
             </div>
           </header>
 
-          <!-- Series Navigation (Top) -->
-          {seriesPosts.length > 1 && (
-            <div class="container-narrow mb-8">
-              <SeriesNav posts={seriesPosts} currentSlug={post.slug} />
+          <!-- Mobile TOC Toggle -->
+          {headings.filter((h) => h.depth >= 2 && h.depth <= 3).length > 0 && (
+            <div class="container-narrow mb-6 lg:hidden">
+              <button
+                type="button"
+                id="mobile-toc-toggle"
+                class="w-full flex items-center justify-between px-4 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:border-[var(--color-border-hover)] transition-colors"
+                aria-expanded="false"
+                aria-controls="mobile-toc"
+                aria-label="목차 열기/닫기"
+              >
+                <span>목차 (On this page)</span>
+                <svg class="w-4 h-4 transition-transform duration-200" data-toc-chevron fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <nav id="mobile-toc" class="hidden mt-2 px-4 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg" aria-label="Table of contents">
+                <ul class="space-y-2 text-sm">
+                  {headings.filter((h) => h.depth >= 2 && h.depth <= 3).map((heading) => (
+                    <li style={`padding-left: ${(heading.depth - 2) * 0.75}rem`}>
+                      <a
+                        href={`#${heading.slug}`}
+                        class="block py-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+                        data-mobile-toc-link
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
             </div>
           )}
 
@@ -116,6 +143,31 @@ const formattedDate = formatDate(post.data.date);
 </BaseLayout>
 
 <script>
-  import { setupPostNavigation } from '../../lib/keyboard';
-  setupPostNavigation();
+  function initMobileToc() {
+    const toggle = document.getElementById('mobile-toc-toggle');
+    const toc = document.getElementById('mobile-toc');
+    const chevron = toggle?.querySelector('[data-toc-chevron]');
+    if (!toggle || !toc) return;
+
+    function handleToggle() {
+      const isExpanded = toggle!.getAttribute('aria-expanded') === 'true';
+      toggle!.setAttribute('aria-expanded', String(!isExpanded));
+      toc!.classList.toggle('hidden');
+      chevron?.classList.toggle('rotate-180');
+    }
+
+    function handleLinkClick() {
+      toggle!.setAttribute('aria-expanded', 'false');
+      toc!.classList.add('hidden');
+      chevron?.classList.remove('rotate-180');
+    }
+
+    toggle.addEventListener('click', handleToggle);
+    toc.querySelectorAll('[data-mobile-toc-link]').forEach((link) => {
+      link.addEventListener('click', handleLinkClick);
+    });
+  }
+
+  initMobileToc();
+  document.addEventListener('astro:page-load', initMobileToc);
 </script>

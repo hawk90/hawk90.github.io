@@ -167,10 +167,31 @@ int main() {
       </div>
     </div>
   </section>
+
+  <!-- Settings Toast -->
+  <div id="settings-toast" class="fixed bottom-6 right-6 z-50 opacity-0 pointer-events-none transition-opacity duration-300" aria-live="polite">
+    <div class="px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg shadow-lg">
+      설정이 저장되었습니다
+    </div>
+  </div>
 </BaseLayout>
 
 <script>
   import { STORAGE_KEYS } from '../consts/config';
+
+  let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function showToast() {
+    const toast = document.getElementById('settings-toast');
+    if (!toast) return;
+    if (toastTimer) clearTimeout(toastTimer);
+    toast.classList.remove('opacity-0', 'pointer-events-none');
+    toast.classList.add('opacity-100');
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('opacity-100');
+      toast.classList.add('opacity-0', 'pointer-events-none');
+    }, 1500);
+  }
 
   function initSettingsPage() {
     const langSelect = document.getElementById('langSelect') as HTMLSelectElement;
@@ -198,9 +219,12 @@ int main() {
         const show = lineNumbersToggle.checked;
         localStorage.setItem(STORAGE_KEYS.showLineNumbers, show ? 'true' : 'false');
         document.documentElement.setAttribute('data-show-line-numbers', show ? 'true' : 'false');
+        showToast();
       });
     }
   }
+
+  window.addEventListener('settings-changed', showToast);
 
   initSettingsPage();
   document.addEventListener('astro:page-load', initSettingsPage);

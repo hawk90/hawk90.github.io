@@ -125,16 +125,21 @@ import { CODE_THEMES } from '../../lib/theme';
     function handleDarkChange() {
       setStoredCodeTheme('dark', darkSelect.value);
       applyPreview();
+      window.dispatchEvent(new CustomEvent('settings-changed'));
     }
 
     function handleLightChange() {
       setStoredCodeTheme('light', lightSelect.value);
       applyPreview();
+      window.dispatchEvent(new CustomEvent('settings-changed'));
     }
 
-    // Event listeners
-    modeDark.addEventListener('click', () => setMode('dark'));
-    modeLight.addEventListener('click', () => setMode('light'));
+    // Event listeners (store references for proper cleanup)
+    function handleDarkMode() { setMode('dark'); }
+    function handleLightMode() { setMode('light'); }
+
+    modeDark.addEventListener('click', handleDarkMode);
+    modeLight.addEventListener('click', handleLightMode);
     darkSelect.addEventListener('change', handleDarkChange);
     lightSelect.addEventListener('change', handleLightChange);
 
@@ -143,8 +148,8 @@ import { CODE_THEMES } from '../../lib/theme';
     setMode(isLight ? 'light' : 'dark');
 
     cleanup = () => {
-      modeDark.removeEventListener('click', () => setMode('dark'));
-      modeLight.removeEventListener('click', () => setMode('light'));
+      modeDark.removeEventListener('click', handleDarkMode);
+      modeLight.removeEventListener('click', handleLightMode);
       darkSelect.removeEventListener('change', handleDarkChange);
       lightSelect.removeEventListener('change', handleLightChange);
     };

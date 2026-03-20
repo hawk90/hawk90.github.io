@@ -123,16 +123,38 @@ const currentPath = Astro.url.pathname;
 
     if (!menuTrigger || !mobileMenu) return;
 
-    function handleClick() {
-      const isExpanded = menuTrigger!.getAttribute('aria-expanded') === 'true';
-      menuTrigger!.setAttribute('aria-expanded', String(!isExpanded));
-      mobileMenu!.classList.toggle('hidden');
+    function closeMenu() {
+      menuTrigger!.setAttribute('aria-expanded', 'false');
+      mobileMenu!.classList.add('hidden');
+      menuTrigger!.focus();
     }
 
+    function handleClick() {
+      const isExpanded = menuTrigger!.getAttribute('aria-expanded') === 'true';
+      if (isExpanded) {
+        closeMenu();
+      } else {
+        menuTrigger!.setAttribute('aria-expanded', 'true');
+        mobileMenu!.classList.remove('hidden');
+        // Focus first menu link for keyboard accessibility
+        const firstLink = mobileMenu!.querySelector('a') as HTMLElement;
+        firstLink?.focus();
+      }
+    }
+
+    // Close menu when a nav link is clicked
+    function handleLinkClick() {
+      closeMenu();
+    }
+
+    const menuLinks = mobileMenu.querySelectorAll('a');
+
     menuTrigger.addEventListener('click', handleClick);
+    menuLinks.forEach((link) => link.addEventListener('click', handleLinkClick));
 
     cleanup = () => {
       menuTrigger.removeEventListener('click', handleClick);
+      menuLinks.forEach((link) => link.removeEventListener('click', handleLinkClick));
     };
   }
 

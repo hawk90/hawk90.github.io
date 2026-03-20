@@ -124,6 +124,32 @@ const ogImageURL = new URL(image, Astro.site);
 
     <!-- View Transitions -->
     <meta name="view-transition" content="same-origin" />
+
+    <!-- Re-apply theme after View Transition swap -->
+    <script is:inline>
+      document.addEventListener('astro:after-swap', function() {
+        try {
+          var theme = localStorage.getItem('theme');
+          if (theme === 'light') {
+            document.documentElement.classList.add('light');
+          } else if (theme === 'dark') {
+            document.documentElement.classList.remove('light');
+          } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.documentElement.classList.add('light');
+          } else {
+            document.documentElement.classList.remove('light');
+          }
+
+          var isLight = document.documentElement.classList.contains('light');
+          var darkCodeTheme = localStorage.getItem('code-theme-dark') || 'github-dark-dimmed';
+          var lightCodeTheme = localStorage.getItem('code-theme-light') || 'github-light';
+          document.documentElement.setAttribute('data-code-theme', isLight ? lightCodeTheme : darkCodeTheme);
+
+          var showLineNumbers = localStorage.getItem('show-line-numbers');
+          document.documentElement.setAttribute('data-show-line-numbers', showLineNumbers !== 'false' ? 'true' : 'false');
+        } catch(e) {}
+      });
+    </script>
   </head>
   <body class="min-h-screen flex flex-col">
     {showProgress && <ScrollProgress />}
@@ -134,18 +160,78 @@ const ogImageURL = new URL(image, Astro.site);
     <Footer />
     <SearchModal />
 
+    <!-- Keyboard Shortcuts Help Modal -->
+    <div id="shortcuts-modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true" aria-label="키보드 단축키">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-shortcuts-backdrop></div>
+      <div class="relative flex items-center justify-center min-h-screen px-4">
+        <div class="w-full max-w-sm bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-xl shadow-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">키보드 단축키</h2>
+            <button type="button" data-shortcuts-close class="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] rounded-lg" aria-label="닫기">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          <dl class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <dt class="text-[var(--color-text-secondary)]">검색 열기</dt>
+              <dd><kbd class="px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] text-xs">/</kbd></dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-[var(--color-text-secondary)]">이 도움말 보기</dt>
+              <dd><kbd class="px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] text-xs">?</kbd></dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-[var(--color-text-secondary)]">모달 닫기</dt>
+              <dd><kbd class="px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] text-xs">Esc</kbd></dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+
     <!-- Keyboard shortcuts -->
     <script>
-      document.addEventListener('keydown', (e) => {
-        // Ignore if typing in input/textarea
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      function initShortcuts() {
+        const shortcutsModal = document.getElementById('shortcuts-modal');
+        const shortcutsBackdrop = document.querySelector('[data-shortcuts-backdrop]');
+        const shortcutsClose = document.querySelector('[data-shortcuts-close]');
 
-        // Escape - Close modals, blur search
-        if (e.key === 'Escape') {
-          const activeElement = document.activeElement as HTMLElement;
-          activeElement?.blur();
+        function closeShortcutsModal() {
+          shortcutsModal?.classList.add('hidden');
+          document.body.style.overflow = '';
         }
-      });
+
+        function openShortcutsModal() {
+          shortcutsModal?.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
+
+        shortcutsBackdrop?.addEventListener('click', closeShortcutsModal);
+        shortcutsClose?.addEventListener('click', closeShortcutsModal);
+
+        document.addEventListener('keydown', (e) => {
+          if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+          if (e.key === 'Escape') {
+            if (shortcutsModal && !shortcutsModal.classList.contains('hidden')) {
+              closeShortcutsModal();
+              return;
+            }
+            const activeElement = document.activeElement as HTMLElement;
+            activeElement?.blur();
+          }
+
+          if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+            if (shortcutsModal?.classList.contains('hidden')) {
+              e.preventDefault();
+              openShortcutsModal();
+            }
+          }
+        });
+      }
+
+      initShortcuts();
+      document.addEventListener('astro:page-load', initShortcuts);
     </script>
   </body>
 </html>
