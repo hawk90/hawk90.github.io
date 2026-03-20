@@ -1,29 +1,36 @@
 ---
-// Giscus configuration
-// Get your repo, repoId, category, and categoryId from https://giscus.app/
+import { COMMENTS_CONFIG } from '../../consts/config';
+import { t } from '../../consts/ui-strings';
+
 const config = {
-  repo: 'hawk90/hawk90.github.io',
-  repoId: '', // Fill this in from giscus.app
-  category: 'Announcements',
-  categoryId: '', // Fill this in from giscus.app
+  enabled: COMMENTS_CONFIG.enabled,
+  repo: COMMENTS_CONFIG.repo,
+  repoId: COMMENTS_CONFIG.repoId,
+  category: COMMENTS_CONFIG.category,
+  categoryId: COMMENTS_CONFIG.categoryId,
   mapping: 'pathname',
   strict: '0',
   reactionsEnabled: '1',
   emitMetadata: '0',
   inputPosition: 'top',
-  lang: 'ko',
+  lang: COMMENTS_CONFIG.lang,
 };
+
+const setupMessage = t('giscus_setup_required');
+const setupLink = t('giscus_setup_link');
 ---
 
-<div class="giscus-wrapper">
-  <div class="giscus"></div>
-  <div class="giscus-error hidden p-4 text-center text-sm text-[var(--color-text-muted)] border border-[var(--color-border)] rounded-lg">
-    <p>댓글 기능을 사용하려면 Giscus 설정이 필요합니다.</p>
-    <a href="https://giscus.app" target="_blank" rel="noopener noreferrer" class="text-[var(--color-accent)] hover:underline">
-      giscus.app에서 설정하기 →
-    </a>
+{config.enabled && (
+  <div class="giscus-wrapper">
+    <div class="giscus"></div>
+    <div class="giscus-error hidden p-4 text-center text-sm text-[var(--color-text-muted)] border border-[var(--color-border)] rounded-lg">
+      <p>{setupMessage}</p>
+      <a href="https://giscus.app" target="_blank" rel="noopener noreferrer" class="text-[var(--color-accent)] hover:underline">
+        {setupLink}
+      </a>
+    </div>
   </div>
-</div>
+)}
 
 <script define:vars={{ config }}>
   let observer = null;
@@ -33,14 +40,12 @@ const config = {
     const errorEl = wrapper?.querySelector('.giscus-error');
     if (!wrapper) return;
 
-    // 설정이 비어있으면 오류 메시지 표시
     if (!config.repoId || !config.categoryId) {
       errorEl?.classList.remove('hidden');
       console.warn('Giscus: repoId or categoryId is not configured');
       return;
     }
 
-    // 이미 로드된 경우 스킵
     if (wrapper.querySelector('script[src*="giscus"]')) return;
 
     errorEl?.classList.add('hidden');
@@ -69,15 +74,15 @@ const config = {
   }
 
   function initGiscus() {
-    // 이전 observer 정리
     if (observer) {
       observer.disconnect();
       observer = null;
     }
 
+    if (!config.enabled) return;
+
     loadGiscus();
 
-    // Update theme when toggled
     observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
@@ -98,7 +103,6 @@ const config = {
     observer.observe(document.documentElement, { attributes: true });
   }
 
-  // Load giscus on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initGiscus);
   } else {

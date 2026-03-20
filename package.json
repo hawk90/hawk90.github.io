@@ -1,7 +1,25 @@
 {
-  "name": "y",
+  "name": "astro-hawk-blog",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "A premium Astro blog theme with dark mode, search, series, SEO, analytics, comments, and i18n support",
+  "keywords": [
+    "astro",
+    "blog",
+    "theme",
+    "tailwindcss",
+    "dark-mode",
+    "seo",
+    "search",
+    "giscus",
+    "analytics",
+    "i18n"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hawk90/hawk90.github.io"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

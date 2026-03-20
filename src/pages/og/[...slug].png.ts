@@ -5,6 +5,7 @@ import { Resvg } from '@resvg/resvg-js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { getPublishedPosts, type BlogPost } from '../../lib/posts';
+import { SITE_CONFIG } from '../../consts/config';
 
 // 빌드 시 폰트를 한 번만 로드
 const fontPath = path.join(process.cwd(), 'public/fonts/Pretendard-Bold.otf');
@@ -30,7 +31,7 @@ export async function GET({ props }: APIContext) {
       </div>
       <div style="display: flex; align-items: center; justify-content: space-between;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="color: #a78bfa; font-size: 28px; font-weight: bold;">Hawk's Blog</div>
+          <div style="color: #a78bfa; font-size: 28px; font-weight: bold;">${SITE_CONFIG.title}</div>
         </div>
         <div style="display: flex; gap: 8px;">
           ${post.data.tags.slice(0, 3).map((tag: string) => `<div style="background: rgba(167, 139, 250, 0.2); color: #a78bfa; padding: 8px 16px; border-radius: 9999px; font-size: 18px;">${tag}</div>`).join('')}

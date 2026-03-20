@@ -1,4 +1,6 @@
 ---
+import { BRAND_CONFIG } from '../../consts/config';
+
 interface Props {
   class?: string;
 }
@@ -13,6 +15,6 @@ const { class: className } = Astro.props;
     className,
   ]}
 >
-  <span class="text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">Hawk</span>
-  <span class="text-[var(--color-accent)]">.dev</span>
+  <span class="text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">{BRAND_CONFIG.logoText}</span>
+  <span class="text-[var(--color-accent)]">{BRAND_CONFIG.logoSuffix}</span>
 </a>

@@ -6,7 +6,12 @@ import TableOfContents from '../../components/blog/TableOfContents.astro';
 import SeriesNav from '../../components/blog/SeriesNav.astro';
 import SeriesSidebar from '../../components/blog/SeriesSidebar.astro';
 import Giscus from '../../components/blog/Giscus.astro';
+import RelatedPosts from '../../components/blog/RelatedPosts.astro';
+import ShareButtons from '../../components/blog/ShareButtons.astro';
 import { formatDate, getTagUrl } from '../../lib/utils';
+import { getReadingTime, getRelatedPosts } from '../../lib/posts';
+import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/config';
+import { t } from '../../consts/ui-strings';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -29,7 +34,18 @@ if (post.data.series) {
     .sort((a, b) => (a.data.seriesOrder || 0) - (b.data.seriesOrder || 0));
 }
 
+// Reading time
+const readingTime = getReadingTime(post.body || '');
+
+// Related posts
+let relatedPosts: CollectionEntry<'blog'>[] = [];
+if (RELATED_POSTS_CONFIG.enabled) {
+  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+  relatedPosts = getRelatedPosts(post, allPosts, RELATED_POSTS_CONFIG.maxPosts);
+}
+
 const formattedDate = formatDate(post.data.date);
+const postUrl = new URL(`/blog/${post.slug}`, SITE_CONFIG.url).toString();
 ---
 
 <BaseLayout
@@ -62,6 +78,8 @@ const formattedDate = formatDate(post.data.date);
               </time>
               <span>·</span>
               <span>{post.data.author}</span>
+              <span>·</span>
+              <span>{readingTime}{t('reading_time_min')}</span>
             </div>
             <div class="flex flex-wrap gap-2 mt-4">
               {post.data.tags.map((tag) => (
@@ -70,6 +88,10 @@ const formattedDate = formatDate(post.data.date);
                 </a>
               ))}
             </div>
+
+            {SHARE_CONFIG.enabled && (
+              <ShareButtons title={post.data.title} url={postUrl} />
+            )}
           </header>
 
           <!-- Mobile TOC Toggle -->
@@ -81,9 +103,9 @@ const formattedDate = formatDate(post.data.date);
                 class="w-full flex items-center justify-between px-4 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:border-[var(--color-border-hover)] transition-colors"
                 aria-expanded="false"
                 aria-controls="mobile-toc"
-                aria-label="목차 열기/닫기"
+                aria-label={t('toc_open_close')}
               >
-                <span>목차 (On this page)</span>
+                <span>{t('toc')}</span>
                 <svg class="w-4 h-4 transition-transform duration-200" data-toc-chevron fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -115,6 +137,13 @@ const formattedDate = formatDate(post.data.date);
           {seriesPosts.length > 1 && (
             <div class="container-narrow mt-12">
               <SeriesNav posts={seriesPosts} currentSlug={post.slug} showAll />
+            </div>
+          )}
+
+          <!-- Related Posts -->
+          {RELATED_POSTS_CONFIG.enabled && relatedPosts.length > 0 && (
+            <div class="container-narrow">
+              <RelatedPosts posts={relatedPosts} />
             </div>
           )}
 

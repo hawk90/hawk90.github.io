@@ -3,8 +3,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/blog/PostCard.astro';
 import BlogSidebar from '../../components/blog/BlogSidebar.astro';
 import Pagination from '../../components/blog/Pagination.astro';
-import { BLOG_CONFIG } from '../../consts/config';
+import { BLOG_CONFIG, SITE_CONFIG } from '../../consts/config';
 import { getPublishedPosts, type BlogPost } from '../../lib/posts';
+import { t } from '../../consts/ui-strings';
 
 export async function getStaticPaths() {
   const { postsPerPage } = BLOG_CONFIG;
@@ -46,7 +47,7 @@ interface Props {
 const { posts, currentPage, totalPages } = Astro.props;
 ---
 
-<BaseLayout title="Blog - Hawk" description="Tech articles, book reviews, and presentations">
+<BaseLayout title={`Blog - ${SITE_CONFIG.author}`} description={SITE_CONFIG.description}>
   <section class="py-16">
     <div class="container">
       <div class="lg:flex lg:gap-12">
@@ -60,7 +61,7 @@ const { posts, currentPage, totalPages } = Astro.props;
             </p>
             {currentPage > 1 && (
               <p class="text-sm text-[var(--color-text-muted)] mt-2">
-                페이지 {currentPage} / {totalPages}
+                {t('page_of')} {currentPage} / {totalPages}
               </p>
             )}
           </div>

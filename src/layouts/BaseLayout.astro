@@ -4,6 +4,8 @@ import Header from '../components/common/Header.astro';
 import Footer from '../components/common/Footer.astro';
 import ScrollProgress from '../components/ui/ScrollProgress.astro';
 import SearchModal from '../components/common/SearchModal.astro';
+import { SITE_CONFIG, ANALYTICS_CONFIG } from '../consts/config';
+import { t } from '../consts/ui-strings';
 
 interface Props {
   title: string;
@@ -19,26 +21,57 @@ interface Props {
 
 const {
   title,
-  description = 'Developer blog about C++, tech books, and software engineering',
+  description = SITE_CONFIG.description,
   image = '/og-default.png',
   type = 'website',
   showProgress = false,
   publishedTime,
   modifiedTime,
-  author = 'Hawk',
+  author = SITE_CONFIG.author,
   noIndex = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL(image, Astro.site);
+const ogLocale = SITE_CONFIG.locale.replace('-', '_');
+
+// JSON-LD structured data
+const jsonLd = type === 'article'
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: title,
+      description,
+      image: ogImageURL.toString(),
+      url: canonicalURL.toString(),
+      datePublished: publishedTime?.toISOString(),
+      dateModified: modifiedTime?.toISOString() || publishedTime?.toISOString(),
+      author: {
+        '@type': 'Person',
+        name: author,
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: SITE_CONFIG.title,
+        url: SITE_CONFIG.url,
+      },
+    }
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: SITE_CONFIG.title,
+      description: SITE_CONFIG.description,
+      url: SITE_CONFIG.url,
+    };
 ---
 
 <!doctype html>
-<html lang="ko" data-code-theme="github-dark-dimmed">
+<html lang={SITE_CONFIG.lang} data-code-theme="github-dark-dimmed">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Primary Meta Tags -->
@@ -54,8 +87,8 @@ const ogImageURL = new URL(image, Astro.site);
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageURL} />
-    <meta property="og:site_name" content="Hawk's Blog" />
-    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content={SITE_CONFIG.title} />
+    <meta property="og:locale" content={ogLocale} />
 
     {type === 'article' && publishedTime && (
       <meta property="article:published_time" content={publishedTime.toISOString()} />
@@ -73,6 +106,28 @@ const ogImageURL = new URL(image, Astro.site);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- Analytics -->
+    {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' && ANALYTICS_CONFIG.id && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${ANALYTICS_CONFIG.id}`}></script>
+        <script define:vars={{ gaId: ANALYTICS_CONFIG.id }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
+    {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' && ANALYTICS_CONFIG.id && (
+      <script async defer data-website-id={ANALYTICS_CONFIG.id} src={ANALYTICS_CONFIG.src || 'https://analytics.umami.is/script.js'}></script>
+    )}
+    {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' && ANALYTICS_CONFIG.id && (
+      <script async defer data-domain={ANALYTICS_CONFIG.id} src="https://plausible.io/js/script.js"></script>
+    )}
 
     <!-- KaTeX CSS -->
     <link
@@ -152,36 +207,40 @@ const ogImageURL = new URL(image, Astro.site);
     </script>
   </head>
   <body class="min-h-screen flex flex-col">
+    <!-- Skip to content (accessibility) -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:bg-[var(--color-accent)] focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
+      {t('skip_to_content')}
+    </a>
     {showProgress && <ScrollProgress />}
     <Header />
-    <main class="flex-1">
+    <main id="main-content" class="flex-1">
       <slot />
     </main>
     <Footer />
     <SearchModal />
 
     <!-- Keyboard Shortcuts Help Modal -->
-    <div id="shortcuts-modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true" aria-label="키보드 단축키">
+    <div id="shortcuts-modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true" aria-label={t('keyboard_shortcuts')}>
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-shortcuts-backdrop></div>
       <div class="relative flex items-center justify-center min-h-screen px-4">
         <div class="w-full max-w-sm bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-xl shadow-2xl p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold">키보드 단축키</h2>
-            <button type="button" data-shortcuts-close class="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] rounded-lg" aria-label="닫기">
+            <h2 class="text-lg font-semibold">{t('keyboard_shortcuts')}</h2>
+            <button type="button" data-shortcuts-close class="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] rounded-lg" aria-label={t('search_close')}>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
           <dl class="space-y-3 text-sm">
             <div class="flex justify-between">
-              <dt class="text-[var(--color-text-secondary)]">검색 열기</dt>
+              <dt class="text-[var(--color-text-secondary)]">{t('shortcut_open_search')}</dt>
               <dd><kbd class="px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] text-xs">/</kbd></dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-[var(--color-text-secondary)]">이 도움말 보기</dt>
+              <dt class="text-[var(--color-text-secondary)]">{t('shortcut_help')}</dt>
               <dd><kbd class="px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] text-xs">?</kbd></dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-[var(--color-text-secondary)]">모달 닫기</dt>
+              <dt class="text-[var(--color-text-secondary)]">{t('shortcut_close_modal')}</dt>
               <dd><kbd class="px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] text-xs">Esc</kbd></dd>
             </div>
           </dl>

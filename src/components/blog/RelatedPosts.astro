@@ -1,0 +1,45 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../../lib/utils';
+import { t } from '../../consts/ui-strings';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { posts } = Astro.props;
+---
+
+{posts.length > 0 && (
+  <section class="mt-16">
+    <h2 class="text-xl font-bold mb-6">{t('related_posts')}</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {posts.map((post) => (
+        <a
+          href={`/blog/${post.slug}`}
+          class="block p-4 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-border-hover)] transition-colors group"
+        >
+          <h3 class="font-semibold mb-2 group-hover:text-[var(--color-accent)] transition-colors line-clamp-2">
+            {post.data.title}
+          </h3>
+          {post.data.description && (
+            <p class="text-sm text-[var(--color-text-secondary)] mb-3 line-clamp-2">
+              {post.data.description}
+            </p>
+          )}
+          <div class="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+            <time datetime={post.data.date.toISOString()}>
+              {formatDate(post.data.date, 'short')}
+            </time>
+            {post.data.tags.length > 0 && (
+              <>
+                <span>·</span>
+                <span>{post.data.tags[0]}</span>
+              </>
+            )}
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+)}

@@ -1,4 +1,7 @@
 ---
+import { UI_CONFIG } from '../../consts/config';
+import { t } from '../../consts/ui-strings';
+
 interface Props {
   currentPage: number;
   totalPages: number;
@@ -14,9 +17,6 @@ function getPageUrl(page: number): string {
   if (page === 1) return baseUrl;
   return `${baseUrl}/${page}`;
 }
-
-// Generate page numbers to show
-import { UI_CONFIG } from '../../consts/config';
 
 function getPageNumbers(): (number | 'ellipsis')[] {
   const pages: (number | 'ellipsis')[] = [];
@@ -47,19 +47,19 @@ const pageNumbers = getPageNumbers();
       <a
         href={getPageUrl(prevPage)}
         class="flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
-        aria-label="이전 페이지"
+        aria-label={t('prev_page')}
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <span class="hidden sm:inline">이전</span>
+        <span class="hidden sm:inline">{t('prev')}</span>
       </a>
     ) : (
       <span class="flex items-center gap-1 px-3 py-2 text-sm text-[var(--color-text-muted)] cursor-not-allowed">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <span class="hidden sm:inline">이전</span>
+        <span class="hidden sm:inline">{t('prev')}</span>
       </span>
     )}
 
@@ -88,16 +88,16 @@ const pageNumbers = getPageNumbers();
       <a
         href={getPageUrl(nextPage)}
         class="flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
-        aria-label="다음 페이지"
+        aria-label={t('next_page')}
       >
-        <span class="hidden sm:inline">다음</span>
+        <span class="hidden sm:inline">{t('next')}</span>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </a>
     ) : (
       <span class="flex items-center gap-1 px-3 py-2 text-sm text-[var(--color-text-muted)] cursor-not-allowed">
-        <span class="hidden sm:inline">다음</span>
+        <span class="hidden sm:inline">{t('next')}</span>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>

@@ -4,6 +4,7 @@ import { html } from 'satori-html';
 import { Resvg } from '@resvg/resvg-js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { SITE_CONFIG, BRAND_CONFIG } from '../consts/config';
 
 // Load font once from local file to avoid network dependency
 const fontPath = path.join(process.cwd(), 'public/fonts/Pretendard-Bold.otf');
@@ -13,8 +14,8 @@ export async function GET(_context: APIContext) {
 
   const markup = html`
     <div style="display: flex; flex-direction: column; width: 100%; height: 100%; background: linear-gradient(135deg, #0f0d17 0%, #1a1625 100%); padding: 60px; justify-content: center; align-items: center;">
-      <div style="color: #a78bfa; font-size: 80px; font-weight: bold; margin-bottom: 24px;">Hawk's Blog</div>
-      <div style="color: #b8b5c5; font-size: 32px; text-align: center;">C++ · System Programming · Embedded Development</div>
+      <div style="color: #a78bfa; font-size: 80px; font-weight: bold; margin-bottom: 24px;">${SITE_CONFIG.title}</div>
+      <div style="color: #b8b5c5; font-size: 32px; text-align: center;">${BRAND_CONFIG.tagline}</div>
     </div>
   `;
 

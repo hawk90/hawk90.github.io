@@ -1,5 +1,16 @@
 ---
-// Search Modal Component
+import { t } from '../../consts/ui-strings';
+
+const searchPlaceholder = t('search_placeholder');
+const searchClose = t('search_close');
+const searchSelect = t('search_select');
+const searchEmpty = t('search_empty');
+const searchNoResults = t('search_no_results');
+const searchLoading = t('search_loading');
+const searchError = t('search_error');
+const searchResultsCount = t('search_results_count');
+const filterTagLabel = t('search_filter_tag');
+const filterSeriesLabel = t('search_filter_series');
 ---
 
 <div
@@ -40,14 +51,14 @@
           type="text"
           id="search-input"
           data-search-input
-          placeholder="검색어를 입력하세요..."
+          placeholder={searchPlaceholder}
           class="flex-1 py-4 bg-transparent text-lg outline-none focus:outline-none placeholder:text-[var(--color-text-muted)]"
           autocomplete="off"
         />
         <button
           id="search-close-btn"
           class="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] rounded-lg transition-colors"
-          aria-label="닫기"
+          aria-label={searchClose}
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -56,20 +67,25 @@
       </div>
 
       <!-- Results -->
-      <div id="search-results" class="max-h-[60vh] overflow-y-auto" role="listbox" aria-label="검색 결과">
+      <div id="search-results" class="max-h-[60vh] overflow-y-auto" role="listbox" aria-label="Search results">
         <div class="p-8 text-center text-[var(--color-text-muted)]" data-search-empty>
-          검색어를 입력하면 결과가 표시됩니다
+          {searchEmpty}
         </div>
       </div>
 
       <!-- Keyboard hint -->
       <div class="px-4 py-2 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-xs text-[var(--color-text-muted)] flex items-center justify-between">
-        <span><kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)]">↵</kbd> 선택</span>
-        <span><kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)]">esc</kbd> 닫기</span>
+        <span><kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)]">↵</kbd> {searchSelect}</span>
+        <span><kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)]">esc</kbd> {searchClose}</span>
       </div>
     </div>
   </div>
 </div>
+
+<script define:vars={{ searchEmpty, searchNoResults, searchLoading, searchError, searchResultsCount, filterTagLabel, filterSeriesLabel }}>
+  // Make i18n strings available to the script
+  window.__searchI18n = { searchEmpty, searchNoResults, searchLoading, searchError, searchResultsCount, filterTagLabel, filterSeriesLabel };
+</script>
 
 <script>
   import { searchPosts, highlightMatch, type SearchItem } from '../../lib/search';
@@ -83,10 +99,19 @@
   let selectedIndex = -1;
 
   const MAX_RETRIES = 3;
-  const EMPTY_MESSAGE = '<div class="p-8 text-center text-[var(--color-text-muted)]">검색어를 입력하면 결과가 표시됩니다</div>';
-  const NO_RESULTS_MESSAGE = '<div class="p-8 text-center text-[var(--color-text-muted)]">검색 결과가 없습니다</div>';
-  const LOADING_MESSAGE = '<div class="p-8 text-center text-[var(--color-text-muted)]"><svg class="animate-spin inline-block w-5 h-5 mr-2 align-middle" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>검색 인덱스 로딩 중...</div>';
-  const ERROR_MESSAGE = '<div class="p-8 text-center text-[var(--color-text-muted)]">검색 인덱스를 불러올 수 없습니다. 다시 시도해주세요.</div>';
+
+  function getI18n() {
+    const i18n = (window as any).__searchI18n || {};
+    return {
+      EMPTY_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${i18n.searchEmpty || 'Type to search'}</div>`,
+      NO_RESULTS_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${i18n.searchNoResults || 'No results'}</div>`,
+      LOADING_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]"><svg class="animate-spin inline-block w-5 h-5 mr-2 align-middle" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>${i18n.searchLoading || 'Loading...'}</div>`,
+      ERROR_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${i18n.searchError || 'Error loading search'}</div>`,
+      resultsCount: i18n.searchResultsCount || ' results',
+      filterTag: i18n.filterTagLabel || 'Tag:',
+      filterSeries: i18n.filterSeriesLabel || 'Series:',
+    };
+  }
 
   async function loadSearchIndex(): Promise<boolean> {
     if (isLoaded) return true;
@@ -122,11 +147,13 @@
 
     if (!modal || !input || !results) return;
 
+    const i18n = getI18n();
+
     function setFilter(filter: { type: 'tag' | 'series'; value: string } | null) {
       currentFilter = filter;
       if (filter && filterContainer && filterLabel && filterName) {
         filterContainer.classList.remove('hidden');
-        filterLabel.textContent = filter.type === 'tag' ? '태그:' : '시리즈:';
+        filterLabel.textContent = filter.type === 'tag' ? i18n.filterTag : i18n.filterSeries;
         filterName.textContent = filter.value;
       } else if (filterContainer) {
         filterContainer.classList.add('hidden');
@@ -139,13 +166,13 @@
       document.body.style.overflow = 'hidden';
       input.focus();
       selectedIndex = -1;
-      results.innerHTML = LOADING_MESSAGE;
+      results.innerHTML = i18n.LOADING_MESSAGE;
 
       loadSearchIndex().then((success) => {
         if (success) {
           renderResults(input.value || '');
         } else {
-          results.innerHTML = ERROR_MESSAGE;
+          results.innerHTML = i18n.ERROR_MESSAGE;
         }
       });
     }
@@ -156,9 +183,8 @@
       input.value = '';
       setFilter(null);
       selectedIndex = -1;
-      results.innerHTML = EMPTY_MESSAGE;
+      results.innerHTML = i18n.EMPTY_MESSAGE;
 
-      // 포커스를 트리거 버튼으로 복원
       const trigger = document.querySelector('[data-search-trigger]') as HTMLElement;
       trigger?.focus();
     }
@@ -167,17 +193,14 @@
       const items = results.querySelectorAll('a[role="option"]');
       if (items.length === 0) return;
 
-      // 범위 체크
       if (newIndex < 0) newIndex = items.length - 1;
       if (newIndex >= items.length) newIndex = 0;
 
-      // 이전 선택 해제
       items.forEach((item) => {
         item.classList.remove('bg-[var(--color-bg-secondary)]');
         item.setAttribute('aria-selected', 'false');
       });
 
-      // 새 선택
       selectedIndex = newIndex;
       const selected = items[selectedIndex] as HTMLElement;
       selected.classList.add('bg-[var(--color-bg-secondary)]');
@@ -201,12 +224,12 @@
           ? { filterTag: currentFilter.value }
           : { filterSeries: currentFilter.value };
         const matches = searchPosts(searchIndex, options);
-        results.innerHTML = matches.length === 0 ? NO_RESULTS_MESSAGE : renderMatchList(matches, '');
+        results.innerHTML = matches.length === 0 ? i18n.NO_RESULTS_MESSAGE : renderMatchList(matches, '');
         return;
       }
 
       if (!q) {
-        results.innerHTML = EMPTY_MESSAGE;
+        results.innerHTML = i18n.EMPTY_MESSAGE;
         return;
       }
 
@@ -217,15 +240,11 @@
       }
 
       const matches = searchPosts(searchIndex, options);
-      results.innerHTML = matches.length === 0 ? NO_RESULTS_MESSAGE : renderMatchList(matches, q);
-    }
-
-    function escapeAttr(str: string): string {
-      return str.replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      results.innerHTML = matches.length === 0 ? i18n.NO_RESULTS_MESSAGE : renderMatchList(matches, q);
     }
 
     function renderMatchList(matches: SearchItem[], query: string): string {
-      const countHtml = `<div class="px-4 py-2 text-xs text-[var(--color-text-muted)] border-b border-[var(--color-border)]">${matches.length}개의 결과</div>`;
+      const countHtml = `<div class="px-4 py-2 text-xs text-[var(--color-text-muted)] border-b border-[var(--color-border)]">${matches.length}${i18n.resultsCount}</div>`;
       const itemsHtml = matches
         .map(
           (item, index) => `
@@ -257,7 +276,6 @@
     }
 
     function handleKeydown(e: KeyboardEvent) {
-      // 모달이 닫혀있을 때 '/' 키로 열기
       if (e.key === '/' && modal.classList.contains('hidden')) {
         if (!isInputElement(e.target)) {
           e.preventDefault();
@@ -266,7 +284,6 @@
         return;
       }
 
-      // 모달이 열려있을 때만 처리
       if (modal.classList.contains('hidden')) return;
 
       switch (e.key) {
@@ -288,7 +305,6 @@
           }
           break;
         case 'Tab':
-          // 포커스 트랩: 모달 내부에 포커스 유지
           e.preventDefault();
           if (e.shiftKey) {
             closeBtn?.focus();

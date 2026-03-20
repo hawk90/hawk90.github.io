@@ -1,22 +1,23 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../consts/ui-strings';
 ---
 
-<BaseLayout title="404 - Page Not Found" description="요청하신 페이지를 찾을 수 없습니다" noIndex={true}>
+<BaseLayout title={`404 - ${t('page_not_found')}`} description={t('page_not_found_description')} noIndex={true}>
   <section class="py-24 lg:py-32">
     <div class="container text-center">
       <div class="max-w-md mx-auto">
         <div class="text-8xl font-bold text-[var(--color-accent)] mb-4">404</div>
-        <h1 class="text-2xl font-bold mb-4">페이지를 찾을 수 없습니다</h1>
+        <h1 class="text-2xl font-bold mb-4">{t('page_not_found')}</h1>
         <p class="text-[var(--color-text-secondary)] mb-8">
-          요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.
+          {t('page_not_found_description')}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <a href="/" class="btn btn-primary">
-            홈으로 돌아가기
+            {t('back_to_home')}
           </a>
           <a href="/blog" class="btn btn-ghost border border-[var(--color-border)]">
-            블로그 보기
+            {t('view_blog')}
           </a>
           <button
             type="button"
@@ -26,7 +27,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            검색하기
+            {t('search')}
           </button>
         </div>
       </div>

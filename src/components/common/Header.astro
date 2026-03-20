@@ -1,12 +1,7 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
 import Logo from './Logo.astro';
-
-const navLinks = [
-  { href: '/about', label: 'About' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/resume', label: 'Resume' },
-];
+import { NAV_CONFIG } from '../../consts/config';
 
 const currentPath = Astro.url.pathname;
 ---
@@ -18,7 +13,7 @@ const currentPath = Astro.url.pathname;
     <!-- Desktop Navigation -->
     <div class="hidden md:flex items-center gap-8">
       <ul class="flex items-center gap-6">
-        {navLinks.map((link) => (
+        {NAV_CONFIG.map((link) => (
           <li>
             <a
               href={link.href}
@@ -93,7 +88,7 @@ const currentPath = Astro.url.pathname;
     class="hidden md:hidden border-t border-[var(--color-border)] bg-[var(--color-bg-primary)]"
   >
     <ul class="container py-4 space-y-2">
-      {navLinks.map((link) => (
+      {NAV_CONFIG.map((link) => (
         <li>
           <a
             href={link.href}
@@ -136,13 +131,11 @@ const currentPath = Astro.url.pathname;
       } else {
         menuTrigger!.setAttribute('aria-expanded', 'true');
         mobileMenu!.classList.remove('hidden');
-        // Focus first menu link for keyboard accessibility
         const firstLink = mobileMenu!.querySelector('a') as HTMLElement;
         firstLink?.focus();
       }
     }
 
-    // Close menu when a nav link is clicked
     function handleLinkClick() {
       closeMenu();
     }

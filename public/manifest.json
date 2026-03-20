@@ -1,0 +1,16 @@
+{
+  "name": "Hawk's Blog",
+  "short_name": "Hawk.dev",
+  "description": "C++, 시스템 프로그래밍, 임베디드 개발에 대한 기술 블로그",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0d17",
+  "theme_color": "#a78bfa",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

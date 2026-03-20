@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { SITE_CONFIG } from '../consts/config';
 
 export type BlogPost = CollectionEntry<'blog'>;
 
@@ -55,4 +56,75 @@ export function filterByCategory(posts: BlogPost[], categoryId: string): BlogPos
 export function filterByTag(posts: BlogPost[], tag: string): BlogPost[] {
   const lowerTag = tag.toLowerCase();
   return posts.filter((p) => p.data.tags.some((t) => t.toLowerCase() === lowerTag));
+}
+
+/**
+ * 읽기 시간 계산
+ * 한국어: 분당 500자 / 영어: 분당 200단어
+ */
+export function getReadingTime(content: string): number {
+  const lang = SITE_CONFIG.lang;
+
+  if (lang === 'ko') {
+    // Korean: count characters (excluding spaces and markdown syntax)
+    const text = content
+      .replace(/```[\s\S]*?```/g, '') // remove code blocks
+      .replace(/`[^`]*`/g, '')        // remove inline code
+      .replace(/!?\[.*?\]\(.*?\)/g, '') // remove links/images
+      .replace(/#{1,6}\s/g, '')        // remove headings
+      .replace(/[*_~`>#\-|]/g, '')     // remove markdown symbols
+      .replace(/\s+/g, '');            // remove whitespace
+    return Math.max(1, Math.ceil(text.length / 500));
+  }
+
+  // English: count words
+  const text = content
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`]*`/g, '')
+    .replace(/!?\[.*?\]\(.*?\)/g, '')
+    .replace(/#{1,6}\s/g, '')
+    .replace(/[*_~`>#\-|]/g, '');
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
+/**
+ * 관련 글 찾기 (태그 유사도 기반, 같은 시리즈 우선)
+ */
+export function getRelatedPosts(
+  currentPost: BlogPost,
+  allPosts: BlogPost[],
+  maxPosts: number = 3,
+): BlogPost[] {
+  const candidates = allPosts.filter((p) => p.slug !== currentPost.slug);
+
+  const scored = candidates.map((post) => {
+    let score = 0;
+
+    // Same series gets highest priority
+    if (currentPost.data.series && post.data.series === currentPost.data.series) {
+      score += 10;
+    }
+
+    // Tag overlap
+    const currentTags = new Set(currentPost.data.tags.map((t) => t.toLowerCase()));
+    for (const tag of post.data.tags) {
+      if (currentTags.has(tag.toLowerCase())) {
+        score += 3;
+      }
+    }
+
+    // Same type
+    if (post.data.type === currentPost.data.type) {
+      score += 1;
+    }
+
+    return { post, score };
+  });
+
+  return scored
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf())
+    .slice(0, maxPosts)
+    .map((s) => s.post);
 }

@@ -1,0 +1,64 @@
+---
+/**
+ * Callout/Admonition component for MDX content.
+ *
+ * Usage in MDX:
+ *   import Callout from '../../components/blog/Callout.astro';
+ *
+ *   <Callout type="info">This is an informational note.</Callout>
+ *   <Callout type="warning">Be careful with this.</Callout>
+ *   <Callout type="danger">This is a breaking change!</Callout>
+ *   <Callout type="tip">Here's a useful tip.</Callout>
+ */
+
+interface Props {
+  type?: 'info' | 'warning' | 'danger' | 'tip';
+  title?: string;
+}
+
+const { type = 'info', title } = Astro.props;
+
+const config = {
+  info: {
+    icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+    defaultTitle: 'Note',
+    borderColor: 'border-blue-500',
+    bgColor: 'bg-blue-500/10',
+    iconColor: 'text-blue-500',
+  },
+  warning: {
+    icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>`,
+    defaultTitle: 'Warning',
+    borderColor: 'border-yellow-500',
+    bgColor: 'bg-yellow-500/10',
+    iconColor: 'text-yellow-500',
+  },
+  danger: {
+    icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+    defaultTitle: 'Danger',
+    borderColor: 'border-red-500',
+    bgColor: 'bg-red-500/10',
+    iconColor: 'text-red-500',
+  },
+  tip: {
+    icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>`,
+    defaultTitle: 'Tip',
+    borderColor: 'border-green-500',
+    bgColor: 'bg-green-500/10',
+    iconColor: 'text-green-500',
+  },
+};
+
+const c = config[type];
+const displayTitle = title || c.defaultTitle;
+---
+
+<aside class:list={['not-prose my-6 rounded-lg border-l-4 p-4', c.borderColor, c.bgColor]} role="note">
+  <div class:list={['flex items-center gap-2 font-semibold mb-1', c.iconColor]}>
+    <Fragment set:html={c.icon} />
+    <span>{displayTitle}</span>
+  </div>
+  <div class="text-sm text-[var(--color-text-secondary)] [&>p]:m-0">
+    <slot />
+  </div>
+</aside>

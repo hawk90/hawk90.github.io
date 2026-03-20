@@ -1,8 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { ABOUT_DATA } from '../consts/about';
+import { SITE_CONFIG } from '../consts/config';
 ---
 
-<BaseLayout title="Who Am I - Hawk" description="System & Firmware Developer">
+<BaseLayout title={`Who Am I - ${ABOUT_DATA.name}`} description={ABOUT_DATA.title}>
   <section class="py-16 lg:py-24">
     <div class="container">
       <div class="max-w-4xl mx-auto">
@@ -11,104 +13,63 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <!-- Image -->
         <div class="lg:col-span-2 flex justify-center lg:justify-start">
           <img
-            src="/images/pic.jpg"
-            alt="Hawk"
+            src={ABOUT_DATA.photo}
+            alt={ABOUT_DATA.name}
             class="w-48 h-48 lg:w-56 lg:h-56 object-cover rounded-2xl shadow-lg"
+            width="224"
+            height="224"
+            loading="eager"
+            decoding="async"
           />
         </div>
 
         <!-- Intro -->
         <div class="lg:col-span-3">
           <h1 class="text-3xl lg:text-4xl font-bold mb-4">
-            Hi, I'm <span class="text-[var(--color-accent)]">Hawk</span>
+            Hi, I'm <span class="text-[var(--color-accent)]">{ABOUT_DATA.name}</span>
           </h1>
           <p class="text-xl text-[var(--color-text-secondary)] leading-relaxed mb-6">
-            System & Firmware Developer with a passion for working close to the hardware.
+            {ABOUT_DATA.tagline}
           </p>
           <div class="flex flex-wrap gap-3">
-            <span class="px-3 py-1 text-sm bg-[var(--color-bg-tertiary)] rounded-full">Embedded Systems</span>
-            <span class="px-3 py-1 text-sm bg-[var(--color-bg-tertiary)] rounded-full">ARM / RISC-V</span>
-            <span class="px-3 py-1 text-sm bg-[var(--color-bg-tertiary)] rounded-full">Jetson Orin</span>
-            <span class="px-3 py-1 text-sm bg-[var(--color-bg-tertiary)] rounded-full">Kernel Porting</span>
+            {ABOUT_DATA.skills.map((skill) => (
+              <span class="px-3 py-1 text-sm bg-[var(--color-bg-tertiary)] rounded-full">{skill}</span>
+            ))}
           </div>
         </div>
       </div>
 
       <!-- Content Sections -->
       <div class="space-y-8">
-        <!-- Area of Expertise -->
-        <div>
-          <div class="flex items-center gap-3 mb-3">
-            <span class="text-2xl">🔧</span>
-            <h2 class="text-xl font-bold">Area of Expertise</h2>
+        {ABOUT_DATA.sections.map((section) => (
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">{section.icon}</span>
+              <h2 class="text-xl font-bold">{section.title}</h2>
+            </div>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed pl-10">
+              {section.content}
+            </p>
           </div>
-          <p class="text-[var(--color-text-secondary)] leading-relaxed pl-10">
-            I'm a System & Firmware Developer with a passion for working close to the hardware.
-            My experience spans embedded systems, low-level debugging, board bring-up,
-            bootloader development, and kernel porting across various platforms.
-          </p>
-        </div>
-
-        <!-- What I'm Working On -->
-        <div>
-          <div class="flex items-center gap-3 mb-3">
-            <span class="text-2xl">🚀</span>
-            <h2 class="text-xl font-bold">What I'm Working On</h2>
-          </div>
-          <p class="text-[var(--color-text-secondary)] leading-relaxed pl-10">
-            These days, I primarily work on firmware development for platforms like ARM-based systems,
-            RISC-V architectures, and Jetson Orin. My focus lies in performance optimization
-            and ensuring system reliability.
-          </p>
-        </div>
-
-        <!-- Purpose of This Blog -->
-        <div>
-          <div class="flex items-center gap-3 mb-3">
-            <span class="text-2xl">✍️</span>
-            <h2 class="text-xl font-bold">Purpose of This Blog</h2>
-          </div>
-          <p class="text-[var(--color-text-secondary)] leading-relaxed pl-10">
-            This blog is a space where I document what I learn through hands-on development.
-            I aim to share insights into system and firmware development, practical debugging tips,
-            and the joy of digging into registers and low-level code.
-          </p>
-        </div>
-
-        <!-- To Visitors -->
-        <div>
-          <div class="flex items-center gap-3 mb-3">
-            <span class="text-2xl">🤝</span>
-            <h2 class="text-xl font-bold">To Visitors</h2>
-          </div>
-          <p class="text-[var(--color-text-secondary)] leading-relaxed pl-10">
-            If you're interested in system software, currently learning, or working in the same field,
-            you're more than welcome here. Feel free to leave comments or feedback—I'd love to connect
-            and learn together.
-          </p>
-        </div>
+        ))}
 
         <!-- Hobbies -->
-        <div>
-          <div class="flex items-center gap-3 mb-3">
-            <span class="text-2xl">🎯</span>
-            <h2 class="text-xl font-bold">Hobbies</h2>
-          </div>
-          <div class="flex gap-6 pl-10">
-            <div class="flex flex-col items-center gap-2 p-4 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-border)]">
-              <span class="text-3xl">🎾</span>
-              <span class="text-sm text-[var(--color-text-secondary)]">Tennis</span>
+        {ABOUT_DATA.hobbies.length > 0 && (
+          <div>
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">🎯</span>
+              <h2 class="text-xl font-bold">Hobbies</h2>
             </div>
-            <div class="flex flex-col items-center gap-2 p-4 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-border)]">
-              <span class="text-3xl">🛹</span>
-              <span class="text-sm text-[var(--color-text-secondary)]">Skateboard</span>
-            </div>
-            <div class="flex flex-col items-center gap-2 p-4 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-border)]">
-              <span class="text-3xl">🎻</span>
-              <span class="text-sm text-[var(--color-text-secondary)]">Violin</span>
+            <div class="flex gap-6 pl-10">
+              {ABOUT_DATA.hobbies.map((hobby) => (
+                <div class="flex flex-col items-center gap-2 p-4 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-border)]">
+                  <span class="text-3xl">{hobby.icon}</span>
+                  <span class="text-sm text-[var(--color-text-secondary)]">{hobby.label}</span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
       </div>
       </div>
     </div>

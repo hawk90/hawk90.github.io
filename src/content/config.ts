@@ -1,4 +1,5 @@
 import { defineCollection, z } from 'astro:content';
+import { SITE_CONFIG } from '../consts/config';
 
 const blogCollection = defineCollection({
   type: 'content',
@@ -9,7 +10,7 @@ const blogCollection = defineCollection({
 
     // Optional metadata
     description: z.string().optional(),
-    author: z.string().default('Hawk'),
+    author: z.string().default(SITE_CONFIG.author),
 
     // Classification
     tags: z.array(z.string()).default([]),
