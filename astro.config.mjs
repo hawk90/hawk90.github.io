@@ -13,6 +13,7 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    build: { sourcemap: false },
   },
 
   integrations: [

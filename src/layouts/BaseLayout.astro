@@ -124,18 +124,15 @@ const jsonLd = type === 'article'
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL} />
 
-    <!-- JSON-LD Structured Data -->
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <!-- JSON-LD Structured Data (escape </ to prevent script breakout) -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
 
     <!-- Analytics -->
     {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' && ANALYTICS_CONFIG.id && (
       <>
         <script async crossorigin="anonymous" src={`https://www.googletagmanager.com/gtag/js?id=${ANALYTICS_CONFIG.id}`}></script>
-        <script define:vars={{ gaId: ANALYTICS_CONFIG.id }}>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', gaId);
+        <script is:inline data-ga-id={ANALYTICS_CONFIG.id}>
+          window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config",document.currentScript.getAttribute("data-ga-id"));
         </script>
       </>
     )}
@@ -162,9 +159,14 @@ const jsonLd = type === 'article'
       crossorigin="anonymous"
     />
 
+    <!-- Clickjacking protection (frame-busting) -->
+    <script is:inline>
+      if(window.top!==window.self){window.top.location=window.self.location}
+    </script>
+
     <!-- Theme initialization (render-blocking to prevent FOUC) -->
     <script is:inline>
-      (function(){try{var t=localStorage.getItem("theme");t==="light"?document.documentElement.classList.add("light"):t==="dark"?document.documentElement.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches&&document.documentElement.classList.add("light");var l=document.documentElement.classList.contains("light"),d=localStorage.getItem("code-theme-dark")||"github-dark-dimmed",c=localStorage.getItem("code-theme-light")||"github-light";document.documentElement.setAttribute("data-code-theme",l?c:d);var n=localStorage.getItem("show-line-numbers");document.documentElement.setAttribute("data-show-line-numbers",n!=="false"?"true":"false")}catch(e){window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches&&document.documentElement.classList.add("light");document.documentElement.setAttribute("data-code-theme",document.documentElement.classList.contains("light")?"github-light":"github-dark-dimmed");document.documentElement.setAttribute("data-show-line-numbers","true")}})();
+      (function(){var v=["github-dark-dimmed","github-light","dracula","one-dark-pro","catppuccin-mocha","catppuccin-latte","nord","tokyo-night"];try{var t=localStorage.getItem("theme");t==="light"?document.documentElement.classList.add("light"):t==="dark"?document.documentElement.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches&&document.documentElement.classList.add("light");var l=document.documentElement.classList.contains("light"),d=localStorage.getItem("code-theme-dark"),c=localStorage.getItem("code-theme-light");d=v.indexOf(d)!==-1?d:"github-dark-dimmed";c=v.indexOf(c)!==-1?c:"github-light";document.documentElement.setAttribute("data-code-theme",l?c:d);var n=localStorage.getItem("show-line-numbers");document.documentElement.setAttribute("data-show-line-numbers",n!=="false"?"true":"false")}catch(e){window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches&&document.documentElement.classList.add("light");document.documentElement.setAttribute("data-code-theme",document.documentElement.classList.contains("light")?"github-light":"github-dark-dimmed");document.documentElement.setAttribute("data-show-line-numbers","true")}})();
     </script>
 
     <!-- View Transitions -->
@@ -172,7 +174,7 @@ const jsonLd = type === 'article'
 
     <!-- Re-apply theme after View Transition swap -->
     <script is:inline>
-      document.addEventListener("astro:after-swap",function(){try{var t=localStorage.getItem("theme");t==="light"?document.documentElement.classList.add("light"):t==="dark"?document.documentElement.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches?document.documentElement.classList.add("light"):document.documentElement.classList.remove("light");var l=document.documentElement.classList.contains("light"),d=localStorage.getItem("code-theme-dark")||"github-dark-dimmed",c=localStorage.getItem("code-theme-light")||"github-light";document.documentElement.setAttribute("data-code-theme",l?c:d);var n=localStorage.getItem("show-line-numbers");document.documentElement.setAttribute("data-show-line-numbers",n!=="false"?"true":"false")}catch(e){}});
+      document.addEventListener("astro:after-swap",function(){var v=["github-dark-dimmed","github-light","dracula","one-dark-pro","catppuccin-mocha","catppuccin-latte","nord","tokyo-night"];try{var t=localStorage.getItem("theme");t==="light"?document.documentElement.classList.add("light"):t==="dark"?document.documentElement.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches?document.documentElement.classList.add("light"):document.documentElement.classList.remove("light");var l=document.documentElement.classList.contains("light"),d=localStorage.getItem("code-theme-dark"),c=localStorage.getItem("code-theme-light");d=v.indexOf(d)!==-1?d:"github-dark-dimmed";c=v.indexOf(c)!==-1?c:"github-light";document.documentElement.setAttribute("data-code-theme",l?c:d);var n=localStorage.getItem("show-line-numbers");document.documentElement.setAttribute("data-show-line-numbers",n!=="false"?"true":"false")}catch(e){}});
     </script>
   </head>
   <body class="min-h-screen flex flex-col">

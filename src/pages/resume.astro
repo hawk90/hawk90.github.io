@@ -16,13 +16,13 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
           {title}
         </p>
         <div class="flex justify-center gap-4">
-          <a href={github} class="btn btn-ghost" target="_blank" rel="noopener">
+          <a href={github} class="btn btn-ghost" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
           <a href="#" class="btn btn-ghost" data-email-user={emailUser} data-email-domain={emailDomain} data-email-link>
             Email
           </a>
-          <button onclick="window.print()" class="btn btn-primary no-print">
+          <button type="button" data-print-btn class="btn btn-primary no-print">
             Print Resume
           </button>
         </div>
@@ -171,7 +171,8 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
 </BaseLayout>
 
 <script>
-  function initEmailLinks() {
+  function initResumePage() {
+    // Email link (anti-harvesting)
     document.querySelectorAll('[data-email-link]').forEach((el) => {
       el.addEventListener('click', (e) => {
         e.preventDefault();
@@ -182,7 +183,12 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
         }
       });
     });
+
+    // Print button (no inline onclick)
+    document.querySelectorAll('[data-print-btn]').forEach((el) => {
+      el.addEventListener('click', () => window.print());
+    });
   }
-  initEmailLinks();
-  document.addEventListener('astro:page-load', initEmailLinks);
+  initResumePage();
+  document.addEventListener('astro:page-load', initResumePage);
 </script>
