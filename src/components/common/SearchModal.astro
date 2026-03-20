@@ -19,6 +19,13 @@ const filterSeriesLabel = t('search_filter_series');
   role="dialog"
   aria-modal="true"
   aria-labelledby="search-title"
+  data-i18n-empty={searchEmpty}
+  data-i18n-no-results={searchNoResults}
+  data-i18n-loading={searchLoading}
+  data-i18n-error={searchError}
+  data-i18n-results-count={searchResultsCount}
+  data-i18n-filter-tag={filterTagLabel}
+  data-i18n-filter-series={filterSeriesLabel}
 >
   <!-- Backdrop -->
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-search-backdrop></div>
@@ -82,11 +89,6 @@ const filterSeriesLabel = t('search_filter_series');
   </div>
 </div>
 
-<script define:vars={{ searchEmpty, searchNoResults, searchLoading, searchError, searchResultsCount, filterTagLabel, filterSeriesLabel }}>
-  // Make i18n strings available to the script
-  window.__searchI18n = { searchEmpty, searchNoResults, searchLoading, searchError, searchResultsCount, filterTagLabel, filterSeriesLabel };
-</script>
-
 <script>
   import { searchPosts, highlightMatch, type SearchItem } from '../../lib/search';
   import { isInputElement } from '../../lib/keyboard';
@@ -101,15 +103,16 @@ const filterSeriesLabel = t('search_filter_series');
   const MAX_RETRIES = 3;
 
   function getI18n() {
-    const i18n = (window as any).__searchI18n || {};
+    const modal = document.getElementById('search-modal');
+    const d = modal?.dataset || {};
     return {
-      EMPTY_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${i18n.searchEmpty || 'Type to search'}</div>`,
-      NO_RESULTS_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${i18n.searchNoResults || 'No results'}</div>`,
-      LOADING_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]"><svg class="animate-spin inline-block w-5 h-5 mr-2 align-middle" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>${i18n.searchLoading || 'Loading...'}</div>`,
-      ERROR_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${i18n.searchError || 'Error loading search'}</div>`,
-      resultsCount: i18n.searchResultsCount || ' results',
-      filterTag: i18n.filterTagLabel || 'Tag:',
-      filterSeries: i18n.filterSeriesLabel || 'Series:',
+      EMPTY_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${d.i18nEmpty || 'Type to search'}</div>`,
+      NO_RESULTS_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${d.i18nNoResults || 'No results'}</div>`,
+      LOADING_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]"><svg class="animate-spin inline-block w-5 h-5 mr-2 align-middle" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>${d.i18nLoading || 'Loading...'}</div>`,
+      ERROR_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${d.i18nError || 'Error loading search'}</div>`,
+      resultsCount: d.i18nResultsCount || ' results',
+      filterTag: d.i18nFilterTag || 'Tag:',
+      filterSeries: d.i18nFilterSeries || 'Series:',
     };
   }
 

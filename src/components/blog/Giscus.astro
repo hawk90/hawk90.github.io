@@ -3,7 +3,7 @@ import { COMMENTS_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
 
 const config = {
-  enabled: COMMENTS_CONFIG.enabled,
+  enabled: String(COMMENTS_CONFIG.enabled),
   repo: COMMENTS_CONFIG.repo,
   repoId: COMMENTS_CONFIG.repoId,
   category: COMMENTS_CONFIG.category,
@@ -20,8 +20,21 @@ const setupMessage = t('giscus_setup_required');
 const setupLink = t('giscus_setup_link');
 ---
 
-{config.enabled && (
-  <div class="giscus-wrapper">
+{COMMENTS_CONFIG.enabled && (
+  <div
+    class="giscus-wrapper"
+    data-giscus-enabled={config.enabled}
+    data-giscus-repo={config.repo}
+    data-giscus-repo-id={config.repoId}
+    data-giscus-category={config.category}
+    data-giscus-category-id={config.categoryId}
+    data-giscus-mapping={config.mapping}
+    data-giscus-strict={config.strict}
+    data-giscus-reactions-enabled={config.reactionsEnabled}
+    data-giscus-emit-metadata={config.emitMetadata}
+    data-giscus-input-position={config.inputPosition}
+    data-giscus-lang={config.lang}
+  >
     <div class="giscus"></div>
     <div class="giscus-error hidden p-4 text-center text-sm text-[var(--color-text-muted)] border border-[var(--color-border)] rounded-lg">
       <p>{setupMessage}</p>
@@ -32,15 +45,18 @@ const setupLink = t('giscus_setup_link');
   </div>
 )}
 
-<script define:vars={{ config }}>
-  let observer = null;
+<script>
+  let observer: MutationObserver | null = null;
 
   function loadGiscus() {
-    const wrapper = document.querySelector('.giscus-wrapper');
+    const wrapper = document.querySelector('.giscus-wrapper') as HTMLElement | null;
     const errorEl = wrapper?.querySelector('.giscus-error');
     if (!wrapper) return;
 
-    if (!config.repoId || !config.categoryId) {
+    const repoId = wrapper.dataset.giscusRepoId;
+    const categoryId = wrapper.dataset.giscusCategoryId;
+
+    if (!repoId || !categoryId) {
       errorEl?.classList.remove('hidden');
       console.warn('Giscus: repoId or categoryId is not configured');
       return;
@@ -56,17 +72,17 @@ const setupLink = t('giscus_setup_link');
 
     const script = document.createElement('script');
     script.src = 'https://giscus.app/client.js';
-    script.setAttribute('data-repo', config.repo);
-    script.setAttribute('data-repo-id', config.repoId);
-    script.setAttribute('data-category', config.category);
-    script.setAttribute('data-category-id', config.categoryId);
-    script.setAttribute('data-mapping', config.mapping);
-    script.setAttribute('data-strict', config.strict);
-    script.setAttribute('data-reactions-enabled', config.reactionsEnabled);
-    script.setAttribute('data-emit-metadata', config.emitMetadata);
-    script.setAttribute('data-input-position', config.inputPosition);
+    script.setAttribute('data-repo', wrapper.dataset.giscusRepo || '');
+    script.setAttribute('data-repo-id', repoId);
+    script.setAttribute('data-category', wrapper.dataset.giscusCategory || '');
+    script.setAttribute('data-category-id', categoryId);
+    script.setAttribute('data-mapping', wrapper.dataset.giscusMapping || 'pathname');
+    script.setAttribute('data-strict', wrapper.dataset.giscusStrict || '0');
+    script.setAttribute('data-reactions-enabled', wrapper.dataset.giscusReactionsEnabled || '1');
+    script.setAttribute('data-emit-metadata', wrapper.dataset.giscusEmitMetadata || '0');
+    script.setAttribute('data-input-position', wrapper.dataset.giscusInputPosition || 'top');
     script.setAttribute('data-theme', theme);
-    script.setAttribute('data-lang', config.lang);
+    script.setAttribute('data-lang', wrapper.dataset.giscusLang || 'ko');
     script.crossOrigin = 'anonymous';
     script.async = true;
 
@@ -79,14 +95,15 @@ const setupLink = t('giscus_setup_link');
       observer = null;
     }
 
-    if (!config.enabled) return;
+    const wrapper = document.querySelector('.giscus-wrapper') as HTMLElement | null;
+    if (!wrapper || wrapper.dataset.giscusEnabled !== 'true') return;
 
     loadGiscus();
 
     observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
-          const iframe = document.querySelector('.giscus-frame');
+          const iframe = document.querySelector('.giscus-frame') as HTMLIFrameElement | null;
           if (iframe) {
             const theme = document.documentElement.classList.contains('light')
               ? 'light'

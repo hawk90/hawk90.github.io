@@ -74,8 +74,22 @@ const jsonLd = type === 'article'
     <link rel="manifest" href="/manifest.json" />
     <link rel="canonical" href={canonicalURL} />
 
-    <!-- Security: Referrer Policy -->
+    <!-- Security -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Content-Security-Policy" content={[
+      "default-src 'self'",
+      // 'unsafe-inline' required for is:inline theme scripts (FOUC prevention).
+      // define:vars has been eliminated from all components (Giscus, SearchModal).
+      "script-src 'self' 'unsafe-inline' https://giscus.app" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.googletagmanager.com https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
+      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+      "font-src 'self' https://cdn.jsdelivr.net",
+      "img-src 'self' data: https:",
+      "connect-src 'self' https://giscus.app" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
+      "frame-src https://giscus.app",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ')} />
 
     <!-- Primary Meta Tags -->
     <title>{title}</title>
@@ -148,37 +162,9 @@ const jsonLd = type === 'article'
       crossorigin="anonymous"
     />
 
-    <!-- Theme initialization (prevent flash) -->
+    <!-- Theme initialization (render-blocking to prevent FOUC) -->
     <script is:inline>
-      (function() {
-        try {
-          const theme = localStorage.getItem('theme');
-          if (theme === 'light') {
-            document.documentElement.classList.add('light');
-          } else if (theme === 'dark') {
-            document.documentElement.classList.remove('light');
-          } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-            document.documentElement.classList.add('light');
-          }
-
-          // Code theme initialization
-          const isLight = document.documentElement.classList.contains('light');
-          const darkCodeTheme = localStorage.getItem('code-theme-dark') || 'github-dark-dimmed';
-          const lightCodeTheme = localStorage.getItem('code-theme-light') || 'github-light';
-          document.documentElement.setAttribute('data-code-theme', isLight ? lightCodeTheme : darkCodeTheme);
-
-          // Line numbers initialization (default: true)
-          const showLineNumbers = localStorage.getItem('show-line-numbers');
-          document.documentElement.setAttribute('data-show-line-numbers', showLineNumbers !== 'false' ? 'true' : 'false');
-        } catch {
-          // Access to localStorage might be restricted; fall back to system preference
-          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-            document.documentElement.classList.add('light');
-          }
-          document.documentElement.setAttribute('data-code-theme', document.documentElement.classList.contains('light') ? 'github-light' : 'github-dark-dimmed');
-          document.documentElement.setAttribute('data-show-line-numbers', 'true');
-        }
-      })();
+      (function(){try{var t=localStorage.getItem("theme");t==="light"?document.documentElement.classList.add("light"):t==="dark"?document.documentElement.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches&&document.documentElement.classList.add("light");var l=document.documentElement.classList.contains("light"),d=localStorage.getItem("code-theme-dark")||"github-dark-dimmed",c=localStorage.getItem("code-theme-light")||"github-light";document.documentElement.setAttribute("data-code-theme",l?c:d);var n=localStorage.getItem("show-line-numbers");document.documentElement.setAttribute("data-show-line-numbers",n!=="false"?"true":"false")}catch(e){window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches&&document.documentElement.classList.add("light");document.documentElement.setAttribute("data-code-theme",document.documentElement.classList.contains("light")?"github-light":"github-dark-dimmed");document.documentElement.setAttribute("data-show-line-numbers","true")}})();
     </script>
 
     <!-- View Transitions -->
@@ -186,28 +172,7 @@ const jsonLd = type === 'article'
 
     <!-- Re-apply theme after View Transition swap -->
     <script is:inline>
-      document.addEventListener('astro:after-swap', function() {
-        try {
-          var theme = localStorage.getItem('theme');
-          if (theme === 'light') {
-            document.documentElement.classList.add('light');
-          } else if (theme === 'dark') {
-            document.documentElement.classList.remove('light');
-          } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-            document.documentElement.classList.add('light');
-          } else {
-            document.documentElement.classList.remove('light');
-          }
-
-          var isLight = document.documentElement.classList.contains('light');
-          var darkCodeTheme = localStorage.getItem('code-theme-dark') || 'github-dark-dimmed';
-          var lightCodeTheme = localStorage.getItem('code-theme-light') || 'github-light';
-          document.documentElement.setAttribute('data-code-theme', isLight ? lightCodeTheme : darkCodeTheme);
-
-          var showLineNumbers = localStorage.getItem('show-line-numbers');
-          document.documentElement.setAttribute('data-show-line-numbers', showLineNumbers !== 'false' ? 'true' : 'false');
-        } catch(e) {}
-      });
+      document.addEventListener("astro:after-swap",function(){try{var t=localStorage.getItem("theme");t==="light"?document.documentElement.classList.add("light"):t==="dark"?document.documentElement.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches?document.documentElement.classList.add("light"):document.documentElement.classList.remove("light");var l=document.documentElement.classList.contains("light"),d=localStorage.getItem("code-theme-dark")||"github-dark-dimmed",c=localStorage.getItem("code-theme-light")||"github-light";document.documentElement.setAttribute("data-code-theme",l?c:d);var n=localStorage.getItem("show-line-numbers");document.documentElement.setAttribute("data-show-line-numbers",n!=="false"?"true":"false")}catch(e){}});
     </script>
   </head>
   <body class="min-h-screen flex flex-col">
