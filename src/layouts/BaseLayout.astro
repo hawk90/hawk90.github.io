@@ -221,7 +221,11 @@ const jsonLd = type === 'article'
 
     <!-- Keyboard shortcuts -->
     <script>
+      let shortcutsCleanup: (() => void) | null = null;
+
       function initShortcuts() {
+        shortcutsCleanup?.();
+
         const shortcutsModal = document.getElementById('shortcuts-modal');
         const shortcutsBackdrop = document.querySelector('[data-shortcuts-backdrop]');
         const shortcutsClose = document.querySelector('[data-shortcuts-close]');
@@ -236,10 +240,7 @@ const jsonLd = type === 'article'
           document.body.style.overflow = 'hidden';
         }
 
-        shortcutsBackdrop?.addEventListener('click', closeShortcutsModal);
-        shortcutsClose?.addEventListener('click', closeShortcutsModal);
-
-        document.addEventListener('keydown', (e) => {
+        function handleKeydown(e: KeyboardEvent) {
           if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
           if (e.key === 'Escape') {
@@ -257,7 +258,17 @@ const jsonLd = type === 'article'
               openShortcutsModal();
             }
           }
-        });
+        }
+
+        shortcutsBackdrop?.addEventListener('click', closeShortcutsModal);
+        shortcutsClose?.addEventListener('click', closeShortcutsModal);
+        document.addEventListener('keydown', handleKeydown);
+
+        shortcutsCleanup = () => {
+          shortcutsBackdrop?.removeEventListener('click', closeShortcutsModal);
+          shortcutsClose?.removeEventListener('click', closeShortcutsModal);
+          document.removeEventListener('keydown', handleKeydown);
+        };
       }
 
       initShortcuts();

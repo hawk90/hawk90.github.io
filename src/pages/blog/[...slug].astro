@@ -172,7 +172,11 @@ const postUrl = new URL(`/blog/${post.slug}`, SITE_CONFIG.url).toString();
 </BaseLayout>
 
 <script>
+  let mobileTocCleanup: (() => void) | null = null;
+
   function initMobileToc() {
+    mobileTocCleanup?.();
+
     const toggle = document.getElementById('mobile-toc-toggle');
     const toc = document.getElementById('mobile-toc');
     const chevron = toggle?.querySelector('[data-toc-chevron]');
@@ -191,10 +195,19 @@ const postUrl = new URL(`/blog/${post.slug}`, SITE_CONFIG.url).toString();
       chevron?.classList.remove('rotate-180');
     }
 
+    const tocLinks = toc.querySelectorAll('[data-mobile-toc-link]');
+
     toggle.addEventListener('click', handleToggle);
-    toc.querySelectorAll('[data-mobile-toc-link]').forEach((link) => {
+    tocLinks.forEach((link) => {
       link.addEventListener('click', handleLinkClick);
     });
+
+    mobileTocCleanup = () => {
+      toggle.removeEventListener('click', handleToggle);
+      tocLinks.forEach((link) => {
+        link.removeEventListener('click', handleLinkClick);
+      });
+    };
   }
 
   initMobileToc();

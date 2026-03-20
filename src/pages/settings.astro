@@ -182,6 +182,7 @@ int main() {
   import { STORAGE_KEYS } from '../consts/config';
 
   let toastTimer: ReturnType<typeof setTimeout> | null = null;
+  let settingsCleanup: (() => void) | null = null;
 
   function showToast() {
     const toast = document.getElementById('settings-toast');
@@ -196,19 +197,30 @@ int main() {
   }
 
   function initSettingsPage() {
+    settingsCleanup?.();
+
     const langSelect = document.getElementById('langSelect') as HTMLSelectElement;
     const previews = document.querySelectorAll('.code-preview');
     const lineNumbersToggle = document.getElementById('lineNumbersToggle') as HTMLInputElement;
 
+    function handleLangChange() {
+      const selected = langSelect.value;
+      previews.forEach((preview) => {
+        const lang = (preview as HTMLElement).dataset.lang;
+        preview.classList.toggle('hidden', lang !== selected);
+      });
+    }
+
+    function handleLineNumbersChange() {
+      const show = lineNumbersToggle.checked;
+      localStorage.setItem(STORAGE_KEYS.showLineNumbers, show ? 'true' : 'false');
+      document.documentElement.setAttribute('data-show-line-numbers', show ? 'true' : 'false');
+      showToast();
+    }
+
     // Language selector
     if (langSelect && previews.length > 0) {
-      langSelect.addEventListener('change', () => {
-        const selected = langSelect.value;
-        previews.forEach((preview) => {
-          const lang = (preview as HTMLElement).dataset.lang;
-          preview.classList.toggle('hidden', lang !== selected);
-        });
-      });
+      langSelect.addEventListener('change', handleLangChange);
     }
 
     // Line numbers toggle
@@ -216,17 +228,17 @@ int main() {
       const stored = localStorage.getItem(STORAGE_KEYS.showLineNumbers);
       const showLineNumbers = stored !== 'false';
       lineNumbersToggle.checked = showLineNumbers;
-
-      lineNumbersToggle.addEventListener('change', () => {
-        const show = lineNumbersToggle.checked;
-        localStorage.setItem(STORAGE_KEYS.showLineNumbers, show ? 'true' : 'false');
-        document.documentElement.setAttribute('data-show-line-numbers', show ? 'true' : 'false');
-        showToast();
-      });
+      lineNumbersToggle.addEventListener('change', handleLineNumbersChange);
     }
-  }
 
-  window.addEventListener('settings-changed', showToast);
+    window.addEventListener('settings-changed', showToast);
+
+    settingsCleanup = () => {
+      langSelect?.removeEventListener('change', handleLangChange);
+      lineNumbersToggle?.removeEventListener('change', handleLineNumbersChange);
+      window.removeEventListener('settings-changed', showToast);
+    };
+  }
 
   initSettingsPage();
   document.addEventListener('astro:page-load', initSettingsPage);

@@ -15,6 +15,8 @@ pnpm-debug.log*
 
 # environment variables
 .env
+.env.*
+.env.local
 .env.production
 
 # macOS-specific files
@@ -22,6 +24,11 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# secrets / credentials
+*.pem
+*.key
+credentials.json
 
 # legacy backup (not part of Astro site)
 _jekyll_backup/
