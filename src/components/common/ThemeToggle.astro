@@ -64,11 +64,17 @@
       updateIcons();
     }
 
+    function handleExternalModeChange() {
+      updateIcons();
+    }
+
     toggle.addEventListener('click', handleClick);
+    window.addEventListener('theme-mode-changed', handleExternalModeChange);
     updateIcons();
 
     cleanup = () => {
       toggle.removeEventListener('click', handleClick);
+      window.removeEventListener('theme-mode-changed', handleExternalModeChange);
     };
   }
 
