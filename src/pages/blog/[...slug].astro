@@ -213,3 +213,14 @@ const postUrl = new URL(`/blog/${post.slug}`, SITE_CONFIG.url).toString();
   initMobileToc();
   document.addEventListener('astro:page-load', initMobileToc);
 </script>
+
+<script>
+  import { setupPostNavigation } from '../../lib/keyboard';
+
+  function initPostNav() {
+    setupPostNavigation();
+  }
+
+  initPostNav();
+  document.addEventListener('astro:page-load', initPostNav);
+</script>

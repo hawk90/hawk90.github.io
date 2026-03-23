@@ -47,24 +47,43 @@ const { title, url } = Astro.props;
 </div>
 
 <script>
+  import { t } from '../../consts/ui-strings';
+
+  let cleanup: (() => void) | null = null;
+
   function initShareButtons() {
-    document.querySelectorAll('[data-copy-url]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const url = (btn as HTMLElement).dataset.copyUrl;
+    cleanup?.();
+
+    const buttons = document.querySelectorAll<HTMLElement>('[data-copy-url]');
+    if (buttons.length === 0) return;
+
+    const handlers: Array<{ btn: Element; handler: () => void }> = [];
+
+    buttons.forEach((btn) => {
+      const handler = async () => {
+        const url = btn.dataset.copyUrl;
         if (!url) return;
         try {
           await navigator.clipboard.writeText(url);
           const label = btn.querySelector('[data-copy-label]');
           if (label) {
             const original = label.textContent;
-            label.textContent = label.closest('[data-copy-url]')?.getAttribute('data-copied-text') || 'Copied!';
+            label.textContent = t('share_copied');
             setTimeout(() => { label.textContent = original; }, 2000);
           }
         } catch {
-          // Fallback: select from input
+          // Clipboard API not available
         }
-      });
+      };
+      btn.addEventListener('click', handler);
+      handlers.push({ btn, handler });
     });
+
+    cleanup = () => {
+      handlers.forEach(({ btn, handler }) => {
+        btn.removeEventListener('click', handler);
+      });
+    };
   }
 
   initShareButtons();
