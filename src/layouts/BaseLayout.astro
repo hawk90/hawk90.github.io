@@ -166,15 +166,36 @@ const jsonLd = type === 'article'
 
     <!-- Theme initialization (render-blocking to prevent FOUC) -->
     <script is:inline>
-      (function(){var v=["github-dark-dimmed","github-light","dracula","one-dark-pro","catppuccin-mocha","catppuccin-latte","nord","tokyo-night"];try{var t=localStorage.getItem("theme");t==="light"?document.documentElement.classList.add("light"):t==="dark"?document.documentElement.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches&&document.documentElement.classList.add("light");var l=document.documentElement.classList.contains("light"),d=localStorage.getItem("code-theme-dark"),c=localStorage.getItem("code-theme-light");d=v.indexOf(d)!==-1?d:"github-dark-dimmed";c=v.indexOf(c)!==-1?c:"github-light";document.documentElement.setAttribute("data-code-theme",l?c:d);var n=localStorage.getItem("show-line-numbers");document.documentElement.setAttribute("data-show-line-numbers",n!=="false"?"true":"false")}catch(e){window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches&&document.documentElement.classList.add("light");document.documentElement.setAttribute("data-code-theme",document.documentElement.classList.contains("light")?"github-light":"github-dark-dimmed");document.documentElement.setAttribute("data-show-line-numbers","true")}})();
+      (function(){
+        function applyTheme(el){
+          var v=["github-dark-dimmed","github-light","dracula","one-dark-pro","catppuccin-mocha","catppuccin-latte","nord","tokyo-night"];
+          try{
+            var t=localStorage.getItem("theme");
+            t==="light"?el.classList.add("light"):t==="dark"?el.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches?el.classList.add("light"):el.classList.remove("light");
+            var l=el.classList.contains("light"),d=localStorage.getItem("code-theme-dark"),c=localStorage.getItem("code-theme-light");
+            d=v.indexOf(d)!==-1?d:"github-dark-dimmed";c=v.indexOf(c)!==-1?c:"github-light";
+            el.setAttribute("data-code-theme",l?c:d);
+            var n=localStorage.getItem("show-line-numbers");
+            el.setAttribute("data-show-line-numbers",n!=="false"?"true":"false");
+          }catch(e){
+            window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches&&el.classList.add("light");
+            el.setAttribute("data-code-theme",el.classList.contains("light")?"github-light":"github-dark-dimmed");
+            el.setAttribute("data-show-line-numbers","true");
+          }
+        }
+        window.__applyTheme=applyTheme;
+        applyTheme(document.documentElement);
+      })();
     </script>
 
     <!-- View Transitions -->
     <meta name="view-transition" content="same-origin" />
 
-    <!-- Apply theme to new document BEFORE swap (prevents flash) -->
+    <!-- Theme: before-swap (new doc), after-swap (fallback), pageshow (prerender/bfcache) -->
     <script is:inline>
-      document.addEventListener("astro:before-swap",function(e){var v=["github-dark-dimmed","github-light","dracula","one-dark-pro","catppuccin-mocha","catppuccin-latte","nord","tokyo-night"];var d=e.newDocument.documentElement;try{var t=localStorage.getItem("theme");t==="light"?d.classList.add("light"):t==="dark"?d.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches?d.classList.add("light"):d.classList.remove("light");var l=d.classList.contains("light"),dk=localStorage.getItem("code-theme-dark"),lt=localStorage.getItem("code-theme-light");dk=v.indexOf(dk)!==-1?dk:"github-dark-dimmed";lt=v.indexOf(lt)!==-1?lt:"github-light";d.setAttribute("data-code-theme",l?lt:dk);var n=localStorage.getItem("show-line-numbers");d.setAttribute("data-show-line-numbers",n!=="false"?"true":"false")}catch(ex){window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches&&d.classList.add("light");d.setAttribute("data-code-theme",d.classList.contains("light")?"github-light":"github-dark-dimmed");d.setAttribute("data-show-line-numbers","true")}});
+      document.addEventListener("astro:before-swap",function(e){window.__applyTheme&&window.__applyTheme(e.newDocument.documentElement)});
+      document.addEventListener("astro:after-swap",function(){window.__applyTheme&&window.__applyTheme(document.documentElement)});
+      window.addEventListener("pageshow",function(e){if(e.persisted){window.__applyTheme&&window.__applyTheme(document.documentElement)}});
     </script>
   </head>
   <body class="min-h-screen flex flex-col">
