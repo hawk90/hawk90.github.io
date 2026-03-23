@@ -185,6 +185,7 @@ const jsonLd = type === 'article'
         }
         window.__applyTheme=applyTheme;
         applyTheme(document.documentElement);
+        if(document.prerendering){document.addEventListener("prerenderingchange",function(){applyTheme(document.documentElement)},{once:true})}
       })();
     </script>
 
@@ -195,7 +196,7 @@ const jsonLd = type === 'article'
     <script is:inline>
       document.addEventListener("astro:before-swap",function(e){window.__applyTheme&&window.__applyTheme(e.newDocument.documentElement)});
       document.addEventListener("astro:after-swap",function(){window.__applyTheme&&window.__applyTheme(document.documentElement)});
-      window.addEventListener("pageshow",function(e){if(e.persisted){window.__applyTheme&&window.__applyTheme(document.documentElement)}});
+      window.addEventListener("pageshow",function(){window.__applyTheme&&window.__applyTheme(document.documentElement)});
     </script>
   </head>
   <body class="min-h-screen flex flex-col">
