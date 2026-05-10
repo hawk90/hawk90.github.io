@@ -8,47 +8,58 @@ seriesOrder: 9
 draft: true
 ---
 
-## 의도
+## 한 줄 요약
 
-객체에 새 책임을 **동적으로** 추가합니다. 기능 확장 측면에서 **서브클래싱의 유연한 대안**.
+> **"커피에 토핑 적층"** — 같은 인터페이스의 wrapper로 책임을 동적으로 쌓음.
 
-## 동기
+## 어떤 문제를 푸는가
 
-피자에 토핑 (치즈, 베이컨, 양파, 페퍼로니, ...) 조합을 클래스로 다루면 폭발 — `CheeseBaconPizza`, `CheeseBaconOnionPizza`, ... 2^N 개. Decorator는 같은 인터페이스의 wrapper로 동적으로 적층합니다.
+피자 + 치즈 + 베이컨 + 양파... 조합을 클래스로 표현하면 **2^N 폭발** — `CheeseBaconPizza`, `CheeseBaconOnionPizza`, ...
 
-스트림 처리도 같은 패턴 — `BufferedReader(GzipReader(FileReader(path)))`처럼.
+스트림 처리도 같음 — `BufferedReader(GzipReader(FileReader(path)))`처럼 적층.
 
-## 적용 가능성
+Decorator는 같은 인터페이스의 wrapper로 **동적으로 적층**합니다.
 
-- 개별 객체에 책임을 동적으로·투명하게 추가하고 싶을 때
-- 책임을 제거할 수도 있어야 할 때
-- 서브클래싱 확장이 비실용적일 때 (조합 폭발)
+```cpp
+auto coffee = std::make_unique<SimpleCoffee>();
+coffee = std::make_unique<Milk>(std::move(coffee));    // milk 추가
+coffee = std::make_unique<Sugar>(std::move(coffee));   // sugar 추가
+```
 
-## 구조
+## 한눈에 보는 구조
 
 ```
    Component (interface)
-   + operation()*
+   ─ operation()*
         △
         │
    ┌────┴────┐
 ConcComp  Decorator ◇──► Component
-              + op()
+              ─ op()
                   △
                   │
             ConcDecorA, ConcDecorB
-              + op()      + op()
-              + addedBehavior()
+              ─ op()      ─ op()
+              ─ addedBehavior()
 ```
 
-## 참여자
+Decorator도 Component 구현. 내부에 **다른 Component를 보유** → 위임 + 추가 동작.
 
-- **Component** — 공통 인터페이스
-- **ConcreteComponent** — 데코레이션 대상 객체
-- **Decorator** — Component 인터페이스 구현 + Component 참조 보유
-- **ConcreteDecorator** — 추가 책임 구현
+## 언제 쓰면 좋은가
+
+- 개별 객체에 책임을 **동적·투명**하게 추가
+- 책임을 **제거**할 수도 있어야 할 때
+- 서브클래싱 확장이 비실용적일 때 (조합 폭발)
+
+## 언제 쓰면 안 되나
+
+> ⚠️ **고정된 조합 몇 개**라면 그냥 서브클래스가 단순.
+
+> ⚠️ **순서 의존성** — Sugar→Whip vs Whip→Sugar 결과가 달라지는 경우 의도치 않게 망가지기 쉬움.
 
 ## C++ 구현
+
+### 1. Component 인터페이스
 
 ```cpp
 class Coffee {
@@ -57,21 +68,32 @@ public:
     virtual std::string description() const = 0;
     virtual double      cost() const = 0;
 };
+```
 
+### 2. ConcreteComponent — 시작점
+
+```cpp
 class SimpleCoffee : public Coffee {
 public:
     std::string description() const override { return "coffee"; }
     double      cost() const override        { return 2.0; }
 };
+```
 
-// 데코레이터 base
+### 3. Decorator base — wrapped 보유
+
+```cpp
 class CoffeeDecorator : public Coffee {
 protected:
     std::unique_ptr<Coffee> wrapped;
 public:
     explicit CoffeeDecorator(std::unique_ptr<Coffee> c) : wrapped(std::move(c)) {}
 };
+```
 
+### 4. ConcreteDecorator — 위임 + 추가
+
+```cpp
 class Milk : public CoffeeDecorator {
 public:
     using CoffeeDecorator::CoffeeDecorator;
@@ -92,18 +114,21 @@ public:
     std::string description() const override { return wrapped->description() + ", whip"; }
     double      cost() const override        { return wrapped->cost() + 0.7; }
 };
+```
 
-// 사용 — 동적 조립
+### 5. 동적 조립
+
+```cpp
 auto c = std::make_unique<SimpleCoffee>();
-auto withMilk = std::make_unique<Milk>(std::move(c));
+auto withMilk      = std::make_unique<Milk>(std::move(c));
 auto withMilkSugar = std::make_unique<Sugar>(std::move(withMilk));
-auto withMilkSugarWhip = std::make_unique<Whip>(std::move(withMilkSugar));
+auto full          = std::make_unique<Whip>(std::move(withMilkSugar));
 
-std::cout << withMilkSugarWhip->description() << ": $" << withMilkSugarWhip->cost();
+std::cout << full->description() << ": $" << full->cost();
 // "coffee, milk, sugar, whip: $3.4"
 ```
 
-순서를 바꾸거나 일부만 적용 가능 — 상속 트리 추가 없이.
+순서를 바꾸거나 일부만 적용 가능 — **상속 트리 추가 없이**.
 
 ## C 구현
 
@@ -119,7 +144,6 @@ typedef struct {
     Coffee* wrapped;
 } Decorator;
 
-// Milk
 static char* milk_desc(Coffee* self) {
     Decorator* d = (Decorator*)self;
     char* inner = d->wrapped->description(d->wrapped);
@@ -133,44 +157,41 @@ static double milk_cost(Coffee* self) {
     Decorator* d = (Decorator*)self;
     return d->wrapped->cost(d->wrapped) + 0.5;
 }
-
-static void milk_destroy(Coffee* self) {
-    Decorator* d = (Decorator*)self;
-    d->wrapped->destroy(d->wrapped);     // 재귀적 해제
-    free(d);
-}
 ```
 
-## 결과 (트레이드오프)
+## 트레이드오프 — 한눈에
 
-**장점**
-- 동적·조합적 기능 확장
-- 단일 책임 원칙 (각 데코레이터 한 가지 책임)
-- 같은 객체에 여러 데코레이터 적층 가능
-- 클라이언트가 데코된 객체 안 보임 (투명성)
+| 차원 | Decorator |
+| --- | --- |
+| 동적·조합적 기능 추가 | ✅ 매우 유연 |
+| 단일 책임 (각 데코 한 가지) | ✅ |
+| 같은 객체에 여러 데코 적층 | ✅ |
+| 작은 객체 다수 생성 | ⚠️ 메모리·생성 비용 |
+| 콜 스택 깊어짐 | ⚠️ 디버깅 어려움 |
+| 순서 의존성 | ⚠️ 잘못 적층 시 결과 달라짐 |
 
-**단점**
-- 작은 객체가 많아짐
-- 디버깅 시 콜 스택 깊음
-- 순서 의존성 (Sugar 먼저 vs Whip 먼저 결과 다를 수도)
-- Component 인터페이스 변경에 모든 Decorator 영향
+## 실제 사례
 
-## 변형
+- **Java I/O 스트림** (`BufferedInputStream(FileInputStream(...))`)
+- **C++ `std::iostream`** (rdbuf 체인)
+- **ASP.NET Middleware** 파이프라인
+- **Express.js / Koa.js** 미들웨어
+- **Python의 함수 데코레이터** (`@property`, `@staticmethod`)
 
-- **Mixin (CRTP)** — 컴파일 타임 데코레이터. 런타임 비용 없음
-- **Filter chain** — 단방향만 (스트림 처리)
+## Decorator vs Proxy vs Adapter — 비교
 
-## 알려진 사용 사례
+| | Decorator | Proxy | Adapter |
+| --- | --- | --- | --- |
+| 인터페이스 | 동일 | 동일 | 변환 |
+| 의도 | 책임 추가 | 접근 제어 | 호환성 |
+| wrapping | ✅ | ✅ | ✅ |
 
-- Java I/O 스트림 (`BufferedInputStream(FileInputStream(...))`)
-- C++ `std::iostream` (rdbuf 체인)
-- ASP.NET Middleware 파이프라인
-- Express.js / Koa.js 미들웨어
+구조 비슷, **의도 다름**.
 
 ## 관련 패턴
 
-- **[Adapter (item 6)](/blog/programming/gof-design-patterns/item06-adapter)** — Adapter는 인터페이스 변환, Decorator는 인터페이스 유지하며 책임 추가
+- **[Adapter (item 6)](/blog/programming/gof-design-patterns/item06-adapter)** — Adapter는 인터페이스 변환, Decorator는 인터페이스 유지 + 책임 추가
 - **[Composite (item 8)](/blog/programming/gof-design-patterns/item08-composite)** — Decorator는 Composite의 degenerate한 형태 (자식 1개)
-- **[Strategy (item 21)](/blog/programming/gof-design-patterns/item21-strategy)** — Strategy는 알고리즘을 통째 교체, Decorator는 점진적 추가
-- **[Proxy (item 12)](/blog/programming/gof-design-patterns/item12-proxy)** — 구조 동일, 의도 다름. Proxy는 접근 제어, Decorator는 책임 추가
-- **[Chain of Responsibility (item 13)](/blog/programming/gof-design-patterns/item13-chain-of-responsibility)** — Decorator는 항상 작업 수행, CoR은 처리하거나 다음으로 패스
+- **[Strategy (item 21)](/blog/programming/gof-design-patterns/item21-strategy)** — Strategy는 알고리즘 통째 교체, Decorator는 점진적 추가
+- **[Proxy (item 12)](/blog/programming/gof-design-patterns/item12-proxy)** — 구조 동일, 의도 다름. Proxy는 접근 제어
+- **[Chain of Responsibility (item 13)](/blog/programming/gof-design-patterns/item13-chain-of-responsibility)** — Decorator는 항상 작업 수행, CoR은 처리하거나 패스

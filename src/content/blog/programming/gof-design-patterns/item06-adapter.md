@@ -8,86 +8,98 @@ seriesOrder: 6
 draft: true
 ---
 
-## 의도
+## 한 줄 요약
 
-클래스의 인터페이스를 클라이언트가 기대하는 다른 인터페이스로 **변환**합니다. 호환되지 않는 인터페이스 때문에 함께 동작할 수 없는 클래스들을 협력 가능하게 만듭니다.
+> **"플러그 모양이 안 맞을 때 끼우는 어댑터"** — 기존 라이브러리를 우리 인터페이스에 맞춰 wrapping.
 
-## 동기
+## 어떤 문제를 푸는가
 
-기존 라이브러리의 클래스를 그대로 사용하고 싶지만 인터페이스가 우리 코드와 맞지 않는 경우 — 라이브러리 코드를 수정할 수 없으면 어댑터로 감쌉니다.
+기존 라이브러리(혹은 legacy 코드)를 그대로 쓰고 싶은데 **인터페이스가 안 맞습니다**. 라이브러리를 수정할 순 없고, 클라이언트 쪽도 표준 인터페이스(`Logger` 같은)에 맞춰져 있습니다.
 
-## 적용 가능성
+→ 사이에 **어댑터**를 끼워 변환.
 
-- 기존 클래스를 사용하고 싶은데 인터페이스가 우리 요구와 안 맞을 때
-- 재사용 가능한 클래스를 만들고 싶은데, 협력해야 할 클래스의 인터페이스가 미리 알려지지 않을 때
-- (object adapter 한정) 여러 기존 서브클래스를 사용하고 싶은데 각각을 서브클래싱하기 비실용적일 때
+```
+[클라이언트] → [Logger 인터페이스] → [LegacyAdapter] → [LegacyPrinter]
+                                            (변환)
+```
+
+## 한눈에 보는 구조 (Object Adapter — 권장)
+
+```
+   Client ──► Target (interface)
+                  △
+                  │
+              Adapter ◇──► Adaptee (existing)
+              ─ request()       ─ specificRequest()
+```
+
+Adapter가 Target을 구현하면서 내부적으로 Adaptee에게 위임.
 
 ## 두 형태
 
-### Object Adapter (composition) — 권장
-어댑터가 어댑티(adaptee)를 멤버로 보유.
+| 형태 | 방식 | 장단점 |
+| --- | --- | --- |
+| **Object Adapter** | composition (멤버) | 권장. 어댑티의 모든 서브클래스 처리 가능 |
+| **Class Adapter** | 다중 상속 | 어댑티의 일부 메서드 override 가능, 하지만 결합도 ↑ |
 
-### Class Adapter (다중 상속)
-어댑터가 어댑티와 타깃 인터페이스를 모두 상속.
+C++에선 거의 항상 Object Adapter.
 
-## 구조 — Object Adapter
+## 언제 쓰면 좋은가
 
-```
-   Client ─► Target (interface)
-                 △
-                 │
-              Adapter ◇──► Adaptee (existing)
-              + request()       + specificRequest()
-```
+- 기존 클래스를 사용하고 싶은데 인터페이스가 우리 요구와 안 맞을 때
+- 재사용 가능한 클래스를 만들고 싶은데, 협력해야 할 클래스의 인터페이스가 미리 알려지지 않았을 때
+- C 라이브러리를 C++ 객체로 wrapping할 때
+
+## 언제 쓰면 안 되나
+
+> ⚠️ **새 라이브러리를 처음부터 설계**한다면 Adapter 대신 [Bridge](/blog/programming/gof-design-patterns/item07-bridge)로 사전 분리.
+
+> ⚠️ **변환 비용이 큰 경우** — 매 호출마다 변환이 들어가면 성능 손해.
 
 ## C++ 구현 — Object Adapter
 
+### 1. 클라이언트가 기대하는 인터페이스
+
 ```cpp
-// 클라이언트가 기대하는 인터페이스
 class Logger {
 public:
     virtual ~Logger() = default;
     virtual void log(const std::string& msg) = 0;
 };
+```
 
-// 기존 라이브러리 (수정 불가)
+### 2. 기존 라이브러리 (수정 불가)
+
+```cpp
 class LegacyPrinter {
 public:
     void print(const char* fmt, ...) { /* C-style printf */ }
 };
+```
 
-// 어댑터
+### 3. 어댑터 — 둘 사이를 잇는다
+
+```cpp
 class LegacyLoggerAdapter : public Logger {
     LegacyPrinter& printer;
 public:
     explicit LegacyLoggerAdapter(LegacyPrinter& p) : printer(p) {}
+
     void log(const std::string& msg) override {
         printer.print("%s\n", msg.c_str());
     }
 };
+```
 
-// 클라이언트
-void doWork(Logger& l) {
-    l.log("hello");
-}
+### 4. 클라이언트는 변환을 모름
+
+```cpp
+void doWork(Logger& l) { l.log("hello"); }
 
 LegacyPrinter lp;
 LegacyLoggerAdapter adapter(lp);
-doWork(adapter);
+doWork(adapter);   // Logger처럼 보이지만 실제론 LegacyPrinter
 ```
-
-## C++ 구현 — Class Adapter
-
-```cpp
-class LegacyLoggerAdapter : public Logger, private LegacyPrinter {
-public:
-    void log(const std::string& msg) override {
-        print("%s\n", msg.c_str());     // base의 메서드 직접 호출
-    }
-};
-```
-
-다중 상속 사용 — composition보다 결합도 ↑, 유연성 ↓. C++에선 거의 안 쓰임.
 
 ## C 구현
 
@@ -114,31 +126,22 @@ LegacyLoggerAdapter* adapter_create(LegacyPrinter* lp) {
 }
 ```
 
-## 결과 (트레이드오프)
+## 트레이드오프 — 한눈에
 
-**Object Adapter 장점**
-- 단일 어댑터로 어댑티의 모든 서브클래스 처리
-- 어댑티의 동작을 추가·재정의 쉬움
+| 차원 | Adapter |
+| --- | --- |
+| 기존 코드 재사용 | ✅ 그대로 활용 |
+| 호환되지 않는 인터페이스 통합 | ✅ |
+| 추가 추상화 계층 | ⚠️ 한 단계 더 |
+| 변환 비용 | ⚠️ 호출당 작은 비용 |
+| 두 인터페이스가 매우 다르면 | ❌ 어댑터가 비대 |
 
-**Class Adapter 장점**
-- 어댑티의 일부만 override 가능
-- 추가 포인터 간접 호출 없음 (성능)
+## 실제 사례
 
-**공통 단점**
-- 추가 추상화 계층
-- 단순 변환 코드 boilerplate
-
-## 변형
-
-- **Two-way Adapter** — 양 인터페이스 모두 만족 (양방향 호환)
-- **Pluggable Adapter** — 어댑티 인터페이스를 매개변수화
-
-## 알려진 사용 사례
-
-- STL의 `std::stack`, `std::queue` (`std::deque`를 어댑트)
-- `std::back_inserter` 등 iterator adapter
-- C 라이브러리를 C++ 객체로 감싸는 모든 wrapper
-- IO library에서 `streambuf` 어댑터
+- **STL의 컨테이너 어댑터** — `std::stack`, `std::queue`(`std::deque`를 어댑트)
+- **iterator 어댑터** — `std::back_inserter`, `reverse_iterator`
+- **C 라이브러리 wrapping** — C++ 객체로 감싸는 모든 wrapper
+- **IO 라이브러리** — `streambuf` 어댑터
 
 ## 관련 패턴
 

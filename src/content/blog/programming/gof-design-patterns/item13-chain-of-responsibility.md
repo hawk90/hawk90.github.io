@@ -1,31 +1,29 @@
 ---
 title: "GoF 13: Chain of Responsibility"
 date: 2026-02-03T10:00:00
-description: "요청을 처리할 객체를 체인을 따라 순차 탐색 — 송신자와 수신자 분리."
+description: "처리자 후보들을 체인으로 — 누가 처리할지는 자동으로 결정."
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 13
 draft: true
 ---
 
-## 의도
+## 한 줄 요약
 
-요청을 처리할 객체를 체인을 따라 **순차적으로** 찾습니다. 송신자가 어떤 객체가 처리할지 모르도록 하고, 둘 이상의 객체가 처리할 기회를 갖도록 합니다.
+> **"누가 처리할지 모르겠으면 체인을 따라 물어봐"** — 송신자는 누가 받을지 모름.
 
-## 동기
+## 어떤 문제를 푸는가
 
-- 로깅 레벨 (DEBUG → INFO → WARN → ERROR — 적합한 핸들러까지)
-- GUI 이벤트 (위젯 → 부모 → 윈도우 — bubbling)
-- HTTP 미들웨어 체인
-- 예외 처리 (try → catch → 상위 catch)
+요청을 처리할 객체가 여러 후보가 있고, 어떤 객체가 처리할지 **런타임에 결정**되어야 합니다.
 
-## 적용 가능성
+- **GUI 이벤트** — 위젯 → 부모 → 윈도우 (bubbling)
+- **로깅 레벨** — DEBUG → INFO → WARN → ERROR (적합한 핸들러까지)
+- **HTTP 미들웨어** — auth → logging → rate-limit → handler
+- **예외 처리** — try → catch → 상위 catch
 
-- 둘 이상의 객체가 요청을 처리할 수 있고, 어떤 객체가 처리할지 자동 결정되어야 할 때
-- 수신자를 명시적으로 지정하지 않고 요청을 보내고 싶을 때
-- 요청 처리자 집합이 동적으로 변경되어야 할 때
+송신자가 "이거 받을 사람?"이라고 묻고, 체인을 따라 누군가 처리하면 됨.
 
-## 구조
+## 한눈에 보는 구조
 
 ```
    Client ──► Handler ─┐
@@ -36,13 +34,23 @@ draft: true
                           (체인 형성)
 ```
 
-## 참여자
+각 Handler가 자신이 처리할 수 있으면 처리, 아니면 next로 패스.
 
-- **Handler** — 요청 처리 인터페이스, optional next 포인터
-- **ConcreteHandler** — 자기 책임 범위 처리, 아니면 next로 전달
-- **Client** — 체인의 첫 Handler에 요청
+## 언제 쓰면 좋은가
+
+- 둘 이상의 객체가 요청을 처리할 수 있고, **어떤 객체가 처리할지 자동 결정**되어야 할 때
+- **수신자를 명시적으로 지정하지 않고** 요청을 보내고 싶을 때
+- 요청 처리자 집합이 **동적으로 변경**되어야 할 때
+
+## 언제 쓰면 안 되나
+
+> ⚠️ **체인 끝까지 가도 처리자 없을 가능성** — 처리 보장이 필요하면 다른 패턴.
+
+> ⚠️ **단일 처리자**가 결정적이라면 그냥 직접 호출.
 
 ## C++ 구현
+
+### 1. Handler base — next 보유
 
 ```cpp
 class Handler {
@@ -51,13 +59,17 @@ protected:
 public:
     virtual ~Handler() = default;
 
-    Handler* setNext(Handler* h) { next = h; return h; }    // chaining 편의
+    Handler* setNext(Handler* h) { next = h; return h; }   // 체인 편의
 
     virtual void handle(const Request& req) {
-        if (next) next->handle(req);    // 기본: 다음으로 패스
+        if (next) next->handle(req);   // 기본: 다음으로 패스
     }
 };
+```
 
+### 2. ConcreteHandler들
+
+```cpp
 class AuthHandler : public Handler {
 public:
     void handle(const Request& req) override {
@@ -73,7 +85,7 @@ class LoggingHandler : public Handler {
 public:
     void handle(const Request& req) override {
         std::cout << "Request: " << req.path() << '\n';
-        Handler::handle(req);    // 처리 후 다음으로
+        Handler::handle(req);    // 처리 후에도 다음으로
     }
 };
 
@@ -83,17 +95,23 @@ public:
         // 실제 라우팅 — 체인 종료
     }
 };
+```
 
-// 체인 조립
+### 3. 체인 조립
+
+```cpp
 LoggingHandler logger;
 AuthHandler    auth;
 RoutingHandler router;
 
 logger.setNext(&auth)->setNext(&router);
-logger.handle(req);    // logger → auth → router
+logger.handle(req);
+// → logger → auth → router
 ```
 
-## 변형 — `std::function` 미들웨어 체인 (모던)
+## 모던 변형 — `std::function` 미들웨어 체인
+
+Express.js·ASP.NET 스타일.
 
 ```cpp
 using Middleware = std::function<void(const Request&, std::function<void()>)>;
@@ -101,24 +119,23 @@ using Middleware = std::function<void(const Request&, std::function<void()>)>;
 std::vector<Middleware> chain = {
     [](const Request& r, auto next) { /* logging */ next(); },
     [](const Request& r, auto next) { if (r.authed()) next(); },
-    [](const Request& r, auto)      { /* routing */ }
+    [](const Request& r, auto)      { /* routing — 체인 끝 */ }
 };
 
-// 실행 헬퍼
 void run(const std::vector<Middleware>& chain, const Request& req, std::size_t i = 0) {
     if (i >= chain.size()) return;
     chain[i](req, [&] { run(chain, req, i + 1); });
 }
 ```
 
-Express.js, ASP.NET, Koa.js 미들웨어 패턴.
+각 미들웨어가 `next()`를 부를지 결정 → 동적 체인 흐름.
 
 ## C 구현
 
 ```c
 typedef struct Handler {
     struct Handler* next;
-    int (*handle)(struct Handler*, Request*);    // return 0 = 처리됨, 1 = 다음으로
+    int (*handle)(struct Handler*, Request*);   // 0 = 처리됨, 1 = 다음으로
 } Handler;
 
 void chain_handle(Handler* head, Request* req) {
@@ -129,34 +146,27 @@ void chain_handle(Handler* head, Request* req) {
 }
 ```
 
-## 결과 (트레이드오프)
+## 트레이드오프 — 한눈에
 
-**장점**
-- 송신자·수신자 분리
-- 동적 체인 구성·재구성
-- 단일 책임 (각 핸들러가 자기 일만)
+| 차원 | Chain of Responsibility |
+| --- | --- |
+| 송신자·수신자 분리 | ✅ |
+| 동적 체인 구성 | ✅ |
+| 단일 책임 (각 핸들러 한 일) | ✅ |
+| 처리 보장 | ❌ 끝까지 가도 처리 X 가능 |
+| 디버깅 (어느 핸들러가 처리?) | ⚠️ 추적 어려움 |
+| 성능 | ⚠️ 체인 순회 비용 |
 
-**단점**
-- 처리 보장 X — 체인 끝까지 가도 처리자 없을 수 있음
-- 디버깅 어려움 (어느 핸들러가 처리했는지 추적)
-- 성능 — 체인 순회 비용
+## 실제 사례
 
-## 변형
-
-- **명시적 next 메서드** — base에서 `Handler::handle()` 호출
-- **`std::function` 체인** — 클래스 계층 없이
-- **Composite 기반 체인** — 트리 구조도 가능
-
-## 알려진 사용 사례
-
-- Express.js 미들웨어, ASP.NET Pipeline
-- Servlet Filter 체인
-- Java util.logging Handler 체인
-- 게임 입력 처리 (focused widget → parent → root)
-- macOS Cocoa의 responder chain
+- **Express.js / Koa.js / ASP.NET 미들웨어**
+- **Servlet Filter 체인**
+- **Java util.logging Handler 체인**
+- **macOS Cocoa의 responder chain**
+- **게임 입력 처리** (focused widget → parent → root)
 
 ## 관련 패턴
 
-- **[Composite (item 8)](/blog/programming/gof-design-patterns/item08-composite)** — Composite의 부모 포인터를 따라 올라가며 처리하는 형태가 자주 사용 (이벤트 bubbling)
+- **[Composite (item 8)](/blog/programming/gof-design-patterns/item08-composite)** — Composite의 부모 포인터를 따라 올라가는 형태가 자주 사용 (이벤트 bubbling)
 - **[Command (item 14)](/blog/programming/gof-design-patterns/item14-command)** — 요청을 Command 객체로 만들어 체인을 통해 전달
-- **[Decorator (item 9)](/blog/programming/gof-design-patterns/item09-decorator)** — 구조 비슷하지만 Decorator는 항상 작업 수행, CoR은 처리하거나 패스
+- **[Decorator (item 9)](/blog/programming/gof-design-patterns/item09-decorator)** — 구조 비슷. Decorator는 항상 작업, CoR은 처리하거나 패스

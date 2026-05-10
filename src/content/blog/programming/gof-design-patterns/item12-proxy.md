@@ -1,35 +1,27 @@
 ---
 title: "GoF 12: Proxy"
 date: 2026-02-02T16:00:00
-description: "다른 객체에 대한 대리/접근 제어 — virtual, remote, protection, smart proxy."
+description: "다른 객체에 대한 대리·접근 제어 — virtual·remote·protection·smart proxy."
 tags: [Design Pattern, GoF, C++, C, Structural]
 series: "GoF Design Patterns"
 seriesOrder: 12
 draft: true
 ---
 
-## 의도
+## 한 줄 요약
 
-다른 객체에 대한 **대리자** 또는 **자리지킴이**를 제공해 그 객체에 대한 접근을 제어합니다.
+> **"진짜 객체 앞에 서서 접근을 통제하는 대리인"** — lazy load, 권한 검사, 원격 호출, 캐싱 등.
 
-## 종류 (의도별)
+## Proxy의 4가지 종류
 
-- **Virtual Proxy** — 비싼 객체의 지연 생성·로드
-- **Remote Proxy** — 원격 객체의 로컬 대리 (RPC, RMI)
-- **Protection Proxy** — 접근 권한 제어
-- **Smart Reference (Smart Proxy)** — 참조 카운트, 락, 로깅, 캐싱
-- **Synchronization Proxy** — 멀티스레드 안전 wrapper
+| 종류 | 의도 | 예 |
+| --- | --- | --- |
+| **Virtual Proxy** | 비싼 객체의 lazy load | 갤러리에서 안 보이는 이미지 안 로드 |
+| **Remote Proxy** | 원격 객체의 로컬 대리 | RPC, RMI |
+| **Protection Proxy** | 접근 권한 제어 | 사용자 권한 검사 |
+| **Smart Proxy** (Smart Reference) | 참조 카운트, 락, 로깅 | `std::shared_ptr` |
 
-## 적용 가능성
-
-각 종류별로 다름:
-
-- 비용 큰 객체의 lazy load → Virtual
-- 다른 주소 공간의 객체 접근 → Remote
-- 권한 검증 → Protection
-- 자원 관리 (참조 카운트, 락) → Smart Reference
-
-## 구조
+## 한눈에 보는 구조
 
 ```
    Client ──► Subject (interface)
@@ -37,16 +29,27 @@ draft: true
                   │
             ┌─────┴─────┐
         RealSubject  Proxy ◇──► RealSubject
-        + request()   + request()
+        ─ request()   ─ request()
 ```
 
-## 참여자
+Proxy는 Subject 구현 + RealSubject 참조 + **추가 동작**(lazy/auth/log/...).
 
-- **Subject** — RealSubject와 Proxy의 공통 인터페이스
-- **RealSubject** — 진짜 객체
-- **Proxy** — Subject 인터페이스 구현, RealSubject 참조 보유, 접근 제어
+## 언제 쓰면 좋은가 (종류별)
 
-## C++ 구현 — Virtual Proxy
+- 비용 큰 객체의 lazy load → **Virtual Proxy**
+- 다른 주소 공간의 객체 접근 → **Remote Proxy**
+- 권한 검증 → **Protection Proxy**
+- 자원 관리 (참조 카운트, 락) → **Smart Proxy**
+
+## 언제 쓰면 안 되나
+
+> ⚠️ **추가 간접 호출**이 hot path에 있으면 성능 영향.
+
+> ⚠️ **단순 wrapping만이라면 Proxy 아닌 그냥 wrapper.** Proxy는 의도가 분명해야.
+
+## C++ 구현 — Virtual Proxy (lazy load)
+
+### 1. Subject 인터페이스
 
 ```cpp
 class Image {
@@ -54,19 +57,27 @@ public:
     virtual ~Image() = default;
     virtual void display() = 0;
 };
+```
 
+### 2. RealSubject — 비쌈
+
+```cpp
 class RealImage : public Image {
     std::string filename;
     std::vector<char> pixels;
 public:
     explicit RealImage(std::string f) : filename(std::move(f)) {
-        loadFromDisk();    // 비쌈
+        loadFromDisk();    // 비쌈 (수 MB 파일)
     }
     void display() override { /* 픽셀 출력 */ }
 private:
     void loadFromDisk() { /* I/O */ }
 };
+```
 
+### 3. Proxy — 첫 호출 시에만 로드
+
+```cpp
 class ImageProxy : public Image {
     std::string filename;
     mutable std::unique_ptr<RealImage> real;
@@ -74,16 +85,21 @@ public:
     explicit ImageProxy(std::string f) : filename(std::move(f)) {}
 
     void display() override {
-        if (!real) real = std::make_unique<RealImage>(filename);   // 첫 호출 시 로드
+        if (!real) real = std::make_unique<RealImage>(filename);   // ◄── lazy
         real->display();
     }
 };
+```
 
-// 사용 — 화면에 안 보이는 이미지는 메모리에도 안 올림
+### 4. 사용 — 안 보이는 건 안 로드
+
+```cpp
 std::vector<std::unique_ptr<Image>> gallery;
-for (auto& f : files) gallery.push_back(std::make_unique<ImageProxy>(f));
+for (auto& f : files)
+    gallery.push_back(std::make_unique<ImageProxy>(f));   // 모두 proxy
 
-gallery[0]->display();    // 0번만 로드 (다른 건 안 로드)
+gallery[0]->display();    // 0번만 진짜 로드
+                          // 나머지는 메모리에 안 올림
 ```
 
 ## C++ 구현 — Protection Proxy
@@ -117,20 +133,9 @@ public:
 };
 ```
 
-## C++ 구현 — Smart Pointer (built-in proxy)
+## C++ 표준의 Smart Proxy
 
-`std::shared_ptr`, `std::unique_ptr` 모두 일종의 smart proxy — 대상 객체를 감싸 자동 해제·참조 카운트 제공. `operator->`, `operator*`로 진짜 객체처럼 보임.
-
-```cpp
-class CountingPtr {
-    Widget* p;
-    int*    count;
-public:
-    explicit CountingPtr(Widget* w) : p(w), count(new int(1)) {}
-    Widget* operator->() { ++(*count); return p; }    // 호출 횟수 추적
-    // ...
-};
-```
+`std::shared_ptr`, `std::unique_ptr`도 일종의 smart proxy — 자동 해제, 참조 카운트, `operator->`/`operator*`로 진짜 객체처럼 보임.
 
 ## C 구현
 
@@ -152,31 +157,33 @@ void proxy_display(Image* self) {
 }
 ```
 
-## 결과 (트레이드오프)
+## 트레이드오프 — 한눈에
 
-**장점**
-- 추가 동작을 클라이언트에 투명하게 삽입
-- lazy load·접근 제어·로깅 등 횡단 관심사 분리
-- RealSubject 변경 없이 동작 추가
+| 차원 | Proxy |
+| --- | --- |
+| 추가 동작 투명 삽입 | ✅ 클라이언트는 모름 |
+| lazy load·접근 제어·로깅 | ✅ 횡단 관심사 분리 |
+| RealSubject 변경 없음 | ✅ |
+| 응답성 | ⚠️ proxy 통과 비용 |
+| 코드 복잡도 | ⚠️ 3개 클래스 (Subject·Real·Proxy) |
 
-**단점**
-- 응답성 ↓ (proxy 통과)
-- 코드 복잡 (Subject·Real·Proxy 세 클래스)
-- Remote proxy는 네트워크 latency 등 추가 고려
+## Proxy vs Decorator vs Adapter — 비교 (다시)
 
-## 변형
+같은 wrapping 구조, 다른 의도. (item 9에도 비슷한 표 있음)
 
-- **Copy-on-write proxy** — 쓰기 시점에만 복사
-- **Cache proxy** — 결과 캐싱 (memoization)
-- **Logging proxy** — 모든 호출 기록 (디버깅)
+| | Proxy | Decorator | Adapter |
+| --- | --- | --- | --- |
+| 의도 | 접근 제어 | 책임 추가 | 인터페이스 변환 |
+| 구조 | wrapping | wrapping | wrapping |
+| 인터페이스 | 동일 | 동일 | 변환 |
 
-## 알려진 사용 사례
+## 실제 사례
 
-- ORM의 lazy loading (Hibernate, EF)
-- Java RMI / CORBA stub
-- `std::shared_ptr`, `std::unique_ptr` (smart proxy)
-- 모든 프록시 서버 (네트워크, web)
-- mock 객체 (테스트)
+- **ORM의 lazy loading** (Hibernate, EF, SQLAlchemy)
+- **Java RMI / CORBA stub**
+- **`std::shared_ptr`, `std::unique_ptr`** (smart proxy)
+- **모든 프록시 서버** (네트워크, web)
+- **mock 객체** (테스트 — Mockito 등)
 
 ## 관련 패턴
 

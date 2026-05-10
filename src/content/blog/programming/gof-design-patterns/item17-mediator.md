@@ -1,30 +1,28 @@
 ---
 title: "GoF 17: Mediator"
 date: 2026-02-03T14:00:00
-description: "객체들의 상호작용을 중재자에 캡슐화 — 객체 간 직접 결합 제거."
+description: "객체들의 상호작용을 중재자에 캡슐화 — N×N 결합을 N으로."
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 17
 draft: true
 ---
 
-## 의도
+## 한 줄 요약
 
-객체들이 서로 직접 통신하지 않고 **중재자 객체를 통해서만** 상호작용하도록. N개 객체의 N×N 결합을 N으로 줄입니다.
+> **"동료들이 서로 직접 말 안 하고 중재자를 통해 협력"** — 채팅방의 중앙 서버처럼.
 
-## 동기
+## 어떤 문제를 푸는가
 
-- GUI 다이얼로그 — 라디오 버튼 선택이 다른 위젯의 활성/비활성에 영향
-- 채팅방 — 사용자들이 서로 직접 알지 않고 채팅방을 통해 통신
-- 항공 관제(ATC) — 비행기들은 서로 직접 통신 X, 관제탑이 중재
+객체 N개가 서로 직접 통신하면 — N×N 결합. 한 객체 변경이 다른 모든 객체에 영향.
 
-## 적용 가능성
+- **GUI 다이얼로그** — 라디오 버튼이 다른 위젯의 활성/비활성에 영향
+- **채팅방** — 사용자들이 서로 직접 알지 않고 채팅방을 통해 통신
+- **항공 관제** — 비행기들이 직접 통신 X, 관제탑이 중재
 
-- 객체 집합이 잘 정의된 그러나 복잡한 방식으로 통신할 때
-- 객체 재사용이 어려운 이유가 다른 객체들과의 강한 결합 때문일 때
-- 여러 클래스에 분산된 동작을 서브클래싱 없이 커스터마이즈하고 싶을 때
+→ **중재자**(Mediator)를 두고, 모든 협력을 그곳을 통해. N개 동료, 각자는 mediator만 알면 됨.
 
-## 구조
+## 한눈에 보는 구조
 
 ```
    Colleague (interface)
@@ -37,13 +35,23 @@ draft: true
                           ConcreteMediator
 ```
 
-## 참여자
+동료들은 서로를 모르고, **mediator만** 안다.
 
-- **Mediator** — Colleague 통신 인터페이스
-- **ConcreteMediator** — 동료들 사이 협력 구현, Colleague들 보유
-- **Colleague** — Mediator를 알고 있고, 다른 colleague와 통신해야 할 때 mediator에 요청
+## 언제 쓰면 좋은가
+
+- 객체 집합이 **잘 정의되어 있지만 복잡하게 통신**할 때
+- 객체 재사용이 어려운 이유가 다른 객체들과의 강한 결합 때문일 때
+- 여러 클래스에 분산된 동작을 서브클래싱 없이 커스터마이즈하고 싶을 때
+
+## 언제 쓰면 안 되나
+
+> ⚠️ **Mediator가 god class**가 될 위험. 책임이 너무 모이면 분리 검토.
+
+> ⚠️ **단순 1:1 통신**엔 과도. 직접 호출이 명확.
 
 ## C++ 구현 — 채팅방
+
+### 1. Mediator 클래스 (ChatRoom)
 
 ```cpp
 class User;
@@ -55,7 +63,11 @@ public:
     void broadcast(const User* sender, const std::string& msg);
     void privateMsg(const User* sender, const std::string& target, const std::string& msg);
 };
+```
 
+### 2. Colleague (User)
+
+```cpp
 class User {
     std::string name;
     ChatRoom*   room;
@@ -64,7 +76,10 @@ public:
         room->addUser(this);
     }
 
-    void send(const std::string& msg)             { room->broadcast(this, msg); }
+    void send(const std::string& msg) {
+        room->broadcast(this, msg);     // ◄── mediator를 통해
+    }
+
     void sendTo(const std::string& target, const std::string& msg) {
         room->privateMsg(this, target, msg);
     }
@@ -75,7 +90,11 @@ public:
 
     const std::string& getName() const { return name; }
 };
+```
 
+### 3. Mediator의 협력 로직
+
+```cpp
 void ChatRoom::broadcast(const User* sender, const std::string& msg) {
     for (User* u : users)
         if (u != sender) u->receive(sender, msg);
@@ -87,7 +106,7 @@ void ChatRoom::privateMsg(const User* sender, const std::string& target, const s
 }
 ```
 
-User들은 ChatRoom만 알면 됨. 서로 모름 — 결합도 ↓.
+User들은 ChatRoom만 안다 — **서로 모름**. 결합도 ↓.
 
 ## C++ 구현 — GUI 다이얼로그
 
@@ -104,9 +123,9 @@ class FontDialog : public DialogMediator {
 public:
     void widgetChanged(Widget* sender) override {
         if (sender == fontList) {
-            okButton->enable();    // 폰트 선택되면 OK 버튼 활성
+            okButton->enable();    // 폰트 선택되면 OK 활성
         }
-        // ...
+        // ... 다른 위젯들의 협력 규칙
     }
 };
 
@@ -134,45 +153,34 @@ void chat_broadcast(ChatRoom* room, User* sender, const char* msg) {
 }
 ```
 
-## 결과 (트레이드오프)
+## 트레이드오프 — 한눈에
 
-**장점**
-- 결합도 ↓ — 객체들이 서로 직접 알지 않음
-- 상호작용을 한 곳(mediator)에 캡슐화 → 이해·변경 쉬움
-- Colleague 재사용 ↑
+| 차원 | Mediator |
+| --- | --- |
+| 동료 결합도 | ✅ ↓ (서로 안 알아도 됨) |
+| 협력 로직 한 곳에 | ✅ 이해·변경 쉬움 |
+| Colleague 재사용 | ✅ |
+| Mediator 비대 위험 | ⚠️ god class |
+| 단일 장애점 | ⚠️ Mediator 깨지면 전체 중단 |
 
-**단점**
-- Mediator가 god class 될 위험 — 모든 협력이 한 곳에 모여 비대
-- 중앙 집중 — 단일 장애점
+## Mediator vs Observer vs Facade
 
-## Mediator vs Observer
+| | Mediator | Observer | Facade |
+| --- | --- | --- | --- |
+| 방향 | 양방향 | 단방향 (subject→observer) | 단방향 (client→subsystem) |
+| 통신 | 중앙 집중 | 분산 알림 | 진입점 |
 
-- **Mediator**: 중앙 집중, 동료들이 mediator를 호출
-- **Observer**: 분산, subject가 observer들에게 알림
+## 실제 사례
 
-자주 결합 — Mediator 안에서 Observer로 동료 변경 받기.
-
-## Facade vs Mediator
-
-- **Facade**: 클라이언트→서브시스템 (단방향 단순화)
-- **Mediator**: 동료↔동료 (양방향 중재)
-
-## 변형
-
-- **Event bus / pub-sub** — Mediator의 일반화 (중앙 메시지 버스)
-- **Observer 결합** — Mediator가 Observer 구독
-
-## 알려진 사용 사례
-
-- 모든 GUI 라이브러리의 다이얼로그 컨트롤러
-- 채팅 시스템
-- Smalltalk MVC의 Controller
-- 게임의 game manager
-- 항공 관제 시스템
+- 모든 **GUI 라이브러리의 다이얼로그 컨트롤러**
+- **채팅 시스템**
+- **Smalltalk MVC**의 Controller
+- **게임의 game manager**
+- **항공 관제 시스템**
 
 ## 관련 패턴
 
-- **[Observer (item 19)](/blog/programming/gof-design-patterns/item19-observer)** — Mediator가 Observer로 동료 상태 변경 받음 (자주 결합)
-- **[Facade (item 10)](/blog/programming/gof-design-patterns/item10-facade)** — Facade는 단방향 진입점, Mediator는 양방향 중재
-- **[Singleton (item 5)](/blog/programming/gof-design-patterns/item05-singleton)** — Mediator는 보통 단 하나만 필요
-- **[Command (item 14)](/blog/programming/gof-design-patterns/item14-command)** — Mediator가 동료에게 명령을 Command 객체로 보내는 형태도 있음
+- **[Observer (item 19)](/blog/programming/gof-design-patterns/item19-observer)** — Mediator가 Observer로 동료 변경 받음 (자주 결합)
+- **[Facade (item 10)](/blog/programming/gof-design-patterns/item10-facade)** — Facade는 단방향, Mediator는 양방향
+- **[Singleton (item 5)](/blog/programming/gof-design-patterns/item05-singleton)** — Mediator는 보통 단 하나
+- **[Command (item 14)](/blog/programming/gof-design-patterns/item14-command)** — Mediator가 동료에게 Command로 명령

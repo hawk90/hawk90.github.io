@@ -8,61 +8,62 @@ seriesOrder: 16
 draft: true
 ---
 
-## 의도
+## 한 줄 요약
 
-집합체(컨테이너)의 내부 표현을 노출하지 않고 그 요소를 **순차적으로 접근**할 방법을 제공합니다.
+> **"컨테이너 내부 모르고도 순회"** — STL과 모든 모던 언어 컬렉션의 토대.
 
-## 동기
+## 어떤 문제를 푸는가
 
-같은 알고리즘이 vector, list, set, map 등 여러 컨테이너에 동작하려면 — 각 컨테이너의 내부 구조에 의존하면 안 됨. Iterator가 추상화 계층.
+같은 알고리즘(`find`, `count`, `sort`)을 vector·list·set·map에 적용하고 싶지만 — 각 컨테이너의 **내부 구조**(배열, 노드, 트리, 해시 테이블)는 다릅니다.
 
-C++ STL 전체가 이 패턴 위에 구축. 알고리즘은 iterator로 작동하므로 컨테이너 종류 무관.
+→ **Iterator** 추상화 계층. 알고리즘은 iterator로 작동하므로 컨테이너 종류와 무관해짐.
 
-## 적용 가능성
+C++ STL 전체가 이 패턴 위에 있습니다.
 
-- 집합체의 내부 표현을 노출하지 않고 순회하고 싶을 때
-- 다양한 순회 방식을 지원하고 싶을 때 (forward, reverse, level-order)
-- 다른 종류의 집합체에 대해 통일된 인터페이스를 제공하고 싶을 때
-
-## 구조
+## 한눈에 보는 구조
 
 ```
    Aggregate          Iterator
-   + iterator()*      + first()
-        △              + next()
-        │              + isDone()
-        │              + currentItem()
+   ─ iterator()*      ─ first()
+        △              ─ next()
+        │              ─ isDone()
+        │              ─ currentItem()
    ConcreteAggregate         △
-   + iterator() ────► ConcreteIterator
+   ─ iterator() ────► ConcreteIterator
 ```
 
-## 참여자
+컨테이너가 **자신의 iterator를 반환** → 클라이언트는 iterator로만 작업.
 
-- **Iterator** — 순회 인터페이스
-- **ConcreteIterator** — 특정 집합체에 대한 iterator
-- **Aggregate** — iterator 생성 인터페이스
-- **ConcreteAggregate** — iterator 반환
+## 외부 vs 내부 iterator
 
-## 외부 vs 내부
+| 외부 | 내부 |
+| --- | --- |
+| 클라이언트가 진행 (`++it`) | 컨테이너가 진행, 콜백 받음 |
+| STL 일반 iterator | `std::for_each` |
+| 유연 (어디서든 멈출 수 있음) | 단순 |
 
-- **외부 iterator**: 클라이언트가 진행 (보통 형태, STL)
-- **내부 iterator**: 컨테이너가 진행, 콜백 받음 (`std::for_each`)
+## 언제 쓰면 좋은가
 
-```cpp
-// 외부
-for (auto it = v.begin(); it != v.end(); ++it) { /* ... */ }
+- 집합체의 내부 표현을 노출하지 않고 순회하고 싶을 때
+- 다양한 순회 방식 지원 (forward, reverse, level-order)
+- 다른 종류의 집합체에 대해 **통일된 인터페이스** 제공
 
-// 내부
-std::for_each(v.begin(), v.end(), [](int x) { /* ... */ });
-```
+## 언제 쓰면 안 되나
+
+> ⚠️ **iterator invalidation** — 컨테이너 수정 시 iterator 무효화. 표준 컨테이너의 invalidation 규칙 숙지 필수.
+
+> ⚠️ **단일 패스만 필요**하면 그냥 `for` + index도 충분.
 
 ## C++ 구현 — 표준 인터페이스
+
+### 1. 컨테이너 + iterator 클래스
 
 ```cpp
 template<typename T>
 class LinkedList {
     struct Node { T value; Node* next; };
     Node* head = nullptr;
+
 public:
     class iterator {
         Node* current;
@@ -86,23 +87,27 @@ public:
     iterator begin() { return iterator(head); }
     iterator end()   { return iterator(nullptr); }
 };
-
-// 사용 — range-for 자동 지원
-LinkedList<int> list;
-for (int x : list) std::cout << x << ' ';
 ```
 
-## C++ 구현 — STL 알고리즘 호환
+표준 트레이트(`iterator_category`, `value_type`)를 정의하면 STL 알고리즘이 자동으로 동작.
 
-표준 iterator 트레이트(`iterator_category`, `value_type`, ...)를 정의하면 STL 알고리즘이 동작.
+### 2. 사용 — range-for 자동 지원
 
 ```cpp
 LinkedList<int> list;
-auto it = std::find(list.begin(), list.end(), 42);
+for (int x : list) std::cout << x << ' ';   // ◄── begin/end만 있으면 됨
+```
+
+### 3. STL 알고리즘 호환
+
+```cpp
+auto it    = std::find(list.begin(), list.end(), 42);
 auto count = std::count(list.begin(), list.end(), 0);
 ```
 
 ## C++20 변형 — 코루틴 generator
+
+lazy iterator를 한 줄로.
 
 ```cpp
 #include <generator>    // C++23
@@ -146,39 +151,36 @@ while (!list_iter_done(&it)) {
 }
 ```
 
-## 결과 (트레이드오프)
+## Iterator 카테고리 (C++ STL)
 
-**장점**
-- 컨테이너 추상화 — 알고리즘 재사용
-- 동시 다중 순회 가능 (각자 iterator)
-- 다양한 순회 방식 지원
+| 카테고리 | 능력 |
+| --- | --- |
+| **input** | 단일 패스, 읽기 |
+| **output** | 단일 패스, 쓰기 |
+| **forward** | 다중 패스, `++` |
+| **bidirectional** | + `--` |
+| **random access** | + `+`, `-`, `[]` |
 
-**단점**
-- 잘못된 사용 시 위험 (iterator invalidation, 범위 초과)
-- iterator 자체 객체 비용 (보통 작음)
-- 복잡한 컨테이너의 iterator 구현 어려움
+## 트레이드오프 — 한눈에
 
-## Iterator Invalidation
+| 차원 | Iterator |
+| --- | --- |
+| 컨테이너 추상화 | ✅ 알고리즘 재사용 |
+| 동시 다중 순회 | ✅ 각자 iterator |
+| 다양한 순회 방식 | ✅ |
+| iterator invalidation | ⚠️ 컨테이너 수정 시 |
+| 복잡한 컨테이너 iterator 구현 | ⚠️ 까다로움 |
 
-컨테이너가 수정되면 iterator가 무효화될 수 있음 (vector resize, list erase 등). 표준 컨테이너의 invalidation 규칙 숙지 필요.
+## 실제 사례
 
-## 변형
-
-- **bidirectional iterator** — 양방향 (`++`, `--`)
-- **random access iterator** — 임의 접근 (`+`, `-`)
-- **input/output iterator** — 한 방향 단일 패스
-- **reverse_iterator** — 역방향 어댑터
-
-## 알려진 사용 사례
-
-- C++ STL 전체
-- Java Collections의 Iterator
-- Python의 iterator protocol (`__iter__`, `__next__`)
+- **C++ STL** 전체
+- **Java Collections**의 `Iterator`
+- **Python**의 iterator protocol (`__iter__`, `__next__`)
 - 거의 모든 모던 언어의 컬렉션
 
 ## 관련 패턴
 
-- **[Composite (item 8)](/blog/programming/gof-design-patterns/item08-composite)** — Composite 트리를 순회하는 데 Iterator 활용
+- **[Composite (item 8)](/blog/programming/gof-design-patterns/item08-composite)** — Composite 트리 순회에 Iterator
 - **[Factory Method (item 3)](/blog/programming/gof-design-patterns/item03-factory-method)** — 컨테이너의 `iterator()` 자체가 Factory Method
-- **[Memento (item 18)](/blog/programming/gof-design-patterns/item18-memento)** — Iterator의 상태(현재 위치)를 Memento로 저장
-- **[Visitor (item 23)](/blog/programming/gof-design-patterns/item23-visitor)** — Visitor가 Iterator로 노드를 순회
+- **[Memento (item 18)](/blog/programming/gof-design-patterns/item18-memento)** — Iterator의 위치를 Memento로 저장
+- **[Visitor (item 23)](/blog/programming/gof-design-patterns/item23-visitor)** — Visitor가 Iterator로 노드 순회

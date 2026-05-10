@@ -8,45 +8,57 @@ seriesOrder: 20
 draft: true
 ---
 
-## 의도
+## 한 줄 요약
 
-객체가 자신의 내부 상태에 따라 다른 동작을 보이도록 — 상태별 동작을 **별도 클래스로** 분리. 객체가 마치 자신의 클래스를 바꾸는 것처럼 보임.
+> **"상태마다 다른 동작 → 상태마다 다른 클래스"** — switch 폭탄 대신 다형성.
 
-## 동기
+## 어떤 문제를 푸는가
 
-- TCP 연결 (Listen, Established, Closed, Wait)
-- 자판기 (Idle, HasMoney, Dispensing, Maintenance)
-- 게임 캐릭터 (Idle, Running, Attacking, Dead)
-- 미디어 플레이어 (Stopped, Playing, Paused)
+객체의 동작이 **내부 상태**에 따라 다릅니다.
 
-`switch (state)` 폭탄 회피, 새 상태 추가 시 OCP 만족.
+- TCP 연결 — Listen, Established, Closed
+- 자판기 — Idle, HasMoney, Dispensing
+- 게임 캐릭터 — Idle, Running, Attacking, Dead
+- 미디어 플레이어 — Stopped, Playing, Paused
 
-## 적용 가능성
+순진하게 짜면 모든 메서드가 `switch (state)` 폭탄.
 
-- 객체의 동작이 자신의 상태에 의존하고, 런타임에 그 동작이 변경되어야 할 때
-- 객체 상태에 따른 동작 분기를 가진 거대한 조건문이 있을 때
-- 상태 전이 규칙이 명시적이어야 할 때
+State 패턴은 **상태별 동작을 별도 클래스로**.
 
-## 구조
+```cpp
+machine.insertCoin();   // 현재 state 객체에 위임 → 상태가 동작 결정
+```
+
+## 한눈에 보는 구조
 
 ```
    Context ◇──► State (interface)
-   - state          + handle()*
-   + request()           △
+   ─ state          ─ handle()*
+   ─ request()           △
         │                │
         │       ┌────────┴────────┐
         ▼   ConcStateA       ConcStateB
-   state.handle() + handle()       + handle()
-                  + ...             + ...
+   state.handle() ─ handle()       ─ handle()
+                   ─ ...             ─ ...
 ```
 
-## 참여자
+각 상태가 자신의 동작을 알고, **다음 상태로 전이**도 결정.
 
-- **Context** — 클라이언트 인터페이스, 현재 State 보유
-- **State** — 상태별 동작 인터페이스
-- **ConcreteState** — 특정 상태의 동작, 다음 상태 결정·전이
+## 언제 쓰면 좋은가
+
+- 객체 동작이 자신의 상태에 의존하고, 런타임에 동작이 변경되어야 할 때
+- 객체 상태에 따른 분기를 가진 **거대한 조건문**이 있을 때
+- 상태 전이 규칙이 **명시적**이어야 할 때
+
+## 언제 쓰면 안 되나
+
+> ⚠️ **상태가 2~3개**라면 그냥 enum + switch가 단순.
+
+> ⚠️ **상태별 클래스 폭증** — `std::variant`로 closed set 대안 검토.
 
 ## C++ 구현 — 자판기
+
+### 1. State 인터페이스
 
 ```cpp
 class VendingMachine;
@@ -58,11 +70,11 @@ public:
     virtual void selectItem(VendingMachine&) = 0;
     virtual void dispense(VendingMachine&)   = 0;
 };
+```
 
-class IdleState;
-class HasCoinState;
-class DispensingState;
+### 2. Context — 현재 state에 위임
 
+```cpp
 class VendingMachine {
     std::unique_ptr<State> state;
 public:
@@ -70,16 +82,20 @@ public:
 
     void changeState(std::unique_ptr<State> s) { state = std::move(s); }
 
-    void insertCoin() { state->insertCoin(*this); }
+    void insertCoin() { state->insertCoin(*this); }    // ◄── state에 위임
     void selectItem() { state->selectItem(*this); }
     void dispense()   { state->dispense(*this);   }
 };
+```
 
+### 3. ConcreteState들 — 자체 전이 결정
+
+```cpp
 class IdleState : public State {
 public:
     void insertCoin(VendingMachine& m) override {
         std::cout << "coin accepted\n";
-        m.changeState(std::make_unique<HasCoinState>());
+        m.changeState(std::make_unique<HasCoinState>());   // ◄── 다음 상태로
     }
     void selectItem(VendingMachine&) override { std::cout << "insert coin first\n"; }
     void dispense(VendingMachine&)   override { std::cout << "insert coin first\n"; }
@@ -104,17 +120,22 @@ public:
         m.changeState(std::make_unique<IdleState>());
     }
 };
+```
 
-// 사용
+### 4. 사용
+
+```cpp
 VendingMachine vm(std::make_unique<IdleState>());
 vm.insertCoin();   // → HasCoinState
 vm.selectItem();   // → DispensingState
 vm.dispense();     // → IdleState
 ```
 
-각 상태가 어떻게 다음 상태로 전이할지 본인이 결정 — 자연스러운 FSM.
+자연스러운 FSM. **상태별 동작과 전이가 한 클래스에**.
 
-## C++ 구현 — `std::variant` (모던 대안)
+## 모던 변형 — `std::variant` (C++17)
+
+가상 함수 없이 closed state set 표현.
 
 ```cpp
 struct Idle {};
@@ -131,15 +152,14 @@ public:
             using T = std::decay_t<decltype(s)>;
             if constexpr (std::is_same_v<T, Idle>) {
                 state = HasCoin{};
-            } else {
-                /* invalid */
             }
+            // 나머지는 무시 (또는 invalid 처리)
         }, state);
     }
 };
 ```
 
-가상 함수 없이 closed state set 표현.
+컴파일 타임에 모든 상태 검사. 가상 호출 없음.
 
 ## C 구현 — 함수 포인터 테이블
 
@@ -169,58 +189,39 @@ void machine_change(VendingMachine* m, StateId s) {
         case S_DISPENSING: m->ops = &dispensing_ops; break;
     }
 }
-
-static void idle_insert(VendingMachine* m) {
-    printf("coin accepted\n");
-    machine_change(m, S_HAS_COIN);
-}
-
-const StateOps idle_ops = {
-    .insert_coin = idle_insert,
-    .select_item = idle_select,
-    .dispense    = idle_dispense,
-};
 ```
 
-## Strategy와의 비교
+## State vs Strategy — 자주 혼동
 
-구조는 비슷하지만 의도가 다름:
+같은 구조, **다른 의도**:
 
-- **State**: 객체 자체가 상태에 따라 다음 상태를 결정 (자체 전이)
-- **Strategy**: 외부에서 알고리즘을 선택 (외부 결정)
+| | State | Strategy |
+| --- | --- | --- |
+| 결정 주체 | 객체 자체 (자체 전이) | 외부 클라이언트 |
+| 객체 간 관계 | 전이 그래프 (state→state) | 평행 (서로 무관) |
+| 변경 빈도 | 자주 (상태 흐름) | 가끔 (정책 변경) |
 
-State는 상태 간 전이 그래프가 있고, Strategy는 보통 평행한 알고리즘들.
+## 트레이드오프 — 한눈에
 
-## 결과 (트레이드오프)
+| 차원 | State |
+| --- | --- |
+| 상태별 동작 명확 분리 | ✅ |
+| 새 상태 추가 (OCP) | ✅ |
+| 거대한 조건문 회피 | ✅ |
+| 상태 전이 명시적 | ✅ |
+| 상태 클래스 증가 | ⚠️ 작은 FSM에 과도 |
+| 상태 객체 인스턴스 비용 | ⚠️ Singleton/Flyweight으로 완화 |
 
-**장점**
-- 상태별 동작이 명확하게 분리
-- 새 상태 추가 시 OCP 만족
-- 거대한 조건문 회피
-- 상태 전이가 코드에 명시적
+## 실제 사례
 
-**단점**
-- 상태 클래스 증가 (작은 FSM에 과도)
-- 상태 객체 간 관계 (한 상태가 다른 상태를 참조)
-- Context 인스턴스마다 state 객체가 새로 만들어지면 비용 → Singleton/Flyweight으로 공유 가능
-
-## 변형
-
-- **State 객체 공유** — 무상태면 Singleton/Flyweight
-- **Table-driven FSM** — 상태×이벤트 테이블 (Boost.MSM, SCXML)
-- **`std::variant`** — closed set, 컴파일 타임 검증
-- **HSM (Hierarchical State Machine)** — 상태가 하위 상태를 가짐
-
-## 알려진 사용 사례
-
-- TCP/IP 스택의 connection state machine
-- 게임 AI/캐릭터 상태
-- 컴파일러의 lexer state
-- UI 위젯 (Idle, Hover, Pressed, Disabled)
-- 워크플로우 엔진
+- **TCP/IP 스택**의 connection state machine
+- **게임 AI / 캐릭터** 상태
+- **컴파일러의 lexer state**
+- **UI 위젯** (Idle, Hover, Pressed, Disabled)
+- **워크플로우 엔진**
 
 ## 관련 패턴
 
 - **[Strategy (item 21)](/blog/programming/gof-design-patterns/item21-strategy)** — 구조 비슷, 의도 다름. Strategy는 외부 선택, State는 자체 전이
-- **[Singleton (item 5)](/blog/programming/gof-design-patterns/item05-singleton)** — 무상태 state 객체는 Singleton으로 공유
-- **[Flyweight (item 11)](/blog/programming/gof-design-patterns/item11-flyweight)** — 같은 이유로 Flyweight 활용
+- **[Singleton (item 5)](/blog/programming/gof-design-patterns/item05-singleton)** — 무상태 state는 Singleton으로 공유
+- **[Flyweight (item 11)](/blog/programming/gof-design-patterns/item11-flyweight)** — 같은 이유로 Flyweight
