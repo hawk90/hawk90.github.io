@@ -5,7 +5,6 @@ description: "단순한 언어의 문법을 클래스 계층으로 — 단순 DS
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 15
-draft: true
 ---
 
 ## 한 줄 요약

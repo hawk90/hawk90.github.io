@@ -5,7 +5,6 @@ description: "객체의 내부 상태에 따라 동작이 변하도록 — if/sw
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 20
-draft: true
 ---
 
 ## 한 줄 요약
