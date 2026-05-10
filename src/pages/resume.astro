@@ -136,7 +136,21 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
               <span class={`inline-block text-xs px-2 py-0.5 rounded mb-2 ${pub.type === 'paper' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}`}>
                 {pub.type === 'paper' ? 'Paper' : 'Patent'}
               </span>
-              <h3 class="font-semibold mb-1">{pub.title}</h3>
+              <h3 class="font-semibold mb-1">
+                {('url' in pub && pub.url) ? (
+                  <a
+                    href={pub.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-[var(--color-accent)] underline-offset-2 hover:underline"
+                  >
+                    {pub.title}
+                    <span class="ml-1 text-xs align-middle">↗</span>
+                  </a>
+                ) : (
+                  pub.title
+                )}
+              </h3>
               <p class="text-sm text-[var(--color-text-secondary)]">{pub.authors}</p>
               <p class="text-sm text-[var(--color-text-muted)]">{pub.venue} ({pub.year})</p>
             </div>

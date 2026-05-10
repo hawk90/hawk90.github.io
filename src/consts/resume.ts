@@ -254,6 +254,7 @@ export const RESUME_DATA = {
       authors: 'Sang-Deok Yoon, In-Yong Jung, Ki-Hyun Kim, Chang-Sung Jeong',
       venue: 'Second International Conference on Future Generation Communication Technologies (FGCT 2013)',
       year: '2013',
+      url: 'https://doi.org/10.1109/FGCT.2013.6767200',
     },
     {
       type: 'paper' as const,
