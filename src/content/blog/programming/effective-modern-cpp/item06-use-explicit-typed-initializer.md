@@ -113,7 +113,89 @@ auto sum = m1 + m2 + m3 + m4;    // Sum<Sum<Sum<Matrix>>> 같은 타입!
 // 표현식 템플릿 (프록시)
 ```
 
+### 프록시 클래스의 일반적인 모양
+
+대부분의 프록시 클래스는 다음 두 가지 패턴 중 하나를 따릅니다.
+
+**패턴 1: 변환 연산자 — "필요할 때 진짜 타입으로 변환"**
+
+```cpp
+template<typename T>
+class Reference {
+    T* target;
+public:
+    operator T() const { return *target; }    // ← 핵심
+    Reference& operator=(const T& v) { *target = v; return *this; }
+    // ... 그 외 연산자들
+};
+
+// 사용 측에선 마치 진짜 T처럼 쓸 수 있음
+Reference<int> r = ...;
+int x = r;          // operator int() 자동 호출
+if (r == 42) ...;   // 마찬가지
+
+// 그러나 auto는 변환 연산자를 부르지 않고 프록시 자체로 추론
+auto y = r;         // y의 타입은 Reference<int> (!)
+```
+
+**패턴 2: 지연 평가 — "연산 결과를 객체에 담아두고 나중에 평가"**
+
+```cpp
+struct Plus {
+    const Matrix& a;
+    const Matrix& b;
+
+    operator Matrix() const {                 // 진짜 Matrix가 필요할 때만 계산
+        Matrix result;
+        for (int i = 0; i < N; ++i)
+            for (int j = 0; j < N; ++j)
+                result(i, j) = a(i, j) + b(i, j);
+        return result;
+    }
+};
+
+Plus operator+(const Matrix& a, const Matrix& b) {
+    return {a, b};       // 더하기 결과를 안 만들고, "더할 거다"라는 약속만 반환
+}
+
+// 사용
+Matrix m = m1 + m2;      // 명시적 타입 → operator Matrix() 호출 → 한 번만 순회
+auto x = m1 + m2;        // x는 Plus 타입 — 진짜 계산 안 됨
+                         // x를 어디다 쓸 때마다 매번 변환·재계산될 수 있음
+                         // 게다가 x는 m1, m2의 참조를 가지고 있음 → 댕글링 위험
+```
+
+### 표현식 템플릿이 왜 빠른가 — `m1 + m2 + m3` 예시
+
+순진한 구현이라면 `m1 + m2 + m3`는:
+1. `m1 + m2` → 임시 행렬 1 생성
+2. `(임시 1) + m3` → 임시 행렬 2 생성
+3. `Matrix m = (임시 2)` → 복사
+
+→ **두 번 전체 순회 + 두 개의 임시 행렬**
+
+표현식 템플릿이라면:
+1. `m1 + m2` → `Plus<m1, m2>` 객체만 생성 (계산 안 함)
+2. `+ m3` → `Plus<Plus<m1, m2>, m3>` 객체로 합쳐짐
+3. `Matrix m = ...` 시점에 변환 연산자가 호출되며, **루프 안에서 `m1(i,j) + m2(i,j) + m3(i,j)`를 한 번에 계산**
+
+→ **한 번 순회, 임시 행렬 0개**. 이게 Eigen·xtensor·Blaze 같은 라이브러리가 빠른 이유입니다.
+
+문제는 `auto sum = m1 + m2 + m3` 시점에 `sum`이 아직 변환되지 않은 표현식 객체라는 점 — 게다가 `m1`·`m2`·`m3`의 참조를 들고 있어 그것들이 사라지면 댕글링.
+
 ## 해결책: static_cast로 명시적 변환
+
+### 이 패턴의 정식 명칭 — "explicitly typed initializer idiom"
+
+이 관용구를 영어권에선 **explicitly typed initializer idiom**(명시적 타입 초기치 관용구)이라 부릅니다. `auto` + `static_cast`로 **의도한 타입을 코드에 명시**한다는 점이 핵심입니다.
+
+```cpp
+auto var = static_cast<DesiredType>(expression_returning_proxy);
+//   ^^^^                ^^^^^^^^^^^
+//   추론                  의도된 진짜 타입
+```
+
+이름이 길지만 패턴은 단순 — "추론을 쓰되, 결과 타입은 내가 정한다."
 
 ### 기본 해결 방법
 
@@ -127,6 +209,30 @@ bool highPriority = features(w)[5];  // 프록시 → bool 변환
 // 해결책 2: static_cast
 auto highPriority = static_cast<bool>(features(w)[5]);
 ```
+
+### `static_cast<T>(proxy)`가 왜 안전한가
+
+핵심은 **prvalue로 강제 변환**된다는 점입니다.
+
+`static_cast<T>(...)`의 결과는 **`T` 타입의 prvalue**(임시 객체)입니다. 즉시 변환이 일어나고 그 결과만 `auto`로 받습니다.
+
+```cpp
+auto x = features(w)[5];
+// 1. features(w) → 임시 vector<bool>
+// 2. [5] → 그 임시에 묶인 vector<bool>::reference 프록시
+// 3. auto는 프록시를 그대로 받음 → x는 프록시
+// 4. 표현식 ; 끝나면 임시 vector<bool> 소멸
+// 5. x는 소멸된 메모리를 가리키는 프록시 → 댕글링!
+
+auto y = static_cast<bool>(features(w)[5]);
+// 1. features(w) → 임시 vector<bool>
+// 2. [5] → 프록시
+// 3. static_cast<bool> → 프록시의 operator bool() 즉시 호출 → bool 값 추출
+// 4. y는 bool 값을 복사해 가짐
+// 5. 임시 vector<bool>이 소멸해도 y는 무관 — 안전!
+```
+
+`static_cast`가 **변환 연산자를 즉시 호출하게 강제**하기 때문에 프록시가 가리키던 원본의 수명에서 해방되는 것입니다.
 
 ### 일반적인 패턴
 
@@ -163,6 +269,32 @@ TD<decltype(result)> td;  // 컴파일 에러로 타입 확인
 - `reference`라는 중첩 타입
 - 표현식 템플릿을 사용하는 라이브러리
 - 비트 조작을 하는 컨테이너
+
+### 4. 표준 라이브러리에서 자주 만나는 프록시들
+
+| 출처 | 프록시 타입 | 어떻게 함정이 되나 |
+| --- | --- | --- |
+| `std::vector<bool>::operator[]` | `vector<bool>::reference` | 1비트를 객체처럼 다루기 위한 wrapper |
+| `std::bitset::operator[]` (비-const) | `bitset::reference` | 같은 패턴 — 비트 단위 접근 |
+| Eigen / xtensor / Blaze 행렬 연산 | 표현식 템플릿 (`Sum`, `Product` 등) | 지연 평가 객체, 원본 참조 보유 |
+| `std::valarray` 슬라이스 | `slice_array`, `gslice_array` | `valarray`의 일부를 wrap |
+| `std::ranges` 어댑터 (C++20) | `view` 객체 | 원본 range의 참조 보유 → 임시에 적용하면 댕글링 |
+| 사용자 라이브러리의 lazy/builder API | `XxxBuilder`, `XxxView` | `.commit()`/`.eval()` 호출 전엔 결과 아님 |
+
+```cpp
+// C++20 ranges 함정 예
+auto v = std::vector{1, 2, 3, 4, 5}
+       | std::views::filter([](int x) { return x % 2; });
+// v는 filter_view — 원본 vector의 참조를 들고 있음
+// 원본이 임시였다면 v는 댕글링!
+
+// 안전: 명시적으로 컨테이너로 수확
+auto v2 = std::vector{1, 2, 3, 4, 5}
+        | std::views::filter([](int x) { return x % 2; })
+        | std::ranges::to<std::vector>();   // C++23
+```
+
+`string_view`나 `span` 같은 **non-owning view**도 비슷한 위험을 가집니다 — 엄밀히는 프록시가 아니지만 "원본을 참조로 들고 있다"는 점에서 같은 종류의 댕글링 함정을 만듭니다.
 
 ## 실전 예제
 
