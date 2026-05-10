@@ -228,6 +228,21 @@ body {
   border-radius: 0.25rem;
   font-family: var(--font-mono);
   font-size: 0.875em;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+/* Disable programming ligatures globally for all monospace —
+   prevents JetBrains Mono / Fira Code from rendering ==, !=, ->, etc.
+   as combined glyphs in code blocks and inline code. */
+code, pre, kbd, samp, tt {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+.expressive-code, .expressive-code * {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
 }
 
 .prose blockquote {
