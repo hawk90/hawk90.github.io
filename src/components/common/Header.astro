@@ -17,6 +17,7 @@ const currentPath = Astro.url.pathname;
           <li>
             <a
               href={link.href}
+              data-nav-link={link.href}
               class:list={[
                 'text-sm font-medium transition-colors',
                 currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
@@ -92,6 +93,7 @@ const currentPath = Astro.url.pathname;
         <li>
           <a
             href={link.href}
+            data-nav-link={link.href}
             class:list={[
               'block py-2 text-base font-medium transition-colors',
               currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
@@ -153,4 +155,26 @@ const currentPath = Astro.url.pathname;
 
   initMobileMenu();
   document.addEventListener('astro:page-load', initMobileMenu);
+
+  // Defensive: ensure the active nav highlight reflects the live pathname after
+  // View Transition / Speculation Rules activation, when the SSR'd active class
+  // may not match the actual URL the visitor is on.
+  function syncNavActive() {
+    const path = location.pathname;
+    document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]').forEach((a) => {
+      const href = a.dataset.navLink || a.getAttribute('href') || '';
+      const active = path === href || (href !== '/' && path.startsWith(href));
+      const isMobile = a.classList.contains('block');
+      a.classList.toggle('text-[var(--color-accent)]', active);
+      a.classList.toggle('text-[var(--color-text-secondary)]', !active);
+      if (!isMobile) {
+        a.classList.toggle('hover:text-[var(--color-text-primary)]', !active);
+      }
+    });
+  }
+
+  syncNavActive();
+  document.addEventListener('astro:page-load', syncNavActive);
+  document.addEventListener('astro:after-swap', syncNavActive);
+  window.addEventListener('pageshow', syncNavActive);
 </script>
