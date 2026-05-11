@@ -1,0 +1,19 @@
+---
+/**
+ * Comments — provider router. Renders Giscus, Utterances, or Disqus
+ * based on COMMENTS_CONFIG.provider. Drop <Comments /> in place of
+ * any single-provider component to get one switchable mount point.
+ */
+import { COMMENTS_CONFIG } from '../../consts/config';
+import Giscus from './Giscus.astro';
+import Utterances from './Utterances.astro';
+import Disqus from './Disqus.astro';
+---
+
+{COMMENTS_CONFIG.enabled && (
+  <>
+    {COMMENTS_CONFIG.provider === 'giscus'     && <Giscus />}
+    {COMMENTS_CONFIG.provider === 'utterances' && <Utterances />}
+    {COMMENTS_CONFIG.provider === 'disqus'     && <Disqus />}
+  </>
+)}

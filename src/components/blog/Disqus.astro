@@ -1,0 +1,51 @@
+---
+/**
+ * Disqus — classic third-party comments.
+ * Configure via COMMENTS_CONFIG with provider: 'disqus' and your shortname.
+ *
+ * Heavier than Giscus/Utterances (tracks across sites, ads in free tier),
+ * but works without a GitHub account for commenters.
+ */
+import { COMMENTS_CONFIG } from '../../consts/config';
+
+if (!COMMENTS_CONFIG.enabled || COMMENTS_CONFIG.provider !== 'disqus') return null;
+
+const cfg = COMMENTS_CONFIG;
+---
+
+<div id="disqus_thread" data-disqus-shortname={cfg.shortname}></div>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function init() {
+    cleanup?.();
+    const mount = document.getElementById('disqus_thread') as HTMLElement | null;
+    if (!mount) return;
+    const shortname = mount.dataset.disqusShortname;
+    if (!shortname) return;
+
+    // (re)mount Disqus on each page navigation
+    (window as any).disqus_config = function (this: { page: { url: string; identifier: string } }) {
+      this.page.url = location.href;
+      this.page.identifier = location.pathname;
+    };
+
+    if (!document.getElementById('disqus-embed-script')) {
+      const s = document.createElement('script');
+      s.id = 'disqus-embed-script';
+      s.src = `https://${shortname}.disqus.com/embed.js`;
+      s.setAttribute('data-timestamp', String(Date.now()));
+      document.body.appendChild(s);
+    } else {
+      // Already loaded — re-render
+      const w = window as any;
+      if (w.DISQUS) w.DISQUS.reset({ reload: true, config: w.disqus_config });
+    }
+
+    cleanup = () => { mount.innerHTML = ''; };
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

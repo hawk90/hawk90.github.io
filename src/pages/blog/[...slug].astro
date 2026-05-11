@@ -5,7 +5,7 @@ import TagBadge from '../../components/blog/TagBadge.astro';
 import TableOfContents from '../../components/blog/TableOfContents.astro';
 import SeriesNav from '../../components/blog/SeriesNav.astro';
 import SeriesSidebar from '../../components/blog/SeriesSidebar.astro';
-import Giscus from '../../components/blog/Giscus.astro';
+import Comments from '../../components/blog/Comments.astro';
 import RelatedPosts from '../../components/blog/RelatedPosts.astro';
 import ShareButtons from '../../components/blog/ShareButtons.astro';
 import StickyTitle from '../../components/blog/StickyTitle.astro';
@@ -52,13 +52,17 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
 ---
 
 <BaseLayout
-  title={post.data.title}
+  title={post.data.seo?.title ?? post.data.title}
   description={post.data.description}
-  image={`/og/${post.id}.png`}
+  image={post.data.seo?.ogImage ?? `/og/${post.id}.png`}
   type="article"
   showProgress={true}
   publishedTime={post.data.date}
+  modifiedTime={post.data.updated}
   author={post.data.author}
+  noIndex={post.data.seo?.noindex}
+  noFollow={post.data.seo?.nofollow}
+  canonical={post.data.seo?.canonical}
 >
   <StickyTitle
     title={post.data.title}
@@ -183,7 +187,7 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
 
           <!-- Comments -->
           <div class="container-narrow mt-16">
-            <Giscus />
+            <Comments />
           </div>
         </div>
 

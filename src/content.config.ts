@@ -42,6 +42,23 @@ const blogCollection = defineCollection({
     featured: z.boolean().default(false),
     image: z.string().optional(),
 
+    // Per-post SEO overrides (all optional — sensible defaults otherwise)
+    seo: z.object({
+      /** Custom <title> override (defaults to the post title) */
+      title: z.string().optional(),
+      /** Override the OG image URL (defaults to the auto-generated /og/<slug>.png) */
+      ogImage: z.string().optional(),
+      /** Canonical URL — use if the post is also published elsewhere */
+      canonical: z.string().url().optional(),
+      /** Tell crawlers to skip indexing this post */
+      noindex: z.boolean().optional(),
+      /** Tell crawlers not to follow outbound links */
+      nofollow: z.boolean().optional(),
+    }).optional(),
+
+    /** When the post was last updated — shown in article header if set */
+    updated: z.coerce.date().optional(),
+
     // Legacy (for Jekyll migration)
     categories: z.array(z.string()).optional(),
   }),

@@ -69,6 +69,22 @@ export type CommentsConfig =
       category: string;
       categoryId: string;
       lang?: string;
+    }
+  | {
+      enabled: true;
+      provider: 'utterances';
+      /** e.g. "owner/repo" */
+      repo: string;
+      /** issue mapping strategy */
+      issueTerm?: 'pathname' | 'url' | 'title' | 'og:title';
+      label?: string;
+      theme?: 'github-light' | 'github-dark' | 'preferred-color-scheme';
+    }
+  | {
+      enabled: true;
+      provider: 'disqus';
+      /** Your Disqus shortname (the part before .disqus.com) */
+      shortname: string;
     };
 export const defineComments = <T extends CommentsConfig>(c: T) => c;
 

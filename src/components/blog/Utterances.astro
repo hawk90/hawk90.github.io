@@ -1,0 +1,50 @@
+---
+/**
+ * Utterances — GitHub-issues comments (lightweight alternative to Giscus).
+ * Configure via COMMENTS_CONFIG with provider: 'utterances'.
+ *
+ * Each post becomes a GitHub issue in the target repo.
+ */
+import { COMMENTS_CONFIG } from '../../consts/config';
+
+if (!COMMENTS_CONFIG.enabled || COMMENTS_CONFIG.provider !== 'utterances') return null;
+
+const cfg = COMMENTS_CONFIG;
+const issueTerm = cfg.issueTerm ?? 'pathname';
+const label = cfg.label ?? '';
+const theme = cfg.theme ?? 'preferred-color-scheme';
+---
+
+<div class="utterances-wrapper" data-utterances-repo={cfg.repo} data-utterances-issue-term={issueTerm} data-utterances-label={label} data-utterances-theme={theme}>
+  <div class="utterances-mount"></div>
+</div>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function init() {
+    cleanup?.();
+    const wrap = document.querySelector<HTMLElement>('.utterances-wrapper');
+    if (!wrap) return;
+    const mount = wrap.querySelector('.utterances-mount');
+    if (!mount) return;
+
+    // Wipe any previous embed (after page swap)
+    mount.innerHTML = '';
+
+    const s = document.createElement('script');
+    s.src = 'https://utteranc.es/client.js';
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    s.setAttribute('repo', wrap.dataset.utterancesRepo ?? '');
+    s.setAttribute('issue-term', wrap.dataset.utterancesIssueTerm ?? 'pathname');
+    if (wrap.dataset.utterancesLabel) s.setAttribute('label', wrap.dataset.utterancesLabel);
+    s.setAttribute('theme', wrap.dataset.utterancesTheme ?? 'preferred-color-scheme');
+    mount.appendChild(s);
+
+    cleanup = () => { mount.innerHTML = ''; };
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

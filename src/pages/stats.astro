@@ -1,0 +1,153 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPublishedPosts, getAllSeries, getAllTags, getReadingTime } from '../lib/posts';
+import { SITE_CONFIG } from '../consts/config';
+
+const posts = await getPublishedPosts();
+
+const totalPosts = posts.length;
+const series = getAllSeries(posts);
+const tags = getAllTags(posts);
+
+// Reading-time / word estimate
+const totalMinutes = posts.reduce((sum, p) => sum + getReadingTime(p.body || ''), 0);
+// Word count: minutes × words-per-min (en) or chars × 500 (ko)
+const isKo = SITE_CONFIG.lang === 'ko';
+const totalWords = isKo
+  ? posts.reduce((s, p) => s + (p.body || '').replace(/\s+/g, '').length, 0)
+  : posts.reduce((s, p) => s + (p.body || '').split(/\s+/).filter(Boolean).length, 0);
+
+// Posting cadence
+const sortedByDate = [...posts].sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
+const firstPost = sortedByDate[0];
+const lastPost = sortedByDate[sortedByDate.length - 1];
+const daysSpan =
+  firstPost && lastPost
+    ? Math.max(1, Math.ceil((lastPost.data.date.valueOf() - firstPost.data.date.valueOf()) / 86400000))
+    : 1;
+const postsPerWeek = (totalPosts / daysSpan) * 7;
+
+// Posts per year
+const byYear = new Map<number, number>();
+for (const p of posts) {
+  const y = p.data.date.getFullYear();
+  byYear.set(y, (byYear.get(y) ?? 0) + 1);
+}
+const yearList = [...byYear.entries()].sort((a, b) => b[0] - a[0]);
+const maxYearCount = Math.max(...byYear.values(), 1);
+
+// Series leaderboard
+const seriesCount = new Map<string, number>();
+for (const p of posts) {
+  if (p.data.series) seriesCount.set(p.data.series, (seriesCount.get(p.data.series) ?? 0) + 1);
+}
+const topSeries = [...seriesCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+const fmt = (n: number) => n.toLocaleString();
+---
+
+<BaseLayout title="Stats" description="Posting metrics — what's been written here, when, and how much.">
+  <section class="py-16">
+    <div class="container">
+      <div class="container-narrow mx-auto px-0">
+        <div class="text-xs uppercase tracking-wider text-[var(--color-accent)] font-medium mb-2">
+          Stats
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-3">By the numbers</h1>
+        <p class="text-[var(--color-text-secondary)] mb-12">
+          Snapshot of writing volume, cadence, and topic coverage. Auto-computed from
+          every published post at build time.
+        </p>
+
+        <!-- Top-line cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
+          <div class="p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
+            <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Posts</div>
+            <div class="text-3xl font-bold tabular-nums">{fmt(totalPosts)}</div>
+          </div>
+          <div class="p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
+            <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+              {isKo ? '글자' : 'Words'}
+            </div>
+            <div class="text-3xl font-bold tabular-nums">{fmt(totalWords)}</div>
+          </div>
+          <div class="p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
+            <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Read time</div>
+            <div class="text-3xl font-bold tabular-nums">
+              {fmt(Math.round(totalMinutes / 60))}<span class="text-base font-normal text-[var(--color-text-muted)] ml-1">h</span>
+            </div>
+          </div>
+          <div class="p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
+            <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Series · Tags</div>
+            <div class="text-3xl font-bold tabular-nums">{series.length} · {tags.length}</div>
+          </div>
+        </div>
+
+        <!-- Cadence -->
+        <section class="mb-12">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Cadence</h2>
+          <div class="p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
+            <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+              <div>
+                <div class="text-xs text-[var(--color-text-muted)]">First post</div>
+                <div class="font-medium tabular-nums">
+                  {firstPost?.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </div>
+              </div>
+              <div>
+                <div class="text-xs text-[var(--color-text-muted)]">Latest post</div>
+                <div class="font-medium tabular-nums">
+                  {lastPost?.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </div>
+              </div>
+              <div>
+                <div class="text-xs text-[var(--color-text-muted)]">Posts / week</div>
+                <div class="font-medium tabular-nums">{postsPerWeek.toFixed(1)}</div>
+              </div>
+              <div>
+                <div class="text-xs text-[var(--color-text-muted)]">Days span</div>
+                <div class="font-medium tabular-nums">{fmt(daysSpan)}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Posts per year (horizontal bar) -->
+        <section class="mb-12">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Posts per year</h2>
+          <div class="space-y-1.5">
+            {yearList.map(([y, c]) => (
+              <div class="flex items-center gap-3 text-sm">
+                <span class="w-12 tabular-nums text-[var(--color-text-muted)] shrink-0">{y}</span>
+                <div class="flex-1 h-6 rounded bg-[var(--color-bg-secondary)] relative overflow-hidden">
+                  <div
+                    class="h-full bg-[var(--color-accent)]/70 rounded transition-all"
+                    style={`width: ${(c / maxYearCount) * 100}%`}
+                    aria-hidden="true"
+                  ></div>
+                </div>
+                <span class="w-12 text-right tabular-nums font-medium shrink-0">{c}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Top series -->
+        {topSeries.length > 0 && (
+          <section class="mb-12">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Top series</h2>
+            <ol class="space-y-2">
+              {topSeries.map(([name, c], i) => (
+                <li class="flex items-baseline gap-3">
+                  <span class="w-6 text-xs tabular-nums text-[var(--color-text-muted)] shrink-0">{i + 1}</span>
+                  <span class="flex-1 truncate text-sm">{name}</span>
+                  <span class="text-xs text-[var(--color-text-muted)] tabular-nums">{c} posts</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
