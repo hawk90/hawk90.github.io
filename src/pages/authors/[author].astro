@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/blog/PostCard.astro';
+import Breadcrumb from '../../components/common/Breadcrumb.astro';
+import { AUTHORS } from '../../consts/authors';
+import { getPublishedPosts, type BlogPost } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const all = await getPublishedPosts();
+  return AUTHORS.map((author) => ({
+    params: { author: author.id },
+    props: {
+      author,
+      posts: all
+        .filter((p) => p.data.author === author.id || p.data.author === author.name)
+        .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()),
+    },
+  }));
+}
+
+interface Props {
+  author: typeof AUTHORS[number];
+  posts: BlogPost[];
+}
+
+const { author, posts } = Astro.props;
+---
+
+<BaseLayout title={`${author.name} - Posts`} description={author.bio ?? ''}>
+  <section class="py-16">
+    <div class="container">
+      <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: author.name }]} />
+
+      <!-- Author hero -->
+      <div class="mb-12 flex flex-col sm:flex-row gap-6 sm:items-start">
+        {author.avatar && (
+          <img
+            src={author.avatar}
+            alt={author.name}
+            class="w-24 h-24 rounded-2xl object-cover shadow-md flex-shrink-0"
+            width="96" height="96" loading="eager"
+          />
+        )}
+        <div class="flex-1 min-w-0">
+          <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-2">{author.name}</h1>
+          {author.bio && (
+            <p class="text-base text-[var(--color-text-secondary)] leading-relaxed mb-4 max-w-2xl">
+              {author.bio}
+            </p>
+          )}
+          <div class="flex flex-wrap gap-3 text-sm">
+            {author.social?.github && (
+              <a href={`https://github.com/${author.social.github}`} target="_blank" rel="noopener noreferrer"
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">
+                GitHub
+              </a>
+            )}
+            {author.social?.twitter && (
+              <a href={`https://twitter.com/${author.social.twitter}`} target="_blank" rel="noopener noreferrer"
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">
+                Twitter/X
+              </a>
+            )}
+            {author.social?.linkedin && (
+              <a href={author.social.linkedin} target="_blank" rel="noopener noreferrer"
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">
+                LinkedIn
+              </a>
+            )}
+            {author.social?.email && (
+              <a href={`mailto:${author.social.email}`}
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">
+                Email
+              </a>
+            )}
+            {author.url && (
+              <a href={author.url}
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">
+                Profile →
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <!-- Posts -->
+      <div class="mb-6 text-sm text-[var(--color-text-muted)]">
+        {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+      </div>
+      {posts.length > 0 ? (
+        <div class="grid gap-6 md:grid-cols-2">
+          {posts.map((post) => (<PostCard post={post} />))}
+        </div>
+      ) : (
+        <p class="text-[var(--color-text-secondary)]">No posts yet.</p>
+      )}
+    </div>
+  </section>
+</BaseLayout>

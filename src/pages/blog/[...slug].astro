@@ -164,7 +164,7 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
 
           <!-- Author bio -->
           <div class="container-narrow">
-            <AuthorBio />
+            <AuthorBio post={post} />
           </div>
 
           <!-- Series Navigation (Bottom) -->
