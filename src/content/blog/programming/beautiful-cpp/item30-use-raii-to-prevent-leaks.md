@@ -1,6 +1,6 @@
 ---
 title: "항목 30: 메모리 누수를 방지하려면 RAII를 사용하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-10T19:00:00
 description: "RAII로 누수와 자원 해제 누락을 막는 법"
 tags: [C++, RAII, Resource Management]
 series: "Beautiful C++"

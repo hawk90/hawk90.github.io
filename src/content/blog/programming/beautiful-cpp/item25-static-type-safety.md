@@ -1,6 +1,6 @@
 ---
 title: "항목 25: 프로그램은 최대한 정적으로 타입에 안전해야 한다"
-date: 2026-05-10T10:00:00
+date: 2026-05-10T14:00:00
 description: "타입 시스템에 의미를 담아 컴파일러에게 검사를 맡기는 법"
 tags: [C++, Type Safety, Strong Types]
 series: "Beautiful C++"

@@ -1,6 +1,6 @@
 ---
 title: "항목 1: ISO 표준 C++로 작성하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-08T10:00:00
 description: "플랫폼·컴파일러 종속성을 피하고 이식성 있는 코드를 작성하는 방법"
 tags: [C++, Portability, Standards]
 series: "Beautiful C++"

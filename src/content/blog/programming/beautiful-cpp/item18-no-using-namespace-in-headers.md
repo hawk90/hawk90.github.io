@@ -1,6 +1,6 @@
 ---
 title: "항목 18: 헤더 파일의 전역 범위에 using namespace를 사용하지 말라"
-date: 2026-05-10T10:00:00
+date: 2026-05-09T17:00:00
 description: "헤더의 using namespace가 전역으로 퍼지는 오염 문제"
 tags: [C++, Headers, Namespaces]
 series: "Beautiful C++"

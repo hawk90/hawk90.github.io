@@ -1,6 +1,6 @@
 ---
 title: "항목 3: 기본 생성자 대신 기본 멤버 초기화자로 초깃값을 설정하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-08T12:00:00
 description: "기본 멤버 초기화자로 깔끔한 초기화를 표현하는 법"
 tags: [C++, Initialization, Constructor]
 series: "Beautiful C++"

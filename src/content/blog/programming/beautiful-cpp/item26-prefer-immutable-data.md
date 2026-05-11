@@ -1,6 +1,6 @@
 ---
 title: "항목 26: 가변 데이터보다는 불변 데이터를 택하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-10T15:00:00
 description: "불변 데이터가 주는 추론·동시성·테스트의 이점"
 tags: [C++, Immutability, const]
 series: "Beautiful C++"

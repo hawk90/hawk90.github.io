@@ -1,6 +1,6 @@
 ---
 title: "항목 28: 값을 초기화하기 전까지는 변수를 선언하지 말라"
-date: 2026-05-10T10:00:00
+date: 2026-05-10T17:00:00
 description: "선언과 초기화를 분리하는 옛 스타일이 만드는 UB의 위험"
 tags: [C++, Initialization, Code Style]
 series: "Beautiful C++"

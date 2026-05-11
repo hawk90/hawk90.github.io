@@ -1,6 +1,6 @@
 ---
 title: "항목 12: 꼭 필요할 때만 템플릿 메타프로그래밍을 사용하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-09T11:00:00
 description: "TMP의 비용과 constexpr·if constexpr·concepts라는 현대적 대안"
 tags: [C++, Templates, Metaprogramming]
 series: "Beautiful C++"

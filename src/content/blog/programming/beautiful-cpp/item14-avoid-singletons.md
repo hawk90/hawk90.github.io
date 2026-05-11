@@ -1,6 +1,6 @@
 ---
 title: "항목 14: 싱글턴을 피하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-09T13:00:00
 description: "싱글턴이 숨기는 비용과 의존성 주입이라는 대안"
 tags: [C++, Design Patterns, Dependency Injection]
 series: "Beautiful C++"

@@ -1,6 +1,6 @@
 ---
 title: "항목 13: 원시 포인터나 참조로 소유권을 넘기지 말라"
-date: 2026-05-10T10:00:00
+date: 2026-05-09T12:00:00
 description: "소유권을 타입으로 표현하기: unique_ptr, shared_ptr, 관찰 포인터"
 tags: [C++, Ownership, Smart Pointers]
 series: "Beautiful C++"

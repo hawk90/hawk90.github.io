@@ -1,6 +1,6 @@
 ---
 title: "항목 22: 컴파일 타임에 계산할 수 있는 값은 constexpr를 사용하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-10T11:00:00
 description: "런타임 비용 0의 컴파일 타임 계산을 활용하는 법"
 tags: [C++, constexpr, consteval]
 series: "Beautiful C++"

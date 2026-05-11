@@ -1,6 +1,6 @@
 ---
 title: "항목 15: memset과 memcpy 대신 생성자와 할당 연산자를 사용하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-09T14:00:00
 description: "객체에 바이트 단위 연산을 적용했을 때의 위험과 올바른 대안"
 tags: [C++, Constructor, Undefined Behavior]
 series: "Beautiful C++"

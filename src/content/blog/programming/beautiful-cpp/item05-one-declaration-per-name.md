@@ -1,6 +1,6 @@
 ---
 title: "항목 5: 선언당 단 하나의 이름만 선언하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-08T14:00:00
 description: "한 줄에 여러 변수를 선언할 때 발생하는 함정을 피하는 법"
 tags: [C++, Declarations, Code Style]
 series: "Beautiful C++"

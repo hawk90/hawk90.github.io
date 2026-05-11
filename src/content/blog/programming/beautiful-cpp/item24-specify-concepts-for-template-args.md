@@ -1,6 +1,6 @@
 ---
 title: "항목 24: 모든 템플릿 인수의 콘셉트를 명시하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-10T13:00:00
 description: "C++20 콘셉트로 템플릿 요구사항을 시그니처에 명시하는 법"
 tags: [C++, Concepts, Templates]
 series: "Beautiful C++"

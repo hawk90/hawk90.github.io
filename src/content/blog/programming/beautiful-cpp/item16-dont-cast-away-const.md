@@ -1,6 +1,6 @@
 ---
 title: "항목 16: const를 형 변환하지 말라"
-date: 2026-05-10T10:00:00
+date: 2026-05-09T15:00:00
 description: "const_cast의 함정과 mutable로 의도를 명시하는 방법"
 tags: [C++, const-correctness, mutable]
 series: "Beautiful C++"

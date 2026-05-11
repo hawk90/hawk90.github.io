@@ -1,6 +1,6 @@
 ---
 title: "항목 4: 자명한 getter와 setter는 피하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-08T13:00:00
 description: "자명한 접근자 대신 진짜 불변식을 보호하는 인터페이스 설계"
 tags: [C++, Encapsulation, Class Design]
 series: "Beautiful C++"

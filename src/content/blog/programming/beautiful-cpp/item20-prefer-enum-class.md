@@ -1,6 +1,6 @@
 ---
 title: "항목 20: 단순 열거형보다는 클래스 열거형을 택하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-09T19:00:00
 description: "enum class가 주는 스코프와 타입 안전성"
 tags: [C++, Enums, Type Safety]
 series: "Beautiful C++"

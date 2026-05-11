@@ -1,6 +1,6 @@
 ---
 title: "항목 8: 함수의 인자를 적게 유지하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-08T17:00:00
 description: "긴 인자 목록의 함정을 피하고 의미 단위로 묶어 표현하는 법"
 tags: [C++, API Design, Function Design]
 series: "Beautiful C++"

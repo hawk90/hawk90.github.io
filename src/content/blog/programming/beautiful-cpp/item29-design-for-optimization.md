@@ -1,6 +1,6 @@
 ---
 title: "항목 29: 최적화할 수 있도록 설계하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-10T18:00:00
 description: "컴파일러가 최적화할 여지를 남기는 설계 원칙"
 tags: [C++, Performance, Design]
 series: "Beautiful C++"

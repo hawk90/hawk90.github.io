@@ -1,6 +1,6 @@
 ---
 title: "항목 10: 멤버를 선언한 순서대로 데이터 멤버를 정의하고 초기화하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-08T19:00:00
 description: "초기화 리스트 순서가 선언 순서와 어긋날 때 생기는 함정"
 tags: [C++, Initialization, Constructor]
 series: "Beautiful C++"

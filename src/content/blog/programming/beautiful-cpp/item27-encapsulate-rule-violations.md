@@ -1,6 +1,6 @@
 ---
 title: "항목 27: 규칙 위반을 캡슐화하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-10T16:00:00
 description: "어쩔 수 없이 규칙을 어겨야 할 때 위반을 한 곳에 가두는 법"
 tags: [C++, Encapsulation]
 series: "Beautiful C++"

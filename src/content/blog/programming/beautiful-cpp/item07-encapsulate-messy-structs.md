@@ -1,6 +1,6 @@
 ---
 title: "항목 7: 지저분한 구조체는 코드에 펼쳐놓지 말고 캡슐화하라"
-date: 2026-05-10T10:00:00
+date: 2026-05-08T16:00:00
 description: "외부 C API의 거친 자원 관리를 RAII 래퍼로 한 곳에 가두는 법"
 tags: [C++, RAII, Encapsulation]
 series: "Beautiful C++"
