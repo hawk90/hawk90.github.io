@@ -20,7 +20,7 @@
   (c.east) -- ($(c.east)+(8mm,0)$);
 \draw[draw=edgec, line width=0.4pt]
   ($(c.east)+(8mm,0)$) arc (0:-180:-2mm and -2mm);
-\node[font=\scriptsize] at ($(c.east)+(14mm,0)$) {IOrder (required)};
+\node[font=\scriptsize, anchor=west] at ($(c.east)+(14mm,0)$) {IOrder (required)};
 
 \node[font=\scriptsize, above=2mm of p] {Provided interface (lollipop)};
 \node[font=\scriptsize, below=2mm of c] {Required interface (socket)};
