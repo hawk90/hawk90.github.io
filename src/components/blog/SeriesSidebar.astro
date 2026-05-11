@@ -9,6 +9,39 @@ interface Props {
 
 const { seriesName, posts, currentSlug } = Astro.props;
 const currentIndex = posts.findIndex((p) => p.slug === currentSlug);
+
+type SeriesPost = CollectionEntry<'blog'>;
+const chapterMap = new Map<string, { posts: SeriesPost[]; baseIndex: number }>();
+posts.forEach((post, idx) => {
+  const parts = post.slug.split('/');
+  const chapter = parts.length >= 4 ? parts[2] : '_flat';
+  let entry = chapterMap.get(chapter);
+  if (!entry) {
+    entry = { posts: [], baseIndex: idx };
+    chapterMap.set(chapter, entry);
+  }
+  entry.posts.push(post);
+});
+const chapters = [...chapterMap.entries()].map(([key, value]) => ({
+  key,
+  posts: value.posts,
+  baseIndex: value.baseIndex,
+  label: formatChapter(key),
+}));
+const hasChapters = chapters.some((c) => c.label !== '');
+
+function formatChapter(key: string): string {
+  if (key === '_flat') return '';
+  const m = key.match(/^ch(\d+)(?:-(.+))?$/);
+  if (!m) return key;
+  const num = String(parseInt(m[1], 10)).padStart(2, '0');
+  if (!m[2]) return `Chapter ${num}`;
+  const title = m[2]
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+  return `Chapter ${num} · ${title}`;
+}
 ---
 
 <nav class="mb-8">
@@ -36,34 +69,46 @@ const currentIndex = posts.findIndex((p) => p.slug === currentSlug);
     </div>
   </button>
 
-  <ol class="hidden mt-3 space-y-1" data-series-list>
-    {posts.map((post, index) => {
-      const isCurrent = post.slug === currentSlug;
-      return (
-        <li>
-          <a
-            href={`/blog/${post.slug}`}
-            class:list={[
-              'flex items-start gap-2 py-1.5 text-sm transition-colors rounded-md px-2 -mx-2',
-              isCurrent
-                ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]',
-            ]}
-          >
-            <span class:list={[
-              'shrink-0 w-5 h-5 flex items-center justify-center rounded text-xs',
-              isCurrent
-                ? 'bg-[var(--color-accent)] text-white'
-                : 'bg-[var(--color-bg-tertiary)]'
-            ]}>
-              {index + 1}
-            </span>
-            <span class="line-clamp-2 leading-tight">{post.data.title}</span>
-          </a>
-        </li>
-      );
-    })}
-  </ol>
+  <div class="hidden mt-3 space-y-4" data-series-list>
+    {chapters.map((chapter) => (
+      <div>
+        {hasChapters && chapter.label && (
+          <div class="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1 px-2 -mx-2">
+            {chapter.label}
+          </div>
+        )}
+        <ol class="space-y-1">
+          {chapter.posts.map((post, i) => {
+            const badge = hasChapters ? i + 1 : chapter.baseIndex + i + 1;
+            const isCurrent = post.slug === currentSlug;
+            return (
+              <li>
+                <a
+                  href={`/blog/${post.slug}`}
+                  class:list={[
+                    'flex items-start gap-2 py-1.5 text-sm transition-colors rounded-md px-2 -mx-2',
+                    isCurrent
+                      ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
+                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]',
+                  ]}
+                >
+                  <span class:list={[
+                    'shrink-0 w-5 h-5 flex items-center justify-center rounded text-xs',
+                    isCurrent
+                      ? 'bg-[var(--color-accent)] text-white'
+                      : 'bg-[var(--color-bg-tertiary)]'
+                  ]}>
+                    {badge}
+                  </span>
+                  <span class="line-clamp-2 leading-tight">{post.data.title}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    ))}
+  </div>
 </nav>
 
 <script>

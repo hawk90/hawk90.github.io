@@ -94,7 +94,7 @@ function formatChapter(key: string): string {
                     >
                       <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-[var(--color-accent)] text-white font-bold rounded-lg">
-                          {post.data.seriesOrder || index + 1}
+                          {hasChapters ? index + 1 : post.data.seriesOrder || index + 1}
                         </div>
                         <div class="flex-1 min-w-0">
                           <h3 class="text-lg font-semibold group-hover:text-[var(--color-accent)] transition-colors">
