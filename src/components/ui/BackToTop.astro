@@ -1,0 +1,50 @@
+---
+/**
+ * BackToTop — small floating button bottom-right. Visible after the
+ * user scrolls past one viewport. Click → smooth-scroll to top.
+ */
+---
+
+<button
+  type="button"
+  id="back-to-top"
+  class="hide-in-reading no-print fixed bottom-6 right-6 z-30 w-11 h-11 rounded-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text-secondary)] shadow-md opacity-0 pointer-events-none translate-y-2 transition-all duration-200 ease-out hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border-hover)]"
+  aria-label="Back to top"
+  data-visible="false"
+>
+  <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
+  </svg>
+</button>
+
+<style>
+  #back-to-top[data-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  let backToTopCleanup: (() => void) | null = null;
+  function initBackToTop() {
+    backToTopCleanup?.();
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+    function onScroll() {
+      btn!.dataset.visible = String(window.scrollY > window.innerHeight * 0.7);
+    }
+    function onClick() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    btn.addEventListener('click', onClick);
+    backToTopCleanup = () => {
+      window.removeEventListener('scroll', onScroll);
+      btn.removeEventListener('click', onClick);
+    };
+  }
+  initBackToTop();
+  document.addEventListener('astro:page-load', initBackToTop);
+</script>

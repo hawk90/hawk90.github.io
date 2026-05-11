@@ -4,6 +4,7 @@ import { ClientRouter } from 'astro:transitions';
 import Header from '../components/common/Header.astro';
 import Footer from '../components/common/Footer.astro';
 import ScrollProgress from '../components/ui/ScrollProgress.astro';
+import BackToTop from '../components/ui/BackToTop.astro';
 import SearchModal from '../components/common/SearchModal.astro';
 import { SITE_CONFIG, ANALYTICS_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
@@ -211,6 +212,7 @@ const jsonLd = type === 'article'
       <slot />
     </main>
     <Footer />
+    <BackToTop />
     <SearchModal />
 
     <!-- Keyboard Shortcuts Help Modal -->

@@ -1,0 +1,116 @@
+---
+/**
+ * StickyTitle — shrinks-and-stick header that appears once the user has
+ * scrolled past the article's real <h1>. Shows series + title + a
+ * thin reading-progress bar.
+ *
+ * Pure CSS sticky positioning + a small IntersectionObserver to fade
+ * in only after the page-header is out of view. Zero layout shift —
+ * the element is position:fixed with opacity 0 until activated.
+ */
+
+interface Props {
+  title: string;
+  series?: string;
+  seriesOrder?: number;
+  seriesTotal?: number;
+}
+
+const { title, series, seriesOrder, seriesTotal } = Astro.props;
+---
+
+<div
+  id="sticky-title"
+  class="hide-in-reading fixed top-0 left-0 right-0 z-40 pointer-events-none opacity-0 transition-opacity duration-200 ease-out"
+  aria-hidden="true"
+>
+  <div class="pointer-events-auto bg-[color-mix(in_oklab,var(--color-bg-primary)_85%,transparent)] backdrop-blur-md border-b border-[var(--color-border)] shadow-sm">
+    <div class="container flex items-center gap-3 py-2.5">
+      <a
+        href="#main-content"
+        class="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+        aria-label="Back to top"
+        data-sticky-top
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+        </svg>
+      </a>
+      <div class="min-w-0 flex-1">
+        {series && (
+          <div class="text-[10px] uppercase tracking-wider text-[var(--color-accent)] font-medium leading-none mb-0.5">
+            {series}{seriesOrder && seriesTotal ? ` · ${seriesOrder}/${seriesTotal}` : ''}
+          </div>
+        )}
+        <div class="text-sm font-semibold text-[var(--color-text-primary)] truncate">{title}</div>
+      </div>
+    </div>
+    <!-- thin scroll-progress sliver -->
+    <div class="h-[2px] bg-[var(--color-bg-tertiary)]">
+      <div id="sticky-title-progress" class="h-full bg-[var(--color-accent)] transition-[width] duration-100 ease-linear" style="width: 0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sentinel placed right after the article header — invisible -->
+<div id="sticky-title-sentinel" aria-hidden="true"></div>
+
+<script>
+  let stickyCleanup: (() => void) | null = null;
+
+  function initStickyTitle() {
+    stickyCleanup?.();
+
+    const bar = document.getElementById('sticky-title');
+    const sentinel = document.getElementById('sticky-title-sentinel');
+    const progress = document.getElementById('sticky-title-progress');
+    if (!bar || !sentinel) return;
+
+    const article = document.querySelector<HTMLElement>('article');
+    const placeAfter = document.querySelector<HTMLElement>('article header');
+    if (placeAfter && sentinel.parentElement !== placeAfter.parentElement) {
+      placeAfter.insertAdjacentElement('afterend', sentinel);
+    }
+
+    function setVisible(on: boolean) {
+      bar!.style.opacity = on ? '1' : '0';
+      bar!.setAttribute('aria-hidden', String(!on));
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => setVisible(!entry.isIntersecting),
+      { rootMargin: '0px' },
+    );
+    io.observe(sentinel);
+
+    function onScroll() {
+      if (!article || !progress) return;
+      const rect = article.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      if (total <= 0) { progress.style.width = '100%'; return; }
+      const scrolled = -rect.top;
+      const pct = Math.max(0, Math.min(100, (scrolled / total) * 100));
+      progress.style.width = pct.toFixed(2) + '%';
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
+    const topBtn = bar.querySelector<HTMLAnchorElement>('[data-sticky-top]');
+    function scrollTop(e: Event) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    topBtn?.addEventListener('click', scrollTop);
+
+    stickyCleanup = () => {
+      io.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      topBtn?.removeEventListener('click', scrollTop);
+    };
+  }
+
+  initStickyTitle();
+  document.addEventListener('astro:page-load', initStickyTitle);
+</script>

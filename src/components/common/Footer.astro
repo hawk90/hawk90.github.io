@@ -1,31 +1,78 @@
 ---
-import { BRAND_CONFIG, SOCIAL_CONFIG } from '../../consts/config';
+import { BRAND_CONFIG, SITE_CONFIG, SOCIAL_CONFIG, NAV_CONFIG } from '../../consts/config';
 
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="border-t border-[var(--color-border)] mt-auto no-print">
+<footer class="border-t border-[var(--color-border)] mt-auto no-print bg-[var(--color-bg-primary)]">
   <div class="container py-12">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-      <!-- Copyright -->
-      <div class="text-sm text-[var(--color-text-muted)]">
-        <p>&copy; {currentYear} {BRAND_CONFIG.copyright}. All rights reserved.</p>
+    <!-- Top row: brand + nav columns + social -->
+    <div class="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr] mb-10">
+      <!-- Brand -->
+      <div>
+        <a href="/" class="inline-block text-xl font-bold text-[var(--color-text-primary)]">
+          {BRAND_CONFIG.logoText}<span class="text-[var(--color-accent)]">{BRAND_CONFIG.logoSuffix}</span>
+        </a>
+        <p class="mt-3 text-sm text-[var(--color-text-secondary)] leading-relaxed max-w-sm">
+          {SITE_CONFIG.description}
+        </p>
+        <div class="flex items-center gap-3 mt-4">
+          {SOCIAL_CONFIG.map((link) => (
+            <a
+              href={link.href}
+              target={link.href.startsWith('http') ? '_blank' : undefined}
+              rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+              class="inline-flex w-9 h-9 items-center justify-center rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+              aria-label={link.name}
+            >
+              <Fragment set:html={link.icon} />
+            </a>
+          ))}
+        </div>
       </div>
 
-      <!-- Social Links -->
-      <div class="flex items-center gap-4">
-        {SOCIAL_CONFIG.map((link) => (
-          <a
-            href={link.href}
-            target={link.href.startsWith('http') ? '_blank' : undefined}
-            rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
-            aria-label={link.name}
-          >
-            <Fragment set:html={link.icon} />
-          </a>
-        ))}
+      <!-- Navigation -->
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Navigate</h3>
+        <ul class="space-y-2">
+          {NAV_CONFIG.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
+
+      <!-- Feeds -->
+      <div>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Subscribe</h3>
+        <ul class="space-y-2">
+          <li>
+            <a href="/rss.xml" class="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/></svg>
+              RSS feed
+            </a>
+          </li>
+          <li>
+            <a href="/sitemap-index.xml" class="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">
+              Sitemap
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--color-text-muted)]">
+      <p>&copy; {currentYear} {BRAND_CONFIG.copyright}. All rights reserved.</p>
+      <p>
+        Built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="hover:text-[var(--color-text-secondary)] transition-colors">Astro</a>
+      </p>
     </div>
   </div>
 </footer>

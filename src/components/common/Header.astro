@@ -13,7 +13,11 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
 }
 ---
 
-<header class="sticky top-0 z-50 bg-[var(--color-bg-primary)]/80 backdrop-blur-lg border-b border-[var(--color-border)]">
+<header
+  id="site-header"
+  class="sticky top-0 z-50 bg-[var(--color-bg-primary)]/70 backdrop-blur-lg border-b border-transparent transition-[border-color,background-color,box-shadow] duration-200 ease-out"
+  data-scrolled="false"
+>
   <nav class="container flex items-center justify-between h-16">
     <Logo />
 
@@ -190,4 +194,24 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
   document.addEventListener('astro:page-load', syncNavActive);
   document.addEventListener('astro:after-swap', syncNavActive);
   window.addEventListener('pageshow', syncNavActive);
+</script>
+
+<script>
+  // Header gets a subtle bg + border + shadow once the user scrolls past ~24px.
+  let headerScrollCleanup: (() => void) | null = null;
+  function initHeaderScroll() {
+    headerScrollCleanup?.();
+    const header = document.getElementById('site-header');
+    if (!header) return;
+
+    function onScroll() {
+      const scrolled = window.scrollY > 16;
+      header!.dataset.scrolled = String(scrolled);
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    headerScrollCleanup = () => window.removeEventListener('scroll', onScroll);
+  }
+  initHeaderScroll();
+  document.addEventListener('astro:page-load', initHeaderScroll);
 </script>

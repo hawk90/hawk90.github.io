@@ -539,6 +539,17 @@ body.reading-mode .container { max-width: var(--content-width); }
 }
 .prose img:not(.no-zoom) { cursor: zoom-in; }
 
+/* ─── Header — adopt bg + border once user scrolls ────── */
+#site-header[data-scrolled="true"] {
+  background-color: color-mix(in oklab, var(--color-bg-primary) 90%, transparent);
+  border-bottom-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Author bio card hover ─────────────────────────────── */
+.author-bio { transition: border-color 0.2s var(--ease-out); }
+.author-bio:hover { border-color: var(--color-border-hover); }
+
 /* ─── Reduce motion ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
