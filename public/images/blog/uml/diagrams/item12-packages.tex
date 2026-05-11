@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Package shape = folder tab
+\foreach \name/\x/\y/\label in {%
+  ui/0/0/UI,
+  app/4/0/Application,
+  domain/8/0/Domain,
+  infra/4/-2.5/Infrastructure
+} {
+  \node[draw=nodebord, fill=nodefill, line width=0.4pt,
+        rounded corners=1pt, anchor=south west,
+        minimum width=28mm, minimum height=14mm,
+        align=left, inner sep=4pt]
+    (\name) at (\x*9mm, \y*9mm) {\\ \\ \quad \textbf{\label}};
+  \node[draw=nodebord, fill=nodefill, line width=0.4pt, rounded corners=1pt,
+        anchor=south west, minimum width=8mm, minimum height=3mm]
+    at ($(\name.north west)+(0,-3mm)$) {};
+}
+
+\draw[-{Stealth[length=2.2mm]}, dashed, draw=edgec, line width=0.45pt]
+  (ui.east) -- (app.west);
+\draw[-{Stealth[length=2.2mm]}, dashed, draw=edgec, line width=0.45pt]
+  (app.east) -- (domain.west);
+\draw[-{Stealth[length=2.2mm]}, dashed, draw=edgec, line width=0.45pt]
+  (infra.north) -- (app.south);
+
+\node[font=\scriptsize] at ($(ui.east)!0.5!(app.west)+(0,2mm)$) {$<<$import$>>$};
+
+\end{tikzpicture}
+\end{document}

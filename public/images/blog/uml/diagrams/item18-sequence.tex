@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Lifelines
+\foreach \name/\x/\label in {a/0/{:Customer}, b/4/{:OrderUI}, c/8/{:OrderSvc}, d/12/{:Stripe}} {
+  \node[cls, minimum width=24mm] (\name h) at (\x, 0) {\label};
+  \draw[dashed, draw=edgec, line width=0.4pt] (\name h) -- ($(\name h)+(0,-7)$);
+}
+
+% activation bars
+\fill[fill=hifill, draw=hibord, line width=0.3pt] (-0.1, -0.9) rectangle (0.1, -5.3);
+\fill[fill=hifill, draw=hibord, line width=0.3pt] (3.9, -1.4) rectangle (4.1, -5);
+\fill[fill=hifill, draw=hibord, line width=0.3pt] (7.9, -2.0) rectangle (8.1, -4.6);
+\fill[fill=hifill, draw=hibord, line width=0.3pt] (11.9, -2.6) rectangle (12.1, -4);
+
+% messages (sync = solid arrow, async = open arrow, return = dashed)
+\draw[-{Stealth[length=2mm]}, draw=edgec, line width=0.5pt]
+  (0.1,-1.2) -- node[above, font=\scriptsize]{1: place(items)} (3.9,-1.2);
+\draw[-{Stealth[length=2mm]}, draw=edgec, line width=0.5pt]
+  (4.1,-1.8) -- node[above, font=\scriptsize]{2: submit(order)} (7.9,-1.8);
+\draw[-{Stealth[length=2mm]}, draw=edgec, line width=0.5pt]
+  (8.1,-2.4) -- node[above, font=\scriptsize]{3: charge(amount)} (11.9,-2.4);
+\draw[-{Stealth[length=2mm]}, dashed, draw=edgec, line width=0.5pt]
+  (11.9,-3.8) -- node[above, font=\scriptsize]{4: txId} (8.1,-3.8);
+\draw[-{Stealth[length=2mm]}, dashed, draw=edgec, line width=0.5pt]
+  (7.9,-4.4) -- node[above, font=\scriptsize]{5: confirmed} (4.1,-4.4);
+\draw[-{Stealth[length=2mm]}, dashed, draw=edgec, line width=0.5pt]
+  (3.9,-5.1) -- node[above, font=\scriptsize]{6: receipt} (0.1,-5.1);
+
+% Combined fragment (alt)
+\draw[draw=edgec, line width=0.4pt] (-0.6,-2.0) rectangle (12.6,-3.6);
+\node[fill=clifill, draw=clibord, font=\scriptsize, inner sep=2pt, anchor=north west]
+  at (-0.6,-2.0) {alt [stock available]};
+
+\end{tikzpicture}
+\end{document}

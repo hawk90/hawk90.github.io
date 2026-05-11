@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=42mm] (lib) {
+  \begin{tabular}{l} \textbf{Library} \\ \hline + name : String \\ \hline + addBook(b : Book) \\ \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=42mm, right=24mm of lib] (book) {
+  \begin{tabular}{l} \textbf{Book} \\ \hline + title : String \\ + isbn : String \\ \hline \\ \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=42mm, below=12mm of lib] (mem) {
+  \begin{tabular}{l} \textbf{Member} \\ \hline + name : String \\ \hline + borrow(b : Book) \\ \end{tabular}
+};
+
+\node[abs, below=12mm of book, minimum width=42mm] (item) {
+  \begin{tabular}{l} \textit{LibraryItem} \\ \hline + checkout() \\ \end{tabular}
+};
+
+% Library -- Book: composition (filled diamond)
+\draw[{Diamond[length=2.6mm,width=2.6mm]}-{Stealth[length=2.2mm]},
+      draw=edgec, line width=0.5pt]
+  (lib.east) -- node[above, font=\scriptsize]{1..*} (book.west);
+
+% Member -- Book: association
+\draw[draw=edgec, line width=0.5pt]
+  (mem.east) -| node[above, font=\scriptsize, near start]{borrows 0..3} (book.south);
+
+% Book -- LibraryItem: generalization
+\draw[inh] (book.south) -- (item.north);
+
+\end{tikzpicture}
+\end{document}

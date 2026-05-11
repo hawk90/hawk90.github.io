@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\foreach \name/\x/\label in {a/0/{:Client}, b/6/{:Server}} {
+  \node[cls, minimum width=24mm] (\name h) at (\x, 0) {\label};
+  \draw[dashed, draw=edgec, line width=0.4pt] (\name h) -- ($(\name h)+(0,-5)$);
+}
+
+\draw[-{Stealth[length=2mm]}, draw=edgec, line width=0.5pt]
+  (0.1,-1.0) -- node[above, font=\scriptsize]{request} (5.9,-1.0);
+\draw[-{Stealth[length=2mm]}, dashed, draw=edgec, line width=0.5pt]
+  (5.9,-3.5) -- node[above, font=\scriptsize]{reply} (0.1,-3.5);
+
+% Time markers
+\node[font=\scriptsize, left=0mm of {(0.1,-1.0)}] {t};
+\node[font=\scriptsize, left=0mm of {(0.1,-3.5)}] {t'};
+
+% Constraint
+\node[fill=clifill, draw=clibord, rounded corners=2pt, font=\scriptsize,
+      align=left, anchor=west] at (-3, -2.2) {\{t' - t $<$ 100ms\}};
+
+\end{tikzpicture}
+\end{document}

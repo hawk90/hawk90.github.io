@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=14mm]
+
+\node[circle, fill=edgec, minimum size=3mm, inner sep=0pt] (start) {};
+\node[draw=nodebord, fill=nodefill, rounded corners=8pt, line width=0.4pt,
+      minimum width=28mm, minimum height=11mm, right=of start] (s1) {Closed};
+\node[draw=nodebord, fill=nodefill, rounded corners=8pt, line width=0.4pt,
+      minimum width=28mm, minimum height=11mm, right=20mm of s1] (s2) {Open};
+\node[draw=nodebord, fill=nodefill, rounded corners=8pt, line width=0.4pt,
+      minimum width=28mm, minimum height=11mm, below=of s2] (s3) {Locked};
+
+\draw[arr] (start) -- (s1);
+\draw[arr] (s1) to[bend left=15] node[above, font=\scriptsize]{open} (s2);
+\draw[arr] (s2) to[bend left=15] node[below, font=\scriptsize]{close} (s1);
+\draw[arr] (s1) to[bend right=20] node[right, font=\scriptsize]{lock} (s3);
+\draw[arr] (s3) to[bend right=20] node[left, font=\scriptsize]{unlock} (s1);
+
+\end{tikzpicture}
+\end{document}

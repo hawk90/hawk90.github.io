@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=10mm]
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=38mm] (a) {
+  \begin{tabular}{l}
+    \scriptsize $<<$interface$>>$ \\
+    \textbf{\textit{Comparable}} \\ \hline \\ \hline
+    + \textit{compareTo(o) : int} \\
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=38mm, right=12mm of a] (b) {
+  \begin{tabular}{l}
+    \scriptsize $<<$datatype$>>$ \\
+    \textbf{Money} \\ \hline
+    + amount : Decimal \\
+    + currency : String \\
+    \hline
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=38mm, right=12mm of b] (c) {
+  \begin{tabular}{l}
+    \scriptsize $<<$signal$>>$ \\
+    \textbf{OrderPlaced} \\ \hline
+    + orderId : Long \\ \hline
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      double, double distance=0.6pt,
+      minimum width=38mm, below=12mm of b] (d) {
+  \begin{tabular}{l}
+    \textbf{Scheduler} \\
+    \scriptsize \{active\} \\ \hline \\ \hline
+    + tick() \\
+  \end{tabular}
+};
+
+\node[font=\scriptsize, below=2mm of d] {Active class (실행 스레드 보유)};
+
+\end{tikzpicture}
+\end{document}

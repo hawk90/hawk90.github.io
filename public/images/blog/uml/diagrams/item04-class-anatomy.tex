@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Concrete class
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt,
+      minimum width=58mm, inner sep=0pt] (a) {
+  \begin{tabular}{l}
+    \textbf{Customer} \\
+    \hline
+    - id : Long \\
+    - name : String \\
+    - tier : Tier = Bronze \\
+    \hline
+    + addOrder(o : Order) : void \\
+    + getOrders() : List$<$Order$>$ \\
+    -- validate() : boolean \\
+  \end{tabular}
+};
+
+% Abstract class
+\node[draw=absbord, fill=absfill, rounded corners=2pt,
+      minimum width=58mm, inner sep=0pt,
+      right=18mm of a] (b) {
+  \begin{tabular}{l}
+    \textit{\textbf{Shape}} \\
+    \textit{\scriptsize $<<$abstract$>>$} \\
+    \hline
+    \# color : Color \\
+    \hline
+    + \textit{area() : double} \\
+    + draw() : void \\
+  \end{tabular}
+};
+
+% Labels
+\node[font=\scriptsize, below=2mm of a] {구체 클래스};
+\node[font=\scriptsize, below=2mm of b] {추상 클래스 (이탤릭)};
+
+\end{tikzpicture}
+\end{document}

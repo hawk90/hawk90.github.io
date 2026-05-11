@@ -10,15 +10,15 @@
   c/.style={cls, draw=conbord, fill=confill}
 ]
 \node[q] (q1) at (0, 0)        {키-값 매핑?};
-\node[q] (q2) at (-5, -2.4)    {정렬 순회?};
-\node[c] (m)  at (-8, -4.6)    {std::map};
-\node[c] (um) at (-4, -4.6)    {unordered\_map};
+\node[q] (q2) at (-6, -2.4)    {정렬 순회?};
+\node[c] (m)  at (-9, -4.6)    {std::map};
+\node[c] (um) at (-5, -4.6)    {unordered\_map};
 
-\node[q] (q3) at (4, -2.4)     {목적?};
-\node[c] (s)  at (-0.4, -4.6)  {set / unordered\_set};
-\node[c] (pq) at (3.4,  -4.6)  {priority\_queue};
-\node[c] (qq) at ( 6.6, -4.6)  {queue / stack};
-\node[c] (vec)at (10,   -4.6)  {vector / deque / array};
+\node[q] (q3) at (5, -2.4)     {목적?};
+\node[c] (s)  at (-1, -4.6)    {set / unordered\_set};
+\node[c] (pq) at ( 3.5, -4.6)  {priority\_queue};
+\node[c] (qq) at ( 7.5, -4.6)  {queue / stack};
+\node[c] (vec)at (11.5,-4.6)   {vector / deque / array};
 
 \draw[uses] (q1.west)  -- node[above, font=\tiny]{Y} (q2.north);
 \draw[uses] (q1.east)  -- node[above, font=\tiny]{N} (q3.north);

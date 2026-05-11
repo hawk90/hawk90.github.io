@@ -10,7 +10,7 @@
   m/.style={rectangle, draw=black!35, line width=0.3pt, minimum size=6mm, inner sep=1pt, fill=nodefill}
 ]
 
-% --- Sample graph (top-left) ---
+% --- Sample graph ---
 \node[font=\sffamily\bfseries\small] at (-3, 4.4) {예시 그래프};
 \node[vx] (a) at (-4, 3)   {1};
 \node[vx] (b) at (-2, 3)   {2};
@@ -19,9 +19,10 @@
 
 \draw[arr] (a) -- node[above, font=\tiny]{3} (b);
 \draw[arr] (a) -- node[left, font=\tiny]{8} (c);
-\draw[arr] (b) -- node[right, font=\tiny]{2} (d);
+% B↔D pair: B→D bends right with "2" on the right; D→B bends left with "−3" on the far left
+\draw[arr] (b) to[bend left=18]  node[right=2pt, font=\tiny]{2}    (d);
+\draw[arr] (d) to[bend left=18]  node[left=2pt,  font=\tiny]{$-$3} (b);
 \draw[arr] (c) -- node[below, font=\tiny]{5} (d);
-\draw[arr] (d) to[bend left=20] node[right, font=\tiny]{$-$3} (b);
 
 % --- D^(0) ---
 \node[font=\sffamily\bfseries\small] at (3, 4.4) {$D^{(0)}$ — 직접 간선};
@@ -58,6 +59,5 @@
 
 \node[font=\sffamily\scriptsize, anchor=west] at (-5, -5)
   {규칙: $D^{(k)}[i][j] = \min(D^{(k-1)}[i][j],\ D^{(k-1)}[i][k] + D^{(k-1)}[k][j])$};
-
 \end{tikzpicture}
 \end{document}

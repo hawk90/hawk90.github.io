@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Three 3D nodes
+\foreach \name/\x/\y/\label in {
+  web/0/0/{<<device>> WebServer},
+  app/6/0/{<<device>> AppServer},
+  db/12/0/{<<device>> DBServer}
+} {
+  \draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+    (\x, \y) -- ++(40mm, 0) -- ++(0, -28mm) -- ++(-40mm, 0) -- cycle;
+  \draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+    ($(\x, \y)+(3mm, 3mm)$) -- ++(40mm, 0) -- ++(-3mm, -3mm);
+  \draw[draw=nodebord, line width=0.4pt]
+    ($(\x, \y)+(40mm, 0)$) -- ++(3mm, 3mm) -- ++(0, -28mm) -- ++(-3mm, -3mm);
+  \node[anchor=north west, font=\sffamily\scriptsize\bfseries]
+    at ($(\x, \y)+(2mm, -2mm)$) {\label};
+}
+
+% Artifacts inside (small boxes with paper-fold icon)
+\node[draw=nodebord, fill=nodefill, line width=0.4pt, font=\scriptsize,
+      minimum width=32mm, minimum height=8mm]
+  at ($(0,0)+(20mm,-15mm)$) {nginx.conf};
+
+\node[draw=nodebord, fill=nodefill, line width=0.4pt, font=\scriptsize,
+      minimum width=32mm, minimum height=8mm]
+  at ($(6,0)+(20mm,-15mm)$) {order-svc.jar};
+
+\node[draw=nodebord, fill=nodefill, line width=0.4pt, font=\scriptsize,
+      minimum width=32mm, minimum height=8mm]
+  at ($(12,0)+(20mm,-15mm)$) {postgres-data};
+
+% Communication paths
+\draw[draw=edgec, line width=0.5pt]
+  ($(0,0)+(40mm,-14mm)$) -- ($(6,0)+(0,-14mm)$)
+  node[midway, above, font=\scriptsize] {HTTP};
+\draw[draw=edgec, line width=0.5pt]
+  ($(6,0)+(40mm,-14mm)$) -- ($(12,0)+(0,-14mm)$)
+  node[midway, above, font=\scriptsize] {TCP/5432};
+
+\end{tikzpicture}
+\end{document}

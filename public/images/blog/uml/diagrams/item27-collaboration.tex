@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Collaboration = dashed ellipse
+\draw[draw=nodebord, dashed, line width=0.5pt, fill=clifill]
+  (0,0) ellipse (32mm and 14mm);
+\node[font=\sffamily\bfseries\small] at (0, 0.8) {Observer};
+\node[font=\scriptsize] at (0, 0.4) {(parameterized collaboration)};
+
+% Roles
+\node[cls, minimum width=22mm] (sub) at (-2.4, -0.5) {:Subject};
+\node[cls, minimum width=22mm] (obs) at (2.4, -0.5) {:Observer};
+\draw[uses] (sub) -- node[above, font=\scriptsize]{notifies} (obs);
+
+\end{tikzpicture}
+\end{document}

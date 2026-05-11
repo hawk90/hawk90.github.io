@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,trees}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  level 1/.style={sibling distance=46mm, level distance=14mm},
+  level 2/.style={sibling distance=22mm, level distance=14mm}
+]
+
+\node[hi] (uml) {UML}
+  child { node[abs] (bb) {Building Blocks}
+    child { node[con] (th) {Things} }
+    child { node[con] (re) {Relationships} }
+    child { node[con] (di) {Diagrams} }
+  }
+  child { node[abs] (ru) {Rules}
+    child { node[imp] (ru1) {Names / Scope} }
+    child { node[imp] (ru2) {Visibility} }
+    child { node[imp] (ru3) {Integrity / Exec} }
+  }
+  child { node[abs] (cm) {Common Mechanisms}
+    child { node[cli] (cm1) {Specifications} }
+    child { node[cli] (cm2) {Adornments} }
+    child { node[cli] (cm3) {Divisions / Ext.} }
+  };
+
+\end{tikzpicture}
+\end{document}

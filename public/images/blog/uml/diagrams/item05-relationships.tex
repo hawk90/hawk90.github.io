@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  node distance=14mm and 22mm]
+
+% Row 1: Dependency
+\node[cls] (a1) {ClientA};
+\node[cls, right=of a1] (b1) {ServiceA};
+\draw[-{Stealth[length=2.2mm]}, dashed, draw=edgec, line width=0.45pt]
+  (a1) -- (b1);
+\node[font=\scriptsize, above=0mm of $(a1)!0.5!(b1)$] {$<<$use$>>$};
+\node[font=\scriptsize\bfseries, left=2mm of a1] {Dependency};
+
+% Row 2: Association
+\node[cls, below=of a1] (a2) {Order};
+\node[cls, right=of a2] (b2) {Customer};
+\draw[draw=edgec, line width=0.5pt] (a2) -- node[above, font=\scriptsize]{owns} (b2);
+\node[font=\scriptsize] at ($(a2)+(0,-0.5)$) {1};
+\node[font=\scriptsize] at ($(b2)+(0,-0.5)$) {0..*};
+\node[font=\scriptsize\bfseries, left=2mm of a2] {Association};
+
+% Row 3: Generalization
+\node[cls, below=of a2] (a3) {Dog};
+\node[abs, right=of a3] (b3) {Animal};
+\draw[inh] (a3) -- (b3);
+\node[font=\scriptsize\bfseries, left=2mm of a3] {Generalization};
+
+% Row 4: Realization
+\node[cls, below=of a3] (a4) {ArrayList};
+\node[abs, right=of a4] (b4) {$<<$interface$>>$ \\ List};
+\draw[-{Triangle[length=3mm,width=3mm,open]}, dashed, draw=edgec, line width=0.5pt]
+  (a4) -- (b4);
+\node[font=\scriptsize\bfseries, left=2mm of a4] {Realization};
+
+\end{tikzpicture}
+\end{document}

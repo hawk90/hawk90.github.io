@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[draw=nodebord, fill=nodefill, double, double distance=0.6pt,
+      rounded corners=2pt, inner sep=0pt, minimum width=42mm] (a) {
+  \begin{tabular}{l}
+    \scriptsize $<<$active$>>$ \\ \textbf{Producer} \\ \hline \\ \hline
+    + produce()
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, double, double distance=0.6pt,
+      rounded corners=2pt, inner sep=0pt, minimum width=42mm, right=22mm of a] (c) {
+  \begin{tabular}{l}
+    \scriptsize $<<$active$>>$ \\ \textbf{Consumer} \\ \hline \\ \hline
+    + consume()
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=42mm, below=12mm of $(a)!0.5!(c)$] (q) {
+  \begin{tabular}{l}
+    \textbf{Queue} \\ \hline \\ \hline
+    + push(x) \\ + pop() : x
+  \end{tabular}
+};
+
+\draw[uses] (a.south) |- node[left, font=\scriptsize, near end]{push} (q.west);
+\draw[uses] (c.south) |- node[right, font=\scriptsize, near end]{pop} (q.east);
+
+\end{tikzpicture}
+\end{document}

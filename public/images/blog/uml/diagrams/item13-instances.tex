@@ -1,0 +1,34 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=46mm] (a) {
+  \begin{tabular}{l}
+    \underline{\textbf{o1 : Order}} \\ \hline
+    id = 42 \\
+    total = 19.99 \\
+    status = Placed \\
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=46mm, right=18mm of a] (b) {
+  \begin{tabular}{l}
+    \underline{\textbf{: Customer}} \\ \hline
+    name = "Hawk" \\
+  \end{tabular}
+};
+
+\draw[draw=edgec, line width=0.5pt] (a) -- node[above, font=\scriptsize]{owner} (b);
+
+\node[font=\scriptsize, below=2mm of a] {이름있는 인스턴스};
+\node[font=\scriptsize, below=2mm of b] {익명 인스턴스};
+
+\end{tikzpicture}
+\end{document}

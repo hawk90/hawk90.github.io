@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Pattern ellipse
+\draw[draw=nodebord, dashed, line width=0.5pt, fill=clifill]
+  (0,0) ellipse (24mm and 9mm);
+\node[font=\sffamily\bfseries\small] at (0,0) {Observer};
+
+% Pattern parameters (rounded box)
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, font=\scriptsize,
+      anchor=south west, dashed] at ($(0,0)+(-22mm, 9mm)$)
+  {Subject, Observer};
+
+% Classes that play the roles
+\node[cls, minimum width=24mm] (st) at (-3.5, -3) {StockTicker};
+\node[cls, minimum width=24mm] (chart) at (3.5, -3) {PriceChart};
+
+% Link from pattern to participants
+\draw[draw=edgec, dashed, line width=0.4pt]
+  (st.north) -- node[left, font=\scriptsize]{Subject} ($(0,0)+(-1.6, -0.4)$);
+\draw[draw=edgec, dashed, line width=0.4pt]
+  (chart.north) -- node[right, font=\scriptsize]{Observer} ($(0,0)+(1.6, -0.4)$);
+
+\end{tikzpicture}
+\end{document}

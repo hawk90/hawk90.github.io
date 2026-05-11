@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Component box with the component icon
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      minimum width=46mm, minimum height=20mm] (c) at (0,0) {};
+\node[anchor=north west, font=\sffamily\bfseries\small]
+  at ($(c.north west)+(2mm,-2mm)$) {OrderService};
+\node[font=\scriptsize, anchor=north west]
+  at ($(c.north west)+(2mm,-7mm)$) {$<<$component$>>$};
+
+% Component icon (small two-tab box) in top right
+\node[draw=nodebord, line width=0.4pt, fill=nodefill,
+      minimum width=8mm, minimum height=6mm] (icon)
+  at ($(c.north east)+(-7mm,-4mm)$) {};
+\draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+  ($(icon.west)+(0,1mm)$) rectangle ++(-3mm, 2mm);
+\draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+  ($(icon.west)+(0,-3mm)$) rectangle ++(-3mm, 2mm);
+
+% Provided interface (lollipop) on right
+\draw[draw=edgec, line width=0.4pt] (c.east) -- ($(c.east)+(8mm,0)$);
+\node[circle, draw=edgec, fill=nodefill, line width=0.4pt, minimum size=4mm,
+      inner sep=0pt] at ($(c.east)+(10mm,0)$) {};
+\node[font=\scriptsize] at ($(c.east)+(20mm,0)$) {IOrder};
+
+% Required interface (socket) on left
+\draw[draw=edgec, line width=0.4pt] (c.west) -- ($(c.west)+(-8mm,0)$);
+\draw[draw=edgec, line width=0.4pt] ($(c.west)+(-8mm,2mm)$) arc (90:270:2mm);
+\node[font=\scriptsize] at ($(c.west)+(-20mm,0)$) {IPayment};
+
+\end{tikzpicture}
+\end{document}

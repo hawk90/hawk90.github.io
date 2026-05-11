@@ -5,12 +5,15 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
-\node[cli] (ct) at (-4.4, 0)   {Caretaker};
-\node[imp] (m)  at ( 0,    0)   {Memento \\ \scriptsize getState()};
-\node[con] (or) at ( 4.4,  0)   {Originator \\ \scriptsize createMemento() \\ \scriptsize restore(m)};
+\node[cli] (ct) at (-5,    1.4) {Caretaker};
+\node[imp] (m)  at ( 0,    1.4) {Memento \\ \scriptsize getState()};
+\node[con] (or) at ( 5,    1.4) {Originator \\ \scriptsize createMemento() \\ \scriptsize restore(m)};
 
 \draw[agg] (ct.east) -- (m.west) node[midway, above, font=\tiny]{stores};
 \draw[ret] (or.west) -- (m.east) node[midway, above, font=\tiny]{creates};
-\draw[arr] (m.south) to[bend left=20] node[midway, below, font=\tiny]{restores} (or.south);
+
+% Restore arrow routes well below to avoid label collision
+\draw[arr] (m.south) to[bend right=35] node[midway, below, font=\tiny]{restores}
+           (or.south);
 \end{tikzpicture}
 \end{document}

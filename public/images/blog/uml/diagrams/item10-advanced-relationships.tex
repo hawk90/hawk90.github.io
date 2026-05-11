@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=10mm and 18mm]
+
+% Composition vs Aggregation
+\node[cls] (h) {House};
+\node[cls, right=of h] (r) {Room};
+\draw[{Diamond[length=2.8mm,width=2.8mm]}-,
+      draw=edgec, line width=0.5pt]
+  (h) -- node[above, font=\scriptsize]{composition} (r);
+
+\node[cls, below=of h] (d) {Department};
+\node[cls, right=of d] (e) {Employee};
+\draw[{Diamond[length=2.8mm,width=2.8mm,open]}-,
+      draw=edgec, line width=0.5pt]
+  (d) -- node[above, font=\scriptsize]{aggregation} (e);
+
+% Qualified association
+\node[cls, right=46mm of r] (b) {Bank};
+\node[cls, right=22mm of b] (a) {Account};
+\node[draw=nodebord, fill=nodefill, font=\scriptsize, inner sep=2pt,
+      anchor=west] at ($(b.east)+(0,0)$) (q) {accountNo};
+\draw[draw=edgec, line width=0.5pt] (q.east) -- (a.west);
+\node[font=\scriptsize, above=2mm of $(b)!0.5!(a)$] {qualified association};
+
+% Association class
+\node[cls, below=22mm of b] (p) {Person};
+\node[cls, right=of p] (c) {Company};
+\draw[draw=edgec, line width=0.5pt] (p) -- node[above, font=\scriptsize]{employed} (c);
+\node[cls, below=10mm of $(p)!0.5!(c)$] (e2) {Job};
+\draw[draw=edgec, line width=0.4pt, dashed] (e2.north) -- ($(p.east)!0.5!(c.west)$);
+\node[font=\scriptsize, right=2mm of e2] {association class};
+
+\end{tikzpicture}
+\end{document}

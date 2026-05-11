@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% 3D-style node (UML node)
+\foreach \name/\x/\label in {a/0/{WebServer}, b/8/{DBServer}} {
+  \draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+    (\x, 0) -- ++(34mm, 0) -- ++(0, -22mm) -- ++(-34mm, 0) -- cycle;
+  \draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+    ($(\x, 0)+(3mm, 3mm)$) -- ++(34mm, 0) -- ++(-3mm, -3mm);
+  \draw[draw=nodebord, line width=0.4pt]
+    ($(\x, 0)+(34mm, 0)$) -- ++(3mm, 3mm) -- ++(0, -22mm) -- ++(-3mm, -3mm);
+  \node[anchor=north west, font=\sffamily\bfseries\small]
+    at ($(\x, 0)+(2mm, -3mm)$) {\label};
+  \node[font=\scriptsize, anchor=north west]
+    at ($(\x, 0)+(2mm, -8mm)$) {$<<$device$>>$};
+}
+
+% Arrow between
+\draw[uses] (3.4 + 0.6, -1.1) -- (8 - 0.1, -1.1)
+  node[midway, above, font=\scriptsize] {TCP/IP};
+
+\end{tikzpicture}
+\end{document}

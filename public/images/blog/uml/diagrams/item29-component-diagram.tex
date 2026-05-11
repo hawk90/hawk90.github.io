@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\foreach \name/\x/\y/\label in {
+  ui/0/0/{Web UI},
+  ord/5/0/{Order Service},
+  pay/10/0/{Payment Service},
+  db/5/-3/{Order DB}
+} {
+  \node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+        minimum width=34mm, minimum height=14mm] (\name) at (\x, \y) {};
+  \node[anchor=north west, font=\sffamily\bfseries\small]
+    at ($(\name.north west)+(2mm,-2mm)$) {\label};
+  \node[font=\scriptsize, anchor=north west]
+    at ($(\name.north west)+(2mm,-7mm)$) {$<<$component$>>$};
+}
+
+% Assembly: UI provides nothing, requires IOrder
+\draw[draw=edgec, line width=0.4pt] (ui.east) -- ++(6mm,0);
+\draw[draw=edgec, line width=0.4pt] ($(ui.east)+(6mm, 2mm)$) arc (90:270:2mm);
+
+\draw[draw=edgec, line width=0.4pt] (ord.west) -- ++(-6mm,0);
+\node[circle, draw=edgec, fill=nodefill, line width=0.4pt, minimum size=4mm,
+      inner sep=0pt] at ($(ord.west)+(-8mm,0)$) {};
+\node[font=\scriptsize] at ($(ord.west)+(-12mm,-3mm)$) {IOrder};
+
+% Order Service requires Payment
+\draw[draw=edgec, line width=0.4pt] (ord.east) -- ++(6mm,0);
+\draw[draw=edgec, line width=0.4pt] ($(ord.east)+(6mm,2mm)$) arc (90:270:2mm);
+
+\draw[draw=edgec, line width=0.4pt] (pay.west) -- ++(-6mm,0);
+\node[circle, draw=edgec, fill=nodefill, line width=0.4pt, minimum size=4mm,
+      inner sep=0pt] at ($(pay.west)+(-8mm,0)$) {};
+\node[font=\scriptsize] at ($(pay.west)+(-12mm,-3mm)$) {IPayment};
+
+% Order -> DB (artifact deploy via dashed)
+\draw[uses] (ord.south) -- node[right, font=\scriptsize]{JDBC} (db.north);
+
+\end{tikzpicture}
+\end{document}

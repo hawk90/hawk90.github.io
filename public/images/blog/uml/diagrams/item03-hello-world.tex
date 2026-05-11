@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% UML class box: name | attributes | operations
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      minimum width=46mm, inner sep=0pt] (cls) {
+  \begin{tabular}{l}
+    \textbf{HelloWorld} \\
+    \hline
+    \\
+    \hline
+    + main(args : String[\,]) : void \\
+    + println(s : String) : void \\
+  \end{tabular}
+};
+
+% Note
+\node[fill=clifill, draw=clibord, rounded corners=2pt, line width=0.4pt,
+      align=left, font=\scriptsize, right=14mm of cls] (note) {
+  + : public \\
+  -- : private \\
+  \# : protected \\
+  $\sim$ : package
+};
+
+\draw[edge, dashed] (cls.east) -- (note.west);
+
+\end{tikzpicture}
+\end{document}

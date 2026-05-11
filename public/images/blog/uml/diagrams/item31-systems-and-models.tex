@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,trees}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  level 1/.style={sibling distance=44mm, level distance=14mm},
+  level 2/.style={sibling distance=20mm, level distance=12mm}
+]
+
+\node[hi] {System}
+  child { node[abs] {Logical View}
+    child { node[con, font=\scriptsize] {Class} }
+    child { node[con, font=\scriptsize] {Object} }
+    child { node[con, font=\scriptsize] {State} }
+  }
+  child { node[abs] {Process View}
+    child { node[con, font=\scriptsize] {Sequence} }
+    child { node[con, font=\scriptsize] {Activity} }
+  }
+  child { node[abs] {Implementation}
+    child { node[con, font=\scriptsize] {Component} }
+    child { node[con, font=\scriptsize] {Package} }
+  }
+  child { node[abs] {Deployment}
+    child { node[con, font=\scriptsize] {Deployment} }
+    child { node[con, font=\scriptsize] {Artifact} }
+  }
+  child { node[abs] {Use Case (+1)}
+    child { node[con, font=\scriptsize] {Use Case} }
+  };
+
+\end{tikzpicture}
+\end{document}

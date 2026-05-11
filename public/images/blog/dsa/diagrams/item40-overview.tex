@@ -8,48 +8,44 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
   cat/.style={cls, draw=hibord, fill=hifill, font=\sffamily\bfseries\small,
-              minimum width=22mm, inner sep=4pt},
-  c/.style={cls, draw=absbord, fill=absfill, minimum width=22mm,
+              minimum width=24mm, inner sep=4pt},
+  c/.style={cls, draw=absbord, fill=absfill, minimum width=24mm,
             font=\sffamily\footnotesize}
 ]
-% Linear
-\node[cat] (lin)  at (-6, 4)  {배열 / 리스트};
-\node[c]   (arr)  at (-8, 2.5){vector};
-\node[c]   (lst)  at (-6, 2.5){list / GLL};
-\node[c]   (st)   at (-4, 2.5){stack/queue};
+% --- Top row: Linear / Tree / Hash ---
+\node[cat] (lin)  at (-7, 4)   {배열 / 리스트};
+\node[c]   (arr)  at (-9, 2.5) {vector};
+\node[c]   (lst)  at (-7, 2.5) {list / GLL};
+\node[c]   (st)   at (-5, 2.5) {stack/queue};
 
-% Tree
-\node[cat] (tr)   at (0, 4)   {트리};
-\node[c]   (bst)  at (-2, 2.5){BST};
-\node[c]   (avl)  at (0, 2.5) {AVL/RB};
-\node[c]   (heap) at (2, 2.5) {Heap};
-\node[c]   (skip) at (-1, 1)  {Skip List};
-\node[c]   (bt)   at (1.2, 1) {B-Tree};
+\node[cat] (tr)   at ( 0, 4)   {트리};
+\node[c]   (bst)  at (-2.5, 2.5) {BST};
+\node[c]   (avl)  at ( 0, 2.5) {AVL/RB};
+\node[c]   (heap) at ( 2.5, 2.5) {Heap};
+\node[c]   (skip) at (-1.3, 1)  {Skip List};
+\node[c]   (bt)   at ( 1.3, 1)  {B-Tree};
 
-% Hash
-\node[cat] (h)    at (5.5, 4) {해싱};
-\node[c]   (sh)   at (4.5, 2.5){static};
-\node[c]   (dh)   at (6.5, 2.5){dynamic};
+\node[cat] (h)    at ( 7, 4)   {해싱};
+\node[c]   (sh)   at ( 5.5, 2.5) {static};
+\node[c]   (dh)   at ( 8.5, 2.5) {dynamic};
 
-% Graph
-\node[cat] (g)    at (-6, -1) {그래프};
-\node[c]   (dfs)  at (-8, -2.5){DFS/BFS};
-\node[c]   (mst)  at (-6, -2.5){MST};
-\node[c]   (sp)   at (-4, -2.5){Shortest path};
-\node[c]   (scc)  at (-5, -4) {SCC / topo};
+% --- Bottom row: Graph / Sort / Patterns (more horizontal spacing) ---
+\node[cat] (g)    at (-7, -1)  {그래프};
+\node[c]   (dfs)  at (-9, -2.5) {DFS/BFS};
+\node[c]   (mst)  at (-7, -2.5) {MST};
+\node[c]   (sp)   at (-5, -2.5) {Shortest path};
+\node[c]   (scc)  at (-6, -4)   {SCC / topo};
 
-% Sort
-\node[cat] (so)   at (0, -1)  {정렬};
-\node[c]   (cmp)  at (-1.5,-2.5){비교 (n log n)};
-\node[c]   (nc)   at (1.5,-2.5){비교 외 (n)};
-\node[c]   (ext)  at (0, -4)  {외부 정렬};
+\node[cat] (so)   at ( 0, -1)  {정렬};
+\node[c]   (cmp)  at (-2, -2.5) {비교 (n log n)};
+\node[c]   (nc)   at ( 2, -2.5) {비교 외 (n)};
+\node[c]   (ext)  at ( 0, -4)   {외부 정렬};
 
-% Patterns
-\node[cat] (pat)  at (5.5, -1){알고리즘 패턴};
-\node[c]   (dp)   at (4, -2.5){DP};
-\node[c]   (gd)   at (5.5,-2.5){Greedy};
-\node[c]   (dc)   at (7, -2.5){분할정복};
-\node[c]   (bk)   at (5.5,-4) {Backtrack};
+\node[cat] (pat)  at ( 6.5, -1)  {알고리즘 패턴};
+\node[c]   (dp)   at ( 4.0, -2.5) {DP};
+\node[c]   (gd)   at ( 6.5, -2.5) {Greedy};
+\node[c]   (dc)   at ( 9.0, -2.5) {분할정복};
+\node[c]   (bk)   at ( 6.5, -4)   {Backtrack};
 
 \foreach \from/\to in {lin/arr, lin/lst, lin/st, tr/bst, tr/avl, tr/heap, avl/skip, avl/bt,
                       h/sh, h/dh, g/dfs, g/mst, g/sp, mst/scc, so/cmp, so/nc, cmp/ext,

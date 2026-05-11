@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,trees}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  level 1/.style={sibling distance=70mm, level distance=14mm},
+  level 2/.style={sibling distance=18mm, level distance=14mm}
+]
+
+\node[hi] (root) {UML Diagrams (13+)}
+  child { node[abs] (s) {Structural (7)}
+    child { node[con, font=\scriptsize] {Class} }
+    child { node[con, font=\scriptsize] {Object} }
+    child { node[con, font=\scriptsize] {Package} }
+    child { node[con, font=\scriptsize] {Component} }
+    child { node[con, font=\scriptsize] {Composite} }
+    child { node[con, font=\scriptsize] {Deployment} }
+    child { node[con, font=\scriptsize] {Artifact} }
+  }
+  child { node[abs] (b) {Behavioral (6)}
+    child { node[imp, font=\scriptsize] {Use Case} }
+    child { node[imp, font=\scriptsize] {Sequence} }
+    child { node[imp, font=\scriptsize] {Communic.} }
+    child { node[imp, font=\scriptsize] {State Machine} }
+    child { node[imp, font=\scriptsize] {Activity} }
+    child { node[imp, font=\scriptsize] {Timing} }
+  };
+
+\end{tikzpicture}
+\end{document}

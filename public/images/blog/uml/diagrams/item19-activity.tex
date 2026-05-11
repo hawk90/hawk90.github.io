@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=8mm]
+
+\node[circle, fill=edgec, minimum size=3mm, inner sep=0pt] (start) {};
+\node[draw=nodebord, fill=nodefill, rounded corners=4pt, line width=0.4pt,
+      minimum width=30mm, minimum height=7mm, below=of start] (a1) {receive order};
+\node[q, below=of a1] (q1) {in stock?};
+\node[draw=nodebord, fill=nodefill, rounded corners=4pt, line width=0.4pt,
+      minimum width=30mm, minimum height=7mm, below left=12mm and 8mm of q1] (a2) {charge card};
+\node[draw=nodebord, fill=nodefill, rounded corners=4pt, line width=0.4pt,
+      minimum width=30mm, minimum height=7mm, below right=12mm and 8mm of q1] (a3) {notify backorder};
+\node[draw=nodebord, fill=nodefill, rounded corners=4pt, line width=0.4pt,
+      minimum width=30mm, minimum height=7mm, below=20mm of q1] (a4) {ship};
+\node[circle, draw=edgec, fill=nodefill, line width=0.6pt, minimum size=4mm,
+      inner sep=0pt, below=of a4] (end) {};
+\node[circle, fill=edgec, inner sep=0pt, minimum size=2mm] at (end) {};
+
+\draw[arr] (start) -- (a1);
+\draw[arr] (a1) -- (q1);
+\draw[arr] (q1) -| node[above, font=\scriptsize, near start]{[yes]} (a2);
+\draw[arr] (q1) -| node[above, font=\scriptsize, near start]{[no]} (a3);
+\draw[arr] (a2) |- (a4);
+\draw[arr] (a3) |- (a4);
+\draw[arr] (a4) -- (end);
+
+\end{tikzpicture}
+\end{document}

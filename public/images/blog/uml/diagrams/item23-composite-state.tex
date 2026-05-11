@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Outer state: Connected
+\node[draw=nodebord, fill=nodefill, rounded corners=8pt, line width=0.5pt,
+      minimum width=70mm, minimum height=42mm, anchor=south west] (conn) at (0,0) {};
+\node[font=\sffamily\bfseries\small, anchor=north west] at ($(conn.north west)+(2mm,-2mm)$) {Connected};
+
+% Inner: Idle, Working
+\node[draw=nodebord, fill=nodefill, rounded corners=6pt, line width=0.4pt,
+      minimum width=24mm, minimum height=10mm] (idle) at (1.5, 1.5) {Idle};
+\node[draw=nodebord, fill=nodefill, rounded corners=6pt, line width=0.4pt,
+      minimum width=24mm, minimum height=10mm] (work) at (5.4, 1.5) {Working};
+\draw[arr] (idle) to[bend left=15] node[above, font=\scriptsize]{start} (work);
+\draw[arr] (work) to[bend left=15] node[below, font=\scriptsize]{done} (idle);
+
+% History pseudostate
+\node[circle, draw=edgec, fill=nodefill, line width=0.4pt, minimum size=5mm,
+      inner sep=0pt, font=\scriptsize] (h) at (5.4, 3.4) {H};
+
+% Outside: Disconnected
+\node[draw=nodebord, fill=nodefill, rounded corners=8pt, line width=0.5pt,
+      minimum width=28mm, minimum height=12mm] (disc) at (4.0,-2) {Disconnected};
+
+\draw[arr] (conn.south) -- node[right, font=\scriptsize]{lose-conn} (disc.north);
+\draw[arr, dashed] (disc.east) to[bend left=20] node[above, font=\scriptsize]{reconnect} (h);
+
+% initial inside
+\node[circle, fill=edgec, minimum size=2mm, inner sep=0pt] (i) at (0.4, 1.5) {};
+\draw[arr] (i) -- (idle);
+
+\end{tikzpicture}
+\end{document}

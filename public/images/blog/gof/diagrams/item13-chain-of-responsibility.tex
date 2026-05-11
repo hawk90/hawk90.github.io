@@ -6,17 +6,23 @@
 \begin{tikzpicture}[blog]
 
 \node[cli] (c)   at (-5,    1.6) {Client};
-\node[abs] (h)   at (-1.2,  1.6) {Handler \\ \scriptsize handle()  next};
-\node[con] (h1)  at (-3.4, -1.6) {ConcHandler1};
-\node[con] (h2)  at ( 0.0, -1.6) {ConcHandler2};
-\node[con] (h3)  at ( 3.4, -1.6) {ConcHandler3};
+\node[abs] (h)   at (-1.0,  1.6) {Handler \\ \scriptsize handle()  next};
+\node[con] (h1)  at (-4.0, -2.0) {ConcHandler1};
+\node[con] (h2)  at ( 0.0, -2.0) {ConcHandler2};
+\node[con] (h3)  at ( 4.0, -2.0) {ConcHandler3};
 
 \draw[agg] (c.east) -- (h.west);
-\draw[agg] (h.east) to[bend left=45] node[right, font=\tiny]{next} (h.north east);
-\draw[inh] (h1.north) -- ++(0,0.4) -| (h.south);
+
+% self-loop "next" — bigger and on the right of Handler
+\draw[agg] (h.north east) to[out=50, in=130, looseness=4]
+           node[above, font=\tiny]{next} (h.north west);
+
+\draw[inh] (h1.north) -- ++(0,0.6) -| (h.south);
 \draw[inh] (h2.north) -- (h.south);
-\draw[inh] (h3.north) -- ++(0,0.4) -| (h.south);
-\draw[arr] (h1) -- (h2);
-\draw[arr] (h2) -- (h3);
+\draw[inh] (h3.north) -- ++(0,0.6) -| (h.south);
+
+% chain
+\draw[arr] (h1) -- node[above, font=\tiny]{next} (h2);
+\draw[arr] (h2) -- node[above, font=\tiny]{next} (h3);
 \end{tikzpicture}
 \end{document}

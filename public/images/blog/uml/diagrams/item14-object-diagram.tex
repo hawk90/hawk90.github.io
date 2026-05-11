@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=38mm] (lib) {
+  \begin{tabular}{l}
+    \underline{\textbf{seoul : Library}} \\ \hline
+    name = "서울도서관" \\
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=38mm, right=14mm of lib] (b1) {
+  \begin{tabular}{l}
+    \underline{\textbf{: Book}} \\ \hline
+    isbn = "001" \\ title = "Algorithms" \\
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=38mm, below=8mm of b1] (b2) {
+  \begin{tabular}{l}
+    \underline{\textbf{: Book}} \\ \hline
+    isbn = "002" \\ title = "UML 가이드" \\
+  \end{tabular}
+};
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, inner sep=0pt,
+      minimum width=38mm, below=8mm of lib] (m) {
+  \begin{tabular}{l}
+    \underline{\textbf{hawk : Member}} \\ \hline
+    name = "Hawk" \\
+  \end{tabular}
+};
+
+\draw[draw=edgec, line width=0.5pt] (lib) -- (b1);
+\draw[draw=edgec, line width=0.5pt] (lib) -- (b2);
+\draw[draw=edgec, line width=0.5pt] (m) -- node[above, font=\scriptsize]{borrows} (b2);
+
+\end{tikzpicture}
+\end{document}

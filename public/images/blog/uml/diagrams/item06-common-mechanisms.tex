@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Stereotyped class
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt,
+      minimum width=54mm, inner sep=0pt] (a) {
+  \begin{tabular}{l}
+    \scriptsize $<<$entity$>>$ \\
+    \textbf{Order} \\
+    \hline
+    + id : Long \\
+    + total : Money \\
+    \hline
+    + place() : void \\
+  \end{tabular}
+};
+
+% Tag values + constraint
+\node[fill=clifill, draw=clibord, rounded corners=2pt,
+      align=left, font=\scriptsize, right=14mm of a] (note) {
+  \{author = "hawk"\} \\
+  \{version = 1.2\} \\
+  \{ordered\}
+};
+\draw[edge, dashed] (a.east) -- (note.west);
+
+\node[font=\scriptsize, below=2mm of a]
+  {스테레오타입 (어휘 확장)};
+\node[font=\scriptsize, below=2mm of note]
+  {태그값 + 제약};
+
+\end{tikzpicture}
+\end{document}

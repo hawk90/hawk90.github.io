@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=18mm]
+
+% Provided (lollipop) and required (socket)
+\node[cls] (p) {OrderService};
+\node[right=24mm of p] (lollipop) {};
+\draw (p.east) -- ($(p.east)+(8mm,0)$) node[circle,draw=edgec,minimum size=4mm,
+   fill=nodefill,line width=0.4pt](circle){};
+\node[font=\scriptsize, right=1mm of circle] {IOrder};
+
+\node[cls, below=of p] (c) {CheckoutUI};
+\draw[draw=edgec, line width=0.4pt]
+  (c.east) -- ($(c.east)+(8mm,0)$);
+\draw[draw=edgec, line width=0.4pt]
+  ($(c.east)+(8mm,0)$) arc (0:-180:-2mm and -2mm);
+\node[font=\scriptsize] at ($(c.east)+(14mm,0)$) {IOrder (required)};
+
+\node[font=\scriptsize, above=2mm of p] {Provided interface (lollipop)};
+\node[font=\scriptsize, below=2mm of c] {Required interface (socket)};
+
+\end{tikzpicture}
+\end{document}

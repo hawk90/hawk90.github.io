@@ -5,12 +5,12 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
-\node[abs] (col) at (-3.2, 1.6) {Colleague};
-\node[abs] (med) at ( 3.2, 1.6) {Mediator \\ \scriptsize notify(c, ev)*};
-\node[con] (ca)  at (-5.4,-1.6) {ColleagueA};
-\node[con] (cb)  at (-3.2,-1.6) {ColleagueB};
-\node[con] (cc)  at (-1.0,-1.6) {ColleagueC};
-\node[imp] (cm)  at ( 3.2,-1.6) {ConcreteMediator};
+\node[abs] (col) at (-3.6, 1.6) {Colleague};
+\node[abs] (med) at ( 4.0, 1.6) {Mediator \\ \scriptsize notify(c, ev)*};
+\node[con] (ca)  at (-6.4, -1.8) {ColleagueA};
+\node[con] (cb)  at (-3.6, -1.8) {ColleagueB};
+\node[con] (cc)  at (-0.8, -1.8) {ColleagueC};
+\node[imp] (cm)  at ( 4.0, -1.8) {ConcreteMediator};
 
 \draw[inh] (ca.north) -- ++(0,0.4) -| (col.south);
 \draw[inh] (cb.north) -- (col.south);
