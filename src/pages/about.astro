@@ -31,9 +31,17 @@ import { SITE_CONFIG } from '../consts/config';
           <p class="text-xl text-[var(--color-text-secondary)] leading-relaxed mb-6">
             {ABOUT_DATA.tagline}
           </p>
-          <div class="flex flex-wrap gap-3">
+          <div class="flex flex-wrap gap-2.5">
             {ABOUT_DATA.skills.map((skill) => (
-              <span class="px-3 py-1 text-sm bg-[var(--color-bg-tertiary)] rounded-full">{skill}</span>
+              <span
+                class:list={[
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border transition-transform hover:-translate-y-0.5',
+                  `skill-chip skill-${skill.color}`,
+                ]}
+              >
+                <span aria-hidden="true">{skill.icon}</span>
+                <span>{skill.label}</span>
+              </span>
             ))}
           </div>
         </div>
@@ -75,3 +83,19 @@ import { SITE_CONFIG } from '../consts/config';
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* Per-skill accent — each chip in its own hue, all share the same level */
+  .skill-chip { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .skill-chip:hover { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12); }
+
+  .skill-cyan   { background: rgba(34, 211, 238, 0.12); color: #67e8f9; border-color: rgba(34, 211, 238, 0.32); }
+  .skill-amber  { background: rgba(251, 146, 60, 0.12); color: #fdba74; border-color: rgba(251, 146, 60, 0.32); }
+  .skill-green  { background: rgba(52, 211, 153, 0.12); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.32); }
+  .skill-violet { background: rgba(167, 139, 250, 0.15); color: #c4b5fd; border-color: rgba(167, 139, 250, 0.35); }
+
+  html.light .skill-cyan   { color: #0e7490; border-color: rgba(14, 116, 144, 0.30); }
+  html.light .skill-amber  { color: #c2410c; border-color: rgba(194, 65, 12, 0.30); }
+  html.light .skill-green  { color: #047857; border-color: rgba(4, 120, 87, 0.30); }
+  html.light .skill-violet { color: #6d28d9; border-color: rgba(109, 40, 217, 0.30); }
+</style>

@@ -10,12 +10,13 @@ export const ABOUT_DATA = {
   title: 'System & Firmware Developer',
   tagline: 'System & Firmware Developer with a passion for working close to the hardware.',
 
-  // Skill badges shown on the hero section
+  // Skill badges shown on the hero section.
+  // Each gets a complementary accent color + small icon.
   skills: [
-    'Embedded Systems',
-    'ARM / RISC-V',
-    'Jetson Orin',
-    'Kernel Porting',
+    { label: 'Embedded Systems', icon: '🔌', color: 'cyan' },
+    { label: 'ARM / RISC-V',     icon: '🧠', color: 'amber' },
+    { label: 'Jetson Orin',      icon: '⚡', color: 'green' },
+    { label: 'Kernel Porting',   icon: '🐧', color: 'violet' },
   ],
 
   // Content sections
