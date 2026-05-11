@@ -5,13 +5,10 @@ import { Resvg } from '@resvg/resvg-js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { SITE_CONFIG, BRAND_CONFIG } from '../consts/config';
+import { escapeHtml } from '../lib/utils';
 
 const fontPath = path.join(process.cwd(), 'public/fonts/Pretendard-Bold.otf');
 const fontData = await fs.readFile(fontPath);
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 
 export async function GET(_context: APIContext) {
   const safeTitle = escapeHtml(SITE_CONFIG.title);

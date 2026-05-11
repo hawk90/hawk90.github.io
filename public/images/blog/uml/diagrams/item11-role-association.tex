@@ -2,6 +2,7 @@
 \usepackage{tikz}
 \usepackage{fontspec}
 \setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
 \input{../../_design.tex}
@@ -12,8 +13,8 @@
 \node[cb] (c) at ( 3.5, 0) {Company};
 
 \draw[edge] (p.east) -- node[above, font=\scriptsize\itshape] {employed\_by} (c.west);
-\node[font=\scriptsize\itshape, edgesc, anchor=north] at ($ (p.east) + (0.4, -0.2) $) {"employee"};
-\node[font=\scriptsize\itshape, edgesc, anchor=north] at ($ (c.west) + (-0.4, -0.2) $) {"employer"};
+\node[font=\scriptsize\itshape, edgesc, anchor=north] at ($ (p.east) + (0.4, -0.55) $) {"employee"};
+\node[font=\scriptsize\itshape, edgesc, anchor=north] at ($ (c.west) + (-0.4, -0.55) $) {"employer"};
 
 \end{tikzpicture}
 \end{document}

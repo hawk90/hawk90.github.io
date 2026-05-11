@@ -8,7 +8,7 @@ const currentPath = Astro.url.pathname;
 function isNavActive(href: string, match: ReadonlyArray<string> | undefined): boolean {
   const prefixes = match ?? [href];
   return prefixes.some(
-    (p) => currentPath === p || (p !== '/' && currentPath.startsWith(p + '/')) || currentPath === p,
+    (p) => currentPath === p || (p !== '/' && currentPath.startsWith(p + '/')),
   );
 }
 ---

@@ -1,3 +1,5 @@
+import { escapeHtml } from './utils';
+
 export interface SearchItem {
   title: string;
   description: string;
@@ -111,26 +113,20 @@ export function searchPosts(items: SearchItem[], options: SearchOptions | string
   return scored.map((s) => s.item);
 }
 
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  };
-  return text.replace(/[&<>"']/g, (char) => map[char]);
-}
-
 export function highlightMatch(text: string, query: string): string {
-  if (!query.trim()) return escapeHtml(text);
+  const q = query.trim();
+  if (!q) return escapeHtml(text);
 
-  const escapedText = escapeHtml(text);
-  const escapedQuery = escapeHtml(query);
-  const regex = new RegExp(`(${escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const escapedQuery = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedQuery})`, 'gi');
 
-  return escapedText.replace(
-    regex,
-    '<mark class="bg-[var(--color-accent-muted)] text-[var(--color-accent)] px-0.5 rounded">$1</mark>'
-  );
+  const parts = text.split(regex);
+  const lowerQ = q.toLowerCase();
+  return parts
+    .map((part) =>
+      part.toLowerCase() === lowerQ
+        ? `<mark class="bg-[var(--color-accent-muted)] text-[var(--color-accent)] px-0.5 rounded">${escapeHtml(part)}</mark>`
+        : escapeHtml(part)
+    )
+    .join('');
 }

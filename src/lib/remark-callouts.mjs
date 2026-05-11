@@ -1,22 +1,3 @@
-/**
- * remark-callouts — turn `:::type [Title]` directive blocks into
- * <aside class="callout callout-type"> with an optional title row.
- *
- * Requires `remark-directive` to parse the ::: syntax.
- *
- * Markdown examples:
- *   :::note
- *   plain note
- *   :::
- *
- *   :::warning[Heads up]
- *   custom title via [label]
- *   :::
- *
- * Authors use [Title] (remark-directive's label syntax) for a custom
- * title. Without one, the default for that type is shown.
- */
-
 import { visit } from 'unist-util-visit';
 
 const ALIAS = {

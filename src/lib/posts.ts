@@ -19,28 +19,30 @@ export function sortByDate(posts: BlogPost[]): BlogPost[] {
 }
 
 /**
- * 태그별 포스트 수 계산 (카운트 내림차순)
+ * 태그별 포스트 수 계산 (카운트 내림차순, 이름 오름차순)
  */
 export function getTagsWithCount(posts: BlogPost[]): [string, number][] {
   const counts: Record<string, number> = {};
   posts.flatMap((p) => p.data.tags).forEach((tag) => {
     counts[tag] = (counts[tag] || 0) + 1;
   });
-  return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
 
 /**
  * 모든 고유 태그 (알파벳순)
  */
 export function getAllTags(posts: BlogPost[]): string[] {
-  return [...new Set(posts.flatMap((p) => p.data.tags))].sort();
+  return [...new Set(posts.flatMap((p) => p.data.tags))].sort((a, b) => a.localeCompare(b));
 }
 
 /**
- * 포스트에서 모든 고유 시리즈 추출
+ * 포스트에서 모든 고유 시리즈 추출 (알파벳순)
  */
 export function getAllSeries(posts: BlogPost[]): string[] {
-  return [...new Set(posts.filter((p) => p.data.series).map((p) => p.data.series!))];
+  return [...new Set(posts.filter((p) => p.data.series).map((p) => p.data.series!))].sort((a, b) =>
+    a.localeCompare(b),
+  );
 }
 
 /**

@@ -4,7 +4,7 @@ import PostCard from '../../components/blog/PostCard.astro';
 import BlogSidebar from '../../components/blog/BlogSidebar.astro';
 import Pagination from '../../components/blog/Pagination.astro';
 import { BLOG_CONFIG, SITE_CONFIG } from '../../consts/config';
-import { getPublishedPosts, type BlogPost } from '../../lib/posts';
+import { getPublishedPosts } from '../../lib/posts';
 import { t } from '../../consts/ui-strings';
 
 export async function getStaticPaths() {
@@ -36,12 +36,6 @@ export async function getStaticPaths() {
   }
 
   return paths;
-}
-
-interface Props {
-  posts: BlogPost[];
-  currentPage: number;
-  totalPages: number;
 }
 
 const { posts, currentPage, totalPages } = Astro.props;

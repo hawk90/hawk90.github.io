@@ -7,15 +7,10 @@ import path from 'node:path';
 import { getPublishedPosts, type BlogPost } from '../../lib/posts';
 import { SITE_CONFIG } from '../../consts/config';
 import { themeForSeries } from '../../lib/og-themes';
+import { escapeHtml } from '../../lib/utils';
 
 const fontPath = path.join(process.cwd(), 'public/fonts/Pretendard-Bold.otf');
 const fontData = await fs.readFile(fontPath);
-
-// Text-content escape only — we don't insert user content into attributes,
-// so '&' can pass through (satori-html does not decode entities reliably).
-function escapeHtml(s: string): string {
-  return s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();

@@ -37,3 +37,17 @@ export function getSeriesUrl(seriesName: string): string {
 export function getTagUrl(tagName: string): string {
   return `/tags/${encodeURIComponent(tagName.toLowerCase())}`;
 }
+
+/**
+ * Escape HTML special characters
+ */
+export function escapeHtml(str: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return str.replace(/[&<>"']/g, (m) => map[m]);
+}

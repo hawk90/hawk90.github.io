@@ -1,5 +1,8 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
 \input{../../_design.tex}
@@ -7,17 +10,17 @@
   cb/.style={cls, minimum width=36mm}
 ]
 % Provided interface (lollipop)
-\node[cb] (svc) at (0, 1.8) {OrderService};
-\draw[edge] (svc.north) -- ++(0, 0.8) node[circle, draw=edgec, fill=nodefill, line width=0.4pt, minimum size=4mm, inner sep=0pt]{};
-\node[font=\scriptsize\itshape, anchor=south] at (0, 2.95) {IOrder};
-\node[font=\scriptsize\itshape, anchor=west, text=edgesc] at (svc.east) {\ \ ← 제공};
+\node[cb] (svc) at (0, 1.6) {OrderService};
+\draw[edge] (svc.north) -- ++(0, 0.6) node[circle, draw=edgec, fill=nodefill, line width=0.4pt, minimum size=4mm, inner sep=0pt] (svcLolli){};
+\node[font=\scriptsize\itshape, anchor=south] at (svcLolli.north) {IOrder};
+\node[font=\scriptsize, text=edgesc, anchor=west] at (svc.east) {\ \ ← 제공};
 
 % Required interface (socket)
 \node[cb] (ui) at (0, -1.6) {CheckoutUI};
-\draw[edge] (ui.south) -- ++(0, -0.6);
-\draw[edge] ($ (ui.south) + (0,-0.6) $) arc[start angle=0, end angle=180, radius=2mm];
-\node[font=\scriptsize\itshape, anchor=north] at (0, -2.5) {IOrder};
-\node[font=\scriptsize\itshape, anchor=west, text=edgesc] at (ui.east) {\ \ ← 필요};
+\draw[edge] (ui.south) -- ++(0, -0.5) coordinate (uiSocketBase);
+\draw[edge] ($ (uiSocketBase) + (-0.18, 0) $) arc[start angle=180, end angle=360, radius=1.8mm];
+\node[font=\scriptsize\itshape, anchor=north] at ($ (uiSocketBase) + (0, -0.35) $) {IOrder};
+\node[font=\scriptsize, text=edgesc, anchor=west] at (ui.east) {\ \ ← 필요};
 
 \end{tikzpicture}
 \end{document}

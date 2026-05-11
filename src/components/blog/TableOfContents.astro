@@ -92,12 +92,24 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
     });
 
     function updateTocHighlight() {
+      const OFFSET = 120;
       const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const bodyHeight = document.body.offsetHeight;
+      
       let currentId = '';
 
-      for (const heading of headingElements) {
-        if (heading.offsetTop - 120 <= scrollY) {
-          currentId = heading.id;
+      // If we're at the very bottom, highlight the last heading
+      if (scrollY + windowHeight >= bodyHeight - 20) {
+        currentId = headingElements[headingElements.length - 1]?.id || '';
+      } else {
+        for (const heading of headingElements) {
+          const top = heading.getBoundingClientRect().top;
+          if (top <= OFFSET) {
+            currentId = heading.id;
+          } else {
+            break;
+          }
         }
       }
 
