@@ -25,7 +25,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "astro check"
+    "check": "astro check",
+    "sync:book-notes": "node scripts/sync-book-notes.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
