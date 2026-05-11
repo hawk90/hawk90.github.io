@@ -5,7 +5,7 @@ description: "§1.2 에서 부분공간(subspace)을 정의했다. 그러나 정
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 103
-draft: true
+draft: false
 ---
 
 §1.2 에서 부분공간(subspace)을 정의했다. 그러나 정의만으로는 부족하다. 부분공간을 *손으로 짓는* 방법도 있어야 한다 — 그래야 마음먹은 부분공간을 자유롭게 만들고 다룰 수 있다.

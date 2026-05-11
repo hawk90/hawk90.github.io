@@ -5,7 +5,7 @@ description: "순서 기저(ordered basis) 을 고정하면 $$"
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 193
-draft: true
+draft: false
 ---
 
 > **시험·복습 직전 1분 회상용.** 정확한 증명·정의는 [README](./README.md) 의 절별 파일 참조.

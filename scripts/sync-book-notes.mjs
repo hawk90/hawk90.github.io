@@ -151,7 +151,7 @@ function buildFrontmatter({ title, description, seriesOrder }) {
     `tags: [${TAGS.map((t) => yaml(t)).join(', ')}]`,
     `series: ${yaml(SERIES)}`,
     `seriesOrder: ${seriesOrder}`,
-    'draft: true',
+    'draft: false',
     '---',
     '',
   );
