@@ -4,6 +4,13 @@ import Logo from './Logo.astro';
 import { NAV_CONFIG } from '../../consts/config';
 
 const currentPath = Astro.url.pathname;
+
+function isNavActive(href: string, match: ReadonlyArray<string> | undefined): boolean {
+  const prefixes = match ?? [href];
+  return prefixes.some(
+    (p) => currentPath === p || (p !== '/' && currentPath.startsWith(p + '/')) || currentPath === p,
+  );
+}
 ---
 
 <header class="sticky top-0 z-50 bg-[var(--color-bg-primary)]/80 backdrop-blur-lg border-b border-[var(--color-border)]">
@@ -18,9 +25,10 @@ const currentPath = Astro.url.pathname;
             <a
               href={link.href}
               data-nav-link={link.href}
+              data-nav-match={(link.match ?? [link.href]).join(',')}
               class:list={[
                 'text-sm font-medium transition-colors',
-                currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
+                isNavActive(link.href, link.match)
                   ? 'text-[var(--color-accent)]'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
               ]}
@@ -94,9 +102,10 @@ const currentPath = Astro.url.pathname;
           <a
             href={link.href}
             data-nav-link={link.href}
+            data-nav-match={(link.match ?? [link.href]).join(',')}
             class:list={[
               'block py-2 text-base font-medium transition-colors',
-              currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
+              isNavActive(link.href, link.match)
                 ? 'text-[var(--color-accent)]'
                 : 'text-[var(--color-text-secondary)]',
             ]}
@@ -163,7 +172,11 @@ const currentPath = Astro.url.pathname;
     const path = location.pathname;
     document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]').forEach((a) => {
       const href = a.dataset.navLink || a.getAttribute('href') || '';
-      const active = path === href || (href !== '/' && path.startsWith(href));
+      const matchAttr = a.dataset.navMatch;
+      const prefixes = matchAttr ? matchAttr.split(',') : [href];
+      const active = prefixes.some(
+        (p) => path === p || (p !== '/' && path.startsWith(p + '/')),
+      );
       const isMobile = a.classList.contains('block');
       a.classList.toggle('text-[var(--color-accent)]', active);
       a.classList.toggle('text-[var(--color-text-secondary)]', !active);

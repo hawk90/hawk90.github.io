@@ -24,9 +24,13 @@ export const BRAND_CONFIG = {
 };
 
 // --- Navigation ---
-export const NAV_CONFIG = [
+export const NAV_CONFIG: ReadonlyArray<{
+  href: string;
+  label: string;
+  match?: ReadonlyArray<string>;
+}> = [
   { href: '/about', label: 'About' },
-  { href: '/blog', label: 'Blog' },
+  { href: '/blog', label: 'Blog', match: ['/blog', '/series', '/tags'] },
   { href: '/resume', label: 'Resume' },
 ];
 
