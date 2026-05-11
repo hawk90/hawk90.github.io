@@ -26,14 +26,7 @@ draft: false
 
 ## 용어
 
-```
-            (root)
-              A
-             / \
-            B   C       ← B는 A의 자식, A는 B의 부모
-           / \   \
-          D   E   F     ← D, E, F는 leaf
-```
+<img src="/images/blog/dsa/diagrams/item10-binary-tree-terms.svg" alt="이진 트리 용어" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 | 용어 | 의미 |
 | --- | --- |
@@ -87,13 +80,7 @@ Node* node_new(int v) {
 
 ## 4가지 순회
 
-```
-        1
-       / \
-      2   3
-     / \   \
-    4   5   6
-```
+<img src="/images/blog/dsa/diagrams/item10-expr-tree-eval.svg" alt="표현식 트리 평가" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 | 순회 | 순서 | 결과 |
 | --- | --- | --- |

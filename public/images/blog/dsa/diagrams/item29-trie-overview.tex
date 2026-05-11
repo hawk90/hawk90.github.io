@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[vxh] (r) at (0, 2.5) {root};
+\node[vx]  (a) at (-2, 1.3) {a};
+\node[vx]  (b) at ( 0, 1.3) {b};
+\node[vx]  (c) at ( 2, 1.3) {c};
+\node[vx]  (la) at (-2, 0)  {n};
+\node[vx]  (lb) at ( 0, 0)  {a};
+\node[vx]  (lc) at ( 2, 0)  {a};
+\node[vxc] (xa) at (-2, -1.3) {t};
+\node[vxc] (xb) at ( 0, -1.3) {t};
+\node[vxc] (xc) at ( 2, -1.3) {r};
+
+\draw[edge] (r) -- (a);
+\draw[edge] (r) -- (b);
+\draw[edge] (r) -- (c);
+\draw[edge] (a) -- (la);
+\draw[edge] (b) -- (lb);
+\draw[edge] (c) -- (lc);
+\draw[edge] (la) -- (xa);
+\draw[edge] (lb) -- (xb);
+\draw[edge] (lc) -- (xc);
+
+\node[anchor=west, font=\sffamily\scriptsize] at (-1.4, -1.3) {ant};
+\node[anchor=west, font=\sffamily\scriptsize] at ( 0.6, -1.3) {bat};
+\node[anchor=west, font=\sffamily\scriptsize] at ( 2.6, -1.3) {car};
+\end{tikzpicture}
+\end{document}

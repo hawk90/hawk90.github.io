@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[vxh] (n50) at (0, 2)    {50};
+\node[vx]  (n30) at (-1.4, 1) {30};
+\node[vx]  (n40) at (1.4, 1)  {40};
+\node[vx]  (n10) at (-2.2, 0) {10};
+\node[vx]  (n20) at (-0.6, 0) {20};
+\node[vx]  (n35) at (1.4, 0)  {35};
+
+\draw[edge] (n50) -- (n30);
+\draw[edge] (n50) -- (n40);
+\draw[edge] (n30) -- (n10);
+\draw[edge] (n30) -- (n20);
+\draw[edge] (n40) -- (n35);
+
+\node[anchor=west, font=\sffamily\footnotesize] at (3, 1) {Max-heap:};
+\node[anchor=west, font=\sffamily\footnotesize] at (3, 0.5) {parent $\geq$ children};
+\end{tikzpicture}
+\end{document}

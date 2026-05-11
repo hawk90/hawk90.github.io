@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  svc/.style={cls, minimum width=32mm},
+  db/.style={cls, minimum width=20mm, font=\footnotesize}
+]
+\node[svc] (gw) at (-5.0, 0) {API Gateway};
+
+\node[svc] (o)  at ( 0.5,  2.0) {Order};
+\node[svc] (i)  at ( 0.5,  0.0) {Inventory};
+\node[svc] (p)  at ( 0.5, -2.0) {Payment};
+
+\node[db] (d1) at (5.0,  2.0) {DB1};
+\node[db] (d2) at (5.0,  0.0) {DB2};
+\node[db] (d3) at (5.0, -2.0) {DB3};
+
+\draw[arr] (gw.east) -- (o.west);
+\draw[arr] (gw.east) -- (i.west);
+\draw[arr] (gw.east) -- (p.west);
+
+\draw[arr] (o.east) -- (d1.west);
+\draw[arr] (i.east) -- (d2.west);
+\draw[arr] (p.east) -- (d3.west);
+\end{tikzpicture}
+\end{document}

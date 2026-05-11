@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  minh/.style={vx, draw=absbord, fill=absfill, font=\sffamily\small},
+  maxh/.style={vxc, font=\sffamily\small}
+]
+% Root (dummy)
+\node[vx, fill=nodefill, draw=nodebord] (r) at (0, 3) {root};
+% Left subtree (min-heap)
+\node[minh] (la) at (-2, 1.8) {5};
+\node[minh] (lb) at (-3, 0.4) {10};
+\node[minh] (lc) at (-1, 0.4) {15};
+% Right subtree (max-heap)
+\node[maxh] (ra) at ( 2, 1.8) {40};
+\node[maxh] (rb) at ( 3, 0.4) {35};
+\node[maxh] (rc) at ( 1, 0.4) {25};
+
+\draw[edge] (r) -- (la); \draw[edge] (r) -- (ra);
+\draw[edge] (la) -- (lb); \draw[edge] (la) -- (lc);
+\draw[edge] (ra) -- (rb); \draw[edge] (ra) -- (rc);
+
+\node[anchor=center, font=\sffamily\small\bfseries] at (-2, 2.6) {min-heap};
+\node[anchor=center, font=\sffamily\small\bfseries] at ( 2, 2.6) {max-heap};
+\end{tikzpicture}
+\end{document}

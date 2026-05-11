@@ -24,18 +24,7 @@ k개의 정렬된 입력 스트림을 병합하고 싶음 — k-way merge.
 
 ### 구조
 
-```
-입력: [3, 7], [2, 9], [5, 8], [1, 6]
-         ↓     ↓      ↓      ↓
-        leaf1 leaf2 leaf3 leaf4
-
-토너먼트:
-         1
-        / \
-       2   5
-      / \ / \
-     3  2 5  1
-```
+<img src="/images/blog/dsa/diagrams/item14-selection-tree.svg" alt="선택 트리 (winner tree)" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 각 내부 노드 = **두 자식의 승자**(작은 값). 루트 = 전체 최솟값.
 

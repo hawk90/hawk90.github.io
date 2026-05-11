@@ -1,0 +1,21 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cb/.style={cls, minimum width=40mm}
+]
+\node[draw=clibord, fill=clifill, ellipse, dashed, line width=0.4pt,
+      minimum width=56mm, minimum height=18mm, font=\sffamily\bfseries] (obs) at (0, 1.6) {Observer 협력};
+
+\node[cb] (st) at (-3.6, -2.0) {StockTicker};
+\node[cb] (pc) at ( 3.6, -2.0) {PriceChart};
+
+\draw[edge, dashed] (obs.south) -- node[left, font=\scriptsize\itshape, near start]{Subject 역할} (st.north);
+\draw[edge, dashed] (obs.south) -- node[right, font=\scriptsize\itshape, near start]{Observer 역할} (pc.north);
+\end{tikzpicture}
+\end{document}

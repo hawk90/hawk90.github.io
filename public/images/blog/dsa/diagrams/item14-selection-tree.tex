@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[vxh] (root) at (0, 2.5)  {1};
+\node[vx]  (l1)   at (-1.8, 1.5){2};
+\node[vx]  (r1)   at (1.8, 1.5) {5};
+\node[vxc] (l2a)  at (-2.6, 0)  {2};
+\node[vxc] (l2b)  at (-1.0, 0)  {4};
+\node[vxc] (r2a)  at (1.0, 0)   {5};
+\node[vxc] (r2b)  at (2.6, 0)   {6};
+
+\draw[edge] (root) -- (l1);
+\draw[edge] (root) -- (r1);
+\draw[edge] (l1) -- (l2a);
+\draw[edge] (l1) -- (l2b);
+\draw[edge] (r1) -- (r2a);
+\draw[edge] (r1) -- (r2b);
+
+\node[anchor=west, font=\sffamily\footnotesize] at (3.4, 2) {각 내부 노드 =};
+\node[anchor=west, font=\sffamily\footnotesize] at (3.4, 1.5) {두 자식의 min};
+\end{tikzpicture}
+\end{document}

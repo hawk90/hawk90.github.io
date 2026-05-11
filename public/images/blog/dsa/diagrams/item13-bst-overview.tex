@@ -1,0 +1,21 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[vxh] (n30) at (0, 2)    {30};
+\node[vx]  (n20) at (-1.4, 1) {20};
+\node[vx]  (n50) at (1.4, 1)  {50};
+\node[vx]  (n40) at (0.6, 0)  {40};
+\node[vx]  (n60) at (2.2, 0)  {60};
+
+\draw[edge] (n30) -- (n20);
+\draw[edge] (n30) -- (n50);
+\draw[edge] (n50) -- (n40);
+\draw[edge] (n50) -- (n60);
+
+\node[anchor=west, font=\sffamily\footnotesize] at (3.2, 1) {left $<$ root $<$ right};
+\node[anchor=west, font=\sffamily\footnotesize] at (3.2, 0.5) {inorder: 20, 30, 40, 50, 60};
+\end{tikzpicture}
+\end{document}

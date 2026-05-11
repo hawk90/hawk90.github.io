@@ -1,0 +1,155 @@
+---
+/**
+ * AnimatedSvg — wrap an inline SVG to support play/pause + restart.
+ * The SVG itself defines the animation via SMIL (<animate>, <animateTransform>)
+ * or CSS @keyframes targeting nested classes. This component just adds
+ * the controls and an IntersectionObserver so animation starts when
+ * scrolled into view (saves CPU).
+ *
+ * Usage in MDX:
+ *   import AnimatedSvg from '@components/blog/AnimatedSvg.astro';
+ *   <AnimatedSvg caption="Quicksort partition">
+ *     <svg viewBox="..." class="animated">
+ *       ...
+ *       <animate attributeName="x" from="0" to="100" dur="2s" repeatCount="indefinite"/>
+ *     </svg>
+ *   </AnimatedSvg>
+ */
+
+interface Props {
+  caption?: string;
+  /** Auto-play once visible (default true). */
+  autoplay?: boolean;
+}
+
+const { caption, autoplay = true } = Astro.props;
+---
+
+<figure class="animated-svg" data-autoplay={autoplay}>
+  <div class="animated-svg-wrap">
+    <slot />
+    <div class="animated-svg-controls" aria-label="Animation controls">
+      <button type="button" data-action="play" aria-label="Play">▶</button>
+      <button type="button" data-action="pause" aria-label="Pause">❚❚</button>
+      <button type="button" data-action="restart" aria-label="Restart">↻</button>
+    </div>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .animated-svg { margin: 1.5em 0; text-align: center; }
+  .animated-svg-wrap {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+  }
+  .animated-svg-wrap :global(svg) { max-width: 100%; height: auto; }
+
+  .animated-svg-controls {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .animated-svg-wrap:hover .animated-svg-controls,
+  .animated-svg-controls:focus-within { opacity: 1; }
+  .animated-svg-controls button {
+    width: 26px; height: 26px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-size: 10px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .animated-svg-controls button:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  /* Pause via CSS class so JS can toggle */
+  .animated-svg.is-paused :global(svg *) {
+    animation-play-state: paused !important;
+  }
+
+  .animated-svg figcaption {
+    margin-top: 0.625rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+</style>
+
+<script>
+  let cleanup: (() => void) | null = null;
+
+  function initAnimatedSvg() {
+    cleanup?.();
+    const figs = document.querySelectorAll<HTMLElement>('.animated-svg');
+    if (figs.length === 0) return;
+
+    const teardowns: (() => void)[] = [];
+
+    figs.forEach((fig) => {
+      const svg = fig.querySelector<SVGSVGElement>('svg');
+      if (!svg) return;
+
+      function pause() {
+        fig.classList.add('is-paused');
+        try { svg!.pauseAnimations(); } catch {}
+      }
+      function play() {
+        fig.classList.remove('is-paused');
+        try { svg!.unpauseAnimations(); } catch {}
+      }
+      function restart() {
+        try { svg!.setCurrentTime(0); } catch {}
+        play();
+      }
+
+      // Wire control buttons
+      const handlers: Array<[HTMLElement, (e: Event) => void]> = [];
+      fig.querySelectorAll<HTMLButtonElement>('[data-action]').forEach((btn) => {
+        const a = btn.dataset.action;
+        const fn =
+          a === 'play' ? play :
+          a === 'pause' ? pause :
+          restart;
+        btn.addEventListener('click', fn);
+        handlers.push([btn, fn]);
+      });
+
+      // Auto-pause when off-screen, resume when visible (saves CPU)
+      const autoplay = fig.dataset.autoplay !== 'false';
+      const io = new IntersectionObserver(
+        ([e]) => {
+          if (!autoplay) return;
+          if (e.isIntersecting) play();
+          else pause();
+        },
+        { threshold: 0.1 },
+      );
+      io.observe(fig);
+
+      teardowns.push(() => {
+        handlers.forEach(([el, fn]) => el.removeEventListener('click', fn));
+        io.disconnect();
+      });
+    });
+
+    cleanup = () => teardowns.forEach((t) => t());
+  }
+
+  initAnimatedSvg();
+  document.addEventListener('astro:page-load', initAnimatedSvg);
+</script>

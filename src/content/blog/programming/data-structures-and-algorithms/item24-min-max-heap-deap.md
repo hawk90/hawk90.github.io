@@ -31,13 +31,7 @@ draft: false
 
 완전 이진 트리. 레벨이 **min level과 max level 교대**.
 
-```
-              7 (min)
-            /        \
-         70 (max)    40 (max)
-         /  \         /  \
-       30   9       10  15  (min)
-```
+<img src="/images/blog/dsa/diagrams/item24-min-max-heap.svg" alt="Min-max heap" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 규칙:
 - min level 노드 ≤ 그 서브트리의 모든 노드
@@ -75,15 +69,7 @@ draft: false
 
 루트가 비어 있고, 두 서브트리가 **min-heap 과 max-heap**.
 
-```
-              · (root, empty)
-            /        \
-       (min-heap)  (max-heap)
-        /   \       /   \
-       7    9    70    40
-      / \  /    / \   /
-     30 12 15  ... ...
-```
+<img src="/images/blog/dsa/diagrams/item24-deap.svg" alt="Deap 구조" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 각 min-heap 노드 ≤ 대응 max-heap 노드 (correspondence property).
 

@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  act/.style={cls, minimum width=24mm, minimum height=10mm, font=\footnotesize}
+]
+\node[q] (d) at (0, 2.4) {재고 있나?};
+\node[act] (yes) at (-3.0, 0) {결제};
+\node[act] (no)  at ( 3.0, 0) {backorder 통보};
+
+\draw[arr] (d.west)  -| node[above, font=\scriptsize\itshape, near start]{[yes]} (yes.north);
+\draw[arr] (d.east)  -| node[above, font=\scriptsize\itshape, near start]{[no]}  (no.north);
+\end{tikzpicture}
+\end{document}

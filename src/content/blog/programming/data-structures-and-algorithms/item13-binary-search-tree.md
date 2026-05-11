@@ -30,13 +30,7 @@ draft: false
 
 ## 한눈에 보는 구조
 
-```
-        30
-       /  \
-      20   50
-     /     / \
-    10    40  60
-```
+<img src="/images/blog/dsa/diagrams/item13-bst-overview.svg" alt="BST 개요" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 - 검색: 비교하며 좌/우로 — 평균 O(log n)
 - 삽입: 검색 후 leaf로 — 평균 O(log n)

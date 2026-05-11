@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[vxh] (A) at (0, 2)    {A};
+\node[vx]  (B) at (-1.4, 1) {B};
+\node[vx]  (C) at (1.4, 1)  {C};
+\node[vxc] (D) at (-2.2, 0) {D};
+\node[vxc] (E) at (-0.6, 0) {E};
+\node[vxc] (F) at (2.2, 0)  {F};
+
+\draw[edge] (A) -- (B);
+\draw[edge] (A) -- (C);
+\draw[edge] (B) -- (D);
+\draw[edge] (B) -- (E);
+\draw[edge] (C) -- (F);
+
+\node[anchor=west, font=\sffamily\footnotesize] at (3, 1) {A: root};
+\node[anchor=west, font=\sffamily\footnotesize] at (3, 0.5) {B: parent of D, E};
+\node[anchor=west, font=\sffamily\footnotesize] at (3, 0) {D, E, F: leaves};
+\end{tikzpicture}
+\end{document}

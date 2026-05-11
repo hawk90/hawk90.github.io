@@ -30,16 +30,7 @@ draft: false
 
 각 노드 = 한 문자. 루트에서 leaf까지의 경로 = 한 단어.
 
-```
-        (root)
-       / | \
-      a  b  c
-     /   |   \
-    n    a    a
-   /     |     \
-  t      t      t
- (ant) (bat)  (cat)
-```
+<img src="/images/blog/dsa/diagrams/item29-trie-overview.svg" alt="Trie 개요" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 `isEnd` 플래그로 단어 끝 표시:
 

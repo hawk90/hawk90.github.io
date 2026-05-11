@@ -30,13 +30,7 @@ draft: false
 - **Max-heap**: 부모 ≥ 자식 (루트가 최댓값)
 - **Min-heap**: 부모 ≤ 자식 (루트가 최솟값)
 
-```
-         50         (max-heap)
-        /  \
-       30   40
-      / \   /
-     10 20 35
-```
+<img src="/images/blog/dsa/diagrams/item12-heap-tree.svg" alt="Max-heap 트리" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 부모-자식 관계만 정의 — 형제 간 순서는 X.
 
@@ -44,17 +38,7 @@ draft: false
 
 완전 이진 트리는 **배열 인덱스만으로 부모·자식 계산** 가능 — 포인터 불필요.
 
-```
-인덱스:  0   1   2   3   4   5
-값:    [50, 30, 40, 10, 20, 35]
-
-      50 (0)
-     /     \
-   30 (1)   40 (2)
-   /  \    /
-  10  20  35
-  (3) (4) (5)
-```
+<img src="/images/blog/dsa/diagrams/item12-heap-tree.svg" alt="Max-heap 배열 표현" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 부모·자식 관계 (1-indexed로 단순화):
 - 노드 i의 **부모**: `i / 2`

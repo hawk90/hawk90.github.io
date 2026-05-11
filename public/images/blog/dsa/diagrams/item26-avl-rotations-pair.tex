@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  every node/.style={font=\sffamily\small}
+]
+% --- LL Before ---
+\begin{scope}[shift={(-7,0)}]
+  \node[font=\sffamily\bfseries\small] at (0, 3) {LL — before};
+  \node[vxh] (z) at (0, 2)    {z};
+  \node[vx]  (y) at (-1.2, 1) {y};
+  \node[vx]  (D) at (1.2, 1)  {D};
+  \node[vx]  (x) at (-1.9, 0) {x};
+  \node[vx]  (C) at (-0.5, 0) {C};
+  \draw[edge] (z) -- (y); \draw[edge] (z) -- (D);
+  \draw[edge] (y) -- (x); \draw[edge] (y) -- (C);
+\end{scope}
+
+\draw[arr, line width=1pt] (-3.5, 1) -- (-2.5, 1) node[midway, above, font=\sffamily\small]{R};
+
+% --- LL After ---
+\begin{scope}[shift={(0,0)}]
+  \node[font=\sffamily\bfseries\small] at (0, 3) {after right-rotate};
+  \node[vxh] (y) at (0, 2)    {y};
+  \node[vx]  (x) at (-1.4, 1) {x};
+  \node[vx]  (z) at (1.4, 1)  {z};
+  \node[vx]  (C) at (0.6, 0)  {C};
+  \node[vx]  (D) at (2.2, 0)  {D};
+  \draw[edge] (y) -- (x); \draw[edge] (y) -- (z);
+  \draw[edge] (z) -- (C); \draw[edge] (z) -- (D);
+\end{scope}
+
+\draw[arr, line width=1pt] (3.5, 1) -- (4.5, 1) node[midway, above, font=\sffamily\small]{after};
+
+% --- LR (zigzag pre-step) ---
+\begin{scope}[shift={(7,0)}]
+  \node[font=\sffamily\bfseries\small] at (0, 3) {LR — first L on y};
+  \node[vxh] (z) at (0, 2)    {z};
+  \node[vx]  (x) at (-1.2, 1) {x};
+  \node[vx]  (D) at (1.2, 1)  {D};
+  \node[vx]  (y) at (-0.5, 0) {y};
+  \draw[edge] (z) -- (x); \draw[edge] (z) -- (D);
+  \draw[edge] (x) -- (y);
+\end{scope}
+\end{tikzpicture}
+\end{document}

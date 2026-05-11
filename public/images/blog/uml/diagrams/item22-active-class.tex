@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      double, double distance=0.6pt,
+      inner sep=4pt, minimum width=58mm] {
+  \begin{tabular}{l}
+    \scriptsize $<<$active$>>$ \\
+    \textbf{Scheduler} \\
+    \hline
+    - thread \\
+    \hline
+    + run() \\
+  \end{tabular}
+};
+\end{tikzpicture}
+\end{document}

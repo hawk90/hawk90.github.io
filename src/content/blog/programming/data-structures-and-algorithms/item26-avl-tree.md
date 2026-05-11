@@ -30,13 +30,7 @@ draft: false
 
 ### 단일 회전 — Right Rotation (LL case)
 
-```
-       y                 x
-      / \               / \
-     x   C    →        A   y
-    / \                   / \
-   A   B                 B   C
-```
+<img src="/images/blog/dsa/diagrams/item26-avl-rotations-pair.svg" alt="AVL LL 회전 및 LR 사전 단계" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 x를 새 루트로, y의 왼쪽 자식이 x의 오른쪽 자식 자리로.
 

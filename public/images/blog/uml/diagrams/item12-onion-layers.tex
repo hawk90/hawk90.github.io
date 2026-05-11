@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  layer/.style={cls, minimum width=46mm}
+]
+\node[layer] (l1) at (0,  3.0) {Infrastructure};
+\node[layer] (l2) at (0,  1.5) {Interfaces};
+\node[layer] (l3) at (0,  0.0) {Application};
+\node[layer] (l4) at (0, -1.5) {Domain \scriptsize (최내곽)};
+
+\draw[arr] (l1.north east) ++(0.6,-0.2) -- ++(0,-4.5) node[midway, right, font=\scriptsize\itshape, text=edgesc]{의존 방향};
+
+\draw[arr] (l1.south) -- (l2.north);
+\draw[arr] (l2.south) -- (l3.north);
+\draw[arr] (l3.south) -- (l4.north);
+\end{tikzpicture}
+\end{document}

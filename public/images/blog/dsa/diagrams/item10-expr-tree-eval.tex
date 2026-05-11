@@ -1,0 +1,18 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[vxc] (mul) at (0, 2)    {$+$};
+\node[vx]  (one) at (-1.4, 1) {1};
+\node[vxc] (mul2) at (1.4, 1) {$\times$};
+\node[vx]  (two) at (0.6, 0)  {2};
+\node[vx]  (three) at (2.2, 0) {3};
+
+\draw[edge] (mul) -- (one);
+\draw[edge] (mul) -- (mul2);
+\draw[edge] (mul2) -- (two);
+\draw[edge] (mul2) -- (three);
+\end{tikzpicture}
+\end{document}
