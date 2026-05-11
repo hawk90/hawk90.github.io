@@ -75,28 +75,19 @@ UML 클래스는 보여주고 싶은 만큼만 보여줄 수 있습니다.
 
 상위 설계 단계 — "이런 게 있다"만 표현.
 
-```
-+----------------+
-|   HelloWorld   |
-+----------------+
-```
+<img src="/images/blog/uml/diagrams/item03-hello-world-name-only.svg" alt="HelloWorld 클래스 — 이름만" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ### 2) 시그너처까지
 
 설계 회의에서 인터페이스를 합의할 때.
 
-```
-+----------------------------+
-|       HelloWorld           |
-+----------------------------+
-+----------------------------+
-| + main(args: String[]):void|
-+----------------------------+
-```
+<img src="/images/blog/uml/diagrams/item03-hello-world-with-ops.svg" alt="HelloWorld 클래스 — 시그너처까지" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ### 3) 구현 디테일까지
 
 이미 짜놓은 코드를 역공학할 때 등.
+
+<img src="/images/blog/uml/diagrams/item03-hello-world.svg" alt="HelloWorld 클래스 — 구현 디테일까지" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 > 💡 같은 클래스를 다른 다이어그램에서 다른 상세도로 그려도 됩니다 — 보고 싶은 면만 보여주는 게 UML의 원칙.
 

@@ -1,0 +1,18 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      minimum width=58mm, inner sep=0pt] (cls) {
+  \begin{tabular}{l}
+    \textbf{HelloWorld} \\
+    \hline
+    + main(args : String[\,]) : void \\
+  \end{tabular}
+};
+
+\end{tikzpicture}
+\end{document}
