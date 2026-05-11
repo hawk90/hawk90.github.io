@@ -128,8 +128,8 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
   function initMobileMenu() {
     cleanup?.();
 
-    const menuTrigger = document.querySelector('[data-mobile-menu-trigger]');
-    const mobileMenu = document.querySelector('[data-mobile-menu]');
+    const menuTrigger = document.querySelector<HTMLButtonElement>('[data-mobile-menu-trigger]');
+    const mobileMenu = document.querySelector<HTMLElement>('[data-mobile-menu]');
 
     if (!menuTrigger || !mobileMenu) return;
 

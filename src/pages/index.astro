@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/blog/PostCard.astro';
-import { SITE_CONFIG, BRAND_CONFIG } from '../consts/config';
+import { BRAND_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);

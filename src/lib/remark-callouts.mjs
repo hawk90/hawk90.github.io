@@ -41,7 +41,7 @@ const DEFAULT_TITLE = {
 
 export default function remarkCallouts() {
   return (tree) => {
-    visit(tree, (node, index, parent) => {
+    visit(tree, (node) => {
       if (node.type !== 'containerDirective') return;
       const variant = ALIAS[node.name];
       if (!variant) return;

@@ -10,14 +10,14 @@
   function initScrollProgress() {
     cleanup?.();
 
-    const progressBar = document.getElementById('scroll-progress');
+    const progressBar = document.getElementById('scroll-progress') as HTMLElement | null;
     if (!progressBar) return;
 
     function updateProgress() {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      progressBar.style.width = `${progress}%`;
+      progressBar!.style.width = `${progress}%`;
     }
 
     let ticking = false;

@@ -39,10 +39,12 @@ const filterSeriesLabel = t('search_filter_series');
           <span id="filter-label" class="text-sm text-[var(--color-text-muted)]"></span>
           <button
             id="filter-badge"
+            type="button"
             class="inline-flex items-center gap-1 px-2 py-1 text-sm bg-[var(--color-accent)] text-white rounded-full hover:bg-[var(--color-accent-hover)] transition-colors"
+            aria-label="Clear filter"
           >
             <span id="filter-name"></span>
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -150,9 +152,15 @@ const filterSeriesLabel = t('search_filter_series');
   function initSearchModal() {
     cleanup?.();
 
-    const modal = document.getElementById('search-modal');
-    const input = document.getElementById('search-input') as HTMLInputElement;
-    const results = document.getElementById('search-results');
+    const modalEl = document.getElementById('search-modal');
+    const inputEl = document.getElementById('search-input') as HTMLInputElement | null;
+    const resultsEl = document.getElementById('search-results');
+    if (!modalEl || !inputEl || !resultsEl) return;
+
+    // After the guard above, these are non-null for the rest of init.
+    const modal = modalEl as HTMLElement;
+    const input = inputEl;
+    const results = resultsEl as HTMLElement;
     const backdrop = document.querySelector('[data-search-backdrop]');
     const triggers = document.querySelectorAll('[data-search-trigger]');
     const filterContainer = document.getElementById('filter-container');
@@ -160,8 +168,6 @@ const filterSeriesLabel = t('search_filter_series');
     const filterName = document.getElementById('filter-name');
     const filterBadge = document.getElementById('filter-badge');
     const closeBtn = document.getElementById('search-close-btn');
-
-    if (!modal || !input || !results) return;
 
     const i18n = getI18n();
 

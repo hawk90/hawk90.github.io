@@ -285,6 +285,6 @@ v.emplace_back(42);  // ≈ 동일 (int는 변환·move 비용 0)
 
 ## 관련 항목
 
-- [항목 21: make_unique / make_shared](/blog/programming/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-use-of-new)
+- [항목 21: make_unique / make_shared](/blog/programming/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new)
 - [항목 30: perfect forwarding 실패](/blog/programming/effective-modern-cpp/item30-familiarize-yourself-with-perfect-forwarding-failure-cases)
 - [항목 41: pass by value](/blog/programming/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params)

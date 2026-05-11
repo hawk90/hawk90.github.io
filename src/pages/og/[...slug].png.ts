@@ -86,7 +86,9 @@ export async function GET({ props }: APIContext) {
 
   const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
   const pngData = resvg.render();
-  const pngBuffer = pngData.asPng();
+  // Convert Node Buffer to Uint8Array to satisfy the global Response
+  // BodyInit type (Node 22 has dual fetch/Buffer types).
+  const pngBuffer = new Uint8Array(pngData.asPng());
 
   return new Response(pngBuffer, {
     headers: {
