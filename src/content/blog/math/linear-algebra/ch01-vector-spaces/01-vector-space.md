@@ -1,6 +1,6 @@
 ---
 title: "1.1 체와 벡터공간(vector space)"
-date: 2026-05-11T10:00:00
+date: 2026-05-10T06:50:20
 description: "§1.0 에서 평면 화살표·다항식·함수·행렬이 같은 모양의 연산 구조를 공유한다는 사실을 보았다. 이제 그 모양에 정확한 이름을 붙인다."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
@@ -117,24 +117,24 @@ $p$ 가 소수여야 한다는 점이 중요하다. 합성수 $n$ 에 대해 $\m
 **증명.**
 
 **(1)** $0\alpha = 0_V$ 임을 보이자.
-$$ 0\alpha = (0+0)\alpha \quad \text{\leftarrow 체에서 } 0+0=0 $$
-$$ \quad\,\, = 0\alpha + 0\alpha \quad \text{\leftarrow (V8) 분배} $$
+$$ 0\alpha = (0+0)\alpha \quad \text{← 체에서 } 0+0=0 $$
+$$ \quad\,\, = 0\alpha + 0\alpha \quad \text{← (V8) 분배} $$
 양변에 $-(0\alpha)$ 를 더하면
 $$ 0_V = 0\alpha + (-0\alpha) = (0\alpha + 0\alpha) + (-0\alpha) = 0\alpha + 0_V = 0\alpha. $$
 *(V8) 로 자기 자신을 두 번 더한 꼴을 만들고, 역원으로 한 번을 깎아 내면 영벡터(zero vector)가 떨어진다.*
 
 **(2)** $c\cdot 0_V = 0_V$ 도 같은 식이다.
-$$ c \cdot 0_V = c(0_V + 0_V) = c\cdot 0_V + c\cdot 0_V \quad \text{\leftarrow (V7) 분배} $$
+$$ c \cdot 0_V = c(0_V + 0_V) = c\cdot 0_V + c\cdot 0_V \quad \text{← (V7) 분배} $$
 양변에 $-(c\cdot 0_V)$ 를 더하면 $0_V = c \cdot 0_V$.
 
 **(3)** $\alpha + (-1)\alpha = 0$ 임을 보이자.
-$$ \alpha + (-1)\alpha = 1\cdot\alpha + (-1)\alpha \quad \text{\leftarrow (V5) } $$
-$$ \quad\,\, = (1 + (-1))\alpha = 0\cdot\alpha \quad \text{\leftarrow (V8)} $$
-$$ \quad\,\, = 0_V \quad \text{\leftarrow (1)에서 방금 얻음.} $$
+$$ \alpha + (-1)\alpha = 1\cdot\alpha + (-1)\alpha \quad \text{← (V5) } $$
+$$ \quad\,\, = (1 + (-1))\alpha = 0\cdot\alpha \quad \text{← (V8)} $$
+$$ \quad\,\, = 0_V \quad \text{← (1)에서 방금 얻음.} $$
 따라서 $(-1)\alpha$ 는 $\alpha$ 의 덧셈 역원과 같다, 곧 $-\alpha$.
 
 **(4)** $c\alpha = 0$ 인데 $c \neq 0$ 이라 가정하자. 체에서 $c$ 는 가역이라 $c^{-1}$ 이 존재한다.
-$$ \alpha = 1 \cdot \alpha = (c^{-1}c)\alpha = c^{-1}(c\alpha) = c^{-1} \cdot 0_V = 0_V \quad \text{\leftarrow (V5), (V6), (2)}. $$
+$$ \alpha = 1 \cdot \alpha = (c^{-1}c)\alpha = c^{-1}(c\alpha) = c^{-1} \cdot 0_V = 0_V \quad \text{← (V5), (V6), (2)}. $$
 *$c \neq 0$ 이라면 $\alpha$ 가 강제로 $0_V$ 가 된다. 대우로, $c\alpha = 0$ 이면 $c = 0$ 또는 $\alpha = 0_V$.* ∎
 
 ---
@@ -192,5 +192,5 @@ $$ \alpha = 1 \cdot \alpha = (c^{-1}c)\alpha = c^{-1}(c\alpha) = c^{-1} \cdot 0_
 
 ---
 
-> \leftarrow 이전 절 [§1.0 워밍업](./1.0-warmup.md)
+> ← 이전 절 [§1.0 워밍업](./1.0-warmup.md)
 > 다음 절 → [§1.2 부분공간(subspace)](./1.2-subspace.md)

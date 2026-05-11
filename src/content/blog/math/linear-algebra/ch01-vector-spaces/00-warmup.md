@@ -1,6 +1,6 @@
 ---
 title: "1.0 워밍업"
-date: 2026-05-11T10:00:00
+date: 2026-05-10T06:48:35
 description: "1장의 첫걸음. 추상화를 시작하기 전에 곧 일반화하게 될 원본 그림을 손에 익혀 둔다."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"

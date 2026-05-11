@@ -109,11 +109,14 @@ async function syncChapter(series, { num, slug, dir }, destPosts, destImages) {
       console.warn(`  skip: ${f} (unrecognized filename)`);
       continue;
     }
-    const raw = await fs.readFile(path.join(dir, f), 'utf-8');
+    const srcPath = path.join(dir, f);
+    const raw = await fs.readFile(srcPath, 'utf-8');
+    const stat = await fs.stat(srcPath);
     const { title, description, body } = transform(raw, series.destSlug, chNum);
     const frontmatter = buildFrontmatter({
       title,
       description,
+      date: stat.mtime,
       tags: series.tags,
       seriesName: series.name,
       seriesOrder: num * 100 + meta.order,
@@ -190,9 +193,9 @@ function extractDescription(body) {
   return '';
 }
 
-function buildFrontmatter({ title, description, tags, seriesName, seriesOrder }) {
-  const today = new Date().toISOString().split('T')[0] + 'T10:00:00';
-  const lines = ['---', `title: ${yaml(title)}`, `date: ${today}`];
+function buildFrontmatter({ title, description, date, tags, seriesName, seriesOrder }) {
+  const dt = (date instanceof Date ? date : new Date()).toISOString().slice(0, 19);
+  const lines = ['---', `title: ${yaml(title)}`, `date: ${dt}`];
   if (description) lines.push(`description: ${yaml(description)}`);
   lines.push(
     `tags: [${tags.map((t) => yaml(t)).join(', ')}]`,

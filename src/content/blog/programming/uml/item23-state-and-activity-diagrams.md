@@ -1,6 +1,6 @@
 ---
 title: "UML 23: 상태 / 활동 다이어그램 심화 — Composite · History · Region"
-date: 2026-07-05T13:00:00
+date: 2026-04-05T13:00:00
 description: "상태 안에 상태, 활동 안에 활동 — 큰 상태 머신을 가독성 있게 그리는 기법."
 tags: [UML, State Machine, Composite State, History]
 series: "UML User Guide"

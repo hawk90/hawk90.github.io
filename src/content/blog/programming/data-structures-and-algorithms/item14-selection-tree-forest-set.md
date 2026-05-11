@@ -1,6 +1,6 @@
 ---
 title: "DSA 14: 선택 트리·포레스트·집합 표현 (Union-Find 입문)"
-date: 2026-06-03T14:00:00
+date: 2026-03-03T14:00:00
 description: "k-way merge용 selection tree, 포레스트로 표현하는 disjoint set."
 tags: [Data Structure, Algorithm, Tournament, Union-Find]
 series: "Data Structures and Algorithms"

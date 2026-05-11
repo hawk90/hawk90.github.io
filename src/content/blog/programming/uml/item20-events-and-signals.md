@@ -1,6 +1,6 @@
 ---
 title: "UML 20: 이벤트와 시그널 — 메시지의 4종류와 도메인 이벤트"
-date: 2026-07-05T10:00:00
+date: 2026-04-05T10:00:00
 description: "Call · Signal · Time · Change — UML이 다루는 이벤트 네 부류와 시그널 계층."
 tags: [UML, Event, Signal, Behavior]
 series: "UML User Guide"

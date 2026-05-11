@@ -1,6 +1,6 @@
 ---
 title: "DSA 19: 단순 정렬 — Bubble, Selection, Insertion"
-date: 2026-06-05T10:00:00
+date: 2026-03-05T10:00:00
 description: "O(n²) 정렬 3종 — 작은 입력엔 충분, 큰 입력엔 부적절."
 tags: [Data Structure, Algorithm, Sort]
 series: "Data Structures and Algorithms"

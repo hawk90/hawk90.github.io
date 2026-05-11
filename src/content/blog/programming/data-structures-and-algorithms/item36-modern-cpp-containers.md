@@ -1,6 +1,6 @@
 ---
 title: "DSA 36: 모던 C++ 컨테이너 활용 가이드"
-date: 2026-06-10T12:00:00
+date: 2026-03-10T12:00:00
 description: "vector, deque, list, map, unordered_map, set — 언제 무엇을."
 tags: [C++, STL, Container]
 series: "Data Structures and Algorithms"

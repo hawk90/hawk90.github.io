@@ -1,6 +1,6 @@
 ---
 title: "DSA 16: 연결 성분과 MST (Kruskal, Prim)"
-date: 2026-06-04T11:00:00
+date: 2026-03-04T11:00:00
 description: "그래프의 분리된 영역 찾기 + 최소 비용 신장 트리 두 알고리즘."
 tags: [Data Structure, Algorithm, Graph, MST, Kruskal, Prim]
 series: "Data Structures and Algorithms"

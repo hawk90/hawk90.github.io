@@ -1,6 +1,6 @@
 ---
 title: "UML 3: Hello, World — 가장 작은 클래스 다이어그램"
-date: 2026-07-01T12:00:00
+date: 2026-04-01T12:00:00
 description: "이름·속성·연산 세 칸짜리 직사각형 — UML 클래스 표기법은 여기서 시작한다."
 tags: [UML, Class Diagram, Notation, Fundamentals]
 series: "UML User Guide"

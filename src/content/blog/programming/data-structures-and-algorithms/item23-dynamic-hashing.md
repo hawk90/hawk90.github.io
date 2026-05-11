@@ -1,6 +1,6 @@
 ---
 title: "DSA 23: 동적 해싱 — Extendible / Linear"
-date: 2026-06-06T11:00:00
+date: 2026-03-06T11:00:00
 description: "데이터 크기 변화에 점진적으로 적응 — 디스크 기반 DB의 표준."
 tags: [Data Structure, Algorithm, Hashing, Database]
 series: "Data Structures and Algorithms"

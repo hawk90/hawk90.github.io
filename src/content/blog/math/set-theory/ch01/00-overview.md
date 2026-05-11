@@ -1,6 +1,6 @@
 ---
 title: "1.0 무너진 세계"
-date: 2026-05-11T10:00:00
+date: 2026-05-09T15:49:48
 description: "Cantor (1845–1918) 가 집합론 (set theory) 을 만든 뒤 30년쯤, 수학은 황금기를 누리고 있었다. \"숫자도, 함수도, 공간도 — 결국 집합 이다.\" 한 줄로 모든 게 정리되는 듯했다."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"

@@ -1,6 +1,6 @@
 ---
 title: "DSA 39: 자료구조 선택 가이드 — 어떤 상황에 무엇을"
-date: 2026-06-11T12:00:00
+date: 2026-03-11T12:00:00
 description: "결정 트리로 빠르게 선택 — 임의 접근, 정렬, 탐색, 우선순위, 키-값."
 tags: [Data Structure, Decision Tree, Guide]
 series: "Data Structures and Algorithms"

@@ -1,6 +1,6 @@
 ---
 title: "DSA 21: 비교 외 정렬 + 외부 정렬"
-date: 2026-06-05T12:00:00
+date: 2026-03-05T12:00:00
 description: "Counting / Radix / Bucket 정렬과 디스크 기반 외부 정렬."
 tags: [Data Structure, Algorithm, Sort, Radix, External Sort]
 series: "Data Structures and Algorithms"

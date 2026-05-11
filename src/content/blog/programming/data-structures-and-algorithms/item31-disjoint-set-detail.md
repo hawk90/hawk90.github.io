@@ -1,6 +1,6 @@
 ---
 title: "DSA 31: Disjoint Set 깊이 — Path Compression + Union by Rank"
-date: 2026-06-09T11:00:00
+date: 2026-03-09T11:00:00
 description: "두 최적화로 amortized O(α(n)) ≈ O(1) — Kruskal·연결 검사의 표준."
 tags: [Data Structure, Algorithm, Union-Find, Disjoint Set]
 series: "Data Structures and Algorithms"

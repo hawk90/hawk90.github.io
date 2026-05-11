@@ -1,6 +1,6 @@
 ---
 title: "UML 27: 협력 — 역할들의 묶음과 재사용 단위"
-date: 2026-07-06T12:00:00
+date: 2026-04-06T12:00:00
 description: "Collaboration은 객체가 아니라 역할의 그룹 — 패턴 추상화의 토대."
 tags: [UML, Collaboration, Role, Pattern]
 series: "UML User Guide"

@@ -1,6 +1,6 @@
 ---
 title: "UML 31: 시스템과 모델 — 시리즈를 마무리하며"
-date: 2026-07-07T10:00:00
+date: 2026-04-07T10:00:00
 description: "31편의 UML 시리즈 정리. System은 Models를 포함하고, Models는 Diagrams를 가진다."
 tags: [UML, Modeling, Summary, System]
 series: "UML User Guide"

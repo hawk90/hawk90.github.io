@@ -1,6 +1,6 @@
 ---
 title: "UML 8: 클래스 다이어그램 — 시스템의 정적 골격"
-date: 2026-07-02T14:00:00
+date: 2026-04-02T14:00:00
 description: "도메인의 명사들을 잡아 시스템 골격으로 — 가장 많이 그리고 가장 오래 가는 다이어그램."
 tags: [UML, Class Diagram, Static Modeling, Domain]
 series: "UML User Guide"
