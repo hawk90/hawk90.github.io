@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  c/.style={rectangle, draw=black!55, minimum size=8mm, inner sep=0pt, fill=absfill, line width=0.4pt, font=\sffamily\small},
+  piv/.style={c, fill=hifill, draw=hibord, font=\sffamily\bfseries},
+  lo/.style={c, fill=impfill, draw=impbord},
+  hi/.style={c, fill=confill, draw=conbord}
+]
+
+% --- Initial array ---
+\node[font=\sffamily\bfseries\small, anchor=east] at (0, 4) {초기:};
+\foreach \v/\i in {7/0, 2/1, 5/2, 1/3, 9/4, 3/5, 6/6, 8/7, 4/8} {
+  \node[c] at (0.5 + \i*0.85, 4) {\v};
+}
+\node[font=\sffamily\footnotesize, anchor=west] at (8.4, 4) {pivot $=$ 4 (마지막)};
+
+% --- Partitioned array ---
+\node[font=\sffamily\bfseries\small, anchor=east] at (0, 2.4) {Partition 후:};
+\foreach \v/\i/\s in {2/0/lo, 1/1/lo, 3/2/lo, 4/3/piv, 9/4/hi, 7/5/hi, 6/6/hi, 8/7/hi, 5/8/hi} {
+  \node[\s] at (0.5 + \i*0.85, 2.4) {\v};
+}
+
+% Labels above the partitioned regions
+\draw[decorate, decoration={brace, amplitude=4pt}] (0.1, 2.95) -- (2.65, 2.95)
+  node[midway, above, font=\sffamily\footnotesize, yshift=2pt]{$<$ pivot};
+\draw[decorate, decoration={brace, amplitude=4pt}] (3.05, 2.95) -- (3.45, 2.95)
+  node[midway, above, font=\sffamily\footnotesize, yshift=2pt]{pivot};
+\draw[decorate, decoration={brace, amplitude=4pt}] (3.85, 2.95) -- (8.05, 2.95)
+  node[midway, above, font=\sffamily\footnotesize, yshift=2pt]{$\geq$ pivot};
+
+% --- Recursion arrows ---
+\draw[arr] (1.4, 2.0) -- (1.4, 0.8) node[below, font=\sffamily\footnotesize]{quicksort(left)};
+\draw[arr] (5.9, 2.0) -- (5.9, 0.8) node[below, font=\sffamily\footnotesize]{quicksort(right)};
+
+% --- Legend ---
+\node[anchor=west, font=\sffamily\scriptsize] at (0, -0.6) {%
+  \tikz \node[lo, minimum size=4mm]{}; \ $<$ pivot \quad
+  \tikz \node[piv, minimum size=4mm]{}; \ pivot \quad
+  \tikz \node[hi, minimum size=4mm]{}; \ $\geq$ pivot
+};
+\end{tikzpicture}
+\end{document}

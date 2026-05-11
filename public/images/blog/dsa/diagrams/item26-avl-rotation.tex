@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Before rotation (LL case — left-heavy)
+\begin{scope}[shift={(-5, 0)}]
+  \node[font=\sffamily\bfseries\small] at (0, 3) {Before (LL imbalance)};
+  \node[vxh] (z) at (0, 2)    {z};
+  \node[vx]  (y) at (-1.4, 1) {y};
+  \node[vx]  (x) at (-2.4, 0) {x};
+  \node[vx]  (T1) at (-3.2,-1) {T1};
+  \node[vx]  (T2) at (-1.6,-1) {T2};
+  \node[vx]  (T3) at (-0.4, 0) {T3};
+  \node[vx]  (T4) at ( 1.2, 1) {T4};
+  \draw[edge] (z)--(y); \draw[edge] (z)--(T4);
+  \draw[edge] (y)--(x); \draw[edge] (y)--(T3);
+  \draw[edge] (x)--(T1); \draw[edge] (x)--(T2);
+\end{scope}
+
+% Right rotation arrow
+\draw[arr, line width=1pt] (-0.5, 1) -- (0.5, 1) node[midway, above, font=\sffamily\small]{Right rotate};
+
+% After rotation
+\begin{scope}[shift={(5, 0)}]
+  \node[font=\sffamily\bfseries\small] at (0, 3) {After};
+  \node[vxh] (y) at (0, 2)    {y};
+  \node[vx]  (x) at (-1.4, 1) {x};
+  \node[vx]  (z) at ( 1.4, 1) {z};
+  \node[vx]  (T1) at (-2.4, 0) {T1};
+  \node[vx]  (T2) at (-0.4, 0) {T2};
+  \node[vx]  (T3) at ( 0.4, 0) {T3};
+  \node[vx]  (T4) at ( 2.4, 0) {T4};
+  \draw[edge] (y)--(x); \draw[edge] (y)--(z);
+  \draw[edge] (x)--(T1); \draw[edge] (x)--(T2);
+  \draw[edge] (z)--(T3); \draw[edge] (z)--(T4);
+\end{scope}
+\end{tikzpicture}
+\end{document}

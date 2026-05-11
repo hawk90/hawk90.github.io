@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ok/.style={vx},
+  bad/.style={vxc, draw=conbord, fill=confill},
+  goal/.style={vx, draw=hibord, fill=hifill, font=\sffamily\bfseries}
+]
+% 4-queens partial decision tree (root tries column for row 1)
+\node[font=\sffamily\bfseries\small] at (0, 4.2) {4-Queens — partial backtrack tree};
+\node[ok]   (r)  at (0, 3.4)        {row 1};
+
+\node[ok]   (c1) at (-4.2, 2)       {col 1};
+\node[ok]   (c2) at (-1.4, 2)       {col 2};
+\node[ok]   (c3) at ( 1.4, 2)       {col 3};
+\node[ok]   (c4) at ( 4.2, 2)       {col 4};
+
+\node[bad]  (b1) at (-5.2, 0.5)     {dead};
+\node[bad]  (b2) at (-3.2, 0.5)     {dead};
+\node[ok]   (s1) at (-1.4, 0.5)     {ok};
+\node[ok]   (s2) at ( 1.4, 0.5)     {ok};
+\node[bad]  (b3) at ( 3.2, 0.5)     {dead};
+\node[bad]  (b4) at ( 5.2, 0.5)     {dead};
+
+\node[goal] (g)  at (-1.4, -1)      {sol!};
+
+\foreach \from/\to in {r/c1, r/c2, r/c3, r/c4} \draw[edge] (\from) -- (\to);
+\draw[edge, draw=conbord] (c1) -- (b1);
+\draw[edge, draw=conbord] (c1) -- (b2);
+\draw[edge] (c2) -- (s1);
+\draw[edge] (c3) -- (s2);
+\draw[edge, draw=conbord] (c4) -- (b3);
+\draw[edge, draw=conbord] (c4) -- (b4);
+\draw[edge] (s1) -- (g);
+
+\node[anchor=west, font=\sffamily\scriptsize] at (-6, -2.2) {%
+  \tikz \node[bad, minimum size=4mm]{}; \ pruned (constraint violated) \quad
+  \tikz \node[goal, minimum size=4mm]{}; \ valid solution
+};
+\end{tikzpicture}
+\end{document}

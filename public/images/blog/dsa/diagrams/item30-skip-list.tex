@@ -1,0 +1,63 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cell/.style={rectangle, draw=black!55, line width=0.4pt, minimum size=7mm, inner sep=0pt,
+               fill=absfill, font=\sffamily\footnotesize},
+  hd/.style={cell, fill=clifill, draw=clibord}
+]
+% Level 3 (sparsest)
+\node[font=\sffamily\scriptsize, anchor=east] at (0, 3) {L3};
+\node[hd]  (h3) at (0.7, 3)  {H};
+\node[cell](n3a) at (4.2, 3) {30};
+\node[cell, fill=nodefill] (t3) at (8.4, 3) {NIL};
+\draw[arr] (h3.east) -- (n3a.west);
+\draw[arr] (n3a.east) -- (t3.west);
+
+% Level 2
+\node[font=\sffamily\scriptsize, anchor=east] at (0, 2.2) {L2};
+\node[hd]  (h2) at (0.7, 2.2) {H};
+\node[cell](n2a) at (2.1, 2.2){15};
+\node[cell](n2b) at (4.2, 2.2){30};
+\node[cell](n2c) at (6.3, 2.2){50};
+\node[cell, fill=nodefill] (t2) at (8.4, 2.2) {NIL};
+\draw[arr] (h2.east) -- (n2a.west);
+\draw[arr] (n2a.east) -- (n2b.west);
+\draw[arr] (n2b.east) -- (n2c.west);
+\draw[arr] (n2c.east) -- (t2.west);
+
+% Level 1
+\node[font=\sffamily\scriptsize, anchor=east] at (0, 1.4) {L1};
+\node[hd]  (h1) at (0.7, 1.4) {H};
+\node[cell](n1a) at (1.4, 1.4){5};
+\node[cell](n1b) at (2.1, 1.4){15};
+\node[cell](n1c) at (3.5, 1.4){25};
+\node[cell](n1d) at (4.2, 1.4){30};
+\node[cell](n1e) at (5.6, 1.4){45};
+\node[cell](n1f) at (6.3, 1.4){50};
+\node[cell](n1g) at (7.7, 1.4){70};
+\node[cell, fill=nodefill] (t1) at (8.4, 1.4) {NIL};
+\foreach \a/\b in {h1/n1a, n1a/n1b, n1b/n1c, n1c/n1d, n1d/n1e, n1e/n1f, n1f/n1g, n1g/t1}
+  \draw[arr] (\a.east) -- (\b.west);
+
+% Vertical "tower" links (drawn lightly)
+\foreach \i in {h1/h2, h2/h3, n1b/n2a, n2a/n3a, n1d/n2b, n2b/n3a, n1f/n2c} {}
+\foreach \pair in {h1/h2, h2/h3, n1b/n2a, n2a/-, n1d/n2b, n2b/-, n1f/n2c}{}
+
+% Search path for 45 (highlighted)
+\draw[arr, draw=hibord, line width=0.7pt] (h3) to[bend right=15] (n3a);
+\draw[arr, draw=hibord, line width=0.7pt] (n3a.south) -- (n2b.north);
+\draw[arr, draw=hibord, line width=0.7pt] (n2b) to[bend right=10] (n2c);
+\draw[arr, draw=hibord, line width=0.7pt] (n2c.south) -- (n1f.north);
+\draw[arr, draw=hibord, line width=0.7pt] (n1e) to[bend left=5] (n1e);
+
+\node[font=\sffamily\footnotesize, anchor=west] at (0, 0.3) {%
+  \tikz \draw[arr, draw=hibord, line width=0.7pt] (0,0) -- (8mm,0); \ search path for 45 (top-down skip)
+};
+\end{tikzpicture}
+\end{document}

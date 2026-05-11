@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\begin{axis}[
+  width=12cm, height=8cm,
+  xlabel={입력 크기 $n$}, ylabel={연산 횟수},
+  xmin=1, xmax=20, ymin=0, ymax=200,
+  legend pos=north west, legend cell align={left},
+  font=\sffamily\small, grid=major, grid style={black!10},
+  axis line style={black!50}, tick style={black!50}
+]
+\addplot[domain=1:20, samples=80, color=impbord, line width=1pt]      {ln(x)/ln(2)};
+\addplot[domain=1:20, samples=80, color=absbord, line width=1pt]      {x};
+\addplot[domain=1:20, samples=80, color=clibord, line width=1pt]      {x*ln(x)/ln(2)};
+\addplot[domain=1:20, samples=80, color=hibord,  line width=1pt]      {x*x};
+\addplot[domain=1:8,  samples=80, color=conbord, line width=1pt]      {2^x};
+\legend{$\log n$, $n$, $n \log n$, $n^2$, $2^n$}
+\end{axis}
+\end{tikzpicture}
+\end{document}

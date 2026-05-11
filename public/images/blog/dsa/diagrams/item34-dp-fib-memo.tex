@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  c/.style={rectangle, draw=black!55, line width=0.4pt, minimum size=8mm, inner sep=0pt,
+            fill=absfill, font=\sffamily\small},
+  filled/.style={c, fill=impfill, draw=impbord},
+  hifilled/.style={c, fill=hifill, draw=hibord, font=\sffamily\bfseries}
+]
+\node[font=\sffamily\bfseries\small, anchor=west] at (-1, 2) {memo[i] = fib(i)};
+\foreach \i/\v in {0/1, 1/1, 2/2, 3/3, 4/5, 5/8, 6/13, 7/21, 8/34, 9/55} {
+  \node[c] (m\i) at (\i*0.95, 1) {\v};
+  \node[font=\sffamily\scriptsize] at (\i*0.95, 0.4) {\i};
+}
+
+% Highlight latest fill (memo[9])
+\node[hifilled] at (8.55, 1) {55};
+
+% Recurrence shown via arcs
+\draw[arr, draw=conbord] (m9.north) to[bend right=30] (m8.north);
+\draw[arr, draw=conbord] (m9.north) to[bend right=40] (m7.north);
+\node[font=\sffamily\scriptsize, anchor=west] at (-1, -0.5)
+  {recurrence: \ memo[$i$] $=$ memo[$i-1$] $+$ memo[$i-2$]};
+\node[font=\sffamily\scriptsize, anchor=west] at (-1, -1.0)
+  {bottom-up: O($n$) time, O($n$) space (or O(1) with rolling pair)};
+\end{tikzpicture}
+\end{document}
