@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      minimum width=58mm, inner sep=0pt] {
+  \begin{tabular}{l}
+    \textbf{Customer} \\
+    \hline
+    {\itshape ... 속성 ...} \\
+    \hline
+    {\itshape ... 연산 ...} \\
+    \hline
+    - 주문 이력 관리 \\
+    - 구매 등급 산정 \\
+  \end{tabular}
+};
+
+\end{tikzpicture}
+\end{document}

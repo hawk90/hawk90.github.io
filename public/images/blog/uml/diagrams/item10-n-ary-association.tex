@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={cls, minimum width=22mm},
+  dia/.style={shape=diamond, draw=edgec, fill=nodefill, inner sep=2pt,
+              minimum width=10mm, minimum height=10mm, line width=0.4pt}
+]
+\node[box] (p)  at (0, 1.6)    {Project};
+\node[dia] (d) at (0, 0)   {};
+\node[box] (s)  at (-2, -1.8)  {Student};
+\node[box] (m)  at ( 2, -1.8)  {Mentor};
+
+\draw[edge] (p.south) -- (d.north);
+\draw[edge] (d.south west) -- (s.north);
+\draw[edge] (d.south east) -- (m.north);
+
+\end{tikzpicture}
+\end{document}

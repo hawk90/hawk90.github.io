@@ -64,18 +64,7 @@ draft: false
 
 UML 클래스에는 네 번째 (선택적) 칸 — 자연어로 그 클래스가 **무엇을 책임지는가**를 쓰는 칸이 있습니다.
 
-```
-+--------------------+
-|      Customer      |
-+--------------------+
-| ...속성...         |
-+--------------------+
-| ...연산...         |
-+--------------------+
-| - 주문 이력 관리   |
-| - 구매 등급 산정   |
-+--------------------+
-```
+<img src="/images/blog/uml/diagrams/item04-class-with-responsibilities.svg" alt="UML 클래스의 4번째 칸 — 책임(Responsibilities)" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 CRC 카드(Class-Responsibility-Collaborator)의 책임 부분이 그대로 들어옵니다. 초기 설계 단계엔 속성·연산보다 이 칸이 더 중요할 수 있습니다.
 

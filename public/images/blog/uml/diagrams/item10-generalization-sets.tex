@@ -1,0 +1,34 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={cls, minimum width=20mm}
+]
+\node[box] (a)   at (0,  2.5) {Animal};
+
+% age-group axis (left branch)
+\node[box] (ad)  at (-3.5, -1) {Adult};
+\node[box] (ju)  at (-1.0, -1) {Juvenile};
+\coordinate (axisAge) at (-2.25, 0.5);
+\draw[inh] (ad.north) -- ++(0, 0.7) -| (axisAge);
+\draw[inh] (ju.north) -- ++(0, 0.7) -| (axisAge);
+\draw[edge] (axisAge) -- (a.south);
+\node[font=\scriptsize\itshape, anchor=south west] at ($ (axisAge) + (0.1, 0) $) {\{age-group\}};
+
+% species axis (right branch)
+\node[box] (dg)  at ( 1.2, -1) {Dog};
+\node[box] (ct)  at ( 3.2, -1) {Cat};
+\node[box] (bd)  at ( 5.2, -1) {Bird};
+\coordinate (axisSp) at (3.2, 0.5);
+\draw[inh] (dg.north) -- ++(0, 0.7) -| (axisSp);
+\draw[inh] (ct.north) -- ++(0, 0.7) -| (axisSp);
+\draw[inh] (bd.north) -- ++(0, 0.7) -| (axisSp);
+\draw[edge] (axisSp) -- (a.south);
+\node[font=\scriptsize\itshape, anchor=south west] at ($ (axisSp) + (0.1, 0) $) {\{species\}};
+
+\end{tikzpicture}
+\end{document}

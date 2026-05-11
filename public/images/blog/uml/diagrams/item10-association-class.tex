@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={cls, minimum width=24mm}
+]
+\node[box] (p) at (-3.5, 1.5) {Person};
+\node[box] (c) at ( 3.5, 1.5) {Company};
+
+\draw[edge] (p.east) -- node[above, font=\scriptsize\itshape] {employed} (c.west);
+\coordinate (mid) at ($ (p.east)!0.5!(c.west) $);
+
+% association class
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      inner sep=0pt, minimum width=32mm] (j) at (0, -1.6) {
+  \begin{tabular}{l}
+    \textbf{Job} \\
+    \hline
+    + startDate \\
+    + salary \\
+  \end{tabular}
+};
+
+\draw[edge, dashed] (mid) -- (j.north);
+
+\end{tikzpicture}
+\end{document}
