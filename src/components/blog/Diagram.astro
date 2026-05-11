@@ -4,9 +4,10 @@
 // Usage in MDX:
 //   import Diagram from '@components/blog/Diagram.astro';
 //   <Diagram src="dsa/diagrams/item20-quicksort-partition" alt="Quicksort partition" />
+//   <Diagram src="gof/relationships" alt="GoF 23 patterns" caption="패턴 관계도" />
 //
 // `src` is the path under /images/blog/, with or without .svg extension.
-// Optional `caption` adds a <figcaption>; without it renders a bare <img>.
+// Optional `caption` adds a <figcaption>; without it renders a bare image.
 
 interface Props {
   src: string;
@@ -17,27 +18,54 @@ interface Props {
 
 const { src, alt, caption, width } = Astro.props;
 const url = `/images/blog/${src.replace(/\.svg$/, '')}.svg`;
-const style = `max-width: ${width ?? '100%'}; background: white; padding: 8px; border-radius: 6px;`;
+const maxWidth = width ?? '100%';
 ---
 
-{caption ? (
-  <figure class="diagram">
-    <img src={url} alt={alt} style={style} loading="lazy" />
-    <figcaption>{caption}</figcaption>
-  </figure>
-) : (
-  <img src={url} alt={alt} style={style} loading="lazy" />
-)}
+<figure class="diagram" style={`--diagram-max-width: ${maxWidth}`}>
+  <a href={url} target="_blank" rel="noopener" class="diagram-link" aria-label={`${alt} — open full size`}>
+    <img src={url} alt={alt} loading="lazy" decoding="async" />
+  </a>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
 
 <style>
   .diagram {
     margin: 1.5rem 0;
     text-align: center;
   }
+
+  .diagram-link {
+    display: inline-block;
+    max-width: var(--diagram-max-width, 100%);
+    line-height: 0;          /* kill any whitespace gap under img */
+  }
+
+  .diagram img {
+    max-width: 100%;
+    height: auto;
+    background: #fff;        /* SVGs are dark-on-white; keep contrast in dark mode */
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .diagram-link:hover img {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
   .diagram figcaption {
-    margin-top: 0.5rem;
+    margin-top: 0.625rem;
     font-size: 0.875rem;
     color: var(--color-text-secondary, #666);
     font-style: italic;
+    line-height: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .diagram img { transition: none; }
+    .diagram-link:hover img { transform: none; }
   }
 </style>
