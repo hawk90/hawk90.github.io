@@ -2,7 +2,7 @@
 // sync-book-notes.mjs — copy book-notes chapters into the blog with frontmatter.
 //
 // Source:  ../book-notes/linear-algebra/NN-topic/*.md + figures/
-// Target:  src/content/blog/programming/linear-algebra/chNN-XX-slug.md
+// Target:  src/content/blog/math/linear-algebra/chNN-<topic>/XX-slug.md
 //          public/images/blog/linear-algebra/chNN/*.{svg,png,...}
 //
 // Re-runnable: overwrites synced files. Author in book-notes, run this to publish.
@@ -12,7 +12,7 @@ import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SOURCE = path.resolve(ROOT, '../book-notes/linear-algebra');
-const DEST_POSTS = path.join(ROOT, 'src/content/blog/programming/linear-algebra');
+const DEST_POSTS = path.join(ROOT, 'src/content/blog/math/linear-algebra');
 const DEST_IMAGES = path.join(ROOT, 'public/images/blog/linear-algebra');
 
 const SERIES = 'Linear Algebra';
@@ -42,9 +42,11 @@ async function listChapters(srcRoot) {
     .sort((a, b) => a.num - b.num);
 }
 
-async function syncChapter({ num, dir }) {
-  const chKey = `ch${String(num).padStart(2, '0')}`;
-  await copyFigures(path.join(dir, 'figures'), path.join(DEST_IMAGES, chKey));
+async function syncChapter({ num, slug, dir }) {
+  const chNum = `ch${String(num).padStart(2, '0')}`;
+  const chFolder = `${chNum}-${slug}`;
+  await copyFigures(path.join(dir, 'figures'), path.join(DEST_IMAGES, chNum));
+  await fs.mkdir(path.join(DEST_POSTS, chFolder), { recursive: true });
 
   const files = await fs.readdir(dir);
   let written = 0;
@@ -56,15 +58,15 @@ async function syncChapter({ num, dir }) {
       continue;
     }
     const raw = await fs.readFile(path.join(dir, f), 'utf-8');
-    const { title, description, body } = transform(raw, chKey);
+    const { title, description, body } = transform(raw, chNum);
     const frontmatter = buildFrontmatter({
       title,
       description,
       seriesOrder: num * 100 + meta.order,
     });
-    const outName = `${chKey}-${meta.suffix}.md`;
-    await fs.writeFile(path.join(DEST_POSTS, outName), `${frontmatter}\n${body}`);
-    console.log(`  wrote: ${outName}`);
+    const outPath = path.join(DEST_POSTS, chFolder, `${meta.suffix}.md`);
+    await fs.writeFile(outPath, `${frontmatter}\n${body}`);
+    console.log(`  wrote: ${chFolder}/${meta.suffix}.md`);
     written++;
   }
   return written;
