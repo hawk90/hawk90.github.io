@@ -78,15 +78,18 @@ function formatChapter(key: string): string {
             </div>
           </div>
 
-          <div class="space-y-10">
+          <div class="space-y-8">
             {chapters.map((chapter) => (
               <div>
                 {hasChapters && chapter.label && (
-                  <h2 class="text-xl font-semibold mb-4 pb-2 border-b border-[var(--color-border)] text-[var(--color-text-secondary)]">
-                    {chapter.label}
-                  </h2>
+                  <div class="flex items-center gap-3 mb-3">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                      {chapter.label}
+                    </span>
+                    <span class="flex-1 h-px bg-[var(--color-border)]" aria-hidden="true"></span>
+                  </div>
                 )}
-                <div class="space-y-4">
+                <div class:list={['space-y-3', hasChapters && chapter.label ? 'sm:pl-4 border-l-2 border-[var(--color-border)]/60 ml-2' : '']}>
                   {chapter.posts.map((post, index) => (
                     <a
                       href={`/blog/${post.slug}`}

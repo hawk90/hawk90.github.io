@@ -88,7 +88,7 @@ export const BLOG_CONFIG = {
 
 // --- UI ---
 export const UI_CONFIG = {
-  paginationDelta: 1,
+  paginationDelta: 3,
   tocHeadingDepth: { min: 2, max: 3 },
   tocScrollOffset: 100,
 };
