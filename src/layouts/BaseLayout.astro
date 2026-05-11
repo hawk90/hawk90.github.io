@@ -297,5 +297,59 @@ const jsonLd = type === 'article'
       initShortcuts();
       document.addEventListener('astro:page-load', initShortcuts);
     </script>
+
+    <!-- Image lightbox (click any <img> inside .prose to expand) -->
+    <script>
+      let lightboxCleanup: (() => void) | null = null;
+      function initLightbox() {
+        lightboxCleanup?.();
+        const images = document.querySelectorAll<HTMLImageElement>('.prose img:not(.no-zoom)');
+        if (images.length === 0) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'lightbox-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Expanded image');
+        overlay.dataset.open = 'false';
+        overlay.style.display = 'none';
+        const inner = document.createElement('img');
+        inner.alt = '';
+        overlay.appendChild(inner);
+        document.body.appendChild(overlay);
+
+        function close() {
+          overlay.dataset.open = 'false';
+          document.body.style.overflow = '';
+          setTimeout(() => { overlay.style.display = 'none'; }, 200);
+        }
+        function open(src: string, alt: string) {
+          inner.src = src;
+          inner.alt = alt;
+          overlay.style.display = 'flex';
+          requestAnimationFrame(() => { overlay.dataset.open = 'true'; });
+          document.body.style.overflow = 'hidden';
+        }
+        function onImgClick(e: Event) {
+          const img = e.currentTarget as HTMLImageElement;
+          open(img.currentSrc || img.src, img.alt);
+        }
+        function onKey(e: KeyboardEvent) {
+          if (e.key === 'Escape' && overlay.dataset.open === 'true') close();
+        }
+        images.forEach((img) => img.addEventListener('click', onImgClick));
+        overlay.addEventListener('click', close);
+        document.addEventListener('keydown', onKey);
+
+        lightboxCleanup = () => {
+          images.forEach((img) => img.removeEventListener('click', onImgClick));
+          overlay.removeEventListener('click', close);
+          document.removeEventListener('keydown', onKey);
+          overlay.remove();
+        };
+      }
+      initLightbox();
+      document.addEventListener('astro:page-load', initLightbox);
+    </script>
   </body>
 </html>

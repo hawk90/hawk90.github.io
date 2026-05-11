@@ -420,7 +420,126 @@ html[data-show-line-numbers="false"] .expressive-code .ec-line .gutter {
   display: none;
 }
 
-/* Reduce motion */
+/* ─── Heading anchor (rehype-autolink-headings prepend) ──── */
+.prose .heading-anchor {
+  position: absolute;
+  left: -1.1em;
+  padding-right: 0.3em;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity 0.15s var(--ease-out), color 0.15s var(--ease-out);
+  pointer-events: auto;
+}
+.prose :is(h1, h2, h3, h4, h5, h6):hover .heading-anchor,
+.prose .heading-anchor:focus-visible {
+  opacity: 1;
+}
+.prose .heading-anchor:hover { color: var(--color-accent); }
+
+/* ─── Callouts (remark-callouts) ─────────────────────────── */
+.callout {
+  display: block;
+  margin: 1.5em 0;
+  padding: 1em 1.25em;
+  border-left: 4px solid var(--callout-border, var(--color-accent));
+  background: var(--callout-bg, var(--color-accent-faint));
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--callout-border, var(--color-accent));
+  margin-bottom: 0.4em;
+}
+.callout-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+.callout-body { color: var(--color-text-secondary); }
+.callout-body > :first-child { margin-top: 0; }
+.callout-body > :last-child  { margin-bottom: 0; }
+
+/* Variant palettes (tied to logical color, not hue, so it themes well) */
+.callout-info    { --callout-border: #60a5fa; --callout-bg: rgba(96,165,250,0.08); }
+.callout-tip     { --callout-border: #34d399; --callout-bg: rgba(52,211,153,0.08); }
+.callout-warning { --callout-border: #fbbf24; --callout-bg: rgba(251,191,36,0.10); }
+.callout-danger  { --callout-border: #f87171; --callout-bg: rgba(248,113,113,0.10); }
+
+/* ─── Math (KaTeX) responsive scroll ─────────────────────── */
+.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+  margin: 1em -0.5rem;        /* bleed slightly to use full content width */
+  padding-inline: 0.5rem;
+}
+.prose .katex-display::-webkit-scrollbar { height: 4px; }
+
+/* ─── Footnote refinements ──────────────────────────────── */
+.prose .footnotes {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+}
+.prose .footnotes h2 {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  border-bottom: none;
+  margin-bottom: 1rem;
+}
+.prose .footnotes ol { padding-left: 1.25rem; }
+.prose [data-footnote-ref],
+.prose .footnote-backref {
+  text-decoration: none;
+  color: var(--color-accent);
+  padding: 0 0.15em;
+}
+.prose [data-footnote-ref]:hover,
+.prose .footnote-backref:hover { color: var(--color-accent-hover); }
+
+/* ─── Reading mode (hide chrome) ────────────────────────── */
+body.reading-mode .no-print,
+body.reading-mode aside.sidebar,
+body.reading-mode .hide-in-reading {
+  display: none !important;
+}
+body.reading-mode .container { max-width: var(--content-width); }
+
+/* ─── Image lightbox ─────────────────────────────────────── */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  cursor: zoom-out;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease-out);
+}
+.lightbox-overlay[data-open="true"] { opacity: 1; }
+.lightbox-overlay img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: var(--shadow-lg);
+  border-radius: 0.5rem;
+  background: white;
+}
+.prose img:not(.no-zoom) { cursor: zoom-in; }
+
+/* ─── Reduce motion ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

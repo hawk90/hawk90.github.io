@@ -5,7 +5,11 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import expressiveCode from 'astro-expressive-code';
 import remarkMath from 'remark-math';
+import remarkDirective from 'remark-directive';
+import remarkCallouts from './src/lib/remark-callouts.mjs';
 import rehypeKatex from 'rehype-katex';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
 // https://astro.build/config
 export default defineConfig({
@@ -23,8 +27,27 @@ export default defineConfig({
   ],
 
   markdown: {
-    remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex],
+    remarkPlugins: [
+      remarkMath,
+      remarkDirective,
+      remarkCallouts,
+    ],
+    rehypePlugins: [
+      rehypeSlug,
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: 'prepend',
+          properties: {
+            class: 'heading-anchor',
+            ariaLabel: 'Link to section',
+            tabIndex: -1,
+          },
+          content: { type: 'text', value: '#' },
+        },
+      ],
+      rehypeKatex,
+    ],
   },
 
   prefetch: {
