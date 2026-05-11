@@ -7,17 +7,17 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 \draw[draw=nodebord, fill=nodefill, rounded corners=4pt, line width=0.4pt]
-  (0,0) rectangle (8.6, 3.2);
-\node[font=\sffamily\bfseries, anchor=north west] at (0.15, 3.1) {Driving};
+  (0,0) rectangle (8.6, 4.0);
+\node[font=\sffamily\bfseries, anchor=north west] at (0.25, 3.85) {Driving};
 
-\draw[draw=nodebord, line width=0.4pt] (0.4, 1.7) rectangle (8.2, 2.55);
-\node[font=\footnotesize\itshape, anchor=north west] at (0.55, 2.5) {Audio};
-\node[font=\footnotesize, anchor=center] at (4.3, 2.05) {Off $\rightarrow$ On};
+\draw[draw=nodebord, line width=0.4pt] (0.4, 2.1) rectangle (8.2, 3.3);
+\node[font=\footnotesize\itshape, anchor=north west] at (0.55, 3.2) {Audio};
+\node[font=\footnotesize, anchor=center] at (4.3, 2.55) {Off $\rightarrow$ On};
 
-\draw[dashed, edgesc, line width=0.4pt] (0.4, 1.55) -- (8.2, 1.55);
+\draw[dashed, edgesc, line width=0.4pt] (0.4, 1.95) -- (8.2, 1.95);
 
-\draw[draw=nodebord, line width=0.4pt] (0.4, 0.4) rectangle (8.2, 1.4);
-\node[font=\footnotesize\itshape, anchor=north west] at (0.55, 1.35) {Cruise};
-\node[font=\footnotesize, anchor=center] at (4.3, 0.85) {Off $\rightarrow$ On};
+\draw[draw=nodebord, line width=0.4pt] (0.4, 0.4) rectangle (8.2, 1.75);
+\node[font=\footnotesize\itshape, anchor=north west] at (0.55, 1.65) {Cruise};
+\node[font=\footnotesize, anchor=center] at (4.3, 1.0) {Off $\rightarrow$ On};
 \end{tikzpicture}
 \end{document}

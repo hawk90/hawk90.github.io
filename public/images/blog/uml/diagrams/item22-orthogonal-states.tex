@@ -7,20 +7,20 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 \draw[draw=nodebord, fill=nodefill, rounded corners=4pt, line width=0.4pt]
-  (0,0) rectangle (8.4, 3.6);
-\node[font=\sffamily\bfseries, anchor=north west] at (0.15, 3.5) {Online};
+  (0,0) rectangle (8.4, 5.0);
+\node[font=\sffamily\bfseries, anchor=north west] at (0.25, 4.85) {Online};
 
-% Auth region
-\draw[draw=nodebord, line width=0.4pt] (0.4, 2.0) rectangle (8.0, 2.95);
-\node[font=\footnotesize\itshape, anchor=north west] at (0.55, 2.9) {Auth};
-\node[font=\footnotesize, anchor=center] at (4.2, 2.35) {Anon $\rightarrow$ LoggedIn};
+% Auth region — title in its own band, content well-clear of edges
+\draw[draw=nodebord, line width=0.4pt] (0.4, 2.7) rectangle (8.0, 4.2);
+\node[font=\footnotesize\itshape, anchor=north west] at (0.55, 4.1) {Auth};
+\node[font=\footnotesize, anchor=center] at (4.2, 3.25) {Anon $\rightarrow$ LoggedIn};
 
-% separator
-\draw[dashed, edgesc, line width=0.4pt] (0.4, 1.85) -- (8.0, 1.85);
+% separator between the two regions
+\draw[dashed, edgesc, line width=0.4pt] (0.4, 2.45) -- (8.0, 2.45);
 
 % Connection region
-\draw[draw=nodebord, line width=0.4pt] (0.4, 0.4) rectangle (8.0, 1.7);
-\node[font=\footnotesize\itshape, anchor=north west] at (0.55, 1.65) {Connection};
-\node[font=\footnotesize, anchor=center] at (4.2, 0.95) {Idle $\rightarrow$ Active};
+\draw[draw=nodebord, line width=0.4pt] (0.4, 0.4) rectangle (8.0, 2.2);
+\node[font=\footnotesize\itshape, anchor=north west] at (0.55, 2.1) {Connection};
+\node[font=\footnotesize, anchor=center] at (4.2, 1.2) {Idle $\rightarrow$ Active};
 \end{tikzpicture}
 \end{document}

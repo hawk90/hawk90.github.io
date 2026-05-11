@@ -6,13 +6,13 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
-\draw[draw=nodebord, fill=nodefill, line width=0.4pt] (0,0) rectangle (8.8, 2.7);
+\draw[draw=nodebord, fill=nodefill, line width=0.4pt] (0,0) rectangle (8.8, 3.6);
 \draw[draw=nodebord, fill=nodefill!50, line width=0.4pt]
-  (0,2.2) -- (1.7, 2.2) -- (2.0, 1.9) -- (2.0, 2.7) -- (0, 2.7) -- cycle;
-\node[font=\sffamily\bfseries\small, anchor=west] at (0.15, 2.45) {critical};
+  (0,3.1) -- (1.7, 3.1) -- (2.0, 2.8) -- (2.0, 3.6) -- (0, 3.6) -- cycle;
+\node[font=\sffamily\bfseries\small, anchor=west] at (0.15, 3.35) {critical};
 
-\node[font=\footnotesize, anchor=west] at (0.35, 1.6) {Worker → SharedRes: lock};
-\node[font=\footnotesize, anchor=west] at (0.35, 1.0) {Worker → SharedRes: use};
-\node[font=\footnotesize, anchor=west] at (0.35, 0.4) {Worker → SharedRes: unlock};
+\node[font=\footnotesize, anchor=west] at (0.45, 2.4)  {Worker → SharedRes: lock};
+\node[font=\footnotesize, anchor=west] at (0.45, 1.65) {Worker → SharedRes: use};
+\node[font=\footnotesize, anchor=west] at (0.45, 0.9)  {Worker → SharedRes: unlock};
 \end{tikzpicture}
 \end{document}
