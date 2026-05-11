@@ -266,12 +266,12 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
     const KEY = 'reading-mode';
 
     function apply(on: boolean) {
-      document.body.classList.toggle('reading-mode', on);
+      document.documentElement.classList.toggle('reading-mode', on);
       btn!.setAttribute('aria-pressed', String(on));
       if (label) label.textContent = on ? 'Exit reading' : 'Reading mode';
     }
 
-    let on = false;
+    let on = document.documentElement.classList.contains('reading-mode');
     try { on = localStorage.getItem(KEY) === '1'; } catch {}
     apply(on);
 

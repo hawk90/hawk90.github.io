@@ -187,6 +187,8 @@ const jsonLd = type === 'article'
         }
         window.__applyTheme=applyTheme;
         applyTheme(document.documentElement);
+        // Apply reading-mode pre-paint to prevent FOUC.
+        try { if (localStorage.getItem("reading-mode") === "1") document.documentElement.classList.add("reading-mode"); } catch(e){}
         if(document.prerendering){document.addEventListener("prerenderingchange",function(){applyTheme(document.documentElement)},{once:true})}
       })();
     </script>

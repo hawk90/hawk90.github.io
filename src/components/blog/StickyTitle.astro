@@ -1,12 +1,10 @@
 ---
 /**
- * StickyTitle — shrinks-and-stick header that appears once the user has
- * scrolled past the article's real <h1>. Shows series + title + a
- * thin reading-progress bar.
+ * StickyTitle — fixed mini-header that fades in after the user has
+ * scrolled past the article's <h1>. Reads scroll position directly
+ * (no sentinel DOM insertion → no layout shift, no race with JS).
  *
- * Pure CSS sticky positioning + a small IntersectionObserver to fade
- * in only after the page-header is out of view. Zero layout shift —
- * the element is position:fixed with opacity 0 until activated.
+ * Hidden by html.reading-mode via the CSS .hide-in-reading class.
  */
 
 interface Props {
@@ -66,9 +64,6 @@ const { title, series, seriesOrder, seriesTotal } = Astro.props;
   </div>
 </div>
 
-<!-- Sentinel placed right after the article header — invisible -->
-<div id="sticky-title-sentinel" aria-hidden="true"></div>
-
 <script>
   let stickyCleanup: (() => void) | null = null;
 
@@ -76,37 +71,47 @@ const { title, series, seriesOrder, seriesTotal } = Astro.props;
     stickyCleanup?.();
 
     const bar = document.getElementById('sticky-title');
-    const sentinel = document.getElementById('sticky-title-sentinel');
     const progress = document.getElementById('sticky-title-progress');
-    if (!bar || !sentinel) return;
+    if (!bar) return;
 
     const article = document.querySelector<HTMLElement>('article');
-    const placeAfter = document.querySelector<HTMLElement>('article header');
-    if (placeAfter && sentinel.parentElement !== placeAfter.parentElement) {
-      placeAfter.insertAdjacentElement('afterend', sentinel);
+    const articleHeader = document.querySelector<HTMLElement>('article header');
+    if (!article) return;
+
+    let ticking = false;
+    function update() {
+      ticking = false;
+
+      // Visibility: show after user scrolls past the bottom of the
+      // article <header> (where the real h1 sits).
+      let triggerY = 80;
+      if (articleHeader) {
+        const r = articleHeader.getBoundingClientRect();
+        triggerY = r.bottom; // becomes <=0 when scrolled past
+      }
+      const visible = triggerY < 0;
+      bar!.style.opacity = visible ? '1' : '0';
+      bar!.setAttribute('aria-hidden', String(!visible));
+
+      // Read progress along the article body
+      if (progress) {
+        const ar = article!.getBoundingClientRect();
+        const total = ar.height - window.innerHeight;
+        if (total <= 0) {
+          progress.style.width = '100%';
+        } else {
+          const scrolled = -ar.top;
+          const pct = Math.max(0, Math.min(100, (scrolled / total) * 100));
+          progress.style.width = pct.toFixed(2) + '%';
+        }
+      }
     }
-
-    function setVisible(on: boolean) {
-      bar!.style.opacity = on ? '1' : '0';
-      bar!.setAttribute('aria-hidden', String(!on));
-    }
-
-    const io = new IntersectionObserver(
-      ([entry]) => setVisible(!entry.isIntersecting),
-      { rootMargin: '0px' },
-    );
-    io.observe(sentinel);
-
     function onScroll() {
-      if (!article || !progress) return;
-      const rect = article.getBoundingClientRect();
-      const total = rect.height - window.innerHeight;
-      if (total <= 0) { progress.style.width = '100%'; return; }
-      const scrolled = -rect.top;
-      const pct = Math.max(0, Math.min(100, (scrolled / total) * 100));
-      progress.style.width = pct.toFixed(2) + '%';
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
     }
-    onScroll();
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
 
@@ -118,7 +123,6 @@ const { title, series, seriesOrder, seriesTotal } = Astro.props;
     topBtn?.addEventListener('click', scrollTop);
 
     stickyCleanup = () => {
-      io.disconnect();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
       topBtn?.removeEventListener('click', scrollTop);

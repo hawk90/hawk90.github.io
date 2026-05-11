@@ -396,20 +396,20 @@ code, pre, kbd, samp, tt {
 }
 
 /* ─── Drop-cap on the first paragraph of an article ────── */
-/* Only on standalone articles (skip if first child is a callout, TL;DR,
-   list, image, blockquote, etc.) */
-.prose > p:first-of-type:first-child::first-letter {
+/* Picks the first <p> child of .prose so it works whether the article
+   opens with a heading or jumps straight into prose. */
+.prose > p:first-of-type::first-letter {
   float: left;
   font-family: var(--font-sans);
-  font-size: 3.5em;
+  font-size: 3.25em;
   line-height: 0.85;
   font-weight: 700;
   margin: 0.08em 0.12em 0 0;
   color: var(--color-accent);
-  /* Avoid drop-cap on small screens — looks awkward when wrap is tight */
 }
+/* Suppress on small screens (tight wrap looks awkward) */
 @media (max-width: 480px) {
-  .prose > p:first-of-type:first-child::first-letter { all: unset; }
+  .prose > p:first-of-type::first-letter { all: unset; color: inherit; }
 }
 
 /* ─── TL;DR / Summary variant ────────────────────────────── */
@@ -604,12 +604,14 @@ html[data-show-line-numbers="false"] .expressive-code .ec-line .gutter {
 .prose .footnote-backref:hover { color: var(--color-accent-hover); }
 
 /* ─── Reading mode (hide chrome) ────────────────────────── */
-body.reading-mode .no-print,
-body.reading-mode aside.sidebar,
-body.reading-mode .hide-in-reading {
+/* Class is set on <html> by an inline pre-paint script so there's no
+   FOUC when the user has reading-mode persisted. */
+:where(html.reading-mode) .no-print,
+:where(html.reading-mode) aside.sidebar,
+:where(html.reading-mode) .hide-in-reading {
   display: none !important;
 }
-body.reading-mode .container { max-width: var(--content-width); }
+html.reading-mode .container { max-width: var(--content-width); }
 
 /* ─── Image lightbox ─────────────────────────────────────── */
 .lightbox-overlay {
