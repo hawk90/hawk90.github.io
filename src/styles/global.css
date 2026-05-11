@@ -395,13 +395,101 @@ code, pre, kbd, samp, tt {
   box-shadow: var(--shadow-sm);
 }
 
-/* Print */
+/* ─── Drop-cap on the first paragraph of an article ────── */
+/* Only on standalone articles (skip if first child is a callout, TL;DR,
+   list, image, blockquote, etc.) */
+.prose > p:first-of-type:first-child::first-letter {
+  float: left;
+  font-family: var(--font-sans);
+  font-size: 3.5em;
+  line-height: 0.85;
+  font-weight: 700;
+  margin: 0.08em 0.12em 0 0;
+  color: var(--color-accent);
+  /* Avoid drop-cap on small screens — looks awkward when wrap is tight */
+}
+@media (max-width: 480px) {
+  .prose > p:first-of-type:first-child::first-letter { all: unset; }
+}
+
+/* ─── TL;DR / Summary variant ────────────────────────────── */
+/* Triggered via :::tldr or by writing a strong "TL;DR:" prefix in a normal
+   blockquote — the directive variant is recognised by remark-callouts. */
+.callout-tldr {
+  --callout-border: var(--color-accent);
+  --callout-bg: var(--color-accent-faint);
+  border-left-width: 3px;
+  padding-left: 1.5em;
+  font-size: 1.05em;
+}
+.callout-tldr .callout-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+}
+.callout-tldr .callout-body { color: var(--color-text-primary); font-weight: 500; }
+
+/* Print — clean, paper-friendly */
 @media print {
-  body { background: white; color: black; }
-  .no-print { display: none !important; }
+  @page { margin: 18mm 16mm; }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.55;
+  }
+
+  /* Hide chrome */
+  .no-print,
+  header#site-header,
+  footer,
+  aside,
+  #back-to-top,
+  #sticky-title,
+  #search-modal,
+  #shortcuts-modal,
+  .scroll-progress {
+    display: none !important;
+  }
+
   .prose { max-width: 100%; }
-  a { color: inherit; text-decoration: underline; }
+
+  /* Links: show URL after the text for offline reference */
+  .prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #555;
+    word-break: break-all;
+  }
+  .prose a[href^="#"]::after,
+  .prose .heading-anchor { content: none !important; }
+  .prose a { color: inherit !important; text-decoration: underline; }
+
+  /* Pre-wrap so wide code doesn't get cut */
+  pre, code { font-size: 9.5pt; }
   pre { white-space: pre-wrap; word-break: break-word; }
+
+  /* Headings: avoid orphans, slight underline */
+  .prose h1, .prose h2, .prose h3 {
+    page-break-after: avoid;
+    color: black !important;
+  }
+  .prose h2 { border-bottom: 1px solid #ddd; }
+
+  /* Callouts: outlined boxes instead of tinted bg */
+  .callout {
+    border: 1px solid #999 !important;
+    background: white !important;
+    page-break-inside: avoid;
+  }
+
+  /* Images and figures stick with caption */
+  figure, .prose img { page-break-inside: avoid; }
+
+  /* Tables and code blocks try to stay together */
+  table, pre { page-break-inside: avoid; }
 }
 
 /* Scroll progress bar */
