@@ -18,6 +18,50 @@ const { categoryInfo } = Astro.props;
 
 const allPosts = await getPublishedPosts();
 const categoryPosts = filterByCategory(allPosts, category!);
+
+type Post = (typeof categoryPosts)[number];
+
+const seriesMap = new Map<string, Map<string, Post[]>>();
+for (const post of categoryPosts) {
+  const series = post.data.series ?? 'Other';
+  const parts = post.slug.split('/');
+  // Slug is "category/series-slug/[chapter/]section". Depth ≥ 4 means a chapter exists.
+  const chapter = parts.length >= 4 ? parts[2] : '_flat';
+  if (!seriesMap.has(series)) seriesMap.set(series, new Map());
+  const chapters = seriesMap.get(series)!;
+  if (!chapters.has(chapter)) chapters.set(chapter, []);
+  chapters.get(chapter)!.push(post);
+}
+for (const chapters of seriesMap.values()) {
+  for (const posts of chapters.values()) {
+    posts.sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0));
+  }
+}
+const seriesList = [...seriesMap.entries()]
+  .map(([name, chapters]) => ({
+    name,
+    chapters: [...chapters.entries()]
+      .map(([key, posts]) => ({ key, posts, label: formatChapter(key) }))
+      .sort((a, b) => (a.posts[0]?.data.seriesOrder ?? 0) - (b.posts[0]?.data.seriesOrder ?? 0)),
+  }))
+  .sort(
+    (a, b) =>
+      (a.chapters[0]?.posts[0]?.data.seriesOrder ?? 0) -
+      (b.chapters[0]?.posts[0]?.data.seriesOrder ?? 0),
+  );
+
+function formatChapter(key: string): string {
+  if (key === '_flat') return '';
+  const m = key.match(/^ch(\d+)(?:-(.+))?$/);
+  if (!m) return key;
+  const num = String(parseInt(m[1], 10)).padStart(2, '0');
+  if (!m[2]) return `Chapter ${num}`;
+  const title = m[2]
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+  return `Chapter ${num} · ${title}`;
+}
 ---
 
 <BaseLayout title={`${categoryInfo.name} - Blog`} description={categoryInfo.description}>
@@ -39,9 +83,29 @@ const categoryPosts = filterByCategory(allPosts, category!);
           </div>
 
           {categoryPosts.length > 0 ? (
-            <div class="grid gap-6 md:grid-cols-2">
-              {categoryPosts.map((post) => (
-                <PostCard post={post} />
+            <div class="space-y-12">
+              {seriesList.map((s) => (
+                <div>
+                  <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-[var(--color-border)]">
+                    {s.name}
+                  </h2>
+                  <div class="space-y-8">
+                    {s.chapters.map((ch) => (
+                      <div>
+                        {ch.label && (
+                          <h3 class="text-lg font-semibold mb-3 text-[var(--color-text-secondary)]">
+                            {ch.label}
+                          </h3>
+                        )}
+                        <div class="grid gap-6 md:grid-cols-2">
+                          {ch.posts.map((post) => (
+                            <PostCard post={post} />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
