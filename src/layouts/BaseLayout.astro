@@ -210,6 +210,12 @@ const jsonLd = type === 'article'
       document.addEventListener("astro:after-swap",function(){window.__applyTheme&&window.__applyTheme(document.documentElement);__syncCodeTheme()});
       document.addEventListener("astro:page-load",__syncCodeTheme);
       window.addEventListener("pageshow",function(){window.__applyTheme&&window.__applyTheme(document.documentElement);__syncCodeTheme()});
+      // Cross-tab sync: when localStorage changes in another tab, mirror it here.
+      window.addEventListener("storage",function(e){
+        if(!e.key||["theme","code-theme-dark","code-theme-light","show-line-numbers"].indexOf(e.key)===-1)return;
+        window.__applyTheme&&window.__applyTheme(document.documentElement);
+        __syncCodeTheme();
+      });
       __syncCodeTheme();
     </script>
   </head>
