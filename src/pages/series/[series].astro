@@ -92,7 +92,10 @@ function formatChapter(key: string): string {
                           {hasChapters ? index + 1 : post.data.seriesOrder || index + 1}
                         </div>
                         <div class="flex-1 min-w-0">
-                          <h3 class="text-base sm:text-lg font-semibold group-hover:text-[var(--color-accent)] transition-colors leading-snug">
+                          <h3
+                            class="text-base sm:text-lg font-semibold group-hover:text-[var(--color-accent)] transition-colors leading-snug"
+                            transition:name={`title-${post.id}`}
+                          >
                             {post.data.title}
                           </h3>
                           {post.data.description && (

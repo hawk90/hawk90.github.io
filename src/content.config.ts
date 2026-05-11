@@ -1,6 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { SITE_CONFIG } from '../consts/config';
+import { SITE_CONFIG } from './consts/config';
 
 const blogCollection = defineCollection({
   // Modern content layer (Astro 5+, required in Astro 6).
