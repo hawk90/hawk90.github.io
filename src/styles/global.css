@@ -66,6 +66,49 @@ html.light {
   --shadow-lg: 0 10px 24px rgba(20, 14, 38, 0.10);
 }
 
+/* ─── User-customisable accent (settings page picker) ──── */
+/* Default accent already set above; these data-attributes
+   override based on user choice persisted in localStorage. */
+html[data-accent="blue"]    { --color-accent: #60a5fa; --color-accent-hover: #93c5fd; --color-accent-muted: rgba(96,165,250,0.18); --color-accent-faint: rgba(96,165,250,0.06); }
+html[data-accent="green"]   { --color-accent: #34d399; --color-accent-hover: #6ee7b7; --color-accent-muted: rgba(52,211,153,0.18); --color-accent-faint: rgba(52,211,153,0.06); }
+html[data-accent="rose"]    { --color-accent: #fb7185; --color-accent-hover: #fda4af; --color-accent-muted: rgba(251,113,133,0.18); --color-accent-faint: rgba(251,113,133,0.06); }
+html[data-accent="amber"]   { --color-accent: #fbbf24; --color-accent-hover: #fcd34d; --color-accent-muted: rgba(251,191,36,0.20); --color-accent-faint: rgba(251,191,36,0.06); }
+html.light[data-accent="blue"]  { --color-accent: #2563eb; --color-accent-hover: #1d4ed8; --color-accent-muted: rgba(37,99,235,0.12); --color-accent-faint: rgba(37,99,235,0.04); }
+html.light[data-accent="green"] { --color-accent: #059669; --color-accent-hover: #047857; --color-accent-muted: rgba(5,150,105,0.12); --color-accent-faint: rgba(5,150,105,0.04); }
+html.light[data-accent="rose"]  { --color-accent: #e11d48; --color-accent-hover: #be123c; --color-accent-muted: rgba(225,29,72,0.12); --color-accent-faint: rgba(225,29,72,0.04); }
+html.light[data-accent="amber"] { --color-accent: #d97706; --color-accent-hover: #b45309; --color-accent-muted: rgba(217,119,6,0.12); --color-accent-faint: rgba(217,119,6,0.04); }
+
+/* ─── User-customisable font family ─────────────────────── */
+html[data-font="serif"] {
+  --font-sans: 'Source Serif Pro', 'Apple SD Gothic Neo', 'Pretendard Variable', Georgia, 'Times New Roman', serif;
+}
+html[data-font="mono"] {
+  --font-sans: var(--font-mono);
+}
+html[data-font="system"] {
+  --font-sans: system-ui, -apple-system, 'Apple SD Gothic Neo', 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ─── User-customisable density ─────────────────────────── */
+/* Default ("cozy") matches what the theme has shipped with. */
+html[data-density="compact"] body { line-height: 1.55; }
+html[data-density="compact"] .prose p          { margin-bottom: 0.85em; }
+html[data-density="compact"] .prose h2         { margin-top: 1.6em; margin-bottom: 0.5em; }
+html[data-density="compact"] .prose h3         { margin-top: 1.4em; }
+html[data-density="compact"] .prose li         { margin-bottom: 0.2em; }
+html[data-density="compact"] .prose blockquote { margin: 1em 0; padding: 0.55em 1em; }
+html[data-density="compact"] .prose .expressive-code { margin: 1em 0; }
+html[data-density="compact"] .callout          { margin: 1em 0; padding: 0.7em 1em; }
+
+html[data-density="comfortable"] body { line-height: 1.9; }
+html[data-density="comfortable"] .prose p          { margin-bottom: 1.5em; }
+html[data-density="comfortable"] .prose h2         { margin-top: 2.8em; margin-bottom: 1em; }
+html[data-density="comfortable"] .prose h3         { margin-top: 2.2em; }
+html[data-density="comfortable"] .prose li         { margin-bottom: 0.55em; }
+html[data-density="comfortable"] .prose blockquote { margin: 2em 0; padding: 1.1em 1.5em 1.1em 1.75em; }
+html[data-density="comfortable"] .prose .expressive-code { margin: 2em 0; }
+html[data-density="comfortable"] .callout          { margin: 2em 0; padding: 1.25em 1.5em; }
+
 /* ─── Base ────────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;

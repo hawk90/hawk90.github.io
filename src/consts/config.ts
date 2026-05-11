@@ -115,6 +115,10 @@ export const STORAGE_KEYS = {
   codeThemeDark: 'code-theme-dark',
   codeThemeLight: 'code-theme-light',
   showLineNumbers: 'show-line-numbers',
+  // Theme customizer (settings page)
+  fontFamily: 'font-family',     // 'sans' | 'serif' | 'mono' | 'system'
+  density: 'ui-density',         // 'compact' | 'cozy' | 'comfortable'
+  accent: 'accent-color',        // 'purple' | 'blue' | 'green' | 'rose' | 'amber'
 };
 
 // --- Default Code Themes (internal) ---

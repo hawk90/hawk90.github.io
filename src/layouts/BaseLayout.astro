@@ -198,6 +198,10 @@ const jsonLd = type === 'article'
           var n=localStorage.getItem("show-line-numbers");
           el.setAttribute("data-show-line-numbers",n!=="false"?"true":"false");
           if(localStorage.getItem("reading-mode")==="1") el.classList.add("reading-mode");
+          // Theme customizer pre-paint
+          var f=localStorage.getItem("font-family");   if(f) el.setAttribute("data-font",f);
+          var dn=localStorage.getItem("ui-density");   if(dn) el.setAttribute("data-density",dn);
+          var ac=localStorage.getItem("accent-color"); if(ac) el.setAttribute("data-accent",ac);
         }catch(e){}
       })();
     </script>

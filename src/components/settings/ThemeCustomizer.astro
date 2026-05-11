@@ -1,0 +1,201 @@
+---
+/**
+ * ThemeCustomizer — font / density / accent pickers for the
+ * /settings page. Values are persisted to localStorage and applied
+ * to <html> as data-* attributes. The inline pre-paint script in
+ * BaseLayout reads them back so there's no FOUC.
+ *
+ * Storage keys:
+ *   font-family  — 'sans' | 'serif' | 'mono' | 'system'   (data-font)
+ *   ui-density   — 'compact' | 'cozy' | 'comfortable'     (data-density)
+ *   accent-color — 'purple' | 'blue' | 'green' | 'rose' | 'amber' (data-accent)
+ */
+---
+
+<div class="space-y-8">
+  <!-- Accent color -->
+  <div>
+    <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+      Accent color
+    </label>
+    <div class="flex flex-wrap gap-3" data-accent-picker>
+      <button type="button" data-value="purple" class="accent-swatch" aria-label="Purple accent" style="--swatch: #a78bfa"></button>
+      <button type="button" data-value="blue"   class="accent-swatch" aria-label="Blue accent"   style="--swatch: #60a5fa"></button>
+      <button type="button" data-value="green"  class="accent-swatch" aria-label="Green accent"  style="--swatch: #34d399"></button>
+      <button type="button" data-value="rose"   class="accent-swatch" aria-label="Rose accent"   style="--swatch: #fb7185"></button>
+      <button type="button" data-value="amber"  class="accent-swatch" aria-label="Amber accent"  style="--swatch: #fbbf24"></button>
+    </div>
+  </div>
+
+  <!-- Density -->
+  <div>
+    <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+      Reading density
+    </label>
+    <div class="grid grid-cols-3 gap-2" data-density-picker>
+      <button type="button" data-value="compact"      class="density-btn">
+        <div class="font-medium">Compact</div>
+        <div class="text-xs text-[var(--color-text-muted)] mt-0.5">Tighter spacing</div>
+      </button>
+      <button type="button" data-value="cozy"         class="density-btn">
+        <div class="font-medium">Cozy</div>
+        <div class="text-xs text-[var(--color-text-muted)] mt-0.5">Default</div>
+      </button>
+      <button type="button" data-value="comfortable"  class="density-btn">
+        <div class="font-medium">Comfortable</div>
+        <div class="text-xs text-[var(--color-text-muted)] mt-0.5">More breathing room</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Font family -->
+  <div>
+    <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+      Body font
+    </label>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" data-font-picker>
+      <button type="button" data-value="sans"   class="font-btn" style="font-family: 'Pretendard Variable', 'Pretendard', system-ui, sans-serif">Aa Sans</button>
+      <button type="button" data-value="serif"  class="font-btn" style="font-family: Georgia, 'Times New Roman', serif">Aa Serif</button>
+      <button type="button" data-value="mono"   class="font-btn" style="font-family: 'JetBrains Mono', 'Fira Code', monospace">Aa Mono</button>
+      <button type="button" data-value="system" class="font-btn" style="font-family: system-ui, -apple-system, sans-serif">Aa System</button>
+    </div>
+    <p class="text-xs text-[var(--color-text-muted)] mt-2">
+      Affects body prose and headings only — code blocks always use the mono font.
+    </p>
+  </div>
+
+  <!-- Reset -->
+  <div>
+    <button type="button" data-customizer-reset class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors underline underline-offset-2">
+      Reset to defaults
+    </button>
+  </div>
+</div>
+
+<style>
+  /* Accent swatches */
+  .accent-swatch {
+    width: 32px; height: 32px;
+    border-radius: 9999px;
+    background: var(--swatch);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    position: relative;
+  }
+  .accent-swatch:hover { transform: scale(1.08); }
+  .accent-swatch.active {
+    border-color: var(--color-text-primary);
+    box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--swatch);
+  }
+
+  /* Density / font segmented buttons */
+  .density-btn, .font-btn {
+    padding: 0.625rem 0.75rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .density-btn:hover, .font-btn:hover {
+    border-color: var(--color-border-hover);
+  }
+  .density-btn.active, .font-btn.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+  }
+  .density-btn.active .text-\[var\(--color-text-muted\)\] {
+    color: rgba(255,255,255,0.8);
+  }
+</style>
+
+<script>
+  import { STORAGE_KEYS } from '../../consts/config';
+
+  let cleanup: (() => void) | null = null;
+
+  function initCustomizer() {
+    cleanup?.();
+
+    const html = document.documentElement;
+    const accentBtns = document.querySelectorAll<HTMLButtonElement>('[data-accent-picker] [data-value]');
+    const densityBtns = document.querySelectorAll<HTMLButtonElement>('[data-density-picker] [data-value]');
+    const fontBtns = document.querySelectorAll<HTMLButtonElement>('[data-font-picker] [data-value]');
+    const resetBtn = document.querySelector<HTMLButtonElement>('[data-customizer-reset]');
+    if (accentBtns.length === 0) return;
+
+    function getCurrent(key: string, fallback: string) {
+      try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+    }
+    function setCurrent(key: string, value: string | null) {
+      try {
+        if (value === null) localStorage.removeItem(key);
+        else localStorage.setItem(key, value);
+      } catch {}
+    }
+    function dispatch() {
+      window.dispatchEvent(new CustomEvent('settings-changed'));
+    }
+
+    function refreshActive() {
+      const accent = getCurrent(STORAGE_KEYS.accent, 'purple');
+      const density = getCurrent(STORAGE_KEYS.density, 'cozy');
+      const font = getCurrent(STORAGE_KEYS.fontFamily, 'sans');
+      accentBtns.forEach((b) => b.classList.toggle('active', b.dataset.value === accent));
+      densityBtns.forEach((b) => b.classList.toggle('active', b.dataset.value === density));
+      fontBtns.forEach((b) => b.classList.toggle('active', b.dataset.value === font));
+    }
+    refreshActive();
+
+    function pick(key: string, attr: string, defaultValue: string) {
+      return (e: Event) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const value = target.dataset.value;
+        if (!value) return;
+        if (value === defaultValue) {
+          html.removeAttribute(attr);
+          setCurrent(key, null);
+        } else {
+          html.setAttribute(attr, value);
+          setCurrent(key, value);
+        }
+        refreshActive();
+        dispatch();
+      };
+    }
+
+    const onAccent  = pick(STORAGE_KEYS.accent, 'data-accent', 'purple');
+    const onDensity = pick(STORAGE_KEYS.density, 'data-density', 'cozy');
+    const onFont    = pick(STORAGE_KEYS.fontFamily, 'data-font', 'sans');
+
+    accentBtns.forEach((b) => b.addEventListener('click', onAccent));
+    densityBtns.forEach((b) => b.addEventListener('click', onDensity));
+    fontBtns.forEach((b) => b.addEventListener('click', onFont));
+
+    function onReset() {
+      html.removeAttribute('data-accent');
+      html.removeAttribute('data-density');
+      html.removeAttribute('data-font');
+      setCurrent(STORAGE_KEYS.accent, null);
+      setCurrent(STORAGE_KEYS.density, null);
+      setCurrent(STORAGE_KEYS.fontFamily, null);
+      refreshActive();
+      dispatch();
+    }
+    resetBtn?.addEventListener('click', onReset);
+
+    cleanup = () => {
+      accentBtns.forEach((b) => b.removeEventListener('click', onAccent));
+      densityBtns.forEach((b) => b.removeEventListener('click', onDensity));
+      fontBtns.forEach((b) => b.removeEventListener('click', onFont));
+      resetBtn?.removeEventListener('click', onReset);
+    };
+  }
+
+  initCustomizer();
+  document.addEventListener('astro:page-load', initCustomizer);
+</script>
