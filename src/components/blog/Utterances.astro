@@ -20,10 +20,9 @@ const theme = cfg.theme ?? 'preferred-color-scheme';
 </div>
 
 <script>
-  let cleanup: (() => void) | null = null;
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  function init() {
-    cleanup?.();
+  onPageLoad(() => {
     const wrap = document.querySelector<HTMLElement>('.utterances-wrapper');
     if (!wrap) return;
     const mount = wrap.querySelector('.utterances-mount');
@@ -42,9 +41,6 @@ const theme = cfg.theme ?? 'preferred-color-scheme';
     s.setAttribute('theme', wrap.dataset.utterancesTheme ?? 'preferred-color-scheme');
     mount.appendChild(s);
 
-    cleanup = () => { mount.innerHTML = ''; };
-  }
-
-  init();
-  document.addEventListener('astro:page-load', init);
+    return () => { mount.innerHTML = ''; };
+  });
 </script>

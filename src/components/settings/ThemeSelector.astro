@@ -75,90 +75,56 @@ import { CODE_THEMES } from '../../lib/theme';
 </style>
 
 <script>
-  import { getStoredCodeTheme, setStoredCodeTheme, setStoredTheme } from '../../lib/theme';
+  import { getStoredCodeTheme, setStoredCodeTheme, setStoredTheme, syncCodeTheme } from '../../lib/theme';
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  let cleanup: (() => void) | null = null;
-
-  function initThemeSelector() {
-    cleanup?.();
-
-    const modeDark = document.getElementById('modeDark') as HTMLButtonElement;
-    const modeLight = document.getElementById('modeLight') as HTMLButtonElement;
-    const darkSelect = document.getElementById('darkThemeSelect') as HTMLSelectElement;
-    const lightSelect = document.getElementById('lightThemeSelect') as HTMLSelectElement;
-
+  onPageLoad(() => {
+    const modeDark = document.getElementById('modeDark') as HTMLButtonElement | null;
+    const modeLight = document.getElementById('modeLight') as HTMLButtonElement | null;
+    const darkSelect = document.getElementById('darkThemeSelect') as HTMLSelectElement | null;
+    const lightSelect = document.getElementById('lightThemeSelect') as HTMLSelectElement | null;
     if (!modeDark || !modeLight || !darkSelect || !lightSelect) return;
 
     let currentMode: 'dark' | 'light' = 'dark';
-
-    // Load saved themes
     darkSelect.value = getStoredCodeTheme('dark');
     lightSelect.value = getStoredCodeTheme('light');
 
-    function setMode(mode: 'dark' | 'light') {
-      currentMode = mode;
+    const applyPreview = () => {
+      const html = document.documentElement;
+      const isLight = currentMode === 'light';
+      html.classList.toggle('light', isLight);
+      html.setAttribute('data-code-theme', isLight ? lightSelect.value : darkSelect.value);
+      setStoredTheme(currentMode);
+      syncCodeTheme();
+      window.dispatchEvent(new CustomEvent('theme-mode-changed'));
+    };
 
-      // Update button states
+    const setMode = (mode: 'dark' | 'light') => {
+      currentMode = mode;
       modeDark.classList.toggle('active', mode === 'dark');
       modeLight.classList.toggle('active', mode === 'light');
-
-      // Show/hide theme selects
       darkSelect.classList.toggle('hidden', mode !== 'dark');
       lightSelect.classList.toggle('hidden', mode !== 'light');
-
-      // Apply preview
       applyPreview();
-    }
-
-    function applyPreview() {
-      const html = document.documentElement;
-
-      if (currentMode === 'light') {
-        html.classList.add('light');
-        html.setAttribute('data-code-theme', lightSelect.value);
-      } else {
-        html.classList.remove('light');
-        html.setAttribute('data-code-theme', darkSelect.value);
-      }
-
-      // Persist mode and notify header toggle
-      setStoredTheme(currentMode);
-      window.dispatchEvent(new CustomEvent('theme-mode-changed'));
-    }
-
-    function handleDarkChange() {
-      setStoredCodeTheme('dark', darkSelect.value);
-      applyPreview();
-      window.dispatchEvent(new CustomEvent('settings-changed'));
-    }
-
-    function handleLightChange() {
-      setStoredCodeTheme('light', lightSelect.value);
-      applyPreview();
-      window.dispatchEvent(new CustomEvent('settings-changed'));
-    }
-
-    // Event listeners (store references for proper cleanup)
-    function handleDarkMode() { setMode('dark'); }
-    function handleLightMode() { setMode('light'); }
-
-    modeDark.addEventListener('click', handleDarkMode);
-    modeLight.addEventListener('click', handleLightMode);
-    darkSelect.addEventListener('change', handleDarkChange);
-    lightSelect.addEventListener('change', handleLightChange);
-
-    // Initialize based on current page mode
-    const isLight = document.documentElement.classList.contains('light');
-    setMode(isLight ? 'light' : 'dark');
-
-    cleanup = () => {
-      modeDark.removeEventListener('click', handleDarkMode);
-      modeLight.removeEventListener('click', handleLightMode);
-      darkSelect.removeEventListener('change', handleDarkChange);
-      lightSelect.removeEventListener('change', handleLightChange);
     };
-  }
 
-  initThemeSelector();
-  document.addEventListener('astro:page-load', initThemeSelector);
+    const onDarkMode = () => setMode('dark');
+    const onLightMode = () => setMode('light');
+    const onDarkChange = () => { setStoredCodeTheme('dark', darkSelect.value); applyPreview(); window.dispatchEvent(new CustomEvent('settings-changed')); };
+    const onLightChange = () => { setStoredCodeTheme('light', lightSelect.value); applyPreview(); window.dispatchEvent(new CustomEvent('settings-changed')); };
+
+    modeDark.addEventListener('click', onDarkMode);
+    modeLight.addEventListener('click', onLightMode);
+    darkSelect.addEventListener('change', onDarkChange);
+    lightSelect.addEventListener('change', onLightChange);
+
+    setMode(document.documentElement.classList.contains('light') ? 'light' : 'dark');
+
+    return () => {
+      modeDark.removeEventListener('click', onDarkMode);
+      modeLight.removeEventListener('click', onLightMode);
+      darkSelect.removeEventListener('change', onDarkChange);
+      lightSelect.removeEventListener('change', onLightChange);
+    };
+  });
 </script>

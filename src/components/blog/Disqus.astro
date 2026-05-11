@@ -16,10 +16,9 @@ const cfg = COMMENTS_CONFIG;
 <div id="disqus_thread" data-disqus-shortname={cfg.shortname}></div>
 
 <script>
-  let cleanup: (() => void) | null = null;
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  function init() {
-    cleanup?.();
+  onPageLoad(() => {
     const mount = document.getElementById('disqus_thread') as HTMLElement | null;
     if (!mount) return;
     const shortname = mount.dataset.disqusShortname;
@@ -43,9 +42,6 @@ const cfg = COMMENTS_CONFIG;
       if (w.DISQUS) w.DISQUS.reset({ reload: true, config: w.disqus_config });
     }
 
-    cleanup = () => { mount.innerHTML = ''; };
-  }
-
-  init();
-  document.addEventListener('astro:page-load', init);
+    return () => { mount.innerHTML = ''; };
+  });
 </script>

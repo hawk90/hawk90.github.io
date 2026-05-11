@@ -50,52 +50,31 @@
 </div>
 
 <script>
-  let cleanup: (() => void) | null = null;
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  function initCodePreview() {
-    cleanup?.();
-
+  onPageLoad(() => {
     const tabs = document.querySelectorAll('.lang-tab');
     const panels = document.querySelectorAll('.code-panel');
-
     if (tabs.length === 0) return;
 
-    const handlers: Array<{ tab: Element; handler: () => void }> = [];
-
-    tabs.forEach(tab => {
-      function handleClick() {
+    const handlers: Array<{ tab: Element; fn: () => void }> = [];
+    tabs.forEach((tab) => {
+      const onClick = () => {
         const lang = tab.getAttribute('data-lang');
-
-        tabs.forEach(t => {
-          if (t.getAttribute('data-lang') === lang) {
-            t.classList.remove('bg-[var(--color-bg-tertiary)]', 'text-[var(--color-text-secondary)]');
-            t.classList.add('bg-[var(--color-accent)]', 'text-white');
-          } else {
-            t.classList.remove('bg-[var(--color-accent)]', 'text-white');
-            t.classList.add('bg-[var(--color-bg-tertiary)]', 'text-[var(--color-text-secondary)]');
-          }
+        tabs.forEach((t) => {
+          const active = t.getAttribute('data-lang') === lang;
+          t.classList.toggle('bg-[var(--color-accent)]', active);
+          t.classList.toggle('text-white', active);
+          t.classList.toggle('bg-[var(--color-bg-tertiary)]', !active);
+          t.classList.toggle('text-[var(--color-text-secondary)]', !active);
         });
-
-        panels.forEach(p => {
-          if (p.getAttribute('data-panel') === lang) {
-            p.classList.remove('hidden');
-          } else {
-            p.classList.add('hidden');
-          }
+        panels.forEach((p) => {
+          p.classList.toggle('hidden', p.getAttribute('data-panel') !== lang);
         });
-      }
-
-      tab.addEventListener('click', handleClick);
-      handlers.push({ tab, handler: handleClick });
+      };
+      tab.addEventListener('click', onClick);
+      handlers.push({ tab, fn: onClick });
     });
-
-    cleanup = () => {
-      handlers.forEach(({ tab, handler }) => {
-        tab.removeEventListener('click', handler);
-      });
-    };
-  }
-
-  initCodePreview();
-  document.addEventListener('astro:page-load', initCodePreview);
+    return () => handlers.forEach(({ tab, fn }) => tab.removeEventListener('click', fn));
+  });
 </script>

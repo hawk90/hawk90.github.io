@@ -91,45 +91,39 @@ const { caption, autoplay = true } = Astro.props;
 </style>
 
 <script>
-  let cleanup: (() => void) | null = null;
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  function initAnimatedSvg() {
-    cleanup?.();
+  onPageLoad(() => {
     const figs = document.querySelectorAll<HTMLElement>('.animated-svg');
     if (figs.length === 0) return;
 
     const teardowns: (() => void)[] = [];
-
     figs.forEach((fig) => {
       const svg = fig.querySelector<SVGSVGElement>('svg');
       if (!svg) return;
 
-      function pause() {
+      const pause = () => {
         fig.classList.add('is-paused');
-        try { svg!.pauseAnimations(); } catch {}
-      }
-      function play() {
+        try { svg.pauseAnimations(); } catch { /* not animatable */ }
+      };
+      const play = () => {
         fig.classList.remove('is-paused');
-        try { svg!.unpauseAnimations(); } catch {}
-      }
-      function restart() {
-        try { svg!.setCurrentTime(0); } catch {}
+        try { svg.unpauseAnimations(); } catch { /* not animatable */ }
+      };
+      const restart = () => {
+        try { svg.setCurrentTime(0); } catch { /* not animatable */ }
         play();
-      }
+      };
 
-      // Wire control buttons
       const handlers: Array<[HTMLElement, (e: Event) => void]> = [];
       fig.querySelectorAll<HTMLButtonElement>('[data-action]').forEach((btn) => {
-        const a = btn.dataset.action;
-        const fn =
-          a === 'play' ? play :
-          a === 'pause' ? pause :
-          restart;
+        const fn = btn.dataset.action === 'play' ? play
+                 : btn.dataset.action === 'pause' ? pause
+                 : restart;
         btn.addEventListener('click', fn);
         handlers.push([btn, fn]);
       });
 
-      // Auto-pause when off-screen, resume when visible (saves CPU)
       const autoplay = fig.dataset.autoplay !== 'false';
       const io = new IntersectionObserver(
         ([e]) => {
@@ -146,10 +140,6 @@ const { caption, autoplay = true } = Astro.props;
         io.disconnect();
       });
     });
-
-    cleanup = () => teardowns.forEach((t) => t());
-  }
-
-  initAnimatedSvg();
-  document.addEventListener('astro:page-load', initAnimatedSvg);
+    return () => teardowns.forEach((t) => t());
+  });
 </script>

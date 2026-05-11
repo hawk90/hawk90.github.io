@@ -73,70 +73,47 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 </style>
 
 <script>
-  let cleanup: (() => void) | null = null;
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  function initTableOfContents() {
-    cleanup?.();
-
+  onPageLoad(() => {
     const tocLinks = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
     if (tocLinks.length === 0) return;
 
     const headingElements: HTMLElement[] = [];
-
     tocLinks.forEach((link) => {
       const id = link.dataset.heading;
       if (id) {
-        const heading = document.getElementById(id);
-        if (heading) headingElements.push(heading);
+        const h = document.getElementById(id);
+        if (h) headingElements.push(h);
       }
     });
 
-    function updateTocHighlight() {
+    const update = () => {
       const OFFSET = 120;
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
       const bodyHeight = document.body.offsetHeight;
-      
       let currentId = '';
-
-      // If we're at the very bottom, highlight the last heading
-      if (scrollY + windowHeight >= bodyHeight - 20) {
+      if (window.scrollY + window.innerHeight >= bodyHeight - 20) {
         currentId = headingElements[headingElements.length - 1]?.id || '';
       } else {
         for (const heading of headingElements) {
-          const top = heading.getBoundingClientRect().top;
-          if (top <= OFFSET) {
-            currentId = heading.id;
-          } else {
-            break;
-          }
+          if (heading.getBoundingClientRect().top <= OFFSET) currentId = heading.id;
+          else break;
         }
       }
-
       tocLinks.forEach((link) => {
         link.classList.toggle('is-active', link.dataset.heading === currentId);
       });
-    }
+    };
 
     let ticking = false;
-    function handleScroll() {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          updateTocHighlight();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    updateTocHighlight();
-
-    cleanup = () => {
-      window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { update(); ticking = false; });
     };
-  }
 
-  initTableOfContents();
-  document.addEventListener('astro:page-load', initTableOfContents);
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  });
 </script>

@@ -56,26 +56,13 @@
 
 <script>
   import { toggleTheme } from '../../lib/theme';
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  let cleanup: (() => void) | null = null;
-
-  function initThemeToggle() {
-    cleanup?.();
-
+  onPageLoad(() => {
     const toggles = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
     if (toggles.length === 0) return;
-
-    function handleClick() {
-      toggleTheme();
-    }
-
-    toggles.forEach((t) => t.addEventListener('click', handleClick));
-
-    cleanup = () => {
-      toggles.forEach((t) => t.removeEventListener('click', handleClick));
-    };
-  }
-
-  initThemeToggle();
-  document.addEventListener('astro:page-load', initThemeToggle);
+    const onClick = () => toggleTheme();
+    toggles.forEach((t) => t.addEventListener('click', onClick));
+    return () => toggles.forEach((t) => t.removeEventListener('click', onClick));
+  });
 </script>

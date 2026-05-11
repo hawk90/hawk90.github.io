@@ -48,19 +48,15 @@ const { title, url } = Astro.props;
 
 <script>
   import { t } from '../../consts/ui-strings';
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  let cleanup: (() => void) | null = null;
-
-  function initShareButtons() {
-    cleanup?.();
-
+  onPageLoad(() => {
     const buttons = document.querySelectorAll<HTMLElement>('[data-copy-url]');
     if (buttons.length === 0) return;
 
-    const handlers: Array<{ btn: Element; handler: () => void }> = [];
-
+    const handlers: Array<{ btn: Element; fn: () => void }> = [];
     buttons.forEach((btn) => {
-      const handler = async () => {
+      const onClick = async () => {
         const url = btn.dataset.copyUrl;
         if (!url) return;
         try {
@@ -71,21 +67,11 @@ const { title, url } = Astro.props;
             label.textContent = t('share_copied');
             setTimeout(() => { label.textContent = original; }, 2000);
           }
-        } catch {
-          // Clipboard API not available
-        }
+        } catch { /* Clipboard API unavailable */ }
       };
-      btn.addEventListener('click', handler);
-      handlers.push({ btn, handler });
+      btn.addEventListener('click', onClick);
+      handlers.push({ btn, fn: onClick });
     });
-
-    cleanup = () => {
-      handlers.forEach(({ btn, handler }) => {
-        btn.removeEventListener('click', handler);
-      });
-    };
-  }
-
-  initShareButtons();
-  document.addEventListener('astro:page-load', initShareButtons);
+    return () => handlers.forEach(({ btn, fn }) => btn.removeEventListener('click', fn));
+  });
 </script>

@@ -112,42 +112,28 @@ function formatChapter(key: string): string {
 </nav>
 
 <script>
-  let cleanup: (() => void) | null = null;
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  function initSeriesSidebar() {
-    cleanup?.();
-
+  onPageLoad(() => {
     const toggles = document.querySelectorAll('[data-series-toggle]');
     if (toggles.length === 0) return;
 
-    const handlers: Array<{ toggle: Element; handler: (e: Event) => void }> = [];
-
+    const handlers: Array<{ el: Element; fn: (e: Event) => void }> = [];
     toggles.forEach((toggle) => {
-      function handleClick(e: Event) {
+      const onClick = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
-
         const nav = toggle.closest('nav');
         const list = nav?.querySelector('[data-series-list]');
         const chevron = toggle.querySelector('[data-chevron]');
-
-        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!isExpanded));
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
         list?.classList.toggle('hidden');
         chevron?.classList.toggle('rotate-180');
-      }
-
-      toggle.addEventListener('click', handleClick);
-      handlers.push({ toggle, handler: handleClick });
+      };
+      toggle.addEventListener('click', onClick);
+      handlers.push({ el: toggle, fn: onClick });
     });
-
-    cleanup = () => {
-      handlers.forEach(({ toggle, handler }) => {
-        toggle.removeEventListener('click', handler);
-      });
-    };
-  }
-
-  initSeriesSidebar();
-  document.addEventListener('astro:page-load', initSeriesSidebar);
+    return () => handlers.forEach(({ el, fn }) => el.removeEventListener('click', fn));
+  });
 </script>
