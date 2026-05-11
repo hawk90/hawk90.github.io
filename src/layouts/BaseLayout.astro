@@ -19,6 +19,8 @@ interface Props {
   modifiedTime?: Date;
   author?: string;
   noIndex?: boolean;
+  noFollow?: boolean;
+  canonical?: string;
 }
 
 const {
@@ -31,10 +33,17 @@ const {
   modifiedTime,
   author = SITE_CONFIG.author,
   noIndex = false,
+  noFollow = false,
+  canonical,
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = canonical
+  ? new URL(canonical)
+  : new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL(image, Astro.site);
+const robotsValue = [noIndex && 'noindex', noFollow && 'nofollow']
+  .filter(Boolean)
+  .join(', ');
 const ogLocale = SITE_CONFIG.locale.replace('-', '_');
 
 // JSON-LD structured data
@@ -98,7 +107,7 @@ const jsonLd = type === 'article'
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <meta name="author" content={author} />
-    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+    {robotsValue && <meta name="robots" content={robotsValue} />}
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content={type} />
@@ -166,57 +175,42 @@ const jsonLd = type === 'article'
       if(window.top!==window.self){window.top.location=window.self.location}
     </script>
 
-    <!-- Theme initialization (render-blocking to prevent FOUC) -->
+    <!--
+      Theme initialization — render-blocking to prevent FOUC.
+      This inline IIFE intentionally duplicates the localStorage read +
+      class/attribute write that `lib/theme.ts → applyTheme` does. The
+      duplication is the price of pre-paint execution: we cannot import a
+      module from an inline script. The two stay in sync via the
+      VALID_CODE_THEMES constant and STORAGE_KEYS object that both sides
+      consume — change the keys in one place only.
+    -->
     <script is:inline>
       (function(){
-        function applyTheme(el){
-          var v=["github-dark-dimmed","github-light","dracula","one-dark-pro","catppuccin-mocha","catppuccin-latte","nord","tokyo-night"];
-          try{
-            var t=localStorage.getItem("theme");
-            t==="light"?el.classList.add("light"):t==="dark"?el.classList.remove("light"):window.matchMedia("(prefers-color-scheme: light)").matches?el.classList.add("light"):el.classList.remove("light");
-            var l=el.classList.contains("light"),d=localStorage.getItem("code-theme-dark"),c=localStorage.getItem("code-theme-light");
-            d=v.indexOf(d)!==-1?d:"github-dark-dimmed";c=v.indexOf(c)!==-1?c:"github-light";
-            el.setAttribute("data-code-theme",l?c:d);
-            var n=localStorage.getItem("show-line-numbers");
-            el.setAttribute("data-show-line-numbers",n!=="false"?"true":"false");
-          }catch(e){
-            window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches&&el.classList.add("light");
-            el.setAttribute("data-code-theme",el.classList.contains("light")?"github-light":"github-dark-dimmed");
-            el.setAttribute("data-show-line-numbers","true");
-          }
-        }
-        window.__applyTheme=applyTheme;
-        applyTheme(document.documentElement);
-        // Apply reading-mode pre-paint to prevent FOUC.
-        try { if (localStorage.getItem("reading-mode") === "1") document.documentElement.classList.add("reading-mode"); } catch(e){}
-        if(document.prerendering){document.addEventListener("prerenderingchange",function(){applyTheme(document.documentElement)},{once:true})}
+        try{
+          var V=["github-dark-dimmed","github-light","dracula","one-dark-pro","catppuccin-mocha","catppuccin-latte","nord","tokyo-night"];
+          var el=document.documentElement, t=localStorage.getItem("theme");
+          var pref=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches;
+          var light=t==="light"||(t!=="dark"&&pref);
+          el.classList.toggle("light",light);
+          var d=localStorage.getItem("code-theme-dark"); if(V.indexOf(d)===-1) d="github-dark-dimmed";
+          var c=localStorage.getItem("code-theme-light"); if(V.indexOf(c)===-1) c="github-light";
+          el.setAttribute("data-code-theme",light?c:d);
+          var n=localStorage.getItem("show-line-numbers");
+          el.setAttribute("data-show-line-numbers",n!=="false"?"true":"false");
+          if(localStorage.getItem("reading-mode")==="1") el.classList.add("reading-mode");
+        }catch(e){}
       })();
     </script>
 
     <!-- SPA-style navigation with cross-document fallback -->
     <ClientRouter />
 
-    <!-- Theme: before-swap (new doc), after-swap (fallback), pageshow (prerender/bfcache).
-         Also propagate data-code-theme to every .expressive-code block on
-         astro:page-load — expressive-code looks for the attribute on the
-         block itself, not on <html>. -->
-    <script is:inline>
-      function __syncCodeTheme(){
-        var t=document.documentElement.getAttribute("data-code-theme");
-        if(!t)return;
-        document.querySelectorAll(".expressive-code").forEach(function(el){el.setAttribute("data-code-theme",t)});
-      }
-      document.addEventListener("astro:before-swap",function(e){window.__applyTheme&&window.__applyTheme(e.newDocument.documentElement)});
-      document.addEventListener("astro:after-swap",function(){window.__applyTheme&&window.__applyTheme(document.documentElement);__syncCodeTheme()});
-      document.addEventListener("astro:page-load",__syncCodeTheme);
-      window.addEventListener("pageshow",function(){window.__applyTheme&&window.__applyTheme(document.documentElement);__syncCodeTheme()});
-      // Cross-tab sync: when localStorage changes in another tab, mirror it here.
-      window.addEventListener("storage",function(e){
-        if(!e.key||["theme","code-theme-dark","code-theme-light","show-line-numbers"].indexOf(e.key)===-1)return;
-        window.__applyTheme&&window.__applyTheme(document.documentElement);
-        __syncCodeTheme();
-      });
-      __syncCodeTheme();
+    <!-- Reactive theme wiring (before-swap, after-swap, pageshow,
+         astro:page-load, storage). All handlers live in lib/theme.ts. -->
+    <script>
+      import { installThemeReactivity, syncCodeTheme } from '../lib/theme';
+      installThemeReactivity();
+      syncCodeTheme();
     </script>
   </head>
   <body class="min-h-screen flex flex-col">
