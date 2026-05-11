@@ -11,6 +11,8 @@ const ja: typeof ko = defineLocale({
   search_loading: '検索インデックスを読み込み中...',
   search_error: '検索インデックスを読み込めませんでした。再試行してください。',
   search_select: '選択',
+  search_navigate: '移動',
+  search_trigger_hint: '記事を検索',
   search_filter_tag: 'タグ:',
   search_filter_series: 'シリーズ:',
 

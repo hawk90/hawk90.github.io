@@ -11,6 +11,8 @@ const en: typeof ko = defineLocale({
   search_loading: 'Loading search index...',
   search_error: 'Failed to load search index. Please try again.',
   search_select: 'Select',
+  search_navigate: 'navigate',
+  search_trigger_hint: 'Search docs',
   search_filter_tag: 'Tag:',
   search_filter_series: 'Series:',
 

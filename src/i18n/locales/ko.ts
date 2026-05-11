@@ -11,6 +11,8 @@ const ko = {
   search_loading: '검색 인덱스 로딩 중...',
   search_error: '검색 인덱스를 불러올 수 없습니다. 다시 시도해주세요.',
   search_select: '선택',
+  search_navigate: '이동',
+  search_trigger_hint: '문서 검색',
   search_filter_tag: '태그:',
   search_filter_series: '시리즈:',
 

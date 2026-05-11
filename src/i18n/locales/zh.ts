@@ -11,6 +11,8 @@ const zh: typeof ko = defineLocale({
   search_loading: '正在加载搜索索引...',
   search_error: '无法加载搜索索引,请重试。',
   search_select: '选择',
+  search_navigate: '导航',
+  search_trigger_hint: '搜索文章',
   search_filter_tag: '标签:',
   search_filter_series: '系列:',
 

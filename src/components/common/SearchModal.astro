@@ -4,6 +4,7 @@ import { t } from '../../consts/ui-strings';
 const searchPlaceholder = t('search_placeholder');
 const searchClose = t('search_close');
 const searchSelect = t('search_select');
+const searchNavigate = t('search_navigate');
 const searchEmpty = t('search_empty');
 const searchNoResults = t('search_no_results');
 const searchLoading = t('search_loading');
@@ -15,7 +16,7 @@ const filterSeriesLabel = t('search_filter_series');
 
 <div
   id="search-modal"
-  class="fixed inset-0 z-[100] hidden"
+  class="search-modal fixed inset-0 z-[100] hidden"
   role="dialog"
   aria-modal="true"
   aria-labelledby="search-title"
@@ -28,11 +29,11 @@ const filterSeriesLabel = t('search_filter_series');
   data-i18n-filter-series={filterSeriesLabel}
 >
   <!-- Backdrop -->
-  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-search-backdrop></div>
+  <div class="search-modal-backdrop absolute inset-0 bg-black/60 backdrop-blur-sm" data-search-backdrop></div>
 
   <!-- Modal -->
-  <div class="relative flex items-start justify-center pt-[15vh] px-4">
-    <div class="w-full max-w-xl bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-xl shadow-2xl overflow-hidden">
+  <div class="relative flex items-start justify-center pt-[12vh] px-4">
+    <div class="search-modal-panel w-full max-w-2xl bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden">
       <!-- Filter -->
       <div id="filter-container" class="hidden px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
         <div class="flex items-center gap-2">
@@ -82,32 +83,79 @@ const filterSeriesLabel = t('search_filter_series');
 
       <!-- Results -->
       <div id="search-results" class="max-h-[60vh] overflow-y-auto" role="listbox" aria-label="Search results">
-        <div class="p-8 text-center text-[var(--color-text-muted)]" data-search-empty>
+        <div class="p-10 text-center text-[var(--color-text-muted)]" data-search-empty>
+          <svg class="w-8 h-8 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
           {searchEmpty}
         </div>
       </div>
 
       <!-- Keyboard hints -->
-      <div class="px-4 py-2 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-[11px] text-[var(--color-text-muted)] flex items-center justify-between flex-wrap gap-2">
-        <div class="flex items-center gap-3">
-          <span class="inline-flex items-center gap-1">
-            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">↑</kbd>
-            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">↓</kbd>
-            navigate
+      <div class="px-4 py-2.5 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-xs text-[var(--color-text-muted)] flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono text-[11px]">↑</kbd>
+            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono text-[11px]">↓</kbd>
+            {searchNavigate}
           </span>
-          <span class="inline-flex items-center gap-1">
-            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">↵</kbd>
+          <span class="inline-flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono text-[11px]">↵</kbd>
             {searchSelect}
           </span>
         </div>
-        <span class="inline-flex items-center gap-1">
-          <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">esc</kbd>
+        <span class="inline-flex items-center gap-1.5">
+          <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono text-[11px]">esc</kbd>
           {searchClose}
         </span>
       </div>
     </div>
   </div>
 </div>
+
+<style is:global>
+  .search-modal {
+    transition: opacity 160ms ease-out;
+  }
+  .search-modal.hidden { display: none; }
+  .search-modal-panel {
+    transform-origin: top center;
+    animation: searchPanelIn 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes searchPanelIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  .search-modal-backdrop {
+    animation: searchBackdropIn 160ms ease-out;
+  }
+  @keyframes searchBackdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  /* Result row hover/selected — left border accent + slightly stronger bg */
+  #search-results a[role="option"] {
+    border-left: 3px solid transparent;
+    padding-left: calc(1rem - 3px);
+    transition: background-color 120ms, border-color 120ms;
+  }
+  #search-results a[role="option"][aria-selected="true"],
+  #search-results a[role="option"]:hover,
+  #search-results a[role="option"]:focus {
+    border-left-color: var(--color-accent);
+    background-color: var(--color-bg-secondary);
+  }
+  #search-results .search-context {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .search-modal-panel, .search-modal-backdrop { animation: none; }
+  }
+</style>
 
 <script>
   import { searchPosts, highlightMatch, type SearchItem } from '../../lib/search';
@@ -282,21 +330,38 @@ const filterSeriesLabel = t('search_filter_series');
     }
 
     function renderMatchList(matches: SearchItem[], query: string): string {
-      const countHtml = `<div class="px-4 py-2 text-xs text-[var(--color-text-muted)] border-b border-[var(--color-border)]">${matches.length}${i18n.resultsCount}</div>`;
+      const countHtml = `<div class="px-4 py-2 text-[11px] text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]/40">${matches.length}${i18n.resultsCount}</div>`;
+      // When already filtering by series, the series context on each row is redundant.
+      const showContext = currentFilter?.type !== 'series';
       const itemsHtml = matches
-        .map(
-          (item, index) => `
-          <a href="/blog/${encodeURI(item.slug)}" id="search-opt-${index}" role="option" aria-selected="${index === selectedIndex}" class="block px-4 py-3 hover:bg-[var(--color-bg-secondary)] transition-colors border-b border-[var(--color-border)] last:border-0 outline-none focus:bg-[var(--color-bg-secondary)]">
-            <div class="font-medium mb-1">${query ? highlightMatch(item.title, query) : highlightMatch(item.title, '')}</div>
-            ${item.description ? `<div class="text-sm text-[var(--color-text-secondary)] line-clamp-1">${query ? highlightMatch(item.description, query) : highlightMatch(item.description, '')}</div>` : ''}
-            <div class="flex gap-2 mt-2">
-              ${item.tags.slice(0, 3).map((tag) => `<span class="text-xs px-2 py-0.5 bg-[var(--color-accent-muted)] text-[var(--color-accent)] rounded-full">${highlightMatch(tag, '')}</span>`).join('')}
-            </div>
-          </a>
-        `
-        )
+        .map((item, index) => {
+          const ctx = showContext && item.series
+            ? `<div class="search-context">${escapeAttr(item.series)}</div>`
+            : '';
+          const desc = item.description
+            ? `<div class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mt-0.5">${highlightMatch(item.description, query)}</div>`
+            : '';
+          const tags = item.tags.slice(0, 3).map((tag) =>
+            `<span class="text-[11px] px-2 py-0.5 bg-[var(--color-accent-muted)] text-[var(--color-accent)] rounded-full">${highlightMatch(tag, '')}</span>`,
+          ).join('');
+          return `
+          <a href="/blog/${encodeURI(item.slug)}" id="search-opt-${index}" role="option" aria-selected="${index === selectedIndex}" class="block px-4 py-3 border-b border-[var(--color-border)] last:border-0 outline-none">
+            ${ctx}
+            <div class="font-medium">${highlightMatch(item.title, query)}</div>
+            ${desc}
+            ${tags ? `<div class="flex gap-1.5 mt-2 flex-wrap">${tags}</div>` : ''}
+          </a>`;
+        })
         .join('');
       return countHtml + itemsHtml;
+    }
+
+    function escapeAttr(s: string): string {
+      return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
     // Event handlers
