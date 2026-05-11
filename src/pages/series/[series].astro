@@ -78,18 +78,10 @@ function formatChapter(key: string): string {
             </div>
           </div>
 
-          <div class="space-y-8">
-            {chapters.map((chapter) => (
-              <div>
-                {hasChapters && chapter.label && (
-                  <div class="flex items-center gap-3 mb-3">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                      {chapter.label}
-                    </span>
-                    <span class="flex-1 h-px bg-[var(--color-border)]" aria-hidden="true"></span>
-                  </div>
-                )}
-                <div class:list={['space-y-3', hasChapters && chapter.label ? 'sm:pl-4 border-l-2 border-[var(--color-border)]/60 ml-2' : '']}>
+          <div class="space-y-6">
+            {chapters.map((chapter) => {
+              const items = (
+                <div class:list={['space-y-3 mt-3', hasChapters && chapter.label ? 'sm:pl-4 border-l-2 border-[var(--color-border)]/60 ml-2' : '']}>
                   {chapter.posts.map((post, index) => (
                     <a
                       href={`/blog/${post.slug}`}
@@ -113,8 +105,36 @@ function formatChapter(key: string): string {
                     </a>
                   ))}
                 </div>
-              </div>
-            ))}
+              );
+
+              if (!hasChapters || !chapter.label) {
+                return <div>{items}</div>;
+              }
+
+              return (
+                <details open class="series-chapter group">
+                  <summary class="flex items-center gap-3 cursor-pointer select-none list-none">
+                    <svg
+                      class="w-3 h-3 text-[var(--color-text-muted)] transition-transform group-open:rotate-90 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] group-hover:text-[var(--color-text-secondary)] transition-colors">
+                      {chapter.label}
+                    </span>
+                    <span class="text-xs text-[var(--color-text-muted)]/70">
+                      {chapter.posts.length}
+                    </span>
+                    <span class="flex-1 h-px bg-[var(--color-border)]" aria-hidden="true"></span>
+                  </summary>
+                  {items}
+                </details>
+              );
+            })}
           </div>
         </div>
 
@@ -124,3 +144,9 @@ function formatChapter(key: string): string {
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* Hide the native marker (Safari renders ▸ by default even with list-none) */
+  .series-chapter > summary::-webkit-details-marker { display: none; }
+  .series-chapter > summary::marker { content: ''; }
+</style>
