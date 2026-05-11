@@ -115,12 +115,9 @@
 
 <script>
   import { STORAGE_KEYS } from '../../consts/config';
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  let cleanup: (() => void) | null = null;
-
-  function initCustomizer() {
-    cleanup?.();
-
+  onPageLoad(() => {
     const html = document.documentElement;
     const accentBtns = document.querySelectorAll<HTMLButtonElement>('[data-accent-picker] [data-value]');
     const densityBtns = document.querySelectorAll<HTMLButtonElement>('[data-density-picker] [data-value]');
@@ -128,74 +125,56 @@
     const resetBtn = document.querySelector<HTMLButtonElement>('[data-customizer-reset]');
     if (accentBtns.length === 0) return;
 
-    function getCurrent(key: string, fallback: string) {
+    const getCurrent = (key: string, fallback: string) => {
       try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
-    }
-    function setCurrent(key: string, value: string | null) {
+    };
+    const setCurrent = (key: string, value: string | null) => {
       try {
         if (value === null) localStorage.removeItem(key);
         else localStorage.setItem(key, value);
-      } catch {}
-    }
-    function dispatch() {
-      window.dispatchEvent(new CustomEvent('settings-changed'));
-    }
+      } catch { /* storage may be blocked */ }
+    };
+    const dispatch = () => window.dispatchEvent(new CustomEvent('settings-changed'));
 
-    function refreshActive() {
+    const refreshActive = () => {
       const accent = getCurrent(STORAGE_KEYS.accent, 'purple');
       const density = getCurrent(STORAGE_KEYS.density, 'cozy');
       const font = getCurrent(STORAGE_KEYS.fontFamily, 'sans');
       accentBtns.forEach((b) => b.classList.toggle('active', b.dataset.value === accent));
       densityBtns.forEach((b) => b.classList.toggle('active', b.dataset.value === density));
       fontBtns.forEach((b) => b.classList.toggle('active', b.dataset.value === font));
-    }
+    };
     refreshActive();
 
-    function pick(key: string, attr: string, defaultValue: string) {
-      return (e: Event) => {
-        const target = e.currentTarget as HTMLButtonElement;
-        const value = target.dataset.value;
-        if (!value) return;
-        if (value === defaultValue) {
-          html.removeAttribute(attr);
-          setCurrent(key, null);
-        } else {
-          html.setAttribute(attr, value);
-          setCurrent(key, value);
-        }
-        refreshActive();
-        dispatch();
-      };
-    }
+    const pick = (key: string, attr: string, defaultValue: string) => (e: Event) => {
+      const value = (e.currentTarget as HTMLButtonElement).dataset.value;
+      if (!value) return;
+      if (value === defaultValue) { html.removeAttribute(attr); setCurrent(key, null); }
+      else { html.setAttribute(attr, value); setCurrent(key, value); }
+      refreshActive();
+      dispatch();
+    };
 
     const onAccent  = pick(STORAGE_KEYS.accent, 'data-accent', 'purple');
     const onDensity = pick(STORAGE_KEYS.density, 'data-density', 'cozy');
     const onFont    = pick(STORAGE_KEYS.fontFamily, 'data-font', 'sans');
-
     accentBtns.forEach((b) => b.addEventListener('click', onAccent));
     densityBtns.forEach((b) => b.addEventListener('click', onDensity));
     fontBtns.forEach((b) => b.addEventListener('click', onFont));
 
-    function onReset() {
-      html.removeAttribute('data-accent');
-      html.removeAttribute('data-density');
-      html.removeAttribute('data-font');
-      setCurrent(STORAGE_KEYS.accent, null);
-      setCurrent(STORAGE_KEYS.density, null);
-      setCurrent(STORAGE_KEYS.fontFamily, null);
+    const onReset = () => {
+      ['data-accent', 'data-density', 'data-font'].forEach((a) => html.removeAttribute(a));
+      [STORAGE_KEYS.accent, STORAGE_KEYS.density, STORAGE_KEYS.fontFamily].forEach((k) => setCurrent(k, null));
       refreshActive();
       dispatch();
-    }
+    };
     resetBtn?.addEventListener('click', onReset);
 
-    cleanup = () => {
+    return () => {
       accentBtns.forEach((b) => b.removeEventListener('click', onAccent));
       densityBtns.forEach((b) => b.removeEventListener('click', onDensity));
       fontBtns.forEach((b) => b.removeEventListener('click', onFont));
       resetBtn?.removeEventListener('click', onReset);
     };
-  }
-
-  initCustomizer();
-  document.addEventListener('astro:page-load', initCustomizer);
+  });
 </script>

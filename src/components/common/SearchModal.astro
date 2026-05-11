@@ -112,12 +112,12 @@ const filterSeriesLabel = t('search_filter_series');
 <script>
   import { searchPosts, highlightMatch, type SearchItem } from '../../lib/search';
   import { isInputElement } from '../../lib/keyboard';
+  import { onPageLoad } from '../../lib/lifecycle';
 
   let searchIndex: SearchItem[] = [];
   let isLoaded = false;
   let loadRetries = 0;
   let currentFilter: { type: 'tag' | 'series'; value: string } | null = null;
-  let cleanup: (() => void) | null = null;
   let selectedIndex = -1;
 
   const MAX_RETRIES = 3;
@@ -154,9 +154,7 @@ const filterSeriesLabel = t('search_filter_series');
     }
   }
 
-  function initSearchModal() {
-    cleanup?.();
-
+  onPageLoad(() => {
     const modalEl = document.getElementById('search-modal');
     const inputEl = document.getElementById('search-input') as HTMLInputElement | null;
     const resultsEl = document.getElementById('search-results');
@@ -399,8 +397,7 @@ const filterSeriesLabel = t('search_filter_series');
     input.addEventListener('input', handleInput);
     document.addEventListener('click', handleDocumentClick);
 
-    // Cleanup function
-    cleanup = () => {
+    return () => {
       filterBadge?.removeEventListener('click', handleFilterBadgeClick);
       triggers.forEach((trigger) => trigger.removeEventListener('click', handleTriggerClick));
       backdrop?.removeEventListener('click', handleBackdropClick);
@@ -409,8 +406,5 @@ const filterSeriesLabel = t('search_filter_series');
       input.removeEventListener('input', handleInput);
       document.removeEventListener('click', handleDocumentClick);
     };
-  }
-
-  initSearchModal();
-  document.addEventListener('astro:page-load', initSearchModal);
+  });
 </script>

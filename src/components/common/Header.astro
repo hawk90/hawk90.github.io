@@ -123,95 +123,63 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
 </header>
 
 <script>
-  let cleanup: (() => void) | null = null;
+  import { onPageLoad } from '../../lib/lifecycle';
 
-  function initMobileMenu() {
-    cleanup?.();
+  // Mobile hamburger menu
+  onPageLoad(() => {
+    const trigger = document.querySelector<HTMLButtonElement>('[data-mobile-menu-trigger]');
+    const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');
+    if (!trigger || !menu) return;
 
-    const menuTrigger = document.querySelector<HTMLButtonElement>('[data-mobile-menu-trigger]');
-    const mobileMenu = document.querySelector<HTMLElement>('[data-mobile-menu]');
-
-    if (!menuTrigger || !mobileMenu) return;
-
-    function closeMenu() {
-      menuTrigger!.setAttribute('aria-expanded', 'false');
-      mobileMenu!.classList.add('hidden');
-      menuTrigger!.focus();
-    }
-
-    function handleClick() {
-      const isExpanded = menuTrigger!.getAttribute('aria-expanded') === 'true';
-      if (isExpanded) {
-        closeMenu();
-      } else {
-        menuTrigger!.setAttribute('aria-expanded', 'true');
-        mobileMenu!.classList.remove('hidden');
-        const firstLink = mobileMenu!.querySelector('a') as HTMLElement;
-        firstLink?.focus();
-      }
-    }
-
-    function handleLinkClick() {
-      closeMenu();
-    }
-
-    const menuLinks = mobileMenu.querySelectorAll('a');
-
-    menuTrigger.addEventListener('click', handleClick);
-    menuLinks.forEach((link) => link.addEventListener('click', handleLinkClick));
-
-    cleanup = () => {
-      menuTrigger.removeEventListener('click', handleClick);
-      menuLinks.forEach((link) => link.removeEventListener('click', handleLinkClick));
+    const close = () => {
+      trigger.setAttribute('aria-expanded', 'false');
+      menu.classList.add('hidden');
+      trigger.focus();
     };
-  }
+    const onTrigger = () => {
+      if (trigger.getAttribute('aria-expanded') === 'true') return close();
+      trigger.setAttribute('aria-expanded', 'true');
+      menu.classList.remove('hidden');
+      (menu.querySelector('a') as HTMLElement | null)?.focus();
+    };
+    const links = menu.querySelectorAll('a');
+    trigger.addEventListener('click', onTrigger);
+    links.forEach((l) => l.addEventListener('click', close));
+    return () => {
+      trigger.removeEventListener('click', onTrigger);
+      links.forEach((l) => l.removeEventListener('click', close));
+    };
+  });
 
-  initMobileMenu();
-  document.addEventListener('astro:page-load', initMobileMenu);
-
-  // Defensive: ensure the active nav highlight reflects the live pathname after
-  // View Transition / Speculation Rules activation, when the SSR'd active class
-  // may not match the actual URL the visitor is on.
-  function syncNavActive() {
+  // Defensive: re-derive active nav highlight from the live pathname.
+  // SSR's class may be stale after View Transition / Speculation Rules
+  // activation; we toggle the same classes server-side rendered.
+  const syncNavActive = () => {
     const path = location.pathname;
     document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]').forEach((a) => {
       const href = a.dataset.navLink || a.getAttribute('href') || '';
-      const matchAttr = a.dataset.navMatch;
-      const prefixes = matchAttr ? matchAttr.split(',') : [href];
-      const active = prefixes.some(
-        (p) => path === p || (p !== '/' && path.startsWith(p + '/')),
-      );
+      const prefixes = a.dataset.navMatch ? a.dataset.navMatch.split(',') : [href];
+      const active = prefixes.some((p) => path === p || (p !== '/' && path.startsWith(p + '/')));
       const isMobile = a.classList.contains('block');
       a.classList.toggle('text-[var(--color-accent)]', active);
       a.classList.toggle('text-[var(--color-text-secondary)]', !active);
-      if (!isMobile) {
-        a.classList.toggle('hover:text-[var(--color-text-primary)]', !active);
-      }
+      if (!isMobile) a.classList.toggle('hover:text-[var(--color-text-primary)]', !active);
     });
-  }
-
+  };
   syncNavActive();
   document.addEventListener('astro:page-load', syncNavActive);
   document.addEventListener('astro:after-swap', syncNavActive);
   window.addEventListener('pageshow', syncNavActive);
-</script>
 
-<script>
-  // Header gets a subtle bg + border + shadow once the user scrolls past ~24px.
-  let headerScrollCleanup: (() => void) | null = null;
-  function initHeaderScroll() {
-    headerScrollCleanup?.();
+  // Subtle bg + border + shadow once the user scrolls past ~16px.
+  onPageLoad(() => {
     const header = document.getElementById('site-header');
     if (!header) return;
-
-    function onScroll() {
-      const scrolled = window.scrollY > 16;
-      header!.dataset.scrolled = String(scrolled);
-    }
+    const onScroll = () => {
+      header.dataset.scrolled = String(window.scrollY > 16);
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    headerScrollCleanup = () => window.removeEventListener('scroll', onScroll);
-  }
-  initHeaderScroll();
-  document.addEventListener('astro:page-load', initHeaderScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  });
 </script>
