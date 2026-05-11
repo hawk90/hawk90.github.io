@@ -3,36 +3,32 @@
 \setmainfont{Apple SD Gothic Neo}
 \setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  q/.style={diamond, draw=black!55, line width=0.4pt, fill=yellow!18,
-            inner sep=2pt, aspect=2.5, align=center},
-  c/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-            inner sep=3pt, fill=red!12, align=center},
-  e/.style={->, draw=black!60, line width=0.45pt, >={Stealth[length=2mm]}}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  c/.style={cls, draw=conbord, fill=confill}
 ]
 \node[q] (q1) at (0, 0)        {키-값 매핑?};
-\node[q] (q2) at (-5, -2.2)    {정렬 순회?};
-\node[c] (m)  at (-8, -4.4)    {std::map};
-\node[c] (um) at (-4, -4.4)    {unordered\_map};
+\node[q] (q2) at (-5, -2.4)    {정렬 순회?};
+\node[c] (m)  at (-8, -4.6)    {std::map};
+\node[c] (um) at (-4, -4.6)    {unordered\_map};
 
-\node[q] (q3) at (4, -2.2)     {목적?};
-\node[c] (s)  at (-0.5, -4.4)  {set / unordered\_set};
-\node[c] (pq) at (3.5, -4.4)   {priority\_queue};
-\node[c] (qq) at ( 6.5, -4.4)  {queue / stack};
-\node[c] (vec)at (10, -4.4)    {vector / deque / array};
+\node[q] (q3) at (4, -2.4)     {목적?};
+\node[c] (s)  at (-0.4, -4.6)  {set / unordered\_set};
+\node[c] (pq) at (3.4,  -4.6)  {priority\_queue};
+\node[c] (qq) at ( 6.6, -4.6)  {queue / stack};
+\node[c] (vec)at (10,   -4.6)  {vector / deque / array};
 
-\draw[e] (q1.west)  -- node[above, font=\tiny]{Y} (q2.north);
-\draw[e] (q1.east)  -- node[above, font=\tiny]{N} (q3.north);
+\draw[uses] (q1.west)  -- node[above, font=\tiny]{Y} (q2.north);
+\draw[uses] (q1.east)  -- node[above, font=\tiny]{N} (q3.north);
 
-\draw[e] (q2.west)  -- node[above left, font=\tiny]{Y} (m.north);
-\draw[e] (q2.east)  -- node[above right, font=\tiny]{N} (um.north);
+\draw[uses] (q2.west)  -- node[above left, font=\tiny]{Y} (m.north);
+\draw[uses] (q2.east)  -- node[above right, font=\tiny]{N} (um.north);
 
-\draw[e] (q3.south) -- (s.north);
-\draw[e] (q3.south) -- (pq.north);
-\draw[e] (q3.south) -- (qq.north);
-\draw[e] (q3.east)  -- (vec.north);
+\draw[uses] (q3.south) -- (s.north);
+\draw[uses] (q3.south) -- (pq.north);
+\draw[uses] (q3.south) -- (qq.north);
+\draw[uses] (q3.east)  -- (vec.north);
 \end{tikzpicture}
 \end{document}

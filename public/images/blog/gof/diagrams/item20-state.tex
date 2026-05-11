@@ -1,21 +1,14 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  cls/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-              minimum height=8mm, minimum width=30mm, inner sep=3pt, fill=white, align=center},
-  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
-  con/.style={cls, fill=red!12},
-  imp/.style={cls, fill=green!10},
-  inh/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=black!60, line width=0.45pt},
-  agg/.style={{Diamond[length=2mm,width=2mm,open]}-{Stealth[length=2mm]}, draw=black!60}
-]
-\node[con] (ctx) at (-3.5, 1.5){Context \\ \scriptsize state \\ \scriptsize request()};
-\node[abs] (st)  at ( 3.5, 1.5){State \\ \scriptsize handle()*};
-\node[imp] (sa)  at ( 1.5,-1.5){ConcStateA \\ \scriptsize handle()};
-\node[imp] (sb)  at ( 5.5,-1.5){ConcStateB \\ \scriptsize handle()};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[con] (ctx) at (-3.6, 1.6) {Context \\ \scriptsize state \\ \scriptsize request()};
+\node[abs] (st)  at ( 3.6, 1.6) {State \\ \scriptsize handle()*};
+\node[imp] (sa)  at ( 1.6,-1.6) {ConcStateA \\ \scriptsize handle()};
+\node[imp] (sb)  at ( 5.6,-1.6) {ConcStateB \\ \scriptsize handle()};
 
 \draw[agg] (ctx.east) -- (st.west);
 \draw[inh] (sa.north) -- ++(0,0.4) -| (st.south);

@@ -1,23 +1,16 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  cls/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-              minimum height=8mm, minimum width=30mm, inner sep=3pt, fill=white, align=center},
-  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
-  con/.style={cls, fill=red!12},
-  imp/.style={cls, fill=green!10},
-  inh/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=black!60, line width=0.45pt},
-  agg/.style={{Diamond[length=2mm,width=2mm,open]}-{Stealth[length=2mm]}, draw=black!60}
-]
-\node[abs] (a)   at (-4, 1.5) {Abstraction \\ \scriptsize operation()};
-\node[abs] (i)   at ( 4, 1.5) {Implementor \\ \scriptsize opImpl()*};
-\node[con] (ra)  at (-6,-1.2) {RefinedA};
-\node[con] (rb)  at (-2,-1.2) {RefinedB};
-\node[imp] (ia)  at ( 2,-1.2) {ConcreteImplA \\ \scriptsize opImpl()};
-\node[imp] (ib)  at ( 6,-1.2) {ConcreteImplB \\ \scriptsize opImpl()};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[abs] (a)  at (-4.2, 1.5) {Abstraction \\ \scriptsize operation()};
+\node[abs] (i)  at ( 4.2, 1.5) {Implementor \\ \scriptsize opImpl()*};
+\node[con] (ra) at (-6.2,-1.4) {RefinedA};
+\node[con] (rb) at (-2.2,-1.4) {RefinedB};
+\node[imp] (ia) at ( 2.2,-1.4) {ConcreteImplA};
+\node[imp] (ib) at ( 6.2,-1.4) {ConcreteImplB};
 
 \draw[agg] (a.east) -- (i.west) node[midway, above, font=\tiny]{impl};
 \draw[inh] (ra.north) -- ++(0,0.4) -| (a.south);

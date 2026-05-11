@@ -3,17 +3,17 @@
 \setmainfont{Apple SD Gothic Neo}
 \setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  s/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-            minimum height=6mm, minimum width=42mm, inner sep=2pt, fill=blue!10, align=center}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  s/.style={cls, draw=absbord, fill=absfill, minimum height=6mm, minimum width=44mm}
 ]
 \node[s] (s1) at (0, 3.0)  {원반 1: A $\to$ C};
 \node[s] (s2) at (0, 2.4)  {원반 2: A $\to$ B};
 \node[s] (s3) at (0, 1.8)  {원반 1: C $\to$ B};
-\node[s] (s4) at (0, 1.2)  {원반 3: A $\to$ C};
+\node[s, fill=hifill, draw=hibord, font=\sffamily\bfseries\small] (s4) at (0, 1.2)
+                              {원반 3: A $\to$ C};
 \node[s] (s5) at (0, 0.6)  {원반 1: B $\to$ A};
 \node[s] (s6) at (0, 0.0)  {원반 2: B $\to$ C};
 \node[s] (s7) at (0,-0.6)  {원반 1: A $\to$ C};

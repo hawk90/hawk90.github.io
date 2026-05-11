@@ -1,52 +1,41 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\footnotesize,
-  every node/.style={circle, draw=black!55, line width=0.4pt, minimum size=7mm, fill=blue!10, inner sep=0pt},
-  edge/.style={draw=black!60, line width=0.4pt},
-  del/.style={circle, draw=red!70, line width=0.6pt, fill=red!18},
-  trans/.style={->, draw=black!60, line width=0.5pt}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  every node/.style={font=\sffamily\footnotesize}
 ]
 
-% case 1: leaf
+% case 1
 \begin{scope}[shift={(-6,0)}]
-  \node[draw=none, fill=none, font=\bfseries] at (0, 2.5) {1) leaf};
-  \node (a) at (0, 1.5)    {30};
-  \node (b) at (-1, 0.5)   {20};
-  \node (c) at (1, 0.5)    {50};
-  \node[del] (d) at (1.8, -0.5){60};
-  \draw[edge] (a) -- (b);
-  \draw[edge] (a) -- (c);
-  \draw[edge] (c) -- (d);
+  \node[font=\sffamily\bfseries\small] at (0, 2.6) {1) leaf};
+  \node[vx] (a) at (0, 1.5)    {30};
+  \node[vx] (b) at (-1, 0.5)   {20};
+  \node[vx] (c) at (1, 0.5)    {50};
+  \node[vxh] (d) at (1.8,-0.5) {60};
+  \draw[edge] (a) -- (b); \draw[edge] (a) -- (c); \draw[edge] (c) -- (d);
 \end{scope}
 
-% case 2: 1 child
+% case 2
 \begin{scope}[shift={(0,0)}]
-  \node[draw=none, fill=none, font=\bfseries] at (0, 2.5) {2) one child};
-  \node (a) at (0, 1.5)    {30};
-  \node (b) at (-1, 0.5)   {20};
-  \node[del] (c) at (1, 0.5)    {50};
-  \node (d) at (1.8, -0.5) {60};
-  \draw[edge] (a) -- (b);
-  \draw[edge] (a) -- (c);
-  \draw[edge] (c) -- (d);
+  \node[font=\sffamily\bfseries\small] at (0, 2.6) {2) one child};
+  \node[vx] (a) at (0, 1.5)    {30};
+  \node[vx] (b) at (-1, 0.5)   {20};
+  \node[vxh] (c) at (1, 0.5)   {50};
+  \node[vx] (d) at (1.8,-0.5)  {60};
+  \draw[edge] (a) -- (b); \draw[edge] (a) -- (c); \draw[edge] (c) -- (d);
 \end{scope}
 
-% case 3: 2 children
+% case 3
 \begin{scope}[shift={(6,0)}]
-  \node[draw=none, fill=none, font=\bfseries] at (0, 2.5) {3) two children};
-  \node[del] (a) at (0, 1.5){30};
-  \node (b) at (-1, 0.5)   {20};
-  \node (c) at (1, 0.5)    {50};
-  \node (d) at (0.4, -0.6) {40};
-  \node (e) at (1.6, -0.6) {60};
-  \draw[edge] (a) -- (b);
-  \draw[edge] (a) -- (c);
-  \draw[edge] (c) -- (d);
-  \draw[edge] (c) -- (e);
+  \node[font=\sffamily\bfseries\small] at (0, 2.6) {3) two children};
+  \node[vxh] (a) at (0, 1.5)   {30};
+  \node[vx] (b) at (-1, 0.5)   {20};
+  \node[vx] (c) at (1, 0.5)    {50};
+  \node[vx] (d) at (0.4,-0.6)  {40};
+  \node[vx] (e) at (1.6,-0.6)  {60};
+  \draw[edge] (a) -- (b); \draw[edge] (a) -- (c); \draw[edge] (c) -- (d); \draw[edge] (c) -- (e);
 \end{scope}
-
 \end{tikzpicture}
 \end{document}

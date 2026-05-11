@@ -1,21 +1,14 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  cls/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-              minimum height=8mm, minimum width=32mm, inner sep=3pt, fill=white, align=center},
-  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
-  con/.style={cls, fill=red!12},
-  pro/.style={cls, fill=green!10},
-  inh/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=black!60, line width=0.45pt},
-  ret/.style={-{Stealth[length=2mm]}, dashed, draw=black!50}
-]
-\node[abs] (cre) at (-3.2, 1.5) {Creator \\ \scriptsize createProduct()*};
-\node[con] (cc)  at (-3.2,-1.2) {ConcreteCreator \\ \scriptsize createProduct()};
-\node[abs] (pr)  at ( 3.2, 1.5) {Product};
-\node[pro] (cp)  at ( 3.2,-1.2) {ConcreteProduct};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[abs] (cre) at (-3.4, 1.5) {Creator \\ \scriptsize createProduct()*};
+\node[con] (cc)  at (-3.4,-1.4) {ConcreteCreator \\ \scriptsize createProduct()};
+\node[abs] (pr)  at ( 3.4, 1.5) {Product};
+\node[imp] (cp)  at ( 3.4,-1.4) {ConcreteProduct};
 
 \draw[inh] (cc.north) -- (cre.south);
 \draw[inh] (cp.north) -- (pr.south);

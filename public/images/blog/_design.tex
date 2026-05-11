@@ -1,0 +1,101 @@
+% _design.tex — shared TikZ design system for all blog diagrams
+% Inputs nothing on its own — meant to be \input{} from each diagram .tex
+% AFTER \begin{document}, BEFORE \begin{tikzpicture}.
+%
+% Provides a unified visual language across GoF / DSA / EMC++ / Beautiful series:
+%   - Colors: muted, accessible, color-coded by role
+%   - Node styles: consistent sizing, rounded, subtle borders
+%   - Edge styles: UML-style inheritance, aggregation, plus dashed alternates
+%
+% Usage:
+%   \documentclass[border=10pt,tikz]{standalone}
+%   \usepackage{tikz}
+%   \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+%   \begin{document}
+%   \input{../_design.tex}     % adjust relative path
+%   \begin{tikzpicture}[blog]  % apply 'blog' style
+%   ...
+
+\definecolor{absfill}{RGB}{220,232,247}   % cool blue
+\definecolor{absbord}{RGB}{72,118,182}
+\definecolor{confill}{RGB}{249,222,222}   % warm red
+\definecolor{conbord}{RGB}{197,93,93}
+\definecolor{impfill}{RGB}{223,238,222}   % soft green
+\definecolor{impbord}{RGB}{99,154,93}
+\definecolor{clifill}{RGB}{251,239,205}   % pale yellow
+\definecolor{clibord}{RGB}{200,167,72}
+\definecolor{hifill} {RGB}{253,224,200}   % accent orange
+\definecolor{hibord} {RGB}{210,135,68}
+\definecolor{nodefill}{RGB}{250,250,250}
+\definecolor{nodebord}{RGB}{120,120,120}
+\definecolor{edgec}  {RGB}{80,80,80}
+\definecolor{edgesc} {RGB}{145,145,145}
+\definecolor{groupbord}{RGB}{200,200,200}
+
+\tikzset{
+  blog/.style={
+    font=\sffamily\small,
+    every node/.style={font=\sffamily\small}
+  },
+  % --- node roles ---
+  cls/.style={
+    rectangle, rounded corners=2pt,
+    draw=nodebord, line width=0.4pt,
+    minimum height=8mm, minimum width=28mm,
+    inner sep=3pt, fill=nodefill, align=center
+  },
+  abs/.style={cls, draw=absbord, fill=absfill, font=\sffamily\itshape\small},
+  con/.style={cls, draw=conbord, fill=confill},
+  imp/.style={cls, draw=impbord, fill=impfill},
+  cli/.style={cls, draw=clibord, fill=clifill},
+  hi/.style={cls, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  % --- circle (for trees / graph nodes) ---
+  vx/.style={
+    circle, draw=absbord, line width=0.4pt,
+    minimum size=8mm, fill=absfill, inner sep=0pt
+  },
+  vxc/.style={vx, draw=conbord, fill=confill},
+  vxh/.style={vx, draw=hibord, fill=hifill, font=\sffamily\bfseries},
+  % --- decision diamond ---
+  q/.style={
+    diamond, draw=clibord, line width=0.4pt, fill=clifill,
+    inner sep=2pt, aspect=2.4, align=center
+  },
+  % --- edges ---
+  inh/.style={                                  % UML inheritance
+    -{Triangle[length=3mm,width=3mm,open]},
+    draw=edgec, line width=0.5pt
+  },
+  agg/.style={                                  % UML aggregation
+    {Diamond[length=2.5mm,width=2.5mm,open]}-{Stealth[length=2.2mm]},
+    draw=edgec, line width=0.45pt
+  },
+  uses/.style={                                 % directed reference
+    -{Stealth[length=2.2mm]}, draw=edgec, line width=0.5pt
+  },
+  arr/.style={                                  % plain arrow (graphs/trees)
+    -{Stealth[length=2mm]}, draw=edgec, line width=0.45pt
+  },
+  edge/.style={                                 % undirected (trees)
+    draw=edgec, line width=0.45pt
+  },
+  alt/.style={                                  % dashed: similar/alt
+    -{Stealth[length=2mm]}, dashed, draw=edgesc, line width=0.45pt
+  },
+  ret/.style={                                  % dashed creates/returns
+    -{Stealth[length=2mm]}, dashed, draw=edgesc, line width=0.45pt
+  },
+  thr/.style={                                  % threading link (red dashed)
+    ->, dashed, draw=conbord, line width=0.5pt
+  },
+  % --- group / region ---
+  group/.style={
+    rectangle, rounded corners=4pt,
+    draw=groupbord, line width=0.4pt,
+    inner sep=10pt, fill=black!2
+  },
+  glabel/.style={font=\sffamily\bfseries\small, anchor=north west, inner sep=2pt}
+}
+
+% Korean font convenience macro — included by every Hangul diagram
+\providecommand{\KOR}{}

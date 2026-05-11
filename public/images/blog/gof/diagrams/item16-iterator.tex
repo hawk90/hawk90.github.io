@@ -1,22 +1,14 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  cls/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-              minimum height=8mm, minimum width=34mm, inner sep=3pt, fill=white, align=center},
-  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
-  con/.style={cls, fill=red!12},
-  imp/.style={cls, fill=green!10},
-  inh/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=black!60, line width=0.45pt},
-  agg/.style={{Diamond[length=2mm,width=2mm,open]}-{Stealth[length=2mm]}, draw=black!60},
-  ret/.style={-{Stealth[length=2mm]}, dashed, draw=black!50}
-]
-\node[abs] (a)   at (-3, 1.5) {Aggregate \\ \scriptsize createIterator()*};
-\node[abs] (i)   at ( 3, 1.5) {Iterator \\ \scriptsize first/next/isDone/curr};
-\node[con] (ca)  at (-3,-1.5) {ConcAggregate \\ \scriptsize createIterator()};
-\node[imp] (ci)  at ( 3,-1.5) {ConcIterator};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[abs] (a)   at (-3.2, 1.6) {Aggregate \\ \scriptsize createIterator()*};
+\node[abs] (i)   at ( 3.2, 1.6) {Iterator \\ \scriptsize first/next/isDone/curr};
+\node[con] (ca)  at (-3.2,-1.6) {ConcAggregate \\ \scriptsize createIterator()};
+\node[imp] (ci)  at ( 3.2,-1.6) {ConcIterator};
 
 \draw[inh] (ca.north) -- (a.south);
 \draw[inh] (ci.north) -- (i.south);

@@ -14,8 +14,8 @@ dir="$(dirname "$src")"
 base="$(basename "$src" .tex)"
 
 cd "$dir"
-# Detect Korean (Hangul) — use xelatex with system font; otherwise pdflatex
-if grep -q '[가-힣]' "$base.tex"; then
+# Use xelatex when fontspec is loaded OR Hangul is present; else pdflatex
+if grep -qE '(usepackage\{fontspec\}|[가-힣])' "$base.tex"; then
     xelatex -interaction=nonstopmode -halt-on-error "$base.tex" >/dev/null
 else
     pdflatex -interaction=nonstopmode -halt-on-error "$base.tex" >/dev/null

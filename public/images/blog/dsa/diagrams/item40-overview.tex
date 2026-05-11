@@ -3,15 +3,14 @@
 \setmainfont{Apple SD Gothic Neo}
 \setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  cat/.style={rectangle, rounded corners=3pt, draw=black!55, line width=0.5pt,
-              fill=blue!12, inner sep=4pt, font=\sffamily\bfseries\small, align=center},
-  c/.style={rectangle, rounded corners=2pt, draw=black!45, line width=0.4pt,
-            fill=white, inner sep=3pt, font=\sffamily\footnotesize, align=center},
-  e/.style={->, draw=black!60, line width=0.4pt, >={Stealth[length=2mm]}}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cat/.style={cls, draw=hibord, fill=hifill, font=\sffamily\bfseries\small,
+              minimum width=22mm, inner sep=4pt},
+  c/.style={cls, draw=absbord, fill=absfill, minimum width=22mm,
+            font=\sffamily\footnotesize}
 ]
 % Linear
 \node[cat] (lin)  at (-6, 4)  {배열 / 리스트};
@@ -45,17 +44,16 @@
 \node[c]   (nc)   at (1.5,-2.5){비교 외 (n)};
 \node[c]   (ext)  at (0, -4)  {외부 정렬};
 
-% Algo patterns
+% Patterns
 \node[cat] (pat)  at (5.5, -1){알고리즘 패턴};
 \node[c]   (dp)   at (4, -2.5){DP};
 \node[c]   (gd)   at (5.5,-2.5){Greedy};
 \node[c]   (dc)   at (7, -2.5){분할정복};
 \node[c]   (bk)   at (5.5,-4) {Backtrack};
 
-% edges
 \foreach \from/\to in {lin/arr, lin/lst, lin/st, tr/bst, tr/avl, tr/heap, avl/skip, avl/bt,
                       h/sh, h/dh, g/dfs, g/mst, g/sp, mst/scc, so/cmp, so/nc, cmp/ext,
                       pat/dp, pat/gd, pat/dc, gd/bk}
-  \draw[e] (\from) -- (\to);
+  \draw[arr] (\from) -- (\to);
 \end{tikzpicture}
 \end{document}

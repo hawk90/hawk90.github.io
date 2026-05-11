@@ -1,26 +1,17 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  cls/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-              minimum height=8mm, minimum width=30mm, inner sep=3pt, fill=white, align=center},
-  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
-  con/.style={cls, fill=red!12},
-  pro/.style={cls, fill=green!10},
-  cli/.style={cls, fill=yellow!18},
-  inh/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=black!60, line width=0.45pt},
-  agg/.style={{Diamond[length=2mm,width=2mm,open]}-{Stealth[length=2mm]}, draw=black!60},
-  ret/.style={-{Stealth[length=2mm]}, dashed, draw=black!50}
-]
-\node[cli] (dir) at (-4, 1) {Director};
-\node[abs] (bui) at ( 0, 1) {Builder \\ \scriptsize buildPart()*};
-\node[con] (cb)  at ( 0,-1.6) {ConcreteBuilder \\ \scriptsize buildPart()};
-\node[pro] (prod) at ( 4,-1.6) {Product};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[cli] (dir) at (-4, 1) {Director \\ \scriptsize construct()};
+\node[abs] (bui) at ( 0, 1) {Builder \\ \scriptsize buildPartA()*  buildPartB()*};
+\node[con] (cb)  at ( 0,-1.8) {ConcreteBuilder \\ \scriptsize getResult()};
+\node[imp] (pr)  at ( 4.4,-1.8) {Product};
 
 \draw[agg] (dir.east) -- (bui.west);
 \draw[inh] (cb.north) -- (bui.south);
-\draw[ret] (cb.east)  -- (prod.west) node[midway, above, font=\tiny]{builds};
+\draw[ret] (cb.east)  -- (pr.west) node[midway, above, font=\tiny]{builds};
 \end{tikzpicture}
 \end{document}

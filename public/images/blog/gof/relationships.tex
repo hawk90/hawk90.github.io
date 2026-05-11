@@ -1,114 +1,106 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,backgrounds,fit}
-
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  pattern/.style={
-    rectangle, rounded corners=2pt,
-    draw=black!50, line width=0.4pt,
-    minimum height=7mm, minimum width=22mm,
-    inner sep=2pt, fill=white
-  },
-  creational/.style={pattern, fill=red!15},
-  structural/.style={pattern, fill=blue!15},
-  behavioral/.style={pattern, fill=green!15},
-  rel/.style={->, >={Stealth[length=2mm]}, draw=black!55, line width=0.35pt},
-  reldash/.style={rel, dashed, draw=black!45},
-  group/.style={rectangle, rounded corners, draw=black!30, line width=0.4pt, inner sep=8pt}
+\input{../_design.tex}
+\begin{tikzpicture}[blog,
+  pat/.style={cls, minimum height=7mm, minimum width=24mm},
+  cre/.style={pat, draw=conbord, fill=confill},
+  stp/.style={pat, draw=absbord, fill=absfill},
+  bep/.style={pat, draw=impbord, fill=impfill}
 ]
 
-% ─── CREATIONAL (top) ───────────────────────────────────────────
-\node[creational]                            (af)  at (-6, 5.5) {Abstract Factory};
-\node[creational, right=8mm of af]           (bld) {Builder};
-\node[creational, right=8mm of bld]          (fm)  {Factory Method};
-\node[creational, right=8mm of fm]           (pt)  {Prototype};
-\node[creational, right=8mm of pt]           (sg)  {Singleton};
+% ============================================================
+% Three regions stacked top-down — Creational, Structural, Behavioral
+% Sparse intentional edges; legend on the right
+% ============================================================
+
+% ─── CREATIONAL ─────────────────────────────────────────────
+\node[cre] (af)  at ( 0,    9) {Abstract\\Factory};
+\node[cre] (bld) at ( 3.4,  9) {Builder};
+\node[cre] (fm)  at ( 6.8,  9) {Factory\\Method};
+\node[cre] (pt)  at (10.2,  9) {Prototype};
+\node[cre] (sg)  at (13.6,  9) {Singleton};
 
 \begin{scope}[on background layer]
-\node[group, fit=(af)(bld)(fm)(pt)(sg), label={[anchor=west,xshift=2pt]left:\textbf{Creational}}] {};
+  \node[group, fit=(af)(sg)] (gC) {};
 \end{scope}
+\node[glabel] at (gC.north west) {Creational};
 
-% ─── STRUCTURAL (middle) ────────────────────────────────────────
-\node[structural]                            (adp) at (-6.5, 2.5) {Adapter};
-\node[structural, right=6mm of adp]          (brd) {Bridge};
-\node[structural, right=6mm of brd]          (cmp) {Composite};
-\node[structural, right=6mm of cmp]          (dec) {Decorator};
-\node[structural, right=6mm of dec]          (fcd) {Facade};
-\node[structural, right=6mm of fcd]          (fly) {Flyweight};
-\node[structural, right=6mm of fly]          (prx) {Proxy};
+% ─── STRUCTURAL ─────────────────────────────────────────────
+\node[stp] (adp) at ( 0,    5.4) {Adapter};
+\node[stp] (dec) at ( 3.4,  5.4) {Decorator};
+\node[stp] (prx) at ( 6.8,  5.4) {Proxy};
+\node[stp] (cmp) at (10.2,  5.4) {Composite};
+\node[stp] (brd) at (13.6,  5.4) {Bridge};
+\node[stp] (fcd) at ( 5.1,  3.6) {Facade};
+\node[stp] (fly) at ( 8.5,  3.6) {Flyweight};
 
 \begin{scope}[on background layer]
-\node[group, fit=(adp)(brd)(cmp)(dec)(fcd)(fly)(prx), label={[anchor=west,xshift=2pt]left:\textbf{Structural}}] {};
+  \node[group, fit=(adp)(brd)(fcd)(fly)] (gS) {};
 \end{scope}
+\node[glabel] at (gS.north west) {Structural};
 
-% ─── BEHAVIORAL (bottom, 2 rows) ────────────────────────────────
-\node[behavioral]                            (cor) at (-6.5, -0.5) {Chain of Resp.};
-\node[behavioral, right=6mm of cor]          (cmd) {Command};
-\node[behavioral, right=6mm of cmd]          (intr){Interpreter};
-\node[behavioral, right=6mm of intr]         (itr) {Iterator};
-\node[behavioral, right=6mm of itr]          (med) {Mediator};
-\node[behavioral, right=6mm of med]          (mem) {Memento};
+% ─── BEHAVIORAL ─────────────────────────────────────────────
+\node[bep] (cor) at ( 0,    -0.3) {Chain of\\Responsibility};
+\node[bep] (cmd) at ( 3.4,  -0.3) {Command};
+\node[bep] (str_) at ( 6.8, -0.3) {Strategy};
+\node[bep] (st)   at (10.2, -0.3) {State};
+\node[bep] (tm)   at (13.6, -0.3) {Template\\Method};
 
-\node[behavioral, below=12mm of cor]         (obs) {Observer};
-\node[behavioral, right=6mm of obs]          (st)  {State};
-\node[behavioral, right=6mm of st]           (str) {Strategy};
-\node[behavioral, right=6mm of str]          (tm)  {Template Method};
-\node[behavioral, right=6mm of tm]           (vis) {Visitor};
+\node[bep] (itr)  at ( 0,    -3.0) {Iterator};
+\node[bep] (vis)  at ( 3.4,  -3.0) {Visitor};
+\node[bep] (intr) at ( 6.8,  -3.0) {Interpreter};
+\node[bep] (med)  at (10.2,  -3.0) {Mediator};
+\node[bep] (obs)  at (13.6,  -3.0) {Observer};
+\node[bep] (mem)  at ( 6.8,  -5.0) {Memento};
 
 \begin{scope}[on background layer]
-\node[group, fit=(cor)(cmd)(intr)(itr)(med)(mem)(obs)(st)(str)(tm)(vis), label={[anchor=west,xshift=2pt]left:\textbf{Behavioral}}] {};
+  \node[group, fit=(cor)(tm)(itr)(obs)(mem)] (gB) {};
 \end{scope}
+\node[glabel] at (gB.north west) {Behavioral};
 
-% ─── RELATIONSHIPS ──────────────────────────────────────────────
-% Creational internal
-\draw[rel] (af)  to[bend right=10] node[above,sloped,font=\tiny]{uses} (fm);
-\draw[reldash] (af) to[bend left=15] node[above,sloped,font=\tiny]{alt} (pt);
-\draw[reldash] (af.south) to[bend right=20] node[right,font=\tiny]{singleton} (sg.north);
+% ============================================================
+% RELATIONSHIPS — minimal & intentional
+% ============================================================
 
-% Builder relationships
-\draw[reldash] (bld) -- node[above,sloped,font=\tiny]{alt} (af);
+% --- Creational internal ---
+\draw[uses] (af) to[bend left=12] node[above, font=\tiny]{uses} (fm);
+\draw[alt]  (af) to[bend left=15] (bld);
+\draw[alt]  (af.south east) to[bend left=18] (pt.south west);
 
-% Creational → Structural / Behavioral
-\draw[rel] (bld.south) to[bend right=15] node[left,font=\tiny]{builds} (cmp.north);
-\draw[reldash] (pt.south) to[bend left=10] node[right,font=\tiny]{stores state} (mem.north);
-\draw[reldash] (sg.south) to[bend left=20] node[right,font=\tiny]{often} (st.north);
-\draw[reldash] (fm.south) to[bend left=5]  node[left,font=\tiny]{step of} (tm.north east);
+% --- Structural internal ---
+\draw[alt] (adp) -- (dec);
+\draw[alt] (dec) -- (prx);
+\draw[alt] (cmp) -- (dec);
+\draw[alt] (brd.south) to[bend right=15] (adp.south);
 
-% Structural internal
-\draw[reldash] (adp) -- node[above,font=\tiny]{similar} (brd);
-\draw[reldash] (adp) to[bend left=20] node[above,font=\tiny]{similar} (dec);
-\draw[reldash] (adp) to[bend left=30] node[above,font=\tiny]{similar} (prx);
-\draw[reldash] (dec) -- node[above,font=\tiny]{similar} (prx);
-\draw[reldash] (cmp) -- node[above,font=\tiny]{similar} (dec);
+% --- Behavioral internal ---
+\draw[alt]  (st)   -- (str_);
+\draw[alt]  (str_) -- (tm);
+\draw[uses] (cmd.south) to[bend right=18] node[right, font=\tiny]{uses} (mem.north);
+\draw[uses] (med) to[bend right=15] node[above, sloped, font=\tiny]{uses} (obs);
+\draw[uses] (vis) to[bend left=10]  node[above, sloped, font=\tiny]{visits} (intr);
+\draw[uses] (cor) to[bend right=10] node[above, font=\tiny]{passes} (cmd);
 
-% Structural → Behavioral
-\draw[rel] (cmp.south) to[bend left=5] node[right,font=\tiny]{traverses} (itr.north);
-\draw[rel] (cmp.south) to[bend left=12] node[left,font=\tiny]{visited} (vis.north);
-\draw[rel] (cmp.south) to[bend right=15] node[left,font=\tiny]{used by} (cor.north);
-\draw[reldash] (fly.south) to[bend right=5] node[right,font=\tiny]{leaves are} (st.north);
-\draw[reldash] (fly.south) to[bend right=15] node[right,font=\tiny]{leaves are} (str.north);
-\draw[reldash] (fcd.south) to[bend right=8] node[right,font=\tiny]{vs} (med.north);
+% --- Cross-category ---
+\draw[uses] (bld.south) to[bend right=20] node[left, font=\tiny]{builds} (cmp.north);
+\draw[uses] (cmp.south) to[bend left=8]   node[right, font=\tiny]{traversed} (itr.north);
+\draw[uses] (cmp.south) to[bend left=22]  node[right, font=\tiny]{visited}   (vis.north);
+\draw[alt]  (fly.south) to[bend right=10] node[right, font=\tiny]{shared as} (str_.north);
 
-% Behavioral internal
-\draw[reldash] (cor) to[bend right=10] node[above,font=\tiny]{passes} (cmd);
-\draw[rel] (cmd.south) to[bend left=8] node[above,sloped,font=\tiny]{uses} (mem.south);
-\draw[reldash] (st) -- node[above,font=\tiny]{similar} (str);
-\draw[reldash] (str) -- node[above,font=\tiny]{vs} (tm);
-\draw[rel] (med) to[bend right=15] node[above,sloped,font=\tiny]{uses} (obs);
-\draw[rel] (vis) to[bend left=10] node[above,sloped,font=\tiny]{visits} (intr);
-\draw[rel] (itr) to[bend right=10] node[above,sloped,font=\tiny]{may use} (mem);
-
-% Legend
-\node[draw=black!40, rounded corners, inner sep=4pt, font=\tiny, anchor=north west]
-  at (-7.5, -5.5) {\begin{tabular}{l}
-    \textcolor{black!55}{$\rightarrow$} \ uses / explicit relationship \\
-    \textcolor{black!45}{$\dashrightarrow$} \ similar / alternative \\
-    \textcolor{red!15!black}{$\blacksquare$} Creational \quad
-    \textcolor{blue!15!black}{$\blacksquare$} Structural \quad
-    \textcolor{green!30!black}{$\blacksquare$} Behavioral
-  \end{tabular}};
-
+% ============================================================
+% LEGEND — right column
+% ============================================================
+\node[draw=groupbord, rounded corners=4pt, inner sep=6pt, font=\footnotesize,
+      anchor=north west, align=left, fill=black!2]
+  at (16, 9) {%
+    \textbf{Legend}\\[3pt]
+    \tikz \draw[uses] (0,0) -- (8mm,0); \ uses / composes\\
+    \tikz \draw[alt]  (0,0) -- (8mm,0); \ similar / alternative\\[4pt]
+    \textcolor{conbord}{\rule{1.6mm}{1.6mm}} Creational (5)\\
+    \textcolor{absbord}{\rule{1.6mm}{1.6mm}} Structural (7)\\
+    \textcolor{impbord}{\rule{1.6mm}{1.6mm}} Behavioral (11)
+  };
 \end{tikzpicture}
 \end{document}

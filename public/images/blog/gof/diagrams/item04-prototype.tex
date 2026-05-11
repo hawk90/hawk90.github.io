@@ -1,22 +1,14 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  cls/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-              minimum height=8mm, minimum width=30mm, inner sep=3pt, fill=white, align=center},
-  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
-  con/.style={cls, fill=red!12},
-  pro/.style={cls, fill=green!10},
-  cli/.style={cls, fill=yellow!18},
-  inh/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=black!60, line width=0.45pt},
-  agg/.style={{Diamond[length=2mm,width=2mm,open]}-{Stealth[length=2mm]}, draw=black!60}
-]
-\node[cli] (c)   at (-4, 1.5) {Client \\ \scriptsize prototype, create()};
-\node[abs] (p)   at ( 0, 1.5) {Prototype \\ \scriptsize clone()*};
-\node[pro] (pa)  at (-2,-1.5) {ConcreteProtoA \\ \scriptsize clone()};
-\node[pro] (pb)  at ( 2,-1.5) {ConcreteProtoB \\ \scriptsize clone()};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[cli] (c)  at (-4.5, 1.5) {Client \\ \scriptsize prototype  create()};
+\node[abs] (p)  at ( 0, 1.5)   {Prototype \\ \scriptsize clone()*};
+\node[imp] (pa) at (-2.2,-1.5) {ConcretePrototypeA \\ \scriptsize clone()};
+\node[imp] (pb) at ( 2.2,-1.5) {ConcretePrototypeB \\ \scriptsize clone()};
 
 \draw[agg] (c.east) -- (p.west);
 \draw[inh] (pa.north) -- ++(0,0.4) -| (p.south);

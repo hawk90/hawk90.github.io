@@ -1,28 +1,20 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  cls/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
-              minimum height=8mm, minimum width=28mm, inner sep=3pt, fill=white, align=center},
-  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
-  con/.style={cls, fill=red!12},
-  cli/.style={cls, fill=yellow!18},
-  inh/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=black!60, line width=0.45pt},
-  agg/.style={{Diamond[length=2mm,width=2mm,open]}-{Stealth[length=2mm]}, draw=black!60},
-  arr/.style={-{Stealth[length=2mm]}, draw=black!60}
-]
-\node[cli] (c)   at (-5, 1.5) {Client};
-\node[abs] (h)   at (-1, 1.5) {Handler \\ \scriptsize handle()  next};
-\node[con] (h1)  at (-3,-1.5) {ConcHandler1};
-\node[con] (h2)  at ( 0,-1.5) {ConcHandler2};
-\node[con] (h3)  at ( 3,-1.5) {ConcHandler3};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[cli] (c)   at (-5,    1.6) {Client};
+\node[abs] (h)   at (-1.2,  1.6) {Handler \\ \scriptsize handle()  next};
+\node[con] (h1)  at (-3.4, -1.6) {ConcHandler1};
+\node[con] (h2)  at ( 0.0, -1.6) {ConcHandler2};
+\node[con] (h3)  at ( 3.4, -1.6) {ConcHandler3};
 
 \draw[agg] (c.east) -- (h.west);
 \draw[agg] (h.east) to[bend left=45] node[right, font=\tiny]{next} (h.north east);
 \draw[inh] (h1.north) -- ++(0,0.4) -| (h.south);
-\draw[inh] (h2.north) -- ++(0,0.4) -| (h.south);
+\draw[inh] (h2.north) -- (h.south);
 \draw[inh] (h3.north) -- ++(0,0.4) -| (h.south);
 \draw[arr] (h1) -- (h2);
 \draw[arr] (h2) -- (h3);

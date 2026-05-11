@@ -1,21 +1,21 @@
 \documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  every node/.style={circle, draw=black!55, line width=0.4pt, minimum size=8mm, fill=red!12, inner sep=0pt},
-  edge/.style={draw=black!60, line width=0.4pt}
-]
-\node (n1) at (0,0) {1};
-\node (n2) at (0.8,-0.8) {2};
-\node (n3) at (1.6,-1.6) {3};
-\node (n4) at (2.4,-2.4) {4};
-\node (n5) at (3.2,-3.2) {5};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[vxc] (n1) at (0,0)       {1};
+\node[vxc] (n2) at (0.8,-0.8)  {2};
+\node[vxc] (n3) at (1.6,-1.6)  {3};
+\node[vxc] (n4) at (2.4,-2.4)  {4};
+\node[vxc] (n5) at (3.2,-3.2)  {5};
 \draw[edge] (n1) -- (n2);
 \draw[edge] (n2) -- (n3);
 \draw[edge] (n3) -- (n4);
 \draw[edge] (n4) -- (n5);
-\node[draw=none, fill=none, anchor=west] at (4.5,-1.6) {right-skewed: O(n)};
+\node[anchor=west, font=\sffamily\small] at (4.5,-1.6) {right-skewed BST: O(n) lookup};
 \end{tikzpicture}
 \end{document}

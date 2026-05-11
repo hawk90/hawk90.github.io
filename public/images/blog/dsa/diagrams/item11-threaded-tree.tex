@@ -1,18 +1,14 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
-\begin{tikzpicture}[
-  font=\sffamily\small,
-  every node/.style={circle, draw=black!55, line width=0.4pt, minimum size=8mm, fill=blue!10, inner sep=0pt},
-  edge/.style={draw=black!60, line width=0.4pt},
-  thr/.style={->, dashed, draw=red!60, line width=0.4pt}
-]
-\node (n20) at (0, 2.5)    {20};
-\node (n10) at (-1.6, 1.2) {10};
-\node (n30) at (1.6, 1.2)  {30};
-\node (n5)  at (-2.6, 0)   {5};
-\node (n15) at (-0.6, 0)   {15};
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[vx] (n20) at (0, 2.5)    {20};
+\node[vx] (n10) at (-1.6, 1.2) {10};
+\node[vx] (n30) at (1.6, 1.2)  {30};
+\node[vx] (n5)  at (-2.6, 0)   {5};
+\node[vx] (n15) at (-0.6, 0)   {15};
 
 \draw[edge] (n20) -- (n10);
 \draw[edge] (n20) -- (n30);
