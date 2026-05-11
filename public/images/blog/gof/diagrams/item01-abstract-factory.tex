@@ -30,10 +30,10 @@
 \draw[ret] (wf) to[bend left=15]  node[right, font=\tiny]{creates} (ww.east);
 \draw[ret] (wf) to[bend right=8]  (wb.north east);
 
-% --- Legend ---
+% --- Legend (placed below the product row to avoid overlap) ---
 \matrix[draw=groupbord, rounded corners, inner sep=4pt, row sep=1pt, column sep=4pt,
-        font=\tiny, anchor=south west]
-  at (-6.5, -5.6) {
+        font=\tiny, anchor=north west]
+  at (-6.5, -5.0) {
     \node[abs, minimum width=12mm, minimum height=4mm]{}; & \node{abstract}; \\
     \node[con, minimum width=12mm, minimum height=4mm]{}; & \node{concrete factory}; \\
     \node[imp, minimum width=12mm, minimum height=4mm]{}; & \node{concrete product}; \\

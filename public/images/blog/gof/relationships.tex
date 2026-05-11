@@ -90,17 +90,17 @@
 \draw[alt]  (fly.south) to[bend right=10] node[right, font=\tiny]{shared as} (str_.north);
 
 % ============================================================
-% LEGEND — right column
+% LEGEND — bottom-right corner, inside the canvas
 % ============================================================
 \node[draw=groupbord, rounded corners=4pt, inner sep=6pt, font=\footnotesize,
-      anchor=north west, align=left, fill=black!2]
-  at (16, 9) {%
+      anchor=north east, align=left, fill=black!2]
+  at (15.4, -4.5) {%
     \textbf{Legend}\\[3pt]
-    \tikz \draw[uses] (0,0) -- (8mm,0); \ uses / composes\\
-    \tikz \draw[alt]  (0,0) -- (8mm,0); \ similar / alternative\\[4pt]
-    \textcolor{conbord}{\rule{1.6mm}{1.6mm}} Creational (5)\\
-    \textcolor{absbord}{\rule{1.6mm}{1.6mm}} Structural (7)\\
-    \textcolor{impbord}{\rule{1.6mm}{1.6mm}} Behavioral (11)
+    \tikz \draw[uses] (0,0) -- (10mm,0); \ uses / composes\\
+    \tikz \draw[alt]  (0,0) -- (10mm,0); \ similar / alternative\\[4pt]
+    \textcolor{conbord}{\rule{2mm}{2mm}} \ Creational (5)\\
+    \textcolor{absbord}{\rule{2mm}{2mm}} \ Structural (7)\\
+    \textcolor{impbord}{\rule{2mm}{2mm}} \ Behavioral (11)
   };
 \end{tikzpicture}
 \end{document}

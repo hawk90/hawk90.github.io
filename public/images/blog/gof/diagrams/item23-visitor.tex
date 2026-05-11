@@ -5,21 +5,22 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
-% --- Element side ---
-\node[abs] (e)   at (-3.6, 1.6) {Element \\ \scriptsize accept(Visitor)*};
-\node[con] (ea)  at (-5.6,-1.6) {ElementA \\ \scriptsize accept(v)};
-\node[con] (eb)  at (-1.6,-1.6) {ElementB \\ \scriptsize accept(v)};
+% --- Element side (left) ---
+\node[abs] (e)   at (-4.4, 1.6) {Element \\ \scriptsize accept(Visitor)*};
+\node[con] (ea)  at (-6.4,-1.6) {ElementA \\ \scriptsize accept(v)};
+\node[con] (eb)  at (-2.4,-1.6) {ElementB \\ \scriptsize accept(v)};
 
-% --- Visitor side ---
-\node[abs] (v)   at ( 4.0, 1.6) {Visitor \\ \scriptsize visit(A)*  visit(B)*};
-\node[imp] (vx)  at ( 2.0,-1.6) {VisitorX};
-\node[imp] (vy)  at ( 6.0,-1.6) {VisitorY};
+% --- Visitor side (right) — wider gap so cross-arrow doesn't cross boxes ---
+\node[abs] (v)   at ( 5.4, 1.6) {Visitor \\ \scriptsize visit(A)*  visit(B)*};
+\node[imp] (vx)  at ( 3.4,-1.6) {VisitorX};
+\node[imp] (vy)  at ( 7.4,-1.6) {VisitorY};
 
 \draw[inh] (ea.north) -- ++(0,0.4) -| (e.south);
 \draw[inh] (eb.north) -- ++(0,0.4) -| (e.south);
 \draw[inh] (vx.north) -- ++(0,0.4) -| (v.south);
 \draw[inh] (vy.north) -- ++(0,0.4) -| (v.south);
 
-\draw[alt] (ea.east) to[bend right=10] node[midway, above, font=\tiny]{v.visit(this)} (vx.west);
+% Curved double-dispatch hint, routed below the boxes to avoid overlap
+\draw[alt] (eb.south) to[bend right=25] node[midway, below, font=\tiny]{v.visit(this)} (vx.south);
 \end{tikzpicture}
 \end{document}
