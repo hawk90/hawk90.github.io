@@ -277,16 +277,7 @@ decltype(std::move(i)) // int&& — xvalue
 
 ### 한눈에 보는 결정 트리
 
-```
-decltype(E):
-  ├─ E가 단순 이름 (id-expression) 또는 멤버 접근 표현식?
-  │     → 그 이름의 선언된 타입
-  │
-  └─ 그 외 표현식?
-        ├─ lvalue   → T&
-        ├─ xvalue   → T&&
-        └─ prvalue  → T
-```
+<img src="/images/blog/emc/diagrams/item03-decltype-flow.svg" alt="decltype 결정 흐름도" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 **기억할 한 줄:** 이름은 "선언된 그대로", 그 외는 "값 카테고리에 따라".
 

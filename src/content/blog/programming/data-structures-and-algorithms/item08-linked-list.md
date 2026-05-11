@@ -44,11 +44,7 @@ head ⇄ [/|A|·] ⇄ [·|B|·] ⇄ [·|C|·] ⇄ [·|D|/] ← tail
 
 ### 원형 연결 리스트 (Circular Linked List)
 
-```
-head → [A|·] → [B|·] → [C|·] ─┐
-       ▲                       │
-       └───────────────────────┘
-```
+<img src="/images/blog/dsa/diagrams/item08-linked-list.svg" alt="원형 연결 리스트" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 마지막이 head를 가리킴. round-robin에 유용.
 

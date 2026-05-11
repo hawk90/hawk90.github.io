@@ -353,22 +353,10 @@ public:
 ```
 
 컴파일러가 만드는 vtable:
-```
-Animal의 vtable:          Dog의 vtable:
-┌──────────────────┐      ┌──────────────────┐
-│ &Animal::speak   │      │ &Dog::speak      │ ← 오버라이드됨
-│ &Animal::eat     │      │ &Animal::eat     │
-└──────────────────┘      └──────────────────┘
-```
+<img src="/images/blog/beautiful/diagrams/item01-vtable.svg" alt="vtable 비교" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 객체 메모리 구조:
-```
-Dog 객체:
-┌─────────┐
-│ vptr    │ → Dog의 vtable을 가리킴
-│ 멤버들  │
-└─────────┘
-```
+<img src="/images/blog/beautiful/diagrams/item01-object-vptr.svg" alt="객체의 vptr" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 가상 함수 호출 과정:
 ```cpp

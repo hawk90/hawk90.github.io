@@ -1,0 +1,61 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit}
+\begin{document}
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  cat/.style={rectangle, rounded corners=3pt, draw=black!55, line width=0.5pt,
+              fill=blue!12, inner sep=4pt, font=\sffamily\bfseries\small, align=center},
+  c/.style={rectangle, rounded corners=2pt, draw=black!45, line width=0.4pt,
+            fill=white, inner sep=3pt, font=\sffamily\footnotesize, align=center},
+  e/.style={->, draw=black!60, line width=0.4pt, >={Stealth[length=2mm]}}
+]
+% Linear
+\node[cat] (lin)  at (-6, 4)  {배열 / 리스트};
+\node[c]   (arr)  at (-8, 2.5){vector};
+\node[c]   (lst)  at (-6, 2.5){list / GLL};
+\node[c]   (st)   at (-4, 2.5){stack/queue};
+
+% Tree
+\node[cat] (tr)   at (0, 4)   {트리};
+\node[c]   (bst)  at (-2, 2.5){BST};
+\node[c]   (avl)  at (0, 2.5) {AVL/RB};
+\node[c]   (heap) at (2, 2.5) {Heap};
+\node[c]   (skip) at (-1, 1)  {Skip List};
+\node[c]   (bt)   at (1.2, 1) {B-Tree};
+
+% Hash
+\node[cat] (h)    at (5.5, 4) {해싱};
+\node[c]   (sh)   at (4.5, 2.5){static};
+\node[c]   (dh)   at (6.5, 2.5){dynamic};
+
+% Graph
+\node[cat] (g)    at (-6, -1) {그래프};
+\node[c]   (dfs)  at (-8, -2.5){DFS/BFS};
+\node[c]   (mst)  at (-6, -2.5){MST};
+\node[c]   (sp)   at (-4, -2.5){Shortest path};
+\node[c]   (scc)  at (-5, -4) {SCC / topo};
+
+% Sort
+\node[cat] (so)   at (0, -1)  {정렬};
+\node[c]   (cmp)  at (-1.5,-2.5){비교 (n log n)};
+\node[c]   (nc)   at (1.5,-2.5){비교 외 (n)};
+\node[c]   (ext)  at (0, -4)  {외부 정렬};
+
+% Algo patterns
+\node[cat] (pat)  at (5.5, -1){알고리즘 패턴};
+\node[c]   (dp)   at (4, -2.5){DP};
+\node[c]   (gd)   at (5.5,-2.5){Greedy};
+\node[c]   (dc)   at (7, -2.5){분할정복};
+\node[c]   (bk)   at (5.5,-4) {Backtrack};
+
+% edges
+\foreach \from/\to in {lin/arr, lin/lst, lin/st, tr/bst, tr/avl, tr/heap, avl/skip, avl/bt,
+                      h/sh, h/dh, g/dfs, g/mst, g/sp, mst/scc, so/cmp, so/nc, cmp/ext,
+                      pat/dp, pat/gd, pat/dc, gd/bk}
+  \draw[e] (\from) -- (\to);
+\end{tikzpicture}
+\end{document}

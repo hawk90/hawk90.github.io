@@ -106,49 +106,7 @@ STL 활용, 캐시, lock-free, 선택 가이드.
 
 ## 자료구조·알고리즘 관계도 (텍스트)
 
-```
-배열 ── vector ── 동적 배열
-        ↓
-        Stack/Queue (adapter)
-        Heap (완전 이진 트리)
-        Hash Table (배열 + 충돌 처리)
-
-연결 리스트 ── List
-              GLL → Tree
-
-트리 ── 이진 트리 ── BST ── 균형 BST
-                              ├ AVL
-                              └ Red-Black
-        ↓
-       힙 (배열 표현)
-        ↓
-       균형 자료구조
-        ├ Skip List (확률)
-        └ B-Tree (디스크)
-
-그래프 ── 표현 (행렬/리스트)
-         ↓
-         DFS, BFS
-         ↓
-         ┌── MST (Kruskal: Union-Find / Prim: Heap)
-         ├── 최단 경로 (Dijkstra: Heap)
-         ├── SCC (Tarjan, Kosaraju)
-         └── 위상 정렬
-
-정렬 ── 비교 기반 (Ω(n log n))
-        ├ Quick / Merge / Heap
-        └ 단순 (O(n²))
-        
-        비교 외 (O(n))
-        ├ Counting / Radix / Bucket
-        └ 외부 정렬
-
-알고리즘 패턴
-        ├ DP (memoization / tabulation)
-        ├ Greedy
-        ├ 분할 정복
-        └ 백트래킹
-```
+<img src="/images/blog/dsa/diagrams/item40-overview.svg" alt="DSA 시리즈 전체 개요" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## 책 + 추가 학습 리소스
 

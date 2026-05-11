@@ -28,17 +28,7 @@ node->size();   // File이든 Directory든 OK
 
 ## 한눈에 보는 구조
 
-```
-   Component
-   ─ operation()*
-   ─ add(Component)?    ◄── 안전성 vs 투명성 결정
-        △
-        │
-   ┌────┴────┐
-  Leaf    Composite
-   ─ op()    ─ op()    ◄── 자식들에게 위임
-             ◇──► Component[]
-```
+<img src="/images/blog/gof/diagrams/item08-composite.svg" alt="Composite 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 Composite의 `operation()`은 자식들에게 재귀 위임 → 트리 전체가 자연스럽게 처리됨.
 

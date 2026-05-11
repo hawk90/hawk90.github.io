@@ -169,12 +169,7 @@ struct GLLNode {
 
 `A = (a, (b, c), d)` 의 GLL:
 
-```
-[atom:a | ·] → [list:· | ·] → [atom:d | /]
-                      │
-                      ▼
-                  [atom:b | ·] → [atom:c | /]
-```
+<img src="/images/blog/dsa/diagrams/item09-gll.svg" alt="일반화 연결 리스트 (GLL) 구조" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## C++ 구현 — GLL (단순)
 

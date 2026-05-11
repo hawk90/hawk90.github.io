@@ -43,12 +43,7 @@ Builder ── 메서드 체인 ── build() ──► Product
 ```
 
 **전통 GoF 형태** (Director가 순서를 통제):
-```
-Director ──► Builder (interface)
-                △
-                │
-        ConcreteBuilder ──► Product
-```
+<img src="/images/blog/gof/diagrams/item02-builder.svg" alt="Builder 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 Director는 "어떤 순서로 부품을 조립할까", Builder는 "각 부품을 어떻게 만들까".
 

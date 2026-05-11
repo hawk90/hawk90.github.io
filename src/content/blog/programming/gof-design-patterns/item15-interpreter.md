@@ -29,15 +29,7 @@ e.evaluate();   // 9
 
 ## 한눈에 보는 구조
 
-```
-   Client ──► AbstractExpression
-                 ─ interpret(Context)*
-                       △
-                       │
-                ┌──────┴──────┐
-       TerminalExpression  NonterminalExpression
-                                  ◇──► AbstractExpression[]
-```
+<img src="/images/blog/gof/diagrams/item15-interpreter.svg" alt="Interpreter 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 - **Terminal**: 리프 (Number, Variable)
 - **Nonterminal**: 자식 보유 (Add, Multiply)

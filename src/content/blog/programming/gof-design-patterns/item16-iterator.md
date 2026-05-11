@@ -21,15 +21,7 @@ C++ STL 전체가 이 패턴 위에 있습니다.
 
 ## 한눈에 보는 구조
 
-```
-   Aggregate          Iterator
-   ─ iterator()*      ─ first()
-        △              ─ next()
-        │              ─ isDone()
-        │              ─ currentItem()
-   ConcreteAggregate         △
-   ─ iterator() ────► ConcreteIterator
-```
+<img src="/images/blog/gof/diagrams/item16-iterator.svg" alt="Iterator 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 컨테이너가 **자신의 iterator를 반환** → 클라이언트는 iterator로만 작업.
 

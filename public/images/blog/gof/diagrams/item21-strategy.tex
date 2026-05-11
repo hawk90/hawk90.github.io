@@ -1,0 +1,26 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\begin{document}
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  cls/.style={rectangle, rounded corners=2pt, draw=black!55, line width=0.4pt,
+              minimum height=8mm, minimum width=30mm, inner sep=3pt, fill=white, align=center},
+  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
+  con/.style={cls, fill=red!12},
+  imp/.style={cls, fill=green!10},
+  inh/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=black!60, line width=0.45pt},
+  agg/.style={{Diamond[length=2mm,width=2mm,open]}-{Stealth[length=2mm]}, draw=black!60}
+]
+\node[con] (ctx) at (-3.5, 1.5){Context \\ \scriptsize strategy \\ \scriptsize execute()};
+\node[abs] (st)  at ( 3.5, 1.5){Strategy \\ \scriptsize execute()*};
+\node[imp] (a)   at ( 0,-1.5)  {ConcStrA};
+\node[imp] (b)   at ( 3.5,-1.5){ConcStrB};
+\node[imp] (c)   at ( 7,-1.5)  {ConcStrC};
+
+\draw[agg] (ctx.east) -- (st.west);
+\draw[inh] (a.north) -- ++(0,0.4) -| (st.south);
+\draw[inh] (b.north) -- (st.south);
+\draw[inh] (c.north) -- ++(0,0.4) -| (st.south);
+\end{tikzpicture}
+\end{document}

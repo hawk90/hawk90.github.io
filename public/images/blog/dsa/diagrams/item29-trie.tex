@@ -1,0 +1,34 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\begin{document}
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  every node/.style={circle, draw=black!55, line width=0.4pt, minimum size=8mm, fill=blue!10, inner sep=0pt},
+  endn/.style={circle, draw=red!70, line width=0.6pt, minimum size=8mm, fill=red!18, inner sep=0pt},
+  edge/.style={draw=black!60, line width=0.4pt}
+]
+\node (r)  at (0, 3)        {root};
+\node (a)  at (-2.5, 2)     {a};
+\node (b)  at ( 2.5, 2)     {b};
+\node (an) at (-3.5, 1)     {n};
+\node (ba) at ( 2.5, 1)     {a};
+\node[endn] (ant) at (-4.5, 0) {t};
+\node (and) at (-2.5, 0)    {d};
+\node[endn] (bat) at ( 2.5, 0) {t};
+\node[endn] (andy) at (-2.5, -1){y};
+
+\draw[edge] (r) -- (a);
+\draw[edge] (r) -- (b);
+\draw[edge] (a) -- (an);
+\draw[edge] (b) -- (ba);
+\draw[edge] (an) -- (ant);
+\draw[edge] (an) -- (and);
+\draw[edge] (ba) -- (bat);
+\draw[edge] (and) -- (andy);
+
+\node[draw=none, fill=none, anchor=west, font=\scriptsize] at (-1.2, 0) {ant};
+\node[draw=none, fill=none, anchor=west, font=\scriptsize] at (-1.2,-1) {andy};
+\node[draw=none, fill=none, anchor=west, font=\scriptsize] at (3.2, 0)  {bat};
+\end{tikzpicture}
+\end{document}

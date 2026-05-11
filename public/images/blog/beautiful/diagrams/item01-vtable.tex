@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\begin{document}
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  ent/.style={rectangle, draw=black!55, line width=0.4pt, minimum height=8mm,
+              minimum width=44mm, inner sep=3pt, fill=blue!10, align=left}
+]
+% Animal vtable
+\node[draw=none, fill=none, font=\bfseries] at (-3.5, 2) {Animal의 vtable};
+\node[ent] (a1) at (-3.5, 1)   {\&Animal::speak};
+\node[ent] (a2) at (-3.5, 0.2) {\&Animal::eat};
+
+% Dog vtable
+\node[draw=none, fill=none, font=\bfseries] at (3.5, 2) {Dog의 vtable};
+\node[ent, fill=red!12] (d1) at (3.5, 1)   {\&Dog::speak \quad \scriptsize (override)};
+\node[ent] (d2) at (3.5, 0.2) {\&Animal::eat};
+\end{tikzpicture}
+\end{document}

@@ -28,17 +28,7 @@ cmd->undo();    // ◄── 객체이기 때문에 가능
 
 ## 한눈에 보는 구조
 
-```
-   Client ──► Command (interface)
-                  ─ execute()*
-                  ─ undo()*
-                       △
-                       │
-                ConcreteCommand ◇──► Receiver
-                                       ─ action()
-
-   Invoker ──► Command   (저장만, execute 호출)
-```
+<img src="/images/blog/gof/diagrams/item14-command.svg" alt="Command 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 - **Receiver**: 실제 동작 수행
 - **Command**: Receiver 호출을 캡슐화

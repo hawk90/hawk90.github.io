@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\begin{document}
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  every node/.style={circle, draw=black!55, line width=0.4pt, minimum size=9mm, fill=blue!10, inner sep=0pt},
+  edge/.style={->, draw=black!70, line width=0.45pt, >={Stealth[length=2mm]}}
+]
+\node (A) at (0,2)   {A};
+\node (B) at (3,2)   {B};
+\node (D) at (6,2)   {D};
+\node (E) at (0,-1)  {E};
+\node (C) at (3,-1)  {C};
+
+\draw[edge] (A) -- node[above, fill=none, draw=none, font=\tiny]{5} (B);
+\draw[edge] (B) -- node[above, fill=none, draw=none, font=\tiny]{3} (D);
+\draw[edge] (A) -- node[left, fill=none, draw=none, font=\tiny]{2} (E);
+\draw[edge] (B) -- node[right, fill=none, draw=none, font=\tiny]{1} (C);
+\draw[edge] (E) -- node[below, fill=none, draw=none, font=\tiny]{6} (C);
+\draw[edge] (C) -- node[right, fill=none, draw=none, font=\tiny]{4} (D);
+\end{tikzpicture}
+\end{document}

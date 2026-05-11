@@ -33,18 +33,7 @@ base가 흐름을 통제, derived는 hook만 제공. **제어 반전**.
 
 ## 한눈에 보는 구조
 
-```
-   AbstractClass
-   ─ templateMethod() ─┐
-   ─ step1()*          │ (호출 흐름 결정)
-   ─ step2()*          │
-   ─ commonStep()  ◄───┘
-        △
-        │
-   ConcreteClass
-   ─ step1()
-   ─ step2()
-```
+<img src="/images/blog/gof/diagrams/item22-template-method.svg" alt="Template Method 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 `templateMethod()`는 **non-virtual** — 호출 흐름이 derived에서 바뀌면 안 됨.
 

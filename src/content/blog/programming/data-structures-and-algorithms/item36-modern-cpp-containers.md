@@ -29,24 +29,7 @@ draft: true
 
 ## 의사결정 트리 — 어떤 컨테이너?
 
-```
-자료가 정렬되어야 하나?
-├ 예 →
-│  └ 검색 빈번?
-│     ├ 예 → set / map (RB tree, O(log n))
-│     └ 아니오 → vector + sort (캐시 친화)
-│
-└ 아니오 →
-   └ 키-값 쌍?
-      ├ 예 → unordered_map (해시, O(1) avg)
-      └ 아니오 →
-         └ 임의 접근 필요?
-            ├ 예 → vector
-            └ 아니오 →
-               └ 빈번한 중간 삽입/삭제?
-                  ├ 예 → list (드뭄 — vector도 보통 OK)
-                  └ 아니오 → vector (default)
-```
+<img src="/images/blog/dsa/diagrams/item36-container-flowchart.svg" alt="STL 컨테이너 선택 흐름도" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## 1. `vector` — 거의 항상 default
 

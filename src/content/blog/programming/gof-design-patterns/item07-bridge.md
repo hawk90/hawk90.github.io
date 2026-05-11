@@ -23,11 +23,7 @@ CircleVector, CircleRaster, RectangleVector, RectangleRaster, ...
 
 Bridge로 분리하면:
 
-```
-Shape ───► Renderer
-  △           △
-Circle, Rect  Vector, Raster
-```
+<img src="/images/blog/gof/diagrams/item07-bridge.svg" alt="Bridge 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 → **N + M**.
 

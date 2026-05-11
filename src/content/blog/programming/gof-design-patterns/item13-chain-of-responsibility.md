@@ -24,14 +24,7 @@ seriesOrder: 13
 
 ## 한눈에 보는 구조
 
-```
-   Client ──► Handler ─┐
-                  △    │ next
-                  │    │
-              ┌───┴────┘
-         ConcHandler1 ──► ConcHandler2 ──► ConcHandler3
-                          (체인 형성)
-```
+<img src="/images/blog/gof/diagrams/item13-chain-of-responsibility.svg" alt="Chain of Responsibility 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 각 Handler가 자신이 처리할 수 있으면 처리, 아니면 next로 패스.
 

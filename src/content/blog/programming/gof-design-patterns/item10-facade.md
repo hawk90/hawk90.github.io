@@ -26,16 +26,7 @@ c.compile("source.cpp", "output.exe");   // 한 줄
 
 ## 한눈에 보는 구조
 
-```
-                 Facade
-                ┌─────┐
-                └──┬──┘
-                   │
-       ┌───────────┼───────────┐
-       ▼           ▼           ▼
-   SubA         SubB         SubC
-   ─ a()        ─ b()        ─ c()
-```
+<img src="/images/blog/gof/diagrams/item10-facade.svg" alt="Facade 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 Facade는 클라이언트와 서브시스템 **사이의 얇은 층**.
 

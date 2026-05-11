@@ -45,15 +45,7 @@ int main() {
 ```
 
 출력:
-```
-원반 1: A -> C
-원반 2: A -> B
-원반 1: C -> B
-원반 3: A -> C
-원반 1: B -> A
-원반 2: B -> C
-원반 1: A -> C
-```
+<img src="/images/blog/dsa/diagrams/item03-hanoi.svg" alt="하노이 탑 이동 단계" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## C 구현
 

@@ -38,13 +38,7 @@ Singleton은 사실상 **전역 변수**입니다. 다음 단점이 있습니다
 
 ## 한눈에 보는 구조
 
-```
-   Singleton
-   ─ instance: Singleton  (static, private)
-   ─ Singleton()          (private)
-   + getInstance()        (static)
-   + operation()
-```
+<img src="/images/blog/gof/diagrams/item05-singleton.svg" alt="Singleton 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 생성자가 private — 외부에서 못 만듦. 유일 진입점이 `getInstance()`.
 

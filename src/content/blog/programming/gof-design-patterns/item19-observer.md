@@ -24,18 +24,7 @@ seriesOrder: 19
 
 ## 한눈에 보는 구조
 
-```
-   Subject ◇──────► Observer (interface)
-   ─ attach(O)*       ─ update()*
-   ─ detach(O)*           △
-   ─ notify()             │
-        △            ┌────┴────┐
-        │         ConcObsA  ConcObsB
-   ConcSubject       ─ update()
-   ─ state
-   ─ getState()
-   ─ setState()
-```
+<img src="/images/blog/gof/diagrams/item19-observer.svg" alt="Observer 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 상태 변경 → `notify()` → 모든 등록된 observer의 `update()` 호출.
 

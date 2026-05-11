@@ -31,26 +31,7 @@ Optimizer op; e->accept(op);   // 최적화
 
 ## 한눈에 보는 구조
 
-```
-   Element (interface)
-   ─ accept(Visitor)*
-        △
-        │
-   ┌────┴────┐
-ElemA       ElemB
-─ accept(v) ─ accept(v)
-   │           │
-   └─►v.visit(this)
-
-
-   Visitor (interface)
-   ─ visit(ElemA)*
-   ─ visit(ElemB)*
-        △
-        │
-   ┌────┴────┐
-VisitorX   VisitorY
-```
+<img src="/images/blog/gof/diagrams/item23-visitor.svg" alt="Visitor 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 **double dispatch**:
 1. `element.accept(visitor)` — element 타입 결정

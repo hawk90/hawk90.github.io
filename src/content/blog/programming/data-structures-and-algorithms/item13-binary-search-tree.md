@@ -125,31 +125,7 @@ tree.inorder();   // 10 20 40 50 60
 
 ## 삭제의 3가지 케이스
 
-```
-1. leaf:        그냥 삭제
-   30                30
-  /  \    →        /  \
- 20   50          20   50
-        \                \
-         60                60
-   (60 삭제)
-
-2. 자식 1개:    자식으로 대체
-   30                30
-  /  \    →        /  \
- 20   50          20   60
-        \
-         60
-   (50 삭제)
-
-3. 자식 2개:    inorder successor로 대체
-       30                40
-      /  \    →        /  \
-     20   50         20   50
-         /  \              \
-        40  60             60
-   (30 삭제, 40이 successor)
-```
+<img src="/images/blog/dsa/diagrams/item13-bst-skewed.svg" alt="치우친 BST" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## C 구현
 
@@ -213,17 +189,7 @@ void bst_inorder(Node* root) {
 
 순서대로 1, 2, 3, 4, 5 삽입하면:
 
-```
-1
- \
-  2
-   \
-    3
-     \
-      4
-       \
-        5
-```
+<img src="/images/blog/dsa/diagrams/item13-bst-delete.svg" alt="BST 삭제 3가지 케이스" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 → 사실상 연결 리스트. 검색 O(n).
 

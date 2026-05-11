@@ -24,15 +24,7 @@ seriesOrder: 4
 
 ## 한눈에 보는 구조
 
-```
-   Client                Prototype
-   ──────             ─ clone()*
-   prototype ◇─────►        △
-   create() ──────►         │
-                  ┌─────────┴─────────┐
-            ConcreteProtoA      ConcreteProtoB
-            ─ clone()           ─ clone()
-```
+<img src="/images/blog/gof/diagrams/item04-prototype.svg" alt="Prototype 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 견본 객체에게 "복사본 줘"라고만 요청하면 됨.
 

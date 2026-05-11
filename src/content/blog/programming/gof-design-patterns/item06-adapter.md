@@ -24,13 +24,7 @@ seriesOrder: 6
 
 ## 한눈에 보는 구조 (Object Adapter — 권장)
 
-```
-   Client ──► Target (interface)
-                  △
-                  │
-              Adapter ◇──► Adaptee (existing)
-              ─ request()       ─ specificRequest()
-```
+<img src="/images/blog/gof/diagrams/item06-adapter.svg" alt="Adapter 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 Adapter가 Target을 구현하면서 내부적으로 Adaptee에게 위임.
 

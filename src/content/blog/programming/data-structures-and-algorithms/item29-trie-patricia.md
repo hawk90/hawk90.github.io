@@ -43,17 +43,7 @@ draft: true
 
 `isEnd` 플래그로 단어 끝 표시:
 
-```
-root
- └ a
-    └ n
-       └ t (isEnd=true)   ← "ant"
-       └ d (isEnd=false)
-          └ y (isEnd=true) ← "andy"
- └ b
-    └ a
-       └ t (isEnd=true)   ← "bat"
-```
+<img src="/images/blog/dsa/diagrams/item29-trie.svg" alt="Trie 트리" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## C++ 구현
 
@@ -216,11 +206,7 @@ root → "antelope" (단일 노드)
 
 여러 단어 공유 부분만 분할:
 
-```
-root → "ant"
-        ├─ "elope"
-        └─ "eater"
-```
+<img src="/images/blog/dsa/diagrams/item29-patricia.svg" alt="PATRICIA 트리 (압축)" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 → **메모리 ↓, 노드 수 ↓**.
 

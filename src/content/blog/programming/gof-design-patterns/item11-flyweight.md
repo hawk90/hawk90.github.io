@@ -29,18 +29,7 @@ intrinsic만 객체에 두고, extrinsic은 메서드 인자로 전달.
 
 ## 한눈에 보는 구조
 
-```
-   FlyweightFactory
-   ─ pool: Map<key, Flyweight>
-   ─ getFlyweight(key)
-
-   Flyweight (interface)
-   ─ operation(extrinsicState)*
-        △
-        │
-   ┌────┴────┐
-ConcFly  UnsharedConcFly
-```
+<img src="/images/blog/gof/diagrams/item11-flyweight.svg" alt="Flyweight 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 Factory가 풀을 관리 — 같은 key 요청 시 캐시된 객체 반환.
 

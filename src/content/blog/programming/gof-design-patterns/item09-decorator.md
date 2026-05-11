@@ -27,20 +27,7 @@ coffee = std::make_unique<Sugar>(std::move(coffee));   // sugar 추가
 
 ## 한눈에 보는 구조
 
-```
-   Component (interface)
-   ─ operation()*
-        △
-        │
-   ┌────┴────┐
-ConcComp  Decorator ◇──► Component
-              ─ op()
-                  △
-                  │
-            ConcDecorA, ConcDecorB
-              ─ op()      ─ op()
-              ─ addedBehavior()
-```
+<img src="/images/blog/gof/diagrams/item09-decorator.svg" alt="Decorator 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 Decorator도 Component 구현. 내부에 **다른 Component를 보유** → 위임 + 추가 동작.
 

@@ -145,15 +145,7 @@ void graph_add_edge(int u, int v, int directed) {
 
 가능한 한 **깊이 들어간 후** 더 이상 못 가면 backtrack.
 
-```
-시작: A
-방문 순서 (한 가지 예): A → B → C → D
-        A
-       / \
-      B   E
-     / \
-    C   D
-```
+<img src="/images/blog/dsa/diagrams/item15-graph-bfs.svg" alt="BFS 방문 예시 그래프" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 스택 사용 (재귀 = 시스템 스택).
 

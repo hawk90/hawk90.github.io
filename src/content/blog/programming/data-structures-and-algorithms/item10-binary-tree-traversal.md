@@ -208,15 +208,7 @@ void postorder(Node* root) {
 
 ### 표현식 트리 평가 (Postorder)
 
-```
-      *
-     / \
-    +   2
-   / \
-  3   4
-
-(3 + 4) * 2 = 14
-```
+<img src="/images/blog/dsa/diagrams/item10-expression-tree.svg" alt="이진 표현식 트리" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ```cpp
 int eval(Node* root) {

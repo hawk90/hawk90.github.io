@@ -23,16 +23,7 @@ seriesOrder: 17
 
 ## 한눈에 보는 구조
 
-```
-   Colleague (interface)
-        △
-        │
-   ┌────┴────────┬───────────┐
-   ColA  ColB  ColC ◇──► Mediator (interface)
-                                △
-                                │
-                          ConcreteMediator
-```
+<img src="/images/blog/gof/diagrams/item17-mediator.svg" alt="Mediator 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 동료들은 서로를 모르고, **mediator만** 안다.
 

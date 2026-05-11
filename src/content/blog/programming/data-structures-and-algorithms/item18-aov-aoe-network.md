@@ -151,11 +151,7 @@ void topological_sort(int V) {
 
 **노드 = 이벤트** (작업의 시작·종료 시점), **간선 = 활동** (가중치 = 소요 시간).
 
-```
-   A ──5──→ B ──3──→ D
-   ↓ 2      ↓ 1      ↑ 4
-   E ──6──→ C ───────┘
-```
+<img src="/images/blog/dsa/diagrams/item18-aoe-network.svg" alt="AOE 네트워크 예시" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 응용:
 - **PERT 차트** — 프로젝트 관리

@@ -33,13 +33,7 @@ draft: true
 - 각 버킷에 키 b개까지
 - 버킷 가득 차면 그 버킷만 분할 (디렉토리 두 배 안 해도 OK)
 
-```
-디렉토리 (d=2):     버킷:
-00 → ┐
-01 → ┼→ Bucket A (local depth 1) [keys with last 1 bit = 0]
-10 → ┘
-11 → ──→ Bucket B (local depth 2) [keys with last 2 bits = 11]
-```
+<img src="/images/blog/dsa/diagrams/item23-extendible-hash.svg" alt="확장 해싱 디렉토리/버킷" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 키의 **하위 d 비트**로 디렉토리 인덱싱.
 
@@ -182,15 +176,7 @@ void insert(int key) {
 - 노드 추가/제거 시 **소수 키만 재배치**
 - 해시 공간을 원형으로
 
-```
-       [노드1]
-      /        \
-[키]              [키]
-      \        /
-       [노드2]
-        |
-      [노드3]
-```
+<img src="/images/blog/dsa/diagrams/item23-linear-hash.svg" alt="선형 해싱 노드 체인" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 새 노드 추가 → 인접 노드의 키 일부만 새 노드로. 전체 재해싱 X.
 

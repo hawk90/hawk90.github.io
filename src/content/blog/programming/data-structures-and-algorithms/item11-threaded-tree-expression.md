@@ -36,21 +36,7 @@ struct ThreadedNode {
 
 ## 동작 원리
 
-```
-        20
-       /  \
-      10   30
-     / \
-    5   15
-
-inorder: 5, 10, 15, 20, 30
-
-스레드 적용:
-- 5의 right (NULL이었음) → 10 (successor)
-- 15의 right → 20 (successor)
-- 5의 left → ø (전임자 없음)
-- 15의 left → 10 (predecessor)
-```
+<img src="/images/blog/dsa/diagrams/item11-threaded-tree.svg" alt="스레드 이진 트리" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## C++ 구현 — 스레드 이진 트리 inorder
 
@@ -133,13 +119,7 @@ void inorder(ThreadedNode* root) {
 
 ### 예: `(3 + 4) * 2`
 
-```
-      *
-     / \
-    +   2
-   / \
-  3   4
-```
+<img src="/images/blog/dsa/diagrams/item11-expression-tree.svg" alt="표현식 트리" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 순회 결과:
 - **Inorder** (괄호 없이): 3 + 4 * 2 — 우선순위 깨짐 → 괄호 추가 필요

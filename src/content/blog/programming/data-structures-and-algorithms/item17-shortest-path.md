@@ -130,6 +130,8 @@ std::vector<int> bellmanFord(int V, int src, const std::vector<Edge>& edges) {
 
 DP. `dist[i][j]` = i에서 j로의 최단 거리.
 
+<img src="/images/blog/dsa/diagrams/item17-floyd-warshall.svg" alt="Floyd-Warshall DP 행렬 진화" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ```
 for k in 0..V-1:           # 중간 노드로 k 허용
     for i in 0..V-1:

@@ -1,0 +1,31 @@
+% Common preamble for GoF diagrams (\input from each .tex)
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\tikzset{
+  cls/.style={
+    rectangle, rounded corners=2pt,
+    draw=black!55, line width=0.4pt,
+    minimum height=8mm, minimum width=28mm,
+    inner sep=3pt, fill=white,
+    align=center, font=\sffamily\small
+  },
+  abs/.style={cls, fill=blue!10, font=\sffamily\itshape\small},
+  con/.style={cls, fill=red!12},
+  imp/.style={cls, fill=green!10},
+  cli/.style={cls, fill=yellow!18},
+  inh/.style={
+    -{Triangle[length=3mm,width=3mm,open]},
+    draw=black!60, line width=0.45pt
+  },
+  agg/.style={
+    {Diamond[length=2mm,width=2mm,open]}-{Stealth[length=2mm]},
+    draw=black!60, line width=0.4pt
+  },
+  arr/.style={
+    -{Stealth[length=2mm]},
+    draw=black!60, line width=0.4pt
+  },
+  ret/.style={
+    -{Stealth[length=2mm]}, dashed,
+    draw=black!50, line width=0.4pt
+  }
+}

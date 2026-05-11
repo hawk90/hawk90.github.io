@@ -19,12 +19,7 @@ seriesOrder: 19
 
 ### shared_ptr의 메모리 구조
 
-```
-shared_ptr (16 byte):  [객체 ptr] [control block ptr]
-                                       │
-                                       ▼
-                       [strong count] [weak count] [deleter] [allocator]
-```
+<img src="/images/blog/emc/diagrams/item19-shared-ptr-layout.svg" alt="shared_ptr 메모리 레이아웃" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 - 객체 포인터 + control block 포인터 → **shared_ptr 자체가 16 byte** (포인터 2개)
 - control block은 힙에 따로 할당

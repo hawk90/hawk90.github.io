@@ -22,14 +22,7 @@ seriesOrder: 12
 
 ## 한눈에 보는 구조
 
-```
-   Client ──► Subject (interface)
-                  △
-                  │
-            ┌─────┴─────┐
-        RealSubject  Proxy ◇──► RealSubject
-        ─ request()   ─ request()
-```
+<img src="/images/blog/gof/diagrams/item12-proxy.svg" alt="Proxy 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 Proxy는 Subject 구현 + RealSubject 참조 + **추가 동작**(lazy/auth/log/...).
 

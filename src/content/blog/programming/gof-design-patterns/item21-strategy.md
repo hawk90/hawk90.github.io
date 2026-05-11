@@ -33,15 +33,7 @@ c.compress(data);
 
 ## 한눈에 보는 구조
 
-```
-   Context ◇──► Strategy (interface)
-   ─ strategy       ─ execute()*
-   ─ setStrategy()       △
-   ─ execute()           │
-                  ┌──────┼──────┐
-              ConcStrA  ConcStrB  ConcStrC
-                ─ execute()
-```
+<img src="/images/blog/gof/diagrams/item21-strategy.svg" alt="Strategy 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## 언제 쓰면 좋은가
 

@@ -14,37 +14,7 @@ draft: true
 
 ## 결정 트리
 
-```
-1) 키-값 매핑이 필요한가?
-   ├ 예 →
-   │   2a) 정렬된 순회 필요?
-   │       ├ 예 → std::map / std::multimap (RB tree)
-   │       └ 아니오 → std::unordered_map (해시)
-   │
-   └ 아니오 → (단순 컬렉션)
-       2b) 중복 허용?
-           ├ 예 (multiset) →
-           │   정렬? std::multiset / 정렬 X? 카운트 → unordered_map<T, int>
-           └ 아니오 (set) →
-               정렬? std::set / 정렬 X? std::unordered_set
-
-3) 우선순위 큐 (top 빈번)?
-   → std::priority_queue (heap)
-
-4) FIFO?
-   → std::queue (deque 기반)
-
-5) LIFO?
-   → std::stack (deque 기반)
-
-6) 그 외 (배열형) →
-   임의 접근 빈번?
-       ├ 예 → std::vector (default!)
-       └ 아니오 →
-           양쪽 끝 빈번? → std::deque
-           중간 빈번 (드뭄) → std::list
-           고정 크기 → std::array
-```
+<img src="/images/blog/dsa/diagrams/item39-selection-guide.svg" alt="자료구조 선택 가이드" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## 시간 복잡도 표
 

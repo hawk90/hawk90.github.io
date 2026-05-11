@@ -194,16 +194,7 @@ explicit Person(T&& n);
 
 ## 의사결정 가이드
 
-```
-오버로드가 진짜 필요한가?
-├ 아니오 → 1. 단일 보편 참조 함수
-└ 예 →
-   ├ 함수면 → 1' 함수 이름 분리
-   └ 생성자면 →
-      ├ 효율 보통 OK → 2. const T& 또는 3. by-value
-      ├ 효율 매우 중요, 단순 분기 → 4. tag dispatch
-      └ 효율 + 정밀 제어 → 5. enable_if (또는 C++20 concepts)
-```
+<img src="/images/blog/emc/diagrams/item27-decision-tree.svg" alt="보편 참조 오버로드 회피 결정 트리" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## 함정 — perfect forwarding의 비용
 
