@@ -1,0 +1,80 @@
+---
+/**
+ * Newsletter — multi-provider signup form.
+ *
+ * Drop into any page (or the article layout) and configure via
+ * NEWSLETTER_CONFIG in src/consts/config.ts.
+ *
+ * Supported providers:
+ *   - 'beehiiv'      publication: subdomain (e.g. "my-pub" → my-pub.beehiiv.com)
+ *   - 'substack'     publication: subdomain (e.g. "stratechery")
+ *   - 'convertkit'   publication: form id
+ *   - 'buttondown'   publication: username
+ *   - 'custom'       publication: POST endpoint URL
+ */
+import { NEWSLETTER_CONFIG } from '../../consts/config';
+
+if (!NEWSLETTER_CONFIG.enabled) return Astro.redirect ? null : null;
+
+// Type guard: from here on, NEWSLETTER_CONFIG is the enabled variant
+const cfg = NEWSLETTER_CONFIG as Extract<typeof NEWSLETTER_CONFIG, { enabled: true }>;
+
+const title = cfg.title ?? 'Get new posts in your inbox';
+const description = cfg.description ?? 'No spam. Unsubscribe anytime.';
+const buttonText = cfg.buttonText ?? 'Subscribe';
+
+function actionUrl(): string {
+  switch (cfg.provider) {
+    case 'beehiiv':
+      return `https://${cfg.publication}.beehiiv.com/embed`;
+    case 'substack':
+      return `https://${cfg.publication}.substack.com/subscribe`;
+    case 'convertkit':
+      return `https://app.convertkit.com/forms/${cfg.publication}/subscriptions`;
+    case 'buttondown':
+      return `https://buttondown.email/api/emails/embed-subscribe/${cfg.publication}`;
+    case 'custom':
+      return cfg.publication;
+  }
+}
+const action = actionUrl();
+---
+
+{NEWSLETTER_CONFIG.enabled && (
+<aside class="newsletter not-prose my-10 p-6 sm:p-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+  <div class="flex flex-col sm:flex-row sm:items-start gap-5">
+    <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-[var(--color-accent-muted)] flex items-center justify-center text-[var(--color-accent)]">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <h3 class="text-base font-semibold leading-tight">{title}</h3>
+      <p class="text-sm text-[var(--color-text-secondary)] mt-1">{description}</p>
+      <form
+        action={action}
+        method="post"
+        target="_blank"
+        class="mt-4 flex flex-col sm:flex-row gap-2"
+        data-newsletter-form
+      >
+        <label class="sr-only" for="newsletter-email">Email</label>
+        <input
+          id="newsletter-email"
+          type="email"
+          name="email"
+          required
+          placeholder="you@example.com"
+          class="flex-1 px-3 py-2 text-sm bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent-muted)] transition-colors"
+        />
+        <button
+          type="submit"
+          class="px-4 py-2 text-sm font-medium bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors"
+        >
+          {buttonText}
+        </button>
+      </form>
+    </div>
+  </div>
+</aside>
+)}

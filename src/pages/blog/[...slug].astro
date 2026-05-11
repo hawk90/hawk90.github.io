@@ -10,6 +10,7 @@ import RelatedPosts from '../../components/blog/RelatedPosts.astro';
 import ShareButtons from '../../components/blog/ShareButtons.astro';
 import StickyTitle from '../../components/blog/StickyTitle.astro';
 import AuthorBio from '../../components/blog/AuthorBio.astro';
+import Newsletter from '../../components/blog/Newsletter.astro';
 import { formatDate, getTagUrl } from '../../lib/utils';
 import { getReadingTime, getRelatedPosts } from '../../lib/posts';
 import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/config';
@@ -154,6 +155,11 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
           <!-- Content -->
           <div class="container-narrow prose">
             <Content />
+          </div>
+
+          <!-- Newsletter signup (renders only when enabled in config) -->
+          <div class="container-narrow">
+            <Newsletter />
           </div>
 
           <!-- Author bio -->

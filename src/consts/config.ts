@@ -1,41 +1,50 @@
 // ============================================================
 // Site Configuration
 // Edit this file to customize your blog.
+// All exports use `define*` helpers for type-safe autocomplete.
 // ============================================================
 
+import {
+  defineSite,
+  defineBranding,
+  defineNav,
+  defineSocial,
+  defineComments,
+  defineAnalytics,
+  defineNewsletter,
+  defineBlog,
+  defineUi,
+} from '../lib/define';
+
 // --- Site Basic Info ---
-export const SITE_CONFIG = {
+export const SITE_CONFIG = defineSite({
   title: "Hawk's Blog",
   description: 'C++, 시스템 프로그래밍, 임베디드 개발에 대한 기술 블로그',
   author: 'Hawk',
   locale: 'ko-KR',
-  lang: 'ko' as 'ko' | 'en',
+  lang: 'ko',
   url: 'https://hawk90.github.io',
-};
+});
 
 // --- Branding ---
-export const BRAND_CONFIG = {
+export const BRAND_CONFIG = defineBranding({
   logoText: 'Hawk',
   logoSuffix: '.dev',
   copyright: 'Hawk',
   tagline: 'Developer Blog',
   heroTitle: 'Hawk',
   heroDescription: 'Software Engineer who loves C++, Modern C++, and sharing knowledge through writing.',
-};
+});
 
 // --- Navigation ---
-export const NAV_CONFIG: ReadonlyArray<{
-  href: string;
-  label: string;
-  match?: ReadonlyArray<string>;
-}> = [
+export const NAV_CONFIG = defineNav([
   { href: '/about', label: 'About' },
   { href: '/blog', label: 'Blog', match: ['/blog', '/series', '/tags'] },
   { href: '/resume', label: 'Resume' },
-];
+]);
 
 // --- Social Links ---
-export const SOCIAL_CONFIG = [
+export const SOCIAL_CONFIG = defineSocial([
   {
     name: 'GitHub',
     href: 'https://github.com/hawk90',
@@ -46,54 +55,61 @@ export const SOCIAL_CONFIG = [
     href: '/rss.xml',
     icon: `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/></svg>`,
   },
-];
+]);
 
-// --- Comments (Premium) ---
-export const COMMENTS_CONFIG = {
+// --- Comments ---
+export const COMMENTS_CONFIG = defineComments({
   enabled: true,
-  provider: 'giscus' as const,
+  provider: 'giscus',
   repo: 'hawk90/hawk90.github.io',
   repoId: '',
   category: 'Announcements',
   categoryId: '',
   lang: 'ko',
-};
+});
 
-// --- Analytics (Premium) ---
-export const ANALYTICS_CONFIG = {
+// --- Analytics ---
+export const ANALYTICS_CONFIG = defineAnalytics({
   enabled: false,
-  provider: 'google' as 'google' | 'umami' | 'plausible',
-  id: '',
-  // Umami-specific
-  src: '', // e.g. 'https://analytics.example.com/script.js'
-};
+});
 
-// --- Share Buttons (Premium) ---
+// --- Newsletter ---
+export const NEWSLETTER_CONFIG = defineNewsletter({
+  enabled: false,
+  // To enable, replace with:
+  // enabled: true, provider: 'beehiiv',
+  // publication: 'your-publication-id',
+  // title: 'Get new posts in your inbox',
+  // description: 'No spam. Unsubscribe anytime.',
+  // buttonText: 'Subscribe',
+});
+
+// --- Share Buttons ---
 export const SHARE_CONFIG = {
   enabled: true,
 };
 
-// --- Related Posts (Premium) ---
+// --- Related Posts ---
 export const RELATED_POSTS_CONFIG = {
   enabled: true,
   maxPosts: 3,
 };
 
 // --- Blog ---
-export const BLOG_CONFIG = {
+export const BLOG_CONFIG = defineBlog({
   postsPerPage: 10,
   maxTagsInCard: 2,
   maxTagsInSidebar: 12,
-};
+});
 
 // --- UI ---
-export const UI_CONFIG = {
+export const UI_CONFIG = defineUi({
   paginationDelta: 3,
   tocHeadingDepth: { min: 2, max: 3 },
   tocScrollOffset: 100,
-};
+});
 
-// --- Storage Keys (internal) ---
+// --- Storage Keys (internal — don't change unless you know why) ---
 export const STORAGE_KEYS = {
   theme: 'theme',
   codeThemeDark: 'code-theme-dark',
