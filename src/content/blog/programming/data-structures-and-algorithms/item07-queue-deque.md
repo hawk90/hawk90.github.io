@@ -23,13 +23,7 @@ draft: false
 
 ## 한눈에 보는 구조
 
-```
-       front          rear
-        ↓              ↓
-       [A] [B] [C] [D]
-       ▲              ▲
-       dequeue        enqueue
-```
+<img src="/images/blog/dsa/diagrams/item07-queue-fifo.svg" alt="FIFO 큐 — front/rear 포인터, dequeue/enqueue 방향" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 연산:
 - `enqueue(x)` — rear에 추가 — O(1)

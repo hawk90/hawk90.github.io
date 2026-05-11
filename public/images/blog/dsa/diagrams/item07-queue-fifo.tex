@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cell/.style={cls, draw=absbord, fill=absfill, minimum height=9mm, minimum width=10mm, inner sep=0pt},
+  lab/.style={font=\footnotesize\sffamily}
+]
+% cells
+\node[cell] (a) at (0,   0) {A};
+\node[cell] (b) at (1.1, 0) {B};
+\node[cell] (c) at (2.2, 0) {C};
+\node[cell] (d) at (3.3, 0) {D};
+
+% front / rear pointers (top)
+\node[lab] (fl) at (0,   1.4) {front};
+\node[lab] (rl) at (3.3, 1.4) {rear};
+\draw[arr] (fl) -- (a.north);
+\draw[arr] (rl) -- (d.north);
+
+% dequeue / enqueue actions (bottom)
+\node[lab] (dq) at (0,  -1.4) {dequeue};
+\node[lab] (eq) at (3.3,-1.4) {enqueue};
+\draw[arr] (a.south) -- (dq);
+\draw[arr] (eq) -- (d.south);
+
+\end{tikzpicture}
+\end{document}

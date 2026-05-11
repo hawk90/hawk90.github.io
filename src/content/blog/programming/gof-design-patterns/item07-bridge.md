@@ -21,24 +21,11 @@ CircleVector, CircleRaster, RectangleVector, RectangleRaster, ...
 
 도형 N개 × 백엔드 M개 = **N×M 클래스**. 추가될 때마다 폭발.
 
-Bridge로 분리하면:
-
-<img src="/images/blog/gof/diagrams/item07-bridge.svg" alt="Bridge 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
-
-→ **N + M**.
+Bridge로 분리하면 **N + M**.
 
 ## 한눈에 보는 구조
 
-```
-   Abstraction        Implementor
-   ─ impl ◇──────►   ─ opImpl()*
-   ─ operation()           △
-        △                  │
-        │            ┌─────┴─────┐
-        │       ConcreteImplA  ConcreteImplB
-   ┌────┴────┐
-RefinedA  RefinedB
-```
+<img src="/images/blog/gof/diagrams/item07-bridge.svg" alt="Bridge 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 - **Abstraction**: 클라이언트가 보는 인터페이스
 - **Implementor**: 실제 동작의 인터페이스 (Abstraction과 일치할 필요 X)
