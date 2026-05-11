@@ -5,7 +5,7 @@ description: "그래프의 분리된 영역 찾기 + 최소 비용 신장 트리
 tags: [Data Structure, Algorithm, Graph, MST, Kruskal, Prim]
 series: "Data Structures and Algorithms"
 seriesOrder: 16
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

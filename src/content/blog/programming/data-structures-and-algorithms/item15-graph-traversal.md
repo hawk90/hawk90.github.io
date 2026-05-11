@@ -5,7 +5,7 @@ description: "인접 행렬 vs 인접 리스트 선택, DFS와 BFS의 두 순회
 tags: [Data Structure, Algorithm, Graph, DFS, BFS]
 series: "Data Structures and Algorithms"
 seriesOrder: 15
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

@@ -5,7 +5,7 @@ description: "엄격한 균형 BST. 모든 연산 worst-case O(log n)."
 tags: [Data Structure, Algorithm, BST, AVL, Balanced Tree]
 series: "Data Structures and Algorithms"
 seriesOrder: 26
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

@@ -5,7 +5,7 @@ description: "한 노드에 키 多 — 디스크 페이지에 최적화. 모든
 tags: [Data Structure, Algorithm, B-Tree, Database]
 series: "Data Structures and Algorithms"
 seriesOrder: 28
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

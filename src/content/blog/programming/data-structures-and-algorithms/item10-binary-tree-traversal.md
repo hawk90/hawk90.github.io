@@ -5,7 +5,7 @@ description: "이진 트리의 정의와 4가지 순회 (preorder, inorder, post
 tags: [Data Structure, Algorithm, Binary Tree, Traversal]
 series: "Data Structures and Algorithms"
 seriesOrder: 10
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

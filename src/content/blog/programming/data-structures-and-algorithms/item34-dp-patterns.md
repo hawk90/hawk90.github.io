@@ -5,7 +5,7 @@ description: "DP의 5가지 표준 패턴과 의사결정 트리."
 tags: [Data Structure, Algorithm, Dynamic Programming, DP]
 series: "Data Structures and Algorithms"
 seriesOrder: 34
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

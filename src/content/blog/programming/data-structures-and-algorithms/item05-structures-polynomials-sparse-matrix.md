@@ -5,7 +5,7 @@ description: "구조체 활용 — 다항식 표현, 희소 행렬 압축으로 
 tags: [Data Structure, Algorithm, Sparse Matrix, Polynomial]
 series: "Data Structures and Algorithms"
 seriesOrder: 5
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

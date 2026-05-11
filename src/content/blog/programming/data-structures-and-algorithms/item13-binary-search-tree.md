@@ -5,7 +5,7 @@ description: "왼쪽 < 루트 < 오른쪽 — 평균 O(log n) 검색·삽입·�
 tags: [Data Structure, Algorithm, BST, Tree]
 series: "Data Structures and Algorithms"
 seriesOrder: 13
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

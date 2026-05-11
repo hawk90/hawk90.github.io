@@ -5,7 +5,7 @@ description: "39개 항목 전체 관계도와 학습 순서 가이드."
 tags: [Data Structure, Algorithm, Overview]
 series: "Data Structures and Algorithms"
 seriesOrder: 40
-draft: true
+draft: false
 ---
 
 ## 시리즈 구성

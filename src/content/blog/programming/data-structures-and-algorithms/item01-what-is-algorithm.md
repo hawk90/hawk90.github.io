@@ -5,7 +5,7 @@ description: "알고리즘의 정의와 좋은 알고리즘이 갖춰야 할 속
 tags: [Data Structure, Algorithm, Fundamentals]
 series: "Data Structures and Algorithms"
 seriesOrder: 1
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

@@ -5,7 +5,7 @@ description: "노드와 포인터로 연결 — 동적 크기, 중간 삽입/삭
 tags: [Data Structure, Algorithm, Linked List]
 series: "Data Structures and Algorithms"
 seriesOrder: 8
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
