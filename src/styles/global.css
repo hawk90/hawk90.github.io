@@ -1,103 +1,108 @@
 @import "tailwindcss";
 
-/* CSS Custom Properties */
+/* ─── Design Tokens ───────────────────────────────────────── */
 :root {
-  /* Colors - Dark mode (default) - Elegant Purple Theme */
-  --color-bg-primary: #0f0d17;
+  /* Colors — Dark mode (default) — Elegant Purple */
+  --color-bg-primary:   #0f0d17;
   --color-bg-secondary: #18151f;
-  --color-bg-tertiary: #231f2e;
+  --color-bg-tertiary:  #231f2e;
 
-  --color-text-primary: #f0f0f2;
+  --color-text-primary:   #f0f0f2;
   --color-text-secondary: #b8b5c5;
-  --color-text-muted: #7e7a8c;
+  --color-text-muted:     #7e7a8c;
 
-  --color-accent: #a78bfa;
-  --color-accent-hover: #c4b5fd;
-  --color-accent-muted: rgba(167, 139, 250, 0.18);
+  --color-accent:        #a78bfa;
+  --color-accent-hover:  #c4b5fd;
+  --color-accent-muted:  rgba(167, 139, 250, 0.18);
+  --color-accent-faint:  rgba(167, 139, 250, 0.06);
 
-  --color-border: #2d2839;
+  --color-border:       #2d2839;
   --color-border-hover: #403a52;
+  --color-border-faint: rgba(45, 40, 57, 0.5);
 
-  --color-code-bg: #1c1825;
+  --color-code-bg:   #1c1825;
   --color-code-text: #7dd3fc;
 
-  /* Fonts */
+  /* Shadows — subtle, scaled */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.18);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.22);
+
+  /* Type */
   --font-sans: 'Pretendard Variable', 'Pretendard', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Spacing */
-  --content-width: 700px;
+  /* Layout */
+  --content-width:      720px;
   --content-width-wide: 1200px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Light mode - Elegant Purple Theme */
 html.light {
-  --color-bg-primary: #faf9fc;
+  --color-bg-primary:   #faf9fc;
   --color-bg-secondary: #f3f1f7;
-  --color-bg-tertiary: #ebe8f2;
+  --color-bg-tertiary:  #ebe8f2;
 
-  --color-text-primary: #1a1523;
+  --color-text-primary:   #1a1523;
   --color-text-secondary: #5c566b;
-  --color-text-muted: #7d7890;
+  --color-text-muted:     #7d7890;
 
-  --color-accent: #7c3aed;
-  --color-accent-hover: #6d28d9;
-  --color-accent-muted: rgba(124, 58, 237, 0.12);
+  --color-accent:        #7c3aed;
+  --color-accent-hover:  #6d28d9;
+  --color-accent-muted:  rgba(124, 58, 237, 0.12);
+  --color-accent-faint:  rgba(124, 58, 237, 0.04);
 
-  --color-border: #e0dce8;
+  --color-border:       #e0dce8;
   --color-border-hover: #cdc7d9;
+  --color-border-faint: rgba(224, 220, 232, 0.5);
 
-  --color-code-bg: #f0edf5;
+  --color-code-bg:   #f0edf5;
   --color-code-text: #6d28d9;
+
+  --shadow-sm: 0 1px 2px rgba(20, 14, 38, 0.06);
+  --shadow-md: 0 4px 12px rgba(20, 14, 38, 0.08);
+  --shadow-lg: 0 10px 24px rgba(20, 14, 38, 0.10);
 }
 
-/* Base styles */
+/* ─── Base ────────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-y: scroll; /* 항상 스크롤바 표시 - 페이지 간 레이아웃 일관성 */
+  overflow-y: scroll;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+  font-feature-settings: "ss01", "tnum";  /* Pretendard stylistic set + tabular nums */
   line-height: 1.7;
   min-height: 100vh;
 }
 
-/* Selection */
 ::selection {
   background-color: var(--color-accent-muted);
+  color: var(--color-text-primary);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+::-webkit-scrollbar         { width: 8px; height: 8px; }
+::-webkit-scrollbar-track   { background: var(--color-bg-primary); }
+::-webkit-scrollbar-thumb   { background: var(--color-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-hover); }
 
-::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-hover);
-}
-
-/* Focus styles */
+/* Polished focus ring — accent halo, not a hard outline */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+  border-radius: 4px;
 }
+:focus:not(:focus-visible) { outline: none; }
 
-/* Container */
+/* ─── Layout primitives ───────────────────────────────────── */
 .container {
   max-width: var(--content-width-wide);
   margin-inline: auto;
@@ -110,20 +115,25 @@ body {
   padding-inline: 1.5rem;
 }
 
-/* Card */
+/* ─── Card ────────────────────────────────────────────────── */
 .card {
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: 0.75rem;
   padding: 1.5rem;
-  transition: border-color 0.2s ease;
+  transition:
+    border-color 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
 }
 
 .card:hover {
   border-color: var(--color-border-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
-/* Buttons */
+/* ─── Buttons ─────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -131,7 +141,7 @@ body {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.2s var(--ease-out);
   cursor: pointer;
 }
 
@@ -139,21 +149,19 @@ body {
   background-color: var(--color-accent);
   color: white;
 }
-
 .btn-primary:hover {
   background-color: var(--color-accent-hover);
+  box-shadow: var(--shadow-sm);
 }
+.btn-primary:active { transform: translateY(1px); }
 
-.btn-ghost {
-  color: var(--color-text-secondary);
-}
-
+.btn-ghost { color: var(--color-text-secondary); }
 .btn-ghost:hover {
   background-color: var(--color-bg-tertiary);
   color: var(--color-text-primary);
 }
 
-/* Tag */
+/* ─── Tag pill ────────────────────────────────────────────── */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -163,57 +171,87 @@ body {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  transition: all 0.18s var(--ease-out);
 }
-
 .tag:hover {
   background-color: var(--color-accent);
   color: white;
+  transform: translateY(-1px);
 }
 
-/* Link styles */
+/* ─── Inline link (outside .prose) ────────────────────────── */
 .link {
   color: var(--color-accent);
   text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color 0.2s ease;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--color-accent-muted);
+  transition: text-decoration-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
-
 .link:hover {
   color: var(--color-accent-hover);
+  text-decoration-color: currentColor;
 }
 
-/* Typography - Prose */
+/* ─── Prose / article body ───────────────────────────────── */
 .prose {
   color: var(--color-text-primary);
   max-width: var(--content-width);
+  font-size: 1rem;
 }
 
-.prose h1, .prose h2, .prose h3, .prose h4 {
+/* Headings — clear hierarchy with subtle visual cues */
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
   color: var(--color-text-primary);
   font-weight: 700;
   line-height: 1.3;
-  margin-top: 2em;
+  letter-spacing: -0.01em;
+  margin-top: 2.25em;
   margin-bottom: 0.75em;
+  scroll-margin-top: 5rem;       /* anchor offset under sticky header */
 }
 
-.prose h1 { font-size: 2.25rem; }
-.prose h2 { font-size: 1.75rem; }
-.prose h3 { font-size: 1.375rem; }
+.prose h1 { font-size: 2.25rem; letter-spacing: -0.02em; margin-top: 0; }
+.prose h2 {
+  font-size: 1.625rem;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--color-border-faint);
+}
+.prose h3 { font-size: 1.3rem;  }
 .prose h4 { font-size: 1.125rem; }
+.prose h5 { font-size: 1rem; color: var(--color-text-secondary); }
+.prose h6 { font-size: 0.875rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
-.prose p {
-  margin-bottom: 1.5em;
+/* Heading hash anchor — shows on hover */
+.prose :is(h2, h3, h4) {
+  position: relative;
 }
+.prose :is(h2, h3, h4) > a[href^="#"]::before {
+  content: '#';
+  position: absolute;
+  left: -1.1em;
+  color: var(--color-text-muted);
+  opacity: 0;
+  font-weight: 400;
+  transition: opacity 0.15s var(--ease-out);
+}
+.prose :is(h2, h3, h4):hover > a[href^="#"]::before {
+  opacity: 1;
+}
+
+.prose p { margin-bottom: 1.25em; }
 
 .prose a {
   color: var(--color-accent);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--color-accent-muted);
+  transition: text-decoration-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
-
 .prose a:hover {
   color: var(--color-accent-hover);
+  text-decoration-color: currentColor;
 }
 
 .prose strong {
@@ -221,20 +259,25 @@ body {
   color: var(--color-text-primary);
 }
 
+.prose em {
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+/* Inline code */
 .prose code:not(pre code) {
   background-color: var(--color-code-bg);
   color: var(--color-code-text);
-  padding: 0.2em 0.4em;
-  border-radius: 0.25rem;
+  padding: 0.15em 0.4em;
+  border-radius: 0.3em;
+  border: 1px solid color-mix(in oklab, var(--color-border) 60%, transparent);
   font-family: var(--font-mono);
   font-size: 0.875em;
   font-variant-ligatures: none;
   font-feature-settings: "liga" 0, "calt" 0;
 }
 
-/* Disable programming ligatures globally for all monospace —
-   prevents JetBrains Mono / Fira Code from rendering ==, !=, ->, etc.
-   as combined glyphs in code blocks and inline code. */
+/* Universal monospace settings */
 code, pre, kbd, samp, tt {
   font-variant-ligatures: none;
   font-feature-settings: "liga" 0, "calt" 0;
@@ -245,75 +288,111 @@ code, pre, kbd, samp, tt {
   font-feature-settings: "liga" 0, "calt" 0;
 }
 
+/* Code blocks (around expressive-code) — soft outer frame */
+.prose .expressive-code {
+  margin: 1.5em 0;
+  border-radius: 0.625rem;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Keyboard glyph */
+.prose kbd {
+  display: inline-block;
+  padding: 0.15em 0.45em;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-bottom-width: 2px;
+  border-radius: 0.3em;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+/* Blockquote — book-quote feel */
 .prose blockquote {
+  position: relative;
   border-left: 3px solid var(--color-accent);
-  padding-left: 1rem;
+  background: var(--color-accent-faint);
+  padding: 0.875em 1.25em 0.875em 1.5em;
+  margin: 1.5em 0;
+  border-radius: 0 0.5rem 0.5rem 0;
   color: var(--color-text-secondary);
   font-style: italic;
-  margin: 1.5em 0;
 }
+.prose blockquote p { margin-bottom: 0.5em; }
+.prose blockquote p:last-child { margin-bottom: 0; }
 
+/* Lists */
 .prose ul, .prose ol {
   padding-left: 1.5rem;
-  margin-bottom: 1.5em;
+  margin-bottom: 1.25em;
 }
+.prose li { margin-bottom: 0.35em; }
+.prose li::marker { color: var(--color-text-muted); }
+.prose ul li::marker { font-size: 0.9em; }
+.prose li > ul, .prose li > ol { margin-top: 0.35em; margin-bottom: 0.35em; }
 
-.prose li {
-  margin-bottom: 0.5em;
-}
+/* Description list */
+.prose dl { margin: 1.25em 0; }
+.prose dt { font-weight: 600; color: var(--color-text-primary); }
+.prose dd { margin-left: 1rem; margin-bottom: 0.75em; color: var(--color-text-secondary); }
 
+/* Horizontal rule — dot pattern */
 .prose hr {
   border: none;
-  border-top: 1px solid var(--color-border);
-  margin: 3em 0;
+  margin: 3em auto;
+  width: 80px;
+  height: 8px;
+  background-image: radial-gradient(circle, var(--color-text-muted) 1.5px, transparent 1.5px);
+  background-size: 16px 8px;
+  background-repeat: repeat-x;
+  opacity: 0.45;
 }
 
+/* Tables — clean horizontal-rule style */
 .prose table {
   width: 100%;
   border-collapse: collapse;
   margin: 1.5em 0;
+  font-size: 0.95em;
 }
 
-.prose th, .prose td {
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  text-align: left;
+.prose thead {
+  border-bottom: 2px solid var(--color-border);
 }
-
-.prose th {
+.prose tbody tr {
+  border-bottom: 1px solid var(--color-border-faint);
+  transition: background-color 0.15s var(--ease-out);
+}
+.prose tbody tr:hover {
   background-color: var(--color-bg-secondary);
+}
+.prose th {
+  padding: 0.6rem 0.75rem;
   font-weight: 600;
+  text-align: left;
+  color: var(--color-text-primary);
+}
+.prose td {
+  padding: 0.6rem 0.75rem;
+  vertical-align: top;
 }
 
+/* Images in prose */
 .prose img {
   border-radius: 0.5rem;
   margin: 1.5em 0;
+  box-shadow: var(--shadow-sm);
 }
 
-/* Print styles */
+/* Print */
 @media print {
-  body {
-    background: white;
-    color: black;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-
-  .prose {
-    max-width: 100%;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: underline;
-  }
-
-  pre {
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
+  body { background: white; color: black; }
+  .no-print { display: none !important; }
+  .prose { max-width: 100%; }
+  a { color: inherit; text-decoration: underline; }
+  pre { white-space: pre-wrap; word-break: break-word; }
 }
 
 /* Scroll progress bar */
@@ -323,12 +402,12 @@ code, pre, kbd, samp, tt {
   left: 0;
   width: 0%;
   height: 3px;
-  background: var(--color-accent);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
   z-index: 9999;
-  transition: width 0.1s ease;
+  transition: width 0.1s linear;
 }
 
-/* Line clamp utilities */
+/* Line clamp */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -336,7 +415,17 @@ code, pre, kbd, samp, tt {
   overflow: hidden;
 }
 
-/* Code block line numbers toggle */
+/* Expressive Code line numbers toggle */
 html[data-show-line-numbers="false"] .expressive-code .ec-line .gutter {
   display: none;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
