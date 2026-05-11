@@ -57,10 +57,9 @@ const { title, series, seriesOrder, seriesTotal } = Astro.props;
         </div>
       )}
     </div>
-    <!-- thin scroll-progress sliver -->
-    <div class="h-[2px] bg-[var(--color-bg-tertiary)]">
-      <div id="sticky-title-progress" class="h-full bg-[var(--color-accent)] transition-[width] duration-100 ease-linear" style="width: 0%"></div>
-    </div>
+    {/* The global .scroll-progress at the very top of the viewport
+        already shows reading progress, so no sliver here — avoids
+        the double-bar look once scrolled to 100%. */}
   </div>
 </div>
 
@@ -71,12 +70,9 @@ const { title, series, seriesOrder, seriesTotal } = Astro.props;
     stickyCleanup?.();
 
     const bar = document.getElementById('sticky-title');
-    const progress = document.getElementById('sticky-title-progress');
     if (!bar) return;
 
-    const article = document.querySelector<HTMLElement>('article');
     const articleHeader = document.querySelector<HTMLElement>('article header');
-    if (!article) return;
 
     let ticking = false;
     function update() {
@@ -92,19 +88,6 @@ const { title, series, seriesOrder, seriesTotal } = Astro.props;
       const visible = triggerY < 0;
       bar!.style.opacity = visible ? '1' : '0';
       bar!.setAttribute('aria-hidden', String(!visible));
-
-      // Read progress along the article body
-      if (progress) {
-        const ar = article!.getBoundingClientRect();
-        const total = ar.height - window.innerHeight;
-        if (total <= 0) {
-          progress.style.width = '100%';
-        } else {
-          const scrolled = -ar.top;
-          const pct = Math.max(0, Math.min(100, (scrolled / total) * 100));
-          progress.style.width = pct.toFixed(2) + '%';
-        }
-      }
     }
     function onScroll() {
       if (ticking) return;
