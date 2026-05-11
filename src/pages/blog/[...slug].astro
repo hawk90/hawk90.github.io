@@ -89,9 +89,23 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
               ))}
             </div>
 
-            {SHARE_CONFIG.enabled && (
-              <ShareButtons title={post.data.title} url={postUrl} />
-            )}
+            <div class="flex items-center justify-between flex-wrap gap-4 mt-6">
+              {SHARE_CONFIG.enabled ? (
+                <ShareButtons title={post.data.title} url={postUrl} />
+              ) : <div></div>}
+              <button
+                type="button"
+                id="reading-mode-toggle"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] border border-[var(--color-border)] rounded-md hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+                aria-pressed="false"
+                aria-label="Toggle distraction-free reading mode"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                <span data-reading-label>Reading mode</span>
+              </button>
+            </div>
           </header>
 
           <!-- Mobile TOC Toggle -->
@@ -223,4 +237,40 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
 
   initPostNav();
   document.addEventListener('astro:page-load', initPostNav);
+</script>
+
+<script>
+  // Reading mode toggle — distraction-free article view, persisted to localStorage.
+  let readingCleanup: (() => void) | null = null;
+
+  function initReadingMode() {
+    readingCleanup?.();
+    const btn = document.getElementById('reading-mode-toggle');
+    if (!btn) return;
+
+    const label = btn.querySelector('[data-reading-label]');
+    const KEY = 'reading-mode';
+
+    function apply(on: boolean) {
+      document.body.classList.toggle('reading-mode', on);
+      btn!.setAttribute('aria-pressed', String(on));
+      if (label) label.textContent = on ? 'Exit reading' : 'Reading mode';
+    }
+
+    let on = false;
+    try { on = localStorage.getItem(KEY) === '1'; } catch {}
+    apply(on);
+
+    function toggle() {
+      on = !on;
+      try { localStorage.setItem(KEY, on ? '1' : '0'); } catch {}
+      apply(on);
+    }
+
+    btn.addEventListener('click', toggle);
+    readingCleanup = () => btn.removeEventListener('click', toggle);
+  }
+
+  initReadingMode();
+  document.addEventListener('astro:page-load', initReadingMode);
 </script>

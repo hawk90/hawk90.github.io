@@ -4,16 +4,42 @@ import { t } from '../consts/ui-strings';
 ---
 
 <BaseLayout title={`404 - ${t('page_not_found')}`} description={t('page_not_found_description')} noIndex={true}>
-  <section class="py-24 lg:py-32">
+  <section class="py-24 lg:py-32 relative overflow-hidden">
+    <!-- Decorative background grid -->
+    <div class="absolute inset-0 -z-10 [mask-image:radial-gradient(closest-side,white,transparent)] pointer-events-none" aria-hidden="true">
+      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid-404" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M40 0L0 0 0 40" fill="none" stroke="currentColor" stroke-width="0.5" class="text-[var(--color-border)]" opacity="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid-404)" />
+      </svg>
+    </div>
+
     <div class="container text-center">
       <div class="max-w-md mx-auto">
-        <div class="text-8xl font-bold text-[var(--color-accent)] mb-4">404</div>
-        <h1 class="text-2xl font-bold mb-4">{t('page_not_found')}</h1>
-        <p class="text-[var(--color-text-secondary)] mb-8">
+        <!-- 404 glyph with accent gradient -->
+        <div class="relative mb-6">
+          <div
+            class="text-[8rem] md:text-[10rem] font-black leading-none bg-clip-text text-transparent"
+            style="background-image: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);"
+          >
+            404
+          </div>
+          <div class="absolute inset-0 blur-3xl opacity-20" aria-hidden="true" style="background: var(--color-accent); border-radius: 50%; transform: scale(0.6);"></div>
+        </div>
+
+        <h1 class="text-2xl md:text-3xl font-bold mb-3">{t('page_not_found')}</h1>
+        <p class="text-[var(--color-text-secondary)] mb-8 leading-relaxed">
           {t('page_not_found_description')}
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
           <a href="/" class="btn btn-primary">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
             {t('back_to_home')}
           </a>
           <a href="/blog" class="btn btn-ghost border border-[var(--color-border)]">
@@ -22,12 +48,13 @@ import { t } from '../consts/ui-strings';
           <button
             type="button"
             data-search-trigger
-            class="btn btn-ghost border border-[var(--color-border)] gap-2"
+            class="btn btn-ghost border border-[var(--color-border)] gap-1.5"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             {t('search')}
+            <kbd class="ml-1 text-[10px] px-1 py-0 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] hidden sm:inline">/</kbd>
           </button>
         </div>
       </div>
