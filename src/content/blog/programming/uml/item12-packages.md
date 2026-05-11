@@ -78,15 +78,7 @@ Domain이 가운데, 양쪽에서 어댑터가 들어옴.
 
 ### 3. Onion / Clean
 
-```
-[Domain] (최내곽)
-  ↑
-[Application]
-  ↑
-[Interfaces]
-  ↑
-[Infrastructure]
-```
+<img src="/images/blog/uml/diagrams/item12-onion-layers.svg" alt="레이어드 아키텍처 — Domain(최내곽) 향한 의존" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 내곽 → 외곽 방향으로 의존 금지. UML 패키지 다이어그램으로 이 규칙을 시각화합니다.
 

@@ -45,13 +45,7 @@ draft: false
 
 ## Decision — 분기
 
-```
-       (재고 있나?)
-       /       \
-   [yes]      [no]
-     ↓          ↓
-  결제      backorder 통보
-```
+<img src="/images/blog/uml/diagrams/item19-decision-branch.svg" alt="분기 다이아몬드 — [yes] 결제, [no] backorder" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 가드(`[yes]`, `[no]`)는 **상호 배타적**이어야 합니다 — 정확히 한 가지가 참.
 

@@ -28,16 +28,7 @@ Producer와 Consumer는 **각자 자기 스레드** (두 줄 테두리). 둘이 
 
 UML의 액티브 클래스는 박스 테두리가 **두 줄**입니다.
 
-```
-+================+
-|  <<active>>    |
-|   Scheduler    |
-+================+
-|   - thread     |
-+================+
-|   + run()      |
-+================+
-```
+<img src="/images/blog/uml/diagrams/item22-active-class.svg" alt="<<active>> Scheduler 클래스 — 이중 테두리" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 코드 매핑:
 - Java: `Thread`를 상속받거나 자기 ExecutorService 보유

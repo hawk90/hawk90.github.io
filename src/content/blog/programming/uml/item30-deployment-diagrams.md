@@ -105,11 +105,7 @@ Production, Staging, Dev는 보통 다릅니다. **각 환경별 한 장씩**.
 
 ### Microservices
 
-```
-[API Gateway] → [Order] → [DB1]
-              → [Inventory] → [DB2]
-              → [Payment] → [DB3]
-```
+<img src="/images/blog/uml/diagrams/item30-api-gateway-tree.svg" alt="API Gateway → 3 서비스 → 각자의 DB" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ### Serverless
 
