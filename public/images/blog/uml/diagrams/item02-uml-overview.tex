@@ -7,25 +7,26 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  level 1/.style={sibling distance=46mm, level distance=14mm},
-  level 2/.style={sibling distance=22mm, level distance=14mm}
+  level 1/.style={sibling distance=84mm, level distance=14mm},
+  level 2/.style={sibling distance=28mm, level distance=14mm},
+  leaf/.style={font=\scriptsize, minimum width=24mm}
 ]
 
 \node[hi] (uml) {UML}
   child { node[abs] (bb) {Building Blocks}
-    child { node[con] (th) {Things} }
-    child { node[con] (re) {Relationships} }
-    child { node[con] (di) {Diagrams} }
+    child { node[con, leaf] (th)  {Things} }
+    child { node[con, leaf] (re)  {Relationships} }
+    child { node[con, leaf] (di)  {Diagrams} }
   }
   child { node[abs] (ru) {Rules}
-    child { node[imp] (ru1) {Names / Scope} }
-    child { node[imp] (ru2) {Visibility} }
-    child { node[imp] (ru3) {Integrity / Exec} }
+    child { node[imp, leaf] (ru1) {Names / Scope} }
+    child { node[imp, leaf] (ru2) {Visibility} }
+    child { node[imp, leaf] (ru3) {Integrity / Exec} }
   }
   child { node[abs] (cm) {Common Mechanisms}
-    child { node[cli] (cm1) {Specifications} }
-    child { node[cli] (cm2) {Adornments} }
-    child { node[cli] (cm3) {Divisions / Ext.} }
+    child { node[cli, leaf] (cm1) {Specifications} }
+    child { node[cli, leaf] (cm2) {Adornments} }
+    child { node[cli, leaf] (cm3) {Divisions / Ext.} }
   };
 
 \end{tikzpicture}

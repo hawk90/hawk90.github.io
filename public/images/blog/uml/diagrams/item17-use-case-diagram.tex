@@ -39,7 +39,7 @@
 \node[draw=nodebord, fill=nodefill, ellipse, minimum width=26mm, minimum height=9mm] (uc1) at (4.5,-2) {Browse Books};
 \node[draw=nodebord, fill=nodefill, ellipse, minimum width=26mm, minimum height=9mm] (uc2) at (4.5,-4) {Place Order};
 \node[draw=nodebord, fill=nodefill, ellipse, minimum width=26mm, minimum height=9mm] (uc3) at (4.5,-6) {Track Shipment};
-\node[draw=nodebord, fill=nodefill, ellipse, minimum width=22mm, minimum height=8mm, font=\scriptsize] (uc4) at (4.5,-7.6) {Authenticate};
+\node[draw=nodebord, fill=nodefill, ellipse, minimum width=22mm, minimum height=8mm, font=\scriptsize] (uc4) at (4.5,-7.8) {Authenticate};
 
 % Customer associations
 \draw[draw=edgec, line width=0.5pt] (0.4,-2.7) -- (uc1.west);
@@ -49,9 +49,11 @@
 % Payment association
 \draw[draw=edgec, line width=0.5pt] (8.6,-4.7) -- (uc2.east);
 
-% Include
+% Include — route to the right of Track Shipment so the label
+% doesn't land on top of it
 \draw[-{Stealth[length=2mm]}, dashed, draw=edgec, line width=0.4pt]
-  (uc2.south) -- node[right, font=\scriptsize]{$<<$include$>>$} (uc4.north);
+  (uc2.south) .. controls (7.0, -5.0) and (7.0, -7.0) ..
+  node[right, font=\scriptsize, pos=0.5]{$<<$include$>>$} (uc4.east);
 
 \end{tikzpicture}
 \end{document}
