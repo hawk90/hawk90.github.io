@@ -48,14 +48,10 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Object.entries(skills).map(([category, items]) => (
             <div>
-              <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
+              <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
                 {category}
               </h3>
-              <div class="flex flex-wrap gap-2">
-                {items.map((skill) => (
-                  <span class="tag">{skill}</span>
-                ))}
-              </div>
+              <p class="text-sm text-[var(--color-text-secondary)]">{items.join(', ')}</p>
             </div>
           ))}
         </div>
