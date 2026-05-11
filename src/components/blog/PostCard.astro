@@ -28,7 +28,7 @@ const thumbnail = post.data.image || getDefaultThumbnail();
 ---
 
 <article class="card group overflow-hidden">
-  <a href={`/blog/${post.slug}`} class="block">
+  <a href={`/blog/${post.id}`} class="block">
     {showImage && (
       <div class="relative aspect-[16/9] -mx-5 -mt-5 mb-4 overflow-hidden bg-[var(--color-bg-tertiary)]">
         <img

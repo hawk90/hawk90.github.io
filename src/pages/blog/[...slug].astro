@@ -1,5 +1,5 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagBadge from '../../components/blog/TagBadge.astro';
 import TableOfContents from '../../components/blog/TableOfContents.astro';
@@ -16,7 +16,7 @@ import { t } from '../../consts/ui-strings';
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
   return posts.map((post) => ({
-    params: { slug: post.slug },
+    params: { slug: post.id },
     props: { post },
   }));
 }
@@ -24,7 +24,7 @@ export async function getStaticPaths() {
 type Props = { post: CollectionEntry<'blog'> };
 
 const { post } = Astro.props;
-const { Content, headings } = await post.render();
+const { Content, headings } = await render(post);
 
 let seriesPosts: CollectionEntry<'blog'>[] = [];
 if (post.data.series) {
@@ -45,13 +45,13 @@ if (RELATED_POSTS_CONFIG.enabled) {
 }
 
 const formattedDate = formatDate(post.data.date);
-const postUrl = new URL(`/blog/${post.slug}`, SITE_CONFIG.url).toString();
+const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
 ---
 
 <BaseLayout
   title={post.data.title}
   description={post.data.description}
-  image={`/og/${post.slug}.png`}
+  image={`/og/${post.id}.png`}
   type="article"
   showProgress={true}
   publishedTime={post.data.date}
@@ -136,7 +136,7 @@ const postUrl = new URL(`/blog/${post.slug}`, SITE_CONFIG.url).toString();
           <!-- Series Navigation (Bottom) -->
           {seriesPosts.length > 1 && (
             <div class="container-narrow mt-12">
-              <SeriesNav posts={seriesPosts} currentSlug={post.slug} showAll />
+              <SeriesNav posts={seriesPosts} currentSlug={post.id} showAll />
             </div>
           )}
 
@@ -160,7 +160,7 @@ const postUrl = new URL(`/blog/${post.slug}`, SITE_CONFIG.url).toString();
               <SeriesSidebar
                 seriesName={post.data.series!}
                 posts={seriesPosts}
-                currentSlug={post.slug}
+                currentSlug={post.id}
               />
             )}
             <TableOfContents headings={headings} />

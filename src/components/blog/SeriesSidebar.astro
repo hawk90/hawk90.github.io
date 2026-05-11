@@ -8,12 +8,12 @@ interface Props {
 }
 
 const { seriesName, posts, currentSlug } = Astro.props;
-const currentIndex = posts.findIndex((p) => p.slug === currentSlug);
+const currentIndex = posts.findIndex((p) => p.id === currentSlug);
 
 type SeriesPost = CollectionEntry<'blog'>;
 const chapterMap = new Map<string, { posts: SeriesPost[]; baseIndex: number }>();
 posts.forEach((post, idx) => {
-  const parts = post.slug.split('/');
+  const parts = post.id.split('/');
   const chapter = parts.length >= 4 ? parts[2] : '_flat';
   let entry = chapterMap.get(chapter);
   if (!entry) {
@@ -80,11 +80,11 @@ function formatChapter(key: string): string {
         <ol class="space-y-1">
           {chapter.posts.map((post, i) => {
             const badge = hasChapters ? i + 1 : chapter.baseIndex + i + 1;
-            const isCurrent = post.slug === currentSlug;
+            const isCurrent = post.id === currentSlug;
             return (
               <li>
                 <a
-                  href={`/blog/${post.slug}`}
+                  href={`/blog/${post.id}`}
                   class:list={[
                     'flex items-start gap-2 py-1.5 text-sm transition-colors rounded-md px-2 -mx-2',
                     isCurrent

@@ -1,8 +1,14 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 import { SITE_CONFIG } from '../consts/config';
 
 const blogCollection = defineCollection({
-  type: 'content',
+  // Modern content layer (Astro 5+, required in Astro 6).
+  // Replaces the deprecated `type: 'content'` option.
+  loader: glob({
+    pattern: '**/*.{md,mdx}',
+    base: './src/content/blog',
+  }),
   schema: z.object({
     // Required
     title: z.string(),

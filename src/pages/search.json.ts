@@ -7,7 +7,7 @@ export async function GET(_context: APIContext) {
   const searchIndex = posts.map((post) => ({
     title: post.data.title,
     description: post.data.description || '',
-    slug: post.slug,
+    slug: post.id,
     tags: post.data.tags,
     date: post.data.date.toISOString(),
     series: post.data.series || null,

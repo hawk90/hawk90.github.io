@@ -24,7 +24,7 @@ type Post = (typeof categoryPosts)[number];
 const seriesMap = new Map<string, Map<string, Post[]>>();
 for (const post of categoryPosts) {
   const series = post.data.series ?? 'Other';
-  const parts = post.slug.split('/');
+  const parts = post.id.split('/');
   // Slug is "category/series-slug/[chapter/]section". Depth ≥ 4 means a chapter exists.
   const chapter = parts.length >= 4 ? parts[2] : '_flat';
   if (!seriesMap.has(series)) seriesMap.set(series, new Map());

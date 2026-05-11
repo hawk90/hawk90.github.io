@@ -56,7 +56,7 @@ function isActiveCategory(categoryId: string): boolean {
       <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Browse</h3>
       <nav class="space-y-1">
         {CATEGORIES.map((cat) => {
-          const catPosts = allPosts.filter((p) => p.slug.startsWith(cat.id + '/'));
+          const catPosts = allPosts.filter((p) => p.id.startsWith(cat.id + '/'));
           const catSeries = [...new Set(catPosts.filter((p) => p.data.series).map((p) => p.data.series))];
           const count = catPosts.length;
           const isCatActive = isActiveCategory(cat.id);

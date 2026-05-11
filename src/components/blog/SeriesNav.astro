@@ -9,7 +9,7 @@ interface Props {
 
 const { posts, currentSlug, showAll = false } = Astro.props;
 
-const currentIndex = posts.findIndex((p) => p.slug === currentSlug);
+const currentIndex = posts.findIndex((p) => p.id === currentSlug);
 const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
 const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
 ---
@@ -20,7 +20,7 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
     <div class="flex items-center justify-between gap-4">
       {prevPost ? (
         <a
-          href={`/blog/${prevPost.slug}`}
+          href={`/blog/${prevPost.id}`}
           class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
           data-prev-post
         >
@@ -37,7 +37,7 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
 
       {nextPost ? (
         <a
-          href={`/blog/${nextPost.slug}`}
+          href={`/blog/${nextPost.id}`}
           class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
           data-next-post
         >
@@ -58,10 +58,10 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
         {posts.map((post, index) => (
           <li>
             <a
-              href={`/blog/${post.slug}`}
+              href={`/blog/${post.id}`}
               class:list={[
                 'flex items-start gap-3 py-2 text-sm transition-colors',
-                post.slug === currentSlug
+                post.id === currentSlug
                   ? 'text-[var(--color-accent)] font-medium'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
               ]}

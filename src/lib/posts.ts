@@ -47,7 +47,7 @@ export function getAllSeries(posts: BlogPost[]): string[] {
  * 카테고리별 포스트 필터링
  */
 export function filterByCategory(posts: BlogPost[], categoryId: string): BlogPost[] {
-  return posts.filter((p) => p.slug.startsWith(categoryId + '/'));
+  return posts.filter((p) => p.id.startsWith(categoryId + '/'));
 }
 
 /**
@@ -96,7 +96,7 @@ export function getRelatedPosts(
   allPosts: BlogPost[],
   maxPosts: number = 3,
 ): BlogPost[] {
-  const candidates = allPosts.filter((p) => p.slug !== currentPost.slug);
+  const candidates = allPosts.filter((p) => p.id !== currentPost.id);
 
   const scored = candidates.map((post) => {
     let score = 0;

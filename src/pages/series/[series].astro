@@ -31,7 +31,7 @@ const allTags = getAllTags(posts);
 
 const chapterMap = new Map<string, BlogPost[]>();
 for (const post of posts) {
-  const parts = post.slug.split('/');
+  const parts = post.id.split('/');
   // category/series-slug/[chapter/]section — depth ≥ 4 means a chapter level exists
   const chapter = parts.length >= 4 ? parts[2] : '_flat';
   if (!chapterMap.has(chapter)) chapterMap.set(chapter, []);
@@ -84,7 +84,7 @@ function formatChapter(key: string): string {
                 <div class:list={['space-y-2.5 mt-3', hasChapters && chapter.label ? 'sm:pl-4 border-l border-[var(--color-border)]/60 ml-1.5' : '']}>
                   {chapter.posts.map((post, index) => (
                     <a
-                      href={`/blog/${post.slug}`}
+                      href={`/blog/${post.id}`}
                       class="series-item block p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-accent)] hover:shadow-md transition-all duration-200 group"
                     >
                       <div class="flex items-start gap-4">
