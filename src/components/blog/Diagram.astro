@@ -1,0 +1,43 @@
+---
+// Diagram — render a pre-compiled TikZ SVG.
+//
+// Usage in MDX:
+//   import Diagram from '@components/blog/Diagram.astro';
+//   <Diagram src="dsa/diagrams/item20-quicksort-partition" alt="Quicksort partition" />
+//
+// `src` is the path under /images/blog/, with or without .svg extension.
+// Optional `caption` adds a <figcaption>; without it renders a bare <img>.
+
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  width?: string;
+}
+
+const { src, alt, caption, width } = Astro.props;
+const url = `/images/blog/${src.replace(/\.svg$/, '')}.svg`;
+const style = `max-width: ${width ?? '100%'}; background: white; padding: 8px; border-radius: 6px;`;
+---
+
+{caption ? (
+  <figure class="diagram">
+    <img src={url} alt={alt} style={style} loading="lazy" />
+    <figcaption>{caption}</figcaption>
+  </figure>
+) : (
+  <img src={url} alt={alt} style={style} loading="lazy" />
+)}
+
+<style>
+  .diagram {
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+  .diagram figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #666);
+    font-style: italic;
+  }
+</style>

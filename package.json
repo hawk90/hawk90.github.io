@@ -26,7 +26,10 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
-    "sync:book-notes": "node scripts/sync-book-notes.mjs"
+    "sync:book-notes": "node scripts/sync-book-notes.mjs",
+    "diagrams": "bash scripts/build-diagrams.sh",
+    "diagrams:force": "bash scripts/build-diagrams.sh --force",
+    "diagrams:watch": "bash scripts/watch-diagrams.sh"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
