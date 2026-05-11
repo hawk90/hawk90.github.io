@@ -75,6 +75,12 @@ export function applyCodeTheme(): void {
   const isLight = isLightMode();
   const theme = getStoredCodeTheme(isLight ? 'light' : 'dark');
   document.documentElement.setAttribute('data-code-theme', theme);
+  // Expressive-code applies theme rules via `.expressive-code[data-code-theme=X]`
+  // (same element, not ancestor). Mirror the html attribute onto every code
+  // block so the per-theme CSS actually matches.
+  document
+    .querySelectorAll<HTMLElement>('.expressive-code')
+    .forEach((el) => el.setAttribute('data-code-theme', theme));
 }
 
 export function toggleTheme(): boolean {

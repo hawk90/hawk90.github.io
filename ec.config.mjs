@@ -13,17 +13,13 @@ export default defineEcConfig({
     'nord',
     'tokyo-night',
   ],
-  themeCssSelector: (theme) => {
-    const lightThemes = ['github-light', 'catppuccin-latte'];
-    const isLight = lightThemes.includes(theme.name);
-
-    if (isLight) {
-      // Light themes: only apply in light mode
-      return `html.light[data-code-theme="${theme.name}"]`;
-    }
-    // Dark themes: only apply in dark mode (not .light)
-    return `html:not(.light)[data-code-theme="${theme.name}"]`;
-  },
+  // Switch theme purely by the data-code-theme attribute on <html>.
+  // The inline pre-paint script in BaseLayout writes the correct value
+  // (a dark theme in dark mode, a light theme in light mode), so we
+  // don't need to encode mode into the selector — and avoiding :not()
+  // sidesteps an expressive-code selector-merge quirk that produced
+  // `.expressive-codehtml:not(...)` (mashed together, never matched).
+  themeCssSelector: (theme) => `[data-code-theme="${theme.name}"]`,
   emitExternalStylesheet: false,
   styleOverrides: {
     borderRadius: '0.5rem',

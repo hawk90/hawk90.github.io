@@ -603,15 +603,45 @@ html[data-show-line-numbers="false"] .expressive-code .ec-line .gutter {
 .prose [data-footnote-ref]:hover,
 .prose .footnote-backref:hover { color: var(--color-accent-hover); }
 
-/* ─── Reading mode (hide chrome) ────────────────────────── */
+/* ─── Reading mode (true zen / distraction-free) ────────── */
 /* Class is set on <html> by an inline pre-paint script so there's no
    FOUC when the user has reading-mode persisted. */
-:where(html.reading-mode) .no-print,
-:where(html.reading-mode) aside.sidebar,
-:where(html.reading-mode) .hide-in-reading {
+html.reading-mode #site-header,
+html.reading-mode > body > footer,
+html.reading-mode article aside,
+html.reading-mode .no-print,
+html.reading-mode .hide-in-reading,
+html.reading-mode #back-to-top,
+html.reading-mode #sticky-title,
+html.reading-mode .scroll-progress,
+html.reading-mode #mobile-toc-toggle,
+html.reading-mode #mobile-toc,
+html.reading-mode .author-bio,
+html.reading-mode article header > .flex.flex-wrap.gap-2,        /* tag row */
+html.reading-mode article header > .flex.items-center.justify-between { /* share+toggle row */
   display: none !important;
 }
+
+/* Keep the reading-mode toggle reachable as a floating exit */
+html.reading-mode #reading-mode-toggle {
+  display: inline-flex !important;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 60;
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+/* Narrow + center; bump typography a notch */
 html.reading-mode .container { max-width: var(--content-width); }
+html.reading-mode article { padding-top: 3rem; }
+html.reading-mode .prose {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+html.reading-mode .prose h2 { margin-top: 2.5em; }
 
 /* ─── Image lightbox ─────────────────────────────────────── */
 .lightbox-overlay {
