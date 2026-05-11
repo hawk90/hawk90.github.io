@@ -1,0 +1,16 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      inner sep=0pt, minimum width=44mm] {
+  \begin{tabular}{l}
+    \underline{\ : Customer} \\
+    \hline
+    name = "..." \\
+  \end{tabular}
+};
+\end{tikzpicture}
+\end{document}

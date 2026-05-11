@@ -1,0 +1,21 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cb/.style={cls, minimum width=42mm}
+]
+\node[cb] (gw) at (-4, 0) {API Gateway};
+\node[cb] (a)  at ( 2.4,  2.4) {Order Service};
+\node[cb] (b)  at ( 2.4,  0.8) {Inventory Service};
+\node[cb] (c)  at ( 2.4, -0.8) {Payment Service};
+\node[cb] (d)  at ( 2.4, -2.4) {User Service};
+\draw[arr] (gw.east) -- (a.west);
+\draw[arr] (gw.east) -- (b.west);
+\draw[arr] (gw.east) -- (c.west);
+\draw[arr] (gw.east) -- (d.west);
+\end{tikzpicture}
+\end{document}

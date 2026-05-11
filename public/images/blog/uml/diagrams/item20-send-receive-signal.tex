@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Send: convex pentagon (flag pointing right)
+\draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+  (0,0) -- (2.4,0) -- (3.0,0.45) -- (2.4,0.9) -- (0,0.9) -- cycle;
+\node[font=\sffamily, anchor=center] at (1.4, 0.45) {Send};
+\draw[arr] (3.05, 0.45) -- ++(0.9, 0);
+
+% Receive: concave pentagon (notch on left)
+\draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+  (6.0,0) -- (8.4,0) -- (8.4,0.9) -- (6.0,0.9) -- (6.6,0.45) -- cycle;
+\node[font=\sffamily, anchor=center] at (7.3, 0.45) {Receive};
+\draw[arr] (5.5, 0.45) -- ++(0.9, 0);
+
+\end{tikzpicture}
+\end{document}

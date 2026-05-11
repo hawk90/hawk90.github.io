@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  act/.style={cls, minimum width=22mm, minimum height=8mm, font=\footnotesize}
+]
+\draw[dashed, draw=nodebord, line width=0.5pt, rounded corners=4pt]
+  (0,0) rectangle (6.0, 1.8);
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west] at (0.1, 1.75) {for each item};
+
+\node[act] (a) at (1.6, 0.8) {check};
+\node[act] (b) at (4.4, 0.8) {process};
+\draw[arr] (a.east) -- (b.west);
+\end{tikzpicture}
+\end{document}

@@ -48,13 +48,7 @@ UML의 액티브 클래스는 박스 테두리가 **두 줄**입니다.
 
 ### 1. 시퀀스 다이어그램의 par fragment
 
-```
-┌─ par ──────────────────────────┐
-│ OrderSvc → Email: notify(...)   │
-│ ────────────                    │
-│ OrderSvc → Analytics: log(...)  │
-└─────────────────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item22-frame-par.svg" alt="par 프레임 — Email/Analytics 병렬 송신" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 두 메시지가 **동시에** 시작됨.
 
@@ -64,17 +58,7 @@ UML의 액티브 클래스는 박스 테두리가 **두 줄**입니다.
 
 ### 3. 상태 머신의 직교 영역 (Orthogonal Regions)
 
-```
-┌── Online ──────────────────┐
-│ ┌── Auth ─────┐            │
-│ │ Anon | LoggedIn          │
-│ └─────────────┘            │
-│ ───────────────────────── │
-│ ┌── Connection ─┐          │
-│ │ Idle | Active │          │
-│ └────────────────┘          │
-└────────────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item22-orthogonal-states.svg" alt="직교 영역 — Auth와 Connection이 동시에 진행" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 한 객체가 동시에 **여러 직교 상태**를 가질 수 있음 — Statecharts(Harel)의 영향.
 
@@ -84,13 +68,7 @@ UML의 액티브 클래스는 박스 테두리가 **두 줄**입니다.
 
 시퀀스 다이어그램의 `critical` fragment — 임계 구역.
 
-```
-┌─ critical ──────────────┐
-│ Worker → SharedRes: lock │
-│ Worker → SharedRes: use  │
-│ Worker → SharedRes: unlock│
-└──────────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item22-frame-critical.svg" alt="critical 프레임 — 임계 구역" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ### Synchronous vs Asynchronous
 

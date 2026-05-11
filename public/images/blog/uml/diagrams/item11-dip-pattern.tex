@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cb/.style={cls, minimum width=32mm}
+]
+\node[cb] (svc)  at (-5.0, 0) {OrderService};
+\node[cb] (intf) at ( 0.0, 0) {IPayment};
+\node[cb] (impl) at ( 5.0, 0) {Stripe};
+
+\draw[arr] (svc.east) -- (intf.west);
+\draw[arr] (impl.west) -- (intf.east);
+
+\node[font=\scriptsize\itshape, edgesc, anchor=north] at (svc.south)  {상위};
+\node[font=\scriptsize\itshape, edgesc, anchor=north] at (intf.south) {추상};
+\node[font=\scriptsize\itshape, edgesc, anchor=north] at (impl.south) {저수준};
+
+\end{tikzpicture}
+\end{document}

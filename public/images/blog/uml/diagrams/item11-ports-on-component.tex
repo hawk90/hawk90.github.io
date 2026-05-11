@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      minimum width=60mm, minimum height=22mm] (c) {OrderService};
+
+% Provided port on left
+\node[draw=edgec, fill=nodefill, line width=0.4pt, minimum size=3mm, inner sep=0pt] (p1) at (c.west) {};
+\node[circle, draw=edgec, fill=nodefill, line width=0.4pt, minimum size=4mm, inner sep=0pt] at ($ (p1) + (-0.55, 0) $) {};
+\node[font=\scriptsize\itshape, anchor=east] at ($ (p1) + (-0.95, 0) $) {IOrder};
+
+% Required port on right
+\node[draw=edgec, fill=nodefill, line width=0.4pt, minimum size=3mm, inner sep=0pt] (p2) at (c.east) {};
+\draw[edge, line width=0.4pt] ($ (p2) + (0.45, 0.2) $) arc[start angle=90, end angle=-90, radius=2mm];
+\node[font=\scriptsize\itshape, anchor=west] at ($ (p2) + (0.85, 0) $) {IPay};
+
+\end{tikzpicture}
+\end{document}

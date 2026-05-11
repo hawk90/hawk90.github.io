@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cb/.style={cls, minimum width=46mm, minimum height=14mm}
+]
+\node[font=\scriptsize\itshape, anchor=south west] at (-2.4, 4.1) {<<layer>> UI};
+\node[cb] (ui) at (0,  3.4) {Web Frontend};
+
+\node[font=\scriptsize\itshape, anchor=south west] at (-2.4, 1.0) {<<layer>> App};
+\node[cb] (app) at (0, 0.3) {Order Service};
+
+\node[font=\scriptsize\itshape, anchor=south west] at (-2.4,-2.1) {<<layer>> Infra};
+\node[cb] (db)  at (0,-2.8) {Order Repository};
+
+\draw[arr] (ui.south) -- node[right, font=\scriptsize\itshape] {IOrder} (app.north);
+\draw[arr] (app.south) -- node[right, font=\scriptsize\itshape] {IOrderRepo} (db.north);
+\end{tikzpicture}
+\end{document}

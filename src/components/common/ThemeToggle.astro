@@ -1,16 +1,23 @@
 ---
-
+/**
+ * ThemeToggle — single button switching between dark and light mode.
+ *
+ * Both icons (sun + moon) are present in the DOM, with CSS choosing
+ * which one is visible based on the html.light class. The class is
+ * set pre-paint by the inline theme script in BaseLayout, so the
+ * correct icon shows from first paint (no FOUC).
+ */
 ---
 
 <button
   type="button"
-  id="theme-toggle"
-  class="btn btn-ghost p-2"
+  class="btn btn-ghost p-2 theme-toggle-btn"
   aria-label="Toggle theme"
+  data-theme-toggle
 >
   <svg
-    class="w-5 h-5"
-    data-sun-icon
+    class="w-5 h-5 theme-icon-sun"
+    aria-hidden="true"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -23,8 +30,8 @@
     />
   </svg>
   <svg
-    class="w-5 h-5"
-    data-moon-icon
+    class="w-5 h-5 theme-icon-moon"
+    aria-hidden="true"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -38,43 +45,34 @@
   </svg>
 </button>
 
+<style is:global>
+  /* Pre-paint icon visibility — uses html.light class set by the
+     inline theme script in BaseLayout. Both icons exist in DOM; CSS
+     hides the one that doesn't match the current mode. */
+  .theme-toggle-btn .theme-icon-moon { display: none; }
+  html.light .theme-toggle-btn .theme-icon-sun  { display: none; }
+  html.light .theme-toggle-btn .theme-icon-moon { display: block; }
+</style>
+
 <script>
-  import { toggleTheme, isLightMode } from '../../lib/theme';
+  import { toggleTheme } from '../../lib/theme';
 
   let cleanup: (() => void) | null = null;
 
   function initThemeToggle() {
-    // 이전 리스너 정리
     cleanup?.();
 
-    const toggle = document.getElementById('theme-toggle');
-    const sunIcon = document.querySelector('[data-sun-icon]') as HTMLElement;
-    const moonIcon = document.querySelector('[data-moon-icon]') as HTMLElement;
-
-    if (!toggle || !sunIcon || !moonIcon) return;
-
-    function updateIcons() {
-      const isLight = isLightMode();
-      sunIcon.style.display = isLight ? 'none' : 'block';
-      moonIcon.style.display = isLight ? 'block' : 'none';
-    }
+    const toggles = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+    if (toggles.length === 0) return;
 
     function handleClick() {
       toggleTheme();
-      updateIcons();
     }
 
-    function handleExternalModeChange() {
-      updateIcons();
-    }
-
-    toggle.addEventListener('click', handleClick);
-    window.addEventListener('theme-mode-changed', handleExternalModeChange);
-    updateIcons();
+    toggles.forEach((t) => t.addEventListener('click', handleClick));
 
     cleanup = () => {
-      toggle.removeEventListener('click', handleClick);
-      window.removeEventListener('theme-mode-changed', handleExternalModeChange);
+      toggles.forEach((t) => t.removeEventListener('click', handleClick));
     };
   }
 

@@ -49,12 +49,7 @@ WebServer
 
 OS·JVM·container runtime처럼 다른 무언가를 실행할 수 있는 환경.
 
-```
-<<device>> Server
-  ┌─ <<executionEnvironment>> JVM ─┐
-  │   order-svc.jar                 │
-  └────────────────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item26-node-execenv.svg" alt="Server 노드 안의 JVM 실행환경" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 노드 안에 노드를 둘 수 있습니다.
 
@@ -76,11 +71,7 @@ order-svc.jar
 
 ## Manifestation — 컴포넌트와 아티팩트 매핑
 
-```
-<<artifact>>            <<component>>
-order-svc.jar  ──┈┈▷    OrderService
-            (<<manifest>>)
-```
+<img src="/images/blog/uml/diagrams/item26-artifact-manifest.svg" alt="아티팩트 manifest — order-svc.jar ⇨ OrderService" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 "이 jar 파일이 이 컴포넌트의 구현 결과물이다."
 

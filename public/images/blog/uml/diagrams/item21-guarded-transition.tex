@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  st/.style={cls, minimum width=28mm, minimum height=10mm}
+]
+% top transition (success)
+\node[st] (a1) at (-3.5, 1.4) {Available};
+\node[st] (a2) at ( 3.5, 1.4) {Available};
+\draw[arr] (a1.east) -- node[above, font=\scriptsize\itshape, align=center]
+  {withdraw(amt) [balance $\geq$ amt] /\\ debit(amt)} (a2.west);
+
+% bottom transition (rejection)
+\node[st] (b1) at (-3.5, -1.4) {Available};
+\node[st] (b2) at ( 3.5, -1.4) {Available};
+\draw[arr] (b1.east) -- node[above, font=\scriptsize\itshape, align=center]
+  {withdraw(amt) [balance < amt] /\\ reject} (b2.west);
+\end{tikzpicture}
+\end{document}

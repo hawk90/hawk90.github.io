@@ -1,0 +1,14 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\footnotesize, anchor=south] at (0, 1.4) {[Instance]};
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      minimum width=30mm, font=\bfseries] (l) at (0, 0.4) {Logger};
+\node[font=\scriptsize\itshape, edgesc, anchor=west] at (l.east) {\ \ ← Instance 역할};
+\end{tikzpicture}
+\end{document}

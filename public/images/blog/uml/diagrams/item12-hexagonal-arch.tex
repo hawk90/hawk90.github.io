@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cb/.style={cls, minimum width=28mm}
+]
+\node[cb] (drv)  at (-4.5, 0) {Driving\\Adapters};
+\node[cb] (core) at ( 0,   0) {Domain Core\\\footnotesize (인터페이스 정의)};
+\node[cb] (dvn)  at ( 4.5, 0) {Driven\\Adapters};
+
+\draw[arr] (drv.east) -- (core.west);
+\draw[arr] (dvn.west) -- (core.east);
+
+\end{tikzpicture}
+\end{document}

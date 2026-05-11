@@ -84,16 +84,7 @@ when(balance > 1000) → VIP로 승급
 
 ### Send/Receive 표기 (특수 모양)
 
-```
-   ┌─────────┐
-───┤  Send   ───→
-   └─────────┘
-       (외쪽이 평행사변형)
-
-   ←─── ┌─────────┐
-        │ Receive │
-        └─────────┘
-```
+<img src="/images/blog/uml/diagrams/item20-send-receive-signal.svg" alt="Send signal · Receive signal 모양" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 활동 다이어그램에서 시그널 송수신을 시각적으로 강조할 때.
 

@@ -51,28 +51,13 @@ event(args) [guard] / action
 
 예시:
 
-```
-            withdraw(amt) [balance >= amt] / debit(amt)
-[Available] ───────────────────────────────────────→ [Available]
-
-            withdraw(amt) [balance < amt] / reject
-[Available] ───────────────────────────────────────→ [Available]
-```
+<img src="/images/blog/uml/diagrams/item21-guarded-transition.svg" alt="Guard와 effect가 붙은 자가 전이" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## State 내부 동작
 
 상태 안에도 동작을 적을 수 있습니다.
 
-```
-┌─────────────────────────┐
-│ Processing               │
-├─────────────────────────┤
-│ entry / startTimer       │  ← 진입 시
-│ exit  / stopTimer        │  ← 나갈 때
-│ do / process()           │  ← 머무는 동안
-│ tick / count++           │  ← 내부 트랜지션
-└─────────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item21-state-internals.svg" alt="상태 내부 — entry·exit·do·internal 트랜지션" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 - `entry` — 상태 진입 시 한 번
 - `exit` — 상태 탈출 시 한 번

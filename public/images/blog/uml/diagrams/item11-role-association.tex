@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cb/.style={cls, minimum width=24mm}
+]
+\node[cb] (p) at (-3.5, 0) {Person};
+\node[cb] (c) at ( 3.5, 0) {Company};
+
+\draw[edge] (p.east) -- node[above, font=\scriptsize\itshape] {employed\_by} (c.west);
+\node[font=\scriptsize\itshape, edgesc, anchor=north] at ($ (p.east) + (0.4, -0.2) $) {"employee"};
+\node[font=\scriptsize\itshape, edgesc, anchor=north] at ($ (c.west) + (-0.4, -0.2) $) {"employer"};
+
+\end{tikzpicture}
+\end{document}

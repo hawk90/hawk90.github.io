@@ -28,16 +28,7 @@ draft: false
 
 폴더 탭 모양 — 위에 작은 탭, 아래 큰 박스.
 
-```
-┌──┐
-│  └──────────┐
-│ Sales       │
-│             │
-│ + Order     │
-│ + Customer  │
-│ - OrderDAO  │
-└─────────────┘
-```
+<img src="/images/blog/uml/diagrams/item12-package-symbol.svg" alt="UML 패키지 기호 — Sales 패키지 안의 멤버들" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 박스 안에 클래스 이름을 직접 적거나, 박스 안에 또 다른 클래스 박스를 그릴 수 있습니다.
 
@@ -81,12 +72,7 @@ API/구현 분리를 표현하는 핵심 도구.
 
 ### 2. Hexagonal (Ports & Adapters)
 
-```
-[Driving]    [Domain] (인터페이스 정의)
-  Adapters ─→   Core
-                ↑
-              Adapters ←─ [Driven]
-```
+<img src="/images/blog/uml/diagrams/item12-hexagonal-arch.svg" alt="Hexagonal Architecture — Driving · Core · Driven" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 Domain이 가운데, 양쪽에서 어댑터가 들어옴.
 

@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  act/.style={cls, minimum width=22mm, minimum height=9mm, font=\footnotesize}
+]
+% lanes
+\foreach \x/\lab in {0/Customer, 3/System, 6/Bank}{%
+  \draw[draw=nodebord, line width=0.4pt] (\x,0) rectangle ({\x+3},6.0);
+  \node[font=\sffamily\bfseries\footnotesize, anchor=south] at ({\x+1.5}, 5.95) {\lab};
+}
+\draw[draw=nodebord, line width=0.4pt] (0,5.4) -- (9,5.4);
+
+% activities
+\node[act] (o)  at (1.5, 4.6) {주문};
+\node[act] (pr) at (4.5, 3.6) {결제 요청};
+\node[act] (ap) at (7.5, 2.6) {승인};
+\node[act] (co) at (4.5, 1.6) {확정};
+\node[act] (rc) at (1.5, 0.6) {영수증};
+
+\draw[arr] (o.south) -- ++(0,-0.2) -| (pr.north);
+\draw[arr] (pr.east) -- ++(0.2,0) -| (ap.north);
+\draw[arr] (ap.south) -- ++(0,-0.2) -| (co.north);
+\draw[arr] (co.west) -- ++(-0.2,0) -| (rc.north);
+\end{tikzpicture}
+\end{document}

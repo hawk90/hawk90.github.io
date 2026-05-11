@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  act/.style={cls, minimum width=28mm, minimum height=10mm}
+]
+% fork bar
+\draw[line width=2.4pt, text=edgec] (-3, 2.2) -- (3, 2.2);
+\node[font=\scriptsize\itshape, anchor=west, text=edgesc] at (3.1, 2.2) {fork};
+
+% two branches
+\node[act] (a) at (-1.7, 0.9) {이메일 발송};
+\node[act] (b) at ( 1.7, 0.9) {로그 기록};
+\draw[arr] (-1.7, 2.18) -- (a.north);
+\draw[arr] ( 1.7, 2.18) -- (b.north);
+\draw[arr] (a.south) -- (-1.7, -0.45);
+\draw[arr] (b.south) -- ( 1.7, -0.45);
+
+% join bar
+\draw[line width=2.4pt, text=edgec] (-3, -0.5) -- (3, -0.5);
+\node[font=\scriptsize\itshape, anchor=west, text=edgesc] at (3.1, -0.5) {join};
+\end{tikzpicture}
+\end{document}

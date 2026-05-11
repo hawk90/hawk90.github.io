@@ -1,0 +1,15 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  art/.style={cls, minimum width=42mm}
+]
+\node[art] (a) at (-3.5, 0) {\textbf{<<artifact>>}\\order-svc.jar};
+\node[art] (c) at ( 3.5, 0) {\textbf{<<component>>}\\OrderService};
+\draw[arr, dashed] (a.east) -- node[above, font=\scriptsize\itshape] {<<manifest>>} (c.west);
+\end{tikzpicture}
+\end{document}

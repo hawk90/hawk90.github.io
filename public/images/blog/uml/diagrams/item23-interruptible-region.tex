@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  act/.style={cls, minimum width=22mm, minimum height=8mm, font=\footnotesize}
+]
+% interruptible region (dashed rectangle)
+\draw[dashed, draw=nodebord, line width=0.5pt, rounded corners=4pt]
+  (0,0) rectangle (8.4, 1.8);
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west] at (0.1, 1.75) {처리 중};
+
+\node[act] (a) at (1.5, 0.8) {데이터 받음};
+\node[act] (b) at (4.2, 0.8) {처리};
+\node[act] (c) at (6.9, 0.8) {저장};
+\draw[arr] (a.east) -- (b.west);
+\draw[arr] (b.east) -- (c.west);
+
+% interrupt signal exit
+\node[draw=nodebord, fill=nodefill, line width=0.4pt,
+      minimum width=22mm, minimum height=8mm, font=\footnotesize] (end) at (4.2, -1.8) {중단됨};
+\draw[arr] (4.2, 0) -- node[right, font=\scriptsize\itshape, text=edgesc] {cancel signal} (end.north);
+\end{tikzpicture}
+\end{document}

@@ -48,14 +48,7 @@ UML은 이 큰 단위를 **컴포넌트(Component)**로 모델링합니다.
 
 컴포넌트는 **포트**(11편 참조)를 통해 외부와 통신합니다.
 
-```
-┌─────────────────┐
-│  OrderService   │
-│                 │
-●─[IOrder]        │  ← 제공 포트
-│        [IPay]─⌒│  ← 필요 포트
-└─────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item25-component-ports.svg" alt="OrderService — 제공·필요 포트" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 포트는 컴포넌트 경계의 작은 사각형. 내부 구현 변화가 외부에 노출되지 않게 격리합니다.
 
@@ -63,13 +56,7 @@ UML은 이 큰 단위를 **컴포넌트(Component)**로 모델링합니다.
 
 `<<component>>` 박스 안에 더 작은 클래스·서브컴포넌트를 그릴 수 있습니다.
 
-```
-┌── OrderService ────────────┐
-│  + OrderController         │
-│  + OrderRepository         │
-│  + OrderValidator          │
-└────────────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item25-component-contents.svg" alt="컴포넌트 내부 — Controller·Repository·Validator" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 또는 **컴포지트 구조 다이어그램**으로 내부 부품과 연결을 보여줍니다.
 

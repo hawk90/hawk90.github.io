@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[draw=nodebord, fill=nodefill, rounded corners=4pt, line width=0.4pt,
+      inner sep=0pt, minimum width=72mm] {
+  \begin{tabular}{l}
+    \textbf{Spring 프레임워크} \\
+    \hline
+    \textbf{DI 협력}: IoC Container... \\
+    \hline
+    \textbf{AOP 협력}: Pointcut, Advice... \\
+    \hline
+    \textbf{MVC 협력}: Controller, View... \\
+  \end{tabular}
+};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cb/.style={cls, minimum width=32mm}
+]
+\node[font=\sffamily\bfseries\footnotesize, anchor=west] at (-5.5, 2.2) {구조};
+\node[cb] (s) at (-3.0, 1.4) {:Subject};
+\node[cb] (o) at ( 3.0, 1.4) {:Observer};
+\draw[arr] (s.east) -- node[above, font=\scriptsize\itshape] {notifies} (o.west);
+
+\node[font=\sffamily\bfseries\footnotesize, anchor=west] at (-5.5, 0.0) {행위 (시퀀스)};
+\node[font=\footnotesize, anchor=west] at (-4.5, -0.6) {Subject.setState()};
+\node[font=\footnotesize, anchor=west] at (-3.3, -1.1) {→ Subject.notify()};
+\node[font=\footnotesize, anchor=west] at (-2.1, -1.6) {→ for each obs:};
+\node[font=\footnotesize, anchor=west] at (-0.7, -2.1) {obs.update()};
+\end{tikzpicture}
+\end{document}

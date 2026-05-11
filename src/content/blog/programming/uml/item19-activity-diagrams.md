@@ -57,13 +57,7 @@ draft: false
 
 ## Fork & Join — 병렬
 
-```
-─━━━━━━━━━━━━━━━━━━━━━ (fork)
- |              |
-이메일 발송     로그 기록
- |              |
-─━━━━━━━━━━━━━━━━━━━━━ (join)
-```
+<img src="/images/blog/uml/diagrams/item19-fork-join.svg" alt="활동 fork·join — 병렬 분기와 합류" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 병렬로 실행 가능한 단계들을 fork 사이에 두고, 모두 끝나면 join. 멀티스레드·비동기 작업 표현에 강력.
 
@@ -71,21 +65,7 @@ draft: false
 
 활동을 **담당자별 트랙**으로 나누는 표기.
 
-```
-┌─────────┬──────────┬──────────┐
-│Customer │ System   │ Bank     │
-├─────────┼──────────┼──────────┤
-│ 주문     │          │          │
-│  ↓       │          │          │
-│         │ 결제 요청 │          │
-│         │   ↓      │          │
-│         │          │ 승인     │
-│         │          │   ↓      │
-│         │ 확정     │          │
-│         │   ↓      │          │
-│ 영수증   │          │          │
-└─────────┴──────────┴──────────┘
-```
+<img src="/images/blog/uml/diagrams/item19-swimlane.svg" alt="Swimlane 활동 — Customer · System · Bank" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 각 활동이 **누구의 책임**인지 한눈에. BPMN(Business Process Model and Notation)이 이걸 더 발전시켰습니다.
 

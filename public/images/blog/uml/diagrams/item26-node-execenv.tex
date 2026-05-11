@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\draw[draw=nodebord, fill=nodefill, line width=0.4pt] (0,0) rectangle (7.8, 3.0);
+\draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+  (0,3.0) -- (0.45,3.45) -- (8.25,3.45) -- (8.25,0.45) -- (7.8,0);
+\draw[draw=nodebord, line width=0.4pt] (7.8,3.0) -- (8.25,3.45);
+\node[font=\sffamily\bfseries\small, anchor=north west] at (0.1, 2.95) {<<device>> Server};
+
+\draw[draw=nodebord, fill=nodefill!60, line width=0.4pt] (0.5, 0.5) rectangle (7.3, 2.1);
+\node[font=\sffamily\bfseries\small, anchor=north west] at (0.6, 2.0) {<<executionEnvironment>> JVM};
+\node[font=\footnotesize, anchor=center] at (3.9, 1.1) {order-svc.jar};
+\end{tikzpicture}
+\end{document}

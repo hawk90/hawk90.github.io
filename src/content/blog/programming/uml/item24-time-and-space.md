@@ -35,13 +35,7 @@ UML은 이를 위한 표기를 제공합니다.
 
 메시지 옆에 시간 변수 표시:
 
-```
-   ┌───┐
-   │ t │  ← request 송신 시간
-   └───┘
-   client → server: request
-       (이벤트 발생 시각 = t)
-```
+<img src="/images/blog/uml/diagrams/item24-timestamp-event.svg" alt="이벤트 발생 시각 t 태그" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ### Time Constraint
 
@@ -74,13 +68,7 @@ UML은 이를 위한 표기를 제공합니다.
 
 시간이 정말 중요한 상호작용은 **타이밍 다이어그램**으로.
 
-```
-       0    100   200   300   400 ms
-        │    │    │    │    │
-Client: ───request───┐
-                     └─response─┐
-Server:    ────receive──process─┘
-```
+<img src="/images/blog/uml/diagrams/item24-timing-axis.svg" alt="시간 축 위의 client/server lifeline" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 시간 축은 가로, 객체는 세로. 객체의 **상태 변화**가 막대로 표시됩니다. 신호 처리·프로토콜 분석에 강력.
 
@@ -98,12 +86,7 @@ Server:    ────receive──process─┘
 
 물리 노드와 그 위 컴포넌트.
 
-```
-┌─ Node: ap-northeast-1 ──┐
-│  ┌─ Component: OrderSvc ┐│
-│  └──────────────────────┘│
-└──────────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item24-node-with-component.svg" alt="노드 안의 컴포넌트 배치" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ### Distribution Pattern
 

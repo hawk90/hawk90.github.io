@@ -1,0 +1,20 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cb/.style={cls, minimum width=42mm, font=\footnotesize}
+]
+\node[font=\sffamily\bfseries\footnotesize, anchor=west] at (-4.0, 2.0) {[Creator, Product]};
+\node[font=\footnotesize\itshape, edgesc, anchor=west] at (-4.0, 1.4) {Factory Method 패턴};
+
+\node[cb] (a) at (-2.0, 0.2)  {DocumentApp};
+\node[cb] (b) at (-2.0, -1.1) {TextDocument};
+
+\node[font=\scriptsize\itshape, edgesc, anchor=west] at (1.0, 0.2)  {— Creator};
+\node[font=\scriptsize\itshape, edgesc, anchor=west] at (1.0, -1.1) {— Product};
+\end{tikzpicture}
+\end{document}

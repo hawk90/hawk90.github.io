@@ -47,18 +47,7 @@ UML의 **매개변수화된 협력**이 그 답.
 
 협력의 두 면(27편)을 패턴 정의 안에 담습니다.
 
-```
-Observer 패턴 정의:
-
-  구조:
-    :Subject ── notifies ─→ :Observer
-
-  행위 (시퀀스):
-    Subject.setState() 
-       → Subject.notify()
-          → for each obs:
-             obs.update()
-```
+<img src="/images/blog/uml/diagrams/item28-observer-pattern.svg" alt="Observer 패턴 — 구조와 시퀀스" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ## 패턴 적용 (Binding)
 
@@ -73,26 +62,13 @@ PriceChart  → Observer
 
 ### 1. Singleton
 
-```
-[Instance]
-  ┌─────────┐
-  │ Logger  │ ← Instance 역할
-  └─────────┘
-```
+<img src="/images/blog/uml/diagrams/item28-instance-role.svg" alt="Logger — Instance 역할" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 매개변수는 보통 클래스 자체.
 
 ### 2. Strategy
 
-```
-[Context, Strategy]
-   Strategy 패턴
-
-OrderProcessor ──Context
-ShippingCalc   ──Strategy 인터페이스
-ExpressShip    ──Strategy 구현
-StandardShip   ──Strategy 구현
-```
+<img src="/images/blog/uml/diagrams/item28-strategy-roles.svg" alt="Strategy 역할 — Context/Strategy/Concrete" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ### 3. Observer
 
@@ -100,13 +76,7 @@ StandardShip   ──Strategy 구현
 
 ### 4. Factory Method
 
-```
-[Creator, Product]
-   Factory Method 패턴
-
-DocumentApp  ──Creator
-TextDocument ──Product
-```
+<img src="/images/blog/uml/diagrams/item28-factory-roles.svg" alt="Factory Method 역할 — Creator/Product" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 ### 5. Composite
 
@@ -119,16 +89,7 @@ TextDocument ──Product
 
 프레임워크는 본질적으로 **여러 협력을 미리 결정해 둔 코드**입니다.
 
-```
-Spring 프레임워크
-  ┌── DI 협력 ─────────┐
-  │ IoC Container...   │
-  ├── AOP 협력 ─────────┤
-  │ Pointcut, Advice...│
-  ├── MVC 협력 ─────────┤
-  │ Controller, View...│
-  └────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item28-spring-framework.svg" alt="Spring 프레임워크 — DI/AOP/MVC 협력" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 UML로 프레임워크를 그릴 때 협력 집합으로 봅니다. 사용자는 빈자리(extension point)에 자기 코드를 채움.
 

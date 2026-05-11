@@ -72,19 +72,7 @@ OrderService
 
 계층 아키텍처를 컴포넌트 다이어그램으로:
 
-```
-┌─ UI ────────────┐
-│ Web Frontend    │
-└────────┬────────┘
-         │ IOrder
-┌─ App ──┴────────┐
-│ Order Service   │
-└────────┬────────┘
-         │ IOrderRepo
-┌─ Infra ┴────────┐
-│ Order Repository│
-└─────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item29-layered-components.svg" alt="레이어드 컴포넌트 — UI/App/Infra" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 각 계층이 컴포넌트, 계층 간 인터페이스로 결합.
 
@@ -92,13 +80,7 @@ OrderService
 
 각 서비스를 컴포넌트로:
 
-```
-[API Gateway]
-   ├──→ [Order Service]
-   ├──→ [Inventory Service]
-   ├──→ [Payment Service]
-   └──→ [User Service]
-```
+<img src="/images/blog/uml/diagrams/item29-api-gateway.svg" alt="API Gateway 패턴 — 4개 마이크로서비스" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 `<<microservice>>` 스테레오타입을 도입해 의도를 분명히.
 

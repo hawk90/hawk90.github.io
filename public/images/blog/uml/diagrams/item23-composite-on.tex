@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  sub/.style={cls, minimum width=22mm, minimum height=10mm, font=\footnotesize}
+]
+\draw[draw=nodebord, fill=nodefill, rounded corners=4pt, line width=0.4pt]
+  (0,0) rectangle (8.0, 2.8);
+\node[font=\sffamily\bfseries, anchor=north west] at (0.15, 2.7) {On};
+
+\node[sub] (l) at (2.2, 1.2) {Loading};
+\node[sub] (r) at (5.8, 1.2) {Ready};
+\draw[arr] (l.east) -- (r.west);
+\end{tikzpicture}
+\end{document}

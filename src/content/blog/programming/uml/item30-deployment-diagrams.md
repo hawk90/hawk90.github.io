@@ -42,14 +42,7 @@ draft: false
 
 ## 노드 안에 노드 — Nesting
 
-```
-<<device>> Server
-  ┌─ <<execEnv>> Linux ─────────┐
-  │  ┌─ <<execEnv>> Docker ───┐ │
-  │  │  order-svc.jar         │ │
-  │  └────────────────────────┘ │
-  └─────────────────────────────┘
-```
+<img src="/images/blog/uml/diagrams/item30-nested-execenv.svg" alt="중첩 실행환경 — Server > Linux > Docker" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 VM/컨테이너 토폴로지를 자연스럽게 표현.
 

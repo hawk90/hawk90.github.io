@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\draw[draw=nodebord, fill=nodefill, line width=0.4pt]
+  (0,0) rectangle (8.2, 2.6);
+\draw[draw=nodebord, fill=nodefill!50, line width=0.4pt]
+  (0,2.1) -- (1.3, 2.1) -- (1.6, 1.8) -- (1.6, 2.6) -- (0, 2.6) -- cycle;
+\node[font=\sffamily\bfseries\small, anchor=west] at (0.15, 2.35) {par};
+
+\node[font=\footnotesize, anchor=west] at (0.4, 1.55) {OrderSvc → Email: notify};
+\draw[dashed, edgesc, line width=0.4pt] (0.1, 1.1) -- (8.1, 1.1);
+\node[font=\footnotesize, anchor=west] at (0.4, 0.6) {OrderSvc → Analytics: log};
+\end{tikzpicture}
+\end{document}

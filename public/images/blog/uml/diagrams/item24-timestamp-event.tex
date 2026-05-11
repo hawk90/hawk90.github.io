@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+% timestamp tag
+\node[draw=nodebord, fill=nodefill, rounded corners=2pt, line width=0.4pt,
+      minimum width=10mm, font=\footnotesize\itshape] (t) at (-3, 0.5) {t};
+% arrow
+\draw[arr] (-2, -0.6) -- node[above, font=\footnotesize] {client → server: request} (3, -0.6);
+% dashed line from t to arrow
+\draw[dashed, line width=0.4pt, text=edgesc] (t.south) -- ($ (t.south) + (0, -1) $);
+\node[font=\scriptsize\itshape, edgesc, anchor=west] at (-2.6, 0.5) {← request 송신 시간};
+\node[font=\scriptsize\itshape, edgesc, anchor=west] at (-1.2, -1.4) {(이벤트 발생 시각 = t)};
+\end{tikzpicture}
+\end{document}

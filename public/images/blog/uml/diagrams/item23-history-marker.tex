@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  st/.style={cls, minimum width=34mm, minimum height=10mm}
+]
+\node[st] (c)  at (0,   1.0) {Connected};
+\node[st] (d)  at (0,  -1.0) {Disconnected};
+% history pseudo-state
+\node[circle, draw=edgec, line width=0.4pt, inner sep=0pt, minimum size=4mm, font=\scriptsize] (h) at (-3.2, 1.0) {H};
+
+\draw[arr] (c.south) -- node[right, font=\scriptsize\itshape] {lose-conn} (d.north);
+\draw[arr] (d.west) -| node[below right, font=\scriptsize\itshape, pos=0.25] {reconnect} (h.south);
+\draw[arr] (h.east) -- (c.west);
+
+\node[font=\scriptsize\itshape, edgesc, anchor=west, align=left] at (3.0, 0)
+  {Connected의 마지막\\직접 자식으로 복귀};
+\end{tikzpicture}
+\end{document}
