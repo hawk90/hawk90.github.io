@@ -617,14 +617,23 @@ html.reading-mode .scroll-progress,
 html.reading-mode #mobile-toc-toggle,
 html.reading-mode #mobile-toc,
 html.reading-mode .author-bio,
-html.reading-mode article header > .flex.flex-wrap.gap-2,        /* tag row */
-html.reading-mode article header > .flex.items-center.justify-between { /* share+toggle row */
+html.reading-mode article header > .flex.flex-wrap.gap-2 {        /* tag row */
   display: none !important;
 }
 
-/* Keep the reading-mode toggle reachable as a floating exit */
+/* The share+toggle row stays in DOM (so the toggle remains a real
+   click target), but the row becomes invisible — only the toggle
+   itself is shown, pinned top-right as a floating exit. */
+html.reading-mode article header > .flex.items-center.justify-between {
+  display: block !important;        /* keep flow, drop flex alignment */
+  margin: 0 !important;
+  height: 0;
+  overflow: visible;
+}
+html.reading-mode article header > .flex.items-center.justify-between > :not(#reading-mode-toggle) {
+  display: none !important;
+}
 html.reading-mode #reading-mode-toggle {
-  display: inline-flex !important;
   position: fixed;
   top: 1rem;
   right: 1rem;
