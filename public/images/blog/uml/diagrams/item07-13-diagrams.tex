@@ -6,27 +6,28 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  level 1/.style={sibling distance=70mm, level distance=14mm},
-  level 2/.style={sibling distance=18mm, level distance=14mm}
+  level 1/.style={sibling distance=110mm, level distance=14mm},
+  level 2/.style={sibling distance=24mm, level distance=14mm},
+  leaf/.style={font=\scriptsize, minimum width=20mm}
 ]
 
 \node[hi] (root) {UML Diagrams (13+)}
   child { node[abs] (s) {Structural (7)}
-    child { node[con, font=\scriptsize] {Class} }
-    child { node[con, font=\scriptsize] {Object} }
-    child { node[con, font=\scriptsize] {Package} }
-    child { node[con, font=\scriptsize] {Component} }
-    child { node[con, font=\scriptsize] {Composite} }
-    child { node[con, font=\scriptsize] {Deployment} }
-    child { node[con, font=\scriptsize] {Artifact} }
+    child { node[con, leaf] {Class} }
+    child { node[con, leaf] {Object} }
+    child { node[con, leaf] {Package} }
+    child { node[con, leaf] {Component} }
+    child { node[con, leaf] {Composite} }
+    child { node[con, leaf] {Deployment} }
+    child { node[con, leaf] {Artifact} }
   }
   child { node[abs] (b) {Behavioral (6)}
-    child { node[imp, font=\scriptsize] {Use Case} }
-    child { node[imp, font=\scriptsize] {Sequence} }
-    child { node[imp, font=\scriptsize] {Communic.} }
-    child { node[imp, font=\scriptsize] {State Machine} }
-    child { node[imp, font=\scriptsize] {Activity} }
-    child { node[imp, font=\scriptsize] {Timing} }
+    child { node[imp, leaf] {Use Case} }
+    child { node[imp, leaf] {Sequence} }
+    child { node[imp, leaf] {Communic.} }
+    child { node[imp, leaf] {State Machine} }
+    child { node[imp, leaf] {Activity} }
+    child { node[imp, leaf] {Timing} }
   };
 
 \end{tikzpicture}
