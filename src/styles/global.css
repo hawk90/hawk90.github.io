@@ -295,6 +295,15 @@ code, pre, kbd, samp, tt {
   box-shadow: var(--shadow-sm);
 }
 
+/* Expressive-code copy button — calmer, fades in on block hover */
+.prose .expressive-code .copy button {
+  opacity: 0.55;
+  transition: opacity 0.2s var(--ease-out);
+}
+.prose .expressive-code:hover .copy button { opacity: 0.9; }
+.prose .expressive-code .copy button:hover,
+.prose .expressive-code .copy button:focus-visible { opacity: 1; }
+
 /* Keyboard glyph */
 .prose kbd {
   display: inline-block;

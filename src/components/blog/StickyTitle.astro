@@ -44,6 +44,20 @@ const { title, series, seriesOrder, seriesTotal } = Astro.props;
         )}
         <div class="text-sm font-semibold text-[var(--color-text-primary)] truncate">{title}</div>
       </div>
+      {series && seriesOrder && seriesTotal && (
+        <div class="hidden sm:block w-32 shrink-0">
+          <div class="h-1 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
+            <div
+              class="h-full bg-[var(--color-accent)] rounded-full transition-[width] duration-300 ease-out"
+              style={`width: ${(seriesOrder / seriesTotal) * 100}%`}
+              aria-hidden="true"
+            ></div>
+          </div>
+          <div class="text-[10px] text-[var(--color-text-muted)] text-right mt-0.5 leading-none tabular-nums">
+            {seriesOrder} / {seriesTotal}
+          </div>
+        </div>
+      )}
     </div>
     <!-- thin scroll-progress sliver -->
     <div class="h-[2px] bg-[var(--color-bg-tertiary)]">

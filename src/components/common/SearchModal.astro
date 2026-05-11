@@ -80,10 +80,23 @@ const filterSeriesLabel = t('search_filter_series');
         </div>
       </div>
 
-      <!-- Keyboard hint -->
-      <div class="px-4 py-2 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-xs text-[var(--color-text-muted)] flex items-center justify-between">
-        <span><kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)]">↵</kbd> {searchSelect}</span>
-        <span><kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)]">esc</kbd> {searchClose}</span>
+      <!-- Keyboard hints -->
+      <div class="px-4 py-2 border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)] text-[11px] text-[var(--color-text-muted)] flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1">
+            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">↑</kbd>
+            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">↓</kbd>
+            navigate
+          </span>
+          <span class="inline-flex items-center gap-1">
+            <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">↵</kbd>
+            {searchSelect}
+          </span>
+        </div>
+        <span class="inline-flex items-center gap-1">
+          <kbd class="px-1.5 py-0.5 bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">esc</kbd>
+          {searchClose}
+        </span>
       </div>
     </div>
   </div>
