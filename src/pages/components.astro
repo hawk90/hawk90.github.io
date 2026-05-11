@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Code } from 'astro-expressive-code/components';
+
+const sampleCode = `interface User { id: number; name: string; }
+
+async function fetchUser(id: number): Promise<User> {
+  const res = await fetch(\`/api/users/\${id}\`);
+  if (!res.ok) throw new Error('not found');
+  return res.json();
+}`;
+---
+
+<BaseLayout title="Components" description="Every block this theme renders, on one page.">
+  <article class="py-16">
+    <div class="container">
+      <header class="container-narrow mb-12">
+        <div class="text-xs uppercase tracking-wider text-[var(--color-accent)] font-medium mb-2">
+          Theme reference
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-3">Components & blocks</h1>
+        <p class="text-[var(--color-text-secondary)]">
+          A live preview of every block this theme renders. Drop the markdown
+          into a post; everything below works out of the box.
+        </p>
+      </header>
+
+      <div class="container-narrow prose">
+
+        <h2>Headings</h2>
+        <p>
+          The drop-cap on this first paragraph appears automatically when an
+          article starts with prose. Subsequent paragraphs render plain.
+          Headings use a soft hairline border and get a hover hash (#) link.
+        </p>
+
+        <h3>Heading level 3</h3>
+        <h4>Heading level 4</h4>
+
+        <h2>Text styles</h2>
+        <p>
+          Inline <strong>strong</strong>, <em>emphasis</em>, <code>inline code</code>,
+          a <a href="/blog">link</a>, and a <kbd>kbd</kbd> glyph.
+        </p>
+
+        <h2>Lists</h2>
+        <ul>
+          <li>First item</li>
+          <li>Second item, longer prose that wraps once it reaches the
+              comfortable reading width set by the prose container.</li>
+          <li>Nested
+            <ul><li>nested item</li></ul>
+          </li>
+        </ul>
+        <ol>
+          <li>One</li>
+          <li>Two</li>
+          <li>Three</li>
+        </ol>
+
+        <h2>Blockquote</h2>
+        <blockquote>
+          <p>Programs must be written for people to read, and only incidentally for machines to execute.</p>
+          <p>— Harold Abelson, SICP</p>
+        </blockquote>
+
+        <h2>Callouts</h2>
+        <p>Write <code>:::tip Title</code> blocks in markdown:</p>
+
+        <aside class="callout callout-info not-prose">
+          <div class="callout-title">
+            <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Note</span>
+          </div>
+          <div class="callout-body">
+            <p>Background context that's useful but optional.</p>
+          </div>
+        </aside>
+
+        <aside class="callout callout-tip not-prose">
+          <div class="callout-title">
+            <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            <span>Tip</span>
+          </div>
+          <div class="callout-body">
+            <p>A non-obvious shortcut or recommendation.</p>
+          </div>
+        </aside>
+
+        <aside class="callout callout-warning not-prose">
+          <div class="callout-title">
+            <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <span>Warning</span>
+          </div>
+          <div class="callout-body">
+            <p>Something to be careful with — easy to get wrong.</p>
+          </div>
+        </aside>
+
+        <aside class="callout callout-danger not-prose">
+          <div class="callout-title">
+            <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Important</span>
+          </div>
+          <div class="callout-body">
+            <p>A hard rule. Breaking it will cause harm.</p>
+          </div>
+        </aside>
+
+        <aside class="callout callout-tldr not-prose">
+          <div class="callout-title">
+            <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <span>TL;DR</span>
+          </div>
+          <div class="callout-body">
+            <p>The article's punchline, set apart so readers skimming get the gist.</p>
+          </div>
+        </aside>
+
+        <h2>Code blocks</h2>
+        <p>Multiple themes are switchable from <a href="/settings">/settings</a>.</p>
+        <Code lang="typescript" title="example.ts" code={sampleCode} />
+
+        <h2>Math</h2>
+        <p>
+          KaTeX is wired up. Write inline math like <code>$a^2 + b^2 = c^2$</code>
+          and display blocks with <code>$$ … $$</code> in your markdown — they
+          render with full LaTeX syntax (Greek letters, integrals, fractions,
+          matrices). Wide equations get horizontal scroll on mobile so layout
+          never breaks.
+        </p>
+
+        <h2>Table</h2>
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Series support</td><td>Built-in</td><td>chapter folding</td></tr>
+            <tr><td>OG images</td><td>Auto-generated</td><td>themed per series</td></tr>
+            <tr><td>Newsletter</td><td>5 providers</td><td>Beehiiv, Substack, ConvertKit, Buttondown, custom</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Horizontal rule</h2>
+        <hr />
+
+        <h2>Diagrams</h2>
+        <p>TikZ → SVG pipeline produces sharp vector diagrams:</p>
+        <img
+          src="/images/blog/dsa/diagrams/item13-bst-overview.svg"
+          alt="BST diagram"
+          style="max-width:100%; background:white; padding:8px; border-radius:6px;"
+        />
+
+      </div>
+    </div>
+  </article>
+</BaseLayout>

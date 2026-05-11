@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPublishedPosts, type BlogPost } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+
+type Group = { year: number; posts: BlogPost[] };
+const byYear = new Map<number, BlogPost[]>();
+for (const p of posts) {
+  const y = p.data.date.getFullYear();
+  if (!byYear.has(y)) byYear.set(y, []);
+  byYear.get(y)!.push(p);
+}
+const groups: Group[] = [...byYear.entries()]
+  .map(([year, ps]) => ({ year, posts: ps.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()) }))
+  .sort((a, b) => b.year - a.year);
+
+const monthLabel = (d: Date) => String(d.getMonth() + 1).padStart(2, '0');
+const dayLabel = (d: Date) => String(d.getDate()).padStart(2, '0');
+---
+
+<BaseLayout title="Archive" description="Every post by year.">
+  <section class="py-16">
+    <div class="container">
+      <div class="container-narrow mx-auto px-0">
+        <div class="text-xs uppercase tracking-wider text-[var(--color-accent)] font-medium mb-2">
+          Archive
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-3">All posts</h1>
+        <p class="text-[var(--color-text-secondary)] mb-12">
+          {posts.length} posts across {groups.length} {groups.length === 1 ? 'year' : 'years'}.
+        </p>
+
+        <div class="space-y-12">
+          {groups.map(({ year, posts }) => (
+            <section>
+              <div class="flex items-baseline gap-4 mb-4 sticky top-16 bg-[var(--color-bg-primary)] py-2 -mx-1 px-1 z-10">
+                <h2 class="text-2xl font-bold tabular-nums">{year}</h2>
+                <span class="text-xs text-[var(--color-text-muted)]">
+                  {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+                </span>
+                <span class="flex-1 h-px bg-[var(--color-border)]" aria-hidden="true"></span>
+              </div>
+              <ul class="space-y-1">
+                {posts.map((p) => (
+                  <li>
+                    <a
+                      href={`/blog/${p.id}`}
+                      class="group grid grid-cols-[3rem_1fr] sm:grid-cols-[5rem_1fr_auto] items-baseline gap-3 sm:gap-4 py-2 px-2 -mx-2 rounded-md hover:bg-[var(--color-bg-secondary)] transition-colors"
+                    >
+                      <time
+                        datetime={p.data.date.toISOString()}
+                        class="text-xs text-[var(--color-text-muted)] tabular-nums font-mono"
+                      >
+                        {monthLabel(p.data.date)}/{dayLabel(p.data.date)}
+                      </time>
+                      <span class="text-sm group-hover:text-[var(--color-accent)] transition-colors line-clamp-1">
+                        {p.data.title}
+                      </span>
+                      {p.data.series && (
+                        <span class="hidden sm:inline text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]/70">
+                          {p.data.series}
+                        </span>
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

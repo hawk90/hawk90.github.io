@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { NOW_DATA } from '../consts/now';
+
+const formattedUpdate = new Date(NOW_DATA.updatedAt).toLocaleDateString('en-US', {
+  year: 'numeric', month: 'long', day: 'numeric',
+});
+---
+
+<BaseLayout title="Now" description="What I'm focused on right now.">
+  <section class="py-16">
+    <div class="container">
+      <div class="container-narrow mx-auto px-0">
+        <div class="text-xs uppercase tracking-wider text-[var(--color-accent)] font-medium mb-2">
+          Now
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-3">What I'm doing now</h1>
+        <p class="text-[var(--color-text-secondary)] mb-2">
+          A snapshot of current focus, in the spirit of
+          <a href="https://nownownow.com" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-accent)]">
+            nownownow.com
+          </a>.
+        </p>
+        <p class="text-xs text-[var(--color-text-muted)] mb-12">
+          Updated {formattedUpdate}{NOW_DATA.location && ` · ${NOW_DATA.location}`}.
+        </p>
+
+        <div class="space-y-10">
+          {NOW_DATA.sections.map((section) => (
+            <section>
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+                {section.title}
+              </h2>
+              <ul class="space-y-2">
+                {section.items.map((item) => (
+                  <li class="flex items-start gap-3">
+                    <span class="mt-2 w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] shrink-0" aria-hidden="true"></span>
+                    <span class="text-[var(--color-text-primary)] leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
