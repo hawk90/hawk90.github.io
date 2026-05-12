@@ -1,10 +1,10 @@
 ---
 title: "Practical RTOS Internals: 서문"
 date: 2026-05-12
-description: "RTOS를 사용하는 것이 아니라 이해하고 구현하는 법. Scheduler, context switch, memory allocator의 내부 동작을 분석합니다."
+description: "RTOS를 사용하는 것이 아니라 이해하고 구현하는 법. Scheduler, context switch, memory allocator의 내부 동작을 소스 코드 수준에서 분석합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 0
-tags: [rtos, freertos, zephyr, scheduler, context-switch, embedded]
+tags: [rtos, freertos, zephyr, scheduler, context-switch, embedded, arm, risc-v]
 type: tech
 featured: true
 ---
@@ -24,19 +24,7 @@ FreeRTOS 튜토리얼은 대부분 여기서 시작합니다. Task를 만들고,
 - "메모리가 fragmentation 되는 것 같은데..."
 - "tickless 모드에서 타이머가 왜 정확하지 않지?"
 
-API 사용법을 아는 것과 **내부 동작을 이해하는 것**은 완전히 다른 차원의 문제입니다.
-
-## RTOS를 "이해한다"는 것
-
-RTOS를 이해한다는 것은:
-
-1. **Scheduler가 어떻게 다음 task를 선택하는지** 설명할 수 있다
-2. **Context switch 시 어떤 레지스터가 저장되는지** 안다
-3. **Priority inversion이 왜 발생하고 어떻게 해결되는지** 안다
-4. **Tickless 모드가 어떻게 전력을 절약하는지** 안다
-5. **실시간 시스템에서 malloc을 쓰면 안 되는 이유**를 안다
-
-이 시리즈는 FreeRTOS와 Zephyr의 소스 코드를 직접 분석하며 이 질문들에 답합니다.
+API 사용법을 아는 것과 **내부 동작을 이해하는 것**은 완전히 다른 차원의 문제입니다. 이 시리즈는 FreeRTOS, Zephyr, RT-Thread의 소스 코드를 직접 분석하며 이 질문들에 답합니다.
 
 ## 대상 독자
 
@@ -54,135 +42,191 @@ RTOS를 이해한다는 것은:
 
 ## 시리즈 구성
 
-총 3개 Part, 15개 글로 구성됩니다:
+**총 5개 Part, 45개 글**로 구성됩니다.
 
-| Part | 주제 | 글 수 |
-|------|-----|-------|
-| 1 | Scheduler & Context Switch | 5 |
-| 2 | Advanced Topics | 5 |
-| 3 | RTOS Comparison | 5 |
+RTOS의 핵심 개념부터 소스 코드 분석, 직접 구현, RTOS 비교까지 체계적으로 다룹니다.
 
-### Part 1: Scheduler & Context Switch
+---
 
-RTOS의 핵심인 스케줄러와 컨텍스트 스위치를 다룹니다:
+### Part 1: RTOS Fundamentals (10개)
 
-- Scheduler 자료구조 (ready list, blocked list)
-- Context switch assembly 분석 (ARM Cortex-M)
-- Tickless 구현
-- ISR entry/exit 처리
-- Latency 측정 방법
+RTOS의 핵심 개념과 기초를 다룹니다.
 
-### Part 2: Advanced Topics
+| # | 글 제목 | 핵심 내용 |
+|---|--------|----------|
+| 1-01 | RTOS가 필요한 이유 | 슈퍼루프의 한계, 실시간 요구사항 |
+| 1-02 | Task와 Thread 개념 | TCB, 상태 머신, 생명 주기 |
+| 1-03 | 스케줄링 알고리즘 | RR, Priority-based, EDF, Rate Monotonic |
+| 1-04 | Preemption과 Cooperation | 선점형 vs 협력형, trade-off |
+| 1-05 | 인터럽트와 RTOS | ISR context, deferred processing |
+| 1-06 | 동기화 기초 | Critical section, mutual exclusion |
+| 1-07 | 세마포어 개념 | Counting, binary, 사용 패턴 |
+| 1-08 | 뮤텍스 개념 | Ownership, recursive, priority inheritance |
+| 1-09 | 큐와 메시지 패싱 | Producer-consumer, mailbox |
+| 1-10 | 실시간성 분석 | Latency, jitter, deadline, WCET |
 
-실무에서 마주치는 고급 주제들:
+---
 
-- SMP RTOS 설계
-- Real-time memory allocator (TLSF, heap_4)
-- IPC 내부 구현 (Queue, Semaphore, EventGroup)
-- POSIX compatibility layer
-- System call 구현
+### Part 2: Scheduler & Context Switch (10개)
 
-### Part 3: RTOS Comparison
+RTOS의 심장인 스케줄러와 컨텍스트 스위치를 깊이 분석합니다.
 
-주요 RTOS들의 비교 분석:
+| # | 글 제목 | 핵심 내용 |
+|---|--------|----------|
+| 2-01 | Ready List 자료구조 | 연결 리스트, 비트맵, O(1) 스케줄러 |
+| 2-02 | Blocked List 자료구조 | 타임아웃 관리, 정렬 방식 |
+| 2-03 | Scheduler 알고리즘 구현 | 다음 task 선택 로직 |
+| 2-04 | Context Switch 원리 | 레지스터 저장/복원, 스택 프레임 |
+| 2-05 | ARM Cortex-M Context Switch | PendSV, 어셈블리 분석 |
+| 2-06 | ARM Cortex-A Context Switch | SVC, 모드 전환 |
+| 2-07 | RISC-V Context Switch | ECALL, mret, CSR |
+| 2-08 | Tick과 타이머 | SysTick, 하드웨어 타이머 연동 |
+| 2-09 | Tickless 모드 구현 | 저전력, 타이머 보상 알고리즘 |
+| 2-10 | Scheduler Latency 측정 | 측정 방법, 최적화 기법 |
 
-- FreeRTOS 소스 분석
-- Zephyr 소스 분석
-- VxWorks/QNX 참고
-- 선택 가이드라인
+---
+
+### Part 3: IPC & Synchronization Internals (10개)
+
+동기화 프리미티브와 IPC의 내부 구현을 분석합니다.
+
+| # | 글 제목 | 핵심 내용 |
+|---|--------|----------|
+| 3-01 | Critical Section 구현 | Interrupt disable, spin lock |
+| 3-02 | 세마포어 내부 구현 | 대기 큐, 카운터 관리 |
+| 3-03 | 뮤텍스 내부 구현 | Owner tracking, recursion |
+| 3-04 | Priority Inversion 문제 | 원인, 사례, Mars Pathfinder |
+| 3-05 | Priority Inheritance 구현 | 동적 우선순위 조정 |
+| 3-06 | Priority Ceiling Protocol | 정적 vs 동적 |
+| 3-07 | 큐 내부 구현 | Ring buffer, 복사 vs 참조 |
+| 3-08 | Event Group 구현 | 비트 플래그, AND/OR 대기 |
+| 3-09 | ISR-safe API 설계 | FromISR 패턴, 지연 처리 |
+| 3-10 | 데드락 탐지와 회피 | 탐지 알고리즘, timeout 활용 |
+
+---
+
+### Part 4: Memory & Advanced Topics (10개)
+
+메모리 관리와 고급 주제를 다룹니다.
+
+| # | 글 제목 | 핵심 내용 |
+|---|--------|----------|
+| 4-01 | 실시간 메모리 요구사항 | Determinism, fragmentation |
+| 4-02 | FreeRTOS heap_1~5 분석 | 각 구현의 특성 비교 |
+| 4-03 | TLSF 알고리즘 | Two-Level Segregated Fit |
+| 4-04 | 정적 메모리 할당 | Static allocation 패턴 |
+| 4-05 | 메모리 풀 구현 | Fixed-size block allocator |
+| 4-06 | 스택 오버플로우 탐지 | Canary, MPU 활용 |
+| 4-07 | SMP RTOS 설계 | 멀티코어, 로드 밸런싱 |
+| 4-08 | Spinlock과 SMP 동기화 | 멀티코어 동기화 기법 |
+| 4-09 | Software Timer 구현 | Timer task, callback |
+| 4-10 | System Call 구현 | User/Kernel 모드 분리 |
+
+---
+
+### Part 5: RTOS Source Analysis & Comparison (5개)
+
+실제 RTOS 소스 코드를 분석하고 비교합니다.
+
+| # | 글 제목 | 핵심 내용 |
+|---|--------|----------|
+| 5-01 | FreeRTOS 소스 분석 | tasks.c, queue.c, port.c |
+| 5-02 | Zephyr 커널 분석 | k_thread, k_sem, 드라이버 모델 |
+| 5-03 | RT-Thread 분석 | 경량 RTOS 구조 |
+| 5-04 | RTOS 포팅 가이드 | 새 아키텍처 포팅 절차 |
+| 5-05 | RTOS 선택 가이드 | 프로젝트별 선택 기준 |
+
+---
 
 ## 분석 대상 RTOS
 
 | RTOS | 버전 | 특징 |
 |------|-----|------|
-| FreeRTOS | 10.x | 가장 널리 사용, 단순한 구조 |
-| Zephyr | 3.x | Linux Foundation 기반, 범용성과 확장성이 강함 |
-| RT-Thread | 5.x | 경량 RTOS 계열에서 참고할 만한 오픈소스 구현 |
+| FreeRTOS | 11.x | 가장 널리 사용, 단순한 구조, AWS IoT 통합 |
+| Zephyr | 3.7+ | Linux Foundation, 풍부한 드라이버, devicetree |
+| RT-Thread | 5.x | 경량 RTOS, 중국 생태계, 다양한 컴포넌트 |
+| ThreadX | 6.x | Azure RTOS, safety certification, 상용 품질 |
 
-### 구현 관점에서 주목할 점
+## 학습 로드맵
 
-- **Zephyr**: 다양한 보드/드라이버/서브시스템 구성이 풍부함
-- **FreeRTOS**: 구조가 단순해 커널 내부 분석과 학습에 적합함
-- **RISC-V 확장**: Cortex-M 중심 설명과 함께 RISC-V 포팅 관점도 같이 볼 가치가 있음
+### RTOS 입문자
 
-## 이 시리즈가 강조하는 질문
+```
+Part 1 (기초) → Part 2 (스케줄러) → Part 5-01 (FreeRTOS 분석)
+```
 
-RTOS를 공부할 때 API 이름보다 더 중요한 질문들이 있습니다:
+### RTOS 내부 이해
 
-- ready list는 어떤 자료구조로 유지되는가
-- preemption point는 정확히 어디인가
-- interrupt tail-chaining이 latency에 어떤 영향을 주는가
-- timeout과 wake-up은 어떤 tick source를 기준으로 계산되는가
-- heap 구현이 fragmentation, determinism, peak memory에 어떤 차이를 만드는가
+```
+Part 2 (스케줄러) → Part 3 (IPC) → Part 4 (메모리)
+```
+
+### RTOS 개발자/포팅
+
+```
+Part 2 심화 → Part 4 심화 → Part 5 (소스 분석, 포팅)
+```
+
+## 핵심 질문
+
+이 시리즈가 답하는 질문들:
+
+- ready list는 어떤 자료구조로 유지되는가?
+- preemption point는 정확히 어디인가?
+- interrupt tail-chaining이 latency에 어떤 영향을 주는가?
+- timeout과 wake-up은 어떤 tick source를 기준으로 계산되는가?
+- heap 구현이 fragmentation, determinism, peak memory에 어떤 차이를 만드는가?
 
 이 질문에 답할 수 있으면 특정 RTOS에 묶이지 않고, 새로운 커널을 보더라도 구조를 빠르게 읽어낼 수 있습니다.
 
-## 소스 코드를 어떻게 읽을 것인가
+## 소스 코드 분석 방법
 
 RTOS 소스는 처음 보면 함수 호출이 얽혀 있어 막막합니다. 이 시리즈에서는 다음 순서로 분석합니다:
 
-1. public API entry point를 찾습니다
-2. 내부 자료구조를 먼저 봅니다
-3. critical section 경계를 표시합니다
-4. scheduler decision point를 찾습니다
-5. architecture-dependent assembly로 내려갑니다
+1. **Public API entry point**를 찾습니다
+2. **내부 자료구조**를 먼저 봅니다
+3. **Critical section 경계**를 표시합니다
+4. **Scheduler decision point**를 찾습니다
+5. **Architecture-dependent assembly**로 내려갑니다
 
 즉, `xTaskCreate()`나 `k_sem_take()` 같은 API에서 시작하되, 결국은 **list, queue, bitmap, stack frame, interrupt mask**까지 내려가서 이해하는 흐름으로 설명합니다.
 
-## 이 시리즈에서 다루지 않는 것
-
-범위를 좁히기 위해 다음은 우선순위를 낮춥니다:
-
-- RTOS API 사용법 입문
-- GUI task 설계나 middleware 포팅 일반론
-- safety certification 문서 절차 자체
-- 상용 RTOS의 라이선스/조달 비교
-
-핵심은 "무엇을 호출할까"보다 **커널이 왜 그렇게 동작하는가**입니다.
-
-## 실무에서 바로 연결되는 포인트
-
-내부 구조를 이해하면 다음 문제들이 훨씬 빨리 풀립니다:
-
-- 특정 task만 주기적으로 deadline miss가 나는 문제
-- ISR 이후 깨어나야 할 task가 예상보다 늦는 문제
-- heap 사용량은 충분한데 allocation 실패가 나는 문제
-- mutex는 잡히는데 system throughput이 계속 떨어지는 문제
-- tickless 전환 이후 sleep/wakeup 타이밍이 흔들리는 문제
-
 ## 사전 지식
 
-이 시리즈를 읽기 전에 다음을 알고 있으면 좋습니다:
-
-- C 프로그래밍 (포인터, 구조체)
-- ARM Cortex-M 기초 (레지스터, 인터럽트)
+- C 프로그래밍 (포인터, 구조체, 함수 포인터)
+- ARM Cortex-M 기초 (레지스터, 인터럽트, 예외)
 - 기본적인 RTOS 개념 (task, scheduler, preemption)
+- 어셈블리 기초 (ARM 또는 RISC-V)
 
 ## 레퍼런스
 
 **서적**
-- *Operating System Concepts* - Silberschatz
+- *Operating System Concepts* (10th ed) - Silberschatz
 - *Real-Time Systems* - Jane W. S. Liu
-- *Hard Real-Time Computing Systems* - Buttazzo
+- *Hard Real-Time Computing Systems* (3rd ed) - Buttazzo
+- *MicroC/OS-III: The Real-Time Kernel* - Jean Labrosse
 
 **소스 코드**
 - [FreeRTOS Kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel)
 - [Zephyr Project](https://github.com/zephyrproject-rtos/zephyr)
+- [RT-Thread](https://github.com/RT-Thread/rt-thread)
 
 **문서**
-- [FreeRTOS Kernel Book](https://www.freertos.org/Documentation/)
+- [FreeRTOS Kernel Developer Docs](https://www.freertos.org/Documentation/)
 - [Zephyr Documentation](https://docs.zephyrproject.org/)
 - [AOSA Book - FreeRTOS Chapter](https://aosabook.org/en/v1/freertos.html)
 
 ## 이 시리즈의 목표
 
-이 시리즈를 다 읽고 나면 적어도 다음은 가능해야 합니다:
+이 시리즈를 완주하면:
 
-- scheduler 지연 원인을 자료구조 수준에서 설명하기
-- context switch 비용을 architecture 관점에서 추적하기
-- allocator/IPC 선택이 실시간성에 미치는 영향을 비교하기
-- FreeRTOS와 Zephyr를 "기능 표"가 아니라 내부 구조 관점에서 평가하기
+- **Scheduler 지연 원인**을 자료구조 수준에서 설명할 수 있다
+- **Context switch 비용**을 architecture 관점에서 추적할 수 있다
+- **동기화 프리미티브**를 직접 구현할 수 있다
+- **Allocator/IPC 선택**이 실시간성에 미치는 영향을 비교할 수 있다
+- **FreeRTOS와 Zephyr**를 "기능 표"가 아니라 내부 구조 관점에서 평가할 수 있다
+- **새로운 RTOS를 분석**할 때 핵심 포인트를 빠르게 파악할 수 있다
 
 ---
 
-다음 글: [Part 1-1: Scheduler 자료구조 분석](/blog/embedded/rtos-internals/part1-01-scheduler)
+다음 글: [Part 1-01: RTOS가 필요한 이유](/blog/embedded/rtos-internals/part1-01-why-rtos)
