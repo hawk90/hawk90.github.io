@@ -48,6 +48,12 @@ export const CATEGORIES: Category[] = [
     description: '발표 자료 / Slidev / 슬라이드',
     icon: '🎤',
   },
+  {
+    id: 'code-review',
+    name: 'Code Review',
+    description: '코드 리뷰 원칙 / 도구 / 문화 / 패턴',
+    icon: '👀',
+  },
 ];
 
 export function getCategoryById(id: string): Category | undefined {
