@@ -279,14 +279,13 @@ const filterSeriesLabel = t('search_filter_series');
       if (newIndex < 0) newIndex = items.length - 1;
       if (newIndex >= items.length) newIndex = 0;
 
+      // Only use aria-selected for styling (CSS handles the highlight)
       items.forEach((item) => {
-        item.classList.remove('bg-[var(--color-bg-secondary)]');
         item.setAttribute('aria-selected', 'false');
       });
 
       selectedIndex = newIndex;
       const selected = items[selectedIndex] as HTMLElement;
-      selected.classList.add('bg-[var(--color-bg-secondary)]');
       selected.setAttribute('aria-selected', 'true');
       selected.scrollIntoView({ block: 'nearest' });
 
@@ -345,7 +344,7 @@ const filterSeriesLabel = t('search_filter_series');
             `<span class="text-[11px] px-2 py-0.5 bg-[var(--color-accent-muted)] text-[var(--color-accent)] rounded-full">${highlightMatch(tag, '')}</span>`,
           ).join('');
           return `
-          <a href="/blog/${encodeURI(item.slug)}" id="search-opt-${index}" role="option" aria-selected="${index === selectedIndex}" class="block px-4 py-3 border-b border-[var(--color-border)] last:border-0 outline-none">
+          <a href="/blog/${encodeURI(item.slug)}" id="search-opt-${index}" role="option" aria-selected="false" class="block px-4 py-3 border-b border-[var(--color-border)] last:border-0 outline-none">
             ${ctx}
             <div class="font-medium">${highlightMatch(item.title, query)}</div>
             ${desc}
