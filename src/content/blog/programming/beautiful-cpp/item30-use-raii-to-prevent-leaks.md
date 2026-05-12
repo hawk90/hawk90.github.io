@@ -5,7 +5,7 @@ description: "RAII로 누수와 자원 해제 누락을 막는 법"
 tags: [C++, RAII, Resource Management]
 series: "Beautiful C++"
 seriesOrder: 30
-draft: true
+draft: false
 ---
 
 

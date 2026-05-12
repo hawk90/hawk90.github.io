@@ -5,7 +5,7 @@ description: "자명한 접근자 대신 진짜 불변식을 보호하는 인터
 tags: [C++, Encapsulation, Class Design]
 series: "Beautiful C++"
 seriesOrder: 4
-draft: true
+draft: false
 ---
 
 

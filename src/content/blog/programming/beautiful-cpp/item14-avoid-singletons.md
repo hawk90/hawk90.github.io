@@ -5,7 +5,7 @@ description: "싱글턴이 숨기는 비용과 의존성 주입이라는 대안"
 tags: [C++, Design Patterns, Dependency Injection]
 series: "Beautiful C++"
 seriesOrder: 14
-draft: true
+draft: false
 ---
 
 

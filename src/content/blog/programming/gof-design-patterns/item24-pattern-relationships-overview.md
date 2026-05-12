@@ -7,8 +7,6 @@ series: "GoF Design Patterns"
 seriesOrder: 24
 ---
 
-> **초안** — 정리 진행 중
-
 ## 개요
 
 GoF 23개 패턴은 독립적으로 존재하지 않습니다. 서로 **사용하거나**, **대체 가능**하거나, **유사한 구조**를 공유합니다. 한 패턴을 다른 패턴 안에서 활용하는 경우도 흔합니다 (예: Abstract Factory 안의 각 메서드는 Factory Method).

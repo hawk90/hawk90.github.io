@@ -5,7 +5,7 @@ description: "타입별 복붙을 템플릿으로 일반화하기"
 tags: [C++, Templates, Generic Programming]
 series: "Beautiful C++"
 seriesOrder: 23
-draft: true
+draft: false
 ---
 
 

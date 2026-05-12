@@ -5,7 +5,7 @@ description: "타입 시스템에 의미를 담아 컴파일러에게 검사를 
 tags: [C++, Type Safety, Strong Types]
 series: "Beautiful C++"
 seriesOrder: 25
-draft: true
+draft: false
 ---
 
 

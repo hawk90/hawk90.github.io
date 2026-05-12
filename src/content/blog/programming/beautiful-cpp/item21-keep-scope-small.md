@@ -5,7 +5,7 @@ description: "변수 수명을 짧게 유지하는 현대 C++ 스타일"
 tags: [C++, Scope, Code Style]
 series: "Beautiful C++"
 seriesOrder: 21
-draft: true
+draft: false
 ---
 
 

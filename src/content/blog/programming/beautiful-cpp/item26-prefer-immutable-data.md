@@ -5,7 +5,7 @@ description: "불변 데이터가 주는 추론·동시성·테스트의 이점"
 tags: [C++, Immutability, const]
 series: "Beautiful C++"
 seriesOrder: 26
-draft: true
+draft: false
 ---
 
 

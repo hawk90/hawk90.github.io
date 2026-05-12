@@ -5,7 +5,7 @@ description: "const_cast의 함정과 mutable로 의도를 명시하는 방법"
 tags: [C++, const-correctness, mutable]
 series: "Beautiful C++"
 seriesOrder: 16
-draft: true
+draft: false
 ---
 
 

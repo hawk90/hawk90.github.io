@@ -5,7 +5,7 @@ description: "기본 멤버 초기화자로 깔끔한 초기화를 표현하는 
 tags: [C++, Initialization, Constructor]
 series: "Beautiful C++"
 seriesOrder: 3
-draft: true
+draft: false
 ---
 
 

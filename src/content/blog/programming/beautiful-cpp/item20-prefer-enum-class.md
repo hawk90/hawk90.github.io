@@ -5,7 +5,7 @@ description: "enum class가 주는 스코프와 타입 안전성"
 tags: [C++, Enums, Type Safety]
 series: "Beautiful C++"
 seriesOrder: 20
-draft: true
+draft: false
 ---
 
 
