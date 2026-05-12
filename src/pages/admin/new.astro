@@ -200,8 +200,14 @@ import { SITE_CONFIG } from '../../consts/config';
     createFile,
     uploadImage,
     parseRepo,
-    serializeFrontmatter,
   } from '../../lib/admin/github-api';
+  import {
+    buildPostDocument,
+    isValidContentPathSegment,
+    parseTagInput,
+    sanitizePreviewHtml,
+    todayIsoDate,
+  } from '../../lib/admin/post-document';
   import { ADMIN_CONFIG } from '../../consts/config';
   import { marked } from 'marked';
 
@@ -284,21 +290,16 @@ import { SITE_CONFIG } from '../../consts/config';
     function buildMarkdown(draft: boolean): string {
       const title = titleInput?.value || 'Untitled';
       const description = descInput?.value || '';
-      const tags = tagsInput?.value
-        ? tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean)
-        : [];
+      const tags = parseTagInput(tagsInput?.value || '');
       const content = getContent();
-      const date = new Date().toISOString().split('T')[0];
-      const frontmatter: Record<string, unknown> = {
+      return buildPostDocument({
         title,
-        date,
+        description,
+        tags,
+        date: todayIsoDate(),
         draft,
-      };
-
-      if (description) frontmatter.description = description;
-      if (tags.length > 0) frontmatter.tags = tags;
-
-      return `${serializeFrontmatter(frontmatter)}\n\n${content}`;
+        body: content,
+      });
     }
 
     // Save to GitHub
@@ -321,12 +322,11 @@ import { SITE_CONFIG } from '../../consts/config';
       // path into the slug. Allows ASCII alphanum, Hangul, dashes,
       // underscores, dots, and forward slash (so chapter subdirs like
       // "ch01-vector-spaces/00-warmup" still work).
-      const safeSegment = /^[A-Za-z0-9가-힣][A-Za-z0-9가-힣._\-\/]*$/;
-      if (!safeSegment.test(rawSlug) || rawSlug.includes('..')) {
+      if (!isValidContentPathSegment(rawSlug)) {
         showToast('Slug has invalid characters', 'error');
         return;
       }
-      if (!safeSegment.test(rawCategory) || rawCategory.includes('..')) {
+      if (!isValidContentPathSegment(rawCategory)) {
         showToast('Category has invalid characters', 'error');
         return;
       }
@@ -433,7 +433,7 @@ import { SITE_CONFIG } from '../../consts/config';
 
       // Update preview content
       if (previewTitle) previewTitle.textContent = titleInput?.value || 'Untitled';
-      if (previewDate) previewDate.textContent = new Date().toISOString().split('T')[0];
+      if (previewDate) previewDate.textContent = todayIsoDate();
       if (previewDescription) {
         previewDescription.textContent = descInput?.value || '';
         previewDescription.classList.toggle('hidden', !descInput?.value);
@@ -441,9 +441,7 @@ import { SITE_CONFIG } from '../../consts/config';
 
       // Tags
       if (previewTags) {
-        const tags = tagsInput?.value
-          ? tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean)
-          : [];
+        const tags = parseTagInput(tagsInput?.value || '');
         previewTags.innerHTML = tags
           .map((tag) => `<span class="px-2 py-1 bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] text-sm rounded">${escapeHtml(tag)}</span>`)
           .join('');
@@ -454,7 +452,7 @@ import { SITE_CONFIG } from '../../consts/config';
       if (previewContent) {
         const markdown = getContent();
         const html = await marked.parse(markdown);
-        previewContent.innerHTML = html;
+        previewContent.innerHTML = sanitizePreviewHtml(html);
       }
 
       // Show modal

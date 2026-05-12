@@ -231,8 +231,14 @@ import { SITE_CONFIG } from '../../consts/config';
     deleteFile,
     parseRepo,
     splitFrontmatter,
-    serializeFrontmatter,
   } from '../../lib/admin/github-api';
+  import {
+    buildPostDocument,
+    isAllowedContentFilePath,
+    parseTagInput,
+    sanitizePreviewHtml,
+    todayIsoDate,
+  } from '../../lib/admin/post-document';
   import { ADMIN_CONFIG } from '../../consts/config';
   import { marked } from 'marked';
 
@@ -384,6 +390,9 @@ import { SITE_CONFIG } from '../../consts/config';
       contentPath: string
     ): Promise<string> {
       if (pathParam) {
+        if (!isAllowedContentFilePath(pathParam, contentPath)) {
+          throw new Error('Invalid post path.');
+        }
         return pathParam;
       }
 
@@ -411,21 +420,15 @@ import { SITE_CONFIG } from '../../consts/config';
         const branch = ADMIN_CONFIG.branch || 'main';
 
         // Build new content
-        const tags = tagsInput?.value
-          ? tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean)
-          : [];
-
-        const frontmatter: Record<string, unknown> = {
-          title: titleInput?.value || 'Untitled',
-          date: publishedDate || new Date().toISOString().split('T')[0],
-          draft: draftCheckbox?.checked ?? true,
-        };
-
-        if (descInput?.value) frontmatter.description = descInput.value;
-        if (tags.length > 0) frontmatter.tags = tags;
-
         const body = contentTextarea?.value || '';
-        const content = buildMarkdown(frontmatter, body);
+        const content = buildMarkdown({
+          title: titleInput?.value || 'Untitled',
+          description: descInput?.value || '',
+          tags: parseTagInput(tagsInput?.value || ''),
+          date: publishedDate || todayIsoDate(),
+          draft: draftCheckbox?.checked ?? true,
+          body,
+        });
 
         const result = await updateFile(
           authState.accessToken,
@@ -448,8 +451,8 @@ import { SITE_CONFIG } from '../../consts/config';
       }
     }
 
-    function buildMarkdown(frontmatter: Record<string, unknown>, body: string): string {
-      return `${serializeFrontmatter(frontmatter)}\n\n${body}`;
+    function buildMarkdown(input: Parameters<typeof buildPostDocument>[0]): string {
+      return buildPostDocument(input);
     }
 
     // Pull a human-readable name out of a repo path. Used in commit
@@ -513,7 +516,7 @@ import { SITE_CONFIG } from '../../consts/config';
 
       // Update preview content
       if (previewTitle) previewTitle.textContent = titleInput?.value || 'Untitled';
-      if (previewDate) previewDate.textContent = publishedDate || new Date().toISOString().split('T')[0];
+      if (previewDate) previewDate.textContent = publishedDate || todayIsoDate();
       if (previewDescription) {
         previewDescription.textContent = descInput?.value || '';
         previewDescription.classList.toggle('hidden', !descInput?.value);
@@ -526,9 +529,7 @@ import { SITE_CONFIG } from '../../consts/config';
 
       // Tags
       if (previewTags) {
-        const tags = tagsInput?.value
-          ? tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean)
-          : [];
+        const tags = parseTagInput(tagsInput?.value || '');
         previewTags.innerHTML = tags
           .map((tag) => `<span class="px-2 py-1 bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] text-sm rounded">${escapeHtml(tag)}</span>`)
           .join('');
@@ -539,7 +540,7 @@ import { SITE_CONFIG } from '../../consts/config';
       if (previewContent) {
         const markdown = contentTextarea?.value || '';
         const html = await marked.parse(markdown);
-        previewContent.innerHTML = html;
+        previewContent.innerHTML = sanitizePreviewHtml(html);
       }
 
       // Show modal
