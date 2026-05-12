@@ -148,6 +148,13 @@ export type AdminConfig =
   | { enabled: false }
   | {
       enabled: true;
+      /**
+       * Authentication mode:
+       * - 'pat': Personal Access Token only (works on GitHub Pages)
+       * - 'oauth': GitHub OAuth only (requires Vercel/Netlify with API routes)
+       * - 'both': Show both options (default)
+       */
+      authMode?: 'pat' | 'oauth' | 'both';
       /** GitHub OAuth App Client ID (public, safe to commit) */
       clientId: string;
       /** GitHub usernames allowed to access admin panel */

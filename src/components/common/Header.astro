@@ -1,10 +1,11 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
 import Logo from './Logo.astro';
-import { NAV_CONFIG } from '../../consts/config';
+import { NAV_CONFIG, ADMIN_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
 
 const currentPath = Astro.url.pathname;
+const showAdminLink = ADMIN_CONFIG.enabled;
 
 function isNavActive(href: string, match: ReadonlyArray<string> | undefined): boolean {
   const prefixes = match ?? [href];
@@ -61,6 +62,15 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
 
         <ThemeToggle />
 
+        <!-- Admin -->
+        {showAdminLink && (
+          <a href="/admin" class="btn btn-ghost p-2" aria-label="Admin">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </a>
+        )}
+
         <!-- Settings -->
         <a href="/settings" class="btn btn-ghost p-2" aria-label="Settings">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,6 +84,15 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
     <!-- Mobile Menu Button -->
     <div class="flex md:hidden items-center gap-3">
       <ThemeToggle />
+
+      <!-- Admin -->
+      {showAdminLink && (
+        <a href="/admin" class="btn btn-ghost p-2" aria-label="Admin">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </a>
+      )}
 
       <!-- Settings -->
       <a href="/settings" class="btn btn-ghost p-2" aria-label="Settings">

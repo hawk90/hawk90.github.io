@@ -1,14 +1,16 @@
 /**
- * GitHub OAuth Device Flow Authentication
+ * GitHub Authentication for Admin Panel
  *
- * Uses the Device Authorization Grant for static sites.
- * No server-side callback required.
+ * Supports two authentication methods:
  *
- * Flow:
- * 1. Request device code from GitHub
- * 2. User enters code at github.com/login/device
- * 3. Poll for access token
- * 4. Store token in localStorage
+ * 1. PAT (Personal Access Token) - Works on all deployments including GitHub Pages
+ *    - User generates token at github.com/settings/tokens
+ *    - Token is stored in localStorage
+ *
+ * 2. OAuth - Requires server-side routes (Vercel/Netlify with hybrid mode)
+ *    - User clicks "Login with GitHub"
+ *    - Server exchanges code for token
+ *    - Token is passed via URL hash and stored in localStorage
  */
 
 // ─── Types ──────────────────────────────────────────────────
@@ -202,6 +204,48 @@ export function getAuthState(): AuthState {
  */
 export function isAllowedUser(user: GitHubUser, allowedUsers: string[]): boolean {
   return allowedUsers.map((u) => u.toLowerCase()).includes(user.login.toLowerCase());
+}
+
+/**
+ * Parse OAuth callback hash and save auth state.
+ * Returns true if successful, false if no hash or invalid.
+ *
+ * Hash format: #token={accessToken}&user={encodedUserJson}
+ */
+export function handleOAuthCallback(): { success: boolean; error?: string } {
+  try {
+    if (typeof window === 'undefined') {
+      return { success: false };
+    }
+
+    const hash = window.location.hash;
+    if (!hash || hash.length < 2) {
+      return { success: false };
+    }
+
+    // Parse hash parameters
+    const params = new URLSearchParams(hash.slice(1));
+    const token = params.get('token');
+    const userJson = params.get('user');
+
+    if (!token || !userJson) {
+      return { success: false };
+    }
+
+    // Parse user object
+    const user = JSON.parse(decodeURIComponent(userJson)) as GitHubUser;
+
+    // Save auth state
+    saveAuth(token, user);
+
+    // Clear the hash from URL (security)
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to parse OAuth callback:', error);
+    return { success: false, error: 'Invalid callback data' };
+  }
 }
 
 /**

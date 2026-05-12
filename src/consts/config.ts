@@ -42,7 +42,6 @@ export const NAV_CONFIG = defineNav([
   { href: '/about', label: 'About' },
   { href: '/blog', label: 'Blog', match: ['/blog', '/series', '/tags'] },
   { href: '/resume', label: 'Resume' },
-  { href: '/admin', label: 'Admin' },
 ]);
 
 // --- Social Links ---
@@ -132,6 +131,11 @@ export const DEFAULT_CODE_THEMES = {
 // --- Admin Panel ---
 export const ADMIN_CONFIG = defineAdmin({
   enabled: true,
+  // Authentication mode:
+  // - 'pat': Personal Access Token only (works everywhere)
+  // - 'oauth': GitHub OAuth only (requires Vercel/Netlify)
+  // - 'both': Show both options (default)
+  authMode: 'both',
   clientId: 'Ov23lim7LA7j5Np59mgw',
   allowedUsers: ['hawk90'],
   contentRepo: 'hawk90/hawk90.github.io',
