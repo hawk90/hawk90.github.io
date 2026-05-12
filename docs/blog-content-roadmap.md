@@ -540,6 +540,41 @@ Part 4: Embedded ML (8개)
 - How to Write & Publish Scientific Paper
 - Academic Writing for Graduate Students
 
+### 프로그래머 필독서 64선 (선별 21권)
+
+**Core Fundamentals (핵심)**
+- The Pragmatic Programmer - Hunt & Thomas ★★
+- Code Complete - McConnell ★★
+- Refactoring - Fowler ★★
+- Design Patterns (GoF) - Gamma et al ★★
+- The Mythical Man-Month - Brooks ★★
+
+**Code Quality (코드 품질)**
+- Test Driven Development: By Example - Beck ★
+- Working Effectively with Legacy Code - Feathers ★
+
+**Algorithms & CS (알고리즘)**
+- Programming Pearls - Bentley ★
+- Structure and Interpretation of Computer Programs - Abelson & Sussman ★
+- Introduction to Algorithms (CLRS) - Cormen et al ★★
+- How to Solve It - Polya ★
+
+**Systems (시스템)**
+- Advanced Programming in the UNIX Environment - Stevens ★★
+- The Art of UNIX Programming - Raymond ★
+- Computer Architecture: A Quantitative Approach - Hennessy & Patterson ★★
+
+**Team & Process (팀/프로세스)**
+- Peopleware - DeMarco & Lister ★
+- Rapid Development - McConnell ★
+- Extreme Programming Explained - Beck ★
+
+**Design & Thinking (설계/사고)**
+- Head First Design Patterns - Freeman ★
+- The Design of Everyday Things - Norman ★
+- Code: The Hidden Language - Petzold ★
+- Hackers & Painters - Graham ★
+
 ★ = 핵심 참고
 ★★ = 시리즈 주요 참고
 
