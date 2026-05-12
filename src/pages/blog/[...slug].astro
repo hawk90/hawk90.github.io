@@ -191,9 +191,11 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
           </div>
         </div>
 
-        <!-- Sidebar — independent scroll region when content overflows viewport -->
+        <!-- Sidebar — keep the column sticky, but avoid making the whole
+             sidebar a second scrolling surface. Only long sub-sections
+             should scroll independently. -->
         <aside class="hidden lg:block w-64 shrink-0">
-          <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto overscroll-contain pr-2 sidebar-scroll">
+          <div class="sticky top-24 space-y-8">
             {seriesPosts.length > 1 && (
               <SeriesSidebar
                 seriesName={post.data.series!}

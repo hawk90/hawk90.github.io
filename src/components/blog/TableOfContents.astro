@@ -88,9 +88,6 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
       }
     });
 
-    const scrollHost = tocLinks[0]?.closest<HTMLElement>('.sidebar-scroll') ?? null;
-    let lastActiveId = '';
-
     const update = () => {
       const OFFSET = 120;
       const bodyHeight = document.body.offsetHeight;
@@ -103,26 +100,10 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
           else break;
         }
       }
-      let activeLink: HTMLAnchorElement | null = null;
       tocLinks.forEach((link) => {
         const isActive = link.dataset.heading === currentId;
         link.classList.toggle('is-active', isActive);
-        if (isActive) activeLink = link;
       });
-
-      // Keep the active TOC link visible inside the sidebar's own scroll
-      // region (only when the active item actually changed — avoids
-      // fighting the user if they're scrolling the sidebar manually).
-      if (activeLink && scrollHost && currentId !== lastActiveId) {
-        lastActiveId = currentId;
-        const link: HTMLAnchorElement = activeLink;
-        const hostRect = scrollHost.getBoundingClientRect();
-        const linkRect = link.getBoundingClientRect();
-        const aboveBy = hostRect.top - linkRect.top;
-        const belowBy = linkRect.bottom - hostRect.bottom;
-        if (aboveBy > 0) scrollHost.scrollBy({ top: -aboveBy - 16, behavior: 'smooth' });
-        else if (belowBy > 0) scrollHost.scrollBy({ top: belowBy + 16, behavior: 'smooth' });
-      }
     };
 
     let ticking = false;

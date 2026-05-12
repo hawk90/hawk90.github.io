@@ -44,7 +44,7 @@ function formatChapter(key: string): string {
 }
 ---
 
-<nav class="mb-8">
+<nav>
   <button
     type="button"
     class="w-full flex items-center justify-between text-left group"
@@ -69,7 +69,10 @@ function formatChapter(key: string): string {
     </div>
   </button>
 
-  <div class="mt-3 space-y-4" data-series-list>
+  <div
+    class="mt-3 space-y-4 max-h-[min(44vh,32rem)] overflow-y-auto overscroll-contain pr-2 sidebar-panel-scroll"
+    data-series-list
+  >
     {chapters.map((chapter) => (
       <div>
         {hasChapters && chapter.label && (
@@ -120,7 +123,7 @@ function formatChapter(key: string): string {
     // own scroll region. Without this, on long series (40+ items) the
     // user lands on the page but the current entry sits off-screen.
     const current = document.querySelector<HTMLAnchorElement>('[data-series-current]');
-    const scrollHost = current?.closest<HTMLElement>('.sidebar-scroll');
+    const scrollHost = current?.closest<HTMLElement>('[data-series-list]');
     if (current && scrollHost) {
       const hostRect = scrollHost.getBoundingClientRect();
       const itemRect = current.getBoundingClientRect();
