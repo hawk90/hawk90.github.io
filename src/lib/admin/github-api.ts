@@ -274,6 +274,11 @@ export interface DraftPost {
 
 /**
  * Parse frontmatter from markdown content.
+ *
+ * Handles one-line scalars and bracket-arrays. The admin panel only emits
+ * this flat shape from the new/edit pages, so we just round-trip what we
+ * write — multi-line YAML block scalars (`|`/`>`) are intentionally not
+ * supported.
  */
 export function parseFrontmatter(content: string): Record<string, unknown> {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
@@ -289,6 +294,7 @@ export function parseFrontmatter(content: string): Record<string, unknown> {
     const key = line.slice(0, colonIndex).trim();
     let value: unknown = line.slice(colonIndex + 1).trim();
 
+    // Array form: [a, b, c] — strip wrapping quotes on each item.
     if (typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
       const inner = value.slice(1, -1).trim();
       value = inner
@@ -298,19 +304,18 @@ export function parseFrontmatter(content: string): Record<string, unknown> {
             .filter(Boolean)
             .map((item) => item.replace(/^['"]|['"]$/g, ''))
         : [];
+    } else if (typeof value === 'string') {
+      // Scalars only: strip wrapping quotes, then convert literal "true"/"false".
+      // Guarded so we don't call `.startsWith` on the array branch above.
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      if (value === 'true') value = true;
+      else if (value === 'false') value = false;
     }
-
-    // Remove quotes if present
-    if (
-      (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-
-    // Parse booleans
-    if (value === 'true') value = true;
-    if (value === 'false') value = false;
 
     frontmatter[key] = value;
   }

@@ -377,7 +377,7 @@ import { SITE_CONFIG } from '../../consts/config';
           currentPath,
           content,
           currentSha,
-          `Update: ${slug}`,
+          `Update: ${postName(currentPath)}`,
           branch
         );
 
@@ -393,6 +393,13 @@ import { SITE_CONFIG } from '../../consts/config';
 
     function buildMarkdown(frontmatter: Record<string, unknown>, body: string): string {
       return `${serializeFrontmatter(frontmatter)}\n\n${body}`;
+    }
+
+    // Pull a human-readable name out of a repo path. Used in commit
+    // messages — `slug` from the query string is often null when we
+    // navigated by `?path=...`, so deriving from the path is more reliable.
+    function postName(p: string): string {
+      return p.split('/').pop()?.replace(/\.(md|mdx)$/, '') ?? p;
     }
 
     // Toggle draft status
@@ -423,7 +430,7 @@ import { SITE_CONFIG } from '../../consts/config';
           repo,
           currentPath,
           currentSha,
-          `Delete: ${slug}`,
+          `Delete: ${postName(currentPath)}`,
           branch
         );
 

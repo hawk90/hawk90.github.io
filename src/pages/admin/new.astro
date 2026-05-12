@@ -259,13 +259,29 @@ import { SITE_CONFIG } from '../../consts/config';
         return;
       }
 
-      const slug = slugInput?.value;
-      const category = categoryInput?.value || 'uncategorized';
+      const rawSlug = (slugInput?.value ?? '').trim();
+      const rawCategory = (categoryInput?.value ?? 'uncategorized').trim();
 
-      if (!slug) {
+      if (!rawSlug) {
         showToast('Please enter a slug', 'error');
         return;
       }
+
+      // Reject anything that would escape the content dir or smuggle a
+      // path into the slug. Allows ASCII alphanum, Hangul, dashes,
+      // underscores, dots, and forward slash (so chapter subdirs like
+      // "ch01-vector-spaces/00-warmup" still work).
+      const safeSegment = /^[A-Za-z0-9가-힣][A-Za-z0-9가-힣._\-\/]*$/;
+      if (!safeSegment.test(rawSlug) || rawSlug.includes('..')) {
+        showToast('Slug has invalid characters', 'error');
+        return;
+      }
+      if (!safeSegment.test(rawCategory) || rawCategory.includes('..')) {
+        showToast('Category has invalid characters', 'error');
+        return;
+      }
+      const slug = rawSlug;
+      const category = rawCategory;
 
       if (saveStatus) saveStatus.textContent = 'Saving...';
 
