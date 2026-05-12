@@ -42,6 +42,7 @@ export const NAV_CONFIG = defineNav([
   { href: '/about', label: 'About' },
   { href: '/blog', label: 'Blog', match: ['/blog', '/series', '/tags'] },
   { href: '/resume', label: 'Resume' },
+  { href: '/admin', label: 'Admin' },
 ]);
 
 // --- Social Links ---
