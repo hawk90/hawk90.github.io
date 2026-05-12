@@ -4,16 +4,59 @@
 
 ---
 
+## 상세 계획 문서
+
+| 문서 | 설명 |
+|-----|------|
+| [cpp-software-design-plan.md](./cpp-software-design-plan.md) | C++ Software Design 39 가이드라인 |
+| [cpp-concurrency-in-action-plan.md](./cpp-concurrency-in-action-plan.md) | C++ Concurrency 11장 |
+| [clean-architecture-plan.md](./clean-architecture-plan.md) | Clean Architecture 34장 |
+| [embedded-courses-design.md](./embedded-courses-design.md) | 임베디드 4개 시리즈 설계 |
+| [embedded-courses-references.md](./embedded-courses-references.md) | 임베디드 참고자료 |
+
+---
+
 ## 현재 블로그 시리즈 현황
 
-| 카테고리 | 시리즈 | Part | 글 수 |
-|---------|-------|------|------|
-| Programming | Effective C++ | - | 진행중 |
-| Programming | Effective Modern C++ | - | 진행중 |
-| Embedded | Modern Embedded Recipes | 11 | 145 |
-| Embedded | RTOS Internals | 5 | 45 |
-| Embedded | Performance Engineering | 6 | 50 |
-| Embedded | Embedded C++ | 5 | 40 |
+### Programming (14 시리즈)
+- Effective C++ (진행중)
+- Effective Modern C++ (진행중)
+- C++ Software Design (40 가이드라인)
+- C++ Concurrency in Action (12장)
+- Beautiful C++
+- Clean Architecture (35장)
+- Code Complete
+- Pragmatic Programmer
+- GoF Design Patterns (23 패턴)
+- Data Structures & Algorithms
+- UML
+- Refactoring — Fowler (예정)
+- Code: The Hidden Language — Petzold (예정)
+- 리눅스 커널의 구조와 원리 (예정)
+
+### Embedded (4 시리즈, preface만 존재)
+- Modern Embedded Recipes (6 Parts, 36글 예정)
+- RTOS Internals (3 Parts, 15글 예정)
+- Performance Engineering (4 Parts, 16글 예정)
+- Embedded C++ (3 Parts, 12글 예정)
+
+### Writing (8 시리즈, stubs)
+- On Writing Well (24장)
+- Elements of Style (5장)
+- Academic Writing (8 units)
+- Style Williams (10 lessons)
+- Only Grammar Book (6장)
+- 우리글 바로쓰기 - 이오덕 (20장)
+- 고종석의 문장 (16장)
+- 비판적 사고 - 김희정·박은진 (예정)
+
+### Math (3 시리즈)
+- Linear Algebra
+- Set Theory
+- How to Solve It
+
+### Parallel (1 시리즈)
+- Parallel Principles (3장)
 
 ---
 
@@ -365,6 +408,226 @@ Part 4: Embedded ML (8개)
 
 ---
 
+### 7. Refactoring — Martin Fowler
+
+**책 정보:**
+- *Refactoring: Improving the Design of Existing Code* — Fowler, 2nd ed (2018)
+- 1st edition (1999) — Java / 2nd edition (2018) — JavaScript
+- ~440쪽, 12장 + 88 refactoring catalog
+- "코드 냄새 → 리팩토링 매핑"의 정전
+
+**제안 구조:**
+
+```
+시리즈: Refactoring (Fowler 2nd Edition)
+총 ~95개 글 (개념 7 + catalog 88)
+
+Part 1: Principles (Ch 1-3, ~5개)
+- 첫 예제 (비디오 대여 시스템)
+- 리팩토링 원칙
+- Bad Smells in Code (24 smells)
+
+Part 2: Tests & Composing (Ch 4-6, ~4개)
+- 테스트 구축
+- 메서드 합성 / 분해
+- Move 계열 리팩토링
+
+Part 3: Encapsulation, Features (Ch 7-9, ~3개)
+- 캡슐화 강화
+- 기능 이동
+- 데이터 조직화
+
+Part 4: Conditional, API, Inheritance (Ch 10-12, ~3개)
+- 조건문 단순화
+- API 리팩토링
+- 상속 다루기
+
+Catalog: 88 리팩토링 (각 글 1-2)
+- Extract Function / Variable
+- Inline Function / Variable
+- Change Function Declaration
+- Encapsulate Variable
+- Rename Variable
+- Move Function / Field
+- Replace Conditional with Polymorphism
+- ... (총 88개)
+```
+
+**예제 통일** — JavaScript 원본 → TypeScript + C++ 병행 (시리즈 결합)
+
+**기존 시리즈와 연결:**
+- C++ Software Design 가이드라인 1-2 (변경 친화)
+- Clean Architecture Ch 7-11 (SOLID)
+- GoF — Strategy / Visitor / State 등 (Replace Conditional 등에서)
+
+---
+
+### 8. Code: The Hidden Language — Charles Petzold
+
+**책 정보:**
+- *Code: The Hidden Language of Computer Hardware and Software* — Petzold, 2nd ed (2022)
+- ~430쪽, 28장
+- "모스 부호 → CPU"까지 bottom-up — 컴퓨터 본질의 정전
+- 64선 추천 도서
+
+**제안 구조:**
+
+```
+시리즈: Code (Petzold 2nd Edition)
+총 29개 글 (overview + 28장)
+
+Part 1: Information & Signals (Ch 1-7, 7개)
+- 손전등 통신, 모스 부호
+- 점자, 코드의 본질
+- 전기, 전선과 신호
+- 논리 게이트
+
+Part 2: From Gates to Computers (Ch 8-16, 9개)
+- 부호화, 이진수
+- 가산기 / 감산기
+- 플립플롭, 카운터
+- 메모리
+
+Part 3: A CPU (Ch 17-22, 6개)
+- 자동화
+- 단순 CPU 설계
+- 명령어 / 어셈블리
+- 인텔 8080 / 모토로라 6800
+
+Part 4: Modern Computer (Ch 23-28, 6개)
+- 운영체제
+- 부동소수점
+- 그래픽
+- 인터넷
+- 마무리
+```
+
+**위상:**
+- 가장 낮은 추상에서 시작하는 입문 — 면접 / 기초 다지기
+- Computer Architecture (Hennessy/Patterson)의 사전 단계
+- 임베디드 / OS 시리즈의 학부 기초
+
+---
+
+### 9. 리눅스 커널의 구조와 원리
+
+**책 정보:**
+- 후보 — *리눅스 커널의 구조와 원리* (김민장) 또는 *리눅스 커널 내부구조* (백승재/최태영)
+- 또는 — *Understanding the Linux Kernel* (Bovet/Cesati) 한국어로 다룸
+- 한국어 출판 / 한국어 자료 풍부
+
+**위상:**
+- 기존 로드맵의 "Linux Systems Deep Dive"와 부분 겹침
+- 그러나 — Kernel **내부 구조**에 집중 (vs 시스템 프로그래밍)
+- 임베디드 Linux Recipe Part 7과 시너지
+
+**제안 구조:**
+
+```
+시리즈: 리눅스 커널의 구조와 원리
+총 ~25개 글, 5 Part
+
+Part 1: Boot & Kernel Init (4개)
+- 부트로더 → 커널 진입
+- 커널 초기화 시퀀스
+- 메모리 맵 구성
+- init / systemd 프로세스 1
+
+Part 2: Process / Scheduling (6개)
+- task_struct 자세히
+- fork / exec / exit
+- 스케줄러 (CFS, RT, deadline)
+- 컨텍스트 스위치
+- 시그널 처리
+- namespace / cgroup
+
+Part 3: Memory Management (6개)
+- 페이지 / zone / node
+- buddy allocator
+- slab / slub / slob
+- vmalloc
+- page cache
+- swap
+
+Part 4: File System / I/O (5개)
+- VFS 계층
+- ext4 / Btrfs / XFS 비교
+- 블록 I/O 계층
+- Direct I/O / O_SYNC
+- io_uring
+
+Part 5: Synchronization & Debug (4개)
+- 동기화 primitives (spinlock, mutex, rwsem, RCU)
+- 인터럽트 / softirq / tasklet / workqueue
+- ftrace / perf / eBPF
+- crash dump 분석
+```
+
+**기존 시리즈와 연결:**
+- C++ Concurrency Ch 5 (메모리 모델) — 커널 시각으로
+- Modern Embedded Recipes Part 7 (Linux Embedded)
+- Performance Engineering — 프로파일링 / 트레이싱
+
+**언어 선택:**
+- 본문 — 한국어 (한국어 책 기반)
+- 코드 예제 — C (커널 표준)
+- 어셈블리 — x86_64 / ARM64 일부
+
+---
+
+### 10. 비판적 사고 — 김희정·박은진
+
+**책 정보:**
+- *비판적 사고: 학술적 글쓰기를 위하여* — 김희정·박은진 (아카넷)
+- 한국어 비판적 사고 / 논증 교과서
+- 학부 교양 / 대학원 학술 글쓰기 표준
+
+**위상:**
+- Writing 시리즈와 결합 — 글쓰기 + 논증 사고
+- Math의 "How to Solve It" (Polya)와 다른 축 — 일상 논증
+- 기술 글의 논증 구조에도 적용
+
+**제안 구조:**
+
+```
+시리즈: 비판적 사고
+총 ~15개 글, 4 Part
+
+Part 1: 논증의 기초 (4개)
+- 명제와 논증
+- 연역 vs 귀납
+- 타당성과 건전성
+- 논증 다이어그램
+
+Part 2: 논증 분석 (4개)
+- 전제와 결론 식별
+- 숨은 전제 발굴
+- 논증 강도 평가
+- 형식 / 비형식 오류
+
+Part 3: 비판적 평가 (4개)
+- 권위 / 통계 / 비교 논증
+- 인과 / 유비 / 가설 논증
+- 정의와 모호성
+- 가치 논증
+
+Part 4: 학술 글쓰기에 적용 (3개)
+- 학술 글의 논증 구조
+- 반론 다루기
+- 결론 도출
+```
+
+**기존 시리즈와 연결:**
+- Writing 7개 (On Writing Well 등) — 표현
+- 비판적 사고 — 사고의 구조 (표현 이전 단계)
+- Academic Writing — 학술 글의 형식
+- 합쳐서 "쓰기 위한 사고 → 사고를 위한 쓰기" 완결
+
+**언어:**
+- 한국어 원본 — 한국어로 작성
+
+---
+
 ## 우선순위 및 로드맵
 
 ### Phase 1 (높은 우선순위)
@@ -387,6 +650,15 @@ Part 4: Embedded ML (8개)
 |-------|------|----------|
 | Distributed Systems | 클라우드 엣지 연동 | 35 |
 | ML Engineering | AI 배포, 임베디드 ML | 40 |
+
+### Phase 추가 (사용자 요청)
+
+| 시리즈 | 이유 | 예상 글 수 |
+|-------|------|----------|
+| Refactoring (Fowler) | 코드 품질 / 변경 친화 — 모든 C++ 시리즈와 시너지 | ~95 |
+| Code (Petzold) | 학부 기초 / 면접 / Computer Architecture 사전 단계 | 29 |
+| 리눅스 커널의 구조와 원리 | 임베디드 Linux / 시스템 프로그래밍 심화 | ~25 |
+| 비판적 사고 (김희정·박은진) | Writing 시리즈와 결합 — 사고 / 논증 / 학술 글 | ~15 |
 
 ---
 
@@ -582,19 +854,18 @@ Part 4: Embedded ML (8개)
 
 ## 다음 단계
 
-1. **Phase 1 시리즈 서문 작성**
-   - Parallel Programming Principles 서문
-   - Mathematics for Engineers 서문
+### 우선순위 1: 기존 시리즈 본문 작성
+- [ ] C++ Software Design 파일럿 (가이드라인 1-3)
+- [ ] C++ Concurrency 파일럿 (Ch 1-2)
+- [ ] Clean Architecture 파일럿 (Ch 1-2)
 
-2. **기존 시리즈 보강**
-   - Modern Embedded Recipes에 PCIe 심화 추가
-   - Performance Engineering에 SIMD, lock-free 추가
+### 우선순위 2: Embedded 본문 시작
+- [ ] Modern Embedded Recipes Part 1 첫 글
 
-3. **카테고리 구조 업데이트**
-   - `math` 카테고리 활성화
-   - `parallel` 카테고리 추가
+### 우선순위 3: Writing 시리즈 본문 작성
+- [ ] On Writing Well 1-3장
 
 ---
 
 *문서 작성일: 2026-05-12*
-*기반: /Users/hawk/Drive/01_Book/list.txt*
+*최종 수정: 2026-05-13 (Refactoring / Code / 리눅스 커널 / 비판적 사고 추가)*
