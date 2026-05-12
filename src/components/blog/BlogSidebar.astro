@@ -32,9 +32,6 @@ function isActiveCategory(categoryId: string): boolean {
   return activeFilter?.type === 'category' && activeFilter.value === categoryId;
 }
 
-// Posts that belong directly to a given category id but NOT to a deeper sub-category.
-// e.g. 'programming' top-level only counts posts directly under programming/<series>/...
-// excluding posts under programming/cpp/... (those belong to the sub-category).
 function postsDirectlyIn(catId: string) {
   const subCatIds = CATEGORIES.filter((c) => c.parent === catId).map((c) => c.id);
   return allPosts.filter((p) => {
@@ -70,7 +67,23 @@ function seriesIn(posts: typeof allPosts): string[] {
 
     <!-- Category Tree -->
     <div>
-      <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Browse</h3>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Browse</h3>
+        <div class="flex gap-1">
+          <button
+            type="button"
+            data-tree-expand-all
+            class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] px-1.5 py-0.5 rounded transition-colors"
+            title="Expand all"
+          >Expand</button>
+          <button
+            type="button"
+            data-tree-collapse-all
+            class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] px-1.5 py-0.5 rounded transition-colors"
+            title="Collapse all"
+          >Collapse</button>
+        </div>
+      </div>
       <nav class="space-y-1">
         {topCats.map((cat) => {
           const subCats = getSubCategories(cat.id);
@@ -78,29 +91,36 @@ function seriesIn(posts: typeof allPosts): string[] {
           const directSeries = seriesIn(directPosts);
           const totalCount = allPosts.filter((p) => p.id.startsWith(cat.id + '/')).length;
           const isCatActive = isActiveCategory(cat.id);
+          const initiallyOpen = isCatActive || subCats.some((s) => isActiveCategory(s.id));
           return (
-            <details class="group" open={isCatActive || subCats.some((s) => isActiveCategory(s.id))}>
-              <summary class="list-none cursor-pointer">
+            <details class="cat-tree" open={initiallyOpen}>
+              <summary
+                class:list={[
+                  'cat-summary flex items-center gap-1 py-2 px-2 font-medium rounded-lg transition-colors cursor-pointer',
+                  isCatActive
+                    ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
+                    : 'hover:bg-[var(--color-bg-secondary)]',
+                ]}
+              >
+                <svg class="chevron w-3 h-3 shrink-0 text-[var(--color-text-muted)] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                </svg>
                 <a
                   href={`/blog/${cat.id}`}
-                  class:list={[
-                    'flex items-center justify-between py-2 px-3 font-medium rounded-lg transition-colors',
-                    isCatActive
-                      ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
-                      : 'hover:bg-[var(--color-bg-secondary)]',
-                  ]}
+                  class="flex items-center justify-between flex-1 min-w-0"
+                  onclick="event.stopPropagation()"
                 >
-                  <span class="flex items-center gap-2">
+                  <span class="flex items-center gap-2 truncate">
                     <span>{cat.icon}</span>
-                    <span>{cat.name}</span>
+                    <span class="truncate">{cat.name}</span>
                   </span>
-                  {totalCount > 0 && <span class="text-xs text-[var(--color-text-muted)]">{totalCount}</span>}
+                  {totalCount > 0 && <span class="text-xs text-[var(--color-text-muted)] ml-2 shrink-0">{totalCount}</span>}
                 </a>
               </summary>
 
               <!-- Sub-categories -->
               {subCats.length > 0 && (
-                <ul class="ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-3">
+                <ul class="ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-2">
                   {subCats.map((sub) => {
                     const subPosts = postsDirectlyIn(sub.id);
                     const subSeries = seriesIn(subPosts);
@@ -108,22 +128,28 @@ function seriesIn(posts: typeof allPosts): string[] {
                     const isSubActive = isActiveCategory(sub.id);
                     return (
                       <li>
-                        <details class="group" open={isSubActive}>
-                          <summary class="list-none cursor-pointer">
+                        <details class="cat-tree" open={isSubActive}>
+                          <summary
+                            class:list={[
+                              'cat-summary flex items-center gap-1 py-1.5 px-2 rounded text-sm transition-colors cursor-pointer',
+                              isSubActive
+                                ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
+                                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
+                            ]}
+                          >
+                            <svg class="chevron w-3 h-3 shrink-0 text-[var(--color-text-muted)] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                            </svg>
                             <a
                               href={`/blog/${sub.id}`}
-                              class:list={[
-                                'flex items-center justify-between py-1.5 px-2 rounded text-sm transition-colors',
-                                isSubActive
-                                  ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
-                                  : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
-                              ]}
+                              class="flex items-center justify-between flex-1 min-w-0"
+                              onclick="event.stopPropagation()"
                             >
-                              <span class="flex items-center gap-1.5">
+                              <span class="flex items-center gap-1.5 truncate">
                                 <span class="text-xs">{sub.icon}</span>
-                                <span>{sub.name}</span>
+                                <span class="truncate">{sub.name}</span>
                               </span>
-                              {subTotal > 0 && <span class="text-xs text-[var(--color-text-muted)]">{subTotal}</span>}
+                              {subTotal > 0 && <span class="text-xs text-[var(--color-text-muted)] ml-2 shrink-0">{subTotal}</span>}
                             </a>
                           </summary>
                           {subSeries.length > 0 && (
@@ -160,7 +186,7 @@ function seriesIn(posts: typeof allPosts): string[] {
 
               <!-- Direct series under the top-level (no sub-cat) -->
               {directSeries.length > 0 && (
-                <ul class="ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-3">
+                <ul class="ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-2">
                   {directSeries.map((series) => {
                     const sCount = directPosts.filter((p) => p.data.series === series).length;
                     const sSlug = toSlug(series);
@@ -211,3 +237,29 @@ function seriesIn(posts: typeof allPosts): string[] {
     </div>
   </div>
 </aside>
+
+<style>
+  /* Hide default disclosure triangle */
+  .cat-tree > .cat-summary { list-style: none; }
+  .cat-tree > .cat-summary::-webkit-details-marker { display: none; }
+
+  /* Rotate chevron when open */
+  .cat-tree[open] > .cat-summary > .chevron {
+    transform: rotate(90deg);
+  }
+</style>
+
+<script>
+  // Wire up Expand / Collapse all buttons
+  function applyAll(open: boolean) {
+    document.querySelectorAll<HTMLDetailsElement>('.cat-tree').forEach((d) => {
+      d.open = open;
+    });
+  }
+  document.querySelectorAll('[data-tree-expand-all]').forEach((btn) => {
+    btn.addEventListener('click', () => applyAll(true));
+  });
+  document.querySelectorAll('[data-tree-collapse-all]').forEach((btn) => {
+    btn.addEventListener('click', () => applyAll(false));
+  });
+</script>
