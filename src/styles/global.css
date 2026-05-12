@@ -137,6 +137,14 @@ body {
 ::-webkit-scrollbar-thumb   { background: var(--color-border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-border-hover); }
 
+/* Sidebar — thinner, more subtle bar so the independent scroll
+   region doesn't compete visually with the main body scroll. */
+.sidebar-scroll::-webkit-scrollbar         { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track   { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb   { background: var(--color-border); border-radius: 2px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-border-hover); }
+.sidebar-scroll { scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
+
 /* Polished focus ring — accent halo, not a hard outline */
 :focus-visible {
   outline: 2px solid var(--color-accent);

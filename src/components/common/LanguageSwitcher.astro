@@ -1,0 +1,161 @@
+---
+/**
+ * LanguageSwitcher — header dropdown to pick the UI language.
+ *
+ * Phase 1: UI only. Korean is fully supported; en/ja/zh are present
+ * but marked "Coming soon" because no translated content exists yet.
+ * Clicking an unavailable option is a no-op (button is disabled).
+ *
+ * The active choice is saved to localStorage under 'lang' so future
+ * routing/content work can read it without changing this component.
+ */
+
+import { SITE_CONFIG } from '../../consts/config';
+
+type LangOption = {
+  code: 'ko' | 'en' | 'ja' | 'zh';
+  label: string;
+  available: boolean;
+};
+
+const LANGS: LangOption[] = [
+  { code: 'ko', label: '한국어',    available: true  },
+  { code: 'en', label: 'English',   available: false },
+  { code: 'ja', label: '日本語',    available: false },
+  { code: 'zh', label: '简体中文',   available: false },
+];
+
+const currentLang = SITE_CONFIG.lang;
+const currentLabel =
+  LANGS.find((l) => l.code === currentLang)?.label ?? '한국어';
+---
+
+<div class="relative" data-lang-switcher>
+  <button
+    type="button"
+    class="btn btn-ghost p-2 inline-flex items-center gap-1.5"
+    aria-label="Change language"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    data-lang-trigger
+  >
+    <svg
+      class="w-5 h-5"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+      />
+    </svg>
+    <span class="hidden lg:inline text-xs font-medium uppercase tracking-wider">
+      {currentLang}
+    </span>
+  </button>
+
+  <div
+    data-lang-menu
+    role="menu"
+    class="hidden absolute right-0 mt-2 min-w-[180px] py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-lg z-50"
+  >
+    {LANGS.map((l) => (
+      <button
+        type="button"
+        role="menuitemradio"
+        aria-checked={l.code === currentLang}
+        data-lang-option={l.code}
+        disabled={!l.available}
+        class:list={[
+          'w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-left transition-colors',
+          l.code === currentLang
+            ? 'text-[var(--color-accent)] font-medium'
+            : 'text-[var(--color-text-secondary)]',
+          l.available
+            ? 'hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)] cursor-pointer'
+            : 'opacity-50 cursor-not-allowed',
+        ]}
+      >
+        <span class="flex items-center gap-2">
+          <span class="font-mono text-[10px] uppercase tracking-wider w-5 text-[var(--color-text-muted)]">
+            {l.code}
+          </span>
+          <span>{l.label}</span>
+        </span>
+        {!l.available && (
+          <span class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
+            Soon
+          </span>
+        )}
+        {l.code === currentLang && l.available && (
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </button>
+    ))}
+
+    <div class="border-t border-[var(--color-border)] mt-1 px-3 py-2 text-[11px] text-[var(--color-text-muted)] leading-snug">
+      English/日本語/中文 translations coming soon — UI strings ready, blog posts pending.
+    </div>
+  </div>
+</div>
+
+<script>
+  import { onPageLoad } from '../../lib/lifecycle';
+
+  onPageLoad(() => {
+    const root = document.querySelector<HTMLElement>('[data-lang-switcher]');
+    if (!root) return;
+    const trigger = root.querySelector<HTMLButtonElement>('[data-lang-trigger]');
+    const menu = root.querySelector<HTMLElement>('[data-lang-menu]');
+    if (!trigger || !menu) return;
+
+    const open = () => {
+      trigger.setAttribute('aria-expanded', 'true');
+      menu.classList.remove('hidden');
+    };
+    const close = () => {
+      trigger.setAttribute('aria-expanded', 'false');
+      menu.classList.add('hidden');
+    };
+    const toggle = () => {
+      if (trigger.getAttribute('aria-expanded') === 'true') close();
+      else open();
+    };
+
+    const onDocClick = (e: MouseEvent) => {
+      if (!root.contains(e.target as Node)) close();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    const onPick = (e: Event) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      if (btn.disabled) return;
+      const code = btn.dataset.langOption;
+      if (!code) return;
+      try {
+        localStorage.setItem('lang', code);
+      } catch {}
+      close();
+    };
+
+    trigger.addEventListener('click', toggle);
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('keydown', onKey);
+    const options = menu.querySelectorAll<HTMLButtonElement>('[data-lang-option]');
+    options.forEach((o) => o.addEventListener('click', onPick));
+
+    return () => {
+      trigger.removeEventListener('click', toggle);
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKey);
+      options.forEach((o) => o.removeEventListener('click', onPick));
+    };
+  });
+</script>

@@ -85,6 +85,7 @@ function formatChapter(key: string): string {
               <li>
                 <a
                   href={`/blog/${post.id}`}
+                  data-series-current={isCurrent ? '' : undefined}
                   class:list={[
                     'flex items-start gap-2 py-1.5 text-sm transition-colors rounded-md px-2 -mx-2',
                     isCurrent
@@ -115,6 +116,20 @@ function formatChapter(key: string): string {
   import { onPageLoad } from '../../lib/lifecycle';
 
   onPageLoad(() => {
+    // Auto-scroll the active series item into view within the sidebar's
+    // own scroll region. Without this, on long series (40+ items) the
+    // user lands on the page but the current entry sits off-screen.
+    const current = document.querySelector<HTMLAnchorElement>('[data-series-current]');
+    const scrollHost = current?.closest<HTMLElement>('.sidebar-scroll');
+    if (current && scrollHost) {
+      const hostRect = scrollHost.getBoundingClientRect();
+      const itemRect = current.getBoundingClientRect();
+      const offset = itemRect.top - hostRect.top - hostRect.height / 3;
+      if (Math.abs(offset) > hostRect.height / 3) {
+        scrollHost.scrollTo({ top: scrollHost.scrollTop + offset, behavior: 'auto' });
+      }
+    }
+
     const toggles = document.querySelectorAll('[data-series-toggle]');
     if (toggles.length === 0) return;
 

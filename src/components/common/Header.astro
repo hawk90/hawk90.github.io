@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
 import Logo from './Logo.astro';
 import { NAV_CONFIG, ADMIN_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
@@ -45,7 +46,7 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
         ))}
       </ul>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-1">
         <!-- Search Button — pill icon on small screens, faux search bar on lg+ -->
         <button
           type="button"
@@ -60,6 +61,7 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
           <kbd class="hidden lg:inline-flex items-center justify-center min-w-[18px] h-5 px-1 text-[11px] bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">/</kbd>
         </button>
 
+        <LanguageSwitcher />
         <ThemeToggle />
 
         <!-- Admin -->
@@ -82,7 +84,8 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
     </div>
 
     <!-- Mobile Menu Button -->
-    <div class="flex md:hidden items-center gap-3">
+    <div class="flex md:hidden items-center gap-1">
+      <LanguageSwitcher />
       <ThemeToggle />
 
       <!-- Admin -->

@@ -191,9 +191,9 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
           </div>
         </div>
 
-        <!-- Sidebar -->
+        <!-- Sidebar — independent scroll region when content overflows viewport -->
         <aside class="hidden lg:block w-64 shrink-0">
-          <div class="sticky top-24">
+          <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto overscroll-contain pr-2 sidebar-scroll">
             {seriesPosts.length > 1 && (
               <SeriesSidebar
                 seriesName={post.data.series!}
