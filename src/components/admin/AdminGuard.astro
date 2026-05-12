@@ -1,0 +1,79 @@
+---
+/**
+ * AdminGuard - Authentication wrapper for admin pages.
+ * Shows loading state while checking auth, redirects to login if not authenticated.
+ */
+---
+
+<div id="admin-guard" class="min-h-[60vh] flex items-center justify-center">
+  <!-- Loading state (shown while checking auth) -->
+  <div id="admin-loading" class="text-center">
+    <div class="inline-block w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin"></div>
+    <p class="mt-4 text-[var(--color-text-muted)]">Checking authentication...</p>
+  </div>
+
+  <!-- Content (hidden until authenticated) -->
+  <div id="admin-content" class="hidden w-full">
+    <slot />
+  </div>
+
+  <!-- Access denied state -->
+  <div id="admin-denied" class="hidden text-center">
+    <div class="text-6xl mb-4">🚫</div>
+    <h2 class="text-xl font-bold mb-2">Access Denied</h2>
+    <p class="text-[var(--color-text-muted)] mb-4">You are not authorized to access this page.</p>
+    <a href="/" class="text-[var(--color-accent)] hover:underline">Return to Home</a>
+  </div>
+</div>
+
+<script>
+  import { onPageLoad } from '../../lib/lifecycle';
+  import { checkAuth, isAllowedUser } from '../../lib/admin/auth';
+  import { ADMIN_CONFIG } from '../../consts/config';
+
+  onPageLoad(async () => {
+    const loading = document.getElementById('admin-loading');
+    const content = document.getElementById('admin-content');
+    const denied = document.getElementById('admin-denied');
+
+    if (!loading || !content || !denied) return;
+
+    // Check if admin is enabled
+    if (!ADMIN_CONFIG.enabled) {
+      loading.classList.add('hidden');
+      denied.classList.remove('hidden');
+      return;
+    }
+
+    try {
+      const authState = await checkAuth();
+
+      if (!authState.isAuthenticated || !authState.user) {
+        // Not authenticated - redirect to login
+        window.location.href = '/admin/login';
+        return;
+      }
+
+      // Check if user is allowed
+      if (!isAllowedUser(authState.user, ADMIN_CONFIG.allowedUsers)) {
+        loading.classList.add('hidden');
+        denied.classList.remove('hidden');
+        return;
+      }
+
+      // Authenticated and allowed - show content
+      loading.classList.add('hidden');
+      content.classList.remove('hidden');
+
+      // Dispatch event for child components
+      window.dispatchEvent(
+        new CustomEvent('admin:authenticated', {
+          detail: authState,
+        })
+      );
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      window.location.href = '/admin/login';
+    }
+  });
+</script>

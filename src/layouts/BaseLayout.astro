@@ -91,15 +91,16 @@ const jsonLd = type === 'article'
       "default-src 'self'",
       // 'unsafe-inline' required for is:inline theme scripts (FOUC prevention).
       // define:vars has been eliminated from all components (Giscus, SearchModal).
+      // GitHub domains added for admin panel OAuth and API access.
       "script-src 'self' 'unsafe-inline' https://giscus.app" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.googletagmanager.com https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
       "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
       "font-src 'self' https://cdn.jsdelivr.net",
       "img-src 'self' data: https:",
-      "connect-src 'self' https://giscus.app" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
+      "connect-src 'self' https://giscus.app https://api.github.com https://github.com" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
       "frame-src https://giscus.app",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://github.com",
     ].join('; ')} />
 
     <!-- Primary Meta Tags -->

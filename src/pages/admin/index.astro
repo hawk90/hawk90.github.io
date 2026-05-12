@@ -1,0 +1,285 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminGuard from '../../components/admin/AdminGuard.astro';
+import { SITE_CONFIG } from '../../consts/config';
+---
+
+<BaseLayout
+  title={`Admin Dashboard - ${SITE_CONFIG.title}`}
+  description="Admin dashboard"
+  noIndex={true}
+>
+  <AdminGuard>
+    <section class="py-8">
+      <div class="container">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h1 class="text-2xl font-bold">Dashboard</h1>
+            <p class="text-[var(--color-text-muted)]">Welcome back, <span id="user-name">Admin</span></p>
+          </div>
+          <div class="flex items-center gap-4">
+            <a
+              href="/admin/new"
+              class="flex items-center gap-2 px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:opacity-90 transition-opacity"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              New Post
+            </a>
+            <button
+              id="logout-btn"
+              class="px-4 py-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid lg:grid-cols-3 gap-8">
+          <!-- Drafts Panel -->
+          <div class="lg:col-span-2">
+            <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
+              <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
+                <h2 class="font-semibold">Drafts</h2>
+                <button
+                  id="refresh-drafts"
+                  class="text-sm text-[var(--color-accent)] hover:underline"
+                >
+                  Refresh
+                </button>
+              </div>
+
+              <div id="drafts-loading" class="p-8 text-center">
+                <div class="inline-block w-6 h-6 border-2 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin"></div>
+                <p class="mt-2 text-sm text-[var(--color-text-muted)]">Loading drafts...</p>
+              </div>
+
+              <div id="drafts-empty" class="hidden p-8 text-center">
+                <div class="text-4xl mb-2">📝</div>
+                <p class="text-[var(--color-text-muted)]">No drafts yet</p>
+                <a href="/admin/new" class="text-sm text-[var(--color-accent)] hover:underline">Create your first draft</a>
+              </div>
+
+              <ul id="drafts-list" class="hidden divide-y divide-[var(--color-border)]">
+                <!-- Drafts will be inserted here -->
+              </ul>
+
+              <div id="drafts-error" class="hidden p-8 text-center text-red-500">
+                <p>Failed to load drafts</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-6">
+            <!-- Quick Stats -->
+            <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
+              <h3 class="font-semibold mb-4">Quick Stats</h3>
+              <dl class="space-y-3">
+                <div class="flex justify-between">
+                  <dt class="text-[var(--color-text-muted)]">Drafts</dt>
+                  <dd id="stat-drafts" class="font-medium">-</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-[var(--color-text-muted)]">Last Login</dt>
+                  <dd id="stat-login" class="font-medium text-sm">-</dd>
+                </div>
+              </dl>
+            </div>
+
+            <!-- Recent Comments -->
+            <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
+              <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
+                <h3 class="font-semibold">Recent Comments</h3>
+                <span id="comments-badge" class="hidden px-2 py-0.5 text-xs font-medium bg-[var(--color-accent)] text-white rounded-full">
+                  0
+                </span>
+              </div>
+
+              <div id="comments-loading" class="p-6 text-center">
+                <div class="inline-block w-5 h-5 border-2 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin"></div>
+              </div>
+
+              <div id="comments-empty" class="hidden p-6 text-center text-sm text-[var(--color-text-muted)]">
+                No recent comments
+              </div>
+
+              <ul id="comments-list" class="hidden divide-y divide-[var(--color-border)]">
+                <!-- Comments will be inserted here -->
+              </ul>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
+              <h3 class="font-semibold mb-4">Quick Links</h3>
+              <ul class="space-y-2 text-sm">
+                <li>
+                  <a href="/blog" class="text-[var(--color-accent)] hover:underline">View Blog →</a>
+                </li>
+                <li>
+                  <a href="/admin/settings" class="text-[var(--color-accent)] hover:underline">Admin Settings →</a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/settings/tokens"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-[var(--color-accent)] hover:underline"
+                  >
+                    GitHub Tokens →
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </AdminGuard>
+</BaseLayout>
+
+<script>
+  import { onPageLoad } from '../../lib/lifecycle';
+  import { getAuthState, logout } from '../../lib/admin/auth';
+  import { fetchDrafts, parseRepo } from '../../lib/admin/github-api';
+  import { ADMIN_CONFIG } from '../../consts/config';
+  import type { AuthState } from '../../lib/admin/auth';
+  import type { DraftPost } from '../../lib/admin/github-api';
+
+  onPageLoad(() => {
+    let authState: AuthState | null = null;
+
+    // Elements
+    const userNameEl = document.getElementById('user-name');
+    const logoutBtn = document.getElementById('logout-btn');
+    const refreshDraftsBtn = document.getElementById('refresh-drafts');
+
+    const draftsLoading = document.getElementById('drafts-loading');
+    const draftsEmpty = document.getElementById('drafts-empty');
+    const draftsList = document.getElementById('drafts-list');
+    const draftsError = document.getElementById('drafts-error');
+    const statDrafts = document.getElementById('stat-drafts');
+    const statLogin = document.getElementById('stat-login');
+
+    const commentsLoading = document.getElementById('comments-loading');
+    const commentsEmpty = document.getElementById('comments-empty');
+    const commentsList = document.getElementById('comments-list');
+
+    function handleLogout() {
+      logout();
+      window.location.href = '/admin/login';
+    }
+
+    function renderDrafts(drafts: DraftPost[]) {
+      if (!draftsList) return;
+
+      draftsList.innerHTML = drafts
+        .map(
+          (draft) => `
+          <li class="px-6 py-4 hover:bg-[var(--color-bg-primary)] transition-colors">
+            <a href="/admin/edit?slug=${encodeURIComponent(draft.slug)}" class="block">
+              <h4 class="font-medium truncate">${escapeHtml(draft.title)}</h4>
+              <p class="text-sm text-[var(--color-text-muted)] mt-1">
+                ${draft.date ? formatDate(draft.date) : 'No date'}
+                <span class="mx-2">·</span>
+                <span class="font-mono text-xs">${draft.slug}</span>
+              </p>
+            </a>
+          </li>
+        `
+        )
+        .join('');
+
+      draftsLoading?.classList.add('hidden');
+      draftsError?.classList.add('hidden');
+
+      if (drafts.length === 0) {
+        draftsEmpty?.classList.remove('hidden');
+        draftsList?.classList.add('hidden');
+      } else {
+        draftsEmpty?.classList.add('hidden');
+        draftsList?.classList.remove('hidden');
+      }
+
+      if (statDrafts) statDrafts.textContent = String(drafts.length);
+    }
+
+    async function loadDrafts() {
+      if (!authState?.accessToken || !ADMIN_CONFIG.enabled) return;
+
+      draftsLoading?.classList.remove('hidden');
+      draftsEmpty?.classList.add('hidden');
+      draftsList?.classList.add('hidden');
+      draftsError?.classList.add('hidden');
+
+      try {
+        const repoString = ADMIN_CONFIG.contentRepo || '';
+        const { owner, repo } = parseRepo(repoString);
+        const contentPath = ADMIN_CONFIG.contentPath || 'src/content/blog';
+
+        const drafts = await fetchDrafts(authState.accessToken, owner, repo, contentPath);
+        renderDrafts(drafts);
+      } catch (error) {
+        console.error('Failed to load drafts:', error);
+        draftsLoading?.classList.add('hidden');
+        draftsError?.classList.remove('hidden');
+      }
+    }
+
+    function loadComments() {
+      // For now, just show empty state
+      // Full implementation requires GitHub Discussions API
+      commentsLoading?.classList.add('hidden');
+      commentsEmpty?.classList.remove('hidden');
+    }
+
+    function escapeHtml(str: string): string {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatDate(dateStr: string): string {
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ko-KR', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    // Listen for authentication event from AdminGuard
+    function handleAuthenticated(event: Event) {
+      const customEvent = event as CustomEvent<AuthState>;
+      authState = customEvent.detail;
+
+      if (userNameEl && authState.user) {
+        userNameEl.textContent = authState.user.name || authState.user.login;
+      }
+
+      if (statLogin) {
+        statLogin.textContent = new Date().toLocaleString('ko-KR');
+      }
+
+      loadDrafts();
+      loadComments();
+    }
+
+    window.addEventListener('admin:authenticated', handleAuthenticated);
+    logoutBtn?.addEventListener('click', handleLogout);
+    refreshDraftsBtn?.addEventListener('click', loadDrafts);
+
+    return () => {
+      window.removeEventListener('admin:authenticated', handleAuthenticated);
+      logoutBtn?.removeEventListener('click', handleLogout);
+      refreshDraftsBtn?.removeEventListener('click', loadDrafts);
+    };
+  });
+</script>

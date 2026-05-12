@@ -14,6 +14,7 @@ import {
   defineNewsletter,
   defineBlog,
   defineUi,
+  defineAdmin,
 } from '../lib/define';
 
 // --- Site Basic Info ---
@@ -126,3 +127,18 @@ export const DEFAULT_CODE_THEMES = {
   dark: 'github-dark-dimmed',
   light: 'github-light',
 };
+
+// --- Admin Panel ---
+export const ADMIN_CONFIG = defineAdmin({
+  enabled: true,
+  clientId: '', // TODO: Set your GitHub OAuth App Client ID
+  allowedUsers: ['hawk90'],
+  contentRepo: 'hawk90/hawk90.github.io',
+  branch: 'main',
+  contentPath: 'src/content/blog',
+  imagePath: 'public/images/blog',
+  notifications: {
+    enabled: true,
+    pollInterval: 5,
+  },
+});

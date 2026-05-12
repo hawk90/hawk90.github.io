@@ -1,0 +1,480 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminGuard from '../../components/admin/AdminGuard.astro';
+import { SITE_CONFIG } from '../../consts/config';
+---
+
+<BaseLayout
+  title={`New Post - ${SITE_CONFIG.title}`}
+  description="Create a new post"
+  noIndex={true}
+>
+  <AdminGuard>
+    <section class="py-8">
+      <div class="container max-w-4xl">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-4">
+            <a
+              href="/admin"
+              class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+            >
+              ← Back
+            </a>
+            <h1 class="text-xl font-bold">New Post</h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="save-status" class="text-sm text-[var(--color-text-muted)]"></span>
+            <button
+              id="save-draft-btn"
+              class="px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-border-hover)] transition-colors"
+            >
+              Save Draft
+            </button>
+            <button
+              id="publish-btn"
+              class="px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Publish
+            </button>
+          </div>
+        </div>
+
+        <!-- Frontmatter Fields -->
+        <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6 mb-6">
+          <div class="grid gap-4">
+            <div>
+              <label for="post-title" class="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                id="post-title"
+                placeholder="Enter post title..."
+                class="w-full px-4 py-2 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-accent)] text-lg"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="post-slug" class="block text-sm font-medium mb-1">Slug</label>
+                <input
+                  type="text"
+                  id="post-slug"
+                  placeholder="post-slug"
+                  class="w-full px-4 py-2 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-accent)] font-mono text-sm"
+                />
+              </div>
+              <div>
+                <label for="post-category" class="block text-sm font-medium mb-1">Category</label>
+                <input
+                  type="text"
+                  id="post-category"
+                  placeholder="programming"
+                  class="w-full px-4 py-2 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-accent)]"
+                />
+              </div>
+            </div>
+            <div>
+              <label for="post-description" class="block text-sm font-medium mb-1">Description</label>
+              <input
+                type="text"
+                id="post-description"
+                placeholder="A brief description..."
+                class="w-full px-4 py-2 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-accent)]"
+              />
+            </div>
+            <div>
+              <label for="post-tags" class="block text-sm font-medium mb-1">Tags (comma-separated)</label>
+              <input
+                type="text"
+                id="post-tags"
+                placeholder="tag1, tag2, tag3"
+                class="w-full px-4 py-2 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-accent)]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Editor -->
+        <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-[var(--color-border)]">
+            <span class="text-sm font-medium">Content</span>
+            <div class="flex items-center gap-2">
+              <button
+                id="toggle-preview"
+                class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+              >
+                Preview
+              </button>
+            </div>
+          </div>
+
+          <!-- Milkdown Editor Container -->
+          <div id="editor-container" class="min-h-[500px] p-4">
+            <div id="editor-loading" class="flex items-center justify-center h-[400px]">
+              <div class="text-center">
+                <div class="inline-block w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin"></div>
+                <p class="mt-4 text-[var(--color-text-muted)]">Loading editor...</p>
+              </div>
+            </div>
+            <div id="editor" class="hidden prose dark:prose-invert max-w-none"></div>
+          </div>
+
+          <!-- Fallback Textarea (if Milkdown fails) -->
+          <div id="editor-fallback" class="hidden p-4">
+            <textarea
+              id="content-textarea"
+              class="w-full min-h-[500px] p-4 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg font-mono text-sm resize-y focus:outline-none focus:border-[var(--color-accent)]"
+              placeholder="Write your content in Markdown..."
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Image Upload -->
+        <div
+          id="drop-zone"
+          class="mt-6 border-2 border-dashed border-[var(--color-border)] rounded-xl p-8 text-center hover:border-[var(--color-accent)] transition-colors"
+        >
+          <input type="file" id="image-input" accept="image/*" class="hidden" />
+          <div class="text-[var(--color-text-muted)]">
+            <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p class="mb-2">Drag and drop images here, or <button id="browse-btn" class="text-[var(--color-accent)] hover:underline">browse</button></p>
+            <p class="text-sm">Images will be uploaded to GitHub</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toast -->
+    <div id="editor-toast" class="fixed bottom-6 right-6 z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+      <div id="toast-content" class="px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg shadow-lg">
+        Saved!
+      </div>
+    </div>
+  </AdminGuard>
+</BaseLayout>
+
+<script>
+  import { onPageLoad } from '../../lib/lifecycle';
+  import { getAuthState } from '../../lib/admin/auth';
+  import {
+    createFile,
+    uploadImage,
+    parseRepo,
+    generatePostTemplate,
+  } from '../../lib/admin/github-api';
+  import { ADMIN_CONFIG } from '../../consts/config';
+
+  onPageLoad(async () => {
+    // Elements
+    const titleInput = document.getElementById('post-title') as HTMLInputElement;
+    const slugInput = document.getElementById('post-slug') as HTMLInputElement;
+    const categoryInput = document.getElementById('post-category') as HTMLInputElement;
+    const descInput = document.getElementById('post-description') as HTMLInputElement;
+    const tagsInput = document.getElementById('post-tags') as HTMLInputElement;
+    const contentTextarea = document.getElementById('content-textarea') as HTMLTextAreaElement;
+
+    const editorLoading = document.getElementById('editor-loading');
+    const editorEl = document.getElementById('editor');
+    const editorFallback = document.getElementById('editor-fallback');
+
+    const saveDraftBtn = document.getElementById('save-draft-btn');
+    const publishBtn = document.getElementById('publish-btn');
+    const saveStatus = document.getElementById('save-status');
+
+    const dropZone = document.getElementById('drop-zone');
+    const imageInput = document.getElementById('image-input') as HTMLInputElement;
+    const browseBtn = document.getElementById('browse-btn');
+
+    const toastEl = document.getElementById('editor-toast');
+    const toastContent = document.getElementById('toast-content');
+
+    let editorInstance: unknown = null;
+    let getMarkdown: (() => string) | null = null;
+    let setMarkdown: ((content: string) => void) | null = null;
+
+    // Auto-generate slug from title
+    titleInput?.addEventListener('input', () => {
+      if (!slugInput?.value) {
+        const slug = titleInput.value
+          .toLowerCase()
+          .replace(/[^a-z0-9가-힣]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        if (slugInput) slugInput.value = slug;
+      }
+    });
+
+    // Show toast
+    function showToast(message: string, type: 'success' | 'error' = 'success') {
+      if (!toastEl || !toastContent) return;
+
+      toastContent.textContent = message;
+      toastContent.className = `px-4 py-2 text-white text-sm font-medium rounded-lg shadow-lg ${
+        type === 'error' ? 'bg-red-500' : 'bg-[var(--color-accent)]'
+      }`;
+
+      toastEl.classList.remove('opacity-0', 'pointer-events-none');
+      toastEl.classList.add('opacity-100');
+
+      setTimeout(() => {
+        toastEl.classList.remove('opacity-100');
+        toastEl.classList.add('opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    // Get content from editor
+    function getContent(): string {
+      if (getMarkdown) {
+        return getMarkdown();
+      }
+      return contentTextarea?.value || '';
+    }
+
+    // Build full markdown with frontmatter
+    function buildMarkdown(draft: boolean): string {
+      const title = titleInput?.value || 'Untitled';
+      const description = descInput?.value || '';
+      const tags = tagsInput?.value
+        ? tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean)
+        : [];
+      const content = getContent();
+      const date = new Date().toISOString().split('T')[0];
+
+      let frontmatter = `---
+title: "${title}"
+date: ${date}
+draft: ${draft}`;
+
+      if (description) {
+        frontmatter += `\ndescription: "${description}"`;
+      }
+
+      if (tags.length > 0) {
+        frontmatter += `\ntags: [${tags.map((t) => `"${t}"`).join(', ')}]`;
+      }
+
+      frontmatter += '\n---\n\n';
+
+      return frontmatter + content;
+    }
+
+    // Save to GitHub
+    async function savePost(draft: boolean) {
+      const authState = getAuthState();
+      if (!authState.accessToken || !ADMIN_CONFIG.enabled) {
+        showToast('Not authenticated', 'error');
+        return;
+      }
+
+      const slug = slugInput?.value;
+      const category = categoryInput?.value || 'uncategorized';
+
+      if (!slug) {
+        showToast('Please enter a slug', 'error');
+        return;
+      }
+
+      if (saveStatus) saveStatus.textContent = 'Saving...';
+
+      try {
+        const repoString = ADMIN_CONFIG.contentRepo || '';
+        const { owner, repo } = parseRepo(repoString);
+        const contentPath = ADMIN_CONFIG.contentPath || 'src/content/blog';
+        const branch = ADMIN_CONFIG.branch || 'main';
+
+        const filePath = `${contentPath}/${category}/${slug}.md`;
+        const content = buildMarkdown(draft);
+        const message = draft ? `Draft: ${slug}` : `Publish: ${slug}`;
+
+        await createFile(authState.accessToken, owner, repo, filePath, content, message, branch);
+
+        showToast(draft ? 'Draft saved!' : 'Published!');
+        if (saveStatus) saveStatus.textContent = '';
+
+        // Redirect to dashboard after publishing
+        if (!draft) {
+          setTimeout(() => {
+            window.location.href = '/admin';
+          }, 1500);
+        }
+      } catch (error) {
+        console.error('Save failed:', error);
+        showToast(error instanceof Error ? error.message : 'Failed to save', 'error');
+        if (saveStatus) saveStatus.textContent = '';
+      }
+    }
+
+    // Handle image upload
+    async function handleImageUpload(file: File) {
+      const authState = getAuthState();
+      if (!authState.accessToken || !ADMIN_CONFIG.enabled) {
+        showToast('Not authenticated', 'error');
+        return;
+      }
+
+      showToast('Uploading image...');
+
+      try {
+        const repoString = ADMIN_CONFIG.contentRepo || '';
+        const { owner, repo } = parseRepo(repoString);
+        const imagePath = ADMIN_CONFIG.imagePath || 'public/images/blog';
+
+        const url = await uploadImage(authState.accessToken, owner, repo, file, imagePath);
+
+        // Insert markdown image syntax
+        const markdown = `![${file.name}](${url})`;
+
+        if (setMarkdown) {
+          const current = getContent();
+          setMarkdown(current + '\n\n' + markdown);
+        } else if (contentTextarea) {
+          contentTextarea.value += '\n\n' + markdown;
+        }
+
+        showToast('Image uploaded!');
+      } catch (error) {
+        console.error('Upload failed:', error);
+        showToast(error instanceof Error ? error.message : 'Failed to upload', 'error');
+      }
+    }
+
+    // Initialize editor (try Milkdown, fallback to textarea)
+    async function initEditor() {
+      try {
+        // Dynamic import Milkdown
+        const { Editor, rootCtx, defaultValueCtx } = await import('@milkdown/kit/core');
+        const { commonmark } = await import('@milkdown/kit/preset/commonmark');
+        const { gfm } = await import('@milkdown/kit/preset/gfm');
+        const { listener, listenerCtx } = await import('@milkdown/kit/plugin/listener');
+        const { getMarkdown: getMd } = await import('@milkdown/kit/utils');
+
+        if (!editorEl) throw new Error('Editor element not found');
+
+        const editor = await Editor.make()
+          .config((ctx) => {
+            ctx.set(rootCtx, editorEl);
+            ctx.set(defaultValueCtx, '');
+            ctx.get(listenerCtx).markdownUpdated((_ctx, markdown) => {
+              // Auto-save to localStorage
+              localStorage.setItem('admin_draft_content', markdown);
+            });
+          })
+          .use(commonmark)
+          .use(gfm)
+          .use(listener)
+          .create();
+
+        editorInstance = editor;
+        getMarkdown = () => editor.action(getMd());
+        setMarkdown = (content: string) => {
+          // For now, we need to destroy and recreate
+          // This is a simplified version
+        };
+
+        editorLoading?.classList.add('hidden');
+        editorEl?.classList.remove('hidden');
+
+        // Restore draft from localStorage
+        const savedContent = localStorage.getItem('admin_draft_content');
+        if (savedContent && setMarkdown) {
+          setMarkdown(savedContent);
+        }
+      } catch (error) {
+        console.warn('Milkdown failed to load, using fallback:', error);
+        editorLoading?.classList.add('hidden');
+        editorFallback?.classList.remove('hidden');
+
+        getMarkdown = () => contentTextarea?.value || '';
+        setMarkdown = (content: string) => {
+          if (contentTextarea) contentTextarea.value = content;
+        };
+
+        // Restore draft
+        const savedContent = localStorage.getItem('admin_draft_content');
+        if (savedContent && contentTextarea) {
+          contentTextarea.value = savedContent;
+        }
+
+        // Auto-save for textarea
+        contentTextarea?.addEventListener('input', () => {
+          localStorage.setItem('admin_draft_content', contentTextarea.value);
+        });
+      }
+    }
+
+    // Event listeners
+    saveDraftBtn?.addEventListener('click', () => savePost(true));
+    publishBtn?.addEventListener('click', () => savePost(false));
+
+    browseBtn?.addEventListener('click', () => imageInput?.click());
+    imageInput?.addEventListener('change', () => {
+      const file = imageInput.files?.[0];
+      if (file) handleImageUpload(file);
+    });
+
+    dropZone?.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('border-[var(--color-accent)]');
+    });
+
+    dropZone?.addEventListener('dragleave', () => {
+      dropZone.classList.remove('border-[var(--color-accent)]');
+    });
+
+    dropZone?.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-[var(--color-accent)]');
+      const file = e.dataTransfer?.files?.[0];
+      if (file && file.type.startsWith('image/')) {
+        handleImageUpload(file);
+      }
+    });
+
+    // Initialize
+    initEditor();
+
+    return () => {
+      // Cleanup
+    };
+  });
+</script>
+
+<style>
+  /* Milkdown editor styles */
+  #editor :global(.milkdown) {
+    min-height: 400px;
+  }
+
+  #editor :global(.editor) {
+    outline: none;
+  }
+
+  #editor :global(p) {
+    margin-bottom: 1rem;
+  }
+
+  #editor :global(h1),
+  #editor :global(h2),
+  #editor :global(h3) {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  #editor :global(pre) {
+    background: var(--color-bg-primary);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+  }
+
+  #editor :global(code) {
+    font-family: ui-monospace, monospace;
+  }
+
+  #editor :global(blockquote) {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1rem;
+    margin-left: 0;
+    color: var(--color-text-muted);
+  }
+</style>

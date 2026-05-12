@@ -142,3 +142,29 @@ export interface UiConfig {
   tocScrollOffset: number;
 }
 export const defineUi = <T extends UiConfig>(c: T) => c;
+
+// ─── Admin ──────────────────────────────────────────────────
+export type AdminConfig =
+  | { enabled: false }
+  | {
+      enabled: true;
+      /** GitHub OAuth App Client ID (public, safe to commit) */
+      clientId: string;
+      /** GitHub usernames allowed to access admin panel */
+      allowedUsers: string[];
+      /** Repository for content (owner/repo format) */
+      contentRepo?: string;
+      /** Branch for edits (default: 'main') */
+      branch?: string;
+      /** Content directory path (default: 'src/content/blog') */
+      contentPath?: string;
+      /** Image upload path (default: 'public/images/blog') */
+      imagePath?: string;
+      /** Comment notifications settings */
+      notifications?: {
+        enabled: boolean;
+        /** Polling interval in minutes (default: 5) */
+        pollInterval?: number;
+      };
+    };
+export const defineAdmin = <T extends AdminConfig>(c: T) => c;
