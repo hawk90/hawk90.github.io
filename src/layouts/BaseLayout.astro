@@ -93,8 +93,8 @@ const jsonLd = type === 'article'
       // define:vars has been eliminated from all components (Giscus, SearchModal).
       // GitHub domains added for admin panel OAuth and API access.
       "script-src 'self' 'unsafe-inline' https://giscus.app" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.googletagmanager.com https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
-      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-      "font-src 'self' https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com",
+      "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       "connect-src 'self' https://giscus.app https://api.github.com https://github.com" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
       "frame-src https://giscus.app",
@@ -165,10 +165,17 @@ const jsonLd = type === 'article'
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
       crossorigin="anonymous"
+    />
+    <!-- Code font: JetBrains Mono -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap"
     />
 
     <!-- Clickjacking protection (frame-busting) -->
