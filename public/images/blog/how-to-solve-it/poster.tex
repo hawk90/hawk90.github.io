@@ -1,0 +1,65 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../_design.tex}
+\begin{tikzpicture}[blog,
+  polyaStep/.style={
+    rectangle, rounded corners=6pt,
+    minimum width=84mm, minimum height=14mm,
+    align=left, inner sep=8pt, line width=0.6pt
+  },
+  polyaSub/.style={
+    rectangle, rounded corners=3pt,
+    draw=nodebord, fill=nodefill,
+    minimum width=84mm, minimum height=7mm,
+    align=left, inner sep=5pt, line width=0.3pt,
+    font=\sffamily\footnotesize
+  }
+]
+
+% --- Header ---
+\node[font=\sffamily\bfseries\Large, anchor=south] at (4.6, 0) {How to Solve It};
+\node[font=\sffamily\itshape\footnotesize, anchor=north, text=edgesc]
+  at (4.6, -0.05) {G. Polya, 1945};
+
+% --- Step 1: Understand ---
+\node[polyaStep, draw=absbord, fill=absfill, anchor=north] (h1) at (4.6, -1.0)
+  {\textbf{1. 문제를 이해하라} \quad {\footnotesize\normalfont (Understand the problem)}};
+\node[polyaSub, below=3pt of h1.south, anchor=north] (h1a)
+  {· 미지수는? 자료는? 조건은?};
+\node[polyaSub, below=3pt of h1a.south, anchor=north] (h1b)
+  {· 그림 · 표기 · 분리 가능한 부분으로 옮길 수 있는가?};
+
+% --- Step 2: Plan ---
+\node[polyaStep, draw=conbord, fill=confill,
+      below=12pt of h1b.south, anchor=north] (h2)
+  {\textbf{2. 계획을 세워라} \quad {\footnotesize\normalfont (Devise a plan)}};
+\node[polyaSub, below=3pt of h2.south, anchor=north] (h2a)
+  {· 비슷한 문제를 본 적이 있는가?};
+\node[polyaSub, below=3pt of h2a.south, anchor=north] (h2b)
+  {· 미지수를 다시 정의하거나, 일부 자료를 무시하면?};
+\node[polyaSub, below=3pt of h2b.south, anchor=north] (h2c)
+  {· 특수화 · 일반화 · 보조문제 · 거꾸로 풀기};
+
+% --- Step 3: Carry out ---
+\node[polyaStep, draw=impbord, fill=impfill,
+      below=12pt of h2c.south, anchor=north] (h3)
+  {\textbf{3. 계획을 실행하라} \quad {\footnotesize\normalfont (Carry out the plan)}};
+\node[polyaSub, below=3pt of h3.south, anchor=north] (h3a)
+  {· 각 단계를 점검하라 — 정확한가? 증명할 수 있는가?};
+
+% --- Step 4: Look back ---
+\node[polyaStep, draw=hibord, fill=hifill,
+      below=12pt of h3a.south, anchor=north] (h4)
+  {\textbf{4. 돌아보라} \quad {\footnotesize\normalfont (Look back)}};
+\node[polyaSub, below=3pt of h4.south, anchor=north] (h4a)
+  {· 결과를 검증하라. 다른 방법으로 풀 수 있는가?};
+\node[polyaSub, below=3pt of h4a.south, anchor=north] (h4b)
+  {· 이 방법을 다른 문제에 어떻게 적용할 수 있는가?};
+
+\end{tikzpicture}
+\end{document}
