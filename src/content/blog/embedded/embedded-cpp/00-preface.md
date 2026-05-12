@@ -244,8 +244,7 @@ CXXFLAGS += -Werror             # 경고를 에러로
 - *Effective Modern C++* - Scott Meyers
 - *C++ Core Guidelines* - Stroustrup & Sutter
 - *Real-Time C++* - Christopher Kormanyos
-- *Embedded C++ for RTOS* - Richard M. Ponds (2024)
-- *C++ in Embedded Systems* - Amar Mahmutbegović (2025)
+- *Large-Scale C++* - John Lakos
 
 **온라인**
 - [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/)
@@ -258,11 +257,9 @@ CXXFLAGS += -Werror             # 경고를 에러로
 - Meeting C++ Embedded
 - Embedded World
 
-**Rust vs C++ 비교** (2025년 트렌드)
-- Rust 임베디드 채택 28% 성장 (2년)
-- 스타트업 주도, 기존 팀은 C/C++ 유지
-- 의료/항공/보안 분야에서 Rust 증가
-- 43개 MCU 중 16개만 Rust peripheral crate 지원
+**비교 관점**
+- Rust도 메모리 안전성 측면에서 강한 대안이 될 수 있다
+- 다만 이 시리즈의 초점은 Rust와의 우열이 아니라, 현재 C/C++ 기반 팀에서 C++를 어디까지 안전하게 도입할 수 있는가에 있다
 
 ## 기대하는 결과
 

@@ -144,17 +144,13 @@ HAL_UART_Transmit(&huart1, buffer, size, timeout);
 - Linux Kernel Documentation
 - Intel Virtual JTAG IP Core / Etherlink
 
-**2025-2026 최신 기술**
-- RISC-V (20B+ 코어, 주류 진입)
-- Zephyr RTOS (산업 표준)
-- Edge AI / TinyML (기본 기능화)
-- Cortex-M85 + Helium (STM32V8, Renesas RA8)
-- CXL 3.2/4.0 (메모리 확장, 128GT/s)
-- NPU (Ethos-U85, 4 TOPs)
-- DPU (BlueField-4, 800 Gbps)
-- UCIe 3.0 (칩렛 인터커넥트, 64GT/s)
-- Matter/Thread (IoT 프로토콜 통합)
-- Rust Embedded (메모리 안전성)
+**확장 주제**
+- RISC-V 기반 SoC bring-up
+- Zephyr 기반 제품 개발
+- Edge AI / TinyML 배포
+- Cortex-M55/M85 + Helium 최적화
+- CXL, UCIe 같은 고속 인터커넥트 디버깅
+- Matter/Thread 기반 IoT 통합
 
 **커뮤니티**
 - LWN.net

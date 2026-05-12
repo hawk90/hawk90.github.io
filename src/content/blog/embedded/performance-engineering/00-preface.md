@@ -201,11 +201,11 @@ featured: true
 - [Brendan Gregg's Blog](https://www.brendangregg.com/)
 - [Denis Bakhvalov's Blog](https://easyperf.net/)
 
-**2025-2026 최신 도구**
-- **eBPF/bpftrace**: 커널 5.15+ 완전 지원
-- **timerlat tracer**: 실시간 latency 분석
-- **Cortex-M85 + Helium**: 4x ML, 3x DSP 성능
-- **NVIDIA Nsight Systems**: Edge AI 프로파일링
+**실무 도구 메모**
+- **perf / ftrace / eBPF**: Linux 기반 시스템 프로파일링 핵심 도구
+- **timerlat tracer / rtla**: 실시간 latency 분석에 유용
+- **PMU / vendor trace tool**: bare-metal, RTOS, SoC 환경에서 중요
+- **Nsight Systems**: GPU/NPU가 포함된 edge AI 플랫폼에서 유용
 
 ## 이 시리즈의 목표
 

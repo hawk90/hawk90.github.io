@@ -229,6 +229,43 @@ GameCharacter<StrongHealthCalc>  c2;
 - 컴파일 시간 ↑
 - 에러 메시지 복잡 (concepts로 개선)
 
+### 임베디드 실전 예 — RTOS 비교를 위한 LockGuard
+
+게임 캐릭터 예제는 추상적이라 와닿지 않을 수 있다. **공통 베이스 클래스 없이도** 정적 다형성을 쓰는 전형적 패턴은 임베디드에서 RTOS 추상화:
+
+```cpp
+template<typename MutexType>
+class GenericLockGuard {
+    MutexType& m;
+public:
+    explicit GenericLockGuard(MutexType& mtx) : m(mtx) { m.Lock(); }
+    ~GenericLockGuard()                                 { m.Unlock(); }
+    GenericLockGuard(const GenericLockGuard&)            = delete;
+    GenericLockGuard& operator=(const GenericLockGuard&) = delete;
+};
+
+class FreeRTOSLock { public: void Lock(); void Unlock(); };
+class ThreadXLock  { public: void Lock(); void Unlock(); };
+
+FreeRTOSLock fLk; ThreadXLock tLk;
+{
+    GenericLockGuard g1(fLk);   // OK — FreeRTOSLock에 Lock/Unlock 있음
+    GenericLockGuard g2(tLk);   // OK — ThreadXLock에도 있음
+}
+```
+
+두 락 클래스는 **같은 상속 계통이 아니다** — 그저 `Lock()`/`Unlock()`이라는 *암묵 인터페이스* ([항목 41](/blog/programming/effective-cpp/item41-understand-implicit-interfaces-and-compile-time-polymorphism))만 공유한다. 가상 함수로 했다면 추상 베이스 `IMutex`를 만들고 `FreeRTOSLock`/`ThreadXLock`이 *제3자 라이브러리라면 손도 못 대므로* 어댑터까지 동원해야 했을 것. 템플릿은 그 모든 의식을 건너뛴다 — vtable 비용은 0이고, **다른 인스턴스가 각자 코드를 생성하므로 코드 크기는 늘어난다** (트레이드오프).
+
+> 💡 **C++20 concepts**로 "`Lock()`과 `Unlock()`이 있는 타입만" 이라는 제약을 *명시적으로* 적을 수 있다 — 잘못된 타입을 넣었을 때의 에러 메시지가 훨씬 짧아진다.
+>
+> ```cpp
+> template<typename T>
+> concept Lockable = requires(T m) { m.Lock(); m.Unlock(); };
+>
+> template<Lockable MutexType>
+> class GenericLockGuard { /* … */ };
+> ```
+
 ## 트레이드오프 비교
 
 | 방식 | 런타임 비용 | 동작 변경 단위 | 코드 복잡도 | 라이프타임 |

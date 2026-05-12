@@ -96,14 +96,14 @@ RTOS의 핵심인 스케줄러와 컨텍스트 스위치를 다룹니다:
 | RTOS | 버전 | 특징 |
 |------|-----|------|
 | FreeRTOS | 10.x | 가장 널리 사용, 단순한 구조 |
-| Zephyr | 3.x | Linux Foundation, **2025년 산업 표준** |
-| RT-Thread | 5.x | 중국 오픈소스, 빠른 성장 |
+| Zephyr | 3.x | Linux Foundation 기반, 범용성과 확장성이 강함 |
+| RT-Thread | 5.x | 경량 RTOS 계열에서 참고할 만한 오픈소스 구현 |
 
-### 2025-2026 트렌드
+### 구현 관점에서 주목할 점
 
-- **Zephyr 주류화**: Intel, NXP, Nordic, ST 후원, 기여자 5배 증가
-- **RISC-V 지원**: FreeRTOS, Zephyr 모두 RISC-V 완벽 지원
-- **SiFive HiFive**: RISC-V 레퍼런스 하드웨어
+- **Zephyr**: 다양한 보드/드라이버/서브시스템 구성이 풍부함
+- **FreeRTOS**: 구조가 단순해 커널 내부 분석과 학습에 적합함
+- **RISC-V 확장**: Cortex-M 중심 설명과 함께 RISC-V 포팅 관점도 같이 볼 가치가 있음
 
 ## 이 시리즈가 강조하는 질문
 

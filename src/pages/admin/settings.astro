@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AdminGuard from '../../components/admin/AdminGuard.astro';
-import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
+import { SITE_CONFIG, ADMIN_CONFIG, FOOTER_LINKS, SOCIAL_CONFIG } from '../../consts/config';
 ---
 
 <BaseLayout
@@ -49,15 +49,46 @@ import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
             </dl>
           </div>
 
+          <!-- Footer Links -->
           <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
-            <h2 class="font-semibold mb-3">Update These Values</h2>
+            <h2 class="font-semibold mb-4">Footer Links</h2>
+            <ul class="space-y-2 text-sm">
+              {FOOTER_LINKS.map((link) => (
+                <li class="flex items-center justify-between gap-4 py-1.5 border-b border-[var(--color-border)] last:border-0">
+                  <span>{link.label}</span>
+                  <code class="text-xs text-[var(--color-text-muted)]">{link.href}</code>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <!-- Social Links -->
+          <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
+            <h2 class="font-semibold mb-4">Social Links</h2>
+            <ul class="space-y-2 text-sm">
+              {SOCIAL_CONFIG.map((link) => (
+                <li class="flex items-center justify-between gap-4 py-1.5 border-b border-[var(--color-border)] last:border-0">
+                  <span class="flex items-center gap-2">
+                    <span class="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4 text-[var(--color-text-muted)]">
+                      <Fragment set:html={link.icon} />
+                    </span>
+                    {link.name}
+                  </span>
+                  <code class="text-xs text-[var(--color-text-muted)] truncate max-w-[200px]">{link.href}</code>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
+            <h2 class="font-semibold mb-3">How to Update</h2>
             <p class="text-sm text-[var(--color-text-muted)] mb-3">
-              Admin configuration is defined in <code>src/consts/config.ts</code>.
+              All configuration is defined in <code>src/consts/config.ts</code>.
             </p>
             <ul class="space-y-2 text-sm text-[var(--color-text-muted)]">
-              <li>Set `clientId` to your GitHub OAuth App client ID before using login.</li>
-              <li>Keep `allowedUsers` restricted to the GitHub accounts that should publish content.</li>
-              <li>Change `branch` if your content workflow does not publish directly from `main`.</li>
+              <li><strong>FOOTER_LINKS</strong> - Links shown in the site footer</li>
+              <li><strong>SOCIAL_CONFIG</strong> - Social media links with icons</li>
+              <li><strong>ADMIN_CONFIG</strong> - Admin panel settings</li>
             </ul>
           </div>
         </div>

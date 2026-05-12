@@ -170,16 +170,15 @@ Part 3: Advanced Patterns (4 articles)
 src/
 ├── content/
 │   └── blog/
-│       └── embedded/                    # 새 카테고리 (생성 예정)
+│       └── embedded/                    # ✅ 생성 완료
 │           ├── modern-recipes/
-│           │   ├── part1-hardware-bringup/
-│           │   │   ├── 01-uart-debugging.md
-│           │   │   └── ...
-│           │   └── part2-rtos-concurrency/
-│           │       └── ...
+│           │   └── 00-preface.md
 │           ├── rtos-internals/
+│           │   └── 00-preface.md
 │           ├── performance-engineering/
+│           │   └── 00-preface.md
 │           └── embedded-cpp/
+│               └── 00-preface.md
 │
 ├── pages/
 │   └── courses/
@@ -384,13 +383,15 @@ featured: false
 - [x] `/courses` 페이지 구현 (기존 series 활용)
 - [x] DifficultyBadge 컴포넌트
 - [x] CourseCard 컴포넌트
-- [x] 빌드 성공 확인 (575 pages)
+- [x] `embedded` 카테고리 폴더 생성
+- [x] 4개 시리즈 서문(`00-preface.md`) 작성
+- [x] 서문 보강: 읽는 법, 범위, 목표, 실전 기준 추가
 
 ### 7.2 진행 예정
 
-- [ ] 첫 번째 시리즈 콘텐츠 작성 (Modern Embedded Recipes)
-- [ ] `embedded` 카테고리 폴더 생성
-- [ ] 첫 포스트 작성 및 테스트
+- [ ] 첫 번째 본편 콘텐츠 작성 (각 시리즈 `part1-01-*`)
+- [ ] 시리즈별 Part 1 본문 초안 작성
+- [ ] 실제 본문 생성 후 series navigation 동작 확인
 - [ ] SeriesNav 스타일 개선 (Part 구분 표시)
 
 ### 7.3 선택적 개선사항
@@ -427,6 +428,17 @@ const category = posts[0]?.id.split('/')[0] || 'programming';
 - 폴더 구조에서 자동 추출
 - 별도 메타데이터 관리 불필요
 - 일관성 유지 용이
+
+### 8.3 현재 콘텐츠 상태에 대한 메모
+
+현재 `embedded` 카테고리는 **시리즈 서문만 작성된 상태**입니다.  
+즉, 코스/시리즈 구조와 방향성은 자리잡았지만 실제 Part 본문은 아직 시작 전입니다.
+
+따라서 다음 작업의 우선순위는:
+
+1. 각 시리즈의 `part1-01-*` 본문 작성
+2. 서문에서 약속한 시리즈 구성과 실제 글 목록을 일치시키기
+3. 빈 링크 상태가 오래 유지되지 않도록 최소 1개 본문씩 먼저 채우기
 
 ---
 

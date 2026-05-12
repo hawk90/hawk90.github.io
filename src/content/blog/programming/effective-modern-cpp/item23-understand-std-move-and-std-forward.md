@@ -241,7 +241,3 @@ void wrapper(T&& arg) {
 - [항목 24: 보편 참조 vs rvalue 참조](/blog/programming/effective-modern-cpp/item24-distinguish-universal-references-from-rvalue-references)
 - [항목 25: move/forward 사용처](/blog/programming/effective-modern-cpp/item25-use-move-on-rvalue-refs-and-forward-on-universal-refs)
 - [항목 28: 참조 축약](/blog/programming/effective-modern-cpp/item28-understand-reference-collapsing) — forward 동작 원리
-
-## 참고 자료
-
-- [[Modern C++] std::move 와 std::forward 정리 - (1) — sheld2.blog.naver](https://blog.naver.com/sheld2/222654277182) — printf 데모와 "왜 이름이 move인가" 직관을 차용

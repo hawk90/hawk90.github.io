@@ -226,6 +226,41 @@ int y = f(x);   // 런타임 호출 — x가 상수 표현식 아님
 
 `constexpr` 함수는 "컴파일 타임 평가 **가능**"이지 "항상"은 아님.
 
+### 정말 컴파일 타임이었나? — `static_assert`로 못 박기
+
+말로만 "컴파일 타임"이라고 하지 말고, `static_assert`로 *증명*하면 의도가 분명해진다:
+
+```cpp
+constexpr int Max(int a, int b) { return a > b ? a : b; }
+
+constexpr auto v = Max(10, 20);        // ① 결과를 constexpr 변수로 받고
+static_assert(v == 20, "not constexpr"); // ② static_assert로 검증
+
+// ②가 통과하면 ①은 정말로 컴파일 타임에 평가된 것.
+// ①을 그냥 `auto`로 받았다면 컴파일러가 런타임으로 도망갈 여지가 있다 —
+// constexpr 변수 자리는 "런타임 값 못 받음"을 강제하는 자물쇠.
+```
+
+`static_assert`가 통과한 시점에서 `Max(10, 20)`은 컴파일 타임에 *반드시* 풀린 값이다. 디버깅 노이즈 없이 한 줄로 검증 가능.
+
+### 실전 사례 — 컴파일 타임에 파일명만 뽑기
+
+C++17 `std::string_view`와 결합하면 의외로 멋진 게 가능하다 — 매크로 `__FILE_NAME__`(또는 `__FILE__`)에서 *컴파일 타임에* 경로를 잘라 파일명만 추출:
+
+```cpp
+#include <string_view>
+
+constexpr std::string_view basename(std::string_view path) {
+    const auto slash = path.find_last_of("\\/");
+    return slash == std::string_view::npos ? path : path.substr(slash + 1);
+}
+
+constexpr auto kFile = basename(__FILE__);
+static_assert(!kFile.empty(), "");          // 컴파일 타임에 잘랐음
+```
+
+`__FILE__`은 리터럴 → `string_view`도 리터럴 슬라이스 → 전 과정이 컴파일 타임. 런타임에는 잘라낸 결과만 데이터 섹션에 박혀 있어 `printf("[%s] ...", kFile.data())` 한 줄로 로그에 파일명만 깔끔히 찍을 수 있다.
+
 C++20의 `consteval`이 "반드시 컴파일 타임만":
 
 ```cpp

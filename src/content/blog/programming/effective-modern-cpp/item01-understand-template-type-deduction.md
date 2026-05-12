@@ -966,7 +966,3 @@ void f(T&& param) {
 7. **`auto` 추론은 거의 같지만** `{}`만 다르게 처리 (항목 2)
 
 템플릿 타입 추론을 이해하면 `auto`, `decltype`, 그리고 Modern C++의 많은 기능들을 더 잘 활용할 수 있습니다.
-
-## 참고 자료
-
-- [[Modern C++] std::move 와 std::forward 정리 - (1) — sheld2.blog.naver](https://blog.naver.com/sheld2/222654277182) — `template<typename T> void setName(T&&)` 예제는 본 항목의 보편 참조 추론 규칙(경우 2)을 정확히 활용한 실용 사례. 그 결과로 만들어진 `T&&`를 안전하게 다루는 후속은 [항목 25](/blog/programming/effective-modern-cpp/item25-use-move-on-rvalue-refs-and-forward-on-universal-refs).
