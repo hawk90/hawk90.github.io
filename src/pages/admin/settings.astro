@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminGuard from '../../components/admin/AdminGuard.astro';
+import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
+---
+
+<BaseLayout
+  title={`Admin Settings - ${SITE_CONFIG.title}`}
+  description="Admin settings"
+  noIndex={true}
+>
+  <AdminGuard>
+    <section class="py-8">
+      <div class="container max-w-3xl">
+        <div class="flex items-center gap-4 mb-6">
+          <a
+            href="/admin"
+            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+          >
+            ← Back
+          </a>
+          <h1 class="text-2xl font-bold">Admin Settings</h1>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
+            <h2 class="font-semibold mb-4">Current Configuration</h2>
+            <dl class="grid gap-3 text-sm">
+              <div class="flex justify-between gap-4">
+                <dt class="text-[var(--color-text-muted)]">Enabled</dt>
+                <dd>{String(ADMIN_CONFIG.enabled)}</dd>
+              </div>
+              <div class="flex justify-between gap-4">
+                <dt class="text-[var(--color-text-muted)]">Client ID</dt>
+                <dd class="font-mono">{ADMIN_CONFIG.enabled ? (ADMIN_CONFIG.clientId || 'Not set') : 'Disabled'}</dd>
+              </div>
+              <div class="flex justify-between gap-4">
+                <dt class="text-[var(--color-text-muted)]">Allowed Users</dt>
+                <dd>{ADMIN_CONFIG.enabled ? ADMIN_CONFIG.allowedUsers.join(', ') : 'Disabled'}</dd>
+              </div>
+              <div class="flex justify-between gap-4">
+                <dt class="text-[var(--color-text-muted)]">Content Repo</dt>
+                <dd class="font-mono">{ADMIN_CONFIG.enabled ? ADMIN_CONFIG.contentRepo : 'Disabled'}</dd>
+              </div>
+              <div class="flex justify-between gap-4">
+                <dt class="text-[var(--color-text-muted)]">Branch</dt>
+                <dd class="font-mono">{ADMIN_CONFIG.enabled ? (ADMIN_CONFIG.branch || 'main') : 'Disabled'}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
+            <h2 class="font-semibold mb-3">Update These Values</h2>
+            <p class="text-sm text-[var(--color-text-muted)] mb-3">
+              Admin configuration is defined in <code>src/consts/config.ts</code>.
+            </p>
+            <ul class="space-y-2 text-sm text-[var(--color-text-muted)]">
+              <li>Set `clientId` to your GitHub OAuth App client ID before using login.</li>
+              <li>Keep `allowedUsers` restricted to the GitHub accounts that should publish content.</li>
+              <li>Change `branch` if your content workflow does not publish directly from `main`.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </AdminGuard>
+</BaseLayout>

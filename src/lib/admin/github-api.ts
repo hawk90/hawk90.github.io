@@ -212,7 +212,8 @@ export async function uploadImage(
   owner: string,
   repo: string,
   file: File,
-  basePath: string = 'public/images/blog'
+  basePath: string = 'public/images/blog',
+  branch: string = 'main'
 ): Promise<string> {
   // Generate path with date prefix
   const now = new Date();
@@ -235,7 +236,7 @@ export async function uploadImage(
     body: JSON.stringify({
       message: `Upload image: ${filename}`,
       content,
-      branch: 'main',
+      branch,
     }),
   });
 
@@ -288,6 +289,17 @@ export function parseFrontmatter(content: string): Record<string, unknown> {
     const key = line.slice(0, colonIndex).trim();
     let value: unknown = line.slice(colonIndex + 1).trim();
 
+    if (typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
+      const inner = value.slice(1, -1).trim();
+      value = inner
+        ? inner
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean)
+            .map((item) => item.replace(/^['"]|['"]$/g, ''))
+        : [];
+    }
+
     // Remove quotes if present
     if (
       (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) ||
@@ -304,6 +316,38 @@ export function parseFrontmatter(content: string): Record<string, unknown> {
   }
 
   return frontmatter;
+}
+
+export function splitFrontmatter(content: string): {
+  frontmatter: Record<string, unknown>;
+  body: string;
+} {
+  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!match) {
+    return { frontmatter: {}, body: content };
+  }
+
+  return {
+    frontmatter: parseFrontmatter(content),
+    body: match[2].replace(/^\n/, ''),
+  };
+}
+
+export function serializeFrontmatter(frontmatter: Record<string, unknown>): string {
+  const lines = Object.entries(frontmatter).map(([key, value]) => {
+    if (Array.isArray(value)) {
+      const serialized = value.map((item) => `"${String(item).replace(/"/g, '\\"')}"`).join(', ');
+      return `${key}: [${serialized}]`;
+    }
+
+    if (typeof value === 'string') {
+      return `${key}: "${value.replace(/"/g, '\\"')}"`;
+    }
+
+    return `${key}: ${JSON.stringify(value)}`;
+  });
+
+  return `---\n${lines.join('\n')}\n---`;
 }
 
 /**
@@ -403,28 +447,7 @@ export function updateFrontmatter(
   content: string,
   updates: Record<string, unknown>
 ): string {
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-
-  if (!frontmatterMatch) {
-    // No frontmatter - create one
-    const lines = Object.entries(updates)
-      .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-      .join('\n');
-    return `---\n${lines}\n---\n\n${content}`;
-  }
-
-  const existingFrontmatter = parseFrontmatter(content);
+  const { frontmatter: existingFrontmatter, body } = splitFrontmatter(content);
   const newFrontmatter = { ...existingFrontmatter, ...updates };
-
-  const lines = Object.entries(newFrontmatter)
-    .map(([key, value]) => {
-      if (typeof value === 'string') {
-        return `${key}: "${value}"`;
-      }
-      return `${key}: ${JSON.stringify(value)}`;
-    })
-    .join('\n');
-
-  const body = content.slice(frontmatterMatch[0].length).trim();
-  return `---\n${lines}\n---\n\n${body}`;
+  return `${serializeFrontmatter(newFrontmatter)}\n\n${body}`;
 }

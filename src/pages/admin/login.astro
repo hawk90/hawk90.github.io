@@ -177,6 +177,11 @@ import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
         return;
       }
 
+      if (!ADMIN_CONFIG.clientId) {
+        showError('GitHub OAuth client ID is not configured.');
+        return;
+      }
+
       try {
         const deviceCode = await startDeviceAuth(ADMIN_CONFIG.clientId);
 

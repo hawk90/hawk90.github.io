@@ -161,7 +161,7 @@ import { SITE_CONFIG } from '../../consts/config';
     createFile,
     uploadImage,
     parseRepo,
-    generatePostTemplate,
+    serializeFrontmatter,
   } from '../../lib/admin/github-api';
   import { ADMIN_CONFIG } from '../../consts/config';
 
@@ -189,7 +189,7 @@ import { SITE_CONFIG } from '../../consts/config';
     const toastEl = document.getElementById('editor-toast');
     const toastContent = document.getElementById('toast-content');
 
-    let editorInstance: unknown = null;
+    let currentMarkdown = localStorage.getItem('admin_draft_content') || '';
     let getMarkdown: (() => string) | null = null;
     let setMarkdown: ((content: string) => void) | null = null;
 
@@ -239,23 +239,16 @@ import { SITE_CONFIG } from '../../consts/config';
         : [];
       const content = getContent();
       const date = new Date().toISOString().split('T')[0];
+      const frontmatter: Record<string, unknown> = {
+        title,
+        date,
+        draft,
+      };
 
-      let frontmatter = `---
-title: "${title}"
-date: ${date}
-draft: ${draft}`;
+      if (description) frontmatter.description = description;
+      if (tags.length > 0) frontmatter.tags = tags;
 
-      if (description) {
-        frontmatter += `\ndescription: "${description}"`;
-      }
-
-      if (tags.length > 0) {
-        frontmatter += `\ntags: [${tags.map((t) => `"${t}"`).join(', ')}]`;
-      }
-
-      frontmatter += '\n---\n\n';
-
-      return frontmatter + content;
+      return `${serializeFrontmatter(frontmatter)}\n\n${content}`;
     }
 
     // Save to GitHub
@@ -318,8 +311,9 @@ draft: ${draft}`;
         const repoString = ADMIN_CONFIG.contentRepo || '';
         const { owner, repo } = parseRepo(repoString);
         const imagePath = ADMIN_CONFIG.imagePath || 'public/images/blog';
+        const branch = ADMIN_CONFIG.branch || 'main';
 
-        const url = await uploadImage(authState.accessToken, owner, repo, file, imagePath);
+        const url = await uploadImage(authState.accessToken, owner, repo, file, imagePath, branch);
 
         // Insert markdown image syntax
         const markdown = `![${file.name}](${url})`;
@@ -340,66 +334,25 @@ draft: ${draft}`;
 
     // Initialize editor (try Milkdown, fallback to textarea)
     async function initEditor() {
-      try {
-        // Dynamic import Milkdown
-        const { Editor, rootCtx, defaultValueCtx } = await import('@milkdown/kit/core');
-        const { commonmark } = await import('@milkdown/kit/preset/commonmark');
-        const { gfm } = await import('@milkdown/kit/preset/gfm');
-        const { listener, listenerCtx } = await import('@milkdown/kit/plugin/listener');
-        const { getMarkdown: getMd } = await import('@milkdown/kit/utils');
+      editorLoading?.classList.add('hidden');
+      editorEl?.classList.add('hidden');
+      editorFallback?.classList.remove('hidden');
 
-        if (!editorEl) throw new Error('Editor element not found');
+      getMarkdown = () => contentTextarea?.value || currentMarkdown;
+      setMarkdown = (content: string) => {
+        currentMarkdown = content;
+        if (contentTextarea) contentTextarea.value = content;
+        localStorage.setItem('admin_draft_content', content);
+      };
 
-        const editor = await Editor.make()
-          .config((ctx) => {
-            ctx.set(rootCtx, editorEl);
-            ctx.set(defaultValueCtx, '');
-            ctx.get(listenerCtx).markdownUpdated((_ctx, markdown) => {
-              // Auto-save to localStorage
-              localStorage.setItem('admin_draft_content', markdown);
-            });
-          })
-          .use(commonmark)
-          .use(gfm)
-          .use(listener)
-          .create();
-
-        editorInstance = editor;
-        getMarkdown = () => editor.action(getMd());
-        setMarkdown = (content: string) => {
-          // For now, we need to destroy and recreate
-          // This is a simplified version
-        };
-
-        editorLoading?.classList.add('hidden');
-        editorEl?.classList.remove('hidden');
-
-        // Restore draft from localStorage
-        const savedContent = localStorage.getItem('admin_draft_content');
-        if (savedContent && setMarkdown) {
-          setMarkdown(savedContent);
-        }
-      } catch (error) {
-        console.warn('Milkdown failed to load, using fallback:', error);
-        editorLoading?.classList.add('hidden');
-        editorFallback?.classList.remove('hidden');
-
-        getMarkdown = () => contentTextarea?.value || '';
-        setMarkdown = (content: string) => {
-          if (contentTextarea) contentTextarea.value = content;
-        };
-
-        // Restore draft
-        const savedContent = localStorage.getItem('admin_draft_content');
-        if (savedContent && contentTextarea) {
-          contentTextarea.value = savedContent;
-        }
-
-        // Auto-save for textarea
-        contentTextarea?.addEventListener('input', () => {
-          localStorage.setItem('admin_draft_content', contentTextarea.value);
-        });
+      if (currentMarkdown && contentTextarea) {
+        contentTextarea.value = currentMarkdown;
       }
+
+      contentTextarea?.addEventListener('input', () => {
+        currentMarkdown = contentTextarea.value;
+        localStorage.setItem('admin_draft_content', contentTextarea.value);
+      });
     }
 
     // Event listeners

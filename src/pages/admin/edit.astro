@@ -2,7 +2,7 @@
 /**
  * Edit Post Page
  *
- * Uses query parameter for slug: /admin/edit?slug=programming/post-name
+ * Uses query parameter for path: /admin/edit?path=src/content/blog/programming/post-name.md
  * This allows static site generation while supporting dynamic content.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -185,13 +185,15 @@ import { SITE_CONFIG } from '../../consts/config';
     updateFile,
     deleteFile,
     parseRepo,
-    parseFrontmatter,
+    splitFrontmatter,
+    serializeFrontmatter,
   } from '../../lib/admin/github-api';
   import { ADMIN_CONFIG } from '../../consts/config';
 
   onPageLoad(async () => {
-    // Get slug from URL query parameter
+    // Get post identifier from URL query parameter
     const urlParams = new URLSearchParams(window.location.search);
+    const pathParam = urlParams.get('path');
     const slug = urlParams.get('slug');
 
     // Elements
@@ -224,9 +226,10 @@ import { SITE_CONFIG } from '../../consts/config';
     let currentSha = '';
     let currentPath = '';
     let isDraft = true;
+    let publishedDate = '';
 
-    // Check if slug is provided
-    if (!slug) {
+    // Check if a post identifier is provided
+    if (!pathParam && !slug) {
       loadingEl?.classList.add('hidden');
       noSlugEl?.classList.remove('hidden');
       return;
@@ -269,7 +272,7 @@ import { SITE_CONFIG } from '../../consts/config';
         const repoString = ADMIN_CONFIG.contentRepo || '';
         const { owner, repo } = parseRepo(repoString);
         const contentPath = ADMIN_CONFIG.contentPath || 'src/content/blog';
-        const filePath = `${contentPath}/${slug}.md`;
+        const filePath = await resolvePostPath(authState.accessToken, owner, repo, contentPath);
 
         currentPath = filePath;
         if (pathEl) pathEl.textContent = filePath;
@@ -283,12 +286,7 @@ import { SITE_CONFIG } from '../../consts/config';
 
         currentSha = sha;
 
-        // Parse frontmatter
-        const frontmatter = parseFrontmatter(content);
-
-        // Extract body (content after frontmatter)
-        const bodyMatch = content.match(/^---\n[\s\S]*?\n---\n\n?([\s\S]*)$/);
-        const body = bodyMatch ? bodyMatch[1] : content;
+        const { frontmatter, body } = splitFrontmatter(content);
 
         // Populate fields
         if (titleInput) titleInput.value = (frontmatter.title as string) || '';
@@ -302,6 +300,7 @@ import { SITE_CONFIG } from '../../consts/config';
           draftCheckbox.checked = isDraft;
         }
         if (dateEl && frontmatter.date) {
+          publishedDate = String(frontmatter.date);
           dateEl.textContent = `Date: ${frontmatter.date}`;
         }
         if (contentTextarea) contentTextarea.value = body;
@@ -318,6 +317,25 @@ import { SITE_CONFIG } from '../../consts/config';
       } catch (error) {
         console.error('Failed to load post:', error);
         showError(error instanceof Error ? error.message : 'Failed to load post');
+      }
+    }
+
+    async function resolvePostPath(
+      accessToken: string,
+      owner: string,
+      repo: string,
+      contentPath: string
+    ): Promise<string> {
+      if (pathParam) {
+        return pathParam;
+      }
+
+      const mdPath = `${contentPath}/${slug}.md`;
+      try {
+        await fetchFileWithSha(accessToken, owner, repo, mdPath);
+        return mdPath;
+      } catch {
+        return `${contentPath}/${slug}.mdx`;
       }
     }
 
@@ -342,7 +360,7 @@ import { SITE_CONFIG } from '../../consts/config';
 
         const frontmatter: Record<string, unknown> = {
           title: titleInput?.value || 'Untitled',
-          date: new Date().toISOString().split('T')[0],
+          date: publishedDate || new Date().toISOString().split('T')[0],
           draft: draftCheckbox?.checked ?? true,
         };
 
@@ -374,16 +392,7 @@ import { SITE_CONFIG } from '../../consts/config';
     }
 
     function buildMarkdown(frontmatter: Record<string, unknown>, body: string): string {
-      const lines = Object.entries(frontmatter)
-        .map(([key, value]) => {
-          if (typeof value === 'string') {
-            return `${key}: "${value}"`;
-          }
-          return `${key}: ${JSON.stringify(value)}`;
-        })
-        .join('\n');
-
-      return `---\n${lines}\n---\n\n${body}`;
+      return `${serializeFrontmatter(frontmatter)}\n\n${body}`;
     }
 
     // Toggle draft status

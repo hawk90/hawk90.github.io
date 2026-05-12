@@ -180,7 +180,7 @@ import { SITE_CONFIG } from '../../consts/config';
         .map(
           (draft) => `
           <li class="px-6 py-4 hover:bg-[var(--color-bg-primary)] transition-colors">
-            <a href="/admin/edit?slug=${encodeURIComponent(draft.slug)}" class="block">
+            <a href="/admin/edit?path=${encodeURIComponent(draft.path)}" class="block">
               <h4 class="font-medium truncate">${escapeHtml(draft.title)}</h4>
               <p class="text-sm text-[var(--color-text-muted)] mt-1">
                 ${draft.date ? formatDate(draft.date) : 'No date'}

@@ -131,7 +131,7 @@ export const DEFAULT_CODE_THEMES = {
 // --- Admin Panel ---
 export const ADMIN_CONFIG = defineAdmin({
   enabled: true,
-  clientId: '', // TODO: Set your GitHub OAuth App Client ID
+  clientId: 'Ov23lim7LA7j5Np59mgw',
   allowedUsers: ['hawk90'],
   contentRepo: 'hawk90/hawk90.github.io',
   branch: 'main',

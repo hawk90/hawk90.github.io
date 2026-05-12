@@ -32,6 +32,11 @@ export interface TokenErrorResponse {
   error_description: string;
 }
 
+export type PollResult =
+  | { status: 'success'; token: TokenResponse }
+  | { status: 'pending' }
+  | { status: 'slow_down' };
+
 export interface GitHubUser {
   login: string;
   id: number;
@@ -88,7 +93,7 @@ export async function startDeviceAuth(clientId: string): Promise<DeviceCodeRespo
 export async function pollForToken(
   clientId: string,
   deviceCode: string
-): Promise<TokenResponse | null> {
+): Promise<PollResult> {
   const response = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: {
@@ -114,9 +119,9 @@ export async function pollForToken(
 
     switch (errorData.error) {
       case 'authorization_pending':
-        return null; // Keep polling
+        return { status: 'pending' };
       case 'slow_down':
-        return null; // Keep polling (caller should increase interval)
+        return { status: 'slow_down' };
       case 'expired_token':
         throw new Error('Device code expired. Please start over.');
       case 'access_denied':
@@ -126,7 +131,7 @@ export async function pollForToken(
     }
   }
 
-  return data as TokenResponse;
+  return { status: 'success', token: data as TokenResponse };
 }
 
 /**
@@ -279,22 +284,19 @@ export function startPolling(options: PollOptions): () => void {
     try {
       const result = await pollForToken(clientId, deviceCode);
 
-      if (result) {
+      if (result.status === 'success') {
         // Got token - fetch user and complete
-        const user = await fetchUser(result.access_token);
-        onSuccess(result.access_token, user);
+        const user = await fetchUser(result.token.access_token);
+        onSuccess(result.token.access_token, user);
+      } else if (result.status === 'slow_down') {
+        currentInterval += 5000;
+        timeoutId = setTimeout(poll, currentInterval);
       } else {
         // Still pending - poll again
         timeoutId = setTimeout(poll, currentInterval);
       }
     } catch (error) {
-      if (error instanceof Error && error.message.includes('slow_down')) {
-        // Increase interval by 5 seconds as per GitHub spec
-        currentInterval += 5000;
-        timeoutId = setTimeout(poll, currentInterval);
-      } else {
-        onError(error instanceof Error ? error : new Error(String(error)));
-      }
+      onError(error instanceof Error ? error : new Error(String(error)));
     }
   };
 
