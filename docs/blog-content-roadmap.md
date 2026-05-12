@@ -780,6 +780,190 @@ Part 5: C++ Software Engineering (Ch 32-33, 2개)
 
 ---
 
+## 실제 코드베이스 학습 시리즈 (Codebase Studies)
+
+책 기반 시리즈와 별개로 — **실제 오픈소스 코드를 읽으며 학습**하는 시리즈. 책으로 배운 디자인 / 패턴 / 시스템 원리를 — 실제 어떻게 구현되었는지 확인.
+
+### 시스템 / 서버 (Tier 1, 블로그와 가장 잘 맞음)
+
+**Redis** ★★
+- C, 이벤트 루프 + 자료구조 showcase
+- 단일 스레드 / I/O 다중화 — 단순함의 미덕
+- 핵심 구조: ziplist, listpack, quicklist, dict, skiplist, intset
+- 약 50K LoC — 깊이 있는 분석 가능
+- **연결**: 리눅스 커널 (epoll), Extreme C (이벤트 루프), C++ Concurrency Ch 4 비교
+
+**SQLite** ★★
+- C, "본받을 만한 C 코드" — 100% 분기 커버리지
+- B-tree / VDBE / 메모리 매핑 / WAL
+- 약 150K LoC — 전체보다 핵심 모듈 선택 학습
+- **연결**: 리눅스 커널 Part 4 (FS / Direct I/O), Extreme C
+
+**nginx** ★
+- 이벤트 기반 / 모듈 아키텍처
+- 메모리 풀 / 슬랩 / shared memory
+- 워커 프로세스 모델
+- **연결**: 리눅스 커널 (process / signal), 디자인 패턴 (Module / Pipeline)
+
+**libuv** ★
+- Node.js의 이벤트 루프 — 크로스 플랫폼 비동기
+- C, ~30K LoC
+- Thread pool / async I/O / TCP / UDP / pipe
+- **연결**: liburing, Extreme C Ch 20 (socket)
+
+**liburing** ★
+- io_uring 사용자 공간 frontend
+- 작음 (~10K LoC) — 빠르게 정복 가능
+- **연결**: 리눅스 커널 Part 4-5 (io_uring) 직결
+
+---
+
+### 임베디드 / RTOS (Tier 1, 임베디드 시리즈와 시너지)
+
+**Zephyr** ★★
+- 모던 RTOS, Linux Foundation 프로젝트
+- 커널 / driver / subsystem 분리
+- KConfig 빌드 / 디바이스 트리
+- **연결**: Modern Embedded Recipes, RTOS Internals
+
+**U-Boot** ★★
+- 부트로더 표준 — 거의 모든 임베디드 보드
+- 디바이스 트리 / fastboot / FIT 이미지
+- **연결**: 리눅스 커널 Part 1-1 (boot) 직결
+
+**FreeRTOS** ★ (입문)
+- 가장 단순한 메이저 RTOS
+- 8-9K LoC — 한 달이면 완독
+- 태스크 / 스케줄러 / queue / semaphore
+- **연결**: Zephyr 가기 전 워밍업
+
+**NuttX**
+- POSIX 호환 RTOS (Apache)
+- Linux 흉내 — 학습 가치
+- PX4 드론 등 실전 사용
+
+**ESP-IDF** ★
+- ESP32 / ESP-S3 등 SDK — 매우 인기
+- FreeRTOS 기반 / WiFi / BLE 통합
+- 학습자 많음 — 실용성 ↑
+
+**mbedTLS**
+- Arm 표준 임베디드 crypto
+- TLS / X.509 / cipher
+
+---
+
+### 성능 / 네트워킹 / 메모리
+
+**DPDK**
+- 고성능 네트워킹 — 커널 우회
+- 도메인 좁음 (NFV / 통신)
+- **연결**: Performance Engineering, 리눅스 커널 (네트워크)
+
+**mimalloc** ★
+- Microsoft 모던 allocator
+- C, 작음 / 잘 문서화
+- **연결**: Extreme C Ch 5 (heap), C++ 메모리 관리
+
+**jemalloc**
+- Facebook / FreeBSD 표준급 allocator
+- 분석 도구 / 통계 풍부
+
+**lwIP**
+- 임베디드 TCP/IP 스택
+- 작음 — 네트워크 학습용
+- **연결**: ESP-IDF / Zephyr가 사용
+
+---
+
+### C++ 라이브러리
+
+**fmtlib** + **spdlog** ★
+- 모던 C++ 라이브러리 모범
+- 작고 — std::format / log API
+- 헤더 전용 옵션 / template 기법
+
+**Eigen**
+- 헤더 전용 / 표현 템플릿
+- 선형대수 — 수학 시리즈 시너지
+- 깊은 메타프로그래밍 — Beautiful C++와 결
+
+**Boost.Asio** ★
+- 비동기 네트워킹 정전
+- C++ executor 모델 토대
+- **연결**: C++ Concurrency, libuv 비교
+
+**Abseil / Folly** (별도 디렉토리 존재)
+- Google / Facebook의 표준 보완 라이브러리
+- 깊이 vs 폭 — 핵심 컴포넌트만 선택
+
+---
+
+### 언어 / 컴파일러
+
+**Lua** ★
+- 5,000줄 C로 완전한 언어
+- 학습용 최고 — 인터프리터 / GC / 코루틴
+- **연결**: 코루틴 (C++ Coroutines Ch 27), Extreme C Ch 21 (FFI)
+
+**TCC** (Tiny C Compiler)
+- 작은 컴파일러 전체
+- single-pass — 단순성
+- 학습 컴파일러 입문
+
+**LLVM / Clang**
+- 대규모 — 장기 프로젝트
+- 컴파일러 인프라 표준
+- IR / 최적화 패스 / clang-tidy
+- **연결**: clang-format / clang-tidy 사용해 본 사람의 다음 단계
+
+---
+
+### 표준 라이브러리 / 최소 시스템
+
+**musl libc** ★
+- 작은 표준 라이브러리 (~70K LoC)
+- 정결한 C — 학습 가속
+- glibc 비교 — 표준의 본질
+- **연결**: Extreme C, 임베디드 Linux
+
+---
+
+### 시리즈 제안 구조 (각 codebase)
+
+```
+시리즈: <Codebase> 코드 읽기
+총 ~10-20개 글 (codebase 크기에 따라)
+
+1. Overview — 아키텍처 / 디렉토리 구조
+2. Build & entry point
+3. 핵심 자료구조 (~3-5 글)
+4. 핵심 알고리즘 / 흐름 (~3-5 글)
+5. 흥미로운 패턴 / idiom (~2-4 글)
+6. 성능 / 측정
+7. 비교 / 대안
+8. 마무리 — 무엇을 배웠나
+```
+
+---
+
+### 우선순위 — Codebase 시리즈
+
+| 우선 | 시리즈 | 이유 |
+|---|---|---|
+| ★★ Tier 1 | **Redis** | 작음, 명료, 자료구조, 단일 스레드 모델 |
+| ★★ Tier 1 | **SQLite** | C 모범, FS / B-tree / VDBE — 깊이 |
+| ★★ Tier 1 | **Zephyr** | 임베디드 시리즈와 직결 |
+| ★★ Tier 1 | **U-Boot** | 리눅스 커널 boot와 짝 |
+| ★ Tier 2 | **Lua** | 인터프리터 학습 — 5K LoC |
+| ★ Tier 2 | **liburing** | 작음 + 커널 시리즈 짝 |
+| ★ Tier 2 | **ESP-IDF** | 실용성 ↑ |
+| ★ Tier 2 | **FreeRTOS** | 입문 RTOS |
+| ★ Tier 2 | **fmtlib + spdlog** | 모던 C++ 라이브러리 모범 |
+| ☆ Tier 3 | nginx / libuv / mimalloc / mbedTLS / musl / Eigen / Asio / NuttX / DPDK / TCC | 도메인별 |
+
+---
+
 ## 우선순위 및 로드맵
 
 ### Phase 1 (높은 우선순위)
@@ -1022,4 +1206,4 @@ Part 5: C++ Software Engineering (Ch 32-33, 2개)
 ---
 
 *문서 작성일: 2026-05-12*
-*최종 수정: 2026-05-13 (Refactoring / Code / 리눅스 커널 / 비판적 사고를 위한 논리 / 전문가를 위한 C·C++ 추가)*
+*최종 수정: 2026-05-13 (codebase studies 섹션 추가 — Redis / SQLite / Zephyr / U-Boot 등 10+ 후보)*
