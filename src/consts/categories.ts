@@ -56,6 +56,12 @@ export const CATEGORIES: Category[] = [
     description: '코드 리뷰 / 오픈소스 코드 읽기',
     icon: '👀',
   },
+  {
+    id: 'tools',
+    name: 'Tools',
+    description: '개발 도구 — Vim / tmux / CLI / 디버거 / 프로파일러',
+    icon: '🛠️',
+  },
 
   // Sub-categories of programming
   {
@@ -92,6 +98,13 @@ export const CATEGORIES: Category[] = [
     name: 'Git',
     description: 'Git — Pro Git / 컨벤션 / 브랜치 전략',
     icon: '🌿',
+  },
+  {
+    id: 'embedded/standards',
+    parent: 'embedded',
+    name: 'Coding Standards',
+    description: '코딩 표준 — MISRA / CERT / AUTOSAR / High Integrity',
+    icon: '📜',
   },
 ];
 
