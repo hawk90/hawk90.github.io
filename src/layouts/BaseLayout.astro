@@ -103,6 +103,9 @@ const jsonLd = type === 'article'
       "form-action 'self' https://github.com",
     ].join('; ')} />
 
+    <!-- Google AdSense site-ownership verification -->
+    <meta name="google-adsense-account" content="ca-pub-6238136533844790" />
+
     <!-- Primary Meta Tags -->
     <title>{title}</title>
     <meta name="title" content={title} />
@@ -200,9 +203,8 @@ const jsonLd = type === 'article'
           var pref=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches;
           var light=t==="light"||(t!=="dark"&&pref);
           el.classList.toggle("light",light);
-          var d=localStorage.getItem("code-theme-dark"); if(V.indexOf(d)===-1) d="github-dark-dimmed";
-          var c=localStorage.getItem("code-theme-light"); if(V.indexOf(c)===-1) c="github-light";
-          el.setAttribute("data-code-theme",light?c:d);
+          var c=localStorage.getItem("code-theme"); if(V.indexOf(c)===-1) c="github-dark-dimmed";
+          el.setAttribute("data-code-theme",c);
           var n=localStorage.getItem("show-line-numbers");
           el.setAttribute("data-show-line-numbers",n!=="false"?"true":"false");
           if(localStorage.getItem("reading-mode")==="1") el.classList.add("reading-mode");

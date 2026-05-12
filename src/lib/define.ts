@@ -96,6 +96,7 @@ export type AnalyticsConfig =
   | { enabled: true; provider: 'plausible'; id: string };
 export const defineAnalytics = <T extends AnalyticsConfig>(c: T) => c;
 
+
 // ─── Newsletter ─────────────────────────────────────────────
 export type NewsletterConfig =
   | { enabled: false }

@@ -113,8 +113,7 @@ export const UI_CONFIG = defineUi({
 // --- Storage Keys (internal — don't change unless you know why) ---
 export const STORAGE_KEYS = {
   theme: 'theme',
-  codeThemeDark: 'code-theme-dark',
-  codeThemeLight: 'code-theme-light',
+  codeTheme: 'code-theme',
   showLineNumbers: 'show-line-numbers',
   // Theme customizer (settings page)
   fontFamily: 'font-family',     // 'sans' | 'serif' | 'mono' | 'system'
