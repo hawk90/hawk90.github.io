@@ -86,6 +86,13 @@ export const CATEGORIES: Category[] = [
     description: '소프트웨어 공학 — 클래식 / 실무 / 문화',
     icon: '🏗️',
   },
+  {
+    id: 'programming/git',
+    parent: 'programming',
+    name: 'Git',
+    description: 'Git — Pro Git / 컨벤션 / 브랜치 전략',
+    icon: '🌿',
+  },
 ];
 
 export function getCategoryById(id: string): Category | undefined {
