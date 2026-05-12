@@ -13,6 +13,12 @@ export const CATEGORIES: Category[] = [
     icon: '💻',
   },
   {
+    id: 'embedded',
+    name: 'Embedded Systems',
+    description: '임베디드 시스템 — RTOS, 성능, C++, 트러블슈팅',
+    icon: '🔧',
+  },
+  {
     id: 'math',
     name: 'Mathematics',
     description: '수학 학습 노트 — 선형대수, 집합론',
