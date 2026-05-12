@@ -18,7 +18,7 @@
 
 ## 현재 블로그 시리즈 현황
 
-### Programming (14 시리즈)
+### Programming (16 시리즈)
 - Effective C++ (진행중)
 - Effective Modern C++ (진행중)
 - C++ Software Design (40 가이드라인)
@@ -33,6 +33,8 @@
 - Refactoring — Fowler (예정)
 - Code: The Hidden Language — Petzold (예정)
 - 리눅스 커널의 구조와 원리 (예정)
+- 전문가를 위한 C — Extreme C / Kamran Amini (예정)
+- 전문가를 위한 C++ — Professional C++ / Marc Gregoire (예정)
 
 ### Embedded (4 시리즈, preface만 존재)
 - Modern Embedded Recipes (6 Parts, 36글 예정)
@@ -631,6 +633,153 @@ Part 4: 적용 (3개)
 
 ---
 
+### 11. 전문가를 위한 C — Extreme C (Kamran Amini)
+
+**책 정보:**
+- *Extreme C* — Kamran Amini (Packt, 2019)
+- 한국어 번역명 — *전문가를 위한 C* (한빛미디어)
+- ~820쪽, 6 Part, 23장
+- C의 시스템 프로그래밍 심화 — 메모리 / 동시성 / IPC / 단위 테스트
+- 본문 자체가 거대 — 시리즈로 적합
+
+**제안 구조:**
+
+```
+시리즈: 전문가를 위한 C (Extreme C)
+총 ~24개 글 (overview + 23장)
+
+Part 1: Build System & Project Layout (Ch 1-3, 3개)
+- 컴파일 파이프라인 (preprocessor / compiler / assembler / linker)
+- 소스 코드 조직 / 헤더 / 모듈
+- 오브젝트 파일 / 정적·동적 라이브러리
+
+Part 2: Memory (Ch 4-7, 4개)
+- 프로세스 메모리 레이아웃
+- Stack vs Heap — 라이프타임 / 안전
+- 메모리 디버깅 (Valgrind, sanitizer)
+- 커스텀 allocator
+
+Part 3: Object Orientation (Ch 8-10, 3개)
+- C로 OO — encapsulation
+- C로 상속 / composition
+- C로 다형성 — 함수 포인터 / vtable
+
+Part 4: Unit Testing & Debugging (Ch 11-12, 2개)
+- CMocka, Unity 등 단위 테스트
+- gdb / ASAN / TSAN
+
+Part 5: System (Ch 13-19, 7개)
+- 프로세스 실행 — fork / exec
+- 프로세스 동기화 — 세마포어 / 락
+- IPC — 시그널 / 파이프 / FIFO / 메시지 큐 / 공유 메모리
+- 소켓 (TCP/UDP)
+- 클라이언트-서버 패턴
+
+Part 6: Concurrency & Beyond (Ch 20-23, 5개)
+- POSIX 스레드
+- 스레드 동기화
+- 다른 언어와의 통합 (Python, Java, Go FFI)
+- WebAssembly / 미래 방향
+```
+
+**위상:**
+- C 시스템 프로그래밍의 정전급
+- 임베디드 / 커널 / 미들웨어 개발자 필수
+- 기존 C++ 시리즈와 짝 — "C의 깊이 vs C++의 추상"
+
+**기존 시리즈와 연결:**
+- C++ Concurrency Ch 5-7 — 메모리 모델 / 동시성 (C 시각으로)
+- 리눅스 커널의 구조와 원리 — 커널 시각
+- Modern Embedded Recipes Part 1-3 — 임베디드 C
+- Code (Petzold) — 하드웨어 → C로 연결
+
+**언어 결정:**
+- 한국어 본문, C 코드 — POSIX 환경 기준
+- Linux + gcc + clang 위주
+
+---
+
+### 12. 전문가를 위한 C++ — Professional C++ (Marc Gregoire)
+
+**책 정보:**
+- *Professional C++* — Marc Gregoire (Wrox/Wiley)
+- 6판 (C++23 기준, 2024 — 또는 5판 C++20 기준)
+- 한국어 번역명 — *전문가를 위한 C++* (위키북스)
+- ~1,000쪽, 5 Part, 33장
+- C++ 종합 참고서 — 언어 + 표준 라이브러리 + 패턴 + 실무
+
+**제안 구조:**
+
+```
+시리즈: 전문가를 위한 C++ (Professional C++)
+총 ~34개 글 (overview + 33장)
+
+Part 1: Introduction to Professional C++ (Ch 1-3, 3개)
+- C++ 입문 단축 코스
+- 모범 사례
+- 스트링 / 문자열 뷰
+
+Part 2: Professional C++ Software Design (Ch 4-7, 4개)
+- 소프트웨어 디자인 일반
+- 소프트웨어 디자인 (모던 C++)
+- OO 디자인
+- 디자인 재사용
+
+Part 3: Coding the Professional Way (Ch 8-18, 11개)
+- 클래스 / 객체 — 깊이
+- 클래스 / 객체 — 정복
+- 상속 — 디자인 vs 구현
+- 모듈 / 헤더 / 네임스페이스
+- 템플릿 — 기초
+- 템플릿 심화
+- C++ idioms
+- 에러 처리
+- 연산자 오버로딩
+- 문자열 / 정규표현식
+- I/O 스트림
+
+Part 4: Mastering Advanced Features (Ch 19-31, 13개)
+- 표준 라이브러리 컨테이너
+- 함수 포인터 / function 객체 / lambda
+- 알고리즘
+- ranges (C++20/23)
+- 추가 라이브러리 유틸리티
+- 데이터 구조 커스텀
+- 단위 테스트
+- 디버깅 / 프로파일링
+- 동시성 — std::thread 등
+- 동시성 — coordination
+- 동시성 — atomic / lock-free
+- coroutine (C++20/23)
+- C 호환
+
+Part 5: C++ Software Engineering (Ch 32-33, 2개)
+- 디자인 패턴 적용
+- 빌드 / 디플로이
+```
+
+**위상:**
+- C++ 종합 참고서 — 입문에서 전문까지
+- Effective / Beautiful / Software Design 시리즈의 **종합 백과**
+- 각 항목별 깊이는 시리즈 책들보다 얕지만 — 폭이 가장 큼
+- 모던 C++ 종합 검토에 이상적
+
+**기존 시리즈와 연결:**
+- Effective C++ — 클래식 가이드
+- Effective Modern C++ — C++11/14 도구
+- Beautiful C++ — 가이드라인
+- C++ Software Design — 모던 디자인
+- **종합 — 이 시리즈가 위의 모든 시리즈를 포괄하는 횡적 백과**
+
+**언어:**
+- 한국어 본문, C++23 (또는 C++20) 코드
+
+**중복 처리:**
+- Effective 시리즈와 겹치는 부분 — Professional은 폭, Effective는 깊이로 차별화
+- 동시성 — C++ Concurrency in Action 시리즈에 위임 (이 시리즈는 요약)
+
+---
+
 ## 우선순위 및 로드맵
 
 ### Phase 1 (높은 우선순위)
@@ -662,6 +811,8 @@ Part 4: 적용 (3개)
 | Code (Petzold) | 학부 기초 / 면접 / Computer Architecture 사전 단계 | 29 |
 | 리눅스 커널의 구조와 원리 | 임베디드 Linux / 시스템 프로그래밍 심화 | ~25 |
 | 비판적 사고를 위한 논리 (박은진·김희정) | 형식·비형식 논리 — 사고 / 논증 / 비판적 평가 | ~16 |
+| 전문가를 위한 C (Extreme C) | C 시스템 프로그래밍 정전 — 임베디드 / 커널 / 미들웨어 | ~24 |
+| 전문가를 위한 C++ (Professional C++) | C++ 종합 백과 — 입문에서 C++23까지 횡적 정리 | ~34 |
 
 ---
 
@@ -871,4 +1022,4 @@ Part 4: 적용 (3개)
 ---
 
 *문서 작성일: 2026-05-12*
-*최종 수정: 2026-05-13 (Refactoring / Code / 리눅스 커널 / 비판적 사고를 위한 논리 추가)*
+*최종 수정: 2026-05-13 (Refactoring / Code / 리눅스 커널 / 비판적 사고를 위한 논리 / 전문가를 위한 C·C++ 추가)*
