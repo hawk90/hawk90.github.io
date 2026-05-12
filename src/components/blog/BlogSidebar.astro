@@ -95,6 +95,7 @@ function seriesIn(posts: typeof allPosts): string[] {
           const initiallyOpen = isCatActive || subCats.some((s) => isActiveCategory(s.id));
           return (
             <details class="cat-tree" open={initiallyOpen}>
+              <summary></summary>
               <div
                 class:list={[
                   'flex items-center gap-1 rounded-lg transition-colors',
@@ -135,6 +136,7 @@ function seriesIn(posts: typeof allPosts): string[] {
                     return (
                       <li>
                         <details class="cat-tree" open={isSubActive}>
+                          <summary></summary>
                           <div
                             class:list={[
                               'flex items-center gap-1 rounded text-sm transition-colors',
