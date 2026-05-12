@@ -35,6 +35,12 @@ move(T&& param) {
 
 **이것뿐**. 이동을 발생시키지 않고, 단지 컴파일러에게 "이 객체는 이동 대상으로 취급해도 좋다"는 신호.
 
+> 🤔 **그런데 왜 이름이 'move'인가?**
+>
+> `std::move`는 직접 객체를 옮기지 않는다. 그러나 객체를 **rvalue로 캐스팅해 "movable" 상태로 만들어 준다**. 진짜 이동을 실행하는 move 생성자(또는 move 대입)를 *호출 가능하게* 해 주는 캐스팅 — 그래서 이름이 `move`다.
+>
+> 직관: rvalue는 곧 사라질 값이라 어차피 *남에게 보여줘야 할 의무*가 없다. 그러니 비싼 복사로 모든 걸 베끼지 말고, 내장된 자원을 통째로 **"훔쳐 가도"** 안전하다 — 이 "훔쳐 가기"가 곧 이동.
+
 ### 실제 이동은 누가?
 
 `std::move(x)`의 결과를 받는 함수가 — 보통 **move 생성자/대입**이 — 이동을 수행.
@@ -44,6 +50,32 @@ std::string a = "hello";
 std::string b = std::move(a);   // std::move는 캐스팅만
                                  // 진짜 이동은 string의 move ctor
 ```
+
+### 눈으로 확인하기 — 어떤 생성자가 불리나
+
+개념만으론 헷갈리는 분들을 위한 짤막한 데모. 두 생성자에 `puts`를 박아 두면 어떤 쪽이 불리는지 그대로 보인다.
+
+```cpp
+#include <cstdio>
+#include <string>
+#include <utility>
+
+class Widget {
+public:
+    explicit Widget(std::string s) : name(std::move(s)) {}
+    Widget(const Widget&)            { std::puts("copy ctor"); }
+    Widget(Widget&&) noexcept        { std::puts("move ctor"); }
+    std::string name;
+};
+
+int main() {
+    Widget a("hello");
+    Widget b = a;             // → "copy ctor"  (a는 lvalue)
+    Widget c = std::move(a);  // → "move ctor"  (std::move가 a를 rvalue로 캐스팅)
+}
+```
+
+`std::move(a)` 자체는 코드 한 줄 — 캐스팅뿐인데, 그 결과로 `Widget(Widget&&)` 오버로드가 선택된다. *이름이 어떻게 이동을 만들어 주는지*가 출력 두 줄로 확인된다.
 
 ## ⚠️ 함정 — `const`는 깎이지 않음
 
@@ -209,3 +241,7 @@ void wrapper(T&& arg) {
 - [항목 24: 보편 참조 vs rvalue 참조](/blog/programming/effective-modern-cpp/item24-distinguish-universal-references-from-rvalue-references)
 - [항목 25: move/forward 사용처](/blog/programming/effective-modern-cpp/item25-use-move-on-rvalue-refs-and-forward-on-universal-refs)
 - [항목 28: 참조 축약](/blog/programming/effective-modern-cpp/item28-understand-reference-collapsing) — forward 동작 원리
+
+## 참고 자료
+
+- [[Modern C++] std::move 와 std::forward 정리 - (1) — sheld2.blog.naver](https://blog.naver.com/sheld2/222654277182) — printf 데모와 "왜 이름이 move인가" 직관을 차용

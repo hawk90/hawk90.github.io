@@ -53,7 +53,13 @@ void wrapper(T&& arg) {
 std::string s = "hello";
 wrapper(s);   // s가 망가짐 — 호출자가 expect한 동작 아님
               // (호출자는 단순 함수 호출 의도였음)
+              // wrapper(s) 호출 이후 s의 내용은 *unspecified* —
+              // 코드를 보고 호출자는 "그저 함수 호출"로만 인식한다.
 ```
+
+이게 위험한 진짜 이유: 호출자는 본인 코드만 본다. `wrapper(s)`라고 적은 줄에서 `s`가 약탈당했다는 신호가 *어디에도 없다*. 다음 줄에서 `s`를 다시 쓰면 — `wrapper`의 정의가 멀리 떨어진 헤더에 있다면 — 디버깅이 한참 어려워진다.
+
+> 🟡 **유일한 예외**: 인자가 wrapper 호출 *이후* 더 이상 쓰이지 않음을 보장할 수 있다면 `T&&`에 `std::move`도 안전하다. 보장이 안 되면 — 즉 일반 라이브러리 코드라면 — 무조건 `std::forward<T>`.
 
 ### rvalue 참조에 `std::forward`
 
@@ -202,3 +208,7 @@ void f(const Widget&& w) {       // ⚠️ const rvalue 참조 — 거의 의미
 - [항목 24: 두 종류 구분](/blog/programming/effective-modern-cpp/item24-distinguish-universal-references-from-rvalue-references)
 - [항목 14: noexcept](/blog/programming/effective-modern-cpp/item14-declare-functions-noexcept-if-they-wont-emit-exceptions)
 - [항목 41: pass by value](/blog/programming/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params)
+
+## 참고 자료
+
+- [[Modern C++] std::move 와 std::forward 정리 - (1) — sheld2.blog.naver](https://blog.naver.com/sheld2/222654277182) — "T&& 에 std::move 쓰지 마라"의 호출자 시점 직관과 예외 조건
