@@ -33,6 +33,12 @@ import { SITE_CONFIG } from '../../consts/config';
           <div class="flex items-center gap-2">
             <span id="save-status" class="text-sm text-[var(--color-text-muted)]"></span>
             <button
+              id="preview-btn"
+              class="px-4 py-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-border-hover)] transition-colors"
+            >
+              Preview
+            </button>
+            <button
               id="save-btn"
               class="px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:opacity-90 transition-opacity"
             >
@@ -174,6 +180,45 @@ import { SITE_CONFIG } from '../../consts/config';
         </div>
       </div>
     </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="hidden fixed inset-0 z-50 overflow-hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-preview-backdrop></div>
+      <div class="relative h-full flex flex-col">
+        <!-- Preview Header -->
+        <div class="flex-shrink-0 bg-[var(--color-bg-primary)] border-b border-[var(--color-border)] px-6 py-4">
+          <div class="container max-w-4xl flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-bold">Preview</h2>
+              <p class="text-sm text-[var(--color-text-muted)]">This is how your post will look when published</p>
+            </div>
+            <button
+              id="close-preview"
+              class="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Preview Content -->
+        <div class="flex-1 overflow-y-auto bg-[var(--color-bg-primary)]">
+          <article class="container max-w-4xl py-8">
+            <header class="mb-8">
+              <h1 id="preview-title" class="text-3xl font-bold mb-4"></h1>
+              <div class="flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-muted)]">
+                <span id="preview-date"></span>
+                <span id="preview-draft-badge" class="hidden px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs font-medium">Draft</span>
+              </div>
+              <p id="preview-description" class="mt-4 text-lg text-[var(--color-text-secondary)]"></p>
+              <div id="preview-tags" class="flex flex-wrap gap-2 mt-4"></div>
+            </header>
+            <div id="preview-content" class="prose prose-lg max-w-none"></div>
+          </article>
+        </div>
+      </div>
+    </div>
   </AdminGuard>
 </BaseLayout>
 
@@ -189,6 +234,7 @@ import { SITE_CONFIG } from '../../consts/config';
     serializeFrontmatter,
   } from '../../lib/admin/github-api';
   import { ADMIN_CONFIG } from '../../consts/config';
+  import { marked } from 'marked';
 
   onPageLoad(async () => {
     // Get post identifier from URL query parameter
@@ -214,11 +260,22 @@ import { SITE_CONFIG } from '../../consts/config';
     const saveBtn = document.getElementById('save-btn');
     const toggleDraftBtn = document.getElementById('toggle-draft-btn');
     const deleteBtn = document.getElementById('delete-btn');
+    const previewBtn = document.getElementById('preview-btn');
     const saveStatus = document.getElementById('save-status');
 
     const deleteModal = document.getElementById('delete-modal');
     const cancelDeleteBtn = document.getElementById('cancel-delete');
     const confirmDeleteBtn = document.getElementById('confirm-delete');
+
+    const previewModal = document.getElementById('preview-modal');
+    const previewBackdrop = document.querySelector('[data-preview-backdrop]');
+    const closePreviewBtn = document.getElementById('close-preview');
+    const previewTitle = document.getElementById('preview-title');
+    const previewDate = document.getElementById('preview-date');
+    const previewDraftBadge = document.getElementById('preview-draft-badge');
+    const previewDescription = document.getElementById('preview-description');
+    const previewTags = document.getElementById('preview-tags');
+    const previewContent = document.getElementById('preview-content');
 
     const toastEl = document.getElementById('editor-toast');
     const toastContent = document.getElementById('toast-content');
@@ -444,9 +501,69 @@ import { SITE_CONFIG } from '../../consts/config';
       }
     }
 
+    // Preview function
+    async function showPreview() {
+      if (!previewModal) return;
+
+      // Configure marked for safe rendering
+      marked.setOptions({
+        gfm: true,
+        breaks: true,
+      });
+
+      // Update preview content
+      if (previewTitle) previewTitle.textContent = titleInput?.value || 'Untitled';
+      if (previewDate) previewDate.textContent = publishedDate || new Date().toISOString().split('T')[0];
+      if (previewDescription) {
+        previewDescription.textContent = descInput?.value || '';
+        previewDescription.classList.toggle('hidden', !descInput?.value);
+      }
+
+      // Draft badge
+      if (previewDraftBadge) {
+        previewDraftBadge.classList.toggle('hidden', !draftCheckbox?.checked);
+      }
+
+      // Tags
+      if (previewTags) {
+        const tags = tagsInput?.value
+          ? tagsInput.value.split(',').map((t) => t.trim()).filter(Boolean)
+          : [];
+        previewTags.innerHTML = tags
+          .map((tag) => `<span class="px-2 py-1 bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] text-sm rounded">${escapeHtml(tag)}</span>`)
+          .join('');
+        previewTags.classList.toggle('hidden', tags.length === 0);
+      }
+
+      // Render markdown content
+      if (previewContent) {
+        const markdown = contentTextarea?.value || '';
+        const html = await marked.parse(markdown);
+        previewContent.innerHTML = html;
+      }
+
+      // Show modal
+      previewModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePreview() {
+      previewModal?.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function escapeHtml(str: string): string {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
     // Event listeners
     saveBtn?.addEventListener('click', saveChanges);
     toggleDraftBtn?.addEventListener('click', toggleDraft);
+    previewBtn?.addEventListener('click', showPreview);
+    closePreviewBtn?.addEventListener('click', closePreview);
+    previewBackdrop?.addEventListener('click', closePreview);
 
     deleteBtn?.addEventListener('click', () => {
       deleteModal?.classList.remove('hidden');
@@ -461,15 +578,24 @@ import { SITE_CONFIG } from '../../consts/config';
       handleDelete();
     });
 
-    // Close modal on backdrop click
+    // Close modals on backdrop click
     deleteModal?.addEventListener('click', (e) => {
       if (e.target === deleteModal) {
         deleteModal.classList.add('hidden');
       }
     });
 
+    // Close preview with Escape key
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key === 'Escape' && !previewModal?.classList.contains('hidden')) {
+        closePreview();
+      }
+    }
+    document.addEventListener('keydown', handleKeydown);
+
     return () => {
       window.removeEventListener('admin:authenticated', handleAuthenticated);
+      document.removeEventListener('keydown', handleKeydown);
     };
   });
 </script>

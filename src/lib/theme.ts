@@ -1,27 +1,23 @@
 import { STORAGE_KEYS, DEFAULT_CODE_THEMES } from '../consts/config';
 
-export const CODE_THEMES = {
-  dark: [
-    { id: 'github-dark-dimmed', name: 'GitHub Dark' },
-    { id: 'dracula', name: 'Dracula' },
-    { id: 'one-dark-pro', name: 'One Dark Pro' },
-    { id: 'catppuccin-mocha', name: 'Catppuccin Mocha' },
-    { id: 'nord', name: 'Nord' },
-    { id: 'tokyo-night', name: 'Tokyo Night' },
-  ],
-  light: [
-    { id: 'github-light', name: 'GitHub Light' },
-    { id: 'catppuccin-latte', name: 'Catppuccin Latte' },
-  ],
-};
+// All available code themes (independent of site mode)
+export const CODE_THEMES = [
+  // Dark themes
+  { id: 'github-dark-dimmed', name: 'GitHub Dark', type: 'dark' as const },
+  { id: 'dracula', name: 'Dracula', type: 'dark' as const },
+  { id: 'one-dark-pro', name: 'One Dark Pro', type: 'dark' as const },
+  { id: 'catppuccin-mocha', name: 'Catppuccin Mocha', type: 'dark' as const },
+  { id: 'nord', name: 'Nord', type: 'dark' as const },
+  { id: 'tokyo-night', name: 'Tokyo Night', type: 'dark' as const },
+  // Light themes
+  { id: 'github-light', name: 'GitHub Light', type: 'light' as const },
+  { id: 'catppuccin-latte', name: 'Catppuccin Latte', type: 'light' as const },
+];
 
 // Allowlist of code-theme IDs the inline FOUC script accepts. Kept here so
 // the runtime and the FOUC script stay in sync — the inline script in
 // BaseLayout embeds this same list as a string.
-export const VALID_CODE_THEMES = [
-  ...CODE_THEMES.dark.map((t) => t.id),
-  ...CODE_THEMES.light.map((t) => t.id),
-];
+export const VALID_CODE_THEMES = CODE_THEMES.map((t) => t.id);
 
 function isStorageAvailable(): boolean {
   try {
@@ -43,16 +39,21 @@ export function getStoredTheme(): 'light' | 'dark' | null {
   }
 }
 
-export function getStoredCodeTheme(mode: 'dark' | 'light'): string {
-  const defaultTheme = mode === 'dark' ? DEFAULT_CODE_THEMES.dark : DEFAULT_CODE_THEMES.light;
+/**
+ * Get stored code theme (independent of site mode).
+ */
+export function getStoredCodeTheme(): string {
   if (typeof localStorage === 'undefined' || !isStorageAvailable()) {
-    return defaultTheme;
+    return DEFAULT_CODE_THEMES.dark;
   }
   try {
-    const key = mode === 'dark' ? STORAGE_KEYS.codeThemeDark : STORAGE_KEYS.codeThemeLight;
-    return localStorage.getItem(key) || defaultTheme;
+    const stored = localStorage.getItem(STORAGE_KEYS.codeTheme);
+    if (stored && VALID_CODE_THEMES.includes(stored)) {
+      return stored;
+    }
+    return DEFAULT_CODE_THEMES.dark;
   } catch {
-    return defaultTheme;
+    return DEFAULT_CODE_THEMES.dark;
   }
 }
 
@@ -65,11 +66,13 @@ export function setStoredTheme(theme: 'light' | 'dark'): void {
   }
 }
 
-export function setStoredCodeTheme(mode: 'dark' | 'light', themeId: string): void {
+/**
+ * Set code theme (independent of site mode).
+ */
+export function setStoredCodeTheme(themeId: string): void {
   if (!isStorageAvailable()) return;
   try {
-    const key = mode === 'dark' ? STORAGE_KEYS.codeThemeDark : STORAGE_KEYS.codeThemeLight;
-    localStorage.setItem(key, themeId);
+    localStorage.setItem(STORAGE_KEYS.codeTheme, themeId);
   } catch {
     // Storage quota exceeded or other error - silently fail
   }
@@ -92,7 +95,7 @@ export function syncCodeTheme(root: ParentNode = document): void {
 }
 
 export function applyCodeTheme(): void {
-  const theme = getStoredCodeTheme(isLightMode() ? 'light' : 'dark');
+  const theme = getStoredCodeTheme();
   document.documentElement.setAttribute('data-code-theme', theme);
   syncCodeTheme();
 }
@@ -113,9 +116,9 @@ export function applyTheme(el: HTMLElement = document.documentElement): void {
     const isLight = stored === 'light' || (stored !== 'dark' && prefersLight);
     el.classList.toggle('light', isLight);
 
-    const d = pickCodeTheme(localStorage.getItem(STORAGE_KEYS.codeThemeDark), 'dark');
-    const c = pickCodeTheme(localStorage.getItem(STORAGE_KEYS.codeThemeLight), 'light');
-    el.setAttribute('data-code-theme', isLight ? c : d);
+    // Code theme is now independent of site mode
+    const codeTheme = pickCodeTheme(localStorage.getItem(STORAGE_KEYS.codeTheme));
+    el.setAttribute('data-code-theme', codeTheme);
 
     const n = localStorage.getItem(STORAGE_KEYS.showLineNumbers);
     el.setAttribute('data-show-line-numbers', n !== 'false' ? 'true' : 'false');
@@ -124,18 +127,13 @@ export function applyTheme(el: HTMLElement = document.documentElement): void {
   }
 }
 
-function pickCodeTheme(v: string | null, mode: 'dark' | 'light'): string {
-  return v && VALID_CODE_THEMES.indexOf(v) !== -1
-    ? v
-    : mode === 'dark'
-      ? DEFAULT_CODE_THEMES.dark
-      : DEFAULT_CODE_THEMES.light;
+function pickCodeTheme(v: string | null): string {
+  return v && VALID_CODE_THEMES.includes(v) ? v : DEFAULT_CODE_THEMES.dark;
 }
 
 export function toggleTheme(): boolean {
   const isLight = document.documentElement.classList.toggle('light');
   setStoredTheme(isLight ? 'light' : 'dark');
-  applyCodeTheme();
   return isLight;
 }
 
@@ -168,8 +166,7 @@ export function installThemeReactivity(): void {
     if (!e.key) return;
     if (
       e.key !== STORAGE_KEYS.theme &&
-      e.key !== STORAGE_KEYS.codeThemeDark &&
-      e.key !== STORAGE_KEYS.codeThemeLight &&
+      e.key !== STORAGE_KEYS.codeTheme &&
       e.key !== STORAGE_KEYS.showLineNumbers
     ) {
       return;

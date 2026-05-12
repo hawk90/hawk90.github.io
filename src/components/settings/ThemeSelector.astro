@@ -1,12 +1,15 @@
 ---
 import { CODE_THEMES } from '../../lib/theme';
+
+const darkThemes = CODE_THEMES.filter(t => t.type === 'dark');
+const lightThemes = CODE_THEMES.filter(t => t.type === 'light');
 ---
 
 <div class="space-y-4">
-  <!-- Mode Selector -->
+  <!-- Site Mode Selector -->
   <div>
     <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-      Mode
+      Site Mode
     </label>
     <div class="flex gap-2">
       <button
@@ -14,42 +17,37 @@ import { CODE_THEMES } from '../../lib/theme';
         id="modeDark"
         class="mode-btn flex-1 px-4 py-2.5 rounded-lg border transition-colors text-sm font-medium"
       >
-        Dark Mode
+        Dark
       </button>
       <button
         type="button"
         id="modeLight"
         class="mode-btn flex-1 px-4 py-2.5 rounded-lg border transition-colors text-sm font-medium"
       >
-        Light Mode
+        Light
       </button>
     </div>
   </div>
 
-  <!-- Theme Selector -->
+  <!-- Code Theme Selector (independent of site mode) -->
   <div>
     <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-      Theme
+      Code Block Theme
     </label>
-
-    <!-- Dark themes -->
     <select
-      id="darkThemeSelect"
-      class="hidden w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
+      id="codeThemeSelect"
+      class="w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
     >
-      {CODE_THEMES.dark.map((theme) => (
-        <option value={theme.id}>{theme.name}</option>
-      ))}
-    </select>
-
-    <!-- Light themes -->
-    <select
-      id="lightThemeSelect"
-      class="hidden w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
-    >
-      {CODE_THEMES.light.map((theme) => (
-        <option value={theme.id}>{theme.name}</option>
-      ))}
+      <optgroup label="Dark Themes">
+        {darkThemes.map((theme) => (
+          <option value={theme.id}>{theme.name}</option>
+        ))}
+      </optgroup>
+      <optgroup label="Light Themes">
+        {lightThemes.map((theme) => (
+          <option value={theme.id}>{theme.name}</option>
+        ))}
+      </optgroup>
     </select>
   </div>
 
@@ -81,50 +79,48 @@ import { CODE_THEMES } from '../../lib/theme';
   onPageLoad(() => {
     const modeDark = document.getElementById('modeDark') as HTMLButtonElement | null;
     const modeLight = document.getElementById('modeLight') as HTMLButtonElement | null;
-    const darkSelect = document.getElementById('darkThemeSelect') as HTMLSelectElement | null;
-    const lightSelect = document.getElementById('lightThemeSelect') as HTMLSelectElement | null;
-    if (!modeDark || !modeLight || !darkSelect || !lightSelect) return;
+    const codeThemeSelect = document.getElementById('codeThemeSelect') as HTMLSelectElement | null;
+    if (!modeDark || !modeLight || !codeThemeSelect) return;
 
-    let currentMode: 'dark' | 'light' = 'dark';
-    darkSelect.value = getStoredCodeTheme('dark');
-    lightSelect.value = getStoredCodeTheme('light');
+    // Initialize code theme dropdown
+    codeThemeSelect.value = getStoredCodeTheme();
 
     const applyPreview = () => {
       const html = document.documentElement;
-      const isLight = currentMode === 'light';
-      html.classList.toggle('light', isLight);
-      html.setAttribute('data-code-theme', isLight ? lightSelect.value : darkSelect.value);
-      setStoredTheme(currentMode);
+      html.setAttribute('data-code-theme', codeThemeSelect.value);
       syncCodeTheme();
-      window.dispatchEvent(new CustomEvent('theme-mode-changed'));
     };
 
     const setMode = (mode: 'dark' | 'light') => {
-      currentMode = mode;
+      const html = document.documentElement;
+      html.classList.toggle('light', mode === 'light');
       modeDark.classList.toggle('active', mode === 'dark');
       modeLight.classList.toggle('active', mode === 'light');
-      darkSelect.classList.toggle('hidden', mode !== 'dark');
-      lightSelect.classList.toggle('hidden', mode !== 'light');
-      applyPreview();
+      setStoredTheme(mode);
+      window.dispatchEvent(new CustomEvent('theme-mode-changed'));
     };
 
     const onDarkMode = () => setMode('dark');
     const onLightMode = () => setMode('light');
-    const onDarkChange = () => { setStoredCodeTheme('dark', darkSelect.value); applyPreview(); window.dispatchEvent(new CustomEvent('settings-changed')); };
-    const onLightChange = () => { setStoredCodeTheme('light', lightSelect.value); applyPreview(); window.dispatchEvent(new CustomEvent('settings-changed')); };
+    const onCodeThemeChange = () => {
+      setStoredCodeTheme(codeThemeSelect.value);
+      applyPreview();
+      window.dispatchEvent(new CustomEvent('settings-changed'));
+    };
 
     modeDark.addEventListener('click', onDarkMode);
     modeLight.addEventListener('click', onLightMode);
-    darkSelect.addEventListener('change', onDarkChange);
-    lightSelect.addEventListener('change', onLightChange);
+    codeThemeSelect.addEventListener('change', onCodeThemeChange);
 
-    setMode(document.documentElement.classList.contains('light') ? 'light' : 'dark');
+    // Initialize mode buttons
+    const isLight = document.documentElement.classList.contains('light');
+    modeDark.classList.toggle('active', !isLight);
+    modeLight.classList.toggle('active', isLight);
 
     return () => {
       modeDark.removeEventListener('click', onDarkMode);
       modeLight.removeEventListener('click', onLightMode);
-      darkSelect.removeEventListener('change', onDarkChange);
-      lightSelect.removeEventListener('change', onLightChange);
+      codeThemeSelect.removeEventListener('change', onCodeThemeChange);
     };
   });
 </script>

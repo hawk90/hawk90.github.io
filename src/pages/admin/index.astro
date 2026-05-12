@@ -220,7 +220,8 @@ import { SITE_CONFIG } from '../../consts/config';
         const { owner, repo } = parseRepo(repoString);
         const contentPath = ADMIN_CONFIG.contentPath || 'src/content/blog';
 
-        const drafts = await fetchDrafts(authState.accessToken, owner, repo, contentPath);
+        const branch = ADMIN_CONFIG.branch || 'main';
+        const drafts = await fetchDrafts(authState.accessToken, owner, repo, contentPath, branch);
         renderDrafts(drafts);
       } catch (error) {
         console.error('Failed to load drafts:', error);

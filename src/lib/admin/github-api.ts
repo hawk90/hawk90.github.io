@@ -355,53 +355,79 @@ export function serializeFrontmatter(frontmatter: Record<string, unknown>): stri
   return `---\n${lines.join('\n')}\n---`;
 }
 
+interface SearchResult {
+  total_count: number;
+  incomplete_results: boolean;
+  items: Array<{
+    name: string;
+    path: string;
+    sha: string;
+    url: string;
+    repository: { full_name: string };
+  }>;
+}
+
 /**
- * Fetch all draft posts from the content directory.
+ * Fetch all draft posts using GitHub Code Search API.
+ * Much faster than scanning all files - searches for "draft: true" directly.
  */
 export async function fetchDrafts(
   token: string,
   owner: string,
   repo: string,
-  contentPath: string = 'src/content/blog'
+  contentPath: string = 'src/content/blog',
+  _branch: string = 'main'
 ): Promise<DraftPost[]> {
-  const drafts: DraftPost[] = [];
+  // Use GitHub Code Search to find files with "draft: true"
+  const query = encodeURIComponent(`"draft: true" repo:${owner}/${repo} path:${contentPath} extension:md`);
+  const endpoint = `/search/code?q=${query}&per_page=100`;
 
-  // Recursive function to scan directories
-  async function scanDirectory(path: string): Promise<void> {
-    try {
-      const contents = await fetchRepoContents(token, owner, repo, path);
-
-      for (const item of contents) {
-        if (item.type === 'dir') {
-          await scanDirectory(item.path);
-        } else if (item.name.endsWith('.md') || item.name.endsWith('.mdx')) {
-          // Fetch file content to check frontmatter
-          try {
-            const content = await fetchFileContent(token, owner, repo, item.path);
-            const frontmatter = parseFrontmatter(content);
-
-            if (frontmatter.draft === true) {
-              drafts.push({
-                slug: item.path
-                  .replace(contentPath + '/', '')
-                  .replace(/\.(md|mdx)$/, ''),
-                path: item.path,
-                title: (frontmatter.title as string) || item.name,
-                date: (frontmatter.date as string) || '',
-                sha: item.sha,
-              });
-            }
-          } catch {
-            // Skip files that can't be read
-          }
-        }
-      }
-    } catch {
-      // Directory doesn't exist or can't be read
-    }
+  let searchResults: SearchResult;
+  try {
+    searchResults = await githubFetch<SearchResult>(endpoint, token);
+  } catch {
+    // Search API might fail (rate limits, etc.) - return empty
+    console.warn('GitHub Code Search failed, returning empty drafts');
+    return [];
   }
 
-  await scanDirectory(contentPath);
+  if (searchResults.items.length === 0) {
+    return [];
+  }
+
+  // Fetch content for matched files in parallel (these are confirmed drafts)
+  const BATCH_SIZE = 5;
+  const drafts: DraftPost[] = [];
+
+  for (let i = 0; i < searchResults.items.length; i += BATCH_SIZE) {
+    const batch = searchResults.items.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (file) => {
+        try {
+          const { content, sha } = await fetchFileWithSha(token, owner, repo, file.path);
+          const frontmatter = parseFrontmatter(content);
+
+          // Double-check it's actually a draft (search might have false positives)
+          if (frontmatter.draft === true) {
+            return {
+              slug: file.path
+                .replace(contentPath + '/', '')
+                .replace(/\.(md|mdx)$/, ''),
+              path: file.path,
+              title: (frontmatter.title as string) || file.name,
+              date: (frontmatter.date as string) || '',
+              sha,
+            };
+          }
+        } catch {
+          // Skip files that can't be read
+        }
+        return null;
+      })
+    );
+
+    drafts.push(...results.filter((d): d is DraftPost => d !== null));
+  }
 
   // Sort by date (newest first)
   drafts.sort((a, b) => {
