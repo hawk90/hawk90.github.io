@@ -367,69 +367,132 @@ interface SearchResult {
   }>;
 }
 
+// Session-storage cache for draft listings. Code Search has noticeable
+// first-call latency (a few seconds); we serve from cache for the rest
+// of the session and let the Refresh button bypass it.
+const DRAFT_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function draftCacheKey(owner: string, repo: string, contentPath: string): string {
+  return `admin:drafts:${owner}/${repo}:${contentPath}`;
+}
+
+function readDraftCache(key: string): DraftPost[] | null {
+  if (typeof sessionStorage === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const { at, drafts } = JSON.parse(raw) as { at: number; drafts: DraftPost[] };
+    if (Date.now() - at > DRAFT_CACHE_TTL_MS) return null;
+    return drafts;
+  } catch {
+    return null;
+  }
+}
+
+function writeDraftCache(key: string, drafts: DraftPost[]): void {
+  if (typeof sessionStorage === 'undefined') return;
+  try {
+    sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), drafts }));
+  } catch {
+    // Quota or serialization failure — silently skip.
+  }
+}
+
 /**
- * Fetch all draft posts using GitHub Code Search API.
- * Much faster than scanning all files - searches for "draft: true" directly.
+ * Fetch only the leading bytes of a file via raw.githubusercontent.com.
+ *
+ * Frontmatter is always at the top of the file, so we only need ~1KB.
+ * raw.githubusercontent.com is GitHub's CDN — not rate-limited the way the
+ * REST API is, and returns text directly (no base64). Public repos only.
+ */
+async function fetchHead(
+  owner: string,
+  repo: string,
+  branch: string,
+  path: string
+): Promise<string | null> {
+  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
+  try {
+    const r = await fetch(url, { headers: { Range: 'bytes=0-2047' } });
+    if (!r.ok && r.status !== 206) return null;
+    return await r.text();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch all draft posts.
+ *
+ * Strategy:
+ * 1. GitHub Code Search returns matching paths + SHAs in one call.
+ * 2. Fetch only the head of each file from the raw CDN (Range request) —
+ *    bypasses API rate limit and skips the base64 decode round-trip.
+ * 3. Session cache so the Refresh button is the only thing that pays
+ *    Code Search's cold-start latency.
  */
 export async function fetchDrafts(
   token: string,
   owner: string,
   repo: string,
   contentPath: string = 'src/content/blog',
-  _branch: string = 'main'
+  branch: string = 'main',
+  options: { force?: boolean } = {}
 ): Promise<DraftPost[]> {
-  // Use GitHub Code Search to find files with "draft: true"
-  const query = encodeURIComponent(`"draft: true" repo:${owner}/${repo} path:${contentPath} extension:md`);
+  const cacheKey = draftCacheKey(owner, repo, contentPath);
+
+  if (!options.force) {
+    const cached = readDraftCache(cacheKey);
+    if (cached) return cached;
+  }
+
+  const query = encodeURIComponent(
+    `"draft: true" repo:${owner}/${repo} path:${contentPath} extension:md`
+  );
   const endpoint = `/search/code?q=${query}&per_page=100`;
 
   let searchResults: SearchResult;
   try {
     searchResults = await githubFetch<SearchResult>(endpoint, token);
   } catch {
-    // Search API might fail (rate limits, etc.) - return empty
     console.warn('GitHub Code Search failed, returning empty drafts');
+    writeDraftCache(cacheKey, []);
     return [];
   }
 
   if (searchResults.items.length === 0) {
+    writeDraftCache(cacheKey, []);
     return [];
   }
 
-  // Fetch content for matched files in parallel (these are confirmed drafts)
-  const BATCH_SIZE = 5;
+  // Higher parallelism — fetching from a CDN, not the rate-limited API.
+  const BATCH_SIZE = 20;
   const drafts: DraftPost[] = [];
 
   for (let i = 0; i < searchResults.items.length; i += BATCH_SIZE) {
     const batch = searchResults.items.slice(i, i + BATCH_SIZE);
     const results = await Promise.all(
       batch.map(async (file) => {
-        try {
-          const { content, sha } = await fetchFileWithSha(token, owner, repo, file.path);
-          const frontmatter = parseFrontmatter(content);
+        const head = await fetchHead(owner, repo, branch, file.path);
+        if (!head) return null;
+        const frontmatter = parseFrontmatter(head);
+        if (frontmatter.draft !== true) return null;
 
-          // Double-check it's actually a draft (search might have false positives)
-          if (frontmatter.draft === true) {
-            return {
-              slug: file.path
-                .replace(contentPath + '/', '')
-                .replace(/\.(md|mdx)$/, ''),
-              path: file.path,
-              title: (frontmatter.title as string) || file.name,
-              date: (frontmatter.date as string) || '',
-              sha,
-            };
-          }
-        } catch {
-          // Skip files that can't be read
-        }
-        return null;
+        return {
+          slug: file.path
+            .replace(contentPath + '/', '')
+            .replace(/\.(md|mdx)$/, ''),
+          path: file.path,
+          title: (frontmatter.title as string) || file.name,
+          date: (frontmatter.date as string) || '',
+          sha: file.sha,
+        };
       })
     );
 
     drafts.push(...results.filter((d): d is DraftPost => d !== null));
   }
 
-  // Sort by date (newest first)
   drafts.sort((a, b) => {
     if (!a.date && !b.date) return 0;
     if (!a.date) return 1;
@@ -437,6 +500,7 @@ export async function fetchDrafts(
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
+  writeDraftCache(cacheKey, drafts);
   return drafts;
 }
 

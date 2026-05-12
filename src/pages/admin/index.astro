@@ -207,7 +207,7 @@ import { SITE_CONFIG } from '../../consts/config';
       if (statDrafts) statDrafts.textContent = String(drafts.length);
     }
 
-    async function loadDrafts() {
+    async function loadDrafts(force = false) {
       if (!authState?.accessToken || !ADMIN_CONFIG.enabled) return;
 
       draftsLoading?.classList.remove('hidden');
@@ -221,7 +221,9 @@ import { SITE_CONFIG } from '../../consts/config';
         const contentPath = ADMIN_CONFIG.contentPath || 'src/content/blog';
 
         const branch = ADMIN_CONFIG.branch || 'main';
-        const drafts = await fetchDrafts(authState.accessToken, owner, repo, contentPath, branch);
+        const drafts = await fetchDrafts(
+          authState.accessToken, owner, repo, contentPath, branch, { force }
+        );
         renderDrafts(drafts);
       } catch (error) {
         console.error('Failed to load drafts:', error);
@@ -273,14 +275,16 @@ import { SITE_CONFIG } from '../../consts/config';
       loadComments();
     }
 
+    const onRefreshDrafts = () => loadDrafts(true);
+
     window.addEventListener('admin:authenticated', handleAuthenticated);
     logoutBtn?.addEventListener('click', handleLogout);
-    refreshDraftsBtn?.addEventListener('click', loadDrafts);
+    refreshDraftsBtn?.addEventListener('click', onRefreshDrafts);
 
     return () => {
       window.removeEventListener('admin:authenticated', handleAuthenticated);
       logoutBtn?.removeEventListener('click', handleLogout);
-      refreshDraftsBtn?.removeEventListener('click', loadDrafts);
+      refreshDraftsBtn?.removeEventListener('click', onRefreshDrafts);
     };
   });
 </script>
