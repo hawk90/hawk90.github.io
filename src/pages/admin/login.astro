@@ -12,61 +12,55 @@ import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
     <div class="container max-w-md">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold mb-2">Admin Login</h1>
-        <p class="text-[var(--color-text-muted)]">Sign in with GitHub to continue</p>
+        <p class="text-[var(--color-text-muted)]">Enter your GitHub Personal Access Token</p>
       </div>
 
-      <!-- Initial State -->
-      <div id="login-initial" class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-8">
-        <button
-          id="login-btn"
-          class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-[#24292f] hover:bg-[#32383f] text-white font-medium rounded-lg transition-colors"
-        >
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-          </svg>
-          Login with GitHub
-        </button>
-      </div>
-
-      <!-- Device Code State -->
-      <div id="login-device" class="hidden bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-8">
-        <div class="text-center">
-          <p class="text-sm text-[var(--color-text-muted)] mb-2">Enter this code at</p>
-          <a
-            id="device-url"
-            href="https://github.com/login/device"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-[var(--color-accent)] hover:underline font-medium"
-          >
-            github.com/login/device
-          </a>
-
-          <div class="my-6">
-            <code
-              id="device-code"
-              class="text-3xl font-mono font-bold tracking-widest bg-[var(--color-bg-primary)] px-6 py-3 rounded-lg inline-block"
-            >
-              --------
-            </code>
-          </div>
-
-          <button
-            id="copy-code-btn"
-            class="text-sm text-[var(--color-accent)] hover:underline mb-6"
-          >
-            Copy code
-          </button>
-
-          <div class="flex items-center justify-center gap-2 text-sm text-[var(--color-text-muted)]">
-            <div class="w-4 h-4 border-2 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin"></div>
-            <span id="status-text">Waiting for authorization...</span>
-          </div>
-
-          <p id="expires-text" class="text-xs text-[var(--color-text-muted)] mt-4">
-            Code expires in <span id="expires-time">15:00</span>
+      <!-- Login Form -->
+      <div id="login-form" class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-8">
+        <div class="mb-6">
+          <label for="token-input" class="block text-sm font-medium mb-2">
+            Personal Access Token
+          </label>
+          <input
+            type="password"
+            id="token-input"
+            placeholder="ghp_xxxxxxxxxxxx"
+            class="w-full px-4 py-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-accent)] font-mono text-sm"
+          />
+          <p class="text-xs text-[var(--color-text-muted)] mt-2">
+            Token needs <code class="bg-[var(--color-bg-primary)] px-1 rounded">repo</code> scope
           </p>
         </div>
+
+        <button
+          id="login-btn"
+          class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-[var(--color-accent)] hover:opacity-90 text-white font-medium rounded-lg transition-opacity"
+        >
+          Login
+        </button>
+
+        <div class="mt-6 pt-6 border-t border-[var(--color-border)]">
+          <p class="text-sm text-[var(--color-text-muted)] mb-3">
+            Don't have a token?
+          </p>
+          <a
+            href="https://github.com/settings/tokens/new?description=Blog%20Admin&scopes=repo"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-2 w-full px-4 py-2 border border-[var(--color-border)] rounded-lg hover:border-[var(--color-border-hover)] transition-colors text-sm"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            Generate Token on GitHub
+          </a>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="login-loading" class="hidden bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-8 text-center">
+        <div class="inline-block w-8 h-8 border-4 border-[var(--color-border)] border-t-[var(--color-accent)] rounded-full animate-spin"></div>
+        <p class="mt-4 text-[var(--color-text-muted)]">Verifying token...</p>
       </div>
 
       <!-- Error State -->
@@ -74,7 +68,7 @@ import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
         <div class="text-4xl mb-4">❌</div>
         <h3 class="font-bold text-red-600 dark:text-red-400 mb-2">Authentication Failed</h3>
         <p id="error-message" class="text-sm text-red-500 dark:text-red-300 mb-4">
-          An error occurred during authentication.
+          Invalid token or unauthorized user.
         </p>
         <button
           id="retry-btn"
@@ -84,7 +78,7 @@ import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
         </button>
       </div>
 
-      <!-- Success State (brief, before redirect) -->
+      <!-- Success State -->
       <div id="login-success" class="hidden bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-8 text-center">
         <div class="text-4xl mb-4">✅</div>
         <h3 class="font-bold text-green-600 dark:text-green-400 mb-2">Authenticated!</h3>
@@ -102,13 +96,7 @@ import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
 
 <script>
   import { onPageLoad } from '../../lib/lifecycle';
-  import {
-    startDeviceAuth,
-    startPolling,
-    saveAuth,
-    getAuthState,
-    isAllowedUser,
-  } from '../../lib/admin/auth';
+  import { fetchUser, saveAuth, getAuthState, isAllowedUser } from '../../lib/admin/auth';
   import { ADMIN_CONFIG } from '../../consts/config';
 
   onPageLoad(() => {
@@ -124,24 +112,18 @@ import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
       return;
     }
 
-    const initialEl = document.getElementById('login-initial');
-    const deviceEl = document.getElementById('login-device');
+    const formEl = document.getElementById('login-form');
+    const loadingEl = document.getElementById('login-loading');
     const errorEl = document.getElementById('login-error');
     const successEl = document.getElementById('login-success');
+    const tokenInput = document.getElementById('token-input') as HTMLInputElement;
     const loginBtn = document.getElementById('login-btn');
-    const copyBtn = document.getElementById('copy-code-btn');
     const retryBtn = document.getElementById('retry-btn');
-    const deviceCodeEl = document.getElementById('device-code');
-    const statusTextEl = document.getElementById('status-text');
-    const expiresTimeEl = document.getElementById('expires-time');
     const errorMessageEl = document.getElementById('error-message');
 
-    let pollCleanup: (() => void) | null = null;
-    let countdownInterval: ReturnType<typeof setInterval> | null = null;
-
-    function showState(state: 'initial' | 'device' | 'error' | 'success') {
-      initialEl?.classList.toggle('hidden', state !== 'initial');
-      deviceEl?.classList.toggle('hidden', state !== 'device');
+    function showState(state: 'form' | 'loading' | 'error' | 'success') {
+      formEl?.classList.toggle('hidden', state !== 'form');
+      loadingEl?.classList.toggle('hidden', state !== 'loading');
       errorEl?.classList.toggle('hidden', state !== 'error');
       successEl?.classList.toggle('hidden', state !== 'success');
     }
@@ -151,105 +133,61 @@ import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
       showState('error');
     }
 
-    function startCountdown(expiresIn: number) {
-      let remaining = expiresIn;
+    async function handleLogin() {
+      const token = tokenInput?.value.trim();
 
-      function update() {
-        const minutes = Math.floor(remaining / 60);
-        const seconds = remaining % 60;
-        if (expiresTimeEl) {
-          expiresTimeEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
-        remaining--;
-
-        if (remaining < 0 && countdownInterval) {
-          clearInterval(countdownInterval);
-        }
+      if (!token) {
+        showError('Please enter a token.');
+        return;
       }
 
-      update();
-      countdownInterval = setInterval(update, 1000);
-    }
-
-    async function handleLogin() {
       if (!ADMIN_CONFIG.enabled) {
         showError('Admin panel is not enabled.');
         return;
       }
 
-      if (!ADMIN_CONFIG.clientId) {
-        showError('GitHub OAuth client ID is not configured.');
-        return;
-      }
+      showState('loading');
 
       try {
-        const deviceCode = await startDeviceAuth(ADMIN_CONFIG.clientId);
+        // Verify token by fetching user
+        const user = await fetchUser(token);
 
-        // Show device code UI
-        if (deviceCodeEl) deviceCodeEl.textContent = deviceCode.user_code;
-        showState('device');
-        startCountdown(deviceCode.expires_in);
+        // Check if user is allowed
+        if (!isAllowedUser(user, ADMIN_CONFIG.allowedUsers)) {
+          showError(`User @${user.login} is not authorized.`);
+          return;
+        }
 
-        // Start polling
-        pollCleanup = startPolling({
-          clientId: ADMIN_CONFIG.clientId,
-          deviceCode: deviceCode.device_code,
-          interval: deviceCode.interval,
-          expiresIn: deviceCode.expires_in,
-          onSuccess: (token, user) => {
-            // Check if user is allowed
-            if (!isAllowedUser(user, ADMIN_CONFIG.allowedUsers)) {
-              showError(`User @${user.login} is not authorized.`);
-              return;
-            }
-
-            // Save auth and redirect
-            saveAuth(token, user);
-            showState('success');
-            setTimeout(() => {
-              window.location.href = '/admin';
-            }, 1000);
-          },
-          onError: (error) => {
-            showError(error.message);
-          },
-          onExpired: () => {
-            showError('Device code expired. Please try again.');
-          },
-        });
-      } catch (error) {
-        showError(error instanceof Error ? error.message : 'Failed to start authentication.');
-      }
-    }
-
-    function handleCopyCode() {
-      const code = deviceCodeEl?.textContent;
-      if (code) {
-        navigator.clipboard.writeText(code);
-        if (copyBtn) copyBtn.textContent = 'Copied!';
+        // Save auth and redirect
+        saveAuth(token, user);
+        showState('success');
         setTimeout(() => {
-          if (copyBtn) copyBtn.textContent = 'Copy code';
-        }, 2000);
+          window.location.href = '/admin';
+        }, 1000);
+      } catch (error) {
+        console.error('Login failed:', error);
+        showError('Invalid token or network error.');
       }
     }
 
     function handleRetry() {
-      pollCleanup?.();
-      if (countdownInterval) clearInterval(countdownInterval);
-      showState('initial');
+      if (tokenInput) tokenInput.value = '';
+      showState('form');
+      tokenInput?.focus();
     }
 
-    // Event listeners
+    // Handle Enter key
+    tokenInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        handleLogin();
+      }
+    });
+
     loginBtn?.addEventListener('click', handleLogin);
-    copyBtn?.addEventListener('click', handleCopyCode);
     retryBtn?.addEventListener('click', handleRetry);
 
-    // Cleanup
     return () => {
-      pollCleanup?.();
-      if (countdownInterval) clearInterval(countdownInterval);
       loginBtn?.removeEventListener('click', handleLogin);
-      copyBtn?.removeEventListener('click', handleCopyCode);
       retryBtn?.removeEventListener('click', handleRetry);
     };
   });
