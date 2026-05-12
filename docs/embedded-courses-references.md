@@ -40,6 +40,87 @@
 
 ---
 
+## 바이블
+
+시리즈별로 자료는 많이 참조하겠지만, 아래 항목들은 **판단 기준이 흔들릴 때 다시 돌아올 원전**으로 취급합니다.
+
+### 1. Modern Embedded Recipes
+
+| 자료 | 분류 | 왜 바이블인가 | 주로 쓰는 위치 |
+|---|---|---|---|
+| ARM Architecture Reference Manual / Cortex-M, Cortex-A TRM | 1차 자료 | 인터럽트, 예외, 메모리 맵, 디버그 인터페이스 해석의 기준점 | bring-up, JTAG, fault 분석 |
+| Linux Kernel Documentation | 1차 자료 | Device Tree, DMA, driver, IRQ, tracing 설명의 기준 문서 | Linux Embedded, DMA, debugfs |
+| U-Boot Documentation | 1차 자료 | boot flow, board init, DDR bring-up, environment 해석의 기준 | bootloader, board bring-up |
+| PCI Express Base Specification | 1차 자료 | BAR, config space, enumeration 같은 PCIe 용어와 동작 정의의 원전 | PCIe, accelerator 연결 |
+| *The Linux Programming Interface* | 2차 자료 | userspace-system call 경계를 안정적으로 설명하기 좋음 | mmap, epoll, userspace integration |
+
+### 2. Practical RTOS Internals
+
+| 자료 | 분류 | 왜 바이블인가 | 주로 쓰는 위치 |
+|---|---|---|---|
+| FreeRTOS Kernel source | 1차 자료 | scheduler, list, queue, heap 구현 자체가 설명 대상 | scheduler, IPC, allocator |
+| Zephyr source tree + docs | 1차 자료 | 보다 큰 RTOS 구조와 subsystem 분리를 보는 기준 | scheduler 비교, SMP, timing |
+| ARMv7-M / ARMv8-M Architecture Reference Manual | 1차 자료 | PendSV, exception entry/exit, stack frame 설명의 기준 | context switch, ISR latency |
+| RISC-V Privileged Specification | 1차 자료 | trap, interrupt, privilege 전환의 기준 | RISC-V RTOS 포팅 |
+| *Operating Systems: Three Easy Pieces* / *Modern Operating Systems* | 2차 자료 | 커널 개념을 일반화해서 설명할 때 유용 | scheduler, IPC, memory model |
+
+### 3. Embedded Performance Engineering
+
+| 자료 | 분류 | 왜 바이블인가 | 주로 쓰는 위치 |
+|---|---|---|---|
+| *Systems Performance* - Brendan Gregg | 2차 자료 | 측정-분석-최적화 프레임을 가장 실전적으로 제공 | perf, ftrace, flamegraph |
+| *Computer Architecture: A Quantitative Approach* | 2차 자료 | CPU, cache, memory hierarchy를 구조적으로 설명하는 기준 | cache miss, branch, pipeline |
+| *What Every Programmer Should Know About Memory* | 2차 자료 | 메모리 계층과 locality 설명에 매우 밀도 높음 | cache, DRAM, NUMA 성격 문제 |
+| perf / ftrace / rtla 공식 문서 | 1차 자료 | 도구 사용법과 이벤트 의미를 잘못 해석하지 않게 해줌 | profiling, latency tracing |
+| ARM / Intel Optimization Manual | 1차 자료 | PMU counter와 microarchitecture-specific 해석의 기준 | PMU, pipeline, branch |
+
+### 4. Embedded C++ for Real Systems
+
+| 자료 | 분류 | 왜 바이블인가 | 주로 쓰는 위치 |
+|---|---|---|---|
+| *The C++ Programming Language* | 2차 자료 | 언어 규칙 자체를 다시 확인할 기준 | core language, type system |
+| *Effective Modern C++* | 2차 자료 | modern C++ idiom의 장단점을 설명하기 좋음 | move, auto, forwarding, ownership |
+| C++ Core Guidelines | 1.5차 자료 | 실무 규칙과 설계 원칙을 문서화한 기준점 | RAII, API 설계, ownership |
+| *Real-Time C++* - Christopher Kormanyos | 2차 자료 | 임베디드 맥락에서 C++ 적용 사례가 직접적 | constexpr, templates, MCU examples |
+| MISRA C++ / AUTOSAR C++ Guidelines | 1차에 가까운 실무 기준 | 안전/제약 환경에서 허용 범위를 정하는 기준 | no-exception, restricted subset |
+
+### 사용 메모
+
+- 1차 자료가 있으면 먼저 그것으로 사실 관계를 고정합니다.
+- 2차 자료는 설명 구조를 만들 때 사용합니다.
+- 블로그/포럼은 예시나 현업 감각 보강용으로만 씁니다.
+
+## 추가 리뷰 대상
+
+아래 책들은 현재 문서의 바이블 목록을 보강하는 **우선 리뷰 후보**입니다.  
+이미 일부는 간접적으로 반영되어 있지만, 본문 작성 전에 챕터 단위로 다시 검토할 가치가 있습니다.
+
+| 자료 | 주 대상 시리즈 | 왜 추가 리뷰가 필요한가 |
+|---|---|---|
+| *The Linux Programming Interface* - Michael Kerrisk | Modern Embedded Recipes | userspace/kernel boundary, file descriptor, `mmap`, `epoll`, signal, process model 설명을 안정적으로 정리할 수 있음 |
+| *Operating Systems: Three Easy Pieces* | Practical RTOS Internals | scheduler, IPC, memory abstraction을 교과서적으로 재정리할 때 가장 설명력이 좋음 |
+| *Embedded Systems Architecture, 2nd Edition* - Tammy Noergaard | Modern Embedded Recipes | board, bus, I/O, memory, driver 관점을 폭넓게 묶어 서문 이후 시리즈 확장에 유리함 |
+| *Systems Performance, 2nd Edition* - Brendan Gregg | Embedded Performance Engineering | 측정-분석-최적화 프레임을 본문 전체에 일관되게 적용할 기준서 역할 |
+| *Large-Scale C++* - John Lakos | Embedded C++ for Real Systems | 언어 기능 소개를 넘어서 의존성, 경계, 빌드 구조, 인터페이스 설계를 다룰 때 유용함 |
+
+### 추가 리뷰 우선순위
+
+1. **즉시 본문 생산용**
+   - *The Linux Programming Interface*
+   - *Operating Systems: Three Easy Pieces*
+   - *Systems Performance*
+
+2. **시리즈 깊이 보강용**
+   - *Embedded Systems Architecture*
+   - *Large-Scale C++*
+
+### 메모
+
+- `Modern Embedded Recipes`는 TLPI와 Noergaard를 같이 보면 실전 절차와 시스템 배경 설명의 균형이 좋아집니다.
+- `Practical RTOS Internals`는 FreeRTOS/Zephyr 소스가 1차 자료이고, OSTEP은 설명 구조를 다듬는 용도입니다.
+- `Embedded Performance Engineering`은 Gregg를 기준축으로 잡고, 아키텍처 책과 PMU 문서를 옆에 두는 방식이 가장 안정적입니다.
+- `Embedded C++ for Real Systems`는 *Effective Modern C++*만으로는 설계 경계 설명이 부족할 수 있어서 Lakos 축을 추가하는 편이 좋습니다.
+
 ## 1. Modern Embedded Recipes
 
 > 실무에서 바로 쓰는 패턴/트러블슈팅
@@ -272,7 +353,7 @@ Embedded Performance Engineering의 첫 글은 **Cache Miss 분석**이므로,
 2. Drepper 문서
 3. perf / cachegrind 실측 예제
 4. ARM core-specific optimization guide
-- perf stat (cache-misses, cache-references)
+5. perf stat 실측 예제 (cache-misses, cache-references)
 
 #### Profiling Tools Deep Dive
 - **perf**: https://www.brendangregg.com/perf.html
