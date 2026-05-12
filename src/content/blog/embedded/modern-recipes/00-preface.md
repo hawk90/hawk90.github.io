@@ -1,171 +1,309 @@
 ---
 title: "Modern Embedded Recipes: 서문"
 date: 2026-05-12
-description: "임베디드 엔지니어가 실제로 겪는 문제들의 해결집. HAL 사용법이 아니라 실전 트러블슈팅을 다룹니다."
+description: "임베디드 엔지니어를 위한 체계적인 학습 경로. 하드웨어 기초부터 프로세서, 소프트웨어, RTOS, 디버깅까지 100개 이상의 레시피로 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 0
-tags: [embedded, recipes, troubleshooting, hardware, rtos, linux]
+tags: [embedded, recipes, troubleshooting, hardware, rtos, linux, arm, risc-v]
 type: tech
 featured: true
 ---
 
 ## 이 시리즈를 쓰는 이유
 
-"UART가 안 찍혀요."
+임베디드 시스템 개발은 **하드웨어와 소프트웨어의 경계**에서 일어납니다.
 
-임베디드 엔지니어라면 누구나 한 번쯤 이 문장으로 시작하는 디버깅 세션을 경험합니다. 데이터시트를 열고, 오실로스코프를 연결하고, clock 설정을 확인하고... 결국 TX/RX 핀이 바뀌어 있었다는 것을 발견하기까지 반나절이 걸립니다.
+회로도를 볼 줄 알아야 하고, 데이터시트를 읽을 줄 알아야 하고, 어셈블리를 이해해야 하고, OS 커널도 알아야 합니다. 범위가 넓고 깊습니다.
 
-문제는 이런 경험이 **전수되지 않는다**는 것입니다.
+문제는 이 지식들이 **파편화**되어 있다는 것입니다:
+- 하드웨어 책은 소프트웨어를 다루지 않고
+- OS 책은 bare-metal을 다루지 않고
+- ARM 책은 RISC-V를 다루지 않고
+- 튜토리얼은 "왜"를 설명하지 않습니다
 
-시중의 임베디드 책들은 대부분 이렇게 시작합니다:
-
-```c
-HAL_UART_Transmit(&huart1, buffer, size, timeout);
-```
-
-"HAL 함수를 호출하면 데이터가 전송됩니다." 네, 맞습니다. 하지만 **안 될 때** 어떻게 해야 하는지는 알려주지 않습니다.
-
-## 이 시리즈가 다루는 것
-
-이 시리즈는 **"안 될 때"**를 다룹니다:
-
-- UART가 안 찍힐 때 체크리스트
-- DDR init이 실패할 때 디버깅 순서
-- PCIe BAR가 제대로 안 잡힐 때
-- Device Tree 수정했는데 적용이 안 될 때
-- JTAG이 안 붙을 때
-- Virtual JTAG / Remote Debug가 동작 안 할 때
-
-그리고 **"될 때도 문제가 되는"** 것들:
-
-- ISR에서 호출하면 안 되는 함수를 호출했을 때
-- Lock-free라고 했는데 성능이 안 나올 때
-- Cache flush 타이밍이 잘못됐을 때
-- DMA가 완료됐는데 데이터가 깨져 있을 때
+이 시리즈는 **임베디드 시스템의 전체 그림**을 그립니다. 하드웨어 기초부터 시작해서 프로세서 아키텍처, 빌드 시스템, bare-metal 프로그래밍, RTOS, Linux, 성능 최적화, 디버깅까지 — 실무에서 필요한 모든 것을 **체계적으로** 정리합니다.
 
 ## 대상 독자
 
-이 시리즈는 다음과 같은 분들을 위해 작성되었습니다:
+1. **임베디드 입문자**
+   - 컴퓨터공학/전자공학 전공자
+   - 임베디드 분야로 진입하려는 분
 
-1. **주니어 임베디드 엔지니어** (1-3년차)
-   - 기본적인 HAL 사용은 가능하지만
+2. **주니어 임베디드 엔지니어** (1-3년차)
+   - HAL 함수는 호출하지만 내부 동작이 궁금한 분
    - "왜 안 되지?"에서 막히는 분
 
-2. **펌웨어에서 Linux로 넘어가는 분**
-   - MCU 개발 경험은 있지만
-   - Device Tree, DMA, kernel module이 낯선 분
+3. **시니어로 성장하려는 분**
+   - 깊이 있는 시스템 이해가 필요한 분
+   - 트러블슈팅 능력을 체계화하고 싶은 분
 
-3. **FPGA/가속기와 협업하는 분**
-   - SW는 할 줄 알지만
-   - HW 인터페이스(PCIe, AXI)가 처음인 분
+4. **FPGA/가속기/AI 하드웨어와 협업하는 분**
+   - HW/SW 경계에서 일하는 분
 
 ## 시리즈 구성
 
-총 6개 Part, 36개 글로 구성됩니다:
+**총 8개 Part, 107개 레시피**로 구성됩니다.
 
-| Part | 주제 | 글 수 |
-|------|-----|-------|
-| 1 | Hardware Bring-up | 6 |
-| 2 | RTOS & Concurrency | 6 |
-| 3 | Performance | 6 |
-| 4 | Linux Embedded | 6 |
-| 5 | FPGA / Accelerator | 6 |
-| 6 | Embedded AI | 6 |
-
-## 집필 원칙
-
-1. **증상으로 시작한다**: "OOO 안 될 때"로 시작합니다
-2. **체크리스트를 제공한다**: 순서대로 따라할 수 있도록
-3. **왜 그런지 설명한다**: 단순 해결책이 아닌 원리
-4. **실제 코드를 보여준다**: 복사-붙여넣기 가능한 예제
-5. **실패 사례를 공유한다**: 저도 이렇게 삽질했습니다
-
-## 이 시리즈를 읽는 법
-
-이 시리즈는 교과서처럼 처음부터 끝까지 정독하는 용도도 있지만, 실제로는 **문제가 생겼을 때 바로 찾아보는 레퍼런스**로 쓰는 것이 더 잘 맞습니다.
-
-추천하는 사용 방식은 다음과 같습니다:
-
-1. 지금 보이는 증상과 가장 비슷한 글을 찾습니다
-2. 제시된 체크리스트를 위에서 아래로 그대로 따라갑니다
-3. 재현 조건, 로그, 레지스터 상태를 같이 기록합니다
-4. 해결 후에는 "왜 그랬는지" 설명 부분까지 읽습니다
-
-즉, 단순 해결집이 아니라 **문제 해결 절차를 몸에 익히는 시리즈**로 구성합니다.
-
-## 공통 디버깅 프레임
-
-시리즈 전반에서 반복해서 사용할 기본 프레임은 같습니다:
-
-- 전원과 clock이 맞는가
-- reset 이후 peripheral state가 기대와 같은가
-- pinmux / pull-up / drive strength가 맞는가
-- DMA / cache / MMU 속성이 데이터 경로와 충돌하지 않는가
-- ISR / thread / user space 중 어디에서 문제가 시작되는가
-- "안 되는 것"이 아니라 "어디까지는 되는지"를 좁힐 수 있는가
-
-이 프레임을 익히면 UART, SPI, PCIe, Device Tree, NPU bring-up처럼 겉보기에 전혀 다른 문제도 비슷한 방식으로 좁혀갈 수 있습니다.
-
-## 이 시리즈에서 다루지 않는 것
-
-다음 항목은 의도적으로 비중을 낮춥니다:
-
-- 특정 벤더 IDE 클릭 순서
-- HAL 함수 나열형 튜토리얼
-- 데이터시트 내용을 그대로 옮긴 요약
-- "이 보드에서는 이렇게 했더니 됐다" 수준의 일회성 팁
-
-핵심은 **재현 가능한 진단 순서**와 **다른 보드로 옮겨도 통하는 사고 방식**입니다.
-
-## 예제의 기준 환경
-
-예제는 다음 환경을 두루 가정합니다:
-
-- Cortex-M MCU bring-up
-- Cortex-A / Linux embedded board
-- FPGA 연동 SoC
-- RTOS + bare-metal 혼합 시스템
-- 캐시 일관성, DMA, MMIO가 중요한 시스템
-
-특정 벤더 이름보다 **문제 패턴**을 일반화하는 데 집중하겠습니다.
-
-## 레퍼런스
-
-이 시리즈는 다음 자료들을 참고하여 작성되었습니다:
-
-**서적**
-- *Linux Device Drivers* (3rd ed) - Corbet, Rubini, Kroah-Hartman
-- *Linux Kernel Development* (3rd ed) - Robert Love
-- *The Art of Multiprocessor Programming* - Herlihy & Shavit
-
-**공식 문서**
-- ARM Cortex-M85/M55 + Helium MVE Reference
-- Device Tree Specification
-- Linux Kernel Documentation
-- Intel Virtual JTAG IP Core / Etherlink
-
-**확장 주제**
-- RISC-V 기반 SoC bring-up
-- Zephyr 기반 제품 개발
-- Edge AI / TinyML 배포
-- Cortex-M55/M85 + Helium 최적화
-- CXL, UCIe 같은 고속 인터커넥트 디버깅
-- Matter/Thread 기반 IoT 통합
-
-**커뮤니티**
-- LWN.net
-- Interrupt Blog (Memfault)
-- Embedded Artistry
-
-## 이 시리즈를 통해 얻어야 하는 것
-
-이 시리즈를 꾸준히 따라오면 결국 다음 능력이 남아야 합니다:
-
-- "증상"을 "가설 목록"으로 바꾸는 능력
-- 무작정 printf를 늘리는 대신, 관측 지점을 설계하는 능력
-- HW/SW 경계 문제를 팀 내에서 더 정확히 설명하는 능력
-- 재발 방지용 체크리스트를 스스로 만들 수 있는 능력
+임베디드 레시피의 구조를 참고하여, 하드웨어 기초부터 디버깅까지 체계적인 학습 경로를 제공합니다.
 
 ---
 
-다음 글: [Part 1-1: UART 안 찍힐 때 체크리스트](/blog/embedded/modern-recipes/part1-01-uart-debugging)
+### Part 1: Hardware Foundation (15개)
+
+하드웨어를 이해하지 않으면 임베디드 소프트웨어를 제대로 작성할 수 없습니다.
+
+| # | 레시피 | 핵심 내용 |
+|---|--------|----------|
+| 1-01 | 전자회로 기초 | 전압, 전류, 저항, 옴의 법칙 |
+| 1-02 | 디지털 로직 | AND, OR, NOT, 플립플롭 |
+| 1-03 | 메모리 종류와 특성 | SRAM, DRAM, Flash, EEPROM |
+| 1-04 | 클럭과 타이밍 | 클럭 트리, PLL, 타이밍 다이어그램 |
+| 1-05 | 버스 아키텍처 | AHB, APB, AXI 기초 |
+| 1-06 | 인터럽트 하드웨어 | NVIC, GIC, 인터럽트 컨트롤러 |
+| 1-07 | GPIO 내부 구조 | 풀업/풀다운, 오픈드레인, 드라이브 강도 |
+| 1-08 | UART 하드웨어 | 보드레이트, 패리티, FIFO |
+| 1-09 | SPI 하드웨어 | 모드, 클럭 극성, 칩셀렉트 |
+| 1-10 | I2C 하드웨어 | 어드레싱, ACK/NACK, 클럭 스트레칭 |
+| 1-11 | ADC/DAC 원리 | 샘플링, 양자화, 분해능 |
+| 1-12 | 전원 시스템 | LDO, DCDC, 파워 시퀀싱 |
+| 1-13 | PCB 기초 | 레이어, 그라운드, 신호 무결성 |
+| 1-14 | 회로도 읽기 | 심볼, 넷, 파트 넘버 |
+| 1-15 | 데이터시트 읽기 | 타이밍 스펙, 절대 최대 정격 |
+
+---
+
+### Part 2: Processor Architecture (12개)
+
+ARM과 RISC-V 아키텍처의 핵심을 이해합니다.
+
+| # | 레시피 | 핵심 내용 |
+|---|--------|----------|
+| 2-01 | CPU 기초 | 레지스터, ALU, 컨트롤 유닛 |
+| 2-02 | 파이프라인 | Fetch, Decode, Execute, 해저드 |
+| 2-03 | ARM Cortex-M 아키텍처 | M0/M3/M4/M7/M33/M55/M85 비교 |
+| 2-04 | ARM Cortex-A 아키텍처 | A-profile vs M-profile |
+| 2-05 | RISC-V 아키텍처 | RV32I, 확장, 에코시스템 |
+| 2-06 | 레지스터 뱅크 | 범용 레지스터, 특수 레지스터 |
+| 2-07 | 예외 처리 메커니즘 | 벡터 테이블, 우선순위, 테일체이닝 |
+| 2-08 | 메모리 맵 | 주소 공간, peripheral 매핑 |
+| 2-09 | 캐시 아키텍처 | L1/L2, write-through vs write-back |
+| 2-10 | MPU/MMU 기초 | 보호 영역, 접근 권한 |
+| 2-11 | DSP/SIMD 명령어 | ARM Helium, RISC-V V extension |
+| 2-12 | TrustZone 기초 | Secure/Non-secure 월드 |
+
+---
+
+### Part 3: Software Build System (12개)
+
+컴파일부터 링킹, 바이너리 생성까지 빌드 과정을 완전히 이해합니다.
+
+| # | 레시피 | 핵심 내용 |
+|---|--------|----------|
+| 3-01 | 크로스 컴파일러 | arm-none-eabi-gcc, toolchain 구성 |
+| 3-02 | 컴파일 과정 | 전처리, 컴파일, 어셈블, 링크 |
+| 3-03 | 오브젝트 파일 분석 | ELF 구조, 섹션, 심볼 |
+| 3-04 | 링커 스크립트 기초 | MEMORY, SECTIONS, 배치 |
+| 3-05 | 링커 스크립트 고급 | KEEP, ALIGN, LMA vs VMA |
+| 3-06 | 스타트업 코드 분석 | Reset_Handler, 초기화 순서 |
+| 3-07 | C 런타임 초기화 | .data 복사, .bss 초기화, 생성자 호출 |
+| 3-08 | 메모리 레이아웃 설계 | 스택, 힙, 정적 변수 배치 |
+| 3-09 | 최적화 옵션 | -O0/-O2/-Os/-Og, LTO |
+| 3-10 | 맵 파일 분석 | 메모리 사용량, 심볼 위치 |
+| 3-11 | Make와 CMake | 빌드 시스템 구성 |
+| 3-12 | 디버그 정보 | DWARF, -g 옵션, 심볼 스트리핑 |
+
+---
+
+### Part 4: Bare-Metal Programming (14개)
+
+OS 없이 하드웨어를 직접 제어하는 방법을 배웁니다.
+
+| # | 레시피 | 핵심 내용 |
+|---|--------|----------|
+| 4-01 | 첫 번째 bare-metal 프로그램 | LED 깜빡이기, 부트 과정 |
+| 4-02 | 레지스터 직접 접근 | volatile, 메모리 매핑 I/O |
+| 4-03 | GPIO 제어 | 입력/출력, 인터럽트 |
+| 4-04 | 클럭 설정 | PLL, 시스템 클럭, peripheral 클럭 |
+| 4-05 | 인터럽트 핸들링 | NVIC 설정, ISR 작성 |
+| 4-06 | 타이머 활용 | SysTick, 하드웨어 타이머 |
+| 4-07 | UART 드라이버 작성 | 폴링, 인터럽트, DMA |
+| 4-08 | SPI 드라이버 작성 | 마스터/슬레이브, DMA |
+| 4-09 | I2C 드라이버 작성 | 마스터/슬레이브, 에러 핸들링 |
+| 4-10 | DMA 기초 | 채널, 트리거, 완료 인터럽트 |
+| 4-11 | 저전력 모드 | Sleep, Stop, Standby |
+| 4-12 | 워치독 타이머 | IWDG, WWDG, 리셋 처리 |
+| 4-13 | Flash 프로그래밍 | 내부 Flash 읽기/쓰기 |
+| 4-14 | 부트로더 기초 | 부트 모드, 점프, 업데이트 |
+
+---
+
+### Part 5: RTOS Internals (16개)
+
+RTOS의 내부 동작을 완전히 이해합니다.
+
+| # | 레시피 | 핵심 내용 |
+|---|--------|----------|
+| 5-01 | RTOS가 필요한 이유 | 슈퍼루프의 한계 |
+| 5-02 | Task와 스케줄러 | TCB, ready list, 스케줄링 알고리즘 |
+| 5-03 | Context Switch 분석 | 레지스터 저장/복원, 스택 프레임 |
+| 5-04 | 우선순위 기반 스케줄링 | Priority inversion, 해결책 |
+| 5-05 | 세마포어 내부 구현 | counting, binary, 대기 큐 |
+| 5-06 | 뮤텍스 내부 구현 | priority inheritance |
+| 5-07 | 큐/메시지 패싱 | ISR-safe API, 복사 vs 포인터 |
+| 5-08 | 이벤트 그룹 | 비트 플래그, AND/OR 대기 |
+| 5-09 | 타이머 서비스 | software timer, tick hook |
+| 5-10 | 메모리 관리 | heap_1/2/3/4/5, 정적 할당 |
+| 5-11 | Tickless 모드 | 저전력, 타이머 보상 |
+| 5-12 | ISR에서의 API 사용 | FromISR 함수, 지연 처리 |
+| 5-13 | FreeRTOS 소스 분석 | 핵심 파일, 포팅 레이어 |
+| 5-14 | Zephyr 소스 분석 | 커널, 드라이버 모델 |
+| 5-15 | RTOS 포팅 | 포트 파일, 어셈블리 |
+| 5-16 | RTOS 디버깅 | 스택 오버플로우, 데드락 탐지 |
+
+---
+
+### Part 6: Linux Embedded (14개)
+
+Linux 기반 임베디드 시스템 개발을 다룹니다.
+
+| # | 레시피 | 핵심 내용 |
+|---|--------|----------|
+| 6-01 | 임베디드 Linux 개요 | 부팅 과정, 컴포넌트 |
+| 6-02 | 부트로더 (U-Boot) | 환경변수, 스크립트, 부팅 |
+| 6-03 | Device Tree 기초 | 노드, 속성, 바인딩 |
+| 6-04 | Device Tree 고급 | overlay, 런타임 수정 |
+| 6-05 | 커널 빌드 | menuconfig, 모듈, 이미지 |
+| 6-06 | 커널 모듈 기초 | init/exit, 파라미터, sysfs |
+| 6-07 | 캐릭터 디바이스 드라이버 | file_operations, ioctl |
+| 6-08 | Platform 드라이버 | probe/remove, 리소스 |
+| 6-09 | 인터럽트 핸들링 | request_irq, threaded IRQ |
+| 6-10 | DMA 엔진 | dma_request_channel, 매핑 |
+| 6-11 | 메모리 매핑 | mmap, ioremap, 캐시 속성 |
+| 6-12 | 루트 파일시스템 | Buildroot, Yocto 기초 |
+| 6-13 | 시스템 최적화 | 부팅 시간, footprint 줄이기 |
+| 6-14 | 보안 기초 | Secure Boot, 암호화 |
+
+---
+
+### Part 7: Performance & Memory (12개)
+
+성능 분석과 메모리 관리의 핵심을 다룹니다.
+
+| # | 레시피 | 핵심 내용 |
+|---|--------|----------|
+| 7-01 | 성능 분석 방법론 | 측정 → 분석 → 최적화 |
+| 7-02 | 캐시 미스 분석 | L1/L2 미스, 프리페치 |
+| 7-03 | 브랜치 예측 | misprediction, 힌트 |
+| 7-04 | 메모리 정렬 | 정렬 요구사항, 패딩 |
+| 7-05 | False Sharing | 캐시라인, 구조체 배치 |
+| 7-06 | DMA 최적화 | scatter-gather, 더블 버퍼링 |
+| 7-07 | 동적 메모리 관리 | 단편화, 풀 할당자 |
+| 7-08 | 스택 분석 | 최대 깊이, 오버플로우 탐지 |
+| 7-09 | 코드 크기 최적화 | -Os, 섹션 제거, LTO |
+| 7-10 | 전력 최적화 | 클럭 게이팅, 저전력 모드 |
+| 7-11 | 실시간 분석 | latency, jitter, WCET |
+| 7-12 | 프로파일링 도구 | perf, ftrace, Trace Compass |
+
+---
+
+### Part 8: Debugging & Troubleshooting (12개)
+
+실전 디버깅 기법을 체계적으로 정리합니다.
+
+| # | 레시피 | 핵심 내용 |
+|---|--------|----------|
+| 8-01 | 디버깅 마인드셋 | 가설-검증 사이클 |
+| 8-02 | JTAG/SWD 기초 | 프로브, 연결, 프로토콜 |
+| 8-03 | GDB 활용 | 원격 디버깅, 스크립트 |
+| 8-04 | 하드폴트 분석 | 레지스터, 스택 프레임 |
+| 8-05 | UART 안 찍힐 때 | 체크리스트, 진단 순서 |
+| 8-06 | 부팅 안 될 때 | 단계별 진단 |
+| 8-07 | 인터럽트 문제 | 누락, 중복, 우선순위 |
+| 8-08 | 메모리 문제 | 오버플로우, 댕글링, 오염 |
+| 8-09 | 타이밍 문제 | 레이스, 데드락, 우선순위 역전 |
+| 8-10 | 통신 문제 | 프로토콜 분석, 로직 애널라이저 |
+| 8-11 | 로깅 시스템 설계 | 레벨, 버퍼, 비동기 |
+| 8-12 | 포스트모템 분석 | 코어 덤프, 크래시 로그 |
+
+---
+
+## 학습 로드맵
+
+### 입문자 (0-6개월)
+
+```
+Part 1 (HW 기초) → Part 2 (프로세서) → Part 4 (Bare-Metal) → Part 8 (디버깅)
+```
+
+하드웨어와 프로세서 기초를 익힌 후, bare-metal 프로그래밍으로 실습합니다.
+
+### 중급자 (6개월-2년)
+
+```
+Part 3 (빌드) → Part 5 (RTOS) → Part 7 (성능)
+```
+
+빌드 시스템을 이해하고, RTOS 내부를 공부하고, 성능 최적화를 시작합니다.
+
+### 고급자 (2년+)
+
+```
+Part 6 (Linux) → Part 7 심화 → Part 8 심화
+```
+
+Linux 드라이버 개발과 고급 디버깅 기법을 익힙니다.
+
+## 집필 원칙
+
+1. **"왜"를 먼저 설명한다**: 동작 원리부터 시작합니다
+2. **체계적으로 구성한다**: 기초 → 중급 → 고급 순서
+3. **실제 코드를 보여준다**: 복사해서 바로 써볼 수 있는 예제
+4. **트러블슈팅을 포함한다**: "안 될 때" 체크리스트
+5. **아키텍처를 비교한다**: ARM vs RISC-V, FreeRTOS vs Zephyr
+
+## 예제 환경
+
+| 플랫폼 | 용도 |
+|--------|------|
+| STM32F4/F7/H7 | Cortex-M 실습 |
+| Raspberry Pi | Cortex-A / Linux |
+| ESP32-C3 | RISC-V 실습 |
+| QEMU | 에뮬레이션 |
+
+특정 보드에 종속되지 않도록 **원리 중심**으로 설명합니다.
+
+## 레퍼런스
+
+**핵심 서적**
+- *Computer Organization and Design (RISC-V Edition)* - Patterson & Hennessy
+- *ARM System Developer's Guide* - Sloss, Symes, Wright
+- *The Definitive Guide to ARM Cortex-M* - Joseph Yiu
+- *Linux Device Drivers* (3rd ed) - Corbet, Rubini, Kroah-Hartman
+- *Real-Time Concepts for Embedded Systems* - Qing Li
+
+**공식 문서**
+- ARM Architecture Reference Manual
+- RISC-V Specifications
+- FreeRTOS Documentation
+- Zephyr Project Documentation
+- Linux Kernel Documentation
+
+**커뮤니티**
+- Interrupt Blog (Memfault)
+- Embedded Artistry
+- LWN.net
+- 임베디드 레시피 (recipes.tistory.com)
+
+## 이 시리즈의 목표
+
+이 시리즈를 완주하면:
+
+- **시스템 전체를 이해**합니다 (하드웨어 ↔ 소프트웨어)
+- **문제를 체계적으로 분석**할 수 있습니다
+- **아키텍처 독립적으로 사고**할 수 있습니다
+- **깊이 있는 기술 토론**에 참여할 수 있습니다
+- **시니어 엔지니어로 성장**하는 기반을 갖춥니다
+
+---
+
+다음 글: [Part 1-01: 전자회로 기초](/blog/embedded/modern-recipes/part1-01-electronics-basics)
