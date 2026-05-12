@@ -23,77 +23,83 @@
 
 ---
 
-### 1. Parallel Computing & HPC (최우선)
+### 1. Parallel Programming Principles (최우선)
+
+**플랫폼 독립적인 병렬 프로그래밍 원리와 패턴에 집중**
 
 **관련 서적:**
-- *Programming Massively Parallel Processors* - Kirk & Hwu
-- *CUDA Handbook* - Nicholas Wilt
-- *Professional CUDA C Programming*
-- *CUDA by Example*
-- *The Art of Multiprocessor Programming* - Herlihy & Shavit
-- *C++ Concurrency in Action* - Anthony Williams
-- *Using OpenMP*
-- *OpenCL Programming Guide*
-- *Heterogeneous Computing with OpenCL*
-- *Seven Concurrency Models in Seven Weeks*
-- *Structured Parallel Programming*
-- *Intel Xeon Phi High Performance Programming*
+- *The Art of Multiprocessor Programming* - Herlihy & Shavit ★★
+- *Structured Parallel Programming* - McCool, Reinders, Robison ★★
+- *Patterns for Parallel Programming* - Mattson, Sanders, Massingill ★
+- *Seven Concurrency Models in Seven Weeks* - Butcher ★
+- *An Introduction to Parallel Programming* - Pacheco
+- *C++ Concurrency in Action* - Anthony Williams ★
+- *The Art of Concurrency* - Breshears
 
 **제안 구조:**
 
 ```
-시리즈: Parallel Computing Mastery
-총 6개 Part, 60개 글
+시리즈: Parallel Programming Principles
+총 4개 Part, 40개 글
 
-Part 1: Parallel Computing Fundamentals (10개)
-- 병렬 컴퓨팅 개요, Amdahl의 법칙
-- 공유 메모리 vs 분산 메모리
-- 스레드, 프로세스, 동기화
+Part 1: Fundamentals (10개)
+- 병렬성 vs 동시성
+- Amdahl의 법칙, Gustafson의 법칙
 - 데이터 병렬성 vs 태스크 병렬성
-- 병렬 알고리즘 설계 패턴
+- 의존성 분석 (data, control, resource)
+- 작업 분해 전략
+- 공유 메모리 vs 분산 메모리 모델
+- 스레드 vs 프로세스
+- 병렬 알고리즘 복잡도
+- 스케일링 (strong vs weak)
+- 효율성과 스피드업
 
-Part 2: CPU Parallelism - OpenMP & TBB (10개)
-- OpenMP 기초 (pragma, 지시어)
-- OpenMP 고급 (task, SIMD)
-- Intel TBB 소개
-- 캐시 친화적 병렬 코드
-- False sharing 회피
+Part 2: Synchronization & Correctness (12개)
+- 원자적 연산
+- Compare-and-Swap (CAS)
+- 락 (mutex, spinlock, rwlock)
+- 조건 변수
+- 배리어, 래치, 세마포어
+- 메모리 모델과 순서 보장
+- Acquire-Release 의미론
+- 데드락 (원인, 탐지, 회피)
+- 라이브락과 기아
+- Lock-free 알고리즘 기초
+- Wait-free 알고리즘
+- ABA 문제
 
-Part 3: GPU Computing - CUDA (15개)
-- GPU 아키텍처 이해
-- CUDA 프로그래밍 모델
-- 메모리 계층 (global, shared, constant, texture)
-- Warp와 스레드 스케줄링
-- 최적화 기법 (coalescing, bank conflict)
-- Streams와 비동기 실행
-- Multi-GPU 프로그래밍
-- cuBLAS, cuDNN, Thrust
+Part 3: Parallel Patterns (12개)
+- Map 패턴
+- Reduce 패턴
+- Scan (Prefix Sum) 패턴
+- Fork-Join 패턴
+- Divide and Conquer
+- Pipeline 패턴
+- Producer-Consumer
+- Work Stealing
+- Stencil 패턴
+- Partition 패턴
+- 패턴 조합과 중첩
+- 패턴 선택 가이드
 
-Part 4: Heterogeneous Computing - OpenCL (10개)
-- OpenCL 아키텍처
-- 플랫폼/디바이스 모델
-- 커널 프로그래밍
-- 메모리 모델
-- FPGA에서의 OpenCL
-
-Part 5: Distributed Computing - MPI (10개)
-- MPI 기초 (send/recv, broadcast)
-- 집합 통신
-- 비동기 통신
-- MPI + OpenMP 하이브리드
-- 성능 분석
-
-Part 6: Advanced Topics (5개)
-- Lock-free 자료구조
-- 트랜잭셔널 메모리
-- 이기종 클러스터
-- 성능 모델링
-- 미래 동향 (CXL, UCIe)
+Part 4: Performance Analysis (6개)
+- 병렬 성능 측정
+- 스케일링 분석
+- 로드 밸런싱
+- False Sharing과 캐시 효과
+- 통신 오버헤드
+- 병렬 벤치마킹 방법론
 ```
 
+**특징:**
+- 플랫폼/벤더 독립적 (CUDA, OpenCL 등 특정 기술 제외)
+- 이론과 원리 중심
+- 어떤 환경에서든 적용 가능한 패턴
+- C++ 예제 (std::thread, std::atomic 수준)
+
 **기존 시리즈와 연결:**
-- Embedded Performance Engineering Part 4 (Concurrency)와 연계
-- Modern Embedded Recipes Part 10 (FPGA)와 연계
+- Embedded Performance Engineering Part 4 (Concurrency) 심화
+- Embedded C++ Part 4 (Lock-free 패턴) 확장
 
 ---
 
@@ -206,7 +212,7 @@ Part 4: Deep Learning for Vision (8개)
 
 **기존 시리즈와 연결:**
 - Modern Embedded Recipes Part 11 (Edge AI)
-- Parallel Computing (CUDA 가속)
+- Parallel Programming Principles (병렬 패턴)
 
 ---
 
@@ -365,7 +371,7 @@ Part 4: Embedded ML (8개)
 
 | 시리즈 | 이유 | 예상 글 수 |
 |-------|------|----------|
-| Parallel Computing & HPC | 임베디드/성능과 직접 연결, CUDA/OpenCL 수요 높음 | 60 |
+| Parallel Programming Principles | 임베디드/성능과 직접 연결, 플랫폼 독립적 원리 | 40 |
 | Mathematics for Engineers | 다른 모든 시리즈의 기초, 차별화 요소 | 50 |
 
 ### Phase 2 (중간 우선순위)
@@ -395,7 +401,7 @@ Part 4: Embedded ML (8개)
 | Part 2 (프로세서) | ARM 어셈블리 심화 | ARM System Developer's Guide |
 | Part 7 (Linux) | 커널 내부 심화 | Understanding the Linux Kernel |
 | Part 10 (FPGA) | PCIe 심화 | PCI Express System Architecture |
-| Part 11 (Edge AI) | TensorRT 심화 | CUDA Handbook |
+| Part 11 (Edge AI) | 모델 최적화 심화 | ML Engineering |
 
 ### Performance Engineering
 
@@ -405,7 +411,7 @@ Part 4: Embedded ML (8개)
 |------|--------|---------|
 | Part 2 (CPU) | SIMD 최적화 | Intel Xeon Phi Programming |
 | Part 4 (Concurrency) | Lock-free 심화 | The Art of Multiprocessor Programming |
-| Part 5 (Tools) | CUDA 프로파일링 | Professional CUDA C Programming |
+| Part 5 (Tools) | 병렬 프로파일링 | Performance Analysis and Tuning |
 
 ### Embedded C++
 
@@ -439,25 +445,27 @@ Part 4: Embedded ML (8개)
 - The Design of the Unix
 - Principles of Computer System Design
 
-### Parallel / HPC / CUDA (18권)
-- Programming Massively Parallel Processors ★★
-- CUDA Handbook ★★
-- Professional CUDA C Programming ★
-- CUDA by Example ★
+### Parallel Programming - 원리/패턴 (핵심, 7권)
 - The Art of Multiprocessor Programming ★★
+- Structured Parallel Programming ★★
+- Patterns for Parallel Programming ★
 - C++ Concurrency in Action ★★
-- Using OpenMP ★
-- OpenCL Programming Guide ★
-- Heterogeneous Computing with OpenCL
-- Seven Concurrency Models in Seven Weeks
-- Structured Parallel Programming ★
-- Intel Xeon Phi High Performance Programming
+- Seven Concurrency Models in Seven Weeks ★
+- The Art of Concurrency ★
 - An Introduction to Parallel Programming
-- Parallel Programming in C with MPI and OpenMP
-- The Art of Concurrency
-- Patterns for Parallel Programming
-- High Performance Parallelism Pearls
-- Multicore Application Programming
+
+### Parallel Programming - 플랫폼별 (참고, 11권)
+- Programming Massively Parallel Processors (CUDA)
+- CUDA Handbook (CUDA)
+- Professional CUDA C Programming (CUDA)
+- CUDA by Example (CUDA)
+- Using OpenMP (OpenMP)
+- OpenCL Programming Guide (OpenCL)
+- Heterogeneous Computing with OpenCL (OpenCL)
+- Intel Xeon Phi High Performance Programming (Xeon Phi)
+- Parallel Programming in C with MPI and OpenMP (MPI/OpenMP)
+- High Performance Parallelism Pearls (Mixed)
+- Multicore Application Programming (Mixed)
 
 ### C/C++ (6권)
 - C Interfaces and Implementations ★
@@ -540,16 +548,16 @@ Part 4: Embedded ML (8개)
 ## 다음 단계
 
 1. **Phase 1 시리즈 서문 작성**
-   - Parallel Computing Mastery 서문
+   - Parallel Programming Principles 서문
    - Mathematics for Engineers 서문
 
 2. **기존 시리즈 보강**
-   - Modern Embedded Recipes에 PCIe, CUDA 심화 추가
+   - Modern Embedded Recipes에 PCIe 심화 추가
    - Performance Engineering에 SIMD, lock-free 추가
 
 3. **카테고리 구조 업데이트**
    - `math` 카테고리 활성화
-   - `hpc` 또는 `parallel` 카테고리 추가
+   - `parallel` 카테고리 추가
 
 ---
 
