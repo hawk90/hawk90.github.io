@@ -39,7 +39,12 @@ export function getTagUrl(tagName: string): string {
 }
 
 /**
- * Escape HTML special characters
+ * Escape HTML special characters.
+ *
+ * Apostrophe is intentionally omitted: numeric entities like &#039; are not
+ * decoded by satori-html (used in OG image generation), so escaping ' there
+ * renders literal "Hawk&#039;s Blog" into the PNG. In normal HTML output
+ * Astro's auto-escape handles the remaining cases.
  */
 export function escapeHtml(str: string): string {
   const map: Record<string, string> = {
@@ -47,7 +52,6 @@ export function escapeHtml(str: string): string {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#039;',
   };
-  return str.replace(/[&<>"']/g, (m) => map[m]);
+  return str.replace(/[&<>"]/g, (m) => map[m]);
 }
