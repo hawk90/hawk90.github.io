@@ -8,191 +8,231 @@ seriesOrder: 10
 draft: false
 ---
 
-> 마지막 장. 주석 / 형식 / 예외 / 마무리.
+마지막 장은 주석과 형식, 그리고 가이드 자체의 마무리 메시지로 구성된다. 형식 규칙은 자동화 도구(clang-format)로 거의 다 처리되지만, 주석과 *원칙*은 사람이 의식해야 한다.
 
-## Comments
+## Comments — Style
 
-### Comment Style
-
-> `//` 선호. 다중 줄도 — `//`.
+C++ 주석은 `//`를 기본으로 한다. 한 줄짜리도, 여러 줄짜리도 `//`로.
 
 ```cpp
-// 좋음:
-// This is a comment.
-// Multiple lines also use //.
+// 한 줄 주석.
 
-// 회피:
-/* C-style block comment. */
+// 여러 줄 주석.
+// 다음 줄.
+// 그 다음 줄.
 ```
 
-`/* */` — 라이선스 헤더 / 거대 블록 등 특수 경우만.
+`/* ... */` 형식은 라이선스 헤더처럼 거대한 블록에만 쓴다.
 
-### File Comments
+```cpp
+/*
+ * Copyright 2025 Google LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ */
+```
+
+함수 인자에 인라인으로 의미를 표시할 때는 `/* */`가 유용하다.
+
+```cpp
+// 호출지점에서 의미 명시
+ProductCalculator pc(/*price=*/100,
+                     /*quantity=*/5,
+                     /*apply_discount=*/true);
+```
+
+## File Comments
+
+파일 시작에는 라이선스(필요하면)와 파일이 하는 일에 대한 짧은 설명을 둔다.
 
 ```cpp
 // Copyright 2025 Google LLC.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// ...
+// Licensed under the Apache License, Version 2.0.
 //
-// This file implements the URL parsing for the foo project.
-// See URL Parsing Design Doc for details.
+// URL parsing routines. This file implements the public API
+// declared in url_parser.h. For the parsing algorithm, see
+// https://example.com/url-parsing-design-doc.
+
+#include "myproject/util/url_parser.h"
 ```
 
-- 라이선스
-- 저작자 (선택)
-- 파일의 목적
+너무 명백한 내용("This file contains the URL parser.")은 적지 않는다. 디자인 문서 링크나 동시성 가정 같은 *코드만 봐서는 모르는 것*이 가치 있는 주석이다.
 
-### Class Comments
+## Class Comments
+
+클래스 선언 위에 클래스가 *무엇*을 *어떻게* 쓰이도록 의도되었는지 적는다.
 
 ```cpp
-// A class for representing a 2D point in screen coordinates.
+// A least-recently-used cache with a fixed maximum size.
 //
-// This class is not thread-safe.
+// This cache is NOT thread-safe; callers must wrap access in a mutex
+// if used from multiple threads. The cache evicts the oldest entry
+// when capacity would be exceeded.
 //
-// Example usage:
-//   Point p(10.0, 20.0);
-//   p.Translate(5.0, 5.0);
-class Point {
+// Example:
+//   LruCache<std::string, int> cache(/*capacity=*/100);
+//   cache.Put("key", 42);
+//   int value;
+//   if (cache.Get("key", &value)) { /* ... */ }
+template <typename Key, typename Value>
+class LruCache {
     // ...
 };
 ```
 
-- 무엇을 하는 클래스
-- 동시성 보장
-- 사용 예 (있으면 좋음)
+자주 빠뜨리지만 중요한 항목들:
+- 동시성 보장 (thread-safe인지)
+- 예외 안전성(있다면)
+- 소유권 가정
+- 라이프타임 제약
+- 간단한 사용 예
 
-### Function Comments
+## Function Comments
+
+선언부에는 *무엇을 하는가, 입력의 의미는, 반환의 의미는, 부작용은 있는가*를 적는다. 정의에는 구현 디테일을 적는다.
 
 ```cpp
-// Returns the user with the given ID. Returns nullptr if not found.
+// 선언부 — 사용자를 위한 설명
 //
-// The returned pointer is owned by the User table.
-User* GetUser(int id);
-
-// Computes the sum of all elements.
+// Returns the user with the given ID.
 //
-// Args:
-//   v: The vector to sum. Must not be empty.
-//
-// Returns: The sum.
-int Sum(const std::vector<int>& v);
+// The returned pointer is owned by this UserTable and remains valid
+// until either RemoveUser() is called or this table is destroyed.
+// Returns nullptr if no user has the given ID.
+const User* GetUser(int user_id) const;
 ```
 
-- 무엇을 하는 함수
-- 인자 의미 (자명하지 않으면)
-- 반환값 의미
-- 예외 / 에러 조건
-- 부작용
-
-### Variable Comments
-
 ```cpp
-// Number of retries before giving up.
-constexpr int kMaxRetries = 3;
-
-class Foo {
-    int counter_;   // 자명 — 주석 생략
-    int delta_;     // 시간차(초) — 의미 자명 안 함 → 주석:
-    // The time difference in seconds.
-};
-```
-
-자명한 변수 — 주석 생략. 의미 / 단위 / 제약이 — 코드만으로 안 보이면 주석.
-
-### Implementation Comments
-
-```cpp
-void Process() {
-    // Skip header bytes.
-    cursor += 16;
-
-    // The DEFLATE algorithm requires window size >= 32K.
-    int window = std::max(input_size, 32768);
+// 정의부 — 구현 디테일
+const User* UserTable::GetUser(int user_id) const {
+    // Binary search keyed on user_id. The vector is kept sorted on
+    // insert.
+    auto it = std::lower_bound(users_.begin(), users_.end(), user_id,
+                               UserIdComparator());
+    if (it == users_.end() || it->id != user_id) {
+        return nullptr;
+    }
+    return &*it;
 }
 ```
 
-*왜*에 대한 주석. *무엇*은 코드.
-
-### Function Argument Comments
+자명한 함수는 주석을 생략해도 된다.
 
 ```cpp
-// 호출 시 — 명시:
-ProductCalculator pc(
-    /*price=*/100,
-    /*quantity=*/5,
-    /*discount=*/true);   // 의미 명시
+// 주석 불필요 — 이름이 전부 알려 줌
+int Size() const;
+bool IsEmpty() const;
 ```
 
-flag / magic number — 의미 명시.
+## Variable Comments
 
-### TODO Comments
+자명한 변수에는 주석이 필요 없다. 단위나 제약 같은 *코드에서 안 보이는 정보*가 있을 때 주석을 적는다.
 
 ```cpp
-// TODO(username): Fix this when foo is implemented.
-// TODO(b/123456): Refactor after migration.
+class Server {
+private:
+    int port_;             // 자명 — 주석 불필요
+
+    // Connection timeout in milliseconds.
+    int timeout_ms_;
+
+    // Total bytes sent since the server started. Reset on Restart().
+    int64_t bytes_sent_;
+
+    // Whether handshake has been completed. Must be true before
+    // SendMessage() is called.
+    bool is_handshake_complete_;
+};
 ```
 
-- 사용자명 (또는 버그 번호)
-- 콜론
-- 무엇을 / 언제
+## Implementation Comments
 
-### Deprecation Comments
+구현 안에서는 *왜*에 답하는 주석이 좋은 주석이다. *무엇*은 코드 자체가 말한다.
 
 ```cpp
-ABSL_DEPRECATED("Use NewFunc instead.")
-void OldFunc();
+// 회피 — 무엇 (코드가 말해 줌)
+i += 1;   // Increment i
+
+// Good — 왜
+i += 1;   // Skip the BOM byte at the start of UTF-8 files.
+
+cursor_ += 16;   // Skip the fixed 16-byte header.
+
+// The DEFLATE algorithm requires a window of at least 32K bytes.
+const int kWindowSize = std::max(input_size, 32 * 1024);
 ```
 
-매크로 — 컴파일 시 경고.
-
-## Formatting
-
-### Line Length
-
-> **80자**.
+마법 같은 숫자나 조건의 *근거*는 주석으로 남긴다.
 
 ```cpp
-// 좋음:
-int result = ComputeSomething(input_value, threshold);
+if (retries_ >= 3) {
+    // After 3 retries, increasing back-off doesn't help — the
+    // service is most likely down. Fail fast.
+    return absl::UnavailableError("...");
+}
+```
 
-// 회피 — 80자 초과:
+## TODO Comments
+
+미래 작업은 `TODO`로 표시한다. 작성자나 추적 가능한 식별자를 함께 적는다.
+
+```cpp
+// TODO(yongbin): Replace polling with a condition variable once the
+// new threading primitives land.
+//
+// TODO(b/123456): Remove this workaround after the upstream fix.
+//
+// TODO: Investigate slow path here.   // 회피 — 책임자 없음
+```
+
+비슷한 마커로 `FIXME`나 `XXX`를 쓰는 코드베이스도 있지만 Google은 `TODO`로 통일한다.
+
+## Deprecation Comments
+
+지원이 끝나는 API에는 `ABSL_DEPRECATED` 같은 매크로로 컴파일 시 경고를 띄운다. 주석도 함께 둔다.
+
+```cpp
+ABSL_DEPRECATED("Use NewProcessor::Process instead.")
+absl::Status OldProcess(const Order& order);
+```
+
+호출자는 컴파일 시 경고와 함께 대체 API를 안내받는다.
+
+## Formatting — 자동화 우선
+
+형식 규칙은 대부분 `clang-format`이 처리한다. 코드베이스에 `.clang-format` 설정 파일을 두고, 저장 시 자동 포매팅을 켜는 것이 권장이다.
+
+```yaml
+# .clang-format
+BasedOnStyle: Google
+ColumnLimit: 80
+IndentWidth: 2
+```
+
+이하 규칙은 자동 도구가 무엇을 강제하는지 이해하기 위한 참고다.
+
+## Line Length
+
+한 줄은 80자가 한도다. 80자를 넘기면 분할한다.
+
+```cpp
+// 회피 — 80자 초과
 int result = ComputeSomethingWithVeryLongName(input_value, very_long_threshold);
 
-// 좋음 — 분할:
+// Good — 분할
 int result = ComputeSomethingWithVeryLongName(
     input_value, very_long_threshold);
 ```
 
-### Non-ASCII Characters
+함수 선언이 한 줄에 안 들어가면 매개변수를 정렬한다.
 
 ```cpp
-// 좋음 — UTF-8:
-const std::string kHello = "안녕";   // UTF-8 인코딩
-const std::u8string kHelloU8 = u8"안녕";   // C++20 u8string
-```
+ReturnType ClassName::FunctionNameThatIsLong(Type1 param1, Type2 param2,
+                                             Type3 param3);
 
-### Spaces vs. Tabs
-
-> **2 spaces**. 탭 금지.
-
-```cpp
-void Func() {
-··int x = 0;   // 2 spaces (· 표시)
-}
-```
-
-### Function Declarations / Definitions
-
-```cpp
-// 한 줄에 들어가면 — 한 줄:
-ReturnType FunctionName(Type1 param1, Type2 param2);
-
-// 안 들어가면 — 분할 (들여쓰기 4):
-ReturnType FunctionNameWithLongName(Type1 param1, Type2 param2,
-                                    Type3 param3);
-
-// 또는 — 더 안 들어가면:
+// 또는 더 길면
 ReturnType ClassName::FunctionNameThatIsReallyReallyLong(
     Type1 param1,
     Type2 param2,
@@ -201,138 +241,225 @@ ReturnType ClassName::FunctionNameThatIsReallyReallyLong(
 }
 ```
 
-### Function Calls
+## Spaces vs. Tabs
+
+들여쓰기는 2 spaces다. 탭은 절대 쓰지 않는다.
 
 ```cpp
-// 한 줄에:
+void Func() {
+  if (cond) {
+    DoSomething();   // 2 spaces 들여쓰기
+  }
+}
+```
+
+## Function Calls
+
+호출이 한 줄에 들어가면 한 줄로, 길면 분할한다.
+
+```cpp
+// 한 줄
 bool result = DoSomething(arg1, arg2, arg3);
 
-// 분할:
+// 분할 — 첫 인자 들여쓰기 정렬
+bool result = DoSomething(arg1, arg2,
+                          arg3, arg4);
+
+// 분할 — 함수 다음 줄에 모든 인자
 bool result = DoSomething(
-    argument1, argument2, argument3, argument4);
+    arg1, arg2, arg3, arg4);
 ```
 
-### Conditionals
+## Conditionals
+
+`if`와 `(` 사이에 공백 하나, `(`와 조건 사이에 공백 없음.
 
 ```cpp
-// 좋음:
-if (condition) {
+if (cond) { /* ... */ }      // Good
+if(cond) { /* ... */ }       // 회피
+if (cond ) { /* ... */ }     // 회피
+```
+
+본문이 한 줄이어도 중괄호를 두는 편을 권한다. 미래에 줄이 추가될 때 버그를 막는다.
+
+```cpp
+// Good
+if (cond) {
     DoSomething();
-} else if (other) {
-    DoOther();
-} else {
-    DoElse();
 }
 
-// 회피 — 중괄호 생략:
-if (condition) DoSomething();   // 가이드는 — 신중 (다중 줄로 변경 시 버그 위험)
-
-// 한 줄이면 — OK:
-if (condition) return -1;
+// 회피 — 문장이 추가될 때 들여쓰기 함정
+if (cond)
+    DoSomething();
 ```
 
-`if`와 `(` 사이 — *공백*. `(`와 `condition` 사이 — 공백 없음.
-
-### Loops and switch
+한 줄에 끝나는 짧은 조건은 OK다.
 
 ```cpp
-// 좋음:
-for (int i = 0; i < n; ++i) {
-    Process(i);
-}
+if (cond) return -1;
+if (!ok) continue;
+```
 
-while (HasMore()) {
-    Process(GetNext());
-}
+## Loops and switch
 
-switch (var) {
-    case 0:
-        DoZero();
+`switch`에는 `default` 케이스를 항상 둔다. 비어 있으면 명시적으로 적는다.
+
+```cpp
+switch (status) {
+    case Status::kOk:
+        HandleOk();
         break;
-    case 1:
-        DoOne();
+    case Status::kError:
+        HandleError();
+        break;
+    case Status::kPending:
+    case Status::kRetrying:
+        // 두 케이스 같은 처리
+        HandleWait();
         break;
     default:
-        DoDefault();
+        LOG(FATAL) << "Unhandled status: " << status;
+}
+```
+
+fall-through가 의도된 경우 `[[fallthrough]]`로 표시한다.
+
+```cpp
+switch (kind) {
+    case Kind::kA:
+        DoA();
+        [[fallthrough]];
+    case Kind::kB:
+        DoB();
         break;
 }
 ```
 
-`switch` — `default` 항상 처리.
-
-### Pointer and Reference Expressions
+빈 루프 본문은 `{}` 또는 `continue;`로 명시한다.
 
 ```cpp
-// 좋음 (Google):
-int* p = nullptr;
-int& r = x;
-const int* p = nullptr;
-const int& r = x;
-
-// 회피:
-int *p;    // 또는
-int * p;
+while (Process()) {
+}
+// 또는
+while (Process()) continue;
 ```
 
-`*` / `&`는 — *타입*에 붙임.
+## Pointer and Reference Expressions
 
-### Boolean Expressions
+`*`와 `&`는 타입에 붙인다. 변수에 붙이지 않는다.
 
 ```cpp
-// 한 줄에 들어가면:
+// Good
+int* p = nullptr;
+const int& r = x;
+const Foo* p = nullptr;
+
+// 회피
+int *p;
+int * p;
+const int &r = x;
+```
+
+여러 변수를 한 줄에 선언할 때는 위 규칙이 혼란을 만들 수 있으므로 한 줄에 하나씩 선언한다.
+
+```cpp
+// 회피
+int* p, q;   // p는 포인터, q는 int — 혼란
+
+// Good
+int* p;
+int q;
+```
+
+## Boolean Expressions
+
+긴 boolean 식은 연산자를 줄 끝에 둔다. 들여쓰기로 같은 우선순위가 시각적으로 정렬되게 한다.
+
+```cpp
 if (this_one_thing > this_other_thing &&
-    a_third_thing == a_fourth_thing) {
+    a_third_thing == a_fourth_thing &&
+    yet_another && last_one) {
     // ...
 }
-
-// 연산자는 — 줄 끝에 (Google 스타일)
 ```
 
-### Return Values
+## Return Values
+
+return에 불필요한 괄호를 두지 않는다.
 
 ```cpp
-// 좋음:
+// Good
 return x;
-return (x + y);   // 의미 있을 때만 괄호
+return x + y;
 
-// 회피:
-return(x);   // 함수 호출처럼 보임
+// 회피
+return (x);
+return (x + y);   // 의미 없는 괄호
 ```
 
-### Variable and Array Initialization
+복잡한 식에서 가독성을 위해 괄호를 쓰는 것은 OK다.
 
 ```cpp
-// 좋음:
-int x = 0;
-int x(0);   // OK
-int x{0};   // C++11+ — 권장
+return (cond_a && cond_b) || cond_c;
+```
+
+## Variable and Array Initialization
+
+초기화에는 `=`, `()`, `{}` 세 가지 형태가 있다. `{}`는 narrowing을 막아 주므로 권장된다.
+
+```cpp
+int x = 0;        // 전통적
+int x(0);         // 함수처럼 보임
+int x{0};         // 권장 — narrowing 방지
 
 std::vector<int> v = {1, 2, 3};
 std::vector<int> v{1, 2, 3};
 ```
 
-`{}`는 — *narrowing 방지*.
+`{}`가 막아 주는 사례:
 
 ```cpp
 int x{3.14};   // 컴파일 에러 (narrowing)
 int x(3.14);   // 3 (silent narrowing)
+int x = 3.14;  // 3 (silent narrowing)
 ```
 
-### Preprocessor Directives
+`auto`와 `{}`를 함께 쓰면 `std::initializer_list`로 추론되므로 주의한다.
 
 ```cpp
-// 좋음 — 들여쓰기 없이:
-#ifdef DEBUG
-#define LOG(x) std::cerr << x
-#else
-#define LOG(x)
-#endif
-
-// 회피 — 들여쓰기:
-    #ifdef DEBUG
+auto x = 5;           // int
+auto y = {5};         // std::initializer_list<int>
+auto z{5};            // int (C++17 이후)
+auto w = std::vector{1, 2, 3};   // vector<int>
 ```
 
-### Class Format
+## Preprocessor Directives
+
+`#ifdef`/`#define`은 들여쓰기 없이 왼쪽 끝에 둔다.
+
+```cpp
+#ifdef DEBUG
+#define LOG_DEBUG(msg) LOG(INFO) << msg
+#else
+#define LOG_DEBUG(msg) ((void)0)
+#endif
+```
+
+들여쓰기로 중첩 의미를 표현할 수도 있다.
+
+```cpp
+#ifdef ENABLE_TLS
+#  ifdef USE_OPENSSL
+#    include <openssl/ssl.h>
+#  else
+#    include <mbedtls/ssl.h>
+#  endif
+#endif
+```
+
+## Class Format
+
+access specifier(`public:`/`private:`/`protected:`)는 들여쓰기 없이 클래스와 같은 열에 둔다. 안의 멤버만 들여쓴다.
 
 ```cpp
 class MyClass {
@@ -340,129 +467,115 @@ public:
     MyClass();
 
     void DoWork();
+    int GetValue() const { return value_; }
 
 private:
     int value_;
 };
 ```
 
-`public:` / `private:` — 들여쓰기 *없이*.
+## Constructor Initializer Lists
 
-### Constructor Initializer Lists
+초기화 목록은 멤버 선언 순서대로 쓴다. 컴파일러가 그 순서로 초기화하기 때문이다.
 
 ```cpp
-// 좋음:
-MyClass::MyClass(int x, int y, int z)
-    : x_(x), y_(y), z_(z) {
-    // ...
-}
+class MyClass {
+public:
+    MyClass(int x, int y, int z)
+        : x_(x), y_(y), z_(z) {}
 
-// 또는 — 길면:
-MyClass::MyClass(int x, int y, int z)
+private:
+    int x_;
+    int y_;
+    int z_;
+};
+```
+
+길면 줄을 나누고 콜론과 콤마를 정렬한다.
+
+```cpp
+MyClass::MyClass(int x, int y, int z, int w, int v)
     : x_(x),
       y_(y),
-      z_(z) {
+      z_(z),
+      w_(w),
+      v_(v) {
     // ...
 }
 ```
 
-선언 순서로 — 초기화.
+## Namespace Formatting
 
-### Namespace Formatting
+namespace 본문에는 들여쓰기를 하지 않는다. 닫을 때는 어느 namespace인지 주석으로 표시한다.
 
 ```cpp
-// 좋음 — 들여쓰기 없이:
-namespace mylib {
+namespace myproject {
+namespace cache {
 
-class Foo { /* ... */ };
+class LruCache { /* ... */ };
 
-void Bar();
+void Helper();
 
-}  // namespace mylib
+}  // namespace cache
+}  // namespace myproject
 ```
 
-`namespace` 안 — 들여쓰기 없음.
+C++17의 중첩 namespace 선언도 자주 쓴다.
+
+```cpp
+namespace myproject::cache {
+
+class LruCache { /* ... */ };
+
+}  // namespace myproject::cache
+```
 
 ## Exceptions to the Rules
 
-### 규칙
+이 가이드의 규칙은 *기존 코드와 일관성*을 위해 깨질 수 있다. 오래된 모듈에 새 코드를 추가할 때는 그 모듈의 스타일을 따른다. 일관성이 가독성을 만든다는 원칙이 모든 개별 규칙보다 우위에 있다.
 
-> 기존 코드 — *일관성 우선*.
-
-```
-규칙 vs. 기존 코드 충돌:
-→ 기존 코드를 따른다 (점진 마이그레이션 외)
-```
-
-이유 — 일관성이 — *읽기*에 가장 중요.
-
-### 새 파일 / 모듈
-
-새로 시작하면 — 가이드 따름. 일관성 유지.
+새로 시작하는 파일과 모듈은 가이드를 따른다.
 
 ## Inclusive Language
 
-### 규칙
-
-> 차별적 용어 회피.
+차별적이거나 배제적 함의가 있는 용어는 피한다. 일반적으로 다음과 같은 대체가 권장된다.
 
 ```cpp
-// 회피:
-master / slave         → primary / replica, leader / follower
-blacklist / whitelist  → blocklist / allowlist
+// 회피  →  Good
+master / slave         →   primary / replica, leader / follower
+blacklist / whitelist  →   blocklist / allowlist
 ```
 
-### 적용
-
-```cpp
-// 좋음:
-class DatabasePrimary { /* ... */ };
-class DatabaseReplica { /* ... */ };
-std::vector<std::string> blocklist;
-```
-
-기존 용어가 — 그대로면 (외부 표준 등) 점진 마이그레이션.
+새 코드에서는 권장 용어를 쓰고, 기존 용어는 점진적으로 마이그레이션한다. 외부 표준이나 API가 옛 용어를 쓰는 경우는 그대로 두되, 가능한 한 우리 코드에서는 새 용어로 감싼다.
 
 ## Parting Words
 
-> 가이드를 *적용*하라.
+가이드 원문의 마지막 메시지는 단순하다.
 
-```
-이 가이드는 — 완벽하지 않다.
-완벽한 스타일 가이드도 — 존재하지 않는다.
-하지만 — 일관성이 가독성을 만든다.
-의문이 있으면 — 가이드를 따른다.
-```
+> Use common sense and BE CONSISTENT.
 
-### 일관성의 가치
+이 가이드가 완벽하지 않다는 것을 가이드 자신이 인정한다. 모든 상황에 답을 줄 수도 없다. 그래서 두 가지를 강조한다. 첫째, 의문이 있으면 가이드의 규칙을 따른다. 일관성이 자산이다. 둘째, 가이드가 분명히 잘못된 경우에는 가이드 갱신을 제안한다.
 
-- 새 인원 — 빠른 적응
-- 코드 검토 — 빠른 진행
-- 자동 도구 — 잘 동작
-- 의사 결정 — 단순화
-
-### 규칙은 — 도구
-
-규칙 자체가 — 목적이 아니다. *읽기 쉬운 코드*가 목적. 규칙이 — 그것을 방해하면, 가이드 갱신을 — 제안.
+스타일 가이드는 도구지 신앙이 아니다. 더 읽기 좋은 코드를 만든다는 목적에 봉사한다. 규칙이 그 목적을 방해한다면 규칙을 고친다.
 
 ## 시리즈 마무리
 
-10장에 걸쳐 — Google C++ Style Guide의 모든 절을 정리.
+10장에 걸쳐 Google C++ Style Guide의 모든 절을 정리했다.
 
 ```
-1. Background / Version / Magic
-2. Header Files
-3. Scoping
-4. Classes
-5. Functions
-6. Memory / Exceptions / Casting
-7. const / Numbers / Macros
-8. Type Deduction / Templates / Lambdas
-9. Naming
-10. Comments / Formatting (이 글)
+Ch 1.  Background / Version / Magic
+Ch 2.  Header Files
+Ch 3.  Scoping
+Ch 4.  Classes
+Ch 5.  Functions
+Ch 6.  Memory / Exceptions / Casting
+Ch 7.  const / Numbers / Macros
+Ch 8.  Type Deduction / Templates / Lambdas
+Ch 9.  Naming
+Ch 10. Comments / Formatting / Closing (이 글)
 ```
 
-핵심 메시지 — **Optimize for the reader**. 코드는 — 읽히기 위해 쓴다.
+가이드의 핵심 메시지를 한 문장으로 줄이면 *Optimize for the reader*다. 코드는 한 번 쓰이고 수십 번 읽히기 때문이다. 일관성, 명시성, 단순함은 모두 그 목적을 위한 도구다.
 
 ## 관련 항목
 
