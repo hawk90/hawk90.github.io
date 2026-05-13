@@ -7,9 +7,20 @@ series: "Effective C++"
 seriesOrder: 39
 ---
 
+## 왜 이 항목이 중요한가?
+
+`private` 상속은 의미상 **composition과 같다** — "is-implemented-in-terms-of"다. is-a가 아니라 "이 클래스의 기능을 빌려쓴다"는 의미다.
+
+그렇다면 항상 composition을 쓰면 되지 않나? 거의 그렇다. 다만 두 가지 자리에서 private 상속이 우위다.
+
+- **base의 protected 멤버나 virtual 함수에 접근**해야 할 때 — composition으론 못 한다.
+- **EBO(Empty Base Optimization)** 로 메모리 절약 — 빈 base는 derived 안에서 자리를 차지하지 않는다. `std::tuple`, allocator 어댑터 같은 자리에서 핵심 도구다.
+
+이 두 경우 외에는 composition이 더 단순하고 명확하다. 이 항목은 private 상속의 정당화 사유와 EBO 메커니즘을 정리한다.
+
 ## 개요
 
-`private` 상속은 IS-A가 아닌 **is-implemented-in-terms-of** 관계를 표현합니다 — composition과 같은 의미. 대부분의 경우 composition이 더 단순하고 명확하지만, **두 가지 경우엔 private 상속이 우위** — base의 protected 멤버 또는 virtual 함수에 접근해야 할 때, 그리고 **EBO**(Empty Base Optimization)로 메모리를 절약해야 할 때.
+`private` 상속은 IS-A가 아닌 **is-implemented-in-terms-of** 관계를 표현한다. composition과 같은 의미다. 대부분의 경우 composition이 더 단순하고 명확하지만, **두 가지 경우엔 private 상속이 우위**다. base의 protected 멤버 또는 virtual 함수에 접근해야 할 때, 그리고 **EBO**(Empty Base Optimization)로 메모리를 절약해야 할 때다.
 
 ## 필수 개념: 상속의 종류와 의미
 
