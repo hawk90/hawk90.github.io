@@ -5,7 +5,6 @@ description: "주요 Linux 파일시스템 — 저널링 / 익스텐트 / 스냅
 tags: [Linux, File System, ext4, Btrfs, XFS]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 18
-draft: true
 ---
 
 ## 작성 중

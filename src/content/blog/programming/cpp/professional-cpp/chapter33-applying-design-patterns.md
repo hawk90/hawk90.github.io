@@ -5,7 +5,6 @@ description: "패턴 실전 적용 — Iterator (range), Observer (signal), Sing
 tags: [C++, Design Patterns, Observer, Iterator]
 series: "전문가를 위한 C++"
 seriesOrder: 33
-draft: true
 ---
 
 ## 작성 중

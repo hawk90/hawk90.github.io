@@ -5,7 +5,6 @@ description: "고급 도구 — stash / bisect / submodule / reflog / cherry-pic
 tags: [Git, Tools, Bisect, Stash]
 series: "Pro Git"
 seriesOrder: 7
-draft: true
 ---
 
 ## 작성 중

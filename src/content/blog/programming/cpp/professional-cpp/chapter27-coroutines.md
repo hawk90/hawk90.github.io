@@ -5,7 +5,6 @@ description: "co_await / co_yield / co_return. promise_type. C++23 std::generato
 tags: [C++, Coroutines, C++20, C++23]
 series: "전문가를 위한 C++"
 seriesOrder: 27
-draft: true
 ---
 
 ## 작성 중

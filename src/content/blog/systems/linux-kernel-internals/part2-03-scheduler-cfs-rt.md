@@ -5,7 +5,6 @@ description: "Completely Fair Scheduler — red-black tree, vruntime. RT / deadl
 tags: [Linux, Kernel, Scheduler, CFS]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 7
-draft: true
 ---
 
 ## 작성 중

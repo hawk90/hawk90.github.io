@@ -5,7 +5,6 @@ description: "io_uring — 비동기 I/O의 현대 인터페이스. 링 버퍼 /
 tags: [Linux, Kernel, io_uring, Async I/O]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 21
-draft: true
 ---
 
 ## 작성 중

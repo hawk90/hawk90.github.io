@@ -5,7 +5,6 @@ description: "Linux perf 도구 + Brendan Gregg의 FlameGraph. 시스템 프로�
 tags: [Performance, perf, FlameGraph, Profiling, Series]
 series: "perf / FlameGraph"
 seriesOrder: 0
-draft: true
 ---
 
 ## 작성 중

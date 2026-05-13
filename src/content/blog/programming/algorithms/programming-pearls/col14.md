@@ -5,7 +5,6 @@ description: "Heaps"
 series: "Programming Pearls"
 seriesOrder: 14
 tags: [algorithms, programming-pearls, classics]
-draft: true
 ---
 
 > **Programming Pearls** Column 14 요약

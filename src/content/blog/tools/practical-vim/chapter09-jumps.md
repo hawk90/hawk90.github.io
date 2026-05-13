@@ -5,7 +5,6 @@ description: "jump list (Ctrl+o / Ctrl+i). changes list. tag jumps."
 tags: [Vim, Jump, Tag]
 series: "Practical Vim"
 seriesOrder: 9
-draft: true
 ---
 
 ## 작성 중

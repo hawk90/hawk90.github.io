@@ -5,7 +5,6 @@ description: "Jetson 최적화"
 series: "Modern Embedded Recipes"
 seriesOrder: 35
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - Jetson 최적화

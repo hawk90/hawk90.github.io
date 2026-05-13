@@ -5,7 +5,6 @@ description: "리눅스 커널의 내부 구조 — boot, process, memory, FS, s
 tags: [Linux, Kernel, Systems, Series]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 0
-draft: true
 ---
 
 ## 작성 중

@@ -5,7 +5,6 @@ description: "TUI 모드, cgdb, gdb-dashboard, VSCode, nvim-dap."
 tags: [gdb, TUI, Frontend, DAP]
 series: "GDB / LLDB"
 seriesOrder: 10
-draft: true
 ---
 
 ## 예정 내용

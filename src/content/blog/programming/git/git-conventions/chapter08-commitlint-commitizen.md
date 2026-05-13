@@ -5,7 +5,6 @@ description: "메시지 검증 (commitlint) / 메시지 도우미 (commitizen). 
 tags: [Git, commitlint, commitizen]
 series: "Git Conventions"
 seriesOrder: 8
-draft: true
 ---
 
 ## 작성 중

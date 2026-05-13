@@ -5,7 +5,6 @@ description: "Writing Correct Programs"
 series: "Programming Pearls"
 seriesOrder: 4
 tags: [algorithms, programming-pearls, classics]
-draft: true
 ---
 
 > **Programming Pearls** Column 4 요약

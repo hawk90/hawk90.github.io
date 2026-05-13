@@ -5,7 +5,6 @@ description: "SIMD 활용법"
 series: "Modern Embedded Recipes"
 seriesOrder: 17
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - SIMD 활용법

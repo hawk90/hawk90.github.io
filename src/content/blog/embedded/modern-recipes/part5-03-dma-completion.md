@@ -5,7 +5,6 @@ description: "DMA completion queue"
 series: "Modern Embedded Recipes"
 seriesOrder: 27
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - DMA completion queue

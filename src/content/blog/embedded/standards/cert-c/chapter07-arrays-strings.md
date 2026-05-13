@@ -5,7 +5,6 @@ description: "배열 경계 / 문자열 NULL terminator / strcpy 함정 / 안전
 tags: [CERT, Array, String, Buffer Overflow]
 series: "CERT C"
 seriesOrder: 7
-draft: true
 ---
 
 ## 예정 내용

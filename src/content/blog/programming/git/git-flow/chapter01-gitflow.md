@@ -5,7 +5,6 @@ description: "전통 GitFlow — develop / feature / release / hotfix / main. �
 tags: [Git, GitFlow, Driessen]
 series: "Git Flow"
 seriesOrder: 1
-draft: true
 ---
 
 ## 작성 중

@@ -5,7 +5,6 @@ description: ":make / quickfix list — 빌드 에러 / 검색 결과 일괄 탐
 tags: [Vim, Quickfix, Build]
 series: "Practical Vim"
 seriesOrder: 17
-draft: true
 ---
 
 ## 예정 내용 (Tips 104-108)

@@ -5,7 +5,6 @@ description: "ELF 포맷, 심볼 테이블, 정적 / 동적 라이브러리, 재
 tags: [C, ELF, Library, Linker]
 series: "전문가를 위한 C"
 seriesOrder: 3
-draft: true
 ---
 
 ## 작성 중

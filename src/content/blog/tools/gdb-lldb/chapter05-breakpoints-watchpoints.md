@@ -5,7 +5,6 @@ description: "조건부 / 위치별 / 데이터 변경 / 예외 / 시그널 trap
 tags: [gdb, Breakpoint, Watchpoint]
 series: "GDB / LLDB"
 seriesOrder: 5
-draft: true
 ---
 
 ## 예정 내용

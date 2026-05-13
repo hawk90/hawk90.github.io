@@ -5,7 +5,6 @@ description: "JTAG 안 붙을 때"
 series: "Modern Embedded Recipes"
 seriesOrder: 6
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - JTAG 안 붙을 때

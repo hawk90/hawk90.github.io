@@ -5,7 +5,6 @@ description: "반론 다루기 — Toulmin 모델. 논증의 강화."
 tags: [Logic, Rebuttal, Toulmin Model]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 15
-draft: true
 ---
 
 ## 작성 중

@@ -5,7 +5,6 @@ description: "브랜치 전략 — GitFlow / GitHub Flow / GitLab Flow / Trunk-b
 tags: [Git, Branching Strategy, Workflow, Series]
 series: "Git Flow"
 seriesOrder: 0
-draft: true
 ---
 
 ## 작성 중

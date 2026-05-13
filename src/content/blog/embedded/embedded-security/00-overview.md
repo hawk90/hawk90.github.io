@@ -5,7 +5,6 @@ description: "MCU / SoC 보안 — secure boot, crypto, TrustZone, OTA, side-cha
 tags: [Embedded, Security, IoT, Series]
 series: "Embedded Security"
 seriesOrder: 0
-draft: true
 ---
 
 ## 작성 중

@@ -5,7 +5,6 @@ description: "conventional-changelog / git-cliff / release-please. Conventional 
 tags: [Git, Changelog, Release]
 series: "Git Conventions"
 seriesOrder: 9
-draft: true
 ---
 
 ## 작성 중

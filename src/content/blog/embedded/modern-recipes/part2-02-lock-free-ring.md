@@ -5,7 +5,6 @@ description: "lock-free ring buffer"
 series: "Modern Embedded Recipes"
 seriesOrder: 8
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - lock-free ring buffer

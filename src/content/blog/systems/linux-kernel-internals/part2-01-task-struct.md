@@ -5,7 +5,6 @@ description: "프로세스 디스크립터 task_struct — PID / 상태 / 시그
 tags: [Linux, Kernel, Process, task_struct]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 5
-draft: true
 ---
 
 ## 작성 중

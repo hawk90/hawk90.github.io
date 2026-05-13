@@ -5,7 +5,6 @@ description: "개체 / 술어 / 변항. 명제 논리를 넘어선 표현력."
 tags: [Logic, Predicate Logic]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 8
-draft: true
 ---
 
 ## 작성 중

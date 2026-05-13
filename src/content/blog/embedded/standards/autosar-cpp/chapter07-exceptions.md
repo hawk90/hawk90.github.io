@@ -5,7 +5,6 @@ description: "예외 규약 — throw 클래스, exception spec, RAII와 결합.
 tags: [AUTOSAR, Exception, RAII]
 series: "AUTOSAR C++14"
 seriesOrder: 7
-draft: true
 ---
 
 ## 예정 내용

@@ -5,7 +5,6 @@ description: "wchar / char8_t / char16_t / char32_t. std::locale. std::regex."
 tags: [C++, Localization, Regex, Unicode]
 series: "전문가를 위한 C++"
 seriesOrder: 19
-draft: true
 ---
 
 ## 작성 중

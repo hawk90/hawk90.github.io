@@ -5,7 +5,6 @@ description: "프로덕션 긴급 수정 — 브랜치 전략별 hotfix 절차. 
 tags: [Git, Hotfix, Production]
 series: "Git Flow"
 seriesOrder: 6
-draft: true
 ---
 
 ## 작성 중

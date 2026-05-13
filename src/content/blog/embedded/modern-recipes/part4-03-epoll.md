@@ -5,7 +5,6 @@ description: "epoll driver-userspace"
 series: "Modern Embedded Recipes"
 seriesOrder: 21
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - epoll driver-userspace

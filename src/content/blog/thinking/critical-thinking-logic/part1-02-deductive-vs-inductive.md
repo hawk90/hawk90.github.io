@@ -5,7 +5,6 @@ description: "연역 — 필연 / 형식. 귀납 — 개연 / 강도. 두 추론
 tags: [Logic, Deductive, Inductive]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 2
-draft: true
 ---
 
 ## 작성 중

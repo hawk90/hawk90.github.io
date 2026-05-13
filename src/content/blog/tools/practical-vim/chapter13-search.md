@@ -5,7 +5,6 @@ description: "/ ? n N. incsearch / hlsearch. * / # — 단어 검색. count + n.
 tags: [Vim, Search]
 series: "Practical Vim"
 seriesOrder: 13
-draft: true
 ---
 
 ## 작성 중

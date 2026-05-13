@@ -5,7 +5,6 @@ description: "템플릿 사용 규칙 — 명시적 instantiation, SFINAE 제한
 tags: [AUTOSAR, Templates]
 series: "AUTOSAR C++14"
 seriesOrder: 6
-draft: true
 ---
 
 ## 예정 내용

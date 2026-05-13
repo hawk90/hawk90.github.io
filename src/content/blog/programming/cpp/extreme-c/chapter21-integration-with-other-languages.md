@@ -5,7 +5,6 @@ description: "C ↔ Python / Java / Go / Rust FFI. C가 시스템의 lingua fran
 tags: [C, FFI, Python, Java, Rust]
 series: "전문가를 위한 C"
 seriesOrder: 21
-draft: true
 ---
 
 ## 작성 중

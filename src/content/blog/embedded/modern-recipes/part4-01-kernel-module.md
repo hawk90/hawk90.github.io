@@ -5,7 +5,6 @@ description: "kernel module 레시피"
 series: "Modern Embedded Recipes"
 seriesOrder: 19
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - kernel module 레시피

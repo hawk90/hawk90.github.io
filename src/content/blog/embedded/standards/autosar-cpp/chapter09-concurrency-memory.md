@@ -5,7 +5,6 @@ description: "std::thread, std::atomic, std::mutex. 메모리 순서. lock-free 
 tags: [AUTOSAR, Concurrency, Memory Model]
 series: "AUTOSAR C++14"
 seriesOrder: 9
-draft: true
 ---
 
 ## 예정 내용

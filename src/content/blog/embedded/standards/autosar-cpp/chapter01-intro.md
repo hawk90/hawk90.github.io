@@ -5,7 +5,6 @@ description: "AUTOSAR consortium, ISO 26262, MISRA C++:2008과의 차이."
 tags: [AUTOSAR, History, ISO 26262]
 series: "AUTOSAR C++14"
 seriesOrder: 1
-draft: true
 ---
 
 ## 예정 내용

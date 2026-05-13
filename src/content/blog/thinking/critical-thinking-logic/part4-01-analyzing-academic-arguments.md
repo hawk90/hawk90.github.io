@@ -5,7 +5,6 @@ description: "논문 / 기술 문서의 논증 추출. thesis / 근거 / 반론 
 tags: [Logic, Academic Writing, Application]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 14
-draft: true
 ---
 
 ## 작성 중

@@ -5,7 +5,6 @@ description: "표준 라이브러리 제한 (21), 자원 관리 (22)."
 tags: [MISRA, Standard Library, Resource]
 series: "MISRA C"
 seriesOrder: 9
-draft: true
 ---
 
 ## 예정 내용

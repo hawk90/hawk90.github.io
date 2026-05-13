@@ -5,7 +5,6 @@ description: "RAII, smart pointer, new / delete 회피. 메모리 풀."
 tags: [C++, Memory, RAII, Smart Pointer]
 series: "전문가를 위한 C++"
 seriesOrder: 7
-draft: true
 ---
 
 ## 작성 중

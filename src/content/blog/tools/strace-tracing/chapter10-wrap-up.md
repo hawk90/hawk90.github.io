@@ -5,7 +5,6 @@ description: "도구 선택 가이드. Brendan Gregg의 BPF Performance Tools / 
 tags: [Tracing, Resources]
 series: "System Tracing"
 seriesOrder: 10
-draft: true
 ---
 
 ## 예정 내용

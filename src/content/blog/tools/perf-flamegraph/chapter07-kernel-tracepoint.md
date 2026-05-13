@@ -5,7 +5,6 @@ description: "tracepoint / kprobe / uprobe / USDT. dynamic vs static."
 tags: [perf, tracepoint, kprobe, uprobe]
 series: "perf / FlameGraph"
 seriesOrder: 7
-draft: true
 ---
 
 ## 예정 내용

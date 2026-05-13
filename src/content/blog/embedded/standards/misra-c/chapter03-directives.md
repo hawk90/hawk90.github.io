@@ -5,7 +5,6 @@ description: "Dir 1 implementation, 2 toolchain, 3 traceability, 4 코딩 환경
 tags: [MISRA, Directive]
 series: "MISRA C"
 seriesOrder: 3
-draft: true
 ---
 
 ## 예정 내용

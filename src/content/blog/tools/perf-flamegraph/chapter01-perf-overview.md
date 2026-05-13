@@ -5,7 +5,6 @@ description: "Linux perf의 본질 — perf_event_open syscall, PMU 카운터, �
 tags: [perf, PMU, Profiling]
 series: "perf / FlameGraph"
 seriesOrder: 1
-draft: true
 ---
 
 ## 예정 내용

@@ -5,7 +5,6 @@ description: "blocking 시간 분석. sched_switch tracepoint 활용."
 tags: [perf, off-CPU, Blocking]
 series: "perf / FlameGraph"
 seriesOrder: 6
-draft: true
 ---
 
 ## 예정 내용

@@ -8,7 +8,6 @@ tags: [writing, korean, 고종석, 문장]
 type: book-review
 bookTitle: "고종석의 문장"
 bookAuthor: "고종석"
-draft: true
 ---
 
 > **고종석의 문장** 제4장 요약

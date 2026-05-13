@@ -5,7 +5,6 @@ description: "UART 안 찍힐 때 체크리스트"
 series: "Modern Embedded Recipes"
 seriesOrder: 1
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - UART 안 찍힐 때 체크리스트

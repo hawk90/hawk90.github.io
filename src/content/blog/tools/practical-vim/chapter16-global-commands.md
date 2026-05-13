@@ -5,7 +5,6 @@ description: ":global / :vglobal — 패턴 매칭 라인에 명령 일괄. 검�
 tags: [Vim, Global, Batch]
 series: "Practical Vim"
 seriesOrder: 15
-draft: true
 ---
 
 ## 작성 중

@@ -5,7 +5,6 @@ description: "Git의 본질 — content-addressable filesystem. blob / tree / co
 tags: [Git, Internals, Plumbing]
 series: "Pro Git"
 seriesOrder: 10
-draft: true
 ---
 
 ## 작성 중

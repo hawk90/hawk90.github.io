@@ -5,7 +5,6 @@ description: "perf 외 도구 — pprof (Go), hotspot (KDAB GUI), Tracy, Intel V
 tags: [Profiling, hotspot, Tracy, VTune]
 series: "perf / FlameGraph"
 seriesOrder: 9
-draft: true
 ---
 
 ## 예정 내용

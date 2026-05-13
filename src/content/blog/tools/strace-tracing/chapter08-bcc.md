@@ -5,7 +5,6 @@ description: "BPF Compiler Collection — Python wrapping + C kernel program."
 tags: [BCC, eBPF, Python]
 series: "System Tracing"
 seriesOrder: 8
-draft: true
 ---
 
 ## 예정 내용

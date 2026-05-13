@@ -5,7 +5,6 @@ description: "CQ/SQ architecture"
 series: "Modern Embedded Recipes"
 seriesOrder: 26
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - CQ/SQ architecture

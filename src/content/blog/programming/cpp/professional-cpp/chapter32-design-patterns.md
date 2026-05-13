@@ -5,7 +5,6 @@ description: "GoF 패턴 + 모던 C++ 변형. 깊은 다룸은 GoF / C++ Softwar
 tags: [C++, Design Patterns, GoF]
 series: "전문가를 위한 C++"
 seriesOrder: 32
-draft: true
 ---
 
 ## 작성 중

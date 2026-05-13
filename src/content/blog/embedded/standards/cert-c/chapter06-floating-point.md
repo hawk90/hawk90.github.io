@@ -5,7 +5,6 @@ description: "부동소수점 비교, NaN / inf, 변환 / 라운딩 함정."
 tags: [CERT, Floating Point, IEEE 754]
 series: "CERT C"
 seriesOrder: 6
-draft: true
 ---
 
 ## 예정 내용

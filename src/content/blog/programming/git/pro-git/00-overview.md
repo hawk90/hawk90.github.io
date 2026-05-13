@@ -5,7 +5,6 @@ description: "Scott Chacon & Ben Straub의 Git 정전. 기초부터 internals까
 tags: [Git, Version Control, Series]
 series: "Pro Git"
 seriesOrder: 0
-draft: true
 ---
 
 ## 작성 중

@@ -5,7 +5,6 @@ description: "SDL — 요구 / 설계 / 구현 / 검증 / 배포 / 유지보수.
 tags: [SDLC, SDL, SBOM]
 series: "Embedded Security"
 seriesOrder: 10
-draft: true
 ---
 
 ## 예정 내용

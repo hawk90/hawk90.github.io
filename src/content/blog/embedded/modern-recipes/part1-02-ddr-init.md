@@ -5,7 +5,6 @@ description: "DDR init 실패 디버깅"
 series: "Modern Embedded Recipes"
 seriesOrder: 2
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - DDR init 실패 디버깅

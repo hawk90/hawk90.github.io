@@ -5,7 +5,6 @@ description: "NUMA memory topology"
 series: "Modern Embedded Recipes"
 seriesOrder: 16
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - NUMA memory topology

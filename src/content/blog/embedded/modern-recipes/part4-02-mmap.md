@@ -5,7 +5,6 @@ description: "mmap vs read/write"
 series: "Modern Embedded Recipes"
 seriesOrder: 20
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - mmap vs read/write

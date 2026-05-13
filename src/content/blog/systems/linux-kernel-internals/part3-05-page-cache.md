@@ -5,7 +5,6 @@ description: "파일 시스템 캐시 — read / write 가속. address_space. wr
 tags: [Linux, Kernel, Memory, Page Cache]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 15
-draft: true
 ---
 
 ## 작성 중

@@ -5,7 +5,6 @@ description: "Trusted Execution Environment. OP-TEE, TA, GlobalPlatform API."
 tags: [TEE, OP-TEE, GlobalPlatform]
 series: "Embedded Security"
 seriesOrder: 5
-draft: true
 ---
 
 ## 예정 내용

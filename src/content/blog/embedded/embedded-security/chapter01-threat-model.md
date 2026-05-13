@@ -5,7 +5,6 @@ description: "STRIDE / DREAD. 임베디드 특수 — 물리 접근 / 자원 제
 tags: [Embedded Security, Threat Model, STRIDE]
 series: "Embedded Security"
 seriesOrder: 1
-draft: true
 ---
 
 ## 예정 내용

@@ -5,7 +5,6 @@ description: "POS — Linux/POSIX 특정. CON — 동시성 오류. 도구."
 tags: [CERT, POSIX, Concurrency]
 series: "CERT C"
 seriesOrder: 10
-draft: true
 ---
 
 ## 예정 내용

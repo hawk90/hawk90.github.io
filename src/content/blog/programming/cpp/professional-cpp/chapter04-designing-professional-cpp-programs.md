@@ -5,7 +5,6 @@ description: "프로그램 설계 — 추상화 / abstraction. 인터페이스 v
 tags: [C++, Design, Abstraction]
 series: "전문가를 위한 C++"
 seriesOrder: 4
-draft: true
 ---
 
 ## 작성 중

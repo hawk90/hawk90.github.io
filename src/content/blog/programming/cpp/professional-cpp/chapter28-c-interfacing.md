@@ -5,7 +5,6 @@ description: "C ↔ C++ — extern \"C\". name mangling. ABI 호환."
 tags: [C++, C, FFI, ABI]
 series: "전문가를 위한 C++"
 seriesOrder: 28
-draft: true
 ---
 
 ## 작성 중

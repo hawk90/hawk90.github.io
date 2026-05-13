@@ -5,7 +5,6 @@ description: ". 명령 반복, 효율의 본질. dot command가 만드는 차이
 tags: [Vim, Dot Command]
 series: "Practical Vim"
 seriesOrder: 1
-draft: true
 ---
 
 ## 작성 중

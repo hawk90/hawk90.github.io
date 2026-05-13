@@ -5,7 +5,6 @@ description: "MISRA 단체, 자동차 산업 동기, MISRA C 1998 → 2004 → 2
 tags: [MISRA, History]
 series: "MISRA C"
 seriesOrder: 1
-draft: true
 ---
 
 ## 예정 내용

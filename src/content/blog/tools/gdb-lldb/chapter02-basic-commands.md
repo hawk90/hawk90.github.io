@@ -5,7 +5,6 @@ description: "프로그램 실행, 중단점, 한 줄씩 진행, 함수 안/밖.
 tags: [gdb, lldb, Commands]
 series: "GDB / LLDB"
 seriesOrder: 2
-draft: true
 ---
 
 ## 예정 내용

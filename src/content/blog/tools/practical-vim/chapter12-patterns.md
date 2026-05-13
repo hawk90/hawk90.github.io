@@ -5,7 +5,6 @@ description: "very magic (\\v), 그룹, 후방참조, 어휘 / 단어 경계. Vi
 tags: [Vim, Regex, Pattern]
 series: "Practical Vim"
 seriesOrder: 12
-draft: true
 ---
 
 ## 작성 중

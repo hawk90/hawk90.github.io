@@ -5,7 +5,6 @@ description: "STL / boost 보기 좋게. 최적화 코드 디버깅. .gdbinit."
 tags: [gdb, STL, Optimization]
 series: "GDB / LLDB"
 seriesOrder: 11
-draft: true
 ---
 
 ## 예정 내용

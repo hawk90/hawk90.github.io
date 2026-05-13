@@ -5,7 +5,6 @@ description: "템플릿 기초 — 클래스 / 함수 템플릿. 인스턴스화
 tags: [C++, Templates]
 series: "전문가를 위한 C++"
 seriesOrder: 12
-draft: true
 ---
 
 ## 작성 중

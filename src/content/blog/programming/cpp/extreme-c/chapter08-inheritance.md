@@ -5,7 +5,6 @@ description: "C로 상속 — struct 내부에 base 임베드. memory layout."
 tags: [C, OOP, Inheritance]
 series: "전문가를 위한 C"
 seriesOrder: 8
-draft: true
 ---
 
 ## 작성 중

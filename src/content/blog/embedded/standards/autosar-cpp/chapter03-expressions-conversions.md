@@ -5,7 +5,6 @@ description: "묵시 변환 제한, 캐스트 종류, 비트 연산, sizeof."
 tags: [AUTOSAR, Conversion, Cast]
 series: "AUTOSAR C++14"
 seriesOrder: 3
-draft: true
 ---
 
 ## 예정 내용

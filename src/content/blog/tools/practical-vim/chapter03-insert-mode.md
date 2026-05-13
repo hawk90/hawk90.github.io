@@ -5,7 +5,6 @@ description: "삽입 모드 — 텍스트 입력. 오타 즉시 수정, replace 
 tags: [Vim, Insert Mode]
 series: "Practical Vim"
 seriesOrder: 3
-draft: true
 ---
 
 ## 작성 중

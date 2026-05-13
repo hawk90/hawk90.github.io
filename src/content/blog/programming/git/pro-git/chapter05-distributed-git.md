@@ -5,7 +5,6 @@ description: "분산 협업 워크플로우 — integration manager / dictator. 
 tags: [Git, Distributed, Workflow]
 series: "Pro Git"
 seriesOrder: 5
-draft: true
 ---
 
 ## 작성 중

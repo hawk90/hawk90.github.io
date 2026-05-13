@@ -5,7 +5,6 @@ description: "extended BPF — 커널 내 안전한 가상 머신. 트레이싱 
 tags: [eBPF, BPF, CO-RE]
 series: "System Tracing"
 seriesOrder: 5
-draft: true
 ---
 
 ## 예정 내용

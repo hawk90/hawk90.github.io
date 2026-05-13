@@ -5,7 +5,6 @@ description: "edge inference pipeline"
 series: "Modern Embedded Recipes"
 seriesOrder: 31
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - edge inference pipeline

@@ -5,7 +5,6 @@ description: "Git 역사, 분산 VCS의 본질, 설치, 첫 설정. snapshot 모
 tags: [Git, VCS, Installation]
 series: "Pro Git"
 seriesOrder: 1
-draft: true
 ---
 
 ## 작성 중

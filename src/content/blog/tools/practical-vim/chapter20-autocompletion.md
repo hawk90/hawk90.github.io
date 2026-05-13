@@ -5,7 +5,6 @@ description: "Ctrl+n / Ctrl+p — 단어 / 라인 / 파일명 / omni / 사전 �
 tags: [Vim, Autocompletion]
 series: "Practical Vim"
 seriesOrder: 19
-draft: true
 ---
 
 ## 예정 내용 (Tips 112-117)

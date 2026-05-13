@@ -5,7 +5,6 @@ description: "Brendan Gregg의 시각화 — perf script → stackcollapse → f
 tags: [FlameGraph, Brendan Gregg, Visualization]
 series: "perf / FlameGraph"
 seriesOrder: 5
-draft: true
 ---
 
 ## 예정 내용

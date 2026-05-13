@@ -5,7 +5,6 @@ description: "C에서 composition / aggregation — has-a 관계 구조화."
 tags: [C, OOP, Composition]
 series: "전문가를 위한 C"
 seriesOrder: 7
-draft: true
 ---
 
 ## 작성 중

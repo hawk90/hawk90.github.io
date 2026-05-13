@@ -5,7 +5,6 @@ description: "thread / process apply. scheduler-locking. follow-fork."
 tags: [gdb, Multithread, Multiprocess]
 series: "GDB / LLDB"
 seriesOrder: 6
-draft: true
 ---
 
 ## 예정 내용

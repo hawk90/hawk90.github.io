@@ -5,7 +5,6 @@ description: "ltrace — 동적 링킹된 libc/lib 함수 호출. strace + ltrac
 tags: [ltrace, Library, Dynamic Linking]
 series: "System Tracing"
 seriesOrder: 4
-draft: true
 ---
 
 ## 예정 내용

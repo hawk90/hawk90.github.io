@@ -5,7 +5,6 @@ description: "단순한 GitHub Flow — main + 토픽 브랜치. PR 통합 / CI 
 tags: [Git, GitHub Flow]
 series: "Git Flow"
 seriesOrder: 2
-draft: true
 ---
 
 ## 작성 중

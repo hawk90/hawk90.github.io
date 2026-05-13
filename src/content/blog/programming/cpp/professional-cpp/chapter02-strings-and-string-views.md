@@ -5,7 +5,6 @@ description: "std::string / std::string_view. raw string literal. format / print
 tags: [C++, String, string_view, format]
 series: "전문가를 위한 C++"
 seriesOrder: 2
-draft: true
 ---
 
 ## 작성 중

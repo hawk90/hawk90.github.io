@@ -5,7 +5,6 @@ description: "FIO 파일, ENV getenv, SIG 비동기 안전, ERR errno 처리."
 tags: [CERT, FIO, Signal, Error]
 series: "CERT C"
 seriesOrder: 9
-draft: true
 ---
 
 ## 예정 내용

@@ -5,7 +5,6 @@ description: "단위 테스트 — Google Test / Catch2 / doctest. coverage. 모
 tags: [C++, Testing, gtest, Catch2]
 series: "전문가를 위한 C++"
 seriesOrder: 30
-draft: true
 ---
 
 ## 작성 중

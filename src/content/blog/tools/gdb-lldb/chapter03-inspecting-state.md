@@ -5,7 +5,6 @@ description: "print / display / x — 값 확인. 형식 지정자. 레지스터
 tags: [gdb, lldb, Memory, Inspection]
 series: "GDB / LLDB"
 seriesOrder: 3
-draft: true
 ---
 
 ## 예정 내용

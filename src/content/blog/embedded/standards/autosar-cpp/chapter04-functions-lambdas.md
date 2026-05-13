@@ -5,7 +5,6 @@ description: "함수 인자, 반환, 람다 캡처, constexpr."
 tags: [AUTOSAR, Function, Lambda]
 series: "AUTOSAR C++14"
 seriesOrder: 4
-draft: true
 ---
 
 ## 예정 내용

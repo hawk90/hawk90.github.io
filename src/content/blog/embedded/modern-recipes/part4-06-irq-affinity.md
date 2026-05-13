@@ -5,7 +5,6 @@ description: "IRQ affinity"
 series: "Modern Embedded Recipes"
 seriesOrder: 24
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - IRQ affinity

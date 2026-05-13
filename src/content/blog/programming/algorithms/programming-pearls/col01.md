@@ -5,7 +5,6 @@ description: "Cracking the Oyster"
 series: "Programming Pearls"
 seriesOrder: 1
 tags: [algorithms, programming-pearls, classics]
-draft: true
 ---
 
 > **Programming Pearls** Column 1 요약

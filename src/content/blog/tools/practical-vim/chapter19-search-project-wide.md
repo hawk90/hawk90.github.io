@@ -5,7 +5,6 @@ description: ":grep / :vimgrep / :Ack / :Rg — 프로젝트 검색. quickfix �
 tags: [Vim, grep, vimgrep, ripgrep]
 series: "Practical Vim"
 seriesOrder: 18
-draft: true
 ---
 
 ## 예정 내용 (Tips 109-111)

@@ -5,7 +5,6 @@ description: "POSIX threads — pthread_create / join. 스레드 attribute. deta
 tags: [C, POSIX, pthread]
 series: "전문가를 위한 C"
 seriesOrder: 15
-draft: true
 ---
 
 ## 작성 중

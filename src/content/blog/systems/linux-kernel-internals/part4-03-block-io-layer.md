@@ -5,7 +5,6 @@ description: "bio / request — 블록 디바이스 추상. I/O 스케줄러 (BF
 tags: [Linux, Kernel, Block I/O, Scheduler]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 19
-draft: true
 ---
 
 ## 작성 중

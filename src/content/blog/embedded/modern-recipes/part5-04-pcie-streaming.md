@@ -5,7 +5,6 @@ description: "PCIe streaming"
 series: "Modern Embedded Recipes"
 seriesOrder: 28
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - PCIe streaming

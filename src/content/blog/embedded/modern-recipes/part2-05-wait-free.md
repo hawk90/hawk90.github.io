@@ -5,7 +5,6 @@ description: "wait-free signaling"
 series: "Modern Embedded Recipes"
 seriesOrder: 11
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - wait-free signaling

@@ -5,7 +5,6 @@ description: "start_kernel() — 서브시스템 초기화 순서. early_init / 
 tags: [Linux, Kernel, Init]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 2
-draft: true
 ---
 
 ## 작성 중

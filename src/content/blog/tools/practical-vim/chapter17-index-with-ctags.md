@@ -5,7 +5,6 @@ description: "ctags / Universal Ctags. Ctrl+] / Ctrl+t. tagstack."
 tags: [Vim, ctags, Code Navigation]
 series: "Practical Vim"
 seriesOrder: 16
-draft: true
 ---
 
 ## 예정 내용 (Tips 100-103)

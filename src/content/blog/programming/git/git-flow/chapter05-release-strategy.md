@@ -5,7 +5,6 @@ description: "tag로 릴리스 마커. annotated vs lightweight. 자동 릴리�
 tags: [Git, Release, Tagging, Versioning]
 series: "Git Flow"
 seriesOrder: 5
-draft: true
 ---
 
 ## 작성 중

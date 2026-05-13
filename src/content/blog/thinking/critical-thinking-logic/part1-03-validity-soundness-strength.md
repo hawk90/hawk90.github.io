@@ -5,7 +5,6 @@ description: "연역 — 타당 / 건전. 귀납 — 강도 / 신뢰성. 평가 
 tags: [Logic, Validity, Soundness]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 3
-draft: true
 ---
 
 ## 작성 중

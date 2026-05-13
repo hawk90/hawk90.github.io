@@ -5,7 +5,6 @@ description: "Sorting"
 series: "Programming Pearls"
 seriesOrder: 11
 tags: [algorithms, programming-pearls, classics]
-draft: true
 ---
 
 > **Programming Pearls** Column 11 요약

@@ -5,7 +5,6 @@ description: "ISR-safe API 설계"
 series: "Modern Embedded Recipes"
 seriesOrder: 7
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - ISR-safe API 설계

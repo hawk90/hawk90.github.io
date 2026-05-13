@@ -5,7 +5,6 @@ description: "클래스 고급 — 정적 멤버, mutable, nested class, rule of
 tags: [C++, Class, Rule of Five]
 series: "전문가를 위한 C++"
 seriesOrder: 9
-draft: true
 ---
 
 ## 작성 중

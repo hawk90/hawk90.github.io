@@ -5,7 +5,6 @@ description: "명제 / 전제 / 결론. 논증과 비-논증 구별."
 tags: [Logic, Argument, Proposition]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 1
-draft: true
 ---
 
 ## 작성 중

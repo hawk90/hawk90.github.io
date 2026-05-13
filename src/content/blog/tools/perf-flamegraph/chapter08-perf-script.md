@@ -5,7 +5,6 @@ description: "perf script — 원시 샘플 텍스트. Perl / Python 후처리."
 tags: [perf, perf script, Custom Analysis]
 series: "perf / FlameGraph"
 seriesOrder: 8
-draft: true
 ---
 
 ## 예정 내용

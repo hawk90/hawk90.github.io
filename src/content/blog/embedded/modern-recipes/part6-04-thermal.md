@@ -5,7 +5,6 @@ description: "thermal throttling"
 series: "Modern Embedded Recipes"
 seriesOrder: 34
 tags: [embedded, recipes]
-draft: true
 ---
 
 > **Modern Embedded Recipes** - thermal throttling

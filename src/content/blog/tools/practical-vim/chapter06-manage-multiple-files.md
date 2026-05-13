@@ -5,7 +5,6 @@ description: "buffer / window / tab — Vim의 세 단위. argument list."
 tags: [Vim, Buffer, Window, Tab]
 series: "Practical Vim"
 seriesOrder: 6
-draft: true
 ---
 
 ## 작성 중
