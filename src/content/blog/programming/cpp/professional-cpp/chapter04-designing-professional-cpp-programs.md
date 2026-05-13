@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Designing Professional C++ Programs"
-date: 2026-07-02T01:00:00
+date: 2025-07-02T01:00:00
 description: "프로그램 설계 — 추상화 / abstraction. 인터페이스 vs 구현. 분할 정복."
 tags: [C++, Design, Abstraction]
 series: "전문가를 위한 C++"

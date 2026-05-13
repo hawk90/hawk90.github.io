@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Polymorphism"
-date: 2026-06-16T04:00:00
+date: 2025-06-16T04:00:00
 description: "C 다형성 — 함수 포인터 / vtable. 수동 OO의 정점."
 tags: [C, OOP, Polymorphism, vtable]
 series: "전문가를 위한 C"

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 28: Managing Construction"
-date: 2026-06-21T04:00:00
+date: 2025-06-21T04:00:00
 description: "construction 관리 — 일정 추정, 측정, 프로그래머 다루기, 좋은 관리자의 특성."
 series: "Code Complete"
 seriesOrder: 28

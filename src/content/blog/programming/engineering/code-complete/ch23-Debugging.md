@@ -1,6 +1,6 @@
 ---
 title: "Chapter 23: Debugging"
-date: 2026-06-20T23:00:00
+date: 2025-06-20T23:00:00
 description: "디버깅 — 과학적 방법으로. 가설·검증·기록. 일반적 함정과 도구."
 series: "Code Complete"
 seriesOrder: 23

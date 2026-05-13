@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Process Memory Structure"
-date: 2026-06-15T04:00:00
+date: 2025-06-15T04:00:00
 description: "프로세스 메모리 레이아웃 — text / data / bss / heap / stack."
 tags: [C, Memory, Process]
 series: "전문가를 위한 C"

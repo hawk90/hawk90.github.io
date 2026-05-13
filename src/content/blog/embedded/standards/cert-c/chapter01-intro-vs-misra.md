@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: CERT란 / MISRA와 차이"
-date: 2026-09-10T01:00:00
+date: 2025-09-10T01:00:00
 description: "CERT 단체, 보안 중심 표준. MISRA C와의 차이와 결합."
 tags: [CERT, Security, MISRA]
 series: "CERT C"

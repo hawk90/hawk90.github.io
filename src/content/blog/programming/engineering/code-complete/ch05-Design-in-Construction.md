@@ -1,6 +1,6 @@
 ---
 title: "Chapter 5: Design in Construction"
-date: 2026-06-20T05:00:00
+date: 2025-06-20T05:00:00
 description: "construction 단계의 설계 — 복잡성 관리가 핵심. 추상화·캡슐화, 결합도·응집도, 휴리스틱 다발."
 series: "Code Complete"
 seriesOrder: 5

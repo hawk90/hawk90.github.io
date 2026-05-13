@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: 컴포넌트 결합"
-date: 2026-06-04T03:00:00
+date: 2025-06-04T03:00:00
 description: "컴포넌트들이 서로 어떻게 의존해야 하는가. ADP, SDP, SAP 세 원칙과 안정성·추상도의 측정."
 tags: [Architecture, Components, Coupling, ADP, SDP, SAP]
 series: "Clean Architecture"

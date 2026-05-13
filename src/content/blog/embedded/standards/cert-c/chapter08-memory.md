@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Memory Management (MEM)"
-date: 2026-09-12T02:00:00
+date: 2025-09-12T02:00:00
 description: "malloc / free 함정 — double free / UAF / leak. realloc 안전."
 tags: [CERT, Memory, malloc, UAF]
 series: "CERT C"

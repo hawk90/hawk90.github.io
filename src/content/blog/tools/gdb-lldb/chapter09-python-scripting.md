@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Python 스크립팅"
-date: 2026-08-22T01:00:00
+date: 2025-08-22T01:00:00
 description: "gdb Python API. pretty-printer. 커스텀 명령."
 tags: [gdb, Python, Scripting]
 series: "GDB / LLDB"

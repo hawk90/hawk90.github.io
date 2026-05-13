@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 구문 / 형식 (Rule 1-7)"
-date: 2026-09-06T01:00:00
+date: 2025-09-06T01:00:00
 description: "환경 (1), 미사용 (2), 주석 (3), 키워드 (4), 식별자 (5), 타입 (6-7)."
 tags: [MISRA, Syntax]
 series: "MISRA C"

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 4: Key Construction Decisions"
-date: 2026-06-20T04:00:00
+date: 2025-06-20T04:00:00
 description: "construction을 시작하기 전 결정해야 할 핵심들 — 언어 선택, 컨벤션, 기술 흐름 위치, 자신만의 도구함."
 series: "Code Complete"
 seriesOrder: 4

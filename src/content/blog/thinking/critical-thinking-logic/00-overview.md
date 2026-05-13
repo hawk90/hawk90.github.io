@@ -1,6 +1,6 @@
 ---
 title: "비판적 사고를 위한 논리 — 시리즈 개요"
-date: 2026-07-22T00:00:00
+date: 2025-07-22T00:00:00
 description: "박은진·김희정의 논리학 교과서. 형식 / 비형식 논리 — 사고와 논증의 구조."
 tags: [Logic, Critical Thinking, Series]
 series: "비판적 사고를 위한 논리"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: String Localization and Regular Expressions"
-date: 2026-07-06T03:00:00
+date: 2025-07-06T03:00:00
 description: "wchar / char8_t / char16_t / char32_t. std::locale. std::regex."
 tags: [C++, Localization, Regex, Unicode]
 series: "전문가를 위한 C++"

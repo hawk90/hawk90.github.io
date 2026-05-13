@@ -1,6 +1,6 @@
 ---
 title: "Part 4-5: io_uring"
-date: 2026-07-18T05:00:00
+date: 2025-07-18T05:00:00
 description: "io_uring — 비동기 I/O의 현대 인터페이스. 링 버퍼 / zero-copy."
 tags: [Linux, Kernel, io_uring, Async I/O]
 series: "리눅스 커널의 구조와 원리"

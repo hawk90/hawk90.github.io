@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Declarations / Initialization (DCL)"
-date: 2026-09-10T03:00:00
+date: 2025-09-10T03:00:00
 description: "변수 초기화, 함수 prototype, const 정확성, restrict 사용."
 tags: [CERT, Declaration, Initialization]
 series: "CERT C"

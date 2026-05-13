@@ -1,6 +1,6 @@
 ---
 title: "Ch 31: 웹은 세부 사항이다"
-date: 2026-06-10T01:00:00
+date: 2025-06-10T01:00:00
 description: "웹은 GUI의 한 변종일 뿐이다. UI는 비즈니스 규칙에서 분리해야 한다 — 핵심 로직과 UI의 진화 속도가 다르다."
 tags: [Architecture, Web, GUI, Detail]
 series: "Clean Architecture"

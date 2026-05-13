@@ -1,6 +1,6 @@
 ---
 title: "Part 5-4: crash dump 분석"
-date: 2026-07-19T04:00:00
+date: 2025-07-19T04:00:00
 description: "kexec / kdump — 커널 패닉 후 dump 수집. crash / drgn 분석."
 tags: [Linux, Kernel, Crash Dump, kdump]
 series: "리눅스 커널의 구조와 원리"

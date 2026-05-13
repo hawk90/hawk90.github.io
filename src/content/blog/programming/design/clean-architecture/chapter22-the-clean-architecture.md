@@ -1,6 +1,6 @@
 ---
 title: "Ch 22: The Clean Architecture"
-date: 2026-06-07T01:00:00
+date: 2025-06-07T01:00:00
 description: "책의 이름이자 책 전체의 시각적 요약. 4겹 동심원, 의존성은 안쪽으로만. Hexagonal / Onion과 같은 본질의 변형."
 tags: [Architecture, CleanArchitecture, DependencyRule]
 series: "Clean Architecture"

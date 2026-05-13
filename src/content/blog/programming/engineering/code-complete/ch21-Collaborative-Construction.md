@@ -1,6 +1,6 @@
 ---
 title: "Chapter 21: Collaborative Construction"
-date: 2026-06-20T21:00:00
+date: 2025-06-20T21:00:00
 description: "협업 construction — 페어 프로그래밍, 공식 인스펙션, 코드 리뷰의 효과와 실제."
 series: "Code Complete"
 seriesOrder: 21

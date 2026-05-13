@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 예외 (A15-A16)"
-date: 2026-09-17T01:00:00
+date: 2025-09-17T01:00:00
 description: "예외 규약 — throw 클래스, exception spec, RAII와 결합."
 tags: [AUTOSAR, Exception, RAII]
 series: "AUTOSAR C++14"

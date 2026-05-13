@@ -1,6 +1,6 @@
 ---
 title: "Practical Vim — 시리즈 개요"
-date: 2026-08-15T00:00:00
+date: 2025-08-15T00:00:00
 description: "Drew Neil의 Practical Vim. 121 tips로 Vim 마스터. 한국어판 (인사이트)."
 tags: [Vim, Editor, Tools, Series]
 series: "Practical Vim"

@@ -1,6 +1,6 @@
 ---
 title: "Designing Data-Intensive Applications — 시리즈 개요"
-date: 2026-07-01T00:00:00
+date: 2025-07-01T00:00:00
 description: "Martin Kleppmann의 분산 데이터 시스템 정전. 신뢰성·확장성·유지보수성부터 batch / stream까지."
 tags: [Distributed Systems, Database, DDIA, Kleppmann, Series]
 series: "Designing Data-Intensive Applications"

@@ -1,6 +1,6 @@
 ---
 title: "전문가를 위한 C++ (Professional C++) — 시리즈 개요"
-date: 2026-07-01T00:00:00
+date: 2025-07-01T00:00:00
 description: "Marc Gregoire의 C++ 종합 백과. C++23 기준 입문에서 전문가까지."
 tags: [C++, Professional, Series]
 series: "전문가를 위한 C++"

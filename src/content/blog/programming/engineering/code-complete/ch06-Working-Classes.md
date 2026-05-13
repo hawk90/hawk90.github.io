@@ -1,6 +1,6 @@
 ---
 title: "Chapter 6: Working Classes"
-date: 2026-06-20T06:00:00
+date: 2025-06-20T06:00:00
 description: "좋은 클래스의 설계 — 추상 데이터 타입, 인터페이스 설계, 상속·구성 선택, 작게 유지."
 series: "Code Complete"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Handling Errors"
-date: 2026-07-05T01:00:00
+date: 2025-07-05T01:00:00
 description: "예외 / 에러 코드 / std::expected (C++23). 예외 안전성 보장."
 tags: [C++, Error Handling, Exception, std::expected]
 series: "전문가를 위한 C++"

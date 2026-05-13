@@ -1,6 +1,6 @@
 ---
 title: "Chapter 10: General Issues in Using Variables"
-date: 2026-06-20T10:00:00
+date: 2025-06-20T10:00:00
 description: "변수 사용의 일반 규칙 — 초기화, 스코프 좁히기, 한 변수 한 목적, 식별자의 수명."
 series: "Code Complete"
 seriesOrder: 10

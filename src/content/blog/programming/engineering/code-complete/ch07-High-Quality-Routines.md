@@ -1,6 +1,6 @@
 ---
 title: "Chapter 7: High-Quality Routines"
-date: 2026-06-20T07:00:00
+date: 2025-06-20T07:00:00
 description: "함수(루틴)를 잘 짜는 법 — 응집도 한 가지, 좋은 이름, 적절한 길이, 적은 매개변수."
 series: "Code Complete"
 seriesOrder: 7

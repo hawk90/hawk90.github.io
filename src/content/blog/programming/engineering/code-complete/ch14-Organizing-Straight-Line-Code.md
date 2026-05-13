@@ -1,6 +1,6 @@
 ---
 title: "Chapter 14: Organizing Straight-Line Code"
-date: 2026-06-20T14:00:00
+date: 2025-06-20T14:00:00
 description: "조건 분기 없는 순차 코드의 조직 — 의존성 명시, 묶음, 가까이."
 series: "Code Complete"
 seriesOrder: 14

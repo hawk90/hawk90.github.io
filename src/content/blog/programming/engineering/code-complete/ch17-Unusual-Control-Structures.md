@@ -1,6 +1,6 @@
 ---
 title: "Chapter 17: Unusual Control Structures"
-date: 2026-06-20T17:00:00
+date: 2025-06-20T17:00:00
 description: "비주류 제어 구조 — 다중 return, recursion, goto, 예외. 각각의 정당한 사용."
 series: "Code Complete"
 seriesOrder: 17

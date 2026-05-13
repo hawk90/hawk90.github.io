@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Unit Testing and Debugging"
-date: 2026-06-17T01:00:00
+date: 2025-06-17T01:00:00
 description: "C 단위 테스트 — CMocka / Unity. gdb / valgrind / sanitizer."
 tags: [C, Testing, Debugging, gdb, Valgrind]
 series: "전문가를 위한 C"

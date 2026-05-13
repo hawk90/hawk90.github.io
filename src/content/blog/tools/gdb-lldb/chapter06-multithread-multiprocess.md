@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 멀티스레드 / 멀티프로세스 디버깅"
-date: 2026-08-21T02:00:00
+date: 2025-08-21T02:00:00
 description: "thread / process apply. scheduler-locking. follow-fork."
 tags: [gdb, Multithread, Multiprocess]
 series: "GDB / LLDB"

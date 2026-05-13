@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Understanding Containers and Iterators"
-date: 2026-07-06T01:00:00
+date: 2025-07-06T01:00:00
 description: "표준 컨테이너 — vector / list / map / unordered_map / array / span."
 tags: [C++, Containers, Iterator]
 series: "전문가를 위한 C++"

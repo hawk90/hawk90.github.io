@@ -1,6 +1,6 @@
 ---
 title: "Ch 32: 프레임워크는 세부 사항이다"
-date: 2026-06-10T02:00:00
+date: 2025-06-10T02:00:00
 description: "프레임워크와 결혼하지 마라. 라이브러리로 다루고 경계로 격리해야 한다 — 프레임워크 저자의 의도와 우리의 필요가 같지 않다."
 tags: [Architecture, Frameworks, Detail]
 series: "Clean Architecture"

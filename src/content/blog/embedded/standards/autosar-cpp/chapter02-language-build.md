@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 어휘 / 빌드 (M0-M2)"
-date: 2026-09-15T02:00:00
+date: 2025-09-15T02:00:00
 description: "환경 / 식별자 / 어휘 규칙. M0 implementation-defined, M1-M2 어휘."
 tags: [AUTOSAR, Lexical]
 series: "AUTOSAR C++14"

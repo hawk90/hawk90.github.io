@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 변수 / 메모리 / 레지스터 조사"
-date: 2026-08-20T03:00:00
+date: 2025-08-20T03:00:00
 description: "print / display / x — 값 확인. 형식 지정자. 레지스터."
 tags: [gdb, lldb, Memory, Inspection]
 series: "GDB / LLDB"

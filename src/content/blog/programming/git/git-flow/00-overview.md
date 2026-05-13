@@ -1,6 +1,6 @@
 ---
 title: "Git Flow — 시리즈 개요"
-date: 2026-08-10T00:00:00
+date: 2025-08-10T00:00:00
 description: "브랜치 전략 — GitFlow / GitHub Flow / GitLab Flow / Trunk-based. 비교와 선택."
 tags: [Git, Branching Strategy, Workflow, Series]
 series: "Git Flow"

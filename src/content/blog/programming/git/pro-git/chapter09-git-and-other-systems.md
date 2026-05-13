@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Git and Other Systems"
-date: 2026-08-03T03:00:00
+date: 2025-08-03T03:00:00
 description: "다른 VCS와의 통합 / 마이그레이션 — SVN / Mercurial / Perforce."
 tags: [Git, SVN, Migration]
 series: "Pro Git"

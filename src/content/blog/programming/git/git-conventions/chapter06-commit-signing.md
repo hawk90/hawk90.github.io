@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 커밋 서명 — GPG / SSH"
-date: 2026-08-06T03:00:00
+date: 2025-08-06T03:00:00
 description: "커밋 서명으로 작성자 검증. GPG vs SSH 서명. GitHub Verified 배지."
 tags: [Git, Signing, GPG, SSH]
 series: "Git Conventions"

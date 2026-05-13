@@ -1,6 +1,6 @@
 ---
 title: "Part 2-3: 스케줄러 — CFS / RT / deadline"
-date: 2026-07-16T03:00:00
+date: 2025-07-16T03:00:00
 description: "Completely Fair Scheduler — red-black tree, vruntime. RT / deadline 클래스."
 tags: [Linux, Kernel, Scheduler, CFS]
 series: "리눅스 커널의 구조와 원리"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: 코드 냄새와 휴리스틱"
-date: 2026-06-15T17:00:00
+date: 2025-06-15T17:00:00
 description: "책 전체의 압축 — 카테고리별 코드 냄새와 작가의 휴리스틱. 코드 리뷰 체크리스트."
 tags: [CleanCode, Code Smells, Heuristics, Robert Martin]
 series: "Clean Code"

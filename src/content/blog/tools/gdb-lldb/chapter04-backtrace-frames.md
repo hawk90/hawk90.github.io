@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: backtrace / 프레임 / 호출 스택"
-date: 2026-08-20T04:00:00
+date: 2025-08-20T04:00:00
 description: "bt / frame / up / down. 호출 스택 분석. inline 함수의 까다로움."
 tags: [gdb, lldb, Backtrace, Stack]
 series: "GDB / LLDB"

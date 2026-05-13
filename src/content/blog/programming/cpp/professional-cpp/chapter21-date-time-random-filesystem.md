@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: Date, Time, Random, Filesystem"
-date: 2026-07-07T02:00:00
+date: 2025-07-07T02:00:00
 description: "std::chrono / random / filesystem. 표준이 제공하는 일상 유틸리티."
 tags: [C++, chrono, random, filesystem]
 series: "전문가를 위한 C++"

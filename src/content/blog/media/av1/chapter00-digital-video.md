@@ -1,6 +1,6 @@
 ---
 title: "Ch 0: 디지털 비디오 기초"
-date: 2026-10-01T00:00:00
+date: 2025-10-01T00:00:00
 description: "코덱을 이해하기 전에 — 픽셀과 프레임, RGB의 한계, YCbCr 색 공간, 크로마 서브샘플링, 공간·시간 중복성, 그리고 고정소수점 연산."
 tags: [AV1, Video, Codec, YCbCr, ChromaSubsampling]
 series: "AV1"

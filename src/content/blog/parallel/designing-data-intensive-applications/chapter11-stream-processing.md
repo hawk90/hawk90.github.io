@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Stream 처리"
-date: 2026-07-03T03:00:00
+date: 2025-07-03T03:00:00
 description: "Kafka, Flink, Storm. 무한 입력의 즉시 처리. Event time vs Processing time, Exactly-once semantics."
 tags: [DDIA, Stream, Kafka, Flink, EventTime, ExactlyOnce]
 series: "Designing Data-Intensive Applications"

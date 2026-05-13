@@ -1,6 +1,6 @@
 ---
 title: "Part 1-4: init / systemd — PID 1"
-date: 2026-07-15T04:00:00
+date: 2025-07-15T04:00:00
 description: "kernel_init → /sbin/init. SysV init / systemd / busybox 비교."
 tags: [Linux, init, systemd]
 series: "리눅스 커널의 구조와 원리"

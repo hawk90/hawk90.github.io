@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 함수형 프로그래밍"
-date: 2026-06-02T04:00:00
+date: 2025-06-02T04:00:00
 description: "함수형의 본질은 불변성이다. 동시성 문제는 모두 가변 상태에서 기인하며, 함수형은 그 문제를 뿌리부터 끊어 낸다."
 tags: [Architecture, Functional, Immutability]
 series: "Clean Architecture"

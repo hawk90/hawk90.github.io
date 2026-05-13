@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Visual Mode"
-date: 2026-08-15T04:00:00
+date: 2025-08-15T04:00:00
 description: "비주얼 모드 — 선택 후 명령. v / V / Ctrl+v 세 변종."
 tags: [Vim, Visual Mode]
 series: "Practical Vim"

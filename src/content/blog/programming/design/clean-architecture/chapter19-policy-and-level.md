@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: 정책과 수준"
-date: 2026-06-06T02:00:00
+date: 2025-06-06T02:00:00
 description: "정책은 비즈니스 규칙. 수준은 입출력에서의 거리. 고수준 정책은 저수준 정책에 의존하면 안 된다."
 tags: [Architecture, Policy, Level]
 series: "Clean Architecture"

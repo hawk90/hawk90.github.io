@@ -1,6 +1,6 @@
 ---
 title: "Chapter 3: Upstream Prerequisites"
-date: 2026-06-20T03:00:00
+date: 2025-06-20T03:00:00
 description: "construction 시작 전 준비 — 문제 정의, 요구사항, 아키텍처. 이 준비가 부족하면 모든 후속 단계의 비용이 폭증한다."
 series: "Code Complete"
 seriesOrder: 3

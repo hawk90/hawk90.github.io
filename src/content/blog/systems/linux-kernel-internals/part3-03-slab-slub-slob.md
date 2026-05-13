@@ -1,6 +1,6 @@
 ---
 title: "Part 3-3: slab / slub / slob"
-date: 2026-07-17T03:00:00
+date: 2025-07-17T03:00:00
 description: "객체 캐시 할당자 — kmalloc 백엔드. 작은 객체 효율화."
 tags: [Linux, Kernel, Memory, slab, kmalloc]
 series: "리눅스 커널의 구조와 원리"

@@ -1,6 +1,6 @@
 ---
 title: "CERT C — 시리즈 개요"
-date: 2026-09-10T00:00:00
+date: 2025-09-10T00:00:00
 description: "SEI CERT Coding Standard for C. 보안 중심. CVE 예방."
 tags: [CERT, C, Security, Standards, Series]
 series: "CERT C"

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 9: The Pseudocode Programming Process"
-date: 2026-06-20T09:00:00
+date: 2025-06-20T09:00:00
 description: "PPP — 의사 코드로 먼저 생각, 그 다음 코드로 옮기기. 함수 작성의 표준 흐름."
 series: "Code Complete"
 seriesOrder: 9

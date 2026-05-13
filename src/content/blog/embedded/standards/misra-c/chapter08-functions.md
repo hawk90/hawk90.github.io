@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 함수 (Rule 17)"
-date: 2026-09-07T01:00:00
+date: 2025-09-07T01:00:00
 description: "재귀 금지, 가변 인자 금지, return type 일치, prototype 명시."
 tags: [MISRA, Function]
 series: "MISRA C"

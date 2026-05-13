@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 두 가치 이야기"
-date: 2026-06-01T02:00:00
+date: 2025-06-01T02:00:00
 description: "소프트웨어의 두 가치 — 행동(현재 작동)과 구조(변경 친화). 어느 쪽이 더 중요한가, 그리고 왜 늘 행동이 이기는가."
 tags: [Architecture, Values, Eisenhower]
 series: "Clean Architecture"

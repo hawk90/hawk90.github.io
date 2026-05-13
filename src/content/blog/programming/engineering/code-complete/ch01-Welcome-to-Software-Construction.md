@@ -1,6 +1,6 @@
 ---
 title: "Chapter 1: Welcome to Software Construction"
-date: 2026-06-20T01:00:00
+date: 2025-06-20T01:00:00
 description: "소프트웨어 construction이란 무엇인가 — 코딩과 디버깅을 중심으로 한 활동들. 전체 개발 과정에서의 위치와 중요성."
 series: "Code Complete"
 seriesOrder: 1

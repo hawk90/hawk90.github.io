@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: Integration with Other Languages"
-date: 2026-06-20T02:00:00
+date: 2025-06-20T02:00:00
 description: "C ↔ Python / Java / Go / Rust FFI. C가 시스템의 lingua franca인 이유."
 tags: [C, FFI, Python, Java, Rust]
 series: "전문가를 위한 C"

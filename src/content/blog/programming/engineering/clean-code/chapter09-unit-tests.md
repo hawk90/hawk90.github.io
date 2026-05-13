@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 단위 테스트"
-date: 2026-06-15T09:00:00
+date: 2025-06-15T09:00:00
 description: "TDD 세 법칙, 깨끗한 테스트의 다섯 가지 F.I.R.S.T 속성. 테스트 코드도 프로덕션 코드만큼 중요하다."
 tags: [CleanCode, Unit Test, TDD, Robert Martin]
 series: "Clean Code"

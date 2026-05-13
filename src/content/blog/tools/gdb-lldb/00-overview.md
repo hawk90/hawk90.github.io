@@ -1,6 +1,6 @@
 ---
 title: "GDB / LLDB — 시리즈 개요"
-date: 2026-08-20T00:00:00
+date: 2025-08-20T00:00:00
 description: "GNU 디버거 + LLVM 디버거. C/C++/Rust 등 네이티브 디버깅의 정석."
 tags: [Debugging, gdb, lldb, Tools, Series]
 series: "GDB / LLDB"

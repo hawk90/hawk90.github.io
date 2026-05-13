@@ -1,6 +1,6 @@
 ---
 title: "리눅스 커널의 구조와 원리 — 시리즈 개요"
-date: 2026-07-15T00:00:00
+date: 2025-07-15T00:00:00
 description: "리눅스 커널의 내부 구조 — boot, process, memory, FS, sync. 임베디드 / 시스템 깊이."
 tags: [Linux, Kernel, Systems, Series]
 series: "리눅스 커널의 구조와 원리"

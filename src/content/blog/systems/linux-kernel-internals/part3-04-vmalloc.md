@@ -1,6 +1,6 @@
 ---
 title: "Part 3-4: vmalloc — 가상 연속 할당"
-date: 2026-07-17T04:00:00
+date: 2025-07-17T04:00:00
 description: "vmalloc — 가상 주소 연속, 물리는 비-연속. ioremap도 같은 메커니즘."
 tags: [Linux, Kernel, Memory, vmalloc]
 series: "리눅스 커널의 구조와 원리"

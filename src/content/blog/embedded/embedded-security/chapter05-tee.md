@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: TEE — OP-TEE / ARM CCA"
-date: 2026-09-21T02:00:00
+date: 2025-09-21T02:00:00
 description: "Trusted Execution Environment. OP-TEE, TA, GlobalPlatform API."
 tags: [TEE, OP-TEE, GlobalPlatform]
 series: "Embedded Security"

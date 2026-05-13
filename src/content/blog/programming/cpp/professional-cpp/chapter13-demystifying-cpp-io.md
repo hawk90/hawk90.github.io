@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Demystifying C++ I/O"
-date: 2026-07-04T03:00:00
+date: 2025-07-04T03:00:00
 description: "iostream — cin / cout / cerr. 파일 I/O. format / println (C++20/23)."
 tags: [C++, I/O, iostream, format]
 series: "전문가를 위한 C++"

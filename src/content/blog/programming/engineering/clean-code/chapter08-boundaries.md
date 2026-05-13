@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 경계"
-date: 2026-06-15T08:00:00
+date: 2025-06-15T08:00:00
 description: "외부 코드와 자기 코드 사이의 경계 — 학습 테스트, Adapter, 우리 시스템에 맞는 인터페이스로 감싸기."
 tags: [CleanCode, Boundaries, Adapter, Robert Martin]
 series: "Clean Code"

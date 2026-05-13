@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: type / scope 카탈로그"
-date: 2026-08-05T03:00:00
+date: 2025-08-05T03:00:00
 description: "feat / fix / docs / style / refactor / perf / test / chore / build / ci. scope 정의."
 tags: [Git, Commit Type, Scope]
 series: "Git Conventions"

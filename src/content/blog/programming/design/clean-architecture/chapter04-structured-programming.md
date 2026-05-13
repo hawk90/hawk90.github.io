@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 구조적 프로그래밍"
-date: 2026-06-02T02:00:00
+date: 2025-06-02T02:00:00
 description: "Dijkstra가 goto를 추방한 진짜 이유 — 분해 가능성을 만들기 위해서. 증명에서 테스트로 옮겨 간 과학의 방법."
 tags: [Architecture, StructuredProgramming, Dijkstra]
 series: "Clean Architecture"

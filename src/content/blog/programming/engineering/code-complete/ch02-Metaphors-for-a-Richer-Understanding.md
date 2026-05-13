@@ -1,6 +1,6 @@
 ---
 title: "Chapter 2: Metaphors for a Richer Understanding"
-date: 2026-06-20T02:00:00
+date: 2025-06-20T02:00:00
 description: "프로그래밍의 네 가지 비유 — 글쓰기, 농사, 진주 만들기, 건설. 각각이 보여주는 진실과 한계."
 series: "Code Complete"
 seriesOrder: 2

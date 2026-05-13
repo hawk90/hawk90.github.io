@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: POSIX / 동시성 / 시리즈 마무리"
-date: 2026-09-12T04:00:00
+date: 2025-09-12T04:00:00
 description: "POS — Linux/POSIX 특정. CON — 동시성 오류. 도구."
 tags: [CERT, POSIX, Concurrency]
 series: "CERT C"

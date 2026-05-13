@@ -1,6 +1,6 @@
 ---
 title: "System Tracing — strace / ltrace / bpftrace 시리즈 개요"
-date: 2026-08-30T00:00:00
+date: 2025-08-30T00:00:00
 description: "시스템 콜 / 라이브러리 / 커널 트레이싱. 디버깅 + 관찰의 핵심 도구."
 tags: [Tracing, strace, ltrace, bpftrace, eBPF, Series]
 series: "System Tracing"

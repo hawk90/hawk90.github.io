@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 도구 / 인증 / 시리즈 마무리"
-date: 2026-09-17T04:00:00
+date: 2025-09-17T04:00:00
 description: "AUTOSAR 분석기 — Polyspace / Helix QAC / Klocwork. MISRA C++:2023 안내."
 tags: [AUTOSAR, Tools, Certification]
 series: "AUTOSAR C++14"

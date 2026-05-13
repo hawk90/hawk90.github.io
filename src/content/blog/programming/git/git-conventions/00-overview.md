@@ -1,6 +1,6 @@
 ---
 title: "Git Conventions — 시리즈 개요"
-date: 2026-08-05T00:00:00
+date: 2025-08-05T00:00:00
 description: "커밋 컨벤션 — Conventional Commits, semver, 서명, hooks, changelog 자동화."
 tags: [Git, Conventions, Conventional Commits, Series]
 series: "Git Conventions"

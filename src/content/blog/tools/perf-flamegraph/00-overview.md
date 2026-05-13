@@ -1,6 +1,6 @@
 ---
 title: "perf / FlameGraph — 시리즈 개요"
-date: 2026-08-25T00:00:00
+date: 2025-08-25T00:00:00
 description: "Linux perf 도구 + Brendan Gregg의 FlameGraph. 시스템 프로파일링의 표준."
 tags: [Performance, perf, FlameGraph, Profiling, Series]
 series: "perf / FlameGraph"

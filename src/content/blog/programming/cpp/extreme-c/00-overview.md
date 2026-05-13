@@ -1,6 +1,6 @@
 ---
 title: "전문가를 위한 C (Extreme C) — 시리즈 개요"
-date: 2026-06-15T00:00:00
+date: 2025-06-15T00:00:00
 description: "Kamran Amini의 C 시스템 프로그래밍 정전. 빌드부터 동시성, IPC, 다른 언어 통합까지."
 tags: [C, Systems Programming, Series]
 series: "전문가를 위한 C"

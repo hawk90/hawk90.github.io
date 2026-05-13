@@ -1,6 +1,6 @@
 ---
 title: "Chapter 8: Defensive Programming"
-date: 2026-06-20T08:00:00
+date: 2025-06-20T08:00:00
 description: "방어적 프로그래밍 — 잘못된 입력에서도 시스템이 망가지지 않게. assertion, 입력 검증, 에러 처리 전략."
 series: "Code Complete"
 seriesOrder: 8

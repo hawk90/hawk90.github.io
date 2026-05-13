@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 도구 / 인증 / 시리즈 마무리"
-date: 2026-09-07T03:00:00
+date: 2025-09-07T03:00:00
 description: "MISRA 분석기 — PRQA / Polyspace / cppcheck-misra / clang-tidy. ISO 26262 인증."
 tags: [MISRA, Tools, Certification]
 series: "MISRA C"

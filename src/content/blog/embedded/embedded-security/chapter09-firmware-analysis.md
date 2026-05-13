@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 펌웨어 분석 / 리버싱"
-date: 2026-09-22T03:00:00
+date: 2025-09-22T03:00:00
 description: "binwalk / Ghidra / radare2. 펌웨어 추출 / 분석 / fuzzing."
 tags: [Firmware, Reverse Engineering, Ghidra]
 series: "Embedded Security"

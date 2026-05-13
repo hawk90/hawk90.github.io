@@ -1,21 +1,961 @@
 ---
-title: "Chapter 8: Designing concurrent code"
+title: "Ch 8: Designing concurrent code"
 date: 2026-05-20T08:00:00
 description: "작업 분할 — 데이터 vs 작업 병렬, false sharing, 작업 단위 결정."
 tags: [C++, Concurrency, Design, Parallelism, False Sharing]
 series: "C++ Concurrency in Action"
 seriesOrder: 8
-draft: true
 ---
 
-## 작성 중
+동시성 코드는 단순히 스레드를 만드는 것 이상이다. 작업을 어떻게 분할하고, 성능을 어떻게 최적화하는지가 중요하다.
 
-### 예정 내용
-- 작업 분할 — 데이터 병렬 vs 작업 병렬
-- 데이터 의존성 분석
-- 동시 코드 성능 — Amdahl, Gustafson
-- false sharing — cache line 충돌
-- data layout — AoS vs SoA
-- contention 회피
-- 동시 알고리즘 예 — parallel for_each, find, partial_sum
-- 예외 안전성 — 동시 코드에서
+## 8.1 작업 분할 전략
+
+### 데이터 병렬 vs 작업 병렬
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      데이터 병렬                             │
+│                                                             │
+│  데이터: [1, 2, 3, 4, 5, 6, 7, 8]                           │
+│                                                             │
+│  Thread 1: [1, 2]  →  process  →  [결과1, 결과2]            │
+│  Thread 2: [3, 4]  →  process  →  [결과3, 결과4]            │
+│  Thread 3: [5, 6]  →  process  →  [결과5, 결과6]            │
+│  Thread 4: [7, 8]  →  process  →  [결과7, 결과8]            │
+│                                                             │
+│  같은 연산을 다른 데이터에 적용                              │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                      작업 병렬                               │
+│                                                             │
+│  데이터: [이미지]                                            │
+│                                                             │
+│  Thread 1: 리사이즈  ──┐                                    │
+│  Thread 2: 필터     ──┼──→ 최종 결과                        │
+│  Thread 3: 압축     ──┘                                    │
+│                                                             │
+│  다른 연산을 같은/다른 데이터에 적용                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 데이터 병렬: 벡터 처리
+
+```cpp
+#include <thread>
+#include <vector>
+#include <numeric>
+
+template<typename Iterator, typename T>
+T parallel_accumulate(Iterator first, Iterator last, T init) {
+    const auto length = std::distance(first, last);
+    if (length == 0) return init;
+
+    const auto hardware_threads = std::thread::hardware_concurrency();
+    const auto num_threads = std::min(
+        hardware_threads != 0 ? hardware_threads : 2,
+        static_cast<unsigned long>(length)
+    );
+    const auto block_size = length / num_threads;
+
+    std::vector<T> results(num_threads);
+    std::vector<std::thread> threads(num_threads - 1);
+
+    Iterator block_start = first;
+    for (unsigned long i = 0; i < num_threads - 1; ++i) {
+        Iterator block_end = block_start;
+        std::advance(block_end, block_size);
+
+        threads[i] = std::thread([=, &results] {
+            results[i] = std::accumulate(block_start, block_end, T{});
+        });
+
+        block_start = block_end;
+    }
+
+    // 마지막 블록은 현재 스레드에서 처리
+    results[num_threads - 1] = std::accumulate(block_start, last, T{});
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    return std::accumulate(results.begin(), results.end(), init);
+}
+```
+
+### 작업 병렬: 파이프라인
+
+```cpp
+#include <thread>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <optional>
+
+template<typename T>
+class threadsafe_queue {
+    std::queue<T> queue_;
+    mutable std::mutex mtx_;
+    std::condition_variable cv_;
+    bool done_ = false;
+
+public:
+    void push(T value) {
+        {
+            std::lock_guard lock(mtx_);
+            queue_.push(std::move(value));
+        }
+        cv_.notify_one();
+    }
+
+    std::optional<T> pop() {
+        std::unique_lock lock(mtx_);
+        cv_.wait(lock, [this] { return !queue_.empty() || done_; });
+        if (queue_.empty()) return std::nullopt;
+        T value = std::move(queue_.front());
+        queue_.pop();
+        return value;
+    }
+
+    void done() {
+        {
+            std::lock_guard lock(mtx_);
+            done_ = true;
+        }
+        cv_.notify_all();
+    }
+};
+
+// 파이프라인 예제: 이미지 처리
+void pipeline_example() {
+    threadsafe_queue<Image> raw_images;
+    threadsafe_queue<Image> resized_images;
+    threadsafe_queue<Image> filtered_images;
+
+    // Stage 1: 리사이즈
+    std::thread resizer([&] {
+        while (auto img = raw_images.pop()) {
+            resized_images.push(resize(*img));
+        }
+        resized_images.done();
+    });
+
+    // Stage 2: 필터
+    std::thread filterer([&] {
+        while (auto img = resized_images.pop()) {
+            filtered_images.push(apply_filter(*img));
+        }
+        filtered_images.done();
+    });
+
+    // Stage 3: 저장
+    std::thread saver([&] {
+        while (auto img = filtered_images.pop()) {
+            save_to_disk(*img);
+        }
+    });
+
+    // 입력 제공
+    for (const auto& path : image_paths) {
+        raw_images.push(load_image(path));
+    }
+    raw_images.done();
+
+    resizer.join();
+    filterer.join();
+    saver.join();
+}
+```
+
+## 8.2 성능 법칙
+
+### Amdahl의 법칙
+
+**병렬화할 수 없는 부분이 전체 성능을 제한한다.**
+
+```
+                    1
+Speedup = ─────────────────────
+           (1 - P) + P/N
+
+P = 병렬화 가능 비율
+N = 프로세서 수
+```
+
+```
+┌────────────────────────────────────────────────────────────┐
+│  Amdahl의 법칙: P = 0.95 (95% 병렬화 가능)                  │
+│                                                            │
+│  N=2   →  Speedup = 1.9x                                   │
+│  N=4   →  Speedup = 3.5x                                   │
+│  N=8   →  Speedup = 5.9x                                   │
+│  N=16  →  Speedup = 9.1x                                   │
+│  N=∞   →  Speedup = 20x   (최대 한계!)                     │
+│                                                            │
+│  5%의 직렬 코드가 무한 코어에서도 20배 이상 불가능          │
+└────────────────────────────────────────────────────────────┘
+```
+
+```cpp
+// Amdahl 계산기
+double amdahl_speedup(double parallel_fraction, int num_processors) {
+    double serial_fraction = 1.0 - parallel_fraction;
+    return 1.0 / (serial_fraction + parallel_fraction / num_processors);
+}
+
+// 예: 95% 병렬화, 8코어
+double speedup = amdahl_speedup(0.95, 8);  // ≈ 5.9
+```
+
+### Gustafson의 법칙
+
+**문제 크기를 늘리면 병렬화 비율도 증가한다.**
+
+```
+Speedup = N - (1 - P) × (N - 1)
+
+또는
+
+Speedup ≈ N × P + (1 - P)
+```
+
+```
+┌────────────────────────────────────────────────────────────┐
+│  Gustafson의 법칙: 문제 크기 확장                           │
+│                                                            │
+│  작은 문제:  [===직렬===][===병렬===]  P = 50%             │
+│                                                            │
+│  큰 문제:    [===직렬===][=========병렬=========]  P = 80% │
+│                                                            │
+│  직렬 부분은 고정, 병렬 부분이 확장됨                       │
+│  → 병렬화 비율이 자연스럽게 증가                            │
+└────────────────────────────────────────────────────────────┘
+```
+
+### 실용적 관점
+
+| 법칙 | 관점 | 적용 |
+|------|------|------|
+| Amdahl | 고정 크기 문제 | 직렬 병목 최소화 |
+| Gustafson | 확장 가능 문제 | 더 큰 문제 해결 |
+
+**핵심:** 직렬 코드를 최소화하고, 가능하면 문제 크기를 확장하라.
+
+## 8.3 데이터 의존성
+
+### 의존성 분석
+
+```cpp
+// 의존성 없음 → 완전 병렬화 가능
+for (int i = 0; i < n; ++i) {
+    result[i] = process(data[i]);
+}
+
+// 의존성 있음 → 병렬화 어려움
+for (int i = 1; i < n; ++i) {
+    result[i] = result[i-1] + data[i];  // 이전 결과에 의존
+}
+```
+
+### 의존성 유형
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  True Dependency (RAW: Read After Write)                    │
+│                                                             │
+│  a = 1;        // Write                                     │
+│  b = a + 2;    // Read (a에 의존)                           │
+│  → 반드시 순서 유지                                         │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  Anti-Dependency (WAR: Write After Read)                    │
+│                                                             │
+│  b = a + 2;    // Read                                      │
+│  a = 3;        // Write (읽기 후에 써야 함)                  │
+│  → 재정렬 가능 (임시 변수로)                                 │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  Output Dependency (WAW: Write After Write)                 │
+│                                                             │
+│  a = 1;        // Write                                     │
+│  a = 2;        // Write (같은 변수)                         │
+│  → 마지막 쓰기만 유지하면 됨                                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 의존성 해결 기법
+
+```cpp
+// 문제: 누적 합 (prefix sum) - 의존성 있음
+// result[i] = result[i-1] + data[i]
+
+// 해결: 병렬 스캔 알고리즘
+template<typename T>
+std::vector<T> parallel_prefix_sum(const std::vector<T>& input) {
+    const size_t n = input.size();
+    std::vector<T> result(n);
+
+    // Phase 1: 각 스레드가 로컬 prefix sum 계산
+    const auto num_threads = std::thread::hardware_concurrency();
+    const auto chunk_size = (n + num_threads - 1) / num_threads;
+
+    std::vector<T> chunk_sums(num_threads);
+    std::vector<std::thread> threads;
+
+    for (size_t t = 0; t < num_threads; ++t) {
+        threads.emplace_back([&, t] {
+            size_t start = t * chunk_size;
+            size_t end = std::min(start + chunk_size, n);
+
+            T sum = 0;
+            for (size_t i = start; i < end; ++i) {
+                sum += input[i];
+                result[i] = sum;
+            }
+            chunk_sums[t] = sum;
+        });
+    }
+
+    for (auto& t : threads) t.join();
+
+    // Phase 2: 청크 합의 prefix sum (직렬)
+    for (size_t t = 1; t < num_threads; ++t) {
+        chunk_sums[t] += chunk_sums[t - 1];
+    }
+
+    // Phase 3: 오프셋 적용 (병렬)
+    threads.clear();
+    for (size_t t = 1; t < num_threads; ++t) {
+        threads.emplace_back([&, t] {
+            size_t start = t * chunk_size;
+            size_t end = std::min(start + chunk_size, n);
+            T offset = chunk_sums[t - 1];
+
+            for (size_t i = start; i < end; ++i) {
+                result[i] += offset;
+            }
+        });
+    }
+
+    for (auto& t : threads) t.join();
+
+    return result;
+}
+```
+
+## 8.4 False Sharing
+
+### 문제: 캐시 라인 충돌
+
+```
+┌────────────────────────────────────────────────────────────┐
+│  CPU 캐시 구조 (단순화)                                     │
+│                                                            │
+│  Core 1 Cache    [==== 64 bytes cache line ====]           │
+│                      ↑                                     │
+│                  counter[0]                                │
+│                                                            │
+│  Core 2 Cache    [==== 64 bytes cache line ====]           │
+│                      ↑                                     │
+│                  counter[1]  ← 같은 캐시 라인!             │
+│                                                            │
+│  counter[0]과 counter[1]이 같은 캐시 라인에 있으면         │
+│  한 코어가 쓰면 다른 코어의 캐시가 무효화됨                 │
+└────────────────────────────────────────────────────────────┘
+```
+
+```cpp
+// 💥 False sharing 발생
+struct BadCounters {
+    int counter1;  // 4 bytes
+    int counter2;  // 4 bytes (같은 캐시 라인)
+};
+
+BadCounters counters;
+
+// Thread 1: counter1 증가
+void thread1() {
+    for (int i = 0; i < 1'000'000; ++i) {
+        ++counters.counter1;  // 💥 cache line bouncing
+    }
+}
+
+// Thread 2: counter2 증가
+void thread2() {
+    for (int i = 0; i < 1'000'000; ++i) {
+        ++counters.counter2;  // 💥 cache line bouncing
+    }
+}
+```
+
+### 해결: 캐시 라인 정렬
+
+```cpp
+// C++17: hardware_destructive_interference_size
+#include <new>
+
+struct alignas(std::hardware_destructive_interference_size) GoodCounters {
+    struct alignas(std::hardware_destructive_interference_size) Counter {
+        std::atomic<int> value{0};
+    };
+
+    Counter counter1;
+    Counter counter2;  // 다른 캐시 라인
+};
+
+// 또는 수동 패딩
+struct PaddedCounters {
+    std::atomic<int> counter1;
+    char padding1[60];  // 64 - 4 = 60 bytes padding
+    std::atomic<int> counter2;
+    char padding2[60];
+};
+```
+
+### 벤치마크: False Sharing의 영향
+
+```cpp
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <atomic>
+#include <new>
+
+constexpr size_t CACHE_LINE = 64;
+
+struct BadLayout {
+    std::atomic<long> a{0};
+    std::atomic<long> b{0};
+};
+
+struct GoodLayout {
+    alignas(CACHE_LINE) std::atomic<long> a{0};
+    alignas(CACHE_LINE) std::atomic<long> b{0};
+};
+
+template<typename Layout>
+void benchmark(const char* name) {
+    Layout layout;
+    constexpr int iterations = 100'000'000;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    std::thread t1([&] {
+        for (int i = 0; i < iterations; ++i) {
+            layout.a.fetch_add(1, std::memory_order_relaxed);
+        }
+    });
+
+    std::thread t2([&] {
+        for (int i = 0; i < iterations; ++i) {
+            layout.b.fetch_add(1, std::memory_order_relaxed);
+        }
+    });
+
+    t1.join();
+    t2.join();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::cout << name << ": " << ms.count() << "ms\n";
+}
+
+int main() {
+    benchmark<BadLayout>("BadLayout (false sharing)");
+    benchmark<GoodLayout>("GoodLayout (no false sharing)");
+}
+
+// 예상 결과:
+// BadLayout (false sharing): ~2000ms
+// GoodLayout (no false sharing): ~500ms
+```
+
+## 8.5 데이터 레이아웃
+
+### AoS vs SoA
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AoS (Array of Structures)                                  │
+│                                                             │
+│  struct Particle {                                          │
+│      float x, y, z;                                         │
+│      float vx, vy, vz;                                      │
+│  };                                                         │
+│  Particle particles[1000];                                  │
+│                                                             │
+│  메모리: [x,y,z,vx,vy,vz][x,y,z,vx,vy,vz][...]             │
+│                                                             │
+│  장점: 개별 객체 접근 시 캐시 친화적                        │
+│  단점: 특정 필드만 처리 시 캐시 낭비                        │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  SoA (Structure of Arrays)                                  │
+│                                                             │
+│  struct Particles {                                         │
+│      float x[1000], y[1000], z[1000];                      │
+│      float vx[1000], vy[1000], vz[1000];                   │
+│  };                                                         │
+│  Particles particles;                                       │
+│                                                             │
+│  메모리: [x,x,x,...][y,y,y,...][z,z,z,...][vx,vx,...]      │
+│                                                             │
+│  장점: SIMD 친화적, 특정 필드 처리 시 캐시 효율적           │
+│  단점: 개별 객체 접근 시 캐시 라인 여러 개 필요             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+```cpp
+// AoS: 개별 파티클 처리에 적합
+struct ParticleAoS {
+    float x, y, z;
+    float vx, vy, vz;
+};
+
+void update_particle_aos(ParticleAoS& p, float dt) {
+    p.x += p.vx * dt;  // 모든 필드가 같은 캐시 라인
+    p.y += p.vy * dt;
+    p.z += p.vz * dt;
+}
+
+// SoA: SIMD 벡터화에 적합
+struct ParticlesSoA {
+    std::vector<float> x, y, z;
+    std::vector<float> vx, vy, vz;
+
+    void update_positions(float dt) {
+        const size_t n = x.size();
+        // 벡터화 가능 (SIMD)
+        for (size_t i = 0; i < n; ++i) {
+            x[i] += vx[i] * dt;
+        }
+        for (size_t i = 0; i < n; ++i) {
+            y[i] += vy[i] * dt;
+        }
+        for (size_t i = 0; i < n; ++i) {
+            z[i] += vz[i] * dt;
+        }
+    }
+};
+```
+
+### 선택 가이드
+
+| 패턴 | 사용 시점 |
+|------|-----------|
+| AoS | 개별 객체 자주 접근, 객체 전체 처리 |
+| SoA | 특정 필드만 대량 처리, SIMD 벡터화 |
+| AoSoA | 둘의 장점 조합 (고급) |
+
+## 8.6 Contention 회피
+
+### Lock Contention
+
+```cpp
+// 💥 High contention: 모든 스레드가 같은 락 경쟁
+class HighContention {
+    std::mutex mtx_;
+    int counter_ = 0;
+
+public:
+    void increment() {
+        std::lock_guard lock(mtx_);
+        ++counter_;
+    }
+};
+
+// ✓ Low contention: 스레드별 로컬 카운터 + 주기적 병합
+class LowContention {
+    struct alignas(64) LocalCounter {
+        std::atomic<int> value{0};
+    };
+
+    std::vector<LocalCounter> local_counters_;
+    std::atomic<int> global_counter_{0};
+
+public:
+    explicit LowContention(int num_threads)
+        : local_counters_(num_threads) {}
+
+    void increment(int thread_id) {
+        local_counters_[thread_id].value.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    int get_total() {
+        int sum = global_counter_.load(std::memory_order_relaxed);
+        for (const auto& lc : local_counters_) {
+            sum += lc.value.load(std::memory_order_relaxed);
+        }
+        return sum;
+    }
+};
+```
+
+### 락 분할 (Lock Striping)
+
+```cpp
+template<typename K, typename V, size_t NumStripes = 16>
+class StripedMap {
+    struct Stripe {
+        std::shared_mutex mtx;
+        std::unordered_map<K, V> map;
+    };
+
+    std::array<Stripe, NumStripes> stripes_;
+
+    size_t get_stripe(const K& key) const {
+        return std::hash<K>{}(key) % NumStripes;
+    }
+
+public:
+    void insert(const K& key, const V& value) {
+        auto& stripe = stripes_[get_stripe(key)];
+        std::unique_lock lock(stripe.mtx);
+        stripe.map[key] = value;
+    }
+
+    std::optional<V> get(const K& key) const {
+        auto& stripe = stripes_[get_stripe(key)];
+        std::shared_lock lock(stripe.mtx);
+        auto it = stripe.map.find(key);
+        if (it != stripe.map.end()) {
+            return it->second;
+        }
+        return std::nullopt;
+    }
+
+    void remove(const K& key) {
+        auto& stripe = stripes_[get_stripe(key)];
+        std::unique_lock lock(stripe.mtx);
+        stripe.map.erase(key);
+    }
+};
+```
+
+## 8.7 병렬 알고리즘 구현
+
+### Parallel for_each
+
+```cpp
+template<typename Iterator, typename Func>
+void parallel_for_each(Iterator first, Iterator last, Func f) {
+    const auto length = std::distance(first, last);
+    if (length == 0) return;
+
+    const auto hardware_threads = std::thread::hardware_concurrency();
+    const auto num_threads = std::min(
+        hardware_threads != 0 ? hardware_threads : 2,
+        static_cast<unsigned long>(length)
+    );
+    const auto block_size = length / num_threads;
+
+    std::vector<std::future<void>> futures(num_threads - 1);
+    Iterator block_start = first;
+
+    for (unsigned long i = 0; i < num_threads - 1; ++i) {
+        Iterator block_end = block_start;
+        std::advance(block_end, block_size);
+
+        futures[i] = std::async(std::launch::async, [=, &f] {
+            std::for_each(block_start, block_end, f);
+        });
+
+        block_start = block_end;
+    }
+
+    // 마지막 블록은 현재 스레드에서
+    std::for_each(block_start, last, f);
+
+    // 모든 스레드 대기
+    for (auto& fut : futures) {
+        fut.get();
+    }
+}
+```
+
+### Parallel find
+
+```cpp
+template<typename Iterator, typename T>
+Iterator parallel_find(Iterator first, Iterator last, const T& value) {
+    const auto length = std::distance(first, last);
+    if (length == 0) return last;
+
+    const auto hardware_threads = std::thread::hardware_concurrency();
+    const auto num_threads = std::min(
+        hardware_threads != 0 ? hardware_threads : 2,
+        static_cast<unsigned long>(length)
+    );
+    const auto block_size = length / num_threads;
+
+    std::atomic<bool> found{false};
+    std::atomic<Iterator> result{last};
+
+    std::vector<std::thread> threads(num_threads);
+    Iterator block_start = first;
+
+    for (unsigned long i = 0; i < num_threads; ++i) {
+        Iterator block_end = (i == num_threads - 1) ? last : block_start;
+        if (i != num_threads - 1) {
+            std::advance(block_end, block_size);
+        }
+
+        threads[i] = std::thread([=, &found, &result, &value] {
+            for (Iterator it = block_start; it != block_end && !found.load(); ++it) {
+                if (*it == value) {
+                    found.store(true);
+                    result.store(it);
+                    return;
+                }
+            }
+        });
+
+        block_start = block_end;
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    return result.load();
+}
+```
+
+### Parallel reduce
+
+```cpp
+template<typename Iterator, typename T, typename BinaryOp>
+T parallel_reduce(Iterator first, Iterator last, T init, BinaryOp op) {
+    const auto length = std::distance(first, last);
+    if (length == 0) return init;
+
+    const auto hardware_threads = std::thread::hardware_concurrency();
+    const auto num_threads = std::min(
+        hardware_threads != 0 ? hardware_threads : 2,
+        static_cast<unsigned long>(length)
+    );
+    const auto block_size = length / num_threads;
+
+    std::vector<std::future<T>> futures(num_threads - 1);
+    Iterator block_start = first;
+
+    for (unsigned long i = 0; i < num_threads - 1; ++i) {
+        Iterator block_end = block_start;
+        std::advance(block_end, block_size);
+
+        futures[i] = std::async(std::launch::async, [=, &op] {
+            return std::accumulate(block_start, block_end, T{}, op);
+        });
+
+        block_start = block_end;
+    }
+
+    T local_result = std::accumulate(block_start, last, T{}, op);
+
+    T final_result = op(init, local_result);
+    for (auto& fut : futures) {
+        final_result = op(final_result, fut.get());
+    }
+
+    return final_result;
+}
+
+// 사용 예
+std::vector<int> data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int sum = parallel_reduce(data.begin(), data.end(), 0, std::plus<int>{});
+int product = parallel_reduce(data.begin(), data.end(), 1, std::multiplies<int>{});
+```
+
+## 8.8 예외 안전성
+
+### 병렬 코드의 예외 처리
+
+```cpp
+template<typename Iterator, typename Func>
+void parallel_for_each_safe(Iterator first, Iterator last, Func f) {
+    const auto length = std::distance(first, last);
+    if (length == 0) return;
+
+    const auto num_threads = std::thread::hardware_concurrency();
+    const auto block_size = length / num_threads;
+
+    std::vector<std::future<void>> futures;
+    std::exception_ptr exception = nullptr;
+    std::mutex exception_mutex;
+
+    Iterator block_start = first;
+    for (unsigned long i = 0; i < num_threads; ++i) {
+        Iterator block_end = (i == num_threads - 1) ? last : block_start;
+        if (i != num_threads - 1) {
+            std::advance(block_end, block_size);
+        }
+
+        futures.push_back(std::async(std::launch::async, [=, &exception, &exception_mutex, &f] {
+            try {
+                for (Iterator it = block_start; it != block_end; ++it) {
+                    f(*it);
+                }
+            } catch (...) {
+                std::lock_guard lock(exception_mutex);
+                if (!exception) {
+                    exception = std::current_exception();
+                }
+            }
+        }));
+
+        block_start = block_end;
+    }
+
+    // 모든 스레드 대기
+    for (auto& fut : futures) {
+        fut.wait();
+    }
+
+    // 예외가 있으면 다시 던지기
+    if (exception) {
+        std::rethrow_exception(exception);
+    }
+}
+```
+
+### std::jthread와 중단
+
+```cpp
+#include <stop_token>
+
+void cancellable_work(std::stop_token stoken) {
+    while (!stoken.stop_requested()) {
+        // 작업 수행
+        do_work();
+    }
+    // 정리
+    cleanup();
+}
+
+void parallel_with_cancellation() {
+    std::vector<std::jthread> threads;
+
+    for (int i = 0; i < 4; ++i) {
+        threads.emplace_back(cancellable_work);
+    }
+
+    // 일정 시간 후 모두 중단
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    // jthread 소멸 시 자동으로 stop_request + join
+}
+```
+
+## 8.9 작업 단위 결정
+
+### 최적 입자도 (Granularity)
+
+```
+┌────────────────────────────────────────────────────────────┐
+│  작업 입자도 트레이드오프                                   │
+│                                                            │
+│  너무 작은 작업:                                           │
+│  [작업][작업][작업][작업][작업][작업][작업][작업]          │
+│      ↓                                                     │
+│  오버헤드 > 실제 작업                                      │
+│  스레드 생성/동기화 비용이 큼                               │
+│                                                            │
+│  너무 큰 작업:                                             │
+│  [========== 작업 ==========]                              │
+│      ↓                                                     │
+│  로드 불균형                                               │
+│  일부 스레드만 바쁨                                        │
+│                                                            │
+│  적절한 크기:                                              │
+│  [=== 작업 ===][=== 작업 ===][=== 작업 ===]               │
+│      ↓                                                     │
+│  오버헤드 최소화 + 로드 균형                               │
+└────────────────────────────────────────────────────────────┘
+```
+
+### 경험 법칙
+
+```cpp
+// 작업 단위 크기 결정
+size_t calculate_chunk_size(size_t total_work, unsigned num_threads) {
+    // 경험 법칙: 스레드 수의 4~8배 청크
+    const size_t min_chunks = num_threads * 4;
+    const size_t max_chunk_size = total_work / min_chunks;
+
+    // 최소 작업량 보장
+    const size_t min_work_per_chunk = 1000;  // 작업 유형에 따라 조정
+
+    return std::max(min_work_per_chunk, max_chunk_size);
+}
+
+// 동적 로드 밸런싱
+template<typename Func>
+void work_stealing_for(size_t total, Func f) {
+    std::atomic<size_t> next_index{0};
+    const size_t chunk_size = 64;  // 작은 청크로 로드 밸런싱
+
+    auto worker = [&] {
+        while (true) {
+            size_t start = next_index.fetch_add(chunk_size);
+            if (start >= total) break;
+
+            size_t end = std::min(start + chunk_size, total);
+            for (size_t i = start; i < end; ++i) {
+                f(i);
+            }
+        }
+    };
+
+    const auto num_threads = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads;
+
+    for (unsigned i = 0; i < num_threads; ++i) {
+        threads.emplace_back(worker);
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+}
+```
+
+## 8.10 가이드라인 요약
+
+### 설계 체크리스트
+
+| 항목 | 확인 |
+|------|------|
+| 작업 분할 전략 | 데이터 병렬 vs 작업 병렬 결정 |
+| 의존성 분석 | 병렬화 가능 여부 확인 |
+| False sharing | 캐시 라인 정렬 |
+| 데이터 레이아웃 | AoS vs SoA 선택 |
+| Contention | 락 분할, 로컬 카운터 |
+| 입자도 | 작업 단위 크기 결정 |
+| 예외 안전 | 예외 전파 처리 |
+
+### 성능 최적화 순서
+
+1. **알고리즘 선택**: 가장 큰 영향
+2. **데이터 레이아웃**: 캐시 효율
+3. **False sharing 제거**: 캐시 라인 정렬
+4. **Contention 감소**: 락 분할
+5. **입자도 조정**: 오버헤드 vs 로드 밸런싱
+
+## 정리
+
+- **데이터 병렬**은 같은 연산을 다른 데이터에, **작업 병렬**은 다른 연산을 동시에
+- **Amdahl의 법칙**: 직렬 코드가 병렬화 한계를 결정한다
+- **False sharing**은 성능을 크게 저하시킨다. 캐시 라인 정렬로 해결
+- **데이터 의존성**을 분석하여 병렬화 가능 여부를 판단하라
+- **SoA**는 SIMD와 특정 필드 처리에, **AoS**는 개별 객체 접근에 적합
+- **예외 안전성**을 고려하여 병렬 코드를 설계하라
+
+## 다음 장 예고
+
+다음 장에서는 고급 스레드 관리를 다룬다. 스레드 풀, 작업 훔치기, 인터럽트 등을 살펴본다.

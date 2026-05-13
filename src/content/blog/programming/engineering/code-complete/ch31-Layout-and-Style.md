@@ -1,6 +1,6 @@
 ---
 title: "Chapter 31: Layout and Style"
-date: 2026-06-21T07:00:00
+date: 2025-06-21T07:00:00
 description: "코드 레이아웃 — 가독성을 위한 시각적 구조. 들여쓰기, 빈 줄, 정렬, 컨벤션."
 series: "Code Complete"
 seriesOrder: 31

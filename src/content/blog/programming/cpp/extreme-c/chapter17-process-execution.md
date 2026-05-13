@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Process Execution"
-date: 2026-06-19T01:00:00
+date: 2025-06-19T01:00:00
 description: "fork / exec / wait. 프로세스 생성, 종료 코드, 좀비 / 고아."
 tags: [C, Process, fork, exec]
 series: "전문가를 위한 C"

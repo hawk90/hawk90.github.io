@@ -1,6 +1,6 @@
 ---
 title: "Ch 23-27: Advanced — Persistence / Threads / Async / Wrap-up"
-date: 2026-10-14T01:00:00
+date: 2025-10-14T01:00:00
 description: "DB 테스트, 스레드 / 비동기 테스트, 시리즈 마무리."
 tags: [TDD, Persistence, Threading]
 series: "Growing Object-Oriented Software"

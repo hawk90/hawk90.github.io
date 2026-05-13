@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Stack and Heap"
-date: 2026-06-15T05:00:00
+date: 2025-06-15T05:00:00
 description: "스택 vs 힙 — 라이프타임 / 성능 / 안전. malloc / free 내부."
 tags: [C, Memory, Stack, Heap, malloc]
 series: "전문가를 위한 C"

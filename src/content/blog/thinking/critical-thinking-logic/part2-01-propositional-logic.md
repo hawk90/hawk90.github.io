@@ -1,6 +1,6 @@
 ---
 title: "Part 2-1: 명제 논리 — 연결사 / 진리표"
-date: 2026-07-23T01:00:00
+date: 2025-07-23T01:00:00
 description: "∧ ∨ ¬ → ↔. 진리표 작성 / 동치 / 항진."
 tags: [Logic, Propositional Logic, Truth Table]
 series: "비판적 사고를 위한 논리"

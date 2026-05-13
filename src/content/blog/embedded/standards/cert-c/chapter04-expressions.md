@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Expressions (EXP)"
-date: 2026-09-11T01:00:00
+date: 2025-09-11T01:00:00
 description: "포인터 산술, sizeof 함정, 비교 / NULL, 시퀀스 포인트."
 tags: [CERT, Expression]
 series: "CERT C"

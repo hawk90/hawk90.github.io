@@ -1,6 +1,6 @@
 ---
 title: "Chapter 12: Fundamental Data Types"
-date: 2026-06-20T12:00:00
+date: 2025-06-20T12:00:00
 description: "기본 데이터 타입의 안전한 사용 — 숫자, 문자, 부울. 오버플로, 부동소수 정확도, 문자열 끝 처리."
 series: "Code Complete"
 seriesOrder: 12

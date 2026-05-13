@@ -1,6 +1,6 @@
 ---
 title: "Pro Git — 시리즈 개요"
-date: 2026-08-01T00:00:00
+date: 2025-08-01T00:00:00
 description: "Scott Chacon & Ben Straub의 Git 정전. 기초부터 internals까지 10장 완주."
 tags: [Git, Version Control, Series]
 series: "Pro Git"

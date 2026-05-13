@@ -1,6 +1,6 @@
 ---
 title: "Part 1-3: 타당성 / 건전성 / 강도"
-date: 2026-07-22T03:00:00
+date: 2025-07-22T03:00:00
 description: "연역 — 타당 / 건전. 귀납 — 강도 / 신뢰성. 평가 기준의 차이."
 tags: [Logic, Validity, Soundness]
 series: "비판적 사고를 위한 논리"

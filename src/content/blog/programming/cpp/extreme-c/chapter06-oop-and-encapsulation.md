@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: OOP and Encapsulation"
-date: 2026-06-16T01:00:00
+date: 2025-06-16T01:00:00
 description: "C에서 OO — 캡슐화. opaque pointer, 모듈 / 헤더로 정보 은닉."
 tags: [C, OOP, Encapsulation]
 series: "전문가를 위한 C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 표현식 / 변환 (A4-A5)"
-date: 2026-09-15T03:00:00
+date: 2025-09-15T03:00:00
 description: "묵시 변환 제한, 캐스트 종류, 비트 연산, sizeof."
 tags: [AUTOSAR, Conversion, Cast]
 series: "AUTOSAR C++14"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 템플릿 (A14)"
-date: 2026-09-16T03:00:00
+date: 2025-09-16T03:00:00
 description: "템플릿 사용 규칙 — 명시적 instantiation, SFINAE 제한."
 tags: [AUTOSAR, Templates]
 series: "AUTOSAR C++14"

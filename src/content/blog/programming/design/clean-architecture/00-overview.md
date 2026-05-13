@@ -1,6 +1,6 @@
 ---
 title: "Clean Architecture — 시리즈 개요"
-date: 2026-06-01T00:00:00
+date: 2025-06-01T00:00:00
 description: "Uncle Bob의 아키텍처 가이드. SOLID, 컴포넌트, 경계 — 변경에 친화적 시스템을 어떻게 짓는가."
 tags: [Architecture, CleanArchitecture, SoftwareEngineering, Series]
 series: "Clean Architecture"
