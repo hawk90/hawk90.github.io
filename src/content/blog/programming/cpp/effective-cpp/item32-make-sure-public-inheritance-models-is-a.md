@@ -7,9 +7,20 @@ series: "Effective C++"
 seriesOrder: 32
 ---
 
+## 왜 이 항목이 중요한가?
+
+`class D : public B`는 단순히 코드 재사용이 아니다. **"D는 B의 일종(is-a)이다"** 라는 강한 의미적 약속이다. 더 정확히는 **Liskov Substitution Principle(LSP)** — base가 쓰이는 모든 곳에서 derived가 동작해야 한다.
+
+자연어 분류는 종종 이 원칙을 어긴다.
+
+- **펭귄은 새다, 그런데 날지 못한다** — `Bird::fly()`를 상속하면 LSP 위반.
+- **정사각형은 직사각형이다, 그런데 너비와 높이가 독립적이지 않다** — `Rectangle::setWidth()` 호출 후 invariant가 깨진다.
+
+이런 케이스에선 public 상속이 답이 아니다. **composition** 또는 **private 상속**으로 모델링해야 한다. 이 항목은 LSP의 함정 사례와 대안 패턴을 정리한다.
+
 ## 개요
 
-`class D : public B`는 **"D는 B의 일종이다"(is-a)** 를 의미합니다. 더 정확히는 — **B의 객체가 쓰이는 모든 곳에서 D의 객체로 대체 가능**해야 합니다(Liskov Substitution Principle). 자연어 분류는 종종 이 원칙을 깨뜨립니다. 이 항목은 LSP의 함정 사례(펭귄, 정사각형)와 올바른 모델링 도구(composition, private 상속)를 다룹니다.
+`class D : public B`는 **"D는 B의 일종이다"(is-a)** 를 의미한다. 더 정확히는 **B의 객체가 쓰이는 모든 곳에서 D의 객체로 대체 가능**해야 한다(Liskov Substitution Principle). 자연어 분류는 종종 이 원칙을 깨뜨린다. 이 항목은 LSP의 함정 사례(펭귄, 정사각형)와 올바른 모델링 도구(composition, private 상속)를 다룬다.
 
 ## 필수 개념: Liskov Substitution Principle
 
