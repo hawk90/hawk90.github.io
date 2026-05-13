@@ -133,6 +133,11 @@ const filterSeriesLabel = t('search_filter_series');
     from { opacity: 0; }
     to   { opacity: 1; }
   }
+  #search-input:focus,
+  #search-input:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
   /* Result row hover/selected — left border accent + slightly stronger bg */
   #search-results a[role="option"] {
     border-left: 3px solid transparent;
