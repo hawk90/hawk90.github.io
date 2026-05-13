@@ -7,9 +7,19 @@ series: "Effective Modern C++"
 seriesOrder: 20
 ---
 
+## 왜 이 항목이 중요한가?
+
+`shared_ptr`로 모든 게 해결되지는 않는다. 다음 자리에서 shared_ptr는 오히려 문제를 만든다.
+
+- **캐싱** — 캐시가 객체 수명을 연장하면 사용자가 떠나도 자원이 안 해제된다.
+- **옵저버 패턴** — Subject가 Observer를 shared_ptr로 들면 Observer가 영원히 못 사라진다.
+- **순환 참조** — 부모-자식이 서로 shared_ptr면 카운트가 영원히 0이 되지 않아 메모리 누수가 일어난다.
+
+`std::weak_ptr`는 이 셋을 모두 해결한다. "소유하지 않고 관찰만 한다"는 의미를 코드에 표현한다. `lock()`으로 안전하게 접근하면 race condition 없이 사용할 수 있다.
+
 ## 개요
 
-`std::weak_ptr`는 shared_ptr가 가리키는 객체를 **소유하지 않고 관찰**합니다. 객체가 살아있는지 확인 후 안전하게 접근하고, 순환 참조도 끊어줍니다.
+`std::weak_ptr`는 shared_ptr가 가리키는 객체를 **소유하지 않고 관찰**한다. 객체가 살아있는지 확인한 후 안전하게 접근하고, 순환 참조도 끊어 준다.
 
 ## 필수 개념: 약한 참조
 
@@ -25,16 +35,16 @@ seriesOrder: 20
 | 자원 직접 접근 | `*sp`, `sp->` | ❌ — `lock()`으로 변환 후 |
 | 자원이 살아있는지 검사 | 자기가 살리니 의미 없음 | `expired()` |
 
-→ weak_ptr는 **소유권 없는 관찰자**.
+weak_ptr는 **소유권 없는 관찰자**다.
 
 ### control block의 weak count
 
-[항목 19의 control block](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership)에 weak count도 — weak_ptr 수.
+[항목 19의 control block](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership)에 weak count도 들어 있다. weak_ptr 수다.
 
-- strong count = 0 → 자원 해제
-- weak count = 0 → control block 해제
+- strong count = 0 → 자원 해제.
+- weak count = 0 → control block 해제.
 
-→ weak_ptr가 살아있는 동안엔 control block 유지 (객체 메모리는 strong에 의해 결정).
+weak_ptr가 살아있는 동안엔 control block이 유지된다 (객체 메모리는 strong에 의해 결정).
 
 ## 기본 사용
 
@@ -42,7 +52,7 @@ seriesOrder: 20
 auto sp = std::make_shared<Widget>();
 std::weak_ptr<Widget> wp = sp;
 
-// wp는 카운트 증가시키지 않음
+// wp는 카운트 증가시키지 않는다
 // sp가 사라지면 wp는 expired
 ```
 
@@ -54,7 +64,7 @@ if (auto locked = wp.lock()) {   // shared_ptr 반환 (또는 nullptr if expired
 }                                 // locked는 임시 shared_ptr — 안전
 ```
 
-`lock()`이 atomic — 다른 스레드가 사이에 자원 해제해도 안전.
+`lock()`은 atomic이다. 다른 스레드가 사이에 자원을 해제해도 안전하다.
 
 ### `expired()` — 만료 검사
 
@@ -64,7 +74,7 @@ if (!wp.expired()) {
 }
 ```
 
-`expired()` + 사용은 **race condition** 가능. **`lock()` 한 번으로 처리**가 안전.
+`expired()` + 사용은 **race condition**이 가능하다. **`lock()` 한 번으로 처리**하는 게 안전하다.
 
 ```cpp
 auto sp = wp.lock();
@@ -90,11 +100,11 @@ std::shared_ptr<Widget> getCached(int id) {
 }
 ```
 
-캐시는 객체 수명을 연장하지 않음 → 진짜 사용자가 모두 떠나면 자동 해제. 캐시는 **자동 정리** 안 됨 (만료된 weak_ptr 그대로) — 주기적 청소 별도 필요.
+캐시는 객체 수명을 연장하지 않는다. 진짜 사용자가 모두 떠나면 자동 해제된다. 캐시는 **자동 정리**가 안 된다 (만료된 weak_ptr가 그대로 남는다). 주기적 청소는 별도로 필요하다.
 
 ## 활용 2 — 옵저버 패턴
 
-옵저버는 관찰 대상을 소유하지 않아야 — `weak_ptr`.
+옵저버는 관찰 대상을 소유하지 않아야 한다. `weak_ptr`다.
 
 ```cpp
 class Subject;
@@ -123,11 +133,11 @@ public:
 };
 ```
 
-→ Observer가 사라지면 자동으로 알림에서 제외 — 깔끔.
+Observer가 사라지면 자동으로 알림에서 제외된다. 깔끔하다.
 
 ## 활용 3 — 순환 참조 끊기
 
-[항목 19](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership)의 사이클 함정:
+[항목 19](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership)의 사이클 함정이다.
 
 ```cpp
 struct Node {
@@ -141,7 +151,7 @@ root->children.push_back(child);
 child->parent = root;   // weak_ptr — 카운트 안 늘림
 ```
 
-부모-자식이 모두 shared_ptr면 카운트가 영원히 0 안 됨 → 메모리 누수. 한쪽을 weak로.
+부모-자식이 모두 shared_ptr면 카운트가 영원히 0이 되지 않아 메모리 누수가 일어난다. 한쪽을 weak로 만든다.
 
 ### 트리 구조
 
@@ -153,7 +163,7 @@ child->parent = root;   // weak_ptr — 카운트 안 늘림
 
 ## 활용 4 — `enable_shared_from_this` 내부
 
-`enable_shared_from_this` ([항목 19](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership)) 내부엔 `weak_ptr`:
+`enable_shared_from_this` ([항목 19](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership)) 내부에 `weak_ptr`가 있다.
 
 ```cpp
 template<typename T>
@@ -166,11 +176,11 @@ public:
 };
 ```
 
-생성 시 weak_this 설정. `shared_from_this()`는 `lock()`으로 shared 반환.
+생성 시 weak_this를 설정한다. `shared_from_this()`는 `lock()`으로 shared를 반환한다.
 
 ## 비용
 
-`weak_ptr`도 control block의 **약한 카운트**를 증감해야 — atomic 연산. shared_ptr만큼은 아니지만 공짜 X.
+`weak_ptr`도 control block의 **약한 카운트**를 증감해야 한다. atomic 연산이다. shared_ptr만큼은 아니지만 공짜는 아니다.
 
 ```cpp
 sizeof(std::weak_ptr<Widget>);   // 16 byte (보통)
@@ -185,9 +195,9 @@ if (!wp.expired()) {
 }
 ```
 
-**`lock()` 호출 후엔 안전** — 만약 lock이 sp 반환했다면 carrier가 살아있고, sp가 그 strong reference 보유.
+**`lock()` 호출 후엔 안전**하다. lock이 sp를 반환했다면 carrier가 살아있고, sp가 그 strong reference를 보유한다.
 
-그러나 `expired()` + 그 다음 `lock()` 사이엔 race — **그냥 `lock()` 한 번**으로:
+그러나 `expired()` + 그 다음 `lock()` 사이엔 race가 가능하다. **그냥 `lock()` 한 번**으로 처리한다.
 
 ```cpp
 if (auto sp = wp.lock()) sp->doIt();
@@ -200,7 +210,7 @@ std::weak_ptr<Widget> wp = ...;
 std::shared_ptr<Widget> sp(wp);   // 생성자 — expired면 std::bad_weak_ptr 예외
 ```
 
-`lock()`은 nullptr, 생성자는 예외 — 의도에 따라 선택.
+`lock()`은 nullptr를, 생성자는 예외를 반환한다. 의도에 따라 선택한다.
 
 ## 비교 — 한눈에
 
@@ -214,14 +224,15 @@ std::shared_ptr<Widget> sp(wp);   // 생성자 — expired면 std::bad_weak_ptr 
 
 ## 핵심 정리
 
-1. **`weak_ptr` = "관찰만 하는 shared_ptr"**
-2. **`lock()`로 안전하게 접근** — atomic
-3. **캐싱, 옵저버, 순환 참조 끊기**에 사용
-4. control block의 weak count도 atomic — 공짜 X
-5. **`expired()` + 사용은 race** — `lock()` 한 번으로
-6. weak_ptr → shared_ptr 변환은 lock() (nullptr) 또는 ctor (예외)
+1. **`weak_ptr` = "관찰만 하는 shared_ptr"** 다.
+2. **`lock()`로 안전하게 접근**한다. atomic이다.
+3. **캐싱, 옵저버, 순환 참조 끊기**에 사용한다.
+4. control block의 weak count도 atomic이다. 공짜가 아니다.
+5. **`expired()` + 사용은 race**다. `lock()` 한 번으로 처리한다.
+6. weak_ptr → shared_ptr 변환은 lock() (nullptr) 또는 ctor (예외)다.
 
 ## 관련 항목
 
+- [항목 18: unique_ptr](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership) — 독점 소유와의 비교
 - [항목 19: shared_ptr](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership) — control block, enable_shared_from_this
 - [항목 21: `make_*` 함수](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new) — make_shared의 weak 함정
