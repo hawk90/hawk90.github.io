@@ -5,6 +5,7 @@ description: "Liskov Substitution Principle. 인터페이스는 시그니처만�
 tags: [C++, Software Design, SOLID, LSP, Liskov]
 series: "C++ Software Design"
 seriesOrder: 6
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

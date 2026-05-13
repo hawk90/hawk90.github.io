@@ -5,6 +5,7 @@ description: "데이터 직렬화 — JSON / Protobuf / Avro / Thrift. 스키마
 tags: [DDIA, Encoding, Protobuf, Avro, SchemaEvolution]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 4
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "Drew Neil의 Practical Vim. 121 tips로 Vim 마스터. 한국어�
 tags: [Vim, Editor, Tools, Series]
 series: "Practical Vim"
 seriesOrder: 0
+draft: true
 ---
 
 ## 작성 중

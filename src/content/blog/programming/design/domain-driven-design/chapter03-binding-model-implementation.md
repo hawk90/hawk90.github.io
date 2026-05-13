@@ -5,6 +5,7 @@ description: "Model-Driven Design — 모델과 구현 일치. Hands-on Modelers
 tags: [DDD, Model-Driven Design, Hands-on Modelers]
 series: "Domain-Driven Design"
 seriesOrder: 3
+draft: true
 ---
 
 ## 모델과 구현의 괴리

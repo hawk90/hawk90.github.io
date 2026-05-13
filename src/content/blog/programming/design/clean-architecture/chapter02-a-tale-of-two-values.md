@@ -5,6 +5,7 @@ description: "소프트웨어의 두 가치 — 행동(현재 작동)과 구조(
 tags: [Architecture, Values, Eisenhower]
 series: "Clean Architecture"
 seriesOrder: 2
+draft: true
 ---
 
 ## 이 챕터의 메시지

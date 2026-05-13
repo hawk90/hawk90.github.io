@@ -5,6 +5,7 @@ description: "condition variable, future/promise/async, std::latch, std::barrier
 tags: [C++, Concurrency, Condition Variable, Future, Latch, Barrier]
 series: "C++ Concurrency in Action"
 seriesOrder: 4
+draft: true
 ---
 
 뮤텍스는 데이터를 보호한다. 하지만 "이벤트가 발생할 때까지 대기"는 어떻게 할까? 이 장에서는 조건 변수, future/promise, 그리고 C++20의 latch와 barrier를 다룬다.

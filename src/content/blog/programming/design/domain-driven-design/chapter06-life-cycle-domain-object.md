@@ -5,6 +5,7 @@ description: "Aggregate / Factory / Repository — 객체 라이프사이클 관
 tags: [DDD, Aggregate, Factory, Repository]
 series: "Domain-Driven Design"
 seriesOrder: 6
+draft: true
 ---
 
 ## 도메인 객체의 생명주기

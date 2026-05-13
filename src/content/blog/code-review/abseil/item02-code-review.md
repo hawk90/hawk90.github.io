@@ -5,6 +5,7 @@ description: "Google/Abseil의 코드 리뷰 철학과 실전 가이드라인을
 tags: [C++, Abseil, Code Review, Best Practices]
 series: "Abseil C++ 라이브러리"
 seriesOrder: 2
+draft: true
 ---
 
 ## Google 코드 리뷰의 핵심 원칙

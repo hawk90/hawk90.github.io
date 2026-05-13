@@ -5,6 +5,7 @@ description: "함수형의 본질은 불변성이다. 동시성 문제는 모두
 tags: [Architecture, Functional, Immutability]
 series: "Clean Architecture"
 seriesOrder: 6
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "외부 → 내부 (outside-in). 인수 → 단위 테스트로 좁
 tags: [TDD, Outside-In]
 series: "Growing Object-Oriented Software"
 seriesOrder: 5
+draft: true
 ---
 
 Walking Skeleton이 완성되면 본격적인 개발이 시작된다. TDD 사이클을 어떻게 유지하면서 기능을 추가해 나갈 수 있을까?

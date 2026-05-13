@@ -5,6 +5,7 @@ description: "OO의 본질은 캡슐화도 상속도 아닌 다형성이다. 그
 tags: [Architecture, OO, Polymorphism, DependencyInversion]
 series: "Clean Architecture"
 seriesOrder: 5
+draft: true
 ---
 
 ## 이 챕터의 메시지

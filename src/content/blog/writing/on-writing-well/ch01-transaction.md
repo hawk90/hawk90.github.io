@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, transaction]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 1 요약

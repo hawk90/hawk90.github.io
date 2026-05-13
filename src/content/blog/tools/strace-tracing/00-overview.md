@@ -5,6 +5,7 @@ description: "시스템 콜 / 라이브러리 / 커널 트레이싱. 디버깅 +
 tags: [Tracing, strace, ltrace, bpftrace, eBPF, Series]
 series: "System Tracing"
 seriesOrder: 0
+draft: true
 ---
 
 ## 작성 중

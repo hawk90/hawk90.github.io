@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, style, voice]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 4 요약

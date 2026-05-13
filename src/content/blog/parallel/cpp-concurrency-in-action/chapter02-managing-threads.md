@@ -5,6 +5,7 @@ description: "std::thread 라이프사이클, join/detach, 인자 전달, std::j
 tags: [C++, Concurrency, std::thread, std::jthread]
 series: "C++ Concurrency in Action"
 seriesOrder: 2
+draft: true
 ---
 
 스레드는 생성되고, 작업을 수행하고, 종료된다. 이 장에서는 스레드의 생애 주기를 관리하는 방법을 다룬다. `join`과 `detach`의 선택, 인자 전달의 함정, 그리고 C++20의 `std::jthread`까지.

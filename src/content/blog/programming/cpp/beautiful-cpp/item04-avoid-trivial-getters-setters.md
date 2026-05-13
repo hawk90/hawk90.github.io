@@ -5,7 +5,7 @@ description: "자명한 접근자는 캡슐화의 환상 — 진짜 불변식을
 tags: [C++, Encapsulation, Class Design]
 series: "Beautiful C++"
 seriesOrder: 4
-draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

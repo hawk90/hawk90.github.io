@@ -5,6 +5,7 @@ description: "데이터 복제의 세 모델 — Single-leader, Multi-leader, Le
 tags: [DDIA, Replication, SingleLeader, MultiLeader, Leaderless]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 5
+draft: true
 ---
 
 ## 이 챕터의 메시지

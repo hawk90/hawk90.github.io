@@ -5,6 +5,7 @@ description: "Layered Architecture — 도메인 계층 분리. UI / Application
 tags: [DDD, Layered Architecture, Domain Layer]
 series: "Domain-Driven Design"
 seriesOrder: 4
+draft: true
 ---
 
 ## 왜 도메인을 격리하는가?

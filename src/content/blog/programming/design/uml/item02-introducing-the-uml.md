@@ -5,7 +5,7 @@ description: "UML은 세 덩어리로 구성된다 — building blocks, rules, c
 tags: [UML, Modeling, Notation, Fundamentals]
 series: "UML User Guide"
 seriesOrder: 2
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

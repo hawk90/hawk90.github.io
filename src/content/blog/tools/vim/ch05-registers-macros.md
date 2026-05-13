@@ -5,6 +5,7 @@ description: "레지스터를 활용한 복사/붙여넣기, 매크로로 작업
 series: "Vim 마스터하기"
 seriesOrder: 5
 tags: [vim, editor, registers, macros, automation]
+draft: true
 ---
 
 > **Vim 마스터하기** Chapter 5: 레지스터와 매크로

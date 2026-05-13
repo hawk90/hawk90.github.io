@@ -5,6 +5,7 @@ description: "커밋 컨벤션 — Conventional Commits, semver, 서명, hooks, 
 tags: [Git, Conventions, Conventional Commits, Series]
 series: "Git Conventions"
 seriesOrder: 0
+draft: true
 ---
 
 ## 작성 중

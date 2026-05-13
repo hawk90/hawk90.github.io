@@ -5,6 +5,7 @@ description: "데이터 집약 애플리케이션의 세 가지 품질 — Relia
 tags: [DDIA, Reliability, Scalability, Maintainability]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 1
+draft: true
 ---
 
 ## 이 챕터의 메시지

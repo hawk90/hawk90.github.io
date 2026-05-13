@@ -5,6 +5,7 @@ description: "변화의 축을 찾아 캡슐화한다. Single Responsibility와 
 tags: [C++, Software Design, SOLID, SRP, DRY]
 series: "C++ Software Design"
 seriesOrder: 2
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

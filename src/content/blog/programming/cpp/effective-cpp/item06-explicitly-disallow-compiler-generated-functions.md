@@ -5,6 +5,7 @@ description: "복사를 막아야 하는 클래스 — C++98 private 트릭, Unc
 tags: [C++, Effective C++, Special Member Functions]
 series: "Effective C++"
 seriesOrder: 6
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

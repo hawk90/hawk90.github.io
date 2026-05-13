@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, clutter]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 3 요약

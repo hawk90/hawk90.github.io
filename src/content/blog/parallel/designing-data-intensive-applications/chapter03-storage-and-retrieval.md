@@ -5,6 +5,7 @@ description: "DB의 내부 — Log-structured (LSM, SSTable) vs Page-oriented (B
 tags: [DDIA, Storage, LSM, BTree, OLTP, OLAP]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 3
+draft: true
 ---
 
 ## 이 챕터의 메시지

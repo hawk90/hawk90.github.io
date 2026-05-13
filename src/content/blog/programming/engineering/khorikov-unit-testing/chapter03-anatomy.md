@@ -5,6 +5,7 @@ description: "AAA / Arrange-Act-Assert. 명명. 매개변수 테스트."
 tags: [TDD, AAA, Naming]
 series: "Khorikov Unit Testing"
 seriesOrder: 3
+draft: true
 ---
 
 좋은 단위 테스트는 일정한 구조를 따른다. 이 장에서는 테스트의 해부학적 구조를 살펴본다.

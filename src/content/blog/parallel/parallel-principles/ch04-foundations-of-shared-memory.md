@@ -8,6 +8,7 @@ tags: [parallel, concurrency, book-review, amp, register, atomic, safe, regular]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
+draft: true
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 4 요약

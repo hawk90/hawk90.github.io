@@ -5,6 +5,7 @@ description: "Anthony Williams의 C++ 동시성 정전. std::thread부터 lock-f
 tags: [C++, Concurrency, Multithreading, Series]
 series: "C++ Concurrency in Action"
 seriesOrder: 0
+draft: true
 ---
 
 Anthony Williams의 **C++ Concurrency in Action** 2nd Edition (2019, Manning)을 정리한 시리즈다. C++11에서 도입된 표준 스레드 라이브러리부터 C++17 병렬 알고리즘, C++20 동기화 프리미티브까지 다룬다.

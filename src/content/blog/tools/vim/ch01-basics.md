@@ -5,6 +5,7 @@ description: "Vim의 모드, 기본 이동, 시작과 종료"
 series: "Vim 마스터하기"
 seriesOrder: 1
 tags: [vim, editor, basics, modes]
+draft: true
 ---
 
 > **Vim 마스터하기** Chapter 1: 기초

@@ -5,6 +5,7 @@ description: "데이터를 노드들에 어떻게 나눌 것인가 — Key range
 tags: [DDIA, Partitioning, Sharding, Consistent Hashing]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 6
+draft: true
 ---
 
 ## 이 챕터의 메시지

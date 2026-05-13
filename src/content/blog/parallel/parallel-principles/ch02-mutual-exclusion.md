@@ -8,6 +8,7 @@ tags: [parallel, concurrency, book-review, amp, mutual-exclusion, peterson, bake
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
+draft: true
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 2 요약

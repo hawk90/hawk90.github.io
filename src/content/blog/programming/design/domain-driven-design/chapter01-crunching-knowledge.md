@@ -5,6 +5,7 @@ description: "도메인 지식을 코드로 — 끊임없는 학습 / 모델링 
 tags: [DDD, Knowledge, Modeling]
 series: "Domain-Driven Design"
 seriesOrder: 1
+draft: true
 ---
 
 ## 지식 탐구의 시작

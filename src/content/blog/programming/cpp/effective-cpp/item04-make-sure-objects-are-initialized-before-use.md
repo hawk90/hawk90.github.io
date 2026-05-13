@@ -5,6 +5,7 @@ description: "내장 타입 비초기화 함정, 멤버 초기화 리스트, 초
 tags: [C++, Effective C++, Initialization]
 series: "Effective C++"
 seriesOrder: 4
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

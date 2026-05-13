@@ -5,6 +5,7 @@ description: "4 pillars — Regression / Refactoring / Fast feedback / Maintaina
 tags: [TDD, Four Pillars]
 series: "Khorikov Unit Testing"
 seriesOrder: 4
+draft: true
 ---
 
 좋은 단위 테스트를 판단하는 객관적 기준이 있을까? Khorikov는 4가지 기둥(pillar)을 제시한다.

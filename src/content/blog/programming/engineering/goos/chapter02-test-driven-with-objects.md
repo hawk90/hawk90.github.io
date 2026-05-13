@@ -5,6 +5,7 @@ description: "객체와 협력 — Tell Don't Ask. 역할 / 책임 중심 설계
 tags: [TDD, OO, Tell Don't Ask]
 series: "Growing Object-Oriented Software"
 seriesOrder: 2
+draft: true
 ---
 
 TDD와 객체지향은 자연스럽게 결합된다. 객체의 협력 관계를 테스트가 발견하고, 테스트가 좋은 객체 설계를 이끈다.

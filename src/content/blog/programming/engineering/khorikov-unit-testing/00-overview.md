@@ -5,6 +5,7 @@ description: "Vladimir Khorikov의 모던 단위 테스트 가이드. classicist
 tags: [TDD, Unit Testing, Khorikov, Series]
 series: "Khorikov Unit Testing"
 seriesOrder: 0
+draft: true
 ---
 
 ## 이 시리즈에 대하여

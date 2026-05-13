@@ -5,7 +5,7 @@ description: "한 줄에 여러 변수를 선언할 때의 함정 — 포인터/
 tags: [C++, Declarations, Code Style]
 series: "Beautiful C++"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

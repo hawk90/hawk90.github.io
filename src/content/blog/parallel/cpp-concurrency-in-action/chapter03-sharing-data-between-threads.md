@@ -5,6 +5,7 @@ description: "race condition, std::mutex, lock guard, deadlock 회피, std::shar
 tags: [C++, Concurrency, Mutex, Race Condition, Deadlock]
 series: "C++ Concurrency in Action"
 seriesOrder: 3
+draft: true
 ---
 
 스레드가 데이터를 공유하는 순간 문제가 시작된다. 이 장에서는 race condition의 본질, `std::mutex`로 보호하는 방법, deadlock을 피하는 전략을 다룬다.

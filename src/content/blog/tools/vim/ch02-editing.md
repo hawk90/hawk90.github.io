@@ -5,6 +5,7 @@ description: "삽입, 삭제, 복사, 붙여넣기, 변경 명령어"
 series: "Vim 마스터하기"
 seriesOrder: 2
 tags: [vim, editor, editing, commands]
+draft: true
 ---
 
 > **Vim 마스터하기** Chapter 2: 편집 명령어

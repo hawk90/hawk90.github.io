@@ -5,6 +5,7 @@ description: "Operating Systems: Three Easy Pieces 핵심 요약"
 series: "Operating Systems: Three Easy Pieces"
 seriesOrder: 0
 tags: [ostep, operating-systems, virtualization, concurrency, persistence]
+draft: true
 ---
 
 > **Operating Systems: Three Easy Pieces** 시리즈 개요

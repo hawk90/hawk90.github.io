@@ -5,6 +5,7 @@ description: "객체 생성을 서브클래스에 맡기기 — 어떤 타입을
 tags: [Design Pattern, GoF, C++, C, Creational]
 series: "GoF Design Patterns"
 seriesOrder: 3
+draft: true
 ---
 
 ## 한 줄 요약

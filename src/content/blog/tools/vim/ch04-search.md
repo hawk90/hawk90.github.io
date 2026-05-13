@@ -5,6 +5,7 @@ description: "패턴 검색, 치환, 정규표현식"
 series: "Vim 마스터하기"
 seriesOrder: 4
 tags: [vim, editor, search, replace, regex]
+draft: true
 ---
 
 > **Vim 마스터하기** Chapter 4: 검색과 치환

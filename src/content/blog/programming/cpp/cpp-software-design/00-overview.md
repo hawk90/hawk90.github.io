@@ -5,6 +5,7 @@ description: "Klaus Iglberger의 39 가이드라인. 모던 C++로 다시 쓰는
 tags: [C++, Software Design, Design Patterns, Modern C++]
 series: "C++ Software Design"
 seriesOrder: 0
+draft: true
 ---
 
 ## 왜 이 책인가

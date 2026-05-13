@@ -5,6 +5,7 @@ description: "데이터를 어떻게 표현할 것인가 — Relational, Documen
 tags: [DDIA, DataModel, Relational, Document, Graph]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 2
+draft: true
 ---
 
 ## 이 챕터의 메시지

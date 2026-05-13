@@ -5,6 +5,7 @@ description: "const 위치별 의미, 멤버 함수의 const, bitwise vs logical
 tags: [C++, Effective C++, const]
 series: "Effective C++"
 seriesOrder: 3
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

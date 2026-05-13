@@ -5,6 +5,7 @@ description: "전처리기 매크로의 네 가지 문제와 컴파일러가 다
 tags: [C++, Effective C++, Preprocessor]
 series: "Effective C++"
 seriesOrder: 2
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

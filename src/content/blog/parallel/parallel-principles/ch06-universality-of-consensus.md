@@ -8,6 +8,7 @@ tags: [parallel, concurrency, book-review, amp, universal-construction, cas]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
+draft: true
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 6 요약

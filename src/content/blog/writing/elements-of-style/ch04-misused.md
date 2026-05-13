@@ -8,6 +8,7 @@ tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
+draft: true
 ---
 
 > **The Elements of Style** Chapter 4 요약

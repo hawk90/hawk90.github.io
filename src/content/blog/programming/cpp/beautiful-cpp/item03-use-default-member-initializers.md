@@ -5,7 +5,7 @@ description: "Default Member Initializer로 초기값을 선언부에 모으는 
 tags: [C++, Initialization, Constructor]
 series: "Beautiful C++"
 seriesOrder: 3
-draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

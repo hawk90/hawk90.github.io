@@ -5,6 +5,7 @@ description: "Google Test, pytest, Mock 라이브러리. C++과 Python 테스트
 tags: [TDD, Tools, GoogleTest, pytest]
 series: "Growing Object-Oriented Software"
 seriesOrder: 3
+draft: true
 ---
 
 TDD를 실천하려면 적절한 도구가 필요하다. C++과 Python 환경에서 사용하는 테스트 프레임워크와 Mock 라이브러리를 살펴본다.

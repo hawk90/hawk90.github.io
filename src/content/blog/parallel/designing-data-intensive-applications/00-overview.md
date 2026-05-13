@@ -5,6 +5,7 @@ description: "Martin Kleppmann의 분산 데이터 시스템 정전. 신뢰성·
 tags: [Distributed Systems, Database, DDIA, Kleppmann, Series]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 0
+draft: true
 ---
 
 ## 책 소개
