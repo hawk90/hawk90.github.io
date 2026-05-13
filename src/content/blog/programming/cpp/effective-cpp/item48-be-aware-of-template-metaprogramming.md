@@ -7,9 +7,21 @@ series: "Effective C++"
 seriesOrder: 48
 ---
 
+## 왜 이 항목이 중요한가?
+
+**Template Metaprogramming (TMP)** 은 C++ 템플릿 시스템이 우연히 **Turing-complete**라는 발견에서 시작된 영역이다. 컴파일 시점에 코드를 생성하고 계산해서 **런타임 비용 0의 추상화**를 만든다.
+
+옛 TMP는 재귀 템플릿과 부분 특수화로 풀어 가독성이 끔찍했다. 모던 C++가 등장하면서 거의 모든 게 더 깔끔해졌다.
+
+- **C++11+ `constexpr`** — 일반 함수로 컴파일 타임 계산.
+- **C++17 `if constexpr`** — 정적 분기를 if 문 형태로.
+- **C++20 concepts, `consteval`** — 인터페이스 명시, 컴파일 타임 강제.
+
+그렇다고 TMP가 사라진 건 아니다. 표준 라이브러리(`<type_traits>`, `iterator_traits`, allocator 어댑터)는 여전히 TMP 패턴 위에 서 있다. 이 항목은 TMP의 핵심 패턴(트레이트, 정적 분기, 타입 변환)과 모던 C++의 대체 도구를 정리한다.
+
 ## 개요
 
-**Template Metaprogramming (TMP)** — 컴파일 시점에 코드를 생성·계산하는 기법. C++ 템플릿 시스템이 우연히 **Turing-complete**라는 발견에서 시작된 영역으로, 런타임 비용 0의 추상화를 가능하게 합니다. C++11+의 `constexpr` 함수, C++17의 `if constexpr`, C++20의 concepts·`consteval`이 많은 부분을 단순화했지만 — TMP의 핵심 패턴(트레이트, 정적 분기, 타입 변환)은 여전히 표준 라이브러리의 기반.
+**Template Metaprogramming (TMP)** 는 컴파일 시점에 코드를 생성·계산하는 기법이다. C++ 템플릿 시스템이 우연히 **Turing-complete**라는 발견에서 시작된 영역으로, 런타임 비용 0의 추상화를 가능하게 한다. C++11+의 `constexpr` 함수, C++17의 `if constexpr`, C++20의 concepts·`consteval`이 많은 부분을 단순화했지만 TMP의 핵심 패턴(트레이트, 정적 분기, 타입 변환)은 여전히 표준 라이브러리의 기반이다.
 
 ## 필수 개념: 왜 컴파일 타임 계산인가
 
