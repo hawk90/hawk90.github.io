@@ -1,13 +1,95 @@
 ---
 title: "Chapter 1: Welcome to Software Construction"
-date: 2026-05-13
-description: "Welcome to Software Construction"
+date: 2026-06-20T01:00:00
+description: "소프트웨어 construction이란 무엇인가 — 코딩과 디버깅을 중심으로 한 활동들. 전체 개발 과정에서의 위치와 중요성."
 series: "Code Complete"
 seriesOrder: 1
-tags: [software-construction, code-complete]
-draft: true
+tags: [software-construction, code-complete, McConnell]
 ---
 
-> **Code Complete** Chapter 1 요약
+## 이 챕터의 메시지
 
-(작성 예정)
+Steve McConnell이 책의 첫 챕터에서 정의를 명확히 한다 — **"construction"이란 무엇을 가리키는가?** 일반적으로 소프트웨어 개발은 요구사항·아키텍처·설계·구현·테스트·유지보수 같은 단계로 나뉜다. 이 중 "construction"은 **코딩, 디버깅, 단위 테스트, 통합**을 중심으로 한 활동을 가리킨다.
+
+> Construction은 전체 개발 시간의 **30~80%**, 결함의 **50% 이상**이 만들어지고 발견되는 단계다.
+
+다른 단계보다 덜 화려해 보이지만 — **가장 자주 일어나고, 가장 큰 영향을 주는 단계**다. 책 전체가 이 한 단계를 어떻게 잘할 것인가에 집중한다.
+
+## 핵심 내용
+
+- "Construction"은 코딩·디버깅 중심 활동이다. 요구사항이나 시스템 테스트는 제외.
+- 전체 시간의 30~80%, 결함의 50%+가 이 단계에서 발생한다.
+- 다른 단계 산출물이 사라져도 **코드는 남는다** — construction이 시스템의 본질이다.
+- "프로그래머의 일상 작업"이 곧 construction이다.
+
+## Construction의 범위
+
+McConnell은 construction에 들어가는 활동을 명확히 나열한다.
+
+- **상세 설계** — 클래스, 함수, 자료구조 수준의 설계.
+- **코딩** — 실제 코드 작성.
+- **디버깅** — 작성한 코드의 문제 찾기·고치기.
+- **단위 테스트** — 작성자가 직접 짜는 테스트.
+- **통합** — 작성한 부분을 다른 부분과 연결.
+- **통합 테스트** — 통합 후 시스템 검증.
+
+요구사항 수집, 아키텍처, 시스템 테스트, 운영은 **construction 밖**의 활동이다.
+
+## 왜 construction이 중요한가
+
+### 가장 큰 시간 비중
+
+McConnell이 인용하는 연구들은 소프트웨어 개발 시간의 30~80%가 construction에 쓰인다고 말한다. 어떤 프로젝트도 이보다 작은 비중이 드물다.
+
+### 가장 큰 결함 발생 단계
+
+결함의 절반 이상이 construction에서 만들어지고, 그 자리에서 발견된다. 이게 의미하는 바는 두 가지다.
+
+- **개선의 여지가 크다** — 잘하면 결함이 크게 줄어든다.
+- **테스트만으론 부족하다** — construction 단계의 품질이 결정적이다.
+
+### 코드는 시스템의 본질
+
+설계 문서, 회의록, 명세서 — 모두 시간이 지나면 사라지거나 코드와 어긋난다. **코드는 시스템의 유일한 신뢰할 수 있는 표현**이다. 그러므로 코드의 품질이 시스템의 품질이다.
+
+### 한 번 더 — 매일 하는 활동
+
+기획자, 디자이너, 매니저는 자기 단계가 끝나면 다른 일을 한다. 프로그래머는 **매일 construction을 한다**. 이 활동을 잘하는 것이 곧 직업적 능력이다.
+
+## Construction이 잘되어야 다른 단계도 잘된다
+
+McConnell이 강조하는 점이 있다. 좋은 construction은 **다른 단계의 결함도 보완**한다.
+
+- 요구사항이 모호해도, 좋은 코더는 그 안에서 일관성을 찾는다.
+- 설계가 부적절해도, 좋은 코드는 그 결함을 드러내고 수정 가능하게 한다.
+- 반대로 — construction이 나쁘면, 다른 단계가 아무리 잘되어도 시스템이 무너진다.
+
+이건 다른 단계가 안 중요하다는 게 아니다. **construction이 다른 단계의 결과를 현실로 만든다**는 의미다.
+
+## 이 책이 다루는 것
+
+이 책은 construction 단계의 **모든 측면**을 다룬다.
+
+- 변수 이름 짓기, 함수 설계.
+- 클래스 구성, 자료구조 선택.
+- 제어 흐름, 조건문, 루프.
+- 디버깅과 단위 테스트.
+- 통합, 도구, 협업.
+- 코드 품질, 성능 튜닝.
+
+35개 챕터, 약 900페이지. 그러나 모든 챕터는 한 메시지로 수렴한다 — **construction의 모든 작은 결정이 시스템의 운명을 결정한다**.
+
+## 정리
+
+- "Construction"은 **코딩·디버깅·단위 테스트·통합** 중심의 일상 활동.
+- 시간의 30~80%, 결함의 50%+가 여기서 발생.
+- 코드는 시스템의 **유일한 신뢰할 수 있는 표현**이다.
+- 좋은 construction이 다른 단계의 약점을 보완한다.
+- 이 책은 construction의 모든 측면을 35개 챕터로 다룬다.
+
+다음 챕터부터는 — **construction을 어떻게 생각해야 하는가**(은유)부터 시작한다.
+
+## 관련 항목
+
+- [Ch 2: 풍부한 이해를 위한 은유](/blog/programming/engineering/code-complete/ch02-Metaphors-for-a-Richer-Understanding) — construction의 비유들
+- [Clean Code Ch 1: 클린 코드](/blog/programming/engineering/clean-code/chapter01-clean-code) — 같은 활동에 대한 다른 시각
