@@ -7,9 +7,19 @@ series: "Effective Modern C++"
 seriesOrder: 18
 ---
 
+## 왜 이 항목이 중요한가?
+
+Modern C++에서 동적 할당이 필요한 자리는 거의 모두 스마트 포인터로 표현된다. 그중에서도 **독점 소유**가 가장 흔하다. 즉 "이 자원을 가지는 객체는 하나뿐이고, 그 객체가 사라질 때 자원도 해제된다"는 의미다.
+
+`std::unique_ptr`는 이 의미를 표현하는 표준 도구다. 핵심은 다음 세 가지다.
+
+- 일반 포인터와 거의 같은 크기(보통 8 byte)와 속도.
+- 복사 불가 / 이동 가능 — 소유권 의미가 코드에 강제된다.
+- `shared_ptr`로 한 줄 변환 가능 — 팩토리 함수 반환 타입으로 가장 유연하다.
+
 ## 개요
 
-`std::unique_ptr`는 **독점 소유**(exclusive ownership)를 표현하는 스마트 포인터. 일반 포인터와 거의 같은 크기·속도이면서 자동 해제 보장. **팩토리 함수의 기본 반환 타입**으로 가장 적합.
+`std::unique_ptr`는 **독점 소유**(exclusive ownership)를 표현하는 스마트 포인터다. 일반 포인터와 거의 같은 크기·속도이면서 자동 해제를 보장한다. **팩토리 함수의 기본 반환 타입**으로 가장 적합하다.
 
 ## 필수 개념: 소유권 모델
 
@@ -17,7 +27,7 @@ seriesOrder: 18
 
 <br>
 
-스마트 포인터는 자원의 **소유권**을 명시적으로 표현:
+스마트 포인터는 자원의 **소유권**을 명시적으로 표현한다.
 
 | 모델 | 표현 | 의미 |
 | --- | --- | --- |
@@ -25,7 +35,7 @@ seriesOrder: 18
 | **공유 소유** | `shared_ptr<T>` | 여러 객체가 공유 — 마지막 사라지면 해제 |
 | **약한 참조** | `weak_ptr<T>` | shared_ptr를 관찰만 — 소유권 X |
 
-→ **독점 = 가장 단순 + 가장 효율적**. 거의 모든 동적 자원 보유의 default.
+**독점 = 가장 단순 + 가장 효율적**이다. 거의 모든 동적 자원 보유의 default다.
 
 ## 기본 사용
 
@@ -40,8 +50,8 @@ p->doSomething();
 
 ## 독점 소유의 의미
 
-- **복사 불가** — copy ctor/assignment = `delete`
-- **이동 가능** — 소유권을 다른 unique_ptr로 넘김
+- **복사 불가** — copy ctor/assignment = `delete`.
+- **이동 가능** — 소유권을 다른 unique_ptr로 넘긴다.
 
 ```cpp
 auto p1 = std::make_unique<Widget>();
@@ -49,7 +59,7 @@ auto p2 = p1;            // 에러! 복사 불가
 auto p3 = std::move(p1); // OK — p1은 nullptr가 됨
 ```
 
-이게 "독점"의 핵심 — 동시에 두 ptr가 같은 자원 못 가짐.
+이게 "독점"의 핵심이다. 동시에 두 ptr가 같은 자원을 못 가진다.
 
 ## 크기 — 일반 포인터와 거의 같음
 
@@ -57,9 +67,9 @@ auto p3 = std::move(p1); // OK — p1은 nullptr가 됨
 sizeof(std::unique_ptr<Widget>);   // 보통 sizeof(Widget*) — 8 byte (64-bit)
 ```
 
-오버헤드 거의 없음. 호출도 인라인 — raw pointer와 같은 코드 생성.
+오버헤드가 거의 없다. 호출도 인라인이 된다. raw pointer와 같은 코드가 생성된다.
 
-(예외: 커스텀 deleter 보유하면 deleter 크기만큼 추가.)
+(예외: 커스텀 deleter를 보유하면 deleter 크기만큼 추가된다.)
 
 ## 팩토리 함수 패턴
 
@@ -85,14 +95,14 @@ inv->doStuff();
 // 자동 해제
 ```
 
-`shared_ptr`로 바꾸기도 쉬움 — `unique_ptr`는 `shared_ptr`로 **암묵 변환**:
+`shared_ptr`로 바꾸기도 쉽다. `unique_ptr`는 `shared_ptr`로 **암묵 변환**된다.
 
 ```cpp
 std::shared_ptr<Investment> shared = makeInvestment(/* ... */);
                                       // unique_ptr → shared_ptr 자동 변환
 ```
 
-→ **팩토리는 unique_ptr 반환**이 가장 유연.
+**팩토리는 unique_ptr 반환**이 가장 유연하다.
 
 ## 커스텀 deleter
 
@@ -105,7 +115,7 @@ auto delInv = [](Investment* p) {
 std::unique_ptr<Investment, decltype(delInv)> inv(new Stock(...), delInv);
 ```
 
-deleter **타입이 unique_ptr 타입의 일부**가 되므로 시그니처가 길어짐.
+deleter **타입이 unique_ptr 타입의 일부**가 되므로 시그니처가 길어진다.
 
 ### 함수 포인터 deleter — 객체 크기 ↑
 
@@ -127,7 +137,7 @@ std::unique_ptr<Investment, decltype(delInv)> inv(new Stock, delInv);
 sizeof(inv);   // 8 byte — 캡처 없는 람다는 stateless
 ```
 
-→ **함수 포인터보다 람다 권장**.
+**함수 포인터보다 람다를 권장**한다.
 
 ### 캡처 있는 람다 — 크기 ↑
 
@@ -148,15 +158,15 @@ arr[0] = 1;                                 // operator[]
                                             // operator-> / operator* 없음
 ```
 
-다만 `std::array`, `std::vector`가 거의 항상 더 나은 선택. `unique_ptr<T[]>`는 C API 호환 같은 특수 경우만.
+다만 `std::array`, `std::vector`가 거의 항상 더 나은 선택이다. `unique_ptr<T[]>`는 C API 호환 같은 특수 경우에만 쓴다.
 
 ## 표준 라이브러리에서
 
-`unique_ptr`는 표준 곳곳에:
+`unique_ptr`는 표준 곳곳에 쓰인다.
 
-- **Pimpl**의 표준 ([항목 22](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file))
-- 팩토리 함수 표준 반환 타입
-- `std::function`이 큰 함수 객체 보유할 때
+- **Pimpl**의 표준 ([항목 22](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file)).
+- 팩토리 함수 표준 반환 타입.
+- `std::function`이 큰 함수 객체를 보유할 때.
 
 ## `unique_ptr`의 두 형태 (요약)
 
@@ -174,12 +184,13 @@ auto p = std::make_unique<Widget>(args);     // 권장
 std::unique_ptr<Widget> q(new Widget(args)); // 권장 X
 ```
 
-이유 ([항목 21](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new) 참고):
-1. **예외 안전**
-2. **타입 중복 제거** (`Widget` 한 번만)
-3. **shared_ptr와 일관성**
+이유는 다음과 같다 ([항목 21](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new) 참고).
 
-C++11엔 `make_unique` 없음 — 직접 작성:
+1. **예외 안전**.
+2. **타입 중복 제거** (`Widget` 한 번만).
+3. **shared_ptr와 일관성**.
+
+C++11엔 `make_unique`가 없다. 직접 작성한다.
 
 ```cpp
 template<typename T, typename... Ts>
@@ -200,11 +211,11 @@ p.reset(new Widget);          // 기존 자원 해제 + 새 자원 보유
 p.reset();                    // 자원 해제 + nullptr
 ```
 
-`release()`는 자원 해제 안 함 — 호출자에게 책임 넘김.
+`release()`는 자원을 해제하지 않는다. 호출자에게 책임을 넘긴다.
 
 ## 함정 — 사이클 (cycles)
 
-`unique_ptr`만으로는 사이클 안 만들어짐 (한 ptr만 가능). 대신 raw pointer로 부모를 가리키는 패턴:
+`unique_ptr`만으로는 사이클이 만들어지지 않는다 (한 ptr만 가능). 대신 raw pointer로 부모를 가리키는 패턴을 쓴다.
 
 ```cpp
 struct Node {
@@ -213,18 +224,19 @@ struct Node {
 };
 ```
 
-`shared_ptr` 사이클은 `weak_ptr`로 ([항목 19, 20](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership)).
+`shared_ptr` 사이클은 `weak_ptr`로 해결한다 ([항목 19, 20](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership)).
 
 ## 핵심 정리
 
-1. **독점 소유 RAII의 표준 도구** — 일반 포인터와 거의 같은 비용
-2. **`make_unique`로 생성** ([항목 21](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new))
-3. **shared_ptr로 한 줄 변환** 가능 — 팩토리 반환 타입으로 적합
-4. 커스텀 deleter는 타입에 박힘 — 람다(stateless) 권장
-5. 배열은 `vector`/`array`가 보통 더 나음
+1. **독점 소유 RAII의 표준 도구**다. 일반 포인터와 거의 같은 비용이다.
+2. **`make_unique`로 생성**한다 ([항목 21](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new)).
+3. **shared_ptr로 한 줄 변환** 가능하다. 팩토리 반환 타입으로 적합하다.
+4. 커스텀 deleter는 타입에 박힌다. 람다(stateless)를 권장한다.
+5. 배열은 `vector`/`array`가 보통 더 낫다.
 
 ## 관련 항목
 
+- [항목 17: 특수 멤버 자동 생성](/blog/programming/cpp/effective-modern-cpp/item17-understand-special-member-function-generation) — unique_ptr이 RAII로 자원 관리를 위임
 - [항목 19: shared_ptr](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership) — 공유 소유
 - [항목 21: `make_unique`/`make_shared`](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new)
 - [항목 22: Pimpl](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file)
