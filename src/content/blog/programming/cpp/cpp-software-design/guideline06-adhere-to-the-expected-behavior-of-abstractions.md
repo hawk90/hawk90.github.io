@@ -1,7 +1,7 @@
 ---
 title: "가이드라인 6: 추상화의 기대 동작을 준수하라"
 date: 2026-05-13T16:00:00
-description: "Liskov Substitution Principle — 인터페이스는 시그니처만이 아니라 의미·계약·불변식. derived는 base의 약속을 모두 지켜야."
+description: "Liskov Substitution Principle. 인터페이스는 시그니처만이 아니라 의미·계약·불변식까지 포함한다는 이야기."
 tags: [C++, Software Design, SOLID, LSP, Liskov]
 series: "C++ Software Design"
 seriesOrder: 6
@@ -20,32 +20,32 @@ public:
     void fly() override { throw std::logic_error("penguins can't fly"); }
 };
 
-void migrate(Bird& b) { b.fly(); }     // Bird 받으면 날린다 — 합리적
+void migrate(Bird& b) { b.fly(); }     // Bird를 받으면 날린다. 합리적이다.
 
 Penguin p;
-migrate(p);     // ⚠️ 런타임 에러 — Penguin은 Bird를 대체 못 함
+migrate(p);     // ⚠️ 런타임 에러. Penguin은 Bird를 대체할 수 없다.
 ```
 
-문제 — `Penguin`이 컴파일러 입장에선 `Bird`의 derived이지만, **의미적으로는 Bird의 약속을 못 지킴**.
+문제는 분명하다. `Penguin`은 컴파일러 입장에서는 `Bird`의 derived이지만, 의미적으로는 `Bird`의 약속을 지키지 못한다.
 
-이게 **Liskov Substitution Principle**(LSP)의 본질. 인터페이스 = **시그니처 + 의미 + 계약 + 불변식**. 시그니처만 일치하는 게 — 진짜 derived가 아니다.
+이것이 **Liskov Substitution Principle(LSP)** 의 본질이다. 인터페이스는 시그니처에 의미와 계약과 불변식까지 더해진 약속이다. 시그니처만 일치한다고 진짜 derived가 되는 것은 아니다.
 
-Iglberger는 이 가이드라인에서 — "추상화의 기대 동작"이 무엇인지, 어떻게 정의하고 검증할지를 다룬다.
+Iglberger는 이 가이드라인에서 "추상화의 기대 동작"이 무엇인지, 그것을 어떻게 정의하고 검증할지를 다룬다.
 
 ## 핵심 내용
 
-- **Liskov Substitution Principle**(LSP) — derived는 base가 쓰이는 모든 곳에서 동작해야
-- 추상화는 — **시그니처 + 의미 + 계약(pre/post condition) + 불변식**
-- 컴파일러는 시그니처만 검사 — **의미적 준수는 사람**
-- LSP 위반의 흔한 형태:
-  - throw "not supported"
-  - 사전조건 강화 (입력 범위 축소)
-  - 사후조건 약화 (반환 보장 축소)
+- **LSP** — derived는 base가 쓰이는 모든 자리에서 동작해야 한다.
+- 추상화는 **시그니처 + 의미 + 계약(pre/post condition) + 불변식**으로 구성된다.
+- 컴파일러는 시그니처만 검사한다. 의미적 준수는 사람의 책임이다.
+- LSP 위반의 흔한 형태는 다음과 같다.
+  - `throw "not supported"`
+  - 사전조건 강화(입력 범위 축소)
+  - 사후조건 약화(반환 보장 축소)
   - 불변식 깨기
 
-## 비교 — LSP 위반 vs 만족
+## 비교 — LSP 위반과 만족
 
-### Bad: 의미적 LSP 위반
+### Bad — 의미적 LSP 위반
 
 ```cpp
 class Rectangle {
@@ -67,18 +67,18 @@ public:
 void makeBigger(Rectangle& r) {
     int oldHeight = r.getHeight();
     r.setWidth(r.getWidth() + 10);
-    assert(r.getHeight() == oldHeight);     // ⚠️ Square엔 깨짐
+    assert(r.getHeight() == oldHeight);     // ⚠️ Square에서는 깨진다
 }
 ```
 
-수학적으로 — "Square ⊂ Rectangle" 맞음. 그러나 **변경 가능한 객체 모델**에선 — `Rectangle.setWidth`의 약속(width만 변경)을 Square가 깸. LSP 위반.
+수학적으로 보면 "Square ⊂ Rectangle"이 맞다. 그러나 변경 가능한 객체 모델에서는 `Rectangle::setWidth`가 가진 약속("width만 바꾼다")을 `Square`가 깬다. LSP 위반이다.
 
-`makeBigger`가 `Rectangle&`를 받지만 `Square`를 넘기면 — assertion 실패.
+`makeBigger`가 `Rectangle&`를 받지만 `Square`를 넘기면 assertion이 무너진다.
 
-### Good: 분리 또는 불변 객체
+### Good — 분리하거나 불변 객체로 둔다
 
 ```cpp
-// 옵션 1: Square가 Rectangle을 대체하지 않음 — 형제 관계
+// 옵션 1 — Square가 Rectangle을 대체하지 않는 형제 관계로 둔다
 class Shape {
 public:
     virtual ~Shape() = default;
@@ -88,7 +88,7 @@ public:
 class Rectangle : public Shape { /* ... */ };
 class Square    : public Shape { /* ... */ };
 
-// 옵션 2: 불변 객체 — 변경 자체 없음
+// 옵션 2 — 불변 객체로 두면 변경 자체가 없으니 LSP가 깨질 일도 없다
 class Rectangle {
     const int width_, height_;
 public:
@@ -99,20 +99,19 @@ class Square : public Rectangle {
 public:
     explicit Square(int side) : Rectangle(side, side) {}
 };
-// 변경 없으니 — LSP OK
 ```
 
-수학적 IS-A ≠ 객체 지향 IS-A. 객체 지향에선 — **계약 호환**이 IS-A.
+수학적 IS-A와 객체 지향의 IS-A는 같지 않다. 객체 지향에서 IS-A는 **계약 호환**이다.
 
-## LSP의 형식 정의 — 4가지 조건
+## LSP의 형식 정의 — 네 가지 조건
 
-Liskov & Wing (1994):
+Liskov와 Wing(1994)이 정리한 조건은 다음과 같다.
 
-derived class T가 base class S를 대체할 수 있으려면:
+derived class T가 base class S를 대체할 수 있으려면 아래 네 조건을 모두 지켜야 한다.
 
-### 1) 사전 조건(precondition)을 강화하지 마라
+### 1) 사전조건(precondition)을 강화하지 마라
 
-base가 더 넓은 입력을 받는데, derived가 좁게 받으면 — 호출자가 base 기대해서 넓은 입력 줬을 때 깨짐.
+base가 더 넓은 입력을 받는데 derived가 좁게 받으면, 호출자가 base를 기대해서 넓은 입력을 넘긴 순간 깨진다.
 
 ```cpp
 class Base {
@@ -123,39 +122,39 @@ public:
 
 class Derived : public Base {
 public:
-    // pre: x > 0  (강화 — 0이 제외됨)
+    // pre: x > 0  (강화됐다. 0이 제외됐다)
     void process(int x) override {
-        if (x == 0) throw "invalid";     // ⚠️ Base는 0 허용
+        if (x == 0) throw "invalid";     // ⚠️ Base는 0을 허용한다
     }
 };
 
 void caller(Base& b) {
-    b.process(0);     // Base 기대 — OK
-                      // Derived면 throw — 깨짐
+    b.process(0);     // Base 기대로는 OK이지만
+                      // Derived라면 throw — 깨진다
 }
 ```
 
-### 2) 사후 조건(postcondition)을 약화하지 마라
+### 2) 사후조건(postcondition)을 약화하지 마라
 
-base가 어떤 결과를 보장하는데, derived가 덜 보장하면 — 호출자 기대 깨짐.
+base가 어떤 결과를 보장하는데 derived가 덜 보장하면, 호출자의 기대가 무너진다.
 
 ```cpp
 class Base {
 public:
-    // post: 반환값은 양수
+    // post: 반환값은 양수다
     virtual int compute();
 };
 
 class Derived : public Base {
 public:
-    // post: 반환값은 정수 (양수 보장 X)  — 약화
-    int compute() override { return -1; }     // ⚠️ Base는 양수 약속
+    // post: 반환값은 정수다(양수 보장 없음) — 약화됐다
+    int compute() override { return -1; }     // ⚠️ Base는 양수를 약속했다
 };
 ```
 
 ### 3) 불변식(invariant)을 깨지 마라
 
-base의 불변식을 — derived는 항상 유지해야 한다.
+base가 늘 만족시키는 불변식을 derived도 유지해야 한다.
 
 ```cpp
 class Account {
@@ -167,19 +166,19 @@ public:
 class OverdraftAccount : public Account {
 public:
     void withdraw(int amount) override {
-        balance_ -= amount;     // ⚠️ balance가 음수 가능 — Account 불변식 깸
+        balance_ -= amount;     // ⚠️ balance가 음수가 될 수 있다. Account 불변식이 깨진다
     }
 };
 ```
 
 ### 4) 새로운 예외를 던지지 마라
 
-base가 던지지 않는 예외를 — derived가 던지면, 사용자가 처리 못 함.
+base가 던지지 않는 예외를 derived가 던지면 사용자가 처리할 길이 없다.
 
 ```cpp
 class Base {
 public:
-    virtual void process(int x);     // 예외 던지지 않음
+    virtual void process(int x);     // 예외를 던지지 않는다
 };
 
 class Derived : public Base {
@@ -190,13 +189,13 @@ public:
 };
 
 void caller(Base& b) {
-    b.process(-1);     // Base는 예외 X 기대 — Derived면 catch 못 함
+    b.process(-1);     // Base는 예외가 없을 거라고 기대 — Derived라면 잡지도 못한다
 }
 ```
 
-(C++에선 `noexcept` 명시로 일부 검증 가능, 그러나 의미적 보장은 별개)
+C++에서는 `noexcept` 명시로 일부를 검증할 수 있지만, 의미적 보장은 별개다.
 
-## 시그니처만으로는 부족 — 의미가 본질
+## 시그니처만으로는 부족하다 — 의미가 본질이다
 
 ```cpp
 class Collection {
@@ -208,24 +207,24 @@ public:
 class UniqueCollection : public Collection {
 public:
     void add(int x) override {
-        if (!contains(x)) Collection::add(x);     // 중복 거부
+        if (!contains(x)) Collection::add(x);     // 중복을 거부한다
     }
 };
 ```
 
-시그니처 일치, 다만 — `add` 후 `size()`가 항상 +1이라는 **암묵적 계약**을 깸. 사용자가:
+시그니처는 일치한다. 그런데 "`add` 후에는 `size()`가 항상 1 증가한다"는 암묵적 계약을 `UniqueCollection`이 깬다.
 
 ```cpp
 void process(Collection& c) {
     size_t before = c.size();
     c.add(42);
-    assert(c.size() == before + 1);     // ⚠️ UniqueCollection이면 깨짐
+    assert(c.size() == before + 1);     // ⚠️ UniqueCollection이라면 깨진다
 }
 ```
 
-이게 — **암묵 계약**(implicit contract). 시그니처에 안 적힘, 그러나 사용자가 기대.
+이런 것을 **암묵적 계약(implicit contract)** 이라 부른다. 시그니처에 적혀 있지는 않지만 사용자가 기대하는 약속이다.
 
-## 계약을 어디에 명시?
+## 계약을 어디에 적어 둘까
 
 ```cpp
 class Account {
@@ -239,15 +238,16 @@ public:
 };
 ```
 
-문서 주석으로 — pre/post/throw 명시. derived 작성자가 이 계약을 — 코드로 + 문서로 준수.
+문서 주석으로 pre, post, throws를 명시한다. derived 작성자가 이 계약을 코드와 문서로 함께 준수한다.
 
-도구:
-- **Doxygen** `@pre @post @invariant @throws` — 표준 문서화
-- **`assert`** — 런타임 검증 (debug mode)
-- **`static_assert`** — 컴파일 타임 검증 (타입 수준)
-- **C++ Contract proposal** (미래) — 컴파일러가 검증
+도구는 다음이 있다.
 
-C++26+ 표준이 contract 추가 예정 — 그때까지는 주석 + assert.
+- **Doxygen** `@pre @post @invariant @throws` — 표준 문서화 형식
+- **`assert`** — debug 모드에서 런타임 검증
+- **`static_assert`** — 컴파일 타임 검증(타입 수준)
+- **C++ Contract 제안** — 표준화되면 컴파일러가 직접 검증
+
+C++26 이후 표준에 contract가 들어올 예정이다. 그때까지는 주석과 `assert`로 보강한다.
 
 ## 불변식의 표현
 
@@ -256,25 +256,25 @@ class Account {
     int balance_ = 0;
 public:
     /// Invariant: balance_ >= 0
-    
+
     void deposit(int amount) {
         assert(amount >= 0);
         balance_ += amount;
         assert(balance_ >= 0);     // 불변식 검증
     }
-    
+
     void withdraw(int amount) {
         assert(amount >= 0);
         assert(amount <= balance_);     // 사전조건
         balance_ -= amount;
-        assert(balance_ >= 0);          // 불변식 유지
+        assert(balance_ >= 0);          // 불변식이 유지되는지 검증
     }
 };
 ```
 
-각 public 메서드 — 진입 시 사전조건, 종료 시 불변식 검증. 표준 패턴.
+각 public 메서드의 진입부에서 사전조건을 검증하고, 종료부에서 불변식이 유지되는지 확인한다. 표준 패턴이다.
 
-## 함정 — IS-A 자연어 분류
+## 함정 — 자연어식 IS-A 분류
 
 ```cpp
 // 자연어: "정사각형은 직사각형이다"
@@ -282,15 +282,15 @@ public:
 //         "구글은 회사다"
 ```
 
-이런 분류 — 거의 항상 LSP 위반 위험. 객체 지향 IS-A는 — **자연어가 아닌 계약 호환**.
+이런 분류는 거의 항상 LSP 위반의 위험을 안고 있다. 객체 지향의 IS-A는 자연어가 아니라 **계약 호환**이다.
 
-매번 자문: "**Derived가 Base의 모든 약속을 지킬 수 있는가?**"
+매번 자문해 보자. *"Derived가 Base의 모든 약속을 지킬 수 있는가?"*
 
-지키기 어려우면 — 상속이 아니라 composition 또는 형제 관계.
+지키기 어렵다면 상속이 아니라 composition이나 형제 관계로 둔다.
 
 ## LSP와 컴파일러
 
-C++ 컴파일러는 — **시그니처만 검사**:
+C++ 컴파일러는 시그니처만 검사한다.
 
 ```cpp
 class Base {
@@ -300,18 +300,19 @@ public:
 
 class Derived : public Base {
 public:
-    int f(int) override;     // 시그니처 일치 — OK
+    int f(int) override;     // 시그니처가 일치하면 OK
 };
 ```
 
-`override` 키워드도 — 시그니처 검사만. 의미적 LSP 검증은 — 컴파일러 능력 밖.
+`override` 키워드도 시그니처 검사 도구일 뿐이다. 의미적 LSP는 컴파일러의 능력 밖에 있다.
 
-도구:
-- **`override`** — 시그니처 검사 (오타 등)
+쓸 수 있는 도구는 이렇다.
+
+- **`override`** — 시그니처 검사(오타 등을 잡는다)
 - **`final`** — 추가 derived 차단
 - **`assert`** — 런타임 검증
 
-**진짜 검증은 — 코드 리뷰 + 테스트.**
+진짜 검증은 코드 리뷰와 테스트로 한다.
 
 ## C++20 concepts와 LSP
 
@@ -322,18 +323,18 @@ concept Drawable = requires(const T& t) {
 };
 ```
 
-concept이 — **시그니처 명시**. 의미적 계약은 여전히 — 문서 + 테스트.
+concept은 시그니처를 명시한다. 의미적 계약은 여전히 문서와 테스트가 맡는다.
 
 ```cpp
 template<typename T>
 concept Account = requires(T& acc, int amount) {
     { acc.balance() } -> std::convertible_to<int>;
     { acc.deposit(amount) } -> std::same_as<void>;
-    // 의미적: 사용자가 약속 — 사후조건, 불변식
+    // 의미적 약속(사후조건과 불변식)은 사용자가 별도로 책임진다
 };
 ```
 
-C++ contract 표준이 도입되면 — 의미도 일부 표현.
+C++ contract 표준이 들어오면 일부 의미도 표현할 수 있게 된다.
 
 ## 함정 — Empty override
 
@@ -343,71 +344,73 @@ public:
     virtual void breathe();
 };
 
-class Doll : public Animal {     // ⚠️ Doll은 Animal?
+class Doll : public Animal {     // ⚠️ Doll이 Animal인가?
 public:
-    void breathe() override {}     // 아무것도 안 함 — LSP 위반
+    void breathe() override {}     // 아무것도 하지 않는다 — LSP 위반
 };
 ```
 
-derived가 — **아무 동작도 안 함**으로 base 약속 회피. 사용자가 `breathe()` 호출해 효과 기대하는데 안 일어남.
+derived가 아무 동작도 하지 않음으로써 base의 약속을 회피한다. 사용자가 `breathe()`를 호출해 효과를 기대했는데 아무 일도 일어나지 않는다.
 
-해결: 상속 관계 자체 재검토. Doll이 Animal이어야 하는가?
+해법은 상속 관계 자체를 다시 보는 것이다. `Doll`이 `Animal`이어야 할 이유가 있는가?
 
 ## 함정 — 사후조건 약화의 미묘함
 
 ```cpp
 class Container {
 public:
-    /// post: 반환된 iterator는 valid
+    /// post: 반환된 iterator는 valid하다
     virtual Iterator find(int x);
 };
 
 class LazyContainer : public Container {
 public:
-    /// post: 반환된 iterator는 lazy initialized — 첫 접근 시 데이터 fetch
+    /// post: 반환된 iterator는 lazy하다 — 첫 접근 시 데이터를 가져온다
     Iterator find(int x) override {
-        return LazyIterator{this, x};     // ⚠️ Container의 "valid" 의미가 다름?
+        return LazyIterator{this, x};     // ⚠️ Container가 말하는 "valid"의 의미와 같은가?
     }
 };
 ```
 
-"valid iterator"의 정의가 — base와 derived에서 다름. 사용자가 Container 받아 즉시 `*it` 하면 — Container는 즉시 데이터 보장, LazyContainer는 그 시점에 fetch. 사용자 입장에선 OK일 수 있지만 — **timing 차이**가 LSP 위반.
+"valid iterator"의 정의가 base와 derived에서 다르다. 사용자가 `Container`로 받아 즉시 `*it`를 호출하면, `Container`는 즉시 데이터를 보장하지만 `LazyContainer`는 그제야 fetch한다. 사용자 입장에서 문제가 없을 수도 있지만, 타이밍 차이가 LSP 위반을 만든다.
 
 ## 함정 — Refused Bequest
 
-derived가 base의 메서드를 — "사용 안 함" 또는 "의미 없음"으로 처리.
+derived가 base의 메서드를 "사용 안 함"이나 "의미 없음"으로 처리하는 경우다.
 
 ```cpp
 class Stack {
 public:
     virtual void push(int x);
     virtual int pop();
-    virtual int& operator[](size_t i);     // ⚠️ Stack에 index access?
+    virtual int& operator[](size_t i);     // ⚠️ Stack에 인덱스 접근?
 };
 
 class StrictStack : public Stack {
 public:
     int& operator[](size_t i) override {
-        throw "stack does not support random access";     // ⚠️ refused bequest
+        throw "stack does not support random access";     // ⚠️ 거부한다
     }
 };
 ```
 
-→ 인터페이스 자체가 잘못 설계. ISP 위반과 결합.
+이런 경우는 인터페이스 자체의 설계가 잘못된 것이다. ISP 위반과도 맞물린다.
 
-## 깊은 메시지 — 추상화는 약속
+## 깊은 메시지 — 추상화는 약속이다
 
-추상화 = **외부와의 약속**. 그 약속을 — 모든 derived가 지켜야.
+추상화는 외부와 맺은 약속이다. 그 약속을 모든 derived가 지켜야 한다.
 
 > "**An abstraction is a promise.** Every derived class must keep that promise."
 
-이 약속이 — **시그니처 + 의미 + 계약 + 불변식**. 시그니처만 일치하는 — 가짜 derived. 그래서:
+이 약속은 시그니처에 의미와 계약과 불변식을 더한 묶음이다. 시그니처만 일치하는 것은 가짜 derived다.
 
-1. base 설계 시 — **약속을 명확히** (코드 + 문서)
-2. derived 작성 시 — **약속 준수** (assert로 검증)
-3. 사용자 코드 — **약속만 의존** (구체 derived 모름)
+그래서 다음이 따라온다.
 
-## 추상화의 4 요소
+1. base를 설계할 때 약속을 코드와 문서로 명확히 둔다.
+2. derived를 작성할 때 약속을 준수한다(`assert`로 검증).
+3. 사용자 코드는 약속에만 의존한다. 구체 derived를 알지 못한다.
+
+## 추상화의 네 요소
 
 ```
 ┌─────────────────────────────────┐
@@ -430,7 +433,7 @@ public:
 └─────────────────────────────────┘
 ```
 
-derived는 **4가지 모두** 만족해야 — 진정한 LSP.
+derived는 이 네 요소를 모두 만족해야 진정한 LSP다.
 
 ## 실전 예 — STL iterator 계층
 
@@ -442,68 +445,71 @@ input_iterator
                  └── contiguous_iterator
 ```
 
-각 계층이 — 이전 계층의 모든 약속을 만족 + 새 능력 추가:
+각 계층이 이전 계층의 약속을 모두 만족하면서 새 능력만 더한다.
+
 - input: `++`, `*`, `==`
 - forward: + multi-pass
 - bidirectional: + `--`
 - random access: + `+n`, `[i]`, `<`
 - contiguous: + 연속 메모리 보장
 
-`std::sort`가 `random_access_iterator` 요구 — `forward_iterator`만 가진 `std::list`는 `std::list::sort` 별도. 인터페이스가 정확히 LSP를 따름.
+`std::sort`는 `random_access_iterator`를 요구한다. `forward_iterator`만 가진 `std::list`에는 `std::list::sort`가 따로 있다. 인터페이스가 정확히 LSP를 따른다.
 
-## C++ 표준 라이브러리의 LSP
+## C++ 표준 라이브러리에서 보는 LSP
 
 ```cpp
-std::vector<T>::iterator     // random_access
-std::list<T>::iterator        // bidirectional
-std::forward_list<T>::iterator // forward
+std::vector<T>::iterator        // random_access
+std::list<T>::iterator          // bidirectional
+std::forward_list<T>::iterator  // forward
 
-std::sort(begin, end);     // random_access 요구 — forward로 호출 시 컴파일 에러
+std::sort(begin, end);     // random_access 요구 — forward로 부르면 컴파일 에러
 ```
 
-C++20 concepts 이전엔 — 깊은 에러 메시지. 이후엔 — "constraint not satisfied: random_access_iterator".
+C++20 concepts 이전에는 에러 메시지가 깊이 들어가서 읽기 힘들었다. 이후로는 "constraint not satisfied: random_access_iterator" 같은 형태로 분명해졌다.
 
-## 실무 가이드 — 새 derived 작성 시
+## 실무 가이드 — 새 derived를 작성할 때
 
-각 메서드별로 자문:
+각 메서드에서 다음을 자문하자.
 
-- [ ] base의 **사전조건**을 강화하지 않았나? (입력 범위)
-- [ ] base의 **사후조건**을 약화하지 않았나? (반환 보장)
-- [ ] base의 **불변식**을 깨지 않았나? (객체 상태)
-- [ ] base가 던지지 않는 **예외**를 던지지 않나?
-- [ ] base가 — `noexcept`였는데 derived가 throw 가능?
-- [ ] base 메서드의 **의미**를 그대로 유지하나? (refused bequest 아님)
-- [ ] base의 약속을 — derived **문서에 명시**?
+- [ ] base의 사전조건을 강화하지는 않았는가?
+- [ ] base의 사후조건을 약화하지는 않았는가?
+- [ ] base의 불변식을 깨지는 않는가?
+- [ ] base가 던지지 않는 예외를 던지지는 않는가?
+- [ ] base가 `noexcept`였는데 derived가 throw 가능해지지는 않았는가?
+- [ ] base 메서드의 의미를 그대로 유지하는가? (refused bequest가 아닌가)
+- [ ] base의 약속을 derived 문서에도 명시했는가?
 
-## 실무 가이드 — base 설계 시
+## 실무 가이드 — base를 설계할 때
 
-- [ ] 모든 derived가 — **자연스럽게 만족할** 약속만 정의?
-- [ ] 너무 좁은 사전조건 — derived 부담?
-- [ ] 너무 강한 사후조건 — derived가 못 지킬 가능성?
-- [ ] 불변식을 — 코드로 강제 (private 멤버 + invariant)?
-- [ ] `assert`로 — 런타임 검증?
+- [ ] 모든 derived가 자연스럽게 만족할 수 있는 약속만 정의했는가?
+- [ ] 사전조건이 지나치게 좁아 derived에 부담을 주지는 않는가?
+- [ ] 사후조건이 지나치게 강해 derived가 못 지킬 가능성은 없는가?
+- [ ] 불변식을 코드로 강제하고 있는가? (private 멤버 + invariant)
+- [ ] `assert`로 런타임에 검증하는가?
 
 ## 정리
 
-**Liskov Substitution Principle** — derived는 base가 쓰이는 모든 곳에서 동작해야 한다.
+LSP는 derived가 base가 쓰이는 모든 자리에서 동작해야 한다는 원칙이다.
 
-추상화의 4 요소:
-1. **시그니처** — 컴파일러가 검사
-2. **의미** — 사람이 이해
-3. **계약** — 사전·사후·예외 보장
-4. **불변식** — 객체 상태
+추상화의 네 요소는 다음과 같다.
 
-derived는 — **4가지 모두** 만족해야 진정한 LSP. 시그니처만 일치는 가짜 derived.
+1. **시그니처** — 컴파일러가 검사한다.
+2. **의미** — 사람이 이해한다.
+3. **계약** — 사전·사후·예외 보장.
+4. **불변식** — 객체 상태에 대한 항구적 조건.
 
-도구:
-- **`override`, `final`** — 시그니처 검사
-- **Doxygen `@pre @post @invariant`** — 계약 문서화
-- **`assert`** — 런타임 검증
-- **C++ contract proposal** (미래) — 표준 contract
+derived는 네 요소를 모두 만족해야 진정한 LSP다. 시그니처만 맞는 것은 가짜 derived다.
+
+도구는 다음이 있다.
+
+- `override`, `final` — 시그니처 검사
+- Doxygen `@pre @post @invariant` — 계약 문서화
+- `assert` — 런타임 검증
+- C++ contract 제안 — 미래의 표준
 
 ## 관련 항목
 
-- [가이드라인 3: 인터페이스 분리](/blog/programming/cpp/cpp-software-design/guideline03-separate-interfaces-to-avoid-artificial-coupling) — ISP와 LSP의 자매
-- [가이드라인 7: base vs concept](/blog/programming/cpp/cpp-software-design/guideline07-understand-the-similarities-between-base-classes-and-concepts) — concepts에도 LSP
+- [가이드라인 3: 인터페이스 분리](/blog/programming/cpp/cpp-software-design/guideline03-separate-interfaces-to-avoid-artificial-coupling) — ISP와 LSP의 자매 관계
+- [가이드라인 7: base와 concept의 유사성](/blog/programming/cpp/cpp-software-design/guideline07-understand-the-similarities-between-base-classes-and-concepts) — concept에도 LSP가 적용된다
 - [Effective C++ 항목 32: public 상속 = is-a](/blog/programming/cpp/effective-cpp/item32-make-sure-public-inheritance-models-is-a) — LSP의 EC++ 버전
-- [Effective C++ 항목 36: non-virtual 재정의 X](/blog/programming/cpp/effective-cpp/item36-never-redefine-an-inherited-non-virtual-function) — LSP 위반의 한 형태
+- [Effective C++ 항목 36: non-virtual을 재정의하지 마라](/blog/programming/cpp/effective-cpp/item36-never-redefine-an-inherited-non-virtual-function) — LSP 위반의 한 형태
