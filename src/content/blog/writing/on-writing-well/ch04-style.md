@@ -1,186 +1,172 @@
 ---
 title: "Chapter 4: Style"
-date: 2026-05-12
-description: "자기 목소리 찾기 — 스타일은 모방할 수 없다. 자기 자신을 정직하게 글에 담을 때 스타일이 생긴다."
+date: 2026-05-18T14:00:00
+description: "스타일은 작가의 인격입니다. 외부에서 입을 수 있는 옷이 아니라, 자기 자신을 정직하게 글에 담는 것입니다."
 series: "On Writing Well"
 seriesOrder: 4
 tags: [writing, nonfiction, zinsser, style, voice]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: true
+draft: false
 ---
 
-> **On Writing Well** Chapter 4 요약
+> 스타일은 작가의 인격입니다.
 
-## 이 챕터의 메시지
+Zinsser의 메시지는 단순합니다. 스타일은 외부에서 입을 수 있는 옷이 아닙니다. 자기 자신입니다.
 
-> **스타일은 작가의 인격이다.**
+## 스타일에 대한 두 가지 잘못된 가르침
 
-스타일은 외부에서 입을 수 있는 옷이 아니다. 자기 자신.
+### 1. "스타일을 갈고닦아라"
 
-## 스타일의 두 잘못된 가르침
+스타일을 외부 기술처럼 다루는 조언입니다. 그러나 스타일은 *작가에게서* 나옵니다. 작가의 사고가 명확하면 스타일도 명확해집니다. 스타일은 외부에서 입히는 것이 아닙니다.
 
-**1. "스타일을 갈고닦아라"**
+### 2. "큰 작가를 모방하라"
 
-스타일을 외부 기술처럼 다룸. 그러나 — 스타일은 작가에게서 나온다. 작가가 명확하면 스타일이 명확.
-
-**2. "큰 작가를 모방하라"**
-
-Hemingway, Faulkner를 모방하라는 조언. 그러나 — 모방은 어색한 패러디만 만든다.
+Hemingway나 Faulkner를 모방하라는 조언이 있습니다. 그러나 모방은 *어색한 패러디*만 만듭니다.
 
 ```
 "Hemingway처럼 쓰고 싶어"
 → 결과: 어색한 Hemingway 흉내
 ```
 
-자기 자신이 되어라. 자기 목소리만 진짜.
+자기 자신이 되어야 합니다. 자기 목소리만이 진짜입니다.
 
-## 어떻게 자기 목소리 찾나
+## 어떻게 자기 목소리를 찾는가
 
-Zinsser의 답.
+Zinsser의 답은 단순합니다.
 
-> **자기 자신이 사는 방식으로 쓴다.**
+> 자기 자신이 사는 방식으로 씁니다.
 
-말할 때 쓰는 단어, 보는 방식, 생각하는 패턴 — 그게 자기 스타일.
-
-가식이 들어오면 — 어색해진다. 독자가 즉시 안다.
+말할 때 쓰는 단어, 보는 방식, 생각하는 패턴. 그것이 자기 스타일입니다. 가식이 들어오면 어색해지고, 독자가 즉시 알아챕니다.
 
 ## 가식의 징후
 
 ```
-❌ "It would seem to be the case that we are currently 
-   experiencing a period of adjustment."
-   
-   → 작가가 사라짐. "I think" 또는 "We" 가 어디?
+회피: It would seem to be the case that we are currently
+       experiencing a period of adjustment.
+       → 작가가 사라졌습니다. "I think"나 "We"가 어디 있나요?
 
-✅ "We're going through changes."
-   
-   → 작가가 살아 있음
+바름: We're going through changes.
+       → 작가가 살아 있습니다.
 ```
 
 ## 학교 교육의 그림자
 
-학교가 자기 목소리를 죽인다.
+학교는 종종 자기 목소리를 죽입니다.
 
 - "I"를 쓰지 마라
-- 개인적 경험 안 됨
-- 격식 있게
-- 큰 단어 / 복잡한 구조
+- 개인적 경험은 안 된다
+- 격식 있게 써라
+- 큰 단어와 복잡한 구조를 써라
 
-이 모든 가르침이 — 작가의 자기 목소리를 죽인다.
-
-좋은 nonfiction 작가는 — 학교가 가르친 것을 다시 잊어야 한다.
+이 모든 가르침이 작가의 목소리를 죽입니다. 좋은 nonfiction 작가는 *학교가 가르친 것을 다시 잊어야* 합니다.
 
 ## "Write in the first person"
 
-Zinsser의 핵심 권장 — **1인칭으로 써라**.
+Zinsser의 핵심 권장 — *1인칭으로 쓰세요*.
 
 ```
-"I think this is important."
-"I disagree."
-"I remember when..."
+I think this is important.
+I disagree.
+I remember when ...
 ```
 
-직접 말한다. 작가가 글에 살아 있다.
+직접 말하면 작가가 글에 살아 있습니다.
 
-**예외** — 학술 / 회사 보고서 등 1인칭이 금지된 형식. 그래도 가능한 한 자기 목소리.
+**예외** — 학술 논문이나 회사 보고서처럼 1인칭이 금지된 형식이 있습니다. 그런 경우에도 가능한 한 자기 목소리를 잃지 않으려 노력합니다.
 
-## 자기 목소리를 잃지 않기
+## 자기 목소리를 유지하는 법
 
-흐릿한 글로 빠지지 않으려면.
+흐릿한 글로 빠지지 않으려면 다음 네 가지를 지킵니다.
 
 1. **자기가 쓸 만한 주제만** — 진심으로 관심 있는 주제
 2. **자기가 아는 방식으로** — 본 것, 들은 것, 느낀 것
 3. **자기가 쓸 단어로** — 일상에서 쓰는 단어
-4. **자기 관점에서** — 객관적 척 X
+4. **자기 관점에서** — 객관적인 척하지 않기
 
-이걸 지키면 — 자기 스타일이 자연스럽게.
+이 네 가지를 지키면 자기 스타일이 자연스럽게 드러납니다.
 
 ## "Don't try to imitate"
 
-Zinsser의 단호한 조언.
+Zinsser의 단호한 조언입니다.
 
-> **Imitation is suicide.**
+> Imitation is suicide.
 
-모방은 자살. 자기를 죽이고 다른 사람의 그림자가 된다.
+*모방은 자살*. 자기를 죽이고 다른 사람의 그림자가 됩니다.
 
-물론 — **읽기**는 좋다. 큰 작가의 작품을 읽으며 배운다. 그러나 글을 쓸 때는 자기 자신.
+물론 *읽기*는 좋습니다. 큰 작가의 작품을 읽으며 배웁니다. 그러나 글을 쓸 때는 자기 자신이 되어야 합니다.
 
-## "Voice"
+## Voice — 목소리
 
-스타일 = 목소리 (voice).
+스타일은 *목소리*입니다.
 
 ```
 누구의 목소리 → 자기 자신
-어떻게 → 자연스럽게
+어떻게        → 자연스럽게
 ```
 
-좋은 글은 — 작가의 목소리가 들린다. 읽으면서 "이 작가구나"가 느껴진다.
-
-Zinsser 자신의 글이 좋은 예. 친근하고, 직접적이고, 명확. 그게 그의 목소리.
+좋은 글에는 작가의 목소리가 들립니다. 읽으면서 *이 작가구나*가 느껴집니다. Zinsser 자신의 글이 좋은 예입니다. 친근하고, 직접적이고, 명확합니다. 그것이 그의 목소리입니다.
 
 ## 어색한 어조의 흔한 원인
 
-스타일이 어색한 이유.
-
-**1. 격식 차림**
+### 격식 차림
 
 ```
-"It is the contention of the author that..."
-→ 누가? 작가? 자기? 그냥 "I think"
+회피: It is the contention of the author that ...
+바름: I think ...
 ```
 
-**2. 학술적 어조 흉내**
+### 학술적 어조 흉내
 
 ```
-"In examining the phenomenology of X..."
-→ 자기가 진짜 그렇게 말하나?
+회피: In examining the phenomenology of X ...
+질문: 자기가 진짜 그렇게 말하나요?
 ```
 
-**3. 비즈니스 어조**
+### 비즈니스 어조
 
 ```
-"We will leverage our synergies to..."
-→ 사람이 한 말 같지 않음
+회피: We will leverage our synergies to ...
+질문: 사람이 한 말 같나요?
 ```
 
-이 모두 가식. 자기 목소리 아님.
+이 모두 *가식*입니다. 자기 목소리가 아닙니다.
 
-## 자기 검토
+## 자기 검토 — 소리 내 읽기
 
-자기 글을 소리 내 읽어 본다.
+자기 글을 *소리 내 읽어* 봅니다.
 
-- **내가 평소 이렇게 말하나?**
-- 친구에게 이 주제로 이야기한다면 — 같은 단어를 쓸까?
+- 내가 평소 이렇게 말하는가?
+- 친구에게 이 주제로 이야기한다면 같은 단어를 쓸까?
 
-아니라면 — 가식이 끼었다.
+답이 아니라면, 가식이 끼었다는 신호입니다.
 
 ## 자신감의 부족
 
-가식의 원인 중 하나 — **자신감 부족**.
+가식의 원인 중 하나는 *자신감 부족*입니다.
 
 - 자기 글이 너무 단순할까봐 큰 단어
 - 너무 평범할까봐 학술적 어조
-- 너무 직설적일까봐 hedging
+- 너무 직설적일까봐 헤지
 
-이걸 거스르려면 — **자기 글에 대한 자신감**. 22장에서 다룬다.
+이것을 거스르려면 자기 글에 대한 자신감이 필요합니다. 22장에서 이 주제를 더 다룹니다.
 
 ## 정리
 
-- **스타일 = 작가의 인격**
-- 외부 기술이 아니라 **자기 자신**
+- **스타일은 작가의 인격** — 외부 기술이 아님
 - 모방은 자살 — 자기 목소리만 진짜
-- **1인칭**으로 써라 (가능하면)
+- **1인칭으로** (가능하면)
 - 자기가 쓸 만한 주제, 쓸 단어, 쓸 관점
-- 자기 글을 **소리 내 읽으면** 가식이 잡힘
+- *소리 내 읽으면* 가식이 잡힙니다
 - **자신감**이 자기 목소리의 토대
 
 ## 다음 장 예고
 
-다음 장은 **The Audience** — 누구를 위해 쓰는가.
+다음 장은 **The Audience**입니다. 누구를 위해 쓰는가에 대한 Zinsser의 의외의 답을 다룹니다.
 
 ## 관련 항목
 
-- [Ch 1: The Transaction](/blog/writing/on-writing-well/ch01-transaction)
-- [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style) — 자기 자신으로
+- [Chapter 3: Clutter](/blog/writing/on-writing-well/ch03-clutter)
+- [Chapter 5: The Audience](/blog/writing/on-writing-well/ch05-audience)
+- [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style)
