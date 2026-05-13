@@ -1,13 +1,111 @@
 ---
 title: "Chapter 27: How Program Size Affects Construction"
-date: 2026-05-13
-description: "How Program Size Affects Construction"
+date: 2026-06-21T03:00:00
+description: "프로그램 크기가 construction에 미치는 영향 — 의사소통·복잡도가 비선형 증가."
 series: "Code Complete"
 seriesOrder: 27
-tags: [software-construction, code-complete]
-draft: true
+tags: [code-complete, scale, McConnell]
 ---
 
-> **Code Complete** Chapter 27 요약
+## 이 챕터의 메시지
 
-(작성 예정)
+작은 프로그램은 — 한 사람 머리에 다 담긴다. 큰 시스템은 — 그렇지 않다. **크기에 따라 다른 접근**이 필요하다.
+
+> 인원·코드 라인 수가 늘면 — 의사소통과 복잡도가 **비선형으로** 증가한다.
+
+## 핵심 내용
+
+- **N명 팀의 의사소통 경로** = N(N-1)/2 — 비선형 증가.
+- 큰 프로젝트일수록 — **준비·문서·과정**이 중요.
+- 작은 프로젝트의 방식을 — 큰 프로젝트에 그대로 적용하면 실패.
+- 큰 프로젝트의 방식을 — 작은 프로젝트에 그대로 적용해도 실패.
+
+## 의사소통 비용
+
+| 인원 | 의사소통 경로 |
+| --- | --- |
+| 2 | 1 |
+| 3 | 3 |
+| 5 | 10 |
+| 10 | 45 |
+| 20 | 190 |
+| 50 | 1,225 |
+
+10명 팀에서 — 같은 결정을 모든 사람에게 전달하려면 45번의 대화. 20명이면 190번.
+
+이게 — **큰 팀에서 의사결정이 느린 이유**.
+
+## 크기에 따른 결함률
+
+McConnell이 인용하는 데이터.
+
+| 프로젝트 크기 (KLOC) | 결함 / KLOC |
+| --- | --- |
+| < 2 | 0~25 |
+| 2~16 | 0~40 |
+| 16~64 | 0.5~50 |
+| 64~512 | 2~70 |
+| > 512 | 4~100 |
+
+크기가 클수록 — KLOC당 결함도 늘어난다. **선형이 아니다**.
+
+이게 — 큰 프로젝트일수록 — 검증·리뷰·과정이 강화돼야 하는 이유.
+
+## 크기별 적절한 방법
+
+### 소규모 (1~3명, < 10K lines)
+
+- 가벼운 과정.
+- 직접 의사소통.
+- 형식적 문서 최소.
+- TDD, pair, refactor 자유.
+
+### 중규모 (3~10명, 10K~50K lines)
+
+- 명시적 코딩 컨벤션.
+- 코드 리뷰 (PR).
+- 단위·통합 테스트.
+- 기본 디자인 문서.
+
+### 대규모 (10명+, > 50K lines)
+
+- 공식 인스펙션.
+- 상세 디자인 문서.
+- 명시적 모듈 경계.
+- 분산 빌드·CI/CD.
+- 변경 관리.
+
+## 작은 방법을 큰 곳에 — 실패
+
+소규모 방법(가벼운 문서, 직접 대화)을 — 대규모에 그대로 적용:
+
+- 결정이 일관되지 않음.
+- 다른 팀이 무엇을 하는지 모름.
+- 기술 부채 누적.
+
+## 큰 방법을 작은 곳에 — 비효율
+
+대규모 방법(공식 인스펙션, 상세 문서)을 — 소규모에 적용:
+
+- 과정 자체가 일보다 큼.
+- 속도 느림.
+- 팀이 좌절.
+
+## 크기 추정
+
+McConnell의 데이터 — **lines of code (LOC)** 가 가장 일관된 측정.
+
+다만 — KLOC가 모든 것을 말하진 않는다. 도메인 복잡도, 팀 경험, 기술 스택 모두 영향.
+
+## 정리
+
+- 의사소통 비용 — **N(N-1)/2** 비선형.
+- 결함률도 크기와 함께 — **선형 이상** 증가.
+- 크기에 맞는 — **소·중·대규모 방법**.
+- 한 방법을 다른 규모에 적용하면 실패.
+
+## 관련 항목
+
+- [Ch 26: Tuning Techniques](/blog/programming/engineering/code-complete/ch26-Code-Tuning-Techniques)
+- [Ch 28: Managing Construction](/blog/programming/engineering/code-complete/ch28-Managing-Construction)
+- [Mythical Man-Month](/blog/programming/engineering/mythical-man-month/) — Brooks의 고전
