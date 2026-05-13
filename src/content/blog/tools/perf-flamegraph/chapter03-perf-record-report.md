@@ -3,7 +3,7 @@ title: "Ch 3: perf record / report"
 date: 2025-08-25T03:00:00
 description: "샘플링 프로파일링 — perf record. perf report로 분석."
 tags: [perf, Sampling, Profile]
-series: "perf / FlameGraph"
+series: "perf and FlameGraph"
 seriesOrder: 3
 draft: true
 ---

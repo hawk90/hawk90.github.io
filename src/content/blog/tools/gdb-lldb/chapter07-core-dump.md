@@ -3,7 +3,7 @@ title: "Ch 7: core dump 분석"
 date: 2025-08-21T03:00:00
 description: "ulimit / core_pattern. gdb -c. 패닉 사후 분석."
 tags: [gdb, Core Dump, Crash]
-series: "GDB / LLDB"
+series: "GDB and LLDB"
 seriesOrder: 7
 draft: true
 ---

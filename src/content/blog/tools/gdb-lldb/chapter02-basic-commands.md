@@ -3,7 +3,7 @@ title: "Ch 2: 핵심 명령 — run / break / continue / step / next"
 date: 2025-08-20T02:00:00
 description: "프로그램 실행, 중단점, 한 줄씩 진행, 함수 안/밖."
 tags: [gdb, lldb, Commands]
-series: "GDB / LLDB"
+series: "GDB and LLDB"
 seriesOrder: 2
 draft: true
 ---

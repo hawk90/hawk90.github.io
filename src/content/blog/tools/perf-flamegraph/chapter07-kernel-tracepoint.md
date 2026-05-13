@@ -3,7 +3,7 @@ title: "Ch 7: 커널 이벤트 / tracepoint"
 date: 2025-08-27T01:00:00
 description: "tracepoint / kprobe / uprobe / USDT. dynamic vs static."
 tags: [perf, tracepoint, kprobe, uprobe]
-series: "perf / FlameGraph"
+series: "perf and FlameGraph"
 seriesOrder: 7
 draft: true
 ---

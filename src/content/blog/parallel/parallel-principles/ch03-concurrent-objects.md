@@ -203,17 +203,7 @@ H_seq = A.enq(1).ok  B.enq(2).ok  A.deq().ok:1
 
 ### 비교
 
-```
-강함    Wait-free
-   ↑    모든 스레드 항상 완료
-   │
-   │    Lock-free
-   │    시스템은 진행, 개별 스레드 기아 가능
-   │
-   │    Obstruction-free
-   ↓    혼자면 완료, 경쟁 시 보장 없음
-약함
-```
+![진행 조건 계층](/images/blog/parallel/diagrams/progress-conditions.svg)
 
 ---
 

@@ -3,7 +3,7 @@ title: "Ch 11: 실전 팁 — STL pretty-printers / 최적화 코드"
 date: 2025-08-22T03:00:00
 description: "STL / boost 보기 좋게. 최적화 코드 디버깅. .gdbinit."
 tags: [gdb, STL, Optimization]
-series: "GDB / LLDB"
+series: "GDB and LLDB"
 seriesOrder: 11
 draft: true
 ---
