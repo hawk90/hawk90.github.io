@@ -95,10 +95,9 @@ function seriesIn(posts: typeof allPosts): string[] {
           const initiallyOpen = isCatActive || subCats.some((s) => isActiveCategory(s.id));
           return (
             <details class="cat-tree" open={initiallyOpen}>
-              <summary></summary>
-              <div
+              <summary
                 class:list={[
-                  'flex items-center gap-1 rounded-lg transition-colors',
+                  'cat-row flex items-center gap-1 rounded-lg transition-colors',
                   isCatActive
                     ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
                     : 'hover:bg-[var(--color-bg-secondary)]',
@@ -123,7 +122,7 @@ function seriesIn(posts: typeof allPosts): string[] {
                   </span>
                   {totalCount > 0 && <span class="text-xs text-[var(--color-text-muted)] ml-2 shrink-0">{totalCount}</span>}
                 </a>
-              </div>
+              </summary>
 
               <!-- Sub-categories -->
               {subCats.length > 0 && (
@@ -136,10 +135,9 @@ function seriesIn(posts: typeof allPosts): string[] {
                     return (
                       <li>
                         <details class="cat-tree" open={isSubActive}>
-                          <summary></summary>
-                          <div
+                          <summary
                             class:list={[
-                              'flex items-center gap-1 rounded text-sm transition-colors',
+                              'cat-row flex items-center gap-1 rounded text-sm transition-colors',
                               isSubActive
                                 ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
                                 : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
@@ -164,7 +162,7 @@ function seriesIn(posts: typeof allPosts): string[] {
                               </span>
                               {subTotal > 0 && <span class="text-xs text-[var(--color-text-muted)] ml-2 shrink-0">{subTotal}</span>}
                             </a>
-                          </div>
+                          </summary>
                           {subSeries.length > 0 && (
                             <ul class="ml-3 mt-1 space-y-0.5 border-l border-[var(--color-border)] pl-2">
                               {subSeries.map((series) => {
@@ -256,9 +254,10 @@ function seriesIn(posts: typeof allPosts): string[] {
     margin-top: 0.25rem;
   }
 
-  .cat-tree > summary {
-    display: none;
-  }
+  /* Hide native disclosure marker — chevron button replaces it */
+  .cat-row { list-style: none; cursor: default; }
+  .cat-row::-webkit-details-marker { display: none; }
+  .cat-row::marker { display: none; }
 
   .cat-tree[open] .cat-toggle > .chevron {
     transform: rotate(90deg);
@@ -278,7 +277,9 @@ function seriesIn(posts: typeof allPosts): string[] {
     const cleanups: Array<() => void> = [];
 
     document.querySelectorAll<HTMLButtonElement>('.cat-toggle').forEach((button) => {
-      const onClick = () => {
+      const onClick = (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         const details = button.closest<HTMLDetailsElement>('.cat-tree');
         if (!details) return;
         details.open = !details.open;
@@ -286,6 +287,15 @@ function seriesIn(posts: typeof allPosts): string[] {
       };
       button.addEventListener('click', onClick);
       cleanups.push(() => button.removeEventListener('click', onClick));
+    });
+
+    // Prevent navigation links inside <summary> from also toggling the details
+    document.querySelectorAll<HTMLAnchorElement>('.cat-row a').forEach((link) => {
+      const onClick = (e: MouseEvent) => {
+        e.stopPropagation();
+      };
+      link.addEventListener('click', onClick);
+      cleanups.push(() => link.removeEventListener('click', onClick));
     });
 
     document.querySelectorAll<HTMLElement>('[data-tree-expand-all]').forEach((button) => {
