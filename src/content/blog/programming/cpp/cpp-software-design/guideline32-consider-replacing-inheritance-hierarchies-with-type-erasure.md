@@ -1,7 +1,7 @@
 ---
 title: "가이드라인 32: 상속 계층을 Type Erasure로 대체하는 것을 고려하라"
 date: 2026-05-15T03:00:00
-description: "Type Erasure — External Polymorphism의 진화. 값 의미론 wrapper로 다형성. std::function, std::any의 핵심 기법."
+description: "Type Erasure는 External Polymorphism이 한 단계 발전한 형태다. 값 의미론 wrapper로 다형성을 표현하며 std::function과 std::any의 기반이 된다."
 tags: [C++, Software Design, Type Erasure, Value Semantics]
 series: "C++ Software Design"
 seriesOrder: 32
@@ -9,26 +9,27 @@ seriesOrder: 32
 
 ## 왜 이 가이드라인이 중요한가?
 
-OO 다형성의 부담:
-- `unique_ptr<Base>` — 사용자에게 노출
-- 깊은 계층 — 결합도 증가
-- 값 의미론 잃음 — 복사·이동·비교 어려움
-- 침습적 — 기존 타입 수정 강요
+전통적인 OO 다형성에는 부담이 따른다.
 
-**Type Erasure** — 다형성을 **값 의미론 객체로 감싸기**. 사용자 입장에선 단순 값, 내부에선 다형 dispatch.
+- 사용자에게 `unique_ptr<Base>`가 노출된다
+- 계층이 깊어질수록 결합도가 올라간다
+- 값 의미론을 잃어 복사·이동·비교가 까다로워진다
+- 침습적이어서 기존 타입의 수정을 강요한다
+
+**Type Erasure**는 다형성을 **값 의미론 객체로 감싸는** 기법이다. 사용자 입장에서는 단순한 값이지만 내부에서는 다형 dispatch가 일어난다.
 
 ```cpp
-Shape s1 = Circle{};        // 값처럼 사용
+Shape s1 = Circle{};        // 값처럼 사용한다
 Shape s2 = Square{};
 s1 = s2;                    // 복사 OK
 s1.draw();                  // 다형 호출
 ```
 
-`std::function`, `std::any`, `std::shared_ptr<void>` — 모두 Type Erasure 응용. 모던 C++의 핵심 기법.
+`std::function`, `std::any`, `std::shared_ptr<void>`가 모두 Type Erasure의 응용이다. 모던 C++의 핵심 기법 중 하나다.
 
 ## 핵심 구조
 
-External Polymorphism(가이드라인 31) + Wrapper:
+External Polymorphism(가이드라인 31)에 Wrapper를 얹은 형태다.
 
 ```cpp
 class Shape {
@@ -39,7 +40,7 @@ class Shape {
         virtual std::unique_ptr<Concept> clone() const = 0;
     };
     
-    // Model<T> — 어떤 T든 감싸기
+    // Model<T> — 어떤 T든 감싼다
     template<typename T>
     struct Model : Concept {
         T data_;
@@ -69,18 +70,18 @@ public:
 };
 ```
 
-**사용 — 값처럼**:
+사용은 값처럼 자연스럽다.
 
 ```cpp
 Shape s1 = Circle{};
 Shape s2 = Square{};
 s1 = s2;            // 복사 OK
-s1.draw();          // Square 그림 (clone된)
+s1.draw();          // Square 그림 (clone된 것)
 
 std::vector<Shape> shapes;
 shapes.push_back(Circle{});
 shapes.push_back(Square{});
-// 다형 컨테이너 + 값 의미론
+// 다형 컨테이너이면서 값 의미론
 ```
 
 ## 비교 — OO vs Type Erasure
@@ -100,22 +101,22 @@ void render(const std::vector<std::unique_ptr<Shape>>& shapes) {
     for (auto& s : shapes) s->draw();
 }
 
-// 사용 — unique_ptr, std::move 등 노출
+// 사용 시 unique_ptr, std::move 등이 표면에 드러난다
 std::vector<std::unique_ptr<Shape>> shapes;
 shapes.push_back(std::make_unique<Circle>());
 ```
 
-- 사용자가 unique_ptr 의식
-- 복사 어려움 — clone() 필요
-- 침습적 — Shape 상속 강요
+- 사용자가 `unique_ptr`를 의식해야 한다
+- 복사가 까다롭다 — `clone()`이 필요하다
+- 침습적이라 Shape 상속을 강요한다
 
-**Type Erasure**:
+**Type Erasure 방식**:
 
 ```cpp
 class Shape { /* 위와 같이 */ };
 
 std::vector<Shape> shapes;
-shapes.push_back(Circle{});        // 값처럼 — 깔끔
+shapes.push_back(Circle{});        // 값처럼 — 깔끔하다
 shapes.push_back(Square{});
 
 void render(const std::vector<Shape>& shapes) {
@@ -123,13 +124,13 @@ void render(const std::vector<Shape>& shapes) {
 }
 ```
 
-- 사용자 — 그냥 값
-- 복사·이동·할당 — 자연스러움
-- 비-침습적 — Circle 수정 없음
+- 사용자에게는 그냥 값이다
+- 복사·이동·할당이 자연스럽다
+- 비-침습적이라 Circle을 수정할 필요가 없다
 
 ## 표준 라이브러리의 Type Erasure
 
-`std::function` — 가장 유명한 예:
+가장 유명한 예가 `std::function`이다.
 
 ```cpp
 std::function<int(int)> f;
@@ -137,12 +138,12 @@ f = [](int x) { return x * 2; };
 f = MyFunctor{};
 f = &someFunction;
 
-f(5);       // 다형 호출 — 어떤 callable이든
+f(5);       // 어떤 callable이든 다형 호출
 ```
 
-내부 — Concept + Model<F> 구조. SBO로 작은 callable은 스택에.
+내부 구조는 Concept + Model<F>이며 작은 callable은 SBO로 스택에 둔다.
 
-`std::any` — 임의 타입:
+`std::any`는 임의 타입을 담는 사례다.
 
 ```cpp
 std::any a = 42;
@@ -151,7 +152,7 @@ a = 3.14;
 auto v = std::any_cast<double>(a);
 ```
 
-`std::shared_ptr<void>` — deleter erasure 포함.
+`std::shared_ptr<void>`도 deleter erasure 형태로 같은 기법을 활용한다.
 
 ## 동작 — 컴파일러 시점
 
@@ -159,19 +160,19 @@ auto v = std::any_cast<double>(a);
 Shape s = Circle{};
 ```
 
-1. `Shape::Shape<Circle>(Circle)` 호출
-2. `std::make_unique<Model<Circle>>(std::move(c))` — Model<Circle> 객체 힙 할당
-3. pimpl_ — 그 객체 가리킴
+1. `Shape::Shape<Circle>(Circle)`이 호출된다
+2. `std::make_unique<Model<Circle>>(std::move(c))`가 Model<Circle>를 힙에 할당한다
+3. `pimpl_`이 그 객체를 가리킨다
 
 ```cpp
 s.draw();
 ```
 
-1. `pimpl_->draw()` — virtual dispatch
-2. `Model<Circle>::draw()` 호출
-3. `data_.draw()` — Circle::draw() 직접 호출
+1. `pimpl_->draw()`로 virtual dispatch가 일어난다
+2. `Model<Circle>::draw()`가 호출된다
+3. 내부의 `data_.draw()`가 결국 `Circle::draw()`를 직접 호출한다
 
-비용 — virtual 한 번 + 힙 할당 한 번 (생성 시).
+비용은 생성 시 힙 할당 한 번과 호출 시 virtual 호출 한 번이다.
 
 ## 값 의미론의 진가
 
@@ -179,13 +180,13 @@ s.draw();
 Shape s1 = Circle{1.0};
 Shape s2 = s1;            // 깊은 복사 — 독립 객체
 s2 = Square{2.0};
-// s1 — 그대로 Circle
-// s2 — Square
+// s1은 그대로 Circle
+// s2는 Square
 
-bool b = (s1 == s2);    // 비교도 가능 (Concept에 추가하면)
+bool b = (s1 == s2);    // 비교도 가능하다 (Concept에 추가하면)
 ```
 
-**비교 연산자** — Concept에 정의해야:
+비교 연산자는 Concept에 별도로 정의해야 한다.
 
 ```cpp
 struct Concept {
@@ -203,11 +204,11 @@ struct Model : Concept {
 };
 ```
 
-비교 — 다소 복잡. `dynamic_cast` 사용.
+비교는 다소 복잡하고 `dynamic_cast`가 들어간다.
 
 ## 함정 — 보일러플레이트 폭발
 
-각 인터페이스마다 Concept + Model<T> 작성:
+인터페이스가 늘어날수록 Concept과 Model<T>가 함께 부풀어 오른다.
 
 ```cpp
 class Shape {
@@ -222,7 +223,7 @@ class Shape {
     template<typename T>
     struct Model : Concept {
         T data_;
-        // 매 메서드마다 forward — boilerplate
+        // 매 메서드마다 forward — 보일러플레이트
         void draw() const override { data_.draw(); }
         void rotate(double a) override { data_.rotate(a); }
         double area() const override { return data_.area(); }
@@ -234,26 +235,27 @@ class Shape {
 };
 ```
 
-**완화책**:
+완화책은 여러 가지가 있다.
+
 - Boost.TypeErasure
 - Dyno 라이브러리 (Louis Dionne)
-- 직접 매크로
+- 직접 작성한 매크로
 - C++23 자동화 제안 (아직 표준 아님)
 
 ## 함정 — 힙 할당 비용
 
 ```cpp
-Shape s = Circle{};        // 힙 할당 — Model<Circle> 위해
+Shape s = Circle{};        // Model<Circle>를 위한 힙 할당
 ```
 
-매 생성 — 힙. **SBO(Small Buffer Optimization)** 적용:
+객체를 만들 때마다 힙 할당이 일어난다. **SBO(Small Buffer Optimization)**를 적용하면 피할 수 있다.
 
 ```cpp
 class Shape {
     static constexpr size_t buffer_size_ = 32;
     
     union {
-        std::byte buffer_[buffer_size_];        // 작은 객체용
+        std::byte buffer_[buffer_size_];          // 작은 객체용
         std::unique_ptr<Concept> ptr_;            // 큰 객체용
     };
     bool small_;
@@ -262,36 +264,36 @@ class Shape {
 };
 ```
 
-`std::function`은 — 보통 SBO 적용 (작은 lambda 스택에).
+`std::function`도 보통 SBO를 적용해서 작은 lambda는 스택에 둔다.
 
 ## 함정 — 동적 dispatch 비용
 
-virtual 호출 — hot path에선 측정 필요. 다음 가이드라인 — [최적화](/blog/programming/cpp/cpp-software-design/guideline33-be-aware-of-the-optimization-potential-of-type-erasure).
+virtual 호출은 hot path에서는 측정이 필요하다. 다음 가이드라인인 [최적화](/blog/programming/cpp/cpp-software-design/guideline33-be-aware-of-the-optimization-potential-of-type-erasure)에서 이어 다룬다.
 
 ## Type Erasure의 다양한 변형
 
-**1. Owning** (값 의미론):
+**1. Owning** — 값 의미론:
 ```cpp
 class Shape {
     std::unique_ptr<Concept> pimpl_;
 };
 ```
 
-**2. Non-owning view** (참조 의미론):
+**2. Non-owning view** — 참조 의미론:
 ```cpp
 class ShapeView {
-    Concept* pimpl_;        // 비 소유
+    Concept* pimpl_;        // 소유하지 않는다
 };
 ```
 
-C++20 `std::function_ref` (제안) — view 변형.
+C++20에서 제안된 `std::function_ref`가 이런 view 변형이다.
 
-**3. Inplace** (SBO 보장):
+**3. Inplace** — SBO를 보장:
 ```cpp
 template<size_t N>
 class ShapeInplace {
     std::aligned_storage_t<N> buffer_;
-    Concept* pimpl_;        // buffer 가리킴
+    Concept* pimpl_;        // buffer를 가리킨다
 };
 ```
 
@@ -306,7 +308,7 @@ class Shape {
 public:
     template<Drawable T>
     Shape(T t) : pimpl_(std::make_unique<Model<T>>(std::move(t))) {}
-    // 에러 메시지 — T가 draw() 없으면 명확히 안내
+    // T에 draw()가 없으면 에러 메시지가 명확히 안내한다
 };
 ```
 
@@ -315,32 +317,34 @@ public:
 | 측면 | OO 상속 | Type Erasure | std::variant |
 |---|---|---|---|
 | 침습성 | 침습적 | 비-침습적 | 비-침습적 |
-| 값 의미론 | 어려움 | ✅ | ✅ |
+| 값 의미론 | 어렵다 | ✅ | ✅ |
 | 타입 집합 | 열림 | 열림 | 닫힘 |
 | dispatch | virtual | virtual | switch (인라인 가능) |
 | 메모리 | 힙 (보통) | 힙 (SBO 가능) | 스택 (max) |
-| 코드량 | 적음 | 많음 (boilerplate) | 중간 |
-| 컴파일 시간 | 빠름 | 느림 (template) | 중간 |
+| 코드량 | 적다 | 많다 (boilerplate) | 중간 |
+| 컴파일 시간 | 빠르다 | 느리다 (template) | 중간 |
 | 빌드 의존 | 헤더 무거움 | 깔끔 | 깔끔 |
 
 ## 흔한 패턴 — Type Erasure 검토
 
-**검토 신호**:
-- 값 의미론 원함 — 컨테이너에 자연스럽게
-- 기존 타입 수정 불가 — 외부 라이브러리
-- 다양한 callable 받기 — std::function 스타일
-- 인터페이스 안정성 — 구현은 자유롭게
+검토할 만한 신호는 다음과 같다.
 
-**Type Erasure 피하기**:
-- 단순 OO 충분 — 권한 있고 계층 합당
-- 닫힌 집합 — variant가 더 빠름
-- hot path — virtual 비용 부담
-- 보일러플레이트 견디기 어려움 + Boost 의존 못 함
+- 값 의미론을 원해서 컨테이너에 자연스럽게 담고 싶다
+- 기존 타입을 수정할 수 없다 (외부 라이브러리)
+- 다양한 callable을 받고 싶다 — `std::function` 스타일
+- 인터페이스를 안정적으로 두고 구현은 자유롭게 두고 싶다
+
+피해야 할 경우는 다음과 같다.
+
+- 단순 OO로 충분하다 — 권한도 있고 계층도 합당하다
+- 닫힌 집합이라면 variant가 더 빠르다
+- hot path여서 virtual 비용이 부담이다
+- 보일러플레이트가 견디기 힘들고 Boost 의존도 어렵다
 
 ## 실무 가이드 — 결정 트리
 
 ```
-다형성 필요한가?
+다형성이 필요한가?
 ├── 닫힌 타입 집합 → std::variant + std::visit
 ├── 열린 + 값 의미론 + 비-침습 → Type Erasure
 ├── 열린 + 참조 의미론 OK → External Polymorphism
@@ -349,21 +353,21 @@ public:
 
 ## 실무 가이드 — 체크리스트
 
-- [ ] 값 의미론이 필요한가? (vector에 넣고 복사 등)
-- [ ] 기존 타입 수정 권한 — 없거나 피하고 싶은가?
-- [ ] 컴파일 타임 타입 집합 알 수 없는가?
-- [ ] virtual 비용 측정 — 수용 가능?
-- [ ] 보일러플레이트 — Boost.TypeErasure 등 활용?
-- [ ] SBO 적용 — 힙 할당 회피?
+- [ ] 값 의미론이 필요한가? (vector에 담고 복사하는 식)
+- [ ] 기존 타입을 수정할 권한이 없거나 피하고 싶은가?
+- [ ] 컴파일 타임에 타입 집합을 알 수 없는가?
+- [ ] virtual 비용을 측정해 수용 가능한가?
+- [ ] 보일러플레이트를 Boost.TypeErasure 등으로 줄일 수 있는가?
+- [ ] SBO를 적용해 힙 할당을 피할 수 있는가?
 
 ## 핵심 정리
 
-1. **Type Erasure** — 값 의미론 wrapper로 다형성
-2. **구조** — Concept (interface) + Model<T> (adapter) + Wrapper
-3. **장점** — 값 의미론 + 비-침습 + 열린 타입 집합
-4. **비용** — virtual + 힙 할당 + boilerplate
-5. **SBO** — 힙 할당 회피
-6. **표준 예** — std::function, std::any, std::shared_ptr deleter
+1. **Type Erasure**는 값 의미론 wrapper로 다형성을 표현한다
+2. 구조는 Concept(interface) + Model<T>(adapter) + Wrapper
+3. 장점은 값 의미론, 비-침습성, 열린 타입 집합이다
+4. 비용은 virtual 호출, 힙 할당, 보일러플레이트다
+5. **SBO**로 힙 할당을 피할 수 있다
+6. 표준의 예는 `std::function`, `std::any`, `std::shared_ptr` deleter다
 
 ## 관련 항목
 
