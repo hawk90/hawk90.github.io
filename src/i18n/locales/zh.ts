@@ -31,6 +31,10 @@ const zh: typeof ko = defineLocale({
   toc: '目录',
   toc_open_close: '切换目录',
   recent_posts: '最近文章',
+  latest_posts: '最新文章',
+  recently_updated: '最近更新',
+  updated: '更新',
+  no_recent_updates: '暂时还没有最近更新的文章',
   view_all: '查看全部 →',
   reading_time_min: ' 分钟阅读',
 

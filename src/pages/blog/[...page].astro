@@ -1,10 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/blog/PostCard.astro';
+import PostListPanel from '../../components/blog/PostListPanel.astro';
 import BlogSidebar from '../../components/blog/BlogSidebar.astro';
 import Pagination from '../../components/blog/Pagination.astro';
 import { BLOG_CONFIG, SITE_CONFIG } from '../../consts/config';
-import { getPublishedPosts } from '../../lib/posts';
+import { getLatestPosts, getPublishedPosts, getRecentlyUpdatedPosts } from '../../lib/posts';
 import { t } from '../../consts/ui-strings';
 
 export async function getStaticPaths() {
@@ -39,6 +40,9 @@ export async function getStaticPaths() {
 }
 
 const { posts, currentPage, totalPages } = Astro.props;
+const allPosts = await getPublishedPosts();
+const latestPosts = getLatestPosts(allPosts, 5);
+const recentlyUpdatedPosts = getRecentlyUpdatedPosts(allPosts, 5);
 ---
 
 <BaseLayout title={`Blog - ${SITE_CONFIG.author}`} description={SITE_CONFIG.description}>
@@ -59,6 +63,18 @@ const { posts, currentPage, totalPages } = Astro.props;
               </p>
             )}
           </div>
+
+          {currentPage === 1 && (
+            <div class="grid gap-6 mb-10 xl:grid-cols-2">
+              <PostListPanel title={t('latest_posts')} posts={latestPosts} />
+              <PostListPanel
+                title={t('recently_updated')}
+                posts={recentlyUpdatedPosts}
+                kind="updated"
+                emptyLabel={t('no_recent_updates')}
+              />
+            </div>
+          )}
 
           <!-- Posts Grid -->
           <div class="grid gap-6 md:grid-cols-2">

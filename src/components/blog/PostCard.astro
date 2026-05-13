@@ -12,7 +12,9 @@ interface Props {
 
 const { post, showImage = true } = Astro.props;
 const formattedDate = formatDate(post.data.date, 'short');
+const formattedUpdatedDate = post.data.updated ? formatDate(post.data.updated, 'short') : null;
 const readingTime = getReadingTime(post.body || '');
+const wasUpdated = !!post.data.updated && post.data.updated.valueOf() > post.data.date.valueOf();
 
 // Default thumbnail based on post type or tags
 const getDefaultThumbnail = () => {
@@ -57,6 +59,13 @@ const thumbnail = post.data.image || getDefaultThumbnail();
     >
       {post.data.title}
     </h3>
+    {wasUpdated && (
+      <div class="mb-2">
+        <span class="inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-accent)]">
+          {t('updated')}
+        </span>
+      </div>
+    )}
     {post.data.description && (
       <p class="text-sm text-[var(--color-text-secondary)] mb-4 line-clamp-2">
         {post.data.description}
@@ -67,6 +76,12 @@ const thumbnail = post.data.image || getDefaultThumbnail();
         <time datetime={post.data.date.toISOString()}>
           {formattedDate}
         </time>
+        {wasUpdated && formattedUpdatedDate && (
+          <>
+            <span>·</span>
+            <span>{t('updated')} {formattedUpdatedDate}</span>
+          </>
+        )}
         <span>·</span>
         <span>{readingTime}{t('reading_time_min')}</span>
       </div>

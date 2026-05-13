@@ -34,6 +34,10 @@ const ko = {
   toc: '목차 (On this page)',
   toc_open_close: '목차 열기/닫기',
   recent_posts: '최근 글',
+  latest_posts: '최신 글',
+  recently_updated: '최근 업데이트',
+  updated: '업데이트',
+  no_recent_updates: '아직 최근 업데이트된 글이 없습니다',
   view_all: '전체 보기 →',
   reading_time_min: '분 읽기',
 

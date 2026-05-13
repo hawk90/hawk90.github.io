@@ -1,4 +1,5 @@
 ---
+import CategoryTreeNode, { type CategoryTreeNodeData } from './CategoryTreeNode.astro';
 import TagBadge from './TagBadge.astro';
 import { CATEGORIES, getTopLevelCategories, getSubCategories } from '../../consts/categories';
 import { BLOG_CONFIG } from '../../consts/config';
@@ -20,6 +21,13 @@ const sortedTags = getTagsWithCount(allPosts);
 const { maxTagsInSidebar } = BLOG_CONFIG;
 
 const topCats = getTopLevelCategories();
+
+interface SeriesLink {
+  name: string;
+  slug: string;
+  count: number;
+  isActive: boolean;
+}
 
 function isActiveTag(tag: string): boolean {
   return activeFilter?.type === 'tag' && activeFilter.value.toLowerCase() === tag.toLowerCase();
@@ -44,6 +52,39 @@ function postsDirectlyIn(catId: string) {
 function seriesIn(posts: typeof allPosts): string[] {
   return [...new Set(posts.filter((p) => p.data.series).map((p) => p.data.series!))];
 }
+
+function buildSeriesLinks(posts: typeof allPosts): SeriesLink[] {
+  return seriesIn(posts).map((series) => ({
+    name: series,
+    slug: toSlug(series),
+    count: posts.filter((p) => p.data.series === series).length,
+    isActive: isActiveSeries(series),
+  }));
+}
+
+function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
+  const category = CATEGORIES.find((cat) => cat.id === categoryId);
+  if (!category) {
+    throw new Error(`Unknown category: ${categoryId}`);
+  }
+
+  const children = getSubCategories(category.id).map((child) => buildCategoryNode(child.id));
+  const directPosts = postsDirectlyIn(category.id);
+  const hasActiveDescendant = children.some((child) => child.isActive || child.initiallyOpen);
+
+  return {
+    id: category.id,
+    name: category.name,
+    icon: category.icon,
+    count: allPosts.filter((post) => post.id.startsWith(category.id + '/')).length,
+    isActive: isActiveCategory(category.id),
+    initiallyOpen: isActiveCategory(category.id) || hasActiveDescendant,
+    children,
+    series: buildSeriesLinks(directPosts),
+  };
+}
+
+const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
 ---
 
 <aside class="hidden lg:block w-72 shrink-0">
@@ -86,144 +127,9 @@ function seriesIn(posts: typeof allPosts): string[] {
         </div>
       </div>
       <nav class="space-y-1">
-        {topCats.map((cat) => {
-          const subCats = getSubCategories(cat.id);
-          const directPosts = postsDirectlyIn(cat.id);
-          const directSeries = seriesIn(directPosts);
-          const totalCount = allPosts.filter((p) => p.id.startsWith(cat.id + '/')).length;
-          const isCatActive = isActiveCategory(cat.id);
-          const initiallyOpen = isCatActive || subCats.some((s) => isActiveCategory(s.id));
-          return (
-            <details class="cat-tree" open={initiallyOpen}>
-              <summary
-                class:list={[
-                  'cat-row flex items-center gap-1 rounded-lg transition-colors',
-                  isCatActive
-                    ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
-                    : 'hover:bg-[var(--color-bg-secondary)]',
-                ]}
-              >
-                <button
-                  type="button"
-                  class="cat-toggle flex items-center gap-1 py-2 pl-2 pr-1 rounded-l-lg cursor-pointer"
-                  aria-expanded={initiallyOpen ? 'true' : 'false'}
-                >
-                  <svg class="chevron w-3 h-3 shrink-0 text-[var(--color-text-muted)] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-                <a
-                  href={`/blog/${cat.id}`}
-                  class="flex items-center justify-between flex-1 min-w-0 py-2 pr-2"
-                >
-                  <span class="flex items-center gap-2 truncate">
-                    <span>{cat.icon}</span>
-                    <span class="truncate">{cat.name}</span>
-                  </span>
-                  {totalCount > 0 && <span class="text-xs text-[var(--color-text-muted)] ml-2 shrink-0">{totalCount}</span>}
-                </a>
-              </summary>
-
-              <!-- Sub-categories -->
-              {subCats.length > 0 && (
-                <ul class="ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-2">
-                  {subCats.map((sub) => {
-                    const subPosts = postsDirectlyIn(sub.id);
-                    const subSeries = seriesIn(subPosts);
-                    const subTotal = allPosts.filter((p) => p.id.startsWith(sub.id + '/')).length;
-                    const isSubActive = isActiveCategory(sub.id);
-                    return (
-                      <li>
-                        <details class="cat-tree" open={isSubActive}>
-                          <summary
-                            class:list={[
-                              'cat-row flex items-center gap-1 rounded text-sm transition-colors',
-                              isSubActive
-                                ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
-                                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
-                            ]}
-                          >
-                            <button
-                              type="button"
-                              class="cat-toggle flex items-center gap-1 py-1.5 pl-2 pr-1 rounded-l cursor-pointer"
-                              aria-expanded={isSubActive ? 'true' : 'false'}
-                            >
-                              <svg class="chevron w-3 h-3 shrink-0 text-[var(--color-text-muted)] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                            <a
-                              href={`/blog/${sub.id}`}
-                              class="flex items-center justify-between flex-1 min-w-0 py-1.5 pr-2"
-                            >
-                              <span class="flex items-center gap-1.5 truncate">
-                                <span class="text-xs">{sub.icon}</span>
-                                <span class="truncate">{sub.name}</span>
-                              </span>
-                              {subTotal > 0 && <span class="text-xs text-[var(--color-text-muted)] ml-2 shrink-0">{subTotal}</span>}
-                            </a>
-                          </summary>
-                          {subSeries.length > 0 && (
-                            <ul class="ml-3 mt-1 space-y-0.5 border-l border-[var(--color-border)] pl-2">
-                              {subSeries.map((series) => {
-                                const sCount = subPosts.filter((p) => p.data.series === series).length;
-                                const sSlug = toSlug(series);
-                                const isSeriesActive = isActiveSeries(series);
-                                return (
-                                  <li>
-                                    <a
-                                      href={`/series/${sSlug}`}
-                                      class:list={[
-                                        'flex items-center justify-between w-full py-1 px-2 rounded text-xs transition-colors',
-                                        isSeriesActive
-                                          ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
-                                          : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
-                                      ]}
-                                    >
-                                      <span class="truncate">{series}</span>
-                                      <span class="text-xs opacity-60">{sCount}</span>
-                                    </a>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          )}
-                        </details>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-
-              <!-- Direct series under the top-level (no sub-cat) -->
-              {directSeries.length > 0 && (
-                <ul class="ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-2">
-                  {directSeries.map((series) => {
-                    const sCount = directPosts.filter((p) => p.data.series === series).length;
-                    const sSlug = toSlug(series);
-                    const isSeriesActive = isActiveSeries(series);
-                    return (
-                      <li>
-                        <a
-                          href={`/series/${sSlug}`}
-                          class:list={[
-                            'flex items-center justify-between w-full py-1.5 px-2 rounded text-sm transition-colors',
-                            isSeriesActive
-                              ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
-                              : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
-                          ]}
-                        >
-                          <span class="truncate">{series}</span>
-                          <span class="text-xs text-[var(--color-text-muted)]">{sCount}</span>
-                        </a>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </details>
-          );
-        })}
+        {categoryTree.map((node) => (
+          <CategoryTreeNode node={node} />
+        ))}
       </nav>
     </div>
 

@@ -2,13 +2,15 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/blog/PostCard.astro';
+import PostListPanel from '../components/blog/PostListPanel.astro';
 import { BRAND_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
+import { getLatestPosts, getRecentlyUpdatedPosts } from '../lib/posts';
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
-const recentPosts = allPosts
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 6);
+const featuredLatestPosts = getLatestPosts(allPosts, 6);
+const latestPosts = getLatestPosts(allPosts, 5);
+const recentlyUpdatedPosts = getRecentlyUpdatedPosts(allPosts, 5);
 ---
 
 <BaseLayout title={`${BRAND_CONFIG.heroTitle} - ${BRAND_CONFIG.tagline}`}>
@@ -63,6 +65,28 @@ const recentPosts = allPosts
     }
   </style>
 
+  <!-- Latest Activity -->
+  <section class="py-16 border-t border-[var(--color-border)]">
+    <div class="container">
+      <div class="grid gap-6 lg:grid-cols-2">
+        <PostListPanel
+          title={t('latest_posts')}
+          posts={latestPosts}
+          href="/blog"
+          hrefLabel={t('view_all')}
+        />
+        <PostListPanel
+          title={t('recently_updated')}
+          posts={recentlyUpdatedPosts}
+          kind="updated"
+          href="/blog"
+          hrefLabel={t('view_all')}
+          emptyLabel={t('no_recent_updates')}
+        />
+      </div>
+    </div>
+  </section>
+
   <!-- Recent Posts -->
   <section class="py-16 border-t border-[var(--color-border)]">
     <div class="container">
@@ -73,7 +97,7 @@ const recentPosts = allPosts
         </a>
       </div>
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {recentPosts.map((post) => (
+        {featuredLatestPosts.map((post) => (
           <PostCard post={post} />
         ))}
       </div>

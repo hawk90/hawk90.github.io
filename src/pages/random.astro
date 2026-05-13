@@ -1,0 +1,37 @@
+---
+import { getPublishedPosts } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+// Pick a stable "random" at build time — different on each build.
+// Client-side script below picks fresh per visit using the JSON list.
+const slugs = posts.map((p) => p.id);
+const buildPick = slugs[Math.floor(Math.random() * slugs.length)] ?? '';
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>Random Post</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={`/blog/${buildPick}`} />
+    <meta http-equiv="refresh" content={`0; url=/blog/${buildPick}`} />
+    <script type="application/json" id="random-slugs" set:html={JSON.stringify(slugs)}></script>
+    <script is:inline>
+      // Pick fresh per visit using the embedded slug list.
+      (function () {
+        try {
+          const node = document.getElementById('random-slugs');
+          if (!node) return;
+          const list = JSON.parse(node.textContent || '[]');
+          if (!Array.isArray(list) || list.length === 0) return;
+          const pick = list[Math.floor(Math.random() * list.length)];
+          location.replace('/blog/' + pick);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to a random post — <a href={`/blog/${buildPick}`}>continue manually</a> if not redirected.</p>
+  </body>
+</html>

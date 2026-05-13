@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/blog/PostCard.astro';
+import Breadcrumb from '../components/common/Breadcrumb.astro';
+import { getPublishedPosts } from '../lib/posts';
+import { formatDate } from '../lib/utils';
+
+const allPosts = await getPublishedPosts();
+
+// Posts that have been updated (updated field set & later than original date)
+const updatedPosts = allPosts
+  .filter((p) => p.data.updated && p.data.updated.valueOf() > p.data.date.valueOf())
+  .sort((a, b) => b.data.updated!.valueOf() - a.data.updated!.valueOf());
+
+// Recent original publications (no updated field, or updated == original date)
+const recentPosts = allPosts
+  .filter((p) => !p.data.updated || p.data.updated.valueOf() === p.data.date.valueOf())
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 24);
+---
+
+<BaseLayout title="Recently Updated" description="최근 수정·발행된 글">
+  <section class="py-16">
+    <div class="container max-w-5xl">
+      <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: 'Recently Updated' }]} />
+
+      <div class="mb-12">
+        <h1 class="text-4xl font-bold mb-3">Recently Updated</h1>
+        <p class="text-lg text-[var(--color-text-secondary)]">
+          최근 수정된 글과 새로 발행된 글
+        </p>
+      </div>
+
+      {updatedPosts.length > 0 && (
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-[var(--color-border)]">
+            🔄 Updated
+            <span class="text-sm text-[var(--color-text-muted)] font-normal ml-2">{updatedPosts.length}</span>
+          </h2>
+          <ul class="space-y-3">
+            {updatedPosts.slice(0, 30).map((post) => (
+              <li>
+                <a
+                  href={`/blog/${post.id}`}
+                  class="flex items-baseline justify-between gap-4 py-2 px-3 rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
+                >
+                  <div class="min-w-0 flex-1">
+                    <div class="font-medium truncate">{post.data.title}</div>
+                    {post.data.series && (
+                      <div class="text-xs text-[var(--color-text-muted)] truncate">
+                        {post.data.series}{post.data.seriesOrder ? ` · ${post.data.seriesOrder}` : ''}
+                      </div>
+                    )}
+                  </div>
+                  <time
+                    datetime={post.data.updated!.toISOString()}
+                    class="text-sm text-[var(--color-text-muted)] shrink-0"
+                  >
+                    {formatDate(post.data.updated!)}
+                  </time>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section>
+        <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-[var(--color-border)]">
+          ✨ Recently Published
+          <span class="text-sm text-[var(--color-text-muted)] font-normal ml-2">{recentPosts.length}</span>
+        </h2>
+        <div class="grid gap-6 md:grid-cols-2">
+          {recentPosts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      </section>
+    </div>
+  </section>
+</BaseLayout>

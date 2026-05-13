@@ -7,8 +7,10 @@ import SeriesNav from '../../components/blog/SeriesNav.astro';
 import SeriesSidebar from '../../components/blog/SeriesSidebar.astro';
 import Comments from '../../components/blog/Comments.astro';
 import RelatedPosts from '../../components/blog/RelatedPosts.astro';
+import Backlinks from '../../components/blog/Backlinks.astro';
 import ShareButtons from '../../components/blog/ShareButtons.astro';
 import StickyTitle from '../../components/blog/StickyTitle.astro';
+import ReadingProgress from '../../components/blog/ReadingProgress.astro';
 import AuthorBio from '../../components/blog/AuthorBio.astro';
 import Newsletter from '../../components/blog/Newsletter.astro';
 import { formatDate, getTagUrl } from '../../lib/utils';
@@ -64,6 +66,8 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
   noFollow={post.data.seo?.nofollow}
   canonical={post.data.seo?.canonical}
 >
+  <ReadingProgress />
+
   <StickyTitle
     title={post.data.title}
     series={post.data.series}
@@ -184,6 +188,11 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
               <RelatedPosts posts={relatedPosts} />
             </div>
           )}
+
+          <!-- Backlinks (posts that reference this one) -->
+          <div class="container-narrow">
+            <Backlinks currentId={post.id} />
+          </div>
 
           <!-- Comments -->
           <div class="container-narrow mt-16">

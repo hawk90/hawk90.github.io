@@ -31,6 +31,10 @@ const ja: typeof ko = defineLocale({
   toc: '目次',
   toc_open_close: '目次の開閉',
   recent_posts: '最近の投稿',
+  latest_posts: '最新の投稿',
+  recently_updated: '最近更新された投稿',
+  updated: '更新',
+  no_recent_updates: '最近更新された投稿はまだありません',
   view_all: 'すべて見る →',
   reading_time_min: '分で読了',
 

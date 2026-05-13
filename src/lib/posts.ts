@@ -12,6 +12,23 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
 }
 
 /**
+ * 최신 발행 글
+ */
+export function getLatestPosts(posts: BlogPost[], limit: number): BlogPost[] {
+  return sortByDate(posts).slice(0, limit);
+}
+
+/**
+ * 최근 수정 글 (updated 기준 내림차순)
+ */
+export function getRecentlyUpdatedPosts(posts: BlogPost[], limit: number): BlogPost[] {
+  return [...posts]
+    .filter((post) => post.data.updated && post.data.updated.valueOf() > post.data.date.valueOf())
+    .sort((a, b) => (b.data.updated?.valueOf() || 0) - (a.data.updated?.valueOf() || 0))
+    .slice(0, limit);
+}
+
+/**
  * 포스트를 날짜 내림차순으로 정렬
  */
 export function sortByDate(posts: BlogPost[]): BlogPost[] {

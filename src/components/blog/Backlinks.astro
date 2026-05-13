@@ -1,0 +1,59 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getPublishedPosts } from '../../lib/posts';
+
+interface Props {
+  /** Current post id, e.g. "programming/cpp/effective-cpp/item13-..." */
+  currentId: string;
+}
+
+const { currentId } = Astro.props;
+
+const allPosts = await getPublishedPosts();
+
+// A backlink is any other post whose markdown body contains a link
+// to `/blog/<currentId>` (with or without trailing slash). We scan
+// rendered HTML via the post body field.
+const targetPaths = [
+  `/blog/${currentId}`,
+  `/blog/${currentId}/`,
+];
+
+type Post = CollectionEntry<'blog'>;
+const backlinks: Post[] = [];
+for (const post of allPosts) {
+  if (post.id === currentId) continue;
+  const body = post.body ?? '';
+  if (targetPaths.some((p) => body.includes(p))) {
+    backlinks.push(post);
+  }
+}
+
+backlinks.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+{backlinks.length > 0 && (
+  <section class="not-prose my-12 p-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50">
+    <h2 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+      </svg>
+      이 글을 참조하는 글 ({backlinks.length})
+    </h2>
+    <ul class="space-y-2">
+      {backlinks.map((p) => (
+        <li>
+          <a
+            href={`/blog/${p.id}`}
+            class="block py-1.5 px-2 rounded hover:bg-[var(--color-bg-primary)] transition-colors"
+          >
+            <span class="font-medium text-sm">{p.data.title}</span>
+            {p.data.series && (
+              <span class="text-xs text-[var(--color-text-muted)] ml-2">— {p.data.series}</span>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

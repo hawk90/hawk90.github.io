@@ -31,6 +31,10 @@ const en: typeof ko = defineLocale({
   toc: 'On this page',
   toc_open_close: 'Toggle table of contents',
   recent_posts: 'Recent Posts',
+  latest_posts: 'Latest Posts',
+  recently_updated: 'Recently Updated',
+  updated: 'Updated',
+  no_recent_updates: 'No recently updated posts yet.',
   view_all: 'View all →',
   reading_time_min: ' min read',
 
