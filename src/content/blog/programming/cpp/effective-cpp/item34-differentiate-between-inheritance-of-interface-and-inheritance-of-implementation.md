@@ -7,15 +7,25 @@ series: "Effective C++"
 seriesOrder: 34
 ---
 
+## 왜 이 항목이 중요한가?
+
+C++ 멤버 함수의 종류(pure virtual, simple virtual, non-virtual)는 단순한 문법 차이가 아니다. 각각이 **base가 derived에 무엇을 강제하고 무엇을 제공하는지**에 대한 다른 약속을 표현한다.
+
+- **pure virtual** — "인터페이스만" 상속. 구현은 derived가 반드시 제공.
+- **simple virtual** — 인터페이스 + 기본 구현. derived가 선택적으로 override.
+- **non-virtual** — 인터페이스 + **강제된 구현**. 모든 derived가 동일하게 동작.
+
+각 의도를 잘못된 종류로 표현하면 깜빡 잊은 override, 의도치 않은 기본 동작 호출, 불변 깨짐 같은 함정이 생긴다. 이 항목은 세 종류의 정확한 의미와 선택 기준을 정리한다.
+
 ## 개요
 
-C++의 멤버 함수는 base 클래스가 derived에 무엇을 강제하고 무엇을 제공하는지에 따라 세 가지 의도를 표현합니다:
+C++의 멤버 함수는 base 클래스가 derived에 무엇을 강제하고 무엇을 제공하는지에 따라 세 가지 의도를 표현한다.
 
-- **pure virtual** — "인터페이스만" 상속, 구현은 derived가 반드시 제공
-- **simple virtual** — 인터페이스 상속 + 기본 구현 제공, derived가 선택적으로 override
-- **non-virtual** — 인터페이스 상속 + **강제된 구현**(모든 derived가 동일)
+- **pure virtual** — "인터페이스만" 상속, 구현은 derived가 반드시 제공.
+- **simple virtual** — 인터페이스 상속 + 기본 구현 제공, derived가 선택적으로 override.
+- **non-virtual** — 인터페이스 상속 + **강제된 구현**(모든 derived가 동일).
 
-각 의도를 잘못된 종류로 표현하면 — 깜빡 잊은 override, 의도치 않은 기본 동작 호출, 불일치 등 함정이 생깁니다.
+각 의도를 잘못된 종류로 표현하면 깜빡 잊은 override, 의도치 않은 기본 동작 호출, 불일치 등 함정이 생긴다.
 
 ## pure virtual — 인터페이스만
 
