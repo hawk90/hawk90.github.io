@@ -5,6 +5,7 @@ description: "C++의 4가지 초기화 문법 — uniform init {}의 강점, ini
 tags: [C++, Initialization, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 7
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

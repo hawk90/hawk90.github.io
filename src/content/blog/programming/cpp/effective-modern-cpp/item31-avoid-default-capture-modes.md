@@ -5,6 +5,7 @@ description: "[&]·[=]가 만드는 댕글링 참조와 의외의 캡처 — 명
 tags: [C++, Lambda, Capture, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 31
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

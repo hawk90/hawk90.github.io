@@ -5,6 +5,7 @@ description: "pass by value + std::move 패턴이 lvalue/rvalue 오버로드보�
 tags: [C++, Performance, Move Semantics, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 41
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

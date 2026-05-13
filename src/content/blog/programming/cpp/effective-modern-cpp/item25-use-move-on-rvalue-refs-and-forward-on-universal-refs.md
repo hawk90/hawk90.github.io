@@ -5,6 +5,7 @@ description: "참조 종류별 올바른 캐스팅 — RVO/NRVO와 충돌 회피
 tags: [C++, std::move, std::forward, RVO, Move Semantics, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 25
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -5,6 +5,7 @@ description: "using 별칭이 typedef보다 나은 4가지 — 가독성, 템플
 tags: [C++, Type Alias, Template, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 9
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

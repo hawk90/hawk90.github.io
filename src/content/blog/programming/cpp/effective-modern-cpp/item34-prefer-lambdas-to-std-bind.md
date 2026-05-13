@@ -5,6 +5,7 @@ description: "C++14+ 람다가 거의 항상 우월 — 가독성·평가 시점
 tags: [C++, Lambda, std::bind, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 34
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

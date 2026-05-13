@@ -5,6 +5,7 @@ description: "제네릭 람다에서 카테고리 보존 forwarding의 정확한
 tags: [C++, Lambda, Generic Lambda, Perfect Forwarding, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 33
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

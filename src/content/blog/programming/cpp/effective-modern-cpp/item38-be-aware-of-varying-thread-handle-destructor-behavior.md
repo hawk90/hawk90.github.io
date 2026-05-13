@@ -5,6 +5,7 @@ description: "std::thread vs std::future 소멸자 동작 비교 — async futur
 tags: [C++, Concurrency, std::future, std::thread, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 38
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -5,6 +5,7 @@ description: "독점 소유의 표준 — 일반 포인터 크기, 자동 해제
 tags: [C++, Smart Pointer, unique_ptr, RAII, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 18
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

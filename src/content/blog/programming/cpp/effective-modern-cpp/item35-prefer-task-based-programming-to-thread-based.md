@@ -5,6 +5,7 @@ description: "std::async가 std::thread보다 안전·유연 — 결과 받기, 
 tags: [C++, Concurrency, std::async, std::thread, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 35
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

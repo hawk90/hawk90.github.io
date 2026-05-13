@@ -5,6 +5,7 @@ description: "std::async의 기본 정책이 가져오는 미묘한 함정 — d
 tags: [C++, Concurrency, std::async, launch policy, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 36
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

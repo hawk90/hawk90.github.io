@@ -5,6 +5,7 @@ description: "참조 카운팅 + control block — 비용과 함정 (control blo
 tags: [C++, Smart Pointer, shared_ptr, RAII, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 19
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -5,6 +5,7 @@ description: "컴파일 타임 평가 가능 — 상수 표현식 자리, 성능
 tags: [C++, constexpr, Modern C++, Compile Time]
 series: "Effective Modern C++"
 seriesOrder: 15
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

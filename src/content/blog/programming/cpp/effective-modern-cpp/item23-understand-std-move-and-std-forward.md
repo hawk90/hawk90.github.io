@@ -5,6 +5,7 @@ description: "둘 다 캐스팅 함수 — 아무것도 이동·전달하지 않
 tags: [C++, std::move, std::forward, Move Semantics, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 23
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

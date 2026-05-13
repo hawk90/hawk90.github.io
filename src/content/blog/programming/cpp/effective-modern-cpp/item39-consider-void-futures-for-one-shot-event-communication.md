@@ -5,6 +5,7 @@ description: "condition_variable·atomic·void future — 일회성 통보의 �
 tags: [C++, Concurrency, std::future, std::condition_variable, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 39
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

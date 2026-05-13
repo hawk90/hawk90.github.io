@@ -5,6 +5,7 @@ description: "make 함수가 안전·효율·가독성 모두 우월. 사용 못
 tags: [C++, Smart Pointer, make_unique, make_shared, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 21
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

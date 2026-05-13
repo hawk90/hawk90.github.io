@@ -5,6 +5,7 @@ description: "joinable thread 소멸 = std::terminate. RAII wrapper / C++20 std:
 tags: [C++, Concurrency, std::thread, RAII, jthread, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 37
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

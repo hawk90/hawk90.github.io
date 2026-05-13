@@ -5,6 +5,7 @@ description: "C++11 move semantics가 항상 성능 향상은 아닌 4가지 이
 tags: [C++, Move Semantics, Performance, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 29
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

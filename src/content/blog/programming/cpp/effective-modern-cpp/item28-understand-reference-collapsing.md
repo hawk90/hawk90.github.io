@@ -5,6 +5,7 @@ description: "참조의 참조를 단일 참조로 — 보편 참조와 std::for
 tags: [C++, Reference Collapsing, Template, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 28
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

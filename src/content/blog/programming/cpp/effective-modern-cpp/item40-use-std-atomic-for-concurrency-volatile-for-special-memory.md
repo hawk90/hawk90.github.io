@@ -5,6 +5,7 @@ description: "atomic과 volatile은 다른 도구 — 자주 혼동되는 두 �
 tags: [C++, std::atomic, volatile, Concurrency, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 40
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

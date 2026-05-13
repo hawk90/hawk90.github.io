@@ -5,6 +5,7 @@ description: "보편 참조 + std::forward로도 전달되지 않는 5가지 표
 tags: [C++, Perfect Forwarding, Template, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 30
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?
