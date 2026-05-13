@@ -7,9 +7,24 @@ series: "Effective C++"
 seriesOrder: 36
 ---
 
+## 왜 이 항목이 중요한가?
+
+C++에서 가장 헷갈리는 함정 중 하나가 **정적 바인딩과 동적 바인딩이 섞일 때**다. derived가 base의 non-virtual 함수를 재정의(엄밀히는 "숨김")하면, **같은 객체라도 어떤 타입의 포인터로 호출하느냐에 따라 다른 함수가 실행**된다.
+
+```cpp
+Derived d;
+Base& b = d;
+b.f();   // Base::f 호출 (정적 바인딩)
+d.f();   // Derived::f 호출
+```
+
+같은 객체의 같은 호출이 다른 결과를 낸다. 이건 LSP를 명백히 깨뜨린다. 컴파일러는 경고하지 않는다.
+
+해결책은 단순하다. **base의 non-virtual을 재정의하지 마라**. 다형성이 필요하면 base의 함수를 virtual로 바꾸고, 같은 동작이 강제되어야 한다면 non-virtual을 그대로 둔다 ([항목 34](/blog/programming/cpp/effective-cpp/item34-differentiate-between-inheritance-of-interface-and-inheritance-of-implementation)).
+
 ## 개요
 
-non-virtual 함수는 **정적 바인딩** — 호출되는 함수가 **포인터/참조의 정적 타입**에 의해 결정됩니다. 같은 객체라도 어떤 타입의 포인터로 부르느냐에 따라 다른 함수가 호출 — 매우 헷갈리고 LSP를 깨뜨립니다. derived가 base의 non-virtual을 재정의하면 — 컴파일은 통과해도 **의도와 다른 동작**.
+non-virtual 함수는 **정적 바인딩**이다. 호출되는 함수가 **포인터/참조의 정적 타입**에 의해 결정된다. 같은 객체라도 어떤 타입의 포인터로 부르느냐에 따라 다른 함수가 호출된다. 매우 헷갈리고 LSP를 깨뜨린다. derived가 base의 non-virtual을 재정의하면 컴파일은 통과해도 **의도와 다른 동작**이 일어난다.
 
 ## 함정 — 같은 객체, 다른 함수
 
