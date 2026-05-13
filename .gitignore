@@ -32,3 +32,8 @@ credentials.json
 
 # legacy backup (not part of Astro site)
 _jekyll_backup/
+
+# Book PDFs (book-notes book/ dirs) — safety net even though no PDFs go in repo
+*.pdf
+*.epub
+*.djvu
