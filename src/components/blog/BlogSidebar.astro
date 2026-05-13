@@ -21,6 +21,15 @@ const sortedTags = getTagsWithCount(allPosts);
 const { maxTagsInSidebar } = BLOG_CONFIG;
 
 const topCats = getTopLevelCategories();
+const subCategoryIdsByParent = new Map(
+  CATEGORIES.map((category) => [category.id, getSubCategories(category.id).map((sub) => sub.id)]),
+);
+const postsByCategoryPrefix = new Map(
+  CATEGORIES.map((category) => [
+    category.id,
+    allPosts.filter((post) => post.id.startsWith(category.id + '/')),
+  ]),
+);
 
 interface SeriesLink {
   name: string;
@@ -42,9 +51,9 @@ function isActiveCategory(categoryId: string): boolean {
 }
 
 function postsDirectlyIn(catId: string) {
-  const subCatIds = CATEGORIES.filter((c) => c.parent === catId).map((c) => c.id);
-  return allPosts.filter((p) => {
-    if (!p.id.startsWith(catId + '/')) return false;
+  const subCatIds = subCategoryIdsByParent.get(catId) ?? [];
+  const prefixedPosts = postsByCategoryPrefix.get(catId) ?? [];
+  return prefixedPosts.filter((p) => {
     return !subCatIds.some((sub) => p.id.startsWith(sub + '/'));
   });
 }
@@ -76,7 +85,7 @@ function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
     id: category.id,
     name: category.name,
     icon: category.icon,
-    count: allPosts.filter((post) => post.id.startsWith(category.id + '/')).length,
+    count: (postsByCategoryPrefix.get(category.id) ?? []).length,
     isActive: isActiveCategory(category.id),
     initiallyOpen: isActiveCategory(category.id) || hasActiveDescendant,
     children,

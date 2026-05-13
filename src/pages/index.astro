@@ -6,11 +6,14 @@ import PostListPanel from '../components/blog/PostListPanel.astro';
 import { BRAND_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
 import { getLatestPosts, getRecentlyUpdatedPosts } from '../lib/posts';
+import { formatDate } from '../lib/utils';
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const featuredLatestPosts = getLatestPosts(allPosts, 6);
 const latestPosts = getLatestPosts(allPosts, 5);
 const recentlyUpdatedPosts = getRecentlyUpdatedPosts(allPosts, 5);
+const heroPost = featuredLatestPosts[0];
+const secondaryLatestPosts = latestPosts.slice(heroPost ? 1 : 0);
 ---
 
 <BaseLayout title={`${BRAND_CONFIG.heroTitle} - ${BRAND_CONFIG.tagline}`}>
@@ -68,21 +71,62 @@ const recentlyUpdatedPosts = getRecentlyUpdatedPosts(allPosts, 5);
   <!-- Latest Activity -->
   <section class="py-16 border-t border-[var(--color-border)]">
     <div class="container">
-      <div class="grid gap-6 lg:grid-cols-2">
-        <PostListPanel
-          title={t('latest_posts')}
-          posts={latestPosts}
-          href="/blog"
-          hrefLabel={t('view_all')}
-        />
-        <PostListPanel
-          title={t('recently_updated')}
-          posts={recentlyUpdatedPosts}
-          kind="updated"
-          href="/blog"
-          hrefLabel={t('view_all')}
-          emptyLabel={t('no_recent_updates')}
-        />
+      <div class="flex items-end justify-between gap-4 mb-8">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+            Latest Activity
+          </div>
+          <h2 class="text-2xl lg:text-3xl font-bold">Fresh writing, not just an archive</h2>
+        </div>
+        <a href="/blog" class="text-[var(--color-accent)] hover:underline">
+          {t('view_all')}
+        </a>
+      </div>
+
+      <div class="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.95fr)]">
+        {heroPost && (
+          <article class="card relative overflow-hidden group">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(167,139,250,0.16),transparent_40%)] pointer-events-none"></div>
+            <div class="relative">
+              <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)] mb-4">
+                <span>Latest Post</span>
+                {heroPost.data.series && <span class="text-[var(--color-text-muted)]">{heroPost.data.series}</span>}
+              </div>
+              <a href={`/blog/${heroPost.id}`} class="block">
+                <h3 class="text-2xl lg:text-3xl font-bold leading-tight mb-4 group-hover:text-[var(--color-accent)] transition-colors">
+                  {heroPost.data.title}
+                </h3>
+                {heroPost.data.description && (
+                  <p class="text-base text-[var(--color-text-secondary)] leading-relaxed mb-6 max-w-2xl">
+                    {heroPost.data.description}
+                  </p>
+                )}
+                <div class="flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-muted)]">
+                  <span>{formatDate(heroPost.data.date, 'short')}</span>
+                  <span class="w-1 h-1 rounded-full bg-[var(--color-border-hover)]"></span>
+                  <span>{heroPost.data.tags.slice(0, 3).join(' · ')}</span>
+                </div>
+              </a>
+            </div>
+          </article>
+        )}
+
+        <div class="grid gap-6">
+          <PostListPanel
+            title={t('latest_posts')}
+            posts={secondaryLatestPosts}
+            href="/blog"
+            hrefLabel={t('view_all')}
+          />
+          <PostListPanel
+            title={t('recently_updated')}
+            posts={recentlyUpdatedPosts}
+            kind="updated"
+            href="/blog"
+            hrefLabel={t('view_all')}
+            emptyLabel={t('no_recent_updates')}
+          />
+        </div>
       </div>
     </div>
   </section>
