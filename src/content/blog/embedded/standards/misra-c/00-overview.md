@@ -5,6 +5,7 @@ description: "자동차 / 임베디드 안전 C 표준. 170+ rules. amendments."
 tags: [MISRA, C, Safety-Critical, Standards, Series]
 series: "MISRA C"
 seriesOrder: 0
+draft: true
 ---
 
 ## 작성 중

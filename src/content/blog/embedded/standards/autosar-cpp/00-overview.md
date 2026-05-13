@@ -5,6 +5,7 @@ description: "자동차 안전중요 C++14. MISRA C++의 모던 후계. 340+ rul
 tags: [AUTOSAR, C++14, Safety-Critical, Automotive, Standards, Series]
 series: "AUTOSAR C++14"
 seriesOrder: 0
+draft: true
 ---
 
 ## 작성 중

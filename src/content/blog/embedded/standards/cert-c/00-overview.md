@@ -5,6 +5,7 @@ description: "SEI CERT Coding Standard for C. 보안 중심. CVE 예방."
 tags: [CERT, C, Security, Standards, Series]
 series: "CERT C"
 seriesOrder: 0
+draft: true
 ---
 
 ## 작성 중
