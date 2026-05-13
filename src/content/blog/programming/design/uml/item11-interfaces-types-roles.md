@@ -6,6 +6,7 @@ tags: [UML, Interface, Ports, DIP, SOLID]
 series: "UML User Guide"
 seriesOrder: 11
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

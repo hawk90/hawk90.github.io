@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, sports]
 type: book-review
 bookTitle: "On Writing Well"
 bookAoauthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 17 요약

@@ -6,6 +6,7 @@ tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 105
 draft: false
+draft: true
 ---
 
 1장의 중심. 여기서 만나는 사실 하나가 1장 전체를 묶어 준다 — *기저는 어떻게 잡아도 같은 크기다*.

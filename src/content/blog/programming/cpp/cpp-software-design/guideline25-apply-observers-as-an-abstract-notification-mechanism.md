@@ -5,6 +5,7 @@ description: "Observer 패턴은 pub/sub이다. 모던 C++에서 std::function �
 tags: [C++, Software Design, Observer, Pub-Sub]
 series: "C++ Software Design"
 seriesOrder: 25
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

@@ -5,6 +5,7 @@ description: "디자인 패턴은 검증된 해결책이자 공유 어휘다. �
 tags: [C++, Software Design, Design Patterns, GoF]
 series: "C++ Software Design"
 seriesOrder: 11
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

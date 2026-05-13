@@ -5,6 +5,7 @@ description: "Sniper의 최소 e2e — 한 경매 join → loss 알림."
 tags: [TDD, Walking Skeleton]
 series: "Growing Object-Oriented Software"
 seriesOrder: 10
+draft: true
 ---
 
 > "Get the skeleton walking first."

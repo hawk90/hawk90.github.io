@@ -5,6 +5,7 @@ description: "39개 가이드라인의 마무리다. 패턴 학습은 평생의 
 tags: [C++, Software Design, Patterns, Learning]
 series: "C++ Software Design"
 seriesOrder: 39
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

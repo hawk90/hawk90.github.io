@@ -6,6 +6,7 @@ tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 107
 draft: false
+draft: true
 ---
 
 ## 한 장의 이야기

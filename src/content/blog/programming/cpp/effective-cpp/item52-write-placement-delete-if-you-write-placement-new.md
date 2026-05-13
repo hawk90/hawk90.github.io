@@ -5,6 +5,7 @@ description: "생성자 throw 시 컴파일러가 매칭 placement delete를 자
 tags: [C++, Effective C++, new, delete, Placement]
 series: "Effective C++"
 seriesOrder: 52
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

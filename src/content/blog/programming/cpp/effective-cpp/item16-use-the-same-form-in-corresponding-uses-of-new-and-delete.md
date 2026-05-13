@@ -5,6 +5,7 @@ description: "new ↔ delete, new[] ↔ delete[] — 짝이 맞지 않으면 UB.
 tags: [C++, Effective C++, Memory Management]
 series: "Effective C++"
 seriesOrder: 16
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -6,6 +6,7 @@ tags: [UML, Class Diagram, Static Modeling, Domain]
 series: "UML User Guide"
 seriesOrder: 8
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

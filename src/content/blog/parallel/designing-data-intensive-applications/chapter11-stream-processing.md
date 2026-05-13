@@ -5,6 +5,7 @@ description: "Kafka, Flink, Storm. 무한 입력의 즉시 처리. Event time vs
 tags: [DDIA, Stream, Kafka, Flink, EventTime, ExactlyOnce]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 11
+draft: true
 ---
 
 ## 이 챕터의 메시지

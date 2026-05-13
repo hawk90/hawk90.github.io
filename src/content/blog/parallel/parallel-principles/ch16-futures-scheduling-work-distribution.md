@@ -8,6 +8,7 @@ tags: [parallel, concurrency, book-review, amp, future, work-stealing, fork-join
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
+draft: true
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 16 요약

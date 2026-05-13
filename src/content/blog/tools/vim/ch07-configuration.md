@@ -5,6 +5,7 @@ description: "vimrc 설정, 키 매핑, 옵션 커스터마이징"
 series: "Vim 마스터하기"
 seriesOrder: 7
 tags: [vim, editor, vimrc, configuration, settings]
+draft: true
 ---
 
 > **Vim 마스터하기** Chapter 7: 설정 (vimrc)

@@ -6,6 +6,7 @@ tags: [UML, Class Diagram, Classifier, Active Class]
 series: "UML User Guide"
 seriesOrder: 9
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

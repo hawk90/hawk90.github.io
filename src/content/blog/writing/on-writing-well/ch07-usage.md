@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, usage, grammar]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 7 요약

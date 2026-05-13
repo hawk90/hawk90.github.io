@@ -6,6 +6,7 @@ tags: [UML, Object Diagram, Snapshot, Debugging]
 series: "UML User Guide"
 seriesOrder: 14
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

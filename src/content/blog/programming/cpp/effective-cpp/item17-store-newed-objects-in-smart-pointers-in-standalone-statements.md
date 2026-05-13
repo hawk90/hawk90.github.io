@@ -5,6 +5,7 @@ description: "함수 인자 평가 순서 함정과 자원 누수 방지 — C++
 tags: [C++, Effective C++, Smart Pointer, Exception Safety]
 series: "Effective C++"
 seriesOrder: 17
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

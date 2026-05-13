@@ -6,6 +6,7 @@ tags: [UML, Collaboration, Role, Pattern]
 series: "UML User Guide"
 seriesOrder: 27
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

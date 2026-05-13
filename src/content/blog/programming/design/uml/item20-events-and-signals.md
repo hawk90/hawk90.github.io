@@ -6,6 +6,7 @@ tags: [UML, Event, Signal, Behavior]
 series: "UML User Guide"
 seriesOrder: 20
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

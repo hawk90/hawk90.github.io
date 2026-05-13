@@ -6,6 +6,7 @@ tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 100
 draft: false
+draft: true
 ---
 
 1장의 첫걸음. 추상화를 시작하기 전에 곧 일반화하게 될 *원본 그림*을 손에 익혀 둔다.

@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, confidence, fear]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 21 요약

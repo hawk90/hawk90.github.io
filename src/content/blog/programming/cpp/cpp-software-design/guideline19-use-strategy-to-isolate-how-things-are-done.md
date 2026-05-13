@@ -5,6 +5,7 @@ description: "Strategy 패턴은 알고리즘을 갈아 끼울 수 있게 만든
 tags: [C++, Software Design, Strategy, Design Patterns]
 series: "C++ Software Design"
 seriesOrder: 19
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

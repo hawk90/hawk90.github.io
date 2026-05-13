@@ -6,6 +6,7 @@ tags: [UML, Design Pattern, Framework, Collaboration]
 series: "UML User Guide"
 seriesOrder: 28
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

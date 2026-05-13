@@ -5,6 +5,7 @@ description: "코드 4 분류 — Domain / Trivial / Controllers / Overcomplicat
 tags: [TDD, Refactoring, Code Categories]
 series: "Khorikov Unit Testing"
 seriesOrder: 7
+draft: true
 ---
 
 모든 코드에 동일한 테스트 전략을 적용할 수는 없다. 코드를 분류하고 각 유형에 맞는 테스트 전략을 세워야 한다.

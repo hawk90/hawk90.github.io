@@ -6,6 +6,7 @@ tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 102
 draft: false
+draft: true
 ---
 
 §1.1 에서 큰 무대를 마련했다. 이제 그 무대 *안*을 들여다본다.

@@ -5,6 +5,7 @@ description: "Singleton은 디자인 패턴인가 안티패턴인가. 글로벌 
 tags: [C++, Software Design, Singleton, Anti-pattern]
 series: "C++ Software Design"
 seriesOrder: 37
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

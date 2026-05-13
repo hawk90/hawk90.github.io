@@ -5,6 +5,7 @@ description: "패턴은 클래스 다이어그램이 아니다. 의도와 트레
 tags: [C++, Software Design, Design Patterns, Anti-patterns]
 series: "C++ Software Design"
 seriesOrder: 12
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

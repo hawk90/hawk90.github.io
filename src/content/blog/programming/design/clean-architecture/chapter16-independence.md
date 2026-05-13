@@ -5,6 +5,7 @@ description: "좋은 아키텍처가 보장해야 할 네 가지 독립성 — u
 tags: [Architecture, Independence, Decoupling]
 series: "Clean Architecture"
 seriesOrder: 16
+draft: true
 ---
 
 ## 이 챕터의 메시지

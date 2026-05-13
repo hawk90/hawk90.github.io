@@ -6,6 +6,7 @@ tags: [UML, Sequence Diagram, Interaction, Behavior]
 series: "UML User Guide"
 seriesOrder: 18
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

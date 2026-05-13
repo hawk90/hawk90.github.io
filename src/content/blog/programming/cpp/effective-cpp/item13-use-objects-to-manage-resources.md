@@ -5,6 +5,7 @@ description: "RAII — 자원의 획득은 곧 초기화. 스마트 포인터·l
 tags: [C++, Effective C++, RAII, Smart Pointer]
 series: "Effective C++"
 seriesOrder: 13
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

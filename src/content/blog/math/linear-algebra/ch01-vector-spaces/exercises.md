@@ -6,6 +6,7 @@ tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 191
 draft: false
+draft: true
 ---
 
 > Hoffman & Kunze, Shilov, 그리고 자체 출제. 풀이는 본문의 정의·정리 번호로 참조한다. 별표 (★) 는 약간 까다롭거나 일반화 가치가 있는 문제.

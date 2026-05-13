@@ -5,6 +5,7 @@ description: "마이크로서비스의 한계. 서비스로 쪼개는 것이 자
 tags: [Architecture, Microservices, Services]
 series: "Clean Architecture"
 seriesOrder: 27
+draft: true
 ---
 
 ## 이 챕터의 메시지

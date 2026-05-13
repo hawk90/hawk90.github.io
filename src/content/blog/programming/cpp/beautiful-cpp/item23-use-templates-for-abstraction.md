@@ -6,6 +6,7 @@ tags: [C++, Templates, Generic Programming]
 series: "Beautiful C++"
 seriesOrder: 23
 draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -6,6 +6,7 @@ tags: [UML, Use Case Diagram, Requirements, Scope]
 series: "UML User Guide"
 seriesOrder: 17
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

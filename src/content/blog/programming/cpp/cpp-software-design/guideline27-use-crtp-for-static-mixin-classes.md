@@ -5,6 +5,7 @@ description: "Mixin 패턴은 능력을 추가하는 작은 클래스다. CRTP�
 tags: [C++, Software Design, CRTP, Mixin]
 series: "C++ Software Design"
 seriesOrder: 27
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

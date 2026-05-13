@@ -5,6 +5,7 @@ description: "derived의 동명 함수는 base의 모든 동명 함수를 가린
 tags: [C++, Effective C++, Inheritance, Name Hiding]
 series: "Effective C++"
 seriesOrder: 33
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

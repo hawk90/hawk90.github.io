@@ -6,6 +6,7 @@ tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 100
 draft: false
+draft: true
 ---
 
 ## 1900년경, 모든 것이 좋아 보였다

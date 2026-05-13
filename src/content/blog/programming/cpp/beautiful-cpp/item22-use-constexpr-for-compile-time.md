@@ -6,6 +6,7 @@ tags: [C++, constexpr, consteval]
 series: "Beautiful C++"
 seriesOrder: 22
 draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

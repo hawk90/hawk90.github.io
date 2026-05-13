@@ -6,6 +6,7 @@ tags: [UML, Package, Modularity, Architecture]
 series: "UML User Guide"
 seriesOrder: 12
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

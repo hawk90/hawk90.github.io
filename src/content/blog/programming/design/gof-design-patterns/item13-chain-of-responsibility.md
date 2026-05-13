@@ -5,6 +5,7 @@ description: "처리자 후보들을 체인으로 — 누가 처리할지는 자
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 13
+draft: true
 ---
 
 ## 한 줄 요약

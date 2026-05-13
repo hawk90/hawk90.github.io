@@ -5,6 +5,7 @@ description: "x = x; 자기 대입 — 별칭으로도 발생. identity check / 
 tags: [C++, Effective C++, Operator Overloading, Exception Safety]
 series: "Effective C++"
 seriesOrder: 11
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -6,6 +6,7 @@ tags: [UML, Class Diagram, Relationships, Composition]
 series: "UML User Guide"
 seriesOrder: 10
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

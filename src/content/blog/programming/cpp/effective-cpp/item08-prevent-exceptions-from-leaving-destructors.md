@@ -5,6 +5,7 @@ description: "예외 진행 중 소멸자에서 또 예외 → terminate. 자원
 tags: [C++, Effective C++, Destructor, Exception]
 series: "Effective C++"
 seriesOrder: 8
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -5,6 +5,7 @@ description: "디렉터리 구조만 봐도 시스템이 무엇을 하는지 즉
 tags: [Architecture, ScreamingArchitecture, DomainDriven]
 series: "Clean Architecture"
 seriesOrder: 21
+draft: true
 ---
 
 ## 이 챕터의 메시지

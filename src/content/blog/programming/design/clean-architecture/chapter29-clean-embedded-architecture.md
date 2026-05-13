@@ -5,6 +5,7 @@ description: "임베디드에서 Clean Architecture를 적용한다는 것. firm
 tags: [Architecture, Embedded, HAL]
 series: "Clean Architecture"
 seriesOrder: 29
+draft: true
 ---
 
 ## 이 챕터의 메시지

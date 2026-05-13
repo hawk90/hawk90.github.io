@@ -6,6 +6,7 @@ tags: [UML, State Machine, Composite State, History]
 series: "UML User Guide"
 seriesOrder: 23
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

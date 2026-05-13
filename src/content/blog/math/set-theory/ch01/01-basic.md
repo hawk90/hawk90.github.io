@@ -6,6 +6,7 @@ tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 101
 draft: false
+draft: true
 ---
 
 ## 무엇이든 시작하기 전에

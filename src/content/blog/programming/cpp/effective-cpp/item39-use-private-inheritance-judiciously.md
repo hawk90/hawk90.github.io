@@ -5,6 +5,7 @@ description: "private 상속의 의미와 composition과의 차이 — EBO와 pr
 tags: [C++, Effective C++, Inheritance, Private]
 series: "Effective C++"
 seriesOrder: 39
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

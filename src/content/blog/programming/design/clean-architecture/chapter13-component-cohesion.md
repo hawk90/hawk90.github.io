@@ -5,6 +5,7 @@ description: "무엇이 한 컴포넌트에 같이 들어가야 하는가. REP, 
 tags: [Architecture, Components, Cohesion, REP, CCP, CRP]
 series: "Clean Architecture"
 seriesOrder: 13
+draft: true
 ---
 
 ## 이 챕터의 메시지

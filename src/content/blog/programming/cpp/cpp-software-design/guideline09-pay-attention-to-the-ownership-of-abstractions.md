@@ -5,6 +5,7 @@ description: "추상화의 소유는 누가 인터페이스를 정의하느냐�
 tags: [C++, Software Design, SOLID, DIP, Architecture]
 series: "C++ Software Design"
 seriesOrder: 9
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

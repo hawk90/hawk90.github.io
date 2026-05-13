@@ -5,6 +5,7 @@ description: "Expression Problem. 새 타입이 자주 들어오는지 새 연�
 tags: [C++, Software Design, Expression Problem, Visitor]
 series: "C++ Software Design"
 seriesOrder: 15
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

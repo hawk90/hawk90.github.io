@@ -5,6 +5,7 @@ description: "pure virtual / simple virtual / non-virtual — base가 derived에
 tags: [C++, Effective C++, Inheritance, Virtual]
 series: "Effective C++"
 seriesOrder: 34
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

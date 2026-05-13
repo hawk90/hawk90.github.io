@@ -5,6 +5,7 @@ description: "단순한 3겹 다이어그램이 만능이 아니다. Hunt the Wu
 tags: [Architecture, Layers, Boundaries]
 series: "Clean Architecture"
 seriesOrder: 25
+draft: true
 ---
 
 ## 이 챕터의 메시지

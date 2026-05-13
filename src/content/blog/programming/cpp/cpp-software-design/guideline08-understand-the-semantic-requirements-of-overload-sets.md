@@ -5,6 +5,7 @@ description: "함수 오버로드도 인터페이스다. 같은 이름은 같은
 tags: [C++, Software Design, Overloading, Customization Point]
 series: "C++ Software Design"
 seriesOrder: 8
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

@@ -5,6 +5,7 @@ description: "캡슐화의 첫걸음 — public 데이터의 4가지 단점, pro
 tags: [C++, Effective C++, Encapsulation]
 series: "Effective C++"
 seriesOrder: 22
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

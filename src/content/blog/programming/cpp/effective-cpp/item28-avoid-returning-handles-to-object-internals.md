@@ -5,6 +5,7 @@ description: "내부 데이터의 참조/포인터/반복자 반환은 캡슐화
 tags: [C++, Effective C++, Encapsulation, Dangling]
 series: "Effective C++"
 seriesOrder: 28
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

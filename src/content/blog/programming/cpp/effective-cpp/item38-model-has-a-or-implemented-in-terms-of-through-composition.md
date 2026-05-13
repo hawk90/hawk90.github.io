@@ -5,6 +5,7 @@ description: "composition의 두 의미 — 도메인의 has-a, 구현의 is-imp
 tags: [C++, Effective C++, Composition]
 series: "Effective C++"
 seriesOrder: 38
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

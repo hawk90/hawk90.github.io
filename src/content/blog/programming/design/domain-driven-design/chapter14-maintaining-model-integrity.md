@@ -5,6 +5,7 @@ description: "Bounded Context. Context Map. Shared Kernel / ACL / Conformist / P
 tags: [DDD, Bounded Context, Context Map]
 series: "Domain-Driven Design"
 seriesOrder: 14
+draft: true
 ---
 
 ## 단일 모델의 한계

@@ -5,6 +5,7 @@ description: "DB 테스트, 스레드 / 비동기 테스트, 시리즈 마무리
 tags: [TDD, Persistence, Threading]
 series: "Growing Object-Oriented Software"
 seriesOrder: 23
+draft: true
 ---
 
 이 장에서는 GOOS 원서의 Chapter 23-27의 고급 주제를 통합하여 다룬다.

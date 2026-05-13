@@ -5,6 +5,7 @@ description: "operator new 실패 시 호출되는 핸들러 — 설치, 동작 
 tags: [C++, Effective C++, new, Memory]
 series: "Effective C++"
 seriesOrder: 49
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

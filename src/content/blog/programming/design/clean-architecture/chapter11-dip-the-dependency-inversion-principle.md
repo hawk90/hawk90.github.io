@@ -5,6 +5,7 @@ description: "고수준 모듈은 저수준 모듈에 의존하면 안 된다. �
 tags: [Architecture, SOLID, DIP]
 series: "Clean Architecture"
 seriesOrder: 11
+draft: true
 ---
 
 ## 이 챕터의 메시지

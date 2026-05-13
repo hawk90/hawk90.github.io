@@ -5,6 +5,7 @@ description: "코드만으로는 디자인의 의도가 드러나지 않는다. 
 tags: [C++, Software Design, Architecture, Documentation]
 series: "C++ Software Design"
 seriesOrder: 10
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

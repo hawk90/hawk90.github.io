@@ -5,6 +5,7 @@ description: "컴포넌트들이 서로 어떻게 의존해야 하는가. ADP, S
 tags: [Architecture, Components, Coupling, ADP, SDP, SAP]
 series: "Clean Architecture"
 seriesOrder: 14
+draft: true
 ---
 
 ## 이 챕터의 메시지

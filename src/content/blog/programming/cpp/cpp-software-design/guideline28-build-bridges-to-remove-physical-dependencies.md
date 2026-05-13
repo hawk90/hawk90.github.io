@@ -5,6 +5,7 @@ description: "Bridge와 Pimpl 패턴은 추상과 구현을 분리해 헤더 의
 tags: [C++, Software Design, Bridge, Pimpl]
 series: "C++ Software Design"
 seriesOrder: 28
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, literature]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 11 요약

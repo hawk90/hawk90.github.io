@@ -5,6 +5,7 @@ description: "Linearizability, Causal Consistency, CAP 정리. Consensus 알고�
 tags: [DDIA, Consistency, Linearizability, Consensus, Paxos, Raft, CAP]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 9
+draft: true
 ---
 
 ## 이 챕터의 메시지

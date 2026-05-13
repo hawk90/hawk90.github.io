@@ -231,17 +231,7 @@ void consumer() {
 - **Release store 이전**의 모든 쓰기는
 - **Acquire load 이후**에서 반드시 보인다
 
-```
-Producer                    Consumer
-─────────────────────────────────────
-data = 42     (1)
-    ↓
-release store (2) ──────→  acquire load (3)
-                                ↓
-                           read data (4)
-
-(1) happens-before (4)
-```
+![Acquire-Release 의미론](/images/blog/parallel/diagrams/acquire-release-semantics.svg)
 
 ### memory_order_acq_rel
 

@@ -5,6 +5,7 @@ description: "Command 패턴은 동작을 객체로 만든다. undo / redo / que
 tags: [C++, Software Design, Command, Design Patterns]
 series: "C++ Software Design"
 seriesOrder: 21
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

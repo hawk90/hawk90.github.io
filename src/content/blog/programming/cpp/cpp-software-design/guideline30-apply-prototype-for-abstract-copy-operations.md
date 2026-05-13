@@ -5,6 +5,7 @@ description: "다형 객체의 복사 문제는 virtual clone()으로 풀린다.
 tags: [C++, Software Design, Prototype, GoF, Polymorphism]
 series: "C++ Software Design"
 seriesOrder: 30
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

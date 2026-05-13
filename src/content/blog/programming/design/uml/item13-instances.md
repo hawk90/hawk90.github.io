@@ -6,6 +6,7 @@ tags: [UML, Object, Instance, Snapshot]
 series: "UML User Guide"
 seriesOrder: 13
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

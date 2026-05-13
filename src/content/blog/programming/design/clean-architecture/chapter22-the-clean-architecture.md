@@ -5,6 +5,7 @@ description: "책의 이름이자 책 전체의 시각적 요약. 4겹 동심원
 tags: [Architecture, CleanArchitecture, DependencyRule]
 series: "Clean Architecture"
 seriesOrder: 22
+draft: true
 ---
 
 ## 이 챕터의 메시지

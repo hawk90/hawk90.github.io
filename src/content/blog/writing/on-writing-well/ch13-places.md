@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, travel, place]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 13 요약

@@ -6,6 +6,7 @@ tags: [UML, Real-time, Deadline, Location, Distribution]
 series: "UML User Guide"
 seriesOrder: 24
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

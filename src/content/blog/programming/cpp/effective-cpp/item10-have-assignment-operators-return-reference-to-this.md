@@ -5,6 +5,7 @@ description: "체인 대입(x = y = z) 지원을 위한 표준 관용구 — 모
 tags: [C++, Effective C++, Operator Overloading]
 series: "Effective C++"
 seriesOrder: 10
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

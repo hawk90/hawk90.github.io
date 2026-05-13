@@ -5,6 +5,7 @@ description: "ACID의 정확한 의미. Isolation level — Read Committed / Sna
 tags: [DDIA, Transaction, ACID, Isolation, Serializable]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 7
+draft: true
 ---
 
 ## 이 챕터의 메시지

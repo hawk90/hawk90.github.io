@@ -5,6 +5,7 @@ description: "선적(cargo) 시스템 종합 예제. 모델 진화 / 빌딩 블�
 tags: [DDD, Case Study, Cargo]
 series: "Domain-Driven Design"
 seriesOrder: 7
+draft: true
 ---
 
 ## 화물 운송 시스템

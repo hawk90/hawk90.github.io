@@ -6,6 +6,7 @@ tags: [UML, Interaction, Sequence, Communication]
 series: "UML User Guide"
 seriesOrder: 15
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

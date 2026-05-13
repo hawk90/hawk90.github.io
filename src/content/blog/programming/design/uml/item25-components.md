@@ -6,6 +6,7 @@ tags: [UML, Component, Architecture, Deployment]
 series: "UML User Guide"
 seriesOrder: 25
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

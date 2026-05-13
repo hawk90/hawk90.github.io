@@ -5,6 +5,7 @@ description: "Type Erasure는 External Polymorphism이 한 단계 발전한 형�
 tags: [C++, Software Design, Type Erasure, Value Semantics]
 series: "C++ Software Design"
 seriesOrder: 32
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

@@ -5,6 +5,7 @@ description: "사용자 정의 swap의 효율과 ADL 패턴 — 멤버 swap, 같
 tags: [C++, Effective C++, Exception Safety, swap]
 series: "Effective C++"
 seriesOrder: 25
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

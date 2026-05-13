@@ -5,6 +5,7 @@ description: "새 클래스 = 새 타입. 생성·소멸·복사·연산자·변
 tags: [C++, Effective C++, API Design]
 series: "Effective C++"
 seriesOrder: 19
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

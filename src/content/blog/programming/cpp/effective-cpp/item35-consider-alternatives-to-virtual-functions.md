@@ -5,6 +5,7 @@ description: "NVI, Strategy 패턴, std::function, 템플릿 — 다형성 구�
 tags: [C++, Effective C++, Virtual, Design Pattern]
 series: "Effective C++"
 seriesOrder: 35
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

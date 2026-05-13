@@ -5,6 +5,7 @@ description: "Kleppmann의 비전 — Unbundling Database, dataflow 사고, 인�
 tags: [DDIA, Future, Dataflow, Ethics]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 12
+draft: true
 ---
 
 ## 이 챕터의 메시지

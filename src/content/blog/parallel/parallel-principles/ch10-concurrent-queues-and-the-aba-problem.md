@@ -8,6 +8,7 @@ tags: [parallel, concurrency, book-review, amp, queue, michael-scott, aba, hazar
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
+draft: true
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 10 요약
@@ -16,11 +17,7 @@ bookAuthor: "Maurice Herlihy, Nir Shavit"
 
 Queue는 두 끝(head, tail)에서 동시 작업이 일어난다. enqueue는 tail, dequeue는 head.
 
-```
-[head] → 1 → 2 → 3 → 4 → [tail]
-         ↑                  ↑
-       dequeue            enqueue
-```
+![동시 큐 구조](/images/blog/parallel/diagrams/concurrent-queue.svg)
 
 좋은 디자인 — **dequeue와 enqueue가 서로 안 막아야** 한다. 락을 두 개 따로 잡으면 가능.
 

@@ -8,6 +8,7 @@ tags: [parallel, concurrency, book-review, amp, skiplist, lock-free]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
+draft: true
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 14 요약
@@ -54,14 +55,7 @@ bookAuthor: "Maurice Herlihy, Nir Shavit"
 
 W. Pugh가 1989년 발명한 자료구조. 균형 트리의 대안.
 
-```
-Level 3: ─────────────────────────────50─────────────────
-Level 2: ───────────20────────────────50─────────70──────
-Level 1: ────10─────20────40─────────50─────────70───80──
-Level 0: 5──10──15──20──30─40──45────50──60──65──70──75──80
-
-         (모든 레벨은 정렬된 리스트, 위로 갈수록 듬성)
-```
+![Skiplist 구조](/images/blog/parallel/diagrams/skiplist-structure.svg)
 
 **Skiplist의 핵심**:
 

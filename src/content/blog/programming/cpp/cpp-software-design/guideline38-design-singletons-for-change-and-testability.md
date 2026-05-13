@@ -5,6 +5,7 @@ description: "Singleton이 불가피하다면 Strategy로 알고리즘을 격리
 tags: [C++, Software Design, Singleton, DI, Testability]
 series: "C++ Software Design"
 seriesOrder: 38
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

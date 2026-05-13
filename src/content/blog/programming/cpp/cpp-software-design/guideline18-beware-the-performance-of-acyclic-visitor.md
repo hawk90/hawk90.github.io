@@ -5,6 +5,7 @@ description: "Acyclic Visitor는 새 타입 추가에서 OCP를 흉내 내지만
 tags: [C++, Software Design, Visitor, Performance]
 series: "C++ Software Design"
 seriesOrder: 18
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

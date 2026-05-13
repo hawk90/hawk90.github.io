@@ -5,6 +5,7 @@ description: "operator new/delete 구현 시 지켜야 할 표준 규약 — han
 tags: [C++, Effective C++, new, delete]
 series: "Effective C++"
 seriesOrder: 51
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -6,6 +6,7 @@ tags: [C++, Immutability, const]
 series: "Beautiful C++"
 seriesOrder: 26
 draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -5,6 +5,7 @@ description: "비디오 판매 시스템을 Clean Architecture로 설계. Actor 
 tags: [Architecture, CaseStudy]
 series: "Clean Architecture"
 seriesOrder: 33
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "완전한 경계는 비싸다. 부분 경계로 절충 — 미래�
 tags: [Architecture, Boundaries, Pragmatic]
 series: "Clean Architecture"
 seriesOrder: 24
+draft: true
 ---
 
 ## 이 챕터의 메시지

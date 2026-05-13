@@ -6,6 +6,7 @@ tags: [C++, Concurrency, Ownership]
 series: "Beautiful C++"
 seriesOrder: 11
 draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

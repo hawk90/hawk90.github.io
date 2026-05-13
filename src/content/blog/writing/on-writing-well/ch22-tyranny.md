@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, process, perfectionism]
 type: book-review
 bookTitle: "On Writing Free"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 22 요약

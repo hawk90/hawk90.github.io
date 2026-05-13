@@ -6,6 +6,7 @@ tags: [C++, Initialization, Code Style]
 series: "Beautiful C++"
 seriesOrder: 28
 draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

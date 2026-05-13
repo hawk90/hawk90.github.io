@@ -5,6 +5,7 @@ description: "사용자 정의 new/delete가 정당한 시나리오 — 성능, 
 tags: [C++, Effective C++, new, delete, Memory]
 series: "Effective C++"
 seriesOrder: 50
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

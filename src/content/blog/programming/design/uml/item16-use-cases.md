@@ -6,6 +6,7 @@ tags: [UML, Use Case, Requirements, Actor]
 series: "UML User Guide"
 seriesOrder: 16
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

@@ -8,6 +8,7 @@ tags: [writing, nonfiction, zinsser, craft]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
+draft: true
 ---
 
 > **On Writing Well** Chapter 24 요약

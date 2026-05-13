@@ -5,6 +5,7 @@ description: "Simon Brown이 쓴 보너스 장. 패키징 전략 — Package by 
 tags: [Architecture, Packaging, SimonBrown]
 series: "Clean Architecture"
 seriesOrder: 34
+draft: true
 ---
 
 ## 이 챕터의 메시지

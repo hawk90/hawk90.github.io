@@ -6,6 +6,7 @@ tags: [C++, Constructor, Undefined Behavior]
 series: "Beautiful C++"
 seriesOrder: 15
 draft: false
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

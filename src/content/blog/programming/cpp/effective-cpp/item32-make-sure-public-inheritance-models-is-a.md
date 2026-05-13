@@ -5,6 +5,7 @@ description: "Liskov Substitution Principle — derived는 base가 쓰이는 모
 tags: [C++, Effective C++, Inheritance, LSP]
 series: "Effective C++"
 seriesOrder: 32
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

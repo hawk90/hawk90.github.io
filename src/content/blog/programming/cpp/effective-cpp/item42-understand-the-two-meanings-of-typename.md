@@ -5,6 +5,7 @@ description: "템플릿 매개변수 선언과 의존 타입(dependent type) 명
 tags: [C++, Effective C++, Template, typename]
 series: "Effective C++"
 seriesOrder: 42
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

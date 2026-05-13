@@ -5,6 +5,7 @@ description: "Strategy와 Command를 값 의미론으로 풀어내는 두 도구
 tags: [C++, Software Design, Strategy, Command, Value Semantics]
 series: "C++ Software Design"
 seriesOrder: 23
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

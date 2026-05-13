@@ -5,6 +5,7 @@ description: "실패하는 테스트는 좋은 진단 메시지 — assert 메�
 tags: [TDD, Diagnostics]
 series: "Growing Object-Oriented Software"
 seriesOrder: 22
+draft: true
 ---
 
 ## 테스트 진단의 중요성

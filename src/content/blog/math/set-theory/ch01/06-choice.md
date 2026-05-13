@@ -6,6 +6,7 @@ tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 106
 draft: false
+draft: true
 ---
 
 ## 마지막 한 자리

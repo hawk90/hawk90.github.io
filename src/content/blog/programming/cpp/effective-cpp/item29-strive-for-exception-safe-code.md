@@ -5,6 +5,7 @@ description: "기본·강력·noexcept 보증 세 단계, copy-and-swap 패턴, 
 tags: [C++, Effective C++, Exception Safety]
 series: "Effective C++"
 seriesOrder: 29
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

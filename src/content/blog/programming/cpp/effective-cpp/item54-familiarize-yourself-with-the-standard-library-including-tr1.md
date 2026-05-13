@@ -5,6 +5,7 @@ description: "C++98 표준 라이브러리, TR1, 그리고 C++11~23에서 추가
 tags: [C++, Effective C++, Standard Library, TR1]
 series: "Effective C++"
 seriesOrder: 54
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

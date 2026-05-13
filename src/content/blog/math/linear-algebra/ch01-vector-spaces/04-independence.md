@@ -6,6 +6,7 @@ tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 104
 draft: false
+draft: true
 ---
 
 §1.3 의 생성공간(span)은 벡터를 더 던질수록 더 커지는 도구다. 그러나 다섯 개를 던졌는데 셋만으로도 같은 부분공간(subspace)이 만들어진다면, 나머지 둘은 *남는 짐*이다. 자리만 차지할 뿐 새로운 방향은 가져오지 못한다.

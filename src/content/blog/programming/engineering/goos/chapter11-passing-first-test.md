@@ -5,6 +5,7 @@ description: "Worked Example 8 챕터 압축 — 점진적 기능 추가, 리팩
 tags: [TDD, Case Study, Mock]
 series: "Growing Object-Oriented Software"
 seriesOrder: 11
+draft: true
 ---
 
 > "Make it work, make it right, make it fast."

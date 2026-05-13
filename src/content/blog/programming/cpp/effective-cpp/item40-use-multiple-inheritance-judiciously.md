@@ -5,6 +5,7 @@ description: "ambiguity, diamond, virtual base — 다중 상속의 함정과 �
 tags: [C++, Effective C++, Multiple Inheritance]
 series: "Effective C++"
 seriesOrder: 40
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

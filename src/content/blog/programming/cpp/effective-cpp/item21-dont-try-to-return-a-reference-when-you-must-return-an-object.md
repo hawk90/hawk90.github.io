@@ -5,6 +5,7 @@ description: "지역 변수 참조 = 댕글링, 힙 + 참조 = 누수, static + 
 tags: [C++, Effective C++, Reference, Return Value]
 series: "Effective C++"
 seriesOrder: 21
+draft: true
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -5,6 +5,7 @@ description: "Entities는 핵심 비즈니스 규칙, Use Cases는 앱별 규칙
 tags: [Architecture, BusinessRules, Entities, UseCases]
 series: "Clean Architecture"
 seriesOrder: 20
+draft: true
 ---
 
 ## 이 챕터의 메시지

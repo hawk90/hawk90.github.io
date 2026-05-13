@@ -5,6 +5,7 @@ description: "확장에는 열려 있고 변경에는 닫혀 있어야 한다. O
 tags: [Architecture, SOLID, OCP]
 series: "Clean Architecture"
 seriesOrder: 8
+draft: true
 ---
 
 ## 이 챕터의 메시지

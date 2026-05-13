@@ -5,6 +5,7 @@ description: "GoF Visitor — 닫힌 타입 집합에 새 연산을 더한다. d
 tags: [C++, Software Design, Visitor, Design Patterns]
 series: "C++ Software Design"
 seriesOrder: 16
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

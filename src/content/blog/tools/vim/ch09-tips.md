@@ -5,6 +5,7 @@ description: "생산성을 높이는 워크플로우와 팁"
 series: "Vim 마스터하기"
 seriesOrder: 9
 tags: [vim, editor, tips, productivity, workflow]
+draft: true
 ---
 
 > **Vim 마스터하기** Chapter 9: 실전 팁

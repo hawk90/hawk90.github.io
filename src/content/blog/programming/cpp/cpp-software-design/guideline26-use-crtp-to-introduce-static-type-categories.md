@@ -5,6 +5,7 @@ description: "CRTP는 Curiously Recurring Template Pattern이다. 컴파일 타�
 tags: [C++, Software Design, CRTP, Templates]
 series: "C++ Software Design"
 seriesOrder: 26
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

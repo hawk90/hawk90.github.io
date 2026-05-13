@@ -5,6 +5,7 @@ description: "C++ 표준 라이브러리 곳곳에 패턴이 있다. std::functi
 tags: [C++, Software Design, Design Patterns, Standard Library]
 series: "C++ Software Design"
 seriesOrder: 13
+draft: true
 ---
 
 ## 왜 이 가이드라인이 중요한가?

@@ -6,6 +6,7 @@ tags: [UML, Diagram Types, Overview]
 series: "UML User Guide"
 seriesOrder: 7
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

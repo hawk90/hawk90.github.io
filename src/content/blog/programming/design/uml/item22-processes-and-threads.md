@@ -6,6 +6,7 @@ tags: [UML, Concurrency, Active Object, Thread]
 series: "UML User Guide"
 seriesOrder: 22
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

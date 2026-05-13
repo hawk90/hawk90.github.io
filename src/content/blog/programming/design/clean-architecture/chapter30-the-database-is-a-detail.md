@@ -5,6 +5,7 @@ description: "데이터베이스는 비즈니스 규칙의 일부가 아니다. 
 tags: [Architecture, Database, Detail]
 series: "Clean Architecture"
 seriesOrder: 30
+draft: true
 ---
 
 ## 이 챕터의 메시지

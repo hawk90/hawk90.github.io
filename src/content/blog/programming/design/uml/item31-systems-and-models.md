@@ -6,6 +6,7 @@ tags: [UML, Modeling, Summary, System]
 series: "UML User Guide"
 seriesOrder: 31
 draft: false
+draft: true
 ---
 
 ## 한 줄 요약

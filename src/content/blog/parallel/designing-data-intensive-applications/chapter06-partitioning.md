@@ -161,17 +161,7 @@ Cassandra (옛), Ketama.
 
 해시 공간을 원으로 보고 노드와 키를 배치.
 
-```
-       hash space
-    [0]─────[2^160]
-     │   ●Node A  │
-     │            │
-     │  ●key X    │
-     │            │
-     │       ●Node B
-     │            │
-     │  ●Node C   │
-```
+![Consistent Hashing](/images/blog/parallel/diagrams/consistent-hashing.svg)
 
 키는 시계 방향으로 가장 가까운 노드로 갑니다.
 
