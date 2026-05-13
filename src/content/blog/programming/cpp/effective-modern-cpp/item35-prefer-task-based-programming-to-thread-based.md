@@ -7,9 +7,22 @@ series: "Effective Modern C++"
 seriesOrder: 35
 ---
 
+## 왜 이 항목이 중요한가?
+
+비동기 작업을 시작하는 방법은 두 가지다. `std::thread`로 OS 스레드를 직접 만들거나, `std::async`로 태스크를 시작해 future로 결과를 받거나. 둘 다 동작하지만 추상화 수준이 다르다.
+
+태스크 기반(`std::async`)이 거의 모든 자리에서 우월하다.
+
+- **결과 회수**가 future로 자동이다. shared variable + 동기화가 필요 없다.
+- **예외 전파**가 future를 통해 자동이다. `std::thread`는 잡히지 않은 예외 → `std::terminate`다.
+- **자원 부족**에 대응한다. async는 새 스레드를 못 만들면 동기 실행으로 후퇴할 수 있다.
+- **스케줄러에 위임**한다. 표준 라이브러리·언어가 진화하면 그 이점을 자동 흡수한다.
+
+이 항목은 두 모델의 차이와 thread가 여전히 적합한 자리(OS 제어, 무한 워커)를 정리한다.
+
 ## 개요
 
-`std::thread`로 직접 스레드를 만드는 것보다, `std::async`로 **태스크**를 시작하는 게 거의 모든 면에서 우월 — **자원 관리**, **결과 받기**, **예외 전파** 모두.
+`std::thread`로 직접 스레드를 만드는 것보다, `std::async`로 **태스크**를 시작하는 게 거의 모든 면에서 우월하다. **자원 관리**, **결과 받기**, **예외 전파** 모두 그렇다.
 
 ## 필수 개념: thread vs task
 
@@ -28,7 +41,7 @@ std::thread t(compute);
 t.join();   // 또는 t.detach()
 ```
 
-OS 스레드와 직접 매핑. 결과 받기 어렵고, 예외 처리 별도 메커니즘 필요.
+OS 스레드와 직접 매핑된다. 결과 받기가 어렵고, 예외 처리에 별도 메커니즘이 필요하다.
 
 ### task 기반 — `std::async`
 
@@ -41,13 +54,13 @@ auto fut = std::async(compute);   // future 반환
 int result = fut.get();           // 결과 (또는 예외)
 ```
 
-태스크를 시작하고 future로 결과·예외 회수. **추상화 한 단계 위**.
+태스크를 시작하고 future로 결과·예외를 회수한다. **추상화 한 단계 위**다.
 
 ## 비교 — 핵심 이점
 
 ### 1. 결과 / 예외 자동 처리
 
-`std::thread`는 결과 반환 메커니즘 없음:
+`std::thread`는 결과 반환 메커니즘이 없다.
 
 ```cpp
 int result;
@@ -56,14 +69,14 @@ t.join();
 // result 사용 — race condition 위험
 ```
 
-`std::async`는 future:
+`std::async`는 future로 처리한다.
 
 ```cpp
 auto fut = std::async(compute);
 int result = fut.get();   // 동기화·반환 자동
 ```
 
-예외도 future 통해 전파:
+예외도 future를 통해 전파된다.
 
 ```cpp
 auto fut = std::async([]() {
@@ -78,32 +91,32 @@ try {
 }
 ```
 
-`std::thread`는 예외가 잡히지 않으면 → `std::terminate`. async는 future에 보관해 사용자에게 전달.
+`std::thread`는 예외가 잡히지 않으면 `std::terminate`로 간다. async는 future에 보관해 사용자에게 전달한다.
 
 ### 2. 자원 고갈 시 안전한 처리
 
-`std::thread`는 시스템 한계(스레드 수)에 도달하면 즉시 예외 (`std::system_error`).
+`std::thread`는 시스템 한계(스레드 수)에 도달하면 즉시 예외 (`std::system_error`)다.
 
-`std::async`는 기본 정책으로 **동기 실행**으로 후퇴할 수 있음 — 새 스레드 못 만들면 호출자 스레드에서 실행.
+`std::async`는 기본 정책으로 **동기 실행**으로 후퇴할 수 있다. 새 스레드를 못 만들면 호출자 스레드에서 실행된다.
 
-→ 시스템 자원에 더 적응적.
+시스템 자원에 더 적응적이다.
 
 ### 3. 부하 분산을 런타임에 맡김
 
-`async`는 표준 스케줄러를 통해 워커 풀에서 실행될 수 있음 (구현마다 다름).
+`async`는 표준 스케줄러를 통해 워커 풀에서 실행될 수 있다 (구현마다 다르다).
 
-→ 매번 새 OS 스레드 생성보다 효율적 (구현에 따라).
+매번 새 OS 스레드 생성보다 효율적이다 (구현에 따라).
 
 ### 4. 약속된 추상화 — 변화에 적응
 
-표준 라이브러리·언어가 진화하면 `async`는 그 이점 자동 흡수. 직접 thread 다루면 옛 패턴에 묶임.
+표준 라이브러리·언어가 진화하면 `async`는 그 이점을 자동 흡수한다. 직접 thread를 다루면 옛 패턴에 묶인다.
 
 ## thread를 직접 써야 할 때
 
-- **운영체제 스레드 API에 직접 접근** 필요 (priority, affinity)
-- **무한 루프 같은 자체 제어 스레드** (백그라운드 워커)
-- 표준 동시성 라이브러리 외부 (custom scheduler)
-- 스레드의 **수명을 명시적으로 제어**해야 할 때
+- **운영체제 스레드 API에 직접 접근**이 필요할 때 (priority, affinity).
+- **무한 루프 같은 자체 제어 스레드** (백그라운드 워커).
+- 표준 동시성 라이브러리 외부 (custom scheduler).
+- 스레드의 **수명을 명시적으로 제어**해야 할 때.
 
 ```cpp
 std::thread t([] {
@@ -128,7 +141,7 @@ t.detach();   // 무한 워커
 }
 ```
 
-자세한 건 [항목 37](/blog/programming/cpp/effective-modern-cpp/item37-make-std-threads-unjoinable-on-all-paths). C++20 `std::jthread`가 자동 join.
+자세한 건 [항목 37](/blog/programming/cpp/effective-modern-cpp/item37-make-std-threads-unjoinable-on-all-paths)에서 다룬다. C++20 `std::jthread`가 자동 join을 한다.
 
 ## std::async의 launch policy
 
@@ -138,7 +151,7 @@ auto fut2 = std::async(std::launch::async, compute);   // 명시 비동기
 auto fut3 = std::async(std::launch::deferred, compute); // 지연 (sync)
 ```
 
-기본은 `async | deferred` — 실용적 함정 있음 ([항목 36](/blog/programming/cpp/effective-modern-cpp/item36-specify-launch-async-if-asynchronicity-is-essential)).
+기본은 `async | deferred`다. 실용적 함정이 있다 ([항목 36](/blog/programming/cpp/effective-modern-cpp/item36-specify-launch-async-if-asynchronicity-is-essential)).
 
 ## 비교 표
 
@@ -165,7 +178,7 @@ doOther();
 auto val = fut.get();
 ```
 
-**개념적으로 단순** — "이거 비동기로 해주고 결과 알려줘".
+**개념적으로 단순**하다. "이거 비동기로 해 주고 결과 알려줘".
 
 ## 패턴 — thread가 적합
 
@@ -181,11 +194,11 @@ shutdown = true;
 worker.join();
 ```
 
-수명을 명시적으로 제어하는 long-running 워커.
+수명을 명시적으로 제어하는 long-running 워커다.
 
 ## std::async + std::shared_future
 
-future는 한 번만 `get()` 가능. `shared_future`는 여러 번 / 여러 스레드:
+future는 한 번만 `get()`이 가능하다. `shared_future`는 여러 번 / 여러 스레드에서 호출할 수 있다.
 
 ```cpp
 std::shared_future<int> sf = std::async(compute).share();
@@ -196,14 +209,15 @@ std::thread t2([sf] { auto v = sf.get(); /* 사용 */ });
 
 ## 핵심 정리
 
-1. **태스크 기반 = `std::async` + future**
-2. **결과·예외 전파, 자원 안전, 스케줄러 위임** — 모두 무료
-3. `thread`는 **OS 수준 제어 / 무한 워커**가 필요할 때만
-4. **`async`의 launch policy** 함정에 주의 ([항목 36](/blog/programming/cpp/effective-modern-cpp/item36-specify-launch-async-if-asynchronicity-is-essential))
-5. C++20 `std::jthread` — thread + 자동 join + cancellation
+1. **태스크 기반 = `std::async` + future**다.
+2. **결과·예외 전파, 자원 안전, 스케줄러 위임**이 모두 무료다.
+3. `thread`는 **OS 수준 제어 / 무한 워커**가 필요할 때만 쓴다.
+4. **`async`의 launch policy** 함정에 주의한다 ([항목 36](/blog/programming/cpp/effective-modern-cpp/item36-specify-launch-async-if-asynchronicity-is-essential)).
+5. C++20 `std::jthread` — thread + 자동 join + cancellation이다.
 
 ## 관련 항목
 
 - [항목 36: launch policy](/blog/programming/cpp/effective-modern-cpp/item36-specify-launch-async-if-asynchronicity-is-essential)
 - [항목 37: jthread / unjoinable](/blog/programming/cpp/effective-modern-cpp/item37-make-std-threads-unjoinable-on-all-paths)
 - [항목 38: future destructor](/blog/programming/cpp/effective-modern-cpp/item38-be-aware-of-varying-thread-handle-destructor-behavior)
+- [항목 39: void futures](/blog/programming/cpp/effective-modern-cpp/item39-consider-void-futures-for-one-shot-event-communication)
