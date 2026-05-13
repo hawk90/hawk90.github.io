@@ -7,9 +7,19 @@ series: "Effective C++"
 seriesOrder: 13
 ---
 
+## 왜 이 항목이 중요한가?
+
+C++에는 try/finally가 없다. 자원 해제를 명시적으로 적는 자리에 의존하면, 예외나 early return 같은 비-주류 경로에서 거의 항상 누수가 일어난다.
+
+C++의 답은 **RAII**다. "자원 획득은 초기화다(Resource Acquisition Is Initialization)". 자원을 객체의 생성·소멸 라이프타임에 묶어, **어떤 경로로 빠져나가도** 컴파일러가 자동으로 정리를 보장하게 한다.
+
+이 한 가지 패턴 위에 `std::unique_ptr`, `std::shared_ptr`, `std::lock_guard`, `std::fstream`, `std::vector` — Modern C++의 거의 모든 자원 관리 도구가 서 있다. 직접 `new`/`delete`를 적는 자리는 도서관 코드 외엔 거의 없어야 한다.
+
+이 항목은 RAII의 두 원리와 표준 스마트 포인터의 선택 기준을 정리한다.
+
 ## 개요
 
-수동으로 `new`/`delete` 짝을 맞추는 코드는 **예외, early return, 새 분기 추가** 모두에 취약합니다. C++의 결정적 자원 관리 모델은 **RAII**(Resource Acquisition Is Initialization) — 자원을 객체의 생성/소멸 라이프타임에 묶어, 어떤 경로로 빠져나가도 정리가 자동 보장되게 합니다.
+수동으로 `new`/`delete` 짝을 맞추는 코드는 **예외, early return, 새 분기 추가** 모두에 취약하다. C++의 결정적 자원 관리 모델은 **RAII**(Resource Acquisition Is Initialization)다. 자원을 객체의 생성/소멸 라이프타임에 묶어, 어떤 경로로 빠져나가도 정리가 자동 보장되게 한다.
 
 ## 필수 개념: RAII의 두 원리
 
