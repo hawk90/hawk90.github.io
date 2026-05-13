@@ -997,6 +997,9 @@ Part 5: C++ Software Engineering (Ch 32-33, 2개)
 | 비판적 사고를 위한 논리 (박은진·김희정) | 형식·비형식 논리 — 사고 / 논증 / 비판적 평가 | ~16 |
 | 전문가를 위한 C (Extreme C) | C 시스템 프로그래밍 정전 — 임베디드 / 커널 / 미들웨어 | ~24 |
 | 전문가를 위한 C++ (Professional C++) | C++ 종합 백과 — 입문에서 C++23까지 횡적 정리 | ~34 |
+| Domain-Driven Design (Eric Evans, Blue Book) | DDD 정전 — Strategic Design / Bounded Context | 18 |
+| Growing Object-Oriented Software (Freeman & Pryce) | TDD + OO 정전, mockist 학파 | ~17 |
+| Unit Testing (Vladimir Khorikov) | 모던 단위 테스트 — 4 pillars, classicist vs mockist | 12 |
 
 ---
 
