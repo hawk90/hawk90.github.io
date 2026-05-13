@@ -2,16 +2,14 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/blog/PostCard.astro';
-import PostListPanel from '../components/blog/PostListPanel.astro';
 import { BRAND_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
-import { getLatestPosts, getRecentlyUpdatedPosts } from '../lib/posts';
+import { getLatestPosts, getReadingTime } from '../lib/posts';
 import { formatDate } from '../lib/utils';
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const featuredLatestPosts = getLatestPosts(allPosts, 6);
 const latestPosts = getLatestPosts(allPosts, 5);
-const recentlyUpdatedPosts = getRecentlyUpdatedPosts(allPosts, 5);
 const heroPost = featuredLatestPosts[0];
 const secondaryLatestPosts = latestPosts.slice(heroPost ? 1 : 0);
 ---
@@ -68,15 +66,15 @@ const secondaryLatestPosts = latestPosts.slice(heroPost ? 1 : 0);
     }
   </style>
 
-  <!-- Latest Activity -->
+  <!-- Latest Writing -->
   <section class="py-16 border-t border-[var(--color-border)]">
     <div class="container">
       <div class="flex items-end justify-between gap-4 mb-8">
         <div>
           <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
-            Latest Activity
+            Latest Writing
           </div>
-          <h2 class="text-2xl lg:text-3xl font-bold">Fresh writing, not just an archive</h2>
+          <h2 class="text-2xl lg:text-3xl font-bold">Start with the newest post, then keep reading</h2>
         </div>
         <a href="/blog" class="text-[var(--color-accent)] hover:underline">
           {t('view_all')}
@@ -104,6 +102,8 @@ const secondaryLatestPosts = latestPosts.slice(heroPost ? 1 : 0);
                 <div class="flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-muted)]">
                   <span>{formatDate(heroPost.data.date, 'short')}</span>
                   <span class="w-1 h-1 rounded-full bg-[var(--color-border-hover)]"></span>
+                  <span>{getReadingTime(heroPost.body || '')}{t('reading_time_min')}</span>
+                  <span class="w-1 h-1 rounded-full bg-[var(--color-border-hover)]"></span>
                   <span>{heroPost.data.tags.slice(0, 3).join(' · ')}</span>
                 </div>
               </a>
@@ -111,22 +111,41 @@ const secondaryLatestPosts = latestPosts.slice(heroPost ? 1 : 0);
           </article>
         )}
 
-        <div class="grid gap-6">
-          <PostListPanel
-            title={t('latest_posts')}
-            posts={secondaryLatestPosts}
-            href="/blog"
-            hrefLabel={t('view_all')}
-          />
-          <PostListPanel
-            title={t('recently_updated')}
-            posts={recentlyUpdatedPosts}
-            kind="updated"
-            href="/blog"
-            hrefLabel={t('view_all')}
-            emptyLabel={t('no_recent_updates')}
-          />
-        </div>
+        <section class="card h-full">
+          <div class="flex items-center justify-between gap-4 mb-4">
+            <h3 class="text-lg font-semibold">{t('latest_posts')}</h3>
+            <a href="/blog" class="text-sm text-[var(--color-accent)] hover:underline">
+              {t('view_all')}
+            </a>
+          </div>
+
+          <ul class="space-y-3">
+            {secondaryLatestPosts.map((post) => (
+              <li class="border-b border-[var(--color-border-faint)] last:border-b-0 last:pb-0 pb-3">
+                <a
+                  href={`/blog/${post.id}`}
+                  class="block rounded-lg px-1 py-1.5 transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                >
+                  {post.data.series && (
+                    <div class="text-[11px] font-medium text-[var(--color-accent)] mb-1 truncate">
+                      {post.data.series}
+                    </div>
+                  )}
+                  <div class="font-medium leading-snug text-[var(--color-text-primary)] line-clamp-2">
+                    {post.data.title}
+                  </div>
+                  <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                    <time datetime={post.data.date.toISOString()}>
+                      {formatDate(post.data.date, 'short')}
+                    </time>
+                    <span>·</span>
+                    <span>{getReadingTime(post.body || '')}{t('reading_time_min')}</span>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </div>
   </section>
