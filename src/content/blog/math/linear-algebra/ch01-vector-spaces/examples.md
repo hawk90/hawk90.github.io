@@ -5,7 +5,6 @@ description: "문제. 다음 부분집합이 의 부분공간인지 판정하라
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 190
-draft: false
 draft: true
 ---
 

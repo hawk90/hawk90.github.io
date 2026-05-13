@@ -5,7 +5,6 @@ description: "제공 인터페이스(lollipop) vs 필요 인터페이스(socket)
 tags: [UML, Interface, Ports, DIP, SOLID]
 series: "UML User Guide"
 seriesOrder: 11
-draft: false
 draft: true
 ---
 

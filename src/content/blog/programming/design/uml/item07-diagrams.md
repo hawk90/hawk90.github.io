@@ -5,7 +5,6 @@ description: "구조 7 + 행위 6. 다이어그램은 시스템의 다른 면을
 tags: [UML, Diagram Types, Overview]
 series: "UML User Guide"
 seriesOrder: 7
-draft: false
 draft: true
 ---
 

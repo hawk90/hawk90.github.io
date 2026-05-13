@@ -5,7 +5,6 @@ description: "C++/Java 표준 컨테이너의 토대 RB 트리 + 자주 접근�
 tags: [Data Structure, Algorithm, BST, Red-Black, Splay]
 series: "Data Structures and Algorithms"
 seriesOrder: 27
-draft: false
 draft: true
 ---
 

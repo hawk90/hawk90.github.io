@@ -5,7 +5,6 @@ description: "31편의 UML 시리즈 정리. System은 Models를 포함하고, M
 tags: [UML, Modeling, Summary, System]
 series: "UML User Guide"
 seriesOrder: 31
-draft: false
 draft: true
 ---
 

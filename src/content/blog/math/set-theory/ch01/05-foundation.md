@@ -5,7 +5,6 @@ description: "지금까지의 일곱 공리는 모두 한 가지 형태였다."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 105
-draft: false
 draft: true
 ---
 

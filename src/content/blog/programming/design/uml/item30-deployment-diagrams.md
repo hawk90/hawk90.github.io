@@ -5,7 +5,6 @@ description: "3D 박스, 통신 경로, 그 위의 아티팩트 — 운영팀과
 tags: [UML, Deployment Diagram, Infrastructure, Production]
 series: "UML User Guide"
 seriesOrder: 30
-draft: false
 draft: true
 ---
 

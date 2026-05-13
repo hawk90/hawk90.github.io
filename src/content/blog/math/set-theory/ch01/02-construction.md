@@ -5,7 +5,6 @@ description: "짝 공리로는 두 개씩만 묶을 수 있다."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 102
-draft: false
 draft: true
 ---
 

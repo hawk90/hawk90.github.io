@@ -5,7 +5,6 @@ description: "null 포인터를 inorder의 다음 노드로 활용 — 스레드
 tags: [Data Structure, Algorithm, Threaded Tree, Expression Tree]
 series: "Data Structures and Algorithms"
 seriesOrder: 11
-draft: false
 draft: true
 ---
 

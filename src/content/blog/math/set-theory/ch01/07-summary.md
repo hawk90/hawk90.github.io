@@ -5,7 +5,6 @@ description: "처음에는 모든 게 좋아 보였다."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 107
-draft: false
 draft: true
 ---
 

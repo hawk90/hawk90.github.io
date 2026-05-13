@@ -5,7 +5,6 @@ description: "k-way merge용 selection tree, 포레스트로 표현하는 disjoi
 tags: [Data Structure, Algorithm, Tournament, Union-Find]
 series: "Data Structures and Algorithms"
 seriesOrder: 14
-draft: false
 draft: true
 ---
 

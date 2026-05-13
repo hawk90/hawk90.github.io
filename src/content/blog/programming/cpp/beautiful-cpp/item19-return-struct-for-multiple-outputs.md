@@ -5,7 +5,6 @@ description: "out 파라미터·pair·tuple 대신 이름 있는 구조체 + 구
 tags: [C++, Function Design, Structured Bindings]
 series: "Beautiful C++"
 seriesOrder: 19
-draft: false
 draft: true
 ---
 

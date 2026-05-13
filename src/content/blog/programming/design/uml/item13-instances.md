@@ -5,7 +5,6 @@ description: "클래스가 아니라 객체. 밑줄·콜론 두 기호로 표현
 tags: [UML, Object, Instance, Snapshot]
 series: "UML User Guide"
 seriesOrder: 13
-draft: false
 draft: true
 ---
 

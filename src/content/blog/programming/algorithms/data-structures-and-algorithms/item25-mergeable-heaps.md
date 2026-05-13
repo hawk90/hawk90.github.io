@@ -5,7 +5,6 @@ description: "두 힙을 효율적으로 병합 — Dijkstra, Prim의 점근 개
 tags: [Data Structure, Algorithm, Heap, Mergeable Heap]
 series: "Data Structures and Algorithms"
 seriesOrder: 25
-draft: false
 draft: true
 ---
 

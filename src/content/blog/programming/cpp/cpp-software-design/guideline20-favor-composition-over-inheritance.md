@@ -5,7 +5,6 @@ description: "Composition over Inheritance — GoF의 핵심 메시지이자 모
 tags: [C++, Software Design, Composition, Inheritance]
 series: "C++ Software Design"
 seriesOrder: 20
-draft: false
 draft: true
 ---
 

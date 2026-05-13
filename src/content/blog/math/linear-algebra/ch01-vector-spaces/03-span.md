@@ -5,7 +5,6 @@ description: "§1.2 에서 부분공간(subspace)을 정의했다. 그러나 정
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 103
-draft: false
 draft: true
 ---
 

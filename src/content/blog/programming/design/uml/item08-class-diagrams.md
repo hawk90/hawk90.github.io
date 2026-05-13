@@ -5,7 +5,6 @@ description: "도메인의 명사들을 잡아 시스템 골격으로 — 가장
 tags: [UML, Class Diagram, Static Modeling, Domain]
 series: "UML User Guide"
 seriesOrder: 8
-draft: false
 draft: true
 ---
 

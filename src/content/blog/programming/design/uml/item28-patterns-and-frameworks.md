@@ -5,7 +5,6 @@ description: "GoF 패턴을 UML로 — 매개변수화된 협력으로 디자인
 tags: [UML, Design Pattern, Framework, Collaboration]
 series: "UML User Guide"
 seriesOrder: 28
-draft: false
 draft: true
 ---
 

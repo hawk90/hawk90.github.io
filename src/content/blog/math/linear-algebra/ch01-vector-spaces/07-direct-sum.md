@@ -5,7 +5,6 @@ description: "1장의 마지막 절. 두 부분공간(subspace)이 만났을 때
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 107
-draft: false
 draft: true
 ---
 

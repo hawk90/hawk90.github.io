@@ -5,7 +5,6 @@ description: "§1.3 의 생성공간(span)은 벡터를 더 던질수록 더 커
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 104
-draft: false
 draft: true
 ---
 

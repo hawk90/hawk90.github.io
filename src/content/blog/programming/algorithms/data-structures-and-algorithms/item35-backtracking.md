@@ -5,7 +5,6 @@ description: "모든 경우 시도 + 가지치기 — 조합·순열·제약 만
 tags: [Data Structure, Algorithm, Backtracking, N-Queens]
 series: "Data Structures and Algorithms"
 seriesOrder: 35
-draft: false
 draft: true
 ---
 

@@ -5,7 +5,6 @@ description: "선언과 초기화 분리는 C 시절의 잔재 — 미초기화 
 tags: [C++, Initialization, Code Style]
 series: "Beautiful C++"
 seriesOrder: 28
-draft: false
 draft: true
 ---
 

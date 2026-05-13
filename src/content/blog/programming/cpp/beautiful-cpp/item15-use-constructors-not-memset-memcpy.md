@@ -5,7 +5,6 @@ description: "객체에 바이트 단위 연산을 적용하면 즉시 UB — vt
 tags: [C++, Constructor, Undefined Behavior]
 series: "Beautiful C++"
 seriesOrder: 15
-draft: false
 draft: true
 ---
 

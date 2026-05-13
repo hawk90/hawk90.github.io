@@ -5,7 +5,6 @@ description: "변수 수명을 짧게 — 사용 직전에 선언, if/for 초기
 tags: [C++, Scope, Code Style]
 series: "Beautiful C++"
 seriesOrder: 21
-draft: false
 draft: true
 ---
 

@@ -5,7 +5,6 @@ description: "Actor가 system에게 시켜서 얻는 가치 단위 — 요구사
 tags: [UML, Use Case, Requirements, Actor]
 series: "UML User Guide"
 seriesOrder: 16
-draft: false
 draft: true
 ---
 

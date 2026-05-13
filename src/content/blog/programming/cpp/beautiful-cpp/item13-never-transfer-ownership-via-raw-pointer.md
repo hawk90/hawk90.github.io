@@ -5,7 +5,6 @@ description: "소유권을 타입으로 표현하기 — unique_ptr, shared_ptr,
 tags: [C++, Ownership, Smart Pointers]
 series: "Beautiful C++"
 seriesOrder: 13
-draft: false
 draft: true
 ---
 

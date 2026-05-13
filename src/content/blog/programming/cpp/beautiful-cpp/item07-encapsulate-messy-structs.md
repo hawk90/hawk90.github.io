@@ -5,7 +5,6 @@ description: "외부 C API의 거친 자원 관리를 RAII 래퍼로 한 곳에 
 tags: [C++, RAII, Encapsulation]
 series: "Beautiful C++"
 seriesOrder: 7
-draft: false
 draft: true
 ---
 

@@ -5,7 +5,6 @@ description: "Cantor (1845–1918) 가 집합론 (set theory) 을 만든 뒤 30�
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 100
-draft: false
 draft: true
 ---
 

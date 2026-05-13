@@ -5,7 +5,6 @@ description: "불변 데이터 — 공짜 동시성, 안정적 추론, 테스트
 tags: [C++, Immutability, const]
 series: "Beautiful C++"
 seriesOrder: 26
-draft: false
 draft: true
 ---
 

@@ -5,7 +5,6 @@ description: "enum class — 스코프 안에 갇히고, 정수 변환은 명시
 tags: [C++, Enums, Type Safety]
 series: "Beautiful C++"
 seriesOrder: 20
-draft: false
 draft: true
 ---
 

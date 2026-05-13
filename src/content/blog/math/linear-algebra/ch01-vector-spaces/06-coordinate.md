@@ -5,7 +5,6 @@ description: "§1.5 에서 모든 유한차원 공간이 기저(basis)를 가진
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 106
-draft: false
 draft: true
 ---
 

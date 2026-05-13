@@ -5,7 +5,6 @@ description: "초기화 리스트 순서 ≠ 실제 초기화 순서 — 한 멤
 tags: [C++, Initialization, Constructor]
 series: "Beautiful C++"
 seriesOrder: 10
-draft: false
 draft: true
 ---
 

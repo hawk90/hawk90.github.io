@@ -5,7 +5,6 @@ description: "O(n²) 정렬 3종 — 작은 입력엔 충분, 큰 입력엔 부�
 tags: [Data Structure, Algorithm, Sort]
 series: "Data Structures and Algorithms"
 seriesOrder: 19
-draft: false
 draft: true
 ---
 

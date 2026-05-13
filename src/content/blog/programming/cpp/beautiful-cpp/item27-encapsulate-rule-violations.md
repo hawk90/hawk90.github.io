@@ -5,7 +5,6 @@ description: "규칙을 어겨야 할 때 — 위반을 한 곳에 가두고 안
 tags: [C++, Encapsulation]
 series: "Beautiful C++"
 seriesOrder: 27
-draft: false
 draft: true
 ---
 

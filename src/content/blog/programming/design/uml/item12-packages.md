@@ -5,7 +5,6 @@ description: "모델이 커지면 폴더가 필요하다 — 패키지로 가시
 tags: [UML, Package, Modularity, Architecture]
 series: "UML User Guide"
 seriesOrder: 12
-draft: false
 draft: true
 ---
 

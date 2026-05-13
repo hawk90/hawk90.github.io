@@ -5,7 +5,6 @@ description: "싱글턴 = 전역 변수 + OOP 위장. 의존성 주입으로 결
 tags: [C++, Design Patterns, Dependency Injection]
 series: "Beautiful C++"
 seriesOrder: 14
-draft: false
 draft: true
 ---
 
