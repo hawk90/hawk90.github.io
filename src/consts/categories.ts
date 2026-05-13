@@ -62,6 +62,12 @@ export const CATEGORIES: Category[] = [
     description: '개발 도구 — Vim / tmux / CLI / 디버거 / 프로파일러',
     icon: '🛠️',
   },
+  {
+    id: 'media',
+    name: 'Media & Codecs',
+    description: '영상 / 오디오 코덱 — AV1, HEVC, H.264, 인코더 / 디코더 분석',
+    icon: '🎞️',
+  },
 
   // Sub-categories of programming
   {
@@ -105,6 +111,15 @@ export const CATEGORIES: Category[] = [
     name: 'Coding Standards',
     description: '코딩 표준 — MISRA / CERT / AUTOSAR / High Integrity',
     icon: '📜',
+  },
+
+  // Sub-categories of media
+  {
+    id: 'media/av1',
+    parent: 'media',
+    name: 'AV1',
+    description: 'AV1 코덱 — bitstream / intra / inter / transform / loop filter / encoder',
+    icon: '📼',
   },
 ];
 
