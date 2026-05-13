@@ -303,6 +303,10 @@ class AuctionMessageTranslator:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### 입찰 상태 머신
+
+![Bidding State Machine](/images/blog/goos/diagrams/ch11-bidding-state-machine.svg)
+
 ### AuctionSniper 핵심 로직
 
 ```cpp

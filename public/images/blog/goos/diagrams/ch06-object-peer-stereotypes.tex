@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Central object
+\node[hi, minimum width=25mm, minimum height=12mm] (obj) at (0,0) {Object};
+
+% Dependencies (left)
+\node[abs, minimum width=25mm] (dep1) at (-4,1) {Service A};
+\node[abs, minimum width=25mm] (dep2) at (-4,-1) {Service B};
+\node[font=\sffamily\bfseries, anchor=east] at (-4,2.2) {Dependencies};
+
+% Notifications (right)
+\node[imp, minimum width=25mm] (not1) at (4,1) {Listener A};
+\node[imp, minimum width=25mm] (not2) at (4,-1) {Listener B};
+\node[font=\sffamily\bfseries, anchor=west] at (4,2.2) {Notifications};
+
+% Adjustments (bottom)
+\node[con, minimum width=25mm] (adj) at (0,-3) {Factory};
+\node[font=\sffamily\bfseries] at (0,-4.2) {Adjustments};
+
+% Arrows
+\draw[uses] (obj) -- node[above, font=\footnotesize] {uses} (dep1);
+\draw[uses] (obj) -- node[below, font=\footnotesize] {uses} (dep2);
+\draw[arr] (obj) -- node[above, font=\footnotesize] {notifies} (not1);
+\draw[arr] (obj) -- node[below, font=\footnotesize] {notifies} (not2);
+\draw[ret] (adj) -- node[right, font=\footnotesize] {creates} (obj);
+
+% Description
+\node[group, text width=80mm, align=center, font=\small] at (0,-5.8) {
+\textbf{Dependencies:} Services the object needs to do its job\\
+\textbf{Notifications:} Objects to inform about events\\
+\textbf{Adjustments:} Configuration/creation concerns
+};
+
+\end{tikzpicture}
+\end{document}

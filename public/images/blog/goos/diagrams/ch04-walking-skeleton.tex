@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Layers from top to bottom
+\node[hi, minimum width=70mm, minimum height=10mm] (test) at (0,3) {Acceptance Test};
+\node[con, minimum width=70mm, minimum height=10mm] (ui) at (0,1.5) {UI Layer};
+\node[imp, minimum width=70mm, minimum height=10mm] (domain) at (0,0) {Domain Layer};
+\node[abs, minimum width=70mm, minimum height=10mm] (infra) at (0,-1.5) {Infrastructure Layer};
+
+% External systems
+\node[cls, minimum width=25mm] (ext1) at (-4,-1.5) {External\\System 1};
+\node[cls, minimum width=25mm] (ext2) at (4,-1.5) {External\\System 2};
+
+% Arrows
+\draw[arr] (test) -- (ui);
+\draw[arr] (ui) -- (domain);
+\draw[arr] (domain) -- (infra);
+\draw[arr] (infra) -- (ext1);
+\draw[arr] (infra) -- (ext2);
+
+% Annotations
+\node[anchor=west, font=\footnotesize] at (3.8,3) {drives};
+\node[anchor=west, font=\footnotesize] at (3.8,1.5) {presents};
+\node[anchor=west, font=\footnotesize] at (3.8,0) {business logic};
+\node[anchor=west, font=\footnotesize] at (3.8,-0.75) {connects};
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4.2) {Walking Skeleton};
+\node[font=\small, text width=80mm, align=center] at (0,-3.2)
+    {Minimal end-to-end path through all layers\\that can be tested and deployed};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Outer loop (Acceptance Test)
+\draw[draw=conbord, line width=1.5pt, rounded corners=15pt]
+    (-4.5,2) rectangle (4.5,-4);
+\node[font=\sffamily\bfseries, conbord] at (0,2.4) {Outer Loop: Acceptance Test};
+
+% Inner loop (Unit Test)
+\draw[draw=impbord, line width=1.5pt, rounded corners=10pt, fill=impfill!20]
+    (-3.5,1) rectangle (3.5,-3);
+\node[font=\sffamily\bfseries, impbord] at (0,1.4) {Inner Loop: Unit Tests};
+
+% Steps inside
+\node[con, minimum width=25mm] (write-at) at (0,0.3) {Write Failing\\Acceptance Test};
+\node[imp, minimum width=25mm] (write-ut) at (-2,-1.5) {Write Failing\\Unit Test};
+\node[imp, minimum width=25mm] (pass-ut) at (2,-1.5) {Make Unit\\Test Pass};
+
+% Arrows
+\draw[arr] (write-at) -- (write-ut);
+\draw[arr] (write-ut) -- (pass-ut);
+\draw[arr, bend left=40] (pass-ut) to node[right, font=\footnotesize] {repeat} (write-ut);
+\draw[arr] (pass-ut.north) to[bend right=30] node[right, font=\footnotesize] {AT passes} (write-at.east);
+
+% Legend
+\node[anchor=west, font=\small] at (-4.3,-4.8) {AT = Acceptance Test};
+\node[anchor=west, font=\small] at (0.5,-4.8) {UT = Unit Test};
+
+\end{tikzpicture}
+\end{document}

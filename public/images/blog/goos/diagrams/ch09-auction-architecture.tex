@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4) {Auction Sniper System};
+
+% External systems
+\node[cls, minimum width=25mm] (auction) at (-4,2) {Auction\\Server};
+\node[cls, minimum width=25mm] (ui-display) at (4,2) {UI\\Display};
+
+% Main layers
+\node[con, minimum width=30mm] (main) at (0,2) {Main};
+\node[hi, minimum width=30mm] (sniper) at (0,0) {AuctionSniper};
+\node[abs, minimum width=30mm] (translator) at (-3,-2) {Message\\Translator};
+\node[imp, minimum width=30mm] (model) at (3,-2) {Sniper\\Model};
+
+% XMPP connection
+\node[abs, minimum width=30mm] (xmpp) at (-4,-0.5) {XMPP\\Connection};
+
+% Arrows
+\draw[arr] (main) -- (sniper);
+\draw[arr] (sniper) -- (translator);
+\draw[arr] (sniper) -- (model);
+\draw[arr] (translator) -- (xmpp);
+\draw[arr] (xmpp) -- (auction);
+\draw[arr] (model) -- (ui-display);
+
+% Event flow annotations
+\draw[thr] (auction.south) to[bend right=20] node[left, font=\footnotesize] {messages} (xmpp.north);
+\draw[thr] (model.north east) to[bend left=20] node[right, font=\footnotesize] {updates} (ui-display.south);
+
+% Legend
+\node[group, minimum width=90mm, minimum height=10mm] at (0,-4) {};
+\node[font=\small] at (0,-4) {Hexagonal architecture: Core domain isolated from externals};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Red node
+\node[circle, draw=conbord, fill=confill, minimum size=20mm, font=\sffamily\bfseries] (red) at (0,0) {RED};
+
+% Green node
+\node[circle, draw=impbord, fill=impfill, minimum size=20mm, font=\sffamily\bfseries] (green) at (3.5,-2) {GREEN};
+
+% Refactor node
+\node[circle, draw=absbord, fill=absfill, minimum size=20mm, font=\sffamily\bfseries] (refactor) at (-3.5,-2) {REFACTOR};
+
+% Arrows
+\draw[-{Stealth[length=3mm]}, line width=1pt, draw=edgec]
+    (red.south east) to[bend left=25] node[midway, right, font=\small] {pass} (green.north);
+
+\draw[-{Stealth[length=3mm]}, line width=1pt, draw=edgec]
+    (green.south west) to[bend left=25] node[midway, below, font=\small] {clean} (refactor.south east);
+
+\draw[-{Stealth[length=3mm]}, line width=1pt, draw=edgec]
+    (refactor.north) to[bend left=25] node[midway, left, font=\small] {new test} (red.south west);
+
+% Labels
+\node[below=2mm of red, font=\small] {Write failing test};
+\node[below=2mm of green, font=\small] {Make it pass};
+\node[below=2mm of refactor, font=\small] {Improve design};
+
+\end{tikzpicture}
+\end{document}

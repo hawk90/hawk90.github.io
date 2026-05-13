@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,3.5) {Listening to Tests};
+
+% Problem detection
+\node[con, minimum width=35mm, minimum height=12mm] (hard) at (-3,2) {Test is\\hard to write};
+\node[hi, minimum width=35mm, minimum height=12mm] (signal) at (0,0) {Design\\Signal!};
+\node[imp, minimum width=35mm, minimum height=12mm] (improve) at (3,2) {Improve\\design};
+
+% Arrows
+\draw[arr, line width=1.2pt] (hard) -- (signal);
+\draw[arr, line width=1.2pt] (signal) -- (improve);
+\draw[arr, bend left=30] (improve) to node[above, font=\footnotesize] {retry test} (hard);
+
+% Test smells
+\node[group, minimum width=85mm, align=left, font=\small] at (0,-2.5) {
+\textbf{Test Smells:}\\[2pt]
+\textbullet\ Too many mocks $\rightarrow$ Missing abstraction\\
+\textbullet\ Complex setup $\rightarrow$ Too many responsibilities\\
+\textbullet\ Fragile tests $\rightarrow$ Coupling issues
+};
+
+\end{tikzpicture}
+\end{document}

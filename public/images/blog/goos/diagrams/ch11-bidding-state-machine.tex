@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% States
+\node[cls, minimum width=22mm] (joining) at (0,0) {JOINING};
+\node[abs, minimum width=22mm] (bidding) at (3.5,0) {BIDDING};
+\node[imp, minimum width=22mm] (winning) at (7,0) {WINNING};
+\node[con, minimum width=22mm] (lost) at (3.5,-2.5) {LOST};
+\node[hi, minimum width=22mm] (won) at (7,-2.5) {WON};
+
+% Transitions
+\draw[arr] (joining) -- node[above, font=\footnotesize] {price} (bidding);
+\draw[arr] (bidding) -- node[above, font=\footnotesize] {winning bid} (winning);
+\draw[arr, bend left=20] (winning) to node[above, font=\footnotesize] {outbid} (bidding);
+\draw[arr] (bidding) -- node[left, font=\footnotesize] {close} (lost);
+\draw[arr] (winning) -- node[right, font=\footnotesize] {close} (won);
+\draw[arr] (joining.south) to[bend right=30] node[below left, font=\footnotesize] {close} (lost.west);
+
+% Start indicator
+\draw[arr] (-1.5,0) -- (joining);
+\node[font=\footnotesize] at (-2,0) {start};
+
+% Final state indicators
+\node[circle, draw=conbord, fill=confill, inner sep=2pt] at (3.5,-3.5) {};
+\node[circle, draw=hibord, fill=hifill, inner sep=2pt] at (7,-3.5) {};
+\node[font=\footnotesize] at (5.25,-3.5) {final states};
+
+% Title
+\node[font=\sffamily\bfseries\large] at (3.5,1.5) {Bidding State Machine};
+
+\end{tikzpicture}
+\end{document}

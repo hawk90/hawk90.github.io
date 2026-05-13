@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,3) {AAA Pattern};
+
+% Three sections
+\node[abs, minimum width=50mm, minimum height=14mm] (arrange) at (0,1.5) {\textbf{Arrange}\\Setup test fixtures};
+\node[hi, minimum width=50mm, minimum height=14mm] (act) at (0,0) {\textbf{Act}\\Execute behavior};
+\node[imp, minimum width=50mm, minimum height=14mm] (assert) at (0,-1.5) {\textbf{Assert}\\Verify outcome};
+
+% Arrows
+\draw[arr, line width=1pt] (arrange) -- (act);
+\draw[arr, line width=1pt] (act) -- (assert);
+
+% Annotations
+\node[anchor=west, font=\footnotesize, text width=30mm] at (3,1.5) {Create objects,\\prepare data};
+\node[anchor=west, font=\footnotesize, text width=30mm] at (3,0) {Call the method\\under test};
+\node[anchor=west, font=\footnotesize, text width=30mm] at (3,-1.5) {Check results,\\verify state};
+
+% Alternate names
+\node[group, minimum width=60mm, font=\small] at (0,-3.3) {Also known as: Given-When-Then};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4.5) {Test Failure Diagnostics};
+
+% Starting point
+\node[con, minimum width=30mm] (fail) at (0,3) {Test Fails!};
+
+% Bad path (left)
+\node[cls, minimum width=35mm, minimum height=12mm] (bad-msg) at (-3.5,1) {Bad Message:\\``AssertionError''};
+\node[cls, minimum width=35mm, minimum height=12mm] (debug) at (-3.5,-1) {Debug with\\debugger};
+\node[con, minimum width=35mm, minimum height=12mm] (time) at (-3.5,-3) {30+ minutes\\wasted};
+
+% Good path (right)
+\node[imp, minimum width=35mm, minimum height=12mm] (good-msg) at (3.5,1) {Good Message:\\Expected WON\\Actual: LOST};
+\node[imp, minimum width=35mm, minimum height=12mm] (understand) at (3.5,-1) {Understand\\immediately};
+\node[hi, minimum width=35mm, minimum height=12mm] (fix) at (3.5,-3) {Fix in\\5 minutes};
+
+% Arrows
+\draw[arr] (fail) -- (bad-msg);
+\draw[arr] (fail) -- (good-msg);
+\draw[arr] (bad-msg) -- (debug);
+\draw[arr] (debug) -- (time);
+\draw[arr] (good-msg) -- (understand);
+\draw[arr] (understand) -- (fix);
+
+% Labels
+\node[font=\footnotesize, anchor=south] at (-3.5,1.7) {Poor};
+\node[font=\footnotesize, anchor=south] at (3.5,1.7) {Good};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Bad example (Ask)
+\node[font=\sffamily\bfseries\large, anchor=west] at (-5,3) {Ask (Bad)};
+
+\node[con, minimum width=22mm] (client-bad) at (-3,2) {Client};
+\node[cls, minimum width=22mm] (obj-bad) at (1,2) {Object};
+
+\draw[uses] (client-bad) -- node[above, font=\footnotesize] {getData()} (obj-bad);
+\draw[ret, bend left=20] (obj-bad) to node[below, font=\footnotesize] {return data} (client-bad);
+\node[con, anchor=west, font=\footnotesize, text width=30mm] at (3,2) {Client processes\\data itself};
+
+% Good example (Tell)
+\node[font=\sffamily\bfseries\large, anchor=west] at (-5,0) {Tell (Good)};
+
+\node[imp, minimum width=22mm] (client-good) at (-3,-1) {Client};
+\node[cls, minimum width=22mm] (obj-good) at (1,-1) {Object};
+
+\draw[uses] (client-good) -- node[above, font=\footnotesize] {doAction()} (obj-good);
+\node[imp, anchor=west, font=\footnotesize, text width=30mm] at (3,-1) {Object handles\\its own data};
+
+% Divider
+\draw[dashed, draw=groupbord, line width=0.5pt] (-5,0.7) -- (5,0.7);
+
+% Principle box
+\node[group, minimum width=90mm, minimum height=12mm] at (0,-3) {};
+\node[font=\sffamily\bfseries] at (0,-3) {Tell, Don't Ask: Let objects decide what to do with their data};
+
+\end{tikzpicture}
+\end{document}
