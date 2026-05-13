@@ -5,6 +5,7 @@ description: "제어 흐름의 일반 쟁점 — 부울 표현식 단순화, 깊
 series: "Code Complete"
 seriesOrder: 19
 tags: [code-complete, control-flow, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

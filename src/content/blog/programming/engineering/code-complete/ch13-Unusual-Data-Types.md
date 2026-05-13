@@ -5,6 +5,7 @@ description: "덜 흔한 데이터 타입 — struct, 포인터, 전역 변수. 
 series: "Code Complete"
 seriesOrder: 13
 tags: [code-complete, data-types, pointers, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

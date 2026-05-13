@@ -5,6 +5,7 @@ description: "클래스도 작아야 한다. SRP, 응집도, 책임 분리. 변�
 tags: [CleanCode, Classes, SRP, Robert Martin]
 series: "Clean Code"
 seriesOrder: 10
+draft: true
 ---
 
 ## 이 챕터의 메시지

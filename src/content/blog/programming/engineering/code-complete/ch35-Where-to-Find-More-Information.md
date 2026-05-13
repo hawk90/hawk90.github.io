@@ -5,6 +5,7 @@ description: "다음 단계 — McConnell이 추천하는 더 깊은 자원들. 
 series: "Code Complete"
 seriesOrder: 35
 tags: [code-complete, references, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "함수(루틴)를 잘 짜는 법 — 응집도 한 가지, 좋은 
 series: "Code Complete"
 seriesOrder: 7
 tags: [code-complete, functions, routines, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

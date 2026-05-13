@@ -5,6 +5,7 @@ description: "읽고 듣는 것을 비판적으로 분석하라 — '유명한 �
 series: "The Pragmatic Programmer"
 seriesOrder: 10
 tags: [pragmatic-programmer, learning]
+draft: true
 ---
 
 ## 이 팁의 메시지

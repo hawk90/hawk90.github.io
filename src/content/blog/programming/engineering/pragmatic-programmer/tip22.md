@@ -5,6 +5,7 @@ description: "문제 도메인 가까이에서 프로그램하라 — 도메인 
 series: "The Pragmatic Programmer"
 seriesOrder: 22
 tags: [pragmatic-programmer, design]
+draft: true
 ---
 
 ## 이 팁의 메시지

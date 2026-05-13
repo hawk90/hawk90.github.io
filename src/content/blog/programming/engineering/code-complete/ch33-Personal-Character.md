@@ -5,6 +5,7 @@ description: "프로그래머의 개인 특성 — 지능보다 끈기·겸손·
 series: "Code Complete"
 seriesOrder: 33
 tags: [code-complete, character, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

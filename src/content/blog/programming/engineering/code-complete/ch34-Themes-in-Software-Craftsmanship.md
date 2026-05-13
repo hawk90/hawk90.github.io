@@ -5,6 +5,7 @@ description: "책 전체의 관통 테마들 — 복잡성 정복, 프로세스,
 series: "Code Complete"
 seriesOrder: 34
 tags: [code-complete, craftsmanship, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

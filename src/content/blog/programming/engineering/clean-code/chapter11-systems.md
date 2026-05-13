@@ -5,6 +5,7 @@ description: "시스템 수준의 클린함 — 구성과 사용의 분리, DI, 
 tags: [CleanCode, Systems, DI, Robert Martin]
 series: "Clean Code"
 seriesOrder: 11
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "루프의 제어 — 입구·출구·본문 분리, 한 책임 한
 series: "Code Complete"
 seriesOrder: 16
 tags: [code-complete, loops, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

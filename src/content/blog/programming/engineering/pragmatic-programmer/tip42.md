@@ -5,6 +5,7 @@ description: "항상 작은 걸음을 — 큰 걸음 = 큰 위험. 작은 걸음
 series: "The Pragmatic Programmer"
 seriesOrder: 42
 tags: [pragmatic-programmer, development]
+draft: true
 ---
 
 ## 이 팁의 메시지

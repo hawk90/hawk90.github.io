@@ -5,6 +5,7 @@ description: "객체와 자료구조의 본질적 대립 — 데이터를 감추
 tags: [CleanCode, OOP, Data Structures, Robert Martin]
 series: "Clean Code"
 seriesOrder: 6
+draft: true
 ---
 
 ## 이 챕터의 메시지

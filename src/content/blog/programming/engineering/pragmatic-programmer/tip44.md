@@ -5,6 +5,7 @@ description: "결합도 낮은 코드가 — 바꾸기 쉽다. ETC 원칙의 한
 series: "The Pragmatic Programmer"
 seriesOrder: 44
 tags: [pragmatic-programmer, design]
+draft: true
 ---
 
 ## 이 팁의 메시지

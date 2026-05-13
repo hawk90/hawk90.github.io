@@ -5,6 +5,7 @@ description: "JUnit의 ComparisonCompactor 코드 리팩토링 — 이미 잘 �
 tags: [CleanCode, Refactoring, JUnit, Robert Martin]
 series: "Clean Code"
 seriesOrder: 15
+draft: true
 ---
 
 ## 이 챕터의 메시지

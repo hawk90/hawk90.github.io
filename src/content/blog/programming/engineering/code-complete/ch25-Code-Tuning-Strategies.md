@@ -5,6 +5,7 @@ description: "성능 튜닝의 전략 — 측정 먼저, 80/20, 디자인 변경
 series: "Code Complete"
 seriesOrder: 25
 tags: [code-complete, performance, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

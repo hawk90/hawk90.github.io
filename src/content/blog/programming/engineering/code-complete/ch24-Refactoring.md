@@ -5,6 +5,7 @@ description: "리팩토링 — 외부 동작은 보존, 내부 구조를 개선.
 series: "Code Complete"
 seriesOrder: 24
 tags: [code-complete, refactoring, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "DRY — 시스템 내 모든 지식은 명확한 단일 표현을 
 series: "The Pragmatic Programmer"
 seriesOrder: 15
 tags: [pragmatic-programmer, design]
+draft: true
 ---
 
 ## 이 팁의 메시지

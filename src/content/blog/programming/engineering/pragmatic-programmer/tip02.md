@@ -5,6 +5,7 @@ description: "당신의 작업을 생각하라 — 자동 조종으로 코드를
 series: "The Pragmatic Programmer"
 seriesOrder: 2
 tags: [pragmatic-programmer, software-craftsmanship]
+draft: true
 ---
 
 ## 이 팁의 메시지

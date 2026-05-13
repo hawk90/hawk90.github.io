@@ -5,6 +5,7 @@ description: "Kent Beck의 네 가지 단순한 규칙 — 테스트 통과, 중
 tags: [CleanCode, Design, Simple Design, Kent Beck, Robert Martin]
 series: "Clean Code"
 seriesOrder: 12
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "상속세를 내지 마라 — 상속은 비싸다. 인터페이�
 series: "The Pragmatic Programmer"
 seriesOrder: 51
 tags: [pragmatic-programmer, oop]
+draft: true
 ---
 
 ## 이 팁의 메시지

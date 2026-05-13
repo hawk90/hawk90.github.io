@@ -5,6 +5,7 @@ description: "당신의 기예에 마음을 써라 — 무관심하면 아무리
 series: "The Pragmatic Programmer"
 seriesOrder: 1
 tags: [pragmatic-programmer, software-craftsmanship]
+draft: true
 ---
 
 ## 이 팁의 메시지

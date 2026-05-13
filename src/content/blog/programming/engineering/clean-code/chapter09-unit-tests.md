@@ -5,6 +5,7 @@ description: "TDD 세 법칙, 깨끗한 테스트의 다섯 가지 F.I.R.S.T 속
 tags: [CleanCode, Unit Test, TDD, Robert Martin]
 series: "Clean Code"
 seriesOrder: 9
+draft: true
 ---
 
 ## 이 챕터의 메시지

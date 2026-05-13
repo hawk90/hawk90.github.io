@@ -5,6 +5,7 @@ description: "변화의 촉매가 되어라 — 큰 허가가 없어도, 작게 
 series: "The Pragmatic Programmer"
 seriesOrder: 6
 tags: [pragmatic-programmer, team]
+draft: true
 ---
 
 ## 이 팁의 메시지

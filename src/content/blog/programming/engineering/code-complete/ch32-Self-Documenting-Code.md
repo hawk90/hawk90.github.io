@@ -5,6 +5,7 @@ description: "자기 문서화 코드 — 좋은 이름·구조가 가장 좋은
 series: "Code Complete"
 seriesOrder: 32
 tags: [code-complete, documentation, comments, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

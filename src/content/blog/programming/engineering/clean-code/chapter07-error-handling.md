@@ -5,6 +5,7 @@ description: "예외를 던져라. 에러 코드를 반환하지 마라. null을
 tags: [CleanCode, Error Handling, Exceptions, Robert Martin]
 series: "Clean Code"
 seriesOrder: 7
+draft: true
 ---
 
 ## 이 챕터의 메시지

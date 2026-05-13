@@ -5,6 +5,7 @@ description: "상태를 쌓아두지 말고 — 전달하라. 함수형 사고."
 series: "The Pragmatic Programmer"
 seriesOrder: 50
 tags: [pragmatic-programmer, design, functional]
+draft: true
 ---
 
 ## 이 팁의 메시지

@@ -5,6 +5,7 @@ description: "코드는 사라지지 않는다. 좋은 코드를 정의하려는
 tags: [CleanCode, Engineering, Robert Martin]
 series: "Clean Code"
 seriesOrder: 1
+draft: true
 ---
 
 ## 이 챕터의 메시지

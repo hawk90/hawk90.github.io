@@ -5,6 +5,7 @@ description: "프로그램 크기가 construction에 미치는 영향 — 의사
 series: "Code Complete"
 seriesOrder: 27
 tags: [code-complete, scale, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "놀라움을 피하려면 추정하라 — 추정 = 예측이 아�
 series: "The Pragmatic Programmer"
 seriesOrder: 23
 tags: [pragmatic-programmer, estimation]
+draft: true
 ---
 
 ## 이 팁의 메시지

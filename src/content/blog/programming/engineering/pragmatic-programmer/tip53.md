@@ -5,6 +5,7 @@ description: "Has-A가 Is-A를 이긴다 — 합성을 — 상속보다. 책의 
 series: "The Pragmatic Programmer"
 seriesOrder: 53
 tags: [pragmatic-programmer, oop]
+draft: true
 ---
 
 ## 이 팁의 메시지

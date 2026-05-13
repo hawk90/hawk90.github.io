@@ -5,6 +5,7 @@ description: "함수는 작아야 한다. 한 가지 일을 해야 한다. 한 �
 tags: [CleanCode, Functions, Robert Martin]
 series: "Clean Code"
 seriesOrder: 3
+draft: true
 ---
 
 ## 이 챕터의 메시지

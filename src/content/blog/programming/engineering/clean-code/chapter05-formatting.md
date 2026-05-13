@@ -5,6 +5,7 @@ description: "포맷은 코드를 통해 의도를 전달하는 시각적 구조
 tags: [CleanCode, Formatting, Robert Martin]
 series: "Clean Code"
 seriesOrder: 5
+draft: true
 ---
 
 ## 이 챕터의 메시지

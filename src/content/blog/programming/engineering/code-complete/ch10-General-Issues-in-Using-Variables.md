@@ -5,6 +5,7 @@ description: "변수 사용의 일반 규칙 — 초기화, 스코프 좁히기,
 series: "Code Complete"
 seriesOrder: 10
 tags: [code-complete, variables, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

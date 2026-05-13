@@ -5,6 +5,7 @@ description: "프로그래밍의 네 가지 비유 — 글쓰기, 농사, 진주
 series: "Code Complete"
 seriesOrder: 2
 tags: [software-construction, code-complete, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

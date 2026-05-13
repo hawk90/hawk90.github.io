@@ -5,6 +5,7 @@ description: "통합 — 부분을 모아 전체로. 점진적 통합이 빅뱅 
 series: "Code Complete"
 seriesOrder: 29
 tags: [code-complete, integration, CI, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

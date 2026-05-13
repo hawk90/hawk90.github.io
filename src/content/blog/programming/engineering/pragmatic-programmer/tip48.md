@@ -5,6 +5,7 @@ description: "전역으로 둘 만큼 중요하면 — API로 감싸라. 직접 
 series: "The Pragmatic Programmer"
 seriesOrder: 48
 tags: [pragmatic-programmer, design]
+draft: true
 ---
 
 ## 이 팁의 메시지

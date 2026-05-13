@@ -5,6 +5,7 @@ description: "변수 이름의 힘 — 의도 전달, 적절한 길이, 컨벤�
 series: "Code Complete"
 seriesOrder: 11
 tags: [code-complete, naming, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

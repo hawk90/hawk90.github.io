@@ -5,6 +5,7 @@ description: "소프트웨어 품질의 차원 — 외부·내부 특성, 트레
 series: "Code Complete"
 seriesOrder: 20
 tags: [code-complete, quality, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

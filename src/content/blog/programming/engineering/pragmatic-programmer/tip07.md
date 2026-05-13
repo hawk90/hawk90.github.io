@@ -5,6 +5,7 @@ description: "큰 그림을 기억하라 — 끓는 개구리가 되지 마라. 
 series: "The Pragmatic Programmer"
 seriesOrder: 7
 tags: [pragmatic-programmer, perspective]
+draft: true
 ---
 
 ## 이 팁의 메시지

@@ -5,6 +5,7 @@ description: "비주류 제어 구조 — 다중 return, recursion, goto, 예외
 series: "Code Complete"
 seriesOrder: 17
 tags: [code-complete, control-flow, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

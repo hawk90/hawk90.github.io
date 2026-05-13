@@ -5,6 +5,7 @@ description: "변수·함수·클래스 이름은 코드의 80%를 차지하는 
 tags: [CleanCode, Naming, Robert Martin]
 series: "Clean Code"
 seriesOrder: 2
+draft: true
 ---
 
 ## 이 챕터의 메시지

@@ -5,6 +5,7 @@ description: "construction 관리 — 일정 추정, 측정, 프로그래머 다
 series: "Code Complete"
 seriesOrder: 28
 tags: [code-complete, management, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지

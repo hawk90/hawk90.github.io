@@ -5,6 +5,7 @@ description: "조건 분기 없는 순차 코드의 조직 — 의존성 명시,
 series: "Code Complete"
 seriesOrder: 14
 tags: [code-complete, control-flow, McConnell]
+draft: true
 ---
 
 ## 이 챕터의 메시지
