@@ -1,7 +1,7 @@
 ---
 title: "가이드라인 35: Decorator로 사용자화를 계층적으로 추가하라"
 date: 2026-05-15T06:00:00
-description: "Decorator 패턴 — 객체에 책임을 동적으로 추가. 컴파일 타임(템플릿) vs 런타임(상속) 변형."
+description: "Decorator 패턴은 객체에 책임을 동적으로 더한다. 컴파일 타임(템플릿)과 런타임(상속) 두 변형 모두를 살펴본다."
 tags: [C++, Software Design, Decorator, GoF, Composition]
 series: "C++ Software Design"
 seriesOrder: 35
@@ -9,10 +9,10 @@ seriesOrder: 35
 
 ## 왜 이 가이드라인이 중요한가?
 
-기능 조합이 폭발하는 문제:
+옵션이 늘어나면 기능 조합이 폭발한다.
 
 ```cpp
-// 차량 옵션 — 조합 폭발
+// 차량 옵션 — 조합이 폭발한다
 class Car { ... };
 class CarWithSunroof : public Car { ... };
 class CarWithLeatherSeats : public Car { ... };
@@ -21,18 +21,18 @@ class CarWithSunroofAndLeatherSeatsAndGPS : public Car { ... };
 // ... 2^N 조합
 ```
 
-N개 옵션 → 2^N 클래스. 명백히 불가능.
+옵션이 N개면 클래스가 2^N개로 늘어난다. 명백히 불가능한 접근이다.
 
-**Decorator 패턴** — 동일 인터페이스의 객체를 **감싸기** — 기능 추가. 조합 자유.
+**Decorator 패턴**은 같은 인터페이스의 객체를 **감싸서** 기능을 더한다. 조합은 자유롭게 만들 수 있다.
 
 ```cpp
 auto car = std::make_unique<BasicCar>();
 auto withSunroof = std::make_unique<SunroofDecorator>(std::move(car));
 auto withGPS = std::make_unique<GPSDecorator>(std::move(withSunroof));
-withGPS->price();    // 모든 옵션 누적
+withGPS->price();    // 모든 옵션이 누적된다
 ```
 
-GoF 23 패턴 중 하나. 자세한 GoF — [Decorator](/blog/programming/design/gof-design-patterns/item11-decorator).
+GoF 23개 패턴 중 하나다. 자세한 GoF 측면은 [Decorator](/blog/programming/design/gof-design-patterns/item11-decorator)에서 다룬다.
 
 ## 기본 구조 — 런타임 (상속 기반)
 
@@ -75,7 +75,7 @@ public:
 };
 ```
 
-**사용**:
+사용은 다음과 같다.
 
 ```cpp
 std::unique_ptr<Item> car = std::make_unique<CClassCar>();
@@ -86,7 +86,7 @@ std::cout << car->price();    // 50000 + 3000 + 1500 = 54500
 
 ## 메커니즘 — 책임의 연결
 
-각 decorator — 자신의 책임만 추가 + wrapped에 위임:
+각 decorator는 자기 책임만 더하고 wrapped에 위임한다.
 
 ```cpp
 double Sunroof::price() const {
@@ -94,14 +94,14 @@ double Sunroof::price() const {
 }
 ```
 
-**연결 그래프**:
+연결 그래프는 다음과 같다.
 
 ```
 GPS → Sunroof → CClassCar
-       (각각 자신의 가격 추가)
+       (각자 자기 가격을 더한다)
 ```
 
-호출은 — 사슬을 타고 안쪽으로. 결과 합산.
+호출은 사슬을 타고 안쪽으로 내려갔다가 결과를 합산하며 돌아온다.
 
 ## 컴파일 타임 변형 — 템플릿 기반
 
@@ -128,7 +128,7 @@ public:
 };
 ```
 
-**사용**:
+사용은 다음과 같다.
 
 ```cpp
 GPS<Sunroof<CClassCar>> car{
@@ -139,7 +139,7 @@ GPS<Sunroof<CClassCar>> car{
 std::cout << car.price();        // 54500 — virtual 비용 0
 ```
 
-타입이 길어짐 — `auto` 또는 helper:
+타입이 길어지므로 `auto`나 헬퍼를 활용한다.
 
 ```cpp
 auto car = GPS{Sunroof{CClassCar{}}};   // C++17 CTAD
@@ -150,26 +150,25 @@ auto car = GPS{Sunroof{CClassCar{}}};   // C++17 CTAD
 | 측면 | 상속 기반 | 템플릿 기반 |
 |---|---|---|
 | 결정 시점 | 런타임 | 컴파일 타임 |
-| 성능 | virtual 비용 | 0 (인라인) |
+| 성능 | virtual 비용 | 0 (인라이닝) |
 | 유연성 | 런타임 조합 | 컴파일 타임 고정 |
 | 타입 | 단일 (Item*) | 복합 타입 |
 | 메모리 | 힙 (보통) | 스택 가능 |
-| 사용자 입장 | 깔끔 | 타입 복잡 |
+| 사용자 입장 | 깔끔 | 타입이 복잡 |
 
-**런타임** — 사용자 입력에 따라 옵션 결정.
-**컴파일 타임** — 설정이 정적이고 — 성능 핵심.
+런타임 방식은 사용자 입력에 따라 옵션이 결정될 때 적합하다. 컴파일 타임 방식은 설정이 정적이고 성능이 핵심일 때 빛난다.
 
-## std::pmr — Decorator 예
+## std::pmr — Decorator의 예
 
 ```cpp
 std::pmr::memory_resource* base = std::pmr::new_delete_resource();
-std::pmr::synchronized_pool_resource pool{base};        // base를 감쌈
-std::pmr::monotonic_buffer_resource buf{&pool};        // pool을 감쌈
+std::pmr::synchronized_pool_resource pool{base};        // base를 감싼다
+std::pmr::monotonic_buffer_resource buf{&pool};         // pool을 감싼다
 
 std::pmr::vector<int> v{&buf};
 ```
 
-각 레이어 — 메모리 자원에 기능 추가. 동기화, 풀링, 모노토닉 등. C++17 표준 라이브러리의 Decorator 응용.
+각 레이어는 메모리 자원에 기능을 더한다. 동기화, 풀링, 모노토닉 같은 책임을 쌓아 올린다. C++17 표준 라이브러리의 Decorator 응용이다.
 
 ## 함수 Decorator — 함수의 일을 확장
 
@@ -196,10 +195,10 @@ auto timed(F f) {
 }
 
 auto fn = timed(logged([](int x) { return x * 2; }));
-fn(5);    // log + 측정 + 본체 호출
+fn(5);    // 로깅 + 측정 + 본체 호출
 ```
 
-함수형 스타일의 decorator. Python 데코레이터 ≈.
+함수형 스타일의 decorator다. Python의 데코레이터와 유사하다.
 
 ## Range Adapter — 모던 사례
 
@@ -210,19 +209,19 @@ auto v = std::views::iota(1, 100)
     | std::views::take(5);
 ```
 
-각 `views::*` — 이전 view를 감쌈. Decorator + Pipeline 결합. C++20.
+각 `views::*`는 이전 view를 감싼다. Decorator와 Pipeline의 결합 형태이며, C++20에서 표준화됐다.
 
 ## 함정 — Decorator 깊이 폭주
 
 ```cpp
 auto car = make_unique<CClassCar>();
 car = make_unique<Sunroof>(std::move(car));
-car = make_unique<Sunroof>(std::move(car));        // 중복 OK? — 의미는?
+car = make_unique<Sunroof>(std::move(car));        // 중복 OK? 의미는?
 car = make_unique<GPS>(std::move(car));
 car = make_unique<Sunroof>(std::move(car));         // 또?
 ```
 
-같은 decorator 중복 — 의미 모호. 도메인 규칙으로 제어 필요. 검증 메서드 또는 fluent API.
+같은 decorator가 중복되면 의미가 모호해진다. 도메인 규칙으로 제어해야 하며, 검증 메서드나 fluent API로 막는다.
 
 ## 함정 — Decorator vs 단순 멤버
 
@@ -242,15 +241,17 @@ struct CarConfig {
 CClassCar car{CarConfig{}};
 ```
 
-**언제 Decorator?**
-- 책임 추가가 **수직적** — 우주적, 행동 변경
-- 조합이 **다양** — 모든 경우의 수
-- 결정 시점이 **런타임**
+Decorator가 어울리는 경우는 다음과 같다.
 
-**언제 단순 멤버?**
-- 단순 데이터 변형
-- 조합이 한정적
-- 결정이 정적
+- 책임이 **수직적**으로 쌓이고 행동을 바꾼다
+- 조합이 다양해서 모든 경우의 수를 다뤄야 한다
+- 결정 시점이 런타임이다
+
+단순 멤버가 어울리는 경우는 다음과 같다.
+
+- 단순한 데이터 변형이다
+- 조합이 제한적이다
+- 결정이 정적이다
 
 ## 함정 — Decorator 순서
 
@@ -258,21 +259,21 @@ CClassCar car{CarConfig{}};
 auto a = Encrypt{Compress{file}};        // 압축 후 암호화
 auto b = Compress{Encrypt{file}};         // 암호화 후 압축
 
-// a와 b — 다른 결과!
+// a와 b는 결과가 다르다!
 ```
 
-Decorator는 — 일반적으로 **순서 의존**. 도메인이 순서를 정의해야.
+Decorator는 보통 **순서에 의존**한다. 의미를 정의하는 것은 도메인의 몫이다.
 
 ## 함정 — Decorator vs Strategy 혼동
 
 | | Decorator | Strategy |
 |---|---|---|
-| 의도 | 책임 **추가** | 알고리즘 **교체** |
-| 구조 | 객체 감싸기 | 객체 보관 |
-| 호출 | 본체 + 추가 | 보유한 알고리즘 |
-| 조합 | 다중 가능 | 1개씩 교체 |
+| 의도 | 책임을 **추가**한다 | 알고리즘을 **교체**한다 |
+| 구조 | 객체를 감싼다 | 객체를 보관한다 |
+| 호출 | 본체 + 추가 | 보유한 알고리즘만 |
+| 조합 | 다중 가능 | 한 번에 하나씩 교체 |
 
-같은 다형성 — 다른 목적. 가이드라인 19 (Strategy)와 구분.
+같은 다형성이지만 목적이 다르다. 가이드라인 19의 Strategy와 명확히 구분해야 한다.
 
 ## 모던 변형 — Type Erasure + Decorator
 
@@ -303,56 +304,56 @@ public:
 };
 
 Item car = Sunroof{CClassCar{}};
-// Type erasure가 외부 인터페이스 — decorator는 컴파일 타임 적용
+// Type erasure가 외부 인터페이스를 제공하고, decorator는 컴파일 타임에 적용된다
 ```
 
-값 의미론 + 컴파일 타임 decorator 결합. Iglberger의 추천 방식.
+값 의미론과 컴파일 타임 decorator를 결합한 형태다. Iglberger가 권하는 방식이다.
 
 ## Decorator vs Pipeline
 
 ```cpp
-// Pipeline (range-v3 style)
+// Pipeline (range-v3 스타일)
 auto result = data 
     | filter(pred1) 
     | transform(fn1) 
     | reduce(0, std::plus{});
 
-// Decorator (object style)
+// Decorator (객체 스타일)
 auto pipeline = Reduce{0, std::plus{}, 
                   Transform{fn1, 
                     Filter{pred1, data}}};
 ```
 
-표현은 달라도 — 본질 유사. **데이터/책임의 layered 처리**.
+표현은 달라도 본질은 같다. 데이터와 책임을 **계층적으로 처리**한다.
 
 ## 실무 가이드 — 결정 트리
 
 ```
-기능 추가 방식 결정:
+기능 추가 방식을 어떻게 정할까?
 ├── 컴파일 타임 + 성능 핵심 → 템플릿 Decorator
 ├── 런타임 조합 + 사용자 선택 → 상속 Decorator
 ├── 함수 변환 + 함수형 스타일 → 함수 Decorator (lambda)
 ├── 데이터 변형 흐름 → Range Adapter (views)
-└── 단순한 옵션 → CarConfig 등 데이터 멤버
+└── 단순한 옵션 → CarConfig 같은 데이터 멤버
 ```
 
 ## 실무 가이드 — 체크리스트
 
-- [ ] 책임이 **수직적** — Decorator 합당?
-- [ ] 동일 인터페이스 유지 — wrapped와 wrapper 같은 시그니처?
-- [ ] 결정 시점 (런타임/컴파일) — 적절한 구현 선택?
-- [ ] 순서 의미 — 도메인이 명확히 정의?
-- [ ] 깊이 제한 — 무한 중첩 방지?
-- [ ] Strategy와 혼동 — 의도가 추가인지 교체인지?
+- [ ] 책임이 **수직적**으로 쌓이는가? Decorator가 합당한가?
+- [ ] 동일 인터페이스를 유지하는가? wrapped와 wrapper가 같은 시그니처인가?
+- [ ] 결정 시점(런타임/컴파일)에 맞는 구현을 골랐는가?
+- [ ] 순서의 의미를 도메인이 명확히 정의했는가?
+- [ ] 깊이를 제한해 무한 중첩을 막는가?
+- [ ] Strategy와 혼동하지 않았는가? 의도가 추가인지 교체인지 확인했는가?
 
 ## 핵심 정리
 
-1. **Decorator** — 동일 인터페이스로 객체를 감싸 책임 추가
-2. **상속 기반** — 런타임 조합, virtual 비용
-3. **템플릿 기반** — 컴파일 타임 결정, 0 비용
-4. **함수 decorator** — lambda, 함수형
-5. **Range adapter** — C++20 views, pipeline 스타일
-6. **순서 의존** — 도메인이 의미 정의 필요
+1. **Decorator**는 같은 인터페이스로 객체를 감싸 책임을 더한다
+2. **상속 기반**은 런타임 조합이 가능하지만 virtual 비용이 있다
+3. **템플릿 기반**은 컴파일 타임에 결정되고 비용이 0이다
+4. **함수 decorator**는 lambda 기반의 함수형 스타일이다
+5. **Range adapter**는 C++20 views의 pipeline 스타일이다
+6. **순서 의존**이 본질적이므로 도메인이 의미를 정의해야 한다
 
 ## 관련 항목
 
