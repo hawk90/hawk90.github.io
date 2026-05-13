@@ -1,13 +1,123 @@
 ---
 title: "Chapter 21: Collaborative Construction"
-date: 2026-05-13
-description: "Collaborative Construction"
+date: 2026-06-20T21:00:00
+description: "협업 construction — 페어 프로그래밍, 공식 인스펙션, 코드 리뷰의 효과와 실제."
 series: "Code Complete"
 seriesOrder: 21
-tags: [software-construction, code-complete]
-draft: true
+tags: [code-complete, collaboration, code-review, McConnell]
 ---
 
-> **Code Complete** Chapter 21 요약
+## 이 챕터의 메시지
 
-(작성 예정)
+코드를 짠 사람과 그 코드를 보는 다른 사람의 시각은 — 다르다. 작가에게 명백한 것이 검토자에겐 함정으로 보이기도 한다.
+
+> 협업 construction = **여러 시각으로 한 코드를 본다**.
+
+McConnell이 인용하는 데이터 — 이 기법들의 검출 효과는 매우 높다.
+
+## 핵심 내용
+
+- **페어 프로그래밍** — 두 사람이 한 화면.
+- **공식 인스펙션** — 가장 효과 큰 결함 검출 기법.
+- **비공식 코드 리뷰** — PR 기반.
+- 모든 기법의 핵심 = **다른 사람의 눈**.
+
+## 페어 프로그래밍
+
+> 두 사람이 한 컴퓨터에서 코드를 짠다. 한 명은 **드라이버**(키보드), 다른 한 명은 **내비게이터**(전략).
+
+### 효과
+
+- 결함 조기 발견.
+- 지식 공유.
+- 더 좋은 설계 (서로 다른 시각).
+- 신입 교육.
+
+### 비용
+
+- 두 사람의 시간이 한 작업에 — **이론상 2배 비용**.
+- 그러나 — **결함 감소·재작업 감소**로 실제 비용은 거의 같거나 낮음 (XP 측정).
+
+### 언제 쓰나
+
+- **복잡한 문제** — 두 시각 필요.
+- **신입 교육** — 가장 효과적 방법.
+- **고위험 영역** — 보안, 결제.
+
+매일 모든 코드를 짝으로 짤 필요 X. 적재적소.
+
+## 공식 인스펙션 (Fagan Inspection)
+
+Michael Fagan이 1976년 IBM에서 개발한 기법. McConnell이 인용하는 가장 효과 큰 결함 검출 도구.
+
+### 단계
+
+1. **계획** — 무엇을 검토할지.
+2. **개요** — 작가가 모더레이터·검토자에게 설명.
+3. **준비** — 검토자가 개별적으로 코드 읽음.
+4. **인스펙션 회의** — 함께 결함 발견.
+5. **재작업** — 작가가 수정.
+6. **추적** — 수정 검증.
+
+### 효과
+
+McConnell 인용 — 결함의 **60~90%** 검출. 단일 기법으로 가장 큰 수치.
+
+### 비용
+
+- 시간이 많이 든다.
+- 회의 + 사전 준비 + 추적.
+
+### 언제
+
+- 안전·중요 시스템.
+- 옛 시스템의 핵심 모듈.
+
+일상 PR엔 과함. 핵심 자리에만.
+
+## 비공식 코드 리뷰 (Pull Request)
+
+현대의 표준 — **PR 기반 리뷰**.
+
+### 좋은 PR 리뷰
+
+- **작은 단위** — PR이 작으면 리뷰가 정확.
+- **명확한 설명** — 왜 변경했는지.
+- **테스트 포함** — 자체 검증.
+- **빠른 응답** — 24시간 안에.
+
+### 코드 리뷰 자세
+
+- **존중** — "이 코드 별로"가 아니라 "이렇게 더 좋아질 수 있다".
+- **구체** — 무엇을 어떻게 바꿀지.
+- **검증 가능** — 변경 후 검증할 방법.
+
+### 협업 리뷰 도구
+
+- GitHub PR
+- Gerrit
+- Phabricator
+- Bitbucket
+
+## 자기 코드를 보는 법
+
+협업이 어려운 자리에선 — **자기 코드를 다른 사람의 눈으로**.
+
+- 몇 시간 후 다시 본다.
+- 다른 환경(노트북·인쇄)에서 본다.
+- 동료가 쓸 거라 가정.
+- 자신의 옛 코드를 다시 본다.
+
+## 정리
+
+- 협업 construction = **여러 시각**.
+- **페어** — 복잡한 문제, 신입 교육.
+- **공식 인스펙션** — 60~90% 결함 검출 (높은 비용).
+- **PR 리뷰** — 일상적 도구.
+- 자기 코드도 — **다른 사람의 눈으로** 다시 본다.
+
+## 관련 항목
+
+- [Ch 20: Quality Landscape](/blog/programming/engineering/code-complete/ch20-The-Software-Quality-Landscape)
+- [Ch 22: Developer Testing](/blog/programming/engineering/code-complete/ch22-Developer-Testing)
+- [Clean Code Ch 16: SerialDate 리뷰](/blog/programming/engineering/clean-code/chapter16-refactoring-serialdate)
