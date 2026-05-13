@@ -7,9 +7,20 @@ series: "Effective C++"
 seriesOrder: 25
 ---
 
+## 왜 이 항목이 중요한가?
+
+`std::swap`의 기본 구현은 세 번의 복사다. 자원 관리 클래스(특히 pimpl 패턴)에선 매우 비효율적이다. 내부 포인터만 교환하면 되는데 전체를 복사한다.
+
+더 중요한 건 swap이 **두 가지 핵심 이디엄의 토대**라는 점이다.
+
+- **copy-and-swap** — 자기 대입 안전한 `operator=` 구현 ([항목 11](/blog/programming/cpp/effective-cpp/item11-handle-assignment-to-self-in-operator-equals)).
+- **강력한 예외 보증** — 작업 실패 시 원상태 복귀 ([항목 29](/blog/programming/cpp/effective-cpp/item29-strive-for-exception-safe-code)).
+
+효율적이고 `noexcept`인 swap을 제공하는 것이 표준 라이브러리와 매끄럽게 결합하기 위한 핵심이다. 이 항목은 멤버 swap, 네임스페이스 비-멤버 swap, `std::swap` 특수화 — 세 단계 패턴을 정리한다.
+
 ## 개요
 
-`std::swap`의 기본 구현은 **세 번의 복사** — 자원 관리 클래스에선 비효율. `pimpl` 패턴처럼 내부 포인터만 교환하면 되는 경우엔 사용자 정의 swap이 훨씬 빠릅니다. 더 중요한 건 — copy-and-swap 패턴(항목 11), 강력한 예외 보증(항목 29) 등의 **이디엄이 swap에 의존**한다는 점. 효율적이고 `noexcept`인 swap을 제공하는 게 표준 라이브러리와의 매끄러운 결합을 위한 핵심.
+`std::swap`의 기본 구현은 **세 번의 복사**다. 자원 관리 클래스에선 비효율이다. `pimpl` 패턴처럼 내부 포인터만 교환하면 되는 경우엔 사용자 정의 swap이 훨씬 빠르다. 더 중요한 건 copy-and-swap 패턴(항목 11), 강력한 예외 보증(항목 29) 등의 **이디엄이 swap에 의존**한다는 점이다. 효율적이고 `noexcept`인 swap을 제공하는 것이 표준 라이브러리와의 매끄러운 결합을 위한 핵심이다.
 
 ## 기본 `std::swap`의 비용
 
