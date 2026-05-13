@@ -7,9 +7,20 @@ series: "Effective C++"
 seriesOrder: 8
 ---
 
+## 왜 이 항목이 중요한가?
+
+소멸자는 자원 정리의 마지막 단계다. 파일 close, DB 연결 close, 네트워크 disconnect 모두 **실패 가능한 작업**이다. 이 실패를 어떻게 처리할 것인지가 문제다.
+
+소멸자에서 예외를 던지면 두 가지 자리에서 사고가 난다.
+
+- **이미 다른 예외가 stack unwinding 중**이면 `std::terminate`가 즉시 호출된다. 프로그램이 죽는다.
+- **C++11부터 소멸자는 기본 `noexcept`** 다. 명시하지 않아도 throw 시 terminate다.
+
+해결책은 소멸자 안에서 예외를 잡고, 외부에 알려야 할 정리 실패는 별도 메서드(`close()` 등)로 분리하는 것이다. 이 항목은 그 패턴들과 C++11 noexcept의 함의를 정리한다.
+
 ## 개요
 
-소멸자에서 예외가 빠져나가면 **이미 다른 예외가 stack unwinding 중일 때 `std::terminate`** 가 호출됩니다. 자원 정리(파일 close, DB 연결 close, 네트워크 disconnect)는 실패 가능성이 있는 작업이어서, 소멸자 안에서 안전하게 처리해야 합니다. C++11부터 소멸자는 **기본 `noexcept`** — 명시하지 않으면 throw 시 즉시 terminate.
+소멸자에서 예외가 빠져나가면 **이미 다른 예외가 stack unwinding 중일 때 `std::terminate`** 가 호출된다. 자원 정리(파일 close, DB 연결 close, 네트워크 disconnect)는 실패 가능성이 있는 작업이어서, 소멸자 안에서 안전하게 처리해야 합니다. C++11부터 소멸자는 **기본 `noexcept`** — 명시하지 않으면 throw 시 즉시 terminate.
 
 ## 필수 개념: stack unwinding 중의 예외
 
@@ -31,7 +42,7 @@ void f() {
 }
 ```
 
-이때 `b`나 `a`의 소멸자가 **또 다른 예외를 던지면** — 한 시점에 두 개의 예외가 진행 중이 됨. C++ 표준은 이 경우 `std::terminate`를 호출(프로그램 종료). 표준 라이브러리는 이를 일관되게 다룰 메커니즘을 갖고 있지 않습니다.
+이때 `b`나 `a`의 소멸자가 **또 다른 예외를 던지면** — 한 시점에 두 개의 예외가 진행 중이 됨. C++ 표준은 이 경우 `std::terminate`를 호출(프로그램 종료). 표준 라이브러리는 이를 일관되게 다룰 메커니즘을 갖고 있지 않다.
 
 ## 함정 — close가 throw할 수 있는 자원
 
@@ -52,7 +63,7 @@ void useConns() {
 }
 ```
 
-이 상황은 추상적이지 않습니다. DB 연결 종료, 파일 flush + close, 네트워크 graceful disconnect 모두 실패 가능 동작.
+이 상황은 추상적이지 않다. DB 연결 종료, 파일 flush + close, 네트워크 graceful disconnect 모두 실패 가능 동작.
 
 ## 해결 1 — 소멸자에서 삼키기
 
