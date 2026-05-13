@@ -7,9 +7,18 @@ series: "Effective Modern C++"
 seriesOrder: 8
 ---
 
+## 왜 이 항목이 중요한가?
+
+`0`과 `NULL`은 코드에 너무 자연스럽게 녹아 있어서, 이게 함정이라는 사실조차 인식하기 어렵다. 그런데 두 가지 자리에서 조용히 잘못된 함수가 호출된다.
+
+- **오버로드** — `f(int)`와 `f(void*)` 중 `f(0)`은 무조건 `f(int)`로 간다.
+- **템플릿 추론** — 템플릿은 암묵 변환을 하지 않으므로 `template<typename T> f(T)`에 `0`을 넘기면 `T = int`로 추론되어 포인터 매칭이 실패한다.
+
+C++11의 `nullptr`는 별도 타입(`std::nullptr_t`)을 가지고 있어 이 모호함이 없다. 이 항목은 그 차이를 정확히 짚는다.
+
 ## 개요
 
-`0`과 `NULL`은 **정수 타입**입니다 — 포인터 타입이 아닙니다. 컴파일러가 문맥상 포인터로 변환해주지만, **오버로드 해석**과 **템플릿 추론**에서는 종종 의도와 다른 함수가 호출됩니다. C++11의 `nullptr`는 진짜 포인터 의미를 가진 별도 타입(`std::nullptr_t`)이라 이런 모호함이 없습니다.
+`0`과 `NULL`은 **정수 타입**이다. 포인터 타입이 아니다. 컴파일러가 문맥상 포인터로 변환해 주지만, **오버로드 해석**과 **템플릿 추론**에서는 종종 의도와 다른 함수가 호출된다. C++11의 `nullptr`는 진짜 포인터 의미를 가진 별도 타입(`std::nullptr_t`)이라 이런 모호함이 없다.
 
 ## 필수 개념: `0`, `NULL`, `nullptr`의 정확한 타입
 
@@ -19,11 +28,11 @@ seriesOrder: 8
 
 ### `0`의 타입
 
-`0`은 **`int`** 타입의 정수 리터럴입니다. C++의 특수 규칙으로 "널 포인터 상수"로 변환 가능 — 그러나 본 타입은 정수.
+`0`은 **`int`** 타입의 정수 리터럴이다. C++의 특수 규칙으로 "널 포인터 상수"로 변환 가능하지만 본 타입은 정수다.
 
 ### `NULL`의 정의
 
-`NULL`의 정의는 **구현 정의** — C와 C++가 다르고, 컴파일러마다도 다름:
+`NULL`의 정의는 **구현 정의**다. C와 C++가 다르고, 컴파일러마다도 다르다.
 
 ```cpp
 // 흔한 구현 중 하나
@@ -32,7 +41,8 @@ seriesOrder: 8
 #define NULL nullptr     // C++11+ 일부 구현
 ```
 
-Linux의 `<cstddef>`에서 보통:
+Linux의 `<cstddef>`에서 보통 이렇다.
+
 ```cpp
 #ifdef __cplusplus
     #define NULL 0
@@ -41,14 +51,15 @@ Linux의 `<cstddef>`에서 보통:
 #endif
 ```
 
-→ C++에선 `NULL`이 보통 `0` (정수). 일부 컴파일러는 `0L`(long).
+C++에선 `NULL`이 보통 `0` (정수)이다. 일부 컴파일러는 `0L`(long)을 쓴다.
 
 ### `nullptr`의 타입
 
-`nullptr`는 **`std::nullptr_t`** 타입의 prvalue. 이 타입은:
-- **모든 포인터 타입으로 암묵 변환** 가능 (raw, member, function 포인터 모두)
-- **정수 타입과는 변환되지 않음**
-- 한 인스턴스 — `nullptr`
+`nullptr`는 **`std::nullptr_t`** 타입의 prvalue다. 이 타입은 다음 성질을 가진다.
+
+- **모든 포인터 타입으로 암묵 변환** 가능 (raw, member, function 포인터 모두).
+- **정수 타입과는 변환되지 않는다.**
+- 인스턴스가 하나뿐이다. `nullptr`.
 
 ```cpp
 int*           p1 = nullptr;     // OK
@@ -77,7 +88,7 @@ f(NULL);     // 구현에 따라 다름:
 f(nullptr);  // f(void*) — nullptr_t → void* 자연스러운 변환
 ```
 
-→ 포인터 의도였더라도 `0`/`NULL`은 정수 함수로 갑니다.
+포인터 의도였더라도 `0`/`NULL`은 정수 함수로 간다.
 
 ### 실제 시나리오
 
@@ -90,7 +101,7 @@ findRecord(0);        // (a) 호출 — recordId=0
 findRecord(nullptr);  // (b) 호출 — Widget* 인자
 ```
 
-`0`을 "널 포인터 의도"로 썼다면 — 함수가 잘못 불립니다.
+`0`을 "널 포인터 의도"로 썼다면 함수가 잘못 불린다.
 
 ## 템플릿 추론에서 더 위험
 
@@ -99,12 +110,12 @@ findRecord(nullptr);  // (b) 호출 — Widget* 인자
 ```cpp
 void process(Widget* w);
 
-process(0);       // OK — 0이 Widget*로 변환됨
+process(0);       // OK — 0이 Widget*로 변환된다
 process(NULL);    // OK
 process(nullptr); // OK
 ```
 
-위는 모두 동작 — 함수 호출 시점에 컴파일러가 변환.
+위는 모두 동작한다. 함수 호출 시점에 컴파일러가 변환을 해 주기 때문이다.
 
 ### 템플릿 매개변수 추론 시 변환 안 됨
 
@@ -121,9 +132,9 @@ call(process, NULL);     // 에러! 마찬가지 (NULL이 0이면 PtrType = int)
 call(process, nullptr);  // OK — PtrType = nullptr_t → process(Widget*) 매칭
 ```
 
-**왜 다른가**: 템플릿 추론은 인자의 본 타입을 그대로 받습니다 — 변환이 일어나지 않음. `0`은 `int`로 추론됨.
+**왜 다른가?** 템플릿 추론은 인자의 본 타입을 그대로 받는다. 변환이 일어나지 않는다. `0`은 `int`로 추론된다.
 
-이게 **lock-free 자료구조**, **mutex API** 등 템플릿 wrapping이 흔한 코드에서 골치.
+이게 **lock-free 자료구조**, **mutex API** 등 템플릿 wrapping이 흔한 코드에서 골치다.
 
 ```cpp
 std::mutex f1m, f2m;
@@ -186,11 +197,11 @@ std::shared_ptr<int> sp = nullptr;
 std::unique_ptr<int> up{nullptr};
 ```
 
-모두 같은 nullptr — 일관성.
+모두 같은 nullptr다. 일관성이 있다.
 
 ## `nullptr_t`의 활용
 
-함수가 명시적으로 "널 포인터만 받음"을 표현:
+함수가 명시적으로 "널 포인터만 받음"을 표현할 수 있다.
 
 ```cpp
 class Widget {
@@ -205,23 +216,23 @@ Widget w2(somePtr);   // 에러
 
 ## C++ Standard에서의 정확한 정의 (요약)
 
-- `nullptr`는 `std::nullptr_t` 타입의 prvalue (Section 7.6.2.1)
-- `nullptr_t`는 다음으로 변환 가능:
-  - 모든 포인터 타입 (object, function, member)
-  - bool (`if (nullptr)` → false)
-- 다음으로는 변환 **불가**:
-  - 정수 타입 (`int`, `long`, `char` 등)
-  - 실수 타입
+- `nullptr`는 `std::nullptr_t` 타입의 prvalue (Section 7.6.2.1).
+- `nullptr_t`는 다음으로 변환 가능하다.
+  - 모든 포인터 타입 (object, function, member).
+  - bool (`if (nullptr)` → false).
+- 다음으로는 변환 **불가**하다.
+  - 정수 타입 (`int`, `long`, `char` 등).
+  - 실수 타입.
 
 ## 마이그레이션 — `0`/`NULL` → `nullptr`
 
-기존 코드의 `0`을 모두 `nullptr`로 바꾸는 게 **항상 안전한가**?
+기존 코드의 `0`을 모두 `nullptr`로 바꾸는 게 **항상 안전한가?**
 
-**보통 안전하지만**, 다음을 확인:
+**보통 안전하지만**, 다음을 확인해야 한다.
 
-- `0`이 진짜 정수 0 의미였다면 (카운터, 인덱스, 산술) → 그대로 두기
-- `0`이 포인터·핸들·함수 포인터 의미였다면 → `nullptr`로
-- 매크로 `NULL`이 정수 0 의미로 쓰인 자리 → 거의 없으나 검토
+- `0`이 진짜 정수 0 의미였다면 (카운터, 인덱스, 산술) → 그대로 둔다.
+- `0`이 포인터·핸들·함수 포인터 의미였다면 → `nullptr`로 바꾼다.
+- 매크로 `NULL`이 정수 0 의미로 쓰인 자리 → 거의 없으나 검토한다.
 
 ```cpp
 // 정수 0 — 그대로
@@ -237,13 +248,14 @@ Widget* w = NULL;       // → nullptr
 
 ## 핵심 정리
 
-1. `0`과 `NULL`은 **정수 타입** — 포인터 의미가 약하고 오버로드/템플릿에서 함정
-2. `nullptr`는 **`std::nullptr_t`** 타입 — 포인터로만 변환되며 모호함 없음
-3. **단순 호출**에선 `0`/`NULL`도 변환되지만, **템플릿 추론**에선 안 됨
-4. `0`/`NULL` 코드의 `0`이 포인터 의미라면 `nullptr`로 마이그레이션
-5. 가독성, `auto` 호환, 함수 포인터 등 일관성 모두 향상
+1. `0`과 `NULL`은 **정수 타입**이다. 포인터 의미가 약하고 오버로드/템플릿에서 함정이 된다.
+2. `nullptr`는 **`std::nullptr_t`** 타입이다. 포인터로만 변환되며 모호함이 없다.
+3. **단순 호출**에선 `0`/`NULL`도 변환되지만, **템플릿 추론**에선 변환되지 않는다.
+4. `0`/`NULL` 코드의 `0`이 포인터 의미라면 `nullptr`로 마이그레이션한다.
+5. 가독성, `auto` 호환, 함수 포인터 등 일관성이 모두 향상된다.
 
 ## 관련 항목
 
-- [항목 1: 템플릿 타입 추론](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) — 템플릿 추론은 변환을 거의 하지 않음
+- [항목 1: 템플릿 타입 추론](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) — 템플릿 추론은 변환을 거의 하지 않는다
+- [항목 7: 객체 생성 시 ()와 {}를 구분하라](/blog/programming/cpp/effective-modern-cpp/item07-distinguish-paren-and-brace-when-creating-objects) — `Widget(std::nullptr_t)` 같은 패턴과 초기화 문법
 - [항목 27: 보편 참조 오버로딩 대안](/blog/programming/cpp/effective-modern-cpp/item27-familiarize-yourself-with-alternatives-to-overloading-on-universal-references) — 오버로드 함정의 일반화
