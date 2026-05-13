@@ -1,0 +1,638 @@
+---
+title: "Ch 4: 옵션과 캐시 변수"
+date: 2025-05-14T13:00:00
+description: "사용자 설정 가능한 빌드 옵션과 CMake 캐시 시스템."
+tags: [cmake, build, cpp, options, cache]
+series: "CMake"
+seriesOrder: 4
+draft: false
+---
+
+## 왜 캐시 변수가 필요한가
+
+CMake를 실행할 때마다 모든 설정을 다시 입력하는 것은 불편합니다.
+
+```bash
+# 매번 같은 옵션을 입력해야 한다면...
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS=ON -DUSE_SYSTEM_ZLIB=OFF
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS=ON -DUSE_SYSTEM_ZLIB=OFF  # 다시
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS=ON -DUSE_SYSTEM_ZLIB=OFF  # 또 다시
+```
+
+CMake는 설정 값을 **캐시 파일**(`build/CMakeCache.txt`)에 저장합니다. 한 번 설정한 값은 캐시에 남아서 다음 구성 때 자동으로 사용됩니다.
+
+```bash
+# 처음만 전체 설정
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS=ON
+
+# 이후에는 변경된 것만
+cmake -B build                           # 이전 설정 유지
+cmake -B build -DENABLE_TESTS=OFF        # 하나만 변경
+```
+
+캐시 시스템은 다음 용도로도 사용됩니다.
+
+- **사용자 옵션**: 기능 활성화/비활성화, 설치 경로 등
+- **탐지 결과**: `find_package`가 찾은 라이브러리 경로
+- **환경 정보**: 컴파일러 경로, 빌드 도구 위치
+
+---
+
+## 캐시 변수
+
+### 설정 방법
+
+```cmake
+set(MY_VAR "default" CACHE STRING "변수 설명")
+```
+
+| 타입 | 설명 | GUI 표시 |
+|------|------|----------|
+| `STRING` | 문자열 | 텍스트 입력 |
+| `BOOL` | 불리언 (ON/OFF) | 체크박스 |
+| `PATH` | 디렉터리 경로 | 디렉터리 선택기 |
+| `FILEPATH` | 파일 경로 | 파일 선택기 |
+| `INTERNAL` | 내부 사용 | 표시 안 됨 |
+
+```cmake
+# 예시
+set(MY_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation prefix")
+set(ENABLE_TESTS ON CACHE BOOL "Enable unit tests")
+set(VERSION_STRING "1.0.0" CACHE STRING "Version string")
+set(DETECTED_COMPILER_PATH "/usr/bin/gcc" CACHE INTERNAL "")
+```
+
+### 명령줄에서 설정
+
+`-D변수=값` 형식으로 캐시 변수를 설정합니다.
+
+```bash
+cmake -B build -DENABLE_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/opt/myapp
+```
+
+### 이미 존재하는 캐시 변수
+
+캐시 변수는 **이미 존재하면 덮어쓰지 않습니다**. 이 동작 덕분에 사용자 설정이 보존됩니다.
+
+```cmake
+# 첫 번째 cmake 실행: MY_VAR = "default"가 캐시에 저장됨
+set(MY_VAR "default" CACHE STRING "")
+
+# 사용자가 cmake -DMY_VAR=custom 으로 실행
+# MY_VAR = "custom"
+
+# 두 번째 cmake 실행: 캐시에 이미 있으므로 "default"로 덮어쓰지 않음
+set(MY_VAR "default" CACHE STRING "")
+# MY_VAR = "custom" 유지
+```
+
+### FORCE 옵션
+
+강제로 덮어쓰려면 `FORCE`를 사용합니다.
+
+```cmake
+set(MY_VAR "new_value" CACHE STRING "설명" FORCE)
+```
+
+**주의**: `FORCE`는 사용자가 설정한 값도 덮어쓰므로 신중히 사용하세요. 주로 CMakeLists.txt에서 계산된 값을 저장할 때만 사용합니다.
+
+---
+
+## option 명령
+
+불리언 캐시 변수의 **단축 문법**입니다.
+
+```cmake
+option(ENABLE_TESTS "Enable unit tests" ON)
+
+# 위 코드는 아래와 같습니다
+set(ENABLE_TESTS ON CACHE BOOL "Enable unit tests")
+```
+
+### 일반적인 옵션 패턴
+
+```cmake
+# 기능 토글
+option(ENABLE_TESTING "Enable unit tests" ON)
+option(ENABLE_COVERAGE "Enable code coverage" OFF)
+option(ENABLE_SANITIZERS "Enable sanitizers in Debug" ON)
+
+# 빌드 방식
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(BUILD_DOCS "Build documentation" OFF)
+
+# 의존성 선택
+option(USE_SYSTEM_ZLIB "Use system zlib instead of bundled" OFF)
+option(USE_SYSTEM_JSON "Use system nlohmann_json" OFF)
+```
+
+### 옵션 사용
+
+```cmake
+option(ENABLE_TESTING "Enable testing" ON)
+option(USE_SYSTEM_ZLIB "Use system zlib" OFF)
+
+if(ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(USE_SYSTEM_ZLIB)
+    find_package(ZLIB REQUIRED)
+    target_link_libraries(myapp PRIVATE ZLIB::ZLIB)
+else()
+    add_subdirectory(third_party/zlib)
+    target_link_libraries(myapp PRIVATE zlib)
+endif()
+```
+
+---
+
+## 캐시 변수와 일반 변수
+
+같은 이름의 캐시 변수와 일반 변수가 있으면, **일반 변수가 우선**합니다.
+
+```cmake
+set(MY_VAR "cache_value" CACHE STRING "")
+set(MY_VAR "normal_value")
+
+message("${MY_VAR}")  # normal_value
+```
+
+캐시 값을 직접 참조하려면 `$CACHE{...}`를 사용합니다.
+
+```cmake
+set(MY_VAR "cache_value" CACHE STRING "")
+set(MY_VAR "normal_value")
+
+message("Cache: $CACHE{MY_VAR}")   # cache_value
+message("Current: ${MY_VAR}")      # normal_value
+```
+
+이 동작은 함수 안에서 캐시 변수를 일시적으로 오버라이드할 때 유용합니다.
+
+---
+
+## 조건부 옵션
+
+### CMakeDependentOption
+
+다른 옵션에 의존하는 옵션을 만듭니다.
+
+```cmake
+include(CMakeDependentOption)
+
+option(BUILD_TOOLS "Build tools" ON)
+
+# BUILD_TOOLS가 ON일 때만 BUILD_TOOL_A를 선택할 수 있음
+# BUILD_TOOLS가 OFF이면 BUILD_TOOL_A는 강제로 OFF
+cmake_dependent_option(
+    BUILD_TOOL_A "Build tool A" ON
+    "BUILD_TOOLS" OFF
+)
+
+cmake_dependent_option(
+    BUILD_TOOL_B "Build tool B" ON
+    "BUILD_TOOLS" OFF
+)
+```
+
+복잡한 조건도 가능합니다.
+
+```cmake
+# ENABLE_TESTING이 ON이고 BUILD_SHARED_LIBS가 OFF일 때만 사용 가능
+cmake_dependent_option(
+    ENABLE_STATIC_TESTS "Static test builds" ON
+    "ENABLE_TESTING;NOT BUILD_SHARED_LIBS" OFF
+)
+```
+
+### FeatureSummary
+
+설정된 기능을 요약 출력합니다.
+
+```cmake
+include(FeatureSummary)
+
+option(ENABLE_FOO "Enable foo feature" ON)
+option(ENABLE_BAR "Enable bar feature" OFF)
+option(ENABLE_BAZ "Enable baz feature" ON)
+
+add_feature_info(Foo ENABLE_FOO "The foo feature for X")
+add_feature_info(Bar ENABLE_BAR "The bar feature for Y")
+add_feature_info(Baz ENABLE_BAZ "The baz feature for Z")
+
+feature_summary(WHAT ALL)
+```
+
+출력:
+
+```
+-- The following features have been enabled:
+ * Foo, The foo feature for X
+ * Baz, The baz feature for Z
+-- The following features have been disabled:
+ * Bar, The bar feature for Y
+```
+
+사용자가 빌드 구성을 한눈에 확인할 수 있어 편리합니다.
+
+---
+
+## 빌드 타입 처리
+
+### 기본 빌드 타입 설정
+
+빌드 타입을 지정하지 않으면 빈 문자열이 됩니다. 기본값을 설정하는 패턴입니다.
+
+```cmake
+# 단일 설정 생성기(Make, Ninja)에서만 유효
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'Release' as none was specified.")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+
+    # GUI에서 선택 가능한 값 설정
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+        "Debug" "Release" "MinSizeRel" "RelWithDebInfo"
+    )
+endif()
+```
+
+`CMAKE_CONFIGURATION_TYPES`는 multi-config 생성기(Visual Studio, Xcode)에서 설정됩니다. 이 변수가 있으면 `CMAKE_BUILD_TYPE`을 건드리지 않습니다.
+
+### 빌드 타입별 설정
+
+**if문 방식** (단일 설정 생성기에서만 동작):
+
+```cmake
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(myapp PRIVATE -fsanitize=address)
+    target_link_options(myapp PRIVATE -fsanitize=address)
+endif()
+```
+
+**제너레이터 표현식 방식** (모든 생성기에서 동작):
+
+```cmake
+target_compile_options(myapp PRIVATE
+    $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+)
+target_link_options(myapp PRIVATE
+    $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+)
+```
+
+제너레이터 표현식 방식을 권장합니다. Visual Studio에서도 Debug 빌드 시에만 sanitizer가 활성화됩니다.
+
+---
+
+## 설정 파일 생성
+
+### configure_file
+
+CMake 변수를 C/C++ 헤더로 내보냅니다.
+
+**템플릿 파일** (`config.h.in`):
+
+```c
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define PROJECT_NAME "@PROJECT_NAME@"
+#define VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+#cmakedefine ENABLE_FEATURE_X
+#cmakedefine01 ENABLE_FEATURE_Y
+
+#endif
+```
+
+**CMakeLists.txt**:
+
+```cmake
+set(ENABLE_FEATURE_X ON)
+set(ENABLE_FEATURE_Y OFF)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/config.h
+)
+
+target_include_directories(myapp PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+```
+
+**생성된 파일** (`build/config.h`):
+
+```c
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define PROJECT_NAME "MyApp"
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 0
+#define VERSION_PATCH 0
+
+#define ENABLE_FEATURE_X
+/* #undef ENABLE_FEATURE_Y */
+
+#endif
+```
+
+### 치환 규칙
+
+| 템플릿 | 결과 (값이 참) | 결과 (값이 거짓/미정의) |
+|--------|---------------|----------------------|
+| `@VAR@` | 변수 값 | 빈 문자열 |
+| `#cmakedefine VAR` | `#define VAR` | `/* #undef VAR */` |
+| `#cmakedefine01 VAR` | `#define VAR 1` | `#define VAR 0` |
+
+---
+
+## CMakePresets.json
+
+CMake 3.19부터 **프리셋**으로 빌드 구성을 미리 정의할 수 있습니다.
+
+### 기본 구조
+
+```json
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug Build",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_TESTING": "ON",
+                "ENABLE_SANITIZERS": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release Build",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ENABLE_TESTING": "OFF"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "configurePreset": "debug"
+        },
+        {
+            "name": "release",
+            "configurePreset": "release"
+        }
+    ]
+}
+```
+
+### 사용
+
+```bash
+# 프리셋 목록 확인
+cmake --list-presets
+
+# 프리셋으로 구성
+cmake --preset debug
+
+# 프리셋으로 빌드
+cmake --build --preset debug
+```
+
+### 상속
+
+프리셋을 상속하여 공통 설정을 재사용합니다.
+
+```json
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_CXX_STANDARD": "17"
+            }
+        },
+        {
+            "name": "debug",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ]
+}
+```
+
+`hidden: true`인 프리셋은 `--list-presets`에 나타나지 않지만 상속용으로 사용됩니다.
+
+---
+
+## 캐시 관리
+
+### 캐시 확인
+
+```bash
+# 텍스트로 확인
+cat build/CMakeCache.txt
+
+# 변수 검색
+grep ENABLE build/CMakeCache.txt
+
+# TUI (Terminal UI)
+ccmake build
+
+# GUI
+cmake-gui build
+```
+
+### 캐시 초기화
+
+문제가 생기면 캐시를 초기화합니다.
+
+```bash
+# 캐시 파일만 삭제
+rm build/CMakeCache.txt
+cmake -B build
+
+# 빌드 디렉터리 전체 삭제 (확실한 방법)
+rm -rf build
+cmake -B build
+```
+
+---
+
+## 실전 예시
+
+```cmake
+cmake_minimum_required(VERSION 3.15)
+project(MyApp VERSION 1.0.0 LANGUAGES CXX)
+
+# === 옵션 ===
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(ENABLE_TESTING "Enable unit tests" ON)
+option(ENABLE_COVERAGE "Enable code coverage" OFF)
+option(ENABLE_SANITIZERS "Enable sanitizers in Debug" ON)
+option(USE_SYSTEM_JSON "Use system nlohmann_json" OFF)
+
+include(CMakeDependentOption)
+cmake_dependent_option(
+    ENABLE_COVERAGE_HTML "Generate HTML coverage report" ON
+    "ENABLE_COVERAGE" OFF
+)
+
+# === 빌드 타입 기본값 ===
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'Release'")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+        Debug Release MinSizeRel RelWithDebInfo
+    )
+endif()
+
+# === 설정 헤더 생성 ===
+configure_file(config.h.in config.h)
+
+# === 컴파일러 설정 ===
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# === 라이브러리 ===
+add_library(mylib src/mylib.cpp)
+target_include_directories(mylib
+    PUBLIC include
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+# === 실행 파일 ===
+add_executable(myapp src/main.cpp)
+target_link_libraries(myapp PRIVATE mylib)
+
+# === Sanitizers ===
+if(ENABLE_SANITIZERS)
+    target_compile_options(mylib PRIVATE
+        $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+    )
+    target_link_options(mylib PRIVATE
+        $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+    )
+endif()
+
+# === 테스트 ===
+if(ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+# === 요약 출력 ===
+include(FeatureSummary)
+add_feature_info(Testing ENABLE_TESTING "Unit tests")
+add_feature_info(Coverage ENABLE_COVERAGE "Code coverage")
+add_feature_info(Sanitizers ENABLE_SANITIZERS "Address/UB sanitizers")
+add_feature_info(SystemJSON USE_SYSTEM_JSON "System nlohmann_json")
+feature_summary(WHAT ALL)
+```
+
+---
+
+## 흔한 실수
+
+### option 기본값이 적용 안 됨
+
+```cmake
+# 회피: 캐시에 이미 있으면 기본값 무시됨
+cmake -B build -DENABLE_TESTS=OFF  # 처음 실행
+# ... 나중에 CMakeLists.txt 수정 ...
+option(ENABLE_TESTS "..." ON)  # 기본값 ON으로 변경
+cmake -B build  # 여전히 OFF (캐시에 남아 있음)
+
+# 해결: 명시적으로 변경하거나 캐시 삭제
+cmake -B build -DENABLE_TESTS=ON  # 명시적 설정
+# 또는
+rm build/CMakeCache.txt && cmake -B build
+```
+
+### if(CMAKE_BUILD_TYPE)가 multi-config에서 동작 안 함
+
+```cmake
+# 회피: Visual Studio에서 CMAKE_BUILD_TYPE은 빈 문자열
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(app PRIVATE DEBUG_MODE)
+endif()
+# Visual Studio에서는 항상 거짓
+
+# Good: 제너레이터 표현식 사용
+target_compile_definitions(app PRIVATE
+    $<$<CONFIG:Debug>:DEBUG_MODE>
+)
+```
+
+### FORCE 남용
+
+```cmake
+# 회피: 사용자 설정을 무시함
+option(ENABLE_TESTS "..." ON)
+# 사용자가 cmake -DENABLE_TESTS=OFF 로 실행해도...
+set(ENABLE_TESTS ON CACHE BOOL "" FORCE)  # 강제로 ON
+# 사용자가 혼란스러움
+
+# Good: FORCE는 계산된 값에만 사용
+set(DETECTED_INCLUDE_PATH "${FOUND_PATH}/include" CACHE PATH "" FORCE)
+```
+
+### 일반 변수와 캐시 변수 혼동
+
+```cmake
+# 회피: 일반 변수 설정이 캐시에 반영 안 됨
+set(ENABLE_TESTS OFF)  # 일반 변수
+# 캐시의 ENABLE_TESTS는 여전히 이전 값
+
+# Good: 캐시 변수 사용
+set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+# 또는 명령줄에서
+# cmake -B build -DENABLE_TESTS=OFF
+```
+
+---
+
+## 정리
+
+- **캐시 변수**는 `CMakeCache.txt`에 저장되어 재설정 시 유지됩니다.
+- `option()`은 불리언 캐시 변수의 단축 문법입니다.
+- 명령줄에서 `-DVAR=value`로 캐시 변수를 설정합니다.
+- 캐시 변수는 **이미 존재하면 덮어쓰지 않습니다**.
+- **일반 변수가 같은 이름의 캐시 변수보다 우선**합니다.
+- `configure_file()`로 CMake 변수를 C/C++ 헤더로 내보냅니다.
+- **CMakePresets.json**으로 빌드 설정을 미리 정의합니다.
+- 빌드 타입별 설정은 **제너레이터 표현식**을 사용하세요.
+
+## 다음 장 예고
+
+Ch 5에서는 `find_package`와 외부 의존성을 다룹니다. 시스템 라이브러리 탐색, FetchContent, 그리고 패키지 설정 파일을 살펴봅니다.
+
+## 참고 자료
+
+- [CMake - set](https://cmake.org/cmake/help/latest/command/set.html)
+- [CMake - option](https://cmake.org/cmake/help/latest/command/option.html)
+- [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
