@@ -1,7 +1,7 @@
 ---
 title: "가이드라인 12: 디자인 패턴 오해를 경계하라"
 date: 2026-05-13T22:00:00
-description: "패턴은 클래스 다이어그램이 아니다 — 의도와 트레이드오프. 흔한 6가지 오해."
+description: "패턴은 클래스 다이어그램이 아니다. 의도와 트레이드오프, 그리고 흔한 여섯 가지 오해."
 tags: [C++, Software Design, Design Patterns, Anti-patterns]
 series: "C++ Software Design"
 seriesOrder: 12
@@ -9,32 +9,28 @@ seriesOrder: 12
 
 ## 왜 이 가이드라인이 중요한가?
 
-가이드라인 11에서 — 패턴의 목적. 이번엔 **흔한 오해**를 정리.
+가이드라인 11에서 패턴의 목적을 짚었다. 이번 가이드라인은 그 위에 쌓이는 **흔한 오해**를 정리한다.
 
-가장 위험한 오해 — "**패턴 = 클래스 다이어그램**". 실제 패턴은:
-- 클래스 다이어그램 (UML)
-- 코드 구조
+가장 위험한 오해는 *"패턴은 곧 클래스 다이어그램이다"* 다. 실제 패턴은 다이어그램이나 코드 구조가 아니라 다음 셋이다.
 
-가 아니라
-
-- **의도** (intent)
+- **의도(intent)**
 - **문제와 해결의 관계**
 - **트레이드오프**
 
-UML만 보고 — 의도와 분리되어 적용하면, **잘못된 곳에 잘못된 패턴**.
+UML 그림만 보고 의도와 분리된 채 적용하면, 잘못된 자리에 잘못된 패턴을 두게 된다.
 
 ## 핵심 내용
 
-- 패턴 = **의도 + 문제 + 해결 + 트레이드오프**, 다이어그램 X
-- **6가지 흔한 오해**:
+- 패턴은 **의도 + 문제 + 해결 + 트레이드오프**다. 다이어그램이 아니다.
+- 흔한 여섯 오해는 다음과 같다.
   1. 패턴 = UML 다이어그램
-  2. 패턴 = 구현 (코드)
+  2. 패턴 = 구현(코드)
   3. 패턴 = 만능
   4. 객체 지향 = 패턴
   5. 패턴 카탈로그 외우기 = 디자인 실력
   6. 같은 구조 = 같은 패턴
 
-## 오해 1 — 패턴 = UML 다이어그램
+## 오해 1 — 패턴은 UML 다이어그램이다
 
 ```
               ┌─────────┐
@@ -48,20 +44,18 @@ UML만 보고 — 의도와 분리되어 적용하면, **잘못된 곳에 잘못
               update()             └──────────┘
 ```
 
-UML — Observer 패턴의 *클래스 다이어그램*. 그러나:
+이건 Observer 패턴의 *클래스 다이어그램 한 형태*다. 그런데 다음 코드도 똑같이 Observer 패턴이다.
 
 ```cpp
-button.on_click = []() { /* ... */ };     // 람다로 콜백
+button.on_click = []() { /* ... */ };     // 람다 콜백
 ```
 
-이것도 — **Observer 패턴**이다. 다이어그램이 안 보이지만 의도는 동일.
+다이어그램이 보이지 않을 뿐 의도는 같다. UML은 한 가지 구현일 뿐이고, 패턴 자체는 더 추상적이다.
 
-UML은 — 한 가지 구현. 패턴 자체는 더 추상적.
-
-## 오해 2 — 패턴 = 코드 구조
+## 오해 2 — 패턴은 코드 구조다
 
 ```cpp
-class Strategy {                    // ⚠️ 이걸 보고 "Strategy다!"
+class Strategy {                    // ⚠️ 이 코드를 보고 "Strategy다!"
     virtual void execute() = 0;
 };
 
@@ -74,17 +68,17 @@ public:
 };
 ```
 
-같은 코드 구조 — 다른 의도:
+같은 코드 구조가 다른 의도를 가질 수도 있다.
 
 ```cpp
-class Renderer {                    // Strategy? State? Template Method? 
-    virtual void execute() = 0;     //   코드만으론 모름
+class Renderer {                    // Strategy? State? Template Method?
+    virtual void execute() = 0;     //   코드만 봐서는 알 수 없다
 };
 ```
 
-패턴 = **의도**. 같은 코드가 — 의도에 따라 Strategy일 수도 State일 수도. 컨텍스트가 결정.
+패턴은 **의도**다. 같은 코드라도 의도에 따라 Strategy도 되고 State도 된다. 컨텍스트가 결정한다.
 
-### Strategy vs State — 같은 구조, 다른 의도
+### Strategy와 State — 같은 구조, 다른 의도
 
 ```cpp
 class Algorithm {
@@ -102,13 +96,14 @@ class IdleState    : public State { /* ... */ };
 class RunningState : public State { /* ... */ };
 ```
 
-코드 동일. 차이:
-- **Strategy** — 클라이언트가 알고리즘 **선택**, 알고리즘끼리 무관
-- **State** — 상태가 **전환** 가능, IdleState가 다음에 RunningState로
+코드는 거의 같다. 차이는 의도에 있다.
 
-의도 다름 → 다른 패턴. UML만으론 구분 불가.
+- **Strategy** — 클라이언트가 알고리즘을 **선택**한다. 알고리즘끼리는 서로 무관하다.
+- **State** — 상태가 **전환**된다. `IdleState`가 다음에 `RunningState`가 된다.
 
-## 오해 3 — 패턴 = 만능
+의도가 다르면 다른 패턴이다. UML만으로는 구분되지 않는다.
+
+## 오해 3 — 패턴은 만능이다
 
 ```cpp
 class SimpleAdder {
@@ -125,62 +120,57 @@ class AdderFactory {
 };
 ```
 
-`a + b` 한 줄에 — 패턴 3개 적용. **over-engineering**.
+`a + b` 한 줄에 패턴 세 개가 붙는다. over-engineering이다.
 
-패턴 = **문제가 있을 때만** (가이드라인 11). 단순한 코드가 — 종종 최선.
+패턴은 문제가 있을 때만 꺼낸다(가이드라인 11). 단순한 코드가 최선일 때가 많다.
 
-원칙:
-- **YAGNI** — 미래의 가능성을 위해 패턴 X
-- **Rule of Three** — 3번 반복되기 전엔 추상화 X
-- **단순함이 미덕** — 패턴 적용으로 단순함 잃지 마라
+원칙은 다음과 같다.
 
-## 오해 4 — 객체 지향 = 패턴
+- **YAGNI** — 미래의 가능성을 위해 패턴을 미리 적용하지 않는다.
+- **Rule of Three** — 세 번 반복되기 전에는 추상화하지 않는다.
+- **단순함이 미덕이다** — 패턴 때문에 단순함을 잃지 않는다.
 
-GoF가 — 객체 지향 디자인 책이라 OOP=패턴의 인상.
+## 오해 4 — 객체 지향이 곧 패턴이다
 
-진실:
-- 패턴은 — **언어 독립적** (Lisp, Haskell, Rust에도 패턴 존재)
-- OOP가 — 유일한 길 X. 함수형, 제네릭, 데이터 지향 등도 디자인의 영역
-- 모던 C++ — OOP + 제네릭 + 함수형 혼합
+GoF가 객체 지향 디자인 책이라 OOP와 패턴이 동의어로 느껴지기 쉽다.
+
+진실은 다르다.
+
+- 패턴은 **언어 독립적**이다. Lisp, Haskell, Rust에도 같은 패턴이 있다.
+- OOP만이 길이 아니다. 함수형, 제네릭, 데이터 지향도 디자인의 영역이다.
+- 모던 C++은 OOP + 제네릭 + 함수형이 섞여 있다.
 
 ```cpp
-// 함수형 — Strategy 패턴
+// 함수형으로 표현한 Strategy
 std::function<int(int, int)> op = [](int a, int b) { return a + b; };
 
-// 객체 지향 — Strategy 패턴
+// 객체 지향으로 표현한 Strategy
 class Op { virtual int apply(int, int) = 0; };
 
 // 같은 패턴, 다른 패러다임
 ```
 
-C++은 — **multi-paradigm**. 패턴을 OOP만으로 구현할 필요 X.
+C++은 multi-paradigm 언어다. 패턴을 OOP만으로 구현할 필요가 없다.
 
-## 오해 5 — 패턴 카탈로그 외우기 = 디자인 실력
+## 오해 5 — 카탈로그 외우기 = 디자인 실력
 
-```
-"GoF 23개 다 외웠다 → 디자인 잘함" — 거짓
-```
+> "GoF 23개를 다 외웠으니 디자인을 잘한다" — 거짓이다.
 
-진실:
-- **언제 적용?** — 카탈로그가 안 알려줌
-- **어떻게 변형?** — 도메인마다 다름
-- **트레이드오프?** — 컨텍스트 의존
+진실은 다음과 같다.
 
-진정한 실력 = **의도 인식 + 트레이드오프 판단**. 카탈로그는 — 어휘 + 시작점.
+- **언제 적용할지** — 카탈로그가 알려 주지 않는다.
+- **어떻게 변형할지** — 도메인마다 다르다.
+- **트레이드오프** — 컨텍스트에 따라 달라진다.
 
-학습 단계 (가이드라인 11 참고):
-1. **인식** — 코드에서 패턴 보기
-2. **이해** — 의도 + 트레이드오프
-3. **적용** — 도메인에 맞게 변형
-4. **창조** — 새 패턴 인식 / 명명
+진짜 실력은 **의도 인식과 트레이드오프 판단**이다. 카탈로그는 어휘이자 시작점일 뿐이다.
 
-대다수가 — 1-2 단계. **3-4 단계**가 진짜 디자인.
+학습 단계는 가이드라인 11에서 본 대로 인식 → 이해 → 적용 → 창조다. 대다수가 1~2단계에 머문다. 3~4단계가 진짜 디자인 영역이다.
 
-## 오해 6 — 같은 구조 = 같은 패턴
+## 오해 6 — 같은 구조면 같은 패턴이다
 
-이미 오해 2에서 — Strategy vs State. 다른 예:
+이미 오해 2에서 Strategy와 State의 사례를 봤다. 더 있다.
 
-### Adapter vs Decorator vs Proxy
+### Adapter, Decorator, Proxy
 
 ```cpp
 class Component {
@@ -196,17 +186,17 @@ public:
 };
 ```
 
-코드 동일. 의도 차이:
+코드는 같지만 의도가 다르다.
 
 | 패턴 | 의도 |
 | --- | --- |
-| **Adapter** | 인터페이스 변환 — incompatible API 호환 |
-| **Decorator** | 기능 추가 — 같은 인터페이스에 새 동작 |
+| **Adapter** | 인터페이스 변환 — 호환되지 않는 API를 맞춘다 |
+| **Decorator** | 기능 추가 — 같은 인터페이스에 새 동작을 더한다 |
 | **Proxy** | 접근 제어 — lazy load, security, caching |
 
-같은 wrapping 구조 — 의도에 따라 셋 다 가능. 의도를 명시(이름, 주석)해야 — 다른 개발자가 이해.
+같은 wrapping 구조가 의도에 따라 셋 다 될 수 있다. 의도를 이름이나 주석으로 분명히 드러내야 다른 개발자가 이해한다.
 
-## 미묘한 오해 7 — Template Method vs Strategy
+## 미묘한 오해 7 — Template Method와 Strategy
 
 ```cpp
 // Template Method
@@ -217,7 +207,7 @@ public:
         step2();
         step3();
     }
-    
+
 protected:
     virtual void step1() = 0;
     void step2() { /* 공통 */ }
@@ -231,7 +221,7 @@ protected:
 };
 ```
 
-vs
+다음과 비교해 보자.
 
 ```cpp
 // Strategy
@@ -246,14 +236,14 @@ public:
 };
 ```
 
-비슷한 결과 — 다른 방식.
+결과는 비슷하지만 방식이 다르다.
 
-**Template Method** — 상속, 알고리즘 골격 base, 일부만 derived.
-**Strategy** — composition, 알고리즘 전체 교체.
+- **Template Method** — 상속이다. 알고리즘 골격이 base에 있고, 일부만 derived가 채운다.
+- **Strategy** — composition이다. 알고리즘 전체가 교체된다.
 
-**모던 권장** (가이드라인 20): **Composition over Inheritance** → Strategy 우선.
+모던 권장은 **Composition over Inheritance**(가이드라인 20)다. Strategy를 우선한다.
 
-## 미묘한 오해 8 — Singleton은 만능
+## 미묘한 오해 8 — Singleton은 만능이다
 
 ```cpp
 class Logger {
@@ -267,15 +257,15 @@ public:
 Logger::instance().log("...");
 ```
 
-흔한 패턴 — 그러나 가이드라인 37-38 — **"Singleton은 디자인 패턴이라기보다 구현 패턴"**, 그리고 보통 안티패턴.
+흔한 패턴이지만, 가이드라인 37~38은 *"Singleton은 디자인 패턴이라기보다 구현 패턴"* 이라는 입장이다. 보통은 안티패턴이다.
 
 - 숨겨진 의존성
 - 테스트 어려움
 - 멀티스레드 함정
 
-대안: **의존성 주입** (가이드라인 14 EC++, Beautiful C++ 14).
+대안은 의존성 주입이다(Beautiful C++ 항목 14).
 
-## 오해 9 — Factory는 항상 필요
+## 오해 9 — Factory는 늘 필요하다
 
 ```cpp
 class WidgetFactory {
@@ -292,19 +282,20 @@ public:
 
 // 사용
 auto factory = std::make_unique<StandardWidgetFactory>();
-auto widget = factory->create();     // 단순한 Widget 생성에 Factory?
+auto widget = factory->create();     // 단순한 생성에 Factory가 정말 필요한가?
 ```
 
-`std::make_unique<Widget>()` 한 줄로 끝나는데 — Factory 클래스 2개. Over-engineering.
+`std::make_unique<Widget>()` 한 줄이면 끝나는 자리에 Factory 클래스 두 개가 붙는다. over-engineering이다.
 
-Factory가 정당한 경우:
-- 객체 생성 — **복잡한 로직** (설정 읽기, DI, 등)
-- 런타임 결정 — **타입이 다양**
-- 테스트에서 — **mock 객체 주입**
+Factory가 정당한 경우는 다음과 같다.
 
-단순 생성 — `make_unique` 직접 또는 named constructor.
+- 객체 생성에 복잡한 로직이 있을 때(설정 읽기, DI 등).
+- 런타임에 타입이 결정될 때.
+- 테스트에서 mock 객체를 주입해야 할 때.
 
-## 오해 10 — Observer는 항상 안전
+단순 생성이라면 `make_unique`를 직접 쓰거나 named constructor면 충분하다.
+
+## 오해 10 — Observer는 늘 안전하다
 
 ```cpp
 class Subject {
@@ -312,21 +303,22 @@ class Subject {
 public:
     void attach(Observer* o) { observers_.push_back(o); }
     void notify() {
-        for (auto* o : observers_) o->update();     // ⚠️ 위험
+        for (auto* o : observers_) o->update();     // ⚠️ 위험하다
     }
 };
 ```
 
-함정:
-- **dangling pointer** — Observer가 detach 안 하고 소멸
-- **순환 참조** — Subject ↔ Observer가 서로 알면 cycle
-- **재진입** — update 안에서 attach/detach → vector 변경 중 iterator 무효
-- **순서 의존** — observer 호출 순서 보장 X
-- **예외** — 한 observer가 throw하면 나머지는?
+함정은 여럿이다.
 
-해결책 — 가이드라인 25에서 자세히. 보통 `weak_ptr`, `shared_ptr`, 또는 message queue.
+- **dangling pointer** — Observer가 detach하지 않고 소멸한다.
+- **순환 참조** — Subject와 Observer가 서로 알면 cycle이 생긴다.
+- **재진입** — `update` 안에서 attach/detach가 일어나면 vector 변경 중 iterator가 무효가 된다.
+- **순서 의존** — observer 호출 순서가 보장되지 않는다.
+- **예외** — 한 observer가 throw하면 나머지는 어떻게 되는가?
 
-## 오해 11 — Visitor가 OCP
+자세한 해법은 가이드라인 25에서 다룬다. 보통 `weak_ptr`나 `shared_ptr`, 혹은 메시지 큐를 동원한다.
+
+## 오해 11 — Visitor가 OCP를 만족한다
 
 ```cpp
 class Visitor {
@@ -336,65 +328,65 @@ public:
 };
 ```
 
-새 도형 추가 → **Visitor 인터페이스 변경** + **모든 visitor 구현 수정**. 도형 추가에는 OCP 위반.
+새 도형을 더하면 Visitor 인터페이스가 바뀌고 모든 visitor 구현을 손봐야 한다. 도형 추가에는 OCP가 깨진다.
 
-Visitor는 — **새 연산 추가**에 OCP, **새 타입 추가**엔 OCP 위반. 가이드라인 5 (Expression Problem) 참고.
+Visitor는 **새 연산 추가**에서는 OCP를 만족하지만 **새 타입 추가**에서는 위반한다. 가이드라인 5의 Expression Problem이 이 이야기다.
 
-## 잘못된 패턴 적용 — 4 신호
+## 잘못된 패턴 적용 — 네 가지 신호
 
-### 1) "패턴 적용했는데 더 복잡해짐"
+### 1) "패턴을 적용했는데 코드가 더 복잡해졌다"
 
-신호 — 패턴이 도메인에 안 맞음. 단순화 검토.
+패턴이 도메인에 맞지 않는다는 신호다. 단순화를 검토한다.
 
-### 2) "다음 변경에 패턴이 방해됨"
+### 2) "다음 변경에 패턴이 방해가 된다"
 
-추상화가 — 잘못된 변화의 축으로. refactor.
+추상화의 축이 잘못 잡혔다. 리팩토링한다.
 
-### 3) "왜 이 패턴인지 설명 못 함"
+### 3) "왜 이 패턴인지 설명하지 못한다"
 
-이해 없이 — 카탈로그 따라함. ADR 작성으로 의도 명시 (가이드라인 10).
+이해 없이 카탈로그를 따라간 결과다. ADR을 써서 의도를 명시한다(가이드라인 10).
 
-### 4) "팀이 패턴을 다르게 부름"
+### 4) "팀이 같은 패턴을 다르게 부른다"
 
-같은 코드를 한 명은 "Strategy", 다른 명은 "Command"로 부름. 의도 불명확. 통일.
+같은 코드를 누구는 Strategy로, 누구는 Command로 부른다. 의도가 불명확하다. 용어를 통일한다.
 
 ## 패턴 vs 라이브러리 — 모던 C++
 
-C++ 표준 라이브러리가 — 많은 패턴 내장:
+C++ 표준 라이브러리가 많은 패턴을 내장하고 있다.
 
 | GoF 패턴 | 표준 도구 |
 | --- | --- |
-| Singleton | (자제) — 의존성 주입 |
+| Singleton | (자제) — 의존성 주입을 우선 |
 | Iterator | `<iterator>` |
 | Visitor | `std::visit` + `std::variant` |
 | Strategy | `std::function`, 람다 |
-| Observer | `std::signal` (Boost), `std::observer_ptr` (제안) |
+| Observer | `std::signal`(Boost), `std::observer_ptr`(제안) |
 | Adapter | `std::span`, `std::string_view` |
-| Decorator | function composition |
+| Decorator | 함수 합성 |
 | Command | `std::function`, `std::packaged_task` |
 | Memento | `std::any`, `std::variant` |
 | Composite | `std::variant<Leaf, std::vector<Tree>>` (재귀) |
 
-**표준 도구가 — 종종 패턴 직접 구현 대체**. 가이드라인 17 (`std::variant` for Visitor) 등.
+표준 도구가 패턴 직접 구현을 종종 대체한다. 가이드라인 17(`std::variant`로 Visitor)이 한 예다.
 
-## 클래스 vs 함수 — 패턴 도구
+## 클래스 vs 함수 — 패턴의 도구
 
-GoF 시대 — 모든 게 클래스. 모던 C++:
+GoF 시대에는 모든 게 클래스였다. 모던 C++에서는 다르다.
 
 ```cpp
-// GoF Strategy (클래스)
+// GoF Strategy — 클래스 기반
 class SortStrategy { virtual void sort(...) = 0; };
 
-// 모던 (함수 객체 / 람다)
+// 모던 — 함수 객체나 람다
 auto sort_strategy = [](auto& v) { std::sort(v.begin(), v.end()); };
 ```
 
-**함수가 — 더 작은 추상화 단위**. 클래스가 정말 필요한지 매번 자문.
+함수가 더 작은 추상화 단위다. 클래스가 정말 필요한지 매번 자문하자.
 
-## 함정 — 패턴 이름 잘못 사용
+## 함정 — 패턴 이름을 잘못 쓴다
 
 ```cpp
-class UserManager {     // ⚠️ "Manager"는 패턴이 아님 — anti-pattern
+class UserManager {     // ⚠️ "Manager"는 패턴이 아니라 안티패턴에 가깝다
     // ...
 };
 
@@ -403,22 +395,22 @@ class UserHelper {      // ⚠️ "Helper"도 안티
 };
 ```
 
-"Manager", "Helper", "Util", "Processor" — **의미 없는 이름**. 도메인 의도가 없음. 가이드라인 14에서 — 의미 있는 이름.
+"Manager", "Helper", "Util", "Processor" 같은 이름은 의미가 비어 있다. 도메인의 의도가 드러나지 않는다. 가이드라인 14에서 의미 있는 이름을 다룬다.
 
-## 패턴 외 — Composition over Inheritance
+## 패턴 너머의 큰 원칙 — Composition over Inheritance
 
-GoF의 큰 메시지:
+GoF의 큰 메시지는 다음 한 문장이다.
 
 > "**Favor object composition over class inheritance.**"
 
-대다수 GoF 패턴 — composition 기반. 상속은 — 특정 경우만.
+대다수 GoF 패턴이 composition 기반이다. 상속은 특정 경우에만 쓰인다.
 
 ```cpp
-// 잘못 — 상속 남용
+// 잘못된 모양 — 상속 남용
 class FastCar : public Car { /* ... */ };
 class FastSedan : public Sedan, public FastCar { /* 다중 상속, 복잡 */ };
 
-// 좋음 — composition
+// 좋은 모양 — composition
 class Car {
     Engine engine_;
     Transmission trans_;
@@ -427,11 +419,9 @@ public:
 };
 ```
 
-상속은 — IS-A. composition은 — HAS-A. 대부분 HAS-A.
+상속은 IS-A, composition은 HAS-A다. 대부분은 HAS-A다. 가이드라인 20에서 자세히 다룬다.
 
-가이드라인 20 — 이 원칙 자세히.
-
-## 깊은 메시지 — 패턴은 도구
+## 깊은 메시지 — 패턴은 도구일 뿐이다
 
 ```
 원칙 (SOLID, DRY, KISS, ...)
@@ -443,49 +433,50 @@ public:
 구현 (코드)
 ```
 
-패턴은 — 중간 도구. **원칙과 속성**이 더 근본. 패턴 적용 자체가 목적 X.
+패턴은 중간 도구다. 더 근본적인 것은 **원칙과 속성**이다. 패턴 적용 자체가 목적은 아니다.
 
-## 좋은 패턴 사용의 5 표지
+## 좋은 패턴 사용의 다섯 표지
 
-1. **의도가 명확** — 왜 적용했는지 ADR / 주석으로
-2. **이름이 정확** — 표준 이름 사용 ("Observer", "Strategy")
-3. **도메인 어휘** — 패턴 이름만이 아닌, 도메인 용어로 (`Logger`, `OrderRepository`)
-4. **트레이드오프 인지** — 비용도 의식
-5. **단순함 유지** — 패턴이 코드를 더 복잡하게 만들지 않음
+1. **의도가 명확하다** — 왜 적용했는지 ADR이나 주석에 적혀 있다.
+2. **이름이 정확하다** — 표준 이름을 쓴다("Observer", "Strategy" 등).
+3. **도메인 어휘를 함께 쓴다** — 패턴 이름만이 아니라 도메인 용어로(`Logger`, `OrderRepository`).
+4. **트레이드오프를 인지한다** — 비용까지 의식한다.
+5. **단순함이 유지된다** — 패턴 때문에 코드가 더 복잡해지지 않는다.
 
-## 실무 가이드 — 패턴 적용 전
+## 실무 가이드 — 패턴을 적용하기 전
 
-질문:
+다음 질문을 던지자.
 
-- [ ] **문제가 명확한가?** 어떤 변화의 압력? 어떤 결합도?
-- [ ] **단순한 해결책으로 안 되는가?** (YAGNI)
-- [ ] **이 패턴의 의도가 문제와 일치하는가?** 같은 구조라고 같은 패턴 X
-- [ ] **트레이드오프를 알고 있는가?** 비용은?
-- [ ] **모던 C++ 도구로 더 간단히?** (`std::variant`, `std::function`)
-- [ ] **표준 라이브러리에 이미 있나?** (`std::visit` 등)
+- [ ] 문제가 분명한가? 어떤 변화 압력, 어떤 결합도 문제인가?
+- [ ] 단순한 해결책으로는 정말 안 되는가? (YAGNI)
+- [ ] 이 패턴의 의도가 지금 문제와 일치하는가? 같은 구조라고 같은 패턴은 아니다.
+- [ ] 트레이드오프를 알고 있는가? 비용은 무엇인가?
+- [ ] 모던 C++ 도구(`std::variant`, `std::function`)로 더 간단히 풀 수 있지 않은가?
+- [ ] 표준 라이브러리에 이미 있는 도구는 아닌가? (`std::visit` 등)
 
 ## 실무 가이드 — 코드 리뷰
 
-- [ ] 패턴 이름이 — 코드/문서에 명시?
-- [ ] 같은 패턴을 — 팀이 같은 용어로?
-- [ ] 의도가 도메인 어휘로?
-- [ ] 단순한 대안 검토했는가?
+- [ ] 패턴 이름이 코드와 문서에 명시되어 있는가?
+- [ ] 같은 패턴을 팀이 같은 용어로 부르는가?
+- [ ] 의도가 도메인 어휘로 드러나는가?
+- [ ] 단순한 대안을 검토했는가?
 
 ## 정리
 
-흔한 오해:
-1. 패턴 = UML — **틀림** (패턴은 의도)
-2. 패턴 = 코드 — **틀림** (같은 코드, 다른 패턴 가능)
-3. 패턴 = 만능 — **틀림** (문제 있을 때만)
-4. OOP = 패턴 — **틀림** (다중 패러다임)
-5. 카탈로그 = 실력 — **틀림** (의도 인식이 본질)
-6. 같은 구조 = 같은 패턴 — **틀림** (의도가 결정)
+흔한 오해를 다시 정리하면 다음과 같다.
 
-진짜 디자인 실력 = **의도 인식 + 트레이드오프 판단 + 단순함 유지**.
+1. 패턴 = UML — 틀렸다. 패턴은 의도다.
+2. 패턴 = 코드 — 틀렸다. 같은 코드라도 다른 패턴일 수 있다.
+3. 패턴 = 만능 — 틀렸다. 문제가 있을 때만 적용한다.
+4. OOP = 패턴 — 틀렸다. 다중 패러다임이다.
+5. 카탈로그 외우기 = 실력 — 틀렸다. 의도 인식이 본질이다.
+6. 같은 구조 = 같은 패턴 — 틀렸다. 의도가 결정한다.
+
+진짜 디자인 실력은 **의도 인식 + 트레이드오프 판단 + 단순함 유지**다.
 
 ## 관련 항목
 
-- [가이드라인 11: 패턴의 목적](/blog/programming/cpp/cpp-software-design/guideline11-understand-the-purpose-of-design-patterns) — 패턴 정의
-- [가이드라인 13: 패턴은 어디에나](/blog/programming/cpp/cpp-software-design/guideline13-design-patterns-are-everywhere) — 일상의 패턴
-- [가이드라인 14: 패턴 이름으로 의도](/blog/programming/cpp/cpp-software-design/guideline14-use-a-design-patterns-name-to-communicate-intent) — 이름의 가치
-- [가이드라인 20: composition over inheritance](/blog/programming/cpp/cpp-software-design/guideline20-favor-composition-over-inheritance) — 패턴의 큰 원칙
+- [가이드라인 11: 패턴의 목적](/blog/programming/cpp/cpp-software-design/guideline11-understand-the-purpose-of-design-patterns) — 패턴의 정의
+- [가이드라인 13: 패턴은 어디에나 있다](/blog/programming/cpp/cpp-software-design/guideline13-design-patterns-are-everywhere) — 일상의 패턴
+- [가이드라인 14: 패턴 이름으로 의도 전달](/blog/programming/cpp/cpp-software-design/guideline14-use-a-design-patterns-name-to-communicate-intent) — 이름의 가치
+- [가이드라인 20: composition over inheritance](/blog/programming/cpp/cpp-software-design/guideline20-favor-composition-over-inheritance) — 패턴 너머의 큰 원칙
