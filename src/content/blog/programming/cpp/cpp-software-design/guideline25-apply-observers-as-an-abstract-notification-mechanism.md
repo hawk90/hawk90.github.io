@@ -1,7 +1,7 @@
 ---
 title: "가이드라인 25: Observer를 추상 알림 메커니즘으로 적용하라"
 date: 2026-05-14T21:00:00
-description: "Observer 패턴 — pub/sub. 모던 C++ — std::function 기반, 라이프타임/순환/예외 함정 주의."
+description: "Observer 패턴은 pub/sub이다. 모던 C++에서 std::function 기반이 표준이며, 라이프타임·순환·예외 같은 함정에 주의한다."
 tags: [C++, Software Design, Observer, Pub-Sub]
 series: "C++ Software Design"
 seriesOrder: 25
@@ -9,7 +9,7 @@ seriesOrder: 25
 
 ## 왜 이 가이드라인이 중요한가?
 
-이벤트 기반 시스템 — 흔한 패턴:
+이벤트 기반 시스템에서 자주 보이는 패턴이다.
 
 ```cpp
 class Button {
@@ -23,29 +23,31 @@ btn.on_click([]() { save_document(); });
 btn.click();     // save_document 호출
 ```
 
-이게 — **Observer 패턴**의 모던 구현. 한 객체(Subject)가 — 여러 객체(Observers)에 이벤트 알림.
+이게 **Observer 패턴**의 모던 구현이다. 한 객체(Subject)가 여러 객체(Observers)에게 이벤트를 알린다.
 
-GoF Observer — 1994년 정의. 모던 C++:
-- `std::function`으로 — 람다 / functor 등 자유
-- Value semantics
-- `shared_ptr` / `weak_ptr`로 라이프타임 관리
+GoF Observer는 1994년의 정의다. 모던 C++에서는 다음이 자리잡았다.
 
-그러나 — Observer는 **함정 가득**한 패턴:
+- `std::function`으로 람다와 functor를 자유롭게 받는다.
+- 값 의미론을 유지한다.
+- `shared_ptr`과 `weak_ptr`로 라이프타임을 관리한다.
+
+다만 Observer는 함정이 많은 패턴이다.
+
 - Dangling reference
 - 순환 참조
-- 재진입 (update 중 attach/detach)
+- 재진입(update 도중 attach/detach)
 - 예외 전파
 - 순서 의존
 
-이 가이드라인 — Observer 패턴 + 흔한 함정 + 모던 구현.
+이번 가이드라인은 Observer 패턴과 흔한 함정, 그리고 모던 구현을 다룬다.
 
 ## 핵심 내용
 
-- **Observer 패턴** — 1:N 알림 메커니즘 (pub/sub)
-- 모던 구현 — **`std::function`** 우선, `weak_ptr`로 라이프타임
-- 함정 — dangling / 순환 / 재진입 / 예외 / 순서
-- C++ 표준 — Boost.Signals2가 모범
-- 비동기 알림 — Message Queue 패턴 검토
+- **Observer 패턴** — 1:N 알림 메커니즘(pub/sub)이다.
+- 모던 구현은 `std::function` 우선, `weak_ptr`로 라이프타임을 관리한다.
+- 함정 — dangling, 순환, 재진입, 예외, 순서.
+- C++ 표준에는 없고 Boost.Signals2가 모범이다.
+- 비동기 알림은 Message Queue 패턴을 검토한다.
 
 ## GoF Observer 구조
 
@@ -65,12 +67,12 @@ public:
         observers_.erase(std::remove(observers_.begin(), observers_.end(), o),
                           observers_.end());
     }
-    
+
     void set_value(int v) {
         value_ = v;
         notify();
     }
-    
+
     void notify() {
         for (auto* o : observers_) o->update(value_);
     }
@@ -86,7 +88,7 @@ Subject s;
 ConcreteObserver o1, o2;
 s.attach(&o1);
 s.attach(&o2);
-s.set_value(42);     // o1, o2 모두 알림
+s.set_value(42);     // o1, o2 모두 알림을 받는다
 ```
 
 ## 모던 — std::function 기반
@@ -96,12 +98,12 @@ class EventBus {
     std::vector<std::function<void(int)>> listeners_;
 public:
     using Handle = size_t;
-    
+
     Handle subscribe(std::function<void(int)> cb) {
         listeners_.push_back(std::move(cb));
         return listeners_.size() - 1;
     }
-    
+
     void publish(int value) {
         for (auto& l : listeners_) l(value);
     }
@@ -110,13 +112,14 @@ public:
 EventBus bus;
 bus.subscribe([](int v) { std::cout << "A: " << v << '\n'; });
 bus.subscribe([](int v) { std::cout << "B: " << v << '\n'; });
-bus.publish(42);     // A, B 모두 호출
+bus.publish(42);     // A와 B가 모두 호출된다
 ```
 
-장점:
-- 클래스 hierarchy 없음
-- 람다로 즉시 등록
-- Value semantics
+장점은 다음과 같다.
+
+- 클래스 hierarchy가 필요 없다.
+- 람다로 즉시 등록한다.
+- 값 의미론을 유지한다.
 
 ## 함정 1 — Dangling reference
 
@@ -125,24 +128,24 @@ class Widget {
     EventBus& bus_;
 public:
     Widget(EventBus& b) : bus_(b) {
-        bus_.subscribe([this](int v) {     // ⚠️ this 캡처
+        bus_.subscribe([this](int v) {     // ⚠️ this를 캡처한다
             this->handle(v);
         });
     }
-    
+
     void handle(int v) { /* ... */ }
 };
 
 {
     Widget w{bus};
-}     // w 소멸 — 하지만 bus의 listener엔 dangling this
+}     // w가 소멸 — 그러나 bus의 listener에는 dangling this가 남는다
 
-bus.publish(42);     // ⚠️ dangling this 호출 — UB
+bus.publish(42);     // ⚠️ 죽은 객체를 호출한다 — UB
 ```
 
-Widget이 — bus보다 먼저 소멸. listener는 — 죽은 객체 호출.
+Widget이 bus보다 먼저 소멸한다. listener가 죽은 객체를 부른다.
 
-해결 1: subscribe 시 — Widget 자기 자신을 unsubscribe 책임:
+해법 1 — subscribe할 때 받은 핸들로 RAII unsubscribe.
 
 ```cpp
 class Widget {
@@ -152,16 +155,16 @@ public:
     Widget(EventBus& b) : bus_(b) {
         handle_ = bus_.subscribe([this](int v) { this->handle(v); });
     }
-    
+
     ~Widget() {
         bus_.unsubscribe(handle_);     // RAII
     }
 };
 ```
 
-RAII로 — 자동 unsubscribe. 가이드라인 30 (Beautiful C++ — RAII).
+RAII로 자동 unsubscribe다(Beautiful C++ 항목 30).
 
-해결 2: weak_ptr (다음 함정).
+해법 2 — `weak_ptr`(다음 함정에서 다룬다).
 
 ## 함정 2 — 라이프타임 관리
 
@@ -170,9 +173,9 @@ auto w = std::make_shared<Widget>();
 bus.subscribe([w](int v) { w->handle(v); });     // ⚠️ 강한 참조 — 순환?
 ```
 
-`shared_ptr` 캡처 — w가 — bus의 listener에 의해 살아 있음. Widget이 — 영원히 안 죽음.
+`shared_ptr`를 캡처하면 w가 bus의 listener에 의해 계속 살아남는다. Widget이 영원히 죽지 않는다.
 
-해결: `weak_ptr`:
+해법은 `weak_ptr`다.
 
 ```cpp
 auto w = std::make_shared<Widget>();
@@ -186,7 +189,7 @@ bus.subscribe([weak_w](int v) {
 });
 ```
 
-`weak_ptr.lock()` — 객체 존재 시 shared_ptr 반환, 죽었으면 empty. 라이프타임 안전.
+`weak_ptr.lock()`이 객체가 살아 있으면 shared_ptr을 반환하고, 죽었으면 empty다. 라이프타임이 안전해진다.
 
 ## 함정 3 — 순환 참조
 
@@ -207,9 +210,9 @@ public:
 };
 ```
 
-A ↔ B 순환. 또는 bus가 강한 참조 가지면 — bus까지 포함된 순환.
+A와 B가 순환한다. 혹은 bus까지 강한 참조를 가지면 bus를 포함하는 순환이 된다.
 
-해결: `weak_ptr` + 명확한 ownership.
+해법은 `weak_ptr`와 명확한 소유 모델이다.
 
 ## 함정 4 — 재진입
 
@@ -218,33 +221,33 @@ class EventBus {
     std::vector<std::function<void()>> listeners_;
 public:
     void publish() {
-        for (auto& l : listeners_) l();     // ⚠️ listener가 subscribe 호출하면?
+        for (auto& l : listeners_) l();     // ⚠️ listener가 subscribe를 호출하면?
     }
-    
+
     void subscribe(std::function<void()> cb) {
         listeners_.push_back(std::move(cb));     // vector 변경 — iterator 무효
     }
 };
 
 bus.subscribe([&bus]() {
-    bus.subscribe([](){ /* ... */ });     // ⚠️ publish 중 subscribe
+    bus.subscribe([](){ /* ... */ });     // ⚠️ publish 도중 subscribe
 });
 
 bus.publish();     // 미정의 동작
 ```
 
-publish 중 listener가 — subscribe / unsubscribe / 같은 publish 호출. iterator / vector 손상.
+publish 도중 listener가 subscribe / unsubscribe / 또 다른 publish를 호출하면 iterator나 vector가 망가진다.
 
-해결책들:
+해법은 다음과 같다.
 
 ```cpp
-// 옵션 1: 복사본 순회
+// 옵션 1 — 복사본을 순회한다
 void publish() {
     auto copy = listeners_;     // 복사
     for (auto& l : copy) l();
 }
 
-// 옵션 2: 변경을 지연 — pending queue
+// 옵션 2 — 변경을 지연시킨다(pending queue)
 class EventBus {
     std::vector<std::function<void()>> listeners_;
     std::vector<std::function<void()>> pending_subs_;
@@ -257,21 +260,21 @@ public:
             listeners_.push_back(std::move(cb));
         }
     }
-    
+
     void publish() {
         publishing_ = true;
         for (auto& l : listeners_) l();
-        
-        // 지연된 subscribe 적용
+
+        // 지연된 subscribe를 반영한다
         for (auto& s : pending_subs_) listeners_.push_back(std::move(s));
         pending_subs_.clear();
-        
+
         publishing_ = false;
     }
 };
 ```
 
-복잡. Boost.Signals2 — 이미 처리.
+복잡하다. Boost.Signals2가 이미 이 문제를 다 처리해 둔다.
 
 ## 함정 5 — 예외 처리
 
@@ -283,9 +286,9 @@ void publish() {
 }
 ```
 
-한 listener가 — throw. 나머지 listener — 알림 받지 못함. publish 메서드 자체가 — 예외 전파.
+한 listener가 throw하면 나머지 listener는 알림을 받지 못한다. publish 메서드 자체도 예외를 전파한다.
 
-해결:
+해법은 listener별로 격리하는 것이다.
 
 ```cpp
 void publish() {
@@ -294,13 +297,11 @@ void publish() {
             l();
         } catch (...) {
             log_error("Listener threw");
-            // 나머지 계속 처리
+            // 나머지를 계속 처리한다
         }
     }
 }
 ```
-
-각 listener — 격리. 한 실패가 — 다른 listener 영향 X.
 
 ## 함정 6 — 순서 의존
 
@@ -308,14 +309,12 @@ void publish() {
 bus.subscribe(listener_A);
 bus.subscribe(listener_B);
 
-// publish 시 A 먼저 호출 또는 B 먼저?
-// 표준 vector 순회 — 등록 순서
-// 사용자가 이 순서를 의존하면? — 디자인 결정
+// publish 시 A가 먼저인가, B가 먼저인가?
+// vector를 순회하면 등록 순서대로다
+// 사용자가 이 순서에 의존한다면? — 디자인 결정이다
 ```
 
-순서 보장 — 명시. `std::vector` 사용 시 — FIFO. `std::set` / `std::map` — 다른 순서.
-
-문서화:
+순서 보장을 명시한다. `std::vector` 기반이면 FIFO다. `std::set`이나 `std::map`이면 다른 순서가 된다.
 
 ```cpp
 /// Listeners are called in registration order.
@@ -328,11 +327,11 @@ class EventBus { /* ... */ };
 ```cpp
 class EventBus {
     std::vector<std::function<void()>> listeners_;
-    // 다른 스레드가 — subscribe 호출하면?
+    // 다른 스레드가 subscribe를 호출하면?
 };
 ```
 
-멀티스레드 — mutex 또는 lock-free.
+멀티스레드 환경에서는 mutex 또는 lock-free 자료구조가 필요하다.
 
 ```cpp
 class EventBus {
@@ -343,14 +342,14 @@ public:
         std::lock_guard lock(mu_);
         listeners_.push_back(std::move(cb));
     }
-    
+
     void publish() {
         std::vector<std::function<void()>> snapshot;
         {
             std::lock_guard lock(mu_);
-            snapshot = listeners_;     // 락 안에서 복사
+            snapshot = listeners_;     // 락 안에서 복사한다
         }
-        // 락 밖 — listener 호출 (다른 publish 안 블록)
+        // 락 밖에서 listener를 호출한다 (다른 publish를 블록하지 않는다)
         for (auto& l : snapshot) l();
     }
 };
@@ -364,7 +363,7 @@ class Subscription {
 public:
     explicit Subscription(std::function<void()> u) : unsub_(std::move(u)) {}
     ~Subscription() { if (unsub_) unsub_(); }
-    
+
     Subscription(Subscription&& other) noexcept = default;
     Subscription& operator=(Subscription&& other) noexcept = default;
     Subscription(const Subscription&) = delete;
@@ -384,36 +383,34 @@ public:
 {
     auto sub = bus.subscribe([]() { /* ... */ });
     // ... 사용 ...
-}     // sub 소멸 — 자동 unsubscribe
+}     // sub가 소멸하면서 자동으로 unsubscribe
 ```
 
-Boost.Signals2 — `boost::signals2::connection` 같은 패턴.
+Boost.Signals2의 `boost::signals2::connection`과 같은 패턴이다.
 
-## Push vs Pull Model
+## Push와 Pull 모델
 
 ```cpp
-// Push — 알림에 데이터 포함
+// Push — 알림에 데이터를 함께 전달한다
 class EventBus {
     void publish(const Event& e) {
         for (auto& l : listeners_) l(e);     // 데이터 전달
     }
 };
 
-// Pull — 알림만, 데이터는 listener가 fetch
+// Pull — 알림만 주고, 데이터는 listener가 fetch한다
 class EventBus {
     void notify() {
-        for (auto& l : listeners_) l();     // 알림만
+        for (auto& l : listeners_) l();     // 알림만 보낸다
     }
 };
 
 bus.subscribe([&subject]() {
-    auto data = subject.current_data();     // listener가 fetch
+    auto data = subject.current_data();     // listener가 직접 가져온다
 });
 ```
 
-Push — 단순, 빠름. Pull — listener가 자기 필요한 데이터만.
-
-대다수 — push (간단).
+Push가 단순하고 빠르다. Pull은 listener가 자기에게 필요한 데이터만 가져온다. 대부분의 경우 Push로 충분하다.
 
 ## Signal-Slot — Qt 스타일
 
@@ -421,7 +418,7 @@ Push — 단순, 빠름. Pull — listener가 자기 필요한 데이터만.
 class Widget : public QObject {
     Q_OBJECT
 signals:
-    void clicked();     // signal — Qt가 처리
+    void clicked();     // signal — Qt가 처리한다
 
 public slots:
     void on_click() { /* ... */ }     // slot
@@ -430,9 +427,9 @@ public slots:
 connect(button, &Button::clicked, widget, &Widget::on_click);
 ```
 
-Qt — moc(meta-object compiler)로 자동. 컴파일 타임 타입 검사.
+Qt는 moc(meta-object compiler)로 자동화한다. 컴파일 타임 타입 검사를 받는다.
 
-C++ 표준 X — Qt 또는 Boost.Signals2.
+C++ 표준에는 없다. Qt나 Boost.Signals2를 쓴다.
 
 ## Boost.Signals2
 
@@ -445,19 +442,20 @@ auto conn = on_value_changed.connect([](int v) {
     std::cout << "Value: " << v << '\n';
 });
 
-on_value_changed(42);     // 모든 slot 호출
+on_value_changed(42);     // 모든 slot이 호출된다
 
 conn.disconnect();     // 명시적 해제
 ```
 
-기능:
-- Multi-slot (1:N)
-- Connection RAII (`scoped_connection`)
-- Thread-safe
-- Slot priority / grouping
-- Combiner (return values)
+기능은 다음과 같다.
 
-C++ 표준이 흡수 안 한 — 강력한 라이브러리.
+- 다중 slot(1:N).
+- Connection RAII(`scoped_connection`).
+- Thread-safe.
+- Slot priority / grouping.
+- Combiner(반환값 결합).
+
+C++ 표준이 흡수하지 않은 강력한 라이브러리다.
 
 ## 비동기 — Message Queue
 
@@ -466,7 +464,7 @@ class AsyncEventBus {
     std::queue<std::function<void()>> queue_;
     std::mutex mu_;
     std::thread worker_;
-    
+
 public:
     AsyncEventBus() {
         worker_ = std::thread([this]() {
@@ -482,7 +480,7 @@ public:
             }
         });
     }
-    
+
     void publish_async(std::function<void()> task) {
         std::lock_guard lock(mu_);
         queue_.push(std::move(task));
@@ -490,7 +488,7 @@ public:
 };
 ```
 
-Publisher와 listener — 분리된 스레드. 비동기.
+Publisher와 listener가 다른 스레드에서 실행된다. 비동기다.
 
 ## std::variant 기반 Event
 
@@ -521,7 +519,7 @@ bus.subscribe([](const Event& e) {
 });
 ```
 
-이벤트 — variant. 타입 안전 + 직렬화 가능.
+이벤트가 variant로 표현된다. 타입 안전성과 직렬화 가능성을 함께 갖춘다.
 
 ## Observer + DI
 
@@ -545,15 +543,15 @@ public:
 };
 ```
 
-DI + Observer — 테스트 친화.
+DI와 Observer가 만나면 테스트 친화성이 올라간다.
 
-## 함정 — Observer 양방향 통신
+## 함정 — Observer의 양방향 통신
 
 ```cpp
 class EventBus {
     void publish(int v) {
         for (auto& l : listeners_) {
-            l(v);     // listener가 publish 다시 호출?
+            l(v);     // listener가 publish를 다시 호출하면?
         }
     }
 };
@@ -565,7 +563,7 @@ bus.subscribe([&bus](int v) {
 bus.publish(0);     // 무한 재귀
 ```
 
-발행자 ↔ 구독자 양방향 — 무한 루프 위험. 방어:
+발행자와 구독자가 양방향으로 호출하면 무한 루프가 생긴다. 방어 장치를 둔다.
 
 ```cpp
 class EventBus {
@@ -584,13 +582,13 @@ public:
 };
 ```
 
-또는 — 이벤트 큐 (async).
+또는 이벤트 큐(async)로 분리한다.
 
 ## 라이프타임 패턴 정리
 
 ```cpp
 // 1) Subscription RAII
-auto sub = bus.subscribe(...);     // sub 소멸 시 자동 unsubscribe
+auto sub = bus.subscribe(...);     // sub가 소멸하면 자동 unsubscribe
 
 // 2) weak_ptr 캡처
 bus.subscribe([w = std::weak_ptr<X>{x}](int v) {
@@ -603,9 +601,9 @@ auto handle = bus.subscribe(...);
 bus.unsubscribe(handle);     // 명시
 ```
 
-가장 안전 — Subscription RAII.
+가장 안전한 것은 Subscription RAII다.
 
-## 모던 C++ 라이브러리 — Observer
+## 모던 C++의 Observer 라이브러리
 
 ```cpp
 // Boost.Signals2
@@ -618,60 +616,63 @@ sigc::signal<void(int)> sig;
 class EventBus { /* ... */ };
 ```
 
-표준 X — 라이브러리 선택. 또는 자체 구현.
+표준에는 없다. 라이브러리를 고르거나 직접 만든다.
 
 ## C++26 — std::observer_ptr (제안)
 
 ```cpp
-std::observer_ptr<Widget> obs = widget;     // non-owning, nullable
+std::observer_ptr<Widget> obs = widget;     // 비-소유, nullable
 ```
 
-`observer_ptr` — semantic clarity. 표준 채택 진행 중.
+`observer_ptr`는 의미적 명확성을 노린다. 표준 채택 논의가 진행 중이다.
 
 ## Observer 적용 시 결정
 
 ```
-1:N 알림 메커니즘 필요 — Observer?
+1:N 알림 메커니즘이 필요하다 — Observer?
 ├── 동기 알림 → std::function 기반 EventBus
 ├── 비동기 → Message Queue + thread
 ├── Qt 환경 → Signal-Slot
-├── Boost OK → Boost.Signals2
-└── 단순 callback (1:1) → std::function 멤버
+├── Boost를 쓸 수 있다 → Boost.Signals2
+└── 단순 callback(1:1) → std::function 멤버
 ```
 
 ## 실무 가이드 — 체크리스트
 
-Observer 적용 시:
+Observer를 적용할 때 다음을 점검한다.
 
-- [ ] **라이프타임 명확**? (subscription RAII / weak_ptr)
-- [ ] **순환 참조** 없는가? (weak_ptr)
-- [ ] **재진입** 처리? (snapshot, pending queue)
-- [ ] **예외** 격리? (try/catch in publish)
-- [ ] **순서 의존** 명시?
-- [ ] **멀티스레드** — mutex 또는 lock-free?
-- [ ] 단순 callback (1:1)이면 — `std::function` 멤버 충분?
+- [ ] 라이프타임이 분명한가? (subscription RAII / weak_ptr)
+- [ ] 순환 참조가 없는가? (weak_ptr)
+- [ ] 재진입을 다루는가? (snapshot, pending queue)
+- [ ] 예외를 격리하는가? (publish 안에서 try/catch)
+- [ ] 순서 의존을 명시했는가?
+- [ ] 멀티스레드를 다루는가? (mutex 또는 lock-free)
+- [ ] 단순 callback(1:1)이면 `std::function` 멤버로 충분하지 않은가?
 
 ## 정리
 
-**Observer 패턴** — 1:N 알림 메커니즘.
+**Observer 패턴**은 1:N 알림 메커니즘이다.
 
-모던 구현:
-- **`std::function`** — 람다 / functor 자유
-- **`weak_ptr`** — 라이프타임 안전
-- **Subscription RAII** — 자동 unsubscribe
-- **`std::variant`** — 타입 안전 이벤트
+모던 구현은 다음과 같다.
 
-함정 (7개):
+- **`std::function`** — 람다와 functor 자유.
+- **`weak_ptr`** — 라이프타임 안전.
+- **Subscription RAII** — 자동 unsubscribe.
+- **`std::variant`** — 타입 안전 이벤트.
+
+함정은 일곱 가지다.
+
 1. Dangling reference
 2. 순환 참조
 3. 재진입
 4. 예외 전파
 5. 순서 의존
 6. 멀티스레드
-7. 양방향 통신 무한 루프
+7. 양방향 통신의 무한 루프
 
-라이브러리:
-- **Boost.Signals2** — 검증된 표준
+라이브러리는 다음을 고른다.
+
+- **Boost.Signals2** — 검증된 표준급
 - **Qt Signal-Slot** — Qt 환경
 - **자체 EventBus** — 단순 도메인
 
