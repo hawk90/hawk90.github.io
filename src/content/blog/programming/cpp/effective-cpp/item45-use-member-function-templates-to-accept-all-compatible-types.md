@@ -7,9 +7,25 @@ series: "Effective C++"
 seriesOrder: 45
 ---
 
+## 왜 이 항목이 중요한가?
+
+내장 포인터는 자연스러운 IS-A 변환을 가진다. `Derived*`가 `Base*`에 그대로 들어간다. 그러나 **스마트 포인터를 직접 만들면** 이 변환이 자동으로 따라오지 않는다.
+
+```cpp
+template<typename T>
+class SmartPtr { /* ... */ };
+
+SmartPtr<Derived> d;
+SmartPtr<Base> b = d;   // ❌ 컴파일 에러 — 두 인스턴스는 무관한 타입
+```
+
+이유는 `SmartPtr<Derived>`와 `SmartPtr<Base>`가 **완전히 별개의 타입**이기 때문이다. 컴파일러는 둘 사이 변환을 모른다.
+
+해결책은 **멤버 함수 템플릿**(generalized copy constructor)이다. `template<typename U> SmartPtr(const SmartPtr<U>&)` 형태로 호환 타입을 모두 받는다. `std::shared_ptr`, `std::unique_ptr`이 이 패턴을 따른다. 이 항목은 그 메커니즘과 컴파일러 자동 생성 함수와의 공존을 정리한다.
+
 ## 개요
 
-내장 포인터는 자연스러운 IS-A 변환을 가집니다 — `Derived*`가 `Base*`에 들어갈 수 있음. 그러나 **템플릿 인스턴스끼리는 무관한 타입** — `SmartPtr<Derived>`와 `SmartPtr<Base>`는 자동 변환 안 됨. 스마트 포인터, 컨테이너 등에서 이 변환을 제공하려면 **멤버 함수 템플릿**(member function template)이 필요합니다.
+내장 포인터는 자연스러운 IS-A 변환을 가진다. `Derived*`가 `Base*`에 들어갈 수 있다. 그러나 **템플릿 인스턴스끼리는 무관한 타입**이다. `SmartPtr<Derived>`와 `SmartPtr<Base>`는 자동 변환이 안 된다. 스마트 포인터, 컨테이너 등에서 이 변환을 제공하려면 **멤버 함수 템플릿**(member function template)이 필요하다.
 
 ## 필수 개념: 템플릿 인스턴스는 별개 타입
 
