@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+    </style>
+    <!-- Sky gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a2744"/>
+      <stop offset="60%" stop-color="#2a3a5a"/>
+      <stop offset="100%" stop-color="#3a4a3a"/>
+    </linearGradient>
+    <!-- Ground gradient -->
+    <linearGradient id="groundGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3a4a3a"/>
+      <stop offset="100%" stop-color="#2a3a2a"/>
+    </linearGradient>
+    <!-- Diff dark background -->
+    <linearGradient id="diffBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a12"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+    <!-- Diff highlight glow -->
+    <radialGradient id="diffGlow" cx="50%" cy="55%" r="30%">
+      <stop offset="0%" stop-color="#f1fa8c" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#f1fa8c" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#f1fa8c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="diffGlow2" cx="35%" cy="55%" r="25%">
+      <stop offset="0%" stop-color="#ffb86c" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#ffb86c" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#ffb86c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="360" fill="#282a36" rx="8"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" fill="#f8f8f2" font-size="18" font-weight="bold">Frame Difference (Temporal Redundancy)</text>
+
+  <!-- Three frames, each ~210x140, with spacing -->
+  <!-- Total: 3*210 + 2*35 = 700, offset = (800-700)/2 = 50 -->
+
+  <!-- === Frame N === -->
+  <g transform="translate(50, 60)">
+    <!-- Scene: sky + ground + moving rectangle (car) -->
+    <rect width="210" height="140" rx="4" fill="url(#skyGrad)" stroke="#6272a4" stroke-width="1.5"/>
+    <rect y="90" width="210" height="50" rx="0" fill="url(#groundGrad)"/>
+    <!-- Horizon line -->
+    <line x1="0" y1="90" x2="210" y2="90" stroke="#4a5a4a" stroke-width="1" opacity="0.5"/>
+    <!-- Car-like rectangle at position 1 -->
+    <rect x="55" y="68" width="50" height="30" rx="4" fill="#8be9fd" opacity="0.8"/>
+    <rect x="60" y="73" width="15" height="12" rx="2" fill="#44475a" opacity="0.7"/>
+    <rect x="83" y="73" width="15" height="12" rx="2" fill="#44475a" opacity="0.7"/>
+    <!-- Wheels -->
+    <circle cx="68" cy="100" r="5" fill="#44475a"/>
+    <circle cx="92" cy="100" r="5" fill="#44475a"/>
+
+    <!-- Label -->
+    <text x="105" y="170" text-anchor="middle" fill="#8be9fd" font-size="14" font-weight="bold">Frame N</text>
+    <text x="105" y="187" text-anchor="middle" fill="#6272a4" font-size="11">t = 0.000s</text>
+  </g>
+
+  <!-- Minus sign -->
+  <text x="282" y="145" text-anchor="middle" fill="#f8f8f2" font-size="28" font-weight="bold">-</text>
+
+  <!-- === Frame N+1 === -->
+  <g transform="translate(295, 60)">
+    <!-- Same scene, car moved slightly right -->
+    <rect width="210" height="140" rx="4" fill="url(#skyGrad)" stroke="#6272a4" stroke-width="1.5"/>
+    <rect y="90" width="210" height="50" rx="0" fill="url(#groundGrad)"/>
+    <line x1="0" y1="90" x2="210" y2="90" stroke="#4a5a4a" stroke-width="1" opacity="0.5"/>
+    <!-- Car moved ~25px to the right -->
+    <rect x="80" y="68" width="50" height="30" rx="4" fill="#8be9fd" opacity="0.8"/>
+    <rect x="85" y="73" width="15" height="12" rx="2" fill="#44475a" opacity="0.7"/>
+    <rect x="108" y="73" width="15" height="12" rx="2" fill="#44475a" opacity="0.7"/>
+    <circle cx="93" cy="100" r="5" fill="#44475a"/>
+    <circle cx="117" cy="100" r="5" fill="#44475a"/>
+
+    <!-- Label -->
+    <text x="105" y="170" text-anchor="middle" fill="#8be9fd" font-size="14" font-weight="bold">Frame N+1</text>
+    <text x="105" y="187" text-anchor="middle" fill="#6272a4" font-size="11">t = 0.033s</text>
+  </g>
+
+  <!-- Equals sign -->
+  <text x="527" y="145" text-anchor="middle" fill="#f8f8f2" font-size="28" font-weight="bold">=</text>
+
+  <!-- === |Diff| === -->
+  <g transform="translate(540, 60)">
+    <!-- Nearly black with glow where movement occurred -->
+    <rect width="210" height="140" rx="4" fill="url(#diffBg)" stroke="#f1fa8c" stroke-width="1.5"/>
+    <!-- Glow area where the car was and where it moved to -->
+    <rect width="210" height="140" rx="4" fill="url(#diffGlow)"/>
+    <rect width="210" height="140" rx="4" fill="url(#diffGlow2)"/>
+    <!-- Faint outline of movement region -->
+    <rect x="55" y="65" width="75" height="45" rx="3" fill="none" stroke="#f1fa8c" stroke-width="1" stroke-dasharray="4,3" opacity="0.4"/>
+    <!-- Bright pixels at old and new car positions -->
+    <rect x="55" y="68" width="12" height="30" rx="2" fill="#f1fa8c" opacity="0.5"/>
+    <rect x="118" y="68" width="12" height="30" rx="2" fill="#f1fa8c" opacity="0.5"/>
+    <!-- Small noise-like dots for subtle differences -->
+    <circle cx="70" cy="95" r="3" fill="#f1fa8c" opacity="0.3"/>
+    <circle cx="115" cy="95" r="3" fill="#f1fa8c" opacity="0.3"/>
+
+    <!-- Label -->
+    <text x="105" y="170" text-anchor="middle" fill="#f1fa8c" font-size="14" font-weight="bold">|Diff|</text>
+    <text x="105" y="187" text-anchor="middle" fill="#6272a4" font-size="11">Mostly black!</text>
+  </g>
+
+  <!-- Annotation -->
+  <g transform="translate(0, 285)">
+    <text x="400" y="0" text-anchor="middle" fill="#50fa7b" font-size="13" font-weight="bold">Bright pixels = movement area only</text>
+    <text x="400" y="20" text-anchor="middle" fill="#6272a4" font-size="12">99% of pixels are identical between frames -- only encode the difference!</text>
+
+    <!-- Small arrows pointing to the diff bright area -->
+    <line x1="620" y1="30" x2="645" y2="10" stroke="#f1fa8c" stroke-width="1" opacity="0.6"/>
+  </g>
+
+  <!-- Bottom insight -->
+  <text x="400" y="340" text-anchor="middle" fill="#ffb86c" font-size="12" font-style="italic">"Send only the difference" = core idea of temporal prediction</text>
+</svg>

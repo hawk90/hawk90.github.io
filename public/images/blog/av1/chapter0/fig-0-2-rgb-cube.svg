@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="800" height="520">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="520" fill="#282a36" rx="8"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" fill="#f8f8f2" font-size="18" font-weight="bold">RGB Color Cube</text>
+
+  <!-- Isometric cube: using 30-degree isometric projection -->
+  <!-- Origin at (400, 350) = black corner (0,0,0) -->
+  <!-- Axes: R goes right-down, G goes right-up, B goes straight up -->
+  <!-- Edge length: 200px in projected space -->
+
+  <g transform="translate(320, 360)">
+    <!-- Isometric unit vectors (approx 30deg): -->
+    <!-- R axis: (173, 100)  i.e. cos(-30)*200, sin(-30)*200 roughly -->
+    <!-- G axis: (-173, 100) reversed to go left-down, wait let me think -->
+    <!-- Standard isometric: x-axis goes lower-right, y-axis goes lower-left, z-axis goes up -->
+    <!-- R axis (x): dx=180, dy=90 -->
+    <!-- G axis (y): dx=-180, dy=90 -->
+    <!-- B axis (z): dx=0, dy=-220 -->
+
+    <!-- Back faces (draw first) -->
+    <!-- Back-top face: Green-Yellow-White-Cyan -->
+    <polygon points="-180,90 0,-130 180,-130 0,90" fill="#004400" opacity="0.3" stroke="#50fa7b" stroke-width="1" stroke-opacity="0.3"/>
+
+    <!-- Back-right face: Red-Yellow-White-Magenta -->
+    <polygon points="180,90 180,-130 0,-130 0,90" fill="#440000" opacity="0.3" stroke="#ff79c6" stroke-width="1" stroke-opacity="0.3"/>
+
+    <!-- Back-left face: Green-Cyan-Magenta-Blue... wait, let me recompute vertices -->
+    <!-- Vertices of the cube in isometric:
+         Black   (0,0,0):     (0, 0)
+         Red     (1,0,0):     (180, 90)
+         Green   (0,1,0):     (-180, 90)
+         Blue    (0,0,1):     (0, -220)
+         Yellow  (1,1,0):     (0, 180)
+         Magenta (1,0,1):     (180, -130)
+         Cyan    (0,1,1):     (-180, -130)
+         White   (1,1,1):     (0, -40)
+    -->
+
+    <!-- Back faces -->
+    <!-- Top face: Blue-Magenta-White-Cyan -->
+    <polygon points="0,-220 180,-130 0,-40 -180,-130" fill="#282a56" opacity="0.5" stroke="#6272a4" stroke-width="1"/>
+
+    <!-- Right-back face: Red-Yellow-White-Magenta -->
+    <polygon points="180,90 0,180 0,-40 180,-130" fill="#382a36" opacity="0.4" stroke="#6272a4" stroke-width="1"/>
+
+    <!-- Left-back face: Green-Yellow-White-Cyan -->
+    <polygon points="-180,90 0,180 0,-40 -180,-130" fill="#283a36" opacity="0.4" stroke="#6272a4" stroke-width="1"/>
+
+    <!-- Front faces -->
+    <!-- Bottom face: Black-Red-Yellow-Green -->
+    <polygon points="0,0 180,90 0,180 -180,90" fill="#1a1a2e" opacity="0.6" stroke="#6272a4" stroke-width="1.5"/>
+
+    <!-- Front-right face: Black-Red-Magenta-Blue -->
+    <polygon points="0,0 180,90 180,-130 0,-220" fill="#2a1a2e" opacity="0.5" stroke="#6272a4" stroke-width="1.5"/>
+
+    <!-- Front-left face: Black-Green-Cyan-Blue -->
+    <polygon points="0,0 -180,90 -180,-130 0,-220" fill="#1a2a2e" opacity="0.5" stroke="#6272a4" stroke-width="1.5"/>
+
+    <!-- Edges - draw all 12 edges -->
+    <!-- From Black -->
+    <line x1="0" y1="0" x2="180" y2="90" stroke="#ff5555" stroke-width="2.5"/>
+    <line x1="0" y1="0" x2="-180" y2="90" stroke="#50fa7b" stroke-width="2.5"/>
+    <line x1="0" y1="0" x2="0" y2="-220" stroke="#6699ff" stroke-width="2.5"/>
+
+    <!-- From Red -->
+    <line x1="180" y1="90" x2="0" y2="180" stroke="#6272a4" stroke-width="1.2"/>
+    <line x1="180" y1="90" x2="180" y2="-130" stroke="#6272a4" stroke-width="1.2"/>
+
+    <!-- From Green -->
+    <line x1="-180" y1="90" x2="0" y2="180" stroke="#6272a4" stroke-width="1.2"/>
+    <line x1="-180" y1="90" x2="-180" y2="-130" stroke="#6272a4" stroke-width="1.2"/>
+
+    <!-- From Blue -->
+    <line x1="0" y1="-220" x2="180" y2="-130" stroke="#6272a4" stroke-width="1.2"/>
+    <line x1="0" y1="-220" x2="-180" y2="-130" stroke="#6272a4" stroke-width="1.2"/>
+
+    <!-- From White -->
+    <line x1="0" y1="-40" x2="180" y2="-130" stroke="#6272a4" stroke-width="1.2"/>
+    <line x1="0" y1="-40" x2="-180" y2="-130" stroke="#6272a4" stroke-width="1.2"/>
+    <line x1="0" y1="-40" x2="0" y2="180" stroke="#6272a4" stroke-width="1.2" stroke-dasharray="6,4"/>
+
+    <!-- Corner dots and labels -->
+    <!-- Black (0,0,0) -->
+    <circle cx="0" cy="0" r="8" fill="#1a1a2e" stroke="#f8f8f2" stroke-width="2"/>
+    <text x="-15" y="25" text-anchor="end" fill="#f8f8f2" font-size="12" font-weight="bold">Black</text>
+    <text x="-15" y="39" text-anchor="end" fill="#6272a4" font-size="10">(0,0,0)</text>
+
+    <!-- Red (255,0,0) -->
+    <circle cx="180" cy="90" r="8" fill="#ff0000" stroke="#f8f8f2" stroke-width="1.5"/>
+    <text x="200" y="95" text-anchor="start" fill="#ff5555" font-size="12" font-weight="bold">Red</text>
+    <text x="200" y="109" text-anchor="start" fill="#6272a4" font-size="10">(255,0,0)</text>
+
+    <!-- Green (0,255,0) -->
+    <circle cx="-180" cy="90" r="8" fill="#00ff00" stroke="#f8f8f2" stroke-width="1.5"/>
+    <text x="-200" y="95" text-anchor="end" fill="#50fa7b" font-size="12" font-weight="bold">Green</text>
+    <text x="-200" y="109" text-anchor="end" fill="#6272a4" font-size="10">(0,255,0)</text>
+
+    <!-- Blue (0,0,255) -->
+    <circle cx="0" cy="-220" r="8" fill="#0000ff" stroke="#f8f8f2" stroke-width="1.5"/>
+    <text x="15" y="-230" text-anchor="start" fill="#6699ff" font-size="12" font-weight="bold">Blue</text>
+    <text x="15" y="-216" text-anchor="start" fill="#6272a4" font-size="10">(0,0,255)</text>
+
+    <!-- Yellow (255,255,0) -->
+    <circle cx="0" cy="180" r="8" fill="#ffff00" stroke="#f8f8f2" stroke-width="1.5"/>
+    <text x="0" y="205" text-anchor="middle" fill="#f1fa8c" font-size="12" font-weight="bold">Yellow</text>
+    <text x="0" y="219" text-anchor="middle" fill="#6272a4" font-size="10">(255,255,0)</text>
+
+    <!-- Magenta (255,0,255) -->
+    <circle cx="180" cy="-130" r="8" fill="#ff00ff" stroke="#f8f8f2" stroke-width="1.5"/>
+    <text x="200" y="-135" text-anchor="start" fill="#ff79c6" font-size="12" font-weight="bold">Magenta</text>
+    <text x="200" y="-121" text-anchor="start" fill="#6272a4" font-size="10">(255,0,255)</text>
+
+    <!-- Cyan (0,255,255) -->
+    <circle cx="-180" cy="-130" r="8" fill="#00ffff" stroke="#f8f8f2" stroke-width="1.5"/>
+    <text x="-200" y="-135" text-anchor="end" fill="#8be9fd" font-size="12" font-weight="bold">Cyan</text>
+    <text x="-200" y="-121" text-anchor="end" fill="#6272a4" font-size="10">(0,255,255)</text>
+
+    <!-- White (255,255,255) -->
+    <circle cx="0" cy="-40" r="8" fill="#ffffff" stroke="#6272a4" stroke-width="1.5"/>
+    <text x="15" y="-45" text-anchor="start" fill="#f8f8f2" font-size="12" font-weight="bold">White</text>
+    <text x="15" y="-31" text-anchor="start" fill="#6272a4" font-size="10">(255,255,255)</text>
+
+    <!-- Axis labels with arrows -->
+    <!-- R axis arrow -->
+    <text x="110" y="75" text-anchor="middle" fill="#ff5555" font-size="14" font-weight="bold">R</text>
+    <!-- G axis arrow -->
+    <text x="-110" y="75" text-anchor="middle" fill="#50fa7b" font-size="14" font-weight="bold">G</text>
+    <!-- B axis arrow -->
+    <text x="-18" y="-110" text-anchor="end" fill="#6699ff" font-size="14" font-weight="bold">B</text>
+  </g>
+</svg>

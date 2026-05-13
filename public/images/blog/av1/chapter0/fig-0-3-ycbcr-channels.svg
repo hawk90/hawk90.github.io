@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" width="800" height="340">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+    </style>
+    <!-- Original: full color gradient (diagonal) -->
+    <linearGradient id="origGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2244aa"/>
+      <stop offset="25%" stop-color="#44aa44"/>
+      <stop offset="50%" stop-color="#ddcc33"/>
+      <stop offset="75%" stop-color="#cc6622"/>
+      <stop offset="100%" stop-color="#aa2244"/>
+    </linearGradient>
+    <linearGradient id="origGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3366bb" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#66bb66" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#bb6633" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- Y channel: grayscale gradient (dark to light) -->
+    <linearGradient id="yGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#111111"/>
+      <stop offset="30%" stop-color="#555555"/>
+      <stop offset="60%" stop-color="#999999"/>
+      <stop offset="100%" stop-color="#e8e8e8"/>
+    </linearGradient>
+
+    <!-- Cb channel: blue-toned gradient -->
+    <linearGradient id="cbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#556688"/>
+      <stop offset="30%" stop-color="#5577bb"/>
+      <stop offset="60%" stop-color="#6688cc"/>
+      <stop offset="100%" stop-color="#5566aa"/>
+    </linearGradient>
+    <linearGradient id="cbGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4466aa" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#7799dd" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#334488" stop-opacity="0.6"/>
+    </linearGradient>
+
+    <!-- Cr channel: red-toned gradient -->
+    <linearGradient id="crGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#886655"/>
+      <stop offset="30%" stop-color="#aa6655"/>
+      <stop offset="60%" stop-color="#cc7766"/>
+      <stop offset="100%" stop-color="#aa5544"/>
+    </linearGradient>
+    <linearGradient id="crGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#aa5544" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#dd8877" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#884433" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="340" fill="#282a36" rx="8"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" fill="#f8f8f2" font-size="18" font-weight="bold">YCbCr Channel Separation</text>
+
+  <!-- Layout: 4 boxes with 20px gaps. Each box ~165x150, starting at y=55 -->
+  <!-- Total width: 4*165 + 3*20 = 720, offset = (800-720)/2 = 40 -->
+
+  <!-- Original -->
+  <g transform="translate(40, 55)">
+    <rect width="165" height="150" rx="4" fill="url(#origGrad1)" stroke="#f8f8f2" stroke-width="1.5"/>
+    <rect width="165" height="150" rx="4" fill="url(#origGrad2)"/>
+    <!-- Simulate some scene elements -->
+    <rect x="30" y="25" width="45" height="60" rx="3" fill="#44aa66" opacity="0.5"/>
+    <rect x="90" y="45" width="40" height="50" rx="3" fill="#cc8833" opacity="0.4"/>
+    <ellipse cx="130" cy="30" rx="25" ry="15" fill="#5588cc" opacity="0.4"/>
+    <text x="82.5" y="180" text-anchor="middle" fill="#f8f8f2" font-size="14" font-weight="bold">Original</text>
+    <text x="82.5" y="197" text-anchor="middle" fill="#6272a4" font-size="11">Full Color</text>
+  </g>
+
+  <!-- Y (Luma) -->
+  <g transform="translate(225, 55)">
+    <rect width="165" height="150" rx="4" fill="url(#yGrad)" stroke="#f1fa8c" stroke-width="1.5"/>
+    <!-- Scene silhouettes in grayscale -->
+    <rect x="30" y="25" width="45" height="60" rx="3" fill="#777777" opacity="0.5"/>
+    <rect x="90" y="45" width="40" height="50" rx="3" fill="#999999" opacity="0.4"/>
+    <ellipse cx="130" cy="30" rx="25" ry="15" fill="#aaaaaa" opacity="0.4"/>
+    <text x="82.5" y="180" text-anchor="middle" fill="#f1fa8c" font-size="14" font-weight="bold">Y (Luma)</text>
+    <text x="82.5" y="197" text-anchor="middle" fill="#6272a4" font-size="11">Brightness only</text>
+  </g>
+
+  <!-- Cb (Blue difference) -->
+  <g transform="translate(410, 55)">
+    <rect width="165" height="150" rx="4" fill="url(#cbGrad)" stroke="#8be9fd" stroke-width="1.5"/>
+    <rect width="165" height="150" rx="4" fill="url(#cbGrad2)"/>
+    <text x="82.5" y="180" text-anchor="middle" fill="#8be9fd" font-size="14" font-weight="bold">Cb (Blue diff)</text>
+    <text x="82.5" y="197" text-anchor="middle" fill="#6272a4" font-size="11">Chrominance blue</text>
+  </g>
+
+  <!-- Cr (Red difference) -->
+  <g transform="translate(595, 55)">
+    <rect width="165" height="150" rx="4" fill="url(#crGrad)" stroke="#ff79c6" stroke-width="1.5"/>
+    <rect width="165" height="150" rx="4" fill="url(#crGrad2)"/>
+    <text x="82.5" y="180" text-anchor="middle" fill="#ff79c6" font-size="14" font-weight="bold">Cr (Red diff)</text>
+    <text x="82.5" y="197" text-anchor="middle" fill="#6272a4" font-size="11">Chrominance red</text>
+  </g>
+
+  <!-- Arrows between boxes -->
+  <g fill="none" stroke="#6272a4" stroke-width="1.5">
+    <line x1="210" y1="130" x2="220" y2="130" marker-end="url(#arrowhead)"/>
+    <line x1="395" y1="130" x2="405" y2="130"/>
+    <line x1="580" y1="130" x2="590" y2="130"/>
+  </g>
+
+  <!-- Arrow symbols -->
+  <text x="215" y="135" fill="#6272a4" font-size="18">=</text>
+  <text x="398" y="135" fill="#6272a4" font-size="18">+</text>
+  <text x="583" y="135" fill="#6272a4" font-size="18">+</text>
+
+  <!-- Bottom note -->
+  <text x="400" y="325" text-anchor="middle" fill="#6272a4" font-size="12">Y preserves detail; Cb/Cr carry only color information (can be subsampled)</text>
+</svg>
