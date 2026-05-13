@@ -1,0 +1,39 @@
+---
+/**
+ * Definition component for terms and concepts.
+ *
+ * Usage in MDX:
+ *   import Definition from '../../components/blog/Definition.astro';
+ *
+ *   <Definition term="snake_case">
+ *     소문자와 밑줄로 단어를 연결하는 명명 규칙.
+ *     예: `my_variable`, `calculate_total`
+ *   </Definition>
+ *
+ *   <Definition term="ERR_PTR" source="Linux Kernel">
+ *     에러 코드를 포인터로 인코딩하는 매크로.
+ *   </Definition>
+ */
+
+interface Props {
+  term: string;
+  source?: string;
+}
+
+const { term, source } = Astro.props;
+---
+
+<dl class="not-prose my-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
+  <dt class="flex items-center gap-2 font-mono font-semibold text-[var(--color-text-primary)]">
+    <svg class="w-4 h-4 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+    </svg>
+    <span>{term}</span>
+    {source && (
+      <span class="text-xs font-normal text-[var(--color-text-tertiary)]">— {source}</span>
+    )}
+  </dt>
+  <dd class="mt-2 text-sm text-[var(--color-text-secondary)] pl-6 [&>p]:m-0 [&>code]:text-xs">
+    <slot />
+  </dd>
+</dl>

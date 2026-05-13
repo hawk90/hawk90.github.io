@@ -1,0 +1,62 @@
+---
+/**
+ * CompareItem component for use inside Compare.
+ *
+ * Types:
+ *   - bad: Red styling with ❌
+ *   - good: Green styling with ✅
+ *   - before: Gray styling with "Before"
+ *   - after: Blue styling with "After"
+ */
+
+interface Props {
+  type: 'bad' | 'good' | 'before' | 'after';
+  label?: string;
+}
+
+const { type, label } = Astro.props;
+
+const config = {
+  bad: {
+    icon: '❌',
+    defaultLabel: 'Bad',
+    borderColor: 'border-red-500',
+    bgColor: 'bg-red-500/10',
+    labelColor: 'text-red-500',
+  },
+  good: {
+    icon: '✅',
+    defaultLabel: 'Good',
+    borderColor: 'border-green-500',
+    bgColor: 'bg-green-500/10',
+    labelColor: 'text-green-500',
+  },
+  before: {
+    icon: '◀',
+    defaultLabel: 'Before',
+    borderColor: 'border-gray-500',
+    bgColor: 'bg-gray-500/10',
+    labelColor: 'text-gray-500',
+  },
+  after: {
+    icon: '▶',
+    defaultLabel: 'After',
+    borderColor: 'border-blue-500',
+    bgColor: 'bg-blue-500/10',
+    labelColor: 'text-blue-500',
+  },
+};
+
+const c = config[type];
+const displayLabel = label || c.defaultLabel;
+---
+
+<div class:list={['rounded-lg border-t-4 p-4', c.borderColor, c.bgColor]}>
+  <div class:list={['flex items-center gap-2 font-semibold mb-2 text-sm', c.labelColor]}>
+    <span>{c.icon}</span>
+    <span>{displayLabel}</span>
+  </div>
+  <div class="text-sm [&>pre]:my-0 [&>p]:my-0 prose prose-sm dark:prose-invert max-w-none">
+    <slot />
+  </div>
+</div>

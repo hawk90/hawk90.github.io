@@ -1,0 +1,45 @@
+---
+/**
+ * Compare component for side-by-side or stacked comparisons.
+ *
+ * Usage in MDX:
+ *   import Compare from '../../components/blog/Compare.astro';
+ *   import CompareItem from '../../components/blog/CompareItem.astro';
+ *
+ *   <Compare>
+ *     <CompareItem type="bad" label="Bad">
+ *       ```c
+ *       if(x){y=z;}
+ *       ```
+ *     </CompareItem>
+ *     <CompareItem type="good" label="Good">
+ *       ```c
+ *       if (x) {
+ *           y = z;
+ *       }
+ *       ```
+ *     </CompareItem>
+ *   </Compare>
+ *
+ *   <!-- Or with before/after -->
+ *   <Compare>
+ *     <CompareItem type="before">Code before refactoring</CompareItem>
+ *     <CompareItem type="after">Code after refactoring</CompareItem>
+ *   </Compare>
+ */
+
+interface Props {
+  layout?: 'side' | 'stack';
+}
+
+const { layout = 'side' } = Astro.props;
+---
+
+<div
+  class:list={[
+    'not-prose my-6 gap-4',
+    layout === 'side' ? 'grid md:grid-cols-2' : 'flex flex-col',
+  ]}
+>
+  <slot />
+</div>
