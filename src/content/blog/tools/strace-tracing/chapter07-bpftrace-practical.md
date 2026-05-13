@@ -5,6 +5,7 @@ description: "흔한 bpftrace 한 줄 — open / signal / TCP / VFS / scheduler 
 tags: [bpftrace, Tracing, Production]
 series: "System Tracing"
 seriesOrder: 7
+draft: true
 ---
 
 ## 예정 내용

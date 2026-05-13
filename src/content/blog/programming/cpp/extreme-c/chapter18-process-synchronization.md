@@ -5,6 +5,7 @@ description: "프로세스 간 동기화 — named semaphore, shared mutex, file
 tags: [C, Process, Synchronization, IPC]
 series: "전문가를 위한 C"
 seriesOrder: 18
+draft: true
 ---
 
 ## 작성 중

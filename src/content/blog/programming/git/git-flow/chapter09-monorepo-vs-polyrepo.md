@@ -5,6 +5,7 @@ description: "단일 저장소 vs 여러 저장소. 빌드 도구 / 의존성 / 
 tags: [Git, Monorepo, Polyrepo, Build]
 series: "Git Flow"
 seriesOrder: 9
+draft: true
 ---
 
 ## 작성 중

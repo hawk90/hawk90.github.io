@@ -5,6 +5,7 @@ description: "커밋 서명으로 작성자 검증. GPG vs SSH 서명. GitHub Ve
 tags: [Git, Signing, GPG, SSH]
 series: "Git Conventions"
 seriesOrder: 6
+draft: true
 ---
 
 ## 작성 중

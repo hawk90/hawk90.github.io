@@ -5,6 +5,7 @@ description: "vmalloc — 가상 주소 연속, 물리는 비-연속. ioremap도
 tags: [Linux, Kernel, Memory, vmalloc]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 14
+draft: true
 ---
 
 ## 작성 중

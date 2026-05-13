@@ -5,6 +5,7 @@ description: "perf stat — 정적 카운터. cycles per instruction, cache miss
 tags: [perf, perf stat, Counters]
 series: "perf / FlameGraph"
 seriesOrder: 2
+draft: true
 ---
 
 ## 예정 내용

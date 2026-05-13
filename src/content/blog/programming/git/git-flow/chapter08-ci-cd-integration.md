@@ -5,6 +5,7 @@ description: "브랜치 → CI 트리거 → 배포. GitHub Actions / GitLab CI 
 tags: [Git, CI/CD, GitHub Actions]
 series: "Git Flow"
 seriesOrder: 8
+draft: true
 ---
 
 ## 작성 중

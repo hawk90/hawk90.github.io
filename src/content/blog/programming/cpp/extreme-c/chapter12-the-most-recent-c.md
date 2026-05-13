@@ -5,6 +5,7 @@ description: "C11 / C17 / C23 — _Generic, _Static_assert, threads.h, atomic, a
 tags: [C, C11, C17, C23, Modern C]
 series: "전문가를 위한 C"
 seriesOrder: 12
+draft: true
 ---
 
 ## 작성 중

@@ -5,6 +5,7 @@ description: ":edit / :find. netrw. :write 변형. 권한 없을 때 sudo trick.
 tags: [Vim, File, netrw]
 series: "Practical Vim"
 seriesOrder: 7
+draft: true
 ---
 
 ## 작성 중

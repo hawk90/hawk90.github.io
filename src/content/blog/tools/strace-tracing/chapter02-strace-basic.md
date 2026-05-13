@@ -5,6 +5,7 @@ description: "ptrace 기반. strace 옵션 — -e, -p, -f, -o, -tt -T."
 tags: [strace, ptrace, syscall]
 series: "System Tracing"
 seriesOrder: 2
+draft: true
 ---
 
 ## 예정 내용

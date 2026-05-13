@@ -5,6 +5,7 @@ description: "PCIe BAR mapping"
 series: "Modern Embedded Recipes"
 seriesOrder: 3
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - PCIe BAR mapping

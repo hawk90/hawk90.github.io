@@ -5,6 +5,7 @@ description: "환경 (1), 미사용 (2), 주석 (3), 키워드 (4), 식별자 (5
 tags: [MISRA, Syntax]
 series: "MISRA C"
 seriesOrder: 4
+draft: true
 ---
 
 ## 예정 내용

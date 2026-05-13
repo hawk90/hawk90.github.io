@@ -5,6 +5,7 @@ description: "후건 긍정 / 전건 부정 / 매개념 부주연 등 — 형식
 tags: [Logic, Formal Fallacy]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 10
+draft: true
 ---
 
 ## 작성 중

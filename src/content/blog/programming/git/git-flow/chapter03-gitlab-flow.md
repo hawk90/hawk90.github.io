@@ -5,6 +5,7 @@ description: "GitLab Flow — environment 브랜치 / release 브랜치 변형. 
 tags: [Git, GitLab Flow]
 series: "Git Flow"
 seriesOrder: 3
+draft: true
 ---
 
 ## 작성 중

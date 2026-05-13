@@ -5,6 +5,7 @@ description: "∀ (전칭) / ∃ (존재). 양화사 부정 / 교환. 술어 논
 tags: [Logic, Quantifier, Universal, Existential]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 9
+draft: true
 ---
 
 ## 작성 중

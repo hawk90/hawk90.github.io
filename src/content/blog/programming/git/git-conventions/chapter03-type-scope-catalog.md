@@ -5,6 +5,7 @@ description: "feat / fix / docs / style / refactor / perf / test / chore / build
 tags: [Git, Commit Type, Scope]
 series: "Git Conventions"
 seriesOrder: 3
+draft: true
 ---
 
 ## 작성 중

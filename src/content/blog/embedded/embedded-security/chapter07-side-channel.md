@@ -5,6 +5,7 @@ description: "DPA / SPA / EM / fault injection. constant-time / masking 방어."
 tags: [Side-channel, Power Analysis, Timing Attack]
 series: "Embedded Security"
 seriesOrder: 7
+draft: true
 ---
 
 ## 예정 내용

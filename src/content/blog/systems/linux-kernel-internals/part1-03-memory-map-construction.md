@@ -5,6 +5,7 @@ description: "E820 / DTB → 물리 메모리 맵. memblock → buddy 전환."
 tags: [Linux, Kernel, Memory Map, memblock]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 3
+draft: true
 ---
 
 ## 작성 중

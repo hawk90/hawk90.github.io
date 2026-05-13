@@ -5,6 +5,7 @@ description: "안전한 펌웨어 업데이트. A/B 슬롯, delta update, 서명
 tags: [OTA, Firmware Update, Rollback]
 series: "Embedded Security"
 seriesOrder: 6
+draft: true
 ---
 
 ## 예정 내용

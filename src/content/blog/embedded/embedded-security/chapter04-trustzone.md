@@ -5,6 +5,7 @@ description: "ARM TrustZone — Secure / Non-Secure World 분리. SMC, NSC."
 tags: [TrustZone, ARM, Secure World]
 series: "Embedded Security"
 seriesOrder: 4
+draft: true
 ---
 
 ## 예정 내용

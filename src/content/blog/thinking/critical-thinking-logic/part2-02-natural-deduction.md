@@ -5,6 +5,7 @@ description: "MP / MT / DS / Conj / Simp / Add / HS. 가정 / 부분 증명."
 tags: [Logic, Natural Deduction, Inference Rules]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 6
+draft: true
 ---
 
 ## 작성 중

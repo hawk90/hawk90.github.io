@@ -5,6 +5,7 @@ description: "BIOS / UEFI → GRUB → vmlinuz. real mode → protected → long
 tags: [Linux, Kernel, Boot, GRUB]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 1
+draft: true
 ---
 
 ## 작성 중

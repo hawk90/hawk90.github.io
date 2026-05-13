@@ -5,6 +5,7 @@ description: "ROM → bootloader → kernel → app. 각 단계 서명 검증. R
 tags: [Secure Boot, Root of Trust, Cryptography]
 series: "Embedded Security"
 seriesOrder: 2
+draft: true
 ---
 
 ## 예정 내용

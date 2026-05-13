@@ -5,6 +5,7 @@ description: "Rule of Five, virtual destructor, 다중 상속, override / final.
 tags: [AUTOSAR, Class, Inheritance]
 series: "AUTOSAR C++14"
 seriesOrder: 5
+draft: true
 ---
 
 ## 예정 내용

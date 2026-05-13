@@ -5,6 +5,7 @@ description: "MISRA 분석기 — PRQA / Polyspace / cppcheck-misra / clang-tidy
 tags: [MISRA, Tools, Certification]
 series: "MISRA C"
 seriesOrder: 10
+draft: true
 ---
 
 ## 예정 내용

@@ -5,6 +5,7 @@ description: "컴파일 파이프라인 — preprocessor / compiler / assembler 
 tags: [C, Compilation, Linker]
 series: "전문가를 위한 C"
 seriesOrder: 2
+draft: true
 ---
 
 ## 작성 중

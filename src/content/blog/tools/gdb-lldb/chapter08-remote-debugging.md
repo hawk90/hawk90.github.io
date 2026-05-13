@@ -5,6 +5,7 @@ description: "임베디드 / 원격 머신 디버깅. target remote."
 tags: [gdb, Remote Debug, gdbserver]
 series: "GDB / LLDB"
 seriesOrder: 8
+draft: true
 ---
 
 ## 예정 내용

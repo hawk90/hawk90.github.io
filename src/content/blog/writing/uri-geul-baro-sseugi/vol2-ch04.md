@@ -8,6 +8,7 @@ tags: [writing, korean, 이오덕, 우리말]
 type: book-review
 bookTitle: "우리글 바로쓰기"
 bookAuthor: "이오덕"
+draft: true
 ---
 
 > **우리글 바로쓰기** 제2권 4장 요약

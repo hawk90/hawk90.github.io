@@ -5,6 +5,7 @@ description: "프로세스 메모리 레이아웃 — text / data / bss / heap /
 tags: [C, Memory, Process]
 series: "전문가를 위한 C"
 seriesOrder: 4
+draft: true
 ---
 
 ## 작성 중

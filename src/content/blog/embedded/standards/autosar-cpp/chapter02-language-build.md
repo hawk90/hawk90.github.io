@@ -5,6 +5,7 @@ description: "환경 / 식별자 / 어휘 규칙. M0 implementation-defined, M1-
 tags: [AUTOSAR, Lexical]
 series: "AUTOSAR C++14"
 seriesOrder: 2
+draft: true
 ---
 
 ## 예정 내용

@@ -5,6 +5,7 @@ description: "C 핵심 기능 — preprocessor, 변수 / 함수 / 포인터, 함
 tags: [C, Preprocessor, Pointers]
 series: "전문가를 위한 C"
 seriesOrder: 1
+draft: true
 ---
 
 ## 작성 중

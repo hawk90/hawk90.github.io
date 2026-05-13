@@ -5,6 +5,7 @@ description: "Git의 핵심 — 가벼운 브랜치. branch / checkout / merge /
 tags: [Git, Branching, Merge, Rebase]
 series: "Pro Git"
 seriesOrder: 3
+draft: true
 ---
 
 ## 작성 중

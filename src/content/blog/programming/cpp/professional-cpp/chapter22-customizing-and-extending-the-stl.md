@@ -5,6 +5,7 @@ description: "사용자 정의 allocator, 사용자 컨테이너 / 알고리즘.
 tags: [C++, STL, Allocator, Custom]
 series: "전문가를 위한 C++"
 seriesOrder: 22
+draft: true
 ---
 
 ## 작성 중

@@ -5,6 +5,7 @@ description: "스레드 동기화 — pthread_mutex / cond / barrier. reader-wri
 tags: [C, pthread, Synchronization]
 series: "전문가를 위한 C"
 seriesOrder: 16
+draft: true
 ---
 
 ## 작성 중

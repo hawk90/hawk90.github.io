@@ -5,6 +5,7 @@ description: "timer wheel 구현"
 series: "Modern Embedded Recipes"
 seriesOrder: 12
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - timer wheel 구현

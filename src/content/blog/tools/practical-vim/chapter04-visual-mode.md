@@ -5,6 +5,7 @@ description: "비주얼 모드 — 선택 후 명령. v / V / Ctrl+v 세 변종.
 tags: [Vim, Visual Mode]
 series: "Practical Vim"
 seriesOrder: 4
+draft: true
 ---
 
 ## 작성 중

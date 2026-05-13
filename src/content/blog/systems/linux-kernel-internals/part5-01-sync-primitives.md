@@ -5,6 +5,7 @@ description: "커널 동기화 도구. spinlock vs mutex 선택. RCU의 lock-fre
 tags: [Linux, Kernel, Synchronization, RCU]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 22
+draft: true
 ---
 
 ## 작성 중

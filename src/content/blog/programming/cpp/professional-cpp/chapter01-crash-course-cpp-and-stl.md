@@ -5,6 +5,7 @@ description: "C++ 단축 입문 — 핵심 언어 + STL. 시리즈의 시작점.
 tags: [C++, STL, Crash Course]
 series: "전문가를 위한 C++"
 seriesOrder: 1
+draft: true
 ---
 
 ## 작성 중

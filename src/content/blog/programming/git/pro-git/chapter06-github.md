@@ -5,6 +5,7 @@ description: "GitHub 워크플로우 — fork / PR / 코드 리뷰 / Issues / Ac
 tags: [Git, GitHub, Pull Request]
 series: "Pro Git"
 seriesOrder: 6
+draft: true
 ---
 
 ## 작성 중

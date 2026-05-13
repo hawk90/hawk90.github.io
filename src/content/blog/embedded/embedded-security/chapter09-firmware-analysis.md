@@ -5,6 +5,7 @@ description: "binwalk / Ghidra / radare2. 펌웨어 추출 / 분석 / fuzzing."
 tags: [Firmware, Reverse Engineering, Ghidra]
 series: "Embedded Security"
 seriesOrder: 9
+draft: true
 ---
 
 ## 예정 내용

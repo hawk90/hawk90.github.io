@@ -5,6 +5,7 @@ description: "STL 사용 — std::array > vector, 안전 함수, deprecated 회�
 tags: [AUTOSAR, STL, Standard Library]
 series: "AUTOSAR C++14"
 seriesOrder: 8
+draft: true
 ---
 
 ## 예정 내용

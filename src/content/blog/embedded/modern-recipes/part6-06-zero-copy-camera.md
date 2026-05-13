@@ -5,6 +5,7 @@ description: "zero-copy camera path"
 series: "Modern Embedded Recipes"
 seriesOrder: 36
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - zero-copy camera path

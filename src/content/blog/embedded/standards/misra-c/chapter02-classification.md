@@ -5,6 +5,7 @@ description: "Directive vs Rule. 위반 시 deviation 절차."
 tags: [MISRA, Classification, Deviation]
 series: "MISRA C"
 seriesOrder: 2
+draft: true
 ---
 
 ## 예정 내용

@@ -5,6 +5,7 @@ description: "zero-copy pipeline"
 series: "Modern Embedded Recipes"
 seriesOrder: 15
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - zero-copy pipeline

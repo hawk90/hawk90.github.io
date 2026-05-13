@@ -5,6 +5,7 @@ description: "malloc / free 함정 — double free / UAF / leak. realloc 안전.
 tags: [CERT, Memory, malloc, UAF]
 series: "CERT C"
 seriesOrder: 8
+draft: true
 ---
 
 ## 예정 내용

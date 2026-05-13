@@ -5,6 +5,7 @@ description: "The Back of the Envelope"
 series: "Programming Pearls"
 seriesOrder: 7
 tags: [algorithms, programming-pearls, classics]
+draft: true
 ---
 
 > **Programming Pearls** Column 7 요약

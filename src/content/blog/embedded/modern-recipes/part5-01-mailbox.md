@@ -5,6 +5,7 @@ description: "FPGA mailbox protocol"
 series: "Modern Embedded Recipes"
 seriesOrder: 25
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - FPGA mailbox protocol

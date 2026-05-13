@@ -5,6 +5,7 @@ description: "UIO/VFIO"
 series: "Modern Embedded Recipes"
 seriesOrder: 22
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - UIO/VFIO

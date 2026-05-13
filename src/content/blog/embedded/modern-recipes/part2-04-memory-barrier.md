@@ -5,6 +5,7 @@ description: "memory barrier"
 series: "Modern Embedded Recipes"
 seriesOrder: 10
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - memory barrier

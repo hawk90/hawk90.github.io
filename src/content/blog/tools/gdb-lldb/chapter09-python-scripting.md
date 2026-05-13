@@ -5,6 +5,7 @@ description: "gdb Python API. pretty-printer. 커스텀 명령."
 tags: [gdb, Python, Scripting]
 series: "GDB / LLDB"
 seriesOrder: 9
+draft: true
 ---
 
 ## 예정 내용

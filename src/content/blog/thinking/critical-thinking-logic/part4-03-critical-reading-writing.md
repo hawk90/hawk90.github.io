@@ -5,6 +5,7 @@ description: "체크리스트 — 어떤 글이든 비판적으로 평가하는 
 tags: [Logic, Critical Reading, Writing]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 16
+draft: true
 ---
 
 ## 작성 중

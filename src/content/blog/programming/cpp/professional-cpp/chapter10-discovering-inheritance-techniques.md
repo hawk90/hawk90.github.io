@@ -5,6 +5,7 @@ description: "상속 — virtual, override, final. 다중 상속, virtual 상속
 tags: [C++, Inheritance, Virtual]
 series: "전문가를 위한 C++"
 seriesOrder: 10
+draft: true
 ---
 
 ## 작성 중

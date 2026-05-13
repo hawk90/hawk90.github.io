@@ -5,6 +5,7 @@ description: "노멀 모드 — 기본 시작점. 연산자 + 동작 결합. cou
 tags: [Vim, Normal Mode]
 series: "Practical Vim"
 seriesOrder: 2
+draft: true
 ---
 
 ## 작성 중

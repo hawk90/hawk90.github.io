@@ -5,6 +5,7 @@ description: "잘 쓴 커밋 메시지의 형태 — 50/72 규칙, 명령형, wh
 tags: [Git, Commit Message]
 series: "Git Conventions"
 seriesOrder: 2
+draft: true
 ---
 
 ## 작성 중

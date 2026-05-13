@@ -5,6 +5,7 @@ description: "Strings of Pearls"
 series: "Programming Pearls"
 seriesOrder: 15
 tags: [algorithms, programming-pearls, classics]
+draft: true
 ---
 
 > **Programming Pearls** Column 15 요약

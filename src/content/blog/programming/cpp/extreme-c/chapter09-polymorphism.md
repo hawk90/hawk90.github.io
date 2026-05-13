@@ -5,6 +5,7 @@ description: "C 다형성 — 함수 포인터 / vtable. 수동 OO의 정점."
 tags: [C, OOP, Polymorphism, vtable]
 series: "전문가를 위한 C"
 seriesOrder: 9
+draft: true
 ---
 
 ## 작성 중

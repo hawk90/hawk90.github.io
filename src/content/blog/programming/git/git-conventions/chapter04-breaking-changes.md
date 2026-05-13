@@ -5,6 +5,7 @@ description: "BREAKING CHANGE 표기 — body footer / type! 형태. semver와 �
 tags: [Git, Breaking Change, Semver]
 series: "Git Conventions"
 seriesOrder: 4
+draft: true
 ---
 
 ## 작성 중

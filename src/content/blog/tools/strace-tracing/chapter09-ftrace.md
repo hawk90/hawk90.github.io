@@ -5,6 +5,7 @@ description: "ftrace — 커널 내장 트레이서. function_graph / events / s
 tags: [ftrace, tracecmd, Kernel]
 series: "System Tracing"
 seriesOrder: 9
+draft: true
 ---
 
 ## 예정 내용

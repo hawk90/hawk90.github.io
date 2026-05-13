@@ -5,6 +5,7 @@ description: "Git 설정 / attribute / hook. pre-commit / pre-push / commit-msg.
 tags: [Git, Configuration, Hooks]
 series: "Pro Git"
 seriesOrder: 8
+draft: true
 ---
 
 ## 작성 중

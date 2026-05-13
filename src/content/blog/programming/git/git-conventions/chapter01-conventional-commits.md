@@ -5,6 +5,7 @@ description: "Conventional Commits 1.0 표준. type / scope / description / body
 tags: [Git, Conventional Commits]
 series: "Git Conventions"
 seriesOrder: 1
+draft: true
 ---
 
 ## 작성 중

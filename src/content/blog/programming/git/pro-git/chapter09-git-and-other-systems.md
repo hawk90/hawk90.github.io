@@ -5,6 +5,7 @@ description: "다른 VCS와의 통합 / 마이그레이션 — SVN / Mercurial /
 tags: [Git, SVN, Migration]
 series: "Pro Git"
 seriesOrder: 9
+draft: true
 ---
 
 ## 작성 중

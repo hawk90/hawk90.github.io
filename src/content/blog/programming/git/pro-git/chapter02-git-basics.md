@@ -5,6 +5,7 @@ description: "기본 워크플로우 — status / add / commit / log / diff / re
 tags: [Git, Basics]
 series: "Pro Git"
 seriesOrder: 2
+draft: true
 ---
 
 ## 작성 중

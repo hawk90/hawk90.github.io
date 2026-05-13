@@ -5,6 +5,7 @@ description: "표준 알고리즘 — find / sort / transform / accumulate. exec
 tags: [C++, STL, Algorithms]
 series: "전문가를 위한 C++"
 seriesOrder: 18
+draft: true
 ---
 
 ## 작성 중

@@ -5,6 +5,7 @@ description: "kernel_init → /sbin/init. SysV init / systemd / busybox 비교."
 tags: [Linux, init, systemd]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 4
+draft: true
 ---
 
 ## 작성 중

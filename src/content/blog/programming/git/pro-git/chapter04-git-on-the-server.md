@@ -5,6 +5,7 @@ description: "Git 서버 설정 — protocol (local / SSH / HTTP / git). bare �
 tags: [Git, Server, SSH]
 series: "Pro Git"
 seriesOrder: 4
+draft: true
 ---
 
 ## 작성 중

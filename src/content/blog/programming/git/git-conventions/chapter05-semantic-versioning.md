@@ -5,6 +5,7 @@ description: "MAJOR.MINOR.PATCH 의미. pre-release / build metadata. CalVer 비
 tags: [Git, Semver, Versioning]
 series: "Git Conventions"
 seriesOrder: 5
+draft: true
 ---
 
 ## 작성 중

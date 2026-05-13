@@ -5,6 +5,7 @@ description: "Algorithm Design Techniques"
 series: "Programming Pearls"
 seriesOrder: 8
 tags: [algorithms, programming-pearls, classics]
+draft: true
 ---
 
 > **Programming Pearls** Column 8 요약

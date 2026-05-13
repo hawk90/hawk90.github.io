@@ -5,6 +5,7 @@ description: "샘플링 프로파일링 — perf record. perf report로 분석."
 tags: [perf, Sampling, Profile]
 series: "perf / FlameGraph"
 seriesOrder: 3
+draft: true
 ---
 
 ## 예정 내용

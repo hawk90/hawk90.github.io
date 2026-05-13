@@ -5,6 +5,7 @@ description: "Mill의 방법 — 일치 / 차이 / 잔여. 유비 강도. 최선
 tags: [Logic, Causal, Analogy, Hypothesis]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 13
+draft: true
 ---
 
 ## 작성 중

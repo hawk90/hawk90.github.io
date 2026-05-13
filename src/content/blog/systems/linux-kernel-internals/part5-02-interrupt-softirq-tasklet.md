@@ -5,6 +5,7 @@ description: "인터럽트 처리 계층 — top half / bottom half. workqueue."
 tags: [Linux, Kernel, Interrupt, softirq, workqueue]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 23
+draft: true
 ---
 
 ## 작성 중

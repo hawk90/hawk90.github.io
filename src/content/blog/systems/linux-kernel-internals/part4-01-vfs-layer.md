@@ -5,6 +5,7 @@ description: "Virtual File System — 추상 인터페이스. inode / dentry / f
 tags: [Linux, Kernel, VFS, File System]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 17
+draft: true
 ---
 
 ## 작성 중

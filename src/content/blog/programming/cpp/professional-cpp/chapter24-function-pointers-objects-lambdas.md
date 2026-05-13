@@ -5,6 +5,7 @@ description: "function pointer / 함수 객체 / 람다. std::function / functio
 tags: [C++, Lambda, std::function, Function Object]
 series: "전문가를 위한 C++"
 seriesOrder: 24
+draft: true
 ---
 
 ## 작성 중

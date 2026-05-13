@@ -5,6 +5,7 @@ description: "제어문 (14), goto (15), switch (16). break / continue / 명시 
 tags: [MISRA, Control Flow, Switch]
 series: "MISRA C"
 seriesOrder: 7
+draft: true
 ---
 
 ## 예정 내용

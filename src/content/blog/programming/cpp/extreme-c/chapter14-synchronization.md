@@ -5,6 +5,7 @@ description: "동기화 primitives — mutex / semaphore / condition variable. a
 tags: [C, Synchronization, Mutex, Atomic]
 series: "전문가를 위한 C"
 seriesOrder: 14
+draft: true
 ---
 
 ## 작성 중

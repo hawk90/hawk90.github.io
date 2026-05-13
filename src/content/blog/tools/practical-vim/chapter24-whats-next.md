@@ -5,6 +5,7 @@ description: "Vim 학습 지속 — 도움말 활용, 플러그인 관리, Neovi
 tags: [Vim, Learning]
 series: "Practical Vim"
 seriesOrder: 21
+draft: true
 ---
 
 ## 예정 내용 (Tip 121)

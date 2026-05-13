@@ -5,6 +5,7 @@ description: "코딩 스타일 — 문서화 / 주석 / 명명 / decomposition /
 tags: [C++, Style, Naming]
 series: "전문가를 위한 C++"
 seriesOrder: 3
+draft: true
 ---
 
 ## 작성 중

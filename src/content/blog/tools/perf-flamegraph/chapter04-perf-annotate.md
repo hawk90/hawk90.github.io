@@ -5,6 +5,7 @@ description: "perf annotate — 어셈블리 + 소스에 hot spot 표시."
 tags: [perf, Annotate, Assembly]
 series: "perf / FlameGraph"
 seriesOrder: 4
+draft: true
 ---
 
 ## 예정 내용

@@ -8,6 +8,7 @@ tags: [writing, grammar, reference, thurman]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
 ---
 
 > **The Only Grammar Book You'll Ever Need** Chapter 1 요약

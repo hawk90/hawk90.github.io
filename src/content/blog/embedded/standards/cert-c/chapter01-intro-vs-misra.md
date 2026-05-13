@@ -5,6 +5,7 @@ description: "CERT 단체, 보안 중심 표준. MISRA C와의 차이와 결합.
 tags: [CERT, Security, MISRA]
 series: "CERT C"
 seriesOrder: 1
+draft: true
 ---
 
 ## 예정 내용

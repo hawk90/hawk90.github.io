@@ -5,6 +5,7 @@ description: "C 단위 테스트 — CMocka / Unity. gdb / valgrind / sanitizer.
 tags: [C, Testing, Debugging, gdb, Valgrind]
 series: "전문가를 위한 C"
 seriesOrder: 10
+draft: true
 ---
 
 ## 작성 중

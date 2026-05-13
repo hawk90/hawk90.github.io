@@ -8,6 +8,7 @@ tags: [writing, academic, research, paper, graduate]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
 ---
 
 > **Academic Writing for Graduate Students** Unit 8 요약

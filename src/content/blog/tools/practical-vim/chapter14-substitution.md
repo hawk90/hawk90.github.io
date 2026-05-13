@@ -5,6 +5,7 @@ description: ":s/find/replace/. flag (g, c, i). 캡처 그룹. 표현식 치환 
 tags: [Vim, Substitute, Substitution]
 series: "Practical Vim"
 seriesOrder: 14
+draft: true
 ---
 
 ## 작성 중

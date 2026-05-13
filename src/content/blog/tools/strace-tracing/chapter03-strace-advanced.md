@@ -5,6 +5,7 @@ description: "-c (통계), -y (fd 이름), -k (콜스택), -e signal, -e network
 tags: [strace, Advanced]
 series: "System Tracing"
 seriesOrder: 3
+draft: true
 ---
 
 ## 예정 내용

@@ -5,6 +5,7 @@ description: "Aha! Algorithms"
 series: "Programming Pearls"
 seriesOrder: 2
 tags: [algorithms, programming-pearls, classics]
+draft: true
 ---
 
 > **Programming Pearls** Column 2 요약

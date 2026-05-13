@@ -5,6 +5,7 @@ description: "진리표 / 진리수목 / 자연 연역 — 세 가지 타당성 
 tags: [Logic, Validity, Truth Tree]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 7
+draft: true
 ---
 
 ## 작성 중

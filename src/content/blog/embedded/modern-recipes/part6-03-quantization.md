@@ -5,6 +5,7 @@ description: "quantization"
 series: "Modern Embedded Recipes"
 seriesOrder: 33
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - quantization

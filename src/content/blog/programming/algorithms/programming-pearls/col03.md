@@ -5,6 +5,7 @@ description: "Data Structures Programs"
 series: "Programming Pearls"
 seriesOrder: 3
 tags: [algorithms, programming-pearls, classics]
+draft: true
 ---
 
 > **Programming Pearls** Column 3 요약

@@ -5,6 +5,7 @@ description: "cache line alignment"
 series: "Modern Embedded Recipes"
 seriesOrder: 13
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - cache line alignment

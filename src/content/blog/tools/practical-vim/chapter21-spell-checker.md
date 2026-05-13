@@ -5,6 +5,7 @@ description: ":set spell. ]s [s — 다음/이전 오류. z= 제안. zg 사전 �
 tags: [Vim, Spell Check]
 series: "Practical Vim"
 seriesOrder: 20
+draft: true
 ---
 
 ## 예정 내용 (Tips 118-120)

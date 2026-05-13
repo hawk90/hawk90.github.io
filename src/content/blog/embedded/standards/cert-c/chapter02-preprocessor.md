@@ -5,6 +5,7 @@ description: "매크로 함정 — side effect, 괄호, 식별자 충돌. PRE00-
 tags: [CERT, Preprocessor, Macro]
 series: "CERT C"
 seriesOrder: 2
+draft: true
 ---
 
 ## 예정 내용

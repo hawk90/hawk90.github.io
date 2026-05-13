@@ -5,6 +5,7 @@ description: "스택 vs 힙 — 라이프타임 / 성능 / 안전. malloc / free
 tags: [C, Memory, Stack, Heap, malloc]
 series: "전문가를 위한 C"
 seriesOrder: 5
+draft: true
 ---
 
 ## 작성 중

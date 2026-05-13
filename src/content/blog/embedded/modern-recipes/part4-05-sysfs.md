@@ -5,6 +5,7 @@ description: "sysfs/debugfs"
 series: "Modern Embedded Recipes"
 seriesOrder: 23
 tags: [embedded, recipes]
+draft: true
 ---
 
 > **Modern Embedded Recipes** - sysfs/debugfs

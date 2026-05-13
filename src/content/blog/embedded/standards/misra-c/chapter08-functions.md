@@ -5,6 +5,7 @@ description: "재귀 금지, 가변 인자 금지, return type 일치, prototype
 tags: [MISRA, Function]
 series: "MISRA C"
 seriesOrder: 8
+draft: true
 ---
 
 ## 예정 내용

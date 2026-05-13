@@ -5,6 +5,7 @@ description: "bpftrace — awk-like DSL. probe 타입, 변수, map, action."
 tags: [bpftrace, eBPF, DSL]
 series: "System Tracing"
 seriesOrder: 6
+draft: true
 ---
 
 ## 예정 내용

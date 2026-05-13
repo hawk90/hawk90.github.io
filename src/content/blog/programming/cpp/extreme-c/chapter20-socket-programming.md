@@ -5,6 +5,7 @@ description: "TCP / UDP 소켓. listen / accept / connect. select / poll / epoll
 tags: [C, Socket, TCP, UDP, epoll]
 series: "전문가를 위한 C"
 seriesOrder: 20
+draft: true
 ---
 
 ## 작성 중

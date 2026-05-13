@@ -5,6 +5,7 @@ description: "MCU 내장 crypto 엔진. 소프트웨어 vs 하드웨어. constan
 tags: [Crypto, AES, ECC, MCU]
 series: "Embedded Security"
 seriesOrder: 3
+draft: true
 ---
 
 ## 예정 내용

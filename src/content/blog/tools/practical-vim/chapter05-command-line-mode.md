@@ -5,6 +5,7 @@ description: ": ex 명령 — 범위 + 명령. q: 명령 히스토리. range / g
 tags: [Vim, Ex Command]
 series: "Practical Vim"
 seriesOrder: 5
+draft: true
 ---
 
 ## 작성 중
