@@ -7,9 +7,30 @@ series: "Effective C++"
 seriesOrder: 43
 ---
 
+## 왜 이 항목이 중요한가?
+
+derived 클래스 템플릿에서 base 템플릿의 멤버를 그냥 호출하면 **컴파일 에러**가 난다. 일반 상속에선 잘 동작하던 코드가 템플릿화하는 순간 깨진다.
+
+```cpp
+template<typename Company>
+class MsgSender { void sendClear() { /* ... */ } };
+
+template<typename Company>
+class LoggingMsgSender : public MsgSender<Company> {
+public:
+    void sendLogged() {
+        sendClear();   // ❌ 컴파일 에러
+    }
+};
+```
+
+이유는 C++의 **2단계 이름 검색** 때문이다. 1단계(템플릿 정의 시점)에선 base 템플릿이 어떤 특수화로 인스턴스화될지 모르므로 base의 멤버를 검색하지 않는다. `MsgSender<Bob>::sendClear`가 없을 수도 있기 때문이다.
+
+해결책은 세 가지다 — `this->sendClear()`, `using MsgSender<Company>::sendClear;`, 또는 명시 자격 `MsgSender<Company>::sendClear()`. 이 항목은 세 방식의 트레이드오프를 정리한다.
+
 ## 개요
 
-derived 클래스 템플릿이 base 클래스 템플릿을 상속할 때 — base의 멤버 함수를 그냥 호출하면 **컴파일 에러**가 날 수 있습니다. 이유는 base 템플릿의 특수화로 인해 그 멤버가 존재하지 않을 가능성이 있기 때문. 해결책은 세 가지 — `this->`, `using`, 명시 자격 — 각각 트레이드오프가 있습니다.
+derived 클래스 템플릿이 base 클래스 템플릿을 상속할 때 base의 멤버 함수를 그냥 호출하면 **컴파일 에러**가 날 수 있다. 이유는 base 템플릿의 특수화로 인해 그 멤버가 존재하지 않을 가능성이 있기 때문이다. 해결책은 세 가지(`this->`, `using`, 명시 자격)이고 각각 트레이드오프가 있다.
 
 ## 함정 — base 멤버를 그냥 호출
 
