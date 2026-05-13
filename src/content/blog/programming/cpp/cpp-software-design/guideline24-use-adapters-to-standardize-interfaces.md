@@ -1,7 +1,7 @@
 ---
 title: "가이드라인 24: 인터페이스 표준화에 Adapter를 사용하라"
 date: 2026-05-14T20:00:00
-description: "Adapter 패턴 — 호환 안 되는 인터페이스를 연결. 표준 인터페이스로 외부 API/legacy 코드 통합."
+description: "Adapter 패턴은 호환되지 않는 인터페이스를 연결한다. 외부 API와 legacy 코드를 표준 인터페이스로 통합한다."
 tags: [C++, Software Design, Adapter, Design Patterns]
 series: "C++ Software Design"
 seriesOrder: 24
@@ -23,9 +23,9 @@ public:
 };
 ```
 
-ExternalLib을 — 우리 코드가 그대로 사용할 수 없음. 인터페이스 불일치.
+ExternalLib을 우리 코드에서 그대로 쓸 수 없다. 인터페이스가 맞지 않는다.
 
-**Adapter 패턴** — 두 호환 안 되는 인터페이스를 연결.
+**Adapter 패턴**이 두 호환되지 않는 인터페이스를 잇는다.
 
 ```cpp
 class ExternalLibAdapter : public ILogger {
@@ -38,15 +38,15 @@ public:
 };
 ```
 
-우리 코드 — ILogger만 의존. Adapter가 — 외부 라이브러리와 우리 인터페이스의 다리.
+우리 코드는 `ILogger`에만 의존한다. Adapter가 외부 라이브러리와 우리 인터페이스를 잇는 다리가 된다.
 
 ## 핵심 내용
 
-- **Adapter 패턴** — 호환 안 되는 인터페이스 연결
-- 본질 — **두 인터페이스의 다리** (변환자)
-- 활용: 외부 라이브러리 통합, legacy 코드, 표준화
-- C++ 구현 — 가상 함수 / 템플릿 / `std::function` / `std::variant`
-- 표준 라이브러리 — `std::stack`, stream iterator, etc.
+- **Adapter 패턴** — 호환되지 않는 인터페이스를 연결한다.
+- 본질은 **두 인터페이스의 다리**(변환자)다.
+- 활용은 외부 라이브러리 통합, legacy 코드 wrapping, 표준화 등이다.
+- C++ 구현은 가상 함수, 템플릿, `std::function`, `std::variant` 모두 가능하다.
+- 표준 라이브러리에 `std::stack`, stream iterator 등 예가 풍부하다.
 
 ## GoF Adapter 구조
 
@@ -64,19 +64,19 @@ public:
     void specific_request();
 };
 
-// Adapter — Target 인터페이스 구현, Adaptee를 사용
+// Adapter — Target 인터페이스를 구현하고, 내부에서 Adaptee를 사용한다
 class Adapter : public ITarget {
     Adaptee& adaptee_;
 public:
     explicit Adapter(Adaptee& a) : adaptee_(a) {}
-    
+
     void request() override {
         adaptee_.specific_request();     // 변환
     }
 };
 ```
 
-GoF 표준 — Object Adapter (composition). Class Adapter (private 상속) — C++에서 가능하지만 less common.
+GoF 표준은 Object Adapter(composition)다. Class Adapter(private 상속)는 C++에서 가능은 하지만 흔히 쓰지 않는다.
 
 ## 실전 — 외부 라이브러리 wrapping
 
@@ -98,22 +98,22 @@ extern "C" {
 class ZlibAdapter : public ICompressor {
 public:
     std::vector<std::byte> compress(std::span<const std::byte> data) override {
-        unsigned long out_size = data.size() * 2 + 12;     // zlib 권장
+        unsigned long out_size = data.size() * 2 + 12;     // zlib 권장 크기
         std::vector<std::byte> result(out_size);
-        
+
         ::compress(
             reinterpret_cast<unsigned char*>(result.data()),
             &out_size,
             reinterpret_cast<const unsigned char*>(data.data()),
             data.size()
         );
-        
+
         result.resize(out_size);
         return result;
     }
 };
 
-// 사용자 코드 — ICompressor만 의존
+// 사용자 코드는 ICompressor에만 의존한다
 void backup(ICompressor& c, std::span<const std::byte> data) {
     auto compressed = c.compress(data);
     // save compressed
@@ -123,7 +123,7 @@ ZlibAdapter zlib;
 backup(zlib, data);
 ```
 
-zlib의 C API — 우리 OOP 인터페이스로 변환. 사용자 코드 — zlib 디테일 모름.
+zlib의 C API가 OOP 인터페이스로 들어왔다. 사용자 코드는 zlib의 디테일을 알 필요가 없다.
 
 ## 다양한 Adaptee 지원
 
@@ -132,23 +132,23 @@ class ZlibAdapter : public ICompressor { /* ... */ };
 class ZstdAdapter : public ICompressor { /* ... */ };
 class LzmaAdapter : public ICompressor { /* ... */ };
 
-// 사용자 코드 — Adapter 교체 가능
+// 사용자 코드는 Adapter를 갈아 끼울 수 있다
 ICompressor& compressor = some_factory.create();
 backup(compressor, data);
 ```
 
-표준 인터페이스 — 다양한 구현 통합.
+표준 인터페이스 한 자리에 다양한 구현을 통합한다.
 
 ## Adapter vs Wrapper
 
 | 개념 | 의도 |
 | --- | --- |
-| **Adapter** | 인터페이스 변환 — 호환 안 되는 API를 표준에 맞춤 |
-| **Wrapper** | 일반 용어 — 객체를 감쌈 (목적 다양) |
-| **Decorator** | 기능 추가 — 같은 인터페이스 (가이드라인 35) |
-| **Proxy** | 접근 제어 — 같은 인터페이스 (lazy, security 등) |
+| **Adapter** | 인터페이스 변환 — 호환되지 않는 API를 표준에 맞춘다 |
+| **Wrapper** | 일반 용어 — 객체를 감싼다(목적은 다양하다) |
+| **Decorator** | 기능 추가 — 같은 인터페이스에 동작을 더한다(가이드라인 35) |
+| **Proxy** | 접근 제어 — 같은 인터페이스(lazy, security 등) |
 
-Adapter — **인터페이스 변환이 본질**. 다른 wrapping 패턴과 구분.
+Adapter는 **인터페이스 변환이 본질**이다. 다른 wrapping 패턴과 구분한다.
 
 ## 표준 라이브러리의 Adapter
 
@@ -159,11 +159,11 @@ std::stack<int>;           // std::deque를 stack 인터페이스로 adapt
 std::queue<int>;
 std::priority_queue<int>;
 
-// 내부 컨테이너 — 다양
+// 내부 컨테이너는 다양하게 고를 수 있다
 std::stack<int, std::vector<int>>;     // vector를 stack으로 adapt
 ```
 
-`stack`, `queue`, `priority_queue` — 내부 컨테이너를 — 자기 인터페이스로 adapt.
+`stack`, `queue`, `priority_queue`가 내부 컨테이너를 자기 인터페이스로 adapt한다.
 
 ### Iterator Adapter
 
@@ -180,23 +180,23 @@ std::copy(v.rbegin(), v.rend(), std::back_inserter(other));
 //          reverse adapter       insert adapter
 ```
 
-각 iterator adapter — iterator를 다른 의미로 변환.
+각 iterator adapter가 iterator를 다른 의미로 변환한다.
 
 ### Function Adapter
 
 ```cpp
 auto greater = std::greater<int>{};
-auto less = std::not_fn(greater);     // adapter — not_fn으로 반대
+auto less = std::not_fn(greater);     // not_fn — 반대로 만든다
 
 auto bound = std::bind_front(some_function, arg1);     // C++20
 ```
 
-`std::not_fn`, `std::bind` — 함수 객체 adapter.
+`std::not_fn`이나 `std::bind`가 함수 객체 adapter다.
 
 ## 모던 — Type Erasure Adapter
 
 ```cpp
-// 어떤 callable이든 ICompressor 같이
+// 어떤 callable이든 ICompressor처럼 다룬다
 using Compressor = std::function<std::vector<std::byte>(std::span<const std::byte>)>;
 
 void backup(Compressor c, std::span<const std::byte> data) {
@@ -204,26 +204,26 @@ void backup(Compressor c, std::span<const std::byte> data) {
     // ...
 }
 
-// 어떤 callable이든
+// 어떤 callable이든 받는다
 backup([](auto data) { return /* zlib */; }, my_data);
 backup(ZstdLib{}, my_data);     // functor
 backup(zstd_compress, my_data);  // 함수 포인터
 ```
 
-`std::function` — type erasure adapter. 가상 함수 hierarchy 없이.
+`std::function`이 type erasure adapter다. 가상 함수 hierarchy 없이 같은 효과를 낸다.
 
-## Stream Adapter — C++ 모범
+## Stream Adapter — C++의 모범
 
 ```cpp
 std::ifstream file{"data.txt"};
 std::stringstream buffer;
-buffer << file.rdbuf();     // file의 stream buffer를 string으로 변환
+buffer << file.rdbuf();     // file의 stream buffer를 string으로 옮긴다
 std::string content = buffer.str();
 ```
 
-stream — 여러 source/sink의 통합 인터페이스. stream adapter로 — file, memory, network 등.
+stream은 다양한 source/sink를 한 인터페이스로 통합한다. stream adapter로 file, memory, network를 같은 흐름에 둔다.
 
-## C++23 Range Adapter
+## C++20 Range Adapter
 
 ```cpp
 auto evens = numbers
@@ -232,7 +232,7 @@ auto evens = numbers
     | std::views::take(10);
 ```
 
-ranges view — adapter chain. 각 view가 — 이전 range를 다른 인터페이스로 변환.
+ranges view가 adapter chain이다. 각 view가 이전 range를 다른 인터페이스로 변환한다.
 
 ## 함정 — Adapter의 비용
 
@@ -241,16 +241,16 @@ class Adapter : public ITarget {
     Adaptee adaptee_;
 public:
     void request() override {
-        // 변환 로직 — 종종 비싼 연산
+        // 변환 로직 — 종종 비싸다
         std::string converted = convert(...);
         adaptee_.specific_request(converted);
     }
 };
 ```
 
-매 호출 — 변환 비용. 핫 패스 — 측정.
+매 호출마다 변환 비용이 든다. 핫 패스라면 측정해 본다.
 
-해결: 변환을 — adapter ctor에 (한 번만), 또는 캐싱.
+해법은 ctor에서 한 번만 변환하거나 결과를 캐싱하는 것이다.
 
 ## Adapter + DI
 
@@ -261,7 +261,7 @@ public:
     explicit Service(ICompressor& c) : compressor_(c) {}
 };
 
-// 실제 — Adapter 주입
+// 실제 — Adapter를 주입한다
 ZlibAdapter zlib;
 Service svc{zlib};
 
@@ -271,14 +271,14 @@ FakeCompressor fake;
 Service test_svc{fake};
 ```
 
-Adapter는 — DI의 자연.
+Adapter는 DI에 자연스럽다.
 
 ## Class Adapter (private 상속)
 
 ```cpp
 class ZlibAdapter : private ZlibCompressor, public ICompressor {
-    // private 상속 — ZlibCompressor 인터페이스 숨김
-    // public 상속 — ICompressor 노출
+    // private 상속으로 ZlibCompressor 인터페이스를 숨긴다
+    // public 상속으로 ICompressor를 노출한다
 public:
     std::vector<std::byte> compress(std::span<const std::byte> data) override {
         return ZlibCompressor::compress(data);     // private base 호출
@@ -286,7 +286,7 @@ public:
 };
 ```
 
-private 상속 — composition의 대안 (가이드라인 39 EC++). 다만 — composition (object adapter)이 보통 단순.
+private 상속은 composition의 대안이다(EC++ 항목 39). 보통은 composition(object adapter)이 더 단순하다.
 
 ## 모던 변형 — std::variant Adapter
 
@@ -303,7 +303,7 @@ std::vector<std::byte> compress(const Compressor& c, std::span<const std::byte> 
 }
 ```
 
-variant — value semantics + closed adapter set.
+variant 기반은 값 의미론과 닫힌 adapter 집합을 함께 가져간다.
 
 ## 함정 — Adapter 남용
 
@@ -320,20 +320,20 @@ class Adapter3 : public Interface3 {
     /* ... */
 };
 
-// Adapter chain — 호출 비용 누적
+// Adapter chain — 호출 비용이 누적된다
 ```
 
-너무 많은 adapter — 단순화 검토. 직접 사용 또는 단일 adapter로.
+Adapter가 너무 많이 쌓이면 단순화를 검토한다. 직접 사용하거나 하나의 adapter로 합친다.
 
 ## Adapter의 명확한 의도
 
 ```cpp
-class LoggerAdapter { /* ... */ };       // ⚠️ 모호 — 무엇을 무엇으로?
+class LoggerAdapter { /* ... */ };       // ⚠️ 모호하다 — 무엇을 무엇으로 변환하는가?
 class SpdlogAdapter { /* ... */ };       // ✅ spdlog를 ILogger로
 class ToConsoleLogger { /* ... */ };     // ⚠️ adapter? wrapper? decorator?
 ```
 
-이름이 — adapter 의도 명시. 가이드라인 14.
+이름이 adapter의 의도를 드러내야 한다(가이드라인 14).
 
 ## 양방향 Adapter
 
@@ -342,13 +342,13 @@ class ILoggerOld { virtual void log_old(const char*) = 0; };
 class ILoggerNew { virtual void log_new(const std::string&) = 0; };
 
 class BidirectionalAdapter : public ILoggerOld, public ILoggerNew {
-    // Old → New 또는 New → Old 양방향
+    // Old → New와 New → Old를 모두 지원한다
 };
 ```
 
-매우 드뭄. 보통 단방향 adapter.
+매우 드물게 쓴다. 보통은 단방향 adapter면 충분하다.
 
-## Adapter for Legacy Code
+## Legacy Code를 위한 Adapter
 
 ```cpp
 // Legacy C 코드
@@ -364,19 +364,19 @@ public:
         // 변환
         std::copy(cfg.values.begin(), cfg.values.end(), config_);
         std::strncpy(name_, n.c_str(), sizeof(name_));
-        
+
         old_initialize(config_, name_);
     }
-    
+
     int process(std::span<const std::byte> data) {
         return old_process(const_cast<std::byte*>(data.data()), data.size());
     }
 };
 ```
 
-Legacy C API — 모던 C++ 인터페이스로. 가이드라인 7 (Beautiful C++ — 지저분한 struct 캡슐화).
+Legacy C API를 모던 C++ 인터페이스로 감싼다(Beautiful C++ 항목 7과 같은 결).
 
-## Adapter for Network / API
+## 네트워크 / API를 위한 Adapter
 
 ```cpp
 class IUserService {
@@ -404,7 +404,7 @@ public:
 };
 ```
 
-다양한 통신 프로토콜 — 같은 인터페이스로. 핵심 비즈니스 코드 — 통신 디테일 모름.
+다양한 통신 프로토콜을 같은 인터페이스로 통합한다. 핵심 비즈니스 코드는 통신 디테일을 알지 못한다.
 
 ## Test Adapter
 
@@ -426,36 +426,36 @@ Service svc{fake};
 ASSERT_EQ(svc.process(1).name, "Alice");
 ```
 
-테스트용 fake — adapter의 한 형태.
+테스트용 fake도 adapter의 한 형태다.
 
 ## Adapter vs Bridge
 
 ```
-Adapter — 기존 호환 안 되는 인터페이스 연결
-Bridge — 추상과 구현 분리 (디자인 시점)
+Adapter — 이미 존재하는 호환되지 않는 인터페이스를 잇는다
+Bridge — 추상과 구현을 처음부터 분리한다 (디자인 시점)
 ```
 
-Adapter는 — **기존**에 적용. Bridge는 — **새 디자인**. 가이드라인 28-29.
+Adapter는 **기존 코드**에 적용한다. Bridge는 **새 디자인**에서 시작한다(가이드라인 28~29).
 
-## 함정 — Adapter의 인터페이스 차이가 너무 큼
+## 함정 — Adapter의 인터페이스 차이가 너무 크다
 
 ```cpp
 class ITarget { virtual void simple_operation() = 0; };
 
 class Adaptee {
-    // 50 메서드, 복잡한 상태, 콜백
+    // 메서드 50개, 복잡한 상태, 콜백
 };
 
 class Adapter : public ITarget {
     Adaptee& adaptee_;
 public:
     void simple_operation() override {
-        // 50개 호출 + 복잡한 변환
+        // 50개 호출과 복잡한 변환
     }
 };
 ```
 
-인터페이스 차이가 — 너무 크면 adapter 자체가 복잡. **adapter** 대신 — **facade** (단순 인터페이스 제공) + refactor.
+인터페이스 차이가 너무 크면 adapter 자체가 복잡해진다. **Adapter** 대신 **Facade**(단순 인터페이스를 제공)와 함께 리팩토링을 고려한다.
 
 ## 표준 라이브러리에서의 Adapter
 
@@ -468,7 +468,7 @@ std::stack<int, std::list<int>> s3;        // list를 adapt
 // 같은 stack 인터페이스 — 다른 underlying
 ```
 
-`stack` — top, push, pop만 노출. Underlying 컨테이너의 부가 메서드 — 숨김. 표준 Adapter 패턴.
+`stack`은 top, push, pop만 노출한다. underlying의 부가 메서드는 숨긴다. 표준 Adapter 패턴이다.
 
 ## C++20 Concepts — Adapter 인터페이스
 
@@ -478,20 +478,20 @@ concept Compressor = requires(T& c, std::span<const std::byte> data) {
     { c.compress(data) } -> std::convertible_to<std::vector<std::byte>>;
 };
 
-// 명시적 Adapter 없이도 — concept으로 인터페이스 명세
+// 명시적 Adapter 없이도 concept으로 인터페이스를 명세할 수 있다
 template<Compressor C>
 void backup(C& c, std::span<const std::byte> data);
 
-backup(ZlibLib{}, my_data);     // ZlibLib이 compress 메서드 가지면 OK
+backup(ZlibLib{}, my_data);     // ZlibLib이 compress 메서드를 가지면 OK
 ```
 
-concept = 인터페이스 명세. duck typing이 — adapter 역할.
+concept이 인터페이스 명세 역할을 한다. duck typing이 adapter의 일부 역할을 대신한다.
 
 ## Adapter의 라이프타임
 
 ```cpp
 class Adapter : public ITarget {
-    Adaptee& adaptee_;     // 참조 — adaptee 라이프타임 보장 필요
+    Adaptee& adaptee_;     // 참조 — adaptee의 라이프타임이 보장돼야 한다
 public:
     explicit Adapter(Adaptee& a) : adaptee_(a) {}
 };
@@ -500,15 +500,15 @@ public:
     Adaptee a;
     Adapter ad{a};
     // 사용
-}     // a, ad 둘 다 소멸 — OK
+}     // a와 ad가 함께 소멸 — OK
 
 // 또는
 Adaptee* a = new Adaptee;
 Adapter ad{*a};
-delete a;     // ⚠️ ad는 dangling
+delete a;     // ⚠️ ad가 dangling이 된다
 ```
 
-라이프타임 — 신중. `shared_ptr`로 명시:
+라이프타임을 신중히 다룬다. `shared_ptr`로 명시할 수도 있다.
 
 ```cpp
 class Adapter : public ITarget {
@@ -522,77 +522,79 @@ public:
 
 ```cpp
 class MultiAdapter : public ICompressor, public IEncryptor {
-    // 한 객체가 — 여러 인터페이스 adapt
+    // 한 객체가 여러 인터페이스를 adapt한다
 };
 ```
 
-다중 상속. 가능하지만 — 보통 — 각 책임별 별도 adapter.
+다중 상속이라 가능하지만, 보통은 책임별로 adapter를 가르는 편이 깔끔하다.
 
 ## 마이그레이션 — Adapter로
 
 ```cpp
-// 옛 시스템 — old API 가득
-// 새 시스템 — 표준 인터페이스로 점진 전환
+// 옛 시스템에는 old API가 가득하다
+// 새 시스템은 표준 인터페이스로 점진적으로 전환한다
 
 class NewService { /* 새 인터페이스 */ };
 
-// Adapter로 — 새 시스템이 옛 API 호출
+// Adapter로 — 새 시스템이 옛 API를 호출한다
 class OldApiAdapter : public NewService {
     OldSystem& old_;
 public:
-    // 새 인터페이스를 옛 API로 변환
+    // 새 인터페이스를 옛 API로 변환한다
 };
 
-// 점진적 마이그레이션 — 사용처를 NewService로 옮김
+// 점진적 마이그레이션 — 사용처를 NewService로 옮긴다
 ```
 
-레거시 시스템 마이그레이션 — adapter가 핵심.
+레거시 시스템 마이그레이션에서 adapter가 핵심 도구가 된다.
 
 ## 빠른 결정 — Adapter 적용
 
 ```
-인터페이스 호환 안 됨 — Adapter?
+인터페이스가 호환되지 않는다 — Adapter?
 ├── 외부 라이브러리 통합 → Adapter ✅
 ├── Legacy 코드 wrapping → Adapter
-├── 표준 인터페이스로 다양 구현 → Adapter
+├── 표준 인터페이스로 다양한 구현 모음 → Adapter
 ├── 점진적 마이그레이션 → Adapter
-└── 인터페이스 변환 본질이 아니면 — 다른 패턴 (Wrapper, Decorator, Facade)
+└── 인터페이스 변환이 본질이 아니라면 다른 패턴 (Wrapper, Decorator, Facade)
 ```
 
 ## 실무 가이드 — 체크리스트
 
-Adapter 적용 시:
+Adapter를 적용할 때 다음을 점검한다.
 
-- [ ] **인터페이스 변환**이 본질? (다른 wrapper와 구분)
-- [ ] **이름이 의도 명시**? (`SpdlogAdapter`)
-- [ ] **단방향**? (보통)
-- [ ] 라이프타임 보장? (참조 / shared_ptr)
-- [ ] 변환 비용 — 측정?
-- [ ] C++20 concept으로 — adapter 없이 가능?
+- [ ] **인터페이스 변환**이 본질인가? (다른 wrapper와 구분되는가)
+- [ ] 이름이 의도를 드러내는가? (예: `SpdlogAdapter`)
+- [ ] 보통 단방향인가?
+- [ ] 라이프타임이 보장되는가? (참조 / shared_ptr)
+- [ ] 변환 비용을 측정했는가?
+- [ ] C++20 concept으로 adapter 없이 풀 수 있지는 않은가?
 
 ## 정리
 
-**Adapter 패턴** — 호환 안 되는 인터페이스 연결.
+**Adapter 패턴**은 호환되지 않는 인터페이스를 연결한다.
 
-활용:
+활용은 다음과 같다.
+
 - 외부 라이브러리 통합
 - Legacy 코드 wrapping
-- 표준화 (다양한 구현 → 한 인터페이스)
+- 표준화(다양한 구현을 한 인터페이스로)
 - Test fake / mock
 - 마이그레이션
 
-표준 라이브러리:
+표준 라이브러리의 사례는 풍부하다.
+
 - `std::stack`, `std::queue`, `std::priority_queue` — container adapter
 - `std::reverse_iterator`, `std::back_insert_iterator` — iterator adapter
 - `std::not_fn`, `std::bind` — function adapter
 - ranges views — pipeline adapter
 
-C++20 concepts — adapter 역할 일부 (duck typing).
+C++20 concept이 duck typing으로 adapter의 일부 역할을 대신한다.
 
 ## 관련 항목
 
-- [가이드라인 19: Strategy](/blog/programming/cpp/cpp-software-design/guideline19-use-strategy-to-isolate-how-things-are-done) — Adapter도 strategy로 주입
-- [가이드라인 28: Bridge](/blog/programming/cpp/cpp-software-design/guideline28-build-bridges-to-remove-physical-dependencies) — 새 디자인의 추상화
+- [가이드라인 19: Strategy](/blog/programming/cpp/cpp-software-design/guideline19-use-strategy-to-isolate-how-things-are-done) — Adapter도 strategy로 주입할 수 있다
+- [가이드라인 28: Bridge](/blog/programming/cpp/cpp-software-design/guideline28-build-bridges-to-remove-physical-dependencies) — 새 디자인에서의 추상화
 - [가이드라인 35: Decorator](/blog/programming/cpp/cpp-software-design/guideline35-use-decorators-to-add-customization-hierarchically) — 같은 인터페이스 + 기능 추가
 - [GoF Adapter](/blog/programming/design/gof-design-patterns/item07-adapter) — 원본
 - [Beautiful C++ 항목 7: 지저분한 struct 캡슐화](/blog/programming/cpp/beautiful-cpp/item07-encapsulate-messy-structs) — C API wrap
