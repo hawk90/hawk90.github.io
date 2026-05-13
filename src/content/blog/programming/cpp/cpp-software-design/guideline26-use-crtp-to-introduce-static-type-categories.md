@@ -1,7 +1,7 @@
 ---
 title: "가이드라인 26: 정적 타입 카테고리 도입에 CRTP를 사용하라"
 date: 2026-05-14T22:00:00
-description: "CRTP — Curiously Recurring Template Pattern. 컴파일 타임 다형성, vtable 비용 0, mixin 패턴."
+description: "CRTP는 Curiously Recurring Template Pattern이다. 컴파일 타임 다형성, vtable 비용 0, mixin 패턴."
 tags: [C++, Software Design, CRTP, Templates]
 series: "C++ Software Design"
 seriesOrder: 26
@@ -9,7 +9,7 @@ seriesOrder: 26
 
 ## 왜 이 가이드라인이 중요한가?
 
-C++ 특화 패턴 — GoF에 없음. 1995년 발견 (Coplien). 1990년대 후반 — STL과 함께 보편화.
+GoF에는 없는 C++ 특화 패턴이다. 1995년 Coplien이 발견했고, 1990년대 후반 STL과 함께 보편화됐다.
 
 ```cpp
 template<typename Derived>
@@ -18,33 +18,34 @@ public:
     bool operator!=(const Derived& other) const {
         return !static_cast<const Derived*>(this)->operator==(other);
     }
-    // > <= >= 도 == 와 < 만 있으면 자동 생성
+    // > <= >= 도 == 와 < 만 있으면 자동 생성된다
 };
 
 class Point : public Comparable<Point> {
 public:
     bool operator==(const Point&) const;
     bool operator<(const Point&) const;
-    // != > <= >= 자동
+    // != > <= >= 가 자동으로 생긴다
 };
 ```
 
-이게 — **CRTP** (Curiously Recurring Template Pattern). 핵심:
-- **상속**: `Point : public Comparable<Point>` — 문법은 상속
-- **컴파일 타임**: 다형성 — `static_cast`로 (가상 함수 없음)
-- **인터페이스**: base가 — derived의 메서드 호출 가능
+이게 **CRTP**(Curiously Recurring Template Pattern)다. 핵심은 다음과 같다.
 
-가상 함수 대안의 강력한 도구. 가이드라인 27 — mixin 사용.
+- **상속** — `Point : public Comparable<Point>`. 문법은 상속이다.
+- **컴파일 타임** — `static_cast`로 다형성을 푼다. 가상 함수가 없다.
+- **인터페이스** — base가 derived의 메서드를 호출할 수 있다.
 
-C++23 `<=>` 가 — Comparable CRTP 일부 대체. 그러나 — 다른 mixin / static interface에 여전히 강력.
+가상 함수의 강력한 대안이다. 가이드라인 27에서 mixin을 본격적으로 다룬다.
+
+C++20의 `<=>`가 Comparable CRTP의 일부를 대체한다. 그러나 다른 mixin이나 정적 인터페이스에는 여전히 유효하다.
 
 ## 핵심 내용
 
-- **CRTP** — `class Derived : public Base<Derived>` 패턴
-- **컴파일 타임 다형성** — vtable 비용 0
-- base가 — derived의 메서드 호출 (static_cast로)
-- 활용 — mixin (가이드라인 27), 정적 인터페이스, 카운터, comparable 등
-- 한계 — 런타임 다형성 X, 같은 base에서 파생된 다른 derived 호환 X
+- **CRTP** — `class Derived : public Base<Derived>` 패턴이다.
+- **컴파일 타임 다형성** — vtable 비용이 0이다.
+- base가 derived의 메서드를 `static_cast`로 호출한다.
+- 활용 — mixin(가이드라인 27), 정적 인터페이스, 카운터, comparable 등.
+- 한계 — 런타임 다형성이 안 되고, 같은 base의 다른 derived가 호환되지 않는다.
 
 ## CRTP 구조
 
@@ -52,7 +53,7 @@ C++23 `<=>` 가 — Comparable CRTP 일부 대체. 그러나 — 다른 mixin / 
 template<typename Derived>
 class Base {
 public:
-    // base가 derived의 메서드 호출 — 컴파일 타임
+    // base가 derived의 메서드를 호출한다 — 컴파일 타임
     void interface() {
         static_cast<Derived*>(this)->implementation();
     }
@@ -67,12 +68,13 @@ Derived d;
 d.interface();     // → d.implementation()
 ```
 
-**핵심 매커니즘**:
-1. Base는 — Derived 타입 알고 있음 (template 매개변수)
-2. `static_cast<Derived*>(this)` — base 포인터를 derived로 (안전 — IS-A 관계)
-3. derived의 메서드 호출 — 가상 함수 없이
+핵심 메커니즘은 셋이다.
 
-vtable 없음. 컴파일러가 — 인라이닝 가능.
+1. Base가 Derived 타입을 안다(template 매개변수).
+2. `static_cast<Derived*>(this)`로 base 포인터를 derived로 캐스트한다(IS-A이므로 안전하다).
+3. derived의 메서드를 가상 함수 없이 호출한다.
+
+vtable이 없다. 컴파일러가 인라이닝할 수 있다.
 
 ## 활용 1 — Comparable Mixin
 
@@ -106,12 +108,12 @@ public:
 };
 
 Point p1, p2;
-p1 != p2;     // ✅ Comparable에서 제공
+p1 != p2;     // ✅ Comparable에서 제공된다
 p1 > p2;       // ✅
 p1 <= p2;      // ✅
 ```
 
-`==`와 `<`만 정의 — 나머지 자동. C++20 `<=>`이 — 표준화. 그래도 CRTP — 다른 mixin에 여전히 유효.
+`==`와 `<`만 정의하면 나머지가 자동으로 생긴다. C++20 `<=>`이 표준화한 자리지만, 다른 mixin에는 CRTP가 여전히 유효하다.
 
 ## 활용 2 — Counter Mixin
 
@@ -123,7 +125,7 @@ public:
     Counted() { ++count_; }
     Counted(const Counted&) { ++count_; }
     ~Counted() { --count_; }
-    
+
     static int count() { return count_; }
 };
 
@@ -134,10 +136,10 @@ Widget w1, w2;
 Widget::count();     // 2
 
 Button b;
-Button::count();     // 1 (별도 counter — 타입별)
+Button::count();     // 1 (별도 카운터 — 타입별로)
 ```
 
-각 T에 — 별도 카운터. 컴파일 타임 분리.
+각 T에 대해 별도 카운터가 생긴다. 컴파일 타임에 분리된다.
 
 ## 활용 3 — Cloneable
 
@@ -155,16 +157,16 @@ public:
 class Widget : public Cloneable<Widget> {
 public:
     Widget(const Widget&);     // 복사 ctor
-    // clone() 자동 — derived 복사
+    // clone()이 자동으로 생긴다 — derived를 복사한다
 };
 
 Widget w1;
 auto w2 = w1.clone();
 ```
 
-복사 가능 객체 — clone() 자동 제공.
+복사 가능한 객체에 clone()을 자동으로 붙인다.
 
-## 활용 4 — Iterator interface
+## 활용 4 — Iterator 인터페이스
 
 ```cpp
 template<typename Derived>
@@ -174,13 +176,13 @@ public:
         static_cast<Derived*>(this)->advance();
         return static_cast<Derived&>(*this);
     }
-    
+
     Derived operator++(int) {
         Derived copy = static_cast<const Derived&>(*this);
         ++*this;
         return copy;
     }
-    
+
     bool operator!=(const Derived& other) const {
         return !static_cast<const Derived*>(this)->equals(other);
     }
@@ -193,7 +195,7 @@ public:
 };
 ```
 
-iterator의 — `++` postfix, `!=` 자동. CRTP 모범.
+iterator의 `++` postfix와 `!=`가 자동으로 생긴다. CRTP의 모범 사례다.
 
 ## CRTP vs 가상 함수
 
@@ -235,12 +237,12 @@ void render(Shape<T>& s) {
 | --- | --- | --- |
 | 비용 | vtable + 간접 호출 | 0 (인라이닝) |
 | 런타임 다형성 | ✅ | ❌ |
-| 컴파일 시간 | 빠름 | 길어짐 |
+| 컴파일 시간 | 빠르다 | 길어진다 |
 | 코드 부피 | 단일 | 인스턴스마다 |
 | 컨테이너 (vector<Base*>) | ✅ | ❌ (각 derived 별도) |
-| 디버깅 | 명확 | 템플릿 에러 |
+| 디버깅 | 명확하다 | 템플릿 에러 |
 
-성능 critical 핫 패스 — CRTP. 런타임 다형성 필요 — virtual.
+성능 critical한 핫 패스에는 CRTP. 런타임 다형성이 필요하면 virtual.
 
 ## C++20 std::span / std::ranges 활용
 
@@ -254,12 +256,12 @@ public:
             static_cast<const Derived*>(this)->end()
         );
     }
-    
+
     bool empty() const {
         return static_cast<const Derived*>(this)->begin() ==
                static_cast<const Derived*>(this)->end();
     }
-    
+
     auto front() {
         return *static_cast<Derived*>(this)->begin();
     }
@@ -269,11 +271,11 @@ class MyContainer : public Range<MyContainer> {
 public:
     Iterator begin();
     Iterator end();
-    // size, empty, front 자동
+    // size, empty, front가 자동으로 생긴다
 };
 ```
 
-자기 begin/end만 — 나머지 자동.
+`begin`과 `end`만 정의하면 나머지가 자동으로 따라온다.
 
 ## 함정 — 잘못된 derived
 
@@ -290,65 +292,65 @@ class A : public Base<A> {
     void impl();
 };
 
-class B : public Base<A> {     // ⚠️ Base<A> 상속 (typo? 또는 의도?)
-    // impl 정의 X
+class B : public Base<A> {     // ⚠️ Base<A>를 상속 (오타? 의도?)
+    // impl이 없다
 };
 
 B b;
 b.f();     // static_cast<A*>(this) — B를 A로 캐스트 — UB
 ```
 
-`Base<Derived>`에서 — `Derived`가 — 정말 자신의 derived인지 보장 안 됨. UB 위험.
+`Base<Derived>`에서 `Derived`가 정말 자신의 derived인지 보장되지 않는다. UB의 위험이 있다.
 
-해결 — protected ctor:
+해법 — protected ctor.
 
 ```cpp
 template<typename Derived>
 class Base {
 protected:
-    Base() = default;     // private/protected — derived만 생성 가능
-    friend Derived;        // 추가 안전
+    Base() = default;     // private/protected — derived만 생성할 수 있다
+    friend Derived;        // 추가 안전장치
 };
 ```
 
-또는 C++23 deducing this — CRTP의 미래 대안 (아래).
+C++23의 deducing this가 CRTP의 미래 대안이 된다(아래).
 
 ## 함정 — 다중 CRTP 상속
 
 ```cpp
-class Widget 
+class Widget
     : public Counted<Widget>,
       public Comparable<Widget>,
       public Cloneable<Widget> {
 };
 ```
 
-여러 mixin — 다중 상속. 가이드라인 40 (EC++) — 다중 상속 신중. 그러나 — CRTP mixin은 보통 안전 (단일 책임).
+여러 mixin을 다중 상속으로 받는다. EC++ 항목 40은 다중 상속을 신중하라고 하지만, CRTP mixin은 단일 책임이라 보통 안전하다.
 
 ## 가이드라인 27 — CRTP for Static Mixin
 
-가이드라인 26 — CRTP 일반. 가이드라인 27 — **mixin 패턴 강조**.
+가이드라인 26은 CRTP 일반을 다룬다. 가이드라인 27은 **mixin 패턴**을 본격적으로 다룬다.
 
 ```cpp
-class Widget 
+class Widget
     : public Printable<Widget>,
       public Serializable<Widget>,
       public Loggable<Widget> {
 };
-// Widget — 자동으로 print, serialize, log 능력
+// Widget이 자동으로 print, serialize, log 능력을 갖춘다
 ```
 
-각 mixin — 독립적 능력 추가. composition over inheritance의 컴파일 타임 버전.
+각 mixin이 독립적인 능력을 더한다. composition over inheritance의 컴파일 타임 버전이다.
 
 ## C++23 — Deducing this
 
-C++23부터 — `this`를 명시적 매개변수로:
+C++23부터 `this`를 명시적 매개변수로 받을 수 있다.
 
 ```cpp
 class Shape {
 public:
     void draw(this auto& self) {
-        // self는 정확한 derived 타입 — static_cast 불필요
+        // self가 정확한 derived 타입이다 — static_cast가 필요 없다
     }
 };
 
@@ -371,10 +373,10 @@ public:
 };
 
 Circle c;
-c.interface();     // CRTP 없이 작동
+c.interface();     // CRTP 없이 동작한다
 ```
 
-C++23 deducing this — CRTP의 많은 사용처를 단순화. 상속 자체가 정적.
+C++23 deducing this가 CRTP의 많은 사용처를 단순화한다. 상속 자체가 정적으로 풀린다.
 
 ## CRTP의 인터페이스 명세
 
@@ -383,15 +385,15 @@ template<typename Derived>
 class Hashable {
 public:
     size_t hash() const {
-        // Derived가 hash_impl() 제공해야
+        // Derived가 hash_impl()을 제공해야 한다
         return static_cast<const Derived*>(this)->hash_impl();
     }
 };
 ```
 
-Derived가 — `hash_impl()` 안 정의하면? 컴파일 에러 — `hash()` 호출 시점. 사용자 입장에선 — 깊은 에러 메시지.
+Derived가 `hash_impl()`을 정의하지 않으면 컴파일 에러가 난다(`hash()` 호출 시점에). 사용자에게는 깊은 에러 메시지가 떨어진다.
 
-C++20 concepts로 — 명시:
+C++20 concept으로 명시한다.
 
 ```cpp
 template<typename T>
@@ -405,7 +407,7 @@ class Hashable {
 };
 ```
 
-Derived가 — concept 충족 안 하면 — 친절한 에러.
+Derived가 concept을 만족하지 않으면 친절한 에러가 나온다.
 
 ## CRTP + Pure Virtual
 
@@ -416,16 +418,16 @@ public:
     void interface() {
         static_cast<Derived*>(this)->implementation();
     }
-    
-    // 컴파일 타임 강제 — implementation 메서드 있어야
+
+    // 컴파일 타임에 강제 — implementation 메서드가 있어야 한다
 };
 
 class Derived : public Base<Derived> {
-    // implementation 안 정의 → 컴파일 에러 (인터페이스 호출 시)
+    // implementation을 정의하지 않으면 → 컴파일 에러(인터페이스 호출 시점)
 };
 ```
 
-가상 함수 — pure virtual로 명시. CRTP — concept로 명시 (또는 메서드 호출에 의존).
+가상 함수는 pure virtual로 명시한다. CRTP는 concept으로 명시한다(혹은 메서드 호출에 의존한다).
 
 ## CRTP의 sizeof
 
@@ -441,9 +443,9 @@ class Widget : public Empty<Widget> {
 sizeof(Widget);     // 4 (EBO — Empty Base Optimization)
 ```
 
-빈 base class — 0 byte (EBO). CRTP — 메모리 오버헤드 X.
+빈 base class는 0 byte다(EBO). CRTP는 메모리 오버헤드가 없다.
 
-## Expression Templates — CRTP 정점
+## Expression Templates — CRTP의 정점
 
 ```cpp
 template<typename E>
@@ -475,10 +477,10 @@ VecSum<E1, E2> operator+(const VecExpr<E1>& a, const VecExpr<E2>& b) {
 }
 
 Vector a, b, c;
-Vector d = a + b + c;     // 임시 객체 없음 — 단일 루프
+Vector d = a + b + c;     // 임시 객체 없이 단일 루프로 처리된다
 ```
 
-Eigen, Blaze 등 수치 라이브러리 — 이 패턴. 임시 객체 회피 + 인라이닝.
+Eigen이나 Blaze 같은 수치 라이브러리가 이 패턴을 쓴다. 임시 객체 회피와 인라이닝이 핵심 이점이다.
 
 ## STL의 CRTP — std::enable_shared_from_this
 
@@ -494,34 +496,34 @@ auto p = std::make_shared<Widget>();
 auto q = p->get_ptr();     // 같은 shared_ptr
 ```
 
-`enable_shared_from_this` — CRTP. C++ 표준 라이브러리의 모범.
+`enable_shared_from_this`는 표준 라이브러리의 CRTP 모범 사례다.
 
-## Boost — CRTP 풍부
+## Boost — CRTP가 풍부하다
 
 ```cpp
 #include <boost/operators.hpp>
 
 class Point : boost::operators<Point> {
-    // operators 헬퍼 — < == 만 정의하면 모두 자동
+    // operators 헬퍼 — < 와 == 만 정의하면 모두 자동으로 생긴다
 public:
     bool operator==(const Point&) const;
     bool operator<(const Point&) const;
-    // != > <= >= 자동
+    // != > <= >= 가 자동으로 생긴다
 };
 ```
 
-`boost::operators` — comparable, addable, multipliable 등 다양한 mixin. CRTP 라이브러리.
+`boost::operators`는 comparable, addable, multipliable 같은 다양한 mixin을 제공하는 CRTP 라이브러리다.
 
 ## 함정 — 템플릿 에러 메시지
 
 ```cpp
-class Widget : public Counted<Wiget> {     // typo
+class Widget : public Counted<Wiget> {     // 오타
 };
 ```
 
-CRTP — 깊은 템플릿 에러. C++20 concepts로 — 개선.
+CRTP는 깊은 템플릿 에러를 만든다. C++20 concept이 이를 크게 개선했다.
 
-## CRTP for Static Polymorphism (Strategy)
+## CRTP로 정적 다형성 — Strategy 변형
 
 ```cpp
 template<typename Derived>
@@ -552,9 +554,9 @@ Sorter<QuickSort> sorter;
 sorter.sort(data);
 ```
 
-가상 함수 비용 0. 컴파일 타임 결정. 가이드라인 19 Strategy의 변형.
+가상 함수 비용이 0이고 컴파일 타임에 결정된다. 가이드라인 19의 Strategy 변형이다.
 
-## 함정 — CRTP 너무 깊은 chain
+## 함정 — 너무 깊은 CRTP chain
 
 ```cpp
 template<typename T>
@@ -569,7 +571,7 @@ class C { };
 class Widget : public A<Widget> {};
 ```
 
-깊은 CRTP — 컴파일 시간 ↑, 디버깅 어려움. 적절한 단순화.
+깊은 CRTP는 컴파일 시간을 늘리고 디버깅도 어렵게 한다. 단순화를 검토한다.
 
 ## CRTP의 한계
 
@@ -580,10 +582,10 @@ class Base { };
 class A : public Base<A> {};
 class B : public Base<B> {};
 
-std::vector<Base<???>> objects;     // ❌ — A와 B는 다른 Base 타입
+std::vector<Base<???>> objects;     // ❌ — A와 B의 Base가 서로 다른 타입이다
 ```
 
-CRTP — **다른 derived를 같은 컨테이너에 못 담음**. 런타임 다형성 필요하면 — virtual 또는 type erasure.
+CRTP는 같은 컨테이너에 다른 derived를 담지 못한다. 런타임 다형성이 필요하면 virtual이나 type erasure로 간다.
 
 ## 모던 변형 — C++20 concepts + CRTP
 
@@ -603,70 +605,73 @@ public:
 };
 ```
 
-concept으로 — 인터페이스 명시. 친절한 에러.
+concept으로 인터페이스를 명시하면 에러 메시지도 친절해진다.
 
 ## C++26 — Reflection + CRTP
 
-C++26 reflection (제안 중):
+C++26 reflection(제안 중)을 생각해 보자.
 
 ```cpp
-// 가상의 미래 syntax
+// 미래의 가상 syntax
 template<typename Derived>
 class Comparable {
-    // reflection으로 derived의 모든 멤버 자동 비교
+    // reflection으로 derived의 모든 멤버를 자동으로 비교한다
 };
 ```
 
-CRTP의 많은 boilerplate — reflection이 자동화 가능. 미래.
+CRTP의 많은 boilerplate를 reflection이 자동화할 가능성이 있다.
 
 ## CRTP 적용 결정
 
 ```
-런타임 다형성 필요?
-├── 그렇다 → virtual functions
-└── 아니다 → CRTP 또는 templates
-    ├── mixin pattern (능력 추가) → CRTP
-    ├── 정적 dispatch → CRTP 또는 함수 템플릿
-    ├── Expression templates (수치) → CRTP
+런타임 다형성이 필요한가?
+├── 그렇다 → 가상 함수
+└── 아니다 → CRTP나 템플릿
+    ├── mixin pattern(능력 추가) → CRTP
+    ├── 정적 dispatch → CRTP나 함수 템플릿
+    ├── Expression templates(수치) → CRTP
     └── 단순 일반화 → 함수 템플릿
 ```
 
-CRTP — 상속 + 컴파일 타임 다형성이 자연스러운 곳.
+CRTP는 상속과 컴파일 타임 다형성이 함께 필요한 자리에 어울린다.
 
 ## 실무 가이드 — 체크리스트
 
-CRTP 적용 시:
+CRTP를 적용할 때 다음을 점검한다.
 
-- [ ] 런타임 다형성 — **불필요**? (CRTP는 정적)
-- [ ] **컴파일 타임** dispatch / 인라이닝 — 중요?
-- [ ] **mixin pattern** — 능력 추가?
-- [ ] 사용자가 — Derived 메서드 명세 알 수 있는가? (문서 / concept)
-- [ ] 다중 CRTP — 충돌 없는가?
-- [ ] C++23 deducing this — 더 단순한 대안?
-- [ ] 에러 메시지 — concept으로 개선?
+- [ ] 런타임 다형성이 정말 필요 없는가? (CRTP는 정적이다)
+- [ ] 컴파일 타임 dispatch와 인라이닝이 중요한가?
+- [ ] mixin 패턴으로 능력을 더하는가?
+- [ ] 사용자가 Derived에 필요한 메서드를 알 수 있는가? (문서나 concept)
+- [ ] 다중 CRTP 사이에 충돌은 없는가?
+- [ ] C++23 deducing this로 더 단순하게 풀 수 있지는 않은가?
+- [ ] 에러 메시지가 concept으로 개선되는가?
 
 ## 정리
 
-**CRTP** — `class Derived : public Base<Derived>`. C++ 특화 패턴.
+**CRTP**는 `class Derived : public Base<Derived>` 패턴이다. C++ 특화 패턴이다.
 
-본질:
-- **컴파일 타임 다형성** — vtable 비용 0
-- 상속 문법 + 정적 dispatch
-- mixin / static interface
+본질은 다음과 같다.
 
-활용:
+- 컴파일 타임 다형성 — vtable 비용 0.
+- 상속 문법 + 정적 dispatch.
+- mixin과 정적 인터페이스.
+
+활용 예는 다양하다.
+
 - Comparable, Cloneable, Countable mixin
-- Expression Templates (Eigen, Blaze)
+- Expression Templates(Eigen, Blaze)
 - 정적 Strategy
 - STL `enable_shared_from_this`
 - Boost operators
 
-한계:
-- 런타임 다형성 X
-- 같은 컨테이너 X
-- 컴파일 시간 ↑
+한계도 분명하다.
 
-C++23 — **deducing this**가 일부 대체. 그러나 — 상속 + 정적 dispatch 필요 시 여전히 강력.
+- 런타임 다형성이 불가능하다.
+- 같은 컨테이너에 다른 derived를 담지 못한다.
+- 컴파일 시간이 길어진다.
+
+C++23의 **deducing this**가 일부 자리를 대체한다. 그러나 상속 + 정적 dispatch가 필요한 자리에서는 여전히 강력하다.
 
 ## 관련 항목
 
