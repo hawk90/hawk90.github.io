@@ -7,9 +7,19 @@ series: "Effective C++"
 seriesOrder: 47
 ---
 
+## 왜 이 항목이 중요한가?
+
+C++ 템플릿에서 자주 마주치는 자리가 "**타입에 따라 다르게 동작하는 코드**"다. 반복자가 random-access면 빠른 경로, bidirectional이면 순차 경로. 정수면 한 방식, 부동소수면 다른 방식.
+
+이걸 if/else로 런타임에 분기하면 비효율이고, 가상 함수로 풀면 추가 비용이 든다. **traits 클래스**는 컴파일 타임에 분기를 결정해 **런타임 비용 0**으로 같은 일을 한다.
+
+C++ 표준 라이브러리 전체가 이 패턴 위에 서 있다. `std::iterator_traits`, `std::numeric_limits`, `<type_traits>` 헤더의 모든 trait, C++20 concepts까지. 한 번 익히면 STL 내부 코드를 읽을 수 있게 된다.
+
+이 항목은 traits 클래스의 구조, **tag dispatch** 기법, 그리고 C++20 concepts로의 진화를 정리한다.
+
 ## 개요
 
-타입에 관한 정보(반복자 카테고리, 값 타입, 부호 여부 등)를 **컴파일 타임**에 알아내고 그에 따라 분기하는 패턴이 **traits 클래스**입니다. C++ 표준 라이브러리는 `std::iterator_traits`, `std::numeric_limits`, `<type_traits>` 헤더 전체가 이 패턴 — 런타임 비용 0, 강력한 인라인 가능.
+타입에 관한 정보(반복자 카테고리, 값 타입, 부호 여부 등)를 **컴파일 타임**에 알아내고 그에 따라 분기하는 패턴이 **traits 클래스**다. C++ 표준 라이브러리는 `std::iterator_traits`, `std::numeric_limits`, `<type_traits>` 헤더 전체가 이 패턴이다. 런타임 비용 0, 강력한 인라인 가능하다.
 
 ## 필수 개념: 컴파일 타임에 타입 분기
 
