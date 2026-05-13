@@ -5,7 +5,6 @@ description: "Intention-Revealing / Side-Effect-Free / Assertions / Standalone C
 tags: [DDD, Supple Design]
 series: "Domain-Driven Design"
 seriesOrder: 10
-draft: true
 ---
 
 ## Supple Design이란?

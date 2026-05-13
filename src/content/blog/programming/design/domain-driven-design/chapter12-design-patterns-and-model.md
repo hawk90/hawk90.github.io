@@ -5,7 +5,6 @@ description: "GoF 패턴 — 도메인 의미와 연결될 때만 사용. Strate
 tags: [DDD, Design Patterns, GoF]
 series: "Domain-Driven Design"
 seriesOrder: 12
-draft: true
 ---
 
 ## 디자인 패턴과 도메인 모델

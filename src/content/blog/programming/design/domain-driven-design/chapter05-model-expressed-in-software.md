@@ -5,7 +5,6 @@ description: "Entity / Value Object / Service / Module — 빌딩 블록 4가지
 tags: [DDD, Entity, Value Object, Service, Module]
 series: "Domain-Driven Design"
 seriesOrder: 5
-draft: true
 ---
 
 ## 도메인 모델의 구성요소

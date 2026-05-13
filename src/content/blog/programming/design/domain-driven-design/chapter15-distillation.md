@@ -5,7 +5,6 @@ description: "Core Domain / Generic Subdomain / Supporting Subdomain — 핵심 
 tags: [DDD, Core Domain, Distillation]
 series: "Domain-Driven Design"
 seriesOrder: 15
-draft: true
 ---
 
 ## 모든 것이 중요하면 아무것도 중요하지 않다

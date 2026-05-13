@@ -5,7 +5,6 @@ description: "암묵 개념을 객체로 — Specification, 제약, 프로세스
 tags: [DDD, Explicit Concepts, Specification]
 series: "Domain-Driven Design"
 seriesOrder: 9
-draft: true
 ---
 
 ## 암묵적 개념이란?

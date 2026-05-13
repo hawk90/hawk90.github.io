@@ -5,7 +5,6 @@ description: "Evolving Order / System Metaphor / Responsibility Layers / Knowled
 tags: [DDD, Large-Scale Structure]
 series: "Domain-Driven Design"
 seriesOrder: 16
-draft: true
 ---
 
 ## 대규모 시스템의 문제

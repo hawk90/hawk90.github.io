@@ -5,7 +5,6 @@ description: "Fowler의 Analysis Patterns 활용 — 도메인 모델의 공통 
 tags: [DDD, Analysis Patterns, Fowler]
 series: "Domain-Driven Design"
 seriesOrder: 11
-draft: true
 ---
 
 ## Analysis Patterns이란?

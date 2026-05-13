@@ -5,7 +5,6 @@ description: "발견 → 리팩토링 → 깊이. 지속적 정제 사이클."
 tags: [DDD, Refactoring, Continuous]
 series: "Domain-Driven Design"
 seriesOrder: 13
-draft: true
 ---
 
 ## 두 종류의 리팩토링

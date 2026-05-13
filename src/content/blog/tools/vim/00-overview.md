@@ -5,7 +5,6 @@ description: "Vim 에디터 완벽 가이드 - 시리즈 개요"
 series: "Vim 마스터하기"
 seriesOrder: 0
 tags: [vim, editor, productivity, tools]
-draft: true
 ---
 
 > **Vim 마스터하기** 시리즈 개요

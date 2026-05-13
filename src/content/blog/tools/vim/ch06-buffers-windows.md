@@ -5,7 +5,6 @@ description: "다중 파일 편집을 위한 버퍼, 윈도우, 탭 관리"
 series: "Vim 마스터하기"
 seriesOrder: 6
 tags: [vim, editor, buffers, windows, tabs]
-draft: true
 ---
 
 > **Vim 마스터하기** Chapter 6: 버퍼, 윈도우, 탭

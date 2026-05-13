@@ -5,7 +5,6 @@ description: "Strategic Design 종합 — Context Map / Distillation / Large-Sca
 tags: [DDD, Strategy]
 series: "Domain-Driven Design"
 seriesOrder: 17
-draft: true
 ---
 
 ## Strategic Design의 세 기둥

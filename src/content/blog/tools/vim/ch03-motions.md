@@ -5,7 +5,6 @@ description: "효율적인 이동과 텍스트 객체를 활용한 편집"
 series: "Vim 마스터하기"
 seriesOrder: 3
 tags: [vim, editor, motions, text-objects]
-draft: true
 ---
 
 > **Vim 마스터하기** Chapter 3: 모션과 텍스트 객체
