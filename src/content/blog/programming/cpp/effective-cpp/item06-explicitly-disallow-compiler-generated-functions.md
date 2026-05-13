@@ -7,11 +7,22 @@ series: "Effective C++"
 seriesOrder: 6
 ---
 
+## 왜 이 항목이 중요한가?
+
+복사가 **의미상 잘못된** 객체가 있다. 파일 핸들, 뮤텍스, 싱글톤, RAII 락 등이다. 이런 클래스를 사용자가 무심코 복사하면 자원 누수, 이중 해제, 논리 오류가 일어난다. 컴파일러는 자동 복사를 만들어 주므로 차단을 명시하지 않으면 막을 방법이 없다.
+
+C++98 시절엔 `private` + 정의 없음 트릭이 있었지만 두 가지 약점이 있었다.
+
+- 멤버/friend가 호출하면 **링크 시점**에야 잡힌다.
+- 에러 메시지가 "private"으로 나와 의도(삭제)가 흐려진다.
+
+C++11의 `= delete`는 한 줄로 두 약점을 모두 해결한다. 이 항목은 두 방식을 비교하고, 복사 차단이 자동 이동 생성도 막는다는 점까지 정리한다.
+
 ## 개요
 
-복사가 **의미상 잘못된** 클래스가 있습니다 — 부동산 객체, 파일 핸들, 뮤텍스, 싱글톤. 컴파일러가 자동으로 복사 함수를 만들어 주면 클라이언트가 무심코 복사할 수 있고, 그 결과는 보통 자원 누수·이중 해제·논리 오류입니다.
+복사가 **의미상 잘못된** 클래스가 있다. 부동산 객체, 파일 핸들, 뮤텍스, 싱글톤. 컴파일러가 자동으로 복사 함수를 만들어 주면 클라이언트가 무심코 복사할 수 있고, 그 결과는 보통 자원 누수·이중 해제·논리 오류다.
 
-해결책은 시대에 따라 발전했습니다. C++98엔 트릭이 필요했지만 C++11에선 `= delete` 한 줄.
+해결책은 시대에 따라 발전했다. C++98엔 트릭이 필요했지만 C++11에선 `= delete` 한 줄로 끝난다.
 
 ## 왜 복사를 막아야 하는가
 
@@ -42,7 +53,7 @@ FileGuard b = a;          // 컴파일러 자동 복사 — fp 비트 복사
                           // → a 소멸: fclose(같은 fp!) → 이중 close
 ```
 
-자원 핸들 객체는 보통 단일 소유 — 복사 의미가 없음.
+자원 핸들 객체는 보통 단일 소유 — 복사 의미가 없다.
 
 ### 사례 3 — 뮤텍스 / 락
 
@@ -61,7 +72,7 @@ Lock a(&m), b = a;        // ⚠️ 같은 뮤텍스에 unlock 두 번
 
 ## C++98 방식 — `private` + 정의 없음
 
-C++98엔 `= delete`가 없어 트릭이 필요했습니다.
+C++98엔 `= delete`가 없어 트릭이 필요했다.
 
 ```cpp
 class HomeForSale {
@@ -265,3 +276,5 @@ private:
 - [항목 5: C++가 자동 생성하는 함수들](/blog/programming/cpp/effective-cpp/item05-know-what-functions-cpp-silently-writes) — 무엇이 자동 생성되는가
 - [항목 14: 자원 관리 클래스의 복사 동작](/blog/programming/cpp/effective-cpp/item14-think-carefully-about-copying-behavior-in-resource-managing-classes) — 복사 금지가 한 가지 선택지
 - [항목 39: private 상속을 신중히](/blog/programming/cpp/effective-cpp/item39-use-private-inheritance-judiciously) — Uncopyable 패턴의 base
+- [EMC 항목 11: `= delete` 선호](/blog/programming/cpp/effective-modern-cpp/item11-prefer-deleted-functions-to-private-undefined) — Modern C++ 시점
+- [EMC 항목 17: 특수 멤버 자동 생성](/blog/programming/cpp/effective-modern-cpp/item17-understand-special-member-function-generation) — 자동 생성 규칙
