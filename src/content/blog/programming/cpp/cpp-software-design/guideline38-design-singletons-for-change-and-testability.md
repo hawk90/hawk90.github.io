@@ -1,7 +1,7 @@
 ---
 title: "가이드라인 38: Singleton은 변경과 테스트 가능성을 위해 설계하라"
 date: 2026-05-15T09:00:00
-description: "Singleton이 불가피하다면 — Strategy로 알고리즘 격리, DI 인터페이스 주입, Locator로 테스트성 확보."
+description: "Singleton이 불가피하다면 Strategy로 알고리즘을 격리하고, DI로 인터페이스를 주입하며, Locator로 테스트성을 확보해야 한다."
 tags: [C++, Software Design, Singleton, DI, Testability]
 series: "C++ Software Design"
 seriesOrder: 38
@@ -9,21 +9,22 @@ seriesOrder: 38
 
 ## 왜 이 가이드라인이 중요한가?
 
-가이드라인 37 — Singleton 회피 권장. 그러나 — 현실에선 **불가피한** 경우 있음:
-- 외부 라이브러리가 강제
-- 기존 코드 — 점진적 개선만 가능
-- 진정한 자원 (스레드 풀, 로깅 시스템)
+가이드라인 37은 Singleton 회피를 권한다. 그러나 현실에서는 **피하기 어려운** 경우가 있다.
 
-이때 — **변경 대비**, **테스트 가능**하게 설계.
+- 외부 라이브러리가 강제하는 경우
+- 기존 코드라 점진적 개선만 가능한 경우
+- 진정한 자원(스레드 풀, 로깅 시스템 등)인 경우
+
+이때는 **변경에 대비**하고 **테스트 가능**하게 설계해야 한다.
 
 ```cpp
-// 일반 Singleton — 변경 적대적
+// 일반 Singleton — 변경에 적대적이다
 class Logger {
     static Logger& instance() { static Logger l; return l; }
     void log(const std::string&) { /* 콘솔에 출력 */ }
 };
 
-// 개선된 Singleton — Strategy 격리, 테스트 가능
+// 개선된 Singleton — Strategy로 격리하고 테스트 가능하게 한다
 class Logger {
 public:
     static Logger& instance() { static Logger l; return l; }
@@ -34,12 +35,12 @@ private:
 };
 ```
 
-핵심 — **변경 가능한 부분을 분리**. 의존성을 인터페이스로 추상.
+핵심은 **변경 가능한 부분을 분리**하는 것이다. 의존성은 인터페이스로 추상화한다.
 
 ## 패턴 1 — Strategy 격리
 
 ```cpp
-// 인터페이스 — 변경 축
+// 인터페이스 — 변경 축이다
 class LogSink {
 public:
     virtual ~LogSink() = default;
@@ -63,7 +64,7 @@ public:
     void write(const std::string&) override {}
 };
 
-// Singleton — Strategy 보유
+// Singleton은 Strategy를 보유한다
 class Logger {
 public:
     static Logger& instance() { static Logger l; return l; }
@@ -77,10 +78,11 @@ private:
 };
 ```
 
-**효과**:
-- Logger 자체 — Singleton (글로벌 접근)
-- 출력 방식 — 인터페이스로 분리 (변경 가능)
-- 테스트 — NullSink 또는 mock 주입
+효과는 다음과 같다.
+
+- Logger 자체는 Singleton으로 글로벌 접근을 유지한다
+- 출력 방식은 인터페이스로 분리되어 자유롭게 바꿀 수 있다
+- 테스트에서는 NullSink나 mock을 주입할 수 있다
 
 ## 패턴 2 — DI로 인터페이스 주입
 
@@ -95,13 +97,13 @@ public:
         return l;
     }
     
-    Logger(Logger&&) = default;        // 교체 가능하게
+    Logger(Logger&&) = default;        // 교체 가능하게 둔다
 private:
     std::unique_ptr<LogSink> sink_;
 };
 ```
 
-또는 함수 추가:
+교체용 함수를 따로 두는 방식도 있다.
 
 ```cpp
 class Logger {
@@ -140,20 +142,22 @@ ServiceLocator::sink().write("...");
 ServiceLocator::provide(std::make_unique<MockSink>());
 ```
 
-**장점** — Logger 클래스조차 불필요. 그러나 — 글로벌 상태의 모든 문제는 그대로.
+Logger 클래스조차 필요 없어진다는 장점이 있지만, 글로벌 상태에 따르는 문제는 그대로 남는다.
 
 ## 패턴 4 — Inversion (의존성 역전)
 
-원래:
+원래 코드는 다음과 같다.
+
 ```cpp
 class UserService {
     void create(User u) {
-        Logger::instance().log("creating");        // 의존성 숨김
+        Logger::instance().log("creating");        // 의존성을 숨긴다
     }
 };
 ```
 
-개선:
+개선된 형태는 다음과 같다.
+
 ```cpp
 class UserService {
     LogSink& logger_;
@@ -169,19 +173,19 @@ ConsoleSink sink;
 UserService svc{sink};
 ```
 
-Singleton 완전 제거. 가능하면 — 이게 최선.
+Singleton을 완전히 제거한다. 가능하다면 이것이 최선이다.
 
 ## 비교 — 패턴별 trade-off
 
 | 패턴 | 변경 가능 | 테스트 가능 | 글로벌 접근 | 복잡도 |
 |---|---|---|---|---|
-| 원시 Singleton | ❌ | ❌ | ✅ | 낮음 |
+| 원시 Singleton | ❌ | ❌ | ✅ | 낮다 |
 | Strategy 격리 | ✅ (sink) | ✅ | ✅ | 중간 |
 | DI 주입 | ✅ | ✅ | ✅ (선택) | 중간 |
 | Service Locator | ✅ | ✅ | ✅ | 중간 |
-| 인버전 (DI 전면) | ✅ | ✅ | ❌ | 높음 |
+| Inversion (DI 전면) | ✅ | ✅ | ❌ | 높다 |
 
-전면 DI가 이상. Singleton 잔재 — 점진적 개선 단계로.
+전면 DI가 이상이고, Singleton의 잔재는 점진적 개선의 단계로 본다.
 
 ## 테스트 — Strategy 격리 활용
 
@@ -205,18 +209,18 @@ TEST(UserService, CreatesLogged) {
 }
 ```
 
-**테스트 격리** — 글로벌 상태 후 정리:
+테스트 격리를 위해 글로벌 상태는 매번 정리해 줘야 한다.
 
 ```cpp
 class LoggerTest : public ::testing::Test {
     void SetUp() override {
-        // 이전 상태 백업 or default sink로 reset
+        // 이전 상태를 backup하거나 default sink로 reset한다
         Logger::instance().setSink(std::make_unique<NullSink>());
     }
 };
 ```
 
-매 테스트 — 깨끗한 sink. 글로벌 상태 위험 완화.
+매 테스트에서 깨끗한 sink로 시작하면 글로벌 상태의 위험을 어느 정도 완화할 수 있다.
 
 ## 패턴 — Async-friendly Singleton
 
@@ -257,7 +261,7 @@ public:
 };
 ```
 
-비동기 + 스레드 안전. Singleton 패턴은 그대로 — 내부 구현 완성도 ↑.
+비동기 처리에 스레드 안전까지 더한 형태다. Singleton 패턴은 유지하면서 내부 구현의 완성도를 끌어올렸다.
 
 ## 함정 — 부분 Strategy
 
@@ -265,10 +269,10 @@ public:
 class Logger {
     static Logger& instance() { static Logger l; return l; }
     
-    // 일부만 Strategy
+    // 일부만 Strategy로 분리한다
     void setSink(std::unique_ptr<LogSink> s) { sink_ = std::move(s); }
     
-    // 그러나 — 시간 포맷, 로그 레벨, 필터 등 — 하드코딩
+    // 그러나 시간 포맷, 로그 레벨, 필터 등은 하드코딩되어 있다
     void log(const std::string& msg) {
         auto time = std::format("{:%H:%M:%S}", std::chrono::system_clock::now());
         sink_->write(time + " | " + msg);
@@ -276,9 +280,9 @@ class Logger {
 };
 ```
 
-테스트 — 시간이 매번 달라 — 출력 일관성 검증 어려움.
+테스트에서는 시간이 매번 달라져 출력 일관성을 검증하기 어렵다.
 
-**완전 Strategy**:
+완전한 Strategy는 다음과 같이 분리한다.
 
 ```cpp
 class LogFormatter {
@@ -316,7 +320,8 @@ public:
 };
 ```
 
-DI — 항상 우선. 그러나 — 매 클래스 ctor에 모든 의존성 — 부담. 도구로 완화:
+DI를 우선해야 한다. 다만 매 클래스 생성자에 모든 의존성을 받는 게 부담스럽다면 도구로 완화할 수 있다.
+
 - Boost.DI
 - 빌더 패턴
 - 작은 service container
@@ -334,7 +339,7 @@ auto* old = std::pmr::set_default_resource(test_resource);
 std::pmr::set_default_resource(old);
 ```
 
-표준이 — 글로벌 자원을 set/get 패턴으로 — 교체 가능하게 설계. Singleton의 모범 사례.
+표준 라이브러리가 글로벌 자원을 set/get 패턴으로 교체 가능하게 설계한 사례다. Singleton의 모범적인 변형이라 할 만하다.
 
 ## 모던 변형 — std::source_location 로깅
 
@@ -347,37 +352,37 @@ void log(std::format_string<Args...> fmt, Args&&... args,
 }
 ```
 
-호출 위치 자동 — 디버깅 편의. C++20.
+호출 위치가 자동으로 들어가 디버깅이 편해진다. C++20 기능이다.
 
 ## 실무 가이드 — 결정 트리
 
 ```
-Singleton 사용해야 할 때:
-├── 진정한 자원이고 글로벌 접근 정당화
+Singleton을 써야 할 때
+├── 진정한 자원이고 글로벌 접근이 정당화되는가?
 │   ├── 변경 축 식별 → Strategy 격리
 │   ├── 테스트 격리 필요 → set/replace 메서드
 │   └── 멀티스레드 → 스레드 안전 (mutex/atomic)
-├── 외부 라이브러리 강제 → adapter로 캡슐화
-└── 점진적 개선 → DI로 단계적 이전
+├── 외부 라이브러리가 강제 → adapter로 캡슐화
+└── 점진적 개선 → DI로 단계적으로 이전
 ```
 
 ## 실무 가이드 — 체크리스트
 
-- [ ] 변경 축 식별 — Strategy로 격리?
-- [ ] 테스트 — set/replace 메서드 또는 mock 주입?
-- [ ] 스레드 안전성 — 락 / atomic 적용?
-- [ ] 글로벌 상태 — 테스트 격리 (SetUp/TearDown)?
-- [ ] 점진적 DI 이전 계획?
-- [ ] 진정한 유일성인가, 가정인가 — 재확인?
+- [ ] 변경 축을 Strategy로 격리했는가?
+- [ ] 테스트를 위한 set/replace 메서드나 mock 주입을 마련했는가?
+- [ ] 스레드 안전성을 위해 락이나 atomic을 적용했는가?
+- [ ] 글로벌 상태를 SetUp/TearDown으로 테스트 간에 격리했는가?
+- [ ] 점진적으로 DI로 이전할 계획이 있는가?
+- [ ] 진정한 유일성인지, 단지 가정인지 재확인했는가?
 
 ## 핵심 정리
 
-1. **Singleton이 불가피** — 변경 / 테스트 가능성 설계
-2. **Strategy 격리** — 변경 축을 인터페이스로 분리
-3. **set/replace 메서드** — 테스트에서 Mock 주입
-4. **DI로 점진적 이전** — 궁극 목표
-5. **표준 모범** — std::pmr::set_default_resource
-6. **테스트 격리** — SetUp/TearDown으로 글로벌 상태 reset
+1. **Singleton이 불가피하다면** 변경과 테스트 가능성을 함께 설계한다
+2. **Strategy 격리**로 변경 축을 인터페이스로 분리한다
+3. **set/replace 메서드**로 테스트에서 Mock을 주입한다
+4. **DI로 점진적 이전**이 궁극의 목표다
+5. **표준 모범**으로 `std::pmr::set_default_resource`가 있다
+6. **테스트 격리**는 SetUp/TearDown으로 글로벌 상태를 reset해 확보한다
 
 ## 관련 항목
 
