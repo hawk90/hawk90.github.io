@@ -7,9 +7,20 @@ series: "Effective C++"
 seriesOrder: 7
 ---
 
+## 왜 이 항목이 중요한가?
+
+C++에서 가장 조용히 무서운 함정 하나가 **base 포인터로 derived를 delete**할 때 일어난다. base 소멸자가 non-virtual이면 derived 부분의 소멸자가 호출되지 않는다. 자원 누수와 UB다. 컴파일러는 보통 경고도 안 준다.
+
+해결은 단순하다 — 다형성 base의 소멸자를 `virtual`로 선언한다. 다만 두 가지 함정이 따라온다.
+
+- **비-다형성 클래스**에 virtual을 붙이면 vptr이 추가되어 객체 크기가 늘어나고 C 호환을 잃는다.
+- **표준 라이브러리 값 타입**(`std::string`, `std::vector` 등)은 다형성 base가 아니다. 상속하지 말아야 한다.
+
+이 항목은 virtual 소멸자가 언제 필요하고 언제 비용이 되는지, 추상 클래스의 pure virtual 소멸자 패턴까지 정리한다.
+
 ## 개요
 
-`Base*`로 `Derived`를 가리키고 그 포인터에 `delete`를 호출하면, base의 소멸자만 호출되어 **derived 부분이 소멸되지 않을 수 있습니다**. 결과는 자원 누수와 UB. 해결은 base의 소멸자를 `virtual`로 선언하는 것 — 단, **다형성 base**일 때만. 비-다형성 클래스에 무지성으로 virtual을 붙이면 **객체 크기와 성능에 비용**이 추가됩니다.
+`Base*`로 `Derived`를 가리키고 그 포인터에 `delete`를 호출하면, base의 소멸자만 호출되어 **derived 부분이 소멸되지 않을 수 있다**. 결과는 자원 누수와 UB다. 해결은 base의 소멸자를 `virtual`로 선언하는 것이다. 단, **다형성 base**일 때만이다. 비-다형성 클래스에 무지성으로 virtual을 붙이면 **객체 크기와 성능에 비용**이 추가된다.
 
 ## 함정 예제 — 부분 파괴
 
@@ -158,7 +169,7 @@ std::string* p = new MyString;
 delete p;       // std::string은 non-virtual 소멸자 — extra 부분 누수 가능
 ```
 
-**표준 라이브러리의 값 타입은 상속을 전제로 설계되지 않았습니다**. `std::string`, `std::vector`, `std::pair` 등의 소멸자는 non-virtual — base로 사용하지 말 것.
+**표준 라이브러리의 값 타입은 상속을 전제로 설계되지 않았다**. `std::string`, `std::vector`, `std::pair` 등의 소멸자는 non-virtual — base로 사용하지 말 것.
 
 C++11+ 에선 `final`로 명시되는 표준 컨테이너도 있음. 의도가 분명.
 
@@ -206,3 +217,4 @@ public:
 - [항목 8: 소멸자에서 예외가 나가지 않게](/blog/programming/cpp/effective-cpp/item08-prevent-exceptions-from-leaving-destructors) — 소멸자 본문의 규칙
 - [항목 9: 생성·소멸 중 가상 함수 호출 금지](/blog/programming/cpp/effective-cpp/item09-never-call-virtual-functions-during-construction-or-destruction) — vtable 상태 함정
 - [항목 32: public 상속은 is-a를 모델](/blog/programming/cpp/effective-cpp/item32-make-sure-public-inheritance-models-is-a) — 다형성의 의미
+- [EMC 항목 12: override 선언](/blog/programming/cpp/effective-modern-cpp/item12-declare-overriding-functions-override) — 소멸자 override 검증
