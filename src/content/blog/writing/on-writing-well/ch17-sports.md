@@ -13,7 +13,6 @@ draft: false
 
 스포츠 글은 cliché의 또 다른 무덤입니다. 매일 수백 명의 기자가 같은 경기를 다루고, 그 글들이 *놀랍게 비슷*합니다.
 
-```
 - give 110%
 - leave it all on the field
 - moment of truth
@@ -22,11 +21,9 @@ draft: false
 - against all odds
 - nail-biter
 - decisive moment
-```
 
 한국어 스포츠 글에도 같은 패턴이 있습니다.
 
-```
 - "혼신의 힘을 다해"
 - "투혼을 발휘"
 - "끝나야 끝나는 야구"
@@ -35,7 +32,6 @@ draft: false
 - "이변의 주인공"
 - "마지막 1분의 기적"
 - "심장을 부여잡는 명승부"
-```
 
 이런 표현이 들어가면 *모든 스포츠 기사*처럼 보입니다.
 
@@ -45,16 +41,10 @@ draft: false
 
 점수만 보고하면 *신문 1면*용입니다. 그러나 좋은 스포츠 글은 *선수의 표정, 결정의 순간, 후회의 무게*를 그립니다.
 
-```
-나쁜 예 (수치만):
-"The team won 3-2 in the final minute. The crowd cheered loudly.
-It was a great victory."
-
-좋은 예 (드라마):
-"He stood on the free throw line. 7 seconds left. The crowd silent.
-He had missed three in a row. He took a breath, bounced the ball
-twice, and shot."
-```
+| 구분 | 예문 |
+|------|------|
+| 나쁜 예 (수치만) | "The team won 3-2 in the final minute. The crowd cheered loudly. It was a great victory." |
+| 좋은 예 (드라마) | "He stood on the free throw line. 7 seconds left. The crowd silent. He had missed three in a row. He took a breath, bounced the ball twice, and shot." |
 
 수치가 아니라 *그 순간의 인간성*. 독자가 *그 자리에 있는 듯* 느낍니다.
 
@@ -64,34 +54,28 @@ twice, and shot."
 
 ### 1. 결정의 순간
 
-```
 - 마지막 슈팅 직전 1초
 - 4쿼터 마지막 timeout 후 작전 회의
 - 경기 후 락커룸의 침묵
 - 코치의 마지막 결단
-```
 
 이 순간들에 *시간이 멈춥니다*. 글에서도 그 멈춤을 그립니다.
 
 ### 2. 선수의 내면
 
-```
 - 부상을 안고 뛰는 결정
 - 은퇴를 앞둔 마지막 시즌
 - 트레이드 통보를 받은 밤
 - 첫 우승의 무게
-```
 
 선수가 *경기 외부*에서 무엇을 견디는지가 종종 가장 강한 이야기입니다.
 
 ### 3. 작은 디테일
 
-```
 - 코치의 손짓
 - 관중석의 한 노부부
 - 락커룸의 사진
 - 경기 전 의식
-```
 
 큰 사건 *주변*의 작은 디테일이 글에 *입체*를 만듭니다.
 
@@ -99,21 +83,16 @@ twice, and shot."
 
 승리만 그리지 마세요. *패배가 더 인간적*입니다.
 
-```
-"He stood at the edge of the court, looking at the scoreboard
-as if the numbers might change. They didn't."
-```
+> "He stood at the edge of the court, looking at the scoreboard as if the numbers might change. They didn't."
 
 이 한 문장이 패배의 무게를 그립니다.
 
 ### 5. 보이지 않는 일
 
-```
 - 새벽 5시의 훈련
 - 부상 회복의 6개월
 - 코치와의 비공개 대화
 - 가족의 희생
-```
 
 언론이 *보지 못하는* 자리가 종종 진짜 드라마의 자리입니다.
 
@@ -123,19 +102,14 @@ as if the numbers might change. They didn't."
 
 ### 특징
 
-```
 - 경기 자체보다 *팬의 마음, 선수의 삶, 시즌의 흐름*
 - 통계 + 시(poetry)
 - 사랑이 묻어나는 글
 - 한 선수를 *수십 년 추적*한 글들
-```
 
 ### 인용 예시
 
-```
-"The game is heart-stopping, beautiful, often boring, and at times
-truly bizarre."
-```
+> "The game is heart-stopping, beautiful, often boring, and at times truly bizarre."
 
 야구의 *모순*을 한 문장에 담았습니다. *심장 멎는*과 *지루한*과 *기괴한*이 한 줄에 공존합니다. 이런 *복잡성의 인정*이 Angell의 글을 살아 있게 합니다.
 
@@ -161,24 +135,20 @@ truly bizarre."
 
 한국에서도 좋은 스포츠 글 작가들이 있습니다.
 
-```
 - 정민철, 박찬호의 회고록 — 선수 본인의 voice
 - 김재섭, 김봉수 등의 베테랑 기자들의 칼럼
-- 스포츠 잡지 *Sports Hankook*의 인물 inteview
-```
+- 스포츠 잡지 *Sports Hankook*의 인물 interview
 
 자기가 좋아하는 스포츠의 *모범 작가*를 한 명 정해 그 글을 자세히 읽으면 자기 글에도 영향이 옵니다.
 
 ## 자기 점검 — 스포츠 글
 
-```
-□ Cliché 표현이 있는가? (혼신의 힘 / 각본 없는 드라마)
-□ 결과만이 아니라 *인간 드라마*가 있는가?
-□ *작은 디테일*이 들어 있는가?
-□ 패배의 순간을 *진지하게* 다루었는가?
-□ 보이지 않는 일(훈련, 부상)을 다루는가?
-□ 통계와 *시*가 함께 있는가? (분석 + 정서)
-```
+- Cliche 표현이 있는가? (혼신의 힘 / 각본 없는 드라마)
+- 결과만이 아니라 *인간 드라마*가 있는가?
+- *작은 디테일*이 들어 있는가?
+- 패배의 순간을 *진지하게* 다루었는가?
+- 보이지 않는 일(훈련, 부상)을 다루는가?
+- 통계와 *시*가 함께 있는가? (분석 + 정서)
 
 ## 정리
 

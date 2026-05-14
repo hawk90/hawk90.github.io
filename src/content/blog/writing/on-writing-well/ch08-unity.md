@@ -13,23 +13,20 @@ draft: false
 
 좋은 글은 통일성이 있습니다. 한 글이 *하나의 어조, 하나의 관점, 하나의 시제*로 유지됩니다. Zinsser는 네 가지 통일성을 강조합니다.
 
-```
-1. 어조 (tone) — 진지 / 가벼움 / 비판적 / 회의적
-2. 시제 (tense) — 현재 / 과거 / 미래
-3. 대명사 (pronoun) — I / we / one / you
-4. 관점 (point of view) — 누구의 시각으로
-```
+1. **어조 (tone)** — 진지 / 가벼움 / 비판적 / 회의적
+2. **시제 (tense)** — 현재 / 과거 / 미래
+3. **대명사 (pronoun)** — I / we / one / you
+4. **관점 (point of view)** — 누구의 시각으로
 
 ## 1. 어조의 통일
 
 한 글은 일관된 어조를 유지해야 합니다.
 
-```
-회피: 진지하게 시작 → 갑자기 농담 → 다시 진지
-회피: 비판적으로 시작 → 갑자기 우호적
-
-선호: 한 어조를 처음부터 끝까지
-```
+| 구분 | 패턴 |
+|------|------|
+| 회피 | 진지하게 시작 → 갑자기 농담 → 다시 진지 |
+| 회피 | 비판적으로 시작 → 갑자기 우호적 |
+| 선호 | 한 어조를 처음부터 끝까지 |
 
 어조가 흔들리면 독자가 흔들립니다. 작가가 누구인지 헷갈립니다.
 
@@ -39,17 +36,14 @@ draft: false
 
 이야기와 보고서의 시제는 일관되어야 합니다.
 
-```
-회피: He went to the store. He buys some milk. Then he came home.
-선호: He went to the store. He bought some milk. Then he came home.
-```
+| 구분 | 예문 |
+|------|------|
+| 회피 | He went to the store. He buys some milk. Then he came home. |
+| 선호 | He went to the store. He bought some milk. Then he came home. |
 
 기본 시제를 결정한 뒤 그 시제로 유지합니다. 변화는 시점 차이를 표시할 때만.
 
-```
-OK: I am writing about my childhood. As a boy, I lived in Seoul.
-       (현재 — 글의 시점)        (과거 — 회상 시점)
-```
+> **OK**: I am writing about my childhood (현재 — 글의 시점). As a boy, I lived in Seoul (과거 — 회상 시점).
 
 이런 변화는 의도된 것이라 자연스럽습니다.
 
@@ -62,13 +56,10 @@ OK: I am writing about my childhood. As a boy, I lived in Seoul.
 - **One** — 보편적 주어, 격식
 - **You** — 2인칭, 독자에게 직접 말함
 
-```
-회피: When I was young, one would often play outside, and you felt free.
-       (I, one, you가 다 등장 — 누구의 시각?)
-
-선호: When I was young, I would often play outside, and I felt free.
-       (모두 I로 통일)
-```
+| 구분 | 예문 | 문제 |
+|------|------|------|
+| 회피 | When I was young, one would often play outside, and you felt free. | I, one, you가 다 등장 |
+| 선호 | When I was young, I would often play outside, and I felt free. | 모두 I로 통일 |
 
 대명사를 정한 뒤 끝까지 유지합니다.
 
@@ -81,12 +72,7 @@ OK: I am writing about my childhood. As a boy, I lived in Seoul.
 - 참여자 — 자기 경험
 - 분석가 — 해석과 평가
 
-```
-회피: The event was held in the auditorium. I felt nervous as I walked in.
-       The crowd seemed bored.
-       ↑                ↑                    ↑
-       객관          참여자                 해석
-```
+> **회피**: The event was held in the auditorium (객관). I felt nervous as I walked in (참여자). The crowd seemed bored (해석).
 
 관점을 정하고 끝까지 유지합니다.
 
@@ -94,12 +80,10 @@ OK: I am writing about my childhood. As a boy, I lived in Seoul.
 
 이 네 가지 통일성을 *글을 시작하기 전에 결정*합니다.
 
-```
-1. 어조 — 어떤 분위기?
-2. 시제 — 언제의 시점?
-3. 대명사 — 어떻게 자기를 부를?
-4. 관점 — 누구의 시각으로?
-```
+1. **어조** — 어떤 분위기?
+2. **시제** — 언제의 시점?
+3. **대명사** — 어떻게 자기를 부를?
+4. **관점** — 누구의 시각으로?
 
 결정 없이 쓰면 글이 흔들립니다.
 
@@ -107,10 +91,10 @@ OK: I am writing about my childhood. As a boy, I lived in Seoul.
 
 큰 주제를 작은 주제로 좁히는 것도 통일성의 일부입니다.
 
-```
-너무 큼: "여행"
-적절:    "오사카에서 만난 한 카페"
-```
+| 구분 | 예 |
+|------|-----|
+| 너무 큼 | "여행" |
+| 적절 | "오사카에서 만난 한 카페" |
 
 한 글에는 한 작은 주제. 큰 주제는 여러 글로 나눕니다.
 
@@ -118,11 +102,9 @@ OK: I am writing about my childhood. As a boy, I lived in Seoul.
 
 길이를 미리 결정합니다.
 
-```
-500단어 글
-2000단어 글
-10000단어 글
-```
+- 500단어 글
+- 2000단어 글
+- 10000단어 글
 
 각 길이마다 다른 양의 정보가 들어갑니다. 미리 결정해야 비례가 맞습니다.
 
@@ -130,12 +112,10 @@ OK: I am writing about my childhood. As a boy, I lived in Seoul.
 
 자기 글을 다 쓴 뒤 점검합니다.
 
-```
-□ 어조 — 처음부터 끝까지 일관?
-□ 시제 — 의도된 변화 외에 일관?
-□ 대명사 — 같은 대명사로 자기 지칭?
-□ 관점 — 한 시각으로 유지?
-```
+- 어조 — 처음부터 끝까지 일관?
+- 시제 — 의도된 변화 외에 일관?
+- 대명사 — 같은 대명사로 자기 지칭?
+- 관점 — 한 시각으로 유지?
 
 어느 하나라도 일관되지 않으면 재작성합니다.
 
@@ -143,10 +123,7 @@ OK: I am writing about my childhood. As a boy, I lived in Seoul.
 
 어조 변화는 종종 자연스러움 손실을 가져옵니다.
 
-```
-"This is a serious problem. We must address it immediately.
-And, well, sometimes things just happen, you know?"
-```
+> "This is a serious problem. We must address it immediately. And, well, sometimes things just happen, you know?"
 
 진지함 → 캐주얼. 독자가 흔들립니다. 첫 두 문장의 무게가 셋째 문장에서 무너집니다.
 
@@ -154,9 +131,7 @@ And, well, sometimes things just happen, you know?"
 
 어떤 글을 쓸지 모르겠으면 자기에게 짧은 글을 씁니다.
 
-```
-"이 글은 X에 대해, Y한 어조로, Z 관점에서, 길이는 W."
-```
+> "이 글은 X에 대해, Y한 어조로, Z 관점에서, 길이는 W."
 
 이 한 문장이 전체 글의 방향이 됩니다. 결정 후 그대로 쓰면 통일성이 자동으로 따라옵니다.
 

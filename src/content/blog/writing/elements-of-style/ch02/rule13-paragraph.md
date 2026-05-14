@@ -19,13 +19,11 @@ draft: false
 
 문장이 *언어의 단위*라면, 단락은 *생각의 단위*입니다. 한 단락에서 *하나의 생각 / 주제 / 단계*를 다룹니다.
 
-```
-좋은 단락 구조:
+**좋은 단락 구조:**
 
-1. Topic sentence (주제문) — 단락의 핵심
-2. Supporting sentences (지지 문장) — 사실 / 예시 / 분석
-3. Concluding sentence (결말 문장, 선택) — 다음 단락 연결
-```
+1. **Topic sentence (주제문)** — 단락의 핵심
+2. **Supporting sentences (지지 문장)** — 사실 / 예시 / 분석
+3. **Concluding sentence (결말 문장, 선택)** — 다음 단락 연결
 
 이 구조를 *전형적인 expository paragraph*라 부릅니다.
 
@@ -91,15 +89,14 @@ walk."
 
 문장들이 *논리적 순서*로 흐릅니다.
 
-```
-일관성을 만드는 도구:
-1. 시간 순서 — first, then, next, finally
-2. 공간 순서 — above, below, beside
-3. 인과 관계 — because, therefore, as a result
-4. 대조 — however, on the other hand, in contrast
-5. 추가 — moreover, furthermore, also
-6. 예시 — for example, for instance
-```
+**일관성을 만드는 도구:**
+
+1. **시간 순서** — first, then, next, finally
+2. **공간 순서** — above, below, beside
+3. **인과 관계** — because, therefore, as a result
+4. **대조** — however, on the other hand, in contrast
+5. **추가** — moreover, furthermore, also
+6. **예시** — for example, for instance
 
 ## 대화의 단락
 
@@ -231,12 +228,10 @@ She nodded. "Yes."
 
 ### 한국어 학술 글의 단락
 
-```
-□ Topic sentence + 지지 문장 + 결말 문장
-□ 평균 4-7 문장
-□ 한 주제 / 한 단계
-□ 단락 사이 연결 표현 ("그러나", "한편", "또한")
-```
+- [ ] Topic sentence + 지지 문장 + 결말 문장
+- [ ] 평균 4-7 문장
+- [ ] 한 주제 / 한 단계
+- [ ] 단락 사이 연결 표현 ("그러나", "한편", "또한")
 
 영어 학술 단락의 구조와 *거의 같습니다*.
 
@@ -263,15 +258,13 @@ Cormac McCarthy의 단락:
 
 ## 자기 글 점검
 
-```
-□ 각 단락이 *한 주제*에 집중하는가?
-□ *Topic sentence*가 단락의 앞에 있는가?
-□ 통일성이 유지되는가? (주제 벗어남 없음)
-□ 일관성이 있는가? (논리 순서)
-□ 단락 길이가 *균형*인가?
-□ 단락 사이 *연결 표현*이 있는가?
-□ 매체에 맞는 *시각적 길이*인가?
-```
+- [ ] 각 단락이 *한 주제*에 집중하는가?
+- [ ] *Topic sentence*가 단락의 앞에 있는가?
+- [ ] 통일성이 유지되는가? (주제 벗어남 없음)
+- [ ] 일관성이 있는가? (논리 순서)
+- [ ] 단락 길이가 *균형*인가?
+- [ ] 단락 사이 *연결 표현*이 있는가?
+- [ ] 매체에 맞는 *시각적 길이*인가?
 
 ## 다음 Rule 예고
 

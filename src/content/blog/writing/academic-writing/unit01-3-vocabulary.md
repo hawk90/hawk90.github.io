@@ -50,36 +50,34 @@ creative solutions to unexpected problems."
 
 ### 자주 등장하는 짝
 
-```
-일상 (phrasal)          학술 (Latinate)
-─────────────────────────────────────
-put up with             tolerate, endure
-look into               investigate, examine
-figure out              determine, ascertain
-come up with            develop, devise, propose
-make up                 constitute, comprise
-get rid of              eliminate, remove
-go up to                reach, attain
-keep up                 maintain, sustain
-go down                 decrease, decline
-think about             consider, contemplate
-bring up                raise (an issue)
-run into                encounter
-show up                 appear, emerge
-look at                 examine, investigate
-break down              analyze, decompose
-build up                develop, accumulate
-find out                determine, discover
-get back                recover, retrieve
-go through              undergo, experience
-look for                seek, search for
-make out                discern, perceive
-point out               indicate, note
-put off                 postpone, defer
-set up                  establish, install
-take in                 absorb, comprehend
-work out                resolve, calculate
-```
+| 일상 (phrasal) | 학술 (Latinate) |
+|---|---|
+| put up with | tolerate, endure |
+| look into | investigate, examine |
+| figure out | determine, ascertain |
+| come up with | develop, devise, propose |
+| make up | constitute, comprise |
+| get rid of | eliminate, remove |
+| go up to | reach, attain |
+| keep up | maintain, sustain |
+| go down | decrease, decline |
+| think about | consider, contemplate |
+| bring up | raise (an issue) |
+| run into | encounter |
+| show up | appear, emerge |
+| look at | examine, investigate |
+| break down | analyze, decompose |
+| build up | develop, accumulate |
+| find out | determine, discover |
+| get back | recover, retrieve |
+| go through | undergo, experience |
+| look for | seek, search for |
+| make out | discern, perceive |
+| point out | indicate, note |
+| put off | postpone, defer |
+| set up | establish, install |
+| take in | absorb, comprehend |
+| work out | resolve, calculate |
 
 *전부 외울 필요는 없습니다*. 다만 *글을 다시 읽을 때 phrasal verb가 눈에 띄면* *단일 동사로 바꿔 볼지 검토*. 글이 *자연스럽게 학술적*이 됩니다.
 
@@ -226,30 +224,28 @@ relevant    → relevance
 
 영어는 *두 큰 어휘 출처*를 갖습니다 — *Anglo-Saxon*과 *Latin / Greek*. 보통 *같은 의미*의 두 단어가 *양쪽에서* 옵니다.
 
-```
-Anglo-Saxon (앵글로색슨)        Latinate (학술적)
-─────────────────────────────────────
-begin                          commence, initiate
-end                            conclude, terminate
-help                           assist, facilitate
-show                           demonstrate, indicate
-think about                    consider, contemplate
-find out                       determine, ascertain
-use                            utilize, employ
-get                            obtain, acquire
-big                            substantial, significant
-small                          minor, insignificant
-about                          concerning, regarding
-build                          construct, establish
-make                           produce, manufacture
-need                           require, necessitate
-ask                            inquire, request
-keep                           maintain, retain
-try                            attempt, endeavor
-go up                          ascend, increase
-go down                        descend, decrease
-break                          fracture, rupture
-```
+| Anglo-Saxon (앵글로색슨) | Latinate (학술적) |
+|---|---|
+| begin | commence, initiate |
+| end | conclude, terminate |
+| help | assist, facilitate |
+| show | demonstrate, indicate |
+| think about | consider, contemplate |
+| find out | determine, ascertain |
+| use | utilize, employ |
+| get | obtain, acquire |
+| big | substantial, significant |
+| small | minor, insignificant |
+| about | concerning, regarding |
+| build | construct, establish |
+| make | produce, manufacture |
+| need | require, necessitate |
+| ask | inquire, request |
+| keep | maintain, retain |
+| try | attempt, endeavor |
+| go up | ascend, increase |
+| go down | descend, decrease |
+| break | fracture, rupture |
 
 학술 영어는 *라틴 어원*을 선호. 다만 *Strunk의 경고*:
 
@@ -375,20 +371,18 @@ break                          fracture, rupture
 → 학술 글은 *후자*를 선호
 ```
 
-```
-순한국어                  한자어 (학술)
-─────────────────────────────────────
-시작하다                  개시하다, 착수하다
-끝내다                    종료하다, 완료하다
-도와주다                  지원하다, 협력하다
-보여주다                  제시하다, 시현하다
-생각하다                  고려하다, 사고하다
-알아내다                  파악하다, 확인하다
-사용하다                  활용하다, 이용하다
-얻다                      획득하다, 취득하다
-크다                      거대하다, 막대하다
-작다                      미미하다, 소규모이다
-```
+| 순한국어 | 한자어 (학술) |
+|---|---|
+| 시작하다 | 개시하다, 착수하다 |
+| 끝내다 | 종료하다, 완료하다 |
+| 도와주다 | 지원하다, 협력하다 |
+| 보여주다 | 제시하다, 시현하다 |
+| 생각하다 | 고려하다, 사고하다 |
+| 알아내다 | 파악하다, 확인하다 |
+| 사용하다 | 활용하다, 이용하다 |
+| 얻다 | 획득하다, 취득하다 |
+| 크다 | 거대하다, 막대하다 |
+| 작다 | 미미하다, 소규모이다 |
 
 영어 *Latinate* 선호와 *비슷한 구조*. 한국 학술 글도 *한자어 중심*.
 

@@ -128,16 +128,15 @@ there could perhaps be ..."
 
 부정적 인상의 표현은 *긍정 등가물*로.
 
-```
-회피                        선호
-not large                  small / modest
-not few                    many / numerous
-not unlike                 similar
-not unusual                common / typical
-not impossible             possible
-not unknown                familiar / known
-not lacking                full / abundant
-```
+| 회피 | 선호 |
+|------|------|
+| not large | small / modest |
+| not few | many / numerous |
+| not unlike | similar |
+| not unusual | common / typical |
+| not impossible | possible |
+| not unknown | familiar / known |
+| not lacking | full / abundant |
 
 *이중 부정*은 *애매*합니다. *직접 긍정*이 명료.
 
@@ -242,15 +241,13 @@ be the case that ..."
 
 ## 자기 글 점검
 
-```
-□ *Not*이 *부정 진술*에 진짜 필요한가, 아니면 *회피*인가?
-□ Not + 일반어를 *한 단어*로 바꿀 수 있는가? (not honest → dishonest)
-□ 조동사가 *남발*되지 않았는가?
-□ *Not un-* 패턴은 없는가?
-□ 약한 동사 + 부사 = *강한 동사 하나*로 가능한가?
-□ 한국 글에 *미적지근한 헤지*가 과다하지 않은가?
-□ 자기 견해를 *분명히* 말했는가?
-```
+- [ ] *Not*이 *부정 진술*에 진짜 필요한가, 아니면 *회피*인가?
+- [ ] Not + 일반어를 *한 단어*로 바꿀 수 있는가? (not honest → dishonest)
+- [ ] 조동사가 *남발*되지 않았는가?
+- [ ] *Not un-* 패턴은 없는가?
+- [ ] 약한 동사 + 부사 = *강한 동사 하나*로 가능한가?
+- [ ] 한국 글에 *미적지근한 헤지*가 과다하지 않은가?
+- [ ] 자기 견해를 *분명히* 말했는가?
 
 ## 다음 Rule 예고
 

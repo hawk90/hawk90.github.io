@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import expressiveCode from 'astro-expressive-code';
+import astroMermaid from 'astro-mermaid';
 import remarkMath from 'remark-math';
 import remarkDirective from 'remark-directive';
 import remarkCallouts from './src/lib/remark-callouts.mjs';
@@ -31,6 +32,10 @@ export default defineConfig({
   },
 
   integrations: [
+    astroMermaid({
+      theme: 'default',
+      autoTheme: true,
+    }),
     expressiveCode(),
     mdx(),
     sitemap(),

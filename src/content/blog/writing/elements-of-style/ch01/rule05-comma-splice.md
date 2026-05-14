@@ -31,18 +31,10 @@ It is nearly half past five. We cannot reach town before dark.
 
 ## 세미콜론 vs 마침표 — 언제 무엇을
 
-```
-세미콜론 → 두 절이 의미상 *친밀*
-마침표 → 두 절이 *독립적*
-
-세미콜론:
-"He loved her; she loved him back."
-"The team played well; they deserved to win."
-
-마침표:
-"He loved her. The next day, she moved away."
-"The team played well. The opponent forfeited."
-```
+| 구두점 | 용도 | 예시 |
+|--------|------|------|
+| 세미콜론 | 두 절이 의미상 *친밀* | "He loved her; she loved him back." |
+| 마침표 | 두 절이 *독립적* | "He loved her. The next day, she moved away." |
 
 *의미상 한 호흡*이면 세미콜론. *별개의 사실*이면 마침표.
 
@@ -192,13 +184,11 @@ similarly, still, then, therefore, thus
 
 ## 자기 글 점검
 
-```
-□ 두 독립절 사이에 *쉼표만* 있는가? → comma splice
-□ 부사(however, therefore 등)가 이끄는 절은 *세미콜론*인가?
-□ Run-on(접속사 없이 연결)은 없는가?
-□ 짧고 균형 잡힌 예외만 쉼표 단독 허용
-□ 한국어 번역에 *세미콜론 직역*이 없는가?
-```
+- [ ] 두 독립절 사이에 *쉼표만* 있는가? → comma splice
+- [ ] 부사(however, therefore 등)가 이끄는 절은 *세미콜론*인가?
+- [ ] Run-on(접속사 없이 연결)은 없는가?
+- [ ] 짧고 균형 잡힌 예외만 쉼표 단독 허용
+- [ ] 한국어 번역에 *세미콜론 직역*이 없는가?
 
 ## *큰 소리로 읽기*
 

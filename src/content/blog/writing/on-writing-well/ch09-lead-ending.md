@@ -26,71 +26,53 @@ draft: false
 3. 신선한 정보 또는 시각
 4. 다음 문장으로 끌어 감
 
-```
-회피: This article will discuss the importance of ...
-       (너무 일반, 약속이 흐릿)
-
-선호: I never thought I'd find myself standing on a glacier in
-       Iceland at 3 a.m., wishing I had brought thicker socks.
-       (구체적, 호기심)
-```
+| 구분 | 예문 | 문제/장점 |
+|------|------|----------|
+| 회피 | This article will discuss the importance of ... | 너무 일반, 약속이 흐릿 |
+| 선호 | I never thought I'd find myself standing on a glacier in Iceland at 3 a.m., wishing I had brought thicker socks. | 구체적, 호기심 |
 
 ## "Lure"의 방법 — 다섯 가지 패턴
 
 ### 1. 일화 (anecdote)
 
-```
-"When I was eight, my grandfather took me fishing for the first time.
-I caught a tin can."
-```
+> "When I was eight, my grandfather took me fishing for the first time. I caught a tin can."
 
 작은 이야기로 시작합니다. 독자가 따라옵니다.
 
 ### 2. 놀라운 주장
 
-```
-"Pickup trucks are now the most popular vehicle in America."
-```
+> "Pickup trucks are now the most popular vehicle in America."
 
 상식과 다른 사실이 호기심을 만듭니다.
 
 ### 3. 강한 질문
 
-```
-"Why do we hate Mondays?"
-```
+> "Why do we hate Mondays?"
 
 독자가 답을 알고 싶어집니다.
 
 ### 4. 인용
 
-```
-"'It is impossible to write a memoir,' said E.B. White."
-```
+> "'It is impossible to write a memoir,' said E.B. White."
 
 권위의 진술로 시작합니다.
 
 ### 5. 장면 묘사
 
-```
-"The room was small, the light was harsh, and the chair was uncomfortable."
-```
+> "The room was small, the light was harsh, and the chair was uncomfortable."
 
 영화처럼 독자를 그 자리로 데려갑니다.
 
 ## Lead의 길이
 
-```
-짧은 lead — 호흡, 강함
-긴 lead — 점진적, 깊은 시작
-```
+| 유형 | 특성 |
+|------|------|
+| 짧은 lead | 호흡, 강함 |
+| 긴 lead | 점진적, 깊은 시작 |
 
 대부분의 좋은 글은 *짧은 lead로 잡고 펼칩니다*.
 
-```
-"Mountains are big.
-But this one was bigger."
-```
+> "Mountains are big. But this one was bigger."
 
 이런 짧음이 독자를 잡습니다.
 
@@ -98,25 +80,18 @@ But this one was bigger."
 
 ### 흐릿한 일반화
 
-```
-회피: In today's modern world ...
-회피: Throughout history ...
-회피: It is widely believed that ...
-```
+- In today's modern world ...
+- Throughout history ...
+- It is widely believed that ...
 
 ### Throat Clearing
 
-```
-회피: Before I begin, let me explain ...
-회피: I would like to talk about ...
-```
+- Before I begin, let me explain ...
+- I would like to talk about ...
 
 ### 약한 단어
 
-```
-회피: There is a topic that has been discussed ...
-       (be 동사로 시작 — 약함)
-```
+> **회피**: There is a topic that has been discussed ... (be 동사로 시작 — 약함)
 
 이런 시작은 독자를 잡지 못합니다.
 
@@ -134,34 +109,28 @@ But this one was bigger."
 
 시작의 어떤 요소를 끝에서 되울립니다.
 
-```
-시작: "I caught a tin can."
-끝: "Forty years later, I still keep that tin can on my desk."
-```
+| 위치 | 예문 |
+|------|------|
+| 시작 | "I caught a tin can." |
+| 끝 | "Forty years later, I still keep that tin can on my desk." |
 
 원이 닫히면서 독자가 만족합니다.
 
 ### 2. 강한 한 문장
 
-```
-"He never came back."
-```
+> "He never came back."
 
 짧고 결정적입니다.
 
 ### 3. 인용
 
-```
-"As my grandfather used to say: 'Patience is its own reward.'"
-```
+> "As my grandfather used to say: 'Patience is its own reward.'"
 
 다른 사람의 말로 마무리, 권위를 빌립니다.
 
 ### 4. 의외의 진실
 
-```
-"After all, perhaps the trip was about the people, not the place."
-```
+> "After all, perhaps the trip was about the people, not the place."
 
 기대와 다른 통찰. 독자에게 생각거리를 남깁니다.
 
@@ -169,29 +138,19 @@ But this one was bigger."
 
 ### 요약
 
-```
-회피: In conclusion, this article discussed three topics ...
-       (이미 본 것 반복 — 지루)
-```
+> **회피**: In conclusion, this article discussed three topics ... (이미 본 것 반복 — 지루)
 
 대학 작문이 가르치는 패턴이지만 nonfiction에서는 피합니다.
 
 ### 길게 끌기
 
-```
-회피: And so, after all is said and done, we can finally see that,
-       considering everything ...
-       (마무리를 못 함)
-```
+> **회피**: And so, after all is said and done, we can finally see that, considering everything ... (마무리를 못 함)
 
 끝나야 할 때 끝냅니다. 안 끌기.
 
 ### 미적지근함
 
-```
-회피: It was an interesting experience overall.
-       (할 말 없으면 마무리하지 말 것)
-```
+> **회피**: It was an interesting experience overall. (할 말 없으면 마무리하지 말 것)
 
 ## "End when you have nothing more to say"
 
@@ -205,11 +164,11 @@ Zinsser의 단호한 원칙입니다.
 
 좋은 글에 들어가는 시간:
 
-```
-Lead 작업    — 글 전체의 25퍼센트
-본문 작업    — 50퍼센트
-Ending 작업  — 25퍼센트
-```
+| 단계 | 비율 |
+|------|------|
+| Lead 작업 | 글 전체의 25퍼센트 |
+| 본문 작업 | 50퍼센트 |
+| Ending 작업 | 25퍼센트 |
 
 50퍼센트가 시작과 끝에 들어갑니다. 그만큼 중요합니다.
 
@@ -217,10 +176,10 @@ Ending 작업  — 25퍼센트
 
 좋은 끝은 *약간의 놀라움*을 가집니다.
 
-```
-너무 예측 가능 → 지루
-너무 비뚤어짐  → 어색
-```
+| 상태 | 결과 |
+|------|------|
+| 너무 예측 가능 | 지루 |
+| 너무 비뚤어짐 | 어색 |
 
 황금 균형은 독자가 *"오, 그렇구나"*를 느낄 정도입니다.
 

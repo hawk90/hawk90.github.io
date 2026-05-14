@@ -309,20 +309,19 @@ cl /std:c++17 /EHsc hello.cpp
 
 ### 실행 흐름
 
-```
-main 스레드                    새 스레드
-     │
-     │ std::thread t(hello)
-     ├────────────────────────────→ 생성
-     │                            │
-     │                            │ hello() 실행
-     │                            │ "Hello..." 출력
-     │                            │
-     │ t.join()                   │
-     │←────────────────────────────┤ 종료
-     │
-     │ return 0
-     ▼
+```mermaid
+sequenceDiagram
+    participant main as main 스레드
+    participant t as 새 스레드
+    Note over main: std::thread t(hello)
+    main->>t: 생성
+    activate t
+    Note over t: hello() 실행
+    Note over t: "Hello..." 출력
+    Note over main: t.join()
+    t-->>main: 종료
+    deactivate t
+    Note over main: return 0
 ```
 
 ### join vs detach

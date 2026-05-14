@@ -82,11 +82,7 @@ adventures, its challenges—are not soon forgotten."
 
 다음 대명사는 *항상 단수* 동사를 씁니다.
 
-```
-each, either, everyone, everybody, neither,
-nobody, someone, somebody, anyone, anybody,
-no one, one
-```
+> each, either, everyone, everybody, neither, nobody, someone, somebody, anyone, anybody, no one, one
 
 ```
 선호:
@@ -238,15 +234,13 @@ no one, one
 
 ## 자기 글 점검
 
-```
-□ 주어와 동사 사이 *끼어든 어구*가 혼란을 안 주는가?
-□ "One of [복수]" 뒤 관계절 동사가 *복수*인가?
-□ Each, either, everyone 등이 *단수 동사*와 함께인가?
-□ "And"로 이은 복합 주어가 *복수 동사*인가?
-□ "As well as, with, in addition to" 뒤가 *부가*인가?
-□ "Either ... or" / "Neither ... nor"는 *가까운 쪽* 일치?
-□ 3인칭 단수 *-s*를 빠뜨리지 않았는가?
-```
+- [ ] 주어와 동사 사이 *끼어든 어구*가 혼란을 안 주는가?
+- [ ] "One of [복수]" 뒤 관계절 동사가 *복수*인가?
+- [ ] Each, either, everyone 등이 *단수 동사*와 함께인가?
+- [ ] "And"로 이은 복합 주어가 *복수 동사*인가?
+- [ ] "As well as, with, in addition to" 뒤가 *부가*인가?
+- [ ] "Either ... or" / "Neither ... nor"는 *가까운 쪽* 일치?
+- [ ] 3인칭 단수 *-s*를 빠뜨리지 않았는가?
 
 ## 다음 Rule 예고
 

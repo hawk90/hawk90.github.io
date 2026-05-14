@@ -48,13 +48,10 @@ Zinsser가 1970년대 미국 산문의 상태를 진단합니다.
 
 단순한 내용을 가식적 어휘로 부풀린 경우. 이것이 진짜 문제입니다.
 
-```
-회피: We conducted an investigation into the matter.
-바름: We investigated.
-
-회피: It is currently our utilization of ...
-바름: We use ...
-```
+| 회피 | 바름 |
+|------|------|
+| We conducted an investigation into the matter. | We investigated. |
+| It is currently our utilization of ... | We use ... |
 
 대부분의 나쁜 글은 두 번째 종류입니다.
 
@@ -80,19 +77,18 @@ Zinsser가 1970년대 미국 산문의 상태를 진단합니다.
 
 Zinsser가 든 짝들입니다. Strunk와 Williams의 유사한 목록과 겹칩니다.
 
-```
-회피                          바름
-at this point in time      →  now
-for the purpose of         →  to / for
-in light of the fact that  →  since
-due to the fact that       →  because
-has the ability to         →  can
-make a recommendation      →  recommend
-utilize                    →  use
-implement                  →  do / carry out
-facilitate                 →  help
-in the event that          →  if
-```
+| 회피 | 바름 |
+|------|------|
+| at this point in time | now |
+| for the purpose of | to / for |
+| in light of the fact that | since |
+| due to the fact that | because |
+| has the ability to | can |
+| make a recommendation | recommend |
+| utilize | use |
+| implement | do / carry out |
+| facilitate | help |
+| in the event that | if |
 
 모두 짧은 단어가 더 강합니다.
 
@@ -110,11 +106,9 @@ in the event that          →  if
 
 건축가 Mies van der Rohe의 원칙을 Zinsser는 글쓰기에 적용합니다.
 
-```
-긴 문장 / 어려운 단어 / 가식적 어조
-   ↓
-짧은 문장 / 평범한 단어 / 자연스러운 어조
-```
+> 긴 문장 / 어려운 단어 / 가식적 어조
+> ↓
+> 짧은 문장 / 평범한 단어 / 자연스러운 어조
 
 이 방향이 거의 항상 더 좋은 글을 만듭니다.
 
@@ -142,12 +136,10 @@ in the event that          →  if
 
 Zinsser의 통찰 — 좋은 글의 90퍼센트는 *편집*입니다.
 
-```
-1차 초안: 자유롭게 쏟아 내기
-2차: 30퍼센트 잘라내기
-3차: 다시 20퍼센트 잘라내기
-4차: 단어와 구두점 다듬기
-```
+1. **1차 초안**: 자유롭게 쏟아 내기
+2. **2차**: 30퍼센트 잘라내기
+3. **3차**: 다시 20퍼센트 잘라내기
+4. **4차**: 단어와 구두점 다듬기
 
 매 단계마다 단순해집니다. 최종 글은 첫 초안의 절반 정도가 됩니다.
 
@@ -155,40 +147,36 @@ Zinsser의 통찰 — 좋은 글의 90퍼센트는 *편집*입니다.
 
 복잡한 글은 종종 *자기가 이해하지 못한 것*을 가립니다.
 
-```
-어려운 단어로 쓰면 → 아는 척이 가능
-짧고 명확하게 쓰면 → 모르는 부분이 드러남
-```
+- 어려운 단어로 쓰면 → 아는 척이 가능
+- 짧고 명확하게 쓰면 → 모르는 부분이 드러남
 
 따라서 명확하게 쓰는 것은 *정직하게 쓰는 것*과 같습니다.
 
 ## 한국어 글의 단순화
 
-```
-한국어 글에도 *Zinsser 단순화*가 그대로 적용:
+한국어 글에도 Zinsser 단순화가 그대로 적용됩니다.
 
-1. *~에 있어서* → *~에서, 에*
-2. *~을 통해서* → *~로*
-3. *~한다는 것이다* → *~한다*
-4. *~할 수 있을 것으로 보인다* → *~할 것이다*
-5. *주지하다시피* → 보통 제거
-6. *역사적으로 볼 때* → *역사적으로*
+| 회피 | 바름 |
+|------|------|
+| ~에 있어서 | ~에서, 에 |
+| ~을 통해서 | ~로 |
+| ~한다는 것이다 | ~한다 |
+| ~할 수 있을 것으로 보인다 | ~할 것이다 |
+| 주지하다시피 | 보통 제거 |
+| 역사적으로 볼 때 | 역사적으로 |
 
 한국어 jargon:
 - 학술 용어 과시 (인지부조화 → 마음의 갈등)
 - 경영 영어 (game changer, paradigm shift)
 - 한자어 과시 (cognitive load → 인지 부담)
-```
 
 ## 자기 글 점검
 
-```
-□ 모든 문장이 *가장 깨끗한 구성*?
-□ Jargon이 *필요한 자리*에만?
-□ 자기 글을 *수정*에 시간을 쓰는가?
-□ 한국어 글에 *번역체 군더더기*가 없는가?
-□ 어려운 한자어를 *쉬운 한국어*로 바꿀 수 있는가?
-```
+- [ ] 모든 문장이 *가장 깨끗한 구성*인가?
+- [ ] Jargon이 *필요한 자리*에만 있는가?
+- [ ] 자기 글을 *수정*하는 데 시간을 쓰는가?
+- [ ] 한국어 글에 *번역체 군더더기*가 없는가?
+- [ ] 어려운 한자어를 *쉬운 한국어*로 바꿀 수 있는가?
 
 ## 정리
 

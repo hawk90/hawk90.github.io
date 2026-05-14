@@ -23,14 +23,14 @@ Zinsser의 강한 권장입니다.
 
 같은 의미의 여러 단어 중에서 *상황에 정확히 맞는 단어*를 찾습니다. 그 차이가 글의 격을 결정합니다.
 
-```
-sad — 일반적인 슬픔
-melancholy — 사색적 슬픔
-dejected — 의기소침
-despondent — 절망
-forlorn — 외로운 슬픔
-woeful — 깊은 비참
-```
+| 단어 | 뉘앙스 |
+|------|------|
+| sad | 일반적인 슬픔 |
+| melancholy | 사색적 슬픔 |
+| dejected | 의기소침 |
+| despondent | 절망 |
+| forlorn | 외로운 슬픔 |
+| woeful | 깊은 비참 |
 
 각 단어가 다른 색깔을 가집니다. 정확한 그림을 그리려면 정확한 단어가 필요합니다.
 
@@ -46,15 +46,13 @@ Mark Twain의 유명한 말입니다.
 
 Cliché는 너무 자주 써서 의미를 잃은 표현입니다.
 
-```
-at the end of the day
-thinking outside the box
-low-hanging fruit
-the bottom line
-perfect storm
-tip of the iceberg
-in this day and age
-```
+- at the end of the day
+- thinking outside the box
+- low-hanging fruit
+- the bottom line
+- perfect storm
+- tip of the iceberg
+- in this day and age
 
 이런 표현이 들어가면 글이 평범해집니다. 독자가 흘려 넘깁니다. 자기가 들어 본 적 있는 구절이면 cliché를 의심하고 자기 단어로 다시 표현합니다.
 
@@ -62,13 +60,11 @@ in this day and age
 
 영어 단어는 두 출신을 가집니다.
 
-```
-Anglo-Saxon — 짧고 강하고 일상적
-   use, start, end, buy, find, help
+**Anglo-Saxon** — 짧고 강하고 일상적
+- use, start, end, buy, find, help
 
-Latinate — 길고 학술적이고 격식
-   utilize, commence, terminate, purchase, ascertain, facilitate
-```
+**Latinate** — 길고 학술적이고 격식
+- utilize, commence, terminate, purchase, ascertain, facilitate
 
 대부분의 경우 Anglo-Saxon이 더 강합니다. Latinate는 격식이 필요한 자리에만.
 
@@ -76,15 +72,14 @@ Latinate — 길고 학술적이고 격식
 
 좋은 글의 단어는 친근합니다.
 
-```
-회피             선호
-residence    →   home
-employment   →   job
-concerning   →   about
-at the present time → now
-purchase     →   buy
-consequently →   so
-```
+| 회피 | 선호 |
+|------|------|
+| residence | home |
+| employment | job |
+| concerning | about |
+| at the present time | now |
+| purchase | buy |
+| consequently | so |
 
 친근한 단어가 독자에게 더 가까이 갑니다.
 
@@ -92,17 +87,13 @@ consequently →   so
 
 같은 단어를 한 단락에 여러 번 쓰면 단조롭습니다. 그러나 *변화의 가치가 명확성보다 클 때만* 동의어로 바꿉니다.
 
-```
-명확성 우선:
-"The committee made a decision. The decision was important."
-                                  ↑
-                       decision 반복이 명확
+**명확성 우선:**
+> "The committee made a decision. The decision was important."
+> → decision 반복이 명확
 
-변화 우선:
-"Climate change affects ecosystems. The phenomenon also ..."
-                                      ↑
-                        phenomenon으로 변형 OK
-```
+**변화 우선:**
+> "Climate change affects ecosystems. The phenomenon also ..."
+> → phenomenon으로 변형 OK
 
 동의어 바꾸기가 항상 좋은 것은 아닙니다.
 
@@ -110,10 +101,8 @@ consequently →   so
 
 비유는 추상을 구체로 만듭니다.
 
-```
-His mind is a steel trap.  (강한 기억력)
-Time is money.             (시간 = 자원)
-```
+- His mind is a steel trap. (강한 기억력)
+- Time is money. (시간 = 자원)
 
 좋은 비유는 *새롭고 정확*합니다.
 
@@ -127,12 +116,12 @@ Time is money.             (시간 = 자원)
 
 영어 단어는 *소리*를 가집니다.
 
-```
-whisper — 부드러움 (s, w)
-crash   — 강함 (cr, sh)
-murmur  — 흐름 (m, r)
-sizzle  — 마찰 (s, z)
-```
+| 단어 | 소리의 느낌 |
+|------|------|
+| whisper | 부드러움 (s, w) |
+| crash | 강함 (cr, sh) |
+| murmur | 흐름 (m, r) |
+| sizzle | 마찰 (s, z) |
 
 소리가 의미를 강화합니다. 좋은 작가는 소리도 봅니다.
 

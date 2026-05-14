@@ -281,15 +281,13 @@ Joan Didion:
 
 ## 자기 글 점검
 
-```
-□ 모호한 단어("things", "stuff", "matters")가 있는가?
-□ 추상 명사("implementation", "facilitation")를 *동사*로 바꿀 수 있는가?
-□ "Several", "many", "few" → *정확한 숫자*가 가능한가?
-□ 일반 명사("person", "place") → *특정 이름*이 가능한가?
-□ 약한 동사 → *강한 동사*가 가능한가?
-□ *Show, don't tell* — 감정을 행동으로 보여 줄 수 있는가?
-□ 한국 글에 *~화, ~성*이 *남발*되지 않았는가?
-```
+- [ ] 모호한 단어("things", "stuff", "matters")가 있는가?
+- [ ] 추상 명사("implementation", "facilitation")를 *동사*로 바꿀 수 있는가?
+- [ ] "Several", "many", "few" → *정확한 숫자*가 가능한가?
+- [ ] 일반 명사("person", "place") → *특정 이름*이 가능한가?
+- [ ] 약한 동사 → *강한 동사*가 가능한가?
+- [ ] *Show, don't tell* — 감정을 행동으로 보여 줄 수 있는가?
+- [ ] 한국 글에 *~화, ~성*이 *남발*되지 않았는가?
 
 ## 다음 Rule 예고
 

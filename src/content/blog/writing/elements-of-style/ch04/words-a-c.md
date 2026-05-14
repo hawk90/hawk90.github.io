@@ -367,29 +367,25 @@ Continuous → 끊임없이 이어지는
 
 ## 한국 학습자의 흔한 함정
 
-```
-영어 단어              한국 학습자 실수
-─────────────────────────────────────
-aggravate           → "짜증" 의미로 잘못 사용 (irritate가 맞음)
-allude / refer      → 둘을 같은 의미로 사용
-alternative         → "대안" 단수가 사실은 복수 의미 가능
-comprise            → 수동태 "is comprised of" 잘못 사용
-contact             → 타동사로 거만하게 사용
-currently           → "지금" 과용
-character           → 한국어 "성격"의 직역
-```
+| 영어 단어 | 한국 학습자 실수 |
+|-----------|------------------|
+| aggravate | "짜증" 의미로 잘못 사용 (irritate가 맞음) |
+| allude / refer | 둘을 같은 의미로 사용 |
+| alternative | "대안" 단수가 사실은 복수 의미 가능 |
+| comprise | 수동태 "is comprised of" 잘못 사용 |
+| contact | 타동사로 거만하게 사용 |
+| currently | "지금" 과용 |
+| character | 한국어 "성격"의 직역 |
 
 ## 자기 글 점검
 
-```
-□ "Aggravate"가 *악화*인가 *짜증*인가? (짜증이면 irritate)
-□ "Allude"가 *간접*인가? (직접이면 refer)
-□ "Comprise / constitute" 방향이 맞는가?
-□ "Currently + 현재 시제" 군더더기 없는가?
-□ "Contact"를 *더 구체적 동사*로 바꿀 수 있는가?
-□ "Compare to / with" 구분이 맞는가?
-□ "Case", "character" 군더더기를 *제거*했는가?
-```
+- [ ] "Aggravate"가 *악화*인가 *짜증*인가? (짜증이면 irritate)
+- [ ] "Allude"가 *간접*인가? (직접이면 refer)
+- [ ] "Comprise / constitute" 방향이 맞는가?
+- [ ] "Currently + 현재 시제" 군더더기 없는가?
+- [ ] "Contact"를 *더 구체적 동사*로 바꿀 수 있는가?
+- [ ] "Compare to / with" 구분이 맞는가?
+- [ ] "Case", "character" 군더더기를 *제거*했는가?
 
 ## 다음 항목 예고
 

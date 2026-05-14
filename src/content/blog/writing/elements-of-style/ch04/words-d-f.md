@@ -324,36 +324,32 @@ Less + 셀 수 없는 명사:
 
 ## 한국 학습자의 D~F 흔한 함정
 
-```
-영어                  한국 학습자 실수
-─────────────────────────────────────
-data is               → 형식 글에서는 "data are"
-different than        → "different from"
-disinterested         → "uninterested" 대체로 오해
-due to                → 부사구로 오용 (becuase of로)
-effect/affect         → 동사 / 명사 혼동
-enormity              → "거대함"으로 오해 (악의 의미)
-facility              → 구체 명사로 바꾸기
-fewer/less            → 셀 수 / 없는 구분 안 함
-finalize              → 비즈니스 군더더기
-fortuitous            → "운 좋은"으로 오해
-```
+| 영어 | 한국 학습자 실수 |
+|------|------------------|
+| data is | 형식 글에서는 "data are" |
+| different than | "different from" |
+| disinterested | "uninterested" 대체로 오해 |
+| due to | 부사구로 오용 (because of로) |
+| effect/affect | 동사 / 명사 혼동 |
+| enormity | "거대함"으로 오해 (악의 의미) |
+| facility | 구체 명사로 바꾸기 |
+| fewer/less | 셀 수 / 없는 구분 안 함 |
+| finalize | 비즈니스 군더더기 |
+| fortuitous | "운 좋은"으로 오해 |
 
 ## 자기 글 점검
 
-```
-□ "Data are"인가 "data is"인가 (격식 글에서는 are)
-□ "Different from" — than 아님
-□ "Disinterested" — 공정한 / "uninterested" — 무관심
-□ "Due to" — attributable일 때만 부사구 사용 자제
-□ "Affect"(동사)와 "Effect"(명사/동사) 구분
-□ "Enormity" — 거대한 악, 단순한 크기 아님
-□ "Facility" — *prison, hospital* 같은 구체로
-□ "Factor" — 더 직접적 표현으로
-□ "Fewer"(셀 수) / "Less"(셀 수 없음)
-□ "Finalize" — *complete, conclude*로
-□ "Fortuitous" — 우연 / "Fortunate" — 운
-```
+- [ ] "Data are"인가 "data is"인가 (격식 글에서는 are)
+- [ ] "Different from" -- than 아님
+- [ ] "Disinterested" -- 공정한 / "uninterested" -- 무관심
+- [ ] "Due to" -- attributable일 때만 부사구 사용 자제
+- [ ] "Affect"(동사)와 "Effect"(명사/동사) 구분
+- [ ] "Enormity" -- 거대한 악, 단순한 크기 아님
+- [ ] "Facility" -- *prison, hospital* 같은 구체로
+- [ ] "Factor" -- 더 직접적 표현으로
+- [ ] "Fewer"(셀 수) / "Less"(셀 수 없음)
+- [ ] "Finalize" -- *complete, conclude*로
+- [ ] "Fortuitous" -- 우연 / "Fortunate" -- 운
 
 ## 다음 항목 예고
 

@@ -23,41 +23,29 @@ A에서 B로, B에서 C로. 점프하지 않습니다. 이 한 줄이 모든 과
 
 좋은 과학 글의 구조는 *사슬*입니다.
 
-```
 1. 기본 개념 (모두가 알 만한)
-   ↓
 2. 그 위에 새 개념 (기본에서 한 걸음)
-   ↓
 3. 그 위에 또 새 개념 (조금 더 깊이)
-   ↓
 4. ...
-```
 
 각 단계가 *이전 단계*를 전제로 합니다. 점프하면 독자가 떨어집니다.
 
 ### 점프의 함정
 
-```
-회피 (점프):
-"Quantum entanglement requires understanding tensor products of
-Hilbert spaces ..."
-
-선호 (단계적):
-"First, imagine two coins. If you flip them, each is heads or tails
-independently. Now imagine two quantum coins where flipping one
-instantly affects the other — even when they are miles apart. This
-is quantum entanglement."
-```
+| 구분 | 예문 |
+|------|------|
+| 회피 (점프) | "Quantum entanglement requires understanding tensor products of Hilbert spaces ..." |
+| 선호 (단계적) | "First, imagine two coins. If you flip them, each is heads or tails independently. Now imagine two quantum coins where flipping one instantly affects the other — even when they are miles apart. This is quantum entanglement." |
 
 같은 개념이지만 두 글은 완전히 다릅니다. 첫 글은 *이미 양자역학을 아는 사람*에게만 통합니다. 두 번째는 *누구나* 따라옵니다.
 
 ### 단계의 *크기*
 
-```
-큰 단계 → 독자 일부 떨어짐
-작은 단계 → 모두 따라옴
-너무 작은 단계 → 지루함
-```
+| 단계 크기 | 결과 |
+|----------|------|
+| 큰 단계 | 독자 일부 떨어짐 |
+| 작은 단계 | 모두 따라옴 |
+| 너무 작은 단계 | 지루함 |
 
 균형이 필요합니다. 자기 분야의 *모범 과학 작가*가 보통 *적절한 단계 크기*의 모델입니다.
 
@@ -65,13 +53,11 @@ is quantum entanglement."
 
 과학 글의 가장 강력한 도구는 *비유*입니다.
 
-```
-"DNA는 책의 페이지처럼 정보를 담는다."
-"원자는 태양계처럼 핵 주위에 전자가 돈다."
-"메모리는 책상처럼 — 자주 쓰는 것은 가까이, 잘 안 쓰는 것은 멀리."
-"네트워크 패킷은 우편 봉투처럼 주소가 적혀 있다."
-"바이러스의 mutation은 복사기의 오타처럼 점차 누적된다."
-```
+- "DNA는 책의 페이지처럼 정보를 담는다."
+- "원자는 태양계처럼 핵 주위에 전자가 돈다."
+- "메모리는 책상처럼 — 자주 쓰는 것은 가까이, 잘 안 쓰는 것은 멀리."
+- "네트워크 패킷은 우편 봉투처럼 주소가 적혀 있다."
+- "바이러스의 mutation은 복사기의 오타처럼 점차 누적된다."
 
 좋은 비유는 *독자가 이미 아는 것*에서 출발합니다. 모르는 것을 *아는 것으로* 풀어내는 작업입니다.
 
@@ -79,36 +65,29 @@ is quantum entanglement."
 
 비유는 *완벽한 일치*가 아닙니다. 한계도 명시해야 합니다.
 
-```
-"DNA는 책의 페이지와 같이 정보를 담는다.
-단, 책과 달리 DNA는 *복사*되고 *자기 자신을 읽으면서* 변할 수 있다."
-
-"원자는 태양계처럼 — 다만 양자역학적 효과 때문에 *경로*가
-고정되지 않는다."
-```
+- "DNA는 책의 페이지와 같이 정보를 담는다. 단, 책과 달리 DNA는 *복사*되고 *자기 자신을 읽으면서* 변할 수 있다."
+- "원자는 태양계처럼 — 다만 양자역학적 효과 때문에 *경로*가 고정되지 않는다."
 
 이런 *단, 다만*이 비유를 *느슨하게 사용하는* 정직함입니다.
 
 ### 흔한 좋은 비유 — 예시
 
-```
-컴퓨터 과학:
+**컴퓨터 과학**:
 - CPU = 요리사
 - RAM = 도마
 - Disk = 냉장고
 - Cache = 카운터 위 자주 쓰는 그릇
 
-생명과학:
+**생명과학**:
 - 세포 = 작은 도시
 - DNA = 청사진
 - 단백질 = 일꾼
 - mRNA = 명령서
 
-물리학:
+**물리학**:
 - 시공간 = 천 (general relativity)
 - 에너지 = 화폐
 - entropy = 흩어짐
-```
 
 자기 분야에 *통하는 비유 한두 개*를 정리해 두면 글이 즉시 명료해집니다.
 
@@ -118,36 +97,27 @@ is quantum entanglement."
 
 ### 정의의 형식
 
-```
-첫 등장:
-"Compile (the process of translating source code into machine
-code) is the first step ..."
+**첫 등장**:
+> "Compile (the process of translating source code into machine code) is the first step ..."
 
-이후:
-"Compile" — 정의 후 자유롭게 사용
-```
+**이후**:
+> "Compile" — 정의 후 자유롭게 사용
 
 ### 정의가 없을 때
 
-```
-회피: "The compiler optimizes the AST before code generation."
-       (AST, code generation — 일반 독자에 불명)
-
-선호: "The compiler first turns the program into a tree structure
-       (called an AST), then optimizes it before producing the
-       final machine code."
-       (개념을 풀어 설명)
-```
+| 구분 | 예문 |
+|------|------|
+| 회피 | "The compiler optimizes the AST before code generation." (AST, code generation — 일반 독자에 불명) |
+| 선호 | "The compiler first turns the program into a tree structure (called an AST), then optimizes it before producing the final machine code." (개념을 풀어 설명) |
 
 ### 약어의 함정
 
 자기 분야 약어를 무심코 쓰면 외부 독자가 떨어집니다.
 
-```
-회피: "PCR amplifies the target sequence."
-선호: "PCR — polymerase chain reaction — amplifies the target
-       sequence by repeatedly copying it."
-```
+| 구분 | 예문 |
+|------|------|
+| 회피 | "PCR amplifies the target sequence." |
+| 선호 | "PCR — polymerase chain reaction — amplifies the target sequence by repeatedly copying it." |
 
 처음 등장할 때 *풀어 쓰고*, 이후 약어를 사용합니다.
 
@@ -155,26 +125,18 @@ code) is the first step ..."
 
 과학·기술 글에서 종종 *사람이 사라집니다*. 추상적 *현상*과 *결과*만 남습니다.
 
-```
-회피 (사람 없음):
-"The phenomenon was discovered in 1995."
-"The model was developed to predict ..."
-
-선호 (사람 있음):
-"In 1995, a researcher named Alice Chen noticed an unusual pattern."
-"To predict X, Brown and his team built a model ..."
-```
+| 구분 | 예문 |
+|------|------|
+| 회피 (사람 없음) | "The phenomenon was discovered in 1995." |
+| 회피 (사람 없음) | "The model was developed to predict ..." |
+| 선호 (사람 있음) | "In 1995, a researcher named Alice Chen noticed an unusual pattern." |
+| 선호 (사람 있음) | "To predict X, Brown and his team built a model ..." |
 
 사람이 들어가면 *추상이 구체*로 바뀝니다. 독자가 *발견의 순간*에 함께합니다.
 
 ### 발견의 *과정* 그리기
 
-```
-"Chen was reviewing data from a routine experiment when she
-spotted an anomaly. She had seen similar patterns before, but
-always dismissed them as noise. This time, she ran the experiment
-again — and the pattern returned."
-```
+> "Chen was reviewing data from a routine experiment when she spotted an anomaly. She had seen similar patterns before, but always dismissed them as noise. This time, she ran the experiment again — and the pattern returned."
 
 같은 *발견*도 *과정*을 그리면 살아납니다.
 
@@ -214,26 +176,22 @@ again — and the pattern returned."
 
 ## 한국의 과학 작가
 
-```
 - 정재승 — *과학콘서트*
 - 최재천 — *최재천의 인간과 동물*
 - 김상욱 — *떨림과 울림*
 - 이정모 — *공생, 생명은 어떻게 진화했는가*
-```
 
 한국어로도 좋은 과학 글의 모델이 있습니다.
 
 ## 자기 점검
 
-```
-□ 각 단계가 *이전 단계*를 전제로 하는가?
-□ 점프가 없는가? (독자가 따라올 수 있는가)
-□ 추상적 개념에 *비유*가 있는가?
-□ 비유의 한계가 명시되었는가?
-□ 전문 용어가 *처음 등장 시* 정의되었는가?
-□ 사람과 발견 과정이 그려졌는가?
-□ 자기 분야의 모범 작가에서 배운 패턴이 있는가?
-```
+- 각 단계가 *이전 단계*를 전제로 하는가?
+- 점프가 없는가? (독자가 따라올 수 있는가)
+- 추상적 개념에 *비유*가 있는가?
+- 비유의 한계가 명시되었는가?
+- 전문 용어가 *처음 등장 시* 정의되었는가?
+- 사람과 발견 과정이 그려졌는가?
+- 자기 분야의 모범 작가에서 배운 패턴이 있는가?
 
 ## 정리
 

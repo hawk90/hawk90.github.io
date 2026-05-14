@@ -88,13 +88,7 @@ void barrier_wait(SimpleBarrier* b) {
 
 병렬 알고리즘에서 자주 등장. **Bulk Synchronous Parallel** (BSP) 모델의 핵심.
 
-```
-Phase:    ───────────────────────────────────────────
-Thread 1: ── compute ──┤barrier├── compute ──┤barrier├──
-Thread 2: ── compute ──┤  ↓   ├── compute ──┤  ↓   ├──
-Thread 3: ──── compute ┤ wait ├──── compute ┤ wait ├──
-Thread 4: ── compute ──┤      ├── compute ──┤      ├──
-```
+![BSP — barrier로 phase 동기화](/images/blog/parallel/diagrams/ch17-barrier-bsp.svg)
 
 모두가 phase 1 끝나야 phase 2 시작. 데이터 의존성이 phase 경계에 모임.
 

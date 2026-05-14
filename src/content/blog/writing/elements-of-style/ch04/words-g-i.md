@@ -303,36 +303,32 @@ completing the plan."
 
 ## 한국 학습자의 G~I 흔한 함정
 
-```
-영어                  한국 학습자 실수
-─────────────────────────────────────
-have got              → 격식 글에 사용
-hopefully             → 문장 시작에 과용
-however               → 문장 첫머리에 직역적 사용
-imply / infer         → 둘을 같은 의미로 혼동
-in regards to         → "in regard to"가 표준
-insightful            → 평범한 발언에 과장 사용
-interesting           → "Interestingly, ..." 도입 과용
-irregardless          → 비표준 단어
-it is ... that        → 약한 도입 패턴
-utilize/-ize          → use가 더 직접적
-```
+| 영어 | 한국 학습자 실수 |
+|------|------------------|
+| have got | 격식 글에 사용 |
+| hopefully | 문장 시작에 과용 |
+| however | 문장 첫머리에 직역적 사용 |
+| imply / infer | 둘을 같은 의미로 혼동 |
+| in regards to | "in regard to"가 표준 |
+| insightful | 평범한 발언에 과장 사용 |
+| interesting | "Interestingly, ..." 도입 과용 |
+| irregardless | 비표준 단어 |
+| it is ... that | 약한 도입 패턴 |
+| utilize/-ize | use가 더 직접적 |
 
 ## 자기 글 점검
 
-```
-□ "Have got" → 격식 글에서 "have"
-□ "Hopefully" → "I hope" / "It is to be hoped"
-□ "However"가 *문장 중간*에 있는가? 첫머리 자제
-□ "Imply"(화자) / "Infer"(청자) 구분?
-□ "In regards to" → "In regard to" / "Regarding"
-□ "In terms of" 군더더기 없는가?
-□ "Insightful" 과장 없는가?
-□ "Interesting" 도입 자제?
-□ "Irregardless" → "Regardless"
-□ "It is ... that" 약한 패턴 없는가?
-□ "-ize / -ization" → 더 직접적 단어로?
-```
+- [ ] "Have got" -- 격식 글에서 "have"
+- [ ] "Hopefully" -- "I hope" / "It is to be hoped"
+- [ ] "However"가 *문장 중간*에 있는가? 첫머리 자제
+- [ ] "Imply"(화자) / "Infer"(청자) 구분?
+- [ ] "In regards to" -- "In regard to" / "Regarding"
+- [ ] "In terms of" 군더더기 없는가?
+- [ ] "Insightful" 과장 없는가?
+- [ ] "Interesting" 도입 자제?
+- [ ] "Irregardless" -- "Regardless"
+- [ ] "It is ... that" 약한 패턴 없는가?
+- [ ] "-ize / -ization" -- 더 직접적 단어로?
 
 ## 다음 항목 예고
 

@@ -17,17 +17,16 @@ draft: false
 
 ## 대명사 격 표
 
-```
-주격          목적격          소유격(형용사형)   소유격(명사형)
-I             me              my                  mine
-you           you             your                yours
-he            him             his                 his
-she           her             her                 hers
-it            it              its                 (none)
-we            us              our                 ours
-they          them            their               theirs
-who           whom            whose               whose
-```
+| 주격 | 목적격 | 소유격(형용사형) | 소유격(명사형) |
+|------|--------|-----------------|---------------|
+| I | me | my | mine |
+| you | you | your | yours |
+| he | him | his | his |
+| she | her | her | hers |
+| it | it | its | (none) |
+| we | us | our | ours |
+| they | them | their | theirs |
+| who | whom | whose | whose |
 
 ## 기본 용법
 
@@ -209,10 +208,10 @@ flower bed."
 
 ## *Who* vs *Whom*
 
-```
-who   → 주격
-whom  → 목적격
-```
+| 대명사 | 격 |
+|--------|-----|
+| who | 주격 |
+| whom | 목적격 |
 
 ```
 선호:
@@ -281,15 +280,13 @@ whom  → 목적격
 
 ## 자기 글 점검
 
-```
-□ 주어 자리에 *주격* 대명사? (he, she, I, we, they, who)
-□ 목적어 자리에 *목적격*? (him, her, me, us, them, whom)
-□ 전치사 뒤에 *목적격*?
-□ "Between you and me" (NOT "between you and I")
-□ Than 비교에서 *생략 동사* 떠올려 결정
-□ 동명사 앞 *소유격* (my asking) / 분사 앞 *목적격* (me asking)
-□ "Whoever / whomever"은 *종속절 역할*로 결정
-```
+- [ ] 주어 자리에 *주격* 대명사? (he, she, I, we, they, who)
+- [ ] 목적어 자리에 *목적격*? (him, her, me, us, them, whom)
+- [ ] 전치사 뒤에 *목적격*?
+- [ ] "Between you and me" (NOT "between you and I")
+- [ ] Than 비교에서 *생략 동사* 떠올려 결정
+- [ ] 동명사 앞 *소유격* (my asking) / 분사 앞 *목적격* (me asking)
+- [ ] "Whoever / whomever"은 *종속절 역할*로 결정
 
 ## 다음 Rule 예고
 

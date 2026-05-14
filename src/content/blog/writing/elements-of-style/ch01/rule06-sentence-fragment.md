@@ -51,19 +51,10 @@ over the world."
 
 ## *Sentence Fragment*의 종류
 
-```
-1. 분사구 (Participial phrase):
-   "Walking down the street."  ← 동사 부족
-
-2. 동격구 (Appositive phrase):
-   "A man of great wisdom."    ← 동사 부족
-
-3. 종속절 (Subordinate clause):
-   "Because it was raining."   ← 종속, 독립 못 됨
-
-4. 전치사구 (Prepositional phrase):
-   "In the middle of the night." ← 동사 부족
-```
+1. **분사구 (Participial phrase):** "Walking down the street." ← 동사 부족
+2. **동격구 (Appositive phrase):** "A man of great wisdom." ← 동사 부족
+3. **종속절 (Subordinate clause):** "Because it was raining." ← 종속, 독립 못 됨
+4. **전치사구 (Prepositional phrase):** "In the middle of the night." ← 동사 부족
 
 이 모두는 *앞 문장에 붙어* 완전한 문장이 됩니다.
 
@@ -96,24 +87,24 @@ over the world."
 Strunk의 주석:
 > Rule 3, 4, 5, 6은 구두점의 *가장 중요한 원칙*들이다. 다른 모든 규칙보다 *먼저* 몸에 익혀야 한다.
 
-```
-Rule 3: 삽입 표현 → 양옆 쉼표
-Rule 4: 등위 접속사 → 앞에 쉼표
-Rule 5: Comma splice 금지 → 세미콜론 / 마침표
-Rule 6: Sentence fragment 금지 → 쉼표로 연결
-```
+| Rule | 원칙 |
+|------|------|
+| Rule 3 | 삽입 표현 → 양옆 쉼표 |
+| Rule 4 | 등위 접속사 → 앞에 쉼표 |
+| Rule 5 | Comma splice 금지 → 세미콜론 / 마침표 |
+| Rule 6 | Sentence fragment 금지 → 쉼표로 연결 |
 
 이 네 규칙이 *영어 구두점의 핵심*입니다.
 
 ## *Run-on*과의 관계
 
-```
-Comma splice: 두 독립절을 *쉼표만으로* 연결
-Run-on: 두 독립절을 *아무것도 없이* 연결
-Sentence fragment: 조각을 *마침표로* 끊음
+| 오류 유형 | 설명 |
+|----------|------|
+| Comma splice | 두 독립절을 *쉼표만으로* 연결 |
+| Run-on | 두 독립절을 *아무것도 없이* 연결 |
+| Sentence fragment | 조각을 *마침표로* 끊음 |
 
-각각 다른 오류이지만, 모두 *문장 경계*의 문제.
-```
+각각 다른 오류이지만, 모두 *문장 경계*의 문제입니다.
 
 ## 영어 학습자가 자주 틀리는 자리
 
@@ -168,13 +159,11 @@ Sentence fragment: 조각을 *마침표로* 끊음
 
 ## 자기 글 점검
 
-```
-□ 마침표 뒤 *조각*이 있는가? (동사 없음)
-□ Sentence fragment를 *앞 문장에 쉼표로 연결*했는가?
-□ 강조용 단편은 *드물게*만 사용했는가?
-□ 학술 / 격식 글에서 단편을 *피했는가*?
-□ Because, although, to 등이 *조각을 만들지* 않았는가?
-```
+- [ ] 마침표 뒤 *조각*이 있는가? (동사 없음)
+- [ ] Sentence fragment를 *앞 문장에 쉼표로 연결*했는가?
+- [ ] 강조용 단편은 *드물게*만 사용했는가?
+- [ ] 학술 / 격식 글에서 단편을 *피했는가*?
+- [ ] Because, although, to 등이 *조각을 만들지* 않았는가?
 
 ## 다음 Rule 예고
 

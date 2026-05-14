@@ -17,12 +17,12 @@ draft: false
 
 ## 구두점의 강도
 
-```
-쉼표      ,  ← 약한 휴지
-세미콜론  ;  ← 중간 휴지
-콜론      :  ← 도입 / 확장 신호
-마침표    .  ← 완전 정지
-```
+| 구두점 | 기호 | 의미 |
+|--------|------|------|
+| 쉼표 | , | 약한 휴지 |
+| 세미콜론 | ; | 중간 휴지 |
+| 콜론 | : | 도입 / 확장 신호 |
+| 마침표 | . | 완전 정지 |
 
 콜론은 독자에게 *"이제 무엇이 따라온다"*고 *예고*합니다.
 
@@ -118,29 +118,12 @@ The treaty states: "..."
 
 여러 형식적 자리에서 콜론을 사용합니다.
 
-```
-1. 편지 인사말 (격식):
-   "Dear Mr. Montague:"
-   "To Whom It May Concern:"
-
-2. 시간 표기:
-   "departs at 10:48 P.M."
-   "the meeting is at 14:30"
-
-3. 책 / 글 제목과 부제:
-   "Practical Calligraphy: An Introduction to Italic Script"
-   "Effective C++: 55 Specific Ways to Improve Your Programs"
-
-4. 성경 장 / 절:
-   "Nehemiah 11:7"
-   "John 3:16"
-
-5. 비율:
-   "the ratio was 3:1"
-
-6. 참고문헌 (출판사 / 도시 분리):
-   "New York: Penguin Books, 2020"
-```
+1. **편지 인사말 (격식):** "Dear Mr. Montague:" / "To Whom It May Concern:"
+2. **시간 표기:** "departs at 10:48 P.M." / "the meeting is at 14:30"
+3. **책 / 글 제목과 부제:** "Effective C++: 55 Specific Ways to Improve Your Programs"
+4. **성경 장 / 절:** "Nehemiah 11:7" / "John 3:16"
+5. **비율:** "the ratio was 3:1"
+6. **참고문헌 (출판사 / 도시 분리):** "New York: Penguin Books, 2020"
 
 ## 콜론 뒤 첫 글자 — 대문자 / 소문자
 
@@ -192,13 +175,11 @@ The treaty states: "..."
 
 ## 자기 글 점검
 
-```
-□ 콜론 앞이 *독립절*인가? (동사 / 전치사 뒤 아님)
-□ 두 독립절을 콜론으로 이으면 *둘째가 첫째의 설명*인가?
-□ 짧은 인용에는 *쉼표*, 긴 인용에는 *콜론*인가?
-□ 책 제목 / 시간 / 비율 등에 *적절히* 사용했는가?
-□ 한국 글에 *영어식 콜론 과용*이 없는가?
-```
+- [ ] 콜론 앞이 *독립절*인가? (동사 / 전치사 뒤 아님)
+- [ ] 두 독립절을 콜론으로 이으면 *둘째가 첫째의 설명*인가?
+- [ ] 짧은 인용에는 *쉼표*, 긴 인용에는 *콜론*인가?
+- [ ] 책 제목 / 시간 / 비율 등에 *적절히* 사용했는가?
+- [ ] 한국 글에 *영어식 콜론 과용*이 없는가?
 
 ## 다음 Rule 예고
 

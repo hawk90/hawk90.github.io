@@ -348,37 +348,33 @@ Nauseated → 메스꺼움을 *느끼는*
 
 ## 한국 학습자의 K~N 흔한 함정
 
-```
-영어                  한국 학습자 실수
-─────────────────────────────────────
-kind of / sort of     → 격식 글에 회화 사용
-lay / lie             → 시제 변화 혼동
-less / fewer          → 셀 수 / 양 구분 안 함
-like / as             → 절을 이끌 때 like 사용
-literally             → 비유 강조로 오용
-meaningful            → 모호한 형용사 과용
-most everyone         → "almost"가 표준
-myself                → I / me 자리에 과잉 사용
-nature                → 명사화 군더더기
-nauseous              → "메스껍게 느낀다"는 nauseated
-nice                  → 모든 자리에 사용
-nor                   → 단순 부정문 뒤 or 자리에 오용
-```
+| 영어 | 한국 학습자 실수 |
+|------|------------------|
+| kind of / sort of | 격식 글에 회화 사용 |
+| lay / lie | 시제 변화 혼동 |
+| less / fewer | 셀 수 / 양 구분 안 함 |
+| like / as | 절을 이끌 때 like 사용 |
+| literally | 비유 강조로 오용 |
+| meaningful | 모호한 형용사 과용 |
+| most everyone | "almost"가 표준 |
+| myself | I / me 자리에 과잉 사용 |
+| nature | 명사화 군더더기 |
+| nauseous | "메스껍게 느낀다"는 nauseated |
+| nice | 모든 자리에 사용 |
+| nor | 단순 부정문 뒤 or 자리에 오용 |
 
 ## 자기 글 점검
 
-```
-□ "Lay / lie" 시제 변화가 정확한가?
-□ "Less / fewer" 셀 수 / 없는 구분이 맞는가?
-□ "Like" → 절을 이끌면 "as"로
-□ "Literally"가 *진짜 문자 그대로*인가?
-□ "Meaningful" 같은 모호한 형용사 *구체화*?
-□ "Nature, character" 군더더기 *제거*?
-□ "Nice"를 구체적 형용사로 *대체*?
-□ "Most everyone" → "Almost everyone"
-□ "Myself" → I / me로 대체 가능?
-□ "Nor"의 사용이 *문법 규칙*에 맞는가?
-```
+- [ ] "Lay / lie" 시제 변화가 정확한가?
+- [ ] "Less / fewer" 셀 수 / 없는 구분이 맞는가?
+- [ ] "Like" -- 절을 이끌면 "as"로
+- [ ] "Literally"가 *진짜 문자 그대로*인가?
+- [ ] "Meaningful" 같은 모호한 형용사 *구체화*?
+- [ ] "Nature, character" 군더더기 *제거*?
+- [ ] "Nice"를 구체적 형용사로 *대체*?
+- [ ] "Most everyone" -- "Almost everyone"
+- [ ] "Myself" -- I / me로 대체 가능?
+- [ ] "Nor"의 사용이 *문법 규칙*에 맞는가?
 
 ## 다음 항목 예고
 

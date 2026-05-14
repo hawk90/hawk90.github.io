@@ -374,44 +374,40 @@ the human race   →    humans / people
 
 ## 한국 학습자의 O~S 흔한 함정
 
-```
-영어                    한국 학습자 실수
-─────────────────────────────────────
-gift (동사)             → give
-host (동사)             → hold
-impact (동사)           → affect
-one / his               → one / one's
--oriented               → focused on / concerned with
-people / persons        → 격식에서는 persons
-personalize             → tailor / customize
-possess                 → have
-presently               → 두 의미 혼동
-regretful / regrettable → 사람 vs 일
-respective              → 거의 항상 제거 가능
-shall / will            → 미국 영어는 will
-so (강조)               → 격식 글에서는 very
-split infinitive        → 가능한 분리 피함
-state                   → 단순 say 대체로 사용
-student body            → students
-```
+| 영어 | 한국 학습자 실수 |
+|------|------------------|
+| gift (동사) | give |
+| host (동사) | hold |
+| impact (동사) | affect |
+| one / his | one / one's |
+| -oriented | focused on / concerned with |
+| people / persons | 격식에서는 persons |
+| personalize | tailor / customize |
+| possess | have |
+| presently | 두 의미 혼동 |
+| regretful / regrettable | 사람 vs 일 |
+| respective | 거의 항상 제거 가능 |
+| shall / will | 미국 영어는 will |
+| so (강조) | 격식 글에서는 very |
+| split infinitive | 가능한 분리 피함 |
+| state | 단순 say 대체로 사용 |
+| student body | students |
 
 ## 자기 글 점검
 
-```
-□ 명사를 *함부로 동사화*하지 않았는가?
-□ "One"의 받음이 *one's*인가? (his / her 아님)
-□ "One of the most" 진부 패턴 자제?
-□ "-oriented" 같은 모호 형용사 *구체화*?
-□ "Personalize, possess" 자제?
-□ "Prestigious, presently" 과장 자제?
-□ "Regretful / regrettable" 구분?
-□ "Respective" 거의 항상 *제거*?
-□ "Firstly" → "First"
-□ "So good, so warm" → very / excellent
-□ Split infinitive 자제 (의미가 살아나면 OK)
-□ "State"가 *진짜 격식 진술*인가?
-□ "Student body" → students
-```
+- [ ] 명사를 *함부로 동사화*하지 않았는가?
+- [ ] "One"의 받음이 *one's*인가? (his / her 아님)
+- [ ] "One of the most" 진부 패턴 자제?
+- [ ] "-oriented" 같은 모호 형용사 *구체화*?
+- [ ] "Personalize, possess" 자제?
+- [ ] "Prestigious, presently" 과장 자제?
+- [ ] "Regretful / regrettable" 구분?
+- [ ] "Respective" 거의 항상 *제거*?
+- [ ] "Firstly" -- "First"
+- [ ] "So good, so warm" -- very / excellent
+- [ ] Split infinitive 자제 (의미가 살아나면 OK)
+- [ ] "State"가 *진짜 격식 진술*인가?
+- [ ] "Student body" -- students
 
 ## 다음 항목 예고
 

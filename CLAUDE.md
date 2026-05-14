@@ -210,17 +210,45 @@ class OrderProcessor {
 
 ## 6. 시각 자료
 
-### 다이어그램
+### 형식 선택 기준
 
-SVG로 `public/images/blog/<series>/diagrams/<name>.svg`에 둡니다.
+다이어그램은 *내용 성격*에 맞춰 도구를 고릅니다.
+
+| 도구 | 적합한 경우 | 적합하지 않은 경우 |
+|------|-------------|-------------------|
+| **TikZ** (→ SVG) | 정밀 좌표가 중요한 그림 — 메모리 레이아웃, 캐시 라인, 모래시계, bar chart, 격자, 수학 도형, flowchart, *비례 폭 timeline* (barrier / phase) | — (거의 모든 경우 OK) |
+| **Mermaid** | *sequence diagram* (스레드 lifeline, 메시지 교환) — 컬럼이 participant로 자연 정렬되는 경우만 | flowchart (auto-layout 들쭉날쭉), gantt (날짜 기반이라 기술 timeline에 어색), state diagram (수동 정렬이 보통 더 깔끔) |
+| **마크다운 표** | 비교 / 매핑 / 카탈로그 | 공간 관계가 의미 있는 그림 |
+| **마크다운 리스트** | 제목 + 항목식 정보 | 흐름 / 의존성 |
+| **코드 블록** | 코드 트레이스 / 디렉토리 트리 / ASCII가 곧 의미 | 진짜 시각 다이어그램 |
+| **KaTeX** (`$$ ... $$`) | 수학 수식 | 그림 |
+
+#### 결정 규칙
+
+1. **표/리스트로 표현 가능?** → 그걸로. 가장 단순하고 검색·복사 가능.
+2. **수식?** → KaTeX.
+3. **그 외 모든 그림** → TikZ. 정밀 좌표, 비례 폭, 일관된 디자인 시스템(`_design.tex`) 활용.
+4. **예외 — sequence diagram만 Mermaid 고려**: participant 컬럼이 자연 정렬되고 메시지 화살표가 단순할 때. 복잡해지면 TikZ.
+
+> **회피 원칙**: ASCII 박스 다이어그램(`┌──┐`)을 *결과물*로 남기지 않는다. 위 5가지 중 하나로 대체.
+
+### 다이어그램 파일 배치
+
+- **TikZ**: `public/images/blog/<series>/diagrams/<name>.tex` + 빌드된 `.svg`
+- **Mermaid**: 글 안에 ` ```mermaid ` 코드 블록 직접 (이미지 파일 X)
+- 빌드: `bash scripts/build-tikz.sh path/to/file.tex`
 
 ```markdown
-![Abstract Factory 구조](/images/blog/gof/diagrams/item01-abstract-factory.svg)
+![구조 설명](/images/blog/gof/diagrams/item01-abstract-factory.svg)
 ```
 
-### TikZ
-
-수학·자료구조 시각화는 TikZ → SVG로 빌드. 동시에 코드 형태로 글에 박지 않고 *결과 이미지만* 포함.
+```mermaid
+sequenceDiagram
+    participant A as Thread A
+    participant B as Thread B
+    A->>B: signal
+    B-->>A: ack
+```
 
 ### 표
 
@@ -338,6 +366,13 @@ media/av1              — AV1
 
 - [ ] 내부 링크가 절대 경로(`/blog/...`)인가? 상대 경로 아닌가?
 - [ ] 다음/이전 글 링크가 양방향으로 일관된가?
+
+### 시각 자료
+
+- [ ] ASCII 박스 다이어그램(`┌──┐`)을 결과물에 남기지 않았는가?
+- [ ] flowchart / gantt / state diagram을 Mermaid auto-layout으로 그리지 않았는가? (TikZ 권장)
+- [ ] Mermaid는 *sequence diagram에만* 한정 사용했는가?
+- [ ] 표·리스트로 충분한 정보를 *불필요한 그림*으로 그리지 않았는가?
 
 ### Frontmatter 중복 키
 

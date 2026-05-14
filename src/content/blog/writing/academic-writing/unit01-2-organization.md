@@ -235,27 +235,23 @@ sleep quality may differ from objective measures."
 
 같은 G-S 진행 안에서도 *일반화의 강도*를 의식해야 합니다. Swales와 Feak는 *5단계*로 정리.
 
-```
-강 ←──────────────────────────────────→ 약
+강도가 강한 것부터 약한 것 순서로:
 
-1. All X are Y.                     (절대적 일반화)
-2. X are almost always Y.           (강한 일반화)
-3. X are generally Y.               (전형적 일반화)
-4. X are often Y.                   (약한 일반화)
-5. X can sometimes be Y.            (가능성)
-```
+1. **All X are Y.** — 절대적 일반화
+2. **X are almost always Y.** — 강한 일반화
+3. **X are generally Y.** — 전형적 일반화
+4. **X are often Y.** — 약한 일반화
+5. **X can sometimes be Y.** — 가능성
 
 ### 한국어 등가
 
-```
-영어                       한국어
-─────────────────────────────────────
-All X are Y                모든 X는 Y이다
-X are almost always Y      X는 거의 항상 Y이다
-X are generally Y          X는 일반적으로 Y이다
-X are often Y              X는 종종 Y이다
-X can sometimes be Y       X는 때로 Y일 수 있다
-```
+| 영어 | 한국어 |
+|---|---|
+| All X are Y | 모든 X는 Y이다 |
+| X are almost always Y | X는 거의 항상 Y이다 |
+| X are generally Y | X는 일반적으로 Y이다 |
+| X are often Y | X는 종종 Y이다 |
+| X can sometimes be Y | X는 때로 Y일 수 있다 |
 
 자기 데이터가 *어느 강도*를 받쳐 줄 수 있는지 점검. *작은 표본*에서 *강한 일반화*를 끌어내면 *과장*이라는 비판.
 
@@ -370,17 +366,7 @@ sleep disturbance."
 
 논문 *전체*도 *조직 패턴*을 따릅니다. 가장 흔한 것이 *hourglass* (모래시계).
 
-```
-    ───────       Introduction (G-S, 넓게 시작)
-        \\
-         \\
-        ────       Methods (좁음)
-         \\
-        ────       Results (좁음)
-         //
-        //
-    ───────       Discussion (S-G, 다시 넓어짐)
-```
+![논문 전체의 모래시계 구조](/images/blog/science-research-writing/diagrams/overview-hourglass.svg)
 
 ```
 - Introduction: 분야 → 본 연구 (G-S, 깔때기)

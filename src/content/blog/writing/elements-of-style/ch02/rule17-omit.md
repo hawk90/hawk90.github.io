@@ -43,30 +43,28 @@ E.B. White가 회상하는 *Strunk 교수님의 강의실*:
 
 ## 흔한 군더더기 — 표현 리스트
 
-```
-원본 (군더더기)                  →  간결
-the question as to whether       →  whether
-there is no doubt but that       →  no doubt (doubtless)
-used for fuel purposes           →  used for fuel
-he is a man who                  →  he
-in a hasty manner                →  hastily
-this is a subject that           →  this subject
-Her story is a strange one.      →  Her story is strange.
-the reason why is that           →  because
-in the event that                →  if
-in the case of                   →  for
-with regard to                   →  about
-at this point in time            →  now
-due to the fact that             →  because
-in order to                      →  to
-in spite of the fact that        →  although
-for the purpose of               →  for / to
-in connection with               →  about
-in the vicinity of               →  near
-prior to                         →  before
-subsequent to                    →  after
-in the event that                →  if
-```
+| 원본 (군더더기) | 간결 |
+|----------------|------|
+| the question as to whether | whether |
+| there is no doubt but that | no doubt (doubtless) |
+| used for fuel purposes | used for fuel |
+| he is a man who | he |
+| in a hasty manner | hastily |
+| this is a subject that | this subject |
+| Her story is a strange one. | Her story is strange. |
+| the reason why is that | because |
+| in the event that | if |
+| in the case of | for |
+| with regard to | about |
+| at this point in time | now |
+| due to the fact that | because |
+| in order to | to |
+| in spite of the fact that | although |
+| for the purpose of | for / to |
+| in connection with | about |
+| in the vicinity of | near |
+| prior to | before |
+| subsequent to | after |
 
 이 표현들은 *공식 문서 / 학술 글*에 자주 등장합니다. *대부분* 한두 단어로 *충분*합니다.
 
@@ -74,17 +72,16 @@ in the event that                →  if
 
 `The fact that`은 *특히 약화시키는* 표현입니다. *거의 모든 문장*에서 빼낼 수 있습니다.
 
-```
-원본                                  →  간결
-owing to the fact that                →  since (because)
-in spite of the fact that             →  though (although)
-call your attention to the fact that  →  remind you (notify you)
-I was unaware of the fact that        →  I did not know that
-the fact that he had not succeeded    →  his failure
-the fact that I had arrived           →  my arrival
-the fact that she was leaving         →  her leaving
-despite the fact that                 →  although
-```
+| 원본 | 간결 |
+|------|------|
+| owing to the fact that | since (because) |
+| in spite of the fact that | though (although) |
+| call your attention to the fact that | remind you (notify you) |
+| I was unaware of the fact that | I did not know that |
+| the fact that he had not succeeded | his failure |
+| the fact that I had arrived | my arrival |
+| the fact that she was leaving | her leaving |
+| despite the fact that | although |
 
 *The fact that*는 *생각의 거리*를 만듭니다. *직접 사실*을 *간접화*합니다. *거의 항상 빼는 것이 좋습니다*.
 
@@ -237,20 +234,19 @@ Gulf Stream."
 
 한국어 글에도 *비슷한 패턴*이 흔합니다.
 
-```
-원본 (군더더기)                            →  간결
-~에 있어서                                 →  ~에서 / 에
-~에 대하여                                 →  ~에 / 에 대해
-~라고 하는 것은                            →  ~는
-~을 한다는 것                              →  ~함
-~함에 따라                                 →  ~므로 / ~서
-~을 통하여                                 →  ~로
-~의 경우에 있어서는                        →  ~의 경우
-~에 다름 아니다                            →  ~이다
-~라고 할 수 있겠다                         →  ~이다 / 같다
-주지하다시피                               →  알다시피
-역사적으로 볼 때                           →  역사적으로
-```
+| 원본 (군더더기) | 간결 |
+|----------------|------|
+| ~에 있어서 | ~에서 / 에 |
+| ~에 대하여 | ~에 / 에 대해 |
+| ~라고 하는 것은 | ~는 |
+| ~을 한다는 것 | ~함 |
+| ~함에 따라 | ~므로 / ~서 |
+| ~을 통하여 | ~로 |
+| ~의 경우에 있어서는 | ~의 경우 |
+| ~에 다름 아니다 | ~이다 |
+| ~라고 할 수 있겠다 | ~이다 / 같다 |
+| 주지하다시피 | 알다시피 |
+| 역사적으로 볼 때 | 역사적으로 |
 
 ### 한국어 *번역체 군더더기*
 
@@ -309,17 +305,15 @@ long one instead."
 
 ## 최종 자기 점검
 
-```
-□ 자기 글의 *모든 단어*가 *일하고 있는가*?
-□ *The fact that*가 한 번이라도 등장하는가? → 제거
-□ *In order to* → "to"
-□ *Due to the fact that* → "because"
-□ 형용사 / 부사 *군더더기*는?
-□ 짧은 문장 5개를 *한 긴 문장*으로 합칠 수 있는가?
-□ 비제한 관계절 → *동격*으로?
-□ 한국 글에 *번역체 군더더기*가 없는가?
-□ *Strunk의 외침* — "Omit needless words!" 들리는가?
-```
+- [ ] 자기 글의 *모든 단어*가 *일하고 있는가*?
+- [ ] *The fact that*가 한 번이라도 등장하는가? → 제거
+- [ ] *In order to* → "to"
+- [ ] *Due to the fact that* → "because"
+- [ ] 형용사 / 부사 *군더더기*는?
+- [ ] 짧은 문장 5개를 *한 긴 문장*으로 합칠 수 있는가?
+- [ ] 비제한 관계절 → *동격*으로?
+- [ ] 한국 글에 *번역체 군더더기*가 없는가?
+- [ ] *Strunk의 외침* — "Omit needless words!" 들리는가?
 
 ## 다음 Rule 예고
 
