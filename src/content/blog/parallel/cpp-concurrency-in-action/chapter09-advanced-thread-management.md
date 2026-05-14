@@ -1295,7 +1295,7 @@ void good_usage(thread_pool& compute_pool, thread_pool& io_pool) {
 
 라이브러리:
 - C++: Boost.Asio, taskflow, oneTBB, Folly executors
-- Rust: rayon, tokio, async-std
+- Rust: rayon (CPU 바운드), tokio (I/O — async-std는 사실상 유지 보수 중단)
 - Java: ExecutorService, ForkJoinPool, CompletableFuture
 - Go: goroutine + work-stealing runtime
 - C#: TPL, Task.Run, async/await
