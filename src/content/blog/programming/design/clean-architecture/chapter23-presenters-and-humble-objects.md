@@ -1,6 +1,6 @@
 ---
 title: "Ch 23: Presenters와 Humble Objects"
-date: 2025-06-07T02:00:00
+date: 2025-06-01T23:00:00
 description: "Humble Object 패턴 — 테스트하기 어려운 부분과 쉬운 부분을 분리. Presenter와 View Model의 정확한 위치."
 tags: [Architecture, Presenter, HumbleObject, MVP]
 series: "Clean Architecture"

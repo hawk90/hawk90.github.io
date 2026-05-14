@@ -1,6 +1,6 @@
 ---
 title: "Ch 25: 레이어와 경계"
-date: 2025-06-08T01:00:00
+date: 2025-06-02T01:00:00
 description: "단순한 3겹 다이어그램이 만능이 아니다. Hunt the Wumpus 예제로 보는 다축 변경과 다중 데이터 흐름."
 tags: [Architecture, Layers, Boundaries]
 series: "Clean Architecture"

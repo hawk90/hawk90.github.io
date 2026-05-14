@@ -1,6 +1,6 @@
 ---
 title: "항목 19: 출력값을 여러 개로 반환하려면 구조체로 반환하라"
-date: 2026-05-09T18:00:00
+date: 2026-05-08T19:00:00
 description: "out 파라미터·pair·tuple 대신 이름 있는 구조체 + 구조적 바인딩 — 의도가 호출 지점에서 명확."
 tags: [C++, Function Design, Structured Bindings]
 series: "Beautiful C++"

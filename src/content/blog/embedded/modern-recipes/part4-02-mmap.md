@@ -1,6 +1,6 @@
 ---
 title: "mmap vs read/write"
-date: 2026-05-13
+date: 2026-05-12T21:00:00
 description: "mmap vs read/write"
 series: "Modern Embedded Recipes"
 seriesOrder: 20

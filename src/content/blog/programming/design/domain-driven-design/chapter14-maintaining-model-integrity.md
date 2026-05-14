@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Maintaining Model Integrity"
-date: 2025-10-05T01:00:00
+date: 2025-10-01T14:00:00
 description: "Bounded Context. Context Map. Shared Kernel / ACL / Conformist / Partnership."
 tags: [DDD, Bounded Context, Context Map]
 series: "Domain-Driven Design"

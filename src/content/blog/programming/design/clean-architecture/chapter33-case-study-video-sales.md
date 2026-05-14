@@ -1,6 +1,6 @@
 ---
 title: "Ch 33: 사례 연구 — 비디오 판매"
-date: 2025-06-10T03:00:00
+date: 2025-06-02T09:00:00
 description: "비디오 판매 시스템을 Clean Architecture로 설계. Actor 분석부터 컴포넌트 분리, 의존성 그래프까지의 실전."
 tags: [Architecture, CaseStudy]
 series: "Clean Architecture"

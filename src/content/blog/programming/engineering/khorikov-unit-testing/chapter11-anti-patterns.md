@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Unit Testing Anti-Patterns"
-date: 2025-10-18T01:00:00
+date: 2025-10-15T11:00:00
 description: "흔한 안티패턴 — private method 테스트, time leak, code pollution. 시리즈 마무리."
 tags: [TDD, Anti-Patterns]
 series: "Khorikov Unit Testing"

@@ -1,6 +1,6 @@
 ---
 title: "Lesson 3: Actions"
-date: 2026-05-12
+date: 2026-05-12T03:00:00
 description: "동사가 명사로 변할 때 글이 흐려진다. Nominalization을 찾아 동사로 되돌리는 기술."
 series: "Style: Lessons in Clarity and Grace"
 seriesOrder: 3

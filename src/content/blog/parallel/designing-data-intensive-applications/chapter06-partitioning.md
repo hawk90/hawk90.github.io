@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 파티셔닝"
-date: 2025-07-02T02:00:00
+date: 2025-07-01T06:00:00
 description: "데이터를 노드들에 어떻게 나눌 것인가 — Key range, Hash, Hotspot 처리, Secondary index, Rebalancing."
 tags: [DDIA, Partitioning, Sharding, Consistent Hashing]
 series: "Designing Data-Intensive Applications"

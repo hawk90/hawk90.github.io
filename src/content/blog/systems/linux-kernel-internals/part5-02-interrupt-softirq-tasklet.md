@@ -1,6 +1,6 @@
 ---
 title: "Part 5-2: 인터럽트 / softirq / tasklet / workqueue"
-date: 2025-07-19T02:00:00
+date: 2025-07-15T23:00:00
 description: "인터럽트 처리 계층 — top half / bottom half. workqueue."
 tags: [Linux, Kernel, Interrupt, softirq, workqueue]
 series: "리눅스 커널의 구조와 원리"

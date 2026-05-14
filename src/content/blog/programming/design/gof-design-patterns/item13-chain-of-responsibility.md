@@ -1,6 +1,6 @@
 ---
 title: "GoF 13: Chain of Responsibility"
-date: 2026-02-03T10:00:00
+date: 2026-02-01T13:00:00
 description: "처리자 후보들을 체인으로 — 누가 처리할지는 자동으로 결정."
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"

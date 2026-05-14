@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 34: 소유 Type Erasure Wrapper의 설정 비용을 인식하라"
-date: 2026-05-15T05:00:00
+date: 2026-05-14T10:00:00
 description: "owning과 non-owning Type Erasure는 비용 구조가 다르다. 빈번한 생성과 복사가 잦다면 std::function_ref 같은 view 변형이 큰 가치를 발휘한다."
 tags: [C++, Software Design, Type Erasure, Performance]
 series: "C++ Software Design"

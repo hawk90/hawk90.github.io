@@ -1,6 +1,6 @@
 ---
 title: "항목 42: typename의 두 가지 의미를 이해하라"
-date: 2025-02-07T11:00:00
+date: 2025-02-02T18:00:00
 description: "템플릿 매개변수 선언과 의존 타입(dependent type) 명시 — 같은 키워드, 두 용도. C++20에서의 완화."
 tags: [C++, Effective C++, Template, typename]
 series: "Effective C++"

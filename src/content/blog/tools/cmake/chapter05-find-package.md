@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: find_package와 외부 의존성"
-date: 2025-05-14T14:00:00
+date: 2025-05-14T05:00:00
 description: "외부 라이브러리 탐색, FetchContent, 그리고 의존성 관리."
 tags: [cmake, build, cpp, dependencies]
 series: "CMake"

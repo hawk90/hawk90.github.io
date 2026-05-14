@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: System Calls and Kernels"
-date: 2025-06-17T02:00:00
+date: 2025-06-15T11:00:00
 description: "시스템 콜 메커니즘 — syscall / int 0x80. 사용자 vs 커널 공간."
 tags: [C, System Calls, Kernel]
 series: "전문가를 위한 C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Concurrency"
-date: 2025-06-18T01:00:00
+date: 2025-06-15T13:00:00
 description: "동시성 vs 병렬성. 스케줄링, 컨텍스트 스위치, 동시성의 본질."
 tags: [C, Concurrency]
 series: "전문가를 위한 C"

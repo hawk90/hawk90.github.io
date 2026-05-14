@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Test Readability"
-date: 2025-10-13T02:00:00
+date: 2025-10-10T13:00:00
 description: "Test as documentation. AAA / Given-When-Then. Helper / Builder 패턴."
 tags: [TDD, Readability, Builder]
 series: "Growing Object-Oriented Software"

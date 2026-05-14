@@ -1,6 +1,6 @@
 ---
 title: "항목 3: 기본 생성자 대신 기본 멤버 초기화자로 초깃값을 설정하라"
-date: 2026-05-08T12:00:00
+date: 2026-05-08T03:00:00
 description: "Default Member Initializer로 초기값을 선언부에 모으는 법 — 노이즈 감소, 일관성, 다중 생성자에서의 효과."
 tags: [C++, Initialization, Constructor]
 series: "Beautiful C++"

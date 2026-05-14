@@ -1,6 +1,6 @@
 ---
 title: "Unit 3.4: Introducing the Solution — 간접 의문문과 해결 도입"
-date: 2026-05-15T14:00:00
+date: 2026-05-14T14:00:00
 description: "학술 영어의 간접 의문문 활용과, 문제-해결 텍스트에서 해결을 도입하는 표현들."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 34

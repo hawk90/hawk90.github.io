@@ -1,6 +1,6 @@
 ---
 title: "memory barrier"
-date: 2026-05-13
+date: 2026-05-12T11:00:00
 description: "memory barrier"
 series: "Modern Embedded Recipes"
 seriesOrder: 10

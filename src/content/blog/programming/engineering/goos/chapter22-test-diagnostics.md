@@ -1,6 +1,6 @@
 ---
 title: "Ch 22: Test Diagnostics"
-date: 2025-10-13T04:00:00
+date: 2025-10-10T15:00:00
 description: "실패하는 테스트는 좋은 진단 메시지 — assert 메시지, dump."
 tags: [TDD, Diagnostics]
 series: "Growing Object-Oriented Software"

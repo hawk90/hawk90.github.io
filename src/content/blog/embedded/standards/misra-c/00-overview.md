@@ -1,6 +1,6 @@
 ---
 title: "MISRA C:2012 — 시리즈 개요"
-date: 2025-09-05T00:00:00
+date: 2025-09-05T01:00:00
 description: "자동차 / 임베디드 안전 C 표준. 170+ rules. amendments."
 tags: [MISRA, C, Safety-Critical, Standards, Series]
 series: "MISRA C"

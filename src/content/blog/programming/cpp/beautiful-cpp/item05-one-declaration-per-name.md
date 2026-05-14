@@ -1,6 +1,6 @@
 ---
 title: "항목 5: 선언당 단 하나의 이름만 선언하라"
-date: 2026-05-08T14:00:00
+date: 2026-05-08T05:00:00
 description: "한 줄에 여러 변수를 선언할 때의 함정 — 포인터/참조 수식어 위치, 초기화 누락, 가독성 손실."
 tags: [C++, Declarations, Code Style]
 series: "Beautiful C++"

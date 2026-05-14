@@ -1,6 +1,6 @@
 ---
 title: "zero-copy camera path"
-date: 2026-05-13
+date: 2026-05-13T13:00:00
 description: "zero-copy camera path"
 series: "Modern Embedded Recipes"
 seriesOrder: 36

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 함수 / 람다 (A7-A8)"
-date: 2025-09-16T01:00:00
+date: 2025-09-15T05:00:00
 description: "함수 인자, 반환, 람다 캡처, constexpr."
 tags: [AUTOSAR, Function, Lambda]
 series: "AUTOSAR C++14"

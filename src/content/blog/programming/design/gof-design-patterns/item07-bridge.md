@@ -1,6 +1,6 @@
 ---
 title: "GoF 7: Bridge"
-date: 2026-02-02T11:00:00
+date: 2026-02-01T07:00:00
 description: "추상과 구현을 분리 — N×M 클래스 폭발을 N+M으로."
 tags: [Design Pattern, GoF, C++, C, Structural]
 series: "GoF Design Patterns"

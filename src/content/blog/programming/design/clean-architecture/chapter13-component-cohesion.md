@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: 컴포넌트 응집도"
-date: 2025-06-04T02:00:00
+date: 2025-06-01T13:00:00
 description: "무엇이 한 컴포넌트에 같이 들어가야 하는가. REP, CCP, CRP 세 원칙과 그 사이의 긴장."
 tags: [Architecture, Components, Cohesion, REP, CCP, CRP]
 series: "Clean Architecture"

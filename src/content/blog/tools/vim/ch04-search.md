@@ -1,6 +1,6 @@
 ---
 title: "Vim 마스터하기: 검색과 치환"
-date: 2026-05-13
+date: 2026-05-13T04:00:00
 description: "패턴 검색, 치환, 정규표현식"
 series: "Vim 마스터하기"
 seriesOrder: 4

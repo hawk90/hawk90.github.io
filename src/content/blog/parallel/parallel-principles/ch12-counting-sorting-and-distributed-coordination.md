@@ -1,6 +1,6 @@
 ---
 title: "Chapter 12: Counting, Sorting, Distributed Coordination"
-date: 2026-05-12
+date: 2026-05-12T12:00:00
 description: "Counting Network, Bitonic Sorting Network. Combining Tree로 카운터 경합 분산."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 12

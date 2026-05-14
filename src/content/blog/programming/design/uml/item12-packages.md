@@ -1,6 +1,6 @@
 ---
 title: "UML 12: 패키지 — 모델의 폴더, 가시성, 의존 관리"
-date: 2026-04-03T13:00:00
+date: 2026-04-01T12:00:00
 description: "모델이 커지면 폴더가 필요하다 — 패키지로 가시성·의존·이름공간을 관리."
 tags: [UML, Package, Modularity, Architecture]
 series: "UML User Guide"

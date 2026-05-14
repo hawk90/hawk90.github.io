@@ -1,6 +1,6 @@
 ---
 title: "Ch 30: 데이터베이스는 세부 사항이다"
-date: 2025-06-09T03:00:00
+date: 2025-06-02T06:00:00
 description: "데이터베이스는 비즈니스 규칙의 일부가 아니다. 단지 데이터를 보관하는 메커니즘일 뿐 — 그게 MySQL이든 Mongo든 파일이든."
 tags: [Architecture, Database, Detail]
 series: "Clean Architecture"

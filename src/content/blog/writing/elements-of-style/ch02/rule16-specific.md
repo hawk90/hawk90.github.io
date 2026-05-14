@@ -1,6 +1,6 @@
 ---
 title: "Ch 2 Rule 16: 구체적이고 구상적인 언어를 쓸 것"
-date: 2026-05-14T02:05:00
+date: 2026-05-14T18:00:00
 description: "추상적인 것보다 구체적인 것, 모호한 것보다 명확한 것, 일반적인 것보다 특정한 것을 선호한다."
 series: "The Elements of Style"
 seriesOrder: 18

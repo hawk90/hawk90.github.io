@@ -1,6 +1,6 @@
 ---
 title: "Unit 6.3: Reaction Papers와 Journal Reviews"
-date: 2026-05-16T23:00:00
+date: 2026-05-15T00:00:00
 description: "짧은 반응 논문의 형식, 그리고 저널 심사 보고서 작성의 학술 관행."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 63

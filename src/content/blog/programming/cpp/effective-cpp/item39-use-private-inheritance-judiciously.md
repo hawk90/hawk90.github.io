@@ -1,6 +1,6 @@
 ---
 title: "항목 39: private 상속을 신중하게 사용하라"
-date: 2025-02-06T17:00:00
+date: 2025-02-02T15:00:00
 description: "private 상속의 의미와 composition과의 차이 — EBO와 protected 접근이 정당화 사유."
 tags: [C++, Effective C++, Inheritance, Private]
 series: "Effective C++"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 보안 개발 라이프사이클 / 시리즈 마무리"
-date: 2025-09-22T04:00:00
+date: 2025-09-20T11:00:00
 description: "SDL — 요구 / 설계 / 구현 / 검증 / 배포 / 유지보수. SBOM."
 tags: [SDLC, SDL, SBOM]
 series: "Embedded Security"

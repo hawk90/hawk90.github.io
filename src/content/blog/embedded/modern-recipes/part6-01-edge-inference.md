@@ -1,6 +1,6 @@
 ---
 title: "edge inference pipeline"
-date: 2026-05-13
+date: 2026-05-13T08:00:00
 description: "edge inference pipeline"
 series: "Modern Embedded Recipes"
 seriesOrder: 31

@@ -1,6 +1,6 @@
 ---
 title: "Unit 5.2: Title의 작성과 시리즈 마무리"
-date: 2026-05-19T20:00:00
+date: 2026-05-19T11:00:00
 description: "좋은 제목의 조건 — 검색 가능성, 정확성, 매력. Science Research Writing 시리즈 마무리."
 series: "Science Research Writing"
 seriesOrder: 52

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 분류 — Required / Advisory / Mandatory"
-date: 2025-09-05T02:00:00
+date: 2025-09-05T03:00:00
 description: "Directive vs Rule. 위반 시 deviation 절차."
 tags: [MISRA, Classification, Deviation]
 series: "MISRA C"

@@ -1,6 +1,6 @@
 ---
 title: "항목 5: C++가 자동으로 작성·호출하는 함수들을 알아두라"
-date: 2025-02-02T10:00:00
+date: 2025-02-01T05:00:00
 description: "기본 생성자, 복사/이동 생성자, 복사/이동 대입, 소멸자 — 컴파일러가 언제 자동 생성하는가."
 tags: [C++, Effective C++, Special Member Functions]
 series: "Effective C++"

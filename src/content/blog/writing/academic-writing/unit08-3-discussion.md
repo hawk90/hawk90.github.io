@@ -1,6 +1,6 @@
 ---
 title: "Unit 8.3: Discussion Sections와 시리즈 마무리"
-date: 2026-05-17T23:00:00
+date: 2026-05-15T06:00:00
 description: "Discussion의 표준 구조 — 핵심 발견, 기존 연구와의 관계, 한계 인정, 함의 도출. Academic Writing 시리즈 마무리."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 83

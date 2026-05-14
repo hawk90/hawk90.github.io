@@ -1,6 +1,6 @@
 ---
 title: "Chapter 18: Transactional Memory"
-date: 2026-05-12
+date: 2026-05-12T18:00:00
 description: "락 없는 atomic block의 약속. Software TM, Hardware TM (Intel TSX, IBM POWER). 합성성과 진행 보장."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 18

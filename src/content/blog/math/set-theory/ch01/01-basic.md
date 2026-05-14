@@ -1,6 +1,6 @@
 ---
 title: "1.1 첫 약속들"
-date: 2026-05-09T15:50:30
+date: 2026-05-09T01:00:00
 description: "집합을 가지고 무언가 하려면, 먼저 두 가지를 정해야 한다."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"

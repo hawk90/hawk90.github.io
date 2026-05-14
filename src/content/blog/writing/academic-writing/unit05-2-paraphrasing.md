@@ -1,6 +1,6 @@
 ---
 title: "Unit 5.2: Paraphrasing과 동의어 활용"
-date: 2026-05-16T12:00:00
+date: 2026-05-14T20:00:00
 description: "패러프레이즈의 실제 기법 — 구조 변경, 어휘 변경, 시점 변경. 동의어 사전의 함정과 안전한 사용."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 52

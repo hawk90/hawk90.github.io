@@ -1,6 +1,6 @@
 ---
 title: "Part 2-2: fork / exec / exit"
-date: 2025-07-16T02:00:00
+date: 2025-07-15T06:00:00
 description: "프로세스 라이프사이클 — fork (COW), exec (이미지 교체), exit (좀비)."
 tags: [Linux, Kernel, fork, exec]
 series: "리눅스 커널의 구조와 원리"

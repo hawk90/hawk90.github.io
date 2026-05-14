@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 11: 디자인 패턴의 목적을 이해하라"
-date: 2026-05-13T21:00:00
+date: 2026-05-13T11:00:00
 description: "디자인 패턴은 검증된 해결책이자 공유 어휘다. 의존성 분리와 변화 관리의 도구라는, GoF 30년의 의미."
 tags: [C++, Software Design, Design Patterns, GoF]
 series: "C++ Software Design"

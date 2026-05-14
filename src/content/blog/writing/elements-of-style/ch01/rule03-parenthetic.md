@@ -1,6 +1,6 @@
 ---
 title: "Ch 1 Rule 3: 삽입 표현은 쉼표로 감싸기"
-date: 2026-05-14T01:03:00
+date: 2026-05-14T04:00:00
 description: "부가 정보로 끼어드는 어구는 양옆에 쉼표. 비제한적 관계절도 마찬가지."
 series: "The Elements of Style"
 seriesOrder: 4

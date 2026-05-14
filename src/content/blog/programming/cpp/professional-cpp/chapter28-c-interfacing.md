@@ -1,6 +1,6 @@
 ---
 title: "Ch 28: Interfacing with C"
-date: 2025-07-09T03:00:00
+date: 2025-07-02T04:00:00
 description: "C ↔ C++ — extern \"C\". name mangling. ABI 호환."
 tags: [C++, C, FFI, ABI]
 series: "전문가를 위한 C++"

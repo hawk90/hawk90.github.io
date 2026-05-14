@@ -1,6 +1,6 @@
 ---
 title: "Unit 8.2: Citation, Tense, Purpose Statements"
-date: 2026-05-17T22:00:00
+date: 2026-05-15T05:00:00
 description: "Introduction의 인용 형태와 시제 선택, 그리고 자기 연구의 목적을 진술하는 표현들."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 82

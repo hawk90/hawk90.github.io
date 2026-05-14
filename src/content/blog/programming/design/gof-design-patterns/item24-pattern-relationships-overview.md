@@ -1,6 +1,6 @@
 ---
 title: "GoF: 23개 패턴 전체 관계 한눈에 보기"
-date: 2026-02-05T10:00:00
+date: 2026-02-02T00:00:00
 description: "23개 GoF 패턴이 어떻게 서로 의존·대체·결합되는지 한 장의 다이어그램으로."
 tags: [Design Pattern, GoF, Overview]
 series: "GoF Design Patterns"

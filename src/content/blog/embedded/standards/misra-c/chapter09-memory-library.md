@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 메모리 / 라이브러리 (Rule 21-22)"
-date: 2025-09-07T02:00:00
+date: 2025-09-05T10:00:00
 description: "표준 라이브러리 제한 (21), 자원 관리 (22)."
 tags: [MISRA, Standard Library, Resource]
 series: "MISRA C"

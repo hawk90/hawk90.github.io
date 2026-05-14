@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: I/O / Environment / Signals / Errors"
-date: 2025-09-12T03:00:00
+date: 2025-09-10T10:00:00
 description: "FIO 파일, ENV getenv, SIG 비동기 안전, ERR errno 처리."
 tags: [CERT, FIO, Signal, Error]
 series: "CERT C"

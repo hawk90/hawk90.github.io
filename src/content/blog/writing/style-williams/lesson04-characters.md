@@ -1,6 +1,6 @@
 ---
 title: "Lesson 4: Characters"
-date: 2026-05-12
+date: 2026-05-12T04:00:00
 description: "문장의 주어는 'character'(행위자)여야 한다. 추상이 주어가 되면 독자가 길을 잃는다."
 series: "Style: Lessons in Clarity and Grace"
 seriesOrder: 4

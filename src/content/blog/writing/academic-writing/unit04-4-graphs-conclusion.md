@@ -1,6 +1,6 @@
 ---
 title: "Unit 4.4: Graphs, Chronological Data, Unexpected Outcomes"
-date: 2026-05-16T00:00:00
+date: 2026-05-14T18:00:00
 description: "그래프와 시간 데이터의 묘사, 예상 외의 결과 처리, Data Commentary 마무리."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 44

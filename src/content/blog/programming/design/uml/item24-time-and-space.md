@@ -1,6 +1,6 @@
 ---
 title: "UML 24: 시간과 공간 — Deadline, Location, 분산 시스템"
-date: 2026-04-05T14:00:00
+date: 2026-04-02T00:00:00
 description: "실시간 시스템·분산 시스템에서 필수인 시간 제약과 위치 표기."
 tags: [UML, Real-time, Deadline, Location, Distribution]
 series: "UML User Guide"

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 14: Skiplist와 균형 검색"
-date: 2026-05-12
+date: 2026-05-12T14:00:00
 description: "Skiplist의 동시성 친화성. Lock-Free Skiplist. 균형 트리(BST)가 동시성에 부적합한 이유."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 14

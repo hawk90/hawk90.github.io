@@ -1,6 +1,6 @@
 ---
 title: "항목 4: 사용 전에 객체를 반드시 초기화하라"
-date: 2025-02-01T13:00:00
+date: 2025-02-01T04:00:00
 description: "내장 타입 비초기화 함정, 멤버 초기화 리스트, 초기화 순서, static 초기화 순서 fiasco와 Meyers' singleton."
 tags: [C++, Effective C++, Initialization]
 series: "Effective C++"

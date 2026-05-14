@@ -1,6 +1,6 @@
 ---
 title: "Chapter 9: The Lead and the Ending"
-date: 2026-05-18T19:00:00
+date: 2026-05-18T09:00:00
 description: "글의 가장 중요한 두 부분 — 시작과 끝. 첫 문장이 다음 문장을 유인해야 하고, 끝은 약간의 놀라움을 가집니다."
 series: "On Writing Well"
 seriesOrder: 9

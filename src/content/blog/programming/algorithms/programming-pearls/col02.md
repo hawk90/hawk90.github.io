@@ -1,6 +1,6 @@
 ---
 title: "Column 2: Aha! Algorithms"
-date: 2026-05-13
+date: 2026-05-13T02:00:00
 description: "Aha! Algorithms"
 series: "Programming Pearls"
 seriesOrder: 2

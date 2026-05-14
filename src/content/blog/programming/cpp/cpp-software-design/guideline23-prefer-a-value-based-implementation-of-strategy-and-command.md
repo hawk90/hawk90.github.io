@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 23: Strategy와 Command는 값 기반 구현을 선호하라"
-date: 2026-05-14T19:00:00
+date: 2026-05-13T23:00:00
 description: "Strategy와 Command를 값 의미론으로 풀어내는 두 도구 — std::function과 std::variant. 가상 함수 대신 값."
 tags: [C++, Software Design, Strategy, Command, Value Semantics]
 series: "C++ Software Design"

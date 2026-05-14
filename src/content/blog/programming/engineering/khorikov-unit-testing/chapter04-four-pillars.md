@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: The Four Pillars of a Good Unit Test"
-date: 2025-10-16T01:00:00
+date: 2025-10-15T04:00:00
 description: "4 pillars — Regression / Refactoring / Fast feedback / Maintainability. Trade-off."
 tags: [TDD, Four Pillars]
 series: "Khorikov Unit Testing"

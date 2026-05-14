@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: AUTOSAR란 / 도입 동기"
-date: 2025-09-15T01:00:00
+date: 2025-09-15T02:00:00
 description: "AUTOSAR consortium, ISO 26262, MISRA C++:2008과의 차이."
 tags: [AUTOSAR, History, ISO 26262]
 series: "AUTOSAR C++14"

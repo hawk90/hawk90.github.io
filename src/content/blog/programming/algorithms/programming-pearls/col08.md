@@ -1,6 +1,6 @@
 ---
 title: "Column 8: Algorithm Design Techniques"
-date: 2026-05-13
+date: 2026-05-13T08:00:00
 description: "Algorithm Design Techniques"
 series: "Programming Pearls"
 seriesOrder: 8

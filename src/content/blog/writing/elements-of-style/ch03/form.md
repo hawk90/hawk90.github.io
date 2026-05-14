@@ -1,6 +1,6 @@
 ---
 title: "Chapter 3: A Few Matters of Form"
-date: 2026-05-14T03:00:00
+date: 2026-05-15T01:00:00
 description: "형식의 디테일 — Colloquialisms / Exclamations / Headings / Hyphen / Margins / Numerals / Parentheses / Quotations / References / Syllabication / Titles."
 series: "The Elements of Style"
 seriesOrder: 25

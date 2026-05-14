@@ -1,6 +1,6 @@
 ---
 title: "Unit 1.1: Introduction의 구조와 4-Move 모델"
-date: 2026-05-19T11:00:00
+date: 2026-05-19T02:00:00
 description: "연구 논문 Introduction의 표준 구조 — 4-Move 모델과 Polymer 예시로 본 자기 template 만들기."
 series: "Science Research Writing"
 seriesOrder: 11

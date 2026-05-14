@@ -1,6 +1,6 @@
 ---
 title: "Ch 4 Words: T–Z"
-date: 2026-05-14T04:06:00
+date: 2026-05-15T07:00:00
 description: "자주 오용되는 단어와 표현 — Than부터 Would까지."
 series: "The Elements of Style"
 seriesOrder: 31

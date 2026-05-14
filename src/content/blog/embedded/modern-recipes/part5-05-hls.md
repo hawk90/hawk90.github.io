@@ -1,6 +1,6 @@
 ---
 title: "HLS 함정들"
-date: 2026-05-13
+date: 2026-05-13T06:00:00
 description: "HLS 함정들"
 series: "Modern Embedded Recipes"
 seriesOrder: 29

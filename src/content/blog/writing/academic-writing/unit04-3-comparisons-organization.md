@@ -1,6 +1,6 @@
 ---
 title: "Unit 4.3: Comparisons와 Highlighting Statements"
-date: 2026-05-15T23:00:00
+date: 2026-05-14T17:00:00
 description: "데이터에서 비교를 표현하는 패턴 — more than, twice as many, percentage 비교. Highlighting statement의 좋은 판단."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 43

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Imports"
-date: 2025-05-14T13:00:00
+date: 2025-05-14T03:00:00
 description: "Import 순서와 그룹핑. 절대 경로 선호, 와일드카드 피하기. isort로 자동 정렬."
 tags: [Python, PEP8, Imports, Modules, isort]
 series: "Python Style Guide (PEP 8)"

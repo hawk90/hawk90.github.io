@@ -1,6 +1,6 @@
 ---
 title: "Bootloader 체인 이해"
-date: 2026-05-13
+date: 2026-05-12T06:00:00
 description: "Bootloader 체인 이해"
 series: "Modern Embedded Recipes"
 seriesOrder: 5

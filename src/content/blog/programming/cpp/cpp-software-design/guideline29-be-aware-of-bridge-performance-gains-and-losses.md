@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 29: Bridge의 성능 이득과 손실을 인식하라"
-date: 2026-05-15T00:00:00
+date: 2026-05-14T05:00:00
 description: "Bridge와 Pimpl은 캐시 미스, 포인터 간접, 힙 할당이라는 비용을 지불한다. 그러나 컴파일 시간 단축과 ABI 안정성이라는 이득이 그만한 가치가 있다."
 tags: [C++, Software Design, Bridge, Pimpl, Performance]
 series: "C++ Software Design"

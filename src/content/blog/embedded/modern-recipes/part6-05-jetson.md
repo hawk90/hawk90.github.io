@@ -1,6 +1,6 @@
 ---
 title: "Jetson 최적화"
-date: 2026-05-13
+date: 2026-05-13T12:00:00
 description: "Jetson 최적화"
 series: "Modern Embedded Recipes"
 seriesOrder: 35

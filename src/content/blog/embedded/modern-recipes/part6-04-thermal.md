@@ -1,6 +1,6 @@
 ---
 title: "thermal throttling"
-date: 2026-05-13
+date: 2026-05-13T11:00:00
 description: "thermal throttling"
 series: "Modern Embedded Recipes"
 seriesOrder: 34

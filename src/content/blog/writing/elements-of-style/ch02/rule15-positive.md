@@ -1,6 +1,6 @@
 ---
 title: "Ch 2 Rule 15: 진술은 긍정 형식으로"
-date: 2026-05-14T02:04:00
+date: 2026-05-14T17:00:00
 description: "분명히 단언하라. 시들하고 색 없는 미적지근한 표현을 피하라."
 series: "The Elements of Style"
 seriesOrder: 17

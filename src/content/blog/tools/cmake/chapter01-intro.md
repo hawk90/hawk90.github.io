@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: CMake 소개 / 설치 / 첫 프로젝트"
-date: 2025-05-14T10:00:00
+date: 2025-05-14T01:00:00
 description: "CMake의 역할, 설치 방법, 첫 CMakeLists.txt 작성과 빌드."
 tags: [cmake, build, cpp]
 series: "CMake"

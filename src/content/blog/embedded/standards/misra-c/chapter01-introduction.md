@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: MISRA란 / 도입 배경"
-date: 2025-09-05T01:00:00
+date: 2025-09-05T02:00:00
 description: "MISRA 단체, 자동차 산업 동기, MISRA C 1998 → 2004 → 2012 진화."
 tags: [MISRA, History]
 series: "MISRA C"

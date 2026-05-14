@@ -1,6 +1,6 @@
 ---
 title: "항목 9: typedef보다 별칭 선언(using)을 선호하라"
-date: 2025-01-06T12:00:00
+date: 2025-01-05T09:00:00
 description: "using 별칭이 typedef보다 나은 4가지 — 가독성, 템플릿화, typename 회피, _t/_v 트레이트."
 tags: [C++, Type Alias, Template, Modern C++]
 series: "Effective Modern C++"

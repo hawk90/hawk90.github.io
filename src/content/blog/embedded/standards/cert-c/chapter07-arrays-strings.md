@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Arrays (ARR) / Strings (STR)"
-date: 2025-09-12T01:00:00
+date: 2025-09-10T08:00:00
 description: "배열 경계 / 문자열 NULL terminator / strcpy 함정 / 안전 대체 함수."
 tags: [CERT, Array, String, Buffer Overflow]
 series: "CERT C"

@@ -1,6 +1,6 @@
 ---
 title: "Unit 2.1: GS 텍스트의 시작 방법 — General Statements와 Statistics"
-date: 2026-05-14T21:00:00
+date: 2026-05-14T07:00:00
 description: "학술 텍스트의 첫 단락을 어떻게 시작할 것인가 — 일반 진술 / 통계 / 정의의 세 가지 흔한 도입 방식."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 21

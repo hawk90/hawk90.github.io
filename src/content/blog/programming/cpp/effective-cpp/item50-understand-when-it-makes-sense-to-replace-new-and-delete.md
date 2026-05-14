@@ -1,6 +1,6 @@
 ---
 title: "항목 50: new와 delete를 교체할 만한 경우를 이해하라"
-date: 2025-02-08T11:00:00
+date: 2025-02-03T02:00:00
 description: "사용자 정의 new/delete가 정당한 시나리오 — 성능, 디버깅, 통계, alignment, 클러스터링. tcmalloc/jemalloc 대안."
 tags: [C++, Effective C++, new, delete, Memory]
 series: "Effective C++"

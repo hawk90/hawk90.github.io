@@ -1,6 +1,6 @@
 ---
 title: "항목 6: 자동 생성 함수가 싫으면 명시적으로 금지하라"
-date: 2025-02-02T11:00:00
+date: 2025-02-01T06:00:00
 description: "복사를 막아야 하는 클래스 — C++98 private 트릭, Uncopyable base, C++11 = delete."
 tags: [C++, Effective C++, Special Member Functions]
 series: "Effective C++"

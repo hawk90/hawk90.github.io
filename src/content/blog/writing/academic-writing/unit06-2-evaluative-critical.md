@@ -1,6 +1,6 @@
 ---
 title: "Unit 6.2: Evaluative Language와 Critical Reading"
-date: 2026-05-16T22:00:00
+date: 2026-05-14T23:00:00
 description: "평가어의 미묘한 어휘 차이 — 긍정·부정·중립. 비평적 읽기의 기술과 비판을 시작하는 표현들."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 62

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 6: Consensus의 보편성"
-date: 2026-05-12
+date: 2026-05-12T06:00:00
 description: "CAS가 universal한 이유 — Universal Construction. 어떤 순차 객체든 wait-free 동시 객체로 변환 가능."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 6

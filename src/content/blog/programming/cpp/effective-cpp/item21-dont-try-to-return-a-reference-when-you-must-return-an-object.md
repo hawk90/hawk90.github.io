@@ -1,6 +1,6 @@
 ---
 title: "항목 21: 반드시 객체를 반환해야 할 때 참조를 반환하려 하지 말라"
-date: 2025-02-04T13:00:00
+date: 2025-02-01T21:00:00
 description: "지역 변수 참조 = 댕글링, 힙 + 참조 = 누수, static + 참조 = 공유 함정. RVO/move를 신뢰하고 값으로 반환."
 tags: [C++, Effective C++, Reference, Return Value]
 series: "Effective C++"

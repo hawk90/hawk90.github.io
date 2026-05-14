@@ -1,6 +1,6 @@
 ---
 title: "Embedded Security — 시리즈 개요"
-date: 2025-09-20T00:00:00
+date: 2025-09-20T01:00:00
 description: "MCU / SoC 보안 — secure boot, crypto, TrustZone, OTA, side-channel. IoT 표준."
 tags: [Embedded, Security, IoT, Series]
 series: "Embedded Security"

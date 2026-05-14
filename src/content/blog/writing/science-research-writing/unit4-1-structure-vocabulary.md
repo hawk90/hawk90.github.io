@@ -1,6 +1,6 @@
 ---
 title: "Unit 4.1: Discussion의 구조와 어휘"
-date: 2026-05-19T17:00:00
+date: 2026-05-19T08:00:00
 description: "Discussion/Conclusion의 표준 구조 — 핵심 발견, 기존 연구와의 관계, 한계, 함의. 모래시계의 다시 넓어지는 부분."
 series: "Science Research Writing"
 seriesOrder: 41

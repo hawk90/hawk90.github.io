@@ -1,6 +1,6 @@
 ---
 title: "Vim 마스터하기: 버퍼, 윈도우, 탭"
-date: 2026-05-13
+date: 2026-05-13T06:00:00
 description: "다중 파일 편집을 위한 버퍼, 윈도우, 탭 관리"
 series: "Vim 마스터하기"
 seriesOrder: 6

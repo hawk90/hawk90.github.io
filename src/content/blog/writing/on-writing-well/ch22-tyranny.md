@@ -1,6 +1,6 @@
 ---
 title: "Chapter 22: The Tyranny of the Final Product"
-date: 2026-05-19T08:00:00
+date: 2026-05-18T22:00:00
 description: "완벽함의 폭정에서 벗어나세요. Process를 즐기는 작가가 좋은 글을 만듭니다."
 series: "On Writing Well"
 seriesOrder: 22

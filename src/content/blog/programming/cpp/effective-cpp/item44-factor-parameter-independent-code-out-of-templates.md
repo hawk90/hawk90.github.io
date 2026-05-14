@@ -1,6 +1,6 @@
 ---
 title: "항목 44: 매개변수와 무관한 코드는 템플릿 밖으로 빼라"
-date: 2025-02-07T13:00:00
+date: 2025-02-02T20:00:00
 description: "code bloat 줄이기 — base 클래스 추출, 비-타입 매개변수 → 런타임 인자, 포인터 타입 통합."
 tags: [C++, Effective C++, Template, Code Bloat]
 series: "Effective C++"

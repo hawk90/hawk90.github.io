@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 포인터 / 배열 (Rule 18)"
-date: 2025-09-06T03:00:00
+date: 2025-09-05T07:00:00
 description: "포인터 산술 제한, 배열 첨자 검증, FAM, restrict, 함수 포인터."
 tags: [MISRA, Pointer, Array]
 series: "MISRA C"

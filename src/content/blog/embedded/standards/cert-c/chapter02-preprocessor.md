@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Preprocessor (PRE)"
-date: 2025-09-10T02:00:00
+date: 2025-09-10T03:00:00
 description: "매크로 함정 — side effect, 괄호, 식별자 충돌. PRE00-PRE13."
 tags: [CERT, Preprocessor, Macro]
 series: "CERT C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 23: Build Systems"
-date: 2025-06-20T04:00:00
+date: 2025-06-15T23:00:00
 description: "Make / CMake / Bazel / Meson — 빌드 시스템 진화. 의존성 / 캐시 / 재현성."
 tags: [C, Build, Make, CMake, Bazel]
 series: "전문가를 위한 C"

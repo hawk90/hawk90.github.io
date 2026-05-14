@@ -1,6 +1,6 @@
 ---
 title: "Chapter 6: Words"
-date: 2026-05-18T16:00:00
+date: 2026-05-18T06:00:00
 description: "단어 선택이 글의 80퍼센트. Thesaurus를 친구로, cliché를 적으로. 짧은 Anglo-Saxon 단어를 우선합니다."
 series: "On Writing Well"
 seriesOrder: 6

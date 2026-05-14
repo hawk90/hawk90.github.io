@@ -1,6 +1,6 @@
 ---
 title: "Unit 2.4: Specific-to-General Organization"
-date: 2026-05-15T00:00:00
+date: 2026-05-14T10:00:00
 description: "역방향 구성 — 구체적 사례에서 일반적 결론으로. Discussions of Schools of Thought와 SG 패턴의 활용."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 24

@@ -1,6 +1,6 @@
 ---
 title: "항목 9: 크로스 컴파일러 ABI가 필요하면 C 방식의 하위 집합을 사용하라"
-date: 2026-05-08T18:00:00
+date: 2026-05-08T09:00:00
 description: "DLL/플러그인 경계에서 C++ ABI 호환성 문제를 피하는 패턴 — extern C, POD 구조체, 불투명 핸들."
 tags: [C++, ABI, FFI]
 series: "Beautiful C++"

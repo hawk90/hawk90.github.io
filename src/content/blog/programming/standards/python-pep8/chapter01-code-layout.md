@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Code Layout"
-date: 2025-05-14T11:00:00
+date: 2025-05-14T01:00:00
 description: "4-space 들여쓰기, 79자 줄 길이, 빈 줄 규칙. 연속 줄, 닫는 괄호 정렬."
 tags: [Python, PEP8, Indentation, Layout, Formatting]
 series: "Python Style Guide (PEP 8)"

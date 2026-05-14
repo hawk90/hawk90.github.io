@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Testing the Database"
-date: 2025-10-17T04:00:00
+date: 2025-10-15T10:00:00
 description: "DB 통합 테스트 — 실제 DB / 격리 / 결정성. 트랜잭션 / 스냅샷."
 tags: [Testing, Database]
 series: "Khorikov Unit Testing"

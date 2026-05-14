@@ -1,6 +1,6 @@
 ---
 title: "항목 32: 객체를 클로저로 이동시키려면 init capture를 사용하라"
-date: 2025-01-09T11:00:00
+date: 2025-01-06T08:00:00
 description: "C++14 init capture로 move-only 객체를 람다에 — C++11 우회법까지."
 tags: [C++, Lambda, Move Semantics, Modern C++]
 series: "Effective Modern C++"

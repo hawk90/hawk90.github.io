@@ -1,6 +1,6 @@
 ---
 title: "DMA completion queue"
-date: 2026-05-13
+date: 2026-05-13T04:00:00
 description: "DMA completion queue"
 series: "Modern Embedded Recipes"
 seriesOrder: 27

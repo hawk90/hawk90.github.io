@@ -1,6 +1,6 @@
 ---
 title: "항목 46: 타입 변환이 필요하면 비-멤버 함수를 템플릿 안에 정의하라"
-date: 2025-02-07T15:00:00
+date: 2025-02-02T22:00:00
 description: "템플릿 매개변수 추론은 암묵 변환을 거치지 않는다 — 양쪽 변환이 필요하면 클래스 안 friend 함수."
 tags: [C++, Effective C++, Template, friend]
 series: "Effective C++"

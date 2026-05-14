@@ -1,6 +1,6 @@
 ---
 title: "Part 4-3: 비판적 읽기 / 쓰기 종합"
-date: 2025-07-25T03:00:00
+date: 2025-07-22T16:00:00
 description: "체크리스트 — 어떤 글이든 비판적으로 평가하는 절차. 시리즈 마무리."
 tags: [Logic, Critical Reading, Writing]
 series: "비판적 사고를 위한 논리"

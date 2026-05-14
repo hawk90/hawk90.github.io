@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Side-channel 공격 — 전력 / 타이밍 / EM"
-date: 2025-09-22T01:00:00
+date: 2025-09-20T08:00:00
 description: "DPA / SPA / EM / fault injection. constant-time / masking 방어."
 tags: [Side-channel, Power Analysis, Timing Attack]
 series: "Embedded Security"

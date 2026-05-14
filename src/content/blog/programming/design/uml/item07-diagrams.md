@@ -1,6 +1,6 @@
 ---
 title: "UML 7: 다이어그램 — 13종을 한 페이지에 정리"
-date: 2026-04-02T13:00:00
+date: 2026-04-01T07:00:00
 description: "구조 7 + 행위 6. 다이어그램은 시스템의 다른 면을 보여주는 카메라 앵글이다."
 tags: [UML, Diagram Types, Overview]
 series: "UML User Guide"

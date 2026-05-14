@@ -1,6 +1,6 @@
 ---
 title: "제9장: 명료함"
-date: 2026-05-12
+date: 2026-05-12T09:00:00
 description: "오해 없이 뜻을 전달하는 명료한 문장"
 series: "고종석의 문장"
 seriesOrder: 9

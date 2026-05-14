@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 22: 참조 의미론보다 값 의미론을 선호하라"
-date: 2026-05-14T18:00:00
+date: 2026-05-13T22:00:00
 description: "값 의미론은 값처럼 자연스럽게 다루는 객체다. 복사 의미가 분명하고, 컨테이너에 친화적이며, 멀티스레드에서 안전하고, NRVO로 효율적이다."
 tags: [C++, Software Design, Value Semantics, Modern C++]
 series: "C++ Software Design"

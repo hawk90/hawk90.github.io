@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 제어 흐름 (Rule 14-15-16)"
-date: 2025-09-06T04:00:00
+date: 2025-09-05T08:00:00
 description: "제어문 (14), goto (15), switch (16). break / continue / 명시 중괄호."
 tags: [MISRA, Control Flow, Switch]
 series: "MISRA C"

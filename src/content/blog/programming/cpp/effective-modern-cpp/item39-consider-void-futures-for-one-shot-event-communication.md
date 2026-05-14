@@ -1,6 +1,6 @@
 ---
 title: "항목 39: 일회성 이벤트 통신에는 void future를 고려하라"
-date: 2025-01-10T14:00:00
+date: 2025-01-06T15:00:00
 description: "condition_variable·atomic·void future — 일회성 통보의 세 옵션 비교."
 tags: [C++, Concurrency, std::future, std::condition_variable, Modern C++]
 series: "Effective Modern C++"

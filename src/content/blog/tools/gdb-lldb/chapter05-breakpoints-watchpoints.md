@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: breakpoint / watchpoint / catchpoint"
-date: 2025-08-21T01:00:00
+date: 2025-08-20T05:00:00
 description: "조건부 / 위치별 / 데이터 변경 / 예외 / 시그널 trap."
 tags: [gdb, Breakpoint, Watchpoint]
 series: "GDB and LLDB"

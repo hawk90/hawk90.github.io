@@ -1,6 +1,6 @@
 ---
 title: "Science Research Writing — 시리즈 개요"
-date: 2026-05-19T11:00:00
+date: 2026-05-19T01:00:00
 description: "Hilary Glasman-Deal의 실용 매뉴얼 — 영어가 모국어가 아닌 과학자가 연구 논문을 빠르게 쓰는 5-Unit 모델."
 series: "Science Research Writing"
 seriesOrder: 0

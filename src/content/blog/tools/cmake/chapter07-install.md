@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 설치와 패키징"
-date: 2025-05-14T16:00:00
+date: 2025-05-14T07:00:00
 description: "install 명령으로 빌드 결과물 배포, CPack으로 플랫폼별 패키지 생성."
 tags: [cmake, build, cpp, install, cpack]
 series: "CMake"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Pre-commit Hooks — husky / lefthook / pre-commit"
-date: 2025-08-07T01:00:00
+date: 2025-08-05T07:00:00
 description: "커밋 전 자동 검사 — 포맷 / lint / 테스트. 도구 비교."
 tags: [Git, Hooks, husky, lefthook]
 series: "Git Conventions"

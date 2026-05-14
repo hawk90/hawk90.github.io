@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Changelog 자동 생성"
-date: 2025-08-07T03:00:00
+date: 2025-08-05T09:00:00
 description: "conventional-changelog / git-cliff / release-please. Conventional Commits → CHANGELOG.md / 릴리스."
 tags: [Git, Changelog, Release]
 series: "Git Conventions"

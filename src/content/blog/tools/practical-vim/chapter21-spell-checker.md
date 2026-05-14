@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Find and Fix Errors with Spell Checker"
-date: 2025-08-18T05:00:00
+date: 2025-08-15T20:00:00
 description: ":set spell. ]s [s — 다음/이전 오류. z= 제안. zg 사전 추가."
 tags: [Vim, Spell Check]
 series: "Practical Vim"

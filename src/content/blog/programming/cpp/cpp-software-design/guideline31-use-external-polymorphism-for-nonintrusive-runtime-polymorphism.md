@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 31: 비-침습적 런타임 다형성에는 External Polymorphism을 사용하라"
-date: 2026-05-15T02:00:00
+date: 2026-05-14T07:00:00
 description: "External Polymorphism은 기존 타입을 건드리지 않고 다형 처리를 가능하게 한다. 어댑터와 추상 base의 결합은 Type Erasure의 토대이기도 하다."
 tags: [C++, Software Design, External Polymorphism, Type Erasure]
 series: "C++ Software Design"

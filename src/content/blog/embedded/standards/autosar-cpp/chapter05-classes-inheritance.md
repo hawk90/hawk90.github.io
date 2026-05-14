@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 클래스 / 상속 (A10-A12)"
-date: 2025-09-16T02:00:00
+date: 2025-09-15T06:00:00
 description: "Rule of Five, virtual destructor, 다중 상속, override / final."
 tags: [AUTOSAR, Class, Inheritance]
 series: "AUTOSAR C++14"

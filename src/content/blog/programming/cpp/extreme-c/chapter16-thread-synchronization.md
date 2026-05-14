@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Thread Synchronization"
-date: 2025-06-18T04:00:00
+date: 2025-06-15T16:00:00
 description: "스레드 동기화 — pthread_mutex / cond / barrier. reader-writer lock."
 tags: [C, pthread, Synchronization]
 series: "전문가를 위한 C"

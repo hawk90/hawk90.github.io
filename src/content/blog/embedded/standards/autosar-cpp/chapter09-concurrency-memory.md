@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 동시성 / 메모리 (A21-A25)"
-date: 2025-09-17T03:00:00
+date: 2025-09-15T10:00:00
 description: "std::thread, std::atomic, std::mutex. 메모리 순서. lock-free 제한."
 tags: [AUTOSAR, Concurrency, Memory Model]
 series: "AUTOSAR C++14"

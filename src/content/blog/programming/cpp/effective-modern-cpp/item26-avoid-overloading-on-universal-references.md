@@ -1,6 +1,6 @@
 ---
 title: "항목 26: 보편 참조에 대한 오버로딩을 피하라"
-date: 2025-01-08T13:00:00
+date: 2025-01-06T02:00:00
 description: "보편 참조 함수가 다른 오버로드를 압도 — copy/move 생성자도 가로챔."
 tags: [C++, Universal Reference, Overloading, Modern C++]
 series: "Effective Modern C++"

@@ -1,6 +1,6 @@
 ---
 title: "timer wheel 구현"
-date: 2026-05-13
+date: 2026-05-12T13:00:00
 description: "timer wheel 구현"
 series: "Modern Embedded Recipes"
 seriesOrder: 12

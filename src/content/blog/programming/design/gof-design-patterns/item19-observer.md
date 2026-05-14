@@ -1,6 +1,6 @@
 ---
 title: "GoF 19: Observer"
-date: 2026-02-03T16:00:00
+date: 2026-02-01T19:00:00
 description: "객체 상태 변경을 관찰자들에게 자동 통보 — pub/sub의 토대."
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"

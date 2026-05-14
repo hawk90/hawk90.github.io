@@ -1,6 +1,6 @@
 ---
 title: "Chapter 17: Sports"
-date: 2026-05-19T03:00:00
+date: 2026-05-18T17:00:00
 description: "스포츠 글은 cliché의 또 다른 무덤. 결과만이 아니라 인간의 드라마를 그려야 합니다."
 series: "On Writing Well"
 seriesOrder: 17

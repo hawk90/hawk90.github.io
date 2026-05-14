@@ -1,6 +1,6 @@
 ---
 title: "항목 30: 인라이닝의 안팎을 이해하라"
-date: 2025-02-05T14:00:00
+date: 2025-02-02T06:00:00
 description: "inline은 요청일 뿐 — 컴파일러가 결정. 코드 부피·디버깅·라이브러리 호환성 트레이드오프와 LTO 시대의 위치."
 tags: [C++, Effective C++, inline, Performance]
 series: "Effective C++"

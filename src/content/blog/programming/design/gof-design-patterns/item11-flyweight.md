@@ -1,6 +1,6 @@
 ---
 title: "GoF 11: Flyweight"
-date: 2026-02-02T15:00:00
+date: 2026-02-01T11:00:00
 description: "공유 가능한 부분을 분리해 메모리 절약 — 객체가 너무 많을 때."
 tags: [Design Pattern, GoF, C++, C, Structural]
 series: "GoF Design Patterns"

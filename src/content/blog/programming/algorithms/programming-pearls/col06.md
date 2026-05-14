@@ -1,6 +1,6 @@
 ---
 title: "Column 6: Perspective on Performance"
-date: 2026-05-13
+date: 2026-05-13T06:00:00
 description: "Perspective on Performance"
 series: "Programming Pearls"
 seriesOrder: 6

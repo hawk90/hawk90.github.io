@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Bringing the Strategy Together"
-date: 2025-10-05T04:00:00
+date: 2025-10-01T17:00:00
 description: "Strategic Design 종합 — Context Map / Distillation / Large-Scale Structure 결합."
 tags: [DDD, Strategy]
 series: "Domain-Driven Design"

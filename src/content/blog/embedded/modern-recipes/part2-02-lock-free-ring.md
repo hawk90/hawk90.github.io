@@ -1,6 +1,6 @@
 ---
 title: "lock-free ring buffer"
-date: 2026-05-13
+date: 2026-05-12T09:00:00
 description: "lock-free ring buffer"
 series: "Modern Embedded Recipes"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "AUTOSAR C++14 — 시리즈 개요"
-date: 2025-09-15T00:00:00
+date: 2025-09-15T01:00:00
 description: "자동차 안전중요 C++14. MISRA C++의 모던 후계. 340+ rules."
 tags: [AUTOSAR, C++14, Safety-Critical, Automotive, Standards, Series]
 series: "AUTOSAR C++14"

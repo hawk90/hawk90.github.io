@@ -1,6 +1,6 @@
 ---
 title: "Unit 2.1: Methodology의 구조와 어휘"
-date: 2026-05-19T13:00:00
+date: 2026-05-19T04:00:00
 description: "Methodology의 표준 구조 — 재료, 절차, 분석. 핵심 동사와 자기 분야 어휘 보강."
 series: "Science Research Writing"
 seriesOrder: 21

@@ -1,6 +1,6 @@
 ---
 title: "GoF 2: Builder"
-date: 2026-02-01T11:00:00
+date: 2026-02-01T02:00:00
 description: "복잡한 객체를 단계별로 조립 — 같은 과정으로 다른 결과를 만든다."
 tags: [Design Pattern, GoF, C++, C, Creational]
 series: "GoF Design Patterns"

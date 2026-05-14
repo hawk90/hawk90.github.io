@@ -1,6 +1,6 @@
 ---
 title: "UML 22: 프로세스와 스레드 — 액티브 객체와 동시성"
-date: 2026-04-05T12:00:00
+date: 2026-04-01T22:00:00
 description: "두 줄 테두리, par fragment, 동기화 표기 — UML이 동시성을 그리는 방법."
 tags: [UML, Concurrency, Active Object, Thread]
 series: "UML User Guide"

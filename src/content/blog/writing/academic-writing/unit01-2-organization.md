@@ -1,6 +1,6 @@
 ---
 title: "Unit 1.2: Organization — 학술 텍스트의 조직"
-date: 2026-05-14T12:00:00
+date: 2026-05-14T02:00:00
 description: "학술 텍스트의 두 큰 조직 패턴 — General-Specific와 Specific-General. 문제-해결, 데이터-논평 같은 변형."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 12

@@ -1,6 +1,6 @@
 ---
 title: "Column 5: A Small Matter of Programming"
-date: 2026-05-13
+date: 2026-05-13T05:00:00
 description: "A Small Matter of Programming"
 series: "Programming Pearls"
 seriesOrder: 5

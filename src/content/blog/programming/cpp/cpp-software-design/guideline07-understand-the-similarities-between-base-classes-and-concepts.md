@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 7: 베이스 클래스와 콘셉트의 유사성을 이해하라"
-date: 2026-05-13T17:00:00
+date: 2026-05-13T07:00:00
 description: "추상 base와 C++20 concept은 본질적으로 같은 인터페이스 도구다. 런타임 다형성과 컴파일 타임 다형성, 그리고 같은 LSP."
 tags: [C++, Software Design, Concepts, Polymorphism]
 series: "C++ Software Design"

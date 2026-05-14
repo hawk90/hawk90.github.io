@@ -1,6 +1,6 @@
 ---
 title: "Lesson 9: Elegance"
-date: 2026-05-12
+date: 2026-05-12T09:00:00
 description: "Balance, rhythm, climactic emphasis. 명확함을 넘어 즐거움을 주는 글의 도구들."
 series: "Style: Lessons in Clarity and Grace"
 seriesOrder: 9

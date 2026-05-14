@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 12: 디자인 패턴 오해를 경계하라"
-date: 2026-05-13T22:00:00
+date: 2026-05-13T12:00:00
 description: "패턴은 클래스 다이어그램이 아니다. 의도와 트레이드오프, 그리고 흔한 여섯 가지 오해."
 tags: [C++, Software Design, Design Patterns, Anti-patterns]
 series: "C++ Software Design"

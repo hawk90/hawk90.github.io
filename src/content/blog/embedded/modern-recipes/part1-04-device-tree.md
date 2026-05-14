@@ -1,6 +1,6 @@
 ---
 title: "Device Tree 실전"
-date: 2026-05-13
+date: 2026-05-12T05:00:00
 description: "Device Tree 실전"
 series: "Modern Embedded Recipes"
 seriesOrder: 4

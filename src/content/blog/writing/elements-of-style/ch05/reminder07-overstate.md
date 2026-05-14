@@ -1,6 +1,6 @@
 ---
 title: "Ch 5 Reminder 7: 과장하지 말라"
-date: 2026-05-14T05:07:00
+date: 2026-05-15T15:00:00
 description: "과장하면 독자는 즉시 경계 태세에 들어간다. 한 번의 과장이 글 전체의 신뢰를 무너뜨린다."
 series: "The Elements of Style"
 seriesOrder: 39

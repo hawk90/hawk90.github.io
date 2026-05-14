@@ -1,6 +1,6 @@
 ---
 title: "Unit 7.1: 출판 유형과 IMRD 구조"
-date: 2026-05-17T11:00:00
+date: 2026-05-15T01:00:00
 description: "학술 출판의 유형 — Short Communications, Letters, Full Papers. 그리고 자연과학·공학 논문의 표준 IMRD 구조."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 71

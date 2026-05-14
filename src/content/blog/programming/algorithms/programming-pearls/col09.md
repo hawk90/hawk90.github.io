@@ -1,6 +1,6 @@
 ---
 title: "Column 9: Code Tuning"
-date: 2026-05-13
+date: 2026-05-13T09:00:00
 description: "Code Tuning"
 series: "Programming Pearls"
 seriesOrder: 9

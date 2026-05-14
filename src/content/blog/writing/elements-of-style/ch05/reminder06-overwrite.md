@@ -1,6 +1,6 @@
 ---
 title: "Ch 5 Reminder 6: 과잉 작문을 피하라"
-date: 2026-05-14T05:06:00
+date: 2026-05-15T14:00:00
 description: "화려하고 장식이 많은 산문은 소화하기 어렵다. 나중에 다시 읽고 가차 없이 잉여를 지우라."
 series: "The Elements of Style"
 seriesOrder: 38

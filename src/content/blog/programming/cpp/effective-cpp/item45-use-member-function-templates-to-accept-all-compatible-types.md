@@ -1,6 +1,6 @@
 ---
 title: "항목 45: 모든 호환 타입을 받기 위해 멤버 함수 템플릿을 사용하라"
-date: 2025-02-07T14:00:00
+date: 2025-02-02T21:00:00
 description: "스마트 포인터의 변환 생성자 — Derived* → Base*. 일반화된 copy ctor와 컴파일러 자동 생성 함수의 공존."
 tags: [C++, Effective C++, Template, Member Function]
 series: "Effective C++"

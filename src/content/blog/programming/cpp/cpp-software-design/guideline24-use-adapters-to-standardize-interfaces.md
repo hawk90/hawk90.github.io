@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 24: 인터페이스 표준화에 Adapter를 사용하라"
-date: 2026-05-14T20:00:00
+date: 2026-05-14T00:00:00
 description: "Adapter 패턴은 호환되지 않는 인터페이스를 연결한다. 외부 API와 legacy 코드를 표준 인터페이스로 통합한다."
 tags: [C++, Software Design, Adapter, Design Patterns]
 series: "C++ Software Design"

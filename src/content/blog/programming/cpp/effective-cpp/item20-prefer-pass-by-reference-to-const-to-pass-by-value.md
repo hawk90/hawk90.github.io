@@ -1,6 +1,6 @@
 ---
 title: "항목 20: 값 전달보다 const 참조 전달을 선호하라"
-date: 2025-02-04T12:00:00
+date: 2025-02-01T20:00:00
 description: "복사 비용 + 슬라이싱 회피 — 그러나 작은 내장 타입과 STL 반복자/함수 객체는 값 전달. C++11 이동 의미론으로 by-value도 재평가."
 tags: [C++, Effective C++, Performance, Pass by Reference]
 series: "Effective C++"

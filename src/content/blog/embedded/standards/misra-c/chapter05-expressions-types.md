@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 표현식 / 타입 변환 (Rule 8-11)"
-date: 2025-09-06T02:00:00
+date: 2025-09-05T06:00:00
 description: "선언 (8), 초기화 (9), 필수 타입 모델 (10), 포인터 변환 (11)."
 tags: [MISRA, Type, Conversion]
 series: "MISRA C"

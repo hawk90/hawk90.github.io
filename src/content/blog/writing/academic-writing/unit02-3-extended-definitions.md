@@ -1,6 +1,6 @@
 ---
 title: "Unit 2.3: Extended Definitions와 Variations"
-date: 2026-05-14T23:00:00
+date: 2026-05-14T09:00:00
 description: "한 문장 정의로 부족할 때의 확장 — 부품, 적용, 역사, 비교 정의. 정의가 분야 안에서 다툴 때의 자리 잡기."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 23

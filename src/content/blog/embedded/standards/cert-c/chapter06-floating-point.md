@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Floating Point (FLP)"
-date: 2025-09-11T03:00:00
+date: 2025-09-10T07:00:00
 description: "부동소수점 비교, NaN / inf, 변환 / 라운딩 함정."
 tags: [CERT, Floating Point, IEEE 754]
 series: "CERT C"

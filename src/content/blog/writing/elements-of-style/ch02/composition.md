@@ -1,6 +1,6 @@
 ---
 title: "Chapter 2: Elementary Principles of Composition"
-date: 2026-05-14T02:00:00
+date: 2026-05-14T13:00:00
 description: "글의 구성 원칙 11개 — 디자인, 단락, 능동태, 긍정 형식, 구체성, 간결, 평행 구조, 어순, 시제, 강조."
 series: "The Elements of Style"
 seriesOrder: 13

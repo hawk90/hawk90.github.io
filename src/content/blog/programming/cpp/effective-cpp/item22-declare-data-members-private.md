@@ -1,6 +1,6 @@
 ---
 title: "항목 22: 데이터 멤버는 private으로 선언하라"
-date: 2025-02-04T14:00:00
+date: 2025-02-01T22:00:00
 description: "캡슐화의 첫걸음 — public 데이터의 4가지 단점, protected의 함정, struct vs class 컨벤션."
 tags: [C++, Effective C++, Encapsulation]
 series: "Effective C++"

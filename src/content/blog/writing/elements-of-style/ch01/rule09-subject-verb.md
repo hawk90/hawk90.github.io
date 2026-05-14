@@ -1,6 +1,6 @@
 ---
 title: "Ch 1 Rule 9: 주어의 수가 동사의 수를 결정"
-date: 2026-05-14T01:09:00
+date: 2026-05-14T10:00:00
 description: "주어와 동사 사이에 끼어든 어구가 동사의 수에 영향을 주면 안 된다."
 series: "The Elements of Style"
 seriesOrder: 10

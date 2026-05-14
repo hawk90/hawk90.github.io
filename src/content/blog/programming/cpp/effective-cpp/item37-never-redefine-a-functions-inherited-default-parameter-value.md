@@ -1,6 +1,6 @@
 ---
 title: "항목 37: 상속받은 함수의 기본 매개변수 값을 재정의하지 말라"
-date: 2025-02-06T15:00:00
+date: 2025-02-02T13:00:00
 description: "기본값은 정적 바인딩, 함수 본문은 동적 바인딩 — 어긋나면 derived 본문이 base 기본값으로 호출되는 함정."
 tags: [C++, Effective C++, Virtual, Default Arguments]
 series: "Effective C++"

@@ -1,6 +1,6 @@
 ---
 title: "Lesson 2: Correctness"
-date: 2026-05-12
+date: 2026-05-12T02:00:00
 description: "문법 규칙의 권위는 어디에서 오는가. 'Real rules'와 'Folklore' 구별 — 누가 만든 규칙인가."
 series: "Style: Lessons in Clarity and Grace"
 seriesOrder: 2

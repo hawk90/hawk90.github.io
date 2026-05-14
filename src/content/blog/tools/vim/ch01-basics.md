@@ -1,6 +1,6 @@
 ---
 title: "Vim 마스터하기: 기초"
-date: 2026-05-13
+date: 2026-05-13T01:00:00
 description: "Vim의 모드, 기본 이동, 시작과 종료"
 series: "Vim 마스터하기"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Search"
-date: 2025-08-17T03:00:00
+date: 2025-08-15T13:00:00
 description: "/ ? n N. incsearch / hlsearch. * / # — 단어 검색. count + n."
 tags: [Vim, Search]
 series: "Practical Vim"

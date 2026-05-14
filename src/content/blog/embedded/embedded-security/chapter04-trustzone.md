@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: TrustZone — Cortex-A / Cortex-M"
-date: 2025-09-21T01:00:00
+date: 2025-09-20T05:00:00
 description: "ARM TrustZone — Secure / Non-Secure World 분리. SMC, NSC."
 tags: [TrustZone, ARM, Secure World]
 series: "Embedded Security"

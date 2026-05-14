@@ -1,6 +1,6 @@
 ---
 title: "Unit 2.2: Methodology의 문법"
-date: 2026-05-19T14:00:00
+date: 2026-05-19T05:00:00
 description: "Passive 위주, 시제 결정, 관사 a/the의 사용, 부사 위치. 영어가 모국어가 아닌 작가가 자주 마주치는 함정."
 series: "Science Research Writing"
 seriesOrder: 22

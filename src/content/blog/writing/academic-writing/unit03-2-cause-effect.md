@@ -1,6 +1,6 @@
 ---
 title: "Unit 3.2: Cause and Effect — -ing 절과 인과 표현"
-date: 2026-05-15T12:00:00
+date: 2026-05-14T12:00:00
 description: "학술 영어의 인과 관계 표현 — -ing 절, 동사 패턴, 전통적 연결어. thus + -ing의 압축 효과."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 32

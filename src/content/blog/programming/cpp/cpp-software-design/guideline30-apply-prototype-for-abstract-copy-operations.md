@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 30: 추상 복사 연산에는 Prototype을 적용하라"
-date: 2026-05-15T01:00:00
+date: 2026-05-14T06:00:00
 description: "다형 객체의 복사 문제는 virtual clone()으로 풀린다. Prototype 패턴은 base 포인터에서 정확한 derived 타입을 그대로 복제하게 해 준다."
 tags: [C++, Software Design, Prototype, GoF, Polymorphism]
 series: "C++ Software Design"

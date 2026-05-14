@@ -1,6 +1,6 @@
 ---
 title: "제3장: 문장의 길이"
-date: 2026-05-12
+date: 2026-05-12T03:00:00
 description: "효과적인 문장 길이의 조절과 활용"
 series: "고종석의 문장"
 seriesOrder: 3

@@ -1,6 +1,6 @@
 ---
 title: "Modern Embedded Recipes: 서문"
-date: 2026-05-12
+date: 2026-05-12T01:00:00
 description: "임베디드 엔지니어를 위한 체계적인 학습 경로. 하드웨어 기초부터 프로세서, 소프트웨어, RTOS, 디버깅까지 100개 이상의 레시피로 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 0

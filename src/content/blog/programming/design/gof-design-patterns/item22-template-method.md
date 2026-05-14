@@ -1,6 +1,6 @@
 ---
 title: "GoF 22: Template Method"
-date: 2026-02-04T11:00:00
+date: 2026-02-01T22:00:00
 description: "알고리즘 골격은 base, 단계 구현은 derived — Hollywood 원칙."
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"

@@ -1,6 +1,6 @@
 ---
 title: "1장 요약 카드"
-date: 2026-05-09T14:13:21
+date: 2026-05-09T12:00:00
 description: "순서 기저(ordered basis) 을 고정하면 $$"
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"

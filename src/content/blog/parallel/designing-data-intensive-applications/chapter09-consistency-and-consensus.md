@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 일관성과 합의"
-date: 2025-07-03T01:00:00
+date: 2025-07-01T09:00:00
 description: "Linearizability, Causal Consistency, CAP 정리. Consensus 알고리즘 — Paxos, Raft. Two-Phase Commit."
 tags: [DDIA, Consistency, Linearizability, Consensus, Paxos, Raft, CAP]
 series: "Designing Data-Intensive Applications"

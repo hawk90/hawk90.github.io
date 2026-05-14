@@ -1,6 +1,6 @@
 ---
 title: "sysfs/debugfs"
-date: 2026-05-13
+date: 2026-05-13T00:00:00
 description: "sysfs/debugfs"
 series: "Modern Embedded Recipes"
 seriesOrder: 23

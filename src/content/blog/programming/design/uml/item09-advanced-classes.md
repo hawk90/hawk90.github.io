@@ -1,6 +1,6 @@
 ---
 title: "UML 9: 고급 클래스 — 분류자, 인터페이스, 데이터타입, 시그널, 액티브 클래스"
-date: 2026-04-03T10:00:00
+date: 2026-04-01T09:00:00
 description: "클래스가 전부가 아니다 — UML 분류자(classifier) 패밀리 전체를 정리."
 tags: [UML, Class Diagram, Classifier, Active Class]
 series: "UML User Guide"

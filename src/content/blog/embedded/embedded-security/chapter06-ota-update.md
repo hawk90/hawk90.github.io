@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: OTA Update — 서명 / rollback 방지"
-date: 2025-09-21T03:00:00
+date: 2025-09-20T07:00:00
 description: "안전한 펌웨어 업데이트. A/B 슬롯, delta update, 서명 검증."
 tags: [OTA, Firmware Update, Rollback]
 series: "Embedded Security"

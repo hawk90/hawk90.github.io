@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 15: 타입 추가와 연산 추가 중 무엇을 위한 디자인인지 결정하라"
-date: 2026-05-14T11:00:00
+date: 2026-05-13T15:00:00
 description: "Expression Problem. 새 타입이 자주 들어오는지 새 연산이 자주 들어오는지에 따라 virtual과 std::variant 중에 고른다."
 tags: [C++, Software Design, Expression Problem, Visitor]
 series: "C++ Software Design"

@@ -1,6 +1,6 @@
 ---
 title: "Lesson 6: Emphasis"
-date: 2026-05-12
+date: 2026-05-12T06:00:00
 description: "문장에서 가장 강한 위치는 끝. 단어 배치만으로 같은 정보가 다른 인상을 줄 수 있다."
 series: "Style: Lessons in Clarity and Grace"
 seriesOrder: 6

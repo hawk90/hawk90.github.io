@@ -1,6 +1,6 @@
 ---
 title: "제13장: 설명문"
-date: 2026-05-12
+date: 2026-05-12T13:00:00
 description: "정보를 명확하게 전달하는 설명문 작성법"
 series: "고종석의 문장"
 seriesOrder: 13

@@ -1,6 +1,6 @@
 ---
 title: "Unit 3.1: Results의 구조와 어휘"
-date: 2026-05-19T15:00:00
+date: 2026-05-19T06:00:00
 description: "Results 섹션의 표준 구조 — 발견의 보고와 시각 자료. 핵심 동사와 표·그림 참조 패턴."
 series: "Science Research Writing"
 seriesOrder: 31

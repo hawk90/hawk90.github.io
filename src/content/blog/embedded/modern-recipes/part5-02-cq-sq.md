@@ -1,6 +1,6 @@
 ---
 title: "CQ/SQ architecture"
-date: 2026-05-13
+date: 2026-05-13T03:00:00
 description: "CQ/SQ architecture"
 series: "Modern Embedded Recipes"
 seriesOrder: 26

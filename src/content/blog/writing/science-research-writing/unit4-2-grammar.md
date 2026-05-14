@@ -1,6 +1,6 @@
 ---
 title: "Unit 4.2: Discussion의 문법"
-date: 2026-05-19T18:00:00
+date: 2026-05-19T09:00:00
 description: "Hedging의 미묘한 어휘 — 자신 있게 불확실하라. 시제 결정, modal verb, 거리 두기 표현."
 series: "Science Research Writing"
 seriesOrder: 42

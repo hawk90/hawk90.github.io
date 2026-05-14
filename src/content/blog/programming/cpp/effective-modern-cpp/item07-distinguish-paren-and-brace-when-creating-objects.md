@@ -1,6 +1,6 @@
 ---
 title: "항목 7: 객체 생성 시 ()와 {}를 구분하라"
-date: 2025-01-06T10:00:00
+date: 2025-01-05T07:00:00
 description: "C++의 4가지 초기화 문법 — uniform init {}의 강점, initializer_list 함정, 선택 기준."
 tags: [C++, Initialization, Modern C++]
 series: "Effective Modern C++"

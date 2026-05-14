@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 9: 추상화의 소유권에 주의하라"
-date: 2026-05-13T19:00:00
+date: 2026-05-13T09:00:00
 description: "추상화의 소유는 누가 인터페이스를 정의하느냐의 문제다. high-level이 소유해야 한다는, Dependency Inversion의 핵심."
 tags: [C++, Software Design, SOLID, DIP, Architecture]
 series: "C++ Software Design"

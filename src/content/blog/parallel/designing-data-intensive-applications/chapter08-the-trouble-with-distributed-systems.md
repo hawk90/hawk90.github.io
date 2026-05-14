@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 분산 시스템의 문제들"
-date: 2025-07-02T04:00:00
+date: 2025-07-01T08:00:00
 description: "신뢰할 수 없는 네트워크, 동기 안 된 시계, 부분 실패. 분산 시스템이 본질적으로 어려운 이유."
 tags: [DDIA, Distributed, Network, Clock, Failure]
 series: "Designing Data-Intensive Applications"

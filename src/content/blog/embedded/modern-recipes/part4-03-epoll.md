@@ -1,6 +1,6 @@
 ---
 title: "epoll driver-userspace"
-date: 2026-05-13
+date: 2026-05-12T22:00:00
 description: "epoll driver-userspace"
 series: "Modern Embedded Recipes"
 seriesOrder: 21

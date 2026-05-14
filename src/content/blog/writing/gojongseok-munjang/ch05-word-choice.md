@@ -1,6 +1,6 @@
 ---
 title: "제5장: 단어 선택"
-date: 2026-05-12
+date: 2026-05-12T05:00:00
 description: "적확한 단어 선택의 중요성과 방법"
 series: "고종석의 문장"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 2: Simplicity"
-date: 2026-05-18T12:00:00
+date: 2026-05-18T02:00:00
 description: "단순함이 영어의 가장 강력한 도구. 모든 문장을 가장 깨끗한 구성으로 벗기는 것이 좋은 글쓰기의 비밀입니다."
 series: "On Writing Well"
 seriesOrder: 2

@@ -1,6 +1,6 @@
 ---
 title: "quantization"
-date: 2026-05-13
+date: 2026-05-13T10:00:00
 description: "quantization"
 series: "Modern Embedded Recipes"
 seriesOrder: 33

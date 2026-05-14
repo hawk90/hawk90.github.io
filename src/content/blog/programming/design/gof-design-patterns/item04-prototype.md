@@ -1,6 +1,6 @@
 ---
 title: "GoF 4: Prototype"
-date: 2026-02-01T13:00:00
+date: 2026-02-01T04:00:00
 description: "기존 객체를 복제 — 비싼 생성을 한 번만 하고, 나머지는 clone."
 tags: [Design Pattern, GoF, C++, C, Creational]
 series: "GoF Design Patterns"

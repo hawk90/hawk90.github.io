@@ -1,6 +1,6 @@
 ---
 title: "Column 14: Heaps"
-date: 2026-05-13
+date: 2026-05-13T14:00:00
 description: "Heaps"
 series: "Programming Pearls"
 seriesOrder: 14

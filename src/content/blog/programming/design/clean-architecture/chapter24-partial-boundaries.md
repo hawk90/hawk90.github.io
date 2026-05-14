@@ -1,6 +1,6 @@
 ---
 title: "Ch 24: 부분 경계"
-date: 2025-06-07T03:00:00
+date: 2025-06-02T00:00:00
 description: "완전한 경계는 비싸다. 부분 경계로 절충 — 미래의 분리를 가능하게 두면서 현재 비용을 줄인다."
 tags: [Architecture, Boundaries, Pragmatic]
 series: "Clean Architecture"

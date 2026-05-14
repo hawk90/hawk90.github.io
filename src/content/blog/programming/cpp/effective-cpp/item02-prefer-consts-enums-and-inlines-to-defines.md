@@ -1,6 +1,6 @@
 ---
 title: "항목 2: #define보다 const, enum, inline을 선호하라"
-date: 2025-02-01T11:00:00
+date: 2025-02-01T02:00:00
 description: "전처리기 매크로의 네 가지 문제와 컴파일러가 다룰 수 있는 대안 — const, constexpr, enum, inline 템플릿."
 tags: [C++, Effective C++, Preprocessor]
 series: "Effective C++"

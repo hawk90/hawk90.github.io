@@ -1,6 +1,6 @@
 ---
 title: "priority inversion"
-date: 2026-05-13
+date: 2026-05-12T10:00:00
 description: "priority inversion"
 series: "Modern Embedded Recipes"
 seriesOrder: 9

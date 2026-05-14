@@ -1,6 +1,6 @@
 ---
 title: "항목 14: 자원 관리 클래스의 복사 동작을 신중히 결정하라"
-date: 2025-02-03T11:00:00
+date: 2025-02-01T14:00:00
 description: "복사 금지·참조 카운트·깊은 복사·소유권 이전 — 네 가지 복사 정책과 C++11 이동 의미론의 결합."
 tags: [C++, Effective C++, RAII, Copy]
 series: "Effective C++"

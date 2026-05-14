@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 39: 디자인 패턴에 대해 계속 학습하라"
-date: 2026-05-15T10:00:00
+date: 2026-05-14T15:00:00
 description: "39개 가이드라인의 마무리다. 패턴 학습은 평생의 과제이며, 모던 C++의 진화와 함께 디자인의 본질도 계속 변해 간다."
 tags: [C++, Software Design, Patterns, Learning]
 series: "C++ Software Design"

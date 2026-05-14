@@ -1,6 +1,6 @@
 ---
 title: "제15장: 서사문"
-date: 2026-05-12
+date: 2026-05-12T15:00:00
 description: "이야기를 풀어가는 서사문의 기법"
 series: "고종석의 문장"
 seriesOrder: 15

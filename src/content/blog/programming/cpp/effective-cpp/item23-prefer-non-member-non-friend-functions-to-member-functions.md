@@ -1,6 +1,6 @@
 ---
 title: "항목 23: 멤버 함수보다 비-멤버 비-friend 함수를 선호하라"
-date: 2025-02-04T15:00:00
+date: 2025-02-01T23:00:00
 description: "캡슐화는 클래스 내부에 접근하는 코드가 적을수록 강해진다 — 네임스페이스 활용과 확장성의 이득."
 tags: [C++, Effective C++, Encapsulation, API Design]
 series: "Effective C++"

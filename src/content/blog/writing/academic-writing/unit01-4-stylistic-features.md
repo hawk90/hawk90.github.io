@@ -1,6 +1,6 @@
 ---
 title: "Unit 1.4: Other Stylistic Features"
-date: 2026-05-14T14:00:00
+date: 2026-05-14T04:00:00
 description: "학술 영어의 작은 결정들 — I / we 쓰기, contractions, 부정형, etc., 직접 호명, 부사 위치, split infinitive, 능동 / 수동."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 14

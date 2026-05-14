@@ -1,6 +1,6 @@
 ---
 title: "Unit 2.2: Sentence Definitions — 정의 문장의 구조"
-date: 2026-05-14T22:00:00
+date: 2026-05-14T08:00:00
 description: "Formal sentence definition의 표준 구조 — Term + class + distinguishing detail. 정의에 자주 쓰이는 동사와 관계절 패턴."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 22

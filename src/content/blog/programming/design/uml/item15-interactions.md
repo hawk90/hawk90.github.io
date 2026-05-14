@@ -1,6 +1,6 @@
 ---
 title: "UML 15: 상호작용 — 객체들이 메시지를 주고받는 방식"
-date: 2026-04-04T10:00:00
+date: 2026-04-01T15:00:00
 description: "Lifeline · 메시지 · activation bar — 행위 모델링의 가장 핵심적인 어휘."
 tags: [UML, Interaction, Sequence, Communication]
 series: "UML User Guide"

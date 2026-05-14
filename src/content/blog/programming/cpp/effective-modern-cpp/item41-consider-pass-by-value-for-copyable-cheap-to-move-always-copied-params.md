@@ -1,6 +1,6 @@
 ---
 title: "항목 41: 복사 가능하고 이동 비용이 저렴하며 항상 복사되는 매개변수는 값 전달을 고려하라"
-date: 2025-01-11T10:00:00
+date: 2025-01-06T17:00:00
 description: "pass by value + std::move 패턴이 lvalue/rvalue 오버로드보다 나은 시점."
 tags: [C++, Performance, Move Semantics, Modern C++]
 series: "Effective Modern C++"

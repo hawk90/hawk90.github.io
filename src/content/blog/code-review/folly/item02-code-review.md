@@ -1,6 +1,6 @@
 ---
 title: "항목 2: Folly 코드 리뷰 가이드 — Meta 스타일 코드 리뷰"
-date: 2025-05-13T14:00:00
+date: 2025-05-13T02:00:00
 description: "Meta/Folly의 코드 리뷰 철학과 성능 중심 리뷰 가이드라인을 배웁니다."
 tags: [C++, Folly, Code Review, Performance, Best Practices]
 series: "Folly C++ 라이브러리"

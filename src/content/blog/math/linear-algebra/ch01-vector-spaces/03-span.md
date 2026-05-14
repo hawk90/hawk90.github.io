@@ -1,6 +1,6 @@
 ---
 title: "1.3 일차결합(linear combination)과 생성"
-date: 2026-05-10T06:52:15
+date: 2026-05-09T04:00:00
 description: "§1.2 에서 부분공간(subspace)을 정의했다. 그러나 정의만으로는 부족하다. 부분공간을 손으로 짓는 방법도 있어야 한다 — 그래야 마음먹은 부분공간을 자유롭게 만들고 다룰 수 있다."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"

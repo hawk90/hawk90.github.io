@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 14: 패턴 이름을 의도 전달에 사용하라"
-date: 2026-05-14T10:00:00
+date: 2026-05-13T14:00:00
 description: "이름이 어휘다. Strategy, Observer, Factory가 코드에 드러나면 의도가 즉시 전달된다."
 tags: [C++, Software Design, Naming, Communication]
 series: "C++ Software Design"

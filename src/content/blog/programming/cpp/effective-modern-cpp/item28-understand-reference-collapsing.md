@@ -1,6 +1,6 @@
 ---
 title: "항목 28: 참조 축약(reference collapsing)을 이해하라"
-date: 2025-01-08T15:00:00
+date: 2025-01-06T04:00:00
 description: "참조의 참조를 단일 참조로 — 보편 참조와 std::forward의 동작 원리."
 tags: [C++, Reference Collapsing, Template, Modern C++]
 series: "Effective Modern C++"

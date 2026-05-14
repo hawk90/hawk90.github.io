@@ -1,6 +1,6 @@
 ---
 title: "Unit 5.1: 요약 작성의 고려 사항과 표절"
-date: 2026-05-16T11:00:00
+date: 2026-05-14T19:00:00
 description: "학술 요약을 쓰기 전에 결정할 것들 — 목적, 길이, 독자, 강조. 그리고 표절의 정의와 회피."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 51

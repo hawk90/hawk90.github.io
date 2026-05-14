@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 어휘 / 빌드 / 문서 directives (Dir 1-4)"
-date: 2025-09-05T03:00:00
+date: 2025-09-05T04:00:00
 description: "Dir 1 implementation, 2 toolchain, 3 traceability, 4 코딩 환경."
 tags: [MISRA, Directive]
 series: "MISRA C"

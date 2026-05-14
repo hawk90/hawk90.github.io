@@ -1,6 +1,6 @@
 ---
 title: "제2장: 주어와 서술어"
-date: 2026-05-12
+date: 2026-05-12T02:00:00
 description: "문장의 핵심 구성 요소인 주어와 서술어의 관계"
 series: "고종석의 문장"
 seriesOrder: 2

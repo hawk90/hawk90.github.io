@@ -1,6 +1,6 @@
 ---
 title: "항목 29: 최적화할 수 있도록 설계하라"
-date: 2026-05-10T18:00:00
+date: 2026-05-09T05:00:00
 description: "컴파일러가 최적화할 여지를 남기는 설계 — 값 의미론, 연속 메모리, 작은 함수, 가상 함수 신중."
 tags: [C++, Performance, Design]
 series: "Beautiful C++"

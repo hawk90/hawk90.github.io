@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 2: 변화를 위한 디자인"
-date: 2026-05-13T12:00:00
+date: 2026-05-13T02:00:00
 description: "변화의 축을 찾아 캡슐화한다. Single Responsibility와 DRY, 변경 가능성이 디자인의 목표라는 이야기."
 tags: [C++, Software Design, SOLID, SRP, DRY]
 series: "C++ Software Design"

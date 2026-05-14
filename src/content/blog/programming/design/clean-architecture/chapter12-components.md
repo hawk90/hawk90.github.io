@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 컴포넌트"
-date: 2025-06-04T01:00:00
+date: 2025-06-01T12:00:00
 description: "컴포넌트는 독립 배포 단위다. 컴파일과 링크의 역사는 어떻게 모던 플러그인 아키텍처를 만들었는가."
 tags: [Architecture, Components, Deployment]
 series: "Clean Architecture"

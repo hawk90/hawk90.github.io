@@ -1,6 +1,6 @@
 ---
 title: "UML 16: 유스케이스 — 시스템 밖에서 본 한 시나리오"
-date: 2026-04-04T11:00:00
+date: 2026-04-01T16:00:00
 description: "Actor가 system에게 시켜서 얻는 가치 단위 — 요구사항 모델링의 가장 강력한 도구."
 tags: [UML, Use Case, Requirements, Actor]
 series: "UML User Guide"

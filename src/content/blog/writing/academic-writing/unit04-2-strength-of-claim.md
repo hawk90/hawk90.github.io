@@ -1,6 +1,6 @@
 ---
 title: "Unit 4.2: Strength of Claim과 Hedging"
-date: 2026-05-15T22:00:00
+date: 2026-05-14T16:00:00
 description: "주장의 강도 조절 — 헤지, 거리 두기, 일반화 약화, 약한 동사 선택. Confidently uncertain."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 42

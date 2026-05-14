@@ -1,6 +1,6 @@
 ---
 title: "Ch 27: Coroutines (C++20)"
-date: 2025-07-09T02:00:00
+date: 2025-07-02T03:00:00
 description: "co_await / co_yield / co_return. promise_type. C++23 std::generator."
 tags: [C++, Coroutines, C++20, C++23]
 series: "전문가를 위한 C++"

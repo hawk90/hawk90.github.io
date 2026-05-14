@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Composition and Aggregation"
-date: 2025-06-16T02:00:00
+date: 2025-06-15T07:00:00
 description: "C에서 composition / aggregation — has-a 관계 구조화."
 tags: [C, OOP, Composition]
 series: "전문가를 위한 C"

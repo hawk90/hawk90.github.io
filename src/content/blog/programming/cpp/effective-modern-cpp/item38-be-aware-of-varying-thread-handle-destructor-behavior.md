@@ -1,6 +1,6 @@
 ---
 title: "항목 38: thread handle 소멸자의 동작 차이를 인식하라"
-date: 2025-01-10T13:00:00
+date: 2025-01-06T14:00:00
 description: "std::thread vs std::future 소멸자 동작 비교 — async future가 block하는 경우."
 tags: [C++, Concurrency, std::future, std::thread, Modern C++]
 series: "Effective Modern C++"

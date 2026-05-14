@@ -1,6 +1,6 @@
 ---
 title: "Vim 마스터하기: 플러그인"
-date: 2026-05-13
+date: 2026-05-13T08:00:00
 description: "플러그인 매니저와 추천 플러그인"
 series: "Vim 마스터하기"
 seriesOrder: 8

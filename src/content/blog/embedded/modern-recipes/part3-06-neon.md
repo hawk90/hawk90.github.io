@@ -1,6 +1,6 @@
 ---
 title: "ARM NEON 최적화"
-date: 2026-05-13
+date: 2026-05-12T19:00:00
 description: "ARM NEON 최적화"
 series: "Modern Embedded Recipes"
 seriesOrder: 18

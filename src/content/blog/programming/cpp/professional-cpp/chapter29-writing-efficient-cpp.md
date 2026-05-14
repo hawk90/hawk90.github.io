@@ -1,6 +1,6 @@
 ---
 title: "Ch 29: Writing Efficient C++"
-date: 2025-07-10T01:00:00
+date: 2025-07-02T05:00:00
 description: "성능 최적화 — 메모리 / 캐시 / 인라인. 측정 우선 원칙."
 tags: [C++, Performance, Optimization]
 series: "전문가를 위한 C++"

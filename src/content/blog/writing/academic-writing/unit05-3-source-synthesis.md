@@ -1,6 +1,6 @@
 ---
 title: "Unit 5.3: Source Identification과 Synthesis"
-date: 2026-05-16T13:00:00
+date: 2026-05-14T21:00:00
 description: "출처를 본문에 도입하는 방법 — Integral vs Non-integral, 보고 동사 선택. 여러 출처를 통합하는 Synthesis 패턴."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 53

@@ -1,6 +1,6 @@
 ---
 title: "Column 10: Squeezing Space"
-date: 2026-05-13
+date: 2026-05-13T10:00:00
 description: "Squeezing Space"
 series: "Programming Pearls"
 seriesOrder: 10

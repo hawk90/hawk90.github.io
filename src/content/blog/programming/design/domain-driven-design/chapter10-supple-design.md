@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Supple Design"
-date: 2025-10-03T03:00:00
+date: 2025-10-01T10:00:00
 description: "Intention-Revealing / Side-Effect-Free / Assertions / Standalone Class / Closure of Operations."
 tags: [DDD, Supple Design]
 series: "Domain-Driven Design"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 31: Conquering Debugging"
-date: 2025-07-10T03:00:00
+date: 2025-07-02T07:00:00
 description: "gdb / lldb / Visual Studio. core dump / sanitizer / Valgrind."
 tags: [C++, Debugging, gdb, Sanitizer]
 series: "전문가를 위한 C++"

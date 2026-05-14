@@ -1,6 +1,6 @@
 ---
 title: "TensorRT 통합"
-date: 2026-05-13
+date: 2026-05-13T09:00:00
 description: "TensorRT 통합"
 series: "Modern Embedded Recipes"
 seriesOrder: 32

@@ -1,6 +1,6 @@
 ---
 title: "항목 20: 댕글링이 가능한 shared_ptr류 포인터에는 weak_ptr를 사용하라"
-date: 2025-01-07T12:00:00
+date: 2025-01-05T20:00:00
 description: "관찰만 하는 shared_ptr — 캐싱, 옵저버 패턴, 순환 참조 끊기."
 tags: [C++, Smart Pointer, weak_ptr, RAII, Modern C++]
 series: "Effective Modern C++"

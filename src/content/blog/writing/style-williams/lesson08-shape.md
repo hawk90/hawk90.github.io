@@ -1,6 +1,6 @@
 ---
 title: "Lesson 8: The Shape of Sentences"
-date: 2026-05-12
+date: 2026-05-12T08:00:00
 description: "긴 문장의 구조 — Resumptive, Summative, Free modifier. 복잡한 생각을 우아하게 전달."
 series: "Style: Lessons in Clarity and Grace"
 seriesOrder: 8

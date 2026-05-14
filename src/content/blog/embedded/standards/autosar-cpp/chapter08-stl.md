@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: STL / 표준 라이브러리 (A18)"
-date: 2025-09-17T02:00:00
+date: 2025-09-15T09:00:00
 description: "STL 사용 — std::array > vector, 안전 함수, deprecated 회피."
 tags: [AUTOSAR, STL, Standard Library]
 series: "AUTOSAR C++14"

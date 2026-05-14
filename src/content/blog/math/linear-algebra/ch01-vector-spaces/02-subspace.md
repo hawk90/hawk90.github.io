@@ -1,6 +1,6 @@
 ---
 title: "1.2 부분공간(subspace)"
-date: 2026-05-10T06:51:07
+date: 2026-05-09T03:00:00
 description: "§1.1 에서 큰 무대를 마련했다. 이제 그 무대 안을 들여다본다."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"

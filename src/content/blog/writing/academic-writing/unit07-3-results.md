@@ -1,6 +1,6 @@
 ---
 title: "Unit 7.3: Results Section 작성"
-date: 2026-05-17T13:00:00
+date: 2026-05-15T03:00:00
 description: "Results 섹션의 표현 — Data Commentary와의 통합, 그림·표 참조, 통계 결과 보고, 핵심 발견 강조."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 73
