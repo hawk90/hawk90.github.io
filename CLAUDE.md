@@ -438,3 +438,10 @@ media/av1              — AV1
 - **반복 수정 허용.** 한 시리즈 안에서도 톤·예시·구조를 사용자가 피드백하면 즉시 반영.
 - **사용자가 직접 결정하는 것** — 톤 전환, 발행 여부, 시리즈 추가/제거, 카테고리 변경.
 - **AI가 결정하는 것** — 코드 예시 선택, 단락 흐름, 절 분할, 표 사용 여부.
+- **overview 글 만들지 않기.** 새 시리즈를 만들 때 별도의 *overview / preface / 00-* 글을 추가하지 않습니다. 시리즈 첫 글이 도입을 겸하면 충분합니다.
+
+  예외(이 네 시리즈만 1편짜리 overview 허용):
+  - Embedded C++ for Real Systems
+  - Modern Embedded Recipes
+  - Embedded Performance Engineering
+  - Practical RTOS Internals
