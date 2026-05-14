@@ -24,9 +24,10 @@
 
 % Tag values + constraint
 \node[fill=clifill, draw=clibord, rounded corners=2pt,
-      align=left, font=\scriptsize, right=14mm of a] (note) {
-  \{author = "hawk"\} \\
-  \{version = 1.2\} \\
+      align=left, font=\scriptsize, inner sep=5pt,
+      right=14mm of a] (note) {
+  \{author = "hawk"\} \\[2pt]
+  \{version = 1.2\} \\[2pt]
   \{ordered\}
 };
 \draw[edge, dashed] (a.east) -- (note.west);

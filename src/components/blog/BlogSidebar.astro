@@ -3,33 +3,38 @@ import CategoryTreeNode, { type CategoryTreeNodeData } from './CategoryTreeNode.
 import TagBadge from './TagBadge.astro';
 import { CATEGORIES, getTopLevelCategories, getSubCategories } from '../../consts/categories';
 import { BLOG_CONFIG } from '../../consts/config';
-import { getPublishedPosts, getTagsWithCount } from '../../lib/posts';
+import { getTagsWithCount, type BlogPost } from '../../lib/posts';
 import { toSlug, getTagUrl } from '../../lib/utils';
 import { onPageLoad } from '../../lib/lifecycle';
 
 interface Props {
+  posts: BlogPost[];
   activeFilter?: {
     type: 'tag' | 'series' | 'category';
     value: string;
   };
 }
 
-const { activeFilter } = Astro.props;
-
-const allPosts = await getPublishedPosts();
+const { activeFilter, posts: allPosts } = Astro.props;
 const sortedTags = getTagsWithCount(allPosts);
 const { maxTagsInSidebar } = BLOG_CONFIG;
 
 const topCats = getTopLevelCategories();
+const categoryById = new Map(CATEGORIES.map((category) => [category.id, category]));
+const childrenByParent = new Map(CATEGORIES.map((category) => [category.id, getSubCategories(category.id)]));
 const subCategoryIdsByParent = new Map(
-  CATEGORIES.map((category) => [category.id, getSubCategories(category.id).map((sub) => sub.id)]),
+  [...childrenByParent.entries()].map(([id, children]) => [id, children.map((sub) => sub.id)]),
 );
-const postsByCategoryPrefix = new Map(
-  CATEGORIES.map((category) => [
-    category.id,
-    allPosts.filter((post) => post.id.startsWith(category.id + '/')),
-  ]),
-);
+const postsByCategoryPrefix = new Map(CATEGORIES.map((category) => [category.id, [] as BlogPost[]]));
+for (const post of allPosts) {
+  const segments = post.id.split('/');
+  let current = '';
+  for (let i = 0; i < segments.length - 1; i++) {
+    current = i === 0 ? segments[i] : `${current}/${segments[i]}`;
+    const bucket = postsByCategoryPrefix.get(current);
+    if (bucket) bucket.push(post);
+  }
+}
 
 interface SeriesLink {
   name: string;
@@ -58,26 +63,27 @@ function postsDirectlyIn(catId: string) {
   });
 }
 
-function seriesIn(posts: typeof allPosts): string[] {
-  return [...new Set(posts.filter((p) => p.data.series).map((p) => p.data.series!))];
-}
-
 function buildSeriesLinks(posts: typeof allPosts): SeriesLink[] {
-  return seriesIn(posts).map((series) => ({
+  const counts = new Map<string, number>();
+  posts.forEach((post) => {
+    if (!post.data.series) return;
+    counts.set(post.data.series, (counts.get(post.data.series) ?? 0) + 1);
+  });
+  return [...counts.entries()].map(([series, count]) => ({
     name: series,
     slug: toSlug(series),
-    count: posts.filter((p) => p.data.series === series).length,
+    count,
     isActive: isActiveSeries(series),
   }));
 }
 
 function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
-  const category = CATEGORIES.find((cat) => cat.id === categoryId);
+  const category = categoryById.get(categoryId);
   if (!category) {
     throw new Error(`Unknown category: ${categoryId}`);
   }
 
-  const children = getSubCategories(category.id).map((child) => buildCategoryNode(child.id));
+  const children = (childrenByParent.get(category.id) ?? []).map((child) => buildCategoryNode(child.id));
   const directPosts = postsDirectlyIn(category.id);
   const hasActiveDescendant = children.some((child) => child.isActive || child.initiallyOpen);
 

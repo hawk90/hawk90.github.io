@@ -14,6 +14,7 @@ export async function getStaticPaths() {
     props: {
       tag,
       posts: filterByTag(allPosts, tag),
+      allPosts,
     },
   }));
 }
@@ -21,9 +22,10 @@ export async function getStaticPaths() {
 interface Props {
   tag: string;
   posts: BlogPost[];
+  allPosts: BlogPost[];
 }
 
-const { tag, posts } = Astro.props;
+const { tag, posts, allPosts } = Astro.props;
 ---
 
 <BaseLayout title={`#${tag} - Tags`} description={`${tag} 태그가 붙은 글`}>
@@ -69,7 +71,7 @@ const { tag, posts } = Astro.props;
         </div>
 
         <!-- Sidebar -->
-        <BlogSidebar activeFilter={{ type: 'tag', value: tag }} />
+        <BlogSidebar posts={allPosts} activeFilter={{ type: 'tag', value: tag }} />
       </div>
     </div>
   </section>

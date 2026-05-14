@@ -4,14 +4,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/blog/PostCard.astro';
 import { BRAND_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
-import { getLatestPosts, getReadingTime } from '../lib/posts';
+import { getHomepageLatestWriting, getPostMeta } from '../lib/posts';
 import { formatDate } from '../lib/utils';
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
-const featuredLatestPosts = getLatestPosts(allPosts, 6);
-const latestPosts = getLatestPosts(allPosts, 5);
-const heroPost = featuredLatestPosts[0];
-const secondaryLatestPosts = latestPosts.slice(heroPost ? 1 : 0);
+const { featuredLatestPosts, heroPost, secondaryLatestPosts } = getHomepageLatestWriting(allPosts);
+const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
 ---
 
 <BaseLayout title={`${BRAND_CONFIG.heroTitle} - ${BRAND_CONFIG.tagline}`}>
@@ -102,7 +100,7 @@ const secondaryLatestPosts = latestPosts.slice(heroPost ? 1 : 0);
                 <div class="flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-muted)]">
                   <span>{formatDate(heroPost.data.date, 'short')}</span>
                   <span class="w-1 h-1 rounded-full bg-[var(--color-border-hover)]"></span>
-                  <span>{getReadingTime(heroPost.body || '')}{t('reading_time_min')}</span>
+                  <span>{heroPostMeta?.readingTime}{t('reading_time_min')}</span>
                   <span class="w-1 h-1 rounded-full bg-[var(--color-border-hover)]"></span>
                   <span>{heroPost.data.tags.slice(0, 3).join(' · ')}</span>
                 </div>
@@ -120,30 +118,33 @@ const secondaryLatestPosts = latestPosts.slice(heroPost ? 1 : 0);
           </div>
 
           <ul class="space-y-3">
-            {secondaryLatestPosts.map((post) => (
-              <li class="border-b border-[var(--color-border-faint)] last:border-b-0 last:pb-0 pb-3">
-                <a
-                  href={`/blog/${post.id}`}
-                  class="block rounded-lg px-1 py-1.5 transition-colors hover:bg-[var(--color-bg-tertiary)]"
-                >
-                  {post.data.series && (
-                    <div class="text-[11px] font-medium text-[var(--color-accent)] mb-1 truncate">
-                      {post.data.series}
+            {secondaryLatestPosts.map((post) => {
+              const { formattedDate, readingTime } = getPostMeta(post);
+              return (
+                <li class="border-b border-[var(--color-border-faint)] last:border-b-0 last:pb-0 pb-3">
+                  <a
+                    href={`/blog/${post.id}`}
+                    class="block rounded-lg px-1 py-1.5 transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                  >
+                    {post.data.series && (
+                      <div class="text-[11px] font-medium text-[var(--color-accent)] mb-1 truncate">
+                        {post.data.series}
+                      </div>
+                    )}
+                    <div class="font-medium leading-snug text-[var(--color-text-primary)] line-clamp-2">
+                      {post.data.title}
                     </div>
-                  )}
-                  <div class="font-medium leading-snug text-[var(--color-text-primary)] line-clamp-2">
-                    {post.data.title}
-                  </div>
-                  <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
-                    <time datetime={post.data.date.toISOString()}>
-                      {formatDate(post.data.date, 'short')}
-                    </time>
-                    <span>·</span>
-                    <span>{getReadingTime(post.body || '')}{t('reading_time_min')}</span>
-                  </div>
-                </a>
-              </li>
-            ))}
+                    <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                      <time datetime={post.data.date.toISOString()}>
+                        {formattedDate}
+                      </time>
+                      <span>·</span>
+                      <span>{readingTime}{t('reading_time_min')}</span>
+                    </div>
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         </section>
       </div>

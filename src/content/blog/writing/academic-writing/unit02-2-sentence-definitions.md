@@ -299,17 +299,15 @@ coal bed methane.
 
 ### 한국어 정의 동사
 
-```
-영어                            한국어
-─────────────────────────────────────
-is                             이다
-is known as                    ~로 알려져 있다
-is called                      ~라고 불린다
-is defined as                  ~로 정의된다
-is referred to as              ~로 일컬어진다
-consists of                    ~로 구성된다
-is characterized by            ~로 특징지어진다
-```
+| 영어 | 한국어 |
+|---|---|
+| is | 이다 |
+| is known as | ~로 알려져 있다 |
+| is called | ~라고 불린다 |
+| is defined as | ~로 정의된다 |
+| is referred to as | ~로 일컬어진다 |
+| consists of | ~로 구성된다 |
+| is characterized by | ~로 특징지어진다 |
 
 ### 한국 학생의 정의 함정
 

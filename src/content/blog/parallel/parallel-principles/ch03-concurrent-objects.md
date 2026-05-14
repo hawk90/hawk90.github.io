@@ -424,9 +424,15 @@ void thread_a_relaxed() {
 ## 연습 문제
 
 1. 다음 실행이 linearizable한가?
-   ```
-   A: enq(1)────────────────
-   B: ────enq(2)────deq():1─
+
+   ```mermaid
+   sequenceDiagram
+       participant A as Thread A
+       participant Q as Queue
+       participant B as Thread B
+       A->>Q: enq(1)
+       B->>Q: enq(2)
+       B->>Q: deq() : 1
    ```
 
 2. Lock-free이지만 Wait-free가 아닌 알고리즘의 예는?

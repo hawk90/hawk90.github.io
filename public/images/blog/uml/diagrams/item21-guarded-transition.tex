@@ -13,12 +13,12 @@
 \node[st] (a1) at (-3.5, 1.4) {Available};
 \node[st] (a2) at ( 3.5, 1.4) {Available};
 \draw[arr] (a1.east) -- node[above, font=\scriptsize\itshape, align=center]
-  {withdraw(amt) [balance $\geq$ amt] /\\ debit(amt)} (a2.west);
+  {withdraw(amt) [balance $\geq$ amt] /\\[2pt] debit(amt)} (a2.west);
 
 % bottom transition (rejection)
 \node[st] (b1) at (-3.5, -1.4) {Available};
 \node[st] (b2) at ( 3.5, -1.4) {Available};
 \draw[arr] (b1.east) -- node[above, font=\scriptsize\itshape, align=center]
-  {withdraw(amt) [balance < amt] /\\ reject} (b2.west);
+  {withdraw(amt) [balance < amt] /\\[2pt] reject} (b2.west);
 \end{tikzpicture}
 \end{document}

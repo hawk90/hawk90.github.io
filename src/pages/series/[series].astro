@@ -14,6 +14,7 @@ export async function getStaticPaths() {
     params: { series: toSlug(series) },
     props: {
       seriesName: series,
+      allPosts,
       posts: allPosts
         .filter((p) => p.data.series === series)
         .sort((a, b) => (a.data.seriesOrder || 0) - (b.data.seriesOrder || 0)),
@@ -24,9 +25,10 @@ export async function getStaticPaths() {
 interface Props {
   seriesName: string;
   posts: BlogPost[];
+  allPosts: BlogPost[];
 }
 
-const { seriesName, posts } = Astro.props;
+const { seriesName, posts, allPosts } = Astro.props;
 const allTags = getAllTags(posts);
 
 const chapterMap = new Map<string, BlogPost[]>();
@@ -142,7 +144,7 @@ function formatChapter(key: string): string {
         </div>
 
         <!-- Sidebar -->
-        <BlogSidebar activeFilter={{ type: 'series', value: seriesName }} />
+        <BlogSidebar posts={allPosts} activeFilter={{ type: 'series', value: seriesName }} />
       </div>
     </div>
   </section>

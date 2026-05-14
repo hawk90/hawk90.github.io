@@ -1,7 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { formatDate } from '../../lib/utils';
-import { getReadingTime } from '../../lib/posts';
+import { getPostMeta } from '../../lib/posts';
 import { BLOG_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
 
@@ -11,21 +10,7 @@ interface Props {
 }
 
 const { post, showImage = true } = Astro.props;
-const formattedDate = formatDate(post.data.date, 'short');
-const formattedUpdatedDate = post.data.updated ? formatDate(post.data.updated, 'short') : null;
-const readingTime = getReadingTime(post.body || '');
-const wasUpdated = !!post.data.updated && post.data.updated.valueOf() > post.data.date.valueOf();
-
-// Default thumbnail based on post type or tags
-const getDefaultThumbnail = () => {
-  const tags = post.data.tags;
-  if (tags.includes('C++') || tags.includes('cpp')) return '/images/thumbnails/cpp.svg';
-  if (tags.includes('TypeScript') || tags.includes('JavaScript')) return '/images/thumbnails/code.svg';
-  if (post.data.type === 'book-review') return '/images/thumbnails/book.svg';
-  return '/images/thumbnails/default.svg';
-};
-
-const thumbnail = post.data.image || getDefaultThumbnail();
+const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail } = getPostMeta(post);
 ---
 
 <article class="card group overflow-hidden">

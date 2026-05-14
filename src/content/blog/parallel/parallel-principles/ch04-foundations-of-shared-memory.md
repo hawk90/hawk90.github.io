@@ -59,11 +59,15 @@ Herlihy와 Shavit는 메모리의 정확성을 세 단계로 정의한다.
 
 다만 **"새 값을 한 번 봤다가 다시 옛 값을 보는"** 현상은 허용된다.
 
-```
-시간 →
-쓰기:  ─────────[ write 1 ]──────────
-읽기 A:     ──[read]──         → 1 (새 값)
-읽기 B:           ──[read]──   → 0 (옛 값, 가능)
+```mermaid
+sequenceDiagram
+    participant W as Writer
+    participant R1 as Reader A
+    participant R2 as Reader B
+    W->>W: write(1) 진행
+    R1->>W: read → 1 (새 값)
+    R2->>W: read → 0 (옛 값, 허용됨)
+    Note over R1,R2: 새 값을 본 뒤 옛 값을 다시 봐도 OK
 ```
 
 ### Atomic Register

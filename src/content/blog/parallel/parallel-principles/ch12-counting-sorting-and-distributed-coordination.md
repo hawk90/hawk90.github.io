@@ -69,16 +69,7 @@ long simple_counter_get(const SimpleCounter* c) {
 
 여러 스레드의 증가를 트리로 **합쳐서** 처리.
 
-```
-스레드들의 증가:
-  T1: +1, T2: +1, T3: +1, T4: +1
-       │       │       │       │
-       └───┬───┘       └───┬───┘
-           │ +2             │ +2
-           └───────┬────────┘
-                   │ +4
-                CENTRAL COUNTER
-```
+![Combining Tree — 단계별 합산](/images/blog/parallel/diagrams/ch12-combining-tree.svg)
 
 리프에서 시작해 트리를 올라가면서 증가량을 합친다. 루트에서는 한 번의 atomic 증가만.
 

@@ -2,20 +2,16 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/blog/PostCard.astro';
 import Breadcrumb from '../components/common/Breadcrumb.astro';
-import { getPublishedPosts } from '../lib/posts';
+import { getPublishedPosts, getRecentlyUpdatedPosts, isUpdatedPost } from '../lib/posts';
 import { formatDate } from '../lib/utils';
 
 const allPosts = await getPublishedPosts();
 
-// Posts that have been updated (updated field set & later than original date)
-const updatedPosts = allPosts
-  .filter((p) => p.data.updated && p.data.updated.valueOf() > p.data.date.valueOf())
-  .sort((a, b) => b.data.updated!.valueOf() - a.data.updated!.valueOf());
+const updatedPosts = getRecentlyUpdatedPosts(allPosts, 30);
 
 // Recent original publications (no updated field, or updated == original date)
 const recentPosts = allPosts
-  .filter((p) => !p.data.updated || p.data.updated.valueOf() === p.data.date.valueOf())
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .filter((p) => !isUpdatedPost(p))
   .slice(0, 24);
 ---
 
@@ -38,7 +34,7 @@ const recentPosts = allPosts
             <span class="text-sm text-[var(--color-text-muted)] font-normal ml-2">{updatedPosts.length}</span>
           </h2>
           <ul class="space-y-3">
-            {updatedPosts.slice(0, 30).map((post) => (
+            {updatedPosts.map((post) => (
               <li>
                 <a
                   href={`/blog/${post.id}`}

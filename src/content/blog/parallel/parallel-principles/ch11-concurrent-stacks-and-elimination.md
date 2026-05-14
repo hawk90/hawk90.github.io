@@ -481,10 +481,16 @@ public:
 
 **답**: 그렇다.
 
-```
-시간:           t1  t2  t3  t4
-스레드 X:    push─────────────
-스레드 Y:              pop───
+```mermaid
+sequenceDiagram
+    participant X as Thread X
+    participant E as Elimination
+    participant Y as Thread Y
+    X->>E: push(item) 대기
+    Y->>E: pop 대기
+    E-->>X: 매치 — X push 성공
+    E-->>Y: 매치 — Y가 item 수신
+    Note over X,Y: 만남 시점이 linearization point<br/>push와 pop이 동시에 일어난 것으로 해석
 ```
 
 X와 Y가 elimination으로 만나는 시점이 linearization point. 그 시점에 push와 pop이 동시에 일어났다고 해석. Linearizability 정의 만족.

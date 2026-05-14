@@ -23,13 +23,11 @@ build/
 
 이 상태에서는 배포할 수 없습니다. 사용자에게 "빌드 디렉터리를 통째로 복사하세요"라고 할 수는 없기 때문입니다. 시스템에 설치하려면 파일들이 올바른 위치로 이동해야 합니다.
 
-```
-설치 전                           설치 후
-──────────                       ──────────
-build/myapp              →       /usr/local/bin/myapp
-build/libmylib.so        →       /usr/local/lib/libmylib.so
-src/include/mylib/*.h    →       /usr/local/include/mylib/*.h
-```
+| 설치 전 (빌드 디렉터리) | 설치 후 (시스템) |
+|---|---|
+| `build/myapp` | `/usr/local/bin/myapp` |
+| `build/libmylib.so` | `/usr/local/lib/libmylib.so` |
+| `src/include/mylib/*.h` | `/usr/local/include/mylib/*.h` |
 
 `install()` 명령은 이 매핑을 정의합니다. 빌드 시스템이 자동으로 올바른 위치에 파일을 복사하도록 규칙을 선언하는 것입니다.
 

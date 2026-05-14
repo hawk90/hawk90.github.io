@@ -256,20 +256,18 @@ A second factor that influences sleep quality is ...
 
 ### 한국어 학술 연결어
 
-```
-영어                       한국어
-─────────────────────────────────────
-However                    그러나, 한편
-In addition                또한, 더불어
-Furthermore                나아가, 게다가
-Therefore                  따라서, 그러므로
-As a result                결과적으로
-For example                예를 들어, 가령
-Specifically               구체적으로, 즉
-In contrast                반대로, 이와 달리
-In summary                 요약하면, 정리하자면
-Indeed                     실로, 사실
-```
+| 영어 | 한국어 |
+|---|---|
+| However | 그러나, 한편 |
+| In addition | 또한, 더불어 |
+| Furthermore | 나아가, 게다가 |
+| Therefore | 따라서, 그러므로 |
+| As a result | 결과적으로 |
+| For example | 예를 들어, 가령 |
+| Specifically | 구체적으로, 즉 |
+| In contrast | 반대로, 이와 달리 |
+| In summary | 요약하면, 정리하자면 |
+| Indeed | 실로, 사실 |
 
 ## 한국 학생의 흔한 흐름 함정
 

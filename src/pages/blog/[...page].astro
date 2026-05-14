@@ -18,6 +18,7 @@ export async function getStaticPaths() {
     params: { page: undefined },
     props: {
       posts: sortedPosts.slice(0, postsPerPage),
+      allPosts: sortedPosts,
       currentPage: 1,
       totalPages,
     },
@@ -29,6 +30,7 @@ export async function getStaticPaths() {
       params: { page: String(i) },
       props: {
         posts: sortedPosts.slice(start, start + postsPerPage),
+        allPosts: sortedPosts,
         currentPage: i,
         totalPages,
       },
@@ -38,7 +40,7 @@ export async function getStaticPaths() {
   return paths;
 }
 
-const { posts, currentPage, totalPages } = Astro.props;
+const { posts, allPosts, currentPage, totalPages } = Astro.props;
 ---
 
 <BaseLayout title={`Blog - ${SITE_CONFIG.author}`} description={SITE_CONFIG.description}>
@@ -74,7 +76,7 @@ const { posts, currentPage, totalPages } = Astro.props;
         </div>
 
         <!-- Sidebar -->
-        <BlogSidebar />
+        <BlogSidebar posts={allPosts} />
       </div>
     </div>
   </section>

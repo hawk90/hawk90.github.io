@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { formatDate } from '../../lib/utils';
-import { getReadingTime } from '../../lib/posts';
+import { getPostMeta } from '../../lib/posts';
 import { t } from '../../consts/ui-strings';
 
 interface Props {
@@ -40,7 +40,7 @@ const {
           kind === 'updated' && post.data.updated
             ? post.data.updated
             : post.data.date;
-        const readingTime = getReadingTime(post.body || '');
+        const { readingTime } = getPostMeta(post);
         return (
           <li>
             <a
