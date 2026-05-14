@@ -93,7 +93,7 @@ find_package(Boost 1.70 REQUIRED)
 find_package(OpenCV 4.0 EXACT REQUIRED)
 
 # 범위
-find_package(fmt 9.0...<11.0 REQUIRED)  # CMake 3.19+
+find_package(fmt 10.0...<12.0 REQUIRED)  # CMake 3.19+
 ```
 
 ### 컴포넌트 지정
@@ -259,7 +259,7 @@ include(FetchContent)
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG        10.1.1
+    GIT_TAG        11.0.2
 )
 
 FetchContent_MakeAvailable(fmt)
@@ -277,19 +277,19 @@ include(FetchContent)
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG        10.1.1
+    GIT_TAG        11.0.2
 )
 
 FetchContent_Declare(
     spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
-    GIT_TAG        v1.12.0
+    GIT_TAG        v1.15.0
 )
 
 FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        v1.14.0
+    GIT_TAG        v1.15.2
 )
 
 # 한 번에 모두 가져오기
@@ -303,7 +303,7 @@ Git 대신 아카이브 파일을 다운로드할 수도 있습니다.
 ```cmake
 FetchContent_Declare(
     json
-    URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
     URL_HASH SHA256=8c4b26bf4b422252e13f332bc5e388ec0ab5c3443d24f...
 )
 
@@ -326,7 +326,7 @@ set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        v1.14.0
+    GIT_TAG        v1.15.2
 )
 
 FetchContent_MakeAvailable(googletest)
@@ -349,7 +349,7 @@ if(NOT fmt_FOUND)
     FetchContent_Declare(
         fmt
         GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG        10.1.1
+        GIT_TAG        11.0.2
     )
     FetchContent_MakeAvailable(fmt)
 endif()
@@ -367,7 +367,7 @@ include(FetchContent)
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG        10.1.1
+    GIT_TAG        11.0.2
     FIND_PACKAGE_ARGS  # 먼저 find_package(fmt) 시도
 )
 
@@ -463,24 +463,24 @@ find_package(OpenSSL REQUIRED)
 # === 선택적 의존성 (시스템 또는 FetchContent) ===
 
 # fmt: 시스템에 있으면 사용, 없으면 다운로드
-find_package(fmt 9.0 QUIET)
+find_package(fmt 10.0 QUIET)
 if(NOT fmt_FOUND)
     message(STATUS "fmt not found, fetching...")
     FetchContent_Declare(fmt
         GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG        10.1.1
+        GIT_TAG        11.0.2
     )
     FetchContent_MakeAvailable(fmt)
 endif()
 
 # spdlog: 위와 같은 패턴
-find_package(spdlog 1.10 QUIET)
+find_package(spdlog 1.12 QUIET)
 if(NOT spdlog_FOUND)
     message(STATUS "spdlog not found, fetching...")
     set(SPDLOG_FMT_EXTERNAL ON CACHE BOOL "" FORCE)
     FetchContent_Declare(spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG        v1.12.0
+        GIT_TAG        v1.15.0
     )
     FetchContent_MakeAvailable(spdlog)
 endif()
@@ -559,7 +559,7 @@ FetchContent_Declare(fmt
 # Good: 고정된 태그나 커밋 해시
 FetchContent_Declare(fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG        10.1.1  # 버전 태그
+    GIT_TAG        11.0.2  # 버전 태그
 )
 ```
 

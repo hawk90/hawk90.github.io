@@ -450,8 +450,8 @@ macro(find_or_fetch PKG GIT_REPO GIT_TAG)
     endif()
 endmacro()
 
-find_or_fetch(fmt https://github.com/fmtlib/fmt.git 10.2.0)
-find_or_fetch(spdlog https://github.com/gabime/spdlog.git v1.13.0)
+find_or_fetch(fmt https://github.com/fmtlib/fmt.git 11.0.2)
+find_or_fetch(spdlog https://github.com/gabime/spdlog.git v1.15.0)
 
 target_link_libraries(myapp PRIVATE fmt::fmt spdlog::spdlog)
 ```

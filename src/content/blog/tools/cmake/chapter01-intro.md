@@ -134,7 +134,7 @@ cmake --version
 # cmake version 3.28.1
 ```
 
-**권장 최소 버전**: 3.15 이상. Modern CMake 기능(타겟 중심 접근, 프리셋 등)을 사용하려면 **3.20 이상**을 권장합니다.
+**권장 최소 버전**: 3.20 이상. Modern CMake 기능(타겟 중심 접근, 프리셋, FetchContent의 `FIND_PACKAGE_ARGS` 등)을 모두 활용하려면 **3.25 이상**을 권장합니다.
 
 ---
 
@@ -197,7 +197,7 @@ CMake Error at CMakeLists.txt:1 (cmake_minimum_required):
 버전 범위도 지정할 수 있습니다.
 
 ```cmake
-cmake_minimum_required(VERSION 3.15...3.28)
+cmake_minimum_required(VERSION 3.20...3.30)
 ```
 
 이 명령은 CMake의 **정책(policy)**을 설정합니다. 정책은 특정 버전에서 도입된 동작 변경을 제어합니다. 반드시 **CMakeLists.txt의 첫 줄에 작성**하세요.
