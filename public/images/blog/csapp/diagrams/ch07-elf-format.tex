@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  sec/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=40mm, minimum height=7mm, inner sep=3pt, align=center}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small] at (0, 5.5) {ELF 파일 구조};
+
+% Sections (top to bottom)
+\node[sec, fill=confill, draw=conbord] (elfh) at (0, 4.8) {ELF 헤더};
+\node[sec, fill=clifill, draw=clibord, below=2pt of elfh] (progh) {프로그램 헤더 테이블};
+\node[sec, fill=absfill, draw=absbord, below=2pt of progh] (text) {.text (코드)};
+\node[sec, fill=absfill, draw=absbord, below=2pt of text] (rodata) {.rodata (읽기 전용 데이터)};
+\node[sec, fill=impfill, draw=impbord, below=2pt of rodata] (data) {.data (초기화된 데이터)};
+\node[sec, fill=impfill, draw=impbord, below=2pt of data] (bss) {.bss (미초기화 데이터)};
+\node[sec, fill=hifill, draw=hibord, below=2pt of bss] (symtab) {.symtab (심볼 테이블)};
+\node[sec, fill=hifill, draw=hibord, below=2pt of symtab] (rel) {.rel.text (재배치 정보)};
+\node[sec, fill=clifill, draw=clibord, below=2pt of rel] (sech) {섹션 헤더 테이블};
+
+% Category braces
+\draw[decorate, decoration={brace, amplitude=5pt}]
+  ([xshift=2mm]text.north east) -- ([xshift=2mm]bss.south east)
+  node[midway, right=6pt, font=\sffamily\scriptsize] {로드 가능 섹션};
+
+\draw[decorate, decoration={brace, amplitude=5pt}]
+  ([xshift=2mm]symtab.north east) -- ([xshift=2mm]rel.south east)
+  node[midway, right=6pt, font=\sffamily\scriptsize] {링킹 정보};
+
+\end{tikzpicture}
+\end{document}

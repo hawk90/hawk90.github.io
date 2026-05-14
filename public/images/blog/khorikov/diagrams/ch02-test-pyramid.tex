@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,5) {테스트 피라미드};
+
+% Pyramid (from bottom to top)
+% Unit tests (base)
+\fill[absfill] (-4,0) -- (4,0) -- (2.5,1.5) -- (-2.5,1.5) -- cycle;
+\node[font=\sffamily\small] at (0,0.75) {단위 테스트 (Unit)};
+
+% Integration tests (middle)
+\fill[confill] (-2.5,1.5) -- (2.5,1.5) -- (1.2,3) -- (-1.2,3) -- cycle;
+\node[font=\sffamily\small] at (0,2.25) {통합 테스트};
+
+% E2E tests (top)
+\fill[hifill] (-1.2,3) -- (1.2,3) -- (0,4.2) -- cycle;
+\node[font=\sffamily\small] at (0,3.4) {E2E};
+
+% Labels on sides
+\node[font=\sffamily\footnotesize, text=gray, align=right] at (-5,2.1) {느림\\적음\\비쌈};
+\node[font=\sffamily\footnotesize, text=gray, align=left] at (5,2.1) {빠름\\많음\\저렴};
+
+% Arrows
+\draw[arr, gray] (-4.2,0.5) -- (-4.2,3.5);
+\draw[arr, gray] (4.2,3.5) -- (4.2,0.5);
+
+% Bottom note
+\node[font=\sffamily\footnotesize, text=gray] at (0,-0.8) {Classical: 피라미드 형태 유지};
+
+\end{tikzpicture}
+\end{document}

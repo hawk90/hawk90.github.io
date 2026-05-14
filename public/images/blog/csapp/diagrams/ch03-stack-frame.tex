@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  frame/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=50mm, minimum height=8mm, inner sep=3pt, align=center}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small] at (0, 5) {스택 프레임 레이아웃};
+
+% Stack frames (top = high address)
+\node[frame, fill=clifill, draw=clibord] (arg) at (0, 4) {인자 7, 8, ...};
+\node[frame, fill=confill, draw=conbord, below=2pt of arg] (ret) {반환 주소};
+\node[frame, fill=absfill, draw=absbord, below=2pt of ret] (rbp) {저장된 \%rbp};
+\node[frame, fill=impfill, draw=impbord, below=2pt of rbp] (local) {지역 변수};
+\node[frame, fill=impfill, draw=impbord, below=2pt of local] (temp) {임시 저장};
+
+% Pointer labels
+\draw[arr, thick, draw=conbord] (3.5, 2.4) -- node[above, font=\sffamily\small] {\%rbp} (rbp.east);
+\draw[arr, thick, draw=conbord] (3.5, 0.5) -- node[above, font=\sffamily\small] {\%rsp} (temp.east);
+
+% Address labels
+\node[font=\sffamily\scriptsize, anchor=east] at (-3, 4) {높은 주소};
+\node[font=\sffamily\scriptsize, anchor=east] at (-3, 0.8) {낮은 주소};
+
+% Growth arrow
+\draw[arr, thick, draw=nodebord] (-3.5, 2) -- (-3.5, 0.5) node[midway, left, font=\sffamily\scriptsize] {성장};
+
+% Current frame brace
+\draw[decorate, decoration={brace, amplitude=5pt}]
+  ([xshift=2mm]rbp.north east) -- ([xshift=2mm]temp.south east)
+  node[midway, right=6pt, font=\sffamily\small] {현재 프레임};
+
+\end{tikzpicture}
+\end{document}

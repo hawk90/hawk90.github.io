@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  region/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=40mm, minimum height=8mm, fill=#1, inner sep=2pt, align=center, rounded corners=1pt, font=\sffamily\scriptsize},
+  stack/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=16mm, minimum height=12mm, fill=clifill, inner sep=2pt, align=center, rounded corners=1pt, font=\sffamily\scriptsize}
+]
+
+% Process boundary
+\draw[thick, draw=nodebord, rounded corners=3pt] (-3, -0.5) rectangle (3, 4.5);
+\node[font=\sffamily\scriptsize\bfseries, anchor=north west] at (-2.9, 4.4) {프로세스};
+
+% Thread stacks at top
+\node[stack] (t1) at (-1.5, 3.5) {스레드 1\\스택};
+\node[stack] (t2) at (1.5, 3.5) {스레드 2\\스택};
+
+% Shared regions
+\node[region=absfill] (heap) at (0, 2) {공유 힙};
+\node[region=confill] (data) at (0, 1) {공유 데이터};
+\node[region=impfill] (code) at (0, 0) {공유 코드};
+
+% Labels
+\node[font=\sffamily\tiny, anchor=west] at (3.2, 3.5) {비공유};
+\node[font=\sffamily\tiny, anchor=west] at (3.2, 1) {공유};
+
+% Brace for shared
+\draw[thick, draw=nodebord] (2.2, 2.5) -- (2.5, 2.5) -- (2.5, -0.3) -- (2.2, -0.3);
+
+% Brace for non-shared
+\draw[thick, draw=nodebord] (2.2, 4) -- (2.5, 4) -- (2.5, 3) -- (2.2, 3);
+
+\end{tikzpicture}
+\end{document}

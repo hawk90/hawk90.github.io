@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  st/.style={cls, fill=confill, draw=conbord, minimum width=18mm, minimum height=9mm},
+  thr/.style={cls, fill=impfill, draw=impbord, minimum width=40mm, minimum height=10mm}
+]
+
+% ===== 단일 스레드 (왼쪽) =====
+\node[font=\sffamily\bfseries] at (-3.5, 3.5) {단일 스레드 게임 루프};
+
+\node[st] (in)  at (-6.0, 2.3) {입력};
+\node[st] (ph)  at (-4.5, 2.3) {물리};
+\node[st] (ai)  at (-3.0, 2.3) {AI};
+\node[st] (rd)  at (-1.5, 2.3) {렌더};
+
+\draw[arr] (in.east) -- (ph.west);
+\draw[arr] (ph.east) -- (ai.west);
+\draw[arr] (ai.east) -- (rd.west);
+\draw[arr, draw=conbord, dashed] (rd.east) to[bend left=50] node[above, font=\sffamily\tiny] {반복} (in.west);
+
+\node[font=\sffamily\footnotesize\itshape, anchor=west, conbord] at (-6.0, 1.0) {AI 느리면 입력도 멈춤};
+
+% ===== 멀티 스레드 (오른쪽) =====
+\node[font=\sffamily\bfseries] at (3.5, 3.5) {멀티 스레드 게임 루프};
+
+\node[thr] (main) at (3.5, 2.5) {메인 — 입력 + 렌더};
+\node[thr] (w1)   at (3.5, 1.4) {워커 — 물리 계산};
+\node[thr] (w2)   at (3.5, 0.3) {워커 — AI 계산};
+
+\draw[arr, dashed, draw=edgesc] (main.south) -- (w1.north);
+\draw[arr, dashed, draw=edgesc] (w1.south) -- (w2.north);
+
+\node[font=\sffamily\footnotesize\itshape, anchor=west, impbord] at (1, -0.7) {AI 느려도 입력 즉각 반응};
+
+\end{tikzpicture}
+\end{document}

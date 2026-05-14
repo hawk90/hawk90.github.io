@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Root
+\node[hi, minimum width=32mm] (dep) at (0,4) {의존 (Dependency)};
+
+% Level 1
+\node[abs, minimum width=34mm] (shared) at (-3.5,2) {공유 의존\\Shared};
+\node[abs, minimum width=34mm] (private) at (3.5,2) {비공유 의존\\Private};
+
+\draw[arr] (dep.south) -- ++(0,-0.4) -| (shared.north);
+\draw[arr] (dep.south) -- ++(0,-0.4) -| (private.north);
+
+% Level 2 - Shared
+\node[con, minimum width=22mm] (db) at (-5,0) {DB\\캐시};
+\node[con, minimum width=22mm] (file) at (-2,0) {파일\\큐};
+
+\draw[arr] (shared.south) -- ++(0,-0.4) -| (db.north);
+\draw[arr] (shared.south) -- ++(0,-0.4) -| (file.north);
+
+% Level 2 - Private
+\node[imp, minimum width=22mm] (value) at (2,0) {값 객체};
+\node[imp, minimum width=22mm] (service) at (5,0) {서비스\\(인스턴스)};
+
+\draw[arr] (private.south) -- ++(0,-0.4) -| (value.north);
+\draw[arr] (private.south) -- ++(0,-0.4) -| (service.north);
+
+% Level 3 - Service
+\node[cli, minimum width=20mm] (mutable) at (3.5,-2) {변경 가능\\Mutable};
+\node[cli, minimum width=20mm] (immut) at (6.5,-2) {불변\\Immutable};
+
+\draw[arr] (service.south) -- ++(0,-0.4) -| (mutable.north);
+\draw[arr] (service.south) -- ++(0,-0.4) -| (immut.north);
+
+% Legend at bottom
+\node[font=\sffamily\footnotesize, text=gray, align=left] at (-3,-3.5) {Classical: 공유 의존만 Mock};
+\node[font=\sffamily\footnotesize, text=gray, align=left] at (3,-3.5) {London: 변경 가능 의존 모두 Mock};
+
+\end{tikzpicture}
+\end{document}

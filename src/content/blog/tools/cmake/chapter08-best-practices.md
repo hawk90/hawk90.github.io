@@ -36,24 +36,14 @@ target_link_libraries(myapp foo bar)
 
 Modern CMake(3.0+)는 이 문제를 **타겟 중심 접근법**으로 해결합니다.
 
-```
-┌────────────────────────────────────────────────────────────────┐
-│                   Old vs Modern CMake                          │
-├────────────────────────────────────────────────────────────────┤
-│                                                                │
-│   Old CMake (전역 중심)           Modern CMake (타겟 중심)     │
-│   ────────────────────           ──────────────────────        │
-│   include_directories()    →    target_include_directories()  │
-│   add_definitions()        →    target_compile_definitions()  │
-│   add_compile_options()    →    target_compile_options()      │
-│   link_directories()       →    target_link_libraries()       │
-│   CMAKE_CXX_FLAGS          →    target_compile_features()     │
-│                                                                │
-│   전역 변수 조작            →    타겟 속성 + 전파 키워드        │
-│   (모든 타겟에 영향)             (선택적 전파)                  │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
-```
+| Old CMake (전역 중심) | Modern CMake (타겟 중심) |
+|---|---|
+| `include_directories()` | `target_include_directories()` |
+| `add_definitions()` | `target_compile_definitions()` |
+| `add_compile_options()` | `target_compile_options()` |
+| `link_directories()` | `target_link_libraries()` |
+| `CMAKE_CXX_FLAGS` | `target_compile_features()` |
+| 전역 변수 조작 (모든 타겟에 영향) | 타겟 속성 + 전파 키워드 (선택적 전파) |
 
 ---
 
@@ -93,22 +83,13 @@ target_link_libraries(myapp PRIVATE mylib)
 # - src 경로는 안 얻음 (PRIVATE이므로)
 ```
 
-```
-┌────────────────────────────────────────────────────────────────┐
-│                   속성 전파 흐름                                │
-├────────────────────────────────────────────────────────────────┤
-│                                                                │
-│   mylib (라이브러리)                                           │
-│   ├── PRIVATE: src/              → mylib 빌드에만 사용         │
-│   ├── PUBLIC:  include/          → mylib + 사용측              │
-│   └── PUBLIC:  -DUSE_MYLIB       → mylib + 사용측              │
-│                     │                                          │
-│                     ▼                                          │
-│   myapp (실행 파일)                                            │
-│   └── 자동으로: include/, -DUSE_MYLIB 상속                     │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
-```
+**속성 전파 흐름**
+
+- `mylib` (라이브러리)
+  - `PRIVATE: src/` → mylib 빌드에만 사용
+  - `PUBLIC: include/` → mylib + 사용측
+  - `PUBLIC: -DUSE_MYLIB` → mylib + 사용측
+- `myapp` (실행 파일, `mylib`에 링크) → 자동으로 `include/`, `-DUSE_MYLIB` 상속
 
 ### INTERFACE 타겟
 

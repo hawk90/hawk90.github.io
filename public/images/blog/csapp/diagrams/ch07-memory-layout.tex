@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  seg/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=50mm, minimum height=8mm, inner sep=3pt, align=center}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small] at (0, 6.5) {프로세스 메모리 레이아웃};
+
+% Memory regions (bottom to top)
+\node[seg, fill=absfill, draw=absbord] (code) at (0, 0) {.text (코드)};
+\node[seg, fill=absfill, draw=absbord, above=2pt of code] (rodata) {.rodata};
+\node[seg, fill=impfill, draw=impbord, above=2pt of rodata] (data) {.data / .bss};
+\node[seg, fill=clifill, draw=clibord, above=2pt of data] (heap) {힙 (Heap)};
+\node[seg, fill=white, draw=white, above=2pt of heap, minimum height=12mm] (free) {};
+\node[seg, fill=confill, draw=conbord, above=2pt of free] (stack) {스택 (Stack)};
+\node[seg, fill=nodefill, draw=nodebord, above=2pt of stack] (kernel) {커널 영역};
+
+% Addresses
+\node[font=\sffamily\tiny, anchor=east] at (-3, 0) {0x400000};
+\node[font=\sffamily\tiny, anchor=east] at (-3, 2.5) {brk $\rightarrow$};
+\node[font=\sffamily\tiny, anchor=east] at (-3, 5.2) {0x7fff...};
+\node[font=\sffamily\tiny, anchor=east] at (-3, 5.9) {0xffff...};
+
+% Growth arrows
+\draw[arr, thick, draw=clibord] ([xshift=30mm]heap.center) -- ++(0, 6mm) node[right, font=\sffamily\scriptsize] {$\uparrow$};
+\draw[arr, thick, draw=conbord] ([xshift=30mm]stack.center) -- ++(0, -6mm) node[right, font=\sffamily\scriptsize] {$\downarrow$};
+
+% Free space label
+\node[font=\sffamily\scriptsize, rotate=90] at (-2.5, 3.5) {빈 공간};
+
+% Labels
+\node[font=\sffamily\tiny, anchor=west] at (3, 5.9) {사용자 접근 불가};
+\node[font=\sffamily\tiny, anchor=west] at (3, 0) {읽기/실행};
+\node[font=\sffamily\tiny, anchor=west] at (3, 1.5) {읽기/쓰기};
+
+\end{tikzpicture}
+\end{document}

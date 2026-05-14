@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  task/.style={rectangle, draw=conbord, fill=confill, line width=0.4pt, minimum height=7mm, inner sep=0pt, font=\sffamily\footnotesize},
+  simd/.style={rectangle, draw=impbord, fill=impfill, line width=0.4pt, minimum height=7mm, inner sep=0pt, font=\sffamily\tiny}
+]
+
+% ===== seq =====
+\node[font=\sffamily\bfseries, anchor=east] at (-0.3, 4.0) {seq};
+\node[task, minimum width=20mm] at (1.0, 4.0) {작업1};
+\node[task, minimum width=20mm] at (3.1, 4.0) {작업2};
+\node[task, minimum width=20mm] at (5.2, 4.0) {작업3};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (7, 4.0) {순차 실행};
+
+% ===== par =====
+\node[font=\sffamily\bfseries, anchor=east] at (-0.3, 2.8) {par};
+\node[task, minimum width=20mm] at (1.0, 3.1) {작업1};
+\node[task, minimum width=20mm] at (1.0, 2.4) {작업2};
+\node[task, minimum width=20mm] at (1.0, 1.7) {작업3};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (7, 2.4) {병렬 실행 (스레드)};
+
+% ===== par_unseq =====
+\node[font=\sffamily\bfseries, anchor=east] at (-0.3, 0.5) {par\_unseq};
+\foreach \i/\lbl in {0/a, 1/b, 2/c} {
+  \node[simd, minimum width=5mm] at (0.5 + \i*0.55, 0.7) {\lbl};
+}
+\foreach \i/\lbl in {0/d, 1/e, 2/f} {
+  \node[simd, minimum width=5mm] at (0.5 + \i*0.55, 0.3) {\lbl};
+}
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (7, 0.5) {병렬 + SIMD 벡터화};
+
+% ===== unseq =====
+\node[font=\sffamily\bfseries, anchor=east] at (-0.3, -0.8) {unseq};
+\foreach \i/\lbl in {0/a, 1/b, 2/c, 3/d, 4/e, 5/f} {
+  \node[simd, minimum width=5mm] at (0.5 + \i*0.55, -0.8) {\lbl};
+}
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (7, -0.8) {단일 스레드 SIMD};
+
+\end{tikzpicture}
+\end{document}

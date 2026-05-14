@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bitbox/.style={rectangle, draw=nodebord, line width=0.4pt, minimum height=10mm, inner sep=3pt, align=center}
+]
+
+% Virtual address
+\node[font=\sffamily\bfseries\small] at (0, 3) {가상 주소};
+\node[bitbox, minimum width=30mm, fill=clifill, draw=clibord] (vpn) at (-0.8, 2) {VPN};
+\node[bitbox, minimum width=25mm, fill=impfill, draw=impbord, right=0pt of vpn] (vpo) {VPO};
+
+% Page table
+\node[font=\sffamily\small] at (0, 0.5) {페이지 테이블};
+\draw[thick, draw=absbord, fill=absfill, rounded corners=2pt] (-2, 0) rectangle (2, -0.5);
+
+% Physical address
+\node[font=\sffamily\bfseries\small] at (0, -1.5) {물리 주소};
+\node[bitbox, minimum width=30mm, fill=confill, draw=conbord] (ppn) at (-0.8, -2.5) {PPN};
+\node[bitbox, minimum width=25mm, fill=impfill, draw=impbord, right=0pt of ppn] (ppo) {PPO};
+
+% Arrows
+\draw[arr, thick] (vpn.south) -- (0, 0);
+\draw[arr, thick] (0, -0.5) -- (ppn.north);
+\draw[arr, thick, dashed, draw=impbord] (vpo.south) -- ++(0, -0.4) -- ++(0, -3.4) -- (ppo.north);
+
+% Labels
+\node[font=\sffamily\scriptsize, anchor=west] at (2.5, 2) {페이지 번호};
+\node[font=\sffamily\scriptsize, anchor=west] at (2.5, 1.5) {(변환됨)};
+\node[font=\sffamily\scriptsize, anchor=west] at (2.5, -2.5) {오프셋 유지};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,45 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  core/.style={cls, fill=absfill, draw=absbord, minimum width=18mm, minimum height=10mm},
+  mem/.style={cls, fill=clifill, draw=clibord, minimum height=10mm, font=\sffamily\bfseries},
+  node/.style={cls, fill=impfill, draw=impbord, minimum width=22mm, minimum height=14mm, align=center}
+]
+
+% ===== 공유 메모리 (왼쪽) =====
+\node[font=\sffamily\bfseries] at (-3.5, 4.0) {공유 메모리 (Shared Memory)};
+
+\node[core] (c1) at (-6.0, 2.6) {Core 1};
+\node[core] (c2) at (-3.5, 2.6) {Core 2};
+\node[core] (c3) at (-1.0, 2.6) {Core 3};
+
+\node[mem, minimum width=58mm] (sm) at (-3.5, 0.7) {Shared Memory};
+
+\draw[arr] (c1.south) -- (c1.south |- sm.north);
+\draw[arr] (c2.south) -- (c2.south |- sm.north);
+\draw[arr] (c3.south) -- (c3.south |- sm.north);
+
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-6.0, -0.5) {통신: 메모리 읽기/쓰기};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-6.0, -1.1) {동기화: 락, atomic};
+
+% ===== 메시지 전달 (오른쪽) =====
+\node[font=\sffamily\bfseries] at (4.0, 4.0) {메시지 전달 (Message Passing)};
+
+\node[node] (n1) at (1.5, 2.6) {Node 1\\Memory};
+\node[node] (n2) at (4.0, 2.6) {Node 2\\Memory};
+\node[node] (n3) at (6.5, 2.6) {Node 3\\Memory};
+
+\draw[arr, <->] (n1.east) -- (n2.west);
+\draw[arr, <->] (n2.east) -- (n3.west);
+
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (1.5, 0.3) {통신: 명시적 메시지};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (1.5, -0.3) {동기화: 메시지 순서};
+
+\end{tikzpicture}
+\end{document}

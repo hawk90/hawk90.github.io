@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  call/.style={cls, fill=absfill, draw=absbord, minimum width=40mm, minimum height=10mm},
+  mode/.style={cls, minimum width=42mm, minimum height=14mm, align=center}
+]
+
+\node[call] (fp) at (0, 3.0) {find\_package(Foo)};
+
+\node[mode, fill=impfill, draw=impbord] (cfg) at (-3.5, 1.0) {Config 모드\\\sffamily\footnotesize FooConfig.cmake};
+\node[mode, fill=clifill, draw=clibord] (mod) at (3.5, 1.0) {Module 모드\\\sffamily\footnotesize FindFoo.cmake};
+
+\draw[arr, line width=0.7pt] (fp.south) -- (cfg.north);
+\draw[arr, line width=0.7pt] (fp.south) -- (mod.north);
+
+\node[call, fill=confill, draw=conbord, minimum width=70mm] (res) at (0, -1.5) {패키지 정보 설정 (타겟, 변수, 경로 등)};
+
+\draw[arr] (cfg.south) -- (res.north -| cfg.south);
+\draw[arr] (mod.south) -- (res.north -| mod.south);
+
+\end{tikzpicture}
+\end{document}

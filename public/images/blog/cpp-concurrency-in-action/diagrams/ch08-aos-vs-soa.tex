@@ -1,0 +1,70 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cell/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=7mm, minimum height=7mm, inner sep=0pt, font=\sffamily\footnotesize},
+  cx/.style={cell, fill=absfill, draw=absbord},
+  cy/.style={cell, fill=impfill, draw=impbord},
+  cz/.style={cell, fill=clifill, draw=clibord},
+  cvx/.style={cell, fill=hifill, draw=hibord},
+  cvy/.style={cell, fill=confill, draw=conbord},
+  cvz/.style={cell, fill=nodefill, draw=nodebord}
+]
+
+% ===== AoS =====
+\node[font=\sffamily\bfseries\large] at (0, 5.0) {AoS — Array of Structures};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-5.5, 4.3) {struct Particle \{ float x, y, z, vx, vy, vz; \};};
+
+% Particle 0
+\foreach \i/\style/\label in {0/cx/x, 1/cy/y, 2/cz/z, 3/cvx/vx, 4/cvy/vy, 5/cvz/vz} {
+  \node[\style] at (\i*0.75 - 4.5, 3.3) {\label};
+}
+% Particle 1
+\foreach \i/\style/\label in {0/cx/x, 1/cy/y, 2/cz/z, 3/cvx/vx, 4/cvy/vy, 5/cvz/vz} {
+  \node[\style] at (\i*0.75, 3.3) {\label};
+}
+% Particle 2
+\foreach \i/\style/\label in {0/cx/x, 1/cy/y, 2/cz/z, 3/cvx/vx, 4/cvy/vy, 5/cvz/vz} {
+  \node[\style] at (\i*0.75 + 4.5, 3.3) {\label};
+}
+
+% Particle 그룹 표시
+\draw[draw=nodebord, line width=0.6pt] (-4.9, 3.7) -- (-4.9, 3.9) -- (-1.2, 3.9) -- (-1.2, 3.7);
+\node[font=\sffamily\footnotesize, anchor=south] at (-3.0, 3.9) {Particle 0};
+\draw[draw=nodebord, line width=0.6pt] (-0.4, 3.7) -- (-0.4, 3.9) -- (3.3, 3.9) -- (3.3, 3.7);
+\node[font=\sffamily\footnotesize, anchor=south] at (1.5, 3.9) {Particle 1};
+\draw[draw=nodebord, line width=0.6pt] (4.1, 3.7) -- (4.1, 3.9) -- (7.8, 3.9) -- (7.8, 3.7);
+\node[font=\sffamily\footnotesize, anchor=south] at (6.0, 3.9) {Particle 2};
+
+\node[font=\sffamily\footnotesize, anchor=west] at (-5.5, 2.3) {장점: 한 객체 접근 시 캐시 친화적};
+\node[font=\sffamily\footnotesize, anchor=west, conbord] at (-5.5, 1.7) {단점: 특정 필드만 처리 시 캐시 낭비};
+
+% ===== SoA =====
+\node[font=\sffamily\bfseries\large] at (0, 0.5) {SoA — Structure of Arrays};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-5.5, -0.2) {struct Particles \{ float x[N], y[N], z[N], vx[N], vy[N], vz[N]; \};};
+
+% x array
+\foreach \i in {0,1,2,3} { \node[cx] at (\i*0.75 - 5.0, -1.1) {x}; }
+% y array
+\foreach \i in {0,1,2,3} { \node[cy] at (\i*0.75 - 1.7, -1.1) {y}; }
+% z array
+\foreach \i in {0,1,2,3} { \node[cz] at (\i*0.75 + 1.6, -1.1) {z}; }
+% vx start
+\foreach \i in {0,1,2} { \node[cvx] at (\i*0.75 + 4.9, -1.1) {vx}; }
+
+% 그룹 라벨
+\node[font=\sffamily\footnotesize, anchor=south] at (-3.9, -0.7) {x[\,]};
+\node[font=\sffamily\footnotesize, anchor=south] at (-0.6, -0.7) {y[\,]};
+\node[font=\sffamily\footnotesize, anchor=south] at (2.7, -0.7) {z[\,]};
+\node[font=\sffamily\footnotesize, anchor=south] at (5.6, -0.7) {vx[\,]\ldots};
+
+\node[font=\sffamily\footnotesize, anchor=west] at (-5.5, -2.2) {장점: SIMD 친화, 특정 필드 대량 처리에 캐시 효율};
+\node[font=\sffamily\footnotesize, anchor=west, conbord] at (-5.5, -2.8) {단점: 한 객체 접근 시 여러 캐시 라인 필요};
+
+\end{tikzpicture}
+\end{document}

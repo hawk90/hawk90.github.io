@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  src/.style={cls, fill=absfill, draw=absbord, minimum width=42mm, minimum height=10mm},
+  gen/.style={cls, fill=clifill, draw=clibord, minimum width=24mm, minimum height=9mm},
+  tool/.style={cls, fill=impfill, draw=impbord, minimum width=22mm, minimum height=9mm},
+  bin/.style={cls, fill=confill, draw=conbord, minimum width=28mm, minimum height=10mm}
+]
+
+% Source
+\node[src] (cml) at (0, 5.5) {CMakeLists.txt};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (3.0, 5.5) {단일 소스};
+
+% cmake -G 화살표
+\draw[arr, line width=0.8pt] (cml.south) -- node[right, font=\sffamily\footnotesize] {cmake -G \ldots} (0, 4.0);
+
+% Generated
+\node[gen] (mk) at (-3.5, 3.5) {Makefile};
+\node[gen] (ni) at (0, 3.5) {build.ninja};
+\node[gen] (vc) at (3.5, 3.5) {.vcxproj};
+
+\draw[arr, line width=0.5pt] (0, 4.0) -- (mk.north);
+\draw[arr, line width=0.5pt] (0, 4.0) -- (ni.north);
+\draw[arr, line width=0.5pt] (0, 4.0) -- (vc.north);
+
+% Tools
+\node[tool] (m) at (-3.5, 1.8) {make};
+\node[tool] (n) at (0, 1.8) {ninja};
+\node[tool] (v) at (3.5, 1.8) {Visual Studio};
+
+\draw[arr] (mk.south) -- (m.north);
+\draw[arr] (ni.south) -- (n.north);
+\draw[arr] (vc.south) -- (v.north);
+
+% Binary
+\node[bin] (bin) at (0, 0.0) {실행 파일};
+
+\draw[arr] (m.south) to[bend right=15] (bin.west);
+\draw[arr] (n.south) -- (bin.north);
+\draw[arr] (v.south) to[bend left=15] (bin.east);
+
+\end{tikzpicture}
+\end{document}

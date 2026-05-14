@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  iv/.style={rectangle, rounded corners=2pt, draw=nodebord, line width=0.5pt, minimum height=8mm, inner sep=0pt, font=\sffamily\small}
+]
+
+% Time axis
+\draw[arr, line width=0.5pt] (-0.5, -1.5) -- (10, -1.5) node[right, font=\sffamily\footnotesize] {time};
+
+% Interval A
+\node[font=\sffamily\bfseries, anchor=east] at (-0.3, 0.5) {A};
+\node[iv, fill=absfill, draw=absbord, minimum width=30mm] (A) at (2.0, 0.5) {$[a_0, a_1)$};
+\draw[draw=edgesc, dashed] (A.south west) -- (A.south west |- -1.5, 0);
+\draw[draw=edgesc, dashed] (A.south east) -- (A.south east |- -1.5, 0);
+\node[font=\sffamily\footnotesize, anchor=north] at (A.south west |- -1.5, 0) {$a_0$};
+\node[font=\sffamily\footnotesize, anchor=north] at (A.south east |- -1.5, 0) {$a_1$};
+
+% Interval B
+\node[font=\sffamily\bfseries, anchor=east] at (-0.3, -0.5) {B};
+\node[iv, fill=impfill, draw=impbord, minimum width=50mm] (B) at (6.0, -0.5) {$[b_0, b_1)$};
+\draw[draw=edgesc, dashed] (B.south west) -- (B.south west |- -1.5, 0);
+\draw[draw=edgesc, dashed] (B.south east) -- (B.south east |- -1.5, 0);
+\node[font=\sffamily\footnotesize, anchor=north] at (B.south west |- -1.5, 0) {$b_0$};
+\node[font=\sffamily\footnotesize, anchor=north] at (B.south east |- -1.5, 0) {$b_1$};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\small] at (0, 5.5) {메모리 계층 구조};
+
+% Pyramid levels (top to bottom, narrower to wider)
+\fill[confill, draw=conbord, line width=0.4pt] (-0.8, 4.5) -- (0.8, 4.5) -- (0.6, 5) -- (-0.6, 5) -- cycle;
+\node[font=\sffamily\small] at (0, 4.75) {레지스터};
+
+\fill[hifill, draw=hibord, line width=0.4pt] (-1.2, 3.8) -- (1.2, 3.8) -- (0.8, 4.3) -- (-0.8, 4.3) -- cycle;
+\node[font=\sffamily\small] at (0, 4.05) {L1 캐시};
+
+\fill[clifill, draw=clibord, line width=0.4pt] (-1.6, 3.1) -- (1.6, 3.1) -- (1.2, 3.6) -- (-1.2, 3.6) -- cycle;
+\node[font=\sffamily\small] at (0, 3.35) {L2 캐시};
+
+\fill[impfill, draw=impbord, line width=0.4pt] (-2.0, 2.4) -- (2.0, 2.4) -- (1.6, 2.9) -- (-1.6, 2.9) -- cycle;
+\node[font=\sffamily\small] at (0, 2.65) {L3 캐시};
+
+\fill[absfill, draw=absbord, line width=0.4pt] (-2.5, 1.6) -- (2.5, 1.6) -- (2.0, 2.2) -- (-2.0, 2.2) -- cycle;
+\node[font=\sffamily\small] at (0, 1.9) {메인 메모리 (DRAM)};
+
+\fill[nodefill, draw=nodebord, line width=0.4pt] (-3.0, 0.8) -- (3.0, 0.8) -- (2.5, 1.4) -- (-2.5, 1.4) -- cycle;
+\node[font=\sffamily\small] at (0, 1.1) {SSD / HDD};
+
+% Side labels
+\node[font=\sffamily\scriptsize, anchor=east, rotate=90] at (-3.5, 3) {빠름 / 비쌈 / 작음};
+\node[font=\sffamily\scriptsize, anchor=west, rotate=90] at (3.5, 3) {느림 / 저렴 / 큼};
+
+% Arrows
+\draw[arr, thick, draw=conbord] (-3.3, 4.5) -- (-3.3, 1.2);
+\draw[arr, thick, draw=absbord] (3.3, 1.2) -- (3.3, 4.5);
+
+% Speed/Size indicators
+\node[font=\sffamily\tiny, anchor=west] at (3.2, 4.75) {$\sim$1ns};
+\node[font=\sffamily\tiny, anchor=west] at (3.2, 4.05) {$\sim$1ns};
+\node[font=\sffamily\tiny, anchor=west] at (3.2, 3.35) {$\sim$10ns};
+\node[font=\sffamily\tiny, anchor=west] at (3.2, 2.65) {$\sim$50ns};
+\node[font=\sffamily\tiny, anchor=west] at (3.2, 1.9) {$\sim$100ns};
+\node[font=\sffamily\tiny, anchor=west] at (3.2, 1.1) {$\sim$ms};
+
+\end{tikzpicture}
+\end{document}

@@ -89,11 +89,7 @@ long simple_counter_get(const SimpleCounter* c) {
 
 더 강력한 아이디어 — **counting network**.
 
-```
-           ┌── balancer ──┐
-입력 N ────┤               ├──── 출력 (균등 분산)
-           └── balancer ──┘
-```
+**Balancer 네트워크**: $N$개 입력이 여러 balancer를 거쳐 출력으로 *균등 분산*된다.
 
 **Balancer** — 입력 두 개를 받아 두 개를 출력. 출력은 번갈아 교차.
 

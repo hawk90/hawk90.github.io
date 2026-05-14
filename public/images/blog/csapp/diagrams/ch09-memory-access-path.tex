@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  stepbox/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=35mm, minimum height=9mm, inner sep=3pt, align=center, rounded corners=2pt}
+]
+
+% Steps from top to bottom
+\node[stepbox, fill=clifill, draw=clibord] (va) at (0, 5) {가상 주소};
+\node[stepbox, fill=absfill, draw=absbord] (tlb) at (0, 3.8) {TLB 검색};
+\node[stepbox, fill=hifill, draw=hibord] (walk) at (0, 2.6) {페이지 테이블 워크};
+\node[stepbox, fill=confill, draw=conbord] (pa) at (0, 1.4) {물리 주소};
+\node[stepbox, fill=impfill, draw=impbord] (cache) at (0, 0) {캐시 계층};
+
+% Cache hierarchy
+\node[font=\sffamily\scriptsize] at (0, -0.7) {L1 → L2 → L3 → 메모리};
+
+% Arrows
+\draw[arr, thick] (va.south) -- (tlb.north);
+\draw[arr, thick] (tlb.south) -- node[right, font=\sffamily\tiny] {미스} (walk.north);
+\draw[arr, thick] (walk.south) -- (pa.north);
+\draw[arr, thick] (pa.south) -- (cache.north);
+
+% TLB hit path (shortcut)
+\draw[arr, thick, dashed, draw=impbord] (tlb.east) -- ++(1.5, 0) node[right, font=\sffamily\tiny] {히트} |- (pa.east);
+
+% Side labels
+\node[font=\sffamily\scriptsize, anchor=east] at (-2.5, 3.8) {변환 (TLB)};
+\node[font=\sffamily\scriptsize, anchor=east] at (-2.5, 0.7) {데이터 접근};
+
+\end{tikzpicture}
+\end{document}

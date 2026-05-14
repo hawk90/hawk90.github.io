@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,5) {Functional Core / Imperative Shell};
+
+% Imperative Shell (outer box)
+\draw[conbord, thick, fill=confill!30, rounded corners=10pt] (-5,-0.5) rectangle (5,4);
+\node[font=\sffamily\small, fill=confill!30] at (0,4) {Imperative Shell};
+
+% Functional Core (inner box)
+\draw[hibord, thick, fill=hifill, rounded corners=8pt] (-3,0.5) rectangle (3,2.8);
+\node[font=\sffamily\small] at (0,2.5) {Functional Core};
+\node[font=\sffamily\footnotesize, text=gray] at (0,1.7) {순수 함수};
+\node[font=\sffamily\footnotesize, text=gray] at (0,1.2) {비즈니스 로직};
+
+% Side effects (corners of shell)
+\node[font=\sffamily\footnotesize] at (-4,3.2) {DB 읽기};
+\node[font=\sffamily\footnotesize] at (4,3.2) {DB 쓰기};
+\node[font=\sffamily\footnotesize] at (-4,0.3) {이메일};
+\node[font=\sffamily\footnotesize] at (4,0.3) {로깅};
+
+% Arrows showing flow
+\draw[arr] (-4.2,2.8) -- (-3,1.65);
+\draw[arr] (3,1.65) -- (4.2,2.8);
+\draw[arr] (-3,1.65) -- (-4.2,0.6);
+\draw[arr] (3,1.65) -- (4.2,0.6);
+
+% Test annotations
+\node[font=\sffamily\footnotesize, text=gray, align=center] at (0,-1.2) {Core: Output-based 테스트\\Shell: 통합 테스트};
+
+\end{tikzpicture}
+\end{document}

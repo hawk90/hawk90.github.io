@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={cls, minimum width=32mm, minimum height=20mm, align=left, inner sep=4pt}
+]
+
+\node[font=\sffamily\bfseries] at (4.5, 3.5) {설치 파이프라인};
+
+% Stage 1
+\node[font=\sffamily\footnotesize, anchor=south] at (0, 2.3) {CMakeLists.txt};
+\node[box, fill=absfill, draw=absbord] (cmd) at (0, 1.0) {install(\\\quad TARGETS \ldots\\\quad FILES \ldots\\)};
+
+% Stage 2
+\node[font=\sffamily\footnotesize, anchor=south] at (4.5, 2.3) {cmake --install};
+\node[box, fill=impfill, draw=impbord] (proc) at (4.5, 1.0) {파일 복사\\권한 설정\\심볼릭 링크};
+
+% Stage 3
+\node[font=\sffamily\footnotesize, anchor=south] at (9, 2.3) {시스템};
+\node[box, fill=clifill, draw=clibord] (sys) at (9, 1.0) {/usr/local/bin\\/usr/local/lib\\/usr/local/include};
+
+\draw[arr, line width=0.8pt] (cmd.east) -- (proc.west);
+\draw[arr, line width=0.8pt] (proc.east) -- (sys.west);
+
+% Variables
+\node[font=\sffamily\footnotesize, anchor=west] at (-1, -1.0) {\textbf{CMAKE\_INSTALL\_PREFIX} → 설치 루트 경로 지정};
+\node[font=\sffamily\footnotesize, anchor=west] at (-1, -1.6) {\textbf{DESTDIR} → 패키징용 가상 루트};
+
+\end{tikzpicture}
+\end{document}

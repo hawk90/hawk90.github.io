@@ -1,0 +1,34 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  slot/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=8mm, minimum height=8mm, inner sep=0pt, font=\sffamily\small},
+  a/.style={slot, fill=confill, draw=conbord},
+  b/.style={slot, fill=impfill, draw=impbord},
+  band/.style={rectangle, line width=0.5pt, minimum height=10mm, inner sep=0pt, font=\sffamily}
+]
+
+% ===== 동시성 (싱글 코어) =====
+\node[font=\sffamily\bfseries, anchor=west] at (-5, 4.0) {동시성 (싱글 코어, 시분할)};
+\foreach \i/\style/\lbl in {0/a/A, 1/b/B, 2/a/A, 3/b/B, 4/a/A, 5/b/B, 6/a/A, 7/b/B} {
+  \node[\style] at (\i*0.85 - 4.5, 3.0) {\lbl};
+}
+\draw[arr, line width=0.5pt] (-5, 2.3) -- (2.5, 2.3) node[right, font=\sffamily\footnotesize] {시간};
+
+% ===== 병렬성 (멀티 코어) =====
+\node[font=\sffamily\bfseries, anchor=west] at (-5, 1.2) {병렬성 (멀티 코어)};
+\node[font=\sffamily\footnotesize, anchor=east] at (-3.8, 0.4) {Core 0};
+\node[band, draw=conbord, fill=confill, minimum width=60mm] at (-0.5, 0.4) {A};
+
+\node[font=\sffamily\footnotesize, anchor=east] at (-3.8, -0.8) {Core 1};
+\node[band, draw=impbord, fill=impfill, minimum width=60mm] at (-0.5, -0.8) {B};
+
+\draw[arr, line width=0.5pt] (-5, -1.6) -- (2.5, -1.6) node[right, font=\sffamily\footnotesize] {시간};
+
+\end{tikzpicture}
+\end{document}

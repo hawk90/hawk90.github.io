@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  task/.style={rectangle, draw=conbord, fill=confill, line width=0.4pt, minimum width=10mm, minimum height=6mm, inner sep=0pt, font=\sffamily\footnotesize},
+  thd/.style={cls, fill=impfill, draw=impbord, minimum width=14mm, minimum height=7mm, font=\sffamily\footnotesize},
+  q/.style={rectangle, draw=nodebord, line width=0.5pt, minimum height=10mm, inner sep=2pt, font=\sffamily\bfseries\footnotesize}
+]
+
+% ===== Global Queue =====
+\node[font=\sffamily\bfseries] at (-3, 4.7) {Global Queue};
+
+\node[q, fill=clifill, draw=clibord, minimum width=44mm] (gq) at (-3, 3.6) {[Task][Task][Task][Task]};
+
+\node[thd] (gt1) at (-5.2, 1.8) {T1};
+\node[thd] (gt2) at (-3.0, 1.8) {T2};
+\node[thd] (gt3) at (-0.8, 1.8) {T3};
+
+\draw[thr] (gt1.north) -- (-5.2, 2.9);
+\draw[thr] (gt2.north) -- (-3.0, 2.9);
+\draw[thr] (gt3.north) -- (-0.8, 2.9);
+
+\node[font=\sffamily\footnotesize\itshape, anchor=west, conbord] at (-5.8, 0.9) {경합 발생 → 캐시 효율 낮음};
+\node[font=\sffamily\footnotesize\itshape, anchor=west, impbord] at (-5.8, 0.2) {로드 밸런싱 자동};
+
+% ===== Thread-Local Queue =====
+\node[font=\sffamily\bfseries] at (5, 4.7) {Thread-Local Queues};
+
+\node[thd] (lt1) at (2.5, 3.6) {T1};
+\node[task] at (4.0, 3.6) {Task};
+\node[task] at (5.2, 3.6) {Task};
+
+\node[thd] (lt2) at (2.5, 2.6) {T2};
+\node[task] at (4.0, 2.6) {Task};
+
+\node[thd] (lt3) at (2.5, 1.6) {T3};
+\node[task] at (4.0, 1.6) {Task};
+\node[task] at (5.2, 1.6) {Task};
+\node[task] at (6.4, 1.6) {Task};
+
+\node[font=\sffamily\footnotesize\itshape, anchor=west, impbord] at (2.0, 0.9) {경합 없음, 캐시 친화};
+\node[font=\sffamily\footnotesize\itshape, anchor=west, conbord] at (2.0, 0.2) {로드 불균형 가능};
+
+\end{tikzpicture}
+\end{document}

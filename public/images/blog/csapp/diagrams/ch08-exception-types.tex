@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,matrix}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hcell/.style={rectangle, draw=absbord, line width=0.4pt, minimum width=28mm, minimum height=8mm, inner sep=3pt, align=center, fill=absfill, font=\sffamily\bfseries\small},
+  tcell/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=28mm, minimum height=8mm, inner sep=3pt, align=center, fill=white, font=\sffamily\small}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small] at (4.2, 3) {예외 종류};
+
+% Header row
+\node[hcell] (h1) at (0, 2) {종류};
+\node[hcell, right=0pt of h1] (h2) {원인};
+\node[hcell, right=0pt of h2] (h3) {비동기?};
+\node[hcell, right=0pt of h3] (h4) {반환};
+
+% Row 1: Interrupt
+\node[tcell, fill=clifill] (r1c1) at (0, 1.1) {인터럽트};
+\node[tcell, right=0pt of r1c1] (r1c2) {I/O 장치};
+\node[tcell, right=0pt of r1c2] (r1c3) {예};
+\node[tcell, right=0pt of r1c3] (r1c4) {다음 명령어};
+
+% Row 2: Trap
+\node[tcell, fill=impfill] (r2c1) at (0, 0.2) {트랩};
+\node[tcell, right=0pt of r2c1] (r2c2) {의도적 (syscall)};
+\node[tcell, right=0pt of r2c2] (r2c3) {아니오};
+\node[tcell, right=0pt of r2c3] (r2c4) {다음 명령어};
+
+% Row 3: Fault
+\node[tcell, fill=hifill] (r3c1) at (0, -0.7) {폴트};
+\node[tcell, right=0pt of r3c1] (r3c2) {복구 가능 오류};
+\node[tcell, right=0pt of r3c2] (r3c3) {아니오};
+\node[tcell, right=0pt of r3c3] (r3c4) {현재 명령어};
+
+% Row 4: Abort
+\node[tcell, fill=confill] (r4c1) at (0, -1.6) {어보트};
+\node[tcell, right=0pt of r4c1] (r4c2) {치명적 오류};
+\node[tcell, right=0pt of r4c2] (r4c3) {아니오};
+\node[tcell, right=0pt of r4c3] (r4c4) {반환 안 함};
+
+% Examples
+\node[font=\sffamily\tiny, anchor=west] at (8.5, 1.1) {타이머, 키보드, 디스크};
+\node[font=\sffamily\tiny, anchor=west] at (8.5, 0.2) {시스템 콜, 브레이크포인트};
+\node[font=\sffamily\tiny, anchor=west] at (8.5, -0.7) {페이지 폴트, 0으로 나누기};
+\node[font=\sffamily\tiny, anchor=west] at (8.5, -1.6) {하드웨어 오류, SIGABRT};
+
+\end{tikzpicture}
+\end{document}

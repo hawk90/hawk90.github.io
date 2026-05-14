@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  tgt/.style={cls, fill=impfill, draw=impbord, minimum width=20mm, minimum height=11mm},
+  glob/.style={cls, fill=clifill, draw=clibord, minimum width=58mm, minimum height=11mm}
+]
+
+% Old CMake
+\node[font=\sffamily\bfseries] at (-3.5, 3.8) {Old CMake (전역 중심)};
+\node[glob] (gcfg) at (-3.5, 2.6) {CMAKE\_CXX\_FLAGS\\include\_directories()};
+\node[tgt, fill=confill, draw=conbord, minimum width=15mm] (t1) at (-5.5, 0.8) {target 1};
+\node[tgt, fill=confill, draw=conbord, minimum width=15mm] (t2) at (-3.5, 0.8) {target 2};
+\node[tgt, fill=confill, draw=conbord, minimum width=15mm] (t3) at (-1.5, 0.8) {target 3};
+\draw[arr] (gcfg.south) -- (t1.north);
+\draw[arr] (gcfg.south) -- (t2.north);
+\draw[arr] (gcfg.south) -- (t3.north);
+\node[font=\sffamily\footnotesize\itshape, conbord] at (-3.5, -0.2) {모든 타겟에 일괄 영향};
+
+% Modern CMake
+\node[font=\sffamily\bfseries] at (3.5, 3.8) {Modern CMake (타겟 중심)};
+\node[tgt] (m1) at (1.5, 2.0) {mylib\\(설정 A)};
+\node[tgt] (m2) at (3.5, 2.0) {app1\\(설정 B)};
+\node[tgt] (m3) at (5.5, 2.0) {app2\\(설정 C)};
+\draw[arr] (m1.east) -- node[above, font=\sffamily\tiny] {링크} (m2.west);
+\draw[arr] (m1.east) to[bend left=30] node[below, font=\sffamily\tiny] {} (m3.west);
+\node[font=\sffamily\footnotesize\itshape, impbord] at (3.5, -0.2) {타겟별 독립 설정 + 의존성 전파};
+
+\end{tikzpicture}
+\end{document}

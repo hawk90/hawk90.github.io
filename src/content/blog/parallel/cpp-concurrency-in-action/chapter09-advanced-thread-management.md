@@ -267,31 +267,7 @@ int main(void) {
 
 ### Global Queue vs Thread-Local Queue
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Global Queue                                               │
-│                                                             │
-│  ┌──────────────────┐                                       │
-│  │ [Task][Task][Task]│  ← 모든 스레드가 접근               │
-│  └──────────────────┘                                       │
-│         ↑    ↑    ↑                                         │
-│       T1   T2   T3   (경합 발생!)                          │
-│                                                             │
-│  장점: 구현 단순, 로드 밸런싱 자동                          │
-│  단점: 경합(contention), 캐시 효율 낮음                     │
-└─────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────┐
-│  Thread-Local Queues                                        │
-│                                                             │
-│  T1: [Task][Task]     ← T1 전용                            │
-│  T2: [Task]           ← T2 전용                            │
-│  T3: [Task][Task][Task] ← T3 전용                          │
-│                                                             │
-│  장점: 경합 없음, 캐시 친화적                               │
-│  단점: 로드 불균형 가능                                     │
-└─────────────────────────────────────────────────────────────┘
-```
+![Global queue vs Thread-local queue](/images/blog/cpp-concurrency-in-action/diagrams/ch09-global-vs-local-queue.svg)
 
 ### Thread-Local Queue 구현
 

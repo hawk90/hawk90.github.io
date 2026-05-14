@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  core/.style={cls, fill=absfill, draw=absbord, minimum width=22mm, minimum height=10mm, font=\sffamily\bfseries},
+  cacheline/.style={rectangle, draw=conbord, fill=confill, line width=0.5pt, minimum height=8mm, inner sep=0pt, font=\sffamily\footnotesize},
+  slot/.style={rectangle, draw=nodebord, fill=clifill, line width=0.4pt, minimum width=10mm, minimum height=8mm, inner sep=0pt, font=\sffamily\footnotesize}
+]
+
+\node[font=\sffamily\bfseries] at (3, 4.5) {False Sharing — 64-byte cache line};
+
+% Core 1
+\node[core] (c1) at (-2, 2.5) {Core 1};
+
+% Core 2
+\node[core] (c2) at (-2, -0.5) {Core 2};
+
+% Shared cache line (둘 다 가리킴)
+\node[cacheline, minimum width=80mm] (cl) at (5, 1.0) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=south] at (5, 1.5) {Shared cache line (64 bytes)};
+
+% 안의 카운터들
+\node[slot] (k0) at (1.5, 1.0) {counter[0]};
+\node[slot] (k1) at (3.0, 1.0) {counter[1]};
+\node[slot, fill=nodefill] at (4.5, 1.0) {\ldots};
+\node[slot, fill=nodefill] at (6.0, 1.0) {\ldots};
+\node[slot, fill=nodefill] at (7.5, 1.0) {\ldots};
+\node[slot, fill=nodefill] at (8.5, 1.0) {\ldots};
+
+% 화살표 (충돌!)
+\draw[thr] (c1.east) -- node[above, font=\sffamily\footnotesize] {write} (k0.west);
+\draw[thr] (c2.east) -- node[below, font=\sffamily\footnotesize] {write} (k1.west);
+
+% 메시지
+\node[font=\sffamily\footnotesize\itshape, conbord, anchor=west] at (-2, -2.5) {다른 변수지만 같은 캐시 라인 → 한 코어 쓰기가 다른 코어 캐시 무효화};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-2, -3.2) {결과: cache line bouncing, 처리량 폭락};
+
+\end{tikzpicture}
+\end{document}

@@ -26,20 +26,9 @@ draft: true
 
 ### London 학파 (Mockist)
 
-```
 격리 = 테스트 대상 시스템(SUT)을 모든 협력자로부터 격리
 
-         ┌─────────────┐
-         │    SUT      │
-         └──────┬──────┘
-                │
-    ┌───────────┼───────────┐
-    ▼           ▼           ▼
-┌───────┐   ┌───────┐   ┌───────┐
-│ Mock  │   │ Mock  │   │ Mock  │
-└───────┘   └───────┘   └───────┘
-   (모든 의존을 mock으로 대체)
-```
+![London vs Classical Schools](/images/blog/khorikov/diagrams/ch02-school-comparison.svg)
 
 **특징:**
 - 모든 변경 가능한 의존을 mock으로 대체
@@ -67,20 +56,7 @@ public void Purchase_succeeds_when_enough_inventory()
 
 ### Classical 학파 (Detroit)
 
-```
 격리 = 테스트 간의 격리 (공유 상태가 없음)
-
-         ┌─────────────┐
-         │    SUT      │
-         └──────┬──────┘
-                │
-    ┌───────────┼───────────┐
-    ▼           ▼           ▼
-┌───────┐   ┌───────┐   ┌───────┐
-│ Real  │   │ Real  │   │ Mock  │ ← 공유 의존만
-└───────┘   └───────┘   └───────┘
-   (실제 협력자 사용, 공유 의존만 mock)
-```
 
 **특징:**
 - 실제 협력자 사용
@@ -116,24 +92,7 @@ public void Purchase_succeeds_when_enough_inventory()
 
 ### 의존의 분류
 
-```
-                    의존 (Dependency)
-                           │
-           ┌───────────────┴───────────────┐
-           ▼                               ▼
-      공유 의존                        비공유 의존
-   (Shared Dependency)              (Private Dependency)
-           │                               │
-     ┌─────┴─────┐                   ┌─────┴─────┐
-     ▼           ▼                   ▼           ▼
-   DB          파일              값 객체       서비스
-  캐시         큐                             (인스턴스)
-                                    │
-                        ┌───────────┴───────────┐
-                        ▼                       ▼
-               변경 가능                   불변
-            (Mutable)                (Immutable)
-```
+![Dependency Classification](/images/blog/khorikov/diagrams/ch02-dependency-tree.svg)
 
 | 의존 유형 | 예시 | Classical | London |
 |-----------|------|-----------|--------|
@@ -246,20 +205,7 @@ StoreTest
 
 ### 테스트 피라미드
 
-```
-                    ╱╲
-                   ╱  ╲
-                  ╱ E2E╲
-                 ╱──────╲
-                ╱        ╲
-               ╱ 통합     ╲
-              ╱────────────╲
-             ╱              ╲
-            ╱   단위 테스트   ╲
-           ╱──────────────────╲
-
-    빠름/많음 ◀──────────────▶ 느림/적음
-```
+![Test Pyramid](/images/blog/khorikov/diagrams/ch02-test-pyramid.svg)
 
 | 레벨 | 특징 | 비율 |
 |------|------|------|

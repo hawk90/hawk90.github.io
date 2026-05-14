@@ -62,19 +62,7 @@ target_link_libraries(myapp PRIVATE ZLIB::ZLIB)
 
 CMake는 두 가지 모드로 패키지를 찾습니다.
 
-```
-                  find_package(Foo)
-                        │
-              ┌─────────┴─────────┐
-              ▼                   ▼
-       Config 모드            Module 모드
-   (FooConfig.cmake)     (FindFoo.cmake)
-              │                   │
-              └─────────┬─────────┘
-                        ▼
-              패키지 정보 설정
-         (타겟, 변수, 경로 등)
-```
+![find_package — Config vs Module 모드](/images/blog/cmake/diagrams/ch05-find-package-modes.svg)
 
 **Config 모드**: 패키지가 제공하는 `<Package>Config.cmake` 파일을 찾습니다. 현대 라이브러리는 대부분 이 파일을 제공합니다.
 

@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  serial/.style={rectangle, draw=conbord, fill=confill, line width=0.4pt, minimum height=8mm, inner sep=0pt},
+  parallel/.style={rectangle, draw=impbord, fill=impfill, line width=0.4pt, minimum height=8mm, inner sep=0pt}
+]
+
+\node[font=\sffamily\bfseries] at (0, 2.0) {Gustafson의 법칙 — 문제 크기 확장};
+
+% 작은 문제 — P = 50%
+\node[font=\sffamily, anchor=east] at (-0.3, 0.8) {작은 문제};
+\node[serial, minimum width=20mm] (s1) at (1.0, 0.8) {};
+\node[parallel, minimum width=20mm] (p1) at (3.0, 0.8) {};
+\node[font=\sffamily\footnotesize] at (1.0, 0.8) {직렬};
+\node[font=\sffamily\footnotesize] at (3.0, 0.8) {병렬};
+\node[font=\sffamily\footnotesize, anchor=west] at (4.3, 0.8) {P = 50\%};
+
+% 큰 문제 — P = 80%
+\node[font=\sffamily, anchor=east] at (-0.3, -0.3) {큰 문제};
+\node[serial, minimum width=20mm] (s2) at (1.0, -0.3) {};
+\node[parallel, minimum width=60mm] (p2) at (5.0, -0.3) {};
+\node[font=\sffamily\footnotesize] at (1.0, -0.3) {직렬};
+\node[font=\sffamily\footnotesize] at (5.0, -0.3) {병렬};
+\node[font=\sffamily\footnotesize, anchor=west] at (8.3, -0.3) {P = 80\%};
+
+% 메시지
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (0, -1.5) {직렬 부분은 고정, 병렬 부분이 확장됨 → 병렬화 비율 자연 증가};
+
+\end{tikzpicture}
+\end{document}

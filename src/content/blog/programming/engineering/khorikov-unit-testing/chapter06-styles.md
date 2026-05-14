@@ -266,19 +266,7 @@ public class UserService
 - 최소한의 로직
 - 통합 테스트로 커버
 
-```
-┌─────────────────────────────────────────────────────┐
-│                 Imperative Shell                     │
-│                                                     │
-│    DB 읽기 ──▶ ┌─────────────────┐ ──▶ DB 쓰기      │
-│                │                 │                  │
-│                │ Functional Core │                  │
-│                │                 │                  │
-│    이메일 ◀── └─────────────────┘ ──▶ 로깅         │
-│                                                     │
-│          (순수 함수, 비즈니스 로직)                   │
-└─────────────────────────────────────────────────────┘
-```
+![Functional Core / Imperative Shell](/images/blog/khorikov/diagrams/ch06-functional-core.svg)
 
 ### 리팩토링 예시
 

@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,5.5) {시스템 경계와 Mock 사용};
+
+% System boundary box
+\draw[edge, thick, dashed, rounded corners=8pt] (-4.5,-0.5) rectangle (4.5,4.5);
+\node[font=\sffamily\small, fill=white] at (0,4.5) {우리 시스템};
+
+% Internal components
+\node[abs, minimum width=24mm] (service) at (-2,3) {Service};
+\node[abs, minimum width=24mm] (domain) at (0,1.5) {Domain};
+\node[abs, minimum width=24mm] (repo) at (2,3) {Repository};
+
+% Internal connections
+\draw[arr] (service) -- (domain);
+\draw[arr] (domain) -- (repo);
+
+% Managed dependency (DB - inside system)
+\node[con, minimum width=22mm] (db) at (2,0) {DB\\(Managed)};
+\draw[arr] (repo) -- (db);
+
+% External boundary indicator
+\draw[edge, thick, red!70] (5,-0.5) -- (5,4.5);
+\node[font=\sffamily\footnotesize, text=red!70, rotate=90] at (5.3,2) {시스템 경계};
+
+% Unmanaged dependency (External API - outside system)
+\node[hi, minimum width=26mm] (api) at (7,2) {외부 API\\(Unmanaged)};
+\draw[arr] (service.east) -- ++(1.2,0) |- (api.west);
+
+% Legend
+\node[font=\sffamily\footnotesize, text=gray, align=left] at (-3,-1.5) {Managed: Mock 지양 (실제/Fake)};
+\node[font=\sffamily\footnotesize, text=gray, align=left] at (2,-1.5) {Unmanaged: Mock 권장};
+
+\end{tikzpicture}
+\end{document}

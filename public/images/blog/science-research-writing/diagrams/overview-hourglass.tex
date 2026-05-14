@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bg/.style={draw=nodebord, line width=0.5pt, fill=nodefill}
+]
+
+% Abstract on top
+\node[font=\sffamily\bfseries\small] at (0, 4.5) {ABSTRACT};
+\draw[bg, fill=clifill] (-2.5, 4.0) -- (2.5, 4.0) -- (-2.5, 4.0);
+\draw[draw=nodebord, line width=0.4pt] (-2.5, 4.0) -- (2.5, 4.0);
+
+% Top funnel (INTRO)
+\draw[bg, fill=absfill] (-2.5, 4.0) -- (2.5, 4.0) -- (1.2, 2.0) -- (-1.2, 2.0) -- cycle;
+\node[font=\sffamily\bfseries] at (0, 3.3) {INTRO};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (2.8, 3.0) {일반 → 구체};
+
+% Central rectangle (METHOD/RESULTS)
+\draw[bg, fill=impfill] (-1.2, 2.0) rectangle (1.2, 0.5);
+\node[font=\sffamily\bfseries\small] at (0, 1.5) {METHODOLOGY};
+\node[font=\sffamily\bfseries\small] at (0, 1.0) {RESULTS};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (2.8, 1.25) {중심 보고};
+
+% Bottom funnel (DISCUSSION)
+\draw[bg, fill=confill] (-1.2, 0.5) -- (1.2, 0.5) -- (2.5, -1.5) -- (-2.5, -1.5) -- cycle;
+\node[font=\sffamily\bfseries] at (0, -0.5) {DISCUSSION};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (2.8, -0.5) {구체 → 일반};
+
+% Bottom
+\draw[draw=nodebord, line width=0.4pt] (-2.5, -1.5) -- (2.5, -1.5);
+
+\end{tikzpicture}
+\end{document}

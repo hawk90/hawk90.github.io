@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  table/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=22mm, minimum height=8mm, fill=#1, inner sep=2pt, align=center, rounded corners=1pt, font=\sffamily\scriptsize},
+  table/.default=white,
+  entry/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=18mm, minimum height=5mm, fill=white, inner sep=1pt, align=center, font=\sffamily\tiny}
+]
+
+% Process table
+\node[font=\sffamily\scriptsize\bfseries] at (-4, 3) {프로세스 테이블};
+\node[table, fill=clifill] (pt) at (-4, 2) {};
+\node[entry] (fd0) at (-4, 2.3) {fd 0};
+\node[entry] (fd1) at (-4, 1.7) {fd 1};
+
+% Open file table
+\node[font=\sffamily\scriptsize\bfseries] at (0, 3) {열린 파일 테이블};
+\node[table, fill=absfill] (oft1) at (0, 2.3) {};
+\node[entry] at (0.3, 2.5) {refcnt};
+\node[entry] at (0.3, 2.1) {pos};
+
+\node[table, fill=absfill] (oft2) at (0, 0.8) {};
+\node[entry] at (0.3, 1.0) {refcnt};
+\node[entry] at (0.3, 0.6) {pos};
+
+% V-node table
+\node[font=\sffamily\scriptsize\bfseries] at (4, 3) {v-node 테이블};
+\node[table, fill=confill] (vnode) at (4, 1.5) {};
+\node[entry] at (4.3, 1.8) {파일 정보};
+\node[entry] at (4.3, 1.4) {크기};
+\node[entry] at (4.3, 1.0) {위치};
+
+% Arrows
+\draw[arr, thick] (fd0.east) -- (oft1.west);
+\draw[arr, thick] (fd1.east) -- (oft2.west);
+\draw[arr, thick] (oft1.east) -- (vnode.west);
+\draw[arr, thick] (oft2.east) -- (vnode.west);
+
+% Legend
+\node[font=\sffamily\tiny, anchor=west, text width=5cm] at (-5, -0.5) {fork() 시 fd 복제, 열린 파일 테이블 공유};
+
+\end{tikzpicture}
+\end{document}

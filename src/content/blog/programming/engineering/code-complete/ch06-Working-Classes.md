@@ -1,7 +1,7 @@
 ---
 title: "Chapter 6: Working Classes"
 date: 2025-06-20T06:00:00
-description: "좋은 클래스 — ADT 기반, 좋은 인터페이스, 포함 vs 상속, 15+ 정당한 이유, Law of Demeter."
+description: "좋은 클래스 — ADT 기반, 좋은 인터페이스, 포함 vs 상속, 13 정당한 이유, Law of Demeter."
 series: "Code Complete"
 seriesOrder: 6
 tags: [code-complete, classes, ADT, McConnell]
@@ -71,16 +71,24 @@ currentFont.SetTypeFace(faceName)
 3. **인터페이스가 — 더 정보성** — `currentFont.size = 16` 모호(픽셀? 포인트?). ADT가 — 명시.
 4. **성능 개선 — 쉬움** — 잘 정의된 루틴만 — 재코딩.
 5. **프로그램의 정확성 — 더 명백** — `currentFont.BoldOn()` 호출 검증 vs `attribute or 0x02` 검증.
-6. **자기 문서화** — `currentFont.BoldOn()` >> `currentFont.attribute or 0x02`.
-7. **HARD DATA** — Woodfield, Dunsmore, Shen(1981) — 학생 연구. **ADT 버전이 — 함수 버전보다 — 30% 높은 점수**.
-8. **데이터를 — 프로그램 곳곳에 — 전달 안 함** — `currentFont`가 — ADT 안에. 전역 X, 인자 전달 X.
-9. **실세계 엔티티와 — 일함** — 배열·구조체·boolean 대신 — `currentFont`로.
+6. **자기 문서화** — `currentFont.BoldOn()` >> `currentFont.attribute or 0x02`. **HARD DATA** — Woodfield, Dunsmore, Shen(1981) — 학생 연구. ADT 버전이 — 함수 버전보다 — **30% 높은 점수**.
+7. **데이터를 — 프로그램 곳곳에 — 전달 안 함** — `currentFont`가 — ADT 안에. 전역 X, 인자 전달 X.
+8. **실세계 엔티티와 — 일함** — 배열·구조체·boolean 대신 — `currentFont`로.
 
 ### More Examples of ADTs
 
-PDF의 — 12 카테고리: Cruise Control, Blender, Fuel Tank, Set of Help Screens, Menu, Pointer, Light, Elevator, List, Stack, File 등.
+PDF의 — primary 예시 = **원자로 냉각 시스템**:
 
-각각 — 연산을 — ADT로 — 정의.
+```
+coolingSystem.Temperature()
+coolingSystem.SetCirculationRate(rate)
+coolingSystem.OpenValve(valveNumber)
+coolingSystem.CloseValve(valveNumber)
+```
+
+나머지 프로그램은 — 데이터-구조 디테일·한계·변경을 — 걱정 X.
+
+표의 11개 추가 예시: Cruise Control, Blender, Fuel Tank, Set of Help Screens, Menu, List, Pointer, Light, Elevator, Stack, File. 각각 — 연산을 — ADT로 — 정의.
 
 ### ADT Guidelines
 
@@ -274,7 +282,7 @@ public:
 
 ## §6.4 Reasons to Create a Class
 
-15+ 정당한 이유:
+PDF 요약 리스트의 — 13 정당한 이유:
 
 - **실세계 객체 모델링** — 각 실세계 객체당 — 한 클래스.
 - **추상 객체 모델링** — Shape ← Circle, Square. 추상 객체 — 추출이 — OO 설계의 큰 과제.
@@ -284,7 +292,7 @@ public:
 - **변경 효과 제한** — hardware/IO/복잡 데이터 타입/business rule.
 - **전역 데이터 숨김** — access routine을 통해. "전역"이 — 실은 — class data였음을 — 자주 발견.
 - **매개변수 전달 간소화** — 여러 루틴에 — 같은 매개변수 → class data로.
-- **중앙 제어점** — Plauger의 *One Right Place*.
+- **중앙 제어점** — 한 과제를 — 한 자리에서 — 통제. DB 읽기·쓰기를 — 한 클래스 → 평면 파일·인메모리로 변경 시 — 한 클래스만 영향.
 - **재사용 가능 코드 촉진** — **HARD DATA** — NASA Software Engineering Lab (McGarry, Waligora, McDermott 1989) — 10 프로젝트 연구. 함수형 = **35% 재사용**. 객체지향 = **70% 이상**.
 - **프로그램 패밀리 계획** (Parnas 1976) — 변할 부분을 — 자기 클래스에. 보험사 예 — 고객별 변동 부분을 — 자기 클래스에. "Custom software!"
 - **관련 연산 — 묶음** — trig 함수, 통계, 문자열 조작.
@@ -334,7 +342,7 @@ McConnell 원문 5가지:
 - §6.1 — ADT가 — 클래스의 토대. Font 예제 + 8 이점 + HARD DATA 30% (Woodfield 1981).
 - §6.2 — 좋은 인터페이스 = 일관된 추상 + 강한 캡슐화 + 의미 위반 경계.
 - §6.3 — Containment 선호. 상속 = is-a만, LSP, 얕게, Bloch "상속은 캡슐화를 깬다".
-- §6.4 — 15+ 정당한 이유. HARD DATA NASA 70% 재사용.
+- §6.4 — 13 정당한 이유. HARD DATA NASA 70% 재사용.
 - §6.6 — 클래스 너머 = 패키지.
 
 ## 관련 항목

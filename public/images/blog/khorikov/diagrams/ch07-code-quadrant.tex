@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,5.5) {코드 4분면};
+
+% Axes
+\draw[edge, thick] (-4.5,0) -- (4.5,0);
+\draw[edge, thick] (0,-0.5) -- (0,5);
+
+% Axis labels
+\node[font=\sffamily\small, text=gray] at (0,-0.8) {협력자 수};
+\node[font=\sffamily\small, text=gray, rotate=90] at (-5,2.25) {복잡도};
+\node[font=\sffamily\footnotesize, text=gray] at (-3.5,-0.3) {적음};
+\node[font=\sffamily\footnotesize, text=gray] at (3.5,-0.3) {많음};
+\node[font=\sffamily\footnotesize, text=gray] at (-0.5,0.3) {낮음};
+\node[font=\sffamily\footnotesize, text=gray] at (-0.5,4.5) {높음};
+
+% Quadrant 1: Domain Model (top-left) - high complexity, low collaborators
+\node[hi, minimum width=38mm, minimum height=20mm, align=center] at (-2.2,3.5) {Domain Model\\\\단위 테스트};
+
+% Quadrant 2: Overcomplicated (top-right) - high complexity, high collaborators
+\node[cli, minimum width=38mm, minimum height=20mm, align=center] at (2.2,3.5) {Overcomplicated\\\\분리 필요};
+
+% Quadrant 3: Trivial (bottom-left) - low complexity, low collaborators
+\node[abs, minimum width=38mm, minimum height=15mm, align=center] at (-2.2,1.2) {Trivial\\\\테스트 불필요};
+
+% Quadrant 4: Controllers (bottom-right) - low complexity, high collaborators
+\node[con, minimum width=38mm, minimum height=15mm, align=center] at (2.2,1.2) {Controllers\\\\통합 테스트};
+
+\end{tikzpicture}
+\end{document}
