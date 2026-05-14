@@ -271,11 +271,32 @@ responses vary significantly based on genetic factors (C, 2022).
 - *전문 용어*는 함부로 바꾸지 말 것
 - 통계는 *수치*가 아니라 *표현 방식*을 바꿈
 
+## 한국 학생의 패러프레이즈 함정
+
+```
+1. 직접 번역 (영 → 한 → 영) — 단어만 바뀜
+   해결: 원본 *덮고* 자기 말로
+2. 전문 용어 함부로 바꿈
+   해결: 분야 표준 용어 *그대로*
+3. 동의어 사전 무비판 사용
+   해결: Google Scholar로 검증
+```
+
+## 자기 글 점검
+
+```
+□ 5단계 절차 (읽기-덮기-메모-작성-비교)?
+□ 구조와 어휘 *모두* 변경?
+□ 전문 용어 유지?
+□ 출처 표기?
+```
+
 ## 다음 글 예고
 
-Unit 5 마지막은 **Unit 5.3: Source Identification과 Synthesis**입니다. 출처를 본문에 도입하는 다양한 방법과, 여러 출처를 통합하는 *Synthesis*를 다룹니다.
+Unit 5 마지막은 **Unit 5.3: Source Identification과 Synthesis**.
 
 ## 관련 항목
 
 - [Unit 5.1: 요약 작성의 고려 사항과 표절](/blog/writing/academic-writing/unit05-1-considerations-plagiarism)
 - [Unit 5.3: Source Identification과 Synthesis](/blog/writing/academic-writing/unit05-3-source-synthesis)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)

@@ -287,12 +287,33 @@ The structure fractures under stress.
 - **자연 과정 / 변화 동사**는 능동이 더 자연스러움
 - 한 글 안에 *능동과 수동을 자연스럽게 혼합*
 
+## 한국 학생의 Process 함정
+
+```
+1. 모든 동사를 수동태로 — 단조로움
+   해결: 자연 과정 → 능동 (rises, increases)
+2. 명령형 학술 글에 사용
+   회피: "Place the sample..."
+   선호: "The sample is placed..."
+3. 행위자 누락의 모호함
+   "It was decided that..."  ← 누가 결정?
+```
+
+## 자기 글 점검
+
+```
+□ 자연 과정에 *능동*?
+□ 명령형은 *지시문 / 매뉴얼*에만?
+□ 행위자가 *모호하지 않은가*?
+```
+
 ## 다음 글 예고
 
-Unit 3 마지막은 **Unit 3.4: Introducing the Solution — 간접 의문문과 해결 도입**입니다. *Indirect questions*의 학술적 용법과 *해결을 도입하는 표현*들을 다룹니다.
+Unit 3 마지막은 **Unit 3.4: Introducing the Solution**.
 
 ## 관련 항목
 
 - [Unit 3.2: Cause and Effect](/blog/writing/academic-writing/unit03-2-cause-effect)
 - [Unit 3.4: Introducing the Solution](/blog/writing/academic-writing/unit03-4-introducing-solution)
 - [Unit 1.4: Other Stylistic Features](/blog/writing/academic-writing/unit01-4-stylistic-features) — passive voice 일반
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)

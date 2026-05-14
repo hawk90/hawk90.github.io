@@ -304,12 +304,31 @@ Implications: 현재 / 미래 (현재의 의미)
 - 자기 분야의 *모범 논문 5–10편*을 분해해 표준을 익힘
 - **Abstract** — 200–300 단어로 논문 전체 압축
 
+## 한국 학생의 출판 함정
+
+```
+1. 분야 / 저널 관습 무시 — 일반 IMRD만
+2. Abstract 비대 / 약함
+3. 제목 / 키워드 전문성 부족
+4. 한국어 직역 abstract
+```
+
+## 자기 글 점검
+
+```
+□ 자기 분야 *표준 구조*?
+□ Abstract 5 요소?
+□ 키워드 검색 가능?
+□ 길이 저널 기준?
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 7.2: Methods Section 작성**입니다. *Methods 섹션*의 표준 패턴, 시제, 수동태 사용을 다룹니다.
+다음은 **Unit 7.2: Methods Section 작성**.
 
 ## 관련 항목
 
 - [Unit 6.3: Reaction Papers와 Journal Reviews](/blog/writing/academic-writing/unit06-3-reaction-journal)
 - [Unit 7.2: Methods Section](/blog/writing/academic-writing/unit07-2-methods)
 - [Unit 8.1: Introductions와 CARS](/blog/writing/academic-writing/unit08-1-introductions-cars)
+- [Elements of Style — Chapter 3: 형식 / 인용](/blog/writing/elements-of-style/ch03-form)

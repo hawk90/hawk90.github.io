@@ -300,12 +300,34 @@ Nowhere in the analysis is X mentioned.
 - *Critical Reading* — 체계적 질문 + 메모하며 읽기
 - *Inversion* — 비평에서 강조 (한 글에 한두 번)
 
+## 한국 학생의 평가어 함정
+
+```
+1. Interesting 남용 — 학술적 약함
+   해결: significant, valuable, illuminating
+2. Seminal, groundbreaking 함부로
+   해결: 진짜 그런 작품에만
+3. Clearly, obviously 남용
+4. 한국식 완곡 비판
+   해결: 명확 + 헤지 균형
+```
+
+## 자기 글 점검
+
+```
+□ 평가어 강도가 *근거에 맞는가*?
+□ Booster 자제?
+□ Hedge 적절?
+□ Interesting 대체 시도?
+```
+
 ## 다음 글 예고
 
-Unit 6 마지막은 **Unit 6.3: Reaction Papers와 Journal Reviews**입니다. 짧은 *반응 논문(reaction paper)*과 *저널 심사 보고서*의 형식을 다룹니다.
+Unit 6 마지막은 **Unit 6.3: Reaction Papers와 Journal Reviews**.
 
 ## 관련 항목
 
 - [Unit 6.1: Book Reviews와 의견 표명](/blog/writing/academic-writing/unit06-1-book-reviews-opinions)
 - [Unit 6.3: Reaction Papers와 Journal Reviews](/blog/writing/academic-writing/unit06-3-reaction-journal)
 - [Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
+- [Elements of Style — Reminder 7: 과장하지 말라](/blog/writing/elements-of-style/ch05-reminder07-overstate)

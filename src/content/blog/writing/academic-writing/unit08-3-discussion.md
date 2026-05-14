@@ -354,3 +354,5 @@ Unit 8 (3 글) — Constructing a Research Paper II
 - [Unit 1.1: Audience, Purpose, Strategy](/blog/writing/academic-writing/unit01-1-audience-purpose) — 시리즈 시작점
 - [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style)
 - [On Writing Well — Chapter 1: The Transaction](/blog/writing/on-writing-well/ch01-transaction)
+- [Elements of Style — Reminder 16: 명료하게 쓰라](/blog/writing/elements-of-style/ch05-reminder16-clarity)
+- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05-reminder17-opinion)

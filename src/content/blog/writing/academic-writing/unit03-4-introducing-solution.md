@@ -267,5 +267,5 @@ Unit 3에서 다룬 것:
 ## 관련 항목
 
 - [Unit 3.3: Process Description과 Passive Voice](/blog/writing/academic-writing/unit03-3-process-passive)
-- [Unit 4: Data Commentary](/blog/writing/academic-writing/unit04-data-commentary) — 데이터 해석
+- [Unit 4.1: Data Commentary Structure](/blog/writing/academic-writing/unit04-1-structure-location) — 데이터 해석
 - [Unit 1.4: Other Stylistic Features](/blog/writing/academic-writing/unit01-4-stylistic-features) — 간접 의문문

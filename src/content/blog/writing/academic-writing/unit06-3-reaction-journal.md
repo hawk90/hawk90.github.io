@@ -314,11 +314,32 @@ Unit 6에서 다룬 것:
 - *Reaction Paper* — 강의 토론의 준비, 짧고 균형
 - *Journal Review* — peer-review의 의무, 건설적·구체적
 
+## 한국 학생의 Reaction / Peer Review 함정
+
+```
+1. Reaction paper — 단순 요약만
+   해결: 자기 반응 / 입장 명시
+2. Peer review — 일방적 비판
+   해결: 건설적 제안 동반
+3. 영어 학술 톤 부족 — 직접적이되 정중
+4. 익명성 — 저자에게 직접 말하듯
+```
+
+## 자기 글 점검
+
+```
+□ Reaction에 자기 *입장*?
+□ Peer review가 *건설적*?
+□ 톤이 *전문적*?
+□ 구체적 *제안 / 예*?
+```
+
 ## 다음 Unit 예고
 
-다음은 **Unit 7: Constructing a Research Paper I**입니다. 연구 논문 작성의 첫 절반 — 출판 유형, *Methods 섹션*, *Results 섹션*을 다룹니다.
+다음은 **Unit 7: Constructing a Research Paper I**.
 
 ## 관련 항목
 
 - [Unit 6.2: Evaluative Language와 Critical Reading](/blog/writing/academic-writing/unit06-2-evaluative-critical)
-- [Unit 7: Constructing a Research Paper I](/blog/writing/academic-writing/unit07-paper-1)
+- [Unit 7.1: Publication Types and IMRD](/blog/writing/academic-writing/unit07-1-publication-types)
+- [Elements of Style — Reminder 5: 수정 / 재작성하라](/blog/writing/elements-of-style/ch05-reminder05-revise)

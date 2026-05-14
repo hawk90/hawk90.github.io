@@ -341,12 +341,32 @@ this effect is stronger in slow caffeine metabolizers.
 - *Research questions vs Hypotheses vs Aims* — 분야 표준
 - 긴 논문은 *Sign-posting*으로 도입 마무리
 
+## 한국 학생의 Citation / Tense 함정
+
+```
+1. 모든 인용에 같은 보고 동사
+   해결: argue, suggest, demonstrate 다양화
+2. 시제 일관성 부족
+3. Purpose statement 약함
+4. Integral / non-integral 미혼용
+```
+
+## 자기 글 점검
+
+```
+□ Integral / non-integral 둘 다?
+□ 보고 동사 다양?
+□ 선행 연구 시제 일관?
+□ Purpose 동사 강함?
+```
+
 ## 다음 글 예고
 
-Unit 8 마지막, AWG 시리즈의 마지막 글은 **Unit 8.3: Discussion Sections와 마무리**입니다. *Discussion 섹션*의 구조, 한계 인정, 함의 도출을 다룹니다.
+Unit 8 마지막, AWG 시리즈의 마지막 글은 **Unit 8.3: Discussion Sections와 마무리**.
 
 ## 관련 항목
 
 - [Unit 8.1: Introductions와 CARS](/blog/writing/academic-writing/unit08-1-introductions-cars)
 - [Unit 8.3: Discussion Sections](/blog/writing/academic-writing/unit08-3-discussion)
 - [Unit 5.3: Source Identification과 Synthesis](/blog/writing/academic-writing/unit05-3-source-synthesis)
+- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02-rule21-tense)

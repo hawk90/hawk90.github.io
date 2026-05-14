@@ -271,12 +271,32 @@ In light of recent findings, the hypothesis must be revised.
 - 인과 표현의 *강도* — *causes* (강) → *is associated with* (약)
 - 상관과 인과를 혼동하지 않는 것이 학술적 정직함
 
+## 한국 학생의 인과 함정
+
+```
+1. cause 동사 과용 — 너무 강함
+   해결: "is associated with", "is linked to"
+2. 상관을 인과로 표현
+   해결: 데이터 검증된 자리에만 cause
+3. 한국어 "~때문에" → "because of"만
+   해결: thus, thereby, leading to 다양화
+```
+
+## 자기 글 점검
+
+```
+□ 인과 강도가 *데이터에 맞는가*?
+□ 상관과 인과 구별?
+□ -ing 절로 *압축* 가능?
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 3.3: Process Description과 Passive Voice**입니다. 과정을 묘사하는 학술 영어의 관습, 그리고 수동태가 자주 쓰이는 이유를 다룹니다.
+다음은 **Unit 3.3: Process Description과 Passive Voice**.
 
 ## 관련 항목
 
 - [Unit 3.1: SPSE 구조](/blog/writing/academic-writing/unit03-1-spse-structure)
 - [Unit 3.3: Process Description과 Passive Voice](/blog/writing/academic-writing/unit03-3-process-passive)
 - [Unit 1.5: Flow and Linking](/blog/writing/academic-writing/unit01-5-flow-linking)
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)

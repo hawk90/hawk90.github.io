@@ -337,12 +337,31 @@ responses.   ← "yielded ... responses"는 결과
 - 함정 — 과한 디테일, 부족한 디테일, voice 혼란, Results 섞임
 - 자기 분야의 모범 논문에서 *길이와 디테일 수준* 확인
 
+## 한국 학생의 Methods 함정
+
+```
+1. 디테일 부족 / 과다
+2. 시제 흔들림
+3. 모든 게 수동 / 능동 (분야 관습)
+4. Results / Methods 섞임
+```
+
+## 자기 글 점검
+
+```
+□ 재현 가능한 디테일?
+□ 시제 일관 (과거)?
+□ Voice 분야 관습?
+□ Results 정보 끼지 않음?
+```
+
 ## 다음 글 예고
 
-Unit 7 마지막은 **Unit 7.3: Results Section 작성**입니다. *Results 섹션*의 표현 — Data Commentary와의 차이, 그림·표 참조, 통계 보고를 다룹니다.
+Unit 7 마지막은 **Unit 7.3: Results Section 작성**.
 
 ## 관련 항목
 
 - [Unit 7.1: 출판 유형과 IMRD](/blog/writing/academic-writing/unit07-1-publication-types)
 - [Unit 7.3: Results Section](/blog/writing/academic-writing/unit07-3-results)
 - [Unit 3.3: Process Description과 Passive Voice](/blog/writing/academic-writing/unit03-3-process-passive)
+- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02-rule21-tense)

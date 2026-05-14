@@ -233,12 +233,31 @@ Form 5: Table N illustrates the relationship between ... ← Indicative
 - **전치사** — *in, by, on, from*이 자주
 - 한 commentary 안에 *형태 변화*로 단조로움 회피
 
+## 한국 학생의 Data Commentary 함정
+
+```
+1. 모든 숫자를 본문에서 반복 — 표는 숫자, 본문은 해석
+2. Location statement 누락 — 모든 표/그림 본문 언급
+3. Highlighting 없이 데이터 나열 — 패턴 / 추세 집중
+4. Discussion 부족 — "이 패턴이 무엇을 의미?"
+```
+
+## 자기 글 점검
+
+```
+□ 모든 표 / 그림이 *본문 언급*?
+□ Location → Highlighting → Discussion 흐름?
+□ 본문이 *해석*인가, *수치 반복*?
+□ 동사 / 전치사가 다양?
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 4.2: Strength of Claim과 Hedging**입니다. 데이터에서 *결론을 내리는 강도*와, 학술 영어에서 매우 중요한 *헤지(hedging)*의 도구들을 정리합니다.
+다음은 **Unit 4.2: Strength of Claim과 Hedging**.
 
 ## 관련 항목
 
 - [Unit 3.4: Introducing the Solution](/blog/writing/academic-writing/unit03-4-introducing-solution)
 - [Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
 - [Unit 1.6: Presentation과 Positioning](/blog/writing/academic-writing/unit01-6-positioning) — stance markers
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)

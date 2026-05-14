@@ -352,12 +352,31 @@ Unit 7에서 다룬 것:
 - 통계 표기 형식의 *분야 표준*
 - Data Commentary 도구가 Results의 세부 도구
 
+## 한국 학생의 Results 함정
+
+```
+1. 해석을 Results에 — Discussion에 두기
+2. 모든 데이터 본문에 — 표 / 그림 활용
+3. 통계 표기 분야 표준 무시
+4. 시제 흔들림
+```
+
+## 자기 글 점검
+
+```
+□ Results가 발견 자체?
+□ 해석은 Discussion?
+□ 통계 표기 분야 표준?
+□ 표 / 그림과 상호 보완?
+```
+
 ## 다음 Unit 예고
 
-다음은 **Unit 8: Constructing a Research Paper II**입니다. 연구 논문의 *나머지 절반* — Introduction의 **CARS 모델**, *Discussion 섹션*, *한계와 함의*를 다룹니다.
+다음은 **Unit 8: Constructing a Research Paper II**.
 
 ## 관련 항목
 
 - [Unit 7.2: Methods Section](/blog/writing/academic-writing/unit07-2-methods)
 - [Unit 8.1: Introductions와 CARS 모델](/blog/writing/academic-writing/unit08-1-introductions-cars)
 - [Unit 4: Data Commentary](/blog/writing/academic-writing/unit04-1-structure-location) — Results의 세부 도구
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)

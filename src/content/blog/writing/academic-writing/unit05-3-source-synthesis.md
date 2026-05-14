@@ -324,12 +324,41 @@ Unit 5에서 다룬 것:
 - *Citation* — Integral과 Non-integral, 보고 동사로 태도 표시
 - *Synthesis* — 출처를 *나열*이 아니라 *논증의 일부*로 통합
 
+## 한국 학생의 Synthesis 함정
+
+```
+1. 출처를 *나열*만 — 자기 논증 없음
+   "Smith (2020) said X. Jones (2021) said Y. Lee (2022) said Z."
+   해결: 출처를 *자기 논증의 일부*로
+
+2. Integral vs non-integral 미혼용
+   해결: 두 형태 적절히 섞기
+
+3. 모든 인용에 같은 보고 동사 ("said", "found")
+   해결: argue, suggest, demonstrate, claim 등 다양화
+
+4. 출처 간 *대화* 없음
+   "Smith argued X. However, Jones countered with Y. Recent work
+    by Lee resolves this tension by..."  ← 좋은 synthesis
+```
+
+## 자기 글 점검
+
+```
+□ 출처가 *자기 논증의 일부*인가?
+□ Integral / non-integral *둘 다 활용*?
+□ 보고 동사가 *다양*한가?
+□ 출처 간 *대화 / 비교*가 있는가?
+□ 자기 기여가 *명확*한가?
+```
+
 ## 다음 Unit 예고
 
-다음은 **Unit 6: Writing Critiques**입니다. 학술 글의 평가 — 서평, 논문 비평, 반응 논문 등을 다룹니다.
+다음은 **Unit 6: Writing Critiques**.
 
 ## 관련 항목
 
 - [Unit 5.2: Paraphrasing과 Synonyms](/blog/writing/academic-writing/unit05-2-paraphrasing)
-- [Unit 6: Writing Critiques](/blog/writing/academic-writing/unit06-critiques)
-- [Unit 8: Constructing a Research Paper II](/blog/writing/academic-writing/unit08-paper-2) — CARS의 인용 패턴
+- [Unit 6.1: Book Reviews and Opinions](/blog/writing/academic-writing/unit06-1-book-reviews-opinions)
+- [Unit 8.1: Introductions and CARS](/blog/writing/academic-writing/unit08-1-introductions-cars) — CARS의 인용 패턴
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)

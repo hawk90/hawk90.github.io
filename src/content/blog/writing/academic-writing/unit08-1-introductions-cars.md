@@ -334,12 +334,34 @@ role of consumption timing has received less systematic attention.
 - 분야별 변형 — 자연과학(짧음), 사회과학(긴 Move 1), 인문학(다른 패턴)
 - CARS는 *단순한 1-2-3*이 아니라 *반복 깔때기*일 수도
 
+## 한국 학생의 CARS 함정
+
+```
+1. Move 2 (Gap) 약함
+   해결: "However, less attention has been paid..."
+2. Move 3 (Niche 점유) 모호
+   해결: 구체적 동사 (examine, test)
+3. 인용 명단 약함
+   해결: 분야 핵심 5-10개
+4. Move 1 비대
+```
+
+## 자기 글 점검
+
+```
+□ Move 1, 2, 3 명확?
+□ Move 2 부드러운 부정?
+□ Move 3 구체적 목적?
+□ 인용 분야 전통?
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 8.2: Citation, Tense, Purpose Statements**입니다. 도입에서 사용하는 인용 형태, 시제 선택, 그리고 *목적 진술(purpose statement)*의 표현을 다룹니다.
+다음은 **Unit 8.2: Citation, Tense, Purpose Statements**.
 
 ## 관련 항목
 
 - [Unit 7.3: Results Section](/blog/writing/academic-writing/unit07-3-results)
 - [Unit 8.2: Citation, Tense, Purpose Statements](/blog/writing/academic-writing/unit08-2-citation-tense)
 - [Unit 5.3: Source Identification과 Synthesis](/blog/writing/academic-writing/unit05-3-source-synthesis)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)

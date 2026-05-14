@@ -299,12 +299,35 @@ draws explicitly on the cognitive framework introduced in Chapter 1.
 - 1인칭 / 익명화 / 책이 행위자 — 분야에 따라 선택
 - 모든 평가에 *근거* — 구체적 예 / 인용
 
+## 한국 학생의 서평 함정
+
+```
+1. Summary 비대 — 책 절반 요약
+   해결: 평가에 필요한 분량
+2. 일방적 칭찬 — 한국 학생 흔함
+   해결: 균형 + 한계 인정
+3. 의견 표현 약함 — "may be interesting"
+   해결: 근거 있는 직접 평가
+4. 비평 회피 — 권위 정중함
+   해결: 영어 학술은 건설적 비판 환영
+```
+
+## 자기 글 점검
+
+```
+□ Summary가 *Evaluation에 필요한 분량*?
+□ 장점 + 한계 균형?
+□ 평가에 *근거*?
+□ 톤이 *건설적*?
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 6.2: Evaluative Language와 Critical Reading**입니다. 평가어의 미묘한 어휘 차이와, 비평적 읽기의 기술을 다룹니다.
+다음은 **Unit 6.2: Evaluative Language와 Critical Reading**.
 
 ## 관련 항목
 
 - [Unit 5.3: Source Identification과 Synthesis](/blog/writing/academic-writing/unit05-3-source-synthesis)
 - [Unit 6.2: Evaluative Language와 Critical Reading](/blog/writing/academic-writing/unit06-2-evaluative-critical)
 - [Unit 1.6: Presentation과 Positioning](/blog/writing/academic-writing/unit01-6-positioning)
+- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05-reminder17-opinion)

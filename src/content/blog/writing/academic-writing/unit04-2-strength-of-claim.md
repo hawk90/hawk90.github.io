@@ -263,12 +263,33 @@ A. ❶ There are a number of explanations for why musicians have
 - **Weaker verbs** — *suggest, support, indicate, contribute to*
 - **Combined qualifications** — 신중히, 과한 헤지는 *책임 회피*
 
+## 한국 학생의 헤지 함정
+
+```
+1. 헤지 과다 — "may possibly perhaps tentatively suggest"
+   해결: 한 헤지 / 문장 한도
+2. 헤지 부족 — 모든 주장 단언
+3. "prove" 남용 — 수학 / 논리에만
+4. 한국어 "것 같다" → "seems"만
+   해결: appears, may, suggests 다양화
+```
+
+## 자기 글 점검
+
+```
+□ 헤지 강도가 *데이터에 맞는가*?
+□ 한 문장 한 헤지?
+□ Booster (clearly, obviously) 자제?
+□ "prove" 남용 없는가?
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 4.3: Comparisons와 Organization**입니다. Data Commentary에서 *비교*를 표현하는 다양한 패턴, 그리고 *highlighting statement*를 효과적으로 만드는 법을 다룹니다.
+다음은 **Unit 4.3: Comparisons와 Organization**.
 
 ## 관련 항목
 
 - [Unit 4.1: Structure of Data Commentary](/blog/writing/academic-writing/unit04-1-structure-location)
 - [Unit 4.3: Comparisons와 Organization](/blog/writing/academic-writing/unit04-3-comparisons-organization)
 - [Unit 1.6: Presentation과 Positioning](/blog/writing/academic-writing/unit01-6-positioning) — hedging의 positioning 효과
+- [Elements of Style — Rule 15: Put statements in positive form](/blog/writing/elements-of-style/ch02-rule15-positive)

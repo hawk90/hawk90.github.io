@@ -256,12 +256,33 @@ Unfortunately, the system has been abandoned.   ← 화자의 태도, 문장 전
 - **Mid-position adverbs**가 학술 톤을 강화
 - 흔한 함정 — 약한 Problem, 일방적 Solution, 누락된 Evaluation, 단계 섞임
 
+## 한국 학생의 SPSE 함정
+
+```
+1. Situation이 너무 김 — 본 주제까지 빨리 좁히기
+2. Problem이 너무 일반 — 구체적 / 측정 가능한 문제로
+3. Solution이 *유일* — 다른 대안의 *한계*도 인정
+4. Evaluation 누락 — 한국 학생이 가장 자주 빠뜨림
+5. 단계 *명시 신호 부족* — However, To address this 등 활용
+```
+
+## 자기 글 점검
+
+```
+□ 네 단계 (S, P, S, E)가 *명확*?
+□ Problem이 *측정 가능*?
+□ Solution이 Problem과 *직접 연결*?
+□ Evaluation에 *한계 인정*?
+□ 단계 전환에 *신호*?
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 3.2: Cause and Effect — *-ing* 절**입니다. 인과 관계를 표현하는 학술 영어의 다양한 도구를 다룹니다.
+다음은 **Unit 3.2: Cause and Effect — *-ing* 절**.
 
 ## 관련 항목
 
 - [Unit 2.1: GS 텍스트의 시작](/blog/writing/academic-writing/unit02-1-openings)
 - [Unit 3.2: Cause and Effect](/blog/writing/academic-writing/unit03-2-cause-effect)
 - [Unit 1.4: Other Stylistic Features](/blog/writing/academic-writing/unit01-4-stylistic-features) — mid-position 부사
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)

@@ -321,11 +321,31 @@ Temp visa         7.7  7.7    7.3      8.2   7.3   9.0   9.3   8.7
 - **Organization** — 큰 그림 → 구체적 차이 → 높은 자리 / 낮은 자리 → 예외
 - 모든 비교에 *적절한 헤지*
 
+## 한국 학생의 비교 함정
+
+```
+1. 모든 수치 나열 → 큰 패턴 / 예외만
+2. 비교 표현 단조 ("more than" 만)
+   → twice as many, N% higher 다양화
+3. 헤지 없이 강한 비교
+4. 큰 그림 누락 → highlighting 먼저
+```
+
+## 자기 글 점검
+
+```
+□ 큰 그림 → 구체 비교 → 예외 순서?
+□ 비교 표현 다양?
+□ 모든 비교에 적절한 헤지?
+□ Highlighting이 *판단*?
+```
+
 ## 다음 글 예고
 
-Unit 4 마지막은 **Unit 4.4: Graphs, Chronological Data, Unexpected Outcomes**입니다. 그래프 / 시간 데이터를 다루는 패턴, 그리고 *예상 외의 결과*를 학술적으로 처리하는 법을 다룹니다.
+Unit 4 마지막은 **Unit 4.4: Graphs, Chronological Data, Unexpected Outcomes**.
 
 ## 관련 항목
 
 - [Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
 - [Unit 4.4: Graphs, Chronological Data, Unexpected Outcomes](/blog/writing/academic-writing/unit04-4-graphs-conclusion)
+- [Elements of Style — Rule 19: 평행 구조](/blog/writing/elements-of-style/ch02-rule19-parallel)
