@@ -167,6 +167,37 @@ Williams의 권장.
 
 규칙을 두려워하지 마라. 그러나 **알고 어겨라**.
 
+## 한국 학생의 미신적 규칙
+
+영어 학습자는 *미신적 규칙*을 *진짜 규칙*보다 더 엄격히 지키는 경향이 있다. 두려움 때문.
+
+```
+한국 학생이 자주 지키는 미신:
+1. *Never split infinitive* — 사실 분리 가능
+2. *Never end with preposition* — 사실 끝 OK
+3. *Never start with And/But* — 사실 가능
+4. *Never use I in academic* — 분야에 따라 다름
+5. *Always use whom* — 회화는 who OK
+
+한국 학생이 자주 어기는 진짜 규칙:
+1. 3인칭 단수 -s 누락
+2. 관사 (a/the) 누락
+3. Subject-verb agreement
+4. Comma splice
+5. Sentence fragment
+
+→ 진짜 규칙 / 미신 *반대로 알고 있는 경우*가 흔하다
+```
+
+## 자기 글 점검
+
+```
+□ 미신적 규칙에 *과도하게* 매여 있지 않은가?
+□ 진짜 규칙을 *실제로 지키고 있는가*?
+□ 자기 분야 / 매체의 *관습*에 맞는 결정인가?
+□ 위반이 *의도*인가 *실수*인가?
+```
+
 ## 정리
 
 - 문법 규칙은 두 종류 — **Real** vs **Folklore**
@@ -175,6 +206,7 @@ Williams의 권장.
 - **Split infinitive**, **preposition at end** 등 — 미신
 - 규칙은 종종 **위계의 도구** — 의사소통이 아니라 권위 확립
 - 알고 어겨라 — 의도된 위반은 효과
+- 한국 학생: 미신은 과잉 준수, 진짜 규칙은 자주 어김
 
 ## 다음 장 예고
 
@@ -183,4 +215,6 @@ Williams의 권장.
 ## 관련 항목
 
 - [Lesson 1: Understanding](/blog/writing/style-williams/lesson01-understanding)
+- [Elements of Style Ch 1: Elementary Rules of Usage](/blog/writing/elements-of-style/ch01-usage)
 - [Elements of Style Ch 4: Misused Words](/blog/writing/elements-of-style/ch04-words-a-c)
+- [Only Grammar Book Ch 4: Common Mistakes](/blog/writing/only-grammar-book/ch04-common-mistakes)

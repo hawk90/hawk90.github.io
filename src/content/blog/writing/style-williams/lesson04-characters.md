@@ -218,6 +218,35 @@ Character와 관련된 부원칙.
 
 그러나 분야 관습이 있다면 — 적당히 절충.
 
+## 한국 학생의 Characters 함정
+
+한국어 학술 글에 *추상 주어*가 흔하다. 영어로 옮길 때 *그대로 추상 주어*로 가면 글이 약하다.
+
+```
+회피 (추상 주어):
+"본 연구의 수행은 X의 해결을 시도하였다."
+→ "The conduct of this study attempted the resolution of X."
+
+선호 (character 주어):
+"우리는 X를 해결하려 했다."
+→ "We attempted to solve X."
+
+회피:
+"It is necessary that consideration be given to..."
+
+선호:
+"We must consider..."
+```
+
+## 자기 글 점검
+
+```
+□ 자기 글의 주어가 *추상 명사*인가, *character*인가?
+□ "누가 무엇을 하는가?" 답할 수 있는가?
+□ "It is ... that" 패턴 *과다*하지 않은가?
+□ 한국어 추상 주어 직역 회피?
+```
+
 ## 정리
 
 - 주어는 **character** (행위자)여야 한다
@@ -236,4 +265,6 @@ Character와 관련된 부원칙.
 
 - [Lesson 3: Actions](/blog/writing/style-williams/lesson03-actions)
 - [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02-composition) — Active voice
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)
 - [On Writing Well Ch 5: Audience](/blog/writing/on-writing-well/ch05-audience)

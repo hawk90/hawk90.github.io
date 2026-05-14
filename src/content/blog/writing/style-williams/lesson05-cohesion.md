@@ -208,6 +208,37 @@ We propose Z as solution. This approach ...
 
 이게 단순한 절차이지만 — 단락의 흐름을 극적으로 개선한다.
 
+## 한국어의 Cohesion
+
+한국어에는 *조사*로 cohesion이 명시된다.
+
+```
+한국어 cohesion 도구:
+- *은/는* (옛 정보, 주제)
+- *이/가* (새 정보, 주제 도입)
+- *이는, 이러한, 그것은* (대용어)
+- *한편, 또한, 그러나* (연결어)
+
+영어 cohesion 도구:
+- Old-to-New (어순으로 표현)
+- this, these, it, they
+- However, Moreover, In addition
+- 명사 반복 / 동의어
+
+→ 한국어가 *조사로 명시*하는 것을
+   영어는 *어순으로 표현*한다
+```
+
+## 자기 글 점검
+
+```
+□ 단락의 주어들이 *비슷한 그룹*인가? (coherent)
+□ 문장 끝과 다음 문장 시작이 *연결*되는가? (cohesive)
+□ Topic sentence가 단락 *시작*에 있는가?
+□ Transition (However, Moreover) *과용* 없는가?
+□ 화제 전환에 *새 단락*?
+```
+
 ## 정리
 
 - **Cohesion** — 문장 사이의 연결, Old-to-New 원칙
@@ -226,3 +257,6 @@ We propose Z as solution. This approach ...
 
 - [Lesson 4: Characters](/blog/writing/style-williams/lesson04-characters)
 - [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02-composition) — Emphatic words at end
+- [Elements of Style — Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02-rule13-paragraph)
+- [Elements of Style — Rule 20: 관련 있는 단어를 함께 두라](/blog/writing/elements-of-style/ch02-rule20-word-order)
+- [AWG Unit 1.5: Flow and Linking](/blog/writing/academic-writing/unit01-5-flow-linking)

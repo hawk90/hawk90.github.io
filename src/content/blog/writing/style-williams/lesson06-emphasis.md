@@ -192,6 +192,49 @@ We MUST address it IMMEDIATELY."
 
 좋은 글은 한 단락에 한 강조점 정도. 그 한 점이 강하게 와닿는다.
 
+## 한국어의 강조
+
+한국어는 *동사가 문장 끝*에 온다. *자연 강조 위치*가 영어와 다르다.
+
+```
+한국어 (동사 끝):
+"나는 어제 그 책을 *읽었다*."
+→ "읽었다"가 끝, 동사 강조
+
+영어 (목적어 끝):
+"I read the book yesterday."
+→ "yesterday" 끝, 시간 강조
+
+도치로 강조:
+"Yesterday, I read the book." (시간 도입)
+"The book, I read yesterday." (목적어 강조)
+```
+
+### 한국어의 *만 / 도 / 까지*
+
+```
+조사로 명시적 강조:
+- "그*만* 왔다" (only)
+- "그*도* 왔다" (also)
+- "끝*까지* 갔다" (even)
+- "*그가* 왔다" (subject 강조)
+
+영어 등가:
+- "Only he came."
+- "He also came."
+- "He even went to the end."
+```
+
+## 자기 글 점검
+
+```
+□ 문장 *끝*에 강조하고 싶은 단어?
+□ 약한 단어로 끝나지 않았는가?
+□ Old-to-New 패턴?
+□ Cleft 구문 (It is X that)이 *드물게* 효과적인가?
+□ 강조가 *선택적*인가, *남발*인가?
+```
+
 ## 정리
 
 - 문장의 **가장 강한 위치는 끝** (stress position)
@@ -211,3 +254,5 @@ We MUST address it IMMEDIATELY."
 
 - [Lesson 5: Cohesion](/blog/writing/style-williams/lesson05-cohesion)
 - [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02-composition) — Emphatic words at end
+- [Elements of Style — Rule 22: 강조 단어는 문장의 끝에](/blog/writing/elements-of-style/ch02-rule22-emphasis)
+- [On Writing Well Ch 9: Lead and Ending](/blog/writing/on-writing-well/ch09-lead-ending)

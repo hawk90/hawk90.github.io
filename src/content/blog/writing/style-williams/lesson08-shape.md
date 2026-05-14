@@ -202,6 +202,43 @@ Subordination — 한 쪽이 주, 다른 쪽이 부.
 
 긴 문장 — 둘을 적절히 섞는다.
 
+## 한국어의 Shape
+
+한국어 문장 길이도 *다양성*이 핵심.
+
+```
+회피 (단조):
+"비가 왔다. 바람이 불었다. 추웠다. 우리는 안으로 들어갔다."
+
+선호 (다양):
+"비가 왔다. 차가운 바람이 옷깃을 파고들고, 발걸음이 무거워질 때,
+우리는 마침내 안으로 들어갔다."
+```
+
+### 한국어 *주기적 문장*
+
+한국어는 *동사가 끝*이므로 *자연 주기적*에 가깝다.
+
+```
+한국어 주기적 (자연):
+"오랜 침묵 끝에, 모두가 그 결정을 기다리고 있을 때, 그녀는 입을
+열었다."
+
+영어 주기적 (의도 필요):
+"After a long silence, with everyone waiting for her decision,
+she finally spoke."
+```
+
+## 자기 글 점검
+
+```
+□ 문장 길이가 *다양*한가?
+□ Cumulative sentence (주절 + 펼침)을 활용했는가?
+□ Periodic sentence가 *극적 자리*에?
+□ Parallel + 비-parallel의 절충?
+□ 한 단락에 *같은 패턴 문장 3개 이상*인가?
+```
+
 ## 정리
 
 - 긴 문장이 나쁜 게 아니라 **잘못 짠 긴 문장**이 나쁘다
@@ -221,3 +258,5 @@ Subordination — 한 쪽이 주, 다른 쪽이 부.
 
 - [Lesson 7: Concision](/blog/writing/style-williams/lesson07-concision) — Part 1 마무리
 - [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style) — 다양성
+- [Elements of Style — Rule 18: Loose Sentence 연쇄](/blog/writing/elements-of-style/ch02-rule18-loose)
+- [Elements of Style — Rule 19: 평행 구조](/blog/writing/elements-of-style/ch02-rule19-parallel)

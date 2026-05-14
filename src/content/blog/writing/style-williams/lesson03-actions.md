@@ -227,6 +227,39 @@ He의 결정이 주제. nominalization OK.
    (decision은 implicit — 더 간결)
 ```
 
+## 한국어의 명사화
+
+한국어 학술 / 격식 글에도 *같은 함정*이 있다.
+
+```
+한국어 명사화 패턴:
+- *~의 검토를 진행* → *검토하다*
+- *~에 대한 분석을 수행* → *분석하다*
+- *~의 결정이 내려짐* → *결정하다*
+- *연구의 수행* → *연구하다*
+- *논의의 진행* → *논의하다*
+
+영어 / 한국어 둘 다:
+명사화 + 약한 동사 (do, make, conduct, perform)
+→ 강한 단일 동사
+
+회피:
+"본 연구에서는 새로운 알고리즘의 개발을 수행하였다."
+
+선호:
+"본 연구는 새 알고리즘을 개발했다."
+```
+
+## 자기 글 점검
+
+```
+□ -tion, -ment, -ence 명사가 *과다*하지 않은가?
+□ 그 명사를 *동사*로 되돌릴 수 있는가?
+□ "There is/are"가 *진짜 동사*를 숨기지 않는가?
+□ 행위자가 *명확*한가?
+□ 한국 글의 "~의 수행", "~의 진행" 패턴 없는가?
+```
+
 ## 정리
 
 - **Nominalization** — 동사가 명사로 변한 것
@@ -236,6 +269,7 @@ He의 결정이 주제. nominalization OK.
 - "There is/are" 구문은 자주 진짜 동사를 숨김
 - 학술 / 격식 글에서도 동사가 강하다
 - 예외 — 그게 진짜 주제이거나, 개념이 명사로 정착된 경우
+- 한국어 학술 글에도 같은 함정 ("~의 수행")
 
 ## 다음 장 예고
 
@@ -245,4 +279,7 @@ He의 결정이 주제. nominalization OK.
 
 - [Lesson 2: Correctness](/blog/writing/style-williams/lesson02-correctness)
 - [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02-composition) — Active voice
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)
+- [Elements of Style — Reminder 4: 명사와 동사로 쓰라](/blog/writing/elements-of-style/ch05-reminder04-nouns-verbs)
 - [On Writing Well Ch 3: Clutter](/blog/writing/on-writing-well/ch03-clutter)

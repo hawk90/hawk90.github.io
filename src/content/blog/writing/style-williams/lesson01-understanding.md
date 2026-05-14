@@ -162,6 +162,54 @@ Williams의 책은 단순한 규칙집이 아니다.
 
 이 책을 읽고 끝나는 게 아니라 — **자기 글에 적용**해야 의미가 있다.
 
+## 한국 학생의 학습된 패턴
+
+영어와 한국어 학교 글쓰기가 만드는 *나쁜 습관*은 비슷하다.
+
+```
+한국 학교 작문 교육:
+- "본인", "필자"로 1인칭 회피
+- 한자어 / 고급 어휘 선호 → 영어의 fancy words
+- 긴 문장이 격식 있다는 인식
+- 수동태가 객관적이라는 신화
+- "~할 수 있을 것으로 사료된다" 패턴
+
+영어 학교 작문 교육:
+- "I" 회피, 격식
+- Latinate 어휘 선호
+- 복잡한 구문 권장
+- 수동태 = 객관성
+- "It can be inferred that..."
+
+→ 양 언어에서 같은 *학습된 나쁜 습관*
+```
+
+## 한국 학생에게 Williams가 주는 메시지
+
+```
+1. *복잡함 ≠ 똑똑함*
+   한자어 / 영어 fancy word 과시 회피
+
+2. *수동태 ≠ 객관성*
+   능동이 자연이면 능동
+
+3. *길이 ≠ 신중*
+   짧고 명확이 강함
+
+4. *학습된 습관*은 *되돌릴 수 있다*
+   분석 가능한 패턴이므로
+```
+
+## 자기 글 점검
+
+```
+□ 학교에서 배운 나쁜 습관이 *남아 있는가*?
+□ Clarity (명확함)가 있는가?
+□ Grace (우아함)도 같이?
+□ 흐릿한 표현이 *책임 회피*에 사용되지 않는가?
+□ 자기 글이 *전문가 인상*만 추구하지 않는가?
+```
+
 ## 정리
 
 - 나쁜 글은 **부주의의 결과** — 의도가 아니다
@@ -178,4 +226,7 @@ Williams의 책은 단순한 규칙집이 아니다.
 ## 관련 항목
 
 - [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style) — Strunk-White의 스타일 조언
+- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05-reminder14-fancy)
+- [Elements of Style — Reminder 16: 명료하게 쓰라](/blog/writing/elements-of-style/ch05-reminder16-clarity)
 - [On Writing Well Ch 1: Transaction](/blog/writing/on-writing-well/ch01-transaction)
+- [On Writing Well Ch 2: Simplicity](/blog/writing/on-writing-well/ch02-simplicity)

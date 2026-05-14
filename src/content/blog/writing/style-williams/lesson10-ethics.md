@@ -219,6 +219,51 @@ Williams가 강조하는 핵심.
 - 독자 존중 — 명확함, 정직, 간결, 우아
 - **민주주의는 명확한 글 위에 선다**
 
+## 한국의 *Plain Language*
+
+한국에도 *쉬운 글쓰기 운동*이 있다.
+
+```
+한국 plain language:
+- 한자어 → 순한국어 (가능한 경우)
+   "수발하다" → "건네주다"
+   "조속히" → "빨리"
+   "당해" → "그해"
+
+- 군더더기 표현 제거
+   "~에 있어서" → "~에서"
+   "~을 통하여" → "~로"
+
+- 공공 문서 / 법률 문서 명확화
+   "한자어 + 직역체" → "쉬운 한국어"
+
+한국 정부 정책:
+- 행정용어 순화 사업
+- 법률용어 한글화
+```
+
+### 한국 공공 글의 명확화 사례
+
+```
+회피 (공무원체):
+"본 공고에 의거 신청자에 대하여 심사를 행하여 그 결과를 통보한다."
+
+선호 (쉬운 한국어):
+"이 공고에 따라 신청자를 심사하고 결과를 알린다."
+```
+
+영어 / 한국어 모두 *Plain Language*의 윤리적 가치 있음.
+
+## 자기 글 점검 — 윤리
+
+```
+□ 자기 글이 *흐림으로 진실을 가리지* 않는가?
+□ 수동태 / 추상 명사가 *책임 회피*에 사용되지 않는가?
+□ 완곡어가 *진실 호도*에 사용되지 않는가?
+□ 독자에게 *명확*하게 전달했는가?
+□ 자기 글이 *민주주의의 도구*인가 *통제의 도구*인가?
+```
+
 ## 시리즈 완결 — 감사 인사
 
 10 lesson의 여정을 끝까지 함께해 주셔서 감사하다.
@@ -233,4 +278,6 @@ Williams가 강조하는 핵심.
 
 - [Lesson 1: Understanding](/blog/writing/style-williams/lesson01-understanding) — 시작점
 - [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style)
+- [Elements of Style — Reminder 16: 명료하게 쓰라](/blog/writing/elements-of-style/ch05-reminder16-clarity)
+- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05-reminder17-opinion)
 - [On Writing Well Ch 2: Simplicity](/blog/writing/on-writing-well/ch02-simplicity)

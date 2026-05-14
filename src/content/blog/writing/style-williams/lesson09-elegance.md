@@ -219,6 +219,52 @@ we recovered."
 
 이 패턴이 단락 차원의 리듬을 만든다.
 
+## 한국어의 Elegance
+
+한국어에도 *균형 / 리듬 / 대조*의 우아함이 있다.
+
+```
+한국어 균형:
+"산은 산이고, 물은 물이다." (성철)
+"인간만사 새옹지마" (균형 4글자)
+
+한국어 antithesis:
+"사람은 죽음으로 알고, 죽음으로 안다."
+"가난한 마음에는 큰 부, 큰 부에는 가난한 마음."
+
+한국어 triplets:
+"국민의, 국민에 의한, 국민을 위한 정부"
+"산아, 물아, 바람아"
+
+한국어 memorable phrases:
+"호랑이는 가죽을 남기고 사람은 이름을 남긴다"
+"늦었다고 생각할 때가 가장 빠르다"
+```
+
+### 한국어 4글자 / 5글자 리듬
+
+한국어는 *4글자, 5글자 단위*가 리듬의 기본.
+
+```
+4글자: "산천초목", "유유자적", "사필귀정"
+5글자: "낯설고 새롭다", "지금 이 순간"
+
+한국어 시는 *3-4-3-4* 또는 *7-5* 음수율
+영어 시는 *iambic pentameter* (강약 5박)
+
+→ 언어마다 자연 리듬이 다르다
+```
+
+## 자기 글 점검
+
+```
+□ Balance가 *극적 자리*에?
+□ Antithesis가 *남용*되지 않았는가?
+□ Triplets이 *3개 정확히*?
+□ 리듬이 *자연*인가, *부자연*인가?
+□ Memorable phrase가 *기억에 남는가*?
+```
+
 ## 정리
 
 - **Elegance** = Clarity 위에 쌓는 선물
@@ -238,3 +284,5 @@ we recovered."
 
 - [Lesson 8: Shape](/blog/writing/style-williams/lesson08-shape)
 - [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style) — 비유 / 음악성
+- [Elements of Style — Rule 19: 평행 구조](/blog/writing/elements-of-style/ch02-rule19-parallel)
+- [Elements of Style — Reminder 18: 비유는 아껴 쓰라](/blog/writing/elements-of-style/ch05-reminder18-figures)
