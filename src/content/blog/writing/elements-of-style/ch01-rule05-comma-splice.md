@@ -1,5 +1,5 @@
 ---
-title: "Rule 5: Comma Splice 금지"
+title: "Ch 1 Rule 5: Comma Splice 금지"
 date: 2026-05-14T01:05:00
 description: "두 독립절을 쉼표만으로 잇지 말 것. 세미콜론 또는 마침표로 분리."
 series: "The Elements of Style"

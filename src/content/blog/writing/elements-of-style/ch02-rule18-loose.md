@@ -1,5 +1,5 @@
 ---
-title: "Rule 18: Loose Sentence의 연쇄를 피하라"
+title: "Ch 2 Rule 18: Loose Sentence의 연쇄를 피하라"
 date: 2026-05-14T02:07:00
 description: "두 절이 등위 접속사나 관계대명사로 이어진 문장을 연속해서 쓰면 글이 기계적으로 들린다."
 series: "The Elements of Style"

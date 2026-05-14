@@ -1,5 +1,5 @@
 ---
-title: "Rule 12: 적절한 디자인을 선택하고 끝까지 지킬 것"
+title: "Ch 2 Rule 12: 적절한 디자인을 선택하고 끝까지 지킬 것"
 date: 2026-05-14T02:01:00
 description: "모든 글에는 골격이 있다. 작가가 그 골격을 미리 그려 두고 쓰면 글의 모양이 분명해진다."
 series: "The Elements of Style"

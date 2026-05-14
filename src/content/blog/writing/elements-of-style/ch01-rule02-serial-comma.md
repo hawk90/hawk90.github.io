@@ -1,5 +1,5 @@
 ---
-title: "Rule 2: 직렬 쉼표 (Serial Comma)"
+title: "Ch 1 Rule 2: 직렬 쉼표 (Serial Comma)"
 date: 2026-05-14T01:02:00
 description: "세 항목 이상의 나열에서 마지막 항목 앞에도 쉼표를 둔다. Oxford comma."
 series: "The Elements of Style"

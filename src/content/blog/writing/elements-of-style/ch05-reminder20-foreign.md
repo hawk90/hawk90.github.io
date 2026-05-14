@@ -1,5 +1,5 @@
 ---
-title: "Reminder 20: 외국어를 피하라"
+title: "Ch 5 Reminder 20: 외국어를 피하라"
 date: 2026-05-14T05:20:00
 description: "과시를 위해 외국어를 흩뿌리지 마라. 영어로 쓰라."
 series: "The Elements of Style"

@@ -1,5 +1,5 @@
 ---
-title: "Reminder 19: 명료성을 희생한 약식을 쓰지 말라"
+title: "Ch 5 Reminder 19: 명료성을 희생한 약식을 쓰지 말라"
 date: 2026-05-14T05:19:00
 description: "조직이나 운동의 이름을 알려진 약자로만 쓰지 마라. 처음에는 풀어서 쓰고, 자리 잡으면 줄여서 쓰라."
 series: "The Elements of Style"

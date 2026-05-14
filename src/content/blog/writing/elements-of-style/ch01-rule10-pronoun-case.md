@@ -1,5 +1,5 @@
 ---
-title: "Rule 10: 대명사의 적절한 격"
+title: "Ch 1 Rule 10: 대명사의 적절한 격"
 date: 2026-05-14T01:10:00
 description: "인칭대명사와 who는 주격, 목적격, 소유격이 형태로 구분된다."
 series: "The Elements of Style"

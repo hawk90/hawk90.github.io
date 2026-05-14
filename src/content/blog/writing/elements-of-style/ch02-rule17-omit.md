@@ -1,5 +1,5 @@
 ---
-title: "Rule 17: 불필요한 단어를 빼라"
+title: "Ch 2 Rule 17: 불필요한 단어를 빼라"
 date: 2026-05-14T02:06:00
 description: "활기찬 글은 간결하다. 모든 단어가 말해야 한다. Omit needless words!"
 series: "The Elements of Style"

@@ -1,5 +1,5 @@
 ---
-title: "Reminder 5: 고쳐 쓰라"
+title: "Ch 5 Reminder 5: 고쳐 쓰라"
 date: 2026-05-14T05:05:00
 description: "처음 쓴 글이 완성형인 작가는 거의 없다. 고쳐 쓰기는 글쓰기의 일부."
 series: "The Elements of Style"

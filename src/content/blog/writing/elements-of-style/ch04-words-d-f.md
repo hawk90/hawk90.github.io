@@ -1,5 +1,5 @@
 ---
-title: "Ch4 Words: D–F"
+title: "Ch 4 Words: D–F"
 date: 2026-05-14T04:02:00
 description: "자주 오용되는 단어와 표현 — Data부터 Fortuitous까지."
 series: "The Elements of Style"

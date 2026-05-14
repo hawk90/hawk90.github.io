@@ -1,5 +1,5 @@
 ---
-title: "Rule 7: 콜론의 용법"
+title: "Ch 1 Rule 7: 콜론의 용법"
 date: 2026-05-14T01:07:00
 description: "콜론은 독립절 뒤에서 부연, 동격, 인용을 도입한다."
 series: "The Elements of Style"

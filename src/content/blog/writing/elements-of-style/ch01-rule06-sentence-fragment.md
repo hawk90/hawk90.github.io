@@ -1,5 +1,5 @@
 ---
-title: "Rule 6: 문장을 둘로 끊지 말 것"
+title: "Ch 1 Rule 6: 문장을 둘로 끊지 말 것"
 date: 2026-05-14T01:06:00
 description: "마침표를 쉼표 대신 쓰지 마라. 분사구나 동격구를 독립 문장처럼 다루지 말 것."
 series: "The Elements of Style"

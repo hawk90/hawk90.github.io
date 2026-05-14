@@ -1,5 +1,5 @@
 ---
-title: "Rule 19: 평행 구조 (Parallel Construction)"
+title: "Ch 2 Rule 19: 평행 구조 (Parallel Construction)"
 date: 2026-05-14T02:08:00
 description: "짝을 이루는 생각은 같은 형태로 표현한다."
 series: "The Elements of Style"

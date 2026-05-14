@@ -1,5 +1,5 @@
 ---
-title: "Reminder 12: 어색한 부사를 만들지 말라"
+title: "Ch 5 Reminder 12: 어색한 부사를 만들지 말라"
 date: 2026-05-14T05:12:00
 description: "형용사에 -ly를 붙이면 부사가 만들어지지만, 없어도 되는 경우가 더 많다."
 series: "The Elements of Style"

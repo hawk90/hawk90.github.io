@@ -1,5 +1,5 @@
 ---
-title: "Rule 21: 요약문에서는 시제를 하나로"
+title: "Ch 2 Rule 21: 요약문에서는 시제를 하나로"
 date: 2026-05-14T02:10:00
 description: "소설, 시, 드라마를 요약할 때는 현재 시제를 쓴다. 어느 쪽이든 하나로 끝까지 유지."
 series: "The Elements of Style"

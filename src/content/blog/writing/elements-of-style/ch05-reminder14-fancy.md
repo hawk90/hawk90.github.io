@@ -1,5 +1,5 @@
 ---
-title: "Reminder 14: 화려한 단어를 피하라"
+title: "Ch 5 Reminder 14: 화려한 단어를 피하라"
 date: 2026-05-14T05:14:00
 description: "뽐내거나 거만하거나 귀엽거나 너무 영리한 단어를 피하라. Anglo-Saxon은 Latin보다 더 생생하다."
 series: "The Elements of Style"
