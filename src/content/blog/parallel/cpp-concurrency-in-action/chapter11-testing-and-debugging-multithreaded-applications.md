@@ -2,10 +2,10 @@
 title: "Ch 11: Testing and debugging multithreaded applications"
 date: 2026-05-20T11:00:00
 description: "ThreadSanitizer, 재현 가능성, 시뮬레이션 테스트, 동시성 버그 분류."
-tags: [C++, Concurrency, Testing, Debugging, ThreadSanitizer]
+tags: [C++, C, Concurrency, Testing, Debugging, ThreadSanitizer]
 series: "C++ Concurrency in Action"
 seriesOrder: 11
-draft: true
+draft: false
 ---
 
 동시성 버그는 재현이 어렵고 디버깅이 까다롭다. 이 장에서는 동시성 코드의 테스트와 디버깅 기법을 다룬다.
@@ -367,6 +367,136 @@ void test_producer_consumer() {
 }
 ```
 
+### C11 동시성 테스트
+
+```c
+#include <threads.h>
+#include <stdatomic.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define NUM_THREADS 8
+#define ITERATIONS 10000
+
+// 테스트 대상: 스레드 안전 카운터
+typedef struct {
+    mtx_t mtx;
+    int value;
+} SafeCounter;
+
+void safe_counter_init(SafeCounter* c) {
+    mtx_init(&c->mtx, mtx_plain);
+    c->value = 0;
+}
+
+void safe_counter_increment(SafeCounter* c) {
+    mtx_lock(&c->mtx);
+    c->value++;
+    mtx_unlock(&c->mtx);
+}
+
+int safe_counter_get(SafeCounter* c) {
+    mtx_lock(&c->mtx);
+    int v = c->value;
+    mtx_unlock(&c->mtx);
+    return v;
+}
+
+void safe_counter_destroy(SafeCounter* c) {
+    mtx_destroy(&c->mtx);
+}
+
+// 테스트용 동기화 배리어 (C11에는 std::latch 없음)
+typedef struct {
+    mtx_t mtx;
+    cnd_t cv;
+    int count;
+    int target;
+} Barrier;
+
+void barrier_init(Barrier* b, int target) {
+    mtx_init(&b->mtx, mtx_plain);
+    cnd_init(&b->cv);
+    b->count = 0;
+    b->target = target;
+}
+
+void barrier_wait(Barrier* b) {
+    mtx_lock(&b->mtx);
+    b->count++;
+    if (b->count == b->target) {
+        cnd_broadcast(&b->cv);
+    } else {
+        while (b->count < b->target) {
+            cnd_wait(&b->cv, &b->mtx);
+        }
+    }
+    mtx_unlock(&b->mtx);
+}
+
+void barrier_destroy(Barrier* b) {
+    mtx_destroy(&b->mtx);
+    cnd_destroy(&b->cv);
+}
+
+// 테스트 컨텍스트
+typedef struct {
+    SafeCounter* counter;
+    Barrier* start_barrier;
+} TestContext;
+
+static int worker(void* arg) {
+    TestContext* ctx = (TestContext*)arg;
+
+    barrier_wait(ctx->start_barrier);  // 모든 스레드 동시 시작
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+        safe_counter_increment(ctx->counter);
+    }
+
+    return 0;
+}
+
+void test_concurrent_counter(void) {
+    SafeCounter counter;
+    Barrier start_barrier;
+    thrd_t threads[NUM_THREADS];
+    TestContext ctx;
+
+    safe_counter_init(&counter);
+    barrier_init(&start_barrier, NUM_THREADS);
+
+    ctx.counter = &counter;
+    ctx.start_barrier = &start_barrier;
+
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        thrd_create(&threads[i], worker, &ctx);
+    }
+
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        thrd_join(threads[i], NULL);
+    }
+
+    int expected = NUM_THREADS * ITERATIONS;
+    int actual = safe_counter_get(&counter);
+
+    if (actual == expected) {
+        printf("PASS: counter = %d\n", actual);
+    } else {
+        printf("FAIL: expected %d, got %d\n", expected, actual);
+    }
+
+    safe_counter_destroy(&counter);
+    barrier_destroy(&start_barrier);
+}
+
+int main(void) {
+    test_concurrent_counter();
+    return 0;
+}
+```
+
 ### 스트레스 테스트
 
 ```cpp
@@ -437,15 +567,89 @@ void stress_test(int duration_seconds) {
 ### 사용법
 
 ```bash
-# 컴파일
+# C++ 컴파일
 g++ -fsanitize=thread -g -O1 program.cpp -o program
 clang++ -fsanitize=thread -g -O1 program.cpp -o program
+
+# C11 컴파일
+gcc -fsanitize=thread -g -O1 -std=c11 program.c -o program
+clang -fsanitize=thread -g -O1 -std=c11 program.c -o program
 
 # 실행
 ./program
 
 # 환경 변수로 옵션 설정
 TSAN_OPTIONS="history_size=7 verbosity=1" ./program
+```
+
+### C11 TSan 예제
+
+```c
+// data_race.c - TSan으로 탐지되는 data race
+
+#include <threads.h>
+#include <stdio.h>
+
+int counter = 0;  // 보호되지 않은 공유 변수
+
+int increment(void* arg) {
+    (void)arg;
+    for (int i = 0; i < 10000; ++i) {
+        counter++;  // 💥 Data race!
+    }
+    return 0;
+}
+
+int main(void) {
+    thrd_t t1, t2;
+
+    thrd_create(&t1, increment, NULL);
+    thrd_create(&t2, increment, NULL);
+
+    thrd_join(t1, NULL);
+    thrd_join(t2, NULL);
+
+    printf("Counter: %d\n", counter);
+    return 0;
+}
+
+// 컴파일 및 실행:
+// gcc -fsanitize=thread -g -O1 -std=c11 data_race.c -o data_race
+// ./data_race
+// → ThreadSanitizer 경고 출력
+```
+
+```c
+// fixed_race.c - atomic으로 수정된 버전
+
+#include <threads.h>
+#include <stdatomic.h>
+#include <stdio.h>
+
+atomic_int counter = 0;  // atomic으로 보호
+
+int increment(void* arg) {
+    (void)arg;
+    for (int i = 0; i < 10000; ++i) {
+        atomic_fetch_add(&counter, 1);  // ✓ 안전
+    }
+    return 0;
+}
+
+int main(void) {
+    thrd_t t1, t2;
+
+    thrd_create(&t1, increment, NULL);
+    thrd_create(&t2, increment, NULL);
+
+    thrd_join(t1, NULL);
+    thrd_join(t2, NULL);
+
+    printf("Counter: %d\n", atomic_load(&counter));
+    return 0;
+}
+
+// TSan 경고 없음
 ```
 
 ### TSan 출력 예시
@@ -711,6 +915,75 @@ void flush_logs() {
 }
 ```
 
+### C11 스레드 안전 로깅
+
+```c
+#include <threads.h>
+#include <stdio.h>
+#include <time.h>
+#include <stdarg.h>
+
+typedef struct {
+    mtx_t mtx;
+    FILE* file;
+} ThreadSafeLogger;
+
+void logger_init(ThreadSafeLogger* logger, const char* filename) {
+    mtx_init(&logger->mtx, mtx_plain);
+    logger->file = fopen(filename, "w");
+}
+
+void logger_log(ThreadSafeLogger* logger, const char* fmt, ...) {
+    time_t now = time(NULL);
+    thrd_t tid = thrd_current();
+
+    mtx_lock(&logger->mtx);
+
+    fprintf(logger->file, "[%ld][%p] ", (long)now, (void*)tid);
+
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(logger->file, fmt, args);
+    va_end(args);
+
+    fprintf(logger->file, "\n");
+    fflush(logger->file);
+
+    mtx_unlock(&logger->mtx);
+}
+
+void logger_destroy(ThreadSafeLogger* logger) {
+    fclose(logger->file);
+    mtx_destroy(&logger->mtx);
+}
+
+// Thread-local 로깅 (lock-free 대안)
+#define MAX_LOG_ENTRIES 1000
+#define MAX_LOG_MSG_LEN 256
+
+typedef struct {
+    char messages[MAX_LOG_ENTRIES][MAX_LOG_MSG_LEN];
+    size_t count;
+} LocalLog;
+
+static _Thread_local LocalLog local_log = {{{0}}, 0};
+
+void log_local(const char* msg) {
+    if (local_log.count < MAX_LOG_ENTRIES) {
+        snprintf(local_log.messages[local_log.count],
+                 MAX_LOG_MSG_LEN, "%s", msg);
+        local_log.count++;
+    }
+}
+
+void flush_local_logs(FILE* out) {
+    for (size_t i = 0; i < local_log.count; ++i) {
+        fprintf(out, "%s\n", local_log.messages[i]);
+    }
+    local_log.count = 0;
+}
+```
+
 ### 조건부 중단점
 
 ```cpp
@@ -864,3 +1137,101 @@ add_executable(stress_test tests/stress_test.cpp)
 - 동시성은 **어렵다**. 도구와 기법을 적극 활용하라
 
 이 시리즈를 통해 C++ 동시성 프로그래밍의 기초부터 고급 기법까지 살펴보았다. 안전하고 효율적인 동시성 코드를 작성하기 위해서는 지속적인 학습과 실습이 필요하다.
+
+## 한국 개발자의 함정
+
+```
+1. *재현 안 되니 없는 버그*
+   - Heisenbug는 *항상* 존재함
+   - 1000번에 1번 → 운영에선 매시간 발생
+   - 재현 안 되면 *더 위험*
+
+2. *printf로 디버깅*
+   - I/O가 타이밍을 바꿔 버그가 사라짐
+   - 보통 lock-free 또는 ring buffer 로깅
+   - 또는 TSan으로 정적 탐지
+
+3. *TSan은 false positive*라는 회피
+   - false positive 매우 드물다 (보통 false negative)
+   - 경고 무시 = 운영 사고
+   - 억제는 정말 검증된 케이스만
+
+4. *valgrind만 쓰면 충분*
+   - Helgrind / DRD는 매우 느림
+   - TSan이 더 정확 + 빠름
+   - 둘 다 쓰는 게 이상적
+
+5. *동시성 테스트는 한 번만*
+   - 100번 실행해서 통과 = 운 좋음
+   - 매 commit마다 + 스트레스 + 다양한 코어 수
+   - CI에서 자동화
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- ThreadSanitizer        → -fsanitize=thread (Clang/GCC)
+- Valgrind Helgrind/DRD  → valgrind --tool=helgrind
+- Static analysis        → Clang Thread Safety Analysis
+- 형식 검증              → CHESS, Spin, TLA+ (분산)
+- Stress testing         → 반복 실행 + 다양한 인터리빙
+- Fuzzing                → libFuzzer + concurrent harness
+
+CI 통합:
+- GitHub Actions: TSan + 스트레스 테스트
+- GitLab CI: 동일
+- Jenkins: 비슷한 패턴
+
+언어별:
+- C++: TSan, Helgrind, Clang TSA
+- Java: jcstress (concurrency stress test 도구)
+- Rust: loom (model checker), miri (UB detector)
+- Go: race detector (go test -race)
+
+설계 원칙:
+- 공유 상태 최소화 (immutable 선호)
+- atomic 또는 명확한 락 정책
+- 동기화 정책 문서화
+- 모든 PR에 동시성 영향 분석
+```
+
+## 자기 점검
+
+```
+□ Data race와 Race condition 차이?
+□ Heisenbug의 정의와 대응 방법?
+□ Check-then-act 패턴이 위험한 이유?
+□ TSan의 작동 원리 (happens-before 추적)?
+□ Clang Thread Safety Analysis의 capability 시스템?
+□ Livelock과 Deadlock 차이?
+□ Stress test와 unit test의 다른 점?
+```
+
+## 시리즈 마무리
+
+C++ Concurrency in Action 11장의 여정을 끝내며.
+
+```
+1장: 동시성 개념          → 동시성과 병렬성 구분
+2장: Thread 관리         → join/detach, jthread
+3장: 데이터 공유         → mutex, lock_guard, deadlock
+4장: 동기화              → condition_variable, future
+5장: 메모리 모델         → atomic, memory_order
+6장: Lock-based 자료구조 → thread-safe stack/queue/map
+7장: Lock-free 자료구조  → CAS, ABA, hazard pointer
+8장: 동시성 설계         → false sharing, AoS/SoA
+9장: 스레드 풀          → work stealing, stop_token
+10장: 병렬 알고리즘     → execution::par, reduce, scan
+11장: 테스트와 디버깅   → TSan, 정적 분석
+```
+
+C++ 동시성의 모든 도구가 여기 있다. 다음은 **이 도구들을 어떤 자료구조에 어떻게 적용할지**의 이론 — *The Art of Multiprocessor Programming*에서 다룬다.
+
+## 관련 항목
+
+- [Ch 9: Advanced Thread Management](/blog/parallel/cpp-concurrency-in-action/chapter09-advanced-thread-management)
+- [Ch 10: Parallel Algorithms](/blog/parallel/cpp-concurrency-in-action/chapter10-parallel-algorithms)
+- [Ch 1: Hello Concurrent World](/blog/parallel/cpp-concurrency-in-action/chapter01-hello-concurrent-world) — 시작점
+- [AMP Ch 1: Introduction](/blog/parallel/parallel-principles/ch01-introduction) — 이론 시리즈
+- [AMP Ch 18: Transactional Memory](/blog/parallel/parallel-principles/ch18-transactional-memory) — 이론 시리즈 끝

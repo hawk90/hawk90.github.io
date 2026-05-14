@@ -1,0 +1,71 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  node/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=8mm, minimum height=6mm, fill=absfill, inner sep=1pt, font=\sffamily\scriptsize}
+]
+
+% Level labels
+\node[font=\sffamily\small, anchor=east] at (-0.5, 3) {Level 3};
+\node[font=\sffamily\small, anchor=east] at (-0.5, 2) {Level 2};
+\node[font=\sffamily\small, anchor=east] at (-0.5, 1) {Level 1};
+\node[font=\sffamily\small, anchor=east] at (-0.5, 0) {Level 0};
+
+% Level 3 (sparsest)
+\node[node, fill=hifill] (l3_50) at (7, 3) {50};
+\draw[edge] (0, 3) -- (l3_50.west);
+\draw[edge] (l3_50.east) -- (12, 3);
+
+% Level 2
+\node[node, fill=clifill] (l2_20) at (3, 2) {20};
+\node[node, fill=clifill] (l2_50) at (7, 2) {50};
+\node[node, fill=clifill] (l2_70) at (9, 2) {70};
+\draw[edge] (0, 2) -- (l2_20.west);
+\draw[edge] (l2_20.east) -- (l2_50.west);
+\draw[edge] (l2_50.east) -- (l2_70.west);
+\draw[edge] (l2_70.east) -- (12, 2);
+
+% Level 1
+\node[node, fill=impfill] (l1_10) at (1.5, 1) {10};
+\node[node, fill=impfill] (l1_20) at (3, 1) {20};
+\node[node, fill=impfill] (l1_40) at (5, 1) {40};
+\node[node, fill=impfill] (l1_50) at (7, 1) {50};
+\node[node, fill=impfill] (l1_70) at (9, 1) {70};
+\node[node, fill=impfill] (l1_80) at (11, 1) {80};
+\draw[edge] (0, 1) -- (l1_10.west);
+\draw[edge] (l1_10.east) -- (l1_20.west);
+\draw[edge] (l1_20.east) -- (l1_40.west);
+\draw[edge] (l1_40.east) -- (l1_50.west);
+\draw[edge] (l1_50.east) -- (l1_70.west);
+\draw[edge] (l1_70.east) -- (l1_80.west);
+\draw[edge] (l1_80.east) -- (12, 1);
+
+% Level 0 (all nodes)
+\node[node] (l0_5) at (0.5, 0) {5};
+\node[node] (l0_10) at (1.5, 0) {10};
+\node[node] (l0_15) at (2.2, 0) {15};
+\node[node] (l0_20) at (3, 0) {20};
+\node[node] (l0_30) at (4, 0) {30};
+\node[node] (l0_40) at (5, 0) {40};
+\node[node] (l0_45) at (6, 0) {45};
+\node[node] (l0_50) at (7, 0) {50};
+\node[node] (l0_60) at (8, 0) {60};
+\node[node] (l0_70) at (9, 0) {70};
+\node[node] (l0_75) at (10, 0) {75};
+\node[node] (l0_80) at (11, 0) {80};
+
+% Vertical connections
+\draw[edge, dashed, draw=nodebord] (l2_50.south) -- (l1_50.north);
+\draw[edge, dashed, draw=nodebord] (l3_50.south) -- (l2_50.north);
+\draw[edge, dashed, draw=nodebord] (l1_50.south) -- (l0_50.north);
+
+% Caption
+\node[font=\sffamily\tiny, anchor=north] at (6, -0.7) {위로 갈수록 듬성듬성, 검색 시 위에서 시작};
+
+\end{tikzpicture}
+\end{document}

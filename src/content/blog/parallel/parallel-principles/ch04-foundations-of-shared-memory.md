@@ -4,14 +4,16 @@ date: 2026-05-12
 description: "공유 메모리의 기초 — 레지스터의 정확성 정의. Safe, Regular, Atomic. SRSW에서 MRMW까지."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 4
-tags: [parallel, concurrency, book-review, amp, register, atomic, safe, regular]
+tags: [parallel, concurrency, book-review, amp, register, atomic, safe, regular, C++, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
-draft: true
+draft: false
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 4 요약
+>
+> 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
 ## 4.1 무엇이 "메모리"인가
 
@@ -107,18 +109,53 @@ SRSW Safe → SRSW Regular → SRSW Atomic
 
 1-bit safe register를 1-bit regular register로 만든다.
 
+```cpp
+// C++20: Safe → Regular 변환 (개념적)
+#include <atomic>
+
+class RegularBit {
+    std::atomic<bool> bits{false};  // safe register 역할
+    bool last_written{false};
+
+public:
+    void write(bool v) {
+        if (v != last_written) {
+            bits.store(v, std::memory_order_relaxed);
+            last_written = v;
+        }
+    }
+
+    bool read() {
+        return bits.load(std::memory_order_relaxed);
+    }
+};
 ```
-class RegularBit:
-    bits = SafeBit()  # safe 레지스터
-    last_written = 0
-    
-    def write(v):
-        if v != last_written:
-            bits.write(v)
-            last_written = v
-    
-    def read():
-        return bits.read()
+
+```c
+// C11: Safe → Regular 변환 (개념적)
+#include <stdatomic.h>
+#include <stdbool.h>
+
+typedef struct {
+    _Atomic bool bits;       // safe register 역할
+    bool last_written;       // writer만 접근
+} RegularBit;
+
+void regular_bit_init(RegularBit* r) {
+    atomic_init(&r->bits, false);
+    r->last_written = false;
+}
+
+void regular_bit_write(RegularBit* r, bool v) {
+    if (v != r->last_written) {
+        atomic_store_explicit(&r->bits, v, memory_order_relaxed);
+        r->last_written = v;
+    }
+}
+
+bool regular_bit_read(RegularBit* r) {
+    return atomic_load_explicit(&r->bits, memory_order_relaxed);
+}
 ```
 
 **핵심 아이디어** — 같은 값을 두 번 쓰지 않는다. 그러면 safe 레지스터의 "임의 값 반환" 동작이 regular의 "이전/현재 값" 동작이 된다 (두 값이 같으니 항상 옳다).
@@ -151,13 +188,81 @@ class RegularBit:
 
 ### 단순 시도 — 두 번 읽기
 
+```cpp
+// C++20: 단순 스냅샷 (Lock-free, Wait-free 아님)
+#include <atomic>
+#include <vector>
+#include <optional>
+
+template <typename T, size_t N>
+class SimpleSnapshot {
+    std::atomic<T> registers[N]{};
+
+public:
+    std::optional<std::vector<T>> snapshot() {
+        while (true) {
+            std::vector<T> s1(N), s2(N);
+
+            for (size_t i = 0; i < N; ++i) {
+                s1[i] = registers[i].load(std::memory_order_acquire);
+            }
+            for (size_t i = 0; i < N; ++i) {
+                s2[i] = registers[i].load(std::memory_order_acquire);
+            }
+
+            if (s1 == s2) {
+                return s1;  // 일관된 상태
+            }
+            // 다시 시도
+        }
+    }
+
+    void update(size_t idx, T value) {
+        registers[idx].store(value, std::memory_order_release);
+    }
+};
 ```
-def snapshot():
-    while True:
-        s1 = [r.read() for r in registers]
-        s2 = [r.read() for r in registers]
-        if s1 == s2:
-            return s1
+
+```c
+// C11: 단순 스냅샷 (Lock-free, Wait-free 아님)
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <string.h>
+
+#define MAX_REGISTERS 16
+
+typedef struct {
+    _Atomic int registers[MAX_REGISTERS];
+    size_t size;
+} SimpleSnapshot;
+
+void snapshot_init(SimpleSnapshot* s, size_t size) {
+    s->size = size;
+    for (size_t i = 0; i < size; ++i) {
+        atomic_init(&s->registers[i], 0);
+    }
+}
+
+bool snapshot_try(SimpleSnapshot* s, int* result) {
+    int s1[MAX_REGISTERS], s2[MAX_REGISTERS];
+
+    for (size_t i = 0; i < s->size; ++i) {
+        s1[i] = atomic_load_explicit(&s->registers[i], memory_order_acquire);
+    }
+    for (size_t i = 0; i < s->size; ++i) {
+        s2[i] = atomic_load_explicit(&s->registers[i], memory_order_acquire);
+    }
+
+    if (memcmp(s1, s2, s->size * sizeof(int)) == 0) {
+        memcpy(result, s1, s->size * sizeof(int));
+        return true;  // 일관된 상태
+    }
+    return false;  // 다시 시도 필요
+}
+
+void snapshot_update(SimpleSnapshot* s, size_t idx, int value) {
+    atomic_store_explicit(&s->registers[idx], value, memory_order_release);
+}
 ```
 
 두 번 읽었을 때 같으면, 그 사이에 변경이 없었다는 뜻 — 일관된 상태로 받아들인다.
@@ -168,23 +273,154 @@ def snapshot():
 
 각 쓰기에 **timestamp + 자신의 snapshot**을 함께 저장한다.
 
-```
-class WaitFreeSnapshot:
-    def update(value):
-        my_snapshot = compute_snapshot()  # 자기 자신의 스냅샷
-        registers[my_id].write(value, timestamp, my_snapshot)
-    
-    def snapshot():
-        # 다른 스레드가 그 동안 두 번 쓴 게 보이면
-        # → 그 스레드가 만든 snapshot을 그대로 사용
-        ...
+```cpp
+// C++20: Wait-free Atomic Snapshot (개념적 구현)
+#include <atomic>
+#include <vector>
+#include <memory>
+
+template <typename T, size_t N>
+class WaitFreeSnapshot {
+    struct StampedValue {
+        T value;
+        uint64_t timestamp;
+        std::vector<T> snap;  // 자신의 스냅샷
+
+        StampedValue() : value{}, timestamp{0}, snap(N) {}
+        StampedValue(T v, uint64_t ts, std::vector<T> s)
+            : value(v), timestamp(ts), snap(std::move(s)) {}
+    };
+
+    std::atomic<std::shared_ptr<StampedValue>> registers[N];
+
+    std::vector<T> collect() {
+        std::vector<T> result(N);
+        for (size_t i = 0; i < N; ++i) {
+            auto p = registers[i].load(std::memory_order_acquire);
+            result[i] = p->value;
+        }
+        return result;
+    }
+
+public:
+    WaitFreeSnapshot() {
+        for (size_t i = 0; i < N; ++i) {
+            registers[i].store(std::make_shared<StampedValue>(),
+                              std::memory_order_release);
+        }
+    }
+
+    void update(size_t me, T value) {
+        auto my_snapshot = snapshot();
+        auto old = registers[me].load(std::memory_order_acquire);
+        auto new_val = std::make_shared<StampedValue>(
+            value, old->timestamp + 1, my_snapshot);
+        registers[me].store(new_val, std::memory_order_release);
+    }
+
+    std::vector<T> snapshot() {
+        std::vector<std::shared_ptr<StampedValue>> moved(N, nullptr);
+
+        while (true) {
+            std::vector<std::shared_ptr<StampedValue>> a1(N), a2(N);
+
+            for (size_t i = 0; i < N; ++i) {
+                a1[i] = registers[i].load(std::memory_order_acquire);
+            }
+            for (size_t i = 0; i < N; ++i) {
+                a2[i] = registers[i].load(std::memory_order_acquire);
+            }
+
+            bool clean = true;
+            for (size_t i = 0; i < N; ++i) {
+                if (a1[i]->timestamp != a2[i]->timestamp) {
+                    clean = false;
+                    if (moved[i] != nullptr &&
+                        moved[i]->timestamp != a2[i]->timestamp) {
+                        // 스레드 i가 두 번 움직임 — 그의 스냅샷 사용
+                        return a2[i]->snap;
+                    }
+                    moved[i] = a2[i];
+                }
+            }
+
+            if (clean) {
+                std::vector<T> result(N);
+                for (size_t i = 0; i < N; ++i) {
+                    result[i] = a1[i]->value;
+                }
+                return result;
+            }
+        }
+    }
+};
 ```
 
 다른 스레드가 두 번 쓰는 동안 자신의 snapshot이 완료되지 못했다면 — 그 다른 스레드가 가진 snapshot이 자신이 원하는 시간 구간을 포괄하므로 그것을 빌려 쓸 수 있다.
 
 **핵심 통찰** — 두 번의 쓰기 사이에 한 번의 snapshot이 끼어 있으므로, 두 번째 쓰기의 snapshot은 사용 가능.
 
-## 4.6 왜 이런 이론이 필요한가
+## 4.6 C++/C Memory Order와의 대응
+
+이 챕터의 이론적 분류가 실제 언어의 memory order와 어떻게 대응되는지 살펴보자.
+
+```cpp
+// C++20: Memory Order별 레지스터 특성
+#include <atomic>
+
+std::atomic<int> x;
+
+// Relaxed — Safe/Regular 수준에 가까움
+void relaxed_example() {
+    x.store(1, std::memory_order_relaxed);   // 순서 보장 없음
+    int r = x.load(std::memory_order_relaxed);  // 원자성만 보장
+}
+
+// Acquire-Release — 동기화 관계 형성
+void acq_rel_example() {
+    x.store(1, std::memory_order_release);   // 이전 연산 publish
+    int r = x.load(std::memory_order_acquire);  // 동기화 수신
+}
+
+// Sequential Consistency — Atomic Register
+void seq_cst_example() {
+    x.store(1, std::memory_order_seq_cst);   // 전역 순서 보장
+    int r = x.load(std::memory_order_seq_cst);  // Linearizable
+}
+```
+
+```c
+// C11: Memory Order별 레지스터 특성
+#include <stdatomic.h>
+
+_Atomic int x;
+
+// Relaxed — Safe/Regular 수준에 가까움
+void relaxed_example(void) {
+    atomic_store_explicit(&x, 1, memory_order_relaxed);
+    int r = atomic_load_explicit(&x, memory_order_relaxed);
+}
+
+// Acquire-Release — 동기화 관계 형성
+void acq_rel_example(void) {
+    atomic_store_explicit(&x, 1, memory_order_release);
+    int r = atomic_load_explicit(&x, memory_order_acquire);
+}
+
+// Sequential Consistency — Atomic Register
+void seq_cst_example(void) {
+    atomic_store_explicit(&x, 1, memory_order_seq_cst);
+    int r = atomic_load_explicit(&x, memory_order_seq_cst);
+}
+```
+
+| 이론적 분류 | C++20/C11 Memory Order | 보장 |
+|-----------|------------------------|-----|
+| Safe Register | `memory_order_relaxed` (부분적) | 원자성만 |
+| Regular Register | `memory_order_relaxed` ~ `acquire/release` | 이전/현재 값 |
+| Atomic Register | `memory_order_seq_cst` | Linearizable |
+
+## 4.7 왜 이런 이론이 필요한가
 
 이 챕터의 메시지는 한 줄로 정리된다.
 
@@ -206,6 +442,66 @@ C++의 `memory_order_relaxed`는 safe / regular 수준에 가깝다. `memory_ord
 - **Atomic Snapshot** — 여러 레지스터의 일관된 읽기, wait-free 버전 존재
 - 실제 메모리 모델, lock-free 알고리즘의 정확성 증명의 토대
 
+## 한국 개발자의 함정
+
+```
+1. *volatile은 atomic*이라는 오해
+   - C: volatile은 *컴파일러 최적화 회피*만
+   - C++: std::atomic이 atomic
+   - C11: _Atomic이 atomic
+
+2. *read / write는 자동으로 안전*하다는 착각
+   - 8 byte 이상 변수는 안전 보장 없음
+   - x86은 word-aligned 8B까지 atomic
+   - ARM은 더 제한적
+
+3. *Memory barrier 없이도 작동*하는 듯한 코드
+   - Tested OK, but undefined behavior
+   - 다른 CPU / 컴파일러에서 깨질 수 있음
+
+4. *memory_order_relaxed면 성능 최적*이라는 착각
+   - 정확성 먼저, 성능은 그 다음
+   - 대부분의 경우 seq_cst로 시작하고 필요시 최적화
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- Safe register   → byte 단위 plain write
+- Regular register → C++ memory_order_relaxed
+- Atomic register  → C++ memory_order_seq_cst
+- Atomic snapshot  → 동시성 자료구조 디버깅 도구
+
+Modern CPU 메모리 모델:
+- x86/x64: TSO (Total Store Order) — 비교적 강함
+- ARM / RISC-V: Relaxed — 약함, 명시적 barrier 필요
+- POWER: 매우 약함
+
+C++20/23 atomic:
+- std::atomic<T>::load(order)
+- std::atomic<T>::store(value, order)
+- std::atomic<T>::exchange(value, order)
+- std::atomic<T>::compare_exchange_strong/weak()
+
+C11 atomic:
+- atomic_load_explicit(&var, order)
+- atomic_store_explicit(&var, value, order)
+- atomic_exchange_explicit(&var, value, order)
+- atomic_compare_exchange_strong/weak_explicit()
+```
+
+## 자기 점검
+
+```
+□ Safe / Regular / Atomic 차이 명시?
+□ SRSW / MRSW / MRMW 표기 이해?
+□ 약한 register에서 강한 register 만드는 방법?
+□ Atomic snapshot의 의미와 wait-free 가능성?
+□ Modern CPU 메모리 모델 (TSO, ARM) 차이?
+□ C++20/C11 memory_order와의 대응?
+```
+
 ## 다음 장 예고
 
 다음 장은 동기화 프리미티브의 **계산 능력 비교** — Consensus 문제로 위계를 정의한다.
@@ -214,4 +510,5 @@ C++의 `memory_order_relaxed`는 safe / regular 수준에 가깝다. `memory_ord
 
 - [Ch 3: Concurrent Objects](/blog/parallel/parallel-principles/ch03-concurrent-objects) — Linearizability
 - [Ch 2: Mutual Exclusion](/blog/parallel/parallel-principles/ch02-mutual-exclusion)
+- [Ch 5: Relative Power of Synchronization](/blog/parallel/parallel-principles/ch05-relative-power-of-synchronization)
 - [C++ Concurrency in Action Ch 5: Memory Model](/blog/parallel/cpp-concurrency-in-action/chapter05-the-cpp-memory-model-and-operations-on-atomic-types)

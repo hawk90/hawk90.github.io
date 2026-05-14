@@ -4,14 +4,16 @@ date: 2026-05-12
 description: "동시성 객체의 정확성 정의. Sequential Consistency와 Linearizability. 진행 조건: wait-free, lock-free."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 3
-tags: [parallel, concurrency, book-review, amp, linearizability, sequential-consistency]
+tags: [parallel, concurrency, book-review, amp, linearizability, sequential-consistency, C++, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
-draft: true
+draft: false
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 3 요약
+>
+> 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
 ## 3.1 동시성과 정확성
 
@@ -24,12 +26,25 @@ draft: true
 
 ### 순차 명세 (Sequential Specification)
 
-```java
-// 큐의 순차 명세
-interface Queue<T> {
-    void enqueue(T item);  // 아이템 추가
-    T dequeue();           // 아이템 제거, 반환
-}
+```cpp
+// C++20: 큐의 순차 명세
+template <typename T>
+class Queue {
+public:
+    void enqueue(T item);   // 아이템 추가
+    T dequeue();            // 아이템 제거, 반환
+};
+
+// 조건: FIFO 순서 유지
+// dequeue는 가장 먼저 enqueue된 아이템 반환
+```
+
+```c
+// C11: 큐의 순차 명세
+typedef struct Queue Queue;
+
+void queue_enqueue(Queue* q, void* item);  // 아이템 추가
+void* queue_dequeue(Queue* q);             // 아이템 제거, 반환
 
 // 조건: FIFO 순서 유지
 // dequeue는 가장 먼저 enqueue된 아이템 반환
@@ -210,18 +225,47 @@ H_seq = A.enq(1).ok  B.enq(2).ok  A.deq().ok:1
 
 ## 3.7 예시: Wait-free Counter
 
-```java
-class WaitFreeCounter {
-    private AtomicInteger value = new AtomicInteger(0);
+```cpp
+// C++20: Lock-free Counter (Wait-free가 아님)
+#include <atomic>
 
-    public int getAndIncrement() {
-        while (true) {
-            int v = value.get();
-            if (value.compareAndSet(v, v + 1)) {
-                return v;
-            }
+class LockFreeCounter {
+    std::atomic<int> value{0};
+
+public:
+    int getAndIncrement() {
+        int v = value.load(std::memory_order_relaxed);
+        while (!value.compare_exchange_weak(v, v + 1,
+                std::memory_order_seq_cst,
+                std::memory_order_relaxed)) {
+            // CAS 실패 시 v가 자동으로 갱신됨
         }
+        return v;
     }
+};
+```
+
+```c
+// C11: Lock-free Counter (Wait-free가 아님)
+#include <stdatomic.h>
+
+typedef struct {
+    _Atomic int value;
+} LockFreeCounter;
+
+void counter_init(LockFreeCounter* c) {
+    atomic_init(&c->value, 0);
+}
+
+int counter_get_and_increment(LockFreeCounter* c) {
+    int v = atomic_load_explicit(&c->value, memory_order_relaxed);
+    while (!atomic_compare_exchange_weak_explicit(
+            &c->value, &v, v + 1,
+            memory_order_seq_cst,
+            memory_order_relaxed)) {
+        // CAS 실패 시 v가 자동으로 갱신됨
+    }
+    return v;
 }
 ```
 
@@ -229,22 +273,117 @@ class WaitFreeCounter {
 
 ### 진정한 Wait-free Counter
 
-```java
-class TrueWaitFreeCounter {
-    private int[] counters;  // 스레드별 카운터
+```cpp
+// C++20: Wait-free Counter (분산 카운터)
+#include <atomic>
+#include <thread>
+#include <vector>
 
-    public void increment() {
-        int me = ThreadID.get();
-        counters[me]++;  // 로컬 업데이트, 항상 완료
+class WaitFreeCounter {
+    static constexpr size_t MAX_THREADS = 64;
+    std::atomic<int> counters[MAX_THREADS]{};
+
+    size_t getThreadIndex() {
+        // 간단한 스레드 ID 매핑 (실제로는 더 정교한 방법 필요)
+        thread_local static size_t idx =
+            std::hash<std::thread::id>{}(std::this_thread::get_id()) % MAX_THREADS;
+        return idx;
     }
 
-    public int get() {
+public:
+    void increment() {
+        size_t me = getThreadIndex();
+        counters[me].fetch_add(1, std::memory_order_relaxed);  // 항상 완료
+    }
+
+    int get() {
         int sum = 0;
-        for (int c : counters) sum += c;
+        for (size_t i = 0; i < MAX_THREADS; ++i) {
+            sum += counters[i].load(std::memory_order_relaxed);
+        }
         return sum;
     }
+};
+```
+
+```c
+// C11: Wait-free Counter (분산 카운터)
+#include <stdatomic.h>
+#include <threads.h>
+#include <string.h>
+
+#define MAX_THREADS 64
+
+typedef struct {
+    _Atomic int counters[MAX_THREADS];
+} WaitFreeCounter;
+
+// 스레드 로컬 인덱스
+thread_local size_t thread_idx = 0;
+_Atomic size_t next_thread_idx = 0;
+
+void counter_init(WaitFreeCounter* c) {
+    memset(c->counters, 0, sizeof(c->counters));
+}
+
+size_t get_thread_index(void) {
+    if (thread_idx == 0) {
+        thread_idx = atomic_fetch_add(&next_thread_idx, 1) % MAX_THREADS + 1;
+    }
+    return thread_idx - 1;
+}
+
+void counter_increment(WaitFreeCounter* c) {
+    size_t me = get_thread_index();
+    atomic_fetch_add_explicit(&c->counters[me], 1, memory_order_relaxed);  // 항상 완료
+}
+
+int counter_get(WaitFreeCounter* c) {
+    int sum = 0;
+    for (size_t i = 0; i < MAX_THREADS; ++i) {
+        sum += atomic_load_explicit(&c->counters[i], memory_order_relaxed);
+    }
+    return sum;
 }
 ```
+
+---
+
+## 3.8 C++ Memory Order와의 관계
+
+C++20/23의 memory order와 이 장의 개념이 어떻게 대응되는지 살펴보자.
+
+```cpp
+// C++20: Memory Order 예시
+#include <atomic>
+
+std::atomic<int> x{0};
+std::atomic<int> y{0};
+
+// Sequential Consistency (가장 강함)
+void thread_a_sc() {
+    x.store(1, std::memory_order_seq_cst);  // Linearizable
+    int r = y.load(std::memory_order_seq_cst);
+}
+
+// Acquire-Release (중간)
+void thread_a_acq_rel() {
+    x.store(1, std::memory_order_release);  // 이전 연산 publish
+    int r = y.load(std::memory_order_acquire);  // 이후 연산 protect
+}
+
+// Relaxed (가장 약함)
+void thread_a_relaxed() {
+    x.store(1, std::memory_order_relaxed);  // 원자성만 보장
+    int r = y.load(std::memory_order_relaxed);  // 순서 보장 없음
+}
+```
+
+| Memory Order | 정확성 수준 | 용도 |
+|-------------|-----------|-----|
+| `seq_cst` | Linearizable | 기본값, 가장 안전 |
+| `acquire/release` | Happens-before 관계 | 동기화 포인트 |
+| `relaxed` | 원자성만 | 카운터, 통계 |
 
 ---
 
@@ -284,4 +423,73 @@ class TrueWaitFreeCounter {
 
 ---
 
-다음 글: [Chapter 4: Foundations of Shared Memory](/blog/parallel/parallel-principles/ch04-shared-memory)
+## 한국 개발자의 함정
+
+```
+1. *Linearizability ≈ Atomicity*라는 오해
+   - Atomic은 *하드웨어 명령의 원자성*
+   - Linearizable은 *추상 객체의 정확성*
+   - 둘은 다른 차원
+
+2. *Sequential consistency만 알면 충분*
+   - C++ Memory Model이 SC가 아님
+   - Modern CPU도 SC가 아님
+   - Acquire-release / sequentially-consistent 등 약한 모델
+
+3. *Lock-free = Wait-free*라는 혼동
+   - Lock-free: 일부가 진행 (전체는 안 끝날 수 있음)
+   - Wait-free: 모두 유한 시간 완료
+   - 실무 대부분이 lock-free만 (wait-free는 너무 비쌈)
+
+4. *Composability(합성성)*의 중요성 간과
+   - Linearizable이 SC보다 강한 이유
+   - 분산 시스템 / 모듈러 설계에 결정적
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- Linearizability  → Strong consistency (DB, etcd, ZooKeeper)
+- Sequential Consistency → Java synchronized의 메모리 모델
+- Wait-free         → 실시간 시스템 (오디오, 게임)
+- Lock-free         → 동시성 자료구조 (java.util.concurrent)
+- Obstruction-free  → STM (Software Transactional Memory)
+
+C++20/23 예:
+- std::atomic<T>::load()/store()    — Linearizable (seq_cst)
+- std::atomic<T>::compare_exchange_*() — CAS 기반
+- std::atomic<T>::fetch_add()       — FAA
+
+C11 예:
+- atomic_load()/atomic_store()      — 원자적 읽기/쓰기
+- atomic_compare_exchange_*()       — CAS
+- atomic_fetch_add()                — FAA
+
+Java 예:
+- ConcurrentHashMap: linearizable
+- AtomicLong: linearizable (CAS 기반)
+- volatile read/write: SC 보장
+```
+
+## 자기 점검
+
+```
+□ Linearizability 정의를 그림으로 그릴 수 있는가?
+□ Linearization point 찾는 법?
+□ Lock-free / Wait-free / Obstruction-free 구분?
+□ Composability(합성성)의 의미와 왜 중요한가?
+□ Sequential Consistency의 비합성성 예?
+□ C++20 memory_order와의 관계?
+```
+
+## 관련 항목
+
+- [Chapter 2: Mutual Exclusion](/blog/parallel/parallel-principles/ch02-mutual-exclusion)
+- [Chapter 4: Foundations of Shared Memory](/blog/parallel/parallel-principles/ch04-foundations-of-shared-memory)
+- [Chapter 5: Relative Power of Synchronization](/blog/parallel/parallel-principles/ch05-relative-power-of-synchronization)
+- [C++ Concurrency in Action — Ch 5: Memory Model](/blog/parallel/cpp-concurrency-in-action/chapter05-the-cpp-memory-model-and-operations-on-atomic-types)
+
+---
+
+다음 글: [Chapter 4: Foundations of Shared Memory](/blog/parallel/parallel-principles/ch04-foundations-of-shared-memory)

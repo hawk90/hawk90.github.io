@@ -2,10 +2,10 @@
 title: "Ch 10: Parallel algorithms"
 date: 2026-05-20T10:00:00
 description: "C++17 execution policy — seq / par / par_unseq / unseq. std::reduce, transform_reduce."
-tags: [C++, Concurrency, Parallel Algorithms, Execution Policy]
+tags: [C++, C, Concurrency, Parallel Algorithms, Execution Policy]
 series: "C++ Concurrency in Action"
 seriesOrder: 10
-draft: true
+draft: false
 ---
 
 C++17은 표준 알고리즘에 병렬 실행을 추가했다. 실행 정책 하나로 순차/병렬/벡터화를 선택할 수 있다.
@@ -68,6 +68,108 @@ std::sort(std::execution::par, data.begin(), data.end());
 // 병렬 + 벡터화
 std::sort(std::execution::par_unseq, data.begin(), data.end());
 ```
+
+### C11의 병렬 알고리즘
+
+C11에는 실행 정책이 없다. 병렬 알고리즘을 사용하려면 직접 구현하거나 OpenMP를 활용해야 한다.
+
+```c
+#include <threads.h>
+#include <stdlib.h>
+#include <string.h>
+
+// 수동 병렬 reduce 구현
+typedef struct {
+    const int* data;
+    size_t start;
+    size_t end;
+    long long result;
+} ReduceArg;
+
+static int reduce_worker(void* arg) {
+    ReduceArg* ra = (ReduceArg*)arg;
+    long long sum = 0;
+    for (size_t i = ra->start; i < ra->end; ++i) {
+        sum += ra->data[i];
+    }
+    ra->result = sum;
+    return 0;
+}
+
+long long parallel_reduce(const int* data, size_t n, size_t num_threads) {
+    thrd_t* threads = malloc(sizeof(thrd_t) * num_threads);
+    ReduceArg* args = malloc(sizeof(ReduceArg) * num_threads);
+
+    size_t chunk_size = n / num_threads;
+
+    for (size_t i = 0; i < num_threads; ++i) {
+        args[i].data = data;
+        args[i].start = i * chunk_size;
+        args[i].end = (i == num_threads - 1) ? n : (i + 1) * chunk_size;
+        thrd_create(&threads[i], reduce_worker, &args[i]);
+    }
+
+    long long total = 0;
+    for (size_t i = 0; i < num_threads; ++i) {
+        thrd_join(threads[i], NULL);
+        total += args[i].result;
+    }
+
+    free(threads);
+    free(args);
+    return total;
+}
+
+// 사용 예
+int main(void) {
+    int data[1000000];
+    for (int i = 0; i < 1000000; ++i) data[i] = i;
+
+    long long sum = parallel_reduce(data, 1000000, 4);
+    printf("Sum: %lld\n", sum);  // 499999500000
+
+    return 0;
+}
+```
+
+**OpenMP를 사용한 C11 병렬 처리:**
+
+```c
+#include <omp.h>
+#include <stdio.h>
+
+// OpenMP parallel reduce
+long long parallel_reduce_omp(const int* data, size_t n) {
+    long long sum = 0;
+
+    #pragma omp parallel for reduction(+:sum)
+    for (size_t i = 0; i < n; ++i) {
+        sum += data[i];
+    }
+
+    return sum;
+}
+
+// OpenMP parallel for_each
+void parallel_for_each_omp(int* data, size_t n) {
+    #pragma omp parallel for
+    for (size_t i = 0; i < n; ++i) {
+        data[i] *= 2;
+    }
+}
+
+// 컴파일: gcc -fopenmp program.c -o program
+```
+
+**C11 vs C++17 병렬 알고리즘 비교:**
+
+| 기능 | C++17 | C11 |
+|------|-------|-----|
+| 실행 정책 | `std::execution::par` | 없음 (수동 구현) |
+| 병렬 reduce | `std::reduce` | 직접 구현 또는 OpenMP |
+| 병렬 transform | `std::transform` | 직접 구현 또는 OpenMP |
+| 병렬 sort | `std::sort(par, ...)` | 직접 구현 필요 |
+| SIMD 힌트 | `par_unseq`, `unseq` | 컴파일러 지시자 |
 
 ## 10.2 병렬 알고리즘 카탈로그
 
@@ -298,6 +400,83 @@ double mean = stats.sum / stats.count;
 double variance = (stats.sum_sq / stats.count) - (mean * mean);
 ```
 
+### C11 transform_reduce 구현
+
+C11에서 transform_reduce 패턴을 직접 구현한다.
+
+```c
+#include <threads.h>
+#include <stdlib.h>
+
+typedef struct {
+    double sum;
+    double sum_sq;
+    size_t count;
+} Stats;
+
+typedef struct {
+    const int* data;
+    size_t start;
+    size_t end;
+    Stats result;
+} TransformReduceArg;
+
+static int stats_worker(void* arg) {
+    TransformReduceArg* tra = (TransformReduceArg*)arg;
+    Stats s = {0, 0, 0};
+
+    for (size_t i = tra->start; i < tra->end; ++i) {
+        double x = (double)tra->data[i];
+        s.sum += x;
+        s.sum_sq += x * x;
+        s.count++;
+    }
+
+    tra->result = s;
+    return 0;
+}
+
+Stats parallel_stats(const int* data, size_t n, size_t num_threads) {
+    thrd_t* threads = malloc(sizeof(thrd_t) * num_threads);
+    TransformReduceArg* args = malloc(sizeof(TransformReduceArg) * num_threads);
+
+    size_t chunk_size = n / num_threads;
+
+    for (size_t i = 0; i < num_threads; ++i) {
+        args[i].data = data;
+        args[i].start = i * chunk_size;
+        args[i].end = (i == num_threads - 1) ? n : (i + 1) * chunk_size;
+        thrd_create(&threads[i], stats_worker, &args[i]);
+    }
+
+    Stats total = {0, 0, 0};
+    for (size_t i = 0; i < num_threads; ++i) {
+        thrd_join(threads[i], NULL);
+        total.sum += args[i].result.sum;
+        total.sum_sq += args[i].result.sum_sq;
+        total.count += args[i].result.count;
+    }
+
+    free(threads);
+    free(args);
+    return total;
+}
+
+int main(void) {
+    int data[1000000];
+    for (int i = 0; i < 1000000; ++i) data[i] = i;
+
+    Stats stats = parallel_stats(data, 1000000, 4);
+
+    double mean = stats.sum / stats.count;
+    double variance = (stats.sum_sq / stats.count) - (mean * mean);
+
+    printf("Mean: %f, Variance: %f\n", mean, variance);
+
+    return 0;
+}
+```
+
 ## 10.5 스캔 알고리즘 (Prefix Sum)
 
 ### inclusive vs exclusive
@@ -328,6 +507,85 @@ std::inclusive_scan(std::execution::par,
 std::exclusive_scan(std::execution::par,
     input.begin(), input.end(), exclusive_result.begin(), 0);
 // [0, 1, 3, 6, 10]
+```
+
+### C11 parallel prefix sum (scan)
+
+병렬 prefix sum은 두 단계로 구현한다: (1) 부분 합 계산, (2) 전파.
+
+```c
+#include <threads.h>
+#include <stdlib.h>
+
+typedef struct {
+    const int* input;
+    int* output;
+    size_t start;
+    size_t end;
+    int partial_sum;
+} ScanArg;
+
+// 1단계: 각 청크의 부분 합 계산
+static int scan_partial(void* arg) {
+    ScanArg* sa = (ScanArg*)arg;
+    int sum = 0;
+
+    for (size_t i = sa->start; i < sa->end; ++i) {
+        sum += sa->input[i];
+        sa->output[i] = sum;
+    }
+
+    sa->partial_sum = sum;
+    return 0;
+}
+
+// 2단계: 이전 청크들의 합을 더함
+static int scan_propagate(void* arg) {
+    ScanArg* sa = (ScanArg*)arg;
+    int offset = sa->partial_sum;  // 이전 청크들의 총합
+
+    for (size_t i = sa->start; i < sa->end; ++i) {
+        sa->output[i] += offset;
+    }
+
+    return 0;
+}
+
+void parallel_inclusive_scan(const int* input, int* output, size_t n,
+                              size_t num_threads) {
+    thrd_t* threads = malloc(sizeof(thrd_t) * num_threads);
+    ScanArg* args = malloc(sizeof(ScanArg) * num_threads);
+
+    size_t chunk_size = n / num_threads;
+
+    // 1단계: 부분 합
+    for (size_t i = 0; i < num_threads; ++i) {
+        args[i].input = input;
+        args[i].output = output;
+        args[i].start = i * chunk_size;
+        args[i].end = (i == num_threads - 1) ? n : (i + 1) * chunk_size;
+        thrd_create(&threads[i], scan_partial, &args[i]);
+    }
+
+    for (size_t i = 0; i < num_threads; ++i) {
+        thrd_join(threads[i], NULL);
+    }
+
+    // 2단계: 오프셋 전파 (첫 청크는 이미 완료)
+    int running_sum = 0;
+    for (size_t i = 1; i < num_threads; ++i) {
+        running_sum += args[i - 1].partial_sum;
+        args[i].partial_sum = running_sum;
+        thrd_create(&threads[i], scan_propagate, &args[i]);
+    }
+
+    for (size_t i = 1; i < num_threads; ++i) {
+        thrd_join(threads[i], NULL);
+    }
+
+    free(threads);
+    free(args);
+}
 ```
 
 ### 응용: 병렬 압축
@@ -715,6 +973,81 @@ std::vector<size_t> find_all_positions(
 - **충분한 데이터**가 있어야 병렬이 효과적이다 (> 10K 요소)
 - **GCC/Clang**은 TBB가 필요하다
 
+## 한국 개발자의 함정
+
+```
+1. *execution::par만 붙이면 빠름*
+   - 작은 데이터엔 오히려 느림 (오버헤드)
+   - 임계값 (≈10K 요소) 이상에서만 이득
+   - 측정 필수
+
+2. *reduce = accumulate 더 빠른 버전*
+   - reduce는 *순서 무관* (결합법칙 필요)
+   - 뺄셈 / 부동소수점 정밀도에서 다른 결과
+   - 의미가 다름
+
+3. *par_unseq에서 락 사용*
+   - 정책이 락 사용 금지
+   - 데드락 또는 UB
+   - thread-safe atomic만 OK
+
+4. *예외 던지면 catch*
+   - 병렬 알고리즘 안에서 예외 → terminate
+   - 직접 catch + exception_ptr로 보관
+   - 표준이 그렇게 정의
+
+5. *GCC에서 그냥 컴파일*
+   - libstdc++는 TBB 필요
+   - -ltbb 없으면 링크 실패
+   - 또는 oneTBB 설치
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- std::execution::seq      → 순차 (기본)
+- std::execution::par      → 병렬
+- std::execution::par_unseq → 병렬 + SIMD
+- std::reduce              → MapReduce의 reduce 단계
+- std::transform_reduce    → 한 번의 패스 (map + reduce)
+- std::inclusive_scan      → prefix sum (segment tree 등)
+- std::exclusive_scan      → parallel compaction에 사용
+
+언어/도구:
+- C++17/20: std::execution
+- C++ 라이브러리: TBB, OpenMP, Intel oneAPI, Highway
+- Rust: rayon (par_iter, par_iter_mut)
+- Java: parallel streams (Stream.parallel())
+- Python: numpy, multiprocessing.Pool
+
+빌드:
+- GCC: -ltbb (Linux), brew install tbb (Mac)
+- Clang: -ltbb 또는 PSTL 백엔드
+- MSVC: 내장
+- CMake: find_package(TBB REQUIRED)
+```
+
+## 자기 점검
+
+```
+□ seq vs par vs par_unseq vs unseq 차이?
+□ reduce가 결합법칙 필요한 이유?
+□ transform_reduce의 map-reduce 패턴?
+□ 부동소수점 reduce의 *재현 불가능* 문제?
+□ 병렬 알고리즘 안 *예외 처리* 방식?
+□ par_unseq에서 락 사용 금지 이유?
+□ 병렬화 임계값 결정 기준?
+```
+
 ## 다음 장 예고
 
 다음 장에서는 동시성 코드의 테스트와 디버깅을 다룬다. ThreadSanitizer, 데이터 레이스 탐지, 동시성 버그 패턴을 살펴본다.
+
+## 관련 항목
+
+- [Ch 8: Designing Concurrent Code](/blog/parallel/cpp-concurrency-in-action/chapter08-designing-concurrent-code)
+- [Ch 9: Advanced Thread Management](/blog/parallel/cpp-concurrency-in-action/chapter09-advanced-thread-management)
+- [Ch 11: Testing and Debugging](/blog/parallel/cpp-concurrency-in-action/chapter11-testing-and-debugging-multithreaded-applications)
+- [AMP Ch 16: Work Stealing](/blog/parallel/parallel-principles/ch16-futures-scheduling-work-distribution)
+- [AMP Ch 12: Counting & Sorting Networks](/blog/parallel/parallel-principles/ch12-counting-sorting-and-distributed-coordination)

@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  op/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=35mm, minimum height=8mm, fill=white, inner sep=3pt, align=center, rounded corners=2pt}
+]
+
+% Column headers
+\node[font=\sffamily\bfseries\small] at (-2.5, 4) {Producer};
+\node[font=\sffamily\bfseries\small] at (2.5, 4) {Consumer};
+
+% Timeline line
+\draw[thick, draw=nodebord] (-2.5, 3.5) -- (-2.5, -0.5);
+\draw[thick, draw=nodebord] (2.5, 3.5) -- (2.5, -0.5);
+
+% Producer operations
+\node[op, fill=impfill, draw=impbord] (p1) at (-2.5, 3) {data = 42};
+\node[op, fill=confill, draw=conbord] (p2) at (-2.5, 1.5) {release store};
+
+% Consumer operations
+\node[op, fill=absfill, draw=absbord] (c1) at (2.5, 1.5) {acquire load};
+\node[op, fill=impfill, draw=impbord] (c2) at (2.5, 0) {read data};
+
+% Synchronization arrow
+\draw[arr, very thick, draw=hibord] (p2.east) -- node[above, font=\sffamily\scriptsize] {동기화} (c1.west);
+
+% Happens-before
+\draw[arr, thick, dashed, draw=conbord] (p1.south) -- (p2.north);
+\draw[arr, thick, dashed, draw=absbord] (c1.south) -- (c2.north);
+
+% Labels
+\node[font=\sffamily\tiny, anchor=west] at (0, 3) {(1)};
+\node[font=\sffamily\tiny, anchor=west] at (-0.3, 1.5) {(2)};
+\node[font=\sffamily\tiny, anchor=east] at (0.3, 1.5) {(3)};
+\node[font=\sffamily\tiny, anchor=west] at (5, 0) {(4)};
+
+% Explanation
+\node[font=\sffamily\scriptsize] at (0, -1.2) {(1) happens-before (4)};
+
+\end{tikzpicture}
+\end{document}

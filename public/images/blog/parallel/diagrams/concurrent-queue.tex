@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  node/.style={circle, draw=absbord, line width=0.4pt, minimum size=10mm, fill=absfill, inner sep=0pt},
+  ptr/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=14mm, minimum height=8mm, fill=clifill, inner sep=2pt, align=center, rounded corners=2pt}
+]
+
+% Queue nodes
+\node[ptr] (head) at (0, 0) {head};
+\node[node] (n1) at (2, 0) {1};
+\node[node] (n2) at (4, 0) {2};
+\node[node] (n3) at (6, 0) {3};
+\node[node] (n4) at (8, 0) {4};
+\node[ptr] (tail) at (10, 0) {tail};
+
+% Links
+\draw[arr, thick] (head.east) -- (n1.west);
+\draw[arr, thick] (n1.east) -- (n2.west);
+\draw[arr, thick] (n2.east) -- (n3.west);
+\draw[arr, thick] (n3.east) -- (n4.west);
+\draw[arr, thick] (n4.east) -- (tail.west);
+
+% Operation labels
+\draw[arr, thick, draw=conbord] (n1.south) -- ++(0, -0.8) node[below, font=\sffamily\small] {dequeue};
+\draw[arr, thick, draw=impbord] (n4.south) -- ++(0, -0.8) node[below, font=\sffamily\small] {enqueue};
+
+% Flow arrows
+\draw[arr, thick, draw=conbord, dashed] (0.5, -1.5) -- (1.5, -1.5) node[right, font=\sffamily\tiny] {제거};
+\draw[arr, thick, draw=impbord, dashed] (8.5, -1.5) -- (9.5, -1.5) node[right, font=\sffamily\tiny] {삽입};
+
+\end{tikzpicture}
+\end{document}

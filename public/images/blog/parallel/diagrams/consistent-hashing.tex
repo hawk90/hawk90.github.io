@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Hash ring (circle)
+\draw[thick, draw=nodebord] (0,0) circle (2.5cm);
+
+% Hash space labels
+\node[font=\sffamily\scriptsize] at (0, 3.1) {hash space};
+\node[font=\sffamily\tiny] at (2.8, 0) {0};
+\node[font=\sffamily\tiny] at (-2.8, 0) {$2^{160}$};
+
+% Nodes on the ring (positioned at different angles)
+\node[circle, fill=confill, draw=conbord, minimum size=6mm, font=\sffamily\scriptsize] (nodeA) at (60:2.5) {A};
+\node[circle, fill=impfill, draw=impbord, minimum size=6mm, font=\sffamily\scriptsize] (nodeB) at (-30:2.5) {B};
+\node[circle, fill=absfill, draw=absbord, minimum size=6mm, font=\sffamily\scriptsize] (nodeC) at (200:2.5) {C};
+
+% Keys on the ring
+\node[circle, fill=hifill, draw=hibord, minimum size=4mm, font=\sffamily\tiny] (keyX) at (30:2.5) {X};
+\node[circle, fill=hifill, draw=hibord, minimum size=4mm, font=\sffamily\tiny] (keyY) at (130:2.5) {Y};
+\node[circle, fill=hifill, draw=hibord, minimum size=4mm, font=\sffamily\tiny] (keyZ) at (250:2.5) {Z};
+
+% Legend
+\node[font=\sffamily\scriptsize, anchor=west] at (3.5, 1.5) {노드};
+\node[circle, fill=confill, draw=conbord, minimum size=4mm] at (3.2, 1.5) {};
+
+\node[font=\sffamily\scriptsize, anchor=west] at (3.5, 0.8) {키};
+\node[circle, fill=hifill, draw=hibord, minimum size=3mm] at (3.2, 0.8) {};
+
+% Explanation
+\node[font=\sffamily\tiny, anchor=north, text width=4cm, align=center] at (0, -3.2) {키는 시계 방향으로\\가장 가까운 노드로 할당};
+
+\end{tikzpicture}
+\end{document}

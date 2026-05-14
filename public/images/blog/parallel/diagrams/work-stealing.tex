@@ -1,0 +1,60 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  task/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=8mm, minimum height=5mm, fill=#1, inner sep=1pt, font=\sffamily\tiny},
+  task/.default=absfill,
+  thread/.style={font=\sffamily\small\bfseries}
+]
+
+% Before stealing - left side
+\node[font=\sffamily\scriptsize\bfseries] at (-3, 3.5) {초기 상태};
+
+% Thread 1 - busy
+\node[thread] (t1b) at (-5, 2.5) {T1:};
+\node[task] at (-4, 2.5) {};
+\node[task] at (-3.1, 2.5) {};
+\node[task] at (-2.2, 2.5) {};
+\node[font=\sffamily\tiny, anchor=west] at (-1.2, 2.5) {← 바쁨};
+
+% Thread 2 - idle
+\node[thread] (t2b) at (-5, 1.5) {T2:};
+\node[font=\sffamily\tiny, anchor=west] at (-4, 1.5) {[ ]};
+\node[font=\sffamily\tiny, anchor=west] at (-3, 1.5) {← 놀고 있음};
+
+% Thread 3 - almost done
+\node[thread] (t3b) at (-5, 0.5) {T3:};
+\node[task] at (-4, 0.5) {};
+\node[font=\sffamily\tiny, anchor=west] at (-3, 0.5) {← 거의 완료};
+
+% Arrow
+\draw[arr, very thick, draw=hibord] (-0.5, 1.5) -- (0.5, 1.5) node[midway, above, font=\sffamily\tiny] {Work Stealing};
+
+% After stealing - right side
+\node[font=\sffamily\scriptsize\bfseries] at (3, 3.5) {Work Stealing 후};
+
+% Thread 1 - less work
+\node[thread] (t1a) at (1, 2.5) {T1:};
+\node[task] at (2, 2.5) {};
+\node[font=\sffamily\tiny, anchor=west] at (3, 2.5) {← T2가 훔쳐감};
+
+% Thread 2 - has work now
+\node[thread] (t2a) at (1, 1.5) {T2:};
+\node[task, fill=confill] at (2, 1.5) {};
+\node[font=\sffamily\tiny, anchor=west] at (3, 1.5) {← T1에서 훔쳐옴};
+
+% Thread 3 - same
+\node[thread] (t3a) at (1, 0.5) {T3:};
+\node[task] at (2, 0.5) {};
+\node[font=\sffamily\tiny, anchor=west] at (3, 0.5) {← 변화 없음};
+
+% Key insight
+\node[font=\sffamily\tiny, text width=6cm, align=center, anchor=north] at (0, -0.5) {핵심: 놀고 있는 스레드가 바쁜 스레드의 작업을 훔침};
+
+\end{tikzpicture}
+\end{document}

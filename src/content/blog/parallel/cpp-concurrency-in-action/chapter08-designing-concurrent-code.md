@@ -2,10 +2,10 @@
 title: "Ch 8: Designing concurrent code"
 date: 2026-05-20T08:00:00
 description: "작업 분할 — 데이터 vs 작업 병렬, false sharing, 작업 단위 결정."
-tags: [C++, Concurrency, Design, Parallelism, False Sharing]
+tags: [C++, C, Concurrency, Design, Parallelism, False Sharing]
 series: "C++ Concurrency in Action"
 seriesOrder: 8
-draft: true
+draft: false
 ---
 
 동시성 코드는 단순히 스레드를 만드는 것 이상이다. 작업을 어떻게 분할하고, 성능을 어떻게 최적화하는지가 중요하다.
@@ -83,6 +83,75 @@ T parallel_accumulate(Iterator first, Iterator last, T init) {
     }
 
     return std::accumulate(results.begin(), results.end(), init);
+}
+```
+
+### C11 데이터 병렬 합계
+
+```c
+// C11 <threads.h> 기반 병렬 합계
+#include <threads.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    const int* data;
+    size_t start;
+    size_t end;
+    long result;
+} AccumulateTask;
+
+int accumulate_worker(void* arg) {
+    AccumulateTask* task = (AccumulateTask*)arg;
+    long sum = 0;
+    for (size_t i = task->start; i < task->end; ++i) {
+        sum += task->data[i];
+    }
+    task->result = sum;
+    return 0;
+}
+
+long parallel_accumulate_c11(const int* data, size_t length, int num_threads) {
+    if (length == 0) return 0;
+    if (num_threads <= 0) num_threads = 4;
+
+    size_t block_size = length / num_threads;
+
+    thrd_t* threads = malloc(sizeof(thrd_t) * (num_threads - 1));
+    AccumulateTask* tasks = malloc(sizeof(AccumulateTask) * num_threads);
+
+    // 각 스레드에 작업 할당
+    size_t start = 0;
+    for (int i = 0; i < num_threads - 1; ++i) {
+        tasks[i].data = data;
+        tasks[i].start = start;
+        tasks[i].end = start + block_size;
+        tasks[i].result = 0;
+
+        thrd_create(&threads[i], accumulate_worker, &tasks[i]);
+        start += block_size;
+    }
+
+    // 마지막 블록은 현재 스레드에서 처리
+    tasks[num_threads - 1].data = data;
+    tasks[num_threads - 1].start = start;
+    tasks[num_threads - 1].end = length;
+    accumulate_worker(&tasks[num_threads - 1]);
+
+    // 스레드 대기
+    for (int i = 0; i < num_threads - 1; ++i) {
+        thrd_join(threads[i], NULL);
+    }
+
+    // 결과 합산
+    long total = 0;
+    for (int i = 0; i < num_threads; ++i) {
+        total += tasks[i].result;
+    }
+
+    free(threads);
+    free(tasks);
+    return total;
 }
 ```
 
@@ -474,6 +543,75 @@ int main() {
 // 예상 결과:
 // BadLayout (false sharing): ~2000ms
 // GoodLayout (no false sharing): ~500ms
+```
+
+### C11 False Sharing 회피
+
+```c
+// C11 캐시 라인 정렬로 False Sharing 회피
+#include <stdatomic.h>
+#include <threads.h>
+#include <stdalign.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
+
+#define CACHE_LINE 64
+#define ITERATIONS 100000000
+
+// 나쁜 레이아웃: false sharing 발생
+typedef struct {
+    atomic_long a;
+    atomic_long b;  // 같은 캐시 라인에 있을 가능성 높음
+} BadLayout;
+
+// 좋은 레이아웃: 캐시 라인 분리
+typedef struct {
+    _Alignas(CACHE_LINE) atomic_long a;
+    _Alignas(CACHE_LINE) atomic_long b;  // 다른 캐시 라인
+} GoodLayout;
+
+typedef struct {
+    atomic_long* counter;
+} WorkerArg;
+
+int worker(void* arg) {
+    WorkerArg* wa = (WorkerArg*)arg;
+    for (int i = 0; i < ITERATIONS; ++i) {
+        atomic_fetch_add_explicit(wa->counter, 1, memory_order_relaxed);
+    }
+    return 0;
+}
+
+void benchmark_c11(const char* name, atomic_long* a, atomic_long* b) {
+    thrd_t t1, t2;
+    WorkerArg wa1 = {a};
+    WorkerArg wa2 = {b};
+
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    thrd_create(&t1, worker, &wa1);
+    thrd_create(&t2, worker, &wa2);
+    thrd_join(t1, NULL);
+    thrd_join(t2, NULL);
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+
+    long ms = (end.tv_sec - start.tv_sec) * 1000 +
+              (end.tv_nsec - start.tv_nsec) / 1000000;
+    printf("%s: %ld ms\n", name, ms);
+}
+
+int main(void) {
+    BadLayout bad = {0, 0};
+    GoodLayout good = {0, 0};
+
+    benchmark_c11("BadLayout (false sharing)", &bad.a, &bad.b);
+    benchmark_c11("GoodLayout (no false sharing)", &good.a, &good.b);
+
+    return 0;
+}
 ```
 
 ## 8.5 데이터 레이아웃
@@ -957,6 +1095,83 @@ void work_stealing_for(size_t total, Func f) {
 - **SoA**는 SIMD와 특정 필드 처리에, **AoS**는 개별 객체 접근에 적합
 - **예외 안전성**을 고려하여 병렬 코드를 설계하라
 
+## 한국 개발자의 함정
+
+```
+1. *N코어 = N배 빠름*
+   - Amdahl로 깨짐 (직렬 부분 한계)
+   - 동기화 + cache + memory bandwidth 병목
+   - 보통 80%도 이상적
+
+2. *False sharing 무시*
+   - 다른 변수인데 같은 cache line이면 ping-pong
+   - 측정 안 하면 발견 어려움
+   - alignas(64) 또는 hardware_destructive_interference_size
+
+3. *작업 단위가 작을수록 좋음*
+   - 스레드 생성/동기화 오버헤드 큼
+   - 보통 청크 = N_threads × 4~8
+   - 너무 크면 load imbalance
+
+4. *모든 코드가 thread-safe 필요*
+   - 단일 스레드 코드는 그대로 두기
+   - 공유 데이터만 보호
+   - 과도한 락은 성능 저하
+
+5. *AoS / SoA 자동 결정*
+   - SIMD / cache 패턴이 다름
+   - 워크로드 분석 필요
+   - 게임/HPC는 SoA가 보통 빠름
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- Parallel for_each      → std::for_each(par, ...) (C++17 병렬 알고리즘)
+- Parallel reduce        → std::reduce(par, ...) (C++17)
+- Work-stealing          → Intel TBB, rayon (Rust), ForkJoinPool (Java)
+- Pipeline               → TBB flow graph, GStreamer, Akka Streams
+- SIMD                   → std::experimental::simd, Highway, xsimd
+- False sharing 회피     → alignas(64), padding
+
+언어/프레임워크:
+- C++: std::execution::par, TBB, OpenMP, MPI
+- Rust: rayon, crossbeam
+- Java: parallel streams, ForkJoinPool
+- Go: goroutine + channel
+- Python: multiprocessing (GIL 우회)
+
+설계 패턴:
+- Embarrassingly parallel → parallel for_each
+- Reduce/Aggregate       → parallel reduce
+- Pipeline               → producer-consumer chain
+- Scatter-gather         → 데이터 분배 + 결과 수집
+- Map-Reduce             → Hadoop / Spark 패턴
+```
+
+## 자기 점검
+
+```
+□ Amdahl과 Gustafson 차이?
+□ False sharing 메커니즘과 회피 방법?
+□ AoS vs SoA 선택 기준?
+□ Lock striping의 작동?
+□ Critical section을 *최소화*하는 방법?
+□ 작업 단위 결정 (입자도) 기준?
+□ Parallel reduce가 commutative + associative 필요한 이유?
+```
+
 ## 다음 장 예고
 
 다음 장에서는 고급 스레드 관리를 다룬다. 스레드 풀, 작업 훔치기, 인터럽트 등을 살펴본다.
+
+## 관련 항목
+
+- [Ch 6: Lock-based Data Structures](/blog/parallel/cpp-concurrency-in-action/chapter06-designing-lock-based-concurrent-data-structures)
+- [Ch 7: Lock-free Data Structures](/blog/parallel/cpp-concurrency-in-action/chapter07-designing-lock-free-concurrent-data-structures)
+- [Ch 9: Advanced Thread Management](/blog/parallel/cpp-concurrency-in-action/chapter09-advanced-thread-management)
+- [Ch 10: Parallel Algorithms](/blog/parallel/cpp-concurrency-in-action/chapter10-parallel-algorithms)
+- [AMP Ch 1: Introduction](/blog/parallel/parallel-principles/ch01-introduction) — Amdahl
+- [AMP Ch 12: Counting & Sorting](/blog/parallel/parallel-principles/ch12-counting-sorting-and-distributed-coordination) — sharded counter
+- [AMP Ch 16: Work Stealing](/blog/parallel/parallel-principles/ch16-futures-scheduling-work-distribution)

@@ -5,7 +5,7 @@ description: "std::thread 라이프사이클, join/detach, 인자 전달, std::j
 tags: [C++, Concurrency, std::thread, std::jthread]
 series: "C++ Concurrency in Action"
 seriesOrder: 2
-draft: true
+draft: false
 ---
 
 스레드는 생성되고, 작업을 수행하고, 종료된다. 이 장에서는 스레드의 생애 주기를 관리하는 방법을 다룬다. `join`과 `detach`의 선택, 인자 전달의 함정, 그리고 C++20의 `std::jthread`까지.
@@ -78,7 +78,139 @@ std::thread t3(task);
 std::thread t4([] { Task{}(); });
 ```
 
-## 2.2 join과 detach
+## 2.2 C11 스레드 관리
+
+C11은 `<threads.h>`에서 스레드 관리 기능을 제공한다.
+
+### C11 스레드 생성
+
+```c
+#include <stdio.h>
+#include <threads.h>
+
+int task(void* arg) {
+    int* value = (int*)arg;
+    printf("Thread received: %d\n", *value);
+    return *value * 2;  // 반환값
+}
+
+int main(void) {
+    thrd_t t;
+    int arg = 21;
+
+    // 스레드 생성
+    if (thrd_create(&t, task, &arg) != thrd_success) {
+        return 1;
+    }
+
+    // 결과 받기
+    int result;
+    thrd_join(t, &result);
+    printf("Thread returned: %d\n", result);  // 42
+
+    return 0;
+}
+```
+
+### C11 vs C++11 스레드 관리 비교
+
+| 기능 | C11 | C++11 |
+|------|-----|-------|
+| 생성 | `thrd_create(&t, func, arg)` | `std::thread t(func, args...)` |
+| join | `thrd_join(t, &result)` | `t.join()` |
+| detach | `thrd_detach(t)` | `t.detach()` |
+| 현재 스레드 ID | `thrd_current()` | `std::this_thread::get_id()` |
+| 양보 | `thrd_yield()` | `std::this_thread::yield()` |
+| sleep | `thrd_sleep(&ts, NULL)` | `std::this_thread::sleep_for()` |
+| 종료 | `thrd_exit(result)` | `return` 또는 예외 |
+
+### C11 스레드 분리
+
+```c
+#include <threads.h>
+
+int background_task(void* arg) {
+    (void)arg;
+    // 백그라운드 작업
+    return 0;
+}
+
+int main(void) {
+    thrd_t t;
+    thrd_create(&t, background_task, NULL);
+    thrd_detach(t);  // 분리 - 더 이상 join 불가
+
+    // 메인은 계속 진행
+    return 0;
+}
+```
+
+### C11 스레드 sleep
+
+```c
+#include <threads.h>
+#include <time.h>
+
+void sleep_example(void) {
+    // 500ms 대기
+    struct timespec duration = {
+        .tv_sec = 0,
+        .tv_nsec = 500000000  // 500ms
+    };
+    struct timespec remaining;
+
+    int result = thrd_sleep(&duration, &remaining);
+    if (result == -1) {
+        // 시그널로 중단됨, remaining에 남은 시간
+    }
+}
+```
+
+### C11 스레드 로컬 저장소
+
+```c
+#include <threads.h>
+
+// 방법 1: thread_local 키워드 (C11)
+thread_local int tls_var = 0;
+
+// 방법 2: tss_t (스레드 특정 저장소)
+tss_t key;
+
+void destructor(void* data) {
+    free(data);
+}
+
+int worker(void* arg) {
+    (void)arg;
+
+    // tss 사용
+    int* data = malloc(sizeof(int));
+    *data = 42;
+    tss_set(key, data);
+
+    // 나중에 가져오기
+    int* retrieved = tss_get(key);
+    printf("TSS value: %d\n", *retrieved);
+
+    return 0;
+}
+
+int main(void) {
+    tss_create(&key, destructor);
+
+    thrd_t t;
+    thrd_create(&t, worker, NULL);
+    thrd_join(t, NULL);
+
+    tss_delete(key);
+    return 0;
+}
+```
+
+> **참고:** C11 `thrd_join`은 반환값을 받을 수 있지만, C++11 `std::thread::join()`은 반환값이 없다. C++에서 결과를 받으려면 `std::future`를 사용해야 한다.
+
+## 2.3 join과 detach
 
 ### joinable 상태
 
@@ -179,7 +311,7 @@ void safe() {
 }  // data가 파괴되어도 람다가 소유권 유지
 ```
 
-## 2.3 예외 안전성
+## 2.4 예외 안전성
 
 ### 문제: 예외로 join을 건너뜀
 
@@ -287,7 +419,7 @@ void modern() {
 
 **새 코드에서는 `std::jthread`를 기본으로 사용하라.**
 
-## 2.4 std::jthread (C++20)
+## 2.5 std::jthread (C++20)
 
 ### 자동 join
 
@@ -356,7 +488,7 @@ source.request_stop();  // == t.request_stop()
 bool requested = token.stop_requested();
 ```
 
-## 2.5 스레드 이동
+## 2.6 스레드 이동
 
 ### std::thread는 이동 가능
 
@@ -403,7 +535,7 @@ for (auto& t : threads) {
 
 주의: `push_back(std::thread(...))`도 가능하지만 `emplace_back`이 더 효율적이다.
 
-## 2.6 스레드 개수 결정
+## 2.7 스레드 개수 결정
 
 ### hardware_concurrency
 
@@ -451,7 +583,7 @@ for (auto& w : workers) {
 
 **스레드 수가 코어 수를 크게 초과하면 성능이 저하된다.** 스케줄링 오버헤드와 캐시 오염이 발생한다.
 
-## 2.7 스레드 식별
+## 2.8 스레드 식별
 
 ### std::thread::id
 
@@ -493,7 +625,7 @@ t.join();
 
 **주의:** `std::thread::id`는 스레드가 종료된 후 재사용될 수 있다. 종료된 스레드의 ID를 장기간 보관하면 안 된다.
 
-## 2.8 네이티브 핸들
+## 2.9 네이티브 핸들
 
 ### native_handle
 
@@ -523,6 +655,72 @@ t.join();
 - `std::thread`는 이동 가능, 복사 불가
 - `hardware_concurrency()`로 적정 스레드 수를 결정하되, 과도한 스레드는 피한다
 
+## 한국 개발자의 함정
+
+```
+1. *Most Vexing Parse*에 당함
+   - std::thread t(Task());  // 함수 선언으로 해석
+   - 중괄호 / 람다 / 변수 분리로 해결
+   - 가장 흔한 C++ 초보 버그
+
+2. *detach 후 ref capture*
+   - 지역 변수가 사라지면 댕글링
+   - shared_ptr 또는 값 캡처
+   - 진짜 fire-and-forget만 detach
+
+3. *std::thread 복사 시도*
+   - thread는 *unique* 자원
+   - std::move(t)로만 전달 가능
+   - vector에 넣을 때 emplace_back 또는 move
+
+4. *jthread를 그냥 jthread*로만 씀
+   - 진짜 가치는 stop_token (협력적 취소)
+   - 첫 인자가 stop_token이면 자동 전달
+   - 자동 join은 *부수 효과*
+
+5. *hardware_concurrency × 2 = 적정 스레드*
+   - 워크로드별로 다름
+   - CPU 바운드: 코어 수
+   - I/O 바운드: 훨씬 많이
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- thread_guard / scoped_thread → std::jthread (C++20)
+- stop_token / stop_source     → cooperative cancellation
+- native_handle                → pthread_setname_np, SetThreadPriority
+- thread pool 직접 구현        → ASIO io_context, std::async (제한적)
+
+플랫폼별:
+- POSIX: pthread_setname_np, pthread_setaffinity_np
+- Windows: SetThreadPriority, SetThreadAffinityMask
+- macOS: pthread_set_qos_class_self_np (QoS class)
+
+언제 jthread vs thread:
+- 새 코드 → std::jthread 기본
+- 명시적 lifecycle 제어 → std::thread + RAII
+- 매우 짧은 작업 → std::async
+```
+
+## 자기 점검
+
+```
+□ Most Vexing Parse 해결 방법 4가지?
+□ join과 detach의 *예외 경로* 차이?
+□ thread_guard 패턴의 핵심?
+□ jthread의 stop_token 자동 전달?
+□ thread 이동의 의미 (unique ownership)?
+□ hardware_concurrency()의 *힌트* 특성?
+```
+
 ## 다음 장 예고
 
 다음 장에서는 스레드 간 데이터 공유를 다룬다. race condition, `std::mutex`, lock guard, deadlock 회피, `std::shared_mutex`를 살펴본다.
+
+## 관련 항목
+
+- [Ch 1: Hello Concurrent World](/blog/parallel/cpp-concurrency-in-action/chapter01-hello-concurrent-world)
+- [Ch 3: Sharing Data](/blog/parallel/cpp-concurrency-in-action/chapter03-sharing-data-between-threads)
+- [AMP Ch 1: Introduction](/blog/parallel/parallel-principles/ch01-introduction)

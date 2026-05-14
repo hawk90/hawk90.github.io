@@ -4,14 +4,16 @@ date: 2026-05-12
 description: "락 없는 atomic block의 약속. Software TM, Hardware TM (Intel TSX, IBM POWER). 합성성과 진행 보장."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 18
-tags: [parallel, concurrency, book-review, amp, transactional-memory, stm, htm]
+tags: [parallel, concurrency, book-review, amp, transactional-memory, stm, htm, C++, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
-draft: true
+draft: false
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 18 요약
+>
+> 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
 ## 18.1 락의 문제
 
@@ -32,11 +34,12 @@ draft: true
 
 ## 18.2 Transactional Memory의 약속
 
-```
+```cpp
+// 이상적인 TM 문법 (C++에는 없음)
 atomic {
     if (account_a.balance >= 100) {
-        account_a.balance -= 100
-        account_b.balance += 100
+        account_a.balance -= 100;
+        account_b.balance += 100;
     }
 }
 ```
@@ -60,29 +63,222 @@ atomic {
 4. 안 변경됐으면 쓰기 셋을 실제 메모리에 반영, 커밋
 5. 변경됐으면 **abort** 후 재시도
 
-```python
-class STMTransaction:
-    read_set: Map<addr, value>
-    write_set: Map<addr, value>
-    
-    def read(addr):
-        if addr in write_set: return write_set[addr]
-        value = memory[addr]
-        read_set[addr] = value
-        return value
-    
-    def write(addr, value):
-        write_set[addr] = value
-    
-    def commit():
-        # validation
-        for addr, old in read_set:
-            if memory[addr] != old:
-                return ABORT
-        # commit
-        for addr, value in write_set:
-            memory[addr] = value
-        return COMMIT
+```cpp
+// C++20 — STM 개념 구현 (단순화)
+#include <unordered_map>
+#include <atomic>
+#include <functional>
+#include <stdexcept>
+
+template<typename T>
+class TVar {
+    std::atomic<T> value_;
+    std::atomic<uint64_t> version_{0};
+
+public:
+    explicit TVar(T initial) : value_(initial) {}
+
+    T read() const { return value_.load(std::memory_order_acquire); }
+    uint64_t version() const { return version_.load(std::memory_order_acquire); }
+
+    bool try_commit(T new_value, uint64_t expected_version) {
+        uint64_t current = expected_version;
+        if (version_.compare_exchange_strong(current, expected_version + 1,
+                                              std::memory_order_acq_rel)) {
+            value_.store(new_value, std::memory_order_release);
+            return true;
+        }
+        return false;
+    }
+
+    friend class STMTransaction;
+};
+
+class STMTransaction {
+    struct ReadEntry {
+        void* var;
+        uint64_t version;
+    };
+
+    struct WriteEntry {
+        void* var;
+        std::function<bool()> commit_fn;
+    };
+
+    std::vector<ReadEntry> read_set_;
+    std::vector<WriteEntry> write_set_;
+    bool aborted_ = false;
+
+public:
+    template<typename T>
+    T read(TVar<T>& var) {
+        T value = var.read();
+        read_set_.push_back({&var, var.version()});
+        return value;
+    }
+
+    template<typename T>
+    void write(TVar<T>& var, T value) {
+        uint64_t ver = var.version();
+        read_set_.push_back({&var, ver});
+        write_set_.push_back({
+            &var,
+            [&var, value, ver]() { return var.try_commit(value, ver); }
+        });
+    }
+
+    bool validate() {
+        for (auto& entry : read_set_) {
+            auto* var = static_cast<TVar<int>*>(entry.var);  // 단순화
+            if (var->version() != entry.version) {
+                return false;  // 충돌 발생
+            }
+        }
+        return true;
+    }
+
+    bool commit() {
+        if (!validate()) {
+            return false;  // abort
+        }
+        for (auto& entry : write_set_) {
+            if (!entry.commit_fn()) {
+                return false;  // abort
+            }
+        }
+        return true;
+    }
+};
+
+// 사용 예
+template<typename F>
+void atomically(F&& fn) {
+    while (true) {
+        STMTransaction tx;
+        try {
+            fn(tx);
+            if (tx.commit()) {
+                return;  // 성공
+            }
+        } catch (...) {
+            // abort
+        }
+        // 재시도
+    }
+}
+```
+
+```c
+// C11 — STM 개념 구현 (단순화)
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    atomic_int value;
+    atomic_uint_fast64_t version;
+} TVar_int;
+
+#define MAX_READ_SET 64
+#define MAX_WRITE_SET 64
+
+typedef struct {
+    TVar_int* var;
+    uint64_t version;
+} ReadEntry;
+
+typedef struct {
+    TVar_int* var;
+    int new_value;
+    uint64_t expected_version;
+} WriteEntry;
+
+typedef struct {
+    ReadEntry read_set[MAX_READ_SET];
+    WriteEntry write_set[MAX_WRITE_SET];
+    size_t read_count;
+    size_t write_count;
+} STMTransaction;
+
+void stm_init(STMTransaction* tx) {
+    tx->read_count = 0;
+    tx->write_count = 0;
+}
+
+int stm_read(STMTransaction* tx, TVar_int* var) {
+    int value = atomic_load(&var->value);
+    uint64_t ver = atomic_load(&var->version);
+
+    tx->read_set[tx->read_count].var = var;
+    tx->read_set[tx->read_count].version = ver;
+    tx->read_count++;
+
+    return value;
+}
+
+void stm_write(STMTransaction* tx, TVar_int* var, int value) {
+    uint64_t ver = atomic_load(&var->version);
+
+    tx->read_set[tx->read_count].var = var;
+    tx->read_set[tx->read_count].version = ver;
+    tx->read_count++;
+
+    tx->write_set[tx->write_count].var = var;
+    tx->write_set[tx->write_count].new_value = value;
+    tx->write_set[tx->write_count].expected_version = ver;
+    tx->write_count++;
+}
+
+bool stm_validate(STMTransaction* tx) {
+    for (size_t i = 0; i < tx->read_count; ++i) {
+        TVar_int* var = tx->read_set[i].var;
+        if (atomic_load(&var->version) != tx->read_set[i].version) {
+            return false;  // 충돌
+        }
+    }
+    return true;
+}
+
+bool stm_commit(STMTransaction* tx) {
+    if (!stm_validate(tx)) {
+        return false;
+    }
+
+    for (size_t i = 0; i < tx->write_count; ++i) {
+        TVar_int* var = tx->write_set[i].var;
+        uint64_t expected = tx->write_set[i].expected_version;
+
+        if (!atomic_compare_exchange_strong(&var->version, &expected, expected + 1)) {
+            return false;  // 다른 트랜잭션이 먼저 커밋
+        }
+        atomic_store(&var->value, tx->write_set[i].new_value);
+    }
+    return true;
+}
+
+// 사용 예
+void transfer_money(TVar_int* from, TVar_int* to, int amount) {
+    while (1) {
+        STMTransaction tx;
+        stm_init(&tx);
+
+        int from_balance = stm_read(&tx, from);
+        int to_balance = stm_read(&tx, to);
+
+        if (from_balance >= amount) {
+            stm_write(&tx, from, from_balance - amount);
+            stm_write(&tx, to, to_balance + amount);
+
+            if (stm_commit(&tx)) {
+                return;  // 성공
+            }
+        } else {
+            return;  // 잔액 부족
+        }
+        // 재시도
+    }
+}
 ```
 
 **장점**: 일반 코드처럼 자연스럽다. 합성 가능.
@@ -92,36 +288,51 @@ class STMTransaction:
 
 락의 가장 큰 문제는 **합성 불가**.
 
-```python
-# 두 함수가 있다:
-def deposit(account, amount):
-    lock(account)
-    account.balance += amount
-    unlock(account)
+```cpp
+// C++20 — 락 기반의 합성 문제
+#include <mutex>
 
-def withdraw(account, amount):
-    lock(account)
-    account.balance -= amount
-    unlock(account)
+class Account {
+    int balance_;
+    std::mutex mtx_;
 
-# 합치려면?
-def transfer(from, to, amount):
-    lock(from)
-    lock(to)            # ⚠️ 락 순서 문제 (deadlock 위험)
-    from.balance -= amount
-    to.balance += amount
-    unlock(to)
-    unlock(from)
+public:
+    void deposit(int amount) {
+        std::lock_guard lock(mtx_);
+        balance_ += amount;
+    }
+
+    void withdraw(int amount) {
+        std::lock_guard lock(mtx_);
+        balance_ -= amount;
+    }
+};
+
+// 두 함수를 합치려면?
+void transfer(Account& from, Account& to, int amount) {
+    // 락 순서 문제 — deadlock 위험!
+    std::scoped_lock lock(from.mtx_, to.mtx_);  // 해결책
+    from.balance_ -= amount;
+    to.balance_ += amount;
+}
+// 그러나 모든 함수가 이렇게 설계되어야 함
 ```
 
 TM에서는 자연스러움.
 
-```python
-def transfer(from, to, amount):
-    atomic {
-        withdraw(from, amount)
-        deposit(to, amount)
-    }
+```cpp
+// 이상적인 TM (개념)
+void transfer(TVar<int>& from, TVar<int>& to, int amount) {
+    atomically([&](auto& tx) {
+        int from_bal = tx.read(from);
+        int to_bal = tx.read(to);
+
+        if (from_bal >= amount) {
+            tx.write(from, from_bal - amount);
+            tx.write(to, to_bal + amount);
+        }
+    });
+}
 ```
 
 `atomic` 블록은 합성이 자유롭다. 함수의 `atomic`이 호출자의 `atomic` 안에 자연스럽게 nested.
@@ -161,6 +372,52 @@ CPU가 TM을 직접 지원.
 
 **IBM POWER8+, ARM** — 비슷한 지원.
 
+```cpp
+// GCC/Clang — Intel TSX intrinsics
+#include <immintrin.h>
+
+void critical_section_with_tsx() {
+    unsigned status;
+
+    // 트랜잭션 시작 시도
+    if ((status = _xbegin()) == _XBEGIN_STARTED) {
+        // 트랜잭션 안에서 실행
+        // ... 임계 영역 코드 ...
+
+        _xend();  // 트랜잭션 커밋
+    } else {
+        // Fallback — 일반 락 사용
+        // status에 abort 이유가 있음
+        take_fallback_lock();
+        // ... 임계 영역 코드 ...
+        release_fallback_lock();
+    }
+}
+```
+
+```c
+// C — Intel TSX intrinsics
+#include <immintrin.h>
+#include <threads.h>
+
+mtx_t fallback_lock;
+
+void critical_section_with_tsx(void) {
+    unsigned status;
+
+    if ((status = _xbegin()) == _XBEGIN_STARTED) {
+        // 트랜잭션 실행
+        // ... 임계 영역 ...
+        _xend();
+    } else {
+        // Fallback
+        mtx_lock(&fallback_lock);
+        // ... 임계 영역 ...
+        mtx_unlock(&fallback_lock);
+    }
+}
+```
+
 **장점**: 매우 빠름 — 충돌 없으면 거의 free.
 **단점**: 작은 트랜잭션만 가능 (cache line 수 제한), 항상 fallback path 필요.
 
@@ -176,27 +433,89 @@ CPU가 TM을 직접 지원.
 ```
 
 ```cpp
-// 의사 코드
-mutex m;
+// C++20 — Lock Elision 패턴
+#include <immintrin.h>
+#include <mutex>
+#include <atomic>
 
-XBEGIN()  // 트랜잭션 시작
-if (!m.is_locked()) {
-    // m이 안 잡혀 있으면 — speculative execution
-    critical_section()
-    XEND()  // commit
-} else {
-    XABORT()  // 다른 스레드가 진짜로 락 잡음 → fallback
-    m.lock()
-    critical_section()
-    m.unlock()
-}
+class ElisionMutex {
+    std::atomic<bool> locked_{false};
+    static constexpr int MAX_RETRIES = 3;
+
+public:
+    void lock() {
+        // TSX로 시도
+        for (int i = 0; i < MAX_RETRIES; ++i) {
+            unsigned status;
+            if ((status = _xbegin()) == _XBEGIN_STARTED) {
+                // 다른 스레드가 락을 잡았는지 확인
+                if (!locked_.load(std::memory_order_relaxed)) {
+                    return;  // 트랜잭션으로 진행
+                }
+                _xabort(0xFF);  // 다른 스레드가 락 보유 중
+            }
+
+            // abort 이유 분석
+            if (status & _XABORT_RETRY) {
+                continue;  // 재시도 가능
+            }
+            break;  // fallback으로
+        }
+
+        // Fallback — 실제 락
+        while (locked_.exchange(true, std::memory_order_acquire)) {
+            while (locked_.load(std::memory_order_relaxed)) {
+                // spin
+            }
+        }
+    }
+
+    void unlock() {
+        if (_xtest()) {
+            _xend();  // 트랜잭션 커밋
+        } else {
+            locked_.store(false, std::memory_order_release);
+        }
+    }
+};
 ```
 
 여러 스레드가 같은 락을 잡으려 시도해도, 실제로 충돌하지 않으면 동시 실행. 충돌 시에만 직렬화.
 
 **효과** — 락의 의미는 유지하면서 경합 적을 때는 lock-free처럼 빠름. Linux 커널, glibc의 `pthread_rwlock` 등에 적용된 적 있음.
 
-## 18.8 TM의 미래
+## 18.8 C++ Transactional Memory TS
+
+C++ 표준에서는 Transactional Memory TS (Technical Specification)가 제안되었다.
+
+```cpp
+// C++ TM TS (실험적, 컴파일러 지원 필요)
+// GCC -fgnu-tm 옵션으로 사용 가능
+
+void transfer(int& from, int& to, int amount) {
+    __transaction_atomic {
+        if (from >= amount) {
+            from -= amount;
+            to += amount;
+        }
+    }
+}
+
+// relaxed 트랜잭션 (I/O 허용, 그러나 위험)
+void log_and_transfer(int& from, int& to, int amount) {
+    __transaction_relaxed {
+        if (from >= amount) {
+            from -= amount;
+            to += amount;
+            printf("Transferred %d\n", amount);  // 위험!
+        }
+    }
+}
+```
+
+그러나 아직 표준 C++에는 포함되지 않았고, 컴파일러 지원도 제한적이다.
+
+## 18.9 TM의 미래
 
 TM이 20년 넘게 연구됐지만 **주류로 자리 잡지 못했다**. 이유.
 
@@ -218,34 +537,106 @@ Lock-free 라이브러리, message passing, actor 모델 등이 다른 길.
 
 다만 GC 언어 + STM은 여전히 흥미로운 영역. Haskell의 STM이 가장 성공한 사례 — pure 함수 + 명시적 atomic의 조합.
 
-## 18.9 Haskell STM
+## 18.10 실용적 대안들
 
-```haskell
-transfer :: TVar Int -> TVar Int -> Int -> STM ()
-transfer from to amount = do
-    f <- readTVar from
-    t <- readTVar to
-    writeTVar from (f - amount)
-    writeTVar to (t + amount)
+TM 대신 실무에서 쓰는 패턴들.
 
-main = do
-    atomically $ transfer accountA accountB 100
+```cpp
+// C++20 — RCU (Read-Copy-Update) 패턴
+#include <atomic>
+#include <memory>
+
+template<typename T>
+class RCUProtected {
+    std::atomic<std::shared_ptr<T>> ptr_;
+
+public:
+    explicit RCUProtected(T value)
+        : ptr_(std::make_shared<T>(std::move(value))) {}
+
+    // 읽기 — 락 없음
+    std::shared_ptr<T> read() const {
+        return ptr_.load(std::memory_order_acquire);
+    }
+
+    // 쓰기 — copy-on-write
+    template<typename F>
+    void update(F&& modifier) {
+        std::shared_ptr<T> old_ptr, new_ptr;
+        do {
+            old_ptr = ptr_.load(std::memory_order_acquire);
+            new_ptr = std::make_shared<T>(*old_ptr);
+            modifier(*new_ptr);
+        } while (!ptr_.compare_exchange_weak(
+            old_ptr, new_ptr,
+            std::memory_order_release,
+            std::memory_order_acquire));
+    }
+};
+
+// 사용
+RCUProtected<Config> config(Config{});
+auto current = config.read();  // 락 없음
+config.update([](Config& c) { c.timeout = 5000; });
 ```
 
-`TVar` (Transactional Variable) — STM이 추적하는 변수. `atomically`로 트랜잭션 시작.
+```cpp
+// C++20 — Hazard Pointers (lock-free 메모리 회수)
+#include <atomic>
+#include <array>
+#include <thread>
 
-**Haskell이 잘 맞는 이유**:
-- Pure 함수 — I/O가 타입으로 분리 (`STM` 모나드)
-- Strong type system — 트랜잭션 안에서 무엇이 안전한지 컴파일러가 보장
+template<typename T, size_t MaxThreads = 64>
+class HazardPointer {
+    struct HazardRecord {
+        std::atomic<std::thread::id> owner{std::thread::id{}};
+        std::atomic<T*> ptr{nullptr};
+    };
 
-이게 Haskell STM이 실용적인 이유. 다른 언어에선 안 됨.
+    static inline std::array<HazardRecord, MaxThreads> hazards_;
 
-## 18.10 정리 — TM의 위상
+public:
+    class Guard {
+        HazardRecord* record_;
+    public:
+        explicit Guard(T* ptr) {
+            // 빈 슬롯 찾기
+            for (auto& h : hazards_) {
+                std::thread::id empty{};
+                if (h.owner.compare_exchange_strong(
+                        empty, std::this_thread::get_id())) {
+                    record_ = &h;
+                    record_->ptr.store(ptr, std::memory_order_release);
+                    return;
+                }
+            }
+            throw std::runtime_error("No hazard slot available");
+        }
+
+        ~Guard() {
+            record_->ptr.store(nullptr, std::memory_order_release);
+            record_->owner.store(std::thread::id{}, std::memory_order_release);
+        }
+    };
+
+    static bool is_hazardous(T* ptr) {
+        for (auto& h : hazards_) {
+            if (h.ptr.load(std::memory_order_acquire) == ptr) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+```
+
+## 18.11 정리 — TM의 위상
 
 20년 후의 결론:
 
 - **HTM** — 락 elision의 도구로 일부 환경에서 유용. 일반 도구는 아님.
 - **STM** — Haskell 같은 함수형 환경에서 우아함. 그 외에선 거의 안 쓰임.
+- **C++ TM TS** — 실험적, 표준 채택 불확실
 - **연구는 계속** — 매년 새 논문 나옴.
 
 실무자는 여전히 락 / lock-free 라이브러리 / 메시지 패싱을 쓴다. TM은 흥미로운 가능성이지만 마지막 도구가 되진 못했다.
@@ -257,7 +648,7 @@ main = do
 - **HTM** — 하드웨어 지원, 작은 트랜잭션에 빠름
 - 가장 큰 가치는 **합성성** — 락의 가장 큰 문제 해결
 - **Lock Elision** — HTM의 실용적 사용
-- Haskell STM이 가장 성공한 사례 — pure 함수 + 명시적 atomic
+- **대안**: RCU, Hazard Pointers, Actor Model
 
 ## 시리즈 마무리
 
@@ -271,8 +662,67 @@ main = do
 
 이 18장이 모든 모던 동시성 시스템의 이론적 토대다. **정확성을 정의하고, 그 정의 위에서 정확하고 빠른 알고리즘을 짓는다**.
 
+## 한국 개발자의 함정
+
+```
+1. *TM = lock-free*라는 오해
+   - TM은 abort/retry 기반 — wait-free가 아님
+   - 충돌 시 진행 보장 없음
+   - 일부 시스템은 retry 횟수 제한
+
+2. *Intel TSX = 항상 사용 가능*
+   - 일부 CPU 버그로 비활성화된 적 있음
+   - 짧은 임계 영역만 적합
+   - Fallback path 필수 — 디자인 복잡
+
+3. *STM이 lock-free 자료구조 대체*
+   - 일반 코드엔 매력적이지만 성능 부족
+   - 잘 짠 lock-free / fine-grained lock보다 보통 느림
+   - 합성성이 필요한 곳에만
+
+4. *atomic 블록에서 I/O 자유*
+   - I/O는 abort 불가 — 트랜잭션 의미 깨짐
+   - Haskell STM은 타입으로 막음
+   - 다른 언어는 프로그래머가 주의
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- HTM (Intel TSX)        → glibc pthread, Linux kernel (일부)
+- Lock Elision           → glibc rwlock (실험적)
+- STM                    → Haskell stm, Clojure refs
+- C++ TM TS              → GCC -fgnu-tm (실험적)
+
+언어별:
+- C++: Intel TSX intrinsics, GCC TM TS (실험적)
+- C: Intel TSX intrinsics
+- Haskell: TVar, atomically, retry, orElse
+- Clojure: ref, dosync, alter, ensure
+- Rust: 표준 없음 (lock-free 라이브러리 선호)
+
+실용적 대안:
+- RCU (Read-Copy-Update) — 읽기 많은 워크로드
+- Hazard Pointers — lock-free 메모리 회수
+- Actor Model — Erlang, Akka
+- Message Passing — Go channels, Rust channels
+```
+
+## 자기 점검
+
+```
+□ TM이 락의 어떤 문제를 해결?
+□ STM의 optimistic concurrency 메커니즘?
+□ HTM의 cache coherence 기반 충돌 감지?
+□ Lock Elision의 작동 원리?
+□ TM이 주류가 못 된 이유?
+□ RCU와 Hazard Pointers의 용도?
+```
+
 ## 관련 항목
 
 - [Ch 17: Barriers](/blog/parallel/parallel-principles/ch17-barriers)
-- [C++ Concurrency in Action Ch 7: Lock-Free](/blog/parallel/cpp-concurrency-in-action/chapter07-designing-lock-free-concurrent-data-structures)
 - [Ch 1: Introduction](/blog/parallel/parallel-principles/ch01-introduction) — 시작점
+- [Ch 10: Queue와 ABA](/blog/parallel/parallel-principles/ch10-concurrent-queues-and-the-aba-problem) — lock-free 어려움
+- [C++ Concurrency in Action Ch 7: Lock-Free](/blog/parallel/cpp-concurrency-in-action/chapter07-designing-lock-free-concurrent-data-structures)

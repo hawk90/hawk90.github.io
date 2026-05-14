@@ -5,7 +5,7 @@ description: "condition variable, future/promise/async, std::latch, std::barrier
 tags: [C++, Concurrency, Condition Variable, Future, Latch, Barrier]
 series: "C++ Concurrency in Action"
 seriesOrder: 4
-draft: true
+draft: false
 ---
 
 뮤텍스는 데이터를 보호한다. 하지만 "이벤트가 발생할 때까지 대기"는 어떻게 할까? 이 장에서는 조건 변수, future/promise, 그리고 C++20의 latch와 barrier를 다룬다.
@@ -82,7 +82,143 @@ void producer(Data data) {
 }
 ```
 
-## 4.2 std::condition_variable
+## 4.2 C11 조건 변수
+
+C11은 `<threads.h>`에 조건 변수를 제공한다.
+
+### C11 조건 변수 기본
+
+```c
+#include <stdio.h>
+#include <threads.h>
+#include <stdbool.h>
+
+mtx_t mtx;
+cnd_t cnd;
+bool ready = false;
+
+int waiter(void* arg) {
+    (void)arg;
+    mtx_lock(&mtx);
+    while (!ready) {
+        cnd_wait(&cnd, &mtx);  // 락 해제 + 대기 + 락 재획득
+    }
+    printf("Condition met!\n");
+    mtx_unlock(&mtx);
+    return 0;
+}
+
+int setter(void* arg) {
+    (void)arg;
+    mtx_lock(&mtx);
+    ready = true;
+    mtx_unlock(&mtx);
+    cnd_signal(&cnd);  // 하나 깨움
+    return 0;
+}
+
+int main(void) {
+    mtx_init(&mtx, mtx_plain);
+    cnd_init(&cnd);
+
+    thrd_t t1, t2;
+    thrd_create(&t1, waiter, NULL);
+    thrd_create(&t2, setter, NULL);
+
+    thrd_join(t1, NULL);
+    thrd_join(t2, NULL);
+
+    mtx_destroy(&mtx);
+    cnd_destroy(&cnd);
+    return 0;
+}
+```
+
+### C11 vs C++11 조건 변수 비교
+
+| 기능 | C11 | C++11 |
+|------|-----|-------|
+| 타입 | `cnd_t` | `std::condition_variable` |
+| 초기화 | `cnd_init(&cnd)` | 기본 생성자 |
+| 대기 | `cnd_wait(&cnd, &mtx)` | `cv.wait(lock)` |
+| 시간 제한 대기 | `cnd_timedwait(&cnd, &mtx, &ts)` | `cv.wait_for(lock, duration)` |
+| 하나 깨움 | `cnd_signal(&cnd)` | `cv.notify_one()` |
+| 모두 깨움 | `cnd_broadcast(&cnd)` | `cv.notify_all()` |
+| 소멸 | `cnd_destroy(&cnd)` | 소멸자 |
+
+### C11 시간 제한 대기
+
+```c
+#include <time.h>
+
+// 1초 타임아웃
+struct timespec ts;
+timespec_get(&ts, TIME_UTC);
+ts.tv_sec += 1;
+
+mtx_lock(&mtx);
+int result = cnd_timedwait(&cnd, &mtx, &ts);
+if (result == thrd_timedout) {
+    // 타임아웃
+} else if (result == thrd_success) {
+    // 조건 충족
+}
+mtx_unlock(&mtx);
+```
+
+### C11 생산자-소비자 패턴
+
+```c
+#include <stdio.h>
+#include <threads.h>
+#include <stdbool.h>
+
+#define QUEUE_SIZE 10
+
+typedef struct {
+    int data[QUEUE_SIZE];
+    int head, tail, count;
+    mtx_t mtx;
+    cnd_t not_empty;
+    cnd_t not_full;
+} Queue;
+
+void queue_init(Queue* q) {
+    q->head = q->tail = q->count = 0;
+    mtx_init(&q->mtx, mtx_plain);
+    cnd_init(&q->not_empty);
+    cnd_init(&q->not_full);
+}
+
+void queue_push(Queue* q, int value) {
+    mtx_lock(&q->mtx);
+    while (q->count == QUEUE_SIZE) {
+        cnd_wait(&q->not_full, &q->mtx);
+    }
+    q->data[q->tail] = value;
+    q->tail = (q->tail + 1) % QUEUE_SIZE;
+    q->count++;
+    cnd_signal(&q->not_empty);
+    mtx_unlock(&q->mtx);
+}
+
+int queue_pop(Queue* q) {
+    mtx_lock(&q->mtx);
+    while (q->count == 0) {
+        cnd_wait(&q->not_empty, &q->mtx);
+    }
+    int value = q->data[q->head];
+    q->head = (q->head + 1) % QUEUE_SIZE;
+    q->count--;
+    cnd_signal(&q->not_full);
+    mtx_unlock(&q->mtx);
+    return value;
+}
+```
+
+> **참고:** C11은 `std::future`, `std::promise`, `std::async`에 해당하는 기능이 없다. C에서 비동기 결과 전달이 필요하면 조건 변수와 공유 변수를 조합하거나 서드파티 라이브러리를 사용해야 한다.
+
+## 4.3 std::condition_variable
 
 ### 기본 구조
 
@@ -178,7 +314,7 @@ if (cv.wait_until(lock, deadline, [] { return ready; })) {
 }
 ```
 
-## 4.3 std::future와 std::promise
+## 4.4 std::future와 std::promise
 
 ### 일회성 결과 전달
 
@@ -249,7 +385,7 @@ std::thread t1([sfut] { int v = sfut.get(); });
 std::thread t2([sfut] { int v = sfut.get(); });  // OK
 ```
 
-## 4.4 std::async
+## 4.5 std::async
 
 ### 비동기 작업 실행
 
@@ -301,7 +437,7 @@ void correct() {
 }
 ```
 
-## 4.5 std::packaged_task
+## 4.6 std::packaged_task
 
 ### 호출 가능 객체를 future와 연결
 
@@ -331,7 +467,7 @@ int result = fut.get();  // 5
 | 실행 위치 | 라이브러리가 결정 | 호출하는 곳 |
 | 소유권 | 내부 관리 | 사용자가 관리 |
 
-## 4.6 std::latch (C++20)
+## 4.7 std::latch (C++20)
 
 ### 일회성 동기화 지점
 
@@ -369,7 +505,7 @@ void worker_sync() {
 }
 ```
 
-## 4.7 std::barrier (C++20)
+## 4.8 std::barrier (C++20)
 
 ### 재사용 가능한 동기화 지점
 
@@ -415,7 +551,7 @@ Phase complete!
 | 콜백 | 없음 | 있음 |
 | 용도 | 일회성 (초기화 완료) | 반복 (페이즈 동기화) |
 
-## 4.8 std::counting_semaphore (C++20)
+## 4.9 std::counting_semaphore (C++20)
 
 ### 제한된 동시 접근
 
@@ -451,7 +587,7 @@ void signaler() {
 }
 ```
 
-## 4.9 동기화 패턴 정리
+## 4.10 동기화 패턴 정리
 
 ### 패턴 선택 가이드
 
@@ -522,6 +658,81 @@ public:
 - **C++20 latch**는 일회성, **barrier**는 반복적 동기화에 사용한다
 - **세마포어**는 N개 동시 접근을 제한한다
 
+## 한국 개발자의 함정
+
+```
+1. *cv.wait(lock) — predicate 없이*
+   - Spurious wakeup으로 깨어남
+   - 조건 확인 없이 진행 → race
+   - 반드시 wait(lock, predicate)
+
+2. *cv.notify_one()을 락 안에서 호출*
+   - 동작은 함, 그러나 비효율
+   - 깨어난 스레드가 즉시 락 못 잡음
+   - notify는 락 *해제 후*가 보통 좋음
+
+3. *fut.get()을 두 번 호출*
+   - 두 번째는 UB
+   - shared_future로 옮기거나 한 번만
+   - 결과 보관은 별도 변수에
+
+4. *std::async = 새 스레드*라는 오해
+   - 기본 launch policy는 구현 정의
+   - launch::async 명시 안 하면 deferred 가능
+   - 명시적으로 launch::async 사용
+
+5. *std::async future 소멸자 = non-blocking*
+   - async가 반환한 future는 소멸자에서 *블로킹*
+   - fire-and-forget으로 쓸 수 없음
+   - 진짜 fire-and-forget은 jthread 또는 detached thread
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- condition_variable     → pthread_cond_t
+- future / promise        → CompletableFuture (Java), Promise (JS), Future (Rust)
+- packaged_task           → 작업 큐 / 스레드 풀의 task 단위
+- async                   → 단발성 비동기, 단 launch policy 주의
+- latch (C++20)           → CountDownLatch (Java), sync.WaitGroup (Go)
+- barrier (C++20)         → CyclicBarrier (Java), pthread_barrier_t
+- counting_semaphore      → Semaphore (Java), sem_t
+
+언제 무엇:
+- 결과 받기            → future / promise
+- 이벤트 통보         → condition_variable
+- 작업 분배           → packaged_task + thread pool
+- N개 작업 완료 대기  → latch
+- 반복 phase 동기화   → barrier
+- 자원 풀 제한        → counting_semaphore
+
+흔한 패턴:
+- Producer-Consumer  → queue + mutex + condition_variable
+- Fan-out/Fan-in     → async + future + when_all (boost / Folly)
+- Pipeline           → 여러 단계의 thread + queue
+```
+
+## 자기 점검
+
+```
+□ Spurious wakeup의 정의와 대응?
+□ notify_one과 notify_all 사용 자리?
+□ wait_for의 반환값 의미?
+□ promise.set_value를 두 번 호출하면?
+□ async의 launch policy 영향?
+□ async가 반환한 future의 *소멸자 블로킹*?
+□ latch와 barrier 차이?
+```
+
 ## 다음 장 예고
 
 다음 장에서는 C++ 메모리 모델을 다룬다. `std::atomic`, memory order, happens-before 관계를 이해하면 락 없이도 스레드 안전한 코드를 작성할 수 있다.
+
+## 관련 항목
+
+- [Ch 3: Sharing Data](/blog/parallel/cpp-concurrency-in-action/chapter03-sharing-data-between-threads)
+- [Ch 5: Memory Model](/blog/parallel/cpp-concurrency-in-action/chapter05-the-cpp-memory-model-and-operations-on-atomic-types)
+- [AMP Ch 8: Monitors](/blog/parallel/parallel-principles/ch08-monitors-and-blocking-synchronization)
+- [AMP Ch 17: Barriers](/blog/parallel/parallel-principles/ch17-barriers)
+- [AMP Ch 16: Futures](/blog/parallel/parallel-principles/ch16-futures-scheduling-work-distribution)

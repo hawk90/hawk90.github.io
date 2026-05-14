@@ -5,7 +5,7 @@ description: "race condition, std::mutex, lock guard, deadlock 회피, std::shar
 tags: [C++, Concurrency, Mutex, Race Condition, Deadlock]
 series: "C++ Concurrency in Action"
 seriesOrder: 3
-draft: true
+draft: false
 ---
 
 스레드가 데이터를 공유하는 순간 문제가 시작된다. 이 장에서는 race condition의 본질, `std::mutex`로 보호하는 방법, deadlock을 피하는 전략을 다룬다.
@@ -69,7 +69,134 @@ C++ 표준은 명확하다: **데이터 레이스는 정의되지 않은 동작(
 
 UB이므로 컴파일러는 아무 가정이나 할 수 있다. 최적화로 코드를 완전히 다르게 바꿔도 합법이다.
 
-## 3.2 std::mutex
+## 3.2 C11 뮤텍스
+
+C11은 `<threads.h>`에 뮤텍스 타입을 제공한다.
+
+### C11 기본 뮤텍스
+
+```c
+#include <stdio.h>
+#include <threads.h>
+
+mtx_t mtx;
+int counter = 0;
+
+int worker(void* arg) {
+    (void)arg;
+    for (int i = 0; i < 100000; ++i) {
+        mtx_lock(&mtx);
+        ++counter;
+        mtx_unlock(&mtx);
+    }
+    return 0;
+}
+
+int main(void) {
+    // 일반 뮤텍스 초기화
+    mtx_init(&mtx, mtx_plain);
+
+    thrd_t t1, t2;
+    thrd_create(&t1, worker, NULL);
+    thrd_create(&t2, worker, NULL);
+
+    thrd_join(t1, NULL);
+    thrd_join(t2, NULL);
+
+    printf("Counter: %d\n", counter);  // 200000
+
+    mtx_destroy(&mtx);
+    return 0;
+}
+```
+
+### C11 vs C++11 뮤텍스 비교
+
+| 기능 | C11 | C++11 |
+|------|-----|-------|
+| 타입 | `mtx_t` | `std::mutex` |
+| 초기화 | `mtx_init(&m, mtx_plain)` | 기본 생성자 |
+| 잠금 | `mtx_lock(&m)` | `m.lock()` |
+| 해제 | `mtx_unlock(&m)` | `m.unlock()` |
+| 시도 | `mtx_trylock(&m)` | `m.try_lock()` |
+| 소멸 | `mtx_destroy(&m)` | 소멸자 |
+| 재귀적 | `mtx_init(&m, mtx_recursive)` | `std::recursive_mutex` |
+| 시간 제한 | `mtx_init(&m, mtx_timed)` | `std::timed_mutex` |
+
+### C11 뮤텍스 타입
+
+```c
+// 일반 뮤텍스
+mtx_init(&mtx, mtx_plain);
+
+// 재귀적 뮤텍스 (같은 스레드가 여러 번 잠금 가능)
+mtx_init(&mtx, mtx_recursive);
+
+// 시간 제한 뮤텍스
+mtx_init(&mtx, mtx_timed);
+
+// 재귀적 + 시간 제한
+mtx_init(&mtx, mtx_recursive | mtx_timed);
+
+// 시간 제한 잠금
+struct timespec ts;
+timespec_get(&ts, TIME_UTC);
+ts.tv_sec += 1;  // 1초 후
+if (mtx_timedlock(&mtx, &ts) == thrd_success) {
+    // 잠금 성공
+    mtx_unlock(&mtx);
+}
+```
+
+### C11 조건 변수
+
+```c
+#include <stdio.h>
+#include <threads.h>
+#include <stdbool.h>
+
+mtx_t mtx;
+cnd_t cnd;
+bool ready = false;
+
+int waiter(void* arg) {
+    (void)arg;
+    mtx_lock(&mtx);
+    while (!ready) {
+        cnd_wait(&cnd, &mtx);
+    }
+    printf("Condition met!\n");
+    mtx_unlock(&mtx);
+    return 0;
+}
+
+int setter(void* arg) {
+    (void)arg;
+    mtx_lock(&mtx);
+    ready = true;
+    mtx_unlock(&mtx);
+    cnd_signal(&cnd);
+    return 0;
+}
+
+int main(void) {
+    mtx_init(&mtx, mtx_plain);
+    cnd_init(&cnd);
+
+    thrd_t t1, t2;
+    thrd_create(&t1, waiter, NULL);
+    thrd_create(&t2, setter, NULL);
+
+    thrd_join(t1, NULL);
+    thrd_join(t2, NULL);
+
+    mtx_destroy(&mtx);
+    cnd_destroy(&cnd);
+    return 0;
+}
+```
+
+## 3.3 std::mutex
 
 ### 기본 사용법
 
@@ -102,7 +229,7 @@ void risky() {
 }
 ```
 
-## 3.3 Lock Guards
+## 3.4 Lock Guards
 
 ### std::lock_guard
 
@@ -157,7 +284,7 @@ void safe_swap(Data& a, Data& b) {
 
 **새 코드에서는 `std::scoped_lock`을 기본으로 사용하라.** 단일 뮤텍스도 OK.
 
-## 3.4 Deadlock
+## 3.5 Deadlock
 
 ### 교착 상태란
 
@@ -304,7 +431,7 @@ void bad() {
 }
 ```
 
-## 3.5 std::shared_mutex
+## 3.6 std::shared_mutex
 
 ### Reader-Writer Lock
 
@@ -341,7 +468,7 @@ void write(int key, const std::string& value) {
 
 `shared_mutex`는 오버헤드가 있다. 읽기가 압도적으로 많을 때만 이득이다.
 
-## 3.6 std::call_once
+## 3.7 std::call_once
 
 ### 단 한 번만 실행
 
@@ -376,7 +503,7 @@ Resource& get_resource() {
 
 컴파일러가 내부적으로 `call_once`와 유사한 메커니즘을 사용한다.
 
-## 3.7 락 입자도 (Granularity)
+## 3.8 락 입자도 (Granularity)
 
 ### 세밀한 락 vs 거친 락
 
@@ -424,7 +551,7 @@ void good() {
 }
 ```
 
-## 3.8 스레드 안전한 인터페이스
+## 3.9 스레드 안전한 인터페이스
 
 ### top() + pop() 문제
 
@@ -482,6 +609,78 @@ public:
 - 락 입자도와 보유 시간을 최적화하라
 - 인터페이스 레벨에서 원자성을 보장하라 (`top() + pop()` 통합)
 
+## 한국 개발자의 함정
+
+```
+1. *mutex.lock() / mutex.unlock() 직접*
+   - 예외 시 unlock 안 됨 → deadlock
+   - 반드시 lock_guard / unique_lock / scoped_lock
+   - 직접 호출은 거의 *항상* 잘못
+
+2. *volatile = thread-safe* (C++에서)
+   - C/C++ volatile은 *최적화 방지*만, 동기화 아님
+   - Java volatile과 의미 다름
+   - thread-safe 필요 시 std::atomic 또는 mutex
+
+3. *읽기는 락 없이 OK*라는 오해
+   - C++ 데이터 레이스는 UB
+   - 동시 읽기 OK, 읽기-쓰기 동시는 데이터 레이스
+   - std::atomic 또는 shared_mutex 사용
+
+4. *shared_mutex가 항상 빠름*
+   - 읽기/쓰기 비율 + 임계 영역 길이에 의존
+   - 짧은 임계 영역은 std::mutex가 더 빠를 수 있음
+   - 측정 필수
+
+5. *동시에 락 잡는 순서가 자유*
+   - 락 순서가 모든 스레드에서 같아야 deadlock 회피
+   - 어렵다면 std::scoped_lock 사용
+   - hierarchical_mutex로 강제도 가능
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- std::mutex          → pthread_mutex_t, CRITICAL_SECTION
+- std::recursive_mutex → pthread_mutex_t (PTHREAD_RECURSIVE)
+- std::shared_mutex   → pthread_rwlock_t, SRWLOCK
+- std::scoped_lock    → std::lock + adopt_lock 패턴
+- std::call_once      → pthread_once
+- thread_local        → __thread, TLS
+
+언제 어느 락:
+- 짧은 + 단일 자원      → std::mutex + lock_guard
+- 여러 자원 동시 락     → std::scoped_lock
+- 조건부 락 / 조기 해제 → std::unique_lock
+- 읽기 압도적           → std::shared_mutex
+- 일회성 초기화         → static (C++11+) 또는 std::call_once
+
+설계 원칙:
+- 락 보유 시간 최소화 (I/O 절대 금지)
+- 인터페이스 레벨 원자성 (top + pop 통합)
+- 락 그래프가 *DAG*이도록 설계
+```
+
+## 자기 점검
+
+```
+□ Data race가 UB인 이유?
+□ ++counter가 atomic 아닌 이유 (LOAD/ADD/STORE)?
+□ lock_guard vs unique_lock vs scoped_lock?
+□ Coffman의 4조건과 회피 전략?
+□ hierarchical_mutex의 작동 원리?
+□ top() + pop() 분리의 안전성 문제?
+□ static local 변수와 call_once 차이?
+```
+
 ## 다음 장 예고
 
 다음 장에서는 스레드 간 **동기화**를 다룬다. condition variable로 이벤트를 대기하고, future/promise로 결과를 전달하고, C++20의 latch와 barrier를 살펴본다.
+
+## 관련 항목
+
+- [Ch 2: Managing Threads](/blog/parallel/cpp-concurrency-in-action/chapter02-managing-threads)
+- [Ch 4: Synchronizing Concurrent Operations](/blog/parallel/cpp-concurrency-in-action/chapter04-synchronizing-concurrent-operations)
+- [AMP Ch 7: Spin Locks](/blog/parallel/parallel-principles/ch07-spin-locks-and-contention)
+- [AMP Ch 8: Monitors](/blog/parallel/parallel-principles/ch08-monitors-and-blocking-synchronization)

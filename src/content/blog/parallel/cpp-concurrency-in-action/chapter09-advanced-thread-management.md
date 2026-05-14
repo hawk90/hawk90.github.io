@@ -2,10 +2,10 @@
 title: "Ch 9: Advanced thread management"
 date: 2026-05-20T09:00:00
 description: "thread pool, work stealing, interruption (cooperative), 스레드 친밀성."
-tags: [C++, Concurrency, Thread Pool, Work Stealing]
+tags: [C++, C, Concurrency, Thread Pool, Work Stealing]
 series: "C++ Concurrency in Action"
 seriesOrder: 9
-draft: true
+draft: false
 ---
 
 스레드를 생성하고 삭제하는 것은 비용이 든다. 스레드 풀을 사용하면 이 비용을 줄일 수 있다. 이 장에서는 고급 스레드 관리 기법을 다룬다.
@@ -123,6 +123,143 @@ int main() {
         std::cout << result.get() << " ";
     }
     // 출력: 0 1 4 9 16 25 36 49 64 81
+}
+```
+
+### C11 기본 스레드 풀
+
+C11에서는 `<threads.h>`를 사용하여 스레드 풀을 구현한다. `std::function` 같은 타입 소거가 없으므로 함수 포인터와 `void*`를 사용한다.
+
+```c
+#include <threads.h>
+#include <stdatomic.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_TASKS 1024
+
+typedef void (*task_func)(void*);
+
+typedef struct {
+    task_func func;
+    void* arg;
+} Task;
+
+typedef struct {
+    thrd_t* workers;
+    size_t num_workers;
+
+    Task tasks[MAX_TASKS];
+    size_t head;
+    size_t tail;
+
+    mtx_t queue_mtx;
+    cnd_t condition;
+    atomic_bool stop;
+} ThreadPool;
+
+static int worker_thread(void* arg) {
+    ThreadPool* pool = (ThreadPool*)arg;
+
+    while (true) {
+        Task task = {NULL, NULL};
+
+        mtx_lock(&pool->queue_mtx);
+
+        while (pool->head == pool->tail && !atomic_load(&pool->stop)) {
+            cnd_wait(&pool->condition, &pool->queue_mtx);
+        }
+
+        if (atomic_load(&pool->stop) && pool->head == pool->tail) {
+            mtx_unlock(&pool->queue_mtx);
+            break;
+        }
+
+        task = pool->tasks[pool->head];
+        pool->head = (pool->head + 1) % MAX_TASKS;
+
+        mtx_unlock(&pool->queue_mtx);
+
+        if (task.func) {
+            task.func(task.arg);
+        }
+    }
+
+    return 0;
+}
+
+ThreadPool* thread_pool_create(size_t num_threads) {
+    ThreadPool* pool = malloc(sizeof(ThreadPool));
+    if (!pool) return NULL;
+
+    pool->workers = malloc(sizeof(thrd_t) * num_threads);
+    pool->num_workers = num_threads;
+    pool->head = 0;
+    pool->tail = 0;
+    atomic_init(&pool->stop, false);
+
+    mtx_init(&pool->queue_mtx, mtx_plain);
+    cnd_init(&pool->condition);
+
+    for (size_t i = 0; i < num_threads; ++i) {
+        thrd_create(&pool->workers[i], worker_thread, pool);
+    }
+
+    return pool;
+}
+
+bool thread_pool_submit(ThreadPool* pool, task_func func, void* arg) {
+    mtx_lock(&pool->queue_mtx);
+
+    size_t next_tail = (pool->tail + 1) % MAX_TASKS;
+    if (next_tail == pool->head) {
+        mtx_unlock(&pool->queue_mtx);
+        return false;  // 큐 가득 참
+    }
+
+    pool->tasks[pool->tail].func = func;
+    pool->tasks[pool->tail].arg = arg;
+    pool->tail = next_tail;
+
+    mtx_unlock(&pool->queue_mtx);
+    cnd_signal(&pool->condition);
+
+    return true;
+}
+
+void thread_pool_destroy(ThreadPool* pool) {
+    atomic_store(&pool->stop, true);
+    cnd_broadcast(&pool->condition);
+
+    for (size_t i = 0; i < pool->num_workers; ++i) {
+        thrd_join(pool->workers[i], NULL);
+    }
+
+    mtx_destroy(&pool->queue_mtx);
+    cnd_destroy(&pool->condition);
+    free(pool->workers);
+    free(pool);
+}
+
+// 사용 예
+void square_task(void* arg) {
+    int* val = (int*)arg;
+    printf("%d ", (*val) * (*val));
+}
+
+int main(void) {
+    ThreadPool* pool = thread_pool_create(4);
+
+    int values[10];
+    for (int i = 0; i < 10; ++i) {
+        values[i] = i;
+        thread_pool_submit(pool, square_task, &values[i]);
+    }
+
+    thrd_sleep(&(struct timespec){.tv_sec = 1}, NULL);  // 완료 대기
+    thread_pool_destroy(pool);
+
+    return 0;
 }
 ```
 
@@ -345,6 +482,85 @@ private:
 thread_local size_t work_stealing_pool::my_index_ = 0;
 ```
 
+### C11 Work Stealing 큐
+
+C11에서 lock-free work stealing 큐를 구현하려면 `<stdatomic.h>`를 사용한다.
+
+```c
+#include <stdatomic.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define WS_QUEUE_CAPACITY 1024
+
+typedef struct {
+    void* tasks[WS_QUEUE_CAPACITY];
+    atomic_size_t top;
+    atomic_size_t bottom;
+} WorkStealingQueue;
+
+void ws_queue_init(WorkStealingQueue* q) {
+    atomic_init(&q->top, 0);
+    atomic_init(&q->bottom, 0);
+}
+
+// 소유자가 push (단일 생산자)
+void ws_queue_push(WorkStealingQueue* q, void* task) {
+    size_t b = atomic_load_explicit(&q->bottom, memory_order_relaxed);
+    q->tasks[b % WS_QUEUE_CAPACITY] = task;
+    atomic_thread_fence(memory_order_release);
+    atomic_store_explicit(&q->bottom, b + 1, memory_order_relaxed);
+}
+
+// 소유자가 pop (LIFO)
+void* ws_queue_pop(WorkStealingQueue* q) {
+    size_t b = atomic_load_explicit(&q->bottom, memory_order_relaxed) - 1;
+    atomic_store_explicit(&q->bottom, b, memory_order_relaxed);
+    atomic_thread_fence(memory_order_seq_cst);
+
+    size_t t = atomic_load_explicit(&q->top, memory_order_relaxed);
+
+    if (t <= b) {
+        void* task = q->tasks[b % WS_QUEUE_CAPACITY];
+
+        if (t == b) {
+            // 마지막 항목 - CAS 필요
+            if (!atomic_compare_exchange_strong_explicit(
+                    &q->top, &t, t + 1,
+                    memory_order_seq_cst, memory_order_relaxed)) {
+                atomic_store_explicit(&q->bottom, b + 1, memory_order_relaxed);
+                return NULL;
+            }
+            atomic_store_explicit(&q->bottom, b + 1, memory_order_relaxed);
+        }
+        return task;
+    }
+
+    atomic_store_explicit(&q->bottom, b + 1, memory_order_relaxed);
+    return NULL;
+}
+
+// 도둑이 steal (FIFO - 소유자와 반대 방향)
+void* ws_queue_steal(WorkStealingQueue* q) {
+    size_t t = atomic_load_explicit(&q->top, memory_order_acquire);
+    atomic_thread_fence(memory_order_seq_cst);
+    size_t b = atomic_load_explicit(&q->bottom, memory_order_acquire);
+
+    if (t < b) {
+        void* task = q->tasks[t % WS_QUEUE_CAPACITY];
+
+        if (!atomic_compare_exchange_strong_explicit(
+                &q->top, &t, t + 1,
+                memory_order_seq_cst, memory_order_relaxed)) {
+            return NULL;  // 다른 도둑이 먼저 훔침
+        }
+        return task;
+    }
+
+    return NULL;
+}
+```
+
 ### Chase-Lev Deque (고성능 버전)
 
 ```cpp
@@ -533,6 +749,78 @@ void consumer(std::stop_token stoken, interruptible_queue& queue) {
         process(*value);
     }
     std::cout << "Consumer stopped\n";
+}
+```
+
+### C11: 협력적 중단 패턴
+
+C11에서는 `atomic_bool`을 사용하여 협력적 중단을 구현한다.
+
+```c
+#include <threads.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+
+typedef struct {
+    thrd_t thread;
+    atomic_bool stop_requested;
+} InterruptibleThread;
+
+typedef struct {
+    InterruptibleThread* ithread;
+    void (*work_func)(atomic_bool*);
+} ThreadArg;
+
+static int thread_func(void* arg) {
+    ThreadArg* targ = (ThreadArg*)arg;
+    targ->work_func(&targ->ithread->stop_requested);
+    free(targ);
+    return 0;
+}
+
+void interruptible_thread_create(InterruptibleThread* it,
+                                  void (*func)(atomic_bool*)) {
+    atomic_init(&it->stop_requested, false);
+
+    ThreadArg* arg = malloc(sizeof(ThreadArg));
+    arg->ithread = it;
+    arg->work_func = func;
+
+    thrd_create(&it->thread, thread_func, arg);
+}
+
+void interruptible_thread_request_stop(InterruptibleThread* it) {
+    atomic_store(&it->stop_requested, true);
+}
+
+void interruptible_thread_join(InterruptibleThread* it) {
+    thrd_join(it->thread, NULL);
+}
+
+// 사용 예
+void my_work(atomic_bool* stop_flag) {
+    while (!atomic_load(stop_flag)) {
+        // 작업 수행
+        do_some_work();
+
+        // 긴 작업 중간에 체크
+        if (atomic_load(stop_flag)) {
+            break;
+        }
+    }
+    cleanup();
+}
+
+int main(void) {
+    InterruptibleThread worker;
+    interruptible_thread_create(&worker, my_work);
+
+    thrd_sleep(&(struct timespec){.tv_sec = 2}, NULL);
+
+    interruptible_thread_request_stop(&worker);
+    interruptible_thread_join(&worker);
+
+    return 0;
 }
 ```
 
@@ -989,6 +1277,81 @@ void good_usage(thread_pool& compute_pool, thread_pool& io_pool) {
   - I/O 바운드: 더 많이
 - 스레드 풀 내에서 **future.get() 호출은 데드락 위험**이 있다
 
+## 한국 개발자의 함정
+
+```
+1. *thread pool 안에서 future.get() 호출*
+   - 같은 풀의 다른 작업 결과 기다림 → deadlock
+   - 풀 크기보다 많은 dependency chain이면 멈춤
+   - continuation / 별도 풀 / async-await 사용
+
+2. *모든 작업을 같은 풀에*
+   - CPU 바운드 + I/O 바운드 섞이면 성능 저하
+   - 풀을 *역할별*로 분리 (compute / io / background)
+   - I/O 풀은 더 크게
+
+3. *Work stealing이 만능*
+   - 매우 짧은 작업엔 오버헤드 큼
+   - locality가 중요한 작업엔 그대로가 더 빠름
+   - 보통 fork-join 패턴에 잘 맞음
+
+4. *Thread affinity = 항상 성능 향상*
+   - OS 스케줄러를 막아 오히려 손해 가능
+   - NUMA 시스템에서만 보통 이득
+   - 측정 + 실험 필요
+
+5. *stop_token을 무시*
+   - 협력적 취소 → 작업 코드가 *체크*해야 함
+   - 긴 계산 루프엔 주기적으로 stop_requested() 호출
+   - condition_variable_any로 wait 중단도 가능
+```
+
+## 실무 적용
+
+```
+이론 → 실무:
+- thread_pool             → Boost.Asio thread_pool, taskflow, BS::thread_pool
+- work-stealing           → Intel TBB, rayon (Rust), ForkJoinPool (Java)
+- priority pool           → 사용자 정의 또는 Asio
+- stop_token (C++20)      → std::jthread, std::condition_variable_any
+- thread affinity         → pthread_setaffinity_np, SetThreadAffinityMask
+- NUMA 인지               → libnuma, jemalloc, mimalloc
+
+라이브러리:
+- C++: Boost.Asio, taskflow, oneTBB, Folly executors
+- Rust: rayon, tokio, async-std
+- Java: ExecutorService, ForkJoinPool, CompletableFuture
+- Go: goroutine + work-stealing runtime
+- C#: TPL, Task.Run, async/await
+
+설계 결정:
+- 짧은 CPU 작업          → fixed-size pool (hardware_concurrency)
+- I/O 바운드             → 큰 pool (수십~수백)
+- 우선순위 필요          → priority_queue 기반 pool
+- 부하 변동             → adaptive pool
+- NUMA / 대규모         → NUMA-aware + thread affinity
+```
+
+## 자기 점검
+
+```
+□ Global queue vs Thread-local queue 차이?
+□ Work stealing의 *bottom*과 *top* 비대칭 이유?
+□ Chase-Lev deque의 핵심 트릭?
+□ stop_token이 *cooperative*인 의미?
+□ thread pool 내 future.get() deadlock 시나리오?
+□ CPU bound와 I/O bound 풀 크기 차이?
+□ NUMA awareness가 필요한 시점?
+```
+
 ## 다음 장 예고
 
 다음 장에서는 C++17/20의 병렬 알고리즘을 다룬다. 실행 정책을 사용해 표준 알고리즘을 병렬로 실행하는 방법을 살펴본다.
+
+## 관련 항목
+
+- [Ch 2: Managing Threads](/blog/parallel/cpp-concurrency-in-action/chapter02-managing-threads)
+- [Ch 8: Designing Concurrent Code](/blog/parallel/cpp-concurrency-in-action/chapter08-designing-concurrent-code)
+- [Ch 10: Parallel Algorithms](/blog/parallel/cpp-concurrency-in-action/chapter10-parallel-algorithms)
+- [AMP Ch 16: Work Stealing](/blog/parallel/parallel-principles/ch16-futures-scheduling-work-distribution)
+- [AMP Ch 15: Priority Queues](/blog/parallel/parallel-principles/ch15-priority-queues)

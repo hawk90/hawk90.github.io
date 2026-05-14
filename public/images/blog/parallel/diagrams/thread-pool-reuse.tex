@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  block/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=12mm, minimum height=6mm, fill=white, inner sep=2pt, align=center, rounded corners=1pt, font=\sffamily\tiny}
+]
+
+% Title - Every time creation
+\node[font=\sffamily\scriptsize\bfseries] at (0, 3.5) {매번 스레드 생성};
+
+% Timeline for every-time creation
+\draw[thick, draw=nodebord] (-4, 2.8) -- (4, 2.8);
+
+% Blocks for every-time
+\node[block, fill=impfill, draw=impbord] (c1) at (-3.2, 2.8) {생성};
+\node[block, fill=absfill, draw=absbord] (w1) at (-2.2, 2.8) {작업};
+\node[block, fill=clifill, draw=clibord] (e1) at (-1.2, 2.8) {종료};
+
+\node[block, fill=impfill, draw=impbord] (c2) at (0, 2.8) {생성};
+\node[block, fill=absfill, draw=absbord] (w2) at (1, 2.8) {작업};
+\node[block, fill=clifill, draw=clibord] (e2) at (2, 2.8) {종료};
+
+\node[font=\sffamily\tiny] at (3.2, 2.8) {...};
+
+% Cost arrows
+\draw[arr, draw=impbord] (c1.south) -- ++(0, -0.3) node[below, font=\sffamily\tiny] {비용};
+\draw[arr, draw=clibord] (e1.south) -- ++(0, -0.3) node[below, font=\sffamily\tiny] {비용};
+\draw[arr, draw=impbord] (c2.south) -- ++(0, -0.3) node[below, font=\sffamily\tiny] {비용};
+\draw[arr, draw=clibord] (e2.south) -- ++(0, -0.3) node[below, font=\sffamily\tiny] {비용};
+
+% Title - Thread pool
+\node[font=\sffamily\scriptsize\bfseries] at (0, 0.8) {스레드 풀};
+
+% Timeline for thread pool
+\draw[thick, draw=nodebord] (-4, 0) -- (4, 0);
+
+% Blocks for thread pool
+\node[block, fill=impfill, draw=impbord] (pc) at (-3.5, 0) {생성};
+\node[block, fill=absfill, draw=absbord] (pw1) at (-2.2, 0) {작업};
+\node[block, fill=confill, draw=conbord] (pd1) at (-1.2, 0) {대기};
+\node[block, fill=absfill, draw=absbord] (pw2) at (-0.2, 0) {작업};
+\node[block, fill=confill, draw=conbord] (pd2) at (0.8, 0) {대기};
+\node[block, fill=absfill, draw=absbord] (pw3) at (1.8, 0) {작업};
+\node[font=\sffamily\tiny] at (2.8, 0) {...};
+
+% Cost arrow - only one
+\draw[arr, draw=impbord] (pc.south) -- ++(0, -0.3) node[below, font=\sffamily\tiny] {1회};
+
+% Reuse brace
+\draw[decorate, decoration={brace, amplitude=4pt, mirror}] (-2.8, -0.5) -- (2.2, -0.5)
+  node[midway, below=4pt, font=\sffamily\tiny] {재사용};
+
+\end{tikzpicture}
+\end{document}
