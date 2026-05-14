@@ -32,11 +32,11 @@ draft: false
 
 ```
 회피:
-"The 2024 election approached. (As we all know, politicians are
+"An election year approached. (As we all know, politicians are
 generally untrustworthy.) Candidates spent the year ..."
 
 선호:
-"The 2024 election approached. Candidates spent the year ..."
+"An election year approached. Candidates spent the year ..."
 ```
 
 괄호 안의 *unsolicited opinion*이 제거되어도 *글의 흐름은 그대로*입니다. 의견이 *글에 기여하지 않으면* 빼야 합니다.
