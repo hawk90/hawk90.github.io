@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cat/.style={
+    rectangle, rounded corners=2pt,
+    minimum width=22mm, minimum height=8mm,
+    inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small
+  },
+  root/.style={cat, fill=absbord!85, draw=absbord, text=white, minimum width=28mm},
+  mid/.style={cat,  fill=absbord!60, draw=absbord, text=white},
+  leaf/.style={cat, fill=absbord!35, draw=absbord},
+  xv/.style={cat,   fill=conbord!55, draw=conbord, text=white},
+  link/.style={draw=edgesc, line width=0.6pt}
+]
+
+% Root: expression
+\node[root] (expr) at (0, 2.8) {expression};
+
+% Middle: glvalue, rvalue
+\node[mid] (gl) at (-3.2, 1.4) {glvalue};
+\node[mid] (rv) at ( 3.2, 1.4) {rvalue};
+
+% Leaves: lvalue, xvalue, prvalue
+\node[leaf] (lv)  at (-4.8, 0.0) {lvalue};
+\node[xv]   (xv)  at ( 0.0, 0.0) {xvalue};
+\node[leaf] (prv) at ( 4.8, 0.0) {prvalue};
+
+% Tree edges
+\draw[link] (expr) -- (gl);
+\draw[link] (expr) -- (rv);
+\draw[link] (gl)   -- (lv);
+\draw[link] (gl)   -- (xv);
+\draw[link] (rv)   -- (xv);
+\draw[link] (rv)   -- (prv);
+
+% Legend
+\node[anchor=west, font=\sffamily\footnotesize, text=edgesc, align=left]
+  at (-5.2, -1.4) {%
+    \textbullet\ glvalue = lvalue + xvalue (메모리에 실제 객체)\\[2pt]
+    \textbullet\ rvalue = xvalue + prvalue (move 가능)\\[2pt]
+    \textbullet\ xvalue = glvalue $\cap$ rvalue (이동 가능한 객체)
+  };
+
+\end{tikzpicture}
+\end{document}
