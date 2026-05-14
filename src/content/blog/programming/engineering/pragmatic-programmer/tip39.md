@@ -1,6 +1,6 @@
 ---
 title: "Tip 39: Use Assertions to Prevent the Impossible"
-date: 2026-05-13
+date: 2026-05-14T15:00:00
 description: "단정으로 불가능을 막아라 — '절대 일어날 리 없다' = 일어날 때를 위한 단정."
 series: "The Pragmatic Programmer"
 seriesOrder: 39

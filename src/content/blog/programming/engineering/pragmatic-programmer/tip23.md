@@ -1,6 +1,6 @@
 ---
 title: "Tip 23: Estimate to Avoid Surprises"
-date: 2026-05-13
+date: 2026-05-13T23:00:00
 description: "놀라움을 피하려면 추정하라 — 추정 = 예측이 아니라 사고 도구."
 series: "The Pragmatic Programmer"
 seriesOrder: 23

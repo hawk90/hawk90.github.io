@@ -1,6 +1,6 @@
 ---
 title: "Tip 29: Fix the Problem, Not the Blame"
-date: 2026-05-13
+date: 2026-05-14T05:00:00
 description: "비난이 아니라 문제를 고쳐라 — 누구의 잘못인지 따지는 시간에 — 문제를 해결할 수 있다."
 series: "The Pragmatic Programmer"
 seriesOrder: 29

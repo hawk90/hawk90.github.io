@@ -1,6 +1,6 @@
 ---
 title: "Tip 6: Be a Catalyst for Change"
-date: 2026-05-13
+date: 2026-05-13T06:00:00
 description: "변화의 촉매가 되어라 — 큰 허가가 없어도, 작게 시작하면 사람들이 따라온다."
 series: "The Pragmatic Programmer"
 seriesOrder: 6

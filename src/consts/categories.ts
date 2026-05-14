@@ -106,10 +106,17 @@ export const CATEGORIES: Category[] = [
     icon: '🌿',
   },
   {
+    id: 'programming/standards',
+    parent: 'programming',
+    name: 'Coding Standards',
+    description: '범용 코딩 표준 — Google C++ / Linux Kernel / PEP 8',
+    icon: '📐',
+  },
+  {
     id: 'embedded/standards',
     parent: 'embedded',
     name: 'Coding Standards',
-    description: '코딩 표준 — MISRA / CERT / AUTOSAR / High Integrity',
+    description: '임베디드 코딩 표준 — MISRA / CERT / AUTOSAR / High Integrity',
     icon: '📜',
   },
 

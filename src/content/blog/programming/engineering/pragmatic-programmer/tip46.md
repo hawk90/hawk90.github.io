@@ -1,6 +1,6 @@
 ---
 title: "Tip 46: Don't Chain Method Calls"
-date: 2026-05-13
+date: 2026-05-14T22:00:00
 description: "메서드 호출을 줄줄이 잇지 마라 — 데메테르 법칙. 친구의 친구의 친구를 만지지 마라."
 series: "The Pragmatic Programmer"
 seriesOrder: 46

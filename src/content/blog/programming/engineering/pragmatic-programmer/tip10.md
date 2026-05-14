@@ -1,6 +1,6 @@
 ---
 title: "Tip 10: Critically Analyze What You Read and Hear"
-date: 2026-05-13
+date: 2026-05-13T10:00:00
 description: "읽고 듣는 것을 비판적으로 분석하라 — '유명한 사람이 말했다'가 진실의 보증은 아니다."
 series: "The Pragmatic Programmer"
 seriesOrder: 10

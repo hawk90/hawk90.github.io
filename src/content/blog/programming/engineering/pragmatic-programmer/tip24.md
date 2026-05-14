@@ -1,6 +1,6 @@
 ---
 title: "Tip 24: Iterate the Schedule with the Code"
-date: 2026-05-13
+date: 2026-05-14T00:00:00
 description: "코드와 함께 일정도 반복하라 — 한 번에 못 박힌 일정은 — 거의 항상 빗나간다."
 series: "The Pragmatic Programmer"
 seriesOrder: 24

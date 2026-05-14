@@ -1,6 +1,6 @@
 ---
 title: "Tip 37: Design with Contracts"
-date: 2026-05-13
+date: 2026-05-14T13:00:00
 description: "계약으로 설계하라 — DBC. 사전 조건·사후 조건·불변식을 — 명시하라."
 series: "The Pragmatic Programmer"
 seriesOrder: 37

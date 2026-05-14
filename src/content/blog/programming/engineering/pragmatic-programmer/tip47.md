@@ -1,6 +1,6 @@
 ---
 title: "Tip 47: Avoid Global Data"
-date: 2026-05-13
+date: 2026-05-14T23:00:00
 description: "전역 데이터를 피하라 — 어디서든 접근, 어디서든 변경 = 어디서든 깨진다."
 series: "The Pragmatic Programmer"
 seriesOrder: 47

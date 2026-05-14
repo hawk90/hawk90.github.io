@@ -1,6 +1,6 @@
 ---
 title: "Tip 21: Prototype to Learn"
-date: 2026-05-13
+date: 2026-05-13T21:00:00
 description: "프로토타입은 학습을 위한 것 — 결과물이 아니라 학습이 목적이다."
 series: "The Pragmatic Programmer"
 seriesOrder: 21

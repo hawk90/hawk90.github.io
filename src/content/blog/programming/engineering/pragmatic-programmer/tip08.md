@@ -1,6 +1,6 @@
 ---
 title: "Tip 8: Make Quality a Requirements Issue"
-date: 2026-05-13
+date: 2026-05-13T08:00:00
 description: "품질을 요구사항의 일부로 만들어라 — 사용자와 함께 '얼마나 좋아야 하는가'를 결정하라."
 series: "The Pragmatic Programmer"
 seriesOrder: 8

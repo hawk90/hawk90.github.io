@@ -1,6 +1,6 @@
 ---
 title: "Tip 19: Forgo Following Fads"
-date: 2026-05-13
+date: 2026-05-13T19:00:00
 description: "유행을 따르지 마라 — 트렌드가 답이 아니다. 자기 문제와 자기 맥락이 답이다."
 series: "The Pragmatic Programmer"
 seriesOrder: 19

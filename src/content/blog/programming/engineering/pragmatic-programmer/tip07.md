@@ -1,6 +1,6 @@
 ---
 title: "Tip 7: Remember the Big Picture"
-date: 2026-05-13
+date: 2026-05-13T07:00:00
 description: "큰 그림을 기억하라 — 끓는 개구리가 되지 마라. 작은 변화의 누적을 인식하라."
 series: "The Pragmatic Programmer"
 seriesOrder: 7

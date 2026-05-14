@@ -1,6 +1,6 @@
 ---
 title: "Tip 25: Keep Knowledge in Plain Text"
-date: 2026-05-13
+date: 2026-05-14T01:00:00
 description: "지식을 평문으로 유지하라 — 바이너리 형식은 미래에 안 읽힌다."
 series: "The Pragmatic Programmer"
 seriesOrder: 25

@@ -1,6 +1,6 @@
 ---
 title: "Tip 33: select Isn't Broken"
-date: 2026-05-13
+date: 2026-05-14T09:00:00
 description: "select가 망가지지 않았다 — OS·언어·라이브러리는 — 자기 코드보다 — 훨씬 안정적이다."
 series: "The Pragmatic Programmer"
 seriesOrder: 33

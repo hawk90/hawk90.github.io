@@ -1,6 +1,6 @@
 ---
 title: "Tip 11: English is Just Another Programming Language"
-date: 2026-05-13
+date: 2026-05-13T11:00:00
 description: "영어(자연어)도 또 하나의 프로그래밍 언어다 — 문서·이메일도 코드처럼 짜라."
 series: "The Pragmatic Programmer"
 seriesOrder: 11

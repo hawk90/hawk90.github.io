@@ -1,6 +1,6 @@
 ---
 title: "Tip 15: DRY—Don't Repeat Yourself"
-date: 2026-05-13
+date: 2026-05-13T15:00:00
 description: "DRY — 시스템 내 모든 지식은 명확한 단일 표현을 가져야 한다."
 series: "The Pragmatic Programmer"
 seriesOrder: 15

@@ -1,6 +1,6 @@
 ---
 title: "Tip 36: You Can't Write Perfect Software"
-date: 2026-05-13
+date: 2026-05-14T12:00:00
 description: "완벽한 소프트웨어는 못 쓴다 — 받아들이고, 방어적으로 코드를 짜라."
 series: "The Pragmatic Programmer"
 seriesOrder: 36

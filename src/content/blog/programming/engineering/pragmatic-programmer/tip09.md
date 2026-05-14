@@ -1,6 +1,6 @@
 ---
 title: "Tip 9: Invest Regularly in Your Knowledge Portfolio"
-date: 2026-05-13
+date: 2026-05-13T09:00:00
 description: "지식 포트폴리오에 정기 투자하라 — 금융처럼, 다양화하고 정기적으로 새 자산을 추가하라."
 series: "The Pragmatic Programmer"
 seriesOrder: 9

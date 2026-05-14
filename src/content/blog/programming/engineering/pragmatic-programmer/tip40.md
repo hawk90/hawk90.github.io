@@ -1,6 +1,6 @@
 ---
 title: "Tip 40: Finish What You Start"
-date: 2026-05-13
+date: 2026-05-14T16:00:00
 description: "시작한 것을 끝내라 — 자원을 할당한 함수가 — 해제 책임도 진다."
 series: "The Pragmatic Programmer"
 seriesOrder: 40

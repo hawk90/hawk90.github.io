@@ -1,6 +1,6 @@
 ---
 title: "Tip 49: Programming Is About Code, But Programs Are About Data"
-date: 2026-05-13
+date: 2026-05-15T01:00:00
 description: "프로그래밍은 코드에 관한 것이지만, 프로그램은 데이터에 관한 것 — 데이터의 흐름을 보라."
 series: "The Pragmatic Programmer"
 seriesOrder: 49
