@@ -371,4 +371,4 @@ is characterized by            ~로 특징지어진다
 
 - [Unit 2.1: GS 텍스트의 시작 방법](/blog/writing/academic-writing/unit02-1-openings)
 - [Unit 2.3: Extended Definitions and Variations](/blog/writing/academic-writing/unit02-3-extended-definitions)
-- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02/rule16-specific)

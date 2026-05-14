@@ -345,4 +345,4 @@ Discussion이 길게 다룬 것을 *짧게 압축*해 반복합니다.
 - [Unit 3.2: Results의 문법](/blog/writing/science-research-writing/unit3-2-grammar)
 - [Unit 4.2: Discussion의 문법](/blog/writing/science-research-writing/unit4-2-grammar)
 - [AWG Unit 8.3: Discussion Sections](/blog/writing/academic-writing/unit08-3-discussion)
-- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05-reminder17-opinion)
+- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05/reminder17-opinion)

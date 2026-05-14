@@ -292,4 +292,4 @@ A. ❶ There are a number of explanations for why musicians have
 - [Unit 4.1: Structure of Data Commentary](/blog/writing/academic-writing/unit04-1-structure-location)
 - [Unit 4.3: Comparisons와 Organization](/blog/writing/academic-writing/unit04-3-comparisons-organization)
 - [Unit 1.6: Presentation과 Positioning](/blog/writing/academic-writing/unit01-6-positioning) — hedging의 positioning 효과
-- [Elements of Style — Rule 15: Put statements in positive form](/blog/writing/elements-of-style/ch02-rule15-positive)
+- [Elements of Style — Rule 15: Put statements in positive form](/blog/writing/elements-of-style/ch02/rule15-positive)

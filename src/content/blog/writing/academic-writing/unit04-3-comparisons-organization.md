@@ -348,4 +348,4 @@ Unit 4 마지막은 **Unit 4.4: Graphs, Chronological Data, Unexpected Outcomes*
 
 - [Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
 - [Unit 4.4: Graphs, Chronological Data, Unexpected Outcomes](/blog/writing/academic-writing/unit04-4-graphs-conclusion)
-- [Elements of Style — Rule 19: 평행 구조](/blog/writing/elements-of-style/ch02-rule19-parallel)
+- [Elements of Style — Rule 19: 평행 구조](/blog/writing/elements-of-style/ch02/rule19-parallel)

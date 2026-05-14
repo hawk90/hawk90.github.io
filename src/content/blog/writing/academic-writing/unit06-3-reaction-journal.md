@@ -342,4 +342,4 @@ Unit 6에서 다룬 것:
 
 - [Unit 6.2: Evaluative Language와 Critical Reading](/blog/writing/academic-writing/unit06-2-evaluative-critical)
 - [Unit 7.1: Publication Types and IMRD](/blog/writing/academic-writing/unit07-1-publication-types)
-- [Elements of Style — Reminder 5: 수정 / 재작성하라](/blog/writing/elements-of-style/ch05-reminder05-revise)
+- [Elements of Style — Reminder 5: 수정 / 재작성하라](/blog/writing/elements-of-style/ch05/reminder05-revise)

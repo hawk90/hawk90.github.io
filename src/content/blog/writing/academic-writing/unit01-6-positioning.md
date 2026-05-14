@@ -268,5 +268,5 @@ Unit 2부터는 *특정 텍스트 유형*을 다룹니다. 다음은 **Unit 2: G
 
 - [Unit 1.5: Flow and Linking](/blog/writing/academic-writing/unit01-5-flow-linking)
 - [Unit 2.1: Openings](/blog/writing/academic-writing/unit02-1-openings)
-- [Elements of Style — Reminder 1: 자신을 배경에 두라](/blog/writing/elements-of-style/ch05-reminder01-background)
+- [Elements of Style — Reminder 1: 자신을 배경에 두라](/blog/writing/elements-of-style/ch05/reminder01-background)
 - [On Writing Well — Chapter 21: Confidence](/blog/writing/on-writing-well/ch21-confidence)

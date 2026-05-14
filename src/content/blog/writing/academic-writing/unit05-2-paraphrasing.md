@@ -299,4 +299,4 @@ Unit 5 마지막은 **Unit 5.3: Source Identification과 Synthesis**.
 
 - [Unit 5.1: 요약 작성의 고려 사항과 표절](/blog/writing/academic-writing/unit05-1-considerations-plagiarism)
 - [Unit 5.3: Source Identification과 Synthesis](/blog/writing/academic-writing/unit05-3-source-synthesis)
-- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)

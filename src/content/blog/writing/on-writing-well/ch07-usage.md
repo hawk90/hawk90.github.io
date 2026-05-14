@@ -162,4 +162,4 @@ Zinsser의 결론입니다.
 
 - [Chapter 6: Words](/blog/writing/on-writing-well/ch06-words)
 - [Chapter 8: Unity](/blog/writing/on-writing-well/ch08-unity)
-- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04-words-a-c)
+- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04/words-a-c)

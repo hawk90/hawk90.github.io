@@ -208,5 +208,5 @@ Zinsser의 통찰 — 좋은 글은 *다시 쓴* 글입니다.
 
 - [Chapter 2: Simplicity](/blog/writing/on-writing-well/ch02-simplicity)
 - [Chapter 4: Style](/blog/writing/on-writing-well/ch04-style)
-- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)
-- [Elements of Style — Reminder 8: Qualifiers 자제](/blog/writing/elements-of-style/ch05-reminder08-qualifiers)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)
+- [Elements of Style — Reminder 8: Qualifiers 자제](/blog/writing/elements-of-style/ch05/reminder08-qualifiers)

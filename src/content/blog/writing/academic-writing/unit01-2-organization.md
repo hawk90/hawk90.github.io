@@ -442,5 +442,5 @@ sleep disturbance."
 - [Unit 1.3: Vocabulary Shift](/blog/writing/academic-writing/unit01-3-vocabulary)
 - [Unit 3: Problem-Solution](/blog/writing/academic-writing/unit03-1-spse-structure)
 - [Unit 4: Data Commentary](/blog/writing/academic-writing/unit04-1-structure-location)
-- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)
-- [Elements of Style — Rule 13: Paragraph](/blog/writing/elements-of-style/ch02-rule13-paragraph)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02/rule12-design)
+- [Elements of Style — Rule 13: Paragraph](/blog/writing/elements-of-style/ch02/rule13-paragraph)

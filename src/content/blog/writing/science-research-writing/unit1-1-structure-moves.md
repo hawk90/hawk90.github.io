@@ -267,4 +267,4 @@ The present paper presents [contribution]. On the basis of
 - [Science Research Writing — 시리즈 개요](/blog/writing/science-research-writing)
 - [Unit 1.2: Introduction의 문법과 어휘](/blog/writing/science-research-writing/unit1-2-grammar-vocabulary)
 - [AWG Unit 8.1: Introductions와 CARS 모델](/blog/writing/academic-writing/unit08-1-introductions-cars)
-- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02/rule12-design)

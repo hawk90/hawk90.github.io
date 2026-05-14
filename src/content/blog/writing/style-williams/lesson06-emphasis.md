@@ -253,6 +253,6 @@ We MUST address it IMMEDIATELY."
 ## 관련 항목
 
 - [Lesson 5: Cohesion](/blog/writing/style-williams/lesson05-cohesion)
-- [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02-composition) — Emphatic words at end
-- [Elements of Style — Rule 22: 강조 단어는 문장의 끝에](/blog/writing/elements-of-style/ch02-rule22-emphasis)
+- [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02/composition) — Emphatic words at end
+- [Elements of Style — Rule 22: 강조 단어는 문장의 끝에](/blog/writing/elements-of-style/ch02/rule22-emphasis)
 - [On Writing Well Ch 9: Lead and Ending](/blog/writing/on-writing-well/ch09-lead-ending)

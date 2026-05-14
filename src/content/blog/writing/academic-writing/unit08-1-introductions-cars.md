@@ -364,4 +364,4 @@ role of consumption timing has received less systematic attention.
 - [Unit 7.3: Results Section](/blog/writing/academic-writing/unit07-3-results)
 - [Unit 8.2: Citation, Tense, Purpose Statements](/blog/writing/academic-writing/unit08-2-citation-tense)
 - [Unit 5.3: Source Identification과 Synthesis](/blog/writing/academic-writing/unit05-3-source-synthesis)
-- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02/rule12-design)

@@ -324,5 +324,5 @@ Indeed                     실로, 사실
 
 - [Unit 1.4: Other Stylistic Features](/blog/writing/academic-writing/unit01-4-stylistic-features)
 - [Unit 1.6: Presentation and Positioning](/blog/writing/academic-writing/unit01-6-positioning)
-- [Elements of Style — Rule 22: Place emphatic words at end](/blog/writing/elements-of-style/ch02-rule22-emphasis) — Old-to-New와 같은 원리
-- [Elements of Style — Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02-rule13-paragraph)
+- [Elements of Style — Rule 22: Place emphatic words at end](/blog/writing/elements-of-style/ch02/rule22-emphasis) — Old-to-New와 같은 원리
+- [Elements of Style — Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02/rule13-paragraph)

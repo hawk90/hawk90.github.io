@@ -328,4 +328,4 @@ and cut into pellets of approximately 3 mm in length.
 - [Unit 2.1: Methodology의 구조와 어휘](/blog/writing/science-research-writing/unit2-1-structure-vocabulary)
 - [Unit 3.1: Results의 구조와 어휘](/blog/writing/science-research-writing/unit3-1-structure-vocabulary)
 - [AWG Unit 7.2: Methods Section](/blog/writing/academic-writing/unit07-2-methods)
-- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02-rule21-tense)
+- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02/rule21-tense)

@@ -298,4 +298,4 @@ transfer was not rate-limiting under our conditions.
 - [Unit 3.1: Results의 구조와 어휘](/blog/writing/science-research-writing/unit3-1-structure-vocabulary)
 - [Unit 4.1: Discussion의 구조와 어휘](/blog/writing/science-research-writing/unit4-1-structure-vocabulary)
 - [AWG Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
-- [Elements of Style — Reminder 8: Qualifiers 자제](/blog/writing/elements-of-style/ch05-reminder08-qualifiers)
+- [Elements of Style — Reminder 8: Qualifiers 자제](/blog/writing/elements-of-style/ch05/reminder08-qualifiers)

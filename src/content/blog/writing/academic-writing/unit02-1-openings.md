@@ -302,6 +302,6 @@ Swales와 Feak가 든 예 — 팁 문화에 관한 학생 글 도입입니다.
 
 - [Unit 1.2: Organization (G-S vs S-G)](/blog/writing/academic-writing/unit01-2-organization)
 - [Unit 2.2: Sentence Definitions](/blog/writing/academic-writing/unit02-2-sentence-definitions)
-- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)
-- [Elements of Style — Rule 16: Use definite, specific, concrete language](/blog/writing/elements-of-style/ch02-rule16-specific)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02/rule12-design)
+- [Elements of Style — Rule 16: Use definite, specific, concrete language](/blog/writing/elements-of-style/ch02/rule16-specific)
 - [On Writing Well — Chapter 4: Style](/blog/writing/on-writing-well/ch04-style)

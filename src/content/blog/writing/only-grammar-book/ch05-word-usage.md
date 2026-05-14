@@ -558,5 +558,5 @@ You're — you are:
 
 - [Chapter 4: Common Mistakes](/blog/writing/only-grammar-book/ch04-common-mistakes)
 - [Chapter 6: Style and Clarity](/blog/writing/only-grammar-book/ch06-style-clarity)
-- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04-words-a-c)
-- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05-reminder14-fancy)
+- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04/words-a-c)
+- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05/reminder14-fancy)

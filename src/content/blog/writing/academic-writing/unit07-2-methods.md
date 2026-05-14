@@ -364,4 +364,4 @@ Unit 7 마지막은 **Unit 7.3: Results Section 작성**.
 - [Unit 7.1: 출판 유형과 IMRD](/blog/writing/academic-writing/unit07-1-publication-types)
 - [Unit 7.3: Results Section](/blog/writing/academic-writing/unit07-3-results)
 - [Unit 3.3: Process Description과 Passive Voice](/blog/writing/academic-writing/unit03-3-process-passive)
-- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02-rule21-tense)
+- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02/rule21-tense)

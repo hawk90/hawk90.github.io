@@ -234,7 +234,7 @@ to use his or her own voice."
 
 - [Chapter 1: The Transaction](/blog/writing/on-writing-well/ch01-transaction) — 시리즈의 시작점
 - [Chapter 23: A Writer's Decisions](/blog/writing/on-writing-well/ch23-decisions)
-- [Elements of Style](/blog/writing/elements-of-style/ch01-usage) — 짝을 이루는 책
+- [Elements of Style](/blog/writing/elements-of-style/ch01/usage) — 짝을 이루는 책
 - [Academic Writing](/blog/writing/academic-writing) — 학술 영어
 - [Science Research Writing](/blog/writing/science-research-writing) — 과학 논문
 - [Only Grammar Book](/blog/writing/only-grammar-book/ch01-parts-of-speech) — 문법 기초

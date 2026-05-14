@@ -466,6 +466,6 @@ Conclusion — 능동 선호:
 
 - [Unit 1.3: Vocabulary Shift](/blog/writing/academic-writing/unit01-3-vocabulary)
 - [Unit 1.5: Flow and Linking](/blog/writing/academic-writing/unit01-5-flow-linking)
-- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)
-- [Elements of Style — Rule 15: Put statements in positive form](/blog/writing/elements-of-style/ch02-rule15-positive)
-- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)
+- [Elements of Style — Rule 15: Put statements in positive form](/blog/writing/elements-of-style/ch02/rule15-positive)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)

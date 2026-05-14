@@ -330,4 +330,4 @@ draws explicitly on the cognitive framework introduced in Chapter 1.
 - [Unit 5.3: Source Identification과 Synthesis](/blog/writing/academic-writing/unit05-3-source-synthesis)
 - [Unit 6.2: Evaluative Language와 Critical Reading](/blog/writing/academic-writing/unit06-2-evaluative-critical)
 - [Unit 1.6: Presentation과 Positioning](/blog/writing/academic-writing/unit01-6-positioning)
-- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05-reminder17-opinion)
+- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05/reminder17-opinion)

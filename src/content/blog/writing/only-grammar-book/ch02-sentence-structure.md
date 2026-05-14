@@ -325,6 +325,6 @@ Should you need help, please call.
 
 - [Chapter 1: Parts of Speech](/blog/writing/only-grammar-book/ch01-parts-of-speech)
 - [Chapter 3: Punctuation](/blog/writing/only-grammar-book/ch03-punctuation)
-- [Elements of Style — Rule 5: Comma splice 금지](/blog/writing/elements-of-style/ch01-rule05-comma-splice)
-- [Elements of Style — Rule 6: 문장을 둘로 끊지 말 것](/blog/writing/elements-of-style/ch01-rule06-sentence-fragment)
-- [Elements of Style — Rule 18: Loose Sentence 연쇄](/blog/writing/elements-of-style/ch02-rule18-loose)
+- [Elements of Style — Rule 5: Comma splice 금지](/blog/writing/elements-of-style/ch01/rule05-comma-splice)
+- [Elements of Style — Rule 6: 문장을 둘로 끊지 말 것](/blog/writing/elements-of-style/ch01/rule06-sentence-fragment)
+- [Elements of Style — Rule 18: Loose Sentence 연쇄](/blog/writing/elements-of-style/ch02/rule18-loose)

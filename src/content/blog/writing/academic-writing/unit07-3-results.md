@@ -379,4 +379,4 @@ Unit 7에서 다룬 것:
 - [Unit 7.2: Methods Section](/blog/writing/academic-writing/unit07-2-methods)
 - [Unit 8.1: Introductions와 CARS 모델](/blog/writing/academic-writing/unit08-1-introductions-cars)
 - [Unit 4: Data Commentary](/blog/writing/academic-writing/unit04-1-structure-location) — Results의 세부 도구
-- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02/rule16-specific)

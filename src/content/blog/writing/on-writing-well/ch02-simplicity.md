@@ -208,5 +208,5 @@ Zinsser의 통찰 — 좋은 글의 90퍼센트는 *편집*입니다.
 
 - [Chapter 1: The Transaction](/blog/writing/on-writing-well/ch01-transaction)
 - [Chapter 3: Clutter](/blog/writing/on-writing-well/ch03-clutter)
-- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)
-- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05-reminder14-fancy)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)
+- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05/reminder14-fancy)

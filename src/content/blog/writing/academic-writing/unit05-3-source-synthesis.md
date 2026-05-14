@@ -361,4 +361,4 @@ Unit 5에서 다룬 것:
 - [Unit 5.2: Paraphrasing과 Synonyms](/blog/writing/academic-writing/unit05-2-paraphrasing)
 - [Unit 6.1: Book Reviews and Opinions](/blog/writing/academic-writing/unit06-1-book-reviews-opinions)
 - [Unit 8.1: Introductions and CARS](/blog/writing/academic-writing/unit08-1-introductions-cars) — CARS의 인용 패턴
-- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)

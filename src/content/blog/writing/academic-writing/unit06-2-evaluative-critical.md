@@ -330,4 +330,4 @@ Unit 6 마지막은 **Unit 6.3: Reaction Papers와 Journal Reviews**.
 - [Unit 6.1: Book Reviews와 의견 표명](/blog/writing/academic-writing/unit06-1-book-reviews-opinions)
 - [Unit 6.3: Reaction Papers와 Journal Reviews](/blog/writing/academic-writing/unit06-3-reaction-journal)
 - [Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
-- [Elements of Style — Reminder 7: 과장하지 말라](/blog/writing/elements-of-style/ch05-reminder07-overstate)
+- [Elements of Style — Reminder 7: 과장하지 말라](/blog/writing/elements-of-style/ch05/reminder07-overstate)

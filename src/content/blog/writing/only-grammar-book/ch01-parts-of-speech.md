@@ -450,5 +450,5 @@ art=관사 (a/an/the는 형용사 또는 한정사로 분류)
 
 - [Only Grammar Book — 시리즈 개요](/blog/writing/only-grammar-book)
 - [Chapter 2: Sentence Structure](/blog/writing/only-grammar-book/ch02-sentence-structure)
-- [Elements of Style — Chapter 1: Rules of Usage](/blog/writing/elements-of-style/ch01-usage)
-- [Elements of Style — Rule 9: 주어와 동사 일치](/blog/writing/elements-of-style/ch01-rule09-subject-verb)
+- [Elements of Style — Chapter 1: Rules of Usage](/blog/writing/elements-of-style/ch01/usage)
+- [Elements of Style — Rule 9: 주어와 동사 일치](/blog/writing/elements-of-style/ch01/rule09-subject-verb)

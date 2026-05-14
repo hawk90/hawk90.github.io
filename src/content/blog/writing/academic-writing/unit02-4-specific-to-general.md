@@ -297,4 +297,4 @@ g. Some common English words are palindromes, such as pop, dad,
 - [Unit 2.3: Extended Definitions and Variations](/blog/writing/academic-writing/unit02-3-extended-definitions)
 - [Unit 3.1: SPSE Structure](/blog/writing/academic-writing/unit03-1-spse-structure)
 - [Unit 1.2: Organization](/blog/writing/academic-writing/unit01-2-organization)
-- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02/rule12-design)

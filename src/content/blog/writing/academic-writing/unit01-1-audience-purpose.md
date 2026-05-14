@@ -330,5 +330,5 @@ Audience ↕ Purpose ↕ Organization ↕ Style ↕ Flow ↕ Presentation
 - [Academic Writing — 시리즈 개요](/blog/writing/academic-writing)
 - [Unit 1.2: Organization](/blog/writing/academic-writing/unit01-2-organization)
 - [On Writing Well — Chapter 5: Audience](/blog/writing/on-writing-well/ch05-audience)
-- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02/rule12-design)
 - [Science Research Writing — Overview](/blog/writing/science-research-writing/00-overview)

@@ -440,6 +440,6 @@ break                          fracture, rupture
 
 - [Unit 1.2: Organization](/blog/writing/academic-writing/unit01-2-organization)
 - [Unit 1.4: Other Stylistic Features](/blog/writing/academic-writing/unit01-4-stylistic-features)
-- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05-reminder14-fancy)
-- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)
+- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05/reminder14-fancy)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)
 - [On Writing Well — Chapter 6: Words](/blog/writing/on-writing-well/ch06-words)

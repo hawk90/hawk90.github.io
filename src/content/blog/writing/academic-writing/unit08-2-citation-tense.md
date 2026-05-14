@@ -369,4 +369,4 @@ Unit 8 마지막, AWG 시리즈의 마지막 글은 **Unit 8.3: Discussion Secti
 - [Unit 8.1: Introductions와 CARS](/blog/writing/academic-writing/unit08-1-introductions-cars)
 - [Unit 8.3: Discussion Sections](/blog/writing/academic-writing/unit08-3-discussion)
 - [Unit 5.3: Source Identification과 Synthesis](/blog/writing/academic-writing/unit05-3-source-synthesis)
-- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02-rule21-tense)
+- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02/rule21-tense)

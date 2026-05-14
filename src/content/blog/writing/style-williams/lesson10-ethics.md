@@ -277,7 +277,7 @@ Williams가 강조하는 핵심.
 ## 관련 항목
 
 - [Lesson 1: Understanding](/blog/writing/style-williams/lesson01-understanding) — 시작점
-- [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style)
-- [Elements of Style — Reminder 16: 명료하게 쓰라](/blog/writing/elements-of-style/ch05-reminder16-clarity)
-- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05-reminder17-opinion)
+- [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style)
+- [Elements of Style — Reminder 16: 명료하게 쓰라](/blog/writing/elements-of-style/ch05/reminder16-clarity)
+- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05/reminder17-opinion)
 - [On Writing Well Ch 2: Simplicity](/blog/writing/on-writing-well/ch02-simplicity)

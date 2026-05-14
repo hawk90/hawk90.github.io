@@ -260,4 +260,4 @@ Form 5: Table N illustrates the relationship between ... ← Indicative
 - [Unit 3.4: Introducing the Solution](/blog/writing/academic-writing/unit03-4-introducing-solution)
 - [Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
 - [Unit 1.6: Presentation과 Positioning](/blog/writing/academic-writing/unit01-6-positioning) — stance markers
-- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02/rule16-specific)

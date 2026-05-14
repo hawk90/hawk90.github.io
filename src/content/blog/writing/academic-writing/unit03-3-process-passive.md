@@ -316,4 +316,4 @@ Unit 3 마지막은 **Unit 3.4: Introducing the Solution**.
 - [Unit 3.2: Cause and Effect](/blog/writing/academic-writing/unit03-2-cause-effect)
 - [Unit 3.4: Introducing the Solution](/blog/writing/academic-writing/unit03-4-introducing-solution)
 - [Unit 1.4: Other Stylistic Features](/blog/writing/academic-writing/unit01-4-stylistic-features) — passive voice 일반
-- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)

@@ -264,7 +264,7 @@ Character와 관련된 부원칙.
 ## 관련 항목
 
 - [Lesson 3: Actions](/blog/writing/style-williams/lesson03-actions)
-- [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02-composition) — Active voice
-- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)
-- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)
+- [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02/composition) — Active voice
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02/rule16-specific)
 - [On Writing Well Ch 5: Audience](/blog/writing/on-writing-well/ch05-audience)

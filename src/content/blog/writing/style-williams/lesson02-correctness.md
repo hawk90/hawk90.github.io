@@ -215,6 +215,6 @@ Williams의 권장.
 ## 관련 항목
 
 - [Lesson 1: Understanding](/blog/writing/style-williams/lesson01-understanding)
-- [Elements of Style Ch 1: Elementary Rules of Usage](/blog/writing/elements-of-style/ch01-usage)
-- [Elements of Style Ch 4: Misused Words](/blog/writing/elements-of-style/ch04-words-a-c)
+- [Elements of Style Ch 1: Elementary Rules of Usage](/blog/writing/elements-of-style/ch01/usage)
+- [Elements of Style Ch 4: Misused Words](/blog/writing/elements-of-style/ch04/words-a-c)
 - [Only Grammar Book Ch 4: Common Mistakes](/blog/writing/only-grammar-book/ch04-common-mistakes)

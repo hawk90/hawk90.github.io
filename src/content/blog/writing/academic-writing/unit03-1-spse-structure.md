@@ -285,4 +285,4 @@ Unfortunately, the system has been abandoned.   ← 화자의 태도, 문장 전
 - [Unit 2.1: GS 텍스트의 시작](/blog/writing/academic-writing/unit02-1-openings)
 - [Unit 3.2: Cause and Effect](/blog/writing/academic-writing/unit03-2-cause-effect)
 - [Unit 1.4: Other Stylistic Features](/blog/writing/academic-writing/unit01-4-stylistic-features) — mid-position 부사
-- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02/rule12-design)

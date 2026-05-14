@@ -173,5 +173,5 @@ Zinsser의 이상입니다.
 
 - [Chapter 5: The Audience](/blog/writing/on-writing-well/ch05-audience)
 - [Chapter 7: Usage](/blog/writing/on-writing-well/ch07-usage)
-- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04-words-a-c)
-- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05-reminder14-fancy)
+- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04/words-a-c)
+- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05/reminder14-fancy)

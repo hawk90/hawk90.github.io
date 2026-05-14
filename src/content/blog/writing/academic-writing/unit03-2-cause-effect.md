@@ -299,4 +299,4 @@ In light of recent findings, the hypothesis must be revised.
 - [Unit 3.1: SPSE 구조](/blog/writing/academic-writing/unit03-1-spse-structure)
 - [Unit 3.3: Process Description과 Passive Voice](/blog/writing/academic-writing/unit03-3-process-passive)
 - [Unit 1.5: Flow and Linking](/blog/writing/academic-writing/unit01-5-flow-linking)
-- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)

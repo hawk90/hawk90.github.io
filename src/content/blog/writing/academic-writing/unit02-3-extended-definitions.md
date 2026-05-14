@@ -320,4 +320,4 @@ Unit 2 마지막은 **Unit 2.4: Specific-to-General Organization**. Discussions 
 
 - [Unit 2.2: Sentence Definitions](/blog/writing/academic-writing/unit02-2-sentence-definitions)
 - [Unit 2.4: Specific-to-General Organization](/blog/writing/academic-writing/unit02-4-specific-to-general)
-- [Elements of Style — Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02-rule13-paragraph)
+- [Elements of Style — Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02/rule13-paragraph)
