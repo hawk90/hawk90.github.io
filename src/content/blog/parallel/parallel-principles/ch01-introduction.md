@@ -196,7 +196,7 @@ Level
 
 ## 1.4 C++20/23 동시성 기능
 
-### C++11 → C++23 진화
+### C++11 → C++26 진화
 
 | 표준 | 추가된 기능 |
 |------|------------|
@@ -204,7 +204,8 @@ Level
 | C++14 | `std::shared_timed_mutex` |
 | C++17 | `std::shared_mutex`, `std::scoped_lock`, 병렬 알고리즘 |
 | C++20 | `std::jthread`, `std::stop_token`, `std::latch`, `std::barrier`, `std::counting_semaphore` |
-| C++23 | `std::generator` (코루틴), hazard pointer (제안 중) |
+| C++23 | `std::generator` (코루틴), `std::expected`, monadic 인터페이스 |
+| C++26 | `std::hazard_pointer`, `std::rcu`, `std::execution` (sender/receiver) 등 진행 중 |
 
 ### C++20 신규 기능 맛보기
 

@@ -65,11 +65,11 @@ std::for_each(std::execution::par,     // 병렬 실행
 
 ```
 CPU 진화 (대략적):
-2000: 1 GHz, 1 core   → 단일 스레드 최적화
-2005: 3 GHz, 2 cores  → 병렬화 시작
-2010: 3 GHz, 4 cores  → 병렬화 필수
-2020: 3 GHz, 8+ cores → 병렬화 기본
-2024: 3 GHz, 16+ cores
+2000: 1 GHz, 1 core    → 단일 스레드 최적화
+2005: 3 GHz, 2 cores   → 병렬화 시작
+2010: 3 GHz, 4 cores   → 병렬화 필수
+2020: 3 GHz, 8+ cores  → 병렬화 기본
+2025: 5 GHz, 24+ cores (P+E core 혼합), 서버는 96+ cores 일반
 ```
 
 **싱글 스레드 성능은 한계에 도달했다.** 성능을 높이려면 코어를 더 쓰는 수밖에 없다.
@@ -148,14 +148,15 @@ int main() {
 - **타입 안전성** — 템플릿 기반 인터페이스
 - **RAII** — `std::thread` 소멸자가 리소스 관리
 
-### C++14 ~ C++23: 지속적 개선
+### C++14 ~ C++26: 지속적 개선
 
 | 표준 | 추가된 기능 |
 |------|------------|
 | C++14 | `std::shared_timed_mutex` |
 | C++17 | `std::shared_mutex`, `std::scoped_lock`, 병렬 알고리즘 |
 | C++20 | `std::jthread`, `std::stop_token`, `std::latch`, `std::barrier`, `std::counting_semaphore` |
-| C++23 | `std::generator` (코루틴), 일부 병렬 ranges |
+| C++23 | `std::generator` (코루틴), `std::expected`, monadic 인터페이스 |
+| C++26 | `std::hazard_pointer`, `std::rcu`, `std::execution` (sender/receiver) 등 진행 중 |
 
 ## 1.4 C11 스레드 (C 언어)
 

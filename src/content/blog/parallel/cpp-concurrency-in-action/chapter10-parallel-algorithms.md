@@ -803,13 +803,14 @@ std::for_each(std::execution::unseq, data.begin(), data.end(),
 // 작은 데이터나 이미 병렬 컨텍스트에서 유용
 ```
 
-### 향후: Ranges + 병렬
+### Ranges + 병렬
 
 ```cpp
-// C++23에서 일부 ranges 알고리즘이 병렬 지원 예정
-// (아직 표준화 진행 중)
+// C++23: ranges algorithm은 표준화됐으나 execution policy 오버로드는
+// 대부분 누락. C++26에서 std::execution (sender/receiver) 기반으로
+// 더 일반적인 비동기 / 병렬 ranges가 도입 중.
 
-// 현재는 ranges::views를 materialize 후 사용
+// 현재 실용 — ranges::views를 materialize 후 병렬 정렬
 auto filtered = data | std::views::filter([](int x) { return x > 0; });
 std::vector<int> filtered_vec(filtered.begin(), filtered.end());
 
