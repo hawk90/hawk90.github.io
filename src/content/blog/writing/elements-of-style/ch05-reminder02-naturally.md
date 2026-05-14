@@ -3,7 +3,7 @@ title: "Reminder 2: 자연스럽게 오는 방식으로 쓰라"
 date: 2026-05-14T05:02:00
 description: "자기에게 쉽게 떠오르는 단어와 표현을 쓴다. 다만 자연스럽다고 해서 결함 없다고 가정하지 마라."
 series: "The Elements of Style"
-seriesOrder: 30
+seriesOrder: 34
 tags: [writing, style, voice, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

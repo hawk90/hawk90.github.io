@@ -3,7 +3,7 @@ title: "Rule 3: 삽입 표현은 쉼표로 감싸기"
 date: 2026-05-14T01:03:00
 description: "부가 정보로 끼어드는 어구는 양옆에 쉼표. 비제한적 관계절도 마찬가지."
 series: "The Elements of Style"
-seriesOrder: 3
+seriesOrder: 4
 tags: [writing, grammar, comma, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

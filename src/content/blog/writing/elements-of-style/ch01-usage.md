@@ -3,7 +3,7 @@ title: "Chapter 1: Elementary Rules of Usage"
 date: 2026-05-14T01:00:00
 description: "기본 문법 규칙 11개의 개요 — 소유격, 쉼표, 세미콜론, 대명사 격, 현수 분사."
 series: "The Elements of Style"
-seriesOrder: 0.1
+seriesOrder: 1
 tags: [writing, grammar, usage, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

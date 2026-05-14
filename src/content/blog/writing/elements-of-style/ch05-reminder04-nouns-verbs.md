@@ -3,7 +3,7 @@ title: "Reminder 4: 명사와 동사로 쓰라"
 date: 2026-05-14T05:04:00
 description: "형용사와 부사가 아니라 명사와 동사로 쓴다. 글의 단단함과 색깔을 만드는 것은 명사와 동사."
 series: "The Elements of Style"
-seriesOrder: 32
+seriesOrder: 36
 tags: [writing, style, nouns, verbs, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

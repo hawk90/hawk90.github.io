@@ -3,7 +3,7 @@ title: "Ch4 Words: G–I"
 date: 2026-05-14T04:03:00
 description: "자주 오용되는 단어와 표현 — Get부터 -ize까지."
 series: "The Elements of Style"
-seriesOrder: 25
+seriesOrder: 28
 tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

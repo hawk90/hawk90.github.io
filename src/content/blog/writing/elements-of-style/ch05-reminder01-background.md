@@ -3,7 +3,7 @@ title: "Reminder 1: 자신을 배경에 두라"
 date: 2026-05-14T05:01:00
 description: "독자의 주의가 글의 무드가 아니라 글의 의미로 향하게 쓰라."
 series: "The Elements of Style"
-seriesOrder: 29
+seriesOrder: 33
 tags: [writing, style, voice, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

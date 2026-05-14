@@ -3,7 +3,7 @@ title: "Rule 7: 콜론의 용법"
 date: 2026-05-14T01:07:00
 description: "콜론은 독립절 뒤에서 부연, 동격, 인용을 도입한다."
 series: "The Elements of Style"
-seriesOrder: 7
+seriesOrder: 8
 tags: [writing, grammar, colon, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

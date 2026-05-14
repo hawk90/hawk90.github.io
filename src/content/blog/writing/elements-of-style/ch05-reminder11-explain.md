@@ -3,7 +3,7 @@ title: "Reminder 11: 너무 많이 설명하지 말라"
 date: 2026-05-14T05:11:00
 description: "He said 다음에 consolingly, grumblingly 같은 부사를 자주 붙이지 마라. 대화 자체가 화자의 기분을 드러내야 한다."
 series: "The Elements of Style"
-seriesOrder: 39
+seriesOrder: 43
 tags: [writing, style, dialogue, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

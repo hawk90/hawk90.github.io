@@ -3,7 +3,7 @@ title: "Rule 11: 현수 분사 (Dangling Participle)"
 date: 2026-05-14T01:11:00
 description: "문장 앞의 분사구는 문장의 주어를 수식해야 한다."
 series: "The Elements of Style"
-seriesOrder: 11
+seriesOrder: 12
 tags: [writing, grammar, dangling-participle, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

@@ -3,7 +3,7 @@ title: "Ch4 Words: T–Z"
 date: 2026-05-14T04:06:00
 description: "자주 오용되는 단어와 표현 — Than부터 Would까지."
 series: "The Elements of Style"
-seriesOrder: 28
+seriesOrder: 31
 tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

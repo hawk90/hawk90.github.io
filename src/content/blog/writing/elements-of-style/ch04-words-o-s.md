@@ -3,7 +3,7 @@ title: "Ch4 Words: O–S"
 date: 2026-05-14T04:05:00
 description: "자주 오용되는 단어와 표현 — Noun used as verb부터 Student body까지."
 series: "The Elements of Style"
-seriesOrder: 27
+seriesOrder: 30
 tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

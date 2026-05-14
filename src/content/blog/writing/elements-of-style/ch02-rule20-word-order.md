@@ -3,7 +3,7 @@ title: "Rule 20: 관련 있는 단어를 함께 두라"
 date: 2026-05-14T02:09:00
 description: "문장에서 어순은 의미를 결정한다. 관련 있는 단어들은 가까이, 관련 없는 단어들은 멀리."
 series: "The Elements of Style"
-seriesOrder: 20
+seriesOrder: 22
 tags: [writing, composition, word-order, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

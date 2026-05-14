@@ -3,7 +3,7 @@ title: "Ch4 Words: A–C"
 date: 2026-05-14T04:01:00
 description: "자주 오용되는 단어와 표현 — Aggravate부터 Currently까지."
 series: "The Elements of Style"
-seriesOrder: 23
+seriesOrder: 26
 tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

@@ -3,7 +3,7 @@ title: "Chapter 5: An Approach to Style"
 date: 2026-05-14T05:00:00
 description: "글쓰기의 총체 원칙 — E.B. White가 추가한 21개 reminders. 스타일을 찾는 법."
 series: "The Elements of Style"
-seriesOrder: 28.5
+seriesOrder: 32
 tags: [writing, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

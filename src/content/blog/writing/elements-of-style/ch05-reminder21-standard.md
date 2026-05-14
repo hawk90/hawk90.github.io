@@ -3,7 +3,7 @@ title: "Reminder 21: 표준을 비표준보다 선호하라"
 date: 2026-05-14T05:21:00
 description: "정통과 이단 사이에서는 정통의 편에 약간 더 기울어라. 조용히 영어의 흐름에 들어가고 휘젓지 말라."
 series: "The Elements of Style"
-seriesOrder: 49
+seriesOrder: 53
 tags: [writing, style, standard, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

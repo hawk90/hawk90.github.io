@@ -3,7 +3,7 @@ title: "Rule 4: 등위 접속사 앞에 쉼표"
 date: 2026-05-14T01:04:00
 description: "두 독립절을 잇는 등위 접속사(and, but, or 등) 앞에 쉼표를 둔다."
 series: "The Elements of Style"
-seriesOrder: 4
+seriesOrder: 5
 tags: [writing, grammar, comma, conjunction, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

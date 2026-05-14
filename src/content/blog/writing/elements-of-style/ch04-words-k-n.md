@@ -3,7 +3,7 @@ title: "Ch4 Words: K–N"
 date: 2026-05-14T04:04:00
 description: "자주 오용되는 단어와 표현 — Kind of부터 Nor까지."
 series: "The Elements of Style"
-seriesOrder: 26
+seriesOrder: 29
 tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

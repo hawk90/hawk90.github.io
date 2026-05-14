@@ -3,7 +3,7 @@ title: "Reminder 17: 의견을 끼워 넣지 말라"
 date: 2026-05-14T05:17:00
 description: "특별한 이유가 없다면 글에 자기 의견을 함부로 끼워 넣지 마라."
 series: "The Elements of Style"
-seriesOrder: 45
+seriesOrder: 49
 tags: [writing, style, opinion, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

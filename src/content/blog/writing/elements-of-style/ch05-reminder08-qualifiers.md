@@ -3,7 +3,7 @@ title: "Reminder 8: 한정어를 자제하라"
 date: 2026-05-14T05:08:00
 description: "Rather, very, little, pretty — 이 단어들은 산문의 연못에 사는 거머리들이다."
 series: "The Elements of Style"
-seriesOrder: 36
+seriesOrder: 40
 tags: [writing, style, qualifiers, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

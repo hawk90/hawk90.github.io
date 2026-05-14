@@ -3,7 +3,7 @@ title: "Reminder 9: 들뜬 분위기를 가장하지 말라"
 date: 2026-05-14T05:09:00
 description: "작가가 마치 환희에 차 있는 듯한 들뜸을 가장하지 마라."
 series: "The Elements of Style"
-seriesOrder: 37
+seriesOrder: 41
 tags: [writing, style, tone, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

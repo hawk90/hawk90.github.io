@@ -3,7 +3,7 @@ title: "Rule 13: 단락을 작문의 단위로 삼을 것"
 date: 2026-05-14T02:02:00
 description: "한 단락은 한 주제를 다룬다. 새 단락의 시작은 새 단계가 시작됨을 독자에게 알리는 신호."
 series: "The Elements of Style"
-seriesOrder: 13
+seriesOrder: 15
 tags: [writing, composition, paragraph, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

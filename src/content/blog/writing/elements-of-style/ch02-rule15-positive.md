@@ -3,7 +3,7 @@ title: "Rule 15: 진술은 긍정 형식으로"
 date: 2026-05-14T02:04:00
 description: "분명히 단언하라. 시들하고 색 없는 미적지근한 표현을 피하라."
 series: "The Elements of Style"
-seriesOrder: 15
+seriesOrder: 17
 tags: [writing, composition, positive-form, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

@@ -3,7 +3,7 @@ title: "Rule 1: 단수 명사의 소유격은 's"
 date: 2026-05-14T01:01:00
 description: "자음으로 끝나든 모음으로 끝나든 's를 붙인다. it's와 its의 구별."
 series: "The Elements of Style"
-seriesOrder: 1
+seriesOrder: 2
 tags: [writing, grammar, possessive, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

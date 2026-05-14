@@ -3,7 +3,7 @@ title: "Reminder 15: 자신 없으면 사투리를 쓰지 말라"
 date: 2026-05-14T05:15:00
 description: "사투리를 흉내 내려면 그 사투리의 진정한 학생이어야 한다. 일관성을 지켜라."
 series: "The Elements of Style"
-seriesOrder: 43
+seriesOrder: 47
 tags: [writing, style, dialect, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"

@@ -3,7 +3,7 @@ title: "Rule 14: 능동태를 쓸 것"
 date: 2026-05-14T02:03:00
 description: "능동태는 보통 수동태보다 직접적이고 활기차다."
 series: "The Elements of Style"
-seriesOrder: 14
+seriesOrder: 16
 tags: [writing, composition, active-voice, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
