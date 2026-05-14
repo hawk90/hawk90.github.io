@@ -353,9 +353,41 @@ Ch 6. Style and Clarity  — 문법을 넘어선 명확성 (이 글)
 
 핵심 메시지 — *문법은 도구*입니다. 좋은 글의 목적은 *문법의 정확성*이 아니라 *명확한 의사소통*. 문법은 그 의사소통을 *방해하지 않도록* 알고 있어야 할 도구입니다.
 
+## 한국 학생의 Style / Clarity 함정
+
+```
+1. *Wordy* 표현 — 한국어 격식의 직역
+   "due to the fact that" → "because"
+   "in order to" → "to"
+2. 수동태 *남용* — 격식의 환상
+   해결: 능동이 자연스러우면 능동
+3. *명사화 (-tion)* 과다
+   "the implementation of" → "implementing"
+4. *Hedging 과다*
+   "may possibly perhaps" → 한 헤지만
+5. 한국어 *추상 명사* → 영어 추상 명사 → 무거움
+   "the necessity of consideration of..." 같은 직역 회피
+6. 단조로움 — 모든 문장이 같은 길이 / 구조
+   해결: 문장 다양화 (Rule 18)
+```
+
+## 자기 글 점검 — Style
+
+```
+□ 모든 단어가 *일하고* 있는가? (Omit needless words)
+□ 능동 / 수동이 *적절한 자리*?
+□ 명사화 과다는 없는가?
+□ 헤지 *균형*?
+□ 문장 *다양*?
+□ 한국어 추상 명사 직역 회피?
+```
+
 ## 관련 항목
 
 - [Only Grammar Book — 시리즈 개요](/blog/writing/only-grammar-book)
 - [Chapter 1: Parts of Speech](/blog/writing/only-grammar-book/ch01-parts-of-speech)
 - [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style)
+- [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02-rule14-active-voice)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)
+- [Elements of Style — Reminder 4: 명사와 동사로 쓰라](/blog/writing/elements-of-style/ch05-reminder04-nouns-verbs)
 - [On Writing Well — Chapter 2: Simplicity](/blog/writing/on-writing-well/ch02-simplicity)

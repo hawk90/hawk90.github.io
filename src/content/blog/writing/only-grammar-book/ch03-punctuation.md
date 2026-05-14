@@ -444,6 +444,27 @@ OK:   Stop!
 □ 하이픈이 명사 앞 복합 형용사에만 있는가?
 ```
 
+## 한국 학생의 구두점 함정
+
+```
+1. *세미콜론* 한국어에 없음 → 영어로 옮길 때 어색
+   해결: 두 독립절을 *마침표*로 분리
+
+2. *어포스트로피* 한국어에 없음 → Its / It's 혼동
+   해결: It is로 풀어 보아 점검
+
+3. *직렬 쉼표* (Oxford comma) 한국어 가운뎃점과 다름
+   해결: 영어는 마지막 and 앞 쉼표 (학술 표준)
+
+4. *대시* 과용 — 번역체 신호
+   해결: 쉼표 / 마침표로 대체 가능한지 확인
+
+5. 따옴표 *부호* 차이
+   한국: " ", 「 」, 《 》
+   영어: " " (미국), ' ' (영국)
+   해결: 한 글에 일관성
+```
+
 ## 정리
 
 - 마침표·쉼표·세미콜론·콜론·대시 — 각각의 자리
@@ -456,10 +477,14 @@ OK:   Stop!
 
 ## 다음 장 예고
 
-다음은 **Chapter 4: Common Mistakes**입니다. 영어 글쓰기에서 자주 마주치는 *흔한 오류*들을 정리합니다.
+다음은 **Chapter 4: Common Mistakes**. 영어 글쓰기에서 자주 마주치는 *흔한 오류*들.
 
 ## 관련 항목
 
 - [Chapter 2: Sentence Structure](/blog/writing/only-grammar-book/ch02-sentence-structure)
 - [Chapter 4: Common Mistakes](/blog/writing/only-grammar-book/ch04-common-mistakes)
 - [Elements of Style — Chapter 1: Elementary Rules of Usage](/blog/writing/elements-of-style/ch01-usage)
+- [Elements of Style — Rule 1: 단수 명사의 소유격](/blog/writing/elements-of-style/ch01-rule01-possessive)
+- [Elements of Style — Rule 2: 직렬 쉼표](/blog/writing/elements-of-style/ch01-rule02-serial-comma)
+- [Elements of Style — Rule 7: 콜론의 용법](/blog/writing/elements-of-style/ch01-rule07-colon)
+- [Elements of Style — Rule 8: 대시의 용법](/blog/writing/elements-of-style/ch01-rule08-dash)

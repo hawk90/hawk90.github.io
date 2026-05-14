@@ -398,6 +398,42 @@ Oh! Wow! Ouch! Hey! Bravo! Yikes! Hmm.
 art=관사 (a/an/the는 형용사 또는 한정사로 분류)
 ```
 
+## 한국 학생의 품사 함정
+
+```
+1. 가산 / 불가산 명사 — 한국어에 *같은 구분 없음*
+   "정보" → information (불가산, "an information" 잘못)
+   "조언" → advice (불가산, "advices" 잘못)
+   "장비" → equipment (불가산)
+
+2. 형용사 순서 — 한국어는 *유연*
+   영어 표준 순서: opinion → size → age → shape →
+                   color → origin → material → purpose
+   "a beautiful old round wooden table"
+
+3. 전치사 관용 — 한국어 조사로 *직역 불가*
+   "depend on" (NOT "depend at")
+   "agree with [사람]", "agree to [제안]"
+   "different from" (NOT "than", "to")
+
+4. 3인칭 단수 동사 -s — 한국어에 *없는 변화*
+   "She runs."  NOT "She run."
+   가장 자주 빠뜨리는 자리
+
+5. 관사 (a / an / the) — 한국어에 *없음*
+   영어 학습자가 *가장 어려워하는* 영역
+```
+
+## 자기 글 점검
+
+```
+□ 모든 *셀 수 없는 명사*가 단수 동사를 받는가?
+□ 형용사 *순서*가 영어 표준?
+□ 전치사가 *관용*에 맞는가? (사전 / 코퍼스 확인)
+□ 3인칭 단수에 *-s*?
+□ 관사 사용이 *일관*되는가?
+```
+
 ## 정리
 
 - 영어의 8가지 품사 — 명사, 대명사, 동사, 형용사, 부사, 전치사, 접속사, 감탄사
@@ -408,10 +444,11 @@ art=관사 (a/an/the는 형용사 또는 한정사로 분류)
 
 ## 다음 장 예고
 
-다음은 **Chapter 2: Sentence Structure**입니다. 문장의 구성 요소와 *문장의 종류* — simple, compound, complex, compound-complex를 다룹니다.
+다음은 **Chapter 2: Sentence Structure**. 문장의 구성 요소와 *문장의 종류* — simple, compound, complex, compound-complex.
 
 ## 관련 항목
 
 - [Only Grammar Book — 시리즈 개요](/blog/writing/only-grammar-book)
 - [Chapter 2: Sentence Structure](/blog/writing/only-grammar-book/ch02-sentence-structure)
 - [Elements of Style — Chapter 1: Rules of Usage](/blog/writing/elements-of-style/ch01-usage)
+- [Elements of Style — Rule 9: 주어와 동사 일치](/blog/writing/elements-of-style/ch01-rule09-subject-verb)

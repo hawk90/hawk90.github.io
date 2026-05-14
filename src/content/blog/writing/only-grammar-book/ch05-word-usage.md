@@ -525,6 +525,23 @@ You're — you are:
 □ Disinterested / Uninterested 같은 정확한 구분
 ```
 
+## 한국 학생의 Word Usage 함정
+
+```
+1. *Utilize* 남용 — "use"가 거의 항상 정답
+2. *Personalize, finalize, optimize* 등 *-ize*  과시
+3. *Very* + 약한 단어 — 강한 단어 하나로
+   "very tired" → "exhausted"
+4. *Nice, interesting* 남발 — 구체적 형용사로
+5. *Contact* 동사 — phone, email 같은 구체 동사로
+6. *Significant* 통계적 의미와 일반 의미 혼동
+   학술: significant = statistically significant
+   일반: significant = important
+7. 한국어 직역 함정
+   "consider as" → "consider" (as 불필요)
+   "discuss about" → "discuss" (about 불필요)
+```
+
 ## 정리
 
 - 동음이의어 / 비슷한 단어 쌍의 *정확한 의미* 구분
@@ -535,10 +552,11 @@ You're — you are:
 
 ## 다음 장 예고
 
-마지막 장은 **Chapter 6: Style and Clarity**입니다. 문법을 넘어선 *문체*와 *명확성*의 원리를 다룹니다.
+마지막 장은 **Chapter 6: Style and Clarity**. 문법을 넘어선 *문체*와 *명확성*의 원리.
 
 ## 관련 항목
 
 - [Chapter 4: Common Mistakes](/blog/writing/only-grammar-book/ch04-common-mistakes)
 - [Chapter 6: Style and Clarity](/blog/writing/only-grammar-book/ch06-style-clarity)
-- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04-misused)
+- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04-words-a-c)
+- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05-reminder14-fancy)

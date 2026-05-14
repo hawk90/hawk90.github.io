@@ -272,6 +272,30 @@ Should you need help, please call.
 
 도치는 *드물게 강조*에 사용합니다.
 
+## 한국 학생의 문장 구조 함정
+
+```
+1. *주어 생략* — 한국어 자연, 영어 불가
+   회피: "Went to the store."
+   선호: "I went to the store."
+
+2. *Fragment*가 한국어 직역에서 흔함
+   회피: "Because I was tired."
+   선호: "I went to bed because I was tired."
+
+3. *Run-on / Comma splice* — 한국어 연결 어미 영향
+   회피: "It was raining we stayed home."
+   선호: "It was raining, so we stayed home."
+
+4. *어순 자유* 착각
+   한국어: "나는 어제 학교에 갔다" / "어제 나는 학교에 갔다"
+   영어: SVO 고정에 가까움 (도치는 예외)
+
+5. 의문문 어순 혼동
+   회피: "I don't know what is your name."
+   선호: "I don't know what your name is."  ← 간접 의문
+```
+
 ## 자기 글 점검
 
 ```
@@ -280,6 +304,8 @@ Should you need help, please call.
 □ Comma splice가 없는가?
 □ 문장 종류가 다양한가?
 □ 같은 구조가 반복되지 않는가?
+□ 간접 의문문 어순이 맞는가?
+□ 한국어 주어 생략을 *영어로 옮길 때 채웠는가*?
 ```
 
 ## 정리
@@ -293,10 +319,12 @@ Should you need help, please call.
 
 ## 다음 장 예고
 
-다음은 **Chapter 3: Punctuation**입니다. 쉼표, 세미콜론, 콜론, 대시, 따옴표 등 구두점의 표준 사용을 다룹니다.
+다음은 **Chapter 3: Punctuation**. 쉼표, 세미콜론, 콜론, 대시, 따옴표 등 구두점의 표준 사용.
 
 ## 관련 항목
 
 - [Chapter 1: Parts of Speech](/blog/writing/only-grammar-book/ch01-parts-of-speech)
 - [Chapter 3: Punctuation](/blog/writing/only-grammar-book/ch03-punctuation)
-- [Elements of Style — Rule 5: Don't join independent clauses with a comma](/blog/writing/elements-of-style/ch01-usage)
+- [Elements of Style — Rule 5: Comma splice 금지](/blog/writing/elements-of-style/ch01-rule05-comma-splice)
+- [Elements of Style — Rule 6: 문장을 둘로 끊지 말 것](/blog/writing/elements-of-style/ch01-rule06-sentence-fragment)
+- [Elements of Style — Rule 18: Loose Sentence 연쇄](/blog/writing/elements-of-style/ch02-rule18-loose)

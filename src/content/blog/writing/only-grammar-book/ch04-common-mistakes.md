@@ -409,6 +409,48 @@ Amount — 양:
 □ 이중 부정 회피
 ```
 
+## 한국 학생의 Common Mistakes Top 10
+
+```
+1. 3인칭 단수 -s 누락
+   "She run" → "She runs"
+
+2. Its / It's 혼동
+   "the dog and it's owner" → "and its owner"
+
+3. Between you and I
+   → "between you and me" (목적격)
+
+4. Affect / Effect 혼동
+   affect = 동사 (영향을 미치다)
+   effect = 명사 (결과)
+
+5. Fewer / Less
+   fewer + 셀 수 (people)
+   less + 양 (water)
+
+6. Their / There / They're
+   their = 그들의
+   there = 거기에
+   they're = they are
+
+7. Dangling participle
+   "Walking down the street, the trees were beautiful."
+   → 나무가 걸었나?
+   → "As I walked down the street, the trees were beautiful."
+
+8. Comma splice
+   "It was raining, we stayed home."
+   → ", so we" 또는 마침표
+
+9. Subject-verb agreement (중간 어구 함정)
+   "The list of items are..." → "is..."
+
+10. Lay / Lie 시제 혼동
+    lay (놓다, 타동) — lay, laid, laid
+    lie (눕다, 자동) — lie, lay, lain
+```
+
 ## 정리
 
 - **주술 일치** — 중간 어구, 단수 -s 명사, collective noun, *each/every*, *or/nor*, *none*, *number*
@@ -422,10 +464,13 @@ Amount — 양:
 
 ## 다음 장 예고
 
-다음은 **Chapter 5: Word Usage**입니다. 자주 잘못 쓰이는 단어와 표현 — 흔한 misuse, 격식 / 비격식 어휘 차이를 다룹니다.
+다음은 **Chapter 5: Word Usage**. 자주 잘못 쓰이는 단어와 표현.
 
 ## 관련 항목
 
 - [Chapter 3: Punctuation](/blog/writing/only-grammar-book/ch03-punctuation)
 - [Chapter 5: Word Usage](/blog/writing/only-grammar-book/ch05-word-usage)
-- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04-misused)
+- [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04-words-a-c)
+- [Elements of Style — Rule 9: 주어와 동사 일치](/blog/writing/elements-of-style/ch01-rule09-subject-verb)
+- [Elements of Style — Rule 10: 대명사 격](/blog/writing/elements-of-style/ch01-rule10-pronoun-case)
+- [Elements of Style — Rule 11: 현수 분사](/blog/writing/elements-of-style/ch01-rule11-dangling)
