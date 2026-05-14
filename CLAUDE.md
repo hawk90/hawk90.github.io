@@ -236,7 +236,8 @@ class OrderProcessor {
 
 - **TikZ**: `public/images/blog/<series>/diagrams/<name>.tex` + 빌드된 `.svg`
 - **Mermaid**: 글 안에 ` ```mermaid ` 코드 블록 직접 (이미지 파일 X)
-- 빌드: `bash scripts/build-tikz.sh path/to/file.tex`
+- 빌드: `npm run diagrams` (증분) / `npm run diagrams:force` (전체) / `npm run diagrams:watch` (감시)
+- 내부적으로 `scripts/build-diagrams.sh` 실행 — xelatex/pdflatex → PDF → pdftocairo SVG
 
 ```markdown
 ![구조 설명](/images/blog/gof/diagrams/item01-abstract-factory.svg)
@@ -249,6 +250,39 @@ sequenceDiagram
     A->>B: signal
     B-->>A: ack
 ```
+
+### TikZ 작성 기준 (가독성 보장)
+
+가독성 떨어지는 다이어그램의 대부분은 좌표·라벨 충돌 때문입니다. 새 `.tex`를 만들 때 다음 규칙을 따릅니다.
+
+**프리앰블·스타일**
+
+- 모든 .tex는 `\input{../../_design.tex}` (상대 경로 조정)로 공통 프리앰블을 불러온다.
+- `\begin{tikzpicture}[blog]`로 `blog` 스타일 적용. 폰트·줄간격 통일.
+- 색상은 **`text=color`** / **`draw=color`** / **`fill=color`**로 명시. `\node[..., conbord]` 같이 색상명을 옵션으로 쓰면 무시되거나 silent fail.
+
+**멀티라인 노드**
+
+- 노드 안 줄바꿈은 `\\` 대신 **`\\[2pt]`**. 디폴트 줄간격은 글리프 ascender/descender와 겹쳐 텍스트가 윗줄·아랫줄과 충돌한다.
+- 긴 텍스트는 `text width=3cm, align=center`로 자동 줄바꿈. 수동 `\\`보다 안전.
+
+**좌표·라벨 위치**
+
+- 고정 좌표 `\node at (x, y) {긴 한글 라벨...}`을 쓸 때 라벨 폭을 미리 계산. 인접 노드 영역에 침범하지 않게 한다.
+- 표·격자 다이어그램의 행별 주석은 표 우측 *끝 + 1cm* 이상에 둔다.
+- 좌표 투영 연산자 순서: `(A.south west |- 0, -1.5)` — `|-`는 *첫 인자의 x* + *둘째 인자의 y*. y가 두 번째 좌표.
+- 회전 라벨 (`rotate=90`)은 anchor가 헷갈리고 충돌 잡기 어렵다. 가능하면 일반 라벨을 위/아래에 배치.
+
+**박스 간격**
+
+- 같은 행의 두 박스: *중심 간 거리 ≥ 박스 폭 + 0.5cm*.
+- 트리 다이어그램에서 좌우 분기가 있으면 *level 1 sibling distance ≥ 양쪽 자식 폭 합 + 여유*.
+
+**검증**
+
+- 작성·수정 후: `python3 scripts/detect-text-overlap.py --series <name>` 로 충돌 확인.
+- 출력의 `olap` 열이 0이면 strict overlap 없음. `touch` 열은 0.5pt 미만 근접(시각 거슬릴 수 있음).
+- 휴리스틱 빠른 점검: `scripts/detect-tikz-overlap.sh`.
 
 ### 표
 
@@ -373,6 +407,14 @@ media/av1              — AV1
 - [ ] flowchart / gantt / state diagram을 Mermaid auto-layout으로 그리지 않았는가? (TikZ 권장)
 - [ ] Mermaid는 *sequence diagram에만* 한정 사용했는가?
 - [ ] 표·리스트로 충분한 정보를 *불필요한 그림*으로 그리지 않았는가?
+
+### TikZ
+
+- [ ] `\input{../../_design.tex}` + `\begin{tikzpicture}[blog]`를 썼는가?
+- [ ] 멀티라인 노드의 `\\`가 `\\[2pt]`로 명시 간격을 가졌는가?
+- [ ] 색상을 `text=color` / `draw=color` 형태로 명시했는가? (옵션 자리에 색상명만 쓰면 무시)
+- [ ] `(A.south west |- 0, -1.5)` 형태로 y가 두 번째에 들어갔는가?
+- [ ] `python3 scripts/detect-text-overlap.py --series <X>`로 `olap` 0 확인했는가?
 
 ### Frontmatter 중복 키
 
