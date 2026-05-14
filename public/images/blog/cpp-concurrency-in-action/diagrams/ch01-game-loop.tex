@@ -22,9 +22,9 @@
 \draw[arr] (in.east) -- (ph.west);
 \draw[arr] (ph.east) -- (ai.west);
 \draw[arr] (ai.east) -- (rd.west);
-\draw[arr, draw=conbord, dashed] (rd.east) to[bend left=50] node[above, font=\sffamily\tiny] {반복} (in.west);
+\draw[arr, draw=conbord, dashed] (rd.east) to[bend left=50] node[below=2pt, font=\sffamily\tiny, pos=0.5] {반복} (in.west);
 
-\node[font=\sffamily\footnotesize\itshape, anchor=west, conbord] at (-6.0, 1.0) {AI 느리면 입력도 멈춤};
+\node[font=\sffamily\footnotesize\itshape, anchor=west, text=conbord] at (-6.0, -0.1) {AI 느리면 입력도 멈춤};
 
 % ===== 멀티 스레드 (오른쪽) =====
 \node[font=\sffamily\bfseries] at (3.5, 3.5) {멀티 스레드 게임 루프};
@@ -36,7 +36,7 @@
 \draw[arr, dashed, draw=edgesc] (main.south) -- (w1.north);
 \draw[arr, dashed, draw=edgesc] (w1.south) -- (w2.north);
 
-\node[font=\sffamily\footnotesize\itshape, anchor=west, impbord] at (1, -0.7) {AI 느려도 입력 즉각 반응};
+\node[font=\sffamily\footnotesize\itshape, anchor=west, text=impbord] at (1, -0.7) {AI 느려도 입력 즉각 반응};
 
 \end{tikzpicture}
 \end{document}

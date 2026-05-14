@@ -12,9 +12,9 @@
 \node[font=\sffamily\bfseries\large] at (0,3.5) {Listening to Tests};
 
 % Problem detection
-\node[con, minimum width=35mm, minimum height=12mm] (hard) at (-3,2) {Test is\\hard to write};
-\node[hi, minimum width=35mm, minimum height=12mm] (signal) at (0,0) {Design\\Signal!};
-\node[imp, minimum width=35mm, minimum height=12mm] (improve) at (3,2) {Improve\\design};
+\node[con, minimum width=35mm, minimum height=12mm] (hard) at (-3,2) {Test is\\[2pt]hard to write};
+\node[hi, minimum width=35mm, minimum height=12mm] (signal) at (0,0) {Design\\[2pt]Signal!};
+\node[imp, minimum width=35mm, minimum height=12mm] (improve) at (3,2) {Improve\\[2pt]design};
 
 % Arrows
 \draw[arr, line width=1.2pt] (hard) -- (signal);
@@ -24,8 +24,8 @@
 % Test smells
 \node[group, minimum width=85mm, align=left, font=\small] at (0,-2.5) {
 \textbf{Test Smells:}\\[2pt]
-\textbullet\ Too many mocks $\rightarrow$ Missing abstraction\\
-\textbullet\ Complex setup $\rightarrow$ Too many responsibilities\\
+\textbullet\ Too many mocks $\rightarrow$ Missing abstraction\\[2pt]
+\textbullet\ Complex setup $\rightarrow$ Too many responsibilities\\[2pt]
 \textbullet\ Fragile tests $\rightarrow$ Coupling issues
 };
 

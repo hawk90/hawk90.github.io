@@ -16,18 +16,18 @@
 % Interval A
 \node[font=\sffamily\bfseries, anchor=east] at (-0.3, 0.5) {A};
 \node[iv, fill=absfill, draw=absbord, minimum width=30mm] (A) at (2.0, 0.5) {$[a_0, a_1)$};
-\draw[draw=edgesc, dashed] (A.south west) -- (A.south west |- -1.5, 0);
-\draw[draw=edgesc, dashed] (A.south east) -- (A.south east |- -1.5, 0);
-\node[font=\sffamily\footnotesize, anchor=north] at (A.south west |- -1.5, 0) {$a_0$};
-\node[font=\sffamily\footnotesize, anchor=north] at (A.south east |- -1.5, 0) {$a_1$};
+\draw[draw=edgesc, dashed] (A.south west) -- (A.south west |- 0, -1.5);
+\draw[draw=edgesc, dashed] (A.south east) -- (A.south east |- 0, -1.5);
+\node[font=\sffamily\footnotesize, anchor=north] at (A.south west |- 0, -1.5) {$a_0$};
+\node[font=\sffamily\footnotesize, anchor=north east] at (A.south east |- 0, -1.5) {$a_1$};
 
 % Interval B
 \node[font=\sffamily\bfseries, anchor=east] at (-0.3, -0.5) {B};
 \node[iv, fill=impfill, draw=impbord, minimum width=50mm] (B) at (6.0, -0.5) {$[b_0, b_1)$};
-\draw[draw=edgesc, dashed] (B.south west) -- (B.south west |- -1.5, 0);
-\draw[draw=edgesc, dashed] (B.south east) -- (B.south east |- -1.5, 0);
-\node[font=\sffamily\footnotesize, anchor=north] at (B.south west |- -1.5, 0) {$b_0$};
-\node[font=\sffamily\footnotesize, anchor=north] at (B.south east |- -1.5, 0) {$b_1$};
+\draw[draw=edgesc, dashed] (B.south west) -- (B.south west |- 0, -1.5);
+\draw[draw=edgesc, dashed] (B.south east) -- (B.south east |- 0, -1.5);
+\node[font=\sffamily\footnotesize, anchor=north west] at (B.south west |- 0, -1.5) {$b_0$};
+\node[font=\sffamily\footnotesize, anchor=north] at (B.south east |- 0, -1.5) {$b_1$};
 
 \end{tikzpicture}
 \end{document}

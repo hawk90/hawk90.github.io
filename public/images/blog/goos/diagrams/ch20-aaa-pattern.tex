@@ -12,18 +12,18 @@
 \node[font=\sffamily\bfseries\large] at (0,3) {AAA Pattern};
 
 % Three sections
-\node[abs, minimum width=50mm, minimum height=14mm] (arrange) at (0,1.5) {\textbf{Arrange}\\Setup test fixtures};
-\node[hi, minimum width=50mm, minimum height=14mm] (act) at (0,0) {\textbf{Act}\\Execute behavior};
-\node[imp, minimum width=50mm, minimum height=14mm] (assert) at (0,-1.5) {\textbf{Assert}\\Verify outcome};
+\node[abs, minimum width=50mm, minimum height=14mm] (arrange) at (0,1.5) {\textbf{Arrange}\\[2pt]Setup test fixtures};
+\node[hi, minimum width=50mm, minimum height=14mm] (act) at (0,0) {\textbf{Act}\\[2pt]Execute behavior};
+\node[imp, minimum width=50mm, minimum height=14mm] (assert) at (0,-1.5) {\textbf{Assert}\\[2pt]Verify outcome};
 
 % Arrows
 \draw[arr, line width=1pt] (arrange) -- (act);
 \draw[arr, line width=1pt] (act) -- (assert);
 
 % Annotations
-\node[anchor=west, font=\footnotesize, text width=30mm] at (3,1.5) {Create objects,\\prepare data};
-\node[anchor=west, font=\footnotesize, text width=30mm] at (3,0) {Call the method\\under test};
-\node[anchor=west, font=\footnotesize, text width=30mm] at (3,-1.5) {Check results,\\verify state};
+\node[anchor=west, font=\footnotesize, text width=30mm] at (3,1.5) {Create objects,\\[2pt]prepare data};
+\node[anchor=west, font=\footnotesize, text width=30mm] at (3,0) {Call the method\\[2pt]under test};
+\node[anchor=west, font=\footnotesize, text width=30mm] at (3,-1.5) {Check results,\\[2pt]verify state};
 
 % Alternate names
 \node[group, minimum width=60mm, font=\small] at (0,-3.3) {Also known as: Given-When-Then};

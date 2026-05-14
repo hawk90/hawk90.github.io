@@ -17,8 +17,8 @@
 ]
 
 % ===== AoS =====
-\node[font=\sffamily\bfseries\large] at (0, 5.0) {AoS — Array of Structures};
-\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-5.5, 4.3) {struct Particle \{ float x, y, z, vx, vy, vz; \};};
+\node[font=\sffamily\bfseries\large] at (0, 5.4) {AoS — Array of Structures};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-5.5, 4.6) {struct Particle \{ float x, y, z, vx, vy, vz; \};};
 
 % Particle 0
 \foreach \i/\style/\label in {0/cx/x, 1/cy/y, 2/cz/z, 3/cvx/vx, 4/cvy/vy, 5/cvz/vz} {
@@ -45,8 +45,8 @@
 \node[font=\sffamily\footnotesize, anchor=west, conbord] at (-5.5, 1.7) {단점: 특정 필드만 처리 시 캐시 낭비};
 
 % ===== SoA =====
-\node[font=\sffamily\bfseries\large] at (0, 0.5) {SoA — Structure of Arrays};
-\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-5.5, -0.2) {struct Particles \{ float x[N], y[N], z[N], vx[N], vy[N], vz[N]; \};};
+\node[font=\sffamily\bfseries\large] at (0, 0.9) {SoA — Structure of Arrays};
+\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-5.5, 0.1) {struct Particles \{ float x[N], y[N], z[N], vx[N], vy[N], vz[N]; \};};
 
 % x array
 \foreach \i in {0,1,2,3} { \node[cx] at (\i*0.75 - 5.0, -1.1) {x}; }

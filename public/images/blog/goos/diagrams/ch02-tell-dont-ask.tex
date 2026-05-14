@@ -16,7 +16,7 @@
 
 \draw[uses] (client-bad) -- node[above, font=\footnotesize] {getData()} (obj-bad);
 \draw[ret, bend left=20] (obj-bad) to node[below, font=\footnotesize] {return data} (client-bad);
-\node[con, anchor=west, font=\footnotesize, text width=30mm] at (3,2) {Client processes\\data itself};
+\node[con, anchor=west, font=\footnotesize, text width=30mm] at (3,2) {Client processes\\[2pt]data itself};
 
 % Good example (Tell)
 \node[font=\sffamily\bfseries\large, anchor=west] at (-5,0) {Tell (Good)};
@@ -25,7 +25,7 @@
 \node[cls, minimum width=22mm] (obj-good) at (1,-1) {Object};
 
 \draw[uses] (client-good) -- node[above, font=\footnotesize] {doAction()} (obj-good);
-\node[imp, anchor=west, font=\footnotesize, text width=30mm] at (3,-1) {Object handles\\its own data};
+\node[imp, anchor=west, font=\footnotesize, text width=30mm] at (3,-1) {Object handles\\[2pt]its own data};
 
 % Divider
 \draw[dashed, draw=groupbord, line width=0.5pt] (-5,0.7) -- (5,0.7);
