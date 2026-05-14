@@ -307,12 +307,22 @@ Methodology는 *어떻게 했는지*만. 결과는 *Results*에.
 - 자기 분야의 *표준 동사 목록* 정리가 효율적
 - 함정 — 시제 불일치, agent 모호, 디테일 부족, 결과 섞임
 
+## 한국 연구자의 Methodology 함정
+
+```
+1. 디테일 부족 / 과다 — 재현 가능성 기준
+2. Sequence 신호어 누락
+3. Results 정보 섞임
+4. Brand name / 모델 번호 누락
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 2.2: Methodology의 문법**입니다. Passive와 시제 결정, 관사 *a/the*의 사용, 부사 위치를 다룹니다.
+다음은 **Unit 2.2: Methodology의 문법**.
 
 ## 관련 항목
 
 - [Unit 1.2: Introduction의 문법과 어휘](/blog/writing/science-research-writing/unit1-2-grammar-vocabulary)
 - [Unit 2.2: Methodology의 문법](/blog/writing/science-research-writing/unit2-2-grammar)
 - [AWG Unit 7.2: Methods Section](/blog/writing/academic-writing/unit07-2-methods)
+- [AWG Unit 3.3: Process Description과 Passive Voice](/blog/writing/academic-writing/unit03-3-process-passive)

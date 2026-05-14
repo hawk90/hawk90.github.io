@@ -372,12 +372,23 @@ The results appear to indicate that ...
 - 분야 표준 *통계 표기* 따르기
 - 함정 — 해석 섞임, 숫자 반복, 부정 결과 숨김
 
+## 한국 연구자의 Results 함정
+
+```
+1. 해석을 Results에 — Discussion으로
+2. 모든 데이터 본문 반복
+3. 부정 결과 숨김 — 학술 정직성 위반
+4. 상관 / 인과 표현 혼동
+5. 통계 표기 분야 표준 무시
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 3.2: Results의 문법**입니다. 시제 결정, 형용사 비교급, 정도 표현을 다룹니다.
+다음은 **Unit 3.2: Results의 문법**.
 
 ## 관련 항목
 
 - [Unit 2.2: Methodology의 문법](/blog/writing/science-research-writing/unit2-2-grammar)
 - [Unit 3.2: Results의 문법](/blog/writing/science-research-writing/unit3-2-grammar)
 - [AWG Unit 7.3: Results Section](/blog/writing/academic-writing/unit07-3-results)
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)

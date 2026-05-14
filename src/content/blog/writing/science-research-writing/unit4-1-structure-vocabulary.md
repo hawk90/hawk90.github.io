@@ -326,12 +326,23 @@ Discussion이 길게 다룬 것을 *짧게 압축*해 반복합니다.
 - 마지막 문장은 *작은 일반화* — 요약이 아니라 확장
 - 분야에 따라 *Conclusion 섹션 별도* 가능
 
+## 한국 연구자의 Discussion 함정
+
+```
+1. Results 단순 반복 — 해석 누락
+2. 한계 회피 / 누락 — 한국 학습 문화 영향
+3. 함의 (implications) 누락
+4. 헤지 부족 — 모든 결과 단언
+5. 결말이 단순 요약
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 4.2: Discussion의 문법**입니다. Hedging, 시제 결정, 불확실성 표현을 다룹니다.
+다음은 **Unit 4.2: Discussion의 문법**.
 
 ## 관련 항목
 
 - [Unit 3.2: Results의 문법](/blog/writing/science-research-writing/unit3-2-grammar)
 - [Unit 4.2: Discussion의 문법](/blog/writing/science-research-writing/unit4-2-grammar)
 - [AWG Unit 8.3: Discussion Sections](/blog/writing/academic-writing/unit08-3-discussion)
+- [Elements of Style — Reminder 17: 의견을 끼워 넣지 말라](/blog/writing/elements-of-style/ch05-reminder17-opinion)

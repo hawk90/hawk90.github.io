@@ -280,12 +280,22 @@ transfer was not rate-limiting under our conditions.
 - 부정 결과도 *명확히* 보고
 - 발견의 강도(*demonstrate / indicate / suggest*)를 데이터에 맞추기
 
+## 한국 연구자의 Results Grammar 함정
+
+```
+1. Significantly 일반 강조 → 통계적 의미만
+2. 비교 대상 누락
+3. Past / Present 자리 흔들림
+4. 동사 강도 데이터와 불일치
+```
+
 ## 다음 Unit 예고
 
-다음은 **Unit 4: Writing the Discussion / Conclusion**입니다. 결과 해석, 한계 인정, 함의 도출, 모래시계의 *다시 넓어지는* 부분을 다룹니다.
+다음은 **Unit 4: Writing the Discussion / Conclusion**.
 
 ## 관련 항목
 
 - [Unit 3.1: Results의 구조와 어휘](/blog/writing/science-research-writing/unit3-1-structure-vocabulary)
 - [Unit 4.1: Discussion의 구조와 어휘](/blog/writing/science-research-writing/unit4-1-structure-vocabulary)
 - [AWG Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
+- [Elements of Style — Reminder 8: Qualifiers 자제](/blog/writing/elements-of-style/ch05-reminder08-qualifiers)

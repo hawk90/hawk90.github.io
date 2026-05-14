@@ -261,12 +261,23 @@ non-technical 언어
 - *본문 완성 후* Abstract 작성
 - 자기 저널의 *형식 표준* 확인 (structured vs unstructured)
 
+## 한국 연구자의 Abstract 함정
+
+```
+1. 너무 일반적 도입 ("In modern science...")
+2. 결과 미명시 — "interesting results"
+3. 통계 누락
+4. 약속 후 미이행
+5. 본문 완성 전 작성
+```
+
 ## 다음 글 예고
 
-마지막 글은 **Unit 5.2: Title의 작성과 시리즈 마무리**입니다. 좋은 제목의 조건과 시리즈 전체 회고를 다룹니다.
+마지막 글은 **Unit 5.2: Title의 작성과 시리즈 마무리**.
 
 ## 관련 항목
 
 - [Unit 4.2: Discussion의 문법](/blog/writing/science-research-writing/unit4-2-grammar)
 - [Unit 5.2: Title과 시리즈 마무리](/blog/writing/science-research-writing/unit5-2-title-closing)
 - [AWG Unit 7.1: 출판 유형과 IMRD](/blog/writing/academic-writing/unit07-1-publication-types)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)

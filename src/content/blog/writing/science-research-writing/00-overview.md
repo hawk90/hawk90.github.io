@@ -130,12 +130,48 @@ Unit 5. Writing the Abstract (and Title)
 
 다섯 Unit을 마치면 *완전한 연구 논문 draft*가 만들어집니다.
 
+## 한국 연구자에게 *이 책*이 유용한 이유
+
+```
+1. *Template 중심* — 빠른 적용 가능
+   한국 학생은 보통 *명시적 패턴 학습*에 강함
+   → SRW의 template 접근이 잘 맞음
+
+2. *비영어권 대상* — IELTS 6.0+ 가정
+   AWG는 *원어민에 가까운 학습자* 가정
+   SRW는 *영어가 두 번째 언어*인 연구자 가정
+
+3. *모범 논문 분석* — 한국 학습 문화와 자연
+   "좋은 예 모방하기" 전략이 *공식화*
+
+4. *자연과학 / 공학 위주*
+   한국의 STEM 박사과정에 *직접 적용*
+```
+
+## SRW vs AWG — 어디서 시작?
+
+```
+당신이 STEM 박사과정 학생이라면:
+   SRW부터 → 빠른 논문 작성 가능
+   그 뒤 AWG → 깊이 있는 학술 영어
+
+당신이 인문·사회과학이라면:
+   AWG부터 → 비평 / 정의 / 종합
+   SRW는 *과학 논문 부분만* 참고
+
+당신이 *처음* 영어 논문을 쓴다면:
+   SRW Unit 1부터 → template 따라 작성
+   AWG의 Unit 1-2를 보완으로
+```
+
 ## 시작점
 
-먼저 **Unit 1: How to Write an Introduction**부터 시작합니다. Introduction이 *모래시계의 가장 넓은 입구* — 가장 일반적인 곳에서 시작해 구체로 좁아집니다.
+먼저 **Unit 1: How to Write an Introduction**부터. Introduction이 *모래시계의 가장 넓은 입구* — 가장 일반적인 곳에서 시작해 구체로 좁아집니다.
 
 ## 관련 항목
 
 - [Academic Writing for Graduate Students — 시리즈 개요](/blog/writing/academic-writing)
-- [Unit 1: How to Write an Introduction](/blog/writing/science-research-writing/unit1-introduction)
+- [Unit 1: How to Write an Introduction (Structure & Moves)](/blog/writing/science-research-writing/unit1-1-structure-moves)
+- [Unit 5: Writing the Abstract](/blog/writing/science-research-writing/unit5-1-abstract)
 - [On Writing Well — 시리즈 개요](/blog/writing/on-writing-well)
+- [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style)

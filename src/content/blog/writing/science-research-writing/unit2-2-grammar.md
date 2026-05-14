@@ -303,12 +303,29 @@ and cut into pellets of approximately 3 mm in length.
 - Quantity 표현은 분야 표준 단위 사용
 - *Agent 모호*에 주의
 
+## 한국 연구자의 Article (a/the) 함정
+
+```
+한국어에 *관사 없음* → 영어 학습자가 가장 어려운 영역
+
+- 처음 등장 → a/an (셀 수 있는 단수)
+- 재언급 → the
+- 일반 / 보편 → Ø
+- 유일한 것 → the
+- 최상급 / 서수 → the
+
+흔한 실수:
+- "Method was developed" → "A method was developed"
+- "Result shows" → "The result shows" / "Results show"
+```
+
 ## 다음 Unit 예고
 
-다음은 **Unit 3: Writing about Results**입니다. Sequence, Frequency, Quantity, Causality 표현과 그림·표 참조를 다룹니다.
+다음은 **Unit 3: Writing about Results**.
 
 ## 관련 항목
 
 - [Unit 2.1: Methodology의 구조와 어휘](/blog/writing/science-research-writing/unit2-1-structure-vocabulary)
 - [Unit 3.1: Results의 구조와 어휘](/blog/writing/science-research-writing/unit3-1-structure-vocabulary)
 - [AWG Unit 7.2: Methods Section](/blog/writing/academic-writing/unit07-2-methods)
+- [Elements of Style — Rule 21: 시제 일관](/blog/writing/elements-of-style/ch02-rule21-tense)

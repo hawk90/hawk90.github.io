@@ -239,12 +239,32 @@ The present paper presents [contribution]. On the basis of
 - *Build a Model*로 자기 분야의 재사용 가능한 template 만들기
 - Move별 길이는 *분야*마다 다름
 
+## 한국 연구자의 Introduction 함정
+
+```
+1. Move 1 (Importance) *너무 광범위*
+2. Move 2 (Background) *연대기적 나열*
+3. Move 3 (Gap) *부드러운 부정 부족*
+4. Move 4 (Present work) *모호한 동사*
+5. 한국어 "본 연구에서는" 직역
+```
+
+## 자기 글 점검
+
+```
+□ 4-Move 명확?
+□ Move 3 부드러운 부정?
+□ Move 4 구체적 동사?
+□ Target article과 비교?
+```
+
 ## 다음 글 예고
 
-다음은 **Unit 1.2: Introduction의 문법과 어휘**입니다. 시제 쌍, signalling language, passive/active의 결정, Introduction에 자주 등장하는 동사를 다룹니다.
+다음은 **Unit 1.2: Introduction의 문법과 어휘**.
 
 ## 관련 항목
 
 - [Science Research Writing — 시리즈 개요](/blog/writing/science-research-writing)
 - [Unit 1.2: Introduction의 문법과 어휘](/blog/writing/science-research-writing/unit1-2-grammar-vocabulary)
 - [AWG Unit 8.1: Introductions와 CARS 모델](/blog/writing/academic-writing/unit08-1-introductions-cars)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)

@@ -339,12 +339,24 @@ the temporal relationship.
 - 한계는 *Present*, 함의는 *Present + Future*
 - 과한 헤지는 *책임 회피* — 적절한 강도
 
+## 한국 연구자의 Discussion Grammar 함정
+
+```
+1. 헤지 부족 — 강한 단언
+2. 헤지 과다 — 여러 헤지 중첩
+3. 시제 흔들림
+4. 인과 / 상관 표현 혼동
+5. 함의 시제 약함
+```
+
 ## 다음 Unit 예고
 
-다음은 **Unit 5: Writing the Abstract and Title**입니다. 200-300 단어로 논문 전체를 압축하는 방법, 그리고 좋은 제목의 조건을 다룹니다.
+다음은 **Unit 5: Writing the Abstract and Title**.
 
 ## 관련 항목
 
 - [Unit 4.1: Discussion의 구조와 어휘](/blog/writing/science-research-writing/unit4-1-structure-vocabulary)
 - [Unit 5.1: Abstract의 구조와 어휘](/blog/writing/science-research-writing/unit5-1-abstract)
+- [AWG Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
+- [Elements of Style — Rule 15: Put statements in positive form](/blog/writing/elements-of-style/ch02-rule15-positive)
 - [AWG Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
