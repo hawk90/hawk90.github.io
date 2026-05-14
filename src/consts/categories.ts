@@ -106,6 +106,13 @@ export const CATEGORIES: Category[] = [
     icon: '🌿',
   },
   {
+    id: 'programming/python',
+    parent: 'programming',
+    name: 'Python',
+    description: 'Python — Fluent Python / 모범 사례 / 라이브러리',
+    icon: '🐍',
+  },
+  {
     id: 'programming/standards',
     parent: 'programming',
     name: 'Coding Standards',
