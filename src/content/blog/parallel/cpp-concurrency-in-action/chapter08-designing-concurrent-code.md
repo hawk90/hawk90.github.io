@@ -1016,12 +1016,12 @@ void work_stealing_for(size_t total, Func f) {
 - Parallel for_each      → std::for_each(par, ...) (C++17 병렬 알고리즘)
 - Parallel reduce        → std::reduce(par, ...) (C++17)
 - Work-stealing          → Intel oneTBB (구 TBB), rayon (Rust), ForkJoinPool (Java)
-- Pipeline               → TBB flow graph, GStreamer, Akka Streams
+- Pipeline               → oneTBB flow graph, GStreamer, Akka Streams (Akka는 2022년 BSL 재라이선싱 — 오픈소스 후속은 Apache Pekko)
 - SIMD                   → std::experimental::simd, Highway, xsimd
 - False sharing 회피     → alignas(64), padding
 
 언어/프레임워크:
-- C++: std::execution::par, TBB, OpenMP, MPI
+- C++: std::execution::par, oneTBB, OpenMP, MPI
 - Rust: rayon, crossbeam
 - Java: parallel streams, ForkJoinPool
 - Go: goroutine + channel

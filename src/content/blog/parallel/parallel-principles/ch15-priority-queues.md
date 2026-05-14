@@ -611,7 +611,7 @@ PQ를 강제로 lock-free로 만들 수는 있다. 그러나 **strict semantics 
 |---|---|---|
 | 순차 PQ | `std::priority_queue` | 직접 구현 또는 라이브러리 |
 | 짧은 임계 + strict | `std::mutex` + heap | `mtx_t` + heap |
-| 동시 + relaxed OK | TBB `concurrent_priority_queue` | Linden-Jonsson 구현 |
+| 동시 + relaxed OK | oneTBB `concurrent_priority_queue` | Linden-Jonsson 구현 |
 | 작업 스케줄링 | Multi-queue + work stealing | Multi-queue + work stealing |
 
 직접 lock-free PQ는 거의 항상 잘못. 라이브러리 사용 권장.
@@ -654,9 +654,9 @@ PQ를 강제로 lock-free로 만들 수는 있다. 그러나 **strict semantics 
 ```
 이론 → 실무:
 - Strict Concurrent Heap   → std::priority_queue + std::mutex
-- Skiplist-based PQ        → 직접 구현 또는 TBB
+- Skiplist-based PQ        → 직접 구현 또는 oneTBB
 - Relaxed PQ               → 학술적 (Linden-Jonsson, SprayList)
-- Multi-queue + steal      → Intel TBB, libdispatch
+- Multi-queue + steal      → Intel oneTBB, libdispatch
 
 언어별:
 - C++: std::priority_queue + std::mutex (단순), TBB::concurrent_priority_queue

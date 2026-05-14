@@ -711,20 +711,20 @@ Work stealing:
 이론 → 실무:
 - Future                  → std::future, std::async (C++)
 - Promise                 → std::promise (C++)
-- Work Stealing           → Intel TBB, libdispatch
+- Work Stealing           → Intel oneTBB, libdispatch
 - Fork-Join               → std::async + recursive
 - Parallel STL            → std::execution::par
 
 언어별:
-- C++: std::async, std::future, TBB, parallel STL
+- C++: std::async, std::future, oneTBB, parallel STL
 - C: 직접 구현 (thrd_t + 큐), OpenMP
 - Rust: rayon (CPU 바운드), tokio (I/O 바운드)
 - Go: goroutine + work-stealing scheduler
 
 설계:
-- CPU 바운드 → TBB / parallel STL / OpenMP
+- CPU 바운드 → oneTBB / parallel STL / OpenMP
 - I/O 바운드 → async runtime / coroutine
-- 혼합 → TBB + async
+- 혼합 → oneTBB + async
 ```
 
 ## 자기 점검

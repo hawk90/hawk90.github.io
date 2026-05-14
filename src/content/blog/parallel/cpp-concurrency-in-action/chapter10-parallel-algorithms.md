@@ -656,7 +656,7 @@ if (has_error && error) {
 **주요 구현**
 
 - **GCC (libstdc++)**: Intel oneTBB 필요 (구 TBB). 컴파일 시 `g++ -std=c++17 -ltbb`
-- **Clang (libc++)**: PSTL 백엔드 필요. TBB 또는 OpenMP 사용
+- **Clang (libc++)**: PSTL 백엔드 필요. oneTBB 또는 OpenMP 사용
 - **MSVC**: 내장 구현, 추가 라이브러리 불필요
 
 ### 빌드 설정
@@ -979,7 +979,7 @@ std::vector<size_t> find_all_positions(
 
 언어/도구:
 - C++17/20: std::execution
-- C++ 라이브러리: TBB, OpenMP, Intel oneAPI, Highway
+- C++ 라이브러리: oneTBB (Intel oneAPI), OpenMP, Highway
 - Rust: rayon (par_iter, par_iter_mut)
 - Java: parallel streams (Stream.parallel())
 - Python: numpy, multiprocessing.Pool

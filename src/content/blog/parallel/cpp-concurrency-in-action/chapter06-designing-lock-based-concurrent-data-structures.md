@@ -787,7 +787,7 @@ T& top() {
 - fine-grained queue     → Michael-Scott (lock-free) 대체
 
 언어별:
-- C++: TBB, folly, boost::lockfree, std::shared_mutex
+- C++: oneTBB (구 TBB), folly, boost::lockfree, std::shared_mutex
 - Java: ConcurrentLinkedQueue, ConcurrentHashMap (lock-free 또는 striped)
 - Rust: dashmap, crossbeam::queue
 - Go: sync.Map, channel

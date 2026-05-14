@@ -441,7 +441,7 @@ static inline uint32_t make_split_ordered_key(uint32_t key, uint32_t bucket_size
 | 라이브러리 | 언어 | 특징 |
 |---|---|---|
 | `java.util.concurrent.ConcurrentHashMap` | Java | striped locking + lazy resize |
-| `tbb::concurrent_hash_map` | C++ | TBB 라이브러리 |
+| `tbb::concurrent_hash_map` | C++ | oneTBB (구 Intel TBB) |
 | `folly::ConcurrentHashMap` | C++ | 매우 빠름 |
 | `dashmap` (Rust) | Rust | striped locking |
 | `sync.Map` | Go | 매우 단순한 read-mostly |

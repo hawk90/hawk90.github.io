@@ -708,7 +708,7 @@ public:
 실용적 대안:
 - RCU (Read-Copy-Update) — 읽기 많은 워크로드
 - Hazard Pointers — lock-free 메모리 회수
-- Actor Model — Erlang, Akka
+- Actor Model — Erlang/Elixir, Akka(2022년 BSL로 전환, Apache Pekko가 오픈소스 포크)
 - Message Passing — Go channels, Rust channels
 ```
 

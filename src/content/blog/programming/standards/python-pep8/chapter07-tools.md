@@ -35,7 +35,7 @@ black --diff myfile.py
 # pyproject.toml
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -173,7 +173,7 @@ mypy --ignore-missing-imports myfile.py
 ```toml
 # pyproject.toml
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -281,7 +281,7 @@ ruff format myfile.py
 # pyproject.toml
 [tool.ruff]
 line-length = 88
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = [
@@ -368,13 +368,13 @@ pre-commit run ruff --all-files
 ```toml
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py312']
 
 [tool.isort]
 profile = "black"
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 
 [tool.ruff]
@@ -425,7 +425,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install ruff mypy pytest
@@ -457,12 +457,12 @@ jobs:
 ## 권장 도구 체인
 
 ```
-2024년 권장:
-- ruff: 린팅 + 포맷팅 + Import 정렬
-- mypy: 타입 체크
+현재 권장 (ruff 통합):
+- ruff: 린팅 + 포맷팅 + Import 정렬 (단일 도구로 통합)
+- mypy 또는 pyright: 타입 체크
 - pre-commit: Git 훅
 
-또는 전통적:
+전통적 (개별 도구 조합):
 - black: 포맷팅
 - isort: Import 정렬
 - flake8: 린팅
