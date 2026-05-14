@@ -242,4 +242,4 @@ Ending 작업  — 25퍼센트
 
 - [Chapter 8: Unity](/blog/writing/on-writing-well/ch08-unity)
 - [Chapter 10: Bits and Pieces](/blog/writing/on-writing-well/ch10-bits-pieces)
-- [Elements of Style — Rule 22: Place emphatic words at the end](/blog/writing/elements-of-style/ch02-composition)
+- [Elements of Style — Rule 22: Place emphatic words at the end](/blog/writing/elements-of-style/ch02-rule22-emphasis)

@@ -127,6 +127,34 @@ Transaction, Simplicity, Clutter, Style, Audience, Words, Usage, Unity, Lead and
 **Part 3 — 작가의 태도 (Ch 20–24)**
 Voice, Confidence, The Tyranny of the Final Product, Decisions, Writing Family History, The Best.
 
+## 한국 학생 / 한국 작가에게
+
+```
+1. 한국 학교 작문 교육의 영향
+   - "본인은", "필자는" 학습 — 영어로 옮기면 어색
+   - 객관성 강박 — Zinsser는 *주관 인정* 권함
+   - 한자어 / 고급 어휘 선호 — 영어 fancy words와 같은 함정
+
+2. 한국어 / 영어 nonfiction 작가의 차이
+   한국 전통: 점잖은 어조, 1인칭 회피
+   영어 (Zinsser): 자기 목소리, 1인칭 자연
+
+3. Personal transaction의 한국어 등가
+   "글은 사람과 사람 사이의 만남"
+   영어 nonfiction의 *작가-독자* 관계
+   한국 에세이 / 칼럼에도 적용
+```
+
+## 자기 글 점검
+
+```
+□ 자기 *목소리*가 글에 있는가?
+□ 객관성을 가장하지 않았는가?
+□ 매일의 *기능공* 자세로 글을 짜냈는가?
+□ 글이 시작 전 *명확한 사고*가 있었는가?
+□ 자기 주제에 *진심*이 있는가?
+```
+
 ## 정리
 
 - 글쓰기는 *작가와 독자 사이의 개인적 거래*
@@ -139,10 +167,12 @@ Voice, Confidence, The Tyranny of the Final Product, Decisions, Writing Family H
 
 ## 다음 장 예고
 
-다음 장은 **Simplicity**입니다. Zinsser의 영어 글쓰기 철학에서 가장 강력한 도구로 꼽히는 *단순함*을 다룹니다.
+다음 장은 **Simplicity**. Zinsser의 영어 글쓰기 철학에서 가장 강력한 도구로 꼽히는 *단순함*.
 
 ## 관련 항목
 
 - [On Writing Well — 시리즈 개요](/blog/writing/on-writing-well)
 - [Chapter 2: Simplicity](/blog/writing/on-writing-well/ch02-simplicity)
 - [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05-style)
+- [Elements of Style — Reminder 1: 자신을 배경에 두라](/blog/writing/elements-of-style/ch05-reminder01-background)
+- [Elements of Style — Reminder 2: 자연스럽게 쓰라](/blog/writing/elements-of-style/ch05-reminder02-naturally)

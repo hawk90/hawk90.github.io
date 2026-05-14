@@ -183,4 +183,4 @@ Williams의 권장.
 ## 관련 항목
 
 - [Lesson 1: Understanding](/blog/writing/style-williams/lesson01-understanding)
-- [Elements of Style Ch 4: Misused Words](/blog/writing/elements-of-style/ch04-misused)
+- [Elements of Style Ch 4: Misused Words](/blog/writing/elements-of-style/ch04-words-a-c)

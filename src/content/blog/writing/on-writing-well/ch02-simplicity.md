@@ -162,6 +162,34 @@ Zinsser의 통찰 — 좋은 글의 90퍼센트는 *편집*입니다.
 
 따라서 명확하게 쓰는 것은 *정직하게 쓰는 것*과 같습니다.
 
+## 한국어 글의 단순화
+
+```
+한국어 글에도 *Zinsser 단순화*가 그대로 적용:
+
+1. *~에 있어서* → *~에서, 에*
+2. *~을 통해서* → *~로*
+3. *~한다는 것이다* → *~한다*
+4. *~할 수 있을 것으로 보인다* → *~할 것이다*
+5. *주지하다시피* → 보통 제거
+6. *역사적으로 볼 때* → *역사적으로*
+
+한국어 jargon:
+- 학술 용어 과시 (인지부조화 → 마음의 갈등)
+- 경영 영어 (game changer, paradigm shift)
+- 한자어 과시 (cognitive load → 인지 부담)
+```
+
+## 자기 글 점검
+
+```
+□ 모든 문장이 *가장 깨끗한 구성*?
+□ Jargon이 *필요한 자리*에만?
+□ 자기 글을 *수정*에 시간을 쓰는가?
+□ 한국어 글에 *번역체 군더더기*가 없는가?
+□ 어려운 한자어를 *쉬운 한국어*로 바꿀 수 있는가?
+```
+
 ## 정리
 
 - 좋은 글은 *모든 문장을 가장 깨끗한 구성으로*
@@ -174,10 +202,11 @@ Zinsser의 통찰 — 좋은 글의 90퍼센트는 *편집*입니다.
 
 ## 다음 장 예고
 
-다음 장은 **Clutter**입니다. 단어의 *어수선함*을 어떻게 잘라낼지의 구체적 방법을 다룹니다.
+다음 장은 **Clutter**. 단어의 *어수선함*을 어떻게 잘라낼지의 구체적 방법.
 
 ## 관련 항목
 
 - [Chapter 1: The Transaction](/blog/writing/on-writing-well/ch01-transaction)
 - [Chapter 3: Clutter](/blog/writing/on-writing-well/ch03-clutter)
-- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-composition)
+- [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02-rule17-omit)
+- [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05-reminder14-fancy)
