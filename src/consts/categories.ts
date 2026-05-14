@@ -47,7 +47,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'thinking',
     name: 'Thinking',
-    description: '비판적 사고 / 인지심리 / 디자인',
+    description: '비판적 사고 / 인지심리',
     icon: '🧠',
   },
   {
@@ -55,6 +55,12 @@ export const CATEGORIES: Category[] = [
     name: 'Philosophy',
     description: '철학 — 과학철학 / 인식론 / 윤리 / 논리',
     icon: '🏛️',
+  },
+  {
+    id: 'design',
+    name: 'Design',
+    description: '디자인 — UX / UI / 정보 디자인 / 사용자 경험',
+    icon: '🎨',
   },
   {
     id: 'code-review',
