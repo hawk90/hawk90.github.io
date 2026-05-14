@@ -270,6 +270,39 @@ This paper follows [author's] definition of ....
 
 ❺의 *may be a stretch* 같은 *부드러운 헤지*가 자기 입장을 *너무 강하지 않게* 표현합니다. Unit 1.6의 *positioning*과 직접 연결됩니다.
 
+## 한국 학생의 Extended Definition 함정
+
+```
+1. 측면 *너무 많이* 다룸 (5개 이상)
+   → 단락이 한 주제를 벗어남
+   해결: 2-4개 핵심 측면만
+
+2. 인용 없는 자기 정의
+   → 권위 부족
+   해결: 분야 권위 인용으로 시작
+
+3. 정의 불일치 인정 안 함
+   → 모든 정의가 같다는 인상
+   해결: 분야 안의 다른 정의도 명시 + 자기 채택 이유
+
+4. 헤지 부족 / 과다
+   → "X is definitely Y" (너무 강함)
+   → "X may possibly perhaps be Y" (너무 약함)
+   해결: 분야 평균 헤지 강도 관찰
+```
+
+## 자기 글 점검 — Extended Definition
+
+```
+□ 한 문장 정의 + 2-4 측면 확장?
+□ 측면이 *글의 주제에 관련*되는가?
+□ 인용이 *분야 권위*에서 왔는가?
+□ Contrastive definition이 *필요한가*? 필요하면 *the former / latter* 활용
+□ 분야 안 *정의 불일치*가 있다면 인정했는가?
+□ 자기 채택 정의의 *이유*를 명시했는가?
+□ 헤지가 *적절한 강도*인가?
+```
+
 ## 정리
 
 - **Extended definition** — 한 문장 정의 → 측면별 확장 (구성 / 종류 / 적용 / 역사 / 사례 / 작동 원리)
@@ -281,10 +314,10 @@ This paper follows [author's] definition of ....
 
 ## 다음 글 예고
 
-Unit 2 마지막은 **Unit 2.4: Specific-to-General Organization**입니다. Discussions of Schools of Thought와 *역방향(S-G)* 구성을 다룹니다.
+Unit 2 마지막은 **Unit 2.4: Specific-to-General Organization**. Discussions of Schools of Thought와 *역방향(S-G)* 구성.
 
 ## 관련 항목
 
 - [Unit 2.2: Sentence Definitions](/blog/writing/academic-writing/unit02-2-sentence-definitions)
 - [Unit 2.4: Specific-to-General Organization](/blog/writing/academic-writing/unit02-4-specific-to-general)
-- [Unit 5: Writing Summaries](/blog/writing/academic-writing/unit05-summaries) — 다양한 출처를 묶는 방법
+- [Elements of Style — Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02-rule13-paragraph)

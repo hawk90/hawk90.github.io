@@ -207,6 +207,84 @@ Swales와 Feak가 든 예 — 팁 문화에 관한 학생 글 도입입니다.
 
 8 문장 안에 *문화 일반 → 국가별 차이 → 통계 → 연구 빈자리 → 가설 → 이론 틀*이 모두 들어 있습니다. 전형적인 *GS 도입*입니다.
 
+## 한국 학생의 도입 함정
+
+```
+1. *In modern society* / *In today's world* 남발
+   → 광범위, 진부
+   → 구체적 맥락 / 분야 / 수치로 시작
+
+2. 한국어 학술 글의 *서론 도입* 직역
+   "본 연구에서는 ~에 관해 살펴보고자 한다"
+   → 영어로 옮길 때 어색
+   → 영어: "This study examines..." (단언)
+
+3. *사전 정의* 시작
+   "사전에 따르면..."
+   → 영어 학술: 분야 권위 정의로
+
+4. *자기 동기*부터 시작
+   "I have always been interested in..."
+   → 학술적이지 않음
+   → 분야의 보편 맥락에서 시작
+
+5. *역사적 도입* 과다
+   "Throughout history..."
+   "Since ancient times..."
+   → 분야의 *최근 맥락*에서 시작
+```
+
+## 도입 단락의 길이
+
+```
+저널 논문: 보통 1-3 단락 (200-500 단어)
+학회 발표: 1 단락 (스피치 시간 따라)
+학위 논문: 첫 챕터 전체 (1000-3000 단어)
+강의 과제: 1 단락 (200 단어 이내)
+블로그 글: 1-2 단락 (150-300 단어)
+```
+
+자기 글의 *분량 / 매체*에 맞는 *도입의 길이*를 결정.
+
+## 다섯 가지 도입 패턴
+
+```
+1. General-to-Specific (일반 → 구체)
+   - 가장 흔한 학술 도입
+   - 분야 → 본 연구
+
+2. Statistic / Problem
+   - 놀라운 수치
+   - 즉시 주의 끔
+
+3. Definition
+   - 새 / 특수 용어
+   - 교육 맥락
+
+4. Quotation (인문학)
+   - 권위 있는 인용
+   - 도입 + 분석
+
+5. Anecdote / Case (사회과학, 인문학)
+   - 구체 사례
+   - 일반화로 확장 (S-G)
+```
+
+자기 분야에서 *어떤 패턴*이 표준인지 *모범 논문 분석*.
+
+## 자기 글 점검 — 도입
+
+```
+□ 첫 문장이 *분야 보편 맥락*인가?
+□ 진부한 표현(*Throughout history*) 없는가?
+□ 사전 정의가 아닌가?
+□ 자기 의견 / 동기로 시작하지 않았는가?
+□ 통계가 있다면 *출처 / 의미*가 따라오는가?
+□ 도입이 *연구 질문 / 본 글의 초점*으로 자연 이어지는가?
+□ 도입의 길이가 *매체 / 분야*에 맞는가?
+□ 한국어 직역 표현이 없는가?
+```
+
 ## 정리
 
 - GS 텍스트의 세 가지 흔한 도입 — **일반 진술**, **통계**, **정의**
@@ -214,13 +292,16 @@ Swales와 Feak가 든 예 — 팁 문화에 관한 학생 글 도입입니다.
 - 통계는 *놀라움 + 출처 + 의미 + 연구로의 연결*
 - 정의는 *학위 논문이나 교육적 맥락*에서 자주, 저널에서는 *분야 표준 용어 외에만*
 - 함정 — *throughout history*, 사전 정의, 진부한 진술, 자기 의견부터 시작
+- 한국 학생: *In modern society* 남발, 사전 정의 직역 자제
 
 ## 다음 글 예고
 
-다음은 **Unit 2.2: Sentence Definitions**입니다. *Formal sentence definition*의 구조와, 학술 영어에서 정의를 만드는 다양한 방법을 정리합니다.
+다음은 **Unit 2.2: Sentence Definitions**. *Formal sentence definition*의 구조와, 학술 영어에서 정의를 만드는 다양한 방법.
 
 ## 관련 항목
 
 - [Unit 1.2: Organization (G-S vs S-G)](/blog/writing/academic-writing/unit01-2-organization)
 - [Unit 2.2: Sentence Definitions](/blog/writing/academic-writing/unit02-2-sentence-definitions)
-- [Unit 8: Constructing a Research Paper II](/blog/writing/academic-writing/unit08-paper-2) — Research paper의 introduction (CARS 모델)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)
+- [Elements of Style — Rule 16: Use definite, specific, concrete language](/blog/writing/elements-of-style/ch02-rule16-specific)
+- [On Writing Well — Chapter 4: Style](/blog/writing/on-writing-well/ch04-style)

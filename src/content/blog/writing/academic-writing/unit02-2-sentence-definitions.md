@@ -276,6 +276,80 @@ coal bed methane.
 
 `is referred to as`, `is defined as`, `is known as`, `is termed`, `is called` — 모두 수동입니다. 행위자가 분야 자체이기 때문입니다.
 
+## 한국어 학술 정의
+
+한국어 학술 글의 *정의 구조*는 영어와 *비슷합니다*.
+
+```
+한국어 정의 구조:
+[용어] + [-(이)란 / -(은/는)] + [상위 분류] + [-이다]
+                                    + [관형구 (수식)]
+
+예시:
+- "Phytoremediation이란 식물을 이용해 토양 / 지하수의 오염을
+   *현장에서 줄이는* 기술이다."
+- "광전자 효과란 *빛이 닿으면 전자가 방출되는* 현상이다."
+
+영어 등가:
+- Phytoremediation is the [class] direct use of living plants
+  [detail] for in situ risk reduction ...
+- The photoelectric effect is the [class] phenomenon
+  [detail] in which electrons are emitted when light strikes ...
+```
+
+### 한국어 정의 동사
+
+```
+영어                            한국어
+─────────────────────────────────────
+is                             이다
+is known as                    ~로 알려져 있다
+is called                      ~라고 불린다
+is defined as                  ~로 정의된다
+is referred to as              ~로 일컬어진다
+consists of                    ~로 구성된다
+is characterized by            ~로 특징지어진다
+```
+
+### 한국 학생의 정의 함정
+
+```
+1. 순환 정의
+   회피: "Phytoremediation은 식물을 이용한 정화 기술이다.
+          그 정화는 phytoremediation으로 수행된다."
+
+2. 너무 좁은 class word
+   회피: "Phytoremediation은 식물이다." (식물이 정화 기술?)
+   선호: "Phytoremediation은 직접 사용이다." (the direct use of...)
+
+3. when / where 사용
+   영어와 같은 함정
+   회피: "Phytoremediation is when..."
+
+4. 정의 위에 인용 누락
+   학술 정의는 분야 *권위* 출처에서 인용
+   "OECD (2008) defines X as..."
+
+5. 한국어 직역 (서술어 길어짐)
+   회피: "Phytoremediation은 식물을 이용하여 토양 등의 오염을
+          현장에서 직접적으로 위험을 줄이는 데 사용되는 직접적인
+          이용을 의미한다."
+   선호: "Phytoremediation is the direct use of living plants..."
+```
+
+## 자기 글 점검 — Sentence Definition
+
+```
+□ 용어 + is + class word + detail 구조인가?
+□ Class word가 *적절한 상위 분류*인가?
+□ 관계절(that/which)이 *제한적*인가?
+□ When / where 정의 회피?
+□ 순환 정의가 아닌가?
+□ 정의가 *분야 권위*에서 왔는가? (인용 명시)
+□ 수동태가 정의 동사에 자연스러운가?
+□ 한국어 직역 정의가 어색하지 않은가?
+```
+
 ## 정리
 
 - **Formal sentence definition** — *Term + is/are + a/an class + that/which-word + detail*
@@ -287,12 +361,14 @@ coal bed methane.
 - 짧은 정의 — 괄호 안에 동의어
 - 순환 정의 회피, *when/where*는 회피, 명확성을 위한 반복은 허용
 - 학술 정의에 *수동태가 흔함* — 행위자가 분야 일반
+- 한국어도 *용어 + 상위 분류 + 수식* 구조 비슷
 
 ## 다음 글 예고
 
-다음은 **Unit 2.3: Extended Definitions와 Variations**입니다. 한 문장 정의로 부족할 때 어떻게 확장하는지, 그리고 정의가 분야 안에서 다툴 때 어떻게 자리를 잡는지를 다룹니다.
+다음은 **Unit 2.3: Extended Definitions와 Variations**. 한 문장 정의로 부족할 때 어떻게 확장하는지, 그리고 정의가 분야 안에서 다툴 때 어떻게 자리를 잡는지.
 
 ## 관련 항목
 
 - [Unit 2.1: GS 텍스트의 시작 방법](/blog/writing/academic-writing/unit02-1-openings)
 - [Unit 2.3: Extended Definitions and Variations](/blog/writing/academic-writing/unit02-3-extended-definitions)
+- [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02-rule16-specific)

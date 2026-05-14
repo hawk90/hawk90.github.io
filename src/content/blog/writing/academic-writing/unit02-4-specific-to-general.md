@@ -257,12 +257,44 @@ g. Some common English words are palindromes, such as pop, dad,
 
 핵심 메시지 — *영어 학술 산문은 거의 항상 GS이지만, SG는 도구함의 또 다른 도구다*. 자기 분야의 모범 논문에서 *어느 자리에 SG가 쓰이는지* 관찰하면 자기 글에도 적용할 자리를 찾을 수 있습니다.
 
+## 한국 학생을 위한 SG 권고
+
+```
+1. 자연과학 / 공학 — GS 표준 유지
+   - 도입은 항상 GS
+   - SG는 *예외적 효과*에만
+
+2. 사회과학 — GS 위주, 일부 SG
+   - 질적 연구의 사례 분석에 SG
+   - 인터뷰 / 관찰에서 일반화로
+
+3. 인문학 — SG도 자유롭게
+   - 문학 / 역사: 사건 / 문장에서 시작
+   - 한국 인문학 전통과 자연
+
+4. 한국 학술 글 → 영어 옮길 때
+   - 한국식 "사례 + 일반화" → 영어식 GS로 *재배치* 고려
+   - 또는 의도적으로 SG 유지 (인문학)
+```
+
+## 자기 글 점검 — S-G Organization
+
+```
+□ 분야 표준이 *GS인가 SG인가*?
+□ SG가 *내 분야 / 매체*에 어울리는가?
+□ 구체 사례에서 *일반화*로 *명확한 단계*?
+□ Anecdote가 *학술적 의미*로 확장되는가?
+□ 결말에서 *큰 그림*이 보이는가?
+□ 독자가 *왜 이 사례에서 시작*했는지 알 수 있는가?
+```
+
 ## 다음 Unit 예고
 
-다음은 **Unit 3: Problem, Process, and Solution**입니다. Situation-Problem-Solution-Evaluation 패턴과, 과정 묘사(process description)의 학술 영어 관습을 다룹니다.
+다음은 **Unit 3: Problem, Process, and Solution**. Situation-Problem-Solution-Evaluation 패턴과, 과정 묘사 (process description)의 학술 영어 관습.
 
 ## 관련 항목
 
 - [Unit 2.3: Extended Definitions and Variations](/blog/writing/academic-writing/unit02-3-extended-definitions)
-- [Unit 3: Problem, Process, and Solution](/blog/writing/academic-writing/unit03-problem-solution)
+- [Unit 3.1: SPSE Structure](/blog/writing/academic-writing/unit03-1-spse-structure)
 - [Unit 1.2: Organization](/blog/writing/academic-writing/unit01-2-organization)
+- [Elements of Style — Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02-rule12-design)

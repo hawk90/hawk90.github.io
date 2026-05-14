@@ -229,6 +229,83 @@ A second factor that influences sleep quality is ...
 
 ❷의 *negative impact*가 ❸에서 *prolong sleep onset, reduce sleep efficiency*로 구체화됩니다. *Specifically*가 linking을 명시하지만, *없어도* 의미가 이어집니다. 그러나 명시한 쪽이 독자에게 더 친절합니다.
 
+## 한국어 글의 흐름
+
+한국어 학술 글에도 *비슷한 패턴*이 있지만, *조사*가 정보 흐름을 *명시*합니다.
+
+```
+한국어:
+- 주어 + *은 / 는* → 옛 정보 (주제)
+- 주어 + *이 / 가* → 새 정보 (주제 도입)
+
+영어:
+- 옛 정보 → 주어 자리 (왼쪽)
+- 새 정보 → 서술부 끝 (오른쪽)
+```
+
+```
+한국 학술 흐름 예시:
+❶ 카페인이 졸음을 줄인다고 *연구가* 보였다.
+❷ 다만 카페인*은* 수면에 영향을 미친다.
+❸ 카페인 음료*는* 수면 시작을 지연시킨다.
+❹ 한편 *새로운 종류의 음료*가 인기를 얻고 있다.
+
+→ "이/가" 새 정보 도입 → "은/는" 주제 (옛 정보)
+→ 영어 Old-to-New와 *같은 원리*
+```
+
+### 한국어 학술 연결어
+
+```
+영어                       한국어
+─────────────────────────────────────
+However                    그러나, 한편
+In addition                또한, 더불어
+Furthermore                나아가, 게다가
+Therefore                  따라서, 그러므로
+As a result                결과적으로
+For example                예를 들어, 가령
+Specifically               구체적으로, 즉
+In contrast                반대로, 이와 달리
+In summary                 요약하면, 정리하자면
+Indeed                     실로, 사실
+```
+
+## 한국 학생의 흔한 흐름 함정
+
+```
+1. 모든 문장이 "and/그리고"로 시작
+   - 단조로움 / 부자연
+   - 다양한 connector 활용
+
+2. 대명사 (it, they, this) 가리키는 것 모호
+   - 직전 문장의 *명시 명사*로 다시 받기
+
+3. 주어가 *모두 같음* (We, The study, The data...)
+   - 변형 / 동의어 활용
+
+4. Linking word *과다 사용*
+   - 매 문장마다 However, Therefore, ...
+   - 한 단락에 2-3개로 제한
+
+5. Topic sentence 흐릿
+   - 단락의 첫 문장이 *큰 그림* 제시
+```
+
+## 자기 글 점검
+
+```
+□ Old-to-New 패턴이 *대부분의 문장*에 적용되는가?
+□ 옛 정보가 *주어 자리*(왼쪽)에?
+□ 새 정보가 *서술부 끝*(오른쪽)에?
+□ 대명사 (it, this, these)가 *명확한 대상*을 가리키는가?
+□ Linking word가 *과다*하지 않은가? (한 단락 2-3개)
+□ "But / And"가 *남용*되지 않는가?
+□ Topic sentence가 *앞 단락과 연결*되는가?
+□ 같은 linking word를 *연속 사용*하지 않았는가?
+□ 한국 글에 *영어 connector 직역*이 없는가?
+```
+
 ## 정리
 
 - 학술 영어 단락의 흐름은 **Old-to-New 정보 패턴**으로 자연스럽게 만들어짐
@@ -237,13 +314,15 @@ A second factor that influences sleep quality is ...
 - 자연스러운 흐름이 어려운 자리에 **linking words**로 명시적 연결
 - 추가 / 대조 / 인과 / 예시 / 순서 / 요약 / 양보 / 강조 — 관계별로 묶어 외움
 - Linking은 *과용 금지*. 의미 자체로 이어지는 흐름이 가장 우아함
+- 한국어 *은/는 vs 이/가* 조사가 영어 Old-to-New와 같은 원리
 
 ## 다음 글 예고
 
-다음은 **Unit 1.6: Presentation과 Positioning**입니다. 글의 시각적 표현, 그리고 학술 공동체 안에서의 *자기 위치*를 만드는 방법을 다룹니다.
+다음은 **Unit 1.6: Presentation과 Positioning**입니다. 글의 시각적 표현, 그리고 학술 공동체 안에서의 *자기 위치*를 만드는 방법.
 
 ## 관련 항목
 
 - [Unit 1.4: Other Stylistic Features](/blog/writing/academic-writing/unit01-4-stylistic-features)
 - [Unit 1.6: Presentation and Positioning](/blog/writing/academic-writing/unit01-6-positioning)
-- [Elements of Style — Rule 22: Place emphatic words at end](/blog/writing/elements-of-style/ch02-composition) — Old-to-New와 같은 원리
+- [Elements of Style — Rule 22: Place emphatic words at end](/blog/writing/elements-of-style/ch02-rule22-emphasis) — Old-to-New와 같은 원리
+- [Elements of Style — Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02-rule13-paragraph)
