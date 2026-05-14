@@ -1015,7 +1015,7 @@ void work_stealing_for(size_t total, Func f) {
 이론 → 실무:
 - Parallel for_each      → std::for_each(par, ...) (C++17 병렬 알고리즘)
 - Parallel reduce        → std::reduce(par, ...) (C++17)
-- Work-stealing          → Intel TBB, rayon (Rust), ForkJoinPool (Java)
+- Work-stealing          → Intel oneTBB (구 TBB), rayon (Rust), ForkJoinPool (Java)
 - Pipeline               → TBB flow graph, GStreamer, Akka Streams
 - SIMD                   → std::experimental::simd, Highway, xsimd
 - False sharing 회피     → alignas(64), padding

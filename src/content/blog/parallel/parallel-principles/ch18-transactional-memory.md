@@ -370,7 +370,9 @@ CPU가 TM을 직접 지원.
 - Cache coherence 메커니즘이 충돌 감지
 - 충돌 시 CPU가 자동 abort
 
-**IBM POWER8+, ARM** — 비슷한 지원.
+> **현재 상태**: TAA 사이드 채널 취약점(2019) 이후 Intel은 Skylake~Coffee Lake에서 마이크로코드로 TSX를 *영구 비활성화*했고, Alder Lake 이후 컨슈머 CPU에서는 기본 *제공 안 함*. Sapphire Rapids 등 일부 서버/HPC 라인에만 잔존. 새 코드에서 TSX 의존은 권장하지 않는다.
+
+**IBM POWER8+, ARM** — 비슷한 지원 (ARM TME는 v9 일부 구현).
 
 ```cpp
 // GCC/Clang — Intel TSX intrinsics
@@ -670,10 +672,11 @@ public:
    - 충돌 시 진행 보장 없음
    - 일부 시스템은 retry 횟수 제한
 
-2. *Intel TSX = 항상 사용 가능*
-   - 일부 CPU 버그로 비활성화된 적 있음
-   - 짧은 임계 영역만 적합
-   - Fallback path 필수 — 디자인 복잡
+2. *Intel TSX는 현역 도구*
+   - TAA 취약점 이후 컨슈머 CPU 대부분 영구 비활성화 (Skylake~Coffee Lake 마이크로코드, Alder Lake 이후 미탑재)
+   - Sapphire Rapids 등 서버 라인에만 잔존
+   - 새 코드에서 TSX 의존 비권장
+   - HTM 학습 목적으론 여전히 가치 있으나 운영 가정은 금물
 
 3. *STM이 lock-free 자료구조 대체*
    - 일반 코드엔 매력적이지만 성능 부족

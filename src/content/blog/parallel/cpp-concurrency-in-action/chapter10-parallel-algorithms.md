@@ -655,7 +655,7 @@ if (has_error && error) {
 
 **주요 구현**
 
-- **GCC (libstdc++)**: Intel TBB 필요 (기본). 컴파일 시 `g++ -std=c++17 -ltbb`
+- **GCC (libstdc++)**: Intel oneTBB 필요 (구 TBB). 컴파일 시 `g++ -std=c++17 -ltbb`
 - **Clang (libc++)**: PSTL 백엔드 필요. TBB 또는 OpenMP 사용
 - **MSVC**: 내장 구현, 추가 라이브러리 불필요
 

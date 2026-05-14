@@ -1070,7 +1070,7 @@ add_executable(stress_test tests/stress_test.cpp)
 |------|------|
 | 메모리 모델 심화 | "C++ Memory Model" - Herb Sutter |
 | 락 프리 심화 | "The Art of Multiprocessor Programming" |
-| 병렬 알고리즘 | Intel TBB 문서 |
+| 병렬 알고리즘 | Intel oneTBB 문서 (구 TBB) |
 | GPU 병렬 | CUDA, OpenCL, SYCL |
 | 분산 시스템 | "Designing Data-Intensive Applications" |
 

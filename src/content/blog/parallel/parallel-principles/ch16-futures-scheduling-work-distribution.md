@@ -600,8 +600,8 @@ Work stealing은 모든 모던 동시성 런타임의 기반.
 
 | 시스템 | 언어 |
 |---|---|
-| Cilk | C/C++ extension |
-| Intel TBB | C++ |
+| OpenCilk (MIT) | C/C++ — Intel Cilk Plus는 GCC 8.5(2020)에서 제거, 학술 후속 |
+| Intel oneTBB | C++ — oneAPI에 통합 (구 Intel TBB) |
 | C++17 parallel STL | C++ |
 | OpenMP tasks | C/C++/Fortran |
 | libdispatch (GCD) | C/Objective-C |
@@ -678,7 +678,7 @@ Work stealing:
 - **Fork-Join** — 작업을 쪼개고 합치는 병렬 패턴
 - **Work Stealing** — 각 스레드 자기 큐 + 비면 훔침
 - **거의 최적** 스케일링 보장 (Blumofe & Leiserson 결과)
-- 모든 모던 동시성 런타임의 기반 (Cilk, TBB, Rayon, Go scheduler)
+- 모던 동시성 런타임의 기반 (oneTBB, Rayon, Go scheduler, Tokio — Cilk는 학술 OpenCilk만 잔존)
 - **불균형 작업**에 특히 강함
 
 ## 한국 개발자의 함정

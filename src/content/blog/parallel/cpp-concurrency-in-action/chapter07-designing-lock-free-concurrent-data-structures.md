@@ -488,7 +488,7 @@ public:
 ### 구현 팁
 
 1. **작게 시작**: 복잡한 구조 대신 단순한 것부터
-2. **검증된 구현 사용**: Intel TBB, Boost.Lockfree
+2. **검증된 구현 사용**: Intel oneTBB, Boost.Lockfree, folly
 3. **메모리 순서 신중히**: `seq_cst`로 시작, 필요시 완화
 4. **ABA 대비**: tagged pointer 또는 hazard pointer
 5. **테스트**: ThreadSanitizer 필수

@@ -653,7 +653,7 @@ GPU의 SIMT 모델에서 barrier가 정확한 데이터 흐름을 보장. 잘못
 - Sense-Reversing       → std::barrier (C++20)
 - One-shot              → std::latch (C++20)
 - POSIX                 → pthread_barrier_t
-- GPU                   → __syncthreads() (CUDA), barrier() (OpenCL)
+- GPU                   → __syncthreads() (CUDA, 사실상 표준), barrier() (OpenCL — 쇠퇴, SYCL/Vulkan Compute가 후속)
 
 언어별:
 - C++20: std::barrier, std::latch

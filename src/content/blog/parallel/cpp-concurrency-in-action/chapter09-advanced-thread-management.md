@@ -1287,7 +1287,7 @@ void good_usage(thread_pool& compute_pool, thread_pool& io_pool) {
 ```
 이론 → 실무:
 - thread_pool             → Boost.Asio thread_pool, taskflow, BS::thread_pool
-- work-stealing           → Intel TBB, rayon (Rust), ForkJoinPool (Java)
+- work-stealing           → Intel oneTBB (구 TBB), rayon (Rust), ForkJoinPool (Java)
 - priority pool           → 사용자 정의 또는 Asio
 - stop_token (C++20)      → std::jthread, std::condition_variable_any
 - thread affinity         → pthread_setaffinity_np, SetThreadAffinityMask
