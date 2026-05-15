@@ -291,94 +291,48 @@ Strunk의 *Rule 11*과 같은 문제입니다.
 
 ### Affect / Effect
 
-```
-Affect (보통 동사) — 영향을 끼치다:
-   The weather affects my mood.
-
-Effect (보통 명사) — 결과:
-   The effect was immediate.
-
-Effect (드물게 동사) — 이루다:
-   They effected a change in policy.
-```
+- **Affect** (보통 동사) — 영향을 끼치다: *The weather affects my mood.*
+- **Effect** (보통 명사) — 결과: *The effect was immediate.*
+- **Effect** (드물게 동사) — 이루다: *They effected a change in policy.*
 
 ### Than / Then
 
-```
-Than — 비교:
-   She is taller than him.
-
-Then — 시간:
-   We ate, then we went home.
-```
+- **Than** — 비교: *She is taller than him.*
+- **Then** — 시간: *We ate, then we went home.*
 
 ### Their / There / They're
 
-```
-Their — 소유격:
-   Their house is big.
-
-There — 장소:
-   The book is over there.
-
-They're — they are 축약:
-   They're coming tomorrow.
-```
+- **Their** — 소유격: *Their house is big.*
+- **There** — 장소: *The book is over there.*
+- **They're** — they are 축약: *They're coming tomorrow.*
 
 ### Your / You're
 
-```
-Your — 소유격:
-   Your idea is great.
-
-You're — you are 축약:
-   You're correct.
-```
+- **Your** — 소유격: *Your idea is great.*
+- **You're** — you are 축약: *You're correct.*
 
 ### Lose / Loose
 
-```
-Lose (동사) — 잃다, 패배하다:
-   Don't lose your keys.
-
-Loose (형용사) — 헐겁다:
-   The screw is loose.
-```
+- **Lose** (동사) — 잃다, 패배하다: *Don't lose your keys.*
+- **Loose** (형용사) — 헐겁다: *The screw is loose.*
 
 ### Lay / Lie
 
-```
-Lay (타동사) — 놓다 (목적어 O):
-   Lay the book on the table.   (lay, laid, laid)
-
-Lie (자동사) — 눕다 (목적어 X):
-   I want to lie down.           (lie, lay, lain)
-
-Lie (자동사) — 거짓말하다:
-   Don't lie to me.              (lie, lied, lied)
-```
+- **Lay** (타동사) — 놓다 (목적어 O): *Lay the book on the table.   (lay, laid, laid)*
+- **Lie** (자동사) — 눕다 (목적어 X): *I want to lie down.           (lie, lay, lain)*
+- **Lie** (자동사) — 거짓말하다: *Don't lie to me.              (lie, lied, lied)*
 
 `Lie`의 과거형이 `lay`라서 더 헷갈립니다.
 
 ### Fewer / Less
 
-```
-Fewer — 셀 수 있는 것:
-   Fewer people came than expected.
-
-Less — 양:
-   Less water than usual.
-```
+- **Fewer** — 셀 수 있는 것: *Fewer people came than expected.*
+- **Less** — 양: *Less water than usual.*
 
 ### Number / Amount
 
-```
-Number — 셀 수 있는 것:
-   A large number of students.
-
-Amount — 양:
-   A large amount of money.
-```
+- **Number** — 셀 수 있는 것: *A large number of students.*
+- **Amount** — 양: *A large amount of money.*
 
 ## Double Negatives — 이중 부정
 
