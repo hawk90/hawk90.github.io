@@ -175,4 +175,3 @@ Part 2의 시작인 **Chapter 11: Nonfiction as Literature**입니다. Nonfictio
 
 - [Chapter 9: The Lead and the Ending](/blog/writing/on-writing-well/ch09-lead-ending)
 - [Chapter 11: Nonfiction as Literature](/blog/writing/on-writing-well/ch11-nonfiction-literature)
-- [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style)

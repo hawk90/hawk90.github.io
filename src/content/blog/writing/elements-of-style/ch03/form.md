@@ -591,7 +591,5 @@ Smith, J. (2024, March 15). The future of AI.
 
 ## 관련 항목
 
-- [Chapter 2: Elementary Principles of Composition](/blog/writing/elements-of-style/ch02/composition)
 - [Chapter 4: Words and Expressions Commonly Misused](/blog/writing/elements-of-style/ch04/words-a-c)
-- [Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style)
 - [Academic Writing — Unit 5: Citation and Plagiarism](/blog/writing/academic-writing/unit05-1-considerations-plagiarism)

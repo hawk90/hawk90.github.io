@@ -225,7 +225,6 @@ Williams의 책은 단순한 규칙집이 아니다.
 
 ## 관련 항목
 
-- [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style) — Strunk-White의 스타일 조언
 - [Elements of Style — Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05/reminder14-fancy)
 - [Elements of Style — Reminder 16: 명료하게 쓰라](/blog/writing/elements-of-style/ch05/reminder16-clarity)
 - [On Writing Well Ch 1: Transaction](/blog/writing/on-writing-well/ch01-transaction)

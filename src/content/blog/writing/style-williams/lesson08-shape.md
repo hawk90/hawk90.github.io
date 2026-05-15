@@ -257,6 +257,5 @@ she finally spoke."
 ## 관련 항목
 
 - [Lesson 7: Concision](/blog/writing/style-williams/lesson07-concision) — Part 1 마무리
-- [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style) — 다양성
 - [Elements of Style — Rule 18: Loose Sentence 연쇄](/blog/writing/elements-of-style/ch02/rule18-loose)
 - [Elements of Style — Rule 19: 평행 구조](/blog/writing/elements-of-style/ch02/rule19-parallel)

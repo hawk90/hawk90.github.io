@@ -293,4 +293,3 @@ SRW가 가르치는 것:
 - [Unit 5.1: Abstract의 구조와 어휘](/blog/writing/science-research-writing/unit5-1-abstract)
 - [Academic Writing for Graduate Students — 시리즈 개요](/blog/writing/academic-writing) — 이론적 보완
 - [On Writing Well](/blog/writing/on-writing-well) — 일반 nonfiction
-- [Elements of Style](/blog/writing/elements-of-style/ch01/usage) — 영어 글쓰기의 정수

@@ -70,6 +70,5 @@ E.B. White가 Chapter V를 시작하면서 처음 두는 reminder는 *역설적*
 
 ## 관련 항목
 
-- [Chapter 5: An Approach to Style — 개요](/blog/writing/elements-of-style/ch05/style)
 - [Reminder 2: Write naturally](/blog/writing/elements-of-style/ch05/reminder02-naturally)
 - [On Writing Well — Chapter 4: Style](/blog/writing/on-writing-well/ch04-style) — 같은 메시지

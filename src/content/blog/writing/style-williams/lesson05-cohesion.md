@@ -256,7 +256,6 @@ We propose Z as solution. This approach ...
 ## 관련 항목
 
 - [Lesson 4: Characters](/blog/writing/style-williams/lesson04-characters)
-- [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02/composition) — Emphatic words at end
 - [Elements of Style — Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02/rule13-paragraph)
 - [Elements of Style — Rule 20: 관련 있는 단어를 함께 두라](/blog/writing/elements-of-style/ch02/rule20-word-order)
 - [AWG Unit 1.5: Flow and Linking](/blog/writing/academic-writing/unit01-5-flow-linking)

@@ -150,6 +150,5 @@ Strunk가 책의 가장 첫 자리에 두는 규칙. 단순해 보이지만 *영
 
 ## 관련 항목
 
-- [Chapter 1: Elementary Rules of Usage](/blog/writing/elements-of-style/ch01/usage)
 - [Rule 2: Serial comma](/blog/writing/elements-of-style/ch01/rule02-serial-comma)
 - [Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04/words-a-c) — Its/It's의 추가 다루기

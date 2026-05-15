@@ -323,7 +323,6 @@ Strunk의 *Rule 20*.
 
 - [Only Grammar Book — 시리즈 개요](/blog/writing/only-grammar-book)
 - [Chapter 1: Parts of Speech](/blog/writing/only-grammar-book/ch01-parts-of-speech)
-- [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style)
 - [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)
 - [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)
 - [Elements of Style — Reminder 4: 명사와 동사로 쓰라](/blog/writing/elements-of-style/ch05/reminder04-nouns-verbs)

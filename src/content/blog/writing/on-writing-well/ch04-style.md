@@ -154,4 +154,3 @@ Zinsser의 단호한 조언입니다.
 
 - [Chapter 3: Clutter](/blog/writing/on-writing-well/ch03-clutter)
 - [Chapter 5: The Audience](/blog/writing/on-writing-well/ch05-audience)
-- [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style)

@@ -166,6 +166,5 @@ Voice, Confidence, The Tyranny of the Final Product, Decisions, Writing Family H
 
 - [On Writing Well — 시리즈 개요](/blog/writing/on-writing-well)
 - [Chapter 2: Simplicity](/blog/writing/on-writing-well/ch02-simplicity)
-- [Elements of Style — Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style)
 - [Elements of Style — Reminder 1: 자신을 배경에 두라](/blog/writing/elements-of-style/ch05/reminder01-background)
 - [Elements of Style — Reminder 2: 자연스럽게 쓰라](/blog/writing/elements-of-style/ch05/reminder02-naturally)

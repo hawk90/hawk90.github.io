@@ -524,7 +524,6 @@ Chapter 5 — *An Approach to Style* (21개 reminders). 글쓰기의 *총체적 
 ## 관련 항목
 
 - [Ch4 Words O-S](/blog/writing/elements-of-style/ch04/words-o-s)
-- [Chapter 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style)
 - [Rule 17: 불필요한 단어를 빼라](/blog/writing/elements-of-style/ch02/rule17-omit)
 - [Reminder 14: Avoid fancy words](/blog/writing/elements-of-style/ch05/reminder14-fancy)
 - [On Writing Well — Chapter 12: Clutter](/blog/writing/on-writing-well/ch12-clutter)

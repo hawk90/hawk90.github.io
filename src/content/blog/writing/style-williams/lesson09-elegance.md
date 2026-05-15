@@ -283,6 +283,5 @@ we recovered."
 ## 관련 항목
 
 - [Lesson 8: Shape](/blog/writing/style-williams/lesson08-shape)
-- [Elements of Style Ch 5: An Approach to Style](/blog/writing/elements-of-style/ch05/style) — 비유 / 음악성
 - [Elements of Style — Rule 19: 평행 구조](/blog/writing/elements-of-style/ch02/rule19-parallel)
 - [Elements of Style — Reminder 18: 비유는 아껴 쓰라](/blog/writing/elements-of-style/ch05/reminder18-figures)

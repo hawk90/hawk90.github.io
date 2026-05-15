@@ -278,7 +278,6 @@ He의 결정이 주제. nominalization OK.
 ## 관련 항목
 
 - [Lesson 2: Correctness](/blog/writing/style-williams/lesson02-correctness)
-- [Elements of Style Ch 2: Composition](/blog/writing/elements-of-style/ch02/composition) — Active voice
 - [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)
 - [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)
 - [Elements of Style — Reminder 4: 명사와 동사로 쓰라](/blog/writing/elements-of-style/ch05/reminder04-nouns-verbs)

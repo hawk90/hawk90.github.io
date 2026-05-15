@@ -197,4 +197,3 @@ Chapter 1 (Rules 1~11)이 *기본 문법 규칙*. 다음 Chapter 2 (Rules 12~22)
 
 - [Rule 10: 대명사의 적절한 격](/blog/writing/elements-of-style/ch01/rule10-pronoun-case)
 - [Rule 12: Choose a suitable design](/blog/writing/elements-of-style/ch02/rule12-design)
-- [Chapter 1: Elementary Rules of Usage](/blog/writing/elements-of-style/ch01/usage)
