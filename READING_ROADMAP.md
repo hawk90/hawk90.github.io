@@ -55,7 +55,7 @@ Making Embedded Systems → Design Patterns for Embedded C → Real-Time Design 
 | 가상면접 사례로 배우는 대규모 시스템 설계 기초 | Alex Xu | 📋 | 16장, 면접 필수 |
 | 가상면접 사례로 배우는 대규모 시스템 설계 기초 2 | Alex Xu | 💡 | 13장, 심화 |
 | 30가지 패턴으로 배우는 분산 시스템 설계와 구현 기법 | Unmesh Joshi | 📋 | 30 패턴 |
-| Designing Data-Intensive Applications (DDIA) | Martin Kleppmann | 📋 | 분산 시스템 바이블 |
+| Designing Data-Intensive Applications (DDIA) | Martin Kleppmann | 📋 | 분산 시스템 바이블, 2판 2026 |
 | Database Internals | Alex Petrov | 📋 | 스토리지 엔진/분산 DB |
 | Building Microservices | Sam Newman | 💡 | 마이크로서비스 입문 |
 | Microservices Patterns | Chris Richardson | 💡 | 44개 구현 패턴 |
@@ -64,6 +64,12 @@ Making Embedded Systems → Design Patterns for Embedded C → Real-Time Design 
 ```
 시스템 설계 기초 (Alex Xu) → DDIA → 분산 시스템 패턴 → Database Internals
 ```
+
+**참고 링크:**
+- [DDIA 공식 사이트 (dataintensive.net)](https://dataintensive.net/)
+- [Martin Kleppmann's Site](https://martin.kleppmann.com/)
+- [Database Internals (databass.dev)](https://www.databass.dev/)
+- [ByteByteGo (Alex Xu)](https://bytebytego.com/)
 
 ---
 
@@ -80,6 +86,12 @@ Making Embedded Systems → Design Patterns for Embedded C → Real-Time Design 
 ```
 Grokking Algorithms (입문) → Algorithm Design Manual → CLRS (심화)
 ```
+
+**참고 링크:**
+- [The Algorithm Design Manual (algorist.com)](https://www.algorist.com/)
+- [Skiena's Lecture Videos](https://www3.cs.stonybrook.edu/~skiena/373/videos/)
+- [Exercise Solutions Wiki](https://www.algorist.com/algowiki/index.php/The_Algorithms_Design_Manual_(Skiena))
+- [Programming Challenges](https://www.programming-challenges.com/)
 
 ---
 
@@ -116,6 +128,13 @@ C++ Concurrency in Action → Patterns for Parallel Programming → Is Parallel 
 Fundamentals of Software Architecture → POSA Vol.1 → Clean Architecture
 C++ Software Design (C++ 특화)
 ```
+
+**참고 링크:**
+- [Fundamentals of Software Architecture (공식)](http://fundamentalsofsoftwarearchitecture.com/)
+- [Architectural Katas (연습문제)](http://fundamentalsofsoftwarearchitecture.com/katas/)
+- [DeveloperToArchitect.com (Mark Richards)](https://developertoarchitect.com/)
+- [C++ Software Design (O'Reilly)](https://www.oreilly.com/library/view/c-software-design/9781098113155/)
+- [Klaus Iglberger CppCon Talks](https://www.youtube.com/results?search_query=klaus+iglberger+cppcon)
 
 ---
 
@@ -174,6 +193,208 @@ Site Reliability Engineering → The Site Reliability Workbook → Building Secu
 | PCIe Deep Dive | ✅ | 17장, 스펙+드라이버 |
 | NVMe Deep Dive | ✅ | 18장, 스펙+드라이버 |
 | DDR Memory Deep Dive | ✅ | 17장, 스펙+트레이닝 |
+| CXL Deep Dive | 📋 | 4.0 스펙, 메모리 풀링, 멀티랙 |
+| HBM / GDDR Deep Dive | 📋 | HBM3E, 고대역 메모리 |
+| UCIe Deep Dive | 📋 | 3.0 스펙, 칩렛 인터커넥트 🔥 |
+| UALink Deep Dive | 📋 | 1.0 스펙, GPU 인터커넥트, NVLink 대안 🔥 |
+| BoW (Bunch of Wires) | 💡 | OCP 오픈 D2D, 저비용 칩렛 |
+| PCIe 6.0 확장 | 📋 | PAM4, 64 GT/s (기존 시리즈 확장) |
+| **기초 프로토콜** | | |
+| Embedded Protocols Deep Dive | 📋 | SPI, UART, I2C, RS-485 — 기본기 |
+| CAN Bus Deep Dive | 📋 | CAN 2.0, CAN FD, CAN XL — 자동차/산업 |
+| MIPI Deep Dive | 📋 | CSI-2, DSI-2, A-PHY — 카메라/디스플레이 |
+| Industrial Ethernet | 📋 | EtherCAT, PROFINET, TSN — 산업용 이더넷 |
+
+### 9.1 CXL Deep Dive (신규)
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | CXL 개요 — PCIe 확장, 왜 필요한가 |
+| 2 | CXL.io — PCIe 호환 I/O |
+| 3 | CXL.cache — 호스트 메모리 캐싱 |
+| 4 | CXL.mem — 디바이스 메모리 접근 |
+| 5 | Type 1/2/3 디바이스 분류 |
+| 6 | 메모리 풀링과 공유 |
+| 7 | CXL 스위치와 패브릭 |
+| 8 | ML 가속기와 CXL |
+| 9 | CXL 3.0 — 패브릭 확장 |
+| 10 | 리눅스 CXL 드라이버 |
+
+### 9.2 HBM / GDDR Deep Dive (신규)
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | 고대역 메모리 개요 — HBM vs GDDR |
+| 2 | HBM 스택 구조와 TSV |
+| 3 | HBM2/HBM2E/HBM3/HBM3E 스펙 비교 |
+| 4 | GDDR6/GDDR6X/GDDR7 |
+| 5 | 대역폭 계산과 병목 분석 |
+| 6 | 열 설계와 전력 관리 |
+| 7 | 메모리 컨트롤러 인터페이스 |
+| 8 | NPU/GPU에서의 활용 |
+
+### 9.3 UCIe Deep Dive (신규) 🔥
+
+칩렛 시대의 "PCIe" — 2025.08 UCIe 3.0 릴리스.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | UCIe 개요 — 왜 칩렛인가, 무어의 법칙 이후 |
+| 2 | UCIe 아키텍처 — 프로토콜 스택, 레이어 구조 |
+| 3 | 물리 계층 — 시그널링, 64 GT/s |
+| 4 | D2D 어댑터 — 프로토콜 변환 |
+| 5 | UCIe 1.0 vs 2.0 vs 3.0 비교 |
+| 6 | 2.5D 패키징 — 인터포저, 실리콘 브릿지 |
+| 7 | 3D 패키징 — 하이브리드 본딩, TSV |
+| 8 | 런타임 재교정과 RAS |
+| 9 | CXL over UCIe — 메모리 확장 |
+| 10 | PCIe over UCIe — I/O 확장 |
+| 11 | 멀티 벤더 칩렛 생태계 |
+| 12 | 사례 연구 — Intel/AMD/NVIDIA 칩렛 |
+
+### 9.4 UALink Deep Dive (신규) 🔥
+
+NVLink 대안 — 2025.04 UALink 1.0 릴리스, 75개사 참여.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | UALink 개요 — 왜 오픈 GPU 인터커넥트인가 |
+| 2 | UALink vs NVLink 비교 |
+| 3 | 물리 계층 — 802.3 이더넷 PHY 기반 |
+| 4 | 링크 구성 — x1, x2, x4 |
+| 5 | 토폴로지 — 1024 가속기 스케일링 |
+| 6 | UALink 스위치 아키텍처 |
+| 7 | CXL과의 협력 — 메모리 + GPU 연결 |
+| 8 | AI 클러스터 설계 패턴 |
+| 9 | 하드웨어 로드맵 (2026~2027) |
+| 10 | 사례 연구 — AMD MI350X, Intel Gaudi |
+
+### 9.5 BoW (Bunch of Wires) 개요
+
+OCP 오픈 D2D 인터페이스 — 저비용 칩렛 타겟.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | BoW 개요 — 오픈소스 칩렛 인터페이스 |
+| 2 | BoW 아키텍처 — 슬라이스 구조 |
+| 3 | BoW 2.0 vs UCIe 비교 |
+| 4 | BoW Memory — 직접 메모리 접근 |
+| 5 | BoW Flexi — 저비용 구현 |
+| 6 | 패키징 요구사항 |
+
+### 9.6 Embedded Protocols Deep Dive (신규)
+
+SPI, UART, I2C, RS-485 — 모든 임베디드의 기본.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | 직렬 통신 개요 — 동기 vs 비동기 |
+| 2 | SPI 기초 — 마스터/슬레이브, CPOL/CPHA |
+| 3 | SPI 고급 — Multi-slave, Dual/Quad SPI |
+| 4 | I2C 기초 — 주소 체계, ACK/NACK |
+| 5 | I2C 고급 — Clock stretching, Bus arbitration |
+| 6 | I2C 문제 해결 — Stuck bus, 풀업 저항 |
+| 7 | UART 기초 — 보레이트, 프레이밍 |
+| 8 | UART 고급 — 하드웨어 흐름 제어, DMA |
+| 9 | RS-232/RS-485 — 전기적 특성, 멀티드롭 |
+| 10 | 리눅스 디바이스 트리 — SPI/I2C/UART 설정 |
+| 11 | 리눅스 드라이버 — spidev, i2c-dev, ttyS |
+| 12 | 디버깅 — Logic analyzer, Protocol decoder |
+
+### 9.7 CAN Bus Deep Dive (신규)
+
+자동차/산업 표준 — CAN 2.0, CAN FD, CAN XL.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | CAN 개요 — 왜 CAN인가, 역사 |
+| 2 | CAN 2.0 물리 계층 — 차동 신호, 종단 저항 |
+| 3 | CAN 2.0 프레임 구조 — Standard/Extended ID |
+| 4 | CAN 2.0 Arbitration — CSMA/CA, 우선순위 |
+| 5 | CAN 에러 처리 — Error frames, Fault confinement |
+| 6 | CAN FD 개요 — 8MB 이상, 가변 비트레이트 |
+| 7 | CAN FD 프레임 구조 — BRS, ESI |
+| 8 | CAN XL 개요 — 10 Mbps+, 2048 바이트 페이로드 |
+| 9 | CANopen 프로토콜 — SDO, PDO, NMT |
+| 10 | J1939 프로토콜 — 상용차 표준 |
+| 11 | 리눅스 SocketCAN — can-utils, 드라이버 |
+| 12 | 디버깅 — CANalyzer, candump, cansniffer |
+
+### 9.8 MIPI Deep Dive (신규)
+
+카메라/디스플레이 인터페이스 — CSI-2, DSI-2, A-PHY.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | MIPI Alliance 개요 — 생태계, 표준 계층 |
+| 2 | D-PHY 물리 계층 — LP/HS 모드, Lane 구성 |
+| 3 | C-PHY 물리 계층 — 3선 심볼, 효율성 |
+| 4 | CSI-2 개요 — 카메라 인터페이스, 패킷 구조 |
+| 5 | CSI-2 데이터 타입 — RAW, YUV, RGB |
+| 6 | CSI-2 v4.2 — 고해상도, 가상 채널 확장 |
+| 7 | DSI 개요 — 디스플레이 인터페이스, Command/Video 모드 |
+| 8 | DSI-2 — 고해상도 디스플레이, Display Stream Compression |
+| 9 | A-PHY — 자동차용 장거리 SerDes |
+| 10 | 리눅스 미디어 서브시스템 — V4L2, DRM/KMS |
+| 11 | 카메라 드라이버 개발 — imx sensor 예제 |
+| 12 | 디버깅 — mipi-dbi, 신호 분석 |
+
+### 9.9 Industrial Ethernet Deep Dive (신규)
+
+산업용 이더넷 — EtherCAT, PROFINET, TSN.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | 산업용 이더넷 개요 — 왜 표준 이더넷이 아닌가 |
+| 2 | 실시간 요구사항 — Determinism, Cycle time |
+| 3 | EtherCAT 아키텍처 — Processing on the fly |
+| 4 | EtherCAT 프레임 구조 — Datagram, WKC |
+| 5 | EtherCAT 마스터/슬레이브 — SOEM, IgH |
+| 6 | PROFINET 개요 — RT, IRT 클래스 |
+| 7 | PROFINET IO — Controller, Device, Supervisor |
+| 8 | TSN (Time-Sensitive Networking) — IEEE 802.1 |
+| 9 | TSN 스케줄링 — Qbv, Qbu, 동기화 |
+| 10 | Ethernet POWERLINK — OpenSAFETY |
+| 11 | 리눅스 실시간 — PREEMPT_RT, EtherCAT 드라이버 |
+| 12 | 비교 분석 — 프로토콜 선택 가이드 |
+
+**참고 링크:**
+
+**고속 인터커넥트:**
+- [CXL Consortium](https://www.computeexpresslink.org/)
+- [UCIe Consortium](https://www.uciexpress.org/)
+- [UALink Consortium](https://ualinkconsortium.org/)
+- [OCP BoW Specification](https://opencomputeproject.github.io/ODSA-BoW/)
+- [JEDEC HBM Standards](https://www.jedec.org/standards-documents/focus/high-bandwidth-memory-hbm)
+- [Linux CXL Documentation](https://www.kernel.org/doc/html/latest/driver-api/cxl/index.html)
+
+**기초 프로토콜:**
+- [SPI Linux Documentation](https://www.kernel.org/doc/html/latest/spi/index.html)
+- [I2C Linux Documentation](https://www.kernel.org/doc/html/latest/i2c/index.html)
+- [Serial UART Documentation](https://www.kernel.org/doc/html/latest/driver-api/serial/index.html)
+- [I2C Tutorial (Sparkfun)](https://learn.sparkfun.com/tutorials/i2c)
+- [SPI Tutorial (Sparkfun)](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi)
+
+**CAN Bus:**
+- [CAN in Automation (CiA)](https://www.can-cia.org/)
+- [Linux SocketCAN](https://www.kernel.org/doc/html/latest/networking/can.html)
+- [CAN FD Specification (Bosch)](https://www.bosch-semiconductors.com/ip-modules/can-fd/)
+- [CANopen (CiA 301)](https://www.can-cia.org/canopen/)
+- [SAE J1939](https://www.sae.org/standards/content/j1939/)
+
+**MIPI:**
+- [MIPI Alliance](https://www.mipi.org/)
+- [MIPI CSI-2 Specification](https://www.mipi.org/specifications/csi-2)
+- [MIPI DSI Specification](https://www.mipi.org/specifications/dsi-2)
+- [MIPI A-PHY (Automotive)](https://www.mipi.org/specifications/a-phy)
+- [Linux V4L2 Documentation](https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/v4l2.html)
+
+**Industrial Ethernet:**
+- [EtherCAT Technology Group](https://www.ethercat.org/)
+- [PROFINET (PI)](https://www.profibus.com/technology/profinet)
+- [IEEE 802.1 TSN](https://1.ieee802.org/tsn/)
+- [SOEM (Simple Open EtherCAT Master)](https://github.com/OpenEtherCATsociety/SOEM)
+- [IgH EtherCAT Master](https://etherlab.org/en/ethercat/)
 
 ---
 
@@ -181,7 +402,7 @@ Site Reliability Engineering → The Site Reliability Workbook → Building Secu
 
 | 시리즈 | 상태 | 비고 |
 |--------|------|------|
-| AV1 Deep Dive | ✅ | 30장, 8 Parts 구조 |
+| AV1 Deep Dive | ✅ | 30장 |
 
 ---
 
@@ -276,11 +497,69 @@ Site Reliability Engineering → The Site Reliability Workbook → Building Secu
 | 10 | ML 인프라와 MLOps |
 | 11 | ML 시스템의 인간적 측면 |
 
+### 11.6 TinyML / Edge AI (신규)
+
+| 책/자료 | 저자/출처 | 상태 | 비고 |
+|---------|-----------|------|------|
+| TinyML | Pete Warden & Daniel Situnayake | 📋 | O'Reilly, MCU 추론 |
+| TensorFlow Lite Micro 공식 | TensorFlow | 📋 | 베어메탈 추론 |
+| CMSIS-NN | ARM | 📋 | Cortex-M 최적화 커널 |
+| Edge Impulse 문서 | Edge Impulse | 💡 | 임베디드 ML 워크플로우 |
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | TinyML 개요 — 왜 MCU에서 ML인가 |
+| 2 | TensorFlow Lite Micro 아키텍처 |
+| 3 | 인터프리터와 메모리 할당 |
+| 4 | 모델 양자화 — INT8/INT4 |
+| 5 | CMSIS-NN 최적화 커널 |
+| 6 | 전력 제약 설계 |
+| 7 | 메모리 제약 설계 (< 256KB) |
+| 8 | 센서 데이터 전처리 |
+| 9 | 웨이크워드 / 키워드 검출 |
+| 10 | 이미지 분류 on MCU |
+| 11 | 이상 탐지 패턴 |
+| 12 | microTVM — TVM 베어메탈 타겟 |
+
+### 11.7 NPU 드라이버 개발 (신규)
+
+리눅스 커널 레벨에서 NPU/가속기 드라이버 개발.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | 가속기 드라이버 개요 — DRM subsystem |
+| 2 | DMA-BUF와 버퍼 공유 |
+| 3 | IOMMU와 주소 변환 |
+| 4 | ioctl 인터페이스 설계 |
+| 5 | 메모리 매핑 (mmap) |
+| 6 | 명령 큐와 제출 |
+| 7 | 인터럽트와 완료 통보 |
+| 8 | Fence / Sync 객체 |
+| 9 | 전력 관리 — Runtime PM |
+| 10 | 펌웨어 로딩 |
+| 11 | 유저스페이스 라이브러리 설계 |
+| 12 | 사례 연구 — Etnaviv / Panfrost |
+
+### 11.8 ML 시스템 프로파일링 (신규)
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | ML 워크로드 특성 분석 |
+| 2 | NPU 프로파일러 활용 |
+| 3 | 레이어별 지연 분석 |
+| 4 | 메모리 대역폭 병목 |
+| 5 | 전력 프로파일링 |
+| 6 | ftrace / perf for ML |
+| 7 | 시스템 트레이싱 — LTTng |
+| 8 | 병목 진단과 최적화 |
+
 **경로:**
 ```
 NPU 아키텍처 → ML 컴파일러 → ONNX 실전
-                ↘
-            ML 디자인 패턴 → 대규모 ML 시스템 설계
+      ↓              ↘
+NPU 드라이버      ML 디자인 패턴 → 대규모 ML 시스템 설계
+      ↓
+TinyML / Edge AI → ML 시스템 프로파일링
 ```
 
 **참고 링크:**
@@ -293,6 +572,20 @@ NPU 아키텍처 → ML 컴파일러 → ONNX 실전
 - [Chip Huyen's Site](https://huyenchip.com/)
 - [Intel NPU Acceleration Library](https://intel.github.io/intel-npu-acceleration-library/npu.html)
 - [ARM NPU Documentation](https://developer.arm.com/documentation/102023/latest/)
+
+**TinyML / Edge AI:**
+- [TinyML Book (O'Reilly)](https://www.oreilly.com/library/view/tinyml/9781492052036/)
+- [TensorFlow Lite Micro](https://www.tensorflow.org/lite/microcontrollers)
+- [CMSIS-NN (ARM)](https://arm-software.github.io/CMSIS_5/NN/html/index.html)
+- [Edge Impulse Documentation](https://docs.edgeimpulse.com/)
+- [microTVM (TVM)](https://tvm.apache.org/docs/topic/microtvm/index.html)
+
+**NPU 드라이버:**
+- [DRM Documentation (Linux Kernel)](https://www.kernel.org/doc/html/latest/gpu/index.html)
+- [DMA-BUF Sharing (Linux Kernel)](https://www.kernel.org/doc/html/latest/driver-api/dma-buf.html)
+- [Etnaviv Driver (오픈소스 GPU)](https://github.com/etnaviv/etnaviv_gpu_tests)
+- [Panfrost Driver (ARM Mali)](https://docs.mesa3d.org/drivers/panfrost.html)
+- [IOMMU Documentation](https://www.kernel.org/doc/html/latest/driver-api/iommu.html)
 
 ---
 
@@ -407,6 +700,12 @@ Newton의 *Philosophiæ Naturalis Principia Mathematica* (1687). 고전역학과
 Computer Networking (Top-Down) → TCP/IP Illustrated → Unix Network Programming
 ```
 
+**참고 링크:**
+- [저자 공식 사이트](https://gaia.cs.umass.edu/kurose_ross/instructor.php)
+- [Wireshark Labs (무료)](https://gaia.cs.umass.edu/kurose_ross/wireshark.php)
+- [Programming Assignments](https://gaia.cs.umass.edu/kurose_ross/programming_assignments.php)
+- [High Performance Browser Networking (무료 온라인)](https://hpbn.co/)
+
 ---
 
 ## 15. 운영체제
@@ -422,6 +721,11 @@ Computer Networking (Top-Down) → TCP/IP Illustrated → Unix Network Programmi
 OSTEP → Modern Operating Systems → 리눅스 커널 시리즈
 ```
 
+**참고 링크:**
+- [OSTEP 무료 온라인 (pages.cs.wisc.edu)](https://pages.cs.wisc.edu/~remzi/OSTEP/)
+- [OSTEP Projects / Homework](https://github.com/remzi-arpacidusseau/ostep-projects)
+- [OSTEP YouTube Lectures](https://pages.cs.wisc.edu/~remzi/Classes/537/Spring2018/Discussion/videos.html)
+
 ---
 
 ## 16. 컴퓨터 아키텍처
@@ -436,6 +740,12 @@ OSTEP → Modern Operating Systems → 리눅스 커널 시리즈
 ```
 CSAPP → Computer Organization → Quantitative Approach
 ```
+
+**참고 링크:**
+- [CSAPP 공식 사이트](https://csapp.cs.cmu.edu/)
+- [CSAPP Labs (Attack Lab, Bomb Lab 등)](https://csapp.cs.cmu.edu/3e/labs.html)
+- [CSAPP Student Resources](https://csapp.cs.cmu.edu/3e/students.html)
+- [CMU 15-213 Course Materials](https://www.cs.cmu.edu/~213/)
 
 ---
 
@@ -453,6 +763,11 @@ CSAPP → Computer Organization → Quantitative Approach
 Crafting Interpreters → Writing An Interpreter In Go → Engineering a Compiler
 ```
 
+**참고 링크:**
+- [Crafting Interpreters (무료 온라인)](https://craftinginterpreters.com/)
+- [Crafting Interpreters GitHub](https://github.com/munificent/craftinginterpreters)
+- [Writing An Interpreter In Go (interpreterbook.com)](https://interpreterbook.com/)
+
 ---
 
 ## 18. 보안 / 암호학
@@ -469,6 +784,11 @@ Crafting Interpreters → Writing An Interpreter In Go → Engineering a Compile
 Serious Cryptography → Real-World Cryptography → 웹/시스템 보안
 ```
 
+**참고 링크:**
+- [Real-World Cryptography (Manning)](https://www.manning.com/books/real-world-cryptography)
+- [David Wong's Blog (cryptologie.net)](https://www.cryptologie.net/)
+- [Serious Cryptography (No Starch)](https://nostarch.com/seriouscrypto)
+
 ---
 
 ## 19. 데이터베이스
@@ -483,6 +803,11 @@ Serious Cryptography → Real-World Cryptography → 웹/시스템 보안
 ```
 Database System Concepts → Database Internals → SQL Performance Explained
 ```
+
+**참고 링크:**
+- [Database Internals (databass.dev)](https://www.databass.dev/)
+- [Red Book 5th Edition (무료 온라인)](http://www.redbook.io/)
+- [Use The Index, Luke (SQL Performance)](https://use-the-index-luke.com/)
 
 ---
 
@@ -500,6 +825,14 @@ Database System Concepts → Database Internals → SQL Performance Explained
 SICP → FP in Scala 또는 Haskell → Category Theory
 ```
 
+**참고 링크:**
+- [SICP (MIT 무료 온라인)](https://mitp-content-server.mit.edu/books/content/sectbyfn/books_pres_0/6515/sicp.zip/full-text/book/book.html)
+- [MIT 6.037 Course](https://web.mit.edu/6.001/6.037/)
+- [MIT OpenCourseWare 6.001](https://ocw.mit.edu/courses/6-001-structure-and-interpretation-of-computer-programs-spring-2005/)
+- [Haskell Book (haskellbook.com)](https://haskellbook.com/)
+- [Haskell Book Exercise Solutions (GitHub)](https://github.com/scarvalhojr/haskellbook)
+- [Category Theory for Programmers (무료)](https://bartoszmilewski.com/2014/10/28/category-theory-for-programmers-the-preface/)
+
 ---
 
 ## 21. 테스팅
@@ -516,13 +849,18 @@ SICP → FP in Scala 또는 Haskell → Category Theory
 TDD by Example → GOOS → Unit Testing Principles
 ```
 
+**참고 링크:**
+- [TDD by Example (O'Reilly)](https://www.oreilly.com/library/view/test-driven-development/0321146530/)
+- [TDD by Example Exercises (GitHub)](https://github.com/jeremykendall/tdd-by-example)
+- [Kent Beck Money Example (GitHub)](https://github.com/test-driven-development/kent-beck-money-example)
+
 ---
 
 ## 22. DevOps / 컨테이너
 
 | 책 | 저자 | 상태 | 비고 |
 |---|------|------|------|
-| The DevOps Handbook | Kim, Humble 외 | 📋 | DevOps 바이블 |
+| The DevOps Handbook | Kim, Humble 외 | 📋 | DevOps 바이블, 2판 2022 |
 | Kubernetes in Action | Marko Lukša | 💡 | K8s 깊이 파기 |
 | Docker Deep Dive | Nigel Poulton | 💡 | Docker 실무 |
 | Infrastructure as Code | Kief Morris | 💡 | IaC 패턴 |
@@ -531,6 +869,11 @@ TDD by Example → GOOS → Unit Testing Principles
 ```
 DevOps Handbook → Docker Deep Dive → Kubernetes in Action
 ```
+
+**참고 링크:**
+- [The DevOps Handbook 2nd Edition (IT Revolution)](https://itrevolution.com/product/the-devops-handbook-second-edition/)
+- [Reader's Guide (Discussion Questions)](https://itrevolution.com/product/readers-guide-the-devops-handbook-2nd-edition/)
+- [IT Revolution Resources](https://itrevolution.com/)
 
 ---
 
@@ -546,6 +889,13 @@ DevOps Handbook → Docker Deep Dive → Kubernetes in Action
 ```
 Practical TLA+ → Specifying Systems → Software Foundations (Coq)
 ```
+
+**참고 링크:**
+- [Learn TLA+ (무료 온라인)](https://www.learntla.com/)
+- [Practical TLA+ Source Code (GitHub)](https://github.com/Apress/practical-tla-plus)
+- [Hillel Wayne's Site](https://www.hillelwayne.com/)
+- [TLA+ Official (Lamport)](https://lamport.azurewebsites.net/tla/tla.html)
+- [Software Foundations (무료 온라인)](https://softwarefoundations.cis.upenn.edu/)
 
 ---
 
@@ -582,6 +932,11 @@ Pragmatic Programmer → Clean Code → Refactoring → Working with Legacy Code
 Concrete Mathematics → Think Stats → Mathematics for ML
 ```
 
+**참고 링크:**
+- [Concrete Mathematics (Stanford / Knuth)](https://www-cs-faculty.stanford.edu/~knuth/gkp.html)
+- [Think Stats (무료 온라인)](https://greenteapress.com/thinkstats/)
+- [Mathematics for Machine Learning (무료 PDF)](https://mml-book.github.io/)
+
 ---
 
 ## 우선순위 큐
@@ -606,85 +961,106 @@ Concrete Mathematics → Think Stats → Mathematics for ML
 13. **Real-Time Design Patterns** — RTOS 패턴
 14. **제안서 작성의 기술** — 설득력 있는 제안서
 
-### Tier 4 — ML 시스템 (신규)
+### Tier 4 — ML 시스템 / 임베디드 ML
 15. **NPU 아키텍처** — 가속기 기초, TPU/ANE/Hexagon
 16. **Dive into Deep Learning Compiler** — TVM/MLIR 기반 컴파일러
 17. **ML Design Patterns** — 30개 ML 패턴
 18. **ONNX 실전** — 모델 교환과 런타임
 19. **Designing ML Systems** — Chip Huyen, 프로덕션 ML
+20. **TinyML / Edge AI** — MCU 추론, TFLite Micro, CMSIS-NN
+21. **NPU 드라이버 개발** — DRM, DMA-BUF, 커널 레벨
 
-### Tier 5 — 철학/과학 고전 (신규)
-20. **수리철학 입문** — Russell, 논리주의 고전 (1919)
-21. **프린키피아** — Newton, 고전역학 기초 (1687)
+### Tier 5 — 가속기 하드웨어 / 인터커넥트 🔥
+22. **UCIe Deep Dive** — 칩렛 인터커넥트, 3.0 스펙 (2025.08)
+23. **UALink Deep Dive** — GPU 인터커넥트, NVLink 대안 (2025.04)
+24. **CXL Deep Dive** — 메모리 풀링, 4.0 스펙 (2025.11)
+25. **HBM / GDDR Deep Dive** — HBM3E, 고대역 메모리
 
-### Tier 6 — 아키텍처/알고리즘
-22. **Fundamentals of Software Architecture** — 아키텍트 입문
-23. **C++ Software Design** — 현대 C++ 패턴
-24. **Algorithm Design Manual** — Skiena, 실용 알고리즘
+### Tier 6 — 기초 페리페럴 / 산업 프로토콜
+26. **Embedded Protocols Deep Dive** — SPI, UART, I2C, RS-485 (기본기)
+27. **CAN Bus Deep Dive** — CAN 2.0, CAN FD, CAN XL (자동차/산업)
+28. **MIPI Deep Dive** — CSI-2, DSI-2, A-PHY (카메라/디스플레이)
+29. **Industrial Ethernet** — EtherCAT, PROFINET, TSN (산업용)
 
-### Tier 7 — 시스템 기초
-25. **CSAPP** — 시스템 프로그래머 필독
-26. **OSTEP** — 운영체제, 무료 온라인
-27. **Computer Networking** — Kurose & Ross
+### Tier 7 — 철학/과학 고전
+30. **수리철학 입문** — Russell, 논리주의 고전 (1919)
+31. **프린키피아** — Newton, 고전역학 기초 (1687)
 
-### Tier 8 — 개발자 필독서
-28. **Pragmatic Programmer** — 개발자 마인드셋
-29. **Clean Code** — 코드 품질
-30. **Refactoring** — 리팩토링 바이블
-31. **Working with Legacy Code** — 레거시 다루기
-32. **TDD by Example** — 테스트 주도 개발
+### Tier 8 — 아키텍처/알고리즘
+32. **Fundamentals of Software Architecture** — 아키텍트 입문
+33. **C++ Software Design** — 현대 C++ 패턴
+34. **Algorithm Design Manual** — Skiena, 실용 알고리즘
 
-### Tier 9 — 컴파일러/형식 검증
-33. **Crafting Interpreters** — 인터프리터 만들기, 무료
-34. **Practical TLA+** — 형식 검증 입문
+### Tier 9 — 시스템 기초
+35. **CSAPP** — 시스템 프로그래머 필독
+36. **OSTEP** — 운영체제, 무료 온라인
+37. **Computer Networking** — Kurose & Ross
 
-### Tier 10 — 보안/암호학/FP
-35. **Real-World Cryptography** — 현대 암호학
-36. **SICP** — 함수형 프로그래밍 고전
+### Tier 10 — 개발자 필독서
+38. **Pragmatic Programmer** — 개발자 마인드셋
+39. **Clean Code** — 코드 품질
+40. **Refactoring** — 리팩토링 바이블
+41. **Working with Legacy Code** — 레거시 다루기
+42. **TDD by Example** — 테스트 주도 개발
 
-### Tier 11 — 수학/DevOps
-37. **Concrete Mathematics** — Knuth 이산수학
-38. **DevOps Handbook** — DevOps 바이블
+### Tier 11 — 컴파일러/형식 검증
+43. **Crafting Interpreters** — 인터프리터 만들기, 무료
+44. **Practical TLA+** — 형식 검증 입문
+
+### Tier 12 — 보안/암호학/FP
+45. **Real-World Cryptography** — 현대 암호학
+46. **SICP** — 함수형 프로그래밍 고전
+
+### Tier 13 — 수학/DevOps
+47. **Concrete Mathematics** — Knuth 이산수학
+48. **DevOps Handbook** — DevOps 바이블
 
 ---
 
 ## 카테고리 매핑
 
-| 카테고리 ID | 시리즈 |
+| 카테고리 ID | 콘텐츠 |
 |-------------|--------|
-| `systems/linux-kernel` | 리눅스 커널 |
-| `systems/linux-drivers` | 리눅스 드라이버 |
-| `systems/distributed` | 분산 시스템 |
-| `systems/sre` | SRE / 운영 |
-| `embedded/hardware` | PCIe, NVMe, DDR |
-| `embedded/patterns` | 임베디드 패턴 |
-| `parallel` | 동시성/병렬 |
-| `programming/design` | 아키텍처/패턴 |
-| `programming/engineering` | 요구사항/공학 |
-| `writing` | 기술 문서/제안서 |
-| `media/av1` | AV1 코덱 |
-| `ml` | 머신러닝 시스템 |
-| `ml/accelerators` | NPU/TPU 아키텍처 |
-| `ml/compilers` | ML 컴파일러 (TVM/MLIR) |
-| `ml/patterns` | ML 디자인 패턴 |
-| `ml/inference` | ONNX / 추론 런타임 |
-| `ml/systems` | 대규모 ML 시스템 설계 |
-| `philosophy/math` | 수리철학 |
-| `science/classics` | 과학 고전 (Newton 등) |
+| `programming/cpp` | C/C++ |
+| `programming/design` | 디자인 패턴, 아키텍처 |
 | `programming/algorithms` | 알고리즘 |
-| `programming/cpp` | C++ 소프트웨어 디자인 |
-| `systems/networking` | 네트워킹 |
-| `systems/os` | 운영체제 |
-| `systems/architecture` | 컴퓨터 아키텍처 |
+| `programming/engineering` | 소프트웨어 공학 |
 | `programming/compilers` | 컴파일러 |
-| `security` | 보안/암호학 |
 | `programming/databases` | 데이터베이스 |
 | `programming/fp` | 함수형 프로그래밍 |
-| `programming/testing` | 테스팅 |
-| `devops` | DevOps/컨테이너 |
-| `programming/verification` | 형식 검증 |
-| `programming/classics` | 개발자 필독서 |
-| `math/applied` | 실용 수학 |
+| `programming/testing` | 테스팅, TDD |
+| `programming/verification` | 형식 검증 (TLA+) |
+| `programming/classics` | 필독서 |
+| `programming/code-review` | 코드 리뷰, 오픈소스 |
+| `systems/linux-kernel` | 리눅스 커널 |
+| `systems/linux-drivers` | 디바이스 드라이버 |
+| `systems/os` | 운영체제 |
+| `systems/distributed` | 분산 시스템 |
+| `systems/networking` | 네트워킹 |
+| `systems/architecture` | 컴퓨터 아키텍처 |
+| `systems/sre` | SRE |
+| `embedded/hardware` | PCIe, NVMe, DDR, CXL, HBM, UCIe, UALink |
+| `embedded/protocols` | SPI, UART, I2C, CAN, MIPI |
+| `embedded/standards` | MISRA, CERT, AUTOSAR |
+| `embedded/patterns` | 임베디드 패턴 |
+| `embedded/industrial` | EtherCAT, PROFINET, TSN |
+| `parallel` | 동시성/병렬 |
+| `ml/accelerators` | NPU, TPU |
+| `ml/compilers` | TVM, MLIR |
+| `ml/inference` | ONNX, TensorRT |
+| `ml/tinyml` | TFLite Micro, CMSIS-NN |
+| `ml/systems` | ML 시스템 설계, MLOps |
+| `ml/drivers` | NPU 드라이버 |
+| `media` | AV1, 코덱 |
+| `math/applied` | 이산수학, 확률통계 |
+| `writing` | 글쓰기 |
+| `philosophy` | 철학, 비판적 사고 |
+| `philosophy/math` | 수리철학 |
+| `science/classics` | 과학 고전 |
+| `design` | UX, UI |
+| `tools/debugging` | 디버깅 |
+| `security` | 보안, 암호학 |
+| `devops` | DevOps, 컨테이너 |
 
 ---
 
@@ -695,8 +1071,14 @@ Concrete Mathematics → Think Stats → Mathematics for ML
 3. [x] 수리철학 카테고리 추가
 4. [x] 과학 고전 카테고리 추가
 5. [x] 신규 분야 카테고리 추가 (네트워킹, OS, 컴파일러, 보안, DB, FP, 테스팅, DevOps, 형식 검증)
-6. [ ] 각 책별 디렉터리 및 첫 글 생성
-7. [ ] 스토리보드 작성 (우선순위 순)
+6. [x] TinyML / Edge AI 시리즈 추가
+7. [x] NPU 드라이버 개발 시리즈 추가
+8. [x] CXL / HBM Deep Dive 시리즈 추가
+9. [x] UCIe / UALink / BoW 시리즈 추가 (칩렛/GPU 인터커넥트)
+10. [x] 기초 페리페럴 시리즈 추가 (SPI, UART, I2C, CAN, MIPI, Industrial Ethernet)
+11. [x] categories.ts에 신규 카테고리 반영
+12. [ ] 각 책별 디렉터리 및 첫 글 생성
+13. [ ] 스토리보드 작성 (우선순위 순)
 
 ---
 
@@ -751,3 +1133,20 @@ Concrete Mathematics → Think Stats → Mathematics for ML
 ### 알고리즘
 - [The Algorithm Design Manual (algorist.com)](https://www.algorist.com/)
 - [Skiena's Lecture Videos](https://www3.cs.stonybrook.edu/~skiena/373/videos/)
+
+### TinyML / Edge AI
+- [TinyML Book (O'Reilly)](https://www.oreilly.com/library/view/tinyml/9781492052036/)
+- [TensorFlow Lite Micro](https://www.tensorflow.org/lite/microcontrollers)
+- [CMSIS-NN (ARM)](https://arm-software.github.io/CMSIS_5/NN/html/index.html)
+- [Edge Impulse Documentation](https://docs.edgeimpulse.com/)
+- [microTVM (TVM)](https://tvm.apache.org/docs/topic/microtvm/index.html)
+- [TinyML Foundation](https://www.tinyml.org/)
+
+### 가속기 하드웨어
+- [CXL Consortium](https://www.computeexpresslink.org/)
+- [Linux CXL Documentation](https://www.kernel.org/doc/html/latest/driver-api/cxl/index.html)
+- [JEDEC HBM Standards](https://www.jedec.org/standards-documents/focus/high-bandwidth-memory-hbm)
+- [DRM Documentation (Linux Kernel)](https://www.kernel.org/doc/html/latest/gpu/index.html)
+- [DMA-BUF Sharing](https://www.kernel.org/doc/html/latest/driver-api/dma-buf.html)
+- [Etnaviv Driver](https://github.com/etnaviv/etnaviv_gpu_tests)
+- [Panfrost Driver (ARM Mali)](https://docs.mesa3d.org/drivers/panfrost.html)

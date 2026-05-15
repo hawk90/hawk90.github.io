@@ -2,356 +2,86 @@ export interface Category {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  icon?: string;
   parent?: string;
 }
 
 export const CATEGORIES: Category[] = [
-  // Top-level categories
-  {
-    id: 'programming',
-    name: 'Programming',
-    description: '프로그래밍 — C/C++, 디자인, 알고리즘, 소프트웨어 공학',
-    icon: '💻',
-  },
-  {
-    id: 'systems',
-    name: 'Systems',
-    description: 'OS / 커널 / 시스템 프로그래밍',
-    icon: '⚙️',
-  },
-  {
-    id: 'embedded',
-    name: 'Embedded',
-    description: '임베디드 — RTOS, MCU, 성능, 트러블슈팅',
-    icon: '🔧',
-  },
-  {
-    id: 'parallel',
-    name: 'Parallel & Concurrency',
-    description: '병렬 / 동시성 — 원리, 패턴, 성능',
-    icon: '⚡',
-  },
-  {
-    id: 'math',
-    name: 'Mathematics',
-    description: '수학 — 선형대수, 집합론, 문제 해결',
-    icon: '📐',
-  },
-  {
-    id: 'writing',
-    name: 'Writing',
-    description: '글쓰기 — 영문 / 한국어 / 학술',
-    icon: '✍️',
-  },
-  {
-    id: 'thinking',
-    name: 'Thinking',
-    description: '비판적 사고 / 인지심리',
-    icon: '🧠',
-  },
-  {
-    id: 'philosophy',
-    name: 'Philosophy',
-    description: '철학 — 과학철학 / 인식론 / 윤리 / 논리',
-    icon: '🏛️',
-  },
-  {
-    id: 'design',
-    name: 'Design',
-    description: '디자인 — UX / UI / 정보 디자인 / 사용자 경험',
-    icon: '🎨',
-  },
-  {
-    id: 'code-review',
-    name: 'Code Review',
-    description: '코드 리뷰 / 오픈소스 코드 읽기',
-    icon: '👀',
-  },
-  {
-    id: 'tools',
-    name: 'Tools',
-    description: '개발 도구 — Vim / tmux / CLI / 디버거 / 프로파일러',
-    icon: '🛠️',
-  },
-  {
-    id: 'media',
-    name: 'Media & Codecs',
-    description: '영상 / 오디오 코덱 — AV1, HEVC, H.264, 인코더 / 디코더 분석',
-    icon: '🎞️',
-  },
-  {
-    id: 'ml',
-    name: 'Machine Learning Systems',
-    description: 'ML 시스템 — NPU / 컴파일러 / 추론 / 디자인 패턴',
-    icon: '🤖',
-  },
-  {
-    id: 'science',
-    name: 'Science',
-    description: '자연과학 — 물리학 / 고전역학 / 과학사',
-    icon: '🔭',
-  },
-  {
-    id: 'security',
-    name: 'Security & Cryptography',
-    description: '보안 / 암호학 — 시스템 보안 / 웹 보안 / 암호화',
-    icon: '🔐',
-  },
-  {
-    id: 'devops',
-    name: 'DevOps & Infrastructure',
-    description: 'DevOps — 컨테이너 / CI-CD / IaC / 모니터링',
-    icon: '🐳',
-  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TOP-LEVEL CATEGORIES
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  // Sub-categories of programming
-  {
-    id: 'programming/cpp',
-    parent: 'programming',
-    name: 'C / C++',
-    description: 'C / C++ 언어 — Effective / Modern / Software Design',
-    icon: '🔠',
-  },
-  {
-    id: 'programming/design',
-    parent: 'programming',
-    name: 'Design & Patterns',
-    description: '디자인 패턴 / 아키텍처 / 리팩토링',
-    icon: '🧩',
-  },
-  {
-    id: 'programming/algorithms',
-    parent: 'programming',
-    name: 'Algorithms',
-    description: '자료구조 / 알고리즘',
-    icon: '🔢',
-  },
-  {
-    id: 'programming/engineering',
-    parent: 'programming',
-    name: 'Software Engineering',
-    description: '소프트웨어 공학 — 클래식 / 실무 / 문화',
-    icon: '🏗️',
-  },
-  {
-    id: 'programming/git',
-    parent: 'programming',
-    name: 'Git',
-    description: 'Git — Pro Git / 컨벤션 / 브랜치 전략',
-    icon: '🌿',
-  },
-  {
-    id: 'programming/python',
-    parent: 'programming',
-    name: 'Python',
-    description: 'Python — Fluent Python / 모범 사례 / 라이브러리',
-    icon: '🐍',
-  },
-  {
-    id: 'programming/standards',
-    parent: 'programming',
-    name: 'Coding Standards',
-    description: '범용 코딩 표준 — Google C++ / Linux Kernel / PEP 8',
-    icon: '📐',
-  },
-  {
-    id: 'programming/compilers',
-    parent: 'programming',
-    name: 'Compilers & Interpreters',
-    description: '컴파일러 — 인터프리터 / 파서 / 코드 생성',
-    icon: '⚙️',
-  },
-  {
-    id: 'programming/databases',
-    parent: 'programming',
-    name: 'Databases',
-    description: '데이터베이스 — SQL / NoSQL / 쿼리 최적화 / 인덱싱',
-    icon: '🗄️',
-  },
-  {
-    id: 'programming/fp',
-    parent: 'programming',
-    name: 'Functional Programming',
-    description: '함수형 프로그래밍 — SICP / Haskell / Scala / 범주론',
-    icon: 'λ',
-  },
-  {
-    id: 'programming/testing',
-    parent: 'programming',
-    name: 'Testing',
-    description: '테스팅 — TDD / 단위 테스트 / 통합 테스트 / 테스트 패턴',
-    icon: '✅',
-  },
-  {
-    id: 'programming/verification',
-    parent: 'programming',
-    name: 'Formal Verification',
-    description: '형식 검증 — TLA+ / Coq / 모델 체킹 / 정형 기법',
-    icon: '📝',
-  },
-  {
-    id: 'programming/classics',
-    parent: 'programming',
-    name: 'Developer Classics',
-    description: '개발자 필독서 — Pragmatic Programmer / Clean Code / Refactoring',
-    icon: '📚',
-  },
-  {
-    id: 'embedded/standards',
-    parent: 'embedded',
-    name: 'Coding Standards',
-    description: '임베디드 코딩 표준 — MISRA / CERT / AUTOSAR / High Integrity',
-    icon: '📜',
-  },
-  {
-    id: 'embedded/hardware',
-    parent: 'embedded',
-    name: 'Hardware Interfaces',
-    description: '하드웨어 인터페이스 — PCIe, NVMe, DDR 스펙과 드라이버',
-    icon: '🔌',
-  },
-  {
-    id: 'tools/debugging',
-    parent: 'tools',
-    name: 'Debugging & Diagnostics',
-    description: '디버깅 / 진단 — sanitizer / valgrind / core dump / tracing',
-    icon: '🐞',
-  },
+  { id: 'programming', name: 'Programming', icon: '💻', description: '프로그래밍 — C/C++, 디자인 패턴, 알고리즘, 소프트웨어 공학' },
+  { id: 'systems', name: 'Systems', icon: '⚙️', description: '시스템 — OS, 커널, 분산 시스템, 네트워킹' },
+  { id: 'embedded', name: 'Embedded', icon: '🔧', description: '임베디드 — 하드웨어 인터페이스, RTOS, 프로토콜' },
+  { id: 'parallel', name: 'Parallel & Concurrency', icon: '⚡', description: '병렬 / 동시성 — 원리, 패턴, 성능' },
+  { id: 'ml', name: 'Machine Learning Systems', icon: '🤖', description: 'ML 시스템 — NPU, 컴파일러, 추론, 엣지 AI' },
+  { id: 'media', name: 'Media & Codecs', icon: '🎬', description: '미디어 코덱 — AV1, HEVC, H.264' },
+  { id: 'math', name: 'Mathematics', icon: '📐', description: '수학 — 선형대수, 집합론, 이산수학' },
+  { id: 'writing', name: 'Writing', icon: '✍️', description: '글쓰기 — 영문, 한국어, 학술, 기술 문서' },
+  { id: 'philosophy', name: 'Philosophy & Thinking', icon: '🧠', description: '철학 / 사고 — 과학철학, 비판적 사고, 인지심리' },
+  { id: 'science', name: 'Science', icon: '🔭', description: '자연과학 — 물리학, 고전역학, 과학사' },
+  { id: 'design', name: 'Design', icon: '🎨', description: '디자인 — UX, UI, 정보 디자인' },
+  { id: 'tools', name: 'Tools', icon: '🛠️', description: '개발 도구 — Vim, 디버거, 프로파일러, 빌드' },
+  { id: 'security', name: 'Security & Cryptography', icon: '🔐', description: '보안 / 암호학 — 시스템 보안, 웹 보안' },
+  { id: 'devops', name: 'DevOps & Infrastructure', icon: '🐳', description: 'DevOps — 컨테이너, CI/CD, IaC' },
 
-  // Sub-categories of media
-  {
-    id: 'media/av1',
-    parent: 'media',
-    name: 'AV1',
-    description: 'AV1 코덱 — bitstream / intra / inter / transform / loop filter / encoder',
-    icon: '📼',
-  },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SUB-CATEGORIES
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  // Sub-categories of systems
-  {
-    id: 'systems/linux-drivers',
-    parent: 'systems',
-    name: 'Linux Device Drivers',
-    description: '리눅스 디바이스 드라이버 — 커널 모듈 / 문자·블록·네트워크 드라이버',
-    icon: '🐧',
-  },
-  {
-    id: 'systems/linux-kernel',
-    parent: 'systems',
-    name: 'Linux Kernel Internals',
-    description: '리눅스 커널 내부 — 스케줄러 / 메모리 / 동기화 / 디버깅',
-    icon: '🔬',
-  },
-  {
-    id: 'systems/distributed',
-    parent: 'systems',
-    name: 'Distributed Systems',
-    description: '분산 시스템 — 합의 / 복제 / 파티셔닝 / 대규모 설계',
-    icon: '🌐',
-  },
-  {
-    id: 'systems/sre',
-    parent: 'systems',
-    name: 'Site Reliability Engineering',
-    description: 'SRE — 모니터링 / 온콜 / 용량 계획 / 장애 대응',
-    icon: '🚨',
-  },
-  {
-    id: 'systems/networking',
-    parent: 'systems',
-    name: 'Networking',
-    description: '네트워킹 — TCP/IP / 소켓 / 프로토콜 / 웹 성능',
-    icon: '🌐',
-  },
-  {
-    id: 'systems/os',
-    parent: 'systems',
-    name: 'Operating Systems',
-    description: '운영체제 — 프로세스 / 메모리 / 파일 시스템 / 가상화',
-    icon: '💽',
-  },
-  {
-    id: 'systems/architecture',
-    parent: 'systems',
-    name: 'Computer Architecture',
-    description: '컴퓨터 아키텍처 — CPU / 캐시 / 파이프라인 / RISC-V',
-    icon: '🖥️',
-  },
+  // Programming
+  { id: 'programming/cpp', parent: 'programming', name: 'C / C++', description: 'Effective, Modern, Software Design' },
+  { id: 'programming/python', parent: 'programming', name: 'Python', description: 'Fluent Python, 모범 사례' },
+  { id: 'programming/design', parent: 'programming', name: 'Design & Patterns', description: '디자인 패턴, 아키텍처, 리팩토링' },
+  { id: 'programming/algorithms', parent: 'programming', name: 'Algorithms', description: '자료구조, 알고리즘' },
+  { id: 'programming/engineering', parent: 'programming', name: 'Software Engineering', description: '요구사항, 테스팅, 레거시' },
+  { id: 'programming/git', parent: 'programming', name: 'Git', description: 'Pro Git, 컨벤션, 브랜치 전략' },
+  { id: 'programming/standards', parent: 'programming', name: 'Coding Standards', description: 'Google C++, Linux Kernel, PEP 8' },
+  { id: 'programming/compilers', parent: 'programming', name: 'Compilers', description: '컴파일러, 인터프리터, 파서' },
+  { id: 'programming/databases', parent: 'programming', name: 'Databases', description: 'SQL, NoSQL, 쿼리 최적화' },
+  { id: 'programming/fp', parent: 'programming', name: 'Functional Programming', description: 'SICP, Haskell, 범주론' },
+  { id: 'programming/testing', parent: 'programming', name: 'Testing', description: 'TDD, 단위/통합 테스트' },
+  { id: 'programming/verification', parent: 'programming', name: 'Formal Verification', description: 'TLA+, Coq, 모델 체킹' },
+  { id: 'programming/classics', parent: 'programming', name: 'Developer Classics', description: 'Pragmatic Programmer, Clean Code' },
+  { id: 'programming/code-review', parent: 'programming', name: 'Code Review', description: '코드 리뷰, 오픈소스 읽기' },
 
-  // Sub-categories of embedded
-  {
-    id: 'embedded/patterns',
-    parent: 'embedded',
-    name: 'Embedded Patterns',
-    description: '임베디드 패턴 — 실시간 / 메모리 제약 / 안전 필수 시스템',
-    icon: '🧱',
-  },
+  // Systems
+  { id: 'systems/linux-kernel', parent: 'systems', name: 'Linux Kernel', description: '스케줄러, 메모리, 동기화' },
+  { id: 'systems/linux-drivers', parent: 'systems', name: 'Linux Drivers', description: '문자, 블록, 네트워크 드라이버' },
+  { id: 'systems/os', parent: 'systems', name: 'Operating Systems', description: '프로세스, 메모리, 파일 시스템' },
+  { id: 'systems/distributed', parent: 'systems', name: 'Distributed Systems', description: '합의, 복제, 대규모 설계' },
+  { id: 'systems/networking', parent: 'systems', name: 'Networking', description: 'TCP/IP, 소켓, 프로토콜' },
+  { id: 'systems/architecture', parent: 'systems', name: 'Computer Architecture', description: 'CPU, 캐시, 파이프라인, RISC-V' },
+  { id: 'systems/sre', parent: 'systems', name: 'SRE', description: '모니터링, 온콜, 장애 대응' },
 
-  // Sub-categories of ml
-  {
-    id: 'ml/accelerators',
-    parent: 'ml',
-    name: 'ML Accelerators',
-    description: 'ML 가속기 — NPU / TPU / Systolic Array / 메모리 계층',
-    icon: '🔲',
-  },
-  {
-    id: 'ml/compilers',
-    parent: 'ml',
-    name: 'ML Compilers',
-    description: 'ML 컴파일러 — TVM / MLIR / 그래프 최적화 / 오토튜닝',
-    icon: '🔄',
-  },
-  {
-    id: 'ml/inference',
-    parent: 'ml',
-    name: 'Inference & Deployment',
-    description: '추론과 배포 — ONNX / TensorRT / Core ML / 엣지 배포',
-    icon: '🚀',
-  },
-  {
-    id: 'ml/patterns',
-    parent: 'ml',
-    name: 'ML Design Patterns',
-    description: 'ML 디자인 패턴 — 데이터 표현 / 학습 / 서빙 / MLOps',
-    icon: '📊',
-  },
-  {
-    id: 'ml/systems',
-    parent: 'ml',
-    name: 'ML Systems Design',
-    description: '대규모 ML 시스템 설계 — 프로덕션 / 데이터 파이프라인 / MLOps',
-    icon: '🏭',
-  },
+  // Embedded
+  { id: 'embedded/hardware', parent: 'embedded', name: 'Hardware Interfaces', description: 'PCIe, NVMe, DDR, CXL, HBM, UCIe, UALink' },
+  { id: 'embedded/protocols', parent: 'embedded', name: 'Protocols', description: 'SPI, UART, I2C, CAN, MIPI' },
+  { id: 'embedded/standards', parent: 'embedded', name: 'Coding Standards', description: 'MISRA, CERT, AUTOSAR' },
+  { id: 'embedded/patterns', parent: 'embedded', name: 'Patterns', description: '실시간, 메모리 제약' },
+  { id: 'embedded/industrial', parent: 'embedded', name: 'Industrial', description: 'EtherCAT, PROFINET, TSN' },
 
-  // Sub-categories of philosophy
-  {
-    id: 'philosophy/math',
-    parent: 'philosophy',
-    name: 'Philosophy of Mathematics',
-    description: '수리철학 — 플라톤주의 / 형식주의 / 직관주의 / 구조주의',
-    icon: '∞',
-  },
+  // ML
+  { id: 'ml/accelerators', parent: 'ml', name: 'Accelerators', description: 'NPU, TPU, Systolic Array' },
+  { id: 'ml/compilers', parent: 'ml', name: 'Compilers', description: 'TVM, MLIR, 그래프 최적화' },
+  { id: 'ml/inference', parent: 'ml', name: 'Inference', description: 'ONNX, TensorRT, Core ML' },
+  { id: 'ml/tinyml', parent: 'ml', name: 'TinyML', description: 'TFLite Micro, CMSIS-NN' },
+  { id: 'ml/systems', parent: 'ml', name: 'Systems', description: '프로덕션, MLOps' },
+  { id: 'ml/drivers', parent: 'ml', name: 'Drivers', description: 'DRM, DMA-BUF, IOMMU' },
 
-  // Sub-categories of science
-  {
-    id: 'science/classics',
-    parent: 'science',
-    name: 'Science Classics',
-    description: '과학 고전 — Newton / Euclid / 고전역학 / 기하학 원론',
-    icon: '📜',
-  },
+  // Tools
+  { id: 'tools/debugging', parent: 'tools', name: 'Debugging', description: 'sanitizer, valgrind, tracing' },
 
-  // Sub-categories of math
-  {
-    id: 'math/applied',
-    parent: 'math',
-    name: 'Applied Mathematics',
-    description: '실용 수학 — 이산수학 / 확률통계 / ML 수학',
-    icon: '🧮',
-  },
+  // Others
+  { id: 'math/applied', parent: 'math', name: 'Applied Math', description: '이산수학, 확률통계' },
+  { id: 'philosophy/math', parent: 'philosophy', name: 'Philosophy of Math', description: '플라톤주의, 형식주의' },
+  { id: 'science/classics', parent: 'science', name: 'Classics', description: 'Newton, Euclid' },
 ];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
 
 export function getCategoryById(id: string): Category | undefined {
   return CATEGORIES.find((cat) => cat.id === id);
