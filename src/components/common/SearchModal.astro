@@ -29,7 +29,7 @@ const filterSeriesLabel = t('search_filter_series');
   data-i18n-filter-series={filterSeriesLabel}
 >
   <!-- Backdrop -->
-  <div class="search-modal-backdrop absolute inset-0 bg-black/60 backdrop-blur-sm" data-search-backdrop></div>
+  <div class="search-modal-backdrop absolute inset-0 bg-black/72" data-search-backdrop></div>
 
   <!-- Modal -->
   <div class="relative flex items-start justify-center pt-[12vh] px-4">
@@ -169,6 +169,7 @@ const filterSeriesLabel = t('search_filter_series');
 
   let searchIndex: SearchItem[] = [];
   let isLoaded = false;
+  let loadPromise: Promise<boolean> | null = null;
   let loadRetries = 0;
   let currentFilter: { type: 'tag' | 'series'; value: string } | null = null;
   let selectedIndex = -1;
@@ -192,19 +193,26 @@ const filterSeriesLabel = t('search_filter_series');
   async function loadSearchIndex(): Promise<boolean> {
     if (isLoaded) return true;
     if (loadRetries >= MAX_RETRIES) return false;
+    if (loadPromise) return loadPromise;
 
-    try {
-      const res = await fetch('/search.json');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      searchIndex = await res.json();
-      isLoaded = true;
-      loadRetries = 0;
-      return true;
-    } catch (e) {
-      loadRetries++;
-      console.error(`Failed to load search index (attempt ${loadRetries}/${MAX_RETRIES}):`, e);
-      return false;
-    }
+    loadPromise = (async () => {
+      try {
+        const res = await fetch('/search.json');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        searchIndex = await res.json();
+        isLoaded = true;
+        loadRetries = 0;
+        return true;
+      } catch (e) {
+        loadRetries++;
+        console.error(`Failed to load search index (attempt ${loadRetries}/${MAX_RETRIES}):`, e);
+        return false;
+      } finally {
+        loadPromise = null;
+      }
+    })();
+
+    return loadPromise;
   }
 
   onPageLoad(() => {
@@ -226,6 +234,9 @@ const filterSeriesLabel = t('search_filter_series');
     const closeBtn = document.getElementById('search-close-btn');
 
     const i18n = getI18n();
+    const preloadSearch = () => {
+      void loadSearchIndex();
+    };
 
     let openerElement: HTMLElement | null = null;
 
@@ -459,21 +470,31 @@ const filterSeriesLabel = t('search_filter_series');
 
     // Attach listeners
     filterBadge?.addEventListener('click', handleFilterBadgeClick);
-    triggers.forEach((trigger) => trigger.addEventListener('click', handleTriggerClick));
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', handleTriggerClick);
+      trigger.addEventListener('pointerenter', preloadSearch, { once: true });
+      trigger.addEventListener('focus', preloadSearch, { once: true });
+    });
     backdrop?.addEventListener('click', handleBackdropClick);
     closeBtn?.addEventListener('click', handleBackdropClick);
     document.addEventListener('keydown', handleKeydown);
     input.addEventListener('input', handleInput);
     document.addEventListener('click', handleDocumentClick);
+    const idleLoader = window.setTimeout(preloadSearch, 1200);
 
     return () => {
       filterBadge?.removeEventListener('click', handleFilterBadgeClick);
-      triggers.forEach((trigger) => trigger.removeEventListener('click', handleTriggerClick));
+      triggers.forEach((trigger) => {
+        trigger.removeEventListener('click', handleTriggerClick);
+        trigger.removeEventListener('pointerenter', preloadSearch);
+        trigger.removeEventListener('focus', preloadSearch);
+      });
       backdrop?.removeEventListener('click', handleBackdropClick);
       closeBtn?.removeEventListener('click', handleBackdropClick);
       document.removeEventListener('keydown', handleKeydown);
       input.removeEventListener('input', handleInput);
       document.removeEventListener('click', handleDocumentClick);
+      window.clearTimeout(idleLoader);
     };
   });
 </script>

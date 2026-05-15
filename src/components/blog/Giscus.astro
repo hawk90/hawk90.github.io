@@ -46,7 +46,10 @@ const setupLink = t('giscus_setup_link');
 )}
 
 <script>
+  import { onPageLoad } from '../../lib/lifecycle';
+
   let observer: MutationObserver | null = null;
+  let intersectionObserver: IntersectionObserver | null = null;
 
   function loadGiscus() {
     const wrapper = document.querySelector('.giscus-wrapper') as HTMLElement | null;
@@ -94,37 +97,59 @@ const setupLink = t('giscus_setup_link');
       observer.disconnect();
       observer = null;
     }
+    if (intersectionObserver) {
+      intersectionObserver.disconnect();
+      intersectionObserver = null;
+    }
 
     const wrapper = document.querySelector('.giscus-wrapper') as HTMLElement | null;
     if (!wrapper || wrapper.dataset.giscusEnabled !== 'true') return;
 
-    loadGiscus();
+    const start = () => {
+      loadGiscus();
 
-    observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          const iframe = document.querySelector('.giscus-frame') as HTMLIFrameElement | null;
-          if (iframe) {
-            const theme = document.documentElement.classList.contains('light')
-              ? 'light'
-              : 'dark_dimmed';
-            iframe.contentWindow?.postMessage(
-              { giscus: { setConfig: { theme } } },
-              'https://giscus.app'
-            );
+      observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            const iframe = document.querySelector('.giscus-frame') as HTMLIFrameElement | null;
+            if (iframe) {
+              const theme = document.documentElement.classList.contains('light')
+                ? 'light'
+                : 'dark_dimmed';
+              iframe.contentWindow?.postMessage(
+                { giscus: { setConfig: { theme } } },
+                'https://giscus.app'
+              );
+            }
           }
-        }
+        });
       });
-    });
 
-    observer.observe(document.documentElement, { attributes: true });
+      observer.observe(document.documentElement, { attributes: true });
+    };
+
+    if (!('IntersectionObserver' in window)) {
+      start();
+      return;
+    }
+
+    intersectionObserver = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      intersectionObserver?.disconnect();
+      intersectionObserver = null;
+      start();
+    }, { rootMargin: '300px 0px' });
+
+    intersectionObserver.observe(wrapper);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initGiscus);
-  } else {
+  onPageLoad(() => {
     initGiscus();
-  }
-
-  document.addEventListener('astro:page-load', initGiscus);
+    return () => {
+      observer?.disconnect();
+      observer = null;
+      intersectionObserver?.disconnect();
+      intersectionObserver = null;
+    };
+  });
 </script>

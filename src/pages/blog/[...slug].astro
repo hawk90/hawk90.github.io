@@ -193,7 +193,7 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
 
           <!-- Backlinks (posts that reference this one) -->
           <div class="container-narrow">
-            <Backlinks currentId={post.id} />
+            <Backlinks currentId={post.id} posts={allPosts} />
           </div>
 
           <!-- Comments -->

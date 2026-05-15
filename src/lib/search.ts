@@ -5,7 +5,7 @@ export interface SearchItem {
   description: string;
   slug: string;
   tags: string[];
-  date: string;
+  date: number;
   series: string | null;
 }
 
@@ -84,7 +84,7 @@ export function searchPosts(items: SearchItem[], options: SearchOptions | string
         if (filterSeries && item.series?.toLowerCase() !== filterSeries) return false;
         return true;
       })
-      .sort((a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf());
+      .sort((a, b) => b.date - a.date);
   }
 
   if (!q) return [];
@@ -107,7 +107,7 @@ export function searchPosts(items: SearchItem[], options: SearchOptions | string
   // 스코어 내림차순, 같으면 최신순
   scored.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
-    return new Date(b.item.date).valueOf() - new Date(a.item.date).valueOf();
+    return b.item.date - a.item.date;
   });
 
   return scored.map((s) => s.item);

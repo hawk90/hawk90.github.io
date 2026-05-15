@@ -23,25 +23,42 @@ const cfg = COMMENTS_CONFIG;
     if (!mount) return;
     const shortname = mount.dataset.disqusShortname;
     if (!shortname) return;
+    let io: IntersectionObserver | null = null;
 
-    // (re)mount Disqus on each page navigation
-    (window as any).disqus_config = function (this: { page: { url: string; identifier: string } }) {
-      this.page.url = location.href;
-      this.page.identifier = location.pathname;
+    const load = () => {
+      // (re)mount Disqus on each page navigation
+      (window as any).disqus_config = function (this: { page: { url: string; identifier: string } }) {
+        this.page.url = location.href;
+        this.page.identifier = location.pathname;
+      };
+
+      if (!document.getElementById('disqus-embed-script')) {
+        const s = document.createElement('script');
+        s.id = 'disqus-embed-script';
+        s.src = `https://${shortname}.disqus.com/embed.js`;
+        s.setAttribute('data-timestamp', String(Date.now()));
+        document.body.appendChild(s);
+      } else {
+        const w = window as any;
+        if (w.DISQUS) w.DISQUS.reset({ reload: true, config: w.disqus_config });
+      }
     };
 
-    if (!document.getElementById('disqus-embed-script')) {
-      const s = document.createElement('script');
-      s.id = 'disqus-embed-script';
-      s.src = `https://${shortname}.disqus.com/embed.js`;
-      s.setAttribute('data-timestamp', String(Date.now()));
-      document.body.appendChild(s);
+    if (!('IntersectionObserver' in window)) {
+      load();
     } else {
-      // Already loaded — re-render
-      const w = window as any;
-      if (w.DISQUS) w.DISQUS.reset({ reload: true, config: w.disqus_config });
+      io = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        io?.disconnect();
+        io = null;
+        load();
+      }, { rootMargin: '300px 0px' });
+      io.observe(mount);
     }
 
-    return () => { mount.innerHTML = ''; };
+    return () => {
+      io?.disconnect();
+      mount.innerHTML = '';
+    };
   });
 </script>

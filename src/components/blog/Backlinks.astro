@@ -1,15 +1,14 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { getPublishedPosts } from '../../lib/posts';
+import type { BlogPost } from '../../lib/posts';
 
 interface Props {
   /** Current post id, e.g. "programming/cpp/effective-cpp/item13-..." */
   currentId: string;
+  posts: BlogPost[];
 }
 
-const { currentId } = Astro.props;
-
-const allPosts = await getPublishedPosts();
+const { currentId, posts: allPosts } = Astro.props;
 
 // A backlink is any other post whose markdown body contains a link
 // to `/blog/<currentId>` (with or without trailing slash). We scan

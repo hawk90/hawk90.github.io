@@ -1,15 +1,19 @@
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 
+function compactText(text: string, maxLength: number): string {
+  return text.replace(/\s+/g, ' ').trim().slice(0, maxLength);
+}
+
 export async function GET(_context: APIContext) {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
 
   const searchIndex = posts.map((post) => ({
     title: post.data.title,
-    description: post.data.description || '',
+    description: compactText(post.data.description || '', 160),
     slug: post.id,
-    tags: post.data.tags,
-    date: post.data.date.toISOString(),
+    tags: post.data.tags.slice(0, 5),
+    date: post.data.date.valueOf(),
     series: post.data.series || null,
   }));
 

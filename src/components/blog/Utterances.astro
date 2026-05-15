@@ -30,17 +30,35 @@ const theme = cfg.theme ?? 'preferred-color-scheme';
 
     // Wipe any previous embed (after page swap)
     mount.innerHTML = '';
+    let io: IntersectionObserver | null = null;
 
-    const s = document.createElement('script');
-    s.src = 'https://utteranc.es/client.js';
-    s.async = true;
-    s.crossOrigin = 'anonymous';
-    s.setAttribute('repo', wrap.dataset.utterancesRepo ?? '');
-    s.setAttribute('issue-term', wrap.dataset.utterancesIssueTerm ?? 'pathname');
-    if (wrap.dataset.utterancesLabel) s.setAttribute('label', wrap.dataset.utterancesLabel);
-    s.setAttribute('theme', wrap.dataset.utterancesTheme ?? 'preferred-color-scheme');
-    mount.appendChild(s);
+    const load = () => {
+      const s = document.createElement('script');
+      s.src = 'https://utteranc.es/client.js';
+      s.async = true;
+      s.crossOrigin = 'anonymous';
+      s.setAttribute('repo', wrap.dataset.utterancesRepo ?? '');
+      s.setAttribute('issue-term', wrap.dataset.utterancesIssueTerm ?? 'pathname');
+      if (wrap.dataset.utterancesLabel) s.setAttribute('label', wrap.dataset.utterancesLabel);
+      s.setAttribute('theme', wrap.dataset.utterancesTheme ?? 'preferred-color-scheme');
+      mount.appendChild(s);
+    };
 
-    return () => { mount.innerHTML = ''; };
+    if (!('IntersectionObserver' in window)) {
+      load();
+    } else {
+      io = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        io?.disconnect();
+        io = null;
+        load();
+      }, { rootMargin: '300px 0px' });
+      io.observe(wrap);
+    }
+
+    return () => {
+      io?.disconnect();
+      mount.innerHTML = '';
+    };
   });
 </script>
