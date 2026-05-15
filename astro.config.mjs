@@ -66,7 +66,10 @@ export default defineConfig({
   },
 
   prefetch: {
-    prefetchAll: true,
+    // Avoid eagerly wiring every link for prefetch on content-heavy pages.
+    // Hover prefetch keeps navigation snappy without adding as much overhead
+    // during initial render and scroll.
+    prefetchAll: false,
     defaultStrategy: 'hover',
   },
 

@@ -30,10 +30,13 @@ type Props = { post: CollectionEntry<'blog'> };
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
+const needsRelatedOrSeries = !!post.data.series || RELATED_POSTS_CONFIG.enabled;
+const allPosts = needsRelatedOrSeries
+  ? await getCollection('blog', ({ data }) => !data.draft)
+  : [];
 
 let seriesPosts: CollectionEntry<'blog'>[] = [];
 if (post.data.series) {
-  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
   seriesPosts = allPosts
     .filter((p) => p.data.series === post.data.series)
     .sort((a, b) => (a.data.seriesOrder || 0) - (b.data.seriesOrder || 0));
@@ -45,7 +48,6 @@ const readingTime = getReadingTime(post.body || '');
 // Related posts
 let relatedPosts: CollectionEntry<'blog'>[] = [];
 if (RELATED_POSTS_CONFIG.enabled) {
-  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
   relatedPosts = getRelatedPosts(post, allPosts, RELATED_POSTS_CONFIG.maxPosts);
 }
 

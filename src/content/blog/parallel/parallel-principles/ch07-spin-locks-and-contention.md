@@ -615,6 +615,8 @@ CLH와 MCS는 실전에서 가장 자주 보이는 queue lock.
 
 ## 7.9 비교
 
+![스핀락 타입 비교](/images/blog/parallel/diagrams/spinlock-types.svg)
+
 | 락 | 경합 시 캐시 트래픽 | 공정성 | 메모리 | NUMA |
 |---|---|---|---|---|
 | TAS | 매우 높음 | 없음 | 1 단어 | 나쁨 |

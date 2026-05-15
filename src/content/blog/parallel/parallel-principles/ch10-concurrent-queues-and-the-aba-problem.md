@@ -348,6 +348,8 @@ bool ms_dequeue(MSQueue* q, int* out_item) {
 
 Lock-free 자료구조의 악명 높은 함정.
 
+![ABA 문제](/images/blog/parallel/diagrams/aba-problem.svg)
+
 ```
 시나리오:
 1. 스레드 X: ptr 읽음 = A

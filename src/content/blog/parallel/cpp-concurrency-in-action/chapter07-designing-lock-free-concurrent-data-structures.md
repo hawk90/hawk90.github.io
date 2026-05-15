@@ -293,6 +293,8 @@ class lock_free_stack_refcount {
 
 ## 7.4 ABA 문제
 
+![ABA 문제](/images/blog/parallel/diagrams/aba-problem.svg)
+
 ### 문제 상황
 
 ```

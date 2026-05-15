@@ -172,6 +172,8 @@ Herlihy의 우아한 통찰.
 
 ## 11.4 Elimination Backoff Stack
 
+![Elimination Array 구조](/images/blog/parallel/diagrams/elimination-array.svg)
+
 ### C++20/23 구현
 
 ```cpp
