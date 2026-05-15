@@ -220,6 +220,8 @@ int queue_pop(Queue* q) {
 
 ## 4.3 std::condition_variable
 
+![condition_variable 시퀀스](/images/blog/parallel/diagrams/condition-variable-sequence.svg)
+
 ### 기본 구조
 
 ```cpp

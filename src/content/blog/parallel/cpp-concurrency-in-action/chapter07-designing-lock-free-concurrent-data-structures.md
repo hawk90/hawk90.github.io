@@ -49,6 +49,8 @@ void lock_based_push(Node* node) {
 
 ## 7.2 Lock-free 스택
 
+![CAS 루프 흐름](/images/blog/parallel/diagrams/cas-loop.svg)
+
 ### 기본 구현
 
 ```cpp

@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  node/.style={circle, draw=absbord, line width=0.4pt, minimum size=10mm, fill=absfill, inner sep=0pt, font=\sffamily\small},
+  nodedel/.style={circle, draw=groupbord, line width=0.4pt, minimum size=10mm, fill=black!5, inner sep=0pt, font=\sffamily\small, dashed},
+  step/.style={font=\sffamily\tiny, text=nodebord},
+  badstep/.style={font=\sffamily\tiny, text=conbord}
+]
+
+% Initial state
+\node[font=\sffamily\bfseries\small] at (-2, 0) {초기};
+\node[node] (a1) at (0, 0) {A};
+\node[node] (b1) at (1.5, 0) {B};
+\node[node] (c1) at (3, 0) {C};
+\draw[arr, thick] (a1) -- (b1);
+\draw[arr, thick] (b1) -- (c1);
+\node[step] at (-1, 0) {head →};
+
+% Step 1: Thread X reads
+\node[font=\sffamily\bfseries\small] at (-2, -1.8) {Step 1};
+\node[step] at (0, -1.5) {X: old = A};
+\draw[->, thick, draw=clibord] (-0.3, -0.5) -- (-0.3, -1.3);
+
+% Step 2-4: Thread Y operations
+\node[font=\sffamily\bfseries\small] at (-2, -3.5) {Step 2-4};
+\node[nodedel] (a2) at (0, -3.5) {A};
+\node[nodedel] (b2) at (1.5, -3.5) {B};
+\node[node] (d2) at (3, -3.5) {D};
+\node[node] (a3) at (4.5, -3.5) {A'};
+\draw[arr, thick] (d2) -- (a3);
+\node[step, align=left] at (-1, -3.5) {head →};
+\node[step, align=left] at (7, -3.2) {Y: pop(A), pop(B)\\[2pt]Y: push(D), push(A)\\[2pt]같은 주소 A 재사용!};
+
+% Step 5: Thread X CAS
+\node[font=\sffamily\bfseries\small] at (-2, -5.5) {Step 5};
+\node[badstep] at (0, -5.2) {X: CAS(A, B)};
+\node[badstep] at (0, -5.8) {성공! (A == A)};
+
+% Result
+\node[font=\sffamily\bfseries\small] at (-2, -7) {결과};
+\node[nodedel] (bres) at (0, -7) {B};
+\node[font=\sffamily\small, text=conbord] at (1.5, -7) {← 삭제된 노드!};
+\node[step] at (-1, -7) {head →};
+
+% Danger annotation
+\draw[decorate, decoration={brace, amplitude=6pt}, draw=conbord, line width=0.5pt]
+  (5.5, -5) -- (5.5, -7.3) node[midway, right, font=\sffamily\small, text=conbord, xshift=3pt] {메모리 손상};
+
+\end{tikzpicture}
+\end{document}

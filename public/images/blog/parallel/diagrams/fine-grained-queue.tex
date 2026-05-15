@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  node/.style={circle, draw=absbord, line width=0.4pt, minimum size=12mm, fill=absfill, inner sep=0pt, font=\sffamily\small},
+  dummy/.style={circle, draw=groupbord, line width=0.4pt, minimum size=12mm, fill=black!5, inner sep=0pt, font=\sffamily\small},
+  ptr/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=16mm, minimum height=10mm, fill=clifill, inner sep=2pt, align=center, rounded corners=2pt, font=\sffamily\small},
+  lock/.style={rectangle, draw=conbord, line width=0.5pt, minimum width=14mm, minimum height=8mm, fill=confill, inner sep=2pt, align=center, rounded corners=2pt, font=\sffamily\tiny},
+  label/.style={font=\sffamily\tiny, text=nodebord}
+]
+
+% Dummy node (sentinel)
+\node[dummy] (sentinel) at (0, 0) {$\emptyset$};
+\node[label, below=2pt of sentinel] {sentinel};
+
+% Queue nodes
+\node[node] (n1) at (2.5, 0) {A};
+\node[node] (n2) at (5, 0) {B};
+\node[node] (n3) at (7.5, 0) {C};
+
+% Links between nodes
+\draw[arr, thick] (sentinel.east) -- (n1.west);
+\draw[arr, thick] (n1.east) -- (n2.west);
+\draw[arr, thick] (n2.east) -- (n3.west);
+\draw[arr, thick] (n3.east) -- ++(1, 0) node[right, font=\sffamily\small] {null};
+
+% Head pointer and lock
+\node[ptr] (head) at (0, 2) {head};
+\node[lock] (head_lock) at (0, 3.2) {head\_mtx};
+\draw[arr, thick, draw=impbord] (head.south) -- (sentinel.north);
+\draw[uses, dashed, draw=conbord] (head_lock.south) -- (head.north);
+
+% Tail pointer and lock
+\node[ptr] (tail) at (7.5, 2) {tail};
+\node[lock] (tail_lock) at (7.5, 3.2) {tail\_mtx};
+\draw[arr, thick, draw=impbord] (tail.south) -- (n3.north);
+\draw[uses, dashed, draw=conbord] (tail_lock.south) -- (tail.north);
+
+% Operations
+\node[font=\sffamily\small, text=impbord] at (-0.5, -1.5) {dequeue()};
+\draw[arr, thick, draw=impbord, dashed] (-0.5, -1.2) -- (sentinel.south west);
+
+\node[font=\sffamily\small, text=impbord] at (8.5, -1.5) {enqueue()};
+\draw[arr, thick, draw=impbord, dashed] (8.5, -1.2) -- (n3.south east);
+
+% Annotation
+\node[font=\sffamily\tiny, text=groupbord, align=center] at (3.75, 3.8) {head/tail 락 분리\\[2pt]→ enqueue/dequeue 동시 가능};
+
+\end{tikzpicture}
+\end{document}

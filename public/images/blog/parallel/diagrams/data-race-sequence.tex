@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  col/.style={minimum width=2.8cm, align=center},
+  op/.style={rectangle, draw=nodebord, line width=0.4pt, minimum height=7mm, minimum width=2.4cm, fill=nodefill, inner sep=2pt, align=center, rounded corners=2pt, font=\sffamily\small},
+  opbad/.style={op, draw=conbord, fill=confill},
+  header/.style={font=\sffamily\bfseries\small}
+]
+
+% Column headers
+\node[header, col] (t1h) at (0, 0) {Thread 1};
+\node[header, col] (t2h) at (4, 0) {Thread 2};
+\node[header, col] (ch) at (8, 0) {counter};
+
+% Timeline
+\foreach \y in {-0.8, -1.6, -2.4, -3.2, -4.0, -4.8} {
+  \draw[draw=groupbord, line width=0.3pt] (-1.8, \y) -- (9.5, \y);
+}
+
+% Operations - Thread 1
+\node[op] (t1l) at (0, -1.2) {LOAD (0)};
+\node[op] (t1a) at (0, -2.8) {ADD (0+1=1)};
+\node[opbad] (t1s) at (0, -4.4) {STORE (1)};
+
+% Operations - Thread 2
+\node[op] (t2l) at (4, -2.0) {LOAD (0)};
+\node[op] (t2a) at (4, -3.6) {ADD (0+1=1)};
+\node[opbad] (t2s) at (4, -5.2) {STORE (1)};
+
+% Counter values
+\node[op, fill=absfill, draw=absbord] (c0) at (8, -0.4) {0};
+\node[op, fill=absfill, draw=absbord] (c1) at (8, -4.4) {1};
+\node[op, fill=confill, draw=conbord] (c2) at (8, -5.2) {1};
+
+% Arrows showing value flow
+\draw[arr, thick, draw=absbord] (c0.south west) -- (t1l.east);
+\draw[arr, thick, draw=absbord] (c0.south) ++(0, -0.5) -- (t2l.west);
+\draw[arr, thick, draw=conbord] (t1s.east) -- (c1.west);
+\draw[arr, thick, draw=conbord] (t2s.east) -- (c2.west);
+
+% Annotation
+\node[font=\sffamily\small, text=conbord, anchor=west] at (9.2, -5.2) {하나 손실!};
+
+% Time arrow
+\draw[arr, thick] (-2.2, -0.2) -- (-2.2, -5.6) node[midway, left, font=\sffamily\tiny] {시간};
+
+\end{tikzpicture}
+\end{document}

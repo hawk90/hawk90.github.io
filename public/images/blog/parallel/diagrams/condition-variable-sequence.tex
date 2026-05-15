@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  lifeline/.style={draw=nodebord, line width=0.5pt, dashed},
+  op/.style={rectangle, draw=nodebord, line width=0.4pt, minimum height=7mm, minimum width=3cm, fill=nodefill, inner sep=3pt, align=center, rounded corners=2pt, font=\sffamily\small},
+  opwait/.style={op, draw=clibord, fill=clifill},
+  opok/.style={op, draw=impbord, fill=impfill},
+  header/.style={font=\sffamily\bfseries\small, minimum width=2.5cm}
+]
+
+% Participants
+\node[header, fill=absfill, draw=absbord, rounded corners=2pt, minimum height=8mm] (consumer) at (0, 0) {Consumer};
+\node[header, fill=absfill, draw=absbord, rounded corners=2pt, minimum height=8mm] (cv) at (4.5, 0) {condition\_variable};
+\node[header, fill=absfill, draw=absbord, rounded corners=2pt, minimum height=8mm] (producer) at (9, 0) {Producer};
+
+% Lifelines
+\draw[lifeline] (consumer.south) -- ++(0, -8);
+\draw[lifeline] (cv.south) -- ++(0, -8);
+\draw[lifeline] (producer.south) -- ++(0, -8);
+
+% Consumer actions
+\node[op] (c1) at (0, -1.2) {lock(mutex)};
+\node[opwait] (c2) at (0, -2.4) {wait(cv, pred)};
+
+% Wait arrow to CV
+\draw[arr, thick] (c2.east) -- (4.5, -2.4) node[midway, above, font=\sffamily\tiny] {unlock + sleep};
+
+% Activation box for waiting
+\fill[clifill, draw=clibord, line width=0.4pt] (4.2, -2.6) rectangle (4.8, -5.4);
+\node[font=\sffamily\tiny, rotate=90] at (4.5, -4) {대기 중};
+
+% Producer actions
+\node[op] (p1) at (9, -3.2) {lock(mutex)};
+\node[op] (p2) at (9, -4.0) {queue.push(data)};
+\node[op] (p3) at (9, -4.8) {unlock(mutex)};
+\node[opok] (p4) at (9, -5.6) {notify\_one()};
+
+% Notify arrow
+\draw[arr, thick, draw=impbord] (p4.west) -- (4.8, -5.6) node[midway, above, font=\sffamily\tiny] {깨우기};
+\draw[arr, thick, draw=impbord] (4.2, -5.6) -- (0.4, -5.6);
+
+% Consumer wakeup
+\node[opok] (c3) at (0, -6.4) {relock(mutex)};
+\node[op] (c4) at (0, -7.2) {process(data)};
+
+% Annotations
+\draw[decorate, decoration={brace, amplitude=5pt, mirror}, draw=clibord]
+  (-1.8, -2.2) -- (-1.8, -5.8) node[midway, left, font=\sffamily\tiny, text=clibord, xshift=-3pt] {블로킹};
+
+\end{tikzpicture}
+\end{document}

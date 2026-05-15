@@ -337,6 +337,8 @@ bool ts_queue_try_pop(ThreadsafeQueue* q, void** out_data) {
 
 head와 tail에 별도 락을 사용하면 push와 pop이 동시에 가능하다.
 
+![Fine-grained 큐 구조](/images/blog/parallel/diagrams/fine-grained-queue.svg)
+
 ```cpp
 template<typename T>
 class fine_grained_queue {

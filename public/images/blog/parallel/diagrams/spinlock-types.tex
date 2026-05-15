@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,patterns}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={rectangle, draw=nodebord, line width=0.4pt, minimum height=8mm, minimum width=2.2cm, fill=nodefill, inner sep=3pt, align=center, rounded corners=2pt, font=\sffamily\small},
+  header/.style={font=\sffamily\bfseries\small},
+  cache/.style={rectangle, draw=absbord, line width=0.4pt, minimum height=6mm, minimum width=1.8cm, fill=absfill, inner sep=2pt, align=center, rounded corners=1pt, font=\sffamily\tiny},
+  bus/.style={rectangle, draw=conbord, line width=0.5pt, minimum height=5mm, fill=confill, font=\sffamily\tiny}
+]
+
+% TAS Section
+\node[header] (tas_h) at (0, 0) {TAS Lock};
+\node[box] (tas_spin) at (0, -1) {exchange(true)};
+\node[bus] (tas_bus) at (0, -2.2) {매번 버스 트래픽};
+\node[font=\sffamily\tiny, text=conbord] at (0, -3) {캐시 무효화 ↑↑};
+
+% TTAS Section
+\node[header] (ttas_h) at (4, 0) {TTAS Lock};
+\node[cache] (ttas_read) at (4, -1) {load (캐시 히트)};
+\node[box, fill=impfill, draw=impbord] (ttas_cas) at (4, -2.2) {풀리면 → CAS};
+\node[font=\sffamily\tiny, text=impbord] at (4, -3) {버스 트래픽 ↓};
+
+% Backoff Section
+\node[header] (back_h) at (8, 0) {Backoff Lock};
+\node[cache] (back_read) at (8, -1) {load (캐시 히트)};
+\node[box, draw=clibord, fill=clifill] (back_wait) at (8, -2.2) {실패 → 대기};
+\node[font=\sffamily\tiny, text=clibord] at (8, -3) {경합 완화};
+
+% Queue Lock Section
+\node[header] (queue_h) at (12, 0) {Queue Lock};
+\node[cache] (queue_local) at (12, -1) {자기 슬롯만 spin};
+\node[box, fill=impfill, draw=impbord] (queue_fifo) at (12, -2.2) {FIFO 공정성};
+\node[font=\sffamily\tiny, text=impbord] at (12, -3) {로컬 스핀};
+
+% Performance comparison bar
+\node[font=\sffamily\bfseries\small] at (6, -4.5) {경합 시 성능};
+\draw[draw=groupbord, line width=0.3pt] (-1.5, -5) -- (13.5, -5);
+
+% Bars
+\fill[confill] (-0.8, -5) rectangle (0.8, -5.3);
+\node[font=\sffamily\tiny] at (0, -5.6) {낮음};
+
+\fill[clifill] (3.2, -5) rectangle (4.8, -5.8);
+\node[font=\sffamily\tiny] at (4, -6.1) {중간};
+
+\fill[absfill] (7.2, -5) rectangle (8.8, -6.2);
+\node[font=\sffamily\tiny] at (8, -6.5) {높음};
+
+\fill[impfill] (11.2, -5) rectangle (12.8, -6.6);
+\node[font=\sffamily\tiny] at (12, -6.9) {최고};
+
+\end{tikzpicture}
+\end{document}

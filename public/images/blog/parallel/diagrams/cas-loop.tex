@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={rectangle, draw=nodebord, line width=0.4pt, minimum height=10mm, minimum width=3.5cm, fill=nodefill, inner sep=3pt, align=center, rounded corners=2pt, font=\sffamily\small},
+  decision/.style={diamond, draw=clibord, line width=0.4pt, fill=clifill, inner sep=2pt, aspect=2.2, align=center, font=\sffamily\small},
+  start/.style={ellipse, draw=absbord, line width=0.4pt, fill=absfill, minimum width=2cm, minimum height=8mm, font=\sffamily\small},
+  endd/.style={ellipse, draw=impbord, line width=0.4pt, fill=impfill, minimum width=2cm, minimum height=8mm, font=\sffamily\small}
+]
+
+% Start
+\node[start] (start) at (0, 0) {push(item)};
+
+% Steps
+\node[box] (new) at (0, -1.5) {new\_node 생성};
+\node[box] (load) at (0, -3) {old = head.load()};
+\node[box] (set) at (0, -4.5) {new\_node.next = old};
+
+% CAS decision
+\node[decision] (cas) at (0, -6.5) {CAS(old,\\[2pt]new\_node)?};
+
+% Branches
+\node[endd] (done) at (3.5, -6.5) {완료};
+\node[box, fill=confill, draw=conbord] (retry) at (-4, -6.5) {재시도};
+
+% Arrows
+\draw[arr, thick] (start) -- (new);
+\draw[arr, thick] (new) -- (load);
+\draw[arr, thick] (load) -- (set);
+\draw[arr, thick] (set) -- (cas);
+\draw[arr, thick] (cas) -- node[above, font=\sffamily\tiny] {성공} (done);
+\draw[arr, thick] (cas) -- node[above, font=\sffamily\tiny] {실패} (retry);
+\draw[arr, thick, draw=conbord] (retry.north) -- ++(0, 1.5) -- (load.west);
+
+% Annotation
+\node[font=\sffamily\tiny, text=nodebord, align=left] at (4.5, -3) {CAS = Compare-And-Swap\\[2pt]원자적으로 비교 후 교체\\[2pt]실패 = 다른 스레드가 먼저 수정};
+
+\end{tikzpicture}
+\end{document}

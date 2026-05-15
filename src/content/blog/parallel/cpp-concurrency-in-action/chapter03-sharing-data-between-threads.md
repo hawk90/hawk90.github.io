@@ -48,16 +48,7 @@ int main() {
 
 두 스레드가 동시에 실행하면:
 
-```
-Thread 1              Thread 2              counter
-───────────────────────────────────────────────────
-LOAD (0)                                    0
-                      LOAD (0)              0
-ADD (0+1=1)                                 0
-                      ADD (0+1=1)           0
-STORE (1)                                   1
-                      STORE (1)             1  ← 하나 잃어버림!
-```
+![데이터 레이스 시퀀스](/images/blog/parallel/diagrams/data-race-sequence.svg)
 
 두 스레드 모두 0을 읽어서 1을 썼다. 증가는 두 번 일어났지만 결과는 1이다.
 
