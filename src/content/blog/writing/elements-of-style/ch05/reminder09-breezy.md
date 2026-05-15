@@ -26,12 +26,7 @@ draft: false
 
 이 reminder에서 가장 유명한 예시는 학교 동창 소식지의 한 단락입니다.
 
-```
-Well, guys, here I am again dishing the dirt about your disorderly
-classmates, after pa$$ing a weekend in the Big Apple trying to catch
-the Columbia hoops tilt and snagging a cab-ride from hell through
-the West Side casbah.
-```
+> *Well, guys, here I am again dishing the dirt about your disorderly classmates, after passing a weekend in the Big Apple trying to catch the Columbia hoops tilt and snagging a cab-ride from hell through the West Side casbah.*
 
 White가 진단하는 문제:
 - *말할 거리가 없음* (실제로 무슨 일이 있었나?)
@@ -45,12 +40,7 @@ White가 진단하는 문제:
 
 같은 정보를 *평범한 톤*으로 쓰면:
 
-```
-Clyde Crawford, who stroked the varsity shell in 1958, is swinging
-an oar again after a lapse of forty years. Clyde resigned last spring
-as executive sales manager of the Indiana Flotex Company and is
-now a gondolier in Venice.
-```
+> *Clyde Crawford, who stroked the varsity shell in 1958, is swinging an oar again after a lapse of forty years. Clyde resigned last spring as executive sales manager of the Indiana Flotex Company and is now a gondolier in Venice.*
 
 이 단락은:
 - *정보가 분명함* (이름, 사실, 변화)
@@ -73,10 +63,7 @@ now a gondolier in Venice.
 
 SNS와 블로그 글이 자주 *breezy*해집니다.
 
-```
-"오늘 진짜 미친 일이 있었는데요!!! 여러분 들으면 깜짝 놀라실 거예요!!
-ㅋㅋㅋ 그래서 제가 ..."
-```
+> 오늘 진짜 미친 일이 있었는데요!!! 여러분 들으면 깜짝 놀라실 거예요!! ㅋㅋㅋ 그래서 제가 ...
 
 이런 톤이 *짧은 SNS 포스트*에는 OK일 수 있지만, *블로그 글이나 책에 그대로* 들어오면 *과식 상태*를 만듭니다.
 
@@ -94,30 +81,23 @@ SNS와 블로그 글이 자주 *breezy*해집니다.
 
 ## 차분한 톤의 가치
 
-```
-들뜬 톤:
-- 처음에는 흥미로워 보임
-- 5분 뒤 피곤함
-- 정보 추출 어려움
-- 작가가 *얕아 보임*
-
-차분한 톤:
-- 처음에는 평범해 보임
-- 시간이 지나도 신선함
-- 정보가 분명함
-- 작가가 *깊어 보임*
-```
+| 들뜬 톤 | 차분한 톤 |
+|---------|-----------|
+| 처음에는 흥미로워 보임 | 처음에는 평범해 보임 |
+| 5분 뒤 피곤함 | 시간이 지나도 신선함 |
+| 정보 추출 어려움 | 정보가 분명함 |
+| 작가가 *얕아 보임* | 작가가 *깊어 보임* |
 
 ## 톤의 일관성
 
 자기 글의 *목적과 매체*에 맞는 톤을 일관되게.
 
-```
-학술 글 — 차분한, 격식 있는 톤
-저널리즘 — 객관적, 가벼운 정도까지
-에세이 — 친근하지만 들뜨지 않게
-SNS — 자유로움 (단, 들뜸이 *내용을 가리지* 않게)
-```
+| 매체 | 톤 |
+|------|-----|
+| 학술 글 | 차분한, 격식 있는 톤 |
+| 저널리즘 | 객관적, 가벼운 정도까지 |
+| 에세이 | 친근하지만 들뜨지 않게 |
+| SNS | 자유로움 (단, 들뜸이 *내용을 가리지* 않게) |
 
 각 매체의 *적절한 톤*이 다릅니다. 자기 매체에 맞는 톤을 선택합니다.
 

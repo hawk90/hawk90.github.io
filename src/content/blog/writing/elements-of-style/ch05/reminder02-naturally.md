@@ -30,15 +30,13 @@ draft: false
 
 ## 의식적 모방 vs 자연스러운 흡수
 
-```
-의식적 모방 (회피):
-"이 글을 Hemingway처럼 써야지."
-→ 어색한 패러디
+**의식적 모방 (회피)**
+- "이 글을 Hemingway처럼 써야지."
+- → 어색한 패러디
 
-자연스러운 흡수 (선호):
-"Hemingway를 좋아한다. 그의 글을 자주 읽는다."
-→ 자기 글에 자연스러운 영향
-```
+**자연스러운 흡수 (선호)**
+- "Hemingway를 좋아한다. 그의 글을 자주 읽는다."
+- → 자기 글에 자연스러운 영향
 
 E.B. White의 권고:
 
@@ -50,15 +48,11 @@ E.B. White의 권고:
 
 자연스럽게 떠오른 문장이 *최선*은 아닙니다. 그것은 *시작*입니다.
 
-```
-초안 (자연스럽게):
-"The meeting was held in the conference room at 10am to discuss
-the new project that we are starting next month."
+**초안 (자연스럽게)**
+> *The meeting was held in the conference room at 10am to discuss the new project that we are starting next month.*
 
-수정 (의식적으로):
-"At 10am, we met in the conference room to discuss next month's
-new project."
-```
+**수정 (의식적으로)**
+> *At 10am, we met in the conference room to discuss next month's new project.*
 
 자연스럽게 떠오른 문장을 *수정*하는 것이 다음 단계입니다. *자연스러움* + *의식적 수정* = 좋은 글.
 

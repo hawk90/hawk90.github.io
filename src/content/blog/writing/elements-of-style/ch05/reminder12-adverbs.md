@@ -17,29 +17,21 @@ draft: false
 
 ## 어색한 부사
 
-```
-어색:
-He climbed tiredly to bed.
-She spoke confusedly.
-The lamp cord lay tangledly beneath her chair.
-
-자연:
-He climbed wearily to bed.    (다른 단어)
-She spoke in confusion.        (전치사구)
-The lamp cord lay in tangles beneath her chair. (전치사구)
-```
+| 어색 | 자연 |
+|------|------|
+| *He climbed tiredly to bed.* | *He climbed wearily to bed.* (다른 단어) |
+| *She spoke confusedly.* | *She spoke in confusion.* (전치사구) |
+| *The lamp cord lay tangledly beneath her chair.* | *The lamp cord lay in tangles beneath her chair.* (전치사구) |
 
 `-ly` 부사가 *문법적으로 가능*하지만 *말에서 잘 안 쓰인다*면 글에서도 어색합니다.
 
 ## "말에서 안 쓰이는 -ly"
 
-```
-말로 쓰지 않는 단어:
-tiredly, confusedly, tangledly, blunderingly, exhaustedly
+**말로 쓰지 않는 단어**
+- *tiredly*, *confusedly*, *tangledly*, *blunderingly*, *exhaustedly*
 
-말로 쓰는 단어:
-wearily, in confusion, in tangles, blunderingly, exhausted
-```
+**말로 쓰는 단어**
+- *wearily*, *in confusion*, *in tangles*, *blunderingly*, *exhausted*
 
 말에서 *자기가 안 쓰는 부사*는 글에서도 *어색*합니다.
 
@@ -47,26 +39,17 @@ wearily, in confusion, in tangles, blunderingly, exhausted
 
 영어는 단어를 *만들어 내는* 자유가 있습니다. 그러나 자기 부사를 *발명*하면 보통 어색합니다.
 
-```
-회피 (발명된 부사):
-overly, muchly, thusly, overlyly
+| 회피 (발명된 부사) | 선호 (이미 있는 단어) |
+|---------------------|------------------------|
+| *overly* | *over* 또는 *too* |
+| *muchly* | *much* |
+| *thusly* | *thus* |
 
-선호 (이미 있는 단어):
-over (또는 too)
-much
-thus
-```
-
-```
-회피: He was overly concerned about the matter.
-선호: He was too concerned about the matter.
-
-회피: The room was muchly improved.
-선호: The room was much improved.
-
-회피: Thusly, we proceed to the next step.
-선호: Thus, we proceed to the next step.
-```
+| 회피 | 선호 |
+|------|------|
+| *He was overly concerned about the matter.* | *He was too concerned about the matter.* |
+| *The room was muchly improved.* | *The room was much improved.* |
+| *Thusly, we proceed to the next step.* | *Thus, we proceed to the next step.* |
 
 ## 모자 씌우기 — Strunk의 비유
 
@@ -78,19 +61,13 @@ White는 이 함정을 *모자 씌우기*에 비유합니다.
 
 ## -ly의 정당한 자리
 
-```
-자연스러운 -ly 부사:
-quickly, slowly, carefully, beautifully, gently, easily, simply,
-properly, perfectly, correctly
-```
+**자연스러운 -ly 부사**
+- *quickly*, *slowly*, *carefully*, *beautifully*, *gently*, *easily*, *simply*, *properly*, *perfectly*, *correctly*
 
 이런 부사는 *오랫동안* 영어에 자리잡았습니다. 자유롭게 사용 가능합니다.
 
-```
-어색한 -ly 부사:
-tiredly, contentedly (← 자주 쓰임), happily (← OK), tangledly,
-mistakenly (← OK)
-```
+**어색한 -ly 부사**
+- *tiredly*, *contentedly* (← 자주 쓰임), *happily* (← OK), *tangledly*, *mistakenly* (← OK)
 
 같은 패턴의 부사라도 *자리잡은 것*과 *어색한 것*이 갈립니다. 자기 *귀*가 결정합니다.
 
@@ -98,18 +75,13 @@ mistakenly (← OK)
 
 한국어 글에서도 비슷한 함정이 있습니다.
 
-```
-자연 (이미 자리잡음):
-빨리, 천천히, 조심스럽게, 아름답게, 간단히, 정확히
+**자연 (이미 자리잡음)**
+- 빨리, 천천히, 조심스럽게, 아름답게, 간단히, 정확히
 
-어색 (만들어진 표현):
-헷갈리듯이, 엉켜져 있게, 피곤하게
-
-대안:
-혼란스럽게 / 혼란 속에서
-엉킨 채 / 엉키게
-지쳐 / 피곤한 채
-```
+**어색 (만들어진 표현) → 대안**
+- 헷갈리듯이 → 혼란스럽게 / 혼란 속에서
+- 엉켜져 있게 → 엉킨 채 / 엉키게
+- 피곤하게 → 지쳐 / 피곤한 채
 
 같은 의미를 *전치사구*나 *분사 구문*으로 더 자연스럽게.
 

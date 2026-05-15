@@ -35,16 +35,11 @@ E.B. White가 1979년에 이미 진단한 위험:
 
 오늘날 (2026년) 이 위험은 더 큽니다. AI가 *추가 단어*를 제안합니다. 클릭 한 번으로 단락이 *확장*됩니다.
 
-```
-원본:
-"The meeting was productive."
+**원본**
+> *The meeting was productive.*
 
-AI 확장 (회피):
-"The meeting was incredibly productive, with significant
-breakthroughs achieved through robust discussions, leading to
-actionable insights that will undoubtedly catalyze our future
-endeavors."
-```
+**AI 확장 (회피)**
+> *The meeting was incredibly productive, with significant breakthroughs achieved through robust discussions, leading to actionable insights that will undoubtedly catalyze our future endeavors.*
 
 확장된 버전은 *원본의 모든 의미를 잃었습니다*.
 
@@ -70,29 +65,28 @@ William Faulkner의 격언:
 
 ### 1. 단어 수 세기
 
-```
-이 단락의 의도된 의미를 한 줄로 적기 → 단어 수
-실제 단락의 단어 수
-```
+- 이 단락의 의도된 의미를 한 줄로 적기 → 단어 수
+- 실제 단락의 단어 수
 
 두 수가 *극적으로 다르면* 과잉입니다.
 
 ### 2. 형용사 / 부사 비율
 
-```
-한 단락에 (형용사 + 부사) / 명사 + 동사
-   ≤ 30% → 정상
-   30-50% → 약간 과잉
-   > 50% → 명백한 과잉
-```
+한 단락에 (형용사 + 부사) / (명사 + 동사) 비율:
+
+| 비율 | 진단 |
+|------|------|
+| ≤ 30% | 정상 |
+| 30-50% | 약간 과잉 |
+| > 50% | 명백한 과잉 |
 
 ### 3. 비유 빈도
 
-```
-한 단락에 비유 1개 이하 → 정상
-2개 → 조심
-3개 이상 → 과잉
-```
+| 비유 개수 | 진단 |
+|-----------|------|
+| 1개 이하 | 정상 |
+| 2개 | 조심 |
+| 3개 이상 | 과잉 |
 
 ## 자기 점검의 절차
 
