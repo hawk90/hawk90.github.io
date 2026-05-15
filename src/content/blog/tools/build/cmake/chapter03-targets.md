@@ -226,17 +226,7 @@ cmake -B build                          # STATIC (기본)
 
 `app → mylib`라는 의존성이 있을 때, `mylib`에 붙인 옵션이 `app`까지 전파되는지를 가시성이 결정합니다.
 
-```
-  ┌─────────┐  PRIVATE: mylib만 사용
-  │  mylib  │  PUBLIC: mylib도 쓰고, app에도 자동 전달
-  │ (.cpp)  │  INTERFACE: mylib는 안 쓰고, app만 쓴다
-  └────┬────┘
-       │ target_link_libraries(app PRIVATE mylib)
-       ▼
-  ┌─────────┐
-  │   app   │  ← mylib의 PUBLIC + INTERFACE 옵션이 자동으로 들어옴
-  └─────────┘
-```
+![가시성 전파](/images/blog/cmake/diagrams/ch03-visibility-propagation.svg)
 
 ### 실제 코드로 — 어느 자리에 어떤 키워드
 
@@ -331,24 +321,7 @@ target_link_libraries(app PRIVATE mylib)
 
 ### 전파 예시 다이어그램
 
-```
-    mylib (라이브러리)
-    ├── PRIVATE: -O2, src/internal
-    ├── PUBLIC: include, cxx_std_17, libfoo
-    └── INTERFACE: USE_MYLIB
-            │
-            │ target_link_libraries(app PRIVATE mylib)
-            ▼
-    app (실행 파일)
-    상속됨:
-    ├── include       (PUBLIC → 전파)
-    ├── cxx_std_17    (PUBLIC → 전파)
-    ├── libfoo        (PUBLIC → 전파)
-    └── USE_MYLIB     (INTERFACE → 전파)
-    상속 안 됨:
-    ├── -O2           (PRIVATE → 전파 안 됨)
-    └── src/internal  (PRIVATE → 전파 안 됨)
-```
+위의 [가시성 전파 다이어그램](#그림으로--의존-그래프와-전파)을 참조하세요. `mylib`의 PUBLIC과 INTERFACE 속성은 `app`에 자동 전파되고, PRIVATE 속성은 전파되지 않습니다.
 
 ---
 
@@ -397,7 +370,7 @@ target_link_libraries(app PRIVATE -lz)
 
 ### 전형적인 디렉터리 구조
 
-```
+```text
 mylib/
 ├── CMakeLists.txt
 ├── include/
@@ -548,7 +521,7 @@ add_subdirectory(third_party/google-benchmark EXCLUDE_FROM_ALL)
 
 ### 프로젝트 구조 예시
 
-```
+```text
 project/
 ├── CMakeLists.txt          ← 최상위
 ├── libs/

@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    libbox/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+                   minimum width=3.5cm, minimum height=3cm, align=center},
+    appbox/.style={rectangle, rounded corners=3pt, draw=impbord, fill=impfill,
+                   minimum width=3.5cm, minimum height=2.5cm, align=center},
+    item/.style={font=\sffamily\scriptsize, anchor=west},
+    privitem/.style={item, text=conbord},
+    pubitem/.style={item, text=absbord},
+    intitem/.style={item, text=clibord!80!black},
+    conn/.style={-{Stealth[length=2mm]}, draw=edgec, line width=0.5pt}
+]
+
+% mylib box
+\node[libbox] (mylib) at (0, 0) {};
+\node[font=\sffamily\small\bfseries, anchor=north] at ([yshift=-0.2cm]mylib.north) {mylib (라이브러리)};
+
+% Items inside mylib
+\node[privitem] at ([xshift=0.3cm, yshift=-0.6cm]mylib.north west) {PRIVATE: -O2, src/internal};
+\node[pubitem] at ([xshift=0.3cm, yshift=-1.1cm]mylib.north west) {PUBLIC: include, cxx\_std\_17, libfoo};
+\node[intitem] at ([xshift=0.3cm, yshift=-1.6cm]mylib.north west) {INTERFACE: USE\_MYLIB};
+
+% app box
+\node[appbox, below=2cm of mylib] (app) {};
+\node[font=\sffamily\small\bfseries, anchor=north] at ([yshift=-0.2cm]app.north) {app (실행 파일)};
+
+% Inherited items
+\node[pubitem] at ([xshift=0.3cm, yshift=-0.6cm]app.north west) {include, cxx\_std\_17, libfoo};
+\node[intitem] at ([xshift=0.3cm, yshift=-1.0cm]app.north west) {USE\_MYLIB};
+
+% Arrow with label
+\draw[conn] (mylib) -- node[right, font=\sffamily\scriptsize] {target\_link\_libraries} (app);
+
+% Legend on the right
+\node[anchor=west, font=\sffamily\footnotesize\bfseries] at (3, 0.5) {전파};
+\node[pubitem, anchor=west] at (3, 0) {PUBLIC $\rightarrow$ 전파됨};
+\node[intitem, anchor=west] at (3, -0.5) {INTERFACE $\rightarrow$ 전파됨};
+\node[privitem, anchor=west] at (3, -1) {PRIVATE $\rightarrow$ 전파 안 됨};
+
+\end{tikzpicture}
+\end{document}
