@@ -111,15 +111,38 @@ set(MY_VAR "new_value" CACHE STRING "설명" FORCE)
 
 ---
 
-## option 명령
-
-불리언 캐시 변수의 **단축 문법**입니다.
+## `option()` 명령 — 불리언 캐시의 단축 문법
 
 ```cmake
 option(ENABLE_TESTS "Enable unit tests" ON)
 
-# 위 코드는 아래와 같습니다
+# 위 한 줄은 다음과 동치
 set(ENABLE_TESTS ON CACHE BOOL "Enable unit tests")
+```
+
+겉모습은 비슷하지만 둘 사이엔 *세 가지 미묘한 차이*가 있습니다.
+
+1. **타입 강제**. `option()`은 *반드시 BOOL*입니다. `STRING` 같은 다른 타입을 못 만듭니다. STRING이 필요하면 `set(... CACHE STRING ...)`이 답.
+2. **`ON`/`OFF` 외 값 거부**. `option(X "" yes)`는 동작하지 않습니다. 정해진 키워드만 받습니다.
+3. **CMake 3.13+ 정책 차이**. 3.13부터 `option`은 *일반 변수가 이미 같은 이름으로 정의되어 있으면* 그걸 그대로 사용합니다 (`CMP0077`). 그 이전엔 캐시 변수가 일반 변수를 덮어썼습니다.
+
+세 번째 점이 종종 사고를 부릅니다. CMake 호출 전에 일반 변수로 미리 값을 설정해 두면, `option()`이 그걸 보고 캐시 작성을 *건너뛸 수* 있습니다. 의도된 동작이지만 모르고 만나면 헷갈립니다.
+
+### `option()` vs `set(... CACHE STRING ...)` — 언제 무엇을
+
+| 상황 | 권장 |
+|------|------|
+| *켜기/끄기 토글* (true/false) | `option(NAME "doc" ON)` |
+| *여러 값 중 하나* (예: "Debug" / "Release") | `set(NAME "Debug" CACHE STRING "doc")` + `set_property(CACHE NAME PROPERTY STRINGS Debug Release ...)` |
+| *경로*  | `set(NAME "/path" CACHE PATH "doc")` |
+| *파일 경로* | `set(NAME "/path/file" CACHE FILEPATH "doc")` |
+| *사용자가 보면 안 되는 내부* | `set(NAME val CACHE INTERNAL "doc")` |
+
+`set_property(CACHE ... PROPERTY STRINGS ...)`이 흥미롭습니다. STRING 캐시 변수에 *허용 값 목록*을 붙이면 `cmake-gui`나 `ccmake`에 *드롭다운*으로 표시됩니다. 사용자가 임의 문자열을 입력하는 사고를 막아 줍니다.
+
+```cmake
+set(MYAPP_BACKEND "OpenGL" CACHE STRING "Rendering backend")
+set_property(CACHE MYAPP_BACKEND PROPERTY STRINGS OpenGL Vulkan DirectX)
 ```
 
 ### 일반적인 옵션 패턴
@@ -353,13 +376,48 @@ target_include_directories(myapp PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 #endif
 ```
 
-### 치환 규칙
+### 치환 규칙 — 네 가지 패턴
 
 | 템플릿 | 결과 (값이 참) | 결과 (값이 거짓/미정의) |
 |--------|---------------|----------------------|
-| `@VAR@` | 변수 값 | 빈 문자열 |
-| `#cmakedefine VAR` | `#define VAR` | `/* #undef VAR */` |
+| `@VAR@` | 변수 값 그대로 | 빈 문자열 |
+| `${VAR}` | 변수 값 그대로 | 빈 문자열 (기본 모드) |
+| `#cmakedefine VAR` | `#define VAR <값>` | `/* #undef VAR */` |
 | `#cmakedefine01 VAR` | `#define VAR 1` | `#define VAR 0` |
+
+`@VAR@`과 `${VAR}` 두 형태가 같은 효과를 갖는데, 굳이 둘이 있는 이유는 *셸 스크립트 템플릿*과의 호환성입니다. 셸 스크립트는 `$`을 자기 변수로 쓰기 때문에 `${VAR}`이 의도와 다르게 풀릴 수 있습니다. 그런 경우 `configure_file(... @ONLY)`을 써서 `@...@`만 치환되도록 강제합니다.
+
+```cmake
+configure_file(
+    script.sh.in
+    script.sh
+    @ONLY    # ${} 형태는 그대로 두고, @...@만 치환
+)
+```
+
+### `configure_file()` vs `file(GENERATE ...)`
+
+비슷해 보이는 두 명령이 *언제 평가되느냐*에서 갈립니다.
+
+| | `configure_file()` | `file(GENERATE ...)` |
+|---|---|---|
+| 평가 시점 | *CMake 구성 시점* | *빌드 시스템 생성 시점* |
+| 제너레이터 식 (`$<...>`) | *지원 안 함* (리터럴로 나옴) | *지원* — 빌드 시점에 풀림 |
+| 입력 | `.in` 파일 또는 `INPUT` 옵션 | `CONTENT` 인라인 또는 `INPUT` |
+| 구성당 출력 | 1개 | 구성마다 *다른 파일*도 가능 |
+
+`configure_file()`은 *컴파일 시점에 고정될 정보*(버전 번호, 빌드 타입과 무관한 매크로)에 씁니다. 빌드 구성에 따라 *내용이 달라야 할 파일*은 `file(GENERATE ...)`을 씁니다.
+
+```cmake
+# configure_file() — 한 번만 결정
+configure_file(version.h.in version.h)
+
+# file(GENERATE) — 각 구성마다 결정 (예: pkg-config 파일)
+file(GENERATE
+    OUTPUT mylib-$<CONFIG>.pc
+    INPUT mylib.pc.in
+)
+```
 
 ---
 

@@ -360,6 +360,71 @@ endif
 
 환경 변수는 *Makefile에서 정의되지 않았을 때*만 자동으로 흡수됩니다. Makefile에서 같은 이름의 변수를 정의하면 환경 변수는 무시됩니다. 정확히는 `make -e` 옵션이 이 우선순위를 바꿔서 환경 변수를 더 위로 올릴 수 있지만, 거의 안 씁니다.
 
+### `$(origin VAR)` — *이 값은 어디서 왔지?*
+
+큰 Makefile에서 디버깅 중 "이 변수의 값이 *어디서* 정해졌지?" 묻는 일이 잦습니다. `$(origin)` 함수가 그 답을 줍니다.
+
+```makefile
+$(info CFLAGS origin: $(origin CFLAGS))
+```
+
+가능한 값:
+
+| 결과 | 의미 |
+|------|------|
+| `undefined` | 정의된 적 없음 |
+| `default` | Make 내장 기본값 (`CC = cc` 같은) |
+| `environment` | 환경 변수로 들어옴 |
+| `environment override` | 환경 + `make -e` |
+| `file` | 이 Makefile에서 정의됨 |
+| `command line` | `make X=Y` 명령줄로 |
+| `override` | `override` 지시자로 |
+| `automatic` | 자동 변수 (`$@` 등) |
+
+```makefile
+# 명령줄에서만 받았을 때만 검증
+ifneq ($(origin CFLAGS),command line)
+$(warning CFLAGS should come from CLI)
+endif
+```
+
+### `$(value VAR)` — *원본 텍스트를 그대로*
+
+```makefile
+A = $(B)
+B = hello
+
+# 일반 참조: $(A)는 $(B)를 풀어 "hello"
+$(info $(A))         # → hello
+
+# value: $(A)의 원본 텍스트
+$(info $(value A))   # → $(B)
+```
+
+지연 평가 변수의 *정의 원본*을 보고 싶을 때 씁니다. 변수가 다른 변수를 참조하는 *템플릿*을 디버깅할 때 유용합니다. `$(call)`이나 `$(eval)`이 풀어내기 전 *그 자리에 박힌 텍스트*를 확인할 수 있습니다.
+
+### `override` 지시자 — *명령줄을 이긴다*
+
+기본 우선순위에서 *명령줄이 가장 강력*하다고 했습니다. 하지만 라이브러리·도구 Makefile에서는 "*사용자가 어떻게 호출해도 이 옵션만은 반드시 켜고 싶다*"는 요구가 있습니다.
+
+```makefile
+# 평범한 += — 명령줄이 덮어쓸 수 있음
+CFLAGS += -Wall
+
+# override — 명령줄도 못 이김
+override CFLAGS += -Wall
+```
+
+```bash
+make CFLAGS="-O3"
+# 평범한 +=: CFLAGS = "-O3"  (명령줄이 이김)
+# override +=: CFLAGS = "-O3 -Wall"  (override가 더해짐)
+```
+
+`override`는 `+=`/`set` 양쪽 모두에 쓸 수 있고, 명령줄을 이깁니다. 보통은 *프로젝트 필수 플래그*(Wall, std=cXX, 보안 옵션)에 씁니다.
+
+다만 `override`를 남용하면 *사용자가 무엇을 줘도 영향이 안 미치는* 답답한 Makefile이 됩니다. 진짜 필수 옵션만 골라서 쓰세요.
+
 ---
 
 ## 디버깅 — "내 변수에 도대체 뭐가 들었지?"

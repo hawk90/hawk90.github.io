@@ -413,6 +413,81 @@ all: $(ALL_TARGETS)
 
 ---
 
+## 타겟별 변수 — *타겟마다 다른 값*
+
+지금까지 본 변수는 *Makefile 전역*입니다. `CFLAGS`가 한 번 정해지면 모든 컴파일에 같이 들어갑니다. 하지만 *특정 타겟에서만 다른 값*을 쓰고 싶을 때가 있습니다.
+
+### 문법
+
+```makefile
+target: VARIABLE = value
+```
+
+또는
+
+```makefile
+target: VARIABLE := value
+target: VARIABLE += value
+target: VARIABLE ?= value
+```
+
+이 변수는 *그 타겟과 모든 의존 타겟의 레시피*에서만 새 값을 갖습니다. 다른 자리는 전역 값을 그대로 봅니다.
+
+### 예시 — 특정 모듈만 다른 최적화
+
+```makefile
+# 전역 기본값
+CFLAGS = -O2 -Wall
+
+# critical.o만 더 강한 최적화 + 더 많은 디버그 정보
+critical.o: CFLAGS += -O3 -g3 -march=native
+
+# debug_helper.o는 디버그용으로 최적화 끄기
+debug_helper.o: CFLAGS = -O0 -g
+
+%.o: %.c
+	gcc $(CFLAGS) -c $< -o $@
+```
+
+`critical.o` 빌드 시점에 `CFLAGS`는 `-O2 -Wall -O3 -g3 -march=native`로 펼쳐집니다. 다른 `.o`는 원래 `-O2 -Wall`만 받습니다.
+
+### 패턴별 변수 — `%` 와일드카드 사용
+
+```makefile
+# tests 디렉터리의 모든 .o 파일은 sanitize 켜기
+tests/%.o: CFLAGS += -fsanitize=address -O0
+```
+
+특정 *모듈 그룹*에 동일 옵션을 일괄 적용할 때 편합니다.
+
+### 의존 타겟까지 *전파*된다는 점이 중요
+
+```makefile
+myapp: CFLAGS += -DAPP_BUILD
+myapp: main.o utils.o
+	$(CC) -o $@ $^
+```
+
+`myapp` 빌드 시 *직접 의존성*인 `main.o`, `utils.o`까지 새 `CFLAGS` 값을 받습니다. 즉 `main.c`와 `utils.c`가 컴파일될 때 *`-DAPP_BUILD`*가 들어갑니다.
+
+이 *전파 규칙* 때문에 타겟별 변수는 *위에서 아래로* 영향을 줍니다. 같은 `.o`가 다른 실행 파일의 의존성이라면 *그 실행 파일의 타겟별 변수*에 따라 다르게 컴파일됩니다. 매우 강력하지만 *디버깅이 어려워질 수 있어* 신중히 씁니다.
+
+### 적용 시점 — *레시피 실행 시*
+
+타겟별 변수는 *Makefile 파싱 시점*에 적용되지 않습니다. *레시피가 실행되기 직전*에 해당 타겟의 컨텍스트에서 평가됩니다. 그래서 `$(info $(CFLAGS))` 같은 *파싱 시점 디버깅*에서는 *전역 값만* 보입니다. 실행 시점 값을 보려면 레시피 안에 `@echo $(CFLAGS)`를 넣어야 합니다.
+
+```makefile
+critical.o: CFLAGS += -O3
+
+$(info Global CFLAGS = $(CFLAGS))    # 전역 값만 보임
+
+critical.o: %.o: %.c
+	@echo "Building $@ with CFLAGS=$(CFLAGS)"   # 타겟별 값 보임
+	gcc $(CFLAGS) -c $< -o $@
+```
+
+---
+
 ## 실전 예시 — 모드 분기 + 자동 의존성
 
 ```makefile

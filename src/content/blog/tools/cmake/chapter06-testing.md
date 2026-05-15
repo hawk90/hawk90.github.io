@@ -247,6 +247,97 @@ set_tests_properties(MyTest PROPERTIES
 
 ---
 
+## CTest 고급 — Labels, Fixtures, Properties
+
+### Labels — 테스트 분류
+
+```cmake
+add_test(NAME UnitMath COMMAND test_math)
+add_test(NAME UnitString COMMAND test_string)
+add_test(NAME IntegrationDB COMMAND test_db)
+add_test(NAME E2EWorkflow COMMAND test_workflow)
+
+set_tests_properties(UnitMath UnitString PROPERTIES LABELS "unit")
+set_tests_properties(IntegrationDB PROPERTIES LABELS "integration;slow")
+set_tests_properties(E2EWorkflow PROPERTIES LABELS "e2e;slow")
+```
+
+라벨을 붙이면 *원하는 그룹만* 실행할 수 있습니다.
+
+```bash
+ctest -L unit              # unit 라벨만
+ctest -L "unit|integration"   # 둘 중 하나
+ctest -LE slow             # slow 제외
+ctest -L unit -L integration  # 두 라벨 모두
+```
+
+CI 파이프라인에서 매우 유용합니다 — PR마다 *빠른 단위 테스트*만 돌리고, 야간 빌드에서 *통합·E2E*까지 모두 돌리는 식.
+
+### Fixtures — 테스트 간 setup/teardown 의존성
+
+```cmake
+# 1. 시작 - 데이터베이스 세팅
+add_test(NAME StartDB COMMAND ./setup_db.sh)
+set_tests_properties(StartDB PROPERTIES FIXTURES_SETUP DB)
+
+# 2. 종료 - 정리
+add_test(NAME StopDB COMMAND ./cleanup_db.sh)
+set_tests_properties(StopDB PROPERTIES FIXTURES_CLEANUP DB)
+
+# 3. DB가 필요한 테스트
+add_test(NAME TestQuery COMMAND test_query)
+set_tests_properties(TestQuery PROPERTIES FIXTURES_REQUIRED DB)
+```
+
+CTest는 *자동으로 순서를 잡습니다*:
+1. `TestQuery`를 실행해야 함 → DB fixture 필요
+2. `StartDB`(SETUP) 먼저 실행
+3. `TestQuery` 실행
+4. `StopDB`(CLEANUP) 마지막 실행 — *다른 테스트가 다 끝나기를 기다림*
+
+여러 테스트가 같은 fixture를 공유해도 *setup/cleanup은 한 번만* 실행됩니다. xUnit·Pytest의 fixture와 같은 개념입니다.
+
+`ctest -j4`로 병렬 실행할 때도 fixture가 자동 보호되어, setup 중인 동안 다른 의존 테스트가 *기다립니다*.
+
+### 자주 쓰는 테스트 속성
+
+| 속성 | 의미 |
+|------|------|
+| `TIMEOUT 30` | 30초 안에 안 끝나면 실패 |
+| `WILL_FAIL TRUE` | *비-0 종료*가 기대 결과 (음성 테스트) |
+| `PASS_REGULAR_EXPRESSION "..."` | 출력에 매칭되어야 통과 |
+| `FAIL_REGULAR_EXPRESSION "..."` | 매칭되면 실패 |
+| `DISABLED TRUE` | 일시 비활성화 (skipped로 보고됨) |
+| `RUN_SERIAL TRUE` | 다른 테스트와 병렬 실행 금지 |
+| `PROCESSORS 4` | 이 테스트가 4 CPU 슬롯을 사용 (자원 추적) |
+| `ENVIRONMENT "VAR=value"` | 환경 변수 설정 |
+| `WORKING_DIRECTORY "..."` | 시작 디렉터리 |
+| `DEPENDS OtherTest` | 다른 테스트 *통과 후* 실행 |
+
+`PROCESSORS`가 흥미롭습니다. 한 테스트가 *내부적으로 멀티 스레드*를 쓴다면 (예: 4 스레드 사용), `PROCESSORS 4`로 알려 주세요. `ctest -j8`로 호출해도 *2개씩만* 동시 실행해 시스템 과부하를 막습니다.
+
+### `ctest_*` 명령 — 스크립트 모드
+
+대시보드 제출이나 복잡한 CI 워크플로에는 *CTest 스크립트*를 씁니다. `CTestScript.cmake` 파일에 절차를 적고 `ctest -S CTestScript.cmake`로 호출합니다.
+
+```cmake
+# CTestScript.cmake
+set(CTEST_SOURCE_DIRECTORY ".")
+set(CTEST_BINARY_DIRECTORY "build")
+set(CTEST_CMAKE_GENERATOR "Ninja")
+
+ctest_start("Continuous")
+ctest_configure()
+ctest_build()
+ctest_test(PARALLEL_LEVEL 8)
+ctest_coverage()
+ctest_submit()
+```
+
+CDash 같은 *대시보드 서버*에 결과를 자동 업로드합니다. 큰 오픈소스 프로젝트(VTK, ITK, Slicer)에서 쓰는 패턴입니다.
+
+---
+
 ## Google Test 연동
 
 Google Test(GTest)는 가장 널리 쓰이는 C++ 테스트 프레임워크입니다. CMake와의 통합이 잘 되어 있습니다.

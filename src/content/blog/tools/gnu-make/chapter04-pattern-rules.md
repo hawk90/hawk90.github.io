@@ -299,6 +299,72 @@ config.o: config.c config.h defaults.h
 
 ---
 
+## `VPATH` / `vpath` — 소스 검색 경로
+
+지금까지는 *소스가 Makefile과 같은 디렉터리에 있다고 가정*했습니다. 하지만 실제 프로젝트는 `src/`, `lib/`, `include/`로 흩어집니다. 패턴 규칙에서 `%.c` 자리를 *어디까지 뒤져 볼지* 알려 주는 메커니즘이 `VPATH`와 `vpath`입니다.
+
+### `VPATH` — 전역 검색 경로
+
+```makefile
+VPATH = src:lib:third_party
+
+%.o: %.c
+	gcc -c $< -o $@
+```
+
+`VPATH`는 *콜론*(또는 공백)으로 구분된 디렉터리 목록입니다. Make는 `%.c`를 찾을 때 *현재 디렉터리에 없으면 VPATH 경로를 순서대로 검색*합니다.
+
+```bash
+$ ls
+Makefile  src/main.c  lib/utils.c
+
+$ make main.o
+# Make: main.c가 현재 디렉터리에 없네. VPATH 검색...
+# → src/main.c 발견 → gcc -c src/main.c -o main.o
+```
+
+`$<`이 *발견된 경로*(`src/main.c`)로 풀린다는 점이 중요합니다. 컴파일러는 정확한 경로를 받습니다.
+
+### `vpath` — 패턴별 검색 경로 (소문자)
+
+대문자 `VPATH`가 *모든 파일 타입*에 적용되는 반면, 소문자 `vpath`는 *패턴별*로 지정합니다.
+
+```makefile
+vpath %.c src
+vpath %.h include
+vpath %.cpp src:third_party/src
+```
+
+이게 `VPATH`보다 *더 정확합니다*. `%.c`는 `src/`만 검색하고, `%.h`는 `include/`만 검색합니다. 잘못된 디렉터리의 파일이 *우연히 매칭되는* 사고를 줄입니다.
+
+`vpath`는 *지시자*(directive)라 함수가 아닙니다. 명령으로 호출하는 게 아니라 *Makefile 최상위에 적습니다*.
+
+### 흔한 함정 — `$@`는 *발견 경로가 아니라 원래 타겟*
+
+```makefile
+VPATH = src
+
+%.o: %.c
+	gcc -c $< -o $@
+```
+
+`main.o`를 빌드할 때:
+- `$<`은 발견된 경로 `src/main.c`
+- `$@`은 *우리가 요청한* `main.o` (검색 안 됨)
+
+즉 출력 파일은 *현재 디렉터리에 생성*됩니다. 이게 원하는 동작이면 좋지만, 출력도 별도 디렉터리에 두고 싶다면 `VPATH`로는 부족합니다.
+
+```makefile
+# build/ 안에 출력하려면 패턴을 직접 적어야 함
+build/%.o: src/%.c
+	@mkdir -p build
+	gcc -c $< -o $@
+```
+
+실무에서 `VPATH`는 *작은 프로젝트*나 *재귀 빌드 보조*에 가끔 등장하고, 큰 프로젝트는 *명시적 경로*를 더 선호합니다. 안전하고 디버깅이 쉽기 때문입니다.
+
+---
+
 ## Grouped Target — 한 명령이 여러 파일을 만들 때 (4.3+)
 
 GNU Make 4.3(2020)에 추가된 `&:` 문법입니다.

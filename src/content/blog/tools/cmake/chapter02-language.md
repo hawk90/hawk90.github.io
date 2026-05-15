@@ -795,6 +795,44 @@ file(GENERATE
 - **제너레이터 표현식**은 빌드 시스템 생성 시점에 평가되며, `$<...>` 문법을 사용합니다.
 - 변수 참조 시 따옴표로 감싸는 것이 안전합니다.
 
+## `cmake_policy()` — 정책 시스템
+
+[Ch 1](/blog/tools/cmake/chapter01-intro)에서 `cmake_minimum_required(VERSION 3.20)`이 *정책 데이터베이스*를 그 버전의 동작으로 설정한다고 했습니다. 이제 그 정책 시스템 자체를 봅니다.
+
+CMake는 버전이 올라가면서 *기존 동작을 바꿔야 했던 결정*들을 *번호가 매겨진 정책*으로 등록합니다. 예: `CMP0048`, `CMP0077`, `CMP0135`.
+
+각 정책은 *OLD*와 *NEW* 두 동작을 가집니다.
+- *OLD* — 정책 도입 *이전*의 동작 (역호환성).
+- *NEW* — 도입 *이후*의 새 동작 (권장).
+
+```cmake
+cmake_policy(GET CMP0077 RESULT)
+message("CMP0077: ${RESULT}")    # NEW 또는 OLD
+
+# 특정 정책을 명시적으로 설정
+cmake_policy(SET CMP0077 NEW)
+```
+
+대부분의 경우 *`cmake_minimum_required`가 한 번에 정책을 정해 줍니다*. 하지만 다음 두 자리에서는 *명시적 `cmake_policy()`*가 필요합니다.
+
+1. *외부 모듈을 가져왔는데* 그 모듈이 옛 정책을 요구할 때. `include`로 들어온 코드의 정책을 우리 의도와 다르게 설정해야 할 때.
+2. *서드파티 빌드*에서 사용하는 `FetchContent`로 가져온 라이브러리가 옛 정책을 가정해 경고를 띄울 때.
+
+```cmake
+# FetchContent 가져오기 전에 정책 명시
+cmake_policy(SET CMP0135 NEW)   # URL_HASH 경고 끄기
+
+include(FetchContent)
+FetchContent_Declare(...)
+```
+
+정책 번호와 이름은 [공식 문서](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html)에 모여 있습니다. 일상 작업에서는 외울 필요 없고, *경고 메시지가 뜨면 그때 검색*하면 됩니다. 경고는 친절하게 정책 번호를 알려 줍니다.
+
+```
+CMake Warning (dev) at CMakeLists.txt:5 (FetchContent_Declare):
+  Policy CMP0135 is not set: ...
+```
+
 ## 다음 장 예고
 
 [Ch 3: 타겟](/blog/tools/cmake/chapter03-targets)에서는 *Modern CMake의 심장* — 타겟(target)을 다룹니다. `add_executable`·`add_library`·`target_link_libraries`와 그 모든 곳에 등장하는 *PRIVATE / PUBLIC / INTERFACE* 세 가시성. 이 셋의 의미를 정확히 잡으면 의존성 추적의 90%가 끝납니다.
