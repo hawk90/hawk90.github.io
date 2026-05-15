@@ -72,6 +72,8 @@ export const CATEGORIES: Category[] = [
 
   // Tools
   { id: 'tools/debugging', parent: 'tools', name: 'Debugging', description: 'sanitizer, valgrind, tracing' },
+  { id: 'tools/cmake', parent: 'tools', name: 'CMake', description: '크로스 플랫폼 빌드 시스템' },
+  { id: 'tools/gnu-make', parent: 'tools', name: 'GNU Make', description: 'Makefile, 규칙, 패턴' },
 
   // Others
   { id: 'math/applied', parent: 'math', name: 'Applied Math', description: '이산수학, 확률통계' },
