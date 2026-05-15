@@ -118,7 +118,6 @@ TODO: 내용 작성
 ## 관련 항목
 
 - [Ch 16: Firmware와 Format](/blog/embedded/hardware/nvme/chapter16-firmware)
-- [시리즈 개요](/blog/embedded/hardware/nvme/00-overview)
 
 ## 외부 참고 자료
 

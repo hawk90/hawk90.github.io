@@ -63,5 +63,4 @@ Chapter 2에서는 DDR의 기본 명령어를 다룬다. ACTIVATE, READ, WRITE, 
 
 ## 관련 항목
 
-- [Overview](/blog/embedded/hardware/ddr/00-overview) — 시리즈 개요
 - [Ch 2: 명령어](/blog/embedded/hardware/ddr/chapter02-commands) — ACT, READ, WRITE, PRE, REF

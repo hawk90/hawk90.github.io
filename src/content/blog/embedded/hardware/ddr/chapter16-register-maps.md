@@ -88,7 +88,6 @@ TODO: 내용 작성
 ## 관련 항목
 
 - [Ch 15: 디버깅](/blog/embedded/hardware/ddr/chapter15-debugging) — 메모리 안 뜸, 트레이닝 실패, ECC 에러
-- [Overview](/blog/embedded/hardware/ddr/00-overview) — 시리즈 개요
 
 ## 외부 참조
 

@@ -108,6 +108,5 @@ TODO: 내용 작성
 
 ## 관련 항목
 
-- [시리즈 개요](/blog/embedded/hardware/pcie/00-overview)
 - [Chapter 3: Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space)
 - [Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter14-troubleshooting)

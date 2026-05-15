@@ -80,5 +80,4 @@ TODO: 내용 작성
 
 ## 관련 항목
 
-- [시리즈 개요](/blog/embedded/hardware/pcie/00-overview)
 - [Chapter 2: TLP](/blog/embedded/hardware/pcie/chapter02-tlp)

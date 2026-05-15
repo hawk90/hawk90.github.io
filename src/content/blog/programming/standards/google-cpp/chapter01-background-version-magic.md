@@ -162,6 +162,5 @@ absl::Status MyFunc() {
 
 ## 관련 항목
 
-- [Google C++ Style — 시리즈 개요](/blog/embedded/standards/google-cpp/00-overview)
 - [Ch 2: Header Files](/blog/embedded/standards/google-cpp/chapter02-header-files)
 - [원문 — Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)

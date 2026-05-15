@@ -581,5 +581,4 @@ Ch 10. Comments / Formatting / Closing (이 글)
 
 - [Ch 9: Naming](/blog/embedded/standards/google-cpp/chapter09-naming)
 - [Ch 1: Background](/blog/embedded/standards/google-cpp/chapter01-background-version-magic)
-- [시리즈 개요](/blog/embedded/standards/google-cpp/00-overview)
 - [원문 — Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)

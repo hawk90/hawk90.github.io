@@ -493,14 +493,13 @@ draft: true
 
 - 신규 챕터 3편 (ch12 phy-architecture / ch13 dfi / ch14 signal-integrity)
 - 기존 ch12~16을 ch15~19로 리넘버
-- 00-overview.md의 로드맵 갱신 (Part 5에 PHY 추가)
 - 내부 cross-link 9곳 갱신
 
 ## 작성 순서 권장
 
 1. 스토리보드 사용자 검토·승인
 2. 신규 ch12~14(PHY 3편) 작성 — 가장 빠진 부분
-3. 리넘버 + 00-overview 갱신
+3. 리넘버
 4. 기존 챕터 깊이 채우기 — 우선순위:
    - ch01 (토대) → ch11 (controller, PHY와 연결) → ch07 (read training, 가장 어려움) → 나머지
 
