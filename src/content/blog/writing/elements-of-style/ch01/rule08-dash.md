@@ -28,14 +28,10 @@ draft: false
 
 ## 기본 용법 — 갑작스러운 단절
 
-```
-선호:
-"His first thought on getting out of bed—if he had any thought
-at all—was to get back in again."
-
-"The rear axle began to make a noise—a grinding, chattering,
-teeth-gritting rasp."
-```
+**선호**
+> *His first thought on getting out of bed—if he had any thought at all—was to get back in again.*
+>
+> *The rear axle began to make a noise—a grinding, chattering, teeth-gritting rasp.*
 
 *문장 흐름*이 *갑자기 끊기고* *부가 / 강조*가 끼어듭니다.
 
@@ -51,51 +47,34 @@ teeth-gritting rasp."
 
 ### 용도
 
-```
-hyphen:
-"well-known author"
-"twenty-one"
-"merry-go-round"
+**hyphen**
+- *well-known author*
+- *twenty-one*
+- *merry-go-round*
 
-en-dash:
-"the 1990–2000 decade"
-"pages 23–45"
-"the New York–London flight"
+**en-dash**
+- *the 1990–2000 decade*
+- *pages 23–45*
+- *the New York–London flight*
 
-em-dash:
-"He came—uninvited—to the party."
-"She said—and I quote—'Never again.'"
-```
+**em-dash**
+- *He came—uninvited—to the party.*
+- *She said—and I quote—'Never again.'*
 
 ### 입력 방법
 
-```
-Mac:
-hyphen   = -
-en-dash  = Option + -
-em-dash  = Option + Shift + -
-
-Windows:
-hyphen   = -
-en-dash  = Alt + 0150
-em-dash  = Alt + 0151
-
-Markdown / Text:
-em-dash  = "—" 또는 "--"
-en-dash  = "–" 또는 "-"
-```
+| 플랫폼 | hyphen | en-dash | em-dash |
+|--------|--------|---------|---------|
+| Mac | `-` | `Option + -` | `Option + Shift + -` |
+| Windows | `-` | `Alt + 0150` | `Alt + 0151` |
+| Markdown / Text | `-` | `–` 또는 `-` | `—` 또는 `--` |
 
 ## 양옆 공백 — 스타일 결정
 
 미국 / 영국 영어가 다릅니다.
 
-```
-미국식 (공백 없음):
-"He came—uninvited—to the party."
-
-영국식 (공백 있음, en-dash 사용):
-"He came – uninvited – to the party."
-```
+- **미국식 (공백 없음)**: *He came—uninvited—to the party.*
+- **영국식 (공백 있음, en-dash 사용)**: *He came – uninvited – to the party.*
 
 *자기 글의 일관성*이 중요합니다.
 
@@ -103,14 +82,11 @@ en-dash  = "–" 또는 "-"
 
 쉼표로 둘러싸기에는 *너무 긴* 부가 정보를 대시로.
 
-```
-선호 (쉼표, 짧음):
-"My friend, John, called me."
+**선호 (쉼표, 짧음)**
+> *My friend, John, called me.*
 
-선호 (대시, 긴 부가):
-"My friend—the one who lives in Seoul, the one who studied
-philosophy, the one who never answers the phone—called me."
-```
+**선호 (대시, 긴 부가)**
+> *My friend—the one who lives in Seoul, the one who studied philosophy, the one who never answers the phone—called me.*
 
 대시가 *긴 삽입을 명확히 격리*합니다.
 
@@ -118,25 +94,21 @@ philosophy, the one who never answers the phone—called me."
 
 대시는 *강조*를 만듭니다. 콜론보다 *극적*.
 
-```
-선호 (콜론, 형식):
-"He had one goal: success."
+**선호 (콜론, 형식)**
+- *He had one goal: success.*
 
-선호 (대시, 극적):
-"He had one goal—success."
-"And then—silence."
-"It was over—finally."
-```
+**선호 (대시, 극적)**
+- *He had one goal—success.*
+- *And then—silence.*
+- *It was over—finally.*
 
 ## 요약 / 결론
 
 문장 끝에서 *요약 / 결론*을 도입할 수 있습니다.
 
-```
-선호:
-"Books, friends, music, travel—these are the things she loved."
-"To live, to love, to learn—this is what matters."
-```
+**선호**
+- *Books, friends, music, travel—these are the things she loved.*
+- *To live, to love, to learn—this is what matters.*
 
 *나열 + 대시 + 요약*의 패턴.
 
@@ -144,25 +116,19 @@ philosophy, the one who never answers the phone—called me."
 
 흔한 잘못은 대시를 *무절제하게* 쓰는 것입니다.
 
-```
-회피 (과용):
-"Her father's suspicions proved well-founded—it was not Edward
-she cared for—it was San Francisco."
+**회피 (과용)**
+> *Her father's suspicions proved well-founded—it was not Edward she cared for—it was San Francisco.*
 
-선호 (구두점 정리):
-"Her father's suspicions proved well-founded. It was not Edward
-she cared for, it was San Francisco."
-```
+**선호 (구두점 정리)**
+> *Her father's suspicions proved well-founded. It was not Edward she cared for, it was San Francisco.*
 
-```
-회피 (대시 연속):
-"He thought—he hoped—she would come—but she didn't—and he sat
-alone—wondering."
+---
 
-선호 (정상 구두점):
-"He thought, he hoped, she would come. But she didn't. He sat
-alone, wondering."
-```
+**회피 (대시 연속)**
+> *He thought—he hoped—she would come—but she didn't—and he sat alone—wondering.*
+
+**선호 (정상 구두점)**
+> *He thought, he hoped, she would come. But she didn't. He sat alone, wondering.*
 
 *대시를 너무 자주 쓰면* 글이 *조각조각 끊긴 인상*을 줍니다. *진짜 강조 / 부가*에만 사용.
 
@@ -170,28 +136,24 @@ alone, wondering."
 
 영어 책 번역에서 대시가 *과도하게* 들어오는 경향이 있습니다.
 
-```
-회피 (번역체 대시 연속):
-"그는 — 비록 늦었지만 — 자기의 길을 — 마침내 — 찾았다."
+**회피 (번역체 대시 연속)**
+- "그는 — 비록 늦었지만 — 자기의 길을 — 마침내 — 찾았다."
 
-선호 (한국식 정리):
-"그는 비록 늦었지만 자기의 길을 마침내 찾았다."
-"늦었지만, 그는 자기의 길을 마침내 찾았다."
-```
+**선호 (한국식 정리)**
+- "그는 비록 늦었지만 자기의 길을 마침내 찾았다."
+- "늦었지만, 그는 자기의 길을 마침내 찾았다."
 
 영어 *em-dash*를 *기계적으로 옮기지 마세요*. 한국어는 *쉼표 / 어미*로 충분합니다.
 
 ### 한국 글의 정당한 대시
 
-```
-선호 (한국, 격리):
-"그날 밤 — 1985년 6월의 한 밤 — 모든 것이 바뀌었다."
-"그는 한 가지를 원했다 — 자유."
+**선호 (한국, 격리)**
+- "그날 밤 — 1985년 6월의 한 밤 — 모든 것이 바뀌었다."
+- "그는 한 가지를 원했다 — 자유."
 
-선호 (한국, 강조):
-"진실은 — 너무 늦었다."
-"그녀는 결심했다 — 떠나기로."
-```
+**선호 (한국, 강조)**
+- "진실은 — 너무 늦었다."
+- "그녀는 결심했다 — 떠나기로."
 
 대시가 *진짜 효과*를 만드는 자리에만 사용합니다.
 

@@ -30,69 +30,61 @@ draft: false
 
 ## 기본 용법
 
-```
-선호 (주격, 주어 자리):
-"Will Jane or he be hired, do you think?"
-"We heavy eaters would rather walk than ride."
-"Who knocks?"
+**선호 (주격, 주어 자리)**
+- *Will Jane or he be hired, do you think?*
+- *We heavy eaters would rather walk than ride.*
+- *Who knocks?*
 
-선호 (목적격, 목적어 자리):
-"The teacher praised her and me."
-"Give the book to him."
-"Whom did you see?"  ← 격식
+**선호 (목적격, 목적어 자리)**
+- *The teacher praised her and me.*
+- *Give the book to him.*
+- *Whom did you see?* ← 격식
 
-선호 (소유격):
-"That is my book."
-"The book is mine."
-```
+**선호 (소유격)**
+- *That is my book.*
+- *The book is mine.*
 
 ## 격을 결정하는 *문법적 역할*
 
 대명사가 *문장에서 무엇인지*가 격을 결정합니다.
 
-```
-주어 (Subject) → 주격
-   "He runs."
-   "She works hard."
+**주어 (Subject) → 주격**
+- *He runs.*
+- *She works hard.*
 
-목적어 (Object) → 목적격
-   "I saw him."
-   "Give it to her."
+**목적어 (Object) → 목적격**
+- *I saw him.*
+- *Give it to her.*
 
-전치사 목적어 → 목적격
-   "between you and me"
-   "for him and me"
+**전치사 목적어 → 목적격**
+- *between you and me*
+- *for him and me*
 
-보어 (Subject Complement, 동사 be의 보어) → 주격 (격식)
-   "It is I."  ← 격식 (현대 회화에서는 "It is me")
-   "This is he."  ← 전화 격식
+**보어 (Subject Complement, 동사 be의 보어) → 주격 (격식)**
+- *It is I.* ← 격식 (현대 회화에서는 *It is me*)
+- *This is he.* ← 전화 격식
 
-소유 → 소유격
-   "his book"
-   "the book is hers"
-```
+**소유 → 소유격**
+- *his book*
+- *the book is hers*
 
 ## *Whoever* vs *Whomever*
 
 `Whoever / whomever`은 *종속절의 동사 / 목적어 역할*에 따라.
 
-```
-선호:
-"Give this work to whoever looks idle."
+**선호**
+> *Give this work to whoever looks idle.*
 
 분석:
-- "to" 뒤 → 목적어 자리처럼 보이지만
-- 실은 *whoever looks idle* 전체가 to의 목적어
-- "whoever"는 *looks*의 주어 → 주격
-```
+- *to* 뒤 → 목적어 자리처럼 보이지만
+- 실은 *whoever looks idle* 전체가 *to* 의 목적어
+- *whoever* 는 *looks* 의 주어 → 주격
 
-```
-선호:
-"Give this work to whomever you choose."
+**선호**
+> *Give this work to whomever you choose.*
 
 분석:
-- "whomever"는 *choose*의 목적어 → 목적격
-```
+- *whomever* 는 *choose* 의 목적어 → 목적격
 
 *종속절 안에서의 역할*을 본다. *문장 위치*가 아니라.
 
@@ -100,29 +92,17 @@ draft: false
 
 `Than` 비교에서 *생략된 동사*를 떠올려 격을 결정합니다.
 
-```
-선호:
-"Sandy writes better than I (do)."
-→ "I do"의 주격
-
-"I think Horace admires Jessica more than I (do)."
-→ "I do"의 주격, "내가 Jessica를 admire하는 것보다 더"
-
-"Polly loves cake more than (she loves) me."
-→ "she loves me"의 목적격, "그녀가 나를 사랑하는 것보다 더"
-```
+**선호**
+- *Sandy writes better than I (do).* → *I do* 의 주격
+- *I think Horace admires Jessica more than I (do).* → *I do* 의 주격, "내가 Jessica를 admire하는 것보다 더"
+- *Polly loves cake more than (she loves) me.* → *she loves me* 의 목적격, "그녀가 나를 사랑하는 것보다 더"
 
 이 두 의미는 *완전히 다릅니다*. 격으로 *구분*합니다.
 
 ### 회화 영어의 변화
 
-```
-격식:
-"He is taller than I."
-
-회화 (현대):
-"He is taller than me."  ← 흔히 받아들임
-```
+- **격식**: *He is taller than I.*
+- **회화 (현대)**: *He is taller than me.* ← 흔히 받아들임
 
 *격식 글*에서는 *than I* (생략된 *am*). *일상 회화*에서는 *than me*가 자연스럽습니다.
 
@@ -130,81 +110,65 @@ draft: false
 
 소유 대명사는 *형용사형* (앞에)과 *명사형* (단독 사용) 두 가지가 있습니다.
 
-```
-형용사형 (앞에):
-"your hat"
-"my book"
-"his car"
+**형용사형 (앞에)**
+- *your hat*
+- *my book*
+- *his car*
 
-명사형 (단독):
-"a hat of yours"
-"the book is mine"
-"the car is his"
-```
+**명사형 (단독)**
+- *a hat of yours*
+- *the book is mine*
+- *the car is his*
 
-```
-선호:
-"The dog has buried one of your gloves and one of mine in the
-flower bed."
+**선호**
+> *The dog has buried one of your gloves and one of mine in the flower bed.*
 
 분석:
-- "your gloves" — 형용사형
-- "one of mine" — 명사형 (앞에 소유 대상 없음)
-```
+- *your gloves* — 형용사형
+- *one of mine* — 명사형 (앞에 소유 대상 없음)
 
 ## 동명사 vs 현재분사
 
 가장 *미묘한 자리*. 동명사 앞에는 *소유격*, 현재분사 앞에는 *목적격*.
 
-```
-"Do you mind me asking a question?"
-→ 분사 "asking" 수식, *질문하는 행위 자체*에 거부감
-
-"Do you mind my asking a question?"
-→ 동명사 "asking", *내가 질문하는 것*에 거부감
-```
+- *Do you mind me asking a question?* → 분사 *asking* 수식, *질문하는 행위 자체*에 거부감
+- *Do you mind my asking a question?* → 동명사 *asking*, *내가 질문하는 것*에 거부감
 
 두 문장 모두 영어에서 통용되지만 *미묘한 차이*가 있습니다.
 
 ### 더 많은 예시
 
-```
-선호 (동명사 + 소유격):
-"I appreciate your helping me."
-"His leaving early was unexpected."
-"My winning surprised everyone."
+**선호 (동명사 + 소유격)**
+- *I appreciate your helping me.*
+- *His leaving early was unexpected.*
+- *My winning surprised everyone.*
 
-선호 (분사 + 목적격, 더 회화적):
-"I saw him running."  ← "him"이 보고 있음, 분사
-"I heard her singing."
-```
+**선호 (분사 + 목적격, 더 회화적)**
+- *I saw him running.* ← *him* 이 보고 있음, 분사
+- *I heard her singing.*
 
 ## *Between You and Me*
 
 *가장 자주 틀리는* 자리.
 
-```
-회피 (학습자 흔한 실수):
-"Between you and I, ..."
+**회피 (학습자 흔한 실수)**
+> *Between you and I, ...*
 
-선호:
-"Between you and me, ..."
+**선호**
+> *Between you and me, ...*
 
 분석:
-- "between"은 전치사
+- *between* 은 전치사
 - 전치사 뒤 → 목적격
-- "you and me"가 맞음
-```
+- *you and me* 가 맞음
 
 *"Between you and I"*는 *과잉 격식*으로 흔히 등장하는 *오류*입니다.
 
 ### *Just Between You and Me*
 
-```
-선호:
-"Just between you and me, the boss is leaving."
-"This is a secret between us." (us = me + 너)
-```
+**선호**
+- *Just between you and me, the boss is leaving.*
+- *This is a secret between us.* (*us* = me + 너)
 
 ## *Who* vs *Whom*
 
@@ -213,39 +177,28 @@ flower bed."
 | who | 주격 |
 | whom | 목적격 |
 
-```
-선호:
-"Who called?"  ← 주격, 주어
-"Whom did you call?"  ← 목적격, 목적어
-"To whom did you give it?"  ← 격식, 전치사 뒤
-```
+**선호**
+- *Who called?* ← 주격, 주어
+- *Whom did you call?* ← 목적격, 목적어
+- *To whom did you give it?* ← 격식, 전치사 뒤
 
 ### 회화에서의 변화
 
-```
-격식:
-"Whom did you see?"
-"To whom should I speak?"
+**격식**
+- *Whom did you see?*
+- *To whom should I speak?*
 
-회화:
-"Who did you see?"
-"Who should I speak to?"
-```
+**회화**
+- *Who did you see?*
+- *Who should I speak to?*
 
 *격식 글 / 학술*에서는 *whom*. *일상 회화*에서는 *who*가 흔합니다.
 
 ### 점검 방법 — *he / him* 치환
 
-```
-"Who/Whom called?"
-→ "He called."  → who
-
-"Who/Whom did you see?"
-→ "I saw him."  → whom
-
-"To who/whom did you give it?"
-→ "I gave it to him."  → whom
-```
+- *Who/Whom called?* → *He called.* → *who*
+- *Who/Whom did you see?* → *I saw him.* → *whom*
+- *To who/whom did you give it?* → *I gave it to him.* → *whom*
 
 *He / him*으로 답할 수 있는 자리에 대명사를 치환해 보면 격이 명확해집니다.
 
@@ -253,30 +206,22 @@ flower bed."
 
 한국어 대명사는 *조사*로 격을 표시합니다. *형태가 변하지 않습니다*.
 
-```
-한국:
-"내가"  ← 주격 (조사 -가/이)
-"나를"  ← 목적격 (조사 -를/을)
-"나의"  ← 소유격 (조사 -의)
-        ↑ "나" 자체는 같음
+**한국**
+- "내가" ← 주격 (조사 -가/이)
+- "나를" ← 목적격 (조사 -를/을)
+- "나의" ← 소유격 (조사 -의)
+- → "나" 자체는 같음
 
-영어:
-"I, me, my"  ← 형태 자체가 변함
-```
+**영어**
+- *I*, *me*, *my* ← 형태 자체가 변함
 
 한국 학습자는 *형태 변화*에 익숙하지 않아 *자주 틀립니다*.
 
-```
-회피 (학습자 흔한 실수):
-"Me and my friend went to the store."
-"He gave the book to John and I."
-"Whom is that?"  ← 잘못된 형식
-
-선호:
-"My friend and I went to the store."
-"He gave the book to John and me."
-"Who is that?"
-```
+| 회피 (학습자 흔한 실수) | 선호 |
+|---------------------------|------|
+| *Me and my friend went to the store.* | *My friend and I went to the store.* |
+| *He gave the book to John and I.* | *He gave the book to John and me.* |
+| *Whom is that?* ← 잘못된 형식 | *Who is that?* |
 
 ## 자기 글 점검
 
