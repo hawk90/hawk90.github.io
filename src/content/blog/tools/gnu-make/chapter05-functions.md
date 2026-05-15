@@ -389,6 +389,32 @@ OBJS := $(call make-obj,build,main.c utils.c)
 
 같은 변환을 *여러 자리에서 재사용*하고 싶을 때 씁니다. 인자가 위치 기반(`$(1)`, `$(2)`)이라 가독성이 떨어지므로, 너무 복잡한 함수는 차라리 셸 스크립트로 빼는 게 낫습니다.
 
+### `define ... endef` — 여러 줄 변수
+
+`$(eval)`을 다루기 전에 *여러 줄 텍스트를 변수에 담는 방법*부터 봅시다. 일반 `=` 대입은 *한 줄*만 받습니다. 줄바꿈을 포함한 큰 블록을 변수에 담으려면 `define`을 씁니다.
+
+```makefile
+define greeting
+Hello, World!
+Welcome to Make.
+endef
+
+test:
+	@echo "$(greeting)"
+```
+
+`define`과 `endef` *사이의 모든 줄*이 한 변수의 값이 됩니다. 줄바꿈도 그대로 보존됩니다.
+
+`define` 자체는 *재귀적 변수*(=)와 같은 의미입니다. 즉시 평가하려면 `:=`을 결합할 수 있습니다 (4.0+).
+
+```makefile
+define version :=
+1.0.0
+endef
+```
+
+`define`이 진가를 발휘하는 자리는 *템플릿*입니다. 매개변수가 들어가는 *여러 줄짜리 텍스트*를 정의하고, 그걸 `$(call)`로 실체화해 `$(eval)`에 넣어 *동적 규칙*을 만듭니다.
+
 ### `$(eval text)` — 동적 Makefile 생성
 
 ```makefile
@@ -415,7 +441,40 @@ $(eval $(call module-template,bar))
 
 `$$`이 잔뜩 등장하는 이유는 *eval 안에서 두 번 확장*되기 때문입니다. 한 번은 `call`에서, 한 번은 `eval`에서. 두 번 모두 살리고 싶은 `$`은 `$$`로 이스케이프해야 합니다. 한 번만 풀고 싶은 `$`(예: `$(1)`)은 한 번만 적습니다.
 
+위 코드를 단계별로 풀어 보면:
+
+1. `$(call module-template,foo)` — `define` 안의 `$(1)`을 `foo`로 치환. `$$`은 `$`로 한 번 줄어듦.
+2. 결과 문자열:
+   ```makefile
+   foo_OBJS := $(patsubst %.c,$(BUILDDIR)/%.o,$(foo_SRCS))
+   foo: $(foo_OBJS)
+   	$(CC) -o $@ $^
+   ```
+3. `$(eval ...)`이 이 텍스트를 *Makefile 코드로 해석*. 위 세 줄이 마치 사용자가 직접 적은 것처럼 *규칙으로 추가*됩니다.
+
 `eval`은 *플러그인식 빌드 시스템*(buildroot, Yocto, OE-core, Kbuild의 일부)에서 활발하게 쓰입니다. 일반 프로젝트에서는 등장할 일이 드물지만, 메가 Makefile을 해독하려면 이 메커니즘을 알아야 합니다.
+
+### `MAKEFILE_LIST` — "지금 어떤 Makefile에 있지?"
+
+이 특수 변수는 *현재까지 Make가 읽은 모든 Makefile의 경로 목록*입니다. `include`로 합쳐진 서브 Makefile에서 *자신의 위치를 알아내는* 표준 관용구의 핵심입니다.
+
+```makefile
+# 모듈에서 자기 디렉터리 찾기 — 비재귀적 Make의 표준 패턴
+THIS_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+# 이제 THIS_DIR을 기준으로 소스 경로를 만들 수 있음
+SRCS += $(THIS_DIR)foo.c $(THIS_DIR)bar.c
+```
+
+여기서 마법은 `$(lastword $(MAKEFILE_LIST))`입니다.
+
+- `$(MAKEFILE_LIST)`는 `Makefile mods/foo/module.mk mods/bar/module.mk` 같이 *순서대로* 모든 파일을 담고 있습니다.
+- `$(lastword ...)`은 *마지막 단어*를 뽑습니다 — 즉 *방금 include된 그 Makefile의 경로*.
+- `$(dir ...)`은 그 경로에서 디렉터리 부분만 추출.
+
+각 서브 Makefile이 *자기 디렉터리를 자동으로 알게 되어*, 비재귀적 Make에서 *모듈 단위 격리*가 가능해집니다. ([Ch 6](/blog/tools/gnu-make/chapter06-conditionals#makefile-분할-패턴)에서 본 multi-module 패턴이 이 트릭 위에 서 있습니다.)
+
+주의: `THIS_DIR`을 *그 자리에서* 즉시 평가하려면 *반드시 `:=`*을 써야 합니다. `=`로 적으면 `$(lastword $(MAKEFILE_LIST))`가 *나중에 평가*되어 그때의 마지막 파일을 가져오게 되는데, 그건 *이미 다른 파일*이 될 수 있습니다.
 
 ### `$(error ...)` / `$(warning ...)` / `$(info ...)` — 메시지
 

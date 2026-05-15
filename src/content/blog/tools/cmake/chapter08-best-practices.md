@@ -136,7 +136,7 @@ target_link_libraries(myapp PRIVATE /opt/libs/libfoo.so)
 target_compile_definitions(myapp PRIVATE USE_FOO)
 ```
 
-### file(GLOB) 남용
+### `file(GLOB)`의 함정과 `CONFIGURE_DEPENDS`
 
 ```cmake
 # ❌ Bad — 새 파일 추가 시 CMake가 자동 감지 못함
@@ -151,15 +151,47 @@ add_executable(myapp
 )
 ```
 
-`file(GLOB)`은 CMake 구성 시점에 파일 목록을 결정합니다. 이후 파일을 추가해도 CMake를 다시 실행하지 않으면 감지하지 못합니다.
+`file(GLOB)`이 *왜 문제인지*를 정확히 짚어 봅니다. 이 명령은 *CMake 구성 시점*에 디렉터리를 한 번 보고 *그때의 파일 목록*을 변수에 저장합니다. 빌드 단계는 이미 결정된 변수만 사용합니다. 즉:
 
-**예외**: `CONFIGURE_DEPENDS` (CMake 3.12+)
+1. `cmake -B build`로 구성 — 그때의 `*.cpp` 목록이 잠깁니다.
+2. 개발자가 `new_module.cpp`를 추가.
+3. `cmake --build build`로 빌드 — *새 파일을 모름*. 빌드 산물에 누락됩니다.
+4. 알아채려면 `cmake -B build`를 다시 돌려 *재구성*해야 함.
+
+이게 "*명시적 나열*이 권장되는 이유"입니다. 손으로 적은 목록은 *Makefile 자체가 변경*되므로 CMake가 자동 재구성을 트리거합니다. 새 파일을 빠뜨릴 수 없습니다.
+
+**`CONFIGURE_DEPENDS` (CMake 3.12+)** — *file(GLOB)을 그래도 쓰고 싶을 때*
 
 ```cmake
 file(GLOB SRCS CONFIGURE_DEPENDS src/*.cpp)
 ```
 
-이 옵션을 사용하면 빌드 시마다 파일 변경을 검사합니다. 단, 빌드 시간이 늘어날 수 있어 대규모 프로젝트에서는 주의가 필요합니다.
+이 옵션을 켜면 CMake가 *매 빌드마다 디렉터리를 다시 검사*하고, 변경이 있으면 *자동으로 재구성*합니다. 일견 완벽해 보입니다.
+
+함정은 *성능*입니다.
+
+- 매 빌드마다 *디렉터리 stat*을 합니다. 작은 프로젝트에서는 무시할 만하지만, 모듈이 수십·수백 개면 누적이 됩니다.
+- 일부 *생성기*(Visual Studio, Xcode)는 이 기능을 *지원하지 않거나 불완전*하게 지원합니다. 크로스 플랫폼 프로젝트에서 미묘한 차이가 생깁니다.
+- *재구성이 자동으로 자주 일어나는* 자체가 빌드 안정성을 해칠 수 있습니다.
+
+CMake 매뉴얼 자체가 *"CONFIGURE_DEPENDS는 가능하면 피하라"*고 적습니다. 그래도 쓴다면, 큰 프로젝트보다 *연구·실험 코드*나 *문서 / 에셋 디렉터리* 같은 *변동이 잦은 비-소스* 자리에 한정하는 게 안전합니다.
+
+```cmake
+# 가능한 사용 예 — 자산 파일 자동 인식
+file(GLOB ASSET_FILES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.png"
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/*.json"
+)
+install(FILES ${ASSET_FILES} DESTINATION share/myapp/assets)
+```
+
+요약:
+
+| 상황 | 권장 |
+|------|-----|
+| C/C++ *소스 파일* | 명시적 나열. `file(GLOB)` 안 씀. |
+| 빈도가 낮은 *자산 파일* | `CONFIGURE_DEPENDS`로 자동 감지 OK. |
+| 자동 감지 강제 필요 | 별도 코드 생성 단계를 두고 `add_custom_command`로 명확히 의존성 정의. |
 
 ### CMAKE_CXX_FLAGS 직접 조작
 
