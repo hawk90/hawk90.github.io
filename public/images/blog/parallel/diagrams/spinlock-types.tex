@@ -7,52 +7,53 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  box/.style={rectangle, draw=nodebord, line width=0.4pt, minimum height=8mm, minimum width=2.2cm, fill=nodefill, inner sep=3pt, align=center, rounded corners=2pt, font=\sffamily\small},
-  header/.style={font=\sffamily\bfseries\small},
-  cache/.style={rectangle, draw=absbord, line width=0.4pt, minimum height=6mm, minimum width=1.8cm, fill=absfill, inner sep=2pt, align=center, rounded corners=1pt, font=\sffamily\tiny},
-  bus/.style={rectangle, draw=conbord, line width=0.5pt, minimum height=5mm, fill=confill, font=\sffamily\tiny}
+  box/.style={rectangle, draw=nodebord, line width=0.4pt,
+              minimum height=8mm, minimum width=2.6cm,
+              fill=nodefill, inner sep=3pt, align=center,
+              rounded corners=2pt, font=\sffamily\small},
+  header/.style={font=\sffamily\bfseries\small, align=center},
+  desc/.style={font=\sffamily\scriptsize, align=center}
 ]
 
-% TAS Section
-\node[header] (tas_h) at (0, 0) {TAS Lock};
-\node[box] (tas_spin) at (0, -1) {exchange(true)};
-\node[bus] (tas_bus) at (0, -2.2) {매번 버스 트래픽};
-\node[font=\sffamily\tiny, text=conbord] at (0, -3) {캐시 무효화 ↑↑};
+% ============ Headers (4 lock types) ============
+\node[header] (tas_h)   at (0,  0.6) {TAS};
+\node[header] (ttas_h)  at (4,  0.6) {TTAS};
+\node[header] (back_h)  at (8,  0.6) {Backoff};
+\node[header] (queue_h) at (12, 0.6) {Queue};
 
-% TTAS Section
-\node[header] (ttas_h) at (4, 0) {TTAS Lock};
-\node[cache] (ttas_read) at (4, -1) {load (캐시 히트)};
-\node[box, fill=impfill, draw=impbord] (ttas_cas) at (4, -2.2) {풀리면 → CAS};
-\node[font=\sffamily\tiny, text=impbord] at (4, -3) {버스 트래픽 ↓};
+% Spin mechanism row
+\node[box, fill=confill, draw=conbord] (tas_op)   at (0,  -0.6)
+    {atomic\\exchange};
+\node[box, fill=clifill, draw=clibord] (ttas_op)  at (4,  -0.6)
+    {load + CAS};
+\node[box, fill=impfill, draw=impbord] (back_op)  at (8,  -0.6)
+    {load + 대기};
+\node[box, fill=absfill, draw=absbord] (queue_op) at (12, -0.6)
+    {local spin};
 
-% Backoff Section
-\node[header] (back_h) at (8, 0) {Backoff Lock};
-\node[cache] (back_read) at (8, -1) {load (캐시 히트)};
-\node[box, draw=clibord, fill=clifill] (back_wait) at (8, -2.2) {실패 → 대기};
-\node[font=\sffamily\tiny, text=clibord] at (8, -3) {경합 완화};
+% Description row
+\node[desc, text=conbord]  at (0,  -1.8) {매 시도마다 버스};
+\node[desc, text=clibord]  at (4,  -1.8) {캐시 hit 유지};
+\node[desc, text=impbord]  at (8,  -1.8) {경합 완화};
+\node[desc, text=absbord]  at (12, -1.8) {FIFO 공정성};
 
-% Queue Lock Section
-\node[header] (queue_h) at (12, 0) {Queue Lock};
-\node[cache] (queue_local) at (12, -1) {자기 슬롯만 spin};
-\node[box, fill=impfill, draw=impbord] (queue_fifo) at (12, -2.2) {FIFO 공정성};
-\node[font=\sffamily\tiny, text=impbord] at (12, -3) {로컬 스핀};
+% ============ Performance comparison (bars going UP — higher = better) ============
+\node[font=\sffamily\bfseries\small] at (6, -3.0) {경합 시 처리량 (높을수록 좋음)};
 
-% Performance comparison bar
-\node[font=\sffamily\bfseries\small] at (6, -4.5) {경합 시 성능};
-\draw[draw=groupbord, line width=0.3pt] (-1.5, -5) -- (13.5, -5);
+\draw[draw=groupbord, line width=0.4pt] (-1.5, -5.5) -- (13.5, -5.5);
 
-% Bars
-\fill[confill] (-0.8, -5) rectangle (0.8, -5.3);
-\node[font=\sffamily\tiny] at (0, -5.6) {낮음};
+% Bars (going up from baseline)
+\fill[confill, draw=conbord] (-0.8, -5.5) rectangle (0.8, -5.2);
+\node[font=\sffamily\scriptsize] at (0, -5.85) {낮음};
 
-\fill[clifill] (3.2, -5) rectangle (4.8, -5.8);
-\node[font=\sffamily\tiny] at (4, -6.1) {중간};
+\fill[clifill, draw=clibord] (3.2, -5.5)  rectangle (4.8, -4.7);
+\node[font=\sffamily\scriptsize] at (4, -5.85) {중간};
 
-\fill[absfill] (7.2, -5) rectangle (8.8, -6.2);
-\node[font=\sffamily\tiny] at (8, -6.5) {높음};
+\fill[impfill, draw=impbord] (7.2, -5.5)  rectangle (8.8, -4.2);
+\node[font=\sffamily\scriptsize] at (8, -5.85) {높음};
 
-\fill[impfill] (11.2, -5) rectangle (12.8, -6.6);
-\node[font=\sffamily\tiny] at (12, -6.9) {최고};
+\fill[absfill, draw=absbord] (11.2, -5.5) rectangle (12.8, -3.6);
+\node[font=\sffamily\scriptsize] at (12, -5.85) {최고};
 
 \end{tikzpicture}
 \end{document}

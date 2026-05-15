@@ -8,41 +8,45 @@
 
 \begin{tikzpicture}[blog,
     libbox/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
-                   minimum width=3.5cm, minimum height=3cm, align=center},
+                   minimum width=6cm, minimum height=3.2cm, align=center},
     appbox/.style={rectangle, rounded corners=3pt, draw=impbord, fill=impfill,
-                   minimum width=3.5cm, minimum height=2.5cm, align=center},
-    item/.style={font=\sffamily\scriptsize, anchor=west},
+                   minimum width=6cm, minimum height=2.4cm, align=center},
+    title/.style={font=\sffamily\small\bfseries, anchor=north},
+    item/.style={font=\sffamily\scriptsize, anchor=west, align=left},
     privitem/.style={item, text=conbord},
     pubitem/.style={item, text=absbord},
     intitem/.style={item, text=clibord!80!black},
-    conn/.style={-{Stealth[length=2mm]}, draw=edgec, line width=0.5pt}
+    conn/.style={-{Stealth[length=2.5mm]}, draw=edgec, line width=0.6pt}
 ]
 
-% mylib box
+% mylib box — wider for content
 \node[libbox] (mylib) at (0, 0) {};
-\node[font=\sffamily\small\bfseries, anchor=north] at ([yshift=-0.2cm]mylib.north) {mylib (라이브러리)};
+\node[title]  at ([yshift=-0.2cm]mylib.north) {mylib (라이브러리)};
+\node[privitem] at ([xshift=0.3cm, yshift=-0.85cm]mylib.north west)
+    {PRIVATE: -O2, src/internal};
+\node[pubitem] at ([xshift=0.3cm, yshift=-1.45cm]mylib.north west)
+    {PUBLIC: include, cxx\_std\_17, libfoo};
+\node[intitem] at ([xshift=0.3cm, yshift=-2.05cm]mylib.north west)
+    {INTERFACE: USE\_MYLIB};
 
-% Items inside mylib
-\node[privitem] at ([xshift=0.3cm, yshift=-0.6cm]mylib.north west) {PRIVATE: -O2, src/internal};
-\node[pubitem] at ([xshift=0.3cm, yshift=-1.1cm]mylib.north west) {PUBLIC: include, cxx\_std\_17, libfoo};
-\node[intitem] at ([xshift=0.3cm, yshift=-1.6cm]mylib.north west) {INTERFACE: USE\_MYLIB};
+% app box — below mylib
+\node[appbox, below=2.5cm of mylib] (app) {};
+\node[title] at ([yshift=-0.2cm]app.north) {app (실행 파일)};
+\node[pubitem] at ([xshift=0.3cm, yshift=-0.85cm]app.north west)
+    {(inherits) include, cxx\_std\_17, libfoo};
+\node[intitem] at ([xshift=0.3cm, yshift=-1.45cm]app.north west)
+    {(inherits) USE\_MYLIB};
 
-% app box
-\node[appbox, below=2cm of mylib] (app) {};
-\node[font=\sffamily\small\bfseries, anchor=north] at ([yshift=-0.2cm]app.north) {app (실행 파일)};
+% Connection arrow with label
+\draw[conn] (mylib) -- node[right, font=\sffamily\scriptsize]
+    {\texttt{target\_link\_libraries(app PRIVATE mylib)}} (app);
 
-% Inherited items
-\node[pubitem] at ([xshift=0.3cm, yshift=-0.6cm]app.north west) {include, cxx\_std\_17, libfoo};
-\node[intitem] at ([xshift=0.3cm, yshift=-1.0cm]app.north west) {USE\_MYLIB};
-
-% Arrow with label
-\draw[conn] (mylib) -- node[right, font=\sffamily\scriptsize] {target\_link\_libraries} (app);
-
-% Legend on the right
-\node[anchor=west, font=\sffamily\footnotesize\bfseries] at (3, 0.5) {전파};
-\node[pubitem, anchor=west] at (3, 0) {PUBLIC $\rightarrow$ 전파됨};
-\node[intitem, anchor=west] at (3, -0.5) {INTERFACE $\rightarrow$ 전파됨};
-\node[privitem, anchor=west] at (3, -1) {PRIVATE $\rightarrow$ 전파 안 됨};
+% Legend — well to the right, not overlapping boxes
+\node[font=\sffamily\footnotesize\bfseries, anchor=west]
+    at (4.5, 0.5) {전파 규칙};
+\node[pubitem, anchor=west]  at (4.5, -0.1) {PUBLIC $\rightarrow$ 전파};
+\node[intitem, anchor=west]  at (4.5, -0.7) {INTERFACE $\rightarrow$ 전파};
+\node[privitem, anchor=west] at (4.5, -1.3) {PRIVATE $\rightarrow$ 막힘};
 
 \end{tikzpicture}
 \end{document}

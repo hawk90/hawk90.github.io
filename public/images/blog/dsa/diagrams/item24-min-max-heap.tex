@@ -7,25 +7,45 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  minlvl/.style={vx, draw=absbord, fill=absfill, font=\sffamily\small},
-  maxlvl/.style={vxc, font=\sffamily\small}
+  minlvl/.style={circle, draw=absbord, fill=absfill, line width=0.4pt,
+                 minimum size=12mm, inner sep=0pt,
+                 font=\sffamily\small},
+  maxlvl/.style={circle, draw=conbord, fill=confill, line width=0.4pt,
+                 minimum size=12mm, inner sep=0pt,
+                 font=\sffamily\small}
 ]
+% Level labels (left side)
+\node[font=\sffamily\scriptsize, anchor=east, text=absbord]
+    at (-5.5, 3.0) {min};
+\node[font=\sffamily\scriptsize, anchor=east, text=conbord]
+    at (-5.5, 1.8) {max};
+\node[font=\sffamily\scriptsize, anchor=east, text=absbord]
+    at (-5.5, 0.4) {min};
+
 % min level (root)
-\node[minlvl] (r) at (0, 3) {7\\[2pt]\scriptsize min};
+\node[minlvl] (r) at (0, 3) {7};
+
 % max level
-\node[maxlvl] (a) at (-2.4, 1.8) {70\\[2pt]\scriptsize max};
-\node[maxlvl] (b) at ( 2.4, 1.8) {40\\[2pt]\scriptsize max};
-% min level
-\node[minlvl] (c) at (-3.5, 0.4) {15};
-\node[minlvl] (d) at (-1.3, 0.4) {30};
-\node[minlvl] (e) at ( 1.3, 0.4) {12};
-\node[minlvl] (f) at ( 3.5, 0.4) {20};
+\node[maxlvl] (a) at (-2.4, 1.8) {70};
+\node[maxlvl] (b) at ( 2.4, 1.8) {40};
 
-\draw[edge] (r) -- (a); \draw[edge] (r) -- (b);
-\draw[edge] (a) -- (c); \draw[edge] (a) -- (d);
-\draw[edge] (b) -- (e); \draw[edge] (b) -- (f);
+% min level (leaves)
+\node[minlvl] (c) at (-3.6, 0.4) {15};
+\node[minlvl] (d) at (-1.2, 0.4) {30};
+\node[minlvl] (e) at ( 1.2, 0.4) {12};
+\node[minlvl] (f) at ( 3.6, 0.4) {20};
 
-\node[anchor=west, font=\sffamily\footnotesize] at (4.6, 2.4) {odd level: min};
-\node[anchor=west, font=\sffamily\footnotesize] at (4.6, 1.8) {even level: max};
+\draw[edge] (r) -- (a);
+\draw[edge] (r) -- (b);
+\draw[edge] (a) -- (c);
+\draw[edge] (a) -- (d);
+\draw[edge] (b) -- (e);
+\draw[edge] (b) -- (f);
+
+% Caption
+\node[font=\sffamily\scriptsize, anchor=north, align=center]
+    at (0, -0.4)
+    {min level의 노드 $\le$ 자손, max level의 노드 $\ge$ 자손};
+
 \end{tikzpicture}
 \end{document}

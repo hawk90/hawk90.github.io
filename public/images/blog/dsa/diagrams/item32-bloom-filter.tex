@@ -29,9 +29,10 @@
 \draw[arr] (k) to[bend left=20]  node[midway, sloped, above, font=\tiny]{$h_3$} (b8.north);
 
 % --- Annotation ---
-\node[anchor=west, font=\sffamily\footnotesize, align=left] at (0, -1.6) {%
-  \textbf{Add(x):} 모든 $h_i(x)$ 비트 set\\[2pt]
-  \textbf{Contains(x):} 모든 비트 set $\to$ "probably yes" \quad / \quad 어느 비트라도 0 $\to$ "definitely no"
+\node[anchor=west, font=\sffamily\footnotesize, align=left] at (0, -1.8) {%
+  \textbf{Add(x):} 모든 $h_i(x)$ 비트 set\\[8pt]
+  \textbf{Contains(x):} 모든 비트 set $\Rightarrow$ "probably yes"\\[4pt]
+  \phantom{\textbf{Contains(x):}} 어느 비트라도 0 $\Rightarrow$ "definitely no"
 };
 \end{tikzpicture}
 \end{document}

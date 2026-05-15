@@ -3,54 +3,61 @@
 \setmainfont{Apple SD Gothic Neo}
 \setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  node/.style={circle, draw=absbord, line width=0.4pt, minimum size=10mm, fill=absfill, inner sep=0pt, font=\sffamily\small},
-  nodedel/.style={circle, draw=groupbord, line width=0.4pt, minimum size=10mm, fill=black!5, inner sep=0pt, font=\sffamily\small, dashed},
-  step/.style={font=\sffamily\tiny, text=nodebord},
-  badstep/.style={font=\sffamily\tiny, text=conbord}
+  nd/.style={circle, draw=absbord, line width=0.4pt, minimum size=10mm,
+             fill=absfill, inner sep=0pt, font=\sffamily\small},
+  nddel/.style={circle, draw=groupbord, line width=0.4pt, minimum size=10mm,
+                fill=black!5, inner sep=0pt, font=\sffamily\small, dashed,
+                text=nodebord},
+  ndnew/.style={circle, draw=hibord, line width=0.5pt, minimum size=10mm,
+                fill=hifill, inner sep=0pt, font=\sffamily\small},
+  rowlabel/.style={font=\sffamily\bfseries\small, anchor=east},
+  note/.style={font=\sffamily\scriptsize, align=left, anchor=west}
 ]
 
-% Initial state
-\node[font=\sffamily\bfseries\small] at (-2, 0) {초기};
-\node[node] (a1) at (0, 0) {A};
-\node[node] (b1) at (1.5, 0) {B};
-\node[node] (c1) at (3, 0) {C};
-\draw[arr, thick] (a1) -- (b1);
-\draw[arr, thick] (b1) -- (c1);
-\node[step] at (-1, 0) {head →};
+% ============ Row 1: Initial =============
+\node[rowlabel] at (-1.0, 0) {초기:};
+\node[nd] (a1) at (0, 0)   {A};
+\node[nd] (b1) at (1.5, 0) {B};
+\node[nd] (c1) at (3, 0)   {C};
+\draw[-{Stealth[length=2mm]}] (a1) -- (b1);
+\draw[-{Stealth[length=2mm]}] (b1) -- (c1);
+\node[note] at (5.0, 0) {Thread X reads head = A};
 
-% Step 1: Thread X reads
-\node[font=\sffamily\bfseries\small] at (-2, -1.8) {Step 1};
-\node[step] at (0, -1.5) {X: old = A};
-\draw[->, thick, draw=clibord] (-0.3, -0.5) -- (-0.3, -1.3);
+% ============ Row 2 =============
+\node[rowlabel] at (-1.0, -2.0) {Step 1:};
+\node[nddel] (a2) at (0, -2.0)   {A};
+\node[nddel] (b2) at (1.5, -2.0) {B};
+\node[nd]    (c2) at (3, -2.0)   {C};
+\node[note] at (5.0, -2.0) {Y: pop(A), pop(B) (free)};
 
-% Step 2-4: Thread Y operations
-\node[font=\sffamily\bfseries\small] at (-2, -3.5) {Step 2-4};
-\node[nodedel] (a2) at (0, -3.5) {A};
-\node[nodedel] (b2) at (1.5, -3.5) {B};
-\node[node] (d2) at (3, -3.5) {D};
-\node[node] (a3) at (4.5, -3.5) {A'};
-\draw[arr, thick] (d2) -- (a3);
-\node[step, align=left] at (-1, -3.5) {head →};
-\node[step, align=left] at (7, -3.2) {Y: pop(A), pop(B)\\[2pt]Y: push(D), push(A)\\[2pt]같은 주소 A 재사용!};
+% ============ Row 3 =============
+\node[rowlabel] at (-1.0, -4.0) {Step 2:};
+\node[nd]    (d3) at (0, -4.0)   {D};
+\node[ndnew] (a3) at (1.5, -4.0) {A'};
+\node[nd]    (c3) at (3, -4.0)   {C};
+\draw[-{Stealth[length=2mm]}] (d3) -- (a3);
+\draw[-{Stealth[length=2mm]}] (a3) -- (c3);
+\node[note, text=conbord] at (5.0, -4.0)
+    {Y: push(D), push(A') — 같은 주소 재사용};
 
-% Step 5: Thread X CAS
-\node[font=\sffamily\bfseries\small] at (-2, -5.5) {Step 5};
-\node[badstep] at (0, -5.2) {X: CAS(A, B)};
-\node[badstep] at (0, -5.8) {성공! (A == A)};
+% ============ Row 4 =============
+\node[rowlabel] at (-1.0, -6.0) {Step 3:};
+\node[ndnew] (ax) at (0, -6.0)   {A'};
+\node[nddel] (bx) at (1.5, -6.0) {B};
+\node[nd]    (cx) at (3, -6.0)   {C};
+\draw[-{Stealth[length=2mm]}, draw=conbord, line width=0.6pt] (ax) -- (bx);
+\node[note, text=conbord] at (5.0, -6.0)
+    {X: CAS(head, A, B) 성공};
 
-% Result
-\node[font=\sffamily\bfseries\small] at (-2, -7) {결과};
-\node[nodedel] (bres) at (0, -7) {B};
-\node[font=\sffamily\small, text=conbord] at (1.5, -7) {← 삭제된 노드!};
-\node[step] at (-1, -7) {head →};
-
-% Danger annotation
-\draw[decorate, decoration={brace, amplitude=6pt}, draw=conbord, line width=0.5pt]
-  (5.5, -5) -- (5.5, -7.3) node[midway, right, font=\sffamily\small, text=conbord, xshift=3pt] {메모리 손상};
+% ============ Row 5: Danger =============
+\node[font=\sffamily\bfseries\small, text=conbord, anchor=east]
+    at (-1.0, -7.5) {결과:};
+\node[note, text=conbord, font=\sffamily\small] at (-0.5, -7.5)
+    {head $\rightarrow$ 해제된 메모리 B (use-after-free)};
 
 \end{tikzpicture}
 \end{document}

@@ -6,35 +6,43 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog,
+  nodecirc/.style={circle, minimum size=9mm, font=\sffamily\small\bfseries,
+                   line width=0.5pt, inner sep=0pt},
+  keycirc/.style={circle, minimum size=7mm, fill=hifill, draw=hibord,
+                  line width=0.4pt, font=\sffamily\scriptsize, inner sep=0pt}
+]
 
-% Hash ring (circle)
-\draw[thick, draw=nodebord] (0,0) circle (2.5cm);
+% Hash ring
+\draw[line width=1pt, draw=nodebord] (0,0) circle (3.5cm);
 
-% Hash space labels
-\node[font=\sffamily\scriptsize] at (0, 3.1) {hash space};
-\node[font=\sffamily\tiny] at (2.8, 0) {0};
-\node[font=\sffamily\tiny] at (-2.8, 0) {$2^{160}$};
+% Nodes — 3 well-spaced positions
+\node[nodecirc, fill=confill, draw=conbord] (nodeA) at (90:3.5)   {A};
+\node[nodecirc, fill=impfill, draw=impbord] (nodeB) at (-30:3.5)  {B};
+\node[nodecirc, fill=absfill, draw=absbord] (nodeC) at (-150:3.5) {C};
 
-% Nodes on the ring (positioned at different angles)
-\node[circle, fill=confill, draw=conbord, minimum size=6mm, font=\sffamily\scriptsize] (nodeA) at (60:2.5) {A};
-\node[circle, fill=impfill, draw=impbord, minimum size=6mm, font=\sffamily\scriptsize] (nodeB) at (-30:2.5) {B};
-\node[circle, fill=absfill, draw=absbord, minimum size=6mm, font=\sffamily\scriptsize] (nodeC) at (200:2.5) {C};
+% Keys — well separated from each other and from nodes
+\node[keycirc] (kX) at (150:3.5) {X};
+\node[keycirc] (kY) at (30:3.5)  {Y};
+\node[keycirc] (kZ) at (-90:3.5) {Z};
 
-% Keys on the ring
-\node[circle, fill=hifill, draw=hibord, minimum size=4mm, font=\sffamily\tiny] (keyX) at (30:2.5) {X};
-\node[circle, fill=hifill, draw=hibord, minimum size=4mm, font=\sffamily\tiny] (keyY) at (130:2.5) {Y};
-\node[circle, fill=hifill, draw=hibord, minimum size=4mm, font=\sffamily\tiny] (keyZ) at (250:2.5) {Z};
+% Assignment arrows — straight lines INSIDE ring (no curve through labels)
+\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
+    (kX) to[bend right=10] (nodeA);
+\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
+    (kY) to[bend left=10] (nodeB);
+\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
+    (kZ) to[bend left=10] (nodeC);
 
-% Legend
-\node[font=\sffamily\scriptsize, anchor=west] at (3.5, 1.5) {노드};
-\node[circle, fill=confill, draw=conbord, minimum size=4mm] at (3.2, 1.5) {};
+% Center label
+\node[font=\sffamily\scriptsize\bfseries, text=edgec] at (0, 0)
+    {hash ring};
 
-\node[font=\sffamily\scriptsize, anchor=west] at (3.5, 0.8) {키};
-\node[circle, fill=hifill, draw=hibord, minimum size=3mm] at (3.2, 0.8) {};
-
-% Explanation
-\node[font=\sffamily\tiny, anchor=north, text width=4cm, align=center] at (0, -3.2) {키는 시계 방향으로\\가장 가까운 노드로 할당};
+% Caption (well below ring)
+\node[font=\sffamily\scriptsize, anchor=north, text width=9cm, align=center]
+    at (0, -4.5)
+    {key는 시계 방향으로 가장 가까운 node에 할당:\\[6pt]
+     \textbf{X $\rightarrow$ A}\quad\textbf{Y $\rightarrow$ B}\quad\textbf{Z $\rightarrow$ C}};
 
 \end{tikzpicture}
 \end{document}

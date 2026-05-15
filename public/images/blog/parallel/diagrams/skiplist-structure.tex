@@ -7,65 +7,93 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  node/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=8mm, minimum height=6mm, fill=absfill, inner sep=1pt, font=\sffamily\scriptsize}
+  nd/.style={rectangle, draw=nodebord, line width=0.3pt,
+             minimum width=8mm, minimum height=6mm, fill=absfill,
+             inner sep=1pt, font=\sffamily\scriptsize, rounded corners=1pt},
+  hlink/.style={-{Stealth[length=1.5mm]}, draw=edgec, line width=0.4pt},
+  vlink/.style={draw=nodebord, line width=0.3pt, dashed}
 ]
 
-% Level labels
-\node[font=\sffamily\small, anchor=east] at (-0.5, 3) {Level 3};
-\node[font=\sffamily\small, anchor=east] at (-0.5, 2) {Level 2};
-\node[font=\sffamily\small, anchor=east] at (-0.5, 1) {Level 1};
-\node[font=\sffamily\small, anchor=east] at (-0.5, 0) {Level 0};
+% Level labels (left, aligned)
+\foreach \lvl/\y in {3/3, 2/2, 1/1, 0/0} {
+  \node[font=\sffamily\small, anchor=east] at (-0.3, \y) {Level \lvl};
+}
 
-% Level 3 (sparsest)
-\node[node, fill=hifill] (l3_50) at (7, 3) {50};
-\draw[edge] (0, 3) -- (l3_50.west);
-\draw[edge] (l3_50.east) -- (12, 3);
+% Head (left edge) for each level
+\foreach \y in {0, 1, 2, 3} {
+  \node[nd, fill=clifill] (head\y) at (0, \y) {head};
+}
 
-% Level 2
-\node[node, fill=clifill] (l2_20) at (3, 2) {20};
-\node[node, fill=clifill] (l2_50) at (7, 2) {50};
-\node[node, fill=clifill] (l2_70) at (9, 2) {70};
-\draw[edge] (0, 2) -- (l2_20.west);
-\draw[edge] (l2_20.east) -- (l2_50.west);
-\draw[edge] (l2_50.east) -- (l2_70.west);
-\draw[edge] (l2_70.east) -- (12, 2);
+% Tail (right edge)
+\foreach \y in {0, 1, 2, 3} {
+  \node[nd, fill=clifill] (tail\y) at (12, \y) {NIL};
+}
 
-% Level 1
-\node[node, fill=impfill] (l1_10) at (1.5, 1) {10};
-\node[node, fill=impfill] (l1_20) at (3, 1) {20};
-\node[node, fill=impfill] (l1_40) at (5, 1) {40};
-\node[node, fill=impfill] (l1_50) at (7, 1) {50};
-\node[node, fill=impfill] (l1_70) at (9, 1) {70};
-\node[node, fill=impfill] (l1_80) at (11, 1) {80};
-\draw[edge] (0, 1) -- (l1_10.west);
-\draw[edge] (l1_10.east) -- (l1_20.west);
-\draw[edge] (l1_20.east) -- (l1_40.west);
-\draw[edge] (l1_40.east) -- (l1_50.west);
-\draw[edge] (l1_50.east) -- (l1_70.west);
-\draw[edge] (l1_70.east) -- (l1_80.west);
-\draw[edge] (l1_80.east) -- (12, 1);
+% Level 3 — only 50
+\node[nd, fill=hifill] (l3_50) at (7, 3) {50};
+\draw[hlink] (head3.east) -- (l3_50.west);
+\draw[hlink] (l3_50.east) -- (tail3.west);
 
-% Level 0 (all nodes)
-\node[node] (l0_5) at (0.5, 0) {5};
-\node[node] (l0_10) at (1.5, 0) {10};
-\node[node] (l0_15) at (2.2, 0) {15};
-\node[node] (l0_20) at (3, 0) {20};
-\node[node] (l0_30) at (4, 0) {30};
-\node[node] (l0_40) at (5, 0) {40};
-\node[node] (l0_45) at (6, 0) {45};
-\node[node] (l0_50) at (7, 0) {50};
-\node[node] (l0_60) at (8, 0) {60};
-\node[node] (l0_70) at (9, 0) {70};
-\node[node] (l0_75) at (10, 0) {75};
-\node[node] (l0_80) at (11, 0) {80};
+% Level 2 — 20, 50, 70
+\node[nd, fill=clifill] (l2_20) at (3, 2) {20};
+\node[nd, fill=clifill] (l2_50) at (7, 2) {50};
+\node[nd, fill=clifill] (l2_70) at (9, 2) {70};
+\draw[hlink] (head2.east) -- (l2_20.west);
+\draw[hlink] (l2_20.east) -- (l2_50.west);
+\draw[hlink] (l2_50.east) -- (l2_70.west);
+\draw[hlink] (l2_70.east) -- (tail2.west);
 
-% Vertical connections
-\draw[edge, dashed, draw=nodebord] (l2_50.south) -- (l1_50.north);
-\draw[edge, dashed, draw=nodebord] (l3_50.south) -- (l2_50.north);
-\draw[edge, dashed, draw=nodebord] (l1_50.south) -- (l0_50.north);
+% Level 1 — 10, 20, 40, 50, 70, 80
+\node[nd, fill=impfill] (l1_10) at (1.5, 1) {10};
+\node[nd, fill=impfill] (l1_20) at (3,   1) {20};
+\node[nd, fill=impfill] (l1_40) at (5,   1) {40};
+\node[nd, fill=impfill] (l1_50) at (7,   1) {50};
+\node[nd, fill=impfill] (l1_70) at (9,   1) {70};
+\node[nd, fill=impfill] (l1_80) at (11,  1) {80};
+\draw[hlink] (head1.east)  -- (l1_10.west);
+\draw[hlink] (l1_10.east)  -- (l1_20.west);
+\draw[hlink] (l1_20.east)  -- (l1_40.west);
+\draw[hlink] (l1_40.east)  -- (l1_50.west);
+\draw[hlink] (l1_50.east)  -- (l1_70.west);
+\draw[hlink] (l1_70.east)  -- (l1_80.west);
+\draw[hlink] (l1_80.east)  -- (tail1.west);
+
+% Level 0 — every node, with proper edges
+\node[nd] (l0_5)  at (0.7,  0) {5};
+\node[nd] (l0_10) at (1.5,  0) {10};
+\node[nd] (l0_15) at (2.3,  0) {15};
+\node[nd] (l0_20) at (3.1,  0) {20};
+\node[nd] (l0_30) at (4.0,  0) {30};
+\node[nd] (l0_40) at (5.0,  0) {40};
+\node[nd] (l0_45) at (6.0,  0) {45};
+\node[nd] (l0_50) at (7.0,  0) {50};
+\node[nd] (l0_60) at (8.0,  0) {60};
+\node[nd] (l0_70) at (9.0,  0) {70};
+\node[nd] (l0_75) at (10.0, 0) {75};
+\node[nd] (l0_80) at (11.0, 0) {80};
+\draw[hlink] (head0.east) -- (l0_5.west);
+\draw[hlink] (l0_5.east)  -- (l0_10.west);
+\draw[hlink] (l0_10.east) -- (l0_15.west);
+\draw[hlink] (l0_15.east) -- (l0_20.west);
+\draw[hlink] (l0_20.east) -- (l0_30.west);
+\draw[hlink] (l0_30.east) -- (l0_40.west);
+\draw[hlink] (l0_40.east) -- (l0_45.west);
+\draw[hlink] (l0_45.east) -- (l0_50.west);
+\draw[hlink] (l0_50.east) -- (l0_60.west);
+\draw[hlink] (l0_60.east) -- (l0_70.west);
+\draw[hlink] (l0_70.east) -- (l0_75.west);
+\draw[hlink] (l0_75.east) -- (l0_80.west);
+\draw[hlink] (l0_80.east) -- (tail0.west);
+
+% Vertical connections — key 50 spans all levels
+\draw[vlink] (l3_50) -- (l2_50);
+\draw[vlink] (l2_50) -- (l1_50);
+\draw[vlink] (l1_50) -- (l0_50);
 
 % Caption
-\node[font=\sffamily\tiny, anchor=north] at (6, -0.7) {위로 갈수록 듬성듬성, 검색 시 위에서 시작};
+\node[font=\sffamily\scriptsize, anchor=north, text width=10cm, align=center]
+    at (6, -0.7)
+    {위 레벨일수록 듬성듬성 — 검색은 위에서 시작해 점점 내려옴};
 
 \end{tikzpicture}
 \end{document}

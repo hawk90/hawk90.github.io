@@ -7,27 +7,49 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  iv/.style={rectangle, rounded corners=2pt, draw=nodebord, line width=0.5pt, minimum height=8mm, inner sep=0pt, font=\sffamily\small}
+  iv/.style={rectangle, rounded corners=2pt, draw=nodebord,
+             line width=0.5pt, minimum height=8mm, inner sep=0pt,
+             font=\sffamily\small}
 ]
 
-% Time axis
-\draw[arr, line width=0.5pt] (-0.5, -1.5) -- (10, -1.5) node[right, font=\sffamily\footnotesize] {time};
+% Time axis (long enough to not collide with labels)
+\draw[-{Stealth[length=2.5mm]}, line width=0.5pt]
+    (-0.5, -2.0) -- (10.5, -2.0)
+    node[right, font=\sffamily\footnotesize] {time};
 
-% Interval A
-\node[font=\sffamily\bfseries, anchor=east] at (-0.3, 0.5) {A};
-\node[iv, fill=absfill, draw=absbord, minimum width=30mm] (A) at (2.0, 0.5) {$[a_0, a_1)$};
-\draw[draw=edgesc, dashed] (A.south west) -- (A.south west |- 0, -1.5);
-\draw[draw=edgesc, dashed] (A.south east) -- (A.south east |- 0, -1.5);
-\node[font=\sffamily\footnotesize, anchor=north] at (A.south west |- 0, -1.5) {$a_0$};
-\node[font=\sffamily\footnotesize, anchor=north east] at (A.south east |- 0, -1.5) {$a_1$};
+% Interval A — non-overlapping with B
+\node[font=\sffamily\bfseries, anchor=east] at (-0.3, 0.7) {A};
+\node[iv, fill=absfill, draw=absbord, minimum width=30mm]
+    (A) at (2.0, 0.7) {$[a_0, a_1)$};
 
-% Interval B
-\node[font=\sffamily\bfseries, anchor=east] at (-0.3, -0.5) {B};
-\node[iv, fill=impfill, draw=impbord, minimum width=50mm] (B) at (6.0, -0.5) {$[b_0, b_1)$};
-\draw[draw=edgesc, dashed] (B.south west) -- (B.south west |- 0, -1.5);
-\draw[draw=edgesc, dashed] (B.south east) -- (B.south east |- 0, -1.5);
-\node[font=\sffamily\footnotesize, anchor=north west] at (B.south west |- 0, -1.5) {$b_0$};
-\node[font=\sffamily\footnotesize, anchor=north] at (B.south east |- 0, -1.5) {$b_1$};
+% Tick lines for A
+\draw[draw=edgesc, dashed]
+    (A.south west) -- (A.south west |- 0, -2.0);
+\draw[draw=edgesc, dashed]
+    (A.south east) -- (A.south east |- 0, -2.0);
+
+% Tick labels for A (well below axis, centered under tick)
+\node[font=\sffamily\footnotesize] at (A.south west |- 0, -2.4) {$a_0$};
+\node[font=\sffamily\footnotesize] at (A.south east |- 0, -2.4) {$a_1$};
+
+% Interval B — separated from A so labels don't collide
+\node[font=\sffamily\bfseries, anchor=east] at (-0.3, -0.7) {B};
+\node[iv, fill=impfill, draw=impbord, minimum width=40mm]
+    (B) at (7.5, -0.7) {$[b_0, b_1)$};
+
+% Tick lines for B
+\draw[draw=edgesc, dashed]
+    (B.south west) -- (B.south west |- 0, -2.0);
+\draw[draw=edgesc, dashed]
+    (B.south east) -- (B.south east |- 0, -2.0);
+
+% Tick labels for B (clearly separated from a1)
+\node[font=\sffamily\footnotesize] at (B.south west |- 0, -2.4) {$b_0$};
+\node[font=\sffamily\footnotesize] at (B.south east |- 0, -2.4) {$b_1$};
+
+% Annotation
+\node[font=\sffamily\footnotesize, text=hibord, align=center] at (5.0, -3.3)
+    {두 구간이 시간상 분리됨 — $a_1 \le b_0$};
 
 \end{tikzpicture}
 \end{document}
