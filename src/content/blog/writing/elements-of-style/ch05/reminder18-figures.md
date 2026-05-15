@@ -17,21 +17,19 @@ draft: false
 
 ## 비유의 종류
 
-```
-직유 (Simile) — "처럼" / "같이":
-"Her hair was like silk."
-"He moved like a dancer."
+**직유 (Simile)** — "처럼" / "같이"
+- *Her hair was like silk.*
+- *He moved like a dancer.*
 
-은유 (Metaphor) — 직접적 동일시:
-"Her hair was silk."
-"Time is money."
+**은유 (Metaphor)** — 직접적 동일시
+- *Her hair was silk.*
+- *Time is money.*
 
-의인화 (Personification):
-"The wind whispered through the trees."
+**의인화 (Personification)**
+- *The wind whispered through the trees.*
 
-과장 (Hyperbole):
-"I've told you a million times."
-```
+**과장 (Hyperbole)**
+- *I've told you a million times.*
 
 각 비유는 *특정한 효과*를 만듭니다.
 
@@ -39,18 +37,13 @@ draft: false
 
 비유가 *연속해서* 등장하면 독자는 *숨 가쁘게 비교*를 따라가야 합니다.
 
-```
-회피 (비유 연속):
-Her smile was like sunshine. Her eyes were stars. Her voice was
-music. Her laugh was a brook. Her presence was a warm fire.
-```
+**회피 (비유 연속)**
+> *Her smile was like sunshine. Her eyes were stars. Her voice was music. Her laugh was a brook. Her presence was a warm fire.*
 
 이 단락은 *시각적으로 그림이 잡히지 않습니다*. 각 비유가 *서로의 효과를 약화*시킵니다.
 
-```
-선호 (한 비유 충실히):
-Her smile lit up the room, as if she had brought sunshine with her.
-```
+**선호 (한 비유 충실히)**
+> *Her smile lit up the room, as if she had brought sunshine with her.*
 
 한 비유에 *깊이*를 두면 효과가 살아납니다.
 
@@ -58,27 +51,21 @@ Her smile lit up the room, as if she had brought sunshine with her.
 
 가장 흔한 함정은 *은유의 혼합*입니다.
 
-```
-회피 (혼합 은유):
-He was a snake in the grass walking on thin ice.
+**회피 (혼합 은유)**
+> *He was a snake in the grass walking on thin ice.*
 
 분석:
-- "snake in the grass" — 배신자 (은유 1)
-- "walking on thin ice" — 위험한 상황 (은유 2)
+- *"snake in the grass"* — 배신자 (은유 1)
+- *"walking on thin ice"* — 위험한 상황 (은유 2)
 - 둘이 서로 *어울리지 않음*
-```
 
 같은 단락에서 *한 비유 체계*를 유지합니다.
 
-```
-회피 (혼합):
-She was the cornerstone of the team, but she also flew like a free
-bird through the project.
+**회피 (혼합)**
+> *She was the cornerstone of the team, but she also flew like a free bird through the project.*
 
-선호 (한 체계):
-She was the cornerstone of the team, supporting everyone around
-her and bearing the weight of every challenge.
-```
+**선호 (한 체계)**
+> *She was the cornerstone of the team, supporting everyone around her and bearing the weight of every challenge.*
 
 은유의 *건축적 무게*를 유지하거나, *자유로운 새*의 비유를 유지하거나. 둘을 *섞지 않습니다*.
 
@@ -115,11 +102,11 @@ her and bearing the weight of every challenge.
 
 White의 권고는 *아껴 쓰기*입니다.
 
-```
-한 단락에 비유 1개 이하 → 정상
-2개 → 주의 필요
-3개 이상 → 명백한 과용
-```
+| 한 단락의 비유 수 | 진단 |
+|--------------------|------|
+| 1개 이하 | 정상 |
+| 2개 | 주의 필요 |
+| 3개 이상 | 명백한 과용 |
 
 희소한 비유가 *강합니다*. 자주 등장하면 *효과가 약합니다*.
 
@@ -140,10 +127,8 @@ White의 권고는 *아껴 쓰기*입니다.
 
 가장 강한 결정 — *비유 없이도 쓸 수 있는가*.
 
-```
-비유 있음: "His smile was like the morning sun."
-비유 없음: "His smile lit up the room. People turned to look."
-```
+- **비유 있음**: *His smile was like the morning sun.*
+- **비유 없음**: *His smile lit up the room. People turned to look.*
 
 비유 없는 버전이 *더 강할 수 있습니다*. 행동과 결과로 *그림을 보여 줍니다*.
 

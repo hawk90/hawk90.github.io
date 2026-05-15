@@ -17,19 +17,17 @@ draft: false
 
 ## 명료함의 자리
 
-```
-명료함이 *필수*인 글:
+**명료함이 *필수*인 글**
 - 학술 논문
 - 비즈니스 문서
 - 기술 매뉴얼
 - 뉴스 기사
 - 교과서
 
-명료함이 *희생되어도 좋을 자리*:
+**명료함이 *희생되어도 좋을 자리***
 - 시
 - 일부 문학 (의도된 효과)
 - 광고 (감성적 영향)
-```
 
 대부분의 글에서 *명료함*은 첫 번째 미덕입니다.
 
@@ -37,12 +35,10 @@ draft: false
 
 어떤 작가는 의도적으로 모호하게 씁니다.
 
-```
-T.S. Eliot의 시
-Borges의 단편소설
-Kafka의 산문
-James Joyce의 *Ulysses*
-```
+- T.S. Eliot의 시
+- Borges의 단편소설
+- Kafka의 산문
+- James Joyce의 *Ulysses*
 
 그러나 White의 통찰:
 
@@ -54,13 +50,8 @@ James Joyce의 *Ulysses*
 
 자기 글을 쓰다 문장이 *너무 복잡*해진 자리. 흔합니다.
 
-```
-원본 (길을 잃음):
-The phenomenon, which was discovered in 1995 by a researcher
-working in collaboration with a team at the institute that was at
-the time supported by funding from agencies that have since
-restructured, suggests that ...
-```
+**원본 (길을 잃음)**
+> *The phenomenon, which was discovered in 1995 by a researcher working in collaboration with a team at the institute that was at the time supported by funding from agencies that have since restructured, suggests that ...*
 
 길을 잃었을 때 *가장 좋은 해결*은:
 
@@ -68,13 +59,8 @@ restructured, suggests that ...
 
 망가진 구조와 *싸우지 마세요*. 보통은 문장이 *너무 복잡해진 것*이 원인입니다. 두세 문장으로 쪼개세요.
 
-```
-수정 (쪼갬):
-The phenomenon was discovered in 1995. A researcher working with
-the institute team made the discovery. The team was funded by
-agencies that have since restructured. The phenomenon suggests
-that ...
-```
+**수정 (쪼갬)**
+> *The phenomenon was discovered in 1995. A researcher working with the institute team made the discovery. The team was funded by agencies that have since restructured. The phenomenon suggests that ...*
 
 같은 정보지만 *읽기 쉽게* 됩니다.
 
@@ -110,15 +96,12 @@ White가 가장 깊이 쓰는 단락:
 
 ## 명료함 vs 단순함
 
-```
-단순함 (simplicity) ≠ 명료함 (clarity)
+단순함(*simplicity*) ≠ 명료함(*clarity*).
 
-단순한 글이 모호할 수 있음.
-복잡한 글이 명료할 수 있음.
+- 단순한 글이 모호할 수 있음
+- 복잡한 글이 명료할 수 있음
 
-좋은 글의 목표는 — *그 주제에 필요한 정도의 복잡성*으로,
-*명료하게* 쓰는 것.
-```
+좋은 글의 목표는 — *그 주제에 필요한 정도의 복잡성*으로, *명료하게* 쓰는 것.
 
 복잡한 과학을 다룬다면 글이 단순할 수 없습니다. 그러나 *복잡한 글도 명료할 수 있습니다*.
 

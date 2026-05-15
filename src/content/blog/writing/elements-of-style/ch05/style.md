@@ -84,17 +84,14 @@ Strunk의 *엄격한 문법*에 White가 *작가의 시선*을 더했습니다. 
 
 > *Write with nouns and verbs, not with adjectives and adverbs.*
 
-```
-약함 (형용사 / 부사 가득):
-"He walked very quickly down the dimly lit, eerily quiet,
-mysteriously deserted street."
+**약함 (형용사 / 부사 가득)**
+> *He walked very quickly down the dimly lit, eerily quiet, mysteriously deserted street.*
 
-강함 (명사 / 동사):
-"He hurried down the dark, empty street."
+**강함 (명사 / 동사)**
+> *He hurried down the dark, empty street.*
 
-→ 명사 / 동사가 글의 *무게*를 든다
-→ 형용사 / 부사는 *도움*만
-```
+- 명사 / 동사가 글의 *무게*를 든다
+- 형용사 / 부사는 *도움*만
 
 White의 강조:
 > *형용사가 명사를 약화하고, 부사가 동사를 약화한다.*
@@ -105,41 +102,33 @@ White의 강조:
 
 > *Place yourself in the background.*
 
-```
-회피 (자기 과시):
-"I, the author, wish to argue that ..."
-"In my humble opinion, ..."
-"As I have already demonstrated, ..."
-
-선호 (작가는 배경에):
-"This study argues that ..."
-"The evidence suggests ..."
-"The results show ..."
-```
+| 회피 (자기 과시) | 선호 (작가는 배경에) |
+|-------------------|------------------------|
+| *I, the author, wish to argue that ...* | *This study argues that ...* |
+| *In my humble opinion, ...* | *The evidence suggests ...* |
+| *As I have already demonstrated, ...* | *The results show ...* |
 
 ### Reminder 5 — 수정 / 재작성
 
 > *Revise and rewrite.*
 
-```
 좋은 글의 *비밀*:
+
 - 초안은 모두 *서툴다*
 - 차이는 *수정에서* 나옴
 - 5번 수정한 글이 *1번 수정한 글*보다 항상 낫다
-```
 
 ### Reminder 14 — Fancy Words 피하라
 
 > *Avoid fancy words.*
 
-```
-회피                  선호
-utilize          →    use
-commence         →    begin
-purchase         →    buy
-endeavor         →    try
-ascertain        →    find out
-```
+| 회피 | 선호 |
+|------|------|
+| *utilize* | *use* |
+| *commence* | *begin* |
+| *purchase* | *buy* |
+| *endeavor* | *try* |
+| *ascertain* | *find out* |
 
 *간단한 단어*가 *강하다*. *어려운 단어 과시*는 *작가의 자신감 부족*의 표시.
 
