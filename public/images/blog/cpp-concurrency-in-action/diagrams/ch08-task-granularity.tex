@@ -7,31 +7,45 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  tiny/.style={rectangle, draw=conbord, fill=confill, line width=0.3pt, minimum width=4mm, minimum height=6mm, inner sep=0pt},
-  big/.style={rectangle, draw=conbord, fill=confill, line width=0.4pt, minimum height=6mm, inner sep=0pt},
-  mid/.style={rectangle, draw=impbord, fill=impfill, line width=0.4pt, minimum height=6mm, inner sep=0pt}
+  tinytask/.style={rectangle, draw=conbord, fill=confill, line width=0.3pt,
+                   minimum width=4mm, minimum height=6mm, inner sep=0pt},
+  bigtask/.style={rectangle, draw=conbord, fill=confill, line width=0.4pt,
+                  minimum height=6mm, inner sep=0pt},
+  midtask/.style={rectangle, draw=impbord, fill=impfill, line width=0.4pt,
+                  minimum height=6mm, inner sep=0pt}
 ]
 
-% ===== 너무 작은 작업 =====
-\node[font=\sffamily\bfseries, anchor=west] at (-6, 3.5) {너무 작은 작업};
+% ===== Too small =====
+\node[font=\sffamily\bfseries, anchor=west] at (-6, 3.5)
+    {너무 작은 작업};
 \foreach \i in {0,1,...,11} {
-  \node[tiny] at (\i*0.45 - 5.5, 3.0) {};
+  \node[tinytask] at (\i*0.45 - 5.5, 3.0) {};
 }
-\node[font=\sffamily\footnotesize, conbord, anchor=west] at (-6, 2.4) {오버헤드 > 실제 작업 (스레드 생성/동기화 비용 큼)};
+\node[font=\sffamily\footnotesize\itshape, text=conbord,
+      anchor=west, text width=14cm] at (-6, 2.3)
+    {오버헤드 > 실제 작업 — 스레드 생성·동기화 비용이 더 큼};
 
-% ===== 너무 큰 작업 =====
-\node[font=\sffamily\bfseries, anchor=west] at (-6, 1.2) {너무 큰 작업};
-\node[big, minimum width=72mm] at (-2.4, 0.7) {};
-\node[font=\sffamily\footnotesize, conbord, anchor=west] at (-6, 0.1) {로드 불균형 (일부 스레드만 바쁨)};
+% ===== Too big =====
+\node[font=\sffamily\bfseries, anchor=west] at (-6, 1.2)
+    {너무 큰 작업};
+\node[bigtask, minimum width=70mm] at (-2.5, 0.7) {};
+\node[font=\sffamily\footnotesize\itshape, text=conbord,
+      anchor=west, text width=14cm] at (-6, 0.0)
+    {로드 불균형 — 한 스레드만 일하고 나머지는 대기};
 
-% ===== 적절한 작업 =====
-\node[font=\sffamily\bfseries, anchor=west] at (-6, -1.1) {적절한 작업};
+% ===== Right-sized =====
+\node[font=\sffamily\bfseries, anchor=west] at (-6, -1.1)
+    {적절한 작업};
 \foreach \i in {0,1,2,3} {
-  \node[mid, minimum width=18mm] at (\i*1.9 - 4.6, -1.6) {};
+  \node[midtask, minimum width=18mm] at (\i*1.9 - 4.6, -1.6) {};
 }
-\node[font=\sffamily\footnotesize, impbord, anchor=west] at (-6, -2.2) {오버헤드 최소화 + 로드 균형};
+\node[font=\sffamily\footnotesize\itshape, text=impbord,
+      anchor=west, text width=14cm] at (-6, -2.3)
+    {오버헤드 최소 + 로드 균형};
 
-\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-6, -3.0) {경험 법칙: 청크 수 = 스레드 수 × 4--8};
+\node[font=\sffamily\footnotesize\itshape, anchor=west, text=hibord]
+    at (-6, -3.2)
+    {경험 법칙: 청크 수 = 스레드 수 $\times$ 4--8};
 
 \end{tikzpicture}
 \end{document}

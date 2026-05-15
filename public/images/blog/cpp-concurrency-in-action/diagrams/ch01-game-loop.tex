@@ -7,36 +7,52 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  st/.style={cls, fill=confill, draw=conbord, minimum width=18mm, minimum height=9mm},
-  thr/.style={cls, fill=impfill, draw=impbord, minimum width=40mm, minimum height=10mm}
+  st/.style={rectangle, rounded corners=2pt, draw=conbord, fill=confill,
+             line width=0.4pt, minimum width=18mm, minimum height=9mm,
+             inner sep=2pt, font=\sffamily\small, align=center},
+  thread/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+                 line width=0.4pt, minimum width=42mm, minimum height=10mm,
+                 inner sep=3pt, font=\sffamily, align=center},
+  stage/.style={-{Stealth[length=2mm]}, draw=edgec, line width=0.5pt}
 ]
 
-% ===== 단일 스레드 (왼쪽) =====
-\node[font=\sffamily\bfseries] at (-3.5, 3.5) {단일 스레드 게임 루프};
+% ===== Single-threaded (left) =====
+\node[font=\sffamily\bfseries, anchor=west] at (-6.5, 3.8)
+    {단일 스레드 게임 루프};
 
-\node[st] (in)  at (-6.0, 2.3) {입력};
-\node[st] (ph)  at (-4.5, 2.3) {물리};
-\node[st] (ai)  at (-3.0, 2.3) {AI};
-\node[st] (rd)  at (-1.5, 2.3) {렌더};
+\node[st] (in) at (-6.0, 2.5) {입력};
+\node[st] (ph) at (-4.0, 2.5) {물리};
+\node[st] (ai) at (-2.0, 2.5) {AI};
+\node[st] (rd) at ( 0.0, 2.5) {렌더};
 
-\draw[arr] (in.east) -- (ph.west);
-\draw[arr] (ph.east) -- (ai.west);
-\draw[arr] (ai.east) -- (rd.west);
-\draw[arr, draw=conbord, dashed] (rd.east) to[bend left=50] node[below=2pt, font=\sffamily\tiny, pos=0.5] {반복} (in.west);
+\draw[stage] (in) -- (ph);
+\draw[stage] (ph) -- (ai);
+\draw[stage] (ai) -- (rd);
 
-\node[font=\sffamily\footnotesize\itshape, anchor=west, text=conbord] at (-6.0, -0.1) {AI 느리면 입력도 멈춤};
+% Loop arrow — wide arc below
+\draw[-{Stealth[length=2mm]}, draw=conbord, dashed, line width=0.5pt]
+    (rd.south) to[out=-90, in=-90, looseness=0.6]
+    node[below, font=\sffamily\footnotesize, text=conbord, pos=0.5] {repeat}
+    (in.south);
 
-% ===== 멀티 스레드 (오른쪽) =====
-\node[font=\sffamily\bfseries] at (3.5, 3.5) {멀티 스레드 게임 루프};
+\node[font=\sffamily\footnotesize\itshape, text=conbord, anchor=west,
+      text width=7.5cm] at (-6.5, -0.5)
+    {AI 한 프레임 느려지면 입력도 즉시 멈춤};
 
-\node[thr] (main) at (3.5, 2.5) {메인 — 입력 + 렌더};
-\node[thr] (w1)   at (3.5, 1.4) {워커 — 물리 계산};
-\node[thr] (w2)   at (3.5, 0.3) {워커 — AI 계산};
+% ===== Multi-threaded (right) =====
+\node[font=\sffamily\bfseries, anchor=west] at (2.5, 3.8)
+    {멀티 스레드 게임 루프};
 
-\draw[arr, dashed, draw=edgesc] (main.south) -- (w1.north);
-\draw[arr, dashed, draw=edgesc] (w1.south) -- (w2.north);
+\node[thread] (main) at (5.0, 2.7) {Main — 입력 + 렌더};
+\node[thread] (w1)   at (5.0, 1.4) {Worker — 물리};
+\node[thread] (w2)   at (5.0, 0.1) {Worker — AI};
 
-\node[font=\sffamily\footnotesize\itshape, anchor=west, text=impbord] at (1, -0.7) {AI 느려도 입력 즉각 반응};
+% Independent threads — show with dotted vertical separator, not sequential
+\draw[draw=edgesc, dashed, line width=0.3pt] (main.west) ++(-0.3,0) -- ++(0,-3);
+
+\node[font=\sffamily\footnotesize\itshape, text=impbord, anchor=west,
+      text width=7.5cm] at (2.5, -0.5)
+    {AI 느려도 입력·렌더가 독립적으로 진행};
 
 \end{tikzpicture}
 \end{document}

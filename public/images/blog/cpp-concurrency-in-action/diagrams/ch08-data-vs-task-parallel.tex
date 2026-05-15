@@ -7,65 +7,93 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  data/.style={cls, fill=clifill, draw=clibord, minimum width=8mm, minimum height=7mm, font=\sffamily\footnotesize},
-  thr/.style={cls, fill=impfill, draw=impbord, minimum width=20mm, minimum height=7mm, font=\sffamily\footnotesize},
-  op/.style={cls, fill=hifill, draw=hibord, minimum width=18mm, minimum height=7mm, font=\sffamily\footnotesize}
+  dcell/.style={rectangle, draw=clibord, fill=clifill, line width=0.4pt,
+                minimum width=7mm, minimum height=7mm, inner sep=0pt,
+                font=\sffamily\footnotesize, rounded corners=1pt},
+  thread/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+                 line width=0.4pt, minimum width=22mm, minimum height=7mm,
+                 inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  op/.style={rectangle, rounded corners=2pt, draw=hibord, fill=hifill,
+             line width=0.4pt, minimum width=22mm, minimum height=7mm,
+             inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  fan/.style={-{Stealth[length=1.5mm]}, draw=edgesc, line width=0.3pt}
 ]
 
-% =========== 데이터 병렬 (왼쪽) ===========
-\node[font=\sffamily\bfseries] at (0, 5.0) {데이터 병렬 (Data Parallel)};
+% =========== LEFT: Data Parallel ===========
+\node[font=\sffamily\bfseries\small] at (-3.5, 4.5) {Data Parallel};
 
-% 데이터
-\foreach \i/\x in {1/-3, 2/-2, 3/-1, 4/0, 5/1, 6/2, 7/3, 8/4} {
-  \node[data] (d\i) at (\x*0.7, 4.0) {\i};
+% Data row (8 items)
+\foreach \i in {1,2,...,8} {
+  \node[dcell] (d\i) at (-7 + \i*0.8, 3.4) {\i};
 }
 
-% 스레드 + 처리
-\foreach \i/\y in {1/3.0, 2/2.2, 3/1.4, 4/0.6} {
-  \node[thr] (t\i) at (-1.6, \y) {Thread \i};
-  \node[op] (op\i) at (1.6, \y) {process};
-  \draw[arr] (t\i.east) -- (op\i.west);
-}
+% 4 threads + ops — each thread handles 2 data items
+\node[thread] (t1) at (-5, 1.8) {Thread 1};
+\node[thread] (t2) at (-5, 0.9) {Thread 2};
+\node[thread] (t3) at (-5, 0.0) {Thread 3};
+\node[thread] (t4) at (-5, -0.9) {Thread 4};
 
-% 데이터 → 스레드 연결
-\draw[arr, draw=edgesc] (d1.south) -- (-2.4, 3.0);
-\draw[arr, draw=edgesc] (d2.south) -- (-1.0, 3.0);
-\draw[arr, draw=edgesc] (d3.south) -- (-2.4, 2.2);
-\draw[arr, draw=edgesc] (d4.south) -- (-1.0, 2.2);
-\draw[arr, draw=edgesc] (d5.south) -- (-2.4, 1.4);
-\draw[arr, draw=edgesc] (d6.south) -- (-1.0, 1.4);
-\draw[arr, draw=edgesc] (d7.south) -- (-2.4, 0.6);
-\draw[arr, draw=edgesc] (d8.south) -- (-1.0, 0.6);
+\node[op] (op1) at (-1.5, 1.8) {process};
+\node[op] (op2) at (-1.5, 0.9) {process};
+\node[op] (op3) at (-1.5, 0.0) {process};
+\node[op] (op4) at (-1.5, -0.9) {process};
 
-\node[font=\sffamily\footnotesize\itshape] at (0, -0.2) {같은 연산, 다른 데이터};
+\draw[uses] (t1) -- (op1);
+\draw[uses] (t2) -- (op2);
+\draw[uses] (t3) -- (op3);
+\draw[uses] (t4) -- (op4);
 
-% =========== 작업 병렬 (오른쪽) ===========
-\begin{scope}[xshift=8.5cm]
-\node[font=\sffamily\bfseries] at (0, 5.0) {작업 병렬 (Task Parallel)};
+% Data assignment (data → thread)
+\draw[fan] (d1.south) to[bend right=10] (t1.north);
+\draw[fan] (d2.south) to[bend right=10] (t1.north);
+\draw[fan] (d3.south) to[bend right=10] (t2.north);
+\draw[fan] (d4.south) to[bend right=10] (t2.north);
+\draw[fan] (d5.south) to[bend right=10] (t3.north);
+\draw[fan] (d6.south) to[bend right=10] (t3.north);
+\draw[fan] (d7.south) to[bend right=10] (t4.north);
+\draw[fan] (d8.south) to[bend right=10] (t4.north);
 
-% 입력 이미지
-\node[data, minimum width=18mm, minimum height=10mm, fill=absfill, draw=absbord] (img) at (0, 4.0) {이미지};
+\node[font=\sffamily\footnotesize\itshape, text=edgec] at (-3.5, -2.0)
+    {같은 연산, 다른 데이터 (SPMD)};
 
-% 3 stages
-\node[thr] (t1) at (-2, 2.5) {Thread 1};
-\node[thr] (t2) at (0, 2.5)  {Thread 2};
-\node[thr] (t3) at (2, 2.5)  {Thread 3};
+% =========== RIGHT: Task Parallel ===========
+\begin{scope}[xshift=12cm]
+\node[font=\sffamily\bfseries\small] at (-3.5, 4.5) {Task Parallel};
 
-\node[op]  (o1) at (-2, 1.3) {리사이즈};
-\node[op]  (o2) at (0, 1.3)  {필터};
-\node[op]  (o3) at (2, 1.3)  {압축};
+% Input
+\node[dcell, minimum width=22mm, minimum height=10mm,
+      fill=absfill, draw=absbord] (img) at (-3.5, 3.4) {image};
 
-% 결과
-\node[data, minimum width=22mm, minimum height=10mm, fill=confill, draw=conbord] (res) at (0, 0.0) {결과};
+% 3 threads, different operations on same data
+\node[thread] (t1b) at (-6, 1.8) {Thread 1};
+\node[op]     (o1b) at (-6, 0.6) {resize};
 
-% 연결
-\foreach \i in {1,2,3} {
-  \draw[arr] (img.south) -- (t\i.north);
-  \draw[arr] (t\i.south) -- (o\i.north);
-  \draw[arr] (o\i.south) -- (res.north);
-}
+\node[thread] (t2b) at (-3.5, 1.8) {Thread 2};
+\node[op]     (o2b) at (-3.5, 0.6) {filter};
 
-\node[font=\sffamily\footnotesize\itshape] at (0, -1.0) {다른 연산, 같은 / 다른 데이터};
+\node[thread] (t3b) at (-1, 1.8) {Thread 3};
+\node[op]     (o3b) at (-1, 0.6) {encode};
+
+\draw[uses] (t1b) -- (o1b);
+\draw[uses] (t2b) -- (o2b);
+\draw[uses] (t3b) -- (o3b);
+
+% Fan-out from img to threads
+\draw[fan] (img.south) to[bend right=20] (t1b.north);
+\draw[fan] (img.south) -- (t2b.north);
+\draw[fan] (img.south) to[bend left=20] (t3b.north);
+
+% Result
+\node[dcell, minimum width=24mm, minimum height=10mm,
+      fill=confill, draw=conbord] (res) at (-3.5, -0.8) {result};
+
+% Fan-in
+\draw[fan] (o1b.south) to[bend left=15] (res.north);
+\draw[fan] (o2b.south) -- (res.north);
+\draw[fan] (o3b.south) to[bend right=15] (res.north);
+
+\node[font=\sffamily\footnotesize\itshape, text=edgec] at (-3.5, -2.0)
+    {다른 연산, 파이프라인 단계};
 \end{scope}
 
 \end{tikzpicture}

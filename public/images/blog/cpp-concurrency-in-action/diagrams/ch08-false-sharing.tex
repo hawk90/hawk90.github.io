@@ -7,38 +7,57 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  core/.style={cls, fill=absfill, draw=absbord, minimum width=22mm, minimum height=10mm, font=\sffamily\bfseries},
-  cacheline/.style={rectangle, draw=conbord, fill=confill, line width=0.5pt, minimum height=8mm, inner sep=0pt, font=\sffamily\footnotesize},
-  slot/.style={rectangle, draw=nodebord, fill=clifill, line width=0.4pt, minimum width=10mm, minimum height=8mm, inner sep=0pt, font=\sffamily\footnotesize}
+  core/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+               line width=0.5pt, minimum width=22mm, minimum height=10mm,
+               inner sep=0pt, font=\sffamily\bfseries, align=center},
+  cacheline/.style={rectangle, draw=conbord, fill=confill, line width=0.5pt,
+                    minimum height=11mm, inner sep=0pt},
+  slot/.style={rectangle, draw=nodebord, fill=clifill, line width=0.4pt,
+               minimum width=11mm, minimum height=9mm, inner sep=0pt,
+               font=\sffamily\footnotesize},
+  hot/.style={slot, fill=hifill, draw=hibord},
+  wr/.style={-{Stealth[length=2.5mm]}, draw=conbord, line width=0.7pt}
 ]
 
-\node[font=\sffamily\bfseries] at (3, 4.5) {False Sharing — 64-byte cache line};
+% Title
+\node[font=\sffamily\bfseries\small] at (0, 4.5)
+    {False Sharing — same 64-byte cache line};
 
-% Core 1
-\node[core] (c1) at (-2, 2.5) {Core 1};
+% Title for cache line region (well above box)
+\node[font=\sffamily\bfseries\footnotesize] at (3.0, 3.4)
+    {Shared cache line (64 B)};
 
-% Core 2
-\node[core] (c2) at (-2, -0.5) {Core 2};
+% Cache line on the right with cells
+\node[cacheline, minimum width=80mm] (cl) at (3.0, 2.5) {};
+\node[hot]  (k0) at (-0.3, 2.5) {counter[0]};
+\node[hot]  (k1) at (0.9,  2.5) {counter[1]};
+\node[slot] at (2.1, 2.5) {\ldots};
+\node[slot] at (3.3, 2.5) {\ldots};
+\node[slot] at (4.5, 2.5) {\ldots};
+\node[slot] at (5.7, 2.5) {\ldots};
 
-% Shared cache line (둘 다 가리킴)
-\node[cacheline, minimum width=80mm] (cl) at (5, 1.0) {};
-\node[font=\sffamily\bfseries\footnotesize, anchor=south] at (5, 1.5) {Shared cache line (64 bytes)};
+% Two cores below
+\node[core] (c1) at (-3.5, 0.0)  {Core 1};
+\node[core] (c2) at (-1.0, 0.0)  {Core 2};
 
-% 안의 카운터들
-\node[slot] (k0) at (1.5, 1.0) {counter[0]};
-\node[slot] (k1) at (3.0, 1.0) {counter[1]};
-\node[slot, fill=nodefill] at (4.5, 1.0) {\ldots};
-\node[slot, fill=nodefill] at (6.0, 1.0) {\ldots};
-\node[slot, fill=nodefill] at (7.5, 1.0) {\ldots};
-\node[slot, fill=nodefill] at (8.5, 1.0) {\ldots};
+% Write arrows — vertical, no crossing
+\draw[wr] (c1.north) -- (c1.north |- k0.south);
+\draw[wr] (c2.north) -- (c2.north |- k1.south);
 
-% 화살표 (충돌!)
-\draw[thr] (c1.east) -- node[above, font=\sffamily\footnotesize] {write} (k0.west);
-\draw[thr] (c2.east) -- node[below, font=\sffamily\footnotesize] {write} (k1.west);
+% Labels next to arrows (clearly separated)
+\node[font=\sffamily\footnotesize, text=conbord, anchor=east]
+    at ([xshift=-0.2cm]c1.north |- 0, 1.2) {write};
+\node[font=\sffamily\footnotesize, text=conbord, anchor=west]
+    at ([xshift=0.2cm]c2.north |- 0, 1.2) {write};
 
-% 메시지
-\node[font=\sffamily\footnotesize\itshape, conbord, anchor=west] at (-2, -2.5) {다른 변수지만 같은 캐시 라인 → 한 코어 쓰기가 다른 코어 캐시 무효화};
-\node[font=\sffamily\footnotesize\itshape, anchor=west] at (-2, -3.2) {결과: cache line bouncing, 처리량 폭락};
+% Annotation
+\node[font=\sffamily\footnotesize\itshape, text=conbord, align=left,
+      anchor=west, text width=14cm]
+    at (-5.5, -1.5)
+    {다른 변수지만 같은 캐시 라인 — 한 코어의 write가 다른 코어 캐시를 무효화};
+\node[font=\sffamily\footnotesize\itshape, anchor=west, text width=14cm]
+    at (-5.5, -2.2)
+    {결과: cache line bouncing, 처리량 급락};
 
 \end{tikzpicture}
 \end{document}
