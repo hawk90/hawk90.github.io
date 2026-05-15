@@ -8,31 +8,31 @@ seriesOrder: 3
 draft: false
 ---
 
-## 왜 타겟 중심 접근법이 필요한가
+## 왜 타겟 중심 접근법인가
 
-예전 CMake 스타일은 전역 변수를 사용했습니다.
+CMake 2.x 시절의 표준 패턴은 *전역 변수*에 모든 것을 담는 모양이었습니다.
 
 ```cmake
-# Old CMake (전역 설정)
+# 옛 CMake — 전역 설정
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 include_directories(include)
 link_libraries(pthread)
 
 add_executable(app1 src/app1.cpp)
 add_executable(app2 src/app2.cpp)
-# 두 실행 파일 모두에 -Wall, include, pthread가 적용됨
+# 두 실행 파일 모두에 -Wall, include, pthread가 자동 적용됨
 ```
 
-이 방식의 문제점은 다음과 같습니다.
+작은 프로젝트에서는 깔끔해 보입니다. 하지만 *프로젝트가 커지자마자* 세 가지 문제가 줄줄이 등장합니다.
 
-1. **전역 오염**: 모든 타겟에 같은 설정이 적용됩니다. `app2`에는 `pthread`가 필요 없는데도 링크됩니다.
-2. **의존성 불명확**: 어떤 타겟이 어떤 설정을 필요로 하는지 알 수 없습니다.
-3. **재사용 어려움**: 라이브러리를 다른 프로젝트에서 사용하려면 필요한 설정을 다시 지정해야 합니다.
+1. **전역 오염**: 모든 타겟이 *모든 설정*을 받습니다. `app2`가 pthread를 안 쓰는데도 강제 링크되고, 라이브러리 X에만 필요한 매크로가 *모든 라이브러리*에 들어갑니다.
+2. **의존성 불명확**: 어떤 타겟이 *무엇 때문에* 특정 옵션을 받았는지 추적이 안 됩니다. 코드 위에서 아래로 흐르는 *순서 의존성*이 모든 줄에 깔립니다.
+3. **재사용 불가**: 다른 프로젝트에서 이 라이브러리를 쓰려면, 어떤 옵션·include·라이브러리가 *그 라이브러리를 위해* 필요했는지를 직접 다시 적어야 합니다.
 
-**Modern CMake**는 **타겟 중심 접근법**을 사용합니다.
+CMake 3.0(2014) 이후 권장되는 *Modern CMake* 모델은 *모든 것을 타겟에 붙입니다*.
 
 ```cmake
-# Modern CMake (타겟 설정)
+# Modern CMake — 타겟별 설정
 add_executable(app1 src/app1.cpp)
 target_compile_options(app1 PRIVATE -Wall)
 target_include_directories(app1 PRIVATE include)
@@ -41,12 +41,18 @@ target_link_libraries(app1 PRIVATE pthread)
 add_executable(app2 src/app2.cpp)
 target_compile_options(app2 PRIVATE -Wall)
 target_include_directories(app2 PRIVATE include)
-# app2는 pthread 없이 빌드
+# app2는 pthread 없이 빌드 — 깔끔
 ```
 
-설정이 타겟에 캡슐화되어 명확하고, 라이브러리로 묶으면 재사용도 쉬워집니다.
+이 모델의 장점은 *명시성*과 *전이성* 둘입니다. 설정이 *어느 타겟에 붙어 있는지* 코드에서 즉시 보입니다. 그리고 한 타겟을 다른 타겟이 *사용*하면, 필요한 설정이 *자동으로 따라옵니다*(PUBLIC/INTERFACE 가시성). 이게 *전이적 의존성 추적*이고, Modern CMake의 가장 중요한 능력입니다.
 
 ![Old CMake vs Modern CMake](/images/blog/cmake/diagrams/ch03-old-vs-modern.svg)
+
+이 챕터의 목표는 셋입니다.
+
+1. 타겟의 *세 종류*(실행 파일·라이브러리·커스텀)와 그 차이.
+2. *PRIVATE / PUBLIC / INTERFACE* 세 가시성의 의미와 선택 기준.
+3. 라이브러리를 *재사용 가능한 단위*로 만드는 표준 패턴.
 
 ---
 

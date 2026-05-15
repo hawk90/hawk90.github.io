@@ -8,26 +8,30 @@ seriesOrder: 5
 draft: false
 ---
 
-## 왜 find_package가 필요한가
+## 왜 `find_package`가 필요한가
 
-프로젝트가 외부 라이브러리를 사용한다고 가정합니다. OpenSSL로 암호화를 하고, zlib으로 압축을 합니다. Makefile로 직접 작성하면 이렇게 됩니다.
+프로젝트가 OpenSSL과 zlib을 사용한다고 합시다. Makefile로 *손으로* 작성하면 OS마다 경로가 흩어져 있어 곤란해집니다.
 
 ```makefile
 # Linux
 CFLAGS += -I/usr/include/openssl
 LDFLAGS += -L/usr/lib -lssl -lcrypto -lz
 
-# macOS (Homebrew)
+# macOS (Homebrew Apple Silicon)
 CFLAGS += -I/opt/homebrew/opt/openssl/include
 LDFLAGS += -L/opt/homebrew/opt/openssl/lib -lssl -lcrypto -lz
 
-# Windows
-# ... 또 다른 경로
+# macOS (Homebrew Intel) — 또 다름
+CFLAGS += -I/usr/local/opt/openssl/include
+# ...
+
+# Windows + vcpkg — 또 다름
+# ...
 ```
 
-플랫폼마다 라이브러리 경로가 다릅니다. 버전이 바뀌면 경로도 바뀝니다. 이 정보를 직접 관리하는 것은 고통입니다.
+플랫폼마다 경로가 다르고, 패키지 매니저마다 또 다릅니다. 버전이 바뀌면 경로도 바뀝니다. *이 정보를 직접 추적하는 것은 정상적인 개발자의 일이 아닙니다*.
 
-CMake의 `find_package`는 이 문제를 해결합니다. 라이브러리 이름만 지정하면 CMake가 알아서 찾습니다.
+CMake의 답은 단순합니다. *라이브러리 이름만 알려 줘라. CMake가 찾는다*.
 
 ```cmake
 find_package(OpenSSL REQUIRED)
@@ -41,7 +45,18 @@ target_link_libraries(myapp PRIVATE
 )
 ```
 
-CMake가 플랫폼별 경로를 처리하고, 인클루드 디렉터리와 링크 플래그를 자동으로 설정합니다.
+이 다섯 줄이 *모든 OS*에서 동작합니다. CMake는:
+1. OS와 패키지 매니저별 *표준 경로*를 순회하며 라이브러리를 찾고,
+2. 헤더 경로·라이브러리 경로를 *임포트 타겟*(`OpenSSL::SSL`, `ZLIB::ZLIB`)에 묶고,
+3. 그 타겟을 사용하는 모든 코드에 *전이적으로 옵션을 전파*합니다.
+
+`target_link_libraries`에 적은 `OpenSSL::SSL`이 어떻게 펼쳐지는지 보면, 결과적으로 위의 `-I.../include` + `-l ssl -l crypto` 같은 컴파일러 옵션이 *자동으로* 명령에 들어갑니다. 하지만 *우리 코드*에서는 이름만 보입니다. 이게 Modern CMake의 큰 그림입니다.
+
+이 챕터는 다음을 다룹니다.
+
+1. `find_package`의 *두 가지 동작 모드* — Module 모드와 Config 모드.
+2. 라이브러리가 없는 시스템에서 *FetchContent로 자동 다운로드*하기.
+3. `find_package` + FetchContent의 *하이브리드 패턴* (3.25+).
 
 ---
 

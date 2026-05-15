@@ -10,15 +10,16 @@ draft: false
 
 ## 왜 CMake 언어를 알아야 하는가
 
-Ch 1에서 세 줄짜리 CMakeLists.txt를 작성했습니다. 간단한 프로젝트는 이것으로 충분합니다. 그러나 실제 프로젝트에서는 다음과 같은 요구가 생깁니다.
+[Ch 1](/blog/tools/cmake/chapter01-intro)의 세 줄짜리 CMakeLists.txt는 *시작점*입니다. 실제 프로젝트는 곧 다음과 같은 요구를 만납니다.
 
-- Debug 빌드에서만 특정 정의를 추가하고 싶다
-- GCC와 Clang에서 다른 경고 옵션을 쓰고 싶다
-- 소스 파일 목록을 변수로 관리하고 싶다
-- 반복되는 설정을 함수로 묶고 싶다
+- Debug 빌드에서만 특정 매크로를 켜고 싶다.
+- GCC와 Clang에서 *다른 경고 옵션*을 쓰고 싶다.
+- 소스 파일 목록을 한 자리에 *변수로* 모으고 싶다.
+- 반복되는 설정을 *함수*로 묶고 싶다.
+
+이런 요구는 모두 CMake가 *자체 스크립팅 언어*라는 사실에서 출발합니다.
 
 ```cmake
-# 이런 코드를 작성하려면 CMake 언어를 알아야 합니다
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(app PRIVATE -Wall -Wextra -Werror)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -26,13 +27,15 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 ```
 
-CMake는 자체 스크립팅 언어를 가지고 있습니다. 변수, 리스트, 조건문, 함수 등 프로그래밍 언어의 기본 요소를 제공합니다. 이 장에서 CMake 언어의 핵심을 다룹니다.
+겉으로 평범해 보이는 위 코드에 *CMake 언어의 특이점이 모두* 담겨 있습니다. 변수 참조, 문자열 비교, 조건 분기, 컴파일러 식별. 이 장은 그 언어의 *핵심 어휘*를 다룹니다.
+
+CMake 언어는 다른 스크립팅 언어와 비교했을 때 *기묘하게 느껴지는 자리*가 몇 군데 있습니다. 변수가 *문자열만 있는 점*, 리스트가 *세미콜론으로 구분되는 점*, `if()`가 *변수 이름을 자동 역참조하는 점*. 다른 언어 경험이 있다면 이런 자리에서 한 번씩 발을 헛디딥니다. 본 장은 그런 함정들을 미리 짚어 둡니다.
 
 ---
 
 ## CMake 언어 기초
 
-CMake는 **명령어 기반** 언어입니다. 모든 구문은 `명령(인자1 인자2 ...)` 형태입니다.
+CMake는 *명령어 기반* 언어입니다. 모든 구문이 `명령(인자1 인자2 ...)` 모양입니다. Python·JavaScript처럼 *연산자나 표현식*이 없습니다. 대입도 `=`이 아니라 `set(...)`이라는 명령입니다. 이 사실이 처음에는 어색하지만, 곧 *대부분의 일이 명령 호출 한 줄로 끝나는 깔끔함*으로 다가옵니다.
 
 ```cmake
 cmake_minimum_required(VERSION 3.15)
@@ -81,7 +84,11 @@ set(SRCS main.cpp;utils.cpp;config.cpp)
 
 ---
 
-## 변수
+## 변수 — 모두 *문자열*이다
+
+CMake의 가장 큰 특징 중 하나: *모든 변수는 문자열*입니다. 숫자도, 리스트도, 불리언도 결국 문자열입니다. `10`이라는 변수의 *내부 표현*은 문자열 `"10"`이고, `TRUE`도 문자열 `"TRUE"`입니다. 비교 시점에 CMake가 의미를 *해석*합니다.
+
+이 단일 타입 모델은 단순하지만 함정도 있습니다. *빈 문자열*과 *정의되지 않은 변수*가 거의 같은 식으로 동작하고, 리스트는 *세미콜론으로 구분된 문자열*이기 때문에 공백이 끼면 의미가 달라집니다.
 
 ### 변수 설정과 참조
 
@@ -726,7 +733,7 @@ file(GENERATE
 
 ## 다음 장 예고
 
-Ch 3에서는 타겟과 라이브러리를 다룹니다. `add_library`, `target_link_libraries`, 그리고 PRIVATE/PUBLIC/INTERFACE 가시성을 살펴봅니다.
+[Ch 3: 타겟](/blog/tools/cmake/chapter03-targets)에서는 *Modern CMake의 심장* — 타겟(target)을 다룹니다. `add_executable`·`add_library`·`target_link_libraries`와 그 모든 곳에 등장하는 *PRIVATE / PUBLIC / INTERFACE* 세 가시성. 이 셋의 의미를 정확히 잡으면 의존성 추적의 90%가 끝납니다.
 
 ## 참고 자료
 

@@ -10,26 +10,31 @@ draft: false
 
 ## 왜 설치 규칙이 필요한가
 
-빌드만 하면 결과물은 빌드 디렉터리 안에 흩어져 있습니다.
+빌드가 끝나면 산물은 *빌드 디렉터리에 어지럽게 흩어진 상태*입니다.
 
 ```
 build/
 ├── myapp                  # 실행 파일
 ├── libmylib.so           # 공유 라이브러리
-├── CMakeFiles/           # CMake 내부 파일들
-├── cmake_install.cmake   # 설치 스크립트
-└── ... (수십 개의 파일들)
+├── CMakeFiles/           # CMake 내부
+├── cmake_install.cmake   # 설치 스크립트 (CMake가 생성)
+└── ... 수십 개의 파일
 ```
 
-이 상태에서는 배포할 수 없습니다. 사용자에게 "빌드 디렉터리를 통째로 복사하세요"라고 할 수는 없기 때문입니다. 시스템에 설치하려면 파일들이 올바른 위치로 이동해야 합니다.
+이대로는 *배포할 수가 없습니다*. 사용자에게 "이 디렉터리를 통째로 복사하세요"라고 할 수 없기 때문입니다. 실행 파일은 `/usr/local/bin`에, 라이브러리는 `/usr/local/lib`에, 헤더는 `/usr/local/include`에 가야 합니다. 그것도 *플랫폼별 관행에 맞춰* 다른 자리에 가야 합니다.
 
-| 설치 전 (빌드 디렉터리) | 설치 후 (시스템) |
+| 설치 전 (빌드 디렉터리) | 설치 후 (Linux/macOS 표준) |
 |---|---|
 | `build/myapp` | `/usr/local/bin/myapp` |
 | `build/libmylib.so` | `/usr/local/lib/libmylib.so` |
 | `src/include/mylib/*.h` | `/usr/local/include/mylib/*.h` |
 
-`install()` 명령은 이 매핑을 정의합니다. 빌드 시스템이 자동으로 올바른 위치에 파일을 복사하도록 규칙을 선언하는 것입니다.
+`install()` 명령은 이 *매핑 규칙*을 CMakeLists.txt에 *선언*하는 도구입니다. 한 번 적어 두면 `cmake --install build`로 *항상 같은 결과*를 얻습니다. *어떤 플랫폼에서도, 어느 PREFIX로 호출해도, 어느 패키저가 호출해도* 결과는 일관됩니다.
+
+이 챕터의 두 큰 주제는 다음과 같습니다.
+
+1. **`install()` 규칙** — 타겟·파일·헤더·디렉터리·내보내기를 *올바른 자리*에 두기.
+2. **CPack** — `install()` 규칙을 *DEB·RPM·NSIS·DMG* 패키지로 자동 변환.
 
 ![CMake 설치 파이프라인](/images/blog/cmake/diagrams/ch07-install-pipeline.svg)
 
