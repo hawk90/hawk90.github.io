@@ -374,6 +374,99 @@ include graphics.mk
 
 ---
 
+## 특수 타겟 — `.PHONY` 그 다음
+
+`.PHONY`(Ch 1에서 본 것)는 Make가 *내부 동작을 사용자에게 노출하는 방법*입니다. 같은 점(`.`)으로 시작하는 *특수 타겟*이 여럿 있고, 각각이 Make의 한 가지 동작을 켜고 끄거나 바꿉니다. 다음 셋이 실무에서 가장 자주 등장합니다.
+
+### `.SECONDARY` — *중간 산물 보존*
+
+Make는 *암시적 규칙 사슬*로 만들어진 *중간 파일*을 빌드 후 자동 삭제합니다. 예컨대 `.y → .c → .o`로 가는 사슬에서 `.c`가 중간 파일이면, 빌드가 끝난 뒤 사라집니다.
+
+```makefile
+%.c: %.y
+	yacc -o $@ $<
+
+%.o: %.c
+	gcc -c $< -o $@
+
+myparser.o: myparser.y
+# yacc가 myparser.c를 만들고, gcc가 컴파일하고, 그 뒤 myparser.c는 삭제됨
+```
+
+대부분의 경우는 이 동작이 *원하는 결과*입니다. 하지만 중간 파일을 *디버깅용으로 남겨 두고 싶을 때*가 있습니다. 그때 `.SECONDARY`를 씁니다.
+
+```makefile
+.SECONDARY:    # 모든 중간 파일 보존
+
+# 또는 특정 파일만
+.SECONDARY: myparser.c
+```
+
+빈 `.SECONDARY:`는 *모든 중간 파일*을 보존하라는 뜻입니다. 큰 자동 생성 코드(yacc/lex 출력)를 다룰 때 자주 켜 둡니다.
+
+### `.PRECIOUS` — *중단 시 삭제 방지*
+
+Make는 *레시피 실행 중에 인터럽트되면 부분적으로 만들어진 타겟을 삭제*합니다. 깨진 산물이 다음 빌드를 망치는 사고를 막기 위해서입니다.
+
+```bash
+$ make myapp
+# 컴파일러가 myapp.o를 만들기 시작했는데...
+# (Ctrl-C로 중단)
+# Make가 자동으로 부분 myapp.o를 삭제
+```
+
+대부분 환영할 동작이지만, *생성에 매우 오래 걸리는 산물*(예: 외부 다운로드 + 빌드)에서는 한 번 만든 걸 *잃기 싫을 때*가 있습니다. 그때 `.PRECIOUS`를 씁니다.
+
+```makefile
+.PRECIOUS: downloaded-archive.tar.gz
+
+downloaded-archive.tar.gz:
+	curl -O https://example.com/big-file.tar.gz
+```
+
+`.PRECIOUS`로 묶인 파일은 *중단 시에도 보존*됩니다. 다음 빌드에서 그대로 재사용되어 다시 받지 않아도 됩니다.
+
+`.SECONDARY`와의 차이: `.SECONDARY`는 *빌드 후 자동 삭제 방지*, `.PRECIOUS`는 *중단 시 부분 산물 삭제 방지*. 둘 다 켜면 *어떤 상황에서도 안 지워집니다*.
+
+### `.DELETE_ON_ERROR` — *반대 방향, 실패 시 강제 삭제*
+
+기본적으로 Make는 *레시피가 실패해도* 그동안 만들어진 부분 산물을 삭제하지 않습니다. 이 동작이 의외의 사고를 부릅니다.
+
+```makefile
+build/output.tar.gz: input.txt
+	gzip -c $< > $@      # 만약 gzip이 도중에 실패하면?
+```
+
+`gzip`이 *부분적으로 출력을 쓰고 실패*하면, `output.tar.gz`가 *불완전한 상태로* 디스크에 남습니다. mtime은 최신이라 *다음 빌드에서 Make는 이미 만들어진 것으로 판단*합니다. 결과: *깨진 산물을 가지고 빌드가 진행*됩니다.
+
+`.DELETE_ON_ERROR`는 이 함정을 막습니다.
+
+```makefile
+.DELETE_ON_ERROR:
+
+build/output.tar.gz: input.txt
+	gzip -c $< > $@
+```
+
+이제 `gzip`이 실패하면 *Make가 부분 `output.tar.gz`를 자동으로 삭제*합니다. 다음 빌드가 새로 시도합니다.
+
+> 💡 *항상 켜 두면 좋은 옵션*입니다. 안 켜면 *언젠가* 위 사고가 납니다. 큰 Makefile 첫 줄(또는 `cmake_minimum_required`처럼 표준 헤더)에 `.DELETE_ON_ERROR:` 한 줄을 더하는 게 권장 관행입니다.
+
+### 그 외 자주 보는 특수 타겟
+
+| 특수 타겟 | 의미 |
+|-----------|------|
+| `.PHONY: a b c` | a/b/c가 *동작 이름*임을 알림. 같은 이름 파일이 있어도 매번 실행. |
+| `.SUFFIXES:` | *옛 접미사 규칙*을 비우거나 추가. `.SUFFIXES:` (비우기)는 암시적 규칙 끄는 표준 패턴. |
+| `.ONESHELL:` | 한 레시피 안의 모든 줄을 *한 셸*에서 실행 (3.82+). |
+| `.NOTPARALLEL:` | 이 Makefile은 *병렬 빌드 금지*. 단계별 의존성이 자동 추적 불가할 때. |
+| `.EXPORT_ALL_VARIABLES:` | 이 Makefile의 모든 변수를 *환경 변수로* 자식 프로세스에 노출. |
+| `.IGNORE: target` | 이 타겟의 *모든 레시피 실패*를 무시. (`-rm ...`과 같은 효과지만 타겟 단위). |
+
+`.DELETE_ON_ERROR:`와 `.SUFFIXES:` 두 줄을 *Makefile 헤더 관용*으로 두면 많은 사고를 미리 막을 수 있습니다.
+
+---
+
 ## 흔한 실수
 
 처음 Makefile 작성 시 자주 부딪히는 자리들입니다.

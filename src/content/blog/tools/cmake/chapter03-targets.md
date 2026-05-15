@@ -476,15 +476,75 @@ target_link_libraries(app PRIVATE MyLib::mylib)
 
 ---
 
-## 서브디렉터리 추가
+## 서브디렉터리 추가 — `add_subdirectory`
 
-### add_subdirectory
+### 기본 사용
 
 ```cmake
 add_subdirectory(libs/mylib)
 ```
 
-해당 디렉터리의 `CMakeLists.txt`를 처리하고, 정의된 타겟을 현재 프로젝트에서 사용할 수 있게 합니다.
+해당 디렉터리의 `CMakeLists.txt`를 *그 자리에서* 처리하고, 거기 정의된 타겟을 *현재 프로젝트 트리에 흡수*합니다. C 언어로 치면 `#include`와 비슷하지만 *스코프 처리가 다릅니다*.
+
+### 스코프 — 변수가 어디까지 가는가
+
+`add_subdirectory`는 *새로운 디렉터리 스코프*를 만듭니다. 이 스코프가 어떻게 동작하는지 정확히 알지 못하면, *변수가 사라지는* 미스터리에 자주 빠집니다.
+
+```cmake
+# 최상위 CMakeLists.txt
+set(MY_VAR "parent value")
+
+add_subdirectory(libs/mylib)   # libs/mylib/CMakeLists.txt가 실행됨
+
+message("After subdir: ${MY_VAR}")  # 여전히 "parent value"
+```
+
+```cmake
+# libs/mylib/CMakeLists.txt
+message("In subdir: ${MY_VAR}")     # "parent value" — 부모 값이 보임
+
+set(MY_VAR "child value")            # 자기 스코프에서만 변경
+message("After change: ${MY_VAR}")   # "child value"
+
+# 이 스코프는 add_subdirectory가 끝나면 사라짐
+```
+
+규칙은 *두 줄*입니다.
+
+1. *부모의 변수는 자식이 읽을 수 있다.* 자식 스코프는 부모 스코프를 상속합니다.
+2. *자식의 변수 변경은 부모에게 안 보인다.* `set()`은 자기 스코프만 변경합니다.
+
+이 두 줄이 *Modern CMake 모델*의 기반입니다. 자식 디렉터리에서 만든 *전역 변수가 부모를 오염시키지 않습니다*. 그 결과 모듈성이 보장됩니다.
+
+자식의 값을 *명시적으로 부모로 올리고* 싶을 때는 `set(VAR value PARENT_SCOPE)`을 씁니다. 하지만 이게 자주 등장하면 설계 신호입니다 — *변수 전달 대신 타겟 속성*([Ch 3 PUBLIC/INTERFACE](/blog/tools/cmake/chapter03-targets#가시성-키워드-private-public-interface))을 쓸 수 있는지 다시 보세요.
+
+### 타겟은 스코프를 가로질러 *전역*이다
+
+변수와 달리, *타겟은 한 번 정의되면 프로젝트 전체에서 보입니다*. 이 차이가 매우 중요합니다.
+
+```cmake
+# libs/mylib/CMakeLists.txt
+add_library(mylib src/mylib.cpp)
+target_include_directories(mylib PUBLIC include)
+```
+
+```cmake
+# 최상위
+add_subdirectory(libs/mylib)
+
+add_executable(myapp src/main.cpp)
+target_link_libraries(myapp PRIVATE mylib)   # 자식이 만든 타겟이 보임
+```
+
+타겟에 붙인 PUBLIC/INTERFACE 옵션은 *스코프 경계를 무시하고* 전이됩니다. 변수처럼 사라지지 않습니다. 이게 Modern CMake가 *변수 대신 타겟에 모든 것을 붙이라*고 권하는 핵심 이유입니다.
+
+### `EXCLUDE_FROM_ALL` — 디폴트 빌드에서 빼기
+
+```cmake
+add_subdirectory(third_party/google-benchmark EXCLUDE_FROM_ALL)
+```
+
+`EXCLUDE_FROM_ALL`을 주면 *이 서브디렉터리의 타겟이 디폴트 빌드에 포함되지 않습니다*. 사용자가 그 타겟을 *명시적으로 링크*할 때만 빌드됩니다. 외부 라이브러리를 통째로 가져왔지만 *우리 빌드에는 일부만 필요*할 때 자주 등장합니다.
 
 ### 프로젝트 구조 예시
 
