@@ -17,35 +17,27 @@ draft: false
 
 ## 잘못된 예
 
-```
-회피:
-"I met them on a Cunard liner many years ago. Coming home from
-Liverpool to New York."
+**회피**
+> *I met them on a Cunard liner many years ago. Coming home from Liverpool to New York.*
 
 분석:
 - 첫 문장: 완전 (주어 + 동사 있음)
-- "Coming home from Liverpool to New York" — *분사구*, 동사 없음
+- *Coming home from Liverpool to New York* — *분사구*, 동사 없음
 - 마침표가 *오류*
 
-선호:
-"I met them on a Cunard liner many years ago, coming home from
-Liverpool to New York."
-```
+**선호**
+> *I met them on a Cunard liner many years ago, coming home from Liverpool to New York.*
 
-```
-회피:
-"She was an interesting talker. A woman who had traveled all
-over the world."
+**회피**
+> *She was an interesting talker. A woman who had traveled all over the world.*
 
 분석:
 - 첫 문장: 완전
-- "A woman who ..." — *동격구*, 명사구일 뿐
+- *A woman who ...* — *동격구*, 명사구일 뿐
 - 마침표가 *오류*
 
-선호:
-"She was an interesting talker, a woman who had traveled all
-over the world."
-```
+**선호**
+> *She was an interesting talker, a woman who had traveled all over the world.*
 
 두 예 모두 *첫 마침표를 쉼표로 바꾸고* 다음 단어를 *소문자*로 시작합니다.
 
@@ -62,23 +54,19 @@ over the world."
 
 *강조*를 위해 짧은 단어구를 한 문장처럼 다루는 것은 허용됩니다. *진짜 강조가 필요할 때*만, *보통 대화체에서만*.
 
-```
-선호 (강조):
-"Again and again he called out. No reply."
-"He thought he knew. He didn't."
-"She walked in. Silence."
-```
+**선호 (강조)**
+- *Again and again he called out. No reply.*
+- *He thought he knew. He didn't.*
+- *She walked in. Silence.*
 
 이런 단편은 *극적 효과*를 만듭니다. *과용하면* 효과가 사라집니다.
 
 ### 광고 / 카피라이팅의 단편
 
-```
-선호 (카피라이팅):
-"Just do it."
-"Think different."
-"Because you're worth it."
-```
+**선호 (카피라이팅)**
+- *Just do it.*
+- *Think different.*
+- *Because you're worth it.*
 
 광고에서는 단편이 *기억에 남는 효과*를 만듭니다. *학술 / 격식 글*에서는 *드물게* 사용.
 
@@ -110,17 +98,11 @@ Strunk의 주석:
 
 영어 학습자는 *짧은 문장이 안전*하다고 생각하여 *조각을 마침표로 끊는* 경향이 있습니다.
 
-```
-회피 (학습자 흔한 실수):
-"Studying English is important. Because it opens many doors."
-"I went to the store. To buy some bread."
-"The book was interesting. Although a bit long."
-
-선호:
-"Studying English is important because it opens many doors."
-"I went to the store to buy some bread."
-"The book was interesting, although a bit long."
-```
+| 회피 (학습자 흔한 실수) | 선호 |
+|---------------------------|------|
+| *Studying English is important. Because it opens many doors.* | *Studying English is important because it opens many doors.* |
+| *I went to the store. To buy some bread.* | *I went to the store to buy some bread.* |
+| *The book was interesting. Although a bit long.* | *The book was interesting, although a bit long.* |
 
 *Because*, *to*, *although* 등이 *종속절 / 부정사구*를 이끕니다. *마침표로 끊지 않습니다*.
 
@@ -128,32 +110,28 @@ Strunk의 주석:
 
 한국어는 *동사 / 형용사*가 *문장 끝*에 오므로 sentence fragment가 *명확*합니다.
 
-```
-한국어 (완전):
-"비가 왔다."  ← 동사 '왔다'로 끝남
-"날씨가 좋았다." ← 형용사 '좋았다'로 끝남
+**한국어 (완전)**
+- "비가 왔다." ← 동사 *왔다* 로 끝남
+- "날씨가 좋았다." ← 형용사 *좋았다* 로 끝남
 
-한국어 (조각):
-"비가 오는."  ← 미완 (관형사형)
-"날씨가 좋은 그날." ← 명사구
-```
+**한국어 (조각)**
+- "비가 오는." ← 미완 (관형사형)
+- "날씨가 좋은 그날." ← 명사구
 
 한국어에서도 *조각을 마침표로 끊는* 것은 *시 / 광고 / 소설*에서만 허용됩니다.
 
 ### 영어 직역 시 주의
 
-```
-영어 회피:
-"He was tired. Working late."
+**영어 회피**
+> *He was tired. Working late.*
 
-직역 회피:
-"그는 피곤했다. 늦게까지 일했다."  ← 두 완전 문장이라 영어와 다름
-"그는 피곤했다. 늦게까지 일하면서." ← 미완, 어색
+**직역 회피**
+- "그는 피곤했다. 늦게까지 일했다." ← 두 완전 문장이라 영어와 다름
+- "그는 피곤했다. 늦게까지 일하면서." ← 미완, 어색
 
-선호 (자연):
-"늦게까지 일해서 그는 피곤했다."
-"그는 늦게까지 일하느라 피곤했다."
-```
+**선호 (자연)**
+- "늦게까지 일해서 그는 피곤했다."
+- "그는 늦게까지 일하느라 피곤했다."
 
 영어 sentence fragment를 *직역*하면 *어색한 한국어*가 됩니다. *문장 구조를 재배치*하면 자연스럽습니다.
 
