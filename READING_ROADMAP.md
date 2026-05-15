@@ -939,6 +939,69 @@ Concrete Mathematics → Think Stats → Mathematics for ML
 
 ---
 
+## 26. 디버깅
+
+| 책 | 저자 | 상태 | 비고 |
+|---|------|------|------|
+| Effective Debugging — 66 Specific Ways to Debug Software & Systems | Diomidis Spinellis | 📋 | Addison-Wesley, 66개 규칙, 범용 |
+| Debugging: The 9 Indispensable Rules | David J. Agans | 📋 | 짧고 실용적, 멘탈 모델 중심 |
+| Self-Service Linux | Wilding & Behman | 💡 | Linux production 디버깅 (IBM Press) |
+| Linux Kernel Debugging | Kaiwan N. Billimoria | 💡 | kdump, crash, kgdb (Packt, 2022) |
+| Advanced Windows Debugging | Hewardt & Pravat | 💡 | WinDbg, 메모리 corruption |
+
+**경로:**
+```
+Agans (9 Rules, 짧음) → Spinellis (Effective, 깊이) → Self-Service Linux / Advanced Windows Debugging
+```
+
+**자체 시리즈 (이미 작성 중):**
+- `tools/debugging/postmortem-debug` — Core dump · ELF core format · GDB core 분석 · debuginfod / minidump
+- `tools/debugging/concurrency-debug` — 동시성 결함 진단
+- `tools/debugging/embedded-debug` — RTOS / 임베디드 트러블슈팅
+- `tools/debugging/sanitizers`, `valgrind`, `runtime-debugging`, `dwarf-elf`, `gdb-extension`, `python-debug`
+
+**참고 링크:**
+- [Effective Debugging (저자 사이트)](https://www.spinellis.gr/debugging/)
+- [Debugging Rules! (Agans 공식 사이트)](http://debuggingrules.com/)
+
+---
+
+## 27. 패턴 활용 리팩터링
+
+| 책 | 저자 | 상태 | 비고 |
+|---|------|------|------|
+| Refactoring to Patterns | Joshua Kerievsky | 📋 | Addison-Wesley 2004, Fowler + GoF 다리 |
+| Refactoring (2판) | Martin Fowler | 📋 | 리팩터링 카탈로그 (section 24와 중복) |
+| Design Patterns | Gamma 외 (GoF) | ✅ | 23개 패턴 (블로그 시리즈 완성) |
+| Working Effectively with Legacy Code | Michael Feathers | 📋 | seam · sprout · 안전 리팩터링 |
+| Smells to Refactorings Quick Reference | Kerievsky | 💡 | 냄새 → 리팩터링 → 패턴 매핑 카드 |
+
+**경로:**
+```
+GoF (개별 패턴 익히기) → Fowler Refactoring (기계적 변환)
+   → Kerievsky Refactoring to Patterns (코드 냄새 → 패턴 도입 / 제거)
+   → Legacy Code (테스트 없는 코드부터 안전하게)
+```
+
+**핵심 아이디어:**
+- *패턴은 목표가 아니라 도착지* — Kerievsky의 핵심 주장
+- "Pattern-Happy" 회피 — 처음부터 패턴을 박지 말고, *냄새* 가 보이면 *그쪽으로 리팩터링*
+- 27가지 리팩터링이 GoF 패턴으로 *나아가거나(Toward)* / *벗어나거나(Away from)* / *대안 패턴으로(Toward Alternative)*
+- 예: Replace Implicit Tree with Composite, Move Accumulation to Visitor, Replace State-Altering Conditionals with State
+
+**자체 시리즈 (계획):**
+- `programming/design/refactoring-to-patterns` — 책의 27개 리팩터링을 코드 냄새 기준으로 재구성
+  - Part 1 — 형성(Formation): 패턴을 *도입* 하는 리팩터링
+  - Part 2 — 변형(Transformation): 패턴을 *바꾸는* 리팩터링
+  - Part 3 — 제거(Removal): 패턴을 *걷어내는* 리팩터링 (과도한 패턴 청소)
+
+**참고 링크:**
+- [Refactoring to Patterns (industriallogic.com)](https://www.industriallogic.com/xp/refactoring/)
+- [refactoring.com (Fowler)](https://refactoring.com/)
+- [Kerievsky CCD Cards](https://www.industriallogic.com/blog/refactoring-cards/)
+
+---
+
 ## 우선순위 큐
 
 ### Tier 1 — 즉시 착수
@@ -1163,8 +1226,10 @@ QEMU Fake Device Driver → QEMU Embedded Emulation → QEMU Internals
 10. [x] 기초 페리페럴 시리즈 추가 (SPI, UART, I2C, CAN, MIPI, Industrial Ethernet)
 11. [x] categories.ts에 신규 카테고리 반영
 12. [x] QEMU / 에뮬레이션 시리즈 추가 (Fake Device, Embedded Emulation, Internals)
-13. [ ] 각 책별 디렉터리 및 첫 글 생성
-14. [ ] 스토리보드 작성 (우선순위 순)
+13. [x] 디버깅 책 섹션 추가 (Effective Debugging, 9 Rules, Self-Service Linux 등)
+14. [x] 패턴 활용 리팩터링 섹션 추가 (Refactoring to Patterns)
+15. [ ] 각 책별 디렉터리 및 첫 글 생성
+16. [ ] 스토리보드 작성 (우선순위 순)
 
 ---
 
