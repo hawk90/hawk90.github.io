@@ -73,6 +73,7 @@ export const CATEGORIES: Category[] = [
   // Tools
   { id: 'tools/debugging', parent: 'tools', name: 'Debugging', description: 'sanitizer, valgrind, tracing' },
   { id: 'tools/build', parent: 'tools', name: 'Build Systems', description: 'CMake, GNU Make, Bazel' },
+  { id: 'tools/emulation', parent: 'tools', name: 'Emulation', description: 'QEMU, 가상 디바이스, 에뮬레이션' },
 
   // Others
   { id: 'math/applied', parent: 'math', name: 'Applied Math', description: '이산수학, 확률통계' },

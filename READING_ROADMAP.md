@@ -976,44 +976,128 @@ Concrete Mathematics → Think Stats → Mathematics for ML
 24. **CXL Deep Dive** — 메모리 풀링, 4.0 스펙 (2025.11)
 25. **HBM / GDDR Deep Dive** — HBM3E, 고대역 메모리
 
-### Tier 6 — 기초 페리페럴 / 산업 프로토콜
+### Tier 6 — 기초 페리페럴 / 산업 프로토콜 / QEMU
 26. **Embedded Protocols Deep Dive** — SPI, UART, I2C, RS-485 (기본기)
 27. **CAN Bus Deep Dive** — CAN 2.0, CAN FD, CAN XL (자동차/산업)
 28. **MIPI Deep Dive** — CSI-2, DSI-2, A-PHY (카메라/디스플레이)
 29. **Industrial Ethernet** — EtherCAT, PROFINET, TSN (산업용)
+30. **QEMU Fake Device Driver** — 가상 디바이스로 드라이버 테스트 🆕
+31. **QEMU Embedded Emulation** — ARM/RISC-V 펌웨어 테스트 🆕
+32. **QEMU Internals** — QEMU 소스 분석, 디바이스 모델 🆕
 
 ### Tier 7 — 철학/과학 고전
-30. **수리철학 입문** — Russell, 논리주의 고전 (1919)
-31. **프린키피아** — Newton, 고전역학 기초 (1687)
+33. **수리철학 입문** — Russell, 논리주의 고전 (1919)
+34. **프린키피아** — Newton, 고전역학 기초 (1687)
 
 ### Tier 8 — 아키텍처/알고리즘
-32. **Fundamentals of Software Architecture** — 아키텍트 입문
-33. **C++ Software Design** — 현대 C++ 패턴
-34. **Algorithm Design Manual** — Skiena, 실용 알고리즘
+35. **Fundamentals of Software Architecture** — 아키텍트 입문
+36. **C++ Software Design** — 현대 C++ 패턴
+37. **Algorithm Design Manual** — Skiena, 실용 알고리즘
 
 ### Tier 9 — 시스템 기초
-35. **CSAPP** — 시스템 프로그래머 필독
-36. **OSTEP** — 운영체제, 무료 온라인
-37. **Computer Networking** — Kurose & Ross
+38. **CSAPP** — 시스템 프로그래머 필독
+39. **OSTEP** — 운영체제, 무료 온라인
+40. **Computer Networking** — Kurose & Ross
 
 ### Tier 10 — 개발자 필독서
-38. **Pragmatic Programmer** — 개발자 마인드셋
-39. **Clean Code** — 코드 품질
-40. **Refactoring** — 리팩토링 바이블
-41. **Working with Legacy Code** — 레거시 다루기
-42. **TDD by Example** — 테스트 주도 개발
+41. **Pragmatic Programmer** — 개발자 마인드셋
+42. **Clean Code** — 코드 품질
+43. **Refactoring** — 리팩토링 바이블
+44. **Working with Legacy Code** — 레거시 다루기
+45. **TDD by Example** — 테스트 주도 개발
 
 ### Tier 11 — 컴파일러/형식 검증
-43. **Crafting Interpreters** — 인터프리터 만들기, 무료
-44. **Practical TLA+** — 형식 검증 입문
+46. **Crafting Interpreters** — 인터프리터 만들기, 무료
+47. **Practical TLA+** — 형식 검증 입문
 
 ### Tier 12 — 보안/암호학/FP
-45. **Real-World Cryptography** — 현대 암호학
-46. **SICP** — 함수형 프로그래밍 고전
+48. **Real-World Cryptography** — 현대 암호학
+49. **SICP** — 함수형 프로그래밍 고전
 
 ### Tier 13 — 수학/DevOps
-47. **Concrete Mathematics** — Knuth 이산수학
-48. **DevOps Handbook** — DevOps 바이블
+50. **Concrete Mathematics** — Knuth 이산수학
+51. **DevOps Handbook** — DevOps 바이블
+
+---
+
+## 26. QEMU / 에뮬레이션
+
+| 시리즈 | 상태 | 비고 |
+|--------|------|------|
+| QEMU Fake Device Driver | 📋 | 가상 디바이스로 드라이버 개발/테스트 |
+| QEMU Embedded Emulation | 📋 | ARM/RISC-V 보드 에뮬레이션, 펌웨어 테스트 |
+| QEMU Internals | 📋 | QEMU 소스 분석, 디바이스 모델 구현 |
+
+### 26.1 QEMU Fake Device Driver (신규)
+
+가상 디바이스로 리눅스 드라이버 개발/테스트. 실제 하드웨어 없이 드라이버 검증.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | QEMU 개요 — 왜 가상 디바이스인가 |
+| 2 | QEMU 설치와 빌드 |
+| 3 | QEMU 디바이스 모델 기초 — QOM (QEMU Object Model) |
+| 4 | 간단한 PCI 디바이스 만들기 |
+| 5 | MMIO 레지스터 구현 |
+| 6 | 인터럽트 (MSI/MSI-X) 구현 |
+| 7 | DMA 버퍼 처리 |
+| 8 | 리눅스 드라이버 작성 — 가상 디바이스용 |
+| 9 | 디버깅 — QEMU + GDB로 드라이버 디버깅 |
+| 10 | 테스트 자동화 — CI에서 QEMU 활용 |
+| 11 | 고급 시나리오 — 에러 주입, 경쟁 조건 테스트 |
+| 12 | 사례 연구 — NVMe 가상 디바이스 |
+
+### 26.2 QEMU Embedded Emulation (신규)
+
+ARM/RISC-V 보드 에뮬레이션으로 펌웨어/OS 개발.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | 임베디드 에뮬레이션 개요 — 왜 QEMU인가 |
+| 2 | ARM virt 머신 — 범용 ARM 플랫폼 |
+| 3 | RISC-V virt 머신 — RISC-V 플랫폼 |
+| 4 | U-Boot 부팅 — 부트로더 에뮬레이션 |
+| 5 | 리눅스 커널 부팅 — 크로스 컴파일 + QEMU |
+| 6 | 루트 파일시스템 — Buildroot/Yocto 이미지 |
+| 7 | 디바이스 트리 — DTB 커스터마이징 |
+| 8 | 페리페럴 추가 — UART, SPI, I2C 에뮬레이션 |
+| 9 | 네트워킹 — TAP/User-mode 네트워킹 |
+| 10 | GDB 원격 디버깅 — 커널/펌웨어 디버깅 |
+| 11 | 베어메탈 펌웨어 — RTOS 없이 실행 |
+| 12 | RTOS 에뮬레이션 — FreeRTOS/Zephyr on QEMU |
+
+### 26.3 QEMU Internals (신규)
+
+QEMU 소스 코드 분석과 디바이스 모델 구현 심화.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | QEMU 아키텍처 개요 — TCG, KVM, 디바이스 모델 |
+| 2 | QOM (QEMU Object Model) 심화 — 타입 시스템, 속성 |
+| 3 | 메모리 모델 — MemoryRegion, AddressSpace |
+| 4 | 이벤트 루프 — main loop, AIO, coroutine |
+| 5 | 블록 레이어 — 이미지 포맷, I/O 경로 |
+| 6 | 네트워크 레이어 — NIC 에뮬레이션, 백엔드 |
+| 7 | PCI 서브시스템 — 버스, 브릿지, 디바이스 |
+| 8 | 인터럽트 컨트롤러 — GIC, APIC 에뮬레이션 |
+| 9 | 타이머와 클럭 — 시간 관리, RTC |
+| 10 | 마이그레이션 — 라이브 마이그레이션, VMState |
+| 11 | 커스텀 머신 타입 — 새 보드 정의 |
+| 12 | QEMU 기여하기 — 코드 스타일, 패치 제출 |
+
+**경로:**
+```
+QEMU Fake Device Driver → QEMU Embedded Emulation → QEMU Internals
+```
+
+**참고 링크:**
+- [QEMU Official Documentation](https://www.qemu.org/docs/master/)
+- [QEMU Wiki](https://wiki.qemu.org/)
+- [QEMU Source Code (GitLab)](https://gitlab.com/qemu-project/qemu)
+- [QEMU Device Model Documentation](https://www.qemu.org/docs/master/devel/qom.html)
+- [QEMU Mailing List Archives](https://lists.gnu.org/archive/html/qemu-devel/)
+- [Bootlin QEMU Tutorials](https://bootlin.com/docs/)
+- [Linux Kernel QEMU Testing](https://www.kernel.org/doc/html/latest/dev-tools/kunit/qemu.html)
 
 ---
 
@@ -1059,6 +1143,7 @@ Concrete Mathematics → Think Stats → Mathematics for ML
 | `science/classics` | 과학 고전 |
 | `design` | UX, UI |
 | `tools/debugging` | 디버깅 |
+| `tools/emulation` | QEMU, 에뮬레이션 |
 | `security` | 보안, 암호학 |
 | `devops` | DevOps, 컨테이너 |
 
@@ -1077,8 +1162,9 @@ Concrete Mathematics → Think Stats → Mathematics for ML
 9. [x] UCIe / UALink / BoW 시리즈 추가 (칩렛/GPU 인터커넥트)
 10. [x] 기초 페리페럴 시리즈 추가 (SPI, UART, I2C, CAN, MIPI, Industrial Ethernet)
 11. [x] categories.ts에 신규 카테고리 반영
-12. [ ] 각 책별 디렉터리 및 첫 글 생성
-13. [ ] 스토리보드 작성 (우선순위 순)
+12. [x] QEMU / 에뮬레이션 시리즈 추가 (Fake Device, Embedded Emulation, Internals)
+13. [ ] 각 책별 디렉터리 및 첫 글 생성
+14. [ ] 스토리보드 작성 (우선순위 순)
 
 ---
 
