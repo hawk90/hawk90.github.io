@@ -8,7 +8,7 @@ tags: [writing, academic, paraphrase, synonyms]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 학술 요약의 핵심 기술은 *paraphrase* — 원문의 *의미*를 보존하면서 *자기 말*로 다시 쓰기입니다. 단어만 바꾸는 *얕은 패러프레이즈*는 표절에 가깝습니다. 이 글은 *충분히 다른* 패러프레이즈를 만드는 기법을 정리합니다.

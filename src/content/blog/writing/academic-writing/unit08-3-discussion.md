@@ -8,7 +8,7 @@ tags: [writing, academic, discussion, limitations, implications]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 연구 논문의 *마지막 큰 섹션*은 *Discussion*입니다. *Results*가 무엇을 발견했는지였다면, *Discussion*은 *그것이 무엇을 의미하는지*입니다. AWG 시리즈의 마지막 글로, Discussion의 표준 구조와 함께 전체 시리즈를 정리합니다.

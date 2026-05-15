@@ -8,7 +8,7 @@ tags: [writing, academic, indirect-questions, solution]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 Unit 3 마지막 글은 문제-해결 텍스트에서 *해결을 도입하는 방법*과, 학술 영어에서 자주 쓰이는 *간접 의문문*을 다룹니다.

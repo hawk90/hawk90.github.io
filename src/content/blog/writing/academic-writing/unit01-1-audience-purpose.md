@@ -8,7 +8,7 @@ tags: [writing, academic, research, audience, purpose]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 Swales와 Feak가 Unit 1에서 출발점으로 잡은 세 가지는 *Audience*, *Purpose*, *Organization*입니다. 이 셋은 *글의 내용을 결정하기 전에* 미리 정해 두어야 하는 결정들입니다. 이 글은 그중 *Audience*와 *Purpose / Strategy*를 다룹니다.

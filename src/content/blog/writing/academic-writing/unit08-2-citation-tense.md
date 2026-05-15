@@ -8,7 +8,7 @@ tags: [writing, academic, citation, tense, purpose]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 CARS 도입에서 *인용*과 *시제 선택*은 미묘한 결정입니다. 학생 글에서 자주 일관되지 않는 부분입니다. 이 글은 도입의 인용·시제·목적 진술을 정리합니다.

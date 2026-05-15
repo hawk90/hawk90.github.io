@@ -8,7 +8,7 @@ tags: [writing, composition, active-voice, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > Use the active voice.

@@ -8,7 +8,7 @@ tags: [writing, academic, presentation, positioning, hedging]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 Unit 1의 마지막 두 주제는 *Presentation*과 *Positioning*입니다. 앞의 글들이 *문장과 단락 안*의 문제를 다뤘다면, 이 둘은 *글 전체와 저자 자신*의 문제입니다.

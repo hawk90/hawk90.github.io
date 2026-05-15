@@ -8,7 +8,7 @@ tags: [writing, academic, data, tables, figures]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 학술 글쓰기에서 표·그래프·통계 같은 *시각 데이터*를 본문에서 다루는 작업이 *Data Commentary*입니다. Swales와 Feak는 *Data Commentary*에 한 Unit 전체를 할애합니다. 그만큼 자주 쓰이고 자주 어렵습니다. 이 글은 Data Commentary의 *표준 구조*와, 가장 첫 단계인 *Location Statement*를 다룹니다.

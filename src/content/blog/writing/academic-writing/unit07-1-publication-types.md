@@ -8,7 +8,7 @@ tags: [writing, academic, research-paper, IMRD]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 Unit 7은 *연구 논문 작성*의 첫 절반입니다. 출판 유형의 이해부터 Methods, Results 섹션까지. 첫 글은 *어떤 형식의 논문을 쓸지*의 결정과, 자연과학·공학 논문의 표준 *IMRD 구조*를 다룹니다.

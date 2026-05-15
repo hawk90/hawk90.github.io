@@ -8,7 +8,7 @@ tags: [writing, academic, passive-voice, process-description]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 학술 글쓰기에서 *과정 묘사(process description)*는 빈번한 작업입니다. 실험 방법을 설명할 때, 자연 현상의 단계를 묘사할 때, 시스템의 작동을 설명할 때 모두 과정 묘사가 필요합니다. 이 글은 학술 영어의 *수동태 관습*과, *과정 묘사의 흐름*을 만드는 방법을 다룹니다.

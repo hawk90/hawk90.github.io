@@ -8,7 +8,7 @@ tags: [writing, academic, research-paper, IMRD, glasman-deal]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: false
+draft: true
 ---
 
 Hilary Glasman-Deal의 *Science Research Writing*은 Imperial College London에서 30년 가까이 가르친 경험을 바탕으로 한 *실용 매뉴얼*입니다. Swales와 Feak의 *Academic Writing for Graduate Students*가 *왜 그렇게 쓰는가*를 설명한다면, 이 책은 *어떻게 빠르게 쓰는가*에 집중합니다.

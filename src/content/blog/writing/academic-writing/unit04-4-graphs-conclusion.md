@@ -8,7 +8,7 @@ tags: [writing, academic, graphs, chronological, data]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 Unit 4 마지막 글은 *Data Commentary*의 특수 사례들을 다룹니다 — 그래프, 시간 흐름 데이터, 예상 외의 결과. 그리고 commentary를 마무리하는 방법.

@@ -8,7 +8,7 @@ tags: [writing, grammar, word-usage, vocabulary]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
-draft: false
+draft: true
 ---
 
 문법이 맞아도 *단어 선택*이 잘못되면 의미가 어긋납니다. 영어에는 비슷하게 들리거나 비슷하게 생긴 단어가 많아 자주 혼동됩니다. 이 챕터는 흔히 혼동되는 단어 쌍을 *알파벳 순*으로 정리합니다.

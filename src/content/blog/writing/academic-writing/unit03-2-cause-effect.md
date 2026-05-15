@@ -8,7 +8,7 @@ tags: [writing, academic, cause-effect, grammar]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 문제-해결 텍스트의 핵심은 *원인과 결과의 연결*입니다. *왜 문제가 생겼는가*, *해결이 어떻게 효과를 내는가*를 명확히 표현해야 합니다. Swales와 Feak는 인과 표현의 세 그룹을 정리합니다 — 동사 패턴, 전통적 연결어, *-ing* 절. 이 글은 그중 *-ing* 절에 집중합니다.

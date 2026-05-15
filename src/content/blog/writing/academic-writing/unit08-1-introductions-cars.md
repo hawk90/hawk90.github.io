@@ -8,7 +8,7 @@ tags: [writing, academic, introduction, CARS, research-paper]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 Unit 8의 첫 글은 연구 논문 *Introduction*의 표준 구조입니다. 이 책의 저자 Swales 자신이 1990년에 제안한 *CARS 모델(Creating a Research Space)*이 학술 영어 연구의 핵심 기여 중 하나입니다. 이 글이 그 모델을 정리합니다.

@@ -8,7 +8,7 @@ tags: [writing, academic, organization, specific-general]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 Unit 2의 마지막은 *Specific-to-General(SG)* 구성입니다. 학술 영어 산문의 *기본*은 GS이지만, 그 *역방향*도 강력한 도구입니다. 특히 인문학과 사회과학에서, 그리고 *학파의 비교*에서 SG가 자주 쓰입니다.

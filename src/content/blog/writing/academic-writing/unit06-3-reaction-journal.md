@@ -8,7 +8,7 @@ tags: [writing, academic, reaction-paper, peer-review]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 Unit 6 마지막은 두 가지 짧은 비평 형식 — *Reaction Paper*와 *Journal Review*입니다. 둘 다 학위 과정에서 자주 마주치는 글이지만, 형식이 명확히 정해져 있지 않아 학생이 혼란스러워합니다.

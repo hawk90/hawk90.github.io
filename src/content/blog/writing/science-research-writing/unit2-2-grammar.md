@@ -8,7 +8,7 @@ tags: [writing, academic, passive, articles, adverbs]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: false
+draft: true
 ---
 
 Methodology는 *수동태와 과거 시제*가 압도적으로 자주 쓰이는 자리입니다. 영어가 모국어가 아닌 작가에게 가장 어려운 자리는 *관사 a/the*와 *부사 위치*입니다.

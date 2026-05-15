@@ -8,7 +8,7 @@ tags: [writing, academic, evaluative, critical-reading]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 학술 평가의 *어휘 선택*이 평가의 *강도와 톤*을 결정합니다. *Good*과 *compelling*은 의미가 비슷하지만 학술 무게가 다릅니다. 이 글은 *평가어의 스펙트럼*과, 비평을 시작하는 *Critical Reading*의 도구를 다룹니다.

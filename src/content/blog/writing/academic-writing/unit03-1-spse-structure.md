@@ -8,7 +8,7 @@ tags: [writing, academic, problem-solution, structure]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 공학, 경영학, 정책, 공중보건 같은 분야의 학술 글은 *문제 해결*을 중심으로 흐릅니다. Swales와 Feak는 이 패턴을 *SPSE — Situation, Problem, Solution, Evaluation*으로 정리합니다. Unit 3의 첫 글은 이 네 단계 구조와, 문제-해결 텍스트에 자주 등장하는 *mid-position 부사*를 다룹니다.

@@ -8,7 +8,7 @@ tags: [writing, academic, book-review, critique]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: false
+draft: true
 ---
 
 학술 글에서 *비평(critique)*은 다양한 형태로 등장합니다. 서평, 논문 비평, 반응 논문, 저널 심사 보고서가 모두 비평입니다. Unit 6의 첫 글은 가장 흔한 형태인 *Book Review*와, 학술적으로 의견을 표명하는 방법을 다룹니다.
