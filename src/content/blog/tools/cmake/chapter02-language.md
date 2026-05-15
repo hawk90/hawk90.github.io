@@ -542,16 +542,80 @@ target_compile_definitions(app PRIVATE
 
 ### 기본 문법
 
+제너레이터 식은 *세 종류의 패턴*을 가집니다.
+
 ```cmake
-# 조건부: 조건이 참이면 값, 거짓이면 빈 문자열
+# 1. 조건부 — 조건이 참이면 값, 거짓이면 빈 문자열
 $<조건:값>
 
-# 조건부 if-else
+# 2. if-else — 조건이 참이면 첫 인자, 거짓이면 두 번째
 $<IF:조건,참값,거짓값>
 
-# 속성/정보 참조
+# 3. 속성/정보 참조 — 타겟 정보 추출
 $<TARGET_FILE:타겟>
 ```
+
+### 중첩 구문 — `$<$<...>:...>`이 무엇을 의미하는가
+
+제너레이터 식에서 가장 헷갈리는 것은 *중첩 구문*입니다.
+
+```cmake
+target_compile_definitions(app PRIVATE
+    $<$<CONFIG:Debug>:DEBUG_MODE>
+)
+```
+
+여기엔 `$<...>`이 *두 번* 등장합니다. 안쪽부터 풀어 봅시다.
+
+**1단계 — 안쪽 `$<CONFIG:Debug>`이 무엇을 돌려주는가**
+
+`$<CONFIG:Debug>`은 *질문 형태의 표현*입니다. "지금 빌드 구성이 Debug인가?" 그 결과는 *1 또는 0*입니다.
+
+- 빌드 타입이 Debug면 → `1`
+- 그 외 (Release / RelWithDebInfo / MinSizeRel) → `0`
+
+**2단계 — 바깥 `$<조건:값>`은 어떻게 결합되는가**
+
+`$<조건:값>` 형태는 "*조건이 1이면 값을 내고, 0이면 빈 문자열을 낸다*"는 의미입니다. 안쪽 결과 1/0이 그대로 바깥의 조건이 됩니다.
+
+따라서 전체는 이렇게 풀립니다.
+
+| `CONFIG` | `$<CONFIG:Debug>` | `$<$<CONFIG:Debug>:DEBUG_MODE>` |
+|----------|-------------------|--------------------------------|
+| Debug | `1` | `DEBUG_MODE` |
+| Release | `0` | `(빈 문자열)` |
+
+빌드 시스템 생성 단계에서 CMake는 *각 구성마다* 이 식을 풀어 결과를 컴파일러 인자로 넣습니다. Debug 빌드에서는 `-DDEBUG_MODE`가 들어가고, Release 빌드에서는 아무것도 안 들어갑니다.
+
+### `$<IF:...>` — 명시적 if-else
+
+위와 같은 효과를 *if-else 형태*로 적을 수도 있습니다.
+
+```cmake
+target_compile_definitions(app PRIVATE
+    $<IF:$<CONFIG:Debug>,DEBUG_MODE,NDEBUG>
+)
+```
+
+- Debug → `DEBUG_MODE`
+- Release/기타 → `NDEBUG`
+
+빈 문자열 분기가 의미 있을 때(예: 위처럼 Release에서 *대체값*이 있을 때)는 `$<IF:...>`가 더 명확합니다. 빈 문자열로 충분하면 짧은 `$<조건:값>` 형태가 관용입니다.
+
+### 왜 `if`로는 안 되는가
+
+같은 일을 단순히 `if`로 적으면 안 되는가? 됩니다 — 단, *single-config 생성기*(Make, Ninja)에서만.
+
+```cmake
+# Make, Ninja에서는 동작
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(app PRIVATE DEBUG_MODE)
+endif()
+```
+
+문제는 *multi-config 생성기*(Visual Studio, Xcode)입니다. 이들은 *구성 시점에 빌드 타입을 정하지 않습니다*. 하나의 솔루션·프로젝트 안에 Debug·Release·RelWithDebInfo가 *공존*하고, 사용자가 IDE에서 *빌드 시점에* 선택합니다. 따라서 구성 시점에 `CMAKE_BUILD_TYPE`은 *빈 문자열*이고, 위 `if`는 *항상 false*가 되어 `DEBUG_MODE`가 어디에도 들어가지 않습니다.
+
+제너레이터 식은 이 한계를 정확히 풀어 줍니다. *구성 시점이 아니라 각 빌드 생성 시점에 평가*되므로, multi-config에서도 각 구성마다 올바른 결과가 들어갑니다.
 
 ### 자주 쓰는 표현식
 

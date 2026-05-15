@@ -208,13 +208,84 @@ cmake -B build                          # STATIC (기본)
 
 ## 가시성 키워드: PRIVATE, PUBLIC, INTERFACE
 
-`target_*` 명령에는 가시성 키워드가 필수입니다. 이 키워드는 설정이 어디까지 전파되는지를 결정합니다.
+`target_*` 계열 명령에는 *가시성 키워드*가 거의 항상 필요합니다. 이 한 단어가 *설정이 어디까지 흘러가는지*를 결정합니다.
 
-| 키워드 | 현재 타겟 빌드에 사용 | 의존 타겟에 전파 |
-|--------|----------------------|-----------------|
-| `PRIVATE` | O | X |
-| `PUBLIC` | O | O |
-| `INTERFACE` | X | O |
+| 키워드 | 현재 타겟 빌드에 사용 | 의존 타겟에도 자동 전파 |
+|--------|----------------------|-----------------------|
+| `PRIVATE` | ✓ | ✗ |
+| `PUBLIC` | ✓ | ✓ |
+| `INTERFACE` | ✗ | ✓ |
+
+### 한 줄 정의
+
+- **PRIVATE** — "*나만* 쓸 거다."
+- **PUBLIC** — "*나도 쓰고, 나를 쓰는 사람도* 쓸 거다."
+- **INTERFACE** — "*나는 안 쓰지만, 나를 쓰는 사람은* 쓸 거다."
+
+### 그림으로 — 의존 그래프와 전파
+
+`app → mylib`라는 의존성이 있을 때, `mylib`에 붙인 옵션이 `app`까지 전파되는지를 가시성이 결정합니다.
+
+```
+  ┌─────────┐  PRIVATE: mylib만 사용
+  │  mylib  │  PUBLIC: mylib도 쓰고, app에도 자동 전달
+  │ (.cpp)  │  INTERFACE: mylib는 안 쓰고, app만 쓴다
+  └────┬────┘
+       │ target_link_libraries(app PRIVATE mylib)
+       ▼
+  ┌─────────┐
+  │   app   │  ← mylib의 PUBLIC + INTERFACE 옵션이 자동으로 들어옴
+  └─────────┘
+```
+
+### 실제 코드로 — 어느 자리에 어떤 키워드
+
+```cmake
+add_library(mylib src/mylib.cpp)
+
+# PRIVATE — mylib 내부 구현 디테일
+target_include_directories(mylib PRIVATE src/internal)
+target_compile_options(mylib PRIVATE -Wno-unused-parameter)
+
+# PUBLIC — mylib도 쓰고, mylib 헤더를 #include하는 사람도 봐야 함
+target_include_directories(mylib PUBLIC include)
+target_compile_features(mylib PUBLIC cxx_std_17)
+
+# INTERFACE — mylib는 안 쓰고, mylib 사용자만 알아야 할 매크로
+target_compile_definitions(mylib INTERFACE USE_MYLIB)
+```
+
+```cmake
+add_executable(app src/main.cpp)
+target_link_libraries(app PRIVATE mylib)
+# 위 한 줄로 app은 자동으로:
+#   - include/ 인클루드 경로
+#   - cxx_std_17 표준
+#   - USE_MYLIB 매크로
+# 를 받습니다 (PUBLIC + INTERFACE 항목).
+#
+# 받지 않는 것:
+#   - src/internal 경로 (PRIVATE)
+#   - -Wno-unused-parameter (PRIVATE)
+```
+
+### 선택 가이드 — 헷갈릴 때 묻는 세 질문
+
+새 설정을 추가하려는데 어떤 키워드를 써야 할지 망설일 때, 다음 세 질문을 던집니다.
+
+1. *내 .cpp가 이 설정을 직접 쓰는가?* — Yes면 (PRIVATE 또는 PUBLIC 후보).
+2. *내 헤더가 이 설정에 의존하는가?* — 즉 헤더 안에서 매크로를 참조하거나, 헤더가 다른 라이브러리 헤더를 `#include`하거나. Yes면 (PUBLIC 또는 INTERFACE 후보).
+3. *나는 안 쓰지만 다른 사람만 쓰는가?* — Yes면 (INTERFACE 후보).
+
+조합하면:
+
+| 1번 | 2번 | 정답 |
+|-----|-----|-----|
+| ✓ | ✗ | **PRIVATE** |
+| ✓ | ✓ | **PUBLIC** |
+| ✗ | ✓ | **INTERFACE** |
+
+가장 흔한 패턴은 `target_include_directories`의 *공개 헤더 경로는 PUBLIC*, *내부 소스의 헤더 경로는 PRIVATE*입니다. 라이브러리 사용자가 보아야 할 헤더 경로가 PUBLIC으로 전파되어, `target_link_libraries`만 호출해도 자동으로 인클루드 경로가 더해집니다.
 
 ### 예시로 이해하기
 
