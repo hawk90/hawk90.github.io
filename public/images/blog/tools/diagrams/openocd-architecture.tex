@@ -1,0 +1,61 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    block/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+                  minimum width=2cm, minimum height=0.7cm, align=center,
+                  font=\sffamily\footnotesize},
+    mainblock/.style={block, draw=absbord, fill=absfill},
+    userblock/.style={block, draw=clibord, fill=clifill},
+    hwblock/.style={block, draw=conbord, fill=confill},
+    chipblock/.style={block, draw=impbord, fill=impfill},
+    conn/.style={-{Stealth[length=1.8mm]}, draw=edgec, line width=0.4pt},
+    label/.style={font=\sffamily\scriptsize, text=edgec}
+]
+
+% Top level: GDB and User
+\node[userblock] (gdb) at (-2.5, 0) {GDB (RSP)};
+\node[userblock] (user) at (2.5, 0) {사용자 (TCL)};
+
+% OpenOCD main box
+\node[rectangle, rounded corners=4pt, draw=absbord, fill=absfill!30,
+      minimum width=9cm, minimum height=3.5cm] (ocdbox) at (0, -3) {};
+\node[font=\sffamily\small\bfseries, anchor=north] at ([yshift=-0.1cm]ocdbox.north) {OpenOCD};
+
+% Inner blocks - top row
+\node[block, minimum width=1.8cm] (rsp) at (-2.8, -2.2) {RSP server};
+\node[block, minimum width=1.8cm] (tcl) at (0, -2.2) {TCL 엔진};
+\node[block, minimum width=1.8cm] (hwdrv) at (2.8, -2.2) {HW driver};
+
+% Inner blocks - bottom row
+\node[block, minimum width=1.8cm] (flash) at (-2.8, -3.6) {Flash drv};
+\node[block, minimum width=1.8cm] (target) at (0, -3.6) {Target};
+\node[block, minimum width=1.8cm] (adapter) at (2.8, -3.6) {Adapter};
+
+% Connections from top
+\draw[conn] (gdb) -- node[left, label] {TCP 3333} ([yshift=0.2cm]rsp.north |- ocdbox.north);
+\draw[conn] (user) -- node[right, label] {TCP 4444} ([yshift=0.2cm]tcl.north |- ocdbox.north);
+
+% USB connection
+\node[label, below=0.5cm of ocdbox] (usblabel) {USB / parallel};
+
+% Probe box
+\node[hwblock, minimum width=5cm, below=1.2cm of ocdbox] (probe) {ST-Link / J-Link / CMSIS-DAP / FT2232};
+
+% SWD/JTAG label
+\node[label, below=0.3cm of probe] (swdlabel) {SWD / JTAG};
+
+% Chip
+\node[chipblock, minimum width=2.5cm, below=1cm of probe] (chip) {칩};
+
+% Connections
+\draw[conn] (ocdbox) -- (probe);
+\draw[conn] (probe) -- (chip);
+
+\end{tikzpicture}
+\end{document}

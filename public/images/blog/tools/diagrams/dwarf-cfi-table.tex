@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,matrix}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    code/.style={rectangle, draw=nodebord, line width=0.4pt,
+                 inner sep=4pt, font=\sffamily\scriptsize\ttfamily,
+                 fill=nodefill, align=left, anchor=west}
+]
+
+\node[font=\sffamily\bfseries\small] at (0, 4.2) {Function prologue + CFI table};
+
+% Code on left
+\node[code] (c1) at (-3.5, 3.3) {0x401120  push rbp};
+\node[code] (c2) at (-3.5, 2.7) {0x401121  mov rbp, rsp};
+\node[code] (c3) at (-3.5, 2.1) {0x401124  sub rsp, 0x10};
+\node[code] (c4) at (-3.5, 1.5) {0x40115a  pop rbp};
+\node[code] (c5) at (-3.5, 0.9) {0x40115b  ret};
+
+% Table on right
+\matrix[matrix of nodes, ampersand replacement=\&,
+        every node/.style={anchor=west, font=\sffamily\scriptsize\ttfamily, inner sep=3pt},
+        column 1/.style={text width=2.0cm},
+        column 2/.style={text width=1.8cm, nodes={fill=absfill}},
+        column 3/.style={text width=1.8cm, nodes={fill=impfill}},
+        column 4/.style={text width=1.8cm, nodes={fill=clifill}},
+        row 1/.style={nodes={font=\sffamily\bfseries\scriptsize, fill=nodefill}}]
+    at (3, 2.1)
+{
+PC \& CFA \& rbp \& rip \\
+0x401120 \& rsp+8 \& -- \& {[CFA-8]} \\
+0x401121 \& rsp+16 \& {[CFA-16]} \& {[CFA-8]} \\
+0x401124 \& rbp+16 \& {[CFA-16]} \& {[CFA-8]} \\
+0x40115a \& rsp+8 \& {[CFA-16]} \& {[CFA-8]} \\
+};
+
+% Arrows from code to table rows
+\draw[-{Stealth[length=1.5mm]}, draw=edgesc, dashed]
+    (c1.east) -- ++(0.3,0) |- (1.0, 2.65);
+\draw[-{Stealth[length=1.5mm]}, draw=edgesc, dashed]
+    (c2.east) -- ++(0.3,0) |- (1.0, 2.25);
+\draw[-{Stealth[length=1.5mm]}, draw=edgesc, dashed]
+    (c3.east) -- ++(0.3,0) |- (1.0, 1.85);
+\draw[-{Stealth[length=1.5mm]}, draw=edgesc, dashed]
+    (c4.east) -- ++(0.3,0) |- (1.0, 1.45);
+
+\node[font=\sffamily\scriptsize, text=hibord, align=center, below=0.5cm of c5, xshift=2.5cm]
+    {매 명령 실행 후 CFI 상태가 변경됨\\bt는 이 표로 호출자 측 SP/PC 복원};
+
+\end{tikzpicture}
+\end{document}

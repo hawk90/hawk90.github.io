@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    cell/.style={rectangle, draw=nodebord, line width=0.4pt,
+                 minimum height=0.6cm, minimum width=0.55cm, inner sep=1pt,
+                 font=\sffamily\scriptsize},
+    full/.style={cell, fill=impfill, draw=impbord},
+    empty/.style={cell, fill=nodefill},
+    block/.style={rectangle, rounded corners=2pt,
+                  draw=nodebord, line width=0.4pt,
+                  minimum height=1.0cm, inner sep=4pt, align=center,
+                  font=\sffamily\footnotesize}
+]
+
+% MCU side
+\node[block, fill=confill, draw=conbord, minimum width=2.4cm] (mcu) at (0, 0) {MCU\\firmware};
+
+% Ring buffer (SRAM)
+\node[font=\sffamily\scriptsize\bfseries, text=absbord] at (4.5, 0.7) {SRAM ring buffer};
+\foreach \i/\s in {0/full,1/full,2/full,3/full,4/full,5/empty,6/empty,7/empty,8/empty,9/empty} {
+  \node[\s] (b\i) at (3.0 + \i*0.55, 0) {};
+}
+
+% Pointers
+\node[font=\sffamily\scriptsize, text=conbord, below=2pt of b0] {read};
+\node[font=\sffamily\scriptsize, text=impbord, below=2pt of b4] {write};
+
+\draw[-{Stealth[length=2mm]}, draw=conbord]
+    (mcu.east) -- node[above, font=\sffamily\scriptsize] {write byte} (b4.west);
+
+% PC side
+\node[block, fill=absfill, draw=absbord, minimum width=2.4cm] (pc) at (10.5, 0) {PC\\J-Link};
+
+% SWD poll
+\draw[-{Stealth[length=2mm]}, draw=absbord]
+    (pc.west) to[bend left=15]
+    node[above, font=\sffamily\scriptsize, text=absbord] {SWD background poll}
+    (b0.east);
+
+% Stdout output
+\node[block, below=0.6cm of pc, fill=clifill, draw=clibord] (stdout) {RTT Client\\stdout};
+\draw[-{Stealth[length=2mm]}, draw=clibord] (pc) -- (stdout);
+
+% Annotation
+\node[font=\sffamily\scriptsize, align=center, below=1.5cm of b4, text=hibord]
+    {CPU never halts -- non-blocking write,\\background memory read from debug probe};
+
+\end{tikzpicture}
+\end{document}

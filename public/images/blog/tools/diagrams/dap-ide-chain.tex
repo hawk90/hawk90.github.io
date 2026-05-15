@@ -1,0 +1,61 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    box/.style={rectangle, rounded corners=2pt,
+                draw=nodebord, line width=0.4pt,
+                minimum width=2.5cm, minimum height=1.0cm,
+                inner sep=4pt, align=center, font=\sffamily\footnotesize},
+    ide/.style={box, fill=absfill, draw=absbord},
+    adapter/.style={box, fill=clifill, draw=clibord},
+    debugger/.style={box, fill=impfill, draw=impbord},
+    target/.style={box, fill=confill, draw=conbord},
+    proto/.style={font=\sffamily\scriptsize\bfseries, text=hibord}
+]
+
+% IDE row
+\node[ide] (vscode) at (0, 3) {VSCode};
+\node[ide, right=1.2cm of vscode] (nvim) {Neovim\\nvim-dap};
+\node[ide, right=1.2cm of nvim] (emacs) {Emacs\\dap-mode};
+
+% DAP arrow down to common adapter row
+\node[adapter] (cppdbg) at (0, 0.5) {cppdbg};
+\node[adapter, right=1.2cm of cppdbg] (codelldb) {CodeLLDB};
+\node[adapter, right=1.2cm of codelldb] (debugpy) {debugpy};
+
+\draw[uses] (vscode) -- node[right, proto] {DAP} (cppdbg);
+\draw[uses] (nvim)   -- (cppdbg);
+\draw[uses] (nvim)   -- (codelldb);
+\draw[uses] (emacs)  -- (codelldb);
+\draw[uses] (emacs)  -- (debugpy);
+
+% Debuggers
+\node[debugger] (gdb) at (-1.5, -2) {GDB};
+\node[debugger] (lldb) at (4, -2)   {LLDB};
+\node[debugger] (py)   at (8, -2)   {Python\\runtime};
+
+\draw[uses] (cppdbg)   -- node[left, proto] {MI} (gdb);
+\draw[uses] (cppdbg)   -- (lldb);
+\draw[uses] (codelldb) -- node[right, proto] {SB API} (lldb);
+\draw[uses] (debugpy)  -- (py);
+
+% Targets
+\node[target] (rsp)    at (-1.5, -4) {gdbserver\\OpenOCD};
+\node[target] (mac)    at (4, -4)    {debugserver\\lldb-server};
+
+\draw[uses] (gdb)  -- node[left, proto] {RSP} (rsp);
+\draw[uses] (lldb) -- (mac);
+
+% Legend
+\node[font=\sffamily\scriptsize, anchor=west] at (9.5, 0.5)  {Adapter};
+\node[font=\sffamily\scriptsize, anchor=west] at (9.5, 3.0)  {IDE};
+\node[font=\sffamily\scriptsize, anchor=west] at (9.5, -2.0) {Debugger};
+\node[font=\sffamily\scriptsize, anchor=west] at (9.5, -4.0) {Stub};
+
+\end{tikzpicture}
+\end{document}

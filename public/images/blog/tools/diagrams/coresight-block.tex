@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    block/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+                  minimum width=1.4cm, minimum height=0.8cm, align=center,
+                  font=\sffamily\footnotesize},
+    mainblock/.style={block, draw=absbord, fill=absfill, minimum width=1.6cm},
+    coreblock/.style={block, draw=conbord, fill=confill},
+    traceblock/.style={block, draw=impbord, fill=impfill},
+    conn/.style={-{Stealth[length=1.8mm]}, draw=edgec, line width=0.4pt}
+]
+
+% SWD/JTAG pins at top
+\node[block, draw=clibord, fill=clifill, minimum width=3cm] (pins) at (0, 0) {SWD/JTAG 핀};
+
+% DAP box
+\node[mainblock, minimum width=3.2cm, minimum height=2.2cm, below=0.6cm of pins] (dap) {};
+\node[font=\sffamily\footnotesize\bfseries, anchor=north] at ([yshift=-0.1cm]dap.north) {DAP};
+
+% DP and AHB-AP inside DAP
+\node[block, minimum width=1.8cm] (dp) at ([yshift=0.1cm]dap.center) {DP};
+\node[block, minimum width=1.8cm, below=0.2cm of dp] (ahbap) {AHB-AP};
+
+% Connection from pins to DAP
+\draw[conn] (pins) -- (dap);
+
+% AHB bus line
+\node[below=0.8cm of dap, font=\sffamily\scriptsize, text=edgec] (bustext) {(AHB 버스)};
+\draw[draw=edgec, line width=0.6pt] ([xshift=-3.5cm]bustext.west) -- ([xshift=3.5cm]bustext.east);
+
+% Bottom blocks
+\def\blockspacing{1.2cm}
+\node[coreblock, below=1.2cm of dap, xshift=-3cm] (cpu) {CPU};
+\node[mainblock, right=0.2cm of cpu] (fpb) {FPB};
+\node[mainblock, right=0.2cm of fpb] (dwt) {DWT};
+\node[traceblock, right=0.2cm of dwt] (itm) {ITM};
+\node[traceblock, right=0.2cm of itm] (tpiu) {TPIU};
+\node[traceblock, right=0.2cm of tpiu] (etm) {ETM};
+
+% Connections from bus to blocks
+\foreach \blk in {cpu, fpb, dwt, itm, tpiu, etm} {
+    \draw[conn] ([yshift=0.3cm]\blk.north) -- (\blk.north);
+}
+
+% Connection from DAP to bus
+\draw[conn] (dap) -- (bustext.north);
+
+% Annotation for trace output
+\node[anchor=west, font=\sffamily\scriptsize, text=impbord]
+      at ([xshift=0.3cm]etm.east) {(SWO/TRACE 핀으로 출력)};
+
+\end{tikzpicture}
+\end{document}

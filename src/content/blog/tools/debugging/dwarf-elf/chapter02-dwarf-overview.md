@@ -66,17 +66,19 @@ $ readelf -S my_prog | grep debug
 
 DWARF의 기본 단위. 트리 구조로 *모든 것*을 표현.
 
-```
+![DWARF DIE 트리](/images/blog/tools/diagrams/dwarf-die-tree.svg)
+
+```text
 DW_TAG_compile_unit (main.cpp)
-├─ DW_AT_name = "main.cpp"
-├─ DW_AT_language = DW_LANG_C_plus_plus
-├─ DW_AT_low_pc = 0x401000
-├─ DW_AT_high_pc = 0x401200
-├─ DW_AT_producer = "clang 17.0.0"
-│
-├─ DW_TAG_base_type [int]
-│  ├─ DW_AT_name = "int"
-│  ├─ DW_AT_byte_size = 4
+  DW_AT_name = "main.cpp"
+  DW_AT_language = DW_LANG_C_plus_plus
+  DW_AT_low_pc = 0x401000
+  DW_AT_high_pc = 0x401200
+  DW_AT_producer = "clang 17.0.0"
+
+  DW_TAG_base_type [int]
+    DW_AT_name = "int"
+    DW_AT_byte_size = 4
 │  └─ DW_AT_encoding = DW_ATE_signed
 │
 ├─ DW_TAG_pointer_type [int*]
@@ -190,6 +192,8 @@ split-DWARF가 도입되면서 *skeleton + split* 쌍이 표준이 됐습니다 
 DIE 하나하나를 단순 표현하면 *수백 메가*. 같은 형태의 DIE가 수천 개 — `DW_TAG_member` + `DW_AT_name` + `DW_AT_type` + `DW_AT_data_member_location` 조합이 *수만 번* 반복.
 
 해법: 약어 표 분리.
+
+![Abbreviation 인코딩 — 같은 약어를 수만 번 공유](/images/blog/tools/diagrams/dwarf-abbrev-encoding.svg)
 
 ```text
 .debug_abbrev:

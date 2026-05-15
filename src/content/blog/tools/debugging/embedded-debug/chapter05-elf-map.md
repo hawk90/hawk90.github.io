@@ -69,13 +69,9 @@ Program Headers:
 
 ## LMA vs VMA
 
-같은 .data 섹션이 두 주소를 가집니다.
+같은 .data 섹션이 두 주소를 가집니다 — *flash의 LMA*에 굽히고 *SRAM의 VMA*에서 실행.
 
-```
-.data:
-  VMA (Virtual Memory Address) = 0x20000000   ← *실행 중 위치* (SRAM)
-  LMA (Load Memory Address)    = 0x0800A4C0   ← *굽는 위치* (flash)
-```
+![ELF LMA vs VMA — startup 복사 흐름](/images/blog/tools/diagrams/elf-lma-vma.svg)
 
 이유: .data는 *초기화된 변수*입니다. 값이 flash에 있어야 (전원 끄면 사라지지 않게), 실행 시엔 SRAM에 (쓰기 가능하게). 부팅 직후 startup 코드가 flash → SRAM으로 *복사*합니다.
 

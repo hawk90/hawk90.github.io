@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    region/.style={rectangle, rounded corners=2pt, draw=nodebord,
+                   line width=0.4pt, minimum width=4cm, align=center,
+                   font=\sffamily\footnotesize, inner sep=4pt},
+    flashreg/.style={region, draw=conbord, fill=confill},
+    ramreg/.style={region, draw=impbord, fill=impfill},
+    label/.style={font=\sffamily\scriptsize\bfseries, align=center}
+]
+
+% Flash on left
+\node[label, text=conbord] at (0, 3.6) {FLASH (0x08000000)};
+\node[flashreg, minimum height=0.8cm] (vec) at (0, 3.0) {.isr\_vector};
+\node[flashreg, minimum height=1.2cm, below=0pt of vec] (text) {.text + .rodata};
+\node[flashreg, minimum height=0.7cm, below=0pt of text] (dataload) {.data (init bytes)\\\scriptsize LMA};
+
+% RAM on right
+\node[label, text=impbord] at (6, 3.6) {SRAM (0x20000000)};
+\node[ramreg, minimum height=0.8cm] (datavma) at (6, 3.0) {.data\\\scriptsize VMA};
+\node[ramreg, minimum height=1.0cm, below=0pt of datavma] (bss) {.bss (zero)};
+\node[ramreg, minimum height=0.7cm, below=0pt of bss] (heap) {heap};
+\node[ramreg, minimum height=0.7cm, below=0pt of heap] (stack) {stack};
+
+% Copy arrow (LMA -> VMA)
+\draw[-{Stealth[length=3mm]}, draw=hibord, line width=0.7pt]
+    (dataload.east) to[bend left=15]
+    node[above, font=\sffamily\scriptsize, text=hibord, sloped] {startup copies}
+    (datavma.west);
+
+% Zero-fill annotation
+\node[font=\sffamily\scriptsize, text=impbord, right=2pt of bss, anchor=west, xshift=2.0cm]
+    {startup zeros .bss};
+\draw[-{Stealth[length=2mm]}, draw=impbord, dashed]
+    ([xshift=2.0cm]bss.east) -- (bss.east);
+
+\end{tikzpicture}
+\end{document}

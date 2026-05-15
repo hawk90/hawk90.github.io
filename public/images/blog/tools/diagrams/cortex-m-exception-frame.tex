@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    slot/.style={rectangle, draw=nodebord, line width=0.4pt,
+                 minimum width=2.5cm, minimum height=0.6cm, inner sep=2pt,
+                 font=\sffamily\footnotesize, align=center, fill=nodefill},
+    hw/.style={slot, fill=confill, draw=conbord},
+    user/.style={slot, fill=impfill, draw=impbord},
+    addr/.style={font=\sffamily\scriptsize, text=nodebord}
+]
+
+\node[font=\sffamily\bfseries\small] at (0, 4.2) {Stack (Cortex-M exception entry)};
+
+% From top to bottom (high address to low)
+\node[addr] at (-2.5, 3.6) {high addr};
+\node[hw]   (xpsr) at (0, 3.6) {xPSR};
+\node[hw, below=0pt of xpsr] (pc) {PC (return)};
+\node[hw, below=0pt of pc]   (lr) {LR};
+\node[hw, below=0pt of lr]   (r12) {R12};
+\node[hw, below=0pt of r12]  (r3) {R3};
+\node[hw, below=0pt of r3]   (r2) {R2};
+\node[hw, below=0pt of r2]   (r1) {R1};
+\node[hw, below=0pt of r1]   (r0) {R0};
+
+\node[user, below=0.2cm of r0] (sp) {SP (now)\\ \scriptsize ISR가 본 SP};
+
+% Annotations
+\node[addr, anchor=west] at ([xshift=0.5cm]xpsr.east)
+    {$\leftarrow$ exception 직전 SP};
+\node[addr, anchor=west] at ([xshift=0.5cm]pc.east)
+    {$\leftarrow$ ISR이 분석할 PC};
+\node[addr, anchor=west] at ([xshift=0.5cm]r0.east)
+    {$\leftarrow$ HW가 자동 push};
+\node[addr, anchor=west] at ([xshift=0.5cm,yshift=2pt]sp.east)
+    {$\leftarrow$ ISR 진입 시 SP};
+
+% Down arrow
+\draw[-{Stealth[length=2mm]}, draw=hibord] (-2.5, 3.3) -- (-2.5, -1.0)
+    node[midway, font=\sffamily\scriptsize, text=hibord, rotate=90, anchor=south] {스택 성장};
+
+\end{tikzpicture}
+\end{document}

@@ -116,6 +116,8 @@ TaskStacks()
 
 기본 핸들러는 *무한 루프*. 진짜 정보는 *예외 발생 시 푸시된 스택 프레임*에 있습니다.
 
+![Cortex-M exception stack frame](/images/blog/tools/diagrams/cortex-m-exception-frame.svg)
+
 ```c
 // 예외 시 HW가 자동 푸시: r0, r1, r2, r3, r12, lr, return_pc, xpsr
 // MSP 또는 PSP 어느 스택에 있는지는 LR (EXC_RETURN) 값으로
@@ -459,7 +461,7 @@ void main() {
 
 ## 외부 자료
 
-- [GDB and LLDB 시리즈](/blog/tools/gdb-lldb/chapter01-intro-and-install) — 일반 GDB
+- [GDB and LLDB 시리즈](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 일반 GDB
 - [DWARF and ELF Internals](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview) — ELF 깊이
 - [Postmortem Debugging](/blog/tools/debugging/postmortem-debug/chapter01-core-generation) — core dump 분석
 - [Cortex-M3/M4 Programming Manual (ARM)](https://developer.arm.com/documentation/ddi0337/latest/) — fault, MPU

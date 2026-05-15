@@ -1,0 +1,66 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    state/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+                  minimum width=2.8cm, minimum height=0.7cm, align=center,
+                  font=\sffamily\footnotesize},
+    drstate/.style={state, draw=conbord, fill=confill},
+    irstate/.style={state, draw=impbord, fill=impfill},
+    trans/.style={-{Stealth[length=1.8mm]}, draw=edgec, line width=0.4pt,
+                  font=\sffamily\scriptsize}
+]
+
+% Top level states
+\node[state] (reset) at (0, 0) {Test-Logic-Reset};
+\node[state, below=0.6cm of reset] (idle) {Run-Test/Idle};
+\node[state, below=0.6cm of idle] (seldr) {Select-DR-Scan};
+
+% DR path (left, red)
+\node[drstate, below left=0.6cm and 0.8cm of seldr] (capdr) {Capture-DR};
+\node[drstate, below=0.5cm of capdr] (shftdr) {Shift-DR};
+\node[drstate, below=0.5cm of shftdr] (ex1dr) {Exit1-DR};
+\node[drstate, below=0.5cm of ex1dr] (upddr) {Update-DR};
+
+% IR path (right, green)
+\node[state, below right=0.6cm and 0.8cm of seldr] (selir) {Select-IR-Scan};
+\node[irstate, below=0.5cm of selir] (capir) {Capture-IR};
+\node[irstate, below=0.5cm of capir] (shftir) {Shift-IR};
+\node[irstate, below=0.5cm of shftir] (ex1ir) {Exit1-IR};
+\node[irstate, below=0.5cm of ex1ir] (updir) {Update-IR};
+
+% Transitions from top
+\draw[trans] (reset) -- node[right] {TMS=0} (idle);
+\draw[trans] (idle) -- node[right] {TMS=1} (seldr);
+\draw[trans, bend left=50] (reset.east) to node[right] {TMS=1} (reset.north east);
+
+% DR path transitions
+\draw[trans] (seldr) -- node[left] {TMS=0} (capdr);
+\draw[trans] (capdr) -- node[left] {TMS=0} (shftdr);
+\draw[trans] (shftdr) -- node[left] {TMS=1} (ex1dr);
+\draw[trans] (ex1dr) -- node[left] {TMS=1} (upddr);
+\draw[trans, bend left=40] (shftdr.west) to node[left] {TMS=0} (shftdr.south west);
+
+% IR path transitions
+\draw[trans] (seldr) -- node[right] {TMS=1} (selir);
+\draw[trans] (selir) -- node[right] {TMS=0} (capir);
+\draw[trans] (capir) -- node[right] {TMS=0} (shftir);
+\draw[trans] (shftir) -- node[right] {TMS=1} (ex1ir);
+\draw[trans] (ex1ir) -- node[right] {TMS=1} (updir);
+\draw[trans, bend right=40] (shftir.east) to node[right] {TMS=0} (shftir.south east);
+
+% Return paths
+\draw[trans] (upddr.south) -- ++(0, -0.3) -| node[near start, below] {TMS=1} (seldr.south west);
+\draw[trans] (updir.south) -- ++(0, -0.3) -| node[near start, below] {TMS=1} (seldr.south east);
+
+% Annotations
+\node[anchor=west, font=\sffamily\scriptsize, text=conbord] at ([xshift=0.3cm]shftdr.east) {TDI$\rightarrow$TDO};
+\node[anchor=west, font=\sffamily\scriptsize, text=impbord] at ([xshift=0.3cm]shftir.east) {TDI$\rightarrow$TDO};
+
+\end{tikzpicture}
+\end{document}

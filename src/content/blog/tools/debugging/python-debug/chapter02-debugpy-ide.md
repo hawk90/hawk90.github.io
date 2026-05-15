@@ -257,5 +257,5 @@ Ch 3 — `asyncio` 디버깅. 코루틴 콜스택의 짧음 문제, `asyncio.run
 
 - [Ch 1: pdb 기본](/blog/tools/debugging/python-debug/chapter01-pdb-basics)
 - [Ch 3: asyncio 디버깅](/blog/tools/debugging/python-debug/chapter03-asyncio)
-- [GDB Ch 10: TUI / 프런트엔드](/blog/tools/gdb-lldb/chapter10-tui-frontends) — DAP는 IDE↔디버거 표준
+- [GDB Ch 10: TUI / 프런트엔드](/blog/tools/debugging/gdb-lldb/chapter10-tui-frontends) — DAP는 IDE↔디버거 표준
 - [debugpy GitHub](https://github.com/microsoft/debugpy)

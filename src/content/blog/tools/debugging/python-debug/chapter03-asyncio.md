@@ -273,6 +273,6 @@ Ch 4 — `py-spy` 샘플링 프로파일러. 운영 프로세스의 콜스택을
 
 - [Ch 2: debugpy / IDE](/blog/tools/debugging/python-debug/chapter02-debugpy-ide)
 - [Ch 4: py-spy 샘플링](/blog/tools/debugging/python-debug/chapter04-py-spy)
-- [GDB Ch 6: 멀티스레드 / 멀티프로세스](/blog/tools/gdb-lldb/chapter06-multithread-multiprocess)
+- [GDB Ch 6: 멀티스레드 / 멀티프로세스](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess)
 - [PEP 567 — Context Variables](https://peps.python.org/pep-0567/)
 - [`asyncio` 디버그 모드 문서](https://docs.python.org/3/library/asyncio-dev.html)

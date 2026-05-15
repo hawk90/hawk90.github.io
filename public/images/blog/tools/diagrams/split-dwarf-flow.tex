@@ -1,0 +1,65 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    file/.style={rectangle, rounded corners=2pt, draw=nodebord,
+                 line width=0.4pt, inner sep=4pt, align=center,
+                 font=\sffamily\footnotesize, minimum width=2.5cm,
+                 minimum height=1.0cm},
+    src/.style={file, fill=nodefill},
+    obj/.style={file, fill=absfill, draw=absbord},
+    dwo/.style={file, fill=impfill, draw=impbord},
+    outfile/.style={file, fill=clifill, draw=clibord},
+    tool/.style={rectangle, rounded corners=2pt, draw=conbord, fill=confill,
+                 inner sep=4pt, font=\sffamily\scriptsize\ttfamily, line width=0.4pt}
+]
+
+% Source
+\node[src] (src1) at (0, 3) {foo.cpp};
+\node[src] (src2) at (0, 1.5) {bar.cpp};
+
+% Compiler
+\node[tool] (gcc1) at (3, 3) {clang++\\-gsplit-dwarf -c};
+\node[tool] (gcc2) at (3, 1.5) {clang++\\-gsplit-dwarf -c};
+
+% Object + dwo
+\node[obj] (o1) at (6, 3.5) {foo.o\\(skeleton only)};
+\node[dwo] (d1) at (6, 2.3) {foo.dwo\\(DIE tree)};
+\node[obj] (o2) at (6, 1.0) {bar.o\\(skeleton only)};
+\node[dwo] (d2) at (6, -0.2) {bar.dwo\\(DIE tree)};
+
+% Linker
+\node[tool] (ld) at (9.5, 2.0) {clang++ (link)};
+
+% Final ELF
+\node[outfile] (elf) at (12.5, 2.5) {prog ELF\\skeleton CUs\\$\rightarrow$ dwo refs};
+
+% dwp packaging
+\node[tool] (dwp) at (9.5, 0.5) {llvm-dwp};
+\node[outfile, fill=hifill, draw=hibord] (pkg) at (12.5, 0.5) {prog.dwp\\(packaged)};
+
+% Edges
+\draw[uses] (src1) -- (gcc1);
+\draw[uses] (src2) -- (gcc2);
+\draw[uses] (gcc1) -- (o1);
+\draw[uses] (gcc1) -- (d1);
+\draw[uses] (gcc2) -- (o2);
+\draw[uses] (gcc2) -- (d2);
+\draw[uses] (o1) -- (ld);
+\draw[uses] (o2) -- (ld);
+\draw[uses] (ld) -- (elf);
+\draw[uses] (d1) -- (dwp);
+\draw[uses] (d2) -- (dwp);
+\draw[uses] (dwp) -- (pkg);
+
+% GDB lookup arrow (dashed back)
+\draw[alt, draw=hibord] (elf.south) to[bend right=20] (pkg.north);
+\node[font=\sffamily\scriptsize, text=hibord] at (12.5, 1.5) {GDB가 lookup};
+
+\end{tikzpicture}
+\end{document}

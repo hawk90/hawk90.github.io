@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    file/.style={rectangle, rounded corners=2pt, draw=nodebord,
+                 line width=0.4pt, inner sep=4pt, align=center,
+                 font=\sffamily\footnotesize, fill=nodefill,
+                 minimum width=2.8cm, minimum height=0.9cm},
+    bin/.style={file, fill=confill, draw=conbord},
+    dbg/.style={file, fill=impfill, draw=impbord},
+    core/.style={file, fill=absfill, draw=absbord},
+    svc/.style={file, fill=clifill, draw=clibord, minimum height=0.7cm},
+    idfont/.style={font=\sffamily\scriptsize\ttfamily, text=hibord}
+]
+
+% Build time
+\node[font=\sffamily\bfseries\small] at (-4, 4) {Build time};
+\node[bin] (binary) at (-4, 3.0) {myapp (stripped)\\\scriptsize Build-ID = 8d3a91...};
+\node[dbg] (debug)  at (-4, 1.7) {myapp.debug\\\scriptsize Build-ID = 8d3a91...};
+\draw[-{Stealth[length=2mm]}, dashed, draw=hibord]
+    (binary.east) to[bend left=15]
+    node[right, idfont] {same ID}
+    (debug.east);
+
+% Runtime crash
+\node[font=\sffamily\bfseries\small] at (3, 4) {Runtime crash};
+\node[core] (corefile) at (3, 3.0) {core file\\\scriptsize embeds Build-ID 8d3a91...};
+
+% debuginfod server
+\node[font=\sffamily\bfseries\small] at (3, 0.5) {Distribution};
+\node[svc] (debuginfod) at (3, -0.3)
+    {debuginfod server};
+\node[svc, below=0.2cm of debuginfod] (cache) {client cache};
+\node[svc, below=0.2cm of cache]      (dist)  {/usr/lib/debug/.build-id/8d/3a91...};
+
+% GDB analysis
+\node[bin, right=2.5cm of debuginfod] (gdb) {gdb exe core};
+\draw[-{Stealth[length=2mm]}, draw=absbord]
+    (corefile.south) to[bend left=10] (gdb.north);
+\draw[-{Stealth[length=2mm]}, draw=clibord]
+    (debuginfod.east) -- node[above, font=\sffamily\scriptsize] {auto download} (gdb.west);
+
+% Build-id flow
+\draw[-{Stealth[length=1.8mm]}, draw=hibord, dashed]
+    (debug.south) to[bend right=20]
+    node[left, idfont, near start] {indexed by}
+    (dist.west);
+
+\end{tikzpicture}
+\end{document}

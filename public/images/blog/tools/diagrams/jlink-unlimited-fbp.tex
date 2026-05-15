@@ -1,0 +1,65 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    region/.style={rectangle, draw=nodebord, line width=0.4pt,
+                   minimum width=4cm, minimum height=0.7cm,
+                   inner sep=3pt, font=\sffamily\scriptsize, align=center,
+                   fill=nodefill},
+    flash/.style={region, fill=confill, draw=conbord},
+    ram/.style={region, fill=impfill, draw=impbord},
+    patch/.style={region, fill=hifill, draw=hibord,
+                  font=\sffamily\scriptsize\bfseries},
+    fpb/.style={rectangle, rounded corners=2pt,
+                draw=absbord, fill=absfill, line width=0.4pt,
+                inner sep=4pt, font=\sffamily\scriptsize, align=center,
+                minimum width=2cm}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small] at (0, 4.5) {Unlimited Flash BP (J-Link)};
+
+% Original flash page (left)
+\node[font=\sffamily\scriptsize\bfseries, text=conbord] at (-4, 3.6) {Flash page};
+\node[flash, minimum height=0.6cm] (f1) at (-4, 3.0) {... NOP NOP MOV ...};
+\node[flash, minimum height=0.6cm, below=0pt of f1] (f2) {... ADD R0,R1 ...};
+\node[flash, minimum height=0.6cm, below=0pt of f2, fill=hifill!50] (f3) {LDR R2, [R0]};
+\node[flash, minimum height=0.6cm, below=0pt of f3] (f4) {... BLX foo ...};
+
+% Patched page (right) — in SRAM
+\node[font=\sffamily\scriptsize\bfseries, text=impbord] at (4, 3.6) {SRAM copy + patch};
+\node[ram, minimum height=0.6cm] (s1) at (4, 3.0) {... NOP NOP MOV ...};
+\node[ram, minimum height=0.6cm, below=0pt of s1] (s2) {... ADD R0,R1 ...};
+\node[patch, minimum height=0.6cm, below=0pt of s2] (s3) {BKPT \#0xAB};
+\node[ram, minimum height=0.6cm, below=0pt of s3] (s4) {... BLX foo ...};
+
+% Copy + patch arrow
+\draw[-{Stealth[length=2.5mm]}, draw=hibord, line width=0.7pt]
+    (f1.east) to[bend left=20]
+    node[above, font=\sffamily\scriptsize, text=hibord]
+        {1. copy 4KB page}
+    (s1.west);
+\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt, dashed]
+    (f3.east) to[bend right=10]
+    node[below, font=\sffamily\scriptsize, text=hibord]
+        {2. replace with BKPT}
+    (s3.west);
+
+% FPB remap
+\node[fpb, below=1.5cm of s2] (fpb)
+    {FPB remap unit\\\scriptsize routes fetch in page to SRAM copy};
+
+\draw[-{Stealth[length=2mm]}, draw=absbord]
+    (fpb) -- (s3.south);
+
+% CPU fetch
+\node[font=\sffamily\scriptsize, text=edgec, below=0.6cm of fpb]
+    {CPU PC reaches page → FPB routes to SRAM → BKPT halts};
+
+\end{tikzpicture}
+\end{document}

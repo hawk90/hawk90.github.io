@@ -259,4 +259,4 @@ valgrind-3.22.0
 ## 관련 시리즈
 
 - [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-intro) — Valgrind와 보완
-- [GDB / LLDB](/blog/tools/gdb-lldb/chapter01-intro-and-install) — 인터랙티브 디버깅
+- [GDB / LLDB](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 인터랙티브 디버깅

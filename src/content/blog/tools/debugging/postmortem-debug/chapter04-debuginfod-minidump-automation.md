@@ -95,6 +95,8 @@ $ sudo apt install glibc-dbgsym libstdc++6-dbgsym
 
 build-id로 *HTTP*로 debuginfo 가져오는 표준 서비스.
 
+![Build-ID 매칭 + debuginfod 자동 다운로드 흐름](/images/blog/tools/diagrams/build-id-matching.svg)
+
 ```bash
 $ export DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/"
 

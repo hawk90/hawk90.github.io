@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    bit/.style={rectangle, draw=nodebord, line width=0.4pt,
+                minimum height=0.7cm, minimum width=0.55cm,
+                inner sep=1pt, align=center, font=\sffamily\scriptsize},
+    req/.style={bit, fill=absfill, draw=absbord},
+    ack/.style={bit, fill=impfill, draw=impbord},
+    data/.style={bit, fill=clifill, draw=clibord},
+    tr/.style={bit, fill=hifill, draw=hibord}
+]
+
+% Request (8 bits)
+\node[font=\sffamily\small, anchor=west] (reqlabel) at (0, 0) {Host $\rightarrow$ Target (Request, 8b):};
+\node[req] (b0) at (5.5, 0) {1};
+\node[req, right=0pt of b0] (b1) {AP};
+\node[req, right=0pt of b1] (b2) {R};
+\node[req, right=0pt of b2] (b3) {A2};
+\node[req, right=0pt of b3] (b4) {A3};
+\node[req, right=0pt of b4] (b5) {P};
+\node[req, right=0pt of b5] (b6) {0};
+\node[req, right=0pt of b6] (b7) {1};
+
+\node[font=\sffamily\scriptsize, above=2pt of b0, text=absbord] {S};
+\node[font=\sffamily\scriptsize, above=2pt of b1, text=absbord] {APnDP};
+\node[font=\sffamily\scriptsize, above=2pt of b2, text=absbord] {RnW};
+\node[font=\sffamily\scriptsize, above=2pt of b3, text=absbord] {A2};
+\node[font=\sffamily\scriptsize, above=2pt of b4, text=absbord] {A3};
+\node[font=\sffamily\scriptsize, above=2pt of b5, text=absbord] {Par};
+\node[font=\sffamily\scriptsize, above=2pt of b6, text=absbord] {Stop};
+\node[font=\sffamily\scriptsize, above=2pt of b7, text=absbord] {Park};
+
+% Turnaround
+\node[tr, below=0.7cm of b1] (trn1) {TRN};
+\node[font=\sffamily\small, anchor=east] at ([xshift=-0.3cm]trn1.west) {turnaround (1 clk)};
+
+% ACK (3 bits)
+\node[font=\sffamily\small, anchor=west] (acklabel) at (0, -2.0) {Target $\rightarrow$ Host (ACK, 3b):};
+\node[ack] (a0) at (5.5, -2.0) {0};
+\node[ack, right=0pt of a0] (a1) {0};
+\node[ack, right=0pt of a1] (a2) {1};
+\node[font=\sffamily\scriptsize, right=0.5cm of a2, text=impbord, anchor=west] {001=OK, 010=WAIT, 100=FAULT};
+
+% Data (32 bits + parity)
+\node[font=\sffamily\small, anchor=west] (datalabel) at (0, -3.0) {Data (32b + P):};
+\node[data, minimum width=4.0cm] (d) at (5.5, -3.0) {};
+\node[data, minimum width=0.55cm, right=0pt of d] (dp) {P};
+\node[font=\sffamily\scriptsize] at (d.center) {32-bit data};
+
+\end{tikzpicture}
+\end{document}

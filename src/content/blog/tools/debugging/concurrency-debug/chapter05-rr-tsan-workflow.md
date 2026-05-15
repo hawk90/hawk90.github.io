@@ -25,6 +25,8 @@ rr이 *비결정성을 결정성으로*. TSan/Helgrind가 *race 위치 진단*. 
 3. **시그널 위치 기록** — 시그널이 도달한 *정확한 명령*.
 4. **재생 시** — 시스템 콜 응답을 *기록 그대로* 주입, 스케줄도 *같은 순서*.
 
+![rr record/replay — trace 저장과 시간 역행](/images/blog/tools/diagrams/rr-record-replay.svg)
+
 ```bash
 # 1. 기록
 $ rr record ./my_prog

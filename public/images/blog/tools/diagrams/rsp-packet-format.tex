@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    field/.style={rectangle, draw=nodebord, line width=0.4pt,
+                  minimum height=0.9cm, inner sep=4pt, align=center,
+                  font=\sffamily\footnotesize},
+    delim/.style={field, fill=hifill, draw=hibord},
+    payload/.style={field, fill=absfill, draw=absbord},
+    cksum/.style={field, fill=impfill, draw=impbord}
+]
+
+% Packet structure
+\node[delim,   minimum width=0.7cm] (dollar) at (0,0) {\$};
+\node[payload, minimum width=4.5cm, right=0pt of dollar] (body) {qSupported:swbreak+;hwbreak+;...};
+\node[delim,   minimum width=0.7cm, right=0pt of body] (hash) {\#};
+\node[cksum,   minimum width=1.2cm, right=0pt of hash] (cs) {cs};
+
+% Labels above
+\node[font=\sffamily\scriptsize, above=2pt of dollar, text=hibord] {Start};
+\node[font=\sffamily\scriptsize, above=2pt of body,   text=absbord] {Payload (ASCII)};
+\node[font=\sffamily\scriptsize, above=2pt of hash,   text=hibord] {End};
+\node[font=\sffamily\scriptsize, above=2pt of cs,     text=impbord] {Checksum};
+
+% Checksum formula
+\node[font=\sffamily\scriptsize, below=4pt of cs, text=impbord, align=center]
+    {hex of\\$\sum\,$payload\,\% 256};
+
+% ACK row
+\node[delim, minimum width=0.7cm, below=1.5cm of dollar] (ack) {+};
+\node[font=\sffamily\footnotesize, right=4pt of ack] (acklabel) {= ACK (received)};
+
+\node[delim, minimum width=0.7cm, right=2.2cm of acklabel.east] (nack) {-};
+\node[font=\sffamily\footnotesize, right=4pt of nack] {= NACK (retransmit)};
+
+\end{tikzpicture}
+\end{document}

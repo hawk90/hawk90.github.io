@@ -26,6 +26,8 @@ VM 모델은 1990년대 ANSI C standard committee가 본 그대로 PostScript·P
 
 VM이 실행되면서 다음 레지스터를 갱신.
 
+![.debug_line 바이트코드 VM — 레지스터·opcode·emit 흐름](/images/blog/tools/diagrams/dwarf-line-state-machine.svg)
+
 | 레지스터 | 초기값 | 의미 |
 |----------|--------|------|
 | `address` | 0 | 현재 PC |

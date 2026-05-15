@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    box/.style={rectangle, rounded corners=2pt, draw=nodebord,
+                line width=0.4pt, inner sep=4pt, align=center,
+                font=\sffamily\footnotesize, minimum width=3.5cm,
+                minimum height=0.8cm, fill=nodefill},
+    pstep/.style={box, fill=absfill, draw=absbord},
+    decide/.style={diamond, draw=clibord, fill=clifill, line width=0.4pt,
+                   inner sep=2pt, aspect=2.4, align=center,
+                   font=\sffamily\footnotesize},
+    finalbox/.style={box, fill=impfill, draw=impbord},
+    rawbox/.style={box, fill=confill, draw=conbord}
+]
+
+\node[pstep] (cmd) at (0, 5) {print val};
+\node[pstep, below=0.4cm of cmd] (type) {get val.type};
+\node[decide, below=0.4cm of type] (q1) {매칭되는\\printer?};
+\node[pstep, below=0.6cm of q1, xshift=2.7cm] (build) {instance = Printer(val)};
+\node[pstep, below=0.5cm of build] (tostr) {to\_string()};
+\node[decide, below=0.4cm of tostr] (q2) {has\\children()?};
+\node[pstep, below=0.5cm of q2, xshift=2.7cm] (children) {yield each\\(name, value)};
+\node[pstep, below=0.6cm of q2, xshift=-1cm] (hint) {display\_hint()};
+
+\node[finalbox, below=2.5cm of hint] (final) {final output\\(MI: variablesReference)};
+
+\node[rawbox, below=0.6cm of q1, xshift=-2.7cm] (rawout) {raw print\\\{member=val,...\}};
+
+% Edges
+\draw[uses] (cmd) -- (type);
+\draw[uses] (type) -- (q1);
+\draw[uses] (q1.east) -- node[above, font=\sffamily\scriptsize] {yes} (build.west);
+\draw[uses] (q1.west) -- node[above, font=\sffamily\scriptsize] {no} (rawout.east);
+\draw[uses] (build) -- (tostr);
+\draw[uses] (tostr) -- (q2);
+\draw[uses] (q2.east) -- node[above, font=\sffamily\scriptsize] {yes} (children.west);
+\draw[uses] (q2.west) -- node[above, font=\sffamily\scriptsize] {no} (hint.east);
+\draw[uses] (children) |- (hint.east);
+\draw[uses] (hint) -- (final);
+\draw[uses] (rawout) |- (final);
+
+\end{tikzpicture}
+\end{document}

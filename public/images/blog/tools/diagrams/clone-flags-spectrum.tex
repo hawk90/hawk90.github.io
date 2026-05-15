@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,matrix,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog]
+
+\matrix (m) [matrix of nodes, ampersand replacement=\&,
+             column sep=2pt, row sep=2pt,
+             every node/.style={font=\sffamily\scriptsize,
+                                inner sep=4pt, anchor=center,
+                                minimum width=2.0cm, minimum height=0.6cm,
+                                align=center},
+             column 1/.style={text width=2.6cm, nodes={anchor=west,
+                              font=\sffamily\scriptsize\bfseries, inner sep=2pt}},
+             row 1/.style={nodes={font=\sffamily\scriptsize\bfseries,
+                                  fill=nodefill, draw=nodebord, line width=0.4pt}}]
+{
+                       \& fork() \& vfork() \& pthread \& clone(custom) \\
+CLONE\_VM (주소공간)     \& copy   \& shared  \& shared  \& flag-dep \\
+CLONE\_FS (cwd/root)    \& copy   \& copy    \& shared  \& flag-dep \\
+CLONE\_FILES (FD)       \& copy   \& copy    \& shared  \& flag-dep \\
+CLONE\_SIGHAND          \& copy   \& copy    \& shared  \& flag-dep \\
+CLONE\_THREAD           \& no     \& no      \& yes     \& flag-dep \\
+Parent block?          \& no     \& yes     \& no      \& flag-dep \\
+Same PID               \& no     \& no      \& yes     \& flag-dep \\
+};
+
+% Color cells based on shared/copy
+\foreach \r in {2,3,4,5} {
+    \node[fit=(m-\r-2), inner sep=0pt, fill=clifill!50, behind path]
+        at (m-\r-2) {};
+    \node[fit=(m-\r-3), inner sep=0pt, fill=confill!50, behind path]
+        at (m-\r-3) {};
+    \node[fit=(m-\r-4), inner sep=0pt, fill=impfill!50, behind path]
+        at (m-\r-4) {};
+}
+
+% Title
+\node[font=\sffamily\bfseries\small, above=0.4cm of m] {clone() flag combinations};
+
+% Legend
+\node[font=\sffamily\scriptsize, below=0.3cm of m, anchor=north, align=center]
+    {녹색=공유, 노란색=복사, 빨간색=blocked. 모든 공유 + CLONE\_THREAD = POSIX 스레드};
+
+\end{tikzpicture}
+\end{document}

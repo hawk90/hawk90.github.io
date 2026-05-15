@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    block/.style={rectangle, rounded corners=2pt,
+                  draw=nodebord, line width=0.4pt,
+                  minimum width=2.0cm, minimum height=0.7cm,
+                  inner sep=4pt, align=center, font=\sffamily\footnotesize,
+                  fill=nodefill},
+    chip/.style={block, fill=confill, draw=conbord},
+    probe/.style={block, fill=impfill, draw=impbord},
+    pc/.style={block, fill=absfill, draw=absbord}
+]
+
+% Chip side
+\node[font=\sffamily\bfseries\small] at (-3, 2.8) {Chip};
+\node[chip] (cpu) at (-3, 2) {CPU\\code};
+\node[chip, below=0.5cm of cpu] (itm) {ITM\\stim ports};
+\node[chip, below=0.5cm of itm] (tpiu) {TPIU\\formatter};
+
+% SWO pin
+\node[font=\sffamily\scriptsize, text=hibord] at (-1, -1.0) {SWO pin (1-bit)};
+
+% Probe
+\node[font=\sffamily\bfseries\small] at (2, 2.8) {Probe};
+\node[probe] (rx) at (2, 0) {SWO RX};
+\node[probe, below=0.5cm of rx] (decode) {decoder};
+
+% PC
+\node[font=\sffamily\bfseries\small] at (6, 2.8) {PC};
+\node[pc] (gdb) at (6, 0.5) {GDB / Telnet};
+\node[pc, below=0.4cm of gdb] (file) {/tmp/swo.log};
+
+% Arrows
+\draw[-{Stealth[length=2mm]}, draw=conbord]
+    (cpu) -- node[right, font=\sffamily\scriptsize] {ITM\_PORT[n]} (itm);
+\draw[-{Stealth[length=2mm]}, draw=conbord]
+    (itm) -- (tpiu);
+\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
+    (tpiu.south) -- ++(0,-0.4) -| (rx.north);
+\draw[-{Stealth[length=2mm]}, draw=impbord]
+    (rx) -- (decode);
+\draw[-{Stealth[length=2mm]}, draw=absbord]
+    (decode.east) -- (gdb.west);
+\draw[-{Stealth[length=2mm]}, draw=absbord]
+    (gdb) -- (file);
+
+% Annotation
+\node[font=\sffamily\scriptsize, text=hibord, below=1.5cm of decode, align=center]
+    {2MBaud over SWO; PC must know core clock\\for accurate decoding};
+
+\end{tikzpicture}
+\end{document}

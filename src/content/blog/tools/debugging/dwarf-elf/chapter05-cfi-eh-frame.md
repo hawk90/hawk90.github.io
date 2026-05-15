@@ -60,6 +60,8 @@ CFA (Canonical Frame Address) = 호출자 측 SP의 값
 
 ## 한 예 — main 함수의 CFI
 
+![CFI 표 — 프롤로그 진행에 따른 CFA·register rule 변경](/images/blog/tools/diagrams/dwarf-cfi-table.svg)
+
 ```bash
 $ llvm-dwarfdump --debug-frame my_prog | head -30
 .debug_frame contents:
@@ -272,6 +274,8 @@ $ llvm-dwarfdump --debug-frame my_prog
 ## .eh_frame_hdr — 이진 탐색 인덱스
 
 `.eh_frame`에 *수천 FDE*가 있을 때 PC로 빠르게 찾으려면 인덱스 필요. `.eh_frame_hdr`이 그 역할.
+
+![.eh_frame_hdr 이진 탐색으로 FDE 찾기](/images/blog/tools/diagrams/eh-frame-hdr-search.svg)
 
 ```
 .eh_frame_hdr 구조:

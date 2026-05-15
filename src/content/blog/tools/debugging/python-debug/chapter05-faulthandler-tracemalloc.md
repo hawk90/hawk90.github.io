@@ -278,7 +278,7 @@ $ pyrasite-shell <pid>
 - [Ch 2: debugpy / IDE](/blog/tools/debugging/python-debug/chapter02-debugpy-ide)
 - [Ch 3: asyncio 디버깅](/blog/tools/debugging/python-debug/chapter03-asyncio)
 - [Ch 4: py-spy 샘플링](/blog/tools/debugging/python-debug/chapter04-py-spy)
-- [GDB and LLDB 시리즈](/blog/tools/gdb-lldb/chapter01-intro-and-install) — C 확장은 GDB로
+- [GDB and LLDB 시리즈](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — C 확장은 GDB로
 - [Valgrind Massif](/blog/tools/debugging/valgrind/chapter05-massif-callgrind) — RSS heap 시각화 (C 확장 포함)
 
 ## 외부 자료

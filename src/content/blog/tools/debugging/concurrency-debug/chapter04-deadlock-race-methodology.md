@@ -29,10 +29,7 @@ draft: false
 
 각 노드 = 스레드, 각 엣지 = "스레드 A가 락 X를 기다리는데 락 X는 스레드 B가 들고 있다".
 
-```
-Thread 2 ──wait──> Lock A (held by Thread 4)
-Thread 4 ──wait──> Lock B (held by Thread 2)
-```
+![데드락 — hold/wait 사이클](/images/blog/tools/diagrams/deadlock-graph.svg)
 
 사이클 = 데드락.
 

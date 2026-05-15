@@ -24,6 +24,8 @@ long clone(unsigned long flags, void *stack, int *ptid, int *ctid, unsigned long
 
 `flags`가 자원 공유 옵션. 각 비트가 *부모와 무엇을 공유할지* 결정.
 
+![clone() 플래그 조합 — fork / vfork / pthread 비교](/images/blog/tools/diagrams/clone-flags-spectrum.svg)
+
 | Flag | 공유 자원 |
 |------|-----------|
 | `CLONE_VM` | 주소 공간 (`mm_struct`) |
@@ -371,7 +373,7 @@ Ch 2 — GDB 멀티스레드 명령. `info threads` / `thread apply` / `schedule
 ## 관련 항목
 
 - [Ch 2: GDB 멀티스레드 명령](/blog/tools/debugging/concurrency-debug/chapter02-gdb-threads)
-- [GDB and LLDB Ch 6 (이전판)](/blog/tools/gdb-lldb/chapter06-multithread-multiprocess)
+- [GDB and LLDB Ch 6 (이전판)](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess)
 - `man 2 clone`, `man 2 futex`, `man 7 pthreads`
 - [futex(7) man page](https://man7.org/linux/man-pages/man7/futex.7.html)
 - [Ulrich Drepper — Futexes Are Tricky](https://www.akkadia.org/drepper/futex.pdf)

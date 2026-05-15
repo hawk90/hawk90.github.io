@@ -16,7 +16,9 @@ GDB의 `print val`이 *val의 타입*에 매칭된 Python 클래스를 호출하
 
 ## Dispatch 메커니즘
 
-```
+![Pretty-printer dispatch 흐름](/images/blog/tools/diagrams/pretty-printer-dispatch.svg)
+
+```text
 (gdb) print v
 
 1. v의 타입을 파악 → gdb.Type

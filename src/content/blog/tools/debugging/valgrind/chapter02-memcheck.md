@@ -172,7 +172,7 @@ gdb ./myapp
 (gdb) target remote | vgdb
 ```
 
-*첫 에러에서 멈춰* 변수를 조사할 수 있습니다. [GDB 시리즈](/blog/tools/gdb-lldb/chapter01-intro-and-install)와 조합.
+*첫 에러에서 멈춰* 변수를 조사할 수 있습니다. [GDB 시리즈](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install)와 조합.
 
 ---
 

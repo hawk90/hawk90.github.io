@@ -16,17 +16,7 @@ ELF core = PT_NOTE (스레드·프로세스 메타) + PT_LOAD (메모리 내용)
 
 ## 전체 구조
 
-```
-ELF Header (e_type = ET_CORE)
-─────────────────────────────
-Program Headers:
-  PT_NOTE                                ← 메타데이터 (레지스터, 스레드, 파일)
-  PT_LOAD ... (수십~수백 개)             ← 메모리 영역들
-─────────────────────────────
-Data:
-  NOTE 데이터 (NT_PRSTATUS x N, NT_FILE, ...)
-  LOAD 데이터 (실제 메모리 내용)
-```
+![ELF core 파일 — PT_NOTE / PT_LOAD 분해](/images/blog/tools/diagrams/core-elf-structure.svg)
 
 `readelf`로 확인.
 

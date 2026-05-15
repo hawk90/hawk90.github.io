@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog]
+
+% Box dimensions
+\def\boxw{5cm}
+\def\boxh{1.2cm}
+\def\sectionh{2cm}
+
+% ELF Header (blue - central)
+\node[rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+      minimum width=\boxw, minimum height=\boxh, align=center]
+      (elfhdr) at (0, 0) {ELF Header};
+
+% Program Headers (red - loader's view)
+\node[rectangle, rounded corners=2pt, draw=conbord, fill=confill,
+      minimum width=\boxw, minimum height=\boxh, align=center,
+      below=0pt of elfhdr]
+      (phdr) {Program Headers};
+
+% Sections (green - actual data)
+\node[rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+      minimum width=\boxw, minimum height=\sectionh, align=center,
+      below=0pt of phdr]
+      (sections) {Sections\\[2pt]{\small .text, .data, .bss, ...}\\[2pt]{\small (실제 데이터)}};
+
+% Section Headers (yellow - linker's view)
+\node[rectangle, rounded corners=2pt, draw=clibord, fill=clifill,
+      minimum width=\boxw, minimum height=\boxh, align=center,
+      below=0pt of sections]
+      (shdr) {Section Headers};
+
+% Annotations on the right
+\node[anchor=west, font=\sffamily\small, text=absbord]
+      at ([xshift=0.8cm]elfhdr.east) {$\rightarrow$ e\_phoff, e\_shoff};
+
+\node[anchor=west, font=\sffamily\small, text=conbord]
+      at ([xshift=0.8cm]phdr.east) {$\leftarrow$ 로더가 본다 (세그먼트)};
+
+\node[anchor=west, font=\sffamily\small, text=clibord]
+      at ([xshift=0.8cm]shdr.east) {$\leftarrow$ 링커가 본다};
+
+\end{tikzpicture}
+\end{document}

@@ -35,6 +35,8 @@ DWARF expression은 *스택 머신*의 명령어 시퀀스.
 - 마지막에 스택 top이 *결과* — 그 변수의 *주소* (또는 *값* 자체).
 - 평가 끝에 스택이 비어 있을 수도 있음 (특수 opcode).
 
+![DWARF expression 스택 머신 — 각 opcode 후의 스택 상태](/images/blog/tools/diagrams/dwarf-expr-vm.svg)
+
 ```text
 DW_OP_reg5            ← 값이 r5 레지스터에 있음
 DW_OP_fbreg -16       ← frame base + (-16) 주소에 있음

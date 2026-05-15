@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    box/.style={rectangle, rounded corners=2pt, draw=nodebord, line width=0.4pt,
+                minimum height=0.6cm, inner sep=4pt, align=center,
+                font=\sffamily\scriptsize, fill=nodefill},
+    record/.style={box, fill=confill, draw=conbord},
+    trace/.style={box, fill=clifill, draw=clibord},
+    replay/.style={box, fill=impfill, draw=impbord},
+    label/.style={font=\sffamily\bfseries\small}
+]
+
+% Record phase
+\node[label] at (-3.5, 3.6) {1. rr record};
+\node[record, minimum width=1.0cm] (e1) at (-5.5, 3) {syscall};
+\node[record, minimum width=1.0cm, right=0.1cm of e1] (e2) {schedule};
+\node[record, minimum width=0.9cm, right=0.1cm of e2] (e3) {signal};
+\node[record, minimum width=1.0cm, right=0.1cm of e3] (e4) {syscall};
+\node[record, minimum width=1.0cm, right=0.1cm of e4] (e5) {schedule};
+\node[record, minimum width=0.9cm, fill=hifill, draw=hibord, right=0.1cm of e5] (bug) {bug!};
+
+% Trace storage
+\node[trace, minimum width=7cm, below=0.7cm of e3]
+    (tr) {trace file (~/.local/share/rr/trace-N)};
+\draw[-{Stealth[length=2mm]}, draw=conbord]
+    (e3.south) -- (tr.north);
+
+% Replay phase
+\node[label] at (-3.5, -0.5) {2. rr replay (반복)};
+\node[replay, minimum width=1.0cm] (r1) at (-5.5, -1.2) {syscall};
+\node[replay, minimum width=1.0cm, right=0.1cm of r1] (r2) {schedule};
+\node[replay, minimum width=0.9cm, right=0.1cm of r2] (r3) {signal};
+\node[replay, minimum width=1.0cm, right=0.1cm of r3] (r4) {syscall};
+\node[replay, minimum width=1.0cm, right=0.1cm of r4] (r5) {schedule};
+\node[replay, minimum width=0.9cm, fill=hifill, draw=hibord, right=0.1cm of r5] (rbug) {bug!};
+
+\draw[-{Stealth[length=2mm]}, draw=impbord]
+    (tr.south) -- (r3.north);
+
+% Time direction
+\draw[-{Stealth[length=2mm]}, draw=edgec]
+    (-5.7, -1.9) -- (3.5, -1.9)
+    node[midway, below, font=\sffamily\scriptsize, text=edgec] {time (forward)};
+
+\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
+    (3.5, -2.3) -- (-5.7, -2.3)
+    node[midway, below, font=\sffamily\scriptsize, text=hibord]
+        {reverse-continue / reverse-step};
+
+\end{tikzpicture}
+\end{document}

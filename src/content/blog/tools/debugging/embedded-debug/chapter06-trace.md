@@ -101,6 +101,8 @@ extern "C" int _write(int fd, char *ptr, int len) {
 
 ARM CoreSight의 일부. 메모리 매핑 레지스터에 워드를 쓰면 *SWO 핀*으로 trace 패킷이 송출됩니다.
 
+![ITM/SWO 데이터 경로](/images/blog/tools/diagrams/itm-swo-path.svg)
+
 ### 펌웨어 측
 
 ```c
@@ -209,6 +211,8 @@ M0/M0+는 *ITM 없음*. trace를 쓰려면 RTT 또는 UART.
 ## 3. RTT (Real-Time Transfer)
 
 Segger의 발명. 메모리 안에 *링 버퍼*를 두고 디버거가 *백그라운드 SWD*로 폴링.
+
+![RTT 링 버퍼 메커니즘](/images/blog/tools/diagrams/rtt-ring-buffer.svg)
 
 ### 동작 원리
 

@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    seg/.style={rectangle, draw=nodebord, line width=0.4pt,
+                minimum width=5cm, inner sep=4pt, align=left,
+                font=\sffamily\footnotesize, fill=nodefill},
+    note/.style={seg, fill=clifill, draw=clibord},
+    load/.style={seg, fill=impfill, draw=impbord},
+    hdr/.style={seg, fill=absfill, draw=absbord, align=center,
+                font=\sffamily\bfseries\small},
+    sub/.style={rectangle, draw=clibord, line width=0.3pt,
+                minimum width=3.0cm, minimum height=0.5cm,
+                inner sep=3pt, font=\sffamily\scriptsize\ttfamily,
+                fill=clifill!50}
+]
+
+% Header
+\node[hdr] (h) at (0, 5)
+    {ELF Header (e\_type = ET\_CORE)};
+
+% Program Headers
+\node[note, minimum width=5cm, below=0.2cm of h] (note)
+    {PT\_NOTE\\\scriptsize 메타데이터 (스레드, 파일, 시그널)};
+
+\node[load, below=0.2cm of note]   (l1) {PT\_LOAD: stack memory};
+\node[load, below=0.1cm of l1]     (l2) {PT\_LOAD: heap};
+\node[load, below=0.1cm of l2]     (l3) {PT\_LOAD: .data / .bss};
+\node[load, below=0.1cm of l3]     (l4) {PT\_LOAD: anonymous mmap};
+\node[load, below=0.1cm of l4]     (l5) {PT\_LOAD: ... (file-backed)};
+
+% Notes expansion (right)
+\node[font=\sffamily\bfseries\small] at (6, 4.6) {Note records};
+
+\node[sub] (n1) at (6.5, 4.0) {NT\_PRSTATUS [thread 1]};
+\node[sub, below=0.1cm of n1] (n2) {NT\_PRSTATUS [thread 2]};
+\node[sub, below=0.1cm of n2] (n3) {NT\_PRSTATUS [thread N]};
+\node[sub, below=0.1cm of n3] (n4) {NT\_PRPSINFO};
+\node[sub, below=0.1cm of n4] (n5) {NT\_AUXV};
+\node[sub, below=0.1cm of n5] (n6) {NT\_SIGINFO};
+\node[sub, below=0.1cm of n6] (n7) {NT\_FILE};
+\node[sub, below=0.1cm of n7] (n8) {NT\_FPREGSET / NT\_X86\_XSTATE};
+
+% Arrow note -> details
+\draw[-{Stealth[length=2mm]}, draw=clibord]
+    (note.east) -- (n1.west);
+
+\end{tikzpicture}
+\end{document}

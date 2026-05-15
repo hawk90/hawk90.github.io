@@ -198,6 +198,8 @@ J-Link만의 상용 기능. FPB의 HW BP 개수(6개) 제한을 *flash patching*
 
 ### 동작 원리
 
+![Unlimited Flash BP 메커니즘](/images/blog/tools/diagrams/jlink-unlimited-fbp.svg)
+
 1. BP 7번째 설정 → J-Link 펌웨어가 *flash 페이지 전체*를 SRAM 임시 영역에 복사.
 2. SRAM 사본에서 해당 위치를 `BKPT` 명령으로 패치.
 3. CPU의 메모리 매핑 (또는 *aliasing*)을 활용해 *그 페이지만* SRAM 사본을 보도록.

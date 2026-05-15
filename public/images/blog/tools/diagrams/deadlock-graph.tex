@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    thr/.style={circle, draw=absbord, fill=absfill, line width=0.5pt,
+                minimum size=1.4cm, inner sep=0pt, font=\sffamily\small\bfseries},
+    lk/.style={rectangle, rounded corners=2pt, draw=conbord, fill=confill,
+               line width=0.5pt, minimum height=0.7cm, minimum width=1.5cm,
+               inner sep=2pt, font=\sffamily\scriptsize}
+]
+
+% Threads
+\node[thr] (t1) at (0, 2.5)   {T1};
+\node[thr] (t2) at (5, 2.5)   {T2};
+
+% Locks
+\node[lk] (la) at (0, 0)   {Lock A};
+\node[lk] (lb) at (5, 0)   {Lock B};
+
+% Hold edges (solid)
+\draw[-{Stealth[length=2.5mm]}, draw=impbord, line width=0.8pt]
+    (la.north) to[bend left=20]
+    node[above left, font=\sffamily\scriptsize, text=impbord] {holds}
+    (t1.south);
+\draw[-{Stealth[length=2.5mm]}, draw=impbord, line width=0.8pt]
+    (lb.north) to[bend right=20]
+    node[above right, font=\sffamily\scriptsize, text=impbord] {holds}
+    (t2.south);
+
+% Wait edges (dashed)
+\draw[-{Stealth[length=2.5mm]}, draw=conbord, dashed, line width=0.8pt]
+    (t1.east) to[bend left=10]
+    node[above, font=\sffamily\scriptsize, text=conbord] {waits for}
+    (lb.north west);
+\draw[-{Stealth[length=2.5mm]}, draw=conbord, dashed, line width=0.8pt]
+    (t2.west) to[bend left=10]
+    node[below, font=\sffamily\scriptsize, text=conbord] {waits for}
+    (la.north east);
+
+% Cycle annotation
+\node[font=\sffamily\bfseries\small, text=hibord, align=center,
+      below=1.5cm of la, xshift=2.5cm]
+    {Cycle = Deadlock\\\scriptsize T1 → Lock B → T2 → Lock A → T1};
+
+\end{tikzpicture}
+\end{document}

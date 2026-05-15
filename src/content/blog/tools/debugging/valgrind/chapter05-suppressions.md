@@ -518,5 +518,5 @@ Valgrind 시리즈 다섯 챕터를 마칩니다.
 ## 관련 시리즈
 
 - [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-intro) — 짝을 이루는 도구
-- [GDB / LLDB](/blog/tools/gdb-lldb/chapter01-intro-and-install) — 인터랙티브 디버깅
+- [GDB / LLDB](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 인터랙티브 디버깅
 - [perf / flamegraph](/blog/tools/perf-flamegraph/chapter01-perf-overview) — 성능 분석

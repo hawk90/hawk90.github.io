@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    actor/.style={rectangle, rounded corners=2pt, draw=nodebord,
+                  line width=0.5pt, minimum width=2cm, minimum height=0.8cm,
+                  inner sep=4pt, align=center, font=\sffamily\small\bfseries,
+                  fill=nodefill},
+    msg/.style={font=\sffamily\scriptsize\ttfamily, fill=white, inner sep=2pt}
+]
+
+% Actors
+\node[actor, fill=absfill, draw=absbord] (host) at (0, 5)   {Host (GDB)};
+\node[actor, fill=impfill, draw=impbord] (stub) at (6, 5)   {Stub};
+
+% Lifelines
+\draw[dashed, draw=edgesc] (host) -- (0, -3);
+\draw[dashed, draw=edgesc] (stub) -- (6, -3);
+
+% Messages
+\draw[-{Stealth[length=2mm]}] (0, 4)   -- (6, 4)
+    node[midway, msg] {\$qSupported...\#cs};
+\draw[-{Stealth[length=2mm]}, draw=impbord] (6, 3.5) -- (0, 3.5)
+    node[midway, msg, text=impbord] {+ (ACK)};
+\draw[-{Stealth[length=2mm]}, draw=impbord] (6, 3) -- (0, 3)
+    node[midway, msg, text=impbord] {\$PacketSize=2000;...\#cs};
+\draw[-{Stealth[length=2mm]}] (0, 2.5) -- (6, 2.5)
+    node[midway, msg] {+ (ACK)};
+
+% NACK example
+\draw[-{Stealth[length=2mm]}] (0, 1.5) -- (6, 1.5)
+    node[midway, msg] {\$g\#67};
+\draw[-{Stealth[length=2mm]}, draw=conbord] (6, 1) -- (0, 1)
+    node[midway, msg, text=conbord] {- (NACK, checksum bad)};
+\draw[-{Stealth[length=2mm]}] (0, 0.5) -- (6, 0.5)
+    node[midway, msg] {\$g\#67 (retransmit)};
+\draw[-{Stealth[length=2mm]}, draw=impbord] (6, 0) -- (0, 0)
+    node[midway, msg, text=impbord] {+ (ACK)};
+\draw[-{Stealth[length=2mm]}, draw=impbord] (6, -0.5) -- (0, -0.5)
+    node[midway, msg, text=impbord] {\$0000...\#xx (register data)};
+
+% NoAck mode annotation
+\node[font=\sffamily\scriptsize, text=hibord, align=center] at (3, -2.0)
+    {QStartNoAckMode 협상 후엔\\ACK가 생략되어 왕복 50\% 절감};
+
+\end{tikzpicture}
+\end{document}

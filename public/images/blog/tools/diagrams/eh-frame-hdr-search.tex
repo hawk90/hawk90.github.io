@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    sec/.style={rectangle, draw=nodebord, line width=0.4pt,
+                minimum width=2.5cm, minimum height=0.5cm,
+                inner sep=2pt, font=\sffamily\scriptsize\ttfamily,
+                fill=nodefill, align=left},
+    hdr/.style={sec, fill=absfill, draw=absbord},
+    fde/.style={sec, fill=impfill, draw=impbord},
+    pc/.style={font=\sffamily\scriptsize\ttfamily, text=hibord}
+]
+
+% .eh_frame_hdr (index)
+\node[font=\sffamily\bfseries\small] at (-3.5, 4.5) {.eh\_frame\_hdr (sorted)};
+\node[hdr] (h1) at (-3.5, 4.0) {(0x401120, FDE@0x10)};
+\node[hdr, below=0pt of h1] (h2) {(0x401200, FDE@0x40)};
+\node[hdr, below=0pt of h2, fill=hifill, draw=hibord] (h3) {(0x401280, FDE@0x60)};
+\node[hdr, below=0pt of h3] (h4) {(0x401400, FDE@0xa0)};
+\node[hdr, below=0pt of h4] (h5) {(0x401580, FDE@0xd0)};
+\node[hdr, below=0pt of h5] (h6) {(0x401780, FDE@0x110)};
+
+% Search query
+\node[font=\sffamily\bfseries\small] at (-3.5, 0.6) {query PC=0x401290};
+\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
+    (-3.5, 1.0) -- (h3.south);
+
+% Binary search annotation
+\node[font=\sffamily\scriptsize, text=edgec, align=center, below=1.3cm of h6]
+    {binary search\\$O(\log n)$};
+
+% FDE table on right
+\node[font=\sffamily\bfseries\small] at (3.5, 4.5) {.eh\_frame};
+\node[fde] (f1) at (3.5, 4.0) {FDE @ 0x10: pc=0x401120, range=0xe0};
+\node[fde, below=0pt of f1] (f2) {FDE @ 0x40: pc=0x401200, range=0x80};
+\node[fde, below=0pt of f2, fill=hifill, draw=hibord] (f3) {FDE @ 0x60: pc=0x401280, range=0x170};
+\node[fde, below=0pt of f3] (f4) {FDE @ 0xa0: pc=0x401400, range=0x180};
+\node[fde, below=0pt of f4] (f5) {FDE @ 0xd0: pc=0x401580, range=0x200};
+\node[fde, below=0pt of f5] (f6) {FDE @ 0x110: pc=0x401780, range=0x300};
+
+% Pointer from hdr to FDE
+\draw[-{Stealth[length=2mm]}, draw=hibord, dashed]
+    (h3.east) -- (f3.west);
+
+% Result
+\node[font=\sffamily\scriptsize, text=impbord, below=0.4cm of f6, align=center]
+    {$\rightarrow$ FDE 0x60이 PC 0x401290를 포함\\$\rightarrow$ 그 함수의 CFI 표 사용};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,70 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,trees}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    node/.style={rectangle, rounded corners=2pt,
+                 draw=nodebord, line width=0.4pt,
+                 inner sep=4pt, align=left,
+                 font=\sffamily\scriptsize, fill=nodefill},
+    cu/.style={node, draw=absbord, fill=absfill},
+    sub/.style={node, draw=impbord, fill=impfill},
+    type/.style={node, draw=clibord, fill=clifill},
+    var/.style={node, draw=conbord, fill=confill}
+]
+
+% Compile unit (root)
+\node[cu] (root) at (0, 0)
+    {DW\_TAG\_compile\_unit\\
+     \scriptsize DW\_AT\_name = "main.cpp"\\
+     \scriptsize DW\_AT\_low\_pc = 0x401120};
+
+% Children
+\node[type, below=0.5cm of root, xshift=-4.5cm] (int)
+    {DW\_TAG\_base\_type\\
+     \scriptsize DW\_AT\_name = "int"\\
+     \scriptsize DW\_AT\_byte\_size = 4};
+
+\node[type, below=0.5cm of root, xshift=-1.5cm] (cls)
+    {DW\_TAG\_class\_type\\
+     \scriptsize DW\_AT\_name = "MyClass"\\
+     \scriptsize DW\_AT\_byte\_size = 16};
+
+\node[sub, below=0.5cm of root, xshift=2.5cm] (fn)
+    {DW\_TAG\_subprogram\\
+     \scriptsize DW\_AT\_name = "main"\\
+     \scriptsize DW\_AT\_low\_pc = 0x401120};
+
+% Grand-children
+\node[var, below=0.5cm of cls, xshift=-1.0cm] (m1)
+    {DW\_TAG\_member\\
+     \scriptsize name = "x"\\
+     \scriptsize type $\rightarrow$ int};
+\node[var, below=0.5cm of cls, xshift=1.4cm] (m2)
+    {DW\_TAG\_member\\
+     \scriptsize name = "y"\\
+     \scriptsize type $\rightarrow$ int};
+
+\node[var, below=0.5cm of fn] (v1)
+    {DW\_TAG\_variable\\
+     \scriptsize name = "obj"\\
+     \scriptsize type $\rightarrow$ MyClass\\
+     \scriptsize location = fbreg(-16)};
+
+% Edges
+\draw[edge] (root) -- (int);
+\draw[edge] (root) -- (cls);
+\draw[edge] (root) -- (fn);
+\draw[edge] (cls) -- (m1);
+\draw[edge] (cls) -- (m2);
+\draw[edge] (fn) -- (v1);
+
+% Type reference (dashed)
+\draw[alt, draw=clibord] (m1.north east) to[bend right=20] (int.south east);
+
+\end{tikzpicture}
+\end{document}
