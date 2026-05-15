@@ -4,6 +4,7 @@ import { formatDate } from './utils';
 
 export type BlogPost = CollectionEntry<'blog'>;
 const postMetaCache = new WeakMap<BlogPost, PostMeta>();
+let publishedPostsPromise: Promise<BlogPost[]> | null = null;
 export interface PostMeta {
   formattedDate: string;
   formattedUpdatedDate: string | null;
@@ -22,8 +23,10 @@ export interface HomepageLatestWriting {
  * 발행된 포스트를 날짜 내림차순으로 가져오기
  */
 export async function getPublishedPosts(): Promise<BlogPost[]> {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
-  return sortByDate(posts);
+  if (!publishedPostsPromise) {
+    publishedPostsPromise = getCollection('blog', ({ data }) => !data.draft).then(sortByDate);
+  }
+  return publishedPostsPromise;
 }
 
 /**
