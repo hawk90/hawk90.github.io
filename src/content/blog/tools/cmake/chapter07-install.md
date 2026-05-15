@@ -207,25 +207,44 @@ install(FILES README.md LICENSE
 
 ---
 
-## 패키지 설정 파일: find_package 지원
+## 패키지 설정 파일 — 내 라이브러리를 `find_package`로 사용하게 하기
 
-라이브러리를 설치한 후 다른 프로젝트에서 `find_package(MyLib)`로 찾을 수 있게 하려면 패키지 설정 파일을 생성해야 합니다.
+여기서부터가 *Modern CMake의 진수*입니다. 이 절을 잘 따라 두면 *내 라이브러리를 설치한 사람이 단 두 줄*로 사용할 수 있습니다.
+
+```cmake
+# 사용자 측 CMakeLists.txt
+find_package(MyLib 1.0 REQUIRED)
+target_link_libraries(app PRIVATE MyLib::mylib)
+```
+
+이 두 줄이 동작하려면, 내 라이브러리가 설치될 때 *CMake 정보 파일*을 함께 깔아야 합니다. 그 정보 파일이 [Ch 5](/blog/tools/cmake/chapter05-find-package#동작-방식--module-모드와-config-모드)에서 본 *Config 모드*의 입력입니다.
+
+### 설치 후의 디렉터리 구조
 
 ```
-설치된 패키지 구조:
-
-${PREFIX}/
+${PREFIX}/                                       ← 예: /usr/local
+├── bin/
+│   └── myapp
 ├── lib/
-│   ├── libmylib.so
+│   ├── libmylib.so                              ← 라이브러리 본체
 │   └── cmake/
 │       └── MyLib/
-│           ├── MyLibConfig.cmake        # 패키지 설정
-│           ├── MyLibConfigVersion.cmake # 버전 검사
-│           └── MyLibTargets.cmake       # 타겟 정보
+│           ├── MyLibConfig.cmake                ← find_package(MyLib) 진입점
+│           ├── MyLibConfigVersion.cmake         ← 버전 검사 로직
+│           └── MyLibTargets.cmake               ← imported 타겟 정의
+│           └── MyLibTargets-release.cmake       ← 구성별 타겟 정보
 └── include/
     └── mylib/
-        └── api.h
+        └── api.h                                ← 공개 헤더
 ```
+
+세 파일이 만들어내는 그림:
+
+- **Config.cmake** — *진입점*. `find_package(MyLib)`이 가장 먼저 찾는 파일. 다른 두 파일을 include하고, 의존성을 확인합니다.
+- **ConfigVersion.cmake** — *버전 검사*. `find_package(MyLib 1.0)` 호출에서 `1.0`이 호환되는지 결정합니다.
+- **Targets.cmake** — *imported 타겟 정의*. `MyLib::mylib`라는 타겟에 *설치된 위치 기반의 include / library 경로*를 박아 둡니다.
+
+이 셋이 *함께* 작동해야 사용자 측에서 `find_package(MyLib REQUIRED)` 한 줄이 깨끗하게 풀립니다. 단계별로 만들어 갑니다.
 
 ### 1단계: Config 파일 템플릿
 
@@ -261,10 +280,10 @@ write_basic_package_version_file(
 | `SameMinorVersion` | 메이저.마이너 버전 일치 |
 | `AnyNewerVersion` | 요청 버전 이상이면 됨 |
 
-### 3단계: 타겟 내보내기
+### 3단계: 타겟 내보내기 — `install(TARGETS ... EXPORT ...)`
 
 ```cmake
-# 타겟을 export set에 추가하며 설치
+# 타겟을 export set에 추가하면서 설치
 install(TARGETS mylib
     EXPORT MyLibTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -273,7 +292,7 @@ install(TARGETS mylib
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# export set을 파일로 설치
+# export set을 .cmake 파일로 설치
 install(EXPORT MyLibTargets
     FILE MyLibTargets.cmake
     NAMESPACE MyLib::
@@ -281,7 +300,36 @@ install(EXPORT MyLibTargets
 )
 ```
 
-`NAMESPACE MyLib::`는 사용측에서 `MyLib::mylib`로 링크하게 만듭니다. 타겟 이름 충돌을 방지하고, 실수로 없는 타겟을 링크하면 에러가 발생합니다.
+여기 등장하는 *세 가지 키워드*가 거의 모든 일을 합니다.
+
+**`EXPORT MyLibTargets`** — *export set의 이름*. CMake 내부에 *논리적인 그룹*을 만든다고 생각하면 됩니다. 여러 타겟을 같은 export set에 묶을 수 있습니다.
+
+```cmake
+install(TARGETS mylib EXPORT MyLibTargets ...)
+install(TARGETS myhelper EXPORT MyLibTargets ...)
+# 두 타겟이 같은 export set에 들어감 → 한 번에 export
+```
+
+**`install(EXPORT ...)`** — *export set을 실제 파일로 내보내기*. 위에서 모은 그룹의 모든 타겟 정보를 `MyLibTargets.cmake`라는 파일에 *기록*합니다. 이 파일에는 *설치 시점에 결정되는 경로*가 들어 있어, 사용자 측에서 이 파일을 읽으면 *내 라이브러리가 어디에 설치됐는지*를 알 수 있습니다.
+
+**`NAMESPACE MyLib::`** — *imported 타겟 이름 앞에 붙는 접두사*. 사용자가 `target_link_libraries(app PRIVATE MyLib::mylib)`로 *명확하게* 링크할 수 있게 만듭니다. 이 네임스페이스 관행은 두 효과가 있습니다.
+
+1. *타겟 이름 충돌 방지*. 두 라이브러리가 같은 이름의 타겟을 가져도 네임스페이스로 구분됩니다.
+2. *오타 보호*. CMake는 *`::`이 포함된 이름이 존재하지 않으면 즉시 에러*를 냅니다. 일반 이름은 "있을 수도 있으니 일단 진행"하다가 링크 단계에서 발견되지만, `::`이 들어가면 *구성 단계에서* 잡힙니다.
+
+### `INCLUDES DESTINATION` — 헤더 경로 자동 전파
+
+```cmake
+install(TARGETS mylib
+    EXPORT MyLibTargets
+    ...
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+```
+
+`INCLUDES DESTINATION`은 *헤더 파일을 설치하는 명령이 아닙니다*. 그건 별도의 `install(DIRECTORY include/...)`이 합니다. 이 옵션은 *imported 타겟에 INTERFACE include 경로를 설정*하는 메타정보입니다.
+
+위 줄 때문에, 사용자가 `target_link_libraries(app PRIVATE MyLib::mylib)`만 적어도 *자동으로* `-I${PREFIX}/include`가 컴파일러에 들어갑니다. [Ch 3](/blog/tools/cmake/chapter03-targets#가시성-키워드-private-public-interface)의 INTERFACE 가시성이 *imported 타겟에도* 동일하게 동작합니다.
 
 ### 4단계: Config 파일 생성 및 설치
 

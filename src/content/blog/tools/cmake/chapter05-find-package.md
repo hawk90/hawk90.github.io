@@ -73,17 +73,97 @@ target_link_libraries(myapp PRIVATE ZLIB::ZLIB)
 
 `REQUIRED`는 필수 의존성을 의미합니다. 찾지 못하면 CMake가 오류로 중단합니다.
 
-### 동작 방식
+### 동작 방식 — Module 모드와 Config 모드
 
-CMake는 두 가지 모드로 패키지를 찾습니다.
+`find_package`가 라이브러리를 찾는 방법은 *두 가지 완전히 다른 메커니즘*이 있습니다. 이 둘의 차이를 이해하지 않으면 *왜 어떤 라이브러리는 잘 찾는데 어떤 라이브러리는 안 찾히는지* 디버깅이 어렵습니다.
 
 ![find_package — Config vs Module 모드](/images/blog/cmake/diagrams/ch05-find-package-modes.svg)
 
-**Config 모드**: 패키지가 제공하는 `<Package>Config.cmake` 파일을 찾습니다. 현대 라이브러리는 대부분 이 파일을 제공합니다.
+**Module 모드** — *CMake가 가진 Find 스크립트*
 
-**Module 모드**: CMake에 포함된 `Find<Package>.cmake` 모듈을 실행합니다. 레거시 라이브러리나 Config 파일이 없는 경우에 사용됩니다.
+CMake 자체에 *수십 개의 `FindXxx.cmake` 스크립트*가 내장되어 있습니다(`$CMAKE/Modules/` 디렉터리). 이 스크립트는 *전통적인 라이브러리*를 시스템 표준 위치에서 찾아 줍니다 — zlib, OpenSSL, Threads, X11, JPEG 같이 *오래된, 그리고 CMake보다 먼저 존재한* 라이브러리들.
 
-Config 모드가 우선입니다.
+```
+$CMAKE/Modules/
+├── FindZLIB.cmake
+├── FindOpenSSL.cmake
+├── FindThreads.cmake
+├── FindJPEG.cmake
+└── ... (수십 개)
+```
+
+Module 모드 흐름:
+1. `find_package(ZLIB)` 호출
+2. CMake가 `FindZLIB.cmake`를 실행
+3. 이 스크립트가 *직접 코드를 써서* 라이브러리 위치 탐색 (시스템 경로, 환경변수, 표준 위치)
+4. 찾으면 `ZLIB_FOUND`, `ZLIB_INCLUDE_DIRS`, `ZLIB_LIBRARIES` 같은 *변수*에 결과를 채움
+5. 최근 버전들은 *imported 타겟*(`ZLIB::ZLIB`)도 함께 만들어 줌
+
+이 모드의 한계는 *라이브러리 자체가 아니라 CMake가 검색 로직을 안다*는 점입니다. 라이브러리가 새 버전을 내거나 새 옵션을 추가해도, CMake의 Find 스크립트가 따라가지 못하면 활용할 수 없습니다.
+
+**Config 모드** — *라이브러리가 제공한 정보 파일*
+
+요즘 잘 만든 라이브러리는 *자기 자신에 대한 CMake 정보 파일*을 직접 제공합니다. 이 파일은 라이브러리가 설치될 때 같이 깔립니다.
+
+```
+/usr/lib/cmake/fmt/
+├── fmt-config.cmake          ← find_package(fmt)가 찾는 파일
+├── fmt-config-version.cmake  ← 버전 정보
+└── fmt-targets.cmake         ← imported 타겟 정의
+```
+
+Config 모드 흐름:
+1. `find_package(fmt)` 호출
+2. CMake가 시스템 경로에서 `fmt-config.cmake` (또는 `fmtConfig.cmake`)를 검색
+3. 찾으면 그 파일을 *그대로 실행*
+4. 그 파일이 *imported 타겟*과 변수를 모두 정의
+
+라이브러리가 *자기 정보를 직접 들고 다닌다*는 점에서 훨씬 정확합니다. CMake가 새 버전 라이브러리를 알 필요가 없습니다.
+
+**우선순위 — Config가 먼저**
+
+`find_package(X)`는 *기본적으로 Config 모드를 먼저* 시도합니다. 시스템에 `XConfig.cmake`가 있으면 그쪽을, 없으면 `FindX.cmake`로 폴백합니다.
+
+특정 모드만 쓰고 싶을 때는 명시할 수 있습니다.
+
+```cmake
+# Config 모드 강제 — Find 스크립트는 무시
+find_package(fmt REQUIRED CONFIG)
+
+# Module 모드 강제 — Config 파일은 무시
+find_package(ZLIB REQUIRED MODULE)
+```
+
+### 검색 경로 — CMake가 어디를 보는가
+
+`find_package`가 실제로 어디를 뒤지는지는 *모드에 따라 미묘하게 다릅니다*. 디버깅이 필요하면 `--debug-find` 옵션이 정답입니다.
+
+```bash
+cmake --debug-find -B build
+# 또는 특정 패키지만
+cmake --debug-find-pkg=fmt -B build
+```
+
+출력에 `find_package`가 어떤 경로를 *순서대로* 시도했는지 모두 찍힙니다.
+
+자주 만나는 검색 경로 영향 변수:
+
+| 변수 | 의미 |
+|------|------|
+| `CMAKE_PREFIX_PATH` | 가장 강력. 콜론(`;`) 구분 prefix 목록. `/opt/myapp:/usr/local` 식. |
+| `<Package>_DIR` | 특정 패키지의 Config 파일 위치를 *직접* 지정. `-DZLIB_DIR=/opt/zlib/lib/cmake/zlib` |
+| `CMAKE_MODULE_PATH` | Module 모드에서 *사용자 Find 스크립트* 추가 경로 |
+| 환경변수 `<Package>_ROOT` | 패키지별 root prefix (3.12+) |
+
+가장 실용적인 두 패턴:
+
+```bash
+# vcpkg / Conan 같은 패키지 매니저 통합
+cmake -B build -DCMAKE_PREFIX_PATH=/path/to/vcpkg/installed/x64-linux
+
+# 직접 빌드한 라이브러리 사용
+cmake -B build -DZLIB_DIR=/opt/zlib-1.3/lib/cmake/zlib
+```
 
 ### 선택적 의존성
 
