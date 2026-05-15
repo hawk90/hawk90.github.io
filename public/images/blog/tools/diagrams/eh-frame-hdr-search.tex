@@ -8,48 +8,50 @@
 
 \begin{tikzpicture}[blog,
     sec/.style={rectangle, draw=nodebord, line width=0.4pt,
-                minimum width=2.5cm, minimum height=0.5cm,
-                inner sep=2pt, font=\sffamily\scriptsize\ttfamily,
-                fill=nodefill, align=left},
+                minimum height=0.5cm, inner sep=3pt,
+                font=\sffamily\scriptsize\ttfamily,
+                fill=nodefill, align=left, text width=3.6cm},
     hdr/.style={sec, fill=absfill, draw=absbord},
-    fde/.style={sec, fill=impfill, draw=impbord},
-    pc/.style={font=\sffamily\scriptsize\ttfamily, text=hibord}
+    fde/.style={sec, fill=impfill, draw=impbord, text width=5.0cm}
 ]
 
-% .eh_frame_hdr (index)
-\node[font=\sffamily\bfseries\small] at (-3.5, 4.5) {.eh\_frame\_hdr (sorted)};
-\node[hdr] (h1) at (-3.5, 4.0) {(0x401120, FDE@0x10)};
-\node[hdr, below=0pt of h1] (h2) {(0x401200, FDE@0x40)};
-\node[hdr, below=0pt of h2, fill=hifill, draw=hibord] (h3) {(0x401280, FDE@0x60)};
-\node[hdr, below=0pt of h3] (h4) {(0x401400, FDE@0xa0)};
-\node[hdr, below=0pt of h4] (h5) {(0x401580, FDE@0xd0)};
-\node[hdr, below=0pt of h5] (h6) {(0x401780, FDE@0x110)};
+% Headers
+\node[font=\sffamily\bfseries\small, anchor=west] at (-5.5, 4.6)
+    {.eh\_frame\_hdr (sorted by PC)};
+\node[font=\sffamily\bfseries\small, anchor=west] at (1.2, 4.6)
+    {.eh\_frame};
 
-% Search query
-\node[font=\sffamily\bfseries\small] at (-3.5, 0.6) {query PC=0x401290};
-\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
-    (-3.5, 1.0) -- (h3.south);
+% Index entries (left) — vertical 0.6cm spacing
+\node[hdr] (h1) at (-5.5, 4.0) [anchor=west] {(0x401120, FDE@0x10)};
+\node[hdr] (h2) at (-5.5, 3.4) [anchor=west] {(0x401200, FDE@0x40)};
+\node[hdr, fill=hifill, draw=hibord] (h3) at (-5.5, 2.8) [anchor=west]
+    {(0x401280, FDE@0x60)};
+\node[hdr] (h4) at (-5.5, 2.2) [anchor=west] {(0x401400, FDE@0xa0)};
+\node[hdr] (h5) at (-5.5, 1.6) [anchor=west] {(0x401580, FDE@0xd0)};
+\node[hdr] (h6) at (-5.5, 1.0) [anchor=west] {(0x401780, FDE@0x110)};
 
-% Binary search annotation
-\node[font=\sffamily\scriptsize, text=edgec, align=center, below=1.3cm of h6]
-    {binary search\\$O(\log n)$};
-
-% FDE table on right
-\node[font=\sffamily\bfseries\small] at (3.5, 4.5) {.eh\_frame};
-\node[fde] (f1) at (3.5, 4.0) {FDE @ 0x10: pc=0x401120, range=0xe0};
-\node[fde, below=0pt of f1] (f2) {FDE @ 0x40: pc=0x401200, range=0x80};
-\node[fde, below=0pt of f2, fill=hifill, draw=hibord] (f3) {FDE @ 0x60: pc=0x401280, range=0x170};
-\node[fde, below=0pt of f3] (f4) {FDE @ 0xa0: pc=0x401400, range=0x180};
-\node[fde, below=0pt of f4] (f5) {FDE @ 0xd0: pc=0x401580, range=0x200};
-\node[fde, below=0pt of f5] (f6) {FDE @ 0x110: pc=0x401780, range=0x300};
+% FDE entries (right)
+\node[fde] (f1) at (1.2, 4.0) [anchor=west] {FDE 0x10: pc=0x401120 ...};
+\node[fde] (f2) at (1.2, 3.4) [anchor=west] {FDE 0x40: pc=0x401200 ...};
+\node[fde, fill=hifill, draw=hibord] (f3) at (1.2, 2.8) [anchor=west]
+    {FDE 0x60: pc=0x401280 range=0x170};
+\node[fde] (f4) at (1.2, 2.2) [anchor=west] {FDE 0xa0: pc=0x401400 ...};
+\node[fde] (f5) at (1.2, 1.6) [anchor=west] {FDE 0xd0: pc=0x401580 ...};
+\node[fde] (f6) at (1.2, 1.0) [anchor=west] {FDE 0x110: pc=0x401780 ...};
 
 % Pointer from hdr to FDE
 \draw[-{Stealth[length=2mm]}, draw=hibord, dashed]
     (h3.east) -- (f3.west);
 
-% Result
-\node[font=\sffamily\scriptsize, text=impbord, below=0.4cm of f6, align=center]
-    {$\rightarrow$ FDE 0x60이 PC 0x401290를 포함\\$\rightarrow$ 그 함수의 CFI 표 사용};
+% Query annotation (bottom)
+\node[font=\sffamily\bfseries\small, anchor=west, text=hibord]
+    at (-5.5, 0.2) {query PC = 0x401290};
+\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
+    (-3.5, 0.4) to[bend left=20] (h3.south);
+
+\node[font=\sffamily\scriptsize, text=impbord, anchor=west]
+    at (1.2, 0.2)
+    {$\rightarrow$ FDE 0x60이 PC 포함};
 
 \end{tikzpicture}
 \end{document}

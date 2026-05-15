@@ -8,30 +8,33 @@
 
 \begin{tikzpicture}[blog,
     block/.style={rectangle, rounded corners=2pt, draw=nodebord,
-                  line width=0.4pt, inner sep=4pt, align=left,
-                  font=\sffamily\scriptsize\ttfamily, fill=nodefill},
+                  line width=0.4pt, inner sep=6pt, align=left,
+                  font=\sffamily\scriptsize\ttfamily, fill=nodefill,
+                  text width=6.5cm},
     abv/.style={block, fill=clifill, draw=clibord},
-    info/.style={block, fill=absfill, draw=absbord},
-    label/.style={font=\sffamily\bfseries\small, align=center}
+    info/.style={block, fill=absfill, draw=absbord, text width=5.5cm}
 ]
 
-% .debug_abbrev (left)
-\node[label] at (0, 4.5) {.debug\_abbrev};
-\node[abv, minimum width=4.5cm, anchor=north west] (a) at (-2.2, 4.0)
-    {Abbrev 1:\\
-     \quad TAG = DW\_TAG\_compile\_unit (children)\\
-     \quad DW\_AT\_name        FORM strx1\\
-     \quad DW\_AT\_low\_pc     FORM addrx\\
-     \\
-     Abbrev 2:\\
-     \quad TAG = DW\_TAG\_member (no children)\\
-     \quad DW\_AT\_name        FORM strx1\\
-     \quad DW\_AT\_type        FORM ref4\\
-     \quad DW\_AT\_data\_member\_location  FORM data1};
+% Section labels
+\node[font=\sffamily\bfseries\small, anchor=west] at (-7, 4.7)
+    {.debug\_abbrev};
+\node[font=\sffamily\bfseries\small, anchor=west] at (1.5, 4.7)
+    {.debug\_info (compact)};
 
-% .debug_info (right)
-\node[label] at (7, 4.5) {.debug\_info (compact)};
-\node[info, minimum width=4cm, anchor=north west] (i) at (5, 4.0)
+% .debug_abbrev (left)
+\node[abv, anchor=north west] (a) at (-7, 4.3)
+    {Abbrev 1:\\
+     \quad TAG = DW\_TAG\_compile\_unit\\
+     \quad name FORM strx1\\
+     \quad low\_pc FORM addrx\\[3pt]
+     Abbrev 2:\\
+     \quad TAG = DW\_TAG\_member\\
+     \quad name FORM strx1\\
+     \quad type FORM ref4\\
+     \quad data\_member\_location FORM data1};
+
+% .debug_info (right) — uses abbrev refs
+\node[info, anchor=north west] (i) at (1.5, 4.3)
     {0x0c: [Abbrev 1]\\
      \quad name=0x05 low\_pc=0x00\\
      0x14: [Abbrev 2]\\
@@ -40,17 +43,18 @@
      \quad name=0x18 type=0x42 loc=0x04\\
      0x28: [Abbrev 2]\\
      \quad name=0x20 type=0x42 loc=0x08\\
-     0x32: [Abbrev 0]    \,$\leftarrow$ null};
+     0x32: [Abbrev 0] (null)};
 
-% Arrow: same abbrev reused
-\draw[-{Stealth[length=2mm]}, draw=hibord, line width=0.7pt]
-    (a.east) to[bend left=10]
-    node[above, font=\sffamily\scriptsize, text=hibord, sloped]
-        {reused N times}
-    (i.west);
+% Arrow: abbrev reused
+\draw[-{Stealth[length=2.5mm]}, draw=hibord, line width=0.7pt]
+    ([yshift=-0.5cm]a.east) -- ([yshift=-0.5cm]i.west)
+    node[midway, above, font=\sffamily\scriptsize, text=hibord]
+        {reused N times};
 
-\node[font=\sffamily\scriptsize, text=hibord, align=center, below=0.3cm of i]
-    {같은 abbrev가 *수만 번* 공유\\$\rightarrow$ 압축비 10배 이상};
+% Bottom note
+\node[font=\sffamily\scriptsize, text=hibord, align=center, anchor=north]
+    at (-2.5, -2.2)
+    {같은 abbrev가 수만 번 공유 $\rightarrow$ 압축비 10배+};
 
 \end{tikzpicture}
 \end{document}

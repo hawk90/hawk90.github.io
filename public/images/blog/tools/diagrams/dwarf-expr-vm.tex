@@ -9,54 +9,46 @@
 \begin{tikzpicture}[blog,
     op/.style={rectangle, rounded corners=1pt,
                draw=absbord, fill=absfill, line width=0.4pt,
-               minimum height=0.55cm, inner sep=4pt,
-               font=\sffamily\scriptsize\ttfamily},
+               minimum width=4.0cm, minimum height=0.6cm,
+               inner sep=4pt,
+               font=\sffamily\scriptsize\ttfamily, align=left},
     stk/.style={rectangle, draw=conbord, line width=0.4pt, fill=confill,
-                minimum width=2.0cm, minimum height=0.5cm,
-                inner sep=2pt, font=\sffamily\scriptsize\ttfamily, align=center},
-    label/.style={font=\sffamily\bfseries\small}
+                minimum width=3.5cm, minimum height=0.55cm,
+                inner sep=3pt, font=\sffamily\scriptsize\ttfamily, align=center},
+    note/.style={font=\sffamily\scriptsize, anchor=west}
 ]
 
-\node[label] at (0, 3.3) {Expression program};
+\node[font=\sffamily\bfseries\small] at (-3, 4.5) {Expression};
+\node[font=\sffamily\bfseries\small] at (4.5, 4.5) {Stack after op};
 
-% Opcode sequence (top-down)
-\node[op] (o1) at (0, 2.6) {DW\_OP\_breg6 -8};
-\node[op, below=0.25cm of o1] (o2) {DW\_OP\_constu 4};
-\node[op, below=0.25cm of o2] (o3) {DW\_OP\_plus};
-\node[op, below=0.25cm of o3] (o4) {DW\_OP\_deref};
-\node[op, below=0.25cm of o4] (o5) {DW\_OP\_stack\_value};
+% Opcodes (left) — vertical spacing 1.1cm
+\node[op] (o1) at (-3, 3.8) {DW\_OP\_breg6 -8};
+\node[op] (o2) at (-3, 2.7) {DW\_OP\_constu 4};
+\node[op] (o3) at (-3, 1.6) {DW\_OP\_plus};
+\node[op] (o4) at (-3, 0.5) {DW\_OP\_deref};
+\node[op] (o5) at (-3, -0.6) {DW\_OP\_stack\_value};
 
-% Stack states (right)
-\node[label] at (6, 3.3) {Stack after each op};
+% Stack snapshots (right) — same vertical alignment
+\node[stk] (s1) at (4.5, 3.8) {[rbp - 8]};
+\node[note, right=0.2cm of s1] {address pushed};
 
-% After o1
-\node[stk] (s1)    at (6, 2.6) {rbp - 8};
-\node[font=\sffamily\scriptsize, anchor=west] at ([xshift=0.3cm]s1.east) {(address)};
+\node[stk] (s2) at (4.5, 2.7) {[rbp - 8] | 4};
+\node[note, right=0.2cm of s2] {top = 4};
 
-% After o2
-\node[stk]                       (s2a) at (6, 2.0) {rbp - 8};
-\node[stk, above=0pt of s2a]     (s2b) {4};
-\node[font=\sffamily\scriptsize, anchor=west] at ([xshift=0.3cm]s2b.east) {top = 4};
+\node[stk] (s3) at (4.5, 1.6) {[rbp - 4]};
+\node[note, right=0.2cm of s3] {plus folded};
 
-% After o3 (combined)
-\node[stk] (s3) at (6, 1.0) {rbp - 4};
-\node[font=\sffamily\scriptsize, anchor=west] at ([xshift=0.3cm]s3.east) {plus consumed};
+\node[stk] (s4) at (4.5, 0.5) {value};
+\node[note, right=0.2cm of s4] {memory[rbp-4]};
 
-% After o4
-\node[stk] (s4) at (6, 0.3) {value};
-\node[font=\sffamily\scriptsize, anchor=west] at ([xshift=0.3cm]s4.east) {memory[rbp-4]};
+\node[stk, fill=impfill, draw=impbord] (s5) at (4.5, -0.6) {value};
+\node[note, text=impbord, right=0.2cm of s5] {= variable result};
 
-% After o5
-\node[stk, fill=impfill, draw=impbord] (s5) at (6, -0.4) {value};
-\node[font=\sffamily\scriptsize, anchor=west, text=impbord] at ([xshift=0.3cm]s5.east)
-    {= variable value};
-
-% Arrows
-\draw[-{Stealth[length=1.5mm]}, draw=edgesc] (o1.east) -- (s1.west);
-\draw[-{Stealth[length=1.5mm]}, draw=edgesc] (o2.east) -- ($(s2a)!0.5!(s2b)$);
-\draw[-{Stealth[length=1.5mm]}, draw=edgesc] (o3.east) -- (s3.west);
-\draw[-{Stealth[length=1.5mm]}, draw=edgesc] (o4.east) -- (s4.west);
-\draw[-{Stealth[length=1.5mm]}, draw=edgesc] (o5.east) -- (s5.west);
+% Arrows from op to stack (dashed thin)
+\foreach \i in {1,2,3,4,5} {
+  \draw[-{Stealth[length=1.5mm]}, draw=edgesc, dashed]
+    (o\i.east) -- (s\i.west);
+}
 
 \end{tikzpicture}
 \end{document}

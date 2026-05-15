@@ -7,56 +7,45 @@
 \input{../../_design.tex}
 
 \begin{tikzpicture}[blog,
-    reg/.style={rectangle, draw=nodebord, line width=0.4pt,
-                minimum width=1.2cm, minimum height=0.55cm,
-                inner sep=2pt, font=\sffamily\scriptsize, align=center,
-                fill=nodefill},
-    block/.style={rectangle, rounded corners=2pt,
-                  draw=absbord, line width=0.5pt, fill=absfill,
-                  inner sep=6pt, align=left,
-                  font=\sffamily\footnotesize},
     op/.style={rectangle, rounded corners=1pt,
                draw=impbord, fill=impfill, line width=0.4pt,
-               minimum height=0.5cm, inner sep=3pt,
-               font=\sffamily\scriptsize\ttfamily}
+               minimum height=0.55cm, inner sep=4pt,
+               font=\sffamily\scriptsize\ttfamily, align=left,
+               text width=6.5cm},
+    emit/.style={rectangle, rounded corners=1pt,
+                draw=clibord, fill=clifill, line width=0.4pt,
+                minimum height=0.55cm, inner sep=4pt,
+                font=\sffamily\scriptsize\ttfamily, align=left,
+                text width=4.5cm}
 ]
 
-% Registers
-\node[font=\sffamily\bfseries\small, anchor=west] (rl) at (-5, 3) {State Registers};
-\node[reg, right=0.2cm of rl] (addr)  {address};
-\node[reg, right=0.1cm of addr] (line) {line};
-\node[reg, right=0.1cm of line] (file) {file};
-\node[reg, right=0.1cm of file] (stmt) {is\_stmt};
+% Title
+\node[font=\sffamily\bfseries\small, anchor=west] at (-6, 5.0)
+    {Bytecode program};
+\node[font=\sffamily\bfseries\small, anchor=west] at (3, 5.0)
+    {Emitted rows};
 
-% Opcode stream
-\node[block, below=0.5cm of rl, anchor=north west, minimum width=12cm] (vm)
-    {Bytecode Program:};
+% Opcodes (left) — vertical 1.1cm spacing
+\node[op] (o1) at (-6, 4.2) [anchor=west] {DW\_LNE\_set\_address 0x401120};
+\node[op] (o2) at (-6, 3.5) [anchor=west] {DW\_LNS\_advance\_line 1};
+\node[op] (o3) at (-6, 2.8) [anchor=west] {DW\_LNS\_set\_prologue\_end};
+\node[op] (o4) at (-6, 2.1) [anchor=west] {DW\_LNS\_copy};
+\node[op] (o5) at (-6, 1.4) [anchor=west] {[special] addr+=7, copy};
+\node[op] (o6) at (-6, 0.7) [anchor=west] {[special] addr+=7, line+=1, copy};
+\node[op] (o7) at (-6, 0.0) [anchor=west] {DW\_LNE\_end\_sequence};
 
-\node[op, below=0.5cm of vm.north west, anchor=west, xshift=0.3cm] (o1) {DW\_LNE\_set\_address 0x401120};
-\node[op, below=0.2cm of o1.south west, anchor=west] (o2) {DW\_LNS\_advance\_line 1};
-\node[op, below=0.2cm of o2.south west, anchor=west] (o3) {DW\_LNS\_set\_prologue\_end};
-\node[op, below=0.2cm of o3.south west, anchor=west] (o4) {DW\_LNS\_copy};
-\node[op, below=0.2cm of o4.south west, anchor=west] (o5) {[special opcode] +7 addr, +0 line, copy};
-\node[op, below=0.2cm of o5.south west, anchor=west] (o6) {[special opcode] +7 addr, +1 line, copy};
-\node[op, below=0.2cm of o6.south west, anchor=west] (o7) {DW\_LNE\_end\_sequence};
+% Output rows (right)
+\node[emit] (r1) at (3, 2.1) [anchor=west] {(0x401120, line 2)};
+\node[emit] (r2) at (3, 1.4) [anchor=west] {(0x401127, line 2)};
+\node[emit] (r3) at (3, 0.7) [anchor=west] {(0x40112e, line 3)};
 
-% Output (right side)
-\node[block, fill=clifill, draw=clibord, right=4cm of vm.north east, anchor=north west,
-      minimum width=4.5cm] (out) {Emitted Rows (PC, line):};
-\node[font=\sffamily\scriptsize\ttfamily, below=0.5cm of out.north west, anchor=west, xshift=0.2cm] (r1)
-    {(0x401120, line 2)};
-\node[font=\sffamily\scriptsize\ttfamily, below=0.2cm of r1.south west, anchor=west] (r2)
-    {(0x401127, line 2)};
-\node[font=\sffamily\scriptsize\ttfamily, below=0.2cm of r2.south west, anchor=west] (r3)
-    {(0x40112e, line 3)};
-
-% Arrow VM -> emit
+% Emit arrows
 \draw[-{Stealth[length=2mm]}, draw=clibord]
-    (o4.east) to[bend left=10] (r1.west);
+    (o4.east) -- (r1.west);
 \draw[-{Stealth[length=2mm]}, draw=clibord]
-    (o5.east) to[bend left=10] (r2.west);
+    (o5.east) -- (r2.west);
 \draw[-{Stealth[length=2mm]}, draw=clibord]
-    (o6.east) to[bend left=10] (r3.west);
+    (o6.east) -- (r3.west);
 
 \end{tikzpicture}
 \end{document}
