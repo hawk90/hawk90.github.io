@@ -23,18 +23,9 @@ MISRA C가 *159 항목*, AUTOSAR C++14가 *340+ 항목*인 데 반해 JPL Power 
 
 Holzmann은 *SPIN model checker* 개발자. *대규모 OS·임베디드 코드 검증* 경험을 *10 rules로 응축*했다.
 
-## 적용 — 어디에 쓰는가
+## 적용 — 일반
 
-```
-Curiosity rover (2012~ 화성)        : Power of 10 + MISRA-like 자체 표준
-Perseverance rover (2021~ 화성)     : Power of 10 + 최신 도구 (Polyspace)
-Cassini-Huygens orbiter (1997~2017): Power of 10 (후기 update)
-Voyager 1, 2 (1977~ 외계)           : 자체 표준, Power of 10 영향
-Mars 2020 helicopter (Ingenuity)    : Power of 10 + Linux + ROS
-James Webb Space Telescope (2021)   : 부분 적용
-```
-
-NASA 외에도 *항공우주 산업 광범위*. ESA, Lockheed Martin 등 *내부 코딩 표준에 흡수*.
+JPL Power of 10은 *NASA JPL의 mission-critical SW 코딩 가이드*로 발행. 공개된 적용 사례는 *JPL이 운영하는 다양한 mission* (화성 로버, orbiter 등). 각 mission의 *세부 적용 범위·내부 표준 변형*은 *공식 발표가 있는 경우만* 인용. NASA 외 *항공우주·자동차 산업*에도 *원칙이 영향*을 준 것으로 자주 인용된다.
 
 ## 10 Rules — 한눈에
 
@@ -590,12 +581,12 @@ polyspace-code-prover -sources-list src.lst -prog mission_app
 
 *빌드 첫날부터 모든 경고 활성화*. *나중에 도입*하면 *수천 개 경고*가 쌓여 *처리 불가능*.
 
-## Curiosity Rover 실제 코드 (단순화)
+## Power of 10 적용 — 통합 예 (가상)
 
-JPL이 *공개한 일부 패턴*에서 추출. 실제 코드는 *export control* 대상.
+10 rules를 *함께 적용한 예* (가상 통신 모듈):
 
 ```c
-/* Curiosity 통신 모듈 (단순화) */
+/* 가상 communication 모듈 — Power of 10 적용 예 */
 
 #define MAX_PACKET_LEN 512
 #define MAX_RETRIES    3
@@ -724,27 +715,20 @@ Phase 5 — Assertion enrichment (지속)
 
 그럼에도 *짧고 강렬*. *Engineering culture 형성*에 효과적.
 
-## 인용 가치
-
-> "Code that follows the Power of 10 rules is *demonstrably safer*. Code that does not, *cannot be analyzed*."
-> — Gerard Holzmann
-
-> "The first day of a new project, all 10 rules are non-negotiable."
-> — JPL Mission Software Coding Standard
-
 ## 정리
 
 - JPL Power of 10은 *단 10 rules*. 단순함이 강점.
-- Curiosity, Perseverance 등 화성 미션이 적용.
+- NASA JPL의 *mission-critical SW 코딩 가이드*.
 - MISRA의 부분집합과 비슷. *Assertion density*와 *함수 길이 60줄*이 고유 가치.
 - *Compile-first day*부터 모든 경고 활성화.
 - *동적 메모리·재귀·goto·setjmp* 금지.
 - *루프 상한 정적 입증*. *반환값 모두 검사*.
 - Engineering culture 도구로 *대학·신생 회사*에서 도입 권장.
+- 원문은 IEEE Computer 2006 — [PDF](https://spinroot.com/gerard/pdf/P10.pdf).
 
 ## 관련 항목
 
-- [MISRA C Ch 1 — MISRA란](/blog/embedded/standards/misra-c/chapter01-introduction)
+- [MISRA C Ch 1 — MISRA란](/blog/embedded/car-standards/misra-c/chapter01-introduction)
 - [DO-178C Ch 1 — 항공 SW 인증](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
 - [JSF C++ Ch 1 — F-35 코딩 표준](/blog/embedded/aerospace-standards/jsf-cpp/chapter01-introduction)
 - [ECSS-Q-ST-80C Ch 1 — ESA 표준](/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter01-introduction)

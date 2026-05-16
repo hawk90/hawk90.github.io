@@ -1,27 +1,21 @@
 ---
-title: "Ch 6: Statements + Functions (Rule 159-208)"
+title: "Ch 6: Statements + Functions"
 date: 2025-09-30T07:00:00
-description: "JSF C++ Rule 159-208 — goto/setjmp 금지, varargs 금지, 재귀 금지, 함수 7 parameter 한계, return value 검사."
+description: "JSF C++ — goto/setjmp 금지, varargs 금지, 재귀 금지, 함수 parameter 한계, return value 검사."
 tags: [jsf-cpp, statements, functions, goto, varargs, recursion, return-value]
 series: "JSF C++"
 seriesOrder: 6
 draft: false
 ---
 
-JSF C++ Rule 159-208이 *제어흐름 + 함수 정책*. *goto/setjmp/longjmp 절대 금지*, *varargs 거의 금지*, *재귀 금지*. 항공 SW의 *deterministic 보장* 핵심. 이 장은 *각 rule + ADA 영향 + F-35 패턴*까지.
+JSF C++의 *제어흐름 + 함수 정책*. *goto/setjmp/longjmp 금지*, *varargs 금지*, *재귀 금지*. 항공 SW의 *deterministic 보장* 핵심. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.
 
-## AV Rule 159-175 — Statements
+## Statements
 
-### AV Rule 159 — Control Statement Block
-
-```
-AV Rule 159 (Will)
-"Statements within compound statement (block) shall have explicit
- braces."
-```
+### 모든 block 중괄호
 
 ```cpp
-// 위반 — 중괄호 없음
+// 회피 — 중괄호 없음
 if (cond) DoSomething();
 while (i < n) i++;
 
@@ -34,12 +28,12 @@ while (i < n) {
 }
 ```
 
-MISRA Rule 15.6과 동일. *"goto fail" 버그*가 단적인 예 (Apple 2014).
+MISRA Rule 15.6과 같은 정신. *"goto fail" 버그* (Apple 2014)가 대표적인 단점 예.
 
-### AV Rule 160 — Switch + Default
+### Switch + default
 
 ```cpp
-// 위반 — default 없음
+// 회피
 switch (mode) {
     case MODE_MANUAL: HandleManual(); break;
     case MODE_AUTO: HandleAuto(); break;
@@ -50,7 +44,7 @@ switch (mode) {
     case MODE_MANUAL: HandleManual(); break;
     case MODE_AUTO: HandleAuto(); break;
     default:
-        assert(0);  // unexpected
+        assert(0);
         EnterSafeMode();
         break;
 }
@@ -58,10 +52,10 @@ switch (mode) {
 
 `default`가 *항상 있어야*. 미처 처리 안 한 case 대비.
 
-### AV Rule 161 — Switch Fallthrough 명시
+### Switch Fallthrough 명시
 
 ```cpp
-// 위반 — break 누락 (silent fallthrough)
+// 회피 — silent fallthrough
 switch (x) {
     case 1: DoA();
     case 2: DoB(); break;
@@ -76,41 +70,21 @@ switch (x) {
 // 의도적 fallthrough — 주석
 switch (x) {
     case 1: DoA();
-            /* fall through */  // 명시
+            /* fall through */
     case 2: DoB(); break;
 }
 ```
 
-C++17의 *`[[fallthrough]]`* attribute가 *더 명확*하지만 *C++03 미지원*.
+C++17의 `[[fallthrough]]` attribute가 *더 명확*. C++03 미지원.
 
-### AV Rule 162 — Switch with 2+ cases
+### Switch 2+ cases
 
-```cpp
-// 위반 — case 1개 + default
-switch (x) {
-    case 1: DoA(); break;
-    default: DoX(); break;
-}
+Case 하나뿐이면 `if`로 단순화. Switch는 *2개 이상*에서 의미가 있다.
 
-// Good — if/else로
-if (x == 1) {
-    DoA();
-} else {
-    DoX();
-}
-```
-
-Case 하나면 *switch가 over-engineering*. `if`로 단순화.
-
-### AV Rule 163 — Loop Termination 보장
-
-```
-AV Rule 163 (Will)
-"All loops must have a non-trivial termination test."
-```
+### Loop Termination 보장
 
 ```cpp
-// 위반 — 무한 루프 (의도적이지만 명시 X)
+// 회피 — 무한 루프 (의도적이지만 명시 X)
 while (true) {
     if (cond) break;
     DoWork();
@@ -129,107 +103,84 @@ for (int i = 0; i < MAX_ITERATIONS; i++) {
 }
 ```
 
-NASA JPL의 *Power of 10 Rule 2*와 같은 정신.
-
-### AV Rule 164-170 — for/while/do-while
+### for / while
 
 ```cpp
-// AV Rule 164 (Should)
-// for loop counter 변경 금지 (body 안에서)
+// 회피 — body에서 loop counter 변경
 for (int i = 0; i < n; i++) {
-    if (cond) i += 5;  // 위반 — 외부 변경
+    if (cond) i += 5;
 }
 
-// AV Rule 165 (Should)
-// for loop의 init/cond/iter 모두 *같은 변수* 사용
-for (int i = 0; i < n; j++) {  // 위반 — j ≠ i
-    ...
-}
+// 회피 — init/cond/iter 변수 불일치
+for (int i = 0; i < n; j++) { /* ... */ }
 
-// AV Rule 166 (Should)
-// for loop 평가 floating point 금지 (MISRA Rule 14.1)
-for (float t = 0.0F; t < 1.0F; t += 0.1F) {  // 위반
-    ...
-}
+// 회피 — floating point loop counter
+for (float t = 0.0F; t < 1.0F; t += 0.1F) { /* ... */ }
 ```
 
-### AV Rule 171-175 — Conditional Logic
+Floating point loop가 *누적 오차*로 *예상 반복 수 다름*.
+
+### Conditional logic
 
 ```cpp
-// AV Rule 171 (Should)
-// if/else if chain의 *마지막은 항상 else*
+// 회피 — else 누락
 if (cond1) { DoA(); }
 else if (cond2) { DoB(); }
-// 위반 — else 누락
 
-// Good
+// Good — 마지막에 else
 if (cond1) { DoA(); }
 else if (cond2) { DoB(); }
 else {
-    // unexpected (intentional empty)
-    log_warn("Unexpected condition");
+    LogWarn("Unexpected condition");
 }
 
-// AV Rule 172 (Should)
-// Complex condition 단순화
-if (a && b && (c || d) && !e) { ... }  // 복잡
+// 회피 — 복잡한 condition 한 줄에
+if (a && b && (c || d) && !e) { /* ... */ }
 
-// Good
+// Good — 의미 있는 이름의 boolean
 bool conditionMet = a && b && (c || d) && !e;
-if (conditionMet) { ... }
+if (conditionMet) { /* ... */ }
 ```
 
-## AV Rule 176-200 — Functions
+## Functions
 
-### AV Rule 176 — Function Prototype 명시
+### Function Prototype 명시
 
 ```cpp
-// 위반 — old-style C
+// 회피 — old-style C
 void Foo(a, b)
     int a;
     int b;
-{
-    /* ... */
-}
+{ /* ... */ }
 
 // Good — prototype
-void Foo(int a, int b) {
-    /* ... */
-}
+void Foo(int a, int b) { /* ... */ }
 ```
 
-C++03부터 *old-style 금지*. 컴파일러가 *대부분 reject*.
+C++에서는 *old-style 금지*. 컴파일러가 대부분 reject.
 
-### AV Rule 177 — Function Parameter 7 이하
+### Function Parameter 수 제한
 
 ```cpp
-// 위반
+// 회피 — 너무 많은 parameter
 void Configure(int p1, int p2, int p3, int p4, int p5,
-               int p6, int p7, int p8, int p9, int p10);  // 10 parameters
+               int p6, int p7, int p8, int p9, int p10);
 
 // Good — 구조체로
 struct ConfigParams {
-    int p1, p2, p3, p4, p5;
-    int p6, p7, p8, p9, p10;
+    int p1, p2, p3;
+    int p4, p5, p6;
+    int p7, p8, p9, p10;
 };
 void Configure(const ConfigParams &params);
-
-// 또는 builder 패턴
-class ConfigBuilder {
-public:
-    ConfigBuilder& SetP1(int v) { /* ... */; return *this; }
-    ConfigBuilder& SetP2(int v) { /* ... */; return *this; }
-    /* ... */
-    Config Build();
-};
 ```
 
-7개 한계가 *Miller's number* (인간 작업기억 7±2)에서 영감. *cognitive load* 감소.
+많은 parameter가 *cognitive load 증가 + 순서 실수 위험*. *Miller의 7±2* 원리를 따른다.
 
-### AV Rule 178 — Return Value Check
+### Return Value 검사
 
 ```cpp
-// 위반
+// 회피
 fopen("config", "r");           // return value 무시
 strcpy(dst, src);                // strcpy returns dst
 
@@ -240,26 +191,20 @@ if (fp == NULL) {
 }
 
 // 명시 무시
-(void)strcpy(dst, src);          // intentional discard
+(void)strcpy(dst, src);
 ```
 
-`(void)` cast가 *의도 무시 명시*. *grep-able*.
+`(void)` cast가 *의도 무시 명시*. grep-able.
 
-### AV Rule 179 — Recursive Function 금지
-
-```
-AV Rule 179 (Will)
-"Functions shall not call themselves, either directly or indirectly
- (i.e. recursion shall not be allowed)."
-```
+### Recursion 금지
 
 ```cpp
-// 위반 — 직접 재귀
+// 회피 — 직접 재귀
 int Factorial(int n) {
     return n <= 1 ? 1 : n * Factorial(n - 1);
 }
 
-// 위반 — 간접 재귀
+// 회피 — 간접 재귀
 void Foo() { Bar(); }
 void Bar() { Foo(); }
 
@@ -290,21 +235,16 @@ public:
 
 이유:
 - *Stack 사용량 정적 분석 불가*
-- 항공기 *worst-case stack* 알아야 안전
+- *Worst-case stack size 보장 어려움*
 - *Stack overflow가 catastrophic*
 
-NASA JPL Power of 10과 동일.
+NASA JPL Power of 10 Rule 1과 같은 정신.
 
-### AV Rule 180 — Varargs (`...`) 금지
-
-```
-AV Rule 180 (Will)
-"All variable parameter declarations and references shall not be used."
-```
+### Varargs 금지
 
 ```cpp
-// 위반
-int LogMessage(const char *fmt, ...);  // varargs
+// 회피 — varargs
+int LogMessage(const char *fmt, ...);
 
 // Good — overload
 int LogMessage(const char *fmt);
@@ -319,30 +259,23 @@ struct LogEntry {
     int errorCode;
 };
 int LogMessage(const LogEntry &entry);
-
-// 또는 stream
-std::ostringstream oss;
-oss << "Error: " << error << " in " << module;
-LogString(oss.str());
 ```
 
-`varargs` 위험:
-- *Type safety 없음* (printf("%d", "string") — undefined)
-- *Compiler check 못함*
-- *Stack 사용 비표준*
+`varargs`의 일반적 위험:
+- *Type safety 없음* (`printf("%d", "string")` — undefined)
+- *Compiler check 불가*
+- Stack 사용이 *플랫폼 의존*
 
-C++11의 *variadic template*가 *type-safe 대안*. JSF C++03 원본은 *둘 다 금지*.
+C++11의 *variadic template*이 type-safe 대안. C++03 원본은 *둘 다 없음*.
 
-### AV Rule 181-185 — Pointer 처리
+### Pointer Parameter
 
 ```cpp
-// AV Rule 181 (Should)
-// 함수 parameter pointer는 *const*가 default
-void Process(const char *data, int len);  // data 변경 안 함
-void Modify(char *buffer, int len);        // buffer 변경
+// 함수 parameter pointer는 const가 default 권장
+void Process(const char *data, int len);  // 변경 안 함
+void Modify(char *buffer, int len);        // 변경
 
-// AV Rule 182 (Will)
-// pointer parameter NULL check
+// NULL check
 void Process(const char *data, int len) {
     if (data == NULL) return;
     if (len < 0) return;
@@ -350,32 +283,26 @@ void Process(const char *data, int len) {
 }
 ```
 
-### AV Rule 186-190 — Inline Functions
+### Inline Functions — 간단하게
 
 ```cpp
-// AV Rule 186 (Should)
-// Inline 함수는 *간단*
+// OK — 간단
 inline int Max(int a, int b) {
     return (a > b) ? a : b;
 }
 
-// 위반 — 50 line inline
+// 회피 — 50 line inline
 inline void ProcessFrame(const Frame &frame) {
-    /* 50 lines of complex logic */
+    /* 50 lines */
 }
 ```
 
-Inline은 *컴파일러 hint*. 큰 함수는 *inline 효과 없음 + code bloat*.
+Inline은 *컴파일러 hint*. 큰 함수는 *inline 효과 없음 + binary 폭증*.
 
-### AV Rule 191-195 — setjmp/longjmp 금지
-
-```
-AV Rule 174 (Will not)
-"The setjmp macro and the longjmp function shall not be used."
-```
+### setjmp / longjmp 금지
 
 ```cpp
-// 위반
+// 회피
 #include <csetjmp>
 jmp_buf env;
 
@@ -388,25 +315,18 @@ void Foo() {
 }
 
 void DoWork() {
-    if (error) longjmp(env, 1);  // 위반 — 비국소 점프
+    if (error) longjmp(env, 1);
 }
 ```
 
-`setjmp/longjmp`가 *비국소 점프*. *Destructor 호출 안 됨*, *exception unwinding 안 됨*.
+`setjmp/longjmp`가 *비국소 점프*. *Destructor 호출 안 됨*, *resource leak 위험*. JSF에서 금지.
 
-C++ exception (try/catch)이 *대안*이지만 *JSF Rule 196에서 exception도 금지*.
+## Exception 금지
 
-→ *return code* + *explicit error handling*만 남음.
-
-## AV Rule 196 — Exception 금지 (가장 유명)
-
-```
-AV Rule 196 (Will not)
-"Exceptions shall not be used."
-```
+JSF는 *exception 사용을 금지*. 이는 *가장 잘 알려진 JSF 정책*.
 
 ```cpp
-// 위반
+// 회피
 try {
     DoWork();
 } catch (const std::exception &e) {
@@ -420,50 +340,39 @@ if (rc != SUCCESS) {
 }
 ```
 
-JSF가 *exception 완전 금지*한 이유 (Lockheed Martin 문서):
+Exception 금지의 일반적 근거:
 
 ```
 1. 처리 시간 비결정적
-   - try/catch가 *normal case* 비용 0
-   - 그러나 *throw 시* 비용 큼 (stack unwinding, destructor 호출)
+   - throw 시 stack unwinding, destructor 호출
    - WCET 분석 어려움
 
 2. Static analysis 곤란
-   - 어디서 throw 가능?
-   - Catch가 어디서 잡나?
-   - Control flow가 *모든 함수에 implicit*
+   - 어디서 throw, 어디서 catch?
+   - Control flow가 implicit
 
-3. MC/DC coverage
-   - 모든 throw path 검증
-   - exception handler 모두 테스트
-   - 효과적 100% 어려움
+3. 100% coverage 어려움
+   - 모든 throw path 검증 곤란
 
-4. Bin size + RTTI
-   - Exception 활성화 시 RTTI 필요 (some impl)
-   - Binary 큼
-
-5. 항공 standard
-   - JSF Rule 196 (강제)
-   - MISRA C++:2008 (회피 권장)
-   - AUTOSAR C++14 (회피 권장)
+4. Binary 부담
+   - Exception 활성화 시 추가 metadata
 ```
 
-대부분 항공 SW가 *`-fno-exceptions`로 컴파일*. 시도하면 *컴파일 에러*.
+대부분 *`-fno-exceptions`로 컴파일*하여 시도 시 *컴파일 에러*.
 
 ```bash
 g++ -fno-exceptions src.cpp
+clang++ -fno-exceptions src.cpp
 ```
 
 ### Exception 대신 — Return Code Pattern
 
 ```cpp
-// 모든 함수 return int (또는 enum)
 enum ErrorCode {
     SUCCESS = 0,
     ERROR_INVALID_ARG = -1,
     ERROR_OUT_OF_MEMORY = -2,
     ERROR_TIMEOUT = -3,
-    /* ... */
 };
 
 ErrorCode ProcessData(const Data &input, Result &output) {
@@ -487,12 +396,11 @@ if (ec != SUCCESS) {
 }
 ```
 
-이런 *return code propagation*이 *F-35의 표준*. *exception의 모든 use case 대체*.
+이런 *return code propagation*이 *JSF style의 기본*.
 
 ### Modern Alternative — `std::expected` (C++23)
 
 ```cpp
-// C++23
 std::expected<Result, ErrorCode> ProcessData(const Data &input) {
     if (!input.IsValid()) {
         return std::unexpected(ERROR_INVALID_ARG);
@@ -506,7 +414,6 @@ std::expected<Result, ErrorCode> ProcessData(const Data &input) {
     return r;
 }
 
-// 호출
 auto result = ProcessData(d);
 if (result) {
     Use(*result);
@@ -515,52 +422,45 @@ if (result) {
 }
 ```
 
-*Rust의 Result<T, E>* 패턴. C++23의 *exception-less error handling*. *항공 친화*.
+*Rust Result<T, E>* 패턴. C++23의 *exception-less error handling*. 항공 친화 패턴.
 
-## 실전 — JSF Style Function
+## JSF Style Function 예
 
 ```cpp
 // flight_controller.h
-
 class CFlightController {
 public:
-    // explicit constructor
     explicit CFlightController(const CFlightConfig &p_config);
     ~CFlightController();
     
-    // No copy
-    CFlightController(const CFlightController &) = delete;  // C++11
-    CFlightController& operator=(const CFlightController &) = delete;
-    
-    // Public methods — clear contract
     ErrorCode Initialize();
     ErrorCode Step(const CSensorData *p_pSensor, CActuatorCommand *p_pActuator);
     ErrorCode SetMode(EFlightMode p_eMode);
     EFlightMode GetCurrentMode() const;
-    
+
 private:
-    // Helper functions (no recursion)
     ErrorCode UpdatePitchControl(const CSensorData *p_pSensor);
     ErrorCode UpdateRollControl(const CSensorData *p_pSensor);
     ErrorCode UpdateYawControl(const CSensorData *p_pSensor);
     
-    // Members
     bool             m_bInitialized;
     EFlightMode      m_eCurrentMode;
     CFlightConfig    *m_pConfig;
     CPIDController   *m_pPitchCtrl;
     CPIDController   *m_pRollCtrl;
     CPIDController   *m_pYawCtrl;
+    
+    CFlightController(const CFlightController &);
+    CFlightController& operator=(const CFlightController &);
 };
 ```
 
 ```cpp
 // flight_controller.cpp
-
 ErrorCode CFlightController::Step(const CSensorData *p_pSensor,
                                    CActuatorCommand *p_pActuator)
 {
-    // Pre-conditions (AV Rule 182)
+    // Pre-conditions
     if (p_pSensor == NULL || p_pActuator == NULL) {
         return ERROR_INVALID_ARG;
     }
@@ -568,7 +468,7 @@ ErrorCode CFlightController::Step(const CSensorData *p_pSensor,
         return ERROR_NOT_INITIALIZED;
     }
     
-    // Update each axis (return value 검사 — AV Rule 178)
+    // Return value 검사
     ErrorCode l_ec = UpdatePitchControl(p_pSensor);
     if (l_ec != SUCCESS) {
         return l_ec;
@@ -584,7 +484,6 @@ ErrorCode CFlightController::Step(const CSensorData *p_pSensor,
         return l_ec;
     }
     
-    // Combine outputs (no exception, no recursion)
     p_pActuator->SetPitch(m_pPitchCtrl->GetOutput());
     p_pActuator->SetRoll(m_pRollCtrl->GetOutput());
     p_pActuator->SetYaw(m_pYawCtrl->GetOutput());
@@ -594,16 +493,13 @@ ErrorCode CFlightController::Step(const CSensorData *p_pSensor,
 ```
 
 JSF style 특징:
-- *Pre-condition checks*
-- *Return code propagation* (no exception)
-- *No recursion*
-- *No goto*
-- *Single exit point* (구조)
-- *Parameter validation*
+- Pre-condition checks
+- Return code propagation (no exception)
+- No recursion, no goto
+- Parameter validation
+- Function decomposition (각 helper가 작음)
 
 ## RAII Without Exceptions
-
-JSF는 *exception 없이 RAII 사용*. *Destructor가 *exception 없이*도 cleanup*.
 
 ```cpp
 class CFileHandle {
@@ -612,19 +508,17 @@ public:
     ~CFileHandle();
     
     bool IsValid() const { return m_pFile != NULL; }
-    
-    // No copy
-    CFileHandle(const CFileHandle &) = delete;
-    CFileHandle& operator=(const CFileHandle &) = delete;
 
 private:
     FILE *m_pFile;
+    
+    CFileHandle(const CFileHandle &);
+    CFileHandle& operator=(const CFileHandle &);
 };
 
 CFileHandle::CFileHandle(const char *p_path) {
     m_pFile = fopen(p_path, "r");
-    // No exception throw on fail
-    // Caller checks IsValid()
+    // No throw on fail — caller checks IsValid()
 }
 
 CFileHandle::~CFileHandle() {
@@ -634,84 +528,20 @@ CFileHandle::~CFileHandle() {
     }
 }
 
-// 사용
 void Foo() {
     CFileHandle file("config.txt");
     if (!file.IsValid()) {
-        // handle error (no exception)
         return;
     }
-    
-    // use file
-    // 자동으로 destructor에서 fclose
+    // use file — 자동 cleanup at }
 }
 ```
 
-Exception 없는 RAII = *check IsValid()*. 약간 verbose지만 *deterministic*.
+Exception 없는 RAII = *constructor에서 throw 안 함*, *caller가 IsValid 확인*.
 
-## ADA 영향 — F/A-18, F-22 Heritage
+## Function 복잡도
 
-F-35 *이전 세대*는 *Ada*. Ada가 *exception 가지만 deterministic*. JSF C++가 *Ada-like programming*을 C++에 강요.
-
-```ada
--- Ada (F/A-18)
-procedure Process_Data
-    (Input  : in     Data_Type;
-     Output :    out Result_Type;
-     Status :    out Status_Type)
-is
-begin
-    if not Is_Valid(Input) then
-        Status := Invalid_Argument;
-        return;
-    end if;
-    
-    Compute(Input, Output);
-    Status := Success;
-end Process_Data;
-```
-
-```cpp
-// C++ JSF style (F-35)
-ErrorCode ProcessData(const Data &p_input, Result &p_output) {
-    if (!IsValid(p_input)) {
-        return ERROR_INVALID_ARG;
-    }
-    
-    Compute(p_input, p_output);
-    return SUCCESS;
-}
-```
-
-*거의 동일 구조*. C++ JSF style이 *Ada 스타일을 C++로 옮긴 것*.
-
-## ADA Comeback?
-
-F-35 이후 *Ada가 재조명*:
-
-```
-2010s-2020s Ada renaissance:
-  - Boeing 787 일부 Ada
-  - ESA 새 mission Ada 검토
-  - Critical SW가 Ada (RTCA DO-333 formal methods)
-  - SPARK Ada (subset, formal verification)
-
-이유:
-  - Ada가 *exception 처리 deterministic*
-  - SPARK이 *formal proof로 runtime error 부재 증명*
-  - C++의 *복잡성 회피*
-
-미래:
-  - Ada + Modern C++ 공존
-  - Critical은 SPARK Ada
-  - 일반은 C++ (MISRA, AUTOSAR)
-```
-
-KAI / KARI도 *Ada 검토* 가능성. 학습 가치 큼.
-
-## 함수 복잡도 — AV Rule 3 재방문
-
-함수 *200 LSLOC + cyclomatic 20* 한계. 함수가 *길어지는 패턴*:
+함수 *길이 + cyclomatic complexity* 제한. JSF의 일반 지침은 *함수 짧게*. 길어지면 *decomposition*.
 
 ```cpp
 // 안티 패턴 — 큰 함수
@@ -734,58 +564,81 @@ ErrorCode ProcessFlight() {
     ec = UpdateTelemetry();
     if (ec != SUCCESS) return ec;
     
-    ec = CheckFaults();
-    return ec;
+    return CheckFaults();
 }
-
-// 각 sub-function < 60 LSLOC, CCN < 10
 ```
 
-이런 *function decomposition*이 *JSF + 다른 모든 표준의 공통 권장*.
+각 sub-function이 짧으면 *cyclomatic complexity 낮음 + test 쉬움*.
 
-## Common Findings — Functions
+## Ada 영향 — 일반적인 관찰
+
+C/C++ 이전 *항공 임베디드 분야*는 *Ada* 사용이 일반적이었다 (Ada83 / Ada95). Ada가 *strong typing + exception 처리 deterministic* 같은 특성을 가진다.
+
+```ada
+-- Ada
+procedure Process_Data
+    (Input  : in     Data_Type;
+     Output :    out Result_Type;
+     Status :    out Status_Type)
+is
+begin
+    if not Is_Valid(Input) then
+        Status := Invalid_Argument;
+        return;
+    end if;
+    
+    Compute(Input, Output);
+    Status := Success;
+end Process_Data;
+```
+
+```cpp
+// JSF C++ style
+ErrorCode ProcessData(const Data &p_input, Result &p_output) {
+    if (!IsValid(p_input)) {
+        return ERROR_INVALID_ARG;
+    }
+    
+    Compute(p_input, p_output);
+    return SUCCESS;
+}
+```
+
+구조가 유사. JSF style이 *Ada-like programming*을 C++에 적용한 측면이 있다는 *기술적 관찰*은 산업 문헌에 자주 등장한다.
+
+### SPARK Ada
+
+*SPARK*는 Ada subset + *formal verification* 도구. *Runtime error 부재 증명* 가능. 일부 *highest-criticality* 영역에 사용. 자세히는 [adacore.com](https://www.adacore.com/sparkpro) 참조.
+
+## 일반적인 finding (functions)
 
 ```
-실전 finding:
+실전에서 자주 발견되는 위반:
 
-1. "ProcessData(int p1, int p2, ..., int p10) — 10 parameters"
-   → AV Rule 177 위반 (≤7)
-
-2. "fopen() return 무시"
-   → AV Rule 178 위반
-
-3. "Recursive ParseExpression() function"
-   → AV Rule 179 위반
-
-4. "varargs LogMessage(fmt, ...)"
-   → AV Rule 180 위반
-
-5. "try { ... } catch (...) { ... } 사용"
-   → AV Rule 196 위반
-
-6. "setjmp + longjmp pattern"
-   → AV Rule 174 위반
-
-7. "Inline function 100 lines"
-   → AV Rule 186 위반
-
-8. "default 없는 switch"
-   → AV Rule 160 위반
+1. 함수 parameter 수 과다
+2. fopen / strcpy return 값 무시
+3. Recursive function (직접 또는 간접)
+4. varargs (...) 사용
+5. try/catch 사용
+6. setjmp + longjmp
+7. 50+ line inline function
+8. default 없는 switch
 ```
 
 ## 정리
 
 - **Statements**: 모든 block 중괄호, switch+default, fallthrough 명시, loop termination 보장.
-- **Functions**: 7 parameter, return value 검사, recursion/varargs/setjmp 금지.
-- **Exception 완전 금지** (Rule 196) — return code pattern으로 대체.
-- *RAII는 exception 없이* — destructor에서만 cleanup.
-- *Ada 영향*: F/A-18, F-22 → F-35의 *Ada-like C++*.
-- *C++23 std::expected*가 *modern alternative*.
-- *Function decomposition*이 *core practice*.
+- **Functions**: parameter 적게, return value 검사, recursion/varargs/setjmp 금지.
+- **Exception 금지** — return code pattern으로 대체.
+- *RAII는 exception 없이* — constructor에서 throw 안 함, IsValid 확인.
+- *Ada-like programming* 정신 — strong typing + return-code error.
+- *C++23 std::expected*가 modern alternative.
+- *Function decomposition*이 핵심 practice.
+- 정확한 AV Rule 번호·wording은 *원문 PDF*.
 
 ## 다음 장 예고
 
-7장은 *Classes basic* (Rule 67-95) — class vs struct, encapsulation, friend, operator overload.
+7장은 *Classes basic* — class vs struct, encapsulation, friend, operator overload.
 
 ## 관련 항목
 

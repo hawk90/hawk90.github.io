@@ -209,7 +209,7 @@ Polarion의 강점:
 - 항공 인증에는 *아직 부족*하나 점진 채택
 ```
 
-대부분의 KAI, Korean Air, KARI = *DOORS 사용*. Boeing, Airbus = *DOORS + 자체 시스템*.
+DOORS가 *항공 산업 큰 시장 점유*. Boeing, Airbus 등 대형 OEM이 *DOORS + 자체 시스템*을 결합하는 사례 공개. 각 한국 기업의 *내부 tool stack*은 *비공개*.
 
 ## Traceability Matrix
 
@@ -512,7 +512,7 @@ Max test cases per HLR              : 12
 | Jama Connect | $3-5k/seat | 5% | Agile-friendly |
 | 3SL Cradle | $3-5k/seat | 10% | UK/Europe |
 
-KAI, KARI = *DOORS*. Boeing, Airbus = *DOORS + 자체*. 신생 스타트업 = *Polarion 또는 Jama*.
+대형 OEM = *DOORS + 자체 시스템*. 신생 스타트업이 *Polarion 또는 Jama*를 채택하는 경우 흔하다. 각 회사의 *공식 tool stack 발표*만 인용.
 
 ## 정리
 
@@ -521,10 +521,9 @@ KAI, KARI = *DOORS*. Boeing, Airbus = *DOORS + 자체*. 신생 스타트업 = *P
 - *Verifiable* — 측정 가능한 표현 필수.
 - Derived requirement는 *system process에 통보* 의무.
 - *Traceability* — System Req ↔ HLR ↔ LLR ↔ Code ↔ Test, 양방향 100%.
-- DOORS가 *항공 산업 50%+ 시장*. KAI, KARI 표준.
-- A-3 그룹 *15 obj*가 HLR 검증. DAL A는 *7개 with Independence*.
-- Peer review가 공식 procedure. *DOORS 안 comment workflow*.
-- Major finding 평균 *HLR 100개당 5~10*.
+- DOORS가 *항공 산업 큰 시장 점유*.
+- A-3 그룹의 obj 다수가 HLR 검증. DAL A는 일부 *Independence* 의무.
+- Peer review가 공식 procedure (DOORS / Polarion 등의 workflow).
 
 ## 다음 장 예고
 

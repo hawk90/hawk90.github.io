@@ -114,80 +114,29 @@ CodeScene
   - Knowledge map
 ```
 
-### Maintainability Report 예
+### Maintainability Report — 일반 template
 
 ```
-=== Maintainability Report — KOMPSAT-6 AOCS Module ===
+=== Maintainability Report (일반 template) ===
 
-Module: attitude_control.c
-LoC:    1,247 (excluding comments)
-Functions: 18
+Module info: file name, LoC, function count
 
-Metrics:
+Metrics 보고:
+  - Cyclomatic Complexity per function (min/max/avg, target)
+  - Coupling (Ca / Ce / Instability)
+  - LoC per function (min/max/avg, target)
+  - Comment Density (target 15-25%)
+  - Nesting Depth (target < 4)
+  - Parameter Count (target < 7)
+  - Halstead (Volume / Difficulty / Effort)
+  - Maintainability Index distribution
 
-  Cyclomatic Complexity (per function):
-    Min:        2
-    Max:        8
-    Average:    4.5
-    Target:     < 10 per function ✓ (all under threshold)
-
-  Coupling:
-    Ca (afferent):  3 (used by 3 modules)
-    Ce (efferent):  7 (uses 7 modules)
-    Instability:    0.70 ← high (concerning)
-
-  LoC per function:
-    Min:        15
-    Max:        82  ← 1 function > 60 (compute_quaternion_attitude)
-    Average:    42
-    Target:     < 60 ✗ (1 violation)
-
-  Comment Density:
-    24%
-    Target:     15-25% ✓
-
-  Nesting Depth:
-    Max:        3
-    Average:    2.1
-    Target:     < 4 ✓
-
-  Parameter Count:
-    Max:        6
-    Target:     < 7 ✓
-
-  Halstead:
-    Volume:     12,547
-    Difficulty: 42
-    Effort:     527,000  ← high
-
-  Maintainability Index:
-    Module average: 72
-    Target:         > 65 ✓ (good)
-    Distribution:
-      80-100 (excellent): 4 functions
-      65-80 (good):       12 functions
-      50-65 (moderate):   2 functions ← improve
-      < 50 (poor):        0 functions
-
-Findings:
-  Major:
-    M-1: compute_quaternion_attitude() = 82 LoC > 60
-         Action: Refactor into 2-3 smaller functions
-         Owner: 김OO
-         Due:   2024-11-30
-
-  Minor:
-    m-1: Instability 0.70 — module depends on too many others
-         Action: Architecture review with team
-         Owner: Architect
-         Due:   2024-12-15
-
-  Observation:
-    o-1: Halstead Effort high (527k)
-         → 알고리즘 본질적 복잡 — 분석 후 결정
-
-Overall: GOOD with minor improvements needed.
+Findings (severity별):
+  Major / Minor / Observation
+  각 finding에 Owner + Due + Action
 ```
+
+각 metric의 *target value*는 *프로젝트 / 조직 / criticality 기반*으로 결정.
 
 ## 2. Reliability
 
@@ -483,7 +432,7 @@ Estimated migration effort: 3 person-months (vs from scratch: 24 months)
 ```yaml
 # sonar-project.properties
 sonar.projectKey=kompsat6-fms
-sonar.projectName=KOMPSAT-6 FMS
+sonar.projectName=Mission-FMS
 sonar.projectVersion=2.0.0
 
 sonar.sources=src/
@@ -504,22 +453,22 @@ sonar.duplicated_lines_density.maximum=5
 sonar.profile=ECSS-Quality
 ```
 
-### Quality Gates
+### Quality Gates — 일반 template
 
 ```
-=== Quality Gate for KOMPSAT-6 ===
+=== Quality Gate (일반 template) ===
 
   Bugs:                      0 (none allowed for Criticality A)
   Vulnerabilities:           0
   Security Hotspots:         0
-  Code Smells:               < 50
-  Test Coverage:             > 85%
-  Duplicated Lines:          < 5%
+  Code Smells:               < N
+  Test Coverage:             > X%
+  Duplicated Lines:          < Y%
   Maintainability Rating:    A (1-5 scale)
   Reliability Rating:        A
   Security Rating:           A
-  Cyclomatic Complexity max: 10
-  Function Length max:       60 LoC
+  Cyclomatic Complexity max: per project
+  Function Length max:       per project
 
 If any fail: Quality Gate fails
 Build pipeline: blocked from production deployment
@@ -532,61 +481,21 @@ Build pipeline: blocked from production deployment
 Git history 기반 *복잡도 + 변경 빈도* 결합.
 
 ```
-=== Hotspots in KOMPSAT-6 AOCS ===
+=== Hotspots (일반 예) ===
 
-Top 5 Hotspots (변경 빈번 + 복잡도 높음):
+Top N Hotspots (변경 빈번 + 복잡도 높음):
 
-1. attitude_control.c
-   Complexity: 8 (avg)
-   Changes (last 6mo): 47
-   Authors: 5
-   → Hotspot risk: HIGH
-   → Action: Refactoring 검토
+1. module_A
+   Complexity: N (avg)
+   Changes (last 6mo): N
+   Authors: N
+   → Hotspot risk: HIGH/MEDIUM/LOW
+   → Action: Refactoring / Test 강화 등
 
-2. quaternion_math.c
-   Complexity: 12 (max)
-   Changes: 23
-   Authors: 3
-   → Hotspot risk: MEDIUM
-   → Action: Test coverage 강화
-
-3. fault_management.c
-   Complexity: 9
-   Changes: 18
-   Authors: 4
-   → Hotspot risk: MEDIUM
-
-(나머지: LOW risk)
+(이하 동일 패턴)
 ```
 
-*잦은 변경 + 복잡*한 코드가 *defect 가능성 높음*. 우선 개선.
-
-## Product Properties — KARI 적용
-
-### KOMPSAT-3A (2015) Maintainability
-
-```
-Module        Functions  Avg Complexity  Max LoC/Func  MI
-─────────────────────────────────────────────────────
-AOCS          24         4.8             58            71
-PMC           18         3.2             42            78
-TT&C          12         5.1             62            68
-TM/TC         8          2.9             35            82
-
-Overall MI: 75 (Good)
-```
-
-### KOMPSAT-6 (2025 예정) Improvement
-
-```
-Target vs KOMPSAT-3A:
-  Maintainability Index:    75 → 80 (target)
-  Defect Density:           1.8 → 1.0 per KLoC
-  Test Coverage:            85% → 95%
-  Reusable Components:      30% → 50% (heritage from 3A)
-```
-
-지속적 개선이 ECSS의 정신.
+*잦은 변경 + 복잡*한 코드가 *defect 가능성 높음*. 우선 개선 대상.
 
 ## ECSS vs DO-178C 비교 — Product Properties
 
@@ -615,7 +524,7 @@ ECSS가 *more measurable*. 비교·개선 가능.
 - Portability: HAL layer, compiler abstraction.
 - Suitability: requirement coverage, performance.
 - Tool: SonarQube가 통합 dashboard. CodeScene hotspot.
-- KARI는 *지속 개선* — KOMPSAT-3A → 6.
+- 정확한 metric target은 *프로젝트 / 조직 / criticality* 기반으로 결정.
 
 ## 다음 장 예고
 

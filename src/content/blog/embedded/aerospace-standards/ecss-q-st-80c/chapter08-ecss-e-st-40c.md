@@ -114,16 +114,16 @@ Review: SRR (System Requirements Review)
   - Feasibility 평가
 ```
 
-### Example — KOMPSAT-7A SR Allocation
+### Example — SR Allocation (가상)
 
 ```
 System Requirement SR-12:
-  "Satellite shall maintain pointing accuracy of 0.01° (3-sigma)
-   during SAR imaging mode."
+  "Satellite shall maintain pointing accuracy of X° (3-sigma)
+   during nominal imaging mode."
 
 SR-12 Allocation:
   HW responsible:
-    - Star tracker accuracy (0.005°, vendor spec)
+    - Star tracker accuracy (vendor spec)
     - Reaction wheel torque resolution
     - Body rigidity (mechanical)
   
@@ -133,9 +133,9 @@ SR-12 Allocation:
     - Mode management (transition logic)
   
   Combined budget:
-    HW: 0.005° (3-sigma)
-    SW: 0.008° (3-sigma)
-    Total: sqrt(0.005² + 0.008²) = 0.009° ≤ 0.01° ✓ (margin 10%)
+    HW: a° (3-sigma)
+    SW: b° (3-sigma)
+    Total: sqrt(a² + b²) ≤ X° (margin)
 ```
 
 이런 *명시적 allocation*이 *후속 design의 기준*.
@@ -250,24 +250,19 @@ CDR Agenda (5-10 days):
 CDR is "design freeze". 이후 변경 → CCB + 큰 영향
 ```
 
-### CDR Effort — KOMPSAT 예
+### CDR Effort — 일반 규모
 
 ```
-KOMPSAT-6 CDR (2024):
-  Preparation: 2 months
-  Review duration: 1 week (face-to-face)
-  Participants: 30+ people
-    - KARI team: 15
-    - Customer (정부): 3
-    - External ISVV: 5
-    - Subcontractor reps: 7
-  
-  Documents reviewed: ~50
-  Findings: 23 Major, 78 Minor
-  Resolution time: 3 months (modifying)
+대형 mission CDR의 일반 규모:
+  Preparation: 수개월
+  Review duration: 수일 ~ 1주
+  Participants: 수십명 (개발 team + customer + ISVV + subcontractor reps)
+  Documents reviewed: 수십~수백
+  Findings: Major + Minor 다수
+  Resolution time: 수개월
 ```
 
-CDR이 *가장 큰 review*. *전체 design의 freeze*.
+CDR이 *가장 큰 review*. *전체 design의 freeze*. 정확한 규모는 *mission*마다 다르다.
 
 ## Phase 5: SW Coding
 
@@ -411,7 +406,7 @@ Mission 종료:
   - 마지막 1-2명 engineer + archive team
 ```
 
-KARI도 KOMPSAT-1 (1999 발사) 후 *disposal phase* 진입한 mission 있음.
+장기 운영 후 mission이 *disposal phase*에 진입하는 사례는 ESA / NASA / 각 국 우주청에 다수.
 
 ## Coding Standards (§5.5.6.2)
 
@@ -436,24 +431,15 @@ External standard 채택:
 
 대부분 ESA missions = *MISRA C* 또는 *Ada with SPARK*. *Ariane 5 launcher = Ada* (legacy + 새 missions은 C++ 검토 중).
 
-### Coding Standard 예 — Ariane 6
+### Ada — 항공우주에서의 일반
 
-```
-Ariane 6 launcher software (2024+ flight):
+*Ada*는 launcher / 위성 등 critical 항공우주 SW에 광범위 사용되어 왔다. 일반 패턴:
 
-Language: Ada 2012 (SPARK subset for critical)
-Standard: ECSS adapted + RavenSPARK profile
+- *Ada 2012* + *SPARK subset*으로 critical 부분 *formal verification*
+- *AdaCore GNAT Pro* 같은 qualified compiler
+- Ariane 등 *유럽 launcher*에 적용 사례 다수
 
-Critical SW (control law, navigation):
-  - SPARK Ada (formal verification)
-  - 모든 runtime error 부재 증명
-
-Less critical (monitoring, logging):
-  - Ada 2012 (full)
-  - Adacore GNAT Pro compiler (qualified)
-```
-
-Ada가 *항공우주에서 여전히 핵심*. KARI는 *C 위주*지만 *학습 가치 있음*.
+각 mission이 실제로 *어떤 언어·표준 조합*을 사용하는지는 *해당 mission 공식 문서* 참조.
 
 ## V-Model vs Agile
 
@@ -465,12 +451,10 @@ ECSS와 Agile 조합:
   - Phase 5-7 (Coding + Testing): continuous integration
   - 단 *gate review (SRR/PDR/CDR)*는 *waterfall 준수*
 
-Hybrid approach examples:
-  - 신생 우주 회사 (페리지, 이노스페이스)
-  - ESA의 일부 small mission
+Hybrid approach는 *신생 우주 회사*나 *small mission*에서 흔히 시도된다. 각 조직의 구체적 process는 *조직 발표*만 인용.
 ```
 
-대형 mission (KOMPSAT, Ariane)은 *순수 V-model*. Schedule risk 회피 + customer 친숙.
+대형 mission은 일반적으로 *순수 V-model* 채택. Schedule risk 회피 + customer 친숙.
 
 ## Document Set — ECSS-E-ST-40C Required
 
@@ -555,7 +539,7 @@ Constellation (다수 위성):
   - 후속 위성에 abbreviated
 ```
 
-KOMPSAT-7A이 *constellation 시작*. 7A 인증 후 *7B/7C는 abbreviated process*.
+Constellation 형태의 mission은 *첫 unit에 full process, 후속 unit에 abbreviated*가 일반 패턴.
 
 ## V-Model 비판 + 진화
 
@@ -593,20 +577,19 @@ Tool qualification Annex Q              DO-330 (별도)
 
 DO-178C가 *objective-driven*이라면 ECSS는 *process-driven*. 둘 다 강점 약점.
 
-## KARI 적용 — V-Model 운영
+## V-Model 운영 — 일반 timeline
 
 ```
-KOMPSAT-6 V-Model (2020-2026):
+대형 mission V-Model의 일반 schedule:
 
-2020 Phase 1: System req 분석
-2021 Phase 2: SW req (SRR 통과)
-2022 Phase 3: Architecture (PDR 통과)
-2023 Phase 4: Detailed design (CDR 통과)
-2024 Phase 5-7: Code + Test (in progress)
-2025 Phase 8: Validation (QR 예정)
-2025 Phase 9: Delivery (AR 예정)
-2025-2026 Phase 9-10: Launch + Operations
-2030+ Phase 11: Disposal
+Year 1     Phase 1: System req 분석
+Year 2     Phase 2: SW req (SRR 통과)
+Year 3     Phase 3: Architecture (PDR 통과)
+Year 4     Phase 4: Detailed design (CDR 통과)
+Year 5-6   Phase 5-7: Code + Test
+Year 6-7   Phase 8-9: Validation + Delivery (QR + AR)
+Year 7+    Phase 10: Operations (수년~수십년)
+End        Phase 11: Disposal
 ```
 
 15-20년 lifecycle. *각 단계*가 *수개월~년*.
@@ -614,23 +597,20 @@ KOMPSAT-6 V-Model (2020-2026):
 ## 신생 우주 회사 — V-Model 적용 어려움
 
 ```
-페리지, 이노스페이스 같은 회사:
-  - Schedule pressure (빠른 launch)
+신생 우주 회사의 일반 도전:
+  - Schedule pressure
   - 적은 budget
   - 작은 team
-  
-도전:
-  - V-Model의 documentation 부담
+  - V-Model documentation 부담
   - 5 milestone review 부담
-  - Customer 미존재 (commercial)
 
-해결:
+일반 해결:
   - Tailored ECSS (heavy reduction)
   - 자체 표준 (ECSS 일부 차용)
   - DO-178C-like (objective-based)
 ```
 
-신생 우주는 *ECSS 변형* 또는 *자체 표준*. ECSS 정통 적용 어려움.
+신생 우주는 *ECSS 변형* 또는 *자체 표준*이 흔하다.
 
 ## Documentation as Code (DAC)
 
@@ -653,9 +633,8 @@ Trend:
   - Review (PR-based)
 
 ECSS 채택 진행:
-  KARI: 부분 채택 (Sphinx + GitLab)
-  ESA: 일부 mission 검토 중
-  Boeing: 광범위 채택
+  많은 우주·항공 조직이 DAC 도구 부분 도입 중
+  Boeing 등 대형 산업도 광범위 채택
 ```
 
 DAC가 *paperwork 부담 감소*. ECSS process compliance 유지하면서.

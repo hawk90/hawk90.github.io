@@ -505,15 +505,9 @@ MB-5: Model standards conformance
 - *모델 자체 검증 추가*
 - *생성된 코드 디버깅 어려움*
 
-### KAI 적용
+### Model-Based 적용 — 일반 관찰
 
-```
-KUH-1 Surion (마린온): Simulink 일부 사용 (SmartSAR-S)
-KF-21 Boramae: Simulink + SCADE 혼합
-T-50: 전통 C 개발 (Simulink 적용 적음)
-```
-
-KARI는 *Matlab/Simulink 광범위 사용*. 위성 자세 제어, 항법 알고리즘 모두 Simulink로 설계.
+항공·우주 산업에서 *Simulink, SCADE 같은 model-based 도구*의 적용은 일반적. *제어 algorithm, 항법, 안전 critical 모듈*에 광범위. 각 한국 회사의 *내부 적용 범위*는 *공식 발표 한정*.
 
 ## LLR Common Findings
 
@@ -667,7 +661,7 @@ SymTA/S (Symtavision): 자동차 + 항공.
 - Architecture: 모듈 분해, 의존성, task 구조, 메모리/타이밍 budget.
 - A-4 그룹 *14 obj*가 LLR + Architecture 검증.
 - Model-Based Development (DO-331)는 Simulink/SCADE로 *모델 → 자동 코드 생성*.
-- KAI/KARI = Matlab/Simulink 광범위. SCADE는 Airbus/Boeing 표준.
+- Model-based (Simulink, SCADE 등) 적용이 industry 일반.
 - Partitioning integrity (A-4-13)는 ARINC 653 IMA에서 핵심.
 - WCET 도구(aiT, RapiTime)로 *실시간 보장 입증*.
 

@@ -1,135 +1,91 @@
 ---
-title: "Ch 10: Exceptions, Memory, Library, Multi-threading (Rule 191-220)"
+title: "Ch 10: Exceptions, Memory, Library, Multi-threading"
 date: 2025-09-30T11:00:00
-description: "JSF C++ Rule 191-220 — Exception 완전 금지, new/delete 거의 금지, STL 부분 사용, multi-threading 정책."
+description: "JSF C++ — Exception 금지, dynamic memory 제한, STL 부분 사용, multi-threading 일반 정책."
 tags: [jsf-cpp, exceptions, memory, new-delete, stl, multi-threading, static-pool]
 series: "JSF C++"
 seriesOrder: 10
 draft: false
 ---
 
-JSF C++의 *가장 strict한 영역*. *Exception 완전 금지*, *dynamic memory 거의 금지*, *STL 일부만 사용*, *multi-threading은 OS가 관리*. 항공 SW의 *deterministic 최우선*. 이 장은 *각 영역 + F-35 적용 + alternative*까지.
+JSF C++의 가장 *strict한 영역들*. *Exception 금지*, *dynamic memory 제한*, *STL 일부만 사용*, *multi-threading은 OS가 관리*. 항공 SW의 *deterministic 우선* 정신. *정확한 AV Rule 번호와 wording은 원문 PDF 참조*.
 
-## AV Rule 191-200 — Exception 완전 금지
+## Exception 정책
 
-```
-AV Rule 196 (Will not) — 가장 유명
-"Exceptions shall not be used."
-```
+JSF C++의 가장 잘 알려진 정책: *Exception 사용 금지*. `throw`, `try`/`catch`, exception specification 모두 금지.
 
-이미 Ch 6에서 깊이 본 *Exception 금지*. 추가 detail:
-
-### AV Rule 191 — `throw` 금지
+### Return code 패턴
 
 ```cpp
-// 위반
-throw std::runtime_error("error");
-throw 42;
-throw "literal";
+// 회피 (JSF 위반)
+void DoWork() {
+    if (error) throw std::runtime_error("failed");
+}
 
-// Good — return code
-return ERROR_CODE;
-```
-
-### AV Rule 192 — `try`/`catch` 금지
-
-```cpp
-// 위반
 try {
-    DoSomething();
+    DoWork();
 } catch (const std::exception &e) {
     HandleError();
 }
 
-// Good — error code propagation
-if (DoSomething() != SUCCESS) {
+// Good — return code
+int DoWork() {
+    if (error) return ERROR_CODE;
+    return SUCCESS;
+}
+
+if (DoWork() != SUCCESS) {
     HandleError();
 }
 ```
 
-### AV Rule 193 — `throw` 명세 금지
+### Destructor에서의 cleanup
+
+Exception 없이도 cleanup 필요. Destructor에서 *throw 금지*, 실패 시 *로그만*.
 
 ```cpp
-// 위반 (C++03)
-void Foo() throw(std::exception);
-void Bar() throw();   // empty throw spec
-
-// Good
-void Foo() {
-    /* return code */
-}
-
-// C++11 noexcept도 회피 (exception 자체 금지므로)
-```
-
-### AV Rule 194 — `std::terminate`, `std::unexpected` 회피
-
-Exception 없으면 *호출 안 됨*. Defensive 회피.
-
-### AV Rule 195 — Destructor에서 throw 금지
-
-```cpp
-// 위반 (C++03 era)
-class CFoo {
+class CFileWriter {
 public:
-    ~CFoo() {
-        if (error) throw 42;  // 위반
-    }
-};
-```
-
-Exception 없으니 trivial. 단 *destructor에서 cleanup 실패*는 *로그 + safe mode*.
-
-```cpp
-// Good
-class CFoo {
-public:
-    ~CFoo() {
-        if (Cleanup() != SUCCESS) {
-            LogError("Cleanup failed");
-            // 다른 action 없음 (destructor라서)
+    ~CFileWriter() {
+        if (Flush() != SUCCESS) {
+            LogError("Flush failed in destructor");
+            // 다른 action 없음 — destructor에서는 throw 금지
         }
     }
 };
 ```
 
-## AV Rule 201-210 — Memory Management
+## Dynamic Memory 정책
 
-JSF의 *strictly limited dynamic memory*. NASA JPL Power of 10 Rule 3과 동일.
+JSF는 *new/delete를 initialization phase에 한정* 권장. NASA JPL Power of 10 Rule 3과 같은 정신.
 
-### AV Rule 206 — `new`/`delete` 거의 금지
-
-```
-AV Rule 206 (Should)
-"Use of new and delete shall be limited to initialization phase."
-```
+### 일반 패턴
 
 ```cpp
-// 위반 — runtime allocation
-class CFlightController {
+// 회피 — runtime allocation
+class CController {
 public:
     void Process() {
-        Buffer *buf = new Buffer(1024);  // 위반 — runtime allocation
+        Buffer *buf = new Buffer(1024);  // runtime new
         DoWork(buf);
         delete buf;
     }
 };
 
-// Good — 초기화 단계만
-class CFlightController {
+// Good — init phase에 할당, runtime에는 reuse
+class CController {
 public:
     int Initialize() {
-        m_pBuffer = new Buffer(1024);   // OK — init phase
+        m_pBuffer = new Buffer(1024);   // init phase OK
         return (m_pBuffer != NULL) ? SUCCESS : ERROR_NO_MEMORY;
     }
     
     void Process() {
-        // m_pBuffer 사용 (no new)
-        DoWork(m_pBuffer);
+        DoWork(m_pBuffer);   // no new
     }
     
-    ~CFlightController() {
-        delete m_pBuffer;   // cleanup at shutdown
+    ~CController() {
+        delete m_pBuffer;
     }
 
 private:
@@ -140,10 +96,10 @@ private:
 ### Static Pool 패턴
 
 ```cpp
-// 정적 풀 (NASA JPL pattern)
-class CCanMessagePool {
+// 정적 풀
+class CMessagePool {
 public:
-    static CCanMessage* Acquire() {
+    static CMessage* Acquire() {
         for (int i = 0; i < POOL_SIZE; i++) {
             if (!s_used[i]) {
                 s_used[i] = true;
@@ -153,7 +109,7 @@ public:
         return NULL;
     }
     
-    static void Release(CCanMessage *p_pMsg) {
+    static void Release(CMessage *p_pMsg) {
         int index = static_cast<int>(p_pMsg - s_pool);
         if (index >= 0 && index < POOL_SIZE) {
             s_used[index] = false;
@@ -162,48 +118,17 @@ public:
 
 private:
     static const int POOL_SIZE = 32;
-    static CCanMessage s_pool[POOL_SIZE];   // 정적 storage
+    static CMessage s_pool[POOL_SIZE];
     static bool s_used[POOL_SIZE];
 };
 
-// 정적 멤버 정의
-CCanMessage CCanMessagePool::s_pool[POOL_SIZE];
-bool CCanMessagePool::s_used[POOL_SIZE] = {false};
-
-// 사용
-void ProcessCanFrame() {
-    CCanMessage *msg = CCanMessagePool::Acquire();
-    if (msg == NULL) {
-        // pool 고갈 (예상치 못함)
-        EnterSafeMode();
-        return;
-    }
-    
-    msg->Init(/* ... */);
-    Transmit(msg);
-    
-    CCanMessagePool::Release(msg);
-}
+CMessage CMessagePool::s_pool[POOL_SIZE];
+bool CMessagePool::s_used[POOL_SIZE] = {false};
 ```
 
-이 패턴이 *F-35의 표준*. *런타임 new 없음*.
+이 패턴이 *real-time deterministic*. *런타임 heap activity 없음*.
 
-### AV Rule 207 — `placement new` 회피
-
-```cpp
-// 위반 — placement new
-void *p = malloc(sizeof(CFoo));
-CFoo *foo = new (p) CFoo();   // placement new
-
-// Good — 정적 storage + manual init
-static CFoo s_foo;  // 정적 instance
-CFoo *foo = &s_foo;
-foo->Init(/* ... */);
-```
-
-Placement new는 *advanced + dangerous*. JSF 회피.
-
-### AV Rule 208 — `delete[]`/`delete` 짝
+### `new[]` / `delete[]` 짝
 
 ```cpp
 // 위반
@@ -212,35 +137,23 @@ delete arr;       // 위반 — new[]에는 delete[]
 
 // Good
 int *arr = new int[100];
-delete[] arr;     // 짝 맞춤
+delete[] arr;
 
 // 또는 (JSF 권장) 정적
-int s_arr[100];   // no delete needed
+int s_arr[100];
 ```
 
-### AV Rule 209 — Memory Leak 방지
+### Memory Leak 방지 — RAII
 
 ```cpp
-// 위반 — leak pattern
+// 회피 — leak pattern
 void Foo() {
     int *p = new int[100];
-    if (error) return;     // 위반 — leak!
+    if (error) return;     // leak
     delete[] p;
 }
 
-// Good — single exit + cleanup
-void Foo() {
-    int *p = new int[100];
-    if (p == NULL) return;
-    
-    if (!error) {
-        // do work
-    }
-    
-    delete[] p;
-}
-
-// 또는 RAII
+// Good — RAII wrapper (exception 없이도 동작)
 class CArrayHolder {
 public:
     explicit CArrayHolder(int n) : m_pData(new int[n]) {}
@@ -250,98 +163,66 @@ public:
 
 private:
     int *m_pData;
-    CArrayHolder(const CArrayHolder &);  // no copy
+    CArrayHolder(const CArrayHolder &);
     CArrayHolder& operator=(const CArrayHolder &);
 };
 
 void Foo() {
-    CArrayHolder holder(100);   // RAII
-    if (error) return;          // 자동 cleanup at destructor
-    // do work
+    CArrayHolder holder(100);
+    if (error) return;          // 자동 cleanup
 }
 ```
 
-RAII가 *exception 없이도 cleanup*. JSF에 광범위.
+RAII는 *exception이 없어도 동작*. Function scope를 벗어나면 destructor 자동 호출.
 
-## AV Rule 211-220 — Library Use
+## STL — 부분 사용
 
-### AV Rule 211 — STL 사용 제한
+JSF는 *동적 메모리 사용 컨테이너*를 회피하는 입장.
 
-```
-AV Rule 211 (Should)
-"STL containers shall not be used."
-```
+### Container 회피
 
-JSF가 *STL containers 회피*:
-- `std::vector` — 동적 메모리
-- `std::list` — 동적 메모리
-- `std::map` — 동적 메모리 + red-black tree (복잡)
-- `std::set` — 동적 메모리
-- `std::deque` — 동적 메모리
-
-대안:
 ```cpp
-// 자체 fixed-size 컨테이너
+// 회피 — 동적 메모리 컨테이너
+std::vector<int> v;
+std::map<int, CString> m;
+std::list<CFoo> l;
+
+// 대안 — 자체 fixed-size 컨테이너
 template <typename T, int N>
-class CFixedVector { /* ... */ };
+class CFixedVector { /* static array 기반 */ };
 
 template <typename Key, typename Value, int N>
-class CFixedMap { /* ... */ };
+class CFixedMap { /* static storage 기반 */ };
 
 CFixedVector<int, 100> v;
 CFixedMap<int, CString, 32> map;
 ```
 
-자체 구현이 *static memory*. *Real-time deterministic*.
-
-### AV Rule 212 — `std::string` 회피
-
-```cpp
-// 위반 — std::string 동적 메모리
-std::string name = "F-35";
-name += " Lightning";   // 메모리 재할당 가능
-
-// Good — C-string 또는 fixed buffer
-const char *name = "F-35";
-char buffer[64];
-strncpy(buffer, name, sizeof(buffer) - 1);
-buffer[sizeof(buffer) - 1] = '\0';
-```
-
-C-string이 *deterministic*. 단 *unsafe* (overflow 가능).
-
-### AV Rule 213 — STL Algorithms는 OK (조건부)
+### Algorithm은 사용 가능
 
 ```cpp
 // OK — STL algorithm은 *container 가정 없음*
 int data[100];
-std::sort(data, data + 100);   // C array sort
+std::sort(data, data + 100);
 std::find(data, data + 100, 42);
 ```
 
-Algorithms는 *iterator 추상*. C array에서도 동작. *Container 없이 algorithm 사용*.
+Algorithm은 iterator 추상이라 C array에서도 동작.
 
-### AV Rule 214-216 — C 라이브러리 사용
+### `std::string` 회피
 
 ```cpp
-// OK — C 라이브러리 (조심해서)
-#include <cstring>
-#include <cstdio>
-#include <cmath>
+// 회피 — std::string은 동적 메모리
+std::string name = "value";
+name += " more";   // 재할당 가능
 
-// 위반 회피:
-strcpy(dst, src);          // 위반 — buffer overflow
-strncpy(dst, src, n);      // OK with size
-
-printf("%d", x);           // OK
-gets(buffer);              // 위반 — 완전 금지
-
-malloc(100);               // 위반 (no dynamic memory)
+// Good — bounded buffer
+char buffer[64];
+strncpy(buffer, "value", sizeof(buffer) - 1);
+buffer[sizeof(buffer) - 1] = '\0';
 ```
 
-C 표준 일부 *완전 금지* (gets, atoi 등 unsafe). MISRA C와 동일.
-
-### AV Rule 217 — `<iostream>` 회피
+### `<iostream>` 회피
 
 ```cpp
 // 회피 — iostream
@@ -354,63 +235,33 @@ printf("Hello\n");
 LogInfo("Hello");
 ```
 
-`std::cout`이 *heap 사용 + heavy*. C-style이 *predictable*.
+`std::cout`은 heap을 사용하며 무겁다.
 
-### AV Rule 218 — Boost 등 외부 library 제한
+### 외부 library 신중
+
+Boost 등 외부 의존은 *qualification 부담* 증가. JSF는 *minimum dependency*.
 
 ```cpp
-// 회피 — Boost 의존
+// 회피 — 외부 의존
 #include <boost/shared_ptr.hpp>
-boost::shared_ptr<CFoo> p(new CFoo);
 
 // Good — 자체 구현
-class CFooHandle {
-    /* manual lifecycle management */
-};
-```
-
-외부 library가 *부담*:
-- *Source code review 필요*
-- *Qualification 부담*
-- *Maintenance dependency*
-
-JSF는 *minimum external dependency*. *자체 lightweight library*.
-
-### AV Rule 219-220 — Headers
-
-```cpp
-// AV Rule 219 (Should)
-// 표준 header만 사용
-#include <cstdint>
-#include <cmath>
-// 외부 header는 신중 review 후
-
-// AV Rule 220 (Should)
-// Conditional inclusion 제한
-#ifdef _WIN32
-#include <windows.h>
-#endif
-// → 회피 (platform-specific)
-// → HAL layer로 분리
+class CHandle { /* manual lifecycle */ };
 ```
 
 ## Multi-threading — JSF 접근
 
-JSF C++03 시절 *C++ 표준 threading 없음*. *OS-level threading*.
+JSF는 *C++03 시기*라 *표준 thread library 없음*. *OS-level threading*을 *abstraction layer* 뒤로 둠.
+
+### OS Abstraction
 
 ```cpp
-// 위반 — pthread 직접
+// 회피 — pthread 직접 사용
 #include <pthread.h>
-
-void* WorkerThread(void *arg) {
-    /* ... */
-    return NULL;
-}
-
 pthread_t tid;
 pthread_create(&tid, NULL, WorkerThread, NULL);
 
-// Good — OS 추상화 (custom or VxWorks)
+// Good — abstraction class
 class CTask {
 public:
     CTask(const char *p_pName, int p_priority);
@@ -426,37 +277,29 @@ protected:
     void Run() override {
         while (m_bRunning) {
             ReadSensor();
-            Sleep(20);  // 50 Hz
+            Sleep(20);
         }
     }
 };
-
-CSensorTask sensor_task("SensorTask", PRIORITY_HIGH);
-sensor_task.Start();
 ```
 
-F-35는 *RTOS (VxWorks)* 위에서 동작. *OS-level task* 사용.
-
-### Mutex (RTOS API)
+### Mutex + RAII
 
 ```cpp
 class CMutex {
 public:
-    CMutex();
-    ~CMutex();
-    
-    int Lock(int p_timeoutMs = INFINITE);
+    int Lock(int p_timeoutMs);
     int Unlock();
 
 private:
-    void *m_pOsHandle;   // OS-specific (HAL)
+    void *m_pOsHandle;   // OS-specific
 };
 
 class CScopedLock {
 public:
     explicit CScopedLock(CMutex *p_pMutex)
         : m_pMutex(p_pMutex) {
-        m_pMutex->Lock();
+        m_pMutex->Lock(INFINITE);
     }
     
     ~CScopedLock() {
@@ -469,80 +312,61 @@ private:
     CScopedLock& operator=(const CScopedLock &);
 };
 
-// 사용
 void Foo() {
     CScopedLock lock(&g_mutex);
     // critical section
-}   // 자동 unlock (RAII)
+}   // 자동 unlock
 ```
 
-OS abstraction layer가 *portable*. JSF + VxWorks → JSF + Linux도 같은 코드.
+OS abstraction은 *portability*에도 유리. 같은 코드를 *다른 RTOS / OS*로 이식.
 
-### Lock-free 회피
+## RTOS — 항공 SW의 일반
 
-```cpp
-// 회피 — lock-free
-std::atomic<int> counter;
-counter.fetch_add(1, std::memory_order_relaxed);
+항공 critical SW는 *DO-178C qualified RTOS* 위에서 동작. 공개된 *대표적인 qualified RTOS*:
 
-// Good — mutex
-class CCounter {
-public:
-    int Increment() {
-        CScopedLock lock(&m_mutex);
-        return ++m_value;
-    }
-private:
-    int m_value;
-    CMutex m_mutex;
-};
-```
+- **Wind River VxWorks** (다양한 항공 프로그램에 사용)
+- **Green Hills INTEGRITY-178** (DAL A qualified)
+- **LynxOS-178** (Lynx Software Technologies)
+- **DDC-I Deos**
+- **SYSGO PikeOS**
 
-Lock-free가 *complex + error-prone*. JSF는 *mutex 권장*.
+각 vendor 페이지에서 *qualification 자료*를 공개한다. 개별 항공 프로그램이 *어느 RTOS를 사용하는지*는 *vendor / 프로그램 측이 공식 발표하지 않은 한 추정하지 않는 것이 안전*.
 
-## RTOS — VxWorks for F-35
+## ARINC 653 IMA
 
-F-35의 RTOS = *Wind River VxWorks*. *DO-178B/C qualified*.
+ARINC 653 *Integrated Modular Avionics*는 *partition* 기반:
 
 ```
-VxWorks Cert:
-  - DO-178C DAL A qualified
-  - ARINC 653 IMA support
-  - Wind River 표준 (Boeing, Airbus, Lockheed 다수 사용)
-  - Wind River 인증 cost: 수억원
+ARINC 653 partition:
+  - Spatial separation (각자 메모리 영역, MPU/MMU)
+  - Temporal separation (각자 time slice)
+  - Own I/O resources
+  - 한 partition 결함이 다른 partition에 전파 안 됨
 
-Alternative:
-  - Green Hills INTEGRITY
-  - LynxOS-178
-  - DDC-I Deos (자세 제어 강함)
-  - SYSGO PikeOS
+Multi-criticality SW를 *한 hardware*에서 안전 실행
 ```
 
-F-35 SW가 *VxWorks 위*. 모든 task가 *VxWorks API*.
+A380, 787 등 *최근 대형 민간 항공기*가 *ARINC 653 IMA 사용*. 자세히는 [ARINC 653 표준 페이지](https://www.arinc.com/) 또는 표준 발행처 자료.
 
-## Heap 사용 — JSF Strategy
+## Heap 사용 — 일반 전략
 
 ```
-JSF Heap Strategy:
+JSF/항공 SW heap strategy (일반):
 
 Phase 1: Initialization (boot)
-  - new/malloc OK
-  - 모든 데이터 구조 할당
-  - Pool initialization
+  new/malloc OK
+  데이터 구조 / pool 초기화
 
 Phase 2: Operation (runtime)
-  - new/malloc 금지
-  - 정적 또는 pool에서만
-  - Deterministic
+  new/malloc 금지
+  정적 storage 또는 pool에서만
+  Deterministic
 
 Phase 3: Shutdown
-  - delete/free OK
-  - Cleanup
-
-→ Mission-critical operational phase에 *zero heap activity*
+  delete/free OK
 ```
 
-이 strategy가 *real-time deterministic 보장*. *heap fragmentation 회피*.
+운영 phase에 *heap activity 0*이 *real-time deterministic 보장* + *fragmentation 회피*.
 
 ## Static Storage 패턴
 
@@ -550,7 +374,6 @@ Phase 3: Shutdown
 // 모든 데이터를 정적으로
 class CFlightSystem {
 public:
-    // No new — instance가 정적
     static CFlightSystem& Instance() {
         static CFlightSystem s_instance;
         return s_instance;
@@ -563,24 +386,20 @@ private:
     CFlightSystem();
     ~CFlightSystem();
     
-    // 모든 멤버 정적 또는 stack
-    CFlightController m_flightCtrl;        // value
+    CFlightController m_flightCtrl;
     CFaultManager m_faultMgr;
-    CSensorManager m_sensorMgr;
-    
-    char m_logBuffer[8192];               // 고정 buffer
-    CCanMessage m_msgPool[32];            // 고정 pool
+    char m_logBuffer[8192];
+    CMessage m_msgPool[32];
 };
 ```
 
-전체 시스템이 *.bss 또는 .data 섹션*. 컴파일 시 *완전 결정*.
+전체 객체가 *.bss 또는 .data 섹션*. 컴파일 시 메모리 위치 결정.
 
-## File Static Variables
+## File-scope Static
 
 ```cpp
 // flight_state.cpp
 static int s_currentMode = 0;
-static bool s_bInitialized = false;
 static CMutex s_modeMutex;
 
 int GetMode() {
@@ -594,142 +413,18 @@ void SetMode(int p_newMode) {
 }
 ```
 
-File-scope static이 *encapsulation* (header에 노출 안 됨). C-style global 대안.
+File-scope static이 *encapsulation*. C-style global의 안전 대안.
 
-## Standard Library — JSF Approved Subset
-
-```
-허용 (JSF approved):
-  <cstdint>           int32_t, uint16_t 등
-  <cmath>             sin, cos, sqrt 등
-  <cstdlib>           일부 (atoi 등은 회피)
-  <cstring>           strncpy, memcpy 등 (size 명시)
-  <cstdio>            printf 등 (heap-aware)
-  <cassert>           assert
-  <climits>           INT_MAX 등
-  <cfloat>            FLT_MAX 등
-
-제한 사용:
-  <algorithm>         iterator-based OK
-  <numeric>           OK
-
-거의 회피:
-  <vector>            dynamic memory
-  <map>               dynamic memory
-  <string>            dynamic memory
-  <iostream>          heavy
-  <fstream>           heap + I/O
-  <iomanip>           formatting
-  <regex>             heap + 복잡
-  <thread>            C++11 (JSF 원본 외)
-  <future>            C++11
-  <chrono>            C++11
-  <mutex>             C++11
-
-완전 금지:
-  <exception>         exception 금지
-  <typeinfo>          RTTI 금지
-```
-
-## Modern Standard Library — KF-21 가능
+## Buffer Safety — Bounded Wrapper
 
 ```cpp
-// JSF (C++03)
-char buffer[256];
-strncpy(buffer, "F-35", sizeof(buffer) - 1);
-buffer[sizeof(buffer) - 1] = '\0';
-
-// Modern (C++17+)
-std::string_view name = "KF-21";
-std::array<char, 256> buffer{};
-std::copy(name.begin(), name.end(), buffer.begin());
-
-// Static container (no heap)
-boost::container::static_vector<int, 100> sv;  // C++11+ Boost
-sv.push_back(42);
-```
-
-*Static container library*가 *JSF policy 충족 + modern style*.
-
-## Concurrency — F-35 Architecture
-
-F-35의 *task architecture* (단순화):
-
-```
-=== F-35 Flight Control Computer Tasks ===
-
-Task 1: FCS Main Loop (Highest priority)
-  Frequency: 50 Hz (20 ms)
-  Function: Sensor read → Control law → Actuator command
-  WCET: 15 ms
-
-Task 2: Fault Detector
-  Frequency: 10 Hz (100 ms)
-  Function: Cross-check sensors, watchdog
-  WCET: 30 ms
-
-Task 3: Built-in Test (BIT)
-  Frequency: 1 Hz (1 s)
-  Function: Self-diagnostic
-  WCET: 50 ms
-
-Task 4: Communications
-  Event-driven (CAN/ARINC 429)
-  Function: Receive/send
-  WCET: 1 ms per message
-
-Task 5: Logger
-  Lowest priority
-  Function: Background log to NVM
-
-Scheduler: Rate Monotonic (RTOS)
-CPU utilization: ~78% worst-case
-```
-
-각 task가 *별도 stack*, *별도 priority*. *RTOS가 schedule*.
-
-## ARINC 653 — Partition
-
-```
-ARINC 653 IMA (Integrated Modular Avionics):
-
-각 partition (별도 spatial + temporal):
-  Partition A: FCS (DAL A)
-  Partition B: Display Manager (DAL B)
-  Partition C: Mission Computer (DAL C)
-  Partition D: IFE (DAL D)
-
-각 partition:
-  - Own memory (MPU)
-  - Own time slice
-  - Own I/O
-  - Cannot affect other partition
-
-→ Multi-criticality SW를 *한 hardware*에서 안전 실행
-```
-
-A380, 787, F-35가 *ARINC 653 IMA 사용*. JSF가 *partition-aware*.
-
-## Memory Safety — Buffer Overflow 차단
-
-```cpp
-// 위반 — buffer overflow 위험
+// 회피
 void ProcessInput(const char *p_pInput) {
     char buffer[100];
-    strcpy(buffer, p_pInput);  // 위반 — overflow 가능
+    strcpy(buffer, p_pInput);  // overflow 위험
 }
 
 // Good
-void ProcessInput(const char *p_pInput, int p_inputLen) {
-    char buffer[100];
-    if (p_inputLen >= sizeof(buffer)) {
-        return;  // overflow 차단
-    }
-    strncpy(buffer, p_pInput, sizeof(buffer) - 1);
-    buffer[sizeof(buffer) - 1] = '\0';
-}
-
-// Better — wrapper class
 class CSafeString {
 public:
     CSafeString() : m_length(0) { m_buffer[0] = '\0'; }
@@ -746,7 +441,6 @@ public:
     }
     
     const char* Get() const { return m_buffer; }
-    size_t GetLength() const { return m_length; }
 
 private:
     static const size_t MAX_LEN = 256;
@@ -757,29 +451,9 @@ private:
 
 Wrapper class가 *encapsulated safety*. 모든 buffer가 *bounded*.
 
-## ASIL/DAL Memory Requirements
-
-```
-DAL A SW Memory Requirements:
-
-1. No dynamic allocation post-init
-2. Stack worst-case 분석
-3. Heap usage <= 0 (after init)
-4. Memory protection (MPU)
-5. Stack overflow detection (canary)
-6. Memory pool exhaustion handling (safe mode)
-
-Tools:
-  StackAnalyzer (AbsInt) — 정적 stack 분석
-  Bound-T — WCET + memory
-  Manual review for pool sizing
-```
-
-이런 *rigorous memory analysis*가 *항공 SW의 표준*.
-
 ## RAII without Exceptions
 
-JSF가 *exception 없이 RAII*. *destructor 호출이 항상 일어남*.
+JSF가 exception 없이도 RAII를 광범위하게 활용. *destructor 호출이 항상 발생*.
 
 ```cpp
 class CFileHandle {
@@ -797,23 +471,19 @@ public:
     
     bool IsValid() const { return m_pFile != NULL; }
     FILE* Get() { return m_pFile; }
-    
-    // No copy
-    CFileHandle(const CFileHandle &);
-    CFileHandle& operator=(const CFileHandle &);
 
 private:
     FILE *m_pFile;
+    CFileHandle(const CFileHandle &);
+    CFileHandle& operator=(const CFileHandle &);
 };
 
-// 사용
 int ProcessFile(const char *p_pPath) {
     CFileHandle file(p_pPath);
     if (!file.IsValid()) {
         return ERROR_OPEN_FAIL;
     }
     
-    // do work
     if (Error) {
         return ERROR_PROCESS;  // 자동 cleanup
     }
@@ -822,150 +492,84 @@ int ProcessFile(const char *p_pPath) {
 }
 ```
 
-*Function scope 끝*에서 *destructor 자동 호출*. Resource leak 없음.
+함수 scope를 벗어나면 destructor가 자동 호출되어 *resource leak 차단*.
 
-## F-35 Memory Usage 예 (대략)
+## Memory 분석 — 일반 도구
 
-```
-F-35 FCC Memory Allocation:
+DAL A 수준의 SW에서 일반적으로 수행하는 *메모리 분석*:
 
-Code (ROM):
-  Application:      ~80 MB
-  RTOS:             ~5 MB
-  Drivers:          ~10 MB
-  Total ROM:        ~100 MB
+- Stack worst-case 분석 (정적 분석 도구 사용)
+- Heap 사용 (init phase 외 0 보장)
+- Memory protection (MPU/MMU)
+- Stack overflow detection (canary 등)
+- Pool exhaustion handling (safe mode)
 
-Data (RAM):
-  Static (.bss + .data):    ~32 MB
-  Stack (per task × tasks): ~16 MB total
-  Heap (init phase):        ~8 MB (post-init: 0)
-  RTOS overhead:            ~2 MB
-  Total RAM:                ~64 MB
+도구 예: AbsInt StackAnalyzer, Bound-T (WCET) 등. 자세히는 *각 vendor 페이지*.
 
-Heap activity:
-  Init phase:     ~8 MB allocations
-  Runtime:        0 (static + pool only)
-  
-Pool 사용:
-  Message pool:   2048 × 256 bytes = 512 KB
-  Task pool:      64 × 4096 bytes = 256 KB
-  etc.
-```
+## Modern C++ Migration
 
-큰 binary이지만 *예측 가능 deterministic*.
+JSF가 *C++03 기반*이라 *modern C++ 기능은 원본 범위 외*. 후속 표준이 다음을 *권장 또는 의무화*:
 
-## Modern Aerospace SW — 차세대
+- Smart pointer (`std::unique_ptr`, `std::shared_ptr`)
+- `auto`, `nullptr`, `enum class`
+- Range-based for
+- `constexpr` (광범위)
+- Move semantics
+- 표준 thread library (`std::thread`, `std::mutex`)
+
+각 표준이 어디까지 허용하는지는 *AUTOSAR C++14 Guidelines*, *MISRA C++:2023* 문서 참조. 본 블로그의 [AUTOSAR C++14 시리즈](/blog/embedded/car-standards/autosar-cpp/chapter01-intro)도 참고.
+
+## 일반적인 정적 분석 finding (memory + library)
 
 ```
-2020s+ Aerospace SW Trends:
+실전에서 자주 발견되는 위반:
 
-1. Multi-core 활용
-   - 단일 task → 병렬 task
-   - 더 큰 algorithm 가능
-   - 단 deterministic 분석 어려움
+1. operational phase에서 operator new 호출
+   → init phase only
 
-2. Linux + RT patch
-   - PREEMPT_RT
-   - 일부 위성 (Mars helicopter Ingenuity)
-   - DO-178C 적용 어려움
+2. std::vector / std::map 사용
+   → fixed-size 자체 컨테이너 권장
 
-3. AI/ML 통합
-   - Sensor fusion ML
-   - 자율 비행
-   - 인증 framework 진행 중
+3. real-time path에서 std::string
+   → bounded buffer 권장
 
-4. Modern C++14/17/20
-   - Smart pointers
-   - constexpr 광범위
-   - Concepts (C++20)
-   - Coroutines (제한적)
-
-5. Open source 확산
-   - RTEMS (ESA)
-   - 자체 RTOS
-```
-
-KF-21 같은 *새 항공 프로젝트*가 *현대 stack 가능*.
-
-## JSF C++ → Modern C++ Migration
-
-```
-F-35 Block 4 (2020+):
-  - Phase 1: Tool 업그레이드
-    Compiler GCC 4.x → 9.x
-    Static analyzer 업그레이드
-  
-  - Phase 2: Selective modernization
-    Smart pointer (legacy code 외)
-    auto 키워드 (제한적)
-    Range-based for
-  
-  - Phase 3: 부분 C++14
-    constexpr 광범위
-    enum class
-    Move semantics
-
-  Block 5+ (검토 중):
-    C++17/20 일부
-    AI inference integration
-    SOSA (Sensor Open Systems Architecture)
-```
-
-JSF C++가 *evolve*. 단 *근본 정신은 유지*.
-
-## Common Findings — Memory + Library
-
-```
-실전 finding:
-
-1. "operator new() 호출 in Process() (operational phase)"
-   → AV Rule 206 위반 (init only)
-
-2. "std::vector<int> 사용"
-   → AV Rule 211 위반
-
-3. "std::string 사용 in real-time path"
-   → AV Rule 212 위반
-
-4. "strcpy() — buffer overflow 위험"
+4. strcpy 사용
    → strncpy + size 권장
 
-5. "iostream cout 사용"
-   → AV Rule 217 위반
+5. iostream cout 사용
+   → printf 또는 자체 logger
 
-6. "Boost 라이브러리 추가"
-   → AV Rule 218 위반 (additional dependency)
+6. 외부 library (Boost 등) 추가
+   → qualification 부담 검토
 
-7. "pthread_create 직접 호출"
+7. pthread_create 직접 호출
    → OS abstraction layer 권장
 
-8. "memory leak — error path에서 delete 누락"
-   → AV Rule 209 위반 (RAII 권장)
+8. error path에서 delete 누락
+   → RAII wrapper 권장
 ```
 
 ## 정리
 
-- **Exception**: 완전 금지 (Rule 196). Return code propagation.
-- **Memory**: new/delete *init phase only*. Static + pool.
-- **STL Container**: 회피 (vector, map, string). 자체 fixed-size.
-- **STL Algorithm**: OK (iterator 추상).
+- **Exception**: 금지. Return code propagation.
+- **Memory**: new/delete는 *init phase only* 권장. 운영 phase는 static + pool.
+- **STL Container**: 회피 (vector, map, string). 자체 fixed-size로.
+- **STL Algorithm**: 사용 가능 (iterator 추상).
 - **iostream**: 회피. printf 또는 자체 logger.
-- **Multi-threading**: RTOS API (VxWorks). OS abstraction layer.
-- **Mutex + RAII**: ScopedLock 패턴.
-- **ARINC 653 IMA**: Partition-aware design.
-- **Buffer overflow 차단**: bounded wrapper class.
-- F-35: 100 MB ROM, 64 MB RAM, *runtime heap 0*.
-- KF-21+: Modern C++14/17 채택 가능.
+- **Multi-threading**: OS abstraction layer. Mutex + ScopedLock (RAII).
+- **ARINC 653 IMA**: partition 기반 격리.
+- **Buffer overflow**: bounded wrapper class.
+- **RAII**: exception 없이도 동작. JSF 핵심 패턴.
+- 정확한 AV Rule 번호 / wording은 *JSF 원문 PDF 참조*.
 
 ## 다음 장 예고
 
-11장은 *AUTOSAR C++14, MISRA C++:2008/2023과의 비교* — JSF vs 후세 표준.
+11장은 *AUTOSAR C++14, MISRA C++:2008/2023과의 비교*.
 
 ## 관련 항목
 
 - [Ch 9 — Templates](/blog/embedded/aerospace-standards/jsf-cpp/chapter09-templates)
 - [Ch 11 — AUTOSAR, MISRA 비교](/blog/embedded/aerospace-standards/jsf-cpp/chapter11-comparison)
 - [AUTOSAR C++14 Ch 7 — Exception Handling](/blog/embedded/car-standards/autosar-cpp/chapter07-exceptions)
-- [AUTOSAR C++14 Ch 8 — STL](/blog/embedded/car-standards/autosar-cpp/chapter08-stl)
 - [AUTOSAR C++14 Ch 11 — RAII Pattern Catalog](/blog/embedded/car-standards/autosar-cpp/chapter11-raii-pattern-catalog)
-- [NASA JPL Power of 10 Rule 3 (no dynamic memory)](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)
+- [NASA JPL Power of 10 Rule 3 — Dynamic Memory](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)

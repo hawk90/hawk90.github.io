@@ -1,74 +1,61 @@
 ---
-title: "Ch 4: Macros, Types, Constants (Rule 67-153)"
+title: "Ch 4: Macros, Types, Constants"
 date: 2025-09-30T05:00:00
-description: "JSF C++ Rule 67-153 — Preprocessor 제한, type 정의, integer/enum, 상수 명명. typedef vs using."
+description: "JSF C++ — Preprocessor 제한, type 정의, integer/enum, 상수 명명, typedef vs using."
 tags: [jsf-cpp, macros, preprocessor, types, constants, enums, typedef]
 series: "JSF C++"
 seriesOrder: 4
 draft: false
 ---
 
-JSF C++의 *큰 영역* — Macros (67-99), Types (100-130), Constants (131-153). *preprocessor minimal*, *integer type strict*, *constants well-defined*. 이 장은 *각 영역의 핵심 rules + F-35 적용*까지.
+JSF C++의 *macros / types / constants* 정책. *preprocessor minimal*, *integer type strict*, *constants well-defined*. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.
 
 ## Macros — Preprocessor 제한
 
-JSF는 *매크로 사용 strongly 제한*. *type-safe inline function* 권장.
+JSF는 *매크로 사용을 강하게 제한*. *type-safe inline function* 권장.
 
-### AV Rule 26 — 함수형 매크로 회피
-
-```
-AV Rule 26 (Should)
-"Function-like macros shall not be used. Use inline functions instead."
-```
+### 함수형 매크로 회피
 
 ```cpp
-// 위반 — 매크로
+// 회피 — 매크로
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-int x = MAX(i++, j);  // i 두 번 증가 — undefined behavior
+int x = MAX(i++, j);   // i 두 번 평가 — undefined
 
 // Good — inline function
 inline int Max(int a, int b) {
     return (a > b) ? a : b;
 }
-int x = Max(i++, j);  // i 한 번만
+int x = Max(i++, j);   // i 한 번
 ```
 
-C++03의 *inline*이 *매크로 대체*. *Type-safe + debugger 친화*.
+C++의 *inline*이 *매크로 대체*. *Type-safe + debugger 친화*.
 
-### AV Rule 27 — Side Effect Macro 회피
-
-```
-AV Rule 27 (Will)
-"An assertion will be used to verify any assumption that is made about
- the validity of expressions, parameters, and return values."
-```
-
-(Assertion 관련, 다음 장에서)
-
-### AV Rule 28-30 — 매크로 제한
+### Control flow 숨김 회피
 
 ```cpp
-// AV Rule 28 (Should)
-// 매크로 안에 control flow (return, break, continue) 회피
+// 회피 — 매크로 안에 return / break
 #define RETURN_IF_ERROR(x) do { if ((x) != 0) return (x); } while (0)
-// → 안전하지만 control flow 숨김. 회피.
 
-// AV Rule 29 (Will)
-// 매크로 이름과 함수 이름 충돌 금지
-#define max(a, b) ...
-int max(int a, int b) { ... }  // 충돌
-
-// AV Rule 30 (Will)
-// Macro #undef 회피
-#define DEBUG 1
-// ...
-#undef DEBUG  // 위반 — 의미 추적 어려움
+// 명시 코드가 안전
+int rc = DoWork();
+if (rc != 0) return rc;
 ```
+
+매크로가 *control flow를 숨김*. 읽기 어려움.
+
+### 매크로 이름과 함수 충돌 금지
+
+```cpp
+#define max(a, b) ...
+int max(int a, int b) { ... }   // 충돌
+```
+
+`#undef` 광범위 사용도 *의미 추적 어려움*.
 
 ### 허용되는 매크로
 
 ```cpp
-// 1. include guard (Rule 6)
+// 1. include guard
 #ifndef PROJECT_FOO_H
 #define PROJECT_FOO_H
 // ...
@@ -85,7 +72,7 @@ int max(int a, int b) { ... }  // 충돌
 #define MAX_BUFFER_SIZE 256
 // → 더 나은: const int MAX_BUFFER_SIZE = 256;
 
-// 4. 디버그/로깅 wrapper
+// 4. 디버그 wrapper
 #ifdef DEBUG
 #  define LOG(msg) cerr << msg << endl
 #else
@@ -93,114 +80,118 @@ int max(int a, int b) { ... }  // 충돌
 #endif
 ```
 
-### JSF가 매크로 회피 이유
+### 매크로 회피의 일반 이유
 
 ```
 1. Type 안전성 없음
-   #define MAX(a,b) ...  → int, float, string 모두 적용
-   → 컴파일러가 type check 못함
+   - 컴파일러가 type check 못함
 
 2. Debugger에서 안 보임
-   매크로 expansion 후 코드만 보임
-   원본 매크로 호출 추적 어려움
+   - 매크로 expansion 후 코드만 표시
 
 3. Side effect 위험
-   MAX(i++, j) — i 두 번 평가
+   - MAX(i++, j) — i 두 번 평가
 
 4. Namespace 무시
-   글로벌 매크로
-   namespace 안 방법 없음
+   - 모든 매크로가 글로벌
 
 5. Scope 무시
-   #define 후 전체 file에 영향
+   - 정의 후 모든 file에 영향
 ```
 
-C++03의 *inline + const*가 *매크로의 대안 90%*.
+C++의 *inline + const*가 *매크로의 대안 대부분*.
 
-## Type — Integer Types (Rule 100-130)
+## Integer Types
 
 JSF는 *integer type strict*. *signed/unsigned 명확*, *width 명시*.
 
-### AV Rule 100 — 표준 타입 사용
+### 표준 타입 사용 (`<cstdint>`)
 
 ```cpp
-// 위반 — basic type
-int counter;        // signed int (which width?)
-unsigned x;         // unsigned int
+// 회피 — basic type (width 불명)
+int counter;
+unsigned x;
 
 // Good — 폭 명시
+#include <cstdint>
+
 int32_t counter;
 uint16_t x;
 ```
 
-`<cstdint>` (C99 `<stdint.h>`의 C++ 버전) 사용. *플랫폼별 차이 회피*.
+`<cstdint>`가 *플랫폼별 차이 회피*.
 
-### AV Rule 102 — Signed vs Unsigned
+### Signed vs Unsigned 비교
 
 ```cpp
-// 위반 — 혼용
+// 회피 — 혼용
 unsigned int u = 100;
 int s = -1;
-if (s < u) { /* ... */ }  // C 변환 함정: s가 큰 unsigned로 변환
+if (s < u) { /* ... */ }   // s가 큰 unsigned로 변환
 
 // Good — 명시
 if (s < 0 || static_cast<unsigned int>(s) < u) { /* ... */ }
 ```
 
-CERT INT35와 동일. *언어 간 표준*.
+CERT INT35와 같은 정신.
 
-### AV Rule 103-110 — Type Conversion
+### Implicit Narrowing 회피
 
 ```cpp
-// 위반 — implicit narrowing
+// 회피
 int32_t big = 100000;
-int8_t small = big;  // 위반 — silent truncation
+int8_t small = big;   // silent truncation
 
-// Good — 명시 + 검사
+// Good
 if (big < INT8_MIN || big > INT8_MAX) {
     return ERROR_RANGE;
 }
 int8_t small = static_cast<int8_t>(big);
 ```
 
-### AV Rule 111-130 — Numeric
+### Boolean 표현식
 
 ```cpp
-// AV Rule 111 (Will)
-// Boolean expression 사용 시 bool 타입
-bool result = (x > 0);  // bool 명시
-if (result) { /* ... */ }
+// 회피
+int count = GetCount();
+if (count) { /* ... */ }
 
-// AV Rule 112 (Should)
-// Floating-point comparison 회피 (== 대신)
-if (f == 0.0f) { ... }  // 위반
-if (std::fabs(f) < 1e-6f) { ... }  // Good
-
-// AV Rule 113 (Will)
-// integer 0과 boolean 혼용 금지
-if (count) { ... }       // 위반 — count는 int
-if (count != 0) { ... }  // Good
-
-// AV Rule 114 (Will)
-// Pointer NULL check 명시
-if (p) { ... }           // 위반 (Hungarian 또한 p와 헷갈림)
-if (p != NULL) { ... }   // Good
+// Good
+bool result = (count > 0);
+if (count != 0) { /* ... */ }
 ```
 
-## Type Definitions — typedef vs using
-
-C++03에서는 *`typedef`*만. C++11의 *`using`*은 *JSF 원본 외*.
+### Floating-point Comparison
 
 ```cpp
-// JSF C++03 표준
+// 회피
+if (f == 0.0F) { /* ... */ }
+
+// Good
+if (std::fabs(f) < 1e-6F) { /* ... */ }
+```
+
+### Pointer NULL Check
+
+```cpp
+// 회피
+if (p) { /* ... */ }
+
+// Good
+if (p != NULL) { /* ... */ }
+```
+
+## typedef vs using
+
+C++03에는 *`typedef`*만. C++11의 *`using`*은 *JSF 원본 외*.
+
+```cpp
+// C++03
 typedef int32_t MyCounter;
 typedef std::vector<int> IntList;
 
 // Template typedef 불가 (C++03)
-template <typename T>
-typedef std::vector<T> Vector;  // 컴파일 에러
-
-// 대안: struct trick
+// 대안 — struct trick
 template <typename T>
 struct VectorOf {
     typedef std::vector<T> type;
@@ -208,7 +199,7 @@ struct VectorOf {
 typename VectorOf<int>::type intVec;
 ```
 
-C++11의 *`using`*이 이를 해결:
+C++11의 `using`이 깔끔:
 
 ```cpp
 // C++11
@@ -220,14 +211,14 @@ using Vector = std::vector<T>;
 Vector<int> intVec;
 ```
 
-JSF 원본은 *C++03 한정* → typedef. 후기 update (Block 4)에서 *using 일부 채택*.
+JSF 원본 (C++03) → typedef. 후속 표준에서 *using 권장*.
 
-## Enum — JSF의 C++03 Style
+## Enum — C++03 vs C++11
 
 C++03 enum은 *unscoped + implicit int*.
 
 ```cpp
-// JSF C++03 enum
+// C++03 enum
 enum EColor {
     COLOR_RED,
     COLOR_GREEN,
@@ -236,18 +227,17 @@ enum EColor {
 
 EColor c = COLOR_RED;
 int x = COLOR_RED;       // implicit int 변환 (위험)
-COLOR_RED == 0;          // true (implicit int)
 ```
 
 문제:
 - *Global namespace pollution* (`COLOR_RED`)
-- *Implicit int 변환* (type safety 부족)
-- *Same value enum 가능* (`enum E1 { A=1 }; enum E2 { B=1 };`)
+- *Implicit int 변환* (type safety 약함)
+- *서로 다른 enum이 같은 값* 가능
 
 C++11의 *enum class*가 해결:
 
 ```cpp
-// C++11 enum class
+// C++11
 enum class Color {
     RED,
     GREEN,
@@ -255,21 +245,21 @@ enum class Color {
 };
 
 Color c = Color::RED;
-int x = Color::RED;          // 컴파일 에러 (implicit 변환 안 됨)
+int x = Color::RED;                    // 컴파일 에러
 int x = static_cast<int>(Color::RED);  // 명시
 ```
 
-JSF 원본은 *C++03* → unscoped enum. *E prefix*로 *type 표시*.
+JSF 원본은 *C++03*이라 unscoped enum + `E` prefix.
 
-### JSF Enum 패턴 — Underlying Type
+### Underlying Type — C++03 trick
 
 ```cpp
-// JSF: underlying type 명시 (C++03 hack)
+// C++03 — enum size 강제
 enum EColor {
     COLOR_RED = 0,
     COLOR_GREEN = 1,
     COLOR_BLUE = 2,
-    COLOR_MAX = 0x7FFFFFFF  // int32 size 강제
+    COLOR_MAX = 0x7FFFFFFF   // int32 강제
 };
 
 // C++11 — clean
@@ -280,18 +270,11 @@ enum class Color : int32_t {
 };
 ```
 
-`COLOR_MAX = 0x7FFFFFFF` trick이 *enum size를 int32로 강제*. 항공계 *legacy pattern*.
+`MAX = 0x7FFFFFFF` trick이 *enum size를 int32로 강제*. C++03 legacy 패턴.
 
-## Constants — Rule 131-153
+## Constants
 
-JSF는 *constant 정의*에 엄격.
-
-### AV Rule 131 — const vs #define
-
-```
-AV Rule 131 (Should)
-"Use const variables instead of #define for constants."
-```
+### const vs #define
 
 ```cpp
 // 회피
@@ -301,16 +284,12 @@ AV Rule 131 (Should)
 const int MAX_BUFFER = 256;
 ```
 
-이유:
-- *Type 안전*
-- *Debugger 보임*
-- *Scope 가능*
-- *Macro pollution 회피*
+이유: *type 안전, debugger 보임, scope 가능, macro pollution 회피*.
 
-### AV Rule 132 — Magic Number 회피
+### Magic Number 회피
 
 ```cpp
-// 위반
+// 회피
 char buf[256];
 if (count > 256) { /* ... */ }
 
@@ -320,89 +299,78 @@ char buf[BUFFER_SIZE];
 if (count > BUFFER_SIZE) { /* ... */ }
 ```
 
-*256*이 *어디 두 번 사용*. 변경 시 *한 곳만*.
+이름 있는 상수로 *의도 표현 + 변경 한 곳*.
 
-### AV Rule 133-140 — Literal Suffix
+### Literal Suffix 명시
 
 ```cpp
-// AV Rule 134 (Will)
-// Literal suffix 명시 (long: L, unsigned: U, float: F)
-long x = 100L;         // L 명시
-unsigned u = 100U;     // U 명시
-float f = 1.0F;        // F 명시
-double d = 1.0;        // 기본 double
+// 명시
+long x = 100L;
+unsigned u = 100U;
+float f = 1.0F;
+double d = 1.0;
 
-// 위반
-long x = 100;          // int → long (silent)
-float f = 1.0;         // double → float (silent narrowing)
+// 회피
+long x = 100;        // int → long (silent)
+float f = 1.0;       // double → float (silent narrowing)
 ```
 
-명시적 suffix가 *implicit 변환 회피*.
+명시 suffix가 *implicit 변환 회피*.
 
-### AV Rule 141-150 — String Literal
+### String Literal
 
 ```cpp
-// AV Rule 141 (Will)
-// String literal은 const char*로
-const char *name = "F-35";      // Good
+// Good
+const char *name = "value";
 
-char *name = "F-35";             // 위반 — 일부 컴파일러 warning
+// 회피 (일부 컴파일러 warning)
+char *name = "value";
 
-// AV Rule 142 (Will)
-// String 수정 금지
+// 수정 금지
 const char *s = "hello";
-s[0] = 'H';                      // 컴파일 에러
-const_cast<char*>(s)[0] = 'H';   // 위반 — UB
+s[0] = 'H';                       // 컴파일 에러
+const_cast<char *>(s)[0] = 'H';   // UB
 ```
 
-C++14의 *`std::string`*과 *string_view* (C++17)이 더 안전. JSF 원본은 *C-string 위주*.
+C++17의 *`std::string_view`*가 더 안전한 대안. C++03 원본은 *C-string 위주*.
 
-## 실전 — F-35 Style 상수 정의
+## JSF Style — 상수 정의 예
 
 ```cpp
 // flight_constants.h
-
 #ifndef FLIGHT_CONSTANTS_H
 #define FLIGHT_CONSTANTS_H
 
 #include <cstdint>
 
-// === Numerical limits ===
+// Numerical limits
 const int32_t MAX_ALTITUDE_FT = 50000;
 const int32_t MIN_ALTITUDE_FT = 0;
 const int32_t MAX_AIRSPEED_KIAS = 600;
 const int32_t MIN_AIRSPEED_KIAS = 60;
 
-// === Control gains ===
+// Control gains
 const float PITCH_KP = 2.5F;
 const float PITCH_KI = 0.8F;
 const float PITCH_KD = 0.15F;
 
-const float ROLL_KP = 1.8F;
-const float ROLL_KI = 0.5F;
-const float ROLL_KD = 0.1F;
+// Timing
+const int32_t FCS_CYCLE_PERIOD_MS = 20;
+const int32_t FAULT_DETECTOR_PERIOD_MS = 100;
+const int32_t TELEMETRY_PERIOD_MS = 1000;
 
-const float YAW_KP = 1.0F;
-const float YAW_KI = 0.3F;
-const float YAW_KD = 0.05F;
-
-// === Timing ===
-const int32_t FCS_CYCLE_PERIOD_MS = 20;       // 50 Hz
-const int32_t FAULT_DETECTOR_PERIOD_MS = 100; // 10 Hz
-const int32_t TELEMETRY_PERIOD_MS = 1000;     // 1 Hz
-
-// === Buffer sizes ===
+// Buffer sizes
 const int32_t MAX_PACKET_SIZE = 512;
 const int32_t MAX_QUEUE_DEPTH = 32;
 
-// === Enum definitions ===
+// Enums
 enum EFlightMode {
     MODE_MANUAL = 0,
     MODE_HEADING_HOLD = 1,
     MODE_ALTITUDE_HOLD = 2,
     MODE_NAV = 3,
     MODE_AUTOLAND = 4,
-    MODE_MAX = 0x7FFFFFFF  // size force
+    MODE_MAX = 0x7FFFFFFF
 };
 
 enum EFaultSeverity {
@@ -414,47 +382,47 @@ enum EFaultSeverity {
     SEVERITY_MAX = 0x7FFFFFFF
 };
 
-#endif // FLIGHT_CONSTANTS_H
+#endif
 ```
 
 특징:
-- *모든 상수 const variable*
-- *Width-specified type* (int32_t, float)
-- *Suffix 명시* (F for float)
-- *Magic number 회피*
-- *Enum E prefix + MAX trick*
+- 모든 상수가 const variable
+- Width-specified type (`int32_t`, `float`)
+- Suffix 명시 (`F` for float)
+- Magic number 회피
+- Enum `E` prefix + `MAX` trick
 
-## Type System — strong vs weak
+## Type System — Strong vs Weak
 
-JSF가 *type safety 강조*. *implicit 변환 최소*.
+JSF의 *type safety 강조*. Implicit 변환 최소.
 
 ```cpp
-// 위반 — implicit 변환
+// 회피 — implicit
 int32_t altitude = 10000;
-int16_t small = altitude;  // 위반 — silent truncation
+int16_t small = altitude;   // silent truncation
 
 float fraction = 5.5F;
-int32_t whole = fraction;   // 위반 — silent truncation
+int32_t whole = fraction;   // silent truncation
 
-// Good — 명시 변환
+// Good — 명시 + 검사
 if (altitude > INT16_MAX) return ERROR_RANGE;
 int16_t small = static_cast<int16_t>(altitude);
 
-int32_t whole = static_cast<int32_t>(fraction);  // 절단 명시
+int32_t whole = static_cast<int32_t>(fraction);
 ```
 
-C-style cast (`(int16_t)altitude`)는 *피해야*. *static_cast* 권장.
+C-style cast `(int16_t)altitude`는 *피하고*, *static_cast* 권장.
 
-## C++03 vs C++14 Type System — JSF 진화
+## C++03 → 후속 표준의 진화
 
 ```
-JSF C++03 (2005):
-  - basic type (int, long, ...)
+JSF C++03 (2005 원본):
+  - basic int / long
   - typedef
   - unscoped enum (E prefix)
   - C-string
 
-JSF C++14 (theoretical update):
+후속 표준 (AUTOSAR C++14, MISRA C++:2023):
   - int32_t, uint16_t (<cstdint>)
   - using alias
   - enum class
@@ -463,37 +431,52 @@ JSF C++14 (theoretical update):
   - auto (제한적)
 ```
 
-F-35 Block 4가 *C++14 부분 채택* 시 *modern type system 일부 도입*.
+각 표준의 *허용 범위*는 *해당 문서 참조*.
 
 ## Tool 자동 검사
 
 ```bash
-# Helix QAC — JSF rule 자동 검출
-qac.exe -prj jsf.prj    # AV Rule 100-153 자동
+# Helix QAC — JSF rule profile
+qac.exe -prj jsf.prj
 
-# clang-tidy — 일부 JSF 규칙
+# clang-tidy — modern style check
 clang-tidy --checks='cppcoreguidelines-*,readability-*' src.cpp
 ```
 
-특히:
-- `cppcoreguidelines-init-variables` (no implicit narrowing)
-- `cppcoreguidelines-pro-type-cstyle-cast` (no C-style cast)
-- `readability-magic-numbers` (no magic numbers)
+관련 check 예:
+- `cppcoreguidelines-init-variables`
+- `cppcoreguidelines-pro-type-cstyle-cast`
+- `readability-magic-numbers`
+
+## 일반적인 finding (macros / types / constants)
+
+```
+실전에서 자주 발견되는 위반:
+
+1. 함수형 매크로 사용
+2. signed/unsigned 혼용 비교
+3. Implicit narrowing (int → short, int → char)
+4. Magic number (256, 1000, ...)
+5. #define으로 상수 (const variable 권장)
+6. C-style cast
+7. Floating-point == 비교
+8. if (count) — boolean 명시 누락
+```
 
 ## 정리
 
 - **Macros**: 함수형 매크로 회피 → inline. 조건부 컴파일 + include guard만.
-- **Types**: width-specified (int32_t, uint16_t). signed/unsigned 명시.
-- **Enums**: E prefix (C++03), `MAX = 0x7FFFFFFF` trick.
-- **Constants**: const variable >> #define. magic number 금지.
-- **String literal**: const char*. 수정 금지.
-- **Numeric literal**: suffix 명시 (L, U, F).
-- **Type conversion**: implicit 회피. static_cast 명시.
-- *Type safety*가 *aerospace SW의 핵심*.
+- **Types**: width-specified (`int32_t`, `uint16_t`). signed/unsigned 명시.
+- **Enums**: C++03은 `E` prefix + `MAX = 0x7FFFFFFF` trick. C++11+ enum class.
+- **Constants**: const variable >> `#define`. Magic number 금지.
+- **String literal**: `const char *`. 수정 금지.
+- **Numeric literal**: suffix 명시 (`L`, `U`, `F`).
+- **Type conversion**: implicit 회피. `static_cast` 명시.
+- 정확한 AV Rule 번호·wording은 *원문 PDF*.
 
 ## 다음 장 예고
 
-5장은 *Declarations, Initialization, Casts* (Rule 138-168) — 선언·초기화 + cast 정책.
+5장은 *Declarations, Initialization, Casts*.
 
 ## 관련 항목
 

@@ -81,37 +81,35 @@ TQL-5: 가장 가벼움
         - 가벼운 test
 ```
 
-## 도구별 Qualification 사례
+## 도구별 Qualification — 일반 적용
 
 ```
-Compiler (GCC/Diab/IAR for Aerospace):
+Compiler (GCC/Diab/IAR for aerospace):
   TQL-1 (DAL A) or TQL-2 (DAL B)
-  Vendor가 Qualification Kit 제공
-  Cost: $50k-200k per compiler
+  Vendor Qualification Kit 일반
 
 Static Analyzer (Helix QAC, Polyspace):
   TQL-4 (DAL A) or TQL-5 (DAL B/C/D)
   Vendor Qualification Kit
-  Cost: $10k-30k
 
 Coverage Tool (VectorCAST, LDRA):
   TQL-4 (DAL A) or TQL-5 (DAL B/C)
   Vendor Qualification Kit
-  Cost: $10k-30k
 
 Model-Based Code Generator (Simulink Embedded Coder):
   TQL-1 (DAL A) or TQL-2 (DAL B)
-  Mathworks Qualification Kit
-  Cost: $50k-150k
+  Vendor Qualification Kit
 
 Linker (GNU ld):
-  TQL-1 (DAL A) — 별도 qualification 어려움
+  TQL-1 (DAL A) — 자체 qualification 어려움
   대안: Linker output 검증 (memory map review)
 
 Debugger (GDB):
   TQL-5 — 가벼움
   사용 한계 문서화로 충분
 ```
+
+각 도구의 *정확한 qualification 비용*은 *vendor / 프로젝트 / 시점*마다 다르다. 공개된 정확한 가격은 *대부분 vendor 페이지에 없으므로 vendor 직접 문의*.
 
 ## TOR — Tool Operational Requirements
 
@@ -349,8 +347,7 @@ Project적용:
 4. Project Tool Accomplishment Summary 작성
 5. FAA submission
 
-Effort saved: ~80% (full custom qualification 대비)
-Cost: $20k-30k (DAL B level)
+Vendor kit 사용이 full self-qualification 대비 *효과 큼* (정확한 절감은 도구·프로젝트마다 다름).
 ```
 
 Vendor kit *없는 도구*는 *자체 qualification* — *극히 비쌈*. 그래서 *qualified tool* 선택이 *프로젝트 시작 결정*.
@@ -359,43 +356,27 @@ Vendor kit *없는 도구*는 *자체 qualification* — *극히 비쌈*. 그래
 
 Tool이 *TOR을 정확히 구현*하는지 *직접 test*. *수백~수천 test cases*.
 
-### MISRA Tool Validation 예
+### MISRA Tool Validation — 일반 흐름
 
 ```bash
-# TVS 실행
+# TVS 실행 (일반)
 tvs-runner --suite misra2012-validation \
-           --tool helix-qac-2024.2 \
+           --tool {vendor-tool-version} \
            --output validation_results.json
 
-# 결과
+# 결과 (일반 구조)
 === Tool Validation Results ===
-Total Tests:        1247
-PASS:               1238
-FAIL:                  3
-NOT APPLICABLE:        6
+Total Tests:        [수]
+PASS:               [수]
+FAIL:               [수, 모두 TOR LIMIT으로 문서화 필요]
+NOT APPLICABLE:     [수]
 
-Failures:
-  Test TVS-MISRA-11.5-027:
-    Description: Detect implicit conversion of void* to T*
-    Expected:    QAC reports MISRA 11.5 violation
-    Actual:      QAC silent (false negative)
-    Impact:      Manual review required (TOR LIMIT-001)
+Failures (예시):
+  - False negative cases — manual review로 mitigation
+  - Edge case discrepancy — TOR LIMIT으로 문서화
+  - Minor metric off-by-one — documented limit
 
-  Test TVS-MISRA-21.21-014:
-    Description: Detect atomic operation patterns
-    Expected:    QAC reports MISRA 21.21 violation
-    Actual:      QAC silent
-    Impact:      Manual review required (TOR LIMIT-003)
-
-  Test TVS-MET-MCABE-038:
-    Description: Cyclomatic complexity for switch with 20 cases
-    Expected:    Complexity = 20
-    Actual:      Complexity = 21 (off by 1)
-    Impact:      Minor, documented in LIMIT-005
-
-Overall: ACCEPTABLE
-        All failures documented in TOR limits.
-        Mitigation through manual review where required.
+Overall: ACCEPTABLE if all failures 문서화 + mitigation
 ```
 
 이 *결과가 TAS의 핵심 증거*. FAA가 *모든 failure를 review*.
@@ -471,16 +452,16 @@ Vendor 도구 외 *프로젝트 자체 도구*도 qualification 필요.
 
 자체 도구는 *vendor kit 없음* → *전체 qualification 자체 수행*.
 
-### 자체 도구 Qualification 비용
+### 자체 도구 Qualification — 일반 effort
 
 ```
-TQL-5 자체 도구:    ~1 person-month
-TQL-4 자체 도구:    ~3-6 person-months
-TQL-2 자체 도구:    ~6-18 person-months
-TQL-1 자체 도구:    ~12-36 person-months (DO-178C DAL A와 동등)
+TQL-5 자체 도구:    가벼움 (operational env + 한계 문서)
+TQL-4 자체 도구:    중간 (TOR + validation suite + TAS)
+TQL-2 자체 도구:    무거움 (DO-178C와 유사한 process)
+TQL-1 자체 도구:    가장 무거움 (DAL A와 동등)
 ```
 
-자체 도구가 *비용 폭주 원인*. *가능하면 vendor 도구 사용*.
+정확한 effort는 *도구 크기·복잡도*에 따라 다르다. 자체 도구가 *비용 폭주 원인*인 경우가 많아 *가능하면 vendor 도구 사용*.
 
 ### 자체 도구 예 — Coverage Aggregator
 
@@ -500,17 +481,16 @@ TQL-1 자체 도구:    ~12-36 person-months (DO-178C DAL A와 동등)
 #   OR-005: 처리 시간 < 60초 for 100 MB input.
 
 # Validation:
-#   - Known input 25 pairs (synthetic), expected output 계산
-#   - 모든 25 pair에서 expected = actual
+#   - Synthetic input pair에 대한 expected output 계산
+#   - 모든 pair에서 expected = actual 검증
 
 # TAS:
-#   - Tool 코드: ~500 LoC Python
-#   - Test suite: 25 cases
-#   - Documentation: 30 pages
-#   - Effort: 2 person-months
+#   - Tool 코드: small Python script
+#   - Test suite + Documentation
+#   - Effort: 수 person-month 정도
 ```
 
-가벼운 자체 도구도 *3개월 효과*.
+가벼운 자체 도구라도 *수개월의 qualification 부담*이 일반적.
 
 ## Open Source Tool — 항공 사용
 
@@ -576,29 +556,9 @@ Tool 변경 시 처리:
 
 이런 *비용* 때문에 *toolchain freeze*가 항공 표준. *5-10년 같은 도구 유지*.
 
-## 도구 qualification 통계
+## 도구 qualification — 일반 규모
 
-```
-DAL A 시스템 (typical):
-
-Qualified Tools:
-  Compiler:               1 (Green Hills C99 11.7)
-  Linker:                 1 (Green Hills linker, bundled)
-  Assembler:              1 (Green Hills as)
-  Static Analyzer:        1 (LDRA Testbed)
-  Test framework:         1 (VectorCAST)
-  Coverage tool:          1 (VectorCAST)
-  Configuration mgmt:     1 (ClearCase, TQL-5)
-  RTOS:                   1 (Wind River VxWorks DO-178C)
-  Custom tools:           5-10
-─────────────────────────────────────
-Total qualified tools:   12-18
-
-Total qualification effort: 50-100 person-years
-Total qualification cost:   $5M-15M
-```
-
-도구 비용이 *전체 인증 비용의 20%-30%*. *큰 부분*.
+DAL A system은 일반적으로 *10여 개 이상의 qualified tool*을 다룬다 (compiler, linker, assembler, static analyzer, test framework, coverage tool, CM, RTOS, 자체 도구 등). 전체 qualification effort는 *프로그램 규모에 비례*하며 *큰 비중*을 차지한다. 정확한 person-year / 비용 수치는 *프로그램별 비공개* 또는 *추정*인 경우가 많다.
 
 ## Tool Qualification 함정
 
@@ -636,9 +596,10 @@ Total qualification cost:   $5M-15M
 - TQP (Tool Qualification Plan) = *어떻게 qualify*.
 - Vendor Qualification Kit이 *80% 효과 절감*. 가능하면 사용.
 - 자체 도구도 qualification 필요 — *수개월~수년*.
-- Toolchain *freeze* (5-10년)이 항공 표준. 변경은 *비용 폭주*.
-- Open source는 *작은 프로젝트, DAL D*에만 권장.
-- Tool qualification이 *전체 인증 비용의 20-30%*.
+- Toolchain *freeze* (수년)이 항공 표준. 변경은 *비용 폭주*.
+- Open source는 *작은 프로젝트, DAL D*에 적합.
+- Tool qualification이 *전체 인증 비용의 큰 비중*.
+- 정확한 obj·deliverable·승인 절차는 *DO-330 원문* 참조.
 
 ## 다음 장 예고
 

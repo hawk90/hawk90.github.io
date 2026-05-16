@@ -87,14 +87,14 @@ Verification 단계:
 ## SCS 작성 예 — 항공 프로젝트
 
 ```
-=== SCS — Flight Management Software ===
-Project: KF-21 FMS v2.0
+=== SCS — Flight Management Software (가상 template) ===
+Project: FMS v2.0
 DAL: B
 Language: C
 
 1. Introduction
    This document defines the source code standards for the
-   KF-21 Flight Management Software (FMS), DAL B.
+   Flight Management Software (FMS), DAL B.
    Applies to all production code in src/ directory.
    Test code in tests/ may deviate per agreed exceptions.
 

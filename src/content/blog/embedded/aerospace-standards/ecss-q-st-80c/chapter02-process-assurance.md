@@ -1,14 +1,14 @@
 ---
 title: "Ch 2: SW Process Assurance — 개발 절차 보증"
 date: 2025-10-05T03:00:00
-description: "ECSS-Q-ST-80C §5.2 — SPA Plan 작성, process metrics, periodic audit, tailoring. KARI 적용 절차."
-tags: [ecss, spa, process-assurance, audit, review, tailoring, kari]
+description: "ECSS-Q-ST-80C — SPA Plan 작성, process metrics, periodic audit, tailoring."
+tags: [ecss, spa, process-assurance, audit, review, tailoring]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 2
 draft: false
 ---
 
-ECSS-Q-ST-80C의 *9개 핵심 활동* 중 가장 큰 비중을 차지하는 *SW Process Assurance (SPA)*. *개발 절차가 정해진 대로 수행되는지*를 *독립적으로 검증*한다. DO-178C의 SQA에 해당하지만 *ESA 특유의 process tailoring* 개념이 더해진다. 이 장은 *SPA Plan 작성, audit·review 절차, KARI/Airbus 적용*까지.
+ECSS-Q-ST-80C의 *9개 핵심 활동* 중 가장 큰 비중을 차지하는 *SW Process Assurance (SPA)*. *개발 절차가 정해진 대로 수행되는지*를 *독립적으로 검증*한다. DO-178C의 SQA에 해당하지만 *ESA 특유의 process tailoring* 개념이 더해진다. *정확한 절차·deliverable은 ECSS-Q-ST-80C 원문 참조*.
 
 ## SPA의 정의 — ECSS-Q-ST-80C §5.2
 
@@ -97,89 +97,48 @@ DO-178C의 SQAP에 해당. ECSS에서는 별도 문서.
     - Metric records
 ```
 
-### SPA Plan 작성 예 — KOMPSAT 위성
+### SPA Plan 작성 — 일반 template
 
 ```
-=== SPA Plan — KOMPSAT-6 Satellite Software ===
+=== SPA Plan (일반 template) ===
 
 1. Introduction
-   Project: KOMPSAT-6 X-band SAR satellite
-   Launch: 2025
-   SW components: 12 (각 Criticality A-C)
+   Project context, scope, SW components + criticality
 
 2. Process Assurance Organization
-   SPA Manager: 김OO (KARI Quality Division)
-   SPA Team: 4명 (full-time)
-   Reports to: KARI Director of Quality (개발 조직과 분리)
+   SPA Manager + team (개발 조직과 분리)
+   Reports to Quality Director (independent chain)
 
 3. Process Assurance Activities
-
-   3.1 Planning
-       - SPA Plan version control
-       - Annual review
-
-   3.2 Audits
-       - Process audit: 매 분기
-       - Product audit: 매 분기
-       - Lifecycle audit: 각 milestone
-
-   3.3 Reviews
-       - 모든 review에 SPA observer
-       - SPA review records
+   3.1 Planning (version control, annual review)
+   3.2 Audits (Process / Product / Lifecycle)
+   3.3 Reviews (SPA observer 참석)
 
 4. Process Tailoring
+   Applied Standards 목록 (Q-ST-80C, E-ST-40C, Q-ST-30C, Q-ST-40C 등)
+   각 Criticality별 tailoring 결정 + rationale
 
-   Applied Standards:
-   - ECSS-Q-ST-80C Rev.1 (Software Product Assurance)
-   - ECSS-E-ST-40C (Software Engineering)
-   - ECSS-Q-ST-30C (Dependability) — Criticality A 한정
-   - ECSS-Q-ST-40C (Safety) — 부분 적용
-
-   Tailoring Decisions:
-   - Criticality D modules: Code review 의무, Independent V&V 면제
-   - Criticality C: Independent V&V 권장
-   - Criticality A/B: ISVV 의무 (외부 조직)
-
-   Rationale: 비용 효율, criticality 기반 risk-driven approach
-
-5. Process Metrics
-
-   매월 수집:
-   - Process compliance rate
+5. Process Metrics (매월 수집)
+   - Compliance rate
    - Defect detection rate
-   - Review effectiveness (issues found per hour)
+   - Review effectiveness
    - Test coverage trend
    - Code churn rate
-   - Open NCR count
-   - NCR resolution time
+   - Open NCR count, resolution time
 
-   매 분기:
-   - SPA Manager 보고 → Director
-   - Trend analysis
-   - 비교: 이전 미션 (KOMPSAT-3A)
-
-6. Audit Plan
-
-   매 분기:
-   Q1: Requirements process audit
-   Q2: Design process audit
-   Q3: Coding + verification audit
-   Q4: Integration + V&V audit
+6. Audit Plan (분기별 schedule)
 
 7. Non-Conformance Process
-   - NCR 등록 → SPA review → 개발팀 통보
-   - 4주 내 응답 의무
-   - Open NCR > 30일: SPA Manager → Director escalation
+   - NCR 등록 → SPA review → 통보
+   - 응답 timeline + escalation 규칙
 
 8. Independence
-   SPA Manager: Quality Division (개발 = Engineering Division)
-   재정: Corporate quality budget (project budget 외)
-   기술: 외부 ISVV (SCISYS 또는 Critical SW)
+   - 조직 차원 (분리된 reporting)
+   - 재정 차원 (별도 budget)
+   - 기술 차원 (외부 ISVV)
 
-Approved:
-   SPA Manager:        김OO   2024-03-15
-   Quality Director:   박OO   2024-03-20
-   Project Manager:    이OO   2024-03-22
+Approved chain:
+   SPA Manager → Quality Director → Project Manager
 ```
 
 ## 2. Process Audit — 정기 절차
@@ -343,73 +302,37 @@ ECSS의 *고유 강조점*. *측정해서 개선*.
    Schedule slippage 검출
 ```
 
-### Metrics 보고서 예
+### Metrics 보고서 — 일반 template
 
 ```
-=== Monthly Process Metrics — September 2024 ===
+=== Monthly Process Metrics (일반 template) ===
 
-Project: KOMPSAT-6
-Reporting Period: 2024-09
-
-1. Process Compliance Rate
-   September: 96.4% (Target ≥ 95%) ✓
-   Trend (last 6 months): 95.2 → 96.4 ✓ (개선)
+1. Process Compliance Rate (target ≥ 95%)
+   - 이번 달 수치 + 추세
 
 2. Defect Detection by Phase
-   Requirements:  35% (44 defects)
-   Design:        28% (35 defects)
-   Coding:        25% (32 defects)
-   Verification:   8% (10 defects)
-   Post-release:   4% (5 defects)
-   → Distribution: HEALTHY (Requirements/Design 비중 적절)
+   - Requirements / Design / Coding / Verification / Post-release 분포
+   - 분포가 예상 외면 문제 가능
 
-3. Review Effectiveness
-   September: 7.2 issues/hour
-   Trend: 6.5 → 7.2 (개선)
-   Target: 5-10 ✓
+3. Review Effectiveness (issues per review hour)
+   - Target 5-10
 
-4. Test Coverage
-   Statement:  98.5% (target 100% by next milestone)
-   Decision:   95.2%
-   MC/DC:      89.1% (Criticality A modules)
+4. Test Coverage (Statement / Decision / MC/DC)
 
-5. Code Churn
-   This month: 4.2% of total LoC
-   Average: 3.8%
-   → Slightly elevated, monitor
+5. Code Churn (% of total LoC)
+   - 너무 높으면 design 불안정
+   - 너무 낮으면 feedback 부족
 
-6. Open NCR
-   Beginning of month: 23
-   Opened: 31
-   Closed: 28
-   End of month: 26
-   → Slight increase. Monitor.
+6. Open NCR count + trend
 
-7. NCR Resolution Time
-   Average: 18 days
-   Target: < 30 ✓
-   Distribution:
-     < 7 days:  20%
-     7-30 days: 65%
-     > 30 days: 15% ← improve
+7. NCR Resolution Time (average days, target < 30)
 
-8. Schedule
-   Planned milestone: PDR (Preliminary Design Review)
-   Actual: 1 week ahead of schedule ✓
+8. Schedule (milestone status)
 
-Conclusions:
-  - Overall: Process healthy
-  - Watch: Code churn slightly elevated
-  - Watch: NCR aging (15% over 30 days)
-  - Improvement: Review effectiveness
-
-Action Items:
-  - Analyze code churn root cause (architectural drift?)
-  - NCR aging review with engineering management
-  - Continue review effectiveness improvement initiative
+Conclusions + Action Items
 ```
 
-이런 *monthly report*가 *management visibility*. *문제 조기 발견*.
+이런 *monthly report*가 *management visibility*에 활용. *문제 조기 발견* 목적.
 
 ## 4. Process Tailoring — ECSS 특유
 
@@ -427,58 +350,38 @@ ESA는 *one-size-fits-all 거부*. 각 mission에 맞춰 *tailoring*.
 7. 후속 audit에서 tailoring 준수 확인
 ```
 
-### Tailoring 예 — Small Satellite
+### Tailoring 예 — 작은 mission (가상)
 
 ```
-=== Tailoring Decision — CubeSat Project ===
+=== Tailoring Decision (가상 작은 mission) ===
 
-Project: Korea Aerospace University CubeSat (1U)
-Mission: Educational + Tech Demo
-Budget: $500k
-Schedule: 18 months
-Team: 5 students + 2 advisors
+Context: 교육·기술 검증 cube-sat 수준
+Resources: 적음 (학생 팀 + advisor)
 
 Applied Standards:
-  - ECSS-Q-ST-80C Rev.1 (full)
-  - ECSS-E-ST-40C (full)
-  - ECSS-Q-ST-30C (Dependability) — NOT APPLIED
-  - ECSS-Q-ST-40C (Safety) — NOT APPLIED
+  - ECSS-Q-ST-80C, ECSS-E-ST-40C (full or tailored)
+  - Dependability / Safety: 적용 / 미적용 결정
 
-Tailoring Decisions:
+Tailoring Decisions (예시):
 
 T-1: Independent ISVV not required
      Justification:
-     - Educational project, not commercial
-     - Tech demo only, no critical mission
-     - Self-review by advisors deemed sufficient
+       - Educational, not commercial mission
+       - Self-review by advisors deemed sufficient
      Risk Mitigation:
-     - Increased advisor review involvement
-     - Open source code review
+       - Increased advisor review involvement
 
-T-2: Process metrics simplified
-     Original: 8 metrics
-     Tailored: 3 metrics (compliance, NCR, coverage)
-     Justification: Resource constraints
-     Risk Mitigation: Manual quality review
+T-2: Process metrics simplified (8 → 3)
 
-T-3: Document set reduced
-     SDP / SVP / SCMP / SQAP → combined into single
-                                  "Project Management Plan"
-     Justification: Small team, single document easier
-     Risk Mitigation: All content preserved, just consolidated
+T-3: Document set reduced (SDP/SVP/SCMP/SQAP → 1 PMP)
 
-T-4: Formal review milestones reduced
-     SRR / PDR / CDR / QR / AR (5) → SRR / CDR / AR (3)
-     Justification: Schedule + cost
-     Risk Mitigation: Informal weekly review with advisors
+T-4: Formal review milestones 줄임 (5 → 3)
 
-Approved by:
-   Project Manager:        Prof. 김OO   2024-02-15
-   Customer (KAIST):       박OO        2024-02-20
-   ESA Liaison (advisor):  Dr. Lee     2024-02-25
+Approved chain:
+   Project Manager → Customer → External liaison
 ```
 
-이런 tailoring이 *작은 프로젝트의 ECSS 적용 가능성* 보장. *과부담 회피*.
+이런 tailoring이 *작은 프로젝트의 ECSS 적용 가능성* 보장. *과부담 회피*. 정확한 tailoring rule은 *ECSS tailoring 가이드 (ECSS-S-ST-00C-Rev.1 등)* 참조.
 
 ### Tailoring vs DO-178C
 
@@ -500,39 +403,27 @@ ESA의 유연성이 *작은 회사·신생 우주에 접근성*.
 모든 audit이 *기록*. SPA의 *audit trail*.
 
 ```
-=== Audit Records (annual summary) ===
+=== Annual Audit Summary (일반 template) ===
 
-2024 Audit Summary — KOMPSAT-6 Project
+Total Audits:           [숫자]
+  Compliance:            [분기별 등]
+  Document:              [milestone마다]
+  Process Effectiveness: [semi-annual 등]
+  Independence:          [annual external]
 
-Total Audits:           12
-  Compliance:            4 (quarterly)
-  Document:              5 (after milestones)
-  Process Effectiveness: 2 (semi-annual)
-  Independence:          1 (annual external)
+Total Findings (severity별 count)
 
-Total Findings:
-  Major:                 8
-  Minor:                23
-  Observations:         15
+Resolution Status (end of year)
 
-Resolution Status (end of year):
-  Major: 7 closed, 1 open (in remediation)
-  Minor: 21 closed, 2 open
-  Observations: 12 closed, 3 deferred
+Trend (vs 이전 연도)
+  - Compliance rate
+  - Major finding 수
+  - NCR resolution time
 
-Trend (vs 2023):
-  Compliance rate:     94.2% → 96.4% ✓
-  Major findings:      12 → 8 ✓
-  NCR resolution time: 32 days → 18 days ✓
-
-Conclusions:
-  - 측정 가능한 process 개선
-  - Major finding 감소
-  - 응답 시간 개선
-  - 1 open Major: tracked for Q1 2025 closure
+Conclusions + open item 추적
 ```
 
-이런 *연간 보고*가 *ESA project review*에 제출.
+이런 *연간 보고*가 *project review*에 제출.
 
 ## Independence — ECSS의 강조
 
@@ -558,101 +449,31 @@ Level 4: Different organization
   - Criticality A 의무
 ```
 
-Criticality A = *외부 회사 검증*. Critical SW, SCISYS, Solenix 등 *유럽 ISVV 회사*.
+Criticality A는 일반적으로 *외부 회사 ISVV*. 유럽에 *Critical Software, CGI/SCISYS, Solenix* 등의 회사가 있다. 자세히는 Ch 7.
 
-## KARI 실제 적용 — KOMPSAT 사례
-
-### KOMPSAT-3A (2015 발사)
+## 시작하는 회사를 위한 SPA 도입 — 일반 가이드
 
 ```
-SW criticality:
-  AOCS (자세 제어):              A
-  PMC (탑재체 관리):              B
-  TT&C (Telemetry, Telecommand): A
-  TM/TC encoder/decoder:          B
-
-ECSS 적용:
-  Process: ECSS-Q-ST-80C full
-  Engineering: ECSS-E-ST-40C
-  Dependability: ECSS-Q-ST-30C (A 모듈만)
-  Tailoring: 학교 협력 일부 면제
-
-ISVV:
-  - Astrium 검증 (협력사가 자체 ISVV)
-  - KARI 추가 internal review
-```
-
-### KOMPSAT-6 (2025 예정)
-
-```
-KARI 첫 자체 SAR 위성
-
-SW criticality:
-  SAR 처리:                       A
-  AOCS:                            A
-  TT&C:                            A
-  Payload data handler:            B
-  Star tracker integration:        B
-
-ECSS 적용:
-  Full ECSS-Q-ST-80C
-  ECSS-E-ST-40C (full V-model)
-  External ISVV (외주)
-
-Process metrics:
-  매월 측정 + 보고
-  Trend analysis 의무
-```
-
-### 누리호 (KSLV-II)
-
-발사체 SW는 *Criticality A의 극단*. 일부 ECSS 참고, *자체 표준 우선*.
-
-## 한국 우주 산업 ISVV 인력
-
-```
-한국 ISVV 인력 (2024 추정):
-  KARI internal QA:    ~30
-  Hanwha ISVV team:    ~15
-  외주 회사:
-    - 한국항공우주 인력:  ~20
-    - 자체 검증 컨설팅:   ~10
-
-총: ~75명
-
-비교 — ESA 권역:
-  Critical SW:        ~150
-  SCISYS:             ~80
-  Solenix:            ~40
-  기타:                ~200
-  총: ~500명
-
-한국 ISVV 인력 *상당히 부족*. 신규 우주 확장의 *큰 도전*.
-```
-
-## 시작하는 회사를 위한 SPA 도입 가이드
-
-```
-Phase 1 (0-3 months) — 인식
+Phase 1 (인식)
   - ECSS 표준 학습 (무료 다운로드)
-  - 한국 KARI 사례 분석
-  - 자사에 맞는 tailoring 검토
+  - 자사 mission에 맞는 tailoring 검토
 
-Phase 2 (3-6 months) — 인프라
-  - SPA Manager 채용 (또는 trained)
-  - SPA tool (DOORS, JIRA 등)
+Phase 2 (인프라)
+  - SPA Manager (또는 trained 역할)
+  - Tool 설정 (requirements / NCR tracker / configuration)
   - Metric 수집 시스템
 
-Phase 3 (6-12 months) — 적용
+Phase 3 (적용)
   - 첫 작은 프로젝트에 ECSS
   - 점진적 expansion
   - 외부 review 참여
 
-Phase 4 (1-2 years) — 성숙
-  - ISVV 협력 관계 구축
-  - ESA 미션 참여
-  - 자체 ISVV capability 개발
+Phase 4 (성숙)
+  - ISVV 협력 관계
+  - 자체 capability 개발
 ```
+
+각 phase의 *기간·비용*은 *조직 / mission*마다 다르다.
 
 ## 정리
 
@@ -662,9 +483,8 @@ Phase 4 (1-2 years) — 성숙
 - 4 종류 audit: Compliance, Document, Process Effectiveness, Independence.
 - *정량 metric*: compliance rate, defect detection, review effectiveness, coverage, churn, NCR.
 - *Tailoring*이 ECSS 유연성의 핵심 — 작은 프로젝트 적용 가능.
-- Criticality A는 *외부 ISVV 의무*.
-- KARI/KOMPSAT가 *국내 ECSS 적용의 선두*.
-- 한국 ISVV 인력 부족 — 우주 산업 성장의 *큰 도전*.
+- Criticality A는 일반적으로 *외부 ISVV 의무*.
+- 정확한 wording·deliverable·승인 기준은 *ECSS-Q-ST-80C 원문*.
 
 ## 다음 장 예고
 
@@ -678,4 +498,3 @@ Phase 4 (1-2 years) — 성숙
 - [DO-178C Ch 10 — CM & SQA](/blog/embedded/aerospace-standards/do-178c/chapter10-cm-sqa)
 - [ECSS-Q-ST-80C Rev.1](https://ecss.nl/)
 - [ECSS Tailoring Guidance](https://ecss.nl/standards/active-standards/)
-- [KARI 공식](https://www.kari.re.kr/)

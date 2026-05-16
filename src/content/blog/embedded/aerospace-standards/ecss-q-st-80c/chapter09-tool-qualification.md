@@ -284,7 +284,7 @@ Class 3 도구는 *gentle qualification*. 보통 *vendor 정보 + 사용 기록*
 ## Qualification Procedure 예 — Polyspace
 
 ```
-=== Polyspace Bug Finder Qualification for KOMPSAT-6 ===
+=== Polyspace Bug Finder Qualification (일반 template) ===
 
 1. Tool Identification
    Name: MATLAB Polyspace Bug Finder R2024a
@@ -310,16 +310,15 @@ Class 3 도구는 *gentle qualification*. 보통 *vendor 정보 + 사용 기록*
    - Known limitations: KL-2024-027 (false positive in macro context)
 
 5. Project Validation
-   - Vendor test suite run in KARI environment
+   - Vendor test suite를 *프로젝트 environment*에서 실행
    - Results compared with reference
-   - Diff analysis: 100% match on all 5,000 tests
+   - Diff analysis 결과 일치 확인
    - Limitations confirmed applicable
 
 6. Project-Specific Validation
-   - 10 known defects in KOMPSAT-3A code base
-   - Polyspace re-analyzes
-   - Result: 10/10 detected (no false negatives)
-   - False positives: 3 (acceptable, < 1% rate)
+   - 알려진 known defects (이전 mission 또는 sample) re-analyze
+   - True positive / false negative 분석
+   - 허용 가능한 false positive rate 확인
 
 7. Operational Limits
    - LIMIT-001: Macros >10 nested levels may produce false negatives
@@ -331,16 +330,16 @@ Class 3 도구는 *gentle qualification*. 보통 *vendor 정보 + 사용 기록*
 
 8. Configuration Management
    - Polyspace R2024a installed in CI environment
-   - Configuration: KARI-CI-POLYSPACE-2024
+   - Configuration: PROJECT-CI-POLYSPACE-{version}
    - License: 5 floating
 
 9. Records
-   - Qualification record: QR-POLYSPACE-2024-001
-   - Approver: 김OO (Quality Manager)
-   - Date: 2024-09-15
-   - Re-qualification: After every major Polyspace upgrade
+   - Qualification record: [unique ID]
+   - Approver: Quality Manager
+   - Date
+   - Re-qualification: After every major tool upgrade
 
-Conclusion: Polyspace R2024a qualified as Class 2 for KOMPSAT-6 use.
+Conclusion: Polyspace qualified as Class 2 for project use.
 ```
 
 이 *qualification record*가 *프로젝트 evidence*. 심사 시 제출.
@@ -469,22 +468,18 @@ RTEMS for Spaceflight:
   - Community: OAR (commercial support available)
   - Long-term: 30+ years history
 
-KARI evaluation for KOMPSAT-6:
+일반 evaluation (RTEMS 채택 시 trade-off):
   Pros:
     - Source code access
     - No vendor lock-in
-    - Lower cost
-    - 한국 자체 expertise 개발 가능
+    - Lower license cost
+    - 자체 expertise 개발 가능
   Cons:
-    - 자체 qualification 필요
+    - 자체 qualification effort 큼
     - 일부 enterprise features 부재
-  
-Decision: RTEMS chosen
-Qualification effort: ~6 months (vs VxWorks vendor kit: 2 months)
-Total cost saved: ~$500k over 10 years
-```
 
-KARI는 RTEMS *전략적 채택*. *장기 cost 절감* + *expertise 축적*.
+각 조직의 실제 결정은 *mission characteristics + budget*에 따라 다르다.
+```
 
 ### Frama-C — OSS Formal Methods
 
@@ -499,11 +494,10 @@ ECSS use:
   - Formal methods + abstract interpretation
   - Astrée의 OSS 대안
 
-KARI evaluation:
+일반 evaluation:
   Heritage: ESA가 일부 mission 사용
   Cost: Free
-  Effort: 자체 qualification 6-12 months
-  Decision: 검토 중 (KOMPSAT-7A 이후)
+  Effort: 자체 qualification 수개월 ~ 1년
 ```
 
 ## Custom (Self-Developed) Tools
@@ -557,41 +551,45 @@ Cost                 Lower                  Higher
 
 ECSS가 *더 간단·저렴*. DO-330이 *더 엄격·비싸지만 신뢰성 보장*.
 
-대부분 *KARI mission이 ECSS qualification*. 미국 export 위성은 *DO-330 추가*.
+ECSS qualification은 *일반적인 우주 mission 표준*. *미국 export 또는 협력 mission*에는 *DO-330 추가* 또는 *대응 qualification*이 필요할 수 있다.
 
-## KARI Tool Stack — 2024 현재
+## 일반 Tool Stack — Class별 예
 
 ```
-KOMPSAT-6 / 7A Tools:
-
 Compilers (Class 1):
-  - GCC for ARM (project-qualified, 일부 vendor support)
-  - GNAT Pro Ada (heritage modules 위해)
+  - GCC / Clang (project-qualified)
+  - GNAT Pro Ada
+  - Wind River Diab
+  - Green Hills C/C++
 
 Code Generation (Class 1):
-  - Simulink + Embedded Coder (일부 AOCS)
-  - SCADE (검토 중, 미적용)
+  - Simulink + Embedded Coder
+  - SCADE Suite
+  - dSPACE TargetLink
 
 Static Analysis (Class 2):
-  - Polyspace Bug Finder + Code Prover (primary)
-  - Helix QAC (보조)
-  - clang-tidy (continuous integration)
+  - Polyspace Bug Finder + Code Prover
+  - Helix QAC
+  - Astrée (AbsInt)
+  - Frama-C (OSS)
+  - clang-tidy (CI)
 
 Test Framework (Class 2):
-  - VectorCAST (primary)
+  - VectorCAST
+  - LDRA Testbed
   - Google Test (host-side)
   - Custom HIL framework
 
 Requirements (Class 3):
-  - DOORS
+  - DOORS / Polarion / Jama
 
 Modeling (Class 3):
-  - MagicDraw (UML/SysML)
-  - Simulink (control system)
+  - MagicDraw / Cameo
+  - Simulink
 
 Version Control (Class 3):
-  - GitLab Enterprise (KARI 자체)
-  - ClearCase (legacy projects)
+  - Git (GitLab / GitHub)
+  - ClearCase (legacy)
 
 CI/CD (Class 3):
   - Jenkins
@@ -599,58 +597,11 @@ CI/CD (Class 3):
 
 Document (Class 3):
   - Confluence
-  - LaTeX (formal documents)
-  - Sphinx (Documentation as Code)
+  - LaTeX
+  - Sphinx (DAC)
 ```
 
-## Qualified Tools — 한국 시장
-
-```
-한국 회사가 사용하는 *ESA-qualified* tool:
-
-KAI:
-  - Helix QAC (MISRA)
-  - LDRA Testbed (DO-178C)
-  - VectorCAST
-  - SCADE (일부)
-
-KARI:
-  - Polyspace
-  - VectorCAST
-  - Custom HIL
-
-한화 우주:
-  - Polyspace
-  - 자체 + KARI heritage
-
-LIG Nex1:
-  - 자체 tool 개발
-  - Polyspace
-
-신생 우주 (페리지, 이노스페이스):
-  - 오픈소스 (gcov, clang-tidy, cppcheck)
-  - Lighter qualification
-  - 자체 표준 + 일부 ECSS
-```
-
-## 한국 ECSS-Compliant Tool Vendor
-
-```
-국내 도구 회사:
-  - 자체 tool 개발 회사 (small market)
-  - Vendor solution 재판매 (Polyspace, VectorCAST 등)
-  - 컨설팅 (qualification 도움)
-
-ESA-equivalent qualification 능력:
-  - KARI internal (자체 도구만)
-  - 일부 컨설팅 회사 (외주)
-  - 한국 ECSS qualification 인프라 *부족*
-  
-도전:
-  - ESA 같은 *공식 catalog* 없음
-  - Cross-mission tool reuse 부족
-  - 작은 시장으로 vendor 부족
-```
+각 조직의 실제 tool 선택은 *budget / heritage / customer 요구*에 따라 다르다.
 
 ## Tool Qualification Maturity Model
 
@@ -681,35 +632,17 @@ Level 5: Optimized
   - Self-sustaining
 ```
 
-ESA = Level 4. KARI = Level 2-3 (transition).
+ESA는 *industry-standard* level. 신생 우주 회사는 *project-based* 또는 *transition* 단계가 일반적.
 
-## Tool Qualification Cost
+## Tool Qualification Cost — 일반
 
-```
-ESA mission tool budget (대략):
+Tool qualification은 *큰 비용 항목*. 대략적 trade-off:
 
-Compiler qualification (Class 1):
-  Vendor kit usage: $30-50k/mission
-  Full self-qualification: $500k+/mission
+- Vendor kit 사용 시 self-qualification보다 *훨씬 저렴*
+- License 비용은 *vendor / seat / mission*에 따라 변동
+- Cross-mission amortize가 *전체 비용 절감*에 핵심
 
-Static analyzer (Class 2):
-  Vendor kit: $20-30k/mission
-  Self: $100-200k
-
-Test framework (Class 2):
-  Vendor kit: $20-30k/mission
-
-Tool licenses (annual):
-  Polyspace: $30k/seat
-  VectorCAST: $20k/seat
-  LDRA: $25k/seat
-  Total for medium project: $200-500k/year
-
-Total tool budget for medium mission:
-  $1-2M (qualification + licenses)
-```
-
-큰 비용. *Multi-project amortize* 필요.
+각 vendor의 정확한 가격은 *vendor 직접 문의*. 공개된 정확한 가격은 *대부분 vendor 페이지에 없음*.
 
 ## 정리
 
@@ -721,12 +654,12 @@ Total tool budget for medium mission:
 - OSS 사용 가능 — license + heritage + sustainability 검토.
 - Custom tool도 qualification 필요 — *비용 폭주 위험*.
 - ECSS가 DO-330보다 *간단·저렴*. 단 *덜 엄격*.
-- KARI는 Polyspace + VectorCAST + GitLab + Jenkins.
-- 한국은 *ECSS qualification 인프라 부족* — 도전.
+- 일반 tool stack: Polyspace, VectorCAST, LDRA, GitLab, Jenkins 등.
+- 정확한 qualification 절차·deliverable은 *ECSS-Q-ST-80C Annex Q 원문*.
 
 ## 다음 장 예고
 
-10장 (마지막): *한국 우주 산업 적용 사례 종합* — KARI/한화/누리호/신생 회사 + 시리즈 마무리.
+10장 (마지막): *한국 우주 — 공개 사실 + 시리즈 마무리*.
 
 ## 관련 항목
 

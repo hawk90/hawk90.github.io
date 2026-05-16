@@ -1,27 +1,21 @@
 ---
-title: "Ch 9: Templates (Rule 101-105)"
+title: "Ch 9: Templates"
 date: 2025-09-30T10:00:00
-description: "JSF C++ Rule 101-105 — 단순 generic만 허용, template metaprogramming 회피, code bloat 우려, F-35 적용."
+description: "JSF C++ 일반 template 정책 — 단순 generic, metaprogramming 회피, code bloat 신중."
 tags: [jsf-cpp, templates, generic, code-bloat, metaprogramming, cpp03]
 series: "JSF C++"
 seriesOrder: 9
 draft: false
 ---
 
-JSF C++의 *template 정책* — *단순 generic만 허용*, *metaprogramming 회피*, *code bloat 신중*. C++03 시대의 *template은 매우 단순*. 이 장은 *각 rule + template 함정 + modern progression*까지.
+JSF C++의 *template 정책* 일반 — *단순 generic 허용*, *metaprogramming 회피*, *code bloat 신중*. C++03 시기의 *template 한계*도 함께. *정확한 AV Rule 번호와 wording은 원문 PDF 참조*.
 
-## AV Rule 101 — Template 사용 제한
+## Template 사용 — 보수적 접근
 
-```
-AV Rule 101 (Should)
-"Templates shall be reviewed to ensure their use is necessary
- and not creating unnecessary complexity."
-```
-
-JSF는 *template 보수적 사용*. *necessary*에만.
+JSF의 *기본 입장*: template은 *necessary*에만, 단순한 generic에 한정. 복잡도가 추가되면 *review 부담* 증가.
 
 ```cpp
-// 정당한 사용 — generic container
+// 정당한 사용 — generic fixed-size container
 template <typename T>
 class CFixedArray {
 public:
@@ -43,32 +37,26 @@ private:
     int m_size;
 };
 
-// 사용
 CFixedArray<int> int_array;
 CFixedArray<float> float_array;
-CFixedArray<CFlightState> state_array;
 ```
 
-*같은 logic*이 *다른 type에 적용*. Template으로 *코드 중복 제거*.
+같은 logic이 *다른 type에 적용*. Template으로 *코드 중복 제거*.
 
 ### 부당한 사용
 
 ```cpp
 // 회피 — over-templated
 template <typename T, typename Allocator, typename Comparator, typename Hasher>
-class CHashTable {
-    /* 4 template params, 복잡 */
-};
+class CHashTable { /* 4 template params, 복잡 */ };
 
-// Good — fixed
-class CHashTable {
-    /* int → int hash table only, simple */
-};
+// Good — mission specific
+class CIntIntHashTable { /* int → int 만, simple */ };
 ```
 
-JSF는 *수많은 type combination*을 *지원할 필요 없음*. *Mission specific*.
+JSF는 *수많은 type combination 지원할 필요 없음*. *Mission specific* 우선.
 
-## AV Rule 102 — Function Template
+## Function Template
 
 ```cpp
 // Good — function template (단순)
@@ -77,31 +65,28 @@ T Max(const T &a, const T &b) {
     return (a > b) ? a : b;
 }
 
-int x = Max(5, 10);          // int instantiation
-float y = Max(3.14F, 2.71F); // float instantiation
+int x = Max(5, 10);
+float y = Max(3.14F, 2.71F);
 ```
-
-`Max`가 *모든 type에 적용*. operator `>` 정의된 type만.
 
 ### Function Template vs Macro
 
 ```cpp
-// 위반 (AV Rule 26) — macro
+// 회피 — macro
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-// Good — template
+// Good — template (type-safe, debugger 친화)
 template <typename T>
 T Max(const T &a, const T &b) {
     return (a > b) ? a : b;
 }
 ```
 
-Template이 *type-safe + debugger 친화*.
+Template이 *type-safe + debug 친화*.
 
-## AV Rule 103 — Class Template
+## Class Template
 
 ```cpp
-// 단순 class template
 template <typename T, int N>
 class CFixedVector {
 public:
@@ -117,22 +102,16 @@ public:
 
 private:
     T m_data[N];
-    int m_size{0};   // C++11 in-class init
+    int m_size;
 };
 
-// 사용
-CFixedVector<int, 10> v1;       // int 10개
-CFixedVector<float, 100> v2;    // float 100개
+CFixedVector<int, 10> v1;
+CFixedVector<float, 100> v2;
 ```
 
 각 instantiation이 *완전 별도 class*. *Compile-time*에 결정.
 
-## AV Rule 104 — Template Specialization 회피
-
-```
-AV Rule 104 (Should)
-"Template specialization shall be avoided when possible."
-```
+## Template Specialization — 회피
 
 ```cpp
 // Primary template
@@ -145,7 +124,7 @@ private:
     T m_data;
 };
 
-// 위반 — specialization
+// 회피 — specialization (다른 implementation, 예상치 못한 동작 위험)
 template <>
 class CStorage<bool> {
 public:
@@ -158,26 +137,18 @@ private:
 };
 ```
 
-Specialization이 *다른 implementation*. *예상치 못한 동작* 위험 (`std::vector<bool>` 함정).
+Specialization이 *primary template과 다른 동작*. `std::vector<bool>`의 *유명 함정*과 같은 부류. JSF는 *필요시 OK, 가능하면 회피*.
 
-JSF는 *avoid* — 단 *특수 필요* 시 OK.
+## Template 정의 — Header에
 
-## AV Rule 105 — Template 정의는 .h에
-
-```
-AV Rule 105 (Should)
-"Templates shall be defined in header files (since separate compilation
- of templates is not well-supported in C++03)."
-```
-
-C++03에서 *template separate compilation* 거의 안 됨. *전체 정의가 header에*.
+C++03에서 *template separate compilation*은 *지원 안 됨*. *전체 정의가 header에* 있어야 함.
 
 ```cpp
 // fixed_vector.h
 template <typename T, int N>
 class CFixedVector {
 public:
-    void Push(const T &p_value);   // declaration
+    void Push(const T &p_value);
     T Pop();
 private:
     T m_data[N];
@@ -191,23 +162,16 @@ void CFixedVector<T, N>::Push(const T &p_value) {
         m_data[m_size++] = p_value;
     }
 }
-
-template <typename T, int N>
-T CFixedVector<T, N>::Pop() {
-    return (m_size > 0) ? m_data[--m_size] : T();
-}
 ```
 
-C++11의 *`export` keyword*가 *separate compilation 도입 시도*. 실패. 폐지.
+C++11의 *`export` keyword*가 *separate compilation*을 시도했으나 폐지. *C++20 Modules*가 진정한 해결이지만 *항공 분야 채택은 늦음*.
 
-C++20의 *Modules*가 *진정 해결*. 단 *항공 채택 늦음*.
+## Template Metaprogramming — 회피
 
-## Template Metaprogramming — JSF 회피
-
-C++03의 *TMP (Template Metaprogramming)*가 *compile-time 계산 가능*. 단 *극도로 복잡*.
+C++03의 *TMP*가 *compile-time 계산 가능*. 단 *극도로 복잡*.
 
 ```cpp
-// TMP 예 — Factorial at compile time
+// TMP — Factorial at compile time
 template <int N>
 struct Factorial {
     static const int value = N * Factorial<N - 1>::value;
@@ -222,10 +186,10 @@ const int kF5 = Factorial<5>::value;  // 120 at compile time
 ```
 
 JSF는 *회피*:
-- *코드 가독성*
-- *Compile time 큰 영향*
-- *Debug 어려움*
-- *Error message 끔찍*
+- 코드 가독성 저하
+- Compile time 영향
+- Debug 어려움
+- Error message가 끔찍
 
 C++11+의 *`constexpr`*가 *훨씬 깔끔*:
 
@@ -235,36 +199,30 @@ constexpr int Factorial(int n) {
     return (n <= 1) ? 1 : n * Factorial(n - 1);
 }
 
-const int kF5 = Factorial(5);  // 120 at compile time
+const int kF5 = Factorial(5);
 ```
 
-JSF C++03 원본은 TMP 가능. *권장 X*.
-
-## Template 함정 — Code Bloat
+## Code Bloat — 주의
 
 ```cpp
 template <typename T>
 class CSensor {
 public:
-    int Read() { /* 100 lines of code */ }
+    int Read() { /* 100 lines */ }
     int Calibrate() { /* 50 lines */ }
     int Reset() { /* 30 lines */ }
-    /* 등등 — 총 500 lines */
+    /* 등 총 500 lines */
 };
 
-// 사용
 CSensor<int8_t> s1;
 CSensor<int16_t> s2;
-CSensor<int32_t> s3;
-CSensor<float> s4;
-CSensor<double> s5;
+CSensor<float> s3;
+// 각 instantiation이 500 lines × type 수
 ```
 
-각 instantiation이 *500 lines × type 수*. 5 type이면 *2500 lines binary*. 비록 *동일 logic*이지만 *별도 binary*.
+각 instantiation은 *동일 logic이라도 별도 binary*. 다수 type 사용 시 *binary 폭증*.
 
-해결:
-- *Common base class*에 non-template logic
-- *Template은 minimal interface*
+### 해결 — Common base + minimal template
 
 ```cpp
 class CSensorBase {
@@ -280,7 +238,6 @@ template <typename T>
 class CSensor : public CSensorBase {
 public:
     int Read(T *p_pValue) {
-        /* type-specific small code */
         *p_pValue = static_cast<T>(m_rawValue);
         return 0;
     }
@@ -301,67 +258,53 @@ T Max(T a, T b) {
 }
 
 int x = Max(5, 10);          // T = int (자동)
-int x = Max<int>(5, 10);     // T = int (명시)
+int y = Max<int>(5, 10);     // T = int (명시)
 
 // 함정
-int x = Max(5, 10.0);        // 컴파일 에러 — T가 int인가 double인가?
+int z = Max(5, 10.0);        // 컴파일 에러 — T가 int인가 double인가?
 
 // 해결
-int x = Max<int>(5, 10);            // 명시
-int x = Max(5, static_cast<int>(10.0));  // type 일치
+int z = Max<int>(5, 10);
 ```
 
-C++11의 `auto`가 *function signature 추론*. C++03 원본은 *수동 지정 필요*.
+C++11의 `auto`가 *function signature 추론*. C++03에서는 명시 필요.
 
-## SFINAE — JSF 회피
+## SFINAE — 회피
 
 ```cpp
 // SFINAE — Substitution Failure Is Not An Error
 template <typename T>
 typename std::enable_if<std::is_integral<T>::value, T>::type
-Process(T value) {
-    /* integer-only logic */
-}
+Process(T value) { /* integer-only */ }
 
 template <typename T>
 typename std::enable_if<std::is_floating_point<T>::value, T>::type
-Process(T value) {
-    /* float-only logic */
-}
+Process(T value) { /* float-only */ }
 ```
 
-SFINAE = *template metaprogramming*. JSF 회피.
+SFINAE는 *template metaprogramming*. JSF 회피.
 
-C++20의 *Concepts*가 *훨씬 깔끔*:
+C++20의 *Concepts*가 훨씬 깔끔:
 
 ```cpp
-// C++20
 template <typename T> requires std::integral<T>
-T Process(T value) { /* ... */ }
-
-template <typename T> requires std::floating_point<T>
 T Process(T value) { /* ... */ }
 ```
 
-JSF C++03 + post-update이 *서서히 modern C++ 도입*. 하지만 *Concepts는 아직*.
+## Tag Dispatch — Compile-time 분기
 
-## Template + RTTI 회피 — Tag Dispatch
-
-JSF 스타일 *compile-time dispatch*:
+JSF 스타일의 *RTTI 없는 compile-time dispatch*:
 
 ```cpp
 struct SensorTagTemperature {};
 struct SensorTagPressure {};
-struct SensorTagAltitude {};
 
 template <typename SensorTag>
 class CSensor {
 public:
     int Read(int *p_pValue);
-    int Calibrate();
 };
 
-// Specialization per tag (단순)
 template <>
 int CSensor<SensorTagTemperature>::Read(int *p_pValue) {
     /* temperature-specific */
@@ -374,17 +317,15 @@ int CSensor<SensorTagPressure>::Read(int *p_pValue) {
     return 0;
 }
 
-// 사용
 CSensor<SensorTagTemperature> temp_sensor;
 CSensor<SensorTagPressure> pressure_sensor;
 ```
 
 Tag이 *compile-time type*. *dynamic_cast 없이* type-specific dispatch.
 
-## Template + Composition
+## Object Pool 예시
 
 ```cpp
-// Template Pool — fixed-size object pool
 template <typename T, int N>
 class CObjectPool {
 public:
@@ -412,184 +353,23 @@ public:
             m_count--;
         }
     }
-    
-    int GetUsedCount() const { return m_count; }
 
 private:
-    T m_storage[N];     // 정적 storage
-    bool m_used[N];      // 사용 여부
+    T m_storage[N];
+    bool m_used[N];
     int m_count;
 };
-
-// 사용 — flight message pool
-class CFlightMessage { /* ... */ };
-CObjectPool<CFlightMessage, 32> g_messagePool;
-
-CFlightMessage *msg = g_messagePool.Acquire();
-if (msg) {
-    msg->Init(/* ... */);
-    Send(msg);
-    g_messagePool.Release(msg);
-}
 ```
 
 Template이 *fixed-size pool*. *No dynamic allocation* (JSF 정신).
 
-## Modern C++ Template — KF-21 비교
+## Strong Type — Tag-based typedef
 
 ```cpp
-// JSF C++03
-template <typename T, int N>
-class CFixedVector {
-public:
-    void Push(const T &p_value);
-    T Pop();
-private:
-    T m_data[N];
-    int m_size;
-};
-
-// Modern C++ (C++11+)
-template <typename T, std::size_t N>
-class FixedVector {
-public:
-    constexpr void Push(const T& value) {
-        if (size_ < N) data_[size_++] = value;
-    }
-    
-    [[nodiscard]] constexpr T Pop() {
-        return (size_ > 0) ? std::move(data_[--size_]) : T{};
-    }
-    
-    [[nodiscard]] constexpr std::size_t Size() const noexcept { return size_; }
-    [[nodiscard]] constexpr std::size_t Capacity() const noexcept { return N; }
-
-private:
-    std::array<T, N> data_{};  // C++11
-    std::size_t size_{0};
-};
-
-// Modern usage
-FixedVector<int, 10> v;
-v.Push(5);
-v.Push(10);
-auto x = v.Pop();
-```
-
-Modern 차이:
-- `std::size_t` (type safety)
-- `constexpr` (compile-time evaluation)
-- `[[nodiscard]]` (return value 강제 사용)
-- `std::array` (better than C array)
-- `std::move` (move semantics)
-- `{}` brace init
-- *no Hungarian*
-
-## Template Argument 검증
-
-```cpp
-template <typename T, int N>
-class CFixedVector {
-public:
-    // ...
-};
-
-// 위반 — N = 0 또는 음수 가능
-CFixedVector<int, 0> v0;
-CFixedVector<int, -5> vn;
-
-// Good — compile-time assertion
-template <typename T, int N>
-class CFixedVector {
-    // C++03: simulated static_assert
-    typedef char _N_must_be_positive[N > 0 ? 1 : -1];  // 0/negative → -1 array (compile error)
-    
-    // C++11+: real static_assert
-    // static_assert(N > 0, "N must be positive");
-
-public:
-    /* ... */
-};
-```
-
-C++03의 *trick assertion*. C++11의 *`static_assert`가 깔끔*.
-
-## Template Instantiation Control
-
-```cpp
-// 위반 — implicit instantiation 폭주
-// header.h
-template <typename T> void Foo(T x) { /* 100 lines */ }
-
-// many.cpp uses Foo<int>, Foo<float>, Foo<double>, ...
-// Each .cpp re-instantiates → linker가 합치지만 compile time 큼
-
-// Good — explicit instantiation
-// header.h
-template <typename T> void Foo(T x);
-
-// foo.cpp
-template <typename T> void Foo(T x) { /* 100 lines */ }
-
-// 명시 instantiation (한 곳만)
-template void Foo<int>(int);
-template void Foo<float>(float);
-
-// 다른 .cpp는 declaration만 see, linker가 foo.cpp에서 해결
-```
-
-이런 *explicit instantiation*이 *compile time + binary size 감소*. JSF에서 권장.
-
-## Variadic Templates — JSF 금지
-
-C++11이 *variadic template* 도입:
-
-```cpp
-// C++11 — variadic template
-template <typename... Args>
-void LogMessage(const char *fmt, Args... args) {
-    /* ... */
-}
-
-LogMessage("error %d in %s", 42, "module");
-```
-
-C의 *varargs*보다 *type-safe*. 단 JSF C++03 시기에는 *없음*.
-
-C++03에서 *수동 overload*:
-
-```cpp
-// C++03
-inline void LogMessage(const char *fmt) { /* ... */ }
-
-template <typename T1>
-void LogMessage(const char *fmt, T1 a) { /* ... */ }
-
-template <typename T1, typename T2>
-void LogMessage(const char *fmt, T1 a, T2 b) { /* ... */ }
-
-// 등 — 수동 overload 다수
-```
-
-Boost가 *workaround tuple*. 복잡.
-
-## F-35 Template Usage — 실전
-
-F-35에서 *typical template 사용*:
-
-```cpp
-// 1. Fixed-size container
-CFixedArray<int, 100> int_buf;
-CFixedArray<CCanMessage, 32> can_msg_pool;
-
-// 2. Object pool
-CObjectPool<CTask, 16> task_pool;
-
-// 3. Type-safe enum (C++03 era)
 template <typename Tag>
-class CStrongEnum {
+class CStrongInt {
 public:
-    explicit CStrongEnum(int value) : m_value(value) {}
+    explicit CStrongInt(int value) : m_value(value) {}
     int GetValue() const { return m_value; }
 private:
     int m_value;
@@ -598,18 +378,78 @@ private:
 struct AltitudeTag {};
 struct AirSpeedTag {};
 
-typedef CStrongEnum<AltitudeTag> CAltitude;
-typedef CStrongEnum<AirSpeedTag> CAirSpeed;
+typedef CStrongInt<AltitudeTag> CAltitude;
+typedef CStrongInt<AirSpeedTag> CAirSpeed;
 
 CAltitude alt(10000);
 CAirSpeed spd(250);
 
-void ProcessAltitude(CAltitude a) { /* ... */ }
+void ProcessAltitude(CAltitude a);
 ProcessAltitude(alt);   // OK
 ProcessAltitude(spd);   // 컴파일 에러 — 다른 type
 ```
 
-Strong type이 *parameter mixing 차단*. C++03 era에 *이런 trick*.
+Strong type이 *parameter mixing 차단*. *Unit-bearing 값* 안전.
+
+## Template Argument 검증
+
+```cpp
+template <typename T, int N>
+class CFixedVector {
+    // C++03 trick — N <= 0이면 컴파일 에러
+    typedef char _N_must_be_positive[N > 0 ? 1 : -1];
+    
+    // C++11+ — 깔끔한 static_assert
+    // static_assert(N > 0, "N must be positive");
+
+public:
+    /* ... */
+};
+```
+
+C++03의 *trick assertion*. C++11의 `static_assert`가 표준 방법.
+
+## Template Instantiation Control
+
+```cpp
+// 회피 — implicit instantiation 폭주
+// header.h
+template <typename T> void Foo(T x) { /* 100 lines */ }
+
+// 다수 .cpp가 Foo<int>, Foo<float> 사용 → 각 .cpp마다 re-instantiate
+
+// Good — explicit instantiation
+// header.h
+template <typename T> void Foo(T x);
+
+// foo.cpp
+template <typename T> void Foo(T x) { /* 100 lines */ }
+template void Foo<int>(int);
+template void Foo<float>(float);
+```
+
+Explicit instantiation이 *compile time + binary size 감소*.
+
+## Variadic Templates — C++03 외
+
+C++11이 *variadic template* 도입. *C++03에는 없음*.
+
+```cpp
+// C++11+
+template <typename... Args>
+void LogMessage(const char *fmt, Args... args) { /* ... */ }
+
+// C++03 — 수동 overload 다수
+inline void LogMessage(const char *fmt) { /* ... */ }
+
+template <typename T1>
+void LogMessage(const char *fmt, T1 a) { /* ... */ }
+
+template <typename T1, typename T2>
+void LogMessage(const char *fmt, T1 a, T2 b) { /* ... */ }
+```
+
+JSF 원본 시기에는 *수동 overload* 또는 *Boost workaround*. 복잡.
 
 ## Template Pitfalls
 
@@ -622,16 +462,13 @@ void Foo(T x);  // declaration only
 
 // foo.cpp
 template <typename T>
-void Foo(T x) { /* ... */ }  // 정의가 cpp에
+void Foo(T x) { /* ... */ }
 
 // main.cpp
-#include "header.h"
-int main() {
-    Foo(5);  // linker error — Foo<int> 정의 못 찾음
-}
+Foo(5);  // linker error
 ```
 
-해결: *header에 정의 모두* (AV Rule 105). 또는 *explicit instantiation*.
+해결: header에 정의 전체. 또는 explicit instantiation.
 
 ### Pitfall 2 — Dependent Name
 
@@ -655,15 +492,15 @@ template <typename T>
 class CDerived : public CBase<T> {
 public:
     void Method() {
-        this->Helper();         // OK (this 사용)
-        CBase<T>::Helper();     // OK (명시 base)
+        this->Helper();         // OK
+        CBase<T>::Helper();     // OK
     }
 };
 ```
 
-Template의 *two-phase lookup*이 *dependent name 까다로움*. 명시 필수.
+Template의 *two-phase lookup* 때문. `this->` 또는 명시 base.
 
-### Pitfall 3 — Specialization Order
+### Pitfall 3 — Specialization Visibility
 
 ```cpp
 // header.h
@@ -674,48 +511,59 @@ void Foo(T x) { /* generic */ }
 template <>
 void Foo<int>(int x) { /* int-specific */ }
 
-// main.cpp
-#include "header.h"
-// specialization.h *not included*
-
-int main() {
-    Foo(5);  // generic 호출 — int-specific 보이지 않음
-}
+// main.cpp (specialization 보지 않음)
+Foo(5);  // generic 호출 — int-specific invisible
 ```
 
-Specialization이 *모든 user에 visible*해야 (header에).
+Specialization은 *모든 user에 visible* (header에).
 
-## Template Compile Time
-
-```
-간단 measurement:
-
-10 lines no template:        0.05 sec
-1000 lines no template:      0.3 sec
-
-template <T> class with 100 lines:
-  no instantiation:          0.05 sec (header만 parse)
-  1 instantiation:           0.1 sec
-  10 instantiations:         0.5 sec
-  100 instantiations:        4 sec
-  1000 instantiations:       40 sec
-
-Heavy TMP (boost spirit 등):
-  100 lines:                 5-30 sec
-
-Project total:
-  Standard C++ code:         1 sec / KLoC
-  Template-heavy code:       5-50 sec / KLoC
-
-→ Template 남용이 *큰 build time 증가*
-```
-
-JSF는 *minimal template*. *Build time 빠름*.
-
-## Modern C++ Template — KF-21 가능
+## CRTP — Static Polymorphism
 
 ```cpp
-// Concepts (C++20) — clean SFINAE 대체
+template <typename Derived>
+class CBase {
+public:
+    void Interface() {
+        static_cast<Derived*>(this)->Implementation();
+    }
+};
+
+class CDerived : public CBase<CDerived> {
+public:
+    void Implementation() { /* ... */ }
+};
+
+CDerived d;
+d.Interface();   // CDerived::Implementation 호출 (no vtable)
+```
+
+CRTP가 *virtual cost 없이 polymorphism*. JSF는 복잡 회피하지만 *가능한 패턴*.
+
+## JSF Template — 일반 권장 패턴
+
+```
+Template 일반 권장:
+  ✓ 단순 generic container (fixed-size)
+  ✓ Object pool template
+  ✓ Strong type (tag-based)
+  ✓ Algorithm template (sort 등)
+
+회피:
+  ✗ Template metaprogramming
+  ✗ SFINAE
+  ✗ 깊은 template hierarchy
+  ✗ Variadic templates (C++03 외)
+  ✗ Template과 macro 혼용
+```
+
+*"Simple is better"* — JSF의 template 정신.
+
+## Modern C++ Template
+
+JSF C++03 원본은 *modern template 기능 외*. 후속 표준이 *concepts, constexpr*을 폭넓게 권장:
+
+```cpp
+// C++20 Concepts
 template <typename T>
 concept Numeric = std::is_arithmetic_v<T>;
 
@@ -726,110 +574,53 @@ T Average(const std::vector<T>& values) {
     return sum / static_cast<T>(values.size());
 }
 
-// Range concepts (C++20)
-template <std::ranges::range R>
-auto Sum(R&& range) {
-    return std::ranges::fold_left(range, 0, std::plus<>{});
-}
-
-// Compile-time computation (C++14+)
+// C++14+ constexpr
 template <int N>
 constexpr int Factorial() {
     int result = 1;
     for (int i = 2; i <= N; i++) result *= i;
     return result;
 }
-
-constexpr int kF10 = Factorial<10>();
 ```
 
-KF-21 같은 *새 항공 프로젝트*가 *Modern C++ template 활용 가능*. F-35 legacy는 *C++03 한정*.
+새 프로젝트라면 *AUTOSAR C++14 / MISRA C++:2023*이 *modern template 가이드 제공*.
 
-## CRTP — Curiously Recurring Template Pattern
-
-```cpp
-// CRTP — base가 derived의 template으로
-template <typename Derived>
-class CBase {
-public:
-    void Interface() {
-        // static_cast로 derived 호출 (no virtual)
-        static_cast<Derived*>(this)->Implementation();
-    }
-};
-
-class CDerived : public CBase<CDerived> {
-public:
-    void Implementation() {
-        /* ... */
-    }
-};
-
-CDerived d;
-d.Interface();  // CDerived::Implementation 호출 (no vtable)
-```
-
-CRTP가 *static polymorphism*. *Virtual cost 없이* polymorphism. JSF는 *복잡 회피*하지만 가능.
-
-## Template + JSF Coding Standard
-
-```
-JSF Template 권장:
-
-✓ 단순 generic container
-✓ Object pool template
-✓ Type-safe strong type
-✓ Algorithm template (sort 등)
-
-✗ Template metaprogramming
-✗ SFINAE
-✗ 깊은 template hierarchy
-✗ Variadic templates (C++11+, 원본 외)
-✗ Template과 macro 혼용
-```
-
-*"Simple is better"* — JSF의 template 정신.
-
-## Common Findings — Templates
+## 일반적인 정적 분석 finding (templates)
 
 ```
 실전 finding:
 
-1. "Template definition .cpp에 있음"
-   → AV Rule 105 위반
+1. Template 정의가 .cpp에 있음
+   → header에 두기
 
-2. "Template metaprogramming 사용 (Factorial<N>)"
-   → AV Rule 101 위반 (necessary 아님)
+2. Template metaprogramming 사용
+   → necessary 아닌 경우 회피
 
-3. "Template specialization 다수"
-   → AV Rule 104 위반
+3. Specialization 다수
+   → 가능하면 단일 template로
 
-4. "Variadic template 사용 (C++03 시기 제외)"
-   → C++11+ 기능 사용
+4. Implicit instantiation 폭주 → binary 큼
+   → explicit instantiation 권장
 
-5. "Dependent name (this-> 누락)"
-   → 컴파일 에러 (some 컴파일러는 lax)
-
-6. "Implicit instantiation 폭주 → binary 큼"
-   → Explicit instantiation 권장
+5. Dependent name (this-> 누락)
+   → 컴파일 에러
 ```
 
 ## 정리
 
-- **AV Rule 101**: Template *necessary*에만.
-- **AV Rule 102**: Function template — macro 대체.
-- **AV Rule 103**: Class template — 단순 generic container.
-- **AV Rule 104**: Specialization 회피.
-- **AV Rule 105**: Template 정의 header에 (C++03 separate compilation 미지원).
+- Template은 *necessary*에만, *단순 generic*에 한정.
+- Function template — macro의 type-safe 대체.
+- Class template — 단순 generic container, fixed-size.
+- Specialization 회피 (가능 시).
+- C++03 template은 *header에 정의 전체* (separate compilation 미지원).
 - *TMP, SFINAE 회피* — 복잡 + debug 어려움.
-- *Code bloat* — 각 instantiation 별도 binary.
-- *Common base + minimal template*으로 bloat 감소.
-- *Strong type, object pool*이 JSF의 typical template 사용.
+- *Code bloat* — common base + minimal template으로 감소.
+- *Strong type, object pool*이 일반적 패턴.
 - Modern C++14/20: `concepts`, `constexpr`이 *훨씬 깔끔*.
 
 ## 다음 장 예고
 
-10장은 *Exceptions, Memory, Library, Multi-threading* (Rule 191-220) — JSF의 *exception 완전 금지*, *new/delete 거의 금지*.
+10장은 *Exceptions, Memory, Library, Multi-threading*.
 
 ## 관련 항목
 

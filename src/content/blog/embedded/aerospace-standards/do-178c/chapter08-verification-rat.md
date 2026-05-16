@@ -1,7 +1,7 @@
 ---
 title: "Ch 8: Verification — Review, Analysis, Test (RAT)"
 date: 2025-09-25T09:00:00
-description: "3가지 verification 방법의 분류·적용·증거. HIL/SIL 환경, robustness testing, KAI HIL lab 실제."
+description: "3가지 verification 방법의 분류·적용·증거. HIL/SIL 환경, robustness testing."
 tags: [do-178c, verification, review, analysis, test, hil, sil, robustness]
 series: "DO-178C"
 seriesOrder: 8
@@ -482,38 +482,34 @@ Iron Bird
   - Boeing 787, Airbus A350 가짐
 ```
 
-### KAI HIL Lab — KF-21 예
+### HIL Lab — 일반 구성
 
-KAI 사천에 *KF-21용 HIL Lab*. 수십억 원 시설.
+전투기 / 민간기 *flight-critical SW* 검증의 일반적 HIL configuration:
 
 ```
-=== KF-21 FCC HIL Configuration ===
+=== FCC HIL Configuration (일반 template) ===
 
 Real Hardware:
-  - FCC (Flight Control Computer) — 시제품
-  - FLIR (Forward-Looking Infrared) interface card
-  - AESA Radar interface card
-  - Cockpit MFD displays
+  - FCC (Flight Control Computer)
+  - 일부 interface cards (radar, sensor 등)
+  - Cockpit displays
 
 Simulated Hardware:
-  - GPS receiver (NMEA 0183 over RS-422)
-  - IRS (Inertial Reference System)
-  - Air Data Computer
+  - GPS, IRS, Air Data Computer
   - Engine (FADEC interface)
   - Hydraulic actuators (force feedback)
 
-Real-time Simulator (dSPACE SCALEXIO):
+Real-time Simulator (dSPACE / 등):
   - 6-DOF aircraft dynamics
-  - Aerodynamic database (wind tunnel data)
-  - Engine model (Pratt & Whitney F100)
+  - Aerodynamic database
+  - Engine model
   - Sensor models (noise, latency, failure)
-  - Environment (atmosphere, wind, turbulence)
+  - Environment model
 
 Test Scenarios:
   - Normal flight (takeoff, cruise, landing)
-  - Aerobatic maneuvers (G-load up to ±9G)
-  - System failures (engine flame-out, sensor failure)
-  - Combat maneuvers (BVR engagement)
+  - Aerobatic maneuvers
+  - System failures
   - Emergency landing
 ```
 
@@ -561,29 +557,16 @@ Result:
   - Stick shaker activation latency: 42 ms → PASS
   - All systems behave per HLR → PASS
 
-Witnesses: KAI Test Engineer, KAA (Korean Aviation Authority) DER, ROKAF representative
-Date: 2024-08-15
-Video Recording: HILR-2024-0815-014.mp4
+Witnesses: Test Engineer, Aviation Authority DER, operator representative
+Date: [date]
+Video Recording: [reference]
 ```
 
 HIL test 1개에 *수십 명 + 수 시간*. *항공의 큰 비용 요소*.
 
-### HIL Lab 시설
+### HIL Lab 시설 — 일반
 
-```
-세계 항공 HIL Lab 비용 (대략):
-  Boeing 787 Iron Bird   : $500M+
-  Airbus A350 Iron Bird  : $300M+
-  Embraer E190 HIL       : $50M
-  KAI KF-21 HIL          : ~$30M (추정)
-  KARI 무인기 HIL         : ~$10M
-
-Operational cost:
-  HIL Test session       : ~$5000-50000/day
-  (Engineers, facility, energy)
-```
-
-큰 비용이라 *작은 회사는 자체 보유 어려움*. *External HIL services* 사용 (Boeing 787, A380 일부 supplier가 사용).
+대형 항공기 *Iron Bird / HIL lab*은 *수억~수십억 달러*의 설비로 알려져 있다. 정확한 mission별 시설 비용은 *공식 발표 한정*. 작은 회사는 *외부 HIL services* 활용.
 
 ## Robustness Testing — DAL A의 핵심
 
@@ -803,7 +786,7 @@ DAL A *Verification만으로 ~$10M*. 전체 인증 비용의 *50%+*.
 - Analysis: static + abstract interpretation (Astrée) + formal methods.
 - Test: Unit → Integration → System → HIL → Flight test.
 - *Robustness test*가 DAL A의 핵심. Fault injection HIL이 표준.
-- HIL Lab은 *수십~수백 M$* 시설. KAI/KARI는 자체 보유.
+- HIL Lab은 *큰 시설 투자*. 작은 회사는 외부 HIL service 활용.
 - Tool: VectorCAST/LDRA/Cantata (test), Polyspace/Astrée (static).
 - SVR이 *모든 verification evidence* 통합. SOI 3 review에 제출.
 - DAL A 전체 verification ~$10M, 인증 비용 50%+.

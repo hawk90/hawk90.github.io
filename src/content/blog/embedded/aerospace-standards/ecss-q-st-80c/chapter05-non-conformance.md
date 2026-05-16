@@ -8,7 +8,7 @@ seriesOrder: 5
 draft: false
 ---
 
-ECSS의 *Non-Conformance Control*은 *결함 발견 → 분석 → 수정 → 재발 방지*의 closed-loop. 단순 *bug tracking* 이상이다. *Root cause analysis*가 의무이고, *Corrective Action*이 *similar bug 재발 차단*까지. 이 장은 *NCR workflow + RCA 방법 + 실제 KARI 적용*까지.
+ECSS의 *Non-Conformance Control*은 *결함 발견 → 분석 → 수정 → 재발 방지*의 closed-loop. 단순 *bug tracking* 이상이다. *Root cause analysis*가 의무이고, *Corrective Action*이 *similar bug 재발 차단*까지. *정확한 절차·deliverable은 ECSS-Q-ST-80C 원문 참조*.
 
 ## NCR의 정의 — ECSS-Q-ST-80C §5.6
 
@@ -99,50 +99,32 @@ Side states:
 ECSS-Q-ST-80C가 *공식 template* 제공.
 
 ```
-=== Non-Conformance Report NCR-K6-2024-247 ===
+=== NCR (일반 template) ===
 
 Identification
-  NCR ID:            NCR-K6-2024-247
-  Date Reported:     2024-09-12
-  Reported by:       박OO (Test Engineer)
-  Project:           KOMPSAT-6
-  Subsystem:         AOCS
+  NCR ID:            [고유 ID]
+  Date Reported:     [YYYY-MM-DD]
+  Reported by:       [reporter]
+  Project / Subsystem
 
 Classification
-  Severity:          Major
-  Type:              Functional
-  Origin:            Test failure (Integration Test)
+  Severity:          Critical / Major / Minor / Observation
+  Type:              Functional / Performance / Safety / Security / Doc / Process / Tool
+  Origin:            Internal review / Test failure / Audit / Customer review / External
 
 Description
-  TC-AOCS-INT-042 (Attitude Recovery from Tumble) 실행 시,
-  quaternion magnitude가 1.0에서 1.0023으로 drift.
-  Expected: |q| = 1.0 ± 0.0001 (per LLR-AC-053)
-  Actual: |q| = 1.0023 (over 30 sec simulation)
-
-  Test parameters:
-    Initial tumble rate: 5 deg/sec all axes
-    Simulation duration: 30 seconds
-    Sample rate: 100 Hz
-
-  Repro: 100% reliable (same input → same drift)
+  - 발견 사항 정확히
+  - Expected vs Actual
+  - 재현 조건 (parameters, reproducibility)
 
 Affected SCIs
-  K6-AOCS-SRC-quaternion_math.c-2.1.0 (suspected)
-  K6-AOCS-SRC-attitude_estimator.c-2.0.3 (possibly)
-  K6-AOCS-LLR-LLR-AC-053-1.3.0 (requirement clarification?)
-  TC-AOCS-INT-042-1.0 (test correctness?)
+  - 영향 source / doc / test
 
 Initial Assessment
-  Impact: Attitude pointing accuracy degradation
-  Mission impact: SAR image quality may degrade
-  Workaround: Force renormalization every 100 cycles (CR pending)
+  - Impact (technical, mission)
+  - Workaround if available
 
-Status: OPEN
-Assigned to: 김OO (Algorithm Engineer)
-Priority: P1 (Major + on critical path)
-Target Resolution: 2024-09-26 (2 weeks)
-
-[다음 단계 — Investigation 진행]
+Status / Assigned / Priority / Target Resolution
 ```
 
 ## Root Cause Analysis (RCA) — ECSS 의무
@@ -152,31 +134,24 @@ ECSS-Q-ST-80C §5.6.3.2: *Major + Critical NCR은 RCA 의무*.
 ### Method 1: 5-Why Analysis
 
 ```
-NCR-K6-2024-247: Quaternion magnitude drift
+일반 5-Why 흐름 (가상 예 — quaternion drift):
 
-Why 1: Quaternion drifts from 1.0?
-  Because Ch3-Ch4의 normalization 매 10 step으로 변경
-  (CR-2024-089으로 인한 변경)
+Why 1: 결과 / 증상의 이유?
+  Because (mechanism)
 
-Why 2: Why does 10-step interval cause drift?
-  Because integration error accumulates over more steps
-  Floating point precision insufficient at 10 step interval
+Why 2: Why does that mechanism trigger?
+  Because (immediate cause)
 
-Why 3: Why was 10-step interval considered safe in CR-2024-089 analysis?
-  Because analysis assumed *quasi-static* conditions
-  Tumble (5 deg/sec) is *highly dynamic*
+Why 3: Why was that cause not prevented?
+  Because (process gap)
 
-Why 4: Why didn't the analysis include tumble scenario?
-  Because the analyst (김OO) used *cruise mode* assumptions only
-  Tumble + recovery scenario not in test matrix
+Why 4: Why did process gap exist?
+  Because (organizational reason)
 
-Why 5: Why was the test matrix incomplete?
-  Because change impact analysis didn't include *operational mode coverage*
-  Process gap: No checklist for change impact mode coverage
+Why 5: Why did organizational reason exist?
+  Because (systemic root)
 
-ROOT CAUSE:
-  Technical: 10-step normalization inadequate for high-dynamic scenarios
-  Process:   Change impact analysis missed operational mode coverage
+ROOT CAUSE: technical + process 양쪽
 ```
 
 5-Why는 *간단하지만 효과적*. Toyota Production System에서 시작, 항공·우주 광범위.
@@ -251,53 +226,26 @@ FTA가 *Critical safety NCR*에 표준. *수학적 확률 계산*.
 RCA 후 *재발 방지 계획*. ECSS-Q-ST-80C §5.6.4 의무.
 
 ```
-=== Corrective Action Plan for NCR-K6-2024-247 ===
+=== Corrective Action Plan (일반 template) ===
 
 Immediate (Corrective Action):
-  CA-1: quaternion_math.c v2.1.0 → revert to v2.0.0
-        (full per-step normalization restored)
-        Due: 2024-09-19
-        Owner: 김OO
-        Verification: TC-AOCS-INT-042 re-pass
+  CA-N: [기술적 fix — revert / patch / restore]
+        Due, Owner, Verification
 
 Short-term (Corrective Action):
-  CA-2: 더 효율적인 normalization 방법 연구
-        Renormalize every N cycles, where N is adaptive
-        based on dynamic mode
-        Due: 2024-10-31
-        Owner: 김OO + 박OO
-        Verification: TC-AOCS-INT-042 + 5 new tumble tests
+  CA-N: [개선된 long-term solution]
+        Due, Owner, Verification
 
-Long-term (Preventive Action — 재발 방지):
-  PA-1: Change impact analysis checklist 업데이트
-        Include "operational mode coverage" 항목
-        Due: 2024-09-30
-        Owner: SPA Manager
-        Affected document: SCMP §4.3
-
-  PA-2: Algorithm robustness training
-        모든 algorithm engineer 대상
-        Topic: numerical stability, edge cases, dynamic conditions
-        Due: 2024-11-30
-        Owner: Engineering Manager
-        Verification: Training records + test by trainer
-
-  PA-3: Static analysis tool update
-        Polyspace에 *floating point drift detection* rule 추가
-        검토 후 적용
-        Due: 2024-12-31
-        Owner: Tool Manager
+Preventive Action (재발 방지):
+  PA-N: [process update — checklist, training, tool rule 등]
+        Due, Owner, Verification
 
 Process Update:
-  P-1: SCMP §4.3 (Change Impact Analysis) 개정
-       "Mode coverage 검증" 항목 추가
+  P-N: [SCMP / SDP / SVP 문서 개정]
        CCB 승인 필요
 
-  P-2: Code review checklist 업데이트
-       Algorithm change 시 "robustness test" 항목 추가
-
 Tracking:
-  Each action assigned NCR sub-ticket
+  Each action: NCR sub-ticket
   Weekly status update
   Closure verified by SPA Manager
 ```
@@ -309,7 +257,7 @@ Tracking:
 NCR이 *축적되면 통계*. *Process health 진단*.
 
 ```
-=== NCR Quarterly Report — Q3 2024 (KOMPSAT-6) ===
+=== NCR Quarterly Report (일반 template) ===
 
 Q3 NCR Activity:
   Opened:     47
@@ -391,7 +339,7 @@ Industry benchmarks:
   Critical SW (DAL A/Crit A): 0.1 - 0.5 per KLoC
   Commercial software: 5 - 15 per KLoC
 
-KOMPSAT-6 target: < 1.0 per KLoC (overall)
+Project target은 *criticality / mission*에 따라 결정.
 ```
 
 ### Calculating Defect Removal Efficiency (DRE)
@@ -401,15 +349,10 @@ DRE = (Defects found in development) /
       (Defects found in development + Field defects)
     × 100%
 
-Target: > 95% (excellent)
-
-KOMPSAT-3A operational data (5 years):
-  Pre-launch defects:  1,247
-  In-orbit defects:      18
-  DRE = 1247 / (1247 + 18) = 98.6% ✓ (excellent)
+Target: > 95% (일반적)
 ```
 
-높은 DRE가 *ECSS의 verification 효과*를 입증.
+높은 DRE가 *ECSS verification의 효과* 지표 중 하나.
 
 ## In-Orbit NCR — 특수 처리
 
@@ -450,50 +393,26 @@ KOMPSAT-3A operational data (5 years):
    - 다음 mission에 반영
 ```
 
-### In-Orbit NCR 예 — KOMPSAT-3A
+### In-Orbit NCR — 일반 패턴
+
+위성·우주선의 *in-orbit NCR*은 일반적으로 다음 패턴:
 
 ```
-=== In-Orbit NCR K3A-IO-2018-005 ===
+1. Detection — operations team이 anomaly 식별
+2. Initial triage — severity + safe-mode 여부
+3. Investigation (수주~수개월) — telemetry 분석, vendor 자문, simulation 재현
+4. Workaround — 즉각 적용 가능한 operational 변경
+5. Permanent fix — ground SW + HIL test + customer approval + in-orbit upload
+6. Verification — 수주~수개월 monitoring
+7. Lessons learned — 다음 mission에 반영
 
-Date: 2018-07-15
-Anomaly: Star tracker intermittent failure
-  - 약 1주에 1회 invalid attitude reading
-  - 항상 spacecraft entry/exit eclipse 부근
-
-Investigation (3 months):
-  - Telemetry 분석: 온도 + radiation 상관
-  - Vendor (Jena-Optronik) 자문
-  - Simulation: thermal cycling 영향
-
-Root cause:
-  Star tracker firmware의 *temperature compensation*이
-  특정 thermal gradient에서 부정확. 알려진 firmware issue
-  (vendor에 logged), but K3A는 patched 전 firmware
-
-Workaround (2018-08, immediate):
-  Operations team이 invalid reading 발생 시
-  *gyro-only attitude estimation* fallback (2 hours)
-
-Permanent Fix (2018-12):
-  Vendor patched firmware upload
-  - Patch package preparation: 1 month
-  - Ground test: 1 month
-  - Customer approval: 2 weeks
-  - Upload window: 1 day
-  - Verification: 2 months monitoring
-
-Outcome:
-  - In-orbit upload successful
-  - Anomaly rate: weekly → 0 (zero over next 5 years)
-  - Lessons learned: KOMPSAT-6 procurement에 반영
-                     (Star tracker patched firmware 의무화)
-
-Effort: ~6 person-months
-Cost: ~$500k
-Mission Impact: 4 months degraded operation
+특성:
+  - 비용 큼 (수 person-month 이상)
+  - 시간 큼 (수개월)
+  - Mission impact (degraded operation 가능)
 ```
 
-In-orbit NCR이 *비싸고 복잡*. 그래서 *pre-launch에 최대 발견*이 목표.
+이런 *비싼 in-orbit NCR* 때문에 *pre-launch에 최대 발견*이 목표.
 
 ## Tool — NCR Management
 
@@ -505,11 +424,11 @@ ESA 표준 도구:
   Polarion (Siemens)
   Custom (Airbus 자체 시스템)
 
-KARI Tool Stack (2024):
+일반 stack 예:
   Jira (NCR tracking)
-  DOORS (linked to req)
-  Confluence (RCA documentation)
-  Custom dashboard (Power BI)
+  Requirements tool (linked to req)
+  Wiki (RCA documentation)
+  Dashboard tool
 
 Open source:
   Bugzilla (legacy)
@@ -528,15 +447,11 @@ Cross-organization NCR sharing:
   - Anonymization (proprietary info 제거)
   - Lessons learned database
 
-Examples:
-  KARI - Airbus DS (KOMPSAT-7A 협력):
-    공통 NCR database
-    매월 cross-review meeting
-    Lessons learned 공유
-
-  KARI - ESA (research collaboration):
-    제한적 NCR 공유
-    Anonymized statistics
+일반 collaboration 패턴:
+  - 공통 NCR database (혹은 export 가능 format)
+  - 정기 cross-review meeting
+  - Lessons learned 공유
+  - Anonymized statistics 외부 공유
 ```
 
 ## NCR ↔ FRACAS
@@ -663,40 +578,28 @@ Automation이 *NCR 관리 부담 감소*. 수동 작업 → tool.
    교훈: 항상 *system fix* 가능 (training, checklist, tool)
 ```
 
-## KARI NCR System — 운영 데이터
+## NCR 운영 — 일반 dashboard 구조
 
 ```
-KARI 2024 NCR 통계 (전 mission 합):
+=== NCR Dashboard (일반 구조) ===
 
-Projects active:    5 (KOMPSAT-6, 7A, GEO-KOMPSAT-3, 누리호, 차세대중형위성)
-Total NCR open:     ~150
-Total NCR closed (2024): ~480
+Active projects: [count]
+Total NCR open / closed (period)
 
-By severity:
-  Critical: 2 (in-orbit, KOMPSAT-3A — fixed)
-  Major: 35 (15% of total)
-  Minor: 380 (79%)
-  Observation: 13
+Distribution by:
+  - Severity (Critical / Major / Minor / Observation)
+  - Origin (Test failure / Internal review / Audit / Customer / External)
+  - Type (Functional / Performance / Safety / etc.)
 
-By origin:
-  Test failure: 240 (50%)
-  Internal review: 145 (30%)
-  Audit: 60 (13%)
-  Customer: 25 (5%)
-  External: 10 (2%)
+RCA outcomes (Major+ NCR):
+  - Process improvement count
+  - Training need
+  - Tool gap
 
-RCA outcomes:
-  Process improvement: 22 (Major NCR의 63%)
-  Training need: 8
-  Tool gap: 5
-
-Average resolution:
-  Critical: 14 days
-  Major: 21 days
-  Minor: 28 days
+Average resolution time (target < N days per severity)
 ```
 
-데이터로 *process health 추적*. *trend 분석*.
+이런 정량 데이터로 *process health 추적* + *trend 분석*.
 
 ## 정리
 

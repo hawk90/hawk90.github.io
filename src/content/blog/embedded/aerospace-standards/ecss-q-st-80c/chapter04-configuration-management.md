@@ -57,7 +57,7 @@ ECSS-specific SCI categories:
 12. Heritage SW (재사용 산출물)
 13. COTS / OSS components
 14. Documentation (manuals, user guides)
-15. Training material (KARI 강조)
+15. Training material
 ```
 
 ### Naming Convention — ECSS-style
@@ -65,13 +65,13 @@ ECSS-specific SCI categories:
 ```
 Format: <Project>-<Subsystem>-<Type>-<Number>-<Version>
 
-예 (KOMPSAT-6):
-  K6-AOCS-SRC-AC_ATT-2.0.0          # source code
-  K6-AOCS-DOC-SRD-1.4.0              # requirements document
-  K6-AOCS-TEST-TC-AC-103-2.1.0       # test case
-  K6-AOCS-EOC-aocs_image-2.0.0       # executable
-  K6-COTS-RTOS-vxworks-7.0           # COTS component
-  K6-HERITAGE-AOCS-from-K3A-1.0      # heritage component
+예 (가상 mission):
+  PRJ-AOCS-SRC-AC_ATT-2.0.0          # source code
+  PRJ-AOCS-DOC-SRD-1.4.0              # requirements document
+  PRJ-AOCS-TEST-TC-AC-103-2.1.0       # test case
+  PRJ-AOCS-EOC-aocs_image-2.0.0       # executable
+  PRJ-COTS-RTOS-vxworks-7.0           # COTS component
+  PRJ-HERITAGE-AOCS-from-prev-1.0     # heritage component
 ```
 
 ESA는 *long mission name*을 사용해 *수십 년 후*도 식별 가능.
@@ -159,7 +159,7 @@ Rotating:
 Special participants (in-orbit 변경 시):
   - Mission Operations Manager
   - Spacecraft Engineer
-  - ESA / KARI Mission Director
+  - Mission Director (운영기관)
 ```
 
 ### Change Request (CR) Workflow — ECSS
@@ -197,84 +197,42 @@ Special participants (in-orbit 변경 시):
    - Baseline 업데이트
 ```
 
-### CR Document — KOMPSAT 예
+### CR Document — 일반 template
 
 ```
-=== Change Request CR-KOMPSAT6-2024-089 ===
+=== Change Request (일반 template) ===
 
-Title: AOCS Quaternion 계산 정밀도 개선
-Originator: 김OO (Algorithm Engineer)
-Submitted Date: 2024-08-15
+Title:       [한 줄 요약]
+Originator:  [submitter]
+Date:        [submission date]
 
 1. Change Description
-   Quaternion normalization을 *매 step*이 아닌 *매 10 step*마다
-   수행. 누적 오차 분석 결과 매 10 step이 충분하고 *CPU 사용량
-   20% 감소* 가능.
+   [기술적 변경 내용]
 
 2. Justification
-   - 현재 quaternion math가 CPU의 35% 차지
-   - Normalization을 매 cycle 수행 → 불필요한 부담
-   - 10 cycle마다도 IEEE 754 정밀도 내 (분석 완료)
-   - CPU margin 확보 → 추가 monitoring 기능 가능
+   [왜 필요한가 — quantitative reason 권장]
 
 3. Affected SCIs
-   K6-AOCS-SRC-quaternion_math.c-2.0.0 → 2.1.0
-   K6-AOCS-DOC-SDD-1.4.0 → 1.5.0 (design rationale 추가)
-   K6-AOCS-TEST-TC-AC-quat-* (test 업데이트)
-   K6-AOCS-DOC-LLR-LLR-AC-042-1.2.0 → 1.3.0
+   [영향 받는 source / doc / test / baseline]
 
 4. Impact Analysis
-
-   Technical:
-   - Accuracy: 분석 보고서 첨부 (AVR-AOCS-2024-005)
-     평균 오차: 0.0001° → 0.0003° (within ±0.001° budget)
-   - Performance: CPU 35% → 28%
-   - Memory: unchanged
-   - Power: 소량 감소 (CPU 사용 감소로)
-
-   Schedule:
-   - Implementation: 2 weeks
-   - Testing: 1 week
-   - Review: 1 week
-   - Total: 4 weeks (within sprint 30)
-
-   Cost:
-   - Engineering: 40 person-hours
-   - Test execution: 20 person-hours
-   - SPA review: 8 hours
-   - Total: ~$15k
-
-   Mission:
-   - Improves CPU margin for future features
-   - No degradation in current functionality
+   - Technical (accuracy / performance / memory / power)
+   - Schedule
+   - Cost
+   - Mission
 
 5. Risks
-   - Low risk: numerical stability
-   - Mitigation: extensive Monte Carlo testing
-   - Rollback: revert to v2.0.0
+   - Risk level
+   - Mitigation
+   - Rollback procedure
 
-6. Recommendation
-   APPROVE
+6. Recommendation: Approve / Conditional / Reject
 
-7. CCB Decision
-   APPROVED unanimously
-   Conditions:
-   - Monte Carlo test results review at CCB closure
-   - Performance benchmark in HIL test
+7. CCB Decision + Conditions
 
-8. Status
-   2024-08-15: Submitted
-   2024-08-20: Impact analysis complete
-   2024-08-22: CCB review, APPROVED
-   2024-09-12: Implementation complete
-   2024-09-19: Tests pass, Monte Carlo OK
-   2024-09-23: HIL benchmark CPU 28.3% ✓
-   2024-09-26: CCB closure, baseline updated
+8. Status timeline (submission → impact analysis → CCB → impl → test → closure)
 
-Approvals:
-   CCB Chair:           박OO          2024-08-22
-   Configuration Mgr:   이OO          2024-09-26
-   SPA Manager:         김OO          2024-09-26
+Approvals: CCB Chair, Config Manager, SPA Manager
 ```
 
 ### 위성 In-orbit Change — 특별 절차
@@ -303,21 +261,16 @@ In-orbit Change Procedure:
 11. CCB closure
 ```
 
-### In-orbit Change 사례
+### In-orbit Change — 일반 관찰
 
-```
-KOMPSAT-3A (2015 발사) in-orbit updates:
-  - 2016: Star tracker calibration update
-  - 2017: TT&C protocol update
-  - 2018: Battery management fine-tuning
-  - 2019: SAR processing algorithm
-  - 2020-2024: 매년 1-2회 minor update
+장기 운영 mission (10+ 년)에서는 *수십 회의 in-orbit update*가 일반적. 종류:
+- Calibration coefficient update
+- Protocol patch
+- Battery / power management 조정
+- Algorithm 개선
+- Bug fix
 
-Total in-orbit changes (9 years): ~15
-Failure rate: 0 (모두 성공)
-```
-
-10년+ 운영하면서 *수십 회 SW update*. *지상 SW 만큼 자주*.
+각 mission의 *정확한 update 횟수, 성공률*은 *운영 기관 공식 발표*만 인용.
 
 ## 3. Configuration Status Accounting
 
@@ -349,73 +302,33 @@ Milestone Reports:
   - Customer delivery
 ```
 
-### Configuration Index — KOMPSAT 예
+### Configuration Index — 일반 template
 
 ```
-=== Configuration Index — KOMPSAT-6 v2.0.0 ===
+=== Configuration Index (일반 template) ===
 
-Baseline: K6-PBL-v2.0.0
-Date:     2024-10-15
-Approved: CCB Meeting 2024-10-12
+Baseline: [version label]
+Date:     [date]
+Approved: [CCB meeting reference]
 
 Contents:
+1. Plans + Standards (count)
+2. Requirements (count in tracking tool)
+3. Design Documents (count)
+4. Source Code (모듈 count, LoC)
+5. Test Cases (count)
+6. Test Results (count, pass status)
+7. Build Artifacts (hash + size)
+8. Tool Configurations (toolchain manifest)
+9. Heritage SW (component count + source)
+10. Customer Documentation (manual count)
 
-1. Plans + Standards (45 documents)
-   PSAC, SDP, SVP, SCMP, SPA Plan + standards
-   See: K6-DOCS/Plans/
+Summary metrics:
+  Total SCIs, Total LoC, Test Coverage, Open NCRs
 
-2. Requirements (1,247 items in DOORS)
-   K6-AOCS-HLR: 247
-   K6-PMC-HLR:  158
-   K6-TTC-HLR:  189
-   ...
+Conclusion: review readiness
 
-3. Design Documents (87 documents)
-   See: K6-DOCS/Design/
-
-4. Source Code (15 modules, ~120 KLoC)
-   K6-AOCS-SRC: 35 files, 28 KLoC
-   K6-PMC-SRC:  22 files, 18 KLoC
-   ...
-
-5. Test Cases (8,234 items)
-   K6-AOCS-TEST: 2,847
-   K6-PMC-TEST:  1,932
-   ...
-
-6. Test Results (8,234 records, all passing)
-
-7. Build Artifacts
-   K6-EOC-image.bin    SHA-256 abc...
-   K6-EOC-image.elf    SHA-256 def...
-   K6-EOC-debug.elf    SHA-256 ghi...
-
-8. Tool Configurations
-   Toolchain manifest (SECI)
-   Tool versions (45 tools tracked)
-
-9. Heritage SW (12 reused components)
-   K6-HERITAGE-from-K3A: 8 components
-   K6-HERITAGE-from-K3:  2 components
-   K6-COTS-SAVOIR:       2 components
-
-10. Customer Documentation
-    User Manual
-    Operations Manual
-    Maintenance Manual
-
-Total SCIs: 9,567
-Total LoC: 124,847
-Total Documents: 132
-Test Coverage: 95% (target)
-Open NCRs: 8 (all Minor)
-
-Conclusion: Configuration ready for Qualification Review.
-
-Approved:
-  Configuration Manager: 이OO     2024-10-15
-  SPA Manager:           김OO     2024-10-15
-  Project Manager:       박OO     2024-10-16
+Approvals: Configuration Manager, SPA Manager, Project Manager
 ```
 
 이 *Configuration Index*가 *공식 산출물*. 심사관·고객 review.
@@ -509,39 +422,23 @@ GitLab의 *audit log* + *signed commits*이 *ECSS 인증 trail*.
 
 ECSS는 *재사용*을 강조. 그에 따른 *추가 SCM 의무*.
 
-### Heritage SW Tracking
+### Heritage SW Tracking — 일반 template
 
 ```
-=== Heritage SW Manifest — KOMPSAT-6 ===
+=== Heritage SW Manifest (일반 template) ===
 
-Component: AOCS Core Algorithm
-  Source: KOMPSAT-3A (2015 launch)
-  Reuse status: As-is with minor modification
+Component: [name]
+  Source: [previous mission / catalog name]
+  Reuse status: As-is / Minor modification / Major rework / COTS
   Modification log:
-    K3A-v2.5.0 → K6-v1.0.0:
-      - Updated for K6-specific orbit parameters
-      - Removed deprecated TT&C interface
-      - No algorithm changes
-  Operational data from K3A:
-    Operating hours: 9 years × 24/7 = ~80,000 hours
-    Anomalies: 2 (both software fix, included in K3A-v2.5.0)
-  Heritage approval: ESA-equivalent QA review
-
-Component: Star Tracker Driver
-  Source: ESA SAVOIR-FAIRE catalog
-  Reuse status: Black-box COTS
-  Vendor: Jena-Optronik (Germany)
-  Heritage: 50+ ESA missions
-  Documentation: Vendor-provided + KARI integration spec
-
-Component: RTOS
-  Source: VxWorks Cert (Wind River)
-  Reuse status: COTS qualified product
-  Heritage: DO-178C DAL A certification kit
-  Customization: KARI port to ARM Cortex-A53
+    [previous version] → [current version]:
+      - [변경 내용]
+  Operational data:
+    [operating hours, anomalies — 이전 mission에서 수집]
+  Heritage approval: [QA review / customer approval]
 ```
 
-각 heritage component가 *완전 추적*. *re-qualification은 minimum*.
+각 heritage component가 *완전 추적*. *재인증 minimum*이 목표.
 
 ## ECSS vs DO-178C — SCM 비교
 
@@ -558,32 +455,32 @@ Customer 참여       FAA late           Customer early + 지속
 
 ESA가 *고객 (운영자) 참여*를 더 강조. 위성·발사체는 *대형 고객 (정부)*가 *전 lifecycle 참여*.
 
-## KARI SCM — 실제 운영
+## SCM — 일반 운영 cadence
 
-### Tool Stack
-
-```
-Requirements:    DOORS (KARI 표준)
-Design:          MagicDraw + Simulink
-Code:            GitLab Enterprise (자체 호스트)
-Build:           CMake + Jenkins
-CCB:             자체 JIRA workflow + DOORS
-Status:          Custom Power BI dashboard
-Archive:         자체 LTO tape + cloud backup
-```
-
-### Process
+### Tool Stack (일반 예)
 
 ```
-주간 활동:
+Requirements:    DOORS / Polarion / Jama 등
+Design:          MagicDraw / Simulink 등
+Code:            Git (GitLab / GitHub) / ClearCase
+Build:           CMake / Make + Jenkins / GitLab CI
+CCB:             JIRA workflow + Requirements tool
+Status:          Dashboard tool (Power BI / Grafana 등)
+Archive:         LTO tape + cloud backup
+```
+
+### Process — 일반 cadence
+
+```
+주간:
   - Build daily
-  - CR review (운영 중인 CR)
+  - CR review
   - SPA spot check
 
 월간:
-  - CCB meeting (4번)
+  - CCB meeting
   - Status accounting report
-  - Customer (정부) status meeting
+  - Customer status meeting
 
 분기:
   - Compliance audit
@@ -646,18 +543,18 @@ Cataloging:
   - Index 검색 가능
 ```
 
-KARI도 *KOMPSAT mission archive* 보유. *수십 년 후* 후속 mission에 재사용 가능.
+장기 운영 mission의 archive가 *후속 mission의 heritage*로 재사용 가능.
 
 ## 정리
 
 - ECSS SCM은 *DO-178C와 기본 동일* + *long-term operation 강조*.
-- 6 baseline: FBL/ABL/DBL/PBL/OBL/MBL.
+- 6 baseline: FBL / ABL / DBL / PBL / OBL / MBL.
 - CCB가 *모든 변경 승인*. In-orbit change는 *별도 절차* + *customer approval*.
-- Heritage SW + COTS는 *별도 tracking*. ESA SAVOIR-FAIRE catalog.
-- KARI = GitLab Enterprise + DOORS + JIRA + Jenkins.
-- KOMPSAT-3A in-orbit changes ~15회 (9년) — *모두 성공*.
+- Heritage SW + COTS는 *별도 tracking*. ESA SAVOIR catalog.
+- Tool stack은 *조직 선택* — Git, DOORS, JIRA, Jenkins 등.
 - Archive: *end-of-mission + 10년 최소*. 일부 30년.
 - Open format + 여러 매체 + geographic redundancy.
+- 정확한 절차·산출물은 *ECSS-Q-ST-80C 원문*.
 
 ## 다음 장 예고
 
@@ -670,4 +567,4 @@ KARI도 *KOMPSAT mission archive* 보유. *수십 년 후* 후속 mission에 재
 - [DO-178C Ch 10 — CM & SQA](/blog/embedded/aerospace-standards/do-178c/chapter10-cm-sqa)
 - [GitLab for Aerospace](https://about.gitlab.com/solutions/)
 - [Wind River VxWorks Cert](https://www.windriver.com/products/vxworks)
-- [Jena-Optronik Star Tracker (SAVOIR)](https://www.jena-optronik.de/)
+- [ESA SAVOIR catalog](https://savoir.estec.esa.int/)

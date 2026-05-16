@@ -1,55 +1,50 @@
 ---
-title: "Ch 7: Classes 기본 (Rule 67-95)"
+title: "Ch 7: Classes 기본"
 date: 2025-09-30T08:00:00
-description: "JSF C++ Rule 67-95 — class vs struct, encapsulation, friend 금지, operator overload 정책, special member functions."
+description: "JSF C++ — class vs struct, encapsulation, friend 회피, operator overload 정책, special member functions."
 tags: [jsf-cpp, classes, struct, encapsulation, friend, operator-overload, raii]
 series: "JSF C++"
 seriesOrder: 7
 draft: false
 ---
 
-JSF C++의 *class 영역* (Rule 67-95). *public data는 struct만*, *friend 회피*, *operator overload 제한*. 항공 SW의 *encapsulation 강조*. 이 장은 *각 rule + F-35 class design 패턴*까지.
+JSF C++의 *class 영역*. *public data는 struct만*, *friend 회피*, *operator overload 신중*. 항공 SW의 *encapsulation 강조*. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.
 
-## AV Rule 67 — public/protected 데이터는 struct만
-
-```
-AV Rule 67 (Should)
-"Public and protected data should only be used in structs—not classes."
-```
+## public/protected 데이터는 struct에만
 
 ```cpp
-// 위반 — class with public data
+// 회피 — class에 public data
 class FlightState {
 public:
-    int altitude;       // public data 위반
+    int altitude;
     int airspeed;
     EFlightMode mode;
 };
 
 // Good 1 — struct (data-only)
 struct FlightState {
-    int altitude;       // OK in struct
+    int altitude;
     int airspeed;
     EFlightMode mode;
 };
 
 // Good 2 — class with accessors
-class FlightState {
+class CFlightState {
 public:
     int GetAltitude() const { return m_altitude; }
     void SetAltitude(int v) { m_altitude = v; }
-    /* ... */
+
 private:
-    int m_altitude;     // private
+    int m_altitude;
     int m_airspeed;
     EFlightMode m_mode;
 };
 ```
 
-JSF의 *class vs struct 철학*:
+JSF의 *class vs struct 관습*:
 
 ```
-struct: pure data aggregate (POD)
+struct: pure data aggregate
    - 모든 멤버 public
    - No methods (또는 trivial)
    - C 호환
@@ -60,97 +55,84 @@ class: encapsulated behavior
    - OOP encapsulation
 ```
 
-Modern C++에서도 *비슷한 관습* (CppCoreGuidelines C.2).
+Modern C++의 CppCoreGuidelines C.2도 같은 정신.
 
-## AV Rule 68 — Class 가시성 순서
+## Class 가시성 순서
 
 ```cpp
-// 권장 순서
 class CFoo {
-public:        // public 먼저 (interface)
+public:        // 먼저 (interface)
     CFoo();
     ~CFoo();
     void DoWork();
 
-protected:     // protected 다음 (inheritance interface)
+protected:     // 다음 (inheritance interface)
     virtual void OnEvent();
 
-private:       // private 마지막 (implementation)
+private:       // 마지막 (implementation)
     int m_data;
     void HelperFunc();
 };
 ```
 
-이유:
-- *Header reader가 interface 먼저 본다*
-- *Public이 most important*
-- *Private은 implementation detail*
+이유: header를 읽는 사람이 *interface 먼저* 본다. Private은 *implementation detail*.
 
-## AV Rule 69-75 — Member Access
-
-### AV Rule 69 — Accessor (getter/setter) 단순 inline
+## Accessor — 단순한 inline
 
 ```cpp
 class CFoo {
 public:
-    int GetValue() const { return m_value; }     // inline OK (1 line)
-    void SetValue(int v) { m_value = v; }        // inline OK
+    int GetValue() const { return m_value; }     // inline OK
+    void SetValue(int v) { m_value = v; }
 
 private:
     int m_value;
 };
 ```
 
-복잡한 accessor는 *.cpp에 정의*.
+복잡한 accessor는 *.cpp에 정의*. inline의 trade-off는 *header 변경 시 모든 user 재컴파일*.
 
-### AV Rule 70 — Const Correctness
+## Const Correctness
 
 ```cpp
 class CFoo {
 public:
-    // Read-only method → const
     int GetValue() const;
     bool IsValid() const;
     
-    // Modifying method → non-const
     void SetValue(int v);
     void Reset();
-
-    // Const-correct parameter
-    void Process(const CData &p_data);  // p_data not modified
-    void Modify(CData &p_data);         // p_data modified
+    
+    void Process(const CData &p_data);   // 변경 안 함
+    void Modify(CData &p_data);          // 변경
 };
 ```
 
-`const` 사용이 *문서이자 강제*. *모든 read-only에 const* 권장.
+`const`는 *문서이자 강제*. *모든 read-only*에 권장.
 
-### AV Rule 71-75 — Initialization List 관련
+## Special Member Functions
 
-(이미 Ch 5에서 다룸 — AV Rule 146-147)
-
-## AV Rule 76-87 — Special Member Functions
-
-C++ 5 (또는 6) special members:
+C++03 special members:
 - Default constructor
 - Destructor
 - Copy constructor
 - Copy assignment
-- (Move constructor — C++11)
-- (Move assignment — C++11)
 
-### AV Rule 76 — Default Constructor 명시
+C++11에 *move constructor*, *move assignment* 추가.
+
+### Default Constructor 명시
 
 ```cpp
-// 위반 — no constructor (compiler-generated)
+// 회피 — no constructor
 class CFoo {
 private:
-    int m_value;    // uninitialized in compiler-generated ctor
+    int m_value;   // uninitialized
 };
 
-CFoo f;             // m_value undefined
+CFoo f;            // m_value 미정
 int x = f.GetValue();   // UB
 
-// Good — 명시 constructor
+// Good — 명시 ctor + initializer
 class CFoo {
 public:
     CFoo() : m_value(0) {}
@@ -159,43 +141,33 @@ private:
 };
 ```
 
-### AV Rule 77 — Rule of Three (C++03) / Rule of Five (C++11)
+### Rule of Three / Five
 
-```
-AV Rule 77 (Should)
-"A class that has any pointer member should provide a copy constructor,
- destructor, and assignment operator."
-```
-
-Rule of Three (C++03):
+JSF는 *pointer member를 가진 class*에 *copy ctor, dtor, copy assignment*를 함께 제공 권장 (Rule of Three).
 
 ```cpp
-class CFoo {
-public:
-    CFoo();
-    ~CFoo();                           // destructor
-    CFoo(const CFoo &);               // copy constructor
-    CFoo& operator=(const CFoo &);     // copy assignment
-};
-```
-
-C++11의 Rule of Five (move 추가):
-
-```cpp
+// C++03 Rule of Three
 class CFoo {
 public:
     CFoo();
     ~CFoo();
     CFoo(const CFoo &);
     CFoo& operator=(const CFoo &);
-    CFoo(CFoo &&) noexcept;           // C++11 move ctor
-    CFoo& operator=(CFoo &&) noexcept; // C++11 move assignment
+};
+
+// C++11 Rule of Five (move 추가)
+class CFoo {
+public:
+    CFoo();
+    ~CFoo();
+    CFoo(const CFoo &);
+    CFoo& operator=(const CFoo &);
+    CFoo(CFoo &&) noexcept;
+    CFoo& operator=(CFoo &&) noexcept;
 };
 ```
 
-JSF 원본 (C++03)은 *Rule of Three*. 후기 update에 *Rule of Five*.
-
-### AV Rule 78 — Copy 금지 패턴
+### Copy 금지 패턴
 
 ```cpp
 // C++03: private + undefined
@@ -206,34 +178,34 @@ private:
     CSingleton() {}
     ~CSingleton() {}
     
-    // Copy 금지 (private + undefined)
-    CSingleton(const CSingleton &);          // not defined
-    CSingleton& operator=(const CSingleton &); // not defined
+    CSingleton(const CSingleton &);              // declaration only
+    CSingleton& operator=(const CSingleton &);   // declaration only
 };
 
-// C++11: = delete
+// C++11: = delete (더 명확)
 class CSingleton {
 public:
     static CSingleton& Instance();
     
     CSingleton(const CSingleton &) = delete;
     CSingleton& operator=(const CSingleton &) = delete;
+
 private:
     CSingleton() {}
     ~CSingleton() {}
 };
 ```
 
-C++11이 *`= delete`로 더 명확*. *Linker error 대신 compile error*.
+`= delete`가 *linker error 대신 compile error*. 의도 명확.
 
-### AV Rule 79 — Destructor virtual (다형 시)
+### Polymorphic Class = Virtual Destructor
 
 ```cpp
-// 위반
+// 회피
 class CBase {
 public:
     void Process();
-    ~CBase();           // non-virtual destructor
+    ~CBase();           // non-virtual
 };
 
 class CDerived : public CBase {
@@ -242,65 +214,50 @@ public:
 };
 
 CBase *p = new CDerived();
-delete p;               // 위반 — Base::~Base()만 호출, ~CDerived() 누락
+delete p;               // ~CDerived() 호출 안 됨
 
 // Good
 class CBase {
 public:
-    virtual ~CBase();   // virtual destructor
+    virtual ~CBase();
 };
 ```
 
-*Polymorphic class*는 *virtual destructor 필수*. Memory leak + resource leak 방지.
+Polymorphic이면 *virtual destructor 의무*.
 
-## AV Rule 88 — Multiple Inheritance 제한
-
-```
-AV Rule 88 (Should)
-"A non-virtual base class with multiple inheritance is allowed only
- with interfaces (pure abstract classes)."
-```
+## Multiple Inheritance — Interface 외 회피
 
 ```cpp
-// 위반 — 다중 비-virtual 상속
+// 회피 — concrete 다중 상속
 class CA { /* data */ };
 class CB { /* data */ };
-class CC : public CA, public CB { /* ... */ };
-// 위반 — A와 B 둘 다 data 가짐
+class CC : public CA, public CB { /* 다이아몬드 위험 */ };
 
-// Good — 인터페이스만 다중 상속
+// Good — interface만 다중
 class IReadable {
 public:
     virtual int Read() = 0;
-    virtual ~IReadable() = default;
+    virtual ~IReadable() {}
 };
 
 class IWritable {
 public:
     virtual int Write() = 0;
-    virtual ~IWritable() = default;
+    virtual ~IWritable() {}
 };
 
-class CFile : public IReadable, public IWritable {
-    /* ... */
-};   // OK — interfaces만
+class CFile : public IReadable, public IWritable { /* OK */ };
 ```
 
-JSF가 *다이아몬드 문제* 회피. *인터페이스 다중 상속만 허용*.
+자세한 내용은 Ch 8 (Inheritance) 참고.
 
-## AV Rule 89 — `friend` 사용 회피
-
-```
-AV Rule 89 (Should)
-"`friend` classes/functions should only be used when no other reasonable
- alternative exists."
-```
+## `friend` — 회피
 
 ```cpp
-// 회피 — friend 사용
+// 회피
 class CFoo {
-    friend class CHelper;        // CHelper가 private 접근
-    friend void HelperFunc(CFoo &); // 함수 접근
+    friend class CHelper;
+    friend void HelperFunc(CFoo &);
 private:
     int m_secret;
 };
@@ -308,31 +265,29 @@ private:
 class CHelper {
 public:
     void DoWork(CFoo &foo) {
-        foo.m_secret = 100;  // private 접근 (friend라서 OK)
+        foo.m_secret = 100;   // friend라 OK
     }
 };
 ```
 
-`friend`가 *encapsulation 깬다*. JSF에서는 *최후의 수단*.
+`friend`가 *encapsulation*을 깬다. JSF는 *최후의 수단*.
 
-### friend 정당화 예
+### 정당화 예 — operator overload
 
 ```cpp
-// 정당한 사용: operator overload
 class CMatrix {
 public:
     CMatrix();
 private:
     int m_data[10][10];
     
-    // friend operator (member 접근 필요)
     friend std::ostream& operator<<(std::ostream &os, const CMatrix &m);
 };
 
 std::ostream& operator<<(std::ostream &os, const CMatrix &m) {
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
-            os << m.m_data[i][j] << " ";  // friend라 m_data 접근 OK
+            os << m.m_data[i][j] << " ";
         }
         os << "\n";
     }
@@ -340,12 +295,11 @@ std::ostream& operator<<(std::ostream &os, const CMatrix &m) {
 }
 ```
 
-`operator<<`가 *member 함수일 수 없음* (외부 `os` 인자 제어 못함). *friend가 유일*.
+`operator<<`는 *member function일 수 없음* (외부 `os` 인자 제어). friend가 유일 또는 public accessor 추가.
 
-### friend 대안
+### 대안 — public accessor
 
 ```cpp
-// 대안 1: public accessor
 class CMatrix {
 public:
     int Get(int i, int j) const { return m_data[i][j]; }
@@ -353,11 +307,10 @@ private:
     int m_data[10][10];
 };
 
-// operator는 public 사용
 std::ostream& operator<<(std::ostream &os, const CMatrix &m) {
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
-            os << m.Get(i, j) << " ";  // public accessor
+            os << m.Get(i, j) << " ";
         }
         os << "\n";
     }
@@ -365,39 +318,36 @@ std::ostream& operator<<(std::ostream &os, const CMatrix &m) {
 }
 ```
 
-*Public accessor*면 friend 불필요. 단 *너무 많은 accessor*가 *encapsulation 약화*. trade-off.
+Trade-off: *너무 많은 accessor*가 *encapsulation 약화*.
 
-## AV Rule 90 — Operator Overload 신중
+## Operator Overload — 신중
 
 ```cpp
-// 회피 — 의미 불명확한 operator
 class CVector {
 public:
-    CVector operator+(const CVector &v) const;   // OK — 의미 명확 (덧셈)
-    CVector operator*(int n) const;               // OK — scaling
+    CVector operator+(const CVector &v) const;   // OK — 의미 명확
+    CVector operator*(int n) const;              // OK — scaling
     
-    CVector operator<<(int n) const;              // 회피 — bit shift? push?
-    bool operator!() const;                         // 회피 — empty check? not?
+    CVector operator<<(int n) const;             // 회피 — bit shift? stream?
+    bool operator!() const;                       // 회피 — empty? not?
 };
 ```
 
-`operator<<`이 *bit shift 또는 stream output*. *모호*.
-
-JSF 권장:
-- *Arithmetic operator* (`+`, `-`, `*`, `/`) — OK
-- *Comparison* (`==`, `!=`, `<`, `>`) — OK
+일반 권장:
+- *Arithmetic* (`+`, `-`, `*`, `/`) — OK
+- *Comparison* (`==`, `!=`, `<`) — OK
 - *Subscript* (`[]`) — OK (container)
 - *Function call* (`()`) — 신중
-- *Conversion operator* — 회피 (implicit 변환)
-- *`new`/`delete` overload* — 회피 (custom allocator)
+- *Conversion operator* — 회피 (implicit 변환 위험)
+- *`new`/`delete` overload* — 회피
 
 ### Conversion Operator 회피
 
 ```cpp
-// 위반
+// 회피
 class CMoney {
 public:
-    operator int() const { return m_amount; }  // implicit conversion
+    operator int() const { return m_amount; }   // implicit
 private:
     int m_amount;
 };
@@ -405,16 +355,16 @@ private:
 CMoney m(100);
 int x = m;        // implicit — 위험
 
-// Good
+// Good — explicit accessor
 class CMoney {
 public:
-    int GetAmount() const { return m_amount; }  // explicit accessor
+    int GetAmount() const { return m_amount; }
 private:
     int m_amount;
 };
 
 CMoney m(100);
-int x = m.GetAmount();  // 명시
+int x = m.GetAmount();
 ```
 
 C++11의 `explicit operator`도 가능:
@@ -425,95 +375,102 @@ public:
     explicit operator int() const { return m_amount; }
 };
 
-int x = m;                        // 컴파일 에러
-int x = static_cast<int>(m);      // OK
+int x = m;                       // 컴파일 에러
+int x = static_cast<int>(m);     // OK
 ```
 
-## AV Rule 91 — Implicit Constructor 회피
-
-```
-AV Rule 91 (Should)
-"Single-parameter constructors should be marked explicit."
-```
-
-(이미 Ch 5에서 다룸 — AV Rule 148)
-
-## AV Rule 92-95 — Class Hierarchy
+## Single-arg Constructor — `explicit`
 
 ```cpp
-// AV Rule 92 (Should)
-// Class hierarchy 깊이 ≤ 3
+class CFoo {
+public:
+    CFoo(int x);              // implicit 변환 가능
+};
+
+void Bar(CFoo f);
+Bar(42);                       // implicit — 의도?
+
+// Good
+class CFoo {
+public:
+    explicit CFoo(int x);
+};
+
+Bar(42);                       // 컴파일 에러
+Bar(CFoo(42));                 // 명시
+```
+
+C++11의 *braced init*도 `explicit`로 차단:
+
+```cpp
+explicit CFoo(int x);
+CFoo f = {42};   // 컴파일 에러
+```
+
+## Class Hierarchy Depth
+
+JSF는 *얕은 hierarchy* 권장. 깊으면 *유지보수 어려움*.
+
+```cpp
 class CA {};
 class CB : public CA {};
-class CC : public CB {};       // OK — depth 3
-class CD : public CC {};       // 회피 — depth 4
+class CC : public CB {};       // 보통 OK
+class CD : public CC {};       // 가능하면 회피
+```
 
-// AV Rule 93 (Should)
-// Concrete class에서 *상속* 회피
-class CConcrete {           // 구체 class
+## Concrete vs Abstract Base
+
+```cpp
+// 회피 — concrete class 상속
+class CConcrete {
 public:
-    void Method();           // virtual 아님
+    void Method();             // non-virtual
 };
 
-class CDerived : public CConcrete {  // 위반 — concrete에서 상속
-    /* ... */
-};
+class CDerived : public CConcrete { /* ... */ };
 
 // Good — abstract base
-class IBase {                 // interface
+class IBase {
 public:
     virtual void Method() = 0;
+    virtual ~IBase() {}
 };
 
 class CConcrete : public IBase {
-    void Method() override;
-};
-
-// AV Rule 94 (Should)
-// Pure virtual 외 다른 base method가 *protected 또는 private*
-class CBase {
 public:
-    virtual void Process() = 0;  // pure virtual
-protected:
-    void HelperFunc();            // derived 사용
-private:
-    int m_internal;
+    void Method() override;
 };
 ```
 
-## 실전 — F-35 Class Hierarchy
+Abstract base가 *interface 명확*.
 
-JSF C++의 *typical class design*:
+## 일반적인 Class Design 예
 
 ```cpp
 // flight_control.h
 
-// Interface
 class ISensor {
 public:
-    virtual ~ISensor() = default;
+    virtual ~ISensor() {}
     virtual int Read(int *p_pValue) = 0;
     virtual bool IsValid() const = 0;
 };
 
 class IActuator {
 public:
-    virtual ~IActuator() = default;
+    virtual ~IActuator() {}
     virtual int Write(int p_value) = 0;
     virtual int GetCurrentPosition(int *p_pValue) = 0;
 };
 
-// Concrete sensor
 class CAltitudeSensor : public ISensor {
 public:
     explicit CAltitudeSensor(int p_address);
-    ~CAltitudeSensor() override;
+    ~CAltitudeSensor();
     
-    // Interface methods
-    int Read(int *p_pValue) override;
-    bool IsValid() const override;
+    int Read(int *p_pValue);
+    bool IsValid() const;
     
-    // Specific methods
     int Calibrate();
     int GetTemperature(int *p_pTemp) const;
 
@@ -521,75 +478,61 @@ private:
     int m_address;
     bool m_bValid;
     int m_calibrationOffset;
+
+    CAltitudeSensor(const CAltitudeSensor &);
+    CAltitudeSensor& operator=(const CAltitudeSensor &);
 };
 
-// Controller using sensors
 class CFlightController {
 public:
-    explicit CFlightController(ISensor *p_pAltSensor,
-                                ISensor *p_pAirSpeedSensor,
-                                IActuator *p_pElevatorAct,
-                                IActuator *p_pAileronAct);
+    CFlightController(ISensor *p_pAltSensor,
+                      ISensor *p_pAirSpeedSensor,
+                      IActuator *p_pElevatorAct,
+                      IActuator *p_pAileronAct);
     ~CFlightController();
     
-    // No copy
-    CFlightController(const CFlightController &) = delete;
-    CFlightController& operator=(const CFlightController &) = delete;
-    
-    // Public API
     int Initialize();
     int Step();
     int SetMode(EFlightMode p_eMode);
     EFlightMode GetMode() const;
-    
+
 private:
-    // Helpers
     int ReadSensors();
     int ComputeControlLaw();
     int WriteActuators();
     
-    // Pointers to interfaces
     ISensor   *m_pAltSensor;
     ISensor   *m_pAirSpeedSensor;
     IActuator *m_pElevatorAct;
     IActuator *m_pAileronAct;
     
-    // Internal state
     EFlightMode m_eMode;
-    int m_currentAltitude;
-    int m_currentAirSpeed;
-    int m_targetAltitude;
-    int m_targetAirSpeed;
     
-    // PID controllers (Composition, not Inheritance)
-    CPIDController *m_pAltitudePID;
-    CPIDController *m_pAirSpeedPID;
+    CFlightController(const CFlightController &);
+    CFlightController& operator=(const CFlightController &);
 };
 ```
 
 JSF style 특징:
-- *Interface (I prefix)*로 abstract
-- *Concrete class*가 interface 구현
-- *Composition over inheritance* (CFlightController가 sensor/actuator 포함)
-- *No multiple inheritance* (interfaces 외)
+- *Interface (I prefix)*로 추상화
+- *Composition* (sensor/actuator를 포함)
+- *No multiple inheritance* (interface 외)
 - *No friend*
 - *Explicit constructor*
 - *Const correctness*
 - *Virtual destructor* in interfaces
+- *Copy 금지* (declaration only 또는 `= delete`)
 
-## Composition vs Inheritance
+## Composition over Inheritance
 
 ```cpp
-// 회피 — Inheritance 남용
-class CSensorReader : public CCommunicationLayer, public CDataProcessor {
-    /* 다중 상속, complex */
-};
+// 회피
+class CSensorReader : public CCommunicationLayer, public CDataProcessor { /* ... */ };
 
-// Good — Composition
+// Good
 class CSensorReader {
 public:
-    explicit CSensorReader(CCommunicationLayer *p_pComm,
-                            CDataProcessor *p_pProcessor)
+    CSensorReader(CCommunicationLayer *p_pComm, CDataProcessor *p_pProcessor)
         : m_pComm(p_pComm), m_pProcessor(p_pProcessor) {}
     
     int Read() {
@@ -603,23 +546,15 @@ private:
 };
 ```
 
-*Composition*이 *flexible*. *Interface 통해 mock 가능* (test).
+Composition이 *flexible + mockable*.
 
-## Singleton Pattern — JSF Style
+## Singleton 패턴
 
 ```cpp
-// flight_state_manager.h
-
 class CFlightStateManager {
 public:
-    // Singleton access
     static CFlightStateManager& Instance();
     
-    // No copy
-    CFlightStateManager(const CFlightStateManager &) = delete;
-    CFlightStateManager& operator=(const CFlightStateManager &) = delete;
-    
-    // API
     void SetMode(EFlightMode p_eMode);
     EFlightMode GetMode() const;
 
@@ -627,23 +562,24 @@ private:
     CFlightStateManager();
     ~CFlightStateManager();
     
+    CFlightStateManager(const CFlightStateManager &);
+    CFlightStateManager& operator=(const CFlightStateManager &);
+    
     EFlightMode m_eCurrentMode;
 };
 
 // .cpp
 CFlightStateManager& CFlightStateManager::Instance() {
-    static CFlightStateManager s_instance;   // Meyers Singleton (C++11 thread-safe)
+    static CFlightStateManager s_instance;
     return s_instance;
 }
 ```
 
-*Meyers Singleton* (C++11 thread-safe). C++03은 *수동 mutex* 필요.
+C++11에서 *Meyers Singleton*은 *thread-safe* (function-local static initialization). C++03은 *수동 mutex 필요*.
 
-JSF는 *global state*를 *Singleton으로 캡슐화*. *Globals 직접 사용 회피*.
+Singleton의 trade-off: *test 어려움*. Modern style은 *dependency injection* 선호.
 
-## RAII — Resource Acquisition Is Initialization
-
-JSF는 *exception 없이도 RAII 적용*.
+## RAII (Exception 없이도)
 
 ```cpp
 class CScopedLock {
@@ -656,148 +592,71 @@ public:
     ~CScopedLock() {
         m_pMutex->Unlock();
     }
-    
-    // No copy
-    CScopedLock(const CScopedLock &) = delete;
-    CScopedLock& operator=(const CScopedLock &) = delete;
 
 private:
     CMutex *m_pMutex;
+    
+    CScopedLock(const CScopedLock &);
+    CScopedLock& operator=(const CScopedLock &);
 };
 
-// 사용
 void Foo() {
-    CScopedLock lock(&g_mutex);  // Lock here
-    
-    // critical section
+    CScopedLock lock(&g_mutex);
     DoWork();
-    
-    // 자동 Unlock at }
+    // 함수 종료 시 자동 unlock
 }
 ```
 
-RAII *destructor 사용*. Exception 없이도 *function 종료 시 cleanup*.
+Exception 없이도 *function scope 종료 = destructor*. JSF RAII 핵심.
 
-## Modern C++ Class — KF-21 Style
+## Modern C++ 차이 — 참고
 
-```cpp
-// modern_flight_control.hpp
+JSF C++03 시기 이후의 *modern C++ 스타일*과의 차이는 후속 표준이 다룬다:
 
-class FlightController {
-public:
-    // Use shared_ptr or unique_ptr (C++11+)
-    FlightController(std::shared_ptr<Sensor> alt_sensor,
-                     std::shared_ptr<Sensor> airspeed_sensor,
-                     std::unique_ptr<Actuator> elevator,
-                     std::unique_ptr<Actuator> aileron);
-    
-    ~FlightController() = default;
-    
-    // No copy, default move
-    FlightController(const FlightController&) = delete;
-    FlightController& operator=(const FlightController&) = delete;
-    FlightController(FlightController&&) = default;
-    FlightController& operator=(FlightController&&) = default;
-    
-    // Public API
-    std::optional<Error> Initialize();   // C++17 optional
-    std::optional<Error> Step();
-    
-    void SetMode(FlightMode mode);
-    FlightMode GetMode() const noexcept { return mode_; }
+- Smart pointers (`std::unique_ptr`, `std::shared_ptr`)
+- `= default` / `= delete`
+- `noexcept`
+- `std::optional` (C++17)
+- Brace initialization `{}`
 
-private:
-    std::shared_ptr<Sensor> alt_sensor_;
-    std::shared_ptr<Sensor> airspeed_sensor_;
-    std::unique_ptr<Actuator> elevator_;
-    std::unique_ptr<Actuator> aileron_;
-    
-    FlightMode mode_{FlightMode::MANUAL};
-    
-    // PID controllers (owned)
-    std::unique_ptr<PIDController> altitude_pid_;
-    std::unique_ptr<PIDController> airspeed_pid_;
-};
-```
+각 표준이 *어디까지 허용*하는지는 *AUTOSAR C++14*, *MISRA C++:2023* 문서 참조.
 
-차이 (modern C++):
-- *smart pointers* (`shared_ptr`, `unique_ptr`)
-- *no raw pointers*
-- *`std::optional<Error>`* (C++17)
-- *`= default` and `= delete`* 명시
-- *trailing underscore_*
-- *brace init `{}`*
-- *`noexcept`* 명시
-
-JSF style은 *raw pointer + manual lifecycle*. Modern은 *smart pointer + RAII*.
-
-## Singleton 회피 (Modern)
-
-```cpp
-// 위반 (modern 관점) — Singleton 남용
-class FlightStateManager {
-public:
-    static FlightStateManager& Instance();
-};
-
-// 다른 코드 어디서나
-FlightStateManager::Instance().SetMode(...);
-
-// Modern 권장 — Dependency Injection
-class FlightController {
-public:
-    FlightController(FlightStateManager& state, /* ... */);
-    // state injected, easier to test
-};
-```
-
-Singleton이 *test 어려움*. *Dependency injection*이 modern.
-
-JSF C++03 시대는 *Singleton 흔함*. C++11+의 *modern style*은 *DI 권장*.
-
-## Common Findings — Classes
+## 일반적인 finding (classes)
 
 ```
-실전 finding:
+실전에서 자주 발견되는 위반:
 
-1. "Class FlightState에 public data altitude 있음"
-   → AV Rule 67 위반 (struct이어야)
+1. class에 public data → struct이어야
 
-2. "CFoo class에 ~CFoo() 누락"
-   → AV Rule 79 위반 (virtual destructor 필요 if polymorphic)
+2. polymorphic class에 virtual destructor 누락
 
-3. "Multi-inheritance from CLogger and CDatabase (both 데이터 있음)"
-   → AV Rule 88 위반
+3. multiple inheritance from 두 concrete class
 
-4. "Class A가 Class B의 friend"
-   → AV Rule 89 위반 (정당화 필요)
+4. friend 사용 (정당화 부족)
 
-5. "Implicit operator int() 정의"
-   → AV Rule 90 위반 (explicit operator)
+5. implicit conversion operator
 
-6. "Class hierarchy depth 5"
-   → AV Rule 92 위반 (≤ 3 권장)
+6. single-arg constructor에 explicit 누락
 
-7. "Single-arg constructor에 explicit 누락"
-   → AV Rule 91 위반
+7. 깊은 hierarchy
 ```
 
 ## 정리
 
-- **public data는 struct만** (AV Rule 67) — class는 encapsulation.
-- **Rule of Three** (C++03) — destructor, copy ctor, assignment 함께.
-- **Virtual destructor** in polymorphic class (AV Rule 79).
-- **Multiple inheritance** — interface (pure virtual) 외 회피.
+- **public data는 struct만** — class는 encapsulation.
+- **Rule of Three** (C++03) / Rule of Five (C++11) — pointer member 있는 class.
+- **Virtual destructor** in polymorphic class.
+- **Multiple inheritance** — interface 외 회피.
 - **friend** 회피 — 최후의 수단.
-- **Operator overload** 신중 — conversion operator 회피.
-- **Composition > Inheritance** — flexibility.
+- **Operator overload** 신중 — conversion operator 특히.
+- **Single-arg ctor**에 `explicit`.
+- **Composition > Inheritance**.
 - **RAII** — exception 없이도 destructor 활용.
-- **JSF style**: raw pointers + manual lifecycle.
-- **Modern style**: smart pointers + DI.
+- JSF style: *raw pointer + manual lifecycle*. Modern: *smart pointer + DI*.
 
 ## 다음 장 예고
 
-8장은 *Inheritance, Virtual* (Rule 88-100) — virtual function, override, RTTI 금지.
+8장은 *Inheritance, Virtual, RTTI 금지*.
 
 ## 관련 항목
 

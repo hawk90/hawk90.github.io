@@ -1,7 +1,7 @@
 ---
 title: "Ch 9: Coverage Analysis — Statement, Decision, MC/DC 완전 해부"
 date: 2025-09-25T10:00:00
-description: "MC/DC truth table 작성, 도구 검출, untestable code 처리, structural coverage analysis, KAI/KARI 적용."
+description: "MC/DC truth table 작성, 도구 검출, untestable code 처리, structural coverage analysis."
 tags: [do-178c, coverage, mc-dc, statement, decision, truth-table, structural]
 series: "DO-178C"
 seriesOrder: 9
@@ -317,7 +317,7 @@ ldra run-tests
 ldra report --format html
 ```
 
-LDRA는 *항공 산업 표준*. *F-35, A380, 787* 등 *광범위 사용*.
+LDRA는 *항공 산업 광범위 사용*. 다수 대형 프로그램에 적용 사례 공개. 자세히는 [ldra.com](https://ldra.com/).
 
 ## MC/DC 적용 — 실제 코드
 
@@ -571,33 +571,15 @@ if (always_true_in_practice && other_cond) {
 
 MC/DC가 *논리적으로 도달 불가*한 case에 *test 요구*. *코드 재설계* 강제.
 
-## Coverage in Aerospace 산업
+## Coverage in Aerospace — 일반 관찰
 
-### F-35 — JSF Coverage
+대형 항공 SW 프로그램의 *coverage 적용*은 일반적으로 다음 패턴:
+- *Statement / Decision 100%* 목표
+- *DAL A 부분에 MC/DC 100%*
+- *Untestable code*는 정당화 보고서 다수
+- *Test case 수십만 + 실행 시간 수개월*
 
-```
-F-35 Block 3F (2017):
-  ~25 million LoC
-  대부분 C++ (JSF C++)
-  DAL B-A 혼합
-
-Coverage:
-  Statement:   100%
-  Decision:    100%
-  MC/DC:       95-99% (DAL A 부분만 100%)
-
-Untestable:    수만 line의 정당화 보고서
-Test cases:    수십만
-Test execution time: 수개월
-```
-
-### Airbus A350 — Astrée + Coverage
-
-Airbus는 *Astrée로 runtime error 0 입증* + *MC/DC 100%* + *formal methods (DO-333)*. *가장 정교한 verification stack*.
-
-### KAI KF-21 — 진행 중
-
-KF-21 (2024 시제기 비행) FCC SW가 *DO-178C DAL A* 적용. *MC/DC 100%* 목표. 현재 *진행 중*. 도구: *LDRA Testbed* (KAI 선택).
+각 프로그램의 *정확한 coverage 수치, 도구 stack, 인력*은 *공식 발표가 없는 한 추정 안 함*. Airbus 등 일부 대형 OEM은 *Astrée + MC/DC + DO-333 formal methods*의 *통합 verification stack* 적용 사례를 vendor 자료에 공개한 바 있다.
 
 ## Coverage 측정 비용
 
@@ -681,9 +663,9 @@ Approved:
 정상 MC/DC 도구 (DO-178C TQL-2 qualified):
 
 1. LDRA Testbed
-   - 항공 1위 시장
+   - 항공 산업 광범위 사용
    - Coverage + static analysis + test 통합
-   - F-35, A380, B787 사용
+   - 다수 대형 OEM 프로그램 적용 (vendor 공개)
 
 2. VectorCAST
    - 자동화 강함
