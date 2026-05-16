@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    box/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+                minimum width=34mm, minimum height=11mm, align=center,
+                font=\sffamily\small},
+    accent/.style={box, draw=hibord, fill=hifill, font=\sffamily\small\bfseries},
+    arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
+    lbl/.style={font=\sffamily\scriptsize, inner sep=2pt}
+]
+
+% Client
+\node[box] (client) at (0, 0) {클라이언트};
+
+% Server
+\node[box] (server) at (5.2, 0) {Sentry / Crashlytics\\서버};
+
+% Worker stage: stackwalker + aggregation
+\node[box] (sw)  at (3.2, -2.4) {stackwalker};
+\node[box] (agg) at (7.2, -2.4) {aggregation};
+
+% Dashboard
+\node[accent] (dash) at (5.2, -4.8) {Dashboard};
+
+\draw[arr] (client) -- node[lbl, above]{minidump} (server);
+\draw[arr] (server.south) -- (sw.north);
+\draw[arr] (server.south) -- (agg.north);
+\draw[arr] (sw.south)  -- (dash.north);
+\draw[arr] (agg.south) -- (dash.north);
+
+\end{tikzpicture}
+\end{document}

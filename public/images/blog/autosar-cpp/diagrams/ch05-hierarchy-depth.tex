@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    ok/.style={cls, draw=impbord, fill=impfill, minimum width=14mm},
+    bad/.style={cls, draw=conbord, fill=confill, minimum width=14mm},
+    note/.style={font=\sffamily\scriptsize, anchor=west}
+]
+
+\node[ok] (a) at (0, 0)    {A};
+\node[ok] (b) at (2, -0.8) {B};
+\node[ok] (c) at (4, -1.6) {C};
+\node[bad] (d) at (6, -2.4) {D};
+
+\draw[inh] (b) -- (a);
+\draw[inh] (c) -- (b);
+\draw[inh] (d) -- (c);
+
+\node[note] at (a.east) {\quad depth 1};
+\node[note] at (b.east) {\quad depth 2};
+\node[note] at (c.east) {\quad depth 3 \quad ← OK};
+\node[note] at (d.east) {\quad depth 4 \quad ← 회피 (너무 깊음)};
+
+\end{tikzpicture}
+\end{document}

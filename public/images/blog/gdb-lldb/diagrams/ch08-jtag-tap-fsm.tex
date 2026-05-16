@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    state/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+                  minimum width=30mm, minimum height=10mm, align=center,
+                  font=\sffamily\small},
+    accent/.style={state, draw=hibord, fill=hifill, font=\sffamily\small\bfseries},
+    arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
+    edgelbl/.style={font=\sffamily\scriptsize, inner sep=2pt, fill=white}
+]
+
+% States
+\node[accent] (reset) at (0, 2.2)  {Test-Logic-Reset};
+\node[state]  (idle)  at (0, 0)    {Run-Test/Idle};
+\node[state]  (sdr)   at (4.4, 0)  {Select-DR-Scan};
+\node[state]  (sir)   at (8.8, 0)  {Select-IR-Scan};
+\node[state]  (cap)   at (4.4, -2.4) {Capture-DR};
+\node[state]  (cap2)  at (8.8, -2.4) {(more states\\toward IR/DR)};
+
+% Self-loop on reset
+\draw[arr] (reset.north) .. controls +(2,1.4) and +(2.2,-0.8) ..
+  node[edgelbl, right]{TMS=1} (reset.east);
+
+% reset → idle
+\draw[arr] (reset) -- node[edgelbl, right]{TMS=0} (idle);
+
+% idle → select-DR
+\draw[arr] (idle) -- node[edgelbl, above]{TMS=1} (sdr);
+
+% select-DR → select-IR or capture-DR
+\draw[arr] (sdr) -- node[edgelbl, above]{TMS=1} (sir);
+\draw[arr] (sdr) -- node[edgelbl, right]{TMS=0} (cap);
+\draw[arr] (sir) -- node[edgelbl, right]{...} (cap2);
+
+\end{tikzpicture}
+\end{document}

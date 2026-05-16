@@ -53,14 +53,7 @@ char *p = NULL;
 
 MISRA는 그 자체로 "인증"을 주지 않는다. 인증은 **안전 표준(safety standard)** 이 준다.
 
-```
-IEC 61508 (1998)          ┐
-   │ (functional safety의 모표준)
-   ├── ISO 26262 (자동차, 2011/2018)
-   ├── DO-178C (항공, 2011)
-   ├── IEC 62304 (의료 SW, 2006)
-   └── EN 50128 (철도, 2011)
-```
+![IEC 61508 derived standards — ISO 26262, DO-178C, IEC 62304, EN 50128](/images/blog/misra-c/diagrams/ch01-iec61508-derivatives.svg)
 
 이 안전 표준들은 모두 "*코딩 가이드라인을 따라야 한다*"고만 명시하고, 구체적인 가이드라인은 산업이 자율적으로 정한다. 자동차 분야에서 사실상 표준이 된 것이 MISRA C(C 코드)와 MISRA C++/AUTOSAR C++(C++ 코드)이다.
 

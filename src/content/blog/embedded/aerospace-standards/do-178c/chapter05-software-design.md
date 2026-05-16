@@ -170,24 +170,7 @@ LLR과 *동시에* SW Architecture 작성. *모듈 구조, 데이터 흐름, 제
 
 ### Architecture Notation — SysML
 
-```
-시각적 표기 — SysML Block Diagram:
-
-  ┌─────────────────────────────────────────────────────┐
-  │ Flight Management System                            │
-  │                                                     │
-  │  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
-  │  │  Sensor  │  │ Naviga-  │  │ Auto-    │         │
-  │  │  Mgr     │─→│ tion     │─→│ pilot    │         │
-  │  └──────────┘  └──────────┘  └──────────┘         │
-  │       │             │              │                │
-  │       └─────────────┴──────────────┘                │
-  │                     │                               │
-  │              ┌──────▼──────┐                       │
-  │              │  Display    │                       │
-  │              └─────────────┘                       │
-  └─────────────────────────────────────────────────────┘
-```
+![FMS SysML Block Diagram](/images/blog/do-178c/diagrams/ch05-fms-architecture.svg)
 
 각 *block*이 모듈. *line*이 data/control flow. *port*가 interface.
 
@@ -195,24 +178,7 @@ LLR과 *동시에* SW Architecture 작성. *모듈 구조, 데이터 흐름, 제
 
 OO 시스템(JSF C++, AUTOSAR)은 *UML Class Diagram*:
 
-```
-+──────────────────+         +──────────────────+
-| <<interface>>    |         | <<concrete>>     |
-| ISensor          |◄────────| GpsReceiver      |
-+──────────────────+         +──────────────────+
-| read() : Data    |         | read() : Data    |
-|                  |         | calibrate()      |
-+──────────────────+         +──────────────────+
-        ▲
-        │
-+──────────────────+
-| <<concrete>>     |
-| ImuReceiver      |
-+──────────────────+
-| read() : Data    |
-| ...              |
-+──────────────────+
-```
+![UML Class Diagram — ISensor + concrete implementations](/images/blog/do-178c/diagrams/ch05-uml-class.svg)
 
 C 시스템도 *적절히 UML 차용* 가능 — 모듈을 class 비유.
 
@@ -535,35 +501,7 @@ MB-5: Model standards conformance
 
 ## SCADE 적용 예 — Pitch Control
 
-```
-SCADE Block Diagram (시각):
-
-   ┌─────────┐
-   │ pitch_  │
-   │ command │───────┐
-   └─────────┘       │ +
-                     ▼
-                   ┌─────┐
-                   │ Sum │───→ error
-                   └─────┘
-                     ▲ -
-   ┌─────────┐       │
-   │ pitch_  │───────┘
-   │ measure │
-   └─────────┘
-
-   error ───────┬─────→ K_P ──→ p_term ──┐
-                │                          │ +
-                ├─→ Integrator ──→ i_term ─┤
-                │   (clamp ±10)            │
-                │                          ▼
-                └─→ Derivative ──→ d_term →┌─────┐
-                                            │ Sum │──→ output
-                                            └─────┘
-                                              │ (clamp ±100)
-                                              ▼
-                                         elevator_command
-```
+![SCADE PID Block Diagram — error → P/I/D → output](/images/blog/do-178c/diagrams/ch05-scade-pid.svg)
 
 SCADE가 *이 diagram을 직접 C로 변환*. K_P/K_I/K_D 같은 *상수도 모델 안에서 변경*.
 

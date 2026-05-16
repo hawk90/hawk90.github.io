@@ -158,68 +158,15 @@ ROOT CAUSE: technical + process 양쪽
 
 ### Method 2: Fishbone (Ishikawa) Diagram
 
-```
-              ┌────────────────────────────────────────────┐
-              │                                                │
-              │              Quaternion Drift                  │
-              │                                                │
-              └────────────────────────────────────────────────┘
-                      │
-       ┌─────────┬────┴────┬────────┬─────────┐
-       │         │         │         │           │
-   People     Process    Tool     Method    Material
-       │         │         │         │           │
-       │         │         │         │           │
-김OO 분석      Change      QAC      10-step    Floating
-경험 부족      impact      false   normalize  point
-              missed mode  positive  (CR-089)  precision
-              coverage    only      변경
-       │         │         │         │           │
-       │         │         │         │           │
-   Training    Checklist  Tool     Algorithm   Hardware
-   부족        update      update   re-design   upgrade
-   필요        필요         필요    필요         (long-term)
+![Ishikawa Fishbone Diagram — 5 cause categories converging to effect](/images/blog/ecss-q-st-80c/diagrams/ch05-fishbone.svg)
 
-Root causes identified:
-  Primary:   Change impact missed mode coverage (Process)
-  Secondary: Insufficient training on algorithm fragility (People)
-  Tertiary:  Tool didn't catch drift (Tool gap)
-```
-
-Fishbone이 *multiple cause* 분석에 유리. ECSS는 *Critical NCR*에 권장.
+Fishbone이 *multiple cause* 분석에 유리. 5M 카테고리 (People, Process, Tool, Method, Material) 기준으로 *cause 식별*. ECSS는 *Critical NCR*에 권장.
 
 ### Method 3: Fault Tree Analysis (FTA)
 
-```
-                  Top Event:
-        ┌──────────────────────────┐
-        │ Quaternion drift > spec  │
-        └──────────────┬─────────────┘
-                       │
-                       │ OR
-        ┌──────────────┼──────────────────┐
-        │              │                    │
-   ┌────▼────┐   ┌─────▼─────┐      ┌──────▼──────┐
-   │ Normali- │  │ Integration│       │ Initial value│
-   │ zation   │  │ error      │       │ wrong       │
-   │ infreq.   │  │ accumulate │       │             │
-   └────┬────┘   └─────┬─────┘      └─────────────┘
-        │              │
-        │              │ AND
-   ┌────▼────┐   ┌─────▼─────┐
-   │CR-089    │  │ Quaternion │
-   │implemented│  │ math      │
-   │           │  │ precision  │
-   └─────────┘   └───────────┘
+![Fault Tree Analysis — top event decomposed via OR/AND gates](/images/blog/ecss-q-st-80c/diagrams/ch05-fta.svg)
 
-Probability:
-  Top event: P(quaternion drift)
-           = P(infrequent normalization) AND P(integration error)
-           = high × high
-           ≈ 0.95 (under tumble conditions)
-```
-
-FTA가 *Critical safety NCR*에 표준. *수학적 확률 계산*.
+FTA는 *top event*를 *OR/AND gate*로 분해. 각 basic event의 *확률 × 게이트 logic*으로 *top event 확률 계산*. *Critical safety NCR*에 표준.
 
 ## Corrective Action Plan (CAP)
 

@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    phase/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+                  minimum width=78mm, inner sep=6pt, align=left,
+                  font=\sffamily\small},
+    final/.style={phase, draw=hibord, fill=hifill},
+    arr/.style={-{Stealth[length=2.6mm]}, draw=edgec, line width=0.6pt},
+    title/.style={font=\sffamily\small\bfseries}
+]
+
+\node[phase] (plan) at (0, 0) {%
+  {\bfseries Planning Phase}\\[1pt]
+  {\scriptsize $\bullet$ PSAC, SDP, SVP, SCMP, SQAP 작성}\\
+  {\scriptsize $\bullet$ SRS, SDS, SCS 작성}\\
+  {\scriptsize $\bullet$ FAA SOI 1 Review (계획 승인)}%
+};
+
+\node[phase, below=8mm of plan] (dev) {%
+  {\bfseries Development Phase}\\[1pt]
+  {\scriptsize $\bullet$ Requirements, Design, Code, Integration}\\
+  {\scriptsize $\bullet$ FAA SOI 2 Review}%
+};
+
+\node[phase, below=8mm of dev] (verif) {%
+  {\bfseries Verification Phase}\\[1pt]
+  {\scriptsize $\bullet$ Review, Analysis, Test}\\
+  {\scriptsize $\bullet$ Coverage 분석}\\
+  {\scriptsize $\bullet$ FAA SOI 3 Review}%
+};
+
+\node[final, below=8mm of verif] (cert) {%
+  {\bfseries Final Certification}\\[1pt]
+  {\scriptsize $\bullet$ SAS 제출}\\
+  {\scriptsize $\bullet$ FAA SOI 4 Review → 인증}%
+};
+
+\draw[arr] (plan)  -- (dev);
+\draw[arr] (dev)   -- (verif);
+\draw[arr] (verif) -- (cert);
+
+\end{tikzpicture}
+\end{document}

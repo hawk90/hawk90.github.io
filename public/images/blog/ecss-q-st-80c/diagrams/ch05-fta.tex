@@ -1,0 +1,53 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,shapes.gates.logic.US}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    top/.style={rectangle, rounded corners=3pt, draw=hibord, fill=hifill,
+                minimum width=50mm, minimum height=11mm, align=center,
+                font=\sffamily\small\bfseries},
+    event/.style={rectangle, rounded corners=2pt, draw=conbord, fill=confill,
+                  minimum width=30mm, minimum height=12mm, align=center,
+                  font=\sffamily\scriptsize},
+    basic/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+                  minimum width=28mm, minimum height=10mm, align=center,
+                  font=\sffamily\scriptsize},
+    gate/.style={font=\sffamily\small\bfseries, draw=edgec, fill=nodefill,
+                 rectangle, rounded corners=2pt, minimum width=10mm,
+                 minimum height=5mm},
+    edge/.style={draw=edgec, line width=0.5pt}
+]
+
+% Top event
+\node[top] (top) at (0, 0) {Quaternion drift > spec};
+
+% OR gate below top
+\node[gate, below=4mm of top] (or) {OR};
+\draw[edge] (top.south) -- (or.north);
+
+% 3 intermediate events (under OR)
+\node[event, below=12mm of or, xshift=-50mm] (e1) {Normalization\\infrequent};
+\node[event, below=12mm of or]              (e2) {Integration error\\accumulate};
+\node[event, below=12mm of or, xshift=50mm]  (e3) {Initial value\\wrong};
+
+\draw[edge] (or.south) -- (e1.north);
+\draw[edge] (or.south) -- (e2.north);
+\draw[edge] (or.south) -- (e3.north);
+
+% AND gate under e1 + e2 (they share a deeper cause path)
+\node[gate, below=4mm of e1] (and) {AND};
+\draw[edge] (e1.south) -- (and.north);
+
+% Basic events below AND
+\node[basic, below=10mm of and, xshift=-18mm] (b1) {CR implemented};
+\node[basic, below=10mm of and, xshift=18mm]  (b2) {Math precision\\limit};
+
+\draw[edge] (and.south) -- (b1.north);
+\draw[edge] (and.south) -- (b2.north);
+
+\end{tikzpicture}
+\end{document}

@@ -263,23 +263,7 @@ $ codesign -dvvv $(which debugserver)
 
 핵심은 **TAP**(Test Access Port) — 16-상태 유한 상태 머신. TMS 값에 따라 천이.
 
-```
-                  TMS=1
-        ┌─────────────────────┐
-        ▼                      │
-   Test-Logic-Reset            │
-        │ TMS=0                │
-        ▼                      │
-   Run-Test/Idle ──TMS=1──> Select-DR-Scan
-                                │
-                          ┌─────┴─────┐
-                       TMS=0       TMS=1
-                          │           │
-                          ▼           ▼
-                       Capture-DR  Select-IR-Scan
-                          │           │
-                          ...        ...
-```
+![JTAG TAP Finite State Machine (partial) — TMS 입력에 따른 상태 천이](/images/blog/gdb-lldb/diagrams/ch08-jtag-tap-fsm.svg)
 
 이 상태 머신에서 *명령 레지스터(IR)*와 *데이터 레지스터(DR)*를 시프트해서 칩의 디버그 자원을 조작합니다. 흔히 보는 IR 명령.
 

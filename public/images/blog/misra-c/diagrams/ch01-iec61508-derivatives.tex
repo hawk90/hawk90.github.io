@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    root/.style={rectangle, rounded corners=3pt, draw=hibord, fill=hifill,
+                 minimum width=58mm, minimum height=12mm, align=center,
+                 font=\sffamily\small\bfseries},
+    leaf/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+                 minimum width=58mm, minimum height=10mm, align=center,
+                 font=\sffamily\small},
+    edge/.style={draw=edgec, line width=0.5pt, rounded corners=2pt}
+]
+
+% Root
+\node[root] (root) at (0, 0) {IEC 61508 (1998)\\
+  \scriptsize functional safety의 모표준};
+
+% Derived standards (vertically aligned to the right)
+\node[leaf, right=22mm of root, yshift=20mm]   (iso)  {ISO 26262 \quad 자동차 (2011/2018)};
+\node[leaf, right=22mm of root, yshift=6mm]    (do)   {DO-178C \quad 항공 (2011)};
+\node[leaf, right=22mm of root, yshift=-8mm]   (iec)  {IEC 62304 \quad 의료 SW (2006)};
+\node[leaf, right=22mm of root, yshift=-22mm]  (en)   {EN 50128 \quad 철도 (2011)};
+
+% Tree connectors
+\foreach \node in {iso, do, iec, en} {
+  \draw[edge] (root.east) -| ([xshift=-8mm]\node.west) -- (\node.west);
+}
+
+\end{tikzpicture}
+\end{document}

@@ -102,12 +102,7 @@ public:
 
 ### A10-4-1 — Hierarchy 깊이 *3 이하* 권장
 
-```
-A
-└─ B
-   └─ C        ← OK
-      └─ D     ← 회피 — 너무 깊음
-```
+![Class inheritance depth — A→B→C OK, D too deep](/images/blog/autosar-cpp/diagrams/ch05-hierarchy-depth.svg)
 
 깊은 상속은 *복잡도와 결합도* 증가. *composition* 또는 *interface 한정*.
 

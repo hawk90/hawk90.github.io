@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    umlclass/.style={rectangle, draw=nodebord, line width=0.5pt,
+                     fill=nodefill, inner sep=0pt, align=center,
+                     font=\sffamily\small, minimum width=38mm},
+    umlabs/.style={umlclass, draw=absbord, fill=absfill},
+    umlcon/.style={umlclass, draw=impbord, fill=impfill},
+    sep/.style={font=\sffamily\scriptsize},
+    inh/.style={-{Triangle[length=3.5mm,width=3.5mm,open]},
+                draw=edgec, line width=0.5pt}
+]
+
+% ISensor (top center) — interface (italic)
+\node[umlabs] (isensor) at (0, 0) {%
+  \begin{tabular}{c}
+    {\itshape <<interface>>} \\[1pt]
+    {\bfseries ISensor} \\[1pt] \hline
+    {\scriptsize read() : Data} \\[1pt] \hline
+    {\scriptsize +} \\[-2pt]
+  \end{tabular}%
+};
+
+% GpsReceiver (right) — concrete
+\node[umlcon, right=18mm of isensor] (gps) {%
+  \begin{tabular}{c}
+    {\itshape <<concrete>>} \\[1pt]
+    {\bfseries GpsReceiver} \\[1pt] \hline
+    {\scriptsize read() : Data} \\
+    {\scriptsize calibrate()} \\
+  \end{tabular}%
+};
+
+% ImuReceiver (below) — concrete
+\node[umlcon, below=14mm of isensor] (imu) {%
+  \begin{tabular}{c}
+    {\itshape <<concrete>>} \\[1pt]
+    {\bfseries ImuReceiver} \\[1pt] \hline
+    {\scriptsize read() : Data} \\
+    {\scriptsize \ldots} \\
+  \end{tabular}%
+};
+
+% Inheritance arrows (concrete → interface, open triangle)
+\draw[inh] (gps.west) -- (isensor.east);
+\draw[inh] (imu.north) -- (isensor.south);
+
+\end{tikzpicture}
+\end{document}

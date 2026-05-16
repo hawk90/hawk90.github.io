@@ -29,28 +29,7 @@ ECSS는 *수십 개 표준*의 모음. ECSS-Q-ST-80C는 그중 *SW Quality* 영�
 
 ## ECSS 표준 체계 — 3대 분류
 
-```
-ECSS-M (Management)        — Project Management
-   ├── M-ST-10C  Project Planning
-   ├── M-ST-80C  Risk Management
-   └── ...
-
-ECSS-E (Engineering)       — System Engineering
-   ├── E-ST-10C  System Engineering
-   ├── E-ST-40C  Software Engineering  ← SW의 *기술* 측면
-   ├── E-ST-50C  Communications
-   ├── E-ST-60C  Control Engineering
-   └── ...
-
-ECSS-Q (Quality Assurance) — Product Assurance
-   ├── Q-ST-10C  Product Assurance Management
-   ├── Q-ST-20C  Quality Assurance
-   ├── Q-ST-30C  Dependability
-   ├── Q-ST-40C  Safety
-   ├── Q-ST-60C  EEE Components
-   ├── Q-ST-70C  Materials
-   └── Q-ST-80C  Software Product Assurance  ← 이 시리즈
-```
+![ECSS standard hierarchy — M / E / Q branches with sub-standards](/images/blog/ecss-q-st-80c/diagrams/ch01-ecss-hierarchy.svg)
 
 ECSS-Q-ST-80C는 *Q (품질) 가운데 SW 영역*. *짝꿍은 ECSS-E-ST-40C* (SW Engineering).
 

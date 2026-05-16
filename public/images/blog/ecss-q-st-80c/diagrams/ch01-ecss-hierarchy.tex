@@ -1,0 +1,70 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    branch/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+                   minimum width=46mm, minimum height=10mm, align=center,
+                   font=\sffamily\small\bfseries},
+    leaf/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+                 minimum width=55mm, inner sep=4pt, align=left,
+                 font=\sffamily\scriptsize},
+    hl/.style={leaf, draw=hibord, fill=hifill,
+               font=\sffamily\scriptsize\bfseries},
+    edge/.style={draw=edgec, line width=0.45pt, rounded corners=2pt}
+]
+
+% Three branch headers (top row)
+\node[branch] (m) at (0, 0)    {ECSS-M\\\scriptsize Project Management};
+\node[branch] (e) at (6.2, 0)  {ECSS-E\\\scriptsize System Engineering};
+\node[branch] (q) at (12.4, 0) {ECSS-Q\\\scriptsize Product Assurance};
+
+% --- M branch leaves ---
+\node[leaf, below=4mm of m.south, anchor=north]
+  (m1) {M-ST-10C \quad Project Planning};
+\node[leaf, below=2mm of m1, anchor=north]
+  (m2) {M-ST-80C \quad Risk Management};
+\node[leaf, below=2mm of m2, anchor=north]
+  (m3) {\ldots};
+
+% --- E branch leaves ---
+\node[leaf, below=4mm of e.south, anchor=north]
+  (e1) {E-ST-10C \quad System Engineering};
+\node[hl, below=2mm of e1, anchor=north]
+  (e2) {E-ST-40C \quad Software Engineering};
+\node[leaf, below=2mm of e2, anchor=north]
+  (e3) {E-ST-50C \quad Communications};
+\node[leaf, below=2mm of e3, anchor=north]
+  (e4) {E-ST-60C \quad Control Engineering};
+\node[leaf, below=2mm of e4, anchor=north]
+  (e5) {\ldots};
+
+% --- Q branch leaves ---
+\node[leaf, below=4mm of q.south, anchor=north]
+  (q1) {Q-ST-10C \quad PA Management};
+\node[leaf, below=2mm of q1, anchor=north]
+  (q2) {Q-ST-20C \quad Quality Assurance};
+\node[leaf, below=2mm of q2, anchor=north]
+  (q3) {Q-ST-30C \quad Dependability};
+\node[leaf, below=2mm of q3, anchor=north]
+  (q4) {Q-ST-40C \quad Safety};
+\node[leaf, below=2mm of q4, anchor=north]
+  (q5) {Q-ST-60C \quad EEE Components};
+\node[leaf, below=2mm of q5, anchor=north]
+  (q6) {Q-ST-70C \quad Materials};
+\node[hl, below=2mm of q6, anchor=north]
+  (q7) {Q-ST-80C \quad SW Product Assurance};
+
+% Connecting lines (branch → leaves)
+\foreach \head/\leaves in {m/{m1,m2,m3}, e/{e1,e2,e3,e4,e5}, q/{q1,q2,q3,q4,q5,q6,q7}} {
+  \foreach \leaf in \leaves {
+    \draw[edge] (\head.south) |- (\leaf.west);
+  }
+}
+
+\end{tikzpicture}
+\end{document}
