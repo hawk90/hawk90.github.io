@@ -1,11 +1,11 @@
 ---
 title: "1.7 지금 우리가 가진 것"
-date: 2026-05-09T07:00:00
+date: 2026-05-09T15:54:43
 description: "처음에는 모든 게 좋아 보였다."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 107
-draft: true
+draft: false
 ---
 
 ## 한 장의 이야기

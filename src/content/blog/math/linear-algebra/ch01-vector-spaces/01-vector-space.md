@@ -1,11 +1,11 @@
 ---
 title: "1.1 체와 벡터공간(vector space)"
-date: 2026-05-09T02:00:00
+date: 2026-05-10T06:50:20
 description: "§1.0 에서 평면 화살표·다항식·함수·행렬이 같은 모양의 연산 구조를 공유한다는 사실을 보았다. 이제 그 모양에 정확한 이름을 붙인다."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 101
-draft: true
+draft: false
 ---
 
 §1.0 에서 평면 화살표·다항식·함수·행렬이 *같은 모양*의 연산 구조를 공유한다는 사실을 보았다. 이제 그 모양에 정확한 이름을 붙인다.

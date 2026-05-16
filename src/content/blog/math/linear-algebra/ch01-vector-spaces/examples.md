@@ -1,11 +1,11 @@
 ---
 title: "1장 풀이 예제 (Worked Examples)"
-date: 2026-05-09T09:00:00
+date: 2026-05-09T14:16:44
 description: "문제. 다음 부분집합이 의 부분공간인지 판정하라. 1. 2. 3. 4."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 190
-draft: true
+draft: false
 ---
 
 > **사용법.** [README](./README.md) 의 8개 절(§1.0–§1.7)을 익힌 뒤 *손으로 먼저 풀어 보고* 풀이와 비교한다. 풀이에는 생각이 전개되는 결을 그대로 적었다.

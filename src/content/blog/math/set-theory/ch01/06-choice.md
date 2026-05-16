@@ -1,11 +1,11 @@
 ---
 title: "1.6 마지막 약속"
-date: 2026-05-09T06:00:00
+date: 2026-05-09T15:54:10
 description: "ZF 까지 오는 길에서 우리는 늘 구체적 규칙 으로 집합을 만들었다."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 106
-draft: true
+draft: false
 ---
 
 ## 마지막 한 자리

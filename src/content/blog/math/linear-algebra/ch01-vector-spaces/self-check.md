@@ -1,11 +1,11 @@
 ---
 title: "1장 자기점검 답안 (Self-Check Answers)"
-date: 2026-05-09T11:00:00
+date: 2026-05-09T14:14:49
 description: "A. 덧셈에 대한 역원 존재 (V4) 가 결정적이다."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 192
-draft: true
+draft: false
 ---
 
 > **사용법.** 각 절 파일(`1.0-warmup.md` ~ `1.7-direct-sum.md`) 끝의 자기점검 질문을 *직접 답해 본 뒤* 여기를 본다. 답은 짧고 명료하게 적었다 — 답이 떠오르지 않으면 해당 절로 돌아가는 게 우선이다.

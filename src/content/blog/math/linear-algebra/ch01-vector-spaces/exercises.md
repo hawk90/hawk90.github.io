@@ -1,11 +1,11 @@
 ---
 title: "1장 연습문제 (Exercises)"
-date: 2026-05-09T10:00:00
+date: 2026-05-09T14:20:36
 description: "집합 에 통상의 덧셈·스칼라곱을 부여한다. 가 -벡터공간인가? 이유와 함께 답하라."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 191
-draft: true
+draft: false
 ---
 
 > Hoffman & Kunze, Shilov, 그리고 자체 출제. 풀이는 본문의 정의·정리 번호로 참조한다. 별표 (★) 는 약간 까다롭거나 일반화 가치가 있는 문제.

@@ -1,11 +1,11 @@
 ---
 title: "1.4 일차독립(linearly independent)과 일차종속(linearly dependent)"
-date: 2026-05-09T05:00:00
+date: 2026-05-10T06:52:58
 description: "§1.3 의 생성공간(span)은 벡터를 더 던질수록 더 커지는 도구다. 그러나 다섯 개를 던졌는데 셋만으로도 같은 부분공간(subspace)이 만들어진다면, 나머지 둘은 남는 짐이다. 자리만 차지할 뿐 새로운 방향은 가져오지 못한다."
 tags: ["Linear Algebra", "Mathematics", "Hoffman & Kunze"]
 series: "Linear Algebra"
 seriesOrder: 104
-draft: true
+draft: false
 ---
 
 §1.3 의 생성공간(span)은 벡터를 더 던질수록 더 커지는 도구다. 그러나 다섯 개를 던졌는데 셋만으로도 같은 부분공간(subspace)이 만들어진다면, 나머지 둘은 *남는 짐*이다. 자리만 차지할 뿐 새로운 방향은 가져오지 못한다.

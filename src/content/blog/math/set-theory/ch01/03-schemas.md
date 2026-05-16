@@ -1,11 +1,11 @@
 ---
 title: "1.3 조심스레 자르기"
-date: 2026-05-09T03:00:00
+date: 2026-05-09T15:51:52
 description: "수학에서 집합을 정의하는 가장 자연스러운 방식은 조건 이다."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 103
-draft: true
+draft: false
 ---
 
 ## 우리가 진짜로 하고 싶은 일
