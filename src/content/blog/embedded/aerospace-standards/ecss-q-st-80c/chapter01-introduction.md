@@ -360,7 +360,7 @@ https://ecss.nl/
 - [DO-178C Ch 1 — 항공 SW 인증](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
 - [JSF C++ Ch 1 — F-35 코딩 표준](/blog/embedded/aerospace-standards/jsf-cpp/chapter01-introduction)
 - [JPL Power of 10](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)
-- [MISRA C Ch 1](/blog/embedded/standards/misra-c/chapter01-introduction)
+- [MISRA C Ch 1](/blog/embedded/car-standards/misra-c/chapter01-introduction)
 - [ECSS 공식 — ecss.nl](https://ecss.nl/)
 - [ESA 미션 페이지](https://www.esa.int/Enabling_Support/Space_Engineering_Technology)
 - [KARI 공식](https://www.kari.re.kr/)
