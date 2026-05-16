@@ -59,7 +59,8 @@ export const CATEGORIES: Category[] = [
   // Embedded
   { id: 'embedded/hardware', parent: 'embedded', name: 'Hardware Interfaces', description: 'PCIe, NVMe, DDR, CXL, HBM, UCIe, UALink' },
   { id: 'embedded/protocols', parent: 'embedded', name: 'Protocols', description: 'SPI, UART, I2C, CAN, MIPI' },
-  { id: 'embedded/standards', parent: 'embedded', name: 'Coding Standards', description: 'MISRA, CERT, AUTOSAR' },
+  { id: 'embedded/standards', parent: 'embedded', name: 'Automotive Standards', description: 'MISRA C, CERT C, AUTOSAR C++14 — ISO 26262 자동차 안전 코딩 표준' },
+  { id: 'embedded/aerospace-standards', parent: 'embedded', name: 'Aerospace Standards', description: 'DO-178C, JSF C++, NASA JPL Power of 10, ECSS — 항공·우주 SW 인증·코딩 표준' },
   { id: 'embedded/patterns', parent: 'embedded', name: 'Patterns', description: '실시간, 메모리 제약' },
   { id: 'embedded/industrial', parent: 'embedded', name: 'Industrial', description: 'EtherCAT, PROFINET, TSN' },
   { id: 'embedded/yocto', parent: 'embedded', name: 'Yocto Project', description: 'BitBake, recipes, layers, 커스텀 배포판' },
