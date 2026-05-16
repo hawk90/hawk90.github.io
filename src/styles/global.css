@@ -126,10 +126,6 @@ body {
   font-feature-settings: "ss01", "tnum";  /* Pretendard stylistic set + tabular nums */
   line-height: 1.7;
   min-height: 100vh;
-  background-image:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--color-accent) 14%, transparent) 0, transparent 28rem),
-    radial-gradient(circle at top right, color-mix(in oklab, var(--color-accent) 8%, transparent) 0, transparent 22rem);
-  background-attachment: fixed;
   overflow-x: clip;
 }
 
@@ -198,11 +194,6 @@ body {
     width: 1.25rem;
   }
 
-  body {
-    background-image:
-      radial-gradient(circle at top left, color-mix(in oklab, var(--color-accent) 10%, transparent) 0, transparent 18rem),
-      radial-gradient(circle at top right, color-mix(in oklab, var(--color-accent) 6%, transparent) 0, transparent 14rem);
-  }
 }
 
 /* ─── Card ────────────────────────────────────────────────── */
@@ -242,16 +233,6 @@ body {
 .surface-section {
   position: relative;
   border-top: 1px solid var(--color-border);
-}
-
-.surface-section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, color-mix(in oklab, var(--color-accent) 4%, transparent), transparent 28%),
-    linear-gradient(180deg, color-mix(in oklab, var(--color-bg-secondary) 45%, transparent), transparent 100%);
-  pointer-events: none;
 }
 
 .section-eyebrow {
