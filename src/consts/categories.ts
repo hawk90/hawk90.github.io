@@ -63,10 +63,8 @@ export const CATEGORIES: Category[] = [
   { id: 'embedded/patterns', parent: 'embedded', name: 'Patterns', description: '실시간, 메모리 제약' },
   { id: 'embedded/industrial', parent: 'embedded', name: 'Industrial', description: 'EtherCAT, PROFINET, TSN' },
   { id: 'embedded/yocto', parent: 'embedded', name: 'Yocto Project', description: 'BitBake, recipes, layers, 커스텀 배포판' },
-  { id: 'embedded/bootloader', parent: 'embedded', name: 'Bootloader', description: 'U-Boot, TF-A, SPL/TPL, 보드 포팅' },
-  { id: 'embedded/buildroot', parent: 'embedded', name: 'Buildroot', description: 'rootfs 빌드 시스템, 패키지, 외부 트리' },
-  { id: 'embedded/bsp', parent: 'embedded', name: 'Board Support Package', description: 'SoC 포팅, DT 설계, BSP 워크플로' },
   { id: 'embedded/wireless', parent: 'embedded', name: 'Wireless (Firmware)', description: 'BLE, Zigbee, Thread, Matter, LoRa, ESP32 Wi-Fi — RTOS/MCU 측' },
+  { id: 'embedded/avionics', parent: 'embedded', name: 'Avionics & Aerospace SW', description: '발사체 에비오닉스 umbrella — 아키텍처·Flight SW·C&DH·SW Assurance·GNC·Simulation·Sensors·Systems Engineering' },
 
   // ML
   { id: 'ml/accelerators', parent: 'ml', name: 'Accelerators', description: 'NPU, TPU, Systolic Array' },
