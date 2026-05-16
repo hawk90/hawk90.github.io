@@ -5,7 +5,7 @@ description: "비트필드(R6), 선언(R8), 초기화(R9), Essential Type Model(
 tags: [misra, c, essential-type, conversion, signed, unsigned, bitfield]
 series: "MISRA C"
 seriesOrder: 5
-draft: true
+draft: false
 ---
 
 MISRA C:2012의 가장 큰 기여는 **Essential Type Model**이다. C의 묵시적 변환은 너무 관대해 *부호 손실, 폭 손실, 의미 손상*이 무성하게 발생한다. MISRA는 타입을 8개 범주로 재정의해 *어떤 변환이 안전한지*를 명시한다.

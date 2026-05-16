@@ -5,7 +5,7 @@ description: "포인터 캐스트(R11), 포인터 산술·배열 첨자(R18.1~7)
 tags: [misra, c, pointer, array, void-pointer, vla, flexible-array]
 series: "MISRA C"
 seriesOrder: 6
-draft: true
+draft: false
 ---
 
 포인터는 C의 *가장 강력하면서 가장 위험한* 도구다. MISRA는 R11(타입 변환)과 R18(산술)에 강한 제약을 둔다. 위반은 거의 항상 메모리 안전 사고와 직결된다.
@@ -258,7 +258,7 @@ typedef void (*timer_callback_t)(timer_handle_t, void *user_data);
 
 ## 다음 장 예고
 
-7장은 R14~R16 — 제어흐름이다. `for`, `while`, `switch`, `goto` — *단일 종료점*과 *fall-through*의 정책을 본다.
+7장은 R14~R16 제어흐름이다. `for`, `while`, `switch`, `goto`에 대한 *단일 종료점*과 *fall-through*의 정책을 본다.
 
 ## 관련 항목
 

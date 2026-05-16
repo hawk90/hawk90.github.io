@@ -5,14 +5,14 @@ description: "SEI CERT의 배경, 보안 중심 철학, MISRA와의 비교, Risk
 tags: [cert-c, security, sei, cwe, risk-assessment]
 series: "CERT C"
 seriesOrder: 1
-draft: true
+draft: false
 ---
 
 CERT(Computer Emergency Response Team)는 1988년 Morris Worm 사건 이후 카네기멜런 SEI(Software Engineering Institute)가 미국방부 자금으로 설립한 보안 대응 조직이다. CERT C는 그 산물 중 하나 — *C 언어로 작성된 코드에서 보안 취약점을 만들지 않기 위한 표준*이다.
 
 ## CERT의 출발점 — 보안
 
-MISRA가 *안전(safety)* — 의도하지 않은 동작이 사람을 다치게 하는 것 — 을 막는다면, CERT는 *보안(security)* — 의도된 공격이 시스템을 손상시키는 것 — 을 막는다. 둘은 겹치지만 강조점이 다르다.
+MISRA는 *안전(safety)*에 초점을 둔다. 의도하지 않은 동작이 사람을 다치게 하는 것을 막는다. CERT는 *보안(security)*에 초점을 둔다. 의도된 공격이 시스템을 손상시키는 것을 막는다. 둘은 겹치지만 강조점이 다르다.
 
 ```
 Safety (MISRA)          Security (CERT)
@@ -171,15 +171,15 @@ clang-tidy -checks='cert-*' source.c
 ## 시리즈 로드맵
 
 1. **Ch 1 (지금)** — CERT 단체, 철학, MISRA와의 비교, Risk Assessment.
-2. **Ch 2** — Preprocessor 규칙(PRE) — 매크로, include, 조건부.
-3. **Ch 3** — Declarations & Initialization (DCL) — 선언 정합성, 초기화.
-4. **Ch 4** — Expressions (EXP) — sequence point, 평가 순서, sizeof.
-5. **Ch 5** — Integers (INT) — overflow, wraparound, 부호 변환.
-6. **Ch 6** — Floating Point (FLP) — NaN, 비교, 변환.
-7. **Ch 7** — Arrays & Strings (ARR, STR) — 경계, null 종결.
-8. **Ch 8** — Memory Management (MEM) — alloc/free, 누수, double free.
+2. **Ch 2** — Preprocessor 규칙(PRE): 매크로, include, 조건부.
+3. **Ch 3** — Declarations & Initialization (DCL): 선언 정합성, 초기화.
+4. **Ch 4** — Expressions (EXP): sequence point, 평가 순서, sizeof.
+5. **Ch 5** — Integers (INT): overflow, wraparound, 부호 변환.
+6. **Ch 6** — Floating Point (FLP): NaN, 비교, 변환.
+7. **Ch 7** — Arrays & Strings (ARR, STR): 경계, null 종결.
+8. **Ch 8** — Memory Management (MEM): alloc/free, 누수, double free.
 9. **Ch 9** — I/O, 환경, 시그널 (FIO, ENV, SIG).
-10. **Ch 10** — POSIX & Concurrency (POS, CON) — 동기화, race condition.
+10. **Ch 10** — POSIX & Concurrency (POS, CON): 동기화, race condition.
 
 ## 정리
 

@@ -5,7 +5,7 @@ description: "함수 매크로 대신 inline(PRE00), 괄호화(PRE01), side effe
 tags: [cert-c, preprocessor, macro, header-guard, side-effect]
 series: "CERT C"
 seriesOrder: 2
-draft: true
+draft: false
 ---
 
 전처리기는 *컴파일 전*에 텍스트를 치환한다. C 언어 시맨틱과 무관하게 동작하므로 *타입 안전성, 스코프, 평가 순서* 모두 무력화된다. PRE 카테고리는 이로 인한 보안 함정을 다룬다.
