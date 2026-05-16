@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    host/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+                 minimum width=46mm, inner sep=8pt, align=center,
+                 font=\sffamily\small},
+    target/.style={host, draw=impbord, fill=impfill},
+    port/.style={font=\sffamily\scriptsize\ttfamily, inner sep=2pt},
+    cable/.style={draw=edgec, line width=0.7pt}
+]
+
+\node[host]   (left)  at (0, 0)    {디버그 호스트\\\scriptsize gdb vmlinux};
+\node[target] (right) at (7.8, 0)  {타깃 머신\\\scriptsize kgdb stub};
+
+% Cable
+\draw[cable, rounded corners=10pt]
+  (left.south) -- ++(0, -1.0)
+  -- node[font=\sffamily\scriptsize, above, midway]{USB-Serial cable}
+     ([yshift=-1cm]right.south)
+  -- (right.south);
+
+% Port labels
+\node[port] at ([yshift=-1.2cm]left.south)  {(ttyUSB0)};
+\node[port] at ([yshift=-1.2cm]right.south) {(ttyS0)};
+
+\end{tikzpicture}
+\end{document}

@@ -92,13 +92,7 @@ user-space gdb와 *같은 인터페이스*. step/next/bt/print 모두.
 
 ## 실 하드웨어 + 시리얼
 
-```
-[디버그 호스트]                [타깃 머신]
-   gdb vmlinux                  kgdb stub
-       |                            |
-       └─── USB-Serial cable ───────┘
-         (ttyUSB0)            (ttyS0)
-```
+![KGDB serial link — host gdb ↔ target kgdb via USB-Serial cable](/images/blog/kernel-debug/diagrams/ch05-kgdb-serial-link.svg)
 
 타깃의 `/etc/default/grub`에 옵션 추가:
 

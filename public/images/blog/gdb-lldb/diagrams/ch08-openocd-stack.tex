@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    box/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+                minimum width=60mm, minimum height=11mm, align=center,
+                font=\sffamily\small},
+    accent/.style={box, draw=hibord, fill=hifill},
+    arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
+    lbl/.style={font=\sffamily\scriptsize, fill=white, inner sep=2pt}
+]
+
+\node[box]    (gdb)  at (0, 5.4)  {GDB};
+\node[box]    (rsp)  at (0, 3.6)  {OpenOCD RSP server};
+\node[box]    (tgt)  at (0, 1.8)  {target.cpp — 칩 모델};
+\node[box]    (adp)  at (0, 0)    {adapter.cpp — 프로브 모델};
+\node[accent] (hw)   at (0, -1.8) {USB $\to$ 프로브 $\to$ SWD/JTAG $\to$ 칩};
+
+\draw[arr] (gdb) -- node[lbl]{RSP} (rsp);
+\draw[arr] (rsp) -- (tgt);
+\draw[arr] (tgt) -- (adp);
+\draw[arr] (adp) -- (hw);
+
+\end{tikzpicture}
+\end{document}

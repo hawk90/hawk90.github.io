@@ -303,21 +303,7 @@ Cortex-M은 거의 SWD. STM32, nRF52, ESP32-S3 등이 모두 SWD 2핀 + SWO 1핀
 
 JTAG/SWD가 *물리 인터페이스*라면 그 위에 칩 안에서 실제 일을 하는 게 **CoreSight**입니다.
 
-```
-[SWD/JTAG 핀]
-     │
-     ▼
-[DAP (Debug Access Port)]
-     │  AMBA AHB-AP (CPU 메모리 공간)
-     ▼
-[CPU][FPB][DWT][ITM][ETM]
-     │   │    │    │    │
-     │   │    │    │    └── 명령 트레이스 (CPU 매 명령)
-     │   │    │    └─── 소프트웨어 trace (printf 같은 메시지)
-     │   │    └────── 데이터 워치포인트 + 카운터 (cycle count 포함)
-     │   └────────── flash-patch + breakpoint
-     └──────────── core debug 레지스터 (DHCSR/DCRSR/DEMCR)
-```
+![ARM CoreSight architecture — DAP에서 CPU/FPB/DWT/ITM/ETM으로 fan-out](/images/blog/gdb-lldb/diagrams/ch08-coresight-arch.svg)
 
 | 블록 | 역할 |
 |------|------|
@@ -376,18 +362,7 @@ OpenOCD(Open On-Chip Debugger)는 거의 모든 프로브 + 거의 모든 칩을
 
 내부 구조 (간단).
 
-```
-[GDB] ──RSP──> [OpenOCD RSP server]
-                       │
-                       ▼
-              [target.cpp — 칩 모델]
-                       │
-                       ▼
-              [adapter.cpp — 프로브 모델]
-                       │
-                       ▼
-                [USB → 프로브 → SWD/JTAG → 칩]
-```
+![OpenOCD internal stack — GDB → RSP server → target → adapter → SWD/JTAG → 칩](/images/blog/gdb-lldb/diagrams/ch08-openocd-stack.svg)
 
 설정 파일이 두 갈래로 분리된 이유 — 프로브와 칩이 독립적으로 조합되기 때문입니다.
 

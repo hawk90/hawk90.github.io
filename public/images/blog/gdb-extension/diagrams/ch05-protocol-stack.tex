@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{kotex}
+
+\begin{document}
+\input{../../_design.tex}
+
+\begin{tikzpicture}[blog,
+    box/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
+                minimum width=44mm, minimum height=11mm, align=center,
+                font=\sffamily\small},
+    arr/.style={<->, >={Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
+    lbl/.style={font=\sffamily\scriptsize, fill=white, inner sep=2pt}
+]
+
+\node[box] (ide)     at (0, 0)    {IDE};
+\node[box] (adapter) at (6, 0)    {Adapter};
+\node[box] (dbg)     at (12.4, 0) {GDB / LLDB /\\debugpy / \ldots};
+
+\draw[arr] (ide) -- node[lbl]{DAP}              (adapter);
+\draw[arr] (adapter) -- node[lbl]{MI 또는 RSP}   (dbg);
+
+\end{tikzpicture}
+\end{document}
