@@ -1,55 +1,35 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usepackage{pgf-umlcd}
 \usepackage{kotex}
 
+% Color tweaks — match blog palette
+\renewcommand{\umltextcolor}{black}
+\renewcommand{\umldrawcolor}{black!60}
+\renewcommand{\umlfillcolor}{blue!4}
+
 \begin{document}
-\input{../../_design.tex}
 
-\begin{tikzpicture}[blog,
-    umlclass/.style={rectangle, draw=nodebord, line width=0.5pt,
-                     fill=nodefill, inner sep=0pt, align=center,
-                     font=\sffamily\small, minimum width=38mm},
-    umlabs/.style={umlclass, draw=absbord, fill=absfill},
-    umlcon/.style={umlclass, draw=impbord, fill=impfill},
-    sep/.style={font=\sffamily\scriptsize},
-    inh/.style={-{Triangle[length=3.5mm,width=3.5mm,open]},
-                draw=edgec, line width=0.5pt}
-]
+\begin{tikzpicture}[font=\sffamily\small]
 
-% ISensor (top center) — interface (italic)
-\node[umlabs] (isensor) at (0, 0) {%
-  \begin{tabular}{c}
-    {\itshape <<interface>>} \\[1pt]
-    {\bfseries ISensor} \\[1pt] \hline
-    {\scriptsize read() : Data} \\[1pt] \hline
-    {\scriptsize +} \\[-2pt]
-  \end{tabular}%
-};
+% ISensor — interface, top-left
+\begin{interface}[text width=4.2cm]{ISensor}{0, 0}
+  \operation{+ read() : Data}
+\end{interface}
 
-% GpsReceiver (right) — concrete
-\node[umlcon, right=18mm of isensor] (gps) {%
-  \begin{tabular}{c}
-    {\itshape <<concrete>>} \\[1pt]
-    {\bfseries GpsReceiver} \\[1pt] \hline
-    {\scriptsize read() : Data} \\
-    {\scriptsize calibrate()} \\
-  \end{tabular}%
-};
+% GpsReceiver — concrete, top-right
+\begin{class}[text width=4.4cm]{GpsReceiver}{6.5, 0}
+  \implement{ISensor}
+  \operation{+ read() : Data}
+  \operation{+ calibrate()}
+\end{class}
 
-% ImuReceiver (below) — concrete
-\node[umlcon, below=14mm of isensor] (imu) {%
-  \begin{tabular}{c}
-    {\itshape <<concrete>>} \\[1pt]
-    {\bfseries ImuReceiver} \\[1pt] \hline
-    {\scriptsize read() : Data} \\
-    {\scriptsize \ldots} \\
-  \end{tabular}%
-};
-
-% Inheritance arrows (concrete → interface, open triangle)
-\draw[inh] (gps.west) -- (isensor.east);
-\draw[inh] (imu.north) -- (isensor.south);
+% ImuReceiver — concrete, below ISensor
+\begin{class}[text width=4.4cm]{ImuReceiver}{0, -3.8}
+  \implement{ISensor}
+  \operation{+ read() : Data}
+  \operation{+ \ldots}
+\end{class}
 
 \end{tikzpicture}
 \end{document}

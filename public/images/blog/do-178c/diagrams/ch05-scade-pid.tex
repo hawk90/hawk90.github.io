@@ -8,53 +8,52 @@
 
 \begin{tikzpicture}[blog,
     sig/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
-                minimum width=22mm, minimum height=10mm, align=center,
+                minimum width=24mm, minimum height=10mm, align=center,
                 font=\sffamily\small},
     blk/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
-                minimum width=22mm, minimum height=10mm, align=center,
+                minimum width=26mm, minimum height=10mm, align=center,
                 font=\sffamily\small},
     sum/.style={circle, draw=hibord, fill=hifill, line width=0.5pt,
-                inner sep=0pt, minimum size=8mm, font=\sffamily\small\bfseries},
-    sigl/.style={font=\sffamily\scriptsize, inner sep=2pt},
+                inner sep=0pt, minimum size=9mm, font=\sffamily\small\bfseries},
+    sigl/.style={font=\sffamily\scriptsize, inner sep=2pt, fill=white},
     flow/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt}
 ]
 
 % --- Section 1: error computation ---
-\node[sig] (cmd)  at (0, 1.2)  {pitch\_command};
-\node[sig] (meas) at (0, -1.2) {pitch\_measure};
-\node[sum] (sum1) at (3.6, 0)  {$\sum$};
-\node[sig] (err)  at (6.2, 0)  {error};
+\node[sig] (cmd)  at (0, 1.4)   {pitch\_command};
+\node[sig] (meas) at (0, -1.4)  {pitch\_measure};
+\node[sum] (sum1) at (4.0, 0)   {$\sum$};
+\node[sig] (err)  at (7.2, 0)   {error};
 
-\draw[flow] (cmd.east)  -- node[sigl, above]{$+$} (sum1.west);
-\draw[flow] (meas.east) -- node[sigl, below]{$-$} (sum1.west);
+\draw[flow] (cmd.east)  -- node[sigl, pos=0.9]{$+$} (sum1.north west);
+\draw[flow] (meas.east) -- node[sigl, pos=0.9]{$-$} (sum1.south west);
 \draw[flow] (sum1.east) -- (err.west);
 
 % --- Section 2: PID branches ---
-% Branch point (just a node for clean fan-out)
-\coordinate (fan) at (7.4, 0);
+\coordinate (fan) at (8.6, 0);
 \draw[flow] (err.east) -- (fan);
 
-\node[blk] (kp)    at (10.4, 1.8)  {$K_P$};
-\node[blk] (intg)  at (10.4, 0)    {Integrator\\\scriptsize(clamp $\pm 10$)};
-\node[blk] (deriv) at (10.4, -1.8) {Derivative};
+\node[blk] (kp)    at (12.2, 2.2)  {$K_P$};
+\node[blk] (intg)  at (12.2, 0)    {Integrator\\\scriptsize(clamp $\pm 10$)};
+\node[blk] (deriv) at (12.2, -2.2) {Derivative};
 
 \draw[flow] (fan) |- (kp.west);
 \draw[flow] (fan) -- (intg.west);
 \draw[flow] (fan) |- (deriv.west);
 
 % --- Section 3: Sum and output ---
-\node[sum] (sum2) at (14.0, 0)    {$\sum$};
+\node[sum] (sum2) at (16.4, 0) {$\sum$};
 
-\node[sigl] at ([xshift=-2mm, yshift=1.5mm]sum2.west) {$+$};
-\node[sigl] at ([xshift=-2mm]sum2.west) {$+$};
-\node[sigl] at ([xshift=-2mm, yshift=-1.5mm]sum2.west) {$+$};
+\draw[flow] (kp.east)    -| node[sigl, pos=0.25]{p\_term} (sum2.north);
+\draw[flow] (intg.east)  -- node[sigl, midway]{i\_term}   (sum2.west);
+\draw[flow] (deriv.east) -| node[sigl, pos=0.25]{d\_term} (sum2.south);
 
-\draw[flow] (kp.east)    -| node[sigl, above, pos=0.25]{p\_term} (sum2.north);
-\draw[flow] (intg.east)  -- node[sigl, above]{i\_term} (sum2.west);
-\draw[flow] (deriv.east) -| node[sigl, below, pos=0.25]{d\_term} (sum2.south);
+\node[sigl] at ([xshift=-3mm]sum2.north) {$+$};
+\node[sigl] at ([yshift=2mm]sum2.west)   {$+$};
+\node[sigl] at ([xshift=-3mm]sum2.south) {$+$};
 
-\node[sig] (out) at (17.5, 0) {elevator\_\\command};
-\draw[flow] (sum2.east) -- node[sigl, above]{output (clamp $\pm 100$)} (out.west);
+\node[sig] (out) at (20.4, 0) {elevator\_\\command};
+\draw[flow] (sum2.east) -- node[sigl, midway]{clamp $\pm 100$} (out.west);
 
 \end{tikzpicture}
 \end{document}

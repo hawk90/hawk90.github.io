@@ -8,13 +8,15 @@
 
 \begin{tikzpicture}[blog,
     layer/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
-                  minimum width=46mm, minimum height=11mm, align=center,
+                  minimum width=58mm, minimum height=11mm, align=center,
                   font=\sffamily\small},
     block/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
-                  minimum width=16mm, minimum height=10mm, align=center,
+                  minimum width=18mm, minimum height=12mm, align=center,
                   font=\sffamily\small\bfseries},
-    arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
-    lbl/.style={font=\sffamily\scriptsize, anchor=west, align=left}
+    note/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+                 align=center, font=\sffamily\scriptsize, inner sep=4pt,
+                 text width=28mm, minimum height=12mm},
+    arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt}
 ]
 
 % Layer 1: SWD/JTAG pins
@@ -24,39 +26,27 @@
 \node[layer] (dap) at (0, 2.4)
   {DAP (Debug Access Port)\\\scriptsize AMBA AHB-AP};
 
-% Layer 3: 5 blocks (CPU, FPB, DWT, ITM, ETM)
-\node[block] (cpu) at (-6.6, 0) {CPU};
-\node[block] (fpb) at (-3.3, 0) {FPB};
-\node[block] (dwt) at (0, 0)    {DWT};
-\node[block] (itm) at (3.3, 0)  {ITM};
-\node[block] (etm) at (6.6, 0)  {ETM};
-
-% Vertical arrows
 \draw[arr] (pins) -- (dap);
+
+% Layer 3: 5 blocks side by side (CPU, FPB, DWT, ITM, ETM)
+\node[block] (cpu) at (-7.2, 0) {CPU};
+\node[block] (fpb) at (-3.6, 0) {FPB};
+\node[block] (dwt) at ( 0,   0) {DWT};
+\node[block] (itm) at ( 3.6, 0) {ITM};
+\node[block] (etm) at ( 7.2, 0) {ETM};
+
 \draw[arr] (dap.south) -- ([yshift=8mm]cpu.north) -- (cpu.north);
 \draw[arr] (dap.south) -- ([yshift=8mm]fpb.north) -- (fpb.north);
 \draw[arr] (dap.south) -- (dwt.north);
 \draw[arr] (dap.south) -- ([yshift=8mm]itm.north) -- (itm.north);
 \draw[arr] (dap.south) -- ([yshift=8mm]etm.north) -- (etm.north);
 
-% Annotation labels (right side)
-\node[lbl] at (8.5, -0.6)  {core debug 레지스터 (DHCSR/DCRSR/DEMCR)};
-\node[lbl] at (8.5, -1.4)  {flash-patch + breakpoint};
-\node[lbl] at (8.5, -2.2)  {데이터 워치포인트 + cycle counter};
-\node[lbl] at (8.5, -3.0)  {software trace (printf 대용)};
-\node[lbl] at (8.5, -3.8)  {명령 트레이스 (CPU 매 명령)};
-
-% Connector lines from blocks down to right-side labels
-\draw[draw=edgesc, line width=0.4pt]
-  (cpu.south) -- ++(0, -0.6) -- (8.4, -0.6);
-\draw[draw=edgesc, line width=0.4pt]
-  (fpb.south) -- ++(0, -1.4) -- (8.4, -1.4);
-\draw[draw=edgesc, line width=0.4pt]
-  (dwt.south) -- ++(0, -2.2) -- (8.4, -2.2);
-\draw[draw=edgesc, line width=0.4pt]
-  (itm.south) -- ++(0, -3.0) -- (8.4, -3.0);
-\draw[draw=edgesc, line width=0.4pt]
-  (etm.south) -- ++(0, -3.8) -- (8.4, -3.8);
+% Annotation notes directly below each block (no crossing lines)
+\node[note, below=4mm of cpu] (n1) {core debug 레지스터\\(DHCSR/DCRSR/DEMCR)};
+\node[note, below=4mm of fpb] (n2) {flash-patch\\+ breakpoint};
+\node[note, below=4mm of dwt] (n3) {데이터 워치포인트\\+ cycle counter};
+\node[note, below=4mm of itm] (n4) {software trace\\(printf 대용)};
+\node[note, below=4mm of etm] (n5) {명령 트레이스\\(CPU 매 명령)};
 
 \end{tikzpicture}
 \end{document}

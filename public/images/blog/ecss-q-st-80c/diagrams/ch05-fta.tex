@@ -1,53 +1,60 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,shapes.gates.logic.US}
+\usetikzlibrary{arrows.meta,shapes.gates.logic.US,shapes.geometric,positioning}
 \usepackage{kotex}
 
 \begin{document}
 \input{../../_design.tex}
 
 \begin{tikzpicture}[blog,
-    top/.style={rectangle, rounded corners=3pt, draw=hibord, fill=hifill,
-                minimum width=50mm, minimum height=11mm, align=center,
-                font=\sffamily\small\bfseries},
-    event/.style={rectangle, rounded corners=2pt, draw=conbord, fill=confill,
-                  minimum width=30mm, minimum height=12mm, align=center,
-                  font=\sffamily\scriptsize},
-    basic/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
-                  minimum width=28mm, minimum height=10mm, align=center,
-                  font=\sffamily\scriptsize},
-    gate/.style={font=\sffamily\small\bfseries, draw=edgec, fill=nodefill,
-                 rectangle, rounded corners=2pt, minimum width=10mm,
-                 minimum height=5mm},
-    edge/.style={draw=edgec, line width=0.5pt}
+    topev/.style={rectangle, rounded corners=3pt, draw=conbord, fill=confill,
+                  minimum width=58mm, minimum height=12mm, align=center,
+                  font=\sffamily\small\bfseries},
+    interm/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+                   minimum width=32mm, minimum height=12mm, align=center,
+                   font=\sffamily\scriptsize},
+    basic/.style={circle, draw=impbord, fill=impfill, line width=0.5pt,
+                  minimum size=18mm, align=center, font=\sffamily\scriptsize,
+                  inner sep=1pt},
+    ftagate/.style={draw=hibord, fill=hifill, line width=0.6pt,
+                    rotate=90, transform shape,
+                    minimum width=10mm, anchor=output},
+    edge/.style={draw=edgec, line width=0.55pt}
 ]
 
 % Top event
-\node[top] (top) at (0, 0) {Quaternion drift > spec};
+\node[topev] (top) at (0, 0) {Quaternion drift $>$ spec};
 
 % OR gate below top
-\node[gate, below=4mm of top] (or) {OR};
-\draw[edge] (top.south) -- (or.north);
+\node[or gate US, ftagate] (or) at (0, -2.0) {};
+\node[font=\sffamily\scriptsize\bfseries, transform shape=false] at (or.center) {OR};
 
-% 3 intermediate events (under OR)
-\node[event, below=12mm of or, xshift=-50mm] (e1) {Normalization\\infrequent};
-\node[event, below=12mm of or]              (e2) {Integration error\\accumulate};
-\node[event, below=12mm of or, xshift=50mm]  (e3) {Initial value\\wrong};
+% Intermediate events (3) under OR
+\node[interm] (e1) at (-4.2, -4.8) {Normalization\\infrequent};
+\node[interm] (e2) at (0,    -4.8) {Integration error\\accumulate};
+\node[interm] (e3) at (4.2,  -4.8) {Initial value\\wrong};
 
-\draw[edge] (or.south) -- (e1.north);
-\draw[edge] (or.south) -- (e2.north);
-\draw[edge] (or.south) -- (e3.north);
+% AND gate under e1
+\node[and gate US, ftagate] (and) at (-4.2, -6.8) {};
+\node[font=\sffamily\scriptsize\bfseries, transform shape=false] at (and.center) {AND};
 
-% AND gate under e1 + e2 (they share a deeper cause path)
-\node[gate, below=4mm of e1] (and) {AND};
-\draw[edge] (e1.south) -- (and.north);
+% Basic events under AND
+\node[basic] (b1) at (-6.4, -9.4) {CR\\implemented};
+\node[basic] (b2) at (-2.0, -9.4) {Math\\precision\\limit};
 
-% Basic events below AND
-\node[basic, below=10mm of and, xshift=-18mm] (b1) {CR implemented};
-\node[basic, below=10mm of and, xshift=18mm]  (b2) {Math precision\\limit};
+% Edges
+\draw[edge] (top.south) -- (or.input 1);
+\draw[edge] (top.south) -- (or.input 2);  % cosmetic, OR gate has 2 inputs
 
-\draw[edge] (and.south) -- (b1.north);
-\draw[edge] (and.south) -- (b2.north);
+\draw[edge] (or.output) -- (e1.north);
+\draw[edge] (or.output) -- (e2.north);
+\draw[edge] (or.output) -- (e3.north);
+
+\draw[edge] (e1.south) -- (and.input 1);
+\draw[edge] (e1.south) -- (and.input 2);
+
+\draw[edge] (and.output) -- (b1.north);
+\draw[edge] (and.output) -- (b2.north);
 
 \end{tikzpicture}
 \end{document}

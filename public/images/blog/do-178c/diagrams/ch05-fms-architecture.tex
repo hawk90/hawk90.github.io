@@ -8,36 +8,38 @@
 
 \begin{tikzpicture}[blog,
     mod/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
-                minimum width=22mm, minimum height=12mm, align=center,
+                minimum width=24mm, minimum height=12mm, align=center,
                 font=\sffamily\small},
     container/.style={rectangle, rounded corners=4pt, draw=nodebord,
-                      fill=nodefill!50, inner sep=10pt},
+                      fill=nodefill!50, inner sep=12pt, inner ysep=14pt},
     flow/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt}
 ]
 
 % Top row — Sensor Mgr → Navigation → Autopilot
 \node[mod] (sensor) at (0, 0)     {Sensor\\Mgr};
-\node[mod] (nav)    at (3.4, 0)   {Navigation};
-\node[mod] (auto)   at (6.8, 0)   {Autopilot};
+\node[mod] (nav)    at (3.6, 0)   {Navigation};
+\node[mod] (auto)   at (7.2, 0)   {Autopilot};
 
 % Bottom — Display
-\node[mod] (disp) at (3.4, -2.4) {Display};
+\node[mod] (disp) at (3.6, -2.8) {Display};
 
 % Horizontal flow at top
 \draw[flow] (sensor.east) -- (nav.west);
 \draw[flow] (nav.east) -- (auto.west);
 
-% All three top modules feed into Display
-\draw[flow] (sensor.south) |- ([yshift=4mm]disp.north);
-\draw[flow] (nav.south) -- (disp.north);
-\draw[flow] (auto.south) |- ([yshift=4mm]disp.north);
+% Three arrows into different anchors of Display (spread, not converging)
+\draw[flow] (sensor.south) |- (disp.west);
+\draw[flow] (nav.south)    -- (disp.north);
+\draw[flow] (auto.south)   |- (disp.east);
 
 % Container around all
 \begin{pgfonlayer}{background}
-  \node[container, fit=(sensor)(nav)(auto)(disp),
-        label={[font=\sffamily\small\bfseries, anchor=north west,
-                xshift=4pt, yshift=-4pt]north west:Flight Management System}] {};
+  \node[container, fit=(sensor)(nav)(auto)(disp)] (frame) {};
 \end{pgfonlayer}
+
+% Title above container (not inside)
+\node[anchor=south west, font=\sffamily\small\bfseries]
+  at ([yshift=2pt]frame.north west) {Flight Management System};
 
 \end{tikzpicture}
 \end{document}

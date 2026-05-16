@@ -1,6 +1,6 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usetikzlibrary{positioning,arrows.meta,calc}
 \usepackage{kotex}
 
 \begin{document}
@@ -8,45 +8,68 @@
 
 \begin{tikzpicture}[blog,
     effect/.style={rectangle, rounded corners=3pt, draw=hibord, fill=hifill,
-                   minimum width=40mm, minimum height=12mm, align=center,
+                   minimum width=42mm, minimum height=14mm, align=center,
                    font=\sffamily\small\bfseries},
-    cat/.style={font=\sffamily\small\bfseries, align=center},
-    cause/.style={font=\sffamily\scriptsize, align=center, inner sep=2pt},
-    spine/.style={draw=edgec, line width=0.7pt, -{Stealth[length=3mm]}},
-    bone/.style={draw=edgec, line width=0.5pt}
+    cat/.style={font=\sffamily\small\bfseries, align=center,
+                rectangle, draw=absbord, fill=absfill, rounded corners=2pt,
+                inner sep=3pt, minimum width=20mm},
+    cause/.style={font=\sffamily\scriptsize, align=left, anchor=west,
+                  inner sep=1pt},
+    spine/.style={draw=edgec, line width=0.8pt, -{Stealth[length=3mm]}},
+    bone/.style={draw=edgec, line width=0.55pt},
+    subbone/.style={draw=edgesc, line width=0.4pt}
 ]
 
-% Main effect (right side)
-\node[effect] (eff) at (14, 0) {결과 / 문제\\(Effect)};
-
-% Spine
+% Effect (right) and spine
+\node[effect] (eff) at (16, 0) {결과 / 문제\\(Effect)};
 \draw[spine] (0, 0) -- (eff.west);
 
-% Top categories (3): People, Process, Tool
-\foreach \x/\name in {2.4/People, 6.4/Process, 10.4/Tool} {
-  \node[cat] (top-\name) at (\x, 2.4) {\name};
-  \draw[bone] (top-\name.south) -- (\x + 0.8, 0);
-}
+% --- Top categories: People, Process, Tool ---
+% Each category sits above the spine; bone slopes down-right into spine.
+% Sub-cause lines branch off the bone.
 
-% Bottom categories (2): Method, Material
-\foreach \x/\name in {4.0/Method, 8.0/Material} {
-  \node[cat] (bot-\name) at (\x, -2.4) {\name};
-  \draw[bone] (bot-\name.north) -- (\x + 0.8, 0);
-}
+% People
+\node[cat] (people) at (2.6, 3.0) {People};
+\draw[bone] (people.south) -- (4.2, 0);
+\node[cause] at (1.4, 2.2) {경험 부족};
+\node[cause] at (1.8, 1.4) {Training 부족};
+\draw[subbone] (2.0, 2.15) -- (2.7, 1.7);
+\draw[subbone] (2.4, 1.35) -- (3.0, 1.05);
 
-% Top sub-causes (small bones angling into the category lines)
-\node[cause, anchor=east] at (2.4, 1.6) {경험 부족};
-\node[cause, anchor=east] at (2.4, 1.05) {Training 부족};
-\node[cause, anchor=east] at (6.4, 1.6) {Change impact};
-\node[cause, anchor=east] at (6.4, 1.05) {missed coverage};
-\node[cause, anchor=east] at (10.4, 1.6) {False positive};
-\node[cause, anchor=east] at (10.4, 1.05) {Tool gap};
+% Process
+\node[cat] (process) at (7.0, 3.0) {Process};
+\draw[bone] (process.south) -- (8.6, 0);
+\node[cause] at (5.8, 2.2) {Change impact};
+\node[cause] at (6.2, 1.4) {missed coverage};
+\draw[subbone] (6.5, 2.15) -- (7.1, 1.7);
+\draw[subbone] (6.9, 1.35) -- (7.4, 1.05);
 
-% Bottom sub-causes
-\node[cause, anchor=east] at (4.0, -1.6)  {Algorithm};
-\node[cause, anchor=east] at (4.0, -1.05) {re-design};
-\node[cause, anchor=east] at (8.0, -1.6)  {Floating point};
-\node[cause, anchor=east] at (8.0, -1.05) {precision};
+% Tool
+\node[cat] (tool) at (11.4, 3.0) {Tool};
+\draw[bone] (tool.south) -- (13.0, 0);
+\node[cause] at (10.2, 2.2) {False positive};
+\node[cause] at (10.6, 1.4) {Tool gap};
+\draw[subbone] (10.9, 2.15) -- (11.5, 1.7);
+\draw[subbone] (11.3, 1.35) -- (11.8, 1.05);
+
+% --- Bottom categories: Method, Material ---
+% Below spine; bone slopes up-right into spine.
+
+% Method
+\node[cat] (method) at (4.6, -3.0) {Method};
+\draw[bone] (method.north) -- (6.4, 0);
+\node[cause] at (3.6, -2.2) {Algorithm};
+\node[cause] at (4.0, -1.4) {re-design};
+\draw[subbone] (4.2, -2.15) -- (4.9, -1.7);
+\draw[subbone] (4.6, -1.35) -- (5.2, -1.05);
+
+% Material
+\node[cat] (material) at (9.4, -3.0) {Material};
+\draw[bone] (material.north) -- (11.2, 0);
+\node[cause] at (8.4, -2.2) {Floating point};
+\node[cause] at (8.8, -1.4) {precision};
+\draw[subbone] (9.1, -2.15) -- (9.7, -1.7);
+\draw[subbone] (9.4, -1.35) -- (10.0, -1.05);
 
 \end{tikzpicture}
 \end{document}

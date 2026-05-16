@@ -1,30 +1,43 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usetikzlibrary{arrows.meta}
+\usepackage{forest}
 \usepackage{kotex}
 
 \begin{document}
 \input{../../_design.tex}
 
-\begin{tikzpicture}[blog,
-    ok/.style={cls, draw=impbord, fill=impfill, minimum width=14mm},
-    bad/.style={cls, draw=conbord, fill=confill, minimum width=14mm},
-    note/.style={font=\sffamily\scriptsize, anchor=west}
-]
+\begin{forest}
+  for tree={
+    font=\sffamily\small,
+    grow'=south,
+    parent anchor=south,
+    child anchor=north,
+    draw=impbord, line width=0.4pt,
+    rounded corners=2.5pt,
+    fill=impfill,
+    minimum width=14mm,
+    minimum height=8mm,
+    inner sep=2pt,
+    l sep=8mm,
+    s sep=4mm,
+    edge={-{Triangle[length=3mm,width=3mm,open]}, draw=edgec, line width=0.5pt},
+    edge path={
+      \noexpand\path[\forestoption{edge}]
+        (.child anchor) -- (!u.parent anchor)\forestoption{edge label};
+    },
+  },
+  [A,
+    name=A,
+    [B,
+      name=B,
+      [C, edge label={node[midway, right, font=\sffamily\scriptsize]{← OK (depth 3)}},
+        [D, fill=confill, draw=conbord,
+          edge label={node[midway, right, font=\sffamily\scriptsize]{← 회피 (depth 4)}}
+        ]
+      ]
+    ]
+  ]
+\end{forest}
 
-\node[ok] (a) at (0, 0)    {A};
-\node[ok] (b) at (2, -0.8) {B};
-\node[ok] (c) at (4, -1.6) {C};
-\node[bad] (d) at (6, -2.4) {D};
-
-\draw[inh] (b) -- (a);
-\draw[inh] (c) -- (b);
-\draw[inh] (d) -- (c);
-
-\node[note] at (a.east) {\quad depth 1};
-\node[note] at (b.east) {\quad depth 2};
-\node[note] at (c.east) {\quad depth 3 \quad ← OK};
-\node[note] at (d.east) {\quad depth 4 \quad ← 회피 (너무 깊음)};
-
-\end{tikzpicture}
 \end{document}
