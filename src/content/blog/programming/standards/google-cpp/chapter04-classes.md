@@ -600,5 +600,5 @@ private:
 
 ## 관련 항목
 
-- [Ch 3: Scoping](/blog/embedded/standards/google-cpp/chapter03-scoping)
-- [Ch 5: Functions](/blog/embedded/standards/google-cpp/chapter05-functions)
+- [Ch 3: Scoping](/blog/embedded/automotive/google-cpp/chapter03-scoping)
+- [Ch 5: Functions](/blog/embedded/automotive/google-cpp/chapter05-functions)

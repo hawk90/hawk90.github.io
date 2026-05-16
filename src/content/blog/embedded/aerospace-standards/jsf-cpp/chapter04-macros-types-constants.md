@@ -482,5 +482,5 @@ clang-tidy --checks='cppcoreguidelines-*,readability-*' src.cpp
 
 - [Ch 3 — Lexical, Naming](/blog/embedded/aerospace-standards/jsf-cpp/chapter03-lexical-naming)
 - [Ch 5 — Declarations, Casts](/blog/embedded/aerospace-standards/jsf-cpp/chapter05-declarations-casts)
-- [MISRA C++ Ch 5 — Essential Type Model](/blog/embedded/car-standards/misra-c/chapter05-expressions-types)
-- [AUTOSAR C++14 Ch 3 — Expressions, Conversions](/blog/embedded/car-standards/autosar-cpp/chapter03-expressions-conversions)
+- [MISRA C++ Ch 5 — Essential Type Model](/blog/embedded/automotive/misra-c/chapter05-expressions-types)
+- [AUTOSAR C++14 Ch 3 — Expressions, Conversions](/blog/embedded/automotive/autosar-cpp/chapter03-expressions-conversions)

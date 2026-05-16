@@ -553,5 +553,5 @@ clang-tidy --checks='modernize-*,cppcoreguidelines-*,readability-*' src/
 
 - [Ch 4 — Macros, Types, Constants](/blog/embedded/aerospace-standards/jsf-cpp/chapter04-macros-types-constants)
 - [Ch 6 — Statements, Functions](/blog/embedded/aerospace-standards/jsf-cpp/chapter06-statements-functions)
-- [MISRA C Ch 4 — Syntax, Format](/blog/embedded/car-standards/misra-c/chapter04-syntax-format)
-- [AUTOSAR C++14 Ch 3 — Expressions](/blog/embedded/car-standards/autosar-cpp/chapter03-expressions-conversions)
+- [MISRA C Ch 4 — Syntax, Format](/blog/embedded/automotive/misra-c/chapter04-syntax-format)
+- [AUTOSAR C++14 Ch 3 — Expressions](/blog/embedded/automotive/autosar-cpp/chapter03-expressions-conversions)

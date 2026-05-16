@@ -626,5 +626,5 @@ constexpr int Factorial() {
 
 - [Ch 8 — Inheritance, Virtual](/blog/embedded/aerospace-standards/jsf-cpp/chapter08-classes-inheritance)
 - [Ch 10 — Exceptions, Memory, Library](/blog/embedded/aerospace-standards/jsf-cpp/chapter10-exceptions-memory-library)
-- [AUTOSAR C++14 Ch 6 — Templates](/blog/embedded/car-standards/autosar-cpp/chapter06-templates)
-- [AUTOSAR C++14 Ch 12 — Compile-time C++](/blog/embedded/car-standards/autosar-cpp/chapter12-compile-time-cpp)
+- [AUTOSAR C++14 Ch 6 — Templates](/blog/embedded/automotive/autosar-cpp/chapter06-templates)
+- [AUTOSAR C++14 Ch 12 — Compile-time C++](/blog/embedded/automotive/autosar-cpp/chapter12-compile-time-cpp)

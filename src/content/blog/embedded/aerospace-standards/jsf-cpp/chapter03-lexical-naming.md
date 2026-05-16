@@ -504,6 +504,6 @@ CI에서 자동 검증. 위반 시 *PR 실패*.
 
 - [Ch 2 — Environment, Language](/blog/embedded/aerospace-standards/jsf-cpp/chapter02-environment-language)
 - [Ch 4 — Macros, Types, Constants](/blog/embedded/aerospace-standards/jsf-cpp/chapter04-macros-types-constants)
-- [AUTOSAR C++14 Ch 2 — Language](/blog/embedded/car-standards/autosar-cpp/chapter02-language-build)
+- [AUTOSAR C++14 Ch 2 — Language](/blog/embedded/automotive/autosar-cpp/chapter02-language-build)
 - [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 - [LLVM Coding Standards](https://llvm.org/docs/CodingStandards.html)

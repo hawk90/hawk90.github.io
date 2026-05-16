@@ -425,5 +425,5 @@ Concept, alias, designated initializer가 자연스럽게 함께 쓰였다.
 
 ## 관련 항목
 
-- [Ch 7: const / Numbers / Macros](/blog/embedded/standards/google-cpp/chapter07-features-const-macros)
-- [Ch 9: Naming](/blog/embedded/standards/google-cpp/chapter09-naming)
+- [Ch 7: const / Numbers / Macros](/blog/embedded/automotive/google-cpp/chapter07-features-const-macros)
+- [Ch 9: Naming](/blog/embedded/automotive/google-cpp/chapter09-naming)

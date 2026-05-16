@@ -649,5 +649,5 @@ Template이 *runtime cost 없음*. 단 *binary size ↑* (각 type instantiation
 - [Ch 7 — Classes basic](/blog/embedded/aerospace-standards/jsf-cpp/chapter07-classes-basic)
 - [Ch 9 — Templates](/blog/embedded/aerospace-standards/jsf-cpp/chapter09-templates)
 - [Ch 10 — Exceptions, Memory](/blog/embedded/aerospace-standards/jsf-cpp/chapter10-exceptions-memory-library)
-- [AUTOSAR C++14 Ch 5 — Classes](/blog/embedded/car-standards/autosar-cpp/chapter05-classes-inheritance)
+- [AUTOSAR C++14 Ch 5 — Classes](/blog/embedded/automotive/autosar-cpp/chapter05-classes-inheritance)
 - [CppCoreGuidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)

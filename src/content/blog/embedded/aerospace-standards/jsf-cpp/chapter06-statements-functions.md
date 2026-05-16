@@ -645,5 +645,5 @@ ErrorCode ProcessData(const Data &p_input, Result &p_output) {
 - [Ch 5 — Declarations, Casts](/blog/embedded/aerospace-standards/jsf-cpp/chapter05-declarations-casts)
 - [Ch 7 — Classes basic](/blog/embedded/aerospace-standards/jsf-cpp/chapter07-classes-basic)
 - [Ch 10 — Exceptions, Memory](/blog/embedded/aerospace-standards/jsf-cpp/chapter10-exceptions-memory-library)
-- [MISRA C Ch 8 — Functions](/blog/embedded/car-standards/misra-c/chapter08-functions)
+- [MISRA C Ch 8 — Functions](/blog/embedded/automotive/misra-c/chapter08-functions)
 - [NASA JPL Power of 10](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)

@@ -577,6 +577,6 @@ blacklist / whitelist  →   blocklist / allowlist
 
 ## 관련 항목
 
-- [Ch 9: Naming](/blog/embedded/standards/google-cpp/chapter09-naming)
-- [Ch 1: Background](/blog/embedded/standards/google-cpp/chapter01-background-version-magic)
+- [Ch 9: Naming](/blog/embedded/automotive/google-cpp/chapter09-naming)
+- [Ch 1: Background](/blog/embedded/automotive/google-cpp/chapter01-background-version-magic)
 - [원문 — Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)

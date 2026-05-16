@@ -249,7 +249,7 @@ JSF C++ 원본은 *C++03 기반* (2005 발행 시점의 표준). C++11/14/17/20/
 ## 관련 항목
 
 - [DO-178C 시리즈](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
-- [AUTOSAR C++14 시리즈](/blog/embedded/car-standards/autosar-cpp/chapter01-intro)
-- [MISRA C 시리즈](/blog/embedded/car-standards/misra-c/chapter01-introduction)
+- [AUTOSAR C++14 시리즈](/blog/embedded/automotive/autosar-cpp/chapter01-intro)
+- [MISRA C 시리즈](/blog/embedded/automotive/misra-c/chapter01-introduction)
 - [NASA JPL Power of 10](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)
 - [원문 PDF (Stroustrup 사이트)](https://www.stroustrup.com/JSF-AV-rules.pdf)

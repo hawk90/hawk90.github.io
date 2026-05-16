@@ -393,5 +393,5 @@ private:
 
 ## 관련 항목
 
-- [Ch 6: Memory / Exceptions](/blog/embedded/standards/google-cpp/chapter06-features-memory-exceptions)
-- [Ch 8: Type Deduction / Templates](/blog/embedded/standards/google-cpp/chapter08-deduction-templates-lambdas)
+- [Ch 6: Memory / Exceptions](/blog/embedded/automotive/google-cpp/chapter06-features-memory-exceptions)
+- [Ch 8: Type Deduction / Templates](/blog/embedded/automotive/google-cpp/chapter08-deduction-templates-lambdas)

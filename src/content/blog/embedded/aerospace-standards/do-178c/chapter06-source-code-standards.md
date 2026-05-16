@@ -805,6 +805,6 @@ int pitch_pid_compute(
 
 - [Ch 5 — Software Design (LLR + Architecture)](/blog/embedded/aerospace-standards/do-178c/chapter05-software-design)
 - [Ch 7 — Integration·Build·EOC](/blog/embedded/aerospace-standards/do-178c/chapter07-integration-build)
-- [MISRA C Ch 1](/blog/embedded/car-standards/misra-c/chapter01-introduction)
+- [MISRA C Ch 1](/blog/embedded/automotive/misra-c/chapter01-introduction)
 - [JPL Power of 10](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)
 - [MISRA Project Coding Standard examples](https://misra.org.uk/)

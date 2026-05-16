@@ -358,5 +358,5 @@ absl::Status Submit(std::unique_ptr<Order> order);
 
 ## 관련 항목
 
-- [Ch 4: Classes](/blog/embedded/standards/google-cpp/chapter04-classes)
-- [Ch 6: Memory / Exceptions](/blog/embedded/standards/google-cpp/chapter06-features-memory-exceptions)
+- [Ch 4: Classes](/blog/embedded/automotive/google-cpp/chapter04-classes)
+- [Ch 6: Memory / Exceptions](/blog/embedded/automotive/google-cpp/chapter06-features-memory-exceptions)

@@ -318,5 +318,5 @@ private:
 
 ## 관련 항목
 
-- [Ch 1: Background](/blog/embedded/standards/google-cpp/chapter01-background-version-magic)
-- [Ch 3: Scoping](/blog/embedded/standards/google-cpp/chapter03-scoping)
+- [Ch 1: Background](/blog/embedded/automotive/google-cpp/chapter01-background-version-magic)
+- [Ch 3: Scoping](/blog/embedded/automotive/google-cpp/chapter03-scoping)

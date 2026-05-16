@@ -140,8 +140,8 @@ Ch 10  : 한국 적용 + 시리즈 마무리
 - [DO-178C 시리즈](/blog/embedded/aerospace-standards/do-178c/chapter01-overview) — 항공 SW 인증
 - [JSF C++ 시리즈](/blog/embedded/aerospace-standards/jsf-cpp/chapter01-introduction) — F-35 코딩 표준
 - [NASA JPL Power of 10](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)
-- [MISRA C 시리즈](/blog/embedded/car-standards/misra-c/chapter01-introduction) — 자동차 + 항공 공통
-- [AUTOSAR C++14 시리즈](/blog/embedded/car-standards/autosar-cpp/chapter01-intro)
+- [MISRA C 시리즈](/blog/embedded/automotive/misra-c/chapter01-introduction) — 자동차 + 항공 공통
+- [AUTOSAR C++14 시리즈](/blog/embedded/automotive/autosar-cpp/chapter01-intro)
 
 ### 자료
 

@@ -728,7 +728,7 @@ Phase 5 — Assertion enrichment (지속)
 
 ## 관련 항목
 
-- [MISRA C Ch 1 — MISRA란](/blog/embedded/car-standards/misra-c/chapter01-introduction)
+- [MISRA C Ch 1 — MISRA란](/blog/embedded/automotive/misra-c/chapter01-introduction)
 - [DO-178C Ch 1 — 항공 SW 인증](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
 - [JSF C++ Ch 1 — F-35 코딩 표준](/blog/embedded/aerospace-standards/jsf-cpp/chapter01-introduction)
 - [ECSS-Q-ST-80C Ch 1 — ESA 표준](/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter01-introduction)

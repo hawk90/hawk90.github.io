@@ -517,7 +517,7 @@ JSF가 *C++03 기반*이라 *modern C++ 기능은 원본 범위 외*. 후속 표
 - Move semantics
 - 표준 thread library (`std::thread`, `std::mutex`)
 
-각 표준이 어디까지 허용하는지는 *AUTOSAR C++14 Guidelines*, *MISRA C++:2023* 문서 참조. 본 블로그의 [AUTOSAR C++14 시리즈](/blog/embedded/car-standards/autosar-cpp/chapter01-intro)도 참고.
+각 표준이 어디까지 허용하는지는 *AUTOSAR C++14 Guidelines*, *MISRA C++:2023* 문서 참조. 본 블로그의 [AUTOSAR C++14 시리즈](/blog/embedded/automotive/autosar-cpp/chapter01-intro)도 참고.
 
 ## 일반적인 정적 분석 finding (memory + library)
 
@@ -570,6 +570,6 @@ JSF가 *C++03 기반*이라 *modern C++ 기능은 원본 범위 외*. 후속 표
 
 - [Ch 9 — Templates](/blog/embedded/aerospace-standards/jsf-cpp/chapter09-templates)
 - [Ch 11 — AUTOSAR, MISRA 비교](/blog/embedded/aerospace-standards/jsf-cpp/chapter11-comparison)
-- [AUTOSAR C++14 Ch 7 — Exception Handling](/blog/embedded/car-standards/autosar-cpp/chapter07-exceptions)
-- [AUTOSAR C++14 Ch 11 — RAII Pattern Catalog](/blog/embedded/car-standards/autosar-cpp/chapter11-raii-pattern-catalog)
+- [AUTOSAR C++14 Ch 7 — Exception Handling](/blog/embedded/automotive/autosar-cpp/chapter07-exceptions)
+- [AUTOSAR C++14 Ch 11 — RAII Pattern Catalog](/blog/embedded/automotive/autosar-cpp/chapter11-raii-pattern-catalog)
 - [NASA JPL Power of 10 Rule 3 — Dynamic Memory](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)

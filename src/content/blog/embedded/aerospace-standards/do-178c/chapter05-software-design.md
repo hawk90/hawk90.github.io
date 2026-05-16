@@ -674,7 +674,7 @@ SymTA/S (Symtavision): 자동차 + 항공.
 - [Ch 4 — Software Requirements (HLR)](/blog/embedded/aerospace-standards/do-178c/chapter04-software-requirements)
 - [Ch 6 — Source Code Standards](/blog/embedded/aerospace-standards/do-178c/chapter06-source-code-standards)
 - [Ch 9 — Coverage Analysis (MC/DC)](/blog/embedded/aerospace-standards/do-178c/chapter09-coverage-mcdc)
-- [MISRA C Ch 1](/blog/embedded/car-standards/misra-c/chapter01-introduction)
+- [MISRA C Ch 1](/blog/embedded/automotive/misra-c/chapter01-introduction)
 - [Ansys SCADE](https://www.ansys.com/products/embedded-software/ansys-scade-suite)
 - [MathWorks Simulink](https://www.mathworks.com/products/simulink.html)
 - [AbsInt aiT — WCET Analyzer](https://www.absint.com/ait/)

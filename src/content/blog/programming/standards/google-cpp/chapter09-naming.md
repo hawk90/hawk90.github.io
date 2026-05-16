@@ -466,5 +466,5 @@ bool IsAllowedRegion(absl::string_view region);
 
 ## 관련 항목
 
-- [Ch 8: Type Deduction / Templates](/blog/embedded/standards/google-cpp/chapter08-deduction-templates-lambdas)
-- [Ch 10: Comments / Formatting](/blog/embedded/standards/google-cpp/chapter10-comments-formatting-closing)
+- [Ch 8: Type Deduction / Templates](/blog/embedded/automotive/google-cpp/chapter08-deduction-templates-lambdas)
+- [Ch 10: Comments / Formatting](/blog/embedded/automotive/google-cpp/chapter10-comments-formatting-closing)

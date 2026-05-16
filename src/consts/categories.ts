@@ -59,7 +59,7 @@ export const CATEGORIES: Category[] = [
   // Embedded
   { id: 'embedded/hardware', parent: 'embedded', name: 'Hardware Interfaces', description: 'PCIe, NVMe, DDR, CXL, HBM, UCIe, UALink' },
   { id: 'embedded/protocols', parent: 'embedded', name: 'Protocols', description: 'SPI, UART, I2C, CAN, MIPI' },
-  { id: 'embedded/standards', parent: 'embedded', name: 'Automotive Standards', description: 'MISRA C, CERT C, AUTOSAR C++14 — ISO 26262 자동차 안전 코딩 표준' },
+  { id: 'embedded/automotive', parent: 'embedded', name: 'Automotive Standards', description: 'MISRA C, CERT C, AUTOSAR C++14 — ISO 26262 자동차 안전 코딩 표준' },
   { id: 'embedded/aerospace-standards', parent: 'embedded', name: 'Aerospace Standards', description: 'DO-178C, JSF C++, NASA JPL Power of 10, ECSS — 항공·우주 SW 인증·코딩 표준' },
   { id: 'embedded/patterns', parent: 'embedded', name: 'Patterns', description: '실시간, 메모리 제약' },
   { id: 'embedded/industrial', parent: 'embedded', name: 'Industrial', description: 'EtherCAT, PROFINET, TSN' },
@@ -82,6 +82,7 @@ export const CATEGORIES: Category[] = [
 
   // Others
   { id: 'math/applied', parent: 'math', name: 'Applied Math', description: '이산수학, 확률통계' },
+  { id: 'math/numerical', parent: 'math', name: 'Numerical Computing', description: 'Numerical Recipes — 수치 선형대수, 적분, ODE/PDE, FFT, 최적화' },
   { id: 'philosophy/math', parent: 'philosophy', name: 'Philosophy of Math', description: '플라톤주의, 형식주의' },
   { id: 'science/classics', parent: 'science', name: 'Classics', description: 'Newton, Euclid' },
 ];
