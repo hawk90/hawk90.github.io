@@ -389,7 +389,7 @@ KARI 무인기 / KF-21 시제:
 
 ## 관련 항목
 
-- [MISRA C Ch 1 — MISRA란](/blog/embedded/standards/misra-c/chapter01-introduction)
+- [MISRA C Ch 1 — MISRA란](/blog/embedded/car-standards/misra-c/chapter01-introduction)
 - [JSF C++ Ch 1 — F-35 코딩 표준](/blog/embedded/aerospace-standards/jsf-cpp/chapter01-introduction)
 - [JPL Power of 10](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)
 - [RTCA DO-178C](https://www.rtca.org/training/do-178c-software-considerations-in-airborne-systems-and-equipment-certification/)
