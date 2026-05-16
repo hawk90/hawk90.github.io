@@ -300,12 +300,6 @@ body {
   color: var(--color-text-muted);
 }
 
-.footer-panel {
-  border: 1px solid var(--color-border);
-  border-radius: 1rem;
-  background: color-mix(in oklab, var(--color-bg-secondary) 78%, var(--color-bg-primary));
-}
-
 /* ─── Buttons ─────────────────────────────────────────────── */
 .btn {
   display: inline-flex;

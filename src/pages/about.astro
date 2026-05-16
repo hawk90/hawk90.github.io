@@ -7,13 +7,12 @@ import { ABOUT_DATA } from '../consts/about';
   <section class="py-16 lg:py-24">
     <div class="container">
       <div class="max-w-4xl mx-auto">
-      <div class="card card-hero p-8 lg:p-10 mb-16">
-        <div class="grid lg:grid-cols-5 gap-8 lg:gap-12 items-center">
+        <div class="grid lg:grid-cols-5 gap-8 lg:gap-12 items-center mb-16">
           <div class="lg:col-span-2 flex justify-center lg:justify-start">
             <img
               src={ABOUT_DATA.photo}
               alt={ABOUT_DATA.name}
-              class="w-48 h-48 lg:w-56 lg:h-56 object-cover rounded-3xl shadow-lg ring-1 ring-[var(--color-border)]"
+              class="w-48 h-48 lg:w-56 lg:h-56 object-cover rounded-3xl"
               width="224"
               height="224"
               loading="eager"
@@ -46,9 +45,9 @@ import { ABOUT_DATA } from '../consts/about';
         </div>
       </div>
 
-      <div class="grid gap-6">
+      <div class="space-y-10">
         {ABOUT_DATA.sections.map((section) => (
-          <section class="card card-panel">
+          <section class="border-t border-[var(--color-border)] pt-6">
             <div class="flex items-center gap-3 mb-3">
               <span class="text-2xl">{section.icon}</span>
               <h2 class="text-xl font-bold">{section.title}</h2>
@@ -60,7 +59,7 @@ import { ABOUT_DATA } from '../consts/about';
         ))}
 
         {ABOUT_DATA.hobbies.length > 0 && (
-          <section class="card card-panel">
+          <section class="border-t border-[var(--color-border)] pt-6">
             <div class="flex items-center gap-3 mb-3">
               <span class="text-2xl">🎯</span>
               <h2 class="text-xl font-bold">Hobbies</h2>
