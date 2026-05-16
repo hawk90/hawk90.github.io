@@ -209,7 +209,7 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
              sidebar a second scrolling surface. Only long sub-sections
              should scroll independently. -->
         <aside class="hidden lg:block w-64 shrink-0">
-          <div class="sticky top-24 sidebar-shell space-y-6">
+          <div class="sticky top-24 space-y-6">
             {seriesPosts.length > 1 && (
               <div>
                 <SeriesSidebar

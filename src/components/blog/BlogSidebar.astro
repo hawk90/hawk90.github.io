@@ -104,7 +104,7 @@ const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
 
 <aside class="hidden lg:block w-72 shrink-0">
   <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
-    <div class="sidebar-shell space-y-5">
+    <div class="space-y-5">
       <a
         href="/blog"
         class:list={[
@@ -122,21 +122,21 @@ const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
 
       <div class="sidebar-divider">
         <div class="flex items-center justify-between mb-3">
-        <h3 class="sidebar-section-title">Browse</h3>
-        <div class="flex gap-1">
-          <button
-            type="button"
-            data-tree-expand-all
-            class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] px-2 py-1 rounded-lg transition-colors"
-            title="Expand all"
-          >Expand</button>
-          <button
-            type="button"
-            data-tree-collapse-all
-            class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] px-2 py-1 rounded-lg transition-colors"
-            title="Collapse all"
-          >Collapse</button>
-        </div>
+          <h3 class="sidebar-section-title">Browse</h3>
+          <div class="flex gap-1">
+            <button
+              type="button"
+              data-tree-expand-all
+              class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] px-1 py-1 transition-colors"
+              title="Expand all"
+            >Expand</button>
+            <button
+              type="button"
+              data-tree-collapse-all
+              class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] px-1 py-1 transition-colors"
+              title="Collapse all"
+            >Collapse</button>
+          </div>
         </div>
         <nav class="space-y-1">
           {categoryTree.map((node) => (

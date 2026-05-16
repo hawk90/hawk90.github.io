@@ -47,15 +47,11 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
   .toc-link {
     position: relative;
     line-height: 1.4;
-    border-radius: 0.75rem;
-    padding-left: 0.2rem;
-    padding-right: 0.2rem;
   }
   /* Active heading: small accent bar that overlays the rail */
   .toc-link.is-active {
     color: var(--color-accent);
     font-weight: 500;
-    background: var(--color-accent-faint);
   }
   .toc-link.is-active::before {
     content: '';
