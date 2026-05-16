@@ -178,6 +178,33 @@ body {
   padding-inline: 1.5rem;
 }
 
+@media (max-width: 768px) {
+  .container,
+  .container-narrow {
+    padding-inline: 1rem;
+  }
+
+  .card {
+    padding: 1.125rem;
+    border-radius: 0.875rem;
+  }
+
+  .section-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+  }
+
+  .section-eyebrow::before {
+    width: 1.25rem;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at top left, color-mix(in oklab, var(--color-accent) 10%, transparent) 0, transparent 18rem),
+      radial-gradient(circle at top right, color-mix(in oklab, var(--color-accent) 6%, transparent) 0, transparent 14rem);
+  }
+}
+
 /* ─── Card ────────────────────────────────────────────────── */
 .card {
   background-color: var(--color-bg-secondary);
@@ -265,6 +292,11 @@ body {
   border-radius: 1rem;
   background: color-mix(in oklab, var(--color-bg-secondary) 88%, var(--color-bg-primary));
   padding: 1rem;
+}
+
+.sidebar-divider {
+  border-top: 1px solid color-mix(in oklab, var(--color-border) 74%, transparent);
+  padding-top: 1.25rem;
 }
 
 .sidebar-section-title {

@@ -103,9 +103,8 @@ const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
 ---
 
 <aside class="hidden lg:block w-72 shrink-0">
-  <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1 space-y-6">
-    <!-- All Posts Link -->
-    <div class="sidebar-shell">
+  <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
+    <div class="sidebar-shell space-y-5">
       <a
         href="/blog"
         class:list={[
@@ -120,11 +119,9 @@ const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
         </svg>
         All Posts
       </a>
-    </div>
 
-    <!-- Category Tree -->
-    <div class="sidebar-shell">
-      <div class="flex items-center justify-between mb-3">
+      <div class="sidebar-divider">
+        <div class="flex items-center justify-between mb-3">
         <h3 class="sidebar-section-title">Browse</h3>
         <div class="flex gap-1">
           <button
@@ -140,31 +137,31 @@ const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
             title="Collapse all"
           >Collapse</button>
         </div>
+        </div>
+        <nav class="space-y-1">
+          {categoryTree.map((node) => (
+            <CategoryTreeNode node={node} />
+          ))}
+        </nav>
       </div>
-      <nav class="space-y-1">
-        {categoryTree.map((node) => (
-          <CategoryTreeNode node={node} />
-        ))}
-      </nav>
-    </div>
 
-    <!-- Tags -->
-    <div class="sidebar-shell">
-      <h3 class="sidebar-section-title mb-3">Tags</h3>
-      <div class="flex flex-wrap gap-2">
-        {sortedTags.slice(0, maxTagsInSidebar).map(([tag]) => {
-          const isTagActive = isActiveTag(tag);
-          return (
-            <a
-              href={getTagUrl(tag)}
-              class:list={[
-                isTagActive && 'ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg-primary)] rounded-full',
-              ]}
-            >
-              <TagBadge tag={tag} />
-            </a>
-          );
-        })}
+      <div class="sidebar-divider">
+        <h3 class="sidebar-section-title mb-3">Tags</h3>
+        <div class="flex flex-wrap gap-2">
+          {sortedTags.slice(0, maxTagsInSidebar).map(([tag]) => {
+            const isTagActive = isActiveTag(tag);
+            return (
+              <a
+                href={getTagUrl(tag)}
+                class:list={[
+                  isTagActive && 'ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg-primary)] rounded-full',
+                ]}
+              >
+                <TagBadge tag={tag} />
+              </a>
+            );
+          })}
+        </div>
       </div>
     </div>
   </div>

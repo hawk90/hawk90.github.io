@@ -84,25 +84,18 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
 
     <!-- Mobile Menu Button -->
     <div class="flex md:hidden items-center gap-1">
+      <button
+        type="button"
+        data-search-trigger
+        class="btn btn-ghost p-2"
+        aria-label={t('search')}
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
       <LanguageSwitcher />
       <ThemeToggle />
-
-      <!-- Admin -->
-      {showAdminLink && (
-        <a href="/admin" class="btn btn-ghost p-2" aria-label="Admin">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </a>
-      )}
-
-      <!-- Settings -->
-      <a href="/settings" class="btn btn-ghost p-2" aria-label="Settings">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </a>
       <button
         type="button"
         data-mobile-menu-trigger
@@ -122,7 +115,9 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
     data-mobile-menu
     class="hidden md:hidden border-t border-[var(--color-border)] bg-[var(--color-bg-primary)]"
   >
-    <ul class="container py-4 space-y-2">
+    <div class="container py-4">
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3">
+        <ul class="space-y-1">
       {NAV_CONFIG.map((link) => (
         <li>
           <a
@@ -130,17 +125,30 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
             data-nav-link={link.href}
             data-nav-match={(link.match ?? [link.href]).join(',')}
             class:list={[
-              'block py-2 text-base font-medium transition-colors',
+              'block rounded-xl px-3 py-3 text-base font-medium transition-colors',
               isNavActive(link.href, link.match)
-                ? 'text-[var(--color-accent)]'
-                : 'text-[var(--color-text-secondary)]',
+                ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
+                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]',
             ]}
           >
             {link.label}
           </a>
         </li>
       ))}
-    </ul>
+        </ul>
+
+        <div class="mt-3 grid grid-cols-2 gap-2 border-t border-[var(--color-border)] pt-3">
+          <a href="/settings" class="rounded-xl px-3 py-3 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors">
+            Settings
+          </a>
+          {showAdminLink && (
+            <a href="/admin" class="rounded-xl px-3 py-3 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors">
+              Admin
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 

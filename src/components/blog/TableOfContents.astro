@@ -15,15 +15,13 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 
 {filteredHeadings.length > 0 && (
   <nav class="toc text-sm" aria-label="Table of contents">
-    <h2 class="text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-semibold mb-3">
-      On this page
-    </h2>
+    <h2 class="sidebar-section-title mb-3">On this page</h2>
     <ul class="toc-list" id="toc-list" role="list">
       {filteredHeadings.map((heading) => (
         <li class:list={['toc-item', `toc-depth-${heading.depth}`]}>
           <a
             href={`#${heading.slug}`}
-            class="toc-link block py-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+            class="toc-link block py-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
             data-heading={heading.slug}
           >
             {heading.text}
@@ -38,8 +36,8 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
   /* Continuous left rail using ::before; active marker is the link itself */
   .toc-list {
     position: relative;
-    padding-left: 0.75rem;
-    border-left: 1px solid var(--color-border);
+    padding-left: 0.9rem;
+    border-left: 1px solid color-mix(in oklab, var(--color-border) 72%, transparent);
   }
   .toc-item {
     position: relative;
@@ -49,11 +47,15 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
   .toc-link {
     position: relative;
     line-height: 1.4;
+    border-radius: 0.75rem;
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
   }
   /* Active heading: small accent bar that overlays the rail */
   .toc-link.is-active {
     color: var(--color-accent);
     font-weight: 500;
+    background: var(--color-accent-faint);
   }
   .toc-link.is-active::before {
     content: '';

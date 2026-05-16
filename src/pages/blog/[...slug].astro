@@ -134,23 +134,26 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
               <button
                 type="button"
                 id="mobile-toc-toggle"
-                class="w-full flex items-center justify-between px-4 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:border-[var(--color-border-hover)] transition-colors"
+                class="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl text-sm font-medium text-[var(--color-text-secondary)] hover:border-[var(--color-border-hover)] transition-colors"
                 aria-expanded="false"
                 aria-controls="mobile-toc"
                 aria-label={t('toc_open_close')}
               >
-                <span>{t('toc')}</span>
+                <span class="inline-flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-[var(--color-accent)]"></span>
+                  <span>{t('toc')}</span>
+                </span>
                 <svg class="w-4 h-4 transition-transform duration-200" data-toc-chevron fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <nav id="mobile-toc" class="hidden mt-2 px-4 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg" aria-label="Table of contents">
-                <ul class="space-y-2 text-sm">
+              <nav id="mobile-toc" class="hidden mt-2 px-4 py-4 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl" aria-label="Table of contents">
+                <ul class="space-y-1.5 text-sm">
                   {headings.filter((h) => h.depth >= 2 && h.depth <= 3).map((heading) => (
                     <li style={`padding-left: ${(heading.depth - 2) * 0.75}rem`}>
                       <a
                         href={`#${heading.slug}`}
-                        class="block py-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+                        class="block rounded-xl px-2 py-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
                         data-mobile-toc-link
                       >
                         {heading.text}
@@ -206,14 +209,17 @@ const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
              sidebar a second scrolling surface. Only long sub-sections
              should scroll independently. -->
         <aside class="hidden lg:block w-64 shrink-0">
-          <div class="sticky top-24 space-y-8">
+          <div class="sticky top-24 sidebar-shell space-y-6">
             {seriesPosts.length > 1 && (
-              <SeriesSidebar
-                seriesName={post.data.series!}
-                posts={seriesPosts}
-                currentSlug={post.id}
-              />
+              <div>
+                <SeriesSidebar
+                  seriesName={post.data.series!}
+                  posts={seriesPosts}
+                  currentSlug={post.id}
+                />
+              </div>
             )}
+            {seriesPosts.length > 1 && headings.length > 0 && <div class="sidebar-divider"></div>}
             <TableOfContents headings={headings} />
           </div>
         </aside>
