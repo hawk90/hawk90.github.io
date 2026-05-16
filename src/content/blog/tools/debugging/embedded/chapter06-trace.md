@@ -466,8 +466,8 @@ Ch 7 — RTOS-aware 디버깅 + 실전 트러블슈팅. FreeRTOS/Zephyr 등의 t
 
 ## 관련 항목
 
-- [Ch 4: J-Link 도구 체인](/blog/tools/debugging/embedded-debug/chapter04-jlink) — RTT는 J-Link 표준
-- [Ch 7: RTOS-aware + 트러블슈팅](/blog/tools/debugging/embedded-debug/chapter07-rtos-troubleshooting)
+- [Ch 4: J-Link 도구 체인](/blog/tools/debugging/embedded/chapter04-jlink) — RTT는 J-Link 표준
+- [Ch 7: RTOS-aware + 트러블슈팅](/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting)
 - [Segger RTT 페이지](https://www.segger.com/products/debug-probes/j-link/technology/about-real-time-transfer/)
 - [ARM Semihosting 명세](https://github.com/ARM-software/abi-aa/blob/main/semihosting/semihosting.rst)
 - [ARMv7-M ITM 명세](https://developer.arm.com/documentation/ddi0403/latest/) — Appendix

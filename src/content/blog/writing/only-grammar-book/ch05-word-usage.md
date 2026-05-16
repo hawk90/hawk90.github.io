@@ -290,20 +290,13 @@ draft: true
 
 ## 한국 학생의 Word Usage 함정
 
-```
-1. *Utilize* 남용 — "use"가 거의 항상 정답
-2. *Personalize, finalize, optimize* 등 *-ize*  과시
-3. *Very* + 약한 단어 — 강한 단어 하나로
-   "very tired" → "exhausted"
-4. *Nice, interesting* 남발 — 구체적 형용사로
-5. *Contact* 동사 — phone, email 같은 구체 동사로
-6. *Significant* 통계적 의미와 일반 의미 혼동
-   학술: significant = statistically significant
-   일반: significant = important
-7. 한국어 직역 함정
-   "consider as" → "consider" (as 불필요)
-   "discuss about" → "discuss" (about 불필요)
-```
+1. ***Utilize* 남용** — "use"가 거의 항상 정답
+2. ***-ize* 과시** — *Personalize, finalize, optimize* 등
+3. ***Very* + 약한 단어** — 강한 단어 하나로. *very tired* → *exhausted*
+4. ***Nice, interesting* 남발** — 구체적 형용사로
+5. ***Contact* 동사** — *phone, email* 같은 구체 동사로
+6. ***Significant* 통계적·일반 의미 혼동** — 학술에서는 *statistically significant*, 일반에서는 *important*
+7. **한국어 직역 함정** — *consider as* → *consider*, *discuss about* → *discuss* (불필요한 전치사)
 
 ## 정리
 

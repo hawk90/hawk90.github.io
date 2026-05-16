@@ -452,18 +452,18 @@ void main() {
 
 ## 관련 항목 (시리즈 전체)
 
-- [Ch 1: RSP 프로토콜](/blog/tools/debugging/embedded-debug/chapter01-rsp-protocol)
-- [Ch 2: JTAG / SWD / CoreSight](/blog/tools/debugging/embedded-debug/chapter02-jtag-swd-coresight)
-- [Ch 3: OpenOCD 깊이](/blog/tools/debugging/embedded-debug/chapter03-openocd)
-- [Ch 4: J-Link 도구 체인](/blog/tools/debugging/embedded-debug/chapter04-jlink)
-- [Ch 5: ELF / MAP](/blog/tools/debugging/embedded-debug/chapter05-elf-map)
-- [Ch 6: Trace](/blog/tools/debugging/embedded-debug/chapter06-trace)
+- [Ch 1: RSP 프로토콜](/blog/tools/debugging/embedded/chapter01-rsp-protocol)
+- [Ch 2: JTAG / SWD / CoreSight](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight)
+- [Ch 3: OpenOCD 깊이](/blog/tools/debugging/embedded/chapter03-openocd)
+- [Ch 4: J-Link 도구 체인](/blog/tools/debugging/embedded/chapter04-jlink)
+- [Ch 5: ELF / MAP](/blog/tools/debugging/embedded/chapter05-elf-map)
+- [Ch 6: Trace](/blog/tools/debugging/embedded/chapter06-trace)
 
 ## 외부 자료
 
 - [GDB and LLDB 시리즈](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 일반 GDB
 - [DWARF and ELF Internals](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview) — ELF 깊이
-- [Postmortem Debugging](/blog/tools/debugging/postmortem-debug/chapter01-core-generation) — core dump 분석
+- [Postmortem Debugging](/blog/tools/debugging/postmortem/chapter01-core-generation) — core dump 분석
 - [Cortex-M3/M4 Programming Manual (ARM)](https://developer.arm.com/documentation/ddi0337/latest/) — fault, MPU
 - [FreeRTOS Real-Time Kernel Reference](https://www.freertos.org/Documentation/RTOS_book.html)
 - [Zephyr Project](https://docs.zephyrproject.org/)

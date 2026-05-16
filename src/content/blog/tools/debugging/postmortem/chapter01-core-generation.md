@@ -412,7 +412,7 @@ Ch 2 — ELF core file 포맷 깊이. PT_NOTE, NT_PRSTATUS, NT_FILE의 정체.
 
 ## 관련 항목
 
-- [Ch 2: ELF core 포맷](/blog/tools/debugging/postmortem-debug/chapter02-elf-core-format)
+- [Ch 2: ELF core 포맷](/blog/tools/debugging/postmortem/chapter02-elf-core-format)
 - `man 5 core` — core dump 포맷
 - `man 8 systemd-coredump`
 - `man 1 coredumpctl`

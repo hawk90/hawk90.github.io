@@ -500,8 +500,8 @@ Ch 4 — J-Link / Segger 도구 체인. J-Link GDB Server, J-Run, J-Trace, Unlim
 
 ## 관련 항목
 
-- [Ch 2: JTAG / SWD / CoreSight](/blog/tools/debugging/embedded-debug/chapter02-jtag-swd-coresight)
-- [Ch 4: J-Link 도구 체인](/blog/tools/debugging/embedded-debug/chapter04-jlink)
+- [Ch 2: JTAG / SWD / CoreSight](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight)
+- [Ch 4: J-Link 도구 체인](/blog/tools/debugging/embedded/chapter04-jlink)
 - [OpenOCD 공식 문서](https://openocd.org/doc/html/)
 - [TCL 8.6 reference](https://www.tcl.tk/man/tcl/) — TCL 문법
 - OpenOCD 소스: `src/flash/nor/`, `src/target/`, `src/transport/`

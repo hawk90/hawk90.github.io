@@ -372,10 +372,10 @@ Amazon AWS는 모든 핵심 분산 알고리즘을 TLA+로 검증.
 
 ## 관련 항목 (시리즈 전체)
 
-- [Ch 1: Linux 스레드 / futex](/blog/tools/debugging/concurrency-debug/chapter01-linux-threads-futex)
-- [Ch 2: GDB 멀티스레드](/blog/tools/debugging/concurrency-debug/chapter02-gdb-threads)
-- [Ch 3: fork / 멀티프로세스](/blog/tools/debugging/concurrency-debug/chapter03-fork-multiprocess)
-- [Ch 4: 데드락 / race 방법론](/blog/tools/debugging/concurrency-debug/chapter04-deadlock-race-methodology)
+- [Ch 1: Linux 스레드 / futex](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex)
+- [Ch 2: GDB 멀티스레드](/blog/tools/debugging/concurrency/chapter02-gdb-threads)
+- [Ch 3: fork / 멀티프로세스](/blog/tools/debugging/concurrency/chapter03-fork-multiprocess)
+- [Ch 4: 데드락 / race 방법론](/blog/tools/debugging/concurrency/chapter04-deadlock-race-methodology)
 
 ## 외부 자료
 

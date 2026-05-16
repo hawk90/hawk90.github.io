@@ -480,7 +480,7 @@ GDB가 *디버거 SDK*임이 분명해집니다. CLI는 그 위의 한 사용자
 ## 외부 자료
 
 - [GDB and LLDB 시리즈](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 기본
-- [Embedded Debugging 시리즈](/blog/tools/debugging/embedded-debug/chapter01-rsp-protocol)
+- [Embedded Debugging 시리즈](/blog/tools/debugging/embedded/chapter01-rsp-protocol)
 - [cgdb](https://cgdb.github.io/)
 - [gdb-dashboard](https://github.com/cyrus-and/gdb-dashboard)
 - [pwndbg](https://github.com/pwndbg/pwndbg)

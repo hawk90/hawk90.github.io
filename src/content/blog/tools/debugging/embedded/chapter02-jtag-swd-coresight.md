@@ -436,8 +436,8 @@ Ch 3 — OpenOCD 깊이. TCL 인터프리터, flash driver, target 정의 파일
 
 ## 관련 항목
 
-- [Ch 1: RSP 프로토콜](/blog/tools/debugging/embedded-debug/chapter01-rsp-protocol) — 위쪽 계층
-- [Ch 3: OpenOCD 깊이](/blog/tools/debugging/embedded-debug/chapter03-openocd)
+- [Ch 1: RSP 프로토콜](/blog/tools/debugging/embedded/chapter01-rsp-protocol) — 위쪽 계층
+- [Ch 3: OpenOCD 깊이](/blog/tools/debugging/embedded/chapter03-openocd)
 - [ARMv7-M Architecture Reference Manual](https://developer.arm.com/documentation/ddi0403/latest/) — CoreSight 정의
 - [ARM Debug Interface Architecture v5](https://developer.arm.com/documentation/ihi0031/latest/) — DAP 명세
 - [CMSIS-DAP](https://arm-software.github.io/CMSIS_5/DAP/html/index.html)

@@ -470,9 +470,9 @@ with open('core', 'rb') as f:
 
 ## 관련 항목 (시리즈 전체)
 
-- [Ch 1: core 생성](/blog/tools/debugging/postmortem-debug/chapter01-core-generation)
-- [Ch 2: ELF core 포맷](/blog/tools/debugging/postmortem-debug/chapter02-elf-core-format)
-- [Ch 3: GDB로 core 분석](/blog/tools/debugging/postmortem-debug/chapter03-gdb-core-analysis)
+- [Ch 1: core 생성](/blog/tools/debugging/postmortem/chapter01-core-generation)
+- [Ch 2: ELF core 포맷](/blog/tools/debugging/postmortem/chapter02-elf-core-format)
+- [Ch 3: GDB로 core 분석](/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis)
 
 ## 외부 자료
 
@@ -482,6 +482,6 @@ with open('core', 'rb') as f:
 - [crashpad](https://chromium.googlesource.com/crashpad/crashpad/)
 - [Sentry](https://sentry.io/)
 - [DWARF and ELF Internals — Ch 6: debuginfod](/blog/tools/debugging/dwarf-elf/chapter06-split-dwarf-tools)
-- [Concurrency Debugging](/blog/tools/debugging/concurrency-debug/chapter01-linux-threads-futex)
-- [Embedded Debugging](/blog/tools/debugging/embedded-debug/chapter01-rsp-protocol)
+- [Concurrency Debugging](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex)
+- [Embedded Debugging](/blog/tools/debugging/embedded/chapter01-rsp-protocol)
 - [GDB Extension and IDE](/blog/tools/debugging/gdb-extension/chapter01-python-api-basics)

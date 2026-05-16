@@ -457,8 +457,8 @@ Ch 3 — GDB로 core 분석. siginfo 해독, 모든 스레드 콜스택, 변수 
 
 ## 관련 항목
 
-- [Ch 1: core 생성 메커니즘](/blog/tools/debugging/postmortem-debug/chapter01-core-generation)
-- [Ch 3: GDB로 core 분석](/blog/tools/debugging/postmortem-debug/chapter03-gdb-core-analysis)
+- [Ch 1: core 생성 메커니즘](/blog/tools/debugging/postmortem/chapter01-core-generation)
+- [Ch 3: GDB로 core 분석](/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis)
 - [DWARF and ELF Internals Ch 1: ELF 포맷](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview)
 - `man 5 core`, `man 5 elf`
 - [Anatomy of an ELF core file](https://www.gabriel.urdhr.fr/2015/05/29/core-file/)

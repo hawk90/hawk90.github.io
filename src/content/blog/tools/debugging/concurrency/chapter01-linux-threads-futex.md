@@ -372,7 +372,7 @@ Ch 2 — GDB 멀티스레드 명령. `info threads` / `thread apply` / `schedule
 
 ## 관련 항목
 
-- [Ch 2: GDB 멀티스레드 명령](/blog/tools/debugging/concurrency-debug/chapter02-gdb-threads)
+- [Ch 2: GDB 멀티스레드 명령](/blog/tools/debugging/concurrency/chapter02-gdb-threads)
 - [GDB and LLDB Ch 6 (이전판)](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess)
 - `man 2 clone`, `man 2 futex`, `man 7 pthreads`
 - [futex(7) man page](https://man7.org/linux/man-pages/man7/futex.7.html)

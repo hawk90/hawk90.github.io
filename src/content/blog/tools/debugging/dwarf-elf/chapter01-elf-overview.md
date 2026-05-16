@@ -503,7 +503,7 @@ Ch 2 — DWARF 개관. DIE 트리, abbrev table, 컴파일 유닛, 모든 DW_TAG
 ## 관련 항목
 
 - [Ch 2: DWARF 개관 — DIE / abbrev](/blog/tools/debugging/dwarf-elf/chapter02-dwarf-overview)
-- [Embedded Debugging Ch 5: ELF / MAP](/blog/tools/debugging/embedded-debug/chapter05-elf-map) — 베어메탈 시각
+- [Embedded Debugging Ch 5: ELF / MAP](/blog/tools/debugging/embedded/chapter05-elf-map) — 베어메탈 시각
 - [System V ABI](https://refspecs.linuxfoundation.org/elf/gabi4+/contents.html)
 - [`elf(5)` man page](https://man7.org/linux/man-pages/man5/elf.5.html)
 - [Oracle Linker and Libraries Guide](https://docs.oracle.com/cd/E26505_01/html/E26506/) — 깊은 ELF 참고

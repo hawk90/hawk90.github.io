@@ -510,5 +510,5 @@ DWARF 6는 2024년 작성 중 (작은 변경). DWARF 7은 *형식 인덱싱*과 
 - [dwz GitHub](https://sourceware.org/git/?p=dwz.git)
 - [debuginfod 공식](https://sourceware.org/elfutils/Debuginfod.html)
 - [Fedora debuginfod](https://debuginfod.fedoraproject.org/)
-- [Embedded Debugging Ch 5: ELF/MAP](/blog/tools/debugging/embedded-debug/chapter05-elf-map)
+- [Embedded Debugging Ch 5: ELF/MAP](/blog/tools/debugging/embedded/chapter05-elf-map)
 - [GDB and LLDB 시리즈](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install)

@@ -391,8 +391,8 @@ Ch 4 — 데드락·race 진단 방법론. 실전 케이스 분석.
 
 ## 관련 항목
 
-- [Ch 2: GDB 멀티스레드](/blog/tools/debugging/concurrency-debug/chapter02-gdb-threads)
-- [Ch 4: 데드락 / race 방법론](/blog/tools/debugging/concurrency-debug/chapter04-deadlock-race-methodology)
+- [Ch 2: GDB 멀티스레드](/blog/tools/debugging/concurrency/chapter02-gdb-threads)
+- [Ch 4: 데드락 / race 방법론](/blog/tools/debugging/concurrency/chapter04-deadlock-race-methodology)
 - [GDB Multi-process](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Forks.html)
 - `man 2 clone`, `man 2 fork`, `man 2 execve`
 - [Docker security/ptrace](https://docs.docker.com/reference/cli/docker/container/run/#security-options)
