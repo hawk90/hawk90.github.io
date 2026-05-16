@@ -447,7 +447,7 @@ JSF C++ (2005)
 ## 관련 항목
 
 - [DO-178C Ch 1 — 항공 SW 인증](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
-- [AUTOSAR C++ Ch 1 — 자동차 C++ 표준](/blog/embedded/standards/autosar-cpp/chapter01-intro)
-- [MISRA C Ch 1](/blog/embedded/standards/misra-c/chapter01-introduction)
+- [AUTOSAR C++ Ch 1 — 자동차 C++ 표준](/blog/embedded/car-standards/autosar-cpp/chapter01-intro)
+- [MISRA C Ch 1](/blog/embedded/car-standards/misra-c/chapter01-introduction)
 - [JPL Power of 10](/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules)
 - [원문 — JSF C++ Coding Standards (PDF)](https://www.stroustrup.com/JSF-AV-rules.pdf)
