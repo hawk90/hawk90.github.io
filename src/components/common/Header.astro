@@ -21,12 +21,12 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
   class="sticky top-0 z-50 bg-[var(--color-bg-primary)]/88 backdrop-blur-sm border-b border-transparent transition-[border-color,background-color,box-shadow] duration-200 ease-out"
   data-scrolled="false"
 >
-  <nav class="container flex items-center justify-between h-16">
+  <nav class="container flex items-center justify-between h-16 gap-6">
     <Logo />
 
     <!-- Desktop Navigation -->
-    <div class="hidden md:flex items-center gap-8">
-      <ul class="flex items-center gap-6">
+    <div class="hidden md:flex items-center gap-6">
+      <ul class="flex items-center gap-5">
         {NAV_CONFIG.map((link) => (
           <li>
             <a
@@ -34,9 +34,9 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
               data-nav-link={link.href}
               data-nav-match={(link.match ?? [link.href]).join(',')}
               class:list={[
-                'text-sm font-medium transition-colors',
+                'text-[13px] font-semibold tracking-[0.02em] transition-colors',
                 isNavActive(link.href, link.match)
-                  ? 'text-[var(--color-accent)]'
+                  ? 'text-[var(--color-text-primary)]'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
               ]}
             >
@@ -46,12 +46,11 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
         ))}
       </ul>
 
-      <div class="flex items-center gap-1">
-        <!-- Search Button — pill icon on small screens, faux search bar on lg+ -->
+      <div class="flex items-center gap-2">
         <button
           type="button"
           data-search-trigger
-          class="search-trigger group inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg px-2 py-1.5 lg:pl-2.5 lg:pr-1.5 lg:w-56 transition-colors hover:border-[var(--color-border-hover)] hover:bg-[var(--color-bg-tertiary)]"
+          class="search-trigger group inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)] bg-[var(--color-bg-secondary)]/88 border border-[var(--color-border)] rounded-xl px-2.5 py-2 lg:pl-3 lg:pr-2 lg:w-60 transition-colors hover:border-[var(--color-border-hover)] hover:bg-[var(--color-bg-tertiary)]"
           aria-label={t('search')}
         >
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -61,25 +60,25 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
           <kbd class="hidden lg:inline-flex items-center justify-center min-w-[18px] h-5 px-1 text-[11px] bg-[var(--color-bg-tertiary)] rounded border border-[var(--color-border)] font-mono">/</kbd>
         </button>
 
-        <LanguageSwitcher />
-        <ThemeToggle />
+        <div class="utility-cluster">
+          <LanguageSwitcher />
+          <ThemeToggle />
 
-        <!-- Admin -->
-        {showAdminLink && (
-          <a href="/admin" class="btn btn-ghost p-2" aria-label="Admin">
+          <a href="/settings" class="btn btn-ghost p-2 opacity-80 hover:opacity-100" aria-label="Settings">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </a>
-        )}
 
-        <!-- Settings -->
-        <a href="/settings" class="btn btn-ghost p-2" aria-label="Settings">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </a>
+          {showAdminLink && (
+            <a href="/admin" class="btn btn-ghost p-2 opacity-70 hover:opacity-100" aria-label="Admin">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </a>
+          )}
+        </div>
       </div>
     </div>
 

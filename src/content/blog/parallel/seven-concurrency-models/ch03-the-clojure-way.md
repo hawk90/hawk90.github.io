@@ -15,12 +15,10 @@ draft: true
 
 ## 3.1 Identity vs Value
 
-Clojure의 핵심 통찰.
+Clojure의 핵심 통찰은 다음 두 개념의 분리다.
 
-```
-Identity: "변하는 것" — 시간에 따라 다른 값을 가질 수 있음
-Value:    "변하지 않는 것" — 특정 시점의 스냅샷
-```
+- **Identity** — "변하는 것". 시간에 따라 다른 값을 가질 수 있다.
+- **Value** — "변하지 않는 것". 특정 시점의 스냅샷.
 
 전통적 OOP는 둘을 *혼동*한다.
 
@@ -147,13 +145,11 @@ Agent는 *비동기 + 순차*. 여러 send가 큐에 쌓여 순서대로 실행.
 
 ## 3.7 STM의 실제 동작
 
-```
-1. 트랜잭션 시작 — read snapshot
-2. ref를 deref / alter — 로컬 사본에서 작업
-3. commit 시도 — 다른 트랜잭션이 변경했나 검사
-4. 충돌 없음 → 커밋
-5. 충돌 있음 → abort, 재시도
-```
+1. **트랜잭션 시작** — read snapshot
+2. **ref를 deref / alter** — 로컬 사본에서 작업
+3. **commit 시도** — 다른 트랜잭션이 변경했는지 검사
+4. **충돌 없음** → 커밋
+5. **충돌 있음** → abort, 재시도
 
 낙관적 동시성. 충돌이 *드물다는 가정*. 충돌 잦으면 락보다 느릴 수 있음.
 
@@ -230,64 +226,49 @@ state.updateAndGet(s -> s.withAge(31));
 
 ## 한국 개발자의 함정
 
-```
-1. *Clojure만 가능하다*는 한정
-   - 패턴은 어디서나 적용 가능
-   - Java AtomicReference + ImmutableX
-
-2. *STM은 항상 락보다 좋다*
-   - 충돌 적을 때 좋음
-   - 충돌 잦으면 락이 더 빠름
-
-3. *Atom으로 모든 동시성 처리*
-   - 단일 변수만 가능
-   - 여러 변수 atomic은 ref + dosync
-
-4. *dosync 안에 I/O*
-   - 재시도 시 I/O 반복
-   - println도 위험
-   - 부수 효과는 *밖으로*
-
-5. *agent와 actor 혼동*
-   - agent: 데이터 자체에 작업 큐
-   - actor: 객체에 메시지 큐
-   - 비슷하지만 다름
-```
+1. ***Clojure만 가능하다*는 한정** — 패턴은 어디서나 적용 가능하다. Java라면 `AtomicReference + ImmutableX`.
+2. ***STM은 항상 락보다 좋다*** — 충돌이 적을 때 좋다. 충돌이 잦으면 락이 더 빠르다.
+3. ***Atom으로 모든 동시성 처리*** — 단일 변수만 가능. 여러 변수 atomic은 `ref + dosync`.
+4. ***`dosync` 안에 I/O*** — 재시도 시 I/O가 반복된다. `println`도 위험. 부수 효과는 *밖으로*.
+5. ***agent와 actor 혼동*** — agent는 *데이터 자체*에 작업 큐, actor는 *객체*에 메시지 큐. 비슷하지만 다르다.
 
 ## 실무 적용
 
-```
-이론 → 실무:
-- Atom              → Java AtomicReference<Immutable>
-- Ref + STM         → Haskell STM, Clojure ref
-- Agent             → Akka Typed Actor 유사
-- Identity/Value    → Rust ownership 모델과 호환
-- ensure            → Database SELECT FOR UPDATE
+**이론 → 실무**
 
-언어별:
-- Clojure: 직접 지원 (atom/ref/agent/var)
-- Java: AtomicReference + immutable objects
-- Scala: Akka, Cats Effect Ref
-- Rust: Arc<Mutex<T>> 또는 Arc<AtomicX>
-- C++: std::atomic<std::shared_ptr<T>>
+| Clojure | 일반화 |
+|---------|--------|
+| Atom | Java `AtomicReference<Immutable>` |
+| Ref + STM | Haskell STM, Clojure ref |
+| Agent | Akka Typed Actor와 유사 |
+| Identity / Value | Rust ownership 모델과 호환 |
+| `ensure` | Database `SELECT FOR UPDATE` |
 
-설계 패턴:
+**언어별**
+
+| 언어 | 도구 |
+|------|------|
+| Clojure | 직접 지원 (`atom` / `ref` / `agent` / `var`) |
+| Java | `AtomicReference + immutable objects` |
+| Scala | Akka, Cats Effect `Ref` |
+| Rust | `Arc<Mutex<T>>` 또는 `Arc<AtomicX>` |
+| C++ | `std::atomic<std::shared_ptr<T>>` |
+
+**설계 패턴**
+
 - 함수형 코어 + atom으로 상태
-- 여러 entity 변경 = STM/dosync
-- 비동기 + 순차 = agent / 큐
+- 여러 entity 변경 → STM / `dosync`
+- 비동기 + 순차 → agent / 큐
 - DB 트랜잭션과 유사한 사고
-```
 
 ## 자기 점검
 
-```
-□ Identity와 Value 분리 의미?
-□ atom / ref / agent 선택 기준?
-□ STM이 락보다 *합성 가능*한 이유?
-□ dosync 안에 부수 효과 금지 이유?
-□ ensure가 필요한 시나리오?
-□ Java로 atom 패턴 구현 방법?
-```
+- [ ] Identity와 Value 분리의 의미는?
+- [ ] atom / ref / agent를 어떻게 선택하나?
+- [ ] STM이 락보다 *합성 가능*한 이유는?
+- [ ] `dosync` 안에서 부수 효과가 금지되는 이유는?
+- [ ] `ensure`가 필요한 시나리오는?
+- [ ] Java로 atom 패턴을 어떻게 구현하나?
 
 ## 다음 장 예고
 

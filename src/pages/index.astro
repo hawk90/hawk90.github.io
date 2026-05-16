@@ -16,15 +16,20 @@ const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
   <!-- Hero Section -->
   <section class="py-16 lg:py-24 overflow-hidden">
     <div class="container">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(22rem,0.95fr)] gap-12 items-center">
         <!-- Text Content -->
         <div class="order-2 lg:order-1">
-          <h1 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6">
+          <div class="section-eyebrow mb-4">Systems Notes</div>
+          <h1 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-[1.05] mb-6">
             Hi, I'm <span class="text-[var(--color-accent)]">{BRAND_CONFIG.heroTitle}</span>
           </h1>
-          <p class="text-xl lg:text-2xl text-[var(--color-text-secondary)] leading-relaxed mb-8">
+          <p class="text-xl lg:text-2xl text-[var(--color-text-secondary)] leading-relaxed mb-8 max-w-2xl">
             {BRAND_CONFIG.heroDescription}
           </p>
+          <div class="flex flex-wrap gap-3 text-sm">
+            <a href="/blog" class="btn btn-primary rounded-xl px-5 py-3">Read the blog</a>
+            <a href="/about" class="btn btn-ghost rounded-xl border border-[var(--color-border)] px-5 py-3">About the author</a>
+          </div>
         </div>
 
         <!-- Hero Illustration -->
@@ -65,14 +70,12 @@ const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
   </style>
 
   <!-- Latest Writing -->
-  <section class="py-16 border-t border-[var(--color-border)]">
+  <section class="surface-section py-16">
     <div class="container">
       <div class="flex items-end justify-between gap-4 mb-8">
         <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
-            Latest Writing
-          </div>
-          <h2 class="text-2xl lg:text-3xl font-bold">Start with the newest post, then keep reading</h2>
+          <div class="section-eyebrow mb-2">Latest Writing</div>
+          <h2 class="text-2xl lg:text-3xl font-bold">Start with the newest post, then branch out</h2>
         </div>
         <a href="/blog" class="text-[var(--color-accent)] hover:underline">
           {t('view_all')}
@@ -81,9 +84,9 @@ const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
 
       <div class="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.95fr)]">
         {heroPost && (
-          <article class="card relative overflow-hidden group">
+          <article class="card card-hero relative overflow-hidden group min-h-[21rem]">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(167,139,250,0.16),transparent_40%)] pointer-events-none"></div>
-            <div class="relative">
+            <div class="relative flex h-full flex-col justify-between">
               <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)] mb-4">
                 <span>Latest Post</span>
                 {heroPost.data.series && <span class="text-[var(--color-text-muted)]">{heroPost.data.series}</span>}
@@ -97,7 +100,7 @@ const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
                     {heroPost.data.description}
                   </p>
                 )}
-                <div class="flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-muted)]">
+                <div class="mt-8 flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-muted)]">
                   <span>{formatDate(heroPost.data.date, 'short')}</span>
                   <span class="w-1 h-1 rounded-full bg-[var(--color-border-hover)]"></span>
                   <span>{heroPostMeta?.readingTime}{t('reading_time_min')}</span>
@@ -109,7 +112,7 @@ const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
           </article>
         )}
 
-        <section class="card h-full">
+        <section class="card card-panel h-full">
           <div class="flex items-center justify-between gap-4 mb-4">
             <h3 class="text-lg font-semibold">{t('latest_posts')}</h3>
             <a href="/blog" class="text-sm text-[var(--color-accent)] hover:underline">
@@ -122,10 +125,7 @@ const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
               const { formattedDate, readingTime } = getPostMeta(post);
               return (
                 <li class="border-b border-[var(--color-border-faint)] last:border-b-0 last:pb-0 pb-3">
-                  <a
-                    href={`/blog/${post.id}`}
-                    class="block rounded-lg px-1 py-1.5 transition-colors hover:bg-[var(--color-bg-tertiary)]"
-                  >
+                  <a href={`/blog/${post.id}`} class="block rounded-xl px-2 py-2 transition-colors hover:bg-[var(--color-bg-tertiary)]">
                     {post.data.series && (
                       <div class="text-[11px] font-medium text-[var(--color-accent)] mb-1 truncate">
                         {post.data.series}
@@ -152,10 +152,13 @@ const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
   </section>
 
   <!-- Recent Posts -->
-  <section class="py-16 border-t border-[var(--color-border)]">
+  <section class="surface-section py-16">
     <div class="container">
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-bold">{t('recent_posts')}</h2>
+        <div>
+          <div class="section-eyebrow mb-2">Archive Pulse</div>
+          <h2 class="text-2xl font-bold">{t('recent_posts')}</h2>
+        </div>
         <a href="/blog" class="text-[var(--color-accent)] hover:underline">
           {t('view_all')}
         </a>

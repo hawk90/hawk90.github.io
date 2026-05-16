@@ -26,35 +26,35 @@ const { node, depth = 0 } = Astro.props;
 const isNested = depth > 0;
 const rowClass = isNested
   ? [
-      'cat-row flex items-center gap-1 rounded text-sm transition-colors',
+      'cat-row flex items-center gap-1 rounded-xl text-sm transition-colors',
       node.isActive
-        ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium'
-        : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
+        ? 'bg-[var(--color-accent)]/12 text-[var(--color-accent)] font-medium shadow-[inset_2px_0_0_0_var(--color-accent)]'
+        : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)]',
     ]
   : [
-      'cat-row flex items-center gap-1 rounded-lg transition-colors',
+      'cat-row flex items-center gap-1 rounded-xl transition-colors',
       node.isActive
-        ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)]'
-        : 'hover:bg-[var(--color-bg-secondary)]',
+        ? 'bg-[var(--color-accent)]/12 text-[var(--color-accent)] shadow-[inset_3px_0_0_0_var(--color-accent)]'
+        : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)]',
     ];
 const toggleClass = isNested
-  ? 'cat-toggle flex items-center gap-1 py-1.5 pl-2 pr-1 rounded-l cursor-pointer'
-  : 'cat-toggle flex items-center gap-1 py-2 pl-2 pr-1 rounded-l-lg cursor-pointer';
+  ? 'cat-toggle flex items-center gap-1 py-1.5 pl-2 pr-1 rounded-l-xl cursor-pointer'
+  : 'cat-toggle flex items-center gap-1 py-2 pl-2 pr-1 rounded-l-xl cursor-pointer';
 const linkClass = isNested
   ? 'flex items-center justify-between flex-1 min-w-0 py-1.5 pr-2'
   : 'flex items-center justify-between flex-1 min-w-0 py-2 pr-2';
 const iconClass = isNested ? 'text-xs' : undefined;
 const childListClass = isNested
-  ? 'ml-3 mt-1 space-y-0.5 border-l border-[var(--color-border)] pl-2'
-  : 'ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-2';
+  ? 'ml-3 mt-1 space-y-0.5 border-l border-[color:color-mix(in_oklab,var(--color-border)_72%,transparent)] pl-2'
+  : 'ml-3 mt-1 space-y-1 border-l border-[color:color-mix(in_oklab,var(--color-border)_72%,transparent)] pl-2';
 const seriesLinkClass = isNested
   ? [
-      'flex items-center justify-between w-full py-1 px-2 rounded text-xs transition-colors',
-      'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
+      'flex items-center justify-between w-full py-1 px-2 rounded-lg text-xs transition-colors',
+      'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)]',
     ]
   : [
-      'flex items-center justify-between w-full py-1.5 px-2 rounded text-sm transition-colors',
-      'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-accent)]',
+      'flex items-center justify-between w-full py-1.5 px-2 rounded-lg text-sm transition-colors',
+      'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-secondary)] hover:text-[var(--color-text-primary)]',
     ];
 ---
 
@@ -96,7 +96,7 @@ const seriesLinkClass = isNested
             href={`/series/${series.slug}`}
             class:list={[
               ...seriesLinkClass,
-              series.isActive && 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-medium',
+              series.isActive && 'bg-[var(--color-accent)]/12 text-[var(--color-accent)] font-medium shadow-[inset_2px_0_0_0_var(--color-accent)]',
             ]}
           >
             <span class="truncate">{series.name}</span>

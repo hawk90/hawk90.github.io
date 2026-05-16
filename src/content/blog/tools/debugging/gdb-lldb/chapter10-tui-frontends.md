@@ -8,6 +8,9 @@ seriesOrder: 10
 draft: false
 ---
 
+> 📖 **이 챕터는 빠른 참조입니다.** 깊은 내부 메커니즘은 [GDB Extension and IDE 시리즈](/blog/tools/debugging/gdb-extension/chapter06-frontends)를 참고하세요 — TUI, cgdb, dashboard, gef/pwndbg, VSCode, nvim-dap, Cortex-Debug 비교.
+
+
 GDB는 기본적으로 명령줄입니다. 강력하지만 한 화면에 *지금 어디서 멈췄는지*, *변수가 얼마인지*, *콜스택*, *레지스터*를 동시에 보여 주지 못합니다. 이 장은 TUI(터미널 UI)와 외부 프런트엔드로 그 한계를 메우는 방법입니다.
 
 내장 TUI에서 출발해 cgdb·gdb-dashboard·gef/pwndbg 같은 *터미널* 확장, VSCode·nvim-dap·Emacs 같은 *IDE 통합*, 마지막으로 모든 IDE가 공유하는 **DAP**(Debug Adapter Protocol)의 정체까지 살펴봅니다.

@@ -17,18 +17,14 @@ draft: true
 
 함수형 프로그래밍의 두 가지 핵심.
 
-```
-1. Immutability — 값은 변하지 않는다
-2. Pure functions — 같은 입력 → 같은 출력, 부수 효과 없음
-```
+1. **Immutability** — 값은 변하지 않는다
+2. **Pure functions** — 같은 입력 → 같은 출력, 부수 효과 없음
 
 이 두 가지로 **동시성 문제 자체가 사라진다**.
 
-```
-변경 가능 상태 없음 → race condition 없음
-공유 상태 없음     → 락 필요 없음
-부수 효과 없음     → 순서 문제 없음
-```
+- 변경 가능 상태 없음 → race condition 없음
+- 공유 상태 없음 → 락 필요 없음
+- 부수 효과 없음 → 순서 문제 없음
 
 ## 2.2 Pure Function의 힘
 
@@ -88,11 +84,11 @@ Pure 함수라서 *순서 무관*. 자동 병렬화 가능.
 
 ## 2.5 Reduce는 결합법칙 필요
 
-```
-foldl: (((a + b) + c) + d)        — 순차
-foldr: (a + (b + (c + d)))        — 역순
-parallel: (a + b) + (c + d)       — 병렬 (결합법칙 필요)
-```
+| 전략 | 결합 순서 |
+|------|----------|
+| `foldl` | $(((a + b) + c) + d)$ — 순차 |
+| `foldr` | $(a + (b + (c + d)))$ — 역순 |
+| parallel | $(a + b) + (c + d)$ — 결합법칙 필요 |
 
 병렬 reduce는 *결합법칙(associativity)*을 만족해야 한다.
 
@@ -211,64 +207,49 @@ Lisp 방언. JVM 위에서 실행. *Pure를 강요하지 않지만 권장*.
 
 ## 한국 개발자의 함정
 
-```
-1. *함수형은 학술적*이라는 회피
-   - Clojure / Scala가 실무에 충분히 쓰임
-   - 데이터 파이프라인엔 거의 표준
-
-2. *Java 8 stream = 함수형*
-   - 람다 + map/filter는 함수형 *문법*
-   - 변경 가능 객체를 다루면 진짜 FP 아님
-   - `forEach`로 상태 변경하면 race 위험
-
-3. *영속 자료구조는 느림*이라는 단정
-   - O(log N) 갱신, 실용적으로 빠름
-   - JVM JIT으로 매우 최적화
-   - 측정 후 판단
-
-4. *Pure는 I/O 못함*이라는 오해
-   - Haskell IO monad가 해법
-   - Functional core / imperative shell 패턴
-
-5. *parallel map = pmap*이라는 단순화
-   - 작업 단위가 작으면 오버헤드 큼
-   - 적절한 chunking 필요
-```
+1. ***함수형은 학술적*이라는 회피** — Clojure / Scala가 실무에 충분히 쓰인다. 데이터 파이프라인엔 거의 표준.
+2. ***Java 8 stream = 함수형*** — 람다와 map/filter는 함수형 *문법*일 뿐. 변경 가능 객체를 다루면 진짜 FP가 아니다. `forEach`로 상태를 변경하면 race 위험.
+3. ***영속 자료구조는 느림*이라는 단정** — $O(\log N)$ 갱신이라 실용적으로 빠르다. JVM JIT으로 매우 최적화된다. 측정 후 판단.
+4. ***Pure는 I/O 못함*이라는 오해** — Haskell IO monad가 해법. *Functional core / imperative shell* 패턴.
+5. ***parallel map = pmap*이라는 단순화** — 작업 단위가 작으면 오버헤드가 크다. 적절한 chunking이 필요하다.
 
 ## 실무 적용
 
-```
-이론 → 실무:
-- Pure functions       → Java Stream, Kotlin let/also, Rust iterators
-- Immutability         → Java record, Kotlin data class, Rust 기본
-- Persistent ds        → Clojure, Scala 표준, Java vavr
-- Parallel reduce      → Java parallelStream, Spark RDD
-- Future/Promise       → CompletableFuture, Scala Future, JS Promise
-- IO monad             → Haskell, Scala ZIO/Cats Effect
+**이론 → 실무**
 
-언어별:
-- Haskell: 순수 함수형, 학습 곡선 가파름
-- Clojure: 실용적, JVM, JS도 가능 (ClojureScript)
-- Scala: FP + OOP 혼합
-- F#: .NET 함수형
-- Elixir: 함수형 + Actor
+| 개념 | 도구 |
+|------|------|
+| Pure functions | Java Stream, Kotlin `let`/`also`, Rust iterators |
+| Immutability | Java `record`, Kotlin `data class`, Rust 기본 |
+| Persistent data structures | Clojure, Scala 표준, Java vavr |
+| Parallel reduce | Java `parallelStream`, Spark RDD |
+| Future/Promise | `CompletableFuture`, Scala `Future`, JS `Promise` |
+| IO monad | Haskell, Scala ZIO/Cats Effect |
 
-데이터 처리:
-- Spark / Flink → 함수형 변환이 기본
-- Kafka Streams → 함수형 API
-- Pandas → 함수형 비슷한 API
-```
+**언어별**
+
+| 언어 | 특징 |
+|------|------|
+| Haskell | 순수 함수형, 학습 곡선 가파름 |
+| Clojure | 실용적, JVM, ClojureScript로 JS도 |
+| Scala | FP + OOP 혼합 |
+| F# | .NET 함수형 |
+| Elixir | 함수형 + Actor |
+
+**데이터 처리**
+
+- Spark / Flink — 함수형 변환이 기본
+- Kafka Streams — 함수형 API
+- Pandas — 함수형 비슷한 API
 
 ## 자기 점검
 
-```
-□ Pure function의 정의?
-□ Immutability가 동시성에 주는 이득?
-□ Parallel reduce의 결합법칙 요구?
-□ Lazy evaluation과 동시성의 상호작용?
-□ Haskell IO monad가 *함수형*을 어떻게 유지?
-□ 영속 자료구조의 시간/공간 복잡도?
-```
+- [ ] Pure function의 정의는?
+- [ ] Immutability가 동시성에 주는 이득은?
+- [ ] Parallel reduce가 결합법칙을 요구하는 이유는?
+- [ ] Lazy evaluation과 동시성의 상호작용은?
+- [ ] Haskell IO monad가 *함수형*을 어떻게 유지하나?
+- [ ] 영속 자료구조의 시간/공간 복잡도는?
 
 ## 다음 장 예고
 

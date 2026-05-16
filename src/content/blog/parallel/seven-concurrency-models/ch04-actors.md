@@ -17,21 +17,15 @@ draft: true
 
 Carl Hewitt의 1973년 모델. 핵심 아이디어 — **공유 상태 없음, 메시지로만 통신**.
 
-```
-각 Actor:
-- 자기만의 mailbox (메시지 큐)
-- 자기만의 state (격리됨)
-- 자기 메시지를 순차 처리
-- 다른 actor에게 메시지 보낼 수 있음
-- 새 actor 생성 가능
-```
+각 Actor의 구성요소.
 
-```
-┌─────────┐  msg   ┌─────────┐
-│ Actor A │ ──────▶│ Actor B │
-│ state X │        │ state Y │
-└─────────┘        └─────────┘
-```
+- 자기만의 **mailbox** (메시지 큐)
+- 자기만의 **state** (격리됨)
+- 자기 메시지를 *순차 처리*
+- 다른 actor에게 메시지 전송 가능
+- 새 actor 생성 가능
+
+Actor A가 메시지를 보내면 Actor B의 mailbox에 들어가고, B는 자기 페이스로 처리한다. 두 actor의 state는 절대 공유되지 않는다.
 
 상태 공유가 없으므로 *락 없음*. *데이터 레이스 없음*.
 
@@ -70,23 +64,21 @@ end
 
 ## 4.3 Erlang 프로세스의 가벼움
 
-```
-OS thread:   수 MB 스택, 수 us 컨텍스트 스위치
-Erlang proc: ~2KB 시작, 매우 빠른 스위칭
+| | 스택 | 컨텍스트 스위치 |
+|------|------|----------------|
+| OS thread | 수 MB | 수 µs |
+| Erlang process | ~2 KB | 매우 빠름 |
 
-→ 100만 개 프로세스 가능
-```
+→ 100만 개 프로세스 가능.
 
 이게 Erlang의 가장 큰 무기 — *매우 가벼운 프로세스*.
 
 ## 4.4 메시지 패싱 의미론
 
-```
-1. 비동기 — send는 즉시 반환
-2. 신뢰성 — 메시지 손실 없음 (같은 노드)
-3. 순서 — 같은 sender → 같은 receiver는 순서 보장
-4. Mailbox — receive는 패턴에 맞는 메시지 선택
-```
+1. **비동기** — `send`는 즉시 반환
+2. **신뢰성** — 메시지 손실 없음 (같은 노드)
+3. **순서** — 같은 sender → 같은 receiver는 순서 보장
+4. **Mailbox** — `receive`는 패턴에 맞는 메시지를 선택
 
 ```elixir
 ;; 패턴 매칭 receive
@@ -101,10 +93,8 @@ end
 
 Erlang 철학의 핵심.
 
-```
-전통: 모든 에러를 처리하려 함
-Erlang: 에러 났으면 죽이고 새로 시작
-```
+- **전통** — 모든 에러를 처리하려 한다
+- **Erlang** — 에러가 났으면 죽이고 새로 시작한다
 
 ```elixir
 defmodule Worker do
@@ -141,19 +131,13 @@ Supervisor.start_link(children, strategy: :one_for_one)
 - `:one_for_all` — 하나 죽으면 모두 재시작
 - `:rest_for_one` — 죽은 것 + 그 뒤 모두 재시작
 
-```
-Supervisor
-├─ Worker A
-├─ Worker B   ← 죽음
-└─ Worker C
+Supervisor 아래 Worker A, B, C가 있을 때 B가 죽으면 전략에 따라 다음과 같이 동작한다.
 
-전략에 따라:
-- one_for_one: B만 재시작
-- one_for_all: A, B, C 모두 재시작
-- rest_for_one: B, C 재시작
-```
+- `one_for_one` — B만 재시작
+- `one_for_all` — A, B, C 모두 재시작
+- `rest_for_one` — B, C 재시작 (B 뒤로 선언된 것까지)
 
-장애 격리 + 자동 복구. 이게 BEAM 시스템이 *99.9999% uptime*을 달성하는 비결.
+장애 격리 + 자동 복구. 이게 BEAM 시스템이 *99.9999% uptime*을 달성하는 비결이다.
 
 ## 4.7 분산 — 위치 투명성
 
@@ -212,26 +196,24 @@ Actor는 격리가 기본이지만, 캐시 같은 공유 데이터엔 ETS(Erlang
 
 ## 4.10 다른 언어의 Actor
 
-```
-Erlang/Elixir: BEAM VM 위, 사실상 표준
-Akka (Scala/Java): JVM에서 가장 성숙
-Pony: type-safe actor
-Vlingo (Java/Kotlin): Akka 대안
-Orleans (.NET): virtual actor
-Pykka (Python): 경량
-```
+| 구현 | 특징 |
+|------|------|
+| Erlang / Elixir | BEAM VM 위, 사실상 표준 |
+| Akka (Scala / Java) | JVM에서 가장 성숙 |
+| Pony | type-safe actor |
+| Vlingo (Java / Kotlin) | Akka 대안 |
+| Orleans (.NET) | virtual actor |
+| Pykka (Python) | 경량 |
 
 각 구현마다 디테일은 다르지만 *모델*은 같음.
 
 ## 4.11 Actor의 단점
 
-```
-1. 메시지 순서 미보장 (서로 다른 sender 간)
-2. 응답 대기는 deadlock 위험 (call이 다시 자신 호출)
-3. 디버깅 어려움 (분산 메시지 추적)
-4. 메시지 직렬화 비용 (분산)
-5. 메모리 — 큐가 무한히 자라면 OOM
-```
+1. **메시지 순서 미보장** — 서로 다른 sender 간
+2. **응답 대기는 deadlock 위험** — call이 다시 자신을 호출하는 경우
+3. **디버깅 어려움** — 분산 메시지 추적
+4. **메시지 직렬화 비용** — 분산일 때
+5. **메모리** — 큐가 무한히 자라면 OOM
 
 특히 **메시지 폭주 (mailbox overflow)**가 흔한 운영 문제.
 
@@ -246,62 +228,47 @@ Pykka (Python): 경량
 
 ## 한국 개발자의 함정
 
-```
-1. *Erlang = 통신사 전용*이라는 편견
-   - WhatsApp, Discord, Pinterest가 Erlang/Elixir 사용
-   - 실시간 시스템 전반에 적합
-
-2. *Actor = 무거운 OS thread*라는 오해
-   - Erlang 프로세스는 *매우* 가벼움
-   - 수백만 개 가능
-
-3. *let it crash = 에러 무시*라는 오해
-   - 정확히는 *국소화된 실패 + 복구*
-   - 시스템 차원에서 안정
-
-4. *Akka actor = OOP 그대로*
-   - 격리 + 메시지를 진짜로 따라야 함
-   - 공유 가변 상태 두면 의미 없음
-
-5. *Actor가 항상 분산에 좋음*
-   - 메시지 직렬화 / 순서 / 신뢰성 처리 필요
-   - 위치 투명성도 *비용*이 있음
-```
+1. ***Erlang = 통신사 전용*이라는 편견** — WhatsApp, Discord, Pinterest가 Erlang/Elixir를 쓴다. 실시간 시스템 전반에 적합.
+2. ***Actor = 무거운 OS thread*라는 오해** — Erlang 프로세스는 *매우* 가볍다. 수백만 개 가능.
+3. ***let it crash = 에러 무시*라는 오해** — 정확히는 *국소화된 실패 + 복구*. 시스템 차원에서 안정.
+4. ***Akka actor = OOP 그대로*** — 격리와 메시지를 진짜로 따라야 한다. 공유 가변 상태를 두면 의미가 없다.
+5. ***Actor가 항상 분산에 좋음*** — 메시지 직렬화, 순서, 신뢰성 처리가 필요하다. 위치 투명성도 *비용*이 있다.
 
 ## 실무 적용
 
-```
-이론 → 실무:
-- Erlang processes      → Elixir GenServer
-- Supervisor tree       → OTP
-- Akka actors            → Scala/Java 백엔드
-- Virtual actors         → Microsoft Orleans (게임 서버)
-- Pony actors            → 안전한 시스템
+**이론 → 실무**
 
-대표 시스템:
-- WhatsApp: Erlang 백엔드
-- Discord: Elixir voice/messaging
-- Klarna: Erlang 금융 시스템
-- Pinterest: Elixir 알림
-- 게임 서버: 일반적으로 actor 모델
+| 개념 | 구현 |
+|------|------|
+| Erlang processes | Elixir GenServer |
+| Supervisor tree | OTP |
+| Akka actors | Scala / Java 백엔드 |
+| Virtual actors | Microsoft Orleans (게임 서버) |
+| Pony actors | 안전한 시스템 |
 
-설계 패턴:
-- 도메인 entity = actor
-- Pipeline stage = actor chain
-- WebSocket connection = actor per connection
-- DB pool = actor with mailbox
-```
+**대표 시스템**
+
+- WhatsApp — Erlang 백엔드
+- Discord — Elixir voice/messaging
+- Klarna — Erlang 금융 시스템
+- Pinterest — Elixir 알림
+- 게임 서버 — 일반적으로 actor 모델
+
+**설계 패턴**
+
+- 도메인 entity → actor
+- Pipeline stage → actor chain
+- WebSocket connection → actor per connection
+- DB pool → actor with mailbox
 
 ## 자기 점검
 
-```
-□ Actor 모델의 세 가지 원칙?
-□ Erlang 프로세스가 OS thread보다 가벼운 이유?
-□ Let it crash 철학의 의미?
-□ Supervisor의 세 가지 전략?
-□ 메시지 순서 보장 / 미보장 경우?
-□ Actor의 단점과 대응?
-```
+- [ ] Actor 모델의 세 가지 원칙은?
+- [ ] Erlang 프로세스가 OS thread보다 가벼운 이유는?
+- [ ] *Let it crash* 철학의 의미는?
+- [ ] Supervisor의 세 가지 전략은?
+- [ ] 메시지 순서가 보장되는 경우와 그렇지 않은 경우는?
+- [ ] Actor의 단점과 대응은?
 
 ## 다음 장 예고
 

@@ -7,9 +7,7 @@ import { USES_DATA } from '../consts/uses';
   <section class="py-16">
     <div class="container">
       <div class="container-narrow mx-auto px-0">
-        <div class="text-xs uppercase tracking-wider text-[var(--color-accent)] font-medium mb-2">
-          Uses
-        </div>
+        <div class="section-eyebrow mb-2">Uses</div>
         <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-3">What I use</h1>
         <p class="text-[var(--color-text-secondary)] mb-12">
           Gear and software behind this site — kept current in the spirit of
@@ -20,8 +18,8 @@ import { USES_DATA } from '../consts/uses';
 
         <div class="grid gap-10 md:grid-cols-2">
           {USES_DATA.sections.map((section) => (
-            <section>
-              <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">
+            <section class="card card-panel">
+              <h2 class="sidebar-section-title mb-4">
                 {section.title}
               </h2>
               <ul class="space-y-3">

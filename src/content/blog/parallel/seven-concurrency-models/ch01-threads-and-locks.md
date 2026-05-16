@@ -17,14 +17,13 @@ draft: true
 
 Butcher가 락을 가장 먼저 다루는 이유 — **모든 다른 모델이 락에 대한 반작용**이다. 락의 한계를 알아야 다른 모델의 가치를 안다.
 
-```
-역사:
-1960s: 락 등장
-1980s: 락의 한계 인식
-1990s: 함수형 / Actor 부활
-2000s: STM, CSP 부활
-2010s: 분산 모델
-```
+| 시대 | 흐름 |
+|------|------|
+| 1960s | 락 등장 |
+| 1980s | 락의 한계 인식 |
+| 1990s | 함수형 / Actor 부활 |
+| 2000s | STM, CSP 부활 |
+| 2010s | 분산 모델 |
 
 ## 1.2 Mutual Exclusion — Java synchronized
 
@@ -215,13 +214,13 @@ int b = q2.poll();
 
 ## 1.9 Java 외 — 다른 언어의 락
 
-```
-Python: threading.Lock, threading.RLock (GIL 때문에 효용 제한)
-C++:    std::mutex, std::shared_mutex, std::atomic
-Go:     sync.Mutex, sync.RWMutex (그러나 channel을 더 권장)
-Ruby:   Mutex (GVL 때문에 GIL과 유사)
-Rust:   std::sync::Mutex (Send/Sync로 컴파일 타임 안전성)
-```
+| 언어 | API | 특징 |
+|------|-----|------|
+| Python | `threading.Lock`, `threading.RLock` | GIL 때문에 효용 제한 |
+| C++ | `std::mutex`, `std::shared_mutex`, `std::atomic` | — |
+| Go | `sync.Mutex`, `sync.RWMutex` | channel을 더 권장 |
+| Ruby | `Mutex` | GVL 때문에 GIL과 유사 |
+| Rust | `std::sync::Mutex` | `Send`/`Sync`로 컴파일 타임 안전성 |
 
 ## 1.10 락의 패턴 — Producer/Consumer
 
@@ -253,58 +252,42 @@ class WorkQueue<T> {
 
 ## 한국 개발자의 함정
 
-```
-1. *synchronized = 만능*이라는 오해
-   - 합성 불가 + 성능 한계
-   - 더 좋은 도구 많음 (concurrent collections)
-
-2. *volatile = atomic*이라는 혼동
-   - volatile: *가시성*만
-   - atomic: *원자성* (CAS)
-   - 카운터엔 AtomicInteger 필수
-
-3. *wait/notify 직접 사용*
-   - 거의 항상 BlockingQueue / Semaphore가 더 명확
-   - 직접 쓰면 버그 잠재력
-
-4. *deadlock은 디자인 시간에 막을 수 있다*
-   - 락 그래프 분석 필요
-   - 그러나 실제로는 매우 어려움
-   - 코드 리뷰 + 정적 분석 필수
-
-5. *Lock-free = 빠름*
-   - CAS 경합 심하면 락보다 느림
-   - 측정 필요
-```
+1. ***synchronized = 만능*이라는 오해** — 합성 불가 + 성능 한계. 더 좋은 도구가 많다 (concurrent collections).
+2. ***volatile = atomic*이라는 혼동** — `volatile`은 *가시성*만, atomic은 *원자성*(CAS). 카운터엔 `AtomicInteger` 필수.
+3. ***wait/notify 직접 사용*** — 거의 항상 `BlockingQueue` / `Semaphore`가 더 명확. 직접 쓰면 버그 잠재력.
+4. ***deadlock은 디자인 시간에 막을 수 있다*** — 락 그래프 분석이 이론적으로 가능하지만 실제로는 매우 어렵다. 코드 리뷰 + 정적 분석이 필수.
+5. ***Lock-free = 빠름*** — CAS 경합이 심하면 락보다 느리다. 측정 필수.
 
 ## 실무 적용
 
-```
-이론 → 실무:
-- synchronized       → 짧은 임계 영역
-- ReentrantLock      → tryLock, fairness 필요시
-- ReadWriteLock      → 읽기 압도적일 때
-- ConcurrentHashMap  → thread-safe map (락 직접 X)
-- AtomicInteger      → 카운터 / 플래그
-- BlockingQueue      → producer-consumer
+**이론 → 실무**
 
-언어별:
-- Java:   java.util.concurrent
-- C++:    std::mutex + thread-safe wrappers
-- Go:     sync.Mutex (그러나 channel 우선)
-- Rust:   Mutex<T> + Arc (컴파일 타임 안전성)
-- Python: threading + GIL 의식
-```
+| 도구 | 용도 |
+|------|------|
+| `synchronized` | 짧은 임계 영역 |
+| `ReentrantLock` | `tryLock`, fairness가 필요할 때 |
+| `ReadWriteLock` | 읽기가 압도적일 때 |
+| `ConcurrentHashMap` | thread-safe map (락 직접 X) |
+| `AtomicInteger` | 카운터 / 플래그 |
+| `BlockingQueue` | producer-consumer |
+
+**언어별 권장**
+
+| 언어 | 도구 |
+|------|------|
+| Java | `java.util.concurrent` |
+| C++ | `std::mutex` + thread-safe wrappers |
+| Go | `sync.Mutex` (그러나 channel 우선) |
+| Rust | `Mutex<T> + Arc` (컴파일 타임 안전성) |
+| Python | `threading` + GIL 의식 |
 
 ## 자기 점검
 
-```
-□ synchronized와 volatile 역할 차이?
-□ Deadlock 4조건과 회피법?
-□ wait가 *while* 안에 들어가야 하는 이유?
-□ 락의 *합성 불가* 의미?
-□ ConcurrentHashMap이 synchronizedMap보다 빠른 이유?
-```
+- [ ] `synchronized`와 `volatile`의 역할 차이는?
+- [ ] Deadlock 4조건과 회피법은?
+- [ ] `wait`가 *while* 안에 들어가야 하는 이유는?
+- [ ] 락의 *합성 불가*가 무슨 뜻인지?
+- [ ] `ConcurrentHashMap`이 `synchronizedMap`보다 빠른 이유는?
 
 ## 다음 장 예고
 

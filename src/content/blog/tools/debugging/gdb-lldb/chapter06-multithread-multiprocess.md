@@ -8,6 +8,9 @@ seriesOrder: 6
 draft: false
 ---
 
+> 📖 **이 챕터는 빠른 참조입니다.** 깊은 내부 메커니즘은 [Concurrency Debugging 시리즈](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex)를 참고하세요 — Linux 스레드 내부, futex 메커니즘, rr 워크플로, TSan/Helgrind 통합까지.
+
+
 싱글 스레드 버그는 호출 흐름만 따라가면 됩니다. 멀티 스레드 버그는 *순서*가 망가집니다. 어떤 스레드가 먼저 락을 잡았는지, 어떤 스레드가 데이터를 덮어썼는지, 어떤 스레드가 안 깨어났는지를 봐야 합니다. 디버거가 정지하는 순간 모든 스레드의 콜스택이 한 시점의 사진처럼 박제됩니다. 이 사진을 잘 읽는 법이 이 장의 주제입니다.
 
 이 장에서는 *Linux 스레드의 정체*에서 출발해 GDB의 스레드 모델, scheduler-locking의 한계, fork/vfork/clone의 차이, 그리고 비결정적 race 디버깅의 표준 무기인 rr까지 다룹니다.

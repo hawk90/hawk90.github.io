@@ -8,6 +8,9 @@ seriesOrder: 8
 draft: false
 ---
 
+> 📖 **이 챕터는 빠른 참조입니다.** 깊은 내부 메커니즘은 [Embedded Debugging 시리즈](/blog/tools/debugging/embedded/chapter01-rsp-protocol)를 참고하세요 — RSP 프로토콜 패킷 카탈로그, JTAG/SWD/CoreSight 회로, OpenOCD TCL, J-Link, RTOS-aware.
+
+
 GDB가 실행되는 *호스트*와 디버깅 대상이 도는 *타깃*은 같은 컴퓨터가 아니어도 됩니다. 라즈베리파이, x86 서버, ARM 보드, Cortex-M MCU — 모두 한 끝에 GDB Remote Serial Protocol(이하 RSP)을 말할 줄 아는 *스텁*만 있으면 GDB가 마치 로컬처럼 디버깅합니다.
 
 이 장은 RSP 프로토콜의 정체에서 출발해 두 갈래로 나아갑니다.

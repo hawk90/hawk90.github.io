@@ -6,39 +6,52 @@ const socialLinks = SOCIAL_CONFIG.filter(s => s.name !== 'RSS');
 ---
 
 <footer class="border-t border-[var(--color-border)] mt-auto no-print bg-[var(--color-bg-primary)]">
-  <div class="container py-5">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
-      <!-- Brand + copyright -->
-      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--color-text-muted)]">
-        <a href="/" class="font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors">
-          {BRAND_CONFIG.logoText}<span class="text-[var(--color-accent)]">{BRAND_CONFIG.logoSuffix}</span>
-        </a>
-        <span aria-hidden="true">·</span>
-        <span class="text-xs">&copy; {currentYear} {BRAND_CONFIG.copyright}</span>
-      </div>
+  <div class="container py-10">
+    <div class="footer-panel px-6 py-6 lg:px-8 lg:py-7">
+      <div class="grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-end">
+        <div>
+          <div class="section-eyebrow mb-3">Stay Oriented</div>
+          <a href="/" class="inline-flex items-center text-xl font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors">
+            {BRAND_CONFIG.logoText}<span class="text-[var(--color-accent)]">{BRAND_CONFIG.logoSuffix}</span>
+          </a>
+          <p class="mt-3 max-w-xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
+            C++, 시스템 프로그래밍, 임베디드 개발을 중심으로 직접 배우고 검증한 내용을 정리합니다.
+          </p>
+          <div class="mt-4 text-xs text-[var(--color-text-muted)]">
+            &copy; {currentYear} {BRAND_CONFIG.copyright}
+          </div>
+        </div>
 
-      <!-- Footer links + socials -->
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-[var(--color-text-muted)] text-xs">
-        {FOOTER_LINKS.map((link) => (
-          <a href={link.href} class="hover:text-[var(--color-text-primary)] transition-colors">
-            {link.label}
-          </a>
-        ))}
-        {socialLinks.length > 0 && (
-          <span class="text-[var(--color-border)]" aria-hidden="true">|</span>
-        )}
-        {socialLinks.map((link) => (
-          <a
-            href={link.href}
-            target={link.href.startsWith('http') || link.href.startsWith('mailto') ? '_blank' : undefined}
-            rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-            class="hover:text-[var(--color-text-primary)] transition-colors inline-flex items-center gap-1"
-            aria-label={link.name}
-          >
-            <span class="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4"><Fragment set:html={link.icon} /></span>
-            <span>{link.name}</span>
-          </a>
-        ))}
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div>
+            <div class="sidebar-section-title mb-3">Explore</div>
+            <div class="flex flex-col gap-2 text-sm text-[var(--color-text-secondary)]">
+              {FOOTER_LINKS.map((link) => (
+                <a href={link.href} class="hover:text-[var(--color-text-primary)] transition-colors">
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div class="sidebar-section-title mb-3">Connect</div>
+            <div class="flex flex-col gap-2 text-sm text-[var(--color-text-secondary)]">
+              {socialLinks.map((link) => (
+                <a
+                  href={link.href}
+                  target={link.href.startsWith('http') || link.href.startsWith('mailto') ? '_blank' : undefined}
+                  rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  class="hover:text-[var(--color-text-primary)] transition-colors inline-flex items-center gap-2"
+                  aria-label={link.name}
+                >
+                  <span class="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4 opacity-80"><Fragment set:html={link.icon} /></span>
+                  <span>{link.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

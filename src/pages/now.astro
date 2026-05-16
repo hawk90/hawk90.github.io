@@ -11,9 +11,7 @@ const formattedUpdate = new Date(NOW_DATA.updatedAt).toLocaleDateString('en-US',
   <section class="py-16">
     <div class="container">
       <div class="container-narrow mx-auto px-0">
-        <div class="text-xs uppercase tracking-wider text-[var(--color-accent)] font-medium mb-2">
-          Now
-        </div>
+        <div class="section-eyebrow mb-2">Now</div>
         <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-3">What I'm doing now</h1>
         <p class="text-[var(--color-text-secondary)] mb-2">
           A snapshot of current focus, in the spirit of
@@ -27,8 +25,8 @@ const formattedUpdate = new Date(NOW_DATA.updatedAt).toLocaleDateString('en-US',
 
         <div class="space-y-10">
           {NOW_DATA.sections.map((section) => (
-            <section>
-              <h2 class="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+            <section class="card card-panel">
+              <h2 class="sidebar-section-title mb-3">
                 {section.title}
               </h2>
               <ul class="space-y-2">

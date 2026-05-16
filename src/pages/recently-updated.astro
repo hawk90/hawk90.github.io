@@ -21,6 +21,7 @@ const recentPosts = allPosts
       <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: 'Recently Updated' }]} />
 
       <div class="mb-12">
+        <div class="section-eyebrow mb-2">Fresh Activity</div>
         <h1 class="text-4xl font-bold mb-3">Recently Updated</h1>
         <p class="text-lg text-[var(--color-text-secondary)]">
           최근 수정된 글과 새로 발행된 글
@@ -28,7 +29,7 @@ const recentPosts = allPosts
       </div>
 
       {updatedPosts.length > 0 && (
-        <section class="mb-16">
+        <section class="card card-panel mb-16">
           <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-[var(--color-border)]">
             🔄 Updated
             <span class="text-sm text-[var(--color-text-muted)] font-normal ml-2">{updatedPosts.length}</span>
@@ -38,7 +39,7 @@ const recentPosts = allPosts
               <li>
                 <a
                   href={`/blog/${post.id}`}
-                  class="flex items-baseline justify-between gap-4 py-2 px-3 rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
+                  class="flex items-baseline justify-between gap-4 py-2.5 px-3 rounded-xl hover:bg-[var(--color-bg-tertiary)] transition-colors"
                 >
                   <div class="min-w-0 flex-1">
                     <div class="font-medium truncate">{post.data.title}</div>
@@ -61,7 +62,7 @@ const recentPosts = allPosts
         </section>
       )}
 
-      <section>
+      <section class="surface-section pt-12">
         <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-[var(--color-border)]">
           ✨ Recently Published
           <span class="text-sm text-[var(--color-text-muted)] font-normal ml-2">{recentPosts.length}</span>

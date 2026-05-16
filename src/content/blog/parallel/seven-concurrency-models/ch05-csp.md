@@ -17,25 +17,12 @@ draft: true
 
 C.A.R. Hoare가 1978년 제안. *Communicating Sequential Processes*.
 
-**핵심 차이 — Actor vs CSP**:
+**핵심 차이 — Actor vs CSP**
 
-```
-Actor: 메시지는 *receiver actor*에게 보낸다
-       (receiver의 identity가 중요)
+- **Actor** — 메시지를 *receiver actor*에게 보낸다. receiver의 identity가 중요.
+- **CSP** — 메시지를 *channel*로 보낸다. sender도 receiver도 서로를 모른다.
 
-CSP:   메시지는 *channel*로 보낸다
-       (sender도 receiver도 모름)
-```
-
-```
-Actor:
-  Sender ──msg──▶ Receiver
-
-CSP:
-  Sender ──▶ [Channel] ──▶ Receiver
-              ↑              ↑
-           쪽 모름        쪽 모름
-```
+즉 Actor는 `Sender → Receiver`로 곧장 가는 반면, CSP는 `Sender → Channel → Receiver`로 *채널*이 매개한다.
 
 ## 5.2 Go — CSP의 현대 구현
 
@@ -65,12 +52,12 @@ go func() {
 }()
 ```
 
-```
-OS Thread:  수 MB 스택
-Goroutine:  ~8 KB 시작, 동적 확장
+| | 스택 |
+|------|------|
+| OS Thread | 수 MB |
+| Goroutine | ~8 KB 시작, 동적 확장 |
 
-→ 수십만 개 동시 가능
-```
+→ 수십만 개 동시 가능.
 
 Go runtime이 M:N 스케줄링 — N개 goroutine을 M개 OS thread에 매핑. work-stealing.
 
@@ -238,12 +225,10 @@ JVM/JS에서 CSP.
 
 ## 5.11 CSP의 함정
 
-```
-1. Channel deadlock — A는 B 기다리고 B는 A 기다림
-2. Goroutine leak — 채널이 영원히 안 닫혀 goroutine이 멈춤
-3. 무한 buffer 채널 — 메모리 폭발
-4. Channel을 lock처럼 쓰는 오용 — mutex가 더 명확한 경우 많음
-```
+1. **Channel deadlock** — A는 B를 기다리고 B는 A를 기다림
+2. **Goroutine leak** — 채널이 영원히 안 닫혀 goroutine이 멈춤
+3. **무한 buffer 채널** — 메모리 폭발
+4. **Channel을 lock처럼 쓰는 오용** — mutex가 더 명확한 경우가 많다
 
 ```go
 // Lock 패턴이 더 명확한 경우
@@ -286,70 +271,48 @@ CSP는 *흐름 설계*에 명확. Actor는 *분산 + 격리*에 강점.
 
 ## 한국 개발자의 함정
 
-```
-1. *Go = goroutine + channel*이라는 단순화
-   - 짧은 임계 영역은 sync.Mutex가 더 명확
-   - 표준 도구도 함께 사용
-
-2. *Buffered channel = 무한 큐*라는 오해
-   - 용량 지정 필수
-   - 미지정은 unbuffered
-
-3. *Channel close는 sender만*이라는 규칙
-   - receiver가 닫으면 panic
-   - 책임 분명히
-
-4. *Goroutine leak*에 대한 무관심
-   - 안 닫힌 채널 → 영원히 대기
-   - context로 cancel 전파
-
-5. *CSP가 Actor 대체*라는 단순화
-   - 분산은 actor가 강점
-   - 단일 노드 흐름 설계는 CSP
-```
+1. ***Go = goroutine + channel*이라는 단순화** — 짧은 임계 영역은 `sync.Mutex`가 더 명확. 표준 도구도 함께 쓴다.
+2. ***Buffered channel = 무한 큐*라는 오해** — 용량을 지정해야 한다. 미지정은 unbuffered.
+3. ***Channel close는 sender만***이라는 규칙. receiver가 닫으면 panic. 책임을 분명히.
+4. ***Goroutine leak*에 대한 무관심** — 안 닫힌 채널 → 영원히 대기. `context`로 cancel을 전파한다.
+5. ***CSP가 Actor 대체*라는 단순화** — 분산은 actor가 강점. 단일 노드 흐름 설계는 CSP.
 
 ## 실무 적용
 
-```
-이론 → 실무:
-- Goroutine + channel  → Go (사실상 표준)
-- core.async           → Clojure / ClojureScript
-- occam                → 학술 / 임베디드
-- libthread            → Plan 9
-- Kotlin coroutines    → Go-like + JVM
+**이론 → 실무**
 
-설계 패턴:
+| 개념 | 구현 |
+|------|------|
+| Goroutine + channel | Go (사실상 표준) |
+| `core.async` | Clojure / ClojureScript |
+| occam | 학술 / 임베디드 |
+| `libthread` | Plan 9 |
+| Kotlin coroutines | Go-like + JVM |
+
+**설계 패턴**
+
 - API 서버 → goroutine per request
 - Pipeline → producer → worker → aggregator
 - Worker pool → fan-out + fan-in
-- Timeout → context.WithTimeout + select
+- Timeout → `context.WithTimeout + select`
 - Pub/sub → channel broadcaster
 
-언제 CSP:
-- 데이터 흐름이 명확
-- 단일 머신 동시성
-- I/O 다중화
+**선택 기준**
 
-언제 Actor:
-- 분산 시스템
-- 격리된 상태 관리
-- Fault tolerance 우선
-
-언제 락:
-- 짧은 임계 영역
-- 단일 변수 보호
-```
+| 상황 | 모델 |
+|------|------|
+| 데이터 흐름이 명확 / 단일 머신 동시성 / I/O 다중화 | CSP |
+| 분산 시스템 / 격리된 상태 관리 / fault tolerance 우선 | Actor |
+| 짧은 임계 영역 / 단일 변수 보호 | 락 |
 
 ## 자기 점검
 
-```
-□ Actor와 CSP의 핵심 차이?
-□ Buffered vs Unbuffered channel?
-□ select의 multiplexing 역할?
-□ Pipeline 패턴의 단계 구성?
-□ Goroutine leak 방지 방법?
-□ context의 cancel propagation?
-```
+- [ ] Actor와 CSP의 핵심 차이는?
+- [ ] Buffered vs Unbuffered channel의 차이는?
+- [ ] `select`의 multiplexing 역할은?
+- [ ] Pipeline 패턴의 단계 구성은?
+- [ ] Goroutine leak 방지 방법은?
+- [ ] `context`의 cancel propagation은?
 
 ## 다음 장 예고
 

@@ -8,6 +8,9 @@ seriesOrder: 9
 draft: false
 ---
 
+> 📖 **이 챕터는 빠른 참조입니다.** 깊은 내부 메커니즘은 [GDB Extension and IDE 시리즈](/blog/tools/debugging/gdb-extension/chapter01-python-api-basics)를 참고하세요 — Python API 깊이, pretty-printer 메커니즘, FrameDecorator/Unwinder, MI/DAP.
+
+
 GDB와 LLDB 모두 Python 인터프리터를 내장합니다. 단순한 매크로는 GDB의 user-defined command로도 되지만, *데이터 구조 시각화*나 *조건이 복잡한 자동화*에는 Python이 거의 유일한 답입니다. STL 컨테이너가 `vector<int>{1, 2, 3}`처럼 깔끔히 보이는 것도 모두 pretty-printer 덕입니다.
 
 이 장은 GDB Python API의 핵심 객체에서 출발해 *어떻게 pretty-printer가 동작하는지*, *MI 프런트엔드(VSCode 등)가 어떻게 트리를 그리는지*, *FrameDecorator로 콜스택을 변형*, 그리고 LLDB의 SB API까지 다룹니다.

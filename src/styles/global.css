@@ -115,6 +115,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-y: scroll;
+  overflow-x: clip;
   text-rendering: optimizeLegibility;
 }
 
@@ -125,6 +126,11 @@ body {
   font-feature-settings: "ss01", "tnum";  /* Pretendard stylistic set + tabular nums */
   line-height: 1.7;
   min-height: 100vh;
+  background-image:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-accent) 14%, transparent) 0, transparent 28rem),
+    radial-gradient(circle at top right, color-mix(in oklab, var(--color-accent) 8%, transparent) 0, transparent 22rem);
+  background-attachment: fixed;
+  overflow-x: clip;
 }
 
 ::selection {
@@ -176,7 +182,7 @@ body {
 .card {
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   padding: 1.5rem;
   transition:
     border-color 0.2s var(--ease-out),
@@ -186,8 +192,93 @@ body {
 
 .card:hover {
   border-color: var(--color-border-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-hero {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--color-accent) 10%, var(--color-bg-secondary)) 0%, var(--color-bg-secondary) 56%),
+    var(--color-bg-secondary);
+  border-color: color-mix(in oklab, var(--color-accent) 24%, var(--color-border));
   box-shadow: var(--shadow-md);
+}
+
+.card-panel {
+  background: color-mix(in oklab, var(--color-bg-secondary) 84%, var(--color-bg-primary));
+}
+
+.card-feed {
+  background: color-mix(in oklab, var(--color-bg-secondary) 92%, var(--color-bg-primary));
+}
+
+.surface-section {
+  position: relative;
+  border-top: 1px solid var(--color-border);
+}
+
+.surface-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--color-accent) 4%, transparent), transparent 28%),
+    linear-gradient(180deg, color-mix(in oklab, var(--color-bg-secondary) 45%, transparent), transparent 100%);
+  pointer-events: none;
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.section-eyebrow::before {
+  content: "";
+  width: 1.75rem;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-accent) 48%, var(--color-border));
+}
+
+#site-header[data-scrolled="true"] {
+  background: color-mix(in oklab, var(--color-bg-primary) 90%, transparent);
+  border-bottom-color: var(--color-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.utility-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-left: 0.75rem;
+  margin-left: 0.5rem;
+  border-left: 1px solid var(--color-border);
+}
+
+.sidebar-shell {
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--color-bg-secondary) 88%, var(--color-bg-primary));
+  padding: 1rem;
+}
+
+.sidebar-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.footer-panel {
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--color-bg-secondary) 78%, var(--color-bg-primary));
 }
 
 /* ─── Buttons ─────────────────────────────────────────────── */
@@ -591,6 +682,13 @@ html[data-show-line-numbers="false"] .expressive-code .ec-line .gutter {
   opacity: 1;
 }
 .prose .heading-anchor:hover { color: var(--color-accent); }
+
+@media (max-width: 768px) {
+  .prose .heading-anchor,
+  .prose :is(h2, h3, h4) > a[href^="#"]::before {
+    display: none;
+  }
+}
 
 /* ─── Callouts (remark-callouts) ─────────────────────────── */
 .callout {

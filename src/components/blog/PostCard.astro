@@ -13,10 +13,10 @@ const { post, showImage = true } = Astro.props;
 const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail } = getPostMeta(post);
 ---
 
-<article class="card group overflow-hidden">
+<article class="card card-feed group overflow-hidden">
   <a href={`/blog/${post.id}`} class="block">
     {showImage && (
-      <div class="relative aspect-[16/9] -mx-5 -mt-5 mb-4 overflow-hidden bg-[var(--color-bg-tertiary)]">
+      <div class="relative aspect-[16/9] -mx-5 -mt-5 mb-5 overflow-hidden bg-[var(--color-bg-tertiary)]">
         <img
           src={thumbnail}
           alt={post.data.title}
@@ -27,7 +27,7 @@ const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail 
           decoding="async"
         />
         {post.data.series && (
-          <div class="absolute top-3 left-3 text-xs font-medium px-2 py-1 bg-[var(--color-accent)] text-white rounded">
+          <div class="absolute top-3 left-3 text-[11px] font-medium px-2.5 py-1 rounded-full bg-[color:color-mix(in_oklab,var(--color-bg-primary)_32%,transparent)] text-white backdrop-blur-sm">
             {post.data.series}
           </div>
         )}
@@ -56,8 +56,8 @@ const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail 
         {post.data.description}
       </p>
     )}
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-text-muted)]">
         <time datetime={post.data.date.toISOString()}>
           {formattedDate}
         </time>
@@ -70,9 +70,9 @@ const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail 
         <span>·</span>
         <span>{readingTime}{t('reading_time_min')}</span>
       </div>
-      <div class="flex gap-1">
+      <div class="flex flex-wrap gap-1.5">
         {post.data.tags.slice(0, BLOG_CONFIG.maxTagsInCard).map((tag) => (
-          <span class="text-xs px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded text-[var(--color-text-muted)]">
+          <span class="text-xs px-2 py-0.5 bg-[var(--color-bg-tertiary)] rounded-full text-[var(--color-text-muted)]">
             {tag}
           </span>
         ))}
