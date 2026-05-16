@@ -5,7 +5,7 @@ description: "Linux 스레드는 실은 프로세스. clone() 옵션, pthread_cr
 tags: [linux, threads, clone, futex, pthread]
 series: "Concurrency Debugging"
 seriesOrder: 1
-draft: false
+draft: true
 ---
 
 멀티스레드 버그를 잡으려면 *Linux의 스레드가 실제로 무엇인지*부터 알아야 합니다. 이 시리즈는 그 토대에서 시작해 GDB 멀티스레드 명령, race·deadlock 진단 방법론, 그리고 rr·TSan·Helgrind를 통합한 *재현 불가 버그* 해결까지 다룹니다.

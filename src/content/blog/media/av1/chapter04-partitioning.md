@@ -5,7 +5,7 @@ description: "AV1의 10가지 파티션 모드 — SPLIT, HORZ, VERT, T-shape, 4
 tags: [AV1, Video, Codec, Partitioning, Block]
 series: "AV1"
 seriesOrder: 4
-draft: false
+draft: true
 ---
 
 ## 4.1 왜 블록으로 나누는가

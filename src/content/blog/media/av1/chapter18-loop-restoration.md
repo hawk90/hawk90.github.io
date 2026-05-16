@@ -5,7 +5,7 @@ description: "AV1의 Loop Restoration — Wiener 필터, SGRPROJ(Self-Guided Res
 tags: [AV1, Video, Codec, Loop Restoration, Wiener, SGRPROJ]
 series: "AV1"
 seriesOrder: 18
-draft: false
+draft: true
 ---
 
 Ch 16에서 디블로킹으로 블록 경계를 정리하고, Ch 17에서 CDEF로 링잉 아티팩트를 처리했다. 그런데 여전히 전체적으로 약간 흐릿하거나 노이즈가 남아 있는 영역이 있다. 국소적인 문제는 해결했지만, **넓은 영역에 걸친 전체적인 화질 저하**는 아직이다.

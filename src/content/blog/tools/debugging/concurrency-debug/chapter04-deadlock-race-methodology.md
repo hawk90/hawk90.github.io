@@ -5,7 +5,7 @@ description: "데드락 그래프, race condition 분류, lock-free 함정, lost
 tags: [deadlock, race-condition, lock-free, aba, memory-ordering]
 series: "Concurrency Debugging"
 seriesOrder: 4
-draft: false
+draft: true
 ---
 
 멀티스레드 버그의 80%가 데드락·race·메모리 순서 문제로 귀결됩니다. 이 장은 *각각의 정체*와 *체계적 진단 방법*을 정리합니다. 락 보유 그래프, race condition의 5가지 분류, lock-free 데이터구조의 ABA 문제, 그리고 메모리 모델 reorder까지.

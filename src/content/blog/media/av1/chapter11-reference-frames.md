@@ -5,7 +5,7 @@ description: "AV1의 참조 프레임 시스템 — 8개 슬롯, 7개 명명된 
 tags: [AV1, Video, Codec, Reference Frame, ALTREF]
 series: "AV1"
 seriesOrder: 11
-draft: false
+draft: true
 ---
 
 지금까지 **Intra 프레임**을 디코딩했다. Intra 프레임은 다른 프레임을 참조하지 않고 자체적으로 완결된다. 하지만 비디오의 대부분은 **Inter 프레임**이다. Inter 프레임은 **이전 프레임을 참조**하여 예측한다. 이 장에서는 과거 프레임을 기억하고 재활용하는 **참조 프레임 시스템**을 살펴본다.

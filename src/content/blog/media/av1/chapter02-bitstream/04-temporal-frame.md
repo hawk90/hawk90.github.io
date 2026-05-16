@@ -5,7 +5,7 @@ description: "Temporal Unit의 정의, KEY/INTER/INTRA_ONLY/SWITCH 4가지 프�
 tags: [AV1, Video, Codec, TemporalUnit, FrameType]
 series: "AV1"
 seriesOrder: 2.04
-draft: false
+draft: true
 ---
 
 비트스트림의 *물리 단위* (OBU)를 보았으니 이제 *의미 단위* (Frame, Temporal Unit)를 보자.

@@ -5,7 +5,7 @@ description: "AV1의 Global/Warped Motion — 아핀 변환의 4가지 모델, L
 tags: [AV1, Video, Codec, Global Motion, Warped Motion, OBMC]
 series: "AV1"
 seriesOrder: 14
-draft: false
+draft: true
 ---
 
 지금까지 본 Inter 예측에서는 **평행 이동(translation)**만 가능했다. Motion Vector `(mvx, mvy)`는 참조 블록을 x, y 방향으로 이동하는 것뿐이다. 하지만 현실의 카메라는 **팬(pan), 틸트(tilt), 줌(zoom), 회전(rotation)**까지 할 수 있다. 이런 복잡한 움직임을 단순 MV로 표현하면 비효율적이다.

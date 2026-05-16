@@ -5,7 +5,7 @@ description: "AV1의 전역 설정과 공간 분할 구조 — Sequence Header, 
 tags: [AV1, Video, Codec, Sequence Header, Tile, Superblock]
 series: "AV1"
 seriesOrder: 3
-draft: false
+draft: true
 ---
 
 이 장에서는 Sequence Header의 상세 구조와 프레임의 공간적 분할 체계를 다룬다. 스펙 Section 5.5(sequence_header_obu)와 Section 6.4(Tile)를 참조한다.

@@ -5,7 +5,7 @@ description: "f(n), uvlc(), leb128(), su(n), ns(n), S(), L(n), NS(n) — AV1 스
 tags: [AV1, Video, Codec, Spec, Descriptors]
 series: "AV1"
 seriesOrder: 2.07
-draft: false
+draft: true
 ---
 
 AV1 스펙을 한 번이라도 펴 본 사람은 `f(4)`, `uvlc()`, `S()` 같은 *디스크립터* 가 빼곡한 syntax를 봤을 것이다. 이 절은 그 디스크립터들의 의미를 한꺼번에 정리한다.

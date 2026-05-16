@@ -5,7 +5,7 @@ description: "info threads, thread apply all, scheduler-locking, non-stop 모드
 tags: [gdb, threads, scheduler-locking, non-stop]
 series: "Concurrency Debugging"
 seriesOrder: 2
-draft: false
+draft: true
 ---
 
 GDB가 멀티스레드 프로세스를 어떻게 정지·검사·재개하는지의 안쪽을 봅니다. 단순한 `info threads` 이상으로 *all-stop vs non-stop 모드*의 차이, scheduler-locking의 한계, 모든 스레드 콜스택 출력의 자동화까지.

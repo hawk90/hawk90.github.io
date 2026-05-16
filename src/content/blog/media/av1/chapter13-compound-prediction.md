@@ -5,7 +5,7 @@ description: "AV1의 Compound 예측 — Averaged, Distance-Weighted, Wedge, DIF
 tags: [AV1, Video, Codec, Compound, Prediction]
 series: "AV1"
 seriesOrder: 13
-draft: false
+draft: true
 ---
 
 지금까지 Inter 예측은 **하나의 참조 프레임**에서 복사해 오는 것이었다. 하지만 현실의 비디오에서는 한 참조만으로는 부족한 경우가 많다. 장면이 서서히 바뀌는 페이드, 물체가 가려졌다 나타나는 영역, 두 물체가 겹치는 경계 등이 그런 예다. AV1은 **두 개의 참조를 섞는** Compound 예측으로 이런 상황을 처리한다.

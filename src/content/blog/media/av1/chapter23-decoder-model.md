@@ -5,7 +5,7 @@ description: "AV1의 Decoder Model — Smoothing Buffer, Frame Buffer, 타이밍
 tags: [AV1, Video, Codec, Decoder Model, Conformance]
 series: "AV1"
 seriesOrder: 23
-draft: false
+draft: true
 ---
 
 이번 장에서는 AV1의 **Decoder Model**을 살펴본다. Decoder Model은 비트스트림이 **디코더의 자원 한계를 넘지 않음**을 수학적으로 보증하는 모델이다. 실시간 스트리밍과 하드웨어 디코더 설계에 필수적인 개념이다.

@@ -5,7 +5,7 @@ description: "AV1의 Intra 예측 — DC, Paeth, Smooth, 56개 방향 예측, Cf
 tags: [AV1, Video, Codec, Intra, Prediction]
 series: "AV1"
 seriesOrder: 8
-draft: false
+draft: true
 ---
 
 ## 8.1 Intra 예측의 핵심 아이디어

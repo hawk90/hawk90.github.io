@@ -5,7 +5,7 @@ description: "AV1 Frame Header 구조 — 프레임 타입, 양자화, 세그멘
 tags: [AV1, Video, Codec, Frame Header, Quantization]
 series: "AV1"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 ## 5.1 Frame Header의 역할

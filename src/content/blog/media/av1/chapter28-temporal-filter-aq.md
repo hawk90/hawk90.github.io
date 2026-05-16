@@ -5,7 +5,7 @@ description: "AV1 인코더의 화질 최적화 — RDO, Temporal Filtering, Var
 tags: [AV1, Video, Codec, Encoder, RDO, Temporal Filter, AQ]
 series: "AV1"
 seriesOrder: 28
-draft: false
+draft: true
 ---
 
 이 장에서는 인코더가 화질을 최적화하는 두 가지 핵심 기법을 살펴본다. **Temporal Filtering**은 시간 축을 따라 노이즈를 제거하여 깨끗한 참조 프레임을 생성한다. **Adaptive Quantization**은 영역별로 양자화 강도를 조절하여 비트를 효율적으로 분배한다.

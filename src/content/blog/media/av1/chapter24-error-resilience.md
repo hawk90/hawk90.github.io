@@ -5,7 +5,7 @@ description: "AV1의 Error Resilience — error_resilient_mode, Switch Frame, Re
 tags: [AV1, Video, Codec, Error Resilience, Recovery]
 series: "AV1"
 seriesOrder: 24
-draft: false
+draft: true
 ---
 
 이번 장에서는 AV1의 **Error Resilience**(에러 복원) 기능을 살펴본다. 네트워크 전송 중 발생하는 에러 상황에서 디코더가 어떻게 대응하는지, 인코더가 어떤 도구를 활용할 수 있는지를 다룬다.

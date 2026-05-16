@@ -5,7 +5,7 @@ description: "재현 불가 race를 기록하고 시간 역행. rr 깊이, Perno
 tags: [rr, pernosco, tsan, helgrind, time-travel, record-replay]
 series: "Concurrency Debugging"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 이 시리즈의 마지막 장은 *재현 불가 race·heisenbug*에 대한 답입니다. **rr**로 *한 번이라도 재현된 버그*를 영원히 보존하고, **Pernosco**로 trace를 클라우드 인덱싱, **TSan**·**Helgrind**가 *어디가 진짜 race인지* 알려 주는 통합 워크플로.

@@ -1,11 +1,11 @@
 ---
-title: "AV1 Deep Dive: 시리즈 개요"
+title: "AV1: 시리즈 개요"
 date: 2026-05-01T00:00:00
 description: "AV1 코덱 완전 정복. 비트스트림 구조부터 디코더 구현, 인코더 전략까지."
-series: "AV1 Deep Dive"
+series: "AV1"
 seriesOrder: 0
 tags: [AV1, Codec, Video, AOMedia, Bitstream]
-draft: false
+draft: true
 ---
 
 AV1은 Alliance for Open Media가 개발한 로열티 프리 비디오 코덱이다. 이 시리즈는 AV1 스펙 전체를 다룬다.
@@ -25,8 +25,8 @@ AV1은 Alliance for Open Media가 개발한 로열티 프리 비디오 코덱이
 
 ## 시리즈 구조
 
-```
-AV1 Deep Dive (30장)
+```text
+AV1 (30장)
 │
 ├── Part 1: Basics (2장) ─────────────── 배경 지식
 ├── Part 2: Bitstream (4장) ──────────── OBU와 헤더 파싱

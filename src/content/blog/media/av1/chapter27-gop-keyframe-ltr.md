@@ -5,7 +5,7 @@ description: "AV1 인코더의 GOP 구조 — Hierarchical GOP, Forced Key Frame
 tags: [AV1, Video, Codec, Encoder, GOP, Key Frame, LTR]
 series: "AV1"
 seriesOrder: 27
-draft: false
+draft: true
 ---
 
 Rate Control이 "각 프레임에 몇 비트를 할당할까?"를 결정한다면, **GOP 설계**는 "어떤 프레임을 언제 만들고, 어떤 참조를 유지할까?"를 결정한다. 이 장에서는 프레임 레벨의 전략을 살펴본다.

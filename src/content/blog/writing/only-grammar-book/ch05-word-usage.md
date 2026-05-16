@@ -66,18 +66,10 @@ draft: true
 
 ## Bad / Badly
 
-```
-Bad (형용사) — 나쁜:
-   I feel bad about the mistake.
+- **Bad** (형용사) — 나쁜: *I feel bad about the mistake.*
+- **Badly** (부사) — 잘못, 심하게: *He sang badly.*
 
-Badly (부사) — 잘못, 심하게:
-   He sang badly.
-
-회피: I feel badly.   (느낌 동사는 형용사)
-바름: I feel bad.
-```
-
-`Feel, look, smell, taste, sound`는 *연결 동사* — 형용사 보어를 받습니다.
+회피: *I feel badly.* — 바름: *I feel bad.* `Feel, look, smell, taste, sound`는 *연결 동사*라 형용사 보어를 받습니다.
 
 ## Bring / Take
 
@@ -109,15 +101,9 @@ Badly (부사) — 잘못, 심하게:
 
 ## Comprise / Compose
 
-```
-Comprise — 구성하다 (전체가 부분을):
-   The orchestra comprises 80 musicians.
-
-Compose — 구성하다 (부분이 전체를):
-   80 musicians compose the orchestra.
-
-수동: The orchestra is composed of 80 musicians.
-```
+- **Comprise** — 구성하다 (전체가 부분을): *The orchestra comprises 80 musicians.*
+- **Compose** — 구성하다 (부분이 전체를): *80 musicians compose the orchestra.*
+- 수동형: *The orchestra is composed of 80 musicians.*
 
 `Is comprised of`는 *비표준*. *Comprises* 또는 *is composed of*를 씁니다.
 
@@ -192,11 +178,9 @@ Compose — 구성하다 (부분이 전체를):
 
 (Chapter 4에서 다룸)
 
-```
-Lay (타동사):   Lay the book down.   (lay, laid, laid)
-Lie (자동사):   I want to lie down.   (lie, lay, lain)
-Lie (거짓말):   Don't lie.            (lie, lied, lied)
-```
+- **Lay** (타동사) — *Lay the book down.* (lay, laid, laid)
+- **Lie** (자동사) — *I want to lie down.* (lie, lay, lain)
+- **Lie** (거짓말) — *Don't lie.* (lie, lied, lied)
 
 ## Lead / Led
 
@@ -298,15 +282,11 @@ Lie (거짓말):   Don't lie.            (lie, lied, lied)
 
 ## 자기 글 점검
 
-```
-□ 자주 혼동하는 쌍이 정확히 쓰였는가?
-   - affect/effect, than/then, their/there/they're
-   - lay/lie, fewer/less, who/whom
-□ 회화 어휘가 격식 글에 섞이지 않았는가?
-□ 동음이의어(homophone)의 의미가 맞는가?
-□ Comprise / Compose의 방향이 맞는가?
-□ Disinterested / Uninterested 같은 정확한 구분
-```
+- [ ] 자주 혼동하는 쌍이 정확히 쓰였는가? — affect/effect, than/then, their/there/they're, lay/lie, fewer/less, who/whom
+- [ ] 회화 어휘가 격식 글에 섞이지 않았는가?
+- [ ] 동음이의어(homophone)의 의미가 맞는가?
+- [ ] Comprise / Compose의 방향이 맞는가?
+- [ ] Disinterested / Uninterested 같은 정확한 구분이 되어 있는가?
 
 ## 한국 학생의 Word Usage 함정
 

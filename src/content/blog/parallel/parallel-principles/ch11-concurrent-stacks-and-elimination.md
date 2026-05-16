@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, amp, stack, treiber, elimination, C++
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
-draft: false
+draft: true
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 11 요약

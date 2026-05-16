@@ -5,7 +5,7 @@ description: "thread-safe stack/queue/map 설계. 락 입자, 예외 안전, 인
 tags: [C++, C, Concurrency, Data Structures, Mutex]
 series: "C++ Concurrency in Action"
 seriesOrder: 6
-draft: false
+draft: true
 ---
 
 스레드 안전한 자료구조를 설계하는 방법을 다룬다. 단순히 뮤텍스를 감싸는 것 이상으로, 인터페이스 설계와 락 입자도가 중요하다.

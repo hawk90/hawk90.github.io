@@ -5,7 +5,7 @@ description: "AV1의 블록 계층 — Superblock, Coding Block, Transform Block
 tags: [AV1, Video, Codec, Superblock, Coding Block, Transform Block]
 series: "AV1"
 seriesOrder: 6
-draft: false
+draft: true
 ---
 
 ## 6.1 블록 계층 구조

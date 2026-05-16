@@ -5,7 +5,7 @@ description: "lock-free / wait-free 정의, compare-and-swap, ABA 문제, hazard
 tags: [C++, C, Concurrency, Lock-free, Atomic, CAS]
 series: "C++ Concurrency in Action"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 뮤텍스 없이 스레드 안전한 자료구조를 만들 수 있다. 원자적 연산만으로 동기화를 달성하는 lock-free 프로그래밍을 다룬다.

@@ -296,33 +296,25 @@ Edge AI와 NPU 활용을 다룹니다.
 
 ### 입문자 (0-6개월)
 
-```
-Part 1 (HW 기초) → Part 2 (프로세서) → Part 4 (Bare-Metal) → Part 5 (페리퍼럴)
-```
+**Part 1 (HW 기초) → Part 2 (프로세서) → Part 4 (Bare-Metal) → Part 5 (페리퍼럴)**
 
 하드웨어와 프로세서 기초를 익힌 후, bare-metal과 페리퍼럴 제어로 실습합니다.
 
 ### 중급자 (6개월-2년)
 
-```
-Part 3 (빌드) → Part 6 (RTOS) → Part 8 (성능) → Part 9 (디버깅)
-```
+**Part 3 (빌드) → Part 6 (RTOS) → Part 8 (성능) → Part 9 (디버깅)**
 
 빌드 시스템을 이해하고, RTOS 내부를 공부하고, 성능 분석과 디버깅을 시작합니다.
 
 ### 고급자 (2년+)
 
-```
-Part 7 (Linux) → Part 10 (FPGA) → Part 11 (Edge AI)
-```
+**Part 7 (Linux) → Part 10 (FPGA) → Part 11 (Edge AI)**
 
 Linux 드라이버 개발, FPGA/가속기 통합, Edge AI 배포를 익힙니다.
 
 ### FPGA/가속기 전문
 
-```
-Part 10 (FPGA) → Part 8 (성능) → Part 11 (Edge AI)
-```
+**Part 10 (FPGA) → Part 8 (성능) → Part 11 (Edge AI)**
 
 Xilinx/Intel FPGA, AXI 인터페이스, HLS, NPU 활용을 집중 학습합니다.
 

@@ -5,7 +5,7 @@ description: "AV1의 잔차 복원 — 계수 파싱, 역양자화, DCT/ADST/IDT
 tags: [AV1, Video, Codec, Transform, Quantization, DCT]
 series: "AV1"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 예측은 완벽하지 않다. 아무리 좋은 예측을 해도 **원본과 예측의 차이**(잔차, residual)는 존재한다. AV1은 이 잔차를 **주파수 영역으로 변환**하여 압축한다. 이 장에서는 비트스트림에서 변환 계수를 파싱하고, 역양자화와 역변환을 거쳐 잔차를 복원하는 과정을 살펴본다.
