@@ -10,9 +10,9 @@ draft: false
 
 이 시리즈의 마지막 장 — *재현 환경 없는* 운영의 누수 진단. ASan은 빌드 다시 필요, Valgrind는 너무 느림, heaptrack은 trace 너무 큼. 그래서 *프로덕션 친화 도구 셋*이 필요합니다.
 
-## 한 줄 요약
-
+:::tldr
 `/proc/[pid]/smaps_rollup` 폴링 + jemalloc 상시 profiler + cgroup `memory.max`로 보호 + drgn으로 *라이브 분석*.
+:::
 
 ## 1단계 — 누수 *확인*
 

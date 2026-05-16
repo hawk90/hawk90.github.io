@@ -10,9 +10,9 @@ draft: false
 
 eBPF(extended Berkeley Packet Filter)는 *커널 안에서 안전하게 실행되는 바이트코드 VM*입니다. 원래 패킷 필터링용이었지만 지금은 *trace·observability·security*의 표준 인프라. bpftrace는 그 위의 *고급 언어*로, ftrace의 모든 기능에 *표현력*과 *집계 능력*을 더합니다.
 
-## 한 줄 요약
-
+:::tldr
 `bpftrace -e 'kprobe:do_sys_open { printf("%s opens %s\n", comm, str(arg1)); }'` — 한 줄로 *시스템 전체의 file open* 추적.
+:::
 
 ## eBPF 모델
 

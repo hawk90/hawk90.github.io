@@ -10,9 +10,9 @@ draft: false
 
 커널 디버깅의 *가장 빠른 도구*는 printk입니다. 너무 단순해 무시하기 쉽지만, *대부분의 커널 버그가 printk 한 줄로 잡힙니다*. 다만 잘 쓰려면 *log level*, *ring buffer*, *ratelimit*, *dynamic_debug*를 알아야 합니다.
 
-## 한 줄 요약
-
+:::tldr
 `printk(KERN_INFO "...")` → 커널 ring buffer → `dmesg`. dynamic_debug로 런타임에 디버그 메시지 켜고 끄기.
+:::
 
 ## printk 기본
 

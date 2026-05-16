@@ -10,9 +10,9 @@ draft: true
 
 이 시리즈의 마지막 장은 *재현 불가 race·heisenbug*에 대한 답입니다. **rr**로 *한 번이라도 재현된 버그*를 영원히 보존하고, **Pernosco**로 trace를 클라우드 인덱싱, **TSan**·**Helgrind**가 *어디가 진짜 race인지* 알려 주는 통합 워크플로.
 
-## 한 줄 요약
-
+:::tldr
 rr이 *비결정성을 결정성으로*. TSan/Helgrind가 *race 위치 진단*. 둘이 보완.
+:::
 
 ## rr — record and replay
 

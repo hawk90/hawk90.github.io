@@ -12,9 +12,9 @@ draft: false
 
 이 시리즈의 첫 장은 RSP의 정체부터 시작합니다. 패킷 형식·체크섬·ACK 핸드셰이크·feature 협상·멀티 패킷 동작 — 이후 모든 챕터(JTAG/SWD, OpenOCD, J-Link)가 결국 이 패킷 위에서 일어납니다.
 
-## 한 줄 요약
-
+:::tldr
 GDB와 원격 스텁이 *`$payload#checksum`* 형태의 ASCII 패킷을 주고받으며 메모리·레지스터·BP·실행 제어를 수행하는 단순 프로토콜.
+:::
 
 ## 왜 알아야 하나
 

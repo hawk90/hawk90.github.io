@@ -8,7 +8,9 @@ seriesOrder: 7
 draft: false
 ---
 
-> 📖 **이 챕터는 빠른 참조입니다.** 깊은 내부 메커니즘은 [Postmortem Debugging 시리즈](/blog/tools/debugging/postmortem/chapter01-core-generation)를 참고하세요 — core 파일 ELF 포맷, NT_PRSTATUS, build-id 매칭, minidump, debuginfod 자동화.
+:::tip[Deep dive]
+이 챕터는 빠른 참조입니다. 깊은 내부 메커니즘은 [Postmortem Debugging 시리즈](/blog/tools/debugging/postmortem/chapter01-core-generation)를 참고하세요 — core 파일 ELF 포맷, NT_PRSTATUS, build-id 매칭, minidump, debuginfod 자동화.
+:::
 
 
 프로덕션에서 가장 답답한 순간 — 서버가 한 번 죽고, 다음에 켤 땐 문제가 안 보입니다. 이때 *시신*만 남으면 부검할 수 있습니다. core dump는 프로세스가 죽기 직전의 메모리·레지스터·콜스택 스냅샷입니다. 라이브 디버깅이 환자 진료라면 core 분석은 부검입니다.

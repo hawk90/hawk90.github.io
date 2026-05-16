@@ -83,7 +83,7 @@ target_link_libraries(myapp PRIVATE ZLIB::ZLIB)
 
 CMake 자체에 *수십 개의 `FindXxx.cmake` 스크립트*가 내장되어 있습니다(`$CMAKE/Modules/` 디렉터리). 이 스크립트는 *전통적인 라이브러리*를 시스템 표준 위치에서 찾아 줍니다 — zlib, OpenSSL, Threads, X11, JPEG 같이 *오래된, 그리고 CMake보다 먼저 존재한* 라이브러리들.
 
-```
+```shell
 $CMAKE/Modules/
 ├── FindZLIB.cmake
 ├── FindOpenSSL.cmake
@@ -105,7 +105,7 @@ Module 모드 흐름:
 
 요즘 잘 만든 라이브러리는 *자기 자신에 대한 CMake 정보 파일*을 직접 제공합니다. 이 파일은 라이브러리가 설치될 때 같이 깔립니다.
 
-```
+```shell
 /usr/lib/cmake/fmt/
 ├── fmt-config.cmake          ← find_package(fmt)가 찾는 파일
 ├── fmt-config-version.cmake  ← 버전 정보

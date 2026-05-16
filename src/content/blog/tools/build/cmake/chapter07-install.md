@@ -12,7 +12,7 @@ draft: false
 
 빌드가 끝나면 산물은 *빌드 디렉터리에 어지럽게 흩어진 상태*입니다.
 
-```
+```shell
 build/
 ├── myapp                  # 실행 파일
 ├── libmylib.so           # 공유 라이브러리
@@ -91,7 +91,7 @@ DESTDIR=/tmp/staging cmake --install build
 
 결과:
 
-```
+```shell
 /tmp/staging/
 └── usr/
     └── local/
@@ -221,7 +221,7 @@ target_link_libraries(app PRIVATE MyLib::mylib)
 
 ### 설치 후의 디렉터리 구조
 
-```
+```shell
 ${PREFIX}/                                       ← 예: /usr/local
 ├── bin/
 │   └── myapp
@@ -499,14 +499,7 @@ include(CPack)
 set(CPACK_DEB_COMPONENT_INSTALL ON)
 ```
 
-결과:
-
-```
-mylib-1.2.3-Linux-Runtime.deb
-mylib-1.2.3-Linux-Libraries.deb
-mylib-1.2.3-Linux-Development.deb
-mylib-1.2.3-Linux-Documentation.deb
-```
+결과는 컴포넌트별로 분리된 `.deb` 파일들이 생깁니다 — `mylib-1.2.3-Linux-Runtime.deb`, `Libraries.deb`, `Development.deb`, `Documentation.deb`.
 
 ---
 

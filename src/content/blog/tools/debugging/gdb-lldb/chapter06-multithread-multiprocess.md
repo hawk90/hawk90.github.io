@@ -8,7 +8,9 @@ seriesOrder: 6
 draft: false
 ---
 
-> 📖 **이 챕터는 빠른 참조입니다.** 깊은 내부 메커니즘은 [Concurrency Debugging 시리즈](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex)를 참고하세요 — Linux 스레드 내부, futex 메커니즘, rr 워크플로, TSan/Helgrind 통합까지.
+:::tip[Deep dive]
+이 챕터는 빠른 참조입니다. 깊은 내부 메커니즘은 [Concurrency Debugging 시리즈](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex)를 참고하세요 — Linux 스레드 내부, futex 메커니즘, rr 워크플로, TSan/Helgrind 통합까지.
+:::
 
 
 싱글 스레드 버그는 호출 흐름만 따라가면 됩니다. 멀티 스레드 버그는 *순서*가 망가집니다. 어떤 스레드가 먼저 락을 잡았는지, 어떤 스레드가 데이터를 덮어썼는지, 어떤 스레드가 안 깨어났는지를 봐야 합니다. 디버거가 정지하는 순간 모든 스레드의 콜스택이 한 시점의 사진처럼 박제됩니다. 이 사진을 잘 읽는 법이 이 장의 주제입니다.
@@ -254,7 +256,9 @@ T2와 T3에서 모두 같은 주소가 보이면 데드락 확정.
 
 LLDB는 `settings set target.process.thread.step-avoid-libraries`와 `thread step-out`/`step-in --run-mode this-thread` 조합으로 비슷한 효과를 냅니다. GDB만큼 깔끔하지는 않습니다.
 
-> **주의** — `scheduler-locking on` 상태로 `continue`하면 정지 상태인 다른 스레드 때문에 데드락에 빠질 수 있습니다. 또한 *현재 스레드가 다른 스레드를 기다리고 있다면* 디버깅이 영원히 진행 안 됩니다. 디버깅 끝나면 `off`로 되돌립니다.
+:::warning
+`scheduler-locking on` 상태로 `continue`하면 정지 상태인 다른 스레드 때문에 데드락에 빠질 수 있습니다. 또한 *현재 스레드가 다른 스레드를 기다리고 있다면* 디버깅이 영원히 진행 안 됩니다. 디버깅 끝나면 `off`로 되돌립니다.
+:::
 
 ### scheduler-locking이 부족할 때
 

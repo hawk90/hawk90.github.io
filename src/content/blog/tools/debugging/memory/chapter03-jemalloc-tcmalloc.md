@@ -10,9 +10,9 @@ draft: false
 
 glibc의 ptmalloc은 *멀티스레드 환경*에서 lock 경합·heap fragmentation으로 *수십 % 메모리 낭비*가 흔합니다. **jemalloc** (Facebook/Mozilla)과 **tcmalloc** (Google)이 *더 효율적인 대체*이자 *내장 profiler*까지 제공.
 
-## 한 줄 요약
-
+:::tldr
 `LD_PRELOAD=libjemalloc.so` → 더 적은 메모리 + heap profiling. `MALLOC_CONF`로 옵션, `jeprof`로 분석.
+:::
 
 ## 왜 대체 malloc인가
 

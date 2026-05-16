@@ -12,9 +12,9 @@ draft: false
 
 이 시리즈는 *Linux 커널 디버깅*의 전체 흐름을 다룹니다. 첫 장은 *왜 어렵나*부터 — user/kernel 경계, /proc 인터페이스, 커널 심볼·debug info의 구조까지.
 
-## 한 줄 요약
-
+:::tldr
 커널은 *프로세스가 아니므로* GDB로 attach 못 함. 대신 *printk/ftrace/eBPF*로 안에서 보고, *kgdb*로 다른 머신에서 보고, *crash/drgn*으로 사후 분석.
+:::
 
 ## User-space vs Kernel-space
 

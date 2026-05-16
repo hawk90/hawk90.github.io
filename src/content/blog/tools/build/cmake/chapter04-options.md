@@ -261,15 +261,7 @@ add_feature_info(Baz ENABLE_BAZ "The baz feature for Z")
 feature_summary(WHAT ALL)
 ```
 
-출력:
-
-```
--- The following features have been enabled:
- * Foo, The foo feature for X
- * Baz, The baz feature for Z
--- The following features have been disabled:
- * Bar, The bar feature for Y
-```
+출력은 활성화된 기능(Foo, Baz)과 비활성화된 기능(Bar)을 그룹으로 나누어 보여줍니다.
 
 사용자가 빌드 구성을 한눈에 확인할 수 있어 편리합니다.
 

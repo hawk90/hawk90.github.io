@@ -10,9 +10,9 @@ draft: false
 
 커널 panic 후 시스템이 죽었습니다. 재현은 안 됩니다. *kdump*가 *재부팅 직전* RAM을 vmcore 파일로 저장해 줬다면 — **crash** 또는 **drgn**으로 부검합니다. 이건 user-space의 core dump 분석(`gdb exe core`)에 해당하는 *커널 버전*.
 
-## 한 줄 요약
-
+:::tldr
 `/var/crash/.../vmcore` 파일 + `vmlinux` debuginfo = 전체 커널 상태 재구성. `crash` (전통)와 `drgn` (Python 기반 모던) 두 선택지.
+:::
 
 ## kdump 셋업
 

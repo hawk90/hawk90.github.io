@@ -10,9 +10,9 @@ draft: false
 
 ftrace·eBPF는 *관찰*만 합니다. *실시간으로 멈추고 변수를 검사*하려면 **kgdb**가 답입니다. 커널이 *자기 자신을 디버깅할 수 없으므로* 별 머신 (호스트) 또는 시리얼 콘솔이 필요합니다. 가상화 시대엔 QEMU + virtio serial이 표준.
 
-## 한 줄 요약
-
+:::tldr
 타깃 머신 (또는 VM)에 *kgdb stub*을 켜고, 호스트의 *gdb*가 serial/TCP로 연결 → user-space와 같은 step debug.
+:::
 
 ## 두 가지 모드
 

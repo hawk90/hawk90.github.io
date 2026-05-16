@@ -145,7 +145,7 @@ cmake version 3.28.1
 
 가장 단순한 CMake 프로젝트입니다.
 
-```
+```shell
 hello/
 ├── CMakeLists.txt
 └── main.cpp
@@ -176,12 +176,7 @@ add_executable(hello main.cpp)
 
 ### `cmake_minimum_required(VERSION 3.20)`
 
-CMake 최소 버전 선언. 이 버전보다 *낮은 CMake*로 빌드하면 즉시 에러가 납니다.
-
-```
-CMake Error at CMakeLists.txt:1 (cmake_minimum_required):
-  CMake 3.20 or higher is required.  You are running version 3.10.2
-```
+CMake 최소 버전 선언. 이 버전보다 *낮은 CMake*로 빌드하면 즉시 에러가 납니다 — `CMake Error at CMakeLists.txt:1 (cmake_minimum_required): CMake 3.20 or higher is required.`
 
 이 선언은 *단순한 버전 체크가 아닙니다*. CMake의 *정책(policy)* 데이터베이스를 *그 버전의 동작*으로 설정합니다. CMake는 버전이 올라가면서 *행동을 바꿔야 했던 결정*들을 정책으로 가지고 있는데(예: `OLD` 정책 N과 `NEW` 정책 N), `cmake_minimum_required`가 그 정책의 기본값을 한꺼번에 정합니다.
 
@@ -251,7 +246,7 @@ add_executable(hello
 
 CMake는 *소스 디렉터리와 빌드 디렉터리를 분리*하기를 강하게 권합니다.
 
-```
+```shell
 hello/                  ← 소스 (불변)
 ├── CMakeLists.txt
 ├── main.cpp
@@ -346,7 +341,7 @@ cmake --build build --config Release
 
 실제 프로젝트는 *공개 헤더*와 *내부 구현*을 분리합니다.
 
-```
+```shell
 myproject/
 ├── CMakeLists.txt
 ├── include/

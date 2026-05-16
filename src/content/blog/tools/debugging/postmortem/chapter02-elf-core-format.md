@@ -10,9 +10,9 @@ draft: false
 
 생성된 core 파일은 그저 *ELF*입니다. `e_type = ET_CORE`. 일반 실행 파일·shared library와 *같은 포맷*. 이 장은 core 안에 *어떤 정보*가 어떻게 들어 있는지를 깊이 봅니다 — PT_NOTE 세그먼트의 모든 NT_* 노트, PT_LOAD의 메모리 매핑, 그리고 *부분 core*가 어떻게 표현되는지.
 
-## 한 줄 요약
-
+:::tldr
 ELF core = PT_NOTE (스레드·프로세스 메타) + PT_LOAD (메모리 내용). 디버거가 이 둘로 *프로세스 상태 전체*를 재구성.
+:::
 
 ## 전체 구조
 

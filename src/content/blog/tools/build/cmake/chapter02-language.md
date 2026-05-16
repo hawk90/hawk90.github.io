@@ -209,13 +209,7 @@ foreach(SRC ${SRCS})
 endforeach()
 ```
 
-출력:
-
-```
-Source: main.cpp
-Source: utils.cpp
-Source: config.cpp
-```
+출력은 `Source: main.cpp`, `Source: utils.cpp`, `Source: config.cpp`.
 
 범위 반복도 지원합니다.
 
@@ -428,15 +422,13 @@ endfunction()
 my_function("Hello" "World" "Extra1" "Extra2")
 ```
 
-출력:
+출력은 다음과 같다.
 
-```
-ARG1 = Hello
-ARG2 = World
-ARGC = 4
-ARGV = Hello;World;Extra1;Extra2
-ARGN = Extra1;Extra2
-```
+- `ARG1 = Hello`
+- `ARG2 = World`
+- `ARGC = 4`
+- `ARGV = Hello;World;Extra1;Extra2`
+- `ARGN = Extra1;Extra2`
 
 함수는 **자체 스코프**를 가집니다. 함수 안에서 설정한 변수는 함수 밖에서 보이지 않습니다.
 
@@ -826,12 +818,7 @@ include(FetchContent)
 FetchContent_Declare(...)
 ```
 
-정책 번호와 이름은 [공식 문서](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html)에 모여 있습니다. 일상 작업에서는 외울 필요 없고, *경고 메시지가 뜨면 그때 검색*하면 됩니다. 경고는 친절하게 정책 번호를 알려 줍니다.
-
-```
-CMake Warning (dev) at CMakeLists.txt:5 (FetchContent_Declare):
-  Policy CMP0135 is not set: ...
-```
+정책 번호와 이름은 [공식 문서](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html)에 모여 있습니다. 일상 작업에서는 외울 필요 없고, *경고 메시지가 뜨면 그때 검색*하면 됩니다. 경고는 친절하게 정책 번호를 알려 줍니다 — `CMake Warning (dev) at CMakeLists.txt:5 (FetchContent_Declare): Policy CMP0135 is not set: ...`.
 
 ## 다음 장 예고
 

@@ -8,7 +8,9 @@ seriesOrder: 12
 draft: false
 ---
 
-> 📖 **이 챕터는 빠른 참조입니다.** 깊은 내부 메커니즘은 [DWARF and ELF Internals 시리즈](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview)를 참고하세요 — ELF 구조, DIE 트리, .debug_line VM, expression VM, CFI, split-DWARF.
+:::tip[Deep dive]
+이 챕터는 빠른 참조입니다. 깊은 내부 메커니즘은 [DWARF and ELF Internals 시리즈](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview)를 참고하세요 — ELF 구조, DIE 트리, .debug_line VM, expression VM, CFI, split-DWARF.
+:::
 
 
 GDB가 `print x`라고 했을 때 `x`의 *타입*, *위치(메모리 주소 또는 레지스터)*, *어떤 라이브러리·소스 파일에 정의됐는지*를 어떻게 알까요. 답은 ELF 파일 안에 박힌 **DWARF**라는 디버그 정보 형식입니다. 이 정보 없이는 GDB가 그저 어셈블리 디스어셈블러에 불과합니다.

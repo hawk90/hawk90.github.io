@@ -10,9 +10,9 @@ draft: false
 
 Valgrind Memcheck/Massif는 정확하지만 *20-100배 느림* — 운영 환경에 부적합. **heaptrack**은 *2-3배 느림*에 *모든 heap allocation*을 콜스택과 함께 기록. KDE 프로젝트 출신이지만 *어떤 Linux 프로그램*에도 적용.
 
-## 한 줄 요약
-
+:::tldr
 `heaptrack ./myprog` → 모든 malloc/free 추적 + 콜스택 → GUI 또는 CLI로 분석. Massif의 80% 기능을 *훨씬 빠르게*.
+:::
 
 ## 설치
 

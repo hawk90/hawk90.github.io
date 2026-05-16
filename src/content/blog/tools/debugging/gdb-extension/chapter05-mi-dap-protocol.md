@@ -12,13 +12,13 @@ VSCode·PyCharm·Neovim·Emacs가 모두 *같은 디버거*에 붙는 비결은 
 
 이 장은 두 프로토콜의 정체와 그 사이 매개의 흐름을 다룹니다.
 
-## 한 줄 요약
-
+:::tldr
 ```
 IDE ←─DAP─→ Adapter ←─MI 또는 RSP─→ GDB / LLDB / debugpy / ...
 ```
 
 DAP가 IDE 호환을 만들고, MI(또는 RSP)가 디버거 호환을 만듭니다.
+:::
 
 ## GDB/MI — Machine Interface
 

@@ -102,7 +102,7 @@ ctest -VV                   # extra verbose — 더 자세한 정보
 
 기본 출력은 간결합니다.
 
-```
+```shell
 Test project /home/user/project/build
     Start 1: MathTest
 1/3 Test #1: MathTest .........................   Passed    0.01 sec
@@ -572,7 +572,7 @@ GitHub Actions 예시:
 
 프로젝트 구조:
 
-```
+```shell
 mymath/
 ├── CMakeLists.txt
 ├── include/

@@ -370,7 +370,7 @@ target_link_libraries(app PRIVATE -lz)
 
 ### 전형적인 디렉터리 구조
 
-```text
+```shell
 mylib/
 ├── CMakeLists.txt
 ├── include/
@@ -521,7 +521,7 @@ add_subdirectory(third_party/google-benchmark EXCLUDE_FROM_ALL)
 
 ### 프로젝트 구조 예시
 
-```text
+```shell
 project/
 ├── CMakeLists.txt          ← 최상위
 ├── libs/

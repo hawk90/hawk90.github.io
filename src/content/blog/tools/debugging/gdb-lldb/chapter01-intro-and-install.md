@@ -8,16 +8,19 @@ seriesOrder: 1
 draft: false
 ---
 
-> 🗺️ **디버깅 시리즈 지도** — 이 시리즈는 *GDB·LLDB의 일상 사용*을 다룹니다. 깊이 들어갈 때:
-> - 🧩 [GDB 확장 & IDE](/blog/tools/debugging/gdb-extension/chapter01-python-api-basics) — Python API, pretty-printer, DAP
-> - 🔬 [DWARF & ELF 내부](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview) — 디버그 정보의 정체
-> - 🔧 [Embedded](/blog/tools/debugging/embedded/chapter01-rsp-protocol) — RSP, JTAG/SWD, OpenOCD, J-Link
-> - 🧵 [Concurrency](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex) — 멀티스레드, rr, TSan
-> - 💀 [Postmortem](/blog/tools/debugging/postmortem/chapter01-core-generation) — core dump, debuginfod
-> - 🐍 [Python 디버깅](/blog/tools/debugging/python/chapter01-pdb-basics) — pdb, debugpy, py-spy
-> - 🛡️ [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-asan) · [Valgrind](/blog/tools/debugging/valgrind/chapter01-memcheck) — 자동 검출
-> - 🧠 [Memory 진단](/blog/tools/debugging/memory/chapter01-memory-accounting) — heap profiler, OOM
-> - 🐧 [Kernel 디버깅](/blog/tools/debugging/kernel/chapter01-user-kernel-boundary) — kdb/kgdb, crash, drgn
+:::info[디버깅 시리즈 지도]
+이 시리즈는 *GDB·LLDB의 일상 사용*을 다룹니다. 깊이 들어갈 때:
+
+- [GDB 확장 & IDE](/blog/tools/debugging/gdb-extension/chapter01-python-api-basics) — Python API, pretty-printer, DAP
+- [DWARF & ELF 내부](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview) — 디버그 정보의 정체
+- [Embedded](/blog/tools/debugging/embedded/chapter01-rsp-protocol) — RSP, JTAG/SWD, OpenOCD, J-Link
+- [Concurrency](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex) — 멀티스레드, rr, TSan
+- [Postmortem](/blog/tools/debugging/postmortem/chapter01-core-generation) — core dump, debuginfod
+- [Python 디버깅](/blog/tools/debugging/python/chapter01-pdb-basics) — pdb, debugpy, py-spy
+- [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-asan) · [Valgrind](/blog/tools/debugging/valgrind/chapter01-memcheck) — 자동 검출
+- [Memory 진단](/blog/tools/debugging/memory/chapter01-memory-accounting) — heap profiler, OOM
+- [Kernel 디버깅](/blog/tools/debugging/kernel/chapter01-user-kernel-boundary) — kdb/kgdb, crash, drgn
+:::
 
 ## 디버거가 *실제로 하는 일*
 

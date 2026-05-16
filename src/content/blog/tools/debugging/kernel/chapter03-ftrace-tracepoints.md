@@ -10,9 +10,9 @@ draft: false
 
 ftrace는 *커널의 내장 tracer*입니다. 별 도구 설치 없이 *모든 함수 호출·이벤트·latency*를 추적할 수 있습니다. printk로는 *너무 느려서* 못 잡는 핫 path 버그, *어디서 호출됐는지 모르는* 함수 호출의 출처 추적, *latency spike*의 원인 분석 — 모두 ftrace의 영역입니다.
 
-## 한 줄 요약
-
+:::tldr
 `/sys/kernel/debug/tracing/` 디렉터리의 파일 셋으로 *모든 커널 함수 호출과 정의된 이벤트*를 ring buffer에 기록.
+:::
 
 ## tracefs 진입
 

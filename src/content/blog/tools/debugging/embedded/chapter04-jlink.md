@@ -12,9 +12,9 @@ J-Link는 *상용 표준*입니다. OpenOCD가 오픈·범용이라면 J-Link는
 
 이 장은 Segger의 도구 체인 전체 — J-Link GDB Server, JLinkExe(commander), J-Run, J-Trace, Ozone GUI, Unlimited Flash Breakpoints, RTT — 를 다룹니다.
 
-## 한 줄 요약
-
+:::tldr
 Segger의 디버그 프로브 + 데몬 + GUI 일체. *비상업·교육용 무료*이지만 상업 라이선스 별도.
+:::
 
 ## 하드웨어 라인업
 

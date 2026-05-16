@@ -10,9 +10,9 @@ draft: false
 
 "이 프로세스가 메모리를 얼마나 쓰나?" 답이 *RSS, VSS, PSS, USS* 중 어느 것이냐에 따라 *4가지*입니다. 잘못 답하면 OOM이 일어났을 때 *왜*인지 알 수 없고, 누수 디버깅도 헛수고. 이 시리즈는 *메모리 진단의 처음부터* — 정확한 회계, 누수 도구, glibc/jemalloc/tcmalloc profiling까지 다룹니다.
 
-## 한 줄 요약
-
+:::tldr
 `/proc/[pid]/status`의 VmRSS는 *대략*. 진짜 누수 추적은 `/proc/[pid]/smaps_rollup`의 PSS 또는 `/proc/[pid]/smaps`의 영역별 분해.
+:::
 
 ## 4가지 메모리 크기
 

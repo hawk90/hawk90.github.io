@@ -225,7 +225,7 @@ target_link_libraries(myapp ${FOO_LIB})
 
 ### 권장 디렉터리 레이아웃
 
-```
+```shell
 project/
 ├── CMakeLists.txt           # 최상위 설정
 ├── CMakePresets.json        # 빌드 프리셋

@@ -10,9 +10,9 @@ draft: false
 
 OpenOCD(Open On-Chip Debugger)는 *오픈 소스* 임베디드 디버그 데몬입니다. 거의 모든 프로브와 거의 모든 칩을 다루며, *TCL 인터프리터*가 내장돼 있어 모든 동작을 스크립트로 자동화할 수 있습니다. 이 장은 OpenOCD를 *블랙박스*로 두지 않고 그 안쪽 — TCL 명령 체계·flash driver·target 정의·custom 명령 — 까지 본격적으로 다룹니다.
 
-## 한 줄 요약
-
+:::tldr
 JTAG/SWD 프로브와 칩 사이의 매개 데몬. GDB 측엔 RSP 서버로 보이고, 내부엔 TCL 스크립트 + 칩별 driver가 묶여 있는 구조.
+:::
 
 ## 내부 구조
 

@@ -10,9 +10,9 @@ draft: false
 
 대규모 운영 환경에선 core dump 분석을 *수동*으로 할 수 없습니다. 사고가 *하루에 수십*. 이 시리즈의 마지막 장은 *자동화* — build-id로 debuginfo 자동 다운로드, Breakpad/crashpad minidump 워크플로, Sentry 같은 SaaS, 그리고 CI에서 자동 사후 분석.
 
-## 한 줄 요약
-
+:::tldr
 build-id가 *바이너리 정체성*. debuginfod가 *네트워크 자동 매칭*. minidump가 *클라이언트 분포 표준*. Sentry/Crashlytics가 SaaS dashboard.
+:::
 
 ## Build-ID — 정체성
 

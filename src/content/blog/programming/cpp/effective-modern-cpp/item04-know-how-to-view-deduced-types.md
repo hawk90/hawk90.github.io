@@ -53,12 +53,10 @@ int main() {
 }
 ```
 
-컴파일러 에러 메시지:
+컴파일러 에러 메시지가 추론된 타입을 그대로 보여준다.
 
-```
-error: incomplete type 'TD<int>' used in nested name specifier
-error: incomplete type 'TD<const int*>' used in nested name specifier
-```
+- `error: incomplete type 'TD<int>' used in nested name specifier`
+- `error: incomplete type 'TD<const int*>' used in nested name specifier`
 
 **장점**: 컴파일 시점에 정확한 타입을 확인할 수 있다.
 
@@ -201,17 +199,10 @@ int main() {
 }
 ```
 
-**출력 예시 (Clang)**
+출력 예시.
 
-```
-void show_type() [T = const int *]
-```
-
-**출력 예시 (MSVC)**
-
-```
-void __cdecl show_type<const int *>(void)
-```
+- **Clang** — `void show_type() [T = const int *]`
+- **MSVC** — `void __cdecl show_type<const int *>(void)`
 
 함수 이름 안에 `T = const int *`처럼 컴파일러가 추론한 타입이 그대로 박혀 나온다. const, `&`, 포인터 모두 보존된다.
 
