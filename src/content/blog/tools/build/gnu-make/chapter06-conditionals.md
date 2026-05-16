@@ -343,7 +343,7 @@ header.h:           ← 빈 규칙
 
 ### 설정과 규칙 분리
 
-```
+```shell
 project/
 ├── Makefile
 ├── config.mk          # 변수 설정

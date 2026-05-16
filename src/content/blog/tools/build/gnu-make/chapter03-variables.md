@@ -113,7 +113,7 @@ OBJS = main.o utils.o
 CFLAGS = $(CFLAGS) -Wall    # 오류
 ```
 
-```
+```shell
 *** Recursive variable 'CFLAGS' references itself (eventually). Stop.
 ```
 
@@ -321,11 +321,9 @@ hello: main.o hello.o
 
 같은 변수가 *여러 자리에서* 정의되면 Make는 우선순위 표대로 한 값을 고릅니다.
 
-```
-1. 명령줄   (make CC=clang)         ← 가장 강함
-2. Makefile (CC := gcc)
-3. 환경 변수 (export CC=clang)       ← 가장 약함
-```
+1. **명령줄** (`make CC=clang`) — 가장 강함
+2. **Makefile** (`CC := gcc`)
+3. **환경 변수** (`export CC=clang`) — 가장 약함
 
 (`override` 지시자는 이 표를 뒤집을 수 있는 별도 카드입니다 — 아래에서 다룹니다.)
 

@@ -4,12 +4,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/blog/PostCard.astro';
 import { BRAND_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
-import { getHomepageLatestWriting, getPostMeta } from '../lib/posts';
-import { formatDate } from '../lib/utils';
+import { getHomepageLatestWriting } from '../lib/posts';
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
-const { featuredLatestPosts, heroPost, secondaryLatestPosts } = getHomepageLatestWriting(allPosts);
-const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
+const { featuredLatestPosts } = getHomepageLatestWriting(allPosts);
 ---
 
 <BaseLayout title={`${BRAND_CONFIG.heroTitle} - ${BRAND_CONFIG.tagline}`}>
@@ -68,88 +66,6 @@ const heroPostMeta = heroPost ? getPostMeta(heroPost) : null;
       }
     }
   </style>
-
-  <!-- Latest Writing -->
-  <section class="surface-section py-16">
-    <div class="container">
-      <div class="flex items-end justify-between gap-4 mb-8">
-        <div>
-          <div class="section-eyebrow mb-2">Latest Writing</div>
-          <h2 class="text-2xl lg:text-3xl font-bold">Start with the newest post, then branch out</h2>
-        </div>
-        <a href="/blog" class="text-[var(--color-accent)] hover:underline">
-          {t('view_all')}
-        </a>
-      </div>
-
-      <div class="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.95fr)]">
-        {heroPost && (
-          <article class="card card-hero relative overflow-hidden group min-h-[21rem]">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(167,139,250,0.16),transparent_40%)] pointer-events-none"></div>
-            <div class="relative flex h-full flex-col justify-between">
-              <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-accent)] mb-4">
-                <span>Latest Post</span>
-                {heroPost.data.series && <span class="text-[var(--color-text-muted)]">{heroPost.data.series}</span>}
-              </div>
-              <a href={`/blog/${heroPost.id}`} class="block">
-                <h3 class="text-2xl lg:text-3xl font-bold leading-tight mb-4 group-hover:text-[var(--color-accent)] transition-colors">
-                  {heroPost.data.title}
-                </h3>
-                {heroPost.data.description && (
-                  <p class="text-base text-[var(--color-text-secondary)] leading-relaxed mb-6 max-w-2xl">
-                    {heroPost.data.description}
-                  </p>
-                )}
-                <div class="mt-8 flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-muted)]">
-                  <span>{formatDate(heroPost.data.date, 'short')}</span>
-                  <span class="w-1 h-1 rounded-full bg-[var(--color-border-hover)]"></span>
-                  <span>{heroPostMeta?.readingTime}{t('reading_time_min')}</span>
-                  <span class="w-1 h-1 rounded-full bg-[var(--color-border-hover)]"></span>
-                  <span>{heroPost.data.tags.slice(0, 3).join(' · ')}</span>
-                </div>
-              </a>
-            </div>
-          </article>
-        )}
-
-        <section class="card card-panel h-full">
-          <div class="flex items-center justify-between gap-4 mb-4">
-            <h3 class="text-lg font-semibold">{t('latest_posts')}</h3>
-            <a href="/blog" class="text-sm text-[var(--color-accent)] hover:underline">
-              {t('view_all')}
-            </a>
-          </div>
-
-          <ul class="space-y-3">
-            {secondaryLatestPosts.map((post) => {
-              const { formattedDate, readingTime } = getPostMeta(post);
-              return (
-                <li class="border-b border-[var(--color-border-faint)] last:border-b-0 last:pb-0 pb-3">
-                  <a href={`/blog/${post.id}`} class="block rounded-xl px-2 py-2 transition-colors hover:bg-[var(--color-bg-tertiary)]">
-                    {post.data.series && (
-                      <div class="text-[11px] font-medium text-[var(--color-accent)] mb-1 truncate">
-                        {post.data.series}
-                      </div>
-                    )}
-                    <div class="font-medium leading-snug text-[var(--color-text-primary)] line-clamp-2">
-                      {post.data.title}
-                    </div>
-                    <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
-                      <time datetime={post.data.date.toISOString()}>
-                        {formattedDate}
-                      </time>
-                      <span>·</span>
-                      <span>{readingTime}{t('reading_time_min')}</span>
-                    </div>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      </div>
-    </div>
-  </section>
 
   <!-- Recent Posts -->
   <section class="surface-section py-16">

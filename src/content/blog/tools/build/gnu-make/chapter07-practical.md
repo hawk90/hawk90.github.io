@@ -25,7 +25,7 @@ draft: false
 
 가장 흔한 시작점. 디렉터리는 다음과 같이 잡습니다.
 
-```
+```shell
 myproject/
 ├── Makefile
 ├── include/
@@ -317,7 +317,7 @@ endif
 
 `tests/` 디렉터리에 *각 테스트가 별도 실행 파일*인 구조가 가장 단순합니다.
 
-```
+```shell
 project/
 ├── src/
 │   ├── main.c

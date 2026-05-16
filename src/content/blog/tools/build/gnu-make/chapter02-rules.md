@@ -104,15 +104,9 @@ hello.o: hello.c hello.h
 
 이 Makefile이 머릿속에서 의존성 그래프로 변환되는 모습은 다음과 같습니다.
 
-```
-hello.h ──┐
-          ├──▶ main.o   ─┐
-main.c  ──┘              │
-                         ├──▶ hello
-hello.h ──┐              │
-          ├──▶ hello.o  ─┘
-hello.c ──┘
-```
+- `main.c` + `hello.h` → `main.o`
+- `hello.c` + `hello.h` → `hello.o`
+- `main.o` + `hello.o` → `hello`
 
 이제 `hello.h`만 손대 봅시다.
 
@@ -262,7 +256,7 @@ hello:
 	gcc -o hello main.o
 ```
 
-```
+```shell
 $ make hello
 echo "Building hello..."
 Building hello...
@@ -277,7 +271,7 @@ hello:
 	gcc -o hello main.o
 ```
 
-```
+```shell
 $ make hello
 Building hello...
 gcc -o hello main.o
@@ -522,7 +516,7 @@ test:
 
 여전히 가장 흔합니다. 에디터 설정을 의심하세요.
 
-```
+```shell
 Makefile:5: *** missing separator.  Stop.
 ```
 

@@ -562,18 +562,16 @@ blacklist / whitelist  →   blocklist / allowlist
 
 10장에 걸쳐 Google C++ Style Guide의 모든 절을 정리했다.
 
-```
-Ch 1.  Background / Version / Magic
-Ch 2.  Header Files
-Ch 3.  Scoping
-Ch 4.  Classes
-Ch 5.  Functions
-Ch 6.  Memory / Exceptions / Casting
-Ch 7.  const / Numbers / Macros
-Ch 8.  Type Deduction / Templates / Lambdas
-Ch 9.  Naming
-Ch 10. Comments / Formatting / Closing (이 글)
-```
+- Ch 1 — Background / Version / Magic
+- Ch 2 — Header Files
+- Ch 3 — Scoping
+- Ch 4 — Classes
+- Ch 5 — Functions
+- Ch 6 — Memory / Exceptions / Casting
+- Ch 7 — `const` / Numbers / Macros
+- Ch 8 — Type Deduction / Templates / Lambdas
+- Ch 9 — Naming
+- Ch 10 — Comments / Formatting / Closing (이 글)
 
 가이드의 핵심 메시지를 한 문장으로 줄이면 *Optimize for the reader*다. 코드는 한 번 쓰이고 수십 번 읽히기 때문이다. 일관성, 명시성, 단순함은 모두 그 목적을 위한 도구다.
 

@@ -86,12 +86,10 @@ myUsefulClass.h          // camelCase
 
 테스트와 벤치마크는 접미사 관용이 있다.
 
-```
-my_class.h            인터페이스
-my_class.cc           구현
-my_class_test.cc      단위 테스트
-my_class_benchmark.cc 벤치마크
-```
+- `my_class.h` — 인터페이스
+- `my_class.cc` — 구현
+- `my_class_test.cc` — 단위 테스트
+- `my_class_benchmark.cc` — 벤치마크
 
 ## Type Names
 

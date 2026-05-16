@@ -54,6 +54,7 @@ export const CATEGORIES: Category[] = [
   { id: 'systems/networking', parent: 'systems', name: 'Networking', description: 'TCP/IP, 소켓, 프로토콜' },
   { id: 'systems/architecture', parent: 'systems', name: 'Computer Architecture', description: 'CPU, 캐시, 파이프라인, RISC-V' },
   { id: 'systems/sre', parent: 'systems', name: 'SRE', description: '모니터링, 온콜, 장애 대응' },
+  { id: 'systems/wireless', parent: 'systems', name: 'Wireless (Kernel)', description: 'mac80211/cfg80211, BlueZ, hostapd, wpa_supplicant, Linux Wi-Fi 드라이버' },
 
   // Embedded
   { id: 'embedded/hardware', parent: 'embedded', name: 'Hardware Interfaces', description: 'PCIe, NVMe, DDR, CXL, HBM, UCIe, UALink' },
@@ -61,6 +62,11 @@ export const CATEGORIES: Category[] = [
   { id: 'embedded/standards', parent: 'embedded', name: 'Coding Standards', description: 'MISRA, CERT, AUTOSAR' },
   { id: 'embedded/patterns', parent: 'embedded', name: 'Patterns', description: '실시간, 메모리 제약' },
   { id: 'embedded/industrial', parent: 'embedded', name: 'Industrial', description: 'EtherCAT, PROFINET, TSN' },
+  { id: 'embedded/yocto', parent: 'embedded', name: 'Yocto Project', description: 'BitBake, recipes, layers, 커스텀 배포판' },
+  { id: 'embedded/bootloader', parent: 'embedded', name: 'Bootloader', description: 'U-Boot, TF-A, SPL/TPL, 보드 포팅' },
+  { id: 'embedded/buildroot', parent: 'embedded', name: 'Buildroot', description: 'rootfs 빌드 시스템, 패키지, 외부 트리' },
+  { id: 'embedded/bsp', parent: 'embedded', name: 'Board Support Package', description: 'SoC 포팅, DT 설계, BSP 워크플로' },
+  { id: 'embedded/wireless', parent: 'embedded', name: 'Wireless (Firmware)', description: 'BLE, Zigbee, Thread, Matter, LoRa, ESP32 Wi-Fi — RTOS/MCU 측' },
 
   // ML
   { id: 'ml/accelerators', parent: 'ml', name: 'Accelerators', description: 'NPU, TPU, Systolic Array' },

@@ -36,7 +36,7 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
               class:list={[
                 'text-[13px] font-semibold tracking-[0.02em] transition-colors',
                 isNavActive(link.href, link.match)
-                  ? 'text-[var(--color-text-primary)]'
+                  ? 'text-[var(--color-accent)]'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
               ]}
             >
