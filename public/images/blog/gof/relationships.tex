@@ -7,8 +7,8 @@
 
 \begin{tikzpicture}[blog,
     pat/.style={
-      rectangle, rounded corners=2pt, draw=nodebord, line width=0.5pt,
-      fill=nodefill, minimum height=10mm, minimum width=26mm,
+      rectangle, rounded corners=1.5pt, draw=nodebord, line width=0.5pt,
+      fill=nodefill, minimum height=8mm, minimum width=22mm,
       align=center, inner sep=3pt,
       font=\sffamily\small\bfseries
     },
@@ -18,147 +18,167 @@
     relarr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.5pt},
     rellbl/.style={font=\sffamily\tiny\itshape,
                    fill=white, draw=white, line width=2pt,
-                   inner sep=2pt, align=center,
+                   inner sep=1.5pt, align=center,
                    text=black!75}
 ]
 
 % ============================================================
-% Wider canvas — Composite hub layout, more spacing
-% Coordinate scale 1.18× from original to ease overlap
+% Layout follows GoF book (Gamma et al.) — Composite as central
+% hub; Iterator/Flyweight/Visitor/Interpreter cluster around it;
+% Memento at top; Decorator/Strategy left column; Command/CoR
+% right column; Generative + Facade at bottom; Proxy/Adapter/
+% Bridge isolated on the right.
 % ============================================================
 
-% --- Central hub ---
-\node[stp] (cmp) at (0, 0) {Composite};
+% --- Top cluster ---
+\node[bep] (mem) at ( 2.4,  8.2) {Memento};
+\node[bep] (itr) at ( 0.8,  6.0) {Iterator};
+\node[cre] (bld) at (-6.6,  6.8) {Builder};
 
-% --- Top arc ---
-\node[bep] (itr) at (-4.6,  5.6) {Iterator};
-\node[bep] (mem) at ( 4.6,  7.4) {Memento};
-\node[cre] (bld) at (-10.8, 5.6) {Builder};
+% --- Central hub + immediate neighbors ---
+\node[stp] (cmp) at ( 0,    3.6) {Composite};
+\node[stp] (dec) at (-7.4,  3.2) {Decorator};
+\node[stp] (fly) at (-1.8,  1.4) {Flyweight};
+\node[bep] (vis) at ( 3.2,  2.0) {Visitor};
+\node[bep] (intp)at ( 0.6,  0.0) {Interpreter};
 
-% --- Mid-upper ---
-\node[stp] (dec) at (-9.6,  2.0) {Decorator};
-\node[bep] (cmd) at ( 8.2,  5.0) {Command};
-\node[bep, minimum width=24mm] (vis) at ( 6.2,  1.0) {Visitor};
-\node[bep] (cor) at ( 11.4, 2.4) {Chain of\\Responsibility};
+% --- Right column ---
+\node[bep] (cmd) at ( 7.0,  5.0) {Command};
+\node[bep, minimum width=32mm] (cor) at ( 7.4,  2.8)
+  {Chain of Responsibility};
 
 % --- Mid-lower ---
-\node[bep] (str) at (-10.8, -2.4) {Strategy};
-\node[bep] (st)  at (-7.6, -5.2) {State};
-\node[stp] (fly) at (-4.0, -2.8) {Flyweight};
-\node[bep] (intp) at (-0.4, -5.2) {Interpreter};
-\node[bep] (med) at ( 5.6, -4.0) {Mediator};
-\node[bep] (obs) at ( 11.4, -4.0) {Observer};
+\node[bep] (str) at (-7.4, -0.6) {Strategy};
+\node[bep] (st)  at (-1.8, -2.4) {State};
+\node[bep] (med) at ( 3.4, -2.4) {Mediator};
+\node[bep, minimum width=24mm] (obs) at ( 8.2, -2.4) {Observer};
 
-% --- Bottom — generative cluster ---
-\node[bep] (tm)  at (-4.2, -8.4) {Template\\Method};
-\node[cre] (fm)  at ( 2.4, -8.4) {Factory\\Method};
-\node[cre] (af)  at (-1.2, -11.0) {Abstract\\Factory};
-\node[cre] (pt)  at (-6.6, -11.0) {Prototype};
-\node[cre] (sg)  at (-3.6, -13.6) {Singleton};
-\node[stp] (fcd) at ( 2.8, -13.6) {Facade};
+% --- Bottom: generative cluster + Facade ---
+\node[bep, minimum width=30mm] (tm)  at ( 0.4, -5.0) {Template Method};
+\node[cre, minimum width=28mm] (fm)  at ( 5.6, -6.6) {Factory Method};
+\node[cre] (pt)  at (-6.0, -6.6) {Prototype};
+\node[cre, minimum width=28mm] (af)  at (-1.8, -7.6) {Abstract Factory};
+\node[cre] (sg)  at (-6.0, -10.0) {Singleton};
+\node[stp] (fcd) at ( 2.0, -10.0) {Facade};
 
-% --- Isolated cluster (top-right) — moved further right ---
-\node[stp] (prx) at ( 14.4,  6.6) {Proxy};
-\node[stp] (adp) at ( 14.4,  4.6) {Adapter};
-\node[stp] (brd) at ( 14.4,  2.6) {Bridge};
+% --- Isolated cluster (top-right, separated by clear gap) ---
+\node[stp] (prx) at ( 9.0,  8.4) {Proxy};
+\node[stp] (adp) at ( 9.0,  7.2) {Adapter};
+\node[stp] (brd) at ( 9.0,  6.0) {Bridge};
 
 % ============================================================
-% RELATIONSHIPS — labeled arrows
+% RELATIONSHIPS — follows the book's arrow labels
 % ============================================================
 
-% --- Composite hub: spread anchors so arrows don't crowd ---
-\draw[relarr] (cmp.north west) to[bend left=14]
-  node[rellbl, sloped, pos=0.55]{enumerating\\children} (itr.south);
-\draw[relarr] (cmp.east) to[bend right=10]
-  node[rellbl, sloped, pos=0.55]{defining\\traversals} (vis.south west);
-\draw[relarr] (cmd.south west) to[bend left=18]
-  node[rellbl, sloped, pos=0.45]{composed\\using} (cmp.north east);
-\draw[relarr] (cor.south west) to[bend right=22]
-  node[rellbl, sloped, pos=0.5]{defining\\the chain} (cmp.east);
-\draw[relarr] (bld.south east) to[bend left=12]
-  node[rellbl, sloped, pos=0.55]{creating\\composites} (cmp.north west);
+% --- Iterator → Memento  (saving state of iteration) ---
+\draw[relarr] (itr.north) to[bend left=20]
+  node[rellbl, sloped, pos=0.55]{saving state\\of iteration} (mem.west);
+
+% --- Command → Memento  (avoiding hysteresis) ---
+\draw[relarr] (cmd.north) to[bend left=22]
+  node[rellbl, sloped, pos=0.55]{avoiding\\hysteresis} (mem.east);
+
+% --- Iterator → Composite  (enumerating children) ---
+\draw[relarr] (itr.south) --
+  node[rellbl, pos=0.45]{enumerating\\children} (cmp.north);
+
+% --- Builder → Composite  (creating composites) ---
+\draw[relarr] (bld.east) to[bend left=8]
+  node[rellbl, sloped, pos=0.5]{creating\\composites} (cmp.north west);
+
+% --- Decorator → Composite  (adding responsibilities to objects) ---
 \draw[relarr] (dec.east) to[bend left=8]
-  node[rellbl, pos=0.5]{adding responsibilities} (cmp.west);
-\draw[relarr] (fly.north east) to[bend left=8]
-  node[rellbl, sloped, pos=0.5]{sharing\\composites} (cmp.south west);
-\draw[relarr] (intp.north) to[bend right=14]
-  node[rellbl, sloped, pos=0.55]{defining\\grammar} (cmp.south);
-\draw[relarr] (vis.west) to[bend left=8]
-  node[rellbl, sloped, pos=0.45]{adding\\operations} (cmp.north east);
+  node[rellbl, pos=0.5]{adding responsibilities\\to objects} (cmp.west);
 
-% --- Iterator → Memento ---
-\draw[relarr] (itr.north east) to[bend left=22]
-  node[rellbl, sloped, pos=0.5]{saving state\\of iteration} (mem.north west);
-
-% --- Command → Memento ---
-\draw[relarr] (cmd.north) to[bend left=14]
-  node[rellbl, sloped, pos=0.5]{avoiding\\hysteresis} (mem.east);
-
-% --- Decorator ↔ Strategy ---
+% --- Decorator ↔ Strategy  (changing skin versus guts) ---
 \draw[{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]},
       draw=edgec, line width=0.5pt]
-  (dec.south) to[bend right=4]
-    node[rellbl, sloped, pos=0.55]{changing skin\\versus guts} (str.north);
+  (dec.south) to[bend right=2]
+    node[rellbl, sloped, pos=0.5]{changing skin\\versus guts} (str.north);
 
-% --- Flyweight → Strategy ---
-\draw[relarr] (fly.west) to[bend left=6]
-  node[rellbl, pos=0.4]{sharing\\strategies} (str.east);
+% --- Flyweight → Composite  (sharing composites) ---
+\draw[relarr] (fly.north) to[bend right=8]
+  node[rellbl, sloped, pos=0.55]{sharing\\composites} (cmp.south west);
 
-% --- Flyweight → State ---
-\draw[relarr] (fly.south west) to[bend right=14]
-  node[rellbl, sloped, pos=0.5]{sharing\\states} (st.north east);
+% --- Flyweight → Strategy  (sharing strategies) ---
+\draw[relarr] (fly.west) to[bend right=4]
+  node[rellbl, sloped, pos=0.45]{sharing\\strategies} (str.east);
 
-% --- Flyweight → Interpreter ---
-\draw[relarr] (fly.south east) to[bend left=18]
-  node[rellbl, sloped, pos=0.5]{sharing terminal\\symbols} (intp.north west);
+% --- Flyweight → State  (sharing states) ---
+\draw[relarr] (fly.south) to[bend right=10]
+  node[rellbl, sloped, pos=0.5]{sharing\\states} (st.north);
 
-% --- Interpreter → Visitor (route around fly/cmp) ---
-\draw[relarr] (intp.east) to[out=0, in=-90, looseness=0.9]
-  node[rellbl, sloped, pos=0.6]{adding\\operations} (vis.south);
+% --- Flyweight → Interpreter  (sharing terminal symbols) ---
+\draw[relarr] (fly.south east) to[bend left=10]
+  node[rellbl, sloped, pos=0.55]{sharing terminal\\symbols} (intp.north west);
 
-% --- Strategy → Template Method ---
-\draw[relarr] (str.south) to[bend right=18]
-  node[rellbl, sloped, pos=0.5]{defining algorithm's\\steps} (tm.west);
+% --- Visitor → Composite  (defining traversals) ---
+\draw[relarr] (vis.north west) to[bend left=10]
+  node[rellbl, sloped, pos=0.5]{defining\\traversals} (cmp.east);
 
-% --- Template Method → Factory Method ---
-\draw[relarr] (tm.east) to[bend right=4]
-  node[rellbl, pos=0.5]{often uses} (fm.west);
+% --- Visitor → Composite  (adding operations) — second relation ---
+\draw[relarr] (vis.west) to[bend left=-4]
+  node[rellbl, sloped, pos=0.5]{adding\\operations} (cmp.south east);
 
-% --- Abstract Factory → Factory Method ---
-\draw[relarr] (af.east) to[bend left=12]
-  node[rellbl, sloped, pos=0.55]{implement\\using} (fm.south);
+% --- Interpreter → Composite  (defining grammar) ---
+\draw[relarr] (intp.north) to[bend left=12]
+  node[rellbl, sloped, pos=0.55]{defining\\grammar} (cmp.south);
 
-% --- Abstract Factory → Prototype ---
-\draw[relarr] (af.west) -- (pt.east)
-  node[rellbl, midway, above]{configure dynamically};
+% --- Interpreter → Visitor  (adding operations) ---
+\draw[relarr] (intp.east) to[bend right=14]
+  node[rellbl, sloped, pos=0.55]{adding\\operations} (vis.south);
 
-% --- Abstract Factory → Singleton ---
-\draw[relarr] (af.south) to[bend left=14]
+% --- Command → Composite  (composed using) — long curve ---
+\draw[relarr] (cmd.west) to[bend right=12]
+  node[rellbl, sloped, pos=0.55]{composed\\using} (cmp.north east);
+
+% --- CoR → Composite  (defining the chain) — long curve ---
+\draw[relarr] (cor.west) to[bend right=20]
+  node[rellbl, sloped, pos=0.55]{defining\\the chain} (cmp.east);
+
+% --- Mediator ↔ Observer  (complex dependency management) ---
+\draw[{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]},
+      draw=edgec, line width=0.5pt]
+  (med.east) -- (obs.west)
+    node[rellbl, midway]{complex dependency\\management};
+
+% --- Strategy → Template Method  (defining algorithm's steps) ---
+\draw[relarr] (str.south) to[bend right=22]
+  node[rellbl, sloped, pos=0.55]{defining algorithm's\\steps} (tm.west);
+
+% --- Template Method → Factory Method  (often uses) ---
+\draw[relarr] (tm.east) to[bend right=12]
+  node[rellbl, pos=0.55]{often uses} (fm.north);
+
+% --- Abstract Factory → Prototype  (configure factory dynamically) ---
+\draw[relarr] (af.west) to[bend left=8]
+  node[rellbl, pos=0.5]{configure factory\\dynamically} (pt.south);
+
+% --- Abstract Factory → Factory Method  (implement using) ---
+\draw[relarr] (af.east) to[bend right=8]
+  node[rellbl, pos=0.5]{implement\\using} (fm.south);
+
+% --- Abstract Factory → Singleton  (single instance) ---
+\draw[relarr] (af.south west) to[bend left=14]
   node[rellbl, sloped, pos=0.55]{single\\instance} (sg.north east);
 
-% --- Facade → Singleton ---
+% --- Facade → Singleton  (single instance) ---
 \draw[relarr] (fcd.west) -- (sg.east)
   node[rellbl, midway, above]{single instance};
-
-% --- Mediator ↔ Observer ---
-\draw[{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]},
-      draw=edgec, line width=0.5pt]
-  (med.east) to[bend right=4]
-    node[rellbl, pos=0.5]{complex dependency\\management} (obs.west);
 
 % ============================================================
 % Title + legend
 % ============================================================
 \node[font=\sffamily\bfseries\Large, anchor=south]
-  at (2.0, -15.2) {Design Pattern Relationships};
+  at (1.0, -11.6) {Design Pattern Relationships};
 
-\node[draw=groupbord, rounded corners=4pt, inner sep=6pt, font=\sffamily\scriptsize,
+\node[draw=groupbord, rounded corners=4pt, inner sep=5pt, font=\sffamily\scriptsize,
       anchor=north east, align=left, fill=black!2]
-  at (16.6, -8.6) {%
-    \textbf{Legend}\\[3pt]
+  at (10.6, -5.0) {%
+    \textbf{Legend}\\[2pt]
     \textcolor{conbord}{\rule{2mm}{2mm}} \ Creational (5)\\
     \textcolor{absbord}{\rule{2mm}{2mm}} \ Structural (7)\\
-    \textcolor{impbord}{\rule{2mm}{2mm}} \ Behavioral (11)\\[3pt]
+    \textcolor{impbord}{\rule{2mm}{2mm}} \ Behavioral (11)\\[2pt]
     {\itshape →} \ uses\\
     {\itshape ↔} \ similar / alternative
   };
