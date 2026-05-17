@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-실제 서버는 *uncorrectable PCIe 에러*가 가끔 발생한다 — 시그널 무결성, 노이즈, link retrain 실패 등. Driver가 이걸 *제대로 복구*하는지 검증하려면 *실 HW*가 아닌 *주입* 시뮬레이션이 필요. QEMU AER injection은 RAS (Reliability, Availability, Serviceability) 검증의 표준 도구.
+실제 서버에는 uncorrectable PCIe 에러가 가끔 발생한다. 시그널 무결성 문제, 노이즈, link retrain 실패 같은 원인이다. driver가 이를 제대로 복구하는지 검증하려면 실 HW가 아닌 주입 시뮬레이션이 필요하다. QEMU AER injection은 RAS(Reliability, Availability, Serviceability) 검증의 표준 도구다.
 
 ## 핵심 항목
 

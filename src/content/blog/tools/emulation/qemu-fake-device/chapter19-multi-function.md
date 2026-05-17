@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-NIC·storage·NPU 컨트롤러는 *한 PCI 디바이스에 여러 function*을 둔다. 예: 4-port NIC = 1 device × 4 functions. Function별로 BAR·configuration·driver가 분리되지만 *내부 자원*(공통 doorbell, MSI vector pool, descriptor mgr)은 공유. 본 챕터는 QEMU에서 multi-function PCI를 구현하고 Linux MFD subsystem과 어떻게 매핑되는지 다룬다.
+NIC, storage, NPU 컨트롤러는 한 PCI 디바이스 안에 여러 function을 둔다. 예를 들어 4-port NIC은 1 device × 4 functions로 표현된다. function별로 BAR, configuration, driver는 분리되지만 공통 doorbell, MSI vector pool, descriptor manager 같은 내부 자원은 공유한다. 이 장에서는 QEMU에 multi-function PCI를 구현하고, 이것이 Linux MFD subsystem과 어떻게 매핑되는지 본다.
 
 ## 핵심 항목
 

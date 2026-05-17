@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-실 HW 없이 *성능 SLO를 미리 검증*하려면 가상 디바이스가 *latency·throughput·jitter·tail latency*를 *현실처럼* 모방해야 한다. Driver 코드의 timeout·retry·backpressure가 실 HW 받기 *전*에 맞는지 검증.
+실 HW 없이 성능 SLO를 미리 검증하려면 가상 디바이스가 latency, throughput, jitter, tail latency를 현실처럼 모방해야 한다. 이 장에서는 driver의 timeout, retry, backpressure 코드가 실 HW를 받기 전에 제대로 동작하는지 검증하는 방법을 본다.
 
 ## 핵심 항목
 

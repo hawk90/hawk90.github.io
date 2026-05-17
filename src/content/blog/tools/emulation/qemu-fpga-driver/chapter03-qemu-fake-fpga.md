@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Driver를 짤 *대상 디바이스*를 QEMU에서 만든다. **fake-fpga**라는 PCI device를 QOM으로 정의하고 BAR 3개(CSR/descriptor ring/user logic)를 노출. 이게 시리즈의 *test bed*. 이후 모든 챕터가 이 위에서 작업.
+Driver를 작성할 대상 디바이스를 QEMU 안에 만든다. `fake-fpga`라는 PCI device를 QOM으로 정의하고 BAR 3개(CSR, descriptor ring, user logic)를 노출한다. 이것이 시리즈의 test bed가 되고, 이후 모든 챕터는 이 위에서 작업한다.
 
 ## 핵심 항목
 

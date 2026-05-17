@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-VirtIO 1.0의 *split ring*은 3개 영역(desc/avail/used)을 분리해 단순했지만 *3번의 cache line touch*가 필요했다. 1.1 *packed ring*은 한 ring으로 통합해 *prefetch 친화*. 본 챕터는 packed ring·indirect descriptor·event suppression 등 *성능 layer*를 다룬다.
+VirtIO 1.0의 split ring은 desc/avail/used 세 영역을 분리해 단순했지만 cache line을 세 번 만져야 했다. 1.1에서 도입된 packed ring은 이를 단일 ring으로 통합해 prefetch에 유리하다. 이 장에서는 packed ring, indirect descriptor, event suppression 같은 성능 계층을 본다.
 
 ## 핵심 항목
 

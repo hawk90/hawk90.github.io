@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-새 SoC/보드를 받았을 때 *Linux를 부팅시키는 절차* — power·clock·UART·DRAM·bootloader·kernel·rootfs·driver를 *한 단계씩* 올리는 게 bringup. 보드 도착 *전*에 QEMU에서 같은 절차를 시뮬레이션하면 *모든 펌웨어·driver 코드를 미리 준비* 가능 → 보드 받으면 *몇 시간 안에 콘솔*.
+새 SoC나 보드를 받았을 때 Linux를 부팅시키는 절차가 bringup이다. power, clock, UART, DRAM, bootloader, kernel, rootfs, driver를 한 단계씩 올린다. 보드가 도착하기 전에 QEMU에서 같은 절차를 미리 시뮬레이션해 두면, 모든 펌웨어와 driver 코드가 준비된 상태에서 실 보드를 받자마자 몇 시간 안에 콘솔까지 올릴 수 있다.
 
 ## 핵심 항목
 

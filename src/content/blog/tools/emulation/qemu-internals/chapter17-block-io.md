@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-guest의 `write(fd, ...)` 한 줄이 QEMU에서 *qcow2 layer → backing file → throttle → host file*까지 *수많은 계층*을 거친다. QEMU **block layer**는 filter chain 구조로 *caching, throttling, snapshot, encryption, mirroring*을 합성. 본 챕터는 BDS·BlockBackend·driver chain·request lifecycle.
+guest의 `write(fd, ...)` 한 줄이 QEMU 안에서는 qcow2 layer → backing file → throttle → host file까지 여러 계층을 거친다. QEMU block layer는 filter chain 구조로 caching, throttling, snapshot, encryption, mirroring을 합성한다. 이 장에서는 BDS, BlockBackend, driver chain, request lifecycle을 차례로 본다.
 
 ## 핵심 항목
 

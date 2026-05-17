@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-자동차 ECU에서 한 SoC가 *infotainment(Linux)* + *cluster(RTOS)* + *ADAS(real-time OS)* 를 동시에 *분리된 partition*으로 돌린다. **ARMv8 virtualization extension (EL2)**가 토대. QEMU `virt,virtualization=on`로 nested KVM·Xen 시뮬레이션 가능 — 본격 hypervisor 학습.
+자동차 ECU에서는 한 SoC가 infotainment(Linux), cluster(RTOS), ADAS(real-time OS)를 분리된 partition으로 동시에 돌린다. 이를 가능하게 하는 토대가 ARMv8 virtualization extension(EL2)이다. QEMU `virt,virtualization=on`을 활용하면 nested KVM과 Xen을 모두 시뮬레이션할 수 있다. 본격적인 hypervisor 학습의 시작점이다.
 
 ## 핵심 항목
 

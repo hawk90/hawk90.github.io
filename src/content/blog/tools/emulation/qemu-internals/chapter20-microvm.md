@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-AWS Lambda 같은 *serverless*는 **함수 한 번 호출 = VM 한 번 부팅**. 일반 q35/virt는 ACPI·PCI enum에 *수 초*가 걸려 부적합. QEMU `microvm` machine은 *모든 legacy 제거*로 **~125ms 부팅**. Firecracker가 이 아이디어를 극단까지 — 본 챕터는 microvm 구조 + Firecracker 비교 + serverless 운영.
+AWS Lambda 같은 serverless는 함수 한 번 호출이 VM 한 번 부팅으로 이어진다. 일반 q35/virt machine은 ACPI와 PCI enumeration에만 수 초가 걸려 부적합하다. QEMU `microvm` machine은 모든 legacy를 제거해 ~125ms 안에 부팅한다. Firecracker가 같은 아이디어를 극단까지 밀어붙인 형태다. 이 장에서는 microvm 구조, Firecracker 비교, serverless 운영을 함께 본다.
 
 ## 핵심 항목
 

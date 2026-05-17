@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Hot-plug는 *runtime에 device가 나타나고 사라지는 사건*. 잘 다루지 않으면 driver의 `remove()` 경로에서 *in-flight DMA*·*open file descriptor*·*sleeping wait*가 모두 깨진다. CXL memory hot-add 시나리오에서도 동일 패턴 — 본 챕터는 QEMU의 hot-plug 메커니즘과 driver 측 안전한 unbind를 같이 본다.
+Hot-plug는 runtime에 device가 나타나고 사라지는 사건이다. 제대로 다루지 않으면 driver의 `remove()` 경로에서 in-flight DMA, open file descriptor, sleeping wait가 모두 깨진다. CXL memory hot-add 시나리오에도 같은 패턴이 적용된다. 이 장에서는 QEMU의 hot-plug 메커니즘과 driver 쪽 안전한 unbind를 함께 본다.
 
 ## 핵심 항목
 

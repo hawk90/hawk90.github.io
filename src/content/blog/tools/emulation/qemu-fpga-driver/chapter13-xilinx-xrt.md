@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Xilinx (현 AMD) FPGA의 management 스택은 *Intel OPAE/DFL과 별개* — **XRT (Xilinx Runtime)**. xocl + xclmgmt 두 kernel module + libxrt userspace. Alveo 카드, Versal, Zynq MPSoC 모두 같은 API. Ch 12 OPAE/DFL과 비교하며 학습.
+Xilinx(현 AMD) FPGA의 management 스택은 Intel OPAE/DFL과 별개인 XRT(Xilinx Runtime)다. xocl과 xclmgmt 두 kernel module 위에 libxrt userspace가 올라간다. Alveo 카드, Versal, Zynq MPSoC가 모두 같은 API를 쓴다. Ch 12 OPAE/DFL과 비교하며 학습한다.
 
 ## 핵심 항목
 

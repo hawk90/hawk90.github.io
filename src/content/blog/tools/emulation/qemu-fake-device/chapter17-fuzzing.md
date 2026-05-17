@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Driver 보안 버그는 *대부분 device→host 방향*에서 발생 — 신뢰할 수 없는 device가 보내는 MMIO/DMA 값을 driver가 *검증 없이* 사용. QEMU + Syzkaller 같은 fuzzer는 device 흉내로 *수백만 조합*을 던져 corner case를 자동 탐색. 보안 + 안정성 검증의 표준 도구.
+Driver 보안 버그는 대부분 device → host 방향에서 발생한다. 신뢰할 수 없는 device가 보내는 MMIO/DMA 값을 driver가 검증 없이 그대로 받아 쓰기 때문이다. QEMU와 Syzkaller 같은 fuzzer는 device를 흉내 내 수백만 조합을 던져 corner case를 자동으로 탐색한다. 보안과 안정성 검증의 표준 도구다.
 
 ## 핵심 항목
 

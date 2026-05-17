@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-FPGA 전체 재프로그래밍은 *수십 초*. 대신 **Partial Reconfiguration (PR)**으로 *일부 영역만* 초 단위로 교체. ML model swap, HFT strategy 전환, NPU kernel 교체에 필수. Linux는 `fpga_region` subsystem으로 추상 — driver는 region 정의 + reconfig 흐름만 구현.
+FPGA 전체 재프로그래밍은 수십 초가 걸린다. Partial Reconfiguration(PR)은 일부 영역만 초 단위로 교체할 수 있어 ML model swap, HFT strategy 전환, NPU kernel 교체에 필수다. Linux는 `fpga_region` subsystem으로 이를 추상화하고, driver는 region 정의와 reconfig 흐름만 구현하면 된다.
 
 ## 핵심 항목
 

@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-KVM은 *host = guest arch*일 때만 동작. *cross-arch* (host x86, guest ARM) 또는 *deterministic 실행*이 필요할 때 QEMU의 **TCG (Tiny Code Generator)**가 핵심. TCG는 guest 명령어를 *block 단위 동적 translate*해 host native code로 실행. 본 챕터는 TCG의 frontend/IR/backend 구조 + MTTCG (multi-threaded).
+KVM은 host와 guest의 아키텍처가 같을 때만 동작한다. cross-arch(host x86에 guest ARM)나 deterministic 실행이 필요할 때 QEMU의 TCG(Tiny Code Generator)가 핵심이 된다. TCG는 guest 명령어를 block 단위로 동적 translate해 host native code로 실행한다. 이 장에서는 TCG의 frontend/IR/backend 구조와 MTTCG(multi-threaded TCG)를 차례로 본다.
 
 ## 핵심 항목
 

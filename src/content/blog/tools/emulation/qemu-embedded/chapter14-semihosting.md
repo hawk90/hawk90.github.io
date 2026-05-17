@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-UART 없는 bare-metal MCU에서 *printf 디버깅*이 가능할까? **Semihosting**은 guest가 *특수 명령*을 trigger해 host(QEMU)의 syscall을 빌리는 메커니즘. 펌웨어 개발자가 매우 자주 쓰는 트릭 — 특히 CI에서 firmware exit code로 test 결과 받기.
+UART도 없는 bare-metal MCU에서 printf 디버깅이 가능할까? Semihosting은 guest가 특수 명령을 trigger해 host(QEMU)의 syscall을 빌려 쓰는 메커니즘이다. 펌웨어 개발자가 매우 자주 쓰는 트릭이며, 특히 CI에서 firmware의 exit code로 테스트 결과를 받는 데 유용하다.
 
 ## 핵심 항목
 

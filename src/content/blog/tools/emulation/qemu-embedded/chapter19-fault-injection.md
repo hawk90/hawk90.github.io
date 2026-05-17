@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-자동차·항공·의료 같은 *safety-critical* 시스템은 *fault가 발생해도 안전해야* 한다 (ISO 26262 ASIL, DO-178C, IEC 62304). Functional safety test는 *실 HW에 fault 인위적 주입*이 표준이지만 *비용·재현성*이 부담. QEMU에서 같은 fault를 *결정적*으로 주입하면 *수천 시나리오 CI 자동화* 가능.
+자동차, 항공, 의료 같은 safety-critical 시스템은 fault가 발생해도 안전해야 한다(ISO 26262 ASIL, DO-178C, IEC 62304). Functional safety test는 실 HW에 fault를 인위적으로 주입하는 게 표준이지만 비용과 재현성이 부담이다. QEMU에서 같은 fault를 결정적으로 주입할 수 있으면 수천 시나리오를 CI로 자동화할 수 있다.
 
 ## 핵심 항목
 

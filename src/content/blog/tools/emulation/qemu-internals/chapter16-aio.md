@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-QEMU의 모든 async I/O는 **AioContext** 위에 선다. event loop · fd handler · timer · BH(Bottom Half)가 한 우산. Backend는 *thread pool / linux-aio / io_uring* 중 선택. IOThread로 디바이스별 dedicated loop도 가능. 본 챕터는 AIO subsystem 구조 + 백엔드별 trade-off.
+QEMU의 모든 async I/O는 AioContext 위에 선다. event loop, fd handler, timer, BH(Bottom Half)가 한 우산 아래 모인다. Backend는 thread pool, linux-aio, io_uring 중에서 고를 수 있고, IOThread로 디바이스별 dedicated loop도 만들 수 있다. 이 장에서는 AIO subsystem 구조와 백엔드별 trade-off를 정리한다.
 
 ## 핵심 항목
 

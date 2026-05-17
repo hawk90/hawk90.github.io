@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-현대 임베디드 SoC는 *heterogeneous*다 — Zynq UltraScale+(APU Cortex-A53 + RPU Cortex-R5), i.MX8 (A72 + M4), STM32MP (A7 + M4). 두 클래스 코어가 동시에 다른 OS를 돌리고 *shared memory + mailbox*로 통신한다. **OpenAMP** + **RPMsg**가 표준 framework. 본 챕터는 QEMU로 AMP 환경을 만들고 *Linux ↔ FreeRTOS* 통신을 시뮬레이션.
+현대 임베디드 SoC는 heterogeneous하다. Zynq UltraScale+(APU Cortex-A53 + RPU Cortex-R5), i.MX8(A72 + M4), STM32MP(A7 + M4)가 그 예다. 두 종류의 코어가 서로 다른 OS를 동시에 돌리고 shared memory와 mailbox로 통신한다. OpenAMP + RPMsg가 표준 프레임워크다. 이 장에서는 QEMU로 AMP 환경을 만들고 Linux ↔ FreeRTOS 통신을 시뮬레이션한다.
 
 ## 핵심 항목
 

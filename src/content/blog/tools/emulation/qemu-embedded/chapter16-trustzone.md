@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-모바일·IoT 디바이스의 *지문/얼굴 인식, DRM, 결제, 키 보관*은 모두 **TrustZone** 안에서 동작한다. ARM이 *secure world*와 *non-secure world*를 하드웨어로 분리해 *Linux를 신뢰하지 않는 상태에서도 비밀을 보호*. 본 챕터는 QEMU `virt secure=on` + ARM Trusted Firmware + OP-TEE로 *완전한 secure boot* 체인을 시뮬레이션.
+모바일과 IoT 디바이스의 지문·얼굴 인식, DRM, 결제, 키 보관은 모두 TrustZone 안에서 동작한다. ARM이 secure world와 non-secure world를 하드웨어로 분리해, Linux를 신뢰하지 않는 상태에서도 비밀을 보호한다. 이 장에서는 QEMU `virt,secure=on` + ARM Trusted Firmware + OP-TEE로 완전한 secure boot 체인을 시뮬레이션한다.
 
 ## 핵심 항목
 

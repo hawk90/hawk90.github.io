@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-**VFIO**는 *kernel driver 없이 userspace가 device를 안전하게 소유*하게 해주는 framework. FPGA driver를 *userspace에서* 짤 수도 있고, *guest VM*에 pass-through할 수도 있다. 본 챕터는 IOMMU group·container·device 3-tier 개념 + 첫 VFIO 호출.
+VFIO는 커널 드라이버 없이 userspace가 디바이스를 안전하게 소유하게 해 주는 프레임워크다. FPGA 드라이버를 userspace에서 짤 수도 있고, guest VM에 pass-through할 수도 있다. 이 장에서는 IOMMU group, container, device 3-tier 개념을 정리하고 첫 VFIO ioctl 호출까지 함께 본다.
 
 ## 핵심 항목
 

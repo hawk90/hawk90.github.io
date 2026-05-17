@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-FPGA driver 개발의 *실제 어려움*은 코드 자체가 아니라 *환경*이다 — 보드 1대를 여러 명이 공유, bitstream 매번 변경, 로그가 dmesg 한 줄, 재현 불가. 본 시리즈는 **QEMU fake FPGA로 driver를 짜고, VFIO로 실 FPGA에 검증**하는 4-step 워크플로를 처음부터 끝까지 다룬다.
+FPGA driver 개발의 실제 어려움은 코드 자체가 아니라 환경에 있다. 보드 1대를 여러 명이 공유하고, bitstream은 자주 바뀌며, 로그는 dmesg 한 줄에 그치고, 재현이 어렵다. 이 시리즈는 QEMU fake FPGA로 driver를 작성한 뒤 VFIO로 실 FPGA에서 검증하는 4단계 워크플로를 처음부터 끝까지 다룬다.
 
 ## 핵심 항목
 

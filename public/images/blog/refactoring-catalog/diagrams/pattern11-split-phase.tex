@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-5, 2.6) {Before};
+\node[con, minimum width=32mm, minimum height=22mm, text width=30mm, align=center] (mono) at (-5, 1)
+  {\textbf{calculate()}\\\footnotesize parse · validate\\transform · format};
+\node[font=\sffamily\bfseries] at (3, 2.6) {After};
+
+\node[abs, minimum width=22mm] (parse)  at (0.8, 1.3) {parse};
+\node[hi,  minimum width=22mm] (inter)  at (3.0, 1.3) {Intermediate};
+\node[abs, minimum width=22mm] (render) at (5.2, 1.3) {render};
+\draw[arr] (parse) -- (inter);
+\draw[arr] (inter) -- (render);
+
+\draw[->, edgec, line width=1.2pt] (-3.4, 1) -- node[above, font=\footnotesize]{Split Phase} (-0.4, 1.3);
+
+\node[font=\footnotesize\itshape, mutec, text width=70mm, align=center] at (0.8, -0.6)
+  {각 phase는 독립적으로 변경/테스트 가능};
+
+\end{tikzpicture}
+\end{document}

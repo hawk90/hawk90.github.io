@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-전통 VM은 *hypervisor를 신뢰*해야 한다 — clouder가 guest 메모리를 볼 수 있다는 뜻. **Confidential VM**은 *hypervisor도 못 보는* 메모리·CPU 상태로 격리. AMD SEV-SNP, Intel TDX, ARM CCA가 이를 *하드웨어*로 보장. 2026 cloud의 *기본 옵션*으로 확산 중.
+전통 VM은 hypervisor를 신뢰해야 한다. cloud 운영자가 guest 메모리를 볼 수 있다는 뜻이다. Confidential VM은 hypervisor도 볼 수 없는 메모리와 CPU 상태로 격리된다. AMD SEV-SNP, Intel TDX, ARM CCA가 이를 하드웨어로 보장한다. 2026 cloud의 기본 옵션으로 확산되고 있다.
 
 ## 핵심 항목
 

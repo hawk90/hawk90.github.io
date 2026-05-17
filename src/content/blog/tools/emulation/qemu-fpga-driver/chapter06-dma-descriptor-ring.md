@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Ch 4의 단순 DMA에 *현실 FPGA가 쓰는* 패턴 — **descriptor ring + SG + bidirectional + completion ring**을 추가. fake-fpga에 NIC/NVMe와 유사한 ring을 만들고 driver가 alloc/prep/submit/wait 사이클을 돈다.
+Ch 4의 단순 DMA에 현실 FPGA가 쓰는 패턴(descriptor ring, SG, bidirectional, completion ring)을 더한다. fake-fpga에 NIC나 NVMe와 비슷한 ring을 만들고, driver가 alloc → prep → submit → wait → complete 사이클을 돈다.
 
 ## 핵심 항목
 

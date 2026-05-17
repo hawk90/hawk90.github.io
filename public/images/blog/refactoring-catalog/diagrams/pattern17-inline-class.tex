@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[imp, text width=34mm, align=left, minimum height=18mm] (p) at (-4.5, 1.6)
+  {\textbf{Person}\\\texttt{name}\\\texttt{telephone}};
+\node[con, text width=34mm, align=left, minimum height=18mm] (t) at (-4.5, -1)
+  {\textbf{TelephoneNumber}\\\texttt{areaCode}\\\texttt{number}};
+\draw[->, edgec] (p.south) -- (t.north);
+
+\node[font=\sffamily\bfseries] at (4, 3) {After};
+\node[imp, text width=40mm, align=left, minimum height=30mm] (merged) at (4, 0.3)
+  {\textbf{Person}\\\hrulefill\\\texttt{name}\\\texttt{areaCode}\\\texttt{number}\\\hrulefill\\\texttt{...}};
+
+\draw[->, edgec, line width=1.2pt] (-2.4, 0.3) -- node[above, font=\footnotesize]{Inline Class} (1.6, 0.3);
+
+\end{tikzpicture}
+\end{document}

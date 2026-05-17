@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-같은 IP (NPU·sensor·NIC controller)가 *x86 host PC, aarch64 자동차 ECU, RISC-V 임베디드*에 모두 들어간다면 *device model 하나*로 세 host를 모두 검증해야 한다. QEMU는 multi-arch을 지원하지만 endianness·alignment·atomic 시멘틱이 host arch에 따라 달라지는 함정이 있다.
+같은 IP(NPU, sensor, NIC controller)가 x86 host PC, aarch64 자동차 ECU, RISC-V 임베디드에 모두 들어간다면 device model 하나로 세 host를 모두 검증해야 한다. QEMU는 multi-arch를 지원하지만 endianness, alignment, atomic 시맨틱이 host 아키텍처에 따라 달라지는 함정이 있다. 이 장에서는 그 함정과 회피법을 본다.
 
 ## 핵심 항목
 

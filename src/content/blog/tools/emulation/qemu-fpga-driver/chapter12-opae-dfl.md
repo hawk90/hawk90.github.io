@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Intel FPGA (Stratix/Agilex)의 management 스택 — **OPAE** (userspace) + **DFL** (Linux kernel framework). DFL은 *device 자체에 metadata가 들어있어* driver가 자동 discovery. PR (Partial Reconfig)·AFU·FME 모두 표준화.
+Intel FPGA(Stratix, Agilex)의 management 스택은 OPAE(userspace)와 DFL(Linux kernel framework) 둘로 나뉜다. DFL은 device 자체에 metadata가 들어 있어 driver가 sub-device를 자동으로 discovery한다. PR(Partial Reconfig), AFU, FME가 모두 표준화돼 있다.
 
 ## 핵심 항목
 

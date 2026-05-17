@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-NVMe·GPU·NPU 같은 *현실 가속기*는 하나의 BAR에 모든 레지스터를 두지 않는다. **doorbell**(연속 write로 SQ tail 통보), **CSR**(상태·설정), **queue ring**(producer/consumer 메모리)을 *서로 다른 영역*에 두는 게 표준. Atomic 영역 분리 + cacheable/uncacheable 정책 분리가 가능해진다. 본 챕터는 QEMU에서 *Multi-Region BAR* 디바이스를 만든다.
+NVMe, GPU, NPU 같은 현실 가속기는 하나의 BAR에 모든 레지스터를 두지 않는다. doorbell(연속 write로 SQ tail 통보), CSR(상태·설정), queue ring(producer/consumer 메모리)을 서로 다른 영역에 두는 게 표준이다. 영역을 분리하면 atomic 보장과 cacheable/uncacheable 정책 분리가 가능해진다. 이 장에서는 QEMU 위에 multi-region BAR를 가진 디바이스를 직접 만든다.
 
 ## 핵심 항목
 

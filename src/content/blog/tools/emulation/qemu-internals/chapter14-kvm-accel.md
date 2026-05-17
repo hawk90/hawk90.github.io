@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-QEMU가 *느린 TCG*만으로 끝나면 production hypervisor가 될 수 없다. **KVM accelerator**가 vCPU 명령 실행을 *host CPU의 VT-x/AMD-V/ARM EL2*에 맡기고, QEMU는 *MMIO/PIO trap 처리*와 *device emulation*만 담당. 본 챕터는 KVM과 QEMU 사이 인터페이스 — `AccelOps`, `KVM_RUN`, exit reason 처리.
+QEMU가 느린 TCG만으로 끝나면 production hypervisor가 될 수 없다. KVM accelerator가 vCPU 명령 실행을 host CPU의 VT-x/AMD-V/ARM EL2에 맡기고, QEMU는 MMIO/PIO trap 처리와 device emulation만 담당한다. 이 장에서는 KVM과 QEMU 사이의 인터페이스(`AccelOps`, `KVM_RUN`, exit reason 처리)를 본다.
 
 ## 핵심 항목
 

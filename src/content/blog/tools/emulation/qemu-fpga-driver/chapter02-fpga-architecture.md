@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Driver는 *FPGA 내부 회로*를 안 봐도 되지만 *driver가 봐야 할 layer* — PCIe endpoint·shell·user logic·AXI 인터페이스는 알아야 한다. 본 챕터는 driver 관점에서 FPGA를 3-layer로 분해.
+Driver는 FPGA 내부 회로 자체는 몰라도 되지만, driver가 봐야 할 layer(PCIe endpoint, shell, user logic, AXI 인터페이스)는 알아야 한다. 이 장에서는 driver 관점에서 FPGA를 3-layer로 분해한다.
 
 ## 핵심 항목
 

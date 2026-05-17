@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-이제 *실 FPGA*를 받았다. VFIO-PCI로 *guest VM에 직접 pass-through*하면 *QEMU fake-fpga로 짠 driver를 그대로 VM에서 실행* 가능. 이게 시리즈의 *step 2*. fake → 실 보드 transition 단계.
+이제 실 FPGA를 받았다. VFIO-PCI로 guest VM에 직접 pass-through하면, QEMU fake-fpga로 짠 driver를 그대로 VM에서 실행할 수 있다. 시리즈의 step 2에 해당하는, fake에서 실 보드로 넘어가는 transition 단계다.
 
 ## 핵심 항목
 

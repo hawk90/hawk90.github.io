@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-VirtIO는 paravirtualization의 *de facto* 표준이고 guest와 host가 *서로 가상화임을 알고 협력*하는 인터페이스다. virtio-net/blk/scsi/gpu가 다 같은 토대(virtqueue) 위에 선다. 본 챕터는 QEMU에서 *minimal VirtIO 디바이스*를 만들면서 transport·queue·feature negotiation을 분해.
+VirtIO는 paravirtualization의 사실상 표준이다. guest와 host가 서로 가상화 환경임을 알고 협력하는 인터페이스이며 virtio-net, virtio-blk, virtio-scsi, virtio-gpu가 모두 같은 토대(virtqueue) 위에 선다. 이 장에서는 QEMU에 최소 VirtIO 디바이스를 만들어 보면서 transport, queue, feature negotiation을 하나씩 풀어본다.
 
 ## 핵심 항목
 

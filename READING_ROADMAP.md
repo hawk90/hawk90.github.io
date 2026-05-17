@@ -1478,9 +1478,12 @@ GoF (개별 패턴 익히기) → Fowler Refactoring (기계적 변환)
 
 | 시리즈 | 상태 | 비고 |
 |--------|------|------|
-| QEMU Fake Device Driver | 📋 | 가상 디바이스로 드라이버 개발/테스트 |
-| QEMU Embedded Emulation | 📋 | ARM/RISC-V 보드 에뮬레이션, 펌웨어 테스트 |
-| QEMU Internals | 📋 | QEMU 소스 분석, 디바이스 모델 구현 |
+| QEMU Fake Device Driver | 📝 | 기존 12편(content) + 심화 10편(stub) = 22편 |
+| QEMU Embedded Emulation | 📝 | 기존 12편(content) + 심화 8편(stub) = 20편 |
+| QEMU Internals | 📝 | 기존 12편(content) + 심화 10편(stub) = 22편 |
+| QEMU FPGA Driver via VFIO 🔥 | 📝 | 신규 14편(stub) — *FPGA 드라이버 개발·검증 목적* |
+
+전체 설계는 `QEMU_STORYBOARD.md` 참고.
 
 ### 26.1 QEMU Fake Device Driver (신규)
 

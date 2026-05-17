@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Fake Device 시리즈(Ch 15-16)가 *VirtIO API 사용자 관점*이었다면 본 챕터는 *QEMU host 구현자 관점*. virtqueue pop/push/notify 흐름, iov packing, virtio-blk/virtio-net 처리 path. KVM Forum에서 가장 자주 등장하는 주제.
+Fake Device 시리즈(Ch 15-16)가 VirtIO API 사용자 관점이었다면 이 장은 QEMU host 구현자 관점이다. virtqueue pop/push/notify 흐름, iov packing, virtio-blk와 virtio-net 처리 path를 본다. KVM Forum에서 가장 자주 등장하는 주제다.
 
 ## 핵심 항목
 

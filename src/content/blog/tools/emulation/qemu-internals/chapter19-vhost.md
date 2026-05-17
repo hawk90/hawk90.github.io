@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-virtio-net data path가 *guest → QEMU → host kernel*을 거치면 context switch 비용이 크다. **vhost-net**(kernel)과 **vhost-user**(userspace 백엔드, DPDK/SPDK)는 *QEMU process를 데이터패스에서 제거*해 throughput을 *수 배* 끌어올린다. 본 챕터는 vhost 프로토콜 + 백엔드별 구조.
+virtio-net data path가 guest → QEMU → host kernel을 거치면 context switch 비용이 크다. vhost-net(kernel)과 vhost-user(userspace 백엔드, DPDK/SPDK)는 QEMU process를 데이터패스에서 제거해 throughput을 몇 배로 끌어올린다. 이 장에서는 vhost 프로토콜과 백엔드별 구조를 본다.
 
 ## 핵심 항목
 

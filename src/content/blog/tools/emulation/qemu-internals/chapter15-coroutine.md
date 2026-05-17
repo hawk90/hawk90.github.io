@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-QEMU의 block I/O·migration·NBD 모두 *async*다. 전통적으로 async는 *callback nesting hell*을 낳지만 QEMU는 **coroutine**으로 *sync처럼 보이는 async code*를 작성. Stefan Hajnoczi가 디자인. 본 챕터는 QEMU coroutine API + stack-switching 구현 + Block I/O 적용.
+QEMU의 block I/O, migration, NBD는 모두 비동기다. 전통적인 콜백 기반 비동기 코드는 nesting hell을 낳지만, QEMU는 coroutine으로 sync처럼 읽히는 async 코드를 짤 수 있게 한다. 이 디자인은 Stefan Hajnoczi가 만들었다. 이 장에서는 QEMU coroutine API, stack-switching 구현, Block I/O에서의 활용을 차례로 본다.
 
 ## 핵심 항목
 

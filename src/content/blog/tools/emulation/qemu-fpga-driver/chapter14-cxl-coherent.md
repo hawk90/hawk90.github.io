@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-DMA는 *coarse-grained* — page 단위 transfer. **Coherent accelerator**는 FPGA가 *host CPU cache에 직접 참여* → load/store 직접, snoop-aware. Intel CCI-P (legacy)와 **CXL.cache** (modern)가 이를 가능하게. NPU·NPU compiler의 진로 — 시리즈 마무리는 *FPGA driver의 미래*.
+DMA는 coarse-grained 방식이라 page 단위 transfer만 가능하다. Coherent accelerator는 FPGA가 host CPU cache에 직접 참여해 load/store를 직접 하고 snoop을 따라간다. Intel CCI-P(legacy)와 CXL.cache(modern)가 이를 가능하게 한다. NPU와 NPU 컴파일러 진로의 핵심이며, 이 시리즈의 마무리로 FPGA driver의 미래를 본다.
 
 ## 핵심 항목
 

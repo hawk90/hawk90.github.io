@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-FPGA 1대를 *여러 VM/tenant가 공유* → datacenter ROI 핵심. **SR-IOV**가 *HW로* 분할, **mdev**가 *SW로* 분할. 본 챕터는 두 패턴 + FPGA-specific application (XRT VF, OPAE, DFL AFU).
+FPGA 1대를 여러 VM 또는 tenant가 공유하는 것은 datacenter ROI의 핵심이다. SR-IOV는 하드웨어로, mdev는 소프트웨어로 디바이스를 분할한다. 이 장에서는 두 패턴과 FPGA에 특화된 응용(XRT VF, OPAE, DFL AFU)을 함께 본다.
 
 ## 핵심 항목
 

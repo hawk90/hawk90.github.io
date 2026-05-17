@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-임베디드 소프트웨어는 *수많은 board × kernel × toolchain* 조합에서 동작해야 한다. 실 HW를 모두 갖추면 비용·관리 부담. QEMU + GitHub Actions/GitLab CI 매트릭스로 *매 commit마다 수십 조합 자동 검증* — Linux kernel·U-Boot·Zephyr 같은 mainline 프로젝트가 정확히 이 방식을 쓴다.
+임베디드 소프트웨어는 수많은 board × kernel × toolchain 조합에서 동작해야 한다. 실 HW를 모두 갖추는 건 비용과 관리 부담이 크다. QEMU와 GitHub Actions/GitLab CI 매트릭스를 결합하면 매 commit마다 수십 조합을 자동 검증할 수 있다. Linux kernel, U-Boot, Zephyr 같은 mainline 프로젝트가 정확히 이 방식을 쓴다.
 
 ## 핵심 항목
 

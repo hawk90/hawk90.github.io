@@ -10,11 +10,11 @@ draft: true
 
 ## 이 챕터의 의도
 
-기존 Ch 2-3이 *generic `-M virt`*를 다뤘다면 본 챕터는 *실제 출하 보드*를 모방한 vendor machine을 다룬다. STM32·i.MX·Raspberry Pi 등 *제품*을 QEMU로 띄우면 펌웨어·driver를 *실 HW 받기 전*에 검증 가능.
+앞선 Ch 2-3이 generic `-M virt`를 다뤘다면 이 장은 실제 출하 보드를 모방한 vendor machine을 다룬다. STM32, i.MX, Raspberry Pi 같은 제품을 QEMU로 띄우면 실 HW를 받기 전에 펌웨어와 driver를 미리 검증할 수 있다.
 
 ## 핵심 항목
 
-- ✦ Vendor-specific machine — `qemu-system-arm -machine ?`로 전체 목록
+- ✦ 벤더별 머신 — `qemu-system-arm -machine ?`로 전체 목록
 - ✦ **STM32 계열** — `netduinoplus2` (STM32F405), `mps2-an{385,505,521}` (Cortex-M3/M33), `b-l475e-iot01a` (STM32L4)
 - ✦ **NXP i.MX** — `mcimx7d-sabre` (i.MX7 dual A7), `mcimx6ul-evk` (i.MX6 single A7), `imx25-pdk`
 - ✦ **BCM (Raspberry Pi)** — `raspi2b` (Pi 2B), `raspi3b` (Pi 3B+), `raspi4b` (Pi 4B) — VideoCore peripheral, mailbox

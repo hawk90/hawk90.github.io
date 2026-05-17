@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-FPGA는 *bitstream*을 받아야 user logic이 살아난다. Linux는 **fpga_mgr** subsystem으로 *어떤 FPGA든 같은 인터페이스*로 program. Driver는 fpga_mgr_ops만 구현. 본 챕터는 fake-fpga에 bitstream load 명령 추가 + driver fpga_mgr registration.
+FPGA는 bitstream을 받아야 user logic이 살아난다. Linux는 fpga_mgr subsystem 덕분에 어떤 FPGA든 같은 인터페이스로 program할 수 있고, driver는 fpga_mgr_ops만 구현하면 된다. 이 장에서는 fake-fpga에 bitstream load 명령을 추가하고 driver를 fpga_mgr에 등록한다.
 
 ## 핵심 항목
 

@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-QEMU에서 *snapshot*과 *live migration*은 *같은 토대 (VMState serialization)*를 공유한다. Snapshot = *single-host, file로*. Migration = *cross-host, network으로*. 본 챕터는 두 메커니즘을 같은 frame으로 보고, dirty page tracking·precopy·postcopy 같은 high-end 기법을 정리.
+QEMU에서 snapshot과 live migration은 같은 토대(VMState serialization)를 공유한다. snapshot은 single-host에서 파일로 저장하고, migration은 cross-host로 네트워크 너머에 옮긴다. 이 장에서는 두 메커니즘을 같은 frame으로 보고, dirty page tracking·precopy·postcopy 같은 high-end 기법까지 정리한다.
 
 ## 핵심 항목
 

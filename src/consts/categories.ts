@@ -55,6 +55,8 @@ export const CATEGORIES: Category[] = [
   { id: 'systems/architecture', parent: 'systems', name: 'Computer Architecture', description: 'CPU, 캐시, 파이프라인, RISC-V' },
   { id: 'systems/sre', parent: 'systems', name: 'SRE', description: '모니터링, 온콜, 장애 대응' },
   { id: 'systems/wireless', parent: 'systems', name: 'Wireless (Kernel)', description: 'mac80211/cfg80211, BlueZ, hostapd, wpa_supplicant, Linux Wi-Fi 드라이버' },
+  { id: 'systems/arm', parent: 'systems', name: 'ARM Architecture Specs', description: 'ARMv8-A·v9-A·v8-M·GIC·SMMU·AMBA·PSCI·SBSA 스펙 풀리뷰' },
+  { id: 'systems/riscv', parent: 'systems', name: 'RISC-V Architecture', description: 'RISC-V ISA, 특권 아키텍처, 벡터 확장, 부트' },
 
   // Embedded
   { id: 'embedded/hardware', parent: 'embedded', name: 'Hardware Interfaces', description: 'PCIe, NVMe, DDR, CXL, HBM, UCIe, UALink' },
@@ -67,6 +69,7 @@ export const CATEGORIES: Category[] = [
   { id: 'embedded/wireless', parent: 'embedded', name: 'Wireless (Firmware)', description: 'BLE, Zigbee, Thread, Matter, LoRa, ESP32 Wi-Fi — RTOS/MCU 측' },
   { id: 'embedded/avionics', parent: 'embedded', name: 'Avionics & Aerospace SW', description: '발사체 에비오닉스 umbrella — 아키텍처·Flight SW·C&DH·SW Assurance·GNC·Simulation·Sensors·Systems Engineering' },
   { id: 'embedded/rtos', parent: 'embedded', name: 'RTOS', description: 'FreeRTOS, RTEMS, Zephyr, VxWorks — scheduler·task·timer 내부와 비교 (Practical RTOS Internals + 책 리뷰)' },
+  { id: 'embedded/riscv', parent: 'embedded', name: 'RISC-V Embedded', description: 'ESP32-C3, BL602, SiFive — RISC-V MCU/SoC 실습' },
 
   // ML
   { id: 'ml/accelerators', parent: 'ml', name: 'Accelerators', description: 'NPU, TPU, Systolic Array' },

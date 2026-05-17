@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-기존 ch07(DMA)이 *단일 buffer DMA*만 다뤘다면 본 챕터는 *현실 디바이스*가 쓰는 **descriptor ring + scatter-gather + partial transfer + error injection**을 QEMU 위에서 구현한다. NIC·NVMe·NPU·FPGA가 모두 이 패턴.
+앞선 ch07(DMA)이 단일 buffer DMA만 다뤘다면 이 장은 현실 디바이스가 쓰는 descriptor ring·scatter-gather·partial transfer·error injection을 QEMU 위에서 구현한다. NIC, NVMe, NPU, FPGA가 모두 같은 패턴을 따른다.
 
 ## 핵심 항목
 

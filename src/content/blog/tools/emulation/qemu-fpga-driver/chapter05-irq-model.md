@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-FPGA는 *수십~수천 개*의 IRQ source(DMA 채널, user logic 이벤트)를 가질 수 있다. **MSI-X**가 이를 *vector별 분리*해 driver가 깔끔히 처리. fake-fpga에 MSI-X 추가 + user IRQ multiplex + polling fallback.
+FPGA는 수십에서 수천 개의 IRQ source(DMA 채널, user logic 이벤트)를 가질 수 있다. MSI-X가 이를 vector별로 분리해 주어 driver가 깔끔하게 처리할 수 있다. 이 장에서는 fake-fpga에 MSI-X, user IRQ multiplex, polling fallback을 차례로 더한다.
 
 ## 핵심 항목
 

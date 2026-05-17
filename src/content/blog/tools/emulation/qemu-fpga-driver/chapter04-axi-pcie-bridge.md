@@ -10,7 +10,7 @@ draft: true
 
 ## 이 챕터의 의도
 
-Ch 3의 fake-fpga에 **AXI↔PCIe bridge** (실 FPGA의 *shell* 핵심부)를 모방. 목표는 driver가 *Xilinx XDMA / Intel DMA IP와 같은 register layout*을 보게 하는 것. 그러면 *driver 코드가 그대로 실 FPGA에서 동작*한다.
+Ch 3의 fake-fpga에 AXI ↔ PCIe bridge(실 FPGA shell의 핵심부)를 더한다. 목표는 driver가 Xilinx XDMA나 Intel DMA IP와 같은 register layout을 보게 만드는 것이다. 그래야 driver 코드를 손대지 않고 그대로 실 FPGA로 옮길 수 있다.
 
 ## 핵심 항목
 

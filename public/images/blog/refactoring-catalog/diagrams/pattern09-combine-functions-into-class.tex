@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Before: scattered functions sharing data
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[con, minimum width=30mm] (f1) at (-5.8, 1.6) {\texttt{calcBase(data)}};
+\node[con, minimum width=30mm] (f2) at (-3.2, 1.6) {\texttt{calcTax(data)}};
+\node[con, minimum width=30mm] (f3) at (-5.8, 0.2) {\texttt{calcShipping(data)}};
+\node[con, minimum width=30mm] (f4) at (-3.2, 0.2) {\texttt{format(data)}};
+\node[hi, minimum width=24mm] (data) at (-4.5, -1.4) {data record};
+\foreach \src in {f1,f2,f3,f4} {
+  \draw[->, edgesc] (\src.south) -- (data.north);
+}
+
+% After: class encapsulating data and methods
+\node[font=\sffamily\bfseries] at (4.5, 3) {After};
+\node[imp, text width=48mm, align=left, minimum height=35mm] (cls) at (4.5, 0.5)
+  {\textbf{Order}\\\hrulefill\\\texttt{- data}\\\hrulefill\\\texttt{+ calcBase()}\\\texttt{+ calcTax()}\\\texttt{+ calcShipping()}\\\texttt{+ format()}};
+
+\draw[->, edgec, line width=1.2pt] (-1.6, 0.5) -- node[above, font=\footnotesize]{Combine into Class} (1.8, 0.5);
+
+\end{tikzpicture}
+\end{document}
