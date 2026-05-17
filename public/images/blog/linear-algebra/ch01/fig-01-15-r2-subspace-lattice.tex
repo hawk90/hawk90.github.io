@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath,amssymb}
+\usetikzlibrary{positioning}
+\begin{document}
+\input{../../_design-math.tex}
+\begin{tikzpicture}[math, node distance=14mm and 14mm]
+
+  % --- Bottom: {0} ---
+  \node[draw=INK, line width=0.5pt, fill=gray!10, rounded corners=2pt,
+        inner sep=4pt, minimum width=18mm, font=\small] (zero) at (0, 0) {$\{0\}$};
+
+  % --- Middle: three 1D subspaces ---
+  \node[draw=VECA, line width=0.5pt, fill=VECA!8, rounded corners=2pt,
+        inner sep=4pt, minimum width=30mm, font=\small] (L1) at (-4, 3)
+        {$L_1 = \mathrm{span}\,\{(1,0)\}$};
+  \node[draw=VECB, line width=0.5pt, fill=VECB!8, rounded corners=2pt,
+        inner sep=4pt, minimum width=30mm, font=\small] (L2) at ( 0, 3)
+        {$L_2 = \mathrm{span}\,\{(0,1)\}$};
+  \node[draw=VECC, line width=0.5pt, fill=VECC!8, rounded corners=2pt,
+        inner sep=4pt, minimum width=30mm, font=\small] (L3) at ( 4, 3)
+        {$L_3 = \mathrm{span}\,\{(1,1)\}$};
+
+  % --- Top: R^2 ---
+  \node[draw=INK, line width=0.5pt, fill=gray!10, rounded corners=2pt,
+        inner sep=4pt, minimum width=18mm, font=\small] (R2) at (0, 6) {$\mathbb{R}^2$};
+
+  % --- Edges: include relation (bottom-to-top) ---
+  \draw[MUTE, line width=0.5pt] (zero) -- (L1);
+  \draw[MUTE, line width=0.5pt] (zero) -- (L2);
+  \draw[MUTE, line width=0.5pt] (zero) -- (L3);
+  \draw[MUTE, line width=0.5pt] (L1)   -- (R2);
+  \draw[MUTE, line width=0.5pt] (L2)   -- (R2);
+  \draw[MUTE, line width=0.5pt] (L3)   -- (R2);
+\end{tikzpicture}
+\end{document}
