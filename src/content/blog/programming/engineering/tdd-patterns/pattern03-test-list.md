@@ -1,7 +1,7 @@
 ---
 title: "Pattern 3: Test List"
 date: 2026-07-01T03:00:00
-description: "구현 시작 전에 — test 목록부터."
+description: "코드 작성 전에 — 어떤 테스트를 쓸지 목록부터. 작업 메모리의 외부화."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 3
 tags: [tdd, beck, test-list, planning]
@@ -13,27 +13,52 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 코드를 작성하기 전에 "어떤 테스트를 작성해야 하는가?"를 목록으로 만들어라.
+> 코드 작성 전에 *"어떤 테스트를 쓸지"*를 목록으로. 머릿속 부담을 *외부*로 옮겨 집중·진행률·재개를 돕는다.
 
 ## 동기 (Motivation)
 
-머릿속에 모든 테스트 케이스를 담고 있으면 어떻게 될까? 코드를 작성하다가 "아, 이 경우도 테스트해야 하는데..."라는 생각이 떠오른다. 그 순간 작업이 중단된다. 집중이 깨진다.
+머릿속에 *모든 테스트 케이스*를 담고 있으면 코드 작성 중 *"이 경우도 테스트해야 하는데..."*가 떠오른다. 그 순간 *작업 중단*. 집중이 깨진다.
 
-**테스트 목록(Test List)**은 이 문제를 해결한다:
-- 머릿속 아이디어를 **외부에 기록**
-- 현재 작업에 **집중** 가능
-- **진행 상황**을 눈으로 확인
-- 중단 후 **복귀가 쉬움**
+테스트 목록(Test List)이 해결:
 
-Beck은 이것을 "작업 메모리의 외부화"라고 부른다. 뇌는 테스트 목록을 기억하는 데 쓰지 말고, 코드 작성에 쓰자.
+- 머릿속 아이디어를 *외부에 기록*.
+- 현재 작업에 *집중*.
+- *진행 상황 시각화*.
+- 중단 후 *복귀가 쉬움*.
 
-## 테스트 목록 작성법
+Beck은 이것을 *"working memory의 외부화"*라 부른다. 뇌는 *테스트 목록을 기억*하는 데 쓰지 말고 *코드 작성*에 쓰자.
 
-### 1. Brain Dump
+### 신호
 
-기능을 구현하기 전에, 떠오르는 모든 테스트 케이스를 적는다:
+- 작업 중 *"아 그것도..."* 가 자꾸 떠오름.
+- 케이스 *기억 못 해* 빠뜨림.
+- 회의·점심 후 *어디까지 했는지* 모름.
+- *Scope creep* — 처음 의도보다 작업이 넓어짐.
+
+### 어디에 작성하나
+
+| 매체 | 장점 | 단점 |
+| --- | --- | --- |
+| 코드 주석 (TODO) | IDE 통합, 코드 옆 | 길어지면 잡음 |
+| 별도 .md 파일 | 정리·검색 쉬움 | 코드와 분리 |
+| GitHub Issue | 협업, 추적 | 외부 시스템 의존 |
+| 화이트보드 | 시각적 | 비동기·기록 |
+| Notion/노트 앱 | 풍부한 포맷 | 컨텍스트 스위칭 |
+
+핵심: *눈에 보이는 곳*.
+
+## 절차 (Mechanics)
+
+1. **Brain dump** — 기능 구현 전, 떠오르는 *모든 테스트 케이스* 적기.
+2. **우선순위 정하기** — 가장 단순·확실·중요한 것부터.
+3. **현재 작업 표시** — 한 번에 하나만 진행.
+4. **완료 체크 + 새 케이스 추가**.
+5. **작업 종료 시 미완 목록 보존** — 다음 세션에서 재개.
+
+## 예시 1 — 장바구니 기능
 
 ```text
+Test List — ShoppingCart
 [ ] 빈 장바구니의 총액은 0
 [ ] 상품 1개 추가 후 총액
 [ ] 같은 상품 2개 추가 후 총액
@@ -43,80 +68,25 @@ Beck은 이것을 "작업 메모리의 외부화"라고 부른다. 뇌는 테스
 [ ] 재고보다 많이 추가 시 에러
 ```
 
-완벽할 필요 없다. 떠오르는 대로 적는다.
+완벽할 필요 없음. *떠오르는 대로*.
 
-### 2. 진행하면서 업데이트
+## 예시 2 — 진행하며 업데이트
 
 ```text
-[x] 빈 장바구니의 총액은 0          ← 완료
-[x] 상품 1개 추가 후 총액            ← 완료
-[ ] 같은 상품 2개 추가 후 총액       ← 현재 작업 중
+[x] 빈 장바구니의 총액은 0         ← 완료
+[x] 상품 1개 추가 후 총액           ← 완료
+[ ] 같은 상품 2개 추가 후 총액      ← 현재 작업 중
 [ ] 다른 상품 2개 추가 후 총액
 [ ] 할인 쿠폰 적용
 [ ] 존재하지 않는 상품 추가 시 에러
 [ ] 재고보다 많이 추가 시 에러
-[ ] 음수 수량 추가 시 에러           ← 새로 발견!
+[ ] 음수 수량 추가 시 에러          ← 새로 발견!
+[ ] 동시 수정 시 동작              ← 새로 발견!
 ```
 
-작업 중 새로운 케이스가 떠오르면 목록에 추가한다. 지금 작업을 중단하지 않고.
+새 케이스 발견 시 *즉시 추가*. 지금 작업 *중단하지 않음*.
 
-## 테스트 목록의 효과
-
-### 1. 북마크 효과
-
-회의에 불려가거나 점심을 먹고 돌아와도, 목록을 보면 어디까지 했는지 바로 알 수 있다.
-
-### 2. 범위 제한
-
-목록에 없는 테스트는 "지금 할 일이 아니다"라고 스스로에게 말할 수 있다. 범위 확장(scope creep)을 막는다.
-
-### 3. 진행 시각화
-
-```text
-완료: 5/10 테스트
-━━━━━━━━━━━━━━━━━━━━ 50%
-```
-
-목록이 줄어드는 것을 보면 동기부여가 된다.
-
-## 어디에 작성할까
-
-```python
-# 코드 주석으로
-# TODO:
-# - test empty cart
-# - test single item
-# - test discount
-
-# 또는 테스트 파일 상단에
-"""
-Test List:
-[x] empty cart returns 0
-[ ] single item adds to total
-[ ] discount reduces total
-"""
-
-def test_empty_cart():
-    cart = Cart()
-    assert cart.total() == 0
-```
-
-IDE의 TODO 추적 기능, 별도 메모장, 화이트보드 — 어디든 좋다. 핵심은 **눈에 보이는 곳**에 두는 것.
-
-## 목록 정리 전략
-
-테스트 목록이 너무 길어지면 부담이 된다. 전략:
-
-| 상황 | 전략 |
-|------|------|
-| 20개 이상 | 카테고리로 그룹화 |
-| 우선순위 불명확 | 가장 간단한 것 먼저 |
-| 막막할 때 | 가장 확실한 것 먼저 |
-| 불안할 때 | 가장 위험한 것 먼저 |
-
-## 예시: Money 클래스
-
-Beck의 책 예제를 따라가 보자:
+## 예시 3 — Beck의 Money 예제
 
 ```text
 Test List — Money
@@ -131,19 +101,115 @@ Test List — Money
 [ ] 다른 객체와 비교
 ```
 
-작업하면서 `[x]`로 체크하고, 새로운 생각이 나면 추가한다.
+Beck의 *TDD by Example* 1부 Money 예제의 출발점. *작업하면서 항상 보임*.
 
-## 정리
+## 자주 보는 안티패턴
 
-- 코드 작성 전에 **테스트 목록**을 만든다
-- 목록은 **brain dump** — 완벽할 필요 없다
-- 완료하면 **체크**, 새로 발견하면 **추가**
-- 목록은 **작업 메모리의 외부화**
-- **북마크 효과**로 중단 후 복귀가 쉬움
-- **범위 제한**으로 scope creep 방지
+### 1. *목록 안 만들고 시작*
+"그냥 짜면서 생각하지" → *발견된 케이스 잊음* → bug.
+
+### 2. *완벽한 목록 만들기*
+시작 전 *모든 케이스 다 적기*에 매달림 → 코드 시작 *지연*. *brain dump*면 충분.
+
+### 3. *목록을 영원히 유지*
+완료된 항목까지 *영원히 남음* → 목록 *복잡*. 적절히 archive.
+
+### 4. *코드 안 적고 메모에만*
+메모 앱에 적고 *코드 옆에 안 봄* → 잊음. *시야*에 두기.
+
+### 5. *너무 큰 항목*
+"인증 시스템 전체" 같은 거대 항목 — *진행 안 됨*. *작게 분할*.
+
+### 6. *순서 무시*
+*가장 어려운 것 먼저* → 막힘. *Starter Test* (가장 단순한 것)부터.
+
+## Modern variants
+
+### TODO comment + IDE TODO panel
+
+```python
+# TODO: empty cart
+# TODO: single item
+# TODO: discount
+```
+
+IntelliJ/VS Code의 *TODO panel*이 자동 수집.
+
+### Markdown file
+
+```markdown
+# Test List
+
+## Done
+- [x] empty cart returns 0
+
+## Doing
+- [ ] single item
+
+## Todo
+- [ ] discount
+- [ ] error cases
+```
+
+git에 commit → *팀 가시화*.
+
+### GitHub Issues + checklist
+
+```markdown
+## Cart implementation tests
+- [x] empty cart
+- [ ] single item
+- [ ] discount
+```
+
+GitHub UI에서 *체크 가능 + progress %*.
+
+### Specification by Example (Cucumber)
+
+각 시나리오를 *Gherkin*으로:
+
+```gherkin
+Scenario: Empty cart total
+  Given an empty cart
+  Then total is 0
+
+Scenario: Single item total
+  Given an empty cart
+  When I add an apple costing 100
+  Then total is 100
+```
+
+자동화 가능한 *living document*.
+
+### Test class 자체를 list로
+
+```python
+class TestShoppingCart:
+    def test_empty_cart_returns_zero(self): pass
+    def test_single_item(self): pass
+    def test_discount_applied(self): pass
+    def test_invalid_product_error(self): pass
+```
+
+*test method 이름*이 곧 *test list 항목*. pending 표시는 `@pytest.mark.skip`.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| IntelliJ / VS Code | TODO panel — comment 기반 |
+| GitHub Projects | Kanban 추적 |
+| Notion / Obsidian | rich note + checklist |
+| Markdown 파일 | git commit으로 가시화 |
+| pytest `--collect-only` | 정의된 test 목록 출력 |
+
+## 성능 고려
+
+추상적 패턴 — 코드 성능과 무관. *작업 효율*에 미치는 영향은 큼.
 
 ## 관련 패턴
 
 - [Pattern 4: Test First](/blog/programming/engineering/tdd-patterns/pattern04-test-first) — 목록에서 하나 골라 테스트 먼저
-- [Pattern 8: One Step Test](/blog/programming/engineering/tdd-patterns/pattern08-one-step-test) — 목록에서 다음 테스트 선택 기준
+- [Pattern 8: One Step Test](/blog/programming/engineering/tdd-patterns/pattern08-one-step-test) — 다음 테스트 선택 기준
 - [Pattern 9: Starter Test](/blog/programming/engineering/tdd-patterns/pattern09-starter-test) — 첫 번째 테스트 선택
+- [Pattern 12: Another Test](/blog/programming/engineering/tdd-patterns/pattern12-another-test) — 새 케이스 발견 시 추가
