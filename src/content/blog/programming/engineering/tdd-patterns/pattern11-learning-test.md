@@ -1,7 +1,7 @@
 ---
 title: "Pattern 11: Learning Test"
 date: 2026-07-01T11:00:00
-description: "외부 라이브러리·API 사용 전에 — 작은 test로 학습."
+description: "외부 라이브러리·API를 사용하기 전에 — 작은 테스트로 학습하고 안전망 확보."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 11
 tags: [tdd, beck, learning-test, library]
@@ -13,145 +13,187 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 낯선 라이브러리나 API를 사용하기 전에, 작은 테스트를 작성하여 내가 이해한 것이 맞는지 검증한다.
+> 낯선 라이브러리/API를 사용 전 *작은 테스트*로 학습. *내 이해가 맞는지* 검증 + *업그레이드 안내자* 부수효과.
 
 ## 동기 (Motivation)
 
-새로운 라이브러리를 프로젝트에 도입하려 한다. 문서를 읽었지만, 정말 내가 이해한 대로 동작할까?
+새 라이브러리 도입 시 — 문서를 읽었지만 *정말 이해한 대로* 동작할까?
 
-**Learning Test**는 이 질문에 답한다:
-- "이 API가 내 예상대로 동작하는가?"를 **테스트로 확인**
-- 문서가 부족하거나 오래된 경우 **실제 동작을 검증**
-- 라이브러리 **업그레이드 시 regression 탐지**
+Learning Test가 답:
 
-Learning Test는 프로덕션 코드가 아니라 **학습 도구**다. 하지만 그 부산물은 가치 있다.
+- *"이 API가 내 예상대로 동작?"*를 테스트로 확인.
+- 문서가 부실/오래된 경우 *실제 동작 검증*.
+- 라이브러리 *업그레이드 시 regression 탐지*.
 
-## Learning Test 예시
+Learning Test는 *production 검증*이 아니라 *학습 도구*. 그러나 부산물이 가치.
 
-### HTTP 클라이언트 학습
+### 신호
+
+- 새 라이브러리 사용 전 *예제 코드만 시도해봄*.
+- 라이브러리 *업그레이드 후 production에서 깨짐*.
+- 문서가 *부실/오래됨*.
+- 동료가 *같은 라이브러리에 같은 질문* 반복.
+
+### 언제 적용하는가
+
+| 상황 | Learning Test 필요성 |
+| --- | --- |
+| 처음 쓰는 라이브러리 | 높음 |
+| 문서 부실 라이브러리 | 매우 높음 |
+| 복잡한 API | 높음 |
+| 단순 utility | 낮음 |
+| 버전 업그레이드 예정 | 높음 |
+| Cross-platform 동작 | 높음 |
+
+## 절차 (Mechanics)
+
+1. *학습할 API* 식별.
+2. *예상 동작* 가정 형성 ("이렇게 호출하면 이걸 반환").
+3. **테스트 작성** — `assert library.foo() == expected`.
+4. 실행 → *내 예상*과 일치 여부 확인.
+5. 불일치면 *문서 재확인 + 가설 수정*.
+6. 통과하면 *test를 git에 commit* — 업그레이드 안내용.
+
+## 예시 1 — HTTP 클라이언트
 
 ```python
 # requests 라이브러리 학습
 def test_requests_get_returns_json():
-    """GET 요청이 JSON을 파싱하는지 확인"""
     response = requests.get("https://api.github.com")
-
     assert response.status_code == 200
     assert "current_user_url" in response.json()
 
-def test_requests_timeout():
-    """타임아웃이 예상대로 동작하는지 확인"""
+def test_requests_timeout_raises():
     with pytest.raises(requests.Timeout):
         requests.get("https://httpbin.org/delay/5", timeout=1)
 ```
 
-### 날짜 라이브러리 학습
+GitHub API/httpbin이 *실제 응답* — 내 코드가 *그것에 맞춰 작성* 됨을 확인.
+
+## 예시 2 — 날짜 라이브러리
 
 ```python
-# dateutil 학습
 def test_relativedelta_month_addition():
-    """월 더하기가 말일을 어떻게 처리하는지"""
+    """1월 31일 + 1개월?"""
     jan_31 = date(2024, 1, 31)
-
-    # 1월 31일 + 1개월 = 2월 몇 일?
     result = jan_31 + relativedelta(months=1)
-
-    assert result == date(2024, 2, 29)  # 2024년은 윤년
+    assert result == date(2024, 2, 29)   # 윤년 2월 마지막
 
 def test_relativedelta_preserves_day():
-    """평범한 경우 일자가 보존되는지"""
     jan_15 = date(2024, 1, 15)
-    result = jan_15 + relativedelta(months=1)
-
-    assert result == date(2024, 2, 15)
+    assert jan_15 + relativedelta(months=1) == date(2024, 2, 15)
 ```
 
-### ORM 학습
+월 더하기의 *edge case 동작*을 *내 코드에 의존하기 전*에 확인.
+
+## 예시 3 — ORM lazy loading
 
 ```python
-# SQLAlchemy 학습
 def test_sqlalchemy_lazy_loading():
-    """관계가 언제 로드되는지 확인"""
     session = Session()
     user = session.query(User).first()
-
-    # 아직 posts 쿼리 안 함
-    assert "posts" not in inspect(user).loaded
-
-    # posts 접근 시 쿼리 발생
-    _ = user.posts
-
-    assert "posts" in inspect(user).loaded
+    assert "posts" not in inspect(user).loaded   # 아직 안 로드
+    _ = user.posts                                # 접근하면
+    assert "posts" in inspect(user).loaded       # 로드 발생
 ```
 
-## Learning Test의 부산물
+ORM의 *동작 시점*을 명시 — N+1 query 같은 *함정* 방지.
 
-### 1. 사용 예제로 남는다
+## 자주 보는 안티패턴
 
-Learning Test는 "이 라이브러리를 이렇게 쓰면 된다"는 **실행 가능한 문서**가 된다.
+### 1. *Production test와 혼동*
+Learning test가 *production CI에 포함* → 외부 API down 시 *false failure*. *별도 marker* (`@pytest.mark.learning`)로 분리.
+
+### 2. *Network 의존 test 남발*
+모든 learning test가 *external API* → 느리고 flaky. *recorded response* (VCR, betamax).
+
+### 3. *영원히 삭제 안 함*
+초기 학습 끝나면 일부는 *제거 OK*. 가치 있는 것만 *문서 + regression*로 유지.
+
+### 4. *API rate limit 무시*
+GitHub/Twitter API 등 rate limit — 매 test마다 *호출 누적*. cache 또는 mock.
+
+### 5. *Mock으로 channel 우회*
+"외부 호출 mock" → learning이 안 됨. learning test는 *진짜* 호출.
+
+### 6. *학습 안 되는 test*
+의미 없는 assertion (`assert True`) — 학습 가설을 *명시*해야.
+
+## Modern variants
+
+### Recorded API responses
 
 ```python
-# 팀원이 requests 사용법을 물으면
-# "test_requests.py 봐" 라고 말할 수 있다
+# VCR.py
+@vcr.use_cassette("github_api.yaml")
+def test_github_api():
+    r = requests.get("https://api.github.com")
+    assert r.status_code == 200
 ```
 
-### 2. 업그레이드 안내자
+첫 호출 *녹화*, 이후 재생. *학습은 진짜 + 이후는 빠름*.
 
-라이브러리 버전을 올릴 때:
+### Contract testing
+
+Pact, Spring Cloud Contract — *consumer-driven contracts*. 학습 + 합의가 *코드 + 문서*.
+
+### Property-based exploratory
+
+```python
+@given(st.integers())
+def test_lib_property(n):
+    result = library.process(n)
+    assert isinstance(result, int)
+```
+
+수많은 입력으로 *동작 탐색*.
+
+### Codecov of library usage
 
 ```bash
-$ pip install requests==3.0
-$ pytest test_requests.py
-
-FAILED test_requests_timeout
-# 타임아웃 동작이 바뀌었구나!
+coverage report --include="*site-packages/library/*"
 ```
 
-Breaking change를 **테스트가 알려준다**.
+내 코드가 *라이브러리의 어느 부분*을 쓰는지 — 업그레이드 영향 평가.
 
-### 3. 문서 부족 보완
+### "Walking skeleton" + learning
 
-문서가 부실한 라이브러리일수록 Learning Test가 더 가치 있다:
+walking skeleton 단계에 learning test를 함께 — *실제 라이브러리 통합*까지 한 번에.
 
-```python
-# 문서에 없는 edge case 발견
-def test_undocumented_behavior():
-    """빈 리스트를 넘기면 어떻게 되지?"""
-    result = mysterious_lib.process([])
+### Bumping dependencies
 
-    # 문서에 없지만, 빈 딕셔너리를 반환하는구나
-    assert result == {}
-```
+dependabot 등이 PR 생성 → learning test가 *CI에서 자동 검증* → 안전 업그레이드.
 
-## 언제 Learning Test를 쓸까
+## 도구 / IDE
 
-| 상황 | Learning Test 필요성 |
-|------|---------------------|
-| 처음 쓰는 라이브러리 | 높음 |
-| 문서가 부실한 라이브러리 | 매우 높음 |
-| 복잡한 API | 높음 |
-| 단순한 유틸리티 | 낮음 |
-| 버전 업그레이드 예정 | 높음 |
+| 도구 | 기능 |
+| --- | --- |
+| VCR.py / vcr (Ruby) | HTTP 녹화/재생 |
+| betamax (Python) | HTTP fixture |
+| Polly.JS | JS HTTP 녹화 |
+| Pact | consumer-driven contract |
+| Hypothesis | exploratory property test |
+| pytest-recording | pytest용 VCR |
+
+## 성능 고려
+
+- *외부 호출*은 느리고 *불안정*. recording 권장.
+- *Learning test*는 *production CI*에서 분리 — 별도 schedule (nightly).
+- *Caching* 적극 활용.
 
 ## Learning Test vs 프로덕션 테스트
 
 | Learning Test | 프로덕션 테스트 |
-|--------------|----------------|
-| 외부 라이브러리 학습 | 내 코드 검증 |
-| 실험적, 탐색적 | 목적 지향적 |
-| 삭제해도 됨 | 유지보수 필수 |
-| 외부 API 호출 OK | 보통 mock 사용 |
-
-## 정리
-
-- 낯선 라이브러리를 **테스트로 학습**한다
-- 내 이해가 맞는지 **코드로 검증**
-- **사용 예제**와 **업그레이드 안내자**로 남는다
-- 문서가 부족할수록 **더 가치 있다**
-- 프로덕션 테스트와는 **목적이 다르다**
+| --- | --- |
+| 외부 lib 학습 | 내 코드 검증 |
+| 실험적·탐색적 | 목적 지향 |
+| 삭제해도 됨 | 유지 필수 |
+| 외부 API 호출 OK | 보통 mock |
+| flaky 허용 | flaky 금지 |
 
 ## 관련 패턴
 
 - [Pattern 1: Test](/blog/programming/engineering/tdd-patterns/pattern01-test) — 테스트의 기본
 - [Pattern 13: Regression Test](/blog/programming/engineering/tdd-patterns/pattern13-regression-test) — 회귀 방지
-- [Pattern 10: Explanation Test](/blog/programming/engineering/tdd-patterns/pattern10-explanation-test) — 학습과 설명의 연결
+- [Pattern 10: Explanation Test](/blog/programming/engineering/tdd-patterns/pattern10-explanation-test) — 학습과 설명
+- [Pattern 17: Mock Object](/blog/programming/engineering/tdd-patterns/pattern17-mock-object) — production에서 외부 의존 격리

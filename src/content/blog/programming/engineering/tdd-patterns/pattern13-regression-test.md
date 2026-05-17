@@ -1,7 +1,7 @@
 ---
 title: "Pattern 13: Regression Test"
 date: 2026-07-01T13:00:00
-description: "Bug 발견 시 — 그 bug를 잡는 test 먼저."
+description: "Bug 발견 시 — 그 bug를 잡는 test 먼저 작성, 영구적인 회귀 방지망."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 13
 tags: [tdd, beck, regression-test, bug]
@@ -13,130 +13,231 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 버그 리포트를 받으면 그 버그를 재현하는 테스트를 먼저 작성한다. 테스트가 실패하는 동안 버그를 수정한다.
+> 버그 리포트 받으면 *그 버그를 재현하는 테스트 먼저*. 테스트가 fail하는 동안 버그 수정 → 통과하면 *영구 안전망*.
 
 ## 동기 (Motivation)
 
-버그 리포트가 들어왔다: "할인 쿠폰이 적용 안 돼요."
+버그가 들어왔다: *"할인 쿠폰이 적용 안 돼요"*. 디버거 켜고 코드 뒤지고 싶은 유혹. TDD는 다른 순서:
 
-바로 디버거를 켜고 코드를 뒤지고 싶은 유혹이 있다. 하지만 TDD 방식은 다르다:
+1. *버그 재현 테스트* 작성.
+2. *fail 확인* (Red).
+3. 버그 *수정*.
+4. *통과 확인* (Green).
 
-1. **버그를 재현하는 테스트** 작성
-2. 테스트가 **실패하는지 확인** (Red)
-3. 버그 **수정**
-4. 테스트가 **통과하는지 확인** (Green)
+장점:
 
-이 순서의 장점:
-- 버그가 **정말 고쳐졌는지** 확실히 알 수 있다
-- 같은 버그가 **다시 발생하면 테스트가 잡는다**
-- 시스템에 대한 **이해가 갱신**된다
+- 버그가 *정말 고쳐졌는지* 확실.
+- 같은 버그 *재발 시 자동 탐지*.
+- 시스템 *이해 갱신*.
 
-## Regression Test 작성 예시
+### 신호
+
+- 같은 버그가 *반복 발생*.
+- 한 곳 fix → *다른 곳 깨짐*.
+- *디버깅에 많은 시간*.
+- 버그 원인이 *production에서 발견*.
+
+### 언제 적용하는가
+
+- *모든* 버그 fix. 예외 거의 없음.
+- *production 인시던트* 후.
+- 코드 리뷰에서 *bug 발견* 시.
+
+## 절차 (Mechanics)
+
+1. **버그 리포트 분석** — 입력·기대 출력·실제 출력.
+2. **재현 테스트 작성** — bug 번호/설명 포함 이름.
+3. **실행 → Red** 확인. red 안 보이면 *재현 부정확*.
+4. **production 수정**.
+5. **실행 → Green** 확인.
+6. **기타 케이스도 추가** (보통 같이 발견됨).
+7. **commit + bug tracker 링크**.
+
+## 예시 1 — 쿠폰 미적용 버그
 
 ### 버그 리포트
 
 > "할인 쿠폰 SAVE10을 적용했는데, 장바구니 총액이 그대로예요."
 
-### Step 1: 재현 테스트 작성
+### Step 1: 재현
 
 ```python
-def test_coupon_applies_discount():
-    """버그 #123: 할인 쿠폰이 적용되지 않음"""
+def test_bug_123_coupon_applies_discount():
+    """버그 #123: 할인 쿠폰이 장바구니에 적용되지 않음"""
     cart = Cart()
     cart.add(Item("A", 1000))
-
-    cart.apply_coupon("SAVE10")  # 10% 할인 쿠폰
-
-    assert cart.total() == 900  # 예상: 1000 * 0.9 = 900
+    cart.apply_coupon("SAVE10")   # 10% 할인
+    assert cart.total() == 900
 ```
 
-### Step 2: 테스트 실행 — 실패 확인
+### Step 2: Red
 
 ```text
-FAILED test_coupon_applies_discount
+FAILED test_bug_123_coupon_applies_discount
 AssertionError: 1000 != 900
 ```
 
-좋다. 버그가 재현된다.
+버그 *재현 확인*.
 
-### Step 3: 버그 수정
+### Step 3: Fix
 
 ```python
 def apply_coupon(self, code):
     coupon = self.coupon_service.get(code)
     if coupon:
-        self.discount = coupon.discount  # 이 줄이 빠져 있었다!
+        self.discount = coupon.discount   # ← 빠져 있었음
 ```
 
-### Step 4: 테스트 통과 확인
+### Step 4: Green
 
 ```text
-PASSED test_coupon_applies_discount
+PASSED test_bug_123_coupon_applies_discount
 ```
 
-버그가 고쳐졌고, 이 테스트는 **영구적인 회귀 방지망**이 된다.
+이제 *영구 안전망*. 같은 버그 *재발 시 즉시*.
 
-## 테스트를 못 쓰면?
-
-버그를 재현하는 테스트를 쓰기 어렵다면, 그 자체가 **신호**다:
-
-| 상황 | 의미 |
-|------|------|
-| 테스트하려면 많은 setup 필요 | 결합도가 높음 → 리팩터링 필요 |
-| 외부 의존성 때문에 재현 불가 | 의존성 주입 필요 |
-| 무엇이 버그인지 불명확 | 요구사항 명확화 필요 |
-
-테스트 불가 = 설계 개선 기회.
-
-## 회귀 테스트의 누적
-
-시간이 지나면 회귀 테스트가 쌓인다:
+## 예시 2 — Edge case 발견
 
 ```python
-def test_bug_101_null_user():
+# 처음 발견: null user
+def test_bug_101_null_user_crashes():
     """버그 #101: 사용자가 null일 때 크래시"""
-    ...
+    cart = Cart(user=None)
+    # crash 대신 graceful behavior
+    assert cart.total() == 0
 
+# 함께 발견: 음수 quantity
 def test_bug_102_negative_quantity():
     """버그 #102: 음수 수량 처리 오류"""
-    ...
-
-def test_bug_123_coupon_not_applied():
-    """버그 #123: 할인 쿠폰 미적용"""
-    ...
+    cart = Cart()
+    with pytest.raises(ValueError):
+        cart.add(Item("A", 1000, quantity=-1))
 ```
 
-이 테스트들이 **안전망**이 된다. 과거 버그가 다시 나타나면 즉시 잡힌다.
+한 버그 fix 중 *관련 케이스 추가 발견* — Test List에 적고 함께.
 
-## Regression Test 네이밍
-
-버그 번호나 설명을 포함하면 나중에 추적이 쉽다:
+## 예시 3 — Production 버그 분석
 
 ```python
-# 방법 1: 버그 번호
-def test_bug_123():
-    ...
+# Production log에서 stack trace
+# NullPointerException at Cart.apply_discount line 42
 
-# 방법 2: 설명적 이름
-def test_coupon_discount_applied_to_total():
-    ...
-
-# 방법 3: 둘 다
-def test_bug_123_coupon_not_applied():
-    """버그 #123: 할인 쿠폰이 장바구니에 적용되지 않음"""
-    ...
+def test_bug_201_discount_when_subtotal_zero():
+    """버그 #201: subtotal 0일 때 discount 계산 NPE"""
+    cart = Cart()   # 빈 cart
+    cart.apply_discount(0.10)
+    assert cart.total() == 0   # 0 * 0.9 = 0, 정상
 ```
 
-## 정리
+production log → *재현 시나리오*를 *테스트 코드로*. 영구 방지.
 
-- 버그 리포트 받으면 **재현 테스트 먼저**
-- 테스트가 **실패해야** 버그가 확인된 것
-- 수정 후 **테스트 통과**로 완료 확인
-- 테스트를 못 쓰면 **설계 개선 신호**
-- 회귀 테스트가 **누적되어 안전망** 형성
+## 자주 보는 안티패턴
+
+### 1. *테스트 없이 직접 fix*
+"빠르게 고치자" → fix는 했지만 *왜 발생했는지* 모름, 재발 가능.
+
+### 2. *Fail 안 확인하고 fix*
+Red 단계 생략 → 테스트가 *항상 통과*하면서 *fix와 무관* 가능.
+
+### 3. *너무 specific*
+```python
+def test_bug_123():
+    assert cart.total() == 900   # 1000 - 100 ?
+```
+의도 불명. *evident data*로.
+
+### 4. *Bug number만 이름*
+```python
+def test_bug_123(): ...
+```
+이름에서 *무엇인지* 안 보임. 설명 포함.
+
+### 5. *Production fix → test 생략*
+hotfix 후 *test 까먹음*. 절차에 *test 포함*.
+
+### 6. *너무 많은 mock*
+mock으로 *재현*했지만 *실제 production에선 다른 경로* → 새로운 인시던트. *실제 시나리오 우선*.
+
+## Modern variants
+
+### Issue tracker integration
+
+PR 메시지에 *issue link* → test가 *해당 issue resolve* 표시.
+
+```python
+def test_bug_GH123_xxx():
+    """https://github.com/org/repo/issues/123"""
+```
+
+### Bisect
+
+`git bisect`로 *어느 commit에서 발생*했는지 자동 탐색.
+
+```bash
+git bisect start
+git bisect bad HEAD
+git bisect good v1.0
+# Each step runs test → automatic locate
+git bisect run pytest test_bug_123
+```
+
+### Chaos engineering
+
+production-like *fault injection*으로 *알려지지 않은 버그* 발견.
+
+### Property-based regression
+
+```python
+@given(st.integers())
+def test_no_negative_total(n):
+    cart = Cart(); cart.add(Item("A", n))
+    assert cart.total() >= 0   # 발견된 invariant
+```
+
+한 버그 발견 후 *property* 추출 → 유사 케이스 자동 발견.
+
+### Snapshot/golden testing
+
+production output을 *baseline*에 저장 → 변경 시 *diff 검토*.
+
+### Differential testing
+
+두 implementation 비교 (old vs new, language A vs B) → behavior 차이 발견.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| pytest --lf | 마지막 실패 test만 재실행 |
+| git bisect | regression introduction commit 찾기 |
+| Sentry / Bugsnag | production error → test 재현 |
+| Hypothesis | property-based regression |
+| mutmut, pitest | mutation으로 test 품질 검증 |
+
+## 성능 고려
+
+regression test 누적 → *test suite 시간 증가*. 분리:
+
+- *Fast unit test* (매 push).
+- *Slow integration* (PR 또는 nightly).
+- *E2E* (deploy 전).
+
+## Regression test의 누적 가치
+
+```python
+# 시간이 지나며
+def test_bug_101_null_user(): ...
+def test_bug_102_negative_quantity(): ...
+def test_bug_123_coupon_not_applied(): ...
+def test_bug_201_npe_discount(): ...
+# ... 수백 개
+```
+
+각 테스트가 *과거 incident의 영구 기억*. *production 신뢰도* 누적.
 
 ## 관련 패턴
 
-- [Pattern 1: Test](/blog/programming/engineering/tdd-patterns/pattern01-test) — 테스트의 정의
+- [Pattern 1: Test](/blog/programming/engineering/tdd-patterns/pattern01-test) — 테스트 기본
 - [Pattern 4: Test First](/blog/programming/engineering/tdd-patterns/pattern04-test-first) — 테스트 먼저
 - [Pattern 2: Isolated Test](/blog/programming/engineering/tdd-patterns/pattern02-isolated-test) — 테스트 격리
+- [Pattern 32: All Tests](/blog/programming/engineering/tdd-patterns/pattern32-all-tests) — 전체 실행
