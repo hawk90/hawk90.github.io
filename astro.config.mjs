@@ -10,6 +10,7 @@ import remarkCallouts from './src/lib/remark-callouts.mjs';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeImageLazy from './src/lib/rehype-image-lazy.mjs';
 
 // ─── OAuth Support (Optional) ───────────────────────────────
 // To enable GitHub OAuth login (instead of PAT only):
@@ -57,6 +58,7 @@ export default defineConfig({
         },
       ],
       rehypeKatex,
+      rehypeImageLazy,
     ],
   },
 

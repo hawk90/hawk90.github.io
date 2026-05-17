@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* ─── Self-hosted code font (JetBrains Mono variable) ────── */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: italic;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/fonts/JetBrainsMono-Italic-Variable.woff2') format('woff2-variations');
+}
+
 /* ─── Design Tokens ───────────────────────────────────────── */
 :root {
   /* Colors — Dark mode (default) — Elegant Purple */
