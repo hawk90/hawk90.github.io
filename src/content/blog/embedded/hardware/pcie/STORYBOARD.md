@@ -337,6 +337,23 @@ draft: true
 - ✦ ACS (Access Control Services) — same-group cross-DMA 차단
 - ✦ Reset modes — FLR, secondary bus reset, hot reset
 
+**Userspace driver — DPDK/SPDK가 VFIO를 쓰는 방식** *(흡수 절)*
+- ✦ **DPDK** — Poll Mode Driver (PMD)가 NIC를 userspace에서 직접 소유, kernel network stack 우회
+  - VFIO container/group에 NIC 바인딩 → `igb_uio`/`vfio-pci` driver
+  - hugepage(2MB/1GB) + IOMMU 매핑으로 zero-copy DMA
+  - Telco vRAN/UPF, Open vSwitch-DPDK, SmartNIC firmware 핵심
+- ✦ **SPDK** — 같은 패턴을 NVMe controller에 적용
+  - VFIO로 NVMe SSD를 userspace 점유, PMD가 SQ/CQ doorbell 직접
+  - NVMe AFA(Lightbits·Pavilion·NetApp) target 기반
+  - vhost-user-blk로 KVM guest에 export
+- ✦ **공통 조건**
+  - IOMMU 활성 필수 (Intel VT-d / AMD-Vi / ARM SMMU)
+  - ACS로 같은 group 디바이스 분리 (안 되면 group 전체를 userspace 점유)
+  - hugepage 사전 예약
+  - dedicated CPU core (lcore 모델)
+- ✦ **VFIO와의 관계 정리**: VFIO는 *인프라*, DPDK/SPDK는 *그 위의 응용*. VFIO + IOMMU group + hugepage가 두 stack 공통 토대.
+- ◦ vfio-user (out-of-process) — SPDK가 활발히 활용
+
 **다이어그램** (5)
 1. SR-IOV PF/VF 트리 + VF BAR stride 매핑
 2. SR-IOV Extended Capability 레지스터 layout (offset by offset)

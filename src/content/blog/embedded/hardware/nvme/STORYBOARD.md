@@ -288,17 +288,27 @@ draft: true
 - ✦ blk-mq dispatch
 - ✦ Queue depth, plug/unplug
 - ✦ io_uring zero-copy path
+- ✦ **uring_cmd passthrough** — kernel block layer를 *우회*해 NVMe SQE 직접 전달
+- ✦ **SPDK kernel bypass 비교** *(흡수 절)*
+  - VFIO + UIO로 NVMe controller를 userspace가 직접 점유
+  - kernel NVMe driver·blk-mq 완전 우회, Poll Mode Driver가 doorbell 직접
+  - hugepage(2MB/1GB) + IOMMU 매핑 — page lookup 비용 회피
+  - 성능 영역: SPDK ~4-6M IOPS / kernel io_uring ~500K-1M / uring_cmd ~1-2M
+  - Trade-off: SPDK = dedicated CPU + 단일 점유 + kernel feature 못 씀
+  - 적합: AFA 어플라이언스(Lightbits·Pavilion·NetApp) → SPDK. 일반 서버 → io_uring/uring_cmd
 - ◦ AIO (libaio) vs io_uring 비교
 - ◦ Splice / sendfile path
+- ◦ vhost-user-blk — SPDK target을 KVM guest에 export
 
-**다이어그램** (4)
+**다이어그램** (5)
 1. read() 시스콜 → NVMe SQE 전체 흐름
 2. blk-mq plugging
 3. io_uring submission queue
 4. Direct I/O DMA mapping
+5. **kernel path vs SPDK bypass 비교** — VFS/blk-mq/nvme vs VFIO/PMD/hugepage
 
-**코드**: `block/blk-mq.c::blk_mq_submit_bio`, NVMe queue_rq
-**레퍼런스**: kernel.org block layer docs, io_uring man pages
+**코드**: `block/blk-mq.c::blk_mq_submit_bio`, NVMe queue_rq, SPDK `nvme_pcie` PMD 진입점
+**레퍼런스**: kernel.org block layer docs, io_uring man pages, SPDK NVMe driver doc (spdk.io)
 
 ---
 
@@ -352,10 +362,15 @@ draft: true
 
 - ✦ Random 4K vs Sequential 128K vs 1M
 - ✦ Queue Depth(QD) 효과 — 1 / 32 / 128 / 256
-- ✦ fio 워크로드 작성 — libaio vs io_uring
+- ✦ fio 워크로드 작성 — libaio vs io_uring vs io_uring+uring_cmd vs SPDK
+- ✦ **fio engine 비교** — `--ioengine=sync/libaio/io_uring/io_uring_cmd/spdk` 측정 결과 표
 - ✦ APST(Autonomous Power State Transition) tradeoff (latency↑ vs power↓)
 - ✦ IRQ affinity, numactl
 - ✦ NVMe over Fabrics 성능 (TCP/RDMA) — 간단히
+- ✦ **SPDK NVMe-oF target 측정** *(흡수 절)* — Lightbits·Pavilion·NetApp AFA가 쓰는 stack
+  - SPDK target vs kernel nvmet (TCP/RDMA) throughput·latency 비교
+  - dedicated core 수에 따른 선형 scale (lcore 모델)
+  - vhost-user-blk를 통한 QEMU guest 성능
 - ◦ ZNS Append throughput
 - ◦ CMB-backed SQ effect
 
