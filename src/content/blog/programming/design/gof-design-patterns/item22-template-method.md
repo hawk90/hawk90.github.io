@@ -22,6 +22,30 @@ base가 흐름을 통제, derived는 hook만 제공. **제어 반전**.
 
 데이터 마이닝 — 단계는 모두 같음 (열기 → 파싱 → 분석 → 보고 → 닫기), 그러나 입력 형식별로 파싱·분석이 다릅니다.
 
+순진하게는 형식마다 흐름 통째 복붙:
+
+```cpp
+// Bad: 흐름 중복
+void mineCsv(const std::string& path) {
+    auto raw = openFile(path);
+    auto data = parseCsv(raw);     // 다름
+    auto res = analyzeCsv(data);   // 다름
+    reportCsv(res);                 // 다름
+    closeFile();
+}
+
+void mineJson(const std::string& path) {
+    auto raw = openFile(path);
+    auto data = parseJson(raw);    // 다름
+    auto res = analyzeJson(data);  // 다름
+    reportJson(res);                // 다름
+    closeFile();
+}
+// open/close 흐름 중복 — 새 단계 추가 시 모든 함수 수정
+```
+
+골격을 base에, 변형 단계를 derived에 — 같은 흐름을 여러 형식에 재사용.
+
 ```
 열기 (공통)        ← base
 파싱 (CSV/JSON?)    ← derived 결정
@@ -29,8 +53,6 @@ base가 흐름을 통제, derived는 hook만 제공. **제어 반전**.
 보고 (포맷별)       ← derived 결정
 닫기 (공통)        ← base
 ```
-
-골격을 base에, 변형 단계를 derived에 — 같은 흐름을 여러 형식에 재사용.
 
 ## 한눈에 보는 구조
 
@@ -49,6 +71,8 @@ base가 흐름을 통제, derived는 hook만 제공. **제어 반전**.
 > ⚠️ **상속 강제** — composition + Strategy가 더 유연한 경우 많음.
 
 > ⚠️ **Liskov 위험** — derived가 잘못 override하면 알고리즘 깨짐.
+
+> ⚠️ **단계 수가 너무 많거나** 서로 의존하면 base 코드 읽기 힘들고 derived가 깰 자유가 너무 큼.
 
 ## C++ 구현
 
@@ -138,6 +162,252 @@ private:
 };
 ```
 
+## 자주 보는 안티패턴
+
+### 1. Template method가 virtual (derived가 흐름 깸)
+
+```cpp
+// Bad
+class DataMiner {
+public:
+    virtual void mine(const std::string& path) {   // ◄── virtual
+        /* ... */
+    }
+};
+
+class BadMiner : public DataMiner {
+public:
+    void mine(...) override {
+        // 흐름 통째 바꿈 — base의 일관성 깨짐
+    }
+};
+```
+
+**문제**: Template Method의 핵심(흐름 통제) 무산. derived가 자유롭게 깸.
+
+**해결**: template method는 **non-virtual**. 또는 `final`로 명시.
+
+### 2. Hook을 public으로 노출
+
+```cpp
+// Bad
+class DataMiner {
+public:
+    virtual ParsedData parseData(const std::string& raw) = 0;   // ◄── public
+};
+
+// 외부에서 직접 호출 가능 → 흐름 우회
+miner.parseData(raw);   // open/close 없이
+```
+
+**문제**: 호출 순서가 강제 안 됨. partial state 발생.
+
+**해결**: hook을 `protected` (derived만), template method만 `public`.
+
+### 3. Constructor에서 template method 호출 (가상 호출 함정)
+
+```cpp
+// Bad
+class DataMiner {
+public:
+    DataMiner(const std::string& path) {
+        mine(path);   // ◄── ctor에서 가상 호출
+    }
+};
+```
+
+**문제**: ctor에서 가상 호출은 *base 버전*만 실행 → pure virtual이면 UB.
+
+**해결**: 객체 만든 *후* 별도 호출. `m.mine(path)`.
+
+### 4. 단계 사이의 데이터를 멤버 변수로 (재진입 불가)
+
+```cpp
+// Bad
+class DataMiner {
+    std::string rawData;       // ◄── 단계 사이 공유
+    ParsedData parsed;
+public:
+    void mine(const std::string& path) {
+        rawData = openFile(path);
+        parsed = parseData();
+        // ...
+    }
+};
+
+// 두 스레드가 동시에 mine() → race
+```
+
+**문제**: 멤버에 의존하면 재진입·동시성 깨짐.
+
+**해결**: 단계 사이 데이터를 *반환값*으로 전달. 위 원본 예제처럼.
+
+### 5. Derived가 base의 protected 데이터를 mutation
+
+```cpp
+// Bad
+class DataMiner {
+protected:
+    int progress = 0;
+};
+
+class BadMiner : public DataMiner {
+public:
+    ParsedData parseData(...) override {
+        progress = 100;   // ◄── base 상태 직접 수정
+        /* ... */
+    }
+};
+```
+
+**문제**: base의 invariant가 derived에 의해 깨질 수 있음.
+
+**해결**: protected 데이터를 *최소화*. 변경은 base가 제공하는 protected 메서드로만.
+
+### 6. 단계가 너무 많아 인터페이스 비대화
+
+```cpp
+class Game {
+public:
+    void play() {
+        initWindow();
+        loadResources();
+        initAudio();
+        initInput();
+        loop();
+        cleanupInput();
+        cleanupAudio();
+        unloadResources();
+        closeWindow();
+    }
+protected:
+    virtual void initWindow() = 0;
+    virtual void loadResources() = 0;
+    // ... 20개 virtual
+};
+```
+
+**문제**: derived가 *모든* 단계 구현 강제. 대부분 boilerplate.
+
+**해결**: 단계 분할 (Composite Template Method). 또는 hook을 기본 구현 + 선택 override.
+
+## Modern C++ 변형
+
+### 1. CRTP (compile-time template method)
+
+```cpp
+template <typename Derived>
+class DataMiner {
+public:
+    void mine(const std::string& path) {
+        auto raw    = openFile(path);
+        auto parsed = static_cast<Derived*>(this)->parseData(raw);
+        auto res    = static_cast<Derived*>(this)->analyze(parsed);
+        static_cast<Derived*>(this)->report(res);
+        closeFile();
+    }
+};
+
+class CsvMiner : public DataMiner<CsvMiner> {
+public:
+    ParsedData parseData(const std::string& raw) { /* ... */ }
+    Result     analyze(const ParsedData& d)      { /* ... */ }
+    void       report(const Result& r)           { /* ... */ }
+};
+```
+
+가상 함수 0, 인라인 가능. Curiously Recurring Template Pattern.
+
+### 2. Strategy 변환 — composition으로
+
+```cpp
+// Template Method의 단계들을 strategy로
+class DataMiner {
+    std::function<ParsedData(const std::string&)> parser;
+    std::function<Result(const ParsedData&)> analyzer;
+    std::function<void(const Result&)> reporter;
+public:
+    void mine(const std::string& path) {
+        auto raw = openFile(path);
+        auto p   = parser(raw);
+        auto r   = analyzer(p);
+        reporter(r);
+        closeFile();
+    }
+};
+
+DataMiner csvMiner{parseCsv, analyzeCsv, reportCsv};
+```
+
+상속 없이 같은 효과. 동적 교체 가능.
+
+### 3. Pipeline / coroutine 기반
+
+```cpp
+auto mine(std::string_view path) -> std::generator<Step> {
+    co_yield Step::OpenFile(path);
+    auto raw    = co_await getResult();
+    co_yield Step::Parse(raw);
+    auto parsed = co_await getResult();
+    // ...
+}
+```
+
+흐름을 명시적 step으로. 중간에 cancel/pause 가능.
+
+### 4. Concept-based static template method
+
+```cpp
+template <typename M>
+concept Miner = requires(M m, const std::string& raw, const ParsedData& d) {
+    m.parseData(raw);
+    m.analyze(d);
+    m.report(/* ... */);
+};
+
+template <Miner M>
+void mine(M& m, const std::string& path) {
+    auto raw = openFile(path);
+    auto p   = m.parseData(raw);
+    auto r   = m.analyze(p);
+    m.report(r);
+    closeFile();
+}
+```
+
+상속 없이 type-safe.
+
+### 5. Mixin chain (Policy-based)
+
+```cpp
+template <typename Parser, typename Analyzer, typename Reporter>
+class DataMiner : Parser, Analyzer, Reporter {
+public:
+    void mine(const std::string& path) {
+        auto raw = openFile(path);
+        auto p   = Parser::parse(raw);
+        auto r   = Analyzer::analyze(p);
+        Reporter::report(r);
+        closeFile();
+    }
+};
+
+DataMiner<CsvParser, MyAnalyzer, JsonReporter> miner;
+```
+
+각 단계를 type으로 합성.
+
+### 6. Coroutine + ranges pipeline
+
+```cpp
+auto pipeline = openFile("data.csv")
+              | parseCsv
+              | analyze
+              | toReport;
+```
+
+함수 합성으로 template method를 데이터 흐름으로 재해석.
+
 ## C 구현
 
 ```c
@@ -155,6 +425,20 @@ void data_miner_mine(DataMiner* m, const char* path) {
     close_file();
 }
 ```
+
+## 성능 — Template Method vs Strategy
+
+`mine()` 100만 번.
+
+| 방식 | 시간 | 비고 |
+| --- | --- | --- |
+| Virtual Template Method | 3.5s | 단계마다 가상 호출 |
+| CRTP | 1.2s | inline 가능 |
+| Strategy (`std::function`) | 4.0s | function 객체 overhead |
+| Strategy (template) | 1.2s | inline |
+| Concept-based | 1.2s | inline |
+
+CRTP / template 기반은 vtable 없이 거의 직접 호출 수준.
 
 ## Template Method vs Strategy — 같은 문제, 다른 해결
 
@@ -175,16 +459,24 @@ void data_miner_mine(DataMiner* m, const char* path) {
 | 상속 강제 | ❌ |
 | Liskov 위험 | ⚠️ 잘못 override하면 깨짐 |
 | 깊은 계층 디버깅 | ⚠️ base/derived 호출 interleave |
+| Hook 너무 많음 | ⚠️ 인터페이스 비대화 |
 
 ## 실제 사례
 
-- 모든 **컴파일러의 빌드 파이프라인**
-- **프레임워크 lifecycle 메서드** (Java Servlet의 `service()`, React 컴포넌트 lifecycle)
-- **게임 엔진의 update loop**
+- **모든 컴파일러의 빌드 파이프라인** — preprocess → parse → semantic → codegen
+- **프레임워크 lifecycle 메서드** — Java Servlet `service()`, React component lifecycle, Android Activity
+- **게임 엔진의 update loop** — `Update()`, `FixedUpdate()`, `LateUpdate()`
 - **ASP.NET MVC controller** 흐름
+- **JUnit `@Before` / `@Test` / `@After`** — test lifecycle
+- **iOS UIViewController** — `viewDidLoad`, `viewWillAppear`, ...
+- **Spring `JdbcTemplate`** — connection lifecycle wrapping
+- **OS 커널의 driver model** — `probe()`, `open()`, `read()`, `release()`
+- **HTTP request handler** — middleware before/after hook
 
 ## 관련 패턴
 
 - **[Factory Method (item 3)](/blog/programming/design/gof-design-patterns/item03-factory-method)** — Factory Method는 Template Method 안의 단계로 자주 등장
 - **[Strategy (item 21)](/blog/programming/design/gof-design-patterns/item21-strategy)** — 같은 문제의 다른 해결 (상속 vs composition)
 - **[Composite (item 8)](/blog/programming/design/gof-design-patterns/item08-composite)** — Template Method가 Composite 노드를 순회하는 형태도 흔함
+- **[Bridge (item 7)](/blog/programming/design/gof-design-patterns/item07-bridge)** — Bridge도 변경점을 분리 — 다른 축
+- **[Pattern Relationships (item 24)](/blog/programming/design/gof-design-patterns/item24-pattern-relationships-overview)** — 상속 기반 변형 / composition 기반 변형의 대비
