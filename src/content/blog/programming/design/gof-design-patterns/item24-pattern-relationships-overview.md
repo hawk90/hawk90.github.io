@@ -5,7 +5,7 @@ description: "GoF 23 패턴의 관계 다이어그램과 각 패턴의 한눈 at
 tags: [Design Pattern, GoF, Overview, Atlas]
 series: "GoF Design Patterns"
 seriesOrder: 24
-draft: true
+draft: false
 ---
 
 ## 왜 마지막 글에 관계도가 필요한가
@@ -383,9 +383,9 @@ bash scripts/build-diagrams.sh public/images/blog/gof/relationships.tex
 23 패턴은 *해야 할 일을 알고 있는 개발자*가 *읽고 쓰는 어휘*입니다. 외우는 게 목적이 아니라 *대화의 단위*로 갖는 것. "이 자리에 Strategy가 어울려" "이건 Mediator로 풀면 깔끔해" — 이런 대화가 가능해지면 GoF의 첫 페이지에서 마지막 페이지로 건너온 셈입니다.
 
 다음 시리즈 추천:
-- [Refactoring](/blog/programming/design/refactoring) — 패턴을 *추출*하는 절차
-- [Clean Architecture](/blog/programming/design/clean-architecture) — 시스템 단위에서의 패턴
-- [Cpp Software Design](/blog/programming/cpp/cpp-software-design) — Modern C++에서의 패턴
+- [Refactoring](/blog/programming/design/refactoring/ch01) — 패턴을 *추출*하는 절차
+- [Clean Architecture](/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture) — 시스템 단위에서의 패턴
+- [Cpp Software Design](/blog/programming/cpp/cpp-software-design/guideline01-understand-the-importance-of-software-design) — Modern C++에서의 패턴
 
 ## 관련 항목
 

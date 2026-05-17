@@ -5,7 +5,7 @@ description: "유일한 인스턴스 보장 — 그러나 사용 시 신중히. 
 tags: [Design Pattern, GoF, C++, C, Creational]
 series: "GoF Design Patterns"
 seriesOrder: 5
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

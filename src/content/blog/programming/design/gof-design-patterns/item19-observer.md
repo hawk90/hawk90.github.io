@@ -5,7 +5,7 @@ description: "객체 상태 변경을 관찰자들에게 자동 통보 — pub/s
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 19
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

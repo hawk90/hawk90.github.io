@@ -5,7 +5,7 @@ description: "알고리즘 골격은 base, 단계 구현은 derived — Hollywoo
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 22
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
