@@ -22,6 +22,19 @@ Pizza p(true, false, true, false, "thin", "tomato", 12, false);
 //      ^ 각 인자가 무슨 뜻??
 ```
 
+`bool` 4개가 나란히 있으면 **호출자가 매번 헤더를 봐야** 합니다. 컴파일러는 순서를 안 챙겨주고, 한 번 잘못 넘기면 silent bug.
+
+대안으로 *오버로드* 또는 *기본값* 늘리기도 한계가 있습니다.
+
+```cpp
+// Bad: 텔레스코핑 생성자
+Pizza(string dough);
+Pizza(string dough, string sauce);
+Pizza(string dough, string sauce, vector<string> toppings);
+Pizza(string dough, string sauce, vector<string> toppings, bool glutenFree);
+// ... 8개 인자 모든 조합?
+```
+
 Builder는 단계별 메서드로 같은 일을 명확하게 합니다.
 
 ```cpp
@@ -32,7 +45,7 @@ auto p = PizzaBuilder()
             .build();
 ```
 
-같은 객체지만 **읽힙니다**.
+같은 객체지만 **읽힙니다**. 각 setter가 의도를 이름에 담고, 누락된 단계가 있다면 `build()`에서 검증 가능.
 
 ## 한눈에 보는 구조
 
@@ -60,6 +73,8 @@ Director는 "어떤 순서로 부품을 조립할까", Builder는 "각 부품을
 > ⚠️ **단순한 객체엔 과도** — 인자 1~2개면 그냥 생성자.
 
 > ⚠️ **C++20 designated initializers**가 더 깔끔할 때도 있음 (집합체 초기화).
+
+> ⚠️ **객체가 자주 바뀌어야 하면** Builder는 *불변* 생성에 어울리고, mutable 객체에는 그냥 setter가 충분.
 
 ## C++ 구현 — fluent 스타일
 
@@ -152,6 +167,228 @@ Pizza p = b.getResult();
 
 같은 Director에 다른 Builder를 끼우면 **같은 순서로 다른 피자**.
 
+## 자주 보는 안티패턴
+
+### 1. Builder가 mutable Product 반환 (불변성 깨짐)
+
+```cpp
+// Bad
+class HttpRequestBuilder {
+    HttpRequest req;
+public:
+    HttpRequest& build() { return req; }   // ◄── 참조 반환
+};
+
+auto& r = builder.build();
+r.url = "evil.com";   // ◄── 외부에서 수정
+builder.build();       // ◄── 두 번째 호출은 어떻게?
+```
+
+**문제**: Builder의 핵심 가치(완성된 객체 보장) 무산. 그리고 build 후 builder 재사용이 모호.
+
+**해결**: `build()`가 값(또는 `unique_ptr`) 반환, 객체는 불변.
+
+### 2. `build()` 후 builder 재사용
+
+```cpp
+PizzaBuilder b;
+auto p1 = b.setDough("thin").build();
+auto p2 = b.setDough("thick").build();   // ◄── b의 상태는?
+```
+
+**문제**: `build()`에서 `std::move(pizza)` 했으면 `b`는 moved-from. 다시 쓰면 부분 상태.
+
+**해결**: build를 호출하면 builder 무효화 (또는 reset). 명시적으로 한 번만 사용.
+
+### 3. 필수 단계 검증 없음
+
+```cpp
+// Bad
+PizzaBuilder b;
+auto p = b.build();   // ◄── dough 없는 피자, 컴파일 OK
+p.cook();              // 런타임 폭발
+```
+
+**문제**: 필수 부품이 빠졌는데 컴파일 통과.
+
+**해결**: `build()`에서 검증 + 예외, 또는 type-state pattern (아래 변형).
+
+### 4. Builder에 너무 많은 책임 (god builder)
+
+```cpp
+class SuperBuilder {
+    // 1000줄, 50개 setter, 10개 build*()
+};
+```
+
+**문제**: Builder가 Product보다 큼. 각 setter끼리 숨겨진 dependency.
+
+**해결**: Builder 분할 (각 sub-builder가 한 영역). Director가 sub-builder 조립.
+
+### 5. setter끼리의 순서 의존 (순서 깨면 broken)
+
+```cpp
+// Bad
+b.setSauce("tomato");
+b.setDough("thin");     // ◄── setDough가 setSauce를 reset
+b.build();   // ◄── sauce 사라짐
+```
+
+**문제**: setter가 다른 setter의 상태를 무효화.
+
+**해결**: setter는 독립적이어야 함. 순서 의존이 진짜 필요하면 Director로 강제.
+
+### 6. fluent + 상속 (`return *this` 함정)
+
+```cpp
+class Base {
+public:
+    Base& setX() { /* ... */ return *this; }
+};
+class Derived : public Base {
+public:
+    Derived& setY() { /* ... */ return *this; }
+};
+
+Derived().setX().setY();   // ◄── setX 후 타입이 Base& — setY 호출 불가
+```
+
+**문제**: 부모의 fluent 메서드가 자식 타입을 잃음.
+
+**해결**: CRTP로 자기 타입 보존.
+
+```cpp
+template <typename T>
+class BuilderBase {
+public:
+    T& setX() { /* ... */ return static_cast<T&>(*this); }
+};
+class Derived : public BuilderBase<Derived> { /* ... */ };
+```
+
+## Modern C++ 변형
+
+### 1. Type-state builder (필수 단계 컴파일 타임 강제)
+
+각 단계가 다른 타입을 반환하면 **빠진 단계가 컴파일 에러**.
+
+```cpp
+struct NoDough {};
+struct DoughSet  { std::string dough; };
+struct SauceSet  { std::string dough, sauce; };
+
+class PizzaBuilder {
+public:
+    static auto start() { return PizzaBuilder<NoDough>{}; }
+};
+
+template <typename State>
+class TypedBuilder;
+
+template <>
+class TypedBuilder<NoDough> {
+public:
+    TypedBuilder<DoughSet> setDough(std::string d) {
+        return {DoughSet{std::move(d)}};
+    }
+};
+
+template <>
+class TypedBuilder<DoughSet> {
+    DoughSet state;
+public:
+    TypedBuilder<SauceSet> setSauce(std::string s) {
+        return {{std::move(state.dough), std::move(s)}};
+    }
+};
+
+template <>
+class TypedBuilder<SauceSet> {
+    SauceSet state;
+public:
+    Pizza build() { return Pizza{std::move(state.dough), std::move(state.sauce)}; }
+};
+```
+
+`setDough` 빼먹고 `build` 호출하면 컴파일 에러.
+
+### 2. Designated initializers (C++20)
+
+단순 집합체엔 굳이 builder 안 만들고:
+
+```cpp
+auto p = Pizza{
+    .dough    = "thin",
+    .sauce    = "tomato",
+    .toppings = {"cheese"}
+};
+```
+
+순서는 *선언 순서대로*. 누락 가능, 기본값 사용. 그러나 검증 없음.
+
+### 3. Named arguments emulation (struct of options)
+
+```cpp
+struct PizzaOptions {
+    std::string dough = "regular";
+    std::string sauce = "tomato";
+    std::vector<std::string> toppings = {};
+    bool glutenFree = false;
+};
+
+Pizza make(PizzaOptions opts);
+
+// 사용
+auto p = make({.dough = "thin", .toppings = {"cheese"}});
+```
+
+Builder의 가독성 + 단순한 구현. C++20 designated init과 결합하면 매우 깔끔.
+
+### 4. Parameter object + chained validation
+
+```cpp
+class PizzaBuilder {
+    Pizza pizza;
+    std::vector<std::string> errors;
+public:
+    auto& setDough(std::string d) {
+        if (d.empty()) errors.push_back("dough empty");
+        else pizza.dough = std::move(d);
+        return *this;
+    }
+    std::expected<Pizza, std::vector<std::string>> build() {
+        if (!errors.empty()) return std::unexpected(errors);
+        return std::move(pizza);
+    }
+};
+```
+
+C++23 `std::expected`로 오류를 값으로.
+
+### 5. Coroutine builder (DSL)
+
+```cpp
+auto build_pizza() -> std::generator<Pizza> {
+    Pizza p;
+    p.dough = "thin"; co_yield p;
+    p.sauce = "tomato"; co_yield p;
+    p.toppings.push_back("cheese"); co_yield p;
+}
+```
+
+각 단계를 generator로 — DSL-like API.
+
+### 6. Template metaprogramming Builder
+
+```cpp
+template <typename... Setters>
+class Builder {
+    // 컴파일 타임에 setter 조합 검증
+};
+```
+
+복잡하지만 진짜 타입 안전한 DSL 가능. Boost.Hana 스타일.
+
 ## C 구현
 
 ```c
@@ -185,6 +422,21 @@ pb_add_topping(&b, "cheese");
 Pizza p = pb_build(&b);
 ```
 
+## 성능 — Builder의 오버헤드
+
+`Pizza` 생성 1000만 번.
+
+| 방식 | 시간 | 비고 |
+| --- | --- | --- |
+| 직접 생성자 | 50ms | baseline |
+| Fluent builder + move | 52ms | 거의 같음 (`*this` 반환은 인라인) |
+| Director + virtual Builder | 80ms | 가상 호출 비용 |
+| Designated initializer | 50ms | 컴파일러가 직접 init |
+| Type-state builder | 50ms | 컴파일 타임에 다 사라짐 |
+| `std::function` 콜백 builder | 120ms | 함수 객체 오버헤드 |
+
+Modern fluent + move는 사실상 무료. Director 형태가 가장 비싼 편.
+
 ## 트레이드오프 — 한눈에
 
 | 차원 | Builder |
@@ -195,43 +447,23 @@ Pizza p = pb_build(&b);
 | 같은 과정 → 다른 결과 | ✅ Director 분리로 |
 | 단순 객체에 적용 | ❌ 과도 (보일러플레이트) |
 | 단계 강제 (필수 단계 누락 컴파일 에러) | ⚠️ type-state 패턴으로만 가능 |
-
-## 모던 C++ 변형
-
-### type-safe builder
-
-각 단계가 다른 타입을 반환하면 **빠진 단계가 컴파일 에러**.
-
-```cpp
-class PizzaBuilder_NoDough { /* setDough만 가능 */ };
-class PizzaBuilder_NoSauce { /* setSauce, addTopping만 */ };
-// ...
-```
-
-복잡하지만 강력한 타입 안전.
-
-### designated initializers (C++20)
-
-단순 집합체엔 굳이 builder 안 만들고:
-
-```cpp
-auto p = Pizza{
-    .dough    = "thin",
-    .sauce    = "tomato",
-    .toppings = {"cheese"}
-};
-```
+| Builder 자체의 mutable 상태 | ⚠️ 재사용·쓰레드 안전 주의 |
 
 ## 실제 사례
 
-- `std::stringstream` (`<<` 체인으로 문자열 조립)
-- LLVM의 `IRBuilder`
-- Java `StringBuilder`, `Stream.Builder`
-- Protocol Buffers의 `Foo.newBuilder()`
-- SwiftUI / Flutter의 declarative UI builder
+- **`std::stringstream`** — `<<` 체인으로 문자열 조립
+- **LLVM의 `IRBuilder`** — IR instruction 단계별 조립
+- **Java `StringBuilder`, `Stream.Builder`**
+- **Protocol Buffers**의 `Foo.newBuilder()`
+- **SwiftUI / Flutter**의 declarative UI builder
+- **Lombok `@Builder`** — Java fluent builder 자동 생성
+- **Rust `std::process::Command`** — fluent 프로세스 spawn
+- **SQL query builder** — Knex.js, SQLAlchemy
+- **HTTP client builder** — `HttpRequest.Builder` (Java 11+), reqwest (Rust)
 
 ## 관련 패턴
 
 - **[Abstract Factory (item 1)](/blog/programming/design/gof-design-patterns/item01-abstract-factory)** — Abstract Factory는 객체 군을 즉시 반환 / Builder는 단일 복잡 객체를 단계적으로 조립
 - **[Composite (item 8)](/blog/programming/design/gof-design-patterns/item08-composite)** — Builder가 만드는 결과가 종종 Composite 트리 구조
 - **[Prototype (item 4)](/blog/programming/design/gof-design-patterns/item04-prototype)** — 조립 비용이 크면 Builder 결과를 prototype으로 두고 clone
+- **[Pattern Relationships (item 24)](/blog/programming/design/gof-design-patterns/item24-pattern-relationships-overview)** — 생성 패턴 5종 중 "복잡한 단일 객체" 담당
