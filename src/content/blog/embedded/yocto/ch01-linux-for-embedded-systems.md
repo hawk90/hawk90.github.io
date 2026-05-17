@@ -1,17 +1,14 @@
 ---
-title: "Ch 1: Linux for Embedded Systems"
+title: "Ch 1: 임베디드 Linux와 Yocto의 위치"
 date: 2026-05-15T01:00:00
-description: "임베디드 시스템에서 Linux를 쓴다는 것의 의미 — 왜 Yocto가 필요한가에 대한 배경."
-series: "Embedded Linux Systems with the Yocto Project"
+description: "임베디드 시스템에서 Linux를 쓴다는 것의 의미와 빌드 시스템 Yocto의 자리 — 공식 Mega-Manual + scarthgap LTS 기준."
+series: "Yocto Deep Dive"
 seriesOrder: 1
-tags: [yocto, embedded-linux, bitbake, openembedded, book-review]
-type: book-review
-bookTitle: "Embedded Linux Systems with the Yocto Project"
-bookAuthor: "Rudolf J. Streif"
+tags: [yocto, embedded-linux, bitbake, openembedded]
 draft: true
 ---
 
-이 시리즈는 Rudolf J. Streif의 *Embedded Linux Systems with the Yocto Project* (Prentice Hall, 2016)를 한 챕터씩 정리합니다. Streif는 Linux Foundation TSC 멤버이자 Yocto Project Advisory Board 출신으로, Yocto 내부 구조를 가장 깊이 다룬 책 중 하나로 평가받습니다.
+이 시리즈는 **Yocto Project 공식 문서**(Mega-Manual, BitBake User Manual, OE-Core Manual)와 **현행 LTS (scarthgap, 2024.4)** 기준으로 Yocto/OpenEmbedded를 정리합니다. 책 한 권으로 묶이지 않는 *살아있는 빌드 시스템*이라 release-cadence를 반영합니다. (책 — Streif *Embedded Linux Systems with the Yocto Project*(2016), Salvador & Angolini *Embedded Linux Development Using Yocto Project Cookbook*(2018) — 은 *참고*로 인용.)
 
 ## 왜 이 책인가
 
