@@ -277,4 +277,4 @@ int airSpeed(Bird b) {
 - **준비**: [Pattern 56: Replace Type Code with Subclasses](/blog/programming/design/refactoring-catalog/pattern56-replace-type-code-with-subclasses)
 - **분해**: [Pattern 35: Decompose Conditional](/blog/programming/design/refactoring-catalog/pattern35-decompose-conditional)
 - **자매**: [Pattern 39: Introduce Special Case](/blog/programming/design/refactoring-catalog/pattern39-introduce-special-case)
-- **반대 (subclass 제거)**: [Pattern 60: Remove Subclass](/blog/programming/design/refactoring-catalog/pattern60-remove-subclass)
+- **반대 (subclass 제거)**: [Pattern 57: Remove Subclass](/blog/programming/design/refactoring-catalog/pattern57-remove-subclass)

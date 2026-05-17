@@ -208,5 +208,5 @@ struct Engineer;
 
 - **역방향**: [Pattern 51: Pull Up Method](/blog/programming/design/refactoring-catalog/pattern51-pull-up-method)
 - **자매**: [Pattern 55: Push Down Field](/blog/programming/design/refactoring-catalog/pattern55-push-down-field)
-- **계층 정리**: [Pattern 60: Remove Subclass](/blog/programming/design/refactoring-catalog/pattern60-remove-subclass)
+- **계층 정리**: [Pattern 57: Remove Subclass](/blog/programming/design/refactoring-catalog/pattern57-remove-subclass)
 - **원칙**: Liskov Substitution Principle

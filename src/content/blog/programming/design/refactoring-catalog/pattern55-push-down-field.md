@@ -209,4 +209,4 @@ field 위치는 *메모리 절약* — superclass에 두면 *모든 subclass ins
 
 - **역방향**: [Pattern 52: Pull Up Field](/blog/programming/design/refactoring-catalog/pattern52-pull-up-field)
 - **자매**: [Pattern 54: Push Down Method](/blog/programming/design/refactoring-catalog/pattern54-push-down-method)
-- **계층 정리**: [Pattern 60: Remove Subclass](/blog/programming/design/refactoring-catalog/pattern60-remove-subclass)
+- **계층 정리**: [Pattern 57: Remove Subclass](/blog/programming/design/refactoring-catalog/pattern57-remove-subclass)
