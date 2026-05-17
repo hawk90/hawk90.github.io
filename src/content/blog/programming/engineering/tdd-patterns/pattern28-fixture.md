@@ -1,7 +1,7 @@
 ---
 title: "Pattern 28: Fixture"
 date: 2026-07-02T04:00:00
-description: "Test에 공유되는 setup — fixture."
+description: "Test에 공유되는 setup — fixture로 추출. Fresh vs Shared의 트레이드오프."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 28
 tags: [xunit, fixture, setup, beck]
@@ -13,34 +13,67 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 여러 테스트에서 공통으로 사용하는 설정 코드를 fixture로 추출한다.
+> 여러 테스트가 공유하는 설정을 *fixture로 추출*. *Fresh* (격리)와 *Shared* (성능)의 균형.
 
 ## 동기 (Motivation)
 
-여러 테스트가 같은 설정을 반복한다:
+같은 setup이 여러 테스트에 *반복*:
 
 ```python
 def test_order_total():
     user = User("Alice")
     product = Product("Book", 1000)
-    order = Order(user)
-    order.add(product)
+    order = Order(user); order.add(product)
     assert order.total == 1000
 
 def test_order_with_discount():
-    user = User("Alice")  # 중복
-    product = Product("Book", 1000)  # 중복
-    order = Order(user)  # 중복
-    order.add(product)  # 중복
+    user = User("Alice")        # 중복
+    product = Product("Book", 1000)   # 중복
+    order = Order(user); order.add(product)   # 중복
     order.apply_discount(10)
     assert order.total == 900
 ```
 
-**Fixture**는 이 **공통 설정**을 추출한다.
+**Fixture**가 *공통 설정*을 추출.
 
-## Fixture 패턴
+### 신호
 
-### setUp 메서드 (xUnit 스타일)
+- 같은 setup이 *여러 테스트* 반복.
+- *test 본문이 setup으로 가득*, 검증이 작음.
+- *복잡한 객체* 생성 코드 중복.
+
+### 언제 적용하는가
+
+- *3+ 테스트*에 같은 setup.
+- *복잡한 객체 생성*.
+- 외부 자원 (DB, file) 공유.
+
+### 언제 적용하지 않는가
+
+- *한 테스트*에만 사용 — inline.
+- setup이 *너무 단순* (한 줄).
+- *test 의도가 흐려질* 위험.
+
+## Fresh vs Shared fixture
+
+| Fresh | Shared |
+| --- | --- |
+| 매 test마다 새로 생성 | 여러 test 공유 |
+| **격리 보장** | 격리 위험 |
+| 약간 느림 | 빠름 |
+| 안전 default | 비싼 setup |
+
+기본은 **Fresh** ([Isolated Test](/blog/programming/engineering/tdd-patterns/pattern02-isolated-test)).
+
+## 절차 (Mechanics)
+
+1. **공통 setup 식별** — 여러 test에 같은 코드.
+2. **추출 위치** 선택 — function/method/fixture.
+3. **scope 결정** — function (fresh), class, module, session.
+4. **cleanup** (tearDown / yield).
+5. 각 test에서 fixture *사용*.
+
+## 예시 1 — xUnit setUp/tearDown
 
 ```python
 class TestOrder(unittest.TestCase):
@@ -50,6 +83,10 @@ class TestOrder(unittest.TestCase):
         self.order = Order(self.user)
         self.order.add(self.product)
 
+    def tearDown(self):
+        # cleanup (필요 시)
+        pass
+
     def test_order_total(self):
         self.assertEqual(self.order.total, 1000)
 
@@ -58,11 +95,11 @@ class TestOrder(unittest.TestCase):
         self.assertEqual(self.order.total, 900)
 ```
 
-### pytest fixture
+매 test 전 setUp → 매 test 후 tearDown.
+
+## 예시 2 — pytest fixture + DI
 
 ```python
-import pytest
-
 @pytest.fixture
 def user():
     return User("Alice")
@@ -73,9 +110,9 @@ def product():
 
 @pytest.fixture
 def order(user, product):
-    order = Order(user)
-    order.add(product)
-    return order
+    o = Order(user)
+    o.add(product)
+    return o
 
 def test_order_total(order):
     assert order.total == 1000
@@ -85,196 +122,161 @@ def test_order_with_discount(order):
     assert order.total == 900
 ```
 
-## Fixture 수명
+*Dependency injection*. fixture를 *합성*.
 
-### Function 범위 (기본)
-
-```python
-@pytest.fixture
-def fresh_order():
-    """매 테스트마다 새로 생성"""
-    return Order()
-
-def test_1(fresh_order):  # 새 Order
-    ...
-
-def test_2(fresh_order):  # 또 새 Order
-    ...
-```
-
-### Class 범위
-
-```python
-@pytest.fixture(scope="class")
-def shared_db():
-    """클래스 내 테스트들이 공유"""
-    db = Database()
-    db.connect()
-    yield db
-    db.disconnect()
-```
-
-### Module 범위
-
-```python
-@pytest.fixture(scope="module")
-def expensive_resource():
-    """모듈 내 모든 테스트가 공유"""
-    return load_heavy_data()
-```
-
-## Fresh Fixture vs Shared Fixture
-
-### Fresh Fixture (권장)
-
-```python
-# 매 테스트마다 새로운 fixture
-def setUp(self):
-    self.order = Order()  # 깨끗한 상태
-
-def test_1(self):
-    self.order.add(item)
-    # order 상태 변경
-
-def test_2(self):
-    # 여전히 빈 order로 시작
-```
-
-### Shared Fixture (주의)
-
-```python
-# 위험: 테스트 간 상태 공유
-@pytest.fixture(scope="module")
-def shared_order():
-    return Order()
-
-def test_1(shared_order):
-    shared_order.add(item)  # 상태 변경
-
-def test_2(shared_order):
-    # test_1의 item이 이미 있음!
-    # 테스트 순서에 의존 — 나쁨
-```
-
-## tearDown
-
-```python
-class TestDatabase(unittest.TestCase):
-    def setUp(self):
-        self.db = Database()
-        self.db.connect()
-
-    def tearDown(self):
-        self.db.disconnect()  # 정리
-
-    def test_query(self):
-        result = self.db.query("SELECT * FROM users")
-        ...
-```
-
-### pytest의 yield
+## 예시 3 — yield로 cleanup
 
 ```python
 @pytest.fixture
 def db():
     db = Database()
     db.connect()
-    yield db  # 여기서 테스트 실행
-    db.disconnect()  # 테스트 후 정리
+    yield db   # 여기서 test 실행
+    db.disconnect()   # test 후 cleanup
 ```
 
-## Fixture 설계 원칙
+setUp + tearDown을 *한 함수에*.
 
-### 필요한 것만
+### Scope
 
 ```python
-# 나쁨: 모든 것을 fixture에
-def setUp(self):
-    self.user = User()
-    self.product = Product()
-    self.order = Order()
-    self.payment = Payment()
-    self.shipping = Shipping()
-    # 대부분의 테스트가 일부만 사용
-
-# 좋음: 필요한 것만
-@pytest.fixture
-def user():
-    return User()
-
-@pytest.fixture
-def order(user):  # 필요한 fixture만 의존
-    return Order(user)
+@pytest.fixture(scope="function")   # default, fresh
+@pytest.fixture(scope="class")      # class 내 공유
+@pytest.fixture(scope="module")     # module 내 공유
+@pytest.fixture(scope="session")    # session 전체 공유
 ```
 
-### 명확한 이름
+비싼 setup은 *넓은 scope* — 단 격리 주의.
 
+## 자주 보는 안티패턴
+
+### 1. *Shared fixture mutation*
 ```python
-# 나쁨
-@pytest.fixture
-def data():
-    return {"name": "Alice"}
+@pytest.fixture(scope="module")
+def shared_order():
+    return Order()
 
-# 좋음
-@pytest.fixture
-def valid_user_data():
-    return {"name": "Alice", "email": "alice@example.com"}
+def test_1(shared_order):
+    shared_order.add(item)   # ← 상태 변경
 
-@pytest.fixture
-def invalid_user_data():
-    return {"name": "", "email": "invalid"}
+def test_2(shared_order):
+    # test_1의 item이 이미!
 ```
+*순서 의존* → 격리 깨짐.
 
-### Fixture도 코드
+### 2. *Fixture가 너무 큼*
+모든 객체 setup → 대부분 test는 *일부만 사용*. *필요한 것만* fixture.
 
+### 3. *암묵적 의존*
 ```python
-# Fixture도 잘 작성해야 함
-@pytest.fixture
-def complex_order():
-    """
-    복잡한 주문 시나리오:
-    - 여러 상품
-    - 할인 적용
-    - 배송비 포함
-    """
-    user = create_premium_user()
-    order = Order(user)
-    order.add(Product("A", 1000))
-    order.add(Product("B", 2000))
-    order.apply_discount("SAVE10")
-    order.set_shipping("express")
-    return order
-```
-
-## 암묵적 결합 주의
-
-```python
-# 나쁨: fixture가 테스트 내용을 숨김
-def test_order_total(self):
-    # setUp에서 뭘 했는지 봐야 이해됨
+def test_order():
+    # setUp에서 뭘 했는지 봐야 함
     self.assertEqual(self.order.total, 1000)
+```
+중요한 setup은 *test 안*에 명시.
 
-# 좋음: 테스트 자체로 이해 가능
-def test_order_total(self):
-    order = Order()
-    order.add(Product("Book", 1000))
-    self.assertEqual(order.total, 1000)
+### 4. *Fixture 이름 모호*
+`data`, `config` — 의미 없음. `valid_user`, `empty_cart` 같은 *의도 표현*.
+
+### 5. *cleanup 누락*
+DB row, file, mock patch — *누수*. yield 또는 tearDown 필수.
+
+### 6. *Fixture 안에 비즈니스 로직*
+fixture가 *production 로직 흉내* → 진짜 코드와 *diverge*.
+
+## Modern variants
+
+### Factory Pattern
+
+```python
+@pytest.fixture
+def user_factory():
+    def _factory(name="Default", **kwargs):
+        return User(name, **kwargs)
+    return _factory
+
+def test(user_factory):
+    alice = user_factory("Alice")
+    bob = user_factory("Bob", age=30)
 ```
 
-중요한 설정은 **테스트 안에 명시**하는 것이 좋다.
+*매번 다른* fixture 필요할 때.
 
-## 정리
+### Object Mother
 
-- **공통 설정**을 fixture로 추출
-- **Fresh fixture** 권장 — 테스트 독립성
-- **tearDown**으로 정리
-- **필요한 것만** fixture에
-- **명확한 이름** 사용
-- **암묵적 결합** 주의 — 중요한 설정은 테스트에
+```python
+class UserMother:
+    @staticmethod
+    def alice(): return User("Alice", "alice@x.com")
+    @staticmethod
+    def admin(): return User("Admin", "admin@x.com", role="admin")
+```
+
+자주 쓰는 *명명된* fixture.
+
+### Test data builder
+
+```python
+user = UserBuilder().with_name("Alice").with_role("admin").build()
+```
+
+fluent builder로 유연.
+
+### Conftest sharing (pytest)
+
+```python
+# conftest.py — 자동 공유
+@pytest.fixture
+def db(): ...
+```
+
+여러 test 파일에 *자동 적용*.
+
+### Parametrized fixture
+
+```python
+@pytest.fixture(params=[1, 2, 3])
+def number(request):
+    return request.param
+
+def test_double(number):
+    assert double(number) == number * 2
+```
+
+같은 test를 *여러 fixture로* 실행.
+
+### Async fixture
+
+```python
+@pytest.fixture
+async def client():
+    async with AsyncClient() as c:
+        yield c
+```
+
+async 환경 지원.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| pytest fixture | DI + scope |
+| pytest-mock | mock fixture |
+| factory_boy | factory |
+| FactoryBot (Ruby) | factory |
+| AutoFixture (.NET) | 자동 생성 |
+| Hypothesis | property-based fixture |
+
+## 성능 고려
+
+- *Function scope* 가장 느림, 가장 안전.
+- *Session scope* 가장 빠름, 격리 위험.
+- 비싼 setup (DB connection)은 *세션*, mutable state는 *function*.
+- *test parallelism* + fixture scope 상호작용 — 측정.
 
 ## 관련 패턴
 
 - [Pattern 29: External Fixture](/blog/programming/engineering/tdd-patterns/pattern29-external-fixture) — DB/파일 fixture
-- [Pattern 2: Isolated Test](/blog/programming/engineering/tdd-patterns/pattern02-isolated-test) — 테스트 독립성
+- [Pattern 2: Isolated Test](/blog/programming/engineering/tdd-patterns/pattern02-isolated-test) — 격리
 - [Pattern 30: Test Method](/blog/programming/engineering/tdd-patterns/pattern30-test-method) — 테스트 구조
-
+- [Pattern 6: Test Data](/blog/programming/engineering/tdd-patterns/pattern06-test-data) — 데이터 선택

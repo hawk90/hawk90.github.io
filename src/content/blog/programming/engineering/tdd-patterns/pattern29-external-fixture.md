@@ -1,7 +1,7 @@
 ---
 title: "Pattern 29: External Fixture"
 date: 2026-07-02T05:00:00
-description: "Process·resource에 걸친 fixture — DB·file·network."
+description: "Process·resource에 걸친 fixture — DB·file·network 관리."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 29
 tags: [xunit, external-fixture, integration, beck]
@@ -13,259 +13,249 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 데이터베이스, 파일 시스템, 네트워크 같은 외부 리소스를 테스트에서 관리한다.
+> 데이터베이스·파일·네트워크 같은 *외부 리소스*를 테스트에서 관리. *격리 vs 속도* 트레이드오프.
 
 ## 동기 (Motivation)
 
-일반 fixture는 **메모리 안**에서 동작한다. 하지만 실제 시스템은 **외부 리소스**에 의존한다:
+일반 fixture는 *메모리 안*에서 동작. 실제 시스템은 *외부 리소스*에 의존:
 
-```text
-- 데이터베이스
-- 파일 시스템
-- 네트워크 서비스
-- 메시지 큐
-- 캐시 서버
-```
+- DB, file system, network service, message queue, cache server.
 
-**External Fixture**는 이런 리소스의 **설정과 정리**를 다룬다.
+**External Fixture**가 이런 리소스의 *설정과 정리*를 다룬다.
 
-## 데이터베이스 Fixture
+### 신호
 
-### 기본 패턴
+- test가 *real DB/file*에 의존.
+- *test 후 cleanup 누락*으로 다음 test 영향.
+- *환경 차이* (local vs CI) 때문에 실패.
+- *test 속도* 매우 느림.
+
+### 언제 적용하는가
+
+- *integration test*가 필수.
+- *외부 시스템 동작 검증* (ORM 쿼리, file format).
+- *unit test mock으로 한계*가 있음.
+
+### 언제 적용하지 않는가
+
+- *순수 비즈니스 로직* — mock으로 충분.
+- 외부 자원이 *너무 비싸* (전용 hardware).
+
+## 절차 (Mechanics)
+
+1. **외부 자원 식별** — DB, file, network.
+2. **격리 전략 선택** — transaction rollback, fresh container, isolated namespace.
+3. **fixture 작성** — 자원 *획득 + cleanup*.
+4. **scope 결정** — session (비싼 자원) / function (mutating).
+5. **에러 시 cleanup 보장** — finally 또는 yield.
+
+## 예시 1 — DB transaction rollback (권장)
 
 ```python
-import pytest
-
 @pytest.fixture
 def db():
-    """데이터베이스 연결"""
     connection = Database.connect("test_db")
     yield connection
     connection.close()
 
 @pytest.fixture
-def clean_db(db):
-    """깨끗한 상태의 DB"""
-    db.execute("DELETE FROM users")
-    db.execute("DELETE FROM orders")
-    yield db
-    # 테스트 후에도 정리
-    db.execute("DELETE FROM users")
-    db.execute("DELETE FROM orders")
-```
-
-### 트랜잭션 롤백
-
-```python
-@pytest.fixture
 def transactional_db(db):
-    """트랜잭션으로 격리"""
     db.begin_transaction()
     yield db
-    db.rollback()  # 모든 변경 취소
+    db.rollback()   # 모든 변경 취소
 ```
 
-이 방식이 **가장 빠르고 안전**하다.
+가장 *빠르고 안전*. 매 test가 *clean state*로 시작.
 
-## Testcontainers
-
-실제 DB를 **Docker로 실행**한다:
+## 예시 2 — Testcontainers
 
 ```python
 import testcontainers.postgres as postgres
 
 @pytest.fixture(scope="module")
 def postgres_db():
-    """Docker로 PostgreSQL 실행"""
     with postgres.PostgresContainer("postgres:15") as pg:
         yield pg.get_connection_url()
 ```
 
-### 장점
+*실제 PostgreSQL container* — production-like.
 
 ```text
-✓ 실제 DB와 동일한 환경
-✓ 격리된 테스트 환경
-✓ CI/CD에서 일관된 실행
-```
-
-### 단점
-
-```text
-✗ 느림 (컨테이너 시작 시간)
+✓ 실제 DB와 동일 환경
+✓ CI/CD 일관
+✗ 느림 (container 시작)
 ✗ Docker 필요
-✗ 리소스 사용량
 ```
 
-## 파일 시스템 Fixture
-
-### 임시 디렉토리
-
-```python
-import pytest
-import tempfile
-import os
-
-@pytest.fixture
-def temp_dir():
-    """임시 디렉토리 생성 및 정리"""
-    dir_path = tempfile.mkdtemp()
-    yield dir_path
-    # 정리
-    import shutil
-    shutil.rmtree(dir_path)
-```
-
-### pytest의 tmp_path
+## 예시 3 — 파일 시스템
 
 ```python
 def test_file_write(tmp_path):
     """pytest 내장 임시 디렉토리"""
     file = tmp_path / "test.txt"
     file.write_text("hello")
-
     assert file.read_text() == "hello"
     # 자동 정리됨
 ```
 
-## 네트워크 서비스 Fixture
+pytest의 `tmp_path` — 매 test마다 *새 디렉토리*, 끝나면 *자동 cleanup*.
 
-### Mock 서버
+## 자주 보는 안티패턴
 
+### 1. *Cleanup 누락*
 ```python
-import responses
-
 @pytest.fixture
-def mock_api():
-    """HTTP 응답 모킹"""
-    with responses.RequestsMock() as rsps:
-        rsps.add(
-            responses.GET,
-            "https://api.example.com/users",
-            json={"users": [{"name": "Alice"}]},
-            status=200
-        )
-        yield rsps
+def db():
+    return Database.connect("test")   # ← 닫지 않음
 ```
+connection leak. yield 또는 finally.
 
-### 실제 서비스 (통합 테스트)
+### 2. *Production DB 사용*
+실수로 *production DB connect* → 데이터 손상. *별도 test DB*, *환경 검증*.
+
+### 3. *Test 순서 의존*
+```python
+def test_create(): db.execute("INSERT ...")
+def test_read(): assert db.query("SELECT ...") == ...   # ← test_create 가정
+```
+독립성 깨짐. *transaction rollback* 또는 *fresh state*.
+
+### 4. *Session scope mutating*
+session scope DB에 *write* → 다른 test 영향. *function scope + transaction*.
+
+### 5. *Network test가 flaky*
+real network → 가끔 fail. *mock + 별도 integration test*.
+
+### 6. *Container 시작 비용*
+매 test마다 container → 분 단위 소요. *module/session scope* + 격리.
+
+## Modern variants
+
+### Transaction rollback (가장 흔함)
 
 ```python
-@pytest.fixture(scope="session")
-def api_server():
-    """테스트용 서버 실행"""
-    import subprocess
-    server = subprocess.Popen(["python", "server.py"])
-    time.sleep(2)  # 시작 대기
-    yield "http://localhost:8080"
-    server.terminate()
-```
-
-## Fixture 범위와 비용
-
-```python
-# Function: 매 테스트마다 (느림, 격리 좋음)
-@pytest.fixture(scope="function")
-def fresh_db(): ...
-
-# Class: 클래스당 한 번
-@pytest.fixture(scope="class")
-def class_db(): ...
-
-# Module: 모듈당 한 번
-@pytest.fixture(scope="module")
-def module_db(): ...
-
-# Session: 전체 테스트 세션당 한 번 (빠름, 격리 나쁨)
-@pytest.fixture(scope="session")
-def session_db(): ...
-```
-
-### 트레이드오프
-
-| 범위 | 속도 | 격리 | 사용 시점 |
-|------|------|------|----------|
-| function | 느림 | 완벽 | 상태 변경 테스트 |
-| class | 중간 | 좋음 | 관련 테스트 그룹 |
-| module | 빠름 | 주의 | 읽기 전용 테스트 |
-| session | 가장 빠름 | 위험 | 불변 데이터 |
-
-## 격리 vs 속도
-
-```python
-# 완벽한 격리 (느림)
 @pytest.fixture
-def isolated_db():
-    db = create_fresh_database()  # 매번 새로 생성
-    yield db
-    drop_database(db)
-
-# 빠른 격리 (권장)
-@pytest.fixture
-def fast_isolated_db(session_db):
+def db(session_db):
     session_db.begin_transaction()
     yield session_db
-    session_db.rollback()  # 트랜잭션으로 격리
+    session_db.rollback()
 ```
 
-## 정리 실패 처리
+session DB 한 번 + transaction *per-test*.
+
+### Snapshot/restore
 
 ```python
 @pytest.fixture
-def robust_fixture():
-    resource = acquire_resource()
-    try:
-        yield resource
-    finally:
-        # 예외가 발생해도 정리
-        try:
-            resource.cleanup()
-        except Exception as e:
-            print(f"Cleanup failed: {e}")
+def db(session_db):
+    snapshot = session_db.create_snapshot()
+    yield session_db
+    session_db.restore(snapshot)
 ```
 
-## Factory Fixture
+비싼 setup을 *한 번*, 매 test 후 *snapshot 복원*.
+
+### Containers
+
+```python
+postgres = PostgresContainer()
+redis = RedisContainer()
+elasticsearch = ElasticsearchContainer()
+```
+
+각 service Docker.
+
+### Hermetic test (Bazel)
+
+```bash
+bazel test //...
+```
+
+외부 network 차단 + sandbox.
+
+### VCR / Polly (HTTP recording)
+
+```python
+@vcr.use_cassette()
+def test_api():
+    requests.get(...)   # 첫 실행 녹화, 이후 재생
+```
+
+real HTTP을 *cassette*로.
+
+### Localstack (AWS)
+
+```python
+from localstack_pytest import *
+def test_s3(s3_client):
+    s3_client.put_object(...)   # 가짜 S3
+```
+
+AWS service mock.
+
+### Database migrations on setup
+
+```python
+@pytest.fixture(scope="session")
+def db():
+    db = create_test_db()
+    run_migrations(db)   # production schema
+    yield db
+    drop_test_db(db)
+```
+
+## Factory + cleanup tracking
 
 ```python
 @pytest.fixture
 def user_factory(db):
-    """사용자 생성 팩토리"""
-    created_users = []
-
-    def create_user(name, email=None):
-        user = User(name=name, email=email or f"{name}@test.com")
+    created = []
+    def _create(name, email=None):
+        user = User(name, email or f"{name}@test.com")
         db.save(user)
-        created_users.append(user)
+        created.append(user)
         return user
-
-    yield create_user
-
-    # 생성된 모든 사용자 정리
-    for user in created_users:
+    yield _create
+    for user in created:
         db.delete(user)
 ```
 
-사용:
+생성된 자원을 *추적해 일괄 cleanup*.
 
-```python
-def test_multiple_users(user_factory):
-    alice = user_factory("Alice")
-    bob = user_factory("Bob")
-    # 테스트 후 자동 정리
-```
+## 격리 vs 속도 트레이드오프
 
-## 정리
+| 전략 | 속도 | 격리 |
+| --- | --- | --- |
+| Fresh container per-test | 매우 느림 | 완벽 |
+| Container per-session + transaction | 빠름 | 좋음 |
+| In-memory replacement (sqlite for postgres) | 매우 빠름 | 좋음 (단 차이) |
+| Mock | 가장 빠름 | 완벽 (단 fake) |
 
-- **외부 리소스**(DB, 파일, 네트워크) 관리
-- **트랜잭션 롤백**이 가장 효율적
-- **Testcontainers**로 실제 환경 재현
-- **범위 선택** — 격리 vs 속도 트레이드오프
-- **정리 실패** 처리 중요
-- **Factory fixture**로 유연성
+기본은 *session container + per-test transaction*.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| Testcontainers | Docker fixture |
+| pytest tmp_path | 임시 디렉토리 |
+| Factory_boy | object factory |
+| Faker | fake data |
+| Responses / VCR | HTTP recording |
+| LocalStack | AWS mock |
+| Toxiproxy | network fault |
+
+## 성능 고려
+
+- *Container start* 5-30초 — session scope.
+- *Transaction* 매우 빠름 (ms).
+- *Filesystem* OS-level (수 ms).
+- *Network mock* 즉시.
+- 큰 test suite는 *parallel* + 자원 *namespace 격리*.
 
 ## 관련 패턴
 
 - [Pattern 28: Fixture](/blog/programming/engineering/tdd-patterns/pattern28-fixture) — 일반 fixture
-- [Pattern 17: Mock Object](/blog/programming/engineering/tdd-patterns/pattern17-mock-object) — 외부 의존성 대체
-- [Pattern 2: Isolated Test](/blog/programming/engineering/tdd-patterns/pattern02-isolated-test) — 테스트 격리
-
+- [Pattern 17: Mock Object](/blog/programming/engineering/tdd-patterns/pattern17-mock-object) — 외부 의존 대체
+- [Pattern 2: Isolated Test](/blog/programming/engineering/tdd-patterns/pattern02-isolated-test) — 격리
+- [Pattern 11: Learning Test](/blog/programming/engineering/tdd-patterns/pattern11-learning-test) — 외부 lib 학습

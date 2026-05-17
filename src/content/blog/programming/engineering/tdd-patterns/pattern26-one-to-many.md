@@ -1,7 +1,7 @@
 ---
 title: "Pattern 26: One to Many"
 date: 2026-07-02T02:00:00
-description: "Single-item에서 collection으로 — 점진적 일반화."
+description: "Single-item에서 collection으로 — 점진적 일반화. 알고리즘 본질 발견."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 26
 tags: [tdd, beck, one-to-many, collection]
@@ -13,44 +13,77 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 컬렉션을 다룰 때 단일 항목부터 시작해서 점진적으로 여러 항목으로 확장한다.
+> Collection을 다룰 때 *단일 항목부터* 시작해 점진적으로 *여러 항목*으로 확장. 알고리즘의 *본질* 발견.
 
 ## 동기 (Motivation)
 
-리스트의 합계를 구현해야 한다. 바로 반복문을 작성할까?
+리스트 합계 구현 — 바로 반복문?
 
 ```python
 def test_sum():
     assert sum([1, 2, 3, 4, 5]) == 15
 ```
 
-TDD에서는 **더 작은 스텝**으로 시작한다: **단일 항목**부터.
+TDD는 *더 작은 스텝* — **단일 항목부터**.
 
-## One to Many 예시
+이유:
+- *알고리즘 핵심*이 *단일 처리 + 결합*이라는 통찰.
+- *경계 조건* 자연스럽게 고려.
+- *Reduce 패턴*으로 자연 진화.
 
-### 단계 1: 단일 항목
+### 신호
+
+- collection을 다루는 새 기능 시작.
+- 바로 반복문 작성 충동.
+- 빈 collection, 단일 처리 *잊음*.
+- *알고리즘 본질*이 흐림.
+
+### 언제 적용하는가
+
+- Map/Reduce/Filter 같은 *collection 알고리즘*.
+- *복잡한 collection 변환*.
+- 도메인 객체 집합 처리.
+
+### 언제 적용하지 않는가
+
+- 이미 *standard library*가 처리 (`sum()`, `max()`).
+- 구현이 *Obvious*.
+
+## 절차 (Mechanics)
+
+1. **빈 collection** 테스트 (경계).
+2. **단일 항목** 테스트 — 핵심 처리.
+3. **두 항목** 테스트 — 결합 방식 등장.
+4. **여러 항목** 테스트 — 일반화 강제.
+5. *reduce/fold 패턴* 발견 가능.
+
+## 예시 1 — Sum
 
 ```python
+# 단계 1: 빈 (경계)
+def test_sum_empty():
+    assert sum([]) == 0
+
+def sum(numbers):
+    return 0
+
+# 단계 2: 단일
 def test_sum_single():
     assert sum([5]) == 5
 
 def sum(numbers):
-    return numbers[0]  # 단일 항목만 처리
-```
+    if not numbers: return 0
+    return numbers[0]
 
-### 단계 2: 두 개
-
-```python
+# 단계 3: 두 개
 def test_sum_two():
     assert sum([2, 3]) == 5
 
 def sum(numbers):
-    return numbers[0] + numbers[1]  # 두 개 처리
-```
+    if not numbers: return 0
+    return numbers[0] + (numbers[1] if len(numbers) > 1 else 0)
 
-### 단계 3: 여러 개 (일반화)
-
-```python
+# 단계 4: 여러 개 — 일반화
 def test_sum_many():
     assert sum([1, 2, 3, 4, 5]) == 15
 
@@ -61,135 +94,150 @@ def sum(numbers):
     return total
 ```
 
-## 왜 이렇게 하나?
+알고리즘이 *점진적으로* 모습.
 
-### 알고리즘의 본질 발견
-
-단일 항목을 처리하는 코드가 **알고리즘의 핵심**이다:
+## 예시 2 — Max
 
 ```python
-# 단일 항목 처리
-def process(item):
-    return transform(item)
-
-# 여러 항목은 단일 처리의 확장
-def process_all(items):
-    return [process(item) for item in items]
-```
-
-### 경계 조건 자연스럽게 고려
-
-```python
-# 자연스럽게 빈 리스트도 고려하게 됨
-def test_sum_empty():
-    assert sum([]) == 0
-
-def test_sum_single():
-    assert sum([5]) == 5
-
-def test_sum_many():
-    assert sum([1, 2, 3]) == 6
-```
-
-## 다양한 적용
-
-### 최댓값
-
-```python
-# 1. 단일 항목
 def test_max_single():
-    assert max([7]) == 7
+    assert maximum([7]) == 7
 
-# 2. 두 개
 def test_max_two():
-    assert max([3, 7]) == 7
+    assert maximum([3, 7]) == 7
 
-# 3. 여러 개
 def test_max_many():
-    assert max([3, 7, 2, 9, 1]) == 9
+    assert maximum([3, 7, 2, 9, 1]) == 9
+
+# 점진적 → reduce
+def maximum(items):
+    result = items[0]
+    for x in items[1:]:
+        if x > result: result = x
+    return result
 ```
 
-### 필터링
+## 예시 3 — Filter
 
 ```python
-# 1. 단일 항목 (통과)
 def test_filter_single_pass():
     assert filter_evens([2]) == [2]
 
-# 2. 단일 항목 (탈락)
 def test_filter_single_fail():
     assert filter_evens([3]) == []
 
-# 3. 여러 개
 def test_filter_many():
     assert filter_evens([1, 2, 3, 4, 5]) == [2, 4]
+
+def filter_evens(items):
+    return [x for x in items if x % 2 == 0]
 ```
 
-### 변환 (Map)
+단일 통과/탈락 → 여러 개로.
+
+## 자주 보는 안티패턴
+
+### 1. *바로 loop 작성*
+"sum은 reduce지" → 단일 처리 *못 봄*. TDD 정신 위배.
+
+### 2. *경계 무시*
+빈 collection test 없음 → production에서 IndexError. *항상 빈 case*.
+
+### 3. *너무 잘게*
+단일 → 두 개 → 세 개 → 네 개... → *과한 분해*. *두 단계*면 충분.
+
+### 4. *Reduce 강제*
+모든 collection을 *reduce로* → 단순 sum 같은 case는 *built-in*이 명확.
+
+### 5. *Stream/iterator 무시*
+list만 가정 → infinite stream에서 깨짐. *iterable* 처리.
+
+### 6. *Production code도 one-by-one*
+test는 점진적이지만 production은 *최종 일반화*. test 진화와 production 진화 *동시*.
+
+## Modern variants
+
+### Functional style
 
 ```python
-# 1. 단일 항목
-def test_double_single():
-    assert double_all([3]) == [6]
-
-# 2. 여러 개
-def test_double_many():
-    assert double_all([1, 2, 3]) == [2, 4, 6]
+def sum(items):
+    return reduce(lambda acc, x: acc + x, items, 0)
 ```
 
-## Test List의 자연스러운 진행
+reduce는 *one-to-many의 자연 결론*.
 
-One to Many는 **Test List 작성**의 가이드가 된다:
+### Generator / lazy
+
+```python
+def sum(iterable):
+    total = 0
+    for x in iterable:
+        total += x
+    return total
+
+# infinite stream 대응
+```
+
+### Recursive
+
+```python
+def sum(items):
+    if not items: return 0
+    return items[0] + sum(items[1:])
+```
+
+base case (empty) + recursive — TDD 진화와 자연.
+
+### Parallel reduce
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+def parallel_sum(items, chunk_size=1000):
+    chunks = [items[i:i+chunk_size] for i in range(0, len(items), chunk_size)]
+    with ThreadPoolExecutor() as ex:
+        return sum(ex.map(sum, chunks))
+```
+
+성능 critical에서 *fork-join*.
+
+### Stream API (Java, Kotlin)
+
+```java
+items.stream().reduce(0, Integer::sum);
+```
+
+## Test List의 가이드
 
 ```text
 Test List for sum():
-1. [ ] 빈 리스트 → 0
-2. [ ] 단일 항목 → 그 값
+1. [ ] 빈 → 0
+2. [ ] 단일 → 그 값
 3. [ ] 두 항목 → 합
-4. [ ] 여러 항목 → 총합
+4. [ ] 여러 → 총합
 5. [ ] 음수 포함
 6. [ ] 소수 포함
+7. [ ] 매우 큰 list (스트림)
 ```
 
-## Reduce 패턴과의 관계
+체계적 테스트 진행.
 
-One to Many는 **reduce 패턴**을 자연스럽게 이끈다:
+## 도구 / IDE
 
-```python
-# 단일 → 두 개 → 여러 개 → reduce 발견
-def sum(numbers):
-    return reduce(lambda acc, n: acc + n, numbers, 0)
+| 도구 | One-to-Many 지원 |
+| --- | --- |
+| pytest.mark.parametrize | 단일→다중 일괄 test |
+| Hypothesis `st.lists()` | 다양한 크기 |
+| QuickCheck (Haskell) | property로 일반화 |
 
-def max(numbers):
-    return reduce(lambda acc, n: acc if acc > n else n, numbers, numbers[0])
-```
+## 성능 고려
 
-## 객체 컬렉션에도 적용
-
-```python
-# 1. 단일 주문
-def test_total_single_order():
-    orders = [Order(amount=100)]
-    assert total_amount(orders) == 100
-
-# 2. 여러 주문
-def test_total_multiple_orders():
-    orders = [Order(100), Order(200), Order(300)]
-    assert total_amount(orders) == 600
-```
-
-## 정리
-
-- **단일 항목**부터 시작
-- **점진적으로 여러 항목**으로 확장
-- **알고리즘의 본질** 발견
-- **경계 조건** 자연스럽게 고려
-- **Test List**의 자연스러운 가이드
-- **Reduce 패턴**으로 이어짐
+알고리즘 패턴 자체는 *Big-O 결정* (O(n), O(n log n)). 단일→다중 *최적화 기회* 식별:
+- *Built-in 사용* (C 수준 빠름).
+- *Vectorized* (NumPy, pandas).
+- *Parallel*.
 
 ## 관련 패턴
 
 - [Pattern 24: Triangulate](/blog/programming/engineering/tdd-patterns/pattern24-triangulate) — 예제로 일반화
 - [Pattern 3: Test List](/blog/programming/engineering/tdd-patterns/pattern03-test-list) — 테스트 계획
 - [Pattern 8: One Step Test](/blog/programming/engineering/tdd-patterns/pattern08-one-step-test) — 작은 스텝
-
+- [Pattern 9: Starter Test](/blog/programming/engineering/tdd-patterns/pattern09-starter-test) — degenerate case 시작
