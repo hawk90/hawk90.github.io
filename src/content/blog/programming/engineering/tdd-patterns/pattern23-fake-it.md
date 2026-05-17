@@ -1,7 +1,7 @@
 ---
 title: "Pattern 23: Fake It (Til You Make It)"
 date: 2026-07-01T23:00:00
-description: "Constant return 부터 — 가장 빠른 green bar."
+description: "Constant return부터 — 가장 빠른 green bar."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 23
 tags: [tdd, beck, fake-it, green-bar]
@@ -13,164 +13,205 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 테스트를 통과시키기 위해 우선 상수를 반환하고, 나중에 일반화한다.
+> 테스트를 통과시키기 위해 *우선 상수를 반환*하고, 나중에 일반화. *가장 작은 스텝*으로 *가장 빠른 green*.
 
 ## 동기 (Motivation)
 
-TDD의 목표는 **빠르게 green bar**에 도달하는 것이다. 가장 빠른 방법은?
+TDD의 목표는 *빠르게 green bar*에 도달하는 것. 가장 빠른 방법은?
 
 ```python
 def test_sum():
     assert sum([1, 2, 3]) == 6
-```
 
-가장 빠른 구현:
-
-```python
+# Fake It — 가장 빠른 green
 def sum(numbers):
-    return 6  # Fake it!
+    return 6
 ```
 
-**비웃음 받을 수 있는** 구현이지만, **가장 작은 스텝**이다.
+*비웃음 받을* 만한 구현이지만 *가장 작은 스텝*. *심리적 안전 + 작은 스텝 강제*.
 
-## Fake It 예시
+### 신호
 
-### 단계 1: 상수 반환
+- 구현 방향이 *불확실*.
+- *완벽한 구현* 작성하다 막힘.
+- Red bar가 *길어짐*.
+- *어디부터 시작*할지 모름.
+
+### 언제 적용하는가
+
+- 구현 *방향 불확실*.
+- *복잡한 알고리즘* 시작 시.
+- *외부 의존성*이 있을 때 (interface 먼저).
+- 자신감 낮음.
+
+### 언제 적용하지 않는가
+
+- 구현이 *명확함* → [Obvious Implementation](/blog/programming/engineering/tdd-patterns/pattern25-obvious-implementation).
+- 이미 비슷한 코드 존재.
+- 단순 *위임 (delegation)*.
+
+## 절차 (Mechanics)
+
+1. **테스트 작성** + Red 확인.
+2. **상수 반환**으로 통과 (Fake It).
+3. Green 확인.
+4. *두 번째 테스트* 추가 → 상수로 fail → [Triangulate](/blog/programming/engineering/tdd-patterns/pattern24-triangulate)로 일반화.
+5. Refactor.
+
+## 예시 1 — 단계별 일반화
 
 ```python
+# Step 1: Test
 def test_plus():
     assert plus(2, 3) == 5
 
-def plus(a, b):
-    return 5  # Fake
-```
-
-### 단계 2: 변수 사용
-
-```python
-def plus(a, b):
-    return 2 + 3  # 여전히 Fake, 하지만 테스트 데이터 사용
-```
-
-### 단계 3: 일반화
-
-```python
-def plus(a, b):
-    return a + b  # Real implementation
-```
-
-이 과정이 **Fake It → Triangulate → Real**이다.
-
-## 왜 이렇게 하나?
-
-### 심리적 안전
-
-```text
-Red → Green: 최소 시간 (안도감)
-Green → Refactor: 안전하게 개선
-```
-
-**red 상태가 오래 지속**되면 불안하다. **빨리 green**으로 가면 안정감.
-
-### 작은 스텝 강제
-
-```python
-# 처음부터 완벽하게 하려는 충동
-def plus(a, b):
-    if not isinstance(a, (int, float)):
-        raise TypeError(...)
-    if not isinstance(b, (int, float)):
-        raise TypeError(...)
-    result = a + b
-    if result > sys.maxsize:
-        raise OverflowError(...)
-    return result
-
-# Fake It — 필요한 것만
+# Step 2: Fake (constant)
 def plus(a, b):
     return 5
+
+# Step 3: Use input (still partial fake)
+def plus(a, b):
+    return 2 + 3   # 테스트 데이터 사용
+
+# Step 4: Generalize
+def plus(a, b):
+    return a + b
 ```
 
-**YAGNI** — 필요할 때 추가한다.
+Fake → 부분 Fake → Real. 각 단계 *안전한 green*.
 
-## Fake It의 변형
-
-### 컬렉션도 상수로
+## 예시 2 — Collection 상수
 
 ```python
 def test_get_users():
     users = get_users()
     assert len(users) == 3
 
+# Fake — 상수 list
 def get_users():
-    return ["Alice", "Bob", "Charlie"]  # Fake list
+    return ["Alice", "Bob", "Charlie"]
+
+# 두 번째 테스트 추가 후 일반화
+def test_get_users_from_db():
+    setup_db_with_users(["A", "B"])
+    assert len(get_users()) == 2
+
+def get_users():
+    return db.query("SELECT * FROM users").fetchall()
 ```
 
-### 객체도 상수로
+## 예시 3 — Object 상수
 
 ```python
 def test_create_order():
     order = create_order("user_1", 1000)
     assert order.total == 1000
 
+# Fake
 def create_order(user_id, amount):
-    return Order(total=1000)  # Fake object
+    return Order(total=1000)
+
+# 다음 테스트로 일반화
+def test_create_order_different_amount():
+    order = create_order("user_2", 2000)
+    assert order.total == 2000
+
+def create_order(user_id, amount):
+    return Order(total=amount)
 ```
 
-## Fake It 후 일반화
+## 자주 보는 안티패턴
 
-### Triangulate로
+### 1. *Fake It만 하고 끝*
+"테스트 통과했네" → 일반화 안 함 → production 깨짐. 항상 *Triangulate* 따라옴.
+
+### 2. *너무 복잡한 Fake*
+*if 분기* 가득한 Fake → 이미 *진짜 구현*. 진짜 fake는 *상수 한 줄*.
+
+### 3. *Test가 Fake에 결합*
+test가 *특정 값에만 의존* → fake에 *과도하게 맞춤*. test가 *동작*을 검증해야.
+
+### 4. *Fake 단계 건너뜀*
+명확하지도 않은데 *real implementation 시도* → 막힘. fake로 시작.
+
+### 5. *Fake가 production에 commit*
+Fake 단계에서 *PR open* → reviewer 혼란. *Triangulate까지 한 commit*.
+
+### 6. *Fake가 부적절*
+constant 반환이 *진짜 production의 single-case*일 수도 — 그땐 *진짜 implementation*.
+
+## Modern variants
+
+### Type-driven Fake (Haskell, Rust)
+
+```rust
+fn plus(a: i32, b: i32) -> i32 {
+    unimplemented!()   // type system이 strong fake
+}
+```
+
+`todo!()` / `unimplemented!()` — 타입 system이 *signature 검증*, 본문은 fake.
+
+### Mock library의 stub
 
 ```python
-# 두 번째 테스트 추가
-def test_plus_different_numbers():
-    assert plus(3, 4) == 7
-
-# 이제 상수로는 안 됨 — 일반화 강제
-def plus(a, b):
-    return a + b
+mock = Mock()
+mock.return_value = "fake"
 ```
 
-### Obvious Implementation으로
+mock의 *return_value*가 Fake It의 변형.
 
-구현이 명확하면 바로:
+### Property-based + Fake
 
 ```python
-def plus(a, b):
-    return a + b  # 너무 명확해서 Fake 불필요
+@given(st.integers())
+def test_plus(a):
+    assert plus(a, 0) == a   # identity
 ```
 
-## 언제 Fake It을 쓰나
+property로 강제 일반화 — fake로는 통과 불가.
+
+### "Cucumber driven development"
+
+acceptance test 먼저 → 점진적 step 구현. fake 단계가 *자연스러움*.
+
+### "Walking skeleton"
+
+end-to-end *최소 동작* → 모든 layer가 *fake*. 점진적 실화.
+
+## Fake It 사이클
 
 ```text
-✓ 구현 방향이 불확실할 때
-✓ 복잡한 알고리즘을 시작할 때
-✓ 외부 의존성이 있을 때
-✓ 자신감이 낮을 때
-
-✗ 구현이 명확할 때 (Obvious Implementation)
-✗ 이미 비슷한 코드가 있을 때
-✗ 단순한 위임(delegation)일 때
+Test → Red → Fake (constant) → Green
+     → 두 번째 Test → Red
+     → Triangulate → Generalize → Green
+     → Refactor
 ```
+
+작은 사이클의 *반복* — *큰 도약 없이* 진화.
+
+## 도구 / IDE
+
+| 도구 | Fake 지원 |
+| --- | --- |
+| Live template (IntelliJ) | `fake` snippet |
+| Rust `todo!()` | 타입은 OK, panic |
+| Haskell `undefined` | type check OK |
+| TypeScript `never` | exhaustive switch에서 fake |
+
+## 성능 고려
+
+Fake 자체는 *극히 빠름*. cycle 속도 향상 효과. 단 *Fake가 production*에 남으면 functional bug.
 
 ## Beck의 조언
 
 > "Fake it은 비웃음 받지만, 가장 실용적인 기법이다. 나도 자주 쓴다."
 
-**작은 스텝**이 **자신감**을 만들고, 자신감이 **더 큰 스텝**을 가능하게 한다.
-
-## 정리
-
-- **상수 반환**으로 가장 빠르게 green
-- **심리적 안전** — red 시간 최소화
-- **작은 스텝 강제** — YAGNI 실천
-- **Triangulate**로 일반화
-- **명확하면 Obvious Implementation**으로
-- **비웃음 받아도** 실용적
+작은 스텝이 *자신감*을 만들고, 자신감이 *더 큰 스텝*을 가능하게.
 
 ## 관련 패턴
 
 - [Pattern 24: Triangulate](/blog/programming/engineering/tdd-patterns/pattern24-triangulate) — Fake 후 일반화
 - [Pattern 25: Obvious Implementation](/blog/programming/engineering/tdd-patterns/pattern25-obvious-implementation) — Fake 건너뛰기
 - [Pattern 8: One Step Test](/blog/programming/engineering/tdd-patterns/pattern08-one-step-test) — 작은 스텝 선택
-
+- [Pattern 9: Starter Test](/blog/programming/engineering/tdd-patterns/pattern09-starter-test) — 시작점
