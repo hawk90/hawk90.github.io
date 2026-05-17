@@ -625,4 +625,4 @@ McConnell 원문 3:
 
 - [Ch 11: The Power of Variable Names](/blog/programming/engineering/code-complete/ch11-The-Power-of-Variable-Names)
 - [Ch 13: Unusual Data Types](/blog/programming/engineering/code-complete/ch13-Unusual-Data-Types)
-- [Effective C++ Ch 2: const/enum/inline > #define](/blog/programming/cpp/effective-cpp)
+- [Effective C++ Ch 2: const/enum/inline > #define](/blog/programming/cpp/effective-cpp/item01-view-cpp-as-a-federation-of-languages)

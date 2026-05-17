@@ -188,4 +188,4 @@ real-time 시스템에서는 호출 비용이 예측 가능해야 한다. 함수
 
 - [Ch 17: 경계](/blog/programming/design/clean-architecture/chapter17-boundaries-drawing-lines) — HAL이 정확히 그 경계
 - [Ch 22: The Clean Architecture](/blog/programming/design/clean-architecture/chapter22-the-clean-architecture) — 동심원
-- [Embedded Security 시리즈](/blog/embedded/embedded-security/) — 임베디드 컨텍스트 더 깊이
+- [Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model/) — 임베디드 컨텍스트 더 깊이

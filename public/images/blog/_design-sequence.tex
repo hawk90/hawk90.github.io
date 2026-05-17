@@ -1,0 +1,125 @@
+% _design-sequence.tex — TikZ sequence diagram styles
+%
+% Mermaid는 *간단한* sequence diagram에 좋지만, 복잡한 경우 (여러 actor,
+% 중첩 activation, alt/opt/loop frame, 자세한 라벨)는 auto-layout이 들쭉날쭉.
+% 정밀 좌표가 필요할 때 TikZ로 그리는 표준.
+%
+% Companion to _design.tex — same palette and ink colors.
+%
+% Usage:
+%   \documentclass[border=10pt,tikz]{standalone}
+%   \usepackage{tikz}
+%   \usetikzlibrary{positioning,arrows.meta,shapes,fit,calc,decorations.pathreplacing}
+%   \begin{document}
+%   \input{../_design.tex}           % core palette
+%   \input{../_design-sequence.tex}  % sequence-specific
+%   \begin{tikzpicture}[blog, seq]
+%     % Actors (top)
+%     \node[actor]   (a) at (0, 0)  {Client};
+%     \node[actor]   (b) at (4, 0)  {Server};
+%     \node[actor]   (c) at (8, 0)  {DB};
+%
+%     % Lifelines (dashed vertical, automatic length via target node)
+%     \draw[lifeline] (a) -- ++(0,-7);
+%     \draw[lifeline] (b) -- ++(0,-7);
+%     \draw[lifeline] (c) -- ++(0,-7);
+%
+%     % Activation boxes (on lifeline)
+%     \node[activation, minimum height=14mm] at (b |- 0,-2.2) {};
+%
+%     % Messages (top-to-bottom time axis)
+%     \draw[msgsync] (a |- 0,-1.5) -- node[msglabel]{request} (b |- 0,-1.5);
+%     \draw[msgsync] (b |- 0,-2.5) -- node[msglabel]{query}   (c |- 0,-2.5);
+%     \draw[msgret]  (c |- 0,-3.2) -- node[msglabel]{rows}    (b |- 0,-3.2);
+%     \draw[msgret]  (b |- 0,-4.0) -- node[msglabel]{response}(a |- 0,-4.0);
+%
+%     % Frame (alt / opt / loop)
+%     \node[frame, fit={(2,-5) (6,-6.5)}, label={[framelabel]north west:alt}] {};
+%   \end{tikzpicture}
+
+\tikzset{
+  % Apply 'seq' style on top of 'blog' to get sequence-friendly defaults.
+  seq/.style={
+    every node/.append style={font=\sffamily\small},
+  },
+
+  % ─── Actors (top of diagram) ────────────────────────────
+  actor/.style={
+    rectangle, rounded corners=2pt,
+    draw=nodebord, line width=0.45pt,
+    minimum height=8mm, minimum width=22mm,
+    inner sep=3pt, fill=nodefill, align=center,
+    font=\sffamily\bfseries\small,
+  },
+  actorAlt/.style={actor, draw=absbord, fill=absfill},     % alternate accent
+  actorWarn/.style={actor, draw=warnbord, fill=warnfill},
+
+  % ─── Lifeline (dashed vertical) ─────────────────────────
+  lifeline/.style={
+    dashed, draw=mutec, line width=0.4pt,
+  },
+
+  % ─── Activation box (process running) ───────────────────
+  activation/.style={
+    rectangle, fill=absfill, draw=absbord, line width=0.35pt,
+    minimum width=2.4mm, anchor=north,
+    inner sep=0pt,
+  },
+  activationAlt/.style={activation, fill=hifill, draw=hibord},  % nested
+
+  % ─── Messages ────────────────────────────────────────────
+  % msgsync / msgasync / msgret already defined in _design.tex; we add labels & specials.
+  msglabel/.style={
+    font=\sffamily\footnotesize, text=inkc,
+    midway, above, fill=white, fill opacity=0.85, text opacity=1,
+    inner sep=2pt,
+  },
+  msglabelBelow/.style={msglabel, above=false, below},
+  msgself/.style={                                          % self-message (loop on lifeline)
+    -{Stealth[length=2.2mm]}, draw=edgec, line width=0.5pt,
+  },
+  msgcreate/.style={                                        % object creation (sets up new lifeline)
+    -{Stealth[length=2.4mm]}, dashed, draw=edgec, line width=0.5pt,
+  },
+  msgdestroy/.style={                                       % destruction (cross at lifeline end)
+    -{Stealth[length=2mm]}, draw=warnbord, line width=0.55pt,
+  },
+  % destruction cross marker
+  destroyX/.pic={
+    \draw[warnbord, line width=0.6pt] (-1.2mm,-1.2mm) -- (1.2mm,1.2mm);
+    \draw[warnbord, line width=0.6pt] (-1.2mm, 1.2mm) -- (1.2mm,-1.2mm);
+  },
+
+  % ─── Frame (alt / opt / loop / par) ─────────────────────
+  frame/.style={
+    rectangle,
+    draw=mutec, line width=0.4pt, dashed,
+    inner sep=4pt,
+    rounded corners=2pt,
+  },
+  framelabel/.style={
+    font=\sffamily\bfseries\footnotesize, text=inkc,
+    fill=neutfill, draw=mutec, line width=0.3pt,
+    inner sep=2pt,
+    rounded corners=1pt,
+  },
+  frameAltSep/.style={                                     % horizontal separator inside alt frame
+    dashed, draw=mutec, line width=0.4pt,
+  },
+
+  % ─── Note / comment attached to a message or lifeline ───
+  seqnote/.style={
+    rectangle, rounded corners=2pt,
+    draw=clibord, line width=0.4pt, fill=clifill,
+    inner sep=3pt, font=\sffamily\footnotesize, align=left,
+  },
+  seqnoteAlt/.style={seqnote, draw=tealbord, fill=tealfill},
+
+  % ─── Time-axis hints (rarely needed; use sparingly) ─────
+  timearrow/.style={
+    -{Stealth[length=2.4mm]}, draw=mutec, line width=0.3pt,
+  },
+  timetick/.style={
+    draw=mutec, line width=0.3pt,
+  },
+}

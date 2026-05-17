@@ -10,7 +10,7 @@ draft: false
 
 ## 왜 CMake 언어를 알아야 하는가
 
-[Ch 1](/blog/tools/cmake/chapter01-intro)의 세 줄짜리 CMakeLists.txt는 *시작점*입니다. 실제 프로젝트는 곧 다음과 같은 요구를 만납니다.
+[Ch 1](/blog/tools/build/cmake/chapter01-intro)의 세 줄짜리 CMakeLists.txt는 *시작점*입니다. 실제 프로젝트는 곧 다음과 같은 요구를 만납니다.
 
 - Debug 빌드에서만 특정 매크로를 켜고 싶다.
 - GCC와 Clang에서 *다른 경고 옵션*을 쓰고 싶다.
@@ -789,7 +789,7 @@ file(GENERATE
 
 ## `cmake_policy()` — 정책 시스템
 
-[Ch 1](/blog/tools/cmake/chapter01-intro)에서 `cmake_minimum_required(VERSION 3.20)`이 *정책 데이터베이스*를 그 버전의 동작으로 설정한다고 했습니다. 이제 그 정책 시스템 자체를 봅니다.
+[Ch 1](/blog/tools/build/cmake/chapter01-intro)에서 `cmake_minimum_required(VERSION 3.20)`이 *정책 데이터베이스*를 그 버전의 동작으로 설정한다고 했습니다. 이제 그 정책 시스템 자체를 봅니다.
 
 CMake는 버전이 올라가면서 *기존 동작을 바꿔야 했던 결정*들을 *번호가 매겨진 정책*으로 등록합니다. 예: `CMP0048`, `CMP0077`, `CMP0135`.
 
@@ -822,7 +822,7 @@ FetchContent_Declare(...)
 
 ## 다음 장 예고
 
-[Ch 3: 타겟](/blog/tools/cmake/chapter03-targets)에서는 *Modern CMake의 심장* — 타겟(target)을 다룹니다. `add_executable`·`add_library`·`target_link_libraries`와 그 모든 곳에 등장하는 *PRIVATE / PUBLIC / INTERFACE* 세 가시성. 이 셋의 의미를 정확히 잡으면 의존성 추적의 90%가 끝납니다.
+[Ch 3: 타겟](/blog/tools/build/cmake/chapter03-targets)에서는 *Modern CMake의 심장* — 타겟(target)을 다룹니다. `add_executable`·`add_library`·`target_link_libraries`와 그 모든 곳에 등장하는 *PRIVATE / PUBLIC / INTERFACE* 세 가시성. 이 셋의 의미를 정확히 잡으면 의존성 추적의 90%가 끝납니다.
 
 ## 참고 자료
 

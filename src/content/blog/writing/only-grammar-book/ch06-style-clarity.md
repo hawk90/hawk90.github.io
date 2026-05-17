@@ -321,7 +321,7 @@ Strunk의 *Rule 20*.
 
 ## 관련 항목
 
-- [Only Grammar Book — 시리즈 개요](/blog/writing/only-grammar-book)
+- [Only Grammar Book — 시리즈 개요](/blog/writing/only-grammar-book/ch01-parts-of-speech)
 - [Chapter 1: Parts of Speech](/blog/writing/only-grammar-book/ch01-parts-of-speech)
 - [Elements of Style — Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)
 - [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)

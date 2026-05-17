@@ -377,7 +377,7 @@ $ minidump_stackwalk crash.dmp ./symbols/
 
 ## ASan / TSan / 시그널과의 관계
 
-[Sanitizer](/blog/tools/debugging/sanitizers/chapter01-asan)들은 검출 시 *진단 메시지*를 출력하고 `abort()`로 죽습니다. `abort()`는 SIGABRT를 일으키므로 core가 생성됩니다. 다만 ASan은 자체 메모리 풀을 쓰므로 core 안의 상태가 약간 혼란스러울 수 있습니다.
+[Sanitizer](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)들은 검출 시 *진단 메시지*를 출력하고 `abort()`로 죽습니다. `abort()`는 SIGABRT를 일으키므로 core가 생성됩니다. 다만 ASan은 자체 메모리 풀을 쓰므로 core 안의 상태가 약간 혼란스러울 수 있습니다.
 
 ```bash
 $ ASAN_OPTIONS="abort_on_error=1:disable_coredump=0" ./my_program
@@ -433,7 +433,7 @@ Ch 8 — 원격·임베디드 디버깅. gdbserver·lldb-server로 다른 머신
 - [Ch 6: 멀티스레드 / 멀티프로세스](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess)
 - [Ch 8: 원격 디버깅 / OpenOCD / J-Link](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)
 - [Ch 12: DWARF](/blog/tools/debugging/gdb-lldb/chapter12-dwarf) — debuginfo의 정체
-- [Sanitizers Ch 1: AddressSanitizer](/blog/tools/debugging/sanitizers/chapter01-asan)
+- [Sanitizers Ch 1: AddressSanitizer](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)
 - `man 5 core` — core dump 포맷
 - `man 5 elf` — ELF 구조
 - [systemd-coredump(8)](https://www.freedesktop.org/software/systemd/man/systemd-coredump.html)

@@ -529,6 +529,6 @@ Ch 6에서는 블록 구조를 다룬다. Coding Block(CB)과 Transform Block(TB
 
 ## 관련 항목
 
-- [Ch 3: Sequence Header와 공간 구조](/blog/media/av1/part2-bitstream/chapter03-tiles-superblocks)
-- [Ch 4: 블록 파티셔닝](/blog/media/av1/part3-blocks/chapter04-partitioning)
-- [Ch 6: 블록 구조와 CB/TB](/blog/media/av1/part3-blocks/chapter06-block-structure)
+- [Ch 3: Sequence Header와 공간 구조](/blog/media/av1/chapter03-tiles-superblocks)
+- [Ch 4: 블록 파티셔닝](/blog/media/av1/chapter04-partitioning)
+- [Ch 6: 블록 구조와 CB/TB](/blog/media/av1/chapter06-block-structure)

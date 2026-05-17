@@ -279,4 +279,4 @@ Ch 5 — **CSP**. Actor와 비슷한 메시지 패싱, 그러나 *채널*이 중
 - [Ch 3: The Clojure Way](/blog/parallel/seven-concurrency-models/ch03-the-clojure-way)
 - [Ch 5: CSP](/blog/parallel/seven-concurrency-models/ch05-csp)
 - [AMP Ch 1: Introduction](/blog/parallel/parallel-principles/ch01-introduction)
-- [DDIA Ch 11: Stream Processing](/blog/parallel/designing-data-intensive-applications) — 분산 통신
+- [DDIA Ch 11: Stream Processing](/blog/parallel/designing-data-intensive-applications/chapter01-reliable-scalable-maintainable) — 분산 통신

@@ -374,8 +374,8 @@ Go는 GC. 누수는 *goroutine leak* 또는 *map에 무한 key* 형태가 흔함
 
 ## 외부 자료
 
-- [Sanitizers — ASan](/blog/tools/debugging/sanitizers/chapter01-asan)
-- [Valgrind — Memcheck](/blog/tools/debugging/valgrind/chapter01-memcheck)
+- [Sanitizers — ASan](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)
+- [Valgrind — Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck)
 - [Kernel Debugging Ch 4: eBPF](/blog/tools/debugging/kernel/chapter04-ebpf-kernel)
 - [`Documentation/admin-guide/cgroup-v2.rst`](https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html)
 - [PSI 공식 문서](https://www.kernel.org/doc/html/latest/accounting/psi.html)

@@ -334,16 +334,7 @@ PR 절차
 
 텍스트 기반 도구(PlantUML, Mermaid)가 git diff와 code review에 어울린다.
 
-```mermaid
-graph TD
-    Domain[Domain Layer]
-    Application[Application Layer]
-    Infrastructure[Infrastructure Layer]
-
-    Application --> Domain
-    Infrastructure --> Domain
-    Infrastructure --> Application
-```
+![Layered Architecture — Application·Infrastructure depend on Domain](/images/blog/cpp-software-design/diagrams/guideline10-layered-arch.svg)
 
 ## 라이프타임 / 시퀀스 다이어그램
 

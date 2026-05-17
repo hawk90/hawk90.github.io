@@ -58,5 +58,5 @@ jobs:
 
 ## 관련 항목
 
-- [Ch 9: 디버깅](/blog/tools/qemu-fake-device/chapter09-debugging)
-- [Ch 11: 고급 시나리오](/blog/tools/qemu-fake-device/chapter11-advanced-scenarios)
+- [Ch 9: 디버깅](/blog/tools/emulation/qemu-fake-device/chapter09-debugging)
+- [Ch 11: 고급 시나리오](/blog/tools/emulation/qemu-fake-device/chapter11-advanced-scenarios)

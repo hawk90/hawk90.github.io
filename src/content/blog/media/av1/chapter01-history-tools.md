@@ -69,8 +69,8 @@ draft: true
 직관: "옆 픽셀이 파란색이면 이 픽셀도 파란색일 것이다"
 ```
 
-- **Intra 예측**: 같은 프레임 내 이웃 픽셀 참조 → [Ch 8](/blog/media/av1/part4-prediction/chapter08-intra-prediction)에서 상세히 다룸
-- **Inter 예측**: 이전/이후 프레임 참조 → [Ch 12](/blog/media/av1/part4-prediction/chapter12-inter-prediction)에서 상세히 다룸
+- **Intra 예측**: 같은 프레임 내 이웃 픽셀 참조 → [Ch 8](/blog/media/av1/chapter08-intra-prediction)에서 상세히 다룸
+- **Inter 예측**: 이전/이후 프레임 참조 → [Ch 12](/blog/media/av1/chapter12-inter-prediction)에서 상세히 다룸
 - 예측이 정확할수록 보낼 정보가 줄어든다
 
 **(2) 잔차(Residual)** — "추측이 틀린 부분만 기록한다"
@@ -87,7 +87,7 @@ residual(x, y) = original(x, y) - prediction(x, y)
 
 - 픽셀 값을 "저주파(부드러운 변화)"와 "고주파(급격한 변화)"로 분리
 - 자연 영상: 에너지의 대부분이 저주파에 집중
-- 결과: 소수의 큰 계수 + 다수의 0에 가까운 계수 → [Ch 9](/blog/media/av1/part3-blocks/chapter09-transform-quantization)에서 상세히 다룸
+- 결과: 소수의 큰 계수 + 다수의 0에 가까운 계수 → [Ch 9](/blog/media/av1/chapter09-transform-quantization)에서 상세히 다룸
 - 비유: 음악을 "도레미" 음계로 분해하는 것과 유사
 
 **(4) 양자화(Quantization)** — "정밀도를 낮춰 비트를 줄인다"
@@ -108,7 +108,7 @@ qcoeff = round(coeff / step)
 ```
 
 - 양자화 후 0이 매우 많음 → 0에 아주 짧은 코드 부여
-- AV1은 산술 코딩(Arithmetic Coding) 사용 → [Ch 7](/blog/media/av1/part2-bitstream/chapter07-entropy-coding)에서 상세히 다룸
+- AV1은 산술 코딩(Arithmetic Coding) 사용 → [Ch 7](/blog/media/av1/chapter07-entropy-coding)에서 상세히 다룸
 - 이론적 한계: Shannon 엔트로피보다 짧을 수 없다
 
 ## 1.3 비디오 코덱의 역사
@@ -358,5 +358,5 @@ Ch 2에서는 AV1 비트스트림의 구조를 다룬다. OBU(Open Bitstream Uni
 
 ## 관련 항목
 
-- [Ch 0: 디지털 비디오 기초](/blog/media/av1/part1-basics/chapter00-digital-video)
-- [Ch 2: 비트스트림 구조](/blog/media/av1/part2-bitstream/chapter02-bitstream)
+- [Ch 0: 디지털 비디오 기초](/blog/media/av1/chapter00-digital-video)
+- [Ch 2: 비트스트림 구조](/blog/media/av1/chapter02-bitstream/00-overview)

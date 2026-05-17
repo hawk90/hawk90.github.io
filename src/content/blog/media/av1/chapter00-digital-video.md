@@ -243,7 +243,7 @@ $$\text{4:2:0} \rightarrow 1 + 0.25 + 0.25 = 1.5 \quad (\text{채널}) \rightarr
 - 텍스처가 있어도 인접 픽셀 간 변화는 작다
 - "옆 픽셀이 200이면 이 픽셀도 200 근처일 것이다"
 
-나중에 다룰 **Intra Prediction** ([Ch 8](/blog/media/av1/part4-prediction/chapter08-intra-prediction))의 기반이다.
+나중에 다룰 **Intra Prediction** ([Ch 8](/blog/media/av1/chapter08-intra-prediction))의 기반이다.
 
 ### 시간 중복성 (Temporal Redundancy)
 
@@ -254,7 +254,7 @@ $$\text{4:2:0} \rightarrow 1 + 0.25 + 0.25 = 1.5 \quad (\text{채널}) \rightarr
 - 카메라가 고정되어 있으면 99%의 픽셀이 동일하다
 - 물체가 이동해도 위치만 바뀌고 픽셀값 자체는 유사하다
 
-나중에 다룰 **Inter Prediction** ([Ch 12](/blog/media/av1/part4-prediction/chapter12-inter-prediction))의 기반이다.
+나중에 다룰 **Inter Prediction** ([Ch 12](/blog/media/av1/chapter12-inter-prediction))의 기반이다.
 
 ### 실습 — 차이 이미지
 
@@ -405,4 +405,4 @@ Round2:          (100 + 4) >> 3 = 13  (반올림 → 정확)
 
 ## 관련 항목
 
-- [AV1 시리즈 개요](/blog/media/av1) — 전체 12장 구조
+- [AV1 시리즈 개요](/blog/media/av1/00-overview) — 전체 12장 구조

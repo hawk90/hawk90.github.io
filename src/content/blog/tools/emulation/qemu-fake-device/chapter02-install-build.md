@@ -69,5 +69,5 @@ make -j$(nproc)
 
 ## 관련 항목
 
-- [Ch 1: QEMU 개요](/blog/tools/qemu-fake-device/chapter01-overview)
-- [Ch 3: QEMU 디바이스 모델 기초](/blog/tools/qemu-fake-device/chapter03-qom-basics)
+- [Ch 1: QEMU 개요](/blog/tools/emulation/qemu-fake-device/chapter01-overview)
+- [Ch 3: QEMU 디바이스 모델 기초](/blog/tools/emulation/qemu-fake-device/chapter03-qom-basics)

@@ -55,5 +55,5 @@ typedef struct MyDeviceState {
 
 ## 관련 항목
 
-- [Ch 2: QEMU 설치와 빌드](/blog/tools/qemu-fake-device/chapter02-install-build)
-- [Ch 4: 간단한 PCI 디바이스](/blog/tools/qemu-fake-device/chapter04-simple-pci)
+- [Ch 2: QEMU 설치와 빌드](/blog/tools/emulation/qemu-fake-device/chapter02-install-build)
+- [Ch 4: 간단한 PCI 디바이스](/blog/tools/emulation/qemu-fake-device/chapter04-simple-pci)

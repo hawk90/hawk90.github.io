@@ -60,5 +60,5 @@ qemu-system-x86_64 ... -incoming tcp:0:4444
 
 ## 관련 항목
 
-- [Ch 9: 타이머와 클럭](/blog/tools/qemu-internals/chapter09-timers)
-- [Ch 11: 커스텀 머신 타입](/blog/tools/qemu-internals/chapter11-custom-machine)
+- [Ch 9: 타이머와 클럭](/blog/tools/emulation/qemu-internals/chapter09-timers)
+- [Ch 11: 커스텀 머신 타입](/blog/tools/emulation/qemu-internals/chapter11-custom-machine)

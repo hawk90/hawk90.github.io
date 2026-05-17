@@ -90,6 +90,6 @@ make check-qtest
 
 ## 관련 항목
 
-- [Ch 11: 커스텀 머신 타입](/blog/tools/qemu-internals/chapter11-custom-machine)
+- [Ch 11: 커스텀 머신 타입](/blog/tools/emulation/qemu-internals/chapter11-custom-machine)
 - [QEMU Official Documentation](https://www.qemu.org/docs/master/)
 - [QEMU Mailing List](https://lists.gnu.org/mailman/listinfo/qemu-devel)

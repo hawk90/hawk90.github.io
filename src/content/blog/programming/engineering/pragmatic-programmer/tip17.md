@@ -59,5 +59,5 @@ draft: true
 
 - [Tip 16: Make It Easy to Reuse](/blog/programming/engineering/pragmatic-programmer/tip16)
 - [Tip 18: There Are No Final Decisions](/blog/programming/engineering/pragmatic-programmer/tip18)
-- [Clean Architecture Ch 14: Component Coupling](/blog/programming/design/clean-architecture/)
+- [Clean Architecture Ch 14: Component Coupling](/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture/)
 - [Code Complete Ch 5: Design in Construction](/blog/programming/engineering/code-complete/ch05-Design-in-Construction)

@@ -299,7 +299,7 @@ $ cd self-hosted && ./install.sh
 
 ## ASan / TSan과 core
 
-[Sanitizer](/blog/tools/debugging/sanitizers/chapter01-asan)는 *검출 시 진단 + abort()*. SIGABRT가 core 생성.
+[Sanitizer](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)는 *검출 시 진단 + abort()*. SIGABRT가 core 생성.
 
 ```bash
 $ ASAN_OPTIONS="abort_on_error=1:disable_coredump=0" ./prog

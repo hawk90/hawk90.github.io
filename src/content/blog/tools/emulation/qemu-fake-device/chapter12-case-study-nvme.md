@@ -60,5 +60,5 @@ qemu-system-x86_64 -drive file=disk.qcow2,if=none,id=nvm \
 
 ## 관련 항목
 
-- [Ch 11: 고급 시나리오](/blog/tools/qemu-fake-device/chapter11-advanced-scenarios)
+- [Ch 11: 고급 시나리오](/blog/tools/emulation/qemu-fake-device/chapter11-advanced-scenarios)
 - [QEMU Embedded Emulation 시리즈](/blog/tools/qemu-embedded-emulation/chapter01-overview)

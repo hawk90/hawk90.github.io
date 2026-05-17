@@ -174,4 +174,4 @@ Martin의 권장.
 
 - [Ch 17: 경계](/blog/programming/design/clean-architecture/chapter17-boundaries-drawing-lines)
 - [Ch 22: The Clean Architecture](/blog/programming/design/clean-architecture/chapter22-the-clean-architecture) — 완전한 경계의 모습
-- [GoF Facade](/blog/programming/design/gof-design-patterns/) — Facade 패턴
+- [GoF Facade](/blog/programming/design/gof-design-patterns/item01-abstract-factory/) — Facade 패턴

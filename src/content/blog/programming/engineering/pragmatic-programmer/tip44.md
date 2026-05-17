@@ -51,4 +51,4 @@ draft: true
 - [Tip 17: Orthogonality](/blog/programming/engineering/pragmatic-programmer/tip17)
 - [Tip 43: Avoid Fortune-Telling](/blog/programming/engineering/pragmatic-programmer/tip43)
 - [Tip 45: Tell, Don't Ask](/blog/programming/engineering/pragmatic-programmer/tip45)
-- [Clean Architecture Ch 14: Component Coupling](/blog/programming/design/clean-architecture/)
+- [Clean Architecture Ch 14: Component Coupling](/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture/)

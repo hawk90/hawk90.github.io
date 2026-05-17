@@ -17,7 +17,7 @@ draft: false
 - [Concurrency](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex) — 멀티스레드, rr, TSan
 - [Postmortem](/blog/tools/debugging/postmortem/chapter01-core-generation) — core dump, debuginfod
 - [Python 디버깅](/blog/tools/debugging/python/chapter01-pdb-basics) — pdb, debugpy, py-spy
-- [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-asan) · [Valgrind](/blog/tools/debugging/valgrind/chapter01-memcheck) — 자동 검출
+- [Sanitizers](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan) · [Valgrind](/blog/tools/debugging/valgrind/chapter02-memcheck) — 자동 검출
 - [Memory 진단](/blog/tools/debugging/memory/chapter01-memory-accounting) — heap profiler, OOM
 - [Kernel 디버깅](/blog/tools/debugging/kernel/chapter01-user-kernel-boundary) — kdb/kgdb, crash, drgn
 :::

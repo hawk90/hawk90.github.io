@@ -215,4 +215,4 @@ DDIA 이후에 권장되는 자료.
 - [Ch 1: Reliability / Scalability / Maintainability](/blog/parallel/designing-data-intensive-applications/chapter01-reliable-scalable-maintainable) — 시작점
 - [AMP 시리즈](/blog/parallel/parallel-principles/ch01-introduction) — 동시성 이론
 - [Clean Architecture 시리즈](/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture) — 시스템 디자인의 다른 차원
-- [C++ Concurrency in Action 시리즈](/blog/parallel/cpp-concurrency-in-action/) — 단일 노드 동시성 실전
+- [C++ Concurrency in Action 시리즈](/blog/parallel/cpp-concurrency-in-action/chapter01-hello-concurrent-world/) — 단일 노드 동시성 실전

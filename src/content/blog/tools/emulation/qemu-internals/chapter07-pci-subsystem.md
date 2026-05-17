@@ -61,5 +61,5 @@ PCI 설정 공간:
 
 ## 관련 항목
 
-- [Ch 6: 네트워크 레이어](/blog/tools/qemu-internals/chapter06-network-layer)
-- [Ch 8: 인터럽트 컨트롤러](/blog/tools/qemu-internals/chapter08-interrupt-controller)
+- [Ch 6: 네트워크 레이어](/blog/tools/emulation/qemu-internals/chapter06-network-layer)
+- [Ch 8: 인터럽트 컨트롤러](/blog/tools/emulation/qemu-internals/chapter08-interrupt-controller)

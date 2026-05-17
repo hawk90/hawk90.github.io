@@ -168,4 +168,4 @@ is-a는 종종 직관적이지만, LSP 관점에서는 **behaves-like-a**가 더
 
 - [C++ Software Design 가이드라인 6: 기대 행동 준수](/blog/programming/cpp/cpp-software-design/guideline06-adhere-to-the-expected-behavior-of-abstractions) — LSP의 다른 표현
 - [Refactoring Ch 12: 상속](/blog/programming/design/refactoring/ch12) — Replace Subclass with Delegate
-- [Effective C++ 항목 32-40](/blog/programming/cpp/effective-cpp/) — 상속과 OO 디자인
+- [Effective C++ 항목 32-40](/blog/programming/cpp/effective-cpp/item01-view-cpp-as-a-federation-of-languages/) — 상속과 OO 디자인

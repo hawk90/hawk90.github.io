@@ -53,5 +53,5 @@ QEMU 프로세스 자체를 GDB로 디버깅할 수도 있습니다.
 
 ## 관련 항목
 
-- [Ch 8: 리눅스 드라이버 작성](/blog/tools/qemu-fake-device/chapter08-linux-driver)
-- [Ch 10: 테스트 자동화](/blog/tools/qemu-fake-device/chapter10-test-automation)
+- [Ch 8: 리눅스 드라이버 작성](/blog/tools/emulation/qemu-fake-device/chapter08-linux-driver)
+- [Ch 10: 테스트 자동화](/blog/tools/emulation/qemu-fake-device/chapter10-test-automation)

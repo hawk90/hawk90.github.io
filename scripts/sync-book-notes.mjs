@@ -16,7 +16,8 @@ import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const BOOK_NOTES_ROOT = path.resolve(ROOT, '../book-notes');
-const IMG_EXT = /\.(svg|png|jpe?g|webp|gif)$/i;
+// Vector-only — blog uses SVG. PNG/raster intentionally skipped (duplicates of SVG).
+const IMG_EXT = /\.svg$/i;
 const SKIP_FILES = new Set(['README.md', 'notes.md', 'notes.md.legacy', 'roadmap.md', 'storyboard.md']);
 
 const SERIES = [

@@ -197,10 +197,31 @@ class OrderProcessor {
 
 ### 언어와 syntax highlight
 
-- C++ → ` ```cpp `
-- Python → ` ```python `
-- Korean 일반 텍스트 → ` ``` ` (언어 없이)
-- 의사 코드 → ` ``` ` (언어 없이)
+**모든 코드 블록에 언어 태그 필수**. expressive-code가 적절히 처리하도록 — 빈 ` ``` `는 *지양*.
+
+| 내용 | 언어 태그 |
+|------|----------|
+| C++ | ` ```cpp ` |
+| C | ` ```c ` |
+| Python | ` ```python ` |
+| Rust | ` ```rust ` |
+| Go | ` ```go ` |
+| JavaScript / TypeScript | ` ```js ` / ` ```ts ` |
+| Bash 명령 (실행) | ` ```bash ` |
+| 셸 세션 (`$` 프롬프트 + 출력 섞임) | ` ```text ` |
+| 디렉토리 트리·ASCII 구조 | ` ```text ` |
+| 컴파일러·툴 출력·로그·에러 메시지 | ` ```text ` |
+| 의사 코드 (어느 언어도 아닌 알고리즘 설명) | ` ```text ` |
+| Makefile | ` ```makefile ` |
+| CMake | ` ```cmake ` |
+| YAML / JSON / TOML / INI | ` ```yaml ` / ` ```json ` / ` ```toml ` / ` ```ini ` |
+| HTML / CSS | ` ```html ` / ` ```css ` |
+| SQL | ` ```sql ` |
+| 한국어 평문 (예외적 박스 표시) | ` ```text ` (그러나 산문은 보통 *블록에 안 넣는다*) |
+
+**`shell` 태그는 피한다** — `bash`/`text` 둘 중에 선택. `shell`은 expressive-code가 *프롬프트·키워드*를 과하게 강조해 트리·출력이 어색해진다.
+
+**Korean 일반 텍스트는 코드 블록에 *넣지 않는다***. 산문은 markdown 본문으로, 비교·매핑은 표로.
 
 ### 코드 길이
 
@@ -216,26 +237,25 @@ class OrderProcessor {
 
 | 도구 | 적합한 경우 | 적합하지 않은 경우 |
 |------|-------------|-------------------|
-| **TikZ** (→ SVG) | 정밀 좌표가 중요한 그림 — 메모리 레이아웃, 캐시 라인, 모래시계, bar chart, 격자, 수학 도형, flowchart, *비례 폭 timeline* (barrier / phase) | — (거의 모든 경우 OK) |
-| **Mermaid** | *sequence diagram* (스레드 lifeline, 메시지 교환) — 컬럼이 participant로 자연 정렬되는 경우만 | flowchart (auto-layout 들쭉날쭉), gantt (날짜 기반이라 기술 timeline에 어색), state diagram (수동 정렬이 보통 더 깔끔) |
+| **TikZ** (→ SVG) | *모든* 다이어그램 — 메모리 레이아웃, 캐시 라인, bar chart, 격자, 수학 도형, flowchart, timeline, sequence, state machine, UML | — |
+| **TikZ + PGFPlots** | math 함수 plot, 벡터 도형, 적분, FFT, 통계 — *책급 정적* | 인터랙티브 |
 | **마크다운 표** | 비교 / 매핑 / 카탈로그 | 공간 관계가 의미 있는 그림 |
 | **마크다운 리스트** | 제목 + 항목식 정보 | 흐름 / 의존성 |
-| **코드 블록** | 코드 트레이스 / 디렉토리 트리 / ASCII가 곧 의미 | 진짜 시각 다이어그램 |
+| **코드 블록** | 코드 / 트레이스 / 디렉토리 트리 / 출력·로그 / ASCII가 곧 의미 (*항상 언어 태그 — `text` 또는 명시 언어*) | 진짜 시각 다이어그램, 산문 |
 | **KaTeX** (`$$ ... $$`) | 수학 수식 | 그림 |
 
 #### 결정 규칙
 
 1. **표/리스트로 표현 가능?** → 그걸로. 가장 단순하고 검색·복사 가능.
 2. **수식?** → KaTeX.
-3. **그 외 모든 그림** → TikZ. 정밀 좌표, 비례 폭, 일관된 디자인 시스템(`_design.tex`) 활용.
-4. **예외 — sequence diagram만 Mermaid 고려**: participant 컬럼이 자연 정렬되고 메시지 화살표가 단순할 때. 복잡해지면 TikZ.
+3. **그 외 모든 그림** → TikZ. 정밀 좌표, 비례 폭, 일관된 디자인 시스템(`_design.tex` / `_design-math.tex` / `_design-sequence.tex` / `_design-state.tex`) 활용.
 
-> **회피 원칙**: ASCII 박스 다이어그램(`┌──┐`)을 *결과물*로 남기지 않는다. 위 5가지 중 하나로 대체.
+> **회피 원칙**: ASCII 박스 다이어그램(`┌──┐`)을 *결과물*로 남기지 않는다.
+> **Mermaid 사용 안 함**: sequence/state는 `_design-sequence.tex` / `_design-state.tex`로. graph·flowchart는 `_design.tex`로. 모든 다이어그램이 *pre-built SVG*로 통일.
 
 ### 다이어그램 파일 배치
 
 - **TikZ**: `public/images/blog/<series>/diagrams/<name>.tex` + 빌드된 `.svg`
-- **Mermaid**: 글 안에 ` ```mermaid ` 코드 블록 직접 (이미지 파일 X)
 - 빌드: `npm run diagrams` (증분) / `npm run diagrams:force` (전체) / `npm run diagrams:watch` (감시)
 - 내부적으로 `scripts/build-diagrams.sh` 실행 — xelatex/pdflatex → PDF → pdftocairo SVG
 
@@ -243,13 +263,12 @@ class OrderProcessor {
 ![구조 설명](/images/blog/gof/diagrams/item01-abstract-factory.svg)
 ```
 
-```mermaid
-sequenceDiagram
-    participant A as Thread A
-    participant B as Thread B
-    A->>B: signal
-    B-->>A: ack
-```
+디자인 토큰:
+
+- `_design.tex` — 일반 (UML·트리·그래프·flowchart)
+- `_design-math.tex` — math (PGFPlots, book-notes 팔레트)
+- `_design-sequence.tex` — sequence diagram
+- `_design-state.tex` — state machine / FSM
 
 ### TikZ 작성 기준 (가독성 보장)
 
@@ -390,6 +409,12 @@ media/av1              — AV1
 - [ ] "정리", "다음 장 예고", "관련 항목" 섹션이 있는가?
 - [ ] 코드 예시가 규칙마다 최소 한 개씩 있는가?
 
+### 코드 블록
+
+- [ ] *모든* 코드 블록에 언어 태그를 붙였는가? (빈 ` ``` ` 금지)
+- [ ] `shell` 대신 `bash`(실행) / `text`(트리·출력·의사코드)를 썼는가?
+- [ ] 한국어 산문을 코드 블록에 *넣지 않았는가*? (산문은 markdown, 비교는 표)
+
 ### Frontmatter
 
 - [ ] `draft`가 의도대로 설정되어 있는가?
@@ -404,8 +429,7 @@ media/av1              — AV1
 ### 시각 자료
 
 - [ ] ASCII 박스 다이어그램(`┌──┐`)을 결과물에 남기지 않았는가?
-- [ ] flowchart / gantt / state diagram을 Mermaid auto-layout으로 그리지 않았는가? (TikZ 권장)
-- [ ] Mermaid는 *sequence diagram에만* 한정 사용했는가?
+- [ ] **Mermaid 블록**(` ```mermaid `)을 *전혀* 쓰지 않았는가? (sequence는 `_design-sequence.tex`, state는 `_design-state.tex`, 나머지는 `_design.tex`로)
 - [ ] 표·리스트로 충분한 정보를 *불필요한 그림*으로 그리지 않았는가?
 
 ### TikZ

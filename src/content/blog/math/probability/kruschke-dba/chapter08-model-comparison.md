@@ -1,0 +1,11 @@
+---
+title: "Ch 8: Model Comparison"
+date: 2030-05-01T08:00:00
+description: "Bayes factor·hierarchical structure로 model을 선택."
+series: "Doing Bayesian Data Analysis (2nd ed, core)"
+seriesOrder: 8
+tags: [kruschke, model-comparison, bayes-factor, model-averaging]
+draft: true
+---
+
+> Outline — *Two-model comparison via Bayes factor*. *Hierarchical formulation* — indicator variable로 model을 random parameter처럼. *Prior sensitivity of Bayes factor*. *Approximate marginal likelihood* — bridge sampling·Laplace. *Model averaging*. *Kruschke의 시각* — *parameter estimation > model selection*.

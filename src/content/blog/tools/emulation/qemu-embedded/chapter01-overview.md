@@ -51,4 +51,4 @@ QEMU의 `virt` 머신은 범용 가상 플랫폼입니다.
 ## 관련 항목
 
 - [Ch 2: ARM virt 머신](/blog/tools/qemu-embedded-emulation/chapter02-arm-virt)
-- [QEMU Fake Device Driver 시리즈](/blog/tools/qemu-fake-device/chapter01-overview)
+- [QEMU Fake Device Driver 시리즈](/blog/tools/emulation/qemu-fake-device/chapter01-overview)

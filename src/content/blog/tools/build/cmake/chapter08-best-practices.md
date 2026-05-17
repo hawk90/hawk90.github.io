@@ -225,7 +225,7 @@ target_link_libraries(myapp ${FOO_LIB})
 
 ### 권장 디렉터리 레이아웃
 
-```shell
+```text
 project/
 ├── CMakeLists.txt           # 최상위 설정
 ├── CMakePresets.json        # 빌드 프리셋
@@ -506,7 +506,7 @@ FetchContent_MakeAvailable(fmt spdlog)
 
 ## 다음 단계 — Modern Advanced
 
-지금까지의 베스트 프랙티스를 적용한 뒤, *더 깊이 들어가야 할 도구*들이 있습니다 — `target_sources` / `target_precompile_headers` 같은 확장 타겟 명령, `BUILD_INTERFACE` vs `INSTALL_INTERFACE`, `CMakePresets.json`, `cmake -E`. 이 도구들은 [Ch 9: Modern Advanced](/blog/tools/cmake/chapter09-modern-advanced)에서 모아 다룹니다.
+지금까지의 베스트 프랙티스를 적용한 뒤, *더 깊이 들어가야 할 도구*들이 있습니다 — `target_sources` / `target_precompile_headers` 같은 확장 타겟 명령, `BUILD_INTERFACE` vs `INSTALL_INTERFACE`, `CMakePresets.json`, `cmake -E`. 이 도구들은 [Ch 9: Modern Advanced](/blog/tools/build/cmake/chapter09-modern-advanced)에서 모아 다룹니다.
 
 ---
 
@@ -607,7 +607,7 @@ Modern find 모듈은 imported 타겟을 제공합니다. 타겟을 링크하면
 
 ## 다음 장 예고
 
-[Ch 9: Modern Advanced](/blog/tools/cmake/chapter09-modern-advanced)에서는 이 베스트 프랙티스 위에 얹는 *고급 도구 모음*을 다룹니다 — `target_*` 패밀리 전체, `BUILD_INTERFACE` vs `INSTALL_INTERFACE`, `add_custom_command/target`, CMakePresets.json, `cmake -E`까지.
+[Ch 9: Modern Advanced](/blog/tools/build/cmake/chapter09-modern-advanced)에서는 이 베스트 프랙티스 위에 얹는 *고급 도구 모음*을 다룹니다 — `target_*` 패밀리 전체, `BUILD_INTERFACE` vs `INSTALL_INTERFACE`, `add_custom_command/target`, CMakePresets.json, `cmake -E`까지.
 
 ---
 
@@ -623,4 +623,4 @@ Modern find 모듈은 imported 타겟을 제공합니다. 타겟을 링크하면
 
 ## 관련 시리즈
 
-- [GNU Make 시리즈](/blog/tools/gnu-make/chapter01-intro) — Make 기초
+- [GNU Make 시리즈](/blog/tools/build/gnu-make/chapter01-intro) — Make 기초

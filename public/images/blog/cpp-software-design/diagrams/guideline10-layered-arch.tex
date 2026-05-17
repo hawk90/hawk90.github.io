@@ -1,0 +1,17 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+  % Three layers — Application·Infrastructure depend on Domain
+  \node[abs, minimum width=42mm] (dom) at (0, 0) {Domain Layer};
+  \node[con, minimum width=42mm] (app) at (-3.2, -2) {Application Layer};
+  \node[imp, minimum width=42mm] (inf) at ( 3.2, -2) {Infrastructure Layer};
+
+  % Dependencies (DIP — both depend on Domain; Infra also depends on Application)
+  \draw[uses] (app.north east) -- node[font=\sffamily\footnotesize, above, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt]{depends on} (dom.south west);
+  \draw[uses] (inf.north west) -- node[font=\sffamily\footnotesize, above, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt]{depends on} (dom.south east);
+  \draw[uses] (inf) -- node[font=\sffamily\footnotesize, below, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt]{depends on} (app);
+\end{tikzpicture}
+\end{document}

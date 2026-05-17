@@ -10,7 +10,7 @@ draft: false
 
 ## 규칙의 해부
 
-[Ch 1](/blog/tools/gnu-make/chapter01-intro)에서 본 것처럼 Makefile은 규칙(rule)의 묶음입니다. 규칙 하나의 모양은 단순합니다.
+[Ch 1](/blog/tools/build/gnu-make/chapter01-intro)에서 본 것처럼 Makefile은 규칙(rule)의 묶음입니다. 규칙 하나의 모양은 단순합니다.
 
 ```makefile
 타겟: 의존성1 의존성2
@@ -56,7 +56,7 @@ bar.o: common.h
 
 각 타겟이 *독립된 규칙*으로 복제된다는 점이 중요합니다. 즉 `make foo.o`를 부르면 `foo.o`용 레시피만, `make bar.o`는 `bar.o`용 레시피만 실행됩니다. 두 타겟이 *한 번의 명령으로 동시에 만들어지는 게 아닙니다*. 정말로 "한 명령이 두 파일을 동시에 만든다"고 알려 주고 싶다면 4.3에 추가된 **grouped target** 문법(`&:`)을 써야 합니다(Ch 4에서 다룹니다).
 
-`$<`(첫 번째 의존성)와 `$@`(타겟 이름)은 *자동 변수*입니다. 자세한 동작은 [Ch 3](/blog/tools/gnu-make/chapter03-variables)에서 다룹니다. 지금은 손잡이로만 봐 두세요.
+`$<`(첫 번째 의존성)와 `$@`(타겟 이름)은 *자동 변수*입니다. 자세한 동작은 [Ch 3](/blog/tools/build/gnu-make/chapter03-variables)에서 다룹니다. 지금은 손잡이로만 봐 두세요.
 
 ### 기본 타겟
 
@@ -81,7 +81,7 @@ clean:
 	rm -f hello goodbye *.o
 ```
 
-이 패턴이면 `make`만 쳐도 `all`이 평가되고, `all`이 `hello`와 `goodbye`에 의존하므로 둘 다 빌드됩니다. `all`은 파일을 만들지 않는 동작 이름이라 [Ch 1](/blog/tools/gnu-make/chapter01-intro#phony-타겟)에서 본 `.PHONY` 보호를 받습니다.
+이 패턴이면 `make`만 쳐도 `all`이 평가되고, `all`이 `hello`와 `goodbye`에 의존하므로 둘 다 빌드됩니다. `all`은 파일을 만들지 않는 동작 이름이라 [Ch 1](/blog/tools/build/gnu-make/chapter01-intro#phony-타겟)에서 본 `.PHONY` 보호를 받습니다.
 
 ---
 
@@ -135,7 +135,7 @@ main.o: main.c hello.h config.h
 	gcc -c main.c -o main.o
 ```
 
-언뜻 보면 무의미한 기법이지만, *자동 생성된 의존성 파일을 `include` 할 때* 진가가 드러납니다. 컴파일러가 `gcc -MMD`로 만들어 둔 `.d` 파일을 그대로 include하면, Make가 이 형태로 의존성을 흡수합니다. 헤더 변경이 정확히 반영되는 빌드는 이 패턴 위에서 돌아갑니다(자세한 자동 의존성 생성은 [Ch 6](/blog/tools/gnu-make/chapter06-conditionals)·[Ch 7](/blog/tools/gnu-make/chapter07-practical)에서 다룹니다).
+언뜻 보면 무의미한 기법이지만, *자동 생성된 의존성 파일을 `include` 할 때* 진가가 드러납니다. 컴파일러가 `gcc -MMD`로 만들어 둔 `.d` 파일을 그대로 include하면, Make가 이 형태로 의존성을 흡수합니다. 헤더 변경이 정확히 반영되는 빌드는 이 패턴 위에서 돌아갑니다(자세한 자동 의존성 생성은 [Ch 6](/blog/tools/build/gnu-make/chapter06-conditionals)·[Ch 7](/blog/tools/build/gnu-make/chapter07-practical)에서 다룹니다).
 
 ### Order-only 의존성 — "있기만 하면 OK"
 
@@ -179,7 +179,7 @@ Make는 레시피를 어떤 셸로 실행할까요? POSIX 표준은 `/bin/sh`를
 
 ### 각 줄은 별도의 셸 — 가장 흔한 오해
 
-[Ch 1](/blog/tools/gnu-make/chapter01-intro)에서 잠깐 언급한 사실인데, 다시 강조할 만합니다.
+[Ch 1](/blog/tools/build/gnu-make/chapter01-intro)에서 잠깐 언급한 사실인데, 다시 강조할 만합니다.
 
 > 레시피의 *각 줄*은 *각자 새 셸 프로세스*에서 실행됩니다.
 
@@ -256,7 +256,7 @@ hello:
 	gcc -o hello main.o
 ```
 
-```shell
+```text
 $ make hello
 echo "Building hello..."
 Building hello...
@@ -271,7 +271,7 @@ hello:
 	gcc -o hello main.o
 ```
 
-```shell
+```text
 $ make hello
 Building hello...
 gcc -o hello main.o
@@ -315,7 +315,7 @@ test:
 	@[[ -f file.txt ]] && echo "exists" || echo "missing"
 ```
 
-여기서 `:=`는 *즉시 확장*(simply-expanded) 대입입니다. 일반 `=`은 *지연 확장*(recursively-expanded)이라 미묘하게 동작이 다른데, 자세한 이야기는 [Ch 3](/blog/tools/gnu-make/chapter03-variables)에서 봅니다.
+여기서 `:=`는 *즉시 확장*(simply-expanded) 대입입니다. 일반 `=`은 *지연 확장*(recursively-expanded)이라 미묘하게 동작이 다른데, 자세한 이야기는 [Ch 3](/blog/tools/build/gnu-make/chapter03-variables)에서 봅니다.
 
 > 💡 *왜 `$$BASH_VERSION`이지?*: Make는 `$`를 자기 변수 시작으로 봅니다. 그래서 *셸 변수*를 표시하려면 `$`를 한 번 더 써서 `$$`로 이스케이프해야 합니다. Make는 `$$`를 만나면 `$` 한 글자로 줄여 셸에 넘기고, 셸이 그 `$BASH_VERSION`을 자기 변수로 해석합니다.
 
@@ -516,7 +516,7 @@ test:
 
 여전히 가장 흔합니다. 에디터 설정을 의심하세요.
 
-```shell
+```text
 Makefile:5: *** missing separator.  Stop.
 ```
 
@@ -593,7 +593,7 @@ clean::
 
 ## 다음 장 예고
 
-[Ch 3: 변수](/blog/tools/gnu-make/chapter03-variables)에서는 Make의 변수를 다룹니다. 사용자 정의, 자동 변수(`$@`, `$<`, `$^`, `$?`), 두 가지 확장 방식(`=` vs `:=`), 환경 변수와의 관계까지 — Make에서 "왜 같은 코드가 미묘하게 다르게 동작하지?"의 9할이 이 장에서 풀립니다.
+[Ch 3: 변수](/blog/tools/build/gnu-make/chapter03-variables)에서는 Make의 변수를 다룹니다. 사용자 정의, 자동 변수(`$@`, `$<`, `$^`, `$?`), 두 가지 확장 방식(`=` vs `:=`), 환경 변수와의 관계까지 — Make에서 "왜 같은 코드가 미묘하게 다르게 동작하지?"의 9할이 이 장에서 풀립니다.
 
 ## 참고 자료
 

@@ -10,7 +10,7 @@ draft: false
 
 ## 왜 함수가 필요한가
 
-[Ch 4](/blog/tools/gnu-make/chapter04-pattern-rules)까지 우리는 *파일 이름을 직접 나열*했습니다.
+[Ch 4](/blog/tools/build/gnu-make/chapter04-pattern-rules)까지 우리는 *파일 이름을 직접 나열*했습니다.
 
 ```makefile
 SRCS := main.c hello.c utils.c config.c network.c
@@ -299,7 +299,7 @@ endif
 
 ## 조건 함수
 
-조건 *지시자*(`ifeq`, `ifdef`, [Ch 6](/blog/tools/gnu-make/chapter06-conditionals))와 조건 *함수*(`$(if ...)`)는 다릅니다. 지시자는 *Makefile 파싱 시점*에 평가되고 한 번 결정되면 끝입니다. 함수는 *변수 평가 시점*에 매번 풀립니다.
+조건 *지시자*(`ifeq`, `ifdef`, [Ch 6](/blog/tools/build/gnu-make/chapter06-conditionals))와 조건 *함수*(`$(if ...)`)는 다릅니다. 지시자는 *Makefile 파싱 시점*에 평가되고 한 번 결정되면 끝입니다. 함수는 *변수 평가 시점*에 매번 풀립니다.
 
 ### `$(if ...)`
 
@@ -472,7 +472,7 @@ SRCS += $(THIS_DIR)foo.c $(THIS_DIR)bar.c
 - `$(lastword ...)`은 *마지막 단어*를 뽑습니다 — 즉 *방금 include된 그 Makefile의 경로*.
 - `$(dir ...)`은 그 경로에서 디렉터리 부분만 추출.
 
-각 서브 Makefile이 *자기 디렉터리를 자동으로 알게 되어*, 비재귀적 Make에서 *모듈 단위 격리*가 가능해집니다. ([Ch 6](/blog/tools/gnu-make/chapter06-conditionals#makefile-분할-패턴)에서 본 multi-module 패턴이 이 트릭 위에 서 있습니다.)
+각 서브 Makefile이 *자기 디렉터리를 자동으로 알게 되어*, 비재귀적 Make에서 *모듈 단위 격리*가 가능해집니다. ([Ch 6](/blog/tools/build/gnu-make/chapter06-conditionals#makefile-분할-패턴)에서 본 multi-module 패턴이 이 트릭 위에 서 있습니다.)
 
 주의: `THIS_DIR`을 *그 자리에서* 즉시 평가하려면 *반드시 `:=`*을 써야 합니다. `=`로 적으면 `$(lastword $(MAKEFILE_LIST))`가 *나중에 평가*되어 그때의 마지막 파일을 가져오게 되는데, 그건 *이미 다른 파일*이 될 수 있습니다.
 
@@ -648,7 +648,7 @@ endif
 
 ## 다음 장 예고
 
-[Ch 6: 조건문과 include](/blog/tools/gnu-make/chapter06-conditionals)에서는 *Makefile 파싱 시점*에 동작하는 조건 지시자(`ifeq`, `ifdef`, `else`, `endif`)와 외부 Makefile을 합치는 `include` / `-include`를 다룹니다. 자동 의존성 생성(`-MMD -MP` + include)도 여기서 마무리됩니다.
+[Ch 6: 조건문과 include](/blog/tools/build/gnu-make/chapter06-conditionals)에서는 *Makefile 파싱 시점*에 동작하는 조건 지시자(`ifeq`, `ifdef`, `else`, `endif`)와 외부 Makefile을 합치는 `include` / `-include`를 다룹니다. 자동 의존성 생성(`-MMD -MP` + include)도 여기서 마무리됩니다.
 
 ## 참고 자료
 

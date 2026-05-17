@@ -50,5 +50,5 @@ draft: true
 
 ## 관련 항목
 
-- [Ch 5: 블록 레이어](/blog/tools/qemu-internals/chapter05-block-layer)
-- [Ch 7: PCI 서브시스템](/blog/tools/qemu-internals/chapter07-pci-subsystem)
+- [Ch 5: 블록 레이어](/blog/tools/emulation/qemu-internals/chapter05-block-layer)
+- [Ch 7: PCI 서브시스템](/blog/tools/emulation/qemu-internals/chapter07-pci-subsystem)

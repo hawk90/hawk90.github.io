@@ -379,7 +379,7 @@ Amazon AWS는 모든 핵심 분산 알고리즘을 TLA+로 검증.
 
 ## 외부 자료
 
-- [Sanitizers — TSan / MSan](/blog/tools/debugging/sanitizers/chapter04-tsan-msan)
+- [Sanitizers — TSan / MSan](/blog/tools/debugging/sanitizers/chapter04-tsan)
 - [Valgrind — Helgrind / DRD](/blog/tools/debugging/valgrind/chapter04-helgrind-drd)
 - [rr 공식](https://rr-project.org/)
 - [Pernosco](https://pernos.co/)

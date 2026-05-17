@@ -370,7 +370,7 @@ target_link_libraries(app PRIVATE -lz)
 
 ### 전형적인 디렉터리 구조
 
-```shell
+```text
 mylib/
 ├── CMakeLists.txt
 ├── include/
@@ -489,7 +489,7 @@ message("After change: ${MY_VAR}")   # "child value"
 
 이 두 줄이 *Modern CMake 모델*의 기반입니다. 자식 디렉터리에서 만든 *전역 변수가 부모를 오염시키지 않습니다*. 그 결과 모듈성이 보장됩니다.
 
-자식의 값을 *명시적으로 부모로 올리고* 싶을 때는 `set(VAR value PARENT_SCOPE)`을 씁니다. 하지만 이게 자주 등장하면 설계 신호입니다 — *변수 전달 대신 타겟 속성*([Ch 3 PUBLIC/INTERFACE](/blog/tools/cmake/chapter03-targets#가시성-키워드-private-public-interface))을 쓸 수 있는지 다시 보세요.
+자식의 값을 *명시적으로 부모로 올리고* 싶을 때는 `set(VAR value PARENT_SCOPE)`을 씁니다. 하지만 이게 자주 등장하면 설계 신호입니다 — *변수 전달 대신 타겟 속성*([Ch 3 PUBLIC/INTERFACE](/blog/tools/build/cmake/chapter03-targets#가시성-키워드-private-public-interface))을 쓸 수 있는지 다시 보세요.
 
 ### 타겟은 스코프를 가로질러 *전역*이다
 
@@ -521,7 +521,7 @@ add_subdirectory(third_party/google-benchmark EXCLUDE_FROM_ALL)
 
 ### 프로젝트 구조 예시
 
-```shell
+```text
 project/
 ├── CMakeLists.txt          ← 최상위
 ├── libs/
@@ -582,7 +582,7 @@ target_compile_features(math PUBLIC cxx_std_17)
 
 `add_executable`·`add_library` 외에 *컴파일러 외부 도구*(protoc, doxygen, 셸 스크립트)를 빌드 단계에 통합하는 *커스텀 타겟* 메커니즘이 있습니다. `add_custom_command`와 `add_custom_target`이 그것입니다.
 
-분량이 적지 않아 별도 챕터로 다룹니다 — [Ch 9: Modern Advanced](/blog/tools/cmake/chapter09-modern-advanced#커스텀-타겟--add_custom_command-vs-add_custom_target)에서 자세히.
+분량이 적지 않아 별도 챕터로 다룹니다 — [Ch 9: Modern Advanced](/blog/tools/build/cmake/chapter09-modern-advanced#커스텀-타겟--add_custom_command-vs-add_custom_target)에서 자세히.
 
 ---
 

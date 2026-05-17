@@ -213,4 +213,4 @@ draft: false
 
 - [Rule 8: 대시의 용법](/blog/writing/elements-of-style/ch01/rule08-dash)
 - [Rule 10: Use the proper case of pronoun](/blog/writing/elements-of-style/ch01/rule10-pronoun-case)
-- [Only Grammar Book — Chapter 2: 동사](/blog/writing/only-grammar-book/ch02-verbs)
+- [Only Grammar Book — Chapter 2: 동사](/blog/writing/only-grammar-book/ch01-parts-of-speech/ch02-verbs)

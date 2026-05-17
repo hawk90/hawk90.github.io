@@ -60,4 +60,4 @@ qemu-system-arm -M mps2-an385 -kernel freertos.elf -nographic
 ## 관련 항목
 
 - [Ch 11: 베어메탈 펌웨어](/blog/tools/qemu-embedded-emulation/chapter11-baremetal)
-- [QEMU Internals 시리즈](/blog/tools/qemu-internals/chapter01-architecture)
+- [QEMU Internals 시리즈](/blog/tools/emulation/qemu-internals/chapter01-architecture)

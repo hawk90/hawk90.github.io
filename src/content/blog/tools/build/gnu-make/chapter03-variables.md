@@ -10,7 +10,7 @@ draft: false
 
 ## 왜 변수가 필요한가
 
-[Ch 1](/blog/tools/gnu-make/chapter01-intro)의 첫 Makefile을 다시 봅시다.
+[Ch 1](/blog/tools/build/gnu-make/chapter01-intro)의 첫 Makefile을 다시 봅시다.
 
 ```makefile
 hello: main.o hello.o
@@ -113,7 +113,7 @@ OBJS = main.o utils.o
 CFLAGS = $(CFLAGS) -Wall    # 오류
 ```
 
-```shell
+```text
 *** Recursive variable 'CFLAGS' references itself (eventually). Stop.
 ```
 
@@ -463,7 +463,7 @@ make --debug=jobs    # 병렬 빌드 상세
 
 ## 실전 예시 — 변수로 다시 쓴 작은 빌드
 
-지금까지의 도구로 [Ch 1](/blog/tools/gnu-make/chapter01-intro)의 첫 Makefile을 다시 써 봅니다.
+지금까지의 도구로 [Ch 1](/blog/tools/build/gnu-make/chapter01-intro)의 첫 Makefile을 다시 써 봅니다.
 
 ```makefile
 # === 설정 ===
@@ -502,9 +502,9 @@ clean:
 	$(RM) -r $(BUILDDIR)
 ```
 
-[Ch 1](/blog/tools/gnu-make/chapter01-intro)의 Makefile과 비교해 *얼마나 짧고 일관되어진* 모양을 보세요. 컴파일러 변경은 첫 줄 한 자리, 새 소스 추가는 *별도 수정이 필요 없습니다* (wildcard가 자동 감지). 변수와 패턴 규칙의 조합이 Make를 실용 도구로 만드는 핵심입니다.
+[Ch 1](/blog/tools/build/gnu-make/chapter01-intro)의 Makefile과 비교해 *얼마나 짧고 일관되어진* 모양을 보세요. 컴파일러 변경은 첫 줄 한 자리, 새 소스 추가는 *별도 수정이 필요 없습니다* (wildcard가 자동 감지). 변수와 패턴 규칙의 조합이 Make를 실용 도구로 만드는 핵심입니다.
 
-`wildcard`와 `$(SRCS:...=...)` 패턴 치환은 [Ch 5: 함수](/blog/tools/gnu-make/chapter05-functions)에서 자세히 다룹니다.
+`wildcard`와 `$(SRCS:...=...)` 패턴 치환은 [Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions)에서 자세히 다룹니다.
 
 ---
 
@@ -586,7 +586,7 @@ SOURCES += $(wildcard *.cpp)  # 이제 `:=`
 
 ## 다음 장 예고
 
-[Ch 4: 패턴 규칙](/blog/tools/gnu-make/chapter04-pattern-rules)에서는 `%.o: %.c` 같은 한 줄로 *수십 개의 컴파일 규칙*을 대체합니다. 정적 패턴 규칙, 암시적 규칙의 검색 순서, 그리고 4.3에 도입된 grouped target(`&:`)까지 다룹니다.
+[Ch 4: 패턴 규칙](/blog/tools/build/gnu-make/chapter04-pattern-rules)에서는 `%.o: %.c` 같은 한 줄로 *수십 개의 컴파일 규칙*을 대체합니다. 정적 패턴 규칙, 암시적 규칙의 검색 순서, 그리고 4.3에 도입된 grouped target(`&:`)까지 다룹니다.
 
 ## 참고 자료
 

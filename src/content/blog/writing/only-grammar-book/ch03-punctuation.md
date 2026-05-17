@@ -370,8 +370,8 @@ draft: false
 
 ## 관련 항목
 
-- [Chapter 2: Sentence Structure](/blog/writing/only-grammar-book/ch02-sentence-structure)
-- [Chapter 4: Common Mistakes](/blog/writing/only-grammar-book/ch04-common-mistakes)
+- [Chapter 2: Sentence Structure](/blog/writing/only-grammar-book/ch01-parts-of-speech/ch02-sentence-structure)
+- [Chapter 4: Common Mistakes](/blog/writing/only-grammar-book/ch01-parts-of-speech/ch04-common-mistakes)
 - [Elements of Style — Rule 1: 단수 명사의 소유격](/blog/writing/elements-of-style/ch01/rule01-possessive)
 - [Elements of Style — Rule 2: 직렬 쉼표](/blog/writing/elements-of-style/ch01/rule02-serial-comma)
 - [Elements of Style — Rule 7: 콜론의 용법](/blog/writing/elements-of-style/ch01/rule07-colon)

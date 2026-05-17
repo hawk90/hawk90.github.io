@@ -12,7 +12,7 @@ draft: false
 
 빌드가 끝나면 산물은 *빌드 디렉터리에 어지럽게 흩어진 상태*입니다.
 
-```shell
+```text
 build/
 ├── myapp                  # 실행 파일
 ├── libmylib.so           # 공유 라이브러리
@@ -91,7 +91,7 @@ DESTDIR=/tmp/staging cmake --install build
 
 결과:
 
-```shell
+```text
 /tmp/staging/
 └── usr/
     └── local/
@@ -217,11 +217,11 @@ find_package(MyLib 1.0 REQUIRED)
 target_link_libraries(app PRIVATE MyLib::mylib)
 ```
 
-이 두 줄이 동작하려면, 내 라이브러리가 설치될 때 *CMake 정보 파일*을 함께 깔아야 합니다. 그 정보 파일이 [Ch 5](/blog/tools/cmake/chapter05-find-package#동작-방식--module-모드와-config-모드)에서 본 *Config 모드*의 입력입니다.
+이 두 줄이 동작하려면, 내 라이브러리가 설치될 때 *CMake 정보 파일*을 함께 깔아야 합니다. 그 정보 파일이 [Ch 5](/blog/tools/build/cmake/chapter05-find-package#동작-방식--module-모드와-config-모드)에서 본 *Config 모드*의 입력입니다.
 
 ### 설치 후의 디렉터리 구조
 
-```shell
+```text
 ${PREFIX}/                                       ← 예: /usr/local
 ├── bin/
 │   └── myapp
@@ -329,7 +329,7 @@ install(TARGETS mylib
 
 `INCLUDES DESTINATION`은 *헤더 파일을 설치하는 명령이 아닙니다*. 그건 별도의 `install(DIRECTORY include/...)`이 합니다. 이 옵션은 *imported 타겟에 INTERFACE include 경로를 설정*하는 메타정보입니다.
 
-위 줄 때문에, 사용자가 `target_link_libraries(app PRIVATE MyLib::mylib)`만 적어도 *자동으로* `-I${PREFIX}/include`가 컴파일러에 들어갑니다. [Ch 3](/blog/tools/cmake/chapter03-targets#가시성-키워드-private-public-interface)의 INTERFACE 가시성이 *imported 타겟에도* 동일하게 동작합니다.
+위 줄 때문에, 사용자가 `target_link_libraries(app PRIVATE MyLib::mylib)`만 적어도 *자동으로* `-I${PREFIX}/include`가 컴파일러에 들어갑니다. [Ch 3](/blog/tools/build/cmake/chapter03-targets#가시성-키워드-private-public-interface)의 INTERFACE 가시성이 *imported 타겟에도* 동일하게 동작합니다.
 
 ### 4단계: Config 파일 생성 및 설치
 

@@ -757,6 +757,6 @@ Ch 14에서는 **Global Motion과 Warped Motion**을 다룬다. 카메라가 팬
 
 ## 관련 항목
 
-- [Ch 12: Inter 예측](/blog/media/av1/part4-prediction/chapter12-inter-prediction) — 단일 참조 Inter 예측
-- [Ch 14: Global/Warped Motion](/blog/media/av1/part4-prediction/chapter14-global-warped-motion) — 아핀 변환과 OBMC
-- [Ch 11: 참조 프레임](/blog/media/av1/part4-prediction/chapter11-reference-frames) — 참조 프레임 시스템
+- [Ch 12: Inter 예측](/blog/media/av1/chapter12-inter-prediction) — 단일 참조 Inter 예측
+- [Ch 14: Global/Warped Motion](/blog/media/av1/chapter14-global-warped-motion) — 아핀 변환과 OBMC
+- [Ch 11: 참조 프레임](/blog/media/av1/chapter11-reference-frames) — 참조 프레임 시스템

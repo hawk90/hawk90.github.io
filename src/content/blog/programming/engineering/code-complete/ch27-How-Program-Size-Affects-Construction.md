@@ -109,4 +109,4 @@ McConnell의 데이터 — **lines of code (LOC)** 가 가장 일관된 측정.
 
 - [Ch 26: Tuning Techniques](/blog/programming/engineering/code-complete/ch26-Code-Tuning-Techniques)
 - [Ch 28: Managing Construction](/blog/programming/engineering/code-complete/ch28-Managing-Construction)
-- [Mythical Man-Month](/blog/programming/engineering/mythical-man-month/) — Brooks의 고전
+- [Mythical Man-Month](/blog/programming/engineering/mythical-man-month/ch01/) — Brooks의 고전

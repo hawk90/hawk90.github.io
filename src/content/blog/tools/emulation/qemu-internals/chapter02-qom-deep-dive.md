@@ -68,5 +68,5 @@ typedef struct MyInterfaceClass {
 
 ## 관련 항목
 
-- [Ch 1: QEMU 아키텍처 개요](/blog/tools/qemu-internals/chapter01-architecture)
-- [Ch 3: 메모리 모델](/blog/tools/qemu-internals/chapter03-memory-model)
+- [Ch 1: QEMU 아키텍처 개요](/blog/tools/emulation/qemu-internals/chapter01-architecture)
+- [Ch 3: 메모리 모델](/blog/tools/emulation/qemu-internals/chapter03-memory-model)

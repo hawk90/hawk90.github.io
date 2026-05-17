@@ -373,7 +373,7 @@ RDI: ffff883456789abc
 ## 외부 자료
 
 - [Postmortem Debugging](/blog/tools/debugging/postmortem/chapter01-core-generation) — user-space core
-- [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-asan) — KASAN의 user-space 버전
+- [Sanitizers](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan) — KASAN의 user-space 버전
 - [Linux Kernel Crash Book](http://www.dedoimedo.com/computers/blogs/crashbook.html)
 - [Brendan Gregg — Linux Performance](https://www.brendangregg.com/linuxperf.html)
 - [`Documentation/admin-guide/bug-hunting.rst`](https://www.kernel.org/doc/html/latest/admin-guide/bug-hunting.html)

@@ -291,8 +291,8 @@ $ numactl --cpunodebind=0 --membind=0 ./myprog    # node 0 고정
 
 위는 *어떤 영역*이 메모리를 쓰는지 *큰 그림*. 누수의 *정확한 라인*은:
 
-- **AddressSanitizer**의 leak detector ([Sanitizers Ch 3](/blog/tools/debugging/sanitizers/chapter03-lsan-leak))
-- **Valgrind Memcheck** ([Valgrind Ch 1](/blog/tools/debugging/valgrind/chapter01-memcheck))
+- **AddressSanitizer**의 leak detector ([Sanitizers Ch 3](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks))
+- **Valgrind Memcheck** ([Valgrind Ch 1](/blog/tools/debugging/valgrind/chapter02-memcheck))
 - **heaptrack** (이 시리즈 Ch 2)
 - **glibc mtrace** (이 시리즈 Ch 4)
 - **jemalloc/tcmalloc profiling** (Ch 3)
@@ -327,7 +327,7 @@ Ch 2 — heaptrack. Valgrind보다 가벼운 heap profiler. 운영 환경에도 
 ## 관련 항목
 
 - [Ch 2: heaptrack](/blog/tools/debugging/memory/chapter02-heaptrack)
-- [Sanitizers Ch 3: LSan](/blog/tools/debugging/sanitizers/chapter03-lsan-leak)
+- [Sanitizers Ch 3: LSan](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks)
 - [Valgrind Ch 5: Massif](/blog/tools/debugging/valgrind/chapter05-massif-callgrind)
 - [Kernel Ch 6: crash / drgn](/blog/tools/debugging/kernel/chapter06-crash-drgn) — kernel 측 메모리
 - `man 5 proc` — /proc 전체

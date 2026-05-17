@@ -292,8 +292,8 @@ Ch 4 — glibc 자체 도구: mtrace, mcheck, MALLOC_CHECK_. 별 라이브러리
 
 - [Ch 2: heaptrack](/blog/tools/debugging/memory/chapter02-heaptrack)
 - [Ch 4: glibc mtrace / mcheck](/blog/tools/debugging/memory/chapter04-glibc-tools)
-- [Sanitizers Ch 1: AddressSanitizer](/blog/tools/debugging/sanitizers/chapter01-asan)
-- [Valgrind Ch 1: Memcheck](/blog/tools/debugging/valgrind/chapter01-memcheck)
+- [Sanitizers Ch 1: AddressSanitizer](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)
+- [Valgrind Ch 1: Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck)
 - [jemalloc 공식](https://jemalloc.net/)
 - [gperftools (tcmalloc)](https://github.com/gperftools/gperftools)
 - [pprof](https://github.com/google/pprof)

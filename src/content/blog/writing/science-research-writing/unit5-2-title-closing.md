@@ -289,7 +289,7 @@ SRW가 가르치는 것:
 
 ## 관련 항목
 
-- [Science Research Writing — 시리즈 개요](/blog/writing/science-research-writing)
-- [Unit 5.1: Abstract의 구조와 어휘](/blog/writing/science-research-writing/unit5-1-abstract)
-- [Academic Writing for Graduate Students — 시리즈 개요](/blog/writing/academic-writing) — 이론적 보완
-- [On Writing Well](/blog/writing/on-writing-well) — 일반 nonfiction
+- [Science Research Writing — 시리즈 개요](/blog/writing/science-research-writing/unit1-1-structure-moves)
+- [Unit 5.1: Abstract의 구조와 어휘](/blog/writing/science-research-writing/unit1-1-structure-moves/unit5-1-abstract)
+- [Academic Writing for Graduate Students — 시리즈 개요](/blog/writing/academic-writing/unit01-1-audience-purpose) — 이론적 보완
+- [On Writing Well](/blog/writing/on-writing-well/ch01-transaction) — 일반 nonfiction

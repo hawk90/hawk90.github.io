@@ -726,6 +726,6 @@ Ch 10에서는 **첫 프레임 완성**을 다룬다. 모든 블록을 순회하
 
 ## 관련 항목
 
-- [Ch 8: Intra 예측](/blog/media/av1/part4-prediction/chapter08-intra-prediction) — 예측값 생성
-- [Ch 7: 엔트로피 코딩](/blog/media/av1/part2-bitstream/chapter07-entropy-coding) — 계수 파싱의 기반
-- [Ch 10: 첫 프레임 완성](/blog/media/av1/part4-prediction/chapter10-frame-assembly) — 블록 순회와 프레임 조립
+- [Ch 8: Intra 예측](/blog/media/av1/chapter08-intra-prediction) — 예측값 생성
+- [Ch 7: 엔트로피 코딩](/blog/media/av1/chapter07-entropy-coding) — 계수 파싱의 기반
+- [Ch 10: 첫 프레임 완성](/blog/media/av1/chapter10-frame-assembly) — 블록 순회와 프레임 조립

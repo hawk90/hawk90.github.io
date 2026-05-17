@@ -54,5 +54,5 @@ qemu-system-x86_64 -icount shift=1
 
 ## 관련 항목
 
-- [Ch 8: 인터럽트 컨트롤러](/blog/tools/qemu-internals/chapter08-interrupt-controller)
-- [Ch 10: 마이그레이션](/blog/tools/qemu-internals/chapter10-migration)
+- [Ch 8: 인터럽트 컨트롤러](/blog/tools/emulation/qemu-internals/chapter08-interrupt-controller)
+- [Ch 10: 마이그레이션](/blog/tools/emulation/qemu-internals/chapter10-migration)

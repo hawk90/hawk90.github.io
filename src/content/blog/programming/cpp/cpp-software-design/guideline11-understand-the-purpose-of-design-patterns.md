@@ -403,4 +403,4 @@ class Singleton {
 - [가이드라인 12: 패턴에 대한 오해](/blog/programming/cpp/cpp-software-design/guideline12-beware-of-design-pattern-misconceptions) — 흔한 오해 정리
 - [가이드라인 13: 패턴은 어디에나 있다](/blog/programming/cpp/cpp-software-design/guideline13-design-patterns-are-everywhere) — 일상에서 만나는 패턴
 - [가이드라인 14: 패턴 이름으로 의도 전달](/blog/programming/cpp/cpp-software-design/guideline14-use-a-design-patterns-name-to-communicate-intent) — 어휘의 가치
-- [GoF Design Patterns](/blog/programming/design/gof-design-patterns) — 1994년의 정전
+- [GoF Design Patterns](/blog/programming/design/gof-design-patterns/item01-abstract-factory) — 1994년의 정전

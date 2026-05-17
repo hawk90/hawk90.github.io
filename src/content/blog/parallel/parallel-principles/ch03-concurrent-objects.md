@@ -64,15 +64,7 @@ void* queue_dequeue(Queue* q);             // 아이템 제거, 반환
 
 ### 예시
 
-```mermaid
-sequenceDiagram
-    participant A as Thread A
-    participant Q as Queue
-    participant B as Thread B
-    A->>Q: enq(1)
-    B->>Q: enq(2)
-    Note over A,B: quiescent point<br/>큐 = [1, 2] 또는 [2, 1] 둘 다 허용
-```
+![두 enq가 quiescent point에서 만나면 큐 = [1,2] 또는 [2,1] 둘 다 허용](/images/blog/parallel-principles/diagrams/ch03-quiescent.svg)
 
 ### 한계
 
@@ -90,16 +82,7 @@ sequenceDiagram
 
 ### 예시
 
-```mermaid
-sequenceDiagram
-    participant A as Thread A
-    participant Q as Queue
-    participant B as Thread B
-    A->>Q: enq(1)
-    B->>Q: enq(2)
-    A->>Q: deq() : 2
-    Note over A,B: 이 실행은 SC 불가능
-```
+![SC 위반 예시 — A의 enq(1)과 deq():2, B의 enq(2)의 순서가 모순](/images/blog/parallel-principles/diagrams/ch03-sc-impossible.svg)
 
 가능한 순차 순서를 따져보면:
 
@@ -113,16 +96,7 @@ sequenceDiagram
 
 **실시간 순서 무시**:
 
-```mermaid
-sequenceDiagram
-    participant A as Thread A
-    participant Q as Queue
-    participant B as Thread B
-    A->>Q: enq(1)
-    Note over A: enq(1) 완료
-    B->>Q: deq() : 1 (실시간상)
-    Note over A,B: SC는 deq() : empty도 허용 (실시간 순서 미보장)
-```
+![A의 enq(1)이 B의 deq보다 먼저 끝나도 SC는 deq():empty를 허용](/images/blog/parallel-principles/diagrams/ch03-sc-relaxed.svg)
 
 A의 `enq`가 B의 `deq` 전에 완료되어도, SC는 `deq():empty`를 허용할 수 있다 (이론적으로).
 
@@ -425,15 +399,7 @@ void thread_a_relaxed() {
 
 1. 다음 실행이 linearizable한가?
 
-   ```mermaid
-   sequenceDiagram
-       participant A as Thread A
-       participant Q as Queue
-       participant B as Thread B
-       A->>Q: enq(1)
-       B->>Q: enq(2)
-       B->>Q: deq() : 1
-   ```
+   ![enq(1), enq(2), deq():1 — linearizable한지 분석](/images/blog/parallel-principles/diagrams/ch03-exercise-linearizable.svg)
 
 2. Lock-free이지만 Wait-free가 아닌 알고리즘의 예는?
 

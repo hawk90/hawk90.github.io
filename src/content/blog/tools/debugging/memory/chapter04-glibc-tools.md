@@ -327,8 +327,8 @@ Ch 5 (마지막) — 운영 메모리 누수 진단. 장기 실행 서비스에 
 
 - [Ch 3: jemalloc / tcmalloc](/blog/tools/debugging/memory/chapter03-jemalloc-tcmalloc)
 - [Ch 5: 운영 누수 진단](/blog/tools/debugging/memory/chapter05-prod-leak-diagnosis)
-- [Sanitizers Ch 1: ASan](/blog/tools/debugging/sanitizers/chapter01-asan)
-- [Valgrind Ch 1: Memcheck](/blog/tools/debugging/valgrind/chapter01-memcheck)
+- [Sanitizers Ch 1: ASan](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)
+- [Valgrind Ch 1: Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck)
 - `man 3 malloc_hook`, `man 3 mtrace`, `man 3 mcheck`
 - `man 1 mtrace`
 - [glibc malloc tunables](https://www.gnu.org/software/libc/manual/html_node/Memory-Allocation-Tunables.html)

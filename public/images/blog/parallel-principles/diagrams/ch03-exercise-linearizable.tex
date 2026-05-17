@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq, x=1cm, y=1cm]
+  \node[actor]    (a) at (0, 0)  {Thread A};
+  \node[actorAlt] (q) at (4, 0)  {Queue};
+  \node[actor]    (b) at (8, 0)  {Thread B};
+
+  \draw[lifeline] (a) -- ++(0,-4.5);
+  \draw[lifeline] (q) -- ++(0,-4.5);
+  \draw[lifeline] (b) -- ++(0,-4.5);
+
+  \draw[msgsync] (a |- 0,-1.3) -- node[msglabel]{enq(1)}     (q |- 0,-1.3);
+  \draw[msgsync] (b |- 0,-2.3) -- node[msglabel]{enq(2)}     (q |- 0,-2.3);
+  \draw[msgsync] (b |- 0,-3.4) -- node[msglabel]{deq() : 1}  (q |- 0,-3.4);
+\end{tikzpicture}
+\end{document}

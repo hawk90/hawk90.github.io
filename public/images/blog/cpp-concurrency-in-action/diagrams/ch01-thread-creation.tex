@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq, x=1cm, y=1cm]
+  % Actors
+  \node[actor]    (m) at (0, 0)  {main 스레드};
+  \node[actorAlt] (t) at (5, 0)  {새 스레드};
+
+  % Lifelines
+  \draw[lifeline] (m) -- ++(0,-7);
+  \draw[lifeline] (t) -- ++(0,-7);
+
+  % Activation on new thread (during execution)
+  \node[activation, minimum height=30mm] at ($(t) + (0,-2.6)$) {};
+
+  % Notes / messages
+  \node[seqnote, anchor=west] at ($(m) + (0.6, -1.0)$) {\texttt{std::thread t(hello)}};
+  \draw[msgsync] (m |- 0,-1.7) -- node[msglabel]{생성} (t |- 0,-1.7);
+
+  \node[seqnote, anchor=west] at ($(t) + (0.6, -2.3)$) {\texttt{hello()} 실행};
+  \node[seqnote, anchor=west] at ($(t) + (0.6, -3.4)$) {"Hello..." 출력};
+
+  \node[seqnote, anchor=east] at ($(m) + (-0.4, -4.5)$) {\texttt{t.join()}};
+
+  \draw[msgret] (t |- 0,-5.3) -- node[msglabel]{종료} (m |- 0,-5.3);
+
+  \node[seqnote, anchor=east] at ($(m) + (-0.4, -6.2)$) {\texttt{return 0}};
+\end{tikzpicture}
+\end{document}

@@ -352,7 +352,7 @@ $ sudo find / -name 'core*' -newer /tmp/test 2>/dev/null
 
 ## ASan / TSan과 core
 
-[Sanitizer](/blog/tools/debugging/sanitizers/chapter01-asan)는 *검출 시 자체 진단 메시지* + `abort()` 호출. SIGABRT는 core 생성 시그널.
+[Sanitizer](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)는 *검출 시 자체 진단 메시지* + `abort()` 호출. SIGABRT는 core 생성 시그널.
 
 ```bash
 $ ASAN_OPTIONS="abort_on_error=1:disable_coredump=0" ./prog

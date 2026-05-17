@@ -10,7 +10,7 @@ draft: false
 
 ## 왜 패턴 규칙이 필요한가
 
-[Ch 3](/blog/tools/gnu-make/chapter03-variables)에서 변수로 중복을 한 번 줄였습니다. 하지만 *오브젝트 파일마다 규칙을 한 번씩 적어야* 한다는 한계는 그대로입니다.
+[Ch 3](/blog/tools/build/gnu-make/chapter03-variables)에서 변수로 중복을 한 번 줄였습니다. 하지만 *오브젝트 파일마다 규칙을 한 번씩 적어야* 한다는 한계는 그대로입니다.
 
 ```makefile
 main.o: main.c hello.h
@@ -88,7 +88,7 @@ build/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 ```
 
-`build/main.o`를 만들 차례가 되면 Make는 `src/main.c`를 찾아 컴파일합니다. `$(@D)`는 [Ch 3](/blog/tools/gnu-make/chapter03-variables#디렉터리·파일-이름-분리)에서 본 *자동 변수의 디렉터리 부분*입니다.
+`build/main.o`를 만들 차례가 되면 Make는 `src/main.c`를 찾아 컴파일합니다. `$(@D)`는 [Ch 3](/blog/tools/build/gnu-make/chapter03-variables#디렉터리·파일-이름-분리)에서 본 *자동 변수의 디렉터리 부분*입니다.
 
 ### 패턴 안의 `%`는 *하나*만
 
@@ -103,7 +103,7 @@ Make 매뉴얼은 *한 패턴에 `%`는 한 번*이라고 못 박습니다. 두 
 
 ## 자동 변수 — stem(`$*`) 포함
 
-[Ch 3](/blog/tools/gnu-make/chapter03-variables#자동-변수-규칙마다-자동으로-채워지는-손잡이)에서 본 자동 변수에 패턴 규칙에서 특히 유용한 한 가지가 더해집니다 — `$*` (stem).
+[Ch 3](/blog/tools/build/gnu-make/chapter03-variables#자동-변수-규칙마다-자동으로-채워지는-손잡이)에서 본 자동 변수에 패턴 규칙에서 특히 유용한 한 가지가 더해집니다 — `$*` (stem).
 
 | 변수 | 의미 | `build/main.o: src/main.c` 예 |
 |------|------|--------------------------------|
@@ -163,7 +163,7 @@ hello: main.o hello.o utils.o
 
 이게 전부입니다. `make` 한 번 치면:
 
-```shell
+```text
 $ make
 cc -Wall -g  -c -o main.o main.c
 cc -Wall -g  -c -o hello.o hello.c
@@ -417,7 +417,7 @@ clean:
 - 정적 패턴으로 *오브젝트만* 이 규칙을 받아 다른 `.o`(예: 외부 라이브러리)와 충돌하지 않음.
 - 디렉터리 생성은 order-only로 안전.
 
-`wildcard`, `patsubst`는 [Ch 5: 함수](/blog/tools/gnu-make/chapter05-functions)에서 상세히 다룹니다.
+`wildcard`, `patsubst`는 [Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions)에서 상세히 다룹니다.
 
 ---
 
@@ -498,7 +498,7 @@ Make는 내장 규칙으로 빌드해 주지만, 변수가 비어 있어 *경고
 
 ## 다음 장 예고
 
-[Ch 5: 함수](/blog/tools/gnu-make/chapter05-functions)에서는 Make의 내장 함수들 — `wildcard`, `patsubst`, `filter`, `foreach`, `shell` 등 — 을 다룹니다. 텍스트 처리만으로 거대한 Makefile을 *수십 줄로* 줄이는 도구들입니다.
+[Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions)에서는 Make의 내장 함수들 — `wildcard`, `patsubst`, `filter`, `foreach`, `shell` 등 — 을 다룹니다. 텍스트 처리만으로 거대한 Makefile을 *수십 줄로* 줄이는 도구들입니다.
 
 ## 참고 자료
 

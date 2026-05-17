@@ -59,5 +59,5 @@ AddressSpace를 평면화한 뷰로, 실제 메모리 접근에 사용됩니다.
 
 ## 관련 항목
 
-- [Ch 2: QOM 심화](/blog/tools/qemu-internals/chapter02-qom-deep-dive)
-- [Ch 4: 이벤트 루프](/blog/tools/qemu-internals/chapter04-event-loop)
+- [Ch 2: QOM 심화](/blog/tools/emulation/qemu-internals/chapter02-qom-deep-dive)
+- [Ch 4: 이벤트 루프](/blog/tools/emulation/qemu-internals/chapter04-event-loop)

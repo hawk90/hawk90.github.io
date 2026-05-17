@@ -65,5 +65,5 @@ qemu_bh_schedule(bh);
 
 ## 관련 항목
 
-- [Ch 3: 메모리 모델](/blog/tools/qemu-internals/chapter03-memory-model)
-- [Ch 5: 블록 레이어](/blog/tools/qemu-internals/chapter05-block-layer)
+- [Ch 3: 메모리 모델](/blog/tools/emulation/qemu-internals/chapter03-memory-model)
+- [Ch 5: 블록 레이어](/blog/tools/emulation/qemu-internals/chapter05-block-layer)

@@ -66,6 +66,7 @@ export const CATEGORIES: Category[] = [
   { id: 'embedded/yocto', parent: 'embedded', name: 'Yocto Project', description: 'BitBake, recipes, layers, 커스텀 배포판' },
   { id: 'embedded/wireless', parent: 'embedded', name: 'Wireless (Firmware)', description: 'BLE, Zigbee, Thread, Matter, LoRa, ESP32 Wi-Fi — RTOS/MCU 측' },
   { id: 'embedded/avionics', parent: 'embedded', name: 'Avionics & Aerospace SW', description: '발사체 에비오닉스 umbrella — 아키텍처·Flight SW·C&DH·SW Assurance·GNC·Simulation·Sensors·Systems Engineering' },
+  { id: 'embedded/rtos', parent: 'embedded', name: 'RTOS', description: 'FreeRTOS, RTEMS, Zephyr, VxWorks — scheduler·task·timer 내부와 비교 (Practical RTOS Internals + 책 리뷰)' },
 
   // ML
   { id: 'ml/accelerators', parent: 'ml', name: 'Accelerators', description: 'NPU, TPU, Systolic Array' },
@@ -74,6 +75,7 @@ export const CATEGORIES: Category[] = [
   { id: 'ml/tinyml', parent: 'ml', name: 'TinyML', description: 'TFLite Micro, CMSIS-NN' },
   { id: 'ml/systems', parent: 'ml', name: 'Systems', description: '프로덕션, MLOps' },
   { id: 'ml/drivers', parent: 'ml', name: 'Drivers', description: 'DRM, DMA-BUF, IOMMU' },
+  { id: 'ml/foundations', parent: 'ml', name: 'Foundations', description: 'Murphy ML1/ML2, Bishop PRML — 확률적 ML 이론' },
 
   // Tools
   { id: 'tools/debugging', parent: 'tools', name: 'Debugging', description: 'sanitizer, valgrind, tracing' },
@@ -83,6 +85,8 @@ export const CATEGORIES: Category[] = [
   // Others
   { id: 'math/applied', parent: 'math', name: 'Applied Math', description: '이산수학, 확률통계' },
   { id: 'math/numerical', parent: 'math', name: 'Numerical Computing', description: 'Numerical Recipes — 수치 선형대수, 적분, ODE/PDE, FFT, 최적화' },
+  { id: 'math/optimization', parent: 'math', name: 'Optimization', description: 'Convex Optimization (Boyd), 수치 최적화 — ML 학습·컴파일러 스케줄링' },
+  { id: 'math/probability', parent: 'math', name: 'Probability·Information', description: 'Cover-Thomas·MacKay·Wasserman·Jaynes — 확률·정보이론·통계' },
   { id: 'philosophy/math', parent: 'philosophy', name: 'Philosophy of Math', description: '플라톤주의, 형식주의' },
   { id: 'science/classics', parent: 'science', name: 'Classics', description: 'Newton, Euclid' },
 ];

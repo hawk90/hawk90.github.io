@@ -1,0 +1,123 @@
+% _design-math.tex — shared TikZ + PGFPlots design for math diagrams
+% Companion to _design.tex (which targets UML / structural diagrams).
+%
+% Palette and base TikZ styles aligned with ../book-notes/<series>/figures/src/_style.tex
+% so that linear-algebra / set-theory (synced) and numerical-recipes / new math series
+% (native) share the *same visual language*.
+%
+% Targets: math/numerical, math/linear-algebra, math/set-theory, and any chapter
+% needing book-quality function plots, vector fields, contour, 3D surfaces, or
+% geometric vector diagrams.
+%
+% Usage:
+%   \documentclass[border=10pt,tikz]{standalone}
+%   \usepackage{tikz}
+%   \usepackage{pgfplots}
+%   \usepackage{amsmath,amssymb,amsfonts}
+%   \usepackage{kotex}            % only if Korean labels needed
+%   \usetikzlibrary{arrows.meta, calc, decorations.pathreplacing, shapes.geometric, positioning, shapes.misc}
+%   \begin{document}
+%   \input{../_design-math.tex}   % adjust relative path
+%   \begin{tikzpicture}[math]
+%     \begin{axis}[mathaxis] \addplot[fn1] {x^2}; \end{axis}
+%   \end{tikzpicture}
+
+\pgfplotsset{compat=1.18}
+
+% ─── Primary palette (책 품질 — book-notes 표준) ──────────
+\definecolor{VECA}{RGB}{ 30, 75,140}    % 짙은 남색  (Primary)
+\definecolor{VECB}{RGB}{160, 45, 50}    % 짙은 적색  (Secondary)
+\definecolor{VECC}{RGB}{ 55,110, 60}    % 짙은 녹색  (Tertiary)
+\definecolor{VECD}{RGB}{120, 70,150}    % 보라      (Quaternary — 함수 plot 구분용)
+\definecolor{VECE}{RGB}{200,120, 30}    % 진한 주황 (5번)
+\definecolor{VECF}{RGB}{ 70,130,140}    % teal      (6번)
+\definecolor{INK} {RGB}{ 30, 30, 30}    % 본문 검정
+\definecolor{MUTE}{RGB}{120,120,120}    % 보조 회색
+\definecolor{GRID}{RGB}{220,220,220}    % grid
+\definecolor{GRIDM}{RGB}{240,240,240}   % minor grid
+
+% ─── TikZ — vector·region·label 스타일 (book-notes와 호환) ──
+\tikzset{
+  math/.style={
+    font=\small,
+    >=Stealth,
+    line cap=round, line join=round,
+  },
+  >=Stealth,
+  every picture/.append style={line cap=round, line join=round, thick},
+  axisL/.style       = {thin, gray!50, ->},
+  axisTip/.style     = {font=\scriptsize\itshape, MUTE},
+  gridL/.style       = {very thin, gray!18},
+  gridM/.style       = {thin,      gray!28},
+  vecA/.style        = {thick, VECA, ->},
+  vecB/.style        = {thick, VECB, ->},
+  vecC/.style        = {thick, VECC, ->},
+  vecD/.style        = {thick, VECD, ->},
+  vecK/.style        = {thick, INK,  ->},
+  emphL/.style       = {very thick, INK},
+  regA/.style        = {fill=VECA!7,  draw=VECA!40, very thin},
+  regB/.style        = {fill=VECB!7,  draw=VECB!40, very thin},
+  regC/.style        = {fill=VECC!7,  draw=VECC!40, very thin},
+  regD/.style        = {fill=VECD!7,  draw=VECD!40, very thin},
+  regGray/.style     = {fill=gray!10, draw=gray!50, very thin},
+  caption/.style     = {font=\footnotesize\itshape, gray!30!black, align=center},
+  panelTitle/.style  = {font=\small\bfseries, INK, align=center},
+  panelSub/.style    = {font=\footnotesize, MUTE, align=center},
+  mathlbl/.style     = {font=\footnotesize, inner sep=2pt},
+  vecdot/.style      = {circle, fill, inner sep=1.5pt},
+  % iteration step (Newton 등 수치 알고리즘에서)
+  iterstep/.style    = {->, dashed, line width=0.6pt, draw=VECB},
+  point/.style       = {circle, fill=VECB, inner sep=1.4pt},
+}
+
+% ─── PGFPlots — axis·function plot 스타일 ─────────────────
+\pgfplotsset{
+  % Base axis — 책 품질, KaTeX 본문 inline 수식과 typographic 일치
+  mathaxis/.style={
+    axis lines=middle,
+    axis line style={draw=INK, line width=0.5pt, -Stealth},
+    every axis label/.append style={font=\small, text=INK},
+    every tick label/.append style={font=\footnotesize, text=INK},
+    tick style={draw=INK, line width=0.4pt},
+    minor tick num=1,
+    grid=major,
+    major grid style={draw=GRID,  line width=0.3pt},
+    minor grid style={draw=GRIDM, line width=0.2pt},
+    enlargelimits=0.08,
+    clip=true,
+    label style={font=\small},
+    title style={font=\small\bfseries, text=INK},
+    legend style={
+      font=\footnotesize,
+      draw=MUTE, line width=0.3pt,
+      fill=white, fill opacity=0.9, text opacity=1,
+      inner sep=3pt,
+    },
+  },
+  % Compact axis — for inline math figures
+  mathaxis-compact/.style={
+    mathaxis,
+    width=8cm, height=5cm,
+    enlargelimits=0.05,
+  },
+  % Function plot styles — book-notes 팔레트 6색
+  fn1/.style={smooth, line width=1.0pt, draw=VECA},
+  fn2/.style={smooth, line width=1.0pt, draw=VECB},
+  fn3/.style={smooth, line width=1.0pt, draw=VECC},
+  fn4/.style={smooth, line width=1.0pt, draw=VECD},
+  fn5/.style={smooth, line width=1.0pt, draw=VECE},
+  fn6/.style={smooth, line width=1.0pt, draw=VECF},
+  % Dashed variants — asymptotes / references / tangent lines
+  fn1d/.style={fn1, dashed},
+  fn2d/.style={fn2, dashed},
+  fn3d/.style={fn3, dashed},
+  fn4d/.style={fn4, dashed},
+  fn5d/.style={fn5, dashed},
+  fn6d/.style={fn6, dashed},
+  % Iteration / data point markers
+  pts/.style     ={only marks, mark=*, mark size=1.3pt, color=VECB},
+  ptsblue/.style ={only marks, mark=*, mark size=1.3pt, color=VECA},
+  ptsgreen/.style={only marks, mark=*, mark size=1.3pt, color=VECC},
+  % Vector field arrows
+  vf/.style={->, line width=0.6pt, draw=VECA},
+}

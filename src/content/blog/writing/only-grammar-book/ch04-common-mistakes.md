@@ -329,8 +329,8 @@ Strunk의 *Rule 11*과 같은 문제입니다.
 
 ## 관련 항목
 
-- [Chapter 3: Punctuation](/blog/writing/only-grammar-book/ch03-punctuation)
-- [Chapter 5: Word Usage](/blog/writing/only-grammar-book/ch05-word-usage)
+- [Chapter 3: Punctuation](/blog/writing/only-grammar-book/ch01-parts-of-speech/ch03-punctuation)
+- [Chapter 5: Word Usage](/blog/writing/only-grammar-book/ch01-parts-of-speech/ch05-word-usage)
 - [Elements of Style — Chapter 4: Words Commonly Misused](/blog/writing/elements-of-style/ch04/words-a-c)
 - [Elements of Style — Rule 9: 주어와 동사 일치](/blog/writing/elements-of-style/ch01/rule09-subject-verb)
 - [Elements of Style — Rule 10: 대명사 격](/blog/writing/elements-of-style/ch01/rule10-pronoun-case)

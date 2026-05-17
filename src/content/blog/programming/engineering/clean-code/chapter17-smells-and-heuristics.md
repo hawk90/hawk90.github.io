@@ -163,4 +163,4 @@ draft: true
 
 - [Ch 1: 클린 코드](/blog/programming/engineering/clean-code/chapter01-clean-code) — 첫 챕터로 돌아가기
 - [Refactoring: Code Smells](/blog/programming/engineering/refactoring/) — Fowler의 냄새 카탈로그 (Martin의 사촌격)
-- [Clean Architecture](/blog/programming/design/clean-architecture/) — 같은 저자, 큰 그림
+- [Clean Architecture](/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture/) — 같은 저자, 큰 그림

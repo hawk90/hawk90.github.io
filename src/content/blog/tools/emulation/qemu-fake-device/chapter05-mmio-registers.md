@@ -58,5 +58,5 @@ pci_register_bar(pdev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &s->mmio);
 
 ## 관련 항목
 
-- [Ch 4: 간단한 PCI 디바이스](/blog/tools/qemu-fake-device/chapter04-simple-pci)
-- [Ch 6: 인터럽트 구현](/blog/tools/qemu-fake-device/chapter06-interrupts)
+- [Ch 4: 간단한 PCI 디바이스](/blog/tools/emulation/qemu-fake-device/chapter04-simple-pci)
+- [Ch 6: 인터럽트 구현](/blog/tools/emulation/qemu-fake-device/chapter06-interrupts)

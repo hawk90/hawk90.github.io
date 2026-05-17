@@ -69,5 +69,5 @@ QEMU는 다목적 에뮬레이터/가상화 도구입니다.
 
 ## 관련 항목
 
-- [Ch 2: QOM 심화](/blog/tools/qemu-internals/chapter02-qom-deep-dive)
-- [QEMU Fake Device Driver 시리즈](/blog/tools/qemu-fake-device/chapter01-overview)
+- [Ch 2: QOM 심화](/blog/tools/emulation/qemu-internals/chapter02-qom-deep-dive)
+- [QEMU Fake Device Driver 시리즈](/blog/tools/emulation/qemu-fake-device/chapter01-overview)

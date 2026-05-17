@@ -322,7 +322,7 @@ Methodology는 *어떻게 했는지*만. 결과는 *Results*에.
 
 ## 관련 항목
 
-- [Unit 1.2: Introduction의 문법과 어휘](/blog/writing/science-research-writing/unit1-2-grammar-vocabulary)
-- [Unit 2.2: Methodology의 문법](/blog/writing/science-research-writing/unit2-2-grammar)
+- [Unit 1.2: Introduction의 문법과 어휘](/blog/writing/science-research-writing/unit1-1-structure-moves/unit1-2-grammar-vocabulary)
+- [Unit 2.2: Methodology의 문법](/blog/writing/science-research-writing/unit1-1-structure-moves/unit2-2-grammar)
 - [AWG Unit 7.2: Methods Section](/blog/writing/academic-writing/unit07-2-methods)
 - [AWG Unit 3.3: Process Description과 Passive Voice](/blog/writing/academic-writing/unit03-3-process-passive)

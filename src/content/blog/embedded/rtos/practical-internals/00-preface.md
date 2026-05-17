@@ -215,4 +215,4 @@ RTOS 소스는 처음 보면 함수 호출이 얽혀 있어 막막합니다. 이
 
 ---
 
-다음 글: [Part 1-01: RTOS가 필요한 이유](/blog/embedded/rtos-internals/part1-01-why-rtos)
+다음 글: [Part 1-01: RTOS가 필요한 이유](/blog/embedded/rtos/practical-internals/part1-01-why-rtos)

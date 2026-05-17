@@ -203,4 +203,4 @@ RETURN c
 ## 관련 항목
 
 - [Ch 1: Reliability / Scalability / Maintainability](/blog/parallel/designing-data-intensive-applications/chapter01-reliable-scalable-maintainable)
-- [DDD 시리즈](/blog/programming/design/domain-driven-design/) — 모델링의 깊은 측면
+- [DDD 시리즈](/blog/programming/design/domain-driven-design/chapter01-crunching-knowledge/) — 모델링의 깊은 측면

@@ -355,8 +355,8 @@ the temporal relationship.
 
 ## 관련 항목
 
-- [Unit 4.1: Discussion의 구조와 어휘](/blog/writing/science-research-writing/unit4-1-structure-vocabulary)
-- [Unit 5.1: Abstract의 구조와 어휘](/blog/writing/science-research-writing/unit5-1-abstract)
+- [Unit 4.1: Discussion의 구조와 어휘](/blog/writing/science-research-writing/unit1-1-structure-moves/unit4-1-structure-vocabulary)
+- [Unit 5.1: Abstract의 구조와 어휘](/blog/writing/science-research-writing/unit1-1-structure-moves/unit5-1-abstract)
 - [AWG Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)
 - [Elements of Style — Rule 15: Put statements in positive form](/blog/writing/elements-of-style/ch02/rule15-positive)
 - [AWG Unit 4.2: Strength of Claim과 Hedging](/blog/writing/academic-writing/unit04-2-strength-of-claim)

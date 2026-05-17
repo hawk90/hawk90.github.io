@@ -56,5 +56,5 @@ msi_notify(pdev, vector);
 
 ## 관련 항목
 
-- [Ch 7: PCI 서브시스템](/blog/tools/qemu-internals/chapter07-pci-subsystem)
-- [Ch 9: 타이머와 클럭](/blog/tools/qemu-internals/chapter09-timers)
+- [Ch 7: PCI 서브시스템](/blog/tools/emulation/qemu-internals/chapter07-pci-subsystem)
+- [Ch 9: 타이머와 클럭](/blog/tools/emulation/qemu-internals/chapter09-timers)

@@ -44,8 +44,8 @@ AV1 (30장)
 
 | Ch | 제목 | 내용 |
 |----|------|------|
-| 0 | [디지털 비디오 기초](/blog/media/av1/part1-basics/chapter00-digital-video) | 색공간, 샘플링, 프레임 타입 |
-| 1 | [AV1 역사와 도구](/blog/media/av1/part1-basics/chapter01-history-tools) | VP9 → AV1, aomenc/dav1d/SVT |
+| 0 | [디지털 비디오 기초](/blog/media/av1/chapter00-digital-video) | 색공간, 샘플링, 프레임 타입 |
+| 1 | [AV1 역사와 도구](/blog/media/av1/chapter01-history-tools) | VP9 → AV1, aomenc/dav1d/SVT |
 
 ---
 
@@ -53,10 +53,10 @@ AV1 (30장)
 
 | Ch | 제목 | 내용 |
 |----|------|------|
-| 2 | [비트스트림 구조](/blog/media/av1/part2-bitstream/chapter02-bitstream) | OBU, Temporal Unit, Frame |
-| 3 | [Sequence Header](/blog/media/av1/part2-bitstream/chapter03-tiles-superblocks) | 프로파일, 해상도, Color Config |
-| 5 | [Frame Header](/blog/media/av1/part2-bitstream/chapter05-prediction-overview) | 프레임별 파라미터, Skip Mode |
-| 7 | [엔트로피 디코딩](/blog/media/av1/part2-bitstream/chapter07-entropy-coding) | Symbol, CDF, Multi-symbol |
+| 2 | [비트스트림 구조](/blog/media/av1/chapter02-bitstream/00-overview) | OBU, Temporal Unit, Frame |
+| 3 | [Sequence Header](/blog/media/av1/chapter03-tiles-superblocks) | 프로파일, 해상도, Color Config |
+| 5 | [Frame Header](/blog/media/av1/chapter05-prediction-overview) | 프레임별 파라미터, Skip Mode |
+| 7 | [엔트로피 디코딩](/blog/media/av1/chapter07-entropy-coding) | Symbol, CDF, Multi-symbol |
 
 ---
 
@@ -64,9 +64,9 @@ AV1 (30장)
 
 | Ch | 제목 | 내용 |
 |----|------|------|
-| 4 | [블록 파티셔닝](/blog/media/av1/part3-blocks/chapter04-partitioning) | Superblock → 재귀 분할 |
-| 6 | [블록 구조](/blog/media/av1/part3-blocks/chapter06-block-structure) | mode_info, transform block |
-| 9 | [변환과 양자화](/blog/media/av1/part3-blocks/chapter09-transform-quantization) | DCT/ADST, Quant Matrix |
+| 4 | [블록 파티셔닝](/blog/media/av1/chapter04-partitioning) | Superblock → 재귀 분할 |
+| 6 | [블록 구조](/blog/media/av1/chapter06-block-structure) | mode_info, transform block |
+| 9 | [변환과 양자화](/blog/media/av1/chapter09-transform-quantization) | DCT/ADST, Quant Matrix |
 
 ---
 
@@ -74,13 +74,13 @@ AV1 (30장)
 
 | Ch | 제목 | 내용 |
 |----|------|------|
-| 8 | [Intra 예측](/blog/media/av1/part4-prediction/chapter08-intra-prediction) | DC, Angular, Paeth, CfL, Palette |
-| 10 | [프레임 조립](/blog/media/av1/part4-prediction/chapter10-frame-assembly) | 예측 + 역변환 + 클리핑 |
-| 11 | [참조 프레임](/blog/media/av1/part4-prediction/chapter11-reference-frames) | 8개 슬롯, refresh, 순서 힌트 |
-| 12 | [Inter 예측](/blog/media/av1/part4-prediction/chapter12-inter-prediction) | MV 예측, 보간 필터 |
-| 13 | [Compound 예측](/blog/media/av1/part4-prediction/chapter13-compound-prediction) | 두 참조 블렌딩, Wedge, Diff |
-| 14 | [Global & Warped Motion](/blog/media/av1/part4-prediction/chapter14-global-warped-motion) | 전역 모션, 아핀, OBMC |
-| 15 | [MFMV](/blog/media/av1/part4-prediction/chapter15-mfmv) | Motion Field MV |
+| 8 | [Intra 예측](/blog/media/av1/chapter08-intra-prediction) | DC, Angular, Paeth, CfL, Palette |
+| 10 | [프레임 조립](/blog/media/av1/chapter10-frame-assembly) | 예측 + 역변환 + 클리핑 |
+| 11 | [참조 프레임](/blog/media/av1/chapter11-reference-frames) | 8개 슬롯, refresh, 순서 힌트 |
+| 12 | [Inter 예측](/blog/media/av1/chapter12-inter-prediction) | MV 예측, 보간 필터 |
+| 13 | [Compound 예측](/blog/media/av1/chapter13-compound-prediction) | 두 참조 블렌딩, Wedge, Diff |
+| 14 | [Global & Warped Motion](/blog/media/av1/chapter14-global-warped-motion) | 전역 모션, 아핀, OBMC |
+| 15 | [MFMV](/blog/media/av1/chapter15-mfmv) | Motion Field MV |
 
 ---
 
@@ -88,9 +88,9 @@ AV1 (30장)
 
 | Ch | 제목 | 내용 |
 |----|------|------|
-| 16 | [디블로킹](/blog/media/av1/part5-filters/chapter16-deblocking) | 수직/수평 필터, bS 결정 |
-| 17 | [CDEF](/blog/media/av1/part5-filters/chapter17-cdef) | 방향성 필터, pri/sec 강도 |
-| 18 | [Loop Restoration](/blog/media/av1/part5-filters/chapter18-loop-restoration) | Wiener, Self-guided |
+| 16 | [디블로킹](/blog/media/av1/chapter16-deblocking) | 수직/수평 필터, bS 결정 |
+| 17 | [CDEF](/blog/media/av1/chapter17-cdef) | 방향성 필터, pri/sec 강도 |
+| 18 | [Loop Restoration](/blog/media/av1/chapter18-loop-restoration) | Wiener, Self-guided |
 
 ---
 
@@ -98,10 +98,10 @@ AV1 (30장)
 
 | Ch | 제목 | 내용 |
 |----|------|------|
-| 19 | [Film Grain](/blog/media/av1/part6-features/chapter19-film-grain) | 필름 그레인 합성 |
-| 20 | [타일과 병렬](/blog/media/av1/part6-features/chapter20-tiles-parallel) | 타일 구조, 병렬 디코딩 |
-| 21 | [Superres & Scalability](/blog/media/av1/part6-features/chapter21-superres-scalability) | 업스케일, SVC |
-| 22 | [Metadata OBU](/blog/media/av1/part6-features/chapter22-metadata) | HDR, 타이밍, 사용자 데이터 |
+| 19 | [Film Grain](/blog/media/av1/chapter19-film-grain) | 필름 그레인 합성 |
+| 20 | [타일과 병렬](/blog/media/av1/chapter20-tiles-parallel) | 타일 구조, 병렬 디코딩 |
+| 21 | [Superres & Scalability](/blog/media/av1/chapter21-superres-scalability) | 업스케일, SVC |
+| 22 | [Metadata OBU](/blog/media/av1/chapter22-metadata) | HDR, 타이밍, 사용자 데이터 |
 
 ---
 
@@ -109,9 +109,9 @@ AV1 (30장)
 
 | Ch | 제목 | 내용 |
 |----|------|------|
-| 23 | [Decoder Model](/blog/media/av1/part7-system/chapter23-decoder-model) | 버퍼링, 레벨, 타이밍 |
-| 24 | [Error Resilience](/blog/media/av1/part7-system/chapter24-error-resilience) | 에러 복구, OBU 독립성 |
-| 25 | [Container & Transport](/blog/media/av1/part7-system/chapter25-container-transport) | MP4, WebM, RTP, CMAF |
+| 23 | [Decoder Model](/blog/media/av1/chapter23-decoder-model) | 버퍼링, 레벨, 타이밍 |
+| 24 | [Error Resilience](/blog/media/av1/chapter24-error-resilience) | 에러 복구, OBU 독립성 |
+| 25 | [Container & Transport](/blog/media/av1/chapter25-container-transport) | MP4, WebM, RTP, CMAF |
 
 ---
 
@@ -119,10 +119,10 @@ AV1 (30장)
 
 | Ch | 제목 | 내용 |
 |----|------|------|
-| 26 | [Rate Control](/blog/media/av1/part8-encoder/chapter26-rate-control) | CBR, VBR, 2-pass |
-| 27 | [GOP & Keyframe](/blog/media/av1/part8-encoder/chapter27-gop-keyframe-ltr) | 구조 설계, LTR |
-| 28 | [Temporal Filter & AQ](/blog/media/av1/part8-encoder/chapter28-temporal-filter-aq) | 시간 필터링, 적응형 QP |
-| 29 | [테스트 벡터](/blog/media/av1/part8-encoder/chapter29-test-vectors) | 공식 벡터, 검증 방법 |
+| 26 | [Rate Control](/blog/media/av1/chapter26-rate-control) | CBR, VBR, 2-pass |
+| 27 | [GOP & Keyframe](/blog/media/av1/chapter27-gop-keyframe-ltr) | 구조 설계, LTR |
+| 28 | [Temporal Filter & AQ](/blog/media/av1/chapter28-temporal-filter-aq) | 시간 필터링, 적응형 QP |
+| 29 | [테스트 벡터](/blog/media/av1/chapter29-test-vectors) | 공식 벡터, 검증 방법 |
 
 ---
 
@@ -179,4 +179,4 @@ Ch 0 → 2 → 4 → 8 → 12 → 25
 
 ## 다음 장
 
-[Ch 0: 디지털 비디오 기초](/blog/media/av1/part1-basics/chapter00-digital-video)에서 시작한다.
+[Ch 0: 디지털 비디오 기초](/blog/media/av1/chapter00-digital-video)에서 시작한다.

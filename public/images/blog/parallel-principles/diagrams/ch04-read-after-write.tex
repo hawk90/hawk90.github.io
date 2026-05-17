@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq, x=1cm, y=1cm]
+  \node[actor]    (w)  at (0, 0)  {Writer};
+  \node[actor]    (r1) at (4, 0)  {Reader A};
+  \node[actor]    (r2) at (8, 0)  {Reader B};
+
+  \draw[lifeline] (w)  -- ++(0,-5);
+  \draw[lifeline] (r1) -- ++(0,-5);
+  \draw[lifeline] (r2) -- ++(0,-5);
+
+  % self message on writer
+  \draw[msgself] (w |- 0,-1.2) -- ++(1.2,0) |- (w |- 0,-1.7)
+                 node[msglabel, midway, right, xshift=10pt, fill=white, fill opacity=0.85, text opacity=1]{write(1) 진행};
+
+  \draw[msgsync] (r1 |- 0,-2.5) -- node[msglabel]{read → 1 (새 값)}     (w |- 0,-2.5);
+  \draw[msgsync] (r2 |- 0,-3.5) -- node[msglabel]{read → 0 (옛 값 — 허용)} (w |- 0,-3.5);
+
+  \node[seqnote, anchor=north, text width=70mm, align=center]
+       at ($(r1)!.5!(r2) + (0,-4.6)$)
+       {새 값을 본 뒤 옛 값을 다시 봐도 OK};
+\end{tikzpicture}
+\end{document}

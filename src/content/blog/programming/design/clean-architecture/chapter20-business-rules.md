@@ -152,4 +152,4 @@ Martin이 강조하는 핵심 메시지.
 ## 관련 항목
 
 - [Ch 19: 정책과 수준](/blog/programming/design/clean-architecture/chapter19-policy-and-level) — Entities는 최고 수준
-- [DDD](/blog/programming/design/domain-driven-design/) — Entity / Aggregate의 더 깊은 다룸
+- [DDD](/blog/programming/design/domain-driven-design/chapter01-crunching-knowledge/) — Entity / Aggregate의 더 깊은 다룸

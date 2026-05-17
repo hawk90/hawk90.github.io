@@ -1,0 +1,144 @@
+% _design-state.tex — TikZ state machine / FSM styles
+%
+% UML state diagram, protocol state machine, hardware FSM, kernel state graph
+% 등에 공통. Mermaid의 state diagram은 *수동 정렬*이 보통 더 깔끔하므로
+% TikZ로 직접 그리는 것이 표준 (CLAUDE.md 규칙).
+%
+% Companion to _design.tex — same palette and ink colors.
+%
+% Usage:
+%   \documentclass[border=10pt,tikz]{standalone}
+%   \usepackage{tikz}
+%   \usetikzlibrary{positioning,arrows.meta,shapes,fit,calc,decorations.pathreplacing}
+%   \begin{document}
+%   \input{../_design.tex}        % core palette
+%   \input{../_design-state.tex}  % state-specific
+%   \begin{tikzpicture}[blog, state]
+%     \node[initial]            (i)   at (-2, 0)  {};
+%     \node[stateBox]           (s1)  at ( 0, 0)  {Idle};
+%     \node[stateBox]           (s2)  at ( 3, 0)  {Running};
+%     \node[stateBox, accent]   (s3)  at ( 6, 0)  {Done};
+%     \node[final]              (f)   at ( 8, 0)  {};
+%
+%     \draw[trans] (i)  -- (s1);
+%     \draw[trans] (s1) -- node[transLabel]{start} (s2);
+%     \draw[trans] (s2) -- node[transLabel]{finish} (s3);
+%     \draw[trans] (s3) -- (f);
+%
+%     % self transition
+%     \draw[trans] (s2) edge[loop above] node[transLabel]{tick} (s2);
+%
+%     % guard / action label
+%     \draw[trans] (s1) to[bend right=30] node[transLabel]{stop\,/\,cleanup} (s3);
+%
+%     % choice (junction)
+%     \node[choice] (c) at (4.5, -2) {};
+%   \end{tikzpicture}
+
+\tikzset{
+  state/.style={
+    every node/.append style={font=\sffamily\small},
+  },
+
+  % ─── State (rounded rectangle, default) ─────────────────
+  stateBox/.style={
+    rectangle, rounded corners=4pt,
+    draw=nodebord, line width=0.5pt,
+    minimum height=8mm, minimum width=22mm,
+    inner sep=4pt, fill=nodefill, align=center,
+  },
+  stateBox/.append style={font=\sffamily\small},
+  % Role-based variants — match _design.tex palette
+  stateAbs/.style ={stateBox, draw=absbord, fill=absfill, font=\sffamily\itshape\small},
+  stateCon/.style ={stateBox, draw=conbord, fill=confill},
+  stateImp/.style ={stateBox, draw=impbord, fill=impfill},
+  stateOk/.style  ={stateBox, draw=okbord,  fill=okfill},
+  stateWarn/.style={stateBox, draw=warnbord, fill=warnfill, font=\sffamily\bfseries\small},
+  statePrp/.style ={stateBox, draw=prpbord, fill=prpfill},   % protocol / interface
+  stateNeut/.style={stateBox, draw=neutbord, fill=neutfill},
+  accent/.style   ={draw=hibord, fill=hifill},               % apply on top (e.g., \node[stateBox, accent])
+
+  % Compact / large variants
+  stateSm/.style ={stateBox, minimum height=6mm, minimum width=16mm, font=\sffamily\footnotesize, inner sep=2pt},
+  stateLg/.style ={stateBox, minimum height=11mm, minimum width=30mm},
+
+  % ─── Initial / final / terminal ─────────────────────────
+  initial/.style={
+    circle, fill=inkc, draw=inkc, line width=0.5pt,
+    minimum size=3.5mm, inner sep=0pt,
+  },
+  final/.style={                                              % bullseye (outer ring + inner dot)
+    circle, draw=inkc, line width=0.5pt,
+    minimum size=5mm, inner sep=0pt,
+    path picture={
+      \fill[inkc] (path picture bounding box.center) circle (1.2mm);
+    },
+  },
+  terminate/.style={                                          % X (terminate pseudo-state)
+    cross out, draw=warnbord, line width=0.8pt,
+    minimum size=3mm, inner sep=0pt,
+  },
+
+  % ─── Choice / junction / fork-join ──────────────────────
+  choice/.style={                                             % diamond decision
+    diamond, draw=clibord, line width=0.45pt, fill=clifill,
+    aspect=1, inner sep=1pt, minimum size=6mm,
+    font=\sffamily\scriptsize, align=center,
+  },
+  junction/.style={                                           % small filled black circle (UML junction)
+    circle, fill=inkc, draw=inkc, line width=0.4pt,
+    minimum size=2.5mm, inner sep=0pt,
+  },
+  forkbar/.style={                                            % horizontal bar (fork / join)
+    rectangle, fill=inkc, draw=inkc, line width=0.4pt,
+    minimum width=20mm, minimum height=1.2mm, inner sep=0pt,
+  },
+  forkbarV/.style={forkbar, minimum width=1.2mm, minimum height=20mm},
+
+  % ─── Transitions ────────────────────────────────────────
+  trans/.style={
+    -{Stealth[length=2.4mm]}, draw=edgec, line width=0.5pt,
+  },
+  transAlt/.style={                                           % dashed (lower priority / alt)
+    -{Stealth[length=2.4mm]}, dashed, draw=edgesc, line width=0.5pt,
+  },
+  transFocus/.style={                                         % highlighted hot path
+    -{Stealth[length=2.6mm]}, draw=focusc, line width=0.7pt,
+  },
+  transError/.style={                                         % error transition
+    -{Stealth[length=2.4mm]}, draw=warnbord, line width=0.55pt,
+  },
+  % Label on transition — event[guard]/action 형식
+  transLabel/.style={
+    font=\sffamily\footnotesize, text=inkc,
+    fill=white, fill opacity=0.85, text opacity=1,
+    inner sep=2pt,
+  },
+  transLabelMute/.style={transLabel, text=mutec},
+
+  % ─── Internal action listing (inside state box) ─────────
+  internalAction/.style={
+    font=\sffamily\footnotesize, text=inkc, anchor=north west, inner sep=2pt,
+  },
+  separator/.style={                                          % thin separator inside composite state
+    draw=mutec, line width=0.3pt,
+  },
+
+  % ─── Composite / region (containing sub-states) ─────────
+  composite/.style={
+    rectangle, rounded corners=6pt,
+    draw=nodebord, line width=0.5pt,
+    inner sep=10pt, fill=neutfill!50,
+  },
+  compositeTitle/.style={
+    font=\sffamily\bfseries\small, text=inkc,
+    fill=neutfill, draw=neutbord, line width=0.3pt,
+    inner sep=2pt, rounded corners=2pt,
+    anchor=north west,
+  },
+  region/.style={                                             % parallel region inside composite
+    rectangle, dashed,
+    draw=mutec, line width=0.35pt,
+    inner sep=8pt,
+  },
+}

@@ -284,7 +284,7 @@ import My_Module  # 혼합
 
 ### 패키지 구조
 
-```shell
+```text
 mypackage/
 ├── __init__.py
 ├── core.py

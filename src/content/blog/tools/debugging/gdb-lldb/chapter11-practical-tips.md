@@ -285,8 +285,8 @@ $ objcopy --add-gnu-debuglink=a.debug a.out
 
 ## 외부 자료
 
-- [Sanitizer 시리즈](/blog/tools/debugging/sanitizers/chapter01-asan)
-- [Valgrind 시리즈](/blog/tools/debugging/valgrind/chapter01-memcheck)
+- [Sanitizer 시리즈](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)
+- [Valgrind 시리즈](/blog/tools/debugging/valgrind/chapter02-memcheck)
 - [rr 프로젝트](https://rr-project.org/)
 - [GDB 공식 매뉴얼](https://sourceware.org/gdb/current/onlinedocs/gdb.html/)
 - [LLDB 튜토리얼](https://lldb.llvm.org/use/tutorial.html)

@@ -662,7 +662,7 @@ Ch 16에서는 **디블로킹 필터**를 다룬다. 복원 직후 이미지에 
 
 ## 관련 항목
 
-- [Ch 11: 참조 프레임](/blog/media/av1/part4-prediction/chapter11-reference-frames) — 참조 버퍼 구조
-- [Ch 12: Inter 예측](/blog/media/av1/part4-prediction/chapter12-inter-prediction) — MV 후보 리스트
-- [Ch 14: Global/Warped Motion](/blog/media/av1/part4-prediction/chapter14-global-warped-motion) — 다른 고급 모션 기법
-- [Ch 16: 디블로킹 필터](/blog/media/av1/part5-filters/chapter16-deblocking) — 블록 경계 처리
+- [Ch 11: 참조 프레임](/blog/media/av1/chapter11-reference-frames) — 참조 버퍼 구조
+- [Ch 12: Inter 예측](/blog/media/av1/chapter12-inter-prediction) — MV 후보 리스트
+- [Ch 14: Global/Warped Motion](/blog/media/av1/chapter14-global-warped-motion) — 다른 고급 모션 기법
+- [Ch 16: 디블로킹 필터](/blog/media/av1/chapter16-deblocking) — 블록 경계 처리

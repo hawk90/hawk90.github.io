@@ -716,6 +716,6 @@ Ch 18에서는 **Loop Restoration**을 다룬다. 디블로킹과 CDEF가 국소
 
 ## 관련 항목
 
-- [Ch 16: 디블로킹 필터](/blog/media/av1/part5-filters/chapter16-deblocking) — CDEF 전 단계
-- [Ch 18: Loop Restoration](/blog/media/av1/part5-filters/chapter18-loop-restoration) — CDEF 후 단계
-- [Ch 9: 변환과 양자화](/blog/media/av1/part3-blocks/chapter09-transform-quant) — 링잉 아티팩트의 원인
+- [Ch 16: 디블로킹 필터](/blog/media/av1/chapter16-deblocking) — CDEF 전 단계
+- [Ch 18: Loop Restoration](/blog/media/av1/chapter18-loop-restoration) — CDEF 후 단계
+- [Ch 9: 변환과 양자화](/blog/media/av1/chapter09-transform-quant) — 링잉 아티팩트의 원인

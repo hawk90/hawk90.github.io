@@ -2,20 +2,29 @@
 % Inputs nothing on its own — meant to be \input{} from each diagram .tex
 % AFTER \begin{document}, BEFORE \begin{tikzpicture}.
 %
-% Provides a unified visual language across GoF / DSA / EMC++ / Beautiful series:
+% Companion files:
+%   _design-math.tex — math diagrams (PGFPlots, book-notes palette)
+%
+% Provides a unified visual language across GoF / DSA / EMC++ / Beautiful / 시리즈:
 %   - Colors: muted, accessible, color-coded by role
 %   - Node styles: consistent sizing, rounded, subtle borders
 %   - Edge styles: UML-style inheritance, aggregation, plus dashed alternates
+%   - Annotation: callouts, notes, badges
 %
 % Usage:
 %   \documentclass[border=10pt,tikz]{standalone}
 %   \usepackage{tikz}
-%   \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+%   \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
 %   \begin{document}
 %   \input{../_design.tex}     % adjust relative path
 %   \begin{tikzpicture}[blog]  % apply 'blog' style
 %   ...
+%
+% Backward-compat note: This file only ADDS to the public API. Existing styles
+% (abs/con/imp/cli/hi/vx/q/inh/agg/uses/arr/edge/alt/ret/thr/group/glabel) are
+% preserved. New helpers are documented below.
 
+% ─── Core palette (fills paired with darker borders) ─────────
 \definecolor{absfill}{RGB}{220,232,247}   % cool blue
 \definecolor{absbord}{RGB}{72,118,182}
 \definecolor{confill}{RGB}{249,222,222}   % warm red
@@ -32,12 +41,28 @@
 \definecolor{edgesc} {RGB}{145,145,145}
 \definecolor{groupbord}{RGB}{200,200,200}
 
+% ─── Extended palette (new) ──────────────────────────────────
+\definecolor{prpfill}{RGB}{233,224,247}   % muted purple (state / interface)
+\definecolor{prpbord}{RGB}{132,103,182}
+\definecolor{tealfill}{RGB}{215,235,235}  % teal (services / utility)
+\definecolor{tealbord}{RGB}{ 78,135,140}
+\definecolor{warnfill}{RGB}{251,229,229}  % deeper warn (error states)
+\definecolor{warnbord}{RGB}{180, 55, 55}
+\definecolor{okfill}  {RGB}{220,240,225}  % success
+\definecolor{okbord}  {RGB}{ 75,140, 90}
+\definecolor{neutfill}{RGB}{238,238,238}  % neutral panel
+\definecolor{neutbord}{RGB}{170,170,170}
+\definecolor{inkc}    {RGB}{ 30, 30, 30}  % strong ink (titles)
+\definecolor{mutec}   {RGB}{120,120,120}  % muted text
+\definecolor{focusc}  {RGB}{210, 70, 70}  % focus / highlight accent
+\definecolor{gridc}   {RGB}{220,220,220}  % background grid
+
 \tikzset{
   blog/.style={
     font=\sffamily\small\linespread{1.18}\selectfont,
     every node/.style={font=\sffamily\small\linespread{1.18}\selectfont}
   },
-  % --- node roles ---
+  % ─── existing node roles (unchanged) ───
   cls/.style={
     rectangle, rounded corners=2pt,
     draw=nodebord, line width=0.4pt,
@@ -49,19 +74,49 @@
   imp/.style={cls, draw=impbord, fill=impfill},
   cli/.style={cls, draw=clibord, fill=clifill},
   hi/.style={cls, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
-  % --- circle (for trees / graph nodes) ---
+  % ─── new node roles ───
+  prp/.style={cls, draw=prpbord, fill=prpfill},               % protocol / interface / state
+  tealn/.style={cls, draw=tealbord, fill=tealfill},           % service / utility
+  warn/.style={cls, draw=warnbord, fill=warnfill, font=\sffamily\bfseries\small},  % error state
+  ok/.style={cls, draw=okbord, fill=okfill},                  % success state
+  neut/.style={cls, draw=neutbord, fill=neutfill},            % neutral
+  % ─── size variants ───
+  clsSm/.style={cls, minimum height=6mm, minimum width=20mm, font=\sffamily\footnotesize, inner sep=2pt},
+  clsLg/.style={cls, minimum height=11mm, minimum width=36mm, font=\sffamily\normalsize},
+  absSm/.style={clsSm, draw=absbord, fill=absfill, font=\sffamily\itshape\footnotesize},
+  conSm/.style={clsSm, draw=conbord, fill=confill},
+  impSm/.style={clsSm, draw=impbord, fill=impfill},
+  % ─── circle (existing) ───
   vx/.style={
     circle, draw=absbord, line width=0.4pt,
     minimum size=8mm, fill=absfill, inner sep=0pt
   },
   vxc/.style={vx, draw=conbord, fill=confill},
   vxh/.style={vx, draw=hibord, fill=hifill, font=\sffamily\bfseries},
-  % --- decision diamond ---
+  % new circle variants
+  vxi/.style={vx, draw=impbord, fill=impfill},                % impl green
+  vxp/.style={vx, draw=prpbord, fill=prpfill},                % protocol purple
+  vxw/.style={vx, draw=warnbord, fill=warnfill},              % warn red
+  vxn/.style={vx, draw=nodebord, fill=nodefill},              % neutral
+  vxSm/.style={vx, minimum size=6mm, font=\sffamily\footnotesize},
+  vxLg/.style={vx, minimum size=11mm, font=\sffamily\normalsize},
+  % ─── decision diamond (existing) ───
   q/.style={
     diamond, draw=clibord, line width=0.4pt, fill=clifill,
     inner sep=2pt, aspect=2.4, align=center
   },
-  % --- edges ---
+  % rounded callout / note (new)
+  note/.style={
+    rectangle, rounded corners=3pt,
+    draw=clibord, line width=0.4pt, fill=clifill,
+    inner sep=3pt, font=\sffamily\footnotesize, align=left
+  },
+  badge/.style={                                              % small inline marker
+    rectangle, rounded corners=2pt,
+    draw=hibord, line width=0.3pt, fill=hifill,
+    inner sep=1.5pt, font=\sffamily\scriptsize\bfseries
+  },
+  % ─── edges (existing) ───
   inh/.style={                                  % UML inheritance
     -{Triangle[length=3mm,width=3mm,open]},
     draw=edgec, line width=0.5pt
@@ -88,13 +143,53 @@
   thr/.style={                                  % threading link (red dashed)
     ->, dashed, draw=conbord, line width=0.5pt
   },
-  % --- group / region ---
+  % ─── new edges ───
+  comp/.style={                                 % UML composition (filled diamond)
+    {Diamond[length=2.5mm,width=2.5mm]}-{Stealth[length=2.2mm]},
+    draw=edgec, line width=0.45pt
+  },
+  realize/.style={                              % UML realize (impl interface)
+    -{Triangle[length=3mm,width=3mm,open]}, dashed,
+    draw=edgec, line width=0.5pt
+  },
+  msgsync/.style={                              % synchronous message (sequence)
+    -{Stealth[length=2.6mm]}, draw=edgec, line width=0.55pt
+  },
+  msgasync/.style={                             % asynchronous message
+    -{Stealth[length=2.4mm,inset=0.4mm,fill=edgec]},
+    draw=edgec, line width=0.5pt
+  },
+  msgret/.style={                               % return message (dashed)
+    -{Stealth[length=2.2mm]}, dashed, draw=edgesc, line width=0.45pt
+  },
+  flow/.style={                                 % control flow (thicker, hi-vis)
+    -{Stealth[length=2.4mm]}, draw=inkc, line width=0.7pt
+  },
+  focus/.style={                                % focus / hot path
+    -{Stealth[length=2.4mm]}, draw=focusc, line width=0.8pt
+  },
+  selfloop/.style={                             % self loop on a node
+    ->, draw=edgec, line width=0.45pt, in=120, out=60, loop, looseness=8
+  },
+  % ─── group / region (existing + new) ───
   group/.style={
     rectangle, rounded corners=4pt,
     draw=groupbord, line width=0.4pt,
     inner sep=10pt, fill=black!2
   },
-  glabel/.style={font=\sffamily\bfseries\small, anchor=north west, inner sep=2pt}
+  glabel/.style={font=\sffamily\bfseries\small, anchor=north west, inner sep=2pt},
+  panel/.style={                                % stronger panel for layered diagrams
+    rectangle, rounded corners=4pt,
+    draw=neutbord, line width=0.45pt,
+    inner sep=10pt, fill=neutfill!50
+  },
+  panelTitle/.style={font=\sffamily\bfseries\small, text=inkc, anchor=north west, inner sep=2pt},
+  panelSub/.style={font=\sffamily\footnotesize, text=mutec, anchor=north west, inner sep=2pt},
+  % ─── typography ───
+  caption/.style={font=\sffamily\footnotesize\itshape, text=mutec, align=center},
+  legendkey/.style={rectangle, minimum width=10mm, minimum height=3mm, inner sep=0pt, line width=0.3pt},
+  % ─── grid / coordinate hints ───
+  bggrid/.style={draw=gridc, line width=0.3pt, dotted},
 }
 
 % Korean font convenience macro — included by every Hangul diagram

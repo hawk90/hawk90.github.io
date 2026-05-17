@@ -55,5 +55,5 @@ iowrite32(0x1, bar0 + REG_CONTROL);
 
 ## 관련 항목
 
-- [Ch 7: DMA 버퍼 처리](/blog/tools/qemu-fake-device/chapter07-dma)
-- [Ch 9: 디버깅](/blog/tools/qemu-fake-device/chapter09-debugging)
+- [Ch 7: DMA 버퍼 처리](/blog/tools/emulation/qemu-fake-device/chapter07-dma)
+- [Ch 9: 디버깅](/blog/tools/emulation/qemu-fake-device/chapter09-debugging)

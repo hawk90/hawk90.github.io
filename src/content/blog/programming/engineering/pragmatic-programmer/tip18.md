@@ -52,4 +52,4 @@ draft: true
 
 - [Tip 17: Orthogonality](/blog/programming/engineering/pragmatic-programmer/tip17)
 - [Tip 19: Forgo Following Fads](/blog/programming/engineering/pragmatic-programmer/tip19)
-- [Clean Architecture: Dependency Rule](/blog/programming/design/clean-architecture/)
+- [Clean Architecture: Dependency Rule](/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture/)

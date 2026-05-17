@@ -44,5 +44,5 @@ msi_notify(pdev, 0);
 
 ## 관련 항목
 
-- [Ch 5: MMIO 레지스터 구현](/blog/tools/qemu-fake-device/chapter05-mmio-registers)
-- [Ch 7: DMA 버퍼 처리](/blog/tools/qemu-fake-device/chapter07-dma)
+- [Ch 5: MMIO 레지스터 구현](/blog/tools/emulation/qemu-fake-device/chapter05-mmio-registers)
+- [Ch 7: DMA 버퍼 처리](/blog/tools/emulation/qemu-fake-device/chapter07-dma)

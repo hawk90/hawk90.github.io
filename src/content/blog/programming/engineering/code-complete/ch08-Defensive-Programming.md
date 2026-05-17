@@ -508,4 +508,4 @@ McConnell 원문 5:
 - [Ch 7: High-Quality Routines](/blog/programming/engineering/code-complete/ch07-High-Quality-Routines)
 - [Ch 9: The Pseudocode Programming Process](/blog/programming/engineering/code-complete/ch09-The-Pseudocode-Programming-Process)
 - [Clean Code Ch 7: 에러 처리](/blog/programming/engineering/clean-code/chapter07-error-handling)
-- [Effective C++ Ch 8: C++의 예외에 익숙해져라](/blog/programming/cpp/effective-cpp)
+- [Effective C++ Ch 8: C++의 예외에 익숙해져라](/blog/programming/cpp/effective-cpp/item01-view-cpp-as-a-federation-of-languages)

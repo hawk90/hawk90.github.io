@@ -208,5 +208,5 @@ class LoanView {
 ## 관련 항목
 
 - [Ch 22: The Clean Architecture](/blog/programming/design/clean-architecture/chapter22-the-clean-architecture) — Adapters 층의 위치
-- [GoF MVC / MVP](/blog/programming/design/gof-design-patterns/) — 같은 패턴 가족
+- [GoF MVC / MVP](/blog/programming/design/gof-design-patterns/item01-abstract-factory/) — 같은 패턴 가족
 - [Refactoring Ch 7: 캡슐화](/blog/programming/design/refactoring/ch07) — Encapsulate Collection

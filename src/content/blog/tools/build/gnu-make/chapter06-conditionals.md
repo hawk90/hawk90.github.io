@@ -343,7 +343,7 @@ header.h:           ← 빈 규칙
 
 ### 설정과 규칙 분리
 
-```shell
+```text
 project/
 ├── Makefile
 ├── config.mk          # 변수 설정
@@ -630,7 +630,7 @@ CFLAGS += -MMD
 
 ## 다음 장 예고
 
-[Ch 7: 실전 Makefile](/blog/tools/gnu-make/chapter07-practical)에서는 지금까지 본 도구들을 합쳐 *진짜 프로젝트에 들어갈 만한 Makefile*을 만듭니다. 다중 타겟, 정적 라이브러리·동적 라이브러리, install/uninstall, 크로스 컴파일, 그리고 흔히 쓰는 helper 타겟(format / lint / test)까지.
+[Ch 7: 실전 Makefile](/blog/tools/build/gnu-make/chapter07-practical)에서는 지금까지 본 도구들을 합쳐 *진짜 프로젝트에 들어갈 만한 Makefile*을 만듭니다. 다중 타겟, 정적 라이브러리·동적 라이브러리, install/uninstall, 크로스 컴파일, 그리고 흔히 쓰는 helper 타겟(format / lint / test)까지.
 
 ## 참고 자료
 

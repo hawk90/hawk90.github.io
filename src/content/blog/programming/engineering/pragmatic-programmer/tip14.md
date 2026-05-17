@@ -57,5 +57,5 @@ draft: true
 
 - [Tip 13: Build Documentation In](/blog/programming/engineering/pragmatic-programmer/tip13)
 - [Tip 15: DRY](/blog/programming/engineering/pragmatic-programmer/tip15)
-- [Clean Architecture Ch 1: What Is Design and Architecture?](/blog/programming/design/clean-architecture/)
+- [Clean Architecture Ch 1: What Is Design and Architecture?](/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture/)
 - [Code Complete Ch 5: Design in Construction](/blog/programming/engineering/code-complete/ch05-Design-in-Construction)

@@ -52,5 +52,5 @@ static void my_pci_class_init(ObjectClass *klass, void *data)
 
 ## 관련 항목
 
-- [Ch 3: QEMU 디바이스 모델 기초](/blog/tools/qemu-fake-device/chapter03-qom-basics)
-- [Ch 5: MMIO 레지스터 구현](/blog/tools/qemu-fake-device/chapter05-mmio-registers)
+- [Ch 3: QEMU 디바이스 모델 기초](/blog/tools/emulation/qemu-fake-device/chapter03-qom-basics)
+- [Ch 5: MMIO 레지스터 구현](/blog/tools/emulation/qemu-fake-device/chapter05-mmio-registers)

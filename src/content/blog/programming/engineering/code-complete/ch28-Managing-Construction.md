@@ -116,5 +116,5 @@ McConnell이 정리한 좋은 관리자.
 
 - [Ch 27: Program Size](/blog/programming/engineering/code-complete/ch27-How-Program-Size-Affects-Construction)
 - [Ch 29: Integration](/blog/programming/engineering/code-complete/ch29-Integration)
-- [Mythical Man-Month](/blog/programming/engineering/mythical-man-month/)
-- [Peopleware](/blog/programming/engineering/peopleware/)
+- [Mythical Man-Month](/blog/programming/engineering/mythical-man-month/ch01/)
+- [Peopleware](/blog/programming/engineering/peopleware/ch01/)

@@ -241,4 +241,4 @@ draft: false
 
 - [Rule 9: 주어와 동사 일치](/blog/writing/elements-of-style/ch01/rule09-subject-verb)
 - [Rule 11: A participial phrase at the beginning of a sentence](/blog/writing/elements-of-style/ch01/rule11-dangling)
-- [Only Grammar Book — Chapter 3: 대명사](/blog/writing/only-grammar-book/ch03-pronouns)
+- [Only Grammar Book — Chapter 3: 대명사](/blog/writing/only-grammar-book/ch01-parts-of-speech/ch03-pronouns)

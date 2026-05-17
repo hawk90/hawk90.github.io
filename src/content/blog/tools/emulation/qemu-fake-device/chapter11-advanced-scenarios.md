@@ -46,5 +46,5 @@ static uint64_t my_mmio_read(void *opaque, hwaddr addr, unsigned size)
 
 ## 관련 항목
 
-- [Ch 10: 테스트 자동화](/blog/tools/qemu-fake-device/chapter10-test-automation)
-- [Ch 12: 사례 연구 — NVMe](/blog/tools/qemu-fake-device/chapter12-case-study-nvme)
+- [Ch 10: 테스트 자동화](/blog/tools/emulation/qemu-fake-device/chapter10-test-automation)
+- [Ch 12: 사례 연구 — NVMe](/blog/tools/emulation/qemu-fake-device/chapter12-case-study-nvme)

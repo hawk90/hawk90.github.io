@@ -455,5 +455,5 @@ Ch 4에서는 블록 파티셔닝을 다룬다. 슈퍼블록을 재귀적으로 
 
 ## 관련 항목
 
-- [Ch 2: 비트스트림 구조](/blog/media/av1/part2-bitstream/chapter02-bitstream)
-- [Ch 4: 블록 파티셔닝](/blog/media/av1/part3-blocks/chapter04-partitioning)
+- [Ch 2: 비트스트림 구조](/blog/media/av1/chapter02-bitstream/00-overview)
+- [Ch 4: 블록 파티셔닝](/blog/media/av1/chapter04-partitioning)

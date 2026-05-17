@@ -329,6 +329,6 @@ Lambda Architecture는 *eventual consistency*를 받아들임. CAP의 AP 쪽.
 
 - [Ch 6: Data Parallelism](/blog/parallel/seven-concurrency-models/ch06-data-parallelism)
 - [Ch 1: Threads and Locks](/blog/parallel/seven-concurrency-models/ch01-threads-and-locks) — 시리즈 시작
-- [DDIA: Designing Data-Intensive Applications](/blog/parallel/designing-data-intensive-applications) — 분산 데이터 심화
+- [DDIA: Designing Data-Intensive Applications](/blog/parallel/designing-data-intensive-applications/chapter01-reliable-scalable-maintainable) — 분산 데이터 심화
 - [AMP Ch 1: Introduction](/blog/parallel/parallel-principles/ch01-introduction) — 동시성 이론
 - [C++ Concurrency in Action Ch 1: Hello](/blog/parallel/cpp-concurrency-in-action/chapter01-hello-concurrent-world) — C++ 실무

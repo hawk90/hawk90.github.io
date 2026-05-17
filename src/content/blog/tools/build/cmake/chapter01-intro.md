@@ -145,7 +145,7 @@ cmake version 3.28.1
 
 가장 단순한 CMake 프로젝트입니다.
 
-```shell
+```text
 hello/
 ├── CMakeLists.txt
 └── main.cpp
@@ -236,7 +236,7 @@ add_executable(hello
 
 타겟 이름(`hello`)이 *실행 파일 이름*이 됩니다. Linux에서는 `hello`, Windows에서는 `hello.exe` — 확장자는 CMake가 *플랫폼 관행*에 맞춰 자동 처리합니다.
 
-타겟은 [Ch 3](/blog/tools/cmake/chapter03-targets)에서 자세히 다룹니다. CMake의 모든 *Modern* 패턴은 *타겟을 중심*으로 돌아갑니다 — 옵션·include 경로·라이브러리 의존성이 모두 *타겟에 붙는* 방식입니다.
+타겟은 [Ch 3](/blog/tools/build/cmake/chapter03-targets)에서 자세히 다룹니다. CMake의 모든 *Modern* 패턴은 *타겟을 중심*으로 돌아갑니다 — 옵션·include 경로·라이브러리 의존성이 모두 *타겟에 붙는* 방식입니다.
 
 ---
 
@@ -246,7 +246,7 @@ add_executable(hello
 
 CMake는 *소스 디렉터리와 빌드 디렉터리를 분리*하기를 강하게 권합니다.
 
-```shell
+```text
 hello/                  ← 소스 (불변)
 ├── CMakeLists.txt
 ├── main.cpp
@@ -341,7 +341,7 @@ cmake --build build --config Release
 
 실제 프로젝트는 *공개 헤더*와 *내부 구현*을 분리합니다.
 
-```shell
+```text
 myproject/
 ├── CMakeLists.txt
 ├── include/
@@ -364,7 +364,7 @@ add_executable(myapp
 target_include_directories(myapp PRIVATE include)
 ```
 
-`target_include_directories`로 *이 타겟이 어디서 헤더를 찾는지*를 지정합니다. `PRIVATE`은 *이 타겟에서만* 사용한다는 뜻입니다. PRIVATE·INTERFACE·PUBLIC 세 가지의 의미는 [Ch 3](/blog/tools/cmake/chapter03-targets)에서 자세히 다룹니다 — Modern CMake의 *가장 중요한 개념* 중 하나입니다.
+`target_include_directories`로 *이 타겟이 어디서 헤더를 찾는지*를 지정합니다. `PRIVATE`은 *이 타겟에서만* 사용한다는 뜻입니다. PRIVATE·INTERFACE·PUBLIC 세 가지의 의미는 [Ch 3](/blog/tools/build/cmake/chapter03-targets)에서 자세히 다룹니다 — Modern CMake의 *가장 중요한 개념* 중 하나입니다.
 
 ### C++ 표준 지정
 
@@ -496,7 +496,7 @@ target_include_directories(app PRIVATE include)
 target_compile_definitions(app PRIVATE DEBUG)
 ```
 
-이 차이가 *Modern CMake*의 핵심입니다. [Ch 3](/blog/tools/cmake/chapter03-targets)에서 본격적으로 다룹니다.
+이 차이가 *Modern CMake*의 핵심입니다. [Ch 3](/blog/tools/build/cmake/chapter03-targets)에서 본격적으로 다룹니다.
 
 ---
 
@@ -513,7 +513,7 @@ target_compile_definitions(app PRIVATE DEBUG)
 
 ## 다음 장 예고
 
-[Ch 2: CMake 언어](/blog/tools/cmake/chapter02-language)에서는 CMake의 문법 자체를 다룹니다 — 변수, 리스트, 조건문, 반복, 함수, 그리고 *제너레이터 식*(generator expression)까지. 다른 언어에 익숙한 사람이 보면 *기묘하게 느껴지는* CMake 언어의 특성을 정리합니다.
+[Ch 2: CMake 언어](/blog/tools/build/cmake/chapter02-language)에서는 CMake의 문법 자체를 다룹니다 — 변수, 리스트, 조건문, 반복, 함수, 그리고 *제너레이터 식*(generator expression)까지. 다른 언어에 익숙한 사람이 보면 *기묘하게 느껴지는* CMake 언어의 특성을 정리합니다.
 
 ## 참고 자료
 

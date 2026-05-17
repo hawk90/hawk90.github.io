@@ -58,5 +58,5 @@ static void my_machine_init(MachineState *machine)
 
 ## 관련 항목
 
-- [Ch 10: 마이그레이션](/blog/tools/qemu-internals/chapter10-migration)
-- [Ch 12: QEMU 기여하기](/blog/tools/qemu-internals/chapter12-contributing)
+- [Ch 10: 마이그레이션](/blog/tools/emulation/qemu-internals/chapter10-migration)
+- [Ch 12: QEMU 기여하기](/blog/tools/emulation/qemu-internals/chapter12-contributing)

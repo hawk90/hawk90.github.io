@@ -46,5 +46,5 @@ pci_dma_write(pdev, guest_addr, buf, len);
 
 ## 관련 항목
 
-- [Ch 6: 인터럽트 구현](/blog/tools/qemu-fake-device/chapter06-interrupts)
-- [Ch 8: 리눅스 드라이버 작성](/blog/tools/qemu-fake-device/chapter08-linux-driver)
+- [Ch 6: 인터럽트 구현](/blog/tools/emulation/qemu-fake-device/chapter06-interrupts)
+- [Ch 8: 리눅스 드라이버 작성](/blog/tools/emulation/qemu-fake-device/chapter08-linux-driver)

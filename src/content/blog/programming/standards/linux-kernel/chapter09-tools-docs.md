@@ -28,7 +28,7 @@ draft: false
 
 ### 일반적인 경고
 
-```shell
+```text
 WARNING: line length of 85 exceeds 80 columns
 WARNING: Prefer using '"%s...", __func__' to using 'function_name'
 WARNING: Missing a blank line after declarations
@@ -133,7 +133,7 @@ static void my_function(void) __acquires(my_lock)
 
 ### sparse 경고
 
-```shell
+```text
 warning: incorrect type in argument 1 (different address spaces)
    expected void *ptr
    got void [noderef] __user *user_ptr
@@ -293,7 +293,7 @@ make KCFLAGS="-Werror"
 
 ### 일반적인 경고
 
-```shell
+```text
 warning: unused variable 'x'
 warning: 'return' with a value, in function returning void
 warning: implicit declaration of function 'foo'
@@ -351,7 +351,7 @@ See Also
 
 ### 문서 위치
 
-```shell
+```text
 Documentation/
 ├── admin-guide/         # 시스템 관리자용
 ├── driver-api/          # 드라이버 API

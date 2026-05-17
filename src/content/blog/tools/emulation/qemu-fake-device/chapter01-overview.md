@@ -98,5 +98,5 @@ QEMU를 소스에서 빌드하고 개발 환경을 구축합니다.
 
 ## 관련 항목
 
-- [Ch 2: QEMU 설치와 빌드](/blog/tools/qemu-fake-device/chapter02-install-build)
+- [Ch 2: QEMU 설치와 빌드](/blog/tools/emulation/qemu-fake-device/chapter02-install-build)
 - [QEMU Official Documentation](https://www.qemu.org/docs/master/)

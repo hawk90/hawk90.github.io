@@ -51,7 +51,7 @@ Iglberger의 네 가지 큰 메시지(가이드라인 1-3, 22 등)는 다음과 
 - 구조 — Composite, Facade, Flyweight, Proxy
 - 행동 — Chain of Responsibility, Iterator, Mediator, Memento, State, Template Method
 
-자세한 내용은 [GoF 시리즈](/blog/programming/design/gof-design-patterns/)에서 23개 패턴을 모두 다룬다.
+자세한 내용은 [GoF 시리즈](/blog/programming/design/gof-design-patterns/item01-abstract-factory/)에서 23개 패턴을 모두 다룬다.
 
 ## 학습 방향 2 — 모던 C++의 진화
 
@@ -139,9 +139,9 @@ C++은 이제 모던 OO와 FP를 함께 쓰는 혼합 언어다.
 
 - *Design Patterns* (GoF, 1994) — 클래식
 - *C++ Software Design* (Iglberger, 2022) — 이 시리즈의 원본
-- *Effective Modern C++* (Meyers, 2014) — [시리즈 링크](/blog/programming/cpp/effective-modern-cpp/)
-- *Effective C++ 3rd* (Meyers, 2005) — [시리즈 링크](/blog/programming/cpp/effective-cpp/)
-- *Beautiful C++* (Vandevoorde, 2020) — [시리즈 링크](/blog/programming/cpp/beautiful-cpp/)
+- *Effective Modern C++* (Meyers, 2014) — [시리즈 링크](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction/)
+- *Effective C++ 3rd* (Meyers, 2005) — [시리즈 링크](/blog/programming/cpp/effective-cpp/item01-view-cpp-as-a-federation-of-languages/)
+- *Beautiful C++* (Vandevoorde, 2020) — [시리즈 링크](/blog/programming/cpp/beautiful-cpp/item01-use-iso-standard-cpp/)
 
 **Modern OO / 디자인**
 
@@ -307,10 +307,10 @@ Ch 11: 마무리 (39)
 
 ## 관련 항목 — 외부 자원
 
-- [GoF 디자인 패턴 시리즈](/blog/programming/design/gof-design-patterns/) — 23 패턴 완전 정리
-- [Effective C++ 시리즈](/blog/programming/cpp/effective-cpp/) — Meyers 클래식
-- [Effective Modern C++ 시리즈](/blog/programming/cpp/effective-modern-cpp/) — C++11/14
-- [Beautiful C++ 시리즈](/blog/programming/cpp/beautiful-cpp/) — 모던 가이드라인
+- [GoF 디자인 패턴 시리즈](/blog/programming/design/gof-design-patterns/item01-abstract-factory/) — 23 패턴 완전 정리
+- [Effective C++ 시리즈](/blog/programming/cpp/effective-cpp/item01-view-cpp-as-a-federation-of-languages/) — Meyers 클래식
+- [Effective Modern C++ 시리즈](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction/) — C++11/14
+- [Beautiful C++ 시리즈](/blog/programming/cpp/beautiful-cpp/item01-use-iso-standard-cpp/) — 모던 가이드라인
 - [가이드라인 1: Software Design의 중요성](/blog/programming/cpp/cpp-software-design/guideline01-understand-the-importance-of-software-design) — 시리즈의 시작점
 
 ## 시리즈 완결 — 감사 인사
