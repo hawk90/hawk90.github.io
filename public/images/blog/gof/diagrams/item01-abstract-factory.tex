@@ -1,39 +1,44 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
 % --- Factory layer ---
-\node[abs] (af) at (0, 4) {AbstractFactory \\ \scriptsize createButton()*  createWindow()*};
-\node[con] (mf) at (-3.4, 1.6) {MacFactory};
-\node[con] (wf) at ( 3.4, 1.6) {WinFactory};
+\node[abs, minimum width=38mm] (af) at (0, 4.2) {AbstractFactory \\[2pt]
+  \scriptsize createButton()* \\ \scriptsize createWindow()*};
+\node[con] (mf) at (-3.8, 1.6) {MacFactory};
+\node[con] (wf) at ( 3.8, 1.6) {WinFactory};
 \draw[inh] (mf.north) -- ++(0,0.4) -| (af.south);
 \draw[inh] (wf.north) -- ++(0,0.4) -| (af.south);
 
-% --- Product layer ---
-\node[abs] (btn) at (-3, -1.4) {Button};
-\node[abs] (win) at ( 3, -1.4) {Window};
-\node[imp] (mb) at (-5,-3.6) {MacButton};
-\node[imp] (wb) at (-1,-3.6) {WinButton};
-\node[imp] (mw) at ( 1,-3.6) {MacWindow};
-\node[imp] (ww) at ( 5,-3.6) {WinWindow};
+% --- Product layer (좌우 그룹 더 명확히, 가운데 갭 확보) ---
+\node[abs] (btn) at (-3.6, -1.4) {Button};
+\node[abs] (win) at ( 3.6, -1.4) {Window};
+\node[imp] (mb) at (-5.6,-3.7) {MacButton};
+\node[imp] (wb) at (-1.6,-3.7) {WinButton};
+\node[imp] (mw) at ( 1.6,-3.7) {MacWindow};
+\node[imp] (ww) at ( 5.6,-3.7) {WinWindow};
 \draw[inh] (mb.north) -- ++(0,0.4) -| (btn.south);
 \draw[inh] (wb.north) -- ++(0,0.4) -| (btn.south);
 \draw[inh] (mw.north) -- ++(0,0.4) -| (win.south);
 \draw[inh] (ww.north) -- ++(0,0.4) -| (win.south);
 
-% --- Returns ---
-\draw[ret] (mf) to[bend right=15] node[left, font=\tiny]{creates} (mb.west);
-\draw[ret] (mf) to[bend left=8]   (mw.north west);
-\draw[ret] (wf) to[bend left=15]  node[right, font=\tiny]{creates} (ww.east);
-\draw[ret] (wf) to[bend right=8]  (wb.north east);
+% --- Returns: each factory creates one Button + one Window ---
+% Mac side
+\draw[ret] (mf.south) to[bend right=18]
+  node[pos=0.65, left=1pt, font=\tiny]{creates} (mb.north);
+\draw[ret] (mf.south) to[out=-30, in=120, looseness=0.7] (mw.north);
+% Win side
+\draw[ret] (wf.south) to[bend left=18]
+  node[pos=0.65, right=1pt, font=\tiny]{creates} (ww.north);
+\draw[ret] (wf.south) to[out=-150, in=60, looseness=0.7] (wb.north);
 
 % --- Legend (placed below the product row to avoid overlap) ---
 \matrix[draw=groupbord, rounded corners, inner sep=4pt, row sep=1pt, column sep=4pt,
         font=\tiny, anchor=north west]
-  at (-6.5, -5.0) {
+  at (-7.0, -5.2) {
     \node[abs, minimum width=12mm, minimum height=4mm]{}; & \node{abstract}; \\
     \node[con, minimum width=12mm, minimum height=4mm]{}; & \node{concrete factory}; \\
     \node[imp, minimum width=12mm, minimum height=4mm]{}; & \node{concrete product}; \\

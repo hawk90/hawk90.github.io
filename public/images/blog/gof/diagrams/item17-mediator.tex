@@ -6,16 +6,16 @@
 \begin{tikzpicture}[blog]
 
 \node[abs] (col) at (-3.6, 1.6) {Colleague};
-\node[abs] (med) at ( 4.0, 1.6) {Mediator \\ \scriptsize notify(c, ev)*};
-\node[con] (ca)  at (-6.4, -1.8) {ColleagueA};
+\node[abs] (med) at ( 4.6, 1.6) {Mediator \\ \scriptsize notify(c, ev)*};
+\node[con] (ca)  at (-6.8, -1.8) {ColleagueA};
 \node[con] (cb)  at (-3.6, -1.8) {ColleagueB};
-\node[con] (cc)  at (-0.8, -1.8) {ColleagueC};
-\node[imp] (cm)  at ( 4.0, -1.8) {ConcreteMediator};
+\node[con] (cc)  at (-0.4, -1.8) {ColleagueC};
+\node[imp] (cm)  at ( 4.6, -1.8) {ConcreteMediator};
 
 \draw[inh] (ca.north) -- ++(0,0.4) -| (col.south);
-\draw[inh] (cb.north) -- (col.south);
+\draw[inh] (cb.north) -- ++(0,0.4) -| (col.south);
 \draw[inh] (cc.north) -- ++(0,0.4) -| (col.south);
-\draw[inh] (cm.north) -- (med.south);
-\draw[agg] (col.east) -- (med.west);
+\draw[inh] (cm.north) -- ++(0,0.4) -| (med.south);
+\draw[agg] (col.east) -- (med.west) node[midway, above, font=\tiny]{notifies};
 \end{tikzpicture}
 \end{document}

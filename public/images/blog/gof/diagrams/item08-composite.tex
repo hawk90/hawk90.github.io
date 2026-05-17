@@ -11,6 +11,7 @@
 
 \draw[inh] (l.north) -- ++(0,0.4) -| (com.south);
 \draw[inh] (cm.north) -- ++(0,0.4) -| (com.south);
-\draw[agg] (cm.east) to[bend right=45] node[right, font=\tiny]{children} (cm.south east);
+\draw[agg] (cm.east) to[out=-20, in=20, looseness=4]
+           node[right=2pt, font=\tiny]{children} (cm.south east);
 \end{tikzpicture}
 \end{document}

@@ -13,6 +13,7 @@
 \draw[agg] (c.east) -- (e.west);
 \draw[inh] (te.north) -- ++(0,0.4) -| (e.south);
 \draw[inh] (nt.north) -- ++(0,0.4) -| (e.south);
-\draw[agg] (nt.east) to[bend right=55] node[right, font=\tiny]{children} (nt.south east);
+\draw[agg] (nt.east) to[out=-20, in=20, looseness=4]
+           node[right=2pt, font=\tiny]{children} (nt.south east);
 \end{tikzpicture}
 \end{document}

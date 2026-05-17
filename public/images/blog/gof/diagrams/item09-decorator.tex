@@ -13,7 +13,8 @@
 
 \draw[inh] (cc.north) -- ++(0,0.4) -| (com.south);
 \draw[inh] (dec.north) -- ++(0,0.4) -| (com.south);
-\draw[agg] (dec.east) to[bend right=45] node[right, font=\tiny]{wraps} (dec.south east);
+\draw[agg] (dec.east) to[out=-20, in=20, looseness=4]
+           node[right=2pt, font=\tiny]{wraps} (dec.south east);
 \draw[inh] (da.north) -- ++(0,0.4) -| (dec.south);
 \draw[inh] (db.north) -- ++(0,0.4) -| (dec.south);
 \end{tikzpicture}

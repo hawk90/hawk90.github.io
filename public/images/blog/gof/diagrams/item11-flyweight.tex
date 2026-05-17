@@ -5,10 +5,10 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
-\node[con, minimum width=38mm] (fac) at (-4.2, 1.2) {FlyweightFactory \\ \scriptsize pool: Map\textless k,F\textgreater \\ \scriptsize getFlyweight(k)};
-\node[abs] (fly) at ( 2.2, 1.2) {Flyweight \\ \scriptsize operation(extrinsic)*};
-\node[imp] (cf)  at ( 0.0,-2.0) {ConcreteFlyweight};
-\node[imp] (uf)  at ( 4.4,-2.0) {UnsharedFlyweight};
+\node[con, minimum width=38mm] (fac) at (-4.4, 1.2) {FlyweightFactory \\ \scriptsize pool: Map\textless k,F\textgreater \\ \scriptsize getFlyweight(k)};
+\node[abs] (fly) at ( 2.6, 1.2) {Flyweight \\ \scriptsize operation(extrinsic)*};
+\node[imp] (cf)  at ( 0.2,-2.2) {ConcreteFlyweight};
+\node[imp] (uf)  at ( 5.0,-2.2) {UnsharedFlyweight};
 
 \draw[agg] (fac.east) -- (fly.west);
 \draw[inh] (cf.north) -- ++(0,0.4) -| (fly.south);
