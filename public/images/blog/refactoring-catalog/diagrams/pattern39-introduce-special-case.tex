@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[abs, minimum width=30mm] (cust) at (0, 2.3) {\textit{Customer}};
+\node[imp, minimum width=30mm] (real) at (-3, 0) {RealCustomer};
+\node[prp, minimum width=30mm] (unk)  at (3, 0) {UnknownCustomer};
+
+\draw[inh] (real.north) -- (cust.south);
+\draw[inh] (unk.north) -- (cust.south);
+
+\node[font=\footnotesize, mutec, text width=40mm, align=left] at (-3, -1.5)
+  {\texttt{getName()}\\\texttt{getPlan()}};
+\node[font=\footnotesize\itshape, mutec, text width=40mm, align=left] at (3, -1.5)
+  {\texttt{getName() → ""}\\\texttt{getPlan() → free}};
+
+\node[font=\sffamily\bfseries] at (0, 3.5) {Introduce Special Case (Null Object)};
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -3)
+  {client는 `customer == null` 분기 없이 동일 interface로 처리};
+
+\end{tikzpicture}
+\end{document}

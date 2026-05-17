@@ -42,7 +42,6 @@
   seq/.style={
     every node/.append style={font=\sffamily\small},
   },
-
   % ─── Actors (top of diagram) ────────────────────────────
   actor/.style={
     rectangle, rounded corners=2pt,
@@ -53,12 +52,10 @@
   },
   actorAlt/.style={actor, draw=absbord, fill=absfill},     % alternate accent
   actorWarn/.style={actor, draw=warnbord, fill=warnfill},
-
   % ─── Lifeline (dashed vertical) ─────────────────────────
   lifeline/.style={
     dashed, draw=mutec, line width=0.4pt,
   },
-
   % ─── Activation box (process running) ───────────────────
   activation/.style={
     rectangle, fill=absfill, draw=absbord, line width=0.35pt,
@@ -66,7 +63,6 @@
     inner sep=0pt,
   },
   activationAlt/.style={activation, fill=hifill, draw=hibord},  % nested
-
   % ─── Messages ────────────────────────────────────────────
   % msgsync / msgasync / msgret already defined in _design.tex; we add labels & specials.
   msglabel/.style={
@@ -89,7 +85,6 @@
     \draw[warnbord, line width=0.6pt] (-1.2mm,-1.2mm) -- (1.2mm,1.2mm);
     \draw[warnbord, line width=0.6pt] (-1.2mm, 1.2mm) -- (1.2mm,-1.2mm);
   },
-
   % ─── Frame (alt / opt / loop / par) ─────────────────────
   frame/.style={
     rectangle,
@@ -106,7 +101,6 @@
   frameAltSep/.style={                                     % horizontal separator inside alt frame
     dashed, draw=mutec, line width=0.4pt,
   },
-
   % ─── Note / comment attached to a message or lifeline ───
   seqnote/.style={
     rectangle, rounded corners=2pt,
@@ -114,7 +108,6 @@
     inner sep=3pt, font=\sffamily\footnotesize, align=left,
   },
   seqnoteAlt/.style={seqnote, draw=tealbord, fill=tealfill},
-
   % ─── Time-axis hints (rarely needed; use sparingly) ─────
   timearrow/.style={
     -{Stealth[length=2.4mm]}, draw=mutec, line width=0.3pt,

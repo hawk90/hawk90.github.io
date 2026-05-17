@@ -13,13 +13,13 @@
   {\textbf{Person}\\\hrulefill\\\texttt{name}\\\texttt{phone1, phone2}\\\texttt{areaCode, country}\\\hrulefill\\\texttt{getTelephoneNumber()}\\\texttt{formatPhone()}};
 
 \node[font=\sffamily\bfseries] at (4, 3.4) {After};
-\node[imp, text width=36mm, align=left, minimum height=20mm] (p) at (3, 1.8)
+\node[imp, text width=36mm, align=left, minimum height=20mm] (p) at (4, 1.8)
   {\textbf{Person}\\\hrulefill\\\texttt{name}\\\texttt{telephoneNumber}\\\hrulefill\\\texttt{...}};
-\node[hi, text width=36mm, align=left, minimum height=20mm] (t) at (5.5, -0.4)
+\node[hi, text width=36mm, align=left, minimum height=20mm] (t) at (4, -1.6)
   {\textbf{TelephoneNumber}\\\hrulefill\\\texttt{areaCode}\\\texttt{number}\\\hrulefill\\\texttt{format()}};
 
 \draw[->, edgec] (p.south) -- node[right, font=\footnotesize]{has} (t.north);
-\draw[->, edgec, line width=1.2pt] (-2.5, 1) -- node[above, font=\footnotesize]{Extract Class} (1.2, 1.8);
+\draw[->, edgec, line width=1.2pt] (-2.5, 1) -- node[above, font=\footnotesize]{Extract Class} (2.2, 1.8);
 
 \end{tikzpicture}
 \end{document}

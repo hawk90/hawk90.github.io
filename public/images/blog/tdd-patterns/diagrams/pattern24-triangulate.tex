@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[con, text width=32mm, align=left, minimum height=18mm] (e1) at (-4, 0)
+  {Example 1\\\footnotesize\texttt{plus(2,3)==5}\\\texttt{hardcoded 5}};
+\node[con, text width=32mm, align=left, minimum height=18mm] (e2) at (4, 0)
+  {Example 2\\\footnotesize\texttt{plus(1,4)==5}\\\texttt{plus(0,7)==7}};
+
+\node[imp, text width=36mm, align=left, minimum height=14mm] (gen) at (0, -3.2)
+  {\textbf{Generalized}\\\footnotesize\texttt{return a + b}};
+
+\draw[arr] (e1.south) -- (gen.north west);
+\draw[arr] (e2.south) -- (gen.north east);
+
+\node[font=\sffamily\bfseries] at (0, 1.6) {Triangulate};
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -4.6)
+  {두 example → abstraction 강제};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[imp, text width=44mm, align=left, minimum height=32mm] (money) at (0, 0)
+  {\textbf{Money}\\\hrulefill\\\footnotesize\texttt{- amount: int}\\\texttt{- currency: String}\\\hrulefill\\\texttt{+ plus(Money)}\\\texttt{+ times(int)}\\\texttt{+ equals(o)}\\\texttt{+ hashCode()}};
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -2.6)
+  {Immutable·equality 기반·thread-safe};
+\node[font=\sffamily\bfseries] at (0, 2.5) {Value Object};
+
+\end{tikzpicture}
+\end{document}

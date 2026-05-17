@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3.4) {Before};
+\node[abs, minimum width=30mm] (b1) at (-4.5, 2) {Base};
+\node[warn, minimum width=30mm] (s1) at (-4.5, 0) {Sub (거의 동일)};
+\draw[inh] (s1.north) -- (b1.south);
+
+\node[font=\sffamily\bfseries] at (4, 3.4) {After};
+\node[imp, minimum width=30mm] (merged) at (4, 1) {Class};
+
+\draw[->, edgec, line width=1.2pt] (-1, 1) -- node[above, font=\footnotesize]{Collapse Hierarchy} (2.2, 1);
+
+\end{tikzpicture}
+\end{document}

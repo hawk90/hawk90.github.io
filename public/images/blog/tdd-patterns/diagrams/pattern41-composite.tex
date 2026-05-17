@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[abs, text width=32mm, align=left, minimum height=14mm] (test) at (0, 2)
+  {\textit{Test}\\\hrulefill\\\texttt{run()}};
+\node[imp, minimum width=30mm] (leaf) at (-3, -0.5) {TestCase};
+\node[hi,  text width=32mm, align=left, minimum height=14mm] (suite) at (3, -0.5)
+  {TestSuite\\\footnotesize\texttt{- tests: Test[]}};
+
+\draw[inh] (leaf.north) -- (test.south);
+\draw[inh] (suite.north) -- (test.south);
+
+\draw[arr, bend right=15] (suite.east) to[loop right] node[right, font=\footnotesize]{contains} (suite.east);
+
+\node[font=\sffamily\bfseries] at (0, 3.5) {Composite (xUnit)};
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -2.2)
+  {TestCase = leaf · TestSuite = composite · same interface};
+
+\end{tikzpicture}
+\end{document}

@@ -107,6 +107,7 @@ const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
     <div class="space-y-5">
       <a
         href="/blog"
+        data-astro-prefetch="viewport"
         class:list={[
           'inline-flex items-center gap-2 text-sm font-medium transition-colors',
           !activeFilter
@@ -153,6 +154,7 @@ const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
             return (
               <a
                 href={getTagUrl(tag)}
+                data-astro-prefetch="viewport"
                 class:list={[
                   isTagActive && 'ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg-primary)] rounded-full',
                 ]}

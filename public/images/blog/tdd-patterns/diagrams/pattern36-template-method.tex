@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[abs, text width=44mm, align=left, minimum height=26mm] (base) at (0, 2)
+  {\textit{TestCase}\\\hrulefill\\\texttt{run()}\\\quad\texttt{setUp();}\\\quad\texttt{runTest();}\\\quad\texttt{tearDown();}};
+
+\node[imp, text width=34mm, align=left, minimum height=18mm] (sa) at (-3.2, -1.7)
+  {ConcreteTestA\\\footnotesize\texttt{setUp()}\\\texttt{runTest()}\\\texttt{tearDown()}};
+\node[imp, text width=34mm, align=left, minimum height=18mm] (sb) at (3.2, -1.7)
+  {ConcreteTestB\\\footnotesize\texttt{setUp()}\\\texttt{runTest()}\\\texttt{tearDown()}};
+
+\draw[inh] (sa.north) -- (base.south);
+\draw[inh] (sb.north) -- (base.south);
+
+\node[font=\sffamily\bfseries] at (0, 4) {Template Method (xUnit)};
+
+\end{tikzpicture}
+\end{document}

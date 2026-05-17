@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3.4) {Before};
+\node[con, text width=32mm, align=left, minimum height=14mm] (b1) at (-4.5, 2)
+  {Base\\\footnotesize\texttt{+ chargeFee()}};
+\node[abs, minimum width=30mm] (s1a) at (-6.2, 0) {SubA};
+\node[abs, minimum width=30mm] (s1b) at (-2.8, 0) {SubB};
+\draw[inh] (s1a.north) -- (b1.south);
+\draw[inh] (s1b.north) -- (b1.south);
+
+\node[font=\sffamily\bfseries] at (4, 3.4) {After};
+\node[abs, minimum width=30mm] (b2) at (4, 2) {Base};
+\node[imp, text width=32mm, align=left, minimum height=14mm] (s2a) at (2.3, 0)
+  {SubA\\\footnotesize\texttt{+ chargeFee()}};
+\node[abs, minimum width=30mm] (s2b) at (5.8, 0) {SubB};
+\draw[inh] (s2a.north) -- (b2.south);
+\draw[inh] (s2b.north) -- (b2.south);
+
+\node[font=\footnotesize\itshape, mutec] at (-0.5, -1.5) {Push Down Method — 일부 sub에만 의미};
+
+\end{tikzpicture}
+\end{document}

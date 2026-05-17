@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[abs, minimum width=30mm] (iface) at (0, 2.5) {\textit{Listener}};
+
+\node[imp, text width=44mm, align=left, minimum height=24mm] (test) at (-3.5, 0)
+  {\textbf{TestCase}\\\footnotesize implements Listener\\\hrulefill\\\texttt{onEvent(e)}\\\texttt{\quad log.add(e)}};
+\node[con, minimum width=30mm] (sut) at (3.5, 0) {SUT};
+
+\draw[inh] (test.north) -- (iface.south);
+\draw[arr] (sut) -- node[above, font=\footnotesize]{notifies} (test);
+
+\node[font=\sffamily\bfseries] at (0, 4) {Self Shunt — Test가 collaborator};
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -1.5)
+  {Mock framework 없이도 가능한 lightweight pattern};
+
+\end{tikzpicture}
+\end{document}

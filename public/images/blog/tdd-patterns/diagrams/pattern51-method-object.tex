@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[con, text width=42mm, align=left, minimum height=32mm] (m) at (-4.5, 0.8)
+  {\textbf{Class}\\\footnotesize\texttt{score(...) \{}\\\quad\texttt{int a, b, c, d;}\\\quad\texttt{// 60 lines}\\\quad\texttt{// many locals}\\\texttt{\}}};
+
+\node[font=\sffamily\bfseries] at (4, 3) {After};
+\node[imp, text width=44mm, align=left, minimum height=40mm] (mo) at (4, 0.4)
+  {\textbf{Scorer (Method Object)}\\\hrulefill\\\footnotesize\texttt{- a, b, c, d}\\\hrulefill\\\texttt{+ compute()}\\\texttt{- step1()}\\\texttt{- step2()}\\\texttt{- step3()}};
+
+\draw[->, edgec, line width=1.2pt] (-2.4, 0.5) -- node[above, font=\footnotesize]{locals → fields} (1.8, 0.5);
+
+\end{tikzpicture}
+\end{document}

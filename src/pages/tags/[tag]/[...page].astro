@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/blog/PostCard.astro';
+import BlogSidebar from '../../../components/blog/BlogSidebar.astro';
+import Breadcrumb from '../../../components/common/Breadcrumb.astro';
+import { getPublishedPosts, getAllTags, filterByTag, type BlogPost } from '../../../lib/posts';
+import type { PaginateFunction } from 'astro';
+
+
+export async function getStaticPaths({ paginate }: { paginate: PaginateFunction }) {
+  const allPosts = await getPublishedPosts();
+  const allTags = getAllTags(allPosts);
+
+  return allTags.flatMap((tag) => {
+    const posts = filterByTag(allPosts, tag);
+    return paginate(posts, {
+      params: { tag: tag.toLowerCase() },
+      pageSize: 12,
+      props: { tag, allPosts },
+    });
+  });
+}
+
+interface Props {
+  tag: string;
+  allPosts: BlogPost[];
+  page: {
+    data: BlogPost[];
+    currentPage: number;
+    lastPage: number;
+    total: number;
+    url: { current: string; prev?: string; next?: string };
+  };
+}
+
+const { tag, allPosts, page } = Astro.props;
+---
+
+<BaseLayout title={`#${tag} - Tags${page.currentPage > 1 ? ` (Page ${page.currentPage})` : ''}`} description={`${tag} 태그가 붙은 글`}>
+  <section class="py-16">
+    <div class="container">
+      <div class="lg:flex lg:gap-12">
+        <div class="flex-1 min-w-0">
+          <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: `#${tag}` }]} />
+
+          <div class="mb-8">
+            <h1 class="text-4xl font-bold mb-4 flex items-center gap-3">
+              <span class="text-[var(--color-accent)]">#</span>{tag}
+            </h1>
+            <p class="text-lg text-[var(--color-text-secondary)]">
+              {page.total}개의 포스트
+              {page.lastPage > 1 && ` · ${page.currentPage}/${page.lastPage} 페이지`}
+            </p>
+          </div>
+
+          {page.data.length > 0 ? (
+            <>
+              <div class="grid gap-6 md:grid-cols-2">
+                {page.data.map((post) => (<PostCard post={post} />))}
+              </div>
+
+              {page.lastPage > 1 && (
+                <nav class="mt-12 flex items-center justify-between gap-3 text-sm" aria-label="pagination">
+                  <div>
+                    {page.url.prev ? (
+                      <a href={page.url.prev} class="btn btn-ghost border border-[var(--color-border)]" rel="prev">← 이전</a>
+                    ) : (
+                      <span class="opacity-40">← 이전</span>
+                    )}
+                  </div>
+                  <div class="text-[var(--color-text-muted)]">
+                    {page.currentPage} / {page.lastPage}
+                  </div>
+                  <div>
+                    {page.url.next ? (
+                      <a href={page.url.next} class="btn btn-ghost border border-[var(--color-border)]" rel="next">다음 →</a>
+                    ) : (
+                      <span class="opacity-40">다음 →</span>
+                    )}
+                  </div>
+                </nav>
+              )}
+            </>
+          ) : (
+            <div class="empty-state flex flex-col items-center text-center py-16 px-6 border border-dashed border-[var(--color-border)] rounded-2xl">
+              <h2 class="text-lg font-semibold mb-2">아직 글이 없어요</h2>
+              <p class="text-sm text-[var(--color-text-secondary)] mb-6">
+                <code class="text-[var(--color-accent)]">#{tag}</code> 태그가 붙은 글이 아직 없습니다.
+              </p>
+              <div class="flex flex-wrap gap-3 justify-center">
+                <a href="/tags" class="btn btn-ghost border border-[var(--color-border)]">모든 태그</a>
+                <a href="/blog" class="btn btn-primary">전체 글 보기</a>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <BlogSidebar posts={allPosts} activeFilter={{ type: 'tag', value: tag }} />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

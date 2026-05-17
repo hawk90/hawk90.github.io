@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[con, text width=44mm, align=left, minimum height=30mm] (sw) at (-4.5, 1)
+  {\texttt{switch (type) \{}\\\texttt{\quad case A: ...}\\\texttt{\quad case B: ...}\\\texttt{\quad case C: ...}\\\texttt{\}}};
+
+\node[font=\sffamily\bfseries] at (4, 3) {After};
+\node[abs, minimum width=30mm] (base) at (4, 1.8) {Shape};
+\node[imp, minimum width=22mm] (sa) at (1.5, -0.3) {Circle};
+\node[imp, minimum width=22mm] (sb) at (4.0, -0.3) {Square};
+\node[imp, minimum width=22mm] (sc) at (6.5, -0.3) {Triangle};
+\draw[inh] (sa.north) -- (base.south);
+\draw[inh] (sb.north) -- (base.south);
+\draw[inh] (sc.north) -- (base.south);
+
+\draw[->, edgec, line width=1.2pt] (-2, 1) -- node[above, font=\footnotesize]{Polymorphism} (2.2, 1.8);
+
+\end{tikzpicture}
+\end{document}

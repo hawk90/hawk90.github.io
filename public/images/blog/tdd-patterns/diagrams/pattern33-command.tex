@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[cli, minimum width=28mm] (bank) at (-6, 2) {Bank};
+\node[abs, text width=32mm, align=left, minimum height=14mm] (cmd) at (0, 2)
+  {\textit{Command}\\\hrulefill\\\texttt{execute()}};
+\node[imp, minimum width=28mm] (sum) at (-3.5, -1) {Sum};
+\node[imp, minimum width=28mm] (money) at (0, -1) {Money};
+\node[imp, minimum width=28mm] (other) at (3.5, -1) {…};
+
+\draw[inh] (sum.north) -- (cmd.south);
+\draw[inh] (money.north) -- (cmd.south);
+\draw[inh] (other.north) -- (cmd.south);
+
+\draw[arr] (bank.east) -- node[above, font=\footnotesize]{reduce(...)} (cmd.west);
+
+\node[font=\sffamily\bfseries] at (0, 3.6) {Command (Money 예제)};
+
+\end{tikzpicture}
+\end{document}

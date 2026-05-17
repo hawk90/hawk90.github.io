@@ -39,7 +39,6 @@
   state/.style={
     every node/.append style={font=\sffamily\small},
   },
-
   % ─── State (rounded rectangle, default) ─────────────────
   stateBox/.style={
     rectangle, rounded corners=4pt,
@@ -57,11 +56,9 @@
   statePrp/.style ={stateBox, draw=prpbord, fill=prpfill},   % protocol / interface
   stateNeut/.style={stateBox, draw=neutbord, fill=neutfill},
   accent/.style   ={draw=hibord, fill=hifill},               % apply on top (e.g., \node[stateBox, accent])
-
   % Compact / large variants
   stateSm/.style ={stateBox, minimum height=6mm, minimum width=16mm, font=\sffamily\footnotesize, inner sep=2pt},
   stateLg/.style ={stateBox, minimum height=11mm, minimum width=30mm},
-
   % ─── Initial / final / terminal ─────────────────────────
   initial/.style={
     circle, fill=inkc, draw=inkc, line width=0.5pt,
@@ -78,7 +75,6 @@
     cross out, draw=warnbord, line width=0.8pt,
     minimum size=3mm, inner sep=0pt,
   },
-
   % ─── Choice / junction / fork-join ──────────────────────
   choice/.style={                                             % diamond decision
     diamond, draw=clibord, line width=0.45pt, fill=clifill,
@@ -94,7 +90,6 @@
     minimum width=20mm, minimum height=1.2mm, inner sep=0pt,
   },
   forkbarV/.style={forkbar, minimum width=1.2mm, minimum height=20mm},
-
   % ─── Transitions ────────────────────────────────────────
   trans/.style={
     -{Stealth[length=2.4mm]}, draw=edgec, line width=0.5pt,
@@ -115,7 +110,6 @@
     inner sep=2pt,
   },
   transLabelMute/.style={transLabel, text=mutec},
-
   % ─── Internal action listing (inside state box) ─────────
   internalAction/.style={
     font=\sffamily\footnotesize, text=inkc, anchor=north west, inner sep=2pt,
@@ -123,7 +117,6 @@
   separator/.style={                                          % thin separator inside composite state
     draw=mutec, line width=0.3pt,
   },
-
   % ─── Composite / region (containing sub-states) ─────────
   composite/.style={
     rectangle, rounded corners=6pt,

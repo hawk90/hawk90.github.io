@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4, 2.6) {Code-First (anti)};
+\node[con, minimum width=28mm, minimum height=12mm] (c1) at (-4, 1) {코드 작성};
+\node[con, minimum width=28mm, minimum height=12mm] (c2) at (-4, -0.5) {test 추가};
+\node[warn, minimum width=28mm, minimum height=12mm] (c3) at (-4, -2.0) {API 문제 발견};
+\draw[arr] (c1) -- (c2);
+\draw[arr] (c2) -- (c3);
+
+\node[font=\sffamily\bfseries] at (3, 2.6) {Test-First};
+\node[abs, minimum width=28mm, minimum height=12mm] (t1) at (3, 1) {test 작성};
+\node[hi,  minimum width=28mm, minimum height=12mm] (t2) at (3, -0.5) {API 설계 압력};
+\node[imp, minimum width=28mm, minimum height=12mm] (t3) at (3, -2.0) {좋은 API + green};
+\draw[arr] (t1) -- (t2);
+\draw[arr] (t2) -- (t3);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (-0.5, -3.4)
+  {Test First가 caller 시각의 API 압력을 만든다};
+
+\end{tikzpicture}
+\end{document}

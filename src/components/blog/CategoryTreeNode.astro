@@ -69,7 +69,7 @@ const seriesLinkClass = isNested
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
       </svg>
     </button>
-    <a href={`/blog/${node.id}`} class={linkClass}>
+    <a href={`/blog/${node.id}`} data-astro-prefetch="viewport" class={linkClass}>
       <span class="flex items-center gap-1.5 truncate">
         <span class={iconClass}>{node.icon}</span>
         <span class="truncate">{node.name}</span>
@@ -94,6 +94,7 @@ const seriesLinkClass = isNested
         <li>
           <a
             href={`/series/${series.slug}`}
+            data-astro-prefetch="viewport"
             class:list={[
               ...seriesLinkClass,
               series.isActive && 'bg-[var(--color-accent)]/12 text-[var(--color-accent)] font-medium shadow-[inset_2px_0_0_0_var(--color-accent)]',

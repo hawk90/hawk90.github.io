@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/blog/PostCard.astro';
+import Breadcrumb from '../../../components/common/Breadcrumb.astro';
+import { AUTHORS } from '../../../consts/authors';
+import { getPublishedPosts, type BlogPost } from '../../../lib/posts';
+import type { PaginateFunction } from 'astro';
+
+
+export async function getStaticPaths({ paginate }: { paginate: PaginateFunction }) {
+  const all = await getPublishedPosts();
+  return AUTHORS.flatMap((author) => {
+    const posts = all
+      .filter((p) => p.data.author === author.id || p.data.author === author.name)
+      .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+    return paginate(posts, {
+      params: { author: author.id },
+      pageSize: 12,
+      props: { author },
+    });
+  });
+}
+
+interface Props {
+  author: typeof AUTHORS[number];
+  page: {
+    data: BlogPost[];
+    currentPage: number;
+    lastPage: number;
+    total: number;
+    url: { current: string; prev?: string; next?: string };
+  };
+}
+
+const { author, page } = Astro.props;
+---
+
+<BaseLayout title={`${author.name} - Posts${page.currentPage > 1 ? ` (Page ${page.currentPage})` : ''}`} description={author.bio ?? ''}>
+  <section class="py-16">
+    <div class="container">
+      <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: author.name }]} />
+
+      <div class="mb-12 flex flex-col sm:flex-row gap-6 sm:items-start">
+        {author.avatar && (
+          <img src={author.avatar} alt={author.name}
+               class="w-24 h-24 rounded-2xl object-cover shadow-md flex-shrink-0"
+               width="96" height="96" loading="eager" />
+        )}
+        <div class="flex-1 min-w-0">
+          <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-2">{author.name}</h1>
+          {author.bio && (
+            <p class="text-base text-[var(--color-text-secondary)] leading-relaxed mb-4 max-w-2xl">{author.bio}</p>
+          )}
+          <div class="flex flex-wrap gap-3 text-sm">
+            {author.social?.github && (
+              <a href={`https://github.com/${author.social.github}`} target="_blank" rel="noopener noreferrer"
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">GitHub</a>
+            )}
+            {author.social?.twitter && (
+              <a href={`https://twitter.com/${author.social.twitter}`} target="_blank" rel="noopener noreferrer"
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">Twitter/X</a>
+            )}
+            {author.social?.linkedin && (
+              <a href={author.social.linkedin} target="_blank" rel="noopener noreferrer"
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">LinkedIn</a>
+            )}
+            {author.social?.email && (
+              <a href={`mailto:${author.social.email}`}
+                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">Email</a>
+            )}
+            {author.url && (
+              <a href={author.url} class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">Profile →</a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-6 text-sm text-[var(--color-text-muted)]">
+        {page.total} {page.total === 1 ? 'post' : 'posts'}
+        {page.lastPage > 1 && ` · ${page.currentPage}/${page.lastPage} 페이지`}
+      </div>
+      {page.data.length > 0 ? (
+        <>
+          <div class="grid gap-6 md:grid-cols-2">
+            {page.data.map((post) => (<PostCard post={post} />))}
+          </div>
+
+          {page.lastPage > 1 && (
+            <nav class="mt-12 flex items-center justify-between gap-3 text-sm" aria-label="pagination">
+              <div>
+                {page.url.prev ? (
+                  <a href={page.url.prev} class="btn btn-ghost border border-[var(--color-border)]" rel="prev">← 이전</a>
+                ) : (<span class="opacity-40">← 이전</span>)}
+              </div>
+              <div class="text-[var(--color-text-muted)]">{page.currentPage} / {page.lastPage}</div>
+              <div>
+                {page.url.next ? (
+                  <a href={page.url.next} class="btn btn-ghost border border-[var(--color-border)]" rel="next">다음 →</a>
+                ) : (<span class="opacity-40">다음 →</span>)}
+              </div>
+            </nav>
+          )}
+        </>
+      ) : (
+        <p class="text-[var(--color-text-secondary)]">No posts yet.</p>
+      )}
+    </div>
+  </section>
+</BaseLayout>

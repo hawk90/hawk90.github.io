@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3.4) {Before — Stack extends Vector};
+\node[abs, minimum width=30mm] (b1) at (-4.5, 2) {Vector};
+\node[con, minimum width=30mm] (s1) at (-4.5, 0) {Stack};
+\draw[inh] (s1.north) -- (b1.south);
+
+\node[font=\sffamily\bfseries] at (4, 3.4) {After — Stack has Vector};
+\node[imp, text width=32mm, align=left, minimum height=14mm] (s2) at (4, 2)
+  {Stack\\\footnotesize\texttt{- items: Vector}};
+\node[prp, minimum width=28mm] (v2) at (4, 0) {Vector};
+\draw[arr] (s2) -- (v2);
+
+\node[font=\footnotesize\itshape, mutec] at (-0.5, -1.5) {LSP 위반 회피·composition으로};
+
+\end{tikzpicture}
+\end{document}

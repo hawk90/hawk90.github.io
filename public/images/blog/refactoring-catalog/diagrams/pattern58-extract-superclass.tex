@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3.4) {Before};
+\node[con, text width=30mm, align=left, minimum height=18mm] (c1a) at (-6.2, 1.5)
+  {Department\\\footnotesize\texttt{- name}\\\texttt{- staff}};
+\node[con, text width=30mm, align=left, minimum height=18mm] (c1b) at (-2.8, 1.5)
+  {Employee\\\footnotesize\texttt{- name}\\\texttt{- id}};
+
+\node[font=\sffamily\bfseries] at (4, 3.4) {After};
+\node[abs, text width=30mm, align=left, minimum height=14mm] (sup) at (4, 2)
+  {\textit{Party}\\\footnotesize\texttt{- name}};
+\node[imp, minimum width=26mm] (c2a) at (2.4, 0) {Department};
+\node[imp, minimum width=26mm] (c2b) at (5.7, 0) {Employee};
+\draw[inh] (c2a.north) -- (sup.south);
+\draw[inh] (c2b.north) -- (sup.south);
+
+\node[font=\footnotesize\itshape, mutec] at (-1, -1.5) {공통 추상을 Extract};
+
+\end{tikzpicture}
+\end{document}

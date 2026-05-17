@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Before — multiple Owner refs share one Account
+\node[font=\sffamily\bfseries] at (-4.5, 2.6) {Before — Reference};
+\node[con, minimum width=22mm] (o1a) at (-7, 1) {Owner A};
+\node[con, minimum width=22mm] (o1b) at (-7, -0.5) {Owner B};
+\node[hi, minimum width=22mm] (acc1) at (-3.5, 0.25) {Account};
+\draw[arr] (o1a) -- (acc1);
+\draw[arr] (o1b) -- (acc1);
+
+% After — each owner has its own immutable value
+\node[font=\sffamily\bfseries] at (4, 2.6) {After — Value (immutable)};
+\node[imp, minimum width=22mm] (o2a) at (1, 1) {Owner A};
+\node[imp, minimum width=22mm] (o2b) at (1, -0.5) {Owner B};
+\node[prp, minimum width=22mm] (v2a) at (4.5, 1) {Money};
+\node[prp, minimum width=22mm] (v2b) at (4.5, -0.5) {Money};
+\draw[arr] (o2a) -- (v2a);
+\draw[arr] (o2b) -- (v2b);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (-1, -2)
+  {Sharing 필요 없을 때 — value object가 단순·thread-safe};
+
+\end{tikzpicture}
+\end{document}

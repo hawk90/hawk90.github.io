@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-5, 2) {Before — imperative loop};
+\node[con, text width=42mm, align=left, minimum height=24mm] (loop) at (-5, 0.4)
+  {\texttt{for item in data:}\\\texttt{\quad if active:}\\\texttt{\quad\quad t = transform(it)}\\\texttt{\quad\quad result.add(t)}};
+
+\node[font=\sffamily\bfseries] at (3, 2) {After — pipeline};
+\node[abs, minimum width=22mm] (src)    at (0.8, 0.4) {data};
+\node[hi,  minimum width=22mm] (filter) at (3.0, 0.4) {filter};
+\node[hi,  minimum width=22mm] (map)    at (5.2, 0.4) {map};
+\node[imp, minimum width=22mm] (out)    at (7.4, 0.4) {collect};
+\draw[arr] (src) -- (filter);
+\draw[arr] (filter) -- (map);
+\draw[arr] (map) -- (out);
+
+\node[font=\footnotesize\itshape, mutec, text width=70mm, align=center] at (3.5, -1.5)
+  {각 단계가 *한 가지 의도*만 — readability ↑};
+
+\end{tikzpicture}
+\end{document}

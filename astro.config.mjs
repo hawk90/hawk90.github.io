@@ -76,4 +76,11 @@ export default defineConfig({
   // adapter: vercel(), // or netlify()
   // ─────────────────────────────────────────────────────────────
   output: 'static',
+  compressHTML: true,
+
+  // Trim whitespace and merge similar nodes when emitting HTML.
+  // Astro 5/6 default — explicitly set to confirm.
+  build: {
+    inlineStylesheets: 'auto',
+  },
 });

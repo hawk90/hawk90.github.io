@@ -1,0 +1,26 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[abs, minimum width=32mm] (logger) at (0, 2) {\textit{Logger}};
+\node[imp, minimum width=32mm] (real) at (-3, 0) {RealLogger};
+\node[prp, minimum width=32mm] (null) at (3, 0) {NullLogger};
+
+\draw[inh] (real.north) -- (logger.south);
+\draw[inh] (null.north) -- (logger.south);
+
+\node[font=\footnotesize, mutec, text width=40mm, align=left] at (-3, -1.4) {\texttt{log(msg)\{ write... \}}};
+\node[font=\footnotesize\itshape, mutec, text width=40mm, align=left] at (3, -1.4) {\texttt{log(msg)\{ /* nop */ \}}};
+
+\node[font=\sffamily\bfseries] at (0, 3.4) {Null Object};
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -2.6)
+  {`if (logger != null)` 분기 제거};
+
+\end{tikzpicture}
+\end{document}
