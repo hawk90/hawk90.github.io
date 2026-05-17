@@ -1,7 +1,7 @@
 ---
 title: "Pattern 33: Command (in TDD)"
 date: 2026-07-02T09:00:00
-description: "Operation을 object로 — TDD에서의 활용."
+description: "Operation을 object로 — undo·queue·log 가능. TDD에서 의도 명확."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 33
 tags: [tdd, beck, command, gof]
@@ -13,40 +13,61 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 연산을 객체로 캡슐화하여 실행, 취소, 큐잉, 로깅을 가능하게 한다.
+> 연산을 *객체로 캡슐화*하여 *실행·취소·큐잉·로깅* 가능. TDD에서 *의도 명확* + *테스트 용이*.
 
 ## 동기 (Motivation)
 
-함수 호출을 **객체로 표현**하면 다양한 이점이 생긴다:
+함수 호출을 *객체로 표현*하면 다양한 이점:
 
 ```python
-# 함수 호출
+# 함수 호출 (휘발성)
 account.withdraw(100)
 
 # Command 객체
 command = WithdrawCommand(account, 100)
 command.execute()
-command.undo()  # 취소 가능!
+command.undo()   # 취소 가능
 ```
 
-TDD에서 Command 패턴은 **의도를 명확히** 하고 **테스트를 쉽게** 만든다.
+GoF *Command* 패턴의 TDD 활용. Beck의 *Money* 예제에서 `Sum`이 *연산 객체*.
 
-## Command 패턴 기본
+### 신호
 
-### 인터페이스
+- *Undo/Redo* 필요.
+- *작업 큐* (지연 실행, batch).
+- *transaction* (모두 success 또는 rollback).
+- *audit log*가 *호출 자체*.
+
+### 언제 적용하는가
+
+- *상태가 있는* 연산 (undo info).
+- *queue/scheduling* 필요.
+- *복잡한 parameter*.
+- *type-safe* invocation.
+
+### 언제 적용하지 않는가
+
+- 단순 *순수 함수* 호출.
+- 상태 없음.
+- *함수형* style.
+
+## 절차 (Mechanics)
+
+1. **Command interface** 정의 (`execute`, 옵션 `undo`).
+2. *각 연산을 class*로 — constructor가 parameter 저장.
+3. *execute*가 실제 동작.
+4. (옵션) *undo*가 역연산.
+5. *queue/history/log* 등 *외부 처리*.
+
+## 예시 1 — Basic command + undo
 
 ```python
 from abc import ABC, abstractmethod
 
 class Command(ABC):
     @abstractmethod
-    def execute(self):
-        pass
-```
+    def execute(self): pass
 
-### 구현
-
-```python
 class WithdrawCommand(Command):
     def __init__(self, account, amount):
         self.account = account
@@ -57,13 +78,20 @@ class WithdrawCommand(Command):
 
     def undo(self):
         self.account.deposit(self.amount)
+
+# 테스트
+def test_withdraw_command():
+    account = Account(balance=500)
+    cmd = WithdrawCommand(account, 100)
+
+    cmd.execute()
+    assert account.balance == 400
+
+    cmd.undo()
+    assert account.balance == 500
 ```
 
-## TDD에서의 활용
-
-### Money 예제의 Sum
-
-Beck의 Money 예제에서 `Sum`은 Command와 비슷하다:
+## 예시 2 — Money Sum (Beck)
 
 ```python
 class Sum:
@@ -79,32 +107,29 @@ class Sum:
         return Money(amount, to)
 ```
 
-**연산 자체를 객체로** 표현했다.
+연산 자체를 *객체*. `+` 같은 연산자도 *first-class*.
 
-### 테스트에서의 이점
-
-```python
-def test_withdraw_command():
-    account = Account(balance=500)
-    command = WithdrawCommand(account, 100)
-
-    # 실행 전 상태 확인
-    assert account.balance == 500
-
-    # 실행
-    command.execute()
-    assert account.balance == 400
-
-    # 취소
-    command.undo()
-    assert account.balance == 500
-```
-
-## 다양한 활용
-
-### Undo/Redo
+## 예시 3 — Transaction + history
 
 ```python
+class TransactionCommand(Command):
+    def __init__(self, commands):
+        self.commands = commands
+        self.executed = []
+
+    def execute(self):
+        try:
+            for cmd in self.commands:
+                cmd.execute()
+                self.executed.append(cmd)
+        except Exception:
+            self.undo()   # 부분 실행 rollback
+            raise
+
+    def undo(self):
+        for cmd in reversed(self.executed):
+            cmd.undo()
+
 class CommandHistory:
     def __init__(self):
         self.history = []
@@ -127,53 +152,36 @@ class CommandHistory:
             self.history[self.position].execute()
 ```
 
-### 큐잉/지연 실행
+undo + redo + history.
+
+## 자주 보는 안티패턴
+
+### 1. *Undo 정확하지 않음*
+execute 후 *완전한 상태 복원 안 됨* → undo가 *부분*. 외부 상태도 고려.
+
+### 2. *Command가 너무 큼*
+한 command가 *복잡한 알고리즘 전체* → 분해.
+
+### 3. *Mutation in execute*
+command가 *자체 상태 변경* → 재실행 불가. *순수* execute.
+
+### 4. *모든 함수를 command로*
+간단한 호출까지 → boilerplate. 진짜 *undo/queue 필요*한 것만.
+
+### 5. *Concurrent execute*
+같은 command 객체 *여러 thread에서 execute* → race. *immutable* 또는 *thread-local*.
+
+### 6. *History 무제한*
+memory growth → 정기 정리, *max history size*.
+
+## Modern variants
+
+### Functional command (closure)
 
 ```python
-class CommandQueue:
-    def __init__(self):
-        self.queue = []
-
-    def add(self, command):
-        self.queue.append(command)
-
-    def execute_all(self):
-        for command in self.queue:
-            command.execute()
-        self.queue.clear()
-```
-
-### 트랜잭션
-
-```python
-class TransactionCommand(Command):
-    def __init__(self, commands):
-        self.commands = commands
-
-    def execute(self):
-        try:
-            for cmd in self.commands:
-                cmd.execute()
-        except Exception:
-            self.undo()
-            raise
-
-    def undo(self):
-        for cmd in reversed(self.commands):
-            cmd.undo()
-```
-
-## 함수형 대안
-
-Python에서는 **first-class function**으로도 가능:
-
-```python
-# Command 객체 대신
 def make_withdraw(account, amount):
-    def execute():
-        account.withdraw(amount)
-    def undo():
-        account.deposit(amount)
+    def execute(): account.withdraw(amount)
+    def undo(): account.deposit(amount)
     return execute, undo
 
 execute, undo = make_withdraw(account, 100)
@@ -181,53 +189,87 @@ execute()
 undo()
 ```
 
-### 언제 객체를 쓰나
+class 없이도 같은 효과.
 
-```text
-객체 (Command 패턴):
-✓ 상태가 필요할 때 (undo 정보)
-✓ 직렬화가 필요할 때
-✓ 복잡한 파라미터가 있을 때
-✓ 타입 안전성이 중요할 때
+### Redux action + reducer
 
-함수:
-✓ 간단한 연산
-✓ 상태가 필요 없을 때
-✓ 함수형 스타일 선호
+```javascript
+const action = { type: "WITHDRAW", payload: { amount: 100 } };
+const newState = reducer(state, action);
 ```
 
-## 테스트 시나리오
+action이 *plain data* — 직렬화·로깅 자연.
+
+### CQRS Command
 
 ```python
-def test_command_logging():
-    commands = []
-    account = Account(balance=1000)
+class WithdrawMoneyCommand:
+    def __init__(self, account_id, amount):
+        self.account_id = account_id
+        self.amount = amount
 
-    cmd1 = WithdrawCommand(account, 100)
-    cmd2 = DepositCommand(account, 50)
-
-    commands.append(cmd1)
-    commands.append(cmd2)
-
-    for cmd in commands:
-        cmd.execute()
-
-    assert account.balance == 950
-    # commands 리스트로 히스토리 추적 가능
+# Handler
+class WithdrawMoneyHandler:
+    def handle(self, command):
+        account = self.repo.find(command.account_id)
+        account.withdraw(command.amount)
 ```
 
-## 정리
+Command 객체 + 별도 *handler* 분리.
 
-- **연산을 객체로** 캡슐화
-- **Undo/Redo** 가능
-- **큐잉, 로깅, 직렬화** 가능
-- **테스트에서 의도 명확**
-- **함수형 대안** 존재 (closure)
-- **Money 예제의 Sum**이 대표적
+### Event sourcing
+
+```python
+# Command → Events
+class TransferCommand:
+    def __init__(self, from_acc, to_acc, amount): ...
+
+class TransferHandler:
+    def handle(self, cmd):
+        return [
+            Withdrawn(cmd.from_acc, cmd.amount),
+            Deposited(cmd.to_acc, cmd.amount),
+        ]
+```
+
+command가 *events* 생성. state는 *event replay*.
+
+### Job queue (Celery, Sidekiq, BullMQ)
+
+```python
+@celery.task
+def withdraw_task(account_id, amount):
+    ...
+
+withdraw_task.delay(123, 100)   # queue로 보냄
+```
+
+분산 환경 command queue.
+
+### Saga pattern
+
+여러 service에 걸친 *분산 transaction* — 각 step이 *command + compensation*.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| Redux/RTK | action + reducer |
+| MediatR (.NET) | command handler |
+| Celery, Sidekiq, BullMQ | job queue |
+| Axon Framework | CQRS/Event sourcing |
+| Akka | actor + command |
+
+## 성능 고려
+
+- Command 객체 생성 *overhead* — 일반 무관.
+- *queue 처리 latency* — 비동기 cost.
+- *history 메모리* — TTL 설정.
+- *Event sourcing* — replay 비용 (snapshot으로 완화).
 
 ## 관련 패턴
 
 - [Pattern 34: Value Object](/blog/programming/engineering/tdd-patterns/pattern34-value-object) — 불변 객체
 - [Pattern 37: Pluggable Object](/blog/programming/engineering/tdd-patterns/pattern37-pluggable-object) — 동작 교체
 - [Pattern 39: Factory Method](/blog/programming/engineering/tdd-patterns/pattern39-factory-method) — 객체 생성
-
+- GoF Command pattern
