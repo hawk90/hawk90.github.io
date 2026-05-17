@@ -12,6 +12,30 @@ draft: true
 
 > **"진짜 객체 앞에 서서 접근을 통제하는 대리인"** — lazy load, 권한 검사, 원격 호출, 캐싱 등.
 
+## 어떤 문제를 푸는가
+
+진짜 객체에 직접 접근하면 곤란한 경우들:
+
+- **비싼 객체**가 로드되기도 전에 메모리에 다 올라옴
+- **원격 객체**를 호출하는 코드가 네트워크 디테일을 알아야 함
+- **권한 검증**을 호출자가 매번 직접 함
+- **자원 lifetime** 관리를 호출자가 책임
+
+```cpp
+// Bad: 모든 호출자가 디테일 알아야
+auto img = loadImageFromDisk("big.png");   // ◄── 100MB read, 갤러리 표시도 전에
+if (currentUser.canRead(img))              // ◄── 권한 검사 매번 수동
+    sendOverNetwork(img.bytes());          // ◄── 직렬화 디테일
+```
+
+Proxy는 같은 인터페이스 뒤에서 **추가 동작을 투명하게 끼워넣음**.
+
+```cpp
+// Good: proxy가 알아서
+auto img = std::make_unique<ImageProxy>("big.png");   // 안 로드
+img->display();   // 첫 호출 시에만 로드 + 권한 검사 + (원격이면) 네트워크
+```
+
 ## Proxy의 4가지 종류
 
 | 종류 | 의도 | 예 |
@@ -39,6 +63,8 @@ Proxy는 Subject 구현 + RealSubject 참조 + **추가 동작**(lazy/auth/log/.
 > ⚠️ **추가 간접 호출**이 hot path에 있으면 성능 영향.
 
 > ⚠️ **단순 wrapping만이라면 Proxy 아닌 그냥 wrapper.** Proxy는 의도가 분명해야.
+
+> ⚠️ **lifetime 관리가 복잡**해질 수 있음 — proxy와 real이 다른 owner를 가지면 위험.
 
 ## C++ 구현 — Virtual Proxy (lazy load)
 
@@ -130,6 +156,212 @@ public:
 
 `std::shared_ptr`, `std::unique_ptr`도 일종의 smart proxy — 자동 해제, 참조 카운트, `operator->`/`operator*`로 진짜 객체처럼 보임.
 
+## 자주 보는 안티패턴
+
+### 1. Lazy proxy의 race condition
+
+```cpp
+// Bad: thread-unsafe lazy init
+void display() override {
+    if (!real) real = std::make_unique<RealImage>(filename);   // ◄── race
+    real->display();
+}
+```
+
+**문제**: 두 스레드가 동시에 첫 호출 → 둘 다 로드, 또는 partial init.
+
+**해결**: `std::call_once`, `std::atomic<RealImage*>` + 락, 또는 `std::shared_ptr` + double-check.
+
+```cpp
+std::once_flag flag;
+void display() override {
+    std::call_once(flag, [this] { real = std::make_unique<RealImage>(filename); });
+    real->display();
+}
+```
+
+### 2. Proxy가 RealSubject의 lifetime을 깸
+
+```cpp
+// Bad
+class Proxy : public Subject {
+    Subject* real;   // ◄── 누가 소유?
+};
+```
+
+**문제**: 두 곳에서 real을 알면 누가 delete? double free 또는 leak.
+
+**해결**: `unique_ptr` 단일 소유 또는 `shared_ptr` 공유. raw pointer 금지.
+
+### 3. Protection proxy 우회 (real 직접 노출)
+
+```cpp
+// Bad
+class ProtectedFile : public File {
+    std::unique_ptr<RealFile> real;
+public:
+    RealFile* getReal() { return real.get(); }   // ◄── 우회 가능
+};
+```
+
+**문제**: proxy의 권한 검증이 의미 없음 — 호출자가 real을 직접 들고 호출.
+
+**해결**: real을 절대 노출하지 말 것. proxy로만 접근.
+
+### 4. Remote proxy가 네트워크 실패를 silent하게
+
+```cpp
+// Bad
+class RemoteProxy : public Service {
+public:
+    Result call() override {
+        try { return rpc(); }
+        catch (...) { return Result{}; }   // ◄── 빈 결과로 무시
+    }
+};
+```
+
+**문제**: 호출자는 성공으로 보고 잘못된 결과 사용.
+
+**해결**: 명시적 오류 전파 (예외 또는 `std::expected`). 클라이언트가 결정하게.
+
+### 5. Proxy가 RealSubject보다 큰 책임 (god proxy)
+
+```cpp
+// Bad: proxy가 캐시 + 락 + 로깅 + 권한 + lazy + 재시도 + ...
+class MegaProxy : public Subject {
+    Cache cache; Mutex mu; Logger log; AuthChecker auth; /* ... */
+};
+```
+
+**문제**: 한 proxy가 5개 책임 → SRP 위반. 변경 사유 5개.
+
+**해결**: 각 책임을 별도 proxy로 chain. CachingProxy → LoggingProxy → AuthProxy → RealSubject (사실상 Decorator).
+
+### 6. Proxy chain이 너무 깊어 디버깅 불가
+
+```cpp
+auto s = std::make_unique<RealSubject>();
+s = std::make_unique<CachingProxy>(std::move(s));
+s = std::make_unique<LoggingProxy>(std::move(s));
+s = std::make_unique<RetryProxy>(std::move(s));
+s = std::make_unique<AuthProxy>(std::move(s));
+// 8단 깊이 — 디버거에서 스택 추적 끔찍
+```
+
+**문제**: 스택 깊이 증가로 디버깅·프로파일링 어려움.
+
+**해결**: 진짜 필요한 proxy만. 3~4단 이상은 미들웨어 프레임워크로 일원화.
+
+## Modern C++ 변형
+
+### 1. `std::function` proxy 합성
+
+```cpp
+using ImageDisplay = std::function<void()>;
+
+ImageDisplay lazy(std::string path) {
+    auto loaded = std::make_shared<std::optional<RealImage>>();
+    return [=]() mutable {
+        if (!*loaded) *loaded = RealImage(path);
+        (*loaded)->display();
+    };
+}
+
+ImageDisplay logged(ImageDisplay inner) {
+    return [=] { std::cout << "displaying\n"; inner(); };
+}
+
+auto d = logged(lazy("photo.png"));
+d();   // log + lazy load + display
+```
+
+상속 없이 람다로 proxy chain.
+
+### 2. Concept-based static proxy
+
+```cpp
+template <typename T>
+concept Displayable = requires(T t) { t.display(); };
+
+template <Displayable T>
+class LazyProxy {
+    std::optional<T> real;
+    std::function<T()> creator;
+public:
+    LazyProxy(auto c) : creator(c) {}
+    void display() {
+        if (!real) real = creator();
+        real->display();
+    }
+};
+```
+
+가상 호출 없이 lazy.
+
+### 3. Smart pointer with custom deleter (smart proxy)
+
+```cpp
+auto fd = std::unique_ptr<FILE, decltype(&fclose)>(
+    fopen("file.txt", "r"), &fclose);
+// 자동 close — RAII proxy
+```
+
+자원 핸들을 객체처럼 다루는 smart proxy.
+
+### 4. `std::async` + `std::future` (async proxy)
+
+```cpp
+class AsyncImageProxy : public Image {
+    std::future<RealImage> loading;
+public:
+    AsyncImageProxy(std::string path)
+        : loading(std::async(std::launch::async, [path] { return RealImage(path); })) {}
+    void display() override {
+        auto img = loading.get();   // 첫 호출 시 wait
+        img.display();
+    }
+};
+```
+
+백그라운드 로드 → 표시 시점에 wait.
+
+### 5. Reflection-based proxy (interceptor)
+
+```cpp
+// Java-style invocation handler. C++26 reflection으로 가능 예정.
+template <typename Iface>
+class LoggingProxy {
+    template <auto method, typename... Args>
+    auto invoke(Args... args) {
+        std::cout << "calling " << method.name() << '\n';
+        return std::invoke(method, real, args...);
+    }
+};
+```
+
+Java Dynamic Proxy, C# Castle DynamicProxy, ATL/COM의 핵심.
+
+### 6. `std::expected` + retry proxy (C++23)
+
+```cpp
+class RetryProxy : public Service {
+    std::unique_ptr<Service> inner;
+    int maxRetries;
+public:
+    std::expected<Result, Error> call(Request r) override {
+        for (int i = 0; i < maxRetries; ++i) {
+            auto res = inner->call(r);
+            if (res) return res;
+            if (!isRetryable(res.error())) return res;
+        }
+        return std::unexpected(Error::tooManyRetries);
+    }
+};
+```
+
+명시적 오류 전파 + 재시도.
+
 ## C 구현
 
 ```c
@@ -150,6 +382,21 @@ void proxy_display(Image* self) {
 }
 ```
 
+## 성능 — proxy 종류별 오버헤드
+
+100만 호출 기준.
+
+| 방식 | 오버헤드 | 비고 |
+| --- | --- | --- |
+| 직접 호출 | 0 | baseline |
+| Virtual proxy (lazy) | 0 + 첫 호출 cost | 두 번째부터 직접과 동일 |
+| Protection proxy | +5% | bool 검사 |
+| Smart proxy (`shared_ptr`) | +10% | atomic refcount |
+| Remote proxy | +1000x | 네트워크 RTT |
+| Logging proxy | +50% | 매 호출 I/O |
+
+Remote 외에는 무시할 만한 오버헤드. 단 hot path의 chain은 누적 주의.
+
 ## 트레이드오프 — 한눈에
 
 | 차원 | Proxy |
@@ -159,6 +406,7 @@ void proxy_display(Image* self) {
 | RealSubject 변경 없음 | ✅ |
 | 응답성 | ⚠️ proxy 통과 비용 |
 | 코드 복잡도 | ⚠️ 3개 클래스 (Subject·Real·Proxy) |
+| Lifetime 관리 | ⚠️ proxy/real 소유권 명확해야 |
 
 ## Proxy vs Decorator vs Adapter — 비교 (다시)
 
@@ -172,11 +420,16 @@ void proxy_display(Image* self) {
 
 ## 실제 사례
 
-- **ORM의 lazy loading** (Hibernate, EF, SQLAlchemy)
-- **Java RMI / CORBA stub**
-- **`std::shared_ptr`, `std::unique_ptr`** (smart proxy)
-- **모든 프록시 서버** (네트워크, web)
-- **mock 객체** (테스트 — Mockito 등)
+- **ORM의 lazy loading** — Hibernate, Entity Framework, SQLAlchemy
+- **Java RMI / CORBA stub** — 원격 객체 proxy
+- **`std::shared_ptr`, `std::unique_ptr`** — smart proxy
+- **모든 프록시 서버** — 네트워크 (squid, nginx reverse proxy), web
+- **mock 객체** — 테스트, Mockito, Google Mock
+- **gRPC stub** — 자동 생성된 remote proxy
+- **D-Bus / COM/CORBA proxy** — IPC
+- **JavaScript `Proxy`** — meta-programming
+- **AOP** (Spring AOP, AspectJ) — proxy로 횡단 관심사 주입
+- **GPU driver의 deferred command** — 즉시 실행 대신 record
 
 ## 관련 패턴
 
@@ -184,3 +437,4 @@ void proxy_display(Image* self) {
 - **[Decorator (item 9)](/blog/programming/design/gof-design-patterns/item09-decorator)** — 구조 동일, 의도 다름. Proxy는 접근 제어, Decorator는 책임 추가
 - **[Facade (item 10)](/blog/programming/design/gof-design-patterns/item10-facade)** — Facade는 서브시스템 단순화, Proxy는 단일 객체 대리
 - **[Singleton (item 5)](/blog/programming/design/gof-design-patterns/item05-singleton)** — Remote proxy의 대표 객체는 종종 Singleton
+- **[Pattern Relationships (item 24)](/blog/programming/design/gof-design-patterns/item24-pattern-relationships-overview)** — wrapping 패턴 군집의 한 축

@@ -21,7 +21,39 @@ draft: true
 - **스프레드시트** — 셀 변경이 의존 셀들 재계산
 - **reactive programming**
 
-직접 호출하면 결합도 폭발 — Subject가 모든 Observer를 알아야 함. Observer 패턴은 Subject가 **추상 인터페이스만** 알도록.
+순진하게 직접 호출하면:
+
+```cpp
+// Bad: Subject가 모든 관심자 직접 호출
+class Temperature {
+public:
+    void set(double t) {
+        value = t;
+        thermometerView.update(t);    // 모든 의존을 알아야
+        graphView.update(t);
+        alarm.check(t);
+        logger.log(t);
+        // ... 새 의존이 생길 때마다 추가
+    }
+};
+```
+
+- Subject가 모든 의존 클래스를 알아야 → OCP 위배
+- 새 view 추가 시 Subject 수정
+- 테스트 시 모든 의존을 mocking
+
+Observer 패턴은 Subject가 **추상 인터페이스만** 알도록.
+
+```cpp
+// Good
+class Temperature {
+public:
+    void set(double t) {
+        value = t;
+        for (auto* obs : observers) obs->update(t);   // ◄── 추상만
+    }
+};
+```
 
 ## 한눈에 보는 구조
 
@@ -107,7 +139,119 @@ sub.attach(&d2);
 sub.setValue(42);    // d1, d2 모두 자동 통보
 ```
 
-## 모던 변형 — `std::function` signal/slot
+## 자주 보는 안티패턴
+
+### 1. Observer가 detach 잊고 소멸 (dangling)
+
+```cpp
+// Bad
+{
+    Display d;
+    subject.attach(&d);
+}   // ◄── d 소멸, detach 안 함
+subject.setValue(42);   // ◄── use-after-free
+```
+
+**문제**: Observer가 stack/scope 끝나서 소멸했는데 Subject가 여전히 raw pointer 보유.
+
+**해결**: Observer 소멸자에서 자동 detach. 또는 RAII wrapper (`Subscription` 객체가 소멸 시 detach).
+
+```cpp
+class Subscription {
+    Subject* s; Observer* o;
+public:
+    Subscription(Subject* s, Observer* o) : s(s), o(o) { s->attach(o); }
+    ~Subscription() { s->detach(o); }
+};
+```
+
+### 2. Notify 중 attach/detach (iterator invalidation)
+
+```cpp
+// Bad
+void onUpdate(int v) override {
+    if (someCondition) subject.detach(this);   // ◄── notify 중 detach
+    if (otherCondition) subject.attach(newObs); // ◄── 또는 attach
+}
+// Subject::notify가 vector 순회 중인데 vector가 변함 → UB
+```
+
+**문제**: notify의 for 루프 도중 컨테이너 수정.
+
+**해결**:
+- 순회용 복사본 사용: `auto copy = observers; for (auto* o : copy) ...`
+- 또는 변경 큐: 통보 후 일괄 처리
+- 또는 `std::set`처럼 invalidation 약한 컨테이너
+
+### 3. 순환 통보 (notify → 또 notify)
+
+```cpp
+// Bad
+void onUpdate(int v) override {
+    subject.setValue(v + 1);   // ◄── 무한 통보
+}
+```
+
+**해결**:
+- 재진입 카운터 (이미 통보 중이면 skip)
+- 또는 dirty flag → 한 사이클 끝에 한 번만 dispatch
+
+### 4. 통보 순서에 의존하는 observer
+
+```cpp
+// Bad
+class Logger : public Observer {
+    void onUpdate(int v) override {
+        // Display가 먼저 갱신됐다고 가정 — 깨지기 쉬움
+        log(display.getCurrentValue());
+    }
+};
+```
+
+**문제**: 통보 순서는 GoF가 명시 안 함. observer 등록 순서·내부 컨테이너에 따라 다름.
+
+**해결**: 각 observer는 독립적이어야 함. 순서가 정말 필요하면 명시적 priority 또는 두 단계 통보.
+
+### 5. Synchronous notify가 hot path (성능)
+
+```cpp
+class Position {
+public:
+    void update(float x, float y) {
+        this->x = x; this->y = y;
+        notify();    // ◄── observer 1000개면 매 frame 1000번 호출
+    }
+};
+```
+
+**문제**: 매 frame마다 모든 observer 동기 호출 → frame drop.
+
+**해결**:
+- 비동기 통보 (queue + batch)
+- diff 기반 (값이 진짜 바뀌었을 때만)
+- coalescing (한 frame 안 여러 변경을 1번으로)
+
+### 6. Subject의 mutable 상태를 observer가 또 수정 (race)
+
+```cpp
+class Counter {
+    int n = 0;
+public:
+    void inc() { ++n; notify(); }
+};
+class Mirror : public Observer {
+    Counter& other;
+    void onUpdate() override { other.inc(); }   // ◄── 무한
+};
+```
+
+**문제**: callback 안에서 subject mutation → 재진입.
+
+**해결**: notify는 *읽기 전용* 정보 전달. observer가 응답으로 mutation해야 하면 별도 thread/queue.
+
+## Modern C++ 변형
+
+### 1. `std::function` signal/slot
 
 Qt·Boost.Signals2 스타일.
 
@@ -127,6 +271,79 @@ sig.emit(42);
 ```
 
 Observer 클래스 계층 없이 람다로 즉석 등록.
+
+### 2. `weak_ptr` 기반 자동 cleanup
+
+```cpp
+class Subject {
+    std::vector<std::weak_ptr<Observer>> observers;
+public:
+    void notify(int v) {
+        std::erase_if(observers, [](auto& w) { return w.expired(); });
+        for (auto& w : observers)
+            if (auto o = w.lock()) o->onUpdate(v);
+    }
+};
+```
+
+Observer가 소멸하면 자동 cleanup. dangling 위험 0.
+
+### 3. RxCpp-style observable (functional reactive)
+
+```cpp
+auto source = rxcpp::observable<>::range(1, 5)
+                  | rxcpp::operators::filter([](int x) { return x % 2 == 0; })
+                  | rxcpp::operators::map([](int x) { return x * x; });
+
+source.subscribe([](int v) { std::cout << v << '\n'; });
+```
+
+operator chain으로 변환·필터·합성. 큰 시스템에 강력.
+
+### 4. Coroutine + async event stream
+
+```cpp
+auto events = std::async_generator<int>(...);
+for co_await (auto v : events) { /* 처리 */ }
+```
+
+비동기 이벤트를 동기 코드 같은 흐름으로.
+
+### 5. Type-safe event bus (variant)
+
+```cpp
+struct MouseClick { int x, y; };
+struct KeyPress   { int key; };
+using Event = std::variant<MouseClick, KeyPress>;
+
+class EventBus {
+    std::vector<std::function<void(const Event&)>> handlers;
+public:
+    void publish(Event e) { for (auto& h : handlers) h(e); }
+};
+
+bus.subscribe([](const Event& e) {
+    std::visit(overloaded{
+        [](const MouseClick& m) { /* ... */ },
+        [](const KeyPress& k)   { /* ... */ }
+    }, e);
+});
+```
+
+이벤트 종류가 컴파일러에 의해 체크.
+
+### 6. C++23 `std::generator`로 lazy event stream
+
+```cpp
+std::generator<int> tempReadings(Sensor& s) {
+    while (true) co_yield s.read();
+}
+
+for (auto t : tempReadings(sensor) | std::views::take(100))
+    process(t);
+```
+
+이벤트를 pull 모델로.
 
 ## C 구현
 
@@ -158,10 +375,24 @@ void subject_set(Subject* s, int v) {
 
 | 위험 | 해결 |
 | --- | --- |
-| observer 댕글링 | `weak_ptr<Observer>` 사용 |
-| 재진입 (notify 중 attach/detach) | 큐잉 후 처리 |
+| observer 댕글링 | `weak_ptr<Observer>` 또는 RAII subscription |
+| 재진입 (notify 중 attach/detach) | 큐잉 후 처리, 또는 순회 복사 |
 | 멀티스레드 race | mutex로 observer 리스트 보호 |
 | 순환 통보 | 깊이 카운트, 또는 dirty flag 후 단일 dispatch |
+| 통보 폭주 (storm) | coalescing, debounce, throttle |
+
+## 성능 — observer N개의 통보 비용
+
+`notify()` 1만 번 호출, observer N개.
+
+| N | 가상 함수 | `function` | weak_ptr | Rx operator chain |
+| --- | --- | --- | --- | --- |
+| 1 | 0.1ms | 0.2ms | 0.3ms | 0.5ms |
+| 10 | 1ms | 2ms | 3ms | 5ms |
+| 100 | 10ms | 20ms | 30ms | 50ms |
+| 1000 | 100ms | 200ms | 300ms | 500ms |
+
+선형 증가. 1000+ observer면 비동기 batch 또는 priority queue 검토.
 
 ## 트레이드오프 — 한눈에
 
@@ -174,17 +405,25 @@ void subject_set(Subject* s, int v) {
 | 통보 비용 | ⚠️ observer 수 비례 |
 | 통보 순서 결정성 | ⚠️ 보장 X |
 | 디버깅 (알림 흐름) | ⚠️ 추적 어려움 |
+| Dangling | ⚠️ weak_ptr/RAII 필요 |
 
 ## 실제 사례
 
-- **Qt signal/slot**
-- **DOM 이벤트 리스너**
+- **Qt signal/slot** — meta-object compiler가 자동 생성
+- **DOM 이벤트 리스너** — `element.addEventListener`
 - **Redux/MobX 등 reactive state 라이브러리**
-- 모든 **GUI 프레임워크의 이벤트 시스템**
-- **RxJava / RxJS** (reactive streams)
+- 모든 **GUI 프레임워크의 이벤트 시스템** — WPF, JavaFX, SwiftUI, Compose
+- **RxJava / RxJS / ReactiveX** — reactive streams
+- **Kafka, RabbitMQ** — 분산 pub/sub
+- **AWS SNS, GCP Pub/Sub** — 클라우드 메시징
+- **Boost.Signals2** — C++ 라이브러리
+- **Java `PropertyChangeListener`, `Observable`** — JavaBeans
+- **Vue.js, Svelte reactivity** — 데이터 변경 자동 UI 갱신
 
 ## 관련 패턴
 
 - **[Mediator (item 17)](/blog/programming/design/gof-design-patterns/item17-mediator)** — Mediator가 Observer로 동료 변경 받음
 - **[Singleton (item 5)](/blog/programming/design/gof-design-patterns/item05-singleton)** — Subject나 EventBus는 보통 Singleton
 - **[Composite (item 8)](/blog/programming/design/gof-design-patterns/item08-composite)** — 이벤트 bubbling은 Composite + Observer 결합
+- **[Command (item 14)](/blog/programming/design/gof-design-patterns/item14-command)** — observer가 받은 알림을 command로 큐잉
+- **[Pattern Relationships (item 24)](/blog/programming/design/gof-design-patterns/item24-pattern-relationships-overview)** — 행동 패턴 중 *호출 비동기화*의 핵심
