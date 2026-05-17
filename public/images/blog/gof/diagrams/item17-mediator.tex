@@ -5,17 +5,25 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
-\node[abs] (col) at (-3.6, 1.6) {Colleague};
-\node[abs] (med) at ( 4.6, 1.6) {Mediator \\ \scriptsize notify(c, ev)*};
-\node[con] (ca)  at (-6.8, -1.8) {ColleagueA};
-\node[con] (cb)  at (-3.6, -1.8) {ColleagueB};
-\node[con] (cc)  at (-0.4, -1.8) {ColleagueC};
-\node[imp] (cm)  at ( 4.6, -1.8) {ConcreteMediator};
+% --- Abstract layer (top) ---
+\node[abs] (col) at (-3.6, 1.8) {Colleague};
+\node[abs, minimum width=34mm] (med) at ( 5.2, 1.8)
+  {Mediator \\[2pt] \scriptsize notify(c, ev)*};
 
+% --- Concrete layer (bottom) — symmetric to abstract above ---
+\node[con] (ca)  at (-7.4, -2.0) {ColleagueA};
+\node[con] (cb)  at (-3.6, -2.0) {ColleagueB};
+\node[con] (cc)  at ( 0.2, -2.0) {ColleagueC};
+\node[con, minimum width=34mm] (cm) at ( 5.2, -2.0) {ConcreteMediator};
+
+% --- inheritance: all children fan-in to parent.south ---
 \draw[inh] (ca.north) -- ++(0,0.4) -| (col.south);
 \draw[inh] (cb.north) -- ++(0,0.4) -| (col.south);
 \draw[inh] (cc.north) -- ++(0,0.4) -| (col.south);
 \draw[inh] (cm.north) -- ++(0,0.4) -| (med.south);
-\draw[agg] (col.east) -- (med.west) node[midway, above, font=\tiny]{notifies};
+
+% --- aggregation: Colleague knows Mediator ---
+\draw[agg] (col.east) -- (med.west)
+  node[midway, above, font=\tiny]{notifies};
 \end{tikzpicture}
 \end{document}
