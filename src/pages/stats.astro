@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getPublishedPosts, getAllSeries, getAllTags, getReadingTime } from '../lib/posts';
+import { getPublishedPosts, getAllSeries, getAllTags, getPostMeta } from '../lib/posts';
 import { SITE_CONFIG } from '../consts/config';
 
 const posts = await getPublishedPosts();
@@ -10,7 +10,7 @@ const series = getAllSeries(posts);
 const tags = getAllTags(posts);
 
 // Reading-time / word estimate
-const totalMinutes = posts.reduce((sum, p) => sum + getReadingTime(p.body || ''), 0);
+const totalMinutes = posts.reduce((sum, p) => sum + getPostMeta(p).readingTime, 0);
 // Word count: minutes × words-per-min (en) or chars × 500 (ko)
 const isKo = SITE_CONFIG.lang === 'ko';
 const totalWords = isKo

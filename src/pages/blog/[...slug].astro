@@ -14,7 +14,7 @@ import ReadingProgress from '../../components/blog/ReadingProgress.astro';
 import AuthorBio from '../../components/blog/AuthorBio.astro';
 import Newsletter from '../../components/blog/Newsletter.astro';
 import { formatDate, getTagUrl } from '../../lib/utils';
-import { getPublishedPosts, getReadingTime, getRelatedPosts } from '../../lib/posts';
+import { getPostMeta, getPublishedPosts, getRelatedPosts } from '../../lib/posts';
 import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
 
@@ -43,7 +43,7 @@ if (post.data.series) {
 }
 
 // Reading time
-const readingTime = getReadingTime(post.body || '');
+const { readingTime } = getPostMeta(post);
 
 // Related posts
 let relatedPosts: CollectionEntry<'blog'>[] = [];

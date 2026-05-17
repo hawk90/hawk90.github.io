@@ -4,6 +4,7 @@ import { formatDate } from './utils';
 
 export type BlogPost = CollectionEntry<'blog'>;
 const postMetaCache = new WeakMap<BlogPost, PostMeta>();
+const backlinkIndexCache = new WeakMap<readonly BlogPost[], Map<string, BlogPost[]>>();
 let publishedPostsPromise: Promise<BlogPost[]> | null = null;
 export interface PostMeta {
   formattedDate: string;
@@ -210,4 +211,43 @@ export function getRelatedPosts(
     .sort((a, b) => b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf())
     .slice(0, maxPosts)
     .map((s) => s.post);
+}
+
+/**
+ * 백링크 조회
+ * 전체 본문 스캔 인덱스를 1회만 만들고 재사용한다.
+ */
+export function getBacklinks(currentId: string, posts: BlogPost[]): BlogPost[] {
+  let index = backlinkIndexCache.get(posts);
+  if (!index) {
+    index = buildBacklinkIndex(posts);
+    backlinkIndexCache.set(posts, index);
+  }
+  return index.get(currentId) ?? [];
+}
+
+function buildBacklinkIndex(posts: BlogPost[]): Map<string, BlogPost[]> {
+  const index = new Map<string, BlogPost[]>();
+  const blogLinkPattern = /\/blog\/([^\s)"'#<]+)/g;
+
+  for (const post of posts) {
+    const body = post.body ?? '';
+    const seen = new Set<string>();
+    let match: RegExpExecArray | null;
+
+    while ((match = blogLinkPattern.exec(body)) !== null) {
+      const rawSlug = match[1]?.replace(/\/$/, '');
+      if (!rawSlug || rawSlug === post.id || seen.has(rawSlug)) continue;
+      seen.add(rawSlug);
+      const bucket = index.get(rawSlug);
+      if (bucket) bucket.push(post);
+      else index.set(rawSlug, [post]);
+    }
+  }
+
+  for (const [, refs] of index) {
+    refs.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  }
+
+  return index;
 }

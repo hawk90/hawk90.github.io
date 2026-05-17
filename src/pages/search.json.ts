@@ -1,12 +1,12 @@
-import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
+import { getPublishedPosts } from '../lib/posts';
 
 function compactText(text: string, maxLength: number): string {
   return text.replace(/\s+/g, ' ').trim().slice(0, maxLength);
 }
 
 export async function GET(_context: APIContext) {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getPublishedPosts();
 
   const searchIndex = posts.map((post) => ({
     title: post.data.title,
