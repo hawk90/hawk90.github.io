@@ -41,28 +41,70 @@
 | Patterns for Time-Triggered Embedded Systems | Michael Pont | 💡 | 안전 필수 (자동차/항공) |
 | Small Memory Software | Noble & Weir | 💡 | 메모리 제약 환경 |
 
-**경로:**
+### 2.x SpaceX-스타일 실전 — *무료 책 우선*
+
+영역별 갭 (ISR latency / Cache coherency / DMA / FPGA-CPU 인터페이스 / RTOS 깊이) 를 *무료 책*으로 시작.
+
+| 책 | 저자 | 상태 | 비고 |
+|---|------|------|------|
+| **Mastering the FreeRTOS Real Time Kernel** | Richard Barry | 📋 | 공식 무료. FreeRTOS scheduler·task·queue·timer 내부. [freertos.org](https://www.freertos.org/Documentation/RTOS_book.html) |
+| **Linux Device Drivers (LDD3)** | Corbet·Rubini·Kroah-Hartman | 📋 | 무료 online. Ch 10 interrupt / Ch 15 DMA 가 ISR·DMA 갭 채움. [lwn.net/Kernel/LDDv3](https://lwn.net/Kernel/LDD3/) |
+| **The Zynq Book** | Crockett·Elliot·Enderwitz·Stewart | 📋 | Strathclyde 무료 PDF. FPGA ↔ ARM PS·AXI·PetaLinux 통합. [zynqbook.co.uk](http://www.zynqbook.co.uk/) |
+| **RTEMS Documentation** | RTEMS Project | 💡 | 무료. RTOS internals 한 사례 (open source 풀 소스). [docs.rtems.org](https://docs.rtems.org/) |
+| **A Primer on Memory Consistency and Cache Coherence** | Sorin·Hill·Wood | 💡 | Synthesis Lectures, *유료지만* 표준. cache coherency 깊이는 이 책이 유일. |
+
+**경로 (무료 우선):**
+
 ```
-Making Embedded Systems → Design Patterns for Embedded C → Real-Time Design Patterns
+Making Embedded Systems → LDD3 (ISR·DMA 챕터) → Mastering FreeRTOS → The Zynq Book → RTEMS Docs
 ```
+
+**카테고리·sub-series 매핑 (book-review 패턴)**
+
+| 책 | 위치 | 카테고리 | 시리즈 이름 | 챕터 수 |
+|------|------|----------|------------|---------|
+| Mastering FreeRTOS | `src/content/blog/embedded/rtos/freertos-mastering/` | `embedded/rtos` (신규) | "Mastering FreeRTOS" | 15 |
+| The Zynq Book | `src/content/blog/embedded/hardware/zynq-book/` | `embedded/hardware` | "The Zynq Book" | 13 |
+| LDD3 (modern) | `src/content/blog/systems/linux-drivers/ldd3-modern/` | `systems/linux-drivers` | "Linux Device Drivers (LDD3)" | 18 (모던 커널 6.x 노트 포함) |
+| Sorin Cache Coherence Primer | `src/content/blog/systems/architecture/cache-coherence/` | `systems/architecture` | "Cache Coherence Primer" | 10 |
+| RTEMS Docs | `src/content/blog/embedded/rtos/rtems/` (later) | `embedded/rtos` | "RTEMS Internals" | 미정 |
+| McKenney *Is Parallel Programming Hard* | 이미 §1·§5에 등재 | `systems/linux-kernel` 또는 `parallel/` | — | — |
+
+**기존 `embedded/rtos-internals/` 처리**
+
+현재 *Practical RTOS Internals* 시리즈가 flat 위치에 있음 (preface 1편). 책 리뷰들과 *같은 토픽 카테고리*에 통합:
+
+- 이동 — `embedded/rtos-internals/00-preface.md` → `embedded/rtos/practical-internals/00-preface.md`
+- 결과 — `embedded/rtos/` 카테고리 아래 sub-series:
+  - `practical-internals/` (원본, deep)
+  - `freertos-mastering/` (책 리뷰)
+  - `rtems/` (later)
+  - `zephyr/` (later)
+- 패턴 일치 — `embedded/automotive/{misra-c, cert-c, autosar-cpp}/`와 동일
 
 ---
 
 ## 3. 분산 시스템 / 대규모 설계
 
+### 3.1 이론·설계 책
+
 | 책 | 저자 | 상태 | 비고 |
 |---|------|------|------|
 | 가상면접 사례로 배우는 대규모 시스템 설계 기초 | Alex Xu | 📋 | 16장, 면접 필수 |
 | 가상면접 사례로 배우는 대규모 시스템 설계 기초 2 | Alex Xu | 💡 | 13장, 심화 |
-| 30가지 패턴으로 배우는 분산 시스템 설계와 구현 기법 | Unmesh Joshi | 📋 | 30 패턴 |
-| Designing Data-Intensive Applications (DDIA) | Martin Kleppmann | 📋 | 분산 시스템 바이블, 2판 2026 |
+| 30가지 패턴으로 배우는 분산 시스템 설계와 구현 기법 | Unmesh Joshi | 📋 | Patterns of Distributed Systems |
+| Designing Data-Intensive Applications (DDIA) | Martin Kleppmann | 📝 | 분산 시스템 바이블 (12장 작성 중) |
 | Database Internals | Alex Petrov | 📋 | 스토리지 엔진/분산 DB |
+| Distributed Systems | Tanenbaum & van Steen | 💡 | 교과서 바이블, 4판 무료 PDF |
+| Distributed Algorithms | Nancy Lynch | 💡 | 이론 깊이 (FLP, consensus) |
+| Site Reliability Engineering | Google (Beyer 외) | 💡 | SRE 바이블, 무료 온라인 |
+| Designing Distributed Systems | Brendan Burns | 💡 | K8s 작가, 클라우드 네이티브 패턴 |
 | Building Microservices | Sam Newman | 💡 | 마이크로서비스 입문 |
 | Microservices Patterns | Chris Richardson | 💡 | 44개 구현 패턴 |
 
 **경로:**
 ```
-시스템 설계 기초 (Alex Xu) → DDIA → 분산 시스템 패턴 → Database Internals
+시스템 설계 기초 (Alex Xu) → DDIA → Patterns of Distributed Systems → Database Internals → Distributed Algorithms
 ```
 
 **참고 링크:**
@@ -70,6 +112,93 @@ Making Embedded Systems → Design Patterns for Embedded C → Real-Time Design 
 - [Martin Kleppmann's Site](https://martin.kleppmann.com/)
 - [Database Internals (databass.dev)](https://www.databass.dev/)
 - [ByteByteGo (Alex Xu)](https://bytebytego.com/)
+- [SRE Books (free)](https://sre.google/books/)
+- [Distributed Systems by Tanenbaum (free PDF)](https://www.distributed-systems.net/)
+
+### 3.2 데이터 엔지니어링 (Spark / Kafka / Hadoop)
+
+| 책 | 저자 | 상태 | 비고 |
+|---|------|------|------|
+| Fundamentals of Data Engineering | Joe Reis & Matt Housley | 💡 | 현대 데이터 엔지니어링 종합, O'Reilly 2022 |
+| Spark: The Definitive Guide | Bill Chambers & Matei Zaharia | 💡 | Spark 창시자, 바이블 |
+| Learning Spark, 2nd Ed | Damji 외 | 💡 | 입문 |
+| High Performance Spark | Karau & Warren | 💡 | 튜닝 |
+| Kafka: The Definitive Guide, 2nd Ed | Narkhede·Shapira·Palino | 💡 | Kafka 바이블 |
+| Streaming Systems | Akidau·Chernyak·Lax | 💡 | Google Dataflow, 스트리밍 이론 바이블 |
+| Designing Event-Driven Systems | Ben Stopford (Confluent) | 💡 | 무료, Kafka 중심 이벤트 아키텍처 |
+| Hadoop: The Definitive Guide | Tom White | 💡 | Hadoop 바이블, 4판 |
+| MapReduce Design Patterns | Donald Miner & Adam Shook | 💡 | MR 패턴 카탈로그 |
+| Stream Processing with Apache Flink | Hueske & Kalavri | 💡 | Flink |
+| The Data Warehouse Toolkit | Ralph Kimball | 💡 | Dimensional modeling 바이블 |
+
+### 3.3 분산 플랫폼 / 오픈소스 (소스 읽기 — 자체 시리즈)
+
+DDIA·Patterns of Distributed Systems의 *이론*을 실제 코드와 비교하며 학습. 각 프로젝트 1편짜리 deep-dive 시리즈로.
+
+**스토리지 / DB**
+
+| 시스템 | 언어 | 상태 | 비고 |
+|---|---|---|---|
+| **etcd** | Go | 💡 | Raft 구현 레퍼런스, K8s 의존, 코드 짧고 명확 |
+| **CockroachDB** | Go | 💡 | 분산 SQL, Spanner 영감, MVCC + Raft |
+| **TiDB** | Go/Rust | 💡 | MySQL 호환 분산 SQL, TiKV(Rust) + PD |
+| **FoundationDB** | C++ | 💡 | Apple, deterministic simulation testing 유명 |
+| **Cassandra** | Java | 💡 | Dynamo + BigTable, AP, 가십 프로토콜 |
+| **ScyllaDB** | C++ | 💡 | Cassandra C++ rewrite, seastar 프레임워크 |
+| **Redis Cluster** | C | 💡 | gossip-based, sharding + replication |
+
+**데이터 처리 (배치 / 스트림)**
+
+| 시스템 | 언어 | 상태 | 비고 |
+|---|---|---|---|
+| **Apache Spark** | Scala/JVM | 💡 | RDD, Catalyst optimizer, Tungsten |
+| **Apache Flink** | Java | 💡 | 진짜 스트리밍, exactly-once 체크포인트 |
+| **Apache Beam** | Java/Python | 💡 | Google Dataflow 이식, 통합 API |
+| **Trino / Presto** | Java | 💡 | 분산 SQL 쿼리 엔진 (Facebook → Starburst) |
+| **Ray** | Python/C++ | 💡 | ML 분산, actor model |
+| **Dask** | Python | 💡 | pandas/numpy 분산 |
+
+**메시징 / 스트리밍**
+
+| 시스템 | 언어 | 상태 | 비고 |
+|---|---|---|---|
+| **Apache Kafka** | Scala/Java | 💡 | 사실상 표준, log abstraction |
+| **Apache Pulsar** | Java | 💡 | 다중 테넌시, geo-replication, BookKeeper |
+| **Redpanda** | C++ | 💡 | Kafka API 호환, seastar 기반 (JVM 제거) |
+| **NATS** | Go | 💡 | 가벼운 high-throughput |
+
+**오케스트레이션 / 워크플로우**
+
+| 시스템 | 언어 | 상태 | 비고 |
+|---|---|---|---|
+| **Kubernetes** | Go | 💡 | 컨테이너 오케스트레이션 표준 |
+| **Temporal** | Go | 💡 | durable workflow, Uber Cadence 후속 |
+| **Apache Airflow** | Python | 💡 | DAG 워크플로우 |
+| **Nomad** | Go | 💡 | HashiCorp, K8s 대안 |
+
+**검색 / OLAP**
+
+| 시스템 | 언어 | 상태 | 비고 |
+|---|---|---|---|
+| **Elasticsearch / OpenSearch** | Java | 💡 | Lucene 기반, inverted index |
+| **ClickHouse** | C++ | 💡 | OLAP 컬럼 스토어, Yandex |
+| **Apache Druid** | Java | 💡 | 실시간 OLAP |
+| **DuckDB** | C++ | 💡 | embedded OLAP, "SQLite for analytics" |
+
+**Consensus / Coordination**
+
+| 시스템 | 언어 | 상태 | 비고 |
+|---|---|---|---|
+| **etcd** | Go | 💡 | Raft (위 스토리지 섹션과 중복) |
+| **Apache ZooKeeper** | Java | 💡 | Zab 합의 알고리즘, Hadoop 생태계 |
+| **Consul** | Go | 💡 | Raft + service discovery |
+
+**소스 읽기 추천 우선순위:**
+1. **etcd** — Raft 학습 최적, Go 짧고 명확
+2. **Redpanda / FoundationDB** — 시스템 디자인 정수
+3. **Spark / Flink** — 데이터 처리 엔진 내부
+4. **Kafka** — 로그 기반 시스템의 결정판
+5. **CockroachDB / TiDB** — Spanner-style 분산 SQL
 
 ---
 
@@ -97,17 +226,48 @@ Grokking Algorithms (입문) → Algorithm Design Manual → CLRS (심화)
 
 ## 5. 동시성 / 병렬 프로그래밍
 
+### 5.1 책
+
 | 책 | 저자 | 상태 | 비고 |
 |---|------|------|------|
-| C++ Concurrency in Action | Anthony Williams | 📋 | C++ 동시성 패턴 |
+| The Art of Multiprocessor Programming | Herlihy & Shavit | 📝 | 이론 + 알고리즘 바이블 (18장 작성 중) |
+| C++ Concurrency in Action, 2nd Ed | Anthony Williams | 📝 | C++ 동시성 패턴 (11장 작성 중) |
+| Seven Concurrency Models in Seven Weeks | Paul Butcher | 📝 | 7가지 모델 (스레드/액터/CSP/STM 등, 7장 작성 중) |
+| Is Parallel Programming Hard (perfbook) | Paul McKenney | 📋 | RCU 저자 무료 PDF, 커널 동시성 정수 |
+| Java Concurrency in Practice | Brian Goetz | 💡 | Java memory model 바이블 |
+| Programming Massively Parallel Processors | Kirk & Hwu | 💡 | GPU/CUDA 바이블 |
 | Patterns for Parallel Programming | Mattson 외 | 💡 | 병렬 프로그래밍 패턴 |
-| The Art of Multiprocessor Programming | Herlihy & Shavit | 💡 | 이론 + 알고리즘 |
-| Is Parallel Programming Hard | Paul McKenney | 📋 | (커널 섹션과 중복) |
+| Parallel and Concurrent Programming in Haskell | Simon Marlow | 💡 | 함수형 병렬 |
 
 **경로:**
 ```
-C++ Concurrency in Action → Patterns for Parallel Programming → Is Parallel Programming Hard
+The Art of Multiprocessor Programming (이론)
+  → C++ Concurrency in Action (실무 C++)
+  → Seven Concurrency Models (다양한 모델)
+  → Is Parallel Programming Hard (커널 수준 깊이)
+  → Programming Massively Parallel Processors (GPU)
 ```
+
+**참고 링크:**
+- [perfbook (free)](https://mirrors.edge.kernel.org/pub/linux/kernel/people/paulmck/perfbook/perfbook.html)
+- [The Art of Multiprocessor Programming 코드](https://github.com/AlexanderMagrini/The-Art-of-Multiprocessor-Programming)
+
+### 5.2 병렬 플랫폼 / 라이브러리 (자체 시리즈)
+
+각 플랫폼 1-3편 deep-dive.
+
+| 시스템 | 언어 | 모델 | 상태 | 비고 |
+|---|---|---|---|---|
+| **MPI** (OpenMPI/MPICH) | C/Fortran | 메시지 패싱 | 💡 | HPC 표준 |
+| **CUDA / SYCL** | C++ | GPU SIMT | 💡 | NVIDIA GPU |
+| **OpenMP** | C/C++/Fortran | shared memory | 💡 | 컴파일러 directive |
+| **Intel TBB / oneTBB** | C++ | task-based | 💡 | work-stealing |
+| **Rayon** | Rust | data parallel | 💡 | join + work-stealing |
+| **Tokio** | Rust | async runtime | 💡 | epoll + work-stealing |
+| **Erlang / BEAM** | Erlang/Elixir | actor | 💡 | actor model 본가 |
+| **Akka** | Scala/Java | actor | 💡 | JVM actor |
+| **Go runtime** | Go | CSP / goroutine | 💡 | M:N 스케줄러 |
+| **HPX** | C++ | async + futures | 💡 | C++ standard async 영감 |
 
 ---
 
@@ -193,19 +353,19 @@ Site Reliability Engineering → The Site Reliability Workbook → Building Secu
 | PCIe Deep Dive | ✅ | 17장, 스펙+드라이버 |
 | NVMe Deep Dive | ✅ | 18장, 스펙+드라이버 |
 | DDR Memory Deep Dive | ✅ | 17장, 스펙+트레이닝 |
-| CXL Deep Dive | 📋 | 4.0 스펙, 메모리 풀링, 멀티랙 |
-| HBM / GDDR Deep Dive | 📋 | HBM3E, 고대역 메모리 |
-| UCIe Deep Dive | 📋 | 3.0 스펙, 칩렛 인터커넥트 🔥 |
-| UALink Deep Dive | 📋 | 1.0 스펙, GPU 인터커넥트, NVLink 대안 🔥 |
+| CXL 심화 | 📋 | 4.0 스펙, 메모리 풀링, 멀티랙 |
+| HBM / GDDR 심화 | 📋 | HBM3E, 고대역 메모리 |
+| UCIe 심화 | 📋 | 3.0 스펙, 칩렛 인터커넥트 🔥 |
+| UALink 심화 | 📋 | 1.0 스펙, GPU 인터커넥트, NVLink 대안 🔥 |
 | BoW (Bunch of Wires) | 💡 | OCP 오픈 D2D, 저비용 칩렛 |
 | PCIe 6.0 확장 | 📋 | PAM4, 64 GT/s (기존 시리즈 확장) |
 | **기초 프로토콜** | | |
-| Embedded Protocols Deep Dive | 📋 | SPI, UART, I2C, RS-485 — 기본기 |
-| CAN Bus Deep Dive | 📋 | CAN 2.0, CAN FD, CAN XL — 자동차/산업 |
-| MIPI Deep Dive | 📋 | CSI-2, DSI-2, A-PHY — 카메라/디스플레이 |
+| Embedded Protocols 심화 | 📋 | SPI, UART, I2C, RS-485 — 기본기 |
+| CAN Bus 심화 | 📋 | CAN 2.0, CAN FD, CAN XL — 자동차/산업 |
+| MIPI 심화 | 📋 | CSI-2, DSI-2, A-PHY — 카메라/디스플레이 |
 | Industrial Ethernet | 📋 | EtherCAT, PROFINET, TSN — 산업용 이더넷 |
 
-### 9.1 CXL Deep Dive (신규)
+### 9.1 CXL 심화 (신규)
 
 | 챕터 | 주제 |
 |------|------|
@@ -220,7 +380,7 @@ Site Reliability Engineering → The Site Reliability Workbook → Building Secu
 | 9 | CXL 3.0 — 패브릭 확장 |
 | 10 | 리눅스 CXL 드라이버 |
 
-### 9.2 HBM / GDDR Deep Dive (신규)
+### 9.2 HBM / GDDR 심화 (신규)
 
 | 챕터 | 주제 |
 |------|------|
@@ -233,7 +393,7 @@ Site Reliability Engineering → The Site Reliability Workbook → Building Secu
 | 7 | 메모리 컨트롤러 인터페이스 |
 | 8 | NPU/GPU에서의 활용 |
 
-### 9.3 UCIe Deep Dive (신규) 🔥
+### 9.3 UCIe 심화 (신규) 🔥
 
 칩렛 시대의 "PCIe" — 2025.08 UCIe 3.0 릴리스.
 
@@ -252,7 +412,7 @@ Site Reliability Engineering → The Site Reliability Workbook → Building Secu
 | 11 | 멀티 벤더 칩렛 생태계 |
 | 12 | 사례 연구 — Intel/AMD/NVIDIA 칩렛 |
 
-### 9.4 UALink Deep Dive (신규) 🔥
+### 9.4 UALink 심화 (신규) 🔥
 
 NVLink 대안 — 2025.04 UALink 1.0 릴리스, 75개사 참여.
 
@@ -282,7 +442,7 @@ OCP 오픈 D2D 인터페이스 — 저비용 칩렛 타겟.
 | 5 | BoW Flexi — 저비용 구현 |
 | 6 | 패키징 요구사항 |
 
-### 9.6 Embedded Protocols Deep Dive (신규)
+### 9.6 Embedded Protocols 심화 (신규)
 
 SPI, UART, I2C, RS-485 — 모든 임베디드의 기본.
 
@@ -301,7 +461,7 @@ SPI, UART, I2C, RS-485 — 모든 임베디드의 기본.
 | 11 | 리눅스 드라이버 — spidev, i2c-dev, ttyS |
 | 12 | 디버깅 — Logic analyzer, Protocol decoder |
 
-### 9.7 CAN Bus Deep Dive (신규)
+### 9.7 CAN Bus 심화 (신규)
 
 자동차/산업 표준 — CAN 2.0, CAN FD, CAN XL.
 
@@ -320,7 +480,7 @@ SPI, UART, I2C, RS-485 — 모든 임베디드의 기본.
 | 11 | 리눅스 SocketCAN — can-utils, 드라이버 |
 | 12 | 디버깅 — CANalyzer, candump, cansniffer |
 
-### 9.8 MIPI Deep Dive (신규)
+### 9.8 MIPI 심화 (신규)
 
 카메라/디스플레이 인터페이스 — CSI-2, DSI-2, A-PHY.
 
@@ -339,7 +499,7 @@ SPI, UART, I2C, RS-485 — 모든 임베디드의 기본.
 | 11 | 카메라 드라이버 개발 — imx sensor 예제 |
 | 12 | 디버깅 — mipi-dbi, 신호 분석 |
 
-### 9.9 Industrial Ethernet Deep Dive (신규)
+### 9.9 Industrial Ethernet 심화 (신규)
 
 산업용 이더넷 — EtherCAT, PROFINET, TSN.
 
@@ -553,6 +713,112 @@ SPI, UART, I2C, RS-485 — 모든 임베디드의 기본.
 | 7 | 시스템 트레이싱 — LTTng |
 | 8 | 병목 진단과 최적화 |
 
+### 11.9 MLIR 심화 (신규) 🔥
+
+11.2의 *개요*보다 깊이. NPU Compiler 진로의 *토대*. CUDA 제외 트랙의 1순위.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | MLIR의 위치 — LLVM·SPIR-V·HLO와 비교 |
+| 2 | Dialect 개념과 설계 원칙 |
+| 3 | Operation·Type·Attribute 시스템 |
+| 4 | Pass와 PatternRewriter |
+| 5 | Conversion·Lowering 패턴 |
+| 6 | `linalg` dialect — 핵심 추상 |
+| 7 | `tosa`·`stablehlo` — frontend dialect |
+| 8 | `vector`·`affine`·`scf`·`memref` |
+| 9 | LLVM dialect로의 lowering |
+| 10 | Bufferization 패스 |
+| 11 | Async / GPU / SPIR-V dialect |
+| 12 | 나만의 dialect 작성 |
+| 13 | TableGen — ODS / DRR |
+| 14 | mlir-opt·mlir-translate 도구 |
+| 15 | 디버깅·trace·crash reduction |
+| 16 | 사례 — Triton·IREE·TensorFlow MLIR |
+
+### 11.10 XLA / OpenXLA 심화 (신규) 🔥
+
+MLIR 실전 사례. JAX·TensorFlow·PyTorch(PJRT) 공통 백엔드.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | XLA의 위치 — TF·JAX·PyTorch backend |
+| 2 | StableHLO — 입력 IR |
+| 3 | HLO IR — 내부 표현 |
+| 4 | HLO 패스 파이프라인 |
+| 5 | Operator fusion 전략 |
+| 6 | Layout assignment |
+| 7 | Backend — CPU / GPU / TPU |
+| 8 | PJRT — Pluggable Runtime |
+| 9 | Sharding과 SPMD |
+| 10 | Autotuning |
+| 11 | JAX와 XLA 통합 |
+| 12 | TF·PyTorch와 XLA 통합 |
+
+### 11.11 Triton DSL (신규)
+
+OpenAI Triton — block programming DSL. CUDA 대안.
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | Triton의 위치와 동기 |
+| 2 | Programming model — block, program_id |
+| 3 | Tiled matmul 예제 |
+| 4 | Attention 구현 (FlashAttention 스타일) |
+| 5 | Triton 컴파일러 흐름 (MLIR 기반) |
+| 6 | Autotuning |
+| 7 | Backend — PTX·AMDGCN |
+| 8 | PyTorch Inductor와의 통합 |
+| 9 | 한계와 트레이드오프 |
+
+### 11.12 PyTorch Internals (신규)
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | eager mode 흐름 — autograd, dispatcher |
+| 2 | C++ 백엔드 구조 — ATen·c10 |
+| 3 | Operator·dispatch key |
+| 4 | TorchScript |
+| 5 | TorchDynamo — Python frame 추적 |
+| 6 | AOTAutograd |
+| 7 | TorchInductor — Triton/C++ codegen |
+| 8 | torch.compile 사용 패턴 |
+| 9 | Distributed — DDP·FSDP |
+| 10 | Quantization (PTQ·QAT) |
+| 11 | ExecuTorch — 추론용 |
+| 12 | 모바일·임베디드 배포 |
+
+### 11.13 추론 엔진 심화 (신규)
+
+11.3 (ONNX 실전)을 *엔진별*로 깊게.
+
+**TensorRT (8편)** — engine builder, plugin API, INT8 calibration, dynamic shape, multi-stream, refit, TimingCache, 모델별 최적화 패턴.
+
+**ONNX Runtime (8편)** — Execution Provider 구조, Graph Optimizer, custom op, sessions·IO binding, IO/memory 최적화.
+
+**Core ML (6편)** — Apple Neural Engine, MPSGraph 백엔드, model conversion, Stateful ML programs, on-device personalization.
+
+### 11.14 Apple Metal Stack (신규) 🔥
+
+CUDA 외 GPU 컴퓨트 스택. Apple Silicon 통합 메모리·NPU(ANE) 접근.
+
+**Metal Compute / MSL (10~12편)** — Metal API, MSL(C++14) 셰이더, command queue·encoder, unified memory, ray tracing, tile shading.
+
+**MPS / MPSGraph (6~8편)** — cuDNN/cuBLAS 등가물, MPSGraph로 ML 그래프 실행, ANE 활용 경로(Core ML 통한 우회).
+
+| 챕터 | 주제 |
+|------|------|
+| 1 | Metal의 위치 — Vulkan·CUDA와 비교 |
+| 2 | MSL 기초 — kernel·thread·threadgroup |
+| 3 | Command queue·buffer·encoder |
+| 4 | Unified memory와 storage mode |
+| 5 | MPS — built-in 커널들 |
+| 6 | MPSGraph — graph-based ML |
+| 7 | Apple AIR (Apple Intermediate Representation) |
+| 8 | Performance — tile shader, raster order |
+| 9 | ML 워크로드 사례 — convolution, attention |
+| 10 | Core ML 백엔드로서의 Metal |
+
 **경로:**
 ```
 NPU 아키텍처 → ML 컴파일러 → ONNX 실전
@@ -560,6 +826,13 @@ NPU 아키텍처 → ML 컴파일러 → ONNX 실전
 NPU 드라이버      ML 디자인 패턴 → 대규모 ML 시스템 설계
       ↓
 TinyML / Edge AI → ML 시스템 프로파일링
+
+[심화·CUDA 제외 트랙]
+MLIR 심화 → XLA 심화 → Triton DSL
+                ↓
+         PyTorch Internals → 추론 엔진 심화
+                ↓
+         Apple Metal Stack
 ```
 
 **참고 링크:**
@@ -586,6 +859,35 @@ TinyML / Edge AI → ML 시스템 프로파일링
 - [Etnaviv Driver (오픈소스 GPU)](https://github.com/etnaviv/etnaviv_gpu_tests)
 - [Panfrost Driver (ARM Mali)](https://docs.mesa3d.org/drivers/panfrost.html)
 - [IOMMU Documentation](https://www.kernel.org/doc/html/latest/driver-api/iommu.html)
+
+**MLIR / XLA / Triton (CUDA 제외 트랙):**
+- [MLIR Tutorial](https://mlir.llvm.org/docs/Tutorials/)
+- [MLIR Dialect List](https://mlir.llvm.org/docs/Dialects/)
+- [StableHLO Specification](https://github.com/openxla/stablehlo)
+- [OpenXLA Project](https://openxla.org/)
+- [XLA HLO Documentation](https://openxla.org/xla)
+- [PJRT — Pluggable Runtime](https://github.com/openxla/xla/tree/main/xla/pjrt)
+- [Triton (OpenAI)](https://github.com/openai/triton)
+- [Triton Documentation](https://triton-lang.org/)
+- [IREE Architecture](https://iree.dev/developers/)
+
+**PyTorch Internals:**
+- [PyTorch Developer Wiki](https://github.com/pytorch/pytorch/wiki)
+- [TorchDynamo Deep Dive](https://pytorch.org/docs/stable/dynamo/index.html)
+- [TorchInductor Overview](https://pytorch.org/blog/inside-the-matrix/)
+- [ExecuTorch](https://pytorch.org/executorch/)
+
+**추론 엔진:**
+- [TensorRT Developer Guide](https://docs.nvidia.com/deeplearning/tensorrt/)
+- [ONNX Runtime Documentation](https://onnxruntime.ai/docs/)
+- [Core ML Tools](https://apple.github.io/coremltools/)
+
+**Apple Metal Stack:**
+- [Metal Programming Guide](https://developer.apple.com/metal/)
+- [Metal Shading Language Specification](https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf)
+- [Metal Performance Shaders (MPS)](https://developer.apple.com/documentation/metalperformanceshaders)
+- [MPSGraph](https://developer.apple.com/documentation/metalperformanceshadersgraph)
+- [Apple Machine Learning Research](https://machinelearning.apple.com/)
 
 ---
 
@@ -922,20 +1224,109 @@ Pragmatic Programmer → Clean Code → Refactoring → Working with Legacy Code
 
 | 책 | 저자 | 상태 | 비고 |
 |---|------|------|------|
+| Convex Optimization | Boyd & Vandenberghe | ✅ | 무료, 11 ch. ML 학습·컴파일러 스케줄링 핵심 |
+| Elements of Information Theory | Cover & Thomas | ✅ | 16 ch. entropy·KL·MI·rate-distortion |
+| Information Theory, Inference, and Learning | David MacKay | ✅ | 무료, 15 ch (50중 핵심). info theory + ML 통합 |
+| All of Statistics | Larry Wasserman | ✅ | 15 ch. 통계 빠른 입문 |
+| Probability Theory: The Logic of Science | E.T. Jaynes | ✅ | 12 ch. 베이지안 관점 |
 | Concrete Mathematics | Knuth, Graham, Patashnik | 📋 | 이산수학 + 분석 |
 | Think Stats | Allen Downey | 💡 | 프로그래머용 통계, 무료 |
-| Probability Theory: The Logic of Science | E.T. Jaynes | 💡 | 베이지안 관점 |
-| Mathematics for Machine Learning | Deisenroth 외 | 💡 | ML 수학, 무료 |
+| Mathematics for Machine Learning | Deisenroth 외 | 💡 | ML 수학, 무료 (Murphy ML1으로 대체 가능) |
+
+### 25.2 Plausible Reasoning·Causality (고전 + 현대)
+
+확률의 토대를 *논리 확장으로서의 추론* 시각에서 본다. Jaynes 라인 + Pearl 라인.
+
+| 책 | 저자 | 상태 | 비고 |
+|---|------|------|------|
+| **Pólya, Mathematics and Plausible Reasoning Vol I** | George Pólya | 📋 | 1954. 8 ch. *plausible reasoning 용어의 원전*. Induction·Analogy |
+| **Pólya, Mathematics and Plausible Reasoning Vol II** | George Pólya | 📋 | 8 ch. Patterns of Plausible Inference |
+| **Cox, Algebra of Probable Inference** | Richard T. Cox | 📋 | 1961. 5 ch (~100 p). *Cox theorem 원전*. Jaynes의 토대 |
+| **Pearl, Probabilistic Reasoning in Intelligent Systems** | Judea Pearl | 📋 | 1988. 10 ch. *Bayesian network 창시 책 (PRIS)* |
+| **Pearl, Causality: Models, Reasoning, Inference** | Judea Pearl | 📋 | 2009 2판. 11 ch. *causal inference 바이블*. do-calculus·SCM |
+| **Halpern, Reasoning About Uncertainty** | Joseph Y. Halpern | 📋 | 2017 2판. 14 ch. Bayes·Dempster-Shafer·possibility 통합 |
+
+**대체·심화 후보:**
+- Pearl, Glymour, Jewell, *Causal Inference in Statistics: A Primer* — 4 ch 짧은 입문
+- Pearl & Mackenzie, *The Book of Why* — 대중서·관점 정리
+- Howson & Urbach, *Scientific Reasoning: The Bayesian Approach*
+- Walley, *Statistical Reasoning with Imprecise Probabilities*
 
 **경로:**
+
 ```
-Concrete Mathematics → Think Stats → Mathematics for ML
+[고전 기반] Pólya Vol I → Vol II → Cox → Jaynes
+[modern AI]  Pearl PRIS → Pearl Causality → Halpern
+```
+
+### 25.3 Bayesian Data Analysis·Modern Bayesian (응용·교육)
+
+Bayesian 데이터 분석의 실전·교육 표준. McElreath·Gelman 라인.
+
+| 책 | 저자 | 상태 | 비고 |
+|---|------|------|------|
+| **Gelman et al., Bayesian Data Analysis (BDA3)** | Gelman·Carlin·Stern·Dunson·Vehtari·Rubin | 📋 | 28 ch. *Bayesian 바이블*. HMC·hierarchical·model checking |
+| **McElreath, Statistical Rethinking** | Richard McElreath | 📋 | 2판 17 ch. *modern Bayesian 교육 표준*. Stan/PyMC 실용 |
+| **Robert, The Bayesian Choice** | Christian P. Robert | 📋 | 2판 11 ch. *decision-theoretic Bayesian* — 이론 깊이 |
+| **Kruschke, Doing Bayesian Data Analysis** | John K. Kruschke | 📋 | 2판 25 ch (핵심 15). 강아지 책. JAGS·Stan 응용 |
+| **Hoff, A First Course in Bayesian Statistical Methods** | Peter D. Hoff | 💡 | 11 ch. 짧은 입문. Gibbs sampling 중심 |
+
+**대체·심화:**
+- Gelman & Hill, *Data Analysis Using Regression and Multilevel/Hierarchical Models*
+- Bernardo & Smith, *Bayesian Theory* — measure-theoretic Bayesian
+- Box & Tiao, *Bayesian Inference in Statistical Analysis* — 고전
+
+**경로:**
+
+```
+[입문]   Hoff or McElreath → Kruschke
+[표준]   McElreath → BDA3
+[이론]   BDA3 → Robert (Bayesian Choice)
+```
+
+### 25.1 측도론적 확률·확률모델·고차원 (NPU compiler·ML 이론 트랙)
+
+ML 이론·연구로 가는 길의 수학 토대. *무료 우선*.
+
+| 책 | 저자 | 상태 | 비고 |
+|---|------|------|------|
+| **Durrett, Probability: Theory and Examples** | Rick Durrett | 📋 | *무료 PDF*. 측도론적 확률 baseline. Cornell 표준. 8 ch (5판) |
+| **Bertsekas & Tsitsiklis, Introduction to Probability** | Bertsekas·Tsitsiklis | 📋 | *MIT 무료 PDF*. 9 ch. 응용 확률 학부 표준 |
+| **Casella & Berger, Statistical Inference** | Casella·Berger | 📋 | 그래듀에이트 수리통계 바이블. 12 ch |
+| **Vershynin, High-Dimensional Probability** | Roman Vershynin | 📋 | *무료 PDF*. 11 ch. ML 이론 modern foundation·집중부등식 |
+| **Koller & Friedman, Probabilistic Graphical Models** | Koller·Friedman | 📋 | 21 ch. PGM 바이블. Bishop PRML과 보완 |
+
+**대체·심화 후보 (필요 시 추가):**
+- Williams, *Probability with Martingales* — martingale 중심 elegant (Durrett 대안)
+- Ross, *Introduction to Probability Models* — queuing·Markov·renewal 응용 (B&T 대안)
+- Norris, *Markov Chains* — 무료, chain 깊이
+- Øksendal, *Stochastic Differential Equations* — Itô·SDE
+- Lehmann & Romano, *Testing Statistical Hypotheses* — 가설검정 심화
+- Wainwright, *High-Dimensional Statistics* — Vershynin 보완
+- Boucheron·Lugosi·Massart, *Concentration Inequalities*
+
+**경로:**
+
+```
+[기초] Wasserman / Jaynes → Convex Opt (Boyd) → Information Theory (Cover-Thomas / MacKay)
+[심화] B&T → Durrett → Casella & Berger → Vershynin → Koller & Friedman
 ```
 
 **참고 링크:**
+- [Boyd, Convex Optimization (무료 PDF)](https://web.stanford.edu/~boyd/cvxbook/)
+- [Durrett, Probability (무료 PDF)](https://services.math.duke.edu/~rtd/PTE/pte.html)
+- [Bertsekas & Tsitsiklis (MIT OCW)](https://ocw.mit.edu/courses/res-6-012-introduction-to-probability-spring-2018/)
+- [Vershynin, HDP (무료 PDF)](https://www.math.uci.edu/~rvershyn/papers/HDP-book/HDP-book.html)
+- [MacKay, ITILA (무료 PDF)](https://www.inference.org.uk/itila/)
 - [Concrete Mathematics (Stanford / Knuth)](https://www-cs-faculty.stanford.edu/~knuth/gkp.html)
 - [Think Stats (무료 온라인)](https://greenteapress.com/thinkstats/)
 - [Mathematics for Machine Learning (무료 PDF)](https://mml-book.github.io/)
+- [Koller & Friedman PGM (Stanford)](https://pgm.stanford.edu/)
+- [Cox — Algebra of Probable Inference (PDF)](https://bayes.wustl.edu/etj/articles/cox.algebra.pdf)
+- [Pearl — Causality (UCLA)](https://bayes.cs.ucla.edu/BOOK-2K/)
+- [McElreath — Statistical Rethinking (저자 사이트)](https://xcelab.net/rm/statistical-rethinking/)
+- [Gelman — BDA3 (Stan)](http://www.stat.columbia.edu/~gelman/book/)
+- [Robert — The Bayesian Choice (Springer)](https://link.springer.com/book/10.1007/0-387-71599-1)
 
 ---
 
@@ -1034,15 +1425,15 @@ GoF (개별 패턴 익히기) → Fowler Refactoring (기계적 변환)
 21. **NPU 드라이버 개발** — DRM, DMA-BUF, 커널 레벨
 
 ### Tier 5 — 가속기 하드웨어 / 인터커넥트 🔥
-22. **UCIe Deep Dive** — 칩렛 인터커넥트, 3.0 스펙 (2025.08)
-23. **UALink Deep Dive** — GPU 인터커넥트, NVLink 대안 (2025.04)
-24. **CXL Deep Dive** — 메모리 풀링, 4.0 스펙 (2025.11)
-25. **HBM / GDDR Deep Dive** — HBM3E, 고대역 메모리
+22. **UCIe 심화** — 칩렛 인터커넥트, 3.0 스펙 (2025.08)
+23. **UALink 심화** — GPU 인터커넥트, NVLink 대안 (2025.04)
+24. **CXL 심화** — 메모리 풀링, 4.0 스펙 (2025.11)
+25. **HBM / GDDR 심화** — HBM3E, 고대역 메모리
 
 ### Tier 6 — 기초 페리페럴 / 산업 프로토콜 / QEMU
-26. **Embedded Protocols Deep Dive** — SPI, UART, I2C, RS-485 (기본기)
-27. **CAN Bus Deep Dive** — CAN 2.0, CAN FD, CAN XL (자동차/산업)
-28. **MIPI Deep Dive** — CSI-2, DSI-2, A-PHY (카메라/디스플레이)
+26. **Embedded Protocols 심화** — SPI, UART, I2C, RS-485 (기본기)
+27. **CAN Bus 심화** — CAN 2.0, CAN FD, CAN XL (자동차/산업)
+28. **MIPI 심화** — CSI-2, DSI-2, A-PHY (카메라/디스플레이)
 29. **Industrial Ethernet** — EtherCAT, PROFINET, TSN (산업용)
 30. **QEMU Fake Device Driver** — 가상 디바이스로 드라이버 테스트 🆕
 31. **QEMU Embedded Emulation** — ARM/RISC-V 펌웨어 테스트 🆕
