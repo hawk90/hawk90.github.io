@@ -12,6 +12,23 @@ draft: false
 
 > **"파일과 폴더를 같은 인터페이스로"** — leaf와 composite 노드가 같은 `Component` 타입.
 
+## 비유 — 폴더와 파일
+
+컴퓨터의 *폴더 구조*를 떠올려봅시다. `Documents` 폴더 안에는 *파일*도 있고, *또 다른 폴더*도 있습니다. 그 안의 폴더에도 같은 패턴이 반복됩니다.
+
+`du -sh Documents/`를 실행하면 *Documents의 총 용량*이 나옵니다. 안에 *파일*이 있든 *폴더가 다시 폴더를 포함*하든 상관없이 *같은 명령*입니다.
+
+이게 가능한 이유는 *파일과 폴더가 같은 "용량을 잴 수 있는 대상"*이라는 *공통 인터페이스*를 따르기 때문입니다.
+
+Composite가 이 구조입니다.
+
+- *파일* = Leaf (안에 다른 것 없음)
+- *폴더* = Composite (안에 다른 것을 포함)
+- *공통 인터페이스* = `Component` (둘 다 `getSize()`)
+- *재귀 처리* = 폴더의 `getSize()`는 안에 있는 모든 것의 `getSize()` 합
+
+클라이언트는 *그게 파일인지 폴더인지* 신경 안 씁니다. *같은 명령*을 보내면 됩니다.
+
 ## 어떤 문제를 푸는가
 
 부분-전체 계층(트리)을 표현해야 합니다.
@@ -75,6 +92,17 @@ GoF는 투명성 선호 — "모든 노드를 동일하게"가 패턴 핵심.
 > ⚠️ **leaf와 composite가 의미상 매우 다르면** 인터페이스 통합이 부자연스러움.
 
 > ⚠️ **트리가 매우 깊고 균등한 처리가 hot path면** 재귀 호출 비용 주의 — flatten 또는 visitor 적용 고려.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Decorator](/blog/programming/design/gof-design-patterns/item09-decorator) | Decorator는 *한 객체를 감싸 책임 적층* (선형 wrapping). Composite는 *여러 자식을 묶어 트리 구성* (재귀 구조). |
+| [Iterator](/blog/programming/design/gof-design-patterns/item16-iterator) | Iterator는 *Composite의 트리를 순회*하는 데 자연스럽게 결합 — 두 패턴이 자주 함께. |
+| [Visitor](/blog/programming/design/gof-design-patterns/item23-visitor) | Composite 트리에 *새 연산을 추가*할 때 Visitor와 결합. |
+| [Chain of Responsibility](/blog/programming/design/gof-design-patterns/item13-chain-of-responsibility) | Composite의 *부모-자식 체인*이 자연스럽게 CoR — 자식이 처리 못 하면 부모로. |
+
+판별 한 줄: *"단일 객체와 여러 객체의 묶음을 같은 방식으로 다루고 싶다"*면 Composite.
 
 ## C++ 구현
 

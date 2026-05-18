@@ -12,6 +12,20 @@ draft: false
 
 > **"추상과 구현을 별개의 계층으로"** — 도형 N개 × 렌더러 M개 → N×M 클래스 대신 N + M.
 
+## 비유 — 리모컨과 TV
+
+리모컨과 TV를 떠올려봅시다. 리모컨 종류는 *여럿*입니다 (Apple TV 리모컨, 삼성 리모컨, 보편 리모컨, 음성 리모컨...). TV 종류도 *여럿*입니다 (삼성 TV, LG TV, Sony TV...). 만약 *모든 조합*을 만든다면 *N×M개의 리모컨-TV 결합 상품*이 필요합니다.
+
+실제 시장은 그렇지 않습니다. *리모컨은 리모컨대로*, *TV는 TV대로* 진화합니다. 둘 사이에 *공통 IR 프로토콜*이 있어서 *어떤 리모컨도 어떤 TV에 연결*됩니다.
+
+Bridge가 이 *프로토콜로 두 계층을 분리*하는 패턴입니다.
+
+- *리모컨* = Abstraction (사용자가 보는 인터페이스)
+- *TV* = Implementor (실제 구현)
+- *IR 프로토콜* = Abstraction이 Implementor를 호출하는 메서드 시그니처
+
+리모컨 종류(Abstraction)와 TV 종류(Implementor)가 *각자 독립적으로 진화*합니다. 한쪽이 늘어나도 *다른 쪽 클래스 폭발이 없습니다*.
+
 ## 어떤 문제를 푸는가
 
 도형(Circle, Rectangle, Triangle) × 렌더러(Vector, Raster) 조합을 *단일 상속*으로 표현하면:
@@ -59,6 +73,16 @@ GoF 책 표현: *"Decouple an abstraction from its implementation so that the tw
 > ⚠️ **추상과 구현이 같이 변하는 게 자연스러우면** — Bridge는 *둘이 독립적*이라는 가정. 항상 같이 변하면 단순 상속이 낫다.
 
 > ⚠️ **구현이 1개로 고정**되어 있고 늘릴 계획 없으면** — Bridge의 *유연성 가치 0*.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Adapter](/blog/programming/design/gof-design-patterns/item06-adapter) | Adapter는 *사후* — 이미 존재하는 두 인터페이스를 임시 결합. Bridge는 *사전* — 설계 시점부터 분리. |
+| [Abstract Factory](/blog/programming/design/gof-design-patterns/item01-abstract-factory) | Abstract Factory는 *객체 군의 생성*. Bridge는 *추상-구현 분리 구조*. 둘은 함께 쓰이기도 (Bridge의 Implementor를 Abstract Factory가 만듦). |
+| Pimpl idiom (C++) | Pimpl은 *컴파일 의존성 숨기기*가 목적 (구현이 하나). Bridge는 *여러 구현을 선택*. |
+
+판별 한 줄: *"두 차원이 각각 늘어날 가능성이 있고, 처음부터 그것을 의도한다"*면 Bridge.
 
 ## C++ 구현
 

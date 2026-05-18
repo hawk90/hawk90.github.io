@@ -12,6 +12,22 @@ draft: false
 
 > **"진짜 객체 앞에 서서 접근을 통제하는 대리인"** — lazy load, 권한 검사, 원격 호출, 캐싱 등.
 
+## 비유 — 비서, 신용카드, 부동산 중개인
+
+*비서*는 사장에게 *직접 연락이 닿기 전*에 가로막습니다. 일정을 확인하고, 우선순위를 정하고, 사장이 *정말 응해야 할 통화*만 전달합니다. *비서와 사장이 같은 "전화 받는 사람"*이라는 인터페이스이지만, 비서가 *접근을 제어*합니다.
+
+*신용카드*는 *현금을 직접 꺼내는 대신* 결제합니다. 가게 입장에선 *결제가 끝났다는 사실*만 같습니다. 카드사가 뒤에서 *진짜 돈의 이동*을 처리합니다.
+
+*부동산 중개인*은 *집주인을 직접 만나지 않고* 거래를 진행합니다. 임차인은 *집과 계약*에 집중하고, 중개인이 *집주인과의 소통*을 대리합니다.
+
+Proxy가 이 *대리* 구조입니다.
+
+- *비서·카드·중개인* = Proxy (Subject 인터페이스 동일)
+- *사장·현금·집주인* = RealSubject
+- *대리 목적* = 접근 제어, 지연, 캐싱, 원격
+
+클라이언트는 *Proxy인지 RealSubject인지 모릅니다*. *같은 인터페이스*입니다.
+
 ## 어떤 문제를 푸는가
 
 진짜 객체에 직접 접근하면 곤란한 경우들:
@@ -65,6 +81,17 @@ Proxy는 Subject 구현 + RealSubject 참조 + **추가 동작**(lazy/auth/log/.
 > ⚠️ **단순 wrapping만이라면 Proxy 아닌 그냥 wrapper.** Proxy는 의도가 분명해야.
 
 > ⚠️ **lifetime 관리가 복잡**해질 수 있음 — proxy와 real이 다른 owner를 가지면 위험.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Decorator](/blog/programming/design/gof-design-patterns/item09-decorator) | Decorator는 *기능 추가*가 목적. Proxy는 *접근 제어*가 목적. 구조는 동일. |
+| [Adapter](/blog/programming/design/gof-design-patterns/item06-adapter) | Adapter는 *인터페이스 변환*. Proxy는 *인터페이스 유지*. |
+| [Facade](/blog/programming/design/gof-design-patterns/item10-facade) | Facade는 *복잡한 서브시스템에 새 단순 인터페이스*. Proxy는 *기존 인터페이스 그대로 + 제어*. |
+| [Flyweight](/blog/programming/design/gof-design-patterns/item11-flyweight) | Flyweight는 *공유로 메모리 절약*. Proxy는 *접근 통제* (보안, 지연, 원격). |
+
+판별 한 줄: *"같은 인터페이스로 호출되지만 진짜 호출 전에 무언가를 하고 싶다"*면 Proxy.
 
 ## C++ 구현 — Virtual Proxy (lazy load)
 

@@ -12,6 +12,21 @@ draft: false
 
 > **"플러그 모양이 안 맞을 때 끼우는 어댑터"** — 기존 라이브러리를 우리 인터페이스에 맞춰 wrapping.
 
+## 비유 — 돼지코 어댑터
+
+해외여행에서 가장 흔히 보는 어댑터입니다. 한국 콘센트는 220V 둥근 두 핀, 미국은 110V 평평한 두 핀. 노트북 충전기를 *그대로 미국에서 쓸 수 없습니다*. 사이에 *돼지코 어댑터*를 끼우면 한국 플러그가 미국 콘센트에 들어갑니다.
+
+중요한 점은 *충전기 자체는 그대로*입니다. *미국 콘센트도 그대로*입니다. *어댑터만이 사이에 끼어 있을 뿐*입니다.
+
+Adapter가 정확히 이 구조입니다.
+
+- *한국 플러그* = 클라이언트가 가진 기존 인터페이스
+- *미국 콘센트* = 호환되지 않는 외부 라이브러리
+- *돼지코 어댑터* = Adapter 클래스
+- *전류는 변환되어 통과* = 메서드 호출이 변환되어 전달
+
+기존 코드는 *건드리지 않습니다*. 사이에 wrapper만 끼웁니다.
+
 ## 어떤 문제를 푸는가
 
 기존 라이브러리(또는 legacy 코드)를 그대로 쓰고 싶은데 **인터페이스가 안 맞습니다**. 라이브러리를 수정할 순 없고, 클라이언트 쪽도 *표준 인터페이스(`Logger` 같은)*에 맞춰져 있습니다.
@@ -53,6 +68,17 @@ C++에선 거의 항상 Object Adapter.
 > ⚠️ **변환 비용이 큰 경우** — 매 호출마다 변환이 들어가면 hot path에서 성능 손해.
 
 > ⚠️ **두 인터페이스의 의미가 너무 다른 경우** — 어댑터가 *완전한 재구현*에 가까워지면 의미가 약하다. 차라리 *facade* 또는 *별도 모듈*.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Decorator](/blog/programming/design/gof-design-patterns/item09-decorator) | Decorator는 *같은 인터페이스 + 책임 추가*. Adapter는 *다른 인터페이스 → 변환*. |
+| [Proxy](/blog/programming/design/gof-design-patterns/item12-proxy) | Proxy는 *같은 인터페이스 + 접근 제어*. Adapter는 *인터페이스 자체를 바꿈*. |
+| [Bridge](/blog/programming/design/gof-design-patterns/item07-bridge) | Bridge는 *사전 설계*로 추상-구현 분리. Adapter는 *사후 통합*. |
+| [Facade](/blog/programming/design/gof-design-patterns/item10-facade) | Facade는 *복잡한 시스템에 단순 진입점*. Adapter는 *1대1 인터페이스 변환*. |
+
+판별 한 줄: *"기존 코드는 그대로, 인터페이스만 안 맞는다"*면 Adapter.
 
 ## C++ 구현 — Object Adapter
 

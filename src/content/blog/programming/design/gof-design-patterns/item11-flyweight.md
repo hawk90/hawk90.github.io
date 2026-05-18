@@ -12,6 +12,22 @@ draft: false
 
 > **"같은 건 하나만 두고 위치만 따로"** — 글자 'a'가 10만 번 등장해도 객체는 1개.
 
+## 비유 — 알파벳 폰트 글리프
+
+문서에 "the quick brown fox..."가 100번 반복된다고 해봅시다. 글자 *'a'가 수백 번* 등장합니다. 매 *'a'마다 글리프 모양*(베지어 곡선 데이터)을 따로 저장하면 *메모리 폭발*입니다.
+
+실제 폰트 렌더링은 *'a'의 모양 데이터를 한 번만* 메모리에 둡니다. 각 *'a'의 위치, 크기, 색상*만 따로 기록합니다.
+
+또는 게임에서 *나무 1만 그루*를 생각해봅시다. *나무 메시(3D 모델)*는 *한 번만* GPU에 올리고, 각 나무의 *위치·크기·회전*만 별도로 처리합니다.
+
+Flyweight가 이 구조입니다.
+
+- *글리프 모양·메시 데이터* = intrinsic state (공유)
+- *위치·색상·크기* = extrinsic state (외부 전달)
+- *Factory* = 같은 글리프 요청 시 *이미 만든 것 재사용*
+
+"*많이 등장하는데 내용은 같은*" 객체가 보이면 Flyweight를 의심합니다.
+
 ## 어떤 문제를 푸는가
 
 문서 편집기에 **수십만 개의 글자 객체**가 있다고 해봅시다. 각 글자가 폰트·색·크기·위치·강조 정보를 모두 들고 있으면 메모리 폭발.
@@ -52,6 +68,17 @@ Factory가 풀을 관리 — 같은 key 요청 시 캐시된 객체 반환.
 > ⚠️ **공유 객체에 mutation 필요** — Flyweight는 보통 immutable. mutation이 필요하면 *Copy-on-Write* 같은 추가 메커니즘.
 
 > ⚠️ **멀티스레드 race** — Factory의 풀 접근에 lock 또는 lock-free 자료구조 필요. 비용 vs 절감 신중 비교.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Singleton](/blog/programming/design/gof-design-patterns/item05-singleton) | Singleton은 *정확히 하나*. Flyweight는 *여러 개를 공유* (intrinsic 동일한 것끼리). |
+| Object Pool | Object Pool은 *생성 비용 절약 + 재사용* (mutable). Flyweight는 *intrinsic 불변 + 공유*. |
+| [Prototype](/blog/programming/design/gof-design-patterns/item04-prototype) | Prototype은 *복제로 새 객체 생성*. Flyweight는 *기존 객체 재사용*. |
+| Cache | Cache는 *값을 일시 저장*. Flyweight는 *영구 공유 객체*. |
+
+판별 한 줄: *"같은 내용 객체가 너무 많아 메모리가 문제"*면 Flyweight.
 
 ## C++ 구현
 
