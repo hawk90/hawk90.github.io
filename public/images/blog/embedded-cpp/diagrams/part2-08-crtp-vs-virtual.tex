@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  obj/.style={rectangle, draw=nodebord, line width=0.45pt, minimum width=34mm, minimum height=12mm, inner sep=3pt, align=center, fill=nodefill, font=\sffamily\footnotesize},
+  vt/.style={rectangle, draw=conbord, line width=0.45pt, minimum width=34mm, minimum height=14mm, inner sep=3pt, align=center, fill=confill, font=\sffamily\footnotesize},
+  fn/.style={rectangle, draw=impbord, line width=0.45pt, minimum width=34mm, minimum height=10mm, inner sep=3pt, align=center, fill=impfill, font=\sffamily\footnotesize}
+]
+
+% Left — Virtual dispatch
+\node[hdr] at (-5, 5.6) {Virtual dispatch \\ (3-step indirection)};
+
+\node[obj] (vobj) at (-5, 4.0) {obj \\ \texttt{vptr | fields}};
+\node[vt]  (vtab) at (-5, 1.8) {vtable \\ \texttt{[fn0, fn1, ...]}};
+\node[fn]  (vfn)  at (-5, -0.4) {Derived::fn() \\ \textit{out-of-line, not inlinable}};
+
+\draw[flow] (vobj.south) -- (vtab.north) node[midway, right, font=\sffamily\footnotesize] {1. load vptr};
+\draw[flow] (vtab.south) -- (vfn.north) node[midway, right, font=\sffamily\footnotesize] {2. index vtable};
+
+\node[font=\sffamily\footnotesize, text=conbord, align=left, text width=40mm] at (-5, -2.4) {
+  \textbf{비용}: \\
+  $\bullet$ vptr 8 byte per obj \\
+  $\bullet$ 2 메모리 indirection \\
+  $\bullet$ inline 불가
+};
+
+% Right — CRTP
+\node[hdr] at (5, 5.6) {CRTP \\ (compile-time dispatch)};
+
+\node[obj] (cobj) at (5, 4.0) {Derived obj \\ \texttt{fields only}};
+\node[fn]  (cfn)  at (5, 1.0) {\texttt{static\_cast<Derived*>(this)} \\ \texttt{->fn\_impl()} \\ \textit{inlined into caller}};
+
+\draw[flow] (cobj.south) -- (cfn.north) node[midway, right, font=\sffamily\footnotesize] {direct call};
+
+\node[font=\sffamily\footnotesize, text=impbord, align=left, text width=40mm] at (5, -2.4) {
+  \textbf{이득}: \\
+  $\bullet$ vptr 없음 \\
+  $\bullet$ 0 indirection \\
+  $\bullet$ inline + 최적화 풀가동
+};
+
+\end{tikzpicture}
+\end{document}

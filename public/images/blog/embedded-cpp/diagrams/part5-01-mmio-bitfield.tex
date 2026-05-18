@@ -1,0 +1,110 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  bit/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=5mm, minimum height=8mm, inner sep=1pt, font=\sffamily\scriptsize, align=center, fill=nodefill},
+  bitR/.style={bit, fill=confill, draw=conbord},
+  bitW/.style={bit, fill=impfill, draw=impbord},
+  bitX/.style={bit, fill=clifill, draw=clibord},
+  bitN/.style={bit, fill=neutfill, draw=neutbord},
+  fldlbl/.style={font=\sffamily\footnotesize, text=inkc, align=center}
+]
+
+% Title
+\node[hdr] at (0, 5.0) {STM32 USART\_CR1 — 32-bit MMIO register at \texttt{0x40004400 + 0x0C}};
+
+% 32 bits, drawn left-to-right as bit 31 ... bit 0
+\foreach \i in {0,...,31} {
+  \pgfmathtruncatemacro{\bitn}{31 - \i}
+  \node[bit] (b\bitn) at ({-7.75 + \i * 0.5}, 3.0) {\bitn};
+}
+
+% Overlay colored field groupings
+% Bits 31..29 reserved (neut)
+\foreach \i in {31,30,29} {
+  \node[bitN] at ({-7.75 + (31-\i) * 0.5}, 3.0) {\i};
+}
+% Bit 28 M1 — mode bit
+\node[bitR] at ({-7.75 + 3 * 0.5}, 3.0) {28};
+% Bits 27..15 mix reserved + flags (neut for compactness)
+\foreach \i in {27,26,25,24,23,22,21,20,19,18,17,16,15} {
+  \node[bitN] at ({-7.75 + (31-\i) * 0.5}, 3.0) {\i};
+}
+% Bit 14 UE — USART enable (highlight)
+\node[bitW] at ({-7.75 + (31-14) * 0.5}, 3.0) {14};
+% Bit 13 M0 — mode bit (R group)
+\node[bitR] at ({-7.75 + (31-13) * 0.5}, 3.0) {13};
+% Bit 12 WAKE
+\node[bitN] at ({-7.75 + (31-12) * 0.5}, 3.0) {12};
+% Bits 11..10 PCE, PS (parity)
+\node[bitX] at ({-7.75 + (31-11) * 0.5}, 3.0) {11};
+\node[bitX] at ({-7.75 + (31-10) * 0.5}, 3.0) {10};
+% Bit 9 PEIE
+\node[bitN] at ({-7.75 + (31-9) * 0.5}, 3.0) {9};
+% Bit 8 TXEIE
+\node[bitW] at ({-7.75 + (31-8) * 0.5}, 3.0) {8};
+% Bit 7 TCIE
+\node[bitW] at ({-7.75 + (31-7) * 0.5}, 3.0) {7};
+% Bit 6 RXNEIE
+\node[bitW] at ({-7.75 + (31-6) * 0.5}, 3.0) {6};
+% Bit 5 IDLEIE
+\node[bitN] at ({-7.75 + (31-5) * 0.5}, 3.0) {5};
+% Bit 4 TE  — transmit enable
+\node[bitW] at ({-7.75 + (31-4) * 0.5}, 3.0) {4};
+% Bit 3 RE
+\node[bitW] at ({-7.75 + (31-3) * 0.5}, 3.0) {3};
+% Bit 2 RWU
+\node[bitN] at ({-7.75 + (31-2) * 0.5}, 3.0) {2};
+% Bit 1 SBK
+\node[bitN] at ({-7.75 + (31-1) * 0.5}, 3.0) {1};
+% Bit 0 SBRK
+\node[bitN] at ({-7.75 + (31-0) * 0.5}, 3.0) {0};
+
+% Field annotations
+\draw[edgesc] ({-7.75 + (31-14) * 0.5 + 0.0}, 2.5) -- ({-7.75 + (31-14) * 0.5 + 0.0}, 1.8);
+\node[fldlbl] at ({-7.75 + (31-14) * 0.5}, 1.5) {UE};
+
+\draw[edgesc] ({-7.75 + (31-13) * 0.5 + 0.0}, 2.5) -- ({-7.75 + (31-13) * 0.5 + 0.0}, 1.0);
+\node[fldlbl] at ({-7.75 + (31-13) * 0.5}, 0.7) {M0};
+
+\draw[edgesc] ({-7.75 + (31-11) * 0.5 + 0.25}, 2.5) -- ({-7.75 + (31-11) * 0.5 + 0.25}, 1.5);
+\node[fldlbl] at ({-7.75 + (31-11) * 0.5 + 0.25}, 1.2) {PCE / PS};
+
+\draw[edgesc] ({-7.75 + (31-7) * 0.5 + 0.25}, 2.5) -- ({-7.75 + (31-7) * 0.5 + 0.25}, 1.0);
+\node[fldlbl] at ({-7.75 + (31-7) * 0.5 + 0.25}, 0.7) {Interrupt enables};
+
+\draw[edgesc] ({-7.75 + (31-3) * 0.5 + 0.25}, 2.5) -- ({-7.75 + (31-3) * 0.5 + 0.25}, 1.5);
+\node[fldlbl] at ({-7.75 + (31-3) * 0.5 + 0.25}, 1.2) {TE / RE};
+
+% Legend
+\node[bitR, minimum width=4mm, minimum height=4mm] at (-6.5, -1.2) {};
+\node[font=\sffamily\footnotesize, anchor=west, text=inkc] at (-6.2, -1.2) {Mode (M0/M1)};
+
+\node[bitW, minimum width=4mm, minimum height=4mm] at (-2.2, -1.2) {};
+\node[font=\sffamily\footnotesize, anchor=west, text=inkc] at (-1.9, -1.2) {Enable bits};
+
+\node[bitX, minimum width=4mm, minimum height=4mm] at (2.0, -1.2) {};
+\node[font=\sffamily\footnotesize, anchor=west, text=inkc] at (2.3, -1.2) {Parity};
+
+\node[bitN, minimum width=4mm, minimum height=4mm] at (5.0, -1.2) {};
+\node[font=\sffamily\footnotesize, anchor=west, text=inkc] at (5.3, -1.2) {Reserved / 기타};
+
+% Naive vs typed approach text
+\node[font=\sffamily\footnotesize, text=conbord, align=left, text width=70mm] at (-4.0, -3.0) {
+  \textbf{Naive}: \texttt{USART2->CR1 |= (1 << 13) | (1 << 3);} \\
+  $\bullet$ 매직 넘버, 의미 불명
+};
+
+\node[font=\sffamily\footnotesize, text=impbord, align=left, text width=70mm] at (3.5, -3.0) {
+  \textbf{Typed}: \texttt{cr1.set<UE>().set<TE>();} \\
+  $\bullet$ 컴파일러가 검사, 가독성 ↑
+};
+
+\end{tikzpicture}
+\end{document}

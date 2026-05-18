@@ -116,6 +116,12 @@ GPIOA_BSRR::write(1 << 5);     // Atomic set (HW supported)
 
 ## Bit field — 명명된 비트
 
+32-bit MMIO 레지스터는 보통 여러 비트 필드로 쪼개져 있습니다. 예를 들어 STM32의 USART\_CR1은 다음처럼 enable 비트, mode 비트, parity 비트 등이 한 워드에 모여 있습니다.
+
+![USART_CR1 32-bit register — bit field 레이아웃](/images/blog/embedded-cpp/diagrams/part5-01-mmio-bitfield.svg)
+
+매직 넘버 대신 *타입으로 명명된 비트*를 두면 컴파일러가 검사하고 가독성이 살아납니다.
+
 ```cpp
 template<int Bit>
 struct BitField {

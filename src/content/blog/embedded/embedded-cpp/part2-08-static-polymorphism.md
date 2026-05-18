@@ -143,6 +143,10 @@ bl      UartLogger::log_impl    ; 직접 호출 — 인라인 가능
 
 ## CRTP vs virtual — 비교
 
+호출 흐름의 차이부터 보면 다음과 같습니다. virtual은 vptr → vtable → 함수까지 두 단계의 메모리 indirection을 거치는 반면, CRTP는 컴파일 타임에 derived 함수로 바로 inline됩니다.
+
+![CRTP vs virtual dispatch — indirection 단계 비교](/images/blog/embedded-cpp/diagrams/part2-08-crtp-vs-virtual.svg)
+
 | | virtual | CRTP |
 | --- | --- | --- |
 | Dispatch | 런타임 | 컴파일 타임 |

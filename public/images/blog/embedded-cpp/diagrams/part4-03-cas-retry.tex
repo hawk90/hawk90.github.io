@@ -1,0 +1,64 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc},
+  cstep/.style={rectangle, draw=nodebord, line width=0.45pt, minimum width=46mm, minimum height=9mm, inner sep=3pt, fill=nodefill, font=\sffamily\footnotesize, align=left},
+  okStep/.style={cstep, fill=okfill, draw=okbord},
+  failStep/.style={cstep, fill=warnfill, draw=warnbord},
+  memBox/.style={rectangle, draw=hibord, line width=0.45pt, minimum width=30mm, minimum height=9mm, inner sep=3pt, fill=hifill, font=\sffamily\footnotesize\ttfamily, align=center},
+  lane/.style={font=\sffamily\bfseries\footnotesize, text=mutec}
+]
+
+% Lane labels
+\node[lane] at (-5.0, 5.2) {Thread A};
+\node[lane] at (1.5, 5.2)  {Shared atomic};
+\node[lane] at (6.0, 5.2)  {Thread B};
+
+% Initial shared value
+\node[memBox] (m0) at (1.5, 4.4) {counter = 5};
+
+% Round 1 — A tries, B interferes
+\node[cstep]     (a1) at (-5.0, 3.4) {1. load $\Rightarrow$ old = 5};
+\draw[uses] (a1.east) -- (m0.south west);
+
+\node[cstep]     (a2) at (-5.0, 2.2) {2. compute new = 6};
+
+% B's interference
+\node[cstep]    (b1) at (6.0, 3.4) {load $\Rightarrow$ old = 5};
+\node[okStep]  (b2) at (6.0, 2.2) {CAS(5 $\rightarrow$ 7) ✓};
+\draw[uses] (b1.west) -- (m0.south east);
+
+\node[memBox] (m1) at (1.5, 1.0) {counter = 7};
+\draw[focus] (b2.west) -- (m1.east) node[midway, above, font=\sffamily\footnotesize, text=warnbord] {now 7};
+
+% A's failed CAS
+\node[failStep] (a3) at (-5.0, 1.0) {3. CAS(5 $\rightarrow$ 6) ✗ \\ \quad expected mismatch};
+\draw[focus, draw=warnbord] (a3.east) -- (m1.west);
+
+% Retry — A reloads
+\node[cstep]     (a4) at (-5.0, -0.4) {4. reload $\Rightarrow$ old = 7};
+\node[cstep]     (a5) at (-5.0, -1.6) {5. compute new = 8};
+\node[okStep]   (a6) at (-5.0, -2.8) {6. CAS(7 $\rightarrow$ 8) ✓};
+
+\node[memBox] (m2) at (1.5, -2.8) {counter = 8};
+\draw[focus, draw=okbord] (a6.east) -- (m2.west) node[midway, above, font=\sffamily\footnotesize, text=okbord] {success};
+
+% Flow arrows down Thread A lane
+\draw[arr] (a1.south) -- (a2.north);
+\draw[arr] (a2.south) -- (a3.north);
+\draw[arr] (a3.south) -- (a4.north);
+\draw[arr] (a4.south) -- (a5.north);
+\draw[arr] (a5.south) -- (a6.north);
+
+\node[font=\sffamily\footnotesize, text=mutec, align=center, text width=120mm] at (0.5, -4.4) {
+  CAS 실패 시 \textbf{최신 값 읽고 재계산}. lock-free의 진행 보장은 retry loop에서 옴.
+};
+
+\end{tikzpicture}
+\end{document}

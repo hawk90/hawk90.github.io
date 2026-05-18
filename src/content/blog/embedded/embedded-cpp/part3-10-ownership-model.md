@@ -27,6 +27,10 @@ Rust가 *컴파일러 차원 강제*. C++는 *프로그래머 규율*.
 
 ## 세 역할 — Owner, Observer, Borrower
 
+C++ 스마트 포인터의 세 가지 소유권 모델을 그림으로 보면 차이가 분명합니다. `unique_ptr`은 단일 소유자가 자원을 직접 가리키고, `shared_ptr`은 control block을 매개로 여러 소유자가 공유합니다. `weak_ptr`은 refcount에 영향을 주지 않고 약하게 참조만 합니다.
+
+![unique/shared/weak 소유권 모델](/images/blog/embedded-cpp/diagrams/part3-10-ownership-graph.svg)
+
 ### Owner — 객체 lifetime 관리
 
 ```cpp

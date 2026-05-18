@@ -66,7 +66,9 @@ ARM Cortex-M에서 *4-byte atomic*은 *single instruction* (load/store가 자연
 
 ## CAS — Compare-And-Swap
 
-Lock-free의 *핵심*. *값을 비교 + 일치하면 교체*. 전체가 *atomic*.
+Lock-free의 핵심 도구입니다. 값을 비교해서 일치하면 새 값으로 교체하는 동작 전체가 하나의 atomic 명령으로 실행됩니다. 다른 스레드가 끼어들면 CAS가 실패하고, 최신 값을 다시 읽어 재시도합니다.
+
+![CAS retry loop — 실패 후 reload-and-retry 흐름](/images/blog/embedded-cpp/diagrams/part4-03-cas-retry.svg)
 
 ```cpp
 std::atomic<Node*> head{nullptr};
