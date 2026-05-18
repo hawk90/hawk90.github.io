@@ -1,7 +1,7 @@
 ---
 title: "Pattern 53: Method Parameter to Constructor Parameter"
 date: 2026-07-03T05:00:00
-description: "모든 호출에 같은 값 전달 — constructor로 옮기기."
+description: "모든 호출에 같은 값 전달 — constructor로 옮기기. DI의 기초. 시리즈 마무리."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 53
 tags: [tdd, beck, constructor-parameter, refactor]
@@ -13,115 +13,73 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 메서드 호출마다 같은 값을 전달한다면 생성자로 옮겨 필드로 보관한다.
+> Method 호출마다 *같은 값* 전달한다면 *constructor로 옮겨* field 보관. *Dependency Injection*의 기초.
 
 ## 동기 (Motivation)
 
-**매번 같은 값**을 메서드에 전달하는 상황:
-
 ```python
 class OrderService:
     def create_order(self, items, database):
         database.save(Order(items))
-
     def get_order(self, id, database):
         return database.find(id)
-
     def delete_order(self, id, database):
         database.delete(id)
 
-# 사용 — 매번 db 전달
-service = OrderService()
-service.create_order(items, db)
-service.get_order(1, db)
-service.delete_order(1, db)
-```
-
-**database**는 **항상 같은 인스턴스**다. 생성자로 옮기자.
-
-## 적용
-
-### Before
-
-```python
-class OrderService:
-    def create_order(self, items, database):
-        database.save(Order(items))
-
-    def get_order(self, id, database):
-        return database.find(id)
-
-    def delete_order(self, id, database):
-        database.delete(id)
-
-# 매번 전달
+# 매번 db 전달
 service = OrderService()
 service.create_order(items, db)
 service.get_order(1, db)
 ```
 
-### After
+`database`가 *항상 같은 인스턴스*. constructor로.
 
 ```python
 class OrderService:
     def __init__(self, database):
-        self.db = database  # 필드로 보관
+        self.db = database
 
-    def create_order(self, items):
-        self.db.save(Order(items))
+    def create_order(self, items): self.db.save(Order(items))
+    def get_order(self, id): return self.db.find(id)
+    def delete_order(self, id): self.db.delete(id)
 
-    def get_order(self, id):
-        return self.db.find(id)
-
-    def delete_order(self, id):
-        self.db.delete(id)
-
-# 생성 시 한 번만
 service = OrderService(db)
 service.create_order(items)
 service.get_order(1)
 ```
 
-## 변환 과정
+호출이 *간결*해지고 *의존이 명시*.
 
-### Step 1: 생성자 파라미터 추가
+### 신호
 
-```python
-class OrderService:
-    def __init__(self, database=None):  # 기본값으로 호환성 유지
-        self.db = database
-```
+- 같은 *인자가 method마다 반복*.
+- 객체 생명주기 동안 *고정된 의존성*.
+- *호출 site 복잡*.
 
-### Step 2: 메서드에서 필드 사용
+### 언제 적용하는가
 
-```python
-def create_order(self, items, database=None):
-    db = database or self.db  # 필드 우선
-    db.save(Order(items))
-```
+- *의존성/설정*은 constructor.
+- *입력 데이터*는 method parameter.
+- *DI* 적용 시.
 
-### Step 3: 호출자 수정
+### 언제 적용하지 않는가
 
-```python
-# Before
-service = OrderService()
-service.create_order(items, db)
+- 호출마다 *다른 값* — method parameter 유지.
+- 객체가 *짧은 수명* — 생성 비용.
 
-# After
-service = OrderService(db)
-service.create_order(items)
-```
+## 절차 (Mechanics)
 
-### Step 4: 메서드 파라미터 제거
+1. **constructor에 parameter 추가** — 기본값 옵션.
+2. **field 보관**.
+3. **method 본문**에서 *field 사용*.
+4. *method parameter 제거*.
+5. **호출처 수정** — *생성 시 1번 전달*.
 
-```python
-def create_order(self, items):
-    self.db.save(Order(items))
-```
+## 예시 1 — DB 의존
 
-## Dependency Injection 관점
+위 OrderService 참고.
 
-이 패턴은 **생성자 주입**의 핵심:
+## 예시 2 — 여러 의존성
 
 ```python
 class EmailService:
@@ -141,148 +99,155 @@ class EmailService:
 service = EmailService(SmtpClient(), TemplateEngine())
 ```
 
-## 테스트에서의 이점
+## 예시 3 — 설정 vs 입력
 
 ```python
-# Before — 매번 fake 전달
-def test_create_order():
-    service = OrderService()
-    fake_db = FakeDatabase()
-
-    service.create_order(items, fake_db)  # 파라미터로
-
-    assert fake_db.saved == [expected_order]
-
-# After — 생성 시 한 번
-def test_create_order():
-    fake_db = FakeDatabase()
-    service = OrderService(fake_db)  # 생성자로
-
-    service.create_order(items)  # 깔끔
-
-    assert fake_db.saved == [expected_order]
-```
-
-### pytest fixture 활용
-
-```python
-@pytest.fixture
-def fake_db():
-    return FakeDatabase()
-
-@pytest.fixture
-def order_service(fake_db):
-    return OrderService(fake_db)
-
-def test_create_order(order_service, fake_db):
-    order_service.create_order([Item(100)])
-
-    assert len(fake_db.saved) == 1
-```
-
-## 상태 vs 설정
-
-### 생성자로 옮길 것 (설정/의존성)
-
-```python
-class ReportGenerator:
-    def __init__(self, formatter, exporter):
-        # 한 번 설정, 여러 번 사용
-        self.formatter = formatter
-        self.exporter = exporter
-
-    def generate(self, data):
-        # data만 변하고, formatter/exporter는 고정
-        formatted = self.formatter.format(data)
-        return self.exporter.export(formatted)
-```
-
-### 메서드에 남길 것 (입력 데이터)
-
-```python
-class Calculator:
-    def __init__(self, precision):
-        self.precision = precision  # 설정 → 생성자
-
-    def calculate(self, a, b):
-        # a, b는 호출마다 다름 → 메서드 파라미터
-        return round(a + b, self.precision)
-```
-
-## 판단 기준
-
-| 질문 | 생성자 | 메서드 |
-|------|--------|--------|
-| 모든 호출에 같은 값? | ✓ | |
-| 의존성/설정인가? | ✓ | |
-| 객체 생명주기 동안 고정? | ✓ | |
-| 호출마다 다른 값? | | ✓ |
-| 입력 데이터인가? | | ✓ |
-
-## 여러 생성자 버전
-
-```python
-class OrderService:
-    def __init__(self, database, logger=None, metrics=None):
-        self.db = database
-        self.logger = logger or NullLogger()
-        self.metrics = metrics or NullMetrics()
-
-# 기본 사용
-service = OrderService(db)
-
-# 로깅 추가
-service = OrderService(db, logger=FileLogger())
-
-# 모든 옵션
-service = OrderService(db, logger=FileLogger(), metrics=Prometheus())
-```
-
-## 불변 객체 고려
-
-```python
-@dataclass(frozen=True)
 class PriceCalculator:
-    """설정이 불변인 계산기"""
-    tax_rate: float
-    discount_rate: float
+    def __init__(self, tax_rate, discount_rate):   # 설정 → constructor
+        self.tax_rate = tax_rate
+        self.discount_rate = discount_rate
 
-    def calculate(self, items):
+    def calculate(self, items):                     # 입력 → method
         subtotal = sum(item.price for item in items)
         after_discount = subtotal * (1 - self.discount_rate)
         return after_discount * (1 + self.tax_rate)
 
-# 설정별로 인스턴스 생성
-us_calculator = PriceCalculator(tax_rate=0.08, discount_rate=0.1)
-eu_calculator = PriceCalculator(tax_rate=0.2, discount_rate=0.05)
+us = PriceCalculator(tax_rate=0.08, discount_rate=0.10)
+eu = PriceCalculator(tax_rate=0.20, discount_rate=0.05)
+
+us.calculate(items)
+eu.calculate(items)
 ```
 
-## 정리
+설정별 *인스턴스 생성* + 같은 method.
 
-- **반복 파라미터 → 필드**
-- **생성자 주입의 기초**
-- **Dependency Injection** 패턴
-- **테스트 간소화**
-- **설정 vs 입력** 구분
-- **시그니처 단순화**
+## 자주 보는 안티패턴
+
+### 1. *모든 것을 constructor로*
+호출마다 다른 값까지 constructor → *매번 새 instance*. 의미 없음.
+
+### 2. *Constructor 폭증*
+parameter 10개+ → 호출 부담. *parameter object* 또는 *builder*.
+
+### 3. *Singleton 회피 (다시 Singleton)*
+DI한다고 한 후 *전역 instance 유지* → 다시 Singleton 안티패턴.
+
+### 4. *Mutable field*
+constructor parameter를 *mutate* → 의도 모호. *immutable* 우선.
+
+### 5. *Optional dependency 강제*
+모든 dependency를 *required* → test 부담. *None 허용 + NullObject*.
+
+### 6. *생성 cost 무시*
+test마다 *비싼 setup* — fixture로 공유.
+
+## Modern variants
+
+### DI framework
+
+```java
+@Component
+public class OrderService {
+    private final Database db;
+
+    @Autowired
+    public OrderService(Database db) {
+        this.db = db;
+    }
+}
+```
+
+Spring, Guice, Dagger가 *자동 wire*.
+
+### Pytest fixture
+
+```python
+@pytest.fixture
+def db(): return FakeDatabase()
+
+@pytest.fixture
+def order_service(db): return OrderService(db)
+
+def test_create(order_service, db):
+    order_service.create_order([Item(100)])
+    assert len(db.saved) == 1
+```
+
+### Immutable + frozen dataclass
+
+```python
+@dataclass(frozen=True)
+class PriceCalculator:
+    tax_rate: float
+    discount_rate: float
+
+    def calculate(self, items): ...
+```
+
+설정 불변 보장.
+
+### Builder for multi-dep
+
+```python
+service = (OrderServiceBuilder()
+    .with_database(db)
+    .with_logger(logger)
+    .with_metrics(metrics)
+    .build())
+```
+
+dependency 많을 때.
+
+### Functional approach
+
+```python
+def make_order_service(db):
+    def create_order(items): db.save(Order(items))
+    def get_order(id): return db.find(id)
+    return {"create": create_order, "get": get_order}
+```
+
+closure가 *constructor* 역할.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| IntelliJ "Move parameter to field" | 자동 |
+| Resharper | 같음 |
+| DI framework | Spring/Guice/Dagger |
+| pytest fixture | DI testing |
+
+## 성능 고려
+
+- *생성 cost* 한 번 — 호출마다 절약.
+- *field access* vs *parameter access* — 거의 무관.
+- *Constructor injection*은 *test cycle*에서 자주 — fixture caching.
 
 ## 관련 패턴
 
-- [Pattern 52: Add Parameter](/blog/programming/engineering/tdd-patterns/pattern52-add-parameter) — 파라미터 추가
-- [Pattern 43: Singleton](/blog/programming/engineering/tdd-patterns/pattern43-singleton) — DI 대안
-- [Pattern 49: Extract Interface](/blog/programming/engineering/tdd-patterns/pattern49-extract-interface) — 의존성 추상화
+- [Pattern 52: Add Parameter](/blog/programming/engineering/tdd-patterns/pattern52-add-parameter) — parameter 추가
+- [Pattern 43: Singleton](/blog/programming/engineering/tdd-patterns/pattern43-singleton) — DI 대안 (비교)
+- [Pattern 49: Extract Interface](/blog/programming/engineering/tdd-patterns/pattern49-extract-interface) — DI에 필요
+- Refactoring [Pattern 6: Encapsulate Variable](/blog/programming/design/refactoring-catalog/pattern06-encapsulate-variable)
 
 ## 시리즈 마무리
 
-이것으로 **TDD by Example — Patterns Deep Dive** 시리즈의 53개 패턴을 모두 살펴보았다.
+**TDD by Example — Patterns Deep Dive** 시리즈 53개 패턴 모두 살펴봤다.
 
-Kent Beck의 **Test-Driven Development: By Example**에서 소개된 이 패턴들은 TDD의 **Red-Green-Refactor** 사이클에서 각각의 역할을 한다:
+Kent Beck의 *Test-Driven Development: By Example*에서 소개된 이 패턴들은 *Red-Green-Refactor* 사이클 각 단계의 *도구*다.
 
-- **테스트 패턴** (Pattern 1-20): 테스트를 어떻게 작성할 것인가
-- **Green Bar 패턴** (Pattern 21-26): 어떻게 빠르게 Green으로 갈 것인가
-- **xUnit 패턴** (Pattern 27-32): 테스트 프레임워크 구조
-- **디자인 패턴** (Pattern 33-43): TDD에서 자주 쓰이는 설계 패턴
-- **리팩터링 패턴** (Pattern 44-53): 안전하게 코드를 개선하는 방법
+| 그룹 | 패턴 번호 | 주제 |
+| --- | --- | --- |
+| Test 패턴 | 1-20 | 테스트 작성 방법 |
+| Green Bar 패턴 | 21-26 | 빠르게 Green으로 |
+| xUnit 패턴 | 27-32 | 테스트 프레임워크 구조 |
+| 디자인 패턴 | 33-43 | TDD에서 자주 쓰는 GoF |
+| 리팩터링 패턴 | 44-53 | 안전한 코드 개선 |
 
-TDD는 단순히 테스트를 먼저 작성하는 것이 아니다. **설계를 이끄는 피드백 루프**다. 이 패턴들을 내재화하면 더 빠르고, 더 안전하게, 더 좋은 코드를 작성할 수 있다.
+TDD는 단순히 *테스트 먼저 작성*이 아니다 — *설계를 이끄는 피드백 루프*. 이 패턴들이 *내재화*되면 *더 빠르고 안전하고 좋은 코드*를 작성할 수 있다.
 
+**다음 추천 시리즈**:
+- [Refactoring Catalog (Fowler 2nd ed)](/blog/programming/design/refactoring-catalog/pattern01-extract-function) — 61개 리팩터링 패턴 (방금 완료)
+- *Working Effectively with Legacy Code* (Michael Feathers)
+- *Growing Object-Oriented Software Guided by Tests* (Freeman/Pryce)

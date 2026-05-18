@@ -1,7 +1,7 @@
 ---
 title: "Pattern 51: Method Object"
 date: 2026-07-03T03:00:00
-description: "복잡한 method를 새 class로 — local 변수 = field."
+description: "복잡한 method를 새 class로 — local 변수 = field. 분해의 발판."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 51
 tags: [tdd, beck, method-object, refactor]
@@ -13,11 +13,11 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 지역 변수가 많은 복잡한 메서드를 별도 클래스로 추출하여 분해를 가능하게 한다.
+> *지역 변수 많은 복잡한 method*를 별도 class로. *지역 변수 → field*가 되어 *분해* 가능. Command 패턴과 유사.
 
 ## 동기 (Motivation)
 
-**지역 변수가 많아서** Extract Method가 어려운 상황:
+지역 변수 많아서 *Extract Method 어려운* 상황:
 
 ```python
 def calculate_price(self, order):
@@ -25,51 +25,46 @@ def calculate_price(self, order):
     discount = 0
     tax = 0
     shipping = 0
-    handling = 0
-    insurance = 0
-
-    # 50줄의 복잡한 계산
-    # 모든 변수가 얽혀 있음
-
-    return base_price - discount + tax + shipping + handling + insurance
+    # 50줄, 변수가 얽힘
+    return base_price - discount + tax + shipping
 ```
 
-**지역 변수 → 필드**로 만들면 분해가 가능해진다.
+helper로 추출하려면 *parameter 폭발*. **Method Object**는 *지역 변수 → field*.
 
-## Method Object 적용
+### 신호
 
-### Before
+- 지역 변수 *5개+*.
+- Extract Method 시도 시 *parameter 7+*.
+- *50줄+ method*.
+- *단계별 test* 필요.
+
+### 언제 적용하는가
+
+- 알고리즘 *복잡*.
+- 분해할 *논리 단계* 명확.
+- *단계별 검증* 필요.
+- *undo / progress / state* 필요.
+
+### 언제 적용하지 않는가
+
+- *단순 계산*.
+- 지역 변수 *1-2개*.
+- Class overhead가 *과잉*.
+
+## 절차 (Mechanics)
+
+1. **새 class 생성** (e.g., `PriceCalculator`).
+2. **constructor**가 *원본 method parameter* 받음.
+3. **지역 변수 → field**.
+4. **method 본문 복사** + self-reference 수정.
+5. *원본 method*는 *delegate* — `Calculator(self).calculate()`.
+6. *이제 단계별 분해* — Extract Method 자유.
+
+## 예시 1 — Price calculation
 
 ```python
-class Order:
-    def calculate_price(self):
-        base_price = sum(item.price for item in self.items)
-        quantity_discount = 0
-        if len(self.items) > 10:
-            quantity_discount = base_price * 0.1
-
-        member_discount = 0
-        if self.customer.is_member:
-            member_discount = base_price * 0.05
-
-        subtotal = base_price - quantity_discount - member_discount
-
-        tax = subtotal * 0.1
-
-        shipping = 0
-        if subtotal < 100:
-            shipping = 10
-        elif subtotal < 500:
-            shipping = 5
-
-        return subtotal + tax + shipping
-```
-
-### After
-
-```python
+# After Method Object
 class PriceCalculator:
-    """Method Object — 계산을 전담하는 클래스"""
     def __init__(self, order):
         self.order = order
         self.base_price = 0
@@ -88,7 +83,7 @@ class PriceCalculator:
         return self.subtotal + self.tax + self.shipping
 
     def _calculate_base_price(self):
-        self.base_price = sum(item.price for item in self.order.items)
+        self.base_price = sum(i.price for i in self.order.items)
 
     def _calculate_discounts(self):
         if len(self.order.items) > 10:
@@ -97,186 +92,49 @@ class PriceCalculator:
             self.member_discount = self.base_price * 0.05
 
     def _calculate_subtotal(self):
-        self.subtotal = (
-            self.base_price -
-            self.quantity_discount -
-            self.member_discount
-        )
+        self.subtotal = self.base_price - self.quantity_discount - self.member_discount
 
     def _calculate_tax(self):
         self.tax = self.subtotal * 0.1
 
     def _calculate_shipping(self):
-        if self.subtotal < 100:
-            self.shipping = 10
-        elif self.subtotal < 500:
-            self.shipping = 5
-        else:
-            self.shipping = 0
+        if self.subtotal < 100: self.shipping = 10
+        elif self.subtotal < 500: self.shipping = 5
 
 class Order:
     def calculate_price(self):
         return PriceCalculator(self).calculate()
 ```
 
-## 변환 과정
+각 *step이 method* — 단독 test 가능.
 
-### Step 1: 새 클래스 생성
-
-```python
-class PriceCalculator:
-    def __init__(self, order):
-        self.order = order
-```
-
-### Step 2: 지역 변수를 필드로
+## 예시 2 — 단계별 test
 
 ```python
-class PriceCalculator:
-    def __init__(self, order):
-        self.order = order
-        # 지역 변수 → 필드
-        self.base_price = 0
-        self.discount = 0
-        self.tax = 0
-```
-
-### Step 3: 메서드 복사
-
-```python
-class PriceCalculator:
-    def calculate(self):
-        # 원래 메서드 내용 복사
-        # local var → self.field
-        pass
-```
-
-### Step 4: 원래 메서드에서 위임
-
-```python
-class Order:
-    def calculate_price(self):
-        return PriceCalculator(self).calculate()
-```
-
-### Step 5: 분해 (이제 가능!)
-
-```python
-class PriceCalculator:
-    def calculate(self):
-        self._step1()
-        self._step2()
-        self._step3()
-        return self.result
-```
-
-## 테스트 이점
-
-```python
-# 전체 계산 테스트
-def test_calculate_price_total():
-    order = Order(items=[Item(100), Item(200)])
-    calculator = PriceCalculator(order)
-
-    result = calculator.calculate()
-
-    assert result == 330  # 300 + 30(tax)
-
-# 개별 단계 테스트 (Method Object만의 이점!)
 def test_calculate_base_price():
     order = Order(items=[Item(100), Item(200)])
-    calculator = PriceCalculator(order)
+    calc = PriceCalculator(order)
+    calc._calculate_base_price()
+    assert calc.base_price == 300
 
-    calculator._calculate_base_price()
-
-    assert calculator.base_price == 300
-
-def test_calculate_quantity_discount():
-    items = [Item(10) for _ in range(15)]  # 15개 아이템
+def test_quantity_discount():
+    items = [Item(10) for _ in range(15)]
     order = Order(items=items)
-    calculator = PriceCalculator(order)
-    calculator._calculate_base_price()
-
-    calculator._calculate_discounts()
-
-    assert calculator.quantity_discount == 15  # 10% 할인
+    calc = PriceCalculator(order)
+    calc._calculate_base_price()
+    calc._calculate_discounts()
+    assert calc.quantity_discount == 15
 ```
 
-## Command 패턴과의 관계
+partial state 검증 — *세분화된 test*.
 
-**Method Object**는 **Command 패턴**과 유사:
-
-```python
-# Command — 연산을 객체로
-class CalculatePriceCommand:
-    def __init__(self, order):
-        self.order = order
-
-    def execute(self):
-        # 계산 로직
-        return result
-
-# Method Object — 복잡한 메서드를 객체로
-class PriceCalculator:
-    def __init__(self, order):
-        self.order = order
-
-    def calculate(self):
-        # 같은 계산 로직
-        return result
-```
-
-**차이**: Method Object는 **내부 분해가 목적**, Command는 **연산 캡슐화가 목적**.
-
-## 다른 예제
-
-### 보고서 생성
-
-```python
-# Before
-class Report:
-    def generate(self, data):
-        header = ...
-        summary = ...
-        details = ...
-        charts = ...
-        footer = ...
-        # 100줄의 로직
-        return combined_output
-
-# After
-class ReportGenerator:
-    def __init__(self, data):
-        self.data = data
-        self.header = None
-        self.summary = None
-        self.details = None
-        self.charts = None
-        self.footer = None
-
-    def generate(self):
-        self._build_header()
-        self._build_summary()
-        self._build_details()
-        self._build_charts()
-        self._build_footer()
-        return self._combine()
-
-    def _build_header(self):
-        self.header = f"Report: {self.data.title}"
-
-    # ... 각 단계를 개별 테스트 가능
-```
-
-### 알고리즘 구현
+## 예시 3 — 알고리즘
 
 ```python
 class DijkstraAlgorithm:
-    """최단 경로 알고리즘을 Method Object로"""
     def __init__(self, graph, start, end):
         self.graph = graph
-        self.start = start
-        self.end = end
+        self.start = start; self.end = end
         self.distances = {}
         self.previous = {}
         self.unvisited = set()
@@ -286,46 +144,106 @@ class DijkstraAlgorithm:
         self._process_nodes()
         return self._build_path()
 
-    def _initialize(self):
-        for node in self.graph.nodes:
-            self.distances[node] = float('inf')
-            self.unvisited.add(node)
-        self.distances[self.start] = 0
-
-    def _process_nodes(self):
-        while self.unvisited:
-            current = self._get_nearest_unvisited()
-            if current == self.end:
-                break
-            self._update_neighbors(current)
-            self.unvisited.remove(current)
-
-    # 각 단계를 독립적으로 테스트 가능
+    def _initialize(self): ...
+    def _process_nodes(self): ...
+    def _build_path(self): ...
 ```
 
-## 언제 사용하나
+복잡한 알고리즘 → *명명된 단계*.
 
-| 상황 | 사용 |
-|------|------|
-| 지역 변수가 5개 이상 | ✓ |
-| Extract Method가 파라미터 폭발 | ✓ |
-| 단계별 테스트가 필요 | ✓ |
-| 복잡한 알고리즘 | ✓ |
-| 단순한 계산 | ✗ |
-| 지역 변수 1-2개 | ✗ |
+## 자주 보는 안티패턴
 
-## 정리
+### 1. *Class overhead 과잉*
+간단한 method까지 class화 → boilerplate. *진짜 복잡*만.
 
-- **지역 변수 → 필드**로 변환
-- **Extract Method 제약 해소**
-- **복잡한 메서드 분해** 가능
-- **단계별 테스트** 가능
-- **Command 패턴**과 유사
-- **알고리즘·보고서 생성**에 유용
+### 2. *모든 step exposed*
+internal step이 *public* → test 외 호출자 의존.
+
+### 3. *Mutable state race*
+multi-thread에서 같은 instance *공유* → race. instance per call.
+
+### 4. *Step 순서 의존 모호*
+`_step1, _step2`처럼 *호출 순서 가정* 명시 없음.
+
+### 5. *Calculator + 비즈니스 로직*
+계산 외 *DB save* 같은 책임 추가 → SRP 위반.
+
+### 6. *원본 method 안 지움*
+duplicate logic — Method Object + 원본 동작 → maintain 두 곳.
+
+## Modern variants
+
+### Command 패턴 (Pattern 33)
+
+```python
+class CalculateCommand:
+    def __init__(self, order): ...
+    def execute(self) -> Price: ...
+```
+
+같은 정신. Method Object는 *분해 목적*, Command는 *연산 객체화*.
+
+### Pipeline
+
+```python
+result = (
+    Pipeline(order)
+    .step(calculate_base)
+    .step(apply_discount)
+    .step(add_tax)
+    .step(add_shipping)
+    .run()
+)
+```
+
+함수형 pipeline 표현.
+
+### Builder
+
+복잡한 객체 *단계적 구축* — Method Object의 build 변형.
+
+### State machine
+
+```python
+class OrderStateMachine:
+    def __init__(self): self.state = "initial"
+    def pay(self): if self.state == "initial": self.state = "paid"
+    def ship(self): ...
+```
+
+상태 + 전이를 *class로*.
+
+### Saga (분산 transaction)
+
+여러 service 호출을 *Saga class*로 — 각 step + compensation.
+
+## Method Object vs Command vs Strategy
+
+| 패턴 | 목적 |
+| --- | --- |
+| Method Object | *분해* 가능하게 |
+| Command | *연산 캡슐화* (undo, queue) |
+| Strategy | *알고리즘 교체* |
+
+겹치지만 *주 목적*이 다름.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| IntelliJ "Replace Method with Method Object" | 자동 |
+| Resharper | 같음 |
+| 수동 + Extract Method 반복 | 일반 |
+
+## 성능 고려
+
+- *Object 생성* overhead — 한 번. 무관.
+- *Field access* vs *local var* — JIT 최적화 — 차이 거의 없음.
+- *분해된 method 호출* — JIT inline.
 
 ## 관련 패턴
 
 - [Pattern 47: Extract Method](/blog/programming/engineering/tdd-patterns/pattern47-extract-method) — 분해 전 단계
 - [Pattern 33: Command](/blog/programming/engineering/tdd-patterns/pattern33-command) — 연산 객체
 - [Pattern 50: Move Method](/blog/programming/engineering/tdd-patterns/pattern50-move-method) — 메서드 이동
-
+- Refactoring [Pattern 49: Replace Function with Command](/blog/programming/design/refactoring-catalog/pattern49-replace-function-with-command)
