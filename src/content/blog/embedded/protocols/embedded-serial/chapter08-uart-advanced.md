@@ -148,6 +148,72 @@ Master → ────[Addr=3]────[Data]────[Data]──── 
 
 9-bit UART (`UART_WORDLENGTH_9B`) 모드 + *주소 매칭 인터럽트*. STM32에 내장. 산업용·자동차 ECU에서 흔함.
 
+## 모뎀 제어 신호 — DTR·DSR·RI·DCD
+
+옛 RS-232 시절 *모뎀(전화선 모뎀)* 제어를 위해 정의된 9-pin DB-9 커넥터의 **6개 보조 신호**. 모던 임베디드에선 거의 미사용이지만 *모뎀·셀룰러 모듈·일부 산업 장비*에서 만남.
+
+### 9-pin DB-9 핀맵 (DTE 기준)
+
+| Pin | 신호 | 방향 | 의미 |
+| --- | --- | --- | --- |
+| 1 | **DCD** (Data Carrier Detect) | 입력 | 모뎀이 *원격 carrier 감지* |
+| 2 | **RXD** | 입력 | 수신 데이터 |
+| 3 | **TXD** | 출력 | 송신 데이터 |
+| 4 | **DTR** (Data Terminal Ready) | 출력 | DTE *준비 완료* — 모뎀에 연결 유지 |
+| 5 | **GND** | — | 신호 ground |
+| 6 | **DSR** (Data Set Ready) | 입력 | 모뎀 *준비 완료* — 전원·라인 OK |
+| 7 | **RTS** | 출력 | 송신 요청 (Ch 8 앞에서) |
+| 8 | **CTS** | 입력 | 송신 OK (Ch 8 앞에서) |
+| 9 | **RI** (Ring Indicator) | 입력 | 모뎀이 *전화 받음* 알림 |
+
+### 모뎀 다이얼-업 시퀀스 (옛 56k 모뎀)
+
+```text
+1. DTE → 모뎀: DTR Assert ("나 살아 있음")
+2. 모뎀 → DTE: DSR Assert ("전원 ON, 라인 OK")
+3. DTE → 모뎀: AT command via TXD ("ATDT01012345678")
+4. 모뎀 → 원격 모뎀: 다이얼 + 협상
+5. 협상 성공:
+   - 모뎀 → DTE: DCD Assert ("carrier 잡힘")
+   - 양단 데이터 흐름 시작
+6. 끊을 때: DTE → 모뎀: DTR Deassert → 모뎀이 hang-up
+```
+
+### RI — 원격 전화 받음
+
+전화 *벨* 신호와 동기. 모뎀이 *링잉* 감지 시 RI를 *주기적 토글* (0.5초 ON / 1.5초 OFF). DTE는 RI 감지 후 "ATA"로 응답.
+
+### 모던 응용 — 셀룰러 모듈
+
+GSM/LTE 모듈 (Telit, SIMCom, u-blox)도 *9-pin RS-232 변형*. AT command + 모뎀 제어 신호 거의 동일. DTR로 *sleep mode 제어*, RI로 *SMS / call 도착*.
+
+```c
+// 셀룰러 모듈 RI 핀 인터럽트
+void EXTI4_IRQHandler(void) {
+    if (HAL_GPIO_ReadPin(RI_PORT, RI_PIN) == GPIO_PIN_RESET) {
+        // RI Low — incoming event (call or SMS)
+        notify_main_task(EVENT_RI);
+    }
+}
+```
+
+### Hardware Flow Control = RTS/CTS만
+
+DTR/DSR는 *연결 상태*, RTS/CTS는 *버퍼 흐름*. **혼동 금지** — STM32 HAL의 `UART_HWCONTROL_RTS_CTS`는 *RTS/CTS만* 자동 처리. DTR/DSR는 일반 GPIO로 구현.
+
+### NULL Modem Cable
+
+두 DTE를 *모뎀 없이* 직결할 때 — TX·RX·RTS·CTS 교차. DTR↔DSR도 교차 (각 측이 *상대의 모뎀처럼 동작*).
+
+```text
+A.TXD  ─── B.RXD       A.CTS  ─── B.RTS
+A.RXD  ─── B.TXD       A.DTR  ─── B.DSR
+A.RTS  ─── B.CTS       A.DSR  ─── B.DTR
+A.GND  ─── B.GND       A.DCD  ─── B.DTR (옵션)
+```
+
+USB-to-Serial 어댑터에 *NULL Modem 변환*을 내장한 케이블도 있음.
+
 ## LIN — UART 위의 자동차 버스
 
 Local Interconnect Network — UART 기반 (보통 19200 baud) + *single-wire*. 자동차 도어·시트·창문 같은 *저속 기능*에 사용.
