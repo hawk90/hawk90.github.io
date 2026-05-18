@@ -28,15 +28,16 @@
 \draw[arr, line width=0.5pt] (P.north east) to[bend left=18] node[evt, above] {Pause} (U.north west);
 \draw[arr, line width=0.5pt] (U.south west) to[bend left=18] node[evt, below] {Resume} (P.south east);
 
-% Stop from anywhere
+% Stop from anywhere — Paused→Stopped는 아래로 우회시켜 제목 영역 침범 방지
 \draw[arr, dashed, draw=conbord] (P.south west) to[bend left=20] node[evt, below=2mm] {Stop} (S.south east);
-\draw[arr, dashed, draw=conbord] (U) to[bend right=45] node[evt, above=8mm] {Stop} (S);
+\draw[arr, dashed, draw=conbord] (U.south) to[bend left=35]
+  node[evt, below=2mm, pos=0.4] {Stop} (S.south);
 
 % Title
 \node[font=\sffamily\bfseries\normalsize, text=inkc] at (5, 2.5) {Media Player FSM};
 
 % Legend
-\node[caption, below=8mm of S, anchor=west, text width=12cm] at (-1, -2) {각 state는 자기 데이터 보유 (Playing/Paused의 position). std::variant + std::visit로 type-safe 표현 가능};
+\node[caption, anchor=west, text width=12cm] at (-1, -3) {각 state는 자기 데이터 보유 (Playing/Paused의 position). std::variant + std::visit로 type-safe 표현 가능};
 
 \end{tikzpicture}
 \end{document}
