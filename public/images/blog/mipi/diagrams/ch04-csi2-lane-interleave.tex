@@ -1,0 +1,68 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=10mm, y=6mm,
+  bytecell/.style={cls, align=center, font=\scriptsize, minimum width=8mm, minimum height=7mm, draw=edgec, line width=0.3pt},
+  l0/.style={bytecell, fill=hifill},
+  l1/.style={bytecell, fill=confill},
+  l2/.style={bytecell, fill=impfill},
+  l3/.style={bytecell, fill=warnfill},
+  arr/.style={-{Stealth[length=2mm]}, draw=edgec, line width=0.4pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (5.5, 6) {CSI-2 Lane Distribution — 4-lane Byte Interleave};
+
+% Input byte stream (top)
+\node[font=\scriptsize, anchor=east] at (-0.3, 4.5) {Input stream:};
+\foreach \i in {0,1,2,3,4,5,6,7,8,9,10,11} {
+  \pgfmathsetmacro{\x}{0.5 + \i * 0.6}
+  \node[bytecell] at (\x, 4.5) {B\i};
+}
+\node[font=\scriptsize, anchor=west] at (7.4, 4.5) {...};
+
+% Arrow down
+\draw[arr] (3.5, 3.7) -- (3.5, 3) node[font=\tiny, midway, right] {distribute};
+
+% 4 lane output (bottom)
+\node[font=\scriptsize, anchor=east] at (-0.3, 2.0) {Lane 0:};
+\foreach \i/\b in {0/0, 1/4, 2/8} {
+  \pgfmathsetmacro{\x}{0.5 + \i * 0.6}
+  \node[l0] at (\x, 2.0) {B\b};
+}
+
+\node[font=\scriptsize, anchor=east] at (-0.3, 1.3) {Lane 1:};
+\foreach \i/\b in {0/1, 1/5, 2/9} {
+  \pgfmathsetmacro{\x}{0.5 + \i * 0.6}
+  \node[l1] at (\x, 1.3) {B\b};
+}
+
+\node[font=\scriptsize, anchor=east] at (-0.3, 0.6) {Lane 2:};
+\foreach \i/\b in {0/2, 1/6, 2/10} {
+  \pgfmathsetmacro{\x}{0.5 + \i * 0.6}
+  \node[l2] at (\x, 0.6) {B\b};
+}
+
+\node[font=\scriptsize, anchor=east] at (-0.3, -0.1) {Lane 3:};
+\foreach \i/\b in {0/3, 1/7, 2/11} {
+  \pgfmathsetmacro{\x}{0.5 + \i * 0.6}
+  \node[l3] at (\x, -0.1) {B\b};
+}
+
+\node[font=\scriptsize, anchor=west] at (2.4, 1) {... 동시 송신 ...};
+
+% Bottom annotation
+\node[font=\tiny, anchor=west, align=left] at (-1, -1.5) {
+  \textbullet\ N-lane = 입력 byte 스트림을 \textit{Lane 0, 1, ..., N-1, 0, 1, ...} 순환 분산\\
+  \textbullet\ 각 lane은 \textit{독립적 D-PHY 차동 pair} — bit-level 정렬 별도 (lane skew 보정)\\
+  \textbullet\ 수신자 측 — lane 0부터 순서대로 재조합\\
+  \textbullet\ 1080p RAW10 = 라인당 2400 byte → 4-lane 시 lane당 600 byte 동시\\
+  \textbullet\ Lane skew (PCB 트레이스 길이 차) ±2 mm 이내 권장
+};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=6mm, y=6mm,
+  tq/.style={cls, align=center, font=\scriptsize, minimum height=14mm, draw=edgec, line width=0.4pt},
+  sync/.style={tq, fill=warnfill, minimum width=6mm},
+  prop/.style={tq, fill=hifill, minimum width=24mm},
+  ph1/.style={tq, fill=confill, minimum width=18mm},
+  ph2/.style={tq, fill=impfill, minimum width=12mm},
+  marker/.style={draw=warnbord, line width=0.8pt, dashed}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (5.5, 3.5) {CAN Bit Timing — Sync · Prop · Phase1 · Phase2 (1 bit time = TQ × N)};
+
+% Segments
+\node[sync] at (0.5, 1) {SS\\\tiny 1 TQ};
+\node[prop] at (3, 1) {Prop\_Seg\\\tiny 4 TQ};
+\node[ph1] at (7, 1) {Phase\_Seg1\\\tiny 3 TQ};
+\node[ph2] at (10.5, 1) {Phase\_Seg2\\\tiny 2 TQ};
+
+% Sample point indicator
+\draw[marker] (9, -0.5) -- (9, 2.5);
+\node[font=\scriptsize, anchor=south, color=warnbord] at (9, 2.5) {Sample Point @ 87.5\%};
+
+% TQ scale at bottom
+\draw[draw=edgec, line width=0.4pt] (-0.2, 0) -- (12.2, 0);
+\foreach \i in {0,1,2,3,4,5,6,7,8,9,10} {
+  \draw[draw=edgec, line width=0.3pt] (\i+0.5, 0) -- (\i+0.5, -0.2);
+  \node[font=\tiny, anchor=north] at (\i+0.5, -0.2) {\i};
+}
+\node[font=\tiny, anchor=west] at (12.2, 0) {TQ (Time Quantum)};
+
+% Bottom annotation
+\node[font=\tiny, anchor=west, align=left] at (-1, -2) {
+  \textbullet\ \textbf{Sync (SS)} = 1 TQ — 동기화 — 항상 첫\\
+  \textbullet\ \textbf{Prop\_Seg} = 전파 지연 보정 (긴 버스 = 큰 값)\\
+  \textbullet\ \textbf{Phase\_Seg1·2} = sample point 위치 조정 (SJW로 ±조정 가능)\\
+  \textbullet\ \textbf{Sample Point} = (SS + Prop + Phase1) / 총 TQ — 75-87.5\% 권장\\
+  \textbullet\ 모든 노드가 \textit{같은 sample point}여야 통신 안정
+};
+
+\end{tikzpicture}
+\end{document}

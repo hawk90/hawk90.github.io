@@ -132,6 +132,8 @@ Frame Start          한 라인 픽셀                                          
 
 ## Lane Distribution — Byte Interleave
 
+![CSI-2 4-lane byte interleave](/images/blog/mipi/diagrams/ch04-csi2-lane-interleave.svg)
+
 1 stream → N lane에 *byte 단위*로 분산.
 
 ```text

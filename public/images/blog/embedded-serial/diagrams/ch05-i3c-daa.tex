@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  sstep/.style={cls, align=center, font=\footnotesize, minimum width=70mm, minimum height=12mm, draw=hibord, fill=hifill, anchor=west},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.8pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (4, 7) {I³C Dynamic Address Assignment (DAA)};
+
+% Steps
+\node[sstep, fill=warnfill, draw=warnbord] (s1) at (0, 5.5) {1. Master 전송 \texttt{ENTDAA} (Enter DAA) CCC};
+\node[sstep] (s2) at (0, 4.0) {2. Master 가 \textit{임시 dynamic addr 0x08} 송신};
+\node[sstep] (s3) at (0, 2.5) {3. 모든 slave가 \textit{48-bit Provisioned ID + BCR + DCR} 송신 (병렬, wired-AND 중재로 lowest PID 우선)};
+\node[sstep] (s4) at (0, 1.0) {4. 우승 slave가 \textit{0x08} 수용 → 이후 트랜잭션은 dynamic addr};
+\node[sstep] (s5) at (0, -0.5) {5. Master 가 다음 dynamic addr (0x09, 0x0A, ...) 차례로 — 모든 slave addr 받음};
+\node[sstep, fill=okfill, draw=okbord] (s6) at (0, -2.0) {6. Master 전송 \texttt{DISEC} → DAA 종료, 정상 통신 시작};
+
+% Arrows between steps
+\foreach \a/\b in {s1/s2, s2/s3, s3/s4, s4/s5, s5/s6} {
+  \draw[arr] (\a.south -| 4, 0) -- (\b.north -| 4, 0);
+}
+
+% Bottom annotation
+\node[font=\tiny, anchor=west, align=left] at (-0.5, -4.5) {
+  \textbullet\ I²C 시절 정적 주소 충돌 문제 해결 — boot 시 \textit{모든 slave가 자동 enumeration}\\
+  \textbullet\ Provisioned ID = 48-bit unique (MFG ID + part ID + instance ID + extra)\\
+  \textbullet\ Master = host controller (보통 SoC), slave = sensor·CCS sensor·EEPROM 등\\
+  \textbullet\ Hot-plug 지원 — 새 디바이스가 늦게 들어와도 \texttt{ENTDAA} 재실행으로 등록\\
+  \textbullet\ Linux kernel 5.5+ \texttt{drivers/i3c/} 지원
+};
+
+\end{tikzpicture}
+\end{document}

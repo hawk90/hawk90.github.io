@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  layer/.style={cls, align=center, font=\footnotesize, minimum width=80mm, minimum height=12mm, draw=edgec},
+  hw/.style={layer, fill=hifill},
+  driver/.style={layer, fill=confill},
+  ldisc/.style={layer, fill=impfill},
+  app/.style={layer, fill=warnfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt},
+  side/.style={font=\scriptsize, anchor=west, align=left}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (4, 6) {Linux TTY Subsystem — termios + Line Discipline};
+
+% Layers
+\node[hw] (hw) at (0, 4.5) {UART Hardware};
+\node[driver] (drv) at (0, 3) {TTY Driver (8250\_dw, stm32-usart)};
+\node[ldisc] (ld) at (0, 1.5) {Line Discipline (N\_TTY, N\_HDLC, N\_SLIP)};
+\node[app] (app) at (0, 0) {User App (read/write /dev/ttyXX)};
+
+% Arrows
+\draw[arr] (hw.south) -- (drv.north);
+\draw[arr] (drv.south) -- (ld.north);
+\draw[arr] (ld.south) -- (app.north);
+
+% Side annotations
+\node[side] at (5, 4.5) {HW — RX FIFO, IRQ};
+\node[side] at (5, 3) {Driver — interrupt handler, ring buffer};
+\node[side] at (5, 1.5) {LDISC — canonical/raw, echo, NL conversion};
+\node[side] at (5, 0) {App — tcsetattr(termios)};
+
+% termios callouts
+\node[font=\tiny, anchor=west, align=left, draw=edgec, fill=hifill!10, inner sep=4pt] at (-4, -2.5) {
+  Canonical mode (default): line-buffered, ECHO, NL→CRLF, ctrl-C breaks\\
+  Raw mode (cfmakeraw): byte-by-byte, no echo, no NL conversion, no signal\\[4pt]
+  흔한 함정: 바이너리 데이터를 canonical로 read → \texttt{0x0D} 추가되어 데이터 깨짐.\\
+  → \texttt{cfmakeraw(\&tio)} 또는 \texttt{c\_lflag \&= NOT(ICANON | ECHO);}
+};
+
+\end{tikzpicture}
+\end{document}

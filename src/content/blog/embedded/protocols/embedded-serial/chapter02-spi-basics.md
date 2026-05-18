@@ -149,6 +149,8 @@ EWDS (Write Disable) | 0x6, addr=0x00
 
 ## Bit-bang vs 하드웨어 페리퍼럴
 
+![SPI bit-bang timing — Mode 0 (tikz-timing)](/images/blog/embedded-serial/diagrams/ch02-spi-bitbang.svg)
+
 | | Bit-bang (GPIO) | HW SPI |
 | --- | --- | --- |
 | 최대 속도 | ~1 MHz (MCU 따라) | 50+ MHz |

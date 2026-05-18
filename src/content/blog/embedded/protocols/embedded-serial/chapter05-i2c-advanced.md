@@ -158,6 +158,10 @@ I³C는 기본 *push-pull SDR 12.5 MHz*. 더 빠르려면 *HDR (High Data Rate) 
 
 ![I³C HDR mode entry / exit](/images/blog/embedded-serial/diagrams/ch05-i3c-hdr-entry.svg)
 
+### Dynamic Address Assignment (DAA)
+
+![I³C DAA — boot 시 자동 enumeration](/images/blog/embedded-serial/diagrams/ch05-i3c-daa.svg)
+
 마스터가 *Common Command Code* (CCC) `ENTHDR0/1/2/3`을 전송 → 모든 노드가 *HDR 모드 진입*. 트랜잭션 끝나면 `HDR Exit Pattern`으로 SDR 복귀.
 
 ### 사용처

@@ -132,6 +132,8 @@ ssize_t n = read(fd, buf, sizeof(buf));
 
 ### 흔한 함정 — Line Discipline
 
+![Linux TTY subsystem layers — termios + Line Discipline](/images/blog/embedded-serial/diagrams/ch11-termios-line-discipline.svg)
+
 Terminal 모드에서 *Linux line discipline*이 `\n` → `\r\n` 변환, *입력 echoing* 등을 자동으로 함. 바이너리 데이터 보낼 때는 **반드시 `cfmakeraw()`** 또는 `tio.c_lflag &= ~(ICANON | ECHO)`.
 
 ## sysfs / device-specific

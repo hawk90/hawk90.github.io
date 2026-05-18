@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{tikz-timing}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikztiminglibrary{counters,interval,nicetabs}
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize]
+
+\node[font=\footnotesize\bfseries, anchor=west] at (0, 4) {SPI Bit-Bang (GPIO) — Mode 0 한 바이트 송신};
+
+\node[anchor=west] at (0, 1.5) {\begin{tikztimingtable}
+  CS   & H 0.3L 8L 0.3H \\
+  SCLK & 0.3L L 0.5H L 0.5H L 0.5H L 0.5H L 0.5H L 0.5H L 0.5H L 0.5H L 0.3L \\
+  MOSI & 0.3L L L H H L L H H 0.3L \\
+\end{tikztimingtable}};
+
+\node[anchor=west, font=\tiny, align=left] at (0, -3) {
+  \textbullet\ CS Low → 8 SCLK 펄스 → CS High\\
+  \textbullet\ 매 SCLK rising edge에 슬레이브가 MOSI sample (Mode 0)\\
+  \textbullet\ MCU GPIO 토글로 구현 가능 — 그러나 \textit{인터럽트로 깨질 수 있음}\\
+  \textbullet\ HW SPI 페리퍼럴이 표준, bit-bang은 \textit{디버그 또는 GPIO 부족 시}\\
+  \textbullet\ 최대 속도 ~1 MHz (MCU 클럭의 1/8 이하)
+};
+
+\end{tikzpicture}
+\end{document}

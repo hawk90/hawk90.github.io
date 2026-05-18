@@ -163,6 +163,8 @@ HAL_DSI_ConfigPhyTimer(&hdsi, &phy_timer);
 
 ## Settle Time — 디버깅의 핵심
 
+![D-PHY eye diagram — JEDEC mask + measured trace](/images/blog/mipi/diagrams/ch02-d-phy-eye.svg)
+
 `THS-SETTLE` — HS 시작 후 *수신자가 안정 sample*하기까지의 시간. 잘못 설정 시:
 
 - *너무 짧음* — preamble 비트까지 sample → 데이터 깨짐
