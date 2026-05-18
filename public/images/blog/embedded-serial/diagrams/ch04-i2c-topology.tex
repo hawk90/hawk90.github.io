@@ -1,0 +1,60 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  chip/.style={cls, align=center, font=\footnotesize, minimum width=22mm, minimum height=14mm},
+  res/.style={rectangle, draw=edgec, line width=0.6pt, minimum width=8mm, minimum height=4mm, font=\tiny},
+  bus/.style={draw=edgec, line width=0.7pt},
+  lbl/.style={font=\tiny}
+]
+
+% V_DD rail
+\node[font=\footnotesize, anchor=west] at (0, 3.6) {V$_{DD}$};
+\draw[bus] (1, 3.6) -- (12, 3.6);
+
+% Pull-up resistors
+\node[res] (rs) at (4, 3) {4.7k};
+\node[res] (rd) at (8, 3) {4.7k};
+\draw[bus] (rs.north) -- (rs.north |- 0, 3.6);
+\draw[bus] (rd.north) -- (rd.north |- 0, 3.6);
+
+% Bus lines
+\draw[bus] (1, 2.5) -- (12, 2.5) node[right, font=\scriptsize] {SCL};
+\draw[bus] (1, 1.8) -- (12, 1.8) node[right, font=\scriptsize] {SDA};
+
+\draw[bus] (rs.south) -- (4, 2.5);
+\draw[bus] (rd.south) -- (8, 1.8);
+
+% Master
+\node[chip, draw=hibord, fill=hifill] (m) at (2, 0.5) {Master\\(MCU)};
+\draw[bus] (m.north) ++(-3mm, 0) -- (m.north -| 2, 2.5);
+\draw[bus] (m.north) ++(3mm, 0) -- (m.north -| 2.6, 1.8);
+
+% Slaves
+\node[chip, draw=conbord, fill=confill] (s1) at (5, 0.5) {Slave 1\\(RTC)};
+\draw[bus] (s1.north) ++(-3mm, 0) -- (s1.north -| 4.7, 2.5);
+\draw[bus] (s1.north) ++(3mm, 0) -- (s1.north -| 5.3, 1.8);
+
+\node[chip, draw=conbord, fill=confill] (s2) at (8, 0.5) {Slave 2\\(EEPROM)};
+\draw[bus] (s2.north) ++(-3mm, 0) -- (s2.north -| 7.7, 2.5);
+\draw[bus] (s2.north) ++(3mm, 0) -- (s2.north -| 8.3, 1.8);
+
+\node[chip, draw=conbord, fill=confill] (s3) at (11, 0.5) {Slave N\\(Sensor)};
+\draw[bus] (s3.north) ++(-3mm, 0) -- (s3.north -| 10.7, 2.5);
+\draw[bus] (s3.north) ++(3mm, 0) -- (s3.north -| 11.3, 1.8);
+
+% GND
+\draw[bus] (1, -0.3) -- (12, -0.3);
+\node[font=\footnotesize, anchor=west] at (12, -0.3) {GND};
+\draw[bus] (m.south) -- (m.south |- 0, -0.3);
+\draw[bus] (s1.south) -- (s1.south |- 0, -0.3);
+\draw[bus] (s2.south) -- (s2.south |- 0, -0.3);
+\draw[bus] (s3.south) -- (s3.south |- 0, -0.3);
+
+\end{tikzpicture}
+\end{document}

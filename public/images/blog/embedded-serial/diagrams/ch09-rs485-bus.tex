@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  node/.style={cls, align=center, font=\footnotesize, minimum width=20mm, minimum height=12mm},
+  res/.style={rectangle, draw=warnbord, line width=0.7pt, fill=warnfill, minimum width=10mm, minimum height=4mm, font=\tiny\bfseries},
+  bus/.style={draw=edgec, line width=0.8pt},
+  lbl/.style={font=\tiny}
+]
+
+% Bus lines (top = A, bottom = B)
+\draw[bus] (0, 2) -- (16, 2) node[right, font=\scriptsize] {A};
+\draw[bus] (0, 1.4) -- (16, 1.4) node[right, font=\scriptsize] {B};
+
+% Termination at both ends
+\node[res] (rL) at (-0.5, 1.7) {120Ω};
+\draw[bus] (rL.north) -- (rL.north |- 0, 2);
+\draw[bus] (rL.south) -- (rL.south |- 0, 1.4);
+
+\node[res] (rR) at (16.5, 1.7) {120Ω};
+\draw[bus] (rR.north) -- (rR.north |- 0, 2);
+\draw[bus] (rR.south) -- (rR.south |- 0, 1.4);
+
+% Master at left
+\node[node, draw=hibord, fill=hifill] (m) at (1.5, 0) {Master\\(PLC)};
+\draw[bus] (m.north -| 1.2, 0) -- (1.2, 2);
+\draw[bus] (m.north -| 1.8, 0) -- (1.8, 1.4);
+
+% 3 slaves spaced
+\node[node, draw=conbord, fill=confill] (s1) at (5.5, 0) {Slave 1\\(센서)};
+\draw[bus] (s1.north -| 5.2, 0) -- (5.2, 2);
+\draw[bus] (s1.north -| 5.8, 0) -- (5.8, 1.4);
+
+\node[node, draw=conbord, fill=confill] (s2) at (9.5, 0) {Slave 2\\(인버터)};
+\draw[bus] (s2.north -| 9.2, 0) -- (9.2, 2);
+\draw[bus] (s2.north -| 9.8, 0) -- (9.8, 1.4);
+
+\node[node, draw=conbord, fill=confill] (s3) at (13.5, 0) {Slave 3\\(액추에이터)};
+\draw[bus] (s3.north -| 13.2, 0) -- (13.2, 2);
+\draw[bus] (s3.north -| 13.8, 0) -- (13.8, 1.4);
+
+% Distance label
+\draw[<->, draw=edgec, line width=0.4pt] (m.south) ++(0, -0.6) -- (s3.south -| 13.5, -0.6);
+\node[font=\scriptsize, anchor=north] at (7.5, -0.7) {≤ 1200 m @ 100 kbps (twisted pair)};
+
+\end{tikzpicture}
+\end{document}

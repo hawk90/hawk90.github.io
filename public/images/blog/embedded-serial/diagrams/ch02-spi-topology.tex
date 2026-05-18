@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  chip/.style={cls, align=center, font=\footnotesize, minimum width=24mm, minimum height=18mm, draw=hibord, fill=hifill},
+  slave/.style={cls, align=center, font=\footnotesize, minimum width=24mm, minimum height=14mm, draw=conbord, fill=confill},
+  bus/.style={draw=edgec, line width=0.7pt},
+  cs/.style={draw=warnbord, line width=0.7pt, dashed},
+  lbl/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+
+% Master
+\node[chip] (m) {Master\\(MCU)};
+
+% Slaves
+\node[slave, right=40mm of m, yshift=14mm] (s1) {Slave 1\\(Flash)};
+\node[slave, right=40mm of m] (s2) {Slave 2\\(ADC)};
+\node[slave, right=40mm of m, yshift=-14mm] (s3) {Slave 3\\(Display)};
+
+% Shared bus (SCLK, MOSI, MISO)
+\draw[bus] (m.east) ++(0, 4mm) -- ++(8mm, 0) coordinate (bus1) node[lbl, above right] {SCLK};
+\draw[bus] (bus1) -- (bus1 |- s1.west) -- (s1.west |- bus1);
+\draw[bus] (bus1) -- (bus1 |- s3.west) -- (s3.west |- bus1);
+
+\draw[bus] (m.east) -- ++(8mm, 0) coordinate (bus2) node[lbl, above right] {MOSI};
+\draw[bus] (bus2) -- (bus2 |- s1.west) -- (s1.west |- bus2);
+\draw[bus] (bus2) -- (bus2 |- s3.west) -- (s3.west |- bus2);
+
+\draw[bus] (m.east) ++(0, -4mm) -- ++(8mm, 0) coordinate (bus3) node[lbl, below right] {MISO};
+\draw[bus] (bus3) -- (bus3 |- s1.west) -- (s1.west |- bus3);
+\draw[bus] (bus3) -- (bus3 |- s3.west) -- (s3.west |- bus3);
+
+% Dedicated CS lines (each slave gets one)
+\draw[cs] (m.south) -- ++(0, -3mm) -| ([xshift=-3mm]s1.south) -- ++(0, 3mm) node[lbl, midway, left] {CS1};
+\draw[cs] (m.south) ++(2mm, 0) -- ++(0, -6mm) -| ([xshift=-3mm]s2.south) -- ++(0, 3mm) node[lbl, midway, left] {CS2};
+\draw[cs] (m.south) ++(4mm, 0) -- ++(0, -9mm) -| ([xshift=-3mm]s3.south) -- ++(0, 3mm) node[lbl, midway, left] {CS3};
+
+\end{tikzpicture}
+\end{document}
