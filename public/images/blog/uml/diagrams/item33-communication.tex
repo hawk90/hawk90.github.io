@@ -9,39 +9,38 @@
 \begin{tikzpicture}[blog,
   obj/.style={con, align=center, font=\footnotesize, minimum width=28mm, minimum height=10mm},
   link/.style={draw=edgec, line width=0.5pt},
-  msg/.style={-{Stealth[length=2.2mm]}, draw=edgec, line width=0.6pt},
-  node distance=20mm and 22mm
+  msg/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt},
+  msglabel/.style={font=\scriptsize, fill=white, inner sep=1.2pt, draw=none}
 ]
 
 % Customer object (left)
 \node[obj] (cust) {:Customer};
 
 % Order object (center)
-\node[obj, right=of cust] (order) {:Order};
+\node[obj, right=32mm of cust] (order) {:Order};
 
 % Inventory (top-right)
-\node[obj, above right=10mm and 6mm of order] (inv) {:Inventory};
+\node[obj, above right=14mm and 14mm of order] (inv) {:Inventory};
 
 % Payment (bottom-right)
-\node[obj, below right=10mm and 6mm of order] (pay) {:Payment};
+\node[obj, below right=14mm and 14mm of order] (pay) {:Payment};
 
-% Links (undirected, structural)
-\draw[link] (cust) -- (order);
-\draw[link] (order) -- (inv);
-\draw[link] (order) -- (pay);
+% Structural links (underneath)
+\draw[link] (cust.east) -- (order.west);
+\draw[link] (order.north east) -- (inv.south west);
+\draw[link] (order.south east) -- (pay.north west);
 
-% Numbered messages
-\node[font=\scriptsize, above=1mm, midway] at ($(cust)!0.5!(order)$)
-  {\textbf{1}: checkout()};
-\draw[msg] ([yshift=2mm]cust.east) -- ([yshift=2mm]order.west);
+% Message arrows (offset above/beside links)
+\draw[msg] ([yshift=3mm]cust.east) -- ([yshift=3mm]order.west)
+  node[msglabel, midway, above] {\textbf{1}: checkout()};
 
-\node[font=\scriptsize, right=1mm of order, yshift=10mm]
-  {\textbf{1.1}: reserve()};
-\draw[msg] ([xshift=2mm]order.north) -- ([xshift=2mm]inv.south);
+\draw[msg] ($(order.north east)+(2mm,1mm)$) --
+           ($(inv.south west)+(2mm,1mm)$)
+  node[msglabel, midway, sloped, above] {\textbf{1.1}: reserve()};
 
-\node[font=\scriptsize, right=1mm of order, yshift=-10mm]
-  {\textbf{1.2}: charge()};
-\draw[msg] ([xshift=2mm]order.south) -- ([xshift=2mm]pay.north);
+\draw[msg] ($(order.south east)+(2mm,-1mm)$) --
+           ($(pay.north west)+(2mm,-1mm)$)
+  node[msglabel, midway, sloped, below] {\textbf{1.2}: charge()};
 
 \end{tikzpicture}
 \end{document}

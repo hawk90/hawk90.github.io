@@ -7,45 +7,42 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  part/.style={con, align=center, font=\footnotesize, minimum width=30mm, minimum height=14mm},
+  part/.style={con, align=center, font=\footnotesize, minimum width=32mm, minimum height=14mm},
   port/.style={rectangle, draw=edgec, fill=white, minimum size=3mm, inner sep=0pt, line width=0.5pt},
-  conn/.style={draw=edgec, line width=0.7pt},
-  node distance=12mm and 18mm
+  conn/.style={draw=edgec, line width=0.7pt}
 ]
 
-% Outer Car class frame
-\node[hi, anchor=north west, font=\small\bfseries] (carlabel) at (0,0) {Car};
-
-% Part: engine
-\node[part, below=8mm of carlabel, anchor=north west] (engine) {engine : Engine};
-% Part: transmission
-\node[part, right=of engine] (trans) {transmission : Transmission};
-% Part: wheels (4)
-\node[part, below=12mm of engine, minimum width=70mm] (wheels) {wheels : Wheel [4]};
+% Parts laid out manually
+\node[part] (engine) {engine : Engine};
+\node[part, right=24mm of engine] (trans) {transmission : Transmission};
+\node[part, below=18mm of $(engine)!0.5!(trans)$, minimum width=80mm] (wheels) {wheels : Wheel [4]};
 
 % Ports on engine
 \node[port] (e_in) at (engine.west) {};
 \node[port] (e_out) at (engine.east) {};
 % Ports on trans
 \node[port] (t_in) at (trans.west) {};
-\node[port] (t_out) at (trans.east) {};
+\node[port] (t_out) at (trans.south) {};
 
-% External port on Car (left side)
-\node[port, left=2mm of e_in] (car_in) {};
+% External port on Car (left, delegate)
+\node[port] (car_in) at ($(engine.west)+(-16mm,0)$) {};
 \node[font=\tiny, left=0.5mm of car_in] {fuelIn};
 
-% External port on Car (bottom)
-\node[port] (car_wheel) at ($(wheels.south)+(0,0)$) {};
+% Internal port on wheels (top)
+\node[port] (w_in) at (wheels.north) {};
 
 % Connectors
-\draw[conn] (car_in) -- (e_in) node[midway, above, font=\tiny] {«delegate»};
+\draw[conn] (car_in) -- node[above, font=\tiny] {«delegate»} (e_in);
 \draw[conn] (e_out) -- node[above, font=\tiny] {torque} (t_in);
-\draw[conn] (trans.south) -- node[right, font=\tiny] {drive} (wheels.north -| trans.south);
+\draw[conn] (t_out) -- node[right, font=\tiny] {drive} (w_in);
 
-% Outer frame
+% Outer Car class frame (background)
 \begin{pgfonlayer}{background}
-  \node[abs, fit=(carlabel)(engine)(trans)(wheels)(car_in),
-        inner sep=8mm, fill=absfill!15] {};
+  \node[hi, fit=(engine)(trans)(wheels)(car_in),
+        inner sep=10mm, fill=hifill!12, draw=hibord, line width=0.7pt] (car) {};
+  \node[anchor=north west, font=\small\bfseries, draw=hibord, fill=hifill,
+        inner sep=3pt]
+    at ([xshift=4pt, yshift=-4pt] car.north west) {Car};
 \end{pgfonlayer}
 
 \end{tikzpicture}
