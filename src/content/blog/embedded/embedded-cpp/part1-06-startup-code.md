@@ -37,7 +37,10 @@ int main() {
 
 ## 부트 흐름 — Reset에서 main까지
 
-ARM Cortex-M 기준 (다른 아키텍처도 개념 동일).
+ARM Cortex-M 기준입니다. 다른 아키텍처도 개념은 동일합니다.
+
+![부트 시퀀스 — Reset에서 main까지](/images/blog/embedded-cpp/diagrams/part1-06-boot-sequence.svg)
+
 
 ```text
 [전원 ON / Reset 핀]
@@ -424,12 +427,12 @@ void Reset_Handler(void) {
 
 ## 정리
 
-- 부트 순서: *Reset → SP/.data/.bss → SystemInit → __libc_init_array → main*.
-- C++ static 객체 생성자는 `.init_array` 섹션에 *함수 포인터*로. `__libc_init_array`가 호출.
-- *같은 TU 내*는 선언 순서, *다른 TU 사이*는 *unspecified* — *Construct-On-First-Use*로 회피.
-- Constructor에서 *peripheral, RTOS 호출 금지*. *명시적 init를 main에*.
-- *trivial constructor* + `constexpr`로 *.init_array 안 들어가게* 권장.
-- 작은 환경엔 *직접 startup* 작성 가능.
+- 부트 순서는 Reset → SP/.data/.bss → SystemInit → `__libc_init_array` → main입니다.
+- C++ static 객체 생성자는 `.init_array` 섹션에 함수 포인터로 등록되고 `__libc_init_array`가 차례로 호출합니다.
+- 같은 TU 내부는 선언 순서가 보장되지만 다른 TU 사이는 unspecified입니다. Construct-On-First-Use로 회피합니다.
+- 생성자에서 peripheral과 RTOS 호출은 금지합니다. 명시적 init를 main에 두는 것이 안전합니다.
+- trivial constructor와 `constexpr`을 활용하면 `.init_array`에 들어가지 않아 부담이 줄어듭니다.
+- 작은 환경에서는 startup 자체를 직접 작성할 수도 있습니다.
 
 ## 관련 항목
 

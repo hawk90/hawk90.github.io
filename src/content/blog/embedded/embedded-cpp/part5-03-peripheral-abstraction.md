@@ -416,12 +416,12 @@ C++ Uart<...>::send (blocking):
 
 ## 정리
 
-- Peripheral = *template class with address*. Type-safe.
-- *3가지 모드*: Blocking (simple), Interrupt (non-blocking), DMA (CPU 0).
-- *Concept으로 interface 통일* — mode 교체 가능.
-- *Device wrapper* (SPI + CS pin)로 *higher abstraction*.
-- *RAII guard*로 *clock/power 관리*.
-- HAL wrap이 *대부분 빠름 + 작음*.
+- Peripheral은 address를 가진 template class로 표현하며 type-safe합니다.
+- 세 가지 모드를 다룹니다 — Blocking(simple), Interrupt(non-blocking), DMA(CPU 0).
+- Concept으로 interface를 통일하면 mode를 교체할 수 있습니다.
+- SPI에 CS pin을 묶는 device wrapper로 더 높은 abstraction을 만듭니다.
+- RAII guard로 clock과 power를 관리합니다.
+- HAL을 wrap하는 방식이 대부분 더 빠르고 작습니다.
 
 ## 관련 항목
 

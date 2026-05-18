@@ -504,11 +504,11 @@ C 코드에서 link 가능한 심볼은 *extern "C" 표시된 것만*.
 
 ## 정리
 
-- C와 C++ 통신 = *extern "C"* + *C-only 헤더 패턴*.
-- 클래스를 C에 노출 = *opaque pointer*.
-- 멤버 함수 callback = *static trampoline* 또는 *capture-less lambda*.
-- struct는 *POD만 공유*, *virtual 금지*.
-- *padding 의식* — member 순서로 RAM 절약, packed는 *bus fault 주의*.
+- C와 C++ 통신은 `extern "C"`와 C-only 헤더 패턴으로 처리합니다.
+- 클래스를 C에 노출할 때는 opaque pointer를 사용합니다.
+- 멤버 함수 callback은 static trampoline이나 capture-less lambda로 만듭니다.
+- 공유 struct는 POD만 사용하고 virtual은 금지합니다.
+- padding을 의식해 멤버 순서로 RAM을 절약하며, packed는 bus fault에 주의합니다.
 
 ## 관련 항목
 

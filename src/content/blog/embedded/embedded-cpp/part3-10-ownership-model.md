@@ -389,12 +389,12 @@ use-after-free: 0
 
 ## 정리
 
-- 객체마다 *owner 한 명*. 나머지는 *non-owning reference*.
-- 도구: `unique_ptr` (owner), `T*`/`T&` (non-owning), `shared_ptr` (드물게).
-- 함수 매개변수: 의도에 맞게 *value, const&, &, *, span, string_view*.
-- 멤버 변수: *value, unique_ptr, optional, pointer*.
-- RTOS task 간 *message passing* (copy) 또는 *pool + handle*.
-- *Lambda capture by reference*는 *dangling 위험*. value capture 또는 외부 owner.
+- 객체마다 owner는 한 명이고 나머지는 non-owning reference로 다룹니다.
+- 도구는 owner로 `unique_ptr`, non-owning으로 `T*`/`T&`, 드물게 `shared_ptr`을 씁니다.
+- 함수 매개변수는 의도에 맞게 value, `const&`, `&`, pointer, span, string_view를 선택합니다.
+- 멤버 변수는 value, `unique_ptr`, optional, pointer 중에서 고릅니다.
+- RTOS task 간에는 message passing (copy)이나 pool + handle로 전달합니다.
+- Lambda를 reference로 capture하면 dangling 위험이 있으므로 value capture나 외부 owner를 씁니다.
 
 ## 관련 항목
 

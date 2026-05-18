@@ -387,11 +387,11 @@ init time   : 0 us
 
 ## 정리
 
-- `constexpr` = *컴파일 타임에 알려진 값*. 변수와 함수 모두.
-- *LUT, CRC table, lookup 함수*가 모두 *컴파일 타임 생성*. RAM 절약.
-- `if constexpr`은 *컴파일 타임 분기* — 코드 크기 감소.
-- C++14 이후 *대부분의 statement* `constexpr` 가능. C++20에서 *new, virtual* 등 완화.
-- `consteval` (C++20)은 *런타임 호출 차단*. `constinit`은 *static 초기화 강제*.
+- `constexpr`은 컴파일 타임에 값이 정해지는 변수와 함수에 모두 적용됩니다.
+- LUT, CRC table, lookup 함수를 컴파일 타임에 생성해 RAM을 절약합니다.
+- `if constexpr`은 컴파일 타임 분기이며 코드 크기를 줄여 줍니다.
+- C++14 이후 대부분의 statement가 `constexpr` 가능하며, C++20에서는 new와 virtual까지 완화됐습니다.
+- `consteval` (C++20)은 런타임 호출을 차단하고, `constinit`은 static 초기화를 강제합니다.
 
 ## 관련 항목
 

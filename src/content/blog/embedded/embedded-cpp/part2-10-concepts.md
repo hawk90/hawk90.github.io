@@ -402,12 +402,12 @@ T add(T a, T b) { return a + b; }
 
 ## 정리
 
-- Concepts = *template 제약을 시그니처에 명시*. C++20.
-- 표준 concepts: `<concepts>` + `<ranges>` 풍부.
-- 3가지 syntax: `requires`, `template<Concept T>`, `auto func(Concept auto x)`.
-- *CRTP + concept*으로 *interface 명확*. 누락 멤버는 *명확한 에러*.
-- SFINAE 대체. *짧고 읽기 좋음*. 에러 메시지 *훨씬 명확*.
-- toolchain 확인 필수 — GCC 10+, Clang 12+. ARM Compiler 6는 부분.
+- Concepts는 template 제약을 시그니처에 명시하는 C++20 기능입니다.
+- 표준 concepts는 `<concepts>`와 `<ranges>`에 풍부하게 준비돼 있습니다.
+- 3가지 syntax를 지원합니다 — `requires`, `template<Concept T>`, `auto func(Concept auto x)`.
+- CRTP와 concept을 함께 쓰면 interface가 명확해지고 누락된 멤버는 명확한 에러로 드러납니다.
+- SFINAE를 대체하며 짧고 읽기 좋고 에러 메시지가 훨씬 명확합니다.
+- toolchain 확인이 필수입니다 — GCC 10+, Clang 12+이며 ARM Compiler 6는 부분 지원입니다.
 
 ## 관련 항목
 

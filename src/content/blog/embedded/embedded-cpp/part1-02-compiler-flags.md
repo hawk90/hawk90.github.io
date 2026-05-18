@@ -390,11 +390,11 @@ default                                    : 24 KB
 
 ## 정리
 
-- 임베디드 C++ 표준 플래그 = *예외/RTTI/threadsafe-statics 끄기 + 크기 최적화 + LTO + gc-sections*.
-- 각 플래그가 *측정 가능한 효과* 있음. 끄기만 해도 *5-10배 크기 감소*.
-- 경고는 *처음부터 모두 켜고 Werror*. 나중에 끄는 게 추가하는 것보다 쉬움.
-- 디버그/release *분리*. release에 LTO, debug에 `-O0 -g3`.
-- ARM 특화 플래그 *반드시* — CPU, FPU, ABI 일치.
+- 임베디드 C++ 표준 플래그는 예외/RTTI/threadsafe-statics 끄기와 크기 최적화, LTO, gc-sections의 조합입니다.
+- 각 플래그는 측정 가능한 효과를 갖고, 끄기만 해도 5-10배 크기 감소가 가능합니다.
+- 경고는 처음부터 모두 켜고 Werror로 다룹니다. 나중에 끄는 편이 추가하는 것보다 쉽습니다.
+- 디버그와 release를 분리해 release에는 LTO를, debug에는 `-O0 -g3`를 적용합니다.
+- ARM 특화 플래그는 반드시 지정해 CPU, FPU, ABI를 일치시킵니다.
 
 ## 관련 항목
 

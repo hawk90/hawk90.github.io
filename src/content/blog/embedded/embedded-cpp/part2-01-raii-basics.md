@@ -472,11 +472,11 @@ shared:
 
 ## 정리
 
-- RAII = *자원 lifetime을 객체 lifetime에 묶음*. 생성자에서 획득, 소멸자에서 해제.
-- 임베디드의 5가지 RAII 자원: *Mutex, Peripheral, Interrupt, Memory, DMA*.
-- *Rule of Three/Five/Zero*: 자원 관리 명시. *복사 금지, 이동 허용* 또는 *표준 클래스 위임*.
-- *소멸자는 noexcept*. 예외 던지면 terminate.
-- *오버헤드 0* — 컴파일러가 생성자/소멸자 인라인.
+- RAII는 자원 lifetime을 객체 lifetime에 묶어 생성자에서 획득하고 소멸자에서 해제합니다.
+- 임베디드의 5가지 RAII 자원은 Mutex, Peripheral, Interrupt, Memory, DMA입니다.
+- Rule of Three/Five/Zero로 자원 관리를 명시하며, 복사 금지와 이동 허용을 택하거나 표준 클래스에 위임합니다.
+- 소멸자는 `noexcept`여야 하며 예외를 던지면 terminate됩니다.
+- 컴파일러가 생성자와 소멸자를 인라인하므로 오버헤드가 0입니다.
 
 ## 관련 항목
 

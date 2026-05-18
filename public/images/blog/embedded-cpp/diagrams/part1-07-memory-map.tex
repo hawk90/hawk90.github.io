@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  reg/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=42mm, inner sep=4pt, align=left, font=\sffamily\small},
+  flashr/.style={reg, fill=confill, draw=conbord},
+  ramr/.style={reg, fill=impfill, draw=impbord},
+  ccmr/.style={reg, fill=prpfill, draw=prpbord},
+  addr/.style={font=\sffamily\footnotesize\ttfamily, text=mutec, anchor=west}
+]
+
+% Flash column
+\node[font=\sffamily\bfseries\small, text=conbord] at (0, 8.2) {FLASH 1MB};
+\node[flashr, minimum height=9mm] (vec) at (0, 7.2) {.isr\_vector};
+\node[flashr, minimum height=18mm, below=0pt of vec] (text) {.text + .rodata};
+\node[flashr, minimum height=7mm, below=0pt of text] (init) {.init\_array};
+\node[flashr, minimum height=6mm, below=0pt of init] (datalma) {.data (LMA)};
+
+\node[addr] at (2.5, 7.6) {0x0800\_0000};
+\node[addr] at (2.5, 6.2) {0x0800\_01CC};
+\node[addr] at (2.5, 4.6) {0x0800\_4B40};
+\node[addr] at (2.5, 3.8) {0x0800\_4B60};
+
+% RAM column
+\node[font=\sffamily\bfseries\small, text=impbord] at (7, 8.2) {RAM 128KB};
+\node[ramr, minimum height=8mm] (datav) at (7, 7.2) {.data (VMA)};
+\node[ramr, minimum height=12mm, below=0pt of datav] (bss) {.bss};
+\node[ramr, minimum height=9mm, below=0pt of bss, fill=clifill, draw=clibord] (heap) {heap $\uparrow$};
+\node[ramr, minimum height=10mm, below=0pt of heap, fill=hifill, draw=hibord] (stack) {stack $\downarrow$};
+
+\node[addr] at (9.5, 7.4) {0x2000\_0000};
+\node[addr] at (9.5, 6.4) {0x2000\_0400};
+\node[addr] at (9.5, 4.7) {0x2000\_2400};
+\node[addr] at (9.5, 3.3) {0x2002\_0000};
+
+% CCM column
+\node[font=\sffamily\bfseries\small, text=prpbord] at (13.5, 8.2) {CCM RAM 64KB};
+\node[ccmr, minimum height=10mm] (ccm) at (13.5, 7) {.ccmram \\ (DMA 불가, 빠름)};
+\node[ccmr, minimum height=12mm, below=0pt of ccm, fill=neutfill, draw=neutbord, text=mutec] (free) {(미사용)};
+
+\node[addr] at (16, 7) {0x1000\_0000};
+\node[addr] at (16, 5.5) {0x1001\_0000};
+
+% LMA -> VMA copy arrow
+\draw[focus, ->] (datalma.east) to[bend right=20] node[font=\sffamily\footnotesize, text=focusc, midway, above] {Reset\_Handler copy} (datav.west);
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (7, 9.2) {STM32F4 메모리 레이아웃 (예시)};
+
+\end{tikzpicture}
+\end{document}

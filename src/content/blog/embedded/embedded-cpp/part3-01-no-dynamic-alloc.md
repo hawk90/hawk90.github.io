@@ -393,12 +393,12 @@ V3 (std::array): +0.2 KB
 
 ## 정리
 
-- 임베디드 = *정적 할당 원칙*. heap 회피 또는 *제한적 사용*.
-- `std::array`가 *유일한 표준 stack 컨테이너*.
-- ETL이 *heap 없는 STL 대체*. 모든 컨테이너 *고정 크기*.
-- `std::pmr` (C++17)로 *표준 컨테이너 + custom allocator* — pool 활용.
-- *placement new*로 *명시적 위치에 생성*.
-- *std::function 대신* etl::delegate 또는 *capture-less lambda*.
+- 임베디드는 정적 할당이 원칙이며 heap은 회피하거나 제한적으로 사용합니다.
+- `std::array`가 유일한 표준 stack 컨테이너입니다.
+- ETL이 heap 없는 STL 대체이며 모든 컨테이너가 고정 크기입니다.
+- `std::pmr`(C++17)로 표준 컨테이너에 custom allocator를 붙여 pool을 활용합니다.
+- placement new로 명시적 위치에 객체를 생성합니다.
+- `std::function` 대신 `etl::delegate`나 capture-less lambda를 씁니다.
 
 ## 관련 항목
 

@@ -406,11 +406,11 @@ C++ 추가 비용 *0*. 추가 *type safety + IDE 지원*.
 
 ## 정리
 
-- GPIO pin = *template instantiated type*. 각 pin *별도 type*.
-- *Port, Pin number 모두 컴파일 타임* — invalid pin은 static_assert.
-- *Concept으로 GPIO interface* 정의 — generic 함수 type-safe.
-- Board-specific *type alias 헤더*로 *다중 보드 지원*.
-- *Configuration도 컴파일 타임* — `if constexpr` 분기.
+- GPIO pin은 template instantiated type이며 pin마다 별도 type을 갖습니다.
+- Port와 Pin number를 모두 컴파일 타임에 결정하므로 invalid pin은 `static_assert`로 잡힙니다.
+- Concept으로 GPIO interface를 정의하면 generic 함수가 type-safe해집니다.
+- Board-specific type alias 헤더로 다중 보드를 지원합니다.
+- Configuration도 컴파일 타임에 결정하며 `if constexpr`로 분기합니다.
 
 ## 관련 항목
 

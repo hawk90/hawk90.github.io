@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc},
+  nodeB/.style={rectangle, draw=nodebord, line width=0.45pt, minimum width=44mm, minimum height=14mm, inner sep=3pt, align=center, font=\sffamily\footnotesize, fill=white},
+  dataB/.style={rectangle, draw=impbord, line width=0.45pt, minimum width=26mm, minimum height=10mm, inner sep=2pt, fill=impfill, font=\sffamily\footnotesize, align=center},
+  wrapB/.style={rectangle, draw=conbord, line width=0.45pt, minimum width=44mm, minimum height=18mm, inner sep=3pt, fill=confill, align=center, font=\sffamily\footnotesize},
+  intruB/.style={rectangle, draw=impbord, line width=0.45pt, minimum width=44mm, minimum height=18mm, inner sep=3pt, fill=impfill, align=center, font=\sffamily\footnotesize}
+]
+
+% std::list (Heap)
+\node[hdr] at (-5, 6) {std::list<Task> — heap};
+\node[wrapB] (n1) at (-5, 4.5) {Node \\ \texttt{prev, next, Task}};
+\node[wrapB, below=8mm of n1] (n2) {Node \\ \texttt{prev, next, Task}};
+\node[wrapB, below=8mm of n2] (n3) {Node \\ \texttt{prev, next, Task}};
+
+\draw[uses, dashed, draw=conbord] (n1.south) -- (n2.north) node[midway, right, font=\sffamily\footnotesize] {heap alloc};
+\draw[uses, dashed, draw=conbord] (n2.south) -- (n3.north) node[midway, right, font=\sffamily\footnotesize] {heap alloc};
+
+% Intrusive (Static)
+\node[hdr] at (5, 6) {Intrusive — node 별도 할당 없음};
+\node[intruB] (i1) at (5, 4.5) {Task \\ \texttt{prev, next, fields...}};
+\node[intruB, below=8mm of i1] (i2) {Task \\ \texttt{prev, next, fields...}};
+\node[intruB, below=8mm of i2] (i3) {Task \\ \texttt{prev, next, fields...}};
+
+\draw[arr, draw=impbord, line width=0.5pt] (i1.south) -- (i2.north);
+\draw[arr, draw=impbord, line width=0.5pt] (i2.south) -- (i3.north);
+
+% Bottom summary
+\node[font=\sffamily\bfseries\footnotesize, text=conbord, align=left, text width=42mm] at (-5, -1.8) {
+  \textbf{비용}: \\
+  $\bullet$ Task + Node 별도 \\
+  $\bullet$ 매 push heap alloc \\
+  $\bullet$ Erase O(n) iterator
+};
+
+\node[font=\sffamily\bfseries\footnotesize, text=impbord, align=left, text width=42mm] at (5, -1.8) {
+  \textbf{장점}: \\
+  $\bullet$ Heap 0 \\
+  $\bullet$ Push/Pop O(1) \\
+  $\bullet$ Erase O(1) (node 직접)
+};
+
+\end{tikzpicture}
+\end{document}

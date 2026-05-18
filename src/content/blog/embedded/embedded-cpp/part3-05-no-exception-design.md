@@ -384,12 +384,12 @@ C++23 `and_then`으로 *체인*. C++17 직접 *마이그레이션*.
 
 ## 정리
 
-- 임베디드 = `-fno-exceptions`. *예외 없는 에러 처리*.
-- 4 패턴: *error code*, `std::optional`, `std::expected` (C++23), `tl::expected` (백포트).
-- *STL의 throw 함수 회피* — `at()`, `stoi()`. `from_chars` 등 대체.
-- *계층화된 에러* — 각 계층의 의미 있는 enum.
-- *Constructor 실패*는 *factory function + optional*.
-- `[[nodiscard]]`로 *에러 무시 방지*.
+- 임베디드는 `-fno-exceptions`로 빌드하며 예외 없이 에러를 처리합니다.
+- 4가지 패턴이 있습니다 — error code, `std::optional`, `std::expected`(C++23), `tl::expected`(백포트).
+- STL의 throw 함수(`at()`, `stoi()`)는 회피하고 `from_chars` 같은 대체를 씁니다.
+- 에러는 계층화하여 각 계층마다 의미 있는 enum을 정의합니다.
+- Constructor 실패는 factory function과 optional 조합으로 처리합니다.
+- `[[nodiscard]]`로 에러 무시를 방지합니다.
 
 ## 관련 항목
 

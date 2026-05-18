@@ -318,11 +318,11 @@ consteval PinId make_pin(int port, int pin);
 
 ## 정리
 
-- `consteval` = *함수의 컴파일 타임 호출 강제*. 런타임 호출은 *컴파일 에러*.
-- `constinit` = *변수의 컴파일 타임 초기화 강제*. *Static Initialization Order Fiasco 방지*.
-- 매크로 대체로 *타입 안전 + 검증 가능*.
-- C++20 (GCC 10+, Clang 12+). *toolchain 지원 확인 필수*.
-- `if consteval` (C++23)으로 *컴파일/런타임 분기*.
+- `consteval`은 함수의 컴파일 타임 호출을 강제하며, 런타임 호출은 컴파일 에러로 막힙니다.
+- `constinit`은 변수의 컴파일 타임 초기화를 강제하므로 Static Initialization Order Fiasco를 방지합니다.
+- 매크로를 대체하면서 타입 안전성과 검증 가능성을 함께 얻습니다.
+- C++20 기능이며 GCC 10+, Clang 12+가 필요하므로 toolchain 지원을 반드시 확인합니다.
+- `if consteval`(C++23)로 컴파일과 런타임을 분기할 수 있습니다.
 
 ## 관련 항목
 

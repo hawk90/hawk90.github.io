@@ -42,19 +42,11 @@ hal::Led::set();
 
 ## HAL의 3 계층
 
-```text
-┌─────────────────────────┐
-│   Application           │   포터블, 벤더 무지
-├─────────────────────────┤
-│   HAL Interface         │   공통 추상화
-├─────────────────────────┤
-│   Vendor HAL / 직접 reg │   벤더 종속
-├─────────────────────────┤
-│   Hardware              │
-└─────────────────────────┘
-```
+HAL은 보통 세 계층으로 쌓입니다. Application은 인터페이스만 보고, 벤더별 구현은 그 아래에 숨어 있습니다.
 
-각 layer가 *위에서 아래로만 의존*. *위는 아래의 구체 구현 모름*.
+![HAL 3 계층 — App → Interface → Vendor → Hardware](/images/blog/embedded-cpp/diagrams/part5-04-hal-layers.svg)
+
+각 계층은 위에서 아래로만 의존합니다. 위 계층은 아래의 구체 구현을 모르고, 인터페이스만 통해 호출합니다.
 
 ## 패턴 1 — Interface + Implementation
 
@@ -457,11 +449,11 @@ HAL이 *얼마나 비싼지* 모름. *측정 도구* ([Part 1-04](/blog/embedded
 
 ## 정리
 
-- HAL = *application과 vendor 사이의 통역*.
-- *3가지 패턴*: Interface (virtual), Template (CRTP), Typedef (compile-time).
-- *Board-specific 헤더*로 *type alias 통일*.
-- *Mock HAL*로 *host 테스트*.
-- *DI*로 *명시 dependency wiring*.
+- HAL은 application과 vendor 사이의 통역 계층입니다.
+- 패턴은 3가지로 나뉩니다 — Interface (virtual), Template (CRTP), Typedef (compile-time).
+- Board-specific 헤더로 type alias를 통일합니다.
+- Mock HAL을 두면 host에서 테스트할 수 있습니다.
+- DI로 dependency wiring을 명시합니다.
 
 ## 관련 항목
 

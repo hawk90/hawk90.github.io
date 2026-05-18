@@ -41,9 +41,15 @@ void play() {
 
 State machine 패턴이 *3가지 단계*로 개선.
 
+## 미디어 플레이어 — 예시 FSM
+
+전체 글에서 *미디어 플레이어 state machine*을 예시로 씁니다. 세 상태와 네 이벤트의 전이는 다음과 같습니다.
+
+![미디어 플레이어 state machine — Stopped/Playing/Paused](/images/blog/embedded-cpp/diagrams/part4-06-state-machine.svg)
+
 ## 단계 1 — Enum + Switch
 
-가장 기본. *직관적 + 작은 코드*.
+가장 기본 형태입니다. 직관적이고 코드도 짧습니다.
 
 ```cpp
 enum class State { Stopped, Playing, Paused };
@@ -399,12 +405,12 @@ etl::fsm:             ~1.6 KB (5 state class + FSM base)
 
 ## 정리
 
-- State machine *3단계*: enum+switch (작음), variant (type-safe), etl::fsm (formal).
-- *State invariant 강제* — variant 또는 single enum.
-- *전이 중앙화* — 모든 전이 한 곳.
-- *State별 데이터*는 variant가 최적.
-- *Logging 통합*으로 production debugging.
-- *Compile-time FSM*은 검증 + 안전.
+- State machine은 세 단계로 발전합니다 — enum+switch(작음), variant(type-safe), etl::fsm(formal).
+- State invariant는 variant나 single enum으로 강제합니다.
+- 전이를 한 곳에 모아 중앙화합니다.
+- State별 데이터를 다룰 때는 variant가 최적입니다.
+- Logging을 통합하면 production debugging이 가능합니다.
+- Compile-time FSM은 검증과 안전을 함께 얻습니다.
 
 ## 관련 항목
 

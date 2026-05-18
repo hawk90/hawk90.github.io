@@ -406,12 +406,12 @@ GCC 11+ 부분 지원. 임베디드 *toolchain 대부분 미지원* (2026 기준
 
 ## 정리
 
-- 템플릿 = *zero runtime cost + compile/binary size cost*.
-- *큰 함수*는 *비-템플릿 helper 분리* → bloat 70% 이상 감소.
-- *type erasure* (`std::variant`) — 닫힌 type set에 유리.
-- `extern template` + `template class` — *명시적 인스턴스화*로 코드 한 곳에.
-- *측정 도구*: `nm` (인스턴스 수), `bloaty` (PR diff), `__PRETTY_FUNCTION__` (debug).
-- 컴파일 시간 줄이려면 *PCH, unity build, modules (C++20)*.
+- 템플릿은 runtime cost는 0이지만 컴파일/binary size cost를 발생시킵니다.
+- 큰 함수는 비-템플릿 helper로 분리하면 bloat가 70% 이상 줄어듭니다.
+- Type erasure(`std::variant`)는 닫힌 type set에 유리합니다.
+- `extern template`과 `template class`로 명시적 인스턴스화를 하면 코드가 한 곳에 모입니다.
+- 측정 도구는 `nm`(인스턴스 수), `bloaty`(PR diff), `__PRETTY_FUNCTION__`(debug)입니다.
+- 컴파일 시간을 줄이려면 PCH, unity build, modules(C++20)를 활용합니다.
 
 ## 관련 항목
 

@@ -427,11 +427,11 @@ V3 (if constexpr): 280 B (인라인 분기 제거)
 
 ## 정리
 
-- Type Traits = *컴파일 타임 type query*. `<type_traits>` 표준 헤더.
-- 주요 trait: `is_integral`, `is_pointer`, `is_trivially_copyable`, `is_same`, `decay` 등.
-- *SFINAE + enable_if*로 *조건부 오버로드*. C++17 *if constexpr*이 *대체*.
-- 임베디드 활용: *type-safe register access*, *serialization*, *custom domain traits*.
-- C++20 *concepts*가 *훨씬 깔끔한 syntax*. 가능하면 concept 권장.
+- Type Traits는 컴파일 타임 type query이며 `<type_traits>` 표준 헤더가 제공합니다.
+- 주요 trait는 `is_integral`, `is_pointer`, `is_trivially_copyable`, `is_same`, `decay` 등이 있습니다.
+- SFINAE와 `enable_if`로 조건부 오버로드를 만들며, C++17의 `if constexpr`이 이를 대체합니다.
+- 임베디드에서는 type-safe register access, serialization, custom domain traits에 활용합니다.
+- C++20 concepts가 훨씬 깔끔한 syntax이므로 가능하면 concept을 권장합니다.
 
 ## 관련 항목
 

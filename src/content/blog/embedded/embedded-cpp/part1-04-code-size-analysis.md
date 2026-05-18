@@ -399,11 +399,11 @@ bloaty -d symbols --demangle=full firmware.elf | head -10
 
 ## 정리
 
-- *측정 도구 4개* — `size` (총량), `nm` (심볼), `objdump` (어셈블리), `bloaty` (분석/비교).
-- *디맹글 필수* (`--demangle`, `-C`) — C++ 심볼은 mangled.
-- *큰 함수 후보* — 예외, float printf, 64-bit divmod, dynamic alloc, STL throw.
-- *PR 크기 변화*는 `bloaty`로 *두 ELF 비교*. CI에 통합.
-- *Flash와 RAM 따로* 추적. `.bss`가 자주 잊혀지는 RAM 소비 원인.
+- 측정 도구는 네 가지입니다 — `size`(총량), `nm`(심볼), `objdump`(어셈블리), `bloaty`(분석/비교).
+- C++ 심볼은 mangled되므로 `--demangle`(`-C`)로 디맹글이 필수입니다.
+- 큰 함수 후보는 예외, float printf, 64-bit divmod, dynamic alloc, STL throw입니다.
+- PR 크기 변화는 `bloaty`로 두 ELF를 비교하고 CI에 통합합니다.
+- Flash와 RAM을 따로 추적합니다. `.bss`가 자주 잊혀지는 RAM 소비 원인입니다.
 
 ## 관련 항목
 

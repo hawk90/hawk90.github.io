@@ -354,11 +354,11 @@ Boost.IntrusivePtr와 같은 idea. *별도 control block 없음*. *작은 메모
 
 ## 정리
 
-- 임베디드 = `unique_ptr` *기본*. *명시적 소유 + RAII + zero overhead*.
-- *shared_ptr 회피* — atomic 카운터, control block heap.
-- raw pointer는 *non-owning만*. 소유권은 *항상 unique 또는 shared*.
-- *Custom deleter* (struct/lambda)로 *pool, FD, 비-heap 자원 관리*.
-- *Optional 멤버*는 `std::optional<T>` (heap 0) 우선.
+- 임베디드에서는 `unique_ptr`이 기본입니다. 명시적 소유와 RAII를 zero overhead로 제공합니다.
+- `shared_ptr`은 회피합니다. atomic 카운터와 heap 위의 control block이 부담입니다.
+- raw pointer는 non-owning에만 쓰고 소유권은 항상 unique나 shared로 표현합니다.
+- Custom deleter(struct나 lambda)로 pool, FD, 비-heap 자원을 관리합니다.
+- Optional 멤버는 `std::optional<T>`(heap 0)를 우선합니다.
 
 ## 관련 항목
 

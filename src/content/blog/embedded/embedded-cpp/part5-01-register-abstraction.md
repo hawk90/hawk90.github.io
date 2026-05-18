@@ -428,12 +428,12 @@ GpioA::clear_pin<5>();
 
 ## 정리
 
-- Memory-mapped register = *volatile + typed pointer*.
-- Template으로 *Address + Pin 모두 compile-time*. zero-cost.
-- *CMSIS struct + wrapper class*가 *표준 패턴*.
-- *enum class*로 *bit value type-safe*.
-- *RAII*로 *peripheral lifecycle 관리*.
-- Bit field struct는 *ABI 위험* — 명시적 마스크.
+- Memory-mapped register는 volatile과 typed pointer의 결합으로 표현합니다.
+- 템플릿으로 Address와 Pin을 모두 compile-time에 결정하면 zero-cost가 됩니다.
+- CMSIS struct를 wrapper class로 감싸는 것이 표준 패턴입니다.
+- enum class로 bit value를 type-safe하게 다룹니다.
+- RAII로 peripheral lifecycle을 관리합니다.
+- Bit field struct는 ABI 위험이 있으므로 명시적 마스크를 권장합니다.
 
 ## 관련 항목
 

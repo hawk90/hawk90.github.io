@@ -299,11 +299,11 @@ picolibc + 직접 stub   : 16 KB
 
 ## 정리
 
-- C++ 런타임 = *libgcc + libsupc++ + libc + libstdc++*. 각각 *최소화* 가능.
-- *부트 시퀀스*: `__libc_init_array`가 *C++ static 생성자 호출*. 그 전엔 *C 코드만 안전*.
-- libc는 *newlib-nano* 또는 *picolibc*. *nano.specs* 잊지 말 것.
-- *syscall stubs*를 환경에 맞춰 구현 (`_write`로 printf → UART, `_sbrk`로 heap).
-- *libsupc++ 일부*는 직접 작성으로 *제거 가능*.
+- C++ 런타임은 libgcc, libsupc++, libc, libstdc++로 구성되며 각각 최소화할 수 있습니다.
+- 부트 시퀀스는 `__libc_init_array`가 C++ static 생성자를 호출하며, 그 전에는 C 코드만 안전합니다.
+- libc는 newlib-nano나 picolibc를 쓰고 `nano.specs`를 잊지 않도록 합니다.
+- syscall stubs는 환경에 맞춰 구현합니다 — `_write`로 printf를 UART에, `_sbrk`로 heap을 연결합니다.
+- libsupc++의 일부는 직접 작성해 제거할 수 있습니다.
 
 ## 관련 항목
 

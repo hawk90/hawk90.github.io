@@ -215,6 +215,10 @@ using ReadyList = bi::list<Task, bi::base_hook<bi::list_base_hook<bi::tag<ReadyT
 
 ## Intrusive vs std::list 비교
 
+구조의 차이를 한눈에 보면 다음과 같습니다.
+
+![std::list와 intrusive list 구조 비교](/images/blog/embedded-cpp/diagrams/part4-01-intrusive-vs-stdlist.svg)
+
 | | `std::list<T>` | Intrusive |
 | --- | --- | --- |
 | 메모리 | T + Node (heap) | T 안에 link (free) |
@@ -224,7 +228,7 @@ using ReadyList = bi::list<Task, bi::base_hook<bi::list_base_hook<bi::tag<ReadyT
 | Type safety | 강함 | 보통 (template으로 강화) |
 | 표준 | C++11 | non-standard (Boost) |
 
-임베디드에서 *intrusive가 압도적 우위*.
+임베디드에서는 intrusive가 압도적으로 유리합니다.
 
 ## ETL의 intrusive_list
 
@@ -395,12 +399,12 @@ intrusive list<Task>:
 
 ## 정리
 
-- Intrusive = *객체 안에 list link 포함*. *node 별도 할당 0*.
-- Linux 커널 `list_head` + `container_of` — 전통 패턴.
-- Boost.Intrusive, ETL의 intrusive_list — C++ 라이브러리.
-- 다중 list 가입 자연 (서로 다른 link).
-- *RTOS scheduler*, *event queue*, *driver chain*에 표준.
-- *Container는 소유 안 함* — *외부에서 lifetime 관리*.
+- Intrusive 컨테이너는 객체 안에 list link를 포함하므로 node 별도 할당이 0입니다.
+- Linux 커널의 `list_head`와 `container_of`가 전통적인 패턴입니다.
+- C++ 라이브러리로는 Boost.Intrusive와 ETL의 intrusive_list가 있습니다.
+- 서로 다른 link를 두면 다중 list 가입이 자연스럽게 가능합니다.
+- RTOS scheduler, event queue, driver chain에서 표준 도구로 쓰입니다.
+- 컨테이너는 객체를 소유하지 않으므로 lifetime은 외부에서 관리해야 합니다.
 
 ## 관련 항목
 

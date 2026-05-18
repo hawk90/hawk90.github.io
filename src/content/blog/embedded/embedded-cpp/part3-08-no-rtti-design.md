@@ -381,11 +381,11 @@ using Event = std::variant<SmallEvent, HugeEvent>;
 
 ## 정리
 
-- `-fno-rtti`로 *type info tables 제거*. 수 KB 절약.
-- 대안 3가지: *enum tag*, *std::variant* (closed set), *CRTP* (compile-time).
-- *dynamic_cast 대체*: type_id 시스템 또는 visitor.
-- `std::any` 사용 불가. `std::function`도 *부분 제한*.
-- RTTI와 예외는 *세트로 켜고 끔*.
+- `-fno-rtti`로 type info table을 제거하면 수 KB를 절약할 수 있습니다.
+- 대안은 세 가지입니다 — enum tag, `std::variant`(closed set), CRTP(compile-time).
+- `dynamic_cast`는 type_id 시스템이나 visitor로 대체합니다.
+- `std::any`는 사용할 수 없고 `std::function`도 부분 제한이 있습니다.
+- RTTI와 예외는 세트로 켜고 끄는 것이 보통입니다.
 
 ## 관련 항목
 

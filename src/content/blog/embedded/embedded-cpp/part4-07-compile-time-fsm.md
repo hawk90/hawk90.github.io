@@ -325,12 +325,12 @@ total cycles: 7500
 
 ## 정리
 
-- Compile-time FSM = *constexpr table* 또는 *template specialization*.
-- *Invalid 전이는 컴파일 에러* — `static_assert`.
-- *Type-based state* (variant)로 *각 state의 데이터 분리*.
-- *Boost.SML*이 *정식 라이브러리*. DSL syntax, guard/action 지원.
-- *Unreachable/dead state 검증*도 컴파일 타임.
-- 작은 FSM은 *enum*, 큰 FSM은 *Boost.SML*.
+- Compile-time FSM은 constexpr table이나 template specialization으로 구현합니다.
+- Invalid 전이는 `static_assert`로 컴파일 에러를 냅니다.
+- Type-based state(variant)로 각 state의 데이터를 분리합니다.
+- Boost.SML이 정식 라이브러리이며 DSL syntax와 guard/action을 지원합니다.
+- Unreachable이나 dead state도 컴파일 타임에 검증할 수 있습니다.
+- 작은 FSM은 enum으로, 큰 FSM은 Boost.SML로 다룹니다.
 
 ## 관련 항목
 

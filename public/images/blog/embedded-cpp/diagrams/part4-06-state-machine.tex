@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  state/.style={ellipse, draw=nodebord, line width=0.5pt, minimum width=24mm, minimum height=12mm, inner sep=2pt, font=\sffamily\bfseries\small, align=center, fill=white},
+  stopped/.style={state, fill=neutfill, draw=neutbord},
+  playing/.style={state, fill=impfill, draw=impbord},
+  paused/.style={state, fill=clifill, draw=clibord},
+  evt/.style={font=\sffamily\footnotesize, text=focusc, fill=white, inner sep=2pt}
+]
+
+% States
+\node[stopped] (S) at (0, 0) {Stopped};
+\node[playing] (P) at (5, 0) {Playing \\ \footnotesize{position}};
+\node[paused] (U) at (10, 0) {Paused \\ \footnotesize{position}};
+
+% Initial state marker
+\node[circle, fill=inkc, minimum size=2.5mm, inner sep=0pt] (init) at (-2.5, 0) {};
+\draw[arr] (init) -- (S);
+
+% Transitions
+\draw[arr, line width=0.5pt] (S.north east) to[bend left=18] node[evt, above] {Play} (P.north west);
+\draw[arr, line width=0.5pt] (P.north east) to[bend left=18] node[evt, above] {Pause} (U.north west);
+\draw[arr, line width=0.5pt] (U.south west) to[bend left=18] node[evt, below] {Resume} (P.south east);
+
+% Stop from anywhere
+\draw[arr, dashed, draw=conbord] (P.south west) to[bend left=20] node[evt, below=2mm] {Stop} (S.south east);
+\draw[arr, dashed, draw=conbord] (U) to[bend right=45] node[evt, above=8mm] {Stop} (S);
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (5, 2.5) {Media Player FSM};
+
+% Legend
+\node[caption, below=8mm of S, anchor=west, text width=12cm] at (-1, -2) {각 state는 자기 데이터 보유 (Playing/Paused의 position). std::variant + std::visit로 type-safe 표현 가능};
+
+\end{tikzpicture}
+\end{document}

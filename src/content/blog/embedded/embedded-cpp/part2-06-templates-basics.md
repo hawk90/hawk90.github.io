@@ -405,11 +405,11 @@ RingBuffer<LogEntry, 16>   : push 64 B, pop 72 B (LogEntry is 16 B)
 
 ## 정리
 
-- 템플릿 = *컴파일 타임 다형성*. 타입별 *전용 코드 생성*.
-- 함수/클래스/non-type 매개변수 모두 지원.
-- 임베디드 활용: *RingBuffer*, *GPIO 추상화*, *type-safe print*.
-- *zero-cost* — 가상 함수 없음, 간접 호출 없음.
-- *비용은 컴파일 시간과 인스턴스별 코드 크기*. 적절히 관리 ([Part 2-07](/blog/embedded/embedded-cpp/part2-07-templates-cost)).
+- 템플릿은 컴파일 타임 다형성으로, 타입별 전용 코드를 생성합니다.
+- 함수, 클래스, non-type 매개변수를 모두 지원합니다.
+- 임베디드에서는 RingBuffer, GPIO 추상화, type-safe print에 활용합니다.
+- 가상 함수와 간접 호출이 없는 zero-cost입니다.
+- 비용은 컴파일 시간과 인스턴스별 코드 크기에서 발생하며 적절히 관리해야 합니다 ([Part 2-07](/blog/embedded/embedded-cpp/part2-07-templates-cost)).
 
 ## 관련 항목
 

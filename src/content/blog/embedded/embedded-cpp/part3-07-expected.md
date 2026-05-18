@@ -322,12 +322,12 @@ sizeof: 8 (int + ErrorCode + flag, well aligned)
 
 ## 정리
 
-- `std::expected<T, E>` (C++23) = *value 또는 error*. Rust `Result<T, E>`.
-- `tl::expected` 백포트로 *C++17부터* 사용 가능.
-- *Monadic operations* (`and_then`, `or_else`, `transform`)로 *체인*.
-- *zero heap* — stack에 직접. 임베디드 친화.
-- 에러 변환 — `transform_error`로 *계층화*.
-- `[[nodiscard]]` default — 무시 *컴파일러 경고*.
+- `std::expected<T, E>`(C++23)는 value 또는 error를 담으며 Rust의 `Result<T, E>`와 같습니다.
+- `tl::expected` 백포트로 C++17부터 사용할 수 있습니다.
+- Monadic operations(`and_then`, `or_else`, `transform`)로 체인을 구성합니다.
+- heap을 쓰지 않고 stack에 직접 두므로 임베디드에 친화적입니다.
+- 에러 변환은 `transform_error`로 계층화합니다.
+- `[[nodiscard]]`가 기본이므로 무시하면 컴파일러가 경고합니다.
 
 ## 관련 항목
 

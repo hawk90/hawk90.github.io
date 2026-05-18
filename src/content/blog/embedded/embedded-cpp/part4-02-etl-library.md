@@ -403,12 +403,12 @@ ETL은 *header-only*. *컴파일 시간 증가*. PCH 활용.
 
 ## 정리
 
-- ETL = *임베디드 STL 대체*. Fixed-size + heap 0.
-- 기본: `etl::vector`, `etl::string`, `etl::list`, `etl::map`, `etl::queue`.
-- 특수: `etl::delegate` (std::function 대체), `etl::observer`, `etl::fsm`, `etl::message_router`.
-- `-fno-exceptions` 환경: `ETL_NO_EXCEPTIONS` 매크로.
-- *측정 가능한 fixed-size*. .bss 영향 추적.
-- MIT license, header-only.
+- ETL은 임베디드용 STL 대체 라이브러리로, 모두 fixed-size이며 heap을 쓰지 않습니다.
+- 기본 컨테이너로 `etl::vector`, `etl::string`, `etl::list`, `etl::map`, `etl::queue`를 제공합니다.
+- 특수 도구로 `etl::delegate`(std::function 대체), `etl::observer`, `etl::fsm`, `etl::message_router`가 있습니다.
+- `-fno-exceptions` 환경에서는 `ETL_NO_EXCEPTIONS` 매크로를 정의합니다.
+- 측정 가능한 fixed-size이므로 `.bss` 영향을 추적할 수 있습니다.
+- MIT 라이선스이며 header-only로 배포됩니다.
 
 ## 관련 항목
 

@@ -472,11 +472,11 @@ bl      UartLogger::log_impl   ; 직접 호출 — 인라인 가능
 
 ## 정리
 
-- CRTP = *templates 기반 다형성*. virtual 없이 *컴파일 타임 dispatch*.
-- *vptr 0, vtable 0, 간접 호출 0*. *인라인 가능*.
-- 임베디드: *peripheral driver, logger, mixin* 패턴에 적합.
-- *런타임 type 결정 불가*. 컴파일 타임 set만.
-- C++20 concepts와 *함께 사용*하면 *interface 명확*.
+- CRTP는 template 기반 다형성으로, virtual 없이 컴파일 타임에 dispatch합니다.
+- vptr, vtable, 간접 호출이 모두 0이고 인라인도 가능합니다.
+- 임베디드에서는 peripheral driver, logger, mixin 패턴에 적합합니다.
+- 런타임에 type을 결정할 수는 없고 컴파일 타임에 닫힌 set만 다룹니다.
+- C++20 concepts와 함께 쓰면 interface가 명확해집니다.
 
 ## 관련 항목
 

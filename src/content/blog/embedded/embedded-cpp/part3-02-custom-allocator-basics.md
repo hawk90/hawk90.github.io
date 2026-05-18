@@ -363,11 +363,11 @@ Pool이 *3배 빠름 + 결정적*. 임베디드 real-time에 *중요*.
 
 ## 정리
 
-- Custom allocator = *STL의 메모리 출처 제어*. `value_type`, `allocate`, `deallocate` 3개.
-- *Stateful allocator*는 *pool/arena 포인터* 보유. 컨테이너 간 *비교 의미 있음*.
-- *Arena allocator* = bump pointer, *개별 해제 불가, 일괄 reset*. transient 객체에 적합.
-- `-fno-exceptions`에서는 *throw 대신 abort*. STL 표준 호환 *깨질 수* 있음.
-- C++17 *std::pmr*가 *훨씬 단순*. 다음 chapter.
+- Custom allocator는 STL의 메모리 출처를 제어하며 `value_type`, `allocate`, `deallocate` 세 가지만 구현하면 됩니다.
+- Stateful allocator는 pool/arena 포인터를 보유하므로 컨테이너 간 비교에 의미가 있습니다.
+- Arena allocator는 bump pointer 방식이라 개별 해제는 불가하지만 일괄 reset이 가능해 transient 객체에 적합합니다.
+- `-fno-exceptions` 환경에서는 throw 대신 abort를 사용하며 STL 표준 호환이 깨질 수 있습니다.
+- C++17 `std::pmr`이 훨씬 단순하며 다음 chapter에서 다룹니다.
 
 ## 관련 항목
 

@@ -35,7 +35,10 @@ assert(pool.available() == 31);
 
 ## Pool의 핵심 — Free List
 
-free 블록들을 *연결 리스트*로. *할당된 블록의 메모리에 next pointer 저장*.
+free 블록들을 연결 리스트로 관리합니다. 할당된 블록의 메모리에는 next pointer를 저장해 둡니다.
+
+![Pool free list — 초기 상태와 두 블록 할당 후](/images/blog/embedded-cpp/diagrams/part3-03-pool-free-list.svg)
+
 
 ```text
 처음 상태:
@@ -451,12 +454,12 @@ ObjectPool<Order, 100>:
 
 ## 정리
 
-- Pool = *고정 크기 블록 + free list*. O(1) 할당/해제.
-- `union` 트릭으로 *추가 메모리 0*.
-- *Thread safety*: mutex (간단) 또는 atomic CAS (lock-free).
-- *RAII wrapper* (`PoolUniquePtr`)로 *예외 안전 + 자동 해제*.
-- 통계 추적으로 *capacity tuning*.
-- *여러 크기*는 *multi-pool* — fragmentation 일부 발생.
+- Pool은 고정 크기 블록과 free list로 구성되며 O(1)에 할당과 해제가 가능합니다.
+- `union` 트릭으로 추가 메모리 없이 free list를 둘 수 있습니다.
+- Thread safety는 mutex(간단)나 atomic CAS(lock-free)로 확보합니다.
+- RAII wrapper인 `PoolUniquePtr`로 예외 안전과 자동 해제를 보장합니다.
+- 통계를 추적하면 capacity tuning이 가능합니다.
+- 여러 크기를 다룰 때는 multi-pool로 가며 fragmentation이 일부 발생합니다.
 
 ## 관련 항목
 

@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  slot/.style={rectangle, draw=nodebord, line width=0.45pt, minimum width=22mm, minimum height=10mm, inner sep=2pt, align=center, font=\sffamily\small},
+  used/.style={slot, fill=clifill, draw=clibord},
+  freeS/.style={slot, fill=impfill, draw=impbord},
+  ptr/.style={rectangle, draw=focusc, line width=0.6pt, fill=warnfill, minimum width=18mm, minimum height=7mm, inner sep=2pt, font=\sffamily\bfseries\footnotesize}
+]
+
+% Top: initial state
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 6.5) {초기 상태 — 모두 free};
+
+\node[freeS] (s0) at (-4, 5) {slot 0};
+\node[freeS, right=0pt of s0] (s1) {slot 1};
+\node[freeS, right=0pt of s1] (s2) {slot 2};
+\node[freeS, right=0pt of s2] (s3) {slot 3};
+
+\node[ptr] (head) at (-4, 6) {free\_head};
+\draw[arr, draw=focusc] (head.south) -- (s0.north);
+
+\draw[arr, draw=impbord] (s0.east |- s0.center) ++(0, 0.8) -- ++(0, 0.4) to[bend right=40] (s1.north);
+\draw[arr, draw=impbord] (s1.east |- s1.center) ++(0, 0.8) -- ++(0, 0.4) to[bend right=40] (s2.north);
+\draw[arr, draw=impbord] (s2.east |- s2.center) ++(0, 0.8) -- ++(0, 0.4) to[bend right=40] (s3.north);
+\node[font=\sffamily\footnotesize, text=mutec, right=3mm of s3] {nullptr};
+
+% Bottom: after 2 allocations
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 2.5) {slot 0, slot 1 할당 후};
+
+\node[used] (u0) at (-4, 1) {slot 0 \\ (사용)};
+\node[used, right=0pt of u0] (u1) {slot 1 \\ (사용)};
+\node[freeS, right=0pt of u1] (f2) {slot 2};
+\node[freeS, right=0pt of f2] (f3) {slot 3};
+
+\node[ptr] (head2) at (-1.5, 2) {free\_head};
+\draw[arr, draw=focusc] (head2.south) -- (f2.north);
+
+\draw[arr, draw=impbord] (f2.east |- f2.center) ++(0, 0.8) -- ++(0, 0.4) to[bend right=40] (f3.north);
+\node[font=\sffamily\footnotesize, text=mutec, right=3mm of f3] {nullptr};
+
+\node[caption, below=4mm of u0, anchor=west, text width=10cm] {free 슬롯의 메모리에 next pointer 저장 — union 활용으로 추가 공간 0};
+
+\end{tikzpicture}
+\end{document}

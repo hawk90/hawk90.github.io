@@ -387,11 +387,11 @@ V2:
 
 ## 정리
 
-- C `#define FLAG_X (1<<n)` 대신 *enum class + bit operators*.
-- *Type safety* — 무관한 정수와 *섞이지 않음*.
-- *Template* 또는 *macro*로 *operator 자동 정의*.
-- 임베디드 register flag, status flag에 적합.
-- *Zero-cost* — 컴파일 결과 동일.
+- C의 `#define FLAG_X (1<<n)` 대신 `enum class`와 bit operator를 함께 씁니다.
+- 무관한 정수와 섞이지 않으므로 type safety가 보장됩니다.
+- Template이나 매크로로 operator를 자동 정의합니다.
+- 임베디드의 register flag와 status flag에 적합합니다.
+- 컴파일 결과가 동일하므로 zero-cost입니다.
 
 ## 관련 항목
 

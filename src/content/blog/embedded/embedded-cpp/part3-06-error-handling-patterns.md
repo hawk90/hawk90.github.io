@@ -444,12 +444,12 @@ int f() { throw std::runtime_error("err"); }
 
 ## 정리
 
-- 에러 처리 *4결정*: fatal/recoverable, error code 표준, Result type 통일, chain 전파.
-- *프로젝트 전체 통일* — `Result<T> = tl::expected<T, Error>`.
-- *Try macro*나 `and_then`으로 *체인 단순화*.
-- *Logging 통합* — `source_location` 또는 매크로.
-- *Recovery 패턴*: retry, fallback, state machine 전이.
-- *Fatal error*는 *비휘발성 메모리에 정보 보존* 후 reset.
+- 에러 처리는 네 가지 결정으로 정리됩니다 — fatal과 recoverable 구분, error code 표준화, Result type 통일, chain 전파.
+- 프로젝트 전체에서 `Result<T> = tl::expected<T, Error>`로 통일합니다.
+- Try macro나 `and_then`으로 체인을 단순화합니다.
+- Logging은 `source_location`이나 매크로로 통합합니다.
+- Recovery 패턴은 retry, fallback, state machine 전이로 구성됩니다.
+- Fatal error는 비휘발성 메모리에 정보를 보존한 뒤 reset합니다.
 
 ## 관련 항목
 

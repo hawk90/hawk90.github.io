@@ -383,12 +383,12 @@ runtime: 0 (no guards)
 
 ## 정리
 
-- Singleton은 *임베디드에서도 회피*. *전역 상태 + test 어려움 + init order*.
-- *대안 3가지*: Construct-On-First-Use, Static DI, Service Locator.
-- *Static DI 권장* — main에서 wiring, 명시적 의존성.
-- *Template injection*은 zero-cost.
-- *진짜 hardware singleton*은 *interface 통해 DI*.
-- DI framework는 *임베디드에 overkill*. *manual wiring*.
+- Singleton은 임베디드에서도 회피합니다. 전역 상태, 테스트 난이도, init order 문제가 따라옵니다.
+- 대안은 세 가지입니다 — Construct-On-First-Use, Static DI, Service Locator.
+- Static DI를 권장합니다. main에서 wiring하고 의존성을 명시합니다.
+- Template injection은 zero-cost입니다.
+- 진짜 hardware singleton도 interface를 거쳐 DI합니다.
+- DI framework는 임베디드에 overkill이므로 manual wiring을 사용합니다.
 
 ## 관련 항목
 

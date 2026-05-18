@@ -491,11 +491,11 @@ raii_lock:
 
 ## 정리
 
-- *5가지 표준 RAII 패턴*: `lock_guard`, `scoped_lock`, `unique_lock`, `unique_ptr+deleter`, `ScopeGuard`.
-- 임베디드 추가 패턴: *Scoped enable/disable*, *Move-only handle*, *Critical section with preservation*.
-- *Custom deleter는 struct/lambda* (empty class optimization). 함수 포인터는 *sizeof 증가*.
-- *ScopeGuard*는 일회성 cleanup의 *우주공통 패턴*. `gsl::finally`도 동일.
-- 모든 RAII는 *zero-cost* — 컴파일러가 *생성자/소멸자 인라인*.
+- 표준 RAII 패턴은 5가지입니다 — `lock_guard`, `scoped_lock`, `unique_lock`, `unique_ptr+deleter`, `ScopeGuard`.
+- 임베디드에서는 Scoped enable/disable, Move-only handle, Critical section with preservation 패턴이 추가됩니다.
+- Custom deleter는 struct나 lambda로 작성해 empty class optimization을 받으며, 함수 포인터는 sizeof를 늘립니다.
+- ScopeGuard는 일회성 cleanup의 보편 패턴이며 `gsl::finally`도 같은 역할을 합니다.
+- 모든 RAII는 zero-cost이며 컴파일러가 생성자와 소멸자를 인라인합니다.
 
 ## 관련 항목
 

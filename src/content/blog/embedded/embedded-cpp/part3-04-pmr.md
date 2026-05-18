@@ -347,12 +347,12 @@ runtime alloc: virtual 호출, ~15 cycles
 
 ## 정리
 
-- `std::pmr` (C++17) = *polymorphic memory resource*. *런타임 allocator 선택*.
-- `std::pmr::vector<int>`가 *type 통일*. 다른 resource 사용 가능.
-- *세 표준 resource*: new_delete (heap), null (실패), monotonic (bump pointer).
-- *Custom resource*: `memory_resource` 상속, virtual 3개 구현.
-- 임베디드 패턴 — *static buffer + monotonic_buffer_resource* + *frame reset*.
-- *RTTI 없는 환경*에선 `do_is_equal` *직접 type id*.
+- `std::pmr`(C++17)은 polymorphic memory resource로, 런타임에 allocator를 선택합니다.
+- `std::pmr::vector<int>`는 type을 통일하면서 다른 resource를 사용할 수 있습니다.
+- 표준 resource는 세 가지입니다 — `new_delete`(heap), `null`(실패), `monotonic`(bump pointer).
+- Custom resource는 `memory_resource`를 상속하고 virtual 함수 3개를 구현합니다.
+- 임베디드 패턴은 static buffer와 monotonic_buffer_resource를 frame 단위로 reset하는 것입니다.
+- RTTI 없는 환경에서는 `do_is_equal`에 직접 type id를 다룹니다.
 
 ## 관련 항목
 

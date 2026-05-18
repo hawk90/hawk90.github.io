@@ -313,12 +313,12 @@ contention 높으면 *CAS retry loop*. mutex보다 *느릴 수* 있음. *측정*
 
 ## 정리
 
-- Lock-free = *atomic operation*. mutex 없이 동시성.
-- 핵심: `std::atomic`, CAS (compare_exchange).
-- *Memory order*: relaxed/acquire/release/seq_cst — 필요한 최소.
-- *SPSC queue*가 *임베디드 lock-free의 표준*. ISR-main 통신.
-- *Cortex-M0/M0+*는 atomic 없음 — critical section.
-- *ABA problem* 주의 — 복잡 lock-free는 *전문 라이브러리*.
+- Lock-free는 atomic operation으로 mutex 없이 동시성을 다룹니다.
+- 핵심은 `std::atomic`과 CAS(`compare_exchange`)입니다.
+- Memory order는 relaxed/acquire/release/seq_cst 중 필요한 최소만 선택합니다.
+- SPSC queue가 임베디드 lock-free의 표준이며 ISR과 main 통신에 적합합니다.
+- Cortex-M0/M0+는 atomic을 지원하지 않으므로 critical section을 씁니다.
+- ABA problem에 주의하고 복잡한 lock-free 자료구조는 전문 라이브러리에 맡깁니다.
 
 ## 관련 항목
 

@@ -18,6 +18,10 @@ ELF 파일은 *섹션의 집합*입니다. `.text`, `.rodata`, `.data`, `.bss`, 
 
 벤더 (STM32, NXP)가 *기본 링커 스크립트*를 제공하지만, *C++가 추가하는 섹션*(`.init_array`, `.fini_array`, `.gnu.linkonce.*`)이나 *프로젝트 특화 영역*(외부 SDRAM, CCM RAM, DMA buffer)을 다루려면 *직접 이해*해야 합니다.
 
+전형적인 STM32F4의 메모리 레이아웃은 다음과 같이 배치됩니다.
+
+![STM32F4 메모리 맵 — Flash/RAM/CCM 배치](/images/blog/embedded-cpp/diagrams/part1-07-memory-map.svg)
+
 ## 링커 스크립트의 두 핵심 — MEMORY와 SECTIONS
 
 ### MEMORY — 사용 가능한 메모리 영역
@@ -418,11 +422,11 @@ CI에 추가해 *영역별 사용량 추적*.
 
 ## 정리
 
-- 링커 스크립트 = *MEMORY 영역 + SECTIONS 배치*.
-- C++가 추가하는 섹션: `.init_array`, `.fini_array`, `.eh_frame` — *KEEP*, *gc-sections* 주의.
-- `.data` = *VMA in RAM + LMA in FLASH*. Reset_Handler가 *copy*.
-- *Custom 섹션*으로 큰 buffer를 CCM/SDRAM에. *DMA는 일반 SRAM 필수*.
-- `-Wl,-Map`으로 *완전한 배치 정보*. CI에 `--print-memory-usage`.
+- 링커 스크립트는 MEMORY 영역 정의와 SECTIONS 배치 두 부분으로 구성됩니다.
+- C++가 추가하는 섹션은 `.init_array`, `.fini_array`, `.eh_frame`이며 `KEEP`과 `--gc-sections`의 상호작용에 주의합니다.
+- `.data`는 VMA를 RAM에, LMA를 FLASH에 둡니다. Reset_Handler가 부팅 시 복사합니다.
+- 큰 buffer는 custom 섹션으로 CCM이나 SDRAM에 배치할 수 있습니다. 단 DMA buffer는 일반 SRAM에 두어야 합니다.
+- `-Wl,-Map`으로 완전한 배치 정보를 얻고, CI에는 `--print-memory-usage`를 추가해 영역별 사용량을 추적합니다.
 
 ## 관련 항목
 

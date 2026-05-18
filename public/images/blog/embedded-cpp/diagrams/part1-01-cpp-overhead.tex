@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  feat/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=42mm, minimum height=8mm, inner sep=3pt, align=left, font=\sffamily\footnotesize},
+  zero/.style={feat, fill=impfill, draw=impbord},
+  small/.style={feat, fill=clifill, draw=clibord},
+  big/.style={feat, fill=confill, draw=conbord},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc}
+]
+
+% Title
+\node[hdr] at (0, 6.5) {Modern C++ 기능별 런타임 비용};
+
+% Zero-cost column (left)
+\node[font=\sffamily\bfseries\footnotesize, text=impbord] at (-5, 5.5) {Zero-cost (0)};
+\node[zero] (z1) at (-5, 4.6) {클래스 + 멤버 함수};
+\node[zero, below=2mm of z1] (z2) {RAII (소멸자)};
+\node[zero, below=2mm of z2] (z3) {Templates};
+\node[zero, below=2mm of z3] (z4) {constexpr / consteval};
+\node[zero, below=2mm of z4] (z5) {CRTP};
+\node[zero, below=2mm of z5] (z6) {unique\_ptr};
+\node[zero, below=2mm of z6] (z7) {std::optional / variant};
+
+% Small cost (middle)
+\node[font=\sffamily\bfseries\footnotesize, text=clibord] at (0, 5.5) {Small cost};
+\node[small] (s1) at (0, 4.6) {Virtual function (1 vtable lookup)};
+\node[small, below=2mm of s1] (s2) {shared\_ptr (atomic counter)};
+\node[small, below=2mm of s2] (s3) {std::function (capture-less)};
+
+% Big cost (right)
+\node[font=\sffamily\bfseries\footnotesize, text=conbord] at (5, 5.5) {Big cost — 보통 끔};
+\node[big] (b1) at (5, 4.6) {Exception handling};
+\node[big, below=2mm of b1] (b2) {RTTI (dynamic\_cast)};
+\node[big, below=2mm of b2] (b3) {iostream (cout, etc.)};
+\node[big, below=2mm of b3] (b4) {Heap (new, malloc)};
+\node[big, below=2mm of b4] (b5) {std::function (with capture)};
+
+% Bottom note
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=14cm] at (-7, -0.5) {임베디드의 핵심 = 우측 영역을 끄거나 대체. -fno-exceptions, -fno-rtti, -Os};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  layer/.style={rectangle, draw=nodebord, line width=0.5pt, minimum width=88mm, minimum height=14mm, inner sep=4pt, align=center, font=\sffamily\small},
+  app/.style={layer, fill=impfill, draw=impbord, font=\sffamily\bfseries\small},
+  iface/.style={layer, fill=prpfill, draw=prpbord, font=\sffamily\bfseries\small},
+  vendor/.style={layer, fill=clifill, draw=clibord},
+  hw/.style={layer, fill=neutfill, draw=neutbord, font=\sffamily\bfseries\small}
+]
+
+\node[app] (app) at (0, 6) {Application \\ \footnotesize{포터블 — 벤더 무관}};
+\node[iface] (iface) at (0, 4.2) {HAL Interface \\ \footnotesize{IGpio, IUart, ISpi ...}};
+
+% Vendor row — 3 columns
+\node[vendor, minimum width=27mm, minimum height=14mm] (stm) at (-3, 2.4) {STM32 \\ \footnotesize{HAL\_GPIO}};
+\node[vendor, minimum width=27mm, minimum height=14mm] (nxp) at (0, 2.4) {NXP \\ \footnotesize{GPIO\_Port}};
+\node[vendor, minimum width=27mm, minimum height=14mm] (nrf) at (3, 2.4) {Nordic \\ \footnotesize{nrf\_gpio}};
+
+\node[hw] (hw) at (0, 0.6) {Hardware (MCU registers)};
+
+% Edges
+\draw[uses, line width=0.6pt] (app.south) -- (iface.north);
+\draw[realize] (stm.north) -- ($(iface.south) + (-3, 0)$);
+\draw[realize] (nxp.north) -- (iface.south);
+\draw[realize] (nrf.north) -- ($(iface.south) + (3, 0)$);
+\draw[arr] (stm.south) -- ($(hw.north) + (-3, 0)$);
+\draw[arr] (nxp.south) -- (hw.north);
+\draw[arr] (nrf.south) -- ($(hw.north) + (3, 0)$);
+
+% Annotations
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (5, 6) {지원 환경};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (5, 4.2) {공통 추상};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (5, 2.4) {벤더별 구현};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (5, 0.6) {Memory-mapped};
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (0, 7.5) {HAL 3 계층 — Vendor 격리};
+
+\end{tikzpicture}
+\end{document}

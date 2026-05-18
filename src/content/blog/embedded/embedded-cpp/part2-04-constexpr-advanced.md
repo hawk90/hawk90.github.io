@@ -346,11 +346,11 @@ boot time   : main까지 +0 ms
 
 ## 정리
 
-- `constexpr` 함수는 *컴파일 타임 sort, search, hash, parse* 모두 가능 (C++14+).
-- 임베디드 활용: *LUT, fixed-point 변환, device tree, register mask*.
-- `static_assert`로 *설계 결정 컴파일 시점 검증*.
-- C++20 — `constexpr new`/`delete`, `constexpr std::sort`. *컴파일 타임 vector* 가능.
-- 못 하는 것 — *I/O, 영구 동적 메모리, system API*.
+- `constexpr` 함수로 컴파일 타임에 sort, search, hash, parse를 모두 수행할 수 있습니다(C++14+).
+- 임베디드에서는 LUT, fixed-point 변환, device tree, register mask에 활용합니다.
+- `static_assert`로 설계 결정을 컴파일 시점에 검증합니다.
+- C++20은 `constexpr new`/`delete`와 `constexpr std::sort`를 추가했고, 컴파일 타임 vector도 가능합니다.
+- 못 하는 것은 I/O, 영구 동적 메모리, system API입니다.
 
 ## 관련 항목
 
