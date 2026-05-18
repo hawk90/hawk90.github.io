@@ -3,7 +3,7 @@ title: "UML 11: 인터페이스 · 타입 · 역할 — ball-and-socket과 의�
 date: 2026-04-01T11:00:00
 description: "제공 인터페이스(lollipop) vs 필요 인터페이스(socket) — 컴포넌트 결합의 표준 어휘."
 tags: [UML, Interface, Ports, DIP, SOLID]
-series: "UML User Guide"
+series: "UML 2.5.1"
 seriesOrder: 11
 draft: true
 ---

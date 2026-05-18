@@ -3,7 +3,7 @@ title: "UML 5: 관계 — Dependency · Association · Generalization · Realiza
 date: 2026-04-01T05:00:00
 description: "네 가지 관계만 알면 UML 다이어그램의 99%는 읽을 수 있다."
 tags: [UML, Class Diagram, Relationships, OOP]
-series: "UML User Guide"
+series: "UML 2.5.1"
 seriesOrder: 5
 draft: true
 ---

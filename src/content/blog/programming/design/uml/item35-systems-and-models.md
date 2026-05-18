@@ -1,24 +1,24 @@
 ---
-title: "UML 31: 시스템과 모델 — 시리즈를 마무리하며"
+title: "UML 35: 시스템과 모델 — 시리즈를 마무리하며"
 date: 2026-04-02T07:00:00
-description: "31편의 UML 시리즈 정리. System은 Models를 포함하고, Models는 Diagrams를 가진다."
+description: "35편의 UML 2.5.1 시리즈 정리. System은 Models를 포함하고, Models는 Diagrams를 가진다."
 tags: [UML, Modeling, Summary, System]
-series: "UML User Guide"
-seriesOrder: 31
+series: "UML 2.5.1"
+seriesOrder: 35
 draft: true
 ---
 
 ## 한 줄 요약
 
-> **"시스템 ⊃ 모델 ⊃ 다이어그램"** — 시스템은 여러 모델의 묶음, 모델은 여러 다이어그램으로 그려진다. 31편 동안 다룬 모든 것이 이 한 줄에 모인다.
+> **"시스템 ⊃ 모델 ⊃ 다이어그램"** — 시스템은 여러 모델의 묶음, 모델은 여러 다이어그램으로 그려진다. 35편 동안 다룬 모든 것이 이 한 줄에 모인다.
 
 ## 어떤 문제를 푸는가
 
-시리즈 30편 동안 13가지 다이어그램을 다뤘습니다. 마지막으로 이 모든 것을 **한 시스템 안에서** 어떻게 관리하는지를 봅니다.
+시리즈 34편 동안 UML 2.5.1의 14가지 다이어그램을 다뤘습니다. 마지막으로 이 모든 것을 **한 시스템 안에서** 어떻게 관리하는지를 봅니다.
 
 ## 한눈에 보는 구조
 
-![System contains models contains diagrams](/images/blog/uml/diagrams/item31-systems-and-models.svg)
+![System contains models contains diagrams](/images/blog/uml/diagrams/item35-systems-and-models.svg)
 
 - **시스템**(System): 우리가 모델링하려는 대상 전체.
 - **모델**(Model): 시스템의 한 면(view)을 보여주는 추상.
@@ -74,7 +74,7 @@ UML 도구는 이 trace 링크를 자동으로 관리합니다.
 
 - 모델링의 4가지 목적: 시각화·명세·구축·문서화
 - UML 세 덩어리: building blocks, rules, common mechanisms
-- 13개 다이어그램은 모두 이 토대 위에
+- UML 2.5.1의 14개 다이어그램은 모두 이 토대 위에
 
 ### Part 2 (4-8): 기본 구조
 
@@ -109,6 +109,13 @@ UML 도구는 이 trace 링크를 자동으로 관리합니다.
 - 협력과 패턴: 재사용 가능한 디자인
 - 컴포넌트·배포 다이어그램: 운영의 청사진
 
+### Part 7 (31-34): UML 2.5.1 추가 다이어그램
+
+- **프로파일 다이어그램** — 도메인 전용 UML 확장 (스테레오타입·태그값·제약)
+- **컴포지트 구조 다이어그램** — 클래스 내부의 부품·포트·연결
+- **커뮤니케이션 다이어그램** — 시퀀스의 공간적 자매 (구 "협력 다이어그램")
+- **상호작용 개요 + 타이밍** — 상호작용을 흐름과 시간 축으로 그리는 두 시각
+
 ## 실무 권장 사항
 
 ### 최소한 그려둘 것
@@ -139,7 +146,7 @@ UML은 30년 가까이 살아남았습니다. 다음 두 이유로:
 
 > **"좋은 모델은 좋은 코드보다 오래간다."**
 
-31편이 끝났습니다. 화이트보드에 UML을 그릴 때 이 시리즈의 한 편이라도 떠올라 도움이 된다면 충분합니다.
+35편이 끝났습니다. 화이트보드에 UML을 그릴 때 이 시리즈의 한 편이라도 떠올라 도움이 된다면 충분합니다.
 
 감사합니다.
 
@@ -177,4 +184,8 @@ UML은 30년 가까이 살아남았습니다. 다음 두 이유로:
 28. [패턴과 프레임워크](/blog/programming/design/uml/item28-patterns-and-frameworks)
 29. [컴포넌트 다이어그램](/blog/programming/design/uml/item29-component-diagrams)
 30. [배포 다이어그램](/blog/programming/design/uml/item30-deployment-diagrams)
-31. **시스템과 모델** (현재)
+31. [프로파일 다이어그램](/blog/programming/design/uml/item31-profile-diagrams)
+32. [컴포지트 구조 다이어그램](/blog/programming/design/uml/item32-composite-structure-diagrams)
+33. [커뮤니케이션 다이어그램](/blog/programming/design/uml/item33-communication-diagrams)
+34. [상호작용 개요 · 타이밍](/blog/programming/design/uml/item34-interaction-overview-and-timing)
+35. **시스템과 모델** (현재)

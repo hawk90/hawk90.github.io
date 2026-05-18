@@ -3,7 +3,7 @@ title: "UML 29: 컴포넌트 다이어그램 — 빌드·배포 단위의 아키
 date: 2026-04-02T05:00:00
 description: "MSA·모놀리스·라이브러리 아키텍처를 한 장에. 인터페이스로 연결된 컴포넌트의 지도."
 tags: [UML, Component Diagram, Architecture, Microservices]
-series: "UML User Guide"
+series: "UML 2.5.1"
 seriesOrder: 29
 draft: true
 ---
