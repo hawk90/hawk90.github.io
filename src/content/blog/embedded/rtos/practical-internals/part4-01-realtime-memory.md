@@ -1,9 +1,9 @@
 ---
 title: "4-01: 실시간 메모리 요구사항"
-date: 2026-05-12T31:00:00
+date: 2026-05-12T33:00:00
 description: "4-01: 실시간 메모리 요구사항"
 series: "Practical RTOS Internals"
-seriesOrder: 31
+seriesOrder: 33
 tags: [memory, determinism, fragmentation]
 draft: true
 ---

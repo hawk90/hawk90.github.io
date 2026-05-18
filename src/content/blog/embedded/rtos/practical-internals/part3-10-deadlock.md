@@ -1,9 +1,9 @@
 ---
 title: "3-10: 데드락 탐지와 회피"
-date: 2026-05-12T30:00:00
+date: 2026-05-12T31:00:00
 description: "3-10: 데드락 탐지와 회피"
 series: "Practical RTOS Internals"
-seriesOrder: 30
+seriesOrder: 31
 tags: [deadlock, detection, avoidance]
 draft: true
 ---

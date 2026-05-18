@@ -1,9 +1,9 @@
 ---
 title: "3-05: Priority Inheritance 구현"
-date: 2026-05-12T25:00:00
+date: 2026-05-12T26:00:00
 description: "3-05: Priority Inheritance 구현"
 series: "Practical RTOS Internals"
-seriesOrder: 25
+seriesOrder: 26
 tags: [priority-inheritance, dynamic]
 draft: true
 ---

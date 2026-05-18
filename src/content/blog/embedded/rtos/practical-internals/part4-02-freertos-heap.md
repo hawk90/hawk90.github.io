@@ -1,9 +1,9 @@
 ---
 title: "4-02: FreeRTOS heap_1~5 분석"
-date: 2026-05-12T32:00:00
+date: 2026-05-12T34:00:00
 description: "4-02: FreeRTOS heap_1~5 분석"
 series: "Practical RTOS Internals"
-seriesOrder: 32
+seriesOrder: 34
 tags: [freertos, heap, allocator]
 draft: true
 ---

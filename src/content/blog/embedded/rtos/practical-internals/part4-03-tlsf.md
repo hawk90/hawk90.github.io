@@ -1,9 +1,9 @@
 ---
 title: "4-03: TLSF 알고리즘"
-date: 2026-05-12T33:00:00
+date: 2026-05-12T35:00:00
 description: "4-03: TLSF 알고리즘"
 series: "Practical RTOS Internals"
-seriesOrder: 33
+seriesOrder: 35
 tags: [tlsf, allocator, deterministic]
 draft: true
 ---

@@ -1,9 +1,9 @@
 ---
 title: "3-06: Priority Ceiling Protocol"
-date: 2026-05-12T26:00:00
+date: 2026-05-12T27:00:00
 description: "3-06: Priority Ceiling Protocol"
 series: "Practical RTOS Internals"
-seriesOrder: 26
+seriesOrder: 27
 tags: [priority-ceiling, immediate, original]
 draft: true
 ---

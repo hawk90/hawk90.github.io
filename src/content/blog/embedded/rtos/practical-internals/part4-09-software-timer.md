@@ -1,9 +1,9 @@
 ---
 title: "4-09: Software Timer 구현"
-date: 2026-05-12T39:00:00
+date: 2026-05-12T41:00:00
 description: "4-09: Software Timer 구현"
 series: "Practical RTOS Internals"
-seriesOrder: 39
+seriesOrder: 41
 tags: [software-timer, callback, daemon]
 draft: true
 ---

@@ -1,9 +1,9 @@
 ---
 title: "4-08: Spinlock과 SMP 동기화"
-date: 2026-05-12T38:00:00
+date: 2026-05-12T40:00:00
 description: "4-08: Spinlock과 SMP 동기화"
 series: "Practical RTOS Internals"
-seriesOrder: 38
+seriesOrder: 40
 tags: [spinlock, smp, dmb]
 draft: true
 ---

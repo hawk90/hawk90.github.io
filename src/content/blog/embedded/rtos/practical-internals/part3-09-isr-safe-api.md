@@ -1,9 +1,9 @@
 ---
 title: "3-09: ISR-safe API 설계"
-date: 2026-05-12T29:00:00
+date: 2026-05-12T30:00:00
 description: "3-09: ISR-safe API 설계"
 series: "Practical RTOS Internals"
-seriesOrder: 29
+seriesOrder: 30
 tags: [isr-safe, fromisr, deferred]
 draft: true
 ---

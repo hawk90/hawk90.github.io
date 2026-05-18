@@ -1,9 +1,9 @@
 ---
 title: "3-08: Event Group 구현"
-date: 2026-05-12T28:00:00
+date: 2026-05-12T29:00:00
 description: "3-08: Event Group 구현"
 series: "Practical RTOS Internals"
-seriesOrder: 28
+seriesOrder: 29
 tags: [event-group, bit-flag, and-or]
 draft: true
 ---

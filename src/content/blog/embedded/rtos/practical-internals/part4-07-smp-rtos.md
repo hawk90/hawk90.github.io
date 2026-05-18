@@ -1,9 +1,9 @@
 ---
 title: "4-07: SMP RTOS 설계"
-date: 2026-05-12T37:00:00
+date: 2026-05-12T39:00:00
 description: "4-07: SMP RTOS 설계"
 series: "Practical RTOS Internals"
-seriesOrder: 37
+seriesOrder: 39
 tags: [smp, multicore, load-balancing]
 draft: true
 ---

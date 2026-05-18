@@ -1,9 +1,9 @@
 ---
 title: "5-05: RTOS 선택 가이드"
-date: 2026-05-12T45:00:00
+date: 2026-05-12T50:00:00
 description: "5-05: RTOS 선택 가이드"
 series: "Practical RTOS Internals"
-seriesOrder: 45
+seriesOrder: 50
 tags: [selection, comparison, freertos, zephyr, threadx]
 draft: true
 ---

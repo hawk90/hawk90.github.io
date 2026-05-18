@@ -1,9 +1,9 @@
 ---
 title: "3-01: Critical Section 구현"
-date: 2026-05-12T21:00:00
+date: 2026-05-12T22:00:00
 description: "3-01: Critical Section 구현"
 series: "Practical RTOS Internals"
-seriesOrder: 21
+seriesOrder: 22
 tags: [critical-section, irq-disable, mask]
 draft: true
 ---

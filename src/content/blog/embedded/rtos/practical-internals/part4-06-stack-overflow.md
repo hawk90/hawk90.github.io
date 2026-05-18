@@ -1,9 +1,9 @@
 ---
 title: "4-06: 스택 오버플로우 탐지"
-date: 2026-05-12T36:00:00
+date: 2026-05-12T38:00:00
 description: "4-06: 스택 오버플로우 탐지"
 series: "Practical RTOS Internals"
-seriesOrder: 36
+seriesOrder: 38
 tags: [stack-overflow, canary, mpu]
 draft: true
 ---

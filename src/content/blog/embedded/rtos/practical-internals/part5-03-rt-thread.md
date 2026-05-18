@@ -1,9 +1,9 @@
 ---
 title: "5-03: RT-Thread 분석"
-date: 2026-05-12T43:00:00
+date: 2026-05-12T48:00:00
 description: "5-03: RT-Thread 분석"
 series: "Practical RTOS Internals"
-seriesOrder: 43
+seriesOrder: 48
 tags: [rt-thread, source-analysis]
 draft: true
 ---
