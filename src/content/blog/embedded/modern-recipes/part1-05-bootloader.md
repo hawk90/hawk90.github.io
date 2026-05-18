@@ -1,13 +1,307 @@
 ---
-title: "Bootloader 체인 이해"
-date: 2026-05-12T06:00:00
-description: "Bootloader 체인 이해"
+title: "1-05: Bootloader 체인 — BootROM·SPL·U-Boot·Kernel·Secure Boot"
+date: 2026-05-13T22:00:00
+description: "Cortex-A 부팅 단계. BootROM → SPL → U-Boot → Linux. Secure boot, FIT image, A/B."
 series: "Modern Embedded Recipes"
 seriesOrder: 5
-tags: [embedded, recipes]
+tags: [recipes, bootloader, u-boot, secure-boot, spl]
 draft: true
 ---
 
-> **Modern Embedded Recipes** - Bootloader 체인 이해
+## 한 줄 요약
 
-(작성 예정)
+> **"부팅 = 점진적 환경 확장"** — 작은 ROM에서 출발해 전체 OS로.
+
+## 일반 ARM Cortex-A 부팅 단계
+
+```text
+1. BootROM (chip 내장, mask ROM)
+   ├ 8-32 KB
+   ├ DDR 미초기화 — internal SRAM에서 실행
+   └ 다음 부트 매체 select (SD·eMMC·NOR·USB)
+        ↓
+2. SPL (Secondary Program Loader) — U-Boot의 first stage
+   ├ ~64 KB, internal SRAM 또는 일부 ROM 후
+   ├ DDR 초기화 *수행*
+   └ U-Boot proper를 DDR로 로드
+        ↓
+3. U-Boot (full)
+   ├ 수 MB, DDR에서 실행
+   ├ 환경 변수·script·shell
+   ├ Kernel·DTB·initrd 로드
+   └ 'bootm' / 'booti' 명령으로 jump
+        ↓
+4. Linux kernel
+   ├ DTB 파싱, drivers init
+   └ init process 시작
+        ↓
+5. systemd / busybox init
+   └ 응용 시작
+```
+
+## BootROM
+
+```text
+- Chip mask ROM, 변경 불가
+- TPL (Tertiary), 또는 SBL (Secondary Boot Loader) 라고도
+- Strap pin·fuse로 *부트 소스* 결정
+  · SD card?
+  · eMMC?
+  · NOR flash?
+  · UART (recovery)?
+- 매체에서 *고정 offset*에서 binary 읽음
+  · NXP i.MX: 0x400 offset, IVT header
+  · STM32MP1: 0 offset, partition 'fsbl1'
+  · Allwinner: 8 KB offset
+- Header 검증 → signature check (secure boot 시)
+- SRAM에 로드 후 jump
+```
+
+## SPL (Secondary Program Loader)
+
+```c
+/* U-Boot SPL의 역할 */
+void board_init_f(ulong dummy) {
+    /* 1. Pin mux·clock·UART (debug) */
+    preloader_console_init();
+    
+    /* 2. DDR controller·PHY 초기화 */
+    ddr_init();
+    
+    /* 3. 다음 단계 binary 로드 */
+    spl_board_init();
+    spl_load_image(IH_TYPE_FIRMWARE, &spl_image);
+    
+    /* 4. Jump to U-Boot proper */
+    jump_to_image_no_args(&spl_image);
+}
+```
+
+크기 *극도로 제한* — chip 내장 SRAM에 들어가야. 64-128 KB 범위.
+
+## U-Boot Proper
+
+```bash
+=> printenv
+bootcmd=run distro_bootcmd
+fdt_addr=0x83000000
+kernel_addr=0x82000000
+initrd_addr=0x84000000
+
+=> setenv bootargs "console=ttyS0,115200 root=/dev/mmcblk0p2"
+=> fatload mmc 0:1 ${kernel_addr} zImage
+=> fatload mmc 0:1 ${fdt_addr} board.dtb
+=> bootz ${kernel_addr} - ${fdt_addr}
+```
+
+`bootcmd` = 자동 실행 명령. `bootdelay` 초만 wait, 키 입력 없으면 자동 시작.
+
+## FIT Image — 통합 부트 이미지
+
+```text
+FIT (Flattened Image Tree) — 한 파일에 kernel + DTB + initrd + 서명
+```
+
+```dts
+/dts-v1/;
+/ {
+    description = "ARM kernel image";
+    images {
+        kernel {
+            description = "Linux 5.15";
+            data = /incbin/("./zImage");
+            type = "kernel";
+            arch = "arm";
+            os = "linux";
+            compression = "none";
+            load = <0x82000000>;
+            entry = <0x82000000>;
+            hash-1 { algo = "sha256"; };
+            signature-1 {
+                algo = "sha256,rsa2048";
+                key-name-hint = "dev";
+            };
+        };
+        fdt {
+            data = /incbin/("./board.dtb");
+            type = "flat_dt";
+        };
+    };
+    configurations {
+        default = "conf-1";
+        conf-1 {
+            kernel = "kernel";
+            fdt = "fdt";
+        };
+    };
+};
+```
+
+```bash
+mkimage -f boot.its boot.itb
+```
+
+`boot.itb` 단일 파일로 *서명 + 검증* 가능.
+
+## Secure Boot
+
+```text
+Hardware Root of Trust:
+[eFuse / OTP — public key hash]
+   ↓
+[BootROM — public key 확인]
+   ↓
+[SPL — 서명된 image만 로드]
+   ↓
+[U-Boot — kernel/DTB 서명 검증]
+   ↓
+[Kernel — IMA·dm-verity로 user space 검증]
+```
+
+각 단계에서 *다음 stage 서명 확인*. 한 단계라도 검증 실패 → 부팅 중단.
+
+### TF-A (Trusted Firmware-A)
+
+```text
+BL1 (BootROM)
+   ↓
+BL2 (Trusted Boot Firmware) — DDR 초기화, 다음 binary 로드
+   ↓
+BL31 (EL3 Runtime) — secure monitor, PSCI provider
+   ↓
+BL32 (Secure-EL1 OS) — OP-TEE 등
+   ↓
+BL33 (Non-secure) — U-Boot or Linux 직접
+```
+
+Cortex-A ARMv8 표준 부팅 chain. 자동차 ECU·모바일 SoC 표준.
+
+## A/B Boot — 안전 업데이트
+
+```text
+Partition layout:
+  /boot_a (kernel A + DTB A)
+  /boot_b (kernel B + DTB B)
+  /root_a, /root_b
+  /misc — current slot + boot count
+```
+
+```bash
+# U-Boot
+=> if test ${current_slot} = "a"; then
+     run boot_a
+   else
+     run boot_b
+   fi
+
+# Fail count
+=> setexpr boot_count ${boot_count} + 1
+=> if test ${boot_count} -ge 3; then
+     run rollback_to_other_slot
+   fi
+```
+
+업데이트 후 *N회 부팅 실패* — *자동 rollback*. Android·Tesla·자동차 OTA에서 사용.
+
+## STM32MP1 부팅 예
+
+```text
+1. BootROM (32 KB)
+2. FSBL (First Stage) — TF-A BL2, 100 KB, internal SRAM
+3. SSBL (Second Stage) — U-Boot, DDR로 로드
+4. Linux + DTB + extlinux script
+```
+
+`STM32CubeProgrammer`로 *flash·verify*.
+
+## i.MX8 부팅
+
+```text
+1. BootROM
+2. SCFW (System Controller Firmware) — power·clock 관리 전용 ARM-M
+3. SECO (Security Controller) — secure key 관리
+4. ATF BL31
+5. U-Boot
+6. Linux
+```
+
+이렇게 *멀티 프로세서* 부팅 — 자동차·산업.
+
+## 부팅 디버깅
+
+### UART 부트 로그 캡쳐
+
+```bash
+# host
+screen /dev/ttyUSB0 115200 -L
+
+# 보드 power on → 로그 확인
+[ROM] Booting from SD...
+[SPL] DRAM init done
+[U-Boot] Hit any key to stop autoboot...
+```
+
+각 stage가 다른 *문자열·서명* → 어느 stage가 hang 했는지 식별.
+
+### JTAG로 stage별 break
+
+```bash
+(gdb) target remote :3333
+(gdb) break *0x10000000   # SPL entry
+(gdb) continue
+```
+
+OpenOCD·J-Link로 BootROM 후 *어느 PC*에 있는지 확인.
+
+## 자주 하는 실수
+
+> ⚠️ DTB · kernel 버전 mismatch
+
+```bash
+fatload mmc 0:1 ${fdt_addr} old.dtb   # 옛 DTB
+bootz ${kernel_addr} - ${fdt_addr}     # 새 kernel
+# → 부팅 hang or "Unable to find a usable RTC"
+```
+
+DTB는 *kernel 같은 버전*에서 빌드. 자동화 — Yocto·Buildroot.
+
+> ⚠️ Boot partition offset 잘못
+
+```bash
+dd if=u-boot-spl.img of=/dev/mmcblk0 bs=1k seek=8   # ← BootROM offset 다름
+```
+
+칩별 offset *정확히 확인*. NXP i.MX는 0x400, Allwinner는 8 KB.
+
+> ⚠️ Bootargs 잘못
+
+```bash
+bootargs="console=ttyAMA0,115200 root=/dev/mmcblk0p2"
+# ← console driver 이름 잘못 → 로그 안 나옴
+```
+
+DT의 `chosen { stdout-path = ... }` 와 *일치*.
+
+> ⚠️ Secure boot key 분실
+
+```text
+eFuse에 public key hash 박힘 → revert 불가
+```
+
+개발 시 *test key*로, 양산 직전 *production key*로 burn. 잘못하면 chip *brick*.
+
+## 정리
+
+- 부팅 = **BootROM → SPL → U-Boot → Kernel**.
+- SPL = DDR 초기화 + 다음 단계 로드.
+- **FIT image**로 통합·서명.
+- **A/B boot**로 안전 업데이트.
+- TF-A는 ARMv8 표준 chain (BL1~BL33).
+- 디버깅 — UART 로그·JTAG break.
+
+다음 편은 **JTAG/SWD 디버깅**.
+
+## 관련 항목
+
+- [1-04: Device Tree](/blog/embedded/modern-recipes/part1-04-device-tree)
+- [1-06: JTAG·SWD](/blog/embedded/modern-recipes/part1-06-jtag)
