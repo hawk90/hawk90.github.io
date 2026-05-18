@@ -67,6 +67,8 @@ DB-9 핀 2 (RXD) ──► MAX232 OUT ──► MCU RX
 
 ### Transceiver
 
+![MAX485 transceiver + termination + bias](/images/blog/embedded-serial/diagrams/ch09-rs485-transceiver.svg)
+
 대표 칩 — **MAX485**, **SN75176**, **THVD1450** (TI 모던). 핀 4-8개:
 - `D` (Driver Input) — TTL TX 입력
 - `R` (Receiver Output) — TTL RX 출력

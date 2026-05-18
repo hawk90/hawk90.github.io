@@ -76,16 +76,9 @@ R_p ≤ 1 µs / (0.85 × 80 pF) ≈ 14 kΩ → 안전하게 4.7 kΩ
 
 3.3V MCU + 5V 센서는 *level shifter*가 필요합니다. 가장 간단한 회로 — **N-MOSFET + 풀업 양쪽**.
 
-```text
-3.3V side ── 4.7k ──┬── SDA_3v3 ── MOSFET drain
-                    │
-                    └── N-MOSFET (BSS138 등)
-                          gate → 3.3V
-                          source → SDA_5v0
-5V side   ── 4.7k ──── SDA_5v0
-```
+![I²C BSS138 level shifter](/images/blog/embedded-serial/diagrams/ch06-i2c-level-shifter.svg)
 
-표준 회로는 NXP AN10441 (또는 Philips AN10441) 참조. 일부 보드는 PCA9306 같은 *전용 IC* 사용.
+NMOS drain → 5V side, source → 3.3V side, gate → 3.3V (low-side reference). 풀업 4.7 kΩ 양쪽. 표준 회로는 NXP AN10441 (또는 Philips AN10441). SDA와 SCL *각각 BSS138 1개씩* 필요. 일부 보드는 PCA9306 같은 *전용 IC* 사용.
 
 ## 로직 분석기 사용
 

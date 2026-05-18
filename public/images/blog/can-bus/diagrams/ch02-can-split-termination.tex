@@ -1,0 +1,45 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{circuitikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\ctikzset{bipoles/length=8mm}
+\begin{document}
+\begin{circuitikz}[scale=1.0, transform shape]
+  % Title
+  \node[font=\footnotesize\bfseries, anchor=south] at (4, 4.5) {CAN Split Termination — 표준 120Ω vs Split + 캐패시터};
+
+  % Left side: Standard 120Ω termination
+  \draw (0,3) node[anchor=south] {\scriptsize Standard 120Ω};
+  \draw (0,2.5) -- (0,1.5) coordinate (canHs);
+  \node[font=\tiny, anchor=west] at (0.1, 2) {CAN\_H};
+  \draw (canHs) to[R=120$\Omega$] (canHs |- 0, 0);
+  \draw (canHs |- 0, 0) -- (0, -0.5) coordinate (canLs);
+  \node[font=\tiny, anchor=west] at (0.1, -0.3) {CAN\_L};
+
+  % Right side: Split termination with capacitor
+  \draw (5,3) node[anchor=south] {\scriptsize Split + Capacitor};
+  \draw (5, 2.5) -- (5,1.5) coordinate (canH);
+  \node[font=\tiny, anchor=west] at (5.1, 2) {CAN\_H};
+  \draw (canH) to[R=60$\Omega$] (canH |- 0, 0.5) coordinate (mid);
+  \draw (mid) to[R=60$\Omega$] (mid |- 0, -0.5);
+  \draw (mid |- 0, -0.5) -- (5, -0.5) coordinate (canL);
+  \node[font=\tiny, anchor=west] at (5.1, -0.3) {CAN\_L};
+
+  % Capacitor from middle to ground
+  \draw (mid) -- (7, 0.5);
+  \draw (7, 0.5) to[C=4.7nF] (7, -1);
+  \node[ground] at (7, -1.2) {};
+
+  % Comparison annotations
+  \node[font=\tiny, align=left, anchor=west] at (8.5, 2) {
+    \textbf{Split termination 장점}:\\
+    \textbullet\ 고주파 EMI ↓\\
+    \textbullet\ 중간점 = 공통 모드\\
+    \textbullet\ 4.7 nF가 EMI 흡수\\
+    \textbullet\ 자동차 양산 표준
+  };
+
+\end{circuitikz}
+\end{document}

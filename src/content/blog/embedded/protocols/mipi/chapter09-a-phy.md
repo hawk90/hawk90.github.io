@@ -56,21 +56,9 @@ GMSL·FPD-Link는 *vendor-locked*. A-PHY는 *open standard*로 다른 회사 Ser
 
 **PoC (Power over Coax)** — 같은 coax로 *전원도 같이*. 카메라 모듈에 별도 전원선 필요 없음.
 
-```text
-ECU 측:
-  Serializer ↔ DC injection circuit ↔ coax
-              ↓
-              12V power (DC)
-              + RF signal (~Gbps)
+![PoC LC injection circuit (CircuiTikZ)](/images/blog/mipi/diagrams/ch09-a-phy-poc.svg)
 
-카메라 측:
-  Deserializer ↔ DC blocking ↔ coax
-                ↓
-                12V → 패널 power
-                + RF → 신호
-```
-
-DC와 RF를 *수동 LC 회로*로 분리. 1 코어 + shield → *진짜 단일 케이블*.
+ECU 쪽 *DC injection*: 인덕터로 12V DC를 coax에 흘리고, 캐패시터로 RF만 SerDes에 받음. 카메라 쪽도 거울 회로. DC와 RF를 *수동 LC 회로*로 분리해 *1 코어 + shield = 진짜 단일 케이블*.
 
 ## ASA Motion Link
 

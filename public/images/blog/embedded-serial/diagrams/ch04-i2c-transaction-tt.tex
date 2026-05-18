@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{tikz-timing}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\definecolor{warnfill}{HTML}{FECACA}
+\definecolor{okfill}{HTML}{BBF7D0}
+\definecolor{hifill}{HTML}{FED7AA}
+\usetikztiminglibrary{counters,interval,nicetabs}
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize]
+
+\node[font=\footnotesize\bfseries, anchor=west] at (0, 3) {I²C Transaction — Start + 7-bit Address + Write + ACK + Stop};
+
+\node[anchor=west] at (0, 0) {\begin{tikztimingtable}
+  SCL  & 0.5H 0.5L 0.5H 0.5L 0.5H 0.5L 0.5H 0.5L 0.5H 0.5L 0.5H 0.5L 0.5H 0.5L 0.5H 0.5L 0.5H 0.5L 0.5H 0.5L 0.5H \\
+  SDA  & 0.5H 0.25L 0.25L 0.5L 0.5H 0.5L 0.5L 0.5H 0.5H 0.5L 0.5L 0.5H 0.5L 0.5H 0.5L 0.5L 0.5L 0.5L 0.5L 0.5H 0.5H \\
+\end{tikztimingtable}};
+
+\node[anchor=west, font=\tiny, align=left] at (0, -4) {
+  \textbf{S} (Start) = SCL High에서 SDA Hi→Lo\\
+  Addr = 7 bit, 다음 1 bit = R/W (이 예에서 W = 0)\\
+  \textbf{ACK} = 9번째 SCL pulse 시 슬레이브가 SDA Low\\
+  \textbf{P} (Stop) = SCL High에서 SDA Lo→Hi
+};
+
+\end{tikzpicture}
+\end{document}

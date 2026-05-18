@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{circuitikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\ctikzset{bipoles/length=8mm}
+\begin{document}
+\begin{circuitikz}[scale=1.0, transform shape]
+  % MAX485 IC box
+  \draw (0,0) rectangle (4,3) node[midway, font=\footnotesize\bfseries] {MAX485};
+  \node[font=\tiny, anchor=center] at (2, 2.4) {SN75176 호환};
+
+  % Pin labels (left, MCU side)
+  \node[font=\scriptsize, anchor=east] at (0, 2.5) {RO};   % Receiver Output
+  \node[font=\scriptsize, anchor=east] at (0, 2.0) {RE};   % Receiver Enable
+  \node[font=\scriptsize, anchor=east] at (0, 1.0) {DE};   % Driver Enable
+  \node[font=\scriptsize, anchor=east] at (0, 0.5) {DI};   % Driver Input
+
+  % Pin labels (right, bus side)
+  \node[font=\scriptsize, anchor=west] at (4, 2.5) {A};
+  \node[font=\scriptsize, anchor=west] at (4, 1.0) {B};
+  \node[font=\scriptsize, anchor=west] at (4, 0.0) {GND};
+  \node[font=\scriptsize, anchor=west] at (4, 3.0) {VCC};
+
+  % MCU connections (left)
+  \draw (-1,2.5) -- (0,2.5) node[anchor=east, font=\tiny] at (-1, 2.5) {MCU RX};
+  \draw (-1,2.0) -- (0,2.0); \draw (-1,1.0) -- (0,1.0);
+  \draw (-1,2.0) -- (-1.5,2.0) -- (-1.5,1.0) -- (-1,1.0);
+  \node[font=\tiny, anchor=east] at (-1.5, 1.5) {MCU GPIO (DE/$\overline{\mathrm{RE}}$)};
+  \draw (-1,0.5) -- (0,0.5) node[anchor=east, font=\tiny] at (-1, 0.5) {MCU TX};
+
+  % Bus side (A, B)
+  \draw (4,2.5) -- (6,2.5);
+  \draw (4,1.0) -- (6,1.0);
+
+  % Termination at end
+  \draw (6,2.5) to[R=120$\Omega$] (6,1.0);
+
+  % Bias resistors (idle state definition)
+  \draw (5.5,2.5) -- (5.5,4) node[anchor=south] {\scriptsize VCC};
+  \draw (5.5,2.5) to[R=680$\Omega$] (5.5,3.5);
+  \draw (5.5,1.0) -- (5.5,-0.5) node[ground] {};
+  \draw (5.5,1.0) to[R=680$\Omega$] (5.5,0);
+
+  % Labels
+  \node[font=\scriptsize, anchor=south] at (7, 2.5) {A line};
+  \node[font=\scriptsize, anchor=south] at (7, 1.0) {B line};
+
+  % VCC
+  \draw (4,3.0) -- (4.5,3.0) -- (4.5,4) node[anchor=south] {\scriptsize VCC};
+  \draw (4,0) -- (4.5,0) node[ground] {};
+
+  % Title
+  \node[font=\footnotesize\bfseries, anchor=south] at (2.5, 4.5) {RS-485 Transceiver (MAX485) + Termination + Bias};
+
+\end{circuitikz}
+\end{document}

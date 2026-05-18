@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{circuitikz}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\definecolor{warnbord}{HTML}{F87171}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\ctikzset{bipoles/length=7mm}
+\begin{document}
+\begin{circuitikz}[scale=1.0, transform shape]
+  % Title
+  \node[font=\footnotesize\bfseries, anchor=south] at (5, 5.5) {Power over Coax (PoC) — DC + RF 분리};
+
+  % ECU side (left)
+  \draw (0,4) rectangle (2,3) node[midway, font=\scriptsize\bfseries] {SerDes};
+  \node[font=\tiny, anchor=east] at (0, 3.5) {ECU};
+
+  % DC supply
+  \draw (-2,2.5) to[V, l=12V] (-2, 0.5) node[ground] {};
+  \draw (-2,2.5) -- (-1,2.5);
+
+  % Inductor (chokes DC, blocks RF) — to coax
+  \draw (-1,2.5) to[L=$L_1$] (1.5, 2.5);
+  \draw (1.5, 2.5) -- (1.5, 3) -- (2, 3);  % to SerDes DC pin
+
+  % Capacitor (passes RF, blocks DC) — to coax
+  \draw (2, 3.5) -- (3, 3.5) to[C=$C_1$] (5, 3.5);
+  \draw (5, 3.5) -- (5, 2.5);
+
+  % Coax cable (shown as horizontal line)
+  \draw[line width=2pt, draw=warnbord] (5, 2.5) -- (15, 2.5);
+  \node[font=\scriptsize, anchor=south] at (10, 2.5) {coax 15m (signal + power)};
+
+  % Camera side (right) — mirror
+  \draw (15, 2.5) -- (15, 3.5) to[C=$C_2$] (17, 3.5);
+  \draw (17, 3.5) -- (18, 3.5) -- (18, 3) -- (18, 3);
+
+  % Inductor on camera side
+  \draw (15, 2.5) to[L=$L_2$] (17.5, 2.5);
+  \draw (17.5, 2.5) -- (17.5, 3) -- (18, 3);
+  \draw (17.5, 2.5) -- (17.5, 1.5);
+
+  % Camera SerDes
+  \draw (18,4) rectangle (20,3) node[midway, font=\scriptsize\bfseries] {SerDes};
+  \node[font=\tiny, anchor=west] at (20, 3.5) {Camera};
+
+  % Camera power (12V derived from coax DC)
+  \draw (17.5, 1.5) -- (17.5, 0.5) node[ground] {};
+
+  % Annotations
+  \node[font=\tiny, anchor=west, align=left] at (-2, 0) {
+    \textbf{L} = bias inductor (DC choke, RF blocker)\\
+    \textbf{C} = DC blocking capacitor (RF passes)\\
+    LC 회로가 *전원 + 신호* 한 케이블로 통합
+  };
+
+\end{circuitikz}
+\end{document}

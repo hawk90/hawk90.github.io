@@ -50,6 +50,10 @@ draft: true
 
 ![I²C bit timing — Start, ACK, Stop](/images/blog/embedded-serial/diagrams/ch04-i2c-bittiming.svg)
 
+전체 한 트랜잭션을 *tikz-timing*으로 본 모습:
+
+![I²C transaction (tikz-timing)](/images/blog/embedded-serial/diagrams/ch04-i2c-transaction-tt.svg)
+
 | 조건 | SDA | SCL |
 | --- | --- | --- |
 | **Start (S)** | High → Low | High |

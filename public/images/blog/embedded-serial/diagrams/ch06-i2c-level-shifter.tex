@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{circuitikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\ctikzset{bipoles/length=8mm}
+\begin{document}
+\begin{circuitikz}[scale=1.0, transform shape]
+  % 3.3V side
+  \draw (0,4) node[anchor=south] {\footnotesize 3.3V};
+  \draw (0,4) -- (0,3);
+  \draw (0,3) to[R=4.7k$\Omega$] (0,1.5);
+  \draw (0,1.5) -- (0,0) coordinate (mcuPin)
+        node[anchor=east] {\footnotesize MCU SDA};
+
+  % BSS138 NMOS (low-side reference at gate)
+  \draw (3,1.5) node[nmos, anchor=G] (Q1) {};
+  \draw (Q1.G) -- (1.5,1.5) -- (0,1.5);
+  \draw (Q1.S) -- (Q1.S |- 0,0) node[anchor=east] {};
+
+  % Gate bias from 3.3V
+  \draw (Q1.G) ++(0,0.5) -- ++(0,1) node[anchor=south] {\footnotesize 3.3V (gate ref)};
+
+  % 5V side
+  \draw (6,4) node[anchor=south] {\footnotesize 5V};
+  \draw (6,4) -- (6,3);
+  \draw (6,3) to[R=4.7k$\Omega$] (6,1.5);
+  \draw (Q1.D) -- (Q1.D -| 6,1.5) -- (6,1.5);
+  \draw (6,1.5) -- (6,0) coordinate (slvPin)
+        node[anchor=west] {\footnotesize Slave SDA};
+
+  % Ground
+  \draw (mcuPin) -- (slvPin);
+  \node[ground] at ($(mcuPin)!0.5!(slvPin) + (0,-0.3)$) {};
+
+  % Title
+  \node[font=\footnotesize\bfseries, anchor=south] at (3, 4.6) {I²C Level Shifter — BSS138 (단방향당 1개)};
+
+  % Annotation
+  \node[font=\tiny, align=left, anchor=west] at (8, 2) {
+    \textbullet\ NMOS drain → 5V side\\
+    \textbullet\ Source → 3.3V side\\
+    \textbullet\ Gate → 3.3V (low-side ref)\\
+    \textbullet\ 풀업 4.7k 양쪽\\
+    \textbullet\ NXP AN10441 표준 회로\\
+    \textbullet\ SDA·SCL 각각 별도 BSS138
+  };
+
+\end{circuitikz}
+\end{document}
