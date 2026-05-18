@@ -12,6 +12,21 @@ draft: false
 
 > **"노드 클래스는 안 건드리고 새 연산을 추가"** — AST 같은 안정된 구조에 평가/출력/최적화/타입검사를 따로따로.
 
+## 비유 — 전기 검침원, 박물관 도슨트
+
+*전기 검침원*은 동네 집들을 *방문*하면서 *미터기를 읽습니다*. 집(객체)은 *그대로*이고, *검침원이라는 새 연산*이 *집집마다 들러* 작업합니다. 다음에 *가스 검침원*이 오면 *같은 집들을 또 방문*해 *다른 일*을 합니다.
+
+집은 *어떤 검침원이 올지 모릅니다*. 검침원이 *방문하면 받아들이고*(`accept()`), *집의 정보를 제공*합니다.
+
+Visitor가 이 *방문자* 구조입니다.
+
+- *집* = Element (AST 노드, 객체 구조)
+- *검침원* = Visitor (새 연산)
+- *방문 받기* = `element.accept(visitor)`
+- *집 정보 제공* = `visitor.visitElement(this)` — *double dispatch*
+
+새 연산이 *집 클래스를 건드리지 않고* 추가됩니다. AST에 *evaluator, printer, optimizer, type checker*가 각각 *별도 Visitor*로 붙는 게 전형 예입니다.
+
 ## 어떤 문제를 푸는가
 
 AST(Abstract Syntax Tree) 같은 안정된 구조에 다양한 연산을 추가하고 싶다면:
@@ -77,6 +92,17 @@ Visitor의 핵심 결정.
 > ⚠️ **노드 캡슐화** 약화 — Visitor가 노드 내부에 접근해야 함.
 
 > ⚠️ **AST가 작고 단순**하면 그냥 노드 내부 메서드가 단순.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Iterator](/blog/programming/design/gof-design-patterns/item16-iterator) | Iterator는 *순회 자체*. Visitor는 *순회하며 각 노드 타입별 작업*. Visitor가 Iterator 안에 들어 있음. |
+| [Composite](/blog/programming/design/gof-design-patterns/item08-composite) | Visitor의 대상이 *Composite 트리*인 경우가 전형. 자주 함께. |
+| [Strategy](/blog/programming/design/gof-design-patterns/item21-strategy) | Strategy는 *한 알고리즘*을 객체화. Visitor는 *여러 노드 타입에 대한 dispatch*까지 포함. |
+| Modern: `std::variant` + `std::visit` | C++17의 *closed type set*에선 Visitor 클래스 계층 *없이도* 동일 효과. *type-safe + 더 간결*. |
+
+판별 한 줄: *"객체 구조는 안정적이고 새 연산을 자주 추가한다"*면 Visitor.
 
 ## C++ 구현 — AST + Visitor
 

@@ -18,6 +18,28 @@ draft: false
 
 base가 흐름을 통제, derived는 hook만 제공. **제어 반전**.
 
+## 비유 — 시험지 양식
+
+학교 시험지를 떠올려봅시다. *시험지 양식*은 학교가 만듭니다.
+
+```text
+[학교 머리말 + 학년/반/이름란]
+1. ___________________
+2. ___________________
+3. ___________________
+[제출 시간 안내]
+```
+
+학생은 *양식 자체*를 바꿀 수 없습니다. *빈칸*에 *답*만 채웁니다.
+
+Template Method가 이 *시험지 양식*입니다.
+
+- *양식* = base class의 `templateMethod()` — 알고리즘 골격 고정
+- *빈칸* = abstract method (자식이 반드시 채워야)
+- *답* = derived class의 override
+
+흐름은 *부모가 결정*합니다 — *"네가 호출하지 마, 내가 호출할게"*라는 *Hollywood 원칙*. 라면 끓이기 절차(물 끓이기 → 면 넣기 → *각자 다른 양념*)도 같은 구조입니다.
+
 ## 어떤 문제를 푸는가
 
 데이터 마이닝 — 단계는 모두 같음 (열기 → 파싱 → 분석 → 보고 → 닫기), 그러나 입력 형식별로 파싱·분석이 다릅니다.
@@ -73,6 +95,16 @@ void mineJson(const std::string& path) {
 > ⚠️ **Liskov 위험** — derived가 잘못 override하면 알고리즘 깨짐.
 
 > ⚠️ **단계 수가 너무 많거나** 서로 의존하면 base 코드 읽기 힘들고 derived가 깰 자유가 너무 큼.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Strategy](/blog/programming/design/gof-design-patterns/item21-strategy) | Strategy는 *composition + 런타임 교체*. Template Method는 *상속 + 컴파일 타임 고정*. |
+| [Factory Method](/blog/programming/design/gof-design-patterns/item03-factory-method) | Factory Method는 *Template Method의 한 단계가 객체 생성*일 때의 특수 경우. 자주 함께 등장. |
+| Hook method | Template Method 안의 *override 가능한 빈 메서드* (필수 아닌 선택). |
+
+판별 한 줄: *"알고리즘 골격은 고정, 일부 단계만 자식이 결정한다"*면 Template Method.
 
 ## C++ 구현
 

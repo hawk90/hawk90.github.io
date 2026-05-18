@@ -12,6 +12,25 @@ draft: false
 
 > **"알고리즘을 끼워서 쓰는 슬롯"** — 같은 인터페이스의 알고리즘 군을 런타임에 교체.
 
+## 비유 — 내비게이션 모드
+
+내비게이션 앱에는 *경로 모드*가 여럿입니다.
+
+- *최단 거리* — km 가장 짧게
+- *최단 시간* — 교통 상황 반영
+- *고속도로 회피* — 일반도로 우선
+- *도보* — 보행자 경로
+
+같은 *"A에서 B로 가는 길 알려줘"*라는 요청에 *모드만 바꾸면 결과가 달라집니다*. 앱 자체는 *그대로*입니다 — 모드 객체만 *끼우거나 빼면* 됩니다.
+
+Strategy가 이 *모드 슬롯*입니다.
+
+- *내비게이션 앱* = Context
+- *경로 모드* = Strategy 객체 (각자 인터페이스 동일)
+- *모드 변경* = `context.setStrategy(new ShortestTime())`
+
+핵심은 *외부에서 모드를 선택해 끼웁니다*. *State와 달리 자기가 다음 모드로 안 바뀝니다*.
+
 ## 어떤 문제를 푸는가
 
 같은 일을 하는 여러 알고리즘이 있고, 상황에 따라 골라 써야 합니다.
@@ -64,6 +83,17 @@ c.compress(data);
 > ⚠️ **무상태 함수**라면 람다 + `std::function`로 충분 — 클래스 계층 불필요.
 
 > ⚠️ **알고리즘끼리 인터페이스가 진짜로 다르면** 통합 강제하면 부자연 — 그냥 별도 함수.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [State](/blog/programming/design/gof-design-patterns/item20-state) | 구조 동일. *Strategy는 외부에서 알고리즘 선택*. *State는 자기가 다음 상태로 전이*. |
+| [Template Method](/blog/programming/design/gof-design-patterns/item22-template-method) | Template Method는 *상속 + 컴파일 타임 고정*. Strategy는 *composition + 런타임 교체*. |
+| [Command](/blog/programming/design/gof-design-patterns/item14-command) | Command는 *요청 객체화*. Strategy는 *알고리즘 객체화*. |
+| [Decorator](/blog/programming/design/gof-design-patterns/item09-decorator) | Decorator는 *기능 적층*. Strategy는 *알고리즘 통째 교체*. |
+
+판별 한 줄: *"같은 일을 하는 여러 알고리즘 중 하나를 런타임에 골라 끼우고 싶다"*면 Strategy.
 
 ## C++ 구현 — 전통
 
