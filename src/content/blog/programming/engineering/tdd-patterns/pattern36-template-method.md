@@ -1,7 +1,7 @@
 ---
 title: "Pattern 36: Template Method (in TDD)"
 date: 2026-07-02T12:00:00
-description: "Algorithm 골격 + subclass의 step 구현."
+description: "Algorithm 골격 + subclass의 step 구현. xUnit setUp/tearDown의 본질."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 36
 tags: [tdd, beck, template-method, gof]
@@ -13,49 +13,64 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 알고리즘의 골격은 부모 클래스에, 가변적인 단계는 자식 클래스에서 구현한다.
+> *알고리즘 골격*은 부모 class에, *가변 단계*는 자식이 구현. xUnit의 *test 실행 순서*가 대표.
 
 ## 동기 (Motivation)
 
-여러 클래스가 비슷한 알고리즘을 따르지만, **일부 단계만 다르다**:
+여러 class가 *비슷한 알고리즘*인데 *일부 단계만 다름*:
 
-```python
-# 테스트 실행 순서
-# 1. setUp
-# 2. 테스트 실행
-# 3. tearDown
+```text
+# 테스트 실행
+1. setUp     (가변)
+2. run_test  (가변)
+3. tearDown  (가변)
 ```
 
-**xUnit의 테스트 실행**이 바로 Template Method다.
+xUnit의 *test 실행 순서*가 Template Method.
 
-## xUnit의 Template Method
+### 신호
 
-### 골격 (부모)
+- 비슷한 알고리즘이 *여러 class*에 중복.
+- *일부 단계*가 *고정*, *나머지*는 가변.
+- *Pull Up Method*의 결과 자연.
+
+### 언제 적용하는가
+
+- 알고리즘 *고정 + 가변 step* 명확.
+- *상속이 자연*.
+- *호출 순서가 invariant*.
+
+### 언제 적용하지 않는가
+
+- *Composition*이 더 적합.
+- 알고리즘 자체가 *다름*.
+- *런타임 변경* 필요 (Strategy).
+
+## 절차 (Mechanics)
+
+1. **공통 알고리즘** 식별.
+2. **부모 class에 template method** 작성.
+3. **고정 step**은 부모에 *완전 구현*.
+4. **가변 step**은 *abstract method* 또는 *hook* (default 있음).
+5. **자식이 가변 step 구현**.
+
+## 예시 1 — xUnit run
 
 ```python
 class TestCase:
     def run(self):
-        """Template Method — 알고리즘 골격"""
-        self.setUp()      # hook
-        self.run_test()   # abstract
-        self.tearDown()   # hook
+        self.setUp()          # hook
+        self.run_test()       # abstract
+        self.tearDown()       # hook
 
-    def setUp(self):
-        """기본 구현 — 아무것도 안 함"""
-        pass
+    def setUp(self): pass
+    def tearDown(self): pass
+    def run_test(self):
+        raise NotImplementedError
 
-    def tearDown(self):
-        """기본 구현 — 아무것도 안 함"""
-        pass
-```
-
-### 구체화 (자식)
-
-```python
 class MyTest(TestCase):
     def setUp(self):
-        self.db = Database()
-        self.db.connect()
+        self.db = Database(); self.db.connect()
 
     def run_test(self):
         result = self.db.query("SELECT * FROM users")
@@ -65,184 +80,169 @@ class MyTest(TestCase):
         self.db.disconnect()
 ```
 
-## Template Method 구조
+*고정 순서* (setUp → test → tearDown), *가변 본문*.
 
-```text
-BaseClass
-├── templateMethod()  # 골격 정의
-│   ├── step1()       # 고정
-│   ├── step2()       # hook (자식이 오버라이드)
-│   └── step3()       # abstract (자식이 반드시 구현)
-│
-ConcreteClass extends BaseClass
-├── step2()           # 오버라이드
-└── step3()           # 구현
-```
-
-## TDD에서의 활용
-
-### Pull Up Method의 결과
+## 예시 2 — Pull Up Method 결과
 
 ```python
-# Before: 중복 코드
+# Before — 중복
 class DollarTest:
     def test_times(self):
-        self.setup_dollar()
-        result = self.dollar.times(2)
-        self.verify_result(result)
+        d = Dollar(5)
+        assert d.times(2).amount == 10
 
 class FrancTest:
     def test_times(self):
-        self.setup_franc()
-        result = self.franc.times(2)
-        self.verify_result(result)
+        f = Franc(5)
+        assert f.times(2).amount == 10
 
-# After: Template Method
+# After — Template
 class MoneyTest:
     def test_times(self):
-        money = self.create_money()  # abstract
-        result = money.times(2)
-        self.verify_result(result)
+        money = self.create_money()   # hook
+        assert money.times(2).amount == self.expected_double()
+
+    def create_money(self): raise NotImplementedError
+    def expected_double(self): raise NotImplementedError
 
 class DollarTest(MoneyTest):
-    def create_money(self):
-        return Dollar(5)
+    def create_money(self): return Dollar(5)
+    def expected_double(self): return 10
 
 class FrancTest(MoneyTest):
-    def create_money(self):
-        return Franc(5)
+    def create_money(self): return Franc(5)
+    def expected_double(self): return 10
 ```
 
-### 테스트 Fixture
-
-```python
-class DatabaseTest:
-    """데이터베이스 테스트의 Template Method"""
-
-    def setUp(self):
-        self.db = self.create_database()
-        self.db.connect()
-        self.seed_data()
-
-    def create_database(self):
-        """자식이 오버라이드"""
-        return Database()
-
-    def seed_data(self):
-        """자식이 오버라이드"""
-        pass
-
-    def tearDown(self):
-        self.db.clear()
-        self.db.disconnect()
-
-class UserDatabaseTest(DatabaseTest):
-    def seed_data(self):
-        self.db.insert(User("Alice"))
-        self.db.insert(User("Bob"))
-```
-
-## Hook vs Abstract
+## 예시 3 — Hook vs Abstract
 
 ```python
 class BaseProcessor:
     def process(self):
-        self.before_process()  # hook (기본 구현 있음)
-        self.do_process()      # abstract (구현 필수)
-        self.after_process()   # hook (기본 구현 있음)
+        self.before_process()   # hook (default no-op)
+        self.do_process()       # abstract (필수)
+        self.after_process()    # hook
 
-    def before_process(self):
-        pass  # hook — 기본은 아무것도 안 함
-
-    def do_process(self):
-        raise NotImplementedError  # abstract — 필수
-
-    def after_process(self):
-        pass  # hook — 기본은 아무것도 안 함
+    def before_process(self): pass          # default
+    def do_process(self): raise NotImplementedError   # 필수
+    def after_process(self): pass           # default
 ```
 
-## 현대적 대안
+`hook` = optional override, `abstract` = required.
 
-### Strategy 패턴
+## 자주 보는 안티패턴
+
+### 1. *Template method가 너무 큼*
+20+ step → 자식 *override 결정 어려움*. 분해.
+
+### 2. *Hook 무한 chain*
+hook이 *base의 super* 호출 잊음 → broken chain. 명시 명세.
+
+### 3. *Liskov 위반*
+자식 override가 *base의 contract* 깨뜨림 → 알고리즘 break.
+
+### 4. *Override 순서 의존*
+*특정 순서로 override* 가정 → 새 자식이 위반. 순서 강제.
+
+### 5. *Composition 적합한 경우*
+runtime 변경 필요한데 inheritance 강제 → 유연성 손실. Strategy.
+
+### 6. *모든 method가 abstract*
+template method가 *추상의 추상* → 의미 없음. *최소 구체*.
+
+## Modern variants
+
+### Strategy 대안
 
 ```python
-# Template Method 대신 Strategy
 class Processor:
     def __init__(self, strategy):
         self.strategy = strategy
-
     def process(self):
         self.strategy.before()
         self.strategy.execute()
         self.strategy.after()
 ```
 
-### Higher-Order Function
+상속 → composition. 런타임 변경.
+
+### Higher-order function
 
 ```python
-# 함수로 단계 전달
-def process(do_work, before=None, after=None):
-    if before:
-        before()
-    do_work()
-    if after:
-        after()
+def run_test(setup, test, teardown):
+    setup()
+    try:
+        test()
+    finally:
+        teardown()
 
-# 사용
-process(
-    do_work=lambda: print("Working"),
-    before=lambda: print("Starting"),
-    after=lambda: print("Done")
+run_test(
+    setup=lambda: db.connect(),
+    test=lambda: assert_query(),
+    teardown=lambda: db.disconnect()
 )
 ```
 
-### Composition over Inheritance
+함수형으로 *step 주입*.
+
+### Pytest fixture
 
 ```python
-# 상속 대신 조합
-class TestRunner:
-    def run(self, test, setup=None, teardown=None):
-        if setup:
-            setup()
-        test()
-        if teardown:
-            teardown()
+@pytest.fixture
+def db():
+    db = Database(); db.connect()
+    yield db
+    db.disconnect()
+
+def test_query(db):
+    result = db.query(...)
+    assert ...
 ```
 
-## 테스트 예시
+setUp/tearDown을 *fixture로 분리*.
+
+### Spring framework
+
+```java
+@TestExecutionListeners({MyListener.class})
+class MyTest { ... }
+```
+
+framework가 *template method 제공*.
+
+### Decorator
 
 ```python
-def test_template_method_calls_steps_in_order():
-    calls = []
+def with_database(fn):
+    def wrapper(*args, **kwargs):
+        db = Database(); db.connect()
+        try: return fn(db, *args, **kwargs)
+        finally: db.disconnect()
+    return wrapper
 
-    class TestProcessor(BaseProcessor):
-        def before_process(self):
-            calls.append("before")
-
-        def do_process(self):
-            calls.append("do")
-
-        def after_process(self):
-            calls.append("after")
-
-    processor = TestProcessor()
-    processor.process()
-
-    assert calls == ["before", "do", "after"]
+@with_database
+def test_query(db):
+    assert db.query(...)
 ```
 
-## 정리
+cross-cutting concern을 *decorator*.
 
-- **알고리즘 골격**은 부모에
-- **가변 단계**는 자식이 구현
-- **xUnit setUp/tearDown**이 대표적
-- **Pull Up Method**의 자연스러운 결과
-- **현대 대안** — Strategy, HOF, Composition
-- **TDD에서 테스트 구조화**에 유용
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| pytest fixture | template 대안 |
+| JUnit @Rule | template 보조 |
+| Spring TestExecutionListener | framework template |
+| Decorator | cross-cutting |
+
+## 성능 고려
+
+상속 lookup 1 단계 — JIT inline. 무관. *fixture/decorator*도 비슷.
 
 ## 관련 패턴
 
 - [Pattern 37: Pluggable Object](/blog/programming/engineering/tdd-patterns/pattern37-pluggable-object) — 동작 교체
 - [Pattern 28: Fixture](/blog/programming/engineering/tdd-patterns/pattern28-fixture) — setUp/tearDown
 - [Pattern 39: Factory Method](/blog/programming/engineering/tdd-patterns/pattern39-factory-method) — 객체 생성 위임
-
+- GoF Template Method
