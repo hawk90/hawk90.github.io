@@ -64,6 +64,8 @@ xTaskCreate(pid_task, "PID", 256, NULL, 3, NULL);
 
 ## Task State — 5 상태 머신
 
+![Task 5-state machine](/images/blog/practical-internals/diagrams/part1-02-task-states.svg)
+
 | State | 의미 |
 | --- | --- |
 | **Running** | *지금 CPU 차지* — 한 코어당 *정확히 1개* |

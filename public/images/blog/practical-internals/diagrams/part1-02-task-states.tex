@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  state/.style={ellipse, cls, align=center, font=\footnotesize\bfseries, minimum width=30mm, minimum height=14mm},
+  running/.style={state, fill=okfill, draw=okbord},
+  ready/.style={state, fill=hifill, draw=hibord},
+  blocked/.style={state, fill=warnfill, draw=warnbord},
+  suspended/.style={state, fill=confill, draw=conbord},
+  deleted/.style={state, fill=neutfill, draw=neutbord},
+  arr/.style={-{Stealth[length=2.5mm]}, draw=edgec, line width=0.6pt},
+  arrV/.style={-{Stealth[length=2.5mm]}, draw=warnbord, line width=0.6pt, dashed},
+  lbl/.style={font=\tiny, fill=white, inner sep=2pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (5, 5.5) {Task 5-State Machine};
+
+% States
+\node[running] (run) at (5, 3) {Running};
+\node[ready] (rdy) at (0, 3) {Ready};
+\node[blocked] (blk) at (5, 0) {Blocked};
+\node[suspended] (sus) at (10, 3) {Suspended};
+\node[deleted] (del) at (5, -2.5) {Deleted};
+
+% Transitions
+\draw[arr, bend left=12] (rdy.north east) to node[lbl, above] {scheduler picks} (run.north west);
+\draw[arr, bend left=12] (run.south west) to node[lbl, below] {preempted} (rdy.south east);
+
+\draw[arr] (run.south) -- node[lbl, right] {wait API (self)} (blk.north);
+\draw[arr, bend right=15] (blk.west) to node[lbl, left, align=center] {event\\(wake)} (rdy.south);
+
+\draw[arrV] (run.east) -- node[lbl, above] {vTaskSuspend} (sus.west);
+\draw[arrV, bend right=15] (sus.south) to node[lbl, right] {vTaskResume} (rdy.east);
+
+\draw[arr, draw=warnbord] (run.south east) -- ++(0.5, -0.5) -- ++(0, -1) -- (del.north east);
+\draw[arr, draw=warnbord, bend left=10] (sus.south) to (del.north east);
+\draw[arr, draw=warnbord, bend right=10] (rdy.south) to (del.north west);
+\node[lbl, color=warnbord] at (8, -1) {vTaskDelete};
+
+% Legend
+\node[font=\tiny, anchor=west, align=left] at (-2, -4) {
+  \textbullet\ \textbf{Running} — CPU 차지 (코어당 1개)\\
+  \textbullet\ \textbf{Ready} — 실행 가능, scheduler 대기\\
+  \textbullet\ \textbf{Blocked} — 이벤트 대기 (semaphore·queue·delay)\\
+  \textbullet\ \textbf{Suspended} — vTaskSuspend (scheduler 무시)\\
+  \textbullet\ \textbf{Deleted} — vTaskDelete (idle task가 정리)
+};
+
+\end{tikzpicture}
+\end{document}

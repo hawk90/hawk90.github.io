@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=10mm, y=10mm,
+  block/.style={cls, draw=edgec, line width=0.3pt, minimum height=8mm, font=\tiny},
+  pidB/.style={block, fill=warnfill},
+  sensB/.style={block, fill=hifill},
+  logB/.style={block, fill=confill},
+  axis/.style={draw=edgec, line width=0.4pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (5, 5) {RMS — 짧은 주기 task 우선 (PID 1ms > Sensor 10ms > Log 50ms)};
+
+% Time axis
+\draw[axis, -{Stealth[length=2mm]}] (0, 0) -- (11, 0) node[right, font=\tiny] {ms};
+\foreach \t in {1,2,3,4,5,6,7,8,9,10} {
+  \draw[axis] (\t, -0.05) -- (\t, 0.05);
+  \node[font=\tiny, anchor=north] at (\t, -0.05) {\t};
+}
+
+% Task labels
+\node[font=\tiny, anchor=east] at (-0.1, 1) {Log (50ms)};
+\node[font=\tiny, anchor=east] at (-0.1, 2) {Sensor (10ms)};
+\node[font=\tiny, anchor=east] at (-0.1, 3) {PID (1ms)};
+
+% PID — fires every 1ms, runs 0.5ms
+\foreach \t in {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} {
+  \node[pidB, minimum width=5mm, anchor=south west] at (\t, 2.7) {};
+}
+
+% Sensor — fires at 0, runs 1ms — but PID preempts
+\node[sensB, minimum width=5mm, anchor=south west] at (0.5, 1.7) {};
+\node[sensB, minimum width=5mm, anchor=south west] at (1.5, 1.7) {};
+
+% Log — fires at 0, runs 2ms — repeatedly preempted
+\node[logB, minimum width=5mm, anchor=south west] at (2.5, 0.7) {};
+\node[logB, minimum width=5mm, anchor=south west] at (3.5, 0.7) {};
+\node[logB, minimum width=5mm, anchor=south west] at (4.5, 0.7) {};
+\node[logB, minimum width=5mm, anchor=south west] at (5.5, 0.7) {};
+
+% Arrows showing preemption
+\node[font=\tiny, color=warnbord, anchor=west] at (0.5, 3.6) {PID 즉시 preempt};
+
+% Utilization
+\node[font=\tiny, anchor=west, align=left] at (0, -1) {
+  Utilization U = 0.5/1 + 1/10 + 2/50 = 0.50 + 0.10 + 0.04 = \textbf{0.64}\\
+  RMS bound (n=3) = 3 × (2\^{1/3} − 1) ≈ \textbf{0.78}  →  schedulable ✓
+};
+
+\end{tikzpicture}
+\end{document}

@@ -57,6 +57,10 @@ configUSE_PREEMPTION = 0   // FreeRTOS
 
 Tick 인터럽트는 *time keeping만* — task 전환 트리거 X. 오직 *task가 yield*할 때만 scheduler 동작.
 
+## 비교 — Preemptive vs Cooperative 타임라인
+
+![Preemption vs Cooperation — 1ms PID + 5ms Log](/images/blog/practical-internals/diagrams/part1-04-preemption-vs-cooperation.svg)
+
 ## 비교 표
 
 | 항목 | Preemptive | Cooperative |

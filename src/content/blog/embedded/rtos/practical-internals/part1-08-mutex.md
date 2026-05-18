@@ -95,6 +95,8 @@ void outer(void *arg) {
 
 ## Priority Inheritance — Mars Pathfinder
 
+![Priority Inversion (without/with PI) timeline](/images/blog/practical-internals/diagrams/part1-08-priority-inversion.svg)
+
 ### 시나리오 (1997 NASA)
 
 ```text

@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  slot/.style={cls, draw=edgec, line width=0.4pt, minimum width=14mm, minimum height=10mm, font=\scriptsize},
+  empty/.style={slot, fill=neutfill!50},
+  filled/.style={slot, fill=impfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt},
+  ptr/.style={font=\scriptsize\bfseries}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (5, 4) {Queue 내부 — Ring Buffer + 2 Wait List};
+
+% Ring buffer (8 slots): slots 0-3 filled, 4-7 empty
+\node[filled] at (0.5, 2) {Item};
+\node[filled] at (2.0, 2) {Item};
+\node[filled] at (3.5, 2) {Item};
+\node[filled] at (5.0, 2) {Item};
+\node[empty] at (6.5, 2) {};
+\node[empty] at (8.0, 2) {};
+\node[empty] at (9.5, 2) {};
+\node[empty] at (11.0, 2) {};
+
+% Slot indices
+\foreach \i in {0,1,2,3,4,5,6,7} {
+  \pgfmathsetmacro{\x}{0.5 + \i * 1.5}
+  \node[font=\tiny, anchor=north] at (\x, 1.4) {\i};
+}
+
+% pcReadFrom pointer
+\draw[arr] (0.5, 0.5) -- (0.5, 1.4);
+\node[ptr, anchor=north] at (0.5, 0.5) {pcReadFrom};
+
+% pcWriteTo pointer
+\draw[arr] (6.5, 0.5) -- (6.5, 1.4);
+\node[ptr, anchor=north] at (6.5, 0.5) {pcWriteTo};
+
+% Wrap arrow
+\draw[arr, bend right=30] (11, 2.7) to (0.5, 2.7);
+\node[font=\tiny, anchor=south] at (5.75, 3.4) {wrap around (circular)};
+
+% Wait lists
+\node[font=\tiny, anchor=west, align=left] at (-0.5, -1) {
+  \textbf{xTasksWaitingToSend} — queue full 시 sender 대기 (linked list)\\
+  \textbf{xTasksWaitingToReceive} — queue empty 시 receiver 대기\\
+  \textbf{uxMessagesWaiting} — 현재 4 / 8 (50\%)
+};
+
+\end{tikzpicture}
+\end{document}

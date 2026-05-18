@@ -36,6 +36,8 @@ void TIM1_IRQHandler(void) {
 
 ## Bottom-Half / Top-Half 패턴
 
+![Top-Half (ISR) + Bottom-Half (Task) pattern](/images/blog/practical-internals/diagrams/part1-05-top-bottom-half.svg)
+
 Linux 커널의 전통적 용어. RTOS에도 동일.
 
 ### Top-Half (ISR)

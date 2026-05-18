@@ -67,6 +67,8 @@ void consumer(void *arg) {
 
 ## Queue 내부 — Ring Buffer
 
+![Queue ring buffer + 2 wait lists](/images/blog/practical-internals/diagrams/part1-09-queue-ringbuffer.svg)
+
 FreeRTOS의 큐 구현:
 
 ```c

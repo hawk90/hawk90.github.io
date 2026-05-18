@@ -87,6 +87,8 @@ UI 1000 ms 주기 → priority 2
 
 이 규칙이 **Rate Monotonic Scheduling (RMS)**. 분석 가능한 *schedulability bound* 존재.
 
+![RMS timeline — PID·Sensor·Log scheduling](/images/blog/practical-internals/diagrams/part1-03-rms-timeline.svg)
+
 ## Rate Monotonic Schedulability
 
 n개 task의 utilization 합이 다음 한계 안이면 **항상 deadline 만족 보장**:

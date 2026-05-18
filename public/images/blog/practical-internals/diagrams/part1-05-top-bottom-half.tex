@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hw/.style={cls, align=center, font=\footnotesize, minimum width=28mm, minimum height=12mm, draw=hibord, fill=hifill},
+  isr/.style={cls, align=center, font=\footnotesize, minimum width=44mm, minimum height=14mm, draw=warnbord, fill=warnfill},
+  queue/.style={cls, align=center, font=\footnotesize, minimum width=24mm, minimum height=12mm, draw=conbord, fill=confill},
+  task/.style={cls, align=center, font=\footnotesize, minimum width=44mm, minimum height=14mm, draw=impbord, fill=impfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt},
+  lbl/.style={font=\tiny, fill=white, inner sep=2pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (5, 4.5) {Top-Half (ISR) + Bottom-Half (Task) 패턴};
+
+% Hardware
+\node[hw] (uart) at (0, 2) {UART HW\\IRQ trigger};
+
+% ISR (Top-Half)
+\node[isr] (isrN) at (4, 2) {Top-Half ISR\\$\sim$수 µs};
+
+% Queue
+\node[queue] (q) at (8.5, 2) {Queue\\(1 byte)};
+
+% Task (Bottom-Half)
+\node[task] (taskN) at (4, -1) {Bottom-Half Task\\$\sim$ms 단위};
+
+% Arrows
+\draw[arr] (uart) -- (isrN) node[lbl, midway, above] {IRQ};
+\draw[arr] (isrN) -- (q) node[lbl, midway, above] {1 byte send};
+\draw[arr, bend right=25] (q.south) to node[lbl, midway, below, sloped] {receive (blocking)} (taskN.east);
+
+% Annotation
+\node[font=\tiny, anchor=west, align=left] at (-0.5, -3) {
+  \textbf{Top-Half (ISR)} — 최소 작업만:\\
+  \quad 1. UART RDR 읽어 1 byte 캡처\\
+  \quad 2. xQueueSendFromISR()\\
+  \quad 3. portYIELD\_FROM\_ISR()\\
+  \quad 끝. 수 µs 안에.\\[4pt]
+  \textbf{Bottom-Half (Task)} — 모든 처리:\\
+  \quad parse·CRC·검증·로그·전송 (ms 단위 OK)\\
+  \quad 모든 RTOS API 사용 가능 (blocking 포함)
+};
+
+\end{tikzpicture}
+\end{document}
