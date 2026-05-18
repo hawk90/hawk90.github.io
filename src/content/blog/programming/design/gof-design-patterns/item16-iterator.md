@@ -12,6 +12,21 @@ draft: false
 
 > **"컨테이너 내부 모르고도 순회"** — STL과 모든 모던 언어 컬렉션의 토대.
 
+## 비유 — TV 채널 ↑↓ 버튼
+
+TV 리모컨에는 *채널 ↑* 버튼이 있습니다. 사용자는 *현재 채널이 무엇인지*만 알면 됩니다. 채널 ↑를 누르면 *다음 채널*로 갑니다.
+
+내부적으로 TV가 *채널 목록을 배열로 저장*하든 *링크드 리스트로 저장*하든, *지상파-케이블 혼합으로 저장*하든 *사용자는 모릅니다*. *"다음"이라는 명령*만 제공하면 됩니다.
+
+Iterator가 이 *"다음" 명령*입니다.
+
+- *리모컨* = Iterator 인터페이스 (`hasNext()`, `next()`)
+- *채널 목록* = Aggregate (vector, list, map ...)
+- *내부 구조* = 클라이언트가 알 필요 없음
+- *현재 위치* = Iterator가 보관
+
+같은 알고리즘(`find`, `count`)을 *어떤 컨테이너에든* 적용할 수 있게 됩니다. STL의 `begin()`/`end()`가 정확히 이 idea입니다.
+
 ## 어떤 문제를 푸는가
 
 같은 알고리즘(`find`, `count`, `sort`)을 vector·list·set·map에 적용하고 싶지만 — 각 컨테이너의 **내부 구조**(배열, 노드, 트리, 해시 테이블)는 다릅니다.
@@ -69,6 +84,17 @@ C++ STL 전체가 이 패턴 위에 있습니다.
 > ⚠️ **단일 패스만 필요**하면 그냥 `for` + index도 충분.
 
 > ⚠️ **데이터가 정말 순서 없는 set이라면** iterator의 "순회 순서"가 의미 없을 수 있음.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Visitor](/blog/programming/design/gof-design-patterns/item23-visitor) | Iterator는 *순회 자체*. Visitor는 *순회하며 연산 수행* — Iterator 안에서 호출됨. |
+| [Composite](/blog/programming/design/gof-design-patterns/item08-composite) | Composite 트리를 *Iterator로 순회*하는 게 자연. 두 패턴이 자주 결합. |
+| [Memento](/blog/programming/design/gof-design-patterns/item18-memento) | Iterator의 *위치를 snapshot으로 저장*하는 데 Memento. 두 패턴 결합. |
+| Generator / Coroutine | 현대 언어의 generator(`yield`)는 Iterator의 *언어 차원 구현*. 동일 정신. |
+
+판별 한 줄: *"내부 구조 노출 없이 순회만 제공하고 싶다"*면 Iterator. 현대 언어에선 *언어 기본 기능*으로 흡수됨.
 
 ## C++ 구현 — 표준 인터페이스
 

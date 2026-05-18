@@ -12,6 +12,20 @@ draft: false
 
 > **"누가 처리할지 모르겠으면 체인을 따라 물어봐"** — 송신자는 누가 받을지 모름.
 
+## 비유 — 민원 처리
+
+동사무소에 *복잡한 민원*을 들고 갔다고 해봅시다. 창구 직원이 *처리 가능*하면 해결합니다. 권한 밖이면 *"이건 구청에 가셔야 합니다"*라며 *상위*로 보냅니다. 구청에서도 안 되면 *시청*으로, 시청에서도 안 되면 *도청*으로 올라갑니다.
+
+민원인은 *누가 처리할지 미리 알 필요 없습니다*. 그냥 *맨 앞 창구*에 제출하면 *체인을 따라 적절한 처리자가 자동으로 발견*됩니다.
+
+Chain of Responsibility가 이 구조입니다.
+
+- *맨 앞 창구* = 클라이언트가 호출하는 첫 핸들러
+- *권한 밖 → 상위로* = `next.handle(request)` 호출
+- *마지막에 처리하거나 종결* = 체인 끝에 default handler 또는 throw
+
+HTTP 미들웨어, 로깅 레벨, 이벤트 bubbling이 모두 같은 구조입니다.
+
 ## 어떤 문제를 푸는가
 
 요청을 처리할 객체가 여러 후보가 있고, *어떤 객체가 처리할지 런타임에 결정*되어야 합니다.
@@ -56,6 +70,17 @@ draft: false
 > ⚠️ **체인이 너무 길어지면** — 디버깅·성능 저하. *5-10 단계 이상*은 재구성 신호.
 
 > ⚠️ **순서가 중요한데 동적 구성**이라면 *config error*가 silent. 정적 분석 어려움.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Command](/blog/programming/design/gof-design-patterns/item14-command) | Command는 *요청 자체를 객체화*. CoR은 *요청을 핸들러 체인에 흘림*. |
+| [Decorator](/blog/programming/design/gof-design-patterns/item09-decorator) | Decorator는 *항상 작업 수행 + 다음에 위임*. CoR은 *처리하거나 패스*. |
+| [Composite](/blog/programming/design/gof-design-patterns/item08-composite) | Composite의 *부모-자식 체인*이 CoR로 자연 결합 (자식이 처리 못 하면 부모). |
+| [Observer](/blog/programming/design/gof-design-patterns/item19-observer) | Observer는 *모든 관찰자에게 broadcast*. CoR은 *적합한 한 핸들러까지만*. |
+
+판별 한 줄: *"누가 처리할지 모르고, 여러 핸들러 후보 중 하나가 처리하면 끝"*이면 CoR.
 
 ## C++ 구현
 

@@ -12,6 +12,31 @@ draft: false
 
 > **"문법 규칙 하나당 클래스 하나"** — AST 자체가 패턴.
 
+## 비유 — 계산기의 수식 트리
+
+전자계산기에 `1 + 2 * 3`을 입력했다고 해봅시다. 계산기는 *문자열을 이해해야* 합니다. 사람이 *수식 트리*를 그리면 다음 같이 됩니다.
+
+```text
+     +
+    / \
+   1   *
+      / \
+     2   3
+```
+
+각 *노드*가 *자기 의미*를 압니다. `+` 노드는 *왼쪽 + 오른쪽을 더한 값* 반환, `*` 노드는 *왼쪽 × 오른쪽* 반환. 숫자 노드는 *자기 값* 반환.
+
+이 트리를 *루트에서 evaluate*하면 자동으로 *재귀로* 답이 나옵니다.
+
+Interpreter가 정확히 이 구조입니다.
+
+- *수식 트리* = AST (Abstract Syntax Tree)
+- *노드 종류* = 문법 규칙 하나당 Expression 클래스 하나
+- *evaluate()* = 각 노드가 자기 의미 해석
+- *Context* = 변수 값 같은 환경
+
+작은 DSL, 규칙 엔진, 조건식 평가에 자연스럽습니다.
+
 ## 어떤 문제를 푸는가
 
 작은 DSL이나 표현식 언어를 만들고 싶을 때:
@@ -52,6 +77,16 @@ e.evaluate();   // 9
 > ⚠️ **성능 중요한 인터프리터** — 노드별 가상 호출이 비쌈. 바이트코드 + VM이 나음.
 
 > ⚠️ **사용자 입력 문자열을 평가**해야 한다면 보안(샌드박싱)이 더 큰 문제. Lua/Wren 같은 임베디드 언어가 안전.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Composite](/blog/programming/design/gof-design-patterns/item08-composite) | Interpreter는 *AST = Composite*. Interpreter는 *Composite의 도메인 특화 응용*. |
+| [Visitor](/blog/programming/design/gof-design-patterns/item23-visitor) | Visitor는 *AST 위에서 새 연산 추가*. Interpreter는 *AST 노드 자체가 evaluate*. Visitor와 결합해 evaluator를 분리하기도. |
+| Parser generator (yacc, ANTLR) | Parser generator는 *문법 정의 → 자동 생성*. Interpreter는 *수동 작성*. 큰 언어는 parser generator, 작은 DSL은 Interpreter. |
+
+판별 한 줄: *"작은 언어를 표현하고 자주 평가해야 한다"*면 Interpreter. 큰 언어는 *전용 parser*가 더 적합.
 
 ## C++ 구현 — 산술식
 

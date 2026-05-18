@@ -12,6 +12,21 @@ draft: false
 
 > **"불투명한 상태 봉투"** — 외부에 보관하지만 안은 원래 객체만 볼 수 있다.
 
+## 비유 — 게임 세이브 파일
+
+RPG 게임에서 *세이브 포인트*에 도달하면 *세이브 파일*이 생성됩니다. 캐릭터의 *위치·체력·인벤토리·퀘스트 진행도*가 모두 *한 파일*에 담깁니다.
+
+세이브 파일은 *밀봉된 봉투* 같습니다. *외부에서 읽으면 의미를 알 수 없지만*, *게임에 다시 넣으면* 정확히 그 상태로 복원됩니다.
+
+Memento가 이 *세이브 파일*입니다.
+
+- *캐릭터* = Originator (원본 객체)
+- *세이브 파일* = Memento (불투명한 상태 봉투)
+- *세이브 슬롯 목록* = Caretaker (보관자, 내용은 모름)
+- *복원* = Originator가 자기 Memento로부터 상태 되돌리기
+
+핵심은 *Caretaker는 Memento를 보관만* 하고 *내용은 못 봅니다*. *캡슐화 유지*.
+
 ## 어떤 문제를 푸는가
 
 undo/redo, 체크포인트, 게임 세이브 — 모두 **객체 상태를 어딘가 저장했다가 복원**해야 합니다.
@@ -68,6 +83,17 @@ void undoSomething() {
 > ⚠️ **명확한 역연산이 있는 동작**이라면 [Command](/blog/programming/design/gof-design-patterns/item14-command) 패턴이 더 효율적.
 
 > ⚠️ **상태가 자주 바뀌고 undo가 드물면** snapshot 비용이 본전을 못 뽑습니다.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Command](/blog/programming/design/gof-design-patterns/item14-command) | Command는 *동작 자체 저장* + undo 메서드. Memento는 *상태 snapshot 저장* + 통째 복원. Undo 구현에서 두 패턴이 *함께 사용*되거나 *대안*으로 선택. |
+| [Prototype](/blog/programming/design/gof-design-patterns/item04-prototype) | Prototype도 *상태 복제*. Prototype은 *새 인스턴스 생성용*, Memento는 *기존 인스턴스 복원용*. |
+| [Iterator](/blog/programming/design/gof-design-patterns/item16-iterator) | Iterator의 *현재 위치를 Memento로 저장*하는 패턴 결합. |
+| 직접 deep copy | deep copy는 *외부에서 모든 멤버 복사*. Memento는 *객체 자신*이 봉투 생성 — 캡슐화 보호. |
+
+판별 한 줄: *"객체 상태를 캡슐화 보호하면서 외부에 저장하고 싶다"*면 Memento.
 
 ## C++ 구현
 

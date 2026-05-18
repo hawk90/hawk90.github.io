@@ -12,6 +12,23 @@ draft: false
 
 > **"동작을 객체로 만들면 뒤집고 큐에 넣고 기록할 수 있다"** — undo/redo의 토대.
 
+## 비유 — 식당 주문서
+
+식당에서 *주문서*가 어떻게 흐르는지 봅시다. 손님이 주문하면 *주문서가 종이로* 작성됩니다. 종이가 *주방에 전달*되어 조리됩니다. *순서대로 쌓아 두고*, 바쁘면 *나중에 처리*하고, *취소도 가능*합니다.
+
+만약 손님이 *주방에 직접 요리하라*고 외친다면 — 순서, 큐, 취소가 *불가능*합니다. *주문서라는 객체*가 있기 때문에 가능한 일들입니다.
+
+Command가 이 *주문서*입니다.
+
+- *손님* = Invoker (요청 발생)
+- *주문서* = Command 객체
+- *주방* = Receiver (실제 일 수행)
+- *주문 큐* = command queue
+- *취소* = undo
+- *기록* = audit log
+
+*요청을 객체로 만들면* 메모리에 *저장*되어 *나중*에, *순서대로*, *되돌리기 가능*하게 처리됩니다.
+
 ## 어떤 문제를 푸는가
 
 요청·동작을 그냥 함수 호출로 처리하면:
@@ -55,6 +72,16 @@ cmd->undo();    // ◄── 객체이기 때문에 가능
 > ⚠️ **undo가 어려운 동작** (외부 효과, I/O) — Memento와 결합 검토.
 
 > ⚠️ **명령이 너무 많아지면** 각 명령마다 클래스 — composition/람다로 평탄화.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Strategy](/blog/programming/design/gof-design-patterns/item21-strategy) | Strategy는 *알고리즘 객체화*. Command는 *요청 객체화*. Strategy는 "어떻게", Command는 "무엇을". |
+| [Memento](/blog/programming/design/gof-design-patterns/item18-memento) | Memento는 *상태 snapshot 저장*. Command는 *동작 자체 저장*. Undo 구현에 보통 함께 결합. |
+| [Chain of Responsibility](/blog/programming/design/gof-design-patterns/item13-chain-of-responsibility) | CoR은 *요청을 핸들러 체인에 흘림*. Command는 *요청을 객체로 보관·실행*. |
+
+판별 한 줄: *"동작을 저장, 큐, undo, 매크로로 다루고 싶다"*면 Command.
 
 ## C++ 구현
 

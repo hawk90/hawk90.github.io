@@ -12,6 +12,21 @@ draft: false
 
 > **"바뀌면 알려줄게요"** — Subject가 등록된 Observer들에게 자동 알림.
 
+## 비유 — 신문 구독, 유튜브 알림
+
+신문을 *구독*하면 매일 *집 앞에 배달*됩니다. 신문사는 *구독자 명단*만 알면 됩니다. 매일 *명단에 있는 모든 집*에 신문이 갑니다.
+
+유튜브 *알림 설정*도 같습니다. 좋아하는 채널이 새 영상을 올리면 *알림이 자동으로 옵니다*. 채널 주인은 *누가 구독했는지 명단*만 알지, *각자에게 일일이 연락하지 않습니다*.
+
+Observer가 이 *구독-발행* 구조입니다.
+
+- *신문사·유튜버* = Subject
+- *구독자* = Observer
+- *구독 등록* = `attach(observer)`
+- *발행 시 자동 통보* = Subject의 `notify()`가 모든 Observer 호출
+
+핵심은 *Subject는 누가 구독했는지만 알고, 구독자들이 무엇을 하는지는 모릅니다*. *느슨한 결합*.
+
 ## 어떤 문제를 푸는가
 
 한 객체의 상태가 변하면 의존하는 객체들에게 **자동으로 통보**되고 갱신되어야 합니다.
@@ -83,6 +98,17 @@ public:
 > ⚠️ **순환 통보** — observer가 subject를 다시 변경하면 무한 루프 위험.
 
 > ⚠️ **단일 observer 결정적** 통보면 그냥 직접 호출.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Mediator](/blog/programming/design/gof-design-patterns/item17-mediator) | Observer는 *주체 → 관찰자 단방향 broadcast*. Mediator는 *양방향 협력 중재*. Mediator 구현에 Observer가 자주 쓰임. |
+| [Chain of Responsibility](/blog/programming/design/gof-design-patterns/item13-chain-of-responsibility) | Observer는 *모든 등록자에게* 알림. CoR은 *처음 처리한 자에게서 종결*. |
+| Pub/Sub messaging | Pub/Sub은 *Observer의 분산 버전* — 같은 정신, 다른 매체 (network broker). |
+| Reactive stream (RxJS, Combine) | Reactive는 *Observer의 함수형 확장* — 변환·필터·결합 가능. |
+
+판별 한 줄: *"한 상태 변화를 여러 곳에 자동으로 알리고 싶다"*면 Observer.
 
 ## C++ 구현 — 전통
 
