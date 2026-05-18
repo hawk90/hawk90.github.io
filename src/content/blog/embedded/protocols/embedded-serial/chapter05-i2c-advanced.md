@@ -74,6 +74,92 @@ Master A는 자기 데이터(1)와 실제(0)가 다름 감지 → 양보
 
 규칙 — **자기 데이터와 실제 SDA가 다르면 양보**. 실무에선 모던 시스템에서 거의 multi-master를 안 씁니다 (CAN으로 가는 게 깔끔).
 
+## I²C MUX·Switch — 같은 주소 슬레이브 여러 개
+
+같은 I²C 주소를 가진 디바이스 2개 이상 — 같은 버스에 못 붙음. **I²C MUX**가 답.
+
+### PCA9548 (TI, 8 채널 MUX)
+
+| 동작 | 설명 |
+| --- | --- |
+| 마스터가 MUX 자체에 *명령 바이트* 송신 (`0x70` 기본 주소) | "지금부터 채널 X를 활성화" |
+| MUX가 *선택된 채널*만 메인 버스에 연결 | 나머지 채널 isolation |
+| 슬레이브 트랜잭션 정상 진행 | 슬레이브는 MUX 존재 모름 |
+| 채널 변경 시 MUX 재명령 | `write(0x70, 1 << ch)` |
+
+### 토폴로지
+
+```text
+              [Master]
+                 │
+              [MUX 0x70]
+            ╱   │   │   ╲
+       CH0  CH1  CH2  ... CH7
+        │    │
+    [Sensor 0x68]  [Sensor 0x68 (2nd)]   ← 같은 주소, 다른 채널
+```
+
+### PCA9548 (스위치, 격리) vs PCA9543 (스위치, 비격리) vs PCA9542 (먹스, 단일 채널만)
+
+- **MUX** — 한 번에 *한 채널*만 (낮은 전력)
+- **Switch** — 여러 채널 *동시* 가능 (broadcast 시)
+- **Isolation** — 채널끼리 전기 격리 (다른 V_DD level 혼용 가능)
+
+### Linux 지원
+
+```dts
+&i2c1 {
+    pca9548@70 {
+        compatible = "nxp,pca9548";
+        reg = <0x70>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        i2c@0 {  // CH 0
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0>;
+            sensor_a: imu@68 {
+                compatible = "invensense,mpu6050";
+                reg = <0x68>;
+            };
+        };
+        i2c@1 {  // CH 1 — 같은 주소 다른 인스턴스
+            reg = <1>;
+            sensor_b: imu@68 {
+                compatible = "invensense,mpu6050";
+                reg = <0x68>;
+            };
+        };
+    };
+};
+```
+
+각 채널이 *별도 i2c bus* — `/dev/i2c-N`이 채널별 생성.
+
+## I³C HDR-DDR·TSP·TSL — 고속 모드 4종
+
+I³C는 기본 *push-pull SDR 12.5 MHz*. 더 빠르려면 *HDR (High Data Rate) 모드* 4종:
+
+| HDR 모드 | 인코딩 | 최대 속도 |
+| --- | --- | --- |
+| **HDR-DDR** | Double Data Rate (rising + falling 양쪽 샘플) | 25 Mbps |
+| **HDR-TSP** | Ternary Symbol Pure (3-symbol) | 37.5 Mbps |
+| **HDR-TSL** | Ternary Symbol Legacy (I²C-compat 보장) | 33 Mbps |
+| **HDR-BT** | Bulk Transfer (SDR-과 다른 frame) | 12.5 Mbps × 멀티 |
+
+### Mode 전환
+
+마스터가 *Common Command Code* (CCC) `ENTHDR0/1/2/3`을 전송 → 모든 노드가 *HDR 모드 진입*. 트랜잭션 끝나면 `HDR Exit Pattern`으로 SDR 복귀.
+
+### 사용처
+
+- **HDR-DDR** — 가장 흔함, 25 Mbps 충분 (이미지 압축 메타데이터 등)
+- **HDR-TSP** — 고대역 센서 (라이다, 카메라)
+- **HDR-TSL** — I²C 슬레이브와 *공존*해야 할 때
+
+I³C 어댑터는 *Adesto Tech ATIC32* 등 신규 IP. 임베디드 채택은 *자동차·HMD*에서 점진적.
+
 ## SMBus — I²C의 산업 변종
 
 System Management Bus. *PC 마더보드*에서 ACPI·배터리·전원 관리에 쓰임. 기본 I²C와 호환되지만 추가 제약:

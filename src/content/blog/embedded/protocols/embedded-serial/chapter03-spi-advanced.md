@@ -91,6 +91,74 @@ HAL_QSPI_MemoryMapped(&hqspi, &cmd, &mmcfg);
 // 이후 *(uint32_t*)0x90000000 가 flash 첫 워드
 ```
 
+## SPI Flash 명령 셋 — JEDEC 표준
+
+NOR 플래시 (Winbond·Macronix·Cypress·ISSI 등)는 *JEDEC 표준 명령 셋*. 칩 데이터시트 첫 페이지의 *Command Table*을 보면 거의 동일.
+
+### 필수 명령 7개
+
+| 명령 | 코드 | 동작 |
+| --- | --- | --- |
+| **RDID** (Read ID) | `0x9F` | 3-byte JEDEC ID (Manufacturer + Memory Type + Capacity) |
+| **RDSR** (Read Status) | `0x05` | Status Register (WIP, WEL 등) |
+| **WREN** (Write Enable) | `0x06` | 쓰기 전 잠금 해제 |
+| **READ** | `0x03` | 일반 Read (≤ 50 MHz) |
+| **Fast READ** | `0x0B` | 한 dummy byte 후 read (100+ MHz) |
+| **PP** (Page Program) | `0x02` | 256 byte 페이지 쓰기 |
+| **SE** (Sector Erase) | `0x20` | 4 KB sector erase |
+| **BE** (Block Erase) | `0xD8` | 64 KB block erase |
+| **CE** (Chip Erase) | `0xC7` | 전체 erase |
+
+### 한 트랜잭션 예 — JEDEC ID 읽기
+
+```text
+CS Low
+MOSI: 0x9F  0x00  0x00  0x00
+MISO: --    MFR   TYPE  CAP
+CS High
+```
+
+예 — Winbond W25Q128: MFR=0xEF, TYPE=0x40, CAP=0x18 (16 MB).
+
+### 쓰기 흐름 — WREN → PP → 폴링
+
+```c
+// 1. Write Enable
+cs_low();
+spi_xfer(0x06);    // WREN
+cs_high();
+
+// 2. Page Program (256 byte 한 페이지)
+cs_low();
+spi_xfer(0x02);                       // PP
+spi_xfer((addr >> 16) & 0xFF);        // 24-bit 주소
+spi_xfer((addr >> 8) & 0xFF);
+spi_xfer(addr & 0xFF);
+for (int i = 0; i < 256; i++)
+    spi_xfer(data[i]);
+cs_high();
+
+// 3. WIP 비트 폴링 — write 완료 대기
+do {
+    cs_low();
+    spi_xfer(0x05);                   // RDSR
+    uint8_t sr = spi_xfer(0x00);
+    cs_high();
+    if ((sr & 0x01) == 0) break;      // WIP = 0
+} while (1);
+```
+
+> ⚠️ **Sector Erase 후에만 Program**. NOR 플래시는 *bit을 0→1 못 함*. erase 없이 program → 일부 비트만 0 됨.
+
+### Quad/Octal SPI 확장 명령
+
+- `0x32` — Quad Page Program
+- `0xEB` — Fast Read Quad I/O (1-1-4 또는 4-4-4)
+- `0xE7` — Fast Read Quad I/O (no dummy)
+- `0x77` — Set Burst with Wrap (XIP)
+
+벤더마다 *세부 차이* 있어 데이터시트 *Command Set Reference* 필수.
+
 ## DMA 활용
 
 대용량 전송은 DMA에 맡깁니다. 마스터 SPI + DMA TX/RX 채널 두 개로 설정.

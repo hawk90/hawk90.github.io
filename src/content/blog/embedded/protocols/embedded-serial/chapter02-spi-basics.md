@@ -97,6 +97,52 @@ uint8_t spi_xfer(uint8_t tx) {
 }
 ```
 
+## 3-wire SPI — MOSI/MISO 단일 양방향
+
+표준 4-wire의 *변형* — MOSI와 MISO를 *한 라인*으로 합쳐 *bidirectional half-duplex*. 핀 1개 절약.
+
+```text
+표준 4-wire:  SCLK · MOSI · MISO · CS
+3-wire:       SCLK · SISO · CS     (SISO = Serial In/Out)
+```
+
+방향은 *명령 단계*에서 결정 — 처음 N 비트는 마스터→슬레이브 (명령), 그 후 슬레이브→마스터 (응답).
+
+### 사용처
+
+- 일부 LCD 컨트롤러 (ST7789 등) — 8-bit 명령 + 데이터 단방향
+- ADC 일부 (TI ADS1148 등) — 작은 PCB
+- 일부 RF 모듈 (Nordic nRF24L01의 일부 모드)
+
+### MCU 페리퍼럴 지원
+
+STM32 SPI의 `Direction = SPI_DIRECTION_1LINE` 또는 `SPI_DIRECTION_BIDIRECTIONAL` 모드 — `HAL_SPI_Transmit/Receive` 각자 호출 시 페리퍼럴이 IO 핀 방향 자동 전환.
+
+## Microwire — SPI의 옛 부분집합
+
+National Semiconductor가 1980년대 발표한 *간소화 SPI*. 모드 0 (CPOL=0, CPHA=0) + 8-bit + 단방향 4-wire만 지원.
+
+| | Microwire | SPI |
+| --- | --- | --- |
+| 모드 | 0 only | 0/1/2/3 |
+| 라인 폭 | 8-bit only | 4-32 bit |
+| 클럭 | 마스터 | 마스터 |
+| 단/양방향 | 단방향 (DO·DI 분리) | 양방향 동시 |
+
+### 사용처 — 옛 EEPROM
+
+Atmel AT93C46/AT93C56/AT93C66 등 *직렬 EEPROM*이 Microwire. 명령 셋:
+
+```text
+EWEN (Write Enable) | 0x6, addr=0xC0
+ERASE | 0x7, addr
+WRITE | 0x5, addr, data (16-bit)
+READ  | 0x6, addr  → 16-bit data
+EWDS (Write Disable) | 0x6, addr=0x00
+```
+
+요즘은 *I²C 또는 SPI EEPROM*으로 거의 대체됨. *Legacy 시스템 유지보수* 시에만.
+
 ## Bit-bang vs 하드웨어 페리퍼럴
 
 | | Bit-bang (GPIO) | HW SPI |

@@ -105,7 +105,89 @@ Saleae는 *프로토콜 디코더 후*의 결과를 트리거로 쓸 수 있어 
 
 DSO + 디지털 채널 + decoder를 결합하면 *DSO 화면에 디코딩된 바이트* 표시 (Rigol DS1000Z, Siglent SDS, Lecroy).
 
+## Loopback Test 패턴
+
+페리퍼럴 자체 *살아있나* 확인. 보드 살리는 첫 단계.
+
+### UART Loopback
+
+TX·RX 핀을 *점퍼로 연결* (또는 페리퍼럴 내장 loopback mode).
+
+```c
+HAL_UART_Transmit(&huart1, (uint8_t*)"PING", 4, 100);
+uint8_t buf[4];
+HAL_UART_Receive(&huart1, buf, 4, 100);
+assert(memcmp(buf, "PING", 4) == 0);  // OK = 페리퍼럴 살아있음
+```
+
+페리퍼럴 *내부 loopback mode* (STM32 USART_CR3.HDSEL=1, 일부 칩)로 *핀 안 거치고* 시험 가능.
+
+### SPI Loopback
+
+MOSI·MISO 핀을 *점퍼*. 마스터 모드에서:
+
+```c
+uint8_t tx[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+uint8_t rx[4];
+HAL_SPI_TransmitReceive(&hspi1, tx, rx, 4, 100);
+assert(memcmp(tx, rx, 4) == 0);
+```
+
+### I²C Loopback — 더 복잡
+
+I²C는 양방향 동시 송수신 어려움 — *2 I²C 페리퍼럴* 필요 (한 페리퍼럴 마스터, 다른 페리퍼럴 슬레이브). 또는 *외부 슬레이브 칩으로 자체 시험*.
+
+### CAN Loopback
+
+페리퍼럴 내장 mode 강력 추천 — *외부 노드 없이* 송수신.
+
+```c
+hcan1.Init.Mode = CAN_MODE_LOOPBACK;
+// 또는 CAN_MODE_SILENT_LOOPBACK (TX·RX 핀에서 격리)
+```
+
+자기 송신 메시지가 *자기 수신 FIFO*에 들어옴. 펌웨어 초기 검증에 필수.
+
+## JTAG / SWD / SWO — 디버깅 인터페이스
+
+UART printf는 *비침습적이지만 코드 크기*가 부담. **JTAG·SWD**가 모던 표준.
+
+| 인터페이스 | 핀 | 속도 | 특징 |
+| --- | --- | --- | --- |
+| **JTAG** | 4-5 (TCK·TMS·TDI·TDO·TRST) | ≤ 30 MHz | 표준, ARM·MIPS·RISC-V 공통 |
+| **SWD** (Serial Wire Debug) | 2 (SWCLK·SWDIO) | ≤ 50 MHz | ARM Cortex 표준, JTAG 후속 |
+| **SWO** (Serial Wire Output) | 1 (SWO) — SWD 보조 | UART-like | printf 출력만 (CPU 부담 거의 0) |
+
+### SWO printf — UART 대체
+
+`ITM` (Instrumentation Trace Macrocell) 페리퍼럴 → *SWD 인터페이스를 통해 호스트로 메시지*.
+
+```c
+// CMSIS의 ITM_SendChar() 사용
+static void _putchar(char c) {
+    ITM_SendChar(c);
+}
+
+// printf 리다이렉트
+int _write(int fd, char *ptr, int len) {
+    for (int i = 0; i < len; i++) _putchar(ptr[i]);
+    return len;
+}
+```
+
+ST-Link·J-Link로 캡처. 장점 — *UART 핀 절약*, *고속* (수 Mbps).
+
+### Cortex-M 디버그 도구
+
+- **OpenOCD** + GDB — 오픈소스 표준
+- **ST-Link**, **J-Link** — 하드웨어 디버거
+- **SEGGER Ozone** — J-Link 전용 GUI
+- **VSCode + cortex-debug** — IDE 통합
+
+JTAG/SWD가 *동작 안 하면* 보드 자체 의심 (전원·리셋·플래시). 거의 *마지막 의지 도구*.
+
 ## 디버깅 워크플로
+
 
 1. **신호 자체가 나오는가** — 로직 분석기로 핀 확인.
 2. **클럭 정상인가** — Hz, idle level, jitter (DSO).

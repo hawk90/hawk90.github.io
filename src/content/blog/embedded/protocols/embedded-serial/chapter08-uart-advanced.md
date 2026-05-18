@@ -214,6 +214,88 @@ A.GND  ─── B.GND       A.DCD  ─── B.DTR (옵션)
 
 USB-to-Serial 어댑터에 *NULL Modem 변환*을 내장한 케이블도 있음.
 
+## RS-485 자동 DE 제어 — Driver Enable
+
+Ch 9에서 다룰 RS-485에서 *DE 핀을 펌웨어로 토글*하지만, **STM32 USART는 페리퍼럴 내장 자동 DE 기능** 제공.
+
+```c
+huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_RS485_INIT;
+huart1.AdvancedInit.DEMode = UART_DE_POLARITY_HIGH;
+huart1.AdvancedInit.AssertionTime = 16;       // 16/16 bit time before send
+huart1.AdvancedInit.DeassertionTime = 16;     // 16/16 bit time after send
+HAL_RS485Ex_Init(&huart1, UART_DE_POLARITY_HIGH, 16, 16);
+```
+
+**장점** — TC (Transmission Complete) 플래그 폴링 불필요. 페리퍼럴이 *마지막 비트의 stop edge*에 정확히 DE Off → 슬레이브와의 *서로 응답* 안전.
+
+> 💡 STM32G0·G4·H7의 USART, F1/F4는 별도 GPIO 토글 필요. 데이터시트의 *Driver Enable* 절 확인.
+
+## Smart Card / ISO 7816 — UART 위의 보안
+
+ISO 7816-3 표준 — *접촉식 IC 카드*(신용카드 IC, SIM 카드, 전자주민증 등)의 통신. **반이중 UART + 클럭 신호 ETU**.
+
+### 핀
+
+| 핀 | 의미 |
+| --- | --- |
+| VCC | 3V or 5V |
+| GND | — |
+| CLK | 외부 클럭 (MCU → 카드) — 1~5 MHz |
+| RST | 카드 reset |
+| I/O | UART data (half-duplex) |
+
+### 한 프레임
+
+```text
+Start (1) | Data (8) | Parity (even) | Guard (2)
+```
+
+8E2 (8 data + Even parity + 2 stop) 가 기본. *에러 시 카드가 응답 라인을 Low로 잡고 재송신 요구*.
+
+### STM32 USART Smart Card 모드
+
+USART_CR3.SCEN = 1 시 페리퍼럴이 *NACK 자동 처리* + *guard time 자동 삽입*.
+
+```c
+huart1.Init.Mode = UART_MODE_TX_RX;
+huart1.Init.WordLength = UART_WORDLENGTH_9B;   // 8 data + parity
+huart1.Init.StopBits = UART_STOPBITS_1_5;
+huart1.Init.Parity = UART_PARITY_EVEN;
+HAL_SMARTCARD_Init(&hsmartcard1);
+```
+
+응용 — POS 단말기, SIM 어댑터.
+
+## IrDA Encoding — UART + 적외선
+
+IrDA SIR (Serial Infrared) — UART를 *적외선 LED + photodiode*로 무선 전송. ISO 17074 표준.
+
+### 인코딩 차이
+
+| | UART | IrDA SIR |
+| --- | --- | --- |
+| Bit 0 | TX = Low | LED 펄스 (3/16 bit time) |
+| Bit 1 | TX = High | LED Off |
+
+`0` 비트마다 *짧은 펄스*만 보내 *에너지 절약 + LED 수명*.
+
+### 속도
+
+| 표준 | 속도 | 거리 |
+| --- | --- | --- |
+| IrDA 1.0 SIR | 2400 - 115200 | 1 m |
+| IrDA 1.1 MIR | 0.576 - 1.152 Mbps | 1 m |
+| IrDA 1.1 FIR | 4 Mbps | 1 m |
+
+STM32 USART_CR3.IREN = 1 시 페리퍼럴이 *3/16 펄스 변조* 자동.
+
+```c
+huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_IRDA_INIT;
+HAL_IRDA_Init(&hirda1);
+```
+
+응용 — 옛 노트북 적외선 포트, 일부 의료기기 무선 데이터 전송. 현재는 *Bluetooth로 대체*.
+
 ## LIN — UART 위의 자동차 버스
 
 Local Interconnect Network — UART 기반 (보통 19200 baud) + *single-wire*. 자동차 도어·시트·창문 같은 *저속 기능*에 사용.

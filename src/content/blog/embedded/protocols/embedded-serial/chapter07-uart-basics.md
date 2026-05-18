@@ -181,6 +181,90 @@ printf("Hello UART\r\n");
 
 대부분의 STM32 HAL 함수는 ORE 발생 시 *RX를 멈춤*. 명시적 클리어 (`__HAL_UART_CLEAR_OREFLAG`) 필요.
 
+## Auto-Baud Detection
+
+송신자의 baud rate를 *모를 때* 수신자가 자동 추정. 두 방법:
+
+### 방법 1 — 알려진 첫 바이트
+
+대부분의 통신은 첫 바이트로 *0x55* (LIN의 Sync byte) 또는 *0xAA* 를 송신 약속. 0x55 = `01010101` → 10개 엣지가 *bit time* 측정 → baud 역산.
+
+### 방법 2 — Falling edge 폭 측정
+
+수신자가 *idle High → 첫 start bit (Low)* 의 *길이*를 측정 → bit time → baud. 노이즈 한 펄스로 오인 가능.
+
+STM32 USART의 `ABREN` 비트 + `ABRMOD[1:0]` 선택 — 0x55 모드, falling edge 모드 등.
+
+```c
+huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_AUTOBAUDRATE_INIT;
+huart1.AdvancedInit.AutoBaudRateEnable = UART_ADVFEATURE_AUTOBAUDRATE_ENABLE;
+huart1.AdvancedInit.AutoBaudRateMode = UART_ADVFEATURE_AUTOBAUDRATE_ONFALLINGEDGE;
+```
+
+LIN 마스터-슬레이브, 부트로더 (사용자가 baud 모름)에서 사용.
+
+## Fractional Baud Rate Generator (BRG)
+
+MCU 시스템 클럭이 *baud 정수배가 아니면* 합성 오차. 모던 USART는 *정수 + 소수* prescaler 지원.
+
+### STM32 USART_BRR — 16× oversampling
+
+```text
+USART_BRR = USART_CLK / baud
+
+12-bit 정수부 + 4-bit 소수부 (1/16 단위)
+```
+
+예 — 72 MHz / 115200:
+
+```text
+72,000,000 / 115,200 = 625.0   → USART_BRR = 0x271 (정수 625)
+실제 baud = 72,000,000 / 625 = 115,200   ✓ 오차 0%
+```
+
+예 — 72 MHz / 921600:
+
+```text
+72,000,000 / 921,600 = 78.125
+정수부 = 78, 소수부 = 0.125 × 16 = 2
+USART_BRR = (78 << 4) | 2 = 0x4E2
+실제 baud = 72M / 78.125 = 921,600   ✓ 오차 0%
+```
+
+소수부가 없으면 921600 ≈ 923,077 → 0.16% 오차. **Fractional BRG가 고속 baud의 정확도를 살림**.
+
+### 8× oversampling 변형
+
+USART_CR1.OVER8 = 1 시 — 16× → 8× oversampling, 분주 한 단계 추가. 더 높은 baud (~10 Mbps) 가능하지만 노이즈 마진 절반.
+
+## Break Signal
+
+UART 라인을 *11+ bit time 연속 Low*로 유지 → "통신 중단 신호". Frame이 아니라 *line-level* 시그널.
+
+### 용도
+
+| 용도 | 설명 |
+| --- | --- |
+| **LIN Wake-up** | LIN 마스터가 슬레이브 깨우기 (≥13 bit Low) |
+| **콘솔 attention** | Linux 콘솔 RS-232: Break → Magic SysRq |
+| **모뎀 hang-up** | 옛 모뎀에서 끊기 신호 |
+| **에러 신호** | 사용자 정의 "중지" |
+
+### STM32 송신·수신
+
+```c
+// 송신 — break 11 bit time
+__HAL_UART_SEND_REQ(&huart1, UART_SENDBREAK_REQUEST);
+
+// 수신 — Break detect 인터럽트
+if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_LBDF)) {
+    __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_LBDF);
+    // Break 감지됨
+}
+```
+
+LIN 슬레이브는 *Break + Sync(0x55) + ID + Data + Checksum* 시퀀스로 깨어남.
+
 ## TX·RX 핀 외에
 
 - **DTR / DSR / RI / DCD** — 모뎀 제어 신호 (RS-232 시대), 모던 시스템에선 거의 미사용

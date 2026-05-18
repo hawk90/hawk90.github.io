@@ -118,6 +118,54 @@ uint8_t who_am_i = i2c_read_reg(0x68, 0x75);
 
 > ⚠️ STM32 HAL은 주소를 **8-bit 형태**로 넘김 — 7-bit 0x68을 `0x68 << 1 = 0xD0`로. 수많은 첫 사용자가 여기서 빠집니다.
 
+## 예약 주소 — General Call·Start Byte
+
+7-bit 주소 공간 중 *8개 prefix*가 예약. 가장 자주 만나는 둘:
+
+### General Call (`0x00`)
+
+마스터가 *모든 슬레이브에 broadcast*. 슬레이브가 *General Call에 응답*하도록 등록되면 ACK.
+
+```text
+S | 0x00 | W | A | 데이터 | A | P
+   ↑       ↑
+   General Call addr   슬레이브 다수가 동시 ACK (wired-AND)
+```
+
+#### 흔한 General Call 명령
+
+| 두 번째 바이트 | 의미 |
+| --- | --- |
+| `0x06` | Software reset — 모든 슬레이브 reset |
+| `0x04` | "프로그램 가능한 주소 받아라" — 동적 주소 |
+| 다른 값 | 슬레이브 정의 |
+
+> 💡 General Call은 *실무에서 거의 안 씀*. 슬레이브가 *명시적 enable* 안 하면 무시.
+
+### Start Byte (`0x01`)
+
+옛 폴링 방식 — 마스터가 *주소 잡기 전에* `0x01`을 보내 "다음 트랜잭션 시작" 신호. 슬레이브들이 *polling-on-interrupt* 모드일 때 활용.
+
+```text
+S | 0x01 | W | <NACK> | Sr | 진짜 주소 | ...
+```
+
+> 💡 *완전 deprecated*. 모던 슬레이브는 *인터럽트 핀*으로 호스트에 깨움 알림.
+
+### 기타 예약 주소
+
+| 주소 | 용도 |
+| --- | --- |
+| `0000 0000 0` (0x00 + W) | General Call |
+| `0000 0000 1` (0x00 + R) | Start Byte |
+| `0000 001x` | CBUS — 옛 Philips 호환 |
+| `0000 010x` | 다른 버스 |
+| `0000 011x` | 미래 예약 |
+| `1111 0xxx` | 10-bit 주소 prefix |
+| `1111 1xxx` | Hs-mode master code |
+
+이 16개 주소는 *일반 슬레이브에 부여 금지*. 실용 공간 128 - 16 = **112개**.
+
 ## 속도 모드
 
 | 모드 | 클럭 | 특징 |

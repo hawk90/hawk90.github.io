@@ -115,6 +115,60 @@ GND ──── 680Ω ──── B
 
 상용 RS-485 보드는 보통 *jumper*로 termination·bias on/off.
 
+## RS-422 — Full-Duplex Differential 자매
+
+RS-485가 *half-duplex multi-drop*이라면, RS-422는 *full-duplex point-to-(multi)point*. **4-wire** (송신 쌍 + 수신 쌍 분리).
+
+| 항목 | RS-422 | RS-485 |
+| --- | --- | --- |
+| 와이어 | 4 (TX+/TX-/RX+/RX-) | 2 (A/B half) 또는 4 (full) |
+| Duplex | Full-duplex | Half-duplex (보통) |
+| Master | **1 master, N slaves (32)** | N master, N slaves |
+| 마스터 송신 | TX+/- → 모든 slave RX | 양보 중재 (multi-master) |
+| 슬레이브 송신 | 자기 슬롯에서만 TX 가능 (충돌 회피) | DE 토글 |
+| 트랜시버 | SN75ALS191, MAX489 등 | MAX485 등 |
+| 거리·속도 | 1200 m @ 100 kbps | 동일 |
+
+### 사용처
+
+- **Yamaha MIDI Star Topology** — 1 master → 다수 음원
+- **CCTV Pan-Tilt-Zoom 카메라** — 컨트롤러 → 다수 카메라 (RS-422 호환 모드)
+- **공장 자동화** (옛 시스템) — DCS → 다수 PLC
+
+### Termination
+
+RS-422도 *종단 120 Ω* 필요. 단, *각 receiver pair*마다 한 개 (마지막 receiver). TX 쌍은 *송신자만*이므로 receiver 측 한 군데.
+
+### RS-485 트랜시버로 호환
+
+대부분 RS-485 트랜시버 (MAX485)가 *RS-422 호환*. *4-wire 모드*로 쓰면 RS-485 full-duplex = RS-422.
+
+## Profibus DP — RS-485 위 자동화 표준
+
+PROFIBUS DP (Decentralized Periphery) — Siemens가 1989년 발표, IEC 61158. *PLC ↔ 분산 IO*의 표준.
+
+### RS-485 변형
+
+- 12 Mbps까지 (RS-485 표준 한계 초과 — 특수 트랜시버)
+- 노드 32 (segment당), 리피터로 4 segment = 126 노드
+- **EIA-485-A** (RS-485 강화 버전)
+- DB-9 또는 M12 4-pin 커넥터
+
+### 통신 모델
+
+```text
+PLC (마스터) ──┬── Slave 1 (IO 모듈)
+                ├── Slave 2 (드라이브)
+                ├── Slave 3 (HMI)
+                └── ...
+```
+
+마스터가 *주기적 polling* (cyclic) — 매 슬레이브에 *작은 데이터 교환*. cycle time 1-10 ms (시스템 크기에 따라).
+
+### 후속 — Profinet
+
+Profibus DP는 *Ethernet으로 진화* → **PROFINET** (실시간 이더넷). PROFIBUS DP는 *레거시 시스템*에 여전히 운영. PROFINET 시리즈 별도 (Industrial Ethernet 카테고리).
+
 ## Modbus RTU — RS-485 위 산업 프로토콜
 
 거의 모든 PLC·산업 센서·인버터의 표준. 1979년 Modicon 정의.

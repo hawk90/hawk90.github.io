@@ -224,6 +224,125 @@ DT의 `compatible = "myvendor,mysensor"` 슬레이브에 매칭. `insmod my_sens
 
 표준 라이브러리 (IIO, hwmon, pwm)이 있는 도메인이면 *그 프레임워크 따르기*. 임시 디버그라면 ioctl로 시작.
 
+## serdev — Serial Device Bus
+
+`/dev/ttyXX` 위의 디바이스 (블루투스·GPS·Wi-Fi 모듈)를 *자동 enumeration*. 옛 방식 — userspace daemon이 `/dev/ttyS0` open. 모던 방식 — **serdev**가 *DT에 선언된 디바이스를 커널이 인식*.
+
+```dts
+&uart7 {
+    status = "okay";
+
+    bluetooth {
+        compatible = "brcm,bcm43438-bt";
+        max-speed = <3000000>;
+        // 다른 속성 — vendor, shutdown-gpios 등
+    };
+};
+```
+
+`hci_serdev` 같은 *serdev 드라이버*가 자동으로 `/dev/ttyXX` 위에 *블루투스 HCI* 인터페이스 생성. 사용자가 *직접 open 안 함*. `hciconfig hci0 up` 등으로 사용.
+
+### serdev 드라이버 작성
+
+```c
+#include <linux/serdev.h>
+
+static int my_probe(struct serdev_device *serdev) {
+    serdev_device_set_baudrate(serdev, 115200);
+    serdev_device_set_flow_control(serdev, false);
+    serdev_device_open(serdev);
+    // 데이터 수신 콜백 설정
+    serdev_device_set_client_ops(serdev, &my_ops);
+    return 0;
+}
+
+static const struct of_device_id my_of_match[] = {
+    { .compatible = "myvendor,mymodule" },
+    { }
+};
+
+static struct serdev_device_driver my_driver = {
+    .driver = { .name = "mymod", .of_match_table = my_of_match },
+    .probe = my_probe,
+};
+module_serdev_device_driver(my_driver);
+```
+
+블루투스·GNSS·Wi-Fi 모듈이 *serdev로 통합*되어 *플랫폼 ↔ 모듈 통신*이 표준화.
+
+## SPI Slave Mode
+
+대부분의 Linux SPI는 *마스터*만 다루지만, *슬레이브 mode* 드라이버도 있음 — Linux 시스템이 *외부 마스터의 SPI 슬레이브*가 됨.
+
+### 표준 슬레이브 드라이버
+
+`drivers/spi/slave/`:
+- `spi-slave-time.c` — 마스터 read 시 *현재 시간* 응답
+- `spi-slave-system-control.c` — 시스템 reboot/halt 명령 받기
+
+```dts
+&spi1 {
+    slave;                              // 슬레이브 모드 마크
+    status = "okay";
+
+    slave@0 {
+        compatible = "linux,spi-slave-time";
+    };
+};
+```
+
+응용 — 대형 MCU 시스템에서 *Cortex-M이 마스터*, *Cortex-A Linux가 슬레이브* (IO 확장).
+
+## I²C Slave Mode
+
+`drivers/i2c/i2c-core-slave.c` — Linux i2c controller가 *슬레이브로 동작*. 콜백 기반 — 데이터 받음·송신 시 호출.
+
+```c
+static int my_slave_cb(struct i2c_client *client,
+                       enum i2c_slave_event event, u8 *val) {
+    switch (event) {
+    case I2C_SLAVE_WRITE_RECEIVED:
+        /* 마스터가 우리에게 *val 보냄 */
+        break;
+    case I2C_SLAVE_READ_REQUESTED:
+        *val = my_response_byte();
+        break;
+    case I2C_SLAVE_STOP:
+        break;
+    }
+    return 0;
+}
+
+// 등록
+i2c_slave_register(client, my_slave_cb);
+```
+
+응용 — Linux 시스템을 *I²C EEPROM 또는 센서로 위장*. 자동차 ECU emulator, 보드 자가진단.
+
+## PREEMPT_RT — Realtime Linux
+
+표준 Linux에서 SPI/I²C 트랜잭션의 *지연 jitter*는 *수 ms*. 모터 제어 등은 *수 µs*가 필요. **PREEMPT_RT** 커널 패치가 해결.
+
+### 영향
+
+| 항목 | Vanilla Linux | PREEMPT_RT |
+| --- | --- | --- |
+| 인터럽트 latency | 수 ms (worst) | < 100 µs |
+| spinlock 대기 | indeterministic | priority-inherited mutex |
+| SPI 트랜잭션 지연 | 변동 큼 | 작음 |
+| 시스템콜 overhead | 작음 | 약간 증가 |
+
+### 사용처
+
+- 산업용 모션 제어 PLC
+- 발사체 GSE (Ground Support Equipment)
+- 의료 영상
+- 일부 자동차 인포테인먼트 백업 인스트루먼트
+
+### 임베디드 통합
+
+Yocto의 `meta-realtime`, Buildroot의 `BR2_PACKAGE_LINUX_RT_PATCH` 옵션. Kernel `CONFIG_PREEMPT_RT=y` 활성.
+
 ## 자주 하는 실수
 
 > ⚠️ spidev 트랜잭션마다 CS 토글
