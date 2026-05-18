@@ -5,7 +5,7 @@ description: "UML에서 가장 많이 그리는 행위 다이어그램. Lifeline
 tags: [UML, Sequence Diagram, Interaction, Behavior]
 series: "UML 2.5.1"
 seriesOrder: 18
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

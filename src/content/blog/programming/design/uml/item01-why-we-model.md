@@ -5,7 +5,7 @@ description: "모델링은 코드의 적이 아니다 — 머릿속에 다 들�
 tags: [UML, Modeling, Software Engineering, Fundamentals]
 series: "UML 2.5.1"
 seriesOrder: 1
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

@@ -5,7 +5,7 @@ description: "메시지를 시간 축이 아닌 공간(객체 배치)에 놓고 
 tags: [UML, Communication Diagram, Interaction, Message]
 series: "UML 2.5.1"
 seriesOrder: 33
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

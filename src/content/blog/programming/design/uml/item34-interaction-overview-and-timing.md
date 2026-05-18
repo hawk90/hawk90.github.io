@@ -5,7 +5,7 @@ description: "여러 시퀀스를 활동 흐름으로 묶는 'Interaction Overvi
 tags: [UML, Interaction Overview, Timing Diagram, Interaction]
 series: "UML 2.5.1"
 seriesOrder: 34
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

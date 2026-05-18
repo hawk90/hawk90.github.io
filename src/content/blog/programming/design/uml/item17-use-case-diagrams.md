@@ -5,7 +5,7 @@ description: "System boundary box, actor, use case, include/extend — 시스템
 tags: [UML, Use Case Diagram, Requirements, Scope]
 series: "UML 2.5.1"
 seriesOrder: 17
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

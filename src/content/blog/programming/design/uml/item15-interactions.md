@@ -5,7 +5,7 @@ description: "Lifeline · 메시지 · activation bar — 행위 모델링의 �
 tags: [UML, Interaction, Sequence, Communication]
 series: "UML 2.5.1"
 seriesOrder: 15
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

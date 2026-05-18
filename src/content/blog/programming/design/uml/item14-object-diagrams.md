@@ -5,7 +5,7 @@ description: "특정 시점의 객체 그래프 — 디버깅·시나리오·테
 tags: [UML, Object Diagram, Snapshot, Debugging]
 series: "UML 2.5.1"
 seriesOrder: 14
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
