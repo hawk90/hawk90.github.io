@@ -10,18 +10,18 @@ type: tech
 
 ## 한 줄 요약
 
-> **"State machine은 *3가지 단계*."** — enum + switch (간단), std::variant (type-safe), etl::fsm (정식).
+> **"State machine은 세 단계로 발전합니다."** enum + switch는 간단하고, `std::variant`는 type-safe하며, `etl::fsm`은 정식 구현입니다.
 
 ## 어떤 문제를 푸는가
 
-임베디드는 *state machine 가득*.
+임베디드는 state machine으로 가득합니다.
 
-- *TCP 연결* — Listen, Established, Closed
-- *자판기* — Idle, HasMoney, Dispensing
-- *프로토콜 파서* — Init, Header, Body, Trailer
-- *미디어 플레이어* — Stopped, Playing, Paused
+- TCP 연결 — Listen, Established, Closed
+- 자판기 — Idle, HasMoney, Dispensing
+- 프로토콜 파서 — Init, Header, Body, Trailer
+- 미디어 플레이어 — Stopped, Playing, Paused
 
-순진한 구현 — *flag 변수 + if 분기*:
+순진한 구현은 flag 변수와 if 분기에 의존합니다.
 
 ```cpp
 bool is_idle = true;
@@ -37,13 +37,13 @@ void play() {
 }
 ```
 
-*상태 invariant 깨짐 + 전이 모호*.
+상태 invariant가 깨지기 쉽고 전이도 모호합니다.
 
-State machine 패턴이 *3가지 단계*로 개선.
+State machine 패턴은 세 단계로 점진적으로 개선합니다.
 
 ## 미디어 플레이어 — 예시 FSM
 
-전체 글에서 *미디어 플레이어 state machine*을 예시로 씁니다. 세 상태와 네 이벤트의 전이는 다음과 같습니다.
+이 글 전반에서 미디어 플레이어 state machine을 예시로 씁니다. 세 상태와 네 이벤트의 전이는 다음과 같습니다.
 
 ![미디어 플레이어 state machine — Stopped/Playing/Paused](/images/blog/embedded-cpp/diagrams/part4-06-state-machine.svg)
 
@@ -87,19 +87,21 @@ void on_stop() {
 }
 ```
 
-장점:
-- 가장 *작은 코드*
-- 디버깅 쉬움
-- *Cortex-M0+*에도 OK
+장점은 다음과 같습니다.
 
-단점:
-- *전이 로직이 함수에 흩어짐*
-- 새 state 추가 시 *모든 함수 수정*
-- *invariant 강제 어려움*
+- 가장 적은 코드로 구현할 수 있습니다.
+- 디버깅이 쉽습니다.
+- Cortex-M0+에서도 동작합니다.
+
+단점은 다음과 같습니다.
+
+- 전이 로직이 여러 함수에 흩어집니다.
+- 새 state를 추가하면 모든 함수를 수정해야 합니다.
+- invariant 강제가 어렵습니다.
 
 ## 단계 2 — std::variant + std::visit
 
-C++17. 각 *state를 type*으로. *type system이 invariant 강제*.
+C++17부터 가능합니다. 각 state를 type으로 표현하므로 type system이 invariant를 강제합니다.
 
 ```cpp
 #include <variant>
@@ -144,14 +146,16 @@ current_state = on_play(current_state);
 current_state = on_pause(current_state);
 ```
 
-장점:
-- *각 state가 자기 데이터 보유* (Playing의 position 등)
-- *전이가 명시적* — 함수가 새 state 반환
-- *exhaustive check* — variant의 모든 type 처리 강제 (if constexpr 패턴)
+장점은 다음과 같습니다.
 
-단점:
-- `std::visit + if constexpr` 약간 복잡
-- 큰 state 머신은 *함수 길어짐*
+- 각 state가 자기 데이터를 가집니다. 예를 들어 Playing은 position을 보유합니다.
+- 전이가 명시적이며 함수가 새 state를 반환합니다.
+- `if constexpr` 패턴으로 variant의 모든 type을 처리하도록 강제할 수 있어 exhaustive check가 가능합니다.
+
+단점은 다음과 같습니다.
+
+- `std::visit + if constexpr` 조합이 약간 복잡합니다.
+- 큰 state machine에서는 함수가 길어집니다.
 
 ## 임베디드 — TCP 연결 state
 
@@ -186,11 +190,11 @@ TcpState handle_ack(TcpState s, const Packet& p) {
 }
 ```
 
-*각 state에 필요한 데이터*. 다른 state에는 *불필요한 데이터 없음*. *RAM 절약*.
+각 state에 필요한 데이터만 두고 다른 state에는 두지 않으므로 RAM이 절약됩니다.
 
 ## 단계 3 — etl::fsm
 
-[Part 4-02](/blog/embedded/embedded-cpp/part4-02-etl-library)의 ETL FSM. *대규모, 형식화*.
+[Part 4-02](/blog/embedded/embedded-cpp/part4-02-etl-library)에서 본 ETL FSM은 대규모 FSM을 형식화할 때 적합합니다.
 
 ```cpp
 #include <etl/fsm.h>
@@ -265,15 +269,17 @@ fsm.receive(PauseEvent{});
 fsm.receive(StopEvent{});
 ```
 
-장점:
-- *상태와 전이가 명시적*
-- *Type-safe event dispatch*
-- *unknown event 처리 명시*
-- *FSM diagram에 직접 매핑*
+장점은 다음과 같습니다.
 
-단점:
-- *boilerplate 많음*
-- *작은 FSM에는 과함*
+- 상태와 전이가 명시적입니다.
+- Type-safe event dispatch가 가능합니다.
+- unknown event 처리도 명시적으로 작성합니다.
+- FSM diagram에 직접 매핑됩니다.
+
+단점은 다음과 같습니다.
+
+- boilerplate가 많습니다.
+- 작은 FSM에는 과합니다.
 
 ## 패턴 비교
 
@@ -285,7 +291,7 @@ fsm.receive(StopEvent{});
 
 ## Hierarchical State Machine (HSM)
 
-복잡한 시스템 — 상태가 *계층화*.
+복잡한 시스템에서는 상태가 계층화되기도 합니다.
 
 ```text
 Operating
@@ -296,11 +302,11 @@ Operating
 └── Error
 ```
 
-`etl::hsm` 또는 *Boost.SML*. 대부분 임베디드는 *flat FSM으로 충분*.
+`etl::hsm`이나 Boost.SML을 사용합니다. 대부분의 임베디드는 flat FSM으로 충분합니다.
 
 ## 임베디드 — Compile-time FSM
 
-C++23 *constexpr*로 *컴파일 타임 검증*.
+C++23의 `constexpr`로 컴파일 타임에 검증할 수 있습니다.
 
 ```cpp
 // transition table — 컴파일 타임 데이터
@@ -333,13 +339,13 @@ StateId state = StateId::Stopped;
 state = next_state(state, EventId::Play);
 ```
 
-*상태 전이 table을 데이터로*. 검증 용이. 새 전이 *table만 추가*.
+상태 전이를 table로 만들어 데이터로 다루면 검증이 쉽고, 새 전이도 table에 한 줄만 추가하면 됩니다.
 
-자세한 compile-time FSM은 [Part 4-07](/blog/embedded/embedded-cpp/part4-07-compile-time-fsm).
+자세한 compile-time FSM은 [Part 4-07](/blog/embedded/embedded-cpp/part4-07-compile-time-fsm)에서 다룹니다.
 
 ## State machine + Logging
 
-각 전이를 *자동 로깅*.
+각 전이를 자동으로 로깅할 수 있습니다.
 
 ```cpp
 template<typename FsmType>
@@ -350,29 +356,31 @@ void transition(FsmType& fsm, StateId from, StateId to, const char* event) {
 }
 ```
 
-production debugging에 *crucial*. *상태 흐름 추적*.
+production debugging에서 상태 흐름을 추적할 때 매우 유용합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *State invariant 깨짐*
+### 1. State invariant 깨짐
 ```cpp
 bool playing = false;
 bool paused = false;
 playing = true;
 paused = true;   // 둘 다 true? — 불가능한 상태
 ```
-*single enum* 또는 *variant*로 강제.
 
-### 2. *전이 로직 흩어짐*
+single enum이나 variant로 invariant를 강제합니다.
+
+### 2. 전이 로직이 흩어짐
 ```cpp
 void on_play() { state = ...; }
 void on_pause() { state = ...; }
 void on_other() { state = ...; }
 // 한곳에 모이지 않음
 ```
-*FSM 패턴*으로 *전이 중앙화*.
 
-### 3. *Unhandled event*
+FSM 패턴으로 전이를 중앙화합니다.
+
+### 3. Unhandled event
 ```cpp
 switch (state) {
     case A: break;
@@ -380,20 +388,21 @@ switch (state) {
     // C 처리 누락
 }
 ```
-*default + assert* 또는 *exhaustive check*.
 
-### 4. *State에 너무 많은 데이터*
-모든 state가 *모든 데이터 보유* → RAM 낭비. *std::variant*로 *state별 데이터*.
+default + assert를 추가하거나 exhaustive check를 강제합니다.
 
-### 5. *동시 event 처리*
-ISR + main이 *동시 receive* → race. *mutex 또는 queue*.
+### 4. State에 너무 많은 데이터
+모든 state가 모든 데이터를 들고 있으면 RAM이 낭비됩니다. `std::variant`로 state별 데이터를 분리합니다.
 
-### 6. *Hardcoded transition*
-새 state 추가 시 *모든 switch 수정*. *transition table data-driven*.
+### 5. 동시 event 처리
+ISR과 main이 동시에 receive하면 race가 발생합니다. mutex나 queue를 둡니다.
+
+### 6. Hardcoded transition
+새 state를 추가할 때 모든 switch를 수정해야 하므로 transition table을 data-driven으로 만듭니다.
 
 ## 측정 — 패턴별 코드 크기
 
-같은 5-state FSM (STM32F4, -Os).
+같은 5-state FSM 기준입니다 (STM32F4, -Os).
 
 ```text
 Enum + switch:        ~400 B
@@ -401,7 +410,7 @@ std::variant + visit: ~800 B (variant 인스턴스)
 etl::fsm:             ~1.6 KB (5 state class + FSM base)
 ```
 
-작은 FSM은 *enum*, 큰 것은 *etl::fsm*.
+작은 FSM에는 enum이, 큰 FSM에는 `etl::fsm`이 적합합니다.
 
 ## 정리
 
@@ -421,4 +430,4 @@ etl::fsm:             ~1.6 KB (5 state class + FSM base)
 
 ## 다음 글
 
-[Part 4-07: Compile-time FSM](/blog/embedded/embedded-cpp/part4-07-compile-time-fsm) — *constexpr FSM* — 컴파일 타임에 *전이 검증*.
+[Part 4-07: Compile-time FSM](/blog/embedded/embedded-cpp/part4-07-compile-time-fsm) — constexpr FSM으로 컴파일 타임에 전이를 검증합니다.

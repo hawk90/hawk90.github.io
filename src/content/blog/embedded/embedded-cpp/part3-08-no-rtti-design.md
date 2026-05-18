@@ -10,22 +10,23 @@ type: tech
 
 ## 한 줄 요약
 
-> **"RTTI 없이도 *type-safe 다형성*."** — enum tag, `std::variant`, CRTP가 *3가지 대안*.
+> **"RTTI 없이도 type-safe한 다형성이 가능합니다."** enum tag, `std::variant`, CRTP가 세 가지 대안입니다.
 
 ## 어떤 문제를 푸는가
 
-C++의 *RTTI*(Run-Time Type Information)는:
+C++의 RTTI(Run-Time Type Information)는 세 가지 기능을 제공합니다.
 
-- `typeid(obj)` — type 정보
-- `dynamic_cast<T*>(p)` — 안전한 down-cast
-- 예외 처리의 *type-based catch*
+- `typeid(obj)`로 type 정보를 얻습니다.
+- `dynamic_cast<T*>(p)`로 안전한 down-cast를 수행합니다.
+- 예외 처리에서 type-based catch를 가능하게 합니다.
 
-비용:
-- *type info 테이블* — 클래스당 수십-수백 byte
-- *vtable에 type info 포인터*
-- *총 수 KB* 가능
+비용은 다음과 같습니다.
 
-임베디드는 `-fno-rtti`. 그러면 *type 정보가 필요할 때*?
+- type info 테이블이 클래스당 수십~수백 byte를 차지합니다.
+- vtable에 type info 포인터가 추가됩니다.
+- 총량이 수 KB에 이를 수 있습니다.
+
+임베디드는 `-fno-rtti`로 빌드합니다. 그렇다면 type 정보가 필요한 상황은 어떻게 처리할까요?
 
 ```cpp
 class Shape { /* virtual */ };
@@ -36,11 +37,11 @@ auto* c = dynamic_cast<Circle*>(s);   // RTTI 필요
 if (c) c->circle_method();
 ```
 
-이 글은 *RTTI 없는 3가지 대안*입니다.
+이 글은 RTTI 없는 세 가지 대안을 다룹니다.
 
 ## 대안 1 — Enum Tag
 
-가장 단순. *type을 enum으로 표현*.
+가장 단순한 방식으로, type을 enum으로 표현합니다.
 
 ```cpp
 enum class ShapeType { Circle, Square, Triangle };
@@ -68,9 +69,9 @@ if (s->type() == ShapeType::Circle) {
 }
 ```
 
-`type_` enum이 *type 식별 역할*. `static_cast`는 *안전 검증 X* — *enum 체크와 짝*.
+`type_` enum이 type을 식별하는 역할을 합니다. `static_cast`는 안전 검증을 해 주지 않으므로 enum 체크와 짝지어 씁니다.
 
-비용: *클래스당 enum size* (4 byte). RTTI보다 작음.
+비용은 클래스당 enum size(4 byte) 정도로, RTTI보다 작습니다.
 
 ### 헬퍼 매크로
 
@@ -90,11 +91,11 @@ template<> struct TypeOf<Square> { static constexpr ShapeType value = ShapeType:
 auto* c = checked_cast<Circle>(s);
 ```
 
-`dynamic_cast` 흉내. *모든 type을 enum + TypeOf 매핑* 필요.
+`dynamic_cast`를 흉내 낼 수 있지만, 모든 type을 enum과 TypeOf 매핑으로 등록해야 합니다.
 
 ## 대안 2 — `std::variant` (C++17)
 
-*type-safe tagged union*. closed type set에 자연.
+type-safe tagged union입니다. closed type set에 자연스럽게 들어맞습니다.
 
 ```cpp
 #include <variant>
@@ -146,9 +147,9 @@ std::visit([](auto&& shape) {
 }, s);
 ```
 
-`std::variant`의 *내부 size* = `max(sizeof of all types) + index`. *heap 없음*.
+`std::variant`의 내부 size는 `max(sizeof of all types) + index`이며 heap을 쓰지 않습니다.
 
-### 가상 함수 *완전 대체*
+### 가상 함수의 완전 대체
 
 ```cpp
 // 전통 — virtual
@@ -166,23 +167,24 @@ float compute_area(const Shape& s) {
 }
 ```
 
-*컴파일 타임에 모든 type 알아야*. 런타임 추가 type 못 함.
+컴파일 타임에 모든 type을 알고 있어야 하며, 런타임에 type을 추가할 수는 없습니다.
 
-장점:
-- *vtable 0*
-- *type info 0*
-- *간접 호출 0* (visitor가 인라인)
-- *value semantics*
+장점은 다음과 같습니다.
 
-단점:
-- *type set closed* — 런타임 확장 불가
-- *모든 type의 메모리 차지* (큰 type 하나가 sizeof 결정)
+- vtable과 type info가 모두 0입니다.
+- visitor가 인라인되어 간접 호출이 0입니다.
+- value semantics를 가집니다.
 
-자세한 비교는 [Part 4-06: State Machine](/blog/embedded/embedded-cpp/part4-06-state-machine).
+단점도 있습니다.
+
+- type set이 closed라서 런타임 확장이 불가합니다.
+- 모든 type의 메모리를 차지하므로(가장 큰 type이 sizeof를 결정합니다) 큰 type 하나가 전체를 부풉니다.
+
+자세한 비교는 [Part 4-06: State Machine](/blog/embedded/embedded-cpp/part4-06-state-machine)에서 다룹니다.
 
 ## 대안 3 — CRTP (Static Polymorphism)
 
-[Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism)에서 다룬 패턴. *컴파일 타임에 type 결정*.
+[Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism)에서 다룬 패턴으로, 컴파일 타임에 type을 결정합니다.
 
 ```cpp
 template<typename Derived>
@@ -204,11 +206,11 @@ Circle c;
 float a = c.area();   // compile-time dispatch
 ```
 
-*RTTI 0, vtable 0*. 단 *runtime polymorphism 못 함*.
+RTTI와 vtable이 모두 0입니다. 다만 runtime polymorphism은 사용할 수 없습니다.
 
 ## 자체 type-id 시스템
 
-도메인 특화 *type id*가 필요할 때. 직접 정의.
+도메인 특화된 type id가 필요할 때 직접 정의합니다.
 
 ```cpp
 template<typename T>
@@ -240,9 +242,9 @@ if (b->type_id() == TypeId<Derived>::value()) {
 }
 ```
 
-*전역 변수 주소*가 *unique type id*. RTTI 없이도 *strict type 비교*.
+전역 변수의 주소가 unique type id 역할을 합니다. RTTI 없이도 strict type 비교가 가능합니다.
 
-C++23 `typeid`의 *대체 구현*. 일부 라이브러리(Boost.TypeIndex 등)가 같은 idea.
+`typeid`의 대체 구현이며, Boost.TypeIndex 같은 일부 라이브러리도 같은 아이디어를 사용합니다.
 
 ## `dynamic_cast` 대체
 
@@ -269,11 +271,11 @@ std::visit([](auto&& obj) {
 }, variant_obj);
 ```
 
-각 패턴이 *조금씩 다른 trade-off*. *닫힌 type set* + *value semantics*면 *variant 가장 깔끔*.
+각 패턴이 조금씩 다른 트레이드오프를 가집니다. type set이 닫혀 있고 value semantics를 원한다면 variant가 가장 깔끔합니다.
 
 ## std::any — 사용 가능?
 
-`std::any`는 *type-erased container*. 내부적으로 *typeid 사용*.
+`std::any`는 type-erased container이며 내부적으로 typeid를 사용합니다.
 
 ```cpp
 #include <any>
@@ -282,9 +284,9 @@ std::any a = 42;
 auto* p = std::any_cast<int>(&a);   // RTTI 필요
 ```
 
-`-fno-rtti`에서는 *컴파일 에러*. *임베디드에서 std::any 사용 불가*.
+`-fno-rtti`에서는 컴파일 에러가 발생하므로 임베디드에서는 `std::any`를 사용할 수 없습니다.
 
-대안: `std::variant` (closed type set).
+대안은 closed type set의 `std::variant`입니다.
 
 ## 임베디드 — Event 시스템
 
@@ -319,11 +321,11 @@ void dispatch(const Event& e) {
 }
 ```
 
-*vtable 0, RTTI 0*. 코드 크기 *수 KB 절약*.
+vtable과 RTTI가 모두 0이며 코드 크기를 수 KB 절약할 수 있습니다.
 
 ## Exception 처리도 무관
 
-`-fno-exceptions` + `-fno-rtti`. *둘 다 끔*. 일반 임베디드 표준.
+`-fno-exceptions`와 `-fno-rtti`를 함께 끄는 것이 일반적인 임베디드 표준입니다.
 
 ```makefile
 CXXFLAGS += -fno-exceptions -fno-rtti
@@ -331,37 +333,37 @@ CXXFLAGS += -fno-exceptions -fno-rtti
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *dynamic_cast 호출 후 nullptr 안 체크*
-RTTI 없으면 `dynamic_cast`가 *컴파일 에러*. 코드 변환 필요.
+### 1. dynamic_cast 호출 후 nullptr 안 체크
+RTTI가 없으면 `dynamic_cast` 자체가 컴파일 에러가 됩니다. 코드 변환이 필요합니다.
 
-### 2. *typeid 사용*
-`typeid` 호출 — 컴파일 에러. *직접 type_id 시스템* 또는 *enum*.
+### 2. typeid 사용
+`typeid` 호출도 컴파일 에러로 떨어집니다. 직접 type_id 시스템이나 enum을 씁니다.
 
-### 3. *enum tag와 type 일관성 깨짐*
+### 3. enum tag와 type 일관성 깨짐
 ```cpp
 class Circle : public Shape {
 public:
     Circle() : Shape(ShapeType::Square) {}   // 잘못 — 컴파일 에러 없음
 };
 ```
-*static_assert* 또는 *factory function*으로 보장.
+static_assert나 factory function으로 일관성을 보장합니다.
 
-### 4. *variant에 큰 type*
+### 4. variant에 큰 type
 ```cpp
 using Event = std::variant<SmallEvent, HugeEvent>;
 // sizeof(Event) = sizeof(HugeEvent) + 인덱스
 ```
-*큰 type 분리*. 또는 *pointer 사용*.
+큰 type을 분리하거나 pointer를 사용합니다.
 
-### 5. *std::function의 RTTI 의존*
-`std::function`은 *내부 type erasure에 typeid 사용*. *RTTI 없으면* 일부 기능 제한. *함수 포인터*나 *etl::delegate*.
+### 5. std::function의 RTTI 의존
+`std::function`은 내부 type erasure에 typeid를 사용합니다. RTTI를 끄면 일부 기능이 제한되므로 함수 포인터나 `etl::delegate`로 대체합니다.
 
-### 6. *exception 일부만 끔*
-*예외와 RTTI는 *세트*로* 끔. 한 모듈만 RTTI 있으면 *링크 충돌* 가능.
+### 6. exception 일부만 끔
+예외와 RTTI는 세트로 끕니다. 한 모듈만 RTTI를 켜 두면 링크 충돌이 발생할 수 있습니다.
 
 ## 측정 — RTTI 끄기 효과
 
-같은 코드, RTTI on/off (STM32F4, simple inheritance project).
+같은 코드를 RTTI on/off로 비교합니다(STM32F4, 단순한 상속 프로젝트).
 
 ```text
 -frtti -fexceptions:
@@ -377,7 +379,7 @@ using Event = std::variant<SmallEvent, HugeEvent>;
 차이: 20 KB (35% 감소)
 ```
 
-큰 프로젝트는 *더 큰 차이*. RTTI 끄기 *임베디드 기본*.
+큰 프로젝트일수록 차이가 더 벌어집니다. RTTI 끄기는 임베디드의 기본 설정입니다.
 
 ## 정리
 
@@ -396,4 +398,4 @@ using Event = std::variant<SmallEvent, HugeEvent>;
 
 ## 다음 글
 
-[Part 3-09: 스마트 포인터 선택](/blog/embedded/embedded-cpp/part3-09-smart-pointer-choice) — `unique_ptr` vs `shared_ptr` vs raw pointer. 임베디드의 *기본 선택*.
+[Part 3-09: 스마트 포인터 선택](/blog/embedded/embedded-cpp/part3-09-smart-pointer-choice) — `unique_ptr`, `shared_ptr`, raw pointer 사이에서 임베디드의 기본 선택을 정리합니다.

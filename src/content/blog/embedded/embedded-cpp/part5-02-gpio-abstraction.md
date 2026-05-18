@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"각 GPIO pin이 *고유 type*."** — 두 pin 섞을 수 없음. 잘못된 사용 = *컴파일 에러*.
+> **"각 GPIO pin이 고유한 type을 갖습니다."** 두 pin을 섞을 수 없고, 잘못 쓰면 컴파일 에러가 납니다.
 
 ## 어떤 문제를 푸는가
 
-전통 C GPIO 사용:
+전통적인 C GPIO 사용 방식입니다.
 
 ```c
 #define LED_PORT GPIOA
@@ -29,9 +29,9 @@ HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
 HAL_GPIO_WritePin(LED_PORT, BUTTON_PIN, GPIO_PIN_SET);   // 오타 — 컴파일 통과
 ```
 
-매크로는 *type 없음*. *섞이는 실수 컴파일러 못 잡음*.
+매크로는 type이 없습니다. 섞이는 실수를 컴파일러가 잡지 못합니다.
 
-C++ template 기반 GPIO:
+C++ template 기반 GPIO는 다음과 같습니다.
 
 ```cpp
 using Led    = Gpio<GpioA, 5>;
@@ -43,11 +43,11 @@ Led::set();          // 다른 함수에서 다시 OK
 // Led::set(Button); // 컴파일 에러
 ```
 
-*Pin이 type* — *섞이지 않음*.
+Pin이 type이므로 섞이지 않습니다.
 
 ## 기본 — Static GPIO class
 
-[Part 2-06 Templates 기초](/blog/embedded/embedded-cpp/part2-06-templates-basics) 보강.
+[Part 2-06 Templates 기초](/blog/embedded/embedded-cpp/part2-06-templates-basics)의 내용을 보강합니다.
 
 ```cpp
 template<uintptr_t Port, uint8_t Pin>
@@ -106,7 +106,7 @@ if (Button::read()) {
 }
 ```
 
-*Pin number도 컴파일 타임*. *invalid pin은 static_assert*.
+Pin number도 컴파일 타임에 결정됩니다. invalid pin은 `static_assert`로 잡힙니다.
 
 ## 어셈블리 출력
 
@@ -122,7 +122,7 @@ LedRed::set():
     bx      lr
 ```
 
-C 매크로의 결과와 *완전 동일*. *zero-cost abstraction*.
+C 매크로의 결과와 완전히 동일합니다. zero-cost abstraction입니다.
 
 ## Pin 그룹 — 여러 pin 동시 조작
 
@@ -140,7 +140,7 @@ Leds::set_all();
 Leds::clear_all();
 ```
 
-C++17 fold expression으로 *variadic 처리*. 각 호출 *별도 어셈블리* — 같은 port면 *컴파일러가 자동 결합 가능*.
+C++17 fold expression으로 variadic을 처리합니다. 각 호출은 별도 어셈블리로 나오지만 같은 port면 컴파일러가 자동으로 결합할 수 있습니다.
 
 ## Pin 출력 직접 조작 (한 번에)
 
@@ -162,7 +162,7 @@ using LedGroup = GpioMask<0x40020000, (1<<5) | (1<<6) | (1<<7)>;
 LedGroup::set_all();   // 3 pin 한 번에 set
 ```
 
-*한 atomic store*. 빠름. 단 *같은 port에 한정*.
+한 번의 atomic store로 끝나 빠릅니다. 단 같은 port에 한정됩니다.
 
 ## Configuration — Compile-time 검증
 
@@ -196,7 +196,7 @@ Led::init();
 Led::set();
 ```
 
-*잘못된 configuration이 빌드 에러*. C++20의 *NTTP (non-type template parameter) 객체*.
+잘못된 configuration이 빌드 에러로 잡힙니다. C++20의 NTTP(non-type template parameter) 객체를 활용합니다.
 
 ## Concept으로 GPIO interface 정의 (C++20)
 
@@ -222,11 +222,11 @@ void blink_n_times(int n, int delay_ms) {
 blink_n_times<LedRed>(5, 500);
 ```
 
-*GpioPin 만족하는 type만* — *컴파일 타임에 인터페이스 검증*.
+`GpioPin`을 만족하는 type만 허용됩니다. 컴파일 타임에 인터페이스가 검증됩니다.
 
 ## Alternative function 매핑
 
-대부분 peripheral pin은 *alternative function*. ([STM32 datasheet] 참조)
+대부분의 peripheral pin은 alternative function을 가집니다(STM32 datasheet 참조).
 
 ```cpp
 enum class AltFn : uint8_t {
@@ -257,7 +257,7 @@ using Usart2Tx = Gpio<0x40020000, 2>;
 Usart2Tx::configure_alt<AltFn::AF7>();
 ```
 
-template parameter로 *AF 컴파일 타임*. *runtime 비교 없음*.
+template parameter로 AF를 컴파일 타임에 결정합니다. runtime 비교가 없습니다.
 
 ## Interrupt — EXTI 통합
 
@@ -277,7 +277,7 @@ public:
 };
 ```
 
-[ARM CMSIS NVIC API]와 통합하면 *interrupt handler*도 type-safe.
+ARM CMSIS NVIC API와 통합하면 interrupt handler도 type-safe해집니다.
 
 ## 임베디드 — 보드 설정 헤더
 
@@ -304,7 +304,7 @@ Led1::configure(GpioMode::Output);
 Led1::set();
 ```
 
-*보드별 설정 헤더*. 다른 보드는 *다른 헤더*. *app 코드 그대로*.
+보드별 설정 헤더를 둡니다. 다른 보드는 다른 헤더를 쓰고, app 코드는 그대로 유지됩니다.
 
 ## 다중 보드 지원
 
@@ -321,26 +321,31 @@ Led1::set();
 #endif
 ```
 
-build flag로 *보드 선택*. *application 코드는 변경 없음*.
+build flag로 보드를 선택합니다. application 코드는 그대로입니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *Pin number runtime 변수*
+### 1. Pin number를 runtime 변수로
+
 ```cpp
 void set_pin(int pin) {   // template parameter 아님
     GPIOA->BSRR = 1u << pin;   // runtime
 }
 ```
-*template으로 컴파일 타임*. type safety + zero-cost.
 
-### 2. *configure 누락*
+template으로 컴파일 타임에 결정하면 type safety와 zero-cost를 함께 얻습니다.
+
+### 2. configure 누락
+
 ```cpp
 Led::set();   // configure 안 함 — invalid mode
 ```
-*configure 강제* — RAII 또는 *명시 호출 강제*.
 
-### 3. *Port clock 활성화 누락*
-GPIO 사용 전 *port clock enable* 필요.
+configure를 RAII나 명시적 호출로 강제합니다.
+
+### 3. Port clock 활성화 누락
+
+GPIO 사용 전에 port clock을 enable해야 합니다.
 
 ```cpp
 template<uintptr_t Port, uint8_t Pin>
@@ -352,22 +357,26 @@ public:
 };
 ```
 
-### 4. *동일 pin을 여러 type alias*
+### 4. 동일 pin에 여러 type alias
+
 ```cpp
 using Led1   = Gpio<0x40020000, 5>;
 using LedDup = Gpio<0x40020000, 5>;   // 같은 pin — 의도 모호
 ```
-*한 type만 사용*.
 
-### 5. *Static configuration vs runtime*
-*Production에서 pin이 변경되어야* 한다면 template 안 됨. *runtime 설정 필요*.
+한 type만 사용합니다.
 
-### 6. *Speed 설정 누락*
-high-speed peripheral (SPI, UART)에 *low speed pin* → signal 못 따라감. *configure에서 speed 명시*.
+### 5. Static configuration vs runtime
+
+production에서 pin이 변경되어야 한다면 template 방식으로는 부족합니다. runtime 설정이 필요합니다.
+
+### 6. Speed 설정 누락
+
+high-speed peripheral(SPI, UART)에 low speed pin을 쓰면 signal을 따라가지 못합니다. configure에서 speed를 명시합니다.
 
 ## 측정 — Macro vs Template GPIO
 
-같은 LED blink loop.
+같은 LED blink loop 비교입니다.
 
 ```text
 # C macro
@@ -402,7 +411,7 @@ str     r2, [r3]
 # 완전 동일
 ```
 
-C++ 추가 비용 *0*. 추가 *type safety + IDE 지원*.
+C++ 추가 비용은 0입니다. 추가로 type safety와 IDE 지원을 얻습니다.
 
 ## 정리
 
@@ -421,4 +430,4 @@ C++ 추가 비용 *0*. 추가 *type safety + IDE 지원*.
 
 ## 다음 글
 
-[Part 5-03: Peripheral 추상화](/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction) — *UART, SPI, I2C 같은 peripheral*을 *type-safe class*로.
+[Part 5-03: Peripheral 추상화](/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction) — UART, SPI, I2C 같은 peripheral을 type-safe class로 다룹니다.

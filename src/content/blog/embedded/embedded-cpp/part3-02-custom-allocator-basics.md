@@ -10,29 +10,29 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Allocator는 *메모리 출처*를 STL에 알려줍니다."** — `std::vector<int, MyAllocator>`로 *내 메모리* 사용.
+> **"Allocator는 메모리 출처를 STL에 알려줍니다."** `std::vector<int, MyAllocator>` 형태로 내가 지정한 메모리를 사용합니다.
 
 ## 어떤 문제를 푸는가
 
-`std::vector<int>`의 기본 allocator는 `std::allocator<int>` — *heap (new/malloc)*. 임베디드에서는 *heap 회피*가 원칙이지만 *표준 컨테이너의 편리함*은 포기하기 어렵습니다.
+`std::vector<int>`의 기본 allocator는 `std::allocator<int>`이며 heap(new/malloc)을 사용합니다. 임베디드에서는 heap 회피가 원칙이지만 표준 컨테이너의 편리함을 포기하기는 어렵습니다.
 
 ```cpp
 std::vector<int> v;
 v.push_back(1);   // new 호출 — heap
 ```
 
-**Custom allocator**는 *STL과 호환되는 메모리 인터페이스*. *pool, stack arena, 특정 메모리 영역*에서 할당하도록.
+**Custom allocator**는 STL과 호환되는 메모리 인터페이스입니다. pool, stack arena, 특정 메모리 영역에서 할당하도록 만들 수 있습니다.
 
 ```cpp
 std::vector<int, MyPoolAllocator<int>> v;
 v.push_back(1);   // pool에서 할당
 ```
 
-이 글은 *STL allocator concept*과 *기본 구현*입니다.
+이 글은 STL allocator concept과 기본 구현을 다룹니다.
 
 ## Allocator Concept (C++17 이전)
 
-STL 컨테이너는 *allocator concept*을 따르는 객체를 사용. C++17 이전:
+STL 컨테이너는 allocator concept을 따르는 객체를 사용합니다. C++17 이전의 형태는 이렇습니다.
 
 ```cpp
 template<typename T>
@@ -62,17 +62,18 @@ template<typename T, typename U>
 bool operator!=(const MyAllocator<T>&, const MyAllocator<U>&) { return false; }
 ```
 
-핵심 요구사항:
-- `value_type` typedef
-- `allocate(n)` — n * sizeof(T) 바이트 반환
-- `deallocate(p, n)` — 반환
-- *컨테이너끼리 비교* 가능 — `operator==`, `operator!=`
+핵심 요구사항은 이렇습니다.
 
-C++20에서는 *concept으로 강제* (`std::allocator_traits`).
+- `value_type` typedef를 제공합니다.
+- `allocate(n)`이 n * sizeof(T) 바이트를 반환합니다.
+- `deallocate(p, n)`으로 메모리를 돌려줍니다.
+- `operator==`, `operator!=`로 컨테이너끼리 비교가 가능합니다.
+
+C++20에서는 concept으로 강제됩니다(`std::allocator_traits`).
 
 ## 가장 단순한 예 — Pool Allocator
 
-고정 크기 pool에서 할당.
+고정 크기 pool에서 할당하는 기본형입니다.
 
 ```cpp
 template<typename T, size_t N>
@@ -107,11 +108,11 @@ private:
 };
 ```
 
-문제: *throw* — `-fno-exceptions`. 다른 패턴 필요.
+문제는 throw입니다. `-fno-exceptions` 환경에서는 다른 패턴이 필요합니다.
 
 ## No-exception allocator — abort 사용
 
-`-fno-exceptions`에서는 *throw 대신* abort 또는 null 처리.
+`-fno-exceptions`에서는 throw 대신 abort 또는 null을 사용합니다.
 
 ```cpp
 template<typename T, size_t N>
@@ -138,11 +139,11 @@ public:
 };
 ```
 
-표준 STL은 *allocate가 throw하거나 정상 반환* 가정. *abort/null*은 *STL 호환 깨짐*. *ETL이나 직접 구현 컨테이너* 권장.
+표준 STL은 allocate가 throw하거나 정상 반환하는 것을 가정합니다. abort나 null을 쓰면 STL 호환이 깨지므로 ETL이나 직접 구현한 컨테이너를 권장합니다.
 
 ## C++17 — `std::pmr::polymorphic_allocator`
 
-C++17이 *polymorphic allocator*를 도입. *런타임에 allocator 변경 가능*.
+C++17이 polymorphic allocator를 도입하면서 런타임에 allocator를 바꿀 수 있게 됐습니다.
 
 ```cpp
 #include <memory_resource>
@@ -156,7 +157,7 @@ std::pmr::vector<int> v(&my_pool);
 
 ## Stateful allocator
 
-allocator가 *상태를 가짐* — pool 포인터, arena 등.
+allocator가 pool 포인터나 arena 같은 상태를 가지는 경우입니다.
 
 ```cpp
 template<typename T>
@@ -187,11 +188,11 @@ bool operator==(const ArenaAllocator<T>& a, const ArenaAllocator<U>& b) {
 }
 ```
 
-*상태 있는 allocator*는 *컨테이너 간 비교*가 *meaningful*. 같은 arena 사용하는 두 vector만 *동등*.
+상태 있는 allocator는 컨테이너 간 비교가 의미를 가집니다. 같은 arena를 사용하는 두 vector만 동등합니다.
 
 ## Arena allocator — bump pointer
 
-가장 단순한 stateful allocator. *포인터를 증가*시키며 할당. *개별 해제 불가*.
+가장 단순한 stateful allocator입니다. 포인터를 증가시키며 할당하므로 개별 해제는 불가합니다.
 
 ```cpp
 class Arena {
@@ -223,11 +224,11 @@ std::array<std::byte, 4096> buffer;
 Arena arena(buffer.data(), buffer.size());
 ```
 
-*매우 빠른 할당* (포인터 산술만). *fragmentation 0*. 단점: *개별 해제 불가*. *frame allocator*나 *transient 객체*에 적합.
+포인터 산술만으로 끝나므로 할당이 매우 빠르고 fragmentation은 0입니다. 단점은 개별 해제가 불가하다는 점입니다. frame allocator나 transient 객체에 적합합니다.
 
 ## 임베디드 — Static memory pool
 
-전역 또는 .bss의 *고정 메모리 영역*을 *pool로*.
+전역 또는 .bss의 고정 메모리 영역을 pool로 활용합니다.
 
 ```cpp
 // 한 task의 transient allocation 용
@@ -265,7 +266,7 @@ void process_frame() {
 }
 ```
 
-*프레임 단위 할당/해제*. 매 프레임 시작 시 reset.
+프레임 단위로 할당과 해제를 처리합니다. 매 프레임 시작 시점에 reset합니다.
 
 ## Allocator로 STL 컨테이너 사용
 
@@ -285,13 +286,13 @@ std::basic_string<char, std::char_traits<char>, PoolAllocator<char, 256>> s;
 s = "hello";
 ```
 
-*STL의 인터페이스 그대로* + *제어된 메모리*. 단 *컨테이너 타입이 길어짐*.
+STL 인터페이스를 그대로 쓰면서 메모리를 제어할 수 있습니다. 단점은 컨테이너 타입이 길어진다는 점입니다.
 
-C++17 *std::pmr*가 *훨씬 깔끔* — 같은 타입 (`std::pmr::vector<int>`), runtime 분기.
+C++17의 `std::pmr`가 훨씬 깔끔합니다. 같은 타입(`std::pmr::vector<int>`)으로 두고 런타임에 분기합니다.
 
 ## C++20 allocator concept
 
-`std::allocator_traits`가 모든 *기본 정의 제공*. 최소 구현:
+`std::allocator_traits`가 모든 기본 정의를 제공합니다. 최소 구현은 이렇습니다.
 
 ```cpp
 template<typename T>
@@ -308,44 +309,44 @@ struct MinimalAllocator {
 std::vector<int, MinimalAllocator<int>> v;
 ```
 
-C++17 이전엔 *수많은 typedef*가 필요했음. 이제 *value_type, allocate, deallocate* 3개만.
+C++17 이전에는 수많은 typedef가 필요했지만 이제 `value_type`, `allocate`, `deallocate` 셋이면 충분합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *rebind 누락*
+### 1. rebind 누락
 ```cpp
 std::list<int, MyAllocator<int>> l;
 // list 내부에 ListNode<int> 할당 필요
 // rebind로 MyAllocator<ListNode<int>> 만들어야
 ```
-*allocator_traits가 자동 rebind* — C++17 이후 보통 무관.
+`allocator_traits`가 자동으로 rebind해 주므로 C++17 이후로는 보통 신경 쓰지 않아도 됩니다.
 
-### 2. *allocator 비교 잘못*
+### 2. allocator 비교 잘못
 ```cpp
 bool operator==(const MyAlloc&, const MyAlloc&) { return true; }   // 다른 pool도 같다고?
 ```
-*상태 있는 allocator*는 *상태 비교*해야. 잘못된 비교는 *컨테이너 move/swap 망침*.
+상태 있는 allocator는 상태 자체를 비교해야 합니다. 잘못된 비교는 컨테이너 move/swap을 망칩니다.
 
-### 3. *deallocate에서 size 무시*
+### 3. deallocate에서 size 무시
 ```cpp
 void deallocate(T* p, size_t n) {
     free(p);   // n 무시 — array는 어떻게?
 }
 ```
-*allocator에 따라 size 필요*. pool은 무시 OK, 다른 경우 필요.
+allocator에 따라 size가 필요합니다. pool은 무시해도 되지만 다른 경우엔 꼭 활용합니다.
 
-### 4. *throw 사용*
-`-fno-exceptions` + throw → *abort*. *abort 명시* 또는 *예외 활성*.
+### 4. throw 사용
+`-fno-exceptions` 환경에서 throw가 발생하면 abort로 떨어집니다. abort를 명시하거나 예외를 활성화합니다.
 
-### 5. *thread safety 가정*
-multi-thread에서 *같은 pool 동시 접근* → race. *mutex* 또는 *thread-local pool*.
+### 5. thread safety 가정
+multi-thread에서 같은 pool을 동시에 접근하면 race가 발생합니다. mutex나 thread-local pool을 씁니다.
 
-### 6. *복잡한 allocator*
-*간단한 pool*로 충분한데 *generic allocator 만들기*. *프로젝트 needs*에 맞게.
+### 6. 복잡한 allocator
+간단한 pool로 충분한데 generic allocator를 만드는 경우가 많습니다. 프로젝트 요구에 맞게 단순하게 유지합니다.
 
 ## 측정 — Pool vs heap allocator
 
-같은 `std::vector<int>`, 10000회 push_back.
+같은 `std::vector<int>`로 10000회 push_back을 비교합니다.
 
 ```text
 # heap (std::allocator)
@@ -359,7 +360,7 @@ total time: 0.4 ms
 fragmentation: 0
 ```
 
-Pool이 *3배 빠름 + 결정적*. 임베디드 real-time에 *중요*.
+Pool이 약 3배 빠르고 결정적입니다. 임베디드 real-time에서 중요한 차이입니다.
 
 ## 정리
 
@@ -378,4 +379,4 @@ Pool이 *3배 빠름 + 결정적*. 임베디드 real-time에 *중요*.
 
 ## 다음 글
 
-[Part 3-03: Pool Allocator 구현](/blog/embedded/embedded-cpp/part3-03-pool-allocator) — 임베디드의 *대표적 allocator*. 고정 크기 블록, free list 관리.
+[Part 3-03: Pool Allocator 구현](/blog/embedded/embedded-cpp/part3-03-pool-allocator) — 임베디드의 대표적 allocator로, 고정 크기 블록과 free list 관리를 다룹니다.

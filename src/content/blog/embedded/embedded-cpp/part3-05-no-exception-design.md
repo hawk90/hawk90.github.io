@@ -10,24 +10,24 @@ type: tech
 
 ## 한 줄 요약
 
-> **"임베디드는 *예외 끔*."** — error code, `std::optional`, `std::expected`로 *명시적 에러 처리*.
+> **"임베디드에서는 예외를 끕니다."** error code, `std::optional`, `std::expected`로 명시적으로 에러를 처리합니다.
 
 ## 어떤 문제를 푸는가
 
-C++ 예외는 *런타임 비용*이 큽니다.
+C++ 예외는 런타임 비용이 큽니다.
 
-- Unwind table — *수 KB 추가*
-- `throw` 시 *수십 μs* 지연 (deterministic 아님)
-- Stack unwinding으로 *예측 못 한 destructor* 호출
-- 인증 환경에서 *대부분 금지*
+- Unwind table이 수 KB 추가됩니다.
+- `throw` 시 수십 μs의 지연이 생기며 deterministic하지 않습니다.
+- Stack unwinding으로 예측하지 못한 destructor가 호출됩니다.
+- 인증 환경에서는 대부분 금지됩니다.
 
-임베디드는 거의 항상 `-fno-exceptions`. 그러나 *에러는 발생*합니다. *예외 없이 어떻게* 처리하나.
+임베디드는 거의 항상 `-fno-exceptions`로 빌드합니다. 그러나 에러는 여전히 발생하므로 예외 없이 어떻게 처리할지가 관건입니다.
 
-이 글은 *no-exception 환경의 에러 처리 패턴* 4가지를 정리합니다.
+이 글은 no-exception 환경에서 쓰는 에러 처리 패턴 네 가지를 정리합니다.
 
 ## 패턴 1 — Error code 반환
 
-가장 단순. C의 전통.
+가장 단순한 방식으로, C의 전통적인 패턴입니다.
 
 ```cpp
 enum class ErrorCode {
@@ -57,8 +57,7 @@ if (err != ErrorCode::Ok) {
 process(v);
 ```
 
-장점: *명시적, 가벼움*.
-단점: *반환값과 결과 분리* (out-parameter).
+장점은 명시적이고 가볍다는 점이고, 단점은 반환값과 결과가 out-parameter로 분리된다는 점입니다.
 
 ### 검증을 강제 — `[[nodiscard]]`
 
@@ -68,11 +67,11 @@ process(v);
 read_register(0x10, v);   // WARNING — return 값 무시
 ```
 
-`[[nodiscard]]` (C++17)이 *컴파일러 경고*. *Werror로 에러*.
+`[[nodiscard]]`(C++17)가 컴파일러 경고를 띄우고, `-Werror`와 결합하면 에러로 승격됩니다.
 
 ## 패턴 2 — `std::optional` (C++17)
 
-값의 *유무*를 표현. 에러 *상세 정보 없음*.
+값의 유무만 표현하며, 에러 상세 정보는 담지 않습니다.
 
 ```cpp
 #include <optional>
@@ -91,10 +90,9 @@ if (auto v = read_register(0x10)) {
 }
 ```
 
-장점: *반환값과 결과 통합*, *간결*.
-단점: *에러 종류 모름*.
+장점은 반환값과 결과가 하나로 통합되어 간결하다는 점이고, 단점은 에러 종류를 알 수 없다는 점입니다.
 
-`std::optional`은 *내부적으로 union + bool* — *heap 없음, sizeof = sizeof(T) + 약간*.
+`std::optional`은 내부적으로 union과 bool 조합이므로 heap을 쓰지 않고, sizeof는 `sizeof(T)`에 약간 더해진 정도입니다.
 
 ### 임베디드 — Optional 활용
 
@@ -114,11 +112,11 @@ if (auto t = sensor.read_celsius()) {
 }
 ```
 
-성공 시 *값 직접 반환*. 실패는 *nullopt*.
+성공 시에는 값을 그대로 반환하고, 실패 시에는 nullopt로 표현합니다.
 
 ## 패턴 3 — `std::expected` (C++23)
 
-값 *또는* 에러. *완전한 정보*.
+값 또는 에러 중 하나를 반환하며, 두 경우 모두 완전한 정보를 전달합니다.
 
 ```cpp
 #include <expected>
@@ -144,14 +142,13 @@ if (result) {
 }
 ```
 
-장점: *값 + 에러 종류 통합*, *명시적*.
-단점: *C++23 — toolchain 미지원* 가능.
+장점은 값과 에러 종류가 하나로 통합되고 명시적이라는 점이고, 단점은 C++23이라 toolchain이 지원하지 않을 수 있다는 점입니다.
 
-자세한 내용은 [Part 3-07: std::expected](/blog/embedded/embedded-cpp/part3-07-expected).
+자세한 내용은 [Part 3-07: std::expected](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
 
 ## 패턴 4 — tl::expected (C++17 호환)
 
-C++23 std::expected의 *header-only 백포트*. C++17부터 사용 가능.
+C++23 `std::expected`의 header-only 백포트입니다. C++17부터 사용할 수 있습니다.
 
 ```cpp
 #include <tl/expected.hpp>
@@ -162,7 +159,7 @@ tl::expected<uint8_t, ReadError> read_register(uint8_t addr) {
 }
 ```
 
-API가 *std::expected와 거의 동일*. *임베디드에서 C++17 + 백포트* 패턴.
+API가 `std::expected`와 거의 동일합니다. 임베디드에서는 C++17과 백포트를 함께 쓰는 패턴이 흔합니다.
 
 ## 비교 표
 
@@ -173,9 +170,9 @@ API가 *std::expected와 거의 동일*. *임베디드에서 C++17 + 백포트* 
 | `std::expected<T, E>` | C++23 | 풍부 | 작음 | 매우 좋음 |
 | `tl::expected<T, E>` | C++17 (백포트) | 풍부 | 작음 | 매우 좋음 |
 
-## STL이 *예외 던지는 함수*
+## STL의 예외 던지는 함수
 
-`-fno-exceptions` 환경에서 *주의할 STL*.
+`-fno-exceptions` 환경에서 주의해야 할 STL 함수들입니다.
 
 ```cpp
 std::vector<int> v = {1, 2, 3};
@@ -189,12 +186,13 @@ s.at(100);                   // throw
 std::stoi("not a number");   // throw
 ```
 
-`-fno-exceptions` 컴파일 시:
-- 일부는 *abort 호출*
-- 일부는 *UB*
-- 일부는 *컴파일 에러*
+`-fno-exceptions`로 컴파일하면 다음 동작이 섞입니다.
 
-해결 — *명시적 검증*:
+- 일부는 abort를 호출합니다.
+- 일부는 UB를 일으킵니다.
+- 일부는 컴파일 에러로 떨어집니다.
+
+해결책은 명시적인 검증입니다.
 
 ```cpp
 if (idx < v.size()) v[idx];
@@ -205,7 +203,7 @@ auto [ptr, ec] = std::from_chars(str, str + len, result);
 if (ec == std::errc{}) { /* OK */ }
 ```
 
-`std::from_chars` (C++17)는 *예외 없음*. *임베디드 안전*.
+`std::from_chars`(C++17)는 예외를 던지지 않으므로 임베디드에서 안전합니다.
 
 ## 임베디드 패턴 — 계층화된 에러
 
@@ -248,11 +246,11 @@ void check_alarm() {
 }
 ```
 
-각 *계층의 에러*는 *해당 도메인 의미*. 위 계층이 *상세를 wrap*.
+각 계층의 에러는 그 도메인 의미를 가지며, 상위 계층이 하위의 상세 정보를 wrap합니다.
 
 ## 에러 전파 — and_then / or_else (C++23)
 
-monadic operations로 *체인 구성*.
+monadic operation으로 체인을 구성합니다.
 
 ```cpp
 auto result = read_register(0x10)
@@ -268,13 +266,13 @@ if (result) {
 }
 ```
 
-*pipe-style*. 첫 실패에서 *체인 short-circuit*. *Rust의 Result*와 유사.
+pipe 스타일로 흘러가며, 첫 실패에서 체인이 short-circuit됩니다. Rust의 Result와 비슷한 모양입니다.
 
-tl::expected도 *유사 API* 제공.
+`tl::expected`도 유사한 API를 제공합니다.
 
 ## Heap 없는 string error message
 
-`std::string`은 *heap 사용*. *고정 메시지*만 권장.
+`std::string`은 heap을 사용하므로 고정 메시지만 권장합니다.
 
 ```cpp
 // BAD — dynamic string
@@ -294,11 +292,11 @@ constexpr const char* error_message(Error e) {
 }
 ```
 
-*Flash에 박힌 string*. *RAM, heap 0*.
+Flash에 박힌 문자열이므로 RAM과 heap 사용은 0입니다.
 
 ## RAII와의 호환
 
-`-fno-exceptions`에서도 *RAII는 정상 동작*. 단 *생성자 실패*가 *까다로움* (throw 못 함).
+`-fno-exceptions`에서도 RAII는 정상 동작합니다. 단 생성자 실패 처리가 까다롭습니다(throw를 쓸 수 없습니다).
 
 ```cpp
 class Resource {
@@ -324,36 +322,36 @@ if (auto r = Resource::create(42)) {
 }
 ```
 
-자세한 패턴은 [Part 2-01](/blog/embedded/embedded-cpp/part2-01-raii-basics) "Constructor에서 실패".
+자세한 패턴은 [Part 2-01](/blog/embedded/embedded-cpp/part2-01-raii-basics)의 "Constructor에서 실패"를 참고합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *예외 켜진 코드 link*
-한 모듈만 `-fexceptions` — *unwind table* 또 들어옴. *모든 모듈 일치*.
+### 1. 예외 켜진 코드 link
+한 모듈만 `-fexceptions`로 빌드하면 unwind table이 다시 들어옵니다. 모든 모듈을 일치시킵니다.
 
-### 2. *STL throw 함수 호출*
-`vec.at(idx)` 대신 `vec[idx]` + 직접 검증. `string::substr()`, `stoi()` 등 주의.
+### 2. STL throw 함수 호출
+`vec.at(idx)` 대신 `vec[idx]`로 쓰고 직접 검증합니다. `string::substr()`, `stoi()` 등에도 주의합니다.
 
-### 3. *에러 반환값 무시*
+### 3. 에러 반환값 무시
 ```cpp
 ErrorCode foo();
 foo();   // ignored
 ```
-`[[nodiscard]]` + Werror.
+`[[nodiscard]]`와 `-Werror` 조합으로 막습니다.
 
-### 4. *optional/expected에 큰 객체*
+### 4. optional/expected에 큰 객체
 ```cpp
 std::optional<HugeStruct> result;   // sizeof(HugeStruct) + 1
 ```
-*pointer 활용* 또는 *큰 객체 분리*.
+pointer를 활용하거나 큰 객체를 분리합니다.
 
-### 5. *에러를 boolean으로 통합*
+### 5. 에러를 boolean으로 통합
 ```cpp
 bool foo();   // 성공/실패만 — 이유 모름
 ```
-*enum 사용* — 추적 가능.
+enum을 써서 원인을 추적할 수 있게 합니다.
 
-### 6. *예외 같은 코드 흐름*
+### 6. 예외 같은 코드 흐름
 ```cpp
 auto v = read1();
 if (!v) return /* propagate */;
@@ -362,11 +360,11 @@ if (!w) return /* propagate */;
 auto x = read3(*w);
 // 매번 if 분기
 ```
-C++23 `and_then`으로 *체인*. C++17 직접 *마이그레이션*.
+C++23 `and_then`으로 체인을 구성하고, C++17이면 직접 마이그레이션합니다.
 
-## 측정 — 예외 켰을 때 vs 끈 시 코드 크기
+## 측정 — 예외 켰을 때와 끈 시점의 코드 크기
 
-같은 simple program (STM32F4).
+같은 단순 프로그램을 STM32F4에서 비교합니다.
 
 ```text
 -fexceptions:
@@ -380,7 +378,7 @@ C++23 `and_then`으로 *체인*. C++17 직접 *마이그레이션*.
   total       : ~38 KB
 ```
 
-*7 KB 차이*. 작은 프로젝트에서 *수십 퍼센트*.
+약 7 KB 차이가 납니다. 작은 프로젝트에서는 수십 퍼센트에 이릅니다.
 
 ## 정리
 
@@ -400,4 +398,4 @@ C++23 `and_then`으로 *체인*. C++17 직접 *마이그레이션*.
 
 ## 다음 글
 
-[Part 3-06: 에러 처리 패턴](/blog/embedded/embedded-cpp/part3-06-error-handling-patterns) — 위 도구들을 *어떻게 조합*해 *실용적 에러 시스템* 만드는가.
+[Part 3-06: 에러 처리 패턴](/blog/embedded/embedded-cpp/part3-06-error-handling-patterns) — 위의 도구들을 어떻게 조합해 실용적인 에러 시스템을 만드는지 살펴봅니다.

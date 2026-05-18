@@ -10,23 +10,23 @@ type: tech
 
 ## 한 줄 요약
 
-> **"C와 C++의 통신은 *함수 이름의 mangling*과 *호출 규약의 일치*가 전부입니다."** — `extern "C"`와 헤더 분리 패턴이 표준 해법.
+> **"C와 C++의 통신은 함수 이름의 mangling과 호출 규약의 일치가 전부입니다."** `extern "C"`와 헤더 분리 패턴이 표준 해법입니다.
 
 ## 어떤 문제를 푸는가
 
-대부분의 임베디드 프로젝트는 *C와 C++가 섞여* 있습니다. 벤더가 제공하는 *HAL은 C*, 애플리케이션은 *C++*. 또는 *legacy C 코드베이스에 C++ 신규 모듈*.
+대부분의 임베디드 프로젝트는 C와 C++가 섞여 있습니다. 벤더가 제공하는 HAL은 C이고 애플리케이션은 C++입니다. 또는 legacy C 코드베이스에 C++ 신규 모듈을 얹기도 합니다.
 
-이 통신 경계에서 *세 가지 ABI 문제*가 발생합니다.
+이 통신 경계에서 세 가지 ABI 문제가 발생합니다.
 
-1. **Name mangling** — C++는 함수 이름에 *타입 정보*를 더함. C는 *함수 이름 그대로*.
-2. **Calling convention** — 인자 전달, 반환값, stack 정리 규칙.
-3. **Struct layout** — 패딩, 정렬, virtual table 포함.
+1. **Name mangling**: C++는 함수 이름에 타입 정보를 더합니다. C는 함수 이름 그대로 씁니다.
+2. **Calling convention**: 인자 전달, 반환값, stack 정리 규칙을 결정합니다.
+3. **Struct layout**: 패딩, 정렬, virtual table 포함 여부를 결정합니다.
 
-이 셋이 맞아야 *링크가 통과*하고 *런타임에 정확히* 동작합니다.
+이 셋이 맞아야 링크가 통과하고 런타임에 정확히 동작합니다.
 
 ## Name Mangling — 왜 필요한가
 
-C는 함수 이름이 *unique*하다고 가정합니다. *오버로드 없음*, *namespace 없음*.
+C는 함수 이름이 unique하다고 가정합니다. 오버로드도 없고 namespace도 없습니다.
 
 ```c
 // C: 두 함수 이름 같으면 컴파일 에러
@@ -34,7 +34,7 @@ int add(int, int);
 int add(double, double);   // 에러: 재정의
 ```
 
-C++는 *같은 이름의 함수가 여러 개* 가능합니다 (overload). 이를 *링커가 구분*하려면 *고유한 심볼 이름*이 필요합니다.
+C++는 같은 이름의 함수가 여러 개 가능합니다(overload). 링커가 구분하려면 고유한 심볼 이름이 필요합니다.
 
 ```cpp
 // C++: 오버로드 가능
@@ -43,7 +43,7 @@ double add(double, double);
 template<typename T> T add(T, T);
 ```
 
-컴파일러가 *함수 시그니처 정보*를 *심볼 이름에 인코딩*합니다. 이게 *name mangling* (Itanium C++ ABI, GCC와 Clang 표준).
+컴파일러가 함수 시그니처 정보를 심볼 이름에 인코딩합니다. 이것이 name mangling입니다(Itanium C++ ABI, GCC와 Clang 표준).
 
 ```text
 # 원래 이름                         # mangled
@@ -53,11 +53,11 @@ namespace foo { int bar(int); }      _ZN3foo3barEi
 class C { void m(int); }             _ZN1C1mEi
 ```
 
-`nm`에서 보이는 *길고 이상한 이름*이 이것. `nm --demangle`로 *원래 이름 복원*.
+`nm`에서 보이는 길고 이상한 이름이 이것입니다. `nm --demangle`로 원래 이름을 복원할 수 있습니다.
 
 ## C에서 C++ 함수를 부르려면
 
-C 컴파일러는 *mangling을 모릅니다*. C++ 함수를 그냥 선언하면 *링크 실패*.
+C 컴파일러는 mangling을 모릅니다. C++ 함수를 그냥 선언하면 링크 실패가 납니다.
 
 ```c
 // fail.c
@@ -73,7 +73,7 @@ int main() {
 int add(int a, int b) { return a + b; }   // mangled as _Z3addii
 ```
 
-해결: C++ 측에서 *`extern "C"`*로 mangling 비활성.
+해결책은 C++ 측에서 `extern "C"`로 mangling을 비활성화하는 것입니다.
 
 ```cpp
 // lib.cpp
@@ -81,25 +81,27 @@ extern "C" int add(int a, int b) { return a + b; }
 //        ^^^^^^^^^^ C linkage — no mangling
 ```
 
-이제 C가 `add`라는 이름으로 *찾을 수 있습니다*.
+이제 C가 `add`라는 이름으로 찾을 수 있습니다.
 
 ## `extern "C"`가 하는 일
 
-`extern "C"`는 두 가지를 *동시에* 합니다.
+`extern "C"`는 두 가지를 동시에 합니다.
 
-1. **Name mangling 비활성** — 심볼 이름 그대로
-2. **C calling convention 사용** — 인자 전달 규약 C와 동일
+1. **Name mangling 비활성**: 심볼 이름 그대로 둡니다
+2. **C calling convention 사용**: 인자 전달 규약을 C와 동일하게 맞춥니다
 
-대부분 *동일*하지만, *일부 플랫폼*에서 다를 수 있으므로 둘 다 명시.
+대부분의 경우 동일하지만 일부 플랫폼에서는 다를 수 있으므로 둘 다 명시합니다.
 
-`extern "C"`로 *감쌀 수 있는 것*:
-- 함수 선언 / 정의
-- 변수 선언 (드뭄)
+`extern "C"`로 감쌀 수 있는 것은 다음과 같습니다.
 
-*감쌀 수 없는 것*:
-- 클래스, 멤버 함수 (개념 자체가 C에 없음)
-- 템플릿 (C에 없음)
-- 오버로드 — `extern "C"`는 *한 이름만 허용*
+- 함수 선언 또는 정의
+- 변수 선언(드뭅니다)
+
+감쌀 수 없는 것은 다음과 같습니다.
+
+- 클래스, 멤버 함수(개념 자체가 C에 없습니다)
+- 템플릿(C에 없습니다)
+- 오버로드(`extern "C"`는 한 이름만 허용합니다)
 
 ```cpp
 // 한 함수
@@ -115,7 +117,7 @@ extern "C" {
 
 ## 헤더 분리 패턴 — C/C++ 양쪽에서 사용
 
-C 헤더가 *C와 C++ 양쪽*에서 inclusion 가능하게 만드는 표준 패턴.
+C 헤더를 C와 C++ 양쪽에서 inclusion 가능하게 만드는 표준 패턴입니다.
 
 ```c
 // driver.h — C와 C++ 양쪽 사용
@@ -143,15 +145,15 @@ void driver_close(Driver* d);
 #endif // DRIVER_H
 ```
 
-`__cplusplus`는 *C++ 컴파일러만 정의*하는 매크로. *C 컴파일러는 정의 안 함*.
+`__cplusplus`는 C++ 컴파일러만 정의하는 매크로입니다. C 컴파일러는 정의하지 않습니다.
 
-C로 컴파일하면 `extern "C" {`/`}` 블록이 *사라지고*, C++로 컴파일하면 *활성화*. 같은 헤더로 *양쪽 모두 OK*.
+C로 컴파일하면 `extern "C" {`/`}` 블록이 사라지고, C++로 컴파일하면 활성화됩니다. 같은 헤더로 양쪽 모두 처리할 수 있습니다.
 
-벤더 HAL 헤더(STM32, NXP)가 *모두 이 패턴*. 그대로 따라 쓰면 됩니다.
+벤더 HAL 헤더(STM32, NXP)가 모두 이 패턴을 따릅니다. 그대로 따라 쓰면 됩니다.
 
 ## C++ 클래스를 C에 노출 — Opaque Pointer 패턴
 
-C는 *class를 모릅니다*. C++ 객체를 C에서 다루려면 *opaque pointer*로 감싸 *C 인터페이스*만 노출.
+C는 class를 모릅니다. C++ 객체를 C에서 다루려면 opaque pointer로 감싸 C 인터페이스만 노출합니다.
 
 ```cpp
 // logger.h — C/C++ 양쪽
@@ -197,7 +199,7 @@ void logger_log(Logger* l, const char* msg) {
 }   // extern "C"
 ```
 
-C에서 사용:
+C에서의 사용은 다음과 같습니다.
 
 ```c
 // app.c
@@ -210,11 +212,11 @@ void run() {
 }
 ```
 
-C 코드는 *Logger의 내부를 모름*. *불투명한 핸들*만 다룸. C++ 구현은 *자유로움*.
+C 코드는 Logger의 내부를 모릅니다. 불투명한 핸들만 다룹니다. C++ 구현은 자유롭게 바꿀 수 있습니다.
 
 ## C 콜백을 C++가 받기
 
-C 라이브러리가 *콜백 함수 포인터*를 받는 경우. C는 *C linkage 함수*만 받음.
+C 라이브러리가 콜백 함수 포인터를 받는 경우입니다. C는 C linkage 함수만 받을 수 있습니다.
 
 ```c
 // C 라이브러리
@@ -222,7 +224,7 @@ typedef void (*callback_t)(int event);
 void register_callback(callback_t cb);
 ```
 
-C++ 멤버 함수는 *암묵의 this*를 받으므로 *C 함수 포인터로 사용 불가*. *static 또는 free function*만 가능.
+C++ 멤버 함수는 암묵의 `this`를 받으므로 C 함수 포인터로 사용할 수 없습니다. static이나 free function만 가능합니다.
 
 ```cpp
 // 해결 1: free function + 글로벌 객체
@@ -264,27 +266,27 @@ void setup() {
 ```cpp
 // 해결 3: lambda (capture 없는 lambda만)
 register_callback([](int event) {
-    // capture 없는 lambda는 *함수 포인터로 변환 가능*
+    // capture 없는 lambda는 함수 포인터로 변환 가능합니다
 });
 ```
 
-*capture 있는 lambda*는 *함수 객체*이므로 *함수 포인터 변환 불가*. 그런 경우 *user_data 포인터 인자*가 있는 C API를 쓰거나 *trampoline 패턴*.
+capture 있는 lambda는 함수 객체이므로 함수 포인터로 변환할 수 없습니다. 그런 경우에는 `user_data` 포인터 인자가 있는 C API를 쓰거나 trampoline 패턴을 사용합니다.
 
 ## Calling Convention — ARM 예시
 
-함수 호출 시 *인자가 어디로 전달되는가*, *반환값이 어디로*, *어느 레지스터를 보존*하는지의 규약.
+함수 호출 시 인자가 어디로 전달되는지, 반환값이 어디로 가는지, 어느 레지스터를 보존하는지를 정한 규약입니다.
 
-ARM AAPCS (ARM Architecture Procedure Call Standard):
+ARM AAPCS(ARM Architecture Procedure Call Standard)의 규칙은 다음과 같습니다.
 
-- r0-r3: 인자 1-4 (정수, 포인터)
-- r0-r1: 반환값 (64-bit는 r0-r1, 작으면 r0)
-- r4-r11: callee-saved (호출된 함수가 저장 후 복원)
-- r12 (ip): scratch
-- r13 (sp): stack pointer
-- r14 (lr): link register (반환 주소)
-- r15 (pc): program counter
+- r0-r3: 인자 1-4(정수, 포인터)
+- r0-r1: 반환값(64-bit는 r0-r1, 작으면 r0)
+- r4-r11: callee-saved(호출된 함수가 저장 후 복원)
+- r12(ip): scratch
+- r13(sp): stack pointer
+- r14(lr): link register(반환 주소)
+- r15(pc): program counter
 
-VFP가 있으면 *float 인자*가 *FPU 레지스터*(s0-s15)로. *없으면 r0-r3 + stack*.
+VFP가 있으면 float 인자가 FPU 레지스터(s0-s15)로 전달됩니다. 없으면 r0-r3과 stack을 씁니다.
 
 ```cpp
 // C 함수
@@ -296,7 +298,7 @@ add:
     bx      lr           // return
 ```
 
-C++의 *멤버 함수*는 *암묵 this를 r0*에 받습니다. *실제 인자는 r1부터*.
+C++의 멤버 함수는 암묵 `this`를 r0에 받습니다. 실제 인자는 r1부터 들어갑니다.
 
 ```cpp
 class Counter {
@@ -313,11 +315,11 @@ Counter::add(int):
     bx      lr
 ```
 
-이 *암묵 this*가 *C에서 멤버 함수를 직접 부를 수 없는 이유*.
+이 암묵 `this`가 C에서 멤버 함수를 직접 부를 수 없는 이유입니다.
 
 ## struct Layout — C와 C++의 차이
 
-POD (Plain Old Data) 구조체는 *C와 C++ layout 동일*. 그러나 C++가 *복잡한 기능*을 더하면 다름.
+POD(Plain Old Data) 구조체는 C와 C++ layout이 동일합니다. 그러나 C++가 복잡한 기능을 더하면 달라집니다.
 
 ```cpp
 // POD — C와 동일
@@ -337,7 +339,7 @@ struct Drawable {
 // layout: [vptr: 4][x: 4][y: 4]
 ```
 
-vtable 포인터(`vptr`)가 *struct 앞에 추가*됩니다. C에서 이 struct를 다루면 *offset이 어긋남*. *C와 통신할 struct에는 virtual 함수 금지*.
+vtable 포인터(`vptr`)가 struct 앞에 추가됩니다. C에서 이 struct를 다루면 offset이 어긋납니다. C와 통신할 struct에는 virtual 함수를 금지합니다.
 
 ### POD 보장하는 패턴
 
@@ -355,14 +357,14 @@ static_assert(std::is_trivially_copyable_v<Packet>);
 static_assert(sizeof(Packet) == 264);
 ```
 
-`std::is_standard_layout_v` — *C와 layout 호환 가능*인지.
-`std::is_trivially_copyable_v` — `memcpy`로 *복사 가능*인지.
+`std::is_standard_layout_v`는 C와 layout 호환이 가능한지를 확인합니다.
+`std::is_trivially_copyable_v`는 `memcpy`로 복사 가능한지를 확인합니다.
 
-이 두 *static_assert*를 *C 인터페이스 struct*에 두면 *향후 실수 방지*.
+이 두 static_assert를 C 인터페이스 struct에 두면 향후 실수를 방지할 수 있습니다.
 
 ## Padding과 Alignment
 
-C struct의 *member 간 padding*은 *alignment 요구*에 따라 결정.
+C struct의 member 간 padding은 alignment 요구에 따라 결정됩니다.
 
 ```cpp
 struct Bad {
@@ -383,13 +385,13 @@ struct Good {
 // total: 12 bytes
 ```
 
-*member 순서*만 바꿔도 *RAM 절약*. *큰 member 먼저, 작은 것 나중*이 원칙.
+member 순서만 바꿔도 RAM이 절약됩니다. 큰 member를 먼저 두고 작은 것을 나중에 두는 것이 원칙입니다.
 
-`-Wpadded` GCC 옵션으로 *padding 발생 시 경고*.
+`-Wpadded` GCC 옵션으로 padding 발생 시 경고를 받을 수 있습니다.
 
 ### `__attribute__((packed))` — 위험
 
-padding을 *강제 제거*. *프로토콜 메시지*나 *하드웨어 레지스터*에 사용.
+padding을 강제로 제거합니다. 프로토콜 메시지나 하드웨어 레지스터에 사용합니다.
 
 ```cpp
 struct __attribute__((packed)) NetworkHeader {
@@ -400,9 +402,9 @@ struct __attribute__((packed)) NetworkHeader {
 // total: 7 bytes (no padding)
 ```
 
-*위험*: ARM은 *unaligned access*가 *bus fault*. packed struct member 접근은 *컴파일러가 byte-by-byte로 변환* → *느림 + 불편*.
+위험은 다음과 같습니다. ARM은 unaligned access가 bus fault로 이어집니다. packed struct member 접근은 컴파일러가 byte-by-byte로 변환해 느리고 불편합니다.
 
-대안: *명시적 byte buffer + memcpy*.
+대안은 명시적 byte buffer와 memcpy를 쓰는 것입니다.
 
 ```cpp
 uint8_t buffer[7];
@@ -412,7 +414,7 @@ std::memcpy(&length, buffer + 1, sizeof(length));   // safe
 
 ## C/C++ 혼합 빌드 패턴
 
-CMake 예시:
+CMake 예시는 다음과 같습니다.
 
 ```cmake
 project(firmware CXX C ASM)
@@ -442,46 +444,55 @@ add_executable(firmware main.cpp startup.s)
 target_link_libraries(firmware PRIVATE app hal)
 ```
 
-*C 코드도 C++ 컴파일러로 컴파일하면* mangling 문제가 사라집니다. 그러나 *C 코드의 의미가 약간 달라질 수* 있어 (예: `void*` 암묵 변환) 보통 *분리 컴파일*.
+C 코드도 C++ 컴파일러로 컴파일하면 mangling 문제가 사라집니다. 그러나 C 코드의 의미가 약간 달라질 수 있어(예: `void*` 암묵 변환) 보통 분리해서 컴파일합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *헤더에 extern "C" 누락*
-C에서 include하면 `__cplusplus` 미정의 → `extern "C"` 무시 → 정상. C++에서 include하면 mangled 기대 → link error.
+### 1. 헤더에 `extern "C"` 누락
+
+C에서 include하면 `__cplusplus`가 미정의이므로 `extern "C"`가 무시되어 정상 동작합니다. C++에서 include하면 mangled 이름을 기대하므로 link error가 납니다.
 
 ```c
 // driver.h — wrong
 void init(void);   // C++에서 include하면 _Z4initv 기대
 ```
 
-→ `extern "C"` 블록 *모든 C 헤더*에.
+모든 C 헤더에 `extern "C"` 블록을 추가합니다.
 
-### 2. *C++ class를 C에 직접 노출*
+### 2. C++ class를 C에 직접 노출
+
 ```c
 // app.c
 struct Logger* l;   // C는 class 모름 → 컴파일 에러
 ```
-→ opaque pointer.
 
-### 3. *멤버 함수를 C callback으로*
+opaque pointer를 사용합니다.
+
+### 3. 멤버 함수를 C callback으로 사용
+
 ```cpp
 register_callback(&MyClass::method);   // 컴파일 에러
 ```
-→ static method 또는 trampoline.
 
-### 4. *virtual struct를 C와 공유*
-vtable 포함 → layout 어긋남. *POD만 공유*.
+static method나 trampoline으로 우회합니다.
 
-### 5. *packed struct member에 직접 access*
-ARM에서 *unaligned bus fault* 또는 느린 *byte access*. *memcpy로 복사 후 사용*.
+### 4. virtual struct를 C와 공유
 
-### 6. *namespace 안 함수를 extern "C"로*
+vtable이 포함되어 layout이 어긋납니다. POD만 공유합니다.
+
+### 5. packed struct member에 직접 access
+
+ARM에서 unaligned bus fault가 나거나 느린 byte access가 발생합니다. memcpy로 복사한 뒤 사용합니다.
+
+### 6. namespace 안 함수를 `extern "C"`로 선언
+
 ```cpp
 namespace foo {
     extern "C" void bar();   // ← 의도 모호
 }
 ```
-*컴파일러마다 동작 다름*. extern "C"는 *namespace 밖*에.
+
+컴파일러마다 동작이 다릅니다. `extern "C"`는 namespace 밖에 둡니다.
 
 ## 측정 — name mangling 확인
 
@@ -500,7 +511,7 @@ arm-none-eabi-nm logger.o
 00000048 T _ZN6Logger3logEPKc            # 멤버는 여전히 mangled
 ```
 
-C 코드에서 link 가능한 심볼은 *extern "C" 표시된 것만*.
+C 코드에서 link 가능한 심볼은 `extern "C"`로 표시된 것뿐입니다.
 
 ## 정리
 
@@ -518,4 +529,4 @@ C 코드에서 link 가능한 심볼은 *extern "C" 표시된 것만*.
 
 ## 다음 글
 
-[Part 1-06: 스타트업 코드](/blog/embedded/embedded-cpp/part1-06-startup-code) — 부트부터 `main`까지의 *흐름*. `__libc_init_array`와 *C++ static 객체 초기화*의 정확한 시점.
+[Part 1-06: 스타트업 코드](/blog/embedded/embedded-cpp/part1-06-startup-code) — 부트부터 `main`까지의 흐름을 다룹니다. `__libc_init_array`와 C++ static 객체 초기화의 정확한 시점이 핵심입니다.

@@ -10,18 +10,18 @@ type: tech
 
 ## 한 줄 요약
 
-> **"임베디드는 `unique_ptr`이 기본."** — *shared_ptr는 거의 피함*, raw pointer는 *non-owning 참조*만.
+> **"임베디드에서는 `unique_ptr`이 기본입니다."** `shared_ptr`은 거의 피하고, raw pointer는 non-owning 참조에만 씁니다.
 
 ## 어떤 문제를 푸는가
 
-C++ 스마트 포인터 셋.
+C++의 스마트 포인터 세트는 다음과 같습니다.
 
-- **`unique_ptr<T>`** — 단일 소유. RAII로 자동 해제.
-- **`shared_ptr<T>`** — 공유 소유. atomic 카운터.
-- **`weak_ptr<T>`** — shared의 non-owning 참조.
-- **`raw pointer (T*)`** — non-owning, 소유권 없음.
+- **`unique_ptr<T>`**는 단일 소유를 표현하며 RAII로 자동 해제합니다.
+- **`shared_ptr<T>`**는 공유 소유를 표현하며 atomic 카운터를 사용합니다.
+- **`weak_ptr<T>`**는 shared의 non-owning 참조입니다.
+- **raw pointer(`T*`)**는 non-owning이며 소유권을 갖지 않습니다.
 
-임베디드에서 각각 *언제 쓰는지* 정리.
+각각을 임베디드에서 언제 쓸지 정리합니다.
 
 ## `unique_ptr<T>` — 단일 소유
 
@@ -37,7 +37,7 @@ auto other = std::move(sensor);   // sensor → other로 소유권 이전
 // sensor는 이제 nullptr
 ```
 
-크기: *sizeof(T*)* 정확히 (deleter empty면). *추가 오버헤드 0*.
+크기는 deleter가 비어 있다면 정확히 `sizeof(T*)`입니다. 추가 오버헤드가 0입니다.
 
 ### 임베디드 활용
 
@@ -60,7 +60,7 @@ void setup() {
 }
 ```
 
-*RAII + 명시적 소유권*. 가장 권장.
+RAII와 명시적 소유권을 동시에 제공하므로 가장 권장합니다.
 
 ### Custom deleter — pool 활용
 
@@ -79,7 +79,7 @@ PoolPtr alloc(Pool& p, size_t n) {
 }
 ```
 
-heap *전혀 안 씀*. *pool에서 할당, 자동 해제*.
+heap을 전혀 쓰지 않고 pool에서 할당한 뒤 자동으로 해제합니다.
 
 ## `shared_ptr<T>` — 공유 소유
 
@@ -89,27 +89,28 @@ auto b = a;   // copy — 카운터 증가 (atomic)
 // a와 b 모두 owner — 마지막이 사라질 때 delete
 ```
 
-크기: *T pointer + control block pointer* = 8 byte (32-bit ARM은 8).
+크기는 T pointer와 control block pointer를 합쳐 8 byte입니다(32-bit ARM에서도 8 byte).
 
-내부 *control block* 별도 할당:
-- 카운터 2개 (strong + weak) — atomic
+내부의 control block은 별도로 할당되며 다음을 포함합니다.
+
+- strong과 weak 두 개의 atomic 카운터
 - deleter
 - allocator
-- 보통 *16-32 byte heap*
+- 보통 16~32 byte의 heap
 
-### 임베디드의 문제
+### 임베디드에서의 문제
 
-1. *Atomic 카운터* — multi-core RTOS에서 *cache coherence overhead*
-2. *Control block* — heap 사용 (make_shared는 1번, 별도 new는 2번)
-3. *Cyclic reference* — `weak_ptr` 안 쓰면 *leak*
+1. atomic 카운터가 multi-core RTOS에서 cache coherence 오버헤드를 만듭니다.
+2. control block이 heap을 사용합니다(`make_shared`는 1번, 별도 `new`는 2번 할당).
+3. cyclic reference에서 `weak_ptr`을 쓰지 않으면 leak이 발생합니다.
 
-대부분 임베디드에서 *shared_ptr 회피*. 사용 시 *명확한 정당화 필요*.
+대부분의 임베디드 환경에서는 shared_ptr을 회피합니다. 사용하려면 명확한 정당화가 필요합니다.
 
-### shared_ptr이 *정말 필요한 경우*
+### shared_ptr이 정말 필요한 경우
 
-- *여러 owner가 진짜 필요*. 한 owner로 표현 못 함.
-- *RTOS 다중 task*에서 *동시 접근*.
-- *비동기 callback*에서 *객체 lifetime 보장*.
+- 여러 owner가 진짜로 필요해서 한 명의 owner로 표현이 어려운 경우
+- RTOS 다중 task에서 동시 접근이 필요한 경우
+- 비동기 callback에서 객체 lifetime을 보장해야 하는 경우
 
 ```cpp
 class Job {
@@ -137,7 +138,7 @@ if (auto locked = weak.lock()) {
 }
 ```
 
-cyclic reference 회피.
+cyclic reference를 회피할 때 씁니다.
 
 ```cpp
 struct Parent {
@@ -149,7 +150,7 @@ struct Child {
 };
 ```
 
-임베디드에서 *weak_ptr 사용은 shared_ptr 의존*. 둘 다 *권장 안 함*.
+임베디드에서 weak_ptr을 쓰려면 shared_ptr이 전제되어야 하므로 둘 다 권장하지 않습니다.
 
 ## Raw pointer — non-owning
 
@@ -172,13 +173,14 @@ Handler h;
 cache.register_handler(&h);   // 소유권 이전 X — h는 호출자가 관리
 ```
 
-raw pointer는 *non-owning reference*. *명시적 소유자가 따로*.
+raw pointer는 non-owning reference 역할만 하며, 소유자는 따로 둡니다.
 
-C++ Core Guidelines 권장:
-- *Owning pointer* → `unique_ptr` / `shared_ptr`
-- *Non-owning pointer* → raw `T*` 또는 reference `T&`
+C++ Core Guidelines의 권장은 다음과 같습니다.
 
-C++ Core Guidelines의 `gsl::owner<T*>` 마커도 있음 (의도 명시).
+- Owning pointer는 `unique_ptr`이나 `shared_ptr`로 표현합니다.
+- Non-owning pointer는 raw `T*`나 reference `T&`로 표현합니다.
+
+C++ Core Guidelines의 `gsl::owner<T*>` 마커로 의도를 명시할 수도 있습니다.
 
 ## 결정 트리
 
@@ -199,7 +201,7 @@ C++ Core Guidelines의 `gsl::owner<T*>` 마커도 있음 (의도 명시).
     └── nullable → T* (또는 optional<T&>)
 ```
 
-임베디드에서 *대부분 unique_ptr 또는 raw 참조*.
+임베디드에서는 대부분 unique_ptr 또는 raw 참조로 정리됩니다.
 
 ## 임베디드 패턴 — Factory + unique_ptr
 
@@ -228,7 +230,7 @@ device->run();
 // 자동 cleanup
 ```
 
-*생성 실패 처리* + *RAII* + *명시 소유*.
+생성 실패 처리, RAII, 명시 소유를 한 번에 해결합니다.
 
 ## 임베디드 패턴 — Optional 멤버 with unique_ptr
 
@@ -247,9 +249,9 @@ public:
 };
 ```
 
-logger가 *있을 수도, 없을 수도*. *동적 활성*.
+logger가 있을 수도 없을 수도 있는 상황에서 동적으로 활성화합니다.
 
-대안: `std::optional<Logger>` (heap 없음).
+대안은 heap을 쓰지 않는 `std::optional<Logger>`입니다.
 
 ```cpp
 class System {
@@ -262,48 +264,48 @@ public:
 };
 ```
 
-`logger_`가 *내부에 Logger 객체 직접 저장*. *heap 0*. 임베디드 선호.
+`logger_`가 내부에 Logger 객체를 직접 저장하므로 heap을 쓰지 않습니다. 임베디드에서 선호합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *new 직접 사용*
+### 1. new 직접 사용
 ```cpp
 auto* p = new Foo();   // raw owning pointer — 어떻게 delete?
 ```
-*항상 `make_unique`*. raw owning 금지.
+항상 `make_unique`를 씁니다. raw owning은 금지합니다.
 
-### 2. *shared_ptr 무심코 사용*
+### 2. shared_ptr 무심코 사용
 ```cpp
 shared_ptr<Data> get_data();   // 정말 공유 소유?
 ```
-*unique_ptr이 충분*하면 unique. shared는 *정당화 필요*.
+unique_ptr로 충분하면 unique로 갑니다. shared는 정당화가 필요합니다.
 
-### 3. *unique_ptr의 함수 포인터 deleter*
+### 3. unique_ptr의 함수 포인터 deleter
 ```cpp
 std::unique_ptr<FILE, decltype(&fclose)> f(fopen(...), &fclose);
 ```
-*sizeof 두 배*. struct/lambda deleter.
+sizeof가 두 배가 됩니다. struct나 lambda deleter를 씁니다.
 
-### 4. *weak_ptr 없이 cycle*
+### 4. weak_ptr 없이 cycle
 ```cpp
 struct A { shared_ptr<B> b; };
 struct B { shared_ptr<A> a; };   // cycle — 영원히 안 해제
 ```
-한쪽을 *weak_ptr*.
+한쪽을 weak_ptr로 둡니다.
 
-### 5. *unique_ptr copy 시도*
+### 5. unique_ptr copy 시도
 ```cpp
 auto a = std::make_unique<Foo>();
 auto b = a;   // ERROR — copy 안 됨
 ```
-*move*: `auto b = std::move(a);`.
+move를 씁니다(`auto b = std::move(a);`).
 
-### 6. *shared_ptr atomic overhead 무시*
-multi-core에서 *각 카피마다 atomic 연산*. *hot path에 부담*. raw + 명확한 owner.
+### 6. shared_ptr atomic overhead 무시
+multi-core에서는 카피마다 atomic 연산이 일어나므로 hot path에 부담이 됩니다. raw pointer와 명확한 owner로 대체합니다.
 
 ## 측정 — 스마트 포인터 비교
 
-같은 객체 사용 (1만 회 생성/해제).
+같은 객체를 1만 회 생성하고 해제합니다.
 
 ```text
 new/delete (raw):
@@ -324,7 +326,7 @@ unique_ptr + pool deleter:
   total: 0.15 ms
 ```
 
-*pool + unique_ptr가 10배 빠름*. *shared_ptr는 두 배 느림*.
+pool과 unique_ptr 조합이 10배 빠릅니다. shared_ptr은 두 배 가까이 느립니다.
 
 ## std::shared_ptr 대안 — Reference counting을 직접
 
@@ -350,7 +352,7 @@ public:
 };
 ```
 
-Boost.IntrusivePtr와 같은 idea. *별도 control block 없음*. *작은 메모리 추가*. multi-thread 시 `count_`를 atomic으로.
+Boost.IntrusivePtr와 같은 아이디어입니다. 별도의 control block이 없고 메모리 추가도 적습니다. multi-thread 환경에서는 `count_`를 atomic으로 둡니다.
 
 ## 정리
 
@@ -370,4 +372,4 @@ Boost.IntrusivePtr와 같은 idea. *별도 control block 없음*. *작은 메모
 
 ## 다음 글
 
-[Part 3-10: 소유권 모델](/blog/embedded/embedded-cpp/part3-10-ownership-model) — 객체 lifetime의 *명확한 책임 할당*. owner, observer, borrower.
+[Part 3-10: 소유권 모델](/blog/embedded/embedded-cpp/part3-10-ownership-model) — 객체 lifetime에 책임을 명확히 할당하는 owner, observer, borrower 모델을 다룹니다.

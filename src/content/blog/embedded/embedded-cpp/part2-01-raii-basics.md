@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"자원 = 객체, 해제 = 소멸자."** — 함수가 어떻게 끝나든 *소멸자가 반드시 호출됨*을 *언어가 보장*합니다.
+> **"자원 = 객체, 해제 = 소멸자."** — 함수가 어떻게 끝나든 소멸자가 반드시 호출됨을 언어가 보장합니다.
 
 ## 어떤 문제를 푸는가
 
-자원(메모리, 파일, mutex, peripheral)을 *획득*하고 *해제*하지 않으면 *누수*입니다. C는 *호출자가 직접 짝을 맞춰야* 합니다.
+자원(메모리, 파일, mutex, peripheral)을 획득한 뒤 해제하지 않으면 누수가 발생합니다. C에서는 호출자가 직접 짝을 맞춰 줘야 합니다.
 
 ```c
 // C: 짝 맞추기 어려움
@@ -39,9 +39,9 @@ void process() {
 }
 ```
 
-*경로마다* 정리 코드 반복. 새 경로 추가 시 *까먹기 쉬움*. 예외 환경에선 *불가능에 가까움*.
+경로마다 정리 코드를 반복해야 하고, 새 경로를 추가할 때 빠뜨리기 쉽습니다. 예외가 도는 환경에서는 거의 불가능에 가깝습니다.
 
-**RAII** (Resource Acquisition Is Initialization)는 이 문제를 *언어 차원에서* 해결합니다.
+**RAII** (Resource Acquisition Is Initialization)는 이 문제를 언어 차원에서 해결합니다.
 
 ```cpp
 // C++: 짝 자동
@@ -54,26 +54,26 @@ void process() {
 }
 ```
 
-*return이 어디서든* 소멸자 *반드시 호출*. 자원 누수 *불가능*.
+return이 어디서 일어나든 소멸자가 반드시 호출되므로 자원 누수가 원천적으로 불가능합니다.
 
 ## RAII의 정의
 
-**자원을 객체 생명주기에 묶는 idiom**.
+자원을 객체 생명주기에 묶는 idiom입니다.
 
-1. **생성자**가 자원 *획득* (메모리 할당, mutex lock, peripheral enable)
-2. **소멸자**가 자원 *해제* (메모리 free, unlock, disable)
-3. *객체의 scope*가 *자원의 lifetime*
+1. **생성자**가 자원을 획득합니다 (메모리 할당, mutex lock, peripheral enable).
+2. **소멸자**가 자원을 해제합니다 (메모리 free, unlock, disable).
+3. 객체의 scope가 곧 자원의 lifetime이 됩니다.
 
-C++ 표준이 *소멸자 호출을 보장*합니다.
+C++ 표준이 다음 시점에 소멸자 호출을 보장합니다.
 
-- 함수가 *return*하면 — 모든 local 객체 소멸자
-- 함수가 *예외 throw*하면 — stack unwinding이 모든 소멸자 호출
-- 객체가 *delete*되면 — 소멸자
-- *프로그램 종료* 시 — static 객체 소멸자 (임베디드는 보통 안 호출됨)
+- 함수가 return하면 모든 local 객체의 소멸자가 호출됩니다.
+- 함수에서 예외가 throw되면 stack unwinding이 모든 소멸자를 호출합니다.
+- 객체가 delete되면 소멸자가 호출됩니다.
+- 프로그램 종료 시 static 객체의 소멸자가 호출됩니다(임베디드에서는 보통 호출되지 않습니다).
 
 ## 임베디드의 RAII — 5가지 자원
 
-임베디드 RAII가 다루는 *주요 자원*:
+임베디드 RAII가 다루는 주요 자원은 다음 다섯입니다.
 
 1. **Mutex / Lock** — RTOS sync primitive
 2. **Peripheral** — GPIO, UART, SPI 활성/비활성
@@ -81,11 +81,11 @@ C++ 표준이 *소멸자 호출을 보장*합니다.
 4. **Memory** — pool 할당 / 반환
 5. **DMA** — channel 획득 / 해제
 
-각각의 RAII 패턴을 봅니다.
+각각의 RAII 패턴을 차례로 살펴봅니다.
 
 ## RAII 패턴 1 — Mutex Lock
 
-가장 흔한 RAII 예. *unlock 까먹기* 방지.
+가장 흔한 RAII 예입니다. unlock을 빠뜨리는 사고를 막아 줍니다.
 
 ```cpp
 // 위험 — 수동 lock/unlock
@@ -127,16 +127,16 @@ void shared_function() {
 }
 ```
 
-핵심:
-- 생성자에서 `osMutexAcquire`
-- 소멸자에서 `osMutexRelease`
-- *복사 금지* — 자원은 *한 객체*만 소유
+핵심은 다음과 같습니다.
+- 생성자에서 `osMutexAcquire`를 호출합니다.
+- 소멸자에서 `osMutexRelease`를 호출합니다.
+- 복사를 금지해 자원은 한 객체만 소유하도록 합니다.
 
-C++17의 `std::scoped_lock`이 표준 라이브러리의 같은 패턴. 자세한 내용은 [Part 2-02](/blog/embedded/embedded-cpp/part2-02-raii-patterns).
+C++17의 `std::scoped_lock`이 표준 라이브러리에서 제공하는 같은 패턴입니다. 자세한 내용은 [Part 2-02](/blog/embedded/embedded-cpp/part2-02-raii-patterns)에서 다룹니다.
 
 ## RAII 패턴 2 — Peripheral
 
-UART, SPI 같은 *peripheral 활성화*도 RAII로.
+UART, SPI 같은 peripheral 활성화도 RAII로 묶을 수 있습니다.
 
 ```cpp
 class UartGuard {
@@ -161,11 +161,11 @@ void log_data() {
 }
 ```
 
-함수가 *끝나면 UART가 자동으로 꺼짐*. *전력 관리 자동*.
+함수가 끝나면 UART가 자동으로 꺼지므로 전력 관리가 함께 처리됩니다.
 
 ## RAII 패턴 3 — Critical Section (Interrupt Disable)
 
-ISR과 *데이터 공유* 시 *짧은 critical section* 필요.
+ISR과 데이터를 공유할 때는 짧은 critical section이 필요합니다.
 
 ```cpp
 // Bad — disable/enable 짝 맞춰야
@@ -201,11 +201,11 @@ void shared() {
 }
 ```
 
-핵심: *이전 상태 보존*. 이미 disabled 상태에서 진입했으면 *enable하지 않음*. *nested critical section* 안전.
+핵심은 이전 상태를 보존하는 데 있습니다. 이미 disabled 상태에서 진입했다면 다시 enable하지 않으므로, nested critical section에서도 안전합니다.
 
 ## RAII 패턴 4 — Pool Allocator Handle
 
-custom allocator에서 *할당된 블록*을 RAII로.
+custom allocator에서 할당된 블록도 RAII로 감쌀 수 있습니다.
 
 ```cpp
 class PoolHandle {
@@ -240,11 +240,11 @@ private:
 };
 ```
 
-자원이 *unique* — 한 블록은 *한 핸들*만. *move로만 이전*. 자세한 pool 구현은 [Part 3-03](/blog/embedded/embedded-cpp/part3-03-pool-allocator).
+자원이 unique하므로 한 블록은 한 핸들만 가질 수 있고, 이전은 move로만 일어납니다. 자세한 pool 구현은 [Part 3-03](/blog/embedded/embedded-cpp/part3-03-pool-allocator)에서 다룹니다.
 
 ## RAII 패턴 5 — DMA Channel
 
-DMA channel은 *제한된 자원*. 획득/해제 RAII.
+DMA channel은 제한된 자원이므로 획득과 해제를 RAII로 묶습니다.
 
 ```cpp
 class DmaChannel {
@@ -278,9 +278,9 @@ void send_buffer(const uint8_t* data, size_t len) {
 }
 ```
 
-## RAII의 핵심 — *3 of 5* 규칙
+## RAII의 핵심 — 3 of 5 규칙
 
-C++의 *복사/이동* 기본 동작이 *자원에 부적합*. RAII 클래스는 *명시적*으로 정의해야 함.
+C++의 기본 복사/이동 동작은 자원 관리에 부적합합니다. RAII 클래스는 이를 명시적으로 정의해야 합니다.
 
 ```cpp
 class Resource {
@@ -298,15 +298,15 @@ public:
 };
 ```
 
-**Rule of Three (C++98)**: 소멸자, 복사 생성자, 복사 대입 — *셋 중 하나 정의하면 셋 다*.
+**Rule of Three (C++98)**: 소멸자, 복사 생성자, 복사 대입 중 하나를 정의하면 셋 다 정의합니다.
 
-**Rule of Five (C++11)**: 위 셋 + 이동 생성자, 이동 대입 — *다섯 모두*.
+**Rule of Five (C++11)**: 위 셋에 이동 생성자와 이동 대입을 더해 다섯을 모두 정의합니다.
 
-**Rule of Zero**: *직접 자원 관리 안 함*. 표준 RAII 클래스(`std::unique_ptr`)에 위임. *권장*.
+**Rule of Zero**: 직접 자원을 관리하지 않고 표준 RAII 클래스(`std::unique_ptr` 등)에 위임합니다. 가장 권장되는 방식입니다.
 
 ## RAII vs `defer` — 다른 언어와의 비교
 
-Go의 `defer`, Java의 `try-with-resources`도 *비슷한 의도*.
+Go의 `defer`, Java의 `try-with-resources`도 비슷한 의도를 가집니다.
 
 ```go
 // Go defer
@@ -333,11 +333,11 @@ void process() {
 }
 ```
 
-C++ RAII는 *추가 키워드 없음*. *객체 scope 자체가 자원 lifetime*. *가장 통합된 접근*.
+C++ RAII는 추가 키워드가 필요 없습니다. 객체 scope 자체가 자원 lifetime이며, 가장 통합된 접근입니다.
 
 ## 임베디드 특화 — Move semantics 주의
 
-자원 이전 시 *move*가 *복사보다 효율*. 그러나 *예외 환경*과 *임베디드 환경*에서 다른 점.
+자원 이전 시 move가 복사보다 효율적입니다. 다만 예외 환경과 임베디드 환경에서 주의할 점이 있습니다.
 
 ```cpp
 class Buffer {
@@ -366,12 +366,12 @@ Buffer create_buffer() {
 }
 ```
 
-*Move 생성자는 noexcept*가 강력 권장. `std::vector` 등이 *noexcept 없으면 copy fallback* — 성능 저하.
+Move 생성자는 `noexcept`로 표시하는 것이 강력히 권장됩니다. `std::vector` 등은 `noexcept`가 없으면 copy로 fallback해 성능이 떨어집니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *소멸자에서 예외*
-소멸자가 *예외 던지면* stack unwinding 중 *terminate*. `-fno-exceptions`라도 *abort 가능*. 소멸자는 *항상 noexcept*.
+### 1. 소멸자에서 예외
+소멸자에서 예외를 던지면 stack unwinding 중 terminate됩니다. `-fno-exceptions` 환경에서도 abort로 이어질 수 있으므로, 소멸자는 항상 `noexcept`여야 합니다.
 
 ```cpp
 ~Resource() noexcept {
@@ -379,7 +379,7 @@ Buffer create_buffer() {
 }
 ```
 
-### 2. *Copy 허용*
+### 2. Copy 허용
 ```cpp
 class MutexLock {
 public:
@@ -393,15 +393,15 @@ void shared() {
     MutexLock l2 = l;   // copy → 둘 다 release → double release
 }
 ```
-*명시적 = delete*.
+복사 연산자는 `= delete`로 명시적으로 막아야 합니다.
 
-### 3. *전역 RAII로 long-lived 자원*
+### 3. 전역 RAII로 long-lived 자원
 ```cpp
 static MutexLock g_lock(some_mutex);   // 영원히 lock
 ```
-RAII는 *지역 객체*. 전역에 쓰면 *해제 시점*이 *프로그램 종료* (임베디드에선 거의 없음). 의도 불명.
+RAII는 지역 객체에 어울립니다. 전역에 쓰면 해제 시점이 프로그램 종료(임베디드에서는 거의 일어나지 않음)가 되어 의도가 모호해집니다.
 
-### 4. *Constructor에서 실패*
+### 4. Constructor에서 실패
 ```cpp
 class Uart {
 public:
@@ -414,7 +414,7 @@ public:
     }
 };
 ```
-대안: *factory function*이 `std::optional<Uart>` 반환.
+대안은 factory function이 `std::optional<Uart>`를 반환하도록 만드는 것입니다.
 
 ```cpp
 std::optional<Uart> make_uart(int baud) {
@@ -423,26 +423,26 @@ std::optional<Uart> make_uart(int baud) {
 }
 ```
 
-### 5. *Move 후 사용*
+### 5. Move 후 사용
 ```cpp
 Buffer b1(1024);
 Buffer b2 = std::move(b1);
 b1.write(...);   // b1은 moved-from 상태 → null 접근
 ```
-Move 후 *사용 안 함*이 관례.
+move한 객체는 더 이상 사용하지 않는 것이 관례입니다.
 
-### 6. *RAII 객체가 너무 작음*
+### 6. RAII 객체의 scope가 너무 작음
 ```cpp
 {
     MutexLock l(m);
     counter = 0;
 }   // 즉시 unlock
 ```
-*scope 너무 짧음* → 필요한 critical section 아님. 의도 확인.
+scope가 너무 짧으면 필요한 critical section을 모두 덮지 못합니다. 의도가 정말 그것인지 확인합니다.
 
 ## 측정 — RAII overhead
 
-같은 코드의 C 수동 정리 vs C++ RAII (ARM Cortex-M4, `-O2`).
+같은 코드를 C 수동 정리와 C++ RAII로 비교합니다(ARM Cortex-M4, `-O2`).
 
 ```text
 # C 수동 (mutex acquire/release)
@@ -468,7 +468,7 @@ shared:
 # 24 bytes — 동일
 ```
 
-*완전 동일*. 생성자/소멸자가 *인라인*되어 *오버헤드 0*. *zero-cost abstraction*.
+완전히 동일합니다. 생성자와 소멸자가 인라인되어 오버헤드가 0이며, 전형적인 zero-cost abstraction입니다.
 
 ## 정리
 

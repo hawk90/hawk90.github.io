@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"ETL = STL의 *임베디드 친화* 대체."** — 모든 컨테이너 *고정 크기*, heap 0, 추가 *FSM, message router, factory*.
+> **"ETL은 STL의 임베디드 친화 대체입니다."** 모든 컨테이너가 고정 크기이고 heap을 쓰지 않으며, FSM과 message router와 factory도 함께 제공합니다.
 
 ## 어떤 문제를 푸는가
 
-C++ STL은 *대부분 heap 사용*. 임베디드는 *heap 회피*. ETL이 *STL 같은 인터페이스*를 *fixed-size + zero heap*로 제공.
+C++ STL은 대부분 heap을 사용하지만, 임베디드에서는 heap을 회피해야 합니다. ETL은 STL과 비슷한 인터페이스를 fixed-size + zero heap으로 제공합니다.
 
 ```cpp
 #include <etl/vector.h>
@@ -24,14 +24,15 @@ v.push_back(1);
 if (v.full()) { /* */ }
 ```
 
-추가로:
-- *Fixed-size FSM*
-- *Fixed-size message router*
-- *etl::delegate* (std::function 대체)
-- *etl::observer* (Observer 패턴)
-- *etl::string* (fixed-size)
+추가로 다음을 제공합니다.
 
-[etlcpp.com](https://www.etlcpp.com/), MIT license, header-only.
+- Fixed-size FSM
+- Fixed-size message router
+- `etl::delegate` (std::function 대체)
+- `etl::observer` (Observer 패턴)
+- `etl::string` (fixed-size)
+
+홈은 [etlcpp.com](https://www.etlcpp.com/)이며 MIT 라이선스의 header-only 라이브러리입니다.
 
 ## 기본 컨테이너
 
@@ -54,7 +55,7 @@ v.erase(v.begin());
 v.clear();
 ```
 
-내부: *T storage[N] + size*. *heap 없음*.
+내부적으로는 `T storage[N]`과 size만 갖고 있어 heap을 쓰지 않습니다.
 
 ### `etl::string<N>`
 
@@ -69,7 +70,7 @@ if (s.size() > 64) { /* truncated */ }
 const char* cstr = s.c_str();
 ```
 
-*고정 크기 char array*. 초과 시 *truncate*.
+고정 크기 char array이며 길이가 초과되면 잘립니다.
 
 ### `etl::list<T, N>`
 
@@ -84,7 +85,7 @@ orders.pop_front();
 for (auto& o : orders) { /* */ }
 ```
 
-doubly linked list, *고정 크기 pool 내부*. *heap 0*.
+doubly linked list이며 고정 크기 pool을 내부에 두므로 heap을 쓰지 않습니다.
 
 ### `etl::map<K, V, N>`
 
@@ -99,7 +100,7 @@ auto it = m.find(1);
 if (it != m.end()) { /* */ }
 ```
 
-RB-tree, *고정 크기 노드 pool*.
+RB-tree 기반이며 노드 pool도 고정 크기입니다.
 
 ### `etl::queue<T, N>`
 
@@ -112,11 +113,11 @@ int v = q.front();
 q.pop();
 ```
 
-ring buffer 기반.
+ring buffer 기반입니다.
 
 ## etl::delegate — std::function 대체
 
-`std::function`은 *heap 가능*. *etl::delegate*는 *fixed-size*.
+`std::function`은 내부에서 heap을 쓸 수 있지만, `etl::delegate`는 fixed-size입니다.
 
 ```cpp
 #include <etl/delegate.h>
@@ -134,9 +135,9 @@ d = etl::delegate<void(int)>::create<Handler, &Handler::on_event>(h);
 d(42);   // h.on_event(42) 호출
 ```
 
-*sizeof = 두 pointer* (object + method). *heap 0*.
+크기는 object와 method 두 pointer만큼이며 heap을 쓰지 않습니다.
 
-함수, lambda도 가능:
+함수와 lambda도 받을 수 있습니다.
 
 ```cpp
 auto d1 = etl::delegate<int(int, int)>::create<add_function>();
@@ -171,11 +172,11 @@ sensor.add_observer(obs);
 sensor.update();   // obs.notification 호출
 ```
 
-heap 없는 *pub/sub*. *최대 observer 수 고정*.
+heap 없는 pub/sub이며 최대 observer 수가 고정되어 있습니다.
 
 ## etl::fsm — Finite State Machine
 
-ETL의 *대표 기능*. *fixed-size FSM*.
+ETL의 대표 기능으로 fixed-size FSM을 제공합니다.
 
 ```cpp
 #include <etl/fsm.h>
@@ -240,9 +241,9 @@ fsm.receive(StartEvent{});   // idle → running
 fsm.receive(StopEvent{});    // running → idle
 ```
 
-heap 없음, *type-safe event dispatch*, *상태 전이 명확*.
+heap을 쓰지 않고, type-safe event dispatch가 가능하며, 상태 전이가 명확합니다.
 
-자세한 FSM 패턴은 [Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine).
+자세한 FSM 패턴은 [Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine)에서 다룹니다.
 
 ## etl::message_router — Type-safe routing
 
@@ -274,11 +275,11 @@ router.receive(TempMessage{25.0f});
 router.receive(PressureMessage{101.3f});
 ```
 
-*message type별 dispatch* — *compile-time*. RTTI 없음.
+message type별 dispatch가 컴파일 타임에 결정되며 RTTI를 쓰지 않습니다.
 
 ## etl::array vs std::array
 
-ETL은 `etl::array`도 제공. 차이는 *예외 환경*.
+ETL은 `etl::array`도 제공합니다. 차이는 주로 예외 환경에서 드러납니다.
 
 ```cpp
 etl::array<int, 8> a = {1, 2, 3};
@@ -286,7 +287,7 @@ etl::array<int, 8> a = {1, 2, 3};
 // 단 -fno-exceptions에서 .at() 동작이 차이
 ```
 
-대부분 `std::array`로 충분.
+대부분의 경우 `std::array`로 충분합니다.
 
 ## etl::optional
 
@@ -299,11 +300,11 @@ x = 42;
 *x = 10;
 ```
 
-C++17 이전 환경에서 *std::optional 대체*. C++17+는 *표준 사용*.
+C++17 이전 환경에서 std::optional의 대체로 쓰며, C++17 이상에서는 표준을 사용합니다.
 
 ## 설정 매크로
 
-ETL은 *컴파일러/플랫폼 설정* 필요.
+ETL은 컴파일러와 플랫폼 설정이 필요합니다.
 
 ```cpp
 // etl_profile.h
@@ -321,7 +322,7 @@ CXXFLAGS += -DETL_NO_STL -DETL_LOG_ERRORS
 
 ## 에러 처리
 
-ETL은 *예외 또는 abort* 선택.
+ETL은 예외 또는 abort를 선택할 수 있습니다.
 
 ```cpp
 // 예외 모드 (기본)
@@ -335,7 +336,7 @@ v.push_back(5);   // throws etl::vector_full
 // → push_back에 5번째는 그냥 *무시* 또는 ETL_ASSERT trigger
 ```
 
-`ETL_ASSERT` 매크로 정의로 *fail behavior 통제*.
+`ETL_ASSERT` 매크로를 정의해 fail 동작을 직접 통제할 수 있습니다.
 
 ```cpp
 #define ETL_ASSERT(condition, error) \
@@ -344,7 +345,7 @@ v.push_back(5);   // throws etl::vector_full
 
 ## 측정 — ETL vs STL
 
-같은 코드, STL vs ETL (STM32F4).
+같은 코드를 STL과 ETL로 비교한 결과입니다 (STM32F4).
 
 ```text
 std::vector<int> + 16 elements:
@@ -358,37 +359,40 @@ etl::vector<int, 16>:
   alloc cost: 0 (compile-time fixed)
 ```
 
-코드 크기 *15배 작음*. *heap 0*.
+코드 크기가 15배 작고 heap도 쓰지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *fixed-size 초과*
+### 1. fixed-size 초과
 ```cpp
 etl::vector<int, 4> v;
 for (int i = 0; i < 10; ++i) v.push_back(i);   // 4 이후 fail
 ```
-*full() 체크* 또는 *size 늘리기*.
 
-### 2. *STL과 혼용*
+`full()`을 먼저 체크하거나 capacity를 늘립니다.
+
+### 2. STL과 혼용
 ```cpp
 std::vector<etl::string<32>> v;   // STL vector는 heap
 ```
-*완전한 ETL 사용* 또는 *STL+허용 환경*.
 
-### 3. *exception 가정*
-ETL은 *기본 exception 던짐*. `-fno-exceptions`에서 *abort*. `ETL_NO_EXCEPTIONS` 정의.
+완전히 ETL을 쓰거나, STL이 허용되는 환경에서만 섞습니다.
 
-### 4. *큰 N으로 .bss 폭증*
+### 3. exception 가정
+ETL은 기본적으로 exception을 던집니다. `-fno-exceptions` 환경에서는 abort합니다. 이때는 `ETL_NO_EXCEPTIONS`를 정의합니다.
+
+### 4. 큰 N으로 .bss 폭증
 ```cpp
 etl::vector<HugeStruct, 1000> v;
 ```
-sizeof(HugeStruct) * 1000이 *.bss*. 측정 후 *적정 N*.
 
-### 5. *Boost.Intrusive와 비교 안 함*
-ETL이 가벼움. Boost가 더 강력. *프로젝트 needs*에 맞게.
+`sizeof(HugeStruct) * 1000`이 그대로 `.bss`에 잡힙니다. 측정 후 적정 N을 선택합니다.
 
-### 6. *Header-only 의존*
-ETL은 *header-only*. *컴파일 시간 증가*. PCH 활용.
+### 5. Boost.Intrusive와 비교하지 않음
+ETL은 가볍고 Boost는 더 강력합니다. 프로젝트의 요구에 맞게 선택합니다.
+
+### 6. Header-only 의존
+ETL은 header-only라서 컴파일 시간이 늘어납니다. PCH를 활용합니다.
 
 ## ETL의 장점 vs 단점
 
@@ -419,4 +423,4 @@ ETL은 *header-only*. *컴파일 시간 증가*. PCH 활용.
 
 ## 다음 글
 
-[Part 4-03: Lock-free 기초](/blog/embedded/embedded-cpp/part4-03-lock-free-basics) — *mutex 없이* 동시성. atomic, CAS, memory order.
+[Part 4-03: Lock-free 기초](/blog/embedded/embedded-cpp/part4-03-lock-free-basics) — mutex 없이 동시성. atomic, CAS, memory order.

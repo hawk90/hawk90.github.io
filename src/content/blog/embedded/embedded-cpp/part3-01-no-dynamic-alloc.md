@@ -10,15 +10,15 @@ type: tech
 
 ## 한 줄 요약
 
-> **"임베디드의 기본은 *정적 할당*."** — `std::vector` 대신 `std::array`, `etl::vector`. *heap 자체를 사용 안 함*.
+> **"임베디드의 기본은 정적 할당입니다."** `std::vector` 대신 `std::array`나 `etl::vector`를 쓰고 heap 자체를 사용하지 않습니다.
 
 ## 어떤 문제를 푸는가
 
-임베디드에서 *동적 할당*은 *세 가지 위험*입니다.
+임베디드에서 동적 할당은 세 가지 위험을 안고 갑니다.
 
-1. **Heap fragmentation** — 짧고 긴 alloc 반복으로 *큰 블록 못 얻음*
-2. **비결정성** — `malloc`의 시간 *예측 불가*. real-time 보장 깨짐
-3. **메모리 부족** — *언제 부족할지* 모름. graceful fail 어려움
+1. **Heap fragmentation** — 짧고 긴 alloc이 반복되면 큰 블록을 얻지 못합니다.
+2. **비결정성** — `malloc`의 시간이 예측 불가합니다. real-time 보장이 깨집니다.
+3. **메모리 부족** — 언제 부족해질지 알 수 없고 graceful fail이 어렵습니다.
 
 ```cpp
 // 위험
@@ -31,13 +31,13 @@ for (auto& order : input) {
 }
 ```
 
-대부분 인증 환경(MISRA, AUTOSAR, DO-178C)이 *동적 할당을 금지*하거나 *심하게 제한*. *시스템 초기화 시점*에만 허용.
+대부분의 인증 환경(MISRA, AUTOSAR, DO-178C)이 동적 할당을 금지하거나 심하게 제한합니다. 허용한다 해도 시스템 초기화 시점에만 허용합니다.
 
-이 글은 *heap 없이 C++ 쓰는 패턴*입니다.
+이 글은 heap 없이 C++를 쓰는 패턴을 정리합니다.
 
 ## 정적 컨테이너 표준 라이브러리
 
-C++ 표준 `<array>`가 *유일한 stack-only 컨테이너*. 나머지는 보통 *heap 사용*.
+C++ 표준에서 `<array>`가 유일한 stack-only 컨테이너입니다. 나머지는 대부분 heap을 사용합니다.
 
 ```cpp
 #include <array>
@@ -58,11 +58,11 @@ std::fill(buffer.begin(), buffer.end(), 0);
 std::sort(sin_table.begin(), sin_table.end());
 ```
 
-`std::array`는 *컴파일 타임 크기*. *런타임 크기 변경 불가* — 그게 *zero-cost의 비결*.
+`std::array`는 컴파일 타임 크기를 갖고 런타임에 크기를 바꿀 수 없습니다. 이것이 zero-cost의 비결입니다.
 
 ## ETL — heap 없는 STL 대체
 
-[Embedded Template Library](https://www.etlcpp.com/) (ETL)는 *임베디드 친화 STL*. 모든 컨테이너가 *고정 크기*.
+[Embedded Template Library](https://www.etlcpp.com/) (ETL)는 임베디드 친화 STL입니다. 모든 컨테이너가 고정 크기로 동작합니다.
 
 ```cpp
 #include <etl/vector.h>
@@ -81,17 +81,18 @@ etl::map<int, Order, 8> orders; // 최대 8 entry
 orders.insert({1, Order{}});
 ```
 
-핵심:
-- *컨테이너 크기가 type의 일부*. compile-time 결정.
-- `push_back` 등이 *실패할 수 있음* — `full()` 체크.
-- *internal storage가 stack 또는 .bss*.
-- `<algorithm>`, `<iterator>` 모두 호환.
+핵심을 정리하면 이렇습니다.
 
-ETL은 *MIT license*, header-only, 임베디드 표준 라이브러리에 가까움.
+- 컨테이너 크기가 type의 일부이며 compile-time에 결정됩니다.
+- `push_back` 등이 실패할 수 있으므로 `full()`로 체크합니다.
+- internal storage가 stack 또는 .bss에 자리잡습니다.
+- `<algorithm>`, `<iterator>`와 모두 호환됩니다.
+
+ETL은 MIT license에 header-only이며, 임베디드 표준 라이브러리에 가깝게 쓰입니다.
 
 ## std::pmr (C++17) — polymorphic allocator
 
-표준 컨테이너 + *사용자 정의 allocator*. *heap 없이도* 표준 STL 사용 가능.
+표준 컨테이너에 사용자 정의 allocator를 붙이면 heap 없이도 표준 STL을 사용할 수 있습니다.
 
 ```cpp
 #include <memory_resource>
@@ -114,7 +115,7 @@ for (int i = 0; i < 100; ++i) v.push_back(i);
 | --- | --- | --- | --- |
 | **Stack** | 함수 scope | 작음 (KB) | 단명 객체 |
 | **Static (.bss/.data)** | 프로그램 전체 | 큼 (수십 KB) | 영구 객체 |
-| **Heap** | 동적 | 매우 큼 | *회피* |
+| **Heap** | 동적 | 매우 큼 | 회피 |
 
 ```cpp
 void func() {
@@ -125,7 +126,7 @@ void func() {
 }
 ```
 
-임베디드는 *stack과 static 우선*.
+임베디드에서는 stack과 static을 우선합니다.
 
 ## 임베디드 패턴 1 — fixed-size object pool
 
@@ -176,11 +177,11 @@ auto* o = order_pool.construct(/* args */);
 order_pool.destroy(o);
 ```
 
-*고정 크기 N개*. *heap 없음*. *결정적 시간*.
+고정 크기 N개를 heap 없이 결정적 시간에 처리합니다.
 
 ## 패턴 2 — placement new
 
-이미 할당된 메모리에 *객체 생성*. `new`의 *생성 부분만*.
+이미 할당된 메모리 위에 객체만 생성합니다. `new`의 생성 부분만 쓰는 셈입니다.
 
 ```cpp
 alignas(Order) std::byte buffer[sizeof(Order)];
@@ -191,11 +192,11 @@ o->process();
 o->~Order();   // 명시 destructor 호출
 ```
 
-heap *전혀 안 씀*. *기존 메모리 위에 객체 construct*.
+heap을 전혀 쓰지 않고 기존 메모리 위에 객체를 construct합니다.
 
 ## 패턴 3 — std::optional (C++17)
 
-객체의 *유무*를 *heap 없이* 표현.
+객체의 유무를 heap 없이 표현합니다.
 
 ```cpp
 std::optional<Order> current_order;   // sizeof(Order) + bool, on stack
@@ -215,11 +216,11 @@ void end() {
 }
 ```
 
-*pointer/heap 없이* "있을 수도, 없을 수도"를 표현. *모든 메모리 stack 또는 static*.
+pointer나 heap 없이 "있을 수도, 없을 수도"를 표현합니다. 모든 메모리가 stack 또는 static에 자리잡습니다.
 
 ## 패턴 4 — Static factory
 
-생성 시점에 *한 번만* 할당. 그 후엔 *공유*.
+생성 시점에 한 번만 할당하고 그 뒤로는 공유합니다.
 
 ```cpp
 class Logger {
@@ -237,7 +238,7 @@ private:
 Logger::instance().log("hello");
 ```
 
-*Construct-On-First-Use*. *.bss에 자리만 잡고*, *최초 호출에 생성*.
+Construct-On-First-Use 패턴입니다. .bss에 자리만 잡아두고 최초 호출 시점에 생성합니다.
 
 ## std::vector 대신
 
@@ -275,7 +276,7 @@ std::string_view sv = "hello";   // const char* + size_t
 std::array<char, 32> s = {'h', 'e', 'l', 'l', 'o', '\0'};
 ```
 
-`string_view`는 *데이터 소유 안 함*. *기존 문자열 가리킴*. 함수 매개변수에 *최적*.
+`string_view`는 데이터를 소유하지 않고 기존 문자열을 가리키기만 합니다. 함수 매개변수에 가장 적합합니다.
 
 ## std::function 대신
 
@@ -295,51 +296,51 @@ void (*cb)(int) = my_function;
 std::function<void(int)> cb = [](int x) { /* */ };   // capture 없으면 inline storage
 ```
 
-`etl::delegate`은 *고정 크기 internal storage*. *heap 없음*.
+`etl::delegate`은 고정 크기 internal storage를 사용하므로 heap을 쓰지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *std::vector 무심코 사용*
-표준 라이브러리의 *대부분 컨테이너가 heap*. *명시적 검사 후* 사용.
+### 1. std::vector 무심코 사용
+표준 라이브러리의 대부분의 컨테이너는 heap을 사용합니다. 명시적으로 검사한 뒤에 써야 합니다.
 
-### 2. *std::string concatenation*
+### 2. std::string concatenation
 ```cpp
 std::string s = "a";
 s += "b";   // heap reallocate 가능
 ```
-*고정 크기 buffer* + `snprintf`.
+고정 크기 buffer와 `snprintf` 조합으로 대체합니다.
 
-### 3. *static array에 큰 객체*
+### 3. static array에 큰 객체
 ```cpp
 static std::array<HugeStruct, 1000> arr;   // 큰 .bss
 ```
-*.bss 크기 폭증*. RAM 부족.
+.bss 크기가 폭증하고 RAM이 부족해집니다.
 
-### 4. *Pool 고갈*
+### 4. Pool 고갈
 ```cpp
 auto* o = pool.allocate();
 if (!o) { /* ? */ }   // nullptr 처리 누락
 ```
-*항상 null 체크*.
+항상 null 체크를 합니다.
 
-### 5. *Destructor 누락*
+### 5. Destructor 누락
 ```cpp
 Order* o = new (buffer) Order;
 return;   // ~Order() 호출 안 함 — leak
 ```
-*placement new에는 명시적 destructor*. RAII로 감쌈.
+placement new에는 명시적으로 destructor를 호출하거나 RAII로 감쌉니다.
 
-### 6. *Recursive structure에 정적 할당*
+### 6. Recursive structure에 정적 할당
 ```cpp
 struct Node {
     std::array<Node, 4> children;   // 무한 재귀 — 컴파일 에러
 };
 ```
-*pointer 또는 index 활용*.
+pointer나 index를 활용해 풉니다.
 
 ## 측정 — heap 사용 추적
 
-malloc 호출 횟수와 크기를 *런타임 추적*.
+malloc 호출 횟수와 크기를 런타임에 추적합니다.
 
 ```cpp
 extern "C" {
@@ -361,11 +362,11 @@ extern "C" {
 }
 ```
 
-링커 옵션 `-Wl,--wrap=malloc,--wrap=free`로 *모든 malloc 호출 가로채기*. *예상치 못한 호출 발견*.
+링커 옵션 `-Wl,--wrap=malloc,--wrap=free`로 모든 malloc 호출을 가로채면 예상치 못한 호출을 발견할 수 있습니다.
 
 ## Code size 비교
 
-같은 기능, *동적* vs *정적*.
+같은 기능을 동적과 정적 방식으로 비교합니다.
 
 ```cpp
 // V1 — std::vector (heap)
@@ -389,7 +390,7 @@ V2 (etl::vector): +0.4 KB
 V3 (std::array): +0.2 KB
 ```
 
-*동적 vs 정적의 차이*가 *수 KB*. 임베디드에선 *결정적*.
+동적과 정적의 차이가 수 KB에 이릅니다. 임베디드에서는 결정적인 차이입니다.
 
 ## 정리
 
@@ -410,4 +411,4 @@ V3 (std::array): +0.2 KB
 
 ## 다음 글
 
-[Part 3-02: Custom Allocator 기초](/blog/embedded/embedded-cpp/part3-02-custom-allocator-basics) — *STL allocator interface*를 구현해 *제어된 메모리* 위에서 표준 컨테이너 사용.
+[Part 3-02: Custom Allocator 기초](/blog/embedded/embedded-cpp/part3-02-custom-allocator-basics) — STL allocator interface를 구현해 제어된 메모리 위에서 표준 컨테이너를 사용합니다.

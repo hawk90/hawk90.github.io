@@ -10,18 +10,18 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Lock-free = *mutex 없이 atomic operation*."** — 짧고 deterministic. ISR-safe.
+> **"Lock-free는 mutex 없이 atomic operation으로 동기화하는 방식입니다."** 짧고 deterministic하며 ISR에서도 안전합니다.
 
 ## 어떤 문제를 푸는가
 
-Mutex의 비용:
+Mutex는 다음과 같은 비용을 동반합니다.
 
-- *context switch* — RTOS task가 blocked
-- *Priority inversion* — 낮은 priority가 lock 잡고 높은 priority 막힘
-- *Deadlock* — 둘 이상 mutex 잘못 잡으면
-- *ISR 사용 불가* — ISR에서 mutex 못 (대부분 RTOS)
+- context switch가 발생해 RTOS task가 block됩니다.
+- Priority inversion이 일어납니다. 낮은 priority가 lock을 잡으면 높은 priority가 막힙니다.
+- Deadlock 가능성이 있습니다. 두 개 이상의 mutex를 잘못 잡으면 발생합니다.
+- 대부분의 RTOS에서 ISR은 mutex를 쓸 수 없습니다.
 
-**Lock-free**는 *mutex 없이* 동시 접근. *atomic 명령*으로 *consistency 보장*.
+**Lock-free**는 mutex 없이 동시에 접근하면서 atomic 명령으로 consistency를 보장합니다.
 
 ```cpp
 // Mutex 기반
@@ -39,7 +39,7 @@ void increment() {
 }
 ```
 
-ARM Cortex-M의 *atomic instruction*(LDREX/STREX)으로 *hardware 보장*.
+ARM Cortex-M의 atomic instruction(LDREX/STREX)이 하드웨어 레벨에서 이를 보장합니다.
 
 ## std::atomic — 기본
 
@@ -60,9 +60,9 @@ bool success = counter.compare_exchange_weak(expected, 10);
 // 아니면 expected = current value + false
 ```
 
-ARM Cortex-M에서 *4-byte atomic*은 *single instruction* (load/store가 자연 atomic).
+ARM Cortex-M에서 4-byte atomic은 single instruction이며 load/store가 자연스럽게 atomic입니다.
 
-`fetch_add`, `compare_exchange`는 *LDREX/STREX* 사용.
+`fetch_add`나 `compare_exchange`는 LDREX/STREX를 사용합니다.
 
 ## CAS — Compare-And-Swap
 
@@ -82,17 +82,18 @@ void push(Node* n) {
 }
 ```
 
-흐름:
-1. `head` 현재 값 읽음 (`old_head`)
-2. `n->next = old_head` 설정
-3. CAS: `head == old_head`면 `n`으로 교체
-4. 다른 thread가 끼어들어 `head` 변경됐으면 CAS 실패 → retry
+흐름은 다음과 같습니다.
 
-*retry loop이 lock-free의 특징*. *deadlock 없음*. 다만 *contention 높으면 starvation* 가능.
+1. `head`의 현재 값을 `old_head`로 읽습니다.
+2. `n->next = old_head`로 설정합니다.
+3. CAS로 `head == old_head`면 `n`으로 교체합니다.
+4. 다른 thread가 끼어들어 `head`가 변경되었으면 CAS가 실패하므로 retry합니다.
+
+retry loop이 lock-free의 특징이며 deadlock이 없습니다. 다만 contention이 높으면 starvation이 발생할 수 있습니다.
 
 ## ABA Problem
 
-CAS의 *함정*. *값이 A → B → A로 변경*되었어도 *CAS는 성공*.
+CAS의 함정입니다. 값이 A → B → A로 바뀌어도 CAS는 성공합니다.
 
 ```cpp
 // Thread 1: pop 시도
@@ -103,16 +104,17 @@ top.compare_exchange_weak(old_top, old_top->next);
 // CAS 성공 — 그러나 old_top->next는 잘못된 값
 ```
 
-해결:
-- *Tagged pointer* — pointer + counter (64-bit)
-- *Hazard pointer* — 다른 thread가 *현재 사용 중인 pointer 추적*
-- *Epoch-based reclamation* — gc-like
+해결책은 다음과 같습니다.
 
-임베디드에서는 *간단한 경우*에 lock-free 사용. *복잡한 ABA 회피*는 *mutex가 낫기도*.
+- Tagged pointer — pointer + counter를 묶어 64-bit으로 다룹니다.
+- Hazard pointer — 다른 thread가 현재 사용 중인 pointer를 추적합니다.
+- Epoch-based reclamation — gc 비슷한 방식입니다.
+
+임베디드에서는 간단한 경우에만 lock-free를 씁니다. ABA 회피가 복잡해진다면 mutex가 나을 때도 많습니다.
 
 ## Memory Order
 
-`std::atomic` 연산은 *memory ordering* 인자.
+`std::atomic` 연산은 memory ordering 인자를 받습니다.
 
 ```cpp
 counter.store(1, std::memory_order_relaxed);
@@ -131,7 +133,7 @@ counter.compare_exchange_weak(expected, new_value,
 | `acq_rel` | acquire + release | RMW |
 | `seq_cst` | 모든 thread가 *같은 순서* (기본) | 강한 보장 |
 
-대부분 임베디드는 *acquire/release* 활용 — *seq_cst보다 빠름*.
+대부분의 임베디드 코드는 `acquire`/`release`를 활용해 `seq_cst`보다 빠르게 만듭니다.
 
 ## 임베디드 — ISR-safe Counter
 
@@ -147,11 +149,11 @@ uint32_t get_uptime_ms() {
 }
 ```
 
-ISR과 main에서 *동시 접근*. *atomic이라 safe*. *no lock*.
+ISR과 main에서 동시에 접근해도 atomic이라 안전하고 lock도 필요 없습니다.
 
 ## 임베디드 — Lock-free SPSC Queue
 
-Single Producer Single Consumer. *가장 단순한 lock-free queue*.
+Single Producer Single Consumer 패턴이며, 가장 단순한 lock-free queue입니다.
 
 ```cpp
 template<typename T, size_t N>
@@ -190,9 +192,9 @@ public:
 };
 ```
 
-*Producer는 head만 변경, Consumer는 tail만*. *서로 무관한 변수* → *CAS 불필요*.
+Producer는 head만, Consumer는 tail만 수정합니다. 서로 다른 변수를 다루므로 CAS가 필요 없습니다.
 
-`acquire`/`release`로 *write가 visible*하게.
+`acquire`/`release`로 한쪽의 write가 다른 쪽에서 visible하게 만듭니다.
 
 ### ISR + main 사용
 
@@ -212,11 +214,11 @@ void main_loop() {
 }
 ```
 
-*mutex 없이* ISR-main 통신. *deterministic*.
+mutex 없이 ISR-main 통신이 가능하며 deterministic하게 동작합니다.
 
 ## MPMC Queue — 복잡
 
-Multi-Producer Multi-Consumer는 *훨씬 복잡*. Boost.Lockfree, Folly, Concurrent Data Structures 활용.
+Multi-Producer Multi-Consumer는 훨씬 복잡합니다. Boost.Lockfree, Folly, Concurrent Data Structures 같은 검증된 라이브러리를 활용합니다.
 
 ```cpp
 // 직접 구현 어렵다 — 검증된 라이브러리 사용
@@ -224,7 +226,7 @@ Multi-Producer Multi-Consumer는 *훨씬 복잡*. Boost.Lockfree, Folly, Concurr
 boost::lockfree::queue<int, boost::lockfree::capacity<128>> q;
 ```
 
-임베디드는 *task당 한 producer/consumer*가 대부분. *SPSC로 충분*한 경우 많음.
+임베디드에서는 task마다 producer와 consumer가 하나씩인 경우가 대부분이라 SPSC로 충분합니다.
 
 ## 자료 정합성 — Critical Section vs Lock-free
 
@@ -249,14 +251,14 @@ void update_shared() {
 }
 ```
 
-V1은 *모든 ISR 차단*. V2는 *해당 변수만*. V1이 *단순*하지만 V2가 *더 deterministic*.
+V1은 모든 ISR을 차단하지만, V2는 해당 변수에만 영향을 줍니다. V1이 단순하지만 V2가 더 deterministic합니다.
 
 ## ARM Cortex-M의 한계
 
-Cortex-M0/M0+는 *LDREX/STREX 없음*. *atomic operation 불가*.
+Cortex-M0/M0+는 LDREX/STREX를 지원하지 않으므로 atomic operation을 쓸 수 없습니다.
 
-- *Cortex-M3, M4, M7*: LDREX/STREX 있음, atomic OK
-- *Cortex-M0, M0+*: atomic 없음, *critical section만*
+- Cortex-M3, M4, M7은 LDREX/STREX가 있어 atomic을 쓸 수 있습니다.
+- Cortex-M0, M0+는 atomic이 없으므로 critical section만 사용합니다.
 
 ```cpp
 // Cortex-M0+
@@ -267,38 +269,41 @@ void increment() {
 }
 ```
 
-Cortex-M0+는 *interrupt disable*이 *cheapest sync*.
+Cortex-M0+에서는 interrupt disable이 가장 저렴한 동기화입니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *Memory order 무시*
+### 1. Memory order 무시
 ```cpp
 counter.store(1);   // 기본 seq_cst — 가장 느림
 ```
-필요한 *최소 order* 사용. relaxed/acquire/release.
 
-### 2. *ABA problem 무시*
-복잡 lock-free에 *tagged pointer* 또는 *hazard pointer*. 또는 *간단한 경우만*.
+필요한 최소 order만 사용합니다. relaxed/acquire/release 중 적절한 것을 고릅니다.
 
-### 3. *load + 사용 + store*
+### 2. ABA problem 무시
+복잡한 lock-free에서는 tagged pointer나 hazard pointer를 씁니다. 아니면 간단한 경우에만 lock-free를 적용합니다.
+
+### 3. load 후 사용하고 store
 ```cpp
 int v = counter.load();
 process(v);
 counter.store(v + 1);   // 다른 thread가 끼어들면 race
 ```
-*atomic operation* 사용 (`fetch_add`).
 
-### 4. *큰 객체 atomic*
+`fetch_add` 같은 atomic operation을 씁니다.
+
+### 4. 큰 객체에 atomic 적용
 ```cpp
 std::atomic<HugeStruct> obj;   // hardware atomic 불가 — lock 사용
 ```
-*4 byte 이하* 또는 *별도 동기화*.
 
-### 5. *Cortex-M0에 atomic 가정*
-LDREX/STREX 없음 → *runtime fallback 또는 컴파일 에러*. *target 확인*.
+4 byte 이하로 만들거나 별도 동기화를 사용합니다.
 
-### 6. *Lock-free라고 빠르다 가정*
-contention 높으면 *CAS retry loop*. mutex보다 *느릴 수* 있음. *측정*.
+### 5. Cortex-M0에 atomic 가정
+LDREX/STREX가 없으므로 runtime fallback이나 컴파일 에러가 발생합니다. target을 확인합니다.
+
+### 6. Lock-free라고 빠르다고 가정
+contention이 높으면 CAS retry loop가 길어져 mutex보다 느릴 수도 있습니다. 반드시 측정합니다.
 
 ## 측정 — atomic vs critical section
 
@@ -311,7 +316,7 @@ contention 높으면 *CAS retry loop*. mutex보다 *느릴 수* 있음. *측정*
 4. Plain ++ (no sync):   ~5 cycles (but unsafe)
 ```
 
-*atomic이 가장 빠름 + 안전*. critical section은 *모든 ISR 차단*해서 latency 영향.
+atomic이 가장 빠르면서도 안전합니다. critical section은 모든 ISR을 차단하므로 latency에 영향을 줍니다.
 
 ## 정리
 
@@ -331,4 +336,4 @@ contention 높으면 *CAS retry loop*. mutex보다 *느릴 수* 있음. *측정*
 
 ## 다음 글
 
-[Part 4-04: Lock-free Container](/blog/embedded/embedded-cpp/part4-04-lock-free-container) — *queue, stack의 lock-free 구현*. SPSC, MPMC 차이.
+[Part 4-04: Lock-free Container](/blog/embedded/embedded-cpp/part4-04-lock-free-container) — queue와 stack의 lock-free 구현. SPSC, MPMC 차이.

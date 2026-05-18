@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Peripheral = *class + 3가지 동작 모드*."** — Blocking, interrupt-driven, DMA.
+> **"Peripheral은 class와 세 가지 동작 모드의 결합입니다."** Blocking, interrupt-driven, DMA로 나뉩니다.
 
 ## 어떤 문제를 푸는가
 
-벤더 HAL은 *C 함수*.
+벤더 HAL은 C 함수입니다.
 
 ```c
 HAL_UART_Transmit(&huart2, data, len, HAL_MAX_DELAY);
@@ -22,12 +22,12 @@ HAL_UART_Transmit_IT(&huart2, data, len);
 HAL_UART_Transmit_DMA(&huart2, data, len);
 ```
 
-타입 없음, *어떤 UART든 같은 함수*. C++ wrapping으로:
+타입이 없어 어떤 UART든 같은 함수로 호출합니다. C++ wrapping으로 다음을 얻습니다.
 
-- *Type-safe* — UART2와 UART3 안 섞임
-- *RAII* — 자원 lifecycle
-- *Concepts* — interface 통일
-- *Mode polymorphism* — blocking/interrupt/DMA
+- **Type-safe**: UART2와 UART3가 섞이지 않습니다
+- **RAII**: 자원 lifecycle을 관리합니다
+- **Concepts**: interface를 통일합니다
+- **Mode polymorphism**: blocking, interrupt, DMA 모드를 바꿔 끼웁니다
 
 ## 기본 — UART class
 
@@ -72,7 +72,7 @@ Uart2::init(115200, 84'000'000);
 Uart2::send(reinterpret_cast<const uint8_t*>("Hello\n"), 6);
 ```
 
-*type별 wrapper*. Uart2와 Uart3는 *다른 type*.
+type별로 wrapper가 갈립니다. Uart2와 Uart3는 다른 type입니다.
 
 ## Interrupt-driven UART
 
@@ -121,7 +121,7 @@ extern "C" void USART2_IRQHandler() {
 }
 ```
 
-*CPU 안 묶임*. *전송 중 다른 일 가능*.
+CPU가 묶이지 않습니다. 전송 중에 다른 일을 할 수 있습니다.
 
 ## DMA UART
 
@@ -157,7 +157,7 @@ using LogUart = DmaUart<0x40004400, 7>;   // DMA1 Channel 7
 LogUart::send_dma(big_buffer, 1024);   // CPU 거의 안 씀
 ```
 
-*CPU 0%* 사용. *큰 buffer 전송*에 적합.
+CPU 사용이 거의 0입니다. 큰 buffer 전송에 적합합니다.
 
 ## Concept으로 UART interface 통일
 
@@ -181,7 +181,7 @@ using LogChannel = Logger<Uart2>;
 LogChannel::log("hello");
 ```
 
-UART implementation 교체 가능 (blocking, interrupt, DMA). Logger는 *변경 없음*.
+UART implementation을 blocking, interrupt, DMA 중 어느 것으로도 교체할 수 있습니다. Logger는 변경할 필요가 없습니다.
 
 ## SPI 추상화
 
@@ -221,7 +221,7 @@ public:
 };
 ```
 
-*전송 == 수신* (SPI 특성). 함수 한 번에 처리.
+SPI 특성상 전송과 수신이 함께 이뤄집니다. 한 함수에서 처리합니다.
 
 ## SPI device — Chip Select 통합
 
@@ -253,7 +253,7 @@ using AccelChip = SpiDevice<Spi1, GpioPin<GpioPortA, 4>>;
 auto response = AccelChip::transfer<2>({0x80, 0x00});
 ```
 
-*SPI + CS pin이 하나의 device*. 매번 *CS toggle 자동*.
+SPI와 CS pin이 하나의 device로 묶입니다. 매번 CS toggle이 자동으로 일어납니다.
 
 ## I2C 추상화
 
@@ -287,7 +287,7 @@ public:
 };
 ```
 
-I2C protocol은 *복잡*. *bus arbitration, ACK/NACK, restart* 등. *벤더 HAL wrapping*이 대부분 실용.
+I2C protocol은 복잡합니다. bus arbitration, ACK/NACK, restart 등을 다뤄야 합니다. 벤더 HAL을 wrapping하는 방식이 대부분 실용적입니다.
 
 ## ADC 추상화
 
@@ -316,7 +316,7 @@ using Ch_Temp = AdcChannel<0x40012000, 5>;
 float v = Ch_Temp::read_voltage();
 ```
 
-*Channel을 type parameter*. *runtime channel 선택 비용 0*.
+Channel을 type parameter로 두면 runtime channel 선택 비용이 0입니다.
 
 ## RAII 통합 — Peripheral Guard
 
@@ -344,7 +344,7 @@ void burst_log(const char* msg) {
 }
 ```
 
-*power saving 자연*. function scope 후 *clock 끔*.
+power saving이 자연스럽게 됩니다. function scope를 벗어나면 clock이 꺼집니다.
 
 ## Peripheral Pool — 동적 할당 (드물게)
 
@@ -376,31 +376,37 @@ public:
 };
 ```
 
-*runtime peripheral 선택*. 임베디드 대부분은 *static 사용*. 동적 필요시 pool.
+runtime peripheral 선택이 필요한 경우에 씁니다. 임베디드 대부분은 static을 씁니다. 동적이 필요할 때 pool을 활용합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *peripheral 초기화 누락*
-clock enable 누락, alternate function 미설정 → 동작 안 함. *RAII guard*.
+### 1. peripheral 초기화 누락
 
-### 2. *Blocking과 ISR 혼용*
-blocking send 중 ISR이 *같은 peripheral 접근* → race. *모드 통일*.
+clock enable이 누락되거나 alternate function이 미설정이면 동작하지 않습니다. RAII guard로 보장합니다.
 
-### 3. *DMA buffer alignment*
-DMA는 *특정 alignment 요구*. `alignas(4)`로.
+### 2. Blocking과 ISR 혼용
 
-### 4. *Volatile 누락*
-peripheral register는 *volatile pointer*. [Part 5-01](/blog/embedded/embedded-cpp/part5-01-register-abstraction).
+blocking send 중 ISR이 같은 peripheral을 접근하면 race가 발생합니다. 모드를 통일합니다.
 
-### 5. *peripheral lifetime*
-static peripheral은 *영원히 살아 있음*. *power down 명시 필요*시 destructor 활용.
+### 3. DMA buffer alignment
 
-### 6. *Multi-task에서 같은 peripheral 공유*
-mutex 또는 *queue로 직렬화*.
+DMA는 특정 alignment를 요구합니다. `alignas(4)`로 맞춰 줍니다.
+
+### 4. Volatile 누락
+
+peripheral register는 volatile pointer로 다룹니다. 자세한 내용은 [Part 5-01](/blog/embedded/embedded-cpp/part5-01-register-abstraction)에서 다룹니다.
+
+### 5. peripheral lifetime
+
+static peripheral은 영원히 살아 있습니다. power down이 명시적으로 필요하면 destructor를 활용합니다.
+
+### 6. Multi-task에서 같은 peripheral 공유
+
+mutex나 queue로 직렬화합니다.
 
 ## 측정 — C++ peripheral vs HAL
 
-같은 UART 100 byte 전송 (STM32F4, 115200 baud).
+같은 UART 100 byte 전송 비교입니다(STM32F4, 115200 baud).
 
 ```text
 HAL_UART_Transmit (blocking):
@@ -412,7 +418,7 @@ C++ Uart<...>::send (blocking):
   실행: ~8.7 ms (동일)
 ```
 
-*동일 속도*. C++가 *15배 작은 코드*. HAL은 *generic + safety check*로 큼.
+속도는 동일합니다. C++가 15배 작은 코드입니다. HAL은 generic 처리와 safety check로 코드가 큽니다.
 
 ## 정리
 
@@ -432,4 +438,4 @@ C++ Uart<...>::send (blocking):
 
 ## 다음 글
 
-[Part 5-04: HAL 설계 패턴](/blog/embedded/embedded-cpp/part5-04-hal-design-patterns) — *범용 HAL 구조*. 벤더 종속성 격리, 다중 보드/MCU 지원.
+[Part 5-04: HAL 설계 패턴](/blog/embedded/embedded-cpp/part5-04-hal-design-patterns) — 범용 HAL 구조를 다루며, 벤더 종속성 격리와 다중 보드/MCU 지원을 살펴봅니다.

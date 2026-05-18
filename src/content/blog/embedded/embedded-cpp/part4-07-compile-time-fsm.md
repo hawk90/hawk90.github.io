@@ -10,21 +10,21 @@ type: tech
 
 ## 한 줄 요약
 
-> **"FSM을 *컴파일 타임 table*로."** — invalid 전이는 *빌드 실패*. 런타임 코드 최소.
+> **"FSM을 컴파일 타임 table로 표현합니다."** invalid 전이는 빌드 실패로 잡히고 런타임 코드는 최소가 됩니다.
 
 ## 어떤 문제를 푸는가
 
-[Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine)의 *런타임 FSM*은 *유연*하지만:
+[Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine)의 런타임 FSM은 유연하지만 다음과 같은 단점이 있습니다.
 
-- *Invalid 전이가 런타임에 발견*
-- *전이 table*이 메모리에
-- *디버깅 시 stack trace 복잡*
+- Invalid 전이가 런타임에야 발견됩니다.
+- 전이 table이 메모리에 올라갑니다.
+- 디버깅 시 stack trace가 복잡합니다.
 
-**Compile-time FSM**은 *constexpr*과 *template* 활용:
+**Compile-time FSM**은 `constexpr`과 template을 활용해 다음을 얻습니다.
 
-- *전이 검증이 컴파일 타임*
-- *invalid 전이는 빌드 실패*
-- *각 전이가 컴파일러에 의해 인라인*
+- 전이 검증을 컴파일 타임에 합니다.
+- invalid 전이는 빌드 실패로 잡힙니다.
+- 각 전이가 컴파일러에 의해 인라인됩니다.
 
 ```cpp
 constexpr auto next = transition<State::Idle, Event::Start>();   // 컴파일 타임
@@ -34,7 +34,7 @@ constexpr auto bad = transition<State::Idle, Event::Stop>();    // 컴파일 에
 // error: invalid transition
 ```
 
-런타임 *코드 0*, *데이터 0*. *수 KB 절약*.
+런타임 코드와 데이터 모두 0이며 수 KB를 절약할 수 있습니다.
 
 ## 기본 — Transition table as data
 
@@ -68,7 +68,7 @@ constexpr State s = next_state(State::Idle, Event::Start);
 static_assert(s == State::Running);
 ```
 
-*table이 .rodata*. *next_state는 컴파일 타임 호출 가능*.
+table은 `.rodata`에 들어가고, `next_state`는 컴파일 타임에도 호출할 수 있습니다.
 
 ## Template-based — invalid 전이 컴파일 에러
 
@@ -109,11 +109,11 @@ constexpr State s1 = transition<State::Idle, Event::Start>();   // OK
 // constexpr State s2 = transition<State::Idle, Event::Stop>();  // 컴파일 에러
 ```
 
-*컴파일 타임 검증*. invalid 전이는 *static_assert 실패*.
+컴파일 타임에 검증되며 invalid 전이는 `static_assert`로 잡힙니다.
 
 ## Type-based state — 각 state가 type
 
-[Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine)의 variant 기반.
+[Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine)의 variant 기반 접근입니다.
 
 ```cpp
 struct Idle {};
@@ -165,11 +165,11 @@ send_event(machine, StartEvent{});   // Idle → Running
 // send_event(machine, StopEvent{});   // Idle + StopEvent — static_assert 실패
 ```
 
-*overload resolution*이 *valid transition만 찾음*. 없으면 *static_assert*.
+overload resolution이 valid transition만 찾고, 없으면 `static_assert`가 실패합니다.
 
 ## Boost.SML — 정식 compile-time FSM
 
-[Boost.SML](https://github.com/boost-ext/sml) (State Machine Library). *DSL-like syntax*.
+[Boost.SML](https://github.com/boost-ext/sml)은 정식 State Machine Library이며 DSL과 비슷한 syntax를 제공합니다.
 
 ```cpp
 #include <boost/sml.hpp>
@@ -200,21 +200,23 @@ fsm.process_event(Pause{});
 fsm.process_event(Resume{});
 ```
 
-장점:
-- *DSL syntax* — UML state diagram에 가까움
-- *컴파일 타임 검증*
-- *guard, action, sub-state machine* 지원
-- *meta-programming 최적화* — 거의 zero-cost
+장점은 다음과 같습니다.
 
-단점:
-- *컴파일 시간 증가* — heavy template
-- *학습 곡선*
+- DSL syntax가 UML state diagram에 가깝습니다.
+- 컴파일 타임에 검증됩니다.
+- guard, action, sub-state machine을 지원합니다.
+- meta-programming으로 최적화되어 거의 zero-cost입니다.
 
-임베디드에서 *큰 FSM*에 유용. 작으면 *직접 enum/variant*.
+단점은 다음과 같습니다.
+
+- heavy template이라 컴파일 시간이 늘어납니다.
+- 학습 곡선이 있습니다.
+
+임베디드에서 큰 FSM에 유용합니다. 작으면 직접 enum이나 variant를 씁니다.
 
 ## 임베디드 — Compile-time HSM
 
-Hierarchical State Machine을 *template*으로.
+Hierarchical State Machine을 template으로 만드는 방법입니다.
 
 ```cpp
 template<typename Parent = void>
@@ -233,11 +235,11 @@ constexpr bool is_in_state(/* ... */) {
 }
 ```
 
-복잡. Boost.SML이 *대부분 처리*. 직접 구현은 *학습 목적*.
+구현이 복잡하므로 Boost.SML이 대부분을 처리합니다. 직접 구현은 학습 목적에만 권합니다.
 
 ## Compile-time 검증 — Unreachable state
 
-전이 table에서 *도달 불가능한 state* 찾기.
+전이 table에서 도달 불가능한 state를 찾을 수 있습니다.
 
 ```cpp
 constexpr Transition trs[] = {
@@ -259,11 +261,11 @@ static_assert(is_reachable(State::Stopped));
 // static_assert(is_reachable(State::Paused));   // 컴파일 에러 — unreachable
 ```
 
-*컴파일 시점에 unreachable state 발견*. *디자인 검증*.
+컴파일 시점에 unreachable state를 발견할 수 있어 디자인을 검증할 수 있습니다.
 
 ## Compile-time 검증 — Dead-end state
 
-빠져나갈 수 없는 *dead state*.
+빠져나갈 수 없는 dead state를 찾을 수도 있습니다.
 
 ```cpp
 constexpr bool has_outgoing(State s) {
@@ -277,31 +279,31 @@ static_assert(has_outgoing(State::Running));
 // static_assert(has_outgoing(State::Stopped));   // dead state
 ```
 
-*Dead state 의도된* 경우 (Stopped 같은 종착)는 *명시*. 의도 안 한 dead state는 *bug*.
+Stopped 같은 종착 state는 의도된 dead state이므로 명시합니다. 의도하지 않은 dead state는 bug입니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *모든 FSM을 compile-time으로*
-런타임 *동적 변경*이 필요한 시스템 — runtime FSM이 자연. *compile-time은 trade-off*.
+### 1. 모든 FSM을 compile-time으로
+런타임 동적 변경이 필요한 시스템에서는 runtime FSM이 자연스럽습니다. compile-time은 trade-off가 있는 선택입니다.
 
-### 2. *Template error message 폭증*
-잘못된 전이 시 *수십 줄 에러*. static_assert 메시지 명확히.
+### 2. Template error message 폭증
+잘못된 전이 시 에러가 수십 줄로 늘어납니다. `static_assert` 메시지를 명확히 작성합니다.
 
-### 3. *Compile time 폭증*
-큰 FSM의 template instantiation — *수 분 컴파일*. 측정.
+### 3. Compile time 폭증
+큰 FSM의 template instantiation은 컴파일 시간이 수 분에 이를 수도 있습니다. 측정이 필요합니다.
 
-### 4. *Action 누락*
-전이 + side effect (logging, action). table에 *함수 포인터* 또는 *action class*.
+### 4. Action 누락
+전이마다 side effect(logging, action)가 따라옵니다. table에 함수 포인터나 action class를 함께 둡니다.
 
-### 5. *Guard 누락*
-조건부 전이 — 단순 from/event/to만 부족. Boost.SML *guard 지원*.
+### 5. Guard 누락
+조건부 전이가 필요한 경우 단순한 from/event/to만으로는 부족합니다. Boost.SML이 guard를 지원합니다.
 
-### 6. *Sub-machine 결합*
-큰 시스템에 *sub-FSM*. 직접 구현 어려움. Boost.SML 또는 etl::hsm.
+### 6. Sub-machine 결합
+큰 시스템에서는 sub-FSM이 필요해집니다. 직접 구현이 어렵다면 Boost.SML이나 `etl::hsm`을 씁니다.
 
 ## 측정 — Compile vs Runtime FSM
 
-같은 5-state FSM, 1000 events.
+같은 5-state FSM에서 1000 event를 처리한 결과입니다.
 
 ```text
 # Runtime FSM (enum + switch)
@@ -321,7 +323,7 @@ total cycles: 5000 (직접 dispatch)
 total cycles: 7500
 ```
 
-*Compile-time이 가장 작고 빠름*. 단 *유연성 낮음*.
+Compile-time이 가장 작고 빠르지만 유연성은 낮습니다.
 
 ## 정리
 
@@ -341,4 +343,4 @@ total cycles: 7500
 
 ## 다음 글
 
-[Part 4-08: Singleton 대안](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives) — *임베디드의 DI 패턴*. Singleton 없이 *명확한 의존성*.
+[Part 4-08: Singleton 대안](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives) — 임베디드의 DI 패턴. Singleton 없이 의존성을 명확히 합니다.

@@ -10,38 +10,40 @@ type: tech
 
 ## 한 줄 요약
 
-> **"에러 처리는 *세 결정*입니다."** — 어디서 발견, 어떻게 전파, 어떻게 복구.
+> **"에러 처리는 세 가지 결정으로 정리됩니다."** 어디서 발견할지, 어떻게 전파할지, 어떻게 복구할지를 정합니다.
 
 ## 어떤 문제를 푸는가
 
-[Part 3-05](/blog/embedded/embedded-cpp/part3-05-no-exception-design)가 *도구*를 소개했습니다. 이 글은 *전체 시스템*입니다.
+[Part 3-05](/blog/embedded/embedded-cpp/part3-05-no-exception-design)에서 도구를 소개했습니다. 이 글은 그것을 엮은 전체 시스템 이야기입니다.
 
-대부분 임베디드 프로젝트가 *에러 처리에 일관성 없습니다*.
+대부분의 임베디드 프로젝트가 에러 처리에 일관성을 갖추지 못합니다.
 
-- 일부는 *error code*, 일부는 *bool*, 일부는 *exception*
-- *전파 방식*이 함수마다 다름
-- *fatal vs recoverable* 구분 모호
-- *로깅 vs 알람 vs 무시* 결정 산발적
+- 어떤 곳은 error code, 어떤 곳은 bool, 어떤 곳은 exception을 씁니다.
+- 전파 방식이 함수마다 다릅니다.
+- fatal과 recoverable 구분이 모호합니다.
+- 로깅, 알람, 무시 사이의 결정이 산발적입니다.
 
-*시스템 차원의 패턴*이 필요. 이 글은 *4가지 결정*을 정리합니다.
+시스템 차원의 패턴이 필요합니다. 이 글은 네 가지 결정으로 정리합니다.
 
 ## 결정 1 — Fatal vs Recoverable
 
-모든 에러는 *둘 중 하나*.
+모든 에러는 둘 중 하나로 분류됩니다.
 
-**Fatal** — 시스템 *유지 불가*. 예:
-- *Heap corruption*
-- *Stack overflow*
-- *Hardware bus fault*
-- *Watchdog reset 임박*
+**Fatal**은 시스템을 유지할 수 없는 경우입니다.
 
-**Recoverable** — 처리 가능. 예:
-- *Sensor reading invalid*
-- *Buffer full*
-- *Timeout*
-- *Invalid user input*
+- Heap corruption
+- Stack overflow
+- Hardware bus fault
+- Watchdog reset 임박
 
-각각 다른 *반응 전략*.
+**Recoverable**은 처리 가능한 경우입니다.
+
+- Sensor reading invalid
+- Buffer full
+- Timeout
+- Invalid user input
+
+각각 다른 반응 전략을 가집니다.
 
 ```cpp
 // Fatal — 즉시 복구 시도 또는 안전 모드
@@ -60,7 +62,7 @@ tl::expected<Data, Error> read_sensor() {
 
 ## 결정 2 — Error code 표준화
 
-프로젝트 전체 *통일된 에러 종류*.
+프로젝트 전체에서 통일된 에러 종류를 정의합니다.
 
 ```cpp
 // errors.h — 프로젝트 전체 공유
@@ -105,11 +107,11 @@ constexpr const char* error_name(Error e) {
 }
 ```
 
-*숫자 범위로 분류*. 새 에러는 *범위 안에서 추가*.
+숫자 범위로 분류해 두면 새 에러를 해당 범위 안에서 추가할 수 있습니다.
 
 ## 결정 3 — Result type 통일
 
-모든 함수가 *같은 Result 타입*. 일관성.
+모든 함수가 같은 Result 타입을 반환하면 일관성이 생깁니다.
 
 ```cpp
 // 프로젝트 전체 표준
@@ -125,7 +127,7 @@ Result<void> write_register(uint8_t addr, uint8_t value);   // 반환값 없음
 inline tl::unexpected<Error> err(Error e) { return tl::unexpected(e); }
 ```
 
-함수 호출:
+함수 호출은 다음과 같이 이어집니다.
 
 ```cpp
 auto result = read_sensor()
@@ -140,7 +142,7 @@ auto result = read_sensor()
 
 ## 결정 4 — 에러 chain 전파
 
-저수준 에러를 *고수준 에러로 wrap*. 디버깅에 정보 보존.
+저수준 에러를 고수준 에러로 wrap해 디버깅 정보를 보존합니다.
 
 ```cpp
 // 옵션 1 — 단순 변환 (정보 손실)
@@ -167,11 +169,11 @@ Result<float> read_temperature() {
 }
 ```
 
-옵션 2는 *디버깅 풍부*하지만 *코드 크기 증가*. 트레이드오프.
+옵션 2는 디버깅 정보가 풍부하지만 코드 크기가 늘어납니다. 트레이드오프입니다.
 
 ## 패턴 — Try Macro
 
-C++23 이전엔 *반환 후 검사*가 반복. 매크로로 단순화.
+C++23 이전에는 반환 후 검사가 반복됩니다. 매크로로 단순화할 수 있습니다.
 
 ```cpp
 #define TRY(expr) \
@@ -189,13 +191,13 @@ Result<float> process() {
 }
 ```
 
-`?` operator (Rust)와 유사. GCC extension *statement expression* 사용 — *gnu++ 모드*에서만.
+Rust의 `?` operator와 유사한 형태입니다. GCC extension인 statement expression을 쓰므로 gnu++ 모드에서만 동작합니다.
 
-C++23 *monadic chain* (`and_then`)으로 *표준 대체* 가능.
+C++23의 monadic chain(`and_then`)으로 표준적으로 대체할 수 있습니다.
 
 ## Logging 통합
 
-에러 발생 시 *어디 + 무엇 + 언제*. 로그가 *debugging의 1차 정보*.
+에러 발생 시 위치, 내용, 시점을 함께 기록합니다. 로그가 디버깅의 1차 정보입니다.
 
 ```cpp
 // 매크로로 자동 file:line 정보
@@ -213,7 +215,7 @@ LOG_ERROR_RESULT(r);
 if (!r) return err(r.error());
 ```
 
-C++20 `std::source_location`이 *함수 매개변수 default*로 자동 위치.
+C++20의 `std::source_location`을 함수 매개변수의 default로 두면 위치가 자동으로 채워집니다.
 
 ```cpp
 template<typename T>
@@ -259,11 +261,11 @@ Result<float> read_or_default() {
 }
 ```
 
-*복구 가능한 에러*는 *재시도/fallback*. *진짜 에러*는 *전파*.
+복구 가능한 에러는 재시도나 fallback으로 처리하고, 진짜 에러는 그대로 전파합니다.
 
 ## State Machine + 에러
 
-상태 머신에서 *에러 = 상태 전이 트리거*.
+상태 머신에서는 에러를 상태 전이 트리거로 사용합니다.
 
 ```cpp
 enum class DeviceState { Idle, Initializing, Ready, Error, Recovering };
@@ -296,11 +298,11 @@ void device_loop() {
 }
 ```
 
-자세한 state machine은 [Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine).
+자세한 state machine은 [Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine)에서 다룹니다.
 
 ## Fatal error handling
 
-`fatal_error`는 *진짜 마지막 수단*. 그 전에 *최대한 정보 보존*.
+`fatal_error`는 마지막 수단입니다. 호출 직전까지 최대한 정보를 보존합니다.
 
 ```cpp
 struct CrashInfo {
@@ -342,16 +344,16 @@ void check_crash_info() {
 }
 ```
 
-*reset 후* `g_crash_info`가 *보존*. *반복 crash 추적*.
+reset 이후에도 `g_crash_info`가 보존되므로 반복 crash를 추적할 수 있습니다.
 
 ## 인증 환경 — DO-178C, ISO 26262
 
-인증 환경은 *에러 처리에 추가 제약*.
+인증 환경에서는 에러 처리에 추가 제약이 붙습니다.
 
-- *모든 에러 경로* 테스트 필수
-- *recovery time* 명시 + 검증
-- *fail-safe behavior* 정의 — power-off 등
-- *로깅이 critical 메모리에* 안전 기록
+- 모든 에러 경로를 테스트해야 합니다.
+- recovery time을 명시하고 검증해야 합니다.
+- fail-safe behavior(예: power-off)를 정의해야 합니다.
+- 로깅이 critical 메모리에 안전하게 기록되어야 합니다.
 
 ```cpp
 // 인증 환경 표준 패턴
@@ -372,51 +374,51 @@ void check_crash_info() {
 }
 ```
 
-*pre/post-condition 명시*. *모든 분기 코드 cover*.
+pre/post-condition을 명시하고 모든 분기 코드를 커버해야 합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *Silent failure*
+### 1. Silent failure
 ```cpp
 bool foo();   // false 반환만 — 이유 모름
 ```
-*enum 사용 + nodiscard*.
+enum과 `[[nodiscard]]`를 함께 씁니다.
 
-### 2. *에러를 magic value로*
+### 2. 에러를 magic value로
 ```cpp
 int read();   // -1 반환 = 에러 (?)
 ```
-*-1이 valid 값일 수* 있음. *명시적 optional/expected*.
+-1이 valid 값일 수 있습니다. 명시적으로 optional이나 expected를 사용합니다.
 
-### 3. *예외와 error code 혼용*
+### 3. 예외와 error code 혼용
 ```cpp
 void foo() {
     throw std::exception();   // -fno-exceptions에서 abort
 }
 ErrorCode bar();
 ```
-*프로젝트 전체 통일*. exception 끄면 *어디서도 throw 금지*.
+프로젝트 전체에서 통일합니다. exception을 끄면 어디에서도 throw하지 않습니다.
 
-### 4. *에러 로그 너무 많음*
+### 4. 에러 로그 너무 많음
 ```cpp
 if (auto r = read(); !r) {
     log_error("read failed");   // 매 호출
 }
 ```
-*timeout 같은 빈번한 에러는 logging level*로 통제.
+timeout처럼 빈번한 에러는 logging level로 통제합니다.
 
-### 5. *fatal_error가 너무 흔함*
-*recoverable*도 fatal 처리 → 시스템 자주 reset. *분류 신중*.
+### 5. fatal_error가 너무 흔함
+recoverable한 경우까지 fatal로 처리하면 시스템이 자주 reset됩니다. 분류를 신중히 합니다.
 
-### 6. *try/catch + -fno-exceptions*
+### 6. try/catch + -fno-exceptions
 ```cpp
 try { foo(); } catch (...) {}   // 컴파일 에러
 ```
-*예외 끄면 try 금지*.
+예외를 끄면 try를 금지합니다.
 
 ## 측정 — 에러 처리 패턴의 코드 영향
 
-같은 함수, 다른 에러 처리.
+같은 함수를 다른 에러 처리 방식으로 비교합니다.
 
 ```text
 # bool 반환
@@ -440,7 +442,7 @@ int f() { throw std::runtime_error("err"); }
 크기: 312 B + unwind table 추가
 ```
 
-*예외가 압도적으로 큼*. *optional/expected는 거의 동일*.
+예외가 압도적으로 크고, optional과 expected는 거의 동일합니다.
 
 ## 정리
 
@@ -460,4 +462,4 @@ int f() { throw std::runtime_error("err"); }
 
 ## 다음 글
 
-[Part 3-07: std::expected (C++23)](/blog/embedded/embedded-cpp/part3-07-expected) — *값 또는 에러*를 표현하는 C++23 표준 Result 타입의 *상세 사용법*.
+[Part 3-07: std::expected (C++23)](/blog/embedded/embedded-cpp/part3-07-expected) — 값 또는 에러를 표현하는 C++23 표준 Result 타입의 상세 사용법을 다룹니다.

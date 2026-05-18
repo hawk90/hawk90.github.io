@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Register는 *typed pointer + bit operation*."** — magic number 매크로 대신 *type-safe wrapper*.
+> **"Register는 typed pointer와 bit operation의 결합입니다."** magic number 매크로 대신 type-safe wrapper를 씁니다.
 
 ## 어떤 문제를 푸는가
 
-전통적 C 매크로:
+전통적인 C 매크로 방식입니다.
 
 ```c
 #define GPIOA_ODR (*(volatile uint32_t*)0x40020014)
@@ -23,13 +23,14 @@ type: tech
 GPIOA_ODR |= GPIO_PIN_5;
 ```
 
-문제:
-- *Magic number*만 — type 정보 없음
-- *Wrong register에 wrong value* 가능
-- *디버거에서 의미 모름*
-- *Pin과 register 매칭 안 보임*
+문제는 다음과 같습니다.
 
-C++ Type abstraction:
+- magic number만 있고 type 정보가 없습니다
+- wrong register에 wrong value를 쓸 수 있습니다
+- 디버거에서 의미를 알 수 없습니다
+- pin과 register 매칭이 보이지 않습니다
+
+C++ type abstraction은 다음과 같습니다.
 
 ```cpp
 template<uintptr_t Address>
@@ -46,11 +47,11 @@ using GpioA_ODR = Register<0x40020014>;
 GpioA_ODR::set(1 << 5);
 ```
 
-*컴파일러가 인라인* → 매크로와 *동일 어셈블리*. *type-safe + 디버깅 가능*.
+컴파일러가 인라인해 매크로와 동일한 어셈블리가 나옵니다. type-safe하고 디버깅도 가능합니다.
 
 ## volatile의 필수
 
-memory-mapped register는 *컴파일러 최적화 회피* 필요.
+memory-mapped register는 컴파일러 최적화를 회피해야 합니다.
 
 ```cpp
 // 잘못 — volatile 없음
@@ -64,7 +65,7 @@ volatile uint32_t* reg = reinterpret_cast<volatile uint32_t*>(0x40020014);
 *reg = 0xFF;   // 두 번 모두 실행 (hardware sequencing 필요)
 ```
 
-`volatile`이 *매 access 강제*. *peripheral과의 정확한 통신*에 필수.
+`volatile`은 매 access를 강제합니다. peripheral과의 정확한 통신에 필수입니다.
 
 ## 단순 wrapper
 
@@ -112,7 +113,7 @@ GPIOA_ODR::set_bits(1 << 5);   // Pin 5 high
 GPIOA_BSRR::write(1 << 5);     // Atomic set (HW supported)
 ```
 
-각 *register가 별도 type*. *섞이지 않음*.
+각 register가 별도 type을 갖습니다. 서로 섞이지 않습니다.
 
 ## Bit field — 명명된 비트
 
@@ -145,7 +146,7 @@ void set_gpio_mode_output(int pin) {
 }
 ```
 
-복잡. *각 field에 enum class*가 더 깔끔:
+복잡합니다. 각 field에 enum class를 쓰는 편이 더 깔끔합니다.
 
 ```cpp
 enum class GpioMode : uint32_t {
@@ -166,11 +167,11 @@ void set_mode(GpioMode mode) {
 set_mode<5>(GpioMode::Output);
 ```
 
-`Pin`이 *컴파일 타임 상수* — `shift` 컴파일 타임 계산.
+`Pin`이 컴파일 타임 상수이므로 `shift`도 컴파일 타임에 계산됩니다.
 
 ## CMSIS-style — 구조체 매핑
 
-ARM CMSIS의 *표준 패턴*. struct를 *register block에 mapping*.
+ARM CMSIS의 표준 패턴입니다. struct를 register block에 매핑합니다.
 
 ```cpp
 struct GpioRegs {
@@ -194,18 +195,20 @@ static_assert(offsetof(GpioRegs, ODR) == 0x14);
 GPIOA->ODR |= 1 << 5;
 ```
 
-장점:
-- *struct member로 register 접근 명확*
-- *디버거가 모든 register 보여줌*
-- *offset 자동 계산*
+장점은 다음과 같습니다.
 
-단점:
-- *raw pointer + macro* — type safety 약함
-- *수정 시 wrong register* 가능
+- struct member로 register 접근이 명확합니다
+- 디버거가 모든 register를 보여줍니다
+- offset이 자동으로 계산됩니다
+
+단점은 다음과 같습니다.
+
+- raw pointer와 macro 조합이라 type safety가 약합니다
+- 수정 시 wrong register를 건드릴 수 있습니다
 
 ## Type-safe peripheral 객체
 
-CMSIS struct를 *wrapping*.
+CMSIS struct를 wrapping합니다.
 
 ```cpp
 class Gpio {
@@ -233,11 +236,11 @@ gpio_a.set_mode(5, GpioMode::Output);
 gpio_a.set_pin(5);
 ```
 
-*method 호출이 명확*. *디버거 step into 가능*.
+method 호출이 명확합니다. 디버거에서 step into도 가능합니다.
 
 ## Template 기반 register
 
-가장 *type-safe + zero-cost*.
+가장 type-safe하고 zero-cost한 방식입니다.
 
 ```cpp
 template<uintptr_t Address>
@@ -276,7 +279,7 @@ GpioA::set_pin<5>();
 GpioA::clear_pin<5>();
 ```
 
-*Address와 Pin 모두 template parameter* — *완전 컴파일 타임*. 어셈블리 출력:
+Address와 Pin이 모두 template parameter로 들어가 완전히 컴파일 타임에 처리됩니다. 어셈블리 출력은 다음과 같습니다.
 
 ```text
 GpioA::set_pin<5>:
@@ -286,7 +289,7 @@ GpioA::set_pin<5>:
     bx      lr
 ```
 
-매크로 출력과 *완전 동일*. *zero-cost + type-safe + IntelliSense*.
+매크로 출력과 완전히 동일합니다. zero-cost이면서 type-safe하고 IntelliSense도 받을 수 있습니다.
 
 ## 임베디드 — UART register 추상화
 
@@ -330,11 +333,11 @@ Uart2::init(115200, 168'000'000);
 Uart2::send('H');
 ```
 
-*peripheral별 type*. 각 UART는 *별도 인스턴스 아닌 type*.
+peripheral별로 type이 갈립니다. 각 UART는 별도 인스턴스가 아니라 별도 type입니다.
 
 ## Bit operations
 
-C++의 *bit operation*은 C와 동일하지만 *type safety 더*.
+C++의 bit operation은 C와 동일하지만 type safety가 더 강합니다.
 
 ```cpp
 // 옛 C 방식 — magic number
@@ -345,7 +348,7 @@ GPIOA->MODER |= (0b01 << 10);    // pin 5 output
 GpioA::set_mode<5>(GpioMode::Output);
 ```
 
-## RAII로 *peripheral lifecycle*
+## RAII로 peripheral lifecycle 관리
 
 ```cpp
 template<typename Uart>
@@ -367,18 +370,21 @@ void burst_log() {
 }
 ```
 
-power saving 자연. [Part 2-01 RAII](/blog/embedded/embedded-cpp/part2-01-raii-basics).
+power saving이 자연스럽게 됩니다. 자세한 내용은 [Part 2-01 RAII](/blog/embedded/embedded-cpp/part2-01-raii-basics)에서 다룹니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *volatile 누락*
+### 1. volatile 누락
+
 ```cpp
 uint32_t* reg = (uint32_t*)0x40020014;   // volatile 없음
 *reg = 0xFF;   // 컴파일러 최적화로 사라질 수 있음
 ```
-*항상 volatile*.
 
-### 2. *Bit field struct 사용*
+항상 volatile을 붙입니다.
+
+### 2. Bit field struct 사용
+
 ```cpp
 struct Reg {
     uint32_t bit0 : 1;
@@ -386,32 +392,40 @@ struct Reg {
     // ...
 };
 ```
-*ABI 의존* — endian, packing, ordering. *PORTABILITY 깨짐*. *명시적 비트 마스크* 권장.
 
-### 3. *Read-Modify-Write atomic 가정*
+ABI에 의존합니다(endian, packing, ordering). portability가 깨집니다. 명시적 비트 마스크를 권장합니다.
+
+### 3. Read-Modify-Write를 atomic으로 가정
+
 ```cpp
 GPIOA->ODR |= mask;   // RMW — ISR이 끼어들면 race
 ```
-대안: *BSRR 사용* (HW atomic) 또는 *critical section*.
 
-### 4. *Magic number 매크로*
+대안은 BSRR을 사용하거나(HW atomic) critical section을 두는 것입니다.
+
+### 4. Magic number 매크로
+
 ```cpp
 #define GPIO_MODE 0b01
 ```
-*enum class* 활용 — type safety.
 
-### 5. *Template parameter overflow*
+enum class를 활용해 type safety를 확보합니다.
+
+### 5. Template parameter overflow
+
 ```cpp
 GpioA::set_mode<32>(/* */);   // Pin 32? — 컴파일 OK but invalid
 ```
-*static_assert* 추가: `static_assert(Pin < 16, "Invalid pin")`.
 
-### 6. *Wrong alignment*
-*64-bit register*를 *32-bit access* — bus fault. *알맞은 type*.
+`static_assert(Pin < 16, "Invalid pin")`을 추가합니다.
+
+### 6. Wrong alignment
+
+64-bit register를 32-bit access하면 bus fault가 납니다. 알맞은 type을 사용합니다.
 
 ## 측정 — 매크로 vs Template
 
-같은 GPIO blink 코드.
+같은 GPIO blink 코드 비교입니다.
 
 ```text
 # C 매크로
@@ -427,10 +441,11 @@ GpioA::clear_pin<5>();
 어셈블리: 8 bytes per call (동일)
 ```
 
-*완전 동일*. 그러나 C++는:
-- *type safety*
-- *디버거에서 함수 이름*
-- *IntelliSense*
+완전히 동일합니다. 다만 C++는 추가로 다음을 얻습니다.
+
+- type safety
+- 디버거에서 함수 이름이 보입니다
+- IntelliSense를 받을 수 있습니다
 
 ## 정리
 
@@ -450,4 +465,4 @@ GpioA::clear_pin<5>();
 
 ## 다음 글
 
-[Part 5-02: GPIO 추상화](/blog/embedded/embedded-cpp/part5-02-gpio-abstraction) — *GPIO pin*을 *template 기반 type*으로. 컴파일 타임 검증.
+[Part 5-02: GPIO 추상화](/blog/embedded/embedded-cpp/part5-02-gpio-abstraction) — GPIO pin을 template 기반 type으로 다루며 컴파일 타임 검증을 적용합니다.

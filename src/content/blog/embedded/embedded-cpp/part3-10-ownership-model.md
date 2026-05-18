@@ -10,20 +10,20 @@ type: tech
 
 ## 한 줄 요약
 
-> **"객체마다 *owner 한 명*. 나머지는 *non-owning 참조*."** — 명시적 책임 할당이 *bug의 90%* 방지.
+> **"객체마다 owner는 한 명이고 나머지는 non-owning 참조입니다."** 책임을 명시적으로 할당하면 메모리 관련 버그의 대부분을 막을 수 있습니다.
 
 ## 어떤 문제를 푸는가
 
-C++의 *메모리 안전 문제*는 거의 모두 *소유권 모호*에서 옵니다.
+C++의 메모리 안전 문제는 거의 모두 소유권의 모호함에서 출발합니다.
 
-- *Use after free* — 소유자가 사라진 후 누가 사용?
-- *Double free* — 두 owner가 *각자 delete*
-- *Memory leak* — owner 미정 — *delete를 누가?*
-- *Dangling pointer* — owner가 소멸했는데 *참조 살아 있음*
+- **Use after free** — 소유자가 사라진 뒤에 누가 사용했는지 분명하지 않습니다.
+- **Double free** — 두 owner가 각자 delete를 호출합니다.
+- **Memory leak** — owner가 미정이라 delete를 누가 할지 모릅니다.
+- **Dangling pointer** — owner는 소멸했는데 참조가 살아 있습니다.
 
-해결 — *명시적 소유권 모델*. 각 객체에 *정확히 한 owner*. 나머지는 *non-owning 참조*.
+해결책은 명시적인 소유권 모델입니다. 각 객체에 정확히 한 owner를 두고 나머지는 non-owning 참조로 다룹니다.
 
-Rust가 *컴파일러 차원 강제*. C++는 *프로그래머 규율*.
+Rust는 이를 컴파일러 차원에서 강제하지만, C++는 프로그래머의 규율에 맡깁니다.
 
 ## 세 역할 — Owner, Observer, Borrower
 
@@ -42,7 +42,7 @@ public:
 };
 ```
 
-`unique_ptr`이 *owner 명시*. *Device가 사라지면 Driver도 사라짐*.
+`unique_ptr`이 owner임을 명시합니다. Device가 사라지면 Driver도 함께 사라집니다.
 
 ### Observer — 참조만, 관여 없음
 
@@ -66,13 +66,14 @@ Logger logger;
 logger.register_sink(&sink);   // logger는 sink 안 소유
 ```
 
-`Logger`는 `Sink`를 *관찰만*. *Sink lifetime은 외부*.
+`Logger`는 `Sink`를 관찰만 하고 lifetime은 외부에서 관리합니다.
 
-Observer 표현:
-- `T*` — nullable, *non-owning* 의도
-- `T&` — non-null, *non-owning*
-- `std::span<T>` — array + size, non-owning
-- `std::string_view` — string, non-owning
+Observer는 다음과 같이 표현합니다.
+
+- `T*` — nullable, non-owning 의도입니다.
+- `T&` — non-null, non-owning입니다.
+- `std::span<T>` — array와 size를 함께 non-owning으로 다룹니다.
+- `std::string_view` — string을 non-owning으로 가리킵니다.
 
 ### Borrower — 일시적 사용
 
@@ -83,9 +84,10 @@ void process(const Data& data) {   // borrower
 }
 ```
 
-함수 매개변수가 *전형적 borrower*. *함수 scope 동안만* 유효.
+함수 매개변수가 전형적인 borrower이며 함수 scope 동안만 유효합니다.
 
-C++에서 *borrowing 명시*:
+C++에서 borrowing은 다음과 같이 표현합니다.
+
 - `const T&` — read-only 빌림
 - `T&` — mutable 빌림
 - `T*` — nullable 빌림
@@ -96,7 +98,7 @@ C++에서 *borrowing 명시*:
 ```text
 이 함수/객체가 ...
 
-1. 이 객체를 *소유*해야 하나?
+1. 이 객체를 소유해야 하나?
    YES → unique_ptr (단일) 또는 shared_ptr (공유, 드물게)
 
 2. 객체 lifetime이 외부에서 관리되나?
@@ -129,7 +131,7 @@ public:
 };
 ```
 
-`System`이 *bus와 display 모두 소유*. `Display`는 *bus 빌림*. *cyclic ownership 없음*.
+`System`이 bus와 display를 모두 소유하고 `Display`는 bus를 빌립니다. cyclic ownership이 발생하지 않습니다.
 
 ## 함수 매개변수 — 결정
 
@@ -190,9 +192,9 @@ class Service {
 
 ## 임베디드 — RTOS task 간 소유권
 
-multi-task RTOS에서 *객체 공유*가 *복잡*. 패턴.
+multi-task RTOS에서는 객체 공유가 복잡해집니다. 자주 쓰는 패턴은 다음과 같습니다.
 
-### 1. *Message passing* — 소유권 이전
+### 1. Message passing — 소유권 이전
 
 ```cpp
 struct Event {
@@ -215,9 +217,9 @@ void consumer() {
 }
 ```
 
-*copy로 소유권 이전*. 두 task가 *공유 메모리 없음*. *race 0*.
+copy로 소유권을 이전하므로 두 task는 공유 메모리를 갖지 않고 race도 발생하지 않습니다.
 
-### 2. *Pool + handle*
+### 2. Pool + handle
 
 ```cpp
 ObjectPool<LargeMessage, 16> pool;
@@ -238,9 +240,9 @@ void consumer() {
 }
 ```
 
-*큰 객체*는 copy 비싸 → *pool + pointer*. *소유권은 명확*: producer → consumer.
+큰 객체는 copy 비용이 크므로 pool과 pointer로 전달합니다. 소유권은 producer에서 consumer로 명확히 이동합니다.
 
-### 3. *Shared state with mutex*
+### 3. Shared state with mutex
 
 ```cpp
 struct SystemState {
@@ -265,11 +267,11 @@ void read(SystemState& out) {
 }
 ```
 
-*공유 객체 + lock*. 소유권은 *시스템 전체*. *non-owning ref*만 task가 사용.
+공유 객체에 lock을 걸어 보호합니다. 소유권은 시스템 전체에 속하며 각 task는 non-owning ref만 사용합니다.
 
 ## 임베디드 — Callback 소유권
 
-callback의 *소유권 모호*가 *자주 bug*.
+callback의 소유권이 모호하면 버그가 자주 발생합니다.
 
 ```cpp
 // Bad — capture가 dangling
@@ -302,17 +304,17 @@ void setup() {
 }
 ```
 
-*Lambda capture by reference*는 *함수 scope 끝나면 dangling*. *value capture* 또는 *외부 owner*.
+lambda를 reference로 capture하면 함수 scope가 끝나는 순간 dangling이 됩니다. value capture로 잡거나 외부 owner를 둡니다.
 
 ## C++ Core Guidelines
 
-ISO C++ Core Guidelines의 *소유권 권장*.
+ISO C++ Core Guidelines의 소유권 권장은 다음과 같습니다.
 
 - `unique_ptr<T>` — exclusive owner
-- `shared_ptr<T>` — shared owner (필요 시만)
-- `gsl::owner<T*>` — raw pointer지만 *owning 의도*
-- `T*` (gsl::owner 없는) — *non-owning*
-- `T&` — *non-owning, non-null*
+- `shared_ptr<T>` — shared owner (필요할 때만)
+- `gsl::owner<T*>` — raw pointer지만 owning 의도를 명시
+- `T*` (gsl::owner 없음) — non-owning
+- `T&` — non-owning, non-null
 
 ```cpp
 #include <gsl/pointers>
@@ -322,33 +324,33 @@ void observe(int* p);                  // 의도: 관찰만
 void use(int& x);                      // 의도: 빌림
 ```
 
-`gsl::owner`는 *static analysis tool*에 *힌트*. 임베디드 인증에 유용.
+`gsl::owner`는 static analysis 도구에 힌트를 주며, 임베디드 인증 환경에서 유용합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *Owner 불명확*
+### 1. Owner 불명확
 ```cpp
 class A { B* b; };   // A가 owner? 그냥 reference?
 ```
-*명시적*: `unique_ptr<B>` (owner) 또는 *주석으로 표시*.
+`unique_ptr<B>`로 명시하거나 주석으로 표시합니다.
 
-### 2. *Cyclic ownership*
+### 2. Cyclic ownership
 ```cpp
 struct A { shared_ptr<B> b; };
 struct B { shared_ptr<A> a; };   // cycle — 영원히 안 해제
 ```
-한쪽 *weak_ptr* 또는 *재설계*.
+한쪽을 weak_ptr로 두거나 구조를 재설계합니다.
 
-### 3. *Local owner를 외부에 노출*
+### 3. Local owner를 외부에 노출
 ```cpp
 void setup() {
     auto resource = std::make_unique<Resource>();
     register_handler([&resource](int e) { /* */ });   // dangling
 }
 ```
-*owner를 외부 객체에*.
+owner를 외부 객체로 옮깁니다.
 
-### 4. *Reference 멤버의 함정*
+### 4. Reference 멤버의 함정
 ```cpp
 class A {
     B& b_;   // reference 멤버
@@ -357,25 +359,25 @@ public:
     // A를 어떻게 copy/move? b_ 못 재바인딩
 };
 ```
-*reference 멤버는 immutable*. copy/move 어려움. *pointer 멤버* 검토.
+reference 멤버는 immutable이라 copy/move가 어렵습니다. pointer 멤버를 검토합니다.
 
-### 5. *Borrowed 객체 저장*
+### 5. Borrowed 객체 저장
 ```cpp
 void process(const Data& data) {
     saved_ = &data;   // data는 borrow — caller가 사라지면 dangling
 }
 ```
-*저장 의도*면 *copy* 또는 *shared_ptr*.
+저장하려는 의도라면 copy하거나 shared_ptr을 사용합니다.
 
-### 6. *void* 사용*
+### 6. void* 사용
 ```cpp
 void register_callback(void* ctx, void (*cb)(void*));
 ```
-*type 정보 없음*. C 인터페이스에만. C++는 *template 또는 std::function*.
+type 정보가 사라집니다. C 인터페이스에서만 쓰고, C++에서는 template이나 std::function을 활용합니다.
 
 ## 측정 — 소유권 명시의 효과
 
-같은 모듈, *명시적 소유권*과 *raw pointer*.
+같은 모듈을 명시적 소유권 버전과 raw pointer 버전으로 비교합니다.
 
 ```text
 # Raw pointer + new/delete
@@ -389,7 +391,7 @@ use-after-free: 1-2건/주
 use-after-free: 0
 ```
 
-*100 B 추가*로 *bug 완전 제거*. *모범 사례*.
+100 B 추가만으로 버그가 완전히 사라집니다. 모범 사례로 자리잡은 이유입니다.
 
 ## 정리
 
@@ -409,4 +411,4 @@ use-after-free: 0
 
 ## 다음 글 (Part 4 시작)
 
-[Part 4-01: Intrusive Containers](/blog/embedded/embedded-cpp/part4-01-intrusive-containers) — *동적 할당 없는 linked list*. 객체 자체가 *next pointer 보유*.
+[Part 4-01: Intrusive Containers](/blog/embedded/embedded-cpp/part4-01-intrusive-containers) — 동적 할당 없는 linked list로, 객체 자체가 next pointer를 보유합니다.

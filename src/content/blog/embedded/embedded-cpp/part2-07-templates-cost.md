@@ -10,16 +10,16 @@ type: tech
 
 ## 한 줄 요약
 
-> **"템플릿은 *zero runtime cost*지만 *compile-time + binary size cost*가 있습니다."** — 같은 함수가 *5개 타입*에 쓰이면 *코드도 5배*.
+> **"템플릿은 zero runtime cost지만 compile-time과 binary size cost가 있습니다."** — 같은 함수가 5개 타입에 쓰이면 코드도 5배가 됩니다.
 
 ## 어떤 문제를 푸는가
 
-[Part 2-06](/blog/embedded/embedded-cpp/part2-06-templates-basics)에서 봤듯 템플릿은 *zero-cost*입니다. 그러나 *bloat 두 형태*가 있습니다.
+[Part 2-06](/blog/embedded/embedded-cpp/part2-06-templates-basics)에서 봤듯 템플릿은 zero-cost입니다. 다만 bloat가 두 형태로 나타납니다.
 
-1. **Code bloat** — 같은 함수가 *여러 인스턴스*로 *코드 중복*
-2. **Compile time** — 인스턴스화마다 *컴파일러 작업*
+1. **Code bloat** — 같은 함수가 여러 인스턴스로 중복됩니다.
+2. **Compile time** — 인스턴스마다 컴파일러가 추가 작업을 합니다.
 
-임베디드는 *binary size*가 critical. 무심코 쓴 템플릿이 *수 KB*를 더할 수 있음. *측정과 패턴*으로 통제.
+임베디드에서는 binary size가 critical합니다. 무심코 쓴 템플릿이 수 KB를 더할 수 있으므로 측정과 패턴으로 통제합니다.
 
 ## bloat의 출처
 
@@ -41,9 +41,9 @@ process<double>(4.0);
 process<MyClass>(obj);
 ```
 
-5개의 *전용 함수* 생성. *200 lines × 5 = 1000 lines*. 동일 로직이라도 *각 타입별*.
+5개의 전용 함수가 생성됩니다. 200줄 × 5 = 1000줄로, 동일한 로직이 각 타입별로 늘어납니다.
 
-확인:
+확인은 다음과 같이 합니다.
 
 ```bash
 arm-none-eabi-nm --size-sort --print-size --demangle firmware.elf | grep "process<"
@@ -55,11 +55,11 @@ arm-none-eabi-nm --size-sort --print-size --demangle firmware.elf | grep "proces
 000003c0 T void process<MyClass>(MyClass)
 ```
 
-총 *3344 B*. 무시 못 함.
+총 3344 B로 무시할 수 없는 크기입니다.
 
 ## 패턴 1 — 비-템플릿 helper로 공통 부분 분리
 
-타입 의존이 *작은 부분*만이면 *그 부분만 템플릿*.
+타입 의존이 작은 부분에 한정된다면 그 부분만 템플릿으로 둡니다.
 
 ```cpp
 // BAD — 전체 템플릿
@@ -89,9 +89,9 @@ void process(T value) {
 }
 ```
 
-각 인스턴스에는 *작은 코드만*. 공통 부분은 *한 번만* 컴파일.
+각 인스턴스에는 작은 코드만 들어가고, 공통 부분은 한 번만 컴파일됩니다.
 
-측정 (이전 예제):
+이전 예제로 측정한 결과는 다음과 같습니다.
 
 ```text
 Before: 3344 B
@@ -103,7 +103,7 @@ After:
 
 ## 패턴 2 — 타입 erasure (`std::any`, `std::variant`)
 
-여러 타입을 *하나의 컨테이너 타입*으로 wrap.
+여러 타입을 하나의 컨테이너 타입으로 감쌉니다.
 
 ```cpp
 // BAD — 5개 vector
@@ -117,7 +117,7 @@ std::variant<int, float, Order> v;
 std::vector<decltype(v)> mixed;
 ```
 
-`std::variant`는 *sizeof = 최대 멤버 + tag*. *코드는 한 번*. 타입별 분기 *visit*으로.
+`std::variant`의 sizeof는 최대 멤버 크기에 tag가 더해진 크기이며, 코드는 한 번만 생성됩니다. 타입별 분기는 `visit`으로 처리합니다.
 
 ```cpp
 std::visit([](auto&& val) {
@@ -131,11 +131,11 @@ std::visit([](auto&& val) {
 }, v);
 ```
 
-*if constexpr*이 *컴파일 타임 분기*. 사용 안 하는 case는 *코드에 없음*.
+`if constexpr`이 컴파일 타임 분기이므로 사용하지 않는 case는 코드에 남지 않습니다.
 
 ## 패턴 3 — non-template wrapper
 
-매개변수만 *non-type* (값)으로 만들면 *코드는 같지만 타입 다름*.
+매개변수만 non-type(값)으로 바꾸면 코드는 같지만 타입이 달라집니다.
 
 ```cpp
 // BAD — 각 크기마다 별도 인스턴스
@@ -177,11 +177,11 @@ public:
 };
 ```
 
-`push_impl`은 *Buffer<T> 한 번만* 컴파일. *N별로 인스턴스화 안 됨*. *storage만 다른 크기*.
+`push_impl`은 `Buffer<T>` 단위로 한 번만 컴파일되고, N별로 인스턴스화되지 않습니다. storage만 다른 크기가 됩니다.
 
 ## 패턴 4 — extern template
 
-자주 사용되는 인스턴스를 *한 TU에만* 컴파일. 다른 TU는 *extern*.
+자주 사용되는 인스턴스를 한 TU에만 컴파일하고, 다른 TU에서는 extern으로 받습니다.
 
 ```cpp
 // container.h
@@ -205,9 +205,9 @@ template class Container<int>;
 template class Container<float>;
 ```
 
-*Container<int>, Container<float>* 코드가 *container.o에만* 있음. 다른 .o 파일은 *extern 선언만 보고 link*.
+`Container<int>`, `Container<float>` 코드가 `container.o`에만 들어가고, 다른 `.o` 파일은 extern 선언만 보고 link합니다.
 
-효과: *컴파일 시간 감소* + *코드 중복 제거*.
+효과는 컴파일 시간 감소와 코드 중복 제거 두 가지입니다.
 
 ## 패턴 5 — virtual 대신 if constexpr
 
@@ -232,9 +232,9 @@ void process(T& obj) {
 }
 ```
 
-가상 함수 *vtable + 간접 호출* 제거. 각 인스턴스에 *해당 분기만*.
+가상 함수의 vtable과 간접 호출이 제거되고, 각 인스턴스에는 해당 분기만 남습니다.
 
-타입 set이 *닫혀 있고 작음*일 때 적합. *plug-in 시스템*처럼 *런타임 확장* 필요하면 virtual.
+타입 set이 닫혀 있고 작을 때 적합합니다. plug-in 시스템처럼 런타임 확장이 필요하면 virtual을 그대로 씁니다.
 
 ## 측정 — bloat 추적 도구
 
@@ -252,16 +252,16 @@ cp firmware.elf new.elf
 bloaty -d symbols --demangle=full new.elf -- base.elf
 ```
 
-증가된 함수 목록 출력. *어느 인스턴스가 새로 추가*되었는지 즉시 확인.
+증가된 함수 목록이 출력되어, 어느 인스턴스가 새로 추가됐는지 즉시 확인할 수 있습니다.
 
-### nm으로 인스턴스 갯수
+### nm으로 인스턴스 개수
 
 ```bash
 arm-none-eabi-nm --demangle firmware.elf | grep "Container<" | wc -l
 # 23 — 23개 다른 Container 인스턴스
 ```
 
-너무 많으면 *디자인 재검토*.
+너무 많으면 디자인을 재검토합니다.
 
 ### __PRETTY_FUNCTION__ 디버깅
 
@@ -273,11 +273,11 @@ void func(T x) {
 }
 ```
 
-*어디서 인스턴스화*되는지 *컴파일 에러*로 추적. (Debug 후 제거.)
+어디서 인스턴스화되는지를 컴파일 에러 메시지로 추적합니다(디버깅 후 제거합니다).
 
 ## 컴파일 시간 — 큰 문제
 
-큰 프로젝트에서 *템플릿 폭증*은 *컴파일 시간*도 늘림.
+큰 프로젝트에서는 템플릿 폭증이 컴파일 시간도 늘립니다.
 
 ```bash
 # 측정
@@ -286,16 +286,16 @@ time make
 make -j1 -B 2>&1 | ts '[%H:%M:%S]'
 ```
 
-C++ 컴파일 시간이 *수십 초 → 분*으로 늘면:
+C++ 컴파일 시간이 수십 초에서 분 단위로 늘면 다음을 점검합니다.
 
-- 자주 변경되는 파일이 *큰 template header* include?
-- `#include <iostream>`이 *수많은 곳*? (iostream은 무거움)
-- *forward declaration* 활용
-- *Pimpl* 패턴으로 *컴파일 의존성 격리*
+- 자주 변경되는 파일이 큰 template header를 include하지는 않는지 확인합니다.
+- `#include <iostream>`이 곳곳에 흩어져 있지는 않은지 봅니다(iostream은 무거운 헤더입니다).
+- forward declaration을 적극적으로 활용합니다.
+- Pimpl 패턴으로 컴파일 의존성을 격리합니다.
 
 ## Precompiled Headers (PCH)
 
-자주 사용되는 헤더를 *미리 컴파일*.
+자주 사용되는 헤더를 미리 컴파일해 둡니다.
 
 ```bash
 # GCC
@@ -305,9 +305,9 @@ arm-none-eabi-g++ -x c++-header common.h -o common.h.gch
 arm-none-eabi-g++ -include common.h source.cpp ...
 ```
 
-*컴파일 시간 30-50% 감소* 가능. 단 *PCH가 invalidate*되면 *전체 재컴파일*.
+컴파일 시간을 30~50% 줄일 수 있습니다. 단 PCH가 invalidate되면 전체가 재컴파일됩니다.
 
-CMake:
+CMake에서는 다음과 같이 설정합니다.
 
 ```cmake
 target_precompile_headers(my_target PRIVATE common.h)
@@ -315,34 +315,34 @@ target_precompile_headers(my_target PRIVATE common.h)
 
 ## Unity build — 다른 접근
 
-여러 .cpp 파일을 *하나로 합쳐 컴파일*. *템플릿 인스턴스 중복 제거*.
+여러 `.cpp` 파일을 하나로 합쳐 컴파일하여 템플릿 인스턴스 중복을 제거합니다.
 
 ```cmake
 # CMake 3.16+
 set_target_properties(my_target PROPERTIES UNITY_BUILD ON)
 ```
 
-*컴파일 시간 40-70% 감소*. 단 *static 함수 충돌*, *header include 충돌* 발생 가능.
+컴파일 시간을 40~70% 줄일 수 있습니다. 단 static 함수 충돌이나 header include 충돌이 발생할 수 있습니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *작은 함수도 템플릿*
+### 1. 작은 함수도 템플릿으로 둠
 ```cpp
 template<typename T>
 T abs(T x) { return x < 0 ? -x : x; }
 ```
-5개 타입에 쓰면 *5개 함수*. 그러나 *각 4-8 바이트*라 *무시 가능*. 큰 함수만 분리.
+5개 타입에 쓰면 5개 함수가 생기지만 각각 4~8바이트라 무시할 만합니다. 큰 함수만 분리합니다.
 
-### 2. *namespace 안 함수도 인스턴스화*
+### 2. namespace 안 함수도 인스턴스화됨
 ```cpp
 namespace detail {
     template<typename T>
     void helper(T x) { /* large */ }
 }
 ```
-*public API와 같은 비용*. detail이라고 작은 것 아님.
+public API와 같은 비용이 듭니다. detail이라고 해서 작아지지 않습니다.
 
-### 3. *header에 거대 template*
+### 3. header에 거대한 template
 ```cpp
 // container.h
 template<typename T>
@@ -351,20 +351,20 @@ class Container {
     void heavy_method() { /* 50 lines */ }
 };
 ```
-*include할 때마다 파싱*. PCH 또는 *extern template*.
+include할 때마다 파싱됩니다. PCH나 extern template으로 대응합니다.
 
-### 4. *컴파일러가 dead code 제거 못 함*
-사용 안 하는 *template member*도 *인스턴스화될 수* 있음 (특정 호출 chain). *gc-sections* 활용 또는 *직접 분리*.
+### 4. 컴파일러가 dead code를 제거하지 못함
+사용하지 않는 template member도 호출 chain에 따라 인스턴스화될 수 있습니다. `gc-sections`를 활용하거나 직접 분리합니다.
 
-### 5. *macro vs template 혼란*
-매크로는 *텍스트 치환*, 템플릿은 *컴파일러 평가*. 비슷해 보이지만 *동작 다름*. 새 코드는 *템플릿 우선*.
+### 5. macro와 template 혼동
+매크로는 텍스트 치환이고 템플릿은 컴파일러 평가입니다. 비슷해 보여도 동작이 다르며, 새 코드에서는 템플릿을 우선합니다.
 
-### 6. *디버깅 어려움*
-템플릿 함수의 *디버그 정보*가 *각 인스턴스*에 별도 생성 → *디버그 정보 크기 증가*. 단 *Flash와 무관* (디버그 정보는 ELF에만).
+### 6. 디버깅이 어려움
+템플릿 함수의 디버그 정보가 각 인스턴스마다 별도로 생성되어 디버그 정보 크기가 늘어납니다. 단 Flash와는 무관합니다(디버그 정보는 ELF에만 포함).
 
 ## 측정 — 실제 프로젝트의 bloat 패턴
 
-한 STM32 프로젝트 (FreeRTOS + C++)의 *template 인스턴스 분포*.
+한 STM32 프로젝트(FreeRTOS + C++)의 template 인스턴스 분포입니다.
 
 ```text
 Top template instances by total size:
@@ -379,11 +379,11 @@ Top template instances by total size:
 Total template overhead: ~5.5 KB (8% of code section)
 ```
 
-8%는 *수용 가능*. 단 *std::function*이 *1.8 KB*는 *과한지 검토*. capture lambdas로 *직접 함수 포인터* 또는 *delegate 패턴*으로 대체 가능.
+8%는 수용할 만한 수준입니다. 다만 `std::function`이 1.8 KB를 차지하는 것은 과한지 검토해 봐야 합니다. capture lambdas 대신 함수 포인터나 delegate 패턴으로 대체할 수 있습니다.
 
 ## C++20 — modules로 컴파일 시간 단축
 
-C++20 modules는 *include의 대안*. *템플릿 한 번 컴파일 후 재사용*.
+C++20 modules는 include의 대안입니다. 템플릿을 한 번 컴파일한 뒤 재사용할 수 있습니다.
 
 ```cpp
 // container.cppm — module
@@ -402,7 +402,7 @@ import container;
 Container<int> c;
 ```
 
-GCC 11+ 부분 지원. 임베디드 *toolchain 대부분 미지원* (2026 기준). *몇 년 후* 일반화 예상.
+GCC 11+가 부분 지원합니다. 2026년 기준 임베디드 toolchain 대부분은 아직 미지원이며, 몇 년 안에 일반화될 것으로 보입니다.
 
 ## 정리
 
@@ -422,4 +422,4 @@ GCC 11+ 부분 지원. 임베디드 *toolchain 대부분 미지원* (2026 기준
 
 ## 다음 글
 
-[Part 2-08: Static Polymorphism](/blog/embedded/embedded-cpp/part2-08-static-polymorphism) — CRTP. virtual 함수 없이 *컴파일 타임 다형성*.
+[Part 2-08: Static Polymorphism](/blog/embedded/embedded-cpp/part2-08-static-polymorphism) — CRTP를 통해 virtual 함수 없이 컴파일 타임 다형성을 구현합니다.

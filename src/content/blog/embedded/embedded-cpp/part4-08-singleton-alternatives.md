@@ -10,25 +10,25 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Singleton은 *임베디드에서도 안티패턴*."** — Static DI, Construct-On-First-Use, service locator가 *3가지 대안*.
+> **"Singleton은 임베디드에서도 안티패턴입니다."** Static DI, Construct-On-First-Use, service locator가 세 가지 대안입니다.
 
 ## 어떤 문제를 푸는가
 
-Singleton의 문제 (GoF조차 권장 안 함):
+Singleton에는 다음과 같은 문제가 있습니다(GoF조차 권장하지 않습니다).
 
-- *전역 상태* — 테스트 어려움
-- *암묵 의존성* — 시그니처에 안 보임
-- *Static Initialization Order Fiasco* — 다른 TU의 static 초기화 순서
-- *Multi-thread* — atomic getInstance 필요
-- *Mock 어려움*
+- 전역 상태라서 테스트가 어렵습니다.
+- 의존성이 시그니처에 드러나지 않아 암묵적입니다.
+- 서로 다른 TU의 static 초기화 순서가 꼬이는 Static Initialization Order Fiasco가 생깁니다.
+- Multi-thread 환경에서 atomic getInstance가 필요합니다.
+- Mock이 어렵습니다.
 
-임베디드도 *예외 없음*. 다만 *제약 환경*에서 *대안 선택지가 다름*.
+임베디드도 예외가 아닙니다. 다만 제약된 환경이라 대안의 선택지가 조금 다릅니다.
 
-이 글은 *3가지 Singleton 대안*입니다.
+이 글에서는 세 가지 Singleton 대안을 살펴봅니다.
 
 ## 대안 1 — Construct-On-First-Use
 
-C++11의 *thread-safe magic static*.
+C++11의 thread-safe magic static을 활용합니다.
 
 ```cpp
 class Logger {
@@ -47,18 +47,20 @@ private:
 Logger::instance().log("hello");
 ```
 
-장점:
-- *Static Init Order Fiasco 해결* — 첫 호출 시 생성
-- *thread-safe* (C++11+)
-- 코드 *간단*
+장점은 다음과 같습니다.
 
-단점:
-- *여전히 전역* — 테스트에서 mock 어려움
-- *thread-safe guard 비용*: `-fno-threadsafe-statics` 끄면 더 작음
+- 첫 호출 시 생성되므로 Static Init Order Fiasco가 해결됩니다.
+- C++11 이상에서 thread-safe입니다.
+- 코드가 간단합니다.
+
+단점은 다음과 같습니다.
+
+- 여전히 전역이라 테스트에서 mock하기 어렵습니다.
+- thread-safe guard 비용이 들며, `-fno-threadsafe-statics`로 끄면 코드가 더 작아집니다.
 
 ## 대안 2 — Static DI (생성자 주입)
 
-*명시적 의존성*. Singleton 안 씀.
+의존성을 명시적으로 받고 Singleton을 쓰지 않습니다.
 
 ```cpp
 class Logger {
@@ -84,15 +86,17 @@ Logger logger;
 Sensor sensor(logger);
 ```
 
-장점:
-- *의존성 명시* — 시그니처에 보임
-- *테스트 쉬움* — fake logger 주입
-- *전역 상태 없음*
-- *static initialization fiasco* 없음
+장점은 다음과 같습니다.
 
-단점:
-- *모든 객체가 의존성 받음* — 매 객체 매개변수 증가
-- *큰 시스템에 wiring 코드 길어짐*
+- 의존성이 시그니처에 그대로 드러납니다.
+- fake logger를 주입해 테스트가 쉽습니다.
+- 전역 상태가 없습니다.
+- static initialization fiasco가 없습니다.
+
+단점은 다음과 같습니다.
+
+- 모든 객체가 의존성을 매개변수로 받으므로 매개변수 수가 늘어납니다.
+- 큰 시스템에서는 wiring 코드가 길어집니다.
 
 ```cpp
 // main.cpp — composition root
@@ -104,11 +108,11 @@ EventBus bus(logger);
 System system(sensor, display, cache, bus, logger);
 ```
 
-*depencency wiring*이 한 곳에 모임. 명확하지만 *길음*.
+dependency wiring이 한 곳에 모입니다. 명확하지만 길어집니다.
 
 ## 대안 3 — Service Locator (조심)
 
-*전역 registry*에 service 등록. 객체가 *id로 검색*.
+전역 registry에 service를 등록하고 객체가 id로 검색하는 방식입니다.
 
 ```cpp
 class ServiceLocator {
@@ -133,20 +137,22 @@ void some_function() {
 }
 ```
 
-장점:
-- *의존성 wiring 가벼움*
-- *test에서 fake 등록 가능*
+장점은 다음과 같습니다.
 
-단점:
-- *여전히 전역* — Singleton과 거의 같음
-- *순서 의존* — register 누락 시 nullptr
-- *anti-pattern 시각도*
+- 의존성 wiring이 가볍습니다.
+- 테스트에서 fake를 등록할 수 있습니다.
 
-대부분 *Singleton보다 약간 나은* 정도. Static DI가 더 권장.
+단점은 다음과 같습니다.
+
+- 여전히 전역이라 Singleton과 거의 같습니다.
+- register를 누락하면 nullptr이 되는 순서 의존이 있습니다.
+- anti-pattern으로 보는 시각도 있습니다.
+
+대부분 Singleton보다 약간 나은 정도입니다. Static DI를 더 권장합니다.
 
 ## 임베디드 — Static DI 실용
 
-embedded는 *시스템 wiring*이 *main에서 한 번*. 큰 부담 아님.
+임베디드에서는 시스템 wiring을 main에서 한 번만 하므로 부담이 크지 않습니다.
 
 ```cpp
 // main.cpp
@@ -172,7 +178,7 @@ int main() {
 }
 ```
 
-*linear 흐름*. *모든 의존성 명시*. Mock에서는:
+linear한 흐름으로 모든 의존성이 명시됩니다. Mock 테스트에서는 다음과 같이 씁니다.
 
 ```cpp
 TEST(SensorTest, ReadDoesNotCrash) {
@@ -187,7 +193,7 @@ TEST(SensorTest, ReadDoesNotCrash) {
 
 ## 대안 4 — Template Injection (compile-time)
 
-*runtime 비용 0*. 컴파일 타임에 의존성 박힘.
+runtime 비용이 0이며 의존성이 컴파일 타임에 결정됩니다.
 
 ```cpp
 template<typename Logger>
@@ -205,24 +211,25 @@ Sensor<UartLogger> sensor(logger);
 sensor.read();   // logger_.log 직접 호출 — inline 가능
 ```
 
-장점:
-- *zero runtime cost*
-- *virtual 호출 없음*
+장점은 다음과 같습니다.
 
-단점:
-- *type 폭증* (template 인스턴스화)
-- *Sensor 클래스가 logger type을 알아야*
+- zero runtime cost입니다.
+- virtual 호출이 없습니다.
 
-CRTP / static polymorphism의 응용. [Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism).
+단점은 다음과 같습니다.
 
-## 진짜 Singleton이 *옳은 경우*
+- template instantiation으로 type이 늘어납니다.
+- Sensor 클래스가 logger의 type을 알고 있어야 합니다.
 
-드물지만 있음.
+CRTP나 static polymorphism의 응용이며 [Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism)에서 다룹니다.
 
-- *진정한 하드웨어 자원* — 시스템에 *물리적으로 하나*
-  - Serial port (UART0)
-  - Display controller
-  - 특정 ADC
+## 진짜 Singleton이 옳은 경우
+
+드물지만 있습니다. 시스템에 물리적으로 하나뿐인 하드웨어 자원입니다.
+
+- Serial port (UART0)
+- Display controller
+- 특정 ADC
 
 ```cpp
 class Uart0 {
@@ -239,7 +246,7 @@ private:
 };
 ```
 
-이 경우에도 *interface 분리*가 좋음:
+이 경우에도 interface를 분리하는 편이 좋습니다.
 
 ```cpp
 class IUart {
@@ -267,36 +274,37 @@ public:
 };
 ```
 
-*interface 통한 의존성*. 운영에선 *Uart0::instance()*, 테스트에선 *FakeUart 주입*.
+interface를 통한 의존성을 둡니다. 운영 환경에서는 `Uart0::instance()`를 주입하고 테스트에서는 `FakeUart`를 주입합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *Singleton 남용*
-"전역 접근 편함" → 모든 service singleton → *test 지옥*. *DI 우선*.
+### 1. Singleton 남용
+"전역 접근이 편하다"는 이유로 모든 service를 singleton으로 만들면 테스트가 지옥이 됩니다. DI를 우선합니다.
 
-### 2. *Singleton의 destructor 의존*
-임베디드는 *main 안 끝남* — *destructor 호출 안 됨*. *destructor에 중요 로직 두지 마*.
+### 2. Singleton의 destructor 의존
+임베디드는 main이 끝나지 않으므로 destructor가 호출되지 않습니다. destructor에 중요한 로직을 두지 않습니다.
 
-### 3. *thread-safe 비활성*
+### 3. thread-safe 비활성화
 ```cpp
 #pragma push_options
 // -fno-threadsafe-statics
 static Logger inst;
 ```
-single-task RTOS면 OK. multi-task는 *thread-safe 유지*.
 
-### 4. *Construct-On-First-Use의 destructor 순서*
-여러 singleton의 *destructor 호출 순서 unspecified*. 의존성 있으면 *위험*. 임베디드는 *main 끝 안 남* 보통 무관.
+single-task RTOS면 괜찮습니다. multi-task에서는 thread-safe를 유지합니다.
 
-### 5. *Service Locator의 register 순서*
-register 안 한 service 사용 → nullptr crash. *순서 명시*.
+### 4. Construct-On-First-Use의 destructor 순서
+여러 singleton의 destructor 호출 순서는 unspecified입니다. 의존성이 있으면 위험하지만, 임베디드는 main이 끝나지 않으므로 보통 무관합니다.
 
-### 6. *Mock 못 할 객체*
-모든 *concrete singleton* → mock 불가. *interface 통한 의존성*.
+### 5. Service Locator의 register 순서
+register하지 않은 service를 사용하면 nullptr로 crash가 납니다. 순서를 명시합니다.
+
+### 6. Mock 못 하는 객체
+모든 의존성이 concrete singleton이면 mock이 불가능합니다. interface를 통해 주입합니다.
 
 ## 임베디드 — Hardware Singleton 패턴
 
-UART0 같은 *hardware singleton*은 *DI + factory* 조합.
+UART0 같은 hardware singleton은 DI와 factory를 조합해서 다룹니다.
 
 ```cpp
 // 1. Interface
@@ -339,11 +347,11 @@ FakeUart fake;
 Logger test_logger(fake);
 ```
 
-*Hardware는 singleton*, *application은 DI*. 균형.
+하드웨어는 singleton으로 두고 application은 DI로 받는 균형입니다.
 
 ## DI Container — overkill?
 
-대규모 desktop SW에서는 *Spring, Guice 같은 DI framework*. 임베디드는 *manual wiring으로 충분*.
+대규모 desktop SW에서는 Spring이나 Guice 같은 DI framework를 씁니다. 임베디드에서는 manual wiring으로 충분합니다.
 
 ```cpp
 // 가벼운 DI container — 직접 작성
@@ -361,11 +369,11 @@ auto& logger = c.create<Logger>();
 auto& sensor = c.create<Sensor>(logger);
 ```
 
-대부분 *unnecessary*. *명시적 wiring*이 *임베디드에선 깨끗*.
+대부분 불필요합니다. 임베디드에서는 명시적 wiring이 더 깨끗합니다.
 
 ## 측정 — Singleton vs DI
 
-코드 크기 (5 service 시스템).
+5개 service 시스템의 코드 크기 비교입니다.
 
 ```text
 # Singleton everywhere
@@ -379,7 +387,7 @@ runtime: thread-safe guards
 runtime: 0 (no guards)
 ```
 
-*DI가 약간 작음 + 더 빠름*. *명확한 의존성* 추가 가치.
+DI가 약간 작고 더 빠릅니다. 의존성이 명확해지는 가치도 함께 얻습니다.
 
 ## 정리
 
@@ -399,4 +407,4 @@ runtime: 0 (no guards)
 
 ## 다음 글 (Part 5 시작)
 
-[Part 5-01: Register 추상화](/blog/embedded/embedded-cpp/part5-01-register-abstraction) — *MMIO를 type-safe하게*. Memory-mapped register의 C++ 표현.
+[Part 5-01: Register 추상화](/blog/embedded/embedded-cpp/part5-01-register-abstraction) — MMIO를 type-safe하게. Memory-mapped register의 C++ 표현.

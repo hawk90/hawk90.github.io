@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"HAL = *application과 hardware 사이의 통역*."** — 벤더 변경에 application 영향 0이 목표.
+> **"HAL은 application과 hardware 사이의 통역입니다."** 벤더를 바꿔도 application 영향이 0이 되는 것이 목표입니다.
 
 ## 어떤 문제를 푸는가
 
-벤더 HAL (STM32 HAL, NXP MCUXpresso, Nordic SDK)은 *벤더 종속*. 보드 변경 = *application 대수정*.
+벤더 HAL(STM32 HAL, NXP MCUXpresso, Nordic SDK)은 벤더에 종속됩니다. 보드 변경은 application 대수정으로 이어집니다.
 
 ```c
 // STM32
@@ -27,9 +27,9 @@ GPIO_PortToggle(GPIO5, 1u << 6);
 nrf_gpio_pin_set(LED_PIN);
 ```
 
-같은 *LED toggle*이지만 *완전 다른 API*. application이 *이 모두 알아야* → 이식 불가.
+같은 LED toggle이지만 API가 완전히 다릅니다. application이 이 모두를 알아야 하니 이식이 불가능해집니다.
 
-**HAL** (Hardware Abstraction Layer)이 *통일된 interface* 제공:
+**HAL**(Hardware Abstraction Layer)은 통일된 interface를 제공합니다.
 
 ```cpp
 // Generic HAL
@@ -38,7 +38,7 @@ hal::Led::set();
 // 내부적으로 보드별 분기 — application은 모름
 ```
 
-이 글이 *시리즈의 마지막*. *전체 패턴 정리* + *HAL 설계*.
+이 글이 시리즈의 마지막입니다. 전체 패턴을 정리하면서 HAL 설계를 다룹니다.
 
 ## HAL의 3 계층
 
@@ -100,18 +100,20 @@ hal::stm32::StmGpio led(GPIOA, GPIO_PIN_5);
 blink(led);
 ```
 
-장점:
-- *Application 코드가 IGpio 인터페이스만*
-- *Vendor 변경 = StmGpio → NxpGpio*
-- *테스트에서 MockGpio*
+장점은 다음과 같습니다.
 
-단점:
-- *Virtual call overhead* — 작지만 있음
-- *vtable + RTTI 비용*
+- Application 코드는 IGpio 인터페이스만 봅니다
+- Vendor 변경은 StmGpio를 NxpGpio로 바꾸는 것으로 끝납니다
+- 테스트에서 MockGpio를 주입할 수 있습니다
+
+단점은 다음과 같습니다.
+
+- Virtual call overhead가 작지만 존재합니다
+- vtable과 RTTI 비용이 듭니다
 
 ## 패턴 2 — Template-based HAL (Zero-cost)
 
-Virtual 대신 *CRTP*.
+Virtual 대신 CRTP를 씁니다.
 
 ```cpp
 // hal/gpio_base.h
@@ -160,14 +162,16 @@ hal::stm32::StmGpio<0x40020000, 5> led;
 blink(led);   // 컴파일 타임 dispatch, zero cost
 ```
 
-장점:
-- *Zero overhead* — virtual call 없음
-- *Compile-time 검증*
-- *Inline 가능*
+장점은 다음과 같습니다.
 
-단점:
-- *Application도 template* (header에 정의)
-- *type 폭증 가능*
+- Zero overhead로 virtual call이 없습니다
+- Compile-time 검증이 가능합니다
+- Inline이 가능합니다
+
+단점은 다음과 같습니다.
+
+- Application도 template이라 header에 정의해야 합니다
+- type이 폭증할 수 있습니다
 
 ## 패턴 3 — typedef 기반 (가장 단순)
 
@@ -192,17 +196,19 @@ void blink() {
 }
 ```
 
-장점:
-- *Compile-time 보드 선택*
-- *Application은 그냥 LedGpio 사용*
-- *zero overhead*
+장점은 다음과 같습니다.
 
-단점:
-- *런타임 보드 변경 불가* (보통 OK)
+- Compile-time에 보드를 선택합니다
+- Application은 그냥 `LedGpio`를 씁니다
+- zero overhead입니다
+
+단점은 다음과 같습니다.
+
+- 런타임에 보드를 변경할 수 없습니다(보통은 괜찮습니다)
 
 ## 패턴 4 — Mixed (interface + template)
 
-복잡한 시스템에서 *application은 interface*, *driver는 template*.
+복잡한 시스템에서는 application은 interface로, driver는 template으로 다룹니다.
 
 ```cpp
 class IUart {
@@ -230,7 +236,7 @@ StmUart<0x40004400> uart2;
 process(uart2);
 ```
 
-application은 *interface로 polymorphic*. driver는 *최적 구현*.
+application은 interface로 polymorphic하게 동작합니다. driver는 최적 구현으로 유지합니다.
 
 ## 디렉토리 구조
 
@@ -258,7 +264,7 @@ project/
     └── main.cpp              # application
 ```
 
-벤더별 *별도 directory*. CMake에서 *조건부 컴파일*.
+벤더별로 별도 directory를 둡니다. CMake에서 조건부로 컴파일합니다.
 
 ```cmake
 if(BOARD STREQUAL "STM32_DISCOVERY")
@@ -296,11 +302,11 @@ TEST(BlinkTest, BlinksTwice) {
 }
 ```
 
-*application 로직 host에서 테스트*. 하드웨어 없이.
+application 로직을 host에서 테스트할 수 있습니다. 하드웨어 없이도 가능합니다.
 
 ## Application 설계 — Dependency Injection
 
-[Part 4-08](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives) 적용.
+[Part 4-08](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives)의 패턴을 적용합니다.
 
 ```cpp
 class System {
@@ -328,11 +334,11 @@ System system(led, uart, spi);
 system.run();
 ```
 
-*모든 dependency 명시*. *test에서 mock 주입*.
+모든 dependency를 명시합니다. test에서는 mock을 주입할 수 있습니다.
 
 ## 임베디드 — Vendor switch 시나리오
 
-같은 application, STM32 → NXP.
+같은 application을 STM32에서 NXP로 옮기는 경우입니다.
 
 ```cpp
 // Application — 변경 없음
@@ -352,11 +358,11 @@ hal::nxp::NxpGpio led(GPIO5, 6);
 process(uart, led);
 ```
 
-*HAL implementation만 다름*. application *코드 0 변경*. 이게 *HAL의 목적*.
+HAL implementation만 다릅니다. application 코드는 변경되지 않습니다. 이것이 HAL의 목적입니다.
 
 ## 시리즈 마무리 — 40 chapter 정리
 
-이 시리즈가 다룬 핵심.
+이 시리즈가 다룬 핵심을 정리합니다.
 
 ### Part 1 — Foundation (8)
 - C++ vs C 비용 측정
@@ -405,17 +411,17 @@ process(uart, led);
 
 ## 핵심 메시지
 
-1. **Modern C++의 대부분은 *zero-cost*** — 측정 후 사용.
-2. **임베디드 = 끄는 기술** — -fno-exceptions, -fno-rtti, -fno-threadsafe-statics.
-3. **정적 할당 우선** — std::array, ETL, pool, placement new.
-4. **컴파일 타임으로 옮김** — constexpr, template, CRTP, concepts.
-5. **명시적 소유권** — unique_ptr (기본), shared_ptr (드물게), raw pointer (non-owning).
-6. **DI > Singleton** — main에서 wiring.
-7. **HAL로 vendor 격리** — application 포터블.
+1. **Modern C++의 대부분은 zero-cost입니다** — 측정한 뒤에 사용합니다
+2. **임베디드는 끄는 기술입니다** — `-fno-exceptions`, `-fno-rtti`, `-fno-threadsafe-statics`
+3. **정적 할당을 우선합니다** — `std::array`, ETL, pool, placement new
+4. **컴파일 타임으로 옮깁니다** — `constexpr`, template, CRTP, concepts
+5. **소유권을 명시합니다** — `unique_ptr`이 기본, `shared_ptr`은 드물게, raw pointer는 non-owning에만 씁니다
+6. **DI가 Singleton보다 낫습니다** — main에서 wiring합니다
+7. **HAL로 vendor를 격리합니다** — application을 portable하게 만듭니다
 
 ## 다음 시리즈 추천
 
-이 시리즈가 *Modern C++ in Embedded*를 다뤘다면, 다음은:
+이 시리즈가 Modern C++ in Embedded를 다뤘다면 다음으로는 이런 시리즈를 추천합니다.
 
 - **[Embedded Performance Engineering](/blog/embedded/performance-engineering)** — 측정과 최적화 (50 chapters)
 - **[Practical RTOS Internals](/blog/embedded/rtos/practical-internals)** — FreeRTOS/Zephyr/RT-Thread 소스 분석 (45 chapters)
@@ -425,27 +431,34 @@ process(uart, led);
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *HAL이 너무 두꺼움*
-모든 추상화에 *virtual*. *small MCU에 부담*. Mix or template.
+### 1. HAL이 너무 두꺼움
 
-### 2. *Application에 vendor 누출*
+모든 추상화에 virtual을 두면 small MCU에 부담이 됩니다. Mix나 template을 활용합니다.
+
+### 2. Application에 vendor 누출
+
 ```cpp
 // application 코드
 HAL_GPIO_WritePin(...);   // STM32 직접 호출 — 포터블 깨짐
 ```
-*hal:: namespace로만*.
 
-### 3. *Mock 없음*
-host에서 *application 로직 테스트 불가*. *Mock HAL 작성*.
+`hal::` namespace로만 호출합니다.
 
-### 4. *Board-specific 헤더 누락*
-모든 보드에 *전체 HAL*. *board config 헤더로 분리*.
+### 3. Mock 없음
 
-### 5. *Vendor switch 시나리오 미고려*
-처음부터 *벤더 종속 가정* → 나중에 *재작성*. *HAL interface 처음부터*.
+host에서 application 로직을 테스트할 수 없게 됩니다. Mock HAL을 함께 작성합니다.
 
-### 6. *Performance 측정 안 함*
-HAL이 *얼마나 비싼지* 모름. *측정 도구* ([Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis)).
+### 4. Board-specific 헤더 누락
+
+모든 보드에 전체 HAL을 들고 다니지 않도록 board config 헤더로 분리합니다.
+
+### 5. Vendor switch 시나리오 미고려
+
+처음부터 벤더 종속을 가정하면 나중에 재작성하게 됩니다. HAL interface를 처음부터 설계합니다.
+
+### 6. Performance 측정 안 함
+
+HAL이 얼마나 비싼지를 모릅니다. 측정 도구를 활용합니다([Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis) 참조).
 
 ## 정리
 
@@ -466,10 +479,10 @@ HAL이 *얼마나 비싼지* 모름. *측정 도구* ([Part 1-04](/blog/embedded
 
 ## 시리즈 마무리
 
-40 chapter, *5 Part*, *Modern C++의 임베디드 사용*을 *전 범위* 다뤘습니다. 측정 가능한 주장만 사용했고, 끄는 기술과 켜는 기술의 *균형*을 강조했습니다.
+40 chapter, 5 Part로 Modern C++의 임베디드 사용을 전 범위에서 다뤘습니다. 측정 가능한 주장만 사용했고, 끄는 기술과 켜는 기술의 균형을 강조했습니다.
 
-C++가 *임베디드에서 안전하게 강력*하다는 사실을 *증명*하는 것이 시리즈의 목표였습니다. *RAII, constexpr, templates, concepts, std::expected, std::variant* 같은 도구가 *런타임 비용 없이* *코드 품질*을 끌어올립니다.
+C++가 임베디드에서 안전하게 강력하다는 사실을 증명하는 것이 시리즈의 목표였습니다. RAII, constexpr, templates, concepts, `std::expected`, `std::variant` 같은 도구는 런타임 비용 없이 코드 품질을 끌어올립니다.
 
-C++ 도입을 망설이던 팀에 *증거*가 되기를. 이미 C++를 쓰는 팀에 *더 깊은 활용*이 되기를. 처음 임베디드를 만나는 *Modern C++ 개발자*에게는 *낯선 영역의 지도*가 되기를.
+C++ 도입을 망설이던 팀에는 증거가 되기를, 이미 C++를 쓰는 팀에는 더 깊은 활용이 되기를, 처음 임베디드를 만나는 Modern C++ 개발자에게는 낯선 영역의 지도가 되기를 바랍니다.
 
 읽어 주셔서 감사합니다.

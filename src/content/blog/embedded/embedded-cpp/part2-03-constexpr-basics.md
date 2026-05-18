@@ -10,16 +10,16 @@ type: tech
 
 ## 한 줄 요약
 
-> **"런타임에 할 일을 컴파일러에게 시킵니다."** — 코드 + 데이터 모두 컴파일 타임으로 옮길 수 있습니다.
+> **"런타임에 할 일을 컴파일러에게 시킵니다."** — 코드와 데이터 모두 컴파일 타임으로 옮길 수 있습니다.
 
 ## 어떤 문제를 푸는가
 
-런타임 비용은 두 형태입니다.
+런타임 비용은 두 형태로 나타납니다.
 
 1. **CPU 사이클** — 함수 실행 시간
-2. **메모리** — 코드 + 데이터 차지 공간
+2. **메모리** — 코드와 데이터가 차지하는 공간
 
-`constexpr`은 *컴파일 타임에 결과를 계산*해 *runtime cost를 0으로* 만듭니다.
+`constexpr`은 컴파일 타임에 결과를 계산해 runtime cost를 0으로 만들어 줍니다.
 
 ```cpp
 // 런타임 계산
@@ -39,7 +39,7 @@ constexpr int factorial(int n) {
 constexpr int x = factorial(10);   // 컴파일러가 3628800으로 치환
 ```
 
-어셈블리에서 `x`는 *그냥 상수 3628800*. *함수 호출도, 계산도 없음*.
+어셈블리에서 `x`는 그냥 상수 3628800이 됩니다. 함수 호출도, 계산도 남지 않습니다.
 
 ## `constexpr`이 적용되는 두 곳
 
@@ -57,9 +57,9 @@ constexpr const char* kVersion = "1.2"; // 포인터/문자열
 constexpr int kEntries = kBufferSize / sizeof(int);
 ```
 
-`const`와의 차이:
-- `const` = *읽기 전용* (값은 컴파일 타임 또는 런타임)
-- `constexpr` = *컴파일 타임에 알려짐* (강한 보장)
+`const`와의 차이는 다음과 같습니다.
+- `const`는 읽기 전용이라는 의미이며, 값은 컴파일 타임이나 런타임에 결정될 수 있습니다.
+- `constexpr`은 컴파일 타임에 값이 알려진다는 강한 보장입니다.
 
 ```cpp
 int runtime_val = read_register();
@@ -79,9 +79,9 @@ constexpr int a = square(5);      // 25 — 컴파일 타임
 int b = square(read_input());     // 런타임 호출 (compile-time 값 아니므로)
 ```
 
-`constexpr` 함수는 *상황에 따라 컴파일 타임 또는 런타임 호출*. 컴파일러가 *인자*를 보고 결정.
+`constexpr` 함수는 상황에 따라 컴파일 타임 또는 런타임에 호출됩니다. 컴파일러가 인자를 보고 결정합니다.
 
-C++14 이전 `constexpr` 함수는 *한 줄 return*만 가능. C++14부터 *대부분 statement* 가능 — loop, branch, 변수.
+C++14 이전에는 `constexpr` 함수가 한 줄짜리 return만 가능했습니다. C++14부터는 loop, branch, 변수 등 대부분의 statement를 쓸 수 있습니다.
 
 ```cpp
 // C++14 — full constexpr
@@ -96,7 +96,7 @@ constexpr int factorial(int n) {
 
 ## 임베디드 — 컴파일 타임 LUT
 
-룩업 테이블을 *컴파일러가 자동 생성*. RAM/Flash 그대로 쓰지만 *런타임 계산 없음*.
+룩업 테이블을 컴파일러가 자동으로 생성합니다. RAM/Flash 공간은 그대로 쓰지만 런타임 계산은 사라집니다.
 
 ```cpp
 // Sin 테이블 256 entry
@@ -113,7 +113,7 @@ constexpr std::array<float, 256> generate_sin_table() {
 constexpr auto sin_table = generate_sin_table();   // Flash에 박힘
 ```
 
-`sin_table`은 *256 * 4 = 1024 바이트*가 *.rodata 섹션*에 들어감. *런타임 초기화 없음*.
+`sin_table`은 256 × 4 = 1024 바이트가 `.rodata` 섹션에 들어갑니다. 런타임 초기화 코드가 전혀 없습니다.
 
 ### Taylor series로 컴파일 타임 sin
 
@@ -130,11 +130,11 @@ constexpr float taylor_sin(float x) {
 }
 ```
 
-*C++ 표준 sin/cos는 constexpr 아님*. 직접 *Taylor 급수* 또는 *CORDIC* 구현 필요. 일회성 노력으로 *전체 LUT 자동 생성*.
+C++ 표준 sin/cos는 `constexpr`이 아닙니다. Taylor 급수나 CORDIC을 직접 구현해야 합니다. 한 번 작성하면 전체 LUT를 자동으로 생성할 수 있습니다.
 
 ## 임베디드 — 컴파일 타임 CRC
 
-CRC 테이블 생성은 *임베디드 단골*. `constexpr`로 컴파일 타임에:
+CRC 테이블 생성은 임베디드의 단골 작업입니다. `constexpr`로 컴파일 타임에 만들어 둘 수 있습니다.
 
 ```cpp
 constexpr std::array<uint32_t, 256> generate_crc_table() {
@@ -161,7 +161,7 @@ uint32_t compute_crc(const uint8_t* data, size_t len) {
 }
 ```
 
-테이블이 *Flash에 미리 박혀*. 런타임에 *초기화 코드 0*. 비교:
+테이블이 Flash에 미리 박히고 런타임 초기화 코드가 0이 됩니다. 비교하면 다음과 같습니다.
 
 ```text
 # C — 첫 호출 시 lazy 초기화 또는 main 시작 시 초기화
@@ -173,7 +173,7 @@ uint32_t compute_crc(const uint8_t* data, size_t len) {
 
 ## 임베디드 — 컴파일 타임 register 주소
 
-여러 peripheral의 *register 주소*가 *컴파일 타임 상수*. 함수로 계산:
+여러 peripheral의 register 주소는 컴파일 타임 상수로 알 수 있습니다. 함수로 계산해 둡니다.
 
 ```cpp
 constexpr uintptr_t gpio_base(int port) {
@@ -186,11 +186,11 @@ constexpr uintptr_t kGpioBOdrAddr = gpio_base(1) + 0x14;
 #define GPIOA_ODR (*reinterpret_cast<volatile uint32_t*>(kGpioAOdrAddr))
 ```
 
-매크로 대신 *컴파일 타임 함수 + 상수*. *타입 안전 + 디버깅 가능*.
+매크로 대신 컴파일 타임 함수와 상수를 씁니다. 타입 안전성과 디버깅 가능성을 함께 얻습니다.
 
 ## `if constexpr` (C++17)
 
-*컴파일 타임 분기*. 잘못된 분기는 *컴파일러가 제거*.
+컴파일 타임 분기입니다. 선택되지 않은 분기는 컴파일러가 제거합니다.
 
 ```cpp
 template<typename T>
@@ -213,9 +213,9 @@ uint8_t buf[4];
 serialize(buf, uint16_t(0x1234));   // 2바이트 분기만 컴파일됨
 ```
 
-`sizeof(T)`가 *컴파일 타임에 알려짐* → *해당 분기 외의 코드 제거*.
+`sizeof(T)`가 컴파일 타임에 알려지므로 선택되지 않은 분기의 코드가 제거됩니다.
 
-런타임 `if`는 *모든 분기 컴파일*하므로 *코드 크기 증가*. `if constexpr`은 *필요한 것만*.
+런타임 `if`는 모든 분기를 컴파일해 코드 크기가 늘어나지만, `if constexpr`은 필요한 분기만 남깁니다.
 
 ## `static_assert` + `constexpr`로 컴파일 타임 검증
 
@@ -229,11 +229,11 @@ static_assert(kMaxBufferSize % kSlotCount == 0,
 constexpr int kSlotSize = kMaxBufferSize / kSlotCount;
 ```
 
-*잘못된 설정*은 *컴파일 실패*. *런타임에 발견*하지 않음.
+잘못된 설정은 컴파일 실패로 이어집니다. 런타임에 발견되지 않습니다.
 
 ## 런타임 vs 컴파일 타임 — 어셈블리 비교
 
-같은 코드, 다른 *constexpr* 적용.
+같은 코드에 `constexpr` 적용 여부만 다르게 한 결과입니다.
 
 ```cpp
 // V1 — 런타임 계산
@@ -255,7 +255,7 @@ constexpr int compute_threshold(int level) {
 constexpr int threshold = compute_threshold(5);   // = 3200
 ```
 
-V1 어셈블리 — *루프 실행 + 함수 호출*:
+V1의 어셈블리는 루프 실행과 함수 호출이 그대로 남습니다.
 
 ```text
 compute_threshold:
@@ -271,25 +271,25 @@ compute_threshold:
     bx      lr
 ```
 
-V2 어셈블리 — *상수만 남음*:
+V2의 어셈블리는 상수만 남습니다.
 
 ```text
 # threshold 변수 직접 사용 — 함수 호출 없음
 ldr     r0, =3200
 ```
 
-*완전한 zero-cost*.
+완전한 zero-cost입니다.
 
-## constexpr의 *제약*
+## constexpr의 제약
 
-C++14 기준 (대부분 C++17/20에서 완화).
+C++14 기준이며, 대부분 C++17/20에서 완화됐습니다.
 
-- *동적 메모리 할당 불가* (C++20에서 `constexpr new` 허용)
-- *예외 throw 불가* (C++20 부분 완화)
-- *virtual 함수 호출 불가* (C++20에서 허용)
-- *try/catch 불가* (C++20 부분)
-- *I/O 불가* (영원히)
-- *reinterpret_cast 불가*
+- 동적 메모리 할당이 불가합니다(C++20에서 `constexpr new` 허용).
+- 예외 throw가 불가합니다(C++20에서 부분 완화).
+- virtual 함수 호출이 불가합니다(C++20에서 허용).
+- try/catch가 불가합니다(C++20에서 부분 허용).
+- I/O는 영원히 불가합니다.
+- `reinterpret_cast`도 불가합니다.
 
 ```cpp
 // 안 됨 (C++17)
@@ -299,11 +299,11 @@ constexpr int* ptr() { return new int(42); }   // dynamic alloc
 constexpr int* ptr() { return new int(42); }
 ```
 
-C++ 표준이 *점진적으로 완화*. 현재 GCC 13은 *C++20 constexpr의 90%* 지원.
+C++ 표준이 점진적으로 완화되고 있으며, GCC 13은 C++20 `constexpr`의 약 90%를 지원합니다.
 
-## consteval — 컴파일 타임 *강제* (C++20)
+## consteval — 컴파일 타임 강제 (C++20)
 
-`constexpr`은 *상황에 따라 런타임 가능*. `consteval`은 *컴파일 타임 강제*.
+`constexpr`은 상황에 따라 런타임 호출도 허용하지만, `consteval`은 컴파일 타임을 강제합니다.
 
 ```cpp
 consteval int square(int x) {
@@ -314,11 +314,11 @@ constexpr int a = square(5);     // OK — 컴파일 타임
 int b = square(read_input());    // ERROR — 런타임 인자 불가
 ```
 
-런타임 호출 *원천 차단*. 자세한 내용은 [Part 2-05](/blog/embedded/embedded-cpp/part2-05-consteval-constinit).
+런타임 호출을 원천 차단합니다. 자세한 내용은 [Part 2-05](/blog/embedded/embedded-cpp/part2-05-consteval-constinit)에서 다룹니다.
 
-## constinit — 정적 초기화 *강제* (C++20)
+## constinit — 정적 초기화 강제 (C++20)
 
-static 객체의 *초기화 시점*을 보장.
+static 객체의 초기화 시점을 보장합니다.
 
 ```cpp
 constinit int counter = compute_initial();   // 컴파일 타임에 초기화
@@ -327,11 +327,11 @@ constinit int counter = compute_initial();   // 컴파일 타임에 초기화
 constinit int x = read_register();
 ```
 
-[Part 1-06 — Static Initialization Order Fiasco](/blog/embedded/embedded-cpp/part1-06-startup-code)를 *컴파일 타임에 방지*.
+[Part 1-06 — Static Initialization Order Fiasco](/blog/embedded/embedded-cpp/part1-06-startup-code)를 컴파일 타임에 방지하는 기능입니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *const ≠ constexpr*
+### 1. const ≠ constexpr
 ```cpp
 const int n = read();     // OK, but not compile-time
 int arr[n];               // C VLA — 표준 C++ 아님 (gnu++만)
@@ -340,36 +340,36 @@ constexpr int n = 100;
 int arr[n];               // OK — 컴파일 타임 크기
 ```
 
-### 2. *constexpr 함수에 IO/std::sin*
+### 2. constexpr 함수에 IO나 std::sin 사용
 ```cpp
 constexpr float my_sin(float x) {
     return std::sin(x);   // ERROR (C++ 표준 sin이 constexpr 아님)
 }
 ```
-*직접 Taylor* 또는 C++26 기다림.
+직접 Taylor 급수로 구현하거나 C++26을 기다려야 합니다.
 
-### 3. *큰 constexpr LUT으로 컴파일 시간 폭증*
+### 3. 큰 constexpr LUT으로 컴파일 시간 폭증
 ```cpp
 constexpr auto huge = generate_table<1000000>();   // 컴파일 30초+
 ```
-*적절한 크기* — 보통 256-4096 entry.
+보통 256~4096 entry 정도가 적절합니다.
 
-### 4. *컴파일러가 constexpr 적용 안 함*
+### 4. 컴파일러가 constexpr을 적용하지 못함
 ```cpp
 constexpr int f(int x) { /* */ }
 int y = f(some_var);   // some_var가 const 아니면 런타임 호출
 ```
-`constexpr auto y = f(...);` 또는 *kConst 변수*로 강제.
+`constexpr auto y = f(...);`로 받거나 kConst 변수에 대입해 강제합니다.
 
-### 5. *constexpr이 LTO와 충돌*
-거의 *없음*. constexpr이 *우선 적용*되어 LTO 단계엔 *이미 결과 박힘*.
+### 5. constexpr이 LTO와 충돌
+거의 발생하지 않습니다. `constexpr`이 먼저 적용돼 LTO 단계에는 이미 결과가 박혀 있습니다.
 
-### 6. *constexpr 멤버 함수에 mutable 필드 변경*
-C++14부터 *constexpr 멤버 함수에서 mutable 변경 가능*. 그러나 *const 멤버에서는 안 됨*.
+### 6. constexpr 멤버 함수에서 mutable 필드 변경
+C++14부터 `constexpr` 멤버 함수에서 mutable 필드를 변경할 수 있습니다. 다만 const 멤버에서는 여전히 불가능합니다.
 
 ## 측정 — constexpr 적용 후 코드 크기
 
-CRC 테이블 비교 (STM32F4).
+CRC 테이블을 STM32F4에서 비교합니다.
 
 ```text
 # C — runtime 초기화
@@ -383,7 +383,7 @@ init time   : ~50 us at startup
 init time   : 0 us
 ```
 
-*초기화 코드 + 시간 절약*. RAM → Flash로 *옮김* (대부분 임베디드는 Flash가 더 큼).
+초기화 코드와 시간을 함께 절약합니다. 데이터가 RAM에서 Flash로 옮겨가는데, 대부분의 임베디드 환경은 Flash 쪽이 더 넉넉합니다.
 
 ## 정리
 
@@ -402,4 +402,4 @@ init time   : 0 us
 
 ## 다음 글
 
-[Part 2-04: constexpr 고급](/blog/embedded/embedded-cpp/part2-04-constexpr-advanced) — *컴파일 타임 sort, search, 문자열 처리*. constexpr 알고리즘의 한계와 가능성.
+[Part 2-04: constexpr 고급](/blog/embedded/embedded-cpp/part2-04-constexpr-advanced) — 컴파일 타임 sort, search, 문자열 처리를 다룹니다. `constexpr` 알고리즘의 한계와 가능성을 함께 살펴봅니다.

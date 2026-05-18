@@ -14,19 +14,19 @@ type: tech
 
 ## 어떤 문제를 푸는가
 
-RAII 자체는 단순한 원리지만, *실제 사용*에서는 여러 표준 패턴이 *각자의 자리*를 가집니다.
+RAII 자체는 단순한 원리지만, 실제 사용에서는 여러 표준 패턴이 각자의 자리를 가집니다.
 
-- *단순 lock* — `std::lock_guard`
-- *여러 mutex* — `std::scoped_lock`
-- *수동 unlock/relock* 필요 — `std::unique_lock`
-- *generic 자원* (FD, peripheral handle) — `std::unique_ptr` with custom deleter
-- *임의 cleanup 코드* — `ScopeGuard` (Finally) 패턴
+- 단순 lock에는 `std::lock_guard`를 씁니다.
+- 여러 mutex를 동시에 잡을 때는 `std::scoped_lock`이 어울립니다.
+- 수동 unlock/relock이 필요하면 `std::unique_lock`을 씁니다.
+- generic 자원(FD, peripheral handle)은 custom deleter를 단 `std::unique_ptr`로 감쌉니다.
+- 임의 cleanup 코드는 `ScopeGuard`(Finally) 패턴으로 처리합니다.
 
-각 도구의 *언제, 왜, 어떻게*를 정리합니다.
+각 도구가 언제, 왜, 어떻게 쓰이는지 정리합니다.
 
 ## 패턴 1 — `std::lock_guard`
 
-C++11. 가장 단순한 mutex RAII. *생성자에서 lock, 소멸자에서 unlock*.
+C++11에 도입된 가장 단순한 mutex RAII입니다. 생성자에서 lock, 소멸자에서 unlock합니다.
 
 ```cpp
 #include <mutex>
@@ -41,22 +41,22 @@ void increment() {
 }
 ```
 
-C++17 — class template argument deduction:
+C++17부터는 class template argument deduction이 가능합니다.
 
 ```cpp
 std::lock_guard lock(m);   // 타입 추론
 ```
 
-특징:
-- *복사/이동 불가*
-- *unlock 수동 호출 불가* — scope이 끝까지 lock 유지
-- *단일 mutex*만
+특징은 다음과 같습니다.
+- 복사와 이동이 불가능합니다.
+- unlock을 수동으로 호출할 수 없고 scope이 끝날 때까지 lock이 유지됩니다.
+- 단일 mutex만 다룹니다.
 
-`-fno-exceptions` 환경에서도 *동작*. mutex가 *예외 던지지 않으면* 무관.
+`-fno-exceptions` 환경에서도 동작합니다. mutex가 예외를 던지지 않는 한 무관합니다.
 
 ### 임베디드 — RTOS 적응
 
-`std::mutex`는 *OS thread* 가정. RTOS는 *자체 mutex API*. RAII wrapper 직접:
+`std::mutex`는 OS thread를 가정합니다. RTOS는 자체 mutex API를 쓰므로 RAII wrapper를 직접 만듭니다.
 
 ```cpp
 class FreeRtosMutex {
@@ -83,7 +83,7 @@ public:
 };
 ```
 
-사용:
+사용은 다음과 같습니다.
 
 ```cpp
 FreeRtosMutex m;
@@ -97,7 +97,7 @@ void increment() {
 
 ## 패턴 2 — `std::scoped_lock` (C++17)
 
-여러 mutex를 *deadlock 없이* 동시에 lock.
+여러 mutex를 deadlock 없이 동시에 lock합니다.
 
 ```cpp
 std::mutex m1, m2;
@@ -109,7 +109,7 @@ void transfer(Account& from, Account& to, int amount) {
 }
 ```
 
-내부 알고리즘: *deadlock 회피 알고리즘* 사용 (보통 `try_lock` + back-off). 두 mutex가 *서로 다른 순서로 동시 호출*되어도 안전.
+내부적으로는 deadlock 회피 알고리즘(보통 `try_lock` + back-off)을 사용합니다. 두 mutex가 서로 다른 순서로 동시에 호출돼도 안전합니다.
 
 ```cpp
 // Thread A
@@ -119,13 +119,13 @@ std::scoped_lock lock(m1, m2);
 std::scoped_lock lock(m2, m1);   // 다른 순서 OK
 ```
 
-`std::lock_guard` 두 개로 *순서 다르게 잡으면 deadlock*. `scoped_lock`은 *피함*.
+`std::lock_guard` 두 개를 다른 순서로 잡으면 deadlock이 발생하지만, `scoped_lock`은 이를 피합니다.
 
-C++17 이전엔 `std::lock(m1, m2)` + `std::lock_guard` 두 개로 같은 효과.
+C++17 이전에는 `std::lock(m1, m2)`와 `std::lock_guard` 두 개로 같은 효과를 냈습니다.
 
 ## 패턴 3 — `std::unique_lock`
 
-수동 *unlock/relock*이 필요한 경우. *condition variable*과 함께 자주 사용.
+수동 unlock/relock이 필요한 경우에 씁니다. condition variable과 함께 자주 사용합니다.
 
 ```cpp
 std::mutex m;
@@ -147,18 +147,18 @@ void set_event() {
 }
 ```
 
-`cv.wait`는 *unlock 후 대기, signal 시 relock*. `unique_lock`이 *수동 unlock 가능*하므로 함께 동작.
+`cv.wait`는 unlock 후 대기하다 signal을 받으면 relock합니다. `unique_lock`이 수동 unlock을 지원하므로 함께 동작합니다.
 
-특징:
-- *unlock/relock 수동 호출 가능*
-- *이동 가능* — 다른 함수로 lock 이전
-- *lock_guard보다 약간 무거움* (상태 추적 필드)
+특징은 다음과 같습니다.
+- unlock과 relock을 수동으로 호출할 수 있습니다.
+- 이동이 가능하므로 다른 함수로 lock을 넘길 수 있습니다.
+- 상태 추적 필드 때문에 `lock_guard`보다 약간 무겁습니다.
 
-임베디드에서 *condition variable 안 쓰면* `lock_guard`/`scoped_lock`로 충분.
+임베디드에서 condition variable을 쓰지 않는다면 `lock_guard`나 `scoped_lock`이면 충분합니다.
 
 ## 패턴 4 — `std::unique_ptr` with Custom Deleter
 
-`unique_ptr`은 *RAII의 모범 사례*. 기본은 `delete`로 해제, *커스텀 deleter*로 *어떤 자원도* 관리.
+`unique_ptr`은 RAII의 모범 사례입니다. 기본은 `delete`로 해제하지만, custom deleter로 어떤 자원이든 관리할 수 있습니다.
 
 ```cpp
 // File descriptor RAII
@@ -178,7 +178,7 @@ UniqueFd open_file(const char* path) {
 }
 ```
 
-조금 무거움 (`new int`). *값 타입* 활용:
+`new int`가 들어가 조금 무겁습니다. 값 타입을 활용하면 더 가볍게 만들 수 있습니다.
 
 ```cpp
 struct Fd {
@@ -212,7 +212,7 @@ PoolPtr alloc_from_pool(Pool& p) {
 }
 ```
 
-`unique_ptr`이 *pool에서 알아서 free*. heap 자체 안 씀.
+`unique_ptr`이 pool에서 알아서 free하며, heap 자체는 사용하지 않습니다.
 
 ### 함수 포인터 deleter — runtime 비용 발생
 
@@ -222,13 +222,13 @@ using UniqueFile = std::unique_ptr<FILE, decltype(&fclose)>;
 UniqueFile f(fopen("data.bin", "r"), &fclose);
 ```
 
-*sizeof(UniqueFile)이 8바이트* (포인터 + 함수 포인터). *empty class deleter*(struct/lambda)는 *empty base optimization*으로 *4바이트*.
+`sizeof(UniqueFile)`이 8바이트가 됩니다(포인터 + 함수 포인터). struct나 lambda 같은 empty class deleter는 empty base optimization으로 4바이트로 줄어듭니다.
 
-임베디드는 *empty struct deleter* 권장.
+임베디드에서는 empty struct deleter를 권장합니다.
 
 ## 패턴 5 — `ScopeGuard` / Finally 패턴
 
-임의의 *cleanup 코드*를 RAII로. *클래스 만들기 귀찮은* 일회성 자원.
+임의의 cleanup 코드를 RAII로 묶는 패턴입니다. 클래스를 따로 만들기 번거로운 일회성 자원에 어울립니다.
 
 ```cpp
 template<typename F>
@@ -252,7 +252,7 @@ ScopeGuard<F> make_scope_guard(F f) { return ScopeGuard<F>(std::move(f)); }
 #define FINALLY(code) auto _guard_##__LINE__ = make_scope_guard([&]{ code; })
 ```
 
-사용:
+사용은 다음과 같습니다.
 
 ```cpp
 void process() {
@@ -265,7 +265,7 @@ void process() {
 }
 ```
 
-C++ Core Guidelines의 `gsl::finally`도 같은 패턴.
+C++ Core Guidelines의 `gsl::finally`도 같은 패턴입니다.
 
 ### 임베디드 — peripheral 일시 활성
 
@@ -283,11 +283,11 @@ void send_uart_burst(const uint8_t* data, size_t len) {
 }
 ```
 
-함수 끝/return/예외 — 모두 UART off 보장.
+함수 종료, return, 예외 어느 경로에서도 UART off가 보장됩니다.
 
 ### `dismiss` — commit 패턴
 
-자원 *반환을 취소*. *transaction 패턴*.
+자원 반환을 취소하는 transaction 패턴입니다.
 
 ```cpp
 bool transfer(Account& from, Account& to, int amount) {
@@ -303,7 +303,7 @@ bool transfer(Account& from, Account& to, int amount) {
 
 ## 패턴 6 — Scoped<T> 일반 wrapper
 
-특정 *enable/disable* 패턴을 *반복할 때* 작성.
+특정 enable/disable 패턴을 반복해서 쓸 때 작성합니다.
 
 ```cpp
 template<auto Enable, auto Disable>
@@ -325,11 +325,11 @@ void use_pins() {
 }
 ```
 
-C++17 `auto` non-type template parameter 활용. *컴파일 타임에 함수 포인터 박힘* → *오버헤드 0*.
+C++17의 `auto` non-type template parameter를 활용합니다. 함수 포인터가 컴파일 타임에 박히므로 오버헤드가 0입니다.
 
 ## 패턴 7 — Resource Handle with Move
 
-자원을 *함수 간 이전*하고 싶을 때 — *move-only 타입*.
+자원을 함수 간에 이전하고 싶을 때 쓰는 move-only 타입입니다.
 
 ```cpp
 class FileHandle {
@@ -368,11 +368,11 @@ void process() {
 }
 ```
 
-자원이 *복사 안 됨*. *오직 이전*. *unique_ptr과 유사*하지만 *별도 heap 객체 없음*.
+자원이 복사되지 않고 오직 이전만 가능합니다. `unique_ptr`과 유사하지만 별도의 heap 객체를 두지 않습니다.
 
 ## 패턴 8 — Critical Section with Interrupt Preservation
 
-ARM Cortex-M에서 *interrupt 상태 보존*:
+ARM Cortex-M에서 interrupt 상태를 보존하는 패턴입니다.
 
 ```cpp
 class CriticalSection {
@@ -389,7 +389,7 @@ public:
 };
 ```
 
-*nested critical section 안전*. 이전에 *enabled였으면 enable, disabled였으면 그대로*.
+nested critical section에서도 안전합니다. 이전 상태가 enabled였다면 enable로, disabled였다면 그대로 복원됩니다.
 
 ```cpp
 void outer() {
@@ -423,51 +423,51 @@ void inner() {
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *temporary scope_lock*
+### 1. temporary lock_guard
 ```cpp
 std::lock_guard(m);   // 임시 객체 — 즉시 소멸 → lock 안 됨!
 ```
-변수에 *바인딩*. `std::lock_guard lock(m)`.
+임시 객체는 즉시 소멸하므로 lock이 유지되지 않습니다. 반드시 변수에 바인딩해 `std::lock_guard lock(m)` 형태로 씁니다.
 
-### 2. *unique_ptr의 함수 포인터 deleter*
+### 2. unique_ptr의 함수 포인터 deleter
 ```cpp
 std::unique_ptr<FILE, decltype(&fclose)> f(fopen(...), &fclose);
 ```
-*sizeof 두 배*. struct deleter 권장.
+sizeof가 두 배로 늘어납니다. struct deleter를 권장합니다.
 
-### 3. *ScopeGuard 함수 호출 빠짐*
+### 3. ScopeGuard 함수 호출 빠짐
 ```cpp
 auto guard = make_scope_guard([&]{ cleanup(); });
 guard.dismiss();   // 의도와 다르게 호출
 do_more();
 // dismiss 되어 cleanup 안 함
 ```
-`dismiss`는 *commit 의도*만.
+`dismiss`는 commit이 성공한 경우에만 호출해야 합니다.
 
-### 4. *lock_guard scope 너무 짧음*
+### 4. lock_guard scope가 너무 짧음
 ```cpp
 {
     std::lock_guard lock(m);
 }
 counter++;   // unlock 상태에서 접근
 ```
-*보호 범위*에 *접근 코드 포함*.
+보호 범위가 실제 접근 코드를 포함해야 합니다.
 
-### 5. *RAII로 자원 *시작*만, *종료*는 다른 곳*
+### 5. RAII로 자원의 시작만 묶고 종료는 다른 곳
 ```cpp
 class Starter {
     Starter() { peripheral_init(); }
     // 소멸자 정의 안 함 → cleanup 누락
 };
 ```
-대칭 *생성/소멸*.
+생성과 소멸은 대칭이어야 합니다.
 
-### 6. *Move 후 destructor가 자원 해제 시도*
+### 6. Move 후 destructor가 자원을 두 번 해제
 ```cpp
 Handle(Handle&& other) : fd_(other.fd_) {}   // other.fd_ 안 비움
 ~Handle() { close(fd_); }   // 두 객체 모두 close → double close
 ```
-move 시 *원본 무효화*: `other.fd_ = -1`.
+move 시 원본을 `other.fd_ = -1`처럼 무효화해야 합니다.
 
 ## 측정 — `lock_guard` 오버헤드
 
@@ -487,7 +487,7 @@ raii_lock:
     bx      lr
 ```
 
-*동일*. RAII는 *zero-cost*.
+완전히 동일합니다. RAII는 zero-cost입니다.
 
 ## 정리
 
@@ -506,4 +506,4 @@ raii_lock:
 
 ## 다음 글
 
-[Part 2-03: constexpr 기초](/blog/embedded/embedded-cpp/part2-03-constexpr-basics) — *컴파일 타임 계산*으로 런타임 코드 제거. `-Os`보다 더 강력한 *기능적 0 비용*.
+[Part 2-03: constexpr 기초](/blog/embedded/embedded-cpp/part2-03-constexpr-basics) — 컴파일 타임 계산으로 런타임 코드를 제거합니다. `-Os`보다 더 강력한 기능적 0 비용을 달성합니다.

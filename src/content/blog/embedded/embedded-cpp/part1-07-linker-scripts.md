@@ -10,13 +10,13 @@ type: tech
 
 ## 한 줄 요약
 
-> **"링커 스크립트는 *바이너리의 지도*입니다."** — 각 섹션이 Flash와 RAM 어디에 가는지, C++ 객체는 어떻게 배치되는지를 정의합니다.
+> **"링커 스크립트는 바이너리의 지도입니다."** 각 섹션이 Flash와 RAM 어디에 가는지, C++ 객체는 어떻게 배치되는지를 정의합니다.
 
 ## 어떤 문제를 푸는가
 
-ELF 파일은 *섹션의 집합*입니다. `.text`, `.rodata`, `.data`, `.bss`, `.init_array` 등이 *자동으로 어딘가에 배치되지 않습니다*. *링커 스크립트*가 *어느 메모리에, 어느 주소에* 두는지 결정합니다.
+ELF 파일은 섹션의 집합입니다. `.text`, `.rodata`, `.data`, `.bss`, `.init_array` 등은 자동으로 어딘가에 배치되지 않습니다. 링커 스크립트가 어느 메모리의 어느 주소에 두는지 결정합니다.
 
-벤더 (STM32, NXP)가 *기본 링커 스크립트*를 제공하지만, *C++가 추가하는 섹션*(`.init_array`, `.fini_array`, `.gnu.linkonce.*`)이나 *프로젝트 특화 영역*(외부 SDRAM, CCM RAM, DMA buffer)을 다루려면 *직접 이해*해야 합니다.
+벤더(STM32, NXP)가 기본 링커 스크립트를 제공하지만, C++가 추가하는 섹션(`.init_array`, `.fini_array`, `.gnu.linkonce.*`)이나 프로젝트 특화 영역(외부 SDRAM, CCM RAM, DMA buffer)을 다루려면 직접 이해해야 합니다.
 
 전형적인 STM32F4의 메모리 레이아웃은 다음과 같이 배치됩니다.
 
@@ -34,16 +34,18 @@ MEMORY {
 }
 ```
 
-각 영역:
-- 이름 (`FLASH`, `RAM`, `CCM`)
-- 권한 (`r`=read, `w`=write, `x`=execute)
-- 시작 주소 (`ORIGIN`)
-- 크기 (`LENGTH`)
+각 영역은 다음과 같이 구성됩니다.
 
-STM32F407 예시:
-- *FLASH* = 0x08000000부터 1MB
-- *RAM* = 0x20000000부터 192KB (main SRAM)
-- *CCM* = 0x10000000부터 64KB (Core-Coupled Memory, CPU 전용 빠른 RAM)
+- 이름(`FLASH`, `RAM`, `CCM`)
+- 권한(`r`=read, `w`=write, `x`=execute)
+- 시작 주소(`ORIGIN`)
+- 크기(`LENGTH`)
+
+STM32F407 예시는 다음과 같습니다.
+
+- FLASH는 0x08000000부터 1MB입니다
+- RAM은 0x20000000부터 192KB(main SRAM)입니다
+- CCM은 0x10000000부터 64KB(Core-Coupled Memory, CPU 전용 빠른 RAM)입니다
 
 ### SECTIONS — 섹션의 배치
 
@@ -69,17 +71,17 @@ SECTIONS {
 }
 ```
 
-`>FLASH`는 *VMA (Virtual Memory Address)*. `AT >FLASH`는 *LMA (Load Memory Address)*. 차이가 *`.data` 섹션*에서 중요.
+`>FLASH`는 VMA(Virtual Memory Address)이고, `AT >FLASH`는 LMA(Load Memory Address)입니다. 차이는 `.data` 섹션에서 중요해집니다.
 
 ## VMA vs LMA — `.data` 섹션의 이중성
 
-`.data`는 *초기값 있는 mutable 변수*. *런타임에 RAM에 있어야* 하지만 *초기값은 Flash에 저장*되어야 함 (RAM은 전원 꺼지면 사라짐).
+`.data`는 초기값 있는 mutable 변수입니다. 런타임에는 RAM에 있어야 하지만 초기값은 Flash에 저장되어야 합니다(RAM은 전원이 꺼지면 사라집니다).
 
 ```cpp
 int counter = 42;   // 초기값 42가 Flash, 런타임 사용은 RAM
 ```
 
-링커 스크립트:
+링커 스크립트는 다음과 같습니다.
 
 ```ld
 .data : {
@@ -91,11 +93,11 @@ int counter = 42;   // 초기값 42가 Flash, 런타임 사용은 RAM
 _sidata = LOADADDR(.data); /* Flash 위치 */
 ```
 
-Reset_Handler에서 *Flash의 _sidata에서 RAM의 _sdata로 복사*. (Part 1-06 참조).
+Reset_Handler에서 Flash의 `_sidata`에서 RAM의 `_sdata`로 복사합니다(Part 1-06 참조).
 
 ## C++가 추가하는 섹션
 
-C 코드 빌드와 다른 *C++ 특유 섹션*들.
+C 코드 빌드와 다른 C++ 특유의 섹션들입니다.
 
 ### `.init_array` — static 생성자 포인터
 
@@ -108,11 +110,11 @@ C 코드 빌드와 다른 *C++ 특유 섹션*들.
 } >FLASH
 ```
 
-- `KEEP` — `--gc-sections`가 *제거하지 않게* 보호
-- `SORT` — 초기화 우선순위에 따라 정렬
-- `PROVIDE_HIDDEN` — symbol 노출하지만 dynamic symbol table엔 안 들어감
+- `KEEP`은 `--gc-sections`가 제거하지 않도록 보호합니다
+- `SORT`는 초기화 우선순위에 따라 정렬합니다
+- `PROVIDE_HIDDEN`은 symbol을 노출하지만 dynamic symbol table에는 들어가지 않습니다
 
-`__libc_init_array`가 `__init_array_start`부터 `__init_array_end`까지 *함수 포인터를 차례로 호출*. 자세한 흐름은 [Part 1-06](/blog/embedded/embedded-cpp/part1-06-startup-code).
+`__libc_init_array`가 `__init_array_start`부터 `__init_array_end`까지 함수 포인터를 차례로 호출합니다. 자세한 흐름은 [Part 1-06](/blog/embedded/embedded-cpp/part1-06-startup-code)에서 다룹니다.
 
 ### `.fini_array` — 소멸자 포인터
 
@@ -125,11 +127,11 @@ C 코드 빌드와 다른 *C++ 특유 섹션*들.
 } >FLASH
 ```
 
-`__libc_fini_array`가 호출. 임베디드에선 *main이 안 끝나서* 보통 *호출 안 됨*. `-fno-use-cxa-atexit` 추가 시 *공간 절약*.
+`__libc_fini_array`가 호출합니다. 임베디드에서는 main이 끝나지 않아 보통 호출되지 않습니다. `-fno-use-cxa-atexit`를 추가하면 공간이 절약됩니다.
 
 ### `.gnu.linkonce.*` 또는 `.text.*` — 템플릿 인스턴스
 
-같은 템플릿이 *여러 TU에서 인스턴스화*되면 *링커가 중복 제거*. C++17 이후 *대부분 자동 처리*.
+같은 템플릿이 여러 TU에서 인스턴스화되면 링커가 중복을 제거합니다. C++17 이후로는 대부분 자동으로 처리됩니다.
 
 ### `.eh_frame` — 예외 unwind table
 
@@ -141,11 +143,11 @@ C 코드 빌드와 다른 *C++ 특유 섹션*들.
 }
 ```
 
-`-fno-exceptions` 환경에선 *완전 제거*. 수 KB 절약.
+`-fno-exceptions` 환경에서는 완전히 제거됩니다. 수 KB가 절약됩니다.
 
 ## 완성 링커 스크립트 — STM32F407 예시
 
-C++ 임베디드 표준 스크립트.
+C++ 임베디드 표준 스크립트입니다.
 
 ```ld
 /* STM32F407 1MB Flash, 192KB RAM */
@@ -271,7 +273,7 @@ _Min_Stack_Size = 0x400;   /* 1 KB */
 
 ## Custom 섹션 — 특정 데이터를 특정 위치에
 
-C++에서 *특정 변수*를 *특정 메모리 영역*에 두고 싶을 때 — `__attribute__((section(...)))`.
+C++에서 특정 변수를 특정 메모리 영역에 두고 싶을 때는 `__attribute__((section(...)))`를 씁니다.
 
 ```cpp
 // 큰 DMA buffer를 CCM RAM에
@@ -283,13 +285,13 @@ __attribute__((section(".text.const_lut")))
 const uint8_t lookup_table[256] = { /* ... */ };
 ```
 
-링커 스크립트가 `.ccmram` 섹션을 *CCM RAM에 배치*. 컴파일러는 *해당 변수를 그 섹션에* 넣음.
+링커 스크립트가 `.ccmram` 섹션을 CCM RAM에 배치합니다. 컴파일러는 해당 변수를 그 섹션에 넣습니다.
 
-DMA buffer를 CCM에 두는 *흔한 케이스*는 *주의*. CCM은 *DMA가 접근 못 함* (peripheral bus와 연결 안 됨). *DMA용은 일반 SRAM*.
+DMA buffer를 CCM에 두는 흔한 케이스는 주의가 필요합니다. CCM은 DMA가 접근하지 못합니다(peripheral bus와 연결되어 있지 않습니다). DMA용은 일반 SRAM에 둡니다.
 
-## C++ 객체의 *지정된 위치 배치*
+## C++ 객체의 지정된 위치 배치
 
-C++ 객체도 같은 attribute로 위치 지정 가능.
+C++ 객체도 같은 attribute로 위치를 지정할 수 있습니다.
 
 ```cpp
 // 큰 lookup 객체를 Flash에 직접
@@ -301,11 +303,11 @@ __attribute__((section(".ccmram")))
 alignas(8) uint8_t packet_pool[8192];
 ```
 
-*constexpr로 생성된 const data*는 `.rodata`에 자동 배치. 별도 지정 불필요한 경우가 많음.
+constexpr로 생성된 const data는 `.rodata`에 자동으로 배치됩니다. 별도 지정이 필요 없는 경우가 많습니다.
 
 ## Symbol 정의 — Reset_Handler가 사용
 
-링커 스크립트가 *symbol을 정의*하면 *C/C++ 코드에서 extern으로 참조* 가능.
+링커 스크립트가 symbol을 정의하면 C/C++ 코드에서 extern으로 참조할 수 있습니다.
 
 ```ld
 /* 링커 스크립트 */
@@ -329,17 +331,17 @@ void copy_data() {
 }
 ```
 
-*주소 자체*가 의미를 가지므로 *`&` 사용*. (변수 값이 아닌 위치).
+주소 자체가 의미를 가지므로 `&`를 사용합니다(변수 값이 아니라 위치이기 때문입니다).
 
 ## Memory Map 생성
 
-링커 옵션 `-Wl,-Map=file.map`이 *모든 섹션과 심볼의 배치 정보*를 텍스트로 출력.
+링커 옵션 `-Wl,-Map=file.map`이 모든 섹션과 심볼의 배치 정보를 텍스트로 출력합니다.
 
 ```bash
 arm-none-eabi-g++ ... -Wl,-Map=firmware.map -o firmware.elf
 ```
 
-`firmware.map` 안:
+`firmware.map` 내용은 다음과 같습니다.
 
 ```text
 Memory Configuration
@@ -367,34 +369,41 @@ Linker script and memory map
                 0x08004b60                PROVIDE_HIDDEN (__init_array_end = .)
 ```
 
-*어느 .o 파일이 어느 섹션에 얼마나 기여*했는지 정확히 보임. *크기 분석의 핵심 도구* (Part 1-04 참조).
+어느 .o 파일이 어느 섹션에 얼마나 기여했는지 정확히 보입니다. 크기 분석의 핵심 도구입니다(Part 1-04 참조).
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *`.init_array`에 `KEEP` 없음*
-`--gc-sections`가 *static 생성자 함수 제거*. 객체 *zero-init만으로 시작* → 잘못된 동작. `KEEP` 필수.
+### 1. `.init_array`에 `KEEP` 없음
 
-### 2. *`AT >FLASH` 누락*
-`.data` 초기값이 *Flash에 안 들어감*. *RAM의 초기값이 garbage*. Reset_Handler의 .data copy가 *garbage 복사*.
+`--gc-sections`가 static 생성자 함수를 제거합니다. 객체가 zero-init만으로 시작해 잘못된 동작을 합니다. `KEEP`이 필수입니다.
 
-### 3. *Stack pointer 미정의*
-vector table의 첫 entry가 *invalid*. CPU가 *random 주소를 SP로* 사용 → 즉시 crash. `_estack = ORIGIN(RAM) + LENGTH(RAM)` 필수.
+### 2. `AT >FLASH` 누락
 
-### 4. *Heap과 Stack 영역 충돌*
-*Heap 위로 자라고 Stack 아래로 자람*. 만나면 *조용히 데이터 corruption*. `_Min_Heap_Size`와 `_Min_Stack_Size` 명시.
+`.data` 초기값이 Flash에 들어가지 않습니다. RAM의 초기값이 garbage가 됩니다. Reset_Handler의 .data copy가 garbage를 복사합니다.
 
-### 5. *DMA buffer를 CCM에 두기*
-CCM은 *CPU 전용 RAM*. *DMA controller가 접근 불가*. *bus fault*. DMA는 *AHB로 접근 가능한 일반 SRAM*에.
+### 3. Stack pointer 미정의
 
-### 6. *예외 사용하면서 `.eh_frame` /DISCARD/*
-`-fexceptions` + DISCARD → 런타임 *예외 정보 없음* → unwind 실패 → crash. 둘 중 하나로 통일.
+vector table의 첫 entry가 invalid가 됩니다. CPU가 random 주소를 SP로 사용해 즉시 crash가 납니다. `_estack = ORIGIN(RAM) + LENGTH(RAM)`이 필수입니다.
 
-### 7. *외부 SDRAM 미설정으로 access*
-external memory는 *MMU 또는 FMC 초기화* 필요. 링커 스크립트만으로는 *주소 할당만*, *실제 access는 SystemInit 이후*.
+### 4. Heap과 Stack 영역 충돌
+
+Heap은 위로 자라고 Stack은 아래로 자랍니다. 만나면 조용히 데이터 corruption이 발생합니다. `_Min_Heap_Size`와 `_Min_Stack_Size`를 명시합니다.
+
+### 5. DMA buffer를 CCM에 두기
+
+CCM은 CPU 전용 RAM입니다. DMA controller가 접근하지 못해 bus fault가 납니다. DMA는 AHB로 접근 가능한 일반 SRAM에 둡니다.
+
+### 6. 예외 사용하면서 `.eh_frame`을 /DISCARD/
+
+`-fexceptions`와 DISCARD를 함께 쓰면 런타임에 예외 정보가 없어 unwind가 실패하고 crash가 납니다. 둘 중 하나로 통일합니다.
+
+### 7. 외부 SDRAM 미설정으로 access
+
+external memory는 MMU나 FMC 초기화가 필요합니다. 링커 스크립트만으로는 주소 할당만 하고, 실제 access는 SystemInit 이후에 가능합니다.
 
 ## 측정 — 링커 스크립트 변경 효과
 
-CCM RAM에 큰 buffer 옮김으로 main RAM 절약.
+CCM RAM에 큰 buffer를 옮겨 main RAM을 절약한 사례입니다.
 
 ```text
 # Before: 일반 RAM
@@ -405,7 +414,7 @@ CCM RAM에 큰 buffer 옮김으로 main RAM 절약.
 .ccmram          4 KB
 ```
 
-main SRAM에 *4KB 여유*. RTOS task stack 추가에 활용.
+main SRAM에 4KB의 여유가 생깁니다. RTOS task stack 추가에 활용할 수 있습니다.
 
 ## ld 스크립트 디버깅 — `--print-memory-usage`
 
@@ -418,7 +427,7 @@ Memory region         Used Size  Region Size  %age Used
              CCM:        4096 B        64 KB      6.25%
 ```
 
-CI에 추가해 *영역별 사용량 추적*.
+CI에 추가해 영역별 사용량을 추적합니다.
 
 ## 정리
 
@@ -436,4 +445,4 @@ CI에 추가해 *영역별 사용량 추적*.
 
 ## 다음 글
 
-[Part 1-08: C++ 표준 선택](/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice) — C++11/14/17/20/23 *어느 표준을 골라야 하나*. 임베디드 관점의 기능 비교.
+[Part 1-08: C++ 표준 선택](/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice) — C++11/14/17/20/23 중 어느 표준을 골라야 하는지 임베디드 관점에서 기능을 비교합니다.

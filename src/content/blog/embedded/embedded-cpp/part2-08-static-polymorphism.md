@@ -10,18 +10,18 @@ type: tech
 
 ## 한 줄 요약
 
-> **"CRTP는 *templates를 통한 다형성*."** — virtual 함수 없이 *컴파일 타임에 dispatch 결정*.
+> **"CRTP는 template을 통한 다형성."** — virtual 함수 없이 컴파일 타임에 dispatch를 결정합니다.
 
 ## 어떤 문제를 푸는가
 
-런타임 다형성(*virtual*)의 비용:
+런타임 다형성(virtual)에는 다음과 같은 비용이 따릅니다.
 
-- *vtable* — 클래스당 4-N 바이트
-- *vptr* — 객체당 4 바이트
-- *간접 호출* — branch prediction 어려움, inline 안 됨
-- *코드 크기* — 가상 함수 코드 + vtable
+- vtable이 클래스당 4~N 바이트를 차지합니다.
+- vptr이 객체당 4 바이트를 더합니다.
+- 간접 호출이 발생해 branch prediction이 어렵고 inline이 거의 되지 않습니다.
+- 가상 함수 코드와 vtable이 코드 크기에 더해집니다.
 
-소규모 MCU에서 *수십 개의 다형성 객체*만으로도 *수 KB 부담*. **CRTP** (Curiously Recurring Template Pattern)가 *대안*입니다.
+소규모 MCU에서는 다형성 객체 수십 개만으로도 수 KB의 부담이 됩니다. 이때의 대안이 **CRTP**(Curiously Recurring Template Pattern)입니다.
 
 ```cpp
 // 전통 — virtual
@@ -53,11 +53,11 @@ public:
 };
 ```
 
-CRTP의 *마법* — `Shape<Circle>::area()`가 `static_cast<Circle*>`로 *컴파일 타임에 dispatch*. *virtual table 없이* polymorphism.
+CRTP의 핵심은 `Shape<Circle>::area()`가 `static_cast<Circle*>`로 컴파일 타임에 dispatch된다는 점입니다. virtual table 없이 다형성을 얻습니다.
 
 ## CRTP의 구조
 
-핵심 idiom:
+핵심 idiom은 다음과 같습니다.
 
 ```cpp
 template<typename Derived>
@@ -77,11 +77,11 @@ public:
 };
 ```
 
-- `Base<Derived>`가 *interface 정의*
-- `Derived`가 *Base<Derived>를 상속* (자신을 template 인자로)
-- Base가 *static_cast로 Derived의 method 호출*
+- `Base<Derived>`가 interface를 정의합니다.
+- `Derived`는 자신을 template 인자로 넘기며 `Base<Derived>`를 상속합니다.
+- Base가 `static_cast`로 Derived의 method를 호출합니다.
 
-각 *Concrete 인스턴스*는 *Base<Concrete>를 별도 인스턴스화*. *컴파일 타임에 dispatch 결정*.
+각 Concrete 인스턴스는 `Base<Concrete>`를 별도로 인스턴스화하며, dispatch가 컴파일 타임에 결정됩니다.
 
 ## 임베디드 — Logger CRTP
 
@@ -127,7 +127,7 @@ UartLogger uart;
 uart.log("hello");      // 컴파일 타임에 UartLogger::log_impl 호출
 ```
 
-`uart.log("hello")`의 어셈블리:
+`uart.log("hello")`의 어셈블리는 다음과 같습니다.
 
 ```text
 # 전통 virtual
@@ -139,11 +139,11 @@ blx     r3               ; 간접 호출 — branch prediction 어려움
 bl      UartLogger::log_impl    ; 직접 호출 — 인라인 가능
 ```
 
-*간접 호출 제거 + inline 가능*. 함수 작으면 *완전 인라인*.
+간접 호출이 제거되고 inline이 가능합니다. 함수가 작으면 완전히 인라인됩니다.
 
 ## CRTP vs virtual — 비교
 
-호출 흐름의 차이부터 보면 다음과 같습니다. virtual은 vptr → vtable → 함수까지 두 단계의 메모리 indirection을 거치는 반면, CRTP는 컴파일 타임에 derived 함수로 바로 inline됩니다.
+호출 흐름의 차이부터 보면 다음과 같습니다. virtual은 vptr → vtable → 함수까지 두 단계의 메모리 indirection을 거치지만, CRTP는 컴파일 타임에 derived 함수로 바로 인라인됩니다.
 
 ![CRTP vs virtual dispatch — indirection 단계 비교](/images/blog/embedded-cpp/diagrams/part2-08-crtp-vs-virtual.svg)
 
@@ -157,7 +157,7 @@ bl      UartLogger::log_impl    ; 직접 호출 — 인라인 가능
 | Container 동질성 | OK (Shape*) | 제한 |
 | 런타임 type 결정 | OK | 컴파일 타임만 |
 
-CRTP의 *제약*: *런타임에 type을 결정 못 함*. *컴파일 타임에 type 알아야*.
+CRTP에는 제약이 있습니다. 런타임에 type을 결정할 수 없고, 컴파일 타임에 type이 알려져 있어야 합니다.
 
 ```cpp
 // virtual — runtime polymorphism
@@ -176,7 +176,7 @@ s.area();   // OK
 // 한 컨테이너에 섞기 어려움 (다른 base type)
 ```
 
-CRTP는 *컴파일 타임에 type set이 닫혀 있을 때* 유리.
+CRTP는 컴파일 타임에 type set이 닫혀 있을 때 유리합니다.
 
 ## 임베디드 — Peripheral CRTP
 
@@ -226,11 +226,11 @@ Uart2 uart;
 uart.send_buffer(data, 100);   // 인라인 가능
 ```
 
-`send_buffer`의 loop 안 `send_impl`이 *인라인*. *데이터 복사 + UART 쓰기*가 *한 작은 loop*으로.
+`send_buffer`의 loop 안에서 `send_impl`이 인라인됩니다. 데이터 복사와 UART 쓰기가 작은 loop 하나로 압축됩니다.
 
 ## CRTP로 mixin 패턴
 
-여러 *독립 기능*을 *조합*. virtual base class가 아니라 *각 mixin을 CRTP*로.
+여러 독립 기능을 조합할 때 virtual base class 대신 각 mixin을 CRTP로 구현합니다.
 
 ```cpp
 template<typename Derived>
@@ -268,13 +268,13 @@ bool b = v1 < v2;    // operator< — 직접 구현
 bool c = v1 >= v2;   // Comparable이 자동 제공 → v1 < v2 → not
 ```
 
-`Version`이 *operator==와 operator<만* 구현. 나머지 비교 연산자는 `Comparable`에서 *자동*.
+`Version`은 `operator==`와 `operator<`만 구현하며, 나머지 비교 연산자는 `Comparable`이 자동으로 제공합니다.
 
-C++20의 `<=>` (spaceship operator)가 *같은 효과*를 제공. 단 CRTP가 *C++11부터 가능*.
+C++20의 `<=>`(spaceship operator)가 같은 효과를 내지만, CRTP는 C++11부터 가능합니다.
 
 ## CRTP의 단점
 
-### 1. 같은 base의 *다른 instantiation은 별개 type*
+### 1. 같은 base의 다른 instantiation은 별개 type
 
 ```cpp
 template<typename D> struct Base {};
@@ -285,7 +285,7 @@ class B : Base<B> {};
 // "Base를 받는 함수"가 자연스럽지 않음
 ```
 
-해결: *concept* (C++20) 또는 *type erasure*.
+해결책은 C++20의 concept이나 type erasure입니다.
 
 ```cpp
 // C++20 concept
@@ -299,15 +299,15 @@ void log_all(LoggerLike auto& logger, ...) {
 }
 ```
 
-### 2. 컴파일 에러 메시지가 *복잡*
+### 2. 컴파일 에러 메시지가 복잡함
 
-template error의 *전형적 문제*. C++20 concepts가 *훨씬 깔끔*.
+template error의 전형적인 문제입니다. C++20 concepts가 훨씬 깔끔하게 만들어 줍니다.
 
-### 3. *런타임 type 결정* 불가능
+### 3. 런타임 type 결정이 불가능
 
-plug-in 시스템, 동적 객체 생성에는 *virtual 필요*. CRTP는 *컴파일 타임 type set*.
+plug-in 시스템이나 동적 객체 생성에는 virtual이 필요합니다. CRTP는 컴파일 타임에 정해진 type set만 다룹니다.
 
-## CRTP가 잘 맞는 *3가지 패턴*
+## CRTP가 잘 맞는 3가지 패턴
 
 ### 1. Static interface enforcement
 
@@ -323,19 +323,19 @@ public:
 };
 ```
 
-자식이 *반드시 구현*해야 하는 메서드를 *컴파일 타임에 강제*.
+자식이 반드시 구현해야 하는 메서드를 컴파일 타임에 강제합니다.
 
 ### 2. Code sharing without runtime cost
 
-여러 device drivers가 *같은 utility*를 사용하지만 *각자의 init/send/recv*. CRTP가 *공통 부분 한 곳, 특수 부분 자식*.
+여러 device driver가 같은 utility를 공유하면서도 각자의 init/send/recv를 가질 때, CRTP가 공통 부분은 한 곳에, 특수 부분은 자식에 둡니다.
 
 ### 3. Operator generation
 
-비교 연산자, arithmetic 연산자 등을 *자동 생성*. *boilerplate 감소*.
+비교 연산자나 arithmetic 연산자 등을 자동 생성해 boilerplate를 줄여 줍니다.
 
 ## CRTP 함정
 
-### 1. *Base에서 Derived의 private member 접근*
+### 1. Base에서 Derived의 private member 접근
 ```cpp
 template<typename D>
 class Base {
@@ -345,16 +345,16 @@ public:
     }
 };
 ```
-해결 — `friend class Base<Derived>;` 추가 또는 *public method*.
+`friend class Base<Derived>;`를 추가하거나 public method로 노출해 해결합니다.
 
-### 2. *Derived의 destructor가 호출 안 됨*
+### 2. Derived의 destructor가 호출되지 않음
 ```cpp
 Base<Derived>* ptr = new Derived;
 delete ptr;   // Base의 destructor만 호출 — Derived 자원 누수
 ```
-CRTP base는 *보통 stack 또는 derived로 직접 사용*. *base pointer로 owning 금지*.
+CRTP base는 보통 stack에서 쓰거나 derived로 직접 사용합니다. base pointer로 소유하는 패턴은 피해야 합니다.
 
-### 3. *복사 동작 무의식*
+### 3. 복사 동작이 의도와 어긋남
 ```cpp
 template<typename D>
 class Base {
@@ -364,17 +364,17 @@ public:
     }
 };
 ```
-*operator=가 잘 정의된 D만* 안전.
+`operator=`가 잘 정의된 D에서만 안전합니다.
 
-### 4. *과도한 CRTP layer*
+### 4. 과도한 CRTP layer
 ```cpp
 class Concrete : public BaseA<Concrete>, public BaseB<Concrete>, public BaseC<Concrete> {};
 ```
-*다중 상속*. *diamond 문제*나 *이름 충돌*. 한두 layer만.
+다중 상속에서 diamond 문제나 이름 충돌이 발생할 수 있습니다. 한두 layer 정도로 제한합니다.
 
 ## C++20 concepts + CRTP
 
-CRTP의 *흐릿한 interface 정의*를 *concepts로 명확화*.
+CRTP의 흐릿한 interface 정의를 concept으로 명확하게 만들 수 있습니다.
 
 ```cpp
 template<typename T>
@@ -391,20 +391,20 @@ public:
 };
 ```
 
-template error message가 *명확*해짐.
+template error message가 한층 명확해집니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *공허한 CRTP*
+### 1. 공허한 CRTP
 ```cpp
 template<typename D>
 class Base {};   // 비어 있음
 
 class Concrete : public Base<Concrete> {};
 ```
-*기능 없음*. CRTP가 *의도된 utility 제공*해야 의미.
+기능이 없습니다. CRTP는 의도된 utility를 제공해야 의미가 있습니다.
 
-### 2. *CRTP base에서 virtual 사용*
+### 2. CRTP base에서 virtual 사용
 ```cpp
 template<typename D>
 class Base {
@@ -412,9 +412,9 @@ public:
     virtual void method() { /* */ }   // virtual + CRTP는 모순
 };
 ```
-*CRTP는 virtual 회피*. 의도 모호.
+CRTP는 virtual을 회피하는 패턴이므로 의도가 모호해집니다.
 
-### 3. *Multiple CRTP base의 충돌*
+### 3. Multiple CRTP base 충돌
 ```cpp
 template<typename D> struct A { void foo(); };
 template<typename D> struct B { void foo(); };
@@ -422,17 +422,17 @@ class C : public A<C>, public B<C> {};
 C c;
 c.foo();   // ERROR — A::foo와 B::foo 충돌
 ```
-*명시적 호출*: `c.A<C>::foo()`.
+`c.A<C>::foo()`처럼 명시적으로 호출합니다.
 
-### 4. *CRTP 외부 인터페이스 불일치*
-서로 다른 CRTP 인스턴스를 *같은 함수에 받기* 어려움. *concept* 또는 *type erasure*.
+### 4. CRTP 외부 인터페이스 불일치
+서로 다른 CRTP 인스턴스를 같은 함수에서 받기가 어렵습니다. concept이나 type erasure를 사용합니다.
 
-### 5. *Sizeof 증가*
-CRTP base가 *멤버를 가지면* Concrete가 *그 크기 만큼 증가*. *Empty Base Optimization*으로 *0 추가*가 일반.
+### 5. Sizeof 증가
+CRTP base가 멤버를 가지면 Concrete가 그만큼 커집니다. Empty Base Optimization 덕분에 보통은 추가 크기가 0으로 처리됩니다.
 
 ## 측정 — CRTP의 효과
 
-같은 logger를 *virtual vs CRTP*로 (ARM Cortex-M4, `-O2`).
+같은 logger를 virtual과 CRTP로 비교합니다(ARM Cortex-M4, `-O2`).
 
 ```text
 # Virtual
@@ -460,19 +460,19 @@ bl      UartLogger::log_impl   ; 직접 호출 — 인라인 가능
 # vptr: 0
 ```
 
-*객체당 4 B + 클래스당 12 B 절약*. 100 객체 50 클래스 = *1000 B 절약*. 작은 차이지만 *극소형 MCU*에선 의미.
+객체당 4 B, 클래스당 12 B를 절약합니다. 100 객체 50 클래스 기준이면 1000 B가 절약되며, 작은 차이지만 극소형 MCU에서는 의미가 있습니다.
 
-## CRTP의 *실용 vs 과용*
+## CRTP의 실용과 과용
 
-권장 사용:
-- *공통 utility + 다양한 구현* — driver, logger
-- *Operator generation* — comparable, arithmetic
-- *Mixin* — 독립 기능 조합
+다음과 같은 경우에 권장합니다.
+- 공통 utility에 다양한 구현이 붙는 경우(driver, logger).
+- 비교나 산술 같은 operator generation.
+- 독립 기능을 조합하는 mixin.
 
-피할 사용:
-- *간단한 함수 한두 개* — 그냥 함수
-- *plug-in 시스템* — virtual 필요
-- *외부 라이브러리 인터페이스* — 사용자 친화적이지 않음
+다음과 같은 경우에는 피합니다.
+- 간단한 함수 한두 개라면 그냥 함수로 둡니다.
+- plug-in 시스템처럼 런타임 확장이 필요하면 virtual을 씁니다.
+- 외부 라이브러리 인터페이스는 사용자 친화적이지 않으므로 피합니다.
 
 ## 정리
 
@@ -492,4 +492,4 @@ bl      UartLogger::log_impl   ; 직접 호출 — 인라인 가능
 
 ## 다음 글
 
-[Part 2-09: Type Traits 활용](/blog/embedded/embedded-cpp/part2-09-type-traits) — `std::is_*`, `std::enable_if`, SFINAE로 *컴파일 타임 type 분기*.
+[Part 2-09: Type Traits 활용](/blog/embedded/embedded-cpp/part2-09-type-traits) — `std::is_*`, `std::enable_if`, SFINAE로 컴파일 타임 type 분기를 다룹니다.

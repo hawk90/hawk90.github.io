@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Type Traits = *type에 대한 컴파일 타임 query*."** — 이 타입이 integral인가, signed인가, trivial인가를 묻고 *분기*합니다.
+> **"Type Traits = type에 대한 컴파일 타임 query."** — 이 타입이 integral인가, signed인가, trivial인가를 묻고 그에 따라 분기합니다.
 
 ## 어떤 문제를 푸는가
 
-generic 코드에서 *타입에 따라 다른 동작*이 필요합니다.
+generic 코드에서는 타입에 따라 다른 동작이 필요합니다.
 
 ```cpp
 template<typename T>
@@ -25,7 +25,7 @@ void process(T value) {
 }
 ```
 
-C에서는 *불가능* (타입 정보 없음). C++ Type Traits가 *컴파일 타임 type query*를 제공.
+C에서는 불가능합니다(타입 정보가 없음). C++ Type Traits가 컴파일 타임 type query를 제공합니다.
 
 ```cpp
 template<typename T>
@@ -40,7 +40,7 @@ void process(T value) {
 }
 ```
 
-*if constexpr*과 함께 *런타임 코드 분기 없음*. 해당 타입의 *코드만 컴파일*.
+`if constexpr`과 함께 쓰면 런타임 코드 분기가 사라지고, 해당 타입에 맞는 코드만 컴파일됩니다.
 
 ## 표준 Type Traits (`<type_traits>`)
 
@@ -104,7 +104,7 @@ std::make_signed_t<T>
 std::make_unsigned_t<T>
 ```
 
-`_v`는 *C++17 variable template*. `_t`는 *C++14 alias template*. 사용하기 *짧고 명확*.
+`_v`는 C++17의 variable template, `_t`는 C++14의 alias template입니다. 짧고 명확해 사용이 편합니다.
 
 ## 임베디드 — type-safe register access
 
@@ -123,11 +123,11 @@ write_register<std::string>(...)                   // ERROR — not trivially co
 write_register<uint64_t>(...)                      // ERROR — too large
 ```
 
-*잘못된 사용*을 *컴파일 시점에 차단*.
+잘못된 사용을 컴파일 시점에 차단합니다.
 
 ## SFINAE — Substitution Failure Is Not An Error
 
-C++의 *오래된 idiom*. 템플릿 인스턴스화 실패가 *컴파일 에러 아닌 무시*. 이를 활용해 *조건부 오버로드*.
+C++의 오래된 idiom입니다. 템플릿 인스턴스화 실패가 컴파일 에러가 아니라 무시 처리되며, 이를 활용해 조건부 오버로드를 구성합니다.
 
 ```cpp
 // 정수 전용
@@ -149,9 +149,9 @@ process(1.5f);   // OK — float 버전
 process("str");  // ERROR — 둘 다 안 맞음
 ```
 
-`std::enable_if`가 *조건이 true이면 정의*, false면 *substitution failure*. *해당 오버로드 무시*.
+`std::enable_if`는 조건이 true이면 정의를 남기고, false이면 substitution failure로 처리해 해당 오버로드를 무시합니다.
 
-C++17의 *if constexpr*이 *대부분의 SFINAE 대체*. 새 코드는 *if constexpr 우선*.
+C++17의 `if constexpr`이 대부분의 SFINAE를 대체합니다. 새 코드에서는 `if constexpr`을 우선합니다.
 
 ```cpp
 // if constexpr — 훨씬 깔끔
@@ -169,7 +169,7 @@ void process(T value) {
 
 ## void_t — SFINAE 검출 idiom
 
-타입에 *특정 멤버나 함수가 있는지* 컴파일 타임에 확인.
+타입에 특정 멤버나 함수가 있는지를 컴파일 타임에 확인합니다.
 
 ```cpp
 template<typename, typename = void>
@@ -200,7 +200,7 @@ void log(T value) {
 }
 ```
 
-C++20 *concepts*가 *훨씬 단순한 syntax*.
+C++20의 concepts가 훨씬 단순한 syntax를 제공합니다.
 
 ```cpp
 // C++20
@@ -221,7 +221,7 @@ void log(T value) {
 
 ## 임베디드 — Serialization with traits
 
-타입에 따라 *다른 직렬화 방법*.
+타입에 따라 다른 직렬화 방법을 골라 씁니다.
 
 ```cpp
 template<typename T>
@@ -261,11 +261,11 @@ serialize(buf, MyPOD{...});          // memcpy
 serialize(buf, std::string{});       // ERROR — not trivially copyable
 ```
 
-*한 함수가 모든 타입 처리*. 컴파일러가 *해당 분기만 생성*.
+한 함수가 모든 타입을 처리하며, 컴파일러는 해당 분기만 생성합니다.
 
 ## std::declval — 인스턴스 없이 type query
 
-`std::declval<T>()`는 *T의 instance가 있다고 가정*. 실제 호출 안 함. *type만 추론*.
+`std::declval<T>()`는 T의 인스턴스가 있다고 가정합니다. 실제로 호출하지 않으며 type만 추론합니다.
 
 ```cpp
 template<typename T>
@@ -274,7 +274,7 @@ using result_type = decltype(std::declval<T>().method());
 // T::method()의 반환 타입을 컴파일 타임에 알아냄
 ```
 
-*decltype과 함께 사용*. *호출 시점이 아닌 declare 시점*에 유효.
+`decltype`과 함께 사용합니다. 호출 시점이 아닌 declare 시점에 유효합니다.
 
 ## Custom traits 만들기
 
@@ -292,7 +292,7 @@ static_assert(is_pointer_or_integer_v<int*>);
 static_assert(!is_pointer_or_integer_v<float>);
 ```
 
-표준 trait들의 *조합*. 도메인 특화 검증에 활용.
+표준 trait들의 조합으로, 도메인 특화 검증에 활용합니다.
 
 ### 임베디드 — register-safe 타입
 
@@ -312,11 +312,11 @@ void write_register(uintptr_t addr, T value) {
 }
 ```
 
-여러 검증을 *한 trait*에. 새 함수에 *재사용*.
+여러 검증을 하나의 trait로 묶어 새 함수에서 재사용합니다.
 
 ## Tag dispatch — SFINAE 대안
 
-함수 *오버로드*를 *tag 객체*로 dispatch.
+함수 오버로드를 tag 객체로 dispatch합니다.
 
 ```cpp
 struct integral_tag {};
@@ -342,39 +342,39 @@ void process(T value) {
 }
 ```
 
-*if constexpr보다 약간 복잡*. *오버로드가 명확*해서 *문서 가치*. 보통은 *if constexpr* 권장.
+`if constexpr`보다 약간 복잡하지만, 오버로드가 명확해 문서로서의 가치가 있습니다. 일반적으로는 `if constexpr`을 권장합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *런타임 if로 type check*
+### 1. 런타임 if로 type check
 ```cpp
 template<typename T>
 void f(T x) {
     if (typeid(T) == typeid(int)) { /* */ }   // runtime, RTTI 필요
 }
 ```
-`if constexpr (std::is_same_v<T, int>)` — *컴파일 타임*.
+`if constexpr (std::is_same_v<T, int>)`로 컴파일 타임에 처리합니다.
 
-### 2. *trait를 잘못 작성*
+### 2. trait를 잘못 작성
 ```cpp
 template<typename T>
 struct has_foo {
     static constexpr bool value = /* */ ;
 };
 ```
-*조건 누락*이나 *false negative* — 단위 테스트(static_assert)로 검증.
+조건 누락이나 false negative가 생길 수 있으므로, `static_assert`로 단위 테스트를 작성해 검증합니다.
 
-### 3. *void_t 패턴 오용*
-SFINAE 검출이 *컴파일러마다 다른 결과*. 표준 trait 또는 *concept* 권장.
+### 3. void_t 패턴 오용
+SFINAE 검출이 컴파일러마다 다른 결과를 낼 수 있습니다. 표준 trait나 concept을 우선합니다.
 
-### 4. *type_traits 미include*
+### 4. type_traits 미include
 ```cpp
 template<typename T>
 void f() { static_assert(std::is_integral_v<T>); }
 // ERROR — <type_traits> 안 include
 ```
 
-### 5. *if constexpr 외 분기에 invalid code*
+### 5. if constexpr 외 분기에 invalid code
 ```cpp
 template<typename T>
 void f(T x) {
@@ -385,14 +385,14 @@ void f(T x) {
     }
 }
 ```
-`if constexpr`의 *false branch는 instantiate 안 됨*. 잘못된 코드 OK. *그러나 syntax는 valid해야*.
+`if constexpr`의 false branch는 인스턴스화되지 않으므로 의미상 잘못된 코드도 통과할 수 있지만, syntax 자체는 valid해야 합니다.
 
-### 6. *unused trait include*
-`<type_traits>`가 *작지만 컴파일 시간 추가*. 사용 안 하면 *제거*.
+### 6. 사용하지 않는 trait 헤더 include
+`<type_traits>`는 작지만 컴파일 시간을 추가합니다. 쓰지 않으면 제거합니다.
 
 ## 측정 — type traits의 코드 크기
 
-같은 함수, virtual vs SFINAE vs if constexpr.
+같은 함수를 virtual, SFINAE, `if constexpr`로 비교합니다.
 
 ```cpp
 // V1 — virtual (런타임 분기)
@@ -415,7 +415,7 @@ void process(T x) {
 }
 ```
 
-코드 크기 (5개 type별 호출, STM32F4):
+5개 type별 호출 기준의 코드 크기입니다(STM32F4).
 
 ```text
 V1 (virtual): 460 B (vtable + 가상 호출)
@@ -423,7 +423,7 @@ V2 (SFINAE): 320 B (per-type 인스턴스)
 V3 (if constexpr): 280 B (인라인 분기 제거)
 ```
 
-`if constexpr`이 *가장 작고 빠름*. *modern 권장*.
+`if constexpr`이 가장 작고 빠르며, modern C++에서 권장됩니다.
 
 ## 정리
 
@@ -442,4 +442,4 @@ V3 (if constexpr): 280 B (인라인 분기 제거)
 
 ## 다음 글
 
-[Part 2-10: Concepts (C++20)](/blog/embedded/embedded-cpp/part2-10-concepts) — *template 제약을 명시*. SFINAE보다 *훨씬 읽기 좋은* 컴파일 타임 type 검증.
+[Part 2-10: Concepts (C++20)](/blog/embedded/embedded-cpp/part2-10-concepts) — template 제약을 시그니처에 명시합니다. SFINAE보다 훨씬 읽기 좋은 컴파일 타임 type 검증을 다룹니다.

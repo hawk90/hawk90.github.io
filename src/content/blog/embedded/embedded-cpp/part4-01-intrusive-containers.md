@@ -10,25 +10,25 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Intrusive = 객체 안에 *list pointer 박힘*."** — `std::list`의 wrapper node 없음. *zero allocation*.
+> **"Intrusive = 객체 안에 list pointer를 박는 방식입니다."** `std::list`처럼 wrapper node를 두지 않으므로 추가 할당이 0입니다.
 
 ## 어떤 문제를 푸는가
 
-`std::list<T>`의 내부 구조:
+`std::list<T>`의 내부 구조는 다음과 같습니다.
 
 ```text
 [head] → [Node{prev, next, T data}] → [Node{...}] → ...
 ```
 
-각 *Node가 heap에 할당*. *T 외에 두 pointer 추가 메모리*. 임베디드에 부담.
+각 Node가 heap에 할당되고, T 외에 두 pointer만큼 메모리가 더 필요합니다. 임베디드에는 부담이 됩니다.
 
-**Intrusive container**는 *반대*:
+**Intrusive container**는 구조가 반대입니다.
 
 ```text
 [head] → [T{prev, next, other fields}] → [T{...}] → ...
 ```
 
-*T 자체에 prev/next pointer 포함*. list node *별도 할당 없음*.
+T 자체에 prev/next pointer가 들어 있어 list node를 별도로 할당하지 않습니다.
 
 ```cpp
 struct Task {
@@ -46,11 +46,11 @@ void add_task(Task* t) {
 }
 ```
 
-*추가 할당 0*. Linux 커널, FreeRTOS 등이 *전부 intrusive*.
+추가 할당이 0입니다. Linux 커널과 FreeRTOS가 전부 이 패턴을 씁니다.
 
 ## Linux 커널 스타일 — `list_head`
 
-Linux 커널의 `list.h`가 *표준 idiom*.
+Linux 커널의 `list.h`가 표준 idiom입니다.
 
 ```cpp
 struct list_head {
@@ -88,9 +88,9 @@ void iterate() {
 }
 ```
 
-`container_of` 매크로가 *핵심 트릭*. `list_head*`에서 *enclosing struct pointer* 계산.
+`container_of` 매크로가 핵심 트릭으로, `list_head*`에서 enclosing struct의 pointer를 계산합니다.
 
-C++로는 *template*으로 더 깔끔.
+C++에서는 template으로 더 깔끔하게 쓸 수 있습니다.
 
 ## C++ Template intrusive list
 
@@ -163,11 +163,11 @@ for (auto& t : pending) {
 }
 ```
 
-*같은 Task*가 *두 list에 동시에* 들어갈 수도 (서로 다른 link). 매우 유연.
+같은 Task가 서로 다른 link를 두면 두 list에 동시에 들어갈 수도 있습니다. 매우 유연한 구조입니다.
 
 ## Boost.Intrusive
 
-Boost의 *intrusive container 라이브러리*. 임베디드 친화.
+Boost가 제공하는 intrusive container 라이브러리이며 임베디드 친화적입니다.
 
 ```cpp
 #include <boost/intrusive/list.hpp>
@@ -191,9 +191,9 @@ for (auto& t : g_pending) {
 }
 ```
 
-`bi::list_base_hook`이 *prev/next 포함*. *상속만 하면* intrusive.
+`bi::list_base_hook`이 prev/next를 포함하고, 상속만 하면 intrusive가 됩니다.
 
-여러 list에 동시 가입:
+여러 list에 동시에 가입할 수도 있습니다.
 
 ```cpp
 struct PendingTag;
@@ -208,10 +208,11 @@ using PendingList = bi::list<Task, bi::base_hook<bi::list_base_hook<bi::tag<Pend
 using ReadyList = bi::list<Task, bi::base_hook<bi::list_base_hook<bi::tag<ReadyTag>>>>;
 ```
 
-장점:
-- *Heap 0*
-- *추가 메모리 minimal* (prev/next만)
-- *erase O(1)* — node 자체 알면
+장점은 다음과 같습니다.
+
+- Heap 사용이 0입니다.
+- 추가 메모리가 prev/next만큼만 늘어납니다.
+- node 자체를 알고 있으면 erase가 O(1)입니다.
 
 ## Intrusive vs std::list 비교
 
@@ -248,7 +249,7 @@ tasks.push_back(t1);
 tasks.push_back(t2);
 ```
 
-ETL이 *임베디드 friendly*. *Boost보다 가벼움*.
+ETL은 임베디드 친화적이며 Boost보다 가볍습니다.
 
 ## 다른 intrusive 자료구조
 
@@ -267,7 +268,7 @@ using TaskSet = bi::set<OrderedTask>;
 TaskSet sorted_tasks;
 ```
 
-RB-tree로 *priority 정렬 자동*. *heap 0*.
+RB-tree로 priority가 자동 정렬되고 heap도 쓰지 않습니다.
 
 ### Intrusive hash map
 
@@ -280,11 +281,11 @@ struct Item : public bi::unordered_set_base_hook<> {
 using ItemMap = bi::unordered_set<Item>;
 ```
 
-bucket array는 *별도 stack/static 할당*.
+bucket array는 stack이나 static으로 별도 할당합니다.
 
 ## 임베디드 — RTOS Task Queue
 
-전형적 사용 — *RTOS scheduler task queue*.
+전형적인 사용처는 RTOS scheduler의 task queue입니다.
 
 ```cpp
 struct TaskTcb {
@@ -306,7 +307,7 @@ void task_make_ready(TaskTcb* t) {
 }
 ```
 
-*heap 없음 + O(1) operations*. FreeRTOS, Zephyr 모두 이 패턴.
+heap을 쓰지 않으면서 모든 연산이 O(1)입니다. FreeRTOS와 Zephyr 모두 이 패턴을 따릅니다.
 
 ## 임베디드 — Event Pool
 
@@ -338,12 +339,12 @@ void process_events() {
 }
 ```
 
-*Pool에서 alloc + intrusive list로 enqueue*. 임베디드 *event-driven*의 표준.
+Pool에서 객체를 할당하고 intrusive list로 enqueue하는 방식이 임베디드 event-driven의 표준입니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *Container 소유권 모호*
-intrusive list는 *node를 소유하지 않음*. *외부에서 lifetime 관리*. *list 소멸 시 node 해제 안 됨*.
+### 1. Container의 소유권 모호
+intrusive list는 node를 소유하지 않으므로 lifetime은 외부에서 관리해야 합니다. list가 소멸해도 node는 해제되지 않습니다.
 
 ```cpp
 {
@@ -351,35 +352,38 @@ intrusive list는 *node를 소유하지 않음*. *외부에서 lifetime 관리*.
     list.push_back(t);
 }   // t 소멸 — list에는 dangling pointer
 ```
-*scope 일치* 또는 *명시적 erase*.
 
-### 2. *Erase 이전 사용*
+scope를 일치시키거나 명시적으로 erase합니다.
+
+### 2. Erase 이전 사용
 ```cpp
 auto* t = list.front();
 list.pop_front();
 t->priority;   // OK (node는 살아 있음, list만 없앰)
 ```
-intrusive에선 *list와 node 분리*. 이건 OK. *node를 free한 후 사용*은 UB.
 
-### 3. *Double linking*
+intrusive 컨테이너는 list와 node가 분리되어 있으므로 위 코드는 안전합니다. 다만 node를 free한 후 사용하면 UB입니다.
+
+### 3. Double linking
 ```cpp
 list1.push_back(t);
 list2.push_back(t);   // 같은 link 사용 — 양쪽 깨짐
 ```
-*다른 link 멤버* 사용.
 
-### 4. *알맞은 link tag 없음*
-*다중 list 가입* 시 *각자 다른 tag* 필수.
+서로 다른 link 멤버를 씁니다.
 
-### 5. *Const correctness*
-intrusive container는 *node 내부 변경* — *const list iteration*에 *non-const node 변경 가능*. 주의.
+### 4. 알맞은 link tag 없음
+다중 list에 가입할 때는 각자 다른 tag가 필요합니다.
 
-### 6. *Concurrent 수정*
-intrusive list의 *push/pop은 non-atomic*. multi-task에 *mutex* 또는 *lock-free intrusive list*.
+### 5. Const correctness
+intrusive container는 node 내부를 변경하므로 const list iteration에서도 non-const node 변경이 가능합니다. 주의가 필요합니다.
+
+### 6. Concurrent 수정
+intrusive list의 push/pop은 atomic하지 않습니다. multi-task 환경에서는 mutex나 lock-free intrusive list가 필요합니다.
 
 ## 측정 — std::list vs intrusive
 
-같은 1000개 객체 enqueue/dequeue (STM32F4).
+같은 1000개 객체를 enqueue/dequeue한 결과입니다 (STM32F4).
 
 ```text
 std::list<Task>:
@@ -395,7 +399,7 @@ intrusive list<Task>:
   heap usage: 0 (Task pool만)
 ```
 
-*10배 이상 빠름 + heap 0*. 임베디드 *결정적 동작*.
+10배 이상 빠르고 heap도 쓰지 않아 임베디드에 적합한 결정적 동작을 보장합니다.
 
 ## 정리
 
@@ -415,4 +419,4 @@ intrusive list<Task>:
 
 ## 다음 글
 
-[Part 4-02: ETL 라이브러리](/blog/embedded/embedded-cpp/part4-02-etl-library) — *임베디드 STL 대체*. heap 없는 vector, map, queue, fsm.
+[Part 4-02: ETL 라이브러리](/blog/embedded/embedded-cpp/part4-02-etl-library) — 임베디드 STL 대체. heap 없는 vector, map, queue, fsm.

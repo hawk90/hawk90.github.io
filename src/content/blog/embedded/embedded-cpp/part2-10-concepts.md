@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Concepts = *templates의 type safety*."** — *어떤 type을 받는지* 함수 시그니처에 명시. 에러 메시지가 *읽힙니다*.
+> **"Concepts = templates의 type safety."** — 어떤 type을 받는지 함수 시그니처에 명시되며, 에러 메시지가 사람이 읽을 수 있는 형태가 됩니다.
 
 ## 어떤 문제를 푸는가
 
-C++20 이전의 templates는 *받을 수 있는 type 제약*이 *코드에 안 보입니다*.
+C++20 이전의 template은 받을 수 있는 type 제약이 코드에 드러나지 않습니다.
 
 ```cpp
 template<typename T>
@@ -28,7 +28,7 @@ add(std::string("a"), std::string("b"));   // OK
 add(MyStruct{}, MyStruct{});               // ERROR — operator+ 없으면 컴파일 에러
 ```
 
-에러 메시지는 *수십 줄의 내부 detail*. *사용자는 이해 어려움*.
+에러 메시지가 수십 줄짜리 내부 detail로 쏟아져 사용자가 이해하기 어렵습니다.
 
 ```text
 error: no match for 'operator+' (operand types are 'MyStruct' and 'MyStruct')
@@ -38,7 +38,7 @@ note:  /usr/include/c++/11/bits/stl_function.h:567:1: note: ...
 (continue for 30 lines)
 ```
 
-C++20 **concepts**는 *제약을 시그니처에 명시*하고 *명확한 에러*를 제공.
+C++20의 **concepts**는 제약을 시그니처에 명시하고 명확한 에러 메시지를 제공합니다.
 
 ## Concept 정의
 
@@ -63,7 +63,7 @@ add(MyStructWithoutPlus{}, MyStructWithoutPlus{});
 // note: because 'MyStructWithoutPlus' does not satisfy 'Addable'
 ```
 
-*에러 메시지가 의미 있음*. *Addable 만족 안 함*이 *즉시 명시*.
+에러 메시지가 의미를 가지며, "Addable을 만족하지 않는다"는 사실이 즉시 드러납니다.
 
 ## Concept syntax 세 가지
 
@@ -94,7 +94,7 @@ auto square(std::integral auto x) {
 }
 ```
 
-가장 짧음. *함수 시그니처 자체가 제약*. 권장.
+가장 짧고, 함수 시그니처 자체가 제약을 표현하므로 권장됩니다.
 
 ## 표준 concepts (`<concepts>`)
 
@@ -133,11 +133,11 @@ std::ranges::input_range<R>
 std::ranges::random_access_range<R>
 ```
 
-C++ Core Library가 *대부분 표준 concepts* 제공. *직접 정의 거의 불필요*.
+C++ Core Library가 대부분의 표준 concepts를 제공하므로 직접 정의할 일이 많지 않습니다.
 
 ## `requires` expression
 
-custom concept 정의의 *기본 도구*.
+custom concept 정의의 기본 도구입니다.
 
 ```cpp
 template<typename T>
@@ -150,12 +150,12 @@ concept Container = requires(T c) {
 };
 ```
 
-requires 안 4가지 표현:
+requires 안에는 4가지 표현이 있습니다.
 
-1. **Simple requirement** — `expr;` — expr이 valid이어야
-2. **Type requirement** — `typename T::xxx;` — nested type 존재
-3. **Compound requirement** — `{ expr } -> Concept;` — expr 결과가 concept 만족
-4. **Nested requirement** — `requires Concept<T>;` — 또 다른 concept 적용
+1. **Simple requirement** — `expr;`로, expr이 valid해야 합니다.
+2. **Type requirement** — `typename T::xxx;`로, nested type이 존재해야 합니다.
+3. **Compound requirement** — `{ expr } -> Concept;`로, expr의 결과가 concept을 만족해야 합니다.
+4. **Nested requirement** — `requires Concept<T>;`로, 또 다른 concept을 적용합니다.
 
 ## 임베디드 — Driver concept
 
@@ -177,11 +177,11 @@ void register_driver(D& driver) {
 }
 ```
 
-*Driver 만족 안 하는 type*은 *시그니처에서 거부*. *function body 안 검사 불필요*.
+Driver를 만족하지 않는 type은 시그니처에서 거부되므로 function body 안에서 검사를 할 필요가 없습니다.
 
 ## 임베디드 — 컴파일 타임 dispatch with concepts
 
-if constexpr + concepts.
+`if constexpr`과 concept을 함께 씁니다.
 
 ```cpp
 template<typename T>
@@ -204,11 +204,11 @@ bool decode(T& obj, const uint8_t* buf, size_t len) {
 }
 ```
 
-*우선순위*가 *코드에 명시*. *type별 분기*가 *자연스럽게 읽힘*.
+우선순위가 코드에 그대로 드러나, type별 분기가 자연스럽게 읽힙니다.
 
 ## Concept 조합
 
-`&&` (and), `||` (or)로 *조합*.
+`&&`(and)와 `||`(or)로 조합합니다.
 
 ```cpp
 template<typename T>
@@ -234,7 +234,7 @@ write_field(std::string());    // ERROR — not numeric
 
 ## CRTP + Concepts — 강력한 결합
 
-[Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism)의 CRTP를 *concept로 명확화*.
+[Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism)의 CRTP를 concept으로 명확하게 만듭니다.
 
 ```cpp
 template<typename T>
@@ -262,7 +262,7 @@ public:
 // error: BadLogger does not satisfy 'LoggerImpl'
 ```
 
-*CRTP base의 type 매개변수가 concept 만족*해야. *missing method*가 *명확한 에러*.
+CRTP base의 type 매개변수가 concept을 만족해야 하므로, missing method가 명확한 에러로 잡힙니다.
 
 ## Concept으로 SFINAE 대체
 
@@ -286,7 +286,7 @@ auto abs(std::integral auto x) {
 }
 ```
 
-C++20이 *압도적으로 짧고 명확*.
+C++20 쪽이 압도적으로 짧고 명확합니다.
 
 ## 임베디드 — Range-based 알고리즘
 
@@ -307,7 +307,7 @@ std::array<float, 3> floats = {1.0f, 2.0f, 3.0f};
 auto sf = sum(floats);   // 6.0f
 ```
 
-*어떤 range든* — *array, vector, std::array, 사용자 컨테이너*. concept만 만족하면 OK.
+array, vector, `std::array`, 사용자 컨테이너 어느 것이든 concept만 만족하면 그대로 동작합니다.
 
 ## Concept 오버로드 — 더 specific 우선
 
@@ -326,11 +326,11 @@ print(1.5);     // float 버전
 print("str");   // fallback
 ```
 
-*더 제약된 concept*이 *우선*. *오버로드 resolution이 명확*.
+더 제약된 concept이 우선합니다. 오버로드 resolution이 명확해집니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *concept 너무 복잡*
+### 1. concept이 너무 복잡함
 ```cpp
 template<typename T>
 concept Foo = requires(T t) {
@@ -343,9 +343,9 @@ concept Foo = requires(T t) {
     // ... 20 more
 };
 ```
-*작은 concept으로 분해*. 조합으로.
+작은 concept으로 분해해 조합합니다.
 
-### 2. *requires 표현 잘못*
+### 2. requires 표현이 의도와 어긋남
 ```cpp
 template<typename T>
 concept Foo = requires(T t) {
@@ -354,27 +354,27 @@ concept Foo = requires(T t) {
     { t.qux() } -> std::convertible_to<int>;   // int로 변환 가능
 };
 ```
-*표현마다 의미 다름*. 의도에 맞게.
+표현마다 의미가 다르므로 의도에 맞게 골라 씁니다.
 
-### 3. *concept 없이 templates*
+### 3. concept 없이 그냥 template
 ```cpp
 template<typename T>
 T process(T x);   // 어떤 T든 받음
 ```
-*문서/사용자 친화성 떨어짐*. concept으로 *제약 명시*.
+문서성과 사용자 친화성이 떨어집니다. concept으로 제약을 명시합니다.
 
-### 4. *concept와 macro 혼동*
-concept은 *type system*. macro는 *텍스트 치환*. 다름.
+### 4. concept과 macro 혼동
+concept은 type system이고 macro는 텍스트 치환이므로 둘은 전혀 다릅니다.
 
-### 5. *toolchain 미지원*
-ARM Compiler 6, IAR 일부는 *C++20 concepts 미지원*. *C++17과 SFINAE 폴백* 또는 toolchain 업그레이드.
+### 5. toolchain 미지원
+ARM Compiler 6, IAR 일부는 C++20 concepts를 지원하지 않습니다. C++17과 SFINAE 폴백을 쓰거나 toolchain을 업그레이드합니다.
 
-### 6. *나만의 concept 과용*
-표준 concept이 *이미 있는데* 직접 정의. `std::integral` 대신 `MyInt` 만들기.
+### 6. 직접 만든 concept 과용
+표준 concept이 이미 있는데도 직접 정의하는 경우가 있습니다. `std::integral` 대신 `MyInt`를 새로 만드는 식이 그 예입니다.
 
 ## 측정 — concept 사용 시 코드 변화
 
-같은 함수, C++17 SFINAE vs C++20 concept.
+같은 함수를 C++17 SFINAE와 C++20 concept으로 비교합니다.
 
 ```cpp
 // C++17 — SFINAE
@@ -387,18 +387,18 @@ template<std::integral T>
 T add(T a, T b) { return a + b; }
 ```
 
-코드 크기: *동일*. concept은 *컴파일 시점에만 영향*. 런타임 동일.
+코드 크기는 동일합니다. concept은 컴파일 시점에만 영향을 주며 런타임은 동일합니다.
 
-컴파일 시간: concept이 *약간 빠름* (SFINAE 추론보다 단순).
+컴파일 시간은 concept 쪽이 약간 빠릅니다. SFINAE 추론보다 단순하기 때문입니다.
 
-에러 메시지: concept이 *훨씬 짧고 명확*.
+에러 메시지는 concept이 훨씬 짧고 명확합니다.
 
-## C++20 concepts의 *실용 가치*
+## C++20 concepts의 실용 가치
 
-1. **에러 메시지** — 가장 큰 이점. 30줄 → 1-2줄.
-2. **자체 문서화** — 함수 시그니처가 *제약 명시*.
-3. **오버로드 명확화** — 더 specific concept 우선.
-4. **SFINAE 대체** — 짧고 읽기 좋음.
+1. **에러 메시지** — 가장 큰 이점입니다. 30줄짜리 에러가 1~2줄로 줄어듭니다.
+2. **자체 문서화** — 함수 시그니처가 제약을 명시합니다.
+3. **오버로드 명확화** — 더 specific한 concept이 우선합니다.
+4. **SFINAE 대체** — 짧고 읽기 좋습니다.
 
 ## 정리
 
@@ -418,4 +418,4 @@ T add(T a, T b) { return a + b; }
 
 ## 다음 글 (Part 3 시작)
 
-[Part 3-01: 동적 할당 없이 C++ 쓰기](/blog/embedded/embedded-cpp/part3-01-no-dynamic-alloc) — *임베디드의 첫 번째 원칙*. `new`, `malloc` 없이 *modern C++*를 쓰는 패턴.
+[Part 3-01: 동적 할당 없이 C++ 쓰기](/blog/embedded/embedded-cpp/part3-01-no-dynamic-alloc) — 임베디드의 첫 번째 원칙입니다. `new`, `malloc` 없이 modern C++를 쓰는 패턴을 다룹니다.

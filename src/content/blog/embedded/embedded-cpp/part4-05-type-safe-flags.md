@@ -10,11 +10,11 @@ type: tech
 
 ## 한 줄 요약
 
-> **"`enum class` + `operator|` 정의 = *type-safe bit flag*."** — 정수 변환 차단, 의도 명확.
+> **"`enum class` 위에 `operator|`만 정의하면 type-safe bit flag가 됩니다."** 정수 변환을 차단하고 의도를 명확히 드러냅니다.
 
 ## 어떤 문제를 푸는가
 
-전통적 C bit flag.
+전통적인 C bit flag는 다음과 같이 씁니다.
 
 ```c
 #define FLAG_READ    (1 << 0)
@@ -29,9 +29,9 @@ int speed = 42;
 permissions |= speed;   // 무관한 정수 OR — 의미 없음, 컴파일 통과
 ```
 
-*flag와 일반 정수가 같은 type*. *섞이는 실수* 컴파일러 못 잡음.
+flag와 일반 정수가 같은 type이므로 섞이는 실수를 컴파일러가 잡지 못합니다.
 
-C++ `enum class` + 연산자 정의로 *type-safe*:
+C++의 `enum class`와 연산자 정의를 함께 쓰면 type-safe가 됩니다.
 
 ```cpp
 enum class Permission : uint32_t {
@@ -51,7 +51,7 @@ int speed = 42;
 p |= speed;   // ERROR — type mismatch
 ```
 
-*정수와 섞이지 않음*. *명확한 의도*.
+정수와 섞이지 않으며 의도가 명확히 드러납니다.
 
 ## 기본 패턴
 
@@ -99,7 +99,7 @@ constexpr bool has_flag(Flag a, Flag b) noexcept {
 }
 ```
 
-연산자 *namespace 안* 또는 *enum과 같은 scope*. ADL로 찾기.
+연산자는 namespace 안이나 enum과 같은 scope에 두어 ADL로 찾도록 합니다.
 
 ## 사용 예
 
@@ -115,11 +115,11 @@ p &= ~Flag::Option1;      // 제거
 p ^= Flag::Option2;       // toggle
 ```
 
-C++ idiomatic.
+C++ idiomatic한 형태입니다.
 
 ## Template으로 자동화
 
-매 enum마다 *operators 정의* 귀찮음. *Macro* 또는 *trait*.
+enum마다 operator를 정의하기는 번거롭습니다. 매크로나 trait로 자동화합니다.
 
 ### Trait + concept (C++20)
 
@@ -158,7 +158,7 @@ struct enable_bit_flags<Permission> : std::true_type {};
 Permission p = Permission::Read | Permission::Write;
 ```
 
-새 enum 추가 — *enable_bit_flags<E> 특수화 1줄*. 나머지 *자동*.
+새 enum을 추가할 때 `enable_bit_flags<E>` 특수화 한 줄만 더 쓰면 나머지는 자동입니다.
 
 ### Macro 버전 (간단)
 
@@ -184,11 +184,11 @@ enum class Permission : uint32_t { Read = 1, Write = 2 };
 DEFINE_BIT_FLAGS(Permission)
 ```
 
-매크로 사용. C++17 이전에 좋음. C++20+는 *template 선호*.
+매크로는 C++17 이전 환경에 잘 맞고, C++20 이상에서는 template을 선호합니다.
 
 ## 임베디드 — Register Bit Flags
 
-ARM Cortex 등의 register flag를 *type-safe*하게.
+ARM Cortex의 register flag를 type-safe하게 다룰 수 있습니다.
 
 ```cpp
 enum class GpioConfig : uint32_t {
@@ -222,7 +222,7 @@ void configure_gpio(int pin, GpioConfig cfg) {
 configure_gpio(5, GpioConfig::Output | GpioConfig::HighSpeed);
 ```
 
-*매크로 #define MODE_OUTPUT보다* type-safe. *디버거에서 enum 이름 확인 가능*.
+`#define MODE_OUTPUT` 매크로보다 type-safe하며 디버거에서 enum 이름을 그대로 확인할 수 있습니다.
 
 ## 임베디드 — Status Register Flags
 
@@ -257,11 +257,11 @@ void uart_isr() {
 }
 ```
 
-ISR에서 *상태 검사 명확*.
+ISR에서 상태 검사가 명확해집니다.
 
 ## To-string for logging
 
-flag 값을 *문자열로 출력*.
+flag 값을 문자열로 출력할 때도 활용합니다.
 
 ```cpp
 constexpr const char* to_string(GpioConfig cfg) {
@@ -286,11 +286,11 @@ void format_flags(GpioConfig cfg, char* buf, size_t n) {
 }
 ```
 
-C++20 *reflection* 추가되면 *자동 to_string* 가능. 현재는 *수동*.
+C++20 이후 reflection이 추가되면 자동 to_string이 가능해집니다. 현재는 수동으로 작성합니다.
 
 ## Strongly-typed Flags<E>
 
-C++의 `std::bitset`처럼 *wrapper class*.
+C++의 `std::bitset`처럼 wrapper class로 감싸는 방식입니다.
 
 ```cpp
 template<typename E>
@@ -322,46 +322,51 @@ p |= Permission::Write;
 if (p.has(Permission::Read)) { /* */ }
 ```
 
-*operator 정의 한 번에 다*. 단 *enum 직접 사용보다 조금 무거움*.
+한 번의 operator 정의로 모두 처리할 수 있지만 enum을 직접 쓰는 것보다 약간 무겁습니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *enum class 없는 enum*
+### 1. `enum class` 없는 enum
 ```cpp
 enum Permission { Read = 1, Write = 2 };   // 옛 enum
 int x = Read;   // 암묵 변환
 ```
-*항상 enum class*. 옛 enum은 *legacy 호환*만.
 
-### 2. *operator 정의 누락*
+항상 `enum class`를 사용하고, 옛 enum은 legacy 호환 용도로만 둡니다.
+
+### 2. operator 정의 누락
 ```cpp
 enum class Flag : uint32_t { A = 1, B = 2 };
 auto x = Flag::A | Flag::B;   // ERROR — operator| 없음
 ```
-*매크로 또는 template으로 자동화*.
 
-### 3. *underlying type 명시 안 함*
+매크로나 template으로 자동화합니다.
+
+### 3. underlying type 명시 안 함
 ```cpp
 enum class Flag { A = 1 << 30 };   // int 가정 — 32-bit 한계
 ```
-*항상 `: uint32_t`* 등 명시.
 
-### 4. *bit position 실수*
+항상 `: uint32_t` 같은 underlying type을 명시합니다.
+
+### 4. bit position 실수
 ```cpp
 enum class Flag { A = 1, B = 2, C = 3 };   // C는 A|B와 같음 — flag 아님
 ```
-*명확한 비트 위치*: `A = 1 << 0, B = 1 << 1, C = 1 << 2`.
 
-### 5. *enum value 충돌*
+`A = 1 << 0, B = 1 << 1, C = 1 << 2`처럼 비트 위치를 명확히 합니다.
+
+### 5. enum value 충돌
 ```cpp
 enum class A { X = 1 };
 enum class B { X = 2 };
 A::X | B::X;   // type 다름 — 컴파일 에러 (의도된 안전)
 ```
-*같은 enum의 flag만 조합*.
 
-### 6. *Strongly typed flags의 overhead 가정*
-`enum class` + operator는 *zero-cost*. *컴파일러가 모두 인라인*.
+같은 enum의 flag끼리만 조합합니다.
+
+### 6. Strongly typed flags의 overhead 가정
+`enum class` + operator는 zero-cost이며 컴파일러가 모두 인라인합니다.
 
 ## 측정 — type-safe vs raw
 
@@ -383,7 +388,7 @@ V2:
     mov  r0, #3       ; 동일
 ```
 
-*완전 동일*. zero-cost.
+생성된 코드가 완전히 동일하며 zero-cost입니다.
 
 ## 정리
 
@@ -401,4 +406,4 @@ V2:
 
 ## 다음 글
 
-[Part 4-06: State Machine](/blog/embedded/embedded-cpp/part4-06-state-machine) — *상태와 전이를 type-safe하게*. enum + switch부터 std::variant까지.
+[Part 4-06: State Machine](/blog/embedded/embedded-cpp/part4-06-state-machine) — 상태와 전이를 type-safe하게. enum + switch부터 std::variant까지.

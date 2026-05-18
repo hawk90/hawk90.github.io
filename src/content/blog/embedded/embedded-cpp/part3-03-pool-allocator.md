@@ -10,17 +10,18 @@ type: tech
 
 ## 한 줄 요약
 
-> **"Pool = *같은 크기 블록의 묶음 + free list*."** — *O(1) 할당/해제*, *fragmentation 0*, *deterministic*.
+> **"Pool은 같은 크기 블록의 묶음에 free list를 더한 구조입니다."** O(1) 할당과 해제, fragmentation 0, deterministic이라는 세 가지를 동시에 제공합니다.
 
 ## 어떤 문제를 푸는가
 
-[Part 3-02](/blog/embedded/embedded-cpp/part3-02-custom-allocator-basics)에서 *간단한 pool*을 보았습니다. 이 글은 *실용적인 pool 구현*입니다.
+[Part 3-02](/blog/embedded/embedded-cpp/part3-02-custom-allocator-basics)에서 간단한 pool을 보았습니다. 이 글은 실용적인 pool 구현을 다룹니다.
 
-요구사항:
-- **O(1) 할당/해제** — 어떤 상태에서도 일정 시간
-- **Fragmentation 0** — 같은 크기 블록만
-- **Thread-safe (선택)** — RTOS 환경
-- **Statistics** — 사용량 추적
+요구사항은 이렇습니다.
+
+- **O(1) 할당과 해제** — 어떤 상태에서도 일정 시간이 걸려야 합니다.
+- **Fragmentation 0** — 같은 크기 블록만 다룹니다.
+- **Thread-safe (선택)** — RTOS 환경에서 필요합니다.
+- **Statistics** — 사용량을 추적할 수 있어야 합니다.
 
 ```cpp
 ObjectPool<Order, 32> pool;
@@ -54,7 +55,7 @@ free_list_head → block0 → block1 → block2 → block3 → nullptr
 (또는 LIFO: block0 → block1 → block2 → ...)
 ```
 
-*포인터 하나*만 보유. *O(1) push/pop*.
+포인터 하나만 보유하면 O(1) push/pop이 가능합니다.
 
 ## 기본 구현
 
@@ -122,7 +123,7 @@ public:
 };
 ```
 
-핵심 idea — `union`으로 *같은 메모리*를 *객체 또는 next pointer*로. *추가 메모리 0*.
+핵심 아이디어는 `union`을 활용해 같은 메모리를 객체 또는 next pointer로 양분한다는 점입니다. 추가 메모리가 전혀 들지 않습니다.
 
 ## 사용 예 — Order Pool
 
@@ -150,7 +151,7 @@ void process_request(int id, int qty, float price) {
 }
 ```
 
-`construct/destroy`로 *RAII와 호환*. 실패 시 *nullptr 반환*.
+`construct`와 `destroy`로 RAII와 자연스럽게 어울리며, 실패 시 nullptr를 반환합니다.
 
 ## RAII wrapper — Pool unique_ptr
 
@@ -197,7 +198,7 @@ PoolUniquePtr<T, N> make_pool_unique(ObjectPool<T, N>& pool, Args&&... args) {
 }
 ```
 
-사용:
+사용 예는 다음과 같습니다.
 
 ```cpp
 ObjectPool<Order, 32> pool;
@@ -211,11 +212,11 @@ void process() {
 }
 ```
 
-`std::unique_ptr`처럼 *예외 안전 + 자동 해제*.
+`std::unique_ptr`처럼 예외 안전과 자동 해제를 모두 챙길 수 있습니다.
 
 ## Thread-safe pool
 
-RTOS multi-task에서 *동시 할당/해제* 시 race condition. *mutex* 또는 *atomic*.
+RTOS multi-task에서 동시에 할당과 해제가 일어나면 race condition이 생깁니다. mutex나 atomic으로 보호합니다.
 
 ```cpp
 template<typename T, size_t N>
@@ -253,11 +254,11 @@ public:
 };
 ```
 
-*mutex 비용*: typical RTOS에서 *1-2 μs*. *짧은 critical section*이라 acceptable.
+mutex 비용은 일반적인 RTOS에서 1~2 μs 수준입니다. critical section이 짧기 때문에 보통 수용 가능합니다.
 
 ### Lock-free pool — atomic free list
 
-더 빠른 옵션. *CAS (Compare-And-Swap)*로 *lock 없이*.
+더 빠른 옵션입니다. CAS(Compare-And-Swap)로 lock 없이 처리합니다.
 
 ```cpp
 template<typename T, size_t N>
@@ -294,15 +295,15 @@ public:
 };
 ```
 
-*ABA problem* 주의 — 다른 thread가 *같은 주소 재할당*하면 CAS가 *잘못 성공*. *tagged pointer*나 *hazard pointer*로 해결.
+ABA problem을 주의해야 합니다. 다른 thread가 같은 주소를 재할당하면 CAS가 잘못 성공합니다. tagged pointer나 hazard pointer로 해결합니다.
 
-대부분 임베디드에서 *mutex 기반이 충분*. lock-free는 *극한 환경*만.
+대부분의 임베디드에서는 mutex 기반이면 충분합니다. lock-free는 극한 환경에서만 고려합니다.
 
-자세한 lock-free는 [Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics).
+자세한 lock-free는 [Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics)에서 다룹니다.
 
 ## 통계와 디버깅
 
-production debugging을 위한 추가 정보.
+production debugging을 위한 추가 정보입니다.
 
 ```cpp
 template<typename T, size_t N>
@@ -340,11 +341,11 @@ public:
 };
 ```
 
-런타임에 *pool 사용 패턴 추적*. *피크 도달*하면 *N 늘리기* 결정.
+런타임에 pool 사용 패턴을 추적합니다. 피크가 N에 도달한다면 N을 늘릴지 판단합니다.
 
 ## Heap-backed pool — 동적 pool
 
-처음에 *malloc 한 번*, 이후 *free list로 관리*.
+처음에 malloc을 한 번만 호출하고 이후로는 free list로 관리합니다.
 
 ```cpp
 template<typename T>
@@ -363,46 +364,46 @@ public:
 };
 ```
 
-*시작 시 한 번만 malloc*. 이후 *fragmentation 없음*. *시스템 init 단계*에서 만들면 *runtime malloc 없음*.
+시작 시점에 한 번만 malloc을 호출하고 이후로는 fragmentation이 없습니다. 시스템 init 단계에서 만들어 두면 런타임 malloc이 사라집니다.
 
-대부분 임베디드는 *static pool*이 더 안전. heap pool은 *시작 시 크기 결정 필요한* 경우만.
+대부분의 임베디드에서는 static pool이 더 안전합니다. heap pool은 시작 시점에야 크기가 결정되는 경우에만 씁니다.
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. *Double free*
+### 1. Double free
 ```cpp
 auto* p = pool.allocate();
 pool.deallocate(p);
 pool.deallocate(p);   // free list 순환 → 무한 루프 또는 corruption
 ```
-*RAII로 wrap*. 직접 호출 회피.
+RAII로 감싸 직접 호출을 피합니다.
 
-### 2. *Use after free*
+### 2. Use after free
 ```cpp
 auto* p = pool.allocate();
 pool.deallocate(p);
 p->method();   // p의 메모리는 next pointer로 변경됨
 ```
-*RAII로 lifetime 명확*.
+RAII로 lifetime을 명확히 합니다.
 
-### 3. *큰 N — .bss 폭증*
+### 3. 큰 N으로 .bss 폭증
 ```cpp
 ObjectPool<HugeStruct, 10000> pool;   // sizeof(HugeStruct) * 10000
 ```
-*N을 측정 기반으로 결정*. peak_allocated 추적 후 *10-20% 마진*.
+N은 측정을 바탕으로 결정합니다. peak_allocated를 추적한 뒤 10~20% 마진을 둡니다.
 
-### 4. *Thread safety 가정*
-single-thread pool을 *RTOS task끼리 공유* → race. *mutex 또는 별도 pool*.
+### 4. Thread safety 가정
+single-thread pool을 RTOS task끼리 공유하면 race가 발생합니다. mutex를 두거나 task별로 별도 pool을 씁니다.
 
-### 5. *Pool 종류 너무 많음*
-각 타입마다 *전용 pool* → *낭비 + 복잡*. 비슷한 크기는 *공용 pool* (다음 단계).
+### 5. Pool 종류 너무 많음
+각 타입마다 전용 pool을 두면 메모리도 낭비되고 관리도 복잡해집니다. 비슷한 크기는 공용 pool로 합칩니다.
 
-### 6. *initial free list 잘못*
-init 시 *next pointer 누락* → null deref. *모든 slot 연결*.
+### 6. initial free list 잘못
+init 시점에 next pointer가 누락되면 null deref가 발생합니다. 모든 slot을 연결합니다.
 
 ## Variable-size — Multi-pool
 
-여러 크기를 *처리하려면 여러 pool*. 크기에 따라 *분기*.
+여러 크기를 처리하려면 여러 pool을 두고 크기에 따라 분기합니다.
 
 ```cpp
 class MultiPool {
@@ -420,7 +421,7 @@ public:
 };
 ```
 
-크기 *추적 필요* — pool마다 *별도 deallocate*.
+크기를 추적해야 하므로 pool마다 별도의 deallocate가 필요합니다.
 
 ```cpp
 void deallocate(void* p, size_t n) {
@@ -430,11 +431,11 @@ void deallocate(void* p, size_t n) {
 }
 ```
 
-malloc 비슷한 *generic allocator*가 됨. *fragmentation 일부 발생* 가능 (각 pool 내부엔 없지만 *pool 간 균형*).
+malloc과 비슷한 generic allocator가 됩니다. 각 pool 내부에는 fragmentation이 없지만, pool 간 균형이 안 맞으면 일부 fragmentation이 발생할 수 있습니다.
 
 ## 측정 — pool vs malloc
 
-같은 패턴 (10000회 alloc/free), STM32F4.
+같은 패턴(10000회 alloc/free)을 STM32F4에서 측정합니다.
 
 ```text
 malloc/free (newlib-nano):
@@ -450,7 +451,7 @@ ObjectPool<Order, 100>:
   determinism: 완벽
 ```
 
-*Pool이 10배 빠름 + 결정적*. real-time critical에 *필수*.
+Pool이 약 10배 빠르고 결정적입니다. real-time critical 환경에서는 사실상 필수입니다.
 
 ## 정리
 
@@ -471,4 +472,4 @@ ObjectPool<Order, 100>:
 
 ## 다음 글
 
-[Part 3-04: std::pmr 활용](/blog/embedded/embedded-cpp/part3-04-pmr) — *C++17 표준 polymorphic allocator*. 같은 컨테이너 타입에 *다른 pool* 사용.
+[Part 3-04: std::pmr 활용](/blog/embedded/embedded-cpp/part3-04-pmr) — C++17 표준 polymorphic allocator로, 같은 컨테이너 타입에 다른 pool을 사용합니다.
