@@ -12,7 +12,7 @@
   leaf/.style={font=\scriptsize, minimum width=14mm}
 ]
 
-\node[hi] (root) {UML Diagrams (13+)}
+\node[hi] (root) {UML 2.5.1 Diagrams (14)}
   child { node[abs] (s) {Structural (7)}
     child { node[con, leaf] {Class} }
     child { node[con, leaf] {Object} }
@@ -20,14 +20,15 @@
     child { node[con, leaf] {Component} }
     child { node[con, leaf] {Composite} }
     child { node[con, leaf] {Deployment} }
-    child { node[con, leaf] {Artifact} }
+    child { node[con, leaf] {Profile} }
   }
-  child { node[abs] (b) {Behavioral (6)}
+  child { node[abs] (b) {Behavioral (7)}
     child { node[imp, leaf] {Use Case} }
+    child { node[imp, leaf] {Activity} }
+    child { node[imp, leaf] {State Machine} }
     child { node[imp, leaf] {Sequence} }
     child { node[imp, leaf] {Communic.} }
-    child { node[imp, leaf] {State Machine} }
-    child { node[imp, leaf] {Activity} }
+    child { node[imp, leaf] {Interact.\,Overview} }
     child { node[imp, leaf] {Timing} }
   };
 

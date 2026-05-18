@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  part/.style={con, align=center, font=\footnotesize, minimum width=30mm, minimum height=14mm},
+  port/.style={rectangle, draw=edgec, fill=white, minimum size=3mm, inner sep=0pt, line width=0.5pt},
+  conn/.style={draw=edgec, line width=0.7pt},
+  node distance=12mm and 18mm
+]
+
+% Outer Car class frame
+\node[hi, anchor=north west, font=\small\bfseries] (carlabel) at (0,0) {Car};
+
+% Part: engine
+\node[part, below=8mm of carlabel, anchor=north west] (engine) {engine : Engine};
+% Part: transmission
+\node[part, right=of engine] (trans) {transmission : Transmission};
+% Part: wheels (4)
+\node[part, below=12mm of engine, minimum width=70mm] (wheels) {wheels : Wheel [4]};
+
+% Ports on engine
+\node[port] (e_in) at (engine.west) {};
+\node[port] (e_out) at (engine.east) {};
+% Ports on trans
+\node[port] (t_in) at (trans.west) {};
+\node[port] (t_out) at (trans.east) {};
+
+% External port on Car (left side)
+\node[port, left=2mm of e_in] (car_in) {};
+\node[font=\tiny, left=0.5mm of car_in] {fuelIn};
+
+% External port on Car (bottom)
+\node[port] (car_wheel) at ($(wheels.south)+(0,0)$) {};
+
+% Connectors
+\draw[conn] (car_in) -- (e_in) node[midway, above, font=\tiny] {«delegate»};
+\draw[conn] (e_out) -- node[above, font=\tiny] {torque} (t_in);
+\draw[conn] (trans.south) -- node[right, font=\tiny] {drive} (wheels.north -| trans.south);
+
+% Outer frame
+\begin{pgfonlayer}{background}
+  \node[abs, fit=(carlabel)(engine)(trans)(wheels)(car_in),
+        inner sep=8mm, fill=absfill!15] {};
+\end{pgfonlayer}
+
+\end{tikzpicture}
+\end{document}

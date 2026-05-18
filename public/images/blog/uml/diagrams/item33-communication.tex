@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  obj/.style={con, align=center, font=\footnotesize, minimum width=28mm, minimum height=10mm},
+  link/.style={draw=edgec, line width=0.5pt},
+  msg/.style={-{Stealth[length=2.2mm]}, draw=edgec, line width=0.6pt},
+  node distance=20mm and 22mm
+]
+
+% Customer object (left)
+\node[obj] (cust) {:Customer};
+
+% Order object (center)
+\node[obj, right=of cust] (order) {:Order};
+
+% Inventory (top-right)
+\node[obj, above right=10mm and 6mm of order] (inv) {:Inventory};
+
+% Payment (bottom-right)
+\node[obj, below right=10mm and 6mm of order] (pay) {:Payment};
+
+% Links (undirected, structural)
+\draw[link] (cust) -- (order);
+\draw[link] (order) -- (inv);
+\draw[link] (order) -- (pay);
+
+% Numbered messages
+\node[font=\scriptsize, above=1mm, midway] at ($(cust)!0.5!(order)$)
+  {\textbf{1}: checkout()};
+\draw[msg] ([yshift=2mm]cust.east) -- ([yshift=2mm]order.west);
+
+\node[font=\scriptsize, right=1mm of order, yshift=10mm]
+  {\textbf{1.1}: reserve()};
+\draw[msg] ([xshift=2mm]order.north) -- ([xshift=2mm]inv.south);
+
+\node[font=\scriptsize, right=1mm of order, yshift=-10mm]
+  {\textbf{1.2}: charge()};
+\draw[msg] ([xshift=2mm]order.south) -- ([xshift=2mm]pay.north);
+
+\end{tikzpicture}
+\end{document}

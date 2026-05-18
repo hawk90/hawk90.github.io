@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,shapes.geometric}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ref/.style={con, align=center, font=\footnotesize, minimum width=42mm, minimum height=14mm},
+  cond/.style={diamond, draw=edgec, fill=white, aspect=2, inner sep=2pt, font=\scriptsize},
+  endpt/.style={circle, draw=edgec, fill=edgec, inner sep=1.4pt},
+  endout/.style={circle, draw=edgec, fill=white, inner sep=2.6pt, line width=0.7pt},
+  flow/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt},
+  node distance=8mm
+]
+
+% Start
+\node[endpt] (start) {};
+% First ref
+\node[ref, below=of start] (validate) {ref: ValidateOrder};
+% Decision
+\node[cond, below=of validate] (cond) {in stock?};
+% Yes branch
+\node[ref, below=of cond] (charge) {ref: ChargePayment};
+\node[ref, below=of charge] (ship) {ref: ScheduleShipment};
+\node[endout, below=of ship] (e1) {};
+% No branch (right)
+\node[ref, right=18mm of cond] (notify) {ref: NotifyOutOfStock};
+\node[endout, below=12mm of notify] (e2) {};
+
+% Flow arrows
+\draw[flow] (start) -- (validate);
+\draw[flow] (validate) -- (cond);
+\draw[flow] (cond) -- node[left, font=\tiny] {Yes} (charge);
+\draw[flow] (charge) -- (ship);
+\draw[flow] (ship) -- (e1);
+\draw[flow] (cond.east) -- node[above, font=\tiny] {No} (notify.west);
+\draw[flow] (notify) -- (e2);
+
+\end{tikzpicture}
+\end{document}

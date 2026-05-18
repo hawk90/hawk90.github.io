@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  stnode/.style={con, align=center, font=\footnotesize, minimum width=34mm},
+  mcnode/.style={imp, align=center, font=\footnotesize, minimum width=30mm},
+  extension/.style={-{Triangle[length=3mm,width=3mm]}, draw=edgec, line width=0.6pt},
+  node distance=8mm and 22mm
+]
+
+% Stereotypes (left column)
+\node[stnode] (entity) {«stereotype» \\[2pt] \textbf{Entity} \\[2pt] {\scriptsize + table : String}};
+\node[stnode, below=of entity] (session) {«stereotype» \\[2pt] \textbf{SessionBean} \\[2pt] {\scriptsize + stateful : Boolean}};
+\node[stnode, below=of session] (ejb) {«stereotype» \\[2pt] \textbf{EJB}};
+
+% Metaclasses (right column)
+\node[mcnode, right=of entity] (mclass) {«metaclass» \\[2pt] \textbf{Class}};
+\node[mcnode, right=of ejb] (mcomp) {«metaclass» \\[2pt] \textbf{Component}};
+
+% Extension arrows
+\draw[extension] (entity.east) -- node[above, font=\tiny] {«extension»} (mclass.west);
+\draw[extension] (session.east) -- node[above, font=\tiny] {«extension»} (mclass.west);
+\draw[extension] (ejb.east) -- node[above, font=\tiny] {«extension»} (mcomp.west);
+
+% Profile package frame
+\begin{pgfonlayer}{background}
+  \node[abs, fit=(entity)(session)(ejb)(mclass)(mcomp),
+        inner sep=8mm, fill=absfill!20] (prof) {};
+  \node[hi, anchor=north west, font=\footnotesize\bfseries]
+    at ([xshift=4pt, yshift=-4pt] prof.north west) {«profile» JEE};
+\end{pgfonlayer}
+
+\end{tikzpicture}
+\end{document}

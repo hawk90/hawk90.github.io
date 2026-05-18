@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=12mm, y=8mm,
+  state/.style={font=\scriptsize, anchor=south west},
+  axis/.style={draw=edgec, line width=0.5pt},
+  trans/.style={draw=edgec, line width=1.2pt},
+  msg/.style={-{Stealth[length=2.4mm]}, draw=hibord, line width=0.7pt, dashed}
+]
+
+% --- Client lifeline ---
+\node[font=\footnotesize\bfseries, anchor=east] at (0, 6.5) {Client};
+
+% State levels: CLOSED (low), SYN\_SENT (mid), ESTABLISHED (high)
+\node[state] at (-0.05, 5.6) {ESTABLISHED};
+\node[state] at (-0.05, 4.6) {SYN\_SENT};
+\node[state] at (-0.05, 3.6) {CLOSED};
+
+% Client trace: CLOSED [0..1] -> SYN_SENT [1..3] -> ESTABLISHED [3..7]
+\draw[trans] (0, 3.5) -- (1, 3.5) -- (1, 4.5) -- (3, 4.5) -- (3, 5.5) -- (7, 5.5);
+
+% --- Server lifeline ---
+\node[font=\footnotesize\bfseries, anchor=east] at (0, 2.5) {Server};
+\node[state] at (-0.05, 1.6) {ESTABLISHED};
+\node[state] at (-0.05, 0.6) {LISTEN};
+
+% Server trace: LISTEN [0..3] -> ESTABLISHED [3..7]
+\draw[trans] (0, 0.5) -- (3, 0.5) -- (3, 1.5) -- (7, 1.5);
+
+% Time axis
+\draw[axis] (0, 0) -- (7.5, 0) node[right, font=\scriptsize] {시간};
+\foreach \t in {1,2,3,4,5,6,7}
+  \draw[axis] (\t, -0.1) -- (\t, 0.1) node[below=2pt, font=\tiny] {\t};
+
+% Messages between lifelines (sequence of TCP 3-way handshake)
+\draw[msg] (1, 4.4) -- (2, 1.4) node[midway, sloped, above, font=\tiny] {SYN};
+\draw[msg] (2, 1.4) -- (3, 4.4) node[midway, sloped, above, font=\tiny] {SYN-ACK};
+\draw[msg] (3, 5.4) -- (3.2, 1.4) node[midway, sloped, above, font=\tiny] {ACK};
+
+% Constraint label
+\node[font=\tiny, draw=warnbord, fill=warnfill, inner sep=2pt] at (5, 7) {$\{t_3 - t_1 \le 100\mathrm{ms}\}$};
+
+\end{tikzpicture}
+\end{document}
