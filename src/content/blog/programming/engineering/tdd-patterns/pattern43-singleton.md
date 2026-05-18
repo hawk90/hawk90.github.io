@@ -1,7 +1,7 @@
 ---
 title: "Pattern 43: Singleton (avoid)"
 date: 2026-07-02T19:00:00
-description: "Beck도 추천하지 않는 패턴 — global state 회피."
+description: "Beck도 추천하지 않는 패턴 — global state 회피, DI 우선."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 43
 tags: [tdd, beck, singleton, anti-pattern]
@@ -13,106 +13,77 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> Singleton은 테스트를 어렵게 만들고 숨겨진 의존성을 만든다 — 가능한 피하라.
+> Singleton은 *테스트를 어렵게* 만들고 *숨겨진 의존성*을 만든다. *가능한 피하고* DI 사용.
 
 ## 동기 (Motivation)
 
-**Singleton**은 GoF 패턴 중 하나지만, TDD에서는 **안티패턴**으로 본다:
+Singleton은 GoF 패턴이지만 *TDD에선 안티패턴*.
 
 ```python
-# Singleton 사용
 class Database:
     _instance = None
-
     @classmethod
     def get_instance(cls):
-        if cls._instance is None:
-            cls._instance = cls()
+        if cls._instance is None: cls._instance = cls()
         return cls._instance
 
-# 어디서나 접근 가능
+# 어디서나
 db = Database.get_instance()
-db.query("SELECT ...")
 ```
 
-**문제**: 테스트에서 이 싱글턴을 어떻게 교체할 것인가?
+**문제**:
+- 테스트에서 *교체 불가*.
+- *숨겨진 의존성* — signature에 안 보임.
+- *전역 상태 공유* — 테스트 격리 깨짐.
 
-## Singleton의 문제점
+### 신호
 
-### 1. 테스트 격리 불가
+- 테스트마다 *DB/state 초기화* 부담.
+- 코드 곳곳 `getInstance()` 호출.
+- *test 순서 의존*.
+- *mocking 어려움*.
 
-```python
-class UserService:
-    def get_user(self, id):
-        db = Database.get_instance()  # 숨겨진 의존성
-        return db.query(f"SELECT * FROM users WHERE id={id}")
+### 언제 적용 *해도 되는가*
 
-# 테스트
-def test_get_user():
-    service = UserService()
-    # Database.get_instance()가 실제 DB 연결!
-    # 테스트마다 DB 상태가 공유됨
-    user = service.get_user(1)  # 어떤 데이터가 있는지 모름
-```
+- *진정한 hardware 자원* (serial port).
+- *immutable config* (변경 없음).
+- *stateless logger*.
+- *cross-cutting concern* (metric).
 
-### 2. 상태 공유
+진짜 *unavoidable*인 경우만.
 
-```python
-def test_first():
-    db = Database.get_instance()
-    db.insert(User("Alice"))
-    # Alice가 DB에 있음
+## 절차 (Mechanics) — Singleton 제거
 
-def test_second():
-    db = Database.get_instance()
-    users = db.query("SELECT * FROM users")
-    # test_first의 Alice가 남아 있을 수도!
-    # 테스트 순서에 따라 결과 달라짐
-```
+1. **Singleton 사용처 식별**.
+2. **dependency를 constructor 주입**.
+3. *Singleton class*는 *factory*로 전환.
+4. test에서 *fake 주입*.
 
-### 3. 숨겨진 의존성
+## 예시 1 — Before/After
 
 ```python
-class OrderProcessor:
-    def process(self, order):
-        # 시그니처만 보면 의존성이 안 보임
-        db = Database.get_instance()
-        logger = Logger.get_instance()
-        mailer = Mailer.get_instance()
-        # 실제로는 3개의 전역 의존성!
-```
-
-## 대안: Dependency Injection
-
-### Before (Singleton)
-
-```python
+# Before — Singleton 의존
 class UserService:
     def get_user(self, id):
         db = Database.get_instance()
-        return db.query(f"SELECT * FROM users WHERE id={id}")
-```
+        return db.query(...)
 
-### After (DI)
-
-```python
+# After — DI
 class UserService:
     def __init__(self, database):
-        self.db = database  # 의존성 명시적 주입
+        self.db = database
 
     def get_user(self, id):
-        return self.db.query(f"SELECT * FROM users WHERE id={id}")
+        return self.db.query(...)
 
-# 프로덕션
-service = UserService(PostgresDatabase())
-
-# 테스트
-service = UserService(FakeDatabase())
+# 사용
+service = UserService(PostgresDatabase())   # production
+service = UserService(FakeDatabase())       # test
 ```
 
-## 테스트 가능한 설계
+의존성 *명시 + 교체 가능*.
 
-### 1. Constructor Injection
+## 예시 2 — Multiple dependency
 
 ```python
 class OrderProcessor:
@@ -120,11 +91,6 @@ class OrderProcessor:
         self.db = database
         self.logger = logger
         self.mailer = mailer
-
-    def process(self, order):
-        self.logger.info(f"Processing {order.id}")
-        self.db.save(order)
-        self.mailer.send_confirmation(order)
 
 # 테스트
 def test_order_processing():
@@ -139,111 +105,11 @@ def test_order_processing():
     assert fake_mailer.sent_emails == 1
 ```
 
-### 2. Factory/Provider 패턴
+세 dependency 모두 *명시 + test에서 fake*.
+
+## 예시 3 — Pytest fixture로 DI
 
 ```python
-class DatabaseProvider:
-    """테스트에서 교체 가능한 Provider"""
-    _factory = lambda: PostgresDatabase()
-
-    @classmethod
-    def get(cls):
-        return cls._factory()
-
-    @classmethod
-    def set_factory(cls, factory):
-        cls._factory = factory
-
-# 테스트
-def test_with_fake_db():
-    DatabaseProvider.set_factory(lambda: FakeDatabase())
-    try:
-        # 테스트 코드
-        pass
-    finally:
-        DatabaseProvider.set_factory(lambda: PostgresDatabase())
-```
-
-### 3. Context/Scope 기반
-
-```python
-from contextlib import contextmanager
-
-class AppContext:
-    def __init__(self):
-        self.database = None
-        self.logger = None
-
-_current_context = None
-
-@contextmanager
-def app_context(database, logger):
-    global _current_context
-    old = _current_context
-    _current_context = AppContext()
-    _current_context.database = database
-    _current_context.logger = logger
-    try:
-        yield _current_context
-    finally:
-        _current_context = old
-
-# 사용
-with app_context(FakeDatabase(), FakeLogger()) as ctx:
-    service = UserService(ctx.database)
-    # 테스트
-```
-
-## 진짜 Singleton이 필요한 경우
-
-**매우 드물게** Singleton이 적합한 경우:
-
-```python
-# 1. 진정한 하드웨어 자원 (시스템에 하나뿐)
-class SerialPort:
-    """물리적으로 하나뿐인 시리얼 포트"""
-    pass
-
-# 2. 로깅 (side effect가 테스트 결과에 영향 없음)
-class Logger:
-    """로깅은 테스트 격리에 영향 없음"""
-    pass
-
-# 3. 설정 (읽기 전용)
-class Config:
-    """불변 설정은 공유해도 안전"""
-    pass
-```
-
-**그러나** 이 경우에도 테스트를 위해 **교체 가능**하게 설계:
-
-```python
-class Logger:
-    _instance = None
-    _test_instance = None  # 테스트용 교체 지점
-
-    @classmethod
-    def get_instance(cls):
-        if cls._test_instance:
-            return cls._test_instance
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
-
-    @classmethod
-    def set_test_instance(cls, instance):
-        cls._test_instance = instance
-
-    @classmethod
-    def reset_test_instance(cls):
-        cls._test_instance = None
-```
-
-## pytest fixture로 DI
-
-```python
-import pytest
-
 @pytest.fixture
 def fake_database():
     return FakeDatabase()
@@ -254,41 +120,154 @@ def fake_mailer():
 
 @pytest.fixture
 def order_processor(fake_database, fake_mailer):
-    return OrderProcessor(
-        database=fake_database,
-        mailer=fake_mailer
-    )
+    return OrderProcessor(database=fake_database, mailer=fake_mailer)
 
 def test_process_order(order_processor, fake_database):
     order = Order(id=1, items=["item1"])
-
     order_processor.process(order)
-
     assert len(fake_database.saved) == 1
 ```
 
-## Singleton vs DI 비교
+fixture가 *자동 주입*.
+
+## 자주 보는 안티패턴
+
+### 1. *Singleton + 전역 mutable state*
+가장 위험. 테스트 격리 *불가*.
+
+### 2. *Singleton + 숨은 호출*
+class deep에 `getInstance()` → 의존 알기 어려움.
+
+### 3. *Test에서 reset 필요*
+`Singleton.reset()` 호출 + 잊으면 leak → flaky.
+
+### 4. *Thread-safe 무시*
+multi-thread에서 `getInstance()` race → double creation.
+
+### 5. *Singleton + Database connection*
+test마다 *production DB connect* → 데이터 손상 위험.
+
+### 6. *Singleton 검증 어려움*
+*행동 검증*보다 *상태 검증*에 집착 → fragile.
+
+## Modern variants
+
+### Dependency Injection framework
+
+```java
+@Component
+public class OrderProcessor {
+    @Autowired private Database db;
+    @Autowired private Mailer mailer;
+}
+```
+
+Spring, Guice, Dagger가 *DI container 관리*.
+
+### Service locator
+
+```python
+class ServiceLocator:
+    services = {}
+
+    @classmethod
+    def register(cls, name, instance):
+        cls.services[name] = instance
+
+    @classmethod
+    def get(cls, name):
+        return cls.services[name]
+```
+
+*test에서 register 교체*. Singleton보다 조금 나음.
+
+### Context object
+
+```python
+@contextmanager
+def app_context(database, logger):
+    ctx = AppContext(database, logger)
+    try: yield ctx
+    finally: pass
+
+with app_context(FakeDb(), FakeLogger()) as ctx:
+    service = UserService(ctx.database)
+```
+
+scope 명시.
+
+### Factory + flag
+
+```python
+class DatabaseFactory:
+    _factory = lambda: PostgresDatabase()
+
+    @classmethod
+    def create(cls): return cls._factory()
+
+    @classmethod
+    def set_factory(cls, fn): cls._factory = fn
+
+# Test
+DatabaseFactory.set_factory(lambda: FakeDatabase())
+```
+
+### Module-level singleton (Python)
+
+```python
+# module.py
+_db = None
+
+def get_db():
+    global _db
+    if _db is None: _db = Database()
+    return _db
+
+# Test에서 monkey-patch 가능
+import module
+module._db = FakeDatabase()
+```
+
+Python module 자체가 *singleton-like*.
+
+### Rust — global state 어려움 by design
+
+```rust
+// Rust는 global mut state 의도적으로 어렵게
+static GLOBAL: Mutex<Option<Database>> = Mutex::new(None);
+```
+
+언어가 *Singleton 회피* 강제.
+
+## Singleton vs DI
 
 | 관점 | Singleton | DI |
-|------|-----------|-----|
+| --- | --- | --- |
 | 테스트 격리 | 어려움 | 쉬움 |
-| 의존성 파악 | 숨겨짐 | 명시적 |
+| 의존성 파악 | 숨겨짐 | 명시 |
 | 유연성 | 낮음 | 높음 |
-| 코드량 | 적음 | 다소 많음 |
 | 상태 관리 | 전역 | 지역 |
+| 동시성 | 위험 | 안전 |
 
-## 정리
+## 도구 / IDE
 
-- **Singleton은 TDD에서 안티패턴**
-- **숨겨진 의존성** 생성
-- **테스트 격리 방해**
-- **전역 상태 공유** 문제
-- **대안**: Dependency Injection
-- **진짜 필요한 경우는 드묾**
+| 도구 | 기능 |
+| --- | --- |
+| Spring | DI container |
+| Guice | DI |
+| Dagger | compile-time DI |
+| InversifyJS | TS DI |
+| pytest fixture | test DI |
+
+## 성능 고려
+
+- *DI overhead*: 객체 생성/lookup 약간. JIT inline.
+- *Singleton*: lookup 빠름 (단 thread-safe lock 비용).
+- 대부분 *무시할 수준*. 디자인 우선.
 
 ## 관련 패턴
 
 - [Pattern 37: Pluggable Object](/blog/programming/engineering/tdd-patterns/pattern37-pluggable-object) — 객체 교체
 - [Pattern 40: Imposter](/blog/programming/engineering/tdd-patterns/pattern40-imposter) — 테스트 대역
 - [Pattern 39: Factory Method](/blog/programming/engineering/tdd-patterns/pattern39-factory-method) — 생성 캡슐화
-
+- *anti-pattern 인식*: Singleton, Service Locator (조심)

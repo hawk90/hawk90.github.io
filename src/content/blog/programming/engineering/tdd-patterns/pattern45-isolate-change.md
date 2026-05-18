@@ -1,7 +1,7 @@
 ---
 title: "Pattern 45: Isolate Change"
 date: 2026-07-02T21:00:00
-description: "변경 영역을 격리 — 다음 단계 작업하기 좋게."
+description: "변경 영역을 격리 — 리팩터링 위험 감소, 테스트 가능 단위 확보."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 45
 tags: [tdd, beck, isolate-change, scaffolding]
@@ -13,254 +13,217 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 변경할 부분을 먼저 격리하여 리팩터링 위험을 줄인다.
+> 변경할 부분을 *먼저 격리*해 *리팩터링 위험* 감소. 격리된 단위에 *전용 테스트* 추가 후 안전하게 수정.
 
 ## 동기 (Motivation)
 
-**큰 메서드**에서 일부만 수정해야 할 때:
+큰 method 일부만 수정해야 할 때:
 
 ```python
 def process_order(self, order):
-    # 30줄의 검증 로직
-    # 20줄의 계산 로직  ← 이 부분만 수정하고 싶음
-    # 15줄의 저장 로직
-    # 10줄의 알림 로직
+    # 30줄 검증
+    # 20줄 계산  ← 이 부분만 수정
+    # 15줄 저장
+    # 10줄 알림
 ```
 
-**전체 메서드를 이해해야** 수정할 수 있다면 위험하다.
+*전체 이해 필요*하면 위험. **Isolate Change**는 *수정 영역 분리*.
 
-## Isolate Change 전략
+### 신호
 
-### Step 1: 변경 영역 추출
+- 큰 method *일부 수정* 빈번.
+- 변경이 *다른 곳에 영향* 의심.
+- *테스트 단위*가 너무 큼.
+- *legacy code* 수정.
+
+### 언제 적용하는가
+
+- *부분 수정* 필요.
+- *테스트 단위* 작게 만들고 싶음.
+- *리팩터링 안전망* 확보.
+- 큰 method/class 분해.
+
+## 절차 (Mechanics)
+
+1. **변경 영역 식별**.
+2. **Extract Method/Class**로 *격리*.
+3. **격리된 단위에 테스트** 추가.
+4. *전체 테스트 green* 확인.
+5. **격리된 단위만 수정** — 안전망 위에서.
+6. (필요 시) 격리 코드 *통합 환원* 또는 *유지*.
+
+## 예시 1 — Method 격리
 
 ```python
+# Before
 def process_order(self, order):
     self._validate_order(order)
-    total = self._calculate_total(order)  # 이 부분만 추출
+    # 20줄 계산
+    self._save_order(order, total)
+    self._notify_customer(order)
+
+# After: 변경 영역 추출
+def process_order(self, order):
+    self._validate_order(order)
+    total = self._calculate_total(order)   # 격리
     self._save_order(order, total)
     self._notify_customer(order)
 
 def _calculate_total(self, order):
-    # 20줄의 계산 로직
-    # 이제 이 메서드만 집중해서 수정
+    # 20줄 — 이제 집중해서 수정
     pass
-```
 
-### Step 2: 격리된 부분만 테스트 추가
-
-```python
+# 격리된 단위 테스트
 def test_calculate_total_basic():
-    processor = OrderProcessor()
+    p = OrderProcessor()
     order = Order(items=[Item(100), Item(200)])
-
-    total = processor._calculate_total(order)
-
-    assert total == 300
-
-def test_calculate_total_with_discount():
-    processor = OrderProcessor()
-    order = Order(items=[Item(100)], discount=10)
-
-    total = processor._calculate_total(order)
-
-    assert total == 90
+    assert p._calculate_total(order) == 300
 ```
 
-### Step 3: 안전하게 수정
+## 예시 2 — Class 격리
+
+복잡한 책임을 *별도 class*로:
 
 ```python
-def _calculate_total(self, order):
-    # 격리된 상태에서 안전하게 로직 변경
-    # 전용 테스트가 보호
-    subtotal = sum(item.price for item in order.items)
-    discount = self._calculate_discount(order)
-    tax = self._calculate_tax(subtotal - discount)
-    return subtotal - discount + tax
-```
-
-## 예제: 복잡한 포맷팅 격리
-
-### Before
-
-```python
-def generate_report(self, data):
-    output = []
-    output.append("=== Report ===")
-
-    # 복잡한 테이블 포맷팅 (변경 필요)
-    for item in data.items:
-        name = item.name.ljust(20)
-        price = f"${item.price:.2f}".rjust(10)
-        qty = str(item.qty).center(5)
-        total = f"${item.price * item.qty:.2f}".rjust(12)
-        output.append(f"| {name} | {price} | {qty} | {total} |")
-
-    output.append("=== End ===")
-    return "\n".join(output)
-```
-
-### After (격리)
-
-```python
-def generate_report(self, data):
-    output = []
-    output.append("=== Report ===")
-    output.extend(self._format_items(data.items))  # 격리
-    output.append("=== End ===")
-    return "\n".join(output)
-
-def _format_items(self, items):
-    """격리된 포맷팅 로직 — 테스트 가능"""
-    lines = []
-    for item in items:
-        lines.append(self._format_single_item(item))
-    return lines
-
-def _format_single_item(self, item):
-    """더 작은 단위로 격리"""
-    name = item.name.ljust(20)
-    price = f"${item.price:.2f}".rjust(10)
-    qty = str(item.qty).center(5)
-    total = f"${item.price * item.qty:.2f}".rjust(12)
-    return f"| {name} | {price} | {qty} | {total} |"
-```
-
-### 격리된 부분 테스트
-
-```python
-def test_format_single_item():
-    processor = ReportGenerator()
-    item = Item(name="Widget", price=10.0, qty=3)
-
-    result = processor._format_single_item(item)
-
-    assert "Widget" in result
-    assert "$10.00" in result
-    assert "3" in result
-    assert "$30.00" in result
-```
-
-## Scaffolding으로 격리
-
-**임시 코드**로 변경 영역 격리:
-
-```python
-def process_payment(self, payment):
-    # Step 1: 변경할 부분을 임시로 추출
-    validated = self._validate_payment_TEMP(payment)
-    if not validated:
-        return False
-
-    # 나머지 로직
-    self._charge_card(payment)
-    self._send_receipt(payment)
-    return True
-
-def _validate_payment_TEMP(self, payment):
-    """Scaffolding — 나중에 rename"""
-    # 이 부분만 수정
-    if payment.amount <= 0:
-        return False
-    if not payment.card_valid:
-        return False
-    if payment.amount > payment.card_limit:
-        return False
-    return True
-```
-
-리팩터링 완료 후 `_TEMP` 제거.
-
-## 클래스 레벨 격리
-
-**복잡한 로직**을 별도 클래스로:
-
-```python
-# Before: 한 클래스에 모든 것
+# Before — 한 class에 모든 것
 class OrderProcessor:
     def process(self, order):
-        # 검증 로직 50줄
-        # 계산 로직 30줄
-        # 저장 로직 20줄
-        pass
+        # 검증 50줄, 계산 30줄, 저장 20줄
+        ...
 
-# After: 변경 영역을 별도 클래스로 격리
+# After — 책임별 분리
 class OrderProcessor:
     def __init__(self):
-        self.validator = OrderValidator()  # 격리
-        self.calculator = PriceCalculator()  # 격리
-        self.repository = OrderRepository()  # 격리
+        self.validator = OrderValidator()
+        self.calculator = PriceCalculator()
+        self.repository = OrderRepository()
 
     def process(self, order):
-        if not self.validator.validate(order):
-            return False
+        if not self.validator.validate(order): return False
         total = self.calculator.calculate(order)
         self.repository.save(order, total)
         return True
 
 class PriceCalculator:
-    """격리된 계산 로직 — 독립적으로 테스트 가능"""
     def calculate(self, order):
-        subtotal = self._subtotal(order)
-        discount = self._discount(order)
-        tax = self._tax(subtotal - discount)
-        return subtotal - discount + tax
+        # 격리된 계산 — 독립 테스트
+        return self._subtotal(order) - self._discount(order) + self._tax(order)
 ```
 
-## 테스트 관점
+각 class가 *독립 테스트 가능*.
 
-### 격리 전
+## 예시 3 — Scaffolding (temp 이름)
 
 ```python
-def test_order_processing():
-    # 전체 프로세스를 테스트해야 함
-    # 검증 + 계산 + 저장 모두 포함
-    processor = OrderProcessor()
-    result = processor.process(order)
-    # 어느 부분이 문제인지 파악 어려움
+def process_payment(self, payment):
+    validated = self._validate_payment_TEMP(payment)
+    if not validated: return False
+    self._charge_card(payment)
+    return True
+
+def _validate_payment_TEMP(self, payment):
+    """Scaffolding — 나중에 rename"""
+    if payment.amount <= 0: return False
+    if not payment.card_valid: return False
+    return True
 ```
 
-### 격리 후
+리팩터링 완료 후 *`_TEMP` 제거*.
+
+## 자주 보는 안티패턴
+
+### 1. *Big-bang 추출*
+한 번에 *여러 method 추출* → 어디서 깨지는지 모름. 한 번에 *하나*.
+
+### 2. *추출 후 테스트 없음*
+격리만 하고 *test 안 씀* → 안전망 없음. 항상 *test 동반*.
+
+### 3. *과도한 분해*
+모든 줄을 method로 → noise. *의미 단위*.
+
+### 4. *Private method test 결합*
+*private method 직접 test* → 리팩터링 시 *test도 깨짐*. *behavior test*.
+
+### 5. *통합 환원 잊음*
+임시 격리가 영구 남음 → 의도 모호. 끝나면 *환원 또는 정식화*.
+
+### 6. *Class 격리 + 양방향 의존*
+새 class가 *원본도 의존* → 순환. *단방향*.
+
+## Modern variants
+
+### Sprout Method (Feathers)
 
 ```python
-def test_price_calculation():
-    # 계산 로직만 테스트
-    calculator = PriceCalculator()
-    total = calculator.calculate(order)
-    assert total == expected
+def existing_method(self, x):
+    self._sprout(x)   # 새 코드는 새 method로
+    return self._original_logic()
 
-def test_order_validation():
-    # 검증 로직만 테스트
-    validator = OrderValidator()
-    assert validator.validate(valid_order)
-    assert not validator.validate(invalid_order)
-
-def test_order_processing_integration():
-    # 통합만 테스트 (각 부분은 이미 검증됨)
-    processor = OrderProcessor()
-    result = processor.process(order)
+def _sprout(self, x):
+    """새 동작만 — test 풍부"""
+    ...
 ```
 
-## 격리의 이점
+기존 코드 *건드리지 않고* 새 동작 추가.
 
-| 측면 | 격리 전 | 격리 후 |
-|------|---------|---------|
-| 이해 범위 | 전체 메서드 | 해당 부분만 |
-| 테스트 범위 | 전체 흐름 | 격리된 단위 |
-| 변경 위험 | 높음 | 낮음 |
-| 재사용 | 어려움 | 쉬움 |
+### Sprout Class
 
-## 정리
+```python
+class ExistingClass:
+    def method(self, x):
+        return NewFeature().process(x)
 
-- **변경할 부분을 먼저 격리**
-- **Extract Method/Class**로 분리
-- **격리된 부분에 테스트 추가**
-- **안전하게 수정 후 통합**
-- **Scaffolding 기법** 활용
-- **리팩터링 위험 감소**
+class NewFeature:
+    def process(self, x):
+        ...   # 독립 테스트
+```
+
+### Wrap Method (Feathers)
+
+```python
+def method(self, x):
+    self._before_logic()
+    result = self._original(x)
+    self._after_logic()
+    return result
+```
+
+원본 *변경 없이 wrap*.
+
+### Branch by abstraction
+
+interface 도입 → 점진적 마이그레이션.
+
+### Feature flag
+
+flag로 *new code 분리* + rollback 쉬움.
+
+```python
+if flag("new_calculation"):
+    return new_calculate(order)
+return old_calculate(order)
+```
+
+### Strangler Fig
+
+old system 옆에 *new system* — 점진적 대체.
+
+## 도구 / IDE
+
+| 도구 | Isolate 지원 |
+| --- | --- |
+| IntelliJ "Extract Method" | 자동 추출 |
+| Refactor → Extract Class | 자동 |
+| Resharper | 같음 |
+| Refactoring [Pattern 1](/blog/programming/design/refactoring-catalog/pattern01-extract-function) | 표준 |
+
+## 성능 고려
+
+method/class 추출은 *JIT inline* — 런타임 무관. *분해된 코드*는 *cache locality* 약간 변화 가능 — 측정.
 
 ## 관련 패턴
 
 - [Pattern 47: Extract Method](/blog/programming/engineering/tdd-patterns/pattern47-extract-method) — 메서드 추출
 - [Pattern 44: Reconcile Differences](/blog/programming/engineering/tdd-patterns/pattern44-reconcile-differences) — 차이 통합
 - [Pattern 49: Extract Interface](/blog/programming/engineering/tdd-patterns/pattern49-extract-interface) — 인터페이스 추출
-
+- [Working Effectively with Legacy Code](/blog/programming/engineering/wewlc) — Feathers의 sprout/wrap

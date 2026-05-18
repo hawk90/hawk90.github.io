@@ -1,7 +1,7 @@
 ---
 title: "Pattern 42: Collecting Parameter"
 date: 2026-07-02T18:00:00
-description: "Collect 결과를 parameter로 전달 — visitor·report."
+description: "Collect 결과를 parameter로 전달 — xUnit TestResult의 본질."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 42
 tags: [tdd, beck, collecting-parameter, builder]
@@ -13,295 +13,245 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 결과를 누적할 컬렉터 객체를 파라미터로 전달하여 여러 객체가 협력해 결과를 구축한다.
+> *결과를 담을 collector 객체*를 parameter로 전달 → 여러 객체가 *협력*해 결과 구축. xUnit `TestResult`가 대표.
 
 ## 동기 (Motivation)
 
-여러 객체를 순회하며 **결과를 모아야** 하는 상황:
+여러 객체 순회하며 *결과 수집*. 반환값 방식은 *매번 복사*.
 
 ```python
-# 반환값으로 결과 수집 — 복잡해짐
-def collect_all_names(node):
+# 반환값 — 매 호출 list 생성
+def collect_names(node):
     names = [node.name]
     for child in node.children:
-        names.extend(collect_all_names(child))  # 매번 리스트 생성
+        names.extend(collect_names(child))
     return names
 ```
 
-**Collecting Parameter**는 결과를 담을 **컬렉터 객체**를 전달한다.
-
-## Collecting Parameter 패턴
-
-### 기본 구현
+**Collecting Parameter**는 *결과 컨테이너*를 *주입*:
 
 ```python
-def collect_all_names(node, collector):
-    """collector에 결과 누적"""
+def collect_names(node, collector):
     collector.append(node.name)
     for child in node.children:
-        collect_all_names(child, collector)
-
-# 사용
-names = []
-collect_all_names(root_node, names)
-print(names)  # 모든 이름이 담김
+        collect_names(child, collector)
 ```
 
-### 반환값 vs Collecting Parameter
+### 신호
 
-```python
-# 반환값 방식 — 메모리 비효율
-def sum_tree(node):
-    total = node.value
-    for child in node.children:
-        total += sum_tree(child)  # 스택 깊이 = 트리 깊이
-    return total
+- 트리/graph 순회 결과 *수집* 필요.
+- 여러 *callback에서 같은 결과 누적*.
+- 반환값이 *복잡 구조* (report, log).
+- *Composite + 결과 모음*.
 
-# Collecting Parameter — 단일 누적기
-def sum_tree(node, accumulator):
-    accumulator.add(node.value)
-    for child in node.children:
-        sum_tree(child, accumulator)
+### 언제 적용하는가
 
-class Accumulator:
-    def __init__(self):
-        self.total = 0
+- *트리 순회 결과* 수집.
+- 여러 객체 *협력 결과 구축*.
+- *report/log 생성*.
+- *test runner 결과 누적*.
 
-    def add(self, value):
-        self.total += value
-```
+### 언제 적용하지 않는가
 
-## xUnit의 TestResult
+- *단순 값 계산* — 반환값.
+- *immutability* 강조 (mutation 기반).
 
-**xUnit 프레임워크**에서 `TestResult`가 대표적인 Collecting Parameter:
+## 절차 (Mechanics)
+
+1. **collector class** 정의 — 결과 누적 method.
+2. *함수에 collector parameter* 추가.
+3. 각 호출에서 *collector에 add*.
+4. 호출자는 *collector 생성 → 호출 → 결과 추출*.
+
+## 예시 1 — xUnit TestResult
 
 ```python
 class TestResult:
-    """Collecting Parameter for test execution"""
     def __init__(self):
         self.run_count = 0
         self.failures = []
-        self.errors = []
 
     def test_started(self):
         self.run_count += 1
 
-    def test_failed(self, test, message):
-        self.failures.append((test, message))
-
-    def test_errored(self, test, exception):
-        self.errors.append((test, exception))
+    def test_failed(self, test, msg):
+        self.failures.append((test, msg))
 
     def summary(self):
         return f"{self.run_count} run, {len(self.failures)} failed"
 
 class TestCase:
-    def run(self, result: TestResult):
-        """result가 Collecting Parameter"""
+    def run(self, result):           # result = collecting parameter
         result.test_started()
         try:
-            self.setUp()
-            self.run_test()
-            self.tearDown()
+            self.setUp(); self.run_test(); self.tearDown()
         except AssertionError as e:
             result.test_failed(self, str(e))
-        except Exception as e:
-            result.test_errored(self, e)
 
 class TestSuite:
-    def run(self, result: TestResult):
-        """같은 result를 모든 테스트에 전달"""
+    def run(self, result):
         for test in self.tests:
-            test.run(result)
-```
+            test.run(result)         # 같은 result 전달
 
-```python
 # 사용
 result = TestResult()
-
-suite = TestSuite()
-suite.add(MyTest("test_add"))
-suite.add(MyTest("test_subtract"))
-suite.add(MyTest("test_multiply"))
-
-suite.run(result)  # result에 모든 결과 수집
-
-print(result.summary())  # "3 run, 0 failed"
+suite.run(result)
+print(result.summary())
 ```
 
-## StringBuilder 패턴
+xUnit framework의 *핵심*.
 
-**StringBuilder**도 Collecting Parameter와 같은 정신:
+## 예시 2 — StringBuilder
 
 ```python
 class StringBuilder:
-    def __init__(self):
-        self._parts = []
+    def __init__(self): self._parts = []
+    def append(self, text): self._parts.append(text); return self
+    def to_string(self): return "".join(self._parts)
 
-    def append(self, text):
-        self._parts.append(text)
-        return self  # fluent interface
-
-    def to_string(self):
-        return "".join(self._parts)
-
-def build_report(nodes, sb: StringBuilder):
+def build_report(nodes, sb):
     sb.append("Report:\n")
-    for node in nodes:
-        sb.append(f"  - {node.name}\n")
-        build_children_report(node.children, sb)
+    for n in nodes:
+        sb.append(f"  - {n.name}\n")
+        build_children(n.children, sb)
 
-def build_children_report(children, sb: StringBuilder):
-    for child in children:
-        sb.append(f"    * {child.name}\n")
-```
+def build_children(children, sb):
+    for c in children:
+        sb.append(f"    * {c.name}\n")
 
-```python
 sb = StringBuilder()
-build_report(root_nodes, sb)
+build_report(roots, sb)
 print(sb.to_string())
 ```
 
-## Visitor 패턴과 결합
+문자열 *concat 비효율* 해결 + 의도 명시.
+
+## 예시 3 — Visitor + Collecting
 
 ```python
 class TreeVisitor:
-    """Collecting Parameter + Visitor"""
     def __init__(self):
         self.visited = []
-        self.total_value = 0
+        self.total = 0
 
     def visit(self, node):
         self.visited.append(node.name)
-        self.total_value += node.value
-        for child in node.children:
-            child.accept(self)
+        self.total += node.value
+        for c in node.children:
+            c.accept(self)
 
 class TreeNode:
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-        self.children = []
+    def accept(self, v):
+        v.visit(self)
 
-    def accept(self, visitor):
-        visitor.visit(self)
-```
-
-```python
 visitor = TreeVisitor()
 root.accept(visitor)
-print(visitor.visited)      # ['root', 'child1', 'child2', ...]
-print(visitor.total_value)  # 합계
+# visitor에 결과 누적
 ```
 
-## 리포트 생성 예제
+Visitor + Collecting의 자연 결합.
+
+## 자주 보는 안티패턴
+
+### 1. *Collector mutate 전파*
+caller가 *같은 collector 재사용* → 이전 결과 leak. *새 instance*.
+
+### 2. *Thread-safe 무시*
+concurrent caller가 *동일 collector* → race. lock 또는 thread-local.
+
+### 3. *Collector가 너무 큼*
+30개 method → 책임 폭증. 분리.
+
+### 4. *반환값과 혼용*
+collector + return 모두 → 어디서 결과 받는지 혼란. 하나만.
+
+### 5. *Optional collector*
+`collector or None` → 호출자가 *check 반복*. Null Object.
+
+### 6. *Mutation을 hide*
+collector 받지만 사실 *return new collector* → fake 효과. 명확히.
+
+## Modern variants
+
+### Functional fold/reduce
 
 ```python
-class ReportCollector:
-    """복잡한 리포트 구축용 Collecting Parameter"""
-    def __init__(self):
-        self.sections = []
-        self.warnings = []
-        self.statistics = {}
-
-    def add_section(self, title, content):
-        self.sections.append({"title": title, "content": content})
-
-    def add_warning(self, message):
-        self.warnings.append(message)
-
-    def set_statistic(self, key, value):
-        self.statistics[key] = value
-
-    def render(self):
-        output = []
-        for section in self.sections:
-            output.append(f"## {section['title']}")
-            output.append(section['content'])
-        if self.warnings:
-            output.append("## Warnings")
-            for w in self.warnings:
-                output.append(f"- {w}")
-        return "\n".join(output)
-
-def analyze_codebase(modules, collector: ReportCollector):
-    total_lines = 0
-    for module in modules:
-        analyze_module(module, collector)
-        total_lines += module.line_count
-
-    collector.set_statistic("total_lines", total_lines)
-    collector.set_statistic("module_count", len(modules))
-
-def analyze_module(module, collector: ReportCollector):
-    collector.add_section(
-        module.name,
-        f"Lines: {module.line_count}, Functions: {len(module.functions)}"
-    )
-    if module.has_issues:
-        collector.add_warning(f"{module.name} has code quality issues")
+total = reduce(lambda acc, n: acc + n.value, nodes, 0)
 ```
 
-## 테스트
+*immutable accumulator*.
+
+### Builder pattern
 
 ```python
-def test_collecting_parameter_accumulates():
-    result = TestResult()
-    test1 = PassingTest("test_1")
-    test2 = PassingTest("test_2")
-
-    test1.run(result)
-    test2.run(result)
-
-    assert result.run_count == 2
-
-def test_collecting_parameter_with_failures():
-    result = TestResult()
-    passing = PassingTest("pass")
-    failing = FailingTest("fail")
-
-    passing.run(result)
-    failing.run(result)
-
-    assert result.run_count == 2
-    assert len(result.failures) == 1
-
-def test_suite_collects_all_results():
-    result = TestResult()
-    suite = TestSuite()
-    suite.add(PassingTest("a"))
-    suite.add(PassingTest("b"))
-    suite.add(FailingTest("c"))
-
-    suite.run(result)
-
-    assert result.run_count == 3
-    assert len(result.failures) == 1
+report = ReportBuilder()\
+    .add_section("Header", "...")\
+    .add_warning("...")\
+    .build()
 ```
 
-## 언제 사용하나
+fluent collector.
 
-| 상황 | 사용 여부 |
-|------|----------|
-| 트리/그래프 순회 결과 수집 | ✓ |
-| 여러 객체가 협력해 결과 구축 | ✓ |
-| 리포트/로그 생성 | ✓ |
-| 반환값이 복잡한 구조 | ✓ |
-| 단순 값 계산 | ✗ (반환값 사용) |
-| 불변성이 중요할 때 | ✗ (mutation 기반) |
+### Output parameter (C/C++ idiom)
 
-## 정리
+```c
+void collect(Node* node, int* total) {
+    *total += node->value;
+    // ...
+}
+```
 
-- **결과를 담을 객체**를 파라미터로 전달
-- **여러 호출이 같은 컬렉터**에 누적
-- **xUnit의 TestResult**가 대표적
-- **StringBuilder, Visitor**와 유사한 정신
-- **트리 순회, 리포트 생성**에 유용
-- **Composite 패턴과 자연스럽게 결합**
+C에서는 *pointer*가 collector.
+
+### Generator/Iterator
+
+```python
+def collect_names(node):
+    yield node.name
+    for c in node.children:
+        yield from collect_names(c)
+
+names = list(collect_names(root))
+```
+
+lazy + 메모리 효율.
+
+### Reactive streams
+
+```python
+Observable.from(nodes).flatMap(traverse).collect(toList())
+```
+
+RxJava/RxJS — *stream으로 collecting*.
+
+### Java Collector
+
+```java
+List<String> names = nodes.stream()
+    .flatMap(Node::traverse)
+    .collect(Collectors.toList());
+```
+
+`Collector` interface가 *공식 패턴*.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| Java Stream Collector | 표준 collector |
+| Python yield/generator | lazy collection |
+| Rust Iterator collect | type-safe |
+| Visitor + collector | 트리 순회 |
+
+## 성능 고려
+
+- *Mutation 기반* — 매 호출 alloc 없음. 빠름.
+- *Thread-safe* 필요 시 lock 비용.
+- *큰 트리* 순회는 stack — iterative + collector.
 
 ## 관련 패턴
 
-- [Pattern 41: Composite](/blog/programming/engineering/tdd-patterns/pattern41-composite) — 트리 구조 순회
+- [Pattern 41: Composite](/blog/programming/engineering/tdd-patterns/pattern41-composite) — 트리 순회
 - [Pattern 32: All Tests](/blog/programming/engineering/tdd-patterns/pattern32-all-tests) — TestResult 사용
 - [Pattern 33: Command](/blog/programming/engineering/tdd-patterns/pattern33-command) — 연산 객체
-
+- GoF Visitor pattern

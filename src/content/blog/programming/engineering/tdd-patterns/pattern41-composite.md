@@ -1,7 +1,7 @@
 ---
 title: "Pattern 41: Composite (in TDD)"
 date: 2026-07-02T17:00:00
-description: "Single·collection 같은 interface — recursive 처리."
+description: "Single·collection 같은 interface — 재귀 처리. xUnit Test/TestSuite의 원형."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 41
 tags: [tdd, beck, composite, gof]
@@ -13,306 +13,221 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 단일 객체와 객체 컬렉션을 동일한 인터페이스로 다루어 재귀적 처리를 가능하게 한다.
+> 단일 객체와 객체 컬렉션을 *동일 interface*로. *재귀 처리*. xUnit `Test`/`TestSuite`의 원형.
 
 ## 동기 (Motivation)
 
-**단일 객체**와 **객체 집합**을 다르게 처리해야 하는 코드:
+단일과 집합을 *다르게 처리*하면:
 
 ```python
-# 단일 테스트 vs 테스트 모음
 if isinstance(test, TestSuite):
-    for t in test.tests:
-        t.run()
+    for t in test.tests: t.run()
 else:
     test.run()
 ```
 
-**Composite** 패턴은 둘을 **같은 인터페이스**로 다룬다.
+호출 사이트 *복잡*. **Composite**는 *같은 interface*로 다룬다.
 
-## Composite 패턴
+### 신호
 
-### 기본 구조
+- *트리 구조* (file system, UI, AST).
+- *단일 vs 집합 분기* 반복.
+- *재귀 알고리즘*이 자연.
+- xUnit suite 구조.
+
+### 언제 적용하는가
+
+- *트리 데이터* — file, org chart, UI.
+- *재귀 처리* 도메인.
+- *uniform treatment*.
+
+### 언제 적용하지 않는가
+
+- 단순 list — Composite overhead 과잉.
+- Leaf와 Composite *동작 크게 다름*.
+- 깊이 제한 시스템.
+
+## 절차 (Mechanics)
+
+1. **Component interface** 정의.
+2. **Leaf class** 구현.
+3. **Composite class** 구현 — children + 재귀 호출.
+4. 호출자가 *interface*로만 사용.
+
+## 예시 1 — xUnit Test/TestSuite
 
 ```python
 from abc import ABC, abstractmethod
 
 class Test(ABC):
-    """Component — 공통 인터페이스"""
     @abstractmethod
-    def run(self) -> None:
-        pass
-
-class TestCase(Test):
-    """Leaf — 단일 테스트"""
-    def __init__(self, name):
-        self.name = name
-
-    def run(self):
-        print(f"Running {self.name}")
-        # 실제 테스트 로직
-
-class TestSuite(Test):
-    """Composite — 테스트 모음"""
-    def __init__(self):
-        self.tests = []
-
-    def add(self, test: Test):
-        self.tests.append(test)
-
-    def run(self):
-        for test in self.tests:
-            test.run()  # 재귀 호출
-```
-
-### 사용
-
-```python
-# 단일 테스트
-test1 = TestCase("test_add")
-test1.run()
-
-# 테스트 모음
-suite = TestSuite()
-suite.add(TestCase("test_add"))
-suite.add(TestCase("test_subtract"))
-
-# 중첩 모음
-nested = TestSuite()
-nested.add(TestCase("test_multiply"))
-nested.add(suite)  # 모음 안에 모음
-
-# 동일한 인터페이스로 실행
-nested.run()  # 모든 테스트 실행
-```
-
-## xUnit에서의 Composite
-
-**xUnit 프레임워크의 핵심 구조**:
-
-```python
-class TestResult:
-    def __init__(self):
-        self.run_count = 0
-        self.failure_count = 0
-
-    def test_started(self):
-        self.run_count += 1
-
-    def test_failed(self):
-        self.failure_count += 1
-
-class Test(ABC):
+    def run(self, result) -> None: pass
     @abstractmethod
-    def run(self, result: TestResult):
-        pass
+    def count_test_cases(self) -> int: pass
 
-    @abstractmethod
-    def count_test_cases(self) -> int:
-        pass
-
-class TestCase(Test):
+class TestCase(Test):                  # Leaf
     def run(self, result):
         result.test_started()
         try:
-            self.setUp()
-            self.run_test()
-            self.tearDown()
+            self.setUp(); self.run_test(); self.tearDown()
         except Exception:
             result.test_failed()
+    def count_test_cases(self): return 1
 
-    def count_test_cases(self):
-        return 1  # Leaf는 항상 1
-
-class TestSuite(Test):
-    def __init__(self):
-        self.tests = []
-
+class TestSuite(Test):                 # Composite
+    def __init__(self): self.tests = []
+    def add(self, t): self.tests.append(t)
     def run(self, result):
-        for test in self.tests:
-            test.run(result)  # 재귀
-
+        for t in self.tests:
+            t.run(result)              # 재귀
     def count_test_cases(self):
         return sum(t.count_test_cases() for t in self.tests)
 ```
 
-## Money 예제의 Composite
+xUnit의 *핵심 구조*. 중첩 가능.
 
-Beck의 **Money 예제**에서 `Expression`이 Composite:
+## 예시 2 — Money Sum (Beck)
 
 ```python
 class Expression(ABC):
-    """Component"""
     @abstractmethod
-    def reduce(self, bank, to_currency):
-        pass
+    def reduce(self, bank, to): pass
 
-class Money(Expression):
-    """Leaf"""
-    def __init__(self, amount, currency):
-        self.amount = amount
-        self.currency = currency
+class Money(Expression):                # Leaf
+    def reduce(self, bank, to):
+        rate = bank.rate(self.currency, to)
+        return Money(self.amount / rate, to)
 
-    def reduce(self, bank, to_currency):
-        rate = bank.rate(self.currency, to_currency)
-        return Money(self.amount / rate, to_currency)
-
-class Sum(Expression):
-    """Composite"""
-    def __init__(self, augend: Expression, addend: Expression):
-        self.augend = augend
-        self.addend = addend
-
-    def reduce(self, bank, to_currency):
-        amount = (
-            self.augend.reduce(bank, to_currency).amount +
-            self.addend.reduce(bank, to_currency).amount
-        )
-        return Money(amount, to_currency)
-```
-
-```python
-# 단일 Money
-five = Money(5, "USD")
-result = five.reduce(bank, "USD")  # Money(5, USD)
-
-# 복합 Expression
-sum_expr = Sum(Money(5, "USD"), Money(10, "CHF"))
-result = sum_expr.reduce(bank, "USD")  # 환율 적용 후 합산
+class Sum(Expression):                  # Composite
+    def reduce(self, bank, to):
+        a = self.augend.reduce(bank, to).amount
+        b = self.addend.reduce(bank, to).amount
+        return Money(a + b, to)
 
 # 중첩
-complex_expr = Sum(
-    Sum(Money(5, "USD"), Money(10, "CHF")),
-    Money(3, "USD")
-)
-result = complex_expr.reduce(bank, "USD")  # 모두 동일 interface
+expr = Sum(Sum(Money(5, "USD"), Money(10, "CHF")), Money(3, "USD"))
+result = expr.reduce(bank, "USD")   # 모두 동일 interface
 ```
 
-## 파일 시스템 예제
+## 예시 3 — File system
 
 ```python
-class FileSystemNode(ABC):
+class Node(ABC):
     @abstractmethod
-    def get_size(self) -> int:
-        pass
+    def size(self) -> int: pass
 
-    @abstractmethod
-    def get_name(self) -> str:
-        pass
+class File(Node):                       # Leaf
+    def __init__(self, name, size): self._size = size
+    def size(self): return self._size
 
-class File(FileSystemNode):
-    def __init__(self, name, size):
-        self._name = name
-        self._size = size
-
-    def get_size(self):
-        return self._size
-
-    def get_name(self):
-        return self._name
-
-class Directory(FileSystemNode):
-    def __init__(self, name):
-        self._name = name
-        self._children = []
-
-    def add(self, node: FileSystemNode):
-        self._children.append(node)
-
-    def get_size(self):
-        return sum(child.get_size() for child in self._children)
-
-    def get_name(self):
-        return self._name
-
-# 사용
-root = Directory("root")
-root.add(File("readme.md", 1024))
-root.add(File("setup.py", 512))
-
-src = Directory("src")
-src.add(File("main.py", 2048))
-src.add(File("utils.py", 1024))
-root.add(src)
-
-print(root.get_size())  # 4608 (재귀적 합산)
+class Directory(Node):                  # Composite
+    def __init__(self): self._children = []
+    def add(self, n): self._children.append(n)
+    def size(self):
+        return sum(c.size() for c in self._children)
 ```
 
-## Composite의 테스트
+총 크기 = *재귀 합*.
+
+## 자주 보는 안티패턴
+
+### 1. *Leaf에 Composite 메서드*
+Component에 `add()` 두면 Leaf에서도 `add()` → meaningless 또는 error.
+
+### 2. *깊이 무제한*
+재귀가 *깊으면 stack overflow*. iterative 또는 depth limit.
+
+### 3. *Cycle 방치*
+composite가 *자신 포함* → 무한 루프. cycle 검출.
+
+### 4. *Parent reference 누락*
+Leaf가 *parent 모름* → 일부 알고리즘 불가. parent pointer.
+
+### 5. *Mixed concerns*
+Component에 *너무 많은 메서드* → 모든 Leaf/Composite가 구현. *interface segregation*.
+
+### 6. *Type cast 빈번*
+caller가 `isinstance(node, Directory)` → 다형성 효과 잃음. *Component method*로 표현.
+
+## Modern variants
+
+### Functional composite (tree walking)
 
 ```python
-def test_single_test_case_runs():
-    result = TestResult()
-    test = TestCase("test_example")
-
-    test.run(result)
-
-    assert result.run_count == 1
-
-def test_suite_runs_all_tests():
-    result = TestResult()
-    suite = TestSuite()
-    suite.add(TestCase("test_1"))
-    suite.add(TestCase("test_2"))
-    suite.add(TestCase("test_3"))
-
-    suite.run(result)
-
-    assert result.run_count == 3
-
-def test_nested_suites():
-    result = TestResult()
-    inner = TestSuite()
-    inner.add(TestCase("inner_1"))
-    inner.add(TestCase("inner_2"))
-
-    outer = TestSuite()
-    outer.add(TestCase("outer_1"))
-    outer.add(inner)  # 중첩
-
-    outer.run(result)
-
-    assert result.run_count == 3
-
-def test_count_test_cases():
-    inner = TestSuite()
-    inner.add(TestCase("a"))
-    inner.add(TestCase("b"))
-
-    outer = TestSuite()
-    outer.add(inner)
-    outer.add(TestCase("c"))
-
-    assert outer.count_test_cases() == 3
+def walk(node, fn):
+    if isinstance(node, File):
+        return fn(node)
+    return [walk(c, fn) for c in node.children]
 ```
 
-## 언제 사용하나
+함수형으로 *visitor 분리*.
 
-```text
-적합한 경우:
-✓ 트리 구조 데이터 (파일 시스템, 조직도, UI 컴포넌트)
-✓ 재귀적 처리가 필요한 도메인
-✓ 단일/복합을 구분 없이 다루고 싶을 때
-✓ xUnit 테스트 러너
+### Visitor pattern 조합
 
-부적합한 경우:
-✗ 단순 리스트 처리 (Composite는 오버엔지니어링)
-✗ Leaf와 Composite 연산이 크게 다를 때
-✗ 깊이 제한이 필요한 구조
+```python
+class Visitor(ABC):
+    @abstractmethod
+    def visit_file(self, f): pass
+    @abstractmethod
+    def visit_directory(self, d): pass
+
+class SizeVisitor(Visitor):
+    def visit_file(self, f): return f.size
+    def visit_directory(self, d):
+        return sum(c.accept(self) for c in d.children)
 ```
 
-## 정리
+새 연산 추가가 *visitor 추가*.
 
-- **단일 객체와 컬렉션**을 동일 인터페이스로
-- **재귀적 처리** 가능
-- **xUnit의 Test/TestSuite**가 대표적
-- **Money 예제의 Money/Sum**도 Composite
-- **트리 구조 도메인**에 자연스러움
-- **클라이언트 코드 단순화**
+### AST 트리 (compiler)
+
+```python
+class Node(ABC): pass
+class Literal(Node): ...
+class BinaryOp(Node):
+    def __init__(self, op, left, right): ...
+```
+
+언어 처리는 *Composite의 전형*.
+
+### React component tree
+
+```jsx
+<App>
+  <Header />
+  <Sidebar>
+    <Menu />
+  </Sidebar>
+  <Main />
+</App>
+```
+
+UI 컴포넌트 = Composite.
+
+### XML/DOM
+
+```javascript
+document.querySelectorAll(...)   // 재귀 traversal
+element.children.forEach(...)
+```
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| antlr | AST 자동 생성 |
+| AST library | parser tree |
+| GoF Composite | 표준 |
+
+## 성능 고려
+
+- *재귀 깊이*는 stack 비용. 매우 깊으면 *iterative*.
+- *Composite 순회*는 O(n) (n = 노드 수).
+- *cache* (size 등) 자주.
 
 ## 관련 패턴
 
-- [Pattern 42: Collecting Parameter](/blog/programming/engineering/tdd-patterns/pattern42-collecting-parameter) — 트리 순회 결과 수집
-- [Pattern 33: Command](/blog/programming/engineering/tdd-patterns/pattern33-command) — Sum이 Command이자 Composite
-- [Pattern 34: Value Object](/blog/programming/engineering/tdd-patterns/pattern34-value-object) — Leaf로 자주 사용
-
+- [Pattern 42: Collecting Parameter](/blog/programming/engineering/tdd-patterns/pattern42-collecting-parameter) — 순회 결과 수집
+- [Pattern 33: Command](/blog/programming/engineering/tdd-patterns/pattern33-command) — Sum이 둘 다
+- [Pattern 34: Value Object](/blog/programming/engineering/tdd-patterns/pattern34-value-object) — Leaf로 자주
+- GoF Composite, Visitor
