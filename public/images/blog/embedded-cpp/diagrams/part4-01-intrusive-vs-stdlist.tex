@@ -32,15 +32,17 @@
 \draw[arr, draw=impbord, line width=0.5pt] (i1.south) -- (i2.north);
 \draw[arr, draw=impbord, line width=0.5pt] (i2.south) -- (i3.north);
 
-% Bottom summary
-\node[font=\sffamily\bfseries\footnotesize, text=conbord, align=left, text width=42mm] at (-5, -1.8) {
+% Bottom summary (anchor north 으로 위쪽이 박스 아래 일정 거리에 위치)
+\node[font=\sffamily\bfseries\footnotesize, text=conbord, align=left, text width=42mm, anchor=north]
+  at ($(n3.south)+(0,-12mm)$) {
   \textbf{비용}: \\
   $\bullet$ Task + Node 별도 \\
   $\bullet$ 매 push heap alloc \\
   $\bullet$ Erase O(n) iterator
 };
 
-\node[font=\sffamily\bfseries\footnotesize, text=impbord, align=left, text width=42mm] at (5, -1.8) {
+\node[font=\sffamily\bfseries\footnotesize, text=impbord, align=left, text width=42mm, anchor=north]
+  at ($(i3.south)+(0,-12mm)$) {
   \textbf{장점}: \\
   $\bullet$ Heap 0 \\
   $\bullet$ Push/Pop O(1) \\

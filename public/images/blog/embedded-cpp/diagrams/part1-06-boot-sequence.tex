@@ -39,8 +39,9 @@
 % Annotations
 \node[caption, above=2mm of reset] {전원 ON / Reset 핀};
 \node[font=\sffamily\footnotesize, anchor=west, text=mutec] at (3.5, 5.6) {(어셈블리 또는 C)};
-\node[font=\sffamily\footnotesize, anchor=west, text=mutec] at (3.5, 2.6) {(C++ runtime 초기화)};
-\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west] at (3.5, 0.5) {여기서 C++ 객체 사용 가능};
+% C++ runtime 초기화 라벨은 detail 박스 아래로
+\node[font=\sffamily\footnotesize, anchor=north west, text=mutec] at ($(detail.south west)+(0,-2mm)$) {(C++ runtime 초기화)};
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west] at (4.0, 1.0) {여기서 C++ 객체 사용 가능};
 
 \end{tikzpicture}
 \end{document}

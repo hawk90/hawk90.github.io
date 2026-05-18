@@ -51,16 +51,17 @@
 % ===== Column 3: weak_ptr =====
 \node[hdr] at (5.5, 4.6) {\texttt{weak\_ptr<T>} \\ 비소유 참조};
 
-\node[owner] (wo)  at (5.5, 3.0) {shared owner};
-\node[wkown] (wk)  at (5.5, 1.2) {weak ref};
-\node[ctrl]  (wc)  at (5.5, -0.6) {control block \\ \texttt{strong: 1} \\ \texttt{weak: 1}};
-\node[res]   (wr)  at (5.5, -2.6) {Resource};
+% shared owner left of column center, weak ref right — 두 화살표가 겹치지 않도록 분리
+\node[owner] (wo)  at (4.5, 3.0) {shared owner};
+\node[wkown] (wk)  at (7.0, 3.0) {weak ref};
+\node[ctrl]  (wc)  at (5.5, 0.6) {control block \\ \texttt{strong: 1} \\ \texttt{weak: 1}};
+\node[res]   (wr)  at (5.5, -2.0) {Resource};
 
-\draw[ownEdge] (wo.south) -- (wc.north) node[midway, right, font=\sffamily\footnotesize] {strong};
-\draw[weakEdge] (wk.south) -- (wc.north west) node[midway, right, font=\sffamily\footnotesize] {weak};
+\draw[ownEdge] (wo.south) -- (wc.north west) node[midway, left, font=\sffamily\footnotesize] {strong};
+\draw[weakEdge] (wk.south) -- (wc.north east) node[midway, right, font=\sffamily\footnotesize] {weak};
 \draw[ownEdge] (wc.south) -- (wr.north);
 
-\node[font=\sffamily\footnotesize, text=prpbord, align=left, text width=38mm] at (5.5, -4.4) {
+\node[font=\sffamily\footnotesize, text=prpbord, align=left, text width=38mm] at (5.5, -3.8) {
   $\bullet$ refcount 영향 0 \\
   $\bullet$ 순환참조 끊기에 사용 \\
   $\bullet$ \texttt{lock()}로 임시 승격
