@@ -87,6 +87,8 @@ void USART1_IRQHandler(void) {
 
 ### 모던 방식 — DMA Circular + IDLE 인터럽트
 
+![UART DMA + IDLE interrupt pattern](/images/blog/embedded-serial/diagrams/ch08-uart-dma-idle.svg)
+
 ```c
 uint8_t rx_buf[256];
 volatile size_t old_pos = 0;
@@ -171,6 +173,8 @@ Master → ────[Addr=3]────[Data]────[Data]──── 
 | 9 | **RI** (Ring Indicator) | 입력 | 모뎀이 *전화 받음* 알림 |
 
 ### 모뎀 다이얼-업 시퀀스 (옛 56k 모뎀)
+
+![Modem dial-up sequence — DTR/DSR/DCD (tikz-timing)](/images/blog/embedded-serial/diagrams/ch08-modem-dialup.svg)
 
 ```text
 1. DTE → 모뎀: DTR Assert ("나 살아 있음")

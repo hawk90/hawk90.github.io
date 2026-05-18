@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  outer/.style={cls, align=center, font=\footnotesize\bfseries, minimum width=120mm, minimum height=80mm, draw=hibord, fill=hifill!30},
+  inner/.style={cls, align=center, font=\scriptsize, minimum width=50mm, minimum height=12mm, draw=conbord, fill=confill},
+  ops/.style={cls, align=center, font=\tiny, minimum width=22mm, minimum height=8mm, draw=impbord, fill=impfill}
+]
+
+% Outer container — v4l2_subdev struct
+\node[outer] (outer) at (0, 0) {};
+\node[font=\footnotesize\bfseries, anchor=north west, fill=hifill, draw=hibord, inner sep=2pt] at ([xshift=2mm, yshift=-2mm]outer.north west) {struct v4l2\_subdev};
+
+% Sub-components inside (relative positions)
+\node[inner] (sd) at (-3, 2) {struct v4l2\_subdev sd\\\tiny base subdev};
+\node[inner] (pad) at (3, 2) {struct media\_pad pad\\\tiny source/sink};
+\node[inner] (ctrl) at (-3, 0) {struct v4l2\_ctrl\_handler\\\tiny Exposure·Gain etc.};
+\node[inner] (client) at (3, 0) {struct i2c\_client *\\\tiny I²C 슬레이브 핸들};
+\node[inner] (gpio) at (-3, -2) {struct gpio\_desc *reset\\\tiny GPIO descriptor};
+\node[inner] (reg) at (3, -2) {struct regulator *\\\tiny VANA·VDIG·VDDL};
+
+% Ops outside (point into pad and video)
+\node[ops] (padops) at (10, 2) {pad ops\\\tiny enum\_mbus\_code\\\tiny get/set\_fmt};
+\node[ops] (vidops) at (10, -1) {video ops\\\tiny s\_stream\\\tiny g\_frame\_interval};
+\node[ops] (ctrlops) at (10, -3) {ctrl ops\\\tiny s\_ctrl};
+
+% Arrows
+\draw[->, draw=edgec, line width=0.4pt] (pad.east) -- (padops.west);
+\draw[->, draw=edgec, line width=0.4pt] (sd.east) -- (sd.east -| 7, 2) -- (10, -1) -- (vidops.west);
+\draw[->, draw=edgec, line width=0.4pt] (ctrl.east) -- (10, 0) -- (ctrlops.west);
+
+% Title above
+\node[font=\footnotesize\bfseries, anchor=south] at (0, 5) {Linux v4l2\_subdev — IMX 센서 드라이버 구조};
+
+% Bottom annotation
+\node[font=\tiny, anchor=west, align=left] at (-7, -6) {
+  \textbullet\ probe()에서 v4l2\_i2c\_subdev\_init() 호출 → subdev 등록\\
+  \textbullet\ pad ops로 format 협상 (CSI receiver와 매칭)\\
+  \textbullet\ video ops로 stream on/off (s\_stream)\\
+  \textbullet\ ctrl ops로 Exposure·Gain 등 노출\\
+  \textbullet\ async 등록 → CSI receiver가 자동 binding
+};
+
+\end{tikzpicture}
+\end{document}

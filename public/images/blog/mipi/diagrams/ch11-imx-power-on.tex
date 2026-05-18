@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{tikz-timing}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikztiminglibrary{counters,interval,nicetabs}
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize]
+
+\node[font=\footnotesize\bfseries, anchor=west] at (0, 6) {Sony IMX 센서 Power-On Sequence};
+
+\node[anchor=west] at (0, 3) {\begin{tikztimingtable}
+  VDDL (1.05V)  & 0.5L 8H \\
+  VANA (2.8V)   & 1L 7.5H \\
+  VDIG (1.8V)   & 1.5L 7H \\
+  XCLK (24MHz) & 2L 6.5H \\
+  XCLR (reset n)& 3L 5.5H \\
+  I²C OK        & 5L 3.5H \\
+  CSI-2 Stream & 6.5L 2H \\
+\end{tikztimingtable}};
+
+\node[anchor=west, font=\tiny, align=left] at (0, -2.5) {
+  1. \textbf{VDDL 1.05V} (digital core) — 첫\\
+  2. \textbf{VANA 2.8V} (analog) — 100 µs 후\\
+  3. \textbf{VDIG 1.8V} (IO) — 100 µs 후\\
+  4. \textbf{XCLK} 24 MHz enable — 200 µs 후\\
+  5. \textbf{XCLR (reset)} High → 6.5 ms wait (Sony 내부 PLL lock)\\
+  6. \textbf{I²C} register read OK → chip ID 확인 (0x0219 for IMX219)\\
+  7. Init register sequence (~100 register) 적용\\
+  8. \textbf{Streaming On} (0x0100 = 0x01) → CSI-2 stream 시작\\[2pt]
+  ⚠ 순서 틀리면 *센서 영구 손상* 가능. 데이터시트 *Power-On Sequence* 표 정확히 따르기.
+};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=12mm,
+  field/.style={cls, align=center, font=\scriptsize\bfseries, minimum height=12mm, draw=edgec, line width=0.4pt},
+  addr/.style={field, fill=hifill},
+  func/.style={field, fill=confill},
+  data/.style={field, fill=impfill},
+  crc/.style={field, fill=warnfill},
+  idle/.style={field, fill=neutfill, font=\scriptsize}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (5, 4) {Modbus RTU Frame Structure};
+
+% Idle (silence)
+\node[idle, minimum width=20mm] at (-0.5, 1.5) {≥ 3.5 char\\\tiny silence};
+
+% Frame fields
+\node[addr, minimum width=12mm] at (1.8, 1.5) {Slave\\Addr (1B)};
+\node[func, minimum width=12mm] at (3.0, 1.5) {Function\\Code (1B)};
+\node[data, minimum width=44mm] at (5.8, 1.5) {Data (0-252 B)};
+\node[crc, minimum width=12mm] at (9.4, 1.5) {CRC-16\\(2B)};
+
+% End idle
+\node[idle, minimum width=20mm] at (10.7, 1.5) {≥ 3.5 char\\\tiny silence};
+
+% Example annotation
+\node[font=\tiny, anchor=west, align=left] at (-1, -0.5) {
+  \textbf{예 — Read Holding Registers (FC 0x03)}:\\
+  \quad TX: \texttt{01 03 00 00 00 05 85 C9} (슬레이브 1, FC 0x03, 시작 0x0000, 5개, CRC)\\
+  \quad RX: \texttt{01 03 0A AA BB CC DD EE FF 11 22 33 44 [CRC]} (10 bytes data + CRC)\\[4pt]
+  \textbf{흔한 Function Codes}:\\
+  \quad 0x01 Read Coils \quad 0x03 Read Holding Reg \quad 0x05 Write Coil \quad 0x06 Write Reg \quad 0x10 Write Multiple Reg\\[4pt]
+  \textbullet\ Frame 경계는 *3.5 char-time idle* — 9600 baud → 3.65 ms idle\\
+  \textbullet\ STM32 USART IDLE 인터럽트로 자동 검출
+};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=8mm, y=6mm,
+  frame/.style={draw=edgec, line width=0.5pt, fill=hifill!20},
+  roi/.style={draw=warnbord, line width=1pt, fill=warnfill!40},
+  skip/.style={draw=edgec, line width=0.3pt, dashed, fill=neutfill!30}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (8, 7.5) {CSI-2 v3.0+ Smart ROI — 관심 영역만 전송};
+
+% Full frame
+\node[font=\scriptsize, anchor=south west] at (0, 7) {Full frame 4000×3000 (12 MP)};
+\draw[frame] (0, 0) rectangle (16, 7);
+
+% ROI 1 — vehicle 1
+\draw[roi] (3.5, 4) rectangle (7, 7);
+\node[font=\tiny, anchor=south] at (5.25, 7) {ROI 1: 500×500};
+
+% ROI 2 — vehicle 2
+\draw[roi] (9, 2) rectangle (11.5, 5);
+\node[font=\tiny, anchor=south] at (10.25, 5) {ROI 2: 300×400};
+
+% Skip regions (cross-hatched)
+\node[font=\tiny, anchor=center] at (1.5, 3.5) {skip};
+\node[font=\tiny, anchor=center] at (13, 3.5) {skip};
+\node[font=\tiny, anchor=center] at (8, 1) {skip};
+
+% Right side — what's actually transmitted
+\node[font=\scriptsize, anchor=south west] at (19, 7) {Transmitted (CSI-2)};
+\node[font=\tiny, anchor=south west, align=left, draw=edgec, fill=hifill!20, inner sep=4pt] at (19, 4) {
+  \textbullet\ Short Packet: Frame Start\\
+  \textbullet\ Short Packet: ROI 1 meta\\
+  \textbullet\ Long Packets: ROI 1 픽셀\\
+  \textbullet\ Short Packet: ROI 2 meta\\
+  \textbullet\ Long Packets: ROI 2 픽셀\\
+  \textbullet\ Short Packet: Frame End
+};
+
+% Calculation
+\node[font=\tiny, anchor=west, align=left] at (0, -1) {
+  대역폭 — 풀 프레임 12 MP × 10 bit × 30 fps = 3.6 Gbps\\
+  ROI만 — (500×500 + 300×400) × 10 × 30 = 370 \textbf{M}bps → \textbf{10× 절감}
+};
+
+\end{tikzpicture}
+\end{document}

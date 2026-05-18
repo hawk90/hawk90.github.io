@@ -1,0 +1,63 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  region/.style={cls, align=left, font=\footnotesize, minimum width=80mm, minimum height=12mm, anchor=west},
+  comm/.style={region, fill=hifill, draw=hibord},
+  mfg/.style={region, fill=confill, draw=conbord},
+  profile/.style={region, fill=impfill, draw=impbord},
+  netvar/.style={region, fill=warnfill, draw=warnbord},
+  dt/.style={region, fill=neutfill, draw=neutbord}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (4.5, 7) {CANopen Object Dictionary — Index 영역 맵};
+
+% Address column
+\node[font=\scriptsize, anchor=east] at (-0.3, 6.0) {0x0001};
+\node[font=\scriptsize, anchor=east] at (-0.3, 4.8) {0x1000};
+\node[font=\scriptsize, anchor=east] at (-0.3, 3.6) {0x2000};
+\node[font=\scriptsize, anchor=east] at (-0.3, 2.4) {0x6000};
+\node[font=\scriptsize, anchor=east] at (-0.3, 1.2) {0xA000};
+
+\node[font=\scriptsize, anchor=east] at (-0.3, 0.6) {0xFFFF};
+
+% Regions
+\node[dt] at (0, 6.0) {0x0001-0x0FFF — \textbf{Data Types} (BOOLEAN, INTEGER8, STRING ...)};
+\node[comm] at (0, 4.8) {0x1000-0x1FFF — \textbf{Communication} (필수, 표준)};
+\node[mfg] at (0, 3.6) {0x2000-0x5FFF — \textbf{Manufacturer-Specific} (벤더 자유)};
+\node[profile] at (0, 2.4) {0x6000-0x9FFF — \textbf{Device Profile} (CiA 402 motion, CiA 401 IO 등)};
+\node[netvar] at (0, 1.2) {0xA000-0xFFFF — \textbf{Network Variables}};
+
+% Examples on right
+\node[font=\tiny, anchor=west, align=left] at (8.5, 4.8) {
+  \textbf{Communication 예}\\
+  0x1000 Device Type\\
+  0x1001 Error Register\\
+  0x1018 Identity Object\\
+  0x1400 RPDO1 Comm Param\\
+  0x1A00 TPDO1 Mapping
+};
+
+\node[font=\tiny, anchor=west, align=left] at (8.5, 2.4) {
+  \textbf{CiA 402 (Motion) 예}\\
+  0x6040 Controlword\\
+  0x6041 Statusword\\
+  0x607A Target Position\\
+  0x6064 Position Actual\\
+  0x6081 Profile Velocity
+};
+
+% Bottom annotation
+\node[font=\tiny, anchor=west, align=left] at (0, 0) {
+  \textbullet\ 각 index는 *16-bit*, sub-index *8-bit* — 16 M slot 가능 (실제 사용은 수십~수백)\\
+  \textbullet\ Communication 영역 (0x1000+)이 *디바이스 발견·시스템 통합*의 핵심\\
+  \textbullet\ Device Profile (0x6000+)이 *상호운용성*의 핵심 — 같은 CiA 402 motion 디바이스는 동일 API
+};
+
+\end{tikzpicture}
+\end{document}

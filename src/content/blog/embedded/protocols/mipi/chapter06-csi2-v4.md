@@ -59,6 +59,8 @@ PHY (D-PHY 4-lane)
 
 ## Smart ROI — 관심 영역만
 
+![CSI-2 Smart ROI — ADAS 차량 추적 예](/images/blog/mipi/diagrams/ch06-smart-roi.svg)
+
 기존 — *전체 프레임* 전송. v3.0+ — *N개 ROI*만 전송, 나머지는 *skip*.
 
 ```text

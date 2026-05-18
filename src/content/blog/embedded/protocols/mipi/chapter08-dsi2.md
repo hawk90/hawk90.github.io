@@ -69,6 +69,8 @@ VESA 표준 — *visually lossless*. *수학적*으로 손실 있지만 *육안 
 
 ## 한눈에 — DSC 데이터 흐름
 
+![VESA DSC compression pipeline](/images/blog/mipi/diagrams/ch08-vesa-dsc-pipeline.svg)
+
 ```text
 SoC
  ↓ RGB888 (10 Gbps)

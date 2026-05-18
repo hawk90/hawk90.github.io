@@ -22,6 +22,8 @@ draft: true
 
 ## v4l2_subdev 구조
 
+![v4l2_subdev struct + ops](/images/blog/mipi/diagrams/ch11-v4l2-subdev-struct.svg)
+
 ```c
 #include <linux/i2c.h>
 #include <linux/module.h>
@@ -109,6 +111,8 @@ static const struct imx219_mode imx219_modes[] = {
 > 💡 *Init sequence*는 Sony NDA 문서 또는 *reference design 공개 코드*에서. 보통 *100+ register* 설정.
 
 ## Power 시퀀스
+
+![IMX sensor power-on timing (tikz-timing)](/images/blog/mipi/diagrams/ch11-imx-power-on.svg)
 
 ```c
 static int imx219_power_on(struct imx219 *sensor) {

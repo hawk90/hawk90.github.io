@@ -1,0 +1,63 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{circuitikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\ctikzset{bipoles/length=8mm}
+\begin{document}
+\begin{circuitikz}[scale=1.0, transform shape]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (5, 6.5) {CAN Transceiver — TJA1051 / SN65HVD230};
+
+% IC
+\draw (3, 1.5) rectangle (7, 5) node[midway, font=\footnotesize\bfseries] {TJA1051};
+
+% Pin labels (left, MCU side)
+\node[font=\scriptsize, anchor=east] at (3, 4.5) {TXD};
+\node[font=\scriptsize, anchor=east] at (3, 4.0) {RXD};
+\node[font=\scriptsize, anchor=east] at (3, 3.0) {GND};
+\node[font=\scriptsize, anchor=east] at (3, 2.0) {VCC};
+
+% Pin labels (right, bus side)
+\node[font=\scriptsize, anchor=west] at (7, 4.5) {CANH};
+\node[font=\scriptsize, anchor=west] at (7, 3.0) {STB};
+\node[font=\scriptsize, anchor=west] at (7, 2.0) {CANL};
+
+% MCU connections
+\draw (3, 4.5) -- (1, 4.5) node[anchor=east, font=\tiny] {MCU CAN\_TX};
+\draw (3, 4.0) -- (1, 4.0) node[anchor=east, font=\tiny] {MCU CAN\_RX};
+
+% Standby (optional)
+\draw (7, 3.0) -- (8.5, 3.0) node[anchor=west, font=\tiny] {STB (GND = active)};
+
+% Power
+\draw (3, 2.0) -- (2, 2.0) -- (2, 6) node[anchor=south] {\scriptsize 5V VCC};
+\draw (2, 6) to[C=100nF] (2, 4.5);
+
+% GND
+\draw (3, 3.0) -- (2.5, 3.0);
+\node[ground] at (2.5, 3.0) {};
+
+% Bus + split termination
+\draw (7, 4.5) -- (9, 4.5);
+\draw (7, 2.0) -- (9, 2.0);
+\draw (9, 4.5) to[R=60$\Omega$] (9, 3.5) coordinate (mid);
+\draw (mid) to[R=60$\Omega$] (9, 2.5);
+\draw (9, 2.5) -- (9, 2.0);
+\draw (mid) -- (10.5, 3.5) to[C=4.7nF] (10.5, 2) node[ground] {};
+
+% Continue bus to other nodes
+\draw (9, 4.5) -- (11.5, 4.5) node[font=\tiny, anchor=west] {CAN\_H bus};
+\draw (9, 2.0) -- (11.5, 2.0) node[font=\tiny, anchor=west] {CAN\_L bus};
+
+% Annotation
+\node[font=\tiny, anchor=west, align=left] at (0, -0.2) {
+  \textbullet\ TJA1051 = 5V single-ended, CAN 2.0/FD 호환 (≤ 5 Mbps)\\
+  \textbullet\ TCAN332 = 3.3V (MCU 직접)\\
+  \textbullet\ STB Low = active, High = standby (저전력 wake-up)\\
+  \textbullet\ Split termination + 4.7 nF로 자동차 EMC 통과
+};
+
+\end{circuitikz}
+\end{document}

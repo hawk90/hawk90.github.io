@@ -61,6 +61,8 @@ draft: true
 
 ### XIP — eXecute In Place
 
+![SPI Flash XIP — Memory-Mapped Mode data flow](/images/blog/embedded-serial/diagrams/ch03-spi-xip-flow.svg)
+
 QSPI/OctSPI 플래시를 **CPU 주소 공간에 매핑**해 코드를 직접 fetch. RAM 복사 없이 실행. 단점은 fetch latency가 RAM보다 길어 *캐시*가 필수.
 
 ```text

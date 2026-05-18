@@ -177,6 +177,8 @@ Profibus DP는 *Ethernet으로 진화* → **PROFINET** (실시간 이더넷). P
 
 ### 프레임 구조
 
+![Modbus RTU frame structure](/images/blog/embedded-serial/diagrams/ch09-modbus-rtu-frame.svg)
+
 ```text
 [Slave Addr (1B)] [Function Code (1B)] [Data (N B)] [CRC-16 (2B)]
                   ↑                                  ↑

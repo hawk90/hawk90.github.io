@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  block/.style={cls, align=center, font=\footnotesize, minimum width=28mm, minimum height=14mm, draw=conbord, fill=confill},
+  cpu/.style={cls, align=center, font=\footnotesize, minimum width=28mm, minimum height=14mm, draw=hibord, fill=hifill},
+  flash/.style={cls, align=center, font=\footnotesize, minimum width=28mm, minimum height=14mm, draw=impbord, fill=impfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt},
+  lbl/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (6, 5) {SPI Flash XIP — Memory-Mapped Mode 데이터 흐름};
+
+% CPU
+\node[cpu] (cpu) at (0, 2) {Cortex-M7 CPU};
+\node[font=\tiny, anchor=south] at (cpu.north) {fetch addr 0x9000\_0000};
+
+% AXI bus
+\node[block] (axi) at (4, 2) {AXI Bus\\Matrix};
+
+% QSPI controller
+\node[block] (qspi) at (8, 2) {QSPI\\Controller};
+\node[font=\tiny, anchor=south, align=center] at (qspi.north) {Memory-Mapped\\Mode};
+
+% NOR Flash
+\node[flash] (nor) at (12, 2) {NOR Flash\\W25Q128};
+
+% Cache (optional)
+\node[block, draw=warnbord, fill=warnfill] (cache) at (4, 0) {L1 I-Cache};
+
+% Connections
+\draw[arr] (cpu.east) -- (axi.west) node[lbl, midway, above] {AXI read};
+\draw[arr] (axi.east) -- (qspi.west) node[lbl, midway, above] {addr};
+\draw[arr] (qspi.east) -- (nor.west) node[lbl, midway, above, align=center] {Cmd 0xEB\\(Fast Read Quad)};
+\draw[arr] (nor.west) -- ([yshift=-3mm]nor.west) -- ([yshift=-3mm]qspi.east) node[lbl, midway, below] {data 4-lane};
+\draw[arr] (qspi.west) -- ([yshift=-3mm]qspi.west) -- ([yshift=-3mm]axi.east) node[lbl, midway, below] {data};
+\draw[arr] (axi.west) -- ([yshift=-3mm]axi.west) -- ([yshift=-3mm]cpu.east) node[lbl, midway, below] {cache line 32B};
+
+% Cache feedback
+\draw[arr, draw=warnbord] (axi.south) -- (cache.north) node[lbl, midway, right] {cache fill};
+\draw[arr, draw=warnbord] (cache.north) -- ([yshift=-3mm]axi.north) node[lbl, midway, left] {hit};
+
+% Bottom annotation
+\node[font=\tiny, anchor=west, align=left] at (0, -1.5) {
+  \textbullet\ CPU read `0x9000_0000` → AXI 자동 변환 → QSPI cmd 0xEB → NOR data → cache 채움\\
+  \textbullet\ 한 cache miss = ~50 ns (QSPI 100 MHz × 4-lane → 32B in ~0.4 µs)\\
+  \textbullet\ Cache hit 시 *AXI 안 거침* — DRAM 같은 latency\\
+  \textbullet\ STM32H7 / NXP RT 시리즈에서 표준 — 외부 RAM 없는 보드의 *실행 매체*
+};
+
+\end{tikzpicture}
+\end{document}

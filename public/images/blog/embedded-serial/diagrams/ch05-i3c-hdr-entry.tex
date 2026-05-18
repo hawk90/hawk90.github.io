@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  state/.style={cls, align=center, font=\footnotesize, minimum width=32mm, minimum height=14mm},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt},
+  lbl/.style={font=\tiny, fill=white, inner sep=2pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (10, 4.5) {I³C HDR Mode Entry/Exit Sequence};
+
+% States
+\node[state, draw=hibord, fill=hifill] (sdr) at (0, 2) {SDR Mode\\\tiny push-pull 12.5 MHz};
+
+\node[state, draw=conbord, fill=confill] (ddr) at (6, 3) {HDR-DDR\\\tiny 25 Mbps};
+\node[state, draw=conbord, fill=confill] (tsp) at (6, 1) {HDR-TSP\\\tiny 37.5 Mbps};
+\node[state, draw=conbord, fill=confill] (tsl) at (6, -1) {HDR-TSL\\\tiny 33 Mbps};
+\node[state, draw=conbord, fill=confill] (bt) at (6, -3) {HDR-BT\\\tiny 12.5 Mbps};
+
+% Entry transitions
+\draw[arr] (sdr) -- (ddr.west) node[lbl, midway, above, sloped] {CCC ENTHDR0};
+\draw[arr] (sdr) -- (tsp.west) node[lbl, midway, above, sloped] {CCC ENTHDR1};
+\draw[arr] (sdr) -- (tsl.west) node[lbl, midway, below, sloped] {CCC ENTHDR2};
+\draw[arr] (sdr) -- (bt.west) node[lbl, midway, below, sloped] {CCC ENTHDR3};
+
+% Exit (HDR Exit Pattern)
+\node[state, draw=warnbord, fill=warnfill] (exit) at (14, 0) {SDR Mode\\\tiny 복귀};
+
+\draw[arr] (ddr) -- (exit) node[lbl, midway, above, sloped] {HDR Exit Pattern};
+\draw[arr] (tsp) -- (exit);
+\draw[arr] (tsl) -- (exit);
+\draw[arr] (bt) -- (exit);
+
+% Bottom annotation
+\node[font=\tiny, anchor=west, align=left] at (0, -4.5) {
+  \textbullet\ 마스터가 *CCC (Common Command Code)* ENTHDR0/1/2/3 송신 → 모든 노드가 HDR 모드 진입\\
+  \textbullet\ HDR 트랜잭션 종료 시 *HDR Exit Pattern*으로 SDR 복귀\\
+  \textbullet\ HDR-DDR (rising + falling 양쪽 샘플) 가장 흔함, HDR-TSP (3-symbol ternary) 가장 빠름\\
+  \textbullet\ HDR-TSL은 I²C-compat 보장 (legacy slave와 공존)
+};
+
+\end{tikzpicture}
+\end{document}
