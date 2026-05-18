@@ -1,0 +1,53 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=2.8mm, y=10mm,
+  field/.style={cls, align=center, font=\tiny, minimum height=10mm, draw=edgec, line width=0.4pt},
+  arb/.style={field, fill=hifill},
+  ctrl/.style={field, fill=confill},
+  data/.style={field, fill=impfill},
+  crc/.style={field, fill=warnfill},
+  endf/.style={field, fill=hifill!30}
+]
+
+% Phase 1: Arbitration (SOF + ID + RTR + IDE + r0)
+\node[arb, minimum width=2.8mm] (sof)  at (0, 0)  {SOF\\\tiny 1};
+\node[arb, minimum width=30.8mm] (id) at (16.8, 0) {ID (11)};
+\node[arb, minimum width=2.8mm] (rtr) at (33.6, 0) {RTR\\\tiny 1};
+\node[arb, minimum width=2.8mm] (ide) at (36.4, 0) {IDE\\\tiny 1};
+\node[arb, minimum width=2.8mm] (r0)  at (39.2, 0) {r0\\\tiny 1};
+
+% Phase 2: DLC
+\node[ctrl, minimum width=11.2mm] (dlc) at (46.2, 0) {DLC (4)};
+
+% Phase 3: Data (0-64 bit = 0-8 byte)
+\node[data, minimum width=44.8mm] (datafield) at (74.2, 0) {Data (0-64 bit)};
+
+% Phase 4: CRC
+\node[crc, minimum width=42mm] (crc) at (117.6, 0) {CRC (15) + Delim};
+\node[crc, minimum width=2.8mm] (ack) at (140.0, 0) {ACK\\\tiny 1};
+\node[crc, minimum width=2.8mm] (ackd) at (142.8, 0) {Dlm\\\tiny 1};
+
+% End
+\node[endf, minimum width=19.6mm] (eof) at (154.0, 0) {EOF (7)};
+\node[endf, minimum width=8.4mm] (ifs) at (167.0, 0) {IFS (3)};
+
+% Phase labels
+\node[font=\footnotesize\bfseries, anchor=north] at (20, -0.9) {Arbitration};
+\node[font=\footnotesize\bfseries, anchor=north] at (60, -0.9) {Control + Data};
+\node[font=\footnotesize\bfseries, anchor=north] at (130, -0.9) {CRC + ACK};
+\node[font=\footnotesize\bfseries, anchor=north] at (160, -0.9) {End};
+
+% Direction arrow
+\draw[->, draw=edgec, line width=0.4pt] (0, 1) -- (167, 1) node[midway, above, font=\scriptsize] {시간 →};
+
+% Bit count under
+\node[font=\tiny, anchor=north] at (84, -1.6) {Standard Frame — 최소 47 bit + payload (8 byte 시 111 bit, bit stuffing 후 최대 130 bit)};
+
+\end{tikzpicture}
+\end{document}

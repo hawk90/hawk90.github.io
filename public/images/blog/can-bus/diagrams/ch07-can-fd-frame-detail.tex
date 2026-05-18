@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=2.4mm, y=8mm,
+  field/.style={cls, align=center, font=\tiny, minimum height=8mm, draw=edgec, line width=0.4pt},
+  arb/.style={field, fill=hifill},
+  ctrl/.style={field, fill=confill},
+  fast/.style={field, fill=impfill},
+  crc/.style={field, fill=warnfill},
+  endf/.style={field, fill=hifill!30}
+]
+
+% Header
+\node[font=\footnotesize\bfseries, anchor=west] at (0, 1.5) {CAN FD Standard Frame — 비트별 (BRS 활성)};
+
+% Arbitration phase (nominal)
+\node[arb, minimum width=2.4mm] at (0, 0) {SOF\\\tiny 1};
+\node[arb, minimum width=26.4mm] at (15.6, 0) {ID (11)};
+\node[arb, minimum width=2.4mm] at (30.0, 0) {RRS};
+\node[arb, minimum width=2.4mm] at (32.4, 0) {IDE};
+\node[arb, minimum width=2.4mm] at (34.8, 0) {FDF};
+\node[arb, minimum width=2.4mm] at (37.2, 0) {res};
+\node[arb, minimum width=2.4mm] at (39.6, 0) {BRS};
+\node[arb, minimum width=2.4mm] at (42.0, 0) {ESI};
+
+% Fast phase
+\node[fast, minimum width=9.6mm] at (48.0, 0) {DLC};
+\node[fast, minimum width=64.8mm] at (85.2, 0) {Data};
+\node[fast, minimum width=9.6mm] at (122.4, 0) {Stuff};
+\node[crc, minimum width=40.8mm] at (147.6, 0) {CRC-17/21};
+
+% Back to nominal
+\node[endf, minimum width=2.4mm] at (169.2, 0) {Dlm};
+\node[endf, minimum width=2.4mm] at (171.6, 0) {ACK};
+\node[endf, minimum width=2.4mm] at (174.0, 0) {Dlm};
+\node[endf, minimum width=16.8mm] at (183.6, 0) {EOF (7)};
+
+% Phase transition markers
+\draw[draw=warnbord, line width=0.4pt, dashed] (43.2, -1) -- (43.2, 1);
+\node[font=\tiny, anchor=south, color=warnbord] at (43.2, -1.5) {↓ 5 Mbps};
+
+\draw[draw=warnbord, line width=0.4pt, dashed] (168.0, -1) -- (168.0, 1);
+\node[font=\tiny, anchor=south, color=warnbord] at (168.0, -1.5) {↓ 1 Mbps};
+
+% Phase labels
+\node[font=\footnotesize\bfseries, anchor=center] at (20, -2.5) {Arbitration (nominal)};
+\node[font=\footnotesize\bfseries, anchor=center] at (105, -2.5) {Data + CRC (fast)};
+\node[font=\footnotesize\bfseries, anchor=center] at (180, -2.5) {End (nominal)};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,64 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=2.6mm, y=10mm,
+  field/.style={cls, align=center, font=\tiny, minimum height=10mm, draw=edgec, line width=0.4pt},
+  arb/.style={field, fill=hifill},
+  ctrl/.style={field, fill=confill},
+  fast/.style={field, fill=impfill},
+  crc/.style={field, fill=warnfill},
+  endf/.style={field, fill=hifill!30}
+]
+
+% Title - CAN 2.0
+\node[font=\footnotesize\bfseries, anchor=west] at (0, 1.5) {CAN 2.0 — nominal rate (1 Mbps)};
+
+% CAN 2.0 frame
+\node[arb, minimum width=2.6mm] at (0, 0) {SOF};
+\node[arb, minimum width=28.6mm] at (15.6, 0) {ID (11)};
+\node[arb, minimum width=10.4mm] at (35.1, 0) {Ctrl};
+\node[ctrl, minimum width=20.8mm] at (50.7, 0) {Data (0-8B)};
+\node[crc, minimum width=39mm] at (80.6, 0) {CRC (15)};
+\node[endf, minimum width=23.4mm] at (111.8, 0) {ACK + EOF};
+
+% Title - CAN FD
+\node[font=\footnotesize\bfseries, anchor=west] at (0, -1.5) {CAN FD — nominal + fast (5 Mbps)};
+
+% CAN FD frame
+\node[arb, minimum width=2.6mm] at (0, -3) {SOF};
+\node[arb, minimum width=28.6mm] at (15.6, -3) {ID (11)};
+\node[arb, minimum width=2.6mm] at (31.2, -3) {RRS};
+\node[arb, minimum width=2.6mm] at (33.8, -3) {IDE};
+\node[arb, minimum width=2.6mm] at (36.4, -3) {FDF};
+\node[arb, minimum width=2.6mm] at (39.0, -3) {res};
+\node[arb, minimum width=2.6mm] at (41.6, -3) {BRS};
+
+% Fast phase
+\node[ctrl, minimum width=2.6mm] at (44.2, -3) {ESI};
+\node[fast, minimum width=10.4mm] at (50.7, -3) {DLC};
+\node[fast, minimum width=70.2mm] at (91.0, -3) {Data (0-64 byte)};
+\node[fast, minimum width=10.4mm] at (131.3, -3) {Stuff};
+\node[crc, minimum width=44.2mm] at (158.6, -3) {CRC-17/21};
+
+% Back to nominal
+\node[endf, minimum width=23.4mm] at (192.4, -3) {ACK + EOF};
+
+% Phase markers below FD
+\draw[draw=warnbord, line width=0.4pt, dashed] (45.5, -3.7) -- (45.5, -1.5);
+\node[font=\tiny, anchor=south, color=warnbord] at (45.5, -3.7) {BRS\,↑ fast 시작};
+
+\draw[draw=warnbord, line width=0.4pt, dashed] (180.7, -3.7) -- (180.7, -1.5);
+\node[font=\tiny, anchor=south, color=warnbord] at (180.7, -3.7) {CRC delim → nominal 복귀};
+
+% Comparison note
+\node[font=\tiny, anchor=west, align=left] at (0, -4.5) {
+  CAN 2.0과 CAN FD 비교 — *중재 phase 동일* (1 Mbps),  *데이터 phase 가속* (5 Mbps),  *페이로드 8 → 64 byte*.
+};
+
+\end{tikzpicture}
+\end{document}
