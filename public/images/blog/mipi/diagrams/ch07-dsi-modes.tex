@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=10mm,
+  block/.style={cls, align=center, font=\scriptsize, minimum width=20mm, minimum height=8mm, draw=edgec},
+  hs/.style={block, fill=warnfill},
+  lp/.style={block, fill=hifill!50},
+  ttl/.style={font=\footnotesize\bfseries, anchor=west}
+]
+
+% Command Mode
+\node[ttl] at (-0.5, 2.5) {Command Mode (frame buffer 있음)};
+\node[lp, minimum width=20mm] at (0, 1.5) {LP idle};
+\node[hs, minimum width=20mm] at (2, 1.5) {HS: Memory Write};
+\node[lp, minimum width=40mm] at (5, 1.5) {LP idle (오랜 시간)};
+\node[hs, minimum width=20mm] at (9, 1.5) {HS: 변화 영역 update};
+\node[lp, minimum width=20mm] at (11, 1.5) {LP};
+\node[font=\tiny, anchor=west] at (-0.5, 0.7) {필요 시에만 update — 절전};
+
+% Video Mode
+\node[ttl] at (-0.5, -0.5) {Video Mode (continuous stream)};
+\node[hs, minimum width=15mm] at (0, -1.5) {HS: Active};
+\node[lp, minimum width=4mm] at (1.5, -1.5) {LP};
+\node[hs, minimum width=15mm] at (2.5, -1.5) {HS: Active};
+\node[lp, minimum width=4mm] at (4, -1.5) {LP};
+\node[hs, minimum width=15mm] at (5, -1.5) {HS: Active};
+\node[lp, minimum width=4mm] at (6.5, -1.5) {LP};
+\node[hs, minimum width=15mm] at (7.5, -1.5) {HS: Active};
+\node[lp, minimum width=4mm] at (9, -1.5) {LP};
+\node[hs, minimum width=15mm] at (10, -1.5) {HS: Active};
+
+\node[font=\tiny, anchor=west] at (-0.5, -2.3) {매 라인마다 HS (burst mode 시 사이 LP)};
+
+% Time arrow
+\draw[->, draw=edgec, line width=0.4pt] (-0.5, -3.2) -- (12, -3.2) node[right, font=\scriptsize] {시간};
+
+\end{tikzpicture}
+\end{document}

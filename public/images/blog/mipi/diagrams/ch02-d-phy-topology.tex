@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  chip/.style={cls, align=center, font=\footnotesize\bfseries, minimum width=32mm, minimum height=44mm, draw=hibord, fill=hifill},
+  pin/.style={rectangle, draw=edgec, fill=white, minimum width=4mm, minimum height=3mm, inner sep=0pt, font=\tiny},
+  diff/.style={draw=edgec, line width=0.8pt},
+  lbl/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+
+% Sensor (left)
+\node[chip] (tx) at (0, 0) {Image\\Sensor\\(IMX)};
+
+% SoC (right)
+\node[chip] (rx) at (10, 0) {SoC\\CSI Rx};
+
+% Clock lane
+\node[pin] at (tx.east |- 0, 1.5) {CK+};
+\node[pin] at (tx.east |- 0, 1.0) {CK-};
+\draw[diff] ([yshift=1.5cm]tx.east) -- ([yshift=1.5cm]rx.west);
+\draw[diff] ([yshift=1.0cm]tx.east) -- ([yshift=1.0cm]rx.west);
+\node[lbl] at (5, 1.25) {Clock lane};
+
+% Data lanes 0-3
+\foreach \i/\y in {0/0.3, 1/-0.3, 2/-0.9, 3/-1.5} {
+  \node[pin] at (tx.east |- 0, \y+0.15) {D\i+};
+  \node[pin] at (tx.east |- 0, \y-0.15) {D\i-};
+  \draw[diff] (tx.east |- 0, \y+0.15) -- (rx.west |- 0, \y+0.15);
+  \draw[diff] (tx.east |- 0, \y-0.15) -- (rx.west |- 0, \y-0.15);
+}
+\node[lbl] at (5, 0) {Data lane 0};
+\node[lbl] at (5, -0.6) {Data lane 1};
+\node[lbl] at (5, -1.2) {Data lane 2};
+\node[lbl] at (5, -1.8) {Data lane 3};
+
+% Annotations
+\node[font=\scriptsize, anchor=north] at (5, -2.7) {Differential — 각 lane = 2 wire (양극·음극)};
+\node[font=\scriptsize, anchor=north] at (5, -3.2) {4-lane D-PHY 2.5 Gbps/lane = 10 Gbps 총 대역폭};
+
+\end{tikzpicture}
+\end{document}

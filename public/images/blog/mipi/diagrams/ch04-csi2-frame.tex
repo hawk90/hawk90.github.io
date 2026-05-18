@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=10mm,
+  pkt/.style={cls, align=center, font=\scriptsize, minimum height=8mm, draw=edgec, line width=0.4pt},
+  short/.style={pkt, fill=warnfill},
+  long/.style={pkt, fill=impfill},
+  marker/.style={draw=warnbord, line width=0.5pt, dashed}
+]
+
+% Frame start
+\node[short, minimum width=10mm] (fs) at (0, 0) {FS};
+\node[font=\tiny, anchor=south] at (fs.north) {Frame Start};
+
+% Line 1
+\node[short, minimum width=10mm] (ls1) at (1.5, 0) {LS};
+\node[long, minimum width=20mm] (line1) at (3.5, 0) {Long: pixel data};
+\node[short, minimum width=10mm] (le1) at (5.5, 0) {LE};
+
+% ...
+\node[font=\large, anchor=center] at (7, 0) {\dots};
+
+% Line N
+\node[short, minimum width=10mm] (lsn) at (8.5, 0) {LS};
+\node[long, minimum width=20mm] (linen) at (10.5, 0) {Long: pixel data};
+\node[short, minimum width=10mm] (len) at (12.5, 0) {LE};
+
+% Frame end
+\node[short, minimum width=10mm] (fe) at (14, 0) {FE};
+\node[font=\tiny, anchor=south] at (fe.north) {Frame End};
+
+% Time arrow
+\draw[->, draw=edgec, line width=0.4pt] (-0.7, -1) -- (14.7, -1) node[right, font=\scriptsize] {시간};
+
+% Annotations
+\node[font=\tiny, anchor=north] at (3.5, -1.5) {Line 1};
+\node[font=\tiny, anchor=north] at (10.5, -1.5) {Line N};
+
+\node[font=\scriptsize, anchor=north, align=center] at (7, -2.5) {Short Packet (LS/LE/FS/FE) = sync 이벤트\\Long Packet = 한 라인의 픽셀 데이터 + CRC};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  module/.style={cls, align=center, font=\footnotesize, minimum width=30mm, minimum height=18mm, draw=hibord, fill=hifill},
+  serdes/.style={cls, align=center, font=\footnotesize, minimum width=22mm, minimum height=14mm, draw=conbord, fill=confill},
+  coax/.style={draw=warnbord, line width=1.2pt},
+  csi/.style={draw=edgec, line width=0.6pt},
+  arr/.style={-{Stealth[length=2.4mm]}}
+]
+
+% Camera module (left)
+\node[module] (cam) at (0, 0) {Camera\\Module\\(Sensor + ISP)};
+\node[serdes, right=2mm of cam] (ser) {Serializer\\(MAX9295)};
+
+% Connection inside module — CSI-2 D-PHY
+\draw[csi, arr] (cam.east) -- (ser.west) node[midway, above, font=\tiny] {CSI-2};
+
+% ECU (right)
+\node[serdes] (deser) at (12, 0) {Deserializer\\(MAX9296)};
+\node[module, right=2mm of deser, draw=impbord, fill=impfill] (ecu) {ECU\\(NVIDIA\\Jetson Orin)};
+\draw[csi, arr] (deser.east) -- (ecu.west) node[midway, above, font=\tiny] {CSI-2};
+
+% A-PHY link (coax)
+\draw[coax, arr] (ser.east) -- (deser.west);
+\node[font=\scriptsize, fill=white, inner sep=1.5pt] at (8, 0.4) {A-PHY G2/G3};
+\node[font=\tiny, anchor=south] at (8, -0.4) {coax 1 wire, 15 m};
+
+% Forward / Reverse labels
+\node[font=\tiny, color=warnbord, anchor=south] at (8, 1.0) {↓ Forward: 4-8 Gbps (CSI-2)};
+\node[font=\tiny, color=warnbord, anchor=north] at (8, -1.0) {↑ Reverse: 100 Mbps (I²C·진단)};
+
+% PoC annotation
+\node[font=\tiny, anchor=north, align=center, draw=warnbord, fill=warnfill, inner sep=2pt] at (8, -2.5) {+ DC power 12V (Power over Coax)};
+
+\end{tikzpicture}
+\end{document}
