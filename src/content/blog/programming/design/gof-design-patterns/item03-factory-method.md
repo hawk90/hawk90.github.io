@@ -12,6 +12,26 @@ draft: false
 
 > **"이 자리에 객체를 만들어줘 — 뭘 만들지는 너가 정해"** — base에 자리만 만들고, derived가 무엇을 인스턴스화할지 결정.
 
+## 비유 — 피자 가게 본사와 지점
+
+피자 체인 본사는 *영업 절차*를 표준화합니다.
+
+1. 주문 받기
+2. 도우 준비
+3. *피자 굽기*
+4. 박스에 담기
+5. 손님에게 전달
+
+본사가 모든 절차를 규정하지만, 3번 *피자 굽기*에서 *어떤 종류의 피자*를 굽는지는 *지점이 결정*합니다. 서울 강남점은 *치즈피자*를, 부산 해운대점은 *해산물피자*를 굽습니다. 본사 매뉴얼은 *그대로*입니다.
+
+Factory Method가 이 구조입니다.
+
+- *본사 매뉴얼* = Creator base class의 알고리즘
+- *피자 굽기 단계* = `createDocument()` 같은 추상 메서드
+- *지점이 선택한 피자* = ConcreteCreator가 반환하는 ConcreteProduct
+
+본사(base)는 "피자가 필요하다"는 *사실*만 알고, 종류는 *지점(derived)이 결정*합니다.
+
 ## 어떤 문제를 푸는가
 
 프레임워크가 사용자 정의 객체를 만들어야 합니다 — 그런데 프레임워크는 **사용자가 어떤 클래스를 쓸지 모릅니다**.
@@ -51,9 +71,15 @@ public:
 
 이제 base는 "Document를 만든다"는 사실만 알고, 종류는 derived가 결정. 새 Document 종류는 새 Application derived로 — base 수정 없음.
 
-## Abstract Factory와의 차이
+## 헷갈리는 패턴과의 차이
 
-자주 혼동되는 두 패턴.
+자주 혼동되는 세 패턴.
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Abstract Factory](/blog/programming/design/gof-design-patterns/item01-abstract-factory) | Abstract Factory는 *객체 군*(여러 종류). Factory Method는 *객체 하나*. Abstract Factory의 각 메서드는 보통 *Factory Method로 구현*. |
+| [Builder](/blog/programming/design/gof-design-patterns/item02-builder) | Builder는 *복잡한 객체를 단계적*으로. Factory Method는 *한 호출*에 하나. |
+| Simple Factory (정적 함수) | Simple Factory는 *조건 분기 + new*. Factory Method는 *서브클래스에 결정 위임* (OCP 준수). |
 
 | 측면 | Abstract Factory | Factory Method |
 | --- | --- | --- |
@@ -61,7 +87,7 @@ public:
 | 도구 | 별도 팩토리 객체 | Creator 클래스 안의 메서드 |
 | 결합 방식 | Composition | Inheritance |
 
-Abstract Factory의 각 메서드는 **보통 Factory Method로 구현**됩니다.
+판별 한 줄: *"이 한 종류의 객체를 어떤 구체 클래스로 만들지 서브클래스가 결정"*하면 Factory Method.
 
 ## 한눈에 보는 구조
 

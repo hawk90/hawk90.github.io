@@ -12,6 +12,20 @@ draft: false
 
 > **"매번 새로 만들지 말고 복제해"** — 견본 객체 하나 만들어두고 `clone()`으로 찍어냄.
 
+## 비유 — 도장과 인주
+
+문서에 같은 도장을 *수십 번* 찍는다고 생각해봅시다. 매번 새 도장을 *조각*하면 시간이 엄청 듭니다. 대신 한 번 *마스터 도장*을 만들고, 인주에 묻혀 *찍기만* 하면 됩니다.
+
+또는 게임에서 *몬스터 한 마리*를 만드는 데 *DB 조회 + 텍스처 로드 + AI 초기화*가 필요하다고 해봅시다. 같은 종류 몬스터 100마리를 화면에 띄우려고 매번 처음부터 하면 *프레임이 끊깁니다*. 대신 *한 마리(prototype)*를 만들어두고 *clone*으로 99마리를 더 찍어냅니다.
+
+Prototype이 바로 이 *마스터 도장 → 찍기* 흐름입니다.
+
+- *마스터 도장* = 미리 만들어둔 prototype 인스턴스
+- *찍기* = `clone()` 호출
+- *새 도장 조각* = 비싼 처음부터의 생성
+
+새 종류가 *런타임에 추가*되어도 *클래스를 새로 만들 필요 없이* 마스터 인스턴스만 등록하면 됩니다.
+
 ## 어떤 문제를 푸는가
 
 객체 생성이 **비쌉니다**:
@@ -65,6 +79,16 @@ for (int i = 0; i < 100; ++i) {
 > ⚠️ **단순한 객체** — 그냥 새로 만들면 됨.
 
 > ⚠️ **객체에 unique한 자원 핸들**(file descriptor, socket)이 있으면 복사 의미가 모호.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Abstract Factory](/blog/programming/design/gof-design-patterns/item01-abstract-factory) | Abstract Factory는 *클래스 계층*으로 종류 표현 (정적). Prototype은 *인스턴스 등록*으로 종류 추가 (동적). |
+| [Factory Method](/blog/programming/design/gof-design-patterns/item03-factory-method) | Factory Method는 *서브클래스 정의*가 필요. Prototype은 *클래스 추가 없이* 새 종류 등록 가능. |
+| 단순 deep copy | `std::copy`나 deep copy 함수는 *외부에서* 복제. Prototype은 *객체 자신*이 `clone()`을 안다 — 다형성. |
+
+판별 한 줄: *"런타임에 종류가 늘어나거나, 생성 비용이 너무 커서 한 번만 하고 싶다"*면 Prototype.
 
 ## C++ 구현
 

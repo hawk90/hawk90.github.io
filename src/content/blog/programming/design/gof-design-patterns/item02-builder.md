@@ -12,6 +12,26 @@ draft: false
 
 > **"인자 폭탄 생성자를 단계별 조립으로"** — `new Pizza(true, false, "thin", ...)` 대신 `Pizza().setDough().addTopping()...build()`.
 
+## 비유 — 서브웨이 샌드위치
+
+서브웨이에서 샌드위치 주문하는 과정을 떠올려봅시다.
+
+1. *빵* 선택 (화이트, 위트, 허니오트 ...)
+2. *치즈* 선택 (체다, 모짜렐라, 페퍼잭 ...)
+3. *야채* 선택 (양상추, 토마토, 피클 ...)
+4. *소스* 선택 (마요, 머스타드, 스위트칠리 ...)
+5. *최종 제출* — 직원이 만들어줍니다.
+
+각 *단계가 명시적*이고, *순서가 정해져* 있으며, 같은 절차로 *햄 샌드위치*도 *베지 샌드위치*도 만들어집니다.
+
+Builder가 바로 이 *주문서 → 직원이 조립*의 흐름입니다.
+
+- *주문서* = Director가 호출하는 단계 순서
+- *직원* = Builder (단계별 메서드 구현)
+- *완성 샌드위치* = `build()`가 반환하는 객체
+
+생성자에 *10개의 인자*를 한 번에 넣는 대신, 각 단계를 *명명된 메서드*로 분리합니다.
+
 ## 어떤 문제를 푸는가
 
 생성자에 인자가 너무 많아질 때 — 의도가 코드에서 사라집니다.
@@ -75,6 +95,16 @@ Director는 "어떤 순서로 부품을 조립할까", Builder는 "각 부품을
 > ⚠️ **C++20 designated initializers**가 더 깔끔할 때도 있음 (집합체 초기화).
 
 > ⚠️ **객체가 자주 바뀌어야 하면** Builder는 *불변* 생성에 어울리고, mutable 객체에는 그냥 setter가 충분.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| [Abstract Factory](/blog/programming/design/gof-design-patterns/item01-abstract-factory) | Abstract Factory는 *여러 별개 객체*를 한 군으로. Builder는 *하나의 복잡한 객체*를 단계적으로. |
+| [Factory Method](/blog/programming/design/gof-design-patterns/item03-factory-method) | Factory Method는 *한 호출에 한 객체*. Builder는 *여러 호출 누적 + 마지막에 객체 반환*. |
+| [Prototype](/blog/programming/design/gof-design-patterns/item04-prototype) | Prototype은 *기존 객체 복제*. Builder는 *처음부터 조립*. |
+
+판별 한 줄: *"객체 하나를 단계별로 만들고 그 단계에 이름을 붙이고 싶다"*면 Builder.
 
 ## C++ 구현 — fluent 스타일
 

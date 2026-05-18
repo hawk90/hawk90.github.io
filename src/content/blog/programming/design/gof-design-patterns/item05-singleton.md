@@ -12,6 +12,20 @@ draft: false
 
 > **"단 하나만 존재해야 하는 객체"** — 그러나 자주 안티패턴. 의존성 주입 검토부터.
 
+## 비유 — 회사의 CEO
+
+회사에 CEO는 *한 명*입니다. 누가 *어디서든* CEO를 호출하면 *같은 사람*이 와야 합니다. 두 명이면 *지시가 충돌*합니다.
+
+Singleton이 바로 이 모델입니다.
+
+- *CEO* = 유일한 인스턴스
+- *전사적 호출* = `getInstance()`
+- *두 명 금지* = constructor private
+
+그러나 *현실의 회사도 CEO에만 의존하면 망합니다*. 모든 의사결정이 CEO를 거치면 *조직이 멈춥니다*. 그래서 *부서장에게 위임*합니다.
+
+Singleton도 *대부분의 경우 같은 함정*에 빠집니다. *전역 의존*이 *테스트와 변경*을 방해합니다. 그래서 *Singleton 사용 전에 의존성 주입*을 먼저 검토해야 합니다.
+
 ## 먼저: 정말 필요한가?
 
 Singleton은 사실상 **전역 변수**입니다. 다음 단점이 있습니다:
@@ -43,6 +57,17 @@ Singleton은 사실상 **전역 변수**입니다. 다음 단점이 있습니다
 <img src="/images/blog/gof/diagrams/item05-singleton.svg" alt="Singleton 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
 생성자가 private — 외부에서 못 만듦. 유일 진입점이 `getInstance()`.
+
+## 헷갈리는 패턴과의 차이
+
+| 비교 대상 | 무엇이 다른가 |
+| --- | --- |
+| 의존성 주입 (DI) | DI는 인스턴스를 *생성자/메서드로 전달* — 테스트에서 fake 주입 가능. Singleton은 *전역 접근* — 테스트 격리 어려움. |
+| Static class (모든 멤버 static) | static class는 *상태 없음*, *상속 불가*. Singleton은 *상태 + 상속 + 다형성* 가능. |
+| Monostate | 모든 멤버 static + public 인스턴스. *같은 효과를 보통 객체처럼* — 보다 단순. |
+| [Flyweight](/blog/programming/design/gof-design-patterns/item11-flyweight) | Flyweight는 *여러 인스턴스를 공유*해서 메모리 절약. Singleton은 *정확히 하나*만 존재. |
+
+판별 한 줄: *"이게 정말 도메인 요구로 하나여야 하나, 아니면 그냥 지금 하나만 쓰고 있는 건가?"*를 먼저 묻습니다. 후자라면 DI.
 
 ## C++ 구현 — Meyers' Singleton (권장)
 
