@@ -1,7 +1,7 @@
 ---
 title: "Pattern 48: Inline Method (in TDD)"
 date: 2026-07-03T00:00:00
-description: "잘못된 extract 복구·1줄 helper 제거."
+description: "잘못된 extract 복구·1줄 helper 제거. Extract Method의 역연산."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 48
 tags: [tdd, beck, inline-method, refactor]
@@ -13,27 +13,52 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 너무 작거나 이름이 도움이 안 되는 메서드는 호출자에 인라인한다.
+> 너무 작거나 *이름이 도움 안 되는* method를 *호출자에 인라인*. Extract Method의 역연산.
 
 ## 동기 (Motivation)
 
-**Extract Method**의 역방향. 메서드가 **가치를 더하지 않을 때**:
+[Extract Method](/blog/programming/engineering/tdd-patterns/pattern47-extract-method)의 역.
 
 ```python
-def calculate_total(self, order):
-    return self._get_sum(order.items)
-
-def _get_sum(self, items):
+def get_sum(self, items):
     return sum(item.price for item in items)
 ```
 
-`_get_sum`이 `sum()`보다 나은가? 아니라면 **인라인**.
+`get_sum`이 `sum()`보다 *나은가*? 아니면 *인라인*.
 
-## Inline Method 적용
+### 신호
 
-### Before
+- 한 줄짜리 wrapper.
+- 이름이 *코드보다 정보 적음*.
+- 과도한 분해 → method 폭증.
+- *Premature extraction* 결과.
+
+### 언제 적용하는가
+
+- *trivial wrapper* — 한 줄.
+- *이름 안 도움* 됨.
+- *과도한 추출* 복구.
+- 단일 호출처.
+
+### 언제 적용하지 않는가
+
+- *의미 있는 추상화*.
+- *재사용*되는 로직.
+- *test 대상*.
+- *다형성* 필요.
+
+## 절차 (Mechanics)
+
+1. **인라인 대상** 확인.
+2. **호출처 식별**.
+3. **method 본문을 호출처로** 복사.
+4. **method 제거**.
+5. *테스트 green* 확인.
+
+## 예시 1 — 단순 inline
 
 ```python
+# Before
 def process(self, data):
     validated = self._is_valid(data)
     if validated:
@@ -41,24 +66,21 @@ def process(self, data):
     return None
 
 def _is_valid(self, data):
-    return data is not None  # 한 줄
+    return data is not None
 
 def _do_process(self, data):
-    return data.value * 2  # 한 줄
-```
+    return data.value * 2
 
-### After
-
-```python
+# After
 def process(self, data):
     if data is not None:
         return data.value * 2
     return None
 ```
 
-## 인라인 대상
+helper *제거 + 호출자 단순화*.
 
-### 1. 한 줄짜리 wrapper
+## 예시 2 — Wrapper 제거
 
 ```python
 # Before
@@ -73,39 +95,15 @@ def get_name(self):
     return self.name
 ```
 
-### 2. 이름이 정보를 추가하지 않음
+## 예시 3 — 과도한 분해 복구
 
 ```python
-# Before
-def calculate(self, x, y):
-    return self._add(x, y)
-
-def _add(self, a, b):
-    return a + b  # 이름이 + 연산자보다 못함
-
-# After
-def calculate(self, x, y):
-    return x + y
-```
-
-### 3. 잘못된 추출
-
-```python
-# Before — 과도한 추출
+# Before — 5개 micro method
 def process_order(self, order):
-    self._step1(order)
-    self._step2(order)
-    self._step3(order)
-    self._step4(order)
-    self._step5(order)
+    self._step1(order); self._step2(order); self._step3(order)
+    self._step4(order); self._step5(order)
 
-def _step1(self, order): order.validate()
-def _step2(self, order): order.calculate()
-def _step3(self, order): order.apply_discount()
-def _step4(self, order): order.save()
-def _step5(self, order): order.notify()
-
-# After — 의미 있는 그룹으로
+# After — 의미 있는 그룹
 def process_order(self, order):
     order.validate()
     self._calculate_total(order)
@@ -120,183 +118,102 @@ def _persist_and_notify(self, order):
     order.notify()
 ```
 
-## TDD에서의 역할
+micro method 5개 → *의미 있는 2개 + inline*.
 
-### Premature Extraction 복구
+## 자주 보는 안티패턴
 
-```python
-# Red-Green-Refactor 중 너무 많이 추출함
-# Refactor 단계에서 인라인으로 되돌림
+### 1. *중복 발생*
+여러 호출처를 모두 inline → 중복. 그땐 *그대로 유지*.
 
-# 테스트는 그대로 통과
-def test_order_total():
-    order = Order(items=[Item(100), Item(200)])
-    assert order.total() == 300
-```
+### 2. *의미 있는 추상화 inline*
+`calculate_tax` 같은 *도메인 method* inline → 의미 손실.
 
-### 실험 후 롤백
+### 3. *test 대상 inline*
+private method가 *test 단위*인데 inline → test 불가.
 
-```python
-# Extract Method로 실험했는데 더 안 좋아짐
-# Inline Method로 원복
+### 4. *Polymorphism 무력화*
+override되는 method inline → 다형성 깨짐.
 
-# Before (실험)
-def method(self):
-    a = self._part1()
-    b = self._part2(a)
-    return self._part3(b)
+### 5. *Long inline*
+50줄 method를 inline → 호출자가 *200줄* → 다시 분해 부담.
 
-# After (원복)
-def method(self):
-    a = compute_a()
-    b = compute_b(a)
-    return finalize(b)
-```
+### 6. *Inline 후 commit message 부정확*
+"feat: ..."로 inline 변경 commit → 의도 모호. "refactor: inline method X".
 
-## 인라인 메커니즘
+## Modern variants
 
-### 1. 호출 지점 확인
+### IDE 자동
 
-```python
-def main_method(self):
-    result = self._helper()  # 유일한 호출
-    return result
+| IDE | 단축키 |
+| --- | --- |
+| IntelliJ / PyCharm | Cmd+Alt+N (Mac) |
+| Rider | Ctrl+R, I |
+| VS Code | 수동 또는 extension |
 
-def _helper(self):
-    return self.data * 2
-```
+자동 inline + 안전.
 
-### 2. 코드 복사
+### Inline temp
 
-```python
-def main_method(self):
-    result = self.data * 2  # _helper 내용을 복사
-    return result
-
-# _helper 삭제
-```
-
-### 3. 테스트 실행
-
-```python
-def test_main_method():
-    obj = MyClass(data=5)
-    assert obj.main_method() == 10  # 여전히 통과
-```
-
-## 여러 호출자가 있을 때
+local 변수를 *없애고 호출 직접*.
 
 ```python
 # Before
-def method_a(self):
-    x = self._common()
-    # ...
+total = self._calculate()
+return total
 
-def method_b(self):
-    y = self._common()
-    # ...
-
-def _common(self):
-    return self.value + 1
-
-# 인라인 (각 호출자에 복사)
-def method_a(self):
-    x = self.value + 1
-    # ...
-
-def method_b(self):
-    y = self.value + 1
-    # ...
+# After
+return self._calculate()
 ```
 
-**주의**: 중복이 생긴다면 인라인하지 않는 것이 나을 수 있다.
+### Inline class
 
-## 인라인하지 말아야 할 때
-
-### 1. 의미 있는 추상화
+class 전체를 *호출자 class에 흡수* — 책임 통합.
 
 ```python
-# 유지 — 이름이 의도를 설명
-def _calculate_tax(self, amount):
-    return amount * 0.1
+# Before
+class Helper:
+    def help(self, x): return x * 2
 
-def _apply_member_discount(self, amount):
-    return amount * 0.9
+class Main:
+    def __init__(self): self.helper = Helper()
+    def method(self, x): return self.helper.help(x)
+
+# After
+class Main:
+    def method(self, x): return x * 2
 ```
 
-### 2. 재사용되는 로직
-
-```python
-# 유지 — 여러 곳에서 사용
-def _format_currency(self, amount):
-    return f"${amount:.2f}"
-
-def method_a(self):
-    return self._format_currency(100)
-
-def method_b(self):
-    return self._format_currency(200)
-```
-
-### 3. 테스트 대상
-
-```python
-# 유지 — 독립적으로 테스트해야 함
-def _complex_calculation(self, data):
-    # 복잡한 로직
-    pass
-
-def test_complex_calculation():
-    # 이 메서드만 테스트
-    pass
-```
-
-## Extract와 Inline의 균형
+## Extract vs Inline 균형
 
 ```text
-Extract Method ←→ Inline Method
-
-너무 많이 추출 → 메서드 폭발, 읽기 어려움
-너무 적게 추출 → 긴 메서드, 이해 어려움
-
-적절한 균형점 찾기
+Extract ←──── Refactor cycle ────→ Inline
+너무 많이             너무 적게
+method 폭증           긴 method
 ```
-
-### 판단 기준
 
 | 질문 | Extract | Inline |
-|------|---------|--------|
-| 이름이 코드보다 명확한가? | ✓ | |
-| 여러 곳에서 재사용되는가? | ✓ | |
-| 독립적으로 테스트해야 하는가? | ✓ | |
-| 한 줄짜리인가? | | ✓ |
-| 이름이 구현과 같은 수준인가? | | ✓ |
+| --- | --- | --- |
+| 이름이 코드보다 명확? | ✓ | |
+| 여러 곳 재사용? | ✓ | |
+| 독립 test? | ✓ | |
+| 한 줄? | | ✓ |
+| 이름이 구현과 같은 수준? | | ✓ |
 
-## IDE 지원
+## 도구 / IDE
 
-```text
-PyCharm: Ctrl+Alt+N (Mac: Cmd+Option+N)
-VS Code: 수동 또는 확장 프로그램
-IntelliJ: Ctrl+Alt+N
+| 도구 | 기능 |
+| --- | --- |
+| IntelliJ Inline | 자동 inline |
+| Resharper | 같음 |
+| Refactor menu | 거의 모든 IDE |
 
-1. 메서드 선택
-2. 단축키
-3. 확인
-4. 자동 인라인
-```
+## 성능 고려
 
-## 정리
-
-- **Extract Method의 역방향**
-- **가치 없는 메서드 제거**
-- **Premature extraction 복구**
-- **한 줄짜리, 이름이 안 좋은 메서드** 대상
-- **중복이 생기면 주의**
-- **Extract/Inline 균형** 유지
+method 호출 한 단계 제거 → 거의 무관 (JIT inline). *over-decomposed code*에서 약간 cache locality 개선 가능.
 
 ## 관련 패턴
 
 - [Pattern 47: Extract Method](/blog/programming/engineering/tdd-patterns/pattern47-extract-method) — 인라인의 역
 - [Pattern 45: Isolate Change](/blog/programming/engineering/tdd-patterns/pattern45-isolate-change) — 변경 격리
 - [Pattern 44: Reconcile Differences](/blog/programming/engineering/tdd-patterns/pattern44-reconcile-differences) — 코드 통합
-
+- Refactoring [Pattern 2: Inline Function](/blog/programming/design/refactoring-catalog/pattern02-inline-function)

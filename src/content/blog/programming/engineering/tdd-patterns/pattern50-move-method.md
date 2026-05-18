@@ -1,7 +1,7 @@
 ---
 title: "Pattern 50: Move Method"
 date: 2026-07-03T02:00:00
-description: "Method가 다른 class에서 더 잘 살면 — 이사."
+description: "Method가 다른 class에서 더 잘 살면 — 이사. Feature Envy 해소."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 50
 tags: [tdd, beck, move-method, feature-envy]
@@ -13,11 +13,9 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 메서드가 다른 클래스의 데이터를 더 많이 사용한다면 그 클래스로 옮긴다.
+> Method가 *다른 class의 데이터*를 더 많이 사용하면 그 class로 이동. *Feature Envy* 해소.
 
 ## 동기 (Motivation)
-
-**Feature Envy** — 메서드가 **자기 클래스보다 다른 클래스**에 더 관심:
 
 ```python
 class Order:
@@ -25,136 +23,68 @@ class Order:
         self.customer = customer
 
     def calculate_discount(self):
-        # customer의 데이터만 사용!
-        if self.customer.membership_years > 5:
-            return 0.2
-        elif self.customer.total_purchases > 10000:
-            return 0.15
-        elif self.customer.is_vip:
-            return 0.1
+        # customer 데이터만 사용
+        if self.customer.membership_years > 5: return 0.2
+        elif self.customer.total_purchases > 10000: return 0.15
+        elif self.customer.is_vip: return 0.1
         return 0
 ```
 
-`calculate_discount`는 **Customer**에 있어야 한다.
+`calculate_discount`가 *customer 정보만* 사용. *Customer*에 있어야.
 
-## Move Method 적용
+### 신호
 
-### Before
+- method가 *자기 class 데이터 거의 사용 안 함*.
+- *다른 class 메서드만 호출*.
+- *getter chaining* — `self.other.data.value`.
+- *Demeter 위반*.
 
-```python
-class Order:
-    def __init__(self, customer, items):
-        self.customer = customer
-        self.items = items
+### 언제 적용하는가
 
-    def calculate_discount(self):
-        # Feature Envy — customer만 참조
-        if self.customer.membership_years > 5:
-            return 0.2
-        elif self.customer.total_purchases > 10000:
-            return 0.15
-        elif self.customer.is_vip:
-            return 0.1
-        return 0
+- *Feature envy* 명확.
+- 데이터와 행동을 *함께 둠*.
+- *응집도 ↑*.
 
-    def total(self):
-        subtotal = sum(item.price for item in self.items)
-        discount = self.calculate_discount()
-        return subtotal * (1 - discount)
+### 언제 적용하지 않는가
 
-class Customer:
-    def __init__(self):
-        self.membership_years = 0
-        self.total_purchases = 0
-        self.is_vip = False
-```
+- method가 *진짜 양쪽 데이터 사용*.
+- *순환 의존* 만들지 않게 주의.
+- *interface 노출* 부적절.
 
-### After
+## 절차 (Mechanics)
+
+1. **대상 class에 method 복사**.
+2. *self 참조 수정* (this.customer.X → this.X).
+3. **원본을 delegate**로.
+4. *호출자 점진 이전*.
+5. **원본 제거**.
+
+## 예시 1 — Discount → Customer
 
 ```python
+# After
 class Customer:
-    def __init__(self):
-        self.membership_years = 0
-        self.total_purchases = 0
-        self.is_vip = False
-
     def discount_rate(self):
-        # 이제 자기 데이터 사용
-        if self.membership_years > 5:
-            return 0.2
-        elif self.total_purchases > 10000:
-            return 0.15
-        elif self.is_vip:
-            return 0.1
+        if self.membership_years > 5: return 0.2
+        elif self.total_purchases > 10000: return 0.15
+        elif self.is_vip: return 0.1
         return 0
 
 class Order:
-    def __init__(self, customer, items):
-        self.customer = customer
-        self.items = items
-
     def total(self):
         subtotal = sum(item.price for item in self.items)
-        discount = self.customer.discount_rate()  # 위임
+        discount = self.customer.discount_rate()   # 위임
         return subtotal * (1 - discount)
 ```
 
-## Move Method 과정
+데이터와 행동 *함께*.
 
-### Step 1: 대상 클래스에 메서드 복사
-
-```python
-class Customer:
-    def discount_rate(self):  # 새 메서드
-        if self.membership_years > 5:
-            return 0.2
-        elif self.total_purchases > 10000:
-            return 0.15
-        elif self.is_vip:
-            return 0.1
-        return 0
-```
-
-### Step 2: self 참조 수정
-
-```python
-# Before (Order에서)
-if self.customer.membership_years > 5:
-
-# After (Customer에서)
-if self.membership_years > 5:
-```
-
-### Step 3: 원래 메서드를 delegate로
-
-```python
-class Order:
-    def calculate_discount(self):
-        return self.customer.discount_rate()  # delegate
-```
-
-### Step 4: 호출자 수정
-
-```python
-# 모든 호출자가 customer.discount_rate() 사용하도록 수정
-total = subtotal * (1 - self.customer.discount_rate())
-```
-
-### Step 5: 원래 메서드 삭제
-
-```python
-class Order:
-    # calculate_discount 삭제
-    pass
-```
-
-## 파라미터가 필요한 경우
+## 예시 2 — Parameter 활용
 
 ```python
 # Before
 class Report:
     def format_amount(self, account):
-        # account의 데이터 사용
         return f"${account.balance:.2f} ({account.currency})"
 
 # After
@@ -164,125 +94,130 @@ class Account:
 
 class Report:
     def render(self, account):
-        return account.format_amount()  # 위임
+        return account.format_amount()
 ```
 
-## 양방향 참조가 있을 때
+## 예시 3 — 양방향 참조
 
 ```python
 # Before
 class Order:
-    def __init__(self, customer):
-        self.customer = customer
-
     def notify(self):
-        # 양쪽 데이터 필요
-        message = f"Order {self.id} for {self.customer.name}"
-        self.customer.send_email(message)
+        msg = f"Order {self.id} for {self.customer.name}"
+        self.customer.send_email(msg)
 
-# After — Order를 파라미터로
+# After — Order 자체를 parameter로
 class Customer:
     def notify_order(self, order):
-        message = f"Order {order.id} for {self.name}"
-        self.send_email(message)
+        msg = f"Order {order.id} for {self.name}"
+        self.send_email(msg)
 
 class Order:
     def notify(self):
         self.customer.notify_order(self)
 ```
 
-## 테스트
+self를 *parameter로* 넘김.
+
+## 자주 보는 안티패턴
+
+### 1. *양방향 의존 만들기*
+이동 후 *Customer → Order, Order → Customer* 모두 → 순환. *단방향* 유지.
+
+### 2. *Polymorphism 깨기*
+override되는 method 이동 → 다형성 깨짐. *전체 계층* 함께.
+
+### 3. *Move 후 caller 누락*
+일부 caller가 *원본 호출* → 일관성 깨짐. find usages.
+
+### 4. *Encapsulation 위반*
+이동 method가 *private state 접근* → 캡슐 깨짐. *public API*만.
+
+### 5. *Test 깨짐*
+test가 *원본 위치 의존* → 이동 후 깨짐. test도 함께 이동.
+
+### 6. *Move + Rename 동시*
+한 commit에 둘 → 검토 어려움. *단계 분리*.
+
+## Modern variants
+
+### IDE Move Method
+
+| IDE | 단축키 |
+| --- | --- |
+| IntelliJ | F6 |
+| Resharper | F6 |
+| VS Code | code action |
+
+자동 + 안전 (모든 호출처 갱신).
+
+### Move + Extract Interface
 
 ```python
-def test_customer_discount_vip():
-    customer = Customer()
-    customer.is_vip = True
+class Customer:
+    def discount_rate(self): ...
 
-    assert customer.discount_rate() == 0.1
-
-def test_customer_discount_long_member():
-    customer = Customer()
-    customer.membership_years = 10
-
-    assert customer.discount_rate() == 0.2
-
-def test_order_total_with_discount():
-    customer = Customer()
-    customer.is_vip = True
-
-    order = Order(customer, [Item(100)])
-
-    assert order.total() == 90  # 10% 할인
+class Order:
+    def __init__(self, customer: DiscountProvider):
+        self.customer = customer
 ```
 
-## Feature Envy 징후
+이동 후 *interface 추출* — DIP.
+
+### Refactoring [Pattern 21: Move Function](/blog/programming/design/refactoring-catalog/pattern21-move-function)
+
+Refactoring catalog의 대응.
+
+### Trait method (Rust/Kotlin)
+
+```kotlin
+fun Customer.discountRate(): Double = when {
+    membershipYears > 5 -> 0.2
+    totalPurchases > 10000 -> 0.15
+    isVip -> 0.1
+    else -> 0.0
+}
+```
+
+extension function — 원본 class 수정 없이 method 추가.
+
+### Service object
+
+method가 *어느 entity에도 자연스럽지 않으면* — service object.
 
 ```python
-# 징후 1: 다른 객체의 getter 체이닝
-def method(self):
-    return self.other.data.value.amount
-
-# 징후 2: 다른 객체 필드만 사용
-def calculate(self):
-    return self.other.a + self.other.b + self.other.c
-
-# 징후 3: 자기 필드 미사용
-def process(self):
-    # self.xxx를 전혀 안 씀
-    return self.collaborator.do_something()
+class DiscountCalculator:
+    def calculate(self, customer): ...
 ```
 
-## Move와 다른 리팩터링
+## 도구 / IDE
 
-### Move Method vs Extract Method
+| 도구 | Move Method |
+| --- | --- |
+| IntelliJ F6 | 안전 이동 |
+| Rider | 같음 |
+| Eclipse | "Move" refactor |
+| Rust Analyzer | "Move definition" |
+
+## 성능 고려
+
+이동 자체는 *런타임 무관*. 호출 *depth 1단계* 추가는 JIT inline.
+
+## Feature Envy 감별
 
 ```python
-# Extract: 같은 클래스 내 분리
-def long_method(self):
-    part1()
-    part2()  # → extract
-    part3()
+# 호출 비율
+N_self = self.x, self.y, ... 호출 수
+N_other(X) = other.X.a, other.X.b, ... 호출 수
 
-# Move: 다른 클래스로 이동
-def foreign_method(self):
-    # 다른 객체 데이터만 사용 → move
-    pass
+if N_other(X) > N_self:
+    # X로 이동 검토
 ```
-
-### Move Method + Extract Interface
-
-```python
-# 1. Move Method로 적절한 위치로
-# 2. Extract Interface로 테스트 가능하게
-
-class PaymentProcessor:
-    def calculate_fee(self, payment):
-        # payment 데이터만 사용
-        return payment.amount * 0.03
-
-# After move
-class Payment:
-    def fee(self):
-        return self.amount * 0.03
-
-# + Extract Interface
-class Chargeable(ABC):
-    @abstractmethod
-    def fee(self) -> float: pass
-```
-
-## 정리
-
-- **Feature Envy 해소**
-- **데이터와 행동을 함께** 배치
-- **응집도 향상**
-- **테스트가 이동을 보호**
-- **delegate → 삭제** 순서
-- **캡슐화 개선**
 
 ## 관련 패턴
 
 - [Pattern 47: Extract Method](/blog/programming/engineering/tdd-patterns/pattern47-extract-method) — 메서드 분리
 - [Pattern 49: Extract Interface](/blog/programming/engineering/tdd-patterns/pattern49-extract-interface) — 인터페이스 추출
-- [Pattern 51: Method Object](/blog/programming/engineering/tdd-patterns/pattern51-method-object) — 메서드를 클래스로
-
+- [Pattern 51: Method Object](/blog/programming/engineering/tdd-patterns/pattern51-method-object) — 메서드를 class로
+- Refactoring [Pattern 21: Move Function](/blog/programming/design/refactoring-catalog/pattern21-move-function)
+- *원칙*: "Tell, don't ask"

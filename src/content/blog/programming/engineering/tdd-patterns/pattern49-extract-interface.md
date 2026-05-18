@@ -1,7 +1,7 @@
 ---
 title: "Pattern 49: Extract Interface"
 date: 2026-07-03T01:00:00
-description: "Test seam·dependency 분리 — interface 추출."
+description: "Test seam·dependency 분리 — interface 추출로 DIP 실현."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 49
 tags: [tdd, beck, extract-interface, dependency-inversion]
@@ -13,256 +13,237 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 구체 클래스에서 인터페이스를 추출하여 테스트 대역 주입을 가능하게 한다.
+> 구체 class에서 *interface 추출* → *test 대역 주입 가능*. Dependency Inversion 실현.
 
 ## 동기 (Motivation)
 
-**구체 클래스에 직접 의존**하면 테스트가 어렵다:
+구체 의존이 *test 방해*:
 
 ```python
 class OrderService:
     def __init__(self):
-        self.db = PostgresDatabase()  # 구체 클래스에 의존
-
-    def get_order(self, id):
-        return self.db.query(f"SELECT * FROM orders WHERE id={id}")
+        self.db = PostgresDatabase()   # 구체 의존
 ```
 
-**인터페이스를 추출**하면 대역 주입이 가능해진다.
-
-## Extract Interface 적용
-
-### Before (구체 의존)
+*test에서 fake 못 끼움*. 인터페이스 추출 후 DI:
 
 ```python
-class PostgresDatabase:
-    def query(self, sql):
-        # 실제 DB 연결
-        return self.connection.execute(sql)
-
-    def save(self, table, data):
-        # 실제 저장
-        pass
-
-class OrderService:
-    def __init__(self):
-        self.db = PostgresDatabase()  # 하드코딩
-```
-
-### After (인터페이스 의존)
-
-```python
-from abc import ABC, abstractmethod
-
 class Database(ABC):
-    """추출된 인터페이스"""
     @abstractmethod
-    def query(self, sql) -> list:
-        pass
-
-    @abstractmethod
-    def save(self, table, data) -> None:
-        pass
-
-class PostgresDatabase(Database):
-    def query(self, sql):
-        return self.connection.execute(sql)
-
-    def save(self, table, data):
-        # 실제 저장
-        pass
+    def query(self, sql) -> list: pass
 
 class OrderService:
-    def __init__(self, database: Database):  # 인터페이스에 의존
+    def __init__(self, database: Database):   # 인터페이스 의존
         self.db = database
 ```
 
-## 테스트에서의 활용
+### 신호
 
-### Fake 구현
+- *test에서 외부 의존 대체* 어려움.
+- 코드가 *구체 class 직접 import*.
+- *DIP 위반*.
+- *플러그인 시스템* 필요.
+
+### 언제 적용하는가
+
+- *외부 의존성* (DB, network, FS).
+- *test seam* 필요.
+- *DIP* 적용.
+- *plugin*/strategy.
+
+### 언제 적용하지 않는가
+
+- *순수 로직* — DIP 무관.
+- 구현이 *진짜 하나*뿐 + 변경 없음.
+- *Over-abstraction* 위험.
+
+## 절차 (Mechanics)
+
+1. **사용되는 method** 식별 — 호출자가 진짜 부르는 것만.
+2. **abstract base / interface** 작성.
+3. *구체 class*가 *상속/구현*.
+4. **caller signature**를 *interface로* 변경.
+5. *test에서 fake/mock 주입*.
+
+## 예시 1 — DB interface
 
 ```python
-class FakeDatabase(Database):
-    """테스트용 가짜 DB"""
-    def __init__(self):
-        self.data = {}
-        self.queries = []
+class Database(ABC):
+    @abstractmethod
+    def query(self, sql) -> list: pass
+    @abstractmethod
+    def save(self, table, data) -> None: pass
 
+class PostgresDatabase(Database):
+    def query(self, sql): ...
+    def save(self, table, data): ...
+
+class FakeDatabase(Database):
+    def __init__(self): self.data = {}; self.queries = []
     def query(self, sql):
         self.queries.append(sql)
         return self.data.get(sql, [])
-
     def save(self, table, data):
-        if table not in self.data:
-            self.data[table] = []
-        self.data[table].append(data)
-```
+        self.data.setdefault(table, []).append(data)
 
-### 테스트 작성
+class OrderService:
+    def __init__(self, database: Database):
+        self.db = database
 
-```python
+# Test
 def test_get_order():
-    # Fake 주입
-    fake_db = FakeDatabase()
-    fake_db.data["SELECT * FROM orders WHERE id=1"] = [
-        {"id": 1, "total": 100}
-    ]
-
-    service = OrderService(fake_db)
-
-    order = service.get_order(1)
-
-    assert order["total"] == 100
-
-def test_save_order():
-    fake_db = FakeDatabase()
-    service = OrderService(fake_db)
-
-    service.save_order(Order(id=1, total=100))
-
-    assert len(fake_db.data["orders"]) == 1
+    fake = FakeDatabase()
+    fake.data["SELECT * FROM orders WHERE id=1"] = [{"id": 1, "total": 100}]
+    service = OrderService(fake)
+    assert service.get_order(1)["total"] == 100
 ```
 
-## Python의 Protocol
-
-**Python 3.8+**에서는 `Protocol`로 암묵적 인터페이스:
+## 예시 2 — Python Protocol (structural)
 
 ```python
 from typing import Protocol
 
 class Database(Protocol):
-    """구조적 서브타이핑"""
     def query(self, sql: str) -> list: ...
     def save(self, table: str, data: dict) -> None: ...
 
-# 명시적 상속 없이도 호환
+# 명시적 상속 없이도 OK
 class PostgresDatabase:
-    def query(self, sql: str) -> list:
-        return self.connection.execute(sql)
-
-    def save(self, table: str, data: dict) -> None:
-        pass
+    def query(self, sql): return self.conn.execute(sql)
+    def save(self, table, data): ...
 
 class FakeDatabase:
-    def query(self, sql: str) -> list:
-        return []
+    def query(self, sql): return []
+    def save(self, table, data): pass
 
-    def save(self, table: str, data: dict) -> None:
-        pass
-
-# 둘 다 Database 프로토콜 충족
-def use_database(db: Database):
+def use(db: Database):   # protocol type
     db.query("SELECT 1")
 ```
 
-## 추출 과정
+duck typing + 명시 type.
 
-### Step 1: 사용되는 메서드 식별
-
-```python
-class EmailSender:
-    def send(self, to, subject, body):
-        # SMTP 로직
-        pass
-
-    def send_bulk(self, recipients, subject, body):
-        for r in recipients:
-            self.send(r, subject, body)
-
-    def validate_email(self, email):
-        # 유효성 검사
-        pass
-
-# OrderService는 send()만 사용
-class OrderService:
-    def __init__(self, email_sender):
-        self.email = email_sender
-
-    def confirm_order(self, order):
-        self.email.send(
-            order.customer.email,
-            "Order Confirmed",
-            f"Order {order.id} confirmed"
-        )
-```
-
-### Step 2: 필요한 메서드만 인터페이스로
+## 예시 3 — Interface segregation
 
 ```python
-class Notifier(ABC):
-    """필요한 것만 추출"""
-    @abstractmethod
-    def send(self, to: str, subject: str, body: str) -> None:
-        pass
-
-# EmailSender가 구현
-class EmailSender(Notifier):
-    def send(self, to, subject, body):
-        # SMTP 로직
-        pass
-
-# 다른 구현 가능
-class SlackNotifier(Notifier):
-    def send(self, to, subject, body):
-        # Slack 메시지
-        pass
-```
-
-### Step 3: 의존성 주입
-
-```python
-class OrderService:
-    def __init__(self, notifier: Notifier):  # 인터페이스에 의존
-        self.notifier = notifier
-```
-
-## Interface Segregation
-
-**너무 큰 인터페이스**는 분리:
-
-```python
-# Bad — 너무 큰 인터페이스
+# Bad — 너무 큰
 class Repository(ABC):
-    @abstractmethod
-    def find(self, id): pass
+    def find(self): ...
+    def save(self): ...
+    def delete(self): ...
+    def count(self): ...
+    def exists(self): ...
 
-    @abstractmethod
-    def find_all(self): pass
-
-    @abstractmethod
-    def save(self, entity): pass
-
-    @abstractmethod
-    def delete(self, id): pass
-
-    @abstractmethod
-    def count(self): pass
-
-    @abstractmethod
-    def exists(self, id): pass
-
-# Good — 분리된 인터페이스
+# Good — 분리
 class Reader(ABC):
-    @abstractmethod
-    def find(self, id): pass
-
-    @abstractmethod
-    def find_all(self): pass
+    def find(self): pass
 
 class Writer(ABC):
-    @abstractmethod
-    def save(self, entity): pass
+    def save(self): pass
+    def delete(self): pass
 
-    @abstractmethod
-    def delete(self, id): pass
-
-# 필요한 것만 의존
 class ReportService:
-    def __init__(self, reader: Reader):  # 읽기만 필요
+    def __init__(self, reader: Reader):   # 읽기만 필요
         self.reader = reader
 ```
 
-## Dependency Inversion
+ISP — 필요한 것만 의존.
+
+## 자주 보는 안티패턴
+
+### 1. *모든 class에 interface*
+순수 로직까지 → boilerplate. *외부 경계*만.
+
+### 2. *Interface가 1대1 매핑*
+구현이 *항상 1개*면 interface 가치 작음. 진짜 *교체 가능*해야.
+
+### 3. *Interface 너무 큼*
+모든 method 포함 → 구현 부담. ISP.
+
+### 4. *Mock 대신 fake 안 만듦*
+mock library 의존 → coupled. *진짜 fake* 작성.
+
+### 5. *Concrete leak*
+caller가 `isinstance(db, PostgresDatabase)` → DIP 깨짐. interface만 사용.
+
+### 6. *Interface가 implementation detail 노출*
+`get_connection()` 같은 *내부 method* interface에 → 누수.
+
+## Modern variants
+
+### Java/Kotlin interface
+
+```java
+public interface Database {
+    List<Row> query(String sql);
+    void save(String table, Map<String, Object> data);
+}
+```
+
+### TypeScript
+
+```typescript
+interface Database {
+  query(sql: string): Row[];
+  save(table: string, data: Record<string, unknown>): void;
+}
+```
+
+### Rust trait
+
+```rust
+trait Database {
+    fn query(&self, sql: &str) -> Vec<Row>;
+    fn save(&self, table: &str, data: &Data);
+}
+```
+
+trait + `Box<dyn Database>` 또는 generic.
+
+### Go interface (implicit)
+
+```go
+type Database interface {
+    Query(sql string) []Row
+    Save(table string, data Data)
+}
+// 구현 명시 안 함 — method만 맞으면 OK
+```
+
+structural typing.
+
+### Hexagonal architecture
+
+```text
+domain ──→ port (interface) ←── adapter (impl)
+```
+
+domain이 *port에만 의존*, adapter 교체 가능.
+
+### DDD Repository pattern
+
+```python
+class UserRepository(ABC):
+    @abstractmethod
+    def find_by_id(self, id) -> User: pass
+    @abstractmethod
+    def save(self, user: User) -> None: pass
+
+class SqlUserRepository(UserRepository): ...
+class InMemoryUserRepository(UserRepository): ...
+```
+
+도메인은 *repository interface*만 안다.
+
+## 도구 / IDE
+
+| 도구 | 기능 |
+| --- | --- |
+| IntelliJ "Extract Interface" | 자동 |
+| Resharper | 같음 |
+| Pyright/Mypy Protocol | structural type 검증 |
+| TypeScript interface | 명시 type |
+
+## Dependency Inversion Principle
 
 ```text
 Before:
@@ -270,59 +251,21 @@ Before:
 
 After:
   OrderService → Database (추상)
-                    ↑
-             PostgresDatabase
-             FakeDatabase
+                   ↑
+            PostgresDatabase
+            FakeDatabase
 ```
 
-**고수준 모듈**(OrderService)이 **저수준 모듈**(PostgresDatabase)에 의존하지 않음.
+상위 모듈이 *추상에만 의존*. SOLID의 D.
 
-## 주의사항
+## 성능 고려
 
-### Over-abstraction
-
-```python
-# Bad — 모든 것에 인터페이스
-class StringFormatterInterface(ABC):
-    @abstractmethod
-    def format(self, s: str) -> str: pass
-
-class UpperCaseFormatter(StringFormatterInterface):
-    def format(self, s: str) -> str:
-        return s.upper()
-
-# Good — 단순한 경우는 그냥 함수
-def uppercase(s: str) -> str:
-    return s.upper()
-```
-
-### 테스트에 필요할 때만
-
-```python
-# 외부 의존성 → 인터페이스 추출
-# 순수 로직 → 인터페이스 불필요
-
-class Calculator:  # 인터페이스 불필요
-    def add(self, a, b):
-        return a + b
-
-class PaymentGateway(ABC):  # 인터페이스 필요
-    @abstractmethod
-    def charge(self, amount): pass
-```
-
-## 정리
-
-- **구체 클래스에서 인터페이스 추출**
-- **테스트 대역 주입** 가능
-- **Dependency Inversion** 실현
-- **Python Protocol**로 암묵적 구현
-- **필요한 메서드만** 인터페이스에
-- **Over-abstraction 주의**
+interface call은 *vtable lookup* — JIT inline. 거의 무관. Rust trait object는 *약간 비용* (dynamic dispatch) — generic으로 *static dispatch* 가능.
 
 ## 관련 패턴
 
 - [Pattern 40: Imposter](/blog/programming/engineering/tdd-patterns/pattern40-imposter) — 테스트 대역
 - [Pattern 43: Singleton](/blog/programming/engineering/tdd-patterns/pattern43-singleton) — DI 대안
 - [Pattern 37: Pluggable Object](/blog/programming/engineering/tdd-patterns/pattern37-pluggable-object) — 객체 교체
-
+- SOLID DIP, ISP
+- Hexagonal architecture (ports & adapters)
