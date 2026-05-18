@@ -42,6 +42,8 @@ draft: true
 
 ## Bit Packing — RAW10 예
 
+![RAW10 packing — 5 pixels in 8 bytes](/images/blog/mipi/diagrams/ch05-raw10-packing.svg)
+
 10-bit 픽셀은 *byte 경계*가 안 맞음. **5 픽셀을 8 byte로 packing**:
 
 ```text

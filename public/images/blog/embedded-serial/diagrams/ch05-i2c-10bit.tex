@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=8mm,
+  bit/.style={cls, align=center, font=\scriptsize\bfseries, minimum width=8mm, minimum height=8mm, draw=edgec, line width=0.4pt},
+  prefixbit/.style={bit, fill=warnfill},
+  addr/.style={bit, fill=hifill},
+  rw/.style={bit, fill=confill}
+]
+
+% Title
+\node[font=\footnotesize\bfseries, anchor=south] at (5.5, 4) {I²C 10-bit Address — 첫 바이트 prefix + 둘째 바이트};
+
+% Byte 1
+\node[anchor=east] at (-0.3, 2.5) {Byte 1};
+\node[prefixbit] at (0, 2.5) {1};
+\node[prefixbit] at (1, 2.5) {1};
+\node[prefixbit] at (2, 2.5) {1};
+\node[prefixbit] at (3, 2.5) {1};
+\node[prefixbit] at (4, 2.5) {0};
+\node[addr] at (5, 2.5) {A9};
+\node[addr] at (6, 2.5) {A8};
+\node[rw] at (7, 2.5) {R/W};
+
+% Brackets
+\draw[draw=warnbord, line width=0.7pt] (-0.4, 2.0) -- (-0.4, 1.7) -- (4.4, 1.7) -- (4.4, 2.0);
+\node[font=\tiny, anchor=north, color=warnbord] at (2, 1.7) {Prefix \texttt{11110}};
+\draw[draw=hibord, line width=0.7pt] (4.6, 2.0) -- (4.6, 1.7) -- (6.4, 1.7) -- (6.4, 2.0);
+\node[font=\tiny, anchor=north, color=hibord] at (5.5, 1.7) {Addr 상위 2 bit};
+
+% Byte 2
+\node[anchor=east] at (-0.3, 0) {Byte 2};
+\node[addr] at (0, 0) {A7};
+\node[addr] at (1, 0) {A6};
+\node[addr] at (2, 0) {A5};
+\node[addr] at (3, 0) {A4};
+\node[addr] at (4, 0) {A3};
+\node[addr] at (5, 0) {A2};
+\node[addr] at (6, 0) {A1};
+\node[addr] at (7, 0) {A0};
+
+\draw[draw=hibord, line width=0.7pt] (-0.4, -0.5) -- (-0.4, -0.8) -- (7.4, -0.8) -- (7.4, -0.5);
+\node[font=\tiny, anchor=north, color=hibord] at (3.5, -0.8) {Addr 하위 8 bit};
+
+% Annotation
+\node[font=\tiny, anchor=west, align=left] at (-0.5, -2) {
+  \textbullet\ 첫 prefix \texttt{11110} 가 "다음 byte도 주소" 신호\\
+  \textbullet\ A9·A8을 첫 byte 마지막 2 bit에, 나머지는 둘째 byte\\
+  \textbullet\ Read 시 마스터가 *반복 Start + 첫 byte 재전송 + R/W=1* — 슬레이브가 *이미 잠금* 상태에서 응답
+};
+
+\end{tikzpicture}
+\end{document}

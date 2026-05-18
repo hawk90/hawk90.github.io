@@ -18,6 +18,8 @@ draft: true
 
 ### Entity Graph — Media Controller
 
+![V4L2 media graph (sensor → CSI → ISP → DMA)](/images/blog/mipi/diagrams/ch10-v4l2-media-graph.svg)
+
 여러 IP 블록 (센서·CSI receiver·ISP·DMA)을 *그래프*로 표현. `media-ctl` CLI로 확인·설정.
 
 ```bash

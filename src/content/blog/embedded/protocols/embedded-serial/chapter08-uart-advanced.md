@@ -14,6 +14,8 @@ draft: true
 
 ## Hardware Flow Control — RTS/CTS
 
+![UART RTS/CTS handshake (tikz-timing)](/images/blog/embedded-serial/diagrams/ch08-uart-rts-cts.svg)
+
 RX 버퍼가 차오르면 송신자에게 "잠깐 멈춰" 신호를 *하드웨어 라인*으로.
 
 ```text
@@ -153,6 +155,8 @@ Master → ────[Addr=3]────[Data]────[Data]──── 
 옛 RS-232 시절 *모뎀(전화선 모뎀)* 제어를 위해 정의된 9-pin DB-9 커넥터의 **6개 보조 신호**. 모던 임베디드에선 거의 미사용이지만 *모뎀·셀룰러 모듈·일부 산업 장비*에서 만남.
 
 ### 9-pin DB-9 핀맵 (DTE 기준)
+
+![DB-9 pinout + NULL Modem cable](/images/blog/embedded-serial/diagrams/ch08-db9-pinout.svg)
 
 | Pin | 신호 | 방향 | 의미 |
 | --- | --- | --- | --- |

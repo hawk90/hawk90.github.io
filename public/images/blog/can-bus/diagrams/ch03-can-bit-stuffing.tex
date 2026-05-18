@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{tikz-timing}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\definecolor{warnfill}{HTML}{FECACA}
+\definecolor{warnbord}{HTML}{F87171}
+\usetikztiminglibrary{counters,interval,nicetabs}
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize]
+
+\node[font=\footnotesize\bfseries, anchor=west] at (0, 3) {CAN Bit Stuffing — 5 동일 비트 후 반대 비트 삽입};
+
+\node[anchor=west] at (0, 1) {\begin{tikztimingtable}
+  원본    & LLLLL H HHHHH L H \\
+  Stuffed & LLLLL H H HHHHH L L H \\
+\end{tikztimingtable}};
+
+\node[anchor=west, font=\tiny, align=left] at (0, -2.5) {
+  \textbullet\ 원본: 5개 연속 Low 후 다음 비트 (송신할 데이터)\\
+  \textbullet\ Stuffed: 5번째 동일 비트 이후 *반대 비트 1개 자동 삽입* (송신자 자동)\\
+  \textbullet\ 수신자가 자동 *제거*\\
+  \textbullet\ 목적 — 클럭 회복 (별도 clock line 없으므로 *비트 엣지로 sync*)\\
+  \textbullet\ 적용 범위 — SOF부터 CRC 끝까지. ACK 이후는 미적용
+};
+
+\end{tikzpicture}
+\end{document}

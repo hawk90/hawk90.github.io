@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  entity/.style={cls, align=center, font=\footnotesize, minimum width=30mm, minimum height=14mm, draw=conbord, fill=confill},
+  sensor/.style={cls, align=center, font=\footnotesize, minimum width=30mm, minimum height=14mm, draw=hibord, fill=hifill},
+  dma/.style={cls, align=center, font=\footnotesize, minimum width=24mm, minimum height=12mm, draw=impbord, fill=impfill},
+  link/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt},
+  fmt/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (8, 4.5) {V4L2 Media Entity Graph (예: RK3399 + IMX219)};
+
+% Sensor
+\node[sensor] (sensor) at (0, 2) {imx219\\\tiny i2c@10};
+\node[font=\tiny, anchor=north, align=center] at (sensor.south) {/dev/v4l-subdev0};
+
+% CSI receiver (subdev)
+\node[entity] (csi) at (5, 2) {csi-rx\\\tiny CSI-2 RX};
+\node[font=\tiny, anchor=north, align=center] at (csi.south) {/dev/v4l-subdev1};
+
+% ISP
+\node[entity] (isp) at (10, 2) {ISP\\\tiny demosaic·AE·AWB};
+\node[font=\tiny, anchor=north, align=center] at (isp.south) {/dev/v4l-subdev2};
+
+% DMA (main path)
+\node[dma] (dma1) at (14, 3.5) {DMA path 0\\\tiny YUYV};
+\node[font=\tiny, anchor=west] at (dma1.east) {/dev/video0};
+
+% DMA (self path)
+\node[dma] (dma2) at (14, 0.5) {DMA path 1\\\tiny BGR888};
+\node[font=\tiny, anchor=west] at (dma2.east) {/dev/video1};
+
+% Links with format negotiation
+\draw[link] (sensor.east) -- (csi.west) node[fmt, midway, above] {SBGGR10\_1X10};
+\draw[link] (csi.east) -- (isp.west) node[fmt, midway, above] {SBGGR10\_1X10};
+\draw[link] (isp.east) -- ([yshift=2mm]isp.east -| 14, 0) -- (dma1.west) node[fmt, midway, above, sloped] {YUYV};
+\draw[link] (isp.east) -- ([yshift=-2mm]isp.east -| 14, 0) -- (dma2.west) node[fmt, midway, below, sloped] {BGR888};
+
+% Bottom annotation
+\node[font=\tiny, anchor=west, align=left] at (0, -1.5) {
+  \textbullet\ Entity = 미디어 IP (센서·CSI·ISP·DMA)\\
+  \textbullet\ Pad = entity의 입출력 포트, 각 pad마다 *format* 협상\\
+  \textbullet\ \texttt{media-ctl -d /dev/media0 -p} → 그래프 확인\\
+  \textbullet\ \texttt{media-ctl -V "..."} → 각 link format 명시
+};
+
+\end{tikzpicture}
+\end{document}

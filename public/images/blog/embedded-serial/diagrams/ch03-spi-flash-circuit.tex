@@ -1,0 +1,69 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{circuitikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\ctikzset{bipoles/length=8mm}
+\begin{document}
+\begin{circuitikz}[scale=1.0, transform shape]
+
+% Title
+\node[font=\footnotesize\bfseries, anchor=south] at (5, 6.5) {SPI Flash (W25Q128) — 디커플링 + 풀업};
+
+% IC body
+\draw (3, 1) rectangle (7, 5) node[midway, font=\footnotesize\bfseries] {W25Q128\\\scriptsize 16 MB NOR};
+
+% Pin labels (left)
+\node[font=\scriptsize, anchor=east] at (3, 4.5) {/CS};
+\node[font=\scriptsize, anchor=east] at (3, 4.0) {DO (MISO)};
+\node[font=\scriptsize, anchor=east] at (3, 3.5) {/WP};
+\node[font=\scriptsize, anchor=east] at (3, 3.0) {GND};
+
+% Pin labels (right)
+\node[font=\scriptsize, anchor=west] at (7, 4.5) {VCC};
+\node[font=\scriptsize, anchor=west] at (7, 4.0) {/HOLD};
+\node[font=\scriptsize, anchor=west] at (7, 3.5) {SCLK};
+\node[font=\scriptsize, anchor=west] at (7, 3.0) {DI (MOSI)};
+
+% Connections to MCU
+\draw (3, 4.5) -- (1, 4.5) node[anchor=east, font=\tiny] {MCU CS};
+\draw (3, 4.0) -- (1, 4.0) node[anchor=east, font=\tiny] {MCU MISO};
+\draw (7, 3.5) -- (9, 3.5) node[anchor=west, font=\tiny] {MCU SCLK};
+\draw (7, 3.0) -- (9, 3.0) node[anchor=west, font=\tiny] {MCU MOSI};
+
+% VCC + decoupling cap
+\draw (7, 4.5) -- (8, 4.5) -- (8, 6) node[anchor=south] {\scriptsize 3.3V VCC};
+\draw (8, 6) to[C=100nF] (8, 5);
+\draw (8, 5) -- (8, 4.5);
+
+% Additional bulk capacitor
+\draw (8, 6) -- (10, 6);
+\draw (10, 6) to[C=10uF] (10, 4.5) node[ground] {};
+
+% /WP and /HOLD tied to VCC via pull-up (unused = inactive)
+\draw (3, 3.5) -- (2, 3.5) -- (2, 6.5) to[R=10k] (2, 6) -- (8, 6);
+\draw (7, 4.0) -- (8, 4.0) -- (8, 4.5);
+\node[font=\tiny, anchor=south] at (2, 6.5) {/WP pull-up};
+
+% GND
+\draw (3, 3.0) -- (2, 3.0) -- (2, 1.5);
+\node[ground] at (2, 1.5) {};
+
+% CS pull-up (optional, depends on MCU)
+\draw (1.5, 4.5) -- (1.5, 5.5) to[R=10k] (1.5, 6) -- (2, 6);
+\node[font=\tiny, anchor=east] at (1.5, 5.7) {CS pull-up\\(idle High)};
+
+% Annotations
+\node[font=\tiny, anchor=west, align=left] at (10.5, 4) {
+  \textbf{디커플링}:\\
+  \textbullet\ 100 nF — 고주파 노이즈\\
+  \textbullet\ 10 µF — 전류 spike\\
+  IC 핀 ≤ 5 mm 근접\\[4pt]
+  \textbf{/WP /HOLD}:\\
+  \textbullet\ 안 쓰면 풀업 (High = inactive)\\
+  \textbullet\ 또는 직접 VCC 연결
+};
+
+\end{circuitikz}
+\end{document}

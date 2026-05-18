@@ -28,6 +28,8 @@ SAE (Society of Automotive Engineers)가 1990년대 트럭·버스·건설장비
 
 ## 29-bit ID 구조
 
+![J1939 29-bit ID dissection](/images/blog/can-bus/diagrams/ch10-j1939-id-structure.svg)
+
 ```text
 Bit 28          Bit 26  Bit 25                      Bit 8    Bit 0
 [Priority (3)] [R (1)] [DP (1)] [PGN High (8)] [PGN Low (8)] [Source Addr (8)]

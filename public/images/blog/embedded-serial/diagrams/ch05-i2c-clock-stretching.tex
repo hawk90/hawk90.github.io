@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{tikz-timing}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\definecolor{warnfill}{HTML}{FECACA}
+\definecolor{warnbord}{HTML}{F87171}
+\usetikztiminglibrary{counters,interval,nicetabs}
+\begin{document}
+\begin{tikzpicture}[font=\scriptsize]
+
+\node[font=\footnotesize\bfseries, anchor=west] at (0, 2.5) {I²C Clock Stretching — 슬레이브가 SCL Low로 잡아 마스터 대기};
+
+\node[anchor=west] at (0, 0) {\begin{tikztimingtable}
+  Master drives SCL & H 0.5L H L H 0.5L 0.5H L 0.5H \\
+  Slave drives SCL  & Z Z Z 2L Z Z Z \\
+  Bus SCL          & H 0.5L H 2L 0.5L 0.5H L 0.5H \\
+  SDA              & H 0.5L 0.5L 0.5H 0.5L L 0.5L 0.5H 0.5H \\
+\end{tikztimingtable}};
+
+\node[anchor=west, font=\tiny, align=left] at (0, -3.5) {
+  \textbullet\ Master는 SCL Hi로 풀어줘도 *slave가 Low로 잡고 있음*\\
+  \textbullet\ Bus SCL = wired-AND → Low 유지\\
+  \textbullet\ Slave 준비 완료 → SCL 해제 → 마스터가 다음 비트 진행\\
+  \textbullet\ *데이터 준비*가 필요한 슬레이브 (EEPROM write cycle, 인터럽트 처리 등)
+};
+
+\end{tikzpicture}
+\end{document}

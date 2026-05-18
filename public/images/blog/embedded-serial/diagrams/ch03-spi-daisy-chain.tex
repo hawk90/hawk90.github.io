@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  master/.style={cls, align=center, font=\footnotesize, minimum width=24mm, minimum height=18mm, draw=hibord, fill=hifill},
+  slave/.style={cls, align=center, font=\footnotesize, minimum width=22mm, minimum height=18mm, draw=conbord, fill=confill},
+  bus/.style={draw=edgec, line width=0.6pt},
+  cs/.style={draw=warnbord, line width=0.7pt, dashed},
+  arr/.style={-{Stealth[length=2mm]}},
+  lbl/.style={font=\tiny}
+]
+
+% Title
+\node[font=\footnotesize\bfseries, anchor=south] at (8, 4.2) {Daisy Chain — CS 1개 공유, 시프트 레지스터 체인};
+
+% Master
+\node[master] (m) at (0, 0) {Master\\(MCU)};
+
+% Slaves in chain
+\node[slave, right=12mm of m] (s1) {Slave 1\\(DAC)};
+\node[slave, right=12mm of s1] (s2) {Slave 2\\(DAC)};
+\node[slave, right=12mm of s2] (s3) {Slave 3\\(DAC)};
+
+% SCLK shared
+\draw[bus] (m.east) ++(0, 5mm) -- ++(8mm, 0) coordinate (sclk1)
+  -| (s1.north -| s1) -- ++(0, 3mm);
+\draw[bus] (s1.east) ++(0, 5mm) -- ++(4mm, 0) -| (s2.north -| s2) -- ++(0, 3mm);
+\draw[bus] (s2.east) ++(0, 5mm) -- ++(4mm, 0) -| (s3.north -| s3) -- ++(0, 3mm);
+\node[lbl, anchor=south] at ($(m.east)+(4mm, 5mm)$) {SCLK};
+
+% MOSI chained — Master.MOSI → S1.MISO → S2.MOSI → S2.MISO → S3.MOSI
+\draw[bus, arr] (m.east) -- (s1.west) node[lbl, midway, above] {DI};
+\draw[bus, arr] (s1.east) -- (s2.west) node[lbl, midway, above] {DO→DI};
+\draw[bus, arr] (s2.east) -- (s3.west) node[lbl, midway, above] {DO→DI};
+
+% CS shared
+\draw[cs] (m.south) ++(0, -2mm) -- ++(0, -3mm) coordinate (csbase);
+\draw[cs] (csbase) -| (s1.south);
+\draw[cs] (csbase) -| (s2.south);
+\draw[cs] (csbase) -| (s3.south);
+\node[lbl, anchor=north, color=warnbord] at (m.south) {CS 공유};
+
+% Annotation
+\node[font=\tiny, anchor=west, align=left] at (0, -2) {
+  \textbullet\ 모든 슬레이브에 CS 1개\\
+  \textbullet\ Master가 N×8 비트 송신 → 시프트 → 각 슬레이브에 한 바이트씩\\
+  \textbullet\ 라우팅 단순, 핀 절약\\
+  \textbullet\ 한 슬레이브만 update 못 함 (전체 N 바이트 시프트 필요)
+};
+
+\end{tikzpicture}
+\end{document}

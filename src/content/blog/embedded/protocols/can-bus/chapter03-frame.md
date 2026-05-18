@@ -93,6 +93,8 @@ DLC (Data Length Code) 4-bit, 그러나 *실제 데이터 길이는 0-8 byte*만
 
 ## Bit Stuffing — 동기화 유지
 
+![CAN bit stuffing (tikz-timing)](/images/blog/can-bus/diagrams/ch03-can-bit-stuffing.svg)
+
 연속 5비트 동일이면 *반대 비트* 1개 삽입 (송신자). 수신자가 *제거*. 이유:
 
 - CAN은 *별도 클럭 라인 없음*. 클럭 회복은 *비트 엣지*로.

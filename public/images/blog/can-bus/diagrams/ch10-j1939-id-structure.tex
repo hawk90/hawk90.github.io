@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=4mm,
+  field/.style={cls, align=center, font=\scriptsize\bfseries, minimum height=10mm, draw=edgec, line width=0.4pt},
+  prio/.style={field, fill=warnfill},
+  pgn/.style={field, fill=hifill},
+  sa/.style={field, fill=confill}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (15, 4) {J1939 29-bit ID Structure};
+
+% Bit positions (MSB → LSB)
+\node[anchor=east] at (-0.5, 2) {bit};
+\foreach \b in {28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0} {
+  \pgfmathsetmacro{\x}{28 - \b}
+  \node[font=\tiny] at (\x, 2) {\b};
+}
+
+% ID fields
+\node[prio, minimum width=12mm] at (1, 0.5) {Priority\\\tiny 3 bit};
+\node[field, minimum width=4mm, fill=hibord!20] at (3.5, 0.5) {R\\\tiny 1};
+\node[field, minimum width=4mm, fill=hibord!20] at (4.5, 0.5) {DP\\\tiny 1};
+\node[pgn, minimum width=32mm] at (10, 0.5) {PDU Format (PF)\\\tiny 8 bit};
+\node[pgn, minimum width=32mm] at (18, 0.5) {Group Ext. (GE) / Dest Addr\\\tiny 8 bit};
+\node[sa, minimum width=32mm] at (26, 0.5) {Source Address (SA)\\\tiny 8 bit};
+
+% Group bracket — PGN
+\draw[draw=hibord, line width=0.8pt] (3.3, -0.3) -- (3.3, -0.6) -- (21.7, -0.6) -- (21.7, -0.3);
+\node[font=\tiny, anchor=north, color=hibord] at (12.5, -0.6) {\textbf{PGN} (Parameter Group Number) — 18 bit};
+
+% Example
+\node[font=\tiny, anchor=west, align=left] at (-1, -2.5) {
+  \textbf{예 — EEC1 (Engine Electronic Control 1)}: ID = \texttt{0x0CF00400}\\
+  \quad Priority = 3 (안전 critical), R=0, DP=0, PF=0xF0, GE=0x04 → PGN = 0xF004, SA = 0x00 (Engine Controller 1)\\[4pt]
+  \textbf{PDU 형식}:\\
+  \quad PF = 0x00-0xEF → \textbf{PDU1}: GE = *Destination Address* (1:1 통신)\\
+  \quad PF = 0xF0-0xFF → \textbf{PDU2}: GE = *Group Extension* (broadcast)
+};
+
+\end{tikzpicture}
+\end{document}

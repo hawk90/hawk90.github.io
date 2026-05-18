@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  state/.style={cls, align=center, font=\footnotesize\bfseries, minimum width=32mm, minimum height=14mm},
+  trans/.style={-{Stealth[length=2.5mm]}, draw=edgec, line width=0.6pt},
+  trlabel/.style={font=\tiny, fill=white, inner sep=2pt}
+]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (8, 5.5) {CANopen NMT State Machine (CiA 301)};
+
+% States
+\node[state, draw=neutbord, fill=neutfill] (init) at (0, 4) {Initialization};
+\node[state, draw=hibord, fill=hifill] (preop) at (8, 4) {Pre-Operational};
+\node[state, draw=okbord, fill=okfill] (op) at (8, 0) {Operational};
+\node[state, draw=warnbord, fill=warnfill] (stop) at (0, 0) {Stopped};
+
+% Transitions
+\draw[trans] (init.east) -- node[trlabel, above] {Boot-up} (preop.west);
+\draw[trans] ([yshift=2mm]preop.south) -- ([yshift=2mm]op.north) node[trlabel, midway] {0x01 Start};
+\draw[trans] ([yshift=-2mm]op.north) -- ([yshift=-2mm]preop.south) node[trlabel, midway] {0x80 Enter Pre-op};
+\draw[trans] (op.west) -- node[trlabel, above] {0x02 Stop} (stop.east);
+\draw[trans, bend right=20] (preop.south west) to node[trlabel, above] {0x02 Stop} (stop.north east);
+\draw[trans, bend right=20] (stop.north) to node[trlabel, left] {0x81 Reset} (init.south);
+\draw[trans, bend left=30] (op.south west) to node[trlabel, below] {0x82 Reset Comm} (init.east);
+
+% State descriptions
+\node[font=\tiny, anchor=north, align=left] at (0, -1) {부팅, OD 로드};
+\node[font=\tiny, anchor=north, align=left] at (8, 3) {SDO·NMT·EMCY OK\\PDO 비활성};
+\node[font=\tiny, anchor=north, align=left] at (8, -1) {모든 통신 활성};
+\node[font=\tiny, anchor=north, align=left] at (0, -1) {NMT·Heartbeat만};
+
+\end{tikzpicture}
+\end{document}

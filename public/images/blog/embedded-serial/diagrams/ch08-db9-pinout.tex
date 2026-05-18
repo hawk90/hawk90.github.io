@@ -1,0 +1,83 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  pin/.style={circle, draw=edgec, fill=hifill!50, minimum size=4mm, inner sep=0pt, font=\tiny},
+  dteIO/.style={font=\scriptsize, anchor=west},
+  cable/.style={draw=edgec, line width=0.4pt},
+  cross/.style={draw=warnbord, line width=0.6pt, dashed}
+]
+
+% Title
+\node[font=\footnotesize\bfseries, anchor=south] at (8, 6.5) {DB-9 Pinout (DTE) + NULL Modem Cable};
+
+% DB-9 connector outline (left)
+\node[font=\footnotesize\bfseries, anchor=south] at (1, 6) {DTE A};
+\draw[draw=edgec, line width=0.6pt] (0, 5.5) -- (0, 1) -- (2.5, 0) -- (2.5, 5.5) -- cycle;
+
+% Pins 1-5 top row, 6-9 bottom — standard DB-9 layout
+\foreach \i/\y in {1/5, 2/4, 3/3, 4/2, 5/1} {
+  \node[pin] (aA\i) at (0.5, \y) {\i};
+  \node[dteIO] at ([xshift=2mm]aA\i.east) {%
+    \ifnum\i=1 DCD\fi
+    \ifnum\i=2 RXD\fi
+    \ifnum\i=3 TXD\fi
+    \ifnum\i=4 DTR\fi
+    \ifnum\i=5 GND\fi
+  };
+}
+\foreach \i/\y in {6/4.5, 7/3.5, 8/2.5, 9/1.5} {
+  \node[pin] (aA\i) at (1.5, \y) {\i};
+  \node[dteIO] at ([xshift=2mm]aA\i.east) {%
+    \ifnum\i=6 DSR\fi
+    \ifnum\i=7 RTS\fi
+    \ifnum\i=8 CTS\fi
+    \ifnum\i=9 RI\fi
+  };
+}
+
+% DB-9 connector outline (right)
+\node[font=\footnotesize\bfseries, anchor=south] at (13, 6) {DTE B};
+\draw[draw=edgec, line width=0.6pt] (15, 5.5) -- (15, 1) -- (12.5, 0) -- (12.5, 5.5) -- cycle;
+
+\foreach \i/\y in {1/5, 2/4, 3/3, 4/2, 5/1} {
+  \node[pin] (bB\i) at (14.5, \y) {\i};
+  \node[font=\scriptsize, anchor=east] at ([xshift=-2mm]bB\i.west) {%
+    \ifnum\i=1 DCD\fi
+    \ifnum\i=2 RXD\fi
+    \ifnum\i=3 TXD\fi
+    \ifnum\i=4 DTR\fi
+    \ifnum\i=5 GND\fi
+  };
+}
+\foreach \i/\y in {6/4.5, 7/3.5, 8/2.5, 9/1.5} {
+  \node[pin] (bB\i) at (13.5, \y) {\i};
+  \node[font=\scriptsize, anchor=east] at ([xshift=-2mm]bB\i.west) {%
+    \ifnum\i=6 DSR\fi
+    \ifnum\i=7 RTS\fi
+    \ifnum\i=8 CTS\fi
+    \ifnum\i=9 RI\fi
+  };
+}
+
+% NULL Modem connections (cross)
+\draw[cross] (aA2) -- (bB3);  % A.RXD ← B.TXD
+\draw[cross] (aA3) -- (bB2);  % A.TXD → B.RXD
+\draw[cable] (aA5) -- (bB5);  % GND
+\draw[cross] (aA7) -- (bB8);  % A.RTS → B.CTS
+\draw[cross] (aA8) -- (bB7);  % A.CTS ← B.RTS
+\draw[cross] (aA4) -- (bB6);  % A.DTR → B.DSR
+\draw[cross] (aA6) -- (bB4);  % A.DSR ← B.DTR
+
+% Legend
+\node[font=\tiny, anchor=west, align=left, draw=warnbord, fill=warnfill, inner sep=3pt] at (0, -1.5) {
+  \textbf{NULL Modem 케이블} = TX↔RX 교차 + RTS↔CTS 교차 + DTR↔DSR 교차 + GND 직결
+};
+
+\end{tikzpicture}
+\end{document}

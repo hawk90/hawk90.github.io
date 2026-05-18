@@ -37,6 +37,8 @@ draft: true
 
 ### Daisy Chain
 
+![SPI daisy chain](/images/blog/embedded-serial/diagrams/ch03-spi-daisy-chain.svg)
+
 슬레이브가 *시프트 레지스터*처럼 연결 — 마스터의 MOSI → S1의 MISO → S2의 MOSI → ... 한 줄로. CS 한 개 공유.
 
 | 장점 | 단점 |
@@ -174,6 +176,12 @@ HAL_SPI_TransmitReceive_DMA(&hspi1, tx_buf, rx_buf, 256);
 - **Full-duplex DMA** — TX/RX 동시 — 2 DMA 채널 필요.
 - **TX-only / RX-only** — 한 방향만 — 1 채널.
 - 일부 SPI 페리퍼럴은 단방향만 지원 (확인 필요).
+
+## 실 회로 예 — W25Q128 SPI Flash
+
+![SPI Flash circuit (CircuiTikZ)](/images/blog/embedded-serial/diagrams/ch03-spi-flash-circuit.svg)
+
+100 nF + 10 µF 디커플링 캡을 IC VCC 핀 ≤ 5 mm 근접 배치. /WP·/HOLD 안 쓰면 풀업으로 *High 고정*. CS는 *MCU GPIO* 외에 풀업 추가로 *부팅 중 idle High* 보장.
 
 ## 보드 레이아웃 주의
 

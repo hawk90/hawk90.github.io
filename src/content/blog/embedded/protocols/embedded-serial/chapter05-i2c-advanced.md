@@ -14,6 +14,8 @@ draft: true
 
 ## Repeated Start — Read 트랜잭션의 핵심
 
+![I²C Repeated Start (tikz-timing)](/images/blog/embedded-serial/diagrams/ch05-i2c-repeated-start.svg)
+
 레지스터를 *읽으려면* 두 단계:
 1. **Write** — 어느 레지스터를 읽을지 슬레이브에 알림.
 2. **Read** — 그 레지스터 값을 받음.
@@ -29,6 +31,8 @@ Sr은 *원자성*을 보장 — read 도중 다른 마스터의 트랜잭션이 
 
 ## 10-bit Addressing
 
+![I²C 10-bit address layout](/images/blog/embedded-serial/diagrams/ch05-i2c-10bit.svg)
+
 7-bit로 부족하면 10-bit 모드. 첫 바이트가 *예약된 prefix*로 시작.
 
 ```text
@@ -41,6 +45,8 @@ Sr은 *원자성*을 보장 — read 도중 다른 마스터의 트랜잭션이 
 실무에선 거의 안 씁니다. 7-bit (112개)로 충분하고 *디바이스 지원이 드물어서*.
 
 ## Clock Stretching — 느린 슬레이브의 권한
+
+![I²C clock stretching (tikz-timing)](/images/blog/embedded-serial/diagrams/ch05-i2c-clock-stretching.svg)
 
 슬레이브가 *데이터 준비가 안 됐을 때* SCL을 Low로 잡아 마스터를 기다리게 함. Open-drain이라 가능.
 
