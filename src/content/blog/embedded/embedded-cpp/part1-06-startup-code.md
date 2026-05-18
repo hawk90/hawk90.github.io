@@ -1,0 +1,442 @@
+---
+title: "Part 1-06: 스타트업 코드"
+date: 2026-05-13T06:00:00
+description: "Reset에서 main까지 — vector table, .data 복사, .bss 초기화, __libc_init_array가 호출하는 C++ static 생성자."
+series: "Embedded C++ for Real Systems"
+seriesOrder: 6
+tags: [cpp, embedded, startup, init-array, static-initialization, reset-handler]
+type: tech
+---
+
+## 한 줄 요약
+
+> **"C++ 객체는 *main 전*에 생성됩니다."** — `__libc_init_array`가 `.init_array` 섹션을 돌며 *static 생성자*를 차례로 호출.
+
+## 어떤 문제를 푸는가
+
+C++의 *static 객체*는 *main 호출 전*에 *생성자가 실행*되어야 합니다. 임베디드에서 이 시점이 *언제이고 누가 호출하는지* 알아야 *함정을 피할 수 있습니다*.
+
+```cpp
+// 이 두 객체는 main 전에 생성되어야 함
+Logger g_logger(LogLevel::Info);
+Timer  g_timer(1000);
+
+int main() {
+    g_logger.log("started");
+    return 0;
+}
+```
+
+부트 순서를 모르면 다음 같은 *조용한 버그*에 빠집니다.
+
+- *static 객체 A의 생성자에서 B를 사용*하는데 B가 *아직 미생성* → *zero-initialized 사용* → 런타임 충돌
+- *부트 코드에서 C++ 객체 접근* → 생성자 미호출 → vtable null → crash
+- *static initialization order fiasco* → 빌드마다 다른 결과
+
+이 글은 *Reset에서 main까지의 정확한 흐름*과 *C++ 객체 초기화 시점*을 다룹니다.
+
+## 부트 흐름 — Reset에서 main까지
+
+ARM Cortex-M 기준 (다른 아키텍처도 개념 동일).
+
+```text
+[전원 ON / Reset 핀]
+    ↓
+[ROM의 boot ROM 실행 — vendor]
+    ↓
+[Reset Vector 읽음]
+    ↓
+Reset_Handler  (어셈블리 또는 C)
+    ↓
+1. SP 초기화 (stack pointer를 vector table의 첫 값으로)
+2. .data 섹션 복사 (Flash → RAM)
+3. .bss 섹션 0으로 초기화
+4. FPU 활성화 (있다면)
+5. 시스템 클럭 설정 (선택, 보통 SystemInit())
+    ↓
+__libc_init_array()   ← C++ 진입의 핵심
+    ↓
+    .preinit_array 순회 호출
+    _init() 호출 (legacy)
+    .init_array 순회 호출  ← *C++ static 객체 생성자*
+    ↓
+main()
+    ↓
+(main return)
+    ↓
+__libc_fini_array() (보통 안 호출됨, 임베디드는 main 무한루프)
+    ↓
+exit() → 무한 루프
+```
+
+핵심: *2번 .bss 초기화* → *.init_array 호출* → *main*. 이 순서를 *깨뜨리면 안 됨*.
+
+## Vector Table — Reset의 시작점
+
+ARM Cortex-M의 첫 256 바이트는 *vector table*. 각 entry는 *함수 포인터*.
+
+```cpp
+// vectors.cpp 또는 vectors.c
+extern "C" void Reset_Handler(void);
+extern "C" void Default_Handler(void);
+
+extern uint32_t _estack;   // 링커가 정의 — stack top
+
+__attribute__((section(".isr_vector")))
+const void* vectors[] = {
+    &_estack,                     // 0x00: 초기 stack pointer
+    (void*)Reset_Handler,         // 0x04: Reset vector
+    (void*)Default_Handler,       // 0x08: NMI
+    (void*)Default_Handler,       // 0x0C: HardFault
+    (void*)Default_Handler,       // 0x10: MemManage
+    (void*)Default_Handler,       // 0x14: BusFault
+    (void*)Default_Handler,       // 0x18: UsageFault
+    // ...
+};
+```
+
+링커 스크립트가 *vectors를 Flash 시작 (0x08000000)*에 배치합니다. *전원 ON 시 CPU가 첫 4 바이트를 SP로, 다음 4 바이트를 PC로 로드*하여 Reset_Handler 실행.
+
+## Reset_Handler — 첫 C++ 호출 전 준비
+
+전형적 ARM Cortex-M 구현:
+
+```cpp
+extern "C" {
+    extern uint32_t _sidata;    // .data의 LMA (Flash 위치)
+    extern uint32_t _sdata;     // .data의 VMA 시작 (RAM)
+    extern uint32_t _edata;     // .data의 VMA 끝 (RAM)
+    extern uint32_t _sbss;      // .bss 시작 (RAM)
+    extern uint32_t _ebss;      // .bss 끝 (RAM)
+}
+
+extern "C" void Reset_Handler(void) {
+    // 1. .data 복사: Flash에서 RAM으로
+    uint32_t* src = &_sidata;
+    uint32_t* dst = &_sdata;
+    while (dst < &_edata) {
+        *dst++ = *src++;
+    }
+
+    // 2. .bss 0으로 초기화
+    dst = &_sbss;
+    while (dst < &_ebss) {
+        *dst++ = 0;
+    }
+
+    // 3. 시스템 클럭 (벤더 함수)
+    SystemInit();
+
+    // 4. C++ 런타임 + static 객체 초기화
+    __libc_init_array();
+
+    // 5. main 호출
+    int rc = main();
+
+    // 6. main return 시
+    __libc_fini_array();
+    while (1);   // 또는 exit(rc)
+}
+```
+
+*1, 2번이 안 끝난 상태에서 C++ 객체를 만지면 위험*. `.bss`가 0이 아닐 수 있고, `.data`가 random.
+
+## `__libc_init_array` — C++ static 생성자 호출
+
+GCC와 newlib이 제공하는 함수. *세 개의 섹션을 차례로 호출*합니다.
+
+```c
+// 개념적 구현 (newlib 내부)
+void __libc_init_array(void) {
+    size_t count;
+    size_t i;
+
+    // 1. .preinit_array — 가장 먼저
+    count = __preinit_array_end - __preinit_array_start;
+    for (i = 0; i < count; i++)
+        __preinit_array_start[i]();
+
+    // 2. _init — legacy GNU init
+    _init();
+
+    // 3. .init_array — C++ static 생성자가 들어 있음
+    count = __init_array_end - __init_array_start;
+    for (i = 0; i < count; i++)
+        __init_array_start[i]();
+}
+```
+
+`__init_array_start`와 `__init_array_end`는 *링커가 정의*. *링커 스크립트의 `.init_array` 섹션* 시작과 끝.
+
+```ld
+/* 링커 스크립트 (예: STM32F4) */
+.init_array : {
+    PROVIDE_HIDDEN(__init_array_start = .);
+    KEEP(*(SORT(.init_array.*)))
+    KEEP(*(.init_array))
+    PROVIDE_HIDDEN(__init_array_end = .);
+} >FLASH
+```
+
+각 *static 객체의 생성자*가 *함수 포인터*로 이 섹션에 들어갑니다.
+
+## Static 객체 생성자가 들어가는 방법
+
+```cpp
+// app.cpp
+class Logger {
+public:
+    Logger() {
+        // 생성자 본문
+    }
+};
+
+Logger g_logger;   // static 객체
+```
+
+컴파일러가 *자동으로 다음을 생성*:
+
+```cpp
+// 컴파일러가 만드는 hidden 코드 (개념)
+void __static_initialization_0() {
+    g_logger.Logger::Logger();   // 생성자 호출
+}
+
+// .init_array 섹션에 함수 포인터 등록
+__attribute__((section(".init_array")))
+void (*__init_0)(void) = __static_initialization_0;
+```
+
+링커가 *모든 `.init_array.*` 섹션을 정렬해 결합*. `__libc_init_array`가 *순회*하며 *호출*.
+
+결과: `g_logger`가 *main 호출 직전*에 *생성됨*.
+
+## Static 초기화 순서 — *같은 TU 안*
+
+같은 *Translation Unit*(같은 .cpp 파일) 안 static 객체는 *선언 순서대로* 초기화.
+
+```cpp
+// file1.cpp
+Logger g_logger;          // 1번째
+Timer  g_timer(g_logger); // 2번째 — g_logger 이미 OK
+Cache  g_cache(g_timer);  // 3번째 — g_timer 이미 OK
+```
+
+이건 *안전*. 순서 보장.
+
+## Static 초기화 순서 — *다른 TU 사이*
+
+문제는 *다른 .cpp 파일 간*의 초기화 순서가 *unspecified*라는 점.
+
+```cpp
+// file_a.cpp
+Logger g_logger;
+
+// file_b.cpp
+extern Logger g_logger;
+Timer g_timer(g_logger);   // g_logger가 먼저 초기화 보장 X
+```
+
+`g_timer`가 *먼저 초기화*되면 *g_logger는 아직 zero-initialized*. 객체에 따라 *런타임 충돌*.
+
+이게 **Static Initialization Order Fiasco**. *Modern C++가 가장 권장하는 해결책*은 *Construct-On-First-Use*:
+
+```cpp
+// 해결 — Construct-On-First-Use
+Logger& get_logger() {
+    static Logger instance;   // C++11+ thread-safe init
+    return instance;
+}
+
+// 다른 곳에서
+Timer g_timer(get_logger());   // 호출 시점에 instance 생성 보장
+```
+
+함수 내 *static 변수*는 *최초 호출 시 생성*. *순서 안전*.
+
+자세한 내용은 [Part 4-08: Singleton 대안](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives).
+
+## 임베디드의 함정 — Constructor에서 H/W 접근
+
+static 생성자가 *하드웨어를 만지면* 문제. `__libc_init_array` 시점에는 *클럭만 설정*되고 *peripheral은 미초기화*일 수 있음.
+
+```cpp
+// 위험!
+class GPIO {
+public:
+    GPIO() {
+        // peripheral 클럭 활성화 — Reset_Handler에서 안 했다면 실패
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+        // ...
+    }
+};
+
+GPIO g_led_pin;   // SystemInit 후, main 전에 호출
+```
+
+`SystemInit()` 다음, `main()` 전. 보통은 안전하지만 *peripheral 초기화 순서*에 *의존성*이 있으면 깨질 수 있음.
+
+권장 — *static 객체는 lazy 초기화* 또는 *main 안에서 명시적 init*:
+
+```cpp
+// 안전
+class GPIO {
+public:
+    void init() {
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+        // ...
+    }
+};
+
+GPIO g_led;
+
+int main() {
+    SystemClock_Config();
+    g_led.init();   // 명시적, 순서 통제
+    // ...
+}
+```
+
+## `static_assert`로 생성자 *trivial 강제*
+
+H/W 접근 안 하는 static은 *trivial constructor*가 안전.
+
+```cpp
+class Counter {
+public:
+    constexpr Counter() : count(0) {}
+    void increment() { ++count; }
+private:
+    int count;
+};
+
+static_assert(std::is_trivially_default_constructible_v<Counter>);
+
+Counter g_counter;   // .bss 0 초기화로 완성 (생성자 호출 불필요)
+```
+
+trivial constructor는 *.init_array에 추가되지 않음*. *.bss zero-init만으로 충분*. 부트 빠르고 *위험 없음*.
+
+## `.init_array` 섹션이 *Flash에 있는지*
+
+링커 스크립트에서 `.init_array`가 *어디에 배치*되는지 확인.
+
+```ld
+/* 보통 — Flash에 배치 (RAM 절약) */
+.init_array : {
+    KEEP(*(SORT(.init_array.*)))
+    KEEP(*(.init_array))
+} >FLASH
+```
+
+*KEEP*가 중요. `--gc-sections`가 *.init_array를 제거하지 않게* 막음. 없으면 *static 생성자가 사라지고 객체 미초기화*.
+
+## `-fno-use-cxa-atexit` — atexit 등록 끄기
+
+C++ 표준은 *static 객체의 소멸자*를 `__cxa_atexit`로 등록. 임베디드는 *main이 끝나지 않으면 호출 안 됨*. 등록 비용만 발생.
+
+```makefile
+CXXFLAGS += -fno-use-cxa-atexit
+```
+
+생성자만 `.init_array`에 등록, 소멸자는 *완전 제거*. *수십~수백 바이트 절약*.
+
+## 측정 — static 객체 갯수와 init 시간
+
+```bash
+# .init_array 크기 = static 생성자 수 × 4 (포인터 크기)
+arm-none-eabi-size -A firmware.elf | grep init_array
+
+.init_array         32       80014c0
+# 32 / 4 = 8개 static 생성자
+```
+
+`nm`으로 *생성자 함수*들 확인:
+
+```bash
+arm-none-eabi-nm --demangle firmware.elf | grep "_GLOBAL__sub_I_"
+
+00000a40 t _GLOBAL__sub_I_g_logger
+00000b20 t _GLOBAL__sub_I_g_timer
+00000c40 t _GLOBAL__sub_I_g_cache
+```
+
+각 `_GLOBAL__sub_I_*`가 *한 TU의 static 초기화 함수*.
+
+*수십 개의 static 객체*면 `__libc_init_array` 자체에 *수 ms* 소요. 부트 시간 critical하면 *명시적 init으로 옮김*.
+
+## 자주 보는 함정과 안티패턴
+
+### 1. *Reset_Handler에서 .data 복사 누락*
+초기값 있는 global이 *random*. 정상 동작 후 *조용히 실패*.
+
+### 2. *.bss 0 초기화 누락*
+zero-init 가정 변수 (`static int counter = 0;`)가 *random*. *카운터가 음수에서 시작*하는 등의 silent bug.
+
+### 3. *`__libc_init_array` 호출 누락*
+static 객체 *생성자 미호출*. vtable이 *null*. virtual 호출 시 *crash*.
+
+### 4. *Constructor에서 다른 TU의 static 의존*
+초기화 순서 fiasco. *Construct-On-First-Use 패턴*.
+
+### 5. *Constructor에서 RTOS 호출*
+RTOS는 *main 후에 시작*. static 생성자에서 *task 생성, mutex 사용*은 *crash*.
+
+### 6. *`.init_array` 섹션 KEEP 누락*
+`--gc-sections`가 *static 생성자 함수를 제거*. 객체가 *zero-init만으로 시작* → 잘못된 동작.
+
+## Bare-metal Minimal Startup — 직접 작성
+
+극도로 작은 환경에서 *startup을 직접 작성*하는 패턴.
+
+```cpp
+// minimal_startup.cpp
+extern "C" {
+
+extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss;
+extern void(*__init_array_start[])(void);
+extern void(*__init_array_end[])(void);
+
+void Reset_Handler(void) {
+    // .data 복사
+    for (uint32_t *src = &_sidata, *dst = &_sdata; dst < &_edata; )
+        *dst++ = *src++;
+
+    // .bss 클리어
+    for (uint32_t *dst = &_sbss; dst < &_ebss; )
+        *dst++ = 0;
+
+    // C++ static 생성자
+    for (auto* fn = __init_array_start; fn < __init_array_end; ++fn)
+        (*fn)();
+
+    // main
+    extern int main(void);
+    main();
+
+    while (1);
+}
+
+}   // extern "C"
+```
+
+*newlib 없이*도 *부트 완성*. 가장 작은 환경 (수 KB Flash)에 유용.
+
+## 정리
+
+- 부트 순서: *Reset → SP/.data/.bss → SystemInit → __libc_init_array → main*.
+- C++ static 객체 생성자는 `.init_array` 섹션에 *함수 포인터*로. `__libc_init_array`가 호출.
+- *같은 TU 내*는 선언 순서, *다른 TU 사이*는 *unspecified* — *Construct-On-First-Use*로 회피.
+- Constructor에서 *peripheral, RTOS 호출 금지*. *명시적 init를 main에*.
+- *trivial constructor* + `constexpr`로 *.init_array 안 들어가게* 권장.
+- 작은 환경엔 *직접 startup* 작성 가능.
+
+## 관련 항목
+
+- [Part 1-03: 런타임 요구사항](/blog/embedded/embedded-cpp/part1-03-runtime-requirements) — `__libc_init_array`의 소속
+- [Part 1-07: 링커 스크립트와 C++](/blog/embedded/embedded-cpp/part1-07-linker-scripts) — `.init_array` 섹션 배치
+- [Part 4-08: Singleton 대안](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives) — Construct-On-First-Use
+
+## 다음 글
+
+[Part 1-07: 링커 스크립트와 C++](/blog/embedded/embedded-cpp/part1-07-linker-scripts) — `.init_array`, `.text`, `.rodata`, `.data`, `.bss`의 *정확한 배치* + custom 섹션.
