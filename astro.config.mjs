@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
-import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import expressiveCode from 'astro-expressive-code';
 import remarkMath from 'remark-math';
@@ -32,9 +31,25 @@ export default defineConfig({
   },
 
   integrations: [
-    expressiveCode(),
-    mdx(),
-    sitemap(),
+    // Limit shiki language bundle — ~44k code blocks across blog, default
+    // loads ~200 langs which pushes heap. Only load what's actually used.
+    expressiveCode({
+      shiki: {
+        langs: [
+          'cpp', 'c', 'text', 'bash', 'python', 'javascript', 'typescript',
+          'java', 'eiffel', 'cmake', 'makefile', 'asm', 'csharp', 'vim',
+          'yaml', 'json', 'rust', 'go', 'sql', 'html', 'css', 'verilog',
+          'dts', 'tcl', 'cuda', 'glsl',
+        ],
+      },
+      themes: ['github-dark', 'github-light'],
+    }),
+    // mdx() integration dropped — repo has 0 .mdx files; pure .md only.
+    // Removing saves parser load + memory during build.
+    sitemap({
+      // Exclude admin pages from sitemap (they're not public).
+      filter: (page) => !page.includes('/admin'),
+    }),
   ],
 
   markdown: {
