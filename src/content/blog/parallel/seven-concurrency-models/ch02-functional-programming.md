@@ -1,6 +1,6 @@
 ---
 title: "Chapter 2: Functional Programming"
-date: 2026-05-22T02:00:00
+date: 2026-05-06T02:00:00
 description: "불변성으로 동시성 문제를 *제거*. Haskell/Clojure의 pure 함수, parallel reduce, futures."
 series: "Seven Concurrency Models in Seven Weeks"
 seriesOrder: 2

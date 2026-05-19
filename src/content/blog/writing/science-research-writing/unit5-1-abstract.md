@@ -1,6 +1,6 @@
 ---
 title: "Unit 5.1: Abstract의 구조와 어휘"
-date: 2026-05-19T10:00:00
+date: 2026-05-14T10:00:00
 description: "200-300 단어로 논문 전체를 압축 — Abstract의 4 부분 구조와 시제 결정."
 series: "Science Research Writing"
 seriesOrder: 51
@@ -8,10 +8,9 @@ tags: [writing, academic, abstract, summary]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: true
 ---
 
-Abstract는 *논문 전체를 200-300 단어로 압축*한 것입니다. 가장 읽히는 부분이지만 가장 마지막에 작성됩니다. 논문의 모든 섹션이 완성된 뒤에야 *진짜 abstract*를 쓸 수 있습니다.
+Abstract는 논문 전체를 200-300 단어로 압축한 것입니다. 가장 읽히는 부분이지만 가장 마지막에 작성됩니다. 논문의 모든 섹션이 완성된 뒤에야 진짜 abstract를 쓸 수 있습니다.
 
 ## Abstract의 역할
 
@@ -31,7 +30,7 @@ Abstract는 *논문 전체를 200-300 단어로 압축*한 것입니다. 가장 
 4. Conclusion — 의미와 함의 (1-2 문장)
 ```
 
-200-300 단어 안에 *논문 전체*를 압축합니다.
+200-300 단어 안에 논문 전체를 압축합니다.
 
 ## 실제 Abstract 예시
 
@@ -60,7 +59,7 @@ just quantity — is a key determinant of sleep quality in young adults,
 with implications for public health messaging.
 ```
 
-분량 분석: 4 부분이 *대략 균등*하게 차지합니다.
+분량 분석을 보면 4 부분이 대략 균등하게 차지합니다.
 
 ## Abstract의 시제
 
@@ -138,7 +137,7 @@ Future research should examine ...
        and sleep quality in young adults.
 ```
 
-*구체성*이 검색 키워드를 만듭니다.
+구체성이 검색 키워드를 만듭니다.
 
 ### 2. 결과 미명시
 
@@ -148,7 +147,7 @@ Future research should examine ...
        with reduced sleep efficiency.
 ```
 
-*무엇이* 발견되었는지 명시해야 합니다.
+무엇이 발견되었는지 명시해야 합니다.
 
 ### 3. Statistical 디테일 누락
 
@@ -157,7 +156,7 @@ Future research should examine ...
 선호: Differences were significant (t = 3.45, p < .001, d = 0.44).
 ```
 
-가능하면 *효과 크기*와 *p-value*를 포함합니다 (분야 표준에 따라).
+가능하면 효과 크기와 p-value를 포함합니다(분야 표준에 따릅니다).
 
 ### 4. Methodology 디테일 부족
 
@@ -167,18 +166,18 @@ Future research should examine ...
        intercepts for participants.
 ```
 
-심사자가 *방법의 적절성*을 abstract만 보고 평가할 수 있어야 합니다.
+심사자가 방법의 적절성을 abstract만 보고 평가할 수 있어야 합니다.
 
 ### 5. 약속 후 미이행
 
-Abstract에서 *한다고 했는데* 본문에서 *안 한 것*은 자주 마주치는 함정입니다.
+Abstract에서 한다고 했는데 본문에서 안 한 것은 자주 마주치는 함정입니다.
 
 ```
 Abstract: We examine three hypotheses ...
 본문:    [실제로는 두 개만 다룸]
 ```
 
-본문 완성 *후* Abstract를 다시 쓰면 이 문제가 해결됩니다.
+본문 완성 후 Abstract를 다시 쓰면 이 문제가 해결됩니다.
 
 ## Abstract 길이
 
@@ -190,7 +189,7 @@ Abstract: We examine three hypotheses ...
    500 단어 — 일부 의학 저널
 ```
 
-저널 요구사항을 *반드시* 확인합니다.
+저널 요구사항을 반드시 확인합니다.
 
 ## Structured vs Unstructured Abstract
 
@@ -213,7 +212,7 @@ Conclusions: ...
 의학·임상 저널에 흔함
 ```
 
-자기 분야 / 자기 저널의 표준을 따릅니다.
+자기 분야와 자기 저널의 표준을 따릅니다.
 
 ## 다른 abstract 형식
 
@@ -243,23 +242,23 @@ non-technical 언어
 ## Abstract 작성 절차
 
 ```
-1. 논문 본문이 *완성된 후* 작성
-2. 각 섹션에서 *핵심 한두 문장*만 추출
+1. 논문 본문이 완성된 후 작성
+2. 각 섹션에서 핵심 한두 문장만 추출
 3. 4 부분 구조로 결합
 4. 단어 수 점검 — 너무 길면 자르기
 5. 키워드 점검 — 검색에 노출될 단어가 포함되었는가
 6. 본문과의 일치 점검
-7. 외부에 보여 주고 *논문 의도*가 명확한지 확인
+7. 외부에 보여 주고 논문 의도가 명확한지 확인
 ```
 
 ## 정리
 
-- Abstract = 논문 전체를 *200-300 단어*로 압축
-- 4 부분 — Background / Methods / Results / Conclusion
-- 시제 — Background (Perfect/Present), Methods (Past), Results (Past), Conclusion (Present)
-- 함정 — 일반적 도입, 결과 미명시, 통계 누락, 약속 후 미이행
-- *본문 완성 후* Abstract 작성
-- 자기 저널의 *형식 표준* 확인 (structured vs unstructured)
+- Abstract는 논문 전체를 200-300 단어로 압축한 글입니다.
+- 4 부분은 Background, Methods, Results, Conclusion입니다.
+- 시제는 Background에서 Perfect나 Present, Methods와 Results에서 Past, Conclusion에서 Present를 씁니다.
+- 흔한 함정은 일반적 도입, 결과 미명시, 통계 누락, 약속 후 미이행입니다.
+- 본문 완성 후 Abstract를 작성합니다.
+- 자기 저널의 형식 표준을 확인합니다(structured와 unstructured).
 
 ## 한국 연구자의 Abstract 함정
 
@@ -273,7 +272,7 @@ non-technical 언어
 
 ## 다음 글 예고
 
-마지막 글은 **Unit 5.2: Title의 작성과 시리즈 마무리**.
+마지막 글은 **Unit 5.2: Title의 작성과 시리즈 마무리**입니다.
 
 ## 관련 항목
 

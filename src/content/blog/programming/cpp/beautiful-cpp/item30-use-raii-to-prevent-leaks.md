@@ -1,6 +1,6 @@
 ---
 title: "항목 30: 메모리 누수를 방지하려면 RAII를 사용하라"
-date: 2026-05-09T06:00:00
+date: 2026-05-05T06:00:00
 description: "RAII — 자원 수명을 객체 수명에 묶기. 메모리·락·파일·소켓 어디든. C++의 가장 강력한 무기."
 tags: [C++, RAII, Resource Management]
 series: "Beautiful C++"

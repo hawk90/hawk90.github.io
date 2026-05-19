@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: QEMU Fake FPGA 디바이스"
-date: 2025-09-04T03:00:00
+date: 2026-05-17T03:00:00
 description: "Minimal PCIe FPGA model — QEMU에서 가상 FPGA 만들기."
 tags: [QEMU, fake-fpga, qom, pci-device]
 series: "FPGA Driver via QEMU+VFIO"

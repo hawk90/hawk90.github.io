@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Backend — CPU·GPU·TPU"
-date: 2027-08-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Target별 codegen 경로 — LLVM·Triton·XLA:TPU."
 series: "XLA·OpenXLA 심화"
 seriesOrder: 7

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Introduction to Multiparameter Models"
-date: 2030-02-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Normal with unknown σ²·multinomial·multivariate normal."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 3

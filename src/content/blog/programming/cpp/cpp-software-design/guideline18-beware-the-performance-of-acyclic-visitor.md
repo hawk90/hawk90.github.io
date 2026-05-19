@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 18: Acyclic Visitor의 성능을 경계하라"
-date: 2026-05-13T18:00:00
+date: 2026-05-02T18:00:00
 description: "Acyclic Visitor는 새 타입 추가에서 OCP를 흉내 내지만 dynamic_cast 남용으로 성능이 깨진다. variant가 답이다."
 tags: [C++, Software Design, Visitor, Performance]
 series: "C++ Software Design"

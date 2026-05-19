@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: POS & CON — POSIX와 동시성, race condition"
-date: 2025-09-10T11:00:00
+date: 2026-05-18T11:00:00
 description: "POSIX 특정 함정(POS), 동시성 race(CON), atomic·mutex, TSan으로 검출. 실전 CVE로 마무리."
 tags: [cert-c, posix, concurrency, race, mutex, atomic, tsan]
 series: "CERT C"

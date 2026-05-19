@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: CXL 스위치와 패브릭"
-date: 2026-10-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "single-level → multi-level switching — rack-scale 메모리."
 series: "CXL 심화"
 seriesOrder: 7

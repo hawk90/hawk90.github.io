@@ -1,6 +1,6 @@
 ---
 title: "Chapter 10: General Issues in Using Variables"
-date: 2025-06-20T10:00:00
+date: 2026-05-11T10:00:00
 description: "변수 — Data Literacy, 초기화 13 가이드, span/live time, binding time, hybrid coupling 회피."
 series: "Code Complete"
 seriesOrder: 10

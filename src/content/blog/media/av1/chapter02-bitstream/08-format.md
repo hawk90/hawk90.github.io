@@ -1,6 +1,6 @@
 ---
 title: "Ch 2.8: Low Overhead vs Length-Delimited 포맷"
-date: 2025-10-01T03:08:00
+date: 2026-05-16T03:08:00
 description: ".obu (Low Overhead), Annex B (Length-Delimited), MP4/WebM 컨테이너 — AV1 비트스트림이 저장되는 세 가지 모양."
 tags: [AV1, Video, Codec, Container, AnnexB]
 series: "AV1"

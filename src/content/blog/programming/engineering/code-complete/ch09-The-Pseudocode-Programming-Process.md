@@ -1,6 +1,6 @@
 ---
 title: "Chapter 9: The Pseudocode Programming Process"
-date: 2025-06-20T09:00:00
+date: 2026-05-11T09:00:00
 description: "PPP — 의도 수준의 의사 코드 → 주석 → 코드. ReportErrorMessage 예제, 5 이점, HARD DATA 95%."
 series: "Code Complete"
 seriesOrder: 9

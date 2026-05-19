@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: strace 기초 — syscall 트레이싱"
-date: 2025-08-30T02:00:00
+date: 2026-05-17T02:00:00
 description: "ptrace 기반. strace 옵션 — -e, -p, -f, -o, -tt -T."
 tags: [strace, ptrace, syscall]
 series: "System Tracing"

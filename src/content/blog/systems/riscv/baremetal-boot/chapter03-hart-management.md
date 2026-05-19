@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 하트(Hart) 관리"
-date: 2025-05-18T21:00:00
+date: 2026-05-17T21:00:00
 description: "RISC-V 하트 관리 — mhartid, 멀티하트 부팅, 파킹 루프를 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 3

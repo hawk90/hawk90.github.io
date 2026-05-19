@@ -1,6 +1,6 @@
 ---
 title: "Chapter 15: Science and Technology"
-date: 2026-05-18T15:00:00
+date: 2026-05-14T15:00:00
 description: "과학과 기술 글의 비밀 — A에서 B, B에서 C로 차근차근. 비유의 활용과 전문 용어의 정의."
 series: "On Writing Well"
 seriesOrder: 15

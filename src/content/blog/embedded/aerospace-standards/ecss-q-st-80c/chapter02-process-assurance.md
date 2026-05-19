@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: SW Process Assurance — 개발 절차 보증"
-date: 2025-10-05T03:00:00
+date: 2026-05-18T03:00:00
 description: "ECSS-Q-ST-80C — SPA Plan 작성, process metrics, periodic audit, tailoring."
 tags: [ecss, spa, process-assurance, audit, review, tailoring]
 series: "ECSS-Q-ST-80C"

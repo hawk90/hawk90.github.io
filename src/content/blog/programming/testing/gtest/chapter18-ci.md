@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: 실전 — CI 통합, JUnit XML, 회귀 감지"
-date: 2026-05-21T18:00:00
+date: 2026-05-10T18:00:00
 description: "GitHub Actions·GitLab CI에서 gtest 돌리기, 결과 시각화, flaky test 감지."
 series: "gtest 심화"
 seriesOrder: 18

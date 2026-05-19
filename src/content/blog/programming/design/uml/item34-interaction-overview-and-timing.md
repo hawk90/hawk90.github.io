@@ -1,6 +1,6 @@
 ---
 title: "UML 34: 상호작용 개요 + 타이밍 다이어그램 — 흐름과 시간 축의 두 시각"
-date: 2026-04-02T05:00:00
+date: 2026-05-03T05:00:00
 description: "여러 시퀀스를 활동 흐름으로 묶는 'Interaction Overview', 라이프라인 상태를 시간 축으로 펴는 'Timing'. UML 2.0 신규 두 다이어그램을 한 편에."
 tags: [UML, Interaction Overview, Timing Diagram, Interaction]
 series: "UML 2.5.1"

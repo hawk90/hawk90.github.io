@@ -8,38 +8,37 @@ tags: [writing, composition, concise, omit, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 > Omit needless words.
 
-*Strunk가 학생들에게 가장 자주 외쳤다*는 문장. *이 책의 가장 유명한 규칙*. 글쓰기 세계에서 가장 자주 인용됩니다.
+Strunk가 학생들에게 가장 자주 외쳤다는 문장입니다. 이 책의 가장 유명한 규칙이며, 글쓰기 세계에서 가장 자주 인용됩니다.
 
-## Strunk의 *진심*
+## Strunk의 진심
 
-E.B. White가 회상하는 *Strunk 교수님의 강의실*:
+E.B. White가 회상하는 Strunk 교수님의 강의실:
 
-> 그는 학생들 앞에 서서 *"Omit needless words! Omit needless words! Omit needless words!"*라고 *세 번* 외쳤다. 한 번으로는 부족하다는 듯이.
+> 그는 학생들 앞에 서서 "Omit needless words! Omit needless words! Omit needless words!"라고 세 번 외쳤다. 한 번으로는 부족하다는 듯이.
 
-이것이 *글쓰기 책의 핵심*. *간결*은 *활기*의 *부산물*입니다.
+이것이 글쓰기 책의 핵심입니다. 간결은 활기의 부산물입니다.
 
-## *모든 단어가 말해야 함*
+## 모든 단어가 말해야 한다
 
-활기찬 글은 *간결*합니다.
+활기찬 글은 간결합니다.
 
 ```
 원칙:
-- 문장에 *불필요한 단어*가 없을 것
-- 단락에 *불필요한 문장*이 없을 것
-- 그림에 *불필요한 선*이 없을 것
-- 기계에 *불필요한 부품*이 없을 것
+- 문장에 불필요한 단어가 없을 것
+- 단락에 불필요한 문장이 없을 것
+- 그림에 불필요한 선이 없을 것
+- 기계에 불필요한 부품이 없을 것
 
 → 같은 이유입니다.
 
-모든 *문장이 짧을 필요는 없습니다*. 모든 *단어가 말해야* 합니다.
+모든 문장이 짧을 필요는 없습니다. 모든 단어가 말해야 합니다.
 ```
 
-긴 문장도 *모든 단어가 일하면* OK. *놀고 있는 단어*가 문제입니다.
+긴 문장도 모든 단어가 일하면 OK입니다. 놀고 있는 단어가 문제입니다.
 
 ## 흔한 군더더기 — 표현 리스트
 
@@ -66,11 +65,11 @@ E.B. White가 회상하는 *Strunk 교수님의 강의실*:
 | prior to | before |
 | subsequent to | after |
 
-이 표현들은 *공식 문서 / 학술 글*에 자주 등장합니다. *대부분* 한두 단어로 *충분*합니다.
+이 표현들은 공식 문서·학술 글에 자주 등장합니다. 대부분 한두 단어로 충분합니다.
 
 ## *The Fact That* — 가장 큰 함정
 
-`The fact that`은 *특히 약화시키는* 표현입니다. *거의 모든 문장*에서 빼낼 수 있습니다.
+`The fact that`은 특히 약화시키는 표현입니다. 거의 모든 문장에서 빼낼 수 있습니다.
 
 | 원본 | 간결 |
 |------|------|
@@ -83,11 +82,11 @@ E.B. White가 회상하는 *Strunk 교수님의 강의실*:
 | the fact that she was leaving | her leaving |
 | despite the fact that | although |
 
-*The fact that*는 *생각의 거리*를 만듭니다. *직접 사실*을 *간접화*합니다. *거의 항상 빼는 것이 좋습니다*.
+*The fact that*는 생각의 거리를 만듭니다. 직접 사실을 간접화합니다. 거의 항상 빼는 편이 좋습니다.
 
 ## 동격으로 바꾸기
 
-비제한 관계절이 길어지면 *동격*으로 다시 쓰는 게 짧습니다.
+비제한 관계절이 길어지면 동격으로 다시 쓰는 편이 짧습니다.
 
 ```
 긴 표현:
@@ -113,7 +112,7 @@ E.B. White가 회상하는 *Strunk 교수님의 강의실*:
 
 ## 문장 합치기
 
-복잡한 한 생각을 *여러 짧은 문장*으로 쪼개면 단어 수가 *늘어납니다*. *하나로 합치면* 짧아집니다.
+복잡한 한 생각을 여러 짧은 문장으로 쪼개면 단어 수가 늘어납니다. 하나로 합치면 짧아집니다.
 
 ```
 원본 (51단어):
@@ -129,9 +128,9 @@ realized the prediction of the witches by murdering Duncan
 and becoming king of Scotland in his place."
 ```
 
-*같은 의미*. *단어 수 절반*. *더 강해짐*.
+같은 의미입니다. 단어 수는 절반이고, 더 강해졌습니다.
 
-## *Wordy* 표현의 패턴
+## Wordy 표현의 패턴
 
 ```
 패턴 1 — "동사 + 명사"가 한 동사로:
@@ -159,7 +158,7 @@ and becoming king of Scotland in his place."
 "past history" → "history"
 ```
 
-## *Redundancy*의 종류
+## Redundancy의 종류
 
 ```
 형용사 군더더기:
@@ -179,10 +178,10 @@ and becoming king of Scotland in his place."
 "is reflective of" → "reflects"
 ```
 
-## *Tighter is Better*
+## Tighter is Better
 
 Strunk의 원칙:
-> 길이가 *짧을수록* 더 *강합니다*.
+> 길이가 짧을수록 더 강합니다.
 
 ```
 원본:
@@ -196,11 +195,11 @@ is a significant correlation between the variables."
 "The variables correlate significantly."
 ```
 
-각 수정에서 *짧아지고 강해집니다*.
+각 수정에서 짧아지고 강해집니다.
 
-## 학술 글의 *Word Inflation*
+## 학술 글의 Word Inflation
 
-학술 글에는 *의도된 단어 부풀리기*가 흔합니다. *분량 채우기 / 진지함 인상*을 위해.
+학술 글에는 의도된 단어 부풀리기가 흔합니다. 분량 채우기·진지함 인상을 위한 것입니다.
 
 ```
 회피 (학술 부풀리기):
@@ -213,11 +212,11 @@ relationship between the two variables under consideration."
 "The two variables correlate significantly (p < 0.05)."
 ```
 
-*간결*이 *전문성*입니다. *부풀리기*는 *아마추어*의 표시.
+간결이 전문성입니다. 부풀리기는 아마추어의 표시입니다.
 
-## *Strunk* vs *Faulkner*
+## Strunk vs Faulkner
 
-White의 회상에 의하면 Strunk는 *Faulkner의 길고 복잡한 문장*을 *경멸*했습니다.
+White의 회상에 의하면 Strunk는 Faulkner의 길고 복잡한 문장을 경멸했습니다.
 
 ```
 Faulkner (긴 문장):
@@ -228,11 +227,11 @@ Hemingway (짧은 문장):
 Gulf Stream."
 ```
 
-두 작가 모두 *master*입니다. 하지만 *Strunk의 권고는 Hemingway 쪽*. *명확한 산문*에는 *간결*이 더 안전.
+두 작가 모두 master입니다. 하지만 Strunk의 권고는 Hemingway 쪽입니다. 명확한 산문에는 간결이 더 안전합니다.
 
 ## 한국어의 군더더기
 
-한국어 글에도 *비슷한 패턴*이 흔합니다.
+한국어 글에도 비슷한 패턴이 흔합니다.
 
 | 원본 (군더더기) | 간결 |
 |----------------|------|
@@ -248,7 +247,7 @@ Gulf Stream."
 | 주지하다시피 | 알다시피 |
 | 역사적으로 볼 때 | 역사적으로 |
 
-### 한국어 *번역체 군더더기*
+### 한국어 번역체 군더더기
 
 ```
 회피 (영어 직역):
@@ -271,7 +270,7 @@ Gulf Stream."
 "이것은 좋은 책일 것이다."  (추측이 필요하면)
 ```
 
-## *Master Writer*의 간결
+## Master Writer의 간결
 
 ```
 Hemingway:
@@ -285,39 +284,39 @@ Twain:
 long one instead."
 ```
 
-*짧은 글이 더 어렵습니다*. *시간*과 *수정*이 필요합니다.
+짧은 글이 더 어렵습니다. 시간과 수정이 필요합니다.
 
-## 자기 글 점검 — *3단계 수정*
+## 자기 글 점검 — 3단계 수정
 
 ```
-1단계 — 모든 *the fact that* 제거:
+1단계 — 모든 the fact that 제거:
 "due to the fact that" → "because"
 
-2단계 — *of phrases* 압축:
+2단계 — of phrases 압축:
 "the implementation of the plan" → "implementing the plan"
 
-3단계 — *형용사 / 부사 군더더기*:
+3단계 — 형용사·부사 군더더기:
 "completely unique" → "unique"
 "absolutely necessary" → "necessary"
 ```
 
-각 단계에서 *10-20%* 단어 수가 줄어듭니다. 세 단계 후 *원본의 50-60%* 길이.
+각 단계에서 10-20% 단어 수가 줄어듭니다. 세 단계 후 원본의 50-60% 길이가 됩니다.
 
 ## 최종 자기 점검
 
-- [ ] 자기 글의 *모든 단어*가 *일하고 있는가*?
+- [ ] 자기 글의 모든 단어가 일하고 있는가?
 - [ ] *The fact that*가 한 번이라도 등장하는가? → 제거
 - [ ] *In order to* → "to"
 - [ ] *Due to the fact that* → "because"
-- [ ] 형용사 / 부사 *군더더기*는?
-- [ ] 짧은 문장 5개를 *한 긴 문장*으로 합칠 수 있는가?
-- [ ] 비제한 관계절 → *동격*으로?
-- [ ] 한국 글에 *번역체 군더더기*가 없는가?
-- [ ] *Strunk의 외침* — "Omit needless words!" 들리는가?
+- [ ] 형용사·부사 군더더기는?
+- [ ] 짧은 문장 5개를 한 긴 문장으로 합칠 수 있는가?
+- [ ] 비제한 관계절을 동격으로 바꿀 수 있는가?
+- [ ] 한국 글에 번역체 군더더기가 없는가?
+- [ ] Strunk의 외침 — "Omit needless words!"가 들리는가?
 
 ## 다음 Rule 예고
 
-다음 — **Rule 18: 헐거운 문장을 연속하지 말라**.
+다음은 **Rule 18: 헐거운 문장을 연속하지 말라**입니다.
 
 ## 관련 항목
 

@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Linux 커널 설정"
-date: 2026-05-20T08:00:00
+date: 2026-05-09T08:00:00
 description: "BSP에서 커널을 빌드 — defconfig 선택·커스터마이즈, DT 통합, 모듈 vs 빌트인."
 series: "BSP Development"
 seriesOrder: 8

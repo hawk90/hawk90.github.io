@@ -1,6 +1,6 @@
 ---
 title: "Rule 6: Keep an Audit Trail"
-date: 2031-01-01T06:00:00
+date: 2026-05-17T06:00:00
 description: "기록 없는 디버깅은 같은 실수를 반복한다."
 series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 6

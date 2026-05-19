@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Dynamic Shape"
-date: 2028-06-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Optimization profile — variable batch·seq에 대응."
 series: "TensorRT 심화"
 seriesOrder: 4

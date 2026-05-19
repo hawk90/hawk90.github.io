@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: FIT image — multi-image, hash, configuration"
-date: 2026-05-18T15:00:00
+date: 2026-05-09T15:00:00
 description: "Flattened Image Tree — kernel·DTB·initramfs·overlay를 한 컨테이너로 묶는 포맷."
 series: "Bootloader Internals"
 seriesOrder: 15

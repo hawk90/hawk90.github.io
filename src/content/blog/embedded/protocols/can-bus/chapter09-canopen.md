@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: CANopen — Object Dictionary, SDO, PDO, NMT (CiA 301)"
-date: 2027-04-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "CAN 위에 얹은 산업 자동화 표준. Object Dictionary가 모든 노드 데이터의 골격."
 series: "CAN Bus 심화"
 seriesOrder: 9

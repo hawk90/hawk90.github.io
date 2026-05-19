@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 6: 추상화의 기대 동작을 준수하라"
-date: 2026-05-13T06:00:00
+date: 2026-05-02T06:00:00
 description: "Liskov Substitution Principle. 인터페이스는 시그니처만이 아니라 의미·계약·불변식까지 포함한다는 이야기."
 tags: [C++, Software Design, SOLID, LSP, Liskov]
 series: "C++ Software Design"

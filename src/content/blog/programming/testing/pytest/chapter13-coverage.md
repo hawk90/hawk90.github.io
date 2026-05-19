@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Coverage"
-date: 2026-05-22T13:00:00
+date: 2026-05-10T13:00:00
 description: "pytest-cov·branch coverage·--cov-fail-under — coverage 측정과 게이트."
 series: "pytest 심화"
 seriesOrder: 13

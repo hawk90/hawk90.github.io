@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: RAII 패턴 카탈로그 — 50개 실전 패턴"
-date: 2025-09-15T12:00:00
+date: 2026-05-18T12:00:00
 description: "C++ RAII의 모든 실전 패턴. ScopedLock, FileHandle, Transaction, Snapshot, Guard, Pool, Reservation 등 50가지 패턴을 코드로."
 tags: [autosar, cpp, raii, scoped, lock-guard, transaction, smart-pointer, pattern]
 series: "AUTOSAR C++14"

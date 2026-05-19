@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 리눅스 CXL 드라이버"
-date: 2026-10-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "drivers/cxl/·cxl-cli·daxctl — 커널 입장에서 CXL 다루기."
 series: "CXL 심화"
 seriesOrder: 10

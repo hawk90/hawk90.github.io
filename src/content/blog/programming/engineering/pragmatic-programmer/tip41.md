@@ -1,6 +1,6 @@
 ---
 title: "Tip 41: Act Locally"
-date: 2026-05-14T17:00:00
+date: 2026-05-11T17:00:00
 description: "지역적으로 행동하라 — 변수의 수명을 짧게. 사이드 이펙트를 가까이에서 처리."
 series: "The Pragmatic Programmer"
 seriesOrder: 41

@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: TimingCache·Build 시간 단축"
-date: 2028-06-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Tactic timing 결과를 cache — 동일 GPU에서 재사용."
 series: "TensorRT 심화"
 seriesOrder: 7

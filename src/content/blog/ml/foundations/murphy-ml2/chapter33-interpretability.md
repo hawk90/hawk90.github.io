@@ -1,6 +1,6 @@
 ---
 title: "Ch 33: Interpretability"
-date: 2029-06-02T09:00:00
+date: 2026-05-16T09:00:00
 description: "Saliency·SHAP·mechanistic — model을 이해하기."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 33

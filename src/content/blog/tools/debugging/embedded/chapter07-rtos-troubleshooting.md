@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: RTOS-aware 디버깅 + 트러블슈팅"
-date: 2025-09-01T07:00:00
+date: 2026-05-17T07:00:00
 description: "FreeRTOS/Zephyr task 콜스택, Hardfault 분석, MPU, 신호 무결성, 보안 lock 해제."
 tags: [rtos, freertos, zephyr, hardfault, mpu, troubleshooting, embedded]
 series: "Embedded Debugging"

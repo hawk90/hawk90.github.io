@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Buildroot/Yocto와 BSP — rootfs 통합"
-date: 2026-05-20T16:00:00
+date: 2026-05-09T16:00:00
 description: "BSP에서 rootfs 빌드 시스템 선택과 통합 — Buildroot 외부 트리, Yocto 메타레이어."
 series: "BSP Development"
 seriesOrder: 16

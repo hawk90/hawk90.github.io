@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: Gaussian Processes"
-date: 2029-06-01T18:00:00
+date: 2026-05-16T18:00:00
 description: "GP regression·classification·sparse·deep GP."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 18

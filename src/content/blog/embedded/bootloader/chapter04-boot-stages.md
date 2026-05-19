@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 부트 단계 — BL1 → SPL → TPL → U-Boot Proper"
-date: 2026-05-18T04:00:00
+date: 2026-05-09T04:00:00
 description: "ARM64와 RISC-V의 다단 부트 — BL1·BL2·BL31·BL33, SPL·TPL·U-Boot Proper의 책임 분할."
 series: "Bootloader Internals"
 seriesOrder: 4

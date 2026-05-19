@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Bayesian Neural Networks"
-date: 2029-06-01T17:00:00
+date: 2026-05-16T17:00:00
 description: "Weight posterior·MC dropout·SWAG·ensemble — DL의 uncertainty."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 17

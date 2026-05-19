@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Central Limit Theorems"
-date: 2030-07-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "CLT·characteristic function·Lévy theorem."
 series: "Probability: Theory and Examples"
 seriesOrder: 3

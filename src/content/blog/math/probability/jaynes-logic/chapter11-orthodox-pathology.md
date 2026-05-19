@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Principles and Pathology of Orthodox Statistics"
-date: 2029-04-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Frequentist 방법의 함정 — Jaynes의 비판적 정리."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 11

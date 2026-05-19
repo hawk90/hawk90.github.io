@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Clique Tree Algorithm"
-date: 2030-11-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Junction tree·message passing·marginal in single shot."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 10

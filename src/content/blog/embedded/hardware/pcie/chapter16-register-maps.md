@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Register Maps — Config Space 비트필드"
-date: 2026-06-01T17:00:00
+date: 2026-05-16T17:00:00
 description: "PCIe Configuration Space 레지스터 맵 — 비트필드 레퍼런스, 주요 레지스터 상세"
 series: "PCIe Deep Dive"
 seriesOrder: 16

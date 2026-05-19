@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Data Structures"
-date: 2025-05-14T07:00:00
+date: 2026-05-18T07:00:00
 description: "커널 자료구조 — list_head, hlist, rbtree, kref. container_of로 임베딩."
 tags: [Linux, Kernel, Data-Structures, list_head, rbtree, kref]
 series: "Linux Kernel Coding Style"

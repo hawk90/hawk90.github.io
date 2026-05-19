@@ -1,6 +1,6 @@
 ---
 title: "Part 1-1: 논증이란 무엇인가"
-date: 2025-07-22T01:00:00
+date: 2026-05-14T01:00:00
 description: "명제 / 전제 / 결론. 논증과 비-논증 구별."
 tags: [Logic, Argument, Proposition]
 series: "비판적 사고를 위한 논리"

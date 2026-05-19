@@ -1,6 +1,6 @@
 ---
 title: "Ch 15.1: Memory Mapping — mmap"
-date: 2026-06-01T15:00:00
+date: 2026-05-13T15:00:00
 description: "vma·remap_pfn_range·nopage — 디바이스 메모리를 userspace로."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 15

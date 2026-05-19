@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 보드 선택 가이드"
-date: 2025-05-19T08:00:00
+date: 2026-05-17T08:00:00
 description: "RISC-V 보드 — ESP32-C3, BL602, Longan Nano, SiFive HiFive 비교를 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 2

@@ -1,6 +1,6 @@
 ---
 title: "Pattern 31: Exception Test"
-date: 2026-07-02T07:00:00
+date: 2026-05-10T07:00:00
 description: "Exception·error 경로 검증 — robustness의 절반."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 31

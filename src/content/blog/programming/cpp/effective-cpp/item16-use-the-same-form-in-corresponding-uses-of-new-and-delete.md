@@ -1,6 +1,6 @@
 ---
 title: "항목 16: new와 delete는 같은 형태를 사용하라"
-date: 2025-02-01T16:00:00
+date: 2026-05-04T16:00:00
 description: "new ↔ delete, new[] ↔ delete[] — 짝이 맞지 않으면 UB. typedef 함정과 컨테이너로 회피."
 tags: [C++, Effective C++, Memory Management]
 series: "Effective C++"

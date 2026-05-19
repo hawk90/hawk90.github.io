@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Independence and Bayesian Networks"
-date: 2030-01-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Conditional independence·d-separation·각 framework의 BN."
 series: "Reasoning About Uncertainty"
 seriesOrder: 4

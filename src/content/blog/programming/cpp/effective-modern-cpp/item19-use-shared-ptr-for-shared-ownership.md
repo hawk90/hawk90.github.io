@@ -1,6 +1,6 @@
 ---
 title: "항목 19: 공유 소유 자원 관리에는 std::shared_ptr를 사용하라"
-date: 2025-01-05T19:00:00
+date: 2026-05-04T19:00:00
 description: "참조 카운팅 + control block — 비용과 함정 (control block 중복, enable_shared_from_this)."
 tags: [C++, Smart Pointer, shared_ptr, RAII, Modern C++]
 series: "Effective Modern C++"

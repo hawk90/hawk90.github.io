@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Geocentric Models"
-date: 2030-03-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Linear regression — 천동설처럼 틀려도 유용한 model."
 series: "Statistical Rethinking"
 seriesOrder: 4

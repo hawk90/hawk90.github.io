@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Test-Driven Development with Objects"
-date: 2025-10-10T02:00:00
+date: 2026-05-10T02:00:00
 description: "객체와 협력 — Tell Don't Ask. 역할 / 책임 중심 설계."
 tags: [TDD, OO, Tell Don't Ask]
 series: "Growing Object-Oriented Software"

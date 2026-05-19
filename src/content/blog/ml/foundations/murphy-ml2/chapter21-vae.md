@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: Variational Autoencoders"
-date: 2029-06-01T21:00:00
+date: 2026-05-16T21:00:00
 description: "ELBO·reparameterization·posterior collapse — VAE 일주."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 21

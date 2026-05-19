@@ -1,6 +1,6 @@
 ---
 title: "4-01: Kernel Module 기초 — init/exit·Parameter·KBuild·DKMS"
-date: 2026-05-20T14:00:00
+date: 2026-05-07T14:00:00
 description: "Linux kernel module의 진입점, 모듈 파라미터, KBuild Makefile, insmod 흐름, DKMS 배포까지 한 번에 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 19

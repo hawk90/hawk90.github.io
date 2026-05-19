@@ -1,6 +1,6 @@
 ---
 title: "Ch 4.4: CXL.mem — BISnp·BIRsp·Back-Invalidate"
-date: 2026-01-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "스펙 §3 mem — back-invalidate from host."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 11

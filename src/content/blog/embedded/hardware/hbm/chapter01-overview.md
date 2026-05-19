@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 고대역 메모리 개요 — HBM vs GDDR"
-date: 2027-01-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "HBM과 GDDR의 분기점 — bandwidth·capacity·cost."
 series: "HBM·GDDR 심화"
 seriesOrder: 1

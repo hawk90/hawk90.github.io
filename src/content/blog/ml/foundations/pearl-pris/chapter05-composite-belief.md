@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Distributed Revision of Composite Beliefs"
-date: 2029-11-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "MAP 추론·most probable explanation — diagnosis 문제."
 series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 문제 표현 패턴"
-date: 2028-09-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Multi-label·cascade·ensembles — 문제를 어떻게 정의하느냐."
 series: "ML 디자인 패턴"
 seriesOrder: 4

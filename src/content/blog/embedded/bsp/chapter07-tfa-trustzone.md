@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: TF-A와 TrustZone 통합"
-date: 2026-05-20T07:00:00
+date: 2026-05-09T07:00:00
 description: "ARM Trusted Firmware-A를 BSP에 통합 — BL31 빌드, U-Boot와 BL33 결합, secure/non-secure 분리."
 series: "BSP Development"
 seriesOrder: 7

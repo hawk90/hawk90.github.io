@@ -1,6 +1,6 @@
 ---
 title: "Part 2-10: Concepts (C++20)"
-date: 2026-05-14T10:00:00
+date: 2026-05-07T10:00:00
 description: "Template 제약을 명시 — SFINAE의 가독성 개선, 에러 메시지 명확화, 자체 문서화."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 18

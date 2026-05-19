@@ -1,6 +1,6 @@
 ---
 title: "Pattern 35: Decompose Conditional"
-date: 2026-06-02T11:00:00
+date: 2026-05-02T11:00:00
 description: "복잡한 조건문을 named function으로 — 무엇이 *왜* 분기인지 한눈에."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 35

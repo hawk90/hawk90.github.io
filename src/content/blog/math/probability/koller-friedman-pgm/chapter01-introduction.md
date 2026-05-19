@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction"
-date: 2030-11-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "PGM의 motivation·structure·decomposition — Koller·Friedman 바이블의 출발."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 1

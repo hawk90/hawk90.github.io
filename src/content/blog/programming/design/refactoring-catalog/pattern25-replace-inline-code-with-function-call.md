@@ -1,6 +1,6 @@
 ---
 title: "Pattern 25: Replace Inline Code with Function Call"
-date: 2026-06-02T01:00:00
+date: 2026-05-02T01:00:00
 description: "Inline 코드가 기존 함수와 같은 일을 한다면 호출로 — DRY."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 25

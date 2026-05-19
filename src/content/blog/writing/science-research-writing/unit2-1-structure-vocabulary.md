@@ -1,6 +1,6 @@
 ---
 title: "Unit 2.1: Methodology의 구조와 어휘"
-date: 2026-05-19T04:00:00
+date: 2026-05-14T04:00:00
 description: "Methodology의 표준 구조 — 재료, 절차, 분석. 핵심 동사와 자기 분야 어휘 보강."
 series: "Science Research Writing"
 seriesOrder: 21
@@ -8,20 +8,19 @@ tags: [writing, academic, methodology, vocabulary]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: true
 ---
 
-Methodology는 *모래시계의 좁은 중심부*입니다. 자기 연구의 *재현 가능성*을 만드는 자리입니다. 이 글은 Methodology의 표준 구조와 자주 쓰이는 어휘를 다룹니다.
+Methodology는 모래시계의 좁은 중심부입니다. 자기 연구의 재현 가능성을 만드는 자리입니다. 이 글은 Methodology의 표준 구조와 자주 쓰이는 어휘를 다룹니다.
 
 ## Methodology의 목적
 
 ```
 1. 재현 가능성 — 다른 연구자가 같은 절차를 반복할 수 있게
 2. 신뢰성 검증 — 심사자가 방법의 적절성을 평가할 수 있게
-3. 한계 명시 — 사용한 방법의 *경계*를 분명히
+3. 한계 명시 — 사용한 방법의 경계를 분명히
 ```
 
-좋은 Methodology는 *충분한 디테일*과 *과한 디테일* 사이의 균형입니다.
+좋은 Methodology는 충분한 디테일과 과한 디테일 사이의 균형입니다.
 
 ## 표준 구조
 
@@ -53,7 +52,7 @@ crosshead speed of 50 mm/min at 23 °C and 50% relative humidity.
 
 이 단락에 5 단계가 모두 들어 있습니다.
 
-- Materials — *PLA, PI*
+- Materials — PLA, PI
 - Preparation — *dried under vacuum*
 - Procedure — *blended, extruded, cooled, cut, compression-moulded*
 - Measurement — *universal testing machine, ASTM D638, tensile tests*
@@ -94,7 +93,7 @@ Review Board.
 
 ## 흔한 sub-section 구조
 
-긴 Methodology는 *sub-section*으로 나뉩니다.
+긴 Methodology는 sub-section으로 나뉩니다.
 
 ```
 2. Methodology
@@ -159,7 +158,7 @@ Following [event], ...
 Finally, ...
 ```
 
-이 *시간 신호어*가 단계 순서를 명확히 합니다.
+이 시간 신호어가 단계 순서를 명확히 합니다.
 
 ## Vocabulary — 분석
 
@@ -213,7 +212,7 @@ triplicate. Values are reported as mean ± SD.
 
 ## 자기 분야 동사 보강
 
-각 분야는 고유한 *기술 동사*가 있습니다.
+각 분야는 고유한 기술 동사를 가집니다.
 
 ### 화학 / 재료
 
@@ -245,7 +244,7 @@ detect, observe, simulate, model
 calibrate, normalize, fit, deconvolve
 ```
 
-자기 분야의 *표준 동사 20-30개*를 정리해 두면 Methodology 작성이 훨씬 빠릅니다.
+자기 분야의 표준 동사 20-30개를 정리해 두면 Methodology 작성이 훨씬 빠릅니다.
 
 ## 함정 — 흔한 실수
 
@@ -256,7 +255,7 @@ calibrate, normalize, fit, deconvolve
 선호: We collected samples. They were analyzed using GC-MS.
 ```
 
-같은 연구의 절차는 *모두 과거 시제*.
+같은 연구의 절차는 모두 과거 시제로 통일합니다.
 
 ### 2. Agent 누락의 모호함
 
@@ -275,7 +274,7 @@ calibrate, normalize, fit, deconvolve
 선호: The cells were treated with 10 μM of the drug for 24 h at 37°C.
 ```
 
-*재현 가능*에 필요한 디테일을 빠뜨리지 않습니다.
+재현 가능성에 필요한 디테일을 빠뜨리지 않습니다.
 
 ### 4. 결과 섞임
 
@@ -284,33 +283,33 @@ calibrate, normalize, fit, deconvolve
 선호: We measured the response. [결과는 Section 3 Results에]
 ```
 
-Methodology는 *어떻게 했는지*만. 결과는 *Results*에.
+Methodology에는 어떻게 했는지만 적습니다. 결과는 Results 섹션의 몫입니다.
 
 ## Write Your Methodology — 통합 과제
 
 ```
 1. 자기 실험의 단계를 시간 순서로 적기
-2. 각 단계의 *재료, 기기, 조건*을 표로 정리
-3. 위 template으로 첫 draft
+2. 각 단계의 재료, 기기, 조건을 표로 정리
+3. 위 template으로 첫 draft 작성
 4. 시제 일관성 점검
 5. Agent 명시 점검
-6. 자기 분야 모범 논문과 비교 — 디테일 수준
+6. 자기 분야 모범 논문과 디테일 수준 비교
 7. 수정
 ```
 
 ## 정리
 
-- Methodology의 5 단계 — Materials, Preparation, Procedure, Measurement, Analysis
-- 분야마다 *섹션 제목*과 *sub-section 구조*가 다름
-- 핵심 동사 — *prepare, measure, analyze, perform*
-- *Sequence 신호어*로 단계 순서 명확히
-- 자기 분야의 *표준 동사 목록* 정리가 효율적
-- 함정 — 시제 불일치, agent 모호, 디테일 부족, 결과 섞임
+- Methodology는 다섯 단계로 구성됩니다. Materials, Preparation, Procedure, Measurement, Analysis 순서입니다.
+- 분야마다 섹션 제목과 sub-section 구조가 다릅니다.
+- 핵심 동사로 *prepare*, *measure*, *analyze*, *perform*이 자주 쓰입니다.
+- Sequence 신호어로 단계 순서를 명확히 합니다.
+- 자기 분야의 표준 동사 목록을 정리해 두면 효율적입니다.
+- 흔한 함정은 시제 불일치, agent 모호, 디테일 부족, 결과 섞임입니다.
 
 ## 한국 연구자의 Methodology 함정
 
 ```
-1. 디테일 부족 / 과다 — 재현 가능성 기준
+1. 디테일 부족 또는 과다 — 재현 가능성 기준
 2. Sequence 신호어 누락
 3. Results 정보 섞임
 4. Brand name / 모델 번호 누락
@@ -318,7 +317,7 @@ Methodology는 *어떻게 했는지*만. 결과는 *Results*에.
 
 ## 다음 글 예고
 
-다음은 **Unit 2.2: Methodology의 문법**.
+다음 글은 **Unit 2.2: Methodology의 문법**입니다.
 
 ## 관련 항목
 

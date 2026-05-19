@@ -1,6 +1,6 @@
 ---
 title: "제4장: 문장의 리듬"
-date: 2026-05-12T04:00:00
+date: 2026-05-14T04:00:00
 description: "문장에 생동감을 부여하는 리듬의 원리"
 series: "고종석의 문장"
 seriesOrder: 4

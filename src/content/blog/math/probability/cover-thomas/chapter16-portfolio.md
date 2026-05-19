@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Information Theory and Portfolio Theory"
-date: 2029-01-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "Investment·log-optimal portfolio — Kelly의 일반화."
 series: "Elements of Information Theory"
 seriesOrder: 16

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: I²C 기초 — 2-wire, Open-Drain, Start/Stop, ACK"
-date: 2027-03-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "SDA·SCL 두 선으로 127개 슬레이브. Open-drain + 풀업이 만드는 wired-AND 버스."
 series: "Embedded Protocols 심화"
 seriesOrder: 4

@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: MAP Inference"
-date: 2030-11-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "Max-product·LP relaxation·dual decomposition."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 13

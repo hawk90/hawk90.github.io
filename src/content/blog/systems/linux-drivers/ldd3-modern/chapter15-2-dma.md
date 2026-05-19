@@ -1,6 +1,6 @@
 ---
 title: "Ch 15.2: DMA — Coherent·Streaming·Scatter-Gather"
-date: 2026-06-01T15:30:00
+date: 2026-05-13T15:30:00
 description: "dma_alloc_coherent·dma_map_single·sg_table — 디바이스 ↔ 메모리 직접 전송."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 16

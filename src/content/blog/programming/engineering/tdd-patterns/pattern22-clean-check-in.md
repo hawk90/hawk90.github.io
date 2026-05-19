@@ -1,6 +1,6 @@
 ---
 title: "Pattern 22: Clean Check-in"
-date: 2026-07-01T22:00:00
+date: 2026-05-10T22:00:00
 description: "팀 작업 끝낼 때 — 모든 test green 상태로 커밋. Trunk-based의 기반."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 22

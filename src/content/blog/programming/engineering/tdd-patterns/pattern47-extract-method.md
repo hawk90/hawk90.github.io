@@ -1,6 +1,6 @@
 ---
 title: "Pattern 47: Extract Method (in TDD)"
-date: 2026-07-02T23:00:00
+date: 2026-05-10T23:00:00
 description: "TDD 흐름에서의 Extract Method — Refactor 단계의 핵심 도구."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 47

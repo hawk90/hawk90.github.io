@@ -1,6 +1,6 @@
 ---
 title: "5-04: PCIe Streaming — BAR Type·MSI-X·Kernel Bypass"
-date: 2026-05-20T22:00:00
+date: 2026-05-07T22:00:00
 description: "PCIe로 streaming traffic을 다룰 때 알아야 할 BAR 종류, prefetchable 의미, MSI-X 분산, posted/non-posted 순서, kernel bypass 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 28

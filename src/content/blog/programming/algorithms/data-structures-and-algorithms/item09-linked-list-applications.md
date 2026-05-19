@@ -1,6 +1,6 @@
 ---
 title: "DSA 9: 연결 리스트 응용 — 다항식·GLL"
-date: 2026-03-01T09:00:00
+date: 2026-05-15T09:00:00
 description: "다항식 덧셈, 일반화 연결 리스트(GLL)로 트리·재귀 구조 표현."
 tags: [Data Structure, Algorithm, Linked List, Polynomial]
 series: "Data Structures and Algorithms"

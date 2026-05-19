@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Autotuning"
-date: 2027-08-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Heuristic으로는 부족 — 실측 기반 kernel selection."
 series: "XLA·OpenXLA 심화"
 seriesOrder: 10

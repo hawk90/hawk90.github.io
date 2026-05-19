@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: PS-PL Interface — AXI"
-date: 2026-08-01T03:00:00
+date: 2026-05-19T03:00:00
 description: "AXI4·AXI4-Lite·AXI4-Stream — PS와 PL 사이의 데이터 통로."
 series: "The Zynq Book"
 seriesOrder: 3

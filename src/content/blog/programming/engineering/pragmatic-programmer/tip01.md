@@ -1,6 +1,6 @@
 ---
 title: "Tip 1: Care About Your Craft"
-date: 2026-05-13T01:00:00
+date: 2026-05-11T01:00:00
 description: "잘하려는 마음이 없으면 어떤 도구도 쓸모없다. 책 전체의 토대가 되는 첫 팁."
 series: "The Pragmatic Programmer"
 seriesOrder: 1

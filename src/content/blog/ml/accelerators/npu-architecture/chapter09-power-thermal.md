@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 전력 효율과 열 설계"
-date: 2028-01-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "TOPS/W·열·DVFS — NPU의 진짜 KPI."
 series: "NPU 아키텍처"
 seriesOrder: 9

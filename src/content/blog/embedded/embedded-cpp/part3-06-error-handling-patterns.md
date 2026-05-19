@@ -1,6 +1,6 @@
 ---
 title: "Part 3-06: 에러 처리 패턴"
-date: 2026-05-15T06:00:00
+date: 2026-05-07T06:00:00
 description: "Result types, error chains, exception-free RAII — 실용적 에러 시스템 구축 패턴."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 24

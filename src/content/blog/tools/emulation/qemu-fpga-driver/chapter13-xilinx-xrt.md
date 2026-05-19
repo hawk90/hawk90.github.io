@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Xilinx XRT 스택"
-date: 2025-09-04T13:00:00
+date: 2026-05-17T13:00:00
 description: "Alveo·Versal driver 스택 — userspace runtime + kernel module."
 tags: [QEMU, xrt, alveo, versal, xilinx]
 series: "FPGA Driver via QEMU+VFIO"

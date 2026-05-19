@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: RISC-V virt 머신"
-date: 2025-09-15T03:00:00
+date: 2026-05-17T03:00:00
 description: "QEMU RISC-V virt 머신으로 RV64 리눅스를 부팅한다."
 tags: [QEMU, RISC-V, virt]
 series: "QEMU Embedded Emulation"

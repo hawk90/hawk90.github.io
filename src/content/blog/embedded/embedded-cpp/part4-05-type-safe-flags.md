@@ -1,6 +1,6 @@
 ---
 title: "Part 4-05: Type-safe Flags"
-date: 2026-05-16T05:00:00
+date: 2026-05-07T05:00:00
 description: "enum class + bit operators — type-safe 비트 플래그. 의도하지 않은 변환 차단."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 33

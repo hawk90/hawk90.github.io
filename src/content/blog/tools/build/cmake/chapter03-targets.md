@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 타겟과 라이브러리"
-date: 2025-05-14T03:00:00
+date: 2026-05-17T03:00:00
 description: "Modern CMake의 핵심: 타겟 중심 접근법과 라이브러리 생성."
 tags: [cmake, build, cpp, library, target]
 series: "CMake"

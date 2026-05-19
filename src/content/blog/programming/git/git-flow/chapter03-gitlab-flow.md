@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: GitLab Flow"
-date: 2025-08-10T03:00:00
+date: 2026-05-17T03:00:00
 description: "GitLab Flow — environment 브랜치 / release 브랜치 변형. 두 변형."
 tags: [Git, GitLab Flow]
 series: "Git Flow"

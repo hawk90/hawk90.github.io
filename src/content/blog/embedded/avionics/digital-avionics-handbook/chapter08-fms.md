@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Flight Management Systems"
-date: 2026-05-25T08:00:00
+date: 2026-05-18T08:00:00
 description: "FMS — mission mode·navigation·trajectory management의 통합."
 series: "Digital Avionics Handbook"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 운영 메모리 누수 진단"
-date: 2025-09-07T05:00:00
+date: 2026-05-17T05:00:00
 description: "장기 실행 서비스의 누수 추적. /proc 모니터링, cgroup memory.max, OOM 회피."
 tags: [memory, leak, production, cgroup, oom]
 series: "Memory Diagnostics"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Triton의 위치와 동기"
-date: 2027-09-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Block-level programming — CUDA보다 짧고 cuBLAS만큼 빠르게."
 series: "Triton DSL"
 seriesOrder: 1

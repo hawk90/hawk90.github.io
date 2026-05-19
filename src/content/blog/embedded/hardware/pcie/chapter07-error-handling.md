@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Error Handling — AER"
-date: 2026-06-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "PCIe 에러 핸들링 — AER, Correctable/Uncorrectable 에러, 에러 로깅과 복구"
 series: "PCIe Deep Dive"
 seriesOrder: 7

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: IOMMU와 주소 변환"
-date: 2027-12-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Device가 보는 주소 ↔ physical 주소 — IOMMU의 역할."
 series: "NPU 드라이버 개발"
 seriesOrder: 3

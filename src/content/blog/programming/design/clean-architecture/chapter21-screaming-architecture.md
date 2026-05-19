@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: 비명 지르는 아키텍처"
-date: 2025-06-01T21:00:00
+date: 2026-05-01T21:00:00
 description: "디렉터리 구조만 봐도 시스템이 무엇을 하는지 즉시 외쳐야 한다. 'Rails 프로젝트'가 아니라 '병원 시스템'이라고."
 tags: [Architecture, ScreamingArchitecture, DomainDriven]
 series: "Clean Architecture"

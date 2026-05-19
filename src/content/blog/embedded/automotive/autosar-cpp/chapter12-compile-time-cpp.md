@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Compile-time C++ — constexpr, type traits, concept 심화"
-date: 2025-09-15T13:00:00
+date: 2026-05-18T13:00:00
 description: "C++의 컴파일 시 계산·검증 도구 총정리 — constexpr 진화(C++11→23), type traits 카탈로그, SFINAE에서 concept으로, 안전 critical 적용."
 tags: [autosar, cpp, constexpr, type-traits, sfinae, concept, compile-time, template]
 series: "AUTOSAR C++14"

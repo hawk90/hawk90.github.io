@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: I²C 디버깅 — Stuck Bus, 풀업, Level Shift, 분석기"
-date: 2027-03-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "현장에서 만나는 I²C 버그 7가지 시그니처와 처방. 그리고 로직 분석기 사용법."
 series: "Embedded Protocols 심화"
 seriesOrder: 6

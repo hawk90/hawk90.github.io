@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: TSan과 데이터 레이스 디버깅"
-date: 2026-05-15T04:00:00
+date: 2026-05-17T04:00:00
 description: "ThreadSanitizer로 멀티스레드 버그 추적 — happens-before 모델, false positive, atomic·mutex 통합."
 tags: [Sanitizer, TSan, ThreadSanitizer, Concurrency, DataRace, C, C++]
 series: "Sanitizers"

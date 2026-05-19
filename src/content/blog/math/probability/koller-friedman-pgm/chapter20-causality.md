@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Causality"
-date: 2030-11-01T20:00:00
+date: 2026-05-16T20:00:00
 description: "Causal Bayes net·intervention·counterfactual — Pearl과 보완 시각."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 20

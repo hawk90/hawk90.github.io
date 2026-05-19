@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: NPU·GPU에서의 활용"
-date: 2027-01-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Weight·activation·KV cache — HBM 자리잡기."
 series: "HBM·GDDR 심화"
 seriesOrder: 8

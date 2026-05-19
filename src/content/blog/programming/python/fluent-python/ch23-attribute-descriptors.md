@@ -1,6 +1,6 @@
 ---
 title: "Ch 23: Attribute Descriptors"
-date: 2026-05-16T23:00:00
+date: 2026-05-15T23:00:00
 description: "디스크립터 — property 내부, 클래스 단위 속성 검증."
 series: "Fluent Python"
 seriesOrder: 23

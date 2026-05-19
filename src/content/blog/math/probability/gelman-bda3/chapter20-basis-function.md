@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Basis Function Models"
-date: 2030-02-01T20:00:00
+date: 2026-05-16T20:00:00
 description: "Spline·wavelet·polynomial — flexible Bayesian regression."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 20

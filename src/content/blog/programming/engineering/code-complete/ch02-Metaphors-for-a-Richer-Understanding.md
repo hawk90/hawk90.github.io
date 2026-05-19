@@ -1,6 +1,6 @@
 ---
 title: "Chapter 2: Metaphors for a Richer Understanding"
-date: 2025-06-20T02:00:00
+date: 2026-05-11T02:00:00
 description: "메타포는 알고리즘이 아니라 휴리스틱. 다섯 가지 비유 — 글쓰기, 농사, 진주(accretion), 건설, 지적 도구상자."
 series: "Code Complete"
 seriesOrder: 2

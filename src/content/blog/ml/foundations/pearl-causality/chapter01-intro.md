@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction to Probabilities, Graphs, and Causal Models"
-date: 2029-12-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Statistics 너머 causality — Pearl 캠페인의 시작."
 series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 1

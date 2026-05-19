@@ -1,6 +1,6 @@
 ---
 title: "Chapter 1: The Transaction"
-date: 2026-05-18T01:00:00
+date: 2026-05-14T01:00:00
 description: "글쓰기는 작가와 독자 사이의 개인적 거래. 좋은 글에 정답은 없지만, 작가의 진심은 공통점입니다."
 series: "On Writing Well"
 seriesOrder: 1

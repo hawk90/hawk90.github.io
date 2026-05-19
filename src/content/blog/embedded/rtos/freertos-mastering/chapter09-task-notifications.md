@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Task Notifications"
-date: 2026-07-01T09:00:00
+date: 2026-05-09T09:00:00
 description: "xTaskNotify·NotifyValue — 큐/세마포보다 가볍고 빠른 알림 방식."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 9

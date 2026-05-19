@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Exemplar-based Methods"
-date: 2029-05-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "K-NN·kernel density·sample-based의 본질."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 16

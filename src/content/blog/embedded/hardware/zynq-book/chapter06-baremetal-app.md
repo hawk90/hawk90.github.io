@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Bare-metal Application Development"
-date: 2026-08-01T06:00:00
+date: 2026-05-19T06:00:00
 description: "standalone BSP·Xil*** API — RTOS 없이 Zynq 위에서 코드를 돌려보자."
 series: "The Zynq Book"
 seriesOrder: 6

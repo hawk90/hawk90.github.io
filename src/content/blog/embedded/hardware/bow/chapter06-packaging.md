@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 패키징 요구사항"
-date: 2027-02-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Substrate·bump·routing — BoW를 양산하는 조건."
 series: "BoW 개요"
 seriesOrder: 6

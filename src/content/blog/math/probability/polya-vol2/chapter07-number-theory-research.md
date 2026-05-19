@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Inductive Research in Number Theory"
-date: 2029-09-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "수론 연구의 inductive 사례 — Gauss·Riemann."
 series: "Mathematics and Plausible Reasoning, Vol II"
 seriesOrder: 7

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 4: Actors"
-date: 2026-05-22T04:00:00
+date: 2026-05-06T04:00:00
 description: "Erlang/Elixir의 Actor 모델 — 격리된 상태, 메시지 패싱, 슈퍼바이저, let it crash 철학."
 series: "Seven Concurrency Models in Seven Weeks"
 seriesOrder: 4

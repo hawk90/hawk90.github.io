@@ -1,6 +1,6 @@
 ---
 title: "Chapter 13: Concurrent Hashing과 자연스러운 병렬성"
-date: 2026-05-12T13:00:00
+date: 2026-05-06T13:00:00
 description: "Closed / Open / Lock-Free 해시 테이블. Resizing의 동시성 문제. Split-Ordered List."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 13

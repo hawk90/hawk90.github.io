@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Linux 드라이버 개요"
-date: 2026-07-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Linux 커널의 NVMe 드라이버 구조 (nvme-core, nvme-pci)를 분석한다"
 series: "NVMe Deep Dive"
 seriesOrder: 11

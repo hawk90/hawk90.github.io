@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Imperfect Experiments — Bounding Effects"
-date: 2029-12-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Non-compliance·partial identification — 실험 한계 다루기."
 series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 8

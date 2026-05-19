@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Posterior Approximation with Gibbs Sampler"
-date: 2030-06-01T06:00:00
+date: 2026-05-15T06:00:00
 description: "Conditional sampling — Gibbs sampler 본격 도입."
 series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 6

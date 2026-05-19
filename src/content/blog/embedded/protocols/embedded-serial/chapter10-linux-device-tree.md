@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Linux Device Tree — SPI·I²C·UART 선언"
-date: 2027-03-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "DTS 노드로 직렬 버스와 슬레이브 디바이스 매핑. Pinctrl·clocks·DMA까지."
 series: "Embedded Protocols 심화"
 seriesOrder: 10

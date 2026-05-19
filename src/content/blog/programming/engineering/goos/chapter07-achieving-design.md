@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Achieving Object-Oriented Design"
-date: 2025-10-10T07:00:00
+date: 2026-05-10T07:00:00
 description: "TDD가 디자인을 이끄는 방법 — 인터페이스 발견, 역할 진화."
 tags: [TDD, Design]
 series: "Growing Object-Oriented Software"

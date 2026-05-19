@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Undirected Graphical Models"
-date: 2030-11-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Markov Random Field·Hammersley-Clifford·CRF."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 4

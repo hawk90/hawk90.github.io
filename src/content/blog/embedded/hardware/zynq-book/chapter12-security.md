@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Security — Secure Boot·TrustZone"
-date: 2026-08-01T12:00:00
+date: 2026-05-19T12:00:00
 description: "RSA·AES·TrustZone — Zynq의 보안 부팅과 격리 모델."
 series: "The Zynq Book"
 seriesOrder: 12

@@ -1,6 +1,6 @@
 ---
 title: "제12장: 품위"
-date: 2026-05-12T12:00:00
+date: 2026-05-14T12:00:00
 description: "글의 격을 높이는 품위 있는 문장"
 series: "고종석의 문장"
 seriesOrder: 12

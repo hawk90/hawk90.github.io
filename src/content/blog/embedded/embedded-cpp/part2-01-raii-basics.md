@@ -1,6 +1,6 @@
 ---
 title: "Part 2-01: RAII 기초"
-date: 2026-05-14T01:00:00
+date: 2026-05-07T01:00:00
 description: "Resource Acquisition Is Initialization — 자원 생명주기를 객체 생명주기에 묶는 C++의 핵심 idiom."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 9

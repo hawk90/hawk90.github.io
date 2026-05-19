@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Queue Management"
-date: 2026-07-01T04:00:00
+date: 2026-05-09T04:00:00
 description: "xQueueSend·xQueueReceive — 태스크 간 메시지 전달의 기본."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 4

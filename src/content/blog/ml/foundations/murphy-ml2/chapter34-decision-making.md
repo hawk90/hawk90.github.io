@@ -1,6 +1,6 @@
 ---
 title: "Ch 34: Decision Making under Uncertainty"
-date: 2029-06-02T10:00:00
+date: 2026-05-16T10:00:00
 description: "Bandit·POMDP·exploration-exploitation."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 34

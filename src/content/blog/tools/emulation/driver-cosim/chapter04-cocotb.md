@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: CocoTB — Python Testbench"
-date: 2025-09-09T04:00:00
+date: 2026-05-17T04:00:00
 description: "Python coroutine으로 RTL testbench — productivity gain."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 4

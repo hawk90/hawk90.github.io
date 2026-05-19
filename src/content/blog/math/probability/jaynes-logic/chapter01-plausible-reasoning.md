@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Plausible Reasoning"
-date: 2029-04-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Aristotle 논리의 확장 — 부분 정보 하의 추론."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 1

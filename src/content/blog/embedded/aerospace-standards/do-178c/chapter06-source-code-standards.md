@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Source Code Standards & MISRA C 적용"
-date: 2025-09-25T07:00:00
+date: 2026-05-18T07:00:00
 description: "SCS 문서 구성, MISRA C 적용, 명명 규칙, defensive programming, LLR ↔ Code traceability."
 tags: [do-178c, source-code, scs, misra, defensive, traceability, code-review]
 series: "DO-178C"

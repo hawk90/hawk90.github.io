@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Group Comparisons and Hierarchical Modeling"
-date: 2030-06-01T08:00:00
+date: 2026-05-15T08:00:00
 description: "Multi-group·varying parameters·shrinkage 효과."
 series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 8

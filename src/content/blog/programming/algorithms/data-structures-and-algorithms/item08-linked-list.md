@@ -1,6 +1,6 @@
 ---
 title: "DSA 8: 연결 리스트 — 단일·이중·원형"
-date: 2026-03-01T08:00:00
+date: 2026-05-15T08:00:00
 description: "노드와 포인터로 연결 — 동적 크기, 중간 삽입/삭제 O(1)."
 tags: [Data Structure, Algorithm, Linked List]
 series: "Data Structures and Algorithms"

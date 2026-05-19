@@ -1,6 +1,6 @@
 ---
 title: "Ch 5.2: Link Layer — CRC·FEC·Retry"
-date: 2026-01-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "스펙 §4 — link reliability mechanisms."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 13

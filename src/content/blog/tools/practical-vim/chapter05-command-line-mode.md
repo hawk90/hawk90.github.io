@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Command-Line Mode"
-date: 2025-08-15T05:00:00
+date: 2026-05-17T05:00:00
 description: ": ex 명령 — 범위 + 명령. q: 명령 히스토리. range / global."
 tags: [Vim, Ex Command]
 series: "Practical Vim"

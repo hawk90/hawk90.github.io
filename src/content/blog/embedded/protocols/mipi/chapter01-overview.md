@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: MIPI Alliance — 모바일에서 자동차·로봇까지"
-date: 2027-05-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "2003년 모바일을 위해 시작한 표준 컨소시엄. 카메라·디스플레이·디버그·전원·터치까지 다 가짐."
 series: "MIPI 심화"
 seriesOrder: 1

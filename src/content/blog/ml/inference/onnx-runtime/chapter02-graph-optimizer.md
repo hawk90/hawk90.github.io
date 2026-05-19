@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Graph Optimizer"
-date: 2028-07-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Basic·Extended·Layout — 3-tier graph optimization."
 series: "ONNX Runtime 심화"
 seriesOrder: 2

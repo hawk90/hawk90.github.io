@@ -1,6 +1,6 @@
 ---
 title: "3-05: SIMD 활용 — Intrinsics·Auto-Vectorization·OpenMP SIMD"
-date: 2026-05-20T12:00:00
+date: 2026-05-07T12:00:00
 description: "Auto-vectorize, intrinsics, OpenMP SIMD pragma 세 갈래를 데이터 layout과 함께 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 17

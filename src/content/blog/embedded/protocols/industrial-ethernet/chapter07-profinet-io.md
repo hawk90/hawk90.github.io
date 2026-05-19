@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: PROFINET IO — Controller·Device·Supervisor"
-date: 2027-06-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "PROFINET IO 통신 모델·RPC·alarm."
 series: "Industrial Ethernet 심화"
 seriesOrder: 7

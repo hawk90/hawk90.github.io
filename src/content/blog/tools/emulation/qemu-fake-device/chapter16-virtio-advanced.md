@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: VirtIO 디바이스 심화"
-date: 2025-09-01T16:00:00
+date: 2026-05-17T16:00:00
 description: "Split·packed virtqueue·indirect descriptor — VirtIO 성능 layer."
 tags: [QEMU, virtio, packed-ring, indirect-descriptor]
 series: "QEMU Fake Device Driver"

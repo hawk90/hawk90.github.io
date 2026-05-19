@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: BAR & MMIO — 메모리 매핑"
-date: 2026-06-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Base Address Register 타입과 Address Translation — Memory BAR, I/O BAR, 64-bit BAR, Prefetchable"
 series: "PCIe Deep Dive"
 seriesOrder: 4

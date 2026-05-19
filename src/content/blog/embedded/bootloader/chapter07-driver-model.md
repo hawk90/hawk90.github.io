@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Driver Model — uclass, driver, device"
-date: 2026-05-18T07:00:00
+date: 2026-05-09T07:00:00
 description: "U-Boot Driver Model — uclass·driver·udevice 구조와 DT 기반 driver binding."
 series: "Bootloader Internals"
 seriesOrder: 7

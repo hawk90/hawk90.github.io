@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: ONNX Runtime 기초"
-date: 2028-03-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "InferenceSession·SessionOptions·EP — ORT 사용 흐름."
 series: "ONNX 실전"
 seriesOrder: 3

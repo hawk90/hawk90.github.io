@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Laws of Large Numbers"
-date: 2030-07-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Weak·Strong LLN — i.i.d. 평균의 수렴."
 series: "Probability: Theory and Examples"
 seriesOrder: 2

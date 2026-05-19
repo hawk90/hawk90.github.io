@@ -1,6 +1,6 @@
 ---
 title: "Unit 4.2: Discussion의 문법"
-date: 2026-05-19T09:00:00
+date: 2026-05-14T09:00:00
 description: "Hedging의 미묘한 어휘 — 자신 있게 불확실하라. 시제 결정, modal verb, 거리 두기 표현."
 series: "Science Research Writing"
 seriesOrder: 42
@@ -8,16 +8,15 @@ tags: [writing, academic, hedging, discussion, modals]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: true
 ---
 
-Discussion의 문법은 *Hedging(헤지)*에 집중됩니다. 자기 결론의 강도를 *데이터가 옹호할 만큼만* 표현하는 것이 학술 영어의 어조입니다.
+Discussion의 문법은 *Hedging*(헤지)에 집중됩니다. 자기 결론의 강도를 데이터가 옹호할 만큼만 표현하는 것이 학술 영어의 어조입니다.
 
 > Be confidently uncertain. — Skelton (1988)
 
 ## Discussion의 시제
 
-Discussion은 *시제가 가장 자주 바뀌는* 자리입니다.
+Discussion은 시제가 가장 자주 바뀌는 자리입니다.
 
 ```
 Past — 자기 연구의 결과:
@@ -36,7 +35,7 @@ Past — 다른 특정 연구:
    Smith (2020) reported a comparable pattern.
 ```
 
-한 단락에 *네 시제*가 모두 등장할 수 있습니다.
+한 단락에 네 시제가 모두 등장할 수 있습니다.
 
 ```
 Our analysis revealed [Past] a strong relationship. This finding
@@ -45,7 +44,7 @@ found [Past] a similar pattern in adults. More recent studies have
 extended [Present Perfect] this work to younger populations.
 ```
 
-각 시제가 *다른 시간 / 맥락*을 신호합니다.
+각 시제가 다른 시간이나 맥락을 신호합니다.
 
 ## Hedging — 핵심 도구
 
@@ -69,7 +68,7 @@ This pattern could indicate that caffeine might contribute to insomnia
 in some individuals.
 ```
 
-자기 데이터의 *결정성*에 맞춰 modal을 선택합니다.
+자기 데이터의 결정성에 맞춰 modal을 선택합니다.
 
 ### Hedging 동사
 
@@ -115,7 +114,7 @@ The data suggest that ...        ← 부드러움
 
 ## Distance — 거리 두기
 
-자기 주장과 *데이터 사이*에 거리를 만드는 기법.
+자기 주장과 데이터 사이에 거리를 만드는 기법입니다.
 
 ### Appear / Seem
 
@@ -133,7 +132,7 @@ According to our analysis, it may be that ...
 In light of these findings, we propose ...
 ```
 
-이런 표현이 *조건부*를 명시합니다.
+이런 표현이 조건부를 명시합니다.
 
 ### Limit (한정)
 
@@ -143,11 +142,11 @@ Under the conditions tested, ...
 For the population examined, ...
 ```
 
-주장의 *적용 범위*를 명시합니다.
+주장의 적용 범위를 명시합니다.
 
 ## Generalization — 일반화 약화
 
-자기 데이터에서 *얼마나 일반화*할지 결정해야 합니다.
+자기 데이터에서 얼마나 일반화할지 결정해야 합니다.
 
 ### 약화 동사 — Appear / Seem / Tend
 
@@ -158,7 +157,7 @@ For the population examined, ...
         Children living in poverty seem to do poorly in school.
 ```
 
-*Tend to*, *appear to*, *seem to*가 *모든 ~*을 *경향성*으로 약화시킵니다.
+*Tend to*, *appear to*, *seem to*가 "모든 ~"을 경향성으로 약화시킵니다.
 
 ### 주어 한정
 
@@ -182,7 +181,7 @@ Apart from / Except for ...
 
 ## Combined Hedging — 조합
 
-여러 헤지를 *동시에* 쓸 수 있습니다.
+여러 헤지를 동시에 쓸 수 있습니다.
 
 ```
 강한 주장:
@@ -210,11 +209,11 @@ quality.
 → 거의 아무 말도 하지 않음
 ```
 
-너무 신중하면 *책임 회피*가 됩니다. *적절한* 강도가 필요합니다.
+너무 신중하면 책임 회피가 됩니다. 적절한 강도가 필요합니다.
 
 ## Causal Language — 인과 vs 상관
 
-Discussion에서 *상관*과 *인과*를 구분하는 것이 학술적 정직성입니다.
+Discussion에서 상관과 인과를 구분하는 것이 학술적 정직성입니다.
 
 ### Strong (인과)
 
@@ -241,7 +240,7 @@ A and B co-occur.
 A is linked to B.
 ```
 
-자기 연구가 *상관*만 측정했다면 *causes*가 아니라 *is associated with*나 *may contribute to*를 씁니다.
+자기 연구가 상관만 측정했다면 *causes*가 아니라 *is associated with*나 *may contribute to*를 씁니다.
 
 ## 한계 인정의 문법
 
@@ -253,7 +252,7 @@ The cross-sectional design precludes causal inference.
 Our findings may not generalize beyond the tested population.
 ```
 
-한계는 *지금도 유효*하므로 Present.
+한계는 지금도 유효하므로 Present를 씁니다.
 
 ### Modal 사용
 
@@ -275,7 +274,7 @@ The results suggest that policy makers should consider ...
 This work contributes to our understanding of ...
 ```
 
-함의는 *현재 / 미래에 유효*하므로 Present.
+함의는 현재와 미래에 유효하므로 Present를 씁니다.
 
 ### Future 권장
 
@@ -285,7 +284,7 @@ Replication studies are needed to ...
 Longitudinal designs could clarify ...
 ```
 
-다음 연구 권장에 *Future*나 *should*를 씁니다.
+다음 연구 권장에 Future나 *should*를 씁니다.
 
 ## 사례 — 한 단락
 
@@ -308,36 +307,36 @@ the temporal relationship.
 ```
 
 분석:
-- *indicate, is associated with* — 적절한 강도 (중간)
-- *suggesting that* — 부드러운 인과
-- *may indicate* — modal + 약한 동사 (이중 헤지)
-- *should be acknowledged* — 한계 도입
-- *precludes* — 강한 표현 (방법론적 사실)
-- *Despite these limitations* — 균형
-- *should employ* — 권장
+- *indicate*, *is associated with* — 적절한 강도(중간)입니다.
+- *suggesting that* — 부드러운 인과입니다.
+- *may indicate* — modal과 약한 동사를 결합한 이중 헤지입니다.
+- *should be acknowledged* — 한계 도입의 신호입니다.
+- *precludes* — 강한 표현으로 방법론적 사실을 단언합니다.
+- *Despite these limitations* — 균형을 잡아 줍니다.
+- *should employ* — 다음 연구 권장입니다.
 
-여러 헤지가 *섞여* 자연스럽게 흐릅니다.
+여러 헤지가 섞여 자연스럽게 흐릅니다.
 
 ## 자기 점검
 
 ```
 □ Modal verb가 데이터의 강도와 맞는가?
 □ 동사가 데이터의 결정성과 맞는가?
-□ 상관과 인과가 *적절히* 구분되었는가?
-□ 헤지가 *과도하지* 않은가?
+□ 상관과 인과가 적절히 구분되었는가?
+□ 헤지가 과도하지 않은가?
 □ 한계가 명확한 시제로 표현되었는가?
-□ 함의가 *적절한 범위*에 한정되었는가?
+□ 함의가 적절한 범위에 한정되었는가?
 ```
 
 ## 정리
 
-- Discussion의 시제는 *자주 바뀜* — Past (자기 결과), Present (일반), Present Perfect (기존 흐름)
-- Hedging의 네 도구 — Modal, 동사, 부사, 명사
-- *Distance* 표현 — appear, seem, based on, within the scope
-- 일반화 약화 — *tend to*, 주어 한정, 예외 추가
-- *Causal vs Correlational* 언어 구분
-- 한계는 *Present*, 함의는 *Present + Future*
-- 과한 헤지는 *책임 회피* — 적절한 강도
+- Discussion의 시제는 자주 바뀝니다. Past(자기 결과), Present(일반), Present Perfect(기존 흐름)가 섞입니다.
+- Hedging의 네 도구는 Modal, 동사, 부사, 명사입니다.
+- Distance 표현으로 *appear*, *seem*, *based on*, *within the scope*를 씁니다.
+- 일반화 약화에는 *tend to*, 주어 한정, 예외 추가가 있습니다.
+- Causal과 Correlational 언어를 구분합니다.
+- 한계는 Present로, 함의는 Present와 Future로 씁니다.
+- 과한 헤지는 책임 회피가 됩니다. 적절한 강도가 필요합니다.
 
 ## 한국 연구자의 Discussion Grammar 함정
 
@@ -345,13 +344,13 @@ the temporal relationship.
 1. 헤지 부족 — 강한 단언
 2. 헤지 과다 — 여러 헤지 중첩
 3. 시제 흔들림
-4. 인과 / 상관 표현 혼동
-5. 함의 시제 약함
+4. 인과와 상관 표현 혼동
+5. 함의 시제가 약함
 ```
 
 ## 다음 Unit 예고
 
-다음은 **Unit 5: Writing the Abstract and Title**.
+다음 Unit은 **Unit 5: Writing the Abstract and Title**입니다.
 
 ## 관련 항목
 

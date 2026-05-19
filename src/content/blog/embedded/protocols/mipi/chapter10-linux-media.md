@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Linux Media — V4L2 카메라, DRM/KMS 디스플레이"
-date: 2027-05-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "V4L2 (capture) + DRM/KMS (display) — MIPI 디바이스의 Linux 통합 모델."
 series: "MIPI 심화"
 seriesOrder: 10

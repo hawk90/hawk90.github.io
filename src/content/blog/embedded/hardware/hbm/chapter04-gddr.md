@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: GDDR6·GDDR6X·GDDR7"
-date: 2027-01-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "고속 그래픽 메모리 — clock·signaling·PAM의 진화."
 series: "HBM·GDDR 심화"
 seriesOrder: 4

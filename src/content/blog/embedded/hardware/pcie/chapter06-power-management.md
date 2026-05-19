@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Power Management — ASPM과 L-states"
-date: 2026-06-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "PCIe 전력 관리 — ASPM, L0s/L1/L2/L3 상태, D-states, 링크 전력 최적화"
 series: "PCIe Deep Dive"
 seriesOrder: 6

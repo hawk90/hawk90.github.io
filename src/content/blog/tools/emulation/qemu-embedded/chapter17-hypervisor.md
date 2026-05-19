@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: ARM Hypervisor (EL2)"
-date: 2025-09-02T17:00:00
+date: 2026-05-17T17:00:00
 description: "KVM·Xen nested — ARM virtualization on QEMU."
 tags: [QEMU, hypervisor, el2, kvm-arm, xen]
 series: "QEMU Embedded Emulation"

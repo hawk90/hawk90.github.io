@@ -1,6 +1,6 @@
 ---
 title: "Pattern 6: Encapsulate Variable"
-date: 2026-06-01T06:00:00
+date: 2026-05-02T06:00:00
 description: "데이터를 함수 뒤로 숨겨 모든 접근에 hook을 걸 수 있게 한다."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 6

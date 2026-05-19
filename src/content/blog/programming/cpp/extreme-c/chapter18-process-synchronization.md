@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: Process Synchronization"
-date: 2025-06-15T18:00:00
+date: 2026-05-05T18:00:00
 description: "프로세스 간 동기화 — named semaphore, shared mutex, file lock."
 tags: [C, Process, Synchronization, IPC]
 series: "전문가를 위한 C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: The Golem of Prague"
-date: 2030-03-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Model은 golem — 멍청하지만 강력하다."
 series: "Statistical Rethinking"
 seriesOrder: 1

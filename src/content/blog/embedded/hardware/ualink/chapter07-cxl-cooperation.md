@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: CXL과의 협력 — 메모리 + GPU 연결"
-date: 2026-12-01T07:00:00
+date: 2026-05-19T07:00:00
 description: "UALink는 가속기 간, CXL은 host-attached memory — 두 역할 구분."
 series: "UALink 심화"
 seriesOrder: 7

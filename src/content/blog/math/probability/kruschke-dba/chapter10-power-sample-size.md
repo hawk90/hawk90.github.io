@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Goals, Power, and Sample Size"
-date: 2030-05-01T10:00:00
+date: 2026-05-15T10:00:00
 description: "Bayesian power·precision-based sample size."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 10

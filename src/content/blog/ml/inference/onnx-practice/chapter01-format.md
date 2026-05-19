@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: ONNX 포맷 구조"
-date: 2028-03-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Protobuf·Graph·Node — ONNX file 안에 무엇이."
 series: "ONNX 실전"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Modal and Distributional Approximations"
-date: 2030-02-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "Laplace·VI·EP·INLA — MCMC 대안의 deterministic approx."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 13

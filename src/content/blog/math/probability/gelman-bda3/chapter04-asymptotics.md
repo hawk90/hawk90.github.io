@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Asymptotics and Connections to Non-Bayesian"
-date: 2030-02-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Posterior가 점근적으로 normal — Bernstein-von Mises."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 4

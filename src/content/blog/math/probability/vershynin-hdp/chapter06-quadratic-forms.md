@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Quadratic Forms, Symmetrization, Contraction"
-date: 2030-10-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Hanson-Wright·Rademacher·symmetrization 기법."
 series: "High-Dimensional Probability"
 seriesOrder: 6

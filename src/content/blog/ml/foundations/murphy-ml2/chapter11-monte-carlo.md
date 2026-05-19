@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Monte Carlo Inference"
-date: 2029-06-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Importance·rejection·SMC 기반·variance reduction."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 11

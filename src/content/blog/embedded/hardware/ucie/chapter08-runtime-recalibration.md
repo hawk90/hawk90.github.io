@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 런타임 재교정과 RAS"
-date: 2026-11-01T08:00:00
+date: 2026-05-19T08:00:00
 description: "Drift·aging·thermal — 시스템이 살아 있는 동안 link를 유지하는 기술."
 series: "UCIe 심화"
 seriesOrder: 8

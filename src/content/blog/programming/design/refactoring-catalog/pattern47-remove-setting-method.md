@@ -1,6 +1,6 @@
 ---
 title: "Pattern 47: Remove Setting Method"
-date: 2026-06-02T23:00:00
+date: 2026-05-02T23:00:00
 description: "Constructor 이후 변경되면 안 되는 field — setter를 제거해 immutable로."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 47

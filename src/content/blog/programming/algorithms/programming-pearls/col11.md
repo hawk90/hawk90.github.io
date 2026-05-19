@@ -1,6 +1,6 @@
 ---
 title: "Column 11: Sorting"
-date: 2026-05-13T11:00:00
+date: 2026-05-11T11:00:00
 description: "Sorting"
 series: "Programming Pearls"
 seriesOrder: 11

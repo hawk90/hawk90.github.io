@@ -1,6 +1,6 @@
 ---
 title: "2-03: Priority Inversion 진단·예방 — Mars Pathfinder Lesson"
-date: 2026-05-20T04:00:00
+date: 2026-05-07T04:00:00
 description: "Priority Inversion 발생 시나리오. Mars Pathfinder 사례. PI mutex, Priority Ceiling."
 series: "Modern Embedded Recipes"
 seriesOrder: 9

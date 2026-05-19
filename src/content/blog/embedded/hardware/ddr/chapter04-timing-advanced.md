@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 고급 타이밍 — tRFC, tREFI, tWR, tWTR"
-date: 2026-08-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "DDR 메모리의 고급 타이밍 파라미터: Refresh, Write Recovery, Read-Write 전환 타이밍"
 series: "DDR Memory Deep Dive"
 seriesOrder: 4

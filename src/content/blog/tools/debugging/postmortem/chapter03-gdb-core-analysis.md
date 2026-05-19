@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: GDB로 Core 분석"
-date: 2025-09-05T03:00:00
+date: 2026-05-17T03:00:00
 description: "core 열기, siginfo 해독, 콜스택 분석, 변수 검사, 자주 만나는 패턴."
 tags: [gdb, core-dump, postmortem, siginfo]
 series: "Postmortem Debugging"

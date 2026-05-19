@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Model Conversion — coremltools"
-date: 2028-08-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "PyTorch·TF → MIL → .mlpackage 변환 흐름."
 series: "Core ML 심화"
 seriesOrder: 3

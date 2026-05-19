@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Data Class Builders"
-date: 2026-05-16T05:00:00
+date: 2026-05-15T05:00:00
 description: "데이터 클래스 — namedtuple, typing.NamedTuple, @dataclass."
 series: "Fluent Python"
 seriesOrder: 5

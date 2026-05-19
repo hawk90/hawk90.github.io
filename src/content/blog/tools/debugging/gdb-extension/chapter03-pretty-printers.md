@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Pretty-Printer 깊이"
-date: 2025-09-03T03:00:00
+date: 2026-05-17T03:00:00
 description: "to_string / children / display_hint, MI 출력, auto-load, libstdc++ printer 분석."
 tags: [gdb, python, pretty-printer, stl]
 series: "GDB Extension and IDE"

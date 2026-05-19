@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: CAN FD 프레임 상세 — 비트별 분석, ISO vs Non-ISO"
-date: 2027-04-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "FDF·res·BRS·ESI 4 새 비트와 그 위치. ISO 11898-1:2015 vs Non-ISO (Bosch 원본) 호환성."
 series: "CAN Bus 심화"
 seriesOrder: 7

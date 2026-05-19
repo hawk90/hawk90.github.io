@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Probability, Entropy, and Inference"
-date: 2029-02-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "확률 = 믿음의 정도 — Cox·Jaynes 라인의 출발."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 2

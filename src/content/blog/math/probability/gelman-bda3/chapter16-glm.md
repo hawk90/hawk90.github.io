@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Generalized Linear Models"
-date: 2030-02-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "Logistic·Poisson·ordinal — Bayesian GLM 전반."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 16

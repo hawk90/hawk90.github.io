@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Markov Chains"
-date: 2030-07-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Stationary distribution·mixing·ergodic — Markov chain의 핵심."
 series: "Probability: Theory and Examples"
 seriesOrder: 6

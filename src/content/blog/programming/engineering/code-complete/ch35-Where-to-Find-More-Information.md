@@ -1,6 +1,6 @@
 ---
 title: "Chapter 35: Where to Find More Information"
-date: 2025-06-21T11:00:00
+date: 2026-05-11T11:00:00
 description: "다음 단계 — McConnell이 추천하는 더 깊은 자원들. 책·논문·도구."
 series: "Code Complete"
 seriesOrder: 35

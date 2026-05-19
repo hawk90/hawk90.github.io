@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Thermal과 watchdog"
-date: 2026-05-20T14:00:00
+date: 2026-05-09T14:00:00
 description: "보드 안전 장치 — thermal zone과 trip point, hardware watchdog 통합."
 series: "BSP Development"
 seriesOrder: 14

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: EtherCAT 아키텍처 — Processing on the Fly"
-date: 2027-06-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Slave가 프레임을 통과시키면서 읽고 쓴다 — EtherCAT 핵심."
 series: "Industrial Ethernet 심화"
 seriesOrder: 3

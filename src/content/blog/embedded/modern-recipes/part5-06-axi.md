@@ -1,6 +1,6 @@
 ---
 title: "5-06: AXI 인터페이스 — AXI4·AXI4-Lite·AXI-Stream 골라 쓰기"
-date: 2026-05-21T00:00:00
+date: 2026-05-07T00:00:00
 description: "AMBA AXI4·AXI4-Lite·AXI-Stream을 역할별로 구분해 사용하는 법과 burst·outstanding·deadlock 회피를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 30

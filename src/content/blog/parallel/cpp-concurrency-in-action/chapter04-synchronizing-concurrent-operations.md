@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Synchronizing concurrent operations"
-date: 2026-05-20T04:00:00
+date: 2026-05-06T04:00:00
 description: "condition variable, future/promise/async, std::latch, std::barrier (C++20)."
 tags: [C++, Concurrency, Condition Variable, Future, Latch, Barrier]
 series: "C++ Concurrency in Action"

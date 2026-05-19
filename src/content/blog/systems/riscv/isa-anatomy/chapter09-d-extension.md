@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 배정밀도 부동소수점 (D)"
-date: 2025-05-18T09:00:00
+date: 2026-05-17T09:00:00
 description: "RISC-V D 확장 — F 확장과의 관계, 64비트 FP 연산, NaN 처리를 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 9

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: pytest 첫걸음"
-date: 2026-05-22T02:00:00
+date: 2026-05-10T02:00:00
 description: "test discovery·assert rewriting·실행 옵션의 기본."
 series: "pytest 심화"
 seriesOrder: 2

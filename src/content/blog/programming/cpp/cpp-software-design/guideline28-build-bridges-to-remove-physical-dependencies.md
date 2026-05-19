@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 28: 물리적 의존성 제거에 Bridge를 사용하라"
-date: 2026-05-14T04:00:00
+date: 2026-05-02T04:00:00
 description: "Bridge와 Pimpl 패턴은 추상과 구현을 분리해 헤더 의존성을 격리하고 ABI를 안정화한다. 컴파일 시간을 줄이고 빌드 자유도를 높이는 핵심 도구다."
 tags: [C++, Software Design, Bridge, Pimpl]
 series: "C++ Software Design"

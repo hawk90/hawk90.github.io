@@ -1,6 +1,6 @@
 ---
 title: "항목 26: 변수 정의는 가능한 한 늦춰라"
-date: 2025-02-02T02:00:00
+date: 2026-05-04T02:00:00
 description: "사용 직전에 정의 — 불필요한 생성·소멸 회피, 의미 있는 값으로 초기화, 루프 안/밖의 트레이드오프."
 tags: [C++, Effective C++, Performance, Initialization]
 series: "Effective C++"

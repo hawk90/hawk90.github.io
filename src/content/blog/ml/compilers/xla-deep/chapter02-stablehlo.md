@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: StableHLO — 입력 IR"
-date: 2027-08-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Frontend가 토하는 IR — 안정성 보장된 portable spec."
 series: "XLA·OpenXLA 심화"
 seriesOrder: 2

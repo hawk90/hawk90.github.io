@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Scatter-Gather DMA 깊이"
-date: 2025-09-01T14:00:00
+date: 2026-05-17T14:00:00
 description: "Descriptor ring·partial transfer·error injection — SG-DMA 정복."
 tags: [QEMU, dma, scatter-gather, descriptor-ring]
 series: "QEMU Fake Device Driver"

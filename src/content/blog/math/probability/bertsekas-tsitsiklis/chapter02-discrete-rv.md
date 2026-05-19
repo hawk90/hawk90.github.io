@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Discrete Random Variables"
-date: 2030-08-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "PMF·CDF·expectation·variance — 이산 RV의 완전한 처리."
 series: "Introduction to Probability"
 seriesOrder: 2

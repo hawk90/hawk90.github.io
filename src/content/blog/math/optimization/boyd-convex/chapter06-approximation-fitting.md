@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Approximation and Fitting"
-date: 2028-11-01T06:00:00
+date: 2026-05-15T06:00:00
 description: "Least-squares·robust·sparse — 데이터 fitting의 convex 형식."
 series: "Convex Optimization (Boyd)"
 seriesOrder: 6

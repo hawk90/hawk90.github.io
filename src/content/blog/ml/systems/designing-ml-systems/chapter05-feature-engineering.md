@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 피처 엔지니어링"
-date: 2028-10-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Missing·scaling·encoding·feature crossing — 피처 변환의 정석."
 series: "Designing Machine Learning Systems"
 seriesOrder: 5

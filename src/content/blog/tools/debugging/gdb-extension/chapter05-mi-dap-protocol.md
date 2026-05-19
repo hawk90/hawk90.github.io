@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: MI / DAP 프로토콜"
-date: 2025-09-03T05:00:00
+date: 2026-05-17T05:00:00
 description: "IDE ↔ 디버거 표준 — GDB/MI와 Debug Adapter Protocol의 정체."
 tags: [gdb, mi, dap, ide, protocol]
 series: "GDB Extension and IDE"

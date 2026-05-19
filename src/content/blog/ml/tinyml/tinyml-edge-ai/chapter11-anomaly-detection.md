@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 이상 탐지 패턴"
-date: 2028-04-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Autoencoder·OC-SVM — 정상에서 벗어남을 잡는다."
 series: "TinyML·Edge AI"
 seriesOrder: 11

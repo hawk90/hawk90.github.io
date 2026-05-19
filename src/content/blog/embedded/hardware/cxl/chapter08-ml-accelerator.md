@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: ML 가속기와 CXL"
-date: 2026-10-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "NPU·GPU에 CXL이 의미하는 것 — capacity·coherent compute."
 series: "CXL 심화"
 seriesOrder: 8

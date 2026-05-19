@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Partial Reconfiguration"
-date: 2025-09-04T08:00:00
+date: 2026-05-17T08:00:00
 description: "Runtime sub-region 교체 — driver 측 워크플로."
 tags: [QEMU, partial-reconfig, fpga-region, dfx]
 series: "FPGA Driver via QEMU+VFIO"

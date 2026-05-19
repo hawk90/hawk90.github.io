@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: What Is a Unit Test?"
-date: 2025-10-15T02:00:00
+date: 2026-05-10T02:00:00
 description: "London (mockist) vs Classical (Detroit) 학파. 테스트 분리도 차이."
 tags: [TDD, London, Classical, School]
 series: "Khorikov Unit Testing"

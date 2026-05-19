@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: CSI-2 Data Types — RAW·YUV·RGB, Bit Packing, DPCM"
-date: 2027-05-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Data Type 6 bit로 표현하는 pixel format. RAW10이 카메라의 표준 → SoC ISP 입력."
 series: "MIPI 심화"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Further Topics on Random Variables"
-date: 2030-08-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Transform·conditional expectation·covariance·correlation."
 series: "Introduction to Probability"
 seriesOrder: 4

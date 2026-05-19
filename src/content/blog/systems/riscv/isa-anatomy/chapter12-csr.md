@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: CSR (Control and Status Registers)"
-date: 2025-05-18T12:00:00
+date: 2026-05-17T12:00:00
 description: "RISC-V CSR — mstatus, misa, mtvec, mepc, mcause 등 주요 레지스터를 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 12

@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Neural Networks for Images"
-date: 2029-05-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "CNN·ResNet·ViT — vision의 진화 한 장."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 14

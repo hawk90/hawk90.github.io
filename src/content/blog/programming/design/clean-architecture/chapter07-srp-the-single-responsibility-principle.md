@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: SRP — 단일 책임 원칙"
-date: 2025-06-01T07:00:00
+date: 2026-05-01T07:00:00
 description: "흔한 오해와 달리 SRP는 '한 가지 일만 하라'가 아니다. 한 모듈은 한 종류의 사용자(actor)에 대해서만 책임진다."
 tags: [Architecture, SOLID, SRP]
 series: "Clean Architecture"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 사례 — AMD MI350X·Intel Gaudi"
-date: 2026-12-01T10:00:00
+date: 2026-05-19T10:00:00
 description: "초기 UALink 채택 제품 — 실제 구성과 성능."
 series: "UALink 심화"
 seriesOrder: 10

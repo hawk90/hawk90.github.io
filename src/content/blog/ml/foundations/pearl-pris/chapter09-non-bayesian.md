@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Non-Bayesian Formalisms"
-date: 2029-11-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Dempster-Shafer·fuzzy·certainty factor — Bayesian이 아닌 길의 평가."
 series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 9

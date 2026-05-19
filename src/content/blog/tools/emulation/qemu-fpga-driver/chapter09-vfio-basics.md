@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: VFIO 기초"
-date: 2025-09-04T09:00:00
+date: 2026-05-17T09:00:00
 description: "Userspace driver framework·IOMMU group — VFIO 첫 걸음."
 tags: [QEMU, vfio, iommu-group, userspace-driver]
 series: "FPGA Driver via QEMU+VFIO"

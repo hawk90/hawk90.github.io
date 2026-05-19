@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introductory Notions"
-date: 2030-04-01T01:00:00
+date: 2026-05-15T01:00:00
 description: "Robert의 decision-theoretic Bayesian — 이론 깊이의 시작."
 series: "The Bayesian Choice"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "항목 43: 템플릿화된 base 클래스의 이름에 접근하는 방법을 알아두라"
-date: 2025-02-02T19:00:00
+date: 2026-05-04T19:00:00
 description: "템플릿 base의 멤버 접근에 this->, using, 명시 자격 — 세 가지 방법과 트레이드오프."
 tags: [C++, Effective C++, Template, Inheritance]
 series: "Effective C++"

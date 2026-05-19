@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 원자 연산 확장 (A)"
-date: 2025-05-18T07:00:00
+date: 2026-05-17T07:00:00
 description: "RISC-V A 확장 — LR/SC, AMO 명령어, 메모리 순서 의미론을 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 7

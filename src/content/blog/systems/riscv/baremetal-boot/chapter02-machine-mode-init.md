@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 머신 모드 초기화"
-date: 2025-05-18T20:00:00
+date: 2026-05-17T20:00:00
 description: "RISC-V M-mode 초기화 — 스택 설정, BSS 클리어, 트랩 벡터, CSR 초기화를 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 2

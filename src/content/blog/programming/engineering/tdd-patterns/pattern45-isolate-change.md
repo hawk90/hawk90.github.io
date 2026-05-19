@@ -1,6 +1,6 @@
 ---
 title: "Pattern 45: Isolate Change"
-date: 2026-07-02T21:00:00
+date: 2026-05-10T21:00:00
 description: "변경 영역을 격리 — 리팩터링 위험 감소, 테스트 가능 단위 확보."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 45

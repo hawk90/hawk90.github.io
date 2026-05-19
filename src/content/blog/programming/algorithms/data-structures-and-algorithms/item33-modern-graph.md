@@ -1,6 +1,6 @@
 ---
 title: "DSA 33: 모던 그래프 — Tarjan SCC, 위상 정렬 응용"
-date: 2026-03-02T09:00:00
+date: 2026-05-15T09:00:00
 description: "강한 연결 요소 찾기 — Kosaraju vs Tarjan. 위상 정렬의 실전 응용."
 tags: [Data Structure, Algorithm, Graph, SCC, Tarjan, Kosaraju]
 series: "Data Structures and Algorithms"

@@ -1,6 +1,6 @@
 ---
 title: "Pattern 6: Test Data"
-date: 2026-07-01T06:00:00
+date: 2026-05-10T06:00:00
 description: "테스트에 어떤 데이터를 쓸지 — 의도가 드러나는 값."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 6

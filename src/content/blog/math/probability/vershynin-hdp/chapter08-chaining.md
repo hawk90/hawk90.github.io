@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Chaining"
-date: 2030-10-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Dudley·Talagrand chaining — sup over function class."
 series: "High-Dimensional Probability"
 seriesOrder: 8

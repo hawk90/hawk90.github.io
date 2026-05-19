@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Type Deduction / Templates / Lambdas / Aliases"
-date: 2025-05-13T08:00:00
+date: 2026-05-18T08:00:00
 description: "auto / CTAD / Lambdas / Template Metaprogramming / Concepts / Boost / Aliases."
 tags: [Google, C++, Style-Guide, auto, Lambda, Template, Concepts]
 series: "Google C++ Style"

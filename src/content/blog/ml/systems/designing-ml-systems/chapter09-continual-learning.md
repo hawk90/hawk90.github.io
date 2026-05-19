@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 지속적 학습과 프로덕션 테스트"
-date: 2028-10-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Continuous training·shadow·canary·A/B — production에서의 실험."
 series: "Designing Machine Learning Systems"
 seriesOrder: 9

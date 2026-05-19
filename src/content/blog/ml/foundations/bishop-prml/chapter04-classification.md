@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Linear Models for Classification"
-date: 2029-07-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "LDA·logistic·probit·Bayesian logistic·Laplace approximation."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 4

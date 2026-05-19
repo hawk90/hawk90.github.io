@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: MISRA란 무엇이고 왜 생겼는가"
-date: 2025-09-05T02:00:00
+date: 2026-05-18T02:00:00
 description: "MISRA 단체의 배경, 자동차 산업의 요구, 1998/2004/2012 세 판의 진화, ISO 26262와의 관계."
 tags: [misra, c, safety, iso-26262, automotive, standards]
 series: "MISRA C"

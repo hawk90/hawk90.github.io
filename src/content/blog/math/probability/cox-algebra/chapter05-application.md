@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Applications and Symbolic Inference"
-date: 2029-10-01T05:00:00
+date: 2026-05-15T05:00:00
 description: "Cox 알고리즘의 실전 — Bayesian inference로의 다리."
 series: "The Algebra of Probable Inference"
 seriesOrder: 5

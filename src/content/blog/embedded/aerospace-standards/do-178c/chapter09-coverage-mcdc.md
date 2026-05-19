@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Coverage Analysis — Statement, Decision, MC/DC 완전 해부"
-date: 2025-09-25T10:00:00
+date: 2026-05-18T10:00:00
 description: "MC/DC truth table 작성, 도구 검출, untestable code 처리, structural coverage analysis."
 tags: [do-178c, coverage, mc-dc, statement, decision, truth-table, structural]
 series: "DO-178C"

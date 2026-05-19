@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Compliance Testing"
-date: 2026-01-02T10:00:00
+date: 2026-05-16T10:00:00
 description: "스펙 compliance — UNH-IOL·integrators list."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 34

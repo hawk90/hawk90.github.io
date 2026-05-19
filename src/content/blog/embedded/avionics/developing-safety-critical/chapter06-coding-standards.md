@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 코딩 표준 — MISRA·CERT·JSF C++"
-date: 2026-05-26T06:00:00
+date: 2026-05-18T06:00:00
 description: "DO-178C에서 코딩 표준의 위치 — MISRA C·CERT C·JSF C++의 비교와 선택."
 series: "Developing Safety-Critical Software"
 seriesOrder: 6

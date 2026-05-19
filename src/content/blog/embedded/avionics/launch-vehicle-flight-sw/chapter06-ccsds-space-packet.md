@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: CCSDS Space Packet — Primary Header·APID·Sequence·Data Field"
-date: 2026-05-27T06:00:00
+date: 2026-05-18T06:00:00
 description: "CCSDS 133.0-B space packet. Primary header·APID·sequence count·TC/TM. NASA·ESA·KARI 표준."
 series: "Launch Vehicle Flight Software"
 seriesOrder: 6

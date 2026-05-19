@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Random Walks"
-date: 2030-07-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Recurrence·transience·hitting time — 1d·high-d random walk."
 series: "Probability: Theory and Examples"
 seriesOrder: 4

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: The Goal of Unit Testing"
-date: 2025-10-15T01:00:00
+date: 2026-05-10T01:00:00
 description: "테스트의 목적 — 지속 가능한 소프트웨어 성장. 가치 vs 비용."
 tags: [TDD, Unit Testing, Goal]
 series: "Khorikov Unit Testing"

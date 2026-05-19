@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Dvoretzky-Milman's Theorem"
-date: 2030-10-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Almost spherical section·high-d convex body geometry."
 series: "High-Dimensional Probability"
 seriesOrder: 11

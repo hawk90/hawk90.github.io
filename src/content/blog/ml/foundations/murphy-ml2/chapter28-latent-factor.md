@@ -1,6 +1,6 @@
 ---
 title: "Ch 28: Latent Factor Models"
-date: 2029-06-02T04:00:00
+date: 2026-05-16T04:00:00
 description: "PCA·factor analysis·NMF·LDA — linear latent의 통합 시각."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 28

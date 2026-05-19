@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Overview of the C++ Standard Library"
-date: 2025-07-01T16:00:00
+date: 2026-05-05T16:00:00
 description: "표준 라이브러리 한눈에 — 컨테이너 / 알고리즘 / 유틸리티."
 tags: [C++, Standard Library, STL]
 series: "전문가를 위한 C++"

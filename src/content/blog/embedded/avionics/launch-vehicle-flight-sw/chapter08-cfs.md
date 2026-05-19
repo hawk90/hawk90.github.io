@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: NASA cFS — Core Flight System Framework"
-date: 2026-05-27T08:00:00
+date: 2026-05-18T08:00:00
 description: "NASA cFE·OSAL·PSP·apps. Software Bus message-based architecture. 미션 사례·채택."
 series: "Launch Vehicle Flight Software"
 seriesOrder: 8

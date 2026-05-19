@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: D-PHY — LP/HS Dual-Mode, Clock + N Data Lane"
-date: 2027-05-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "1.2V differential HS + 1.2V single-ended LP. 두 모드 전환이 D-PHY의 핵심 트릭."
 series: "MIPI 심화"
 seriesOrder: 2

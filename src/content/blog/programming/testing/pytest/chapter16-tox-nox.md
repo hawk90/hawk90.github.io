@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: tox / nox — 환경 매트릭스"
-date: 2026-05-22T16:00:00
+date: 2026-05-10T16:00:00
 description: "Python 버전·의존성·OS 매트릭스로 격리된 환경에서 테스트 돌리기."
 series: "pytest 심화"
 seriesOrder: 16

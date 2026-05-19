@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Bayesian Inference"
-date: 2029-03-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Prior·posterior·credible interval — Bayesian의 정수."
 series: "All of Statistics"
 seriesOrder: 11

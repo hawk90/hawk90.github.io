@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Advanced Char Driver Operations"
-date: 2026-06-01T06:00:00
+date: 2026-05-13T06:00:00
 description: "ioctl·blocking I/O·poll·async notification·seek·access control — char driver 심화."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 6

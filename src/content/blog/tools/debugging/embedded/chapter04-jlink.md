@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: J-Link 도구 체인"
-date: 2025-09-01T04:00:00
+date: 2026-05-17T04:00:00
 description: "JLinkGDBServer, JLinkExe, J-Run, J-Trace, Unlimited Flash BP, RTT, Ozone."
 tags: [jlink, segger, embedded, rtt]
 series: "Embedded Debugging"

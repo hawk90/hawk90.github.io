@@ -1,6 +1,6 @@
 ---
 title: "항목 35: 가상 함수의 대안을 고려하라"
-date: 2025-02-02T11:00:00
+date: 2026-05-04T11:00:00
 description: "NVI, Strategy 패턴, std::function, 템플릿 — 다형성 구현의 다양한 방법과 그 트레이드오프."
 tags: [C++, Effective C++, Virtual, Design Pattern]
 series: "Effective C++"

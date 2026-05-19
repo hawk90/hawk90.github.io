@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: CXL over UCIe — 메모리 확장"
-date: 2026-11-01T09:00:00
+date: 2026-05-19T09:00:00
 description: "Chiplet 안에서도 cache-coherent memory — CXL을 UCIe로 운반."
 series: "UCIe 심화"
 seriesOrder: 9

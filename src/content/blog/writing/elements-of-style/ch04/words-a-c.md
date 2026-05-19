@@ -1,6 +1,6 @@
 ---
 title: "Ch 4 Words: A–C"
-date: 2026-05-15T02:00:00
+date: 2026-05-14T02:00:00
 description: "자주 오용되는 단어와 표현 — Aggravate부터 Currently까지."
 series: "The Elements of Style"
 seriesOrder: 26
@@ -8,18 +8,17 @@ tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 > Words and Expressions Commonly Misused.
 
-Chapter 4는 *자주 잘못 쓰이는 단어 / 표현*의 사전입니다. Strunk가 *학생들의 글에서 본 패턴*을 정리했습니다. 알파벳 순.
+Chapter 4는 자주 잘못 쓰이는 단어와 표현의 사전입니다. Strunk가 학생들의 글에서 본 패턴을 정리했습니다. 알파벳 순으로 따라갑니다.
 
 ## A
 
 ### Aggravate / Irritate
 
-`Aggravate`는 *이미 있는 문제를 더 심하게 만들다*. `Irritate`는 *짜증 나게 하다*.
+`Aggravate`는 이미 있는 문제를 더 심하게 만든다는 뜻입니다. `Irritate`는 짜증 나게 한다는 뜻입니다.
 
 ```
 The medicine aggravated his symptoms.    ← 증상을 악화시켰다
@@ -31,11 +30,11 @@ The noise irritated him.                  ← 짜증 나게 했다
 "The dog irritated me."
 ```
 
-한국 학습자 함정: *aggravate*를 *짜증*의 의미로 잘못 사용. *Worsen / make worse*의 뜻이 정확.
+한국 학습자 함정 — *aggravate*를 "짜증"의 의미로 잘못 씁니다. *Worsen* 또는 *make worse*의 뜻이 정확합니다.
 
 ### All right
 
-*한 단어 alright가 아니라 두 단어*로 씁니다. 의미는 *agreed*, *go ahead*, *OK*.
+한 단어 *alright*가 아니라 두 단어로 씁니다. 의미는 *agreed*, *go ahead*, *OK*입니다.
 
 ```
 선호:
@@ -48,7 +47,7 @@ The noise irritated him.                  ← 짜증 나게 했다
 
 ### Allude / Elude
 
-`Allude`는 *간접 언급*. `Elude`는 *피하다 / 빠져나가다*.
+`Allude`는 간접 언급, `Elude`는 피하거나 빠져나간다는 뜻입니다.
 
 ```
 She alluded to his earlier remark.   ← 간접 언급
@@ -75,11 +74,11 @@ Illusion → 환영 / 헛것
 "The magician created the illusion of a floating ball."
 ```
 
-발음이 비슷해 혼동되지만 *의미가 완전히 다름*.
+발음이 비슷해 혼동되지만 의미가 완전히 다릅니다.
 
 ### Alternate / Alternative
 
-`Alternate`는 *번갈아 가며*. `Alternative`는 *둘 중 선택*.
+`Alternate`는 "번갈아 가며", `Alternative`는 "둘 중 선택"입니다.
 
 ```
 "As the flooded road left them no alternative, they took the
@@ -98,7 +97,7 @@ alternate route."
 
 ### Among / Between
 
-*셋 이상은 보통 among*. *둘이거나, 셋 이상이라도 각자 개별적으로 다룰 때는 between*.
+셋 이상은 보통 *among*입니다. 둘이거나, 셋 이상이라도 각자 개별적으로 다룰 때는 *between*을 씁니다.
 
 ```
 선호 (셋 이상, 집단적):
@@ -114,7 +113,7 @@ alternate route."
 
 ### And/or
 
-*문장을 망치는 약자*. *의미를 풀어 쓰는 게* 더 명확.
+문장을 망치는 약자입니다. 의미를 풀어 쓰는 편이 더 명확합니다.
 
 ```
 회피:
@@ -126,11 +125,11 @@ and/or cheating?"
 cheating or both?"
 ```
 
-법률 / 행정 문서가 아니라면 *피하는 것*이 안전.
+법률·행정 문서가 아니라면 피하는 편이 안전합니다.
 
 ### Anticipate
 
-*Expect*의 뜻으로 *함부로 쓰지 마세요*. `Anticipate`는 *예상하고 미리 행동*한다는 뉘앙스.
+*Expect*의 뜻으로 함부로 쓰지 마세요. `Anticipate`는 "예상하고 미리 행동한다"는 뉘앙스를 갖습니다.
 
 ```
 선호 (단순 예상):
@@ -143,7 +142,7 @@ cheating or both?"
 
 ### Anybody / Any body
 
-한 단어면 *any person*, 두 단어면 *any corpse* 또는 *any human form*.
+한 단어면 *any person*, 두 단어면 *any corpse* 또는 *any human form*입니다.
 
 ```
 "Anybody can do this." ← 누구든 (한 단어)
@@ -152,7 +151,7 @@ cheating or both?"
 
 ### As good or better than
 
-문장을 *다시 정리*합니다.
+문장을 다시 정리합니다.
 
 ```
 회피:
@@ -170,7 +169,7 @@ cheating or both?"
 
 ### As to whether
 
-`Whether` 하나로 충분.
+`Whether` 하나로 충분합니다.
 
 ```
 회피: "the question as to whether"
@@ -179,7 +178,7 @@ cheating or both?"
 
 ### As yet
 
-`Yet`이 *거의 항상 더 짧고* 같은 의미.
+`Yet`이 거의 항상 더 짧고 같은 의미입니다.
 
 ```
 "No agreement has been reached as yet."
@@ -190,7 +189,7 @@ cheating or both?"
 
 ### Being
 
-`Regard ... as` 뒤에 `being`은 *군더더기*.
+`Regard ... as` 뒤에 `being`은 군더더기입니다.
 
 ```
 회피: "He is regarded as being the best dancer in the club."
@@ -199,7 +198,7 @@ cheating or both?"
 
 ### But
 
-`Doubt`와 `help` 뒤의 `but`은 *불필요*.
+`Doubt`와 `help` 뒤의 `but`은 불필요합니다.
 
 ```
 회피: "I have no doubt but that he will come."
@@ -209,7 +208,7 @@ cheating or both?"
 선호: "I cannot help admiring him."
 ```
 
-`But`을 *자주 쓰면* Loose sentence(Rule 18) 함정에 빠지기 쉽습니다.
+`But`을 자주 쓰면 Loose sentence(Rule 18) 함정에 빠지기 쉽습니다.
 
 ## C
 
@@ -224,11 +223,11 @@ May → 허가 / 가능성
 "It may rain." (가능성)
 ```
 
-회화에서는 *can*이 *허가*에도 사용되지만, *격식 글*에서는 *may*.
+회화에서는 *can*이 허가에도 쓰이지만, 격식 글에서는 *may*를 씁니다.
 
 ### Case
 
-대부분 *불필요*.
+대부분 불필요합니다.
 
 ```
 회피: "In many cases, the rooms lacked air conditioning."
@@ -240,7 +239,7 @@ May → 허가 / 가능성
 
 ### Center around
 
-*Center on*이 맞음. 중심은 *어디*에 *있다*.
+*Center on*이 맞습니다. 중심은 어디에 있는 것입니다.
 
 ```
 회피: "The story centers around a young boy."
@@ -249,7 +248,7 @@ May → 허가 / 가능성
 
 ### Certainly
 
-*과용*되는 부사. 진짜 확실할 때만.
+과용되는 부사입니다. 진짜 확실할 때만 씁니다.
 
 ```
 회피 (과용):
@@ -263,7 +262,7 @@ will review the matter."
 
 ### Character
 
-`Acts of a hostile character` → `hostile acts`. 자주 *빼낼 수 있습니다*.
+`Acts of a hostile character`는 `hostile acts`로 줄입니다. 자주 빼낼 수 있는 단어입니다.
 
 ```
 회피: "His remarks were of a critical character."
@@ -275,7 +274,7 @@ will review the matter."
 
 ### Claim (verb)
 
-*Lay claim to*의 의미입니다. `Declare`, `maintain`, `charge`의 대체어로 *쓰지 마세요*.
+*Lay claim to*의 의미입니다. `Declare`, `maintain`, `charge`의 대체어로 쓰지 마세요.
 
 ```
 회피: "He claimed that he was innocent."
@@ -288,7 +287,7 @@ will review the matter."
 
 ### Clever
 
-사람과 동물에 대해 *의미가 다릅니다*. *Clever horse*는 영리한 말이 아니라 *기질이 좋은 말*.
+사람과 동물에 대해 의미가 다릅니다. *Clever horse*는 영리한 말이 아니라 기질이 좋은 말입니다.
 
 ```
 "A clever boy" ← 영리한
@@ -307,7 +306,7 @@ Compare with → 같은 종류 사이의 *차이* 따짐 (비교)
 
 ### Comprise
 
-*문자 그대로 embrace, include*. *동물원이 동물들을 comprises*하지, *동물들이 동물원을 comprise*하지 않습니다.
+문자 그대로 *embrace*, *include*입니다. 동물원이 동물들을 *comprises*하지, 동물들이 동물원을 *comprise*하지 않습니다.
 
 ```
 선호: "A zoo comprises mammals, reptiles, and birds."
@@ -317,11 +316,11 @@ Compare with → 같은 종류 사이의 *차이* 따짐 (비교)
    → 잘못된 수동태 사용
 ```
 
-*Comprise = include*. *Constitute = make up*. 방향이 *반대*.
+*Comprise*는 *include*, *constitute*는 *make up*입니다. 방향이 반대입니다.
 
 ### Consider
 
-*Believe to be*의 의미일 때 `as`가 *따라오지 않습니다*.
+*Believe to be*의 의미일 때 `as`가 따라오지 않습니다.
 
 ```
 회피: "I consider him as competent."
@@ -334,14 +333,14 @@ Compare with → 같은 종류 사이의 *차이* 따짐 (비교)
 
 ### Contact (verb)
 
-타동사로서의 *contact*는 *모호하고 거만*하게 들립니다.
+타동사로서의 *contact*는 모호하고 거만하게 들립니다.
 
 ```
 회피: "I will contact him."
 선호: "I will phone him." / "I will email him." / "I will meet him."
 ```
 
-*Get in touch with*, *look up*, *phone*, *find*, *meet* 중 *더 구체적인 것*을 씁니다.
+*Get in touch with*, *look up*, *phone*, *find*, *meet* 중 더 구체적인 것을 씁니다.
 
 ### Continual / Continuous
 
@@ -355,7 +354,7 @@ Continuous → 끊임없이 이어지는
 
 ### Currently
 
-*Now* + 현재 시제와 함께 쓰면 *군더더기*. *빼거나* 더 정확한 시간 표시를.
+*Now* + 현재 시제와 함께 쓰면 군더더기입니다. 빼거나 더 정확한 시간 표시로 바꿉니다.
 
 ```
 회피: "We are currently reviewing your application."
@@ -379,17 +378,17 @@ Continuous → 끊임없이 이어지는
 
 ## 자기 글 점검
 
-- [ ] "Aggravate"가 *악화*인가 *짜증*인가? (짜증이면 irritate)
-- [ ] "Allude"가 *간접*인가? (직접이면 refer)
+- [ ] "Aggravate"가 악화인가 짜증인가? (짜증이면 *irritate*)
+- [ ] "Allude"가 간접인가? (직접이면 *refer*)
 - [ ] "Comprise / constitute" 방향이 맞는가?
 - [ ] "Currently + 현재 시제" 군더더기 없는가?
-- [ ] "Contact"를 *더 구체적 동사*로 바꿀 수 있는가?
+- [ ] "Contact"를 더 구체적 동사로 바꿀 수 있는가?
 - [ ] "Compare to / with" 구분이 맞는가?
-- [ ] "Case", "character" 군더더기를 *제거*했는가?
+- [ ] "Case", "character" 군더더기를 제거했는가?
 
 ## 다음 항목 예고
 
-다음 — **Words D~F** (Data, Different from, Effect 등).
+다음은 **Words D~F**입니다 (Data, Different from, Effect 등).
 
 ## 관련 항목
 

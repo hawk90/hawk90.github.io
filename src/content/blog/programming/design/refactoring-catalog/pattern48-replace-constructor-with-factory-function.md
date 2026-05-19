@@ -1,6 +1,6 @@
 ---
 title: "Pattern 48: Replace Constructor with Factory Function"
-date: 2026-06-03T00:00:00
+date: 2026-05-02T00:00:00
 description: "Constructor의 한계 — factory function이 의미 있는 이름·다양한 구성·subtype 반환을 가능하게."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 48

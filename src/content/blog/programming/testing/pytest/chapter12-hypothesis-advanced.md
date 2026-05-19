@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Property-based 심화"
-date: 2026-05-22T12:00:00
+date: 2026-05-10T12:00:00
 description: "composite strategies·shrinking·stateful testing — 복합 도메인 모델링."
 series: "pytest 심화"
 seriesOrder: 12

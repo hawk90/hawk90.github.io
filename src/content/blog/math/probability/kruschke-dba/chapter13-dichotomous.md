@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Dichotomous Predicted Variable"
-date: 2030-05-01T13:00:00
+date: 2026-05-15T13:00:00
 description: "Logistic regression·prediction·classification."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 13

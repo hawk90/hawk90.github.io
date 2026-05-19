@@ -1,6 +1,6 @@
 ---
 title: "Ch 23: Normalizing Flows"
-date: 2029-06-01T23:00:00
+date: 2026-05-16T23:00:00
 description: "Invertible neural network·exact likelihood — flow의 정수."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 23

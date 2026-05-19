@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Building on Third-Party Code"
-date: 2025-10-10T08:00:00
+date: 2026-05-10T08:00:00
 description: "외부 라이브러리 — 직접 모킹 X. ACL / wrapper로 격리."
 tags: [TDD, Third-Party, Wrapper]
 series: "Growing Object-Oriented Software"

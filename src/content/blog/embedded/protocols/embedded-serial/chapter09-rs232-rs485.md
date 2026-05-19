@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: RS-232·RS-485 — 전기 사양, Differential, Modbus"
-date: 2027-03-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "UART 위에 얹는 PHY. RS-232로 ±12V, RS-485로 differential·1.2km·multi-drop."
 series: "Embedded Protocols 심화"
 seriesOrder: 9

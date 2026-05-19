@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: faulthandler / tracemalloc / objgraph — 죽음과 누수"
-date: 2025-08-21T05:00:00
+date: 2026-05-17T05:00:00
 description: "세그폴트 트레이스백, 메모리 할당 추적, 객체 그래프 시각화."
 tags: [python, debugging, faulthandler, tracemalloc, objgraph]
 series: "Python Debugging"

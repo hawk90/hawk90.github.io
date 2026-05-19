@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: DO-178C 개요 — DAL·71 Objectives·12 Data Items"
-date: 2026-05-26T02:00:00
+date: 2026-05-18T02:00:00
 description: "RTCA DO-178C 구조. DAL A-E, 71 objectives, 12 data items, supplements."
 series: "Developing Safety-Critical Software"
 seriesOrder: 2

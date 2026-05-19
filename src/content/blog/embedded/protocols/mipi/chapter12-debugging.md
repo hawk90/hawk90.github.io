@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: MIPI 디버깅 — 신호 분석, Linux 도구, 시나리오"
-date: 2027-05-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Protocol analyzer + DSO + Linux 도구. 보드 살리기부터 frame drop까지."
 series: "MIPI 심화"
 seriesOrder: 12

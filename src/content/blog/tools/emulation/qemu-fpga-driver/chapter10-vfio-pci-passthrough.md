@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: VFIO-PCI 패스스루"
-date: 2025-09-04T10:00:00
+date: 2026-05-17T10:00:00
 description: "실 FPGA를 VM에 — bind·unbind·reset 흐름."
 tags: [QEMU, vfio-pci, passthrough, fpga]
 series: "FPGA Driver via QEMU+VFIO"

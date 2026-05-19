@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 명령어 인코딩"
-date: 2025-05-18T05:00:00
+date: 2026-05-17T05:00:00
 description: "RISC-V 명령어 포맷 — R/I/S/B/U/J 타입, 즉시값 배치, opcode 맵을 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 5

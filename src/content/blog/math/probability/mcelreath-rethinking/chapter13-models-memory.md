@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Models with Memory"
-date: 2030-03-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "Multi-level model의 본격적 도입 — varying intercepts."
 series: "Statistical Rethinking"
 seriesOrder: 13

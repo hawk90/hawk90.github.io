@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Beliefs, Defaults, and Counterfactuals"
-date: 2030-01-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Default reasoning·conditional·Pearl과 Halpern의 만남."
 series: "Reasoning About Uncertainty"
 seriesOrder: 8

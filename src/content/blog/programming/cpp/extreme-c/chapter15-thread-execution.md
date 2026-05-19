@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Thread Execution"
-date: 2025-06-15T15:00:00
+date: 2026-05-05T15:00:00
 description: "POSIX threads — pthread_create / join. 스레드 attribute. detached / joinable."
 tags: [C, POSIX, pthread]
 series: "전문가를 위한 C"

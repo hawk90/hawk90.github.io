@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 메모리 접근"
-date: 2025-05-18T04:00:00
+date: 2026-05-17T04:00:00
 description: "RISC-V load/store 명령어, 주소 지정 모드, 정렬 요구사항을 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 4

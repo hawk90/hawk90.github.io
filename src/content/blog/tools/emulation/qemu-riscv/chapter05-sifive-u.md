@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: sifive_u 머신"
-date: 2025-05-19T23:00:00
+date: 2026-05-17T23:00:00
 description: "QEMU sifive_u — U54 코어, S 모드, Linux 부팅을 다룬다."
 series: "RISC-V QEMU 심화"
 seriesOrder: 5

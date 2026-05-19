@@ -1,6 +1,6 @@
 ---
 title: "Tip 45: Tell, Don't Ask"
-date: 2026-05-14T21:00:00
+date: 2026-05-11T21:00:00
 description: "묻지 말고 시켜라 — 객체에 데이터를 받아 처리하지 말고, 객체에게 일을 시켜라."
 series: "The Pragmatic Programmer"
 seriesOrder: 45

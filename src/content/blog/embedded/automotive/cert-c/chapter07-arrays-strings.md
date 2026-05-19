@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: ARR & STR — 배열 경계와 문자열 안전성"
-date: 2025-09-10T08:00:00
+date: 2026-05-18T08:00:00
 description: "Buffer overflow 차단 — 배열 경계(ARR30), 충분한 버퍼(STR31), null 종결(STR32), 안전 wrapper."
 tags: [cert-c, array, string, buffer-overflow, null-termination, cwe-119]
 series: "CERT C"

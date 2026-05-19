@@ -1,6 +1,6 @@
 ---
 title: "Part 5-04: HAL 설계 패턴"
-date: 2026-05-17T04:00:00
+date: 2026-05-07T04:00:00
 description: "범용 HAL 구조 — 벤더 종속성 격리, 다중 보드/MCU 지원, 시리즈 마무리."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 40

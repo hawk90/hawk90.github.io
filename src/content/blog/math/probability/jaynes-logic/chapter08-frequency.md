@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Probability and Frequency"
-date: 2029-04-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "왜 frequency가 probability가 아닌가."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 8

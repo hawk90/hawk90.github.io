@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Bayesian Approaches to Testing"
-date: 2030-05-01T09:00:00
+date: 2026-05-15T09:00:00
 description: "ROPE·NHST 대체·Kruschke의 시그니처 주장."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 9

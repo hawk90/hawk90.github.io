@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: PCI 서브시스템"
-date: 2025-10-01T07:00:00
+date: 2026-05-17T07:00:00
 description: "QEMU PCI 버스, 브릿지, 디바이스 구현을 이해한다."
 tags: [QEMU, PCI, Bus]
 series: "QEMU Internals"

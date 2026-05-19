@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: The Anatomy of a Unit Test"
-date: 2025-10-15T03:00:00
+date: 2026-05-10T03:00:00
 description: "AAA / Arrange-Act-Assert. 명명. 매개변수 테스트."
 tags: [TDD, AAA, Naming]
 series: "Khorikov Unit Testing"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 패턴 규칙과 암시적 규칙"
-date: 2025-05-14T04:00:00
+date: 2026-05-17T04:00:00
 description: "% 한 글자로 100개의 규칙을 줄이는 패턴 규칙, Make 내장 암시적 규칙, 그리고 둘의 충돌·우선순위."
 tags: [make, build, Makefile, pattern]
 series: "GNU Make"

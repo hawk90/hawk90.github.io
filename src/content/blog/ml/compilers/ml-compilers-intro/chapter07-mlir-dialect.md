@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: MLIR 방언과 변환"
-date: 2028-02-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "MLIR 개요 — ML 컴파일러 관점에서. (심화는 별도 시리즈)"
 series: "ML 컴파일러"
 seriesOrder: 7

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Probability Distributions"
-date: 2029-07-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Bernoulli·multinomial·Gaussian·exponential family·nonparametric."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 2

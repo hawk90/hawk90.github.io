@@ -1,6 +1,6 @@
 ---
 title: "Pattern 42: Parameterize Function"
-date: 2026-06-02T18:00:00
+date: 2026-05-02T18:00:00
 description: "비슷한 함수 여러 개 — 차이를 parameter로 빼서 DRY."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 42

@@ -1,6 +1,6 @@
 ---
 title: "Pattern 42: Collecting Parameter"
-date: 2026-07-02T18:00:00
+date: 2026-05-10T18:00:00
 description: "Collect 결과를 parameter로 전달 — xUnit TestResult의 본질."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 42

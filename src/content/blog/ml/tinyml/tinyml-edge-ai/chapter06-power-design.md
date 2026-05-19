@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 전력 제약 설계"
-date: 2028-04-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Energy/inference·duty cycle — battery life 계산."
 series: "TinyML·Edge AI"
 seriesOrder: 6

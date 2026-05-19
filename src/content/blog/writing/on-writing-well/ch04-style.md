@@ -1,6 +1,6 @@
 ---
 title: "Chapter 4: Style"
-date: 2026-05-18T04:00:00
+date: 2026-05-14T04:00:00
 description: "스타일은 작가의 인격입니다. 외부에서 입을 수 있는 옷이 아니라, 자기 자신을 정직하게 글에 담는 것입니다."
 series: "On Writing Well"
 seriesOrder: 4

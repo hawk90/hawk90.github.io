@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Principles of Data Reduction"
-date: 2030-09-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Sufficient·ancillary·complete — sample을 요약하는 방법."
 series: "Statistical Inference"
 seriesOrder: 6

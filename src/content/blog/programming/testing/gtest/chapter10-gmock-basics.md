@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: gMock 기초"
-date: 2026-05-21T10:00:00
+date: 2026-05-10T10:00:00
 description: "mock class 작성, EXPECT_CALL과 .Times/.WillOnce/.WillRepeatedly."
 series: "gtest 심화"
 seriesOrder: 10

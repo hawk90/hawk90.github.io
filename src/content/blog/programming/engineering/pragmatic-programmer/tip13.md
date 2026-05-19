@@ -1,6 +1,6 @@
 ---
 title: "Tip 13: Build Documentation In, Don't Bolt It On"
-date: 2026-05-13T13:00:00
+date: 2026-05-11T13:00:00
 description: "문서를 안으로 짜 넣어라 — 마지막에 덧붙이지 마라. 코드와 함께 자란다."
 series: "The Pragmatic Programmer"
 seriesOrder: 13

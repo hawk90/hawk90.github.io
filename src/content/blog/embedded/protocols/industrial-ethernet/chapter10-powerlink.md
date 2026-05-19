@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: POWERLINK·OpenSAFETY"
-date: 2027-06-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "B&R 발 오픈소스 표준 산업 이더넷·통합 safety layer."
 series: "Industrial Ethernet 심화"
 seriesOrder: 10

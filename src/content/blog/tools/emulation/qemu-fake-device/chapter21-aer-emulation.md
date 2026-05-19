@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: PCIe AER 에뮬레이션"
-date: 2025-09-01T21:00:00
+date: 2026-05-17T21:00:00
 description: "Correctable·uncorrectable·fatal — Advanced Error Reporting 주입."
 tags: [QEMU, pcie-aer, error-injection, ras]
 series: "QEMU Fake Device Driver"

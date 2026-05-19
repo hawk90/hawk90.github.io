@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Bayesian Calculations"
-date: 2030-04-01T06:00:00
+date: 2026-05-15T06:00:00
 description: "Analytic·Laplace·MCMC — posterior 계산 방법론."
 series: "The Bayesian Choice"
 seriesOrder: 6

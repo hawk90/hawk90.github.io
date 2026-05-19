@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 하드웨어 로드맵 (2026~2027)"
-date: 2026-12-01T09:00:00
+date: 2026-05-19T09:00:00
 description: "UALink 1.0 → 2.0 — 차세대 인터커넥트 로드맵."
 series: "UALink 심화"
 seriesOrder: 9

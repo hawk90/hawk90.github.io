@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 최적화 패스"
-date: 2028-03-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "onnx·onnx-simplifier·onnxoptimizer — model을 줄이는 도구."
 series: "ONNX 실전"
 seriesOrder: 6

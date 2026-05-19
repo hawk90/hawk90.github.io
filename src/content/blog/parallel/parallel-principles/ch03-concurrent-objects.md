@@ -1,6 +1,6 @@
 ---
 title: "Chapter 3: Concurrent Objects"
-date: 2026-05-12T03:00:00
+date: 2026-05-06T03:00:00
 description: "동시성 객체의 정확성 정의. Sequential Consistency와 Linearizability. 진행 조건: wait-free, lock-free."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 3

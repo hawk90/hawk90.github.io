@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: UCIe 개요 — 무어의 법칙 이후 칩렛 시대"
-date: 2026-11-01T01:00:00
+date: 2026-05-19T01:00:00
 description: "칩렛 시대의 PCIe — UCIe가 푸는 문제."
 series: "UCIe 심화"
 seriesOrder: 1

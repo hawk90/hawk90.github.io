@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: AMP and OpenAMP"
-date: 2026-08-01T11:00:00
+date: 2026-05-19T11:00:00
 description: "Linux + FreeRTOS 동시 구동·RPMsg·remoteproc — 비대칭 멀티코어."
 series: "The Zynq Book"
 seriesOrder: 11

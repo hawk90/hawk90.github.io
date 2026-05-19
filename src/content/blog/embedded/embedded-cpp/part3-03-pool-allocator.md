@@ -1,6 +1,6 @@
 ---
 title: "Part 3-03: Pool Allocator 구현"
-date: 2026-05-15T03:00:00
+date: 2026-05-07T03:00:00
 description: "고정 크기 블록 + free list — 임베디드의 표준 allocator 구현."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 21

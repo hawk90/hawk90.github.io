@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Linux Driver — spidev, i2c-dev, ttyS, 그리고 커널 드라이버"
-date: 2027-03-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Userspace에서 직렬 디바이스 다루기. ioctl·termios·sysfs. 그리고 언제 kernel 드라이버를 써야 하나."
 series: "Embedded Protocols 심화"
 seriesOrder: 11

@@ -1,6 +1,6 @@
 ---
 title: "항목 38: composition으로 'has-a'나 'is-implemented-in-terms-of'를 모델링하라"
-date: 2025-02-02T14:00:00
+date: 2026-05-04T14:00:00
 description: "composition의 두 의미 — 도메인의 has-a, 구현의 is-implemented-in-terms-of. 상속(is-a)과의 명확한 구분."
 tags: [C++, Effective C++, Composition]
 series: "Effective C++"

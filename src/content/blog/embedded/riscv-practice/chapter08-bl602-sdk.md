@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: bl_mcu_sdk 환경"
-date: 2025-05-19T14:00:00
+date: 2026-05-17T14:00:00
 description: "bl_mcu_sdk — 빌드, 플래시, 디버그 설정을 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: eBPF 개요 — bpf / libbpf / CO-RE"
-date: 2025-08-30T05:00:00
+date: 2026-05-17T05:00:00
 description: "extended BPF — 커널 내 안전한 가상 머신. 트레이싱 / 네트워킹 / 보안."
 tags: [eBPF, BPF, CO-RE]
 series: "System Tracing"

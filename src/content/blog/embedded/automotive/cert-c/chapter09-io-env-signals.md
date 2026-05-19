@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: FIO / ENV / SIG / ERR — 파일, 환경, 시그널, errno"
-date: 2025-09-10T10:00:00
+date: 2026-05-18T10:00:00
 description: "TOCTOU(FIO30), 입력 검증(FIO34), getenv 함정(ENV01), async-signal-safe(SIG30), errno 처리(ERR30)."
 tags: [cert-c, file-io, signal, environment, errno, toctou, race]
 series: "CERT C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Model-Based Development (DO-331)"
-date: 2026-05-26T11:00:00
+date: 2026-05-18T11:00:00
 description: "DO-331 — Simulink·SCADE 모델 기반 개발의 DO-178C 통합."
 series: "Developing Safety-Critical Software"
 seriesOrder: 11

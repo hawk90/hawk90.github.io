@@ -1,6 +1,6 @@
 ---
 title: "Part 1-07: 링커 스크립트와 C++"
-date: 2026-05-13T07:00:00
+date: 2026-05-07T07:00:00
 description: "MEMORY와 SECTIONS — Flash와 RAM에 C++ 객체와 코드를 정확한 위치에 두는 법."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 7

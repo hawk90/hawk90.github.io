@@ -1,6 +1,6 @@
 ---
 title: "Column 4: Writing Correct Programs"
-date: 2026-05-13T04:00:00
+date: 2026-05-11T04:00:00
 description: "Writing Correct Programs"
 series: "Programming Pearls"
 seriesOrder: 4

@@ -1,6 +1,6 @@
 ---
 title: "항목 1: C++를 언어들의 연합체로 보라"
-date: 2025-02-01T01:00:00
+date: 2026-05-04T01:00:00
 description: "C++는 단일 언어가 아니라 네 가지 하위 언어의 연합 — 영역마다 효율의 규칙이 다르다."
 tags: [C++, Effective C++]
 series: "Effective C++"

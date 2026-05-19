@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Preliminaries on Random Variables"
-date: 2030-10-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Tail bound·sub-Gaussian·sub-exponential — HDP의 기본 도구."
 series: "High-Dimensional Probability"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Pattern 13: Regression Test"
-date: 2026-07-01T13:00:00
+date: 2026-05-10T13:00:00
 description: "Bug 발견 시 — 그 bug를 잡는 test 먼저 작성, 영구적인 회귀 방지망."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 13

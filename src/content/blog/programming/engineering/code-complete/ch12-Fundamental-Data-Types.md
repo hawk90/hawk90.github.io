@@ -1,6 +1,6 @@
 ---
 title: "Chapter 12: Fundamental Data Types"
-date: 2025-06-20T12:00:00
+date: 2026-05-11T12:00:00
 description: "기본 데이터 타입 — magic number 금지, 정수 overflow, float Equals(), Unicode, enum 5 용도, 자기 타입 생성."
 series: "Code Complete"
 seriesOrder: 12

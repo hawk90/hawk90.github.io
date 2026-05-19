@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Decision Theory"
-date: 2029-05-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Loss·risk·empirical risk minimization — ML의 통합 framework."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: AOTAutograd"
-date: 2027-10-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Forward + backward graph를 미리 만든다."
 series: "PyTorch Internals"
 seriesOrder: 6

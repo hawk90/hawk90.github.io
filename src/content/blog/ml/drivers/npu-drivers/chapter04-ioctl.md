@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: ioctl 인터페이스 설계"
-date: 2027-12-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Userspace ↔ driver 약속 — 한 번 만들면 영원히 지원."
 series: "NPU 드라이버 개발"
 seriesOrder: 4

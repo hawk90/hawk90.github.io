@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: .debug_line 바이트코드 VM"
-date: 2025-09-02T03:00:00
+date: 2026-05-17T03:00:00
 description: "DWARF 줄 정보의 정체. 상태 머신, 표준/확장 opcode, file table, addr2line의 내부."
 tags: [dwarf, debug-line, state-machine, addr2line]
 series: "DWARF and ELF Internals"

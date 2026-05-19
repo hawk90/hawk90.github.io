@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Analysis of Variance and Regression"
-date: 2030-09-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "One-way·two-way ANOVA·simple linear regression."
 series: "Statistical Inference"
 seriesOrder: 11

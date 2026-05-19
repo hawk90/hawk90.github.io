@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Type 1/2/3 디바이스 분류"
-date: 2026-10-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "어떤 protocol을 쓰느냐로 결정되는 device 3종."
 series: "CXL 심화"
 seriesOrder: 5

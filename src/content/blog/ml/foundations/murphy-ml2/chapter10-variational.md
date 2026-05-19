@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Variational Inference"
-date: 2029-06-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "ELBO·mean-field·amortized·SVI — VI 통합."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 10

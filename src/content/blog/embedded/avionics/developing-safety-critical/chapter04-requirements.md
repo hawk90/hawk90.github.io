@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 요구사항 — High-Level·Low-Level·Derived·Traceability"
-date: 2026-05-26T04:00:00
+date: 2026-05-18T04:00:00
 description: "DO-178C requirements process. HLR·LLR·Derived. Traceability·DOORS·validation."
 series: "Developing Safety-Critical Software"
 seriesOrder: 4

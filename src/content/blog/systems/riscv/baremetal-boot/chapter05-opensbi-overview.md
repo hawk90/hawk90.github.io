@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: OpenSBI 개요"
-date: 2025-05-18T23:00:00
+date: 2026-05-17T23:00:00
 description: "OpenSBI — SBI 스펙, 플랫폼 추상화, 펌웨어 타입을 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 5

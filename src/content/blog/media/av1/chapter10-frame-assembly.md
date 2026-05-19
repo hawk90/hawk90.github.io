@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 프레임 조립"
-date: 2025-10-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "AV1 프레임 조립 — 블록 순회, 크로마 처리, YUV→RGB 변환, 첫 프레임 완성과 검증."
 tags: [AV1, Video, Codec, Frame, Decoding]
 series: "AV1"

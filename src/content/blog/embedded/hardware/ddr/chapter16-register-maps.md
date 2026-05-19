@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: 레지스터 맵 — Mode Register, SPD"
-date: 2026-08-01T17:00:00
+date: 2026-05-16T17:00:00
 description: "DDR 메모리의 레지스터: Mode Register 설정, SPD(Serial Presence Detect) 구조"
 series: "DDR Memory Deep Dive"
 seriesOrder: 16

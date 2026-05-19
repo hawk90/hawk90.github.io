@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Graphical Models"
-date: 2029-07-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Bayesian network·Markov random field·factor graph·inference."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 8

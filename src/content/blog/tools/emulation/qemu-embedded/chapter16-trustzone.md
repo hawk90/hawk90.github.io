@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: TrustZone Secure World"
-date: 2025-09-02T16:00:00
+date: 2026-05-17T16:00:00
 description: "EL3·secure·non-secure 분리 — OP-TEE 부팅."
 tags: [QEMU, trustzone, op-tee, secure-world]
 series: "QEMU Embedded Emulation"

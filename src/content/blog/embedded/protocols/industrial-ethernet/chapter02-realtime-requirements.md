@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 실시간 요구사항 — Determinism·Cycle Time"
-date: 2027-06-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Soft·Firm·Hard real-time — 산업 자동화의 시간 등급."
 series: "Industrial Ethernet 심화"
 seriesOrder: 2

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4 Words: D–F"
-date: 2026-05-15T03:00:00
+date: 2026-05-14T03:00:00
 description: "자주 오용되는 단어와 표현 — Data부터 Fortuitous까지."
 series: "The Elements of Style"
 seriesOrder: 27
@@ -8,14 +8,13 @@ tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 ## D
 
 ### Data
 
-`Data`는 *복수형* (strata, phenomena, media처럼). 단수로 쓰는 용법도 점차 받아들여지지만, *형식적인 글*에서는 *복수*로 다룹니다.
+`Data`는 복수형입니다 (strata, phenomena, media처럼). 단수로 쓰는 용법도 점차 받아들여지지만, 형식적인 글에서는 복수로 다룹니다.
 
 ```
 선호 (격식 / 학술):
@@ -35,11 +34,11 @@ medium    → media (라틴어)
 criterion → criteria (그리스어)
 ```
 
-학술 글에서는 *복수 형식*이 표준.
+학술 글에서는 복수 형식이 표준입니다.
 
 ### Different than / Different from
 
-`Different from`이 표준. 비교의 `other than`, `unlike`와 같은 계통.
+`Different from`이 표준입니다. 비교의 *other than*, *unlike*와 같은 계통입니다.
 
 ```
 선호: "This book is different from that one."
@@ -48,7 +47,7 @@ criterion → criteria (그리스어)
 
 ### Disinterested / Uninterested
 
-`Disinterested` — *공정한, 편향 없는*. `Uninterested` — *관심 없는*. *완전히 다른 의미*.
+`Disinterested`는 공정한·편향 없는 것이고, `Uninterested`는 관심 없는 것입니다. 완전히 다른 의미입니다.
 
 ```
 "Let a disinterested person judge our dispute."
@@ -58,7 +57,7 @@ criterion → criteria (그리스어)
    ← 무관심
 ```
 
-한국 학습자가 자주 *동의어*로 오해. *Dis-*가 *not*이 아니라 *fair*에 가까운 자리.
+한국 학습자가 자주 동의어로 오해합니다. *Dis-*가 *not*이 아니라 *fair*에 가까운 자리입니다.
 
 ### Doubt that / Doubt whether
 
@@ -72,7 +71,7 @@ criterion → criteria (그리스어)
 
 ### Due to
 
-부사구로서 *because of*, *through*, *owing to*의 의미로 *함부로 쓰지 마세요*. *Attributable to* 의미일 때만 정확.
+부사구로서 *because of*, *through*, *owing to*의 의미로 함부로 쓰지 마세요. *Attributable to* 의미일 때만 정확합니다.
 
 ```
 회피 (부사구):
@@ -111,11 +110,11 @@ cf. Affect (동사, 영향을 끼치다):
 "The weather affects my mood."
 ```
 
-*Affect / Effect*는 *학습자가 가장 자주 틀리는* 자리.
+*Affect / Effect*는 학습자가 가장 자주 틀리는 자리입니다.
 
 ### Either
 
-*Or*와 함께 쓰일 때만 *둘 중 하나*. 셋 이상에는 부적합.
+*Or*와 함께 쓰일 때만 "둘 중 하나"입니다. 셋 이상에는 부적합합니다.
 
 ```
 선호: "Either A or B" (둘 중 하나)
@@ -124,7 +123,7 @@ cf. Affect (동사, 영향을 끼치다):
 
 ### Enormity
 
-*Monstrous wickedness* (거대한 악)의 의미. *Hugeness*의 뜻으로 *쓰지 마세요*.
+*Monstrous wickedness* (거대한 악)의 의미입니다. *Hugeness*의 뜻으로 쓰지 마세요.
 
 ```
 선호: "The enormity of the crime shocked the nation."
@@ -136,7 +135,7 @@ cf. Affect (동사, 영향을 끼치다):
 
 ### Etc.
 
-*And so forth*의 라틴어 약자. *Such as*, *for example* 같은 표현으로 시작한 리스트의 *끝에는 쓰지 않습니다*. 형식적인 글에서는 *가능한 한 피합니다*.
+*And so forth*의 라틴어 약자입니다. *Such as*, *for example* 같은 표현으로 시작한 리스트의 끝에는 쓰지 않습니다. 형식적인 글에서는 가능한 한 피합니다.
 
 ```
 회피 (중복):
@@ -161,7 +160,7 @@ cf. Affect (동사, 영향을 끼치다):
 
 ### Fact
 
-*직접 검증 가능한 일*에만 씁니다. *판단이나 견해*에는 쓰지 마세요.
+직접 검증 가능한 일에만 씁니다. 판단이나 견해에는 쓰지 마세요.
 
 ```
 선호 (사실):
@@ -178,7 +177,7 @@ cf. Affect (동사, 영향을 끼치다):
 
 ### Facility
 
-*감옥, 학교, 병원*을 굳이 *facility*로 부르는 *관료적 습관*을 피합니다.
+감옥·학교·병원을 굳이 *facility*로 부르는 관료적 습관을 피합니다.
 
 ```
 회피: "He has been appointed warden of the new facility."
@@ -188,11 +187,11 @@ cf. Affect (동사, 영향을 끼치다):
 선호: "The hospital opened last week."
 ```
 
-*Facility*는 *모호*. *구체 명사*가 *강함*.
+*Facility*는 모호합니다. 구체 명사가 강합니다.
 
 ### Factor
 
-*진부한* 단어. *더 직접적인 표현*으로.
+진부한 단어입니다. 더 직접적인 표현으로 바꿉니다.
 
 ```
 회피:
@@ -221,7 +220,7 @@ Further → 시간 / 정도 / 추상:
 "Further developments are expected."
 ```
 
-미국식 영어는 *farther = 물리적, further = 비유*. 영국식은 *섞임*.
+미국식 영어는 *farther*가 물리적, *further*가 비유입니다. 영국식은 둘이 섞입니다.
 
 ### Fewer / Less
 
@@ -245,7 +244,7 @@ Less + 셀 수 없는 명사:
 
 ### Finalize
 
-*거만하고 모호한* 동사. *Conclude*, *complete*, *terminate*로 *바꿔 쓰세요*.
+거만하고 모호한 동사입니다. *Conclude*, *complete*, *terminate*로 바꿔 쓰세요.
 
 ```
 회피: "We need to finalize the plans."
@@ -253,11 +252,11 @@ Less + 셀 수 없는 명사:
 또는: "We need to settle the plans."
 ```
 
-비즈니스 영어의 *전형적 군더더기*. 학술 / 격식 글에서는 *피하세요*.
+비즈니스 영어의 전형적 군더더기입니다. 학술·격식 글에서는 피하세요.
 
 ### Fix
 
-미국에서는 *arrange, prepare, mend*의 *구어*. 본래 *figere*(굳히다, 위치를 정하다)에서 왔으므로 *형식적 글*에서는 *본래 의미*로만 씁니다.
+미국에서는 *arrange*, *prepare*, *mend*의 구어로 쓰입니다. 본래 *figere*(굳히다, 위치를 정하다)에서 왔으므로 형식적 글에서는 본래 의미로만 씁니다.
 
 ```
 구어 (회화):
@@ -270,11 +269,11 @@ Less + 셀 수 없는 명사:
 "The image was fixed in his memory." (굳히다)
 ```
 
-격식 글에서는 *prepare, repair, set* 등이 더 명확.
+격식 글에서는 *prepare*, *repair*, *set* 등이 더 명확합니다.
 
 ### Flammable / Inflammable
 
-*같은 의미*. *Inflammable*은 *접두사 in-*이 *부정*으로 오해될 우려가 있어 *flammable*이 안전 표지에 사용됩니다.
+같은 의미입니다. *Inflammable*은 접두사 *in-*이 부정으로 오해될 우려가 있어 *flammable*이 안전 표지에 쓰입니다.
 
 ```
 선호 (안전 표지):
@@ -283,7 +282,7 @@ Less + 셀 수 없는 명사:
 
 ### Folk
 
-*People*의 의미로 *단수형 folk*만 씁니다. *Folks*(가족, 부모)는 *너무 구어적*.
+*People*의 의미로 단수형 *folk*만 씁니다. *Folks*(가족, 부모)는 너무 구어적입니다.
 
 ```
 회피 (구어):
@@ -296,7 +295,7 @@ Less + 셀 수 없는 명사:
 
 ### Fortuitous
 
-*우연한*의 의미. *Fortunate, lucky*와 *다릅니다*.
+"우연한"의 의미입니다. *Fortunate*, *lucky*와 다릅니다.
 
 ```
 "The meeting was fortuitous."
@@ -310,11 +309,11 @@ Less + 셀 수 없는 명사:
 선호: "It was a fortunate outcome."
 ```
 
-*Chance*의 의미일 때만 *fortuitous*. *Good luck*의 의미면 *fortunate*.
+*Chance*의 의미일 때만 *fortuitous*입니다. *Good luck*의 의미면 *fortunate*를 씁니다.
 
 ### Free gift
 
-*Gift*는 이미 *공짜*. *Free*는 *군더더기*.
+*Gift*는 이미 공짜입니다. *Free*는 군더더기입니다.
 
 ```
 회피: "Free gift with purchase!"
@@ -353,7 +352,7 @@ Less + 셀 수 없는 명사:
 
 ## 다음 항목 예고
 
-다음 — **Words G~I** (Hopefully, However, Imply 등).
+다음은 **Words G~I**입니다 (Hopefully, However, Imply 등).
 
 ## 관련 항목
 

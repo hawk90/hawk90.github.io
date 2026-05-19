@@ -1,6 +1,6 @@
 ---
 title: "Ch 5 Reminder 8: 한정어를 자제하라"
-date: 2026-05-15T16:00:00
+date: 2026-05-14T16:00:00
 description: "Rather, very, little, pretty — 이 단어들은 산문의 연못에 사는 거머리들이다."
 series: "The Elements of Style"
 seriesOrder: 40

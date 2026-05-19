@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Queue 메커니즘"
-date: 2026-07-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "NVMe의 Submission Queue, Completion Queue, Doorbell, Phase Bit 메커니즘을 분석한다"
 series: "NVMe Deep Dive"
 seriesOrder: 4

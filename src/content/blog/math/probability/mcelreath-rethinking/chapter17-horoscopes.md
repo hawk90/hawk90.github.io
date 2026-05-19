@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Horoscopes"
-date: 2030-03-01T17:00:00
+date: 2026-05-16T17:00:00
 description: "Final thoughts — Bayesian workflow의 종합."
 series: "Statistical Rethinking"
 seriesOrder: 17

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Neural Networks"
-date: 2029-07-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Feed-forward·backprop·Bayesian NN — 2006년 시각의 NN."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 5

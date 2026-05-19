@@ -1,6 +1,6 @@
 ---
 title: "Ch 8.1: Switching — Single-Level·VCS·vPPB"
-date: 2026-01-01T18:00:00
+date: 2026-05-16T18:00:00
 description: "스펙 §7 — single-level switch (CXL 2.0+)."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 18

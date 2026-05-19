@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Statistical Estimation"
-date: 2028-11-01T07:00:00
+date: 2026-05-15T07:00:00
 description: "MLE·MAP·Bayes — convex 형식의 통계 추정."
 series: "Convex Optimization (Boyd)"
 seriesOrder: 7

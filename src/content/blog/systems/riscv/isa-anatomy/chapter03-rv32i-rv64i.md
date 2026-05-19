@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: RV32I/RV64I 기본 정수 명령어"
-date: 2025-05-18T03:00:00
+date: 2026-05-17T03:00:00
 description: "RISC-V 기본 정수 명령어 — 산술, 논리, 비교, 분기, 점프 명령어를 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 3

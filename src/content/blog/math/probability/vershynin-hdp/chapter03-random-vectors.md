@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Random Vectors in High Dimensions"
-date: 2030-10-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Concentration of norm·thin shell·high-d Gaussian geometry."
 series: "High-Dimensional Probability"
 seriesOrder: 3

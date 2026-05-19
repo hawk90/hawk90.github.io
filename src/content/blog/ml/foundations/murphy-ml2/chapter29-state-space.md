@@ -1,6 +1,6 @@
 ---
 title: "Ch 29: State-Space Models"
-date: 2029-06-02T05:00:00
+date: 2026-05-16T05:00:00
 description: "HMM·LDS·deep SSM·Mamba — sequence의 잠재 state."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 29

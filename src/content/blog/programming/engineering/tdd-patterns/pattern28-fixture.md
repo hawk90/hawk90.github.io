@@ -1,6 +1,6 @@
 ---
 title: "Pattern 28: Fixture"
-date: 2026-07-02T04:00:00
+date: 2026-05-10T04:00:00
 description: "Test에 공유되는 setup — fixture로 추출. Fresh vs Shared의 트레이드오프."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 28

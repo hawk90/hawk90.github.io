@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: 핫플러그/핫언플러그"
-date: 2025-09-01T20:00:00
+date: 2026-05-17T20:00:00
 description: "device_add·device_del·refcount — runtime device dynamics."
 tags: [QEMU, hotplug, pcie, hot-add]
 series: "QEMU Fake Device Driver"

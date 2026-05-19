@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Object-Oriented (DO-332) — C++ in avionics"
-date: 2026-05-26T12:00:00
+date: 2026-05-18T12:00:00
 description: "DO-332 — OO 기능의 인증 위험과 완화. C++의 avionics 자리."
 series: "Developing Safety-Critical Software"
 seriesOrder: 12

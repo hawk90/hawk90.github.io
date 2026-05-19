@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 37: Singleton을 디자인 패턴이 아닌 구현 패턴으로 다루어라"
-date: 2026-05-14T13:00:00
+date: 2026-05-02T13:00:00
 description: "Singleton은 디자인 패턴인가 안티패턴인가. 글로벌 상태의 본질과 의존성 추상화로의 분리를 짚어 본다."
 tags: [C++, Software Design, Singleton, Anti-pattern]
 series: "C++ Software Design"

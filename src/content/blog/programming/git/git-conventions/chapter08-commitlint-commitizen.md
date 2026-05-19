@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: commitlint / commitizen"
-date: 2025-08-05T08:00:00
+date: 2026-05-17T08:00:00
 description: "메시지 검증 (commitlint) / 메시지 도우미 (commitizen). 자동화 / 강제."
 tags: [Git, commitlint, commitizen]
 series: "Git Conventions"

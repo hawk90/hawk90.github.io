@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 데이터 시스템의 미래"
-date: 2025-07-01T12:00:00
+date: 2026-05-12T12:00:00
 description: "Kleppmann의 비전 — Unbundling Database, dataflow 사고, 인간을 위한 데이터 시스템."
 tags: [DDIA, Future, Dataflow, Ethics]
 series: "Designing Data-Intensive Applications"

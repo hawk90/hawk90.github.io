@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: DDR 매개변수 — 보드별 timing"
-date: 2026-05-20T05:00:00
+date: 2026-05-09T05:00:00
 description: "DDR controller 설정값이 어디서 오는지 — vendor tool, SPD, 데이터시트 timing 표."
 series: "BSP Development"
 seriesOrder: 5

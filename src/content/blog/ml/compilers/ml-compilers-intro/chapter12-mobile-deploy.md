@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 사례 — 모바일 배포"
-date: 2028-02-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "한 모델을 모바일 NPU·GPU·CPU에 — 컴파일러로 풀기."
 series: "ML 컴파일러"
 seriesOrder: 12

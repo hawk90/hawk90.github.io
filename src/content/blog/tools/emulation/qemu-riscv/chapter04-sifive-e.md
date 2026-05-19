@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: sifive_e 머신"
-date: 2025-05-19T22:00:00
+date: 2026-05-17T22:00:00
 description: "QEMU sifive_e — E31 코어 에뮬레이션, 주변장치 모델을 다룬다."
 series: "RISC-V QEMU 심화"
 seriesOrder: 4

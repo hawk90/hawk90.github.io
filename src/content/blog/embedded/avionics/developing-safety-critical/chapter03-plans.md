@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 5 Plans — PSAC·SDP·SVP·SCMP·SQAP"
-date: 2026-05-26T03:00:00
+date: 2026-05-18T03:00:00
 description: "DO-178C 시작점. PSAC FAA 제출 약속. SDP·SVP·SCMP·SQAP 상세 구조."
 series: "Developing Safety-Critical Software"
 seriesOrder: 3

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Probability"
-date: 2029-03-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "확률공간·conditional·independence — 토대."
 series: "All of Statistics"
 seriesOrder: 1

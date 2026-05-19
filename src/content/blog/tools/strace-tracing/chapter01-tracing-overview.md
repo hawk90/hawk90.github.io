@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 트레이싱이란 / 종류 비교"
-date: 2025-08-30T01:00:00
+date: 2026-05-17T01:00:00
 description: "ptrace / perf_event_open / eBPF — 세 가지 메커니즘. 비용 비교."
 tags: [Tracing, ptrace, eBPF]
 series: "System Tracing"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: CAN XL — 10 Mbps, 2048 byte, TCP/IP 운반"
-date: 2027-04-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Bosch 2018·CiA 표준. 페이로드 64 → 2048 byte, 데이터 phase 10-20 Mbps. CAN 위에 IP 패킷."
 series: "CAN Bus 심화"
 seriesOrder: 8

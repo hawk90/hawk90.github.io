@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: CXL.mem — 디바이스 메모리 접근"
-date: 2026-10-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Host가 device memory를 직접 byte-addressable로 — load/store 시맨틱."
 series: "CXL 심화"
 seriesOrder: 4

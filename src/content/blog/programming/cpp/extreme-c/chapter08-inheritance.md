@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Inheritance"
-date: 2025-06-15T08:00:00
+date: 2026-05-05T08:00:00
 description: "C로 상속 — struct 내부에 base 임베드. memory layout."
 tags: [C, OOP, Inheritance]
 series: "전문가를 위한 C"

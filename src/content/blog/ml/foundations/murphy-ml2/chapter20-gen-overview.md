@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Generative Models — Overview"
-date: 2029-06-01T20:00:00
+date: 2026-05-16T20:00:00
 description: "Likelihood-based·implicit·diffusion — generative model 분류학."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 20

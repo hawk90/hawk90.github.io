@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Monte Carlo Methods"
-date: 2029-02-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Importance·rejection·MCMC — 샘플링으로 적분."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 12

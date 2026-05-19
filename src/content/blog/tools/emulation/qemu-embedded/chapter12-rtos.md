@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: RTOS 에뮬레이션"
-date: 2025-09-15T12:00:00
+date: 2026-05-17T12:00:00
 description: "FreeRTOS와 Zephyr를 QEMU에서 실행한다."
 tags: [QEMU, FreeRTOS, Zephyr, RTOS]
 series: "QEMU Embedded Emulation"

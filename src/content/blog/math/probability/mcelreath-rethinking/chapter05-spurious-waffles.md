@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: The Many Variables and the Spurious Waffles"
-date: 2030-03-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Multiple regression·spurious correlation·confounding."
 series: "Statistical Rethinking"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 30: Becoming Adept at Testing"
-date: 2025-07-02T06:00:00
+date: 2026-05-05T06:00:00
 description: "단위 테스트 — Google Test / Catch2 / doctest. coverage. 모킹."
 tags: [C++, Testing, gtest, Catch2]
 series: "전문가를 위한 C++"

@@ -1,6 +1,6 @@
 ---
 title: "Pattern 22: Move Field"
-date: 2026-06-01T22:00:00
+date: 2026-05-02T22:00:00
 description: "Field가 다른 class에서 더 자주 쓰이면 이동한다 — Feature Envy의 데이터 측면."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 22

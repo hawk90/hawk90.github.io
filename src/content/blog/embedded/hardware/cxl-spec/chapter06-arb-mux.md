@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: ARB/MUX Layer"
-date: 2026-01-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "스펙 §5 — protocol multiplexing·arbitration·vLSM."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 15

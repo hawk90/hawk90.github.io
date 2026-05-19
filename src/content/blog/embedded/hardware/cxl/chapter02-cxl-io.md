@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: CXL.io — PCIe 호환 I/O"
-date: 2026-10-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "configuration·discovery·DMA — CXL의 PCIe-호환 sub-protocol."
 series: "CXL 심화"
 seriesOrder: 2

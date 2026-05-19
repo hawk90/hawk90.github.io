@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: EFI in U-Boot — bootefi와 EFI loader"
-date: 2026-05-18T18:00:00
+date: 2026-05-09T18:00:00
 description: "U-Boot이 UEFI Boot Services를 노출하는 방식 — bootefi, EBBR, Linux EFI stub과의 연결."
 series: "Bootloader Internals"
 seriesOrder: 18

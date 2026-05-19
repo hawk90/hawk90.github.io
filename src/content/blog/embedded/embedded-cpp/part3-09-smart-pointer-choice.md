@@ -1,6 +1,6 @@
 ---
 title: "Part 3-09: 스마트 포인터 선택"
-date: 2026-05-15T09:00:00
+date: 2026-05-07T09:00:00
 description: "unique_ptr vs shared_ptr vs raw pointer — 임베디드의 소유권 모델 선택."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 27

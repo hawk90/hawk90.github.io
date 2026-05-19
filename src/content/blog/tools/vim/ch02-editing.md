@@ -1,6 +1,6 @@
 ---
 title: "Vim 마스터하기: 편집 명령어"
-date: 2026-05-13T02:00:00
+date: 2026-05-17T02:00:00
 description: "삽입, 삭제, 복사, 붙여넣기, 변경 명령어"
 series: "Vim 마스터하기"
 seriesOrder: 2

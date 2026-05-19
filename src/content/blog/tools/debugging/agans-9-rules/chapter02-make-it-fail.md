@@ -1,6 +1,6 @@
 ---
 title: "Rule 2: Make It Fail"
-date: 2031-01-01T02:00:00
+date: 2026-05-17T02:00:00
 description: "재현 못 하는 버그는 디버그할 수 없다."
 series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 2

@@ -1,6 +1,6 @@
 ---
 title: "Part 2-5: 시그널 처리"
-date: 2025-07-15T09:00:00
+date: 2026-05-12T09:00:00
 description: "시그널 — 비동기 알림. signal_pending / handler / sigreturn."
 tags: [Linux, Kernel, Signal]
 series: "리눅스 커널의 구조와 원리"

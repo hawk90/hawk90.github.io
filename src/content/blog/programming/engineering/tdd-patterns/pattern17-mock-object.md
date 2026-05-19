@@ -1,6 +1,6 @@
 ---
 title: "Pattern 17: Mock Object"
-date: 2026-07-01T17:00:00
+date: 2026-05-10T17:00:00
 description: "비싸거나 어려운 collaborator — mock으로 대체해 격리된 테스트."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 17

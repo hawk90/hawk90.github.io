@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Statistics"
-date: 2029-05-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "MLE·MAP·Bayes·bootstrap — 추론의 도구함."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 4

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5 Reminder 1: 자신을 배경에 두라"
-date: 2026-05-15T09:00:00
+date: 2026-05-14T09:00:00
 description: "독자의 주의가 글의 무드가 아니라 글의 의미로 향하게 쓰라."
 series: "The Elements of Style"
 seriesOrder: 33

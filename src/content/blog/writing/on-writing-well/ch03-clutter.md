@@ -1,6 +1,6 @@
 ---
 title: "Chapter 3: Clutter"
-date: 2026-05-18T03:00:00
+date: 2026-05-14T03:00:00
 description: "어수선함은 미국 산문의 병입니다. 7가지 잡초를 잘라내야 글이 산다."
 series: "On Writing Well"
 seriesOrder: 3

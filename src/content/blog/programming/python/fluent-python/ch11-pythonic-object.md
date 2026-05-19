@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: A Pythonic Object"
-date: 2026-05-16T11:00:00
+date: 2026-05-15T11:00:00
 description: "파이썬다운 객체 — __repr__, __str__, classmethod, property."
 series: "Fluent Python"
 seriesOrder: 11

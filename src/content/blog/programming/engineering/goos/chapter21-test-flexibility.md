@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: Test Flexibility"
-date: 2025-10-10T14:00:00
+date: 2026-05-10T14:00:00
 description: "유연한 테스트 — over-specified mocks 회피. Custom matchers."
 tags: [TDD, Flexibility, Matchers]
 series: "Growing Object-Oriented Software"

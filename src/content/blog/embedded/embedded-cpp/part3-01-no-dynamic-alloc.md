@@ -1,6 +1,6 @@
 ---
 title: "Part 3-01: 동적 할당 없이 C++ 쓰기"
-date: 2026-05-15T01:00:00
+date: 2026-05-07T01:00:00
 description: "임베디드의 첫 번째 원칙 — new/malloc 없이 modern C++의 STL 같은 컨테이너 활용."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 19

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Trace — RTT / ITM / SWO / ETM / Semihosting"
-date: 2025-09-01T06:00:00
+date: 2026-05-17T06:00:00
 description: "printf 없이 펌웨어 로그·trace 빼내기. 다섯 가지 방법 비교 + 코드 예제."
 tags: [rtt, itm, swo, etm, semihosting, trace, embedded]
 series: "Embedded Debugging"

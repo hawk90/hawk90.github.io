@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: U-Boot의 위치 — Das U-Boot, TF-A, EDK II"
-date: 2026-05-18T02:00:00
+date: 2026-05-09T02:00:00
 description: "임베디드 부트로더 생태계 — Das U-Boot, ARM Trusted Firmware, EDK II의 역할 분담."
 series: "Bootloader Internals"
 seriesOrder: 2

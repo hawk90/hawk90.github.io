@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 동시성, atomic, memory model"
-date: 2025-09-15T10:00:00
+date: 2026-05-18T10:00:00
 description: "std::thread(A21), atomic memory_order(A23), race 회피, lock-free 제한, 임베디드 RTOS 대응."
 tags: [autosar, cpp, concurrency, atomic, memory-model, thread]
 series: "AUTOSAR C++14"

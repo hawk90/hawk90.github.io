@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Socket Programming"
-date: 2025-06-15T20:00:00
+date: 2026-05-05T20:00:00
 description: "TCP / UDP 소켓. listen / accept / connect. select / poll / epoll."
 tags: [C, Socket, TCP, UDP, epoll]
 series: "전문가를 위한 C"

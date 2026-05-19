@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Linux on HiFive"
-date: 2025-05-19T18:00:00
+date: 2026-05-17T18:00:00
 description: "Linux on HiFive Unmatched — 빌드, 부팅, 드라이버 개발 맛보기를 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 12

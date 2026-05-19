@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 정수 벡터 연산"
-date: 2025-05-20T09:00:00
+date: 2026-05-17T09:00:00
 description: "RVV 정수 연산 — 산술, 비교, 논리, 시프트를 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 5

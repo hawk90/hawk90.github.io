@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: ltrace — 라이브러리 함수 트레이싱"
-date: 2025-08-30T04:00:00
+date: 2026-05-17T04:00:00
 description: "ltrace — 동적 링킹된 libc/lib 함수 호출. strace + ltrace 결합."
 tags: [ltrace, Library, Dynamic Linking]
 series: "System Tracing"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Memory Protection Unit (MPU) Support"
-date: 2026-07-01T12:00:00
+date: 2026-05-09T12:00:00
 description: "FreeRTOS-MPU·privileged·unprivileged — 태스크 격리와 보안."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 12

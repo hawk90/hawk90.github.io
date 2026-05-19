@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Maintaining the Test-Driven Cycle"
-date: 2025-10-10T05:00:00
+date: 2026-05-10T05:00:00
 description: "외부 → 내부 (outside-in). 인수 → 단위 테스트로 좁혀가기."
 tags: [TDD, Outside-In]
 series: "Growing Object-Oriented Software"

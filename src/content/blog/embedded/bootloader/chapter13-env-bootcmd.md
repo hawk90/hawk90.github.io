@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: 환경 변수와 bootcmd"
-date: 2026-05-18T13:00:00
+date: 2026-05-09T13:00:00
 description: "U-Boot 환경 변수 시스템 — saveenv·bootcmd·bootargs·distro_bootcmd 패턴."
 series: "Bootloader Internals"
 seriesOrder: 13

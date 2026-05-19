@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Heap Memory Management"
-date: 2026-07-01T02:00:00
+date: 2026-05-09T02:00:00
 description: "heap_1·heap_2·heap_3·heap_4·heap_5 — 다섯 가지 메모리 할당 전략."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 2

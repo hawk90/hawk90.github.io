@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Namespace"
-date: 2026-07-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "NVMe Namespace의 개념과 Multi-path I/O 구성을 분석한다"
 series: "NVMe Deep Dive"
 seriesOrder: 3

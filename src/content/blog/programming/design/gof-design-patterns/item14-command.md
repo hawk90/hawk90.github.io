@@ -1,6 +1,6 @@
 ---
 title: "GoF 14: Command"
-date: 2026-02-01T14:00:00
+date: 2026-05-01T14:00:00
 description: "요청을 객체로 — undo/redo, 큐, 매크로, 로깅이 가능해진다."
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"

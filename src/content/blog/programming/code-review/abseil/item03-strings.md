@@ -1,6 +1,6 @@
 ---
 title: "항목 3: Abseil 문자열 라이브러리 — StrCat, StrJoin, StrSplit"
-date: 2025-05-13T03:00:00
+date: 2026-05-18T03:00:00
 description: "Abseil의 문자열 처리 라이브러리를 깊이 있게 살펴봅니다."
 tags: [C++, Abseil, Strings, Performance]
 series: "Abseil C++ 라이브러리"

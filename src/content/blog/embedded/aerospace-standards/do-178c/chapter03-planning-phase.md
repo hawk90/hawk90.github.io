@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Planning Phase — 5개 Plan + 3개 Standard"
-date: 2025-09-25T04:00:00
+date: 2026-05-18T04:00:00
 description: "PSAC·SDP·SVP·SCMP·SQAP 5 plan과 SRS·SDS·SCS 3 standard 작성. FAA SOI 1 review 대응 가이드."
 tags: [do-178c, planning, psac, sdp, svp, scmp, sqap, srs, sds, scs, soi-1]
 series: "DO-178C"

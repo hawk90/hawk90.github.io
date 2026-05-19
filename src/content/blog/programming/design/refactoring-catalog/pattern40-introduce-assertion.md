@@ -1,6 +1,6 @@
 ---
 title: "Pattern 40: Introduce Assertion"
-date: 2026-06-02T16:00:00
+date: 2026-05-02T16:00:00
 description: "암묵적 invariant를 코드로 명시 — 가정이 깨지면 즉시 실패."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 40

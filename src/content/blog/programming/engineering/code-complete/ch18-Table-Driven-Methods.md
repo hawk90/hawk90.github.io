@@ -1,6 +1,6 @@
 ---
 title: "Chapter 18: Table-Driven Methods"
-date: 2025-06-20T18:00:00
+date: 2026-05-11T18:00:00
 description: "테이블로 로직을 표현 — 거대한 if-else를 데이터로. 직접·인덱스·계단 테이블 접근."
 series: "Code Complete"
 seriesOrder: 18

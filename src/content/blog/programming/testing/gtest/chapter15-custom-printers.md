@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Custom printers와 traits"
-date: 2026-05-21T15:00:00
+date: 2026-05-10T15:00:00
 description: "PrintTo·value-printer 커스터마이즈로 사용자 타입의 가독성 있는 실패 메시지."
 series: "gtest 심화"
 seriesOrder: 15

@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Linux Advanced — SR-IOV, VFIO, P2P"
-date: 2026-06-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "Linux PCIe 고급 주제 — SR-IOV 가상화, VFIO 사용자 공간 드라이버, P2P DMA"
 series: "PCIe Deep Dive"
 seriesOrder: 12

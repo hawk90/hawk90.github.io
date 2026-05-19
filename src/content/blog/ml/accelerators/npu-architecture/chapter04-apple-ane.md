@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Apple Neural Engine (ANE)"
-date: 2028-01-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "iPhone부터 M-series까지 — Apple의 NPU."
 series: "NPU 아키텍처"
 seriesOrder: 4

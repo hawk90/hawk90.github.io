@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: The Bayesian Network Representation"
-date: 2030-11-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "DAG·CPD·d-separation·I-map — Bayesian network 본격."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 3

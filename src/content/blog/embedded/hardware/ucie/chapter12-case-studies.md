@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 사례 — Intel·AMD·NVIDIA 칩렛"
-date: 2026-11-01T12:00:00
+date: 2026-05-19T12:00:00
 description: "실제 출하 칩렛 제품 — Foveros·Infinity Fabric·NVLink-C2C."
 series: "UCIe 심화"
 seriesOrder: 12

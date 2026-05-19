@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Snooping Coherence Protocols"
-date: 2026-09-01T07:00:00
+date: 2026-05-19T07:00:00
 description: "Bus·broadcast — 모든 캐시가 모든 transaction을 본다."
 series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 7

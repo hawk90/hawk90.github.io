@@ -1,6 +1,6 @@
 ---
 title: "Chapter 19: General Control Issues"
-date: 2025-06-20T19:00:00
+date: 2026-05-11T19:00:00
 description: "제어 흐름의 일반 쟁점 — 부울 표현식 단순화, 깊이 제한, 흐름 복잡도 측정."
 series: "Code Complete"
 seriesOrder: 19

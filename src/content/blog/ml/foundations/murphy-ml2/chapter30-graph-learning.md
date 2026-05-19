@@ -1,6 +1,6 @@
 ---
 title: "Ch 30: Graph Learning"
-date: 2029-06-02T06:00:00
+date: 2026-05-16T06:00:00
 description: "Structure learning·GNN·heterogeneous — graph 데이터 ML."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 30

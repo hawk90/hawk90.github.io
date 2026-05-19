@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 1: 소프트웨어 디자인의 중요성을 이해하라"
-date: 2026-05-13T01:00:00
+date: 2026-05-02T01:00:00
 description: "디자인이란 무엇인가. 아키텍처·디자인·구현이라는 세 층위, 의존성 관리라는 본질, 그리고 디자인을 미룬 대가."
 tags: [C++, Software Design, Architecture, Dependencies]
 series: "C++ Software Design"

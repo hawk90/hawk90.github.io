@@ -1,6 +1,6 @@
 ---
 title: "Chapter 34: Themes in Software Craftsmanship"
-date: 2025-06-21T10:00:00
+date: 2026-05-11T10:00:00
 description: "책 전체의 관통 테마들 — 복잡성 정복, 프로세스, 코드 품질, 변경 가능성."
 series: "Code Complete"
 seriesOrder: 34

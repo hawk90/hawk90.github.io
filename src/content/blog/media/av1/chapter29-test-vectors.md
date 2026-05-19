@@ -1,6 +1,6 @@
 ---
 title: "Ch 29: 테스트 벡터 검증"
-date: 2025-10-02T06:00:00
+date: 2026-05-16T06:00:00
 description: "AV1 디코더 검증 — AOMedia CTC 테스트 벡터, 바이트 단위 비교, 디버깅 전략, 최종 마일스톤."
 tags: [AV1, Video, Codec, Test, Conformance, Verification]
 series: "AV1"

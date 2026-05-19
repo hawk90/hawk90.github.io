@@ -1,6 +1,6 @@
 ---
 title: "3-01: Cache Line Alignment — alignas·Padding·SoA"
-date: 2026-05-20T08:00:00
+date: 2026-05-07T08:00:00
 description: "Cache line 정렬과 false sharing 회피, hot/cold 분리, SoA 변환을 코드와 측정으로 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 13

@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Model Comparison"
-date: 2030-05-01T08:00:00
+date: 2026-05-15T08:00:00
 description: "Bayes factor·hierarchical structure로 model을 선택."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 8

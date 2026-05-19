@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Convex Optimization Problems"
-date: 2028-11-01T04:00:00
+date: 2026-05-15T04:00:00
 description: "LP·QP·SOCP·SDP·CP — 표준 convex 문제 계층."
 series: "Convex Optimization (Boyd)"
 seriesOrder: 4

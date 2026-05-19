@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Metal의 위치 — Vulkan·CUDA와 비교"
-date: 2027-11-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Apple의 GPU·NPU 통합 컴퓨트 스택 — CUDA 외 길."
 series: "Apple Metal Stack"
 seriesOrder: 1

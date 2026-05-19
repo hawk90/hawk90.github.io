@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Limit Theorems"
-date: 2030-08-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Markov·Chebyshev·LLN·CLT — 점근적 결과."
 series: "Introduction to Probability"
 seriesOrder: 5

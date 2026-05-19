@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Environmental Qualification (DO-160 개관)"
-date: 2026-05-25T13:00:00
+date: 2026-05-18T13:00:00
 description: "RTCA DO-160G — 진동·충격·EMI·고도·온도 시험 표준의 한 장 정리."
 series: "Digital Avionics Handbook"
 seriesOrder: 13

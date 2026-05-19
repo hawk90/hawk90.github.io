@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Neural Networks for Sequences"
-date: 2029-05-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "RNN·LSTM·Transformer·attention의 modern 정점."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 15

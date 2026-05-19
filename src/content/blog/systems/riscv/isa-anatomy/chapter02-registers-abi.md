@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 레지스터와 호출 규약"
-date: 2025-05-18T02:00:00
+date: 2026-05-17T02:00:00
 description: "x0-x31 레지스터, ABI 이름(zero, ra, sp, gp, tp, a0-a7, s0-s11, t0-t6), 함수 호출 규약을 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 2

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Fault Tolerance — TMR·이중화"
-date: 2026-05-25T09:00:00
+date: 2026-05-18T09:00:00
 description: "Triple Modular Redundancy·dual·hot/cold spare — avionics 이중화 패턴."
 series: "Digital Avionics Handbook"
 seriesOrder: 9

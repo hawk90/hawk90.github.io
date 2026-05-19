@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Freedom Metal"
-date: 2025-05-19T17:00:00
+date: 2026-05-17T17:00:00
 description: "Freedom Metal — HAL 사용, GPIO, 인터럽트 핸들링을 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 11

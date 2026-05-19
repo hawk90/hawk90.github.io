@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 사례 연구 — NVMe 가상 디바이스"
-date: 2025-09-01T12:00:00
+date: 2026-05-17T12:00:00
 description: "QEMU 내장 NVMe 디바이스 분석으로 실전 패턴을 학습한다."
 tags: [QEMU, NVMe, CaseStudy]
 series: "QEMU Fake Device Driver"

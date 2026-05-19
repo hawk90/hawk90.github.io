@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 부동소수점 벡터 연산"
-date: 2025-05-20T11:00:00
+date: 2026-05-17T11:00:00
 description: "RVV 부동소수점 — FP 산술, 변환, 비교를 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 7

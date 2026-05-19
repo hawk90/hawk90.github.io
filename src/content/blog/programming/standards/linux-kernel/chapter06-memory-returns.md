@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Memory & Returns"
-date: 2025-05-14T06:00:00
+date: 2026-05-18T06:00:00
 description: "kmalloc/kfree, GFP 플래그, 에러 코드 규칙. NULL vs ERR_PTR, IS_ERR 패턴."
 tags: [Linux, Kernel, Memory, kmalloc, Error-Handling, ERR_PTR]
 series: "Linux Kernel Coding Style"

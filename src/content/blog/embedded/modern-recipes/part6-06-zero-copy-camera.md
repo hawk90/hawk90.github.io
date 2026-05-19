@@ -1,6 +1,6 @@
 ---
 title: "6-06: Zero-Copy Camera — V4L2·DMA-BUF·GPU Import·NPU 직결"
-date: 2026-05-21T06:00:00
+date: 2026-05-07T06:00:00
 description: "카메라부터 NPU·display까지 한 frame이 한 physical page를 유지하도록 V4L2·DMA-BUF·EGL·CUDA를 연결하는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 36

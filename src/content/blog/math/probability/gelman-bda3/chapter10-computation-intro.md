@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Introduction to Bayesian Computation"
-date: 2030-02-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "왜 sampling이 필요한가 — 적분에서 simulation으로."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 10

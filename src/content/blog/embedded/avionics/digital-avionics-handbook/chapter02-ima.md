@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Integrated Modular Avionics (IMA)"
-date: 2026-05-25T02:00:00
+date: 2026-05-18T02:00:00
 description: "전통 federated 아키텍처에서 IMA로의 전환 — 공유 플랫폼·partition 분리."
 series: "Digital Avionics Handbook"
 seriesOrder: 2

@@ -1,6 +1,6 @@
 ---
 title: "Tip 35: Learn a Text Manipulation Language"
-date: 2026-05-14T11:00:00
+date: 2026-05-11T11:00:00
 description: "텍스트 조작 언어를 익혀라 — 매일 마주치는 — 텍스트 처리. 사고의 도구."
 series: "The Pragmatic Programmer"
 seriesOrder: 35

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: QEMU 설치와 빌드"
-date: 2025-09-01T02:00:00
+date: 2026-05-17T02:00:00
 description: "QEMU를 소스에서 빌드하고 개발 환경을 구축한다."
 tags: [QEMU, Build, Setup]
 series: "QEMU Fake Device Driver"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: rr / Pernosco / TSan / Helgrind 통합 워크플로"
-date: 2025-09-04T05:00:00
+date: 2026-05-17T05:00:00
 description: "재현 불가 race를 기록하고 시간 역행. rr 깊이, Pernosco 인덱싱, TSan/Helgrind와의 분담."
 tags: [rr, pernosco, tsan, helgrind, time-travel, record-replay]
 series: "Concurrency Debugging"

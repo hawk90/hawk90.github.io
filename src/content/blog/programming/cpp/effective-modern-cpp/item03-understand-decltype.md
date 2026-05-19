@@ -1,6 +1,6 @@
 ---
 title: "항목 3: decltype의 작동 방식을 이해하라"
-date: 2025-01-05T03:00:00
+date: 2026-05-04T03:00:00
 description: "decltype은 추론하지 않고 보고한다. decltype(auto), 이름 vs 표현식의 결정적 차이, 그리고 평가되지 않는 문맥."
 tags: [C++, decltype, Type Deduction]
 series: "Effective Modern C++"

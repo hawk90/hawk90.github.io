@@ -1,6 +1,6 @@
 ---
 title: "Ch 23: Dirichlet Process Models"
-date: 2030-02-01T23:00:00
+date: 2026-05-16T23:00:00
 description: "DP·HDP·infinite mixture — nonparametric Bayes."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 23

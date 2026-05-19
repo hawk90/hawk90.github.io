@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Models, Statistical Inference, Learning"
-date: 2029-03-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Estimator·bias·variance·MSE — 추론의 어휘."
 series: "All of Statistics"
 seriesOrder: 6

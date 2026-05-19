@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 압축 명령어 (C)"
-date: 2025-05-18T10:00:00
+date: 2026-05-17T10:00:00
 description: "RISC-V C 확장 — 16비트 명령어 인코딩, RVC 매핑, 코드 밀도 향상을 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 10

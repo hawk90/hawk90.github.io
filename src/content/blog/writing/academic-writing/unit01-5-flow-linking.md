@@ -8,18 +8,17 @@ tags: [writing, academic, flow, linking, cohesion]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: true
 ---
 
-문장 단위가 모여 단락을 이룰 때, 그 사이의 *연결*을 만드는 것이 *flow*입니다. Swales와 Feak는 흐름의 두 큰 도구를 정리합니다 — *Old-to-New 정보 패턴*과 *linking words / phrases*. 둘은 보완 관계입니다. 정보 패턴이 흐름의 *내용*을 만들고, linking이 *명시적 연결*을 만듭니다.
+문장 단위가 모여 단락을 이룰 때, 그 사이의 연결을 만드는 것이 flow입니다. Swales와 Feak는 흐름의 두 큰 도구를 정리합니다. Old-to-New 정보 패턴과 linking words / phrases입니다. 둘은 보완 관계입니다. 정보 패턴이 흐름의 내용을 만들고, linking이 명시적 연결을 만듭니다.
 
 ## Old-to-New Information Pattern
 
-영어 학술 문장은 *옛 정보(이미 등장한 것)*를 문장의 *주어 자리*(왼쪽 끝)에, *새 정보*를 문장의 *서술부 끝*(오른쪽 끝)에 두는 경향이 있습니다. 이 패턴이 단락 안에서 반복되면 흐름이 *자연스럽게* 만들어집니다.
+영어 학술 문장은 옛 정보(이미 등장한 것)를 문장의 주어 자리(왼쪽 끝)에, 새 정보를 문장의 서술부 끝(오른쪽 끝)에 두는 경향이 있습니다. 이 패턴이 단락 안에서 반복되면 흐름이 자연스럽게 만들어집니다.
 
-다음은 카페인과 수면에 관한 단락입니다. 각 문장에서 *옛 정보 → 새 정보*의 흐름을 따라가 보세요.
+다음은 카페인과 수면에 관한 단락입니다. 각 문장에서 옛 정보 → 새 정보의 흐름을 따라가 보세요.
 
-```
+```text
 ❶ Research has shown that caffeine does indeed reduce sleepiness
    and can lead to better academic performance since students can
    spend more time studying.
@@ -50,15 +49,15 @@ draft: true
 
 흐름을 따라가면:
 
-- ❷가 *its effectiveness*로 ❶의 *caffeine reduces sleepiness*를 받습니다. 그리고 새 정보 *negative impact on sleep*을 끝에 둡니다.
-- ❸은 *caffeinated beverages*로 카페인을 다시 받고, *prolong sleep onset*이라는 구체적 새 정보를 추가합니다.
-- ❺의 새 정보 *functional energy drinks (FEDs)*가, ❻의 주어 *FEDs*로 받아집니다.
-- ❼은 *containing caffeine*으로 카페인 이야기를 다시 잇고, 새 활성 성분(*taurine, glucose ...*)을 끝에 둡니다.
-- ❽은 *these ingredients*로 ❼의 활성 성분을 받습니다.
+- ❷가 its effectiveness로 ❶의 caffeine reduces sleepiness를 받습니다. 그리고 새 정보 negative impact on sleep을 끝에 둡니다.
+- ❸은 caffeinated beverages로 카페인을 다시 받고, prolong sleep onset이라는 구체적 새 정보를 추가합니다.
+- ❺의 새 정보 functional energy drinks (FEDs)가, ❻의 주어 FEDs로 받아집니다.
+- ❼은 containing caffeine으로 카페인 이야기를 다시 잇고, 새 활성 성분(taurine, glucose ...)을 끝에 둡니다.
+- ❽은 these ingredients로 ❼의 활성 성분을 받습니다.
 
-같은 단락을 *주어*만 추리면 흐름이 더 분명히 보입니다.
+같은 단락을 주어만 추리면 흐름이 더 분명히 보입니다.
 
-```
+```text
 ❶ Research
 ❷ caffeine    ← ❶의 새 정보
 ❸ caffeinated beverages   ← ❷의 caffeine을 변형
@@ -69,11 +68,11 @@ draft: true
 ❽ these ingredients   ← ❼의 새 정보
 ```
 
-각 문장의 주어가 *직전 문장의 어딘가*와 연결됩니다. 이 연결이 *흐름*을 만듭니다.
+각 문장의 주어가 직전 문장의 어딘가와 연결됩니다. 이 연결이 흐름을 만듭니다.
 
 ### 주어 자리에 넣을 수 있는 옛 정보의 형태
 
-```
+```text
 - 직전 문장의 같은 단어 (caffeine → caffeine)
 - 그 단어의 변형 (caffeine → caffeinated beverages)
 - 동의어 (drink → beverage)
@@ -82,28 +81,28 @@ draft: true
 - this / these + 명사 (a new drink → this drink)
 ```
 
-`this`, `these`, `it`, `they`는 *직전 문장에 가까이 있어야 안전*합니다. 너무 멀어지면 가리키는 대상이 모호해집니다.
+`this`, `these`, `it`, `they`는 직전 문장에 가까이 있어야 안전합니다. 너무 멀어지면 가리키는 대상이 모호해집니다.
 
 ## When Old-to-New Cannot Be Maintained — Use Linking Words
 
-옛 정보를 주어에 두기 어려운 자리도 있습니다. 그럴 때 *linking word*가 명시적 연결을 만듭니다.
+옛 정보를 주어에 두기 어려운 자리도 있습니다. 그럴 때 linking word가 명시적 연결을 만듭니다.
 
-```
+```text
 ❹ Most of the research on how caffeine affects sleepiness has focused
    on coffee or no-doze pills.
 ❺ However, a new kind of caffeinated drink has become increasingly
    popular, namely functional energy drinks (FEDs).
 ```
 
-❺의 주어 *a new kind of caffeinated drink*는 ❹의 *research focus*와 직접적인 옛 정보 연결이 약합니다. *However*가 *대조 관계*를 명시적으로 알려 줍니다. Linking word가 흐름의 *접착제* 역할을 합니다.
+❺의 주어 a new kind of caffeinated drink는 ❹의 research focus와 직접적인 옛 정보 연결이 약합니다. However가 대조 관계를 명시적으로 알려 줍니다. Linking word가 흐름의 접착제 역할을 합니다.
 
 ## Linking Words / Phrases — 분류
 
-학술 영어의 연결어는 *논리 관계*별로 묶어 외워 두면 글을 쓸 때 빠르게 꺼낼 수 있습니다.
+학술 영어의 연결어는 논리 관계별로 묶어 외워 두면 글을 쓸 때 빠르게 꺼낼 수 있습니다.
 
 ### 추가 / 부연
 
-```
+```text
 in addition, additionally, furthermore, moreover
 also, besides
 not only ... but also
@@ -112,7 +111,7 @@ similarly, likewise
 
 ### 대조
 
-```
+```text
 however, nevertheless, nonetheless
 in contrast, on the other hand
 conversely, by contrast
@@ -122,7 +121,7 @@ on the contrary
 
 ### 원인 / 결과
 
-```
+```text
 therefore, thus, hence, consequently, accordingly
 as a result, as a consequence
 for this reason, due to, owing to
@@ -131,7 +130,7 @@ because of
 
 ### 예시
 
-```
+```text
 for example, for instance
 namely, specifically, in particular
 such as, including
@@ -140,7 +139,7 @@ to illustrate
 
 ### 순서 / 시간
 
-```
+```text
 first, second, third, finally
 next, then, subsequently
 previously, earlier, later
@@ -149,7 +148,7 @@ meanwhile, simultaneously
 
 ### 요약 / 결론
 
-```
+```text
 in summary, to summarize, in conclusion
 overall, in short, briefly
 in other words, that is, i.e.
@@ -157,7 +156,7 @@ in other words, that is, i.e.
 
 ### 양보 / 한정
 
-```
+```text
 although, while, whereas
 still, yet, even so
 on one hand ... on the other hand
@@ -166,7 +165,7 @@ to some extent
 
 ### 강조
 
-```
+```text
 indeed, in fact, certainly
 importantly, notably, significantly
 above all, most importantly
@@ -176,20 +175,20 @@ above all, most importantly
 
 ### 1. 과용 금지
 
-논리 관계가 *너무 명백*하면 linking word가 오히려 군더더기가 됩니다. *흐름이 자연스러운 단락*에는 linking이 거의 없어도 됩니다. 카페인 단락에서도 *However*는 한 번, *Specifically*는 한 번, *In addition to*는 한 번만 등장합니다.
+논리 관계가 너무 명백하면 linking word가 오히려 군더더기가 됩니다. 흐름이 자연스러운 단락에는 linking이 거의 없어도 됩니다. 카페인 단락에서도 However는 한 번, Specifically는 한 번, In addition to는 한 번만 등장합니다.
 
 ### 2. 한 문장에 둘 이상의 강한 linking은 피하기
 
-```
+```text
 어색: However, in addition, the data show ...
 자연: However, the data show ...
 ```
 
-### 3. *그러나*의 위치 — 첫 단어 vs 중간 위치
+### 3. 그러나의 위치 — 첫 단어 vs 중간 위치
 
-학술 영어에서 *however*는 첫 단어 자리에 자주 오지만, *mid-position*도 가능합니다.
+학술 영어에서 however는 첫 단어 자리에 자주 오지만, mid-position도 가능합니다.
 
-```
+```text
 First-position:
 However, the data show a different pattern.
 
@@ -197,22 +196,22 @@ Mid-position:
 The data, however, show a different pattern.
 ```
 
-Mid-position은 *대조*를 부드럽게 만듭니다. 첫 단어 자리가 더 강한 대조입니다.
+Mid-position은 대조를 부드럽게 만듭니다. 첫 단어 자리가 더 강한 대조입니다.
 
-### 4. *and / but / so*로 문장 시작하기
+### 4. and / but / so로 문장 시작하기
 
-엄격한 규범은 *and*와 *but*으로 문장을 시작하지 말라고 합니다. 그러나 현대 학술 영어는 이 규칙을 *완화*하고 있습니다. 자연스러운 흐름을 위해 가끔 쓰는 것은 받아들여집니다. 다만 *남용*은 회화체로 미끄러집니다.
+엄격한 규범은 and와 but으로 문장을 시작하지 말라고 합니다. 그러나 현대 학술 영어는 이 규칙을 완화하고 있습니다. 자연스러운 흐름을 위해 가끔 쓰는 것은 받아들여집니다. 다만 남용은 회화체로 미끄러집니다.
 
-```
+```text
 허용:  But this assumption may not hold in all cases.
 남용:  But the data show ... But the model assumes ... But we found ...
 ```
 
 ### 5. 단락 시작 단어
 
-새 단락의 첫 문장이 *the topic sentence*입니다. 그 문장이 *앞 단락과 어떤 관계*인지 linking으로 보여 주면 흐름이 분명해집니다.
+새 단락의 첫 문장이 the topic sentence입니다. 그 문장이 앞 단락과 어떤 관계인지 linking으로 보여 주면 흐름이 분명해집니다.
 
-```
+```text
 However, recent studies have challenged this view.
 In contrast, qualitative studies suggest a different mechanism.
 A second factor that influences sleep quality is ...
@@ -220,38 +219,38 @@ A second factor that influences sleep quality is ...
 
 ## Linking 없는 흐름 — 의미 자체의 연결
 
-가장 우아한 흐름은 *linking word 없이* 의미 자체가 이어지는 흐름입니다. 카페인 단락의 ❷ → ❸이 그렇습니다.
+가장 우아한 흐름은 linking word 없이 의미 자체가 이어지는 흐름입니다. 카페인 단락의 ❷ → ❸이 그렇습니다.
 
-```
+```text
 ❷ caffeine can have a negative impact on subsequent sleep ...
 ❸ Specifically, caffeinated beverages consumed near bedtime ...
 ```
 
-❷의 *negative impact*가 ❸에서 *prolong sleep onset, reduce sleep efficiency*로 구체화됩니다. *Specifically*가 linking을 명시하지만, *없어도* 의미가 이어집니다. 그러나 명시한 쪽이 독자에게 더 친절합니다.
+❷의 negative impact가 ❸에서 prolong sleep onset, reduce sleep efficiency로 구체화됩니다. Specifically가 linking을 명시하지만, 없어도 의미가 이어집니다. 그러나 명시한 쪽이 독자에게 더 친절합니다.
 
 ## 한국어 글의 흐름
 
-한국어 학술 글에도 *비슷한 패턴*이 있지만, *조사*가 정보 흐름을 *명시*합니다.
+한국어 학술 글에도 비슷한 패턴이 있지만, 조사가 정보 흐름을 명시합니다.
 
-```
+```text
 한국어:
-- 주어 + *은 / 는* → 옛 정보 (주제)
-- 주어 + *이 / 가* → 새 정보 (주제 도입)
+- 주어 + 은 / 는 → 옛 정보 (주제)
+- 주어 + 이 / 가 → 새 정보 (주제 도입)
 
 영어:
 - 옛 정보 → 주어 자리 (왼쪽)
 - 새 정보 → 서술부 끝 (오른쪽)
 ```
 
-```
+```text
 한국 학술 흐름 예시:
-❶ 카페인이 졸음을 줄인다고 *연구가* 보였다.
-❷ 다만 카페인*은* 수면에 영향을 미친다.
-❸ 카페인 음료*는* 수면 시작을 지연시킨다.
-❹ 한편 *새로운 종류의 음료*가 인기를 얻고 있다.
+❶ 카페인이 졸음을 줄인다고 연구가 보였다.
+❷ 다만 카페인은 수면에 영향을 미친다.
+❸ 카페인 음료는 수면 시작을 지연시킨다.
+❹ 한편 새로운 종류의 음료가 인기를 얻고 있다.
 
 → "이/가" 새 정보 도입 → "은/는" 주제 (옛 정보)
-→ 영어 Old-to-New와 *같은 원리*
+→ 영어 Old-to-New와 같은 원리
 ```
 
 ### 한국어 학술 연결어
@@ -271,52 +270,52 @@ A second factor that influences sleep quality is ...
 
 ## 한국 학생의 흔한 흐름 함정
 
-```
+```text
 1. 모든 문장이 "and/그리고"로 시작
    - 단조로움 / 부자연
    - 다양한 connector 활용
 
 2. 대명사 (it, they, this) 가리키는 것 모호
-   - 직전 문장의 *명시 명사*로 다시 받기
+   - 직전 문장의 명시 명사로 다시 받기
 
-3. 주어가 *모두 같음* (We, The study, The data...)
+3. 주어가 모두 같음 (We, The study, The data...)
    - 변형 / 동의어 활용
 
-4. Linking word *과다 사용*
+4. Linking word 과다 사용
    - 매 문장마다 However, Therefore, ...
    - 한 단락에 2-3개로 제한
 
 5. Topic sentence 흐릿
-   - 단락의 첫 문장이 *큰 그림* 제시
+   - 단락의 첫 문장이 큰 그림 제시
 ```
 
 ## 자기 글 점검
 
-```
-□ Old-to-New 패턴이 *대부분의 문장*에 적용되는가?
-□ 옛 정보가 *주어 자리*(왼쪽)에?
-□ 새 정보가 *서술부 끝*(오른쪽)에?
-□ 대명사 (it, this, these)가 *명확한 대상*을 가리키는가?
-□ Linking word가 *과다*하지 않은가? (한 단락 2-3개)
-□ "But / And"가 *남용*되지 않는가?
-□ Topic sentence가 *앞 단락과 연결*되는가?
-□ 같은 linking word를 *연속 사용*하지 않았는가?
-□ 한국 글에 *영어 connector 직역*이 없는가?
+```text
+□ Old-to-New 패턴이 대부분의 문장에 적용되는가?
+□ 옛 정보가 주어 자리(왼쪽)에?
+□ 새 정보가 서술부 끝(오른쪽)에?
+□ 대명사 (it, this, these)가 명확한 대상을 가리키는가?
+□ Linking word가 과다하지 않은가? (한 단락 2-3개)
+□ "But / And"가 남용되지 않는가?
+□ Topic sentence가 앞 단락과 연결되는가?
+□ 같은 linking word를 연속 사용하지 않았는가?
+□ 한국 글에 영어 connector 직역이 없는가?
 ```
 
 ## 정리
 
-- 학술 영어 단락의 흐름은 **Old-to-New 정보 패턴**으로 자연스럽게 만들어짐
-- 옛 정보가 *주어 자리*, 새 정보가 *서술부 끝*
-- 옛 정보를 받는 방법 — 반복, 변형, 동의어, *this/these*, 대명사
-- 자연스러운 흐름이 어려운 자리에 **linking words**로 명시적 연결
-- 추가 / 대조 / 인과 / 예시 / 순서 / 요약 / 양보 / 강조 — 관계별로 묶어 외움
-- Linking은 *과용 금지*. 의미 자체로 이어지는 흐름이 가장 우아함
-- 한국어 *은/는 vs 이/가* 조사가 영어 Old-to-New와 같은 원리
+- 학술 영어 단락의 흐름은 **Old-to-New 정보 패턴**으로 자연스럽게 만들어집니다.
+- 옛 정보가 주어 자리에, 새 정보가 서술부 끝에 놓입니다.
+- 옛 정보를 받는 방법으로 반복, 변형, 동의어, `this`/`these`, 대명사가 있습니다.
+- 자연스러운 흐름이 어려운 자리에서는 **linking words**로 명시적 연결을 만듭니다.
+- 추가, 대조, 인과, 예시, 순서, 요약, 양보, 강조를 관계별로 묶어 외워 둡니다.
+- Linking은 과용을 금합니다. 의미 자체로 이어지는 흐름이 가장 우아합니다.
+- 한국어 은/는과 이/가 조사가 영어 Old-to-New와 같은 원리로 작동합니다.
 
 ## 다음 글 예고
 
-다음은 **Unit 1.6: Presentation과 Positioning**입니다. 글의 시각적 표현, 그리고 학술 공동체 안에서의 *자기 위치*를 만드는 방법.
+다음은 **Unit 1.6: Presentation과 Positioning**입니다. 글의 시각적 표현, 그리고 학술 공동체 안에서의 자기 위치를 만드는 방법을 다룹니다.
 
 ## 관련 항목
 

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9.2: HDM Decoder·DOE Capability"
-date: 2026-01-01T23:00:00
+date: 2026-05-16T23:00:00
 description: "스펙 §8 — HDM Decoder register·DOE Cap."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 23

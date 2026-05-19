@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Performance — Xcode·Instruments"
-date: 2028-08-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Core ML Performance Report·MLPredictor — latency 측정과 튜닝."
 series: "Core ML 심화"
 seriesOrder: 6

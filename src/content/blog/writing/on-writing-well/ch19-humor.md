@@ -1,6 +1,6 @@
 ---
 title: "Chapter 19: Humor"
-date: 2026-05-18T19:00:00
+date: 2026-05-14T19:00:00
 description: "유머는 가벼움이 아니라 진실의 도구입니다. 가장 잘 짜인 nonfiction이 종종 가장 유머러스합니다."
 series: "On Writing Well"
 seriesOrder: 19

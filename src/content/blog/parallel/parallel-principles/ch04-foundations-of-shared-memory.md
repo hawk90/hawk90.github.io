@@ -1,6 +1,6 @@
 ---
 title: "Chapter 4: Foundations of Shared Memory"
-date: 2026-05-12T04:00:00
+date: 2026-05-06T04:00:00
 description: "공유 메모리의 기초 — 레지스터의 정확성 정의. Safe, Regular, Atomic. SRSW에서 MRMW까지."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 4

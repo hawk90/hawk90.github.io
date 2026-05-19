@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: IR 설계 — Relay·HLO·MLIR"
-date: 2028-02-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "ML 컴파일러의 중간 표현 — 3가지 디자인 철학."
 series: "ML 컴파일러"
 seriesOrder: 2

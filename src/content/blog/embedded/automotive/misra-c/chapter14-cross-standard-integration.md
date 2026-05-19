@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: MISRA + CERT + AUTOSAR 동시 적용 — 통합 전략"
-date: 2025-09-05T15:00:00
+date: 2026-05-18T15:00:00
 description: "세 표준이 같은 코드베이스에 동시에 적용될 때 — conflict 해결, 우선순위, 통합 Compliance Matrix, 도구 cross-mapping."
 tags: [misra, cert-c, autosar, c, cpp, integration, cross-standard, governance]
 series: "MISRA C"

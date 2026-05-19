@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 비교 분석 — 프로토콜 선택 가이드"
-date: 2027-06-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "EtherCAT·PROFINET·EtherNet/IP·TSN — 언제 무엇을 쓸지."
 series: "Industrial Ethernet 심화"
 seriesOrder: 12

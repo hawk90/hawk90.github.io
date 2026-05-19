@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Generalized Linear Models"
-date: 2029-06-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "Advanced GLM — Bayesian·hierarchical·heteroscedastic."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 15

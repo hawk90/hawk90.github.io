@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Execution Provider 구조"
-date: 2028-07-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "ORT의 vendor 추상 — CPU·CUDA·TensorRT·CoreML·QNN."
 series: "ONNX Runtime 심화"
 seriesOrder: 1

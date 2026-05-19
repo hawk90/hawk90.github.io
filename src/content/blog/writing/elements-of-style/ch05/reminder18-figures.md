@@ -1,6 +1,6 @@
 ---
 title: "Ch 5 Reminder 18: 비유는 아껴 쓰라"
-date: 2026-05-16T02:00:00
+date: 2026-05-14T02:00:00
 description: "직유가 연속해서 등장하면 독자는 숨 가쁘게 비교를 따라가야 한다. 은유를 쓸 때는 섞지 마라."
 series: "The Elements of Style"
 seriesOrder: 50

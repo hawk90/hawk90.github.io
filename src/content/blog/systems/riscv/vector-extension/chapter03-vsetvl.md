@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 벡터 타입 설정"
-date: 2025-05-20T07:00:00
+date: 2026-05-17T07:00:00
 description: "RVV 타입 설정 — vsetvli/vsetivli, SEW, LMUL, 꼬리/마스크 정책을 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 3

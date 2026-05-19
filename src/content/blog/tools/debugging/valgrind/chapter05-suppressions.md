@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Suppression과 실무 운용"
-date: 2026-05-15T05:00:00
+date: 2026-05-17T05:00:00
 description: "Valgrind suppression 문법, 외부 라이브러리 우회, Sanitizer와의 분담, CI 통합 실전."
 tags: [Valgrind, Suppression, CI, Debugging, C, C++]
 series: "Valgrind"

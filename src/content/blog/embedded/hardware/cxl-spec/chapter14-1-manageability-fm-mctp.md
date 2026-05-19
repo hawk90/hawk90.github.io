@@ -1,6 +1,6 @@
 ---
 title: "Ch 14.1: Manageability — FM·MCTP"
-date: 2026-01-02T08:00:00
+date: 2026-05-16T08:00:00
 description: "스펙 §9 manageability — out-of-band management."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 32

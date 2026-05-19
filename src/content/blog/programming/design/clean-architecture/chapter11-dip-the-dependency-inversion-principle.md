@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: DIP — 의존성 역전 원칙"
-date: 2025-06-01T11:00:00
+date: 2026-05-01T11:00:00
 description: "고수준 모듈은 저수준 모듈에 의존하면 안 된다. 양쪽 모두 추상에 의존해야 한다 — Clean Architecture의 핵심 도구."
 tags: [Architecture, SOLID, DIP]
 series: "Clean Architecture"

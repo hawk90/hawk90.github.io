@@ -1,6 +1,6 @@
 ---
 title: "Tip 4: Provide Options, Don't Make Lame Excuses"
-date: 2026-05-13T04:00:00
+date: 2026-05-11T04:00:00
 description: "안 된다는 말 대신 무엇을 할 수 있는지 말한다. 변명은 신뢰를 깎고, 옵션은 신뢰를 쌓는다."
 series: "The Pragmatic Programmer"
 seriesOrder: 4

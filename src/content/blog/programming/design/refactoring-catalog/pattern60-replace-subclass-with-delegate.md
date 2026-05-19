@@ -1,6 +1,6 @@
 ---
 title: "Pattern 60: Replace Subclass with Delegate"
-date: 2026-06-03T12:00:00
+date: 2026-05-02T12:00:00
 description: "상속의 강한 결합을 피하고 — 다른 차원의 다양성을 표현하기 위해 위임으로."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 60

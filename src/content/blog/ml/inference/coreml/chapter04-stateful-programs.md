@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Stateful ML Programs"
-date: 2028-08-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "KV cache·state — modern Core ML의 stateful 기능."
 series: "Core ML 심화"
 seriesOrder: 4

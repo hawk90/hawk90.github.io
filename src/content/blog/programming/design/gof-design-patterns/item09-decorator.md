@@ -1,6 +1,6 @@
 ---
 title: "GoF 9: Decorator"
-date: 2026-02-01T09:00:00
+date: 2026-05-01T09:00:00
 description: "객체에 책임을 동적으로 추가 — 상속의 유연한 대안."
 tags: [Design Pattern, GoF, C++, C, Structural]
 series: "GoF Design Patterns"

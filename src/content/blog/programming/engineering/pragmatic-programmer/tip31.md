@@ -1,6 +1,6 @@
 ---
 title: "Tip 31: Failing Test Before Fixing Code"
-date: 2026-05-14T07:00:00
+date: 2026-05-11T07:00:00
 description: "코드를 고치기 전에 실패하는 테스트를 — 회귀를 막는 안전망."
 series: "The Pragmatic Programmer"
 seriesOrder: 31

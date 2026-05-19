@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Other Features II — const / Numbers / Macros"
-date: 2025-05-13T07:00:00
+date: 2026-05-18T07:00:00
 description: "Preincrement / const / constexpr / Integer / 64-bit / Preprocessor Macros / nullptr / sizeof."
 tags: [Google, C++, Style-Guide, const, constexpr, Macro, nullptr]
 series: "Google C++ Style"

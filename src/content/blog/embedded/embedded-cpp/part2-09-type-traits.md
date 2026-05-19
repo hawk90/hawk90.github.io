@@ -1,6 +1,6 @@
 ---
 title: "Part 2-09: Type Traits 활용"
-date: 2026-05-14T09:00:00
+date: 2026-05-07T09:00:00
 description: "std::is_*, std::enable_if, SFINAE — 컴파일 타임 type 정보로 코드 분기와 검증."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 17

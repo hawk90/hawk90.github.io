@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Performance — Tile Shader·Raster Order"
-date: 2027-11-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Apple GPU-only 가속 기법 — tile·imageblock·simdgroup."
 series: "Apple Metal Stack"
 seriesOrder: 8

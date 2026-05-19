@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Backtrace와 프레임 이동"
-date: 2025-08-20T04:00:00
+date: 2026-05-17T04:00:00
 description: "bt·frame·up·down — 호출 스택 분석, 프레임 안 변수 조사, 인라인 함수 처리."
 tags: [gdb, lldb, Backtrace, Stack]
 series: "GDB and LLDB"

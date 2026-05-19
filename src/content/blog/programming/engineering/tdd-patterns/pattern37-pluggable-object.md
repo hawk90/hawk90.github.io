@@ -1,6 +1,6 @@
 ---
 title: "Pattern 37: Pluggable Object"
-date: 2026-07-02T13:00:00
+date: 2026-05-10T13:00:00
 description: "If-statement 변종 — 객체 교체로 동작 변경. Strategy 패턴의 정신."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 37

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Designing lock-based concurrent data structures"
-date: 2026-05-20T06:00:00
+date: 2026-05-06T06:00:00
 description: "thread-safe stack/queue/map 설계. 락 입자, 예외 안전, 인터페이스 vs 구현."
 tags: [C++, C, Concurrency, Data Structures, Mutex]
 series: "C++ Concurrency in Action"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Zynq System Architecture"
-date: 2026-08-01T02:00:00
+date: 2026-05-19T02:00:00
 description: "Application Processing Unit·OCM·DDR controller — PS 내부의 구성요소들."
 series: "The Zynq Book"
 seriesOrder: 2

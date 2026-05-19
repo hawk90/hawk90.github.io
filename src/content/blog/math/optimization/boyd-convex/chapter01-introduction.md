@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction — 최적화 문제와 convex의 정의"
-date: 2028-11-01T01:00:00
+date: 2026-05-15T01:00:00
 description: "왜 convexity가 결정적인가 — local = global이 보장된다."
 series: "Convex Optimization (Boyd)"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: GSL safety types — span, not_null, owner, narrow_cast"
-date: 2025-09-15T14:00:00
+date: 2026-05-18T14:00:00
 description: "Microsoft GSL / C++ Core Guidelines의 type wrapper들 — *컴파일러가 잡지 못하는 의미를 type system에 인코딩*. 임베디드 적용 패턴."
 tags: [autosar, cpp, gsl, core-guidelines, span, not-null, owner, narrow-cast]
 series: "AUTOSAR C++14"

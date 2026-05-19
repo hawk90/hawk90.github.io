@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: A/B 업데이트와 boot 이중화"
-date: 2026-05-18T17:00:00
+date: 2026-05-09T17:00:00
 description: "A/B 슬롯 부트 — 양산 시스템의 안전한 펌웨어 업데이트와 자동 fallback."
 series: "Bootloader Internals"
 seriesOrder: 17

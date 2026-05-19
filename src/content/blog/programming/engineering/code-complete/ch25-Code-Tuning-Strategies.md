@@ -1,6 +1,6 @@
 ---
 title: "Chapter 25: Code-Tuning Strategies"
-date: 2025-06-21T01:00:00
+date: 2026-05-11T01:00:00
 description: "성능 튜닝의 전략 — 측정 먼저, 80/20, 디자인 변경 우선, 작은 코드 최적화는 마지막."
 series: "Code Complete"
 seriesOrder: 25

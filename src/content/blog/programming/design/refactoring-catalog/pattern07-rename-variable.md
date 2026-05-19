@@ -1,6 +1,6 @@
 ---
 title: "Pattern 7: Rename Variable"
-date: 2026-06-01T07:00:00
+date: 2026-05-02T07:00:00
 description: "변수 이름을 의도에 맞게 — 가장 흔하고 가장 가치 있는 리팩토링."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 7

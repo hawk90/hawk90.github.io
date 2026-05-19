@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: CXL 4.0 신기능 정리·5.0 Horizon"
-date: 2026-01-02T11:00:00
+date: 2026-05-16T11:00:00
 description: "CXL 4.0 highlights + 다음 단계."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 35

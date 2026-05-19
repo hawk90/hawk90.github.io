@@ -1,6 +1,6 @@
 ---
 title: "Chapter 11: Concurrent Stack과 Elimination"
-date: 2026-05-12T11:00:00
+date: 2026-05-06T11:00:00
 description: "Lock-Free Treiber Stack. Elimination 기법으로 push/pop이 서로 상쇄되어 스택을 안 거치게."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 11

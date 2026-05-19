@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: heaptrack — 가벼운 heap profiler"
-date: 2025-09-07T02:00:00
+date: 2026-05-17T02:00:00
 description: "Valgrind보다 빠른 heap profiler. KDE 출신, 운영 환경에도 적용 가능."
 tags: [memory, heaptrack, profiler, kde]
 series: "Memory Diagnostics"

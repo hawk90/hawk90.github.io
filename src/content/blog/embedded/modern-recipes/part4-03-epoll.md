@@ -1,6 +1,6 @@
 ---
 title: "4-03: epoll 실전 — LT·ET·ONESHOT·EXCLUSIVE"
-date: 2026-05-20T16:00:00
+date: 2026-05-07T16:00:00
 description: "select·poll의 한계와 epoll의 트리거 모드, ONESHOT·EXCLUSIVE 플래그를 코드와 성능으로 비교합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 21

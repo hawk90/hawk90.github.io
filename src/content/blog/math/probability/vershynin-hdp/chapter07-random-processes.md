@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Random Processes"
-date: 2030-10-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Empirical process·Gaussian process·Slepian·Sudakov-Fernique."
 series: "High-Dimensional Probability"
 seriesOrder: 7

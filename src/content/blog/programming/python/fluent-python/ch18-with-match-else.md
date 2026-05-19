@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: with, match, and else Blocks"
-date: 2026-05-16T18:00:00
+date: 2026-05-15T18:00:00
 description: "with / match / else — 흐름 제어 구문."
 series: "Fluent Python"
 seriesOrder: 18

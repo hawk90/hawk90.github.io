@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Patterns of Plausible Inference"
-date: 2029-09-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Pólya의 plausible inference 패턴 카탈로그."
 series: "Mathematics and Plausible Reasoning, Vol II"
 seriesOrder: 1

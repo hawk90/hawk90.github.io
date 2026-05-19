@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: 독립성"
-date: 2025-06-01T16:00:00
+date: 2026-05-01T16:00:00
 description: "좋은 아키텍처가 보장해야 할 네 가지 독립성 — use case, 운용, 개발, 배포. 디커플링의 세 모드."
 tags: [Architecture, Independence, Decoupling]
 series: "Clean Architecture"

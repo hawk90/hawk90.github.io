@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Combining Models"
-date: 2029-07-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "Bayesian model averaging·committee·boosting·tree·conditional mixture."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 14

@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Refactoring Toward Deeper Insight"
-date: 2025-10-01T13:00:00
+date: 2026-05-01T13:00:00
 description: "발견 → 리팩토링 → 깊이. 지속적 정제 사이클."
 tags: [DDD, Refactoring, Continuous]
 series: "Domain-Driven Design"

@@ -1,6 +1,6 @@
 ---
 title: "6-05: Jetson — Nano·Xavier·Orin·Thor·JetPack·DLA·VPI"
-date: 2026-05-21T05:00:00
+date: 2026-05-07T05:00:00
 description: "Jetson 라인업의 power·성능 trade-off, JetPack 구성, DLA·VPI·DeepStream을 묶어 자율주행·로봇 stack에서 쓰는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 35

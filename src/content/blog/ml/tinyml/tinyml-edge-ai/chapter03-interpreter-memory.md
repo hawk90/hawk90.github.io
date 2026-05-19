@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 인터프리터와 메모리 할당"
-date: 2028-04-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Tensor arena·greedy allocator — 메모리를 어떻게 짜는가."
 series: "TinyML·Edge AI"
 seriesOrder: 3

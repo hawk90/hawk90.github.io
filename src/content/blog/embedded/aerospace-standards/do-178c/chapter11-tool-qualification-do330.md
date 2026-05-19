@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Tool Qualification — DO-330 완전 가이드"
-date: 2025-09-25T12:00:00
+date: 2026-05-18T12:00:00
 description: "TQL-1~5 결정, Tool Operational Requirements (TOR), Tool Qualification Plan (TQP), Vendor Qualification Kit, 자체 도구 qualification."
 tags: [do-178c, do-330, tool-qualification, tql, tor, tqp, vendor]
 series: "DO-178C"

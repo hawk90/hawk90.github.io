@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 검증 — Reviews·Analyses·Testing"
-date: 2026-05-26T07:00:00
+date: 2026-05-18T07:00:00
 description: "DO-178C verification process — review·analysis·test의 3축과 trace 요구."
 series: "Developing Safety-Critical Software"
 seriesOrder: 7

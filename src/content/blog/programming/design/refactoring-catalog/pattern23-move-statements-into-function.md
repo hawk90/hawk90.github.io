@@ -1,6 +1,6 @@
 ---
 title: "Pattern 23: Move Statements into Function"
-date: 2026-06-01T23:00:00
+date: 2026-05-02T23:00:00
 description: "함수 호출 전·후 statement가 *항상* 함께 다닌다면 함수 안으로."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 23

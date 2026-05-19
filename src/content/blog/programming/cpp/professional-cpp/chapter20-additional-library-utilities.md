@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Additional Library Utilities"
-date: 2025-07-01T20:00:00
+date: 2026-05-05T20:00:00
 description: "tuple / optional / variant / any / pair. utility 헤더 한눈에."
 tags: [C++, Utility, optional, variant]
 series: "전문가를 위한 C++"

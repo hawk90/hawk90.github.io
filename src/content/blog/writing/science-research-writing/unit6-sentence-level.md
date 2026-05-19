@@ -1,6 +1,6 @@
 ---
 title: "Unit 6: 문장 단위 편집·문체"
-date: 2026-05-19T12:00:00
+date: 2026-05-14T12:00:00
 description: "section을 다 쓴 후 문장 단위에서 다듬는 단계 — 문법·문체·간결성·일관성."
 series: "Science Research Writing"
 seriesOrder: 60
@@ -8,16 +8,15 @@ tags: [writing, academic, sentence-style, science]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: true
 ---
 
-논문의 *section 구조*(Intro / Method / Result / Discussion / Abstract / Title)를 다 잡은 다음에는 **문장 단위**에서 다듬는 마지막 단계가 남습니다. Glasman-Deal Unit 6은 이 단계를 다룹니다 — section-level 작업이 끝났을 때 *원어민 검토* 이전에 본인이 할 수 있는 정리.
+논문의 section 구조(Intro / Method / Result / Discussion / Abstract / Title)를 다 잡은 다음에는 문장 단위에서 다듬는 마지막 단계가 남습니다. Glasman-Deal Unit 6은 이 단계를 다룹니다. section-level 작업이 끝났을 때 원어민 검토 이전에 본인이 할 수 있는 정리입니다.
 
 ## 이 단계의 목적
 
-- *구조*가 아닌 *문장*에서 일어나는 약점 잡기
-- non-native 화자가 자주 놓치는 grammar·vocabulary·style 점검
-- 동료·교수·journal editor가 읽을 때 *방해받지 않게*
+- 구조가 아닌 문장에서 일어나는 약점을 잡습니다.
+- non-native 화자가 자주 놓치는 grammar·vocabulary·style을 점검합니다.
+- 동료·교수·journal editor가 읽을 때 방해받지 않게 다듬습니다.
 
 ## 점검 영역
 
@@ -35,7 +34,7 @@ draft: true
 - 학술 어휘 vs 일상 어휘 (`get` → `obtain`)
 
 ### 3. Style & Flow
-- *Old → New* 정보 흐름 (theme/rheme)
+- Old → New 정보 흐름 (theme/rheme)
 - 문장 길이 변주
 - Passive voice 적정 사용 (Methods 위주)
 - Nominalization 과잉 피하기
@@ -61,18 +60,18 @@ draft: true
 
 ## 도구
 
-- **Grammarly Premium / LanguageTool** — 1차 grammar pass
-- **Hemingway Editor** — 문장 길이·복잡도
-- **academic phrasebank** (Manchester) — section별 표현 검색
-- 동료 review — non-native가 미리 잡은 후 native 검토
+- **Grammarly Premium / LanguageTool** — 1차 grammar pass에 씁니다.
+- **Hemingway Editor** — 문장 길이와 복잡도를 점검합니다.
+- **academic phrasebank** (Manchester) — section별 표현을 검색합니다.
+- 동료 review — non-native가 미리 잡은 뒤 native 검토를 받습니다.
 
 ## 다음 단계
 
-문장 단위 편집이 끝나면 *최종 단계*가 남습니다.
+문장 단위 편집이 끝나면 최종 단계가 남습니다.
 
 - Journal 형식 맞춤 (cover letter, ORCID, ethics statement)
 - Pre-submission peer review
-- Submission portal 입력 + supplementary 첨부
+- Submission portal 입력과 supplementary 첨부
 
 ## 관련 항목
 
@@ -82,4 +81,4 @@ draft: true
 
 ## 참고
 
-이 글은 *Glasman-Deal Science Research Writing for Non-Native Speakers of English* 4판의 Unit 6 (sentence-level review 단계)를 정리한 것입니다. 책의 sentence-level checklist + 추가 도구 참고.
+이 글은 *Glasman-Deal Science Research Writing for Non-Native Speakers of English* 4판의 Unit 6(sentence-level review 단계)을 정리한 것입니다. 책의 sentence-level checklist에 추가 도구를 보탰습니다.

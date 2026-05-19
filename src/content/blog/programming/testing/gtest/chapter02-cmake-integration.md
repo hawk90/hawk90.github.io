@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 설치와 CMake 통합"
-date: 2026-05-21T02:00:00
+date: 2026-05-10T02:00:00
 description: "gtest를 프로젝트에 붙이는 표준 워크플로 — FetchContent, gtest_discover_tests, version pinning."
 series: "gtest 심화"
 seriesOrder: 2

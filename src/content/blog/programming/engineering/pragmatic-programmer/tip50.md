@@ -1,6 +1,6 @@
 ---
 title: "Tip 50: Don't Hoard State; Pass It Around"
-date: 2026-05-15T02:00:00
+date: 2026-05-11T02:00:00
 description: "상태를 쌓아두지 말고 — 전달하라. 함수형 사고."
 series: "The Pragmatic Programmer"
 seriesOrder: 50

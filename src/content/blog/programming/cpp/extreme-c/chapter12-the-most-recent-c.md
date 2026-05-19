@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: The Most Recent C"
-date: 2025-06-15T12:00:00
+date: 2026-05-05T12:00:00
 description: "C11 / C17 / C23 — _Generic, _Static_assert, threads.h, atomic, attribute."
 tags: [C, C11, C17, C23, Modern C]
 series: "전문가를 위한 C"

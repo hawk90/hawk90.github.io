@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: 경계 — 선 긋기"
-date: 2025-06-01T17:00:00
+date: 2026-05-01T17:00:00
 description: "어디에 경계선을 그을 것인가. 미래의 변경을 격리하는 경계의 동기와 메커니즘."
 tags: [Architecture, Boundaries]
 series: "Clean Architecture"

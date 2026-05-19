@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction"
-date: 2029-07-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Bishop의 PRML — probabilistic ML의 토대를 다지는 책."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 1

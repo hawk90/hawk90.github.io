@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 메모리 풀링과 공유"
-date: 2026-10-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "CXL 2.0의 핵심 가치 — 여러 호스트가 메모리 풀을 동적으로 분할."
 series: "CXL 심화"
 seriesOrder: 6

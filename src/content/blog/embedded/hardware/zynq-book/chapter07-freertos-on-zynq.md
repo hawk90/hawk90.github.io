@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: FreeRTOS on Zynq"
-date: 2026-08-01T07:00:00
+date: 2026-05-19T07:00:00
 description: "Cortex-A9 port·GIC·SMP — Zynq 위에서 FreeRTOS 돌리기."
 series: "The Zynq Book"
 seriesOrder: 7

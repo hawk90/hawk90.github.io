@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Zephyr on BL602"
-date: 2025-05-19T15:00:00
+date: 2026-05-17T15:00:00
 description: "Zephyr RTOS on BL602 — 포팅 상태, 빌드, 예제를 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 9

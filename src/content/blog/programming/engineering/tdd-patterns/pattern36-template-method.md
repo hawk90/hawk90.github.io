@@ -1,6 +1,6 @@
 ---
 title: "Pattern 36: Template Method (in TDD)"
-date: 2026-07-02T12:00:00
+date: 2026-05-10T12:00:00
 description: "Algorithm 골격 + subclass의 step 구현. xUnit setUp/tearDown의 본질."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 36

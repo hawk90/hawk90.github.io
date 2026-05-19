@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: 새 보드 포팅 — defconfig부터 첫 부팅까지"
-date: 2026-05-18T21:00:00
+date: 2026-05-09T21:00:00
 description: "U-Boot에 새 보드를 추가하는 전체 워크플로 — configs·board·dts·MAINTAINERS."
 series: "Bootloader Internals"
 seriesOrder: 21

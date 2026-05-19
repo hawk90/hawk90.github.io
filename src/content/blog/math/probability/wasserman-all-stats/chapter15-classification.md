@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Classification"
-date: 2029-03-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "Bayes classifier·LDA·SVM·tree — 분류기의 통계적 토대."
 series: "All of Statistics"
 seriesOrder: 15

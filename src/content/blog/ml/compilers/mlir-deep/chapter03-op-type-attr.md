@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Operation·Type·Attribute 시스템"
-date: 2027-07-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "MLIR을 구성하는 3개의 핵심 추상."
 series: "MLIR 심화"
 seriesOrder: 3

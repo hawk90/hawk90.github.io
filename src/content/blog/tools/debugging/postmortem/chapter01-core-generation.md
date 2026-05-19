@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Core Dump 생성 메커니즘"
-date: 2025-09-05T01:00:00
+date: 2026-05-17T01:00:00
 description: "Linux core dump가 어떻게 만들어지나. ulimit, core_pattern, dumpable, systemd-coredump."
 tags: [core-dump, linux, ulimit, systemd]
 series: "Postmortem Debugging"

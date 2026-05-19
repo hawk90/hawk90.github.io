@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: ARINC-653 partitioning"
-date: 2026-05-25T03:00:00
+date: 2026-05-18T03:00:00
 description: "Avionics partitioned OS의 표준 인터페이스 — space + time partitioning, APEX."
 series: "Digital Avionics Handbook"
 seriesOrder: 3

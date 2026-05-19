@@ -1,6 +1,6 @@
 ---
 title: "제6장: 어순"
-date: 2026-05-12T06:00:00
+date: 2026-05-14T06:00:00
 description: "한국어 어순의 특성과 효과적인 배열"
 series: "고종석의 문장"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Rule 4: Divide and Conquer"
-date: 2031-01-01T04:00:00
+date: 2026-05-17T04:00:00
 description: "Binary search로 buggy 영역을 좁힌다."
 series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 4

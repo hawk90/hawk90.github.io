@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Common Families of Distributions"
-date: 2030-09-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Discrete·continuous·exponential family — distribution zoo."
 series: "Statistical Inference"
 seriesOrder: 3

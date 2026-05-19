@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: Parametric Nonlinear Models"
-date: 2030-02-01T19:00:00
+date: 2026-05-16T19:00:00
 description: "Nonlinear regression·pharmacokinetic·dose-response."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 19

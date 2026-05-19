@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: ISVV — Independent Software Verification & Validation"
-date: 2025-10-05T08:00:00
+date: 2026-05-18T08:00:00
 description: "ECSS의 특징 — 외부 독립 V&V 활동, 7 영역, 일반 적용 가이드."
 tags: [ecss, isvv, verification, validation, independence, esa]
 series: "ECSS-Q-ST-80C"

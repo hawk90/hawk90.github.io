@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Building and Running Modules"
-date: 2026-06-01T02:00:00
+date: 2026-05-13T02:00:00
 description: "Hello world 모듈부터 — module_init·module_exit·Kbuild·printk의 모던 사용."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 2

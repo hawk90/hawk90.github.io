@@ -1,6 +1,6 @@
 ---
 title: "항목 27: 캐스팅을 최소화하라"
-date: 2025-02-02T03:00:00
+date: 2026-05-04T03:00:00
 description: "C++ 4가지 캐스트의 용도, 흔한 함정(슬라이싱, 다중 상속 오프셋), dynamic_cast 비용과 대안."
 tags: [C++, Effective C++, Casting]
 series: "Effective C++"

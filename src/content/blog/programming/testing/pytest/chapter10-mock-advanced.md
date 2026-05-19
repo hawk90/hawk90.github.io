@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Mock 심화"
-date: 2026-05-22T10:00:00
+date: 2026-05-10T10:00:00
 description: "patch decorators·monkeypatch·pytest-mock — *어디서* mocking을 적용할지."
 series: "pytest 심화"
 seriesOrder: 10

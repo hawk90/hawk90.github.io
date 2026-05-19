@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 인터럽트와 완료 통보"
-date: 2027-12-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "MSI-X·threaded IRQ·tasklet — NPU가 끝났음을 알리는 길."
 series: "NPU 드라이버 개발"
 seriesOrder: 7

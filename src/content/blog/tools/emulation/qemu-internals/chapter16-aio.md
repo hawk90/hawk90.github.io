@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: AIO 서브시스템"
-date: 2025-09-03T16:00:00
+date: 2026-05-17T16:00:00
 description: "fd handler·io_uring·linux-aio backend — async I/O 통합."
 tags: [QEMU, aio, io-uring, linux-aio]
 series: "QEMU Internals"

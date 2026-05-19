@@ -1,6 +1,6 @@
 ---
 title: "Pattern 14: Replace Primitive with Object"
-date: 2026-06-01T14:00:00
+date: 2026-05-02T14:00:00
 description: "Primitive obsession 해소 — 값 객체로 type safety와 도메인 의미를 동시에."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 14

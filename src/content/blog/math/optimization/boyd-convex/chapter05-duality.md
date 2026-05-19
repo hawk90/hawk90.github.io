@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Duality"
-date: 2028-11-01T05:00:00
+date: 2026-05-15T05:00:00
 description: "Lagrangian·dual problem·KKT — convex 최적화의 중심 도구."
 series: "Convex Optimization (Boyd)"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: DAL과 71 Objectives — 등급별 의무사항 완전 해부"
-date: 2025-09-25T03:00:00
+date: 2026-05-18T03:00:00
 description: "DAL A부터 E까지 등급 결정 원리, 71개 objectives의 의미·output·independence 요구를 모두 정리. Annex A 표 line-by-line."
 tags: [do-178c, dal, objectives, independence, control-category, annex-a]
 series: "DO-178C"

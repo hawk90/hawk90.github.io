@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: MPSGraph — Graph-based ML"
-date: 2027-11-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Compute graph로 ML 워크로드 표현·실행."
 series: "Apple Metal Stack"
 seriesOrder: 6

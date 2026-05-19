@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: eBPF / bpftrace로 커널 디버깅"
-date: 2025-09-06T04:00:00
+date: 2026-05-17T04:00:00
 description: "kprobe/uprobe/tracepoint 위에 표현력 있는 trace 언어. bpftrace 원-라이너부터 BCC까지."
 tags: [kernel, ebpf, bpftrace, kprobe, bcc]
 series: "Kernel Debugging"

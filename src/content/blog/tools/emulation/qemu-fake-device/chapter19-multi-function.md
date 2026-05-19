@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: Multi-Function PCI 디바이스"
-date: 2025-09-01T19:00:00
+date: 2026-05-17T19:00:00
 description: "Function 분리·shared resource — multi-function PCI 패턴."
 tags: [QEMU, multi-function, pci, mfd]
 series: "QEMU Fake Device Driver"

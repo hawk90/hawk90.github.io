@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 데드락 / Race 진단 방법론"
-date: 2025-09-04T04:00:00
+date: 2026-05-17T04:00:00
 description: "데드락 그래프, race condition 분류, lock-free 함정, lost update / ABA / 메모리 reorder 진단."
 tags: [deadlock, race-condition, lock-free, aba, memory-ordering]
 series: "Concurrency Debugging"

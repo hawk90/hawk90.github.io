@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: gtest의 위치 — Catch2·doctest·Boost.Test 비교"
-date: 2026-05-21T01:00:00
+date: 2026-05-10T01:00:00
 description: "C++ test framework 생태계 — gtest, Catch2, doctest, Boost.Test의 트레이드오프와 gtest를 선택하는 이유."
 series: "gtest 심화"
 seriesOrder: 1

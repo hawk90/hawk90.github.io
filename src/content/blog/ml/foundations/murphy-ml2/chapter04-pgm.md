@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Graphical Models"
-date: 2029-06-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Bayes net·MRF·factor graph — conditional independence의 그림."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 4

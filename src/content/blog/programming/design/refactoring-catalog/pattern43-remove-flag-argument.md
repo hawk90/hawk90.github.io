@@ -1,6 +1,6 @@
 ---
 title: "Pattern 43: Remove Flag Argument"
-date: 2026-06-02T19:00:00
+date: 2026-05-02T19:00:00
 description: "Boolean flag는 함수의 *두 가지 모드* — 별도 함수로 분리해 의도 노출."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 43

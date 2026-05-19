@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 책임 있는 AI 패턴"
-date: 2028-09-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Heuristic benchmark·explainable predictions·fairness lens."
 series: "ML 디자인 패턴"
 seriesOrder: 7

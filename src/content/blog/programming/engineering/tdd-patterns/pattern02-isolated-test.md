@@ -1,6 +1,6 @@
 ---
 title: "Pattern 2: Isolated Test"
-date: 2026-07-01T02:00:00
+date: 2026-05-10T02:00:00
 description: "Test가 서로에게 의존하면 안 된다 — 격리는 디버깅과 신뢰의 토대."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 2

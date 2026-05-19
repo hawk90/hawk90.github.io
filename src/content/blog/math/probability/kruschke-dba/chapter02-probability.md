@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: What is This Stuff Called Probability?"
-date: 2030-05-01T02:00:00
+date: 2026-05-15T02:00:00
 description: "확률의 두 해석·distribution·random variable 토대."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 2

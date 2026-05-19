@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Refactoring Toward Valuable Unit Tests"
-date: 2025-10-15T07:00:00
+date: 2026-05-10T07:00:00
 description: "코드 4 분류 — Domain / Trivial / Controllers / Overcomplicated. 리팩토링 방향."
 tags: [TDD, Refactoring, Code Categories]
 series: "Khorikov Unit Testing"

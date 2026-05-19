@@ -1,6 +1,6 @@
 ---
 title: "항목 28: 객체 내부 핸들 반환을 피하라"
-date: 2025-02-02T04:00:00
+date: 2026-05-04T04:00:00
 description: "내부 데이터의 참조/포인터/반복자 반환은 캡슐화를 깨고 댕글링을 만든다. 임시 객체 + 내부 핸들의 함정."
 tags: [C++, Effective C++, Encapsulation, Dangling]
 series: "Effective C++"

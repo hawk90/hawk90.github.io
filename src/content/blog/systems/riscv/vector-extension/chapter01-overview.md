@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 벡터 확장 개요"
-date: 2025-05-20T05:00:00
+date: 2026-05-17T05:00:00
 description: "RISC-V Vector Extension — SIMD vs 벡터, VLA 설계 철학, RVV 1.0을 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 1

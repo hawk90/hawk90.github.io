@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 정적 분석 도구, Compliance Matrix, 인증 보고서"
-date: 2025-09-05T11:00:00
+date: 2026-05-18T11:00:00
 description: "PRQA·Polyspace·LDRA·Cppcheck·clang-tidy 비교, Compliance Matrix 작성, ISO 26262 심사 대응."
 tags: [misra, c, tools, polyspace, ldra, certification, iso-26262, compliance]
 series: "MISRA C"

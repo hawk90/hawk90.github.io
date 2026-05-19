@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Autotuning"
-date: 2027-09-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "@triton.autotune·configs·key — 실측 기반 kernel 선택."
 series: "Triton DSL"
 seriesOrder: 6

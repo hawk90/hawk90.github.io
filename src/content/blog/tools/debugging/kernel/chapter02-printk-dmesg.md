@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: printk / dmesg / dynamic_debug"
-date: 2025-09-06T02:00:00
+date: 2026-05-17T02:00:00
 description: "커널 로깅의 모든 것. log level, ring buffer, ratelimit, 런타임 토글."
 tags: [kernel, printk, dmesg, dynamic-debug]
 series: "Kernel Debugging"

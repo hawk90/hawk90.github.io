@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 부동소수점과 문자열 assertions"
-date: 2026-05-21T06:00:00
+date: 2026-05-10T06:00:00
 description: "EXPECT_NEAR·EXPECT_FLOAT_EQ·StrEq·StrCaseEq — 비교의 특수 케이스."
 series: "gtest 심화"
 seriesOrder: 6

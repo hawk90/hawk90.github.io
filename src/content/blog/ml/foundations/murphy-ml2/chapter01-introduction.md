@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction"
-date: 2029-06-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "ML 연구의 modern 지도 — inference·generation·discovery·action."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 1

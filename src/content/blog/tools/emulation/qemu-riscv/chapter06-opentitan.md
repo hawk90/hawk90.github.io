@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: opentitan 머신"
-date: 2025-05-20T00:00:00
+date: 2026-05-17T00:00:00
 description: "QEMU opentitan — 보안 칩 에뮬레이션, ROM 부팅을 다룬다."
 series: "RISC-V QEMU 심화"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Generalized Linear Models"
-date: 2029-05-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Exponential family + link function — linear model의 통일 framework."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 12

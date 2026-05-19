@@ -1,6 +1,6 @@
 ---
 title: "Pattern 41: Separate Query from Modifier"
-date: 2026-06-02T17:00:00
+date: 2026-05-02T17:00:00
 description: "값을 묻는 것과 상태를 바꾸는 것 — 한 함수에 섞지 않는다 (CQS 원칙)."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 41

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Helgrind와 DRD"
-date: 2026-05-15T04:00:00
+date: 2026-05-17T04:00:00
 description: "Valgrind의 두 동시성 분석 도구 비교 — Helgrind의 락 추적과 DRD의 vector clock, 언제 무엇을."
 tags: [Valgrind, Helgrind, DRD, Concurrency, DataRace, Debugging, C, C++]
 series: "Valgrind"

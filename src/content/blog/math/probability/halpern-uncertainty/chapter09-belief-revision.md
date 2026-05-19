@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Belief Revision"
-date: 2030-01-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "AGM postulates — qualitative belief change."
 series: "Reasoning About Uncertainty"
 seriesOrder: 9

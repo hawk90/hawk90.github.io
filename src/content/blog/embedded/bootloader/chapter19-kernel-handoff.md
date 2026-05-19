@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: 커널로 인계 — Linux boot ABI"
-date: 2026-05-18T19:00:00
+date: 2026-05-09T19:00:00
 description: "부트로더 → 커널 인계 — ARM64·RISC-V·x86 boot ABI, 인자 전달, 레지스터 상태."
 series: "Bootloader Internals"
 seriesOrder: 19

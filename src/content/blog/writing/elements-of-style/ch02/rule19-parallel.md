@@ -8,16 +8,15 @@ tags: [writing, composition, parallel-construction, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 > Express coordinate ideas in similar form.
 
-같은 *기능과 내용*을 가진 표현은 *형태도 같게* 만듭니다. 이를 *Parallel construction* (평행 구조)이라 부릅니다. 강한 글의 *핵심 기법*.
+같은 기능과 내용을 가진 표현은 형태도 같게 만듭니다. 이를 parallel construction(평행 구조)이라 부릅니다. 강한 글의 핵심 기법입니다.
 
-## *Beatitudes*의 예
+## Beatitudes의 예
 
-성경의 *팔복(八福)*은 평행 구조의 *고전적 예*.
+성경의 팔복(八福)은 평행 구조의 고전적 예입니다.
 
 ```
 Blessed are the poor in spirit: for theirs is the kingdom of heaven.
@@ -29,14 +28,14 @@ Blessed are the meek:           for they shall inherit the earth.
 패턴:
 "Blessed are [주어]: for [결과]"
 
-→ 모든 줄이 *같은 형태*
+→ 모든 줄이 같은 형태
 → 리듬 + 음악 + 기억하기 쉬움
-→ 평행 구조의 *힘*
+→ 평행 구조의 힘
 ```
 
 ## 일관성 > 변화
 
-같은 정보를 굳이 *다른 형태*로 표현해 *변화를 주려는* 시도는 *약*합니다. *일관성*이 *변화*보다 *강*합니다.
+같은 정보를 굳이 다른 형태로 표현해 변화를 주려는 시도는 약합니다. 일관성이 변화보다 강합니다.
 
 ```
 회피 (변화 시도):
@@ -46,7 +45,7 @@ now the laboratory method is employed."
 분석:
 - 첫 절: "science was taught by the textbook method"
 - 둘째 절: "the laboratory method is employed"
-- 주어 / 동사 패턴이 *다름*
+- 주어·동사 패턴이 다름
 - 어색
 
 선호 (평행 유지):
@@ -55,7 +54,7 @@ is taught by the laboratory method."
 
 분석:
 - 두 절 모두 "[방법] was/is taught"
-- *같은 형태* → 강함
+- 같은 형태 → 강함
 ```
 
 ## 평행해야 하는 자리
@@ -81,7 +80,7 @@ is taught by the laboratory method."
 
 ## 관사 / 전치사의 평행
 
-복수 항목에 *같은 관사 / 전치사*를 적용할 때는 *첫 항목 앞에 한 번만* 쓰거나, *모든 항목 앞에 반복*합니다.
+복수 항목에 같은 관사·전치사를 적용할 때는 첫 항목 앞에 한 번만 쓰거나, 모든 항목 앞에 반복합니다.
 
 ```
 회피 (일관성 없음):
@@ -108,7 +107,7 @@ is taught by the laboratory method."
 
 ## 상관 표현 (Correlative Conjunctions)
 
-`Both ... and`, `not only ... but also`, `either ... or`, `neither ... nor`, `first ... second` — *양쪽 형태가 같아야* 합니다.
+`Both ... and`, `not only ... but also`, `either ... or`, `neither ... nor`, `first ... second` — 양쪽 형태가 같아야 합니다.
 
 ```
 회피:
@@ -118,7 +117,7 @@ second, that it is unconstitutional."
 분석:
 - first 뒤: 명사구 "the injustice ..."
 - second 뒤: 절 "that it is ..."
-- *불평행*
+- 불평행
 
 선호:
 "My objections are, first, that the measure is unjust;
@@ -138,7 +137,7 @@ second, that it is unconstitutional."
 또는:
 "She not only sings but also dances beautifully."
 
-원칙: not only 뒤와 but also 뒤가 *문법적으로 동일*
+원칙: not only 뒤와 but also 뒤가 문법적으로 동일
 ```
 
 ### *Either ... Or* / *Neither ... Nor*
@@ -152,12 +151,12 @@ second, that it is unconstitutional."
 또는:
 "Either you can come with us, or you can stay home."
 
-원칙: 양쪽이 *같은 단위* (구 / 절)
+원칙: 양쪽이 같은 단위(구 / 절)
 ```
 
-## *Comparisons* — 비교 구조
+## Comparisons — 비교 구조
 
-비교 구조에서도 *평행*이 필수.
+비교 구조에서도 평행이 필수입니다.
 
 ```
 회피:
@@ -177,9 +176,9 @@ second, that it is unconstitutional."
 "To know him is to love him."
 ```
 
-## *Lists*와 *Bullet Points*
+## Lists와 Bullet Points
 
-목록 / 불릿 포인트는 *특히 평행*이 중요합니다.
+목록·불릿 포인트는 특히 평행이 중요합니다.
 
 ```
 회피 (불평행 불릿):
@@ -196,7 +195,7 @@ The new policy will:
 - Implement training programs
 - Increase morale
 
-→ 모두 *동사 + 목적어* 형태
+→ 모두 동사 + 목적어 형태
 ```
 
 ```
@@ -208,7 +207,7 @@ Today's agenda:
 - Closing remarks
 ```
 
-## *Master Examples*
+## Master Examples
 
 ### Kennedy의 *Inaugural Address*
 
@@ -225,7 +224,7 @@ the success of liberty."
 - support any friend
 - oppose any foe
 
-→ 모두 *동사 + any + 명사*
+→ 모두 동사 + any + 명사
 → 리듬 + 무게 + 기억
 ```
 
@@ -234,7 +233,7 @@ the success of liberty."
 ```
 "government of the people, by the people, for the people"
 
-→ "[전치사] the people" × 3
+→ [전치사] the people × 3
 → 가장 유명한 평행 구조
 ```
 
@@ -251,24 +250,24 @@ shall fight in the hills; we shall never surrender."
 → 결단의 무게
 ```
 
-## 평행 구조가 *깨지면* 일어나는 일
+## 평행 구조가 깨지면 일어나는 일
 
 ```
 독자의 반응:
-- *리듬이 끊김*
-- *문법 오류*로 느낌
-- *작가의 부주의*로 해석
-- *의미 혼란* 가능
+- 리듬이 끊김
+- 문법 오류로 느낌
+- 작가의 부주의로 해석
+- 의미 혼란 가능
 
 수정 후:
-- *읽기 쉬움*
-- *기억하기 쉬움*
-- *프로의 인상*
+- 읽기 쉬움
+- 기억하기 쉬움
+- 프로의 인상
 ```
 
 ## 한국어의 평행 구조
 
-한국어에서도 *평행 구조*가 강합니다.
+한국어에서도 평행 구조가 강합니다.
 
 ```
 선호 (평행):
@@ -277,11 +276,11 @@ shall fight in the hills; we shall never surrender."
 슬퍼하는 사람은 행복하니, 위로받을 것이다.
 온유한 사람은 행복하니, 땅을 물려받을 것이다."
 
-→ 같은 어미 / 같은 구조
-→ 한국어에서도 평행이 *강한 효과*
+→ 같은 어미·같은 구조
+→ 한국어에서도 평행이 강한 효과를 낸다
 ```
 
-### 한국어 *불평행* 함정
+### 한국어 불평행 함정
 
 ```
 회피 (어미 섞임):
@@ -294,17 +293,17 @@ shall fight in the hills; we shall never surrender."
 
 ## 자기 글 점검
 
-- [ ] 목록 / 나열에서 *모든 항목*이 *같은 형태*인가?
-- [ ] 동사 시제 / 형태가 *일관*되는가?
-- [ ] 명사 / 동명사 / 부정사가 *섞이지 않았는가*?
-- [ ] 상관 표현 (not only ... but also) 양쪽이 *평행*인가?
-- [ ] 비교 구조에서 *같은 단위*를 비교하는가?
-- [ ] 불릿 포인트가 *모두 같은 형태*인가?
-- [ ] 한국 글의 어미가 *일관*되는가?
+- [ ] 목록·나열에서 모든 항목이 같은 형태인가?
+- [ ] 동사 시제·형태가 일관되는가?
+- [ ] 명사·동명사·부정사가 섞이지 않았는가?
+- [ ] 상관 표현(not only ... but also) 양쪽이 평행인가?
+- [ ] 비교 구조에서 같은 단위를 비교하는가?
+- [ ] 불릿 포인트가 모두 같은 형태인가?
+- [ ] 한국 글의 어미가 일관되는가?
 
 ## 다음 Rule 예고
 
-다음 — **Rule 20: 관련된 단어를 가까이 두라**.
+다음은 **Rule 20: 관련된 단어를 가까이 두라**입니다.
 
 ## 관련 항목
 

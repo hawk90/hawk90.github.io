@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: SIMD와 Systolic Array"
-date: 2028-01-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "NPU의 두 가지 기본 dataflow."
 series: "NPU 아키텍처"
 seriesOrder: 2

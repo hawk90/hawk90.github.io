@@ -1,6 +1,6 @@
 ---
 title: "Column 15: Strings of Pearls"
-date: 2026-05-13T15:00:00
+date: 2026-05-11T15:00:00
 description: "Strings of Pearls"
 series: "Programming Pearls"
 seriesOrder: 15

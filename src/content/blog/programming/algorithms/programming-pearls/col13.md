@@ -1,6 +1,6 @@
 ---
 title: "Column 13: Searching"
-date: 2026-05-13T13:00:00
+date: 2026-05-11T13:00:00
 description: "Searching"
 series: "Programming Pearls"
 seriesOrder: 13

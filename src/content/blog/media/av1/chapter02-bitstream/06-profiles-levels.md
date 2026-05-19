@@ -1,6 +1,6 @@
 ---
 title: "Ch 2.6: Profiles · Levels · Tiers"
-date: 2025-10-01T03:06:00
+date: 2026-05-16T03:06:00
 description: "AV1의 3-Profile, 13-Level, 2-Tier 체계와 코덱 스트링 av01.X.YYZ.B를 읽는 법."
 tags: [AV1, Video, Codec, Profile, Level, Tier]
 series: "AV1"

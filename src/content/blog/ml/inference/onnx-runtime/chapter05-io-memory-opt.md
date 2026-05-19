@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: IO·메모리 최적화"
-date: 2028-07-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Memory arena·prepacking·external initializer."
 series: "ONNX Runtime 심화"
 seriesOrder: 5

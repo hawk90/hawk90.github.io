@@ -1,6 +1,6 @@
 ---
 title: "Ch 31: Nonparametric Bayesian Models"
-date: 2029-06-02T07:00:00
+date: 2026-05-16T07:00:00
 description: "Dirichlet process·CRP·IBP — infinite-dimensional Bayes."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 31

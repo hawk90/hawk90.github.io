@@ -1,6 +1,6 @@
 ---
 title: "Part 1-08: C++ 표준 선택"
-date: 2026-05-13T08:00:00
+date: 2026-05-07T08:00:00
 description: "C++11/14/17/20/23 — 임베디드에서 어느 표준을 골라야 하나. 컴파일러 지원, 표준 라이브러리 변화, 핵심 기능 비교."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 메모리 제약 설계 (<256 KB)"
-date: 2028-04-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "RAM·Flash·tensor arena 분배 — 매 KB가 소중하다."
 series: "TinyML·Edge AI"
 seriesOrder: 7

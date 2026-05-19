@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: BL602 개요"
-date: 2025-05-19T13:00:00
+date: 2026-05-17T13:00:00
 description: "BL602 — RV32IMFC 코어, Wi-Fi/BLE, 메모리 맵을 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 7

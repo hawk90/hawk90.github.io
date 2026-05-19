@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: OpenSBI 빌드와 구성"
-date: 2025-05-19T00:00:00
+date: 2026-05-17T00:00:00
 description: "OpenSBI 빌드 — 플랫폼 포팅, 설정 옵션, 커스터마이징을 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 6

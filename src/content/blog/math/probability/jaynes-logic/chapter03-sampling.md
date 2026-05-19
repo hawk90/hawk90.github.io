@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Elementary Sampling Theory"
-date: 2029-04-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Urn model·hypergeometric·binomial — sampling의 정확한 분석."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 3

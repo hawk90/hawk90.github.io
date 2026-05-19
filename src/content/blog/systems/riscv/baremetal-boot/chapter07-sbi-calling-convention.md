@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: SBI 호출 규약"
-date: 2025-05-19T01:00:00
+date: 2026-05-17T01:00:00
 description: "SBI 호출 규약 — ecall, 함수 ID, 반환값, 에러 코드를 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 7

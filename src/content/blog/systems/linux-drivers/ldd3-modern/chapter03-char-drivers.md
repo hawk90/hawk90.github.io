@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Char Drivers"
-date: 2026-06-01T03:00:00
+date: 2026-05-13T03:00:00
 description: "Char device — scull 예제로 본 major/minor·file_operations·cdev·open/release/read/write."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 3

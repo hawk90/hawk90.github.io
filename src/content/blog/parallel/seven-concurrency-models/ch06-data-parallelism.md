@@ -1,6 +1,6 @@
 ---
 title: "Chapter 6: Data Parallelism"
-date: 2026-05-22T06:00:00
+date: 2026-05-06T06:00:00
 description: "GPU / SIMD — 한 명령으로 수천 데이터. OpenCL, CUDA, kernel 사고."
 series: "Seven Concurrency Models in Seven Weeks"
 seriesOrder: 6

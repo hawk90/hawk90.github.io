@@ -1,6 +1,6 @@
 ---
 title: "Ch 2.2: CXL.io — MMIO·DMA Transactions"
-date: 2026-01-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "스펙 §3 — PCIe-compatible MMIO·DMA transaction."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 3

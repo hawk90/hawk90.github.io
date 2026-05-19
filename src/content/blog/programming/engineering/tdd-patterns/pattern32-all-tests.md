@@ -1,6 +1,6 @@
 ---
 title: "Pattern 32: All Tests"
-date: 2026-07-02T08:00:00
+date: 2026-05-10T08:00:00
 description: "모든 test를 한 번에 — 변경의 안전망, CI의 토대."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 32

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Bayes' Rule"
-date: 2030-05-01T03:00:00
+date: 2026-05-15T03:00:00
 description: "Posterior = prior × likelihood / evidence — Bayes 본체."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 3

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Markov Chain Monte Carlo"
-date: 2030-03-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "HMC·Stan·NUTS — MCMC를 직관적으로."
 series: "Statistical Rethinking"
 seriesOrder: 9

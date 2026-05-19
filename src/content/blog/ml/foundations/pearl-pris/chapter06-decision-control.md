@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Decision and Control"
-date: 2029-11-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Influence diagram·utility — 추론에서 결정으로."
 series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 6

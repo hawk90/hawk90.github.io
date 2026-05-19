@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Designing with Objects"
-date: 2025-07-01T05:00:00
+date: 2026-05-05T05:00:00
 description: "객체 설계 — has-a vs is-a. 컴포넌트 식별. 책임 할당."
 tags: [C++, OOP, Design]
 series: "전문가를 위한 C++"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Monsters and Mixtures"
-date: 2030-03-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Over-dispersed·zero-inflated·ordered categorical."
 series: "Statistical Rethinking"
 seriesOrder: 12

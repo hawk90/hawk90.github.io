@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: BoW Flexi — 저비용 구현"
-date: 2027-02-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Organic substrate에서도 동작 — Flexi의 trade-off."
 series: "BoW 개요"
 seriesOrder: 5

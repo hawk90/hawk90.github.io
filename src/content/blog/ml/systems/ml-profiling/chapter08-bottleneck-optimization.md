@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 병목 진단과 최적화"
-date: 2028-05-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Compute·memory·comm — 어느 축이 막혔는지 정확히 찾기."
 series: "ML 시스템 프로파일링"
 seriesOrder: 8

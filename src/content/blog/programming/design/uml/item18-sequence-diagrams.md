@@ -1,6 +1,6 @@
 ---
 title: "UML 18: 시퀀스 다이어그램 — 시간 축으로 펼친 시나리오"
-date: 2026-04-01T18:00:00
+date: 2026-05-03T18:00:00
 description: "UML에서 가장 많이 그리는 행위 다이어그램. Lifeline 4개로 시스템의 한 흐름을."
 tags: [UML, Sequence Diagram, Interaction, Behavior]
 series: "UML 2.5.1"

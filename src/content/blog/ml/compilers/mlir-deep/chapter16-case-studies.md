@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: 사례 — Triton·IREE·TensorFlow MLIR"
-date: 2027-07-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "현실의 MLIR 활용 — 세 가지 대표 프로젝트."
 series: "MLIR 심화"
 seriesOrder: 16

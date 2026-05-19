@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Manage Multiple Files"
-date: 2025-08-15T06:00:00
+date: 2026-05-17T06:00:00
 description: "buffer / window / tab — Vim의 세 단위. argument list."
 tags: [Vim, Buffer, Window, Tab]
 series: "Practical Vim"

@@ -1,6 +1,6 @@
 ---
 title: "Part 2-08: Static Polymorphism (CRTP)"
-date: 2026-05-14T08:00:00
+date: 2026-05-07T08:00:00
 description: "Curiously Recurring Template Pattern — virtual 함수 없이 컴파일 타임 다형성. vtable 0, 간접 호출 0."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 16

@@ -1,6 +1,6 @@
 ---
 title: "Part 4-06: State Machine"
-date: 2026-05-16T06:00:00
+date: 2026-05-07T06:00:00
 description: "타입 안전한 상태 머신 — enum + switch부터 std::variant, etl::fsm까지."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 34

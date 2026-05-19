@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: TSN 스케줄링 — Qbv·Qbu·동기화"
-date: 2027-06-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Gate control list·preemption·PTP — TSN 핵심 메커니즘."
 series: "Industrial Ethernet 심화"
 seriesOrder: 9

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 벡터 메모리 접근"
-date: 2025-05-20T08:00:00
+date: 2026-05-17T08:00:00
 description: "RVV 메모리 접근 — unit-stride, strided, indexed, segment를 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 4

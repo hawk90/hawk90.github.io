@@ -1,6 +1,6 @@
 ---
 title: "Part 5-02: GPIO 추상화"
-date: 2026-05-17T02:00:00
+date: 2026-05-07T02:00:00
 description: "GPIO pin = type — 컴파일 타임에 핀 설정 검증, runtime 비용 0."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 38

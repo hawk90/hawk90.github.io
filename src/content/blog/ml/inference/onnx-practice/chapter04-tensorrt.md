@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: TensorRT와 ONNX"
-date: 2028-03-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "ONNX → TensorRT engine — NVIDIA inference 최적화."
 series: "ONNX 실전"
 seriesOrder: 4

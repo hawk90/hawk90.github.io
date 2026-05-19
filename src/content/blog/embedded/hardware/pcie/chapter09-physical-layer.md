@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Physical Layer — LTSSM과 링크 트레이닝"
-date: 2026-06-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "PCIe Physical Layer — LTSSM 상태 머신, 링크 트레이닝, Equalization, 시그널링"
 series: "PCIe Deep Dive"
 seriesOrder: 9

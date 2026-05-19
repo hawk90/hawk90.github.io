@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 자동 벡터화와 최적화"
-date: 2025-05-20T14:00:00
+date: 2026-05-17T14:00:00
 description: "RVV 자동 벡터화 — GCC/LLVM 옵션, 벤치마크, 튜닝을 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 10

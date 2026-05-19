@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Memory Management"
-date: 2025-07-01T07:00:00
+date: 2026-05-05T07:00:00
 description: "RAII, smart pointer, new / delete 회피. 메모리 풀."
 tags: [C++, Memory, RAII, Smart Pointer]
 series: "전문가를 위한 C++"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: From Statistics to Beliefs"
-date: 2030-01-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Statistical → degree of belief — Carnap·objective Bayesianism."
 series: "Reasoning About Uncertainty"
 seriesOrder: 11

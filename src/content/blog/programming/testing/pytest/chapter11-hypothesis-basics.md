@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Property-based — Hypothesis 기초"
-date: 2026-05-22T11:00:00
+date: 2026-05-10T11:00:00
 description: "strategies·examples·settings — example-based 테스트를 property-based로."
 series: "pytest 심화"
 seriesOrder: 11

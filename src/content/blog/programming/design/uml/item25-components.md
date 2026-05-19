@@ -1,6 +1,6 @@
 ---
 title: "UML 25: 컴포넌트 — 배치 가능한 단위와 인터페이스 계약"
-date: 2026-04-02T01:00:00
+date: 2026-05-03T01:00:00
 description: "클래스보다 큰 단위. 빌드·배포·교체의 기본 단위로서의 컴포넌트."
 tags: [UML, Component, Architecture, Deployment]
 series: "UML 2.5.1"

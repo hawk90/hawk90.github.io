@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 멀티큐"
-date: 2026-07-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "NVMe 멀티큐 전략, Weighted Round Robin, CPU Affinity를 분석한다"
 series: "NVMe Deep Dive"
 seriesOrder: 9

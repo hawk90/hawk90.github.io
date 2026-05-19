@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Probability"
-date: 2029-10-01T02:00:00
+date: 2026-05-15T02:00:00
 description: "확률 함수의 유도 — sum·product rule이 유일하다."
 series: "The Algebra of Probable Inference"
 seriesOrder: 2

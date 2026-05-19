@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Custom Op·Custom Kernel"
-date: 2028-07-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "ORT가 모르는 op·새로운 kernel을 끼우기."
 series: "ONNX Runtime 심화"
 seriesOrder: 3

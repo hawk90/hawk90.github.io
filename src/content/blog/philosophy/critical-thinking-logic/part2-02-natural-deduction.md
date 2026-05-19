@@ -1,6 +1,6 @@
 ---
 title: "Part 2-2: 자연 연역 — 추론 규칙"
-date: 2025-07-22T06:00:00
+date: 2026-05-14T06:00:00
 description: "MP / MT / DS / Conj / Simp / Add / HS. 가정 / 부분 증명."
 tags: [Logic, Natural Deduction, Inference Rules]
 series: "비판적 사고를 위한 논리"

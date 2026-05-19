@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Macros, Types, Constants"
-date: 2025-09-30T05:00:00
+date: 2026-05-18T05:00:00
 description: "JSF C++ — Preprocessor 제한, type 정의, integer/enum, 상수 명명, typedef vs using."
 tags: [jsf-cpp, macros, preprocessor, types, constants, enums, typedef]
 series: "JSF C++"

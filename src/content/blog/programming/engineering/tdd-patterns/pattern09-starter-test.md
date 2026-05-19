@@ -1,6 +1,6 @@
 ---
 title: "Pattern 9: Starter Test"
-date: 2026-07-01T09:00:00
+date: 2026-05-10T09:00:00
 description: "처음 test — 가장 작고 퇴화된(degenerate) 케이스로 시작."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 9

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Hotfix 패턴"
-date: 2025-08-10T06:00:00
+date: 2026-05-17T06:00:00
 description: "프로덕션 긴급 수정 — 브랜치 전략별 hotfix 절차. cherry-pick 활용."
 tags: [Git, Hotfix, Production]
 series: "Git Flow"

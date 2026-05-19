@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 임베디드 보안 개요 / 위협 모델"
-date: 2025-09-20T02:00:00
+date: 2026-05-08T02:00:00
 description: "STRIDE / DREAD. 임베디드 특수 — 물리 접근 / 자원 제약."
 tags: [Embedded Security, Threat Model, STRIDE]
 series: "Embedded Security"

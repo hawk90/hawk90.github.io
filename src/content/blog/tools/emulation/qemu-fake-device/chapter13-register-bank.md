@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: 레지스터 뱅크 패턴 — Multi-Region 디바이스"
-date: 2025-09-01T13:00:00
+date: 2026-05-17T13:00:00
 description: "Doorbell·CSR·queue 영역 분리 — 현실 가속기의 BAR 레이아웃."
 tags: [QEMU, register-bank, bar, mmio]
 series: "QEMU Fake Device Driver"

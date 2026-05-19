@@ -1,6 +1,6 @@
 ---
 title: "Pattern 40: Imposter"
-date: 2026-07-02T16:00:00
+date: 2026-05-10T16:00:00
 description: "다른 객체 *척하기* — duck typing 기반 polymorphism. Mock/Stub/Fake의 상위 개념."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 40

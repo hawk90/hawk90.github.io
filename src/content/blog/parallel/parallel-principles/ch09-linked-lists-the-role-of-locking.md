@@ -1,6 +1,6 @@
 ---
 title: "Chapter 9: Linked List — Locking의 역할"
-date: 2026-05-12T09:00:00
+date: 2026-05-06T09:00:00
 description: "동시성 리스트의 진화 — 거대 락, 미세 락, optimistic, lazy, lock-free."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 9

@@ -1,6 +1,6 @@
 ---
 title: "Ch 8.3: Fabric Manager·MCTP·DCD"
-date: 2026-01-01T20:00:00
+date: 2026-05-16T20:00:00
 description: "스펙 §7·§9 — out-of-band switch management."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 20

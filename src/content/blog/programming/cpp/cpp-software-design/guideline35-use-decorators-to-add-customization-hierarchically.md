@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 35: Decorator로 사용자화를 계층적으로 추가하라"
-date: 2026-05-14T11:00:00
+date: 2026-05-02T11:00:00
 description: "Decorator 패턴은 객체에 책임을 동적으로 더한다. 컴파일 타임(템플릿)과 런타임(상속) 두 변형 모두를 살펴본다."
 tags: [C++, Software Design, Decorator, GoF, Composition]
 series: "C++ Software Design"

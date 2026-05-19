@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 물리 계층 — 시그널링과 64 GT/s"
-date: 2026-11-01T03:00:00
+date: 2026-05-19T03:00:00
 description: "Standard·Advanced·Retimer — UCIe 물리 시그널 옵션."
 series: "UCIe 심화"
 seriesOrder: 3

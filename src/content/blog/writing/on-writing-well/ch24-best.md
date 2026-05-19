@@ -1,6 +1,6 @@
 ---
 title: "Chapter 24: Write as Well as You Can"
-date: 2026-05-19T00:00:00
+date: 2026-05-14T00:00:00
 description: "책의 마지막 메시지 — 자기가 할 수 있는 최선으로 쓰세요. 그것이 작가의 의무이자 보상입니다."
 series: "On Writing Well"
 seriesOrder: 24

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 표현식과 변환 — cast, narrowing, sizeof"
-date: 2025-09-15T04:00:00
+date: 2026-05-18T04:00:00
 description: "static_cast 명시(A5-2-2), C-style cast 금지(A5-2-3), narrowing 차단(A5-2-5), 0 나눗셈(A5-6-1)."
 tags: [autosar, cpp, cast, narrowing, sizeof, division]
 series: "AUTOSAR C++14"

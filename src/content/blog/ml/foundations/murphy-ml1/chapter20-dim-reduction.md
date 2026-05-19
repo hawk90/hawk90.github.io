@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Dimensionality Reduction"
-date: 2029-05-01T20:00:00
+date: 2026-05-16T20:00:00
 description: "PCA·Factor·autoencoder·UMAP·t-SNE — 차원 축소 zoo."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 20

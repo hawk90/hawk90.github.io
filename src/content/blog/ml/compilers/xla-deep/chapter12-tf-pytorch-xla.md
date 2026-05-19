@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: TF·PyTorch와 XLA 통합"
-date: 2027-08-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "tf.function·torch_xla — 두 framework가 XLA에 다다르는 길."
 series: "XLA·OpenXLA 심화"
 seriesOrder: 12

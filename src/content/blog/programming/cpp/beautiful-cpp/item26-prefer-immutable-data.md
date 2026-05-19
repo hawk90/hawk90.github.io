@@ -1,6 +1,6 @@
 ---
 title: "항목 26: 가변 데이터보다는 불변 데이터를 택하라"
-date: 2026-05-09T02:00:00
+date: 2026-05-05T02:00:00
 description: "불변 데이터 — 공짜 동시성, 안정적 추론, 테스트 용이성. 값 객체와 함수형 스타일."
 tags: [C++, Immutability, const]
 series: "Beautiful C++"

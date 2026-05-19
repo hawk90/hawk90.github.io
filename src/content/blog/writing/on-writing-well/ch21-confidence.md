@@ -1,6 +1,6 @@
 ---
 title: "Chapter 21: Enjoyment, Fear, and Confidence"
-date: 2026-05-18T21:00:00
+date: 2026-05-14T21:00:00
 description: "글쓰기는 두려움과 즐거움 사이에 있습니다. 자기 글에 대한 자신감이 좋은 글의 토대입니다."
 series: "On Writing Well"
 seriesOrder: 21

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Some Kinds of Plausible Reasoning"
-date: 2029-09-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Plausible reasoning의 분류 — Pólya의 taxonomy."
 series: "Mathematics and Plausible Reasoning, Vol II"
 seriesOrder: 5

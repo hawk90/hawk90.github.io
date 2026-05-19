@@ -1,6 +1,6 @@
 ---
 title: "Chapter 13: Writing About Places — The Travel Article"
-date: 2026-05-18T13:00:00
+date: 2026-05-14T13:00:00
 description: "장소 글은 cliché의 또 다른 무덤. 모두가 본 것이 아닌 자기만 본 한 디테일을 찾아야 합니다."
 series: "On Writing Well"
 seriesOrder: 13

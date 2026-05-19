@@ -1,6 +1,6 @@
 ---
 title: "Tip 20: Use Tracer Bullets to Find the Target"
-date: 2026-05-13T20:00:00
+date: 2026-05-11T20:00:00
 description: "조명탄을 써서 표적을 찾아라 — 끝과 끝을 잇는 얇은 코드로 — 빠른 피드백."
 series: "The Pragmatic Programmer"
 seriesOrder: 20

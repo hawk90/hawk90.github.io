@@ -1,6 +1,6 @@
 ---
 title: "Tip 53: Has-A Trumps Is-A"
-date: 2026-05-15T05:00:00
+date: 2026-05-11T05:00:00
 description: "Has-A가 Is-A를 이긴다 — 합성을 — 상속보다. 책의 마지막 팁."
 series: "The Pragmatic Programmer"
 seriesOrder: 53

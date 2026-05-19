@@ -1,6 +1,6 @@
 ---
 title: "Tip 44: Decoupled Code Is Easier to Change"
-date: 2026-05-14T20:00:00
+date: 2026-05-11T20:00:00
 description: "결합도 낮은 코드가 — 바꾸기 쉽다. ETC 원칙의 한 형태."
 series: "The Pragmatic Programmer"
 seriesOrder: 44

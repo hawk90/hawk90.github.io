@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: TCG 심화"
-date: 2025-09-03T13:00:00
+date: 2026-05-17T13:00:00
 description: "Tiny Code Generator — block translation·IR·backend."
 tags: [QEMU, tcg, dynamic-translation, code-cache]
 series: "QEMU Internals"

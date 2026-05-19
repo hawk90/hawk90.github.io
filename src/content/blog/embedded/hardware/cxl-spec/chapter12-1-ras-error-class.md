@@ -1,6 +1,6 @@
 ---
 title: "Ch 12.1: RAS — Error Class·Log Register"
-date: 2026-01-02T03:00:00
+date: 2026-05-16T03:00:00
 description: "스펙 §12 — correctable·uncorrectable error logging."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 27

@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: U-Boot SPL"
-date: 2025-05-19T04:00:00
+date: 2026-05-17T04:00:00
 description: "U-Boot SPL — 2단계 로더, DRAM 초기화, 다음 단계 로드를 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 10

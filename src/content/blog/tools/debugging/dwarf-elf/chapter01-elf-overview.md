@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: ELF 포맷 개관"
-date: 2025-09-02T01:00:00
+date: 2026-05-17T01:00:00
 description: "ELF 헤더, Program Header / Section Header, dynamic linking, build-id."
 tags: [elf, binary, linker]
 series: "DWARF and ELF Internals"

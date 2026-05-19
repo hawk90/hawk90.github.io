@@ -1,6 +1,6 @@
 ---
 title: "GoF 0: 23 패턴을 이해하는 6개의 멘탈 모델"
-date: 2026-02-01T00:00:00
+date: 2026-05-01T00:00:00
 description: "GoF가 어려운 이유와 그것을 풀어줄 6개의 멘탈 모델. 일상 비유, 결정 트리, 흔한 혼동까지."
 tags: [Design Pattern, GoF, Mental Model, Overview]
 series: "GoF Design Patterns"

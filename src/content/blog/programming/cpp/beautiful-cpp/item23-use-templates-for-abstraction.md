@@ -1,6 +1,6 @@
 ---
 title: "항목 23: 템플릿을 사용하여 코드의 추상화 수준을 높이라"
-date: 2026-05-08T23:00:00
+date: 2026-05-05T23:00:00
 description: "타입별 복붙을 템플릿으로 일반화 — 컴파일 타임 다형성, 런타임 비용 0, C++20 concepts로 안전성."
 tags: [C++, Templates, Generic Programming]
 series: "Beautiful C++"

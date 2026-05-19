@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Software Timer Management"
-date: 2026-07-01T05:00:00
+date: 2026-05-09T05:00:00
 description: "xTimerCreate·oneshot·autoreload — 타이머 데몬과 콜백."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 5

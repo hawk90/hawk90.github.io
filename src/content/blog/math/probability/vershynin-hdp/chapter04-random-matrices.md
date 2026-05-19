@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Random Matrices"
-date: 2030-10-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Singular value concentration·Marchenko-Pastur·Tracy-Widom."
 series: "High-Dimensional Probability"
 seriesOrder: 4

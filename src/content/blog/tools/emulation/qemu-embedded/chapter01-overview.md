@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 임베디드 에뮬레이션 개요"
-date: 2025-09-15T01:00:00
+date: 2026-05-17T01:00:00
 description: "QEMU로 ARM/RISC-V 보드를 에뮬레이션해 펌웨어와 OS를 테스트하는 이유."
 tags: [QEMU, ARM, RISC-V, Embedded]
 series: "QEMU Embedded Emulation"

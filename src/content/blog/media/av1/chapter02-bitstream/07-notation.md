@@ -1,6 +1,6 @@
 ---
 title: "Ch 2.7: 스펙 표기법과 디스크립터"
-date: 2025-10-01T03:07:00
+date: 2026-05-16T03:07:00
 description: "f(n), uvlc(), leb128(), su(n), ns(n), S(), L(n), NS(n) — AV1 스펙을 읽는 데 필요한 디스크립터 전부."
 tags: [AV1, Video, Codec, Spec, Descriptors]
 series: "AV1"

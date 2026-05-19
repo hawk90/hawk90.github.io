@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Inequalities"
-date: 2029-03-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Markov·Chebyshev·Hoeffding·Jensen — 확률의 무기."
 series: "All of Statistics"
 seriesOrder: 4

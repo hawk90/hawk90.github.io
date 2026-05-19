@@ -1,6 +1,6 @@
 ---
 title: "Ch 3.1: CXL.cache — D2H Request·Response·Data"
-date: 2026-01-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "스펙 §3 cache — Device-to-Host channels."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 5

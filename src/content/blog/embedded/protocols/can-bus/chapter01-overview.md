@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: CAN — 자동차 표준의 40년 진화 (1986 → CAN XL)"
-date: 2027-04-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Bosch가 1986년 발표한 차동 버스. 우선순위 중재로 멀티마스터에 강하다."
 series: "CAN Bus 심화"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: First-Order Modal Logic of Probability"
-date: 2030-01-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Quantifier + probability — 전제·conditional의 정형 표현."
 series: "Reasoning About Uncertainty"
 seriesOrder: 10

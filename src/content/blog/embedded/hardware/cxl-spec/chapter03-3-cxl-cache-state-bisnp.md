@@ -1,6 +1,6 @@
 ---
 title: "Ch 3.3: CXL.cache — Cache State·Snoop Filter·BISnp"
-date: 2026-01-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "스펙 §3 — line state·snoop filter·back-invalidate."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 7

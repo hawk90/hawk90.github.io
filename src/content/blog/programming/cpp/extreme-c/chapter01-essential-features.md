@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Essential Features"
-date: 2025-06-15T01:00:00
+date: 2026-05-05T01:00:00
 description: "C 핵심 기능 — preprocessor, 변수 / 함수 / 포인터, 함수 호출 규약."
 tags: [C, Preprocessor, Pointers]
 series: "전문가를 위한 C"

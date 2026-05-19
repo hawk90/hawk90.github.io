@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Data Compression"
-date: 2029-01-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Kraft·Huffman·Shannon-Fano-Elias — 압축 코드의 정수."
 series: "Elements of Information Theory"
 seriesOrder: 5

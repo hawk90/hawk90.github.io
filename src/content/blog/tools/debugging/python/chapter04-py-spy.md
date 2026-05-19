@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: py-spy — 운영 프로세스를 코드 수정 없이 검사"
-date: 2025-08-21T04:00:00
+date: 2026-05-17T04:00:00
 description: "py-spy로 콜스택 dump, 샘플링 프로파일링, flamegraph, 외부 attach."
 tags: [python, debugging, py-spy, profiling]
 series: "Python Debugging"

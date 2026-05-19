@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: IoT 표준 — ETSI EN 303 645 / IEC 62443"
-date: 2025-09-20T09:00:00
+date: 2026-05-08T09:00:00
 description: "IoT 소비자 보안 / 산업 보안 표준. NIST 가이드라인."
 tags: [IoT, ETSI, IEC 62443, NIST]
 series: "Embedded Security"

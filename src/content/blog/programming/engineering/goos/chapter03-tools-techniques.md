@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: An Introduction to the Tools and Techniques"
-date: 2025-10-10T03:00:00
+date: 2026-05-10T03:00:00
 description: "Google Test, pytest, Mock 라이브러리. C++과 Python 테스트 환경."
 tags: [TDD, Tools, GoogleTest, pytest]
 series: "Growing Object-Oriented Software"

@@ -1,6 +1,6 @@
 ---
 title: "GoF 10: Facade"
-date: 2026-02-01T10:00:00
+date: 2026-05-01T10:00:00
 description: "복잡한 서브시스템에 단순한 진입점 — 비대해지지 않게 주의."
 tags: [Design Pattern, GoF, C++, C, Structural]
 series: "GoF Design Patterns"

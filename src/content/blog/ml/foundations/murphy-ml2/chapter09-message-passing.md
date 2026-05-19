@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Message Passing Algorithms"
-date: 2029-06-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "BP·EP·loopy BP — graph 위의 추론 통합."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 9

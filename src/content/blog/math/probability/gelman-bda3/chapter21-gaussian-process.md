@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: Gaussian Process Models"
-date: 2030-02-01T21:00:00
+date: 2026-05-16T21:00:00
 description: "BDA3 시각의 GP — spatial·temporal·geostatistics."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 21

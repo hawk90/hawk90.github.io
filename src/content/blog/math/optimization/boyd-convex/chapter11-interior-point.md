@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Interior-Point Methods"
-date: 2028-11-01T11:00:00
+date: 2026-05-15T11:00:00
 description: "Barrier·primal-dual — modern convex solver의 엔진."
 series: "Convex Optimization (Boyd)"
 seriesOrder: 11

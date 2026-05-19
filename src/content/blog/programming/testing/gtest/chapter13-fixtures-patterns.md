@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Test fixtures 패턴"
-date: 2026-05-21T13:00:00
+date: 2026-05-10T13:00:00
 description: "SetUp·TearDown·SetUpTestSuite·Global Environment의 lifecycle과 공유 패턴."
 series: "gtest 심화"
 seriesOrder: 13

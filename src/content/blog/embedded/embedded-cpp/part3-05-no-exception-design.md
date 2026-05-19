@@ -1,6 +1,6 @@
 ---
 title: "Part 3-05: No-Exception 설계"
-date: 2026-05-15T05:00:00
+date: 2026-05-07T05:00:00
 description: "-fno-exceptions 환경에서 에러 처리 — error code, std::optional, std::expected."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 23

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: SystemVerilog DPI-C 기초"
-date: 2025-09-09T02:00:00
+date: 2026-05-17T02:00:00
 description: "Import·export·data type — SV와 C 사이의 다리."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 2

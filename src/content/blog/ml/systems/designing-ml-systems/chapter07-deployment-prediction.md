@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 모델 배포와 예측 서비스"
-date: 2028-10-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Batch·online·edge — 어디서 prediction을 만드나."
 series: "Designing Machine Learning Systems"
 seriesOrder: 7

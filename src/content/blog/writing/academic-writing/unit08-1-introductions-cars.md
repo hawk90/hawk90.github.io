@@ -1,6 +1,6 @@
 ---
 title: "Unit 8.1: Introductions와 CARS 모델"
-date: 2026-05-15T04:00:00
+date: 2026-05-14T04:00:00
 description: "연구 논문 Introduction의 표준 구조 — Swales의 CARS 모델. Territory, Niche, Occupying the Niche의 세 Move."
 series: "Academic Writing for Graduate Students"
 seriesOrder: 81
@@ -8,16 +8,15 @@ tags: [writing, academic, introduction, CARS, research-paper]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
-draft: true
 ---
 
-Unit 8의 첫 글은 연구 논문 *Introduction*의 표준 구조입니다. 이 책의 저자 Swales 자신이 1990년에 제안한 *CARS 모델(Creating a Research Space)*이 학술 영어 연구의 핵심 기여 중 하나입니다. 이 글이 그 모델을 정리합니다.
+Unit 8의 첫 글은 연구 논문 Introduction의 표준 구조입니다. 이 책의 저자 Swales 자신이 1990년에 제안한 CARS 모델(Creating a Research Space)이 학술 영어 연구의 핵심 기여 중 하나입니다. 이 글이 그 모델을 정리합니다.
 
 ## CARS 모델 — 세 가지 Move
 
-연구 논문 도입의 보편적 구조를 Swales가 *세 Move*로 정리했습니다.
+연구 논문 도입의 보편적 구조를 Swales가 세 Move로 정리했습니다.
 
-```
+```text
 Move 1: Establishing a Territory
         — 연구 영역을 설정 (이 분야는 중요하다)
 
@@ -28,15 +27,17 @@ Move 3: Occupying the Niche
         — 그 자리를 차지 (그래서 우리가 이걸 한다)
 ```
 
-이 세 Move가 *깔때기 모양*입니다 — 넓게 시작해 점점 좁아져 *자기 연구의 위치*에 수렴합니다.
+이 세 Move가 깔때기 모양입니다 — 넓게 시작해 점점 좁아져 자기 연구의 위치에 수렴합니다. 각 Move는 다시 여러 substep으로 구성됩니다.
+
+![CARS 모델 — 세 Move와 substep](/images/blog/writing/diagrams/academic-writing-cars.svg)
 
 ## Move 1 — Establishing a Territory
 
-연구의 *영역*을 만드는 단계입니다. 다음 *세 Step* 중 하나 이상으로 구성됩니다.
+연구의 영역을 만드는 단계입니다. 다음 세 Step 중 하나 이상으로 구성됩니다.
 
 ### Step 1A — 주제의 중요성 주장
 
-```
+```text
 The relationship between caffeine and sleep has attracted increasing
 attention in recent years.
 Sleep disorders represent a major public health concern in
@@ -45,7 +46,7 @@ industrialized societies.
 
 ### Step 1B — 일반화 / 배경 진술
 
-```
+```text
 Caffeine is one of the most widely consumed psychoactive substances
 in the world.
 The biological clock plays a central role in regulating sleep.
@@ -53,17 +54,17 @@ The biological clock plays a central role in regulating sleep.
 
 ### Step 1C — 기존 연구 리뷰
 
-```
+```text
 Several studies have examined the effects of caffeine on sleep
 (Smith, 2019; Brown, 2020; Lee, 2021).
 Research in this area has focused primarily on adults aged 30–50.
 ```
 
-대부분의 도입은 *Step 1B + Step 1C*를 결합합니다 — 일반 배경 + 관련 연구.
+대부분의 도입은 Step 1B + Step 1C를 결합합니다 — 일반 배경 + 관련 연구.
 
 ### Move 1의 예
 
-```
+```text
 ❶ Caffeine is one of the most widely consumed psychoactive substances
 in the world, with daily intake estimated at over 80 billion cups of coffee
 globally (ICO, 2020). ❷ Its effects on alertness, attention, and cognitive
@@ -77,13 +78,13 @@ markedly from earlier generations (Lee, 2019).
 
 ## Move 2 — Establishing a Niche
 
-*기존 연구의 빈 자리*를 찾는 단계. *Step 1A*나 *1B* 중 하나입니다.
+기존 연구의 빈 자리를 찾는 단계. Step 1A나 1B 중 하나입니다.
 
 ### Step 2A — Counter-Claiming
 
-기존 연구의 *결과나 해석을 반박*.
+기존 연구의 결과나 해석을 반박.
 
-```
+```text
 However, this conclusion has been challenged by recent findings ...
 Contrary to this view, ...
 This explanation, while widely accepted, fails to account for ...
@@ -91,9 +92,9 @@ This explanation, while widely accepted, fails to account for ...
 
 ### Step 2B — Indicating a Gap
 
-기존 연구가 *다루지 않은 영역*을 지적.
+기존 연구가 다루지 않은 영역을 지적.
 
-```
+```text
 However, little research has examined this relationship in college students.
 Despite extensive work in this area, the role of [factor] remains poorly
 understood.
@@ -102,9 +103,9 @@ The mechanisms underlying this effect are not well characterized.
 
 ### Step 2C — Question-Raising
 
-기존 연구의 *남은 질문* 제기.
+기존 연구의 남은 질문 제기.
 
-```
+```text
 This raises the question of whether ...
 A central question remains: ...
 It is unclear how [X] relates to [Y].
@@ -112,18 +113,18 @@ It is unclear how [X] relates to [Y].
 
 ### Step 2D — Continuing a Tradition
 
-자기 연구가 *기존 흐름을 잇는다*는 입장.
+자기 연구가 기존 흐름을 잇는다는 입장.
 
-```
+```text
 Building on this work, the present study extends ...
 Following [Smith]'s framework, we examine ...
 ```
 
-### Move 2의 핵심 — *Hedging*
+### Move 2의 핵심 — Hedging
 
-Move 2는 *반박이나 빈 자리 지적*입니다. 학술 공동체의 다른 연구자를 *완전히 부정*하면 적대적입니다. *부드러운 표현*이 필수입니다.
+Move 2는 반박이나 빈 자리 지적입니다. 학술 공동체의 다른 연구자를 완전히 부정하면 적대적입니다. 부드러운 표현이 필수입니다.
 
-```
+```text
 강함 (회피):
 Smith (2020) is wrong about ...
 Previous research has failed to ...
@@ -138,9 +139,9 @@ Less attention has been paid to ...
 
 ### Move 2의 예
 
-```
-❹ However, most studies have focused on the *quantity* of caffeine
-consumed rather than the *timing* of consumption. ❺ The few studies
+```text
+❹ However, most studies have focused on the quantity of caffeine
+consumed rather than the timing of consumption. ❺ The few studies
 that have examined timing effects have produced mixed results, with
 some reporting strong effects of evening intake (Park, 2018) and others
 finding minimal effects (Kim, 2020). ❻ This inconsistency may reflect
@@ -148,33 +149,33 @@ differences in measurement, but it may also indicate that individual
 factors moderate the relationship between caffeine timing and sleep.
 ```
 
-❹ — Step 2B (gap, focus가 quantity에 머묾). ❺ — 모순된 결과 제시. ❻ — Question-raising + hedge (*may*).
+❹ — Step 2B (gap, focus가 quantity에 머묾). ❺ — 모순된 결과 제시. ❻ — Question-raising + hedge (may).
 
 ## Move 3 — Occupying the Niche
 
-자기 연구가 *그 빈 자리*를 채운다는 선언. *Step 3A*가 핵심이고, *3B*, *3C*는 선택.
+자기 연구가 그 빈 자리를 채운다는 선언. Step 3A가 핵심이고, 3B, 3C는 선택.
 
-### Step 3A — 자기 연구의 *목적 / 질문* 명시
+### Step 3A — 자기 연구의 목적 / 질문 명시
 
-```
+```text
 The present study aims to examine ...
 This paper investigates ...
 We address this gap by ...
 The objective of this research is to determine ...
 ```
 
-### Step 3B — *핵심 발견* 사전 공개 (선택)
+### Step 3B — 핵심 발견 사전 공개 (선택)
 
-```
+```text
 Our results show that ...
 We find that ...
 ```
 
-자연과학에 흔합니다. 인문학에서는 보통 *결론 사전 공개*를 피합니다.
+자연과학에 흔합니다. 인문학에서는 보통 결론 사전 공개를 피합니다.
 
 ### Step 3C — 논문 구조 안내 (선택)
 
-```
+```text
 The paper is organized as follows. Section 2 reviews ... Section 3
 describes ... Section 4 presents ... Section 5 discusses ...
 ```
@@ -183,7 +184,7 @@ describes ... Section 4 presents ... Section 5 discusses ...
 
 ### Move 3의 예
 
-```
+```text
 ❼ The present study addresses this gap by examining the relationship
 between caffeine timing and sleep quality in a sample of 245 college
 students, while also examining individual differences in caffeine
@@ -197,46 +198,46 @@ genetic variation in caffeine clearance.
 
 ## 전체 도입의 흐름
 
-```
+```text
 [Move 1]                 [Move 2]                 [Move 3]
 영역 설정       →        빈 자리 발견    →        그 자리 차지
 일반 → 구체              부드러운 반박             목적 / 가설
 배경 + 기존 연구          gap 지적                자기 연구의 기여
 ```
 
-*도입의 마지막 문장*은 보통 *Move 3의 핵심* — 자기 논문의 *질문이나 목적*입니다.
+도입의 마지막 문장은 보통 Move 3의 핵심 — 자기 논문의 질문이나 목적입니다.
 
 ## CARS의 분야별 변형
 
 ### 자연과학 / 공학
 
-```
+```text
 Move 1 (짧음, 1–2 단락) → Move 2 (짧음, 1 단락) → Move 3 (짧음, 1 단락)
 ```
 
-도입이 짧고 깔끔합니다. *결과 사전 공개*가 흔합니다.
+도입이 짧고 깔끔합니다. 결과 사전 공개가 흔합니다.
 
 ### 사회과학
 
-```
+```text
 Move 1 (길음, 3–5 단락) → Move 2 (중간, 1–2 단락) → Move 3 (중간, 1 단락)
 ```
 
-기존 연구 리뷰가 깁니다. *Literature Review*가 별도 섹션이면 도입은 짧아집니다.
+기존 연구 리뷰가 깁니다. Literature Review가 별도 섹션이면 도입은 짧아집니다.
 
 ### 인문학
 
-```
-복잡한 *주제 설정* → 개념 정의 → 자기 위치 → 논증 안내
+```text
+복잡한 주제 설정 → 개념 정의 → 자기 위치 → 논증 안내
 ```
 
-CARS와 다른 패턴. 인문학은 *논증의 결*에 따라 도입이 결정됩니다.
+CARS와 다른 패턴. 인문학은 논증의 결에 따라 도입이 결정됩니다.
 
 ## CARS의 학생 글 분석
 
-다음은 *Daniel Bechor*가 쓴 학생 글의 도입입니다.
+다음은 Daniel Bechor가 쓴 학생 글의 도입입니다.
 
-```
+```text
 A Piezoelectric Frequency-Increased Power Generator for Scavenging
 Low-Frequency Ambient Vibration
 
@@ -278,15 +279,15 @@ periodic and occurs less often.
 - ❼ — Move 1 (해결의 한 방향 — energy scavenging)
 - ❽ — 그 중 kinetic energy 강조
 - ❾ — Move 2, Step 2B (gap — 고주파수 한정)
-- ❿–⓫ — Gap의 *결과* (응용 영역 배제)
+- ❿–⓫ — Gap의 결과 (응용 영역 배제)
 
-여러 Move 1과 Move 2가 *교차*합니다. Move 3은 아직 — 다음 단락에서 자기 연구가 *그 빈 자리를 채움*을 선언할 것입니다. CARS는 단순한 *1-2-3 순서*가 아니라 *반복적 깔때기*가 될 수 있습니다.
+여러 Move 1과 Move 2가 교차합니다. Move 3은 아직 — 다음 단락에서 자기 연구가 그 빈 자리를 채움을 선언할 것입니다. CARS는 단순한 1-2-3 순서가 아니라 반복적 깔때기가 될 수 있습니다.
 
 ## Negative Openings in Move 2
 
-Move 2는 *부정적 표현*이 자주 등장합니다. 학술 영어의 *부드러운 부정* 어휘.
+Move 2는 부정적 표현이 자주 등장합니다. 학술 영어의 부드러운 부정 어휘.
 
-```
+```text
 부드러운 부정:
 However, ...
 Despite the progress, ...
@@ -306,13 +307,13 @@ However, the role of [X] is poorly characterized.
 ... merits further investigation.
 ```
 
-이런 표현이 Move 2의 *부정*을 *학술적으로 가능*하게 만듭니다.
+이런 표현이 Move 2의 부정을 학술적으로 가능하게 만듭니다.
 
 ## CARS의 변형 — 적절한 강도
 
-CARS의 *Move 2*는 신중해야 합니다. 자기 빈 자리를 *너무 크게 만들면* 과장으로 들립니다.
+CARS의 Move 2는 신중해야 합니다. 자기 빈 자리를 너무 크게 만들면 과장으로 들립니다.
 
-```
+```text
 과장 (회피):
 Despite decades of research, the relationship between caffeine and
 sleep remains completely unknown.
@@ -322,7 +323,7 @@ While previous research has examined caffeine's effects on sleep, the
 role of consumption timing has received less systematic attention.
 ```
 
-자기 연구의 *기여를 크게* 보이려고 *기존 연구를 작게 만들지 마세요*. 그건 학술 공동체의 *기존 작업을 무시*하는 행위로 받아들여집니다.
+자기 연구의 기여를 크게 보이려고 기존 연구를 작게 만들지 마세요. 그건 학술 공동체의 기존 작업을 무시하는 행위로 받아들여집니다.
 
 ## 정리
 
@@ -330,13 +331,13 @@ role of consumption timing has received less systematic attention.
 - **Move 1** — Territory (영역 설정, 배경, 기존 연구)
 - **Move 2** — Niche (빈 자리 — counter-claim, gap, question)
 - **Move 3** — Occupying the Niche (자기 연구의 목적·가설)
-- *부드러운 부정*이 Move 2의 핵심 — *however, less attention, remains unclear*
+- 부드러운 부정이 Move 2의 핵심 — however, less attention, remains unclear
 - 분야별 변형 — 자연과학(짧음), 사회과학(긴 Move 1), 인문학(다른 패턴)
-- CARS는 *단순한 1-2-3*이 아니라 *반복 깔때기*일 수도
+- CARS는 단순한 1-2-3이 아니라 반복 깔때기일 수도
 
 ## 한국 학생의 CARS 함정
 
-```
+```text
 1. Move 2 (Gap) 약함
    해결: "However, less attention has been paid..."
 2. Move 3 (Niche 점유) 모호
@@ -348,7 +349,7 @@ role of consumption timing has received less systematic attention.
 
 ## 자기 글 점검
 
-```
+```text
 □ Move 1, 2, 3 명확?
 □ Move 2 부드러운 부정?
 □ Move 3 구체적 목적?

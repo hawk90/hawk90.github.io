@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: TVM 아키텍처"
-date: 2028-02-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Relay·TIR·Runtime — TVM의 3 layer."
 series: "ML 컴파일러"
 seriesOrder: 3

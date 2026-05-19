@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Universal Source Coding"
-date: 2029-01-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "분포를 모를 때 compress — Lempel-Ziv·MDL."
 series: "Elements of Information Theory"
 seriesOrder: 13

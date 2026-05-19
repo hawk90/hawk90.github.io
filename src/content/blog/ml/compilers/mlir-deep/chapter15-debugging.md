@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: 디버깅·Trace·Crash Reduction"
-date: 2027-07-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "Pass·rewrite·conversion 추적 — MLIR 디버깅 도구상자."
 series: "MLIR 심화"
 seriesOrder: 15

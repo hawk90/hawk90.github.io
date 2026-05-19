@@ -1,6 +1,6 @@
 ---
 title: "Rule 7: Check the Plug"
-date: 2031-01-01T07:00:00
+date: 2026-05-17T07:00:00
 description: "Obvious assumption을 의심한다."
 series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 7

@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: Beyond the iid Assumption"
-date: 2029-06-01T19:00:00
+date: 2026-05-16T19:00:00
 description: "Time series·spatial·hierarchical — iid 가정을 깬다."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 19

@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Brownian Motion"
-date: 2030-07-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Wiener process·Markov·martingale·SDE — 연속 시간 확률과정."
 series: "Probability: Theory and Examples"
 seriesOrder: 8

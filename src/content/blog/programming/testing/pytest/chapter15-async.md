@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Async testing"
-date: 2026-05-22T15:00:00
+date: 2026-05-10T15:00:00
 description: "pytest-asyncio·anyio — coroutine·async generator의 테스트."
 series: "pytest 심화"
 seriesOrder: 15

@@ -1,6 +1,6 @@
 ---
 title: "항목 5: 명시적 타입 선언보다는 auto를 선호하라"
-date: 2025-01-05T05:00:00
+date: 2026-05-04T05:00:00
 description: "auto는 단순히 타이핑을 줄여주는 키워드가 아니다. 초기화 강제, 타입 불일치 방지, 람다 저장까지 — 안전하고 유연한 코드를 만든다."
 tags: [C++, auto, Modern C++]
 series: "Effective Modern C++"

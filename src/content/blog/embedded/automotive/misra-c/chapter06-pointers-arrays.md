@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Rules 11, 18 — 포인터 변환과 배열·산술"
-date: 2025-09-05T07:00:00
+date: 2026-05-18T07:00:00
 description: "포인터 캐스트(R11), 포인터 산술·배열 첨자(R18.1~7), VLA 금지(R18.8) — 메모리 안전성의 1차 방어선."
 tags: [misra, c, pointer, array, void-pointer, vla, flexible-array]
 series: "MISRA C"

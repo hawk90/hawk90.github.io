@@ -1,6 +1,6 @@
 ---
 title: "Ch 13.2: Security — CMA·SPDM·Attestation"
-date: 2026-01-02T06:00:00
+date: 2026-05-16T06:00:00
 description: "스펙 §11 — component measurement·attestation."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 30

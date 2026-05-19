@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Induction in the Theory of Numbers"
-date: 2029-08-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Fermat·Euler·Goldbach — 정수론의 추측들."
 series: "Mathematics and Plausible Reasoning, Vol I"
 seriesOrder: 4

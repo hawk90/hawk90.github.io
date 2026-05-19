@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Belief Updating by Network Propagation"
-date: 2029-11-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Belief Propagation의 창시 — sum-product의 원조."
 series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 4

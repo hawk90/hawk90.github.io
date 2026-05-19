@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 임베디드 직렬 통신 개요 — 4가지 주축"
-date: 2027-03-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "SPI·I²C·UART·RS-485. 30년 묵은 표준이 여전히 MCU 보드의 80%를 차지하는 이유."
 series: "Embedded Protocols 심화"
 seriesOrder: 1

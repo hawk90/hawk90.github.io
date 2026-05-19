@@ -1,6 +1,6 @@
 ---
 title: "Pattern 29: Remove Dead Code"
-date: 2026-06-02T05:00:00
+date: 2026-05-02T05:00:00
 description: "사용되지 않는 코드는 망설이지 말고 제거 — Git이 기억한다."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 29

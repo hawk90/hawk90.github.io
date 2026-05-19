@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 시리즈 마무리 + 추가 학습"
-date: 2025-08-30T10:00:00
+date: 2026-05-17T10:00:00
 description: "도구 선택 가이드. Brendan Gregg의 BPF Performance Tools / Systems Performance."
 tags: [Tracing, Resources]
 series: "System Tracing"

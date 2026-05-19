@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Rules 6~10 — Essential Type Model과 묵시적 변환"
-date: 2025-09-05T06:00:00
+date: 2026-05-18T06:00:00
 description: "비트필드(R6), 선언(R8), 초기화(R9), Essential Type Model(R10) — MISRA 2012의 타입 안전성 모델."
 tags: [misra, c, essential-type, conversion, signed, unsigned, bitfield]
 series: "MISRA C"

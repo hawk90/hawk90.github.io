@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Elementary Hypothesis Testing"
-date: 2029-04-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Bayesian hypothesis test — evidence와 odds로 본 추론."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 4

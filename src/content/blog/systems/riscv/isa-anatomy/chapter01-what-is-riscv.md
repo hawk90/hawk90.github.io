@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: RISC-V란 무엇인가"
-date: 2025-05-18T01:00:00
+date: 2026-05-17T01:00:00
 description: "RISC-V의 역사, 설계 철학, 모듈형 ISA 구조, 네이밍 규칙(RV32/64/128, I/M/A/F/D/C)을 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 1

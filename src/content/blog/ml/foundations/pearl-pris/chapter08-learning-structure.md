@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Learning the Structure of Belief Networks"
-date: 2029-11-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Constraint-based·score-based·PC·hill-climbing — 구조 학습."
 series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 8

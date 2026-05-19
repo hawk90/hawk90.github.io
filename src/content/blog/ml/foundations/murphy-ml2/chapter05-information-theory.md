@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Information Theory"
-date: 2029-06-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Modern info theory in ML — IB·sufficient statistic·loss decomposition."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "항목 10: 멤버를 선언한 순서대로 데이터 멤버를 정의하고 초기화하라"
-date: 2026-05-08T10:00:00
+date: 2026-05-05T10:00:00
 description: "초기화 리스트 순서 ≠ 실제 초기화 순서 — 한 멤버로 다른 멤버를 초기화할 때의 UB와 -Wreorder 경고."
 tags: [C++, Initialization, Constructor]
 series: "Beautiful C++"

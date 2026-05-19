@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: I/O Commands"
-date: 2026-07-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "NVMe I/O Commands (Read, Write, Flush, Dataset Management)를 분석한다"
 series: "NVMe Deep Dive"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: The Linux Device Model"
-date: 2026-06-01T14:00:00
+date: 2026-05-13T14:00:00
 description: "kobject·sysfs·bus·class·device — Linux 디바이스 모델의 뼈대."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 14

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: EXP — 표현식, 평가 순서, sizeof, 비교"
-date: 2025-09-10T05:00:00
+date: 2026-05-18T05:00:00
 description: "Sequence point(EXP30), 미초기화 사용(EXP33), NULL deref(EXP34), 인자 일치(EXP37) — C 표현식의 함정."
 tags: [cert-c, expression, sequence-point, sizeof, null-deref]
 series: "CERT C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: The Source Coding Theorem"
-date: 2029-02-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "압축의 한계 = entropy — Shannon 첫째 정리."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 4

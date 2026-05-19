@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: On-Device Personalization"
-date: 2028-08-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "사용자 데이터로 fine-tune — Core ML의 on-device training."
 series: "Core ML 심화"
 seriesOrder: 5

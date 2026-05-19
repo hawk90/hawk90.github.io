@@ -1,6 +1,6 @@
 ---
 title: "Pattern 29: External Fixture"
-date: 2026-07-02T05:00:00
+date: 2026-05-10T05:00:00
 description: "Process·resource에 걸친 fixture — DB·file·network 관리."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 29

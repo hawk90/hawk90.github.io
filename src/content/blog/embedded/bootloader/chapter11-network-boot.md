@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 네트워크 부트 — TFTP, PXE, BOOTP"
-date: 2026-05-18T11:00:00
+date: 2026-05-09T11:00:00
 description: "네트워크를 통한 부팅 — DHCP/BOOTP·TFTP·PXE의 단계와 U-Boot 명령."
 series: "Bootloader Internals"
 seriesOrder: 11

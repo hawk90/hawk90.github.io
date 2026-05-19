@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Register Map"
-date: 2026-07-01T18:00:00
+date: 2026-05-16T18:00:00
 description: "NVMe Controller Register Map (CAP/VS/CC/CSTS/AQA/ASQ/ACQ)을 상세히 분석한다"
 series: "NVMe Deep Dive"
 seriesOrder: 17

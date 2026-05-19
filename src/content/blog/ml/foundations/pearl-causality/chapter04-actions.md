@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Actions, Plans, and Direct Effects"
-date: 2029-12-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Atomic·conditional intervention·direct·indirect effect."
 series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 4

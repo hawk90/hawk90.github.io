@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: UVM C Reference Model"
-date: 2025-09-09T07:00:00
+date: 2026-05-17T07:00:00
 description: "UVM testbench의 reference model을 C로 — driver와 공유."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 7

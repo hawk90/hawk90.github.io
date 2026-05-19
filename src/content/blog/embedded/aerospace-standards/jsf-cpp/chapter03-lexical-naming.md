@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Lexical + Naming Conventions"
-date: 2025-09-30T04:00:00
+date: 2026-05-18T04:00:00
 description: "JSF C++ — 주석, 식별자, Hungarian-like prefix (m_, s_, p_, l_) 패턴."
 tags: [jsf-cpp, lexical, comments, naming, hungarian, prefix, identifier]
 series: "JSF C++"

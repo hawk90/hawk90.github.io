@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Measure Theory"
-date: 2030-07-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "σ-algebra·Lebesgue measure·integration — 확률의 측도론적 기초."
 series: "Probability: Theory and Examples"
 seriesOrder: 1

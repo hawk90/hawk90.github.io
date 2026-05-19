@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Tools — lspci/setpci 실전"
-date: 2026-06-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "PCIe 디버깅 도구 — lspci, setpci, devmem2, pcitree 실전 사용법"
 series: "PCIe Deep Dive"
 seriesOrder: 13

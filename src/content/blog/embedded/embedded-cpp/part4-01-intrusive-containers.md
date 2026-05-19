@@ -1,6 +1,6 @@
 ---
 title: "Part 4-01: Intrusive Containers"
-date: 2026-05-16T01:00:00
+date: 2026-05-07T01:00:00
 description: "객체가 자기 next pointer 보유 — 동적 할당 없는 linked list와 tree."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 29

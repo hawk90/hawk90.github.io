@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 보안 hardening 컴파일러 옵션 — Stack Canary부터 CFI까지"
-date: 2025-09-10T13:00:00
+date: 2026-05-18T13:00:00
 description: "_FORTIFY_SOURCE, -fstack-protector, -fPIE, RELRO, BIND_NOW, -fsanitize=cfi, ShadowCallStack, AddressMasking — 보안 빌드 옵션 종합."
 tags: [cert-c, hardening, security, canary, aslr, pie, relro, cfi, scs]
 series: "CERT C"

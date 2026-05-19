@@ -1,6 +1,6 @@
 ---
 title: "Pattern 52: Add Parameter"
-date: 2026-07-03T04:00:00
+date: 2026-05-10T04:00:00
 description: "Function signature에 안전하게 parameter 추가 — 기본값으로 점진 이전."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 52

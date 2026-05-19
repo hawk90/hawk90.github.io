@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Modules, Header Files, and Namespaces"
-date: 2025-07-01T11:00:00
+date: 2026-05-05T11:00:00
 description: "C++20 모듈, 전통 헤더, namespace, ADL, inline namespace."
 tags: [C++, Modules, Namespace, ADL]
 series: "전문가를 위한 C++"

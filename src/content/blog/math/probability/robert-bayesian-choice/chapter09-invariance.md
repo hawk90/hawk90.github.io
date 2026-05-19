@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Invariance, Haar Measures, Equivariant Estimators"
-date: 2030-04-01T09:00:00
+date: 2026-05-15T09:00:00
 description: "Symmetry·invariance — non-informative prior의 깊은 이유."
 series: "The Bayesian Choice"
 seriesOrder: 9

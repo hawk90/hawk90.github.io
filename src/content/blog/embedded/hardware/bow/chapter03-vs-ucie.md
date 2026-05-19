@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: BoW 2.0 vs UCIe 비교"
-date: 2027-02-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Bandwidth density·packaging·생태계 — 두 표준의 포지션."
 series: "BoW 개요"
 seriesOrder: 3

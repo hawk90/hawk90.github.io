@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Sampling Methods"
-date: 2029-07-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Basic·MCMC·Gibbs·slice·HMC — stochastic approximation."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 11

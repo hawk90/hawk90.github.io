@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: TEST와 TEST_F — 기본 매크로와 fixture"
-date: 2026-05-21T03:00:00
+date: 2026-05-10T03:00:00
 description: "gtest의 기본 단위 — TEST·TEST_F 매크로 확장과 등록 메커니즘."
 series: "gtest 심화"
 seriesOrder: 3

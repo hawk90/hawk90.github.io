@@ -1,6 +1,6 @@
 ---
 title: "항목 25: rvalue 참조에는 std::move를, 보편 참조에는 std::forward를 사용하라"
-date: 2025-01-06T01:00:00
+date: 2026-05-04T01:00:00
 description: "참조 종류별 올바른 캐스팅 — RVO/NRVO와 충돌 회피하는 return 패턴까지."
 tags: [C++, std::move, std::forward, RVO, Move Semantics, Modern C++]
 series: "Effective Modern C++"

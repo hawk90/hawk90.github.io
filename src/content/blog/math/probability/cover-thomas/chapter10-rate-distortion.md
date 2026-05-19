@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Rate Distortion Theory"
-date: 2029-01-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Lossy compression의 한계 — R(D) function."
 series: "Elements of Information Theory"
 seriesOrder: 10

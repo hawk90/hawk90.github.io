@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 모델 개발과 오프라인 평가"
-date: 2028-10-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Baseline·ensemble·debug·calibration — model 개발 자체."
 series: "Designing Machine Learning Systems"
 seriesOrder: 6

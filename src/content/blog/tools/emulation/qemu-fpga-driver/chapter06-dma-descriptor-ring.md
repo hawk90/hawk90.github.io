@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: FPGA DMA — Descriptor Ring"
-date: 2025-09-04T06:00:00
+date: 2026-05-17T06:00:00
 description: "SG·bidirectional·zero-copy — FPGA의 표준 DMA 패턴."
 tags: [QEMU, fpga, dma, descriptor-ring, zero-copy]
 series: "FPGA Driver via QEMU+VFIO"

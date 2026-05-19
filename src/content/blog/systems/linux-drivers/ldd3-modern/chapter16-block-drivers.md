@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Block Drivers"
-date: 2026-06-01T16:00:00
+date: 2026-05-13T16:00:00
 description: "blk-mq·request_queue·bio — 블록 디바이스 드라이버 모델."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 17

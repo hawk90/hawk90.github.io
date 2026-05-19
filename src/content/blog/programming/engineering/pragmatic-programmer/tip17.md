@@ -1,6 +1,6 @@
 ---
 title: "Tip 17: Eliminate Effects Between Unrelated Things"
-date: 2026-05-13T17:00:00
+date: 2026-05-11T17:00:00
 description: "관련 없는 것들 사이의 영향을 제거하라 — 직교성. 한 변경이 한 자리만 건드리도록."
 series: "The Pragmatic Programmer"
 seriesOrder: 17

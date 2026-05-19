@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: SBI 확장"
-date: 2025-05-19T02:00:00
+date: 2026-05-17T02:00:00
 description: "SBI 확장 — 타이머, IPI, RFENCE, HSM, PMU 등 주요 확장을 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 8

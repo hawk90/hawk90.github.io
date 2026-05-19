@@ -1,6 +1,6 @@
 ---
 title: "Column 7: The Back of the Envelope"
-date: 2026-05-13T07:00:00
+date: 2026-05-11T07:00:00
 description: "The Back of the Envelope"
 series: "Programming Pearls"
 seriesOrder: 7

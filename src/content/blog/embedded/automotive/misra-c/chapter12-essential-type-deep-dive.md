@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Essential Type Model 심화 — 변환 매트릭스와 컴파일러 코드 생성"
-date: 2025-09-05T13:00:00
+date: 2026-05-18T13:00:00
 description: "Essential type 8개의 *모든 변환 조합*과 결과. promotion, conversion rank, GCC/Clang assembly 비교. 자주 위반되는 패턴 50개."
 tags: [misra, c, essential-type, conversion, promotion, assembly, rank]
 series: "MISRA C"

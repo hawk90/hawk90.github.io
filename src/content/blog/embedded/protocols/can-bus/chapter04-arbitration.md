@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: CAN 중재 — Non-Destructive Priority Arbitration"
-date: 2027-04-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "낮은 ID가 무조건 이긴다. 충돌 없이 자동으로 우선순위 결정 — CAN의 가장 우아한 부분."
 series: "CAN Bus 심화"
 seriesOrder: 4

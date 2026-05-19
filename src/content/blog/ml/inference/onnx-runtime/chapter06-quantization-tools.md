@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Quantization Tools"
-date: 2028-07-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "PTQ·QAT·QDQ — ORT가 제공하는 quantization 도구."
 series: "ONNX Runtime 심화"
 seriesOrder: 6

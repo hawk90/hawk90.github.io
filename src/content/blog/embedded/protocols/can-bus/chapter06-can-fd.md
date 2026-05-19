@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: CAN FD — Flexible Data-Rate (5 Mbps × 64 byte)"
-date: 2027-04-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Bosch 2012. 중재는 그대로 1 Mbps, 데이터만 가속 5 Mbps. 페이로드 8 → 64 byte."
 series: "CAN Bus 심화"
 seriesOrder: 6

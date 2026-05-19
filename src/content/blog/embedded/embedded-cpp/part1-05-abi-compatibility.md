@@ -1,6 +1,6 @@
 ---
 title: "Part 1-05: ABI 호환성"
-date: 2026-05-13T05:00:00
+date: 2026-05-07T05:00:00
 description: "C와 C++가 한 바이너리에서 살아남는 법 — name mangling, extern \"C\", calling convention, struct layout."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 5

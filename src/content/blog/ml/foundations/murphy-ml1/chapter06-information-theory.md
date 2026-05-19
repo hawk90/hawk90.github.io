@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Information Theory"
-date: 2029-05-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Entropy·KL·cross-entropy — ML loss의 정보이론적 뿌리."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 6

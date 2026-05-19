@@ -1,6 +1,6 @@
 ---
 title: "항목 23: std::move와 std::forward를 이해하라"
-date: 2025-01-05T23:00:00
+date: 2026-05-04T23:00:00
 description: "둘 다 캐스팅 함수 — 아무것도 이동·전달하지 않음. const + std::move의 함정."
 tags: [C++, std::move, std::forward, Move Semantics, Modern C++]
 series: "Effective Modern C++"

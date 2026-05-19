@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: CSI-2 v3.0+ — Smart ROI, USL, RAW24, MIPI CCS"
-date: 2027-05-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "v3.0 (2019) → v4.2 (2024) 신기능. 확장 VC, ROI, 24-bit RAW, Always-On Sentinel."
 series: "MIPI 심화"
 seriesOrder: 6

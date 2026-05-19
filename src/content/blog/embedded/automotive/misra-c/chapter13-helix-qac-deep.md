@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Helix QAC 깊이 — 프로젝트 setup, suppression, CI 통합"
-date: 2025-09-05T14:00:00
+date: 2026-05-18T14:00:00
 description: "Helix QAC 2024 실전 설정 — .prj 구조, RCMA 룰 셋, suppression 문법, GitLab/Jenkins CI, baseline 관리, reporting."
 tags: [misra, c, helix-qac, prqa, ci, static-analysis, gitlab, suppression]
 series: "MISRA C"

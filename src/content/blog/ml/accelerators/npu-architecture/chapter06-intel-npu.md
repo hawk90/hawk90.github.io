@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Intel NPU (Meteor Lake+)"
-date: 2028-01-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "VPU 출신 — Intel 노트북 NPU의 구조."
 series: "NPU 아키텍처"
 seriesOrder: 6

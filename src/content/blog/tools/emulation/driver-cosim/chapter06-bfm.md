@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Bus Functional Model (BFM) in C"
-date: 2025-09-09T06:00:00
+date: 2026-05-17T06:00:00
 description: "Driver와 RTL 사이의 protocol-aware adapter."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: DWARF — 디버그 정보의 정체"
-date: 2025-08-20T12:00:00
+date: 2026-05-17T12:00:00
 description: "DWARF 표준, DIE / abbrev / line / location, expression VM, CFI, split-DWARF."
 tags: [gdb, lldb, DWARF, ELF, DebugInfo]
 series: "GDB and LLDB"

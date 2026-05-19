@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: INT — 정수 오버플로, 부호 변환, 시프트 함정"
-date: 2025-09-10T06:00:00
+date: 2026-05-18T06:00:00
 description: "unsigned wraparound(INT30), signed overflow UB(INT31), shift UB(INT34), 부호 변환(INT35) — CVE의 큰 부분."
 tags: [cert-c, integer, overflow, signed, unsigned, shift, cwe-190]
 series: "CERT C"

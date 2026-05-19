@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: The Gaussian Distribution"
-date: 2029-04-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Central place·CLT·왜 Gaussian이 'normal'인가."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 6

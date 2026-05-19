@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 3D 패키징 — 하이브리드 본딩과 TSV"
-date: 2026-11-01T07:00:00
+date: 2026-05-19T07:00:00
 description: "Foveros·SoIC·TSV — die를 위로 쌓는다."
 series: "UCIe 심화"
 seriesOrder: 7

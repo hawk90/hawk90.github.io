@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 36: 런타임과 컴파일 타임 추상화의 트레이드오프를 이해하라"
-date: 2026-05-14T12:00:00
+date: 2026-05-02T12:00:00
 description: "런타임 다형성(virtual)과 컴파일 타임 다형성(템플릿/concept)은 비용과 이득이 다르다. 어느 쪽도 절대적으로 우월하지 않으며 선택 기준을 명확히 알아야 한다."
 tags: [C++, Software Design, Polymorphism, Trade-off]
 series: "C++ Software Design"

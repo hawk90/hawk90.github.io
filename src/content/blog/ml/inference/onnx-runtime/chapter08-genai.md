@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: ONNX Runtime GenAI·LLM Serving"
-date: 2028-07-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "onnxruntime-genai — LLM 추론 고수준 API."
 series: "ONNX Runtime 심화"
 seriesOrder: 8

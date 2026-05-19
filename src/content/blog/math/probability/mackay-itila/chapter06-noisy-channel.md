@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Noisy-Channel Coding"
-date: 2029-02-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Channel capacity와 Shannon 둘째 정리 — 노이즈 너머 신호."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 언어 환경, Lexical, One Definition Rule"
-date: 2025-09-15T03:00:00
+date: 2026-05-18T03:00:00
 description: "Implementation-defined 동작(M0/M1), 어휘 규칙(M2), 식별자, 헤더·ODR — C++의 첫 진입 장벽."
 tags: [autosar, cpp, lexical, identifier, odr, header]
 series: "AUTOSAR C++14"

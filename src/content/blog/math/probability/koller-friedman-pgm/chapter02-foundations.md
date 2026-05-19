@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Foundations"
-date: 2030-11-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "확률·graph theory·algorithm — PGM의 토대."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 2

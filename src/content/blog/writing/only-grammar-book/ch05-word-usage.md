@@ -1,6 +1,6 @@
 ---
 title: "Chapter 5: Word Usage"
-date: 2026-05-18T05:00:00
+date: 2026-05-14T05:00:00
 description: "단어 선택의 정확성 — 동음이의어, 헷갈리는 단어 쌍, 격식·비격식 어휘 차이, 잘못된 단어 선택."
 series: "The Only Grammar Book You'll Ever Need"
 seriesOrder: 5
@@ -8,10 +8,9 @@ tags: [writing, grammar, word-usage, vocabulary]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
-draft: true
 ---
 
-문법이 맞아도 *단어 선택*이 잘못되면 의미가 어긋납니다. 영어에는 비슷하게 들리거나 비슷하게 생긴 단어가 많아 자주 혼동됩니다. 이 챕터는 흔히 혼동되는 단어 쌍을 *알파벳 순*으로 정리합니다.
+문법이 맞아도 단어 선택이 잘못되면 의미가 어긋납니다. 영어에는 비슷하게 들리거나 비슷하게 생긴 단어가 많아 자주 혼동됩니다. 이 챕터는 흔히 혼동되는 단어 쌍을 알파벳 순으로 정리합니다.
 
 ## Accept / Except
 
@@ -55,7 +54,7 @@ draft: true
 ## Among / Between
 
 - **Among** — 셋 이상: *The money was divided among the four players.*
-- **Between** — 둘, 또는 셋 이상이 *개별적*일 때: *An agreement between the six countries.*
+- **Between** — 둘, 또는 셋 이상이 개별적일 때: *An agreement between the six countries.*
 
 ## Anxious / Eager
 
@@ -69,19 +68,19 @@ draft: true
 - **Bad** (형용사) — 나쁜: *I feel bad about the mistake.*
 - **Badly** (부사) — 잘못, 심하게: *He sang badly.*
 
-회피: *I feel badly.* — 바름: *I feel bad.* `Feel, look, smell, taste, sound`는 *연결 동사*라 형용사 보어를 받습니다.
+회피: *I feel badly.* — 바름: *I feel bad.* `Feel`, `look`, `smell`, `taste`, `sound`는 연결 동사라 형용사 보어를 받습니다.
 
 ## Bring / Take
 
 - **Bring** — 화자 쪽으로: *Bring me the book.*
-- **Take** — 화자에게서 멀어지는: *Take this to your sister.*
+- **Take** — 화자에게서 멀어지는 방향: *Take this to your sister.*
 
 ## Can / May
 
 - **Can** — 능력: *I can swim.*
 - **May** — 허락: *May I leave now?*
 
-회화에서 *can*이 허락의 의미로 자주 쓰이지만, 격식에서는 *may*.
+회화에서 *can*이 허락의 의미로 자주 쓰이지만, 격식에서는 *may*를 씁니다.
 
 ## Capital / Capitol
 
@@ -105,7 +104,7 @@ draft: true
 - **Compose** — 구성하다 (부분이 전체를): *80 musicians compose the orchestra.*
 - 수동형: *The orchestra is composed of 80 musicians.*
 
-`Is comprised of`는 *비표준*. *Comprises* 또는 *is composed of*를 씁니다.
+`Is comprised of`는 비표준입니다. *Comprises* 또는 *is composed of*를 씁니다.
 
 ## Continual / Continuous
 
@@ -123,7 +122,7 @@ draft: true
 - **Disinterested** — 공정한, 편향 없는: *A disinterested judge.*
 - **Uninterested** — 관심 없는: *He was uninterested in the conversation.*
 
-회화에서 두 단어가 혼용되지만, 격식 글에서는 구분.
+회화에서 두 단어가 혼용되지만, 격식 글에서는 구분합니다.
 
 ## Emigrate / Immigrate
 
@@ -159,14 +158,14 @@ draft: true
 - **Well** (부사): *She writes well.*
 - **Well** (형용사, 건강): *I feel well. (건강 — 형용사)*
 
-`I feel good`(정서)과 `I feel well`(건강)이 *모두 맞습니다*. 의미가 다릅니다.
+`I feel good`(정서)과 `I feel well`(건강)이 모두 맞습니다. 의미가 다릅니다.
 
 ## Imply / Infer
 
 - **Imply** — 암시하다 (화자가): *The CEO implied that layoffs were coming.*
 - **Infer** — 추론하다 (청자가): *We inferred from her tone that something was wrong.*
 
-*화자가 imply, 청자가 infer*. 자주 혼동됩니다.
+화자가 *imply*, 청자가 *infer*입니다. 자주 혼동됩니다.
 
 ## Insure / Ensure / Assure
 
@@ -290,25 +289,25 @@ draft: true
 
 ## 한국 학생의 Word Usage 함정
 
-1. ***Utilize* 남용** — "use"가 거의 항상 정답
-2. ***-ize* 과시** — *Personalize, finalize, optimize* 등
-3. ***Very* + 약한 단어** — 강한 단어 하나로. *very tired* → *exhausted*
-4. ***Nice, interesting* 남발** — 구체적 형용사로
-5. ***Contact* 동사** — *phone, email* 같은 구체 동사로
-6. ***Significant* 통계적·일반 의미 혼동** — 학술에서는 *statistically significant*, 일반에서는 *important*
-7. **한국어 직역 함정** — *consider as* → *consider*, *discuss about* → *discuss* (불필요한 전치사)
+1. **Utilize 남용** — *use*가 거의 항상 정답입니다.
+2. **-ize 과시** — *Personalize*, *finalize*, *optimize* 등.
+3. **Very + 약한 단어** — 강한 단어 하나로. *very tired* → *exhausted*.
+4. **Nice, interesting 남발** — 구체적 형용사로.
+5. **Contact 동사** — *phone*, *email* 같은 구체 동사로.
+6. **Significant 통계·일반 의미 혼동** — 학술에서는 *statistically significant*, 일반에서는 *important*.
+7. **한국어 직역 함정** — *consider as* → *consider*, *discuss about* → *discuss* (불필요한 전치사).
 
 ## 정리
 
-- 동음이의어 / 비슷한 단어 쌍의 *정확한 의미* 구분
-- 자주 혼동되는 쌍 — affect/effect, lay/lie, fewer/less, imply/infer
-- 격식 / 비격식 어휘 — 회화 어휘를 격식 글에서 피함
-- 단어 선택은 *문법만큼 중요* — 의미가 어긋남
-- *사전*과 *코퍼스*로 의심스러운 사용 점검
+- 동음이의어·비슷한 단어 쌍의 정확한 의미를 구분합니다.
+- 자주 혼동되는 쌍 — affect/effect, lay/lie, fewer/less, imply/infer.
+- 격식·비격식 어휘 — 회화 어휘를 격식 글에서 피합니다.
+- 단어 선택은 문법만큼 중요합니다. 잘못 쓰면 의미가 어긋납니다.
+- 사전과 코퍼스로 의심스러운 사용을 점검합니다.
 
 ## 다음 장 예고
 
-마지막 장은 **Chapter 6: Style and Clarity**. 문법을 넘어선 *문체*와 *명확성*의 원리.
+마지막 장은 **Chapter 6: Style and Clarity**입니다. 문법을 넘어선 문체와 명확성의 원리를 다룹니다.
 
 ## 관련 항목
 

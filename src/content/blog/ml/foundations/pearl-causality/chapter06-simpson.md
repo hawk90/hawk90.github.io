@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Simpson's Paradox, Confounding, Collapsibility"
-date: 2029-12-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "전체와 부분의 모순 — causal 시각으로 해소."
 series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 6

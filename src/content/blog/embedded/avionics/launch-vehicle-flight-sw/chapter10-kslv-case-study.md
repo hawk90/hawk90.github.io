@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: KSLV-II 누리·민간 LV 공개 사례 — KARI·InnoSpace·Perigee·UNASTELLA"
-date: 2026-05-27T10:00:00
+date: 2026-05-18T10:00:00
 description: "한국 발사체 avionics 공개 자료. KSLV-II 누리·민간 LV·국가 우주개발 로드맵."
 series: "Launch Vehicle Flight Software"
 seriesOrder: 10

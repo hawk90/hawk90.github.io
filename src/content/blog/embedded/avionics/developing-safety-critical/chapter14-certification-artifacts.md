@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: 인증 산출물"
-date: 2026-05-26T14:00:00
+date: 2026-05-18T14:00:00
 description: "DO-178C — 5 plans + 5 standards + 12 data items의 전체 산출물 카탈로그."
 series: "Developing Safety-Critical Software"
 seriesOrder: 14

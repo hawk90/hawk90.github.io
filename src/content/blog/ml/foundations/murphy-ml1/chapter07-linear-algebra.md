@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Linear Algebra"
-date: 2029-05-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Vector·matrix·decomposition — ML-friendly 선형대수."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 7

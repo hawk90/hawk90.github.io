@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Using the Language: An Extended Example"
-date: 2025-10-01T07:00:00
+date: 2026-05-01T07:00:00
 description: "선적(cargo) 시스템 종합 예제. 모델 진화 / 빌딩 블록 적용."
 tags: [DDD, Case Study, Cargo]
 series: "Domain-Driven Design"

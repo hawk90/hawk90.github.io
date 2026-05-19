@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: From Prior Information to Prior Distributions"
-date: 2030-04-01T03:00:00
+date: 2026-05-15T03:00:00
 description: "Subjective·conjugate·noninformative·reference prior."
 series: "The Bayesian Choice"
 seriesOrder: 3

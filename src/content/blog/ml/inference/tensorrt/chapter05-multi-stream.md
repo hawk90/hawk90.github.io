@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Multi-Stream Inference"
-date: 2028-06-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "CUDA Stream으로 throughput 끌어올리기."
 series: "TensorRT 심화"
 seriesOrder: 5

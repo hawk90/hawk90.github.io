@@ -1,6 +1,6 @@
 ---
 title: "Pattern 39: Factory Method (in TDD)"
-date: 2026-07-02T15:00:00
+date: 2026-05-10T15:00:00
 description: "Constructor 우회 — flexibility·naming. Money.dollar(5) 같은 의도 표현."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 39

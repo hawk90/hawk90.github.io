@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: BSP란 무엇인가"
-date: 2026-05-20T01:00:00
+date: 2026-05-09T01:00:00
 description: "Board Support Package의 정의·범위·구성요소 — 보드를 부팅 가능한 시스템으로 만드는 모든 것."
 series: "BSP Development"
 seriesOrder: 1

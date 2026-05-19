@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Bernoulli and Poisson Processes"
-date: 2030-08-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Counting process·inter-arrival·merging·splitting."
 series: "Introduction to Probability"
 seriesOrder: 6

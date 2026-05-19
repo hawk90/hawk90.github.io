@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 커스텀 머신 타입"
-date: 2025-10-01T11:00:00
+date: 2026-05-17T11:00:00
 description: "QEMU에서 새로운 머신 타입(보드)을 정의한다."
 tags: [QEMU, Machine, Board]
 series: "QEMU Internals"

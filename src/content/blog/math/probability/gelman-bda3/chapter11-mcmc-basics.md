@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Basics of Markov Chain Simulation"
-date: 2030-02-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Metropolis·Gibbs·HMC — MCMC 기본 알고리즘들."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 11

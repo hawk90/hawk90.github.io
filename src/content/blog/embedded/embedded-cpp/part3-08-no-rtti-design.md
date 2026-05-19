@@ -1,6 +1,6 @@
 ---
 title: "Part 3-08: No-RTTI 설계"
-date: 2026-05-15T08:00:00
+date: 2026-05-07T08:00:00
 description: "-fno-rtti 환경에서 type info 없이 다형성 — enum tag, std::variant, CRTP."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 26

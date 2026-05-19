@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Sharding과 SPMD"
-date: 2027-08-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "GSPMD·sharding propagation — multi-device 자동 분할."
 series: "XLA·OpenXLA 심화"
 seriesOrder: 9

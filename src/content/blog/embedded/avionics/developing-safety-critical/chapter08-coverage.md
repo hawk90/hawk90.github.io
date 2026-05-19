@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Coverage — Statement·Decision·MC/DC"
-date: 2026-05-26T08:00:00
+date: 2026-05-18T08:00:00
 description: "DAL별 structural coverage 요구 — statement·decision·MC/DC의 정의와 도구."
 series: "Developing Safety-Critical Software"
 seriesOrder: 8

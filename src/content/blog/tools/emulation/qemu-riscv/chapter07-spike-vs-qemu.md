@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: spike vs QEMU"
-date: 2025-05-20T01:00:00
+date: 2026-05-17T01:00:00
 description: "RISC-V 시뮬레이터 비교 — spike와 QEMU의 차이, 용도별 선택을 다룬다."
 series: "RISC-V QEMU 심화"
 seriesOrder: 7

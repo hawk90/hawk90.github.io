@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Other Features I — Memory / Exceptions"
-date: 2025-05-13T06:00:00
+date: 2026-05-18T06:00:00
 description: "Ownership / Smart Pointers / Rvalue / Friends / Exceptions / noexcept / RTTI / Casting / Streams."
 tags: [Google, C++, Style-Guide, Smart-Pointer, Exception, RTTI, Casting]
 series: "Google C++ Style"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Verilator — Open Source SV Simulator"
-date: 2025-09-09T03:00:00
+date: 2026-05-17T03:00:00
 description: "RTL → C++ — driver code와 link되는 가장 빠른 simulator."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 3

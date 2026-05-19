@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: BoW 아키텍처 — 슬라이스 구조"
-date: 2027-02-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Slice·lane·data rate — BoW의 기본 빌딩 블록."
 series: "BoW 개요"
 seriesOrder: 2

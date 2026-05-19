@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 모델 양자화 — INT8·INT4"
-date: 2028-04-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Float32 → INT8 — 4× 작게, 빠르게."
 series: "TinyML·Edge AI"
 seriesOrder: 4

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Layout Assignment"
-date: 2027-08-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Tensor의 메모리 순서를 결정한다 — minor-to-major dimension."
 series: "XLA·OpenXLA 심화"
 seriesOrder: 6

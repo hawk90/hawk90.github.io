@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 카메라 드라이버 — Sony IMX 센서 V4L2 Subdev"
-date: 2027-05-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "v4l2_subdev 드라이버 — power, I²C register, mode table, stream on/off."
 series: "MIPI 심화"
 seriesOrder: 11

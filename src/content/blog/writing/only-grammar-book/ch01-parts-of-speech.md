@@ -1,6 +1,6 @@
 ---
 title: "Chapter 1: Parts of Speech"
-date: 2026-05-18T01:00:00
+date: 2026-05-14T01:00:00
 description: "영어 문법의 출발점 — 여덟 가지 품사. 명사, 대명사, 동사, 형용사, 부사, 전치사, 접속사, 감탄사."
 series: "The Only Grammar Book You'll Ever Need"
 seriesOrder: 1

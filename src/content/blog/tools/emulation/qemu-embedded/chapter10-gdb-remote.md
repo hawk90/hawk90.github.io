@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: GDB 원격 디버깅"
-date: 2025-09-15T10:00:00
+date: 2026-05-17T10:00:00
 description: "QEMU GDB 서버로 커널과 펌웨어를 원격 디버깅한다."
 tags: [QEMU, GDB, Debugging]
 series: "QEMU Embedded Emulation"

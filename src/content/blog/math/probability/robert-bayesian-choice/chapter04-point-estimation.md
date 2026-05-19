@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Bayesian Point Estimation"
-date: 2030-04-01T04:00:00
+date: 2026-05-15T04:00:00
 description: "Bayes estimator·loss-specific·robust."
 series: "The Bayesian Choice"
 seriesOrder: 4

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: SoC 데이터시트 읽기"
-date: 2026-05-20T02:00:00
+date: 2026-05-09T02:00:00
 description: "Reference Manual에서 BSP에 필요한 정보를 찾는 방법 — clock tree, memory map, pin mux."
 series: "BSP Development"
 seriesOrder: 2

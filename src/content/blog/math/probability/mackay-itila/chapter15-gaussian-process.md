@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Gaussian Processes"
-date: 2029-02-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "Infinite-width neural network·kernel method의 만남."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 15

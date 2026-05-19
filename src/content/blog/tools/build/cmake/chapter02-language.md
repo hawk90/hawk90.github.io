@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: CMake 언어 — 변수, 조건문, 함수"
-date: 2025-05-14T02:00:00
+date: 2026-05-17T02:00:00
 description: "CMake 스크립트의 기본 문법: 변수, 리스트, 조건문, 반복문, 함수."
 tags: [cmake, build, cpp, syntax]
 series: "CMake"

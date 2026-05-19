@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Rule 17 — 함수의 본체, 재귀, 가변인자, 반환값"
-date: 2025-09-05T09:00:00
+date: 2026-05-18T09:00:00
 description: "stdarg 금지(R17.1), 재귀 금지(R17.2), 모든 경로 return(R17.4), 반환값 처리(R17.7) — 함수 호출의 안전 계약."
 tags: [misra, c, function, recursion, varargs, return-value]
 series: "MISRA C"

@@ -1,6 +1,6 @@
 ---
 title: "Part 1-2: 연역 논증과 귀납 논증"
-date: 2025-07-22T02:00:00
+date: 2026-05-14T02:00:00
 description: "연역 — 필연 / 형식. 귀납 — 개연 / 강도. 두 추론 양식 구별."
 tags: [Logic, Deductive, Inductive]
 series: "비판적 사고를 위한 논리"

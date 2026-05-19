@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Managing threads"
-date: 2026-05-20T02:00:00
+date: 2026-05-06T02:00:00
 description: "std::thread 라이프사이클, join/detach, 인자 전달, std::jthread (C++20)."
 tags: [C++, Concurrency, std::thread, std::jthread]
 series: "C++ Concurrency in Action"

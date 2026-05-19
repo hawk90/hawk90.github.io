@@ -1,6 +1,6 @@
 ---
 title: "Pattern 24: Triangulate"
-date: 2026-07-01T24:00:00
+date: 2026-05-10T24:00:00
 description: "두 examples로 abstraction 강제 — 일반화의 방향 GPS 삼각측량."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 24

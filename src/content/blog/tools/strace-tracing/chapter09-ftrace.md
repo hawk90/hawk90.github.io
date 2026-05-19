@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: ftrace / tracecmd — 커널 내장"
-date: 2025-08-30T09:00:00
+date: 2026-05-17T09:00:00
 description: "ftrace — 커널 내장 트레이서. function_graph / events / set_ftrace_filter."
 tags: [ftrace, tracecmd, Kernel]
 series: "System Tracing"

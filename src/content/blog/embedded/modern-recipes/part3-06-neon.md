@@ -1,6 +1,6 @@
 ---
 title: "3-06: ARM NEON 심화 — Matrix Multiply·FFT·Image Filter"
-date: 2026-05-20T13:00:00
+date: 2026-05-07T13:00:00
 description: "NEON 실전 사례를 matrix multiply, color conversion, box filter, Sobel, FFT, crypto로 묶어 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 18

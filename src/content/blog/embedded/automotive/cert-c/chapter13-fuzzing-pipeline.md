@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Fuzzing 자동화 파이프라인 — libFuzzer, AFL++, OSS-Fuzz, honggfuzz"
-date: 2025-09-10T14:00:00
+date: 2026-05-18T14:00:00
 description: "현대 보안의 *기본 인프라*가 된 fuzzing. coverage-guided 원리, libFuzzer/AFL++/honggfuzz 비교, OSS-Fuzz 통합, CI 파이프라인, corpus 관리."
 tags: [cert-c, fuzzing, libfuzzer, afl, oss-fuzz, security, coverage]
 series: "CERT C"

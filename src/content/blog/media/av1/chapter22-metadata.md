@@ -1,6 +1,6 @@
 ---
 title: "Ch 22: Metadata OBU"
-date: 2025-10-01T23:00:00
+date: 2026-05-16T23:00:00
 description: "AV1의 Metadata OBU — HDR CLL, MDCV, Scalability, ITU-T T.35, Timecode."
 tags: [AV1, Video, Codec, Metadata, HDR]
 series: "AV1"

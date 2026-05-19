@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Session·IO Binding"
-date: 2028-07-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Pre-allocated buffer로 copy 최소화."
 series: "ONNX Runtime 심화"
 seriesOrder: 4

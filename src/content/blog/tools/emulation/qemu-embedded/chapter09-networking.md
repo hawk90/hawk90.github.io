@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 네트워킹"
-date: 2025-09-15T09:00:00
+date: 2026-05-17T09:00:00
 description: "QEMU에서 TAP/User-mode 네트워킹을 설정한다."
 tags: [QEMU, Networking, TAP]
 series: "QEMU Embedded Emulation"

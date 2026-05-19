@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Sequential Monte Carlo"
-date: 2029-06-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "Particle filter·SMC sampler — 시계열·sequential inference."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 13

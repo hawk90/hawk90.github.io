@@ -1,6 +1,6 @@
 ---
 title: "Unit 3.2: Results의 문법"
-date: 2026-05-19T07:00:00
+date: 2026-05-14T07:00:00
 description: "Results의 시제 결정, 비교급과 최상급, 정도 표현. 부정 결과를 보고하는 방법."
 series: "Science Research Writing"
 seriesOrder: 32
@@ -8,14 +8,13 @@ tags: [writing, academic, results, comparison, tense]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: true
 ---
 
-Results의 문법은 *시제*와 *비교 표현*에 집중됩니다. 자기 발견을 어느 강도로 표현하는가가 voice를 결정합니다.
+Results의 문법은 시제와 비교 표현에 집중됩니다. 자기 발견을 어느 강도로 표현하는가가 voice를 결정합니다.
 
 ## Results의 시제
 
-기본은 *Past Simple* — 관찰된 사실입니다.
+기본은 Past Simple입니다. 관찰된 사실을 가리키기 때문입니다.
 
 ```
 The yield increased with temperature.
@@ -113,7 +112,7 @@ A reached 30%.         ← 도달값
 또는: A is larger than the control group.
 ```
 
-비교는 항상 *대상 명시*가 필요합니다.
+비교는 항상 대상 명시가 필요합니다.
 
 ## 정도 부사 — Modifying Comparatives
 
@@ -135,7 +134,7 @@ considerably larger — 상당히 큼
 significantly larger — 통계적으로 유의
 ```
 
-*significantly*는 학술 글에서 *통계적 유의성*을 가리키므로 *일반적 강조*에는 쓰지 않습니다.
+*significantly*는 학술 글에서 통계적 유의성을 가리키므로 일반적 강조에는 쓰지 않습니다.
 
 ## Statistical Significance — 표현
 
@@ -178,11 +177,11 @@ There was perhaps a slight tendency toward a small difference.
 No significant difference was found between groups.
 ```
 
-부정 결과도 *명확하게* 보고합니다.
+부정 결과도 명확하게 보고합니다.
 
 ### 2. 결과 누락
 
-가설을 검증하기 위한 모든 분석을 보고합니다 — 부정 결과도.
+가설을 검증하기 위한 모든 분석을 보고합니다. 부정 결과도 포함됩니다.
 
 ```
 선호: Of the five hypothesized effects, three were confirmed
@@ -199,7 +198,7 @@ The data strongly suggest a significant effect (p = .049).
 The data suggest a marginally significant effect (p = .049).
 ```
 
-`p < .05`라도 *.049*는 *.001*보다 약합니다. 그에 맞는 어조를 씁니다.
+`p < .05`라도 .049는 .001보다 약합니다. 그에 맞는 어조를 씁니다.
 
 ## 발견의 강도 조절
 
@@ -234,7 +233,7 @@ The results possibly indicate ...
 The findings could be interpreted as ...
 ```
 
-자기 데이터의 *결정성*에 맞춰 동사를 선택합니다.
+자기 데이터의 결정성에 맞춰 동사를 선택합니다.
 
 ## 사례 — 한 단락
 
@@ -252,46 +251,46 @@ transfer was not rate-limiting under our conditions.
 
 분석:
 
-- **Present (그림 참조)** — *is shown*
-- **Past (관찰)** — *increased, rose, remained, was unaffected*
-- **비교** — *from 80°C to 100°C*, *from 65% to 87%*
-- **정량 정도** — *significantly*, *a 22-percentage-point increase*
-- **인과** — *suggesting that*, *indicating that* (약한 인과)
-- **부정 결과** — *was unaffected ... p = .54* (명확히 보고)
+- **Present (그림 참조)** — *is shown*이 쓰였습니다.
+- **Past (관찰)** — *increased*, *rose*, *remained*, *was unaffected*가 등장합니다.
+- **비교** — *from 80°C to 100°C*, *from 65% to 87%*로 범위를 명시합니다.
+- **정량 정도** — *significantly*, *a 22-percentage-point increase*로 정도를 표현합니다.
+- **인과** — *suggesting that*, *indicating that*으로 약한 인과를 시사합니다.
+- **부정 결과** — *was unaffected ... p = .54*로 명확히 보고합니다.
 
 이 단락이 Results의 좋은 모델입니다.
 
 ## 자기 점검
 
 ```
-□ 기본 시제가 *Past Simple*인가?
-□ 그림 참조가 *Present Simple*인가?
-□ 비교에 *대상이 명시*되었는가?
-□ *significantly*가 통계적 의미로 사용되었는가?
-□ 부정 결과가 *명확히* 보고되었는가?
+□ 기본 시제가 Past Simple인가?
+□ 그림 참조가 Present Simple인가?
+□ 비교에 대상이 명시되었는가?
+□ significantly가 통계적 의미로 사용되었는가?
+□ 부정 결과가 명확히 보고되었는가?
 □ 발견의 강도가 데이터에 맞는가?
 ```
 
 ## 정리
 
-- Results의 시제 — 발견은 *Past*, 그림 참조와 일반화는 *Present*
-- 비교는 *대상 명시* + 정도 부사
-- *Significantly*는 통계적 유의성 — 일반 강조 금지
-- 부정 결과도 *명확히* 보고
-- 발견의 강도(*demonstrate / indicate / suggest*)를 데이터에 맞추기
+- Results의 시제는 발견을 Past로, 그림 참조와 일반화는 Present로 씁니다.
+- 비교는 대상 명시와 정도 부사가 함께 가야 합니다.
+- *Significantly*는 통계적 유의성 전용입니다. 일반 강조에는 쓰지 않습니다.
+- 부정 결과도 명확히 보고합니다.
+- 발견의 강도(*demonstrate*, *indicate*, *suggest*)를 데이터에 맞춥니다.
 
 ## 한국 연구자의 Results Grammar 함정
 
 ```
-1. Significantly 일반 강조 → 통계적 의미만
+1. Significantly의 일반 강조 — 통계적 의미만
 2. 비교 대상 누락
 3. Past / Present 자리 흔들림
-4. 동사 강도 데이터와 불일치
+4. 동사 강도와 데이터의 불일치
 ```
 
 ## 다음 Unit 예고
 
-다음은 **Unit 4: Writing the Discussion / Conclusion**.
+다음 Unit은 **Unit 4: Writing the Discussion / Conclusion**입니다.
 
 ## 관련 항목
 

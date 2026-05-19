@@ -1,6 +1,6 @@
 ---
 title: "DSA 18: AOV / AOE 네트워크 — 위상 정렬과 임계 경로"
-date: 2026-03-01T18:00:00
+date: 2026-05-15T18:00:00
 description: "활동 네트워크로 작업 일정 관리 — 의존성 순서와 최장 경로(임계)."
 tags: [Data Structure, Algorithm, Graph, Topological Sort, Critical Path]
 series: "Data Structures and Algorithms"

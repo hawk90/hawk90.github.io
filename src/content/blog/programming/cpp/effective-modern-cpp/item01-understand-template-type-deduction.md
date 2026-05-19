@@ -1,6 +1,6 @@
 ---
 title: "항목 1: 템플릿 타입 추론 규칙을 이해하라"
-date: 2025-01-05T01:00:00
+date: 2026-05-04T01:00:00
 description: "템플릿 타입 추론의 세 가지 경우. 참조·포인터, 보편 참조, 값 전달. 그리고 auto가 이 규칙을 어떻게 물려받는가."
 tags: [C++, Template, Type Deduction]
 series: "Effective Modern C++"

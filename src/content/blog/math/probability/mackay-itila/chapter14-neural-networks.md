@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Neural Networks as Inference"
-date: 2029-02-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "Single neuron·multilayer·Bayesian neural network."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 14

@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Sanitizers와 gtest"
-date: 2026-05-21T17:00:00
+date: 2026-05-10T17:00:00
 description: "ASan·TSan·UBSan을 gtest와 결합 — 메모리·동시성·UB 검출."
 series: "gtest 심화"
 seriesOrder: 17

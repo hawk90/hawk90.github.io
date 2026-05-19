@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Properties of Random Samples"
-date: 2030-09-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Sampling distribution·t·F·χ² — sample 분포의 정수."
 series: "Statistical Inference"
 seriesOrder: 5

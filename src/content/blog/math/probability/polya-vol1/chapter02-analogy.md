@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Generalization, Specialization, Analogy"
-date: 2029-08-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "수학적 발견의 3가지 동력 — 일반화·특수화·유추."
 series: "Mathematics and Plausible Reasoning, Vol I"
 seriesOrder: 2

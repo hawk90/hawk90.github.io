@@ -1,6 +1,6 @@
 ---
 title: "Ch 36: Causality"
-date: 2029-06-02T12:00:00
+date: 2026-05-16T12:00:00
 description: "Pearl·potential outcome·SCM·do-calculus — causal ML."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 36

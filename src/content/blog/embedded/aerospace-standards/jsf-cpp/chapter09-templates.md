@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Templates"
-date: 2025-09-30T10:00:00
+date: 2026-05-18T10:00:00
 description: "JSF C++ 일반 template 정책 — 단순 generic, metaprogramming 회피, code bloat 신중."
 tags: [jsf-cpp, templates, generic, code-bloat, metaprogramming, cpp03]
 series: "JSF C++"

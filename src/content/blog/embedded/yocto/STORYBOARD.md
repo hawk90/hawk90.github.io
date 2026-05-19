@@ -1,6 +1,6 @@
 ---
 title: "Yocto Deep Dive — Storyboard"
-date: 2026-10-01T00:00:00
+date: 2026-05-19T00:00:00
 description: "Yocto/OpenEmbedded 시리즈 설계 문서 — 공식 manual + 2026 LTS 기준 재정리"
 tags: [yocto, bitbake, openembedded, storyboard, internal]
 draft: true

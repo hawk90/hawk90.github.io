@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Logics for Reasoning about Uncertainty"
-date: 2030-01-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Probabilistic logic·sound·complete — formal system."
 series: "Reasoning About Uncertainty"
 seriesOrder: 7

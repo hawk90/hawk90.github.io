@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 메모리 회계 — RSS / VSS / PSS / smaps"
-date: 2025-09-07T01:00:00
+date: 2026-05-17T01:00:00
 description: "프로세스 메모리의 실제 정체. VSS vs RSS vs PSS, /proc/[pid]/{status,smaps}."
 tags: [memory, linux, rss, pss, smaps]
 series: "Memory Diagnostics"

@@ -1,6 +1,6 @@
 ---
 title: "Part 4-02: ETL 라이브러리"
-date: 2026-05-16T02:00:00
+date: 2026-05-07T02:00:00
 description: "Embedded Template Library — heap 없는 STL 대체, fsm, message router 포함."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 30

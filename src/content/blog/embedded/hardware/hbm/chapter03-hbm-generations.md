@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: HBM2/HBM2E/HBM3/HBM3E 스펙 비교"
-date: 2027-01-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "세대별 bandwidth·capacity·feature 변화."
 series: "HBM·GDDR 심화"
 seriesOrder: 3

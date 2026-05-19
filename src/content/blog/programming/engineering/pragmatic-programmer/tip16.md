@@ -1,6 +1,6 @@
 ---
 title: "Tip 16: Make It Easy to Reuse"
-date: 2026-05-13T16:00:00
+date: 2026-05-11T16:00:00
 description: "재사용을 쉽게 하라 — 재사용이 어려우면 사람들은 — 다시 짠다(중복 발생)."
 series: "The Pragmatic Programmer"
 seriesOrder: 16

@@ -1,6 +1,6 @@
 ---
 title: "Vim 마스터하기: 레지스터와 매크로"
-date: 2026-05-13T05:00:00
+date: 2026-05-17T05:00:00
 description: "레지스터를 활용한 복사/붙여넣기, 매크로로 작업 자동화"
 series: "Vim 마스터하기"
 seriesOrder: 5

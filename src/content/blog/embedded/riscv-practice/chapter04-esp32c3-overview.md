@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: ESP32-C3 개요"
-date: 2025-05-19T10:00:00
+date: 2026-05-17T10:00:00
 description: "ESP32-C3 — RV32IMC 코어, 메모리 맵, 주변장치를 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 4

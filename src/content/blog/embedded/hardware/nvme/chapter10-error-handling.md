@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 에러 처리"
-date: 2026-07-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "NVMe Status Code 분류, 복구 전략, AER(Asynchronous Event Reporting) 연동을 분석한다"
 series: "NVMe Deep Dive"
 seriesOrder: 10

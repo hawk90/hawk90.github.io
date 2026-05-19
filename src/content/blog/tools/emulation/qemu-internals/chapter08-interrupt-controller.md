@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 인터럽트 컨트롤러"
-date: 2025-10-01T08:00:00
+date: 2026-05-17T08:00:00
 description: "GIC, APIC 인터럽트 컨트롤러 에뮬레이션을 이해한다."
 tags: [QEMU, GIC, APIC, Interrupt]
 series: "QEMU Internals"

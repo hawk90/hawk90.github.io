@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: ML 인프라와 MLOps"
-date: 2028-10-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Compute·storage·development tooling — ML 팀의 인프라 스택."
 series: "Designing Machine Learning Systems"
 seriesOrder: 10

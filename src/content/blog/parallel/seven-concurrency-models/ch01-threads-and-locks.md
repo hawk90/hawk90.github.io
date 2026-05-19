@@ -1,6 +1,6 @@
 ---
 title: "Chapter 1: Threads and Locks"
-date: 2026-05-22T01:00:00
+date: 2026-05-06T01:00:00
 description: "가장 익숙하지만 가장 위험한 모델 — Java synchronized, deadlock, 메모리 가시성, 합성 불가."
 series: "Seven Concurrency Models in Seven Weeks"
 seriesOrder: 1

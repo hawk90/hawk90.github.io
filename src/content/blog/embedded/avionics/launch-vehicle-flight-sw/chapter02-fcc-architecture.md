@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: LV 비행 컴퓨터 아키텍처 — ARM·DSP·FPGA Heterogeneous"
-date: 2026-05-27T02:00:00
+date: 2026-05-18T02:00:00
 description: "발사체 FCC 보드 구성. ARM Cortex-A·R + DSP + FPGA. CompactPCI·VPX backplane. 사례."
 series: "Launch Vehicle Flight Software"
 seriesOrder: 2

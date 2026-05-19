@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: XLA의 위치 — TF·JAX·PyTorch Backend"
-date: 2027-08-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Accelerated Linear Algebra — Google이 만든 ML 컴파일러의 진화."
 series: "XLA·OpenXLA 심화"
 seriesOrder: 1

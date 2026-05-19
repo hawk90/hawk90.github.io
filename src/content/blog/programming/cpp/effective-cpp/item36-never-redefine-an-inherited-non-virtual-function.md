@@ -1,6 +1,6 @@
 ---
 title: "항목 36: 상속받은 non-virtual 함수를 재정의하지 말라"
-date: 2025-02-02T12:00:00
+date: 2026-05-04T12:00:00
 description: "정적 바인딩 — 같은 객체에서 포인터 타입에 따라 다른 함수가 호출되는 함정. final로 강제 차단."
 tags: [C++, Effective C++, Inheritance, Virtual]
 series: "Effective C++"

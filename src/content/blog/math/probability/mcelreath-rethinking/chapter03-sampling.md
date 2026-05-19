@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Sampling the Imaginary"
-date: 2030-03-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Posterior sampling — point estimate·interval·prediction."
 series: "Statistical Rethinking"
 seriesOrder: 3

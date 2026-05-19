@@ -1,6 +1,6 @@
 ---
 title: "항목 8: 함수의 인자를 적게 유지하라"
-date: 2026-05-08T08:00:00
+date: 2026-05-05T08:00:00
 description: "긴 인자 목록의 함정 — 무음 버그, 변경 부담, 책임 비대. 구조체와 designated init으로 묶기."
 tags: [C++, API Design, Function Design]
 series: "Beautiful C++"

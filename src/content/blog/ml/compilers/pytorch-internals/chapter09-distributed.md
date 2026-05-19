@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Distributed — DDP·FSDP"
-date: 2027-10-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Data parallel·sharded model — multi-GPU/multi-node 학습."
 series: "PyTorch Internals"
 seriesOrder: 9

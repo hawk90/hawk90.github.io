@@ -1,6 +1,6 @@
 ---
 title: "Modern Embedded Recipes: 서문"
-date: 2026-05-12T01:00:00
+date: 2026-05-07T01:00:00
 description: "Bare-metal부터 Linux 커널, FPGA, Edge AI까지 임베디드 실전에서 자주 부딪히는 39개 advanced 레시피."
 series: "Modern Embedded Recipes"
 seriesOrder: 0

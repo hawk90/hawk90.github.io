@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Channel Capacity"
-date: 2029-01-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Shannon channel coding theorem — 노이즈 채널의 전송 한계."
 series: "Elements of Information Theory"
 seriesOrder: 7

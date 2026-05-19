@@ -1,6 +1,6 @@
 ---
 title: "Tip 12: It's Both What You Say and the Way You Say It"
-date: 2026-05-13T12:00:00
+date: 2026-05-11T12:00:00
 description: "무엇을 말하는가와 어떻게 말하는가 — 둘 다 중요하다. 청자·시점·매체를 고려하라."
 series: "The Pragmatic Programmer"
 seriesOrder: 12

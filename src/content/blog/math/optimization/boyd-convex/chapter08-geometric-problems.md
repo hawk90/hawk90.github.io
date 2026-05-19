@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Geometric Problems"
-date: 2028-11-01T08:00:00
+date: 2026-05-15T08:00:00
 description: "Projection·distance·classification — 기하학 문제의 convex 형식."
 series: "Convex Optimization (Boyd)"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "항목 28: 값을 초기화하기 전까지는 변수를 선언하지 말라"
-date: 2026-05-09T04:00:00
+date: 2026-05-05T04:00:00
 description: "선언과 초기화 분리는 C 시절의 잔재 — 미초기화 변수 = UB. 사용 시점 선언 + auto가 정답."
 tags: [C++, Initialization, Code Style]
 series: "Beautiful C++"

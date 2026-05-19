@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Parameter Estimation in Bayes Net"
-date: 2030-11-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "MLE·Bayesian estimation·Dirichlet prior — BN parameter learning."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 16

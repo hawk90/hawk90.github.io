@@ -1,6 +1,6 @@
 ---
 title: "제16장: 번역문"
-date: 2026-05-12T16:00:00
+date: 2026-05-14T16:00:00
 description: "자연스러운 한국어로 옮기는 번역의 원칙"
 series: "고종석의 문장"
 seriesOrder: 16

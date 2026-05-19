@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: On Inductive Research in Mathematical Research"
-date: 2029-09-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "수학 연구의 inductive 방법론 — Pólya 연구 노트의 정수."
 series: "Mathematics and Plausible Reasoning, Vol II"
 seriesOrder: 6

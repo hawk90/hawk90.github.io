@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Linear and Logistic Regression"
-date: 2029-03-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "OLS·logistic·variable selection — 가장 많이 쓰이는 모델."
 series: "All of Statistics"
 seriesOrder: 13

@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Linear and Generalized Linear Mixed Effects Models"
-date: 2030-06-01T11:00:00
+date: 2026-05-15T11:00:00
 description: "LMM·GLMM·latent ordinal — applied Bayesian의 마무리."
 series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 11

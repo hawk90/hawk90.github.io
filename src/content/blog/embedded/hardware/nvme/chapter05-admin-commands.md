@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Admin Commands"
-date: 2026-07-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "NVMe Admin Command (Identify, Create Queue, Get/Set Features)를 분석한다"
 series: "NVMe Deep Dive"
 seriesOrder: 5

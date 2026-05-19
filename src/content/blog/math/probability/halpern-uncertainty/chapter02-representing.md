@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Representing Uncertainty"
-date: 2030-01-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "확률·set·plausibility·ranking — uncertainty 표현 5종."
 series: "Reasoning About Uncertainty"
 seriesOrder: 2

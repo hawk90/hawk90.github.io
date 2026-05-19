@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Induction in Solid Geometry"
-date: 2029-08-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Euler 다면체 공식 V-E+F=2의 발견 과정."
 series: "Mathematics and Plausible Reasoning, Vol I"
 seriesOrder: 3

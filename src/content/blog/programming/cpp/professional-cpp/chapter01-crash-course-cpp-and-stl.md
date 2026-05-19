@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: A Crash Course in C++ and the STL"
-date: 2025-07-01T01:00:00
+date: 2026-05-05T01:00:00
 description: "C++ 단축 입문 — 핵심 언어 + STL. 시리즈의 시작점."
 tags: [C++, STL, Crash Course]
 series: "전문가를 위한 C++"

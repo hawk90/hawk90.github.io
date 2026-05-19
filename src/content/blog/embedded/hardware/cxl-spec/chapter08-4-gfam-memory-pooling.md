@@ -1,6 +1,6 @@
 ---
 title: "Ch 8.4: GFAM·Memory Pooling·Sharing"
-date: 2026-01-01T21:00:00
+date: 2026-05-16T21:00:00
 description: "스펙 §7 — global fabric-attached memory."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 21

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Engine Refit"
-date: 2028-06-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Engine 재빌드 없이 weight만 갱신."
 series: "TensorRT 심화"
 seriesOrder: 6

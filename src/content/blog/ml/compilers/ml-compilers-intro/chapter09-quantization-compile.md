@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 양자화 컴파일"
-date: 2028-02-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Compiler가 본 quantization — fake quant·QDQ·dequantize folding."
 series: "ML 컴파일러"
 seriesOrder: 9

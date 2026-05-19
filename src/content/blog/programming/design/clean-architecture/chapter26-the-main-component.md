@@ -1,6 +1,6 @@
 ---
 title: "Ch 26: Main 컴포넌트"
-date: 2025-06-02T02:00:00
+date: 2026-05-01T02:00:00
 description: "Main은 가장 더러운 컴포넌트다. composition root에서 의존성 그래프를 조립한다. 환경별로 별도의 main이 가능하다."
 tags: [Architecture, Main, CompositionRoot, DI]
 series: "Clean Architecture"

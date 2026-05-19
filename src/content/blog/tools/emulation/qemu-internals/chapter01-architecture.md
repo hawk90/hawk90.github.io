@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: QEMU 아키텍처 개요"
-date: 2025-10-01T01:00:00
+date: 2026-05-17T01:00:00
 description: "QEMU의 전체 아키텍처 — TCG, KVM, 디바이스 모델을 이해한다."
 tags: [QEMU, Architecture, TCG, KVM]
 series: "QEMU Internals"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 템플릿 — 제네릭, SFINAE, type traits"
-date: 2025-09-15T07:00:00
+date: 2026-05-18T07:00:00
 description: "비-타입 인자 제한(A14-1), 명시적 instantiation(A14-5), SFINAE 신중 사용(A14-7), type traits로 컴파일 분기."
 tags: [autosar, cpp, template, sfinae, type-traits, concepts]
 series: "AUTOSAR C++14"

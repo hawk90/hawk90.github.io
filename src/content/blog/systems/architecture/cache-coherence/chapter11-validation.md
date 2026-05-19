@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Specifying and Validating Memory Consistency Models"
-date: 2026-09-01T11:00:00
+date: 2026-05-19T11:00:00
 description: "Axiomatic·operational spec — 모델을 형식적으로 정의하고 검증하기."
 series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 11

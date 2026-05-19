@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: USB 부트 — fastboot, UMS, USB host"
-date: 2026-05-18T12:00:00
+date: 2026-05-09T12:00:00
 description: "USB를 통한 부팅과 flash — fastboot, USB Mass Storage(UMS), USB host 부팅 흐름."
 series: "Bootloader Internals"
 seriesOrder: 12

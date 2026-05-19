@@ -1,6 +1,6 @@
 ---
 title: "Part 2-06: Templates 기초"
-date: 2026-05-14T06:00:00
+date: 2026-05-07T06:00:00
 description: "함수 템플릿과 클래스 템플릿 — 컴파일 타임 다형성으로 type-safe + zero-cost generic 코드."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 14

@@ -1,6 +1,6 @@
 ---
 title: "항목 6: auto가 원치 않은 타입으로 추론될 때는 명시적 타입의 초기치를 사용하라"
-date: 2025-01-05T06:00:00
+date: 2026-05-04T06:00:00
 description: "프록시 타입은 auto와 만나면 함정이 된다. vector<bool>, 표현식 템플릿, ranges 어댑터, 그리고 안전한 explicitly typed initializer 패턴."
 tags: [C++, auto, Proxy Types]
 series: "Effective Modern C++"

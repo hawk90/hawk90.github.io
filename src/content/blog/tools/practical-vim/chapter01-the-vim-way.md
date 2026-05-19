@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: The Vim Way"
-date: 2025-08-15T01:00:00
+date: 2026-05-17T01:00:00
 description: ". 명령 반복, 효율의 본질. dot command가 만드는 차이."
 tags: [Vim, Dot Command]
 series: "Practical Vim"

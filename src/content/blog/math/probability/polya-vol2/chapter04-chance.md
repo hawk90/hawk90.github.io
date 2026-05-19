@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Chance, the Ever-present Rival Conjecture"
-date: 2029-09-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "우연 가설이 항상 따라온다 — pattern vs chance."
 series: "Mathematics and Plausible Reasoning, Vol II"
 seriesOrder: 4

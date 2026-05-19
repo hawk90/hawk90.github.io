@@ -1,6 +1,6 @@
 ---
 title: "Chapter 18: Writing About the Arts — Critics and Columnists"
-date: 2026-05-18T18:00:00
+date: 2026-05-14T18:00:00
 description: "비평 글은 의견이 강해야 합니다. 그러나 자기 의견을 사실처럼 쓰지 말아야 합니다."
 series: "On Writing Well"
 seriesOrder: 18

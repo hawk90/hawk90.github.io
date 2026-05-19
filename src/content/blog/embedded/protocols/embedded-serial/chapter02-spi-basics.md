@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: SPI 기초 — 4-wire, CPOL/CPHA, 4가지 모드"
-date: 2027-03-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "MOSI·MISO·SCLK·CS 4-wire. CPOL과 CPHA의 조합이 만드는 4가지 SPI 모드를 한눈에."
 series: "Embedded Protocols 심화"
 seriesOrder: 2

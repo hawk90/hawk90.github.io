@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 연결 패턴"
-date: 2028-09-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Two-phase·cascade·embeddings — model을 단독으로 안 쓴다."
 series: "ML 디자인 패턴"
 seriesOrder: 8

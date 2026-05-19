@@ -1,6 +1,6 @@
 ---
 title: "Ch 10.2: APN·HDM Setup·System Address Map"
-date: 2026-01-02T01:00:00
+date: 2026-05-16T01:00:00
 description: "스펙 §9 — boot-time init·alternate protocol·address map."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 25

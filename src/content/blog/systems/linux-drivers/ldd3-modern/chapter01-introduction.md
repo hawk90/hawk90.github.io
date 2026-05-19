@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: An Introduction to Device Drivers"
-date: 2026-06-01T01:00:00
+date: 2026-05-13T01:00:00
 description: "디바이스 드라이버의 역할·종류·메커니즘. LDD3 첫 장 — 커널 6.x 시각 보정."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Model Checking"
-date: 2030-02-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Posterior predictive check·discrepancy — model 검증의 핵심."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 6

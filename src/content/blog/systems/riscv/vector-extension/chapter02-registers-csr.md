@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 벡터 레지스터와 CSR"
-date: 2025-05-20T06:00:00
+date: 2026-05-17T06:00:00
 description: "RVV 레지스터 — v0-v31, vl, vtype, vlenb, vstart를 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 2

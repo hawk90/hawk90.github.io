@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Linux I/O 경로"
-date: 2026-07-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "Linux NVMe 드라이버의 I/O 경로 (blk-mq → nvme_cmd → completion)를 추적한다"
 series: "NVMe Deep Dive"
 seriesOrder: 12

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 명령어 — ACT, READ, WRITE, PRE, REF"
-date: 2026-08-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "DDR 메모리의 기본 명령어: ACTIVATE, READ, WRITE, PRECHARGE, REFRESH의 동작 원리"
 series: "DDR Memory Deep Dive"
 seriesOrder: 2

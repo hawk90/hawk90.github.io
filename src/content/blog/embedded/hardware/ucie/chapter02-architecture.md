@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: UCIe 아키텍처 — 프로토콜 스택"
-date: 2026-11-01T02:00:00
+date: 2026-05-19T02:00:00
 description: "Physical·D2D Adapter·Protocol — UCIe 3-layer 스택."
 series: "UCIe 심화"
 seriesOrder: 2

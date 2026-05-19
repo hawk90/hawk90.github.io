@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Ulysses' Compass"
-date: 2030-03-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Overfitting·underfitting·information criteria — model selection."
 series: "Statistical Rethinking"
 seriesOrder: 7

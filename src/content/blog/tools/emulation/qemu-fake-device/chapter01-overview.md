@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: QEMU 개요 — 왜 가상 디바이스인가"
-date: 2025-09-01T01:00:00
+date: 2026-05-17T01:00:00
 description: "QEMU로 가상 디바이스를 만들어 드라이버를 테스트하는 이유와 전체 워크플로우."
 tags: [QEMU, Driver, Emulation]
 series: "QEMU Fake Device Driver"

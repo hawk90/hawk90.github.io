@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 대역폭 계산과 병목 분석"
-date: 2027-01-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Theoretical vs achievable — 메모리 대역폭의 실제."
 series: "HBM·GDDR 심화"
 seriesOrder: 5

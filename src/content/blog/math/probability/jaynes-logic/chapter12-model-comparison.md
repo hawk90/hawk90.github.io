@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Model Comparison"
-date: 2029-04-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Evidence·Occam·hypothesis testing의 일반화."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 12

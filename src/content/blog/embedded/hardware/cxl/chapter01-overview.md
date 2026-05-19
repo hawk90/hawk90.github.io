@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: CXL 개요 — PCIe 확장, 왜 필요한가"
-date: 2026-10-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "메모리 풀링·가속기 일관성 — CXL이 풀려는 문제."
 series: "CXL 심화"
 seriesOrder: 1

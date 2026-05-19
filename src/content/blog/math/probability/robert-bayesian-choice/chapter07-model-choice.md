@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Model Choice"
-date: 2030-04-01T07:00:00
+date: 2026-05-15T07:00:00
 description: "Bayes factor·posterior model probability·DIC·WAIC."
 series: "The Bayesian Choice"
 seriesOrder: 7

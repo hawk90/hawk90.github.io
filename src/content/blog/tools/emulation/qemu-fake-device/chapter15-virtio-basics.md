@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: VirtIO 디바이스 기초"
-date: 2025-09-01T15:00:00
+date: 2026-05-17T15:00:00
 description: "virtio-pci·virtqueue·feature bits — VirtIO의 본질."
 tags: [QEMU, virtio, virtqueue, virtio-pci]
 series: "QEMU Fake Device Driver"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: The FreeRTOS Distribution"
-date: 2026-07-01T01:00:00
+date: 2026-05-09T01:00:00
 description: "FreeRTOS 소스 트리·포팅 레이어·예제 — 시작 전 알아둘 것."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 1

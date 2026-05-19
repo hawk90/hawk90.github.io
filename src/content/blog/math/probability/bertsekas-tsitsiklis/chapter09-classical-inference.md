@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Classical Statistical Inference"
-date: 2030-08-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "MLE·confidence interval·hypothesis test — frequentist 코너."
 series: "Introduction to Probability"
 seriesOrder: 9

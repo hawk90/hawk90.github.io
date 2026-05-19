@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 프레임워크 → ONNX 변환"
-date: 2028-03-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "PyTorch·TensorFlow·JAX 모델을 ONNX로."
 series: "ONNX 실전"
 seriesOrder: 2

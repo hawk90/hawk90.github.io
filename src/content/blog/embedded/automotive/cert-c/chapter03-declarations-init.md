@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: DCL — 선언, 초기화, 타입 정합성"
-date: 2025-09-10T04:00:00
+date: 2026-05-18T04:00:00
 description: "const 정확성(DCL00), 식별자 가독성(DCL02), 자동 변수 lifetime(DCL30), 함수 호환 선언(DCL40)."
 tags: [cert-c, declaration, initialization, const, lifetime, prototype]
 series: "CERT C"

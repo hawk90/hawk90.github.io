@@ -1,6 +1,6 @@
 ---
 title: "DSA 6: 스택 — 미로 탐색·표현식 평가"
-date: 2026-03-01T06:00:00
+date: 2026-05-15T06:00:00
 description: "LIFO의 위력 — 함수 호출, 표현식 평가, 백트래킹의 토대."
 tags: [Data Structure, Algorithm, Stack]
 series: "Data Structures and Algorithms"

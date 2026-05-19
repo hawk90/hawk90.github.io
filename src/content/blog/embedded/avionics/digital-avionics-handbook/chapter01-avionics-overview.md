@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Avionics 시스템 개요"
-date: 2026-05-25T01:00:00
+date: 2026-05-18T01:00:00
 description: "Sensor → FCC → actuator → comm — avionics 시스템 구성 요소와 흐름의 한 장 정리."
 series: "Digital Avionics Handbook"
 seriesOrder: 1

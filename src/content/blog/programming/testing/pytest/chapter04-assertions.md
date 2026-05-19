@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Assertions 깊이"
-date: 2026-05-22T04:00:00
+date: 2026-05-10T04:00:00
 description: "assert rewriting 내부, pytest.approx, 자세한 실패 메시지 생성."
 series: "pytest 심화"
 seriesOrder: 4

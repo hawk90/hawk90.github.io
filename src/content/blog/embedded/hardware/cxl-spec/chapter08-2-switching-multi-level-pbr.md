@@ -1,6 +1,6 @@
 ---
 title: "Ch 8.2: Switching — Multi-Level·PBR·HBR"
-date: 2026-01-01T19:00:00
+date: 2026-05-16T19:00:00
 description: "스펙 §7 — multi-level switching·routing."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 19

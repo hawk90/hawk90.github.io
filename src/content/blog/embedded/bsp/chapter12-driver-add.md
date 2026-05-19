@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 드라이버 추가 — 보드별 peripheral 통합"
-date: 2026-05-20T12:00:00
+date: 2026-05-09T12:00:00
 description: "BSP에서 새 드라이버 통합 — 기존 드라이버 활용, DT binding, 새 드라이버 작성 결정."
 series: "BSP Development"
 seriesOrder: 12

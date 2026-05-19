@@ -1,6 +1,6 @@
 ---
 title: "Part 1-06: 스타트업 코드"
-date: 2026-05-13T06:00:00
+date: 2026-05-07T06:00:00
 description: "Reset에서 main까지 — vector table, .data 복사, .bss 초기화, __libc_init_array가 호출하는 C++ static 생성자."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: 디버깅 — 메모리 안 뜸, 트레이닝 실패, ECC 에러"
-date: 2026-08-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "DDR 메모리 문제 디버깅: 인식 불가, 트레이닝 실패, ECC 에러 사례와 해결"
 series: "DDR Memory Deep Dive"
 seriesOrder: 15

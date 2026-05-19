@@ -1,6 +1,6 @@
 ---
 title: "Ch 7.2: Flex Bus — Link Training·Optical"
-date: 2026-01-01T17:00:00
+date: 2026-05-16T17:00:00
 description: "스펙 §6 — training·equalization·retimer·optical."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 17

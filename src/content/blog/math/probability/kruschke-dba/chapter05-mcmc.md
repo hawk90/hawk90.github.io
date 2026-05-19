@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Markov Chain Monte Carlo"
-date: 2030-05-01T05:00:00
+date: 2026-05-15T05:00:00
 description: "Metropolis·Gibbs·HMC — 그림으로 보여주는 MCMC."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 5

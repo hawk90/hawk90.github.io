@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: ML 워크로드 사례 — Conv·Attention"
-date: 2027-11-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "MSL로 conv2d·attention 작성과 성능 분석."
 series: "Apple Metal Stack"
 seriesOrder: 9

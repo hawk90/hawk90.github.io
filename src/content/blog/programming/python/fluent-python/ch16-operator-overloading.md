@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Operator Overloading"
-date: 2026-05-16T16:00:00
+date: 2026-05-15T16:00:00
 description: "연산자 오버로딩 — __add__, 산술 연산자, 비교 연산자."
 series: "Fluent Python"
 seriesOrder: 16

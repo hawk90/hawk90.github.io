@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Comments"
-date: 2025-05-14T04:00:00
+date: 2026-05-18T04:00:00
 description: "What보다 Why. 코드로 설명하고, 주석은 이유를 설명. kernel-doc 형식."
 tags: [Linux, Kernel, Comments, Documentation]
 series: "Linux Kernel Coding Style"

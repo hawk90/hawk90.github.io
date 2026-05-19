@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 패러다임 개요"
-date: 2025-06-01T03:00:00
+date: 2026-05-01T03:00:00
 description: "세 가지 프로그래밍 패러다임 — 구조적, 객체 지향, 함수형. 패러다임의 본질은 능력을 부여하는 게 아니라 제약하는 데 있다."
 tags: [Architecture, Paradigm, Structured, OO, Functional]
 series: "Clean Architecture"

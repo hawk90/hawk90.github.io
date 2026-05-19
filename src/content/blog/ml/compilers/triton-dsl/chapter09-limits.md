@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 한계와 Trade-off"
-date: 2027-09-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Triton이 못 하는 것 — 언제 CUDA·CUTLASS로 돌아가야 하나."
 series: "Triton DSL"
 seriesOrder: 9

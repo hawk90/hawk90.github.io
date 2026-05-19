@@ -1,6 +1,6 @@
 ---
 title: "Part 1-02: 컴파일러 플래그 가이드"
-date: 2026-05-13T02:00:00
+date: 2026-05-07T02:00:00
 description: "C++를 임베디드 모드로 — -fno-exceptions, -fno-rtti, -Os, -flto. 각 플래그가 실제 바이너리에 무엇을 하는가."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 2

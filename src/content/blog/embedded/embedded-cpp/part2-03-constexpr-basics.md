@@ -1,6 +1,6 @@
 ---
 title: "Part 2-03: constexpr 기초"
-date: 2026-05-14T03:00:00
+date: 2026-05-07T03:00:00
 description: "컴파일 타임 계산 — 런타임 코드와 데이터를 컴파일러가 미리 만들어줍니다. -Os보다 강력한 zero-cost."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 11

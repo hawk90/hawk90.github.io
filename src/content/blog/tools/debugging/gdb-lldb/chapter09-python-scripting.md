@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Python 스크립팅"
-date: 2025-08-20T09:00:00
+date: 2026-05-17T09:00:00
 description: "GDB / LLDB Python API. pretty-printer 작성, 커스텀 명령, 자동화, MI."
 tags: [gdb, lldb, Python, Scripting]
 series: "GDB and LLDB"

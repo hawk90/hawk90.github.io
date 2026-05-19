@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Continuous Latent Variables"
-date: 2029-07-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "PCA·probabilistic PCA·factor analysis·kernel PCA·nonlinear LV."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 12

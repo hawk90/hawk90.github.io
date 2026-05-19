@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Why Pre-Silicon Driver Verification"
-date: 2025-09-09T01:00:00
+date: 2026-05-17T01:00:00
 description: "Silicon 없이 driver 검증 — co-simulation의 의미."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 1

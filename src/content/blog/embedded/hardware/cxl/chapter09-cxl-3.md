@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: CXL 3.x — 패브릭 확장과 GFAM"
-date: 2026-10-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Multi-level switching·peer-to-peer·GFAM — CXL 3.x의 새로운 모델."
 series: "CXL 심화"
 seriesOrder: 9

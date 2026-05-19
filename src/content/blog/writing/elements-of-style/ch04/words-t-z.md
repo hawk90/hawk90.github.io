@@ -1,6 +1,6 @@
 ---
 title: "Ch 4 Words: T–Z"
-date: 2026-05-15T07:00:00
+date: 2026-05-14T07:00:00
 description: "자주 오용되는 단어와 표현 — Than부터 Would까지."
 series: "The Elements of Style"
 seriesOrder: 31
@@ -8,14 +8,13 @@ tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 ## T
 
 ### Than
 
-`Than`이 들어간 비교문에는 *생략된 단어가 명확한지* 확인.
+`Than`이 들어간 비교문에는 생략된 단어가 명확한지 확인합니다.
 
 ```
 모호:
@@ -30,11 +29,11 @@ draft: true
 "I'm probably closer to my mother than my father is."
 ```
 
-Rule 10에서도 다룬 *than I / than me* 격 결정과 함께 점검.
+Rule 10에서 다룬 *than I / than me* 격 결정과 함께 점검합니다.
 
 ### That / Which
 
-`That` — *defining (제한적)*, *restrictive*. `Which` — *nondefining (비제한적)*, *nonrestrictive*. Rule 3과 같은 원리.
+`That`은 defining(제한적, restrictive)이고, `Which`는 nondefining(비제한적, nonrestrictive)입니다. Rule 3과 같은 원리입니다.
 
 ```
 "The lawn mower that is broken is in the garage."
@@ -46,7 +45,7 @@ Rule 10에서도 다룬 *than I / than me* 격 결정과 함께 점검.
    ← 비제한적, which, commas
 ```
 
-*조심스러운 작가*는 *defining which*를 *that*으로 바꾸는 *사냥*을 자주 합니다.
+조심스러운 작가는 defining *which*를 *that*으로 바꾸는 사냥을 자주 합니다.
 
 ```
 회피 (defining which):
@@ -57,11 +56,11 @@ Rule 10에서도 다룬 *than I / than me* 격 결정과 함께 점검.
 또는: "The book you sent me is interesting." (that 생략 가능)
 ```
 
-미국 영어는 *that / which* 구분이 더 엄격. 영국 영어는 *섞임*.
+미국 영어는 *that / which* 구분이 더 엄격합니다. 영국 영어는 둘이 섞입니다.
 
 ### The fact is... / The truth is...
 
-*문장을 시작하는 약한 도입*입니다. *그냥 사실을 말하세요*. *청구서를 미리 보내는 격*입니다.
+문장을 시작하는 약한 도입입니다. 그냥 사실을 말하세요. 청구서를 미리 보내는 격입니다.
 
 ```
 회피:
@@ -77,7 +76,7 @@ Rule 10에서도 다룬 *than I / than me* 격 결정과 함께 점검.
 
 ### They / He or She
 
-선행사가 `each`, `everyone`, `every one`, `many a man`일 때 `they`로 받지 *마세요*. *단수 대명사*를 씁니다.
+선행사가 `each`, `everyone`, `every one`, `many a man`일 때 `they`로 받지 마세요. 단수 대명사를 씁니다.
 
 ```
 회피:
@@ -119,7 +118,7 @@ invited."
 
 ### This
 
-*선행 문장이나 절 전체*를 가리키는 `this`는 *모호*할 수 있습니다. *가리키는 것*을 *명사구*로 *풀어 쓰는 게 안전*.
+선행 문장이나 절 전체를 가리키는 `this`는 모호할 수 있습니다. 가리키는 것을 명사구로 풀어 쓰는 편이 안전합니다.
 
 ```
 회피 (모호):
@@ -138,7 +137,7 @@ The coach's promotion was unexpected."
 
 ### Thrust
 
-권력 · 성 · 과시의 *뉘앙스*가 있는 명사로, *광고와 정치 화법*의 단골. *구체적 의미*에서만 사용.
+권력·성·과시의 뉘앙스가 있는 명사로, 광고와 정치 화법의 단골입니다. 구체적 의미에서만 씁니다.
 
 ```
 회피 (모호):
@@ -152,7 +151,7 @@ The coach's promotion was unexpected."
 
 ### Together with
 
-`As well as`, `with` 등과 같이 *주어의 수를 바꾸지 않습니다* (Rule 9).
+`As well as`, `with` 등과 같이 주어의 수를 바꾸지 않습니다 (Rule 9).
 
 ```
 선호:
@@ -176,7 +175,7 @@ Torturous → 고통스러운
 
 ### Transpire
 
-*Happen, come to pass*의 의미로 *쓰지 마세요*. 원뜻은 *become known* (알려지다).
+*Happen*이나 *come to pass*의 의미로 쓰지 마세요. 원뜻은 *become known*, 곧 "알려지다"입니다.
 
 ```
 선호 (본래 의미):
@@ -188,11 +187,11 @@ Torturous → 고통스러운
    → "What happened at the meeting?"가 표준
 ```
 
-현대 영어는 *happen* 의미를 받아들이지만, 격식 글에서는 *주의*.
+현대 영어는 *happen* 의미를 받아들이지만, 격식 글에서는 주의가 필요합니다.
 
 ### Try
 
-`Try to`. *Try and*는 *회화*로 굳어졌지만 *형식적 글*에서는 `try to`.
+표준은 `try to`입니다. *Try and*는 회화로 굳어졌지만 형식적 글에서는 `try to`를 씁니다.
 
 ```
 선호 (격식):
@@ -205,7 +204,7 @@ Torturous → 고통스러운
 
 ### Type
 
-`Kind of`의 *동의어가 아닙니다*.
+`Kind of`의 동의어가 아닙니다.
 
 ```
 회피:
@@ -216,7 +215,7 @@ Torturous → 고통스러운
 또는: "that type of employee"
 ```
 
-*Type + 명사*는 *명사 합성어*. *Type of + 명사*가 일반.
+*Type + 명사*는 명사 합성어이고, *type of + 명사*가 일반 용법입니다.
 
 ```
 선호 (type + 명사):
@@ -232,7 +231,7 @@ Torturous → 고통스러운
 
 ### Unique
 
-*Without like or equal*. *정도가 없습니다*. *Very unique*, *most unique*는 *잘못*.
+*Without like or equal*의 의미로, 정도가 없습니다. *Very unique*나 *most unique*는 잘못입니다.
 
 ```
 회피:
@@ -248,13 +247,13 @@ Torturous → 고통스러운
 → Unique는 *수식 안 함*. (유일한 것은 정도가 없음)
 ```
 
-비슷한 *절대 형용사*:
+비슷한 절대 형용사는 다음과 같습니다.
 ```
 absolute formless equal infinite perfect
 preferable square supreme total universal
 ```
 
-이 형용사들은 *very, more, most*로 *수식하지 않음*.
+이 형용사들은 *very*, *more*, *most*로 수식하지 않습니다.
 
 ### Utilize
 
@@ -270,7 +269,7 @@ preferable square supreme total universal
 "The team used new technology."
 ```
 
-*Utilize*는 *use*의 *과장된 형식*. *비즈니스 영어의 진부어*.
+*Utilize*는 *use*의 과장된 형식이며, 비즈니스 영어의 진부어입니다.
 
 ### Verbal / Oral
 
@@ -286,11 +285,11 @@ Oral → *말로만*
    ← verbal보다 정확
 ```
 
-회화에서는 *verbal*이 *oral*의 의미로 자주 사용되지만, *법률 / 격식 글*은 *구분*.
+회화에서는 *verbal*이 *oral*의 의미로 자주 쓰이지만, 법률·격식 글에서는 구분합니다.
 
 ### Very
 
-*남발하지 마세요*. 강조가 필요하면 *그 자체로 강한 단어*를 고르세요.
+남발하지 마세요. 강조가 필요하면 그 자체로 강한 단어를 고르세요.
 
 ```
 약함:                    강함:
@@ -306,11 +305,11 @@ very hot         →       scorching / sweltering
 very cold        →       freezing / frigid
 ```
 
-*Very + 평범한 형용사 = 약함*. *강한 형용사 하나 = 강함*.
+*Very + 평범한 형용사*는 약하고, 강한 형용사 하나는 강합니다.
 
 ### Well-known
 
-*Famous, renowned, notorious*보다 *약함*.
+*Famous*, *renowned*, *notorious*보다 약합니다.
 
 ```
 회피 (약함):
@@ -323,7 +322,7 @@ very cold        →       freezing / frigid
 
 ### While
 
-*And, but, although*의 *대체어로 함부로 쓰지 마세요*. 본뜻은 *during the time that*.
+*And*, *but*, *although*의 대체어로 함부로 쓰지 마세요. 본뜻은 *during the time that*입니다.
 
 ```
 회피:
@@ -347,7 +346,7 @@ manufacturing."
 
 ### Who / Whom
 
-Rule 10에서 다룸. *주격 who*, *목적격 whom*.
+Rule 10에서 다룹니다. 주격은 *who*, 목적격은 *whom*입니다.
 
 ```
 선호:
@@ -356,11 +355,11 @@ Rule 10에서 다룸. *주격 who*, *목적격 whom*.
 "To whom did you give it?"  (전치사 + 목적격)
 ```
 
-현대 회화에서는 *whom*이 사라지지만, *격식 글*에서는 *유지*.
+현대 회화에서는 *whom*이 사라지고 있지만, 격식 글에서는 유지합니다.
 
 ### Whose
 
-*Of which*의 대체로도 사용됩니다 (사물에도).
+*Of which*의 대체로도 쓰입니다 (사물에도).
 
 ```
 선호:
@@ -373,7 +372,7 @@ Rule 10에서 다룸. *주격 who*, *목적격 whom*.
 
 ### -wise
 
-*Taxwise, pricewise, marriagewise* 같은 *임의의 접미사*는 *피합니다*. *Clockwise*처럼 *in the manner of*의 의미로 *굳어진 단어*만 표준.
+*Taxwise*, *pricewise*, *marriagewise* 같은 임의의 접미사는 피합니다. *Clockwise*처럼 *in the manner of*의 의미로 굳어진 단어만 표준입니다.
 
 ```
 회피 (임의 접미사):
@@ -395,7 +394,7 @@ Rule 10에서 다룸. *주격 who*, *목적격 whom*.
 
 ### Worth while / Worthwhile
 
-*행위*에만 — *Is it worth while to telegraph?*. *형용사 worthwhile*은 *닳은 단어*이므로 *더 강한 형용사*로.
+행위에만 씁니다 — *Is it worth while to telegraph?*. 형용사 *worthwhile*은 닳은 단어이므로 더 강한 형용사로 바꿉니다.
 
 ```
 회피 (약함):
@@ -409,7 +408,7 @@ Rule 10에서 다룸. *주격 who*, *목적격 whom*.
 
 ### Would
 
-*습관적 · 반복적 행동*의 표시. 같은 의미가 *once a year*, *each Sunday* 같은 구절로 *이미 표현*된다면 *과거 시제*가 더 강하고 짧습니다.
+습관적·반복적 행동의 표시입니다. 같은 의미가 *once a year*, *each Sunday* 같은 구절로 이미 표현된다면 과거 시제가 더 강하고 짧습니다.
 
 ```
 약함:
@@ -507,19 +506,19 @@ Rule 10에서 다룸. *주격 who*, *목적격 whom*.
 
 ## Chapter 4 마무리
 
-Chapter 4는 *영어의 흔한 함정 사전*. *60여 단어*가 *학습자가 가장 자주 틀리는* 자리.
+Chapter 4는 영어의 흔한 함정 사전입니다. 60여 단어가 학습자가 가장 자주 틀리는 자리를 정리합니다.
 
 권고:
-1. 의심되는 단어는 *사전 확인*
-2. 격식 글에서는 *전통 규칙* 적용
-3. 회화 영어와 격식 영어 *구분*
-4. *닳은 단어*는 *구체 단어*로
-5. *거만한 단어*는 *직접 단어*로
-6. *Show, don't tell*의 정신
+1. 의심되는 단어는 사전을 확인합니다.
+2. 격식 글에서는 전통 규칙을 적용합니다.
+3. 회화 영어와 격식 영어를 구분합니다.
+4. 닳은 단어는 구체 단어로 바꿉니다.
+5. 거만한 단어는 직접 단어로 바꿉니다.
+6. *Show, don't tell*의 정신을 따릅니다.
 
 ## 다음 Chapter 예고
 
-Chapter 5 — *An Approach to Style* (21개 reminders). 글쓰기의 *총체적 원칙*. 이미 폴리싱 완료.
+Chapter 5는 *An Approach to Style* (21개 reminders)입니다. 글쓰기의 총체적 원칙을 다룹니다. 이미 폴리싱이 완료되었습니다.
 
 ## 관련 항목
 

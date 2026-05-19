@@ -1,6 +1,6 @@
 ---
 title: "Chapter 16: Controlling Loops"
-date: 2025-06-20T16:00:00
+date: 2026-05-11T16:00:00
 description: "루프의 제어 — 입구·출구·본문 분리, 한 책임 한 루프, break/continue 신중."
 series: "Code Complete"
 seriesOrder: 16

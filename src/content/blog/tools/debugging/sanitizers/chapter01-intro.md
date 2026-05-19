@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Sanitizers 개요 — ASan / UBSan / LSan / TSan / MSan"
-date: 2026-05-15T01:00:00
+date: 2026-05-17T01:00:00
 description: "C/C++ 런타임 검사 도구 Sanitizer 계열의 역할, 종류별 선택, 실무 도입 순서."
 tags: [Sanitizer, ASan, UBSan, TSan, LSan, MSan, Debugging, C, C++]
 series: "Sanitizers"

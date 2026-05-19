@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Sufficiency, Ancillarity, and All That"
-date: 2029-04-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Sufficient statistic·exponential family — 데이터의 압축."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 7

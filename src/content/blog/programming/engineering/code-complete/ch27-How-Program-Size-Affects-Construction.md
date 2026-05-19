@@ -1,6 +1,6 @@
 ---
 title: "Chapter 27: How Program Size Affects Construction"
-date: 2025-06-21T03:00:00
+date: 2026-05-11T03:00:00
 description: "프로그램 크기가 construction에 미치는 영향 — 의사소통·복잡도가 비선형 증가."
 series: "Code Complete"
 seriesOrder: 27

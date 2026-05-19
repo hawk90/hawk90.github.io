@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Core ML 개요 — ANE·GPU·CPU"
-date: 2028-08-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Apple의 통합 inference framework — automatic backend dispatch."
 series: "Core ML 심화"
 seriesOrder: 1

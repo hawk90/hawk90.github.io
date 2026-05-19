@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Communication and the Use of Language"
-date: 2025-10-01T02:00:00
+date: 2026-05-01T02:00:00
 description: "Ubiquitous Language — 도메인 전문가와 개발자 공통 어휘. 모든 곳에서."
 tags: [DDD, Ubiquitous Language, Communication]
 series: "Domain-Driven Design"

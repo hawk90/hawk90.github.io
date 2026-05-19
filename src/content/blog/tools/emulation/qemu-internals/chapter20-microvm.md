@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: microvm Machine"
-date: 2025-09-03T20:00:00
+date: 2026-05-17T20:00:00
 description: "virtio-mmio·minimal boot·serverless VM."
 tags: [QEMU, microvm, serverless, firecracker]
 series: "QEMU Internals"

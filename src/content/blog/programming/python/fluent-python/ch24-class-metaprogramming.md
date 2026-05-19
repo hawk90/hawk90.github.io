@@ -1,6 +1,6 @@
 ---
 title: "Ch 24: Class Metaprogramming"
-date: 2026-05-17T00:00:00
+date: 2026-05-15T00:00:00
 description: "클래스 메타프로그래밍 — 클래스 데코레이터, __init_subclass__, 메타클래스."
 series: "Fluent Python"
 seriesOrder: 24

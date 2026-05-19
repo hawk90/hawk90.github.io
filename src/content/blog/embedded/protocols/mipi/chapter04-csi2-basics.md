@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: CSI-2 — 패킷 구조, Short/Long, Frame/Line Sync"
-date: 2027-05-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "이미지 센서 → SoC 데이터 흐름. Short Packet (sync) + Long Packet (pixel data)의 단순 모델."
 series: "MIPI 심화"
 seriesOrder: 4

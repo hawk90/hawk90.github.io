@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 첫 부팅 — 0%부터 login prompt까지"
-date: 2026-05-20T10:00:00
+date: 2026-05-09T10:00:00
 description: "보드 켜는 순간부터 login prompt까지의 단계별 체크포인트 — 어디서 멈추는지를 안다."
 series: "BSP Development"
 seriesOrder: 10

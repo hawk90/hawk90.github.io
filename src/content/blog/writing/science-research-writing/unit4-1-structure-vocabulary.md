@@ -1,6 +1,6 @@
 ---
 title: "Unit 4.1: Discussion의 구조와 어휘"
-date: 2026-05-19T08:00:00
+date: 2026-05-14T08:00:00
 description: "Discussion/Conclusion의 표준 구조 — 핵심 발견, 기존 연구와의 관계, 한계, 함의. 모래시계의 다시 넓어지는 부분."
 series: "Science Research Writing"
 seriesOrder: 41
@@ -8,10 +8,9 @@ tags: [writing, academic, discussion, conclusion, limitations]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: true
 ---
 
-Discussion은 *모래시계가 다시 넓어지는* 부분입니다. 좁은 Results에서 시작해 *기존 연구와의 관계, 함의, 한계*로 넓혀 갑니다. Introduction의 *거꾸로 진행*과 같습니다.
+Discussion은 모래시계가 다시 넓어지는 부분입니다. 좁은 Results에서 시작해 기존 연구와의 관계, 함의, 한계로 넓혀 갑니다. Introduction의 거꾸로 진행과 같습니다.
 
 ## Discussion의 목적
 
@@ -50,7 +49,7 @@ Move 3 (Gap)          ← Move 2 (How we filled the gap)
 Move 4 (Present work) ← Move 1 (What we found)
 ```
 
-Introduction이 일반→구체로 좁아진다면, Discussion은 *구체→일반*으로 넓어집니다.
+Introduction이 일반에서 구체로 좁아진다면, Discussion은 구체에서 일반으로 넓어집니다.
 
 ## 표준 구조 (4-Move)
 
@@ -70,7 +69,7 @@ Move 4: Implications and future directions
 
 ## Move 1 — 핵심 발견 재진술
 
-Discussion의 첫 단락은 *연구 질문에 답*합니다.
+Discussion의 첫 단락은 연구 질문에 답합니다.
 
 ```
 The present study examined whether caffeine timing affects sleep
@@ -84,9 +83,9 @@ individuals than previously hypothesized.
 ```
 
 분석:
-- *첫 문장* — Introduction의 Move 4 재진술
-- *둘째 문장* — 주된 발견 (가설 지지)
-- *셋째 문장* — 예상 외 발견 (가설 미지지)
+- 첫 문장은 Introduction의 Move 4를 재진술합니다.
+- 둘째 문장은 주된 발견(가설 지지)을 적습니다.
+- 셋째 문장은 예상 외 발견(가설 미지지)을 적습니다.
 
 이 세 문장이 Discussion 전체의 나침반입니다.
 
@@ -114,11 +113,11 @@ subjective detection. Second, our sample's higher caffeine intake
 detectable effects.
 ```
 
-*불일치를 인정*하고 *가능한 설명*을 제시. 학술적 정직성.
+불일치를 인정하고 가능한 설명을 제시합니다. 학술적 정직성의 표시입니다.
 
 ## Move 3 — 한계 인정
 
-학술 글에서 *한계의 인정*은 *글의 신뢰를 깎지 않고 오히려 높입니다*.
+학술 글에서 한계를 인정하는 것은 글의 신뢰를 깎지 않고 오히려 높여 줍니다.
 
 ### 한계의 종류
 
@@ -150,18 +149,18 @@ effects.
 
 ### 한계의 균형
 
-너무 길고 깊은 한계 섹션은 *논문의 신뢰를 약화*시킵니다. *주요 한계 2-4개*에 집중합니다.
+너무 길고 깊은 한계 섹션은 논문의 신뢰를 약화시킵니다. 주요 한계 2-4개에 집중합니다.
 
 ```
 회피:
-- 자기 연구가 *모든 것*을 해결하지 못함을 한탄
-- 비판자의 *예상 비판*을 모두 미리 받아들임
-- *명백한* 한계를 길게
+- 자기 연구가 모든 것을 해결하지 못함을 한탄
+- 비판자의 예상 비판을 모두 미리 받아들임
+- 명백한 한계를 길게 늘어놓기
 
 선호:
-- *구체적이고 옹호 가능한* 한계
-- 그 한계가 *결과 해석에 어떻게 영향*을 주는지
-- 그 한계가 *어떻게 극복될 수 있는지*
+- 구체적이고 옹호 가능한 한계
+- 그 한계가 결과 해석에 어떻게 영향을 주는지
+- 그 한계가 어떻게 극복될 수 있는지
 ```
 
 ## Move 4 — 함의와 다음 연구
@@ -194,10 +193,10 @@ data. Second, replication in non-undergraduate populations would
 test the generalizability of the effect.
 ```
 
-좋은 *future directions*의 조건:
-- 자기 한계에 직접 응답
-- 구체적이고 실행 가능
-- 논문의 함의를 자연스럽게 확장
+좋은 future directions의 조건은 다음과 같습니다.
+- 자기 한계에 직접 응답합니다.
+- 구체적이고 실행 가능합니다.
+- 논문의 함의를 자연스럽게 확장합니다.
 
 ## Vocabulary — Discussion의 핵심 동사
 
@@ -269,7 +268,7 @@ By [contribution], this work [broader significance].
 
 ## Closing — 마지막 문장
 
-Discussion의 마지막 문장은 자주 *작은 일반화*입니다.
+Discussion의 마지막 문장은 자주 작은 일반화로 마무리됩니다.
 
 ```
 회피 (요약 반복):
@@ -284,14 +283,14 @@ broader health outcomes.
 
 ## Conclusion 섹션 (분야에 따라 별도)
 
-일부 분야는 *Discussion* 외에 *Conclusion* 섹션을 따로 둡니다.
+일부 분야는 Discussion 외에 Conclusion 섹션을 따로 둡니다.
 
 ### Conclusion의 역할
 
 ```
-- Discussion보다 *간결*
-- 핵심 발견 + 핵심 함의 + 다음 단계의 *재진술*
-- 보통 1-2 단락
+- Discussion보다 간결합니다.
+- 핵심 발견, 핵심 함의, 다음 단계를 재진술합니다.
+- 보통 1-2 단락입니다.
 ```
 
 ```
@@ -304,41 +303,41 @@ Future research should clarify the causal direction and explore
 non-metabolic moderators of this relationship.
 ```
 
-Discussion이 길게 다룬 것을 *짧게 압축*해 반복합니다.
+Discussion이 길게 다룬 것을 짧게 압축해 반복합니다.
 
 ## 자기 점검
 
 ```
-□ Move 1 — 핵심 발견이 *첫 단락*에 명확한가?
-□ Move 2 — 기존 연구와 *비교*가 있는가?
-□ Move 3 — *한계*를 인정했는가? (2-4개)
-□ Move 4 — *함의*와 *다음 연구*가 있는가?
+□ Move 1 — 핵심 발견이 첫 단락에 명확한가?
+□ Move 2 — 기존 연구와 비교가 있는가?
+□ Move 3 — 한계를 인정했는가? (2-4개)
+□ Move 4 — 함의와 다음 연구가 있는가?
 □ 마무리 — 단순 요약 반복이 아닌가?
-□ Discussion이 *Results보다 짧지 않은가?*
+□ Discussion이 Results보다 짧지 않은가?
 ```
 
 ## 정리
 
-- Discussion = 모래시계가 *다시 넓어지는* 부분
-- 4-Move (Introduction의 거꾸로) — Findings → Literature → Limitations → Implications
-- *한계 인정*이 신뢰를 *낮추지 않고 높임*
-- Move 3의 길이 — *2-4 한계*에 집중
-- 마지막 문장은 *작은 일반화* — 요약이 아니라 확장
-- 분야에 따라 *Conclusion 섹션 별도* 가능
+- Discussion은 모래시계가 다시 넓어지는 부분입니다.
+- 4-Move는 Introduction의 거꾸로입니다. Findings → Literature → Limitations → Implications 순서로 흐릅니다.
+- 한계 인정이 신뢰를 낮추지 않고 오히려 높여 줍니다.
+- Move 3의 길이는 2-4개 한계에 집중합니다.
+- 마지막 문장은 작은 일반화로 마무리합니다. 요약이 아니라 확장입니다.
+- 분야에 따라 Conclusion 섹션을 별도로 둘 수 있습니다.
 
 ## 한국 연구자의 Discussion 함정
 
 ```
 1. Results 단순 반복 — 해석 누락
-2. 한계 회피 / 누락 — 한국 학습 문화 영향
-3. 함의 (implications) 누락
+2. 한계 회피 또는 누락 — 한국 학습 문화의 영향
+3. 함의(implications) 누락
 4. 헤지 부족 — 모든 결과 단언
 5. 결말이 단순 요약
 ```
 
 ## 다음 글 예고
 
-다음은 **Unit 4.2: Discussion의 문법**.
+다음 글은 **Unit 4.2: Discussion의 문법**입니다.
 
 ## 관련 항목
 

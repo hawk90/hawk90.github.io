@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Ergodic Theorems"
-date: 2030-07-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Stationary process·Birkhoff·subadditive ergodic."
 series: "Probability: Theory and Examples"
 seriesOrder: 7

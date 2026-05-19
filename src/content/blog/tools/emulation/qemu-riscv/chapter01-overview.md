@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: QEMU RISC-V 개요"
-date: 2025-05-19T19:00:00
+date: 2026-05-17T19:00:00
 description: "QEMU RISC-V — 지원 머신, 빌드 옵션, 기본 사용법을 다룬다."
 series: "RISC-V QEMU 심화"
 seriesOrder: 1

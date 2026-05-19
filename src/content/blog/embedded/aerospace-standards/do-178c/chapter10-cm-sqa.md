@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Configuration Management & Software Quality Assurance"
-date: 2025-09-25T11:00:00
+date: 2026-05-18T11:00:00
 description: "SCM baseline·CCB·PR workflow. SQA audit·SAS 작성. 도구 (ClearCase, Git, JIRA). 항공 산업 거버넌스."
 tags: [do-178c, scm, configuration-management, sqa, baseline, ccb, sas, clearcase]
 series: "DO-178C"

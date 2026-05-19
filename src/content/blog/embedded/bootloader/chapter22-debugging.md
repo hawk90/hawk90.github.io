@@ -1,6 +1,6 @@
 ---
 title: "Ch 22: 디버깅 — DEBUG, JTAG, serial, post-mortem"
-date: 2026-05-18T22:00:00
+date: 2026-05-09T22:00:00
 description: "부트로더 디버깅 — CONFIG_DEBUG_UART, JTAG, 시리얼 콘솔, panic dump 읽기."
 series: "Bootloader Internals"
 seriesOrder: 22

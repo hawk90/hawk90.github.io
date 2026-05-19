@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Interval Estimation"
-date: 2030-09-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Confidence interval·pivot·inversion·Bayesian credible."
 series: "Statistical Inference"
 seriesOrder: 9

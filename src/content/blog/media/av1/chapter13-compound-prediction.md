@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Compound 예측"
-date: 2025-10-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "AV1의 Compound 예측 — Averaged, Distance-Weighted, Wedge, DIFFWTD, Inter-Intra 블렌딩의 원리와 구현."
 tags: [AV1, Video, Codec, Compound, Prediction]
 series: "AV1"

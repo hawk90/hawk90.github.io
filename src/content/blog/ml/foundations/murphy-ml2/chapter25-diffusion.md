@@ -1,6 +1,6 @@
 ---
 title: "Ch 25: Diffusion Models"
-date: 2029-06-02T01:00:00
+date: 2026-05-16T01:00:00
 description: "Forward·reverse SDE·score matching — modern generative의 정점."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 25

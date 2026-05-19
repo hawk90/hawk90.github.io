@@ -1,6 +1,6 @@
 ---
 title: "Ch 2.2: OBU(Open Bitstream Unit)"
-date: 2025-10-01T03:02:00
+date: 2026-05-16T03:02:00
 description: "OBU 헤더 비트 레이아웃, 8가지 타입, Extension Header, LEB128 크기 필드."
 tags: [AV1, Video, Codec, OBU, Bitstream]
 series: "AV1"

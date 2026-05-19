@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Configuration Space — 설정 공간과 Capability"
-date: 2026-06-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "PCIe Configuration Space 구조 — Type 0/1 헤더, Capability 체인, Extended Configuration Space"
 series: "PCIe Deep Dive"
 seriesOrder: 3

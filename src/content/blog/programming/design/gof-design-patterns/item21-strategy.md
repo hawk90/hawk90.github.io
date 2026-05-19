@@ -1,6 +1,6 @@
 ---
 title: "GoF 21: Strategy"
-date: 2026-02-01T21:00:00
+date: 2026-05-01T21:00:00
 description: "알고리즘을 객체로 캡슐화 — 런타임에 교체 가능."
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"

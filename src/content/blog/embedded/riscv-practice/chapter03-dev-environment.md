@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 개발 환경"
-date: 2025-05-19T09:00:00
+date: 2026-05-17T09:00:00
 description: "RISC-V 개발 환경 — OpenOCD, probe-rs, 디버거 설정을 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 3

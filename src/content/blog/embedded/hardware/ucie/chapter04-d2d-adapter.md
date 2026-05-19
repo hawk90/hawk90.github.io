@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: D2D 어댑터 — 프로토콜 변환"
-date: 2026-11-01T04:00:00
+date: 2026-05-19T04:00:00
 description: "CRC·retry·flit — 프로토콜과 물리 사이의 다리."
 series: "UCIe 심화"
 seriesOrder: 4

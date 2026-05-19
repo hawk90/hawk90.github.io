@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 16: 연산 확장에 Visitor를 사용하라"
-date: 2026-05-13T16:00:00
+date: 2026-05-02T16:00:00
 description: "GoF Visitor — 닫힌 타입 집합에 새 연산을 더한다. double dispatch의 메커니즘과 모던 한계."
 tags: [C++, Software Design, Visitor, Design Patterns]
 series: "C++ Software Design"

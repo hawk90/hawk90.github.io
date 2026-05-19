@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Resource Management"
-date: 2026-07-01T07:00:00
+date: 2026-05-09T07:00:00
 description: "mutex·recursive mutex·priority inheritance — 공유 자원 보호 패턴."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 7

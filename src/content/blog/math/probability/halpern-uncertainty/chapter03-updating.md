@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Updating Beliefs"
-date: 2030-01-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Bayes·Jeffrey·Dempster — framework별 update 규칙."
 series: "Reasoning About Uncertainty"
 seriesOrder: 3

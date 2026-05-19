@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: OPAE·DFL Framework"
-date: 2025-09-04T12:00:00
+date: 2026-05-17T12:00:00
 description: "Intel FPGA management — Device Feature List·Accelerated Function Unit."
 tags: [QEMU, opae, dfl, intel-fpga, afu]
 series: "FPGA Driver via QEMU+VFIO"

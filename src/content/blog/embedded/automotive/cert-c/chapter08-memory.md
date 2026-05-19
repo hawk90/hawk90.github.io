@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: MEM — malloc/free, double free, use-after-free, 누수"
-date: 2025-09-10T09:00:00
+date: 2026-05-18T09:00:00
 description: "MEM30~36 — heap exploitation의 모든 단골 패턴과 차단 방법. ASan, mimalloc, hardened malloc."
 tags: [cert-c, memory, malloc, double-free, use-after-free, asan, cwe-416]
 series: "CERT C"

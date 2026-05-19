@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: RISC-V 부트 시퀀스 개요"
-date: 2025-05-18T19:00:00
+date: 2026-05-17T19:00:00
 description: "RISC-V 부트 시퀀스 — 리셋 벡터, 부트 단계, 책임 분리를 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 1

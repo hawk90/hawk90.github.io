@@ -1,6 +1,6 @@
 ---
 title: "Ch 22: Finite Mixture Models"
-date: 2030-02-01T22:00:00
+date: 2026-05-16T22:00:00
 description: "Mixture model·label switching·EM·MCMC."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 22

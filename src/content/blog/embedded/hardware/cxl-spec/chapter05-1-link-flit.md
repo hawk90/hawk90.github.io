@@ -1,6 +1,6 @@
 ---
 title: "Ch 5.1: Link Layer — Flit Formats"
-date: 2026-01-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "스펙 §4 — 68B·256B·Latency-Optimized flit."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 12

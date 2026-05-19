@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Optimization"
-date: 2029-05-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "SGD·Adam·second-order — ML training의 엔진."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 8

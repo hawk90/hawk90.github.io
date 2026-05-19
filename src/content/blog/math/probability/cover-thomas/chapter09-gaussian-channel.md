@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Gaussian Channel"
-date: 2029-01-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "C = ½ log(1+SNR) — 가장 유명한 capacity 공식."
 series: "Elements of Information Theory"
 seriesOrder: 9

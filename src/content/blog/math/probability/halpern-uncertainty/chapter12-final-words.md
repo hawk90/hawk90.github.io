@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Final Words"
-date: 2030-01-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Framework 선택 가이드 — 언제 무엇을 쓸지."
 series: "Reasoning About Uncertainty"
 seriesOrder: 12

@@ -1,6 +1,6 @@
 ---
 title: "Pattern 28: Replace Loop with Pipeline"
-date: 2026-06-02T04:00:00
+date: 2026-05-02T04:00:00
 description: "Loop를 filter·map·reduce 파이프라인으로 — 의도를 직접 드러낸다."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 28

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Asymptotic Equipartition Property"
-date: 2029-01-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "전형 집합 — 큰 수의 법칙이 정보이론에 던지는 함의."
 series: "Elements of Information Theory"
 seriesOrder: 3

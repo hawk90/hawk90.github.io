@@ -1,6 +1,6 @@
 ---
 title: "GoF 1: Abstract Factory"
-date: 2026-02-01T01:00:00
+date: 2026-05-01T01:00:00
 description: "관련된 객체 군을 한 번에 만들기 — 클라이언트는 어떤 OS·테마인지 알 필요가 없다."
 tags: [Design Pattern, GoF, C++, C, Creational]
 series: "GoF Design Patterns"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Probability of Causation"
-date: 2029-12-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "PN·PS·PNS — 인과의 확률적 의미."
 series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 9

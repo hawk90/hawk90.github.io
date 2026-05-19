@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 단정밀도 부동소수점 (F)"
-date: 2025-05-18T08:00:00
+date: 2026-05-17T08:00:00
 description: "RISC-V F 확장 — f0-f31 레지스터, FP 연산, 반올림 모드, fcsr을 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 8

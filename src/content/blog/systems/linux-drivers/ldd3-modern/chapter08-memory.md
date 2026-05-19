@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Allocating Memory"
-date: 2026-06-01T08:00:00
+date: 2026-05-13T08:00:00
 description: "kmalloc·vmalloc·alloc_pages·slab·devm — 커널 메모리 할당 도구."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 8

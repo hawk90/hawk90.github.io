@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: ML 워크로드 특성 분석"
-date: 2028-05-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Compute·memory·communication — ML 워크로드의 3축."
 series: "ML 시스템 프로파일링"
 seriesOrder: 1

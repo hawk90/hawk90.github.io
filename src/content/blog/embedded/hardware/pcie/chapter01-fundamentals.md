@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: PCIe Fundamentals — 계층 구조와 토폴로지"
-date: 2026-06-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "PCIe 아키텍처의 기초 — 계층 구조, 포인트-투-포인트 토폴로지, Root Complex, Switch, Endpoint"
 series: "PCIe Deep Dive"
 seriesOrder: 1

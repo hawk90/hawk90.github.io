@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: VirtIO 구현 심화"
-date: 2025-09-03T18:00:00
+date: 2026-05-17T18:00:00
 description: "virtio-blk·virtio-net·virtqueue 처리 — host side."
 tags: [QEMU, virtio, virtqueue, virtio-blk, virtio-net]
 series: "QEMU Internals"

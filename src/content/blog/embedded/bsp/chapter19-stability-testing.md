@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: Stability testing — stress와 soak"
-date: 2026-05-20T19:00:00
+date: 2026-05-09T19:00:00
 description: "양산 BSP의 안정성 검증 — stress 도구, 장기간 soak, thermal 사이클, EMC 영향."
 series: "BSP Development"
 seriesOrder: 19

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: ECC — On-die ECC, Scrubbing"
-date: 2026-08-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "DDR 메모리의 ECC: ECC DIMM 구조, On-die ECC, Memory Scrubbing과 에러 정정"
 series: "DDR Memory Deep Dive"
 seriesOrder: 9

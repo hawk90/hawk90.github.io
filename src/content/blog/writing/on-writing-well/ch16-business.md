@@ -1,6 +1,6 @@
 ---
 title: "Chapter 16: Business Writing"
-date: 2026-05-18T16:00:00
+date: 2026-05-14T16:00:00
 description: "비즈니스 글의 잘못된 관습. 가식적 jargon이 신뢰를 떨어뜨립니다. 인간적인 글이 가장 효율적입니다."
 series: "On Writing Well"
 seriesOrder: 16

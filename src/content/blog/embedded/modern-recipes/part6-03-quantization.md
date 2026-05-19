@@ -1,6 +1,6 @@
 ---
 title: "6-03: Quantization — PTQ·QAT·INT8·INT4·Calibration·SmoothQuant"
-date: 2026-05-21T03:00:00
+date: 2026-05-07T03:00:00
 description: "FP32→INT8/INT4 양자화의 수식, PTQ와 QAT 차이, per-channel·per-tensor 선택, LLM용 GPTQ·AWQ까지 실전 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 33

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 분류 체계 — Directive / Rule / Mandatory / Required / Advisory"
-date: 2025-09-05T03:00:00
+date: 2026-05-18T03:00:00
 description: "MISRA의 4축 분류: 적용 대상(Directive/Rule), 강제도(Mandatory/Required/Advisory), 결정성(Decidable/Undecidable), Deviation 절차."
 tags: [misra, c, classification, deviation, decidable, advisory]
 series: "MISRA C"

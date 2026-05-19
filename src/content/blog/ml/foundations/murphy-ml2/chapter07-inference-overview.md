@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Inference Algorithms — Overview"
-date: 2029-06-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Exact·deterministic approx·stochastic approx — 추론 알고리즘 지도."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 7

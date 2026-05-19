@@ -1,6 +1,6 @@
 ---
 title: "항목 17: 전역 상태에 따른 에러 처리는 피하라"
-date: 2026-05-08T17:00:00
+date: 2026-05-05T17:00:00
 description: "errno 같은 전역 에러 채널 대신 타입에 에러를 담아 반환 — optional, expected, 예외."
 tags: [C++, Error Handling]
 series: "Beautiful C++"

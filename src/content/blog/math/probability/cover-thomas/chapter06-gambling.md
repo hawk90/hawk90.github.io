@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Gambling and Data Compression"
-date: 2029-01-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Kelly betting과 doubling rate — 압축의 쌍둥이."
 series: "Elements of Information Theory"
 seriesOrder: 6

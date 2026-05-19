@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Probability — Univariate Models"
-date: 2029-05-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "RV·Bayes·Gaussian — 1차원 확률의 ML-friendly 정리."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 2

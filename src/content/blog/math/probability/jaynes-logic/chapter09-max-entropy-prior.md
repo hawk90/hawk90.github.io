@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Maximum Entropy Priors"
-date: 2029-04-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "정보가 부족할 때 — 가장 'unbiased'한 prior를 선택한다."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 9

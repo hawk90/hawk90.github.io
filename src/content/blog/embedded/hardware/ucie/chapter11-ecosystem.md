@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 멀티 벤더 칩렛 생태계"
-date: 2026-11-01T11:00:00
+date: 2026-05-19T11:00:00
 description: "다른 벤더의 chiplet을 조립한다 — 표준이 가능하게 한 시장."
 series: "UCIe 심화"
 seriesOrder: 11

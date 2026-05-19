@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Fixtures 기초"
-date: 2026-05-22T05:00:00
+date: 2026-05-10T05:00:00
 description: "scope·autouse·yield — fixture의 lifecycle과 DI 원리."
 series: "pytest 심화"
 seriesOrder: 5

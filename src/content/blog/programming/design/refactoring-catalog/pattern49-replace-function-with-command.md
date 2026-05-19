@@ -1,6 +1,6 @@
 ---
 title: "Pattern 49: Replace Function with Command"
-date: 2026-06-03T01:00:00
+date: 2026-05-02T01:00:00
 description: "복잡한 함수를 객체로 — 분해·상태 보유·undo 가능."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 49

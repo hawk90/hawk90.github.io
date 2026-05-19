@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Exact Inference in Graphs"
-date: 2029-02-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Sum-product on tree·junction tree·trellis."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 9

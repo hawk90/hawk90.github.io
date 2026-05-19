@@ -1,6 +1,6 @@
 ---
 title: "Part 2-4: 컨텍스트 스위치"
-date: 2025-07-15T08:00:00
+date: 2026-05-12T08:00:00
 description: "schedule() → context_switch — 레지스터 / 스택 / 페이지 테이블 교체."
 tags: [Linux, Kernel, Context Switch]
 series: "리눅스 커널의 구조와 원리"

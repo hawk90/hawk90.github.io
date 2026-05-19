@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: DMA-BUF와 버퍼 공유"
-date: 2027-12-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Cross-driver buffer sharing — NPU·camera·codec이 같은 버퍼를."
 series: "NPU 드라이버 개발"
 seriesOrder: 2

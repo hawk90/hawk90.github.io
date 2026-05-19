@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Probability — Multivariate Models"
-date: 2029-05-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Joint·multivariate Gaussian·copula·mixture model."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 3

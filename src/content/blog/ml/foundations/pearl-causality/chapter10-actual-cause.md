@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: The Actual Cause"
-date: 2029-12-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Halpern-Pearl actual cause — 'X가 Y의 실제 원인이었다'."
 series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 10

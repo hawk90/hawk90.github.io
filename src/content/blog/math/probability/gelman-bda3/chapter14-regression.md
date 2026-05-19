@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Introduction to Regression Models"
-date: 2030-02-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "Bayesian linear regression — interpretation·prior choice."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 14

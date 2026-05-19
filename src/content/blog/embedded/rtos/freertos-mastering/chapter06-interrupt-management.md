@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Interrupt Management"
-date: 2026-07-01T06:00:00
+date: 2026-05-09T06:00:00
 description: "...FromISR·deferred interrupt — ISR과 태스크의 안전한 다리."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 6

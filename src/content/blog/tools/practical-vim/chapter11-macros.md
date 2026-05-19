@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Macros"
-date: 2025-08-15T11:00:00
+date: 2026-05-17T11:00:00
 description: "q + reg / 명령 / q. @reg 실행. @@ 반복. 여러 라인 / 파일에 일괄."
 tags: [Vim, Macro, Automation]
 series: "Practical Vim"

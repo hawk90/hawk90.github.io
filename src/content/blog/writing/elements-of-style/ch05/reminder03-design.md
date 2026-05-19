@@ -1,6 +1,6 @@
 ---
 title: "Ch 5 Reminder 3: 적절한 디자인으로부터 쓰라"
-date: 2026-05-15T11:00:00
+date: 2026-05-14T11:00:00
 description: "무엇을 쓰기 전에 자기 작업의 성격과 범위를 가늠하고, 적합한 설계를 갖춰 두라."
 series: "The Elements of Style"
 seriesOrder: 35

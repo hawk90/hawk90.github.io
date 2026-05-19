@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Quantization — PTQ·QAT"
-date: 2027-10-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Post-training·QAT — INT8/INT4·fp8까지."
 series: "PyTorch Internals"
 seriesOrder: 10

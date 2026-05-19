@@ -1,6 +1,6 @@
 ---
 title: "UML 31: 프로파일 다이어그램 — 도메인을 위한 UML 확장"
-date: 2026-04-02T03:30:00
+date: 2026-05-03T03:30:00
 description: "스테레오타입·태그값·제약을 모아 도메인 전용 UML을 만드는 first-class 메커니즘. UML 2.5에서 다이어그램으로 승격."
 tags: [UML, Profile, Stereotype, Extension, Domain]
 series: "UML 2.5.1"

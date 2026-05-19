@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction — CXL System Architecture"
-date: 2026-01-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "CXL 4.0 스펙 Ch 1·2 — 시스템 아키텍처 개관."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 1

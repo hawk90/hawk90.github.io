@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: perf annotate / 함수 단위"
-date: 2025-08-25T04:00:00
+date: 2026-05-17T04:00:00
 description: "perf annotate — 어셈블리 + 소스에 hot spot 표시."
 tags: [perf, Annotate, Assembly]
 series: "perf and FlameGraph"

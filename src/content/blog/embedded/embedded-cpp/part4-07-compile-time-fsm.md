@@ -1,6 +1,6 @@
 ---
 title: "Part 4-07: Compile-time FSM"
-date: 2026-05-16T07:00:00
+date: 2026-05-07T07:00:00
 description: "constexpr state machine — 컴파일 타임에 전이 검증, runtime 코드 0."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 35

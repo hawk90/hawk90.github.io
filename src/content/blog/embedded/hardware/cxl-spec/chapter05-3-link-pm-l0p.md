@@ -1,6 +1,6 @@
 ---
 title: "Ch 5.3: Link Layer — PM·L0p·State Transitions"
-date: 2026-01-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "스펙 §4 — link power state·L0p partial width."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 14

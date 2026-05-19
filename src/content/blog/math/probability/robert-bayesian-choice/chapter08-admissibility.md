@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Admissibility and Complete Classes"
-date: 2030-04-01T08:00:00
+date: 2026-05-15T08:00:00
 description: "Bayes estimator의 admissibility — decision theory 정점."
 series: "The Bayesian Choice"
 seriesOrder: 8

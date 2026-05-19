@@ -1,6 +1,6 @@
 ---
 title: "Ch 12.2: RAS — Viral·AER·Recovery"
-date: 2026-01-02T04:00:00
+date: 2026-05-16T04:00:00
 description: "스펙 §12 — containment·AER·recovery flow."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 28

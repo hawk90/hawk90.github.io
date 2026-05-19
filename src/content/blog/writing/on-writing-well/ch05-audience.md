@@ -1,6 +1,6 @@
 ---
 title: "Chapter 5: The Audience"
-date: 2026-05-18T05:00:00
+date: 2026-05-14T05:00:00
 description: "누구를 위해 쓰는가에 대한 Zinsser의 의외의 답 — 독자를 위해 쓰지 말고 자기 자신을 위해 쓰세요."
 series: "On Writing Well"
 seriesOrder: 5

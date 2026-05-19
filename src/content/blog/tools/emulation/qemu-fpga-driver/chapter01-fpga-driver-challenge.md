@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: FPGA Driver 개발의 과제"
-date: 2025-09-04T01:00:00
+date: 2026-05-17T01:00:00
 description: "실 보드 없이도 driver 검증 — QEMU + VFIO 워크플로 개관."
 tags: [QEMU, fpga, driver, vfio, workflow]
 series: "FPGA Driver via QEMU+VFIO"

@@ -1,6 +1,6 @@
 ---
 title: "Rule 8: Get a Fresh View"
-date: 2031-01-01T08:00:00
+date: 2026-05-17T08:00:00
 description: "다른 사람의 시선으로 — rubber duck부터 expert까지."
 series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "Pattern 56: Replace Type Code with Subclasses"
-date: 2026-06-03T08:00:00
+date: 2026-05-02T08:00:00
 description: "Type code (enum·string) 대신 다형성 subclass — 분기 사라지고 type-specific 동작 자연."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 56

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 루트 파일시스템"
-date: 2025-09-15T06:00:00
+date: 2026-05-17T06:00:00
 description: "Buildroot/Yocto로 루트 파일시스템을 만들고 QEMU에서 사용한다."
 tags: [QEMU, Buildroot, Yocto, Rootfs]
 series: "QEMU Embedded Emulation"

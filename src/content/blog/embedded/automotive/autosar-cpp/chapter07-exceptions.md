@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 예외 처리 — try/catch, noexcept, exception safety"
-date: 2025-09-15T08:00:00
+date: 2026-05-18T08:00:00
 description: "예외 클래스 throw(A15-1-1), destructor에서 leak 금지(A15-5-1), exception safety guarantee, 임베디드 적용 논쟁."
 tags: [autosar, cpp, exception, noexcept, raii, exception-safety]
 series: "AUTOSAR C++14"

@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 25: Observer를 추상 알림 메커니즘으로 적용하라"
-date: 2026-05-14T01:00:00
+date: 2026-05-02T01:00:00
 description: "Observer 패턴은 pub/sub이다. 모던 C++에서 std::function 기반이 표준이며, 라이프타임·순환·예외 같은 함정에 주의한다."
 tags: [C++, Software Design, Observer, Pub-Sub]
 series: "C++ Software Design"

@@ -1,6 +1,6 @@
 ---
 title: "제1장: 문장이란 무엇인가"
-date: 2026-05-12T01:00:00
+date: 2026-05-14T01:00:00
 description: "문장의 정의와 본질에 대한 탐구"
 series: "고종석의 문장"
 seriesOrder: 1

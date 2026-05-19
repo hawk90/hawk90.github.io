@@ -1,6 +1,6 @@
 ---
 title: "Part 2-07: Templates 비용 분석"
-date: 2026-05-14T07:00:00
+date: 2026-05-07T07:00:00
 description: "Template instantiation의 코드 bloat — 추적, 통제, 공통 부분 분리 패턴."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 15

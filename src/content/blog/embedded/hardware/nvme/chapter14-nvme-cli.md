@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: nvme-cli"
-date: 2026-07-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "nvme-cli 도구를 활용한 NVMe 디바이스 관리와 진단을 완전 정복한다"
 series: "NVMe Deep Dive"
 seriesOrder: 14

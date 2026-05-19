@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Mocks and Test Fragility"
-date: 2025-10-15T05:00:00
+date: 2026-05-10T05:00:00
 description: "Mock 종류 — Dummy / Stub / Spy / Mock / Fake. 4 communications + observable / 비-observable."
 tags: [TDD, Mock, Stub, Fake]
 series: "Khorikov Unit Testing"

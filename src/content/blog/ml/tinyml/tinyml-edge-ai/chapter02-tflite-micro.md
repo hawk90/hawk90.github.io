@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: TensorFlow Lite Micro 아키텍처"
-date: 2028-04-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Bare-metal interpreter — no malloc·no OS."
 series: "TinyML·Edge AI"
 seriesOrder: 2

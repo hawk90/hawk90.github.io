@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: MLOps 패턴"
-date: 2028-09-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Workflow pipelines·feature store·model versioning — production ML 운영."
 series: "ML 디자인 패턴"
 seriesOrder: 10

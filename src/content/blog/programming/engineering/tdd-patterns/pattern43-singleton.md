@@ -1,6 +1,6 @@
 ---
 title: "Pattern 43: Singleton (avoid)"
-date: 2026-07-02T19:00:00
+date: 2026-05-10T19:00:00
 description: "Beck도 추천하지 않는 패턴 — global state 회피, DI 우선."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 43

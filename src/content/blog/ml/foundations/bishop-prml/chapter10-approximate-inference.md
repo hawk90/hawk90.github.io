@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Approximate Inference"
-date: 2029-07-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Variational·EP·local methods — deterministic approximation."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 10

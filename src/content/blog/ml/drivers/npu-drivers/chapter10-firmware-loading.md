@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 펌웨어 로딩"
-date: 2027-12-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "request_firmware·signed firmware·secure boot — 펌웨어의 일생."
 series: "NPU 드라이버 개발"
 seriesOrder: 10

@@ -1,6 +1,6 @@
 ---
 title: "DSA 28: B-트리 / B+ 트리 — 디스크 친화 인덱스"
-date: 2026-03-02T04:00:00
+date: 2026-05-15T04:00:00
 description: "한 노드에 키 多 — 디스크 페이지에 최적화. 모든 RDBMS의 인덱스 토대."
 tags: [Data Structure, Algorithm, B-Tree, Database]
 series: "Data Structures and Algorithms"

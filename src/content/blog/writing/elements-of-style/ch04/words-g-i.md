@@ -1,6 +1,6 @@
 ---
 title: "Ch 4 Words: G–I"
-date: 2026-05-15T04:00:00
+date: 2026-05-14T04:00:00
 description: "자주 오용되는 단어와 표현 — Get부터 -ize까지."
 series: "The Elements of Style"
 seriesOrder: 28
@@ -8,14 +8,13 @@ tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 ## G
 
 ### Get
 
-`Have got`은 *회화체*. 형식적 글에서는 *have*. 과거분사는 *got*이 표준(미국식)이지만, *gotten*도 미국 회화에서 사용됩니다.
+`Have got`은 회화체입니다. 형식적 글에서는 *have*를 씁니다. 과거분사는 *got*이 표준(미국식)이지만, *gotten*도 미국 회화에서 쓰입니다.
 
 ```
 회화: "I have got a new car."
@@ -27,7 +26,7 @@ draft: true
 
 ### Gratuitous
 
-*받지 않은, 부당한, 정당화 안 되는*의 의미. *공짜*가 아닙니다.
+"받지 않은", "부당한", "정당화 안 되는"의 의미입니다. "공짜"가 아닙니다.
 
 ```
 "The insult seemed gratuitous."
@@ -42,7 +41,7 @@ draft: true
 
 ### Guess
 
-*Suppose*, *believe*, *think*의 의미로 *과용*. 회화는 OK, 격식 글에서는 적절한 동사로.
+*Suppose*, *believe*, *think*의 의미로 과용됩니다. 회화는 OK, 격식 글에서는 적절한 동사로 바꿉니다.
 
 ```
 회피 (격식): "I guess he is right."
@@ -54,7 +53,7 @@ draft: true
 
 ### He is a man who
 
-*군더더기* 표현.
+군더더기 표현입니다.
 
 ```
 회피: "He is a man who is very ambitious."
@@ -64,13 +63,13 @@ draft: true
 선호: "She likes books."
 ```
 
-*Is a man who / Is a person who* 패턴은 거의 항상 *제거 가능*.
+*Is a man who*, *Is a person who* 패턴은 거의 항상 제거할 수 있습니다.
 
 ## H
 
 ### Hopefully
 
-원래 *with hope*. 지금은 *I hope* 또는 *it is to be hoped*의 의미로 *흔히* 쓰이지만, Strunk는 이 새 용법을 *nonsense*라고 부릅니다. *보수적 글*에서는 *옛 의미*만 씁니다.
+원래는 *with hope*입니다. 지금은 *I hope* 또는 *it is to be hoped*의 의미로 흔히 쓰이지만, Strunk는 이 새 용법을 nonsense라고 부릅니다. 보수적 글에서는 옛 의미만 씁니다.
 
 ```
 회피 (현대 회화):
@@ -85,7 +84,7 @@ draft: true
    ← 희망에 차서
 ```
 
-현대 영어는 *변화 중*. 격식 / 학술 글에서는 *주의*.
+현대 영어는 변화 중입니다. 격식·학술 글에서는 주의가 필요합니다.
 
 ### How ever / However
 
@@ -100,7 +99,7 @@ draft: true
 
 ### However
 
-*Nevertheless*의 의미로 *문장 첫머리에 쓰지 마세요*. 보통 *다른 자리*에 두면 더 자연스럽습니다.
+*Nevertheless*의 의미로 문장 첫머리에 쓰지 마세요. 보통 다른 자리에 두면 더 자연스럽습니다.
 
 ```
 어색:
@@ -110,7 +109,7 @@ draft: true
 "We succeeded, however, in reaching camp."
 ```
 
-문장 *첫머리의 however*는 *in whatever way*, *to whatever extent*의 의미일 때만.
+문장 첫머리의 *however*는 *in whatever way*, *to whatever extent*의 의미일 때만 씁니다.
 
 ```
 선호 (in whatever way):
@@ -120,13 +119,13 @@ draft: true
 "However hard he tries, he will not succeed."
 ```
 
-현대 영어에서는 *however = nevertheless*가 *문장 첫머리*에 흔하지만, *Strunk-White 학파*는 *반대*.
+현대 영어에서는 *however*가 *nevertheless* 뜻으로 문장 첫머리에 흔하지만, Strunk-White 학파는 반대 입장입니다.
 
 ## I
 
 ### Imply / Infer
 
-`Imply` — 말하지 않고 *암시함*. `Infer` — 증거에서 *추론함*. *화자가 imply, 청자가 infer*.
+`Imply`는 말하지 않고 암시하는 것이고, `Infer`는 증거에서 추론하는 것입니다. 화자가 *imply*, 청자가 *infer*입니다.
 
 ```
 "Farming implies early rising."
@@ -146,11 +145,11 @@ draft: true
 선호: "Are you implying that I'm lying?"
 ```
 
-이 *구분*이 자주 *흐려지지만* 격식 글에서는 *지킵니다*.
+이 구분이 자주 흐려지지만 격식 글에서는 지킵니다.
 
 ### In regard to / As regards
 
-`In regards to`는 *잘못*. `In regard to` 또는 `as regards`가 맞습니다.
+`In regards to`는 잘못입니다. `In regard to` 또는 `as regards`가 맞습니다.
 
 ```
 회피: "In regards to your request, ..."
@@ -161,7 +160,7 @@ draft: true
 
 ### In terms of
 
-대개 *군더더기*.
+대개 군더더기입니다.
 
 ```
 회피:
@@ -172,7 +171,7 @@ draft: true
 또는: "The salary was low."
 ```
 
-*In terms of*가 정당한 자리: *비교의 기준*이 다른 차원일 때만.
+*In terms of*가 정당한 자리는 비교의 기준이 다른 차원일 때뿐입니다.
 
 ```
 선호 (정당):
@@ -182,7 +181,7 @@ draft: true
 
 ### Insightful
 
-*Perceptive*의 *과장된 대체어*. 정말 *비범한 통찰*일 때만. 평범한 발언에는 *perceptive*로 충분.
+*Perceptive*의 과장된 대체어입니다. 정말 비범한 통찰일 때만 씁니다. 평범한 발언에는 *perceptive*로 충분합니다.
 
 ```
 회피 (과장):
@@ -199,11 +198,11 @@ draft: true
    ← 진짜 비범한 통찰
 ```
 
-비즈니스 / 마케팅 영어에 *과도하게* 등장. *학술 / 격식 글*에서는 *주의*.
+비즈니스·마케팅 영어에 과도하게 등장합니다. 학술·격식 글에서는 주의가 필요합니다.
 
 ### Interesting
 
-*소개의 도구로 쓰지 마세요*. 무엇을 *말한 다음* 독자가 흥미를 느끼게 해야지, *앞서서 흥미롭다고 알려서*는 안 됩니다.
+소개의 도구로 쓰지 마세요. 무엇을 말한 다음 독자가 흥미를 느끼게 해야지, 앞서서 "흥미롭다"고 알려서는 안 됩니다.
 
 ```
 회피:
@@ -215,11 +214,11 @@ draft: true
 (단순히 그 이야기 / 사실을 들려주세요.)
 ```
 
-*Show, don't tell*. 흥미로움은 *독자가 느끼는 것*. *작가가 선언*하는 것이 아닙니다.
+*Show, don't tell*. 흥미로움은 독자가 느끼는 것이지, 작가가 선언하는 것이 아닙니다.
 
 ### Irregardless
 
-*Regardless*가 맞습니다. *Irregardless*는 *이중 부정* (ir- + -less)으로 *비표준*.
+*Regardless*가 맞습니다. *Irregardless*는 이중 부정(ir- + -less)으로 비표준입니다.
 
 ```
 회피: "Irregardless of the weather, we will proceed."
@@ -228,7 +227,7 @@ draft: true
 
 ### It is
 
-*문장 시작 it is*는 *약한 도입*. *진짜 주어*가 있다면 그것으로 시작.
+문장을 시작하는 *it is*는 약한 도입입니다. 진짜 주어가 있다면 그것으로 시작합니다.
 
 ```
 회피 (약함):
@@ -249,7 +248,7 @@ draft: true
 
 ### Its / It's
 
-가장 흔한 *영어 글쓰기 실수*. Rule 1에서 자세히 다룸.
+가장 흔한 영어 글쓰기 실수입니다. Rule 1에서 자세히 다룹니다.
 
 ```
 its  = 소유격 (어포스트로피 없음)
@@ -262,7 +261,7 @@ it's = it is / it has (축약)
 
 ### -ize
 
-`-ize` 접미사로 *동사를 만드는 습관*에 주의. *Containerize*, *prioritize*, *finalize* 같은 단어들이 늘고 있지만, *이미 같은 의미의 좋은 동사가 있는지* 먼저 확인하세요.
+`-ize` 접미사로 동사를 만드는 습관에 주의하세요. *Containerize*, *prioritize*, *finalize* 같은 단어들이 늘고 있지만, 이미 같은 의미의 좋은 동사가 있는지 먼저 확인하세요.
 
 ```
 회피                       선호
@@ -285,11 +284,11 @@ and finalize the project."
 complete the project."
 ```
 
-비즈니스 영어의 *최악 함정*. *-ize*가 *전문성* 같지만 *모호함*과 *추상*을 만듭니다.
+비즈니스 영어의 최악 함정입니다. *-ize*가 전문성처럼 보이지만 모호함과 추상을 만듭니다.
 
 ### -ization
 
-*-ize*에서 *-ization*으로 *명사화*되면 *더 약해집니다*.
+*-ize*에서 *-ization*으로 명사화되면 더 약해집니다.
 
 ```
 회피:
@@ -332,7 +331,7 @@ completing the plan."
 
 ## 다음 항목 예고
 
-다음 — **Words K~N** (Kind of, Lay/Lie, Like, Nature 등).
+다음은 **Words K~N**입니다 (Kind of, Lay/Lie, Like, Nature 등).
 
 ## 관련 항목
 

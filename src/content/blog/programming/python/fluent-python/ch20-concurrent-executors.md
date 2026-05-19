@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: Concurrent Executors"
-date: 2026-05-16T20:00:00
+date: 2026-05-15T20:00:00
 description: "concurrent.futures — ThreadPoolExecutor / ProcessPoolExecutor."
 series: "Fluent Python"
 seriesOrder: 20

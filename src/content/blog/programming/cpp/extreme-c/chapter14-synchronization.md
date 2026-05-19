@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Synchronization"
-date: 2025-06-15T14:00:00
+date: 2026-05-05T14:00:00
 description: "동기화 primitives — mutex / semaphore / condition variable. atomic 연산."
 tags: [C, Synchronization, Mutex, Atomic]
 series: "전문가를 위한 C"

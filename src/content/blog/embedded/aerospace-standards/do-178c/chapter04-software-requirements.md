@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Software Requirements (HLR — High-Level Requirements)"
-date: 2025-09-25T05:00:00
+date: 2026-05-18T05:00:00
 description: "System Requirements → HLR 파생, DOORS 활용, 7 attribute, derived requirement, requirement review의 전체 과정."
 tags: [do-178c, requirements, hlr, doors, polarion, traceability, derived]
 series: "DO-178C"

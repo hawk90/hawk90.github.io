@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Multi-Agent Systems"
-date: 2030-01-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Common knowledge·distributed belief — multi-agent reasoning."
 series: "Reasoning About Uncertainty"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Pin Mux와 Clock"
-date: 2026-05-20T04:00:00
+date: 2026-05-09T04:00:00
 description: "보드의 가장 보드-특화된 초기화 — pin 멀티플렉싱과 clock tree 설정."
 series: "BSP Development"
 seriesOrder: 4

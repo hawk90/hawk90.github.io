@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Interrupts — Legacy, MSI, MSI-X"
-date: 2026-06-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "PCIe 인터럽트 메커니즘 — Legacy INTx, MSI, MSI-X의 구조와 차이"
 series: "PCIe Deep Dive"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 7: Lambda Architecture"
-date: 2026-05-22T07:00:00
+date: 2026-05-06T07:00:00
 description: "배치 + 스트리밍 통합 — Hadoop/Storm/Spark. 정확성과 실시간성의 트레이드오프."
 series: "Seven Concurrency Models in Seven Weeks"
 seriesOrder: 7

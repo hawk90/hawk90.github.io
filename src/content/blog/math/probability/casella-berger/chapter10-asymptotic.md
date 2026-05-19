@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Asymptotic Evaluations"
-date: 2030-09-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Consistency·asymptotic normality·efficiency·bootstrap."
 series: "Statistical Inference"
 seriesOrder: 10

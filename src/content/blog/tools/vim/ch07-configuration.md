@@ -1,6 +1,6 @@
 ---
 title: "Vim 마스터하기: 설정 (vimrc)"
-date: 2026-05-13T07:00:00
+date: 2026-05-17T07:00:00
 description: "vimrc 설정, 키 매핑, 옵션 커스터마이징"
 series: "Vim 마스터하기"
 seriesOrder: 7

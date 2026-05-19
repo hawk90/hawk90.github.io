@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: 리눅스 EDAC — 에러 리포팅"
-date: 2026-08-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "리눅스 EDAC 서브시스템: 메모리 에러 감지, 리포팅, RAS 데몬"
 series: "DDR Memory Deep Dive"
 seriesOrder: 13

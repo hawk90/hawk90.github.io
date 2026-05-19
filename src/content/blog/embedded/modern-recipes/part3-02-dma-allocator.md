@@ -1,6 +1,6 @@
 ---
 title: "3-02: DMA-Friendly Allocator — dma_alloc_coherent·IOMMU·Pool"
-date: 2026-05-20T09:00:00
+date: 2026-05-07T09:00:00
 description: "DMA buffer 할당 패턴을 coherent와 streaming, CMA, IOMMU, MPU non-cacheable 영역으로 나눠 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 14

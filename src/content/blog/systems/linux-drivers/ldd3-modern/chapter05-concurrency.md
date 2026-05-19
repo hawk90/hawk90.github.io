@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Concurrency and Race Conditions"
-date: 2026-06-01T05:00:00
+date: 2026-05-13T05:00:00
 description: "Semaphore·mutex·spinlock·completion·atomic·RCU — 커널 동기화 도구의 한 장 정리."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 커널 디버깅 개론 — User/Kernel 경계"
-date: 2025-09-06T01:00:00
+date: 2026-05-17T01:00:00
 description: "user-space와 kernel-space 디버깅의 차이. /proc, kallsyms, kernel debug info."
 tags: [kernel, linux, debugging, proc]
 series: "Kernel Debugging"

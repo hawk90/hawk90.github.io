@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 사례 — Etnaviv·Panfrost"
-date: 2027-12-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "오픈소스 GPU 드라이버에서 배우는 NPU 드라이버 패턴."
 series: "NPU 드라이버 개발"
 seriesOrder: 12

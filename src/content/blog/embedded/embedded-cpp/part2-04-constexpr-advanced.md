@@ -1,6 +1,6 @@
 ---
 title: "Part 2-04: constexpr 고급"
-date: 2026-05-14T04:00:00
+date: 2026-05-07T04:00:00
 description: "컴파일 타임 sort, search, 문자열 — constexpr 알고리즘의 한계와 가능성."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 12

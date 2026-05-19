@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Adventures in Covariance"
-date: 2030-03-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "Varying slopes·covariance·Gaussian process·instrumental variable."
 series: "Statistical Rethinking"
 seriesOrder: 14

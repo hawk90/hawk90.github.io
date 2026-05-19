@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Programming Model — block·program_id"
-date: 2027-09-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Pid·tl.load·tl.store — Triton의 3가지 핵심."
 series: "Triton DSL"
 seriesOrder: 2

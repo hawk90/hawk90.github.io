@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Gaussian Network Models"
-date: 2030-11-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Gaussian Bayes net·Gaussian MRF·precision matrix."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 7

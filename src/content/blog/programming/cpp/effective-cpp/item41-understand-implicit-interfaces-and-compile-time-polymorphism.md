@@ -1,6 +1,6 @@
 ---
 title: "항목 41: 암묵 인터페이스와 컴파일 타임 다형성을 이해하라"
-date: 2025-02-02T17:00:00
+date: 2026-05-04T17:00:00
 description: "OOP의 명시 인터페이스 + 런타임 다형성 vs 템플릿의 암묵 인터페이스 + 컴파일 타임 다형성 — 두 모델의 트레이드오프."
 tags: [C++, Effective C++, Template, Polymorphism]
 series: "Effective C++"

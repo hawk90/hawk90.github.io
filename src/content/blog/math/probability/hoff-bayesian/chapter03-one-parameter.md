@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: One-Parameter Models"
-date: 2030-06-01T03:00:00
+date: 2026-05-15T03:00:00
 description: "Binomial·Poisson·exponential — 1-parameter Bayesian의 표준."
 series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 3

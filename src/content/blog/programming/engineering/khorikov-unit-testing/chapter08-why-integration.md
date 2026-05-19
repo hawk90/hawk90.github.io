@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Why Integration Testing?"
-date: 2025-10-15T08:00:00
+date: 2026-05-10T08:00:00
 description: "Integration test — managed dependencies 실제로. test pyramid 변형."
 tags: [Testing, Integration]
 series: "Khorikov Unit Testing"

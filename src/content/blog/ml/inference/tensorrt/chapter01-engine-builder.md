@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: TensorRT Engine Builder"
-date: 2028-06-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Network·BuilderConfig·Engine — TensorRT compile flow."
 series: "TensorRT 심화"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: Trees·Forests·Boosting"
-date: 2029-05-01T18:00:00
+date: 2026-05-16T18:00:00
 description: "Decision tree·random forest·XGBoost — tabular의 강자."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 18

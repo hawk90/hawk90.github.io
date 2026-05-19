@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: NPU 프로그래밍 모델 비교"
-date: 2028-01-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Graph·command stream·kernel — NPU를 다루는 길들."
 series: "NPU 아키텍처"
 seriesOrder: 10

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Single-Parameter Models"
-date: 2030-02-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Beta-Binomial·Normal·Poisson — 1-parameter Bayesian의 기본기."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 2

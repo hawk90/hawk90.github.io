@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Kconfig & Modules"
-date: 2025-05-14T08:00:00
+date: 2026-05-18T08:00:00
 description: "Kconfig 설정 시스템, 모듈 구조, module_init/exit, 라이선스 선언."
 tags: [Linux, Kernel, Kconfig, Modules, module_init]
 series: "Linux Kernel Coding Style"

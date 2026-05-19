@@ -1,6 +1,6 @@
 ---
 title: "Part 2-05: consteval과 constinit"
-date: 2026-05-14T05:00:00
+date: 2026-05-07T05:00:00
 description: "C++20의 컴파일 타임 강제 — consteval은 함수 호출을, constinit은 변수 초기화를 컴파일 타임에 강제합니다."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 13

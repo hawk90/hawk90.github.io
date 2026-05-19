@@ -1,6 +1,6 @@
 ---
 title: "항목 8: 0과 NULL보다 nullptr를 선호하라"
-date: 2025-01-05T08:00:00
+date: 2026-05-04T08:00:00
 description: "nullptr가 왜 안전하고, 0과 NULL은 어떤 미묘한 함정을 만드는지 — 오버로드와 템플릿."
 tags: [C++, nullptr, Modern C++]
 series: "Effective Modern C++"

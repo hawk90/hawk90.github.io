@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Sequential Data"
-date: 2029-07-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "Markov chain·HMM·LDS — sequence model 통합."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 13

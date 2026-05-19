@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 페리페럴 추가"
-date: 2025-09-15T08:00:00
+date: 2026-05-17T08:00:00
 description: "UART, SPI, I2C 등 페리페럴을 QEMU에 추가한다."
 tags: [QEMU, UART, SPI, I2C]
 series: "QEMU Embedded Emulation"

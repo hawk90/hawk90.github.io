@@ -1,6 +1,6 @@
 ---
 title: "Chapter 2: Mutual Exclusion"
-date: 2026-05-12T02:00:00
+date: 2026-05-06T02:00:00
 description: "상호 배제 문제와 해결책. Peterson, Filter, Bakery 알고리즘. 하한 증명과 불가능성 결과."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 2

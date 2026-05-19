@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Missing Data and Other Opportunities"
-date: 2030-03-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "Measurement error·imputation·dependencies — model을 확장."
 series: "Statistical Rethinking"
 seriesOrder: 15

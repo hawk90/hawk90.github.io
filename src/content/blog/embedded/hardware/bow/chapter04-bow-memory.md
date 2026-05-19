@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: BoW Memory — 직접 메모리 접근"
-date: 2027-02-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Memory-coherent extension — BoW의 메모리 풀링 모드."
 series: "BoW 개요"
 seriesOrder: 4

@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: End-to-End — Driver + RTL Co-sim"
-date: 2025-09-09T08:00:00
+date: 2026-05-17T08:00:00
 description: "Verilator + DPI-C + Linux driver — 통합 cosim flow."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 8

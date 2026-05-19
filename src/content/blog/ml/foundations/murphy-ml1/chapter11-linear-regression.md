@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Linear Regression"
-date: 2029-05-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "OLS·ridge·Bayesian linear regression — 가장 기본의 깊이."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 11

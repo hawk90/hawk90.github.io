@@ -1,6 +1,6 @@
 ---
 title: "2-06: Timer Wheel — Hashed·Hierarchical·O(1) Tick"
-date: 2026-05-20T07:00:00
+date: 2026-05-07T07:00:00
 description: "Timer wheel 자료구조. Hashed wheel·hierarchical wheel·O(1) tick·Linux jiffies."
 series: "Modern Embedded Recipes"
 seriesOrder: 12

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Intrinsics 프로그래밍"
-date: 2025-05-20T13:00:00
+date: 2026-05-17T13:00:00
 description: "RVV Intrinsics — rvv-intrinsics API, 컴파일러 지원을 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 9

@@ -1,6 +1,6 @@
 ---
 title: "항목 24: 보편 참조와 rvalue 참조를 구분하라"
-date: 2025-01-06T00:00:00
+date: 2026-05-04T00:00:00
 description: "T&&는 두 의미 — 정확한 식별 조건과 시각적 구분법."
 tags: [C++, Universal Reference, Rvalue Reference, Modern C++]
 series: "Effective Modern C++"

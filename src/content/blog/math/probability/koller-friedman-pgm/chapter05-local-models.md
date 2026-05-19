@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Local Probabilistic Models"
-date: 2030-11-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Tabular·tree-CPD·context-specific·noisy-OR·logistic."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Expressions & Statements"
-date: 2025-05-14T04:00:00
+date: 2026-05-18T04:00:00
 description: "공백 규칙, 연산자 우선순위, 비교문 스타일. None 비교, 예외 처리."
 tags: [Python, PEP8, Expressions, Statements, Operators]
 series: "Python Style Guide (PEP 8)"

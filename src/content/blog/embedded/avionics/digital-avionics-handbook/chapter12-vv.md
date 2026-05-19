@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Verification & Validation"
-date: 2026-05-25T12:00:00
+date: 2026-05-18T12:00:00
 description: "HIL·SIL·MIL·certification — avionics V&V의 전체 그림."
 series: "Digital Avionics Handbook"
 seriesOrder: 12

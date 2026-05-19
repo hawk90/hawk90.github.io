@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Sample Space and Probability"
-date: 2030-08-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Sample space·event·conditional·Bayes — MIT 학부 표준."
 series: "Introduction to Probability"
 seriesOrder: 1

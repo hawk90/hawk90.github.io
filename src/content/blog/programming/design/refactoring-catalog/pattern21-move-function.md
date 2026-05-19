@@ -1,6 +1,6 @@
 ---
 title: "Pattern 21: Move Function"
-date: 2026-06-01T21:00:00
+date: 2026-05-02T21:00:00
 description: "함수를 자기가 속해야 할 모듈로 옮긴다 — feature envy 해소의 핵심."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 21

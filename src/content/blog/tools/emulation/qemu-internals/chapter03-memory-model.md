@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 메모리 모델"
-date: 2025-10-01T03:00:00
+date: 2026-05-17T03:00:00
 description: "MemoryRegion과 AddressSpace로 QEMU의 메모리 시스템을 이해한다."
 tags: [QEMU, Memory, AddressSpace]
 series: "QEMU Internals"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Modern Advanced — target_* 패밀리, BUILD/INSTALL_INTERFACE, CMakePresets, cmake -E"
-date: 2025-05-14T09:00:00
+date: 2026-05-17T09:00:00
 description: "Modern CMake의 고급 도구 모음 — 자주 안 보이지만 실무에서 결정적인 기능들."
 tags: [cmake, build, cpp, advanced, presets]
 series: "CMake"

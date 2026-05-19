@@ -1,6 +1,6 @@
 ---
 title: "Pattern 46: Migrate Data"
-date: 2026-07-02T22:00:00
+date: 2026-05-10T22:00:00
 description: "Data representation 변경 — 양쪽 유지하며 점진적 이전. Expand-Migrate-Contract."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 46

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Advanced thread management"
-date: 2026-05-20T09:00:00
+date: 2026-05-06T09:00:00
 description: "thread pool, work stealing, interruption (cooperative), 스레드 친밀성."
 tags: [C++, C, Concurrency, Thread Pool, Work Stealing]
 series: "C++ Concurrency in Action"

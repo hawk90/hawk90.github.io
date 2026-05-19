@@ -1,6 +1,6 @@
 ---
 title: "DSA 11: 스레드 이진 트리 + 표현식 트리"
-date: 2026-03-01T11:00:00
+date: 2026-05-15T11:00:00
 description: "null 포인터를 inorder의 다음 노드로 활용 — 스레드 트리. 표현식 트리로 수식 평가."
 tags: [Data Structure, Algorithm, Threaded Tree, Expression Tree]
 series: "Data Structures and Algorithms"

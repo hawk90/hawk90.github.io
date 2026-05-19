@@ -1,6 +1,6 @@
 ---
 title: "Ch 4 Words: K–N"
-date: 2026-05-15T05:00:00
+date: 2026-05-14T05:00:00
 description: "자주 오용되는 단어와 표현 — Kind of부터 Nor까지."
 series: "The Elements of Style"
 seriesOrder: 29
@@ -8,14 +8,13 @@ tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 ## K–L
 
 ### Kind of / Sort of
 
-회화에서 *rather*, *something like*의 의미로 *쓰지 마세요*. 격식 글에서는 *본래 의미*로만.
+회화에서 *rather*, *something like*의 의미로 쓰지 마세요. 격식 글에서는 본래 의미로만 씁니다.
 
 ```
 회피 (회화 / 격식 글에 부적합):
@@ -35,7 +34,7 @@ draft: true
 
 ### Lay / Lie
 
-*가장 자주 혼동되는* 동사. 한국 학습자뿐 아니라 *영어 native*도 자주 틀림.
+가장 자주 혼동되는 동사입니다. 한국 학습자뿐 아니라 영어 native도 자주 틀립니다.
 
 ```
 LAY (놓다, 타동사):
@@ -67,11 +66,11 @@ LIE (거짓말, 자동사) — 또 다른 lie:
 "I have lain there for hours." (완료)
 ```
 
-이 *시제 패턴*이 *영어 학습자가 가장 자주 틀리는* 자리.
+이 시제 패턴이 영어 학습자가 가장 자주 틀리는 자리입니다.
 
 ### Leave / Let
 
-*Leave it stand* → *Let it stand*. `Let go`는 표준.
+*Leave it stand*는 *Let it stand*로 씁니다. `Let go`는 표준입니다.
 
 ```
 회피: "Leave him do it."
@@ -118,7 +117,7 @@ Less + 양 / 셀 수 없는 것:
 
 ### Like
 
-*접속사가 아니라 전치사*. *명사·대명사 앞*에서만 씁니다. *절이나 구*를 이끌 때는 *as*.
+`Like`는 접속사가 아니라 전치사입니다. 명사·대명사 앞에서만 씁니다. 절이나 구를 이끌 때는 `as`를 씁니다.
 
 ```
 회피:
@@ -140,11 +139,11 @@ Less + 양 / 셀 수 없는 것:
 "Do as I say."
 ```
 
-이 *Like vs. As* 구분은 *Strunk-White 정통*. 현대 영어 회화에서는 *like*가 양쪽에 쓰이지만 격식 글에서는 *지킵니다*.
+이 Like vs. As 구분은 Strunk-White 정통입니다. 현대 영어 회화에서는 *like*가 양쪽에 쓰이지만 격식 글에서는 지킵니다.
 
 ### Literal / Literally
 
-*과장이나 비유의 강조*로 쓰지 마세요. 단어의 *원래 의미*는 *문자 그대로*입니다.
+과장이나 비유의 강조로 쓰지 마세요. 단어의 원래 의미는 "문자 그대로"입니다.
 
 ```
 회피 (잘못된 강조):
@@ -164,11 +163,11 @@ Less + 양 / 셀 수 없는 것:
    ← 실제로 떨어졌다 (비유 아님)
 ```
 
-*Literally*를 *figuratively*의 강조로 쓰는 것은 *역설적*. 영어 native도 자주 혼동.
+*Literally*를 *figuratively*의 강조로 쓰는 것은 역설적입니다. 영어 native도 자주 혼동합니다.
 
 ### Lots / A lot of
 
-*많음*의 회화 표현. 격식 글에서는 *many*, *much*, *several*.
+"많음"의 회화 표현입니다. 격식 글에서는 *many*, *much*, *several*을 씁니다.
 
 ```
 회피 (격식): "Lots of people attended."
@@ -194,7 +193,7 @@ Many + 복수 명사 + 복수 동사:
 
 ### Meaningful
 
-*빈 형용사*입니다. *다른 단어*로 대체하거나 문장을 *다시 씁니다*.
+빈 형용사입니다. 다른 단어로 대체하거나 문장을 다시 씁니다.
 
 ```
 회피:
@@ -208,7 +207,7 @@ Many + 복수 명사 + 복수 동사:
 "We discussed important topics."
 ```
 
-*Meaningful*은 *비즈니스 영어의 진부어*. 의미가 *흐릿*합니다.
+*Meaningful*은 비즈니스 영어의 진부어입니다. 의미가 흐릿합니다.
 
 ### Memento
 
@@ -227,7 +226,7 @@ momento ← 없음. 잘못된 철자.
 
 ### Most
 
-*Almost*의 의미로 *형식적 글에 쓰지 마세요*.
+*Almost*의 의미로 형식적 글에 쓰지 마세요.
 
 ```
 회피 (회화):
@@ -245,7 +244,7 @@ momento ← 없음. 잘못된 철자.
 
 ### Myself
 
-*I*나 *me* 대신 쓰지 마세요. 강조나 재귀 의미가 있을 때만.
+*I*나 *me* 대신 쓰지 마세요. 강조나 재귀 의미가 있을 때만 씁니다.
 
 ```
 회피:
@@ -261,11 +260,11 @@ momento ← 없음. 잘못된 철자.
 "I cut myself." (재귀)
 ```
 
-*Myself*를 *I*나 *me* 자리에 쓰면 *과잉 격식*으로 들립니다.
+*Myself*를 *I*나 *me* 자리에 쓰면 과잉 격식으로 들립니다.
 
 ### Nature
 
-`Character`처럼 *군더더기*로 자주 쓰입니다.
+`Character`처럼 군더더기로 자주 쓰입니다.
 
 ```
 회피                            선호
@@ -274,7 +273,7 @@ things of a similar nature →   similar things
 decisions of a routine nature → routine decisions
 ```
 
-`Lover of nature`, `poems about nature`처럼 *모호한 표현*도 피합니다. *어떤 자연*인지 *구체적*으로.
+`Lover of nature`, `poems about nature`처럼 모호한 표현도 피합니다. 어떤 자연인지 구체적으로 씁니다.
 
 ```
 회피 (모호):
@@ -301,11 +300,11 @@ Nauseated → 메스꺼움을 *느끼는*
 "I feel nauseated."
 ```
 
-현대 회화에서는 *nauseous = 메스꺼움 느끼는*이 흔하지만, *격식 글*에서는 *구분*합니다.
+현대 회화에서는 *nauseous*가 "메스꺼움 느끼는" 뜻으로 흔하지만, 격식 글에서는 구분합니다.
 
 ### Nice
 
-*모든 의미를 흐릿하게* 만드는 *닳은 단어*입니다. 형식적 글에서는 *precise, delicate*의 의미일 때만 명확.
+모든 의미를 흐릿하게 만드는 닳은 단어입니다. 형식적 글에서는 *precise*, *delicate*의 의미일 때만 명확합니다.
 
 ```
 회피 (모호):
@@ -327,7 +326,7 @@ Nauseated → 메스꺼움을 *느끼는*
 
 ### Nor
 
-*부정문 뒤의 or 자리*에 *잘못 쓰지 마세요*. `Nor`은 *neither ... nor*의 쌍에서만, 또는 *독립된 부정절*을 이끌 때만.
+부정문 뒤의 *or* 자리에 잘못 쓰지 마세요. `Nor`은 *neither ... nor*의 쌍에서만, 또는 독립된 부정절을 이끌 때만 씁니다.
 
 ```
 회피:

@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 커스텀 디바이스 추가"
-date: 2025-05-20T02:00:00
+date: 2026-05-17T02:00:00
 description: "QEMU 커스텀 디바이스 — MMIO 디바이스 구현을 다룬다."
 series: "RISC-V QEMU 심화"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "Rule 5: Change One Thing at a Time"
-date: 2031-01-01T05:00:00
+date: 2026-05-17T05:00:00
 description: "한 번에 한 변수만 — 인과를 끊지 않기."
 series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 5

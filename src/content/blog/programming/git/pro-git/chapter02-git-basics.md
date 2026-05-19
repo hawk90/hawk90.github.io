@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Git Basics"
-date: 2025-08-01T02:00:00
+date: 2026-05-17T02:00:00
 description: "기본 워크플로우 — status / add / commit / log / diff / remote / tag."
 tags: [Git, Basics]
 series: "Pro Git"

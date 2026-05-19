@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: CERT C란 무엇이고 MISRA와 어떻게 다른가"
-date: 2025-09-10T02:00:00
+date: 2026-05-18T02:00:00
 description: "SEI CERT의 배경, 보안 중심 철학, MISRA와의 비교, Risk Assessment Framework."
 tags: [cert-c, security, sei, cwe, risk-assessment]
 series: "CERT C"

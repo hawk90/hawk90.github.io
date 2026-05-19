@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 호환성과 opset 버전"
-date: 2028-03-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "opset bumping·deprecation·domain — ONNX 버전 관리."
 series: "ONNX 실전"
 seriesOrder: 7

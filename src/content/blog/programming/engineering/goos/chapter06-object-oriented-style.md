@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Object-Oriented Style"
-date: 2025-10-10T06:00:00
+date: 2026-05-10T06:00:00
 description: "Steve & Nat의 OO 스타일 — 작은 객체, 명확한 역할, 한 곳의 진실."
 tags: [OO, Style, Roles]
 series: "Growing Object-Oriented Software"

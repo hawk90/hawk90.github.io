@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 메모리 맵과 디바이스 트리"
-date: 2025-05-18T22:00:00
+date: 2026-05-17T22:00:00
 description: "RISC-V 메모리 맵 — 주소 공간 레이아웃, DTB 전달, FDT 파싱을 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 4

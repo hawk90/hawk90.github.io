@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: DMA 버퍼 처리"
-date: 2025-09-01T07:00:00
+date: 2026-05-17T07:00:00
 description: "QEMU 디바이스에서 DMA를 통해 게스트 메모리에 접근한다."
 tags: [QEMU, DMA, Memory]
 series: "QEMU Fake Device Driver"

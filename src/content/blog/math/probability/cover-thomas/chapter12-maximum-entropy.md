@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Maximum Entropy"
-date: 2029-01-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "제약 하에서 가장 'unbiased' 분포 — exponential family의 자연 출생지."
 series: "Elements of Information Theory"
 seriesOrder: 12

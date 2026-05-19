@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 고급 시나리오 — 에러 주입, 경쟁 조건"
-date: 2025-09-01T11:00:00
+date: 2026-05-17T11:00:00
 description: "에러 주입과 경쟁 조건 테스트로 드라이버 견고성을 검증한다."
 tags: [QEMU, Testing, ErrorInjection]
 series: "QEMU Fake Device Driver"

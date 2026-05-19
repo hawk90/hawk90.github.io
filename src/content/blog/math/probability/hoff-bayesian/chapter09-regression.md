@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Linear Regression"
-date: 2030-06-01T09:00:00
+date: 2026-05-15T09:00:00
 description: "Bayesian linear regression — conjugate·Gibbs·model selection."
 series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 9

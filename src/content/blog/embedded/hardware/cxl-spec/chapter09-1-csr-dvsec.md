@@ -1,6 +1,6 @@
 ---
 title: "Ch 9.1: CSR·DVSEC·Component Register"
-date: 2026-01-01T22:00:00
+date: 2026-05-16T22:00:00
 description: "스펙 §8 — PCIe config·DVSEC·CXL Component Register."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 22

@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Message Passing"
-date: 2029-02-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Belief propagation·factor graph — 추론의 보편 도구."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 7

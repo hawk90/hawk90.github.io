@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 재현성 패턴"
-date: 2028-09-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Transform·repeatable split·bridged schema — 같은 실험을 다시."
 series: "ML 디자인 패턴"
 seriesOrder: 6

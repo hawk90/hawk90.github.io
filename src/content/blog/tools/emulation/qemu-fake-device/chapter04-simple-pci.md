@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 간단한 PCI 디바이스 만들기"
-date: 2025-09-01T04:00:00
+date: 2026-05-17T04:00:00
 description: "QEMU에서 간단한 PCI 디바이스를 만들고 게스트에서 인식시킨다."
 tags: [QEMU, PCI, DeviceModel]
 series: "QEMU Fake Device Driver"

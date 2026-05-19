@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: unittest stdlib과 pytest 공존"
-date: 2026-05-22T03:00:00
+date: 2026-05-10T03:00:00
 description: "기존 unittest 코드를 pytest로 그대로 돌리기 + 단계적 마이그레이션."
 series: "pytest 심화"
 seriesOrder: 3

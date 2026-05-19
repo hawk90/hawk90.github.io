@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 메모리 계층과 대역폭 병목"
-date: 2028-01-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "NPU 성능의 99%는 메모리 — tier별 설계 결정."
 series: "NPU 아키텍처"
 seriesOrder: 7

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: ASan + UBSan 실전 설정"
-date: 2026-05-15T02:00:00
+date: 2026-05-17T02:00:00
 description: "황금 조합 -fsanitize=address,undefined를 실제로 켜고 운영하는 자세한 방법 — 옵션, 환경 변수, suppression, 흔한 오탐."
 tags: [Sanitizer, ASan, UBSan, Debugging, C, C++]
 series: "Sanitizers"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: The Quantitative Rules"
-date: 2029-04-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Cox의 정리 — product rule과 sum rule이 유일하다."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 2

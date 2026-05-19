@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 19: 어떻게 하는가의 격리에 Strategy를 사용하라"
-date: 2026-05-13T19:00:00
+date: 2026-05-02T19:00:00
 description: "Strategy 패턴은 알고리즘을 갈아 끼울 수 있게 만든다. 가상 함수, 함수 포인터, std::function, 템플릿의 네 가지 구현."
 tags: [C++, Software Design, Strategy, Design Patterns]
 series: "C++ Software Design"

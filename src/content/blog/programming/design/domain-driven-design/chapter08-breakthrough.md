@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Breakthrough"
-date: 2025-10-01T08:00:00
+date: 2026-05-01T08:00:00
 description: "모델 통찰의 순간. 점진적 진화 → 갑작스러운 도약."
 tags: [DDD, Breakthrough, Refactoring]
 series: "Domain-Driven Design"

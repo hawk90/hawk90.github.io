@@ -1,6 +1,6 @@
 ---
 title: "Pattern 19: Remove Middle Man"
-date: 2026-06-01T19:00:00
+date: 2026-05-02T19:00:00
 description: "Delegate가 너무 많아지면 중개자를 제거 — Hide Delegate의 역연산."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 19

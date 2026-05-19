@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: MLIR의 위치 — LLVM·SPIR-V·HLO와 비교"
-date: 2027-07-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "왜 LLVM IR 위에 또 다른 IR이 필요한가."
 series: "MLIR 심화"
 seriesOrder: 1

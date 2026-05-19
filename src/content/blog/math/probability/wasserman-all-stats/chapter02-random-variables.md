@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Random Variables"
-date: 2029-03-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "CDF·PDF·PMF·transform — 확률변수 일주."
 series: "All of Statistics"
 seriesOrder: 2

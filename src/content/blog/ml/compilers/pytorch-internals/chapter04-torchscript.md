@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: TorchScript"
-date: 2027-10-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "Trace·script·graph — torch.jit의 두 가지 길."
 series: "PyTorch Internals"
 seriesOrder: 4

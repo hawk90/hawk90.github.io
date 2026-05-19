@@ -1,6 +1,6 @@
 ---
 title: "Pattern 20: Substitute Algorithm"
-date: 2026-06-01T20:00:00
+date: 2026-05-02T20:00:00
 description: "알고리즘 자체를 더 명확하거나 효율적인 것으로 교체."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 20

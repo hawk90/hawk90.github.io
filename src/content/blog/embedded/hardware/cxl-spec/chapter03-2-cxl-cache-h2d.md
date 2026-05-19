@@ -1,6 +1,6 @@
 ---
 title: "Ch 3.2: CXL.cache — H2D Snoop·Response·Data"
-date: 2026-01-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "스펙 §3 cache — Host-to-Device channels."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 6

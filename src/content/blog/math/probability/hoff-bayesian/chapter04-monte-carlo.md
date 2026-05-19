@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Monte Carlo Approximation"
-date: 2030-06-01T04:00:00
+date: 2026-05-15T04:00:00
 description: "Direct·importance·rejection — sampling 기초."
 series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 4

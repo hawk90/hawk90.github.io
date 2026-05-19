@@ -1,6 +1,6 @@
 ---
 title: "Pattern 54: Push Down Method"
-date: 2026-06-03T06:00:00
+date: 2026-05-02T06:00:00
 description: "Superclass method가 일부 subclass에만 의미 있다면 — 해당 subclass로 내려보낸다."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 54

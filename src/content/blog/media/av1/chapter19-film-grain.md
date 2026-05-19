@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: Film Grain"
-date: 2025-10-01T20:00:00
+date: 2026-05-16T20:00:00
 description: "AV1의 Film Grain Synthesis — AR 모델, 그레인 템플릿, 스케일링 곡선."
 tags: [AV1, Video, Codec, Film Grain, Synthesis]
 series: "AV1"

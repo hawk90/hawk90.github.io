@@ -1,6 +1,6 @@
 ---
 title: "Ch 32: Representation Learning"
-date: 2029-06-02T08:00:00
+date: 2026-05-16T08:00:00
 description: "Self-supervised·contrastive·masked·foundation embedding."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 32

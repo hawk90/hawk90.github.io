@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: torch.compile 사용 패턴"
-date: 2027-10-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Mode·backend·dynamic — torch.compile을 잘 쓰는 법."
 series: "PyTorch Internals"
 seriesOrder: 8

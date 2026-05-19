@@ -1,6 +1,6 @@
 ---
 title: "항목 2: Abseil 코드 리뷰 가이드 — Google 스타일 코드 리뷰"
-date: 2025-05-13T02:00:00
+date: 2026-05-18T02:00:00
 description: "Google/Abseil의 코드 리뷰 철학과 실전 가이드라인을 배웁니다."
 tags: [C++, Abseil, Code Review, Best Practices]
 series: "Abseil C++ 라이브러리"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: Learning with Fewer Labeled Examples"
-date: 2029-05-01T19:00:00
+date: 2026-05-16T19:00:00
 description: "Semi-supervised·active·weak·self-supervised — label 부족 시 모든 길."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 19

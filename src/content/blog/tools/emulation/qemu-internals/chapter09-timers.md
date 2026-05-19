@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 타이머와 클럭"
-date: 2025-10-01T09:00:00
+date: 2026-05-17T09:00:00
 description: "QEMU의 시간 관리, RTC, 타이머 구현을 이해한다."
 tags: [QEMU, Timer, Clock, RTC]
 series: "QEMU Internals"

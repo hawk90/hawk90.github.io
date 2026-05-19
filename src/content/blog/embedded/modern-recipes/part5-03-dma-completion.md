@@ -1,6 +1,6 @@
 ---
 title: "5-03: DMA Completion — Interrupt·Polling·Completion Ring 골라 쓰기"
-date: 2026-05-20T21:00:00
+date: 2026-05-07T21:00:00
 description: "DMA가 끝났음을 알려주는 세 가지 방식을 비교합니다. Interrupt, polling, completion ring과 IRQ coalescing의 trade-off를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 27

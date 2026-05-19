@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Hierarchical and Empirical Bayes·Stein Effect"
-date: 2030-04-01T10:00:00
+date: 2026-05-15T10:00:00
 description: "Shrinkage·hyperprior·empirical Bayes — Stein paradox 해석."
 series: "The Bayesian Choice"
 seriesOrder: 10

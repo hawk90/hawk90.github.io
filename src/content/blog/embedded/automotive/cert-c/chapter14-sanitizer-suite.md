@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Sanitizer 종합 — ASan, MSan, TSan, UBSan, HWASan, LSan"
-date: 2025-09-10T15:00:00
+date: 2026-05-18T15:00:00
 description: "런타임 메모리·동시성·UB 검출 도구 5종 비교, 정밀 조합 가이드, production safe mode, 임베디드 적용."
 tags: [cert-c, sanitizer, asan, msan, tsan, ubsan, hwasan, lsan, runtime]
 series: "CERT C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 설계 — Software Architecture·Partitioning·Coupling"
-date: 2026-05-26T05:00:00
+date: 2026-05-18T05:00:00
 description: "DO-178C design process. SW architecture, ARINC-653 partitioning, coupling·cohesion."
 series: "Developing Safety-Critical Software"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 네트워크 레이어"
-date: 2025-10-01T06:00:00
+date: 2026-05-17T06:00:00
 description: "QEMU NIC 에뮬레이션과 네트워크 백엔드를 이해한다."
 tags: [QEMU, Network, NIC]
 series: "QEMU Internals"

@@ -1,6 +1,6 @@
 ---
 title: "6-08: TF-M·TrustZone — Cortex-M33 Secure Firmware·PSA·MCUboot"
-date: 2026-05-21T08:00:00
+date: 2026-05-07T08:00:00
 description: "Cortex-M33+ TrustZone-M 위에 TF-M으로 secure firmware를 구성하는 패턴. SPE/NSPE, PSA Crypto/ITS/Attestation, MCUboot secure boot를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 38

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: Environment + Language Compliance"
-date: 2025-09-30T03:00:00
+date: 2026-05-18T03:00:00
 description: "JSF C++ — 함수 크기 한계, cyclomatic complexity, ISO C++03 준수, 컴파일러 확장 회피."
 tags: [jsf-cpp, environment, language, iso-14882, complexity, function-size]
 series: "JSF C++"

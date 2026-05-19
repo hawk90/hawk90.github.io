@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Network Information Theory"
-date: 2029-01-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "Multi-user channel — multiple access·broadcast·relay."
 series: "Elements of Information Theory"
 seriesOrder: 15

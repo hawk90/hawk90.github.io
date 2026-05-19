@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 함수"
-date: 2025-05-14T05:00:00
+date: 2026-05-17T05:00:00
 description: "내장 함수로 텍스트·파일·조건을 다루기 — wildcard / patsubst / filter / shell / foreach / call / eval."
 tags: [make, build, Makefile, functions]
 series: "GNU Make"

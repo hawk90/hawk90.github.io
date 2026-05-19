@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Memory Consistency Motivation and Sequential Consistency"
-date: 2026-09-01T03:00:00
+date: 2026-05-19T03:00:00
 description: "Lamport의 SC — 가장 단순하고 가장 비싼 일관성 모델."
 series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 3

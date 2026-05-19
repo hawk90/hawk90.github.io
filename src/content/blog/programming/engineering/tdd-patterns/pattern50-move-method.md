@@ -1,6 +1,6 @@
 ---
 title: "Pattern 50: Move Method"
-date: 2026-07-03T02:00:00
+date: 2026-05-10T02:00:00
 description: "Method가 다른 class에서 더 잘 살면 — 이사. Feature Envy 해소."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 50

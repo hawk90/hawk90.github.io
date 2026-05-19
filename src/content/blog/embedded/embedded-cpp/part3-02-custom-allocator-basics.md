@@ -1,6 +1,6 @@
 ---
 title: "Part 3-02: Custom Allocator 기초"
-date: 2026-05-15T02:00:00
+date: 2026-05-07T02:00:00
 description: "STL allocator interface — 표준 컨테이너의 메모리 출처를 제어."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 20

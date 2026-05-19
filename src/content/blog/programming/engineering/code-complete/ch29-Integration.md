@@ -1,6 +1,6 @@
 ---
 title: "Chapter 29: Integration"
-date: 2025-06-21T05:00:00
+date: 2026-05-11T05:00:00
 description: "통합 — 부분을 모아 전체로. 점진적 통합이 빅뱅 통합보다 우월. CI/CD의 본질."
 series: "Code Complete"
 seriesOrder: 29

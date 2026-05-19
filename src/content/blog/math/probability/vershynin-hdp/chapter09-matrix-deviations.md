@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Deviations of Random Matrices and Geometric Consequences"
-date: 2030-10-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Random matrix concentration·random projection geometric impact."
 series: "High-Dimensional Probability"
 seriesOrder: 9

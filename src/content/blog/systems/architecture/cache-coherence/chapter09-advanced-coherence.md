@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Advanced Topics in Coherence"
-date: 2026-09-01T09:00:00
+date: 2026-05-19T09:00:00
 description: "Hierarchical·token·DRAM cache·TLB shootdown — 현대 시스템의 변형들."
 series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 9

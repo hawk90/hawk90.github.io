@@ -1,6 +1,6 @@
 ---
 title: "Pattern 57: Remove Subclass"
-date: 2026-06-03T09:00:00
+date: 2026-05-02T09:00:00
 description: "Subclass가 더 이상 가치 없을 때 — 제거하고 type field로 단순화."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 57

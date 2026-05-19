@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Statistical Decision Theory"
-date: 2029-03-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Loss·risk·minimax·admissibility — 추정·예측의 통합 framework."
 series: "All of Statistics"
 seriesOrder: 12

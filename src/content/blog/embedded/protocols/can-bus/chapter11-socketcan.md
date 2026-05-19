@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Linux SocketCAN — BSD Socket으로 CAN 다루기"
-date: 2027-04-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "AF_CAN socket — Raw·BCM·ISO-TP·J1939 4 종류. can-utils + vcan으로 PC에서도 시험."
 series: "CAN Bus 심화"
 seriesOrder: 11

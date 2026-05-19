@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Parameterized tests"
-date: 2026-05-21T07:00:00
+date: 2026-05-10T07:00:00
 description: "TEST_P, INSTANTIATE_TEST_SUITE_P — 같은 로직을 다른 입력으로 자동 반복."
 series: "gtest 심화"
 seriesOrder: 7

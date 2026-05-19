@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: 인터럽트"
-date: 2025-05-18T14:00:00
+date: 2026-05-17T14:00:00
 description: "RISC-V 인터럽트 — 외부/타이머/소프트웨어 인터럽트, mie/mip, PLIC/CLINT를 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 14

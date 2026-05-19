@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Rules 21~22 — 표준 라이브러리, 동적 메모리, 자원"
-date: 2025-09-05T10:00:00
+date: 2026-05-18T10:00:00
 description: "stdlib·string·signal·setjmp 금지(R21), 파일·자원 lifetime(R22), 정적 풀 패턴 — 임베디드 안전성의 마지막 방어선."
 tags: [misra, c, stdlib, malloc, signal, setjmp, resource]
 series: "MISRA C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: Loop Restoration"
-date: 2025-10-01T19:00:00
+date: 2026-05-16T19:00:00
 description: "AV1의 Loop Restoration — Wiener 필터, SGRPROJ(Self-Guided Restoration), RU 단위 처리."
 tags: [AV1, Video, Codec, Loop Restoration, Wiener, SGRPROJ]
 series: "AV1"

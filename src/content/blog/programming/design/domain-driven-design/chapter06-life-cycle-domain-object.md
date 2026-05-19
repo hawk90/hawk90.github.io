@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: The Life Cycle of a Domain Object"
-date: 2025-10-01T06:00:00
+date: 2026-05-01T06:00:00
 description: "Aggregate / Factory / Repository — 객체 라이프사이클 관리."
 tags: [DDD, Aggregate, Factory, Repository]
 series: "Domain-Driven Design"

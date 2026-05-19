@@ -1,6 +1,6 @@
 ---
 title: "Pattern 55: Push Down Field"
-date: 2026-06-03T07:00:00
+date: 2026-05-02T07:00:00
 description: "Superclass field가 일부 subclass에만 — 해당 subclass로 내려보낸다."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 55

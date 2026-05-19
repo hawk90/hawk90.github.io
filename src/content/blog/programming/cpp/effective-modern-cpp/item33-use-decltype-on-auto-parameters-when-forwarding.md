@@ -1,6 +1,6 @@
 ---
 title: "항목 33: auto&& 매개변수에 std::forward를 쓸 때는 decltype을 사용하라"
-date: 2025-01-06T09:00:00
+date: 2026-05-04T09:00:00
 description: "제네릭 람다에서 카테고리 보존 forwarding의 정확한 패턴 — decltype 함정 포함."
 tags: [C++, Lambda, Generic Lambda, Perfect Forwarding, Modern C++]
 series: "Effective Modern C++"

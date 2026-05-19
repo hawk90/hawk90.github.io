@@ -1,6 +1,6 @@
 ---
 title: "Ch 27: Discovery Methods — Overview"
-date: 2029-06-02T03:00:00
+date: 2026-05-16T03:00:00
 description: "Latent·state·graph·representation — unsupervised discovery 지도."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 27

@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: 동시성"
-date: 2025-06-15T13:00:00
+date: 2026-05-11T13:00:00
 description: "동시성은 직관을 깬다. 분리, 캡슐화, 적은 임계 영역. Producer-Consumer, Readers-Writers 같은 표준 패턴."
 tags: [CleanCode, Concurrency, Robert Martin]
 series: "Clean Code"

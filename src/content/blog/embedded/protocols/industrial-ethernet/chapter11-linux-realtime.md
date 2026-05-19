@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 리눅스 실시간 — PREEMPT_RT·EtherCAT"
-date: 2027-06-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Linux 위에서 산업 이더넷 master를 돌리려면."
 series: "Industrial Ethernet 심화"
 seriesOrder: 11

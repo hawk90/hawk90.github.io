@@ -1,6 +1,6 @@
 ---
 title: "항목 52: placement new를 작성하면 placement delete도 작성하라"
-date: 2025-02-03T04:00:00
+date: 2026-05-04T04:00:00
 description: "생성자 throw 시 컴파일러가 매칭 placement delete를 자동 호출 — 없으면 메모리 누수. 짝 맞춤 규칙."
 tags: [C++, Effective C++, new, delete, Placement]
 series: "Effective C++"

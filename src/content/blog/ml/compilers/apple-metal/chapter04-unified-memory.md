@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Unified Memory와 Storage Mode"
-date: 2027-11-01T04:00:00
+date: 2026-05-16T04:00:00
 description: "CPU·GPU·ANE가 같은 물리 메모리를 공유한다."
 series: "Apple Metal Stack"
 seriesOrder: 4

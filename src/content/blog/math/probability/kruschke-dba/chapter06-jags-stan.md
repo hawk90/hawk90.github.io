@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: JAGS·Stan Workflow"
-date: 2030-05-01T06:00:00
+date: 2026-05-15T06:00:00
 description: "Bayesian computation tool — JAGS·Stan·rstanarm 사용법."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 6

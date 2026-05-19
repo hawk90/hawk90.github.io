@@ -1,6 +1,6 @@
 ---
 title: "Ch 26: Generative Adversarial Networks"
-date: 2029-06-02T02:00:00
+date: 2026-05-16T02:00:00
 description: "Generator·discriminator·Wasserstein·mode collapse."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 26

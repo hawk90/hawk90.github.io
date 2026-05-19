@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: tosa·stablehlo — Frontend Dialect"
-date: 2027-07-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Framework가 토하는 IR — TOSA·StableHLO 비교."
 series: "MLIR 심화"
 seriesOrder: 7

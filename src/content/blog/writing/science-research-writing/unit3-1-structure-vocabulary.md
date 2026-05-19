@@ -1,6 +1,6 @@
 ---
 title: "Unit 3.1: Results의 구조와 어휘"
-date: 2026-05-19T06:00:00
+date: 2026-05-14T06:00:00
 description: "Results 섹션의 표준 구조 — 발견의 보고와 시각 자료. 핵심 동사와 표·그림 참조 패턴."
 series: "Science Research Writing"
 seriesOrder: 31
@@ -8,20 +8,19 @@ tags: [writing, academic, results, figures, tables]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: true
 ---
 
-Results는 *모래시계의 좁은 끝*입니다. 발견 자체에 집중하고 해석은 *Discussion*으로 미룹니다. 이 글은 Results의 구조와 어휘를 다룹니다.
+Results는 모래시계의 좁은 끝입니다. 발견 자체에 집중하고 해석은 Discussion으로 미룹니다. 이 글은 Results의 구조와 어휘를 다룹니다.
 
 ## Results의 목적
 
 ```
 1. 발견을 명확히 보고
 2. 표·그림으로 데이터를 시각화
-3. 해석은 *최소*로 (Discussion 영역)
+3. 해석은 최소로 (Discussion의 영역)
 ```
 
-Results는 *객관적 보고*입니다. 해석과 의견은 다음 섹션에서 다룹니다.
+Results는 객관적 보고의 자리입니다. 해석과 의견은 다음 섹션에서 다룹니다.
 
 ## 표준 구조
 
@@ -79,11 +78,11 @@ The yield increased with temperature (Figure 1).
 The difference was significant (Table 2, p < 0.001).
 ```
 
-같은 단락에 *형태를 섞어* 단조로움을 피합니다.
+같은 단락에 형태를 섞어 단조로움을 피합니다.
 
 ## Vocabulary — Sequence (순서)
 
-Results에서 사건의 *순서*를 표현하는 어휘입니다.
+Results에서 사건의 순서를 표현하는 어휘입니다.
 
 ### 단계 순서
 
@@ -182,7 +181,7 @@ Compared to A, B is ...
 
 ## Vocabulary — Causality (인과)
 
-Results에서 *상관*과 *인과*를 구분하는 것이 중요합니다.
+Results에서 상관과 인과를 구분하는 것이 중요합니다.
 
 ### 약한 표현 (상관)
 
@@ -213,7 +212,7 @@ A contributes to B
 A is partially responsible for B
 ```
 
-자기 데이터가 *상관*만 보였다면 *causes*가 아니라 *is associated with*를 씁니다.
+자기 데이터가 상관만 보였다면 *causes*가 아니라 *is associated with*를 씁니다.
 
 ## Build a Model — Results Template
 
@@ -278,7 +277,7 @@ the runtime was [value]
 the F1 score reached ...
 ```
 
-자기 분야 모범 논문에서 *Results에 자주 등장하는 20-30개 동사*를 정리합니다.
+자기 분야 모범 논문에서 Results에 자주 등장하는 동사 20-30개를 정리합니다.
 
 ## 통계 표기 형식
 
@@ -318,7 +317,7 @@ The data may suggest that ...
 The results appear to indicate that ...
 ```
 
-자기 데이터의 *결정성*에 맞춰 동사를 선택합니다.
+자기 데이터의 결정성에 맞춰 동사를 선택합니다.
 
 ## 함정
 
@@ -341,11 +340,11 @@ The results appear to indicate that ...
        see Table 1 for details).
 ```
 
-표가 모든 숫자를 보여 줍니다. 본문은 *핵심*만.
+표가 모든 숫자를 보여 줍니다. 본문은 핵심만 적습니다.
 
 ### 3. 부정 결과 숨김
 
-부정 결과(가설 미지지)도 *반드시 보고*. 학술 정직성의 핵심.
+부정 결과(가설 미지지)도 반드시 보고합니다. 학술 정직성의 핵심입니다.
 
 ```
 선호: Contrary to our hypothesis, treatment X did not significantly
@@ -355,36 +354,36 @@ The results appear to indicate that ...
 ## 자기 점검
 
 ```
-□ 가장 중요한 발견이 *앞*에 있는가?
-□ 표/그림이 본문에서 *언급*되었는가?
-□ 모든 통계값에 *효과 크기*가 함께 있는가?
-□ 해석이 *과도하게* 들어가지 않았는가?
+□ 가장 중요한 발견이 앞에 있는가?
+□ 표/그림이 본문에서 언급되었는가?
+□ 모든 통계값에 효과 크기가 함께 있는가?
+□ 해석이 과도하게 들어가지 않았는가?
 □ 부정 결과가 빠지지 않았는가?
-□ 시제가 *Past Simple*인가? (관찰된 사실)
+□ 시제가 Past Simple인가? (관찰된 사실)
 ```
 
 ## 정리
 
-- Results의 표준 — 데이터 설명 → 핵심 발견 → 추가 → 시각 자료
-- 그림·표 참조 — *능동 / 수동 / as-clause / 괄호* 형태를 섞기
-- Sequence, Frequency, Quantity, Causality 어휘
-- 상관과 인과를 구분 — *causes* vs *is associated with*
-- 분야 표준 *통계 표기* 따르기
-- 함정 — 해석 섞임, 숫자 반복, 부정 결과 숨김
+- Results의 표준 흐름은 데이터 설명 → 핵심 발견 → 추가 → 시각 자료입니다.
+- 그림·표 참조는 능동, 수동, as-clause, 괄호 형태를 섞어 단조로움을 피합니다.
+- Sequence, Frequency, Quantity, Causality 어휘를 익혀 둡니다.
+- 상관과 인과를 구분합니다. *causes*와 *is associated with*는 의미가 다릅니다.
+- 분야 표준 통계 표기를 따릅니다.
+- 흔한 함정은 해석 섞임, 숫자 반복, 부정 결과 숨김입니다.
 
 ## 한국 연구자의 Results 함정
 
 ```
-1. 해석을 Results에 — Discussion으로
-2. 모든 데이터 본문 반복
+1. 해석을 Results에 — Discussion으로 옮기기
+2. 모든 데이터를 본문에 반복
 3. 부정 결과 숨김 — 학술 정직성 위반
-4. 상관 / 인과 표현 혼동
+4. 상관과 인과 표현 혼동
 5. 통계 표기 분야 표준 무시
 ```
 
 ## 다음 글 예고
 
-다음은 **Unit 3.2: Results의 문법**.
+다음 글은 **Unit 3.2: Results의 문법**입니다.
 
 ## 관련 항목
 

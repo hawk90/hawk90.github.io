@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 실전 팁 — STL / 최적화 코드 / 시간 역행"
-date: 2025-08-20T11:00:00
+date: 2026-05-17T11:00:00
 description: "STL pretty-printers, -O2 디버깅, .gdbinit 추천, rr time-travel. 시리즈 마무리."
 tags: [gdb, STL, Optimization, rr]
 series: "GDB and LLDB"

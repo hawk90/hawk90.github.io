@@ -1,6 +1,6 @@
 ---
 title: "Unit 5.2: Title의 작성과 시리즈 마무리"
-date: 2026-05-19T11:00:00
+date: 2026-05-14T11:00:00
 description: "좋은 제목의 조건 — 검색 가능성, 정확성, 매력. Science Research Writing 시리즈 마무리."
 series: "Science Research Writing"
 seriesOrder: 52
@@ -8,10 +8,9 @@ tags: [writing, academic, title, science]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
-draft: true
 ---
 
-논문의 *제목*은 가장 짧고 가장 중요한 부분입니다. 모든 잠재 독자가 *처음 보는* 것이고, 인용·검색·소개에서 반복 등장합니다.
+논문의 제목은 가장 짧고 가장 중요한 부분입니다. 모든 잠재 독자가 처음 보는 것이고, 인용·검색·소개에서 반복 등장합니다.
 
 ## Title의 역할
 
@@ -25,12 +24,12 @@ draft: true
 ## 좋은 Title의 조건
 
 ```
-□ 논문의 *핵심 주제*가 명확
-□ 핵심 *변수 / 대상*이 포함됨
-□ *방법론*의 신호가 있음 (가능하면)
-□ *너무 길지 않음* (보통 15-20 단어)
-□ *너무 짧지 않음* (5 단어 미만은 흔히 모호)
-□ 검색에 노출될 *키워드*가 포함됨
+□ 논문의 핵심 주제가 명확한가?
+□ 핵심 변수 / 대상이 포함되었는가?
+□ 가능하면 방법론의 신호가 있는가?
+□ 너무 길지 않은가? (보통 15-20 단어)
+□ 너무 짧지 않은가? (5 단어 미만은 흔히 모호)
+□ 검색에 노출될 키워드가 포함되었는가?
 ```
 
 ## 좋은 제목의 패턴
@@ -43,7 +42,7 @@ draft: true
 "Detection of dark matter halos using gravitational lensing"
 ```
 
-*무엇*을 *어떻게* 연구했는지가 모두 포함됩니다.
+무엇을 어떻게 연구했는지가 모두 포함됩니다.
 
 ### 2. Topic + Finding
 
@@ -52,7 +51,7 @@ draft: true
 "Rubber modification of PLA increases impact resistance"
 ```
 
-핵심 *발견*을 제목에 직접. 결정적 발견이 있을 때 효과적.
+핵심 발견을 제목에 직접 담는 방식입니다. 결정적 발견이 있을 때 효과적입니다.
 
 ### 3. Question 형식
 
@@ -61,7 +60,7 @@ draft: true
 "Can deep learning predict protein folding?"
 ```
 
-질문이 *주의*를 끕니다. 학술 글에 점차 흔해지고 있습니다.
+질문이 주의를 끌어 줍니다. 학술 글에 점차 흔해지고 있습니다.
 
 ### 4. Subtitle 사용
 
@@ -70,7 +69,7 @@ draft: true
 "Polymer blends: From synthesis to mechanical characterization"
 ```
 
-콜론(:)으로 *큰 주제 + 구체적 초점*을 분리.
+콜론(:)으로 큰 주제와 구체적 초점을 분리합니다.
 
 ## 함정 — 피해야 할 제목
 
@@ -82,7 +81,7 @@ draft: true
 회피: Research on AI
 ```
 
-검색에서 묻힙니다. *어떤 polymers? 어떤 sleep? 어떤 AI?*
+검색에서 묻힙니다. 어떤 polymers인지, 어떤 sleep인지, 어떤 AI인지 알 수 없습니다.
 
 ### 2. 너무 길음
 
@@ -94,7 +93,7 @@ draft: true
 선호: Caffeine timing and sleep efficiency in college students
 ```
 
-20 단어를 넘으면 *검색에서 잘림*. 핵심을 추려야 합니다.
+20 단어를 넘으면 검색에서 잘립니다. 핵심을 추려야 합니다.
 
 ### 3. Jargon 과다
 
@@ -105,7 +104,7 @@ draft: true
        A benchmark comparison
 ```
 
-분야 *외부 독자*도 이해할 수 있어야 합니다. 약어는 *논문 안에서 정의*되지만 *제목에서는 풀어 쓰기*.
+분야 외부 독자도 이해할 수 있어야 합니다. 약어는 논문 안에서 정의되지만, 제목에서는 풀어 씁니다.
 
 ### 4. 과장
 
@@ -115,11 +114,11 @@ draft: true
 선호: A new approach to AI alignment via constitutional methods
 ```
 
-*Revolutionary*, *Breakthrough*, *Novel*(과사용) 같은 단어는 *심사*에서 깎입니다.
+*Revolutionary*, *Breakthrough*, *Novel* 같은 단어는 심사에서 점수가 깎입니다.
 
 ### 5. 약속 위반
 
-제목이 *약속한 것*과 본문이 다르면 심사·인용에서 부정적입니다.
+제목이 약속한 것과 본문이 다르면 심사·인용에서 부정적입니다.
 
 ```
 제목: A comprehensive review of X
@@ -129,13 +128,13 @@ draft: true
 본문: 실제로는 상관만 보임
 ```
 
-본문 완성 *후* 제목을 *마지막에 다시* 점검.
+본문 완성 후 제목을 마지막에 다시 점검합니다.
 
 ## 제목 작성 절차
 
 ### Step 1 — 키워드 추출
 
-자기 논문에서 *가장 중요한 단어 5-8개*를 적습니다.
+자기 논문에서 가장 중요한 단어 5-8개를 적습니다.
 
 ```
 caffeine, timing, sleep, college students, multilevel, actigraphy
@@ -143,7 +142,7 @@ caffeine, timing, sleep, college students, multilevel, actigraphy
 
 ### Step 2 — 조합
 
-핵심 키워드를 조합해 *세 가지 후보*를 만듭니다.
+핵심 키워드를 조합해 세 가지 후보를 만듭니다.
 
 ```
 후보 1: Caffeine timing and sleep quality in college students
@@ -155,15 +154,15 @@ caffeine, timing, sleep, college students, multilevel, actigraphy
 
 ### Step 3 — 동료 점검
 
-후보들을 *분야의 동료*에게 보입니다. 어느 것이 *가장 클릭하고 싶은가*.
+후보들을 분야의 동료에게 보입니다. 어느 것이 가장 클릭하고 싶은지를 물어봅니다.
 
 ### Step 4 — 검색 시뮬레이션
 
-Google Scholar에 자기 후보 제목으로 검색해 봅니다. *비슷한 제목이 너무 많으면* 차별화가 필요합니다.
+Google Scholar에 자기 후보 제목으로 검색해 봅니다. 비슷한 제목이 너무 많으면 차별화가 필요합니다.
 
 ### Step 5 — Abstract와의 일관성
 
-제목과 abstract의 *주된 단어*가 겹쳐야 합니다. 다르면 검색에서 노출이 줄어듭니다.
+제목과 abstract의 주된 단어가 겹쳐야 합니다. 다르면 검색에서 노출이 줄어듭니다.
 
 ## 학위 논문의 제목
 
@@ -178,22 +177,22 @@ Thesis (길음, 묘사적):
 of timing effects in college students using actigraphic measurement"
 ```
 
-학위 논문은 *범위와 방법*을 모두 명시하는 긴 제목이 흔합니다.
+학위 논문은 범위와 방법을 모두 명시하는 긴 제목이 흔합니다.
 
 ## 자기 점검
 
 ```
-□ 제목이 *15-20 단어* 이내인가?
-□ *핵심 변수 / 대상*이 포함되었는가?
-□ Google Scholar 검색에서 *너무 흔하지* 않은가?
-□ 약어가 *분야 외부*에도 이해되는가?
-□ 본문이 *제목이 약속한 것*을 다 하는가?
-□ Abstract와 제목의 *핵심어*가 일치하는가?
+□ 제목이 15-20 단어 이내인가?
+□ 핵심 변수 / 대상이 포함되었는가?
+□ Google Scholar 검색에서 너무 흔하지 않은가?
+□ 약어가 분야 외부에도 이해되는가?
+□ 본문이 제목이 약속한 것을 다 하는가?
+□ Abstract와 제목의 핵심어가 일치하는가?
 ```
 
 ## 시리즈 마무리 — Science Research Writing 회고
 
-이 시리즈에서 다룬 것:
+이 시리즈에서 다룬 내용을 정리합니다.
 
 ```
 Unit 1. How to Write an Introduction
@@ -223,16 +222,16 @@ Glasman-Deal의 *Science Research Writing*의 핵심은 단순합니다.
 
 > Science writing is much easier than it looks.
 
-*과학 글쓰기는 보이는 것보다 훨씬 쉽다*. 이유 — 구조와 어휘가 *관습적*이기 때문입니다.
+과학 글쓰기는 보이는 것보다 훨씬 쉽습니다. 이유는 구조와 어휘가 관습적이기 때문입니다.
 
 ```
-1. 자기 분야의 *모범 논문*을 자세히 본다
-2. 구조 / 문법 / 어휘의 *패턴*을 발견한다
-3. 그 패턴을 자기 *template*으로 만든다
-4. 자기 연구에 *적용*한다
+1. 자기 분야의 모범 논문을 자세히 본다
+2. 구조, 문법, 어휘의 패턴을 발견한다
+3. 그 패턴을 자기 template으로 만든다
+4. 자기 연구에 적용한다
 ```
 
-이 절차가 *영어 능력 보다 더 중요*합니다. 영어가 모국어가 아니어도 *관습을 따르면* 충분히 좋은 과학 글을 쓸 수 있습니다.
+이 절차가 영어 능력보다 더 중요합니다. 영어가 모국어가 아니어도 관습을 따르면 충분히 좋은 과학 글을 쓸 수 있습니다.
 
 ## AWG와의 통합
 
@@ -253,7 +252,7 @@ SRW가 가르치는 것:
 - Abstract와 Title 특별 강조
 ```
 
-두 책을 *함께* 활용하면 학술 영어의 *이론과 실용*이 모두 채워집니다.
+두 책을 함께 활용하면 학술 영어의 이론과 실용이 모두 채워집니다.
 
 ## 다음 추천
 
@@ -285,7 +284,7 @@ SRW가 가르치는 것:
 
 ## 시리즈 완결
 
-12 글의 여정을 끝까지 함께해 주셔서 감사합니다. 자기 분야의 모범 논문을 자세히 보고, 자기 template을 만들고, 자기 연구로 적용하는 *반복의 과정*이 평생의 글쓰기 동반자가 되기를 바랍니다.
+12 글의 여정을 끝까지 함께해 주셔서 감사합니다. 자기 분야의 모범 논문을 자세히 보고, 자기 template을 만들고, 자기 연구로 적용하는 반복의 과정이 평생의 글쓰기 동반자가 되기를 바랍니다.
 
 ## 관련 항목
 

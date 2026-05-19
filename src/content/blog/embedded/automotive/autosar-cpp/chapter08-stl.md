@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: STL — Container, Algorithm, Smart Pointer"
-date: 2025-09-15T09:00:00
+date: 2026-05-18T09:00:00
 description: "C 라이브러리 금지(A18-0), std::array 권장(A18-1), new/delete 회피(A18-5), make_unique·make_shared, vector at vs []."
 tags: [autosar, cpp, stl, smart-pointer, container, algorithm]
 series: "AUTOSAR C++14"

@@ -1,6 +1,6 @@
 ---
 title: "DSA 26: AVL 트리 — 회전과 균형"
-date: 2026-03-02T02:00:00
+date: 2026-05-15T02:00:00
 description: "엄격한 균형 BST. 모든 연산 worst-case O(log n)."
 tags: [Data Structure, Algorithm, BST, AVL, Balanced Tree]
 series: "Data Structures and Algorithms"

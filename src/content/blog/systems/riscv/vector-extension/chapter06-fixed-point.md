@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 고정소수점·포화 연산"
-date: 2025-05-20T10:00:00
+date: 2026-05-17T10:00:00
 description: "RVV 고정소수점 — widening, narrowing, saturating 연산을 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 6

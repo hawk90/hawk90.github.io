@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 변환과 양자화"
-date: 2025-10-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "AV1의 잔차 복원 — 계수 파싱, 역양자화, DCT/ADST/IDTX 역변환, 16가지 2D 변환 조합."
 tags: [AV1, Video, Codec, Transform, Quantization, DCT]
 series: "AV1"

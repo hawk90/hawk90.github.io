@@ -1,6 +1,6 @@
 ---
 title: "UML 1: 왜 모델링하는가"
-date: 2026-04-01T01:00:00
+date: 2026-05-03T01:00:00
 description: "모델링은 코드의 적이 아니다 — 머릿속에 다 들어오지 않는 시스템을 다루는 단 하나의 방법."
 tags: [UML, Modeling, Software Engineering, Fundamentals]
 series: "UML 2.5.1"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Relating Design Patterns to the Model"
-date: 2025-10-01T12:00:00
+date: 2026-05-01T12:00:00
 description: "GoF 패턴 — 도메인 의미와 연결될 때만 사용. Strategy / Composite."
 tags: [DDD, Design Patterns, GoF]
 series: "Domain-Driven Design"

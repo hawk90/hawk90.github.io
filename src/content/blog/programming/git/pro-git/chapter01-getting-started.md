@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Getting Started"
-date: 2025-08-01T01:00:00
+date: 2026-05-17T01:00:00
 description: "Git 역사, 분산 VCS의 본질, 설치, 첫 설정. snapshot 모델 vs delta."
 tags: [Git, VCS, Installation]
 series: "Pro Git"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Time, Delays, and Deferred Work"
-date: 2026-06-01T07:00:00
+date: 2026-05-13T07:00:00
 description: "jiffies·HZ·timer·delay·workqueue·tasklet — 커널 시간 관리."
 series: "Linux Device Drivers (LDD3)"
 seriesOrder: 7

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Expectation"
-date: 2030-01-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "기댓값의 generalization — Choquet·lower previsions."
 series: "Reasoning About Uncertainty"
 seriesOrder: 5

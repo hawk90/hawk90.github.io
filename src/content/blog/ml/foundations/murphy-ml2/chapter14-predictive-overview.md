@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Predictive Models — Overview"
-date: 2029-06-01T14:00:00
+date: 2026-05-16T14:00:00
 description: "Conditional p(y|x) 모델링 — supervised learning 통합."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 14

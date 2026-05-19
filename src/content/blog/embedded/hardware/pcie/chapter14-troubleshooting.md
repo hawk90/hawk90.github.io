@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Troubleshooting — 디버깅 시나리오"
-date: 2026-06-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "PCIe 트러블슈팅 — 링크 다운, 에러 분석, 인식 불가, 성능 저하 해결"
 series: "PCIe Deep Dive"
 seriesOrder: 14

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: jemalloc / tcmalloc Profiling"
-date: 2025-09-07T03:00:00
+date: 2026-05-17T03:00:00
 description: "표준 glibc malloc 대체 + 내장 profiler. pprof로 시각화."
 tags: [memory, jemalloc, tcmalloc, malloc, pprof]
 series: "Memory Diagnostics"

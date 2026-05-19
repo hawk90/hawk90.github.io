@@ -1,6 +1,6 @@
 ---
 title: "Embedded C++ for Real Systems: 서문"
-date: 2026-05-12
+date: 2026-05-07
 description: "어디까지 C++를 써도 되는가? RAII, constexpr, no-exception 설계부터 lock-free 패턴까지. 임베디드에서 안전하게 C++를 쓰는 법."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 0

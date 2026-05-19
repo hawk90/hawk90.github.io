@@ -1,6 +1,6 @@
 ---
 title: "Tip 34: Don't Assume It—Prove It"
-date: 2026-05-14T10:00:00
+date: 2026-05-11T10:00:00
 description: "가정하지 마라 — 증명하라. 실제 데이터·실제 입력·실제 환경으로."
 series: "The Pragmatic Programmer"
 seriesOrder: 34

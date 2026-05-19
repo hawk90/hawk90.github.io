@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Rules 1~5 — 표준 준수, 미사용 코드, 주석, 문자집합, 식별자"
-date: 2025-09-05T05:00:00
+date: 2026-05-18T05:00:00
 description: "환경(R1), 미사용·도달불가(R2), 주석(R3), 문자·키워드(R4), 식별자 고유성(R5) — Rule 본문의 첫 다섯 그룹."
 tags: [misra, c, identifiers, unused-code, comments, ambiguity]
 series: "MISRA C"

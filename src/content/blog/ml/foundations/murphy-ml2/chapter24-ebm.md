@@ -1,6 +1,6 @@
 ---
 title: "Ch 24: Energy-based Models"
-date: 2029-06-01T24:00:00
+date: 2026-05-16T24:00:00
 description: "Boltzmann·score matching·MCMC training — unnormalized density."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 24

@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Decorators and Closures"
-date: 2026-05-16T09:00:00
+date: 2026-05-15T09:00:00
 description: "데코레이터와 클로저 — 함수 메타프로그래밍의 기초."
 series: "Fluent Python"
 seriesOrder: 9

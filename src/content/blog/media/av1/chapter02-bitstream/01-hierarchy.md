@@ -1,6 +1,6 @@
 ---
 title: "Ch 2.1: 비트스트림 계층 구조"
-date: 2025-10-01T03:01:00
+date: 2026-05-16T03:01:00
 description: "AV1 비트스트림이 어떻게 7개 계층으로 쌓여 있는지 — Coded Video Sequence부터 Coefficient까지."
 tags: [AV1, Video, Codec, Bitstream, Hierarchy]
 series: "AV1"

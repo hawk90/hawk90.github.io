@@ -1,6 +1,6 @@
 ---
 title: "Chapter 8: Defensive Programming"
-date: 2025-06-20T08:00:00
+date: 2026-05-11T08:00:00
 description: "방어적 프로그래밍 — Garbage In, Nothing Out. assertion, 10가지 에러 처리, 예외, barricade, offensive programming."
 series: "Code Complete"
 seriesOrder: 8

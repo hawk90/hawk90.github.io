@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Event Groups"
-date: 2026-07-01T08:00:00
+date: 2026-05-09T08:00:00
 description: "xEventGroupSetBits·WaitForBits — 24비트 이벤트 플래그로 다중 동기화."
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 8

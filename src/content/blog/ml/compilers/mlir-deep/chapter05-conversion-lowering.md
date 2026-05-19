@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Conversion·Lowering 패턴"
-date: 2027-07-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Dialect 간 lowering — partial·full·dialect conversion."
 series: "MLIR 심화"
 seriesOrder: 5

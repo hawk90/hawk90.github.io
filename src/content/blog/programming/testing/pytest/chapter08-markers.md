@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Markers"
-date: 2026-05-22T08:00:00
+date: 2026-05-10T08:00:00
 description: "built-in markers·custom·skip·xfail·skipif — test에 의미 라벨 붙이기."
 series: "pytest 심화"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: Confidential Computing"
-date: 2025-09-03T21:00:00
+date: 2026-05-17T21:00:00
 description: "SEV·SEV-SNP·TDX — secure VM 기반."
 tags: [QEMU, sev, tdx, confidential-computing]
 series: "QEMU Internals"

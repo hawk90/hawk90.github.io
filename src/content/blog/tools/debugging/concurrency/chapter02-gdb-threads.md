@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: GDB 멀티스레드 명령"
-date: 2025-09-04T02:00:00
+date: 2026-05-17T02:00:00
 description: "info threads, thread apply all, scheduler-locking, non-stop 모드 깊이."
 tags: [gdb, threads, scheduler-locking, non-stop]
 series: "Concurrency Debugging"

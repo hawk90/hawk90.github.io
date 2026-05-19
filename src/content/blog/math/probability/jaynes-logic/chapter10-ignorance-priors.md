@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Ignorance Priors·Transformation Groups"
-date: 2029-04-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "'아무것도 모를 때'의 prior — uniform 너머의 답."
 series: "Probability Theory: The Logic of Science"
 seriesOrder: 10

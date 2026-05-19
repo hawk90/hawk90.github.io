@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Variable Elimination"
-date: 2030-11-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "Variable elimination·sum-product·conditioning — exact inference 기본."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 9

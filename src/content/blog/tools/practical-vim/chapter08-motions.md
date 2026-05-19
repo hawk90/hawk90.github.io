@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Navigate Inside Files with Motions"
-date: 2025-08-15T08:00:00
+date: 2026-05-17T08:00:00
 description: "단어 / 라인 / 화면 / 마크 motion. f F t T ; , — 문자 검색."
 tags: [Vim, Motion, Navigation]
 series: "Practical Vim"

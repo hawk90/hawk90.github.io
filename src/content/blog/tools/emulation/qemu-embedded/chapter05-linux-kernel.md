@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 리눅스 커널 부팅"
-date: 2025-09-15T05:00:00
+date: 2026-05-17T05:00:00
 description: "크로스 컴파일된 리눅스 커널을 QEMU에서 부팅한다."
 tags: [QEMU, Linux, Kernel]
 series: "QEMU Embedded Emulation"

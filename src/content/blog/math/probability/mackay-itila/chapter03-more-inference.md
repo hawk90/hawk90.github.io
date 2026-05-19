@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: More about Inference"
-date: 2029-02-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Box·bent coin·forensic — Bayesian 추론 case study."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 3

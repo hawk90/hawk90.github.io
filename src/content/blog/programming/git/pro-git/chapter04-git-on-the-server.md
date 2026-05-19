@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Git on the Server"
-date: 2025-08-01T04:00:00
+date: 2026-05-17T04:00:00
 description: "Git 서버 설정 — protocol (local / SSH / HTTP / git). bare 저장소. Gitolite."
 tags: [Git, Server, SSH]
 series: "Pro Git"

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 30: Programming Tools"
-date: 2025-06-21T06:00:00
+date: 2026-05-11T06:00:00
 description: "프로그래밍 도구 — 편집기, 디버거, 빌드, VCS, 분석 도구. 도구 숙달의 가치."
 series: "Code Complete"
 seriesOrder: 30

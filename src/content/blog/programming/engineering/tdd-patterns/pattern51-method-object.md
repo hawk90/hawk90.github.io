@@ -1,6 +1,6 @@
 ---
 title: "Pattern 51: Method Object"
-date: 2026-07-03T03:00:00
+date: 2026-05-10T03:00:00
 description: "복잡한 method를 새 class로 — local 변수 = field. 분해의 발판."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 51

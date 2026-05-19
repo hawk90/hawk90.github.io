@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Particle-Based Approximate Inference"
-date: 2030-11-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Sampling·MCMC·SMC — particle inference 종합."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 12

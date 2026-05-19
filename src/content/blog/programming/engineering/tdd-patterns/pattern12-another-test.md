@@ -1,6 +1,6 @@
 ---
 title: "Pattern 12: Another Test"
-date: 2026-07-01T12:00:00
+date: 2026-05-10T12:00:00
 description: "Tangent 아이디어 — test list에 추가하고 현재 작업 유지. Squirrel Effect 회피."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 12

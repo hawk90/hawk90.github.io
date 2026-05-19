@@ -1,6 +1,6 @@
 ---
 title: "Pattern 36: Consolidate Conditional Expression"
-date: 2026-06-02T12:00:00
+date: 2026-05-02T12:00:00
 description: "여러 조건이 같은 결과를 낸다면 — 하나로 묶어 의도를 드러낸다."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 36

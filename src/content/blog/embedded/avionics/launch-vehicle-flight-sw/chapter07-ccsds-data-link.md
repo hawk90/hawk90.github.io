@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: CCSDS TM/TC Space Data Link — Frame·Virtual Channel·COP-1"
-date: 2026-05-27T07:00:00
+date: 2026-05-18T07:00:00
 description: "CCSDS 132.0-B/232.0-B. Transfer frame, virtual channel, AOS, COP-1 FARM/FOP, Reed-Solomon·LDPC."
 series: "Launch Vehicle Flight Software"
 seriesOrder: 7

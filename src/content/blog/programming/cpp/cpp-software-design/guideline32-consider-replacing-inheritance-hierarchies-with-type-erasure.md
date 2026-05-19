@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 32: 상속 계층을 Type Erasure로 대체하는 것을 고려하라"
-date: 2026-05-14T08:00:00
+date: 2026-05-02T08:00:00
 description: "Type Erasure는 External Polymorphism이 한 단계 발전한 형태다. 값 의미론 wrapper로 다형성을 표현하며 std::function과 std::any의 기반이 된다."
 tags: [C++, Software Design, Type Erasure, Value Semantics]
 series: "C++ Software Design"

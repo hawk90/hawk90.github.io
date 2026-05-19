@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Exceptions, Memory, Library, Multi-threading"
-date: 2025-09-30T11:00:00
+date: 2026-05-18T11:00:00
 description: "JSF C++ — Exception 금지, dynamic memory 제한, STL 부분 사용, multi-threading 일반 정책."
 tags: [jsf-cpp, exceptions, memory, new-delete, stl, multi-threading, static-pool]
 series: "JSF C++"

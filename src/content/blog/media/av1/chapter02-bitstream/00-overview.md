@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 비트스트림 구조 — 개요"
-date: 2025-10-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "AV1 비트스트림이 어떻게 계층화되는지 — OBU·Temporal Unit·Frame·Tile의 관계를 한눈에."
 tags: [AV1, Video, Codec, Bitstream, OBU]
 series: "AV1"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 인터럽트 (MSI/MSI-X) 구현"
-date: 2025-09-01T06:00:00
+date: 2026-05-17T06:00:00
 description: "PCI 디바이스에서 MSI/MSI-X 인터럽트를 구현한다."
 tags: [QEMU, MSI, Interrupt]
 series: "QEMU Fake Device Driver"

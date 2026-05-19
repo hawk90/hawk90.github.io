@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 블록 구조"
-date: 2025-10-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "AV1의 블록 계층 — Superblock, Coding Block, Transform Block의 관계와 디코딩 순서."
 tags: [AV1, Video, Codec, Superblock, Coding Block, Transform Block]
 series: "AV1"

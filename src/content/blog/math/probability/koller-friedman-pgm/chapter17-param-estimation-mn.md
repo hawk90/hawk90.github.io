@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Parameter Estimation in Markov Network"
-date: 2030-11-01T17:00:00
+date: 2026-05-16T17:00:00
 description: "Log-linear MLE·partition function·contrastive learning."
 series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 17

@@ -1,6 +1,6 @@
 ---
 title: "항목 11: 쓰기 가능한 데이터의 명시적 공유는 최소화하라"
-date: 2026-05-08T11:00:00
+date: 2026-05-05T11:00:00
 description: "공유는 읽기에만 안전 — 가변 상태 공유가 만드는 동시성·소유권·재진입 문제와 그 대안."
 tags: [C++, Concurrency, Ownership]
 series: "Beautiful C++"

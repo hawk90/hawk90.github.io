@@ -1,6 +1,6 @@
 ---
 title: "UML 21: 상태 머신 — 객체의 라이프사이클"
-date: 2026-04-01T21:00:00
+date: 2026-05-03T21:00:00
 description: "둥근 박스, 화살표, 가드 — 라이프사이클이 복잡한 객체를 다루는 결정타."
 tags: [UML, State Machine, Behavior, Statechart]
 series: "UML 2.5.1"

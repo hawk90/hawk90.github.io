@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: The Bootstrap"
-date: 2029-03-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Resample — 분포 모를 때 standard error를 얻는다."
 series: "All of Statistics"
 seriesOrder: 8

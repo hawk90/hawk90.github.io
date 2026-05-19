@@ -1,6 +1,6 @@
 ---
 title: "Pattern 31: Rename Field"
-date: 2026-06-02T07:00:00
+date: 2026-05-02T07:00:00
 description: "Field 이름을 더 정확하게 — 데이터 의미를 코드에 새긴다."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 31

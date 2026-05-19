@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: 의미 있는 이름"
-date: 2025-06-15T02:00:00
+date: 2026-05-11T02:00:00
 description: "변수·함수·클래스 이름은 코드의 80%를 차지하는 토큰이다. 의도가 드러나는 이름을 짓는 규칙들."
 tags: [CleanCode, Naming, Robert Martin]
 series: "Clean Code"

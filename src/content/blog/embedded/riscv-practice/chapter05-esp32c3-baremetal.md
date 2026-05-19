@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 베어메탈 LED 깜빡이기"
-date: 2025-05-19T11:00:00
+date: 2026-05-17T11:00:00
 description: "ESP32-C3 베어메탈 — GPIO 제어, 링커 스크립트, 스타트업 코드를 다룬다."
 series: "RISC-V 임베디드 실습"
 seriesOrder: 5

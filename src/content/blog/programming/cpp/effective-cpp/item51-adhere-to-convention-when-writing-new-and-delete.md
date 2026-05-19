@@ -1,6 +1,6 @@
 ---
 title: "항목 51: new와 delete를 작성할 때 규약을 따르라"
-date: 2025-02-03T03:00:00
+date: 2026-05-04T03:00:00
 description: "operator new/delete 구현 시 지켜야 할 표준 규약 — handler 루프, 0-byte, 상속, 정렬, 짝 맞춤."
 tags: [C++, Effective C++, new, delete]
 series: "Effective C++"

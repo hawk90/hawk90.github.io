@@ -1,6 +1,6 @@
 ---
 title: "Ch 19: vhost-net·vhost-user"
-date: 2025-09-03T19:00:00
+date: 2026-05-17T19:00:00
 description: "Kernel·userspace backend offload — QEMU bypass."
 tags: [QEMU, vhost, vhost-user, dpdk]
 series: "QEMU Internals"

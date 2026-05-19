@@ -1,6 +1,6 @@
 ---
 title: "제14장: 논증문"
-date: 2026-05-12T14:00:00
+date: 2026-05-14T14:00:00
 description: "설득력 있는 논증문의 구성과 전개"
 series: "고종석의 문장"
 seriesOrder: 14

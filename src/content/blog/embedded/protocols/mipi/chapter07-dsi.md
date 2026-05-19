@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: DSI — Command vs Video Mode, DCS, 양방향"
-date: 2027-05-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "SoC → 패널. Command mode (frame buffer 패널)와 Video mode (continuous stream)의 두 사용 패턴."
 series: "MIPI 심화"
 seriesOrder: 7

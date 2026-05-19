@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: LSan과 누수 분석"
-date: 2026-05-15T03:00:00
+date: 2026-05-17T03:00:00
 description: "LeakSanitizer로 메모리 누수 추적 — 보고서 해석, suppression, 일회성·반복 분석 패턴."
 tags: [Sanitizer, LSan, MemoryLeak, Debugging, C, C++]
 series: "Sanitizers"

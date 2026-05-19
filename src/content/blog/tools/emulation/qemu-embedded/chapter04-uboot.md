@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: U-Boot 부팅"
-date: 2025-09-15T04:00:00
+date: 2026-05-17T04:00:00
 description: "QEMU에서 U-Boot 부트로더를 실행하고 커널을 로드한다."
 tags: [QEMU, U-Boot, Bootloader]
 series: "QEMU Embedded Emulation"

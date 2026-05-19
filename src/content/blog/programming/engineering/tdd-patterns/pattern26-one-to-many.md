@@ -1,6 +1,6 @@
 ---
 title: "Pattern 26: One to Many"
-date: 2026-07-02T02:00:00
+date: 2026-05-10T02:00:00
 description: "Single-item에서 collection으로 — 점진적 일반화. 알고리즘 본질 발견."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 26

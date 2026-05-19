@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: 부트 디버깅"
-date: 2025-05-19T06:00:00
+date: 2026-05-17T06:00:00
 description: "RISC-V 부트 디버깅 — UART 초기화, 초기 프린트, JTAG, 흔한 문제를 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 12

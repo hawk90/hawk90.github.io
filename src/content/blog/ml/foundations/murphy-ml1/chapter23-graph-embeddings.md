@@ -1,6 +1,6 @@
 ---
 title: "Ch 23: Graph Embeddings"
-date: 2029-05-01T23:00:00
+date: 2026-05-16T23:00:00
 description: "Node2vec·GNN·heterogeneous graph — relational data의 ML."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 23

@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Functions"
-date: 2025-05-14T03:00:00
+date: 2026-05-18T03:00:00
 description: "함수는 짧게, 한 가지만. 지역 변수 10개 이하, 중첩 3단계 이하. goto를 통한 에러 처리."
 tags: [Linux, Kernel, Functions, goto, Error-Handling]
 series: "Linux Kernel Coding Style"

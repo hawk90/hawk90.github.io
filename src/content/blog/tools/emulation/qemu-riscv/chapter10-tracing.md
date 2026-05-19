@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 성능 측정과 트레이싱"
-date: 2025-05-20T04:00:00
+date: 2026-05-17T04:00:00
 description: "QEMU 트레이싱 — TCG 프로파일링, -d 옵션, 성능 분석을 다룬다."
 series: "RISC-V QEMU 심화"
 seriesOrder: 10

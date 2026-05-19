@@ -1,6 +1,6 @@
 ---
 title: "Ch 22: 크로스 아키텍처 디바이스"
-date: 2025-09-01T22:00:00
+date: 2026-05-17T22:00:00
 description: "한 device model을 x86/ARM/RISC-V에서 — endian·alignment 일관성."
 tags: [QEMU, cross-architecture, endianness, portable-device]
 series: "QEMU Fake Device Driver"

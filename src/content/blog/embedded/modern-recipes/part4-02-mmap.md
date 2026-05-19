@@ -1,6 +1,6 @@
 ---
 title: "4-02: mmap 네 가지 모드 — Anonymous·File·Shared·Huge Page"
-date: 2026-05-20T15:00:00
+date: 2026-05-07T15:00:00
 description: "mmap의 네 가지 사용 모드와 madvise·MAP_HUGETLB·mlock을 코드와 측정값으로 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 20

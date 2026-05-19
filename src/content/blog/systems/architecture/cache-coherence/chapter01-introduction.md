@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction to Consistency and Coherence"
-date: 2026-09-01T01:00:00
+date: 2026-05-19T01:00:00
 description: "Consistency vs Coherence — 두 개념의 출발점과 차이."
 series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 1

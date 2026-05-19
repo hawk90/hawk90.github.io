@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 메모리 컨트롤러 인터페이스"
-date: 2027-01-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "Bank·row·column·command — 컨트롤러가 보는 HBM."
 series: "HBM·GDDR 심화"
 seriesOrder: 7

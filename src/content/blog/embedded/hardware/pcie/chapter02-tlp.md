@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: TLP — Transaction Layer Packet"
-date: 2026-06-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "TLP 패킷 구조와 종류 — Memory, I/O, Configuration, Message, Completion"
 series: "PCIe Deep Dive"
 seriesOrder: 2

@@ -1,6 +1,6 @@
 ---
 title: "제10장: 간결함"
-date: 2026-05-12T10:00:00
+date: 2026-05-14T10:00:00
 description: "군더더기 없는 간결한 문장 쓰기"
 series: "고종석의 문장"
 seriesOrder: 10

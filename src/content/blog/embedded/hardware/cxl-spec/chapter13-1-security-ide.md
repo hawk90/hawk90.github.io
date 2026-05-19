@@ -1,6 +1,6 @@
 ---
 title: "Ch 13.1: Security — IDE·AES-GCM"
-date: 2026-01-02T05:00:00
+date: 2026-05-16T05:00:00
 description: "스펙 §11 — link integrity·data encryption."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 29

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction to Information Theory"
-date: 2029-02-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "통신 채널에서 inference·learning으로 — MacKay의 시각."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Software Design — LLR + Architecture"
-date: 2025-09-25T06:00:00
+date: 2026-05-18T06:00:00
 description: "HLR → LLR decomposition, Architecture 설계, SCADE/Simulink model-based, memory/timing budget, A-4 verification."
 tags: [do-178c, design, llr, architecture, scade, simulink, do-331, model-based]
 series: "DO-178C"

@@ -1,6 +1,6 @@
 ---
 title: "Rule 9: If You Didn't Fix It, It Ain't Fixed"
-date: 2031-01-01T09:00:00
+date: 2026-05-17T09:00:00
 description: "사라진 버그를 안 믿는다 — 진짜 fix까지 확인."
 series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 9

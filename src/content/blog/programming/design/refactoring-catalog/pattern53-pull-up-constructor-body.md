@@ -1,6 +1,6 @@
 ---
 title: "Pattern 53: Pull Up Constructor Body"
-date: 2026-06-03T05:00:00
+date: 2026-05-02T05:00:00
 description: "Subclass constructor의 공통 setup — superclass constructor + super() 호출로."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 53

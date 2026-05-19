@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: QEMU 디바이스 모델 기초 — QOM"
-date: 2025-09-01T03:00:00
+date: 2026-05-17T03:00:00
 description: "QEMU Object Model (QOM) 타입 시스템과 디바이스 모델 프레임워크."
 tags: [QEMU, QOM, DeviceModel]
 series: "QEMU Fake Device Driver"

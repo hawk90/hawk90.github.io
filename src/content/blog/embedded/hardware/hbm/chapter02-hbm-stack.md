@@ -1,6 +1,6 @@
 ---
 title: "Ch 2: HBM 스택 구조와 TSV"
-date: 2027-01-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "Base die + DRAM die stack — 3D 메모리의 구성요소."
 series: "HBM·GDDR 심화"
 seriesOrder: 2

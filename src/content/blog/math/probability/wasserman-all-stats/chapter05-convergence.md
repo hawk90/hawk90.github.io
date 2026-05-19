@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Convergence of Random Variables"
-date: 2029-03-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "LLN·CLT·Delta method — asymptotic statistics 기초."
 series: "All of Statistics"
 seriesOrder: 5

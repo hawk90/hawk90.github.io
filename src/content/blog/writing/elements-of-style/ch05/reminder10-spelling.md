@@ -1,6 +1,6 @@
 ---
 title: "Ch 5 Reminder 10: 표준 철자를 쓰라"
-date: 2026-05-15T18:00:00
+date: 2026-05-14T18:00:00
 description: "일반 글에서는 표준 철자를 따른다. nite, thru, pleez를 쓰지 마라."
 series: "The Elements of Style"
 seriesOrder: 42

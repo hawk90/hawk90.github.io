@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: Deep Neural Networks"
-date: 2029-06-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "Modern DL — transformer·diffusion·foundation model."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 16

@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Performance — 레이턴시와 대역폭"
-date: 2026-06-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "PCIe 성능 분석 — 레이턴시 측정, 대역폭 최적화, 프로파일링, 병목 분석"
 series: "PCIe Deep Dive"
 seriesOrder: 15

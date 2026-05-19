@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: SPI 심화 — Daisy Chain, Dual/Quad/Octal SPI, XIP"
-date: 2027-03-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "데이터 라인을 1→2→4→8로 늘려 50 MHz × 8 = 400 MB/s. 모던 MCU의 boot 매체."
 series: "Embedded Protocols 심화"
 seriesOrder: 3

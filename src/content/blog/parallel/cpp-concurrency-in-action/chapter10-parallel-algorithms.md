@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Parallel algorithms"
-date: 2026-05-20T10:00:00
+date: 2026-05-06T10:00:00
 description: "C++17 execution policy — seq / par / par_unseq / unseq. std::reduce, transform_reduce."
 tags: [C++, C, Concurrency, Parallel Algorithms, Execution Policy]
 series: "C++ Concurrency in Action"

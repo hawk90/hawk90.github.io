@@ -1,6 +1,6 @@
 ---
 title: "Tip 2: Think! About Your Work"
-date: 2026-05-13T02:00:00
+date: 2026-05-11T02:00:00
 description: "자동 조종을 끄고 매 결정을 실시간으로 비판한다. 일하는 동안 일을 생각하라."
 series: "The Pragmatic Programmer"
 seriesOrder: 2

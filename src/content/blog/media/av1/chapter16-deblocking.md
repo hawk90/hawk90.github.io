@@ -1,6 +1,6 @@
 ---
 title: "Ch 16: 디블로킹 필터"
-date: 2025-10-01T17:00:00
+date: 2026-05-16T17:00:00
 description: "AV1의 디블로킹 필터 — 블록 경계 강도, 4/8/14-tap 필터, sharpness, flatness 판별의 원리와 구현."
 tags: [AV1, Video, Codec, Deblocking, Loop Filter]
 series: "AV1"

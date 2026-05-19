@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: U-Boot RISC-V 포팅"
-date: 2025-05-19T03:00:00
+date: 2026-05-17T03:00:00
 description: "U-Boot RISC-V — 보드 설정, 디바이스 트리, 드라이버 설정을 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 9

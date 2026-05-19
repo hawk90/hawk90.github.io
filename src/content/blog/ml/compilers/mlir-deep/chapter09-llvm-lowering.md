@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: LLVM dialect로의 Lowering"
-date: 2027-07-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "MLIR의 종착역 — LLVM IR로 떨어지는 마지막 단계."
 series: "MLIR 심화"
 seriesOrder: 9

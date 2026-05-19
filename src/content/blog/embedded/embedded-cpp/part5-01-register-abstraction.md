@@ -1,6 +1,6 @@
 ---
 title: "Part 5-01: Register 추상화"
-date: 2026-05-17T01:00:00
+date: 2026-05-07T01:00:00
 description: "MMIO를 type-safe하게 — volatile, bit field, register wrapper class."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 37

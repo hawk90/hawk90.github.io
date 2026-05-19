@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: MMIO 레지스터 구현"
-date: 2025-09-01T05:00:00
+date: 2026-05-17T05:00:00
 description: "Memory-mapped I/O 레지스터를 구현하고 게스트에서 읽고 쓴다."
 tags: [QEMU, MMIO, Register]
 series: "QEMU Fake Device Driver"

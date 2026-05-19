@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Gaussian Filtering and Smoothing"
-date: 2029-06-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Kalman·extended·unscented — Gaussian state-space inference."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 8

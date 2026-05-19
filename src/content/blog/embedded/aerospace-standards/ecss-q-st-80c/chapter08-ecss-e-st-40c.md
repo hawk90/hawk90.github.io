@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: ECSS-E-ST-40C — SW Engineering V-model 11 단계"
-date: 2025-10-05T09:00:00
+date: 2026-05-18T09:00:00
 description: "ECSS-Q-ST-80C의 짝꿍 표준. V-model 11 단계, 5 milestone review (SRR/PDR/CDR/QR/AR), 코딩 표준."
 tags: [ecss, ecss-e-st-40c, engineering, v-model, srr, pdr, cdr, qr, ar]
 series: "ECSS-Q-ST-80C"

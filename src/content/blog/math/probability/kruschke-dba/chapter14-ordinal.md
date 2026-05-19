@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Ordinal Predicted Variable"
-date: 2030-05-01T14:00:00
+date: 2026-05-15T14:00:00
 description: "Likert scale·cumulative link·threshold model."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 14

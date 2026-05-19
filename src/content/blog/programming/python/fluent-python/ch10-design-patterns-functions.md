@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Design Patterns with First-Class Functions"
-date: 2026-05-16T10:00:00
+date: 2026-05-15T10:00:00
 description: "일급 함수로 다시 본 디자인 패턴 — Strategy, Command."
 series: "Fluent Python"
 seriesOrder: 10

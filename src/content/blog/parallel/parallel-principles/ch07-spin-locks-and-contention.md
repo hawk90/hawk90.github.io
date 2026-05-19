@@ -1,6 +1,6 @@
 ---
 title: "Chapter 7: 스핀 락과 경합"
-date: 2026-05-12T07:00:00
+date: 2026-05-06T07:00:00
 description: "스핀 락의 설계 — TAS, TTAS, exponential backoff, queue locks (Anderson, CLH, MCS)."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 7

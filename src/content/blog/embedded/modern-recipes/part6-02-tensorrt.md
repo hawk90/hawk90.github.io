@@ -1,6 +1,6 @@
 ---
 title: "6-02: TensorRT — ONNX→Engine·FP16·INT8·DLA·Multi-Stream"
-date: 2026-05-21T02:00:00
+date: 2026-05-07T02:00:00
 description: "NVIDIA TensorRT로 ONNX 모델을 engine으로 빌드하고 FP16·INT8·DLA·multi-stream으로 throughput을 끌어올리는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 32

@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: Mastering STL Algorithms"
-date: 2025-07-01T18:00:00
+date: 2026-05-05T18:00:00
 description: "표준 알고리즘 — find / sort / transform / accumulate. execution policy (C++17)."
 tags: [C++, STL, Algorithms]
 series: "전문가를 위한 C++"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 18: Models for Missing Data"
-date: 2030-02-01T18:00:00
+date: 2026-05-16T18:00:00
 description: "Multiple imputation·EM·full Bayesian — missing 자연스럽게."
 series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 18

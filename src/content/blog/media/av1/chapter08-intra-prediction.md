@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Intra 예측"
-date: 2025-10-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "AV1의 Intra 예측 — DC, Paeth, Smooth, 56개 방향 예측, CfL, Filter Intra."
 tags: [AV1, Video, Codec, Intra, Prediction]
 series: "AV1"

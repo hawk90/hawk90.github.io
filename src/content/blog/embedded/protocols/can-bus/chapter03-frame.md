@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: CAN 2.0 프레임 — Standard·Extended·Remote·Error·Overload"
-date: 2027-04-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "5가지 프레임 종류와 각 필드의 의미. Bit stuffing과 CRC까지."
 series: "CAN Bus 심화"
 seriesOrder: 3

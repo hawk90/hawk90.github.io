@@ -1,6 +1,6 @@
 ---
 title: "Pattern 21: Broken Test"
-date: 2026-07-01T21:00:00
+date: 2026-05-10T21:00:00
 description: "Solo 작업 끝낼 때 — failing test로 놔두기. 복귀 시 어디서 멈췄는지 즉시."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 21

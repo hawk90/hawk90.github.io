@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Sparse Recovery"
-date: 2030-10-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Compressed sensing·L1 minimization·LASSO 보장."
 series: "High-Dimensional Probability"
 seriesOrder: 10

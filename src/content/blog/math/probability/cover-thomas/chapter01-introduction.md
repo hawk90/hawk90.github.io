@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Introduction and Preview"
-date: 2029-01-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "정보이론이 답하는 두 질문 — 압축 한계·전송 한계."
 series: "Elements of Information Theory"
 seriesOrder: 1

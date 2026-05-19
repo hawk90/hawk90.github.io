@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Assertions — ASSERT vs EXPECT"
-date: 2026-05-21T04:00:00
+date: 2026-05-10T04:00:00
 description: "ASSERT_*와 EXPECT_*의 차이 — fatal vs non-fatal, predicate format, 사용 시점."
 series: "gtest 심화"
 seriesOrder: 4

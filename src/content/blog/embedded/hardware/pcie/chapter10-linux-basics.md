@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Linux Basics — pci_driver와 probe"
-date: 2026-06-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "Linux PCIe 드라이버 기초 — pci_driver, probe/remove, 리소스 관리, sysfs"
 series: "PCIe Deep Dive"
 seriesOrder: 10

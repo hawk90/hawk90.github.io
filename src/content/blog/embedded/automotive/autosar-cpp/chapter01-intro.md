@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: AUTOSAR C++14 — 자동차 C++의 표준이 된 이유"
-date: 2025-09-15T02:00:00
+date: 2026-05-18T02:00:00
 description: "AUTOSAR 컨소시엄, Classic/Adaptive, C++14 채택 배경, MISRA C++:2008과의 차이, MISRA C++:2023 통합."
 tags: [autosar, cpp, c++14, iso-26262, adaptive, classic, automotive]
 series: "AUTOSAR C++14"

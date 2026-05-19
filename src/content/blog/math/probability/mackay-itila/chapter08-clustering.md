@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Clustering·Mixture Models"
-date: 2029-02-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "K-means·soft K-means·EM의 information-theoretic 해석."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: 실전 Makefile 예제"
-date: 2025-05-14T07:00:00
+date: 2026-05-17T07:00:00
 description: "기본 C/C++부터 라이브러리, 크로스 컴파일, 테스트 통합까지 — 실제 프로젝트에 그대로 쓰는 Makefile 패턴."
 tags: [make, build, Makefile, practical]
 series: "GNU Make"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: bpftrace 실전 — 시그널 / 파일 / 네트워크"
-date: 2025-08-30T07:00:00
+date: 2026-05-17T07:00:00
 description: "흔한 bpftrace 한 줄 — open / signal / TCP / VFS / scheduler 트레이스."
 tags: [bpftrace, Tracing, Production]
 series: "System Tracing"

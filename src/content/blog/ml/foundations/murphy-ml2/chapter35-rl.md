@@ -1,6 +1,6 @@
 ---
 title: "Ch 35: Reinforcement Learning"
-date: 2029-06-02T11:00:00
+date: 2026-05-16T11:00:00
 description: "MDP·policy·value·actor-critic·RLHF — RL의 modern overview."
 series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 35

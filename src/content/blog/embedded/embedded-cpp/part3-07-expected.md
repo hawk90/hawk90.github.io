@@ -1,6 +1,6 @@
 ---
 title: "Part 3-07: std::expected (C++23)"
-date: 2026-05-15T07:00:00
+date: 2026-05-07T07:00:00
 description: "C++23의 Result type — Rust 같은 monadic 에러 처리, 예외 없이 풍부한 정보."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 25

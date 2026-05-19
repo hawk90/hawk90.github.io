@@ -8,12 +8,11 @@ tags: [writing, composition, word-order, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 > Keep related words together.
 
-문장에서 *어순은 의미를 결정*합니다. 영어는 *어순 의존*이 강한 언어. *관련 있는 단어들은 가까이*, *관련 없는 단어들은 멀리*.
+문장에서 어순은 의미를 결정합니다. 영어는 어순 의존이 강한 언어입니다. 관련 있는 단어들은 가까이, 관련 없는 단어들은 멀리 둡니다.
 
 ## 기본 원칙
 
@@ -22,7 +21,7 @@ draft: true
 "He noticed a large stain in the rug that was right in the center."
 
 → 얼룩이 가운데? 양탄자가 가운데?
-→ "that was right in the center"가 *무엇을* 수식?
+→ "that was right in the center"가 무엇을 수식하는가?
 
 명확:
 "He noticed a large stain right in the center of the rug."
@@ -33,7 +32,7 @@ draft: true
 
 ## 우스꽝스러운 어순
 
-어순이 *잘못된* 자리는 *우스워지거나 무서워집니다*.
+어순이 잘못된 자리는 우스워지거나 무서워집니다.
 
 ```
 우스움:
@@ -41,7 +40,7 @@ draft: true
 with semen samples from eighteen men frozen in a stainless
 steel tank."
 
-→ 18명의 *남자가 냉동*됐는가? (실은 정자가 냉동)
+→ 18명의 남자가 냉동됐는가? (실은 정자가 냉동)
 
 수정:
 "New York's first commercial human-sperm bank opened Friday.
@@ -62,7 +61,7 @@ steel tank."
 
 ## 주어와 동사 — 가까이
 
-*주어와 동사 사이*를 *긴 구 / 절*로 끊지 마세요. *흐름이 끊깁니다*.
+주어와 동사 사이를 긴 구·절로 끊지 마세요. 흐름이 끊깁니다.
 
 ```
 끊어짐:
@@ -80,7 +79,7 @@ escaped from slavery but are haunted by its heritage."
 escaped from slavery but are haunted by its heritage."
 ```
 
-*전치사구*를 *문장 시작*으로 옮기면 주어 / 동사가 *바로 이어집니다*.
+전치사구를 문장 시작으로 옮기면 주어와 동사가 바로 이어집니다.
 
 ### 더 긴 끊김
 
@@ -91,19 +90,19 @@ had been working on it for several months and which faced
 considerable opposition from various stakeholders, was finally
 approved."
 
-→ 주어 "proposal"과 동사 "was approved" 사이가 *너무 멀음*
+→ 주어 "proposal"과 동사 "was approved" 사이가 너무 멀다
 
 수정:
 "The proposal was finally approved. The committee had worked on
 it for several months, facing considerable opposition from
 various stakeholders."
 
-→ 두 문장으로 나눠 *주어-동사 거리*를 줄임
+→ 두 문장으로 나눠 주어-동사 거리를 줄임
 ```
 
 ## 관계대명사와 선행사
 
-관계대명사는 *선행사 바로 뒤*에 옵니다.
+관계대명사는 선행사 바로 뒤에 옵니다.
 
 ```
 모호:
@@ -117,10 +116,10 @@ judged ..."
 "A proposal, which has been variously judged, to amend the
 Sherman Act ..."
 
-→ "which"가 *proposal*을 명확히 가리킴
+→ "which"가 proposal을 명확히 가리킴
 ```
 
-### *Dangling Relative Clause*
+### Dangling Relative Clause
 
 ```
 회피:
@@ -133,16 +132,16 @@ Sherman Act ..."
 또는: "His small farm in the country grew vegetables."
 ```
 
-## 수식어 — 수식 대상에 *붙이기*
+## 수식어 — 수식 대상에 붙이기
 
-수식어는 *수식 대상*에 *바로 인접*해야 합니다.
+수식어는 수식 대상에 바로 인접해야 합니다.
 
 ```
 회피 (모호):
 "All the members were not present."
 
 → 전원 없음? 일부 없음?
-→ "not"의 위치 때문에 모호
+→ not의 위치 때문에 모호
 
 선호 (명확):
 "Not all the members were present."  ← 일부만 없음
@@ -153,7 +152,7 @@ Sherman Act ..."
 회피:
 "She only found two mistakes."
 
-→ "only"가 무엇을 수식?
+→ only가 무엇을 수식하는가?
 → 그녀만? 발견했다는 행위만? 두 개의 실수만?
 
 선호:
@@ -164,7 +163,7 @@ Sherman Act ..."
 
 ### *Only*의 위치
 
-`Only`는 *위치에 따라 의미가 완전히 다릅니다*.
+`Only`는 위치에 따라 의미가 완전히 다릅니다.
 
 ```
 "Only I love you."          ← 나만이 (다른 누구도 아닌)
@@ -173,7 +172,7 @@ Sherman Act ..."
 "I love you only."          ← 너만 (강조)
 ```
 
-*수식 대상* 바로 *앞*에 두는 것이 *표준*입니다.
+수식 대상 바로 앞에 두는 것이 표준입니다.
 
 ## 부사구 / 전치사구의 위치
 
@@ -192,9 +191,9 @@ Sherman Act ..."
    ← yesterday = told (어제 말했다)
 ```
 
-## *Squinting Modifier* — 모호한 수식어
+## Squinting Modifier — 모호한 수식어
 
-*양쪽 어느 것이든* 수식할 수 있는 수식어. *Squinting*(곁눈질) 수식어.
+양쪽 어느 것이든 수식할 수 있는 수식어를 squinting(곁눈질) 수식어라 부릅니다.
 
 ```
 회피:
@@ -207,14 +206,14 @@ Sherman Act ..."
 "The teacher said she would give a test on Monday."   ← 시험 시점
 ```
 
-## *Misplaced Modifier*의 우스꽝
+## Misplaced Modifier의 우스꽝
 
 ```
 회피 (전치사구):
 "For sale: an antique desk for a lady with thick legs and
 large drawers."
 
-→ 두꺼운 다리의 *부인*? *책상*의 두꺼운 다리?
+→ 두꺼운 다리의 부인? 책상의 두꺼운 다리?
 
 선호:
 "For sale: an antique desk with thick legs and large drawers,
@@ -232,39 +231,39 @@ suitable for a lady."
 또는: "As I walked down the road, the trees looked beautiful."
 ```
 
-## 영어의 *어순 의존*
+## 영어의 어순 의존
 
-영어는 *어순*이 *의미를 결정*합니다. *격 어미 / 조사*가 *없기* 때문.
+영어는 어순이 의미를 결정합니다. 격 어미·조사가 없기 때문입니다.
 
 ```
 영어:
 "Dog bites man." vs "Man bites dog."
-→ 같은 단어, 어순이 다르면 의미가 *완전히 다름*
+→ 같은 단어, 어순이 다르면 의미가 완전히 다름
 
 한국어:
 "개가 사람을 물었다." vs "사람을 개가 물었다."
-→ 조사로 구분되므로 어순이 *상대적으로 자유*
+→ 조사로 구분되므로 어순이 상대적으로 자유
 ```
 
-영어는 *어순*에 *모든 정보가 의존*합니다.
+영어는 어순에 모든 정보가 의존합니다.
 
 ## 한국어의 어순
 
-한국어는 *조사* 덕분에 어순이 *유연*. 그러나 *수식*은 *영어와 같은 문제*가 있습니다.
+한국어는 조사 덕분에 어순이 유연합니다. 그러나 수식에는 영어와 같은 문제가 있습니다.
 
 ```
 회피 (한국 모호):
 "빠르게 달리는 사람을 보았다."
 
 → 빠르게 달리는 사람? 빠르게 보았다?
-→ 보통 *전자*로 해석되지만 모호
+→ 보통 전자로 해석되지만 모호
 
 선호 (명확):
 "달리는 사람을 빠르게 보았다."  ← 빠르게 보았다
 "빠르게 달리는 사람을 보았다."  ← 빠르게 달림 (일반 해석)
 ```
 
-### *Only*의 한국어 *만*
+### *Only*의 한국어 "만"
 
 ```
 "오직 나만이 너를 사랑해."   ← 나만이
@@ -272,21 +271,21 @@ suitable for a lady."
 "나는 너를 사랑할 뿐이야." ← 사랑하는 행위뿐
 ```
 
-*만 / 뿐 / 오직*의 위치가 의미를 결정합니다.
+"만", "뿐", "오직"의 위치가 의미를 결정합니다.
 
 ## 자기 글 점검
 
-- [ ] 모든 *수식어*가 *수식 대상*에 *인접*한가?
-- [ ] 주어와 동사 사이에 *긴 끼어듦*이 없는가?
-- [ ] 관계대명사가 *선행사 바로 뒤*에 있는가?
-- [ ] *Only, just, even, almost* 같은 부사가 *올바른 위치*인가?
-- [ ] Dangling / squinting modifier가 없는가?
-- [ ] 문장이 *읽고 한 번에 이해*되는가?
-- [ ] 한국 글에 *모호한 수식*이 없는가?
+- [ ] 모든 수식어가 수식 대상에 인접한가?
+- [ ] 주어와 동사 사이에 긴 끼어듦이 없는가?
+- [ ] 관계대명사가 선행사 바로 뒤에 있는가?
+- [ ] *Only*, *just*, *even*, *almost* 같은 부사가 올바른 위치인가?
+- [ ] Dangling·squinting modifier가 없는가?
+- [ ] 문장이 읽고 한 번에 이해되는가?
+- [ ] 한국 글에 모호한 수식이 없는가?
 
 ## 다음 Rule 예고
 
-다음 — **Rule 21: 동사 시제는 일관되게**.
+다음은 **Rule 21: 동사 시제는 일관되게**입니다.
 
 ## 관련 항목
 

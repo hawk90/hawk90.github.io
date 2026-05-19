@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: 마스킹과 조건부 실행"
-date: 2025-05-20T12:00:00
+date: 2026-05-17T12:00:00
 description: "RVV 마스킹 — v0 마스크, vmerge, vcompress를 다룬다."
 series: "RISC-V Vector Extension"
 seriesOrder: 8

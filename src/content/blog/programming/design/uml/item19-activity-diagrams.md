@@ -1,6 +1,6 @@
 ---
 title: "UML 19: 활동 다이어그램 — 워크플로와 알고리즘의 흐름"
-date: 2026-04-01T19:00:00
+date: 2026-05-03T19:00:00
 description: "객체가 아니라 행동에 집중. 비즈니스 프로세스·알고리즘·UX 흐름을 그릴 때."
 tags: [UML, Activity Diagram, Workflow, Flowchart]
 series: "UML 2.5.1"

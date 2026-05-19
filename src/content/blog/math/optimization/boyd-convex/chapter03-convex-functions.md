@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: Convex Functions"
-date: 2028-11-01T03:00:00
+date: 2026-05-15T03:00:00
 description: "정의·1차·2차 조건·보존 연산·conjugate."
 series: "Convex Optimization (Boyd)"
 seriesOrder: 3

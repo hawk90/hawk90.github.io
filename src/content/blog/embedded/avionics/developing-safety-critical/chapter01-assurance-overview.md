@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 항공우주 SW Assurance 개요 — DO-178C·NASA·방사청"
-date: 2026-05-26T01:00:00
+date: 2026-05-18T01:00:00
 description: "SW assurance vs testing. 영역별 표준 — civil avionics·defense·space·Korea."
 series: "Developing Safety-Critical Software"
 seriesOrder: 1

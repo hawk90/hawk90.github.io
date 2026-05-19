@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: FLP — 부동소수점, NaN, 비교, 변환"
-date: 2025-09-10T07:00:00
+date: 2026-05-18T07:00:00
 description: "Loop counter 금지(FLP30), 도메인 에러(FLP32), 변환 검증(FLP34), 비트 비교 금지(FLP37) — IEEE 754의 함정."
 tags: [cert-c, floating-point, ieee-754, nan, denormal, rounding]
 series: "CERT C"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Conditional Manatees"
-date: 2030-03-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "Interaction·moderation — 효과가 다른 변수에 의존할 때."
 series: "Statistical Rethinking"
 seriesOrder: 8

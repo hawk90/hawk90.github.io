@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 마이그레이션"
-date: 2025-10-01T10:00:00
+date: 2026-05-17T10:00:00
 description: "QEMU 라이브 마이그레이션과 VMState를 이해한다."
 tags: [QEMU, Migration, VMState]
 series: "QEMU Internals"

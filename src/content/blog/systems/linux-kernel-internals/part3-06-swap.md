@@ -1,6 +1,6 @@
 ---
 title: "Part 3-6: swap"
-date: 2025-07-15T16:00:00
+date: 2026-05-12T16:00:00
 description: "swap — 디스크에 페이지 저장. LRU / kswapd / 메모리 압박."
 tags: [Linux, Kernel, Memory, Swap]
 series: "리눅스 커널의 구조와 원리"

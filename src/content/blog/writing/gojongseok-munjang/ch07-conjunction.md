@@ -1,6 +1,6 @@
 ---
 title: "제7장: 접속"
-date: 2026-05-12T07:00:00
+date: 2026-05-14T07:00:00
 description: "문장과 문장을 잇는 접속의 기술"
 series: "고종석의 문장"
 seriesOrder: 7

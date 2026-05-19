@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: DSI-2 — DSC 압축, 4K/8K, VR/AR HMD"
-date: 2027-05-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "VESA Display Stream Compression 통합 — 4K/8K @ 120Hz를 같은 lane으로. AR/VR HMD의 표준."
 series: "MIPI 심화"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 클래스, RAII, virtual, Rule of Five"
-date: 2025-09-15T06:00:00
+date: 2026-05-18T06:00:00
 description: "특수 멤버 함수 일관(A12), Rule of Five/Zero, virtual destructor, override/final, 다중 상속 정책."
 tags: [autosar, cpp, class, raii, virtual, rule-of-five, inheritance]
 series: "AUTOSAR C++14"

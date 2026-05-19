@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: Regression Models"
-date: 2030-09-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Multiple regression·diagnostics·robust·logistic."
 series: "Statistical Inference"
 seriesOrder: 12

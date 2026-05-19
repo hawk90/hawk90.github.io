@@ -1,6 +1,6 @@
 ---
 title: "Ch 13: Variational Methods"
-date: 2029-02-01T13:00:00
+date: 2026-05-16T13:00:00
 description: "Sampling이 너무 느릴 때 — optimization으로 posterior 근사."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 13

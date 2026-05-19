@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: CXL.cache — 호스트 메모리 캐싱"
-date: 2026-10-01T03:00:00
+date: 2026-05-16T03:00:00
 description: "Device가 host DRAM을 캐싱한다 — coherency 전송."
 series: "CXL 심화"
 seriesOrder: 3

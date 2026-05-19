@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Maxima and Minima"
-date: 2029-08-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "극값 문제의 직관적 풀이 — 변분의 plausible 시각."
 series: "Mathematics and Plausible Reasoning, Vol I"
 seriesOrder: 8

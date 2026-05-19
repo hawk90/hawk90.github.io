@@ -1,6 +1,6 @@
 ---
 title: "Pattern 18: Hide Delegate"
-date: 2026-06-01T18:00:00
+date: 2026-05-02T18:00:00
 description: "Law of Demeter — 중개자 노출을 막아 클라이언트가 이웃의 이웃을 모르게."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 18

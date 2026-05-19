@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: LV 에비오닉스 vs 항공기 에비오닉스"
-date: 2026-05-27T01:00:00
+date: 2026-05-18T01:00:00
 description: "발사체와 항공기 에비오닉스 차이 — 시간·환경·이중화·정비성, SW 아키텍처 영향."
 series: "Launch Vehicle Flight Software"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Part 4-08: Singleton 대안"
-date: 2026-05-16T08:00:00
+date: 2026-05-07T08:00:00
 description: "임베디드의 DI 패턴 — Construct-On-First-Use, static dependency injection, service locator."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 36

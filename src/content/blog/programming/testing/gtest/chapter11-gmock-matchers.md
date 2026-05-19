@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: gMock matchers"
-date: 2026-05-21T11:00:00
+date: 2026-05-10T11:00:00
 description: "Eq·AllOf·Field·Pointee — 인자 매칭과 custom matcher 작성."
 series: "gtest 심화"
 seriesOrder: 11

@@ -1,6 +1,6 @@
 ---
 title: "Ch 2 Rule 22: 강조 단어는 문장의 끝에"
-date: 2026-05-15T00:00:00
+date: 2026-05-14T00:00:00
 description: "문장에서 가장 두드러진 자리는 끝이다. 강조하고 싶은 단어나 구는 보통 끝에 둔다."
 series: "The Elements of Style"
 seriesOrder: 24
@@ -8,16 +8,15 @@ tags: [writing, composition, emphasis, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 > Place the emphatic words of a sentence at the end.
 
-문장에서 *가장 두드러진 자리는 끝*. 강조하고 싶은 단어나 구는 *보통 끝에* 둡니다. Chapter 2의 *마지막 규칙*. *문장 / 단락 / 글 전체*의 강조 원리.
+문장에서 가장 두드러진 자리는 끝입니다. 강조하고 싶은 단어나 구는 보통 끝에 둡니다. Chapter 2의 마지막 규칙으로, 문장·단락·글 전체의 강조 원리입니다.
 
 ## 기본 원리
 
-문장의 *끝*은 *기억에 남는 자리*. 독자가 *마지막에 읽은 것*을 *가장 또렷이 기억*합니다.
+문장의 끝은 기억에 남는 자리입니다. 독자가 마지막에 읽은 것을 가장 또렷이 기억합니다.
 
 ```
 약함:
@@ -61,9 +60,9 @@ making razors."
 → *행동*이 핵심
 ```
 
-## *논리적 술부* — 새 정보의 자리
+## 논리적 술부 — 새 정보의 자리
 
-문장 끝은 *논리적 술부* (logical predicate). 새 정보가 오는 자리.
+문장 끝은 논리적 술부(logical predicate)입니다. 새 정보가 오는 자리입니다.
 
 ```
 선호:
@@ -74,16 +73,16 @@ a westward passage to the Indies to offset the achievement of
 Portuguese discoverers, lighted on America."
 
 분석:
-- 모든 배경 정보가 *앞에*
-- 핵심 사건 "lighted on America"가 *끝에*
-- 독자가 *기다림*에서 *발견*으로
+- 모든 배경 정보가 앞에
+- 핵심 사건 "lighted on America"가 끝에
+- 독자가 기다림에서 발견으로
 ```
 
-이런 *periodic sentence* (주기적 문장)는 *극적 효과*를 만듭니다.
+이런 periodic sentence(주기적 문장)는 극적 효과를 만듭니다.
 
-## *Old to New* 원칙
+## Old to New 원칙
 
-문장 안에서 *오래된 정보(이미 아는 것)*가 *앞*에, *새 정보*가 *뒤*에 오는 패턴이 *자연*입니다.
+문장 안에서 오래된 정보(이미 아는 것)가 앞에, 새 정보가 뒤에 오는 패턴이 자연스럽습니다.
 
 ```
 선호:
@@ -96,29 +95,29 @@ Portuguese discoverers, lighted on America."
 - "won last night" (새 정보) → 뒤
 ```
 
-이를 *theme / rheme* 또는 *given / new*라 부릅니다.
+이를 theme / rheme 또는 given / new라 부릅니다.
 
-## 문장의 *시작* — 두 번째 강조 자리
+## 문장의 시작 — 두 번째 강조 자리
 
-문장의 *시작*은 *두 번째로* 강조되는 자리. 보통 주어가 아닌 요소가 *문장 앞*에 오면 *자연스럽게 강조*됩니다.
+문장의 시작은 두 번째로 강조되는 자리입니다. 보통 주어가 아닌 요소가 문장 앞에 오면 자연스럽게 강조됩니다.
 
 ```
 선호 (시작 강조):
 "Deceit or treachery she could never forgive."
-→ "Deceit or treachery"가 *시작 자리*에서 강조
+→ "Deceit or treachery"가 시작 자리에서 강조
 
 "Vast and rude, fretted by the action of nearly three thousand
 years, the fragments of this architecture may often seem, at
 first sight, like works of nature."
-→ "Vast and rude"가 *시작 자리*에서 강조
+→ "Vast and rude"가 시작 자리에서 강조
 
 "Home is the sailor."
-→ "Home"이 *시작 자리*에서 강조
+→ "Home"이 시작 자리에서 강조
 ```
 
-## *Inversion*의 효과
+## Inversion의 효과
 
-영어는 *어순 도치*로 강조를 만듭니다.
+영어는 어순 도치로 강조를 만듭니다.
 
 ```
 보통:
@@ -135,9 +134,9 @@ first sight, like works of nature."
 "So beautiful was she that he froze."
 ```
 
-## *Mid-Sentence* — 약한 자리
+## Mid-Sentence — 약한 자리
 
-문장 *중간*은 *가장 약한* 자리. 끼어들거나 부수적 정보가 옵니다.
+문장 중간은 가장 약한 자리입니다. 끼어들거나 부수적 정보가 옵니다.
 
 ```
 약한 자리 (중간):
@@ -153,50 +152,50 @@ first sight, like works of nature."
 → 시작 자리에서 "young age"가 강조
 ```
 
-## *Periodic* vs *Loose* — 다시
+## Periodic vs Loose — 다시
 
-Rule 18에서 다룬 *periodic sentence*는 *강조 원리*의 응용.
+Rule 18에서 다룬 periodic sentence는 강조 원리의 응용입니다.
 
 ```
 Loose:
 "The boy ran down the street with great speed."
-→ 중요한 정보가 *앞에*
+→ 중요한 정보가 앞에
 
 Periodic:
 "With great speed, down the street, the boy ran."
-→ 중요한 정보 "the boy ran"이 *끝에서*
-→ 더 *극적*
+→ 중요한 정보 "the boy ran"이 끝에서
+→ 더 극적
 ```
 
-## 단락 / 글 전체의 강조
+## 단락·글 전체의 강조
 
-이 원리는 *문장의 단어*뿐 아니라 *단락의 문장*, *글 전체의 단락*에도 *똑같이 적용*됩니다.
+이 원리는 문장의 단어뿐 아니라 단락의 문장, 글 전체의 단락에도 똑같이 적용됩니다.
 
-### 단락 안의 *문장 순서*
+### 단락 안의 문장 순서
 
 ```
 선호 (단락):
 - 첫 문장: topic sentence (소개)
-- 중간 문장들: 지지 / 사실
-- 마지막 문장: *결론 / 핵심*
+- 중간 문장들: 지지·사실
+- 마지막 문장: 결론·핵심
 
 → 단락 끝이 가장 강조됨
 ```
 
-### 글 전체의 *단락 순서*
+### 글 전체의 단락 순서
 
 ```
 선호 (글):
 - 첫 단락: 도입
 - 중간 단락들: 본문
-- 마지막 단락: *결론 / 핵심 메시지*
+- 마지막 단락: 결론·핵심 메시지
 
-→ 글의 *마지막 단락*이 가장 큰 무게
+→ 글의 마지막 단락이 가장 큰 무게
 ```
 
-## 단락의 *마지막 문장*
+## 단락의 마지막 문장
 
-단락의 *마지막 문장*이 *기억*에 남습니다. *결론 / 핵심*을 그 자리에.
+단락의 마지막 문장이 기억에 남습니다. 결론·핵심을 그 자리에 둡니다.
 
 ```
 선호 (단락 끝 강조):
@@ -207,9 +206,9 @@ against all odds, they won the championship."
 → 마지막 문장: 승리 (단락의 핵심)
 ```
 
-## *Title*과 *Opening*의 자리
+## Title과 Opening의 자리
 
-글의 *제목*과 *첫 문장*은 *가장 강조되는 자리*입니다.
+글의 제목과 첫 문장은 가장 강조되는 자리입니다.
 
 ```
 좋은 제목:
@@ -230,7 +229,7 @@ against all odds, they won the championship."
 "Many years later, as he faced the firing squad..." (García Márquez)
 ```
 
-## *Master Speakers*의 강조
+## Master Speakers의 강조
 
 ```
 Churchill — 끝 강조:
@@ -250,7 +249,7 @@ for your country."
 
 ## 한국어의 강조 자리
 
-한국어는 *동사가 문장 끝*에 옵니다. 한국어의 *자연 강조*는 *동사 / 핵심 정보*가 *마지막*에 있는 셈.
+한국어는 동사가 문장 끝에 옵니다. 한국어의 자연 강조는 동사·핵심 정보가 마지막에 있는 셈입니다.
 
 ```
 한국어 (자연 강조):
@@ -262,9 +261,9 @@ for your country."
 → "you"가 끝, 목적어가 강조
 ```
 
-### 한국어 도치 / 강조
+### 한국어 도치·강조
 
-한국어에서도 *어순 변경*으로 강조 가능.
+한국어에서도 어순 변경으로 강조가 가능합니다.
 
 ```
 보통:
@@ -282,16 +281,16 @@ for your country."
 
 ## 자기 글 점검
 
-- [ ] 자기 *문장의 끝*에 가장 강조하고 싶은 단어가 있는가?
-- [ ] 부가 정보 / 시간 표현을 *앞으로* 옮기면 더 강할까?
-- [ ] 글의 *마지막 단락 / 문장*에 *핵심 메시지*가 있는가?
-- [ ] 제목과 첫 문장이 *기억*에 남는가?
-- [ ] *Old to new* 패턴 — 아는 것 먼저, 새 것 나중?
-- [ ] 한국 글의 *동사 자리* / 도치 활용?
+- [ ] 자기 문장의 끝에 가장 강조하고 싶은 단어가 있는가?
+- [ ] 부가 정보·시간 표현을 앞으로 옮기면 더 강할까?
+- [ ] 글의 마지막 단락·문장에 핵심 메시지가 있는가?
+- [ ] 제목과 첫 문장이 기억에 남는가?
+- [ ] Old to new 패턴 — 아는 것 먼저, 새 것 나중?
+- [ ] 한국 글의 동사 자리·도치를 활용했는가?
 
 ## Chapter 2 마무리
 
-Chapter 2의 *11개 규칙*은 *문체와 구성*의 기초입니다.
+Chapter 2의 11개 규칙은 문체와 구성의 기초입니다.
 
 | Rule | 핵심 |
 |------|------|
@@ -307,7 +306,7 @@ Chapter 2의 *11개 규칙*은 *문체와 구성*의 기초입니다.
 | Rule 21 | 시제 → 일관성 |
 | Rule 22 | 강조 자리 → 무게 |
 
-이 11개 원칙을 *몸에 익히면* *기본 문체*가 갖춰집니다. *Chapter 3*는 *형식 (form)*, *Chapter 4*는 *흔히 잘못 쓰는 단어*, *Chapter 5*는 *글쓰기의 일반 원칙 (reminders)*입니다.
+이 11개 원칙을 몸에 익히면 기본 문체가 갖춰집니다. Chapter 3은 형식(form), Chapter 4는 흔히 잘못 쓰는 단어, Chapter 5는 글쓰기의 일반 원칙(reminders)입니다.
 
 ## 관련 항목
 

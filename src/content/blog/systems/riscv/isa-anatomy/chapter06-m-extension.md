@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: 곱셈·나눗셈 확장 (M)"
-date: 2025-05-18T06:00:00
+date: 2026-05-17T06:00:00
 description: "RISC-V M 확장 — MUL, MULH, MULHSU, MULHU, DIV, DIVU, REM, REMU 명령어를 다룬다."
 series: "RISC-V ISA 해부"
 seriesOrder: 6

@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Logistic Regression"
-date: 2029-05-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Sigmoid·softmax·MLE — ML 분류의 출발점."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 10

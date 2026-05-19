@@ -1,6 +1,6 @@
 ---
 title: "Tip 38: Crash Early"
-date: 2026-05-14T14:00:00
+date: 2026-05-11T14:00:00
 description: "일찍 죽어라 — 잘못된 상태로 — 계속 가지 마라. 즉시 멈춰서 — 원인을 보여라."
 series: "The Pragmatic Programmer"
 seriesOrder: 38

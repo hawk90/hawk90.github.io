@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: 디버깅 — QEMU + GDB"
-date: 2025-09-01T09:00:00
+date: 2026-05-17T09:00:00
 description: "QEMU와 GDB를 연동해 커널과 드라이버를 디버깅한다."
 tags: [QEMU, GDB, Debugging]
 series: "QEMU Fake Device Driver"

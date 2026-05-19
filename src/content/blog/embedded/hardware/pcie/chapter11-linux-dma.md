@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Linux DMA — DMA API"
-date: 2026-06-01T12:00:00
+date: 2026-05-16T12:00:00
 description: "Linux DMA API — Coherent DMA, Streaming DMA, Scatter-Gather, IOMMU"
 series: "PCIe Deep Dive"
 seriesOrder: 11

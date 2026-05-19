@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Hierarchical Models"
-date: 2030-05-01T07:00:00
+date: 2026-05-15T07:00:00
 description: "Subject-level + group-level — partial pooling 그림으로."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 7

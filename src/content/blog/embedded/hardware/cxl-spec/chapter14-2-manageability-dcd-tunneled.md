@@ -1,6 +1,6 @@
 ---
 title: "Ch 14.2: Manageability — DCD·Tunneled Commands"
-date: 2026-01-02T09:00:00
+date: 2026-05-16T09:00:00
 description: "스펙 §9 — dynamic capacity·tunneled FM commands."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 33

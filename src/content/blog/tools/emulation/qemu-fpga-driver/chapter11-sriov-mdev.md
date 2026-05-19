@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: SR-IOV·mdev"
-date: 2025-09-04T11:00:00
+date: 2026-05-17T11:00:00
 description: "FPGA 공유 — PF/VF·virtual function·mediated device."
 tags: [QEMU, sr-iov, mdev, multi-tenant]
 series: "FPGA Driver via QEMU+VFIO"

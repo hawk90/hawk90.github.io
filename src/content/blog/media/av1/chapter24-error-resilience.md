@@ -1,6 +1,6 @@
 ---
 title: "Ch 24: Error Resilience"
-date: 2025-10-02T01:00:00
+date: 2026-05-16T01:00:00
 description: "AV1의 Error Resilience — error_resilient_mode, Switch Frame, Redundant Frame Header, 에러 복원 전략."
 tags: [AV1, Video, Codec, Error Resilience, Recovery]
 series: "AV1"

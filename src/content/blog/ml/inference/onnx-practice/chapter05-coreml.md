@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Core ML 변환"
-date: 2028-03-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "ONNX → Core ML — Apple Silicon 배포."
 series: "ONNX 실전"
 seriesOrder: 5

@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: 객체 지향 프로그래밍"
-date: 2025-06-01T05:00:00
+date: 2026-05-01T05:00:00
 description: "OO의 본질은 캡슐화도 상속도 아닌 다형성이다. 그것이 가능하게 만든 가장 중요한 것은 의존성 역전이다."
 tags: [Architecture, OO, Polymorphism, DependencyInversion]
 series: "Clean Architecture"

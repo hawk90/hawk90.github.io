@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: Kernel Methods"
-date: 2029-05-01T17:00:00
+date: 2026-05-16T17:00:00
 description: "RKHS·SVM·GP — kernel의 통일된 시각."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 17

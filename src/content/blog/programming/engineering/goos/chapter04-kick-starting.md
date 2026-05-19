@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Kick-Starting the TDD Cycle"
-date: 2025-10-10T04:00:00
+date: 2026-05-10T04:00:00
 description: "Walking Skeleton — 가장 단순한 end-to-end. 첫 사이클 시작 방법."
 tags: [TDD, Walking Skeleton]
 series: "Growing Object-Oriented Software"

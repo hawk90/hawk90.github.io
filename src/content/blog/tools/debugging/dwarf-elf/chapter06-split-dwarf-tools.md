@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: split-DWARF, dwz, debuginfod, pyelftools"
-date: 2025-09-02T06:00:00
+date: 2026-05-17T06:00:00
 description: "큰 디버그 정보 다루기. 분리·압축·네트워크 다운로드·자체 도구 작성."
 tags: [dwarf, split-dwarf, dwz, debuginfod, pyelftools, tools]
 series: "DWARF and ELF Internals"

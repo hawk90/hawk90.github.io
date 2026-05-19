@@ -1,6 +1,6 @@
 ---
 title: "Part 3-10: 소유권 모델"
-date: 2026-05-15T10:00:00
+date: 2026-05-07T10:00:00
 description: "Owner, observer, borrower — 객체 lifetime의 명확한 책임 할당."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 28

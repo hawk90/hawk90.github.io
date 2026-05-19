@@ -1,6 +1,6 @@
 ---
 title: "Ch 12: QEMU 기여하기"
-date: 2025-10-01T12:00:00
+date: 2026-05-17T12:00:00
 description: "QEMU 프로젝트에 코드 기여하는 방법 — 코드 스타일, 패치 제출."
 tags: [QEMU, Contributing, OpenSource]
 series: "QEMU Internals"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Test discovery·sharding·필터링"
-date: 2026-05-21T14:00:00
+date: 2026-05-10T14:00:00
 description: "--gtest_filter, sharding, parallel run — 큰 테스트 스위트를 빠르게."
 series: "gtest 심화"
 seriesOrder: 14

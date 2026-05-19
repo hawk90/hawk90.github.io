@@ -1,6 +1,6 @@
 ---
 title: "Part 1-01: C++ vs C: 무엇이 다른가"
-date: 2026-05-13T01:00:00
+date: 2026-05-07T01:00:00
 description: "임베디드에서 C++가 진짜로 무거운가? 측정 가능한 비교와, C가 여전히 옳은 자리들."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 1

@@ -1,6 +1,6 @@
 ---
 title: "Chapter 20: The Software-Quality Landscape"
-date: 2025-06-20T20:00:00
+date: 2026-05-11T20:00:00
 description: "소프트웨어 품질의 차원 — 외부·내부 특성, 트레이드오프, 결함 검출 기법들의 효과."
 series: "Code Complete"
 seriesOrder: 20

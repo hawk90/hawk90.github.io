@@ -1,6 +1,6 @@
 ---
 title: "Pattern 7: Evident Data"
-date: 2026-07-01T07:00:00
+date: 2026-05-10T07:00:00
 description: "테스트의 expected value를 *계산식으로* — 의도를 드러낸다."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 7

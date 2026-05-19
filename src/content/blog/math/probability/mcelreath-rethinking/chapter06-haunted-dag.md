@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: The Haunted DAG and the Causal Terror"
-date: 2030-03-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Confounding·collider·post-treatment bias — DAG의 함정."
 series: "Statistical Rethinking"
 seriesOrder: 6

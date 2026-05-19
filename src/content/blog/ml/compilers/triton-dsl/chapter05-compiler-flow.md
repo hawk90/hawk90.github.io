@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Triton 컴파일러 흐름"
-date: 2027-09-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Python AST → Triton IR → TritonGPU IR → LLVM/PTX."
 series: "Triton DSL"
 seriesOrder: 5

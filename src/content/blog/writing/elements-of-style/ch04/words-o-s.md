@@ -1,6 +1,6 @@
 ---
 title: "Ch 4 Words: O–S"
-date: 2026-05-15T06:00:00
+date: 2026-05-14T06:00:00
 description: "자주 오용되는 단어와 표현 — Noun used as verb부터 Student body까지."
 series: "The Elements of Style"
 seriesOrder: 30
@@ -8,14 +8,13 @@ tags: [writing, grammar, vocabulary, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: true
 ---
 
 ## O–P
 
 ### Noun used as verb
 
-*명사를 동사화*하는 흐름은 늘고 있지만, *모두 좋은 동사는 아닙니다*. `Host`, `gift`, `chair`, `debut`을 *동사로 쓰는 것*은 *의심스러운 사례*입니다.
+명사를 동사화하는 흐름은 늘고 있지만, 모두 좋은 동사는 아닙니다. `Host`, `gift`, `chair`, `debut`을 동사로 쓰는 것은 의심스러운 사례입니다.
 
 ```
 회피:
@@ -41,7 +40,7 @@ journal → write in a journal
 
 ### Offputting / Ongoing
 
-*Offputting*은 부적절. *Ongoing*은 과용. 적절한 한국어 같은 영어 표현으로.
+*Offputting*은 부적절하고, *ongoing*은 과용됩니다. 더 적절한 영어 표현으로 바꿉니다.
 
 ```
 회피                선호
@@ -52,7 +51,7 @@ ongoing project     current project / project under way
 
 ### One
 
-*A person*의 의미일 때 `his` / `her`로 받지 *않습니다*. `One ... one's`로 *일관*.
+*A person*의 의미일 때 `his` 또는 `her`로 받지 않습니다. `One ... one's`로 일관합니다.
 
 ```
 회피:
@@ -63,14 +62,14 @@ ongoing project     current project / project under way
 ```
 
 ```
-미국 회화는 *his / her*도 받아들이지만, 학술 / 격식 글은 *one's*로 유지.
+미국 회화는 *his / her*도 받아들이지만, 학술·격식 글은 *one's*로 유지합니다.
 
-영국 영어는 더 엄격: 항상 *one ... one's*.
+영국 영어는 더 엄격해서 항상 *one ... one's*입니다.
 ```
 
 ### One of the most
 
-*진부한 공식*. 문법에 문제는 없지만 *닳고 닳았습니다*.
+진부한 공식입니다. 문법에 문제는 없지만 닳고 닳았습니다.
 
 ```
 회피 (진부):
@@ -85,7 +84,7 @@ ongoing project     current project / project under way
 
 ### -oriented
 
-*거만하고 모호한 도구*. *방향*이나 *지향*을 말하는 *더 나은 표현*을.
+거만하고 모호한 도구입니다. 방향이나 지향을 말하는 더 나은 표현으로 바꿉니다.
 
 ```
 회피:
@@ -101,7 +100,7 @@ ongoing project     current project / project under way
 
 ### People
 
-*정치적 용어*로의 *people*과 *일반 다수*로의 *public*은 다릅니다. *단순한 개수*에는 `persons`를 씁니다.
+정치적 용어로서의 *people*과 일반 다수로서의 *public*은 다릅니다. 단순한 개수에는 `persons`를 씁니다.
 
 ```
 선호 (정치):
@@ -120,7 +119,7 @@ ongoing project     current project / project under way
 
 ### Personalize
 
-*쓰지 마세요*. *Make it good* 한 마디면 충분.
+쓰지 마세요. *Make it good* 한 마디면 충분합니다.
 
 ```
 회피:
@@ -134,7 +133,7 @@ ongoing project     current project / project under way
 
 ### Possess
 
-*Have, own*보다 *인상적으로 들리려는* 무의식적 선택일 때가 많습니다.
+*Have*나 *own*보다 인상적으로 들리려는 무의식적 선택일 때가 많습니다.
 
 ```
 회피:
@@ -155,7 +154,7 @@ ongoing project     current project / project under way
 
 ### Prestigious
 
-*Famous*나 *important*보다 *과장된 인상*. *과용*되면 *의심*을 부릅니다.
+*Famous*나 *important*보다 과장된 인상을 줍니다. 과용되면 의심을 부릅니다.
 
 ```
 회피 (과장):
@@ -169,7 +168,7 @@ ongoing project     current project / project under way
 
 ### Presently
 
-*두 의미*가 있어 *모호*합니다.
+두 의미가 있어 모호합니다.
 
 ```
 의미 1 (in a short while): 곧 — *가장 안전*
@@ -185,7 +184,7 @@ ongoing project     current project / project under way
 
 ### Refer / Allude
 
-`Allude`와의 차이를 *다시 확인*. `Refer`는 *직접 언급*, `Allude`는 *간접 언급*.
+`Allude`와의 차이를 다시 확인합니다. `Refer`는 직접 언급, `Allude`는 간접 언급입니다.
 
 ```
 Refer (직접):
@@ -219,7 +218,7 @@ in communications."
 
 ### Relate
 
-*Tell*이나 *narrate*의 단순 대체로 쓰지 마세요. 또한 *can relate to*는 회화체.
+*Tell*이나 *narrate*의 단순 대체로 쓰지 마세요. 또한 *can relate to*는 회화체입니다.
 
 ```
 회피: "I can relate to your feelings."
@@ -232,7 +231,7 @@ in communications."
 
 ### Respective / Respectively
 
-*대개 빼고* 더 자연스럽게 *다시 쓰는 게 낫습니다*.
+대개 빼고 더 자연스럽게 다시 쓰는 편이 낫습니다.
 
 ```
 회피 (과잉 격식):
@@ -251,13 +250,13 @@ in communications."
 "John was paid $500, and Mary was paid $700."
 ```
 
-*Respectively*는 *목록 순서* 매칭이 필요할 때만. 그 외에는 *쓰지 않습니다*.
+*Respectively*는 목록 순서 매칭이 필요할 때만 씁니다. 그 외에는 쓰지 않습니다.
 
 ## S
 
 ### Same
 
-*The same*을 회피 / 격식 도구로 *쓰지 마세요*.
+*The same*을 회피·격식 도구로 쓰지 마세요.
 
 ```
 회피 (관료적):
@@ -269,7 +268,7 @@ in communications."
 
 ### Secondly, Thirdly, etc.
 
-*First, second, third*가 더 직접적. *Firstly, secondly*는 *과잉 격식*.
+*First*, *second*, *third*가 더 직접적입니다. *Firstly*, *secondly*는 과잉 격식입니다.
 
 ```
 회피: "Firstly, ... Secondly, ... Thirdly, ..."
@@ -278,7 +277,7 @@ in communications."
 
 ### Shall / Will
 
-*형식적 글*에서 *미래*는 *I shall*, *you / he will*. *결심·약속*은 *I will*. *회화*에서는 이 구분이 거의 *사라졌습니다*.
+형식적 글에서 미래는 *I shall*, *you / he will*입니다. 결심·약속은 *I will*입니다. 회화에서는 이 구분이 거의 사라졌습니다.
 
 ```
 격식 (전통):
@@ -292,11 +291,11 @@ in communications."
 "I'll be there."
 ```
 
-미국 영어는 *shall*을 거의 안 씁니다. *영국 영어*는 *형식*에 따라 남아 있음.
+미국 영어는 *shall*을 거의 안 씁니다. 영국 영어는 형식에 따라 남아 있습니다.
 
 ### So
 
-*강조 부사*로 *쓰지 마세요* — *so good*, *so warm*, *so delightful*.
+강조 부사로 쓰지 마세요 — *so good*, *so warm*, *so delightful* 같은 식으로 쓰면 안 됩니다.
 
 ```
 회피 (회화):
@@ -316,7 +315,7 @@ in communications."
 
 ### Split infinitive
 
-`to + adverb + verb` 형태는 *가능한 한* 피합니다. 다만 *분리하면 의미가 더 분명*해지는 경우는 *분리*합니다.
+`to + adverb + verb` 형태는 가능한 한 피합니다. 다만 분리하면 의미가 더 분명해지는 경우는 분리합니다.
 
 ```
 회피 (의미 모호):
@@ -333,13 +332,13 @@ in communications."
    ← "to double more than the output"은 어색
 ```
 
-*Star Trek*의 유명 문장: *"to boldly go where no man has gone before"*. *Split infinitive*이지만 *수용*되었습니다.
+*Star Trek*의 유명 문장 "to boldly go where no man has gone before"는 split infinitive이지만 수용되었습니다.
 
-현대 영어 문법학자 대부분이 *split infinitive 규칙*을 *과거의 미신*으로 봅니다. 그러나 *Strunk-White 학파*는 *피하는 편*.
+현대 영어 문법학자 대부분이 split infinitive 규칙을 과거의 미신으로 봅니다. 그러나 Strunk-White 학파는 피하는 편입니다.
 
 ### State
 
-*Say, remark*의 단순 대체어로 *쓰지 마세요*. *Express fully or clearly*의 의미일 때만.
+*Say*나 *remark*의 단순 대체어로 쓰지 마세요. *Express fully or clearly*의 의미일 때만 씁니다.
 
 ```
 회피 (단순 say 대체):
@@ -356,7 +355,7 @@ in communications."
 
 ### Student body
 
-*거의 항상 students*가 더 낫습니다.
+거의 항상 *students*가 더 낫습니다.
 
 ```
 회피: "The student body voted on the proposal."
@@ -395,23 +394,23 @@ the human race   →    humans / people
 
 ## 자기 글 점검
 
-- [ ] 명사를 *함부로 동사화*하지 않았는가?
-- [ ] "One"의 받음이 *one's*인가? (his / her 아님)
+- [ ] 명사를 함부로 동사화하지 않았는가?
+- [ ] "One"의 받음이 *one's*인가? (*his / her* 아님)
 - [ ] "One of the most" 진부 패턴 자제?
-- [ ] "-oriented" 같은 모호 형용사 *구체화*?
-- [ ] "Personalize, possess" 자제?
-- [ ] "Prestigious, presently" 과장 자제?
+- [ ] "-oriented" 같은 모호 형용사 구체화?
+- [ ] "Personalize", "possess" 자제?
+- [ ] "Prestigious", "presently" 과장 자제?
 - [ ] "Regretful / regrettable" 구분?
-- [ ] "Respective" 거의 항상 *제거*?
-- [ ] "Firstly" -- "First"
-- [ ] "So good, so warm" -- very / excellent
+- [ ] "Respective" 거의 항상 제거?
+- [ ] "Firstly"를 "First"로?
+- [ ] "So good", "so warm"을 *very* 또는 *excellent*로?
 - [ ] Split infinitive 자제 (의미가 살아나면 OK)
-- [ ] "State"가 *진짜 격식 진술*인가?
-- [ ] "Student body" -- students
+- [ ] "State"가 진짜 격식 진술인가?
+- [ ] "Student body"를 *students*로?
 
 ## 다음 항목 예고
 
-다음 — **Words T~Z** (Thanking you in advance, Type, Unique, While, Whose 등).
+다음은 **Words T~Z**입니다 (Thanking you in advance, Type, Unique, While, Whose 등).
 
 ## 관련 항목
 

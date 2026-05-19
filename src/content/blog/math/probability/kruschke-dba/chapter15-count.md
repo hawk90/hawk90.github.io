@@ -1,6 +1,6 @@
 ---
 title: "Ch 15: Count Predicted Variable"
-date: 2030-05-01T15:00:00
+date: 2026-05-15T15:00:00
 description: "Poisson·negative binomial·zero-inflated — count data."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 15

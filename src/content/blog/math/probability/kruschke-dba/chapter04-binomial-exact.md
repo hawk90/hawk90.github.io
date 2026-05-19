@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Inferring a Binomial Probability"
-date: 2030-05-01T04:00:00
+date: 2026-05-15T04:00:00
 description: "Beta-binomial conjugate — 분석적 Bayesian 한 사례."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 4

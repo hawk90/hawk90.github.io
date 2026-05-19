@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: 전력 관리 — Self-Refresh, Power-Down"
-date: 2026-08-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "DDR 메모리의 전력 관리: Self-Refresh, Power-Down 모드, LPDDR 저전력 기법"
 series: "DDR Memory Deep Dive"
 seriesOrder: 10

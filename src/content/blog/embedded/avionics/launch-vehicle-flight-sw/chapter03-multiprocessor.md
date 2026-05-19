@@ -1,6 +1,6 @@
 ---
 title: "Ch 3: 멀티프로세서 SW — AMP·SMP·OpenAMP·RPMsg in LV"
-date: 2026-05-27T03:00:00
+date: 2026-05-18T03:00:00
 description: "발사체 heterogeneous SoC의 SW 협업 패턴. AMP·SMP·OpenAMP·RPMsg·remoteproc. Fault isolation."
 series: "Launch Vehicle Flight Software"
 seriesOrder: 3

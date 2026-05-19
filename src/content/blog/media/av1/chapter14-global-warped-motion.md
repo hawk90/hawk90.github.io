@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: Global & Warped Motion"
-date: 2025-10-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "AV1의 Global/Warped Motion — 아핀 변환의 4가지 모델, Local Warp, OBMC의 원리와 구현."
 tags: [AV1, Video, Codec, Global Motion, Warped Motion, OBMC]
 series: "AV1"

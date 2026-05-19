@@ -1,6 +1,6 @@
 ---
 title: "항목 36: 비동기성이 필수라면 std::launch::async를 명시하라"
-date: 2025-01-06T12:00:00
+date: 2026-05-04T12:00:00
 description: "std::async의 기본 정책이 가져오는 미묘한 함정 — deferred로 떨어지면 polling 무한 루프."
 tags: [C++, Concurrency, std::async, launch policy, Modern C++]
 series: "Effective Modern C++"

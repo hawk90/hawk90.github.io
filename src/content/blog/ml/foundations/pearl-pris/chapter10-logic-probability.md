@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Logic and Probability"
-date: 2029-11-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "First-order logic + probability — 통합의 시도."
 series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 10

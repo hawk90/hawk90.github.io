@@ -1,6 +1,6 @@
 ---
 title: "Ch 7.1: Flex Bus PHY — PCIe 7.0·128 GT/s"
-date: 2026-01-01T16:00:00
+date: 2026-05-16T16:00:00
 description: "스펙 §6 — PHY signaling·PAM4·FEC."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 16

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: 아키텍처 — 셀, Bank, Row, Column, Rank"
-date: 2026-08-01T02:00:00
+date: 2026-05-16T02:00:00
 description: "DDR 메모리의 물리적 구조: 메모리 셀부터 Bank, Row, Column, Rank까지의 계층 구조"
 series: "DDR Memory Deep Dive"
 seriesOrder: 1

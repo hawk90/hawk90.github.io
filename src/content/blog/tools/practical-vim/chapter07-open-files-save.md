@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Open Files and Save Them"
-date: 2025-08-15T07:00:00
+date: 2026-05-17T07:00:00
 description: ":edit / :find. netrw. :write 변형. 권한 없을 때 sudo trick."
 tags: [Vim, File, netrw]
 series: "Practical Vim"

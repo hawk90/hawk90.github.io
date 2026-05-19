@@ -1,6 +1,6 @@
 ---
 title: "1.4 유한의 끝에서"
-date: 2026-05-09T15:52:35
+date: 2026-05-15T15:52:35
 description: "여섯 약속을 손에 쥐고 모든 집합 을 차례로 만들어 보자."
 tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"

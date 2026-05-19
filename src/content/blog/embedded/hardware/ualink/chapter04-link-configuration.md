@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: 링크 구성 — x1·x2·x4"
-date: 2026-12-01T04:00:00
+date: 2026-05-19T04:00:00
 description: "Lane width·bandwidth·power — 칩 면적과의 trade-off."
 series: "UALink 심화"
 seriesOrder: 4

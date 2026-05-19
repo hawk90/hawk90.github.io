@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Bufferization 패스"
-date: 2027-07-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Tensor → memref 변환 — value semantics에서 memory로."
 series: "MLIR 심화"
 seriesOrder: 10

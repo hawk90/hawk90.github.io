@@ -1,6 +1,6 @@
 ---
 title: "Tip 5: Don't Live with Broken Windows"
-date: 2026-05-13T05:00:00
+date: 2026-05-11T05:00:00
 description: "깨진 창문과 살지 마라 — 작은 부패가 큰 부패를 부른다. 즉시 고치거나, 표시하라."
 series: "The Pragmatic Programmer"
 seriesOrder: 5

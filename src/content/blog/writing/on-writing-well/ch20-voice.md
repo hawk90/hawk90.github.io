@@ -1,6 +1,6 @@
 ---
 title: "Chapter 20: The Sound of Your Voice"
-date: 2026-05-18T20:00:00
+date: 2026-05-14T20:00:00
 description: "자기 voice 찾기는 평생의 작업입니다. 한 권의 책 안에서 한 voice를 유지해야 합니다."
 series: "On Writing Well"
 seriesOrder: 20

@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: PL Acceleration — HLS·AXI DMA Workflow"
-date: 2026-08-01T10:00:00
+date: 2026-05-19T10:00:00
 description: "SW 관점에서 PL 가속기 호출하기 — HLS IP·AXI DMA·register map."
 series: "The Zynq Book"
 seriesOrder: 10

@@ -1,6 +1,6 @@
 ---
 title: "Part 1-04: 코드 크기 분석"
-date: 2026-05-13T04:00:00
+date: 2026-05-07T04:00:00
 description: "size, nm, objdump, bloaty — 어디서 어떤 크기가 오는지 측정하는 도구. bloat 추적의 표준 워크플로."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 4

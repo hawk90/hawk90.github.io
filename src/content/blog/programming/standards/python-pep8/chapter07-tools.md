@@ -1,6 +1,6 @@
 ---
 title: "Ch 7: Tools"
-date: 2025-05-14T07:00:00
+date: 2026-05-18T07:00:00
 description: "Black, flake8, mypy, isort, ruff. 자동 포맷팅, 린팅, 타입 체크 도구 체인."
 tags: [Python, PEP8, Black, flake8, mypy, ruff, Tools]
 series: "Python Style Guide (PEP 8)"

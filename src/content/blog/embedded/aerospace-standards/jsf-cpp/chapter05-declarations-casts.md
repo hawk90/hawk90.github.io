@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Declarations, Initialization, Casts, Expressions"
-date: 2025-09-30T06:00:00
+date: 2026-05-18T06:00:00
 description: "JSF C++ — 선언 정책, 명시 초기화, C-style cast 금지, 표현식 평가, sizeof 함정."
 tags: [jsf-cpp, declarations, initialization, casts, expressions, sizeof, static-cast]
 series: "JSF C++"

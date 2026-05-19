@@ -1,6 +1,6 @@
 ---
 title: "Ch 4: Classes"
-date: 2025-05-13T04:00:00
+date: 2026-05-18T04:00:00
 description: "Constructors / Implicit Conversion / Copyable-Movable / Struct vs Class / Inheritance / Operator Overloading / Access / Declaration Order."
 tags: [Google, C++, Style-Guide, Class, Inheritance]
 series: "Google C++ Style"

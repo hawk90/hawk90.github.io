@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: DRAM 초기화 — controller programming과 training"
-date: 2026-05-18T09:00:00
+date: 2026-05-09T09:00:00
 description: "DDR controller 초기화 시퀀스 — 레지스터 프로그래밍, training, 보드별 파라미터의 위치."
 series: "Bootloader Internals"
 seriesOrder: 9

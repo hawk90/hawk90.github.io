@@ -1,6 +1,6 @@
 ---
 title: "Chapter 8: Unity"
-date: 2026-05-18T08:00:00
+date: 2026-05-14T08:00:00
 description: "글의 통일성 — 어조, 시제, 대명사, 관점. 한 글에서 일관되게 유지해야 할 네 가지."
 series: "On Writing Well"
 seriesOrder: 8

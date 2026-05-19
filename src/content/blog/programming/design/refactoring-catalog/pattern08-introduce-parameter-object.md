@@ -1,6 +1,6 @@
 ---
 title: "Pattern 8: Introduce Parameter Object"
-date: 2026-06-01T08:00:00
+date: 2026-05-02T08:00:00
 description: "여러 인자가 함께 다니면 객체로 묶어 잠재 도메인 객체를 표면화한다."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 8

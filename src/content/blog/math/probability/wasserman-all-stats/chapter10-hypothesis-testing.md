@@ -1,6 +1,6 @@
 ---
 title: "Ch 10: Hypothesis Testing and p-values"
-date: 2029-03-01T10:00:00
+date: 2026-05-16T10:00:00
 description: "Type I·II error·Wald·LRT·permutation."
 series: "All of Statistics"
 seriesOrder: 10

@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: Background / C++ Version / Magic"
-date: 2025-05-13T01:00:00
+date: 2026-05-18T01:00:00
 description: "Goals of the Style Guide, C++ Version 정책, Google-Specific Magic (cpplint) — 메타와 철학."
 tags: [Google, C++, Style-Guide, Background, Version, cpplint]
 series: "Google C++ Style"

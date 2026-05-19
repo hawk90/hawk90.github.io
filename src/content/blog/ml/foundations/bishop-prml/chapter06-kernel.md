@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Kernel Methods"
-date: 2029-07-01T06:00:00
+date: 2026-05-16T06:00:00
 description: "Dual representation·kernel construction·Gaussian Process."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 6

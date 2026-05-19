@@ -1,6 +1,6 @@
 ---
 title: "Pattern 16: Extract Class"
-date: 2026-06-01T16:00:00
+date: 2026-05-02T16:00:00
 description: "Class가 너무 많은 책임을 질 때 일부를 새 class로 분리한다 — SRP."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 16

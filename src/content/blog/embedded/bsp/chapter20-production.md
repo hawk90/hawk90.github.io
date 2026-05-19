@@ -1,6 +1,6 @@
 ---
 title: "Ch 20: 양산 환경 — CI/CD, 재현 가능 빌드, 서명"
-date: 2026-05-20T20:00:00
+date: 2026-05-09T20:00:00
 description: "BSP를 양산으로 옮기는 단계 — CI 빌드, 재현성, 코드 서명, 키 관리."
 series: "BSP Development"
 seriesOrder: 20

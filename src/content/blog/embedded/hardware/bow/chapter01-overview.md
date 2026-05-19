@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: BoW 개요 — 오픈소스 칩렛 인터페이스"
-date: 2027-02-01T01:00:00
+date: 2026-05-16T01:00:00
 description: "Bunch of Wires — OCP가 만든 저비용 D2D 표준."
 series: "BoW 개요"
 seriesOrder: 1

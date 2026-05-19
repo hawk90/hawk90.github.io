@@ -1,6 +1,6 @@
 ---
 title: "Pattern 26: Slide Statements"
-date: 2026-06-02T02:00:00
+date: 2026-05-02T02:00:00
 description: "관련 코드를 가까이 — 가독성과 다음 리팩토링의 발판."
 series: "Refactoring Catalog (Fowler 2nd ed)"
 seriesOrder: 26

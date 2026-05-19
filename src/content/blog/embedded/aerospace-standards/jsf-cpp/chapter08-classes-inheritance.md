@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Inheritance, Virtual, RTTI 금지"
-date: 2025-09-30T09:00:00
+date: 2026-05-18T09:00:00
 description: "JSF C++ — 단일 상속, virtual function 정책, 다중 상속 제한, RTTI 금지, dynamic_cast 회피."
 tags: [jsf-cpp, inheritance, virtual, multiple-inheritance, rtti, dynamic-cast]
 series: "JSF C++"

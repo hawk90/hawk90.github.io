@@ -1,6 +1,6 @@
 ---
 title: "가이드라인 13: 디자인 패턴은 어디에나 있다"
-date: 2026-05-13T13:00:00
+date: 2026-05-02T13:00:00
 description: "C++ 표준 라이브러리 곳곳에 패턴이 있다. std::function의 Type Erasure, std::visit의 Visitor, iterator의 Iterator를 알아보는 일."
 tags: [C++, Software Design, Design Patterns, Standard Library]
 series: "C++ Software Design"

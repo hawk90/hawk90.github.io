@@ -1,6 +1,6 @@
 ---
 title: "DSA 37: 캐시 친화 자료구조 — 메모리 지역성의 위력"
-date: 2026-03-02T13:00:00
+date: 2026-05-15T13:00:00
 description: "이론 시간 복잡도가 같아도 캐시 친화 차이로 10~100배 — vector vs list 실측."
 tags: [Data Structure, Algorithm, Cache, Performance]
 series: "Data Structures and Algorithms"

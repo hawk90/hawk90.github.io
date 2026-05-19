@@ -1,6 +1,6 @@
 ---
 title: "Ch 5: Symbol·Stream Codes"
-date: 2029-02-01T05:00:00
+date: 2026-05-16T05:00:00
 description: "Huffman·arithmetic·LZ — 압축 알고리즘의 정수."
 series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 5

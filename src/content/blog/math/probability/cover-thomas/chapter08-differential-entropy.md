@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: Differential Entropy"
-date: 2029-01-01T08:00:00
+date: 2026-05-16T08:00:00
 description: "연속 분포의 entropy — 이산과의 미묘한 차이."
 series: "Elements of Information Theory"
 seriesOrder: 8

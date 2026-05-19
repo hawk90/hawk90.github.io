@@ -1,6 +1,6 @@
 ---
 title: "Ch 4.2: CXL.mem — S2M DRS·NDR"
-date: 2026-01-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "스펙 §3 mem — Subordinate-to-Master responses."
 series: "CXL 4.0 Spec Full Review"
 seriesOrder: 9

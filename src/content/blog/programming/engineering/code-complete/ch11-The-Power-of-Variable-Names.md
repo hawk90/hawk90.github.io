@@ -1,6 +1,6 @@
 ---
 title: "Chapter 11: The Power of Variable Names"
-date: 2025-06-20T11:00:00
+date: 2026-05-11T11:00:00
 description: "변수 이름 — 9~15 chars (HARD DATA), 의도 묘사, 컨벤션, 5 differentiation, 17 회피 함정."
 series: "Code Complete"
 seriesOrder: 11

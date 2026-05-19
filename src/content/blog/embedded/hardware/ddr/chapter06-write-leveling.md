@@ -1,6 +1,6 @@
 ---
 title: "Ch 6: Write Leveling — DQS-CLK 정렬"
-date: 2026-08-01T07:00:00
+date: 2026-05-16T07:00:00
 description: "DDR Write Leveling: DQS 스트로브와 CLK의 타이밍 정렬 원리와 구현"
 series: "DDR Memory Deep Dive"
 seriesOrder: 6

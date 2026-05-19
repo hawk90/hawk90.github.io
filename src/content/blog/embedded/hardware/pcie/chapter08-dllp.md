@@ -1,6 +1,6 @@
 ---
 title: "Ch 8: DLLP — Data Link Layer Packet"
-date: 2026-06-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "DLLP 구조와 역할 — Ack/Nak, Flow Control, Replay Buffer, 신뢰성 보장"
 series: "PCIe Deep Dive"
 seriesOrder: 8

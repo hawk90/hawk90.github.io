@@ -1,6 +1,6 @@
 ---
 title: "Ch 9: Mixture Models and EM"
-date: 2029-07-01T09:00:00
+date: 2026-05-16T09:00:00
 description: "K-means·Gaussian mixture·EM algorithm·variational EM."
 series: "Pattern Recognition and Machine Learning"
 seriesOrder: 9

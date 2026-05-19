@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: 부트로그 디버깅"
-date: 2026-05-20T11:00:00
+date: 2026-05-09T11:00:00
 description: "부트 실패 패턴 카탈로그 — 시리얼 garbage, hang, panic, late hang의 대응."
 series: "BSP Development"
 seriesOrder: 11

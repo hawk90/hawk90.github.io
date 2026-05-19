@@ -1,6 +1,6 @@
 ---
 title: "Ch 11: Reflections, Elaborations, and Discussions"
-date: 2029-12-01T11:00:00
+date: 2026-05-16T11:00:00
 description: "FAQ·비판 응답·미해결 — Pearl의 자기 반성."
 series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 11

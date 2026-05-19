@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: UALink 개요 — 오픈 GPU 인터커넥트"
-date: 2026-12-01T01:00:00
+date: 2026-05-19T01:00:00
 description: "NVLink 대안 — 75개사가 모인 open scaling interconnect."
 series: "UALink 심화"
 seriesOrder: 1

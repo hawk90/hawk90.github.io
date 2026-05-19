@@ -1,6 +1,6 @@
 ---
 title: "Ch 1: ARMv8-A Overview·Variants·History"
-date: 2026-03-01T01:00:00
+date: 2026-05-17T01:00:00
 description: "ARMv8-A 아키텍처 소개·variants·8.1-8.9 확장 history."
 series: "ARMv8-A Architecture Reference Manual"
 seriesOrder: 1

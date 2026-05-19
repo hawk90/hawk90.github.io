@@ -1,6 +1,6 @@
 ---
 title: "Ch 2.4: Temporal Unit과 Frame Type"
-date: 2025-10-01T03:04:00
+date: 2026-05-16T03:04:00
 description: "Temporal Unit의 정의, KEY/INTER/INTRA_ONLY/SWITCH 4가지 프레임 타입, show_frame과 show_existing_frame의 정확한 의미."
 tags: [AV1, Video, Codec, TemporalUnit, FrameType]
 series: "AV1"

@@ -1,6 +1,6 @@
 ---
 title: "Ch 21: Clustering"
-date: 2029-05-01T21:00:00
+date: 2026-05-16T21:00:00
 description: "K-means·EM·hierarchical·spectral — 비지도 군집화."
 series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 21

@@ -1,6 +1,6 @@
 ---
 title: "Ch 17: 디바이스 퍼징"
-date: 2025-09-01T17:00:00
+date: 2026-05-17T17:00:00
 description: "Syzkaller·QEMU device fuzzer — 가상 디바이스로 driver 취약점 발견."
 tags: [QEMU, fuzzing, syzkaller, security]
 series: "QEMU Fake Device Driver"

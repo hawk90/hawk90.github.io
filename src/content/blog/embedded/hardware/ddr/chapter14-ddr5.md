@@ -1,6 +1,6 @@
 ---
 title: "Ch 14: DDR5 — 듀얼 채널, DFE, 향상된 RAS"
-date: 2026-08-01T15:00:00
+date: 2026-05-16T15:00:00
 description: "DDR5의 새로운 기능: DIMM 내 듀얼 채널, Decision Feedback Equalization, On-die ECC"
 series: "DDR Memory Deep Dive"
 seriesOrder: 14

@@ -1,6 +1,6 @@
 ---
 title: "6-01: Edge Inference — Cloud vs Edge·Latency·Privacy·HW Spectrum"
-date: 2026-05-21T01:00:00
+date: 2026-05-07T01:00:00
 description: "Edge inference가 cloud 대비 언제 답인지, MCU부터 server-class edge까지 하드웨어 스펙트럼과 프레임워크 선택, 3-stage pipeline 설계를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 31

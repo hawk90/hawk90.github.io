@@ -1,6 +1,6 @@
 ---
 title: "4-04: UIO·VFIO — User-Space Driver와 IOMMU 격리"
-date: 2026-05-20T17:00:00
+date: 2026-05-07T17:00:00
 description: "UIO·VFIO로 user space에서 hardware를 다루는 방법, IOMMU 기반 DMA 안전성, DPDK·SPDK 사용 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 22
