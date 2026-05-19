@@ -5,12 +5,52 @@ description: "C++17 execution policy — seq / par / par_unseq / unseq. std::red
 tags: [C++, C, Concurrency, Parallel Algorithms, Execution Policy]
 series: "C++ Concurrency in Action"
 seriesOrder: 10
-draft: true
+draft: false
 ---
 
 C++17은 표준 알고리즘에 병렬 실행을 추가했다. 실행 정책 하나로 순차/병렬/벡터화를 선택할 수 있다.
 
-## 10.1 실행 정책 (Execution Policy)
+## 10.1 표준 라이브러리 병렬화
+
+### 세 가지 차원
+
+Williams는 표준 알고리즘에 적용 가능한 실행 모델을 세 차원으로 정리한다. 같은 알고리즘이라도 어느 차원을 활성화하느냐에 따라 의미가 달라진다.
+
+| 차원 | 무엇이 동시에 진행되나 | 하드웨어 자원 |
+|------|----------------------|-----------------|
+| 순차 (sequential) | 아무것도 동시 진행되지 않음 | 단일 스레드 |
+| 벡터화 (vectorization) | 한 스레드 안에서 여러 데이터 처리 | SIMD 레지스터 (SSE/AVX/NEON) |
+| 병렬 (parallelism) | 여러 스레드에서 동시 처리 | 멀티 코어 |
+| 벡터 병렬 (vector parallelism) | 여러 스레드 + 각 스레드의 SIMD | 멀티 코어 + SIMD |
+
+순차는 명령이 소스 코드 순서대로 한 스레드에서 실행된다. 벡터화는 같은 연산을 여러 데이터에 한 명령으로 적용하는 SIMD 기반 모델이다. 병렬은 작업을 여러 스레드에 분배한다. 벡터 병렬은 둘을 합쳐 가장 공격적인 형태가 된다.
+
+### 동기
+
+표준 라이브러리에 병렬을 도입한 동기는 두 가지다. 첫째, 데이터 병렬 패턴이 충분히 일반적이라 라이브러리 수준의 추상화가 가능하다. 둘째, 직접 `std::thread`로 분할하면 청크 크기, 작업 분배, 합치기 코드가 매번 반복된다. 알고리즘 한 줄에 정책만 끼우면 컴파일러와 표준 라이브러리가 그 부담을 떠안는다.
+
+```cpp
+// 직접 분할 — 매번 반복되는 보일러플레이트
+auto chunk_size = data.size() / num_threads;
+std::vector<std::thread> workers;
+for (size_t i = 0; i < num_threads; ++i) {
+    workers.emplace_back([&, i] {
+        for (auto j = i * chunk_size; j < (i + 1) * chunk_size; ++j) {
+            f(data[j]);
+        }
+    });
+}
+for (auto& t : workers) t.join();
+
+// 실행 정책 — 한 줄
+std::for_each(std::execution::par, data.begin(), data.end(), f);
+```
+
+### 책임 분기
+
+라이브러리가 모든 책임을 떠안지는 않는다. Williams는 *데이터 레이스 회피*와 *예외 의미*는 사용자 책임으로 남는다고 강조한다. 정책은 라이브러리가 무엇을 할 수 있는지 *허용*할 뿐, 사용자가 넘긴 함수 객체의 안전성은 사용자가 보장해야 한다.
+
+## 10.2 실행 정책 (Execution Policy)
 
 ### 네 가지 정책
 
@@ -52,6 +92,57 @@ std::sort(std::execution::par, data.begin(), data.end());
 // 병렬 + 벡터화
 std::sort(std::execution::par_unseq, data.begin(), data.end());
 ```
+
+### std::execution::seq — 순차 실행
+
+`seq`는 호출 스레드 위에서 알고리즘을 직렬로 실행한다. 정책 없는 오버로드와 동일한 의미적 보증을 제공하되, 정책 인수 자리에 명시적으로 의도를 드러낼 수 있다는 차이가 있다.
+
+```cpp
+std::vector<int> v = {3, 1, 4, 1, 5, 9, 2, 6};
+std::for_each(std::execution::seq, v.begin(), v.end(),
+              [](int x) { std::cout << x << ' '; });
+// 출력 순서는 반복자 순서와 동일하게 보장된다
+```
+
+`seq`는 함수 객체에 동시성 요구를 부과하지 않는다. 함수 객체가 호출 스레드에서 비공유 상태를 다루듯 작성돼 있어도 안전하다. 락을 잡거나 외부 상태를 변경해도 데이터 레이스가 발생하지 않는다. 정책 없는 알고리즘과 다른 점은, 구현이 *예외에 대해 `std::terminate`를 호출할 권리*를 가진다는 것뿐이다.
+
+### std::execution::par — 멀티 스레드
+
+`par`는 호출 스레드와 라이브러리가 생성한 추가 스레드들 사이에 작업을 분배한다. 같은 스레드 안에서는 호출 순서가 보장되지만, 서로 다른 스레드 사이에서는 보장되지 않는다.
+
+```cpp
+std::atomic<int> counter{0};
+std::for_each(std::execution::par, v.begin(), v.end(),
+              [&](int) { counter.fetch_add(1, std::memory_order_relaxed); });
+```
+
+함수 객체는 *서로 다른 스레드에서 동시에 호출돼도 안전*해야 한다. 공유 변수에 접근한다면 `std::atomic`이나 뮤텍스가 필요하다. SIMD 변환은 보장되지 않으므로, 함수 객체 안에서 락을 잡는 것은 합법이다. 단, 락이 직렬화 지점이 되어 병렬 효과를 잠식한다는 점은 별개의 성능 문제다.
+
+### std::execution::par_unseq — 멀티 스레드 + SIMD
+
+`par_unseq`는 가장 공격적인 정책이다. 라이브러리는 작업을 여러 스레드에 분배하는 동시에, 각 스레드 안에서 함수 객체의 호출을 *인터리브*하거나 SIMD 명령으로 융합할 수 있다.
+
+```cpp
+std::transform(std::execution::par_unseq, v.begin(), v.end(), out.begin(),
+               [](int x) { return x * x + 1; });
+```
+
+`par_unseq`의 제약은 엄격하다. 함수 객체는 *vectorization-safe*해야 한다. 한 함수 객체의 호출이 끝나기 전에 다른 호출이 시작될 수 있기 때문에, 호출 사이에 동기화 객체를 잡는 것은 허용되지 않는다. 뮤텍스 lock, atomic 외 동기화, 메모리 할당 호출 등 동기화를 동반하는 동작은 정의되지 않은 동작이다. SIMD 친화적인 산술과 atomic 연산만 안전하다.
+
+### unseq — SIMD만 (C++20)
+
+C++20은 `std::execution::unseq`를 추가했다. 단일 스레드에서 벡터화만 허용한다. 스레드 생성 오버헤드가 없어 데이터가 작거나 이미 병렬 컨텍스트 안에 있을 때 유용하다. 함수 객체 제약은 `par_unseq`와 동일하다.
+
+### 정책별 책임 분기 요약
+
+| 정책 | 함수 객체에 요구되는 것 | 라이브러리가 약속하는 것 |
+|------|------------------------|-------------------------|
+| `seq` | 호출 스레드에서 동작하면 충분 | 반복자 순서대로 호출 |
+| `par` | 다른 스레드 동시 호출 안전 | 작업을 여러 스레드에 분배 |
+| `par_unseq` | vectorization-safe (락·할당 금지) | 스레드 + SIMD 융합 |
+| `unseq` | vectorization-safe | 단일 스레드 SIMD |
+
+데이터 레이스가 발생하면 사용자 책임이다. 라이브러리는 함수 객체가 정책 제약을 만족한다고 *가정*하고 최적화를 수행한다.
 
 ### C11의 병렬 알고리즘
 
@@ -155,7 +246,70 @@ void parallel_for_each_omp(int* data, size_t n) {
 | 병렬 sort | `std::sort(par, ...)` | 직접 구현 필요 |
 | SIMD 힌트 | `par_unseq`, `unseq` | 컴파일러 지시자 |
 
-## 10.2 병렬 알고리즘 카탈로그
+## 10.3 표준 라이브러리의 병렬 알고리즘
+
+### 알고리즘 카탈로그 개요
+
+C++17은 기존 `<algorithm>`과 `<numeric>` 알고리즘의 대다수에 실행 정책 오버로드를 추가했다. Williams는 책의 후반부에서 가장 자주 쓰이는 네 알고리즘에 집중한다: `for_each`, `sort`, `reduce`, `transform_reduce`. 나머지는 같은 패턴을 따른다.
+
+### Listing 10.1 — 병렬 std::for_each
+
+`for_each`는 가장 단순한 병렬 알고리즘이다. 시퀀스의 각 요소에 함수를 적용하고, 함수 반환값을 사용하지 않는다. 부수 효과를 유발하는 작업에 적합하다.
+
+```cpp
+#include <algorithm>
+#include <execution>
+#include <vector>
+
+void process_in_parallel(std::vector<int>& v) {
+    std::for_each(std::execution::par, v.begin(), v.end(),
+                  [](int& x) { x = process(x); });
+}
+```
+
+Williams가 강조하는 핵심은 두 가지다. 첫째, `for_each`는 반환값을 무시하므로 정책 없는 버전과 의미가 거의 동일하다. 둘째, 함수 객체가 *어느 스레드에서 호출될지 알 수 없으므로* 스레드 로컬 상태에 의존해서는 안 된다.
+
+```cpp
+// 위험 — 스레드 로컬 카운터는 매 스레드마다 다른 인스턴스
+thread_local int local_counter = 0;
+std::for_each(std::execution::par, v.begin(), v.end(),
+              [](int& x) { x += local_counter++; });
+// 결과는 각 스레드의 청크 크기와 분배 방식에 따라 달라진다
+```
+
+### Listing 10.2 — 병렬 std::sort
+
+`sort`의 병렬 버전은 동일한 정렬 결과를 보장한다. 안정성은 보장되지 않으므로 안정 정렬이 필요하면 `stable_sort`의 병렬 오버로드를 쓴다.
+
+```cpp
+#include <algorithm>
+#include <execution>
+#include <vector>
+
+void parallel_quicksort(std::vector<int>& v) {
+    std::sort(std::execution::par, v.begin(), v.end());
+}
+```
+
+내부 구현은 일반적으로 *parallel quicksort*나 *parallel mergesort* 변형이다. Williams의 책 8장에서 직접 구현했던 work-stealing 기반 quicksort와 같은 아이디어를, 표준 라이브러리가 한 줄로 제공한다. 비교 함수는 *순수해야* 한다 — 외부 상태를 변경하면 race를 일으킨다.
+
+```cpp
+// 위험 — 비교 함수가 외부 카운터를 변경
+int comparisons = 0;
+std::sort(std::execution::par, v.begin(), v.end(),
+          [&](int a, int b) {
+              ++comparisons;  // 💥 data race
+              return a < b;
+          });
+
+// Good — atomic 카운터
+std::atomic<int> comparisons{0};
+std::sort(std::execution::par, v.begin(), v.end(),
+          [&](int a, int b) {
+              comparisons.fetch_add(1, std::memory_order_relaxed);
+              return a < b;
+          });
+```
 
 ### 변환/적용 알고리즘
 
@@ -256,7 +410,23 @@ std::transform_inclusive_scan(std::execution::par,
     [](int x) { return x * 2; });
 ```
 
-## 10.3 reduce vs accumulate
+## 10.4 reduce vs accumulate
+
+### 왜 새로운 알고리즘이 필요했나
+
+Williams는 `std::accumulate`를 *순서가 의미 있는* 좌접기로 정의한다. 즉 `accumulate`는 본질적으로 직렬 알고리즘이다. 병렬화하려면 *순서를 포기*해야 하고, 그래서 별도의 이름이 필요했다. `std::reduce`는 C++17에서 `<numeric>`에 추가된 *결합법칙을 가정하는* 리덕션이다.
+
+```cpp
+// accumulate — 순서 보장, 결합법칙 불필요
+//   (((init op a) op b) op c)
+T s1 = std::accumulate(v.begin(), v.end(), init, op);
+
+// reduce — 순서 불확정, 결합법칙 가정
+//   임의의 트리 구조로 op를 적용
+T s2 = std::reduce(std::execution::par, v.begin(), v.end(), init, op);
+```
+
+이 분리는 C++ 표준 라이브러리 설계의 한 사례다. *기존 알고리즘의 의미를 보존*하면서 *새 의미*를 별도 이름으로 추가하는 방식이다.
 
 ### 핵심 차이
 
@@ -311,7 +481,27 @@ float r = std::reduce(std::execution::par,
     floats.begin(), floats.end(), 0.0f);  // 1.0 또는 0.0
 ```
 
-## 10.4 transform_reduce 패턴
+## 10.5 transform_reduce 패턴
+
+### 왜 transform + reduce가 한 호출인가
+
+`reduce`와 `transform`을 따로 부르면 *중간 컨테이너*가 필요하다. 변환 결과를 어딘가에 저장한 뒤 다시 리덕션을 돌려야 한다. Williams는 이 패턴이 흔하기 때문에 `std::transform_reduce`가 *한 패스로 둘을 융합*한다고 설명한다. 컴파일러는 변환과 리덕션을 한 루프 안에서 인라인할 수 있고, 캐시 친화성이 개선된다.
+
+```cpp
+// 두 번의 패스 — 중간 컨테이너 필요
+std::vector<long long> squared(v.size());
+std::transform(std::execution::par, v.begin(), v.end(), squared.begin(),
+               [](int x) { return static_cast<long long>(x) * x; });
+long long s = std::reduce(std::execution::par, squared.begin(), squared.end(), 0LL);
+
+// 한 번의 패스 — transform_reduce
+long long s2 = std::transform_reduce(std::execution::par,
+                                     v.begin(), v.end(), 0LL,
+                                     std::plus<>{},
+                                     [](int x) { return static_cast<long long>(x) * x; });
+```
+
+`transform_reduce`도 reduce와 같은 결합/가환 요구를 그대로 받는다. 변환 함수는 *순수해야* 하며 부수 효과가 없어야 한다.
 
 ### 맵-리듀스 패턴
 
@@ -375,84 +565,7 @@ double mean = stats.sum / stats.count;
 double variance = (stats.sum_sq / stats.count) - (mean * mean);
 ```
 
-### C11 transform_reduce 구현
-
-C11에서 transform_reduce 패턴을 직접 구현한다.
-
-```c
-#include <threads.h>
-#include <stdlib.h>
-
-typedef struct {
-    double sum;
-    double sum_sq;
-    size_t count;
-} Stats;
-
-typedef struct {
-    const int* data;
-    size_t start;
-    size_t end;
-    Stats result;
-} TransformReduceArg;
-
-static int stats_worker(void* arg) {
-    TransformReduceArg* tra = (TransformReduceArg*)arg;
-    Stats s = {0, 0, 0};
-
-    for (size_t i = tra->start; i < tra->end; ++i) {
-        double x = (double)tra->data[i];
-        s.sum += x;
-        s.sum_sq += x * x;
-        s.count++;
-    }
-
-    tra->result = s;
-    return 0;
-}
-
-Stats parallel_stats(const int* data, size_t n, size_t num_threads) {
-    thrd_t* threads = malloc(sizeof(thrd_t) * num_threads);
-    TransformReduceArg* args = malloc(sizeof(TransformReduceArg) * num_threads);
-
-    size_t chunk_size = n / num_threads;
-
-    for (size_t i = 0; i < num_threads; ++i) {
-        args[i].data = data;
-        args[i].start = i * chunk_size;
-        args[i].end = (i == num_threads - 1) ? n : (i + 1) * chunk_size;
-        thrd_create(&threads[i], stats_worker, &args[i]);
-    }
-
-    Stats total = {0, 0, 0};
-    for (size_t i = 0; i < num_threads; ++i) {
-        thrd_join(threads[i], NULL);
-        total.sum += args[i].result.sum;
-        total.sum_sq += args[i].result.sum_sq;
-        total.count += args[i].result.count;
-    }
-
-    free(threads);
-    free(args);
-    return total;
-}
-
-int main(void) {
-    int data[1000000];
-    for (int i = 0; i < 1000000; ++i) data[i] = i;
-
-    Stats stats = parallel_stats(data, 1000000, 4);
-
-    double mean = stats.sum / stats.count;
-    double variance = (stats.sum_sq / stats.count) - (mean * mean);
-
-    printf("Mean: %f, Variance: %f\n", mean, variance);
-
-    return 0;
-}
-```
-
-## 10.5 스캔 알고리즘 (Prefix Sum)
+## 10.6 스캔 알고리즘 (Prefix Sum)
 
 ### inclusive vs exclusive
 
@@ -598,7 +711,7 @@ std::for_each(std::execution::par,
 int result_size = positions.back() + flags.back();  // 4
 ```
 
-## 10.6 예외 처리
+## 10.7 예외 처리
 
 ### 병렬 알고리즘의 예외
 
@@ -649,7 +762,7 @@ if (has_error && error) {
 }
 ```
 
-## 10.7 구현 고려사항
+## 10.8 구현 고려사항
 
 ### 라이브러리 지원
 
@@ -658,6 +771,33 @@ if (has_error && error) {
 - **GCC (libstdc++)**: Intel oneTBB 필요 (구 TBB). 컴파일 시 `g++ -std=c++17 -ltbb`
 - **Clang (libc++)**: PSTL 백엔드 필요. oneTBB 또는 OpenMP 사용
 - **MSVC**: 내장 구현, 추가 라이브러리 불필요
+
+### GCC libstdc++의 TBB 의존
+
+Williams는 표준이 *구현 방식*을 강제하지 않는다고 강조한다. 표준은 의미만 정의한다. GCC의 libstdc++는 Intel oneTBB(Threading Building Blocks)를 백엔드로 채택했다. 헤더 `<execution>`을 포함해도 링크 단계에서 `libtbb`를 함께 묶지 않으면 다음과 같은 오류를 본다.
+
+```text
+undefined reference to `tbb::detail::r1::initialize(...)'
+undefined reference to `__pstl::execution::v1::par'
+```
+
+이는 표준의 *바깥*에서 발생하는 문제다. 같은 코드가 MSVC에서는 곧장 빌드된다. MSVC는 PPL(Parallel Patterns Library) 기반의 내장 구현을 가진다. Clang의 libc++는 PSTL(Parallel STL) 백엔드를 따로 선택해야 한다.
+
+```bash
+# Ubuntu/Debian
+sudo apt install libtbb-dev
+g++ -std=c++17 -O3 program.cpp -ltbb
+
+# macOS Homebrew
+brew install tbb
+g++ -std=c++17 -O3 program.cpp -ltbb
+
+# CMake — 권장 방식
+find_package(TBB REQUIRED)
+target_link_libraries(my_app PRIVATE TBB::tbb)
+```
+
+`-ltbb`로 충분한 경우가 많지만, 정적 링크나 cross-compile 환경에서는 CMake의 `TBB::tbb` 타깃을 쓰는 것이 안전하다. 의존이 명시적으로 빌드 그래프에 들어간다.
 
 ### 빌드 설정
 
@@ -693,7 +833,7 @@ void parallel_for_each(Container& c, Func f) {
 }
 ```
 
-## 10.8 성능 가이드라인
+## 10.9 성능 가이드라인
 
 ### 언제 병렬을 사용할까
 
@@ -790,7 +930,7 @@ std::for_each(std::execution::par, data.begin(), data.end(),
 | 동기화 | 락 없이 가능한가? |
 | I/O | CPU 바운드인가? |
 
-## 10.9 C++20/23 확장
+## 10.10 C++20/23 확장
 
 ### C++20: unseq 정책
 
@@ -817,7 +957,7 @@ std::vector<int> filtered_vec(filtered.begin(), filtered.end());
 std::sort(std::execution::par, filtered_vec.begin(), filtered_vec.end());
 ```
 
-## 10.10 실전 예제
+## 10.11 실전 예제
 
 ### 이미지 처리
 

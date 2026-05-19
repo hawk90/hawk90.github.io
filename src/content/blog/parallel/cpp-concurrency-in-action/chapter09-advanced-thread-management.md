@@ -5,7 +5,7 @@ description: "thread pool, work stealing, interruption (cooperative), 스레드 
 tags: [C++, C, Concurrency, Thread Pool, Work Stealing]
 series: "C++ Concurrency in Action"
 seriesOrder: 9
-draft: true
+draft: false
 ---
 
 스레드를 생성하고 삭제하는 것은 비용이 든다. 스레드 풀을 사용하면 이 비용을 줄일 수 있다. 이 장에서는 고급 스레드 관리 기법을 다룬다.
@@ -23,108 +23,162 @@ draft: true
 | 확장성 | 제한적 | 우수 |
 | 자원 제어 | 어려움 | 용이 |
 
-### 기본 스레드 풀 구현
+### 가장 단순한 스레드 풀 (Listing 9.1)
+
+Williams는 책의 9.1.1에서 *fire-and-forget* 형태의 가장 단순한 풀로 시작한다. 작업은 `std::function<void()>`로 표현되고, 결과 회수도 예외 전달도 없다. 워커 스레드는 미리 생성해 두고 무한 루프로 큐에서 작업을 꺼낸다.
 
 ```cpp
+#include <atomic>
 #include <thread>
 #include <vector>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
 #include <functional>
-#include <future>
-#include <atomic>
 
+// threadsafe_queue는 Listing 6.2의 그것 (push / wait_and_pop / try_pop)
 class thread_pool {
-    std::vector<std::thread> workers_;
-    std::queue<std::function<void()>> tasks_;
+    std::atomic<bool> done_;
+    threadsafe_queue<std::function<void()>> work_queue_;
+    std::vector<std::thread> threads_;
+    join_threads joiner_;  // 소멸 시 모든 스레드 join (Listing 8.2)
 
-    std::mutex queue_mutex_;
-    std::condition_variable condition_;
-    std::atomic<bool> stop_{false};
+    void worker_thread() {
+        while (!done_) {
+            std::function<void()> task;
+            if (work_queue_.try_pop(task)) {
+                task();
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    }
 
 public:
-    explicit thread_pool(size_t num_threads = std::thread::hardware_concurrency()) {
-        for (size_t i = 0; i < num_threads; ++i) {
-            workers_.emplace_back([this] {
-                while (true) {
-                    std::function<void()> task;
-
-                    {
-                        std::unique_lock lock(queue_mutex_);
-                        condition_.wait(lock, [this] {
-                            return stop_ || !tasks_.empty();
-                        });
-
-                        if (stop_ && tasks_.empty()) {
-                            return;
-                        }
-
-                        task = std::move(tasks_.front());
-                        tasks_.pop();
-                    }
-
-                    task();
-                }
-            });
-        }
-    }
-
-    ~thread_pool() {
-        stop_ = true;
-        condition_.notify_all();
-        for (auto& worker : workers_) {
-            worker.join();
-        }
-    }
-
-    template<typename F, typename... Args>
-    auto submit(F&& f, Args&&... args) -> std::future<decltype(f(args...))> {
-        using return_type = decltype(f(args...));
-
-        auto task = std::make_shared<std::packaged_task<return_type()>>(
-            std::bind(std::forward<F>(f), std::forward<Args>(args)...)
-        );
-
-        std::future<return_type> result = task->get_future();
-
-        {
-            std::lock_guard lock(queue_mutex_);
-            if (stop_) {
-                throw std::runtime_error("submit on stopped thread_pool");
+    thread_pool() : done_(false), joiner_(threads_) {
+        unsigned const thread_count = std::thread::hardware_concurrency();
+        try {
+            for (unsigned i = 0; i < thread_count; ++i) {
+                threads_.emplace_back(&thread_pool::worker_thread, this);
             }
-            tasks_.emplace([task]() { (*task)(); });
+        } catch (...) {
+            done_ = true;
+            throw;
         }
+    }
 
-        condition_.notify_one();
-        return result;
+    ~thread_pool() { done_ = true; }
+
+    template<typename FunctionType>
+    void submit(FunctionType f) {
+        work_queue_.push(std::function<void()>(f));
     }
 };
 ```
+
+세 가지 포인트가 있다. 첫째, `done_` 플래그와 워커 큐를 *멤버 선언 순서*대로 두는 것이 중요하다. `joiner_`가 마지막에 와야 소멸 시 가장 먼저 호출되어 워커들을 안전하게 정리한다. 둘째, 생성자에서 예외가 발생하면 즉시 `done_=true`로 만들어 이미 만들어진 스레드들을 정지시킨다. 셋째, 빈 큐일 때 `yield()`로 양보하는 단순한 폴링이라 busy-wait에 가까운 동작이 된다.
+
+### 작업 완료를 기다리는 풀 (Listing 9.2)
+
+Listing 9.1은 결과를 회수할 방법이 없다. 책의 9.1.2는 `std::packaged_task<>`를 사용하여 결과와 예외를 `std::future`로 반환하는 풀을 만든다. 한 가지 문제는 `std::packaged_task`가 *이동 전용*이라 `std::function`에 넣을 수 없다는 점이다. Williams는 이를 위해 작은 type-erasure 래퍼를 둔다.
+
+```cpp
+class function_wrapper {
+    struct impl_base {
+        virtual void call() = 0;
+        virtual ~impl_base() {}
+    };
+
+    template<typename F>
+    struct impl_type : impl_base {
+        F f;
+        impl_type(F&& f_) : f(std::move(f_)) {}
+        void call() override { f(); }
+    };
+
+    std::unique_ptr<impl_base> impl_;
+
+public:
+    template<typename F>
+    function_wrapper(F&& f)
+        : impl_(new impl_type<F>(std::move(f))) {}
+
+    void operator()() { impl_->call(); }
+
+    function_wrapper() = default;
+    function_wrapper(function_wrapper&& other) noexcept
+        : impl_(std::move(other.impl_)) {}
+    function_wrapper& operator=(function_wrapper&& other) noexcept {
+        impl_ = std::move(other.impl_);
+        return *this;
+    }
+
+    function_wrapper(const function_wrapper&) = delete;
+    function_wrapper(function_wrapper&) = delete;
+    function_wrapper& operator=(const function_wrapper&) = delete;
+};
+```
+
+### 결과 반환 풀 (Listing 9.3)
+
+`function_wrapper`를 큐 원소로 사용하면 `packaged_task`를 그대로 큐에 넣을 수 있다.
+
+```cpp
+class thread_pool {
+    std::atomic<bool> done_;
+    threadsafe_queue<function_wrapper> work_queue_;
+    std::vector<std::thread> threads_;
+    join_threads joiner_;
+
+    void worker_thread() {
+        while (!done_) {
+            function_wrapper task;
+            if (work_queue_.try_pop(task)) {
+                task();
+            } else {
+                std::this_thread::yield();
+            }
+        }
+    }
+
+public:
+    template<typename FunctionType>
+    std::future<typename std::invoke_result_t<FunctionType>>
+    submit(FunctionType f) {
+        using result_type = std::invoke_result_t<FunctionType>;
+
+        std::packaged_task<result_type()> task(std::move(f));
+        std::future<result_type> res(task.get_future());
+        work_queue_.push(std::move(task));  // packaged_task → function_wrapper
+        return res;
+    }
+
+    // 생성자 / 소멸자는 Listing 9.1과 동일
+};
+```
+
+이 풀은 호출자가 `submit()`의 반환 `future`로 결과나 예외를 회수할 수 있다. Quick-sort 같은 분할 정복 알고리즘을 풀로 옮길 때 이 형태가 출발점이 된다.
 
 ### 사용 예제
 
 ```cpp
 int main() {
-    thread_pool pool(4);  // 4개 워커 스레드
+    thread_pool pool;  // hardware_concurrency() 만큼 워커
 
-    // 작업 제출
     std::vector<std::future<int>> results;
-
     for (int i = 0; i < 10; ++i) {
         results.push_back(pool.submit([i] {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             return i * i;
         }));
     }
 
-    // 결과 수집
-    for (auto& result : results) {
-        std::cout << result.get() << " ";
+    for (auto& r : results) {
+        std::cout << r.get() << ' ';
     }
-    // 출력: 0 1 4 9 16 25 36 49 64 81
+    // 0 1 4 9 16 25 36 49 64 81
 }
 ```
+
+### 동적 스레드 관리 (책의 권고)
+
+책은 9.1 마지막에서 풀 크기를 *런타임에* 조정하는 문제를 다룬다. 표준 라이브러리에는 별도 기능이 없으므로 직접 만들어야 한다. 두 가지 패턴이 일반적이다. 첫째, 워커가 일정 시간 idle이면 자발적으로 종료한다(`wait_for` 타임아웃). 둘째, 부하 측정값(큐 길이·평균 대기 시간)에 따라 dispatcher 스레드가 워커를 추가하거나 정지 플래그를 set한다. 두 패턴 모두 *워커 수의 단조 감소를 보장*하는 것이 어렵다. 책의 권고는 풀 크기 조정을 *시작 시 1회*로 제한하고, 정말 변동 부하라면 *역할별로 풀을 분리*하라는 것이다(예: compute pool은 hardware_concurrency 고정, I/O pool은 대용량). 동적 풀의 구체 구현은 9.5에서 다룬다.
 
 ### C11 기본 스레드 풀
 
@@ -269,70 +323,16 @@ int main(void) {
 
 ![Global queue vs Thread-local queue](/images/blog/cpp-concurrency-in-action/diagrams/ch09-global-vs-local-queue.svg)
 
-### Thread-Local Queue 구현
+### Thread-Local Queue 요점
 
-```cpp
-class thread_pool_local_queue {
-    struct thread_data {
-        std::queue<std::function<void()>> local_queue;
-        std::mutex queue_mutex;
-    };
+| 측면 | Global queue | Thread-local queue |
+|------|--------------|--------------------|
+| 락 경합 | 워커 수에 비례 | 낮음 |
+| Locality | 작업이 임의 워커로 | 같은 워커가 연속 처리 |
+| 부하 분산 | 자연스러움 | 한쪽에 쌓일 수 있음 |
+| 처리량 | 코어 수가 늘수록 한계 | 코어 확장에 강함 |
 
-    std::vector<std::thread> workers_;
-    std::vector<std::unique_ptr<thread_data>> thread_data_;
-    std::atomic<bool> stop_{false};
-    std::atomic<size_t> next_thread_{0};
-
-public:
-    explicit thread_pool_local_queue(size_t num_threads) {
-        thread_data_.reserve(num_threads);
-
-        for (size_t i = 0; i < num_threads; ++i) {
-            thread_data_.push_back(std::make_unique<thread_data>());
-        }
-
-        for (size_t i = 0; i < num_threads; ++i) {
-            workers_.emplace_back([this, i] {
-                auto& data = *thread_data_[i];
-
-                while (!stop_) {
-                    std::function<void()> task;
-
-                    {
-                        std::lock_guard lock(data.queue_mutex);
-                        if (!data.local_queue.empty()) {
-                            task = std::move(data.local_queue.front());
-                            data.local_queue.pop();
-                        }
-                    }
-
-                    if (task) {
-                        task();
-                    } else {
-                        std::this_thread::yield();
-                    }
-                }
-            });
-        }
-    }
-
-    ~thread_pool_local_queue() {
-        stop_ = true;
-        for (auto& w : workers_) {
-            w.join();
-        }
-    }
-
-    void submit(std::function<void()> task) {
-        // 라운드 로빈으로 분배
-        size_t idx = next_thread_.fetch_add(1) % workers_.size();
-        auto& data = *thread_data_[idx];
-
-        std::lock_guard lock(data.queue_mutex);
-        data.local_queue.push(std::move(task));
-    }
-};
-```
+Thread-local queue는 락 경합을 줄이지만 *부하 불균형* 문제를 낳는다. 다음 절의 work stealing이 이 문제의 표준 해법이다. Williams가 9.1.4에서 보이는 Listing 9.7이 정확히 이 통합 형태다.
 
 ## 9.3 Work Stealing
 
@@ -384,79 +384,143 @@ public:
 };
 ```
 
-### Work Stealing 스레드 풀
+### 책의 work-stealing 큐 (Listing 9.6)
+
+Williams는 책의 9.1.4에서 단일 소유자 + 다중 도둑을 가정한 단순한 deque 래퍼를 보여 준다. 소유자는 *앞*(front)을 LIFO로 쓰고, 도둑은 *뒤*(back)에서 FIFO로 꺼낸다.
 
 ```cpp
-class work_stealing_pool {
-    using task_type = std::function<void()>;
-
-    std::vector<std::thread> workers_;
-    std::vector<std::unique_ptr<work_stealing_queue<task_type>>> queues_;
-    std::atomic<bool> stop_{false};
-    std::atomic<size_t> index_{0};
-
-    static thread_local size_t my_index_;
+class work_stealing_queue {
+private:
+    using data_type = function_wrapper;
+    std::deque<data_type> the_queue_;
+    mutable std::mutex the_mutex_;
 
 public:
-    explicit work_stealing_pool(size_t num_threads = std::thread::hardware_concurrency()) {
-        queues_.reserve(num_threads);
-        for (size_t i = 0; i < num_threads; ++i) {
-            queues_.push_back(std::make_unique<work_stealing_queue<task_type>>());
-        }
+    work_stealing_queue() {}
+    work_stealing_queue(const work_stealing_queue&) = delete;
+    work_stealing_queue& operator=(const work_stealing_queue&) = delete;
 
-        for (size_t i = 0; i < num_threads; ++i) {
-            workers_.emplace_back([this, i] {
-                my_index_ = i;
-                worker_loop(i);
-            });
+    void push(data_type data) {
+        std::lock_guard<std::mutex> lock(the_mutex_);
+        the_queue_.push_front(std::move(data));
+    }
+
+    bool empty() const {
+        std::lock_guard<std::mutex> lock(the_mutex_);
+        return the_queue_.empty();
+    }
+
+    bool try_pop(data_type& res) {
+        std::lock_guard<std::mutex> lock(the_mutex_);
+        if (the_queue_.empty()) return false;
+        res = std::move(the_queue_.front());
+        the_queue_.pop_front();
+        return true;
+    }
+
+    bool try_steal(data_type& res) {
+        std::lock_guard<std::mutex> lock(the_mutex_);
+        if (the_queue_.empty()) return false;
+        res = std::move(the_queue_.back());
+        the_queue_.pop_back();
+        return true;
+    }
+};
+```
+
+소유자와 도둑이 *같은* 끝을 다투지 않으므로 락 경합이 줄어든다. 진짜 lock-free Chase-Lev deque로 가는 출발점이기도 하다.
+
+### Per-thread queue 풀 (Listing 9.7, 9.8)
+
+이제 풀이 워커마다 자신의 큐를 들고, 글로벌 큐는 fallback으로 둔다. 핵심은 `thread_local` 포인터로 각 워커가 자기 큐를 식별하는 것이다.
+
+```cpp
+class thread_pool {
+    using task_type = function_wrapper;
+
+    std::atomic_bool done_;
+    threadsafe_queue<task_type> pool_work_queue_;
+    std::vector<std::unique_ptr<work_stealing_queue>> queues_;
+    std::vector<std::thread> threads_;
+    join_threads joiner_;
+
+    static thread_local work_stealing_queue* local_work_queue_;
+    static thread_local unsigned my_index_;
+
+    void worker_thread(unsigned my_index) {
+        my_index_ = my_index;
+        local_work_queue_ = queues_[my_index_].get();
+        while (!done_) {
+            run_pending_task();
         }
     }
 
-    ~work_stealing_pool() {
-        stop_ = true;
-        for (auto& w : workers_) {
-            w.join();
+    bool pop_task_from_local_queue(task_type& task) {
+        return local_work_queue_ && local_work_queue_->try_pop(task);
+    }
+
+    bool pop_task_from_pool_queue(task_type& task) {
+        return pool_work_queue_.try_pop(task);
+    }
+
+    bool pop_task_from_other_thread_queue(task_type& task) {
+        for (unsigned i = 0; i < queues_.size(); ++i) {
+            unsigned const index = (my_index_ + i + 1) % queues_.size();
+            if (queues_[index]->try_steal(task)) return true;
         }
+        return false;
     }
 
-    void submit(task_type task) {
-        size_t idx = index_.fetch_add(1) % queues_.size();
-        queues_[idx]->push_front(std::move(task));
-    }
-
-private:
-    void worker_loop(size_t my_idx) {
-        while (!stop_) {
-            task_type task;
-
-            // 1. 자신의 큐에서 먼저 시도
-            if (auto t = queues_[my_idx]->pop_front()) {
-                task = std::move(*t);
+public:
+    thread_pool() : done_(false), joiner_(threads_) {
+        unsigned const thread_count = std::thread::hardware_concurrency();
+        try {
+            for (unsigned i = 0; i < thread_count; ++i) {
+                queues_.push_back(
+                    std::unique_ptr<work_stealing_queue>(new work_stealing_queue));
             }
-            // 2. 다른 큐에서 훔치기
-            else {
-                bool found = false;
-                for (size_t i = 0; i < queues_.size() && !found; ++i) {
-                    size_t victim = (my_idx + i + 1) % queues_.size();
-                    if (auto t = queues_[victim]->steal()) {
-                        task = std::move(*t);
-                        found = true;
-                    }
-                }
-
-                if (!found) {
-                    std::this_thread::yield();
-                    continue;
-                }
+            for (unsigned i = 0; i < thread_count; ++i) {
+                threads_.emplace_back(&thread_pool::worker_thread, this, i);
             }
+        } catch (...) {
+            done_ = true;
+            throw;
+        }
+    }
 
+    ~thread_pool() { done_ = true; }
+
+    template<typename FunctionType>
+    std::future<typename std::invoke_result_t<FunctionType>>
+    submit(FunctionType f) {
+        using result_type = std::invoke_result_t<FunctionType>;
+        std::packaged_task<result_type()> task(f);
+        std::future<result_type> res(task.get_future());
+
+        if (local_work_queue_) {
+            local_work_queue_->push(std::move(task));
+        } else {
+            pool_work_queue_.push(std::move(task));
+        }
+        return res;
+    }
+
+    void run_pending_task() {
+        task_type task;
+        if (pop_task_from_local_queue(task) ||
+            pop_task_from_pool_queue(task) ||
+            pop_task_from_other_thread_queue(task)) {
             task();
+        } else {
+            std::this_thread::yield();
         }
     }
 };
-
-thread_local size_t work_stealing_pool::my_index_ = 0;
 ```
+
+세 단계 우선순위가 핵심이다. *로컬 → 글로벌 → 도둑질* 순서로 작업을 찾는다. 풀 내부에서 `submit()`이 호출되면(분할 정복 재귀) 자기 로컬 큐에 push해 cache locality를 살린다. 외부 호출자는 글로벌 큐로 들어간다. 다른 워커가 일을 다 끝낸 경우에만 도둑질이 일어난다.
+
+`run_pending_task()`는 *공개* 멤버 함수로 두어 풀 사용자가 자신이 제출한 future를 기다리는 동안 *다른 작업을 처리*할 수 있도록 한다. 이는 8장의 `parallel_quick_sort`에서 본 패턴이다.
 
 ### C11 Work Stealing 큐
 
@@ -539,104 +603,198 @@ void* ws_queue_steal(WorkStealingQueue* q) {
 
 ### Chase-Lev Deque (고성능 버전)
 
+책의 단순한 mutex 기반 구현은 강한 메모리 모델에서도 옳지만, 락 경합이 병목이 되기 쉽다. 실전에서는 Chase-Lev deque 같은 lock-free 변형이 쓰인다. 아이디어는 *bottom*은 소유자만 쓰고, *top*은 도둑끼리 CAS로 다투며, 큐가 거의 빌 때만 양쪽이 충돌하므로 그때만 CAS로 동기화한다는 것이다. Intel oneTBB, Java ForkJoinPool, Go runtime이 모두 이 계열을 변형해 쓴다. 상세 구현은 Chase·Lev 2005 논문과 Lê·Pop·Cohen·Nardelli 2013의 C++ memory model 분석을 참조하면 좋다.
+
+## 9.4 스레드 인터럽트
+
+### 책의 interruptible_thread (Listing 9.9)
+
+C++20 이전, Williams는 책의 9.2에서 *cooperative* 인터럽션을 구현하는 방법을 직접 보여 준다. 핵심 아이디어는 *각 스레드별 플래그*를 `thread_local`로 두고, 인터럽트 가능한 대기 함수에서 그 플래그를 검사하는 것이다.
+
 ```cpp
-// Lock-free work stealing deque (개념적 구현)
-template<typename T>
-class chase_lev_deque {
-    static constexpr size_t INITIAL_CAPACITY = 32;
+class interrupt_flag {
+public:
+    void set();
+    bool is_set() const;
+};
 
-    struct array {
-        std::atomic<T*> buffer[INITIAL_CAPACITY];
-        size_t capacity;
-    };
+thread_local interrupt_flag this_thread_interrupt_flag;
 
-    std::atomic<size_t> top_{0};
-    std::atomic<size_t> bottom_{0};
-    std::atomic<array*> array_;
+class interruptible_thread {
+    std::thread internal_thread_;
+    interrupt_flag* flag_;
 
 public:
-    chase_lev_deque() {
-        array_.store(new array{});
-    }
+    template<typename FunctionType>
+    interruptible_thread(FunctionType f) {
+        std::promise<interrupt_flag*> p;
 
-    // 소유자가 아래에 push (단일 생산자)
-    void push(T item) {
-        size_t b = bottom_.load(std::memory_order_relaxed);
-        size_t t = top_.load(std::memory_order_acquire);
-
-        auto* a = array_.load(std::memory_order_relaxed);
-
-        if (b - t >= a->capacity) {
-            // 배열 확장 필요 (생략)
-        }
-
-        a->buffer[b % a->capacity].store(new T(std::move(item)),
-                                          std::memory_order_relaxed);
-
-        std::atomic_thread_fence(std::memory_order_release);
-        bottom_.store(b + 1, std::memory_order_relaxed);
-    }
-
-    // 소유자가 아래에서 pop
-    std::optional<T> pop() {
-        size_t b = bottom_.load(std::memory_order_relaxed) - 1;
-        auto* a = array_.load(std::memory_order_relaxed);
-
-        bottom_.store(b, std::memory_order_relaxed);
-        std::atomic_thread_fence(std::memory_order_seq_cst);
-
-        size_t t = top_.load(std::memory_order_relaxed);
-
-        if (t <= b) {
-            T* item = a->buffer[b % a->capacity].load(std::memory_order_relaxed);
-
-            if (t == b) {
-                // 마지막 항목 - CAS 필요
-                if (!top_.compare_exchange_strong(t, t + 1,
-                        std::memory_order_seq_cst, std::memory_order_relaxed)) {
-                    bottom_.store(b + 1, std::memory_order_relaxed);
-                    return std::nullopt;
-                }
-                bottom_.store(b + 1, std::memory_order_relaxed);
+        internal_thread_ = std::thread([f, &p] {
+            p.set_value(&this_thread_interrupt_flag);
+            try {
+                f();
+            } catch (thread_interrupted const&) {
+                // 인터럽션은 정상 종료
             }
+        });
 
-            T result = std::move(*item);
-            delete item;
-            return result;
-        }
-
-        bottom_.store(b + 1, std::memory_order_relaxed);
-        return std::nullopt;
+        flag_ = p.get_future().get();
     }
 
-    // 도둑이 위에서 steal
-    std::optional<T> steal() {
-        size_t t = top_.load(std::memory_order_acquire);
-        std::atomic_thread_fence(std::memory_order_seq_cst);
-        size_t b = bottom_.load(std::memory_order_acquire);
-
-        if (t < b) {
-            auto* a = array_.load(std::memory_order_relaxed);
-            T* item = a->buffer[t % a->capacity].load(std::memory_order_relaxed);
-
-            if (!top_.compare_exchange_strong(t, t + 1,
-                    std::memory_order_seq_cst, std::memory_order_relaxed)) {
-                return std::nullopt;  // 다른 도둑이 먼저 훔침
-            }
-
-            T result = std::move(*item);
-            delete item;
-            return result;
-        }
-
-        return std::nullopt;
+    void interrupt() {
+        if (flag_) flag_->set();
     }
+
+    void join() { internal_thread_.join(); }
+    void detach() { internal_thread_.detach(); }
+    bool joinable() const { return internal_thread_.joinable(); }
 };
 ```
 
-## 9.4 스레드 인터럽트 (C++20)
+부모 스레드가 자식의 `thread_local` 플래그에 접근해야 하기 때문에 `std::promise<interrupt_flag*>`로 주소를 넘겨 받는다. 자식이 시작하자마자 자신의 플래그 주소를 promise에 set하고, 생성자가 future로 받아 저장한다.
 
-### std::stop_token
+### interruption_point (Listing 9.10)
+
+작업 코드는 *interruption point*를 명시적으로 호출해야 한다. `thread_interrupted`는 일반 예외 타입이며, 워커 코드에서 catch하지 않으면 위의 `interruptible_thread` 생성자의 lambda가 잡는다.
+
+```cpp
+class thread_interrupted : public std::exception {
+public:
+    char const* what() const noexcept override {
+        return "thread interrupted";
+    }
+};
+
+void interruption_point() {
+    if (this_thread_interrupt_flag.is_set()) {
+        throw thread_interrupted();
+    }
+}
+
+// 작업 코드에서
+void long_task() {
+    for (int i = 0; i < 1000000; ++i) {
+        do_chunk(i);
+        interruption_point();  // 주기적으로 검사
+    }
+}
+```
+
+이 접근의 한계는 *대기 중인 스레드는 응답하지 않는다*는 점이다. `condition_variable::wait()`로 잠들어 있으면 플래그를 검사할 기회가 없다. 책은 이 문제를 두 단계로 해결한다.
+
+### 대기 중 인터럽트, condition_variable (Listing 9.11~9.12)
+
+먼저 `interrupt_flag`를 *조건 변수 인지*로 확장한다. 인터럽트가 발생하면 현재 대기 중인 cv를 깨우도록 만든다.
+
+```cpp
+class interrupt_flag {
+    std::atomic<bool> flag_;
+    std::condition_variable* thread_cond_;
+    std::mutex set_clear_mutex_;
+
+public:
+    interrupt_flag() : thread_cond_(nullptr) {}
+
+    void set() {
+        flag_.store(true, std::memory_order_relaxed);
+        std::lock_guard<std::mutex> lk(set_clear_mutex_);
+        if (thread_cond_) thread_cond_->notify_all();
+    }
+
+    bool is_set() const {
+        return flag_.load(std::memory_order_relaxed);
+    }
+
+    void set_condition_variable(std::condition_variable& cv) {
+        std::lock_guard<std::mutex> lk(set_clear_mutex_);
+        thread_cond_ = &cv;
+    }
+
+    void clear_condition_variable() {
+        std::lock_guard<std::mutex> lk(set_clear_mutex_);
+        thread_cond_ = nullptr;
+    }
+
+    struct clear_cv_on_destruct {
+        ~clear_cv_on_destruct() {
+            this_thread_interrupt_flag.clear_condition_variable();
+        }
+    };
+};
+```
+
+이제 인터럽트 가능한 wait를 작성할 수 있다. 핵심은 *짧은 타임아웃*으로 wait하고, 깨어날 때마다 플래그를 검사하는 것이다.
+
+```cpp
+void interruptible_wait(std::condition_variable& cv,
+                        std::unique_lock<std::mutex>& lk) {
+    interruption_point();
+    this_thread_interrupt_flag.set_condition_variable(cv);
+    interrupt_flag::clear_cv_on_destruct guard;
+
+    interruption_point();
+    cv.wait_for(lk, std::chrono::milliseconds(1));
+    interruption_point();
+}
+
+template<typename Predicate>
+void interruptible_wait(std::condition_variable& cv,
+                        std::unique_lock<std::mutex>& lk,
+                        Predicate pred) {
+    interruption_point();
+    this_thread_interrupt_flag.set_condition_variable(cv);
+    interrupt_flag::clear_cv_on_destruct guard;
+    while (!this_thread_interrupt_flag.is_set() && !pred()) {
+        cv.wait_for(lk, std::chrono::milliseconds(1));
+    }
+    interruption_point();
+}
+```
+
+1ms마다 일어나 플래그를 검사하므로 latency는 최대 1ms로 보장된다. 책은 이 polling이 부담스러우면 `condition_variable_any` 버전으로 lock 자체를 가로채는 더 정교한 구현을 9.2.4에서 보여 준다(Listing 9.13~9.14). 핵심 아이디어는 인터럽트 플래그가 들고 있는 *custom lockable*로 wait의 락을 감싸, set() 시점에 락을 가로채 cv를 깨우는 것이다.
+
+### future 대기 인터럽트 (Listing 9.15)
+
+`std::future::wait()`은 cv와 달리 외부에서 깨울 통로가 없다. Williams는 `wait_for`를 짧은 타임아웃으로 반복하며 플래그를 검사하는 방법을 제시한다.
+
+```cpp
+template<typename T>
+void interruptible_wait(std::future<T>& uf) {
+    while (!this_thread_interrupt_flag.is_set()) {
+        if (uf.wait_for(std::chrono::milliseconds(1))
+                == std::future_status::ready) {
+            break;
+        }
+    }
+    interruption_point();
+}
+```
+
+응답성과 polling 오버헤드의 trade-off가 있다. 1ms로 설정하면 응답성은 좋지만 idle CPU 사용이 비어 있지 않다. 실시간 시스템이 아니라면 10ms~100ms 수준으로 늘리는 편이 일반적이다.
+
+### Interruption point 가이드
+
+interrupt를 받아들일 수 있는 지점은 작업 코드 안에 *명시적으로* 박아 두어야 한다.
+
+```cpp
+void worker() {
+    while (true) {
+        chunk_of_work();
+        interruption_point();          // 일반 검사 지점
+
+        std::unique_lock lk(mtx);
+        interruptible_wait(cv, lk,     // 대기도 인터럽트 가능
+                          [] { return ready; });
+
+        auto fut = pool.submit(task);
+        interruptible_wait(fut);       // future도 인터럽트 가능
+    }
+}
+```
+
+핵심 규칙은 *모든 긴 작업이 어떤 형태로든 점검 지점을 통과한다*는 것이다. 이를 어기면 인터럽트는 영원히 도달하지 못한다.
+
+### C++20 std::stop_token
 
 C++20은 협력적 스레드 중단을 위한 `std::stop_token`을 도입했다.
 
@@ -798,49 +956,6 @@ int main(void) {
 
     return 0;
 }
-```
-
-### C++17 이전: 협력적 중단 패턴
-
-```cpp
-class interruptible_thread {
-    std::thread thread_;
-    std::atomic<bool> stop_requested_{false};
-
-public:
-    template<typename F>
-    explicit interruptible_thread(F&& f) {
-        thread_ = std::thread([this, f = std::forward<F>(f)] {
-            f([this] { return stop_requested_.load(); });
-        });
-    }
-
-    void request_stop() {
-        stop_requested_.store(true);
-    }
-
-    void join() {
-        if (thread_.joinable()) {
-            thread_.join();
-        }
-    }
-
-    ~interruptible_thread() {
-        request_stop();
-        join();
-    }
-};
-
-// 사용
-interruptible_thread worker([](auto is_stopped) {
-    while (!is_stopped()) {
-        do_work();
-    }
-});
-
-std::this_thread::sleep_for(std::chrono::seconds(2));
-worker.request_stop();
-worker.join();
 ```
 
 ## 9.5 스레드 풀 고급 기능
@@ -1255,7 +1370,7 @@ void good_usage(thread_pool& compute_pool, thread_pool& io_pool) {
 
 ## 한국 개발자의 함정
 
-```
+```text
 1. *thread pool 안에서 future.get() 호출*
    - 같은 풀의 다른 작업 결과 기다림 → deadlock
    - 풀 크기보다 많은 dependency chain이면 멈춤
@@ -1284,7 +1399,7 @@ void good_usage(thread_pool& compute_pool, thread_pool& io_pool) {
 
 ## 실무 적용
 
-```
+```text
 이론 → 실무:
 - thread_pool             → Boost.Asio thread_pool, taskflow, BS::thread_pool
 - work-stealing           → Intel oneTBB (구 TBB), rayon (Rust), ForkJoinPool (Java)
@@ -1310,7 +1425,7 @@ void good_usage(thread_pool& compute_pool, thread_pool& io_pool) {
 
 ## 자기 점검
 
-```
+```text
 □ Global queue vs Thread-local queue 차이?
 □ Work stealing의 *bottom*과 *top* 비대칭 이유?
 □ Chase-Lev deque의 핵심 트릭?
