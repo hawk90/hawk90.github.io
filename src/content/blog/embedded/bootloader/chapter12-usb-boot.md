@@ -60,18 +60,7 @@ fastboot_partition_alias_userdata=mmc 0:3
 
 fastboot는 *USB bulk endpoint*에서 4byte 헤더 + payload로 메시지를 주고 받습니다. 명령은 ASCII로, payload는 binary로 갑니다.
 
-```text
-호스트 → 보드: "getvar:version-bootloader"
-보드 → 호스트: "OKAY2024.04"
-
-호스트 → 보드: "download:00400000"   (4MB 받겠다)
-보드 → 호스트: "DATA00400000"        (ready)
-호스트 → 보드: [4MB binary]
-보드 → 호스트: "OKAY"
-
-호스트 → 보드: "flash:boot"          (방금 받은 거 boot 파티션에)
-보드 → 호스트: "OKAY"
-```
+![fastboot 프로토콜 — 호스트와 보드 간의 getvar/download/flash 메시지 교환](/images/blog/bootloader/diagrams/chapter12-fastboot-seq.svg)
 
 응답 접두사가 의미가 있습니다.
 

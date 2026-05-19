@@ -38,18 +38,7 @@ DCP는 *IP 위가 아니라 Ethernet 위*에서 동작합니다. EtherType `0x88
 
 흐름은 단순합니다.
 
-```text
-Supervisor                       Device
-   |                                |
-   |---  Identify All (multicast) ->|
-   |<-- Identify response (unicast) |
-   |   "MAC=00:1B:1B:.. , name=''" |
-   |                                |
-   |--- Set Name "io-device-01" -->|
-   |<------- ACK -------------------|
-   |--- Set IP 192.168.1.10 ------>|
-   |<------- ACK -------------------|
-```
+![DCP 절차 — Supervisor가 multicast Identify로 Device를 발견하고, 이름과 IP를 부여하면 Device는 flash에 영구 저장](/images/blog/industrial-ethernet/diagrams/ch07-dcp-discovery-seq.svg)
 
 이 절차가 끝나면 Device는 `io-device-01`이라는 이름과 IP를 *flash에 영구 저장*합니다. 다음 부팅부터는 같은 이름·IP로 올라옵니다.
 
@@ -84,18 +73,7 @@ AR은 Controller와 Device 사이의 *논리적 1:1 채널*입니다. 한 AR 안
 
 연결 수립은 *AR Establish*라는 RPC 호출로 시작합니다. Controller가 Device의 UDP 49152 포트로 *DCE-RPC*를 보냅니다.
 
-```text
-1. Controller -> Device : Connect (RPC)
-     IOCR Block        ← cyclic data layout, send/recv clock
-     ExpectedSubmodule ← which modules in which slots
-     AlarmCR Block     ← alarm channel parameters
-2. Device  -> Controller : Connect Response (OK)
-3. Controller -> Device : Write multiple (RecordData)
-     parameters per submodule
-4. Controller -> Device : DControl (Done)
-5. Device  -> Controller : CControl (Application Ready)
-6. <Cyclic IO starts>
-```
+![AR Establish — Controller가 RPC로 Device에 Connect, 파라미터 Write, DControl/CControl 핸드셰이크 후 cyclic IO 시작](/images/blog/industrial-ethernet/diagrams/ch07-ar-connect-seq.svg)
 
 이 절차가 *모두 성공*해야 Device의 LED가 녹색이 됩니다. 어디서 멈추는지가 트러블슈팅의 절반입니다.
 

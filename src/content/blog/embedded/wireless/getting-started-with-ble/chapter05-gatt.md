@@ -182,24 +182,7 @@ Permission = Read | Write (클라이언트가 직접 씀)
 
 *Notify/Indicate property가 있는 Characteristic*은 *반드시 CCCD를 옆에 둬야 합니다*. 클라이언트가 *CCCD에 0x0001을 쓰면* 그때부터 서버가 notification을 보냅니다. 안 쓰면 서버는 *아무리 데이터가 바뀌어도 침묵*합니다.
 
-```text
-Client → Server
-12 30 00 01 00
-│  │  │  │  │
-│  │  │  └──┴── value 0x0001 (Notification ON)
-│  └──┴──────── handle 0x0030 (CCCD)
-└────────────── ATT Write Request (0x12)
-
-Server → Client
-13                ← ATT Write Response (성공)
-
-(이후 데이터 변화 시)
-Server → Client
-1B 2A 00 5C
-│  │  │  └── new value (예: 92)
-│  └──┴───── value handle 0x002A
-└─────────── Handle Value Notification (0x1B)
-```
+![CCCD에 Notification 활성화 비트를 쓰면 이후 서버가 값 변경 시마다 Handle Value Notification을 보낸다](/images/blog/ble/diagrams/ch05-cccd-notify-seq.svg)
 
 ### User Description
 
@@ -363,16 +346,7 @@ ATT MTU 517 (스펙 최대)
 
 ### MTU 협상
 
-```text
-Client → Server
-02 47 00         ← Exchange MTU Request, client MTU = 247
-
-Server → Client
-03 90 00         ← Exchange MTU Response, server MTU = 144
-
-협상 결과: min(247, 144) = 144
-이후 모든 ATT 트래픽이 144 byte MTU를 따름
-```
+![ATT MTU 협상 — Client가 Request로 자신의 MTU를 알리고 Server가 Response로 자신의 MTU를 회신, 최소값이 이후 트래픽의 MTU](/images/blog/ble/diagrams/ch05-mtu-exchange-seq.svg)
 
 연결 직후 *한 번만* 협상합니다. 클라이언트가 *Exchange MTU Request*를 보내야 협상이 시작됩니다. iOS는 *자동으로 185 byte*를 요청합니다. Android는 *Android 5+*가 *517*까지 요청 가능합니다.
 
