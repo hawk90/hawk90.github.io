@@ -3,7 +3,7 @@ title: "Chapter 4: Common Mistakes"
 date: 2026-05-14T04:00:00
 description: "영어 글쓰기에서 자주 마주치는 오류 — 주술 일치, 대명사 격, 수식어 위치, 현수 분사, 평행 구조."
 series: "The Only Grammar Book You'll Ever Need"
-seriesOrder: 4
+seriesOrder: 22
 tags: [writing, grammar, mistakes, errors]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"

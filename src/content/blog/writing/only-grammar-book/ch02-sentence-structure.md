@@ -3,7 +3,7 @@ title: "Chapter 2: Sentence Structure"
 date: 2026-05-14T02:00:00
 description: "문장의 구성 요소 — 주어, 동사, 목적어, 보어, 수식어. 네 가지 문장 종류와 단편·연결 오류 회피."
 series: "The Only Grammar Book You'll Ever Need"
-seriesOrder: 2
+seriesOrder: 10
 tags: [writing, grammar, sentence, syntax]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"

@@ -3,7 +3,7 @@ title: "Chapter 5: Word Usage"
 date: 2026-05-14T05:00:00
 description: "단어 선택의 정확성 — 동음이의어, 헷갈리는 단어 쌍, 격식·비격식 어휘 차이, 잘못된 단어 선택."
 series: "The Only Grammar Book You'll Ever Need"
-seriesOrder: 5
+seriesOrder: 27
 tags: [writing, grammar, word-usage, vocabulary]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"

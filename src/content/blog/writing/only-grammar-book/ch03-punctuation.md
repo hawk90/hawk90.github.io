@@ -3,7 +3,7 @@ title: "Chapter 3: Punctuation"
 date: 2026-05-14T03:00:00
 description: "구두점의 표준 사용 — 마침표, 쉼표, 세미콜론, 콜론, 대시, 따옴표, 어포스트로피, 괄호, 하이픈."
 series: "The Only Grammar Book You'll Ever Need"
-seriesOrder: 3
+seriesOrder: 15
 tags: [writing, grammar, punctuation]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
