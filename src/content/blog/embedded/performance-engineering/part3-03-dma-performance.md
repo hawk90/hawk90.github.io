@@ -189,17 +189,14 @@ Setup overhead - 매 transfer 시작 비용:
 
 ## CPU vs DMA - 손익 분기점
 
-```text
-memcpy: 1 byte ≈ 0.5 cycle (Cortex-M4)
-DMA setup ~50 cycle + transfer cost (~ 1 byte/cycle)
+- memcpy: 1 byte ≈ 0.5 cycle (Cortex-M4)
+- DMA setup ~50 cycle + transfer cost (~ 1 byte/cycle)
 
-손익:
-  CPU: cost = 0.5 × N
-  DMA: cost = 50 + 1 × N
-  cross-over: 50 + N = 0.5N → N = -100 (?)
-  
-실제로는 DMA가 CPU를 자유롭게 만들어 *CPU offload가 진짜 이득*
-```
+$$\text{CPU cost} = 0.5 \cdot N, \quad \text{DMA cost} = 50 + 1 \cdot N$$
+
+$$\text{cross-over}: \quad 50 + N = 0.5 \cdot N \implies N = -100 \ (?)$$
+
+실제로는 DMA가 CPU를 자유롭게 만들어 *CPU offload가 진짜 이득*입니다.
 
 작은 copy는 CPU가 유리합니다. 큰 copy(>256 byte)는 DMA가 유리합니다. CPU가 *다른 일을 할 수 있을 때*는 DMA가 무조건 유리합니다.
 

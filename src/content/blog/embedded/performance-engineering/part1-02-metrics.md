@@ -42,11 +42,7 @@ draft: false
 
 **자원 사용률(%)**을 의미합니다.
 
-```text
-CPU U = (busy time) / (total time)
-Memory U = used / total
-Bus U = (active cycles) / (total cycles)
-```
+$$U_{CPU} = \frac{t_{busy}}{t_{total}}, \quad U_{mem} = \frac{u}{m_{total}}, \quad U_{bus} = \frac{c_{active}}{c_{total}}$$
 
 100%에 도달하면 saturation 상태가 되고, queueing이 발생하면서 latency가 증가합니다.
 
@@ -62,12 +58,11 @@ Bus U = (active cycles) / (total cycles)
 
 **Queueing Theory** (Little's Law)는 다음과 같습니다.
 
-```
-L = λ × W
-L = 평균 대기 수, λ = 도착률, W = 평균 대기 시간
-```
+$$L = \lambda \cdot W$$
 
-자원 utilization이 100%에 근접하면 *W → ∞*가 됩니다. 그래서 임베디드에서는 *80% 한계*를 권장합니다.
+여기서 $L$은 평균 대기 수, $\lambda$는 도착률, $W$는 평균 대기 시간입니다.
+
+자원 utilization이 100%에 근접하면 $W \to \infty$가 됩니다. 그래서 임베디드에서는 *80% 한계*를 권장합니다.
 
 ## Service Time vs Response Time
 
@@ -89,8 +84,9 @@ Latency의 *변동성*을 의미합니다.
 ```text
 주기적 1ms PID task:
 실제 wake: 1.000, 1.001, 0.998, 1.003, 0.997 ...
-Jitter = max - min = 6 µs
 ```
+
+$$\text{Jitter} = \max - \min = 6\ \mu s$$
 
 평균이 양호한데 jitter가 크면 *실시간 제어가 불가능*합니다. Audio, motor, camera 동기처럼 동기화가 핵심인 영역에서는 치명적입니다.
 

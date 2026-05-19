@@ -207,15 +207,13 @@ cat /proc/<pid>/sched
 
 ## Amdahl·USL — Scalability 한계
 
-```text
-Amdahl:   S(N) = 1 / (s + (1 - s) / N)
-USL:      S(N) = N / (1 + α(N - 1) + βN(N - 1))
+$$\text{Amdahl:} \quad S(N) = \frac{1}{s + \frac{1 - s}{N}}$$
 
-s, α — contention (serial 비율)
-β    — coherency overhead
-```
+$$\text{USL:} \quad S(N) = \frac{N}{1 + \alpha(N - 1) + \beta N(N - 1)}$$
 
-Amdahl은 contention만 모델링하지만 USL은 coherency overhead까지 포함합니다. 실측 데이터로 α와 β를 fitting하면 scaling 한계를 예측할 수 있습니다.
+여기서 $s$와 $\alpha$는 contention(serial 비율), $\beta$는 coherency overhead입니다.
+
+Amdahl은 contention만 모델링하지만 USL은 coherency overhead까지 포함합니다. 실측 데이터로 $\alpha$와 $\beta$를 fitting하면 scaling 한계를 예측할 수 있습니다.
 
 ```text
 α=0.1, β=0.01인 시스템:

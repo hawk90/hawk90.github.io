@@ -128,9 +128,9 @@ ARM CoreSight와 DSU PMU를 함께 활용합니다.
 Event: BUS_ACCESS_LD, BUS_ACCESS_ST
 Event: BUS_ACCESS_CHKD (외부 bus 접근만)
 Event: BUS_CYCLES (bus active cycle)
-
-Utilization = BUS_ACCESS / BUS_CYCLES
 ```
+
+$$U_{bus} = \frac{\text{BUS\_ACCESS}}{\text{BUS\_CYCLES}}$$
 
 ```bash
 perf stat -e r19,r1d ./prog

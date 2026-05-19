@@ -102,11 +102,11 @@ void print(void) {
 
 | 지표 | 공식 | 의미 |
 | --- | --- | --- |
-| Mean | Σx / N | 평균 — outlier에 민감 |
-| Median | sorted[N/2] | 50th percentile — robust |
+| Mean | $\mu = \frac{1}{N}\sum_{i} x_i$ | 평균 — outlier에 민감 |
+| Median | $\text{sorted}[N/2]$ | 50th percentile — robust |
 | Mode | 가장 빈번 값 | 일상적 값 |
-| Variance | Σ(x-μ)² / N | 분산 |
-| Stdev | √variance | 표준편차 |
+| Variance | $\sigma^2 = \frac{1}{N}\sum_{i}(x_i - \mu)^2$ | 분산 |
+| Stdev | $\sigma = \sqrt{\sigma^2}$ | 표준편차 |
 | Min, Max | — | 극단값 |
 
 Real-time에서는 max에 신경 써야 합니다. Mean과 stdev는 *정규분포를 가정*하지만, latency는 *비대칭 long-tail*이라 적합하지 않습니다.

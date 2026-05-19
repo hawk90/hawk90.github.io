@@ -72,24 +72,23 @@ perf report
 
 ## 핵심 비율 — IPC·MPKI
 
-```text
-IPC = INST_RETIRED / CPU_CYCLES        ← 높을수록 좋음 (target 1+)
-MPKI = (L1D_CACHE_REFILL × 1000) / INST_RETIRED   ← 낮을수록 좋음
+$$\text{IPC} = \frac{\text{INST\_RETIRED}}{\text{CPU\_CYCLES}} \quad (\text{높을수록 좋음, target } 1+)$$
 
+$$\text{MPKI} = \frac{\text{L1D\_CACHE\_REFILL} \times 1000}{\text{INST\_RETIRED}} \quad (\text{낮을수록 좋음})$$
+
+```text
 MPKI < 10  — cache 효율 좋음
 MPKI 10-30 — 보통
 MPKI > 30  — cache 문제
 ```
 
-```text
-Branch mispredict rate = BR_MIS_PRED / BRANCHES
-  < 5%  — 양호
-  > 10% — 문제
+$$\text{Branch mispredict rate} = \frac{\text{BR\_MIS\_PRED}}{\text{BRANCHES}}$$
 
-Frontend bound = STALL_FRONTEND / CYCLES
-Backend bound = STALL_BACKEND / CYCLES
-  → 둘 합이 50%↑면 stall 지배적
-```
+5% 미만이면 양호, 10% 초과면 문제입니다.
+
+$$\text{Frontend bound} = \frac{\text{STALL\_FRONTEND}}{\text{CYCLES}}, \quad \text{Backend bound} = \frac{\text{STALL\_BACKEND}}{\text{CYCLES}}$$
+
+둘 합이 50% 이상이면 stall 지배적입니다.
 
 ## Top-Down Microarchitecture Analysis
 

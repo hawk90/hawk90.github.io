@@ -10,7 +10,7 @@ draft: false
 
 ## 한 줄 요약
 
-> **"Bandwidth = bytes / second"**입니다. 대역폭이 saturation 상태에 이르면 CPU가 빠르지 않은 것이 아니라 메모리가 발목을 잡습니다.
+> $\text{Bandwidth} = \text{bytes} / \text{second}$입니다. 대역폭이 saturation 상태에 이르면 CPU가 빠르지 않은 것이 아니라 메모리가 발목을 잡습니다.
 
 ## STREAM Benchmark — 표준
 

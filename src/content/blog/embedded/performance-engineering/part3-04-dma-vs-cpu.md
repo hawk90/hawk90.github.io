@@ -48,16 +48,11 @@ HAL_DMA_Start(&hdma, src, dst, len);
 
 ## Break-even Point
 
-```text
-CPU cost:  N / 3 cycle
-DMA cost:  200 + N / 1 cycle (bus 한계)
+$$\text{CPU cost} = \frac{N}{3} \text{ cycle}, \quad \text{DMA cost} = 200 + N \text{ cycle (bus 한계)}$$
 
-Equal when: N/3 = 200 + N
-            N/3 - N = 200
-            negative N → DMA가 절대 안 빠름? 
+$$\text{Equal when:} \quad \frac{N}{3} = 200 + N \implies \frac{N}{3} - N = 200 \implies N < 0$$
 
-* CPU는 transfer 중에 *다른 일을 못 하므로* 실제 이득은 CPU offload
-```
+즉 단순 cycle 비교만으로는 DMA가 빠를 수 없습니다. 하지만 CPU는 transfer 중에 *다른 일을 못 하므로* 실제 이득은 CPU offload에서 옵니다.
 
 실제 break-even은 *CPU가 할 다른 일*에 달려 있습니다. CPU가 idle이면 *CPU copy*가 빠릅니다.
 

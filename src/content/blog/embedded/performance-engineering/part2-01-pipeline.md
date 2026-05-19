@@ -107,10 +107,7 @@ Pentium 4는 31 stage였습니다. mispredict 시 *31 cycle을 손실*했고, �
 
 ## Throughput vs Latency
 
-```text
-Without pipeline: 5 cycle per instruction × N = 5N cycle
-With 5-stage pipe: 5 + (N-1) cycle = N + 4 cycle  (N≫1)
-```
+$$T_{\text{no pipeline}} = 5N \text{ cycle}, \quad T_{\text{5-stage pipe}} = 5 + (N-1) = N + 4 \text{ cycle} \ (N \gg 1)$$
 
 *N=1000*이면 pipeline은 200x throughput을 냅니다. 다만 *latency* (한 명령의 완료 시간)는 *동일하거나 길어집니다*.
 

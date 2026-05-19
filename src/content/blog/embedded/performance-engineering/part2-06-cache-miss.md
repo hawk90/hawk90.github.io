@@ -93,18 +93,17 @@ int C[2048];
 
 ## 측정 — PMU 이벤트
 
-```c
-/* Cortex-A53 perf events */
-0x03 L1D_CACHE_REFILL    // L1 D 미스 (refill 횟수)
-0x04 L1D_CACHE           // L1 D 액세스
-0x01 L1I_CACHE_REFILL    // L1 I 미스
-0x14 L1I_CACHE           // L1 I 액세스
-0x17 L2D_CACHE_REFILL    // L2 D 미스
-0x16 L2D_CACHE           // L2 D 액세스
-
-L1 miss rate = L1D_CACHE_REFILL / L1D_CACHE
-L2 miss rate = L2D_CACHE_REFILL / L2D_CACHE
+```text
+Cortex-A53 perf events:
+  0x03 L1D_CACHE_REFILL    L1 D 미스 (refill 횟수)
+  0x04 L1D_CACHE           L1 D 액세스
+  0x01 L1I_CACHE_REFILL    L1 I 미스
+  0x14 L1I_CACHE           L1 I 액세스
+  0x17 L2D_CACHE_REFILL    L2 D 미스
+  0x16 L2D_CACHE           L2 D 액세스
 ```
+
+$$\text{L1 miss rate} = \frac{\text{L1D\_CACHE\_REFILL}}{\text{L1D\_CACHE}}, \quad \text{L2 miss rate} = \frac{\text{L2D\_CACHE\_REFILL}}{\text{L2D\_CACHE}}$$
 
 ```bash
 perf stat -e r03,r04,r17,r16 ./prog

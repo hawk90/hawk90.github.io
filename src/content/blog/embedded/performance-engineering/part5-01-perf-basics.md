@@ -223,9 +223,9 @@ perf diff before.data after.data
 
 `perf stat`의 두 숫자만 잘 보면 1차 진단의 절반은 끝납니다.
 
-```text
-IPC = instructions / cycles
+$$\text{IPC} = \frac{\text{instructions}}{\text{cycles}}$$
 
+```text
 IPC > 2.0  — superscalar 잘 활용
 IPC 1.0~2.0 — 일반적
 IPC < 0.5  — 심각한 stall, 원인 찾기 필요

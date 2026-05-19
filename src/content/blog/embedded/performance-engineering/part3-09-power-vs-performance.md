@@ -10,20 +10,15 @@ draft: false
 
 ## 한 줄 요약
 
-> **"Power = V² × f × C"** — voltage, frequency, capacitive load가 모두 전력에 영향을 줍니다.
+> **$P = V^2 \cdot f \cdot C$** — voltage, frequency, capacitive load가 모두 전력에 영향을 줍니다.
 
 ## CMOS Dynamic Power 공식
 
-```text
-P_dynamic = α × C × V² × f
+$$P_{\text{dynamic}} = \alpha \cdot C \cdot V^2 \cdot f$$
 
-  α  — switching activity (0~1)
-  C  — capacitance
-  V  — voltage
-  f  — frequency
+여기서 $\alpha$는 switching activity (0~1), $C$는 capacitance, $V$는 voltage, $f$는 frequency입니다.
 
-P_static = leakage (V·온도 비례)
-```
+$$P_{\text{static}} = \text{leakage} \quad (V \cdot \text{온도에 비례})$$
 
 **V를 10% 줄이면** power가 19% 절약됩니다.
 **f를 절반**으로 줄이고 **V를 약간** 더 낮추면 power를 4배까지도 절약할 수 있습니다.
@@ -244,7 +239,7 @@ loop_benchmark();   // ← 10초 후부터 thermal throttle
 
 ## 정리
 
-- Power는 **V² × f**에 leakage가 더해진 값입니다.
+- Power는 $V^2 \cdot f$에 leakage가 더해진 값입니다.
 - **Race-to-Idle**은 burst high freq로 빠르게 처리하고 깊은 sleep으로 들어가는 전략입니다.
 - Linux에서는 *schedutil governor*와 CPUIdle C-state를 함께 씁니다.
 - ARM **big.LITTLE / DynamIQ**는 heterogeneous 구조로 전력 효율을 끌어올립니다.
