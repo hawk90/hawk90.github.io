@@ -5,20 +5,20 @@ description: "ARM memory barrier 실전. DMB/DSB/ISB 사용 시점. DMA·MMIO·s
 series: "Modern Embedded Recipes"
 seriesOrder: 10
 tags: [recipes, memory-barrier, dmb, dsb, isb, dma]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"DMB는 데이터, DSB는 데이터+명령, ISB는 pipeline flush"** — 잘못된 선택은 race 또는 overhead.
+> **"DMB는 데이터, DSB는 데이터+명령, ISB는 pipeline flush"**입니다. 잘못된 선택은 race 또는 overhead를 부릅니다.
 
 ## 3 가지 Barrier
 
 | Barrier | 의미 | Cycle 비용 |
 |---|---|---|
-| **DMB** | Data Memory Barrier — 이전 access 완료 후 이후 진행 | 1-10 |
-| **DSB** | Data Sync Barrier — DMB + 모든 명령 완료 대기 | 10-50 |
-| **ISB** | Instruction Sync — pipeline flush + instruction refetch | 5-20 |
+| **DMB** | Data Memory Barrier. 이전 access 완료 후 이후 진행 | 1-10 |
+| **DSB** | Data Sync Barrier. DMB + 모든 명령 완료 대기 | 10-50 |
+| **ISB** | Instruction Sync. pipeline flush + instruction refetch | 5-20 |
 
 ## DMB — Data Memory Ordering
 
@@ -28,7 +28,7 @@ __DMB();
 flag = 1;   /* shared_data write가 flag write *전*에 가시 */
 ```
 
-`memory_order_release` store와 같은 역할 (수동).
+`memory_order_release` store와 같은 역할을 수동으로 수행합니다.
 
 ### 언제 DMB 필요?
 
@@ -63,7 +63,7 @@ __DSB();   /* clock enable 완료 대기 */
 TIM2->CR1 = 1;   /* safe */
 ```
 
-DMB와 차이 — DSB는 *모든 이전 명령 (memory + non-memory) 완료* 대기.
+DMB와의 차이는 다음과 같습니다. DSB는 *모든 이전 명령(memory + non-memory) 완료*를 기다립니다.
 
 ### 언제 DSB?
 
@@ -91,7 +91,7 @@ __DSB(); __ISB();   /* pipeline 안 *옛 명령* 클리어 */
 call((void*)addr);
 ```
 
-ISB — *fetched instructions 폐기 + refetch*. CPU state·MPU·VFP 활성화 후 필수.
+ISB는 *fetched instructions 폐기 + refetch*를 수행합니다. CPU state·MPU·VFP 활성화 후 필수입니다.
 
 ### 언제 ISB?
 
@@ -118,7 +118,7 @@ __DMB_NSH();     /* Non-shareable — same CPU */
 __DMB_OSH();     /* Outer Shareable — across clusters */
 ```
 
-좁은 scope일수록 *빠름*. SMP cluster 내 sync는 *ISH* 충분.
+좁은 scope일수록 *더 빠릅니다*. SMP cluster 내 sync는 *ISH*로 충분합니다.
 
 ```c
 /* Linux smp_mb() = DMB ISH */
@@ -139,7 +139,7 @@ DMB 필요 케이스:
   - Self-modifying code (DSB + ISB)
 ```
 
-Single core SMP의 lock-free는 *barrier 없이도 동작 가능* (volatile + correct usage).
+Single core의 lock-free는 *barrier 없이도 동작 가능*합니다(volatile + correct usage).
 
 ## Cortex-A SMP — Barrier 필수
 
@@ -151,7 +151,7 @@ atomic_store_explicit(&head, next, memory_order_release);
                                    /* → STLR */
 ```
 
-ARMv8 — *acquire/release 단일 명령* (LDAR/STLR) → DMB 수동 사용 줄어듦.
+ARMv8은 *acquire/release 단일 명령*(LDAR/STLR)을 제공합니다. 그래서 DMB 수동 사용이 줄어듭니다.
 
 ## Lock-Free Queue with Barriers
 
@@ -179,7 +179,7 @@ bool pop(ring_t *r, uint8_t *out) {
 }
 ```
 
-`atomic_store/load` 사용 권장 — 컴파일러가 *효율적 명령* 선택.
+`atomic_store/load` 사용을 권장합니다. 컴파일러가 *효율적 명령*을 선택해 줍니다.
 
 ## DMA + Cache Maintenance
 
@@ -199,7 +199,7 @@ __DSB();
 read_data(buf);
 ```
 
-Cortex-M7 D-cache + DMA — *coherent 아님*. 명시 maintenance.
+Cortex-M7 D-cache + DMA는 *coherent하지 않습니다*. 명시적 maintenance가 필요합니다.
 
 ## Self-Modifying Code — FW Update
 
@@ -226,7 +226,7 @@ void flash_write_and_jump(uint32_t addr, uint8_t *code, size_t len) {
 }
 ```
 
-5 단계 — write + D-cache flush + I-cache invalidate + DSB + ISB + jump.
+전체 흐름은 5 단계입니다. write + D-cache flush + I-cache invalidate + DSB + ISB + jump.
 
 ## STM32 Bootloader — Vector Table 변경
 
@@ -237,7 +237,7 @@ __ISB();   /* pipeline flush */
 /* 이제 IRQ가 새 vector 사용 */
 ```
 
-VTOR 변경 후 *DSB+ISB 없으면* — 다음 IRQ가 *옛 vector* 사용 → crash.
+VTOR 변경 후 *DSB+ISB가 없으면* 다음 IRQ가 *옛 vector*를 사용해 crash가 발생합니다.
 
 ## Multi-Core Wakeup
 
@@ -255,20 +255,20 @@ void core1_reset(void) {
 }
 ```
 
-Cortex-A multi-core boot 표준 패턴.
+Cortex-A multi-core boot의 표준 패턴입니다.
 
 ## 자주 하는 실수
 
-> ⚠️ DMB만 사용 (DSB·ISB 필요한 곳에)
+> ⚠️ DSB·ISB가 필요한 곳에 DMB만 사용합니다
 
 ```c
 SCB->VTOR = new_addr;
 __DMB();   /* ← 부족 — DSB·ISB 필요 */
 ```
 
-→ system register는 DSB+ISB.
+→ system register에는 DSB+ISB를 사용합니다.
 
-> ⚠️ Barrier 위치 잘못
+> ⚠️ Barrier 위치를 잘못 잡습니다
 
 ```c
 flag = 1;
@@ -276,35 +276,35 @@ __DMB();   /* ← 너무 늦음 — flag가 이미 가시화 */
 data = compute();
 ```
 
-→ data write 후 *flag write 전* DMB.
+→ data write 후, *flag write 전*에 DMB를 배치합니다.
 
-> ⚠️ 모든 atomic에 manual barrier
+> ⚠️ 모든 atomic에 manual barrier를 답니다
 
 ```c
 atomic_store(&x, 1);
 __DMB();   /* ← atomic 자체가 acquire/release — 중복 */
 ```
 
-→ C11 atomic만 신뢰.
+→ C11 atomic만 신뢰합니다.
 
-> ⚠️ Cortex-M에서 DMB ISH
+> ⚠️ Cortex-M에서 DMB ISH를 씁니다
 
 ```c
 __DMB_ISH();   /* ← Cortex-M에는 share domain 개념 없음 */
 ```
 
-→ Cortex-M = single `__DMB()`. Variant는 Cortex-A 전용.
+→ Cortex-M에서는 단일 `__DMB()`만 씁니다. Variant는 Cortex-A 전용입니다.
 
 ## 정리
 
-- **DMB** = data ordering, **DSB** = + sync, **ISB** = pipeline flush.
-- Cortex-M single core — *MMIO·DMA·atomic*에만.
-- SMP Cortex-A — *acquire/release pair* 필수.
-- DMA TX — clean + DSB. RX — invalidate + DSB.
-- Self-modifying — D/I cache maintenance + DSB + ISB.
-- C11 `atomic_*` + `memory_order_*` — 컴파일러가 *최적 barrier 선택*.
+- **DMB**는 data ordering, **DSB**는 거기에 sync를 더한 것, **ISB**는 pipeline flush입니다.
+- Cortex-M single core에서는 *MMIO·DMA·atomic*에만 씁니다.
+- SMP Cortex-A에서는 *acquire/release pair*가 필수입니다.
+- DMA TX에서는 clean + DSB, RX에서는 invalidate + DSB를 씁니다.
+- Self-modifying에는 D/I cache maintenance + DSB + ISB를 모두 적용합니다.
+- C11 `atomic_*` + `memory_order_*`를 쓰면 컴파일러가 *최적 barrier를 선택*해 줍니다.
 
-다음 편은 **Wait-Free**.
+다음 편은 **Wait-Free**입니다.
 
 ## 관련 항목
 

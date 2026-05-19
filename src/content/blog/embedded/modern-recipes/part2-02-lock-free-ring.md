@@ -5,12 +5,12 @@ description: "SPSC ring 구현. Power-of-2 size, head/tail atomic, memory order 
 series: "Modern Embedded Recipes"
 seriesOrder: 8
 tags: [recipes, lock-free, ring-buffer, spsc, atomic]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"SPSC ring = head/tail + atomic + release/acquire"** — ISR↔task 가장 빠른 IPC.
+> **"SPSC ring = head/tail + atomic + release/acquire"** ISR과 task 사이에서 가장 빠른 IPC입니다.
 
 ## 기본 SPSC Ring
 
@@ -46,7 +46,7 @@ bool ring_pop(ring_t *r, uint8_t *out) {
 }
 ```
 
-Producer만 head 변경, consumer만 tail 변경 → *별도 변수, race 없음*.
+Producer만 head를 변경하고 consumer만 tail을 변경합니다. 서로 *다른 변수에만 write*하므로 race가 발생하지 않습니다.
 
 ## Power-of-2 — 왜 중요한가
 
@@ -56,9 +56,9 @@ uint16_t next = (h + 1) & RING_MASK;   /* AND — 1 cycle */
 uint16_t next = (h + 1) % RING_SIZE;   /* MOD — 10+ cycle (div) */
 ```
 
-Cortex-M3 — *div 명령 12 cycle*. AND mask 1 cycle.
+Cortex-M3에서는 *div 명령이 12 cycle*인 반면 AND mask는 1 cycle에 끝납니다.
 
-→ `RING_SIZE`는 *반드시 power of 2* (16, 32, 64, 128, ...).
+그래서 `RING_SIZE`는 *반드시 power of 2*(16, 32, 64, 128, ...)여야 합니다.
 
 ## Memory Order — Release/Acquire
 
@@ -78,7 +78,7 @@ bool ring_push_atomic(ring_t *r, uint8_t b) {
 }
 ```
 
-Release/acquire pair — producer의 `buf[h]` write가 consumer의 `head` read *후* 가시.
+Release/acquire pair를 쓰면 producer의 `buf[h]` write가 consumer의 `head` read *이후*에 가시화됩니다.
 
 ## ARM Cortex-M Single Core
 
@@ -89,7 +89,7 @@ Release/acquire pair — producer의 `buf[h]` write가 consumer의 `head` read *
 volatile uint16_t head, tail;   /* volatile은 컴파일러 차단만 */
 ```
 
-Single core — *재정렬 없음* (in-order pipeline + no store buffer reorder for same address). `volatile`로 충분.
+Single core에서는 *재정렬이 없습니다*(in-order pipeline에 같은 주소의 store buffer reorder도 없습니다). 그래서 `volatile`만으로 충분합니다.
 
 ## ARM SMP — DMB·LDAR/STLR 필요
 
@@ -98,7 +98,7 @@ Single core — *재정렬 없음* (in-order pipeline + no store buffer reorder 
 atomic_store_explicit(&head, next, memory_order_release);
 ```
 
-SMP에선 *반드시 atomic + memory order*. Race 발생 가능.
+SMP에서는 *반드시 atomic과 memory order*를 함께 써야 합니다. 그렇지 않으면 race가 발생할 수 있습니다.
 
 ## Cache Alignment — False Sharing 방지
 
@@ -114,7 +114,7 @@ typedef struct {
 } ring_t;
 ```
 
-Cortex-A SMP — head·tail이 *같은 line*이면 false sharing → 10x slowdown.
+Cortex-A SMP에서는 head와 tail이 *같은 line*에 있으면 false sharing이 발생해 10배 가까이 느려질 수 있습니다.
 
 ## Multi-Byte Push
 
@@ -135,7 +135,7 @@ size_t ring_push_n(ring_t *r, const uint8_t *data, size_t n) {
 }
 ```
 
-Wrap 한 번에 처리 — *byte loop보다 빠름*. UART·CAN 큰 frame에 유리.
+Wrap을 한 번에 처리하므로 *byte loop보다 빠릅니다*. UART와 CAN의 큰 frame에서 특히 유리합니다.
 
 ## ISR↔Task 사용
 
@@ -159,7 +159,7 @@ void uart_task(void *p) {
 }
 ```
 
-ISR이 *queue API 안 씀* — 매우 빠름. *FromISR 호출 overhead 0*.
+ISR이 *queue API를 쓰지 않으므로* 매우 빠릅니다. FromISR 호출 overhead도 0입니다.
 
 ## Notification 합쳐서
 
@@ -191,11 +191,11 @@ void uart_task(void *p) {
 }
 ```
 
-매 byte semaphore give 대신 *flag로 합침* — ISR overhead ↓.
+매 byte마다 semaphore give를 호출하는 대신 *flag로 합칩니다*. 그러면 ISR overhead가 줄어듭니다.
 
 ## Vyukov MPMC Queue
 
-Multi-producer multi-consumer은 *훨씬 복잡*:
+Multi-producer multi-consumer는 *훨씬 복잡*합니다.
 
 ```c
 struct cell {
@@ -223,7 +223,7 @@ bool mpmc_push(mpmc_t *q, T item) {
 }
 ```
 
-Dmitry Vyukov MPMC. Folly·LMAX·DPDK가 채택. *진짜 lock-free*.
+Dmitry Vyukov가 제안한 MPMC 알고리즘으로, Folly와 LMAX, DPDK가 채택했습니다. *진짜 lock-free* 방식입니다.
 
 ## ABA — SPSC엔 없음
 
@@ -233,7 +233,7 @@ SPSC — producer/consumer 각 1개
   → 같은 변수 두 thread가 write 안 함 → ABA 없음
 ```
 
-Lock-free stack·queue의 ABA 문제 — *SPSC엔 무관*.
+Lock-free stack과 queue에서 흔히 등장하는 ABA 문제는 *SPSC에서는 발생하지 않습니다*.
 
 ## Static Allocation
 
@@ -243,7 +243,7 @@ static ring_t g_uart_ring;   /* static — heap 안 씀 */
 ring_t *get_ring(void) { return &g_uart_ring; }
 ```
 
-ISR·task가 같은 *static instance* 사용.
+ISR과 task가 같은 *static instance*를 공유해서 씁니다.
 
 ## DPDK rte_ring — 표준 라이브러리
 
@@ -256,7 +256,7 @@ rte_ring_sp_enqueue(r, obj);
 rte_ring_sc_dequeue(r, &obj);
 ```
 
-DPDK ring — *bulk operation* 최적화. 10G 이더넷에서 사용.
+DPDK ring은 *bulk operation*에 최적화되어 있습니다. 10G 이더넷에서 표준처럼 쓰입니다.
 
 ## STM32H7 — DMA UART + Ring
 
@@ -279,7 +279,7 @@ void uart_task(void *p) {
 }
 ```
 
-ISR 자체 없음 — DMA + polling. Very high baud (1 Mbps+) UART에서 표준.
+ISR 자체가 필요 없고 DMA와 polling만으로 동작합니다. 1 Mbps 이상의 high baud UART에서 표준으로 쓰입니다.
 
 ## Stream Buffer — FreeRTOS Built-in
 
@@ -293,7 +293,7 @@ xStreamBufferSendFromISR(sb, &byte, 1, &pxHP);
 xStreamBufferReceive(sb, buf, n, portMAX_DELAY);
 ```
 
-FreeRTOS — *내부 ring buffer* + locking. 우리 직접 구현보다 *약간 느림*, 그러나 *API 깔끔*.
+FreeRTOS는 내부적으로 *ring buffer와 locking*을 함께 씁니다. 직접 구현한 것보다 약간 느리지만, *API가 깔끔합니다*.
 
 ## 자주 하는 실수
 
@@ -303,7 +303,7 @@ FreeRTOS — *내부 ring buffer* + locking. 우리 직접 구현보다 *약간 
 #define RING_SIZE 100   /* ← MOD operation 매번 */
 ```
 
-→ 64 또는 128.
+대신 64 또는 128처럼 power-of-2 크기를 씁니다.
 
 > ⚠️ Volatile만 + SMP
 
@@ -311,7 +311,7 @@ FreeRTOS — *내부 ring buffer* + locking. 우리 직접 구현보다 *약간 
 volatile uint16_t head;   /* SMP에선 부족 */
 ```
 
-→ `atomic_*` + memory order.
+대신 `atomic_*`에 memory order를 함께 지정해야 합니다.
 
 > ⚠️ False sharing 무시
 
@@ -320,7 +320,7 @@ struct { volatile uint16_t head, tail; uint8_t buf[]; } ring;
 /* head·tail 같은 line — SMP에서 ping-pong */
 ```
 
-→ alignas(64).
+이때는 `alignas(64)`로 분리해야 합니다.
 
 > ⚠️ Multi-producer 가정
 
@@ -329,18 +329,18 @@ struct { volatile uint16_t head, tail; uint8_t buf[]; } ring;
 ring_push(r, b);   /* race — SPSC 보장 깨짐 */
 ```
 
-→ MPMC ring 또는 *lock + ring*.
+이런 경우에는 MPMC ring을 쓰거나 *lock과 ring을 함께* 사용해야 합니다.
 
 ## 정리
 
-- SPSC ring = **head/tail + atomic + release/acquire**.
-- **Power-of-2** size + AND mask로 *div 회피*.
-- Cortex-M single core — volatile로 충분.
-- SMP — *반드시 atomic·alignas(64)*.
-- ABA는 SPSC엔 무관.
-- DMA UART → ring → task는 *zero ISR* 패턴.
+- SPSC ring은 **head/tail + atomic + release/acquire** 조합으로 구성합니다.
+- **Power-of-2** size에 AND mask를 써서 *div를 회피*합니다.
+- Cortex-M single core에서는 volatile만으로 충분합니다.
+- SMP에서는 *반드시 atomic과 alignas(64)*를 함께 적용합니다.
+- ABA 문제는 SPSC에서는 무관합니다.
+- DMA UART에서 ring을 거쳐 task로 가는 흐름이 *zero ISR* 패턴입니다.
 
-다음 편은 **Priority Inversion**.
+다음 편은 **Priority Inversion**입니다.
 
 ## 관련 항목
 

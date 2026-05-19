@@ -5,12 +5,12 @@ description: "Priority Inversion 발생 시나리오. Mars Pathfinder 사례. PI
 series: "Modern Embedded Recipes"
 seriesOrder: 9
 tags: [recipes, priority-inversion, mars-pathfinder, pi, mutex]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Priority Inversion = High task가 Low 잠금 자원 대기 + Medium에 차단됨"** — Mars Pathfinder 1997을 정지시켰던 bug.
+> **"Priority Inversion = High task가 Low 잠금 자원 대기 + Medium에 차단됨"** 1997년 Mars Pathfinder를 정지시켰던 bug입니다.
 
 ## 시나리오
 
@@ -30,7 +30,7 @@ t=2:  L ready, but M now CPU 점유 (L 못 가짐)
 t=10: M 계속 진행 → H deadline miss
 ```
 
-Medium task가 lock과 무관함에도 *high task 블록*.
+Medium task는 lock과 무관한데도 결과적으로 *high task를 블록*합니다.
 
 ## Mars Pathfinder (1997)
 
@@ -48,7 +48,7 @@ NASA의 Sojourner rover 시스템:
   - Bus mgmt deadline miss → watchdog reset
 ```
 
-매 며칠마다 *system reset*. 지구에서 *원격 debug* → priority inheritance 활성화 → 해결.
+매 며칠마다 *system reset*이 일어났습니다. 지구에서 원격으로 debug를 진행했고, priority inheritance를 활성화해 문제를 해결했습니다.
 
 ## Tony Hoare의 회상
 
@@ -57,7 +57,7 @@ NASA의 Sojourner rover 시스템:
  because of overhead concerns. We had to push the update."
 ```
 
-VxWorks `selectPriorityInherit` 활성화 → 해결.
+VxWorks의 `selectPriorityInherit`를 활성화해 문제를 해결했습니다.
 
 ## 해결 1: Priority Inheritance (PI)
 
@@ -93,9 +93,9 @@ L1 mtx_B 대기 → L2 boost
 H mtx_A 대기 → L1·L2 둘 다 boost
 ```
 
-체인 길이 N → boost N번 propagation. *수십 µs* 가능.
+체인 길이가 N이면 boost가 N번 propagation됩니다. 그러면 *수십 µs*까지 시간이 누적될 수 있습니다.
 
-자동차 ASIL-D — *chain depth 제한* (보통 ≤ 3).
+자동차 ASIL-D에서는 *chain depth를 제한*합니다(보통 3 이하).
 
 ## 해결 2: Priority Ceiling Protocol (PCP)
 
@@ -107,7 +107,7 @@ Take 시 — task priority가 ceiling 수준으로 *즉시 boost*
 Give 시 — 원래 priority 복원
 ```
 
-VxWorks·INTEGRITY·µC/OS 일부 — PCP 지원. WCET 분석 *훨씬 쉬움*.
+VxWorks와 INTEGRITY, 일부 µC/OS는 PCP를 지원합니다. 덕분에 WCET 분석이 *훨씬 쉬워집니다*.
 
 ### Immediate vs Original PCP
 
@@ -119,11 +119,11 @@ Original PCP:
   Ceiling만큼 boost되어 *다른 lower priority task만* preempt 가능
 ```
 
-Immediate가 *구현 쉬움* + 효과 같음. Modern RTOS 표준.
+Immediate 방식이 *구현이 쉬우면서도* 효과는 같습니다. 그래서 Modern RTOS의 표준이 되었습니다.
 
 ## 해결 3: Priority Ceiling Emulation (PCE)
 
-Linux PREEMPT_RT — *robust mutex + priority ceiling*:
+Linux PREEMPT_RT는 *robust mutex와 priority ceiling*을 함께 제공합니다.
 
 ```c
 pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_PROTECT);
@@ -131,16 +131,17 @@ pthread_mutexattr_setprioceiling(&attr, 90);
 pthread_mutex_init(&mtx, &attr);
 ```
 
-Take 시 *ceiling 90으로 boost*. 자동 *우선순위 통제*.
+Take 시점에 *ceiling인 90으로 boost*되어 우선순위가 자동으로 통제됩니다.
 
 ## 진단 — Tracealyzer / SystemView
 
-Trace 화면:
-- Task L "running" with priority boost 표시
-- Mutex held by L
-- Task H "blocked on mutex"
+Trace 화면에서는 다음과 같이 확인할 수 있습니다.
 
-→ Priority inversion 직접 시각화.
+- Task L이 "running" 상태로 priority boost와 함께 표시됩니다.
+- Mutex가 L에 의해 잡혀 있다고 보입니다.
+- Task H는 "blocked on mutex" 상태로 표시됩니다.
+
+이렇게 하면 priority inversion을 직접 시각적으로 확인할 수 있습니다.
 
 ```c
 /* Debug — boost 횟수 측정 */
@@ -157,14 +158,14 @@ ISR run on H mutex held → ISR no priority concept
   → 단순 block 아니라 *ISR is blocked task* — 일반적으로 ISR이 mutex 안 잡음
 ```
 
-ISR ↔ task — *semaphore* (signaling). Mutex는 *task 간만*.
+ISR과 task 사이에는 *semaphore*(signaling)를 씁니다. Mutex는 *task 간에만* 사용합니다.
 
 ## 예방 — Design Rule
 
-1. **Short critical section** — μs 단위
-2. **No mutex held during sleep/IO**
-3. **Lock ordering** — deadlock + chain inheritance 제한
-4. **PI mutex 사용** — default activated
+1. **Short critical section**을 μs 단위로 유지합니다.
+2. Sleep이나 IO 중에는 **mutex를 잡지 않습니다**.
+3. **Lock ordering**으로 deadlock과 chain inheritance를 제한합니다.
+4. **PI mutex**를 사용합니다(기본 활성화).
 
 ```c
 /* 회피 */
@@ -188,7 +189,7 @@ ASIL-D ECU:
   - 일부 코드는 *mutex 자체 금지*
 ```
 
-자동차 — *예측 가능*이 *throughput*보다 우선.
+자동차에서는 *예측 가능성*이 *throughput*보다 우선합니다.
 
 ## Boeing 787 Bug
 
@@ -198,7 +199,7 @@ ASIL-D ECU:
   → priority inversion-like 상태로 fail
 ```
 
-테스트되지 않은 long-run path — *WCET 분석에 포함*. 단기 테스트로 못 잡음.
+테스트되지 않은 long-run path는 *WCET 분석에 반드시 포함*해야 합니다. 단기 테스트만으로는 잡히지 않습니다.
 
 ## WCET 분석
 
@@ -211,7 +212,7 @@ Total worst case wait: 150 µs
 H가 매 1 ms tick에 — budget 안 OK? → 100 µs < 1 ms ✓
 ```
 
-aiT·Bound-T 등 *정적 WCET 도구*. 자동차·항공 표준.
+aiT와 Bound-T 같은 *정적 WCET 도구*를 활용합니다. 자동차와 항공 분야의 표준입니다.
 
 ## 자주 하는 실수
 
@@ -221,7 +222,7 @@ aiT·Bound-T 등 *정적 WCET 도구*. 자동차·항공 표준.
 SemaphoreHandle_t mtx = xSemaphoreCreateBinary();   /* ← PI 없음 — semaphore */
 ```
 
-→ `xSemaphoreCreateMutex` (PI 자동).
+대신 `xSemaphoreCreateMutex`를 써야 PI가 자동으로 동작합니다.
 
 > ⚠️ Long task in mutex
 
@@ -231,7 +232,7 @@ http_request();   /* seconds — high task block */
 xSemaphoreGive(mtx);
 ```
 
-→ data 사전 fetch + 짧은 critical.
+이때는 데이터를 미리 fetch해 두고 critical section을 짧게 유지해야 합니다.
 
 > ⚠️ ISR이 mutex 사용
 
@@ -239,7 +240,7 @@ xSemaphoreGive(mtx);
 ISR: xSemaphoreTake(mtx, 0);   /* ✗ */
 ```
 
-→ semaphore.
+ISR에서는 mutex 대신 semaphore를 써야 합니다.
 
 > ⚠️ Priority 계층 잘못 설계
 
@@ -248,18 +249,18 @@ Task H priority 5
 Task M priority 5    /* ← same priority → preempt 없음, FIFO */
 ```
 
-→ Priority 명확히 다르게.
+이런 경우에는 priority를 명확히 다르게 지정해야 합니다.
 
 ## 정리
 
-- Priority Inversion = **Low 보유 + Medium preempt = High block**.
-- Mars Pathfinder 1997 — *원격 patch로 해결*.
-- **PI mutex** = 보유자 priority 동적 boost.
-- **PCP** = 컴파일 타임 ceiling, 더 단순한 분석.
-- Chain inheritance = depth 제한 필요.
-- ASIL-D — *lock 자체 자제*, double buffer 선호.
+- Priority Inversion은 **Low가 보유 + Medium이 preempt = High가 block**되는 상황입니다.
+- Mars Pathfinder는 1997년에 *원격 patch로 해결*했습니다.
+- **PI mutex**는 보유자 priority를 동적으로 boost합니다.
+- **PCP**는 컴파일 타임 ceiling을 활용해 더 단순한 분석이 가능합니다.
+- Chain inheritance는 depth 제한이 필요합니다.
+- ASIL-D에서는 *lock 자체를 자제*하고 double buffer를 선호합니다.
 
-다음 편은 **Memory Barrier**.
+다음 편은 **Memory Barrier**입니다.
 
 ## 관련 항목
 

@@ -5,12 +5,12 @@ description: "PCIe BAR (Base Address Register), enumeration, sizing, MMIO 매핑
 series: "Modern Embedded Recipes"
 seriesOrder: 3
 tags: [recipes, pcie, bar, mmio, enumeration]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"BAR = device 메모리/IO 영역 선언"** — CPU가 *어디로 접근*할지 알려줌.
+> **"BAR는 device의 메모리/IO 영역 선언입니다."** CPU에게 어디로 접근해야 할지 알려주는 역할을 합니다.
 
 ## PCIe Config Space 256 byte
 
@@ -35,7 +35,7 @@ Offset
 0x3C  IRQ Line / Pin
 ```
 
-PCIe extended config = *4 KB* (PCIe Spec). 일반 OS는 0x100 이상도 액세스.
+PCIe extended config는 4 KB까지 확장됩니다 (PCIe Spec). 일반 OS는 0x100 이상도 액세스 가능합니다.
 
 ## BAR Layout
 
@@ -54,7 +54,7 @@ BAR (32-bit register):
   P (bit 3): Prefetchable
 ```
 
-64-bit BAR — 두 인접 BAR 사용 (예: BAR0 + BAR1).
+64-bit BAR은 인접한 두 BAR을 사용합니다 (예: BAR0 + BAR1).
 
 ## Sizing — Device가 얼마 필요한지
 
@@ -74,7 +74,7 @@ size = ~mask + 1;
 pci_write_config_dword(dev, BAR0, orig);
 ```
 
-예: device가 64 KB 요청 → mask = `0xFFFF0000`, size = `0x10000`.
+예를 들어 device가 64 KB를 요청하면 mask는 `0xFFFF0000`이 되고 size는 `0x10000`이 됩니다.
 
 ## Enumeration 흐름
 
@@ -117,7 +117,7 @@ static int my_probe(struct pci_dev *pdev, const struct pci_device_id *id) {
 }
 ```
 
-`pci_iomap`은 *내부에서 `ioremap`* — page table에 *non-cacheable mapping* 추가.
+`pci_iomap`은 내부에서 `ioremap`을 호출해 page table에 non-cacheable mapping을 추가합니다.
 
 ## __iomem 타입 표시
 
@@ -127,7 +127,7 @@ uint32_t v = ioread32(mmio + 0x10);   // ← 정확
 uint32_t v = *(uint32_t*)(mmio + 0x10);   // ← 컴파일러 경고, 위험
 ```
 
-`__iomem` (sparse annotation) — *pointer가 IO space*임을 표시. Direct dereference 금지. `iowrite32`·`ioread32`·`readl`·`writel` 사용.
+`__iomem` (sparse annotation)은 pointer가 IO space임을 표시합니다. Direct dereference는 금지이므로 `iowrite32`, `ioread32`, `readl`, `writel`을 사용합니다.
 
 ## Volatile + Memory Barrier
 
@@ -137,11 +137,11 @@ __iowmb();   // ← write memory barrier
 iowrite32(val, mmio + 0x14);
 ```
 
-DMA + MMIO 순서 보장. `dma_wmb()`·`smp_wmb()` 와 *다른 barrier*.
+DMA와 MMIO 사이의 순서를 보장합니다. `dma_wmb()`, `smp_wmb()`와는 다른 barrier입니다.
 
 ## DPDK·SPDK — User-space PCIe
 
-Linux kernel bypass:
+Linux kernel bypass 방식입니다.
 
 ```c
 struct rte_pci_device *dev;
@@ -152,8 +152,7 @@ volatile uint32_t *reg = (uint32_t*)mmio;
 *reg = 0x12345678;
 ```
 
-장점 — kernel/user mode 전환 없음, 매우 빠름.
-단점 — driver 통제 안 됨, 위험.
+장점은 kernel/user mode 전환이 없어 매우 빠르다는 점입니다. 반대로 단점은 driver 통제가 안 돼 위험하다는 점입니다.
 
 ## VFIO — Hardware Passthrough
 
@@ -163,7 +162,7 @@ echo 0000:01:00.0 > /sys/bus/pci/drivers/nvme/unbind
 echo 8086 0a54   > /sys/bus/pci/drivers/vfio-pci/new_id
 ```
 
-QEMU/KVM이 VFIO로 *PCIe device 통째로* VM에 넘김. BAR도 VM의 게스트 메모리에 mapping.
+QEMU/KVM이 VFIO를 이용해 PCIe device를 통째로 VM에 넘깁니다. BAR도 VM의 게스트 메모리에 mapping됩니다.
 
 ## PCIe Root Complex 임베디드
 
@@ -175,7 +174,7 @@ QEMU/KVM이 VFIO로 *PCIe device 통째로* VM에 넘김. BAR도 VM의 게스트
 | TI AM65x | Gen2 x2 | host |
 | Cortex-M에는 PCIe 없음 (USB·Ethernet) | | |
 
-Zynq Ultrascale+ — PCIe Gen3 16 lane = 16 GB/s 양방향. *카메라·SSD·GPU* 연결.
+Zynq Ultrascale+의 PCIe Gen3 16 lane은 양방향 16 GB/s를 제공합니다. 주로 카메라, SSD, GPU 연결에 쓰입니다.
 
 ## PCIe Endpoint — 우리가 device 만들 때
 
@@ -190,7 +189,7 @@ pcie_ep->BAR0_CFG = SIZE_64KB | TYPE_MEM32;
 pcie_ep->BAR0_BASE = 0xC0000000;   // 우리 DRAM
 ```
 
-NVMe SSD·FPGA accelerator 가 host PC의 endpoint.
+NVMe SSD나 FPGA accelerator가 host PC의 endpoint로 동작하는 예입니다.
 
 ## Linux로 PCIe 디버깅
 
@@ -209,7 +208,7 @@ lspci -vv -s 01:00.0 | grep LnkSta
 # LnkSta: Speed 8GT/s (ok), Width x16 (ok)
 ```
 
-`LnkSta`가 *원하는 속도·폭*보다 *낮으면* — *training failure* 또는 *link error*.
+`LnkSta`가 원하는 속도나 폭보다 낮게 나오면 training failure나 link error를 의심합니다.
 
 ## Error — AER (Advanced Error Reporting)
 
@@ -225,7 +224,7 @@ echo 1 > /sys/bus/pci/devices/0000:01:00.0/reset
 [12345.679]   Receiver Error Receiver ID: 00
 ```
 
-Corrected → hardware 자동 처리. Uncorrectable Fatal → device hang·system crash.
+Corrected는 hardware가 자동으로 처리합니다. 반대로 Uncorrectable Fatal은 device hang이나 system crash로 이어집니다.
 
 ## 자주 하는 실수
 
@@ -236,7 +235,7 @@ uint32_t addr = pci_read_config_dword(dev, BAR0);
 // ← 상위 32-bit 무시 — 4GB 이상 device 매핑 못 찾음
 ```
 
-Type bit 확인 후 64-bit이면 *BAR1까지 합쳐서* 64-bit address.
+Type bit를 확인해서 64-bit이면 BAR1까지 합쳐 64-bit address를 만들어야 합니다.
 
 > ⚠️ Bus Master 비활성
 
@@ -247,7 +246,7 @@ dma_alloc_coherent(...);
 /* → DMA 동작 안 함 */
 ```
 
-`pci_set_master(pdev)` 필수.
+`pci_set_master(pdev)` 호출이 필수입니다.
 
 > ⚠️ Prefetchable Memory에 MMIO register
 
@@ -260,7 +259,7 @@ struct device_config {
 mmio = pci_iomap(pdev, 0, 0);   // prefetchable 영역
 ```
 
-Prefetchable이면 CPU가 *speculative read* 가능 — side effect register는 *non-prefetchable*에.
+Prefetchable 영역이면 CPU가 speculative read를 할 수 있습니다. side effect가 있는 register는 non-prefetchable 영역에 배치해야 합니다.
 
 > ⚠️ Endpoint 측 BAR sizing 잘못
 
@@ -272,14 +271,14 @@ pcie_ep->BAR0_CFG = SIZE_128KB;   // 128 KB 요청
 
 ## 정리
 
-- BAR = device의 *MMIO 영역 선언*.
-- Enumeration — config space scan + BAR sizing.
-- Linux `pci_iomap` + `ioread32`/`iowrite32`.
-- 64-bit BAR은 *두 BAR* 합쳐서.
-- AER로 link error 감지.
-- Endpoint side는 *우리가 host에 노출할 영역*.
+- BAR는 device의 MMIO 영역 선언입니다.
+- Enumeration은 config space scan과 BAR sizing으로 구성됩니다.
+- Linux에서는 `pci_iomap`과 `ioread32`/`iowrite32`를 사용합니다.
+- 64-bit BAR은 두 BAR을 합쳐 표현합니다.
+- AER로 link error를 감지합니다.
+- Endpoint 측에서는 host에 노출할 영역을 우리가 정의합니다.
 
-다음 편은 **Device Tree**.
+다음 편은 **Device Tree**입니다.
 
 ## 관련 항목
 

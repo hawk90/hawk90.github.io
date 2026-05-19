@@ -5,12 +5,12 @@ description: "Timer wheel 자료구조. Hashed wheel·hierarchical wheel·O(1) t
 series: "Modern Embedded Recipes"
 seriesOrder: 12
 tags: [recipes, timer-wheel, hashed-wheel, hierarchical, scheduler]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Timer Wheel = O(1) tick, O(1) add·cancel"** — 수천 timer에도 *상수 시간*.
+> **"Timer Wheel은 O(1) tick, O(1) add·cancel"**입니다. 수천 timer에도 *상수 시간*을 유지합니다.
 
 ## Naive — Sorted List
 
@@ -31,9 +31,9 @@ void tick(void) {
 }
 ```
 
-Tick = O(K) where K = expired count. Add = O(N).
+Tick은 O(K)이고 여기서 K는 expired count입니다. Add는 O(N)입니다.
 
-→ N=1000 timer 시 add 마다 1000 cmp. *High freq use*에 부적합.
+→ N=1000 timer 시 add마다 1000번의 cmp가 발생합니다. 그래서 *high freq use*에 부적합합니다.
 
 ## Min-Heap
 
@@ -52,7 +52,7 @@ void tick(void) {
 }
 ```
 
-`O(log N)` add. Linux hrtimer = *red-black tree* (비슷한 효율).
+add 비용은 `O(log N)`입니다. Linux hrtimer는 *red-black tree*를 쓰며 비슷한 효율을 보입니다.
 
 ## Hashed Timer Wheel — Varghese·Lauck 1987
 
@@ -97,9 +97,9 @@ void tick(void) {
 }
 ```
 
-**Add = O(1), Tick = O(K)** (K = current slot의 timer 수).
+**Add는 O(1), Tick은 O(K)**입니다(K는 current slot의 timer 수).
 
-> ⚠️ Wheel 한 바퀴 (256 tick) 초과 timer는 *slot 충돌* — re-add 처리.
+> ⚠️ Wheel 한 바퀴(256 tick)를 초과하는 timer는 *slot 충돌*이 발생하므로 re-add로 처리합니다.
 
 ## Hierarchical Wheel — Linux jiffies
 
@@ -120,7 +120,7 @@ Tick (level 0 8ms):
   - 즉 level 1→0 *cascade*
 ```
 
-`O(1) add + O(1) tick + 가끔 cascade*. Linux kernel 5.0까지 jiffies로 사용. 5.0+ — *hash-only* (no cascade).
+O(1) add + O(1) tick에 가끔 cascade가 들어갑니다. Linux kernel 5.0까지 jiffies로 사용했고, 5.0+에서는 *hash-only*로 바뀌었습니다(no cascade).
 
 ## Linux New Hashed Wheel (HRtimer 아닌 timer_list)
 
@@ -135,7 +135,7 @@ Cascade 없음 — 각 level 직접 expiry 처리
 Tick O(1) + occasional level 0 process
 ```
 
-Linux 4.8+ → cascade 제거. 더 단순·예측 가능.
+Linux 4.8+에서는 cascade를 제거했습니다. 그래서 더 단순하고 예측 가능합니다.
 
 ## DPDK Timer
 
@@ -145,7 +145,7 @@ rte_timer_init(&t);
 rte_timer_reset(&t, 1000000 /* hz */, PERIODICAL, lcore_id, callback, arg);
 ```
 
-DPDK — *skiplist 기반*. O(log N) add·tick.
+DPDK는 *skiplist 기반*입니다. add와 tick 모두 O(log N)입니다.
 
 ## 정확도 vs 효율
 
@@ -159,7 +159,7 @@ Tickless idle — sleep 중 *expiry까지 hardware timer set*
   → 다음 expiry == hardware timer
 ```
 
-Modern Linux·FreeRTOS — *tickless*.
+Modern Linux와 FreeRTOS는 *tickless*입니다.
 
 ## STM32 — Hardware Timer Compare
 
@@ -173,7 +173,7 @@ void HAL_TIM_OC_DelayElapsedCallback(...) {
 }
 ```
 
-여러 compare channel → *여러 timer 동시*. Hardware 자체 정확.
+여러 compare channel로 *여러 timer를 동시에* 운용할 수 있습니다. Hardware 자체가 정확합니다.
 
 ## ESP32 — esp_timer (One-shot·Periodic)
 
@@ -189,7 +189,7 @@ esp_timer_start_once(timer, 1000000);   /* 1 sec */
 esp_timer_start_periodic(timer, 500000);   /* 500 ms */
 ```
 
-내부 — *high-resolution timer + sorted list*. 1 µs 정확도.
+내부는 *high-resolution timer + sorted list*로 구성되어 있습니다. 1 µs 정확도를 보장합니다.
 
 ## FreeRTOS Software Timer Wheel?
 
@@ -200,7 +200,7 @@ FreeRTOS의 xTimer 내부:
   - O(N) add — 적은 timer엔 OK
 ```
 
-Modern Linux의 wheel과 다름. 임베디드 timer 수 적어 *수용 가능*.
+Modern Linux의 wheel과는 다릅니다. 임베디드에서는 timer 수가 적어 *수용 가능*합니다.
 
 ## Hierarchical Wheel — Software 구현
 
@@ -242,7 +242,7 @@ void tick(void) {
 }
 ```
 
-각 level에서 *expiry bit pattern으로 slot 결정*. Cascade로 *expiry 임박 시 lower level로 이동*.
+각 level에서 *expiry bit pattern으로 slot을 결정*합니다. Cascade를 통해 *expiry가 임박하면 lower level로 이동*합니다.
 
 ## TCP Timeout — Wheel 사례
 
@@ -253,51 +253,51 @@ Linux kernel TCP — connection 수만 timer 발생
   - Sorted list 불가능 → wheel 필수
 ```
 
-Linux kernel — hashed wheel + cascade 없음 (4.8+).
+Linux kernel은 hashed wheel을 쓰고 cascade는 없습니다(4.8+).
 
 ## 자주 하는 실수
 
-> ⚠️ Naive sorted list로 1000+ timer
+> ⚠️ Naive sorted list로 1000+ timer를 처리합니다
 
 ```c
 add_timer(t, expiry);   /* O(N) — 1000 timer 시 1 µs+ per add */
 ```
 
-→ wheel 또는 min-heap.
+→ wheel 또는 min-heap을 씁니다.
 
-> ⚠️ Wheel 1 cycle 초과 timer
+> ⚠️ Wheel 1 cycle을 초과하는 timer를 처리합니다
 
 ```c
 WHEEL_SIZE = 256
 add(timer, expiry = current + 1000);   /* ← slot 996 = (current+1000) % 256 = same slot of current+232? */
 ```
 
-→ hierarchical wheel 또는 *re-add on wrap*.
+→ hierarchical wheel 또는 *re-add on wrap*을 적용합니다.
 
-> ⚠️ Tick frequency 너무 높음
+> ⚠️ Tick frequency가 너무 높습니다
 
 ```c
 configTICK_RATE_HZ = 10000;   /* 100 µs tick — overhead 큼 */
 ```
 
-→ tickless idle 또는 *hardware compare*.
+→ tickless idle 또는 *hardware compare*를 활용합니다.
 
-> ⚠️ Cancel 자주 — list scan
+> ⚠️ Cancel을 자주 하면 list scan이 발생합니다
 
 ```c
 cancel_timer(t);   /* O(N) — list search */
 ```
 
-→ doubly-linked list (O(1) remove).
+→ doubly-linked list로 O(1) remove를 보장합니다.
 
 ## 정리
 
-- Naive list = O(N) add, Min-heap = O(log N), **Wheel = O(1)**.
-- Hashed wheel — slot collision wrap.
-- **Hierarchical wheel** = multi-level + cascade.
-- Linux 4.8+ — hashed no-cascade.
-- STM32 hardware timer compare = *진정한 hardware*.
-- Tickless idle — 다음 expiry까지 sleep.
+- Naive list는 O(N) add, Min-heap은 O(log N), **Wheel은 O(1)**입니다.
+- Hashed wheel은 slot collision에서 wrap이 발생합니다.
+- **Hierarchical wheel**은 multi-level + cascade 구조입니다.
+- Linux 4.8+는 hashed no-cascade 방식입니다.
+- STM32 hardware timer compare는 *진정한 hardware* 동작입니다.
+- Tickless idle은 다음 expiry까지 sleep합니다.
 
 ## 관련 항목
 

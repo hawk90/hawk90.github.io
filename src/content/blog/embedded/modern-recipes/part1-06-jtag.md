@@ -5,12 +5,12 @@ description: "JTAG·SWD 디버깅 체크리스트. Pin·voltage·clock·daisy ch
 series: "Modern Embedded Recipes"
 seriesOrder: 6
 tags: [recipes, jtag, swd, openocd, debug, brick]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"JTAG 안 붙음 = 전기·핀 → 속도 → 보안잠금"** — 위에서부터.
+> **"JTAG가 안 붙으면 전기·핀 → 속도 → 보안잠금 순으로 점검합니다."** 위에서부터 차례로 확인합니다.
 
 ## JTAG vs SWD
 
@@ -23,7 +23,7 @@ draft: true
 | Cortex-A | 표준 | 가능 (cJTAG 변종) |
 | ARM debug protocol | Both supports |  |
 
-Cortex-M3+ — *SWJ-DP* (선택 가능). 보통 SWD가 핀 수 적어 선호.
+Cortex-M3+는 *SWJ-DP*를 제공해 선택할 수 있습니다. 보통 SWD가 핀 수가 적어 선호됩니다.
 
 ## Step 1: 핀 연결
 
@@ -44,7 +44,7 @@ Cortex-M3+ — *SWJ-DP* (선택 가능). 보통 SWD가 핀 수 적어 선호.
    └──────────────────────────────┘
 ```
 
-VTref = *target voltage* — debugger가 *level translate*에 사용.
+VTref는 *target voltage*입니다. debugger가 *level translate*에 씁니다.
 
 ### 10-pin Cortex (SWD/JTAG 양용)
 
@@ -58,7 +58,7 @@ VTref = *target voltage* — debugger가 *level translate*에 사용.
    └──────────────┘
 ```
 
-ST-Link·J-Link 표준 커넥터.
+ST-Link·J-Link의 표준 커넥터입니다.
 
 ## Step 2: 전압 매칭
 
@@ -67,9 +67,9 @@ ST-Link·J-Link 표준 커넥터.
 1.8V 보드 (modern SoC) + 3.3V debugger → 신호 불안정 또는 손상
 ```
 
-**VTref pin이 *target에서 debugger로*** 정보 제공 — debugger가 자동 level shift.
+**VTref pin이 *target에서 debugger로*** 정보를 제공합니다. 이렇게 하면 debugger가 자동으로 level shift를 합니다.
 
-VTref 안 연결 시 *debug interface 모름* → connect fail.
+VTref가 연결되지 않으면 *debug interface*를 알 수 없어 connect가 실패합니다.
 
 ## Step 3: Clock Speed
 
@@ -83,7 +83,7 @@ adapter speed 20000  # 20 MHz — 최대
 # 안정 후 *높임*
 ```
 
-너무 빠르면 *간헐 connect failure*. 너무 느리면 *flash erase 매우 느림* (~분 단위).
+너무 빠르면 *간헐적 connect failure*가 발생합니다. 반대로 너무 느리면 *flash erase가 매우 느려집니다* (~분 단위).
 
 ## Step 4: Reset 신호
 
@@ -93,41 +93,41 @@ adapter reset_config srst_only
 # 또는
 adapter reset_config trst_and_srst
 
-# 일부 보드 — nRESET 풀업 약함 → debugger가 못 잡음
+# 일부 보드에서는 nRESET 풀업이 약해 debugger가 잡지 못합니다
 ```
 
-`srst_pulls_trst` — system reset이 *test reset도 트리거*.
+`srst_pulls_trst`는 system reset이 *test reset도 트리거*하게 합니다.
 
 ## Step 5: Security Lock — RDP
 
 ```text
 STM32: Readout Protection (RDP)
-  Level 0 — 잠금 없음
-  Level 1 — Flash 읽기 잠금, 디버깅 가능 but read 못 함
-  Level 2 — 완전 잠금 (영구) — Brick에 가까움
+  Level 0: 잠금 없음
+  Level 1: Flash 읽기 잠금, 디버깅 가능하지만 read는 불가
+  Level 2: 완전 잠금 (영구), Brick에 가까움
 
 NXP: HAB (High Assurance Boot)
 ESP32: eFuse-based secure boot
-Nordic: APPROTECT — debug 차단
+Nordic: APPROTECT, debug 차단
 ```
 
 ```bash
 # STM32CubeProgrammer
 > readout protection
 Level 1 set
-# → 다시 풀려면 *mass erase* (코드 잃음)
+# → 다시 풀려면 *mass erase*를 해야 하고 코드를 잃습니다
 ```
 
-읽지 못하는 게 *기능* — 양산 폰·자동차 ECU 표준.
+읽지 못하는 것이 *기능*입니다. 양산 폰·자동차 ECU의 표준입니다.
 
-> ⚠️ 양산 펌웨어에 *실수로 RDP Level 2 set* → 영원 디버깅 불가, 칩 *교체* 외 답 없음.
+> ⚠️ 양산 펌웨어에서 *실수로 RDP Level 2를 set*하면 영원히 디버깅이 불가합니다. 칩 *교체* 외에는 답이 없습니다.
 
 ## Step 6: Power 상태
 
 ```text
-PWR_OFF — 보드 전원 자체 없음
-DEEP_SLEEP — DEBUGEN 비활성 (특정 칩)
-WFI 또는 WFE — clock 정지, debugger 못 잡음
+PWR_OFF: 보드 전원 자체 없음
+DEEP_SLEEP: DEBUGEN 비활성 (특정 칩)
+WFI 또는 WFE: clock 정지, debugger가 못 잡음
 ```
 
 ```c
@@ -138,11 +138,11 @@ DBGMCU->CR |= DBGMCU_CR_DBG_SLEEP | DBGMCU_CR_DBG_STOP;
 ## Step 7: Bootloader가 Debug 차단
 
 ```text
-Secure boot 시 — BootROM이 *디버깅 차단* 후 application으로 jump
-Application에서 *debug enable* 다시 안 함 → connect fail
+Secure boot 시 BootROM이 *디버깅을 차단* 후 application으로 jump합니다.
+Application에서 *debug enable*을 다시 하지 않으면 connect가 실패합니다.
 ```
 
-ESP32 — `efuse_disable_debug` 가능 (영구). Nordic — `APPROTECT`.
+ESP32에서는 `efuse_disable_debug`가 가능합니다 (영구). Nordic은 `APPROTECT`를 씁니다.
 
 ## OpenOCD 실전
 
@@ -192,7 +192,7 @@ J-Link> regs
 J-Link> mem32 0x20000000 16
 ```
 
-매우 빠른 flash speed — 산업·양산 라인 표준.
+매우 빠른 flash speed를 제공해 산업·양산 라인의 표준입니다.
 
 ## Daisy Chain (JTAG only)
 
@@ -202,23 +202,23 @@ J-Link> mem32 0x20000000 16
                                                             (returned)
 ```
 
-여러 device 직렬. OpenOCD 설정:
+여러 device를 직렬로 연결합니다. OpenOCD 설정 예시는 다음과 같습니다.
 
 ```bash
 jtag newtap chip0 cpu -irlen 4
 jtag newtap chip1 cpu -irlen 4
 ```
 
-`irlen` = *Instruction Register length*. 각 device 데이터시트 확인.
+`irlen`은 *Instruction Register length*입니다. 각 device 데이터시트에서 확인합니다.
 
 ## SWO Trace
 
 ```text
-SWO pin (SWD에선 별도) — 디버그 trace, printf
+SWO pin (SWD에선 별도): 디버그 trace, printf
 Manchester 또는 NRZ 인코딩
-ITM stimulus port — printf
-DWT — cycle·event counter
-ETM — instruction trace (수 백 MB/s)
+ITM stimulus port: printf
+DWT: cycle·event counter
+ETM: instruction trace (수 백 MB/s)
 ```
 
 ```c
@@ -226,7 +226,7 @@ ITM_SendChar('H');   // SWO로 출력
 DWT->CYCCNT;          // cycle counter
 ```
 
-ETM은 *trace probe* (J-Trace 등) 필요. *실시간 명령 흐름 캡쳐*.
+ETM은 *trace probe* (J-Trace 등)가 필요합니다. *실시간 명령 흐름을 캡쳐*할 수 있습니다.
 
 ## 자주 하는 실수
 
@@ -237,15 +237,15 @@ openocd ...
 # Error: target not halted
 ```
 
-Board power 먼저. Power LED 확인.
+Board power를 먼저 켜야 합니다. Power LED를 확인합니다.
 
 > ⚠️ Reset 회로 RC 시정수
 
-reset capacitor가 크면 (1µF) — *reset assert 후 release까지 ms 단위*. Debugger의 *짧은 reset pulse* 못 인식.
+reset capacitor가 크면 (1µF) *reset assert 후 release까지 ms 단위*가 걸립니다. 이렇게 되면 Debugger의 *짧은 reset pulse*를 인식하지 못합니다.
 
 > ⚠️ TDI·TDO 교차 안 함
 
-JTAG 4-wire에서 *TDI/TDO는 1:1* (UART와 다름). Debugger TDI → Target TDI, TDO → TDO.
+JTAG 4-wire에서 *TDI/TDO는 1:1*입니다 (UART와 다릅니다). Debugger TDI → Target TDI, TDO → TDO 방식으로 연결합니다.
 
 > ⚠️ 옛 펌웨어가 SWD pin을 GPIO로 reconfigure
 
@@ -254,10 +254,10 @@ GPIO_InitTypeDef gpio = {0};
 gpio.Pin = GPIO_PIN_13 | GPIO_PIN_14;   // ← SWDIO, SWCLK
 gpio.Mode = GPIO_MODE_OUTPUT_PP;
 HAL_GPIO_Init(GPIOA, &gpio);
-/* → SWD 잠김 — 다음 connect 못 함 */
+/* → SWD가 잠겨 다음 connect가 불가합니다 */
 ```
 
-해결 — *연결 즉시 reset halt* (SWD가 GPIO 되기 *전에* halt).
+해결책은 *연결 즉시 reset halt*입니다 (SWD가 GPIO로 바뀌기 *전에* halt합니다).
 
 ```bash
 # OpenOCD
@@ -275,29 +275,30 @@ reset halt
 4. 펌웨어 재로드
 ```
 
-마지막 수단 — *eFuse 잠금* 시 *불가*. 칩 교체.
+마지막 수단입니다. *eFuse 잠금* 상태에서는 복구가 *불가*하므로 칩을 교체해야 합니다.
 
 ## 자동차·항공 — JTAG 영구 차단
 
-양산 ECU — *JTAG fuse blow* (또는 RDP Level 2). Reverse engineering 방지.
+양산 ECU에서는 *JTAG fuse blow*를 하거나 RDP Level 2를 적용합니다. Reverse engineering 방지가 목적입니다.
 
-개발 vs 양산 *별도 board version*. 또는 *secure debug* (서명된 challenge로만 unlock).
+개발과 양산에는 *별도 board version*을 씁니다. 또는 *secure debug* (서명된 challenge로만 unlock)을 적용합니다.
 
 ## 정리
 
-체크리스트:
-1. VTref 연결
-2. 전압 매칭 (level shift 필요?)
-3. Pin orientation (TDI·TDO 1:1, SWD는 SWDIO·SWCLK)
-4. Adapter speed 낮게 시작
-5. nRESET 동작
-6. RDP·secure lock 확인
-7. WFI·sleep mode 회피 (DBGMCU 설정)
-8. OpenOCD·J-Link Commander로 *기본 연결* 검증
-9. ITM·SWO로 trace
-10. Brick — system bootloader + mass erase
+체크리스트는 다음과 같습니다.
 
-다음 part는 **Cortex-M Bring-up**.
+1. VTref 연결을 확인합니다.
+2. 전압 매칭 (level shift 필요 여부)을 확인합니다.
+3. Pin orientation (TDI·TDO 1:1, SWD는 SWDIO·SWCLK)을 확인합니다.
+4. Adapter speed를 낮게 시작합니다.
+5. nRESET 동작을 확인합니다.
+6. RDP·secure lock을 확인합니다.
+7. WFI·sleep mode를 회피합니다 (DBGMCU 설정).
+8. OpenOCD·J-Link Commander로 *기본 연결*을 검증합니다.
+9. ITM·SWO로 trace를 합니다.
+10. Brick 상태에서는 system bootloader + mass erase를 시도합니다.
+
+다음 part는 **Cortex-M Bring-up**입니다.
 
 ## 관련 항목
 

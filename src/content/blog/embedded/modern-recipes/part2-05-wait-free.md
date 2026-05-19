@@ -5,12 +5,12 @@ description: "Wait-free 보장 patterns. Atomic flag, sequence number, latest-va
 series: "Modern Embedded Recipes"
 seriesOrder: 11
 tags: [recipes, wait-free, signaling, sequence, double-buffer]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Wait-Free = 모든 thread 진행 *bounded*"** — Lock-free보다 *강한 보장*.
+> **"Wait-Free는 모든 thread 진행이 *bounded*"**임을 의미합니다. Lock-free보다 *강한 보장*입니다.
 
 ## Progress Property 복습
 
@@ -20,7 +20,7 @@ draft: true
 - Wait-free:        *각 thread*가 N step 이내 완료
 ```
 
-Wait-free = 가장 강한 보장 — *deadline 보장*에 유리.
+Wait-free는 가장 강한 보장입니다. 그래서 *deadline 보장*에 유리합니다.
 
 ## Atomic Flag Signaling
 
@@ -40,7 +40,7 @@ if (atomic_load_explicit(&ready, memory_order_acquire)) {
 }
 ```
 
-가장 단순한 wait-free signaling — *재진입성, retry 없음*.
+가장 단순한 wait-free signaling입니다. *재진입성이 있고 retry가 없습니다*.
 
 ## Sequence Number — Multi-Reader
 
@@ -72,7 +72,7 @@ bool read(sensor_data_t *out) {
 }
 ```
 
-Seqlock — *reader 다중 wait-free* (writer 한 명).
+Seqlock은 *reader 다중 wait-free*입니다(writer는 한 명).
 
 ## Latest-Value — Double Buffer
 
@@ -97,11 +97,11 @@ void read(sensor_data_t *out) {
 }
 ```
 
-Wait-free *both sides*. *가장 최근 값만* 필요할 때 (sensor, GPS).
+양쪽 모두 wait-free입니다. *가장 최근 값만* 필요할 때 적합합니다(sensor, GPS).
 
-> ⚠️ Reader가 *읽는 동안 writer 두 번 write* → reader buf 변경 가능 (race in same buf).
+> ⚠️ Reader가 *읽는 동안 writer가 두 번 write*하면 reader buf가 변경될 수 있습니다(race in same buf).
 
-→ *Triple buffer* (3 slot)로 해결.
+→ *Triple buffer*(3 slot)로 해결합니다.
 
 ## Triple Buffer
 
@@ -130,12 +130,12 @@ void read(sensor_data_t *out) {
 }
 ```
 
-3 buffer:
-- writer 채우는 (writer_buf)
-- 가장 최근 (next)
-- reader 읽는 중 (active)
+3 buffer 구성은 다음과 같습니다.
+- writer가 채우는 곳(writer_buf)
+- 가장 최근(next)
+- reader가 읽는 중(active)
 
-Reader·writer 절대 *같은 buffer* 안 봄.
+Reader와 writer는 절대 *같은 buffer*를 보지 않습니다.
 
 ## Wait-Free Queue — Kogan-Petrank
 
@@ -146,7 +146,7 @@ Reader·writer 절대 *같은 buffer* 안 봄.
   - 일반 사용엔 부담
 ```
 
-academic. 임베디드에선 *SPSC lock-free*가 표준.
+academic 영역입니다. 임베디드에서는 *SPSC lock-free*가 표준입니다.
 
 ## Cortex-M Single-Word Atomic
 
@@ -158,7 +158,7 @@ ISR: status = STATUS_OK;
 task: if (status == STATUS_OK) ...
 ```
 
-Aligned word write/read = *single load/store* = atomic. *Wait-free by default*.
+Aligned word write/read은 *single load/store*로 atomic합니다. 기본적으로 *wait-free*입니다.
 
 ## SwiftLM — Hardware Wait-Free Counter
 
@@ -168,9 +168,9 @@ atomic_fetch_add(&counter, 1, memory_order_relaxed);
                 /* → LDADD — 단일 명령, contention 무관 wait-free */
 ```
 
-ARMv8.1+ — LDADD·LDSET·LDCLR이 모두 *single instruction*. *진정한 wait-free*.
+ARMv8.1+에서는 LDADD·LDSET·LDCLR이 모두 *single instruction*입니다. *진정한 wait-free*입니다.
 
-ARMv8.0 LDREX/STREX — retry 가능 → *lock-free but not wait-free*.
+ARMv8.0의 LDREX/STREX는 retry가 가능하므로 *lock-free이지만 wait-free는 아닙니다*.
 
 ## Read-Copy-Update (Read-Side Wait-Free)
 
@@ -190,7 +190,7 @@ synchronize_rcu();
 free(old);
 ```
 
-Read는 wait-free, write는 *grace period wait*. Linux kernel routing table 등.
+Read는 wait-free이고 write는 *grace period wait*입니다. Linux kernel routing table 등에서 씁니다.
 
 ## ISR↔Task Wait-Free Pattern
 
@@ -217,7 +217,7 @@ void task(void *p) {
 }
 ```
 
-ISR overhead 최소 — task가 *batch 처리*.
+ISR overhead가 최소화됩니다. task가 *batch로 처리*하기 때문입니다.
 
 ## RP2040 — HW Spinlock + Wait-Free
 
@@ -228,7 +228,7 @@ critical();
 spin_unlock(spin_lock_instance(0), saved);
 ```
 
-HW spinlock — *bounded* wait (waiter 수만큼). 거의 wait-free.
+HW spinlock은 *bounded* wait입니다(waiter 수만큼). 거의 wait-free에 가깝습니다.
 
 ## 자동차 — Wait-Free 우선
 
@@ -240,11 +240,11 @@ ASIL-D ECU:
   - Critical path — wait-free 보장
 ```
 
-WCET 보장 — *진행 보장*이 곧 *deadline 보장*.
+WCET 보장에서는 *진행 보장*이 곧 *deadline 보장*입니다.
 
 ## 자주 하는 실수
 
-> ⚠️ CAS retry — wait-free 아님
+> ⚠️ CAS retry는 wait-free가 아닙니다
 
 ```c
 do {
@@ -253,43 +253,43 @@ do {
 /* contention 시 무한 retry — lock-free, not wait-free */
 ```
 
-→ ARMv8.1 LDADD 또는 *대기 없는 알고리즘*.
+→ ARMv8.1 LDADD 또는 *대기 없는 알고리즘*을 씁니다.
 
-> ⚠️ Double buffer race
+> ⚠️ Double buffer에서 race가 발생합니다
 
 ```c
 read(buf[active]);   /* writer가 active 변경 *중* — race */
 ```
 
-→ atomic swap 또는 triple buffer.
+→ atomic swap 또는 triple buffer로 해결합니다.
 
-> ⚠️ 64-bit on 32-bit MCU
+> ⚠️ 32-bit MCU에서 64-bit 변수를 다룹니다
 
 ```c
 volatile uint64_t timestamp;   /* split load/store — not atomic */
 ```
 
-→ atomic_uint64 or critical section.
+→ atomic_uint64 또는 critical section을 사용합니다.
 
-> ⚠️ Wait-free 가정 안 확인
+> ⚠️ Wait-free 가정을 확인하지 않습니다
 
 ```c
 my_atomic_op();   /* lock-free? wait-free? — 측정 안 함 */
 ```
 
-→ retry 횟수·timing 측정.
+→ retry 횟수와 timing을 측정합니다.
 
 ## 정리
 
-- **Wait-free** = *각 thread* bounded steps.
-- Atomic flag, sequence number, latest-value — wait-free patterns.
-- **Double buffer** = reader·writer 둘 다 wait-free (race 가능).
-- **Triple buffer** = race 없음.
-- ARMv8.1 **LDADD** = single instruction wait-free.
-- RCU — read side wait-free.
-- 자동차·RT critical — wait-free 패턴 우선.
+- **Wait-free**는 *각 thread*가 bounded steps 안에 진행함을 의미합니다.
+- Atomic flag, sequence number, latest-value는 모두 wait-free 패턴입니다.
+- **Double buffer**는 reader·writer 둘 다 wait-free이지만 race가 가능합니다.
+- **Triple buffer**에서는 race가 없습니다.
+- ARMv8.1 **LDADD**는 single instruction wait-free입니다.
+- RCU는 read side가 wait-free입니다.
+- 자동차·RT critical 영역에서는 wait-free 패턴을 우선합니다.
 
-다음 편은 **Timer Wheel**.
+다음 편은 **Timer Wheel**입니다.
 
 ## 관련 항목
 

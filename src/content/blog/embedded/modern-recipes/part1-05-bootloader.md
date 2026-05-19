@@ -5,12 +5,12 @@ description: "Cortex-A 부팅 단계. BootROM → SPL → U-Boot → Linux. Secu
 series: "Modern Embedded Recipes"
 seriesOrder: 5
 tags: [recipes, bootloader, u-boot, secure-boot, spl]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"부팅 = 점진적 환경 확장"** — 작은 ROM에서 출발해 전체 OS로.
+> **"부팅은 점진적 환경 확장입니다."** 작은 ROM에서 출발해 전체 OS까지 확장합니다.
 
 ## 일반 ARM Cortex-A 부팅 단계
 
@@ -83,7 +83,7 @@ void board_init_f(ulong dummy) {
 }
 ```
 
-크기 *극도로 제한* — chip 내장 SRAM에 들어가야. 64-128 KB 범위.
+크기가 *극도로 제한*됩니다. chip 내장 SRAM에 들어가야 하므로 보통 64-128 KB 범위입니다.
 
 ## U-Boot Proper
 
@@ -100,12 +100,12 @@ initrd_addr=0x84000000
 => bootz ${kernel_addr} - ${fdt_addr}
 ```
 
-`bootcmd` = 자동 실행 명령. `bootdelay` 초만 wait, 키 입력 없으면 자동 시작.
+`bootcmd`는 자동 실행 명령입니다. `bootdelay` 초만 wait하고, 키 입력이 없으면 자동으로 시작합니다.
 
 ## FIT Image — 통합 부트 이미지
 
 ```text
-FIT (Flattened Image Tree) — 한 파일에 kernel + DTB + initrd + 서명
+FIT (Flattened Image Tree): 한 파일에 kernel + DTB + initrd + 서명
 ```
 
 ```dts
@@ -147,7 +147,7 @@ FIT (Flattened Image Tree) — 한 파일에 kernel + DTB + initrd + 서명
 mkimage -f boot.its boot.itb
 ```
 
-`boot.itb` 단일 파일로 *서명 + 검증* 가능.
+`boot.itb` 단일 파일로 *서명 + 검증*이 가능합니다.
 
 ## Secure Boot
 
@@ -164,23 +164,23 @@ Hardware Root of Trust:
 [Kernel — IMA·dm-verity로 user space 검증]
 ```
 
-각 단계에서 *다음 stage 서명 확인*. 한 단계라도 검증 실패 → 부팅 중단.
+각 단계에서 *다음 stage의 서명을 확인*합니다. 한 단계라도 검증에 실패하면 부팅이 중단됩니다.
 
 ### TF-A (Trusted Firmware-A)
 
 ```text
 BL1 (BootROM)
    ↓
-BL2 (Trusted Boot Firmware) — DDR 초기화, 다음 binary 로드
+BL2 (Trusted Boot Firmware): DDR 초기화, 다음 binary 로드
    ↓
-BL31 (EL3 Runtime) — secure monitor, PSCI provider
+BL31 (EL3 Runtime): secure monitor, PSCI provider
    ↓
-BL32 (Secure-EL1 OS) — OP-TEE 등
+BL32 (Secure-EL1 OS): OP-TEE 등
    ↓
-BL33 (Non-secure) — U-Boot or Linux 직접
+BL33 (Non-secure): U-Boot or Linux 직접
 ```
 
-Cortex-A ARMv8 표준 부팅 chain. 자동차 ECU·모바일 SoC 표준.
+Cortex-A ARMv8 표준 부팅 chain입니다. 자동차 ECU·모바일 SoC의 표준입니다.
 
 ## A/B Boot — 안전 업데이트
 
@@ -207,31 +207,31 @@ Partition layout:
    fi
 ```
 
-업데이트 후 *N회 부팅 실패* — *자동 rollback*. Android·Tesla·자동차 OTA에서 사용.
+업데이트 후 *N회 부팅 실패*가 발생하면 *자동 rollback*이 일어납니다. Android·Tesla·자동차 OTA에서 씁니다.
 
 ## STM32MP1 부팅 예
 
 ```text
 1. BootROM (32 KB)
-2. FSBL (First Stage) — TF-A BL2, 100 KB, internal SRAM
-3. SSBL (Second Stage) — U-Boot, DDR로 로드
+2. FSBL (First Stage): TF-A BL2, 100 KB, internal SRAM
+3. SSBL (Second Stage): U-Boot, DDR로 로드
 4. Linux + DTB + extlinux script
 ```
 
-`STM32CubeProgrammer`로 *flash·verify*.
+`STM32CubeProgrammer`로 *flash·verify*를 수행합니다.
 
 ## i.MX8 부팅
 
 ```text
 1. BootROM
-2. SCFW (System Controller Firmware) — power·clock 관리 전용 ARM-M
-3. SECO (Security Controller) — secure key 관리
+2. SCFW (System Controller Firmware): power·clock 관리 전용 ARM-M
+3. SECO (Security Controller): secure key 관리
 4. ATF BL31
 5. U-Boot
 6. Linux
 ```
 
-이렇게 *멀티 프로세서* 부팅 — 자동차·산업.
+이렇게 *멀티 프로세서* 부팅이 일어납니다. 자동차·산업 분야에서 표준입니다.
 
 ## 부팅 디버깅
 
@@ -247,7 +247,7 @@ screen /dev/ttyUSB0 115200 -L
 [U-Boot] Hit any key to stop autoboot...
 ```
 
-각 stage가 다른 *문자열·서명* → 어느 stage가 hang 했는지 식별.
+각 stage가 다른 *문자열·서명*을 출력합니다. 이렇게 어느 stage에서 hang이 났는지 식별할 수 있습니다.
 
 ### JTAG로 stage별 break
 
@@ -257,7 +257,7 @@ screen /dev/ttyUSB0 115200 -L
 (gdb) continue
 ```
 
-OpenOCD·J-Link로 BootROM 후 *어느 PC*에 있는지 확인.
+OpenOCD·J-Link로 BootROM 이후 *어느 PC*에 있는지 확인합니다.
 
 ## 자주 하는 실수
 
@@ -269,7 +269,7 @@ bootz ${kernel_addr} - ${fdt_addr}     # 새 kernel
 # → 부팅 hang or "Unable to find a usable RTC"
 ```
 
-DTB는 *kernel 같은 버전*에서 빌드. 자동화 — Yocto·Buildroot.
+DTB는 *kernel과 같은 버전*에서 빌드해야 합니다. 자동화는 Yocto·Buildroot로 합니다.
 
 > ⚠️ Boot partition offset 잘못
 
@@ -277,35 +277,35 @@ DTB는 *kernel 같은 버전*에서 빌드. 자동화 — Yocto·Buildroot.
 dd if=u-boot-spl.img of=/dev/mmcblk0 bs=1k seek=8   # ← BootROM offset 다름
 ```
 
-칩별 offset *정확히 확인*. NXP i.MX는 0x400, Allwinner는 8 KB.
+칩별 offset을 *정확히 확인*해야 합니다. NXP i.MX는 0x400, Allwinner는 8 KB입니다.
 
 > ⚠️ Bootargs 잘못
 
 ```bash
 bootargs="console=ttyAMA0,115200 root=/dev/mmcblk0p2"
-# ← console driver 이름 잘못 → 로그 안 나옴
+# ← console driver 이름이 잘못되면 로그가 안 나옵니다
 ```
 
-DT의 `chosen { stdout-path = ... }` 와 *일치*.
+DT의 `chosen { stdout-path = ... }`와 *일치*해야 합니다.
 
 > ⚠️ Secure boot key 분실
 
 ```text
-eFuse에 public key hash 박힘 → revert 불가
+eFuse에 public key hash가 박히면 revert가 불가합니다
 ```
 
-개발 시 *test key*로, 양산 직전 *production key*로 burn. 잘못하면 chip *brick*.
+개발 시에는 *test key*를 쓰고, 양산 직전에 *production key*로 burn합니다. 잘못하면 chip이 *brick*됩니다.
 
 ## 정리
 
-- 부팅 = **BootROM → SPL → U-Boot → Kernel**.
-- SPL = DDR 초기화 + 다음 단계 로드.
-- **FIT image**로 통합·서명.
-- **A/B boot**로 안전 업데이트.
-- TF-A는 ARMv8 표준 chain (BL1~BL33).
-- 디버깅 — UART 로그·JTAG break.
+- 부팅은 **BootROM → SPL → U-Boot → Kernel** 순서입니다.
+- SPL은 DDR 초기화와 다음 단계 로드를 담당합니다.
+- **FIT image**로 통합과 서명을 합니다.
+- **A/B boot**로 안전한 업데이트를 보장합니다.
+- TF-A는 ARMv8 표준 chain입니다 (BL1~BL33).
+- 디버깅에는 UART 로그와 JTAG break를 씁니다.
 
-다음 편은 **JTAG/SWD 디버깅**.
+다음 편은 **JTAG/SWD 디버깅**입니다.
 
 ## 관련 항목
 

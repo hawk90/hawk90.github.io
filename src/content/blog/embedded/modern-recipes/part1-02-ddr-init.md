@@ -5,12 +5,12 @@ description: "DDR3/4 초기화 sequence. ZQ calibration, write leveling, walking
 series: "Modern Embedded Recipes"
 seriesOrder: 2
 tags: [recipes, ddr, sdram, memory, calibration]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"DDR init = 수십 개 timing parameter 정확히"** — 하나 틀리면 *bit error 또는 crash*.
+> **"DDR init은 수십 개 timing parameter를 정확히 맞추는 작업입니다."** 하나라도 틀리면 bit error가 발생하거나 시스템이 crash합니다.
 
 ## DDR 종류와 속도
 
@@ -24,7 +24,7 @@ draft: true
 | LPDDR5 | 4266-6400 | 1.05V | 최신 |
 | DDR5 | 3200-8400 | 1.1V | 데스크탑·서버 |
 
-LV는 *low voltage*, LP는 *low power* (다른 표준).
+LV는 low voltage를 의미하고, LP는 low power를 의미합니다. 둘은 다른 표준입니다.
 
 ## JEDEC Init Sequence (DDR3)
 
@@ -42,7 +42,7 @@ LV는 *low voltage*, LP는 *low power* (다른 표준).
 11. Normal operation
 ```
 
-순서·timing 다 맞아야 — *수 ms 이내 ~100개 step*.
+순서와 timing이 모두 맞아야 합니다. 수 ms 이내에 약 100개의 step을 순서대로 실행해야 합니다.
 
 ## 핵심 Timing Parameter (DDR3-1600)
 
@@ -57,7 +57,7 @@ LV는 *low voltage*, LP는 *low power* (다른 표준).
 | tREFI | 7800 | refresh interval (max 7.8 µs) |
 | CL | 11 cycle | CAS latency |
 
-데이터시트의 *AC characteristics* 표 보고 *CLK 사이클 단위로 변환*:
+데이터시트의 AC characteristics 표를 보고 CLK 사이클 단위로 변환합니다.
 
 ```c
 ddr->tRCD = ceil(13.75 / 1.25);   // = 11 cycle
@@ -81,7 +81,7 @@ ddr->ZQCTL = ZQCL_INTERVAL_256ms;
 
 ## Write Leveling
 
-DDR3 fly-by topology — *각 chip별 신호 도착 시점 다름*. 보정:
+DDR3 fly-by topology에서는 각 chip별로 신호 도착 시점이 다릅니다. 이를 보정하는 절차는 다음과 같습니다.
 
 ```text
 1. MRS — write leveling mode
@@ -90,7 +90,7 @@ DDR3 fly-by topology — *각 chip별 신호 도착 시점 다름*. 보정:
 4. 각 byte lane 별로 fine adjust
 ```
 
-DDR controller가 *자동* — 그러나 *결과를 register에서 읽어 확인*.
+DDR controller가 자동으로 수행하지만, 결과는 반드시 register에서 읽어 확인해야 합니다.
 
 ## DQS Gate Training
 
@@ -125,7 +125,7 @@ void walking_bit_test(uint32_t *base, size_t words) {
 }
 ```
 
-`0x55555555`·`0xAAAAAAAA`·`0xCAFEBABE` 등 패턴도 시험.
+`0x55555555`, `0xAAAAAAAA`, `0xCAFEBABE` 같은 패턴도 함께 시험합니다.
 
 ## 주소 라인 검증 — March Test
 
@@ -146,7 +146,7 @@ void address_test(uint32_t *base, size_t words) {
 }
 ```
 
-A0~An line *짧음/단선* 시 — 다른 address에 같은 data 쓰기 → 검출.
+A0부터 An까지의 line이 짧거나 단선된 경우, 서로 다른 address에 같은 data가 기록되어 검출됩니다.
 
 ## 실측 — 데이터 무결성
 
@@ -171,7 +171,7 @@ void full_dram_test(uint32_t *base, size_t mb) {
 }
 ```
 
-운영 시 *Linux MemTest86* 또는 *u-boot memtest 명령*.
+운영 시에는 Linux MemTest86이나 u-boot memtest 명령을 사용합니다.
 
 ## 보드 디자인 — Length Matching
 
@@ -183,22 +183,22 @@ DDR signal lines:
   DQS - DQ — 25 mil 이내
 ```
 
-Length mismatch → *skew* → high-speed 실패.
+Length mismatch는 skew를 만들어 high-speed 동작을 실패하게 합니다.
 
-> ⚠️ DDR4 1600 MT/s 이상에선 *수 mil 차이*도 marginal.
+> ⚠️ DDR4 1600 MT/s 이상에서는 수 mil 차이도 marginal입니다.
 
 ## 종단 — VTT·ODT
 
-DDR3/4 — *ODT* (On-Die Termination):
-- Write 시 — slave (DRAM) ODT enable
-- Read 시 — master (controller) ODT enable
+DDR3/4는 ODT (On-Die Termination)를 사용합니다.
+- Write 시에는 slave (DRAM) ODT를 enable합니다.
+- Read 시에는 master (controller) ODT를 enable합니다.
 
 ```c
 mr1.ODT = ODT_60_OHM;       // 60Ω
 mr1.OUTPUT_DRIVE = DRV_34;   // 34Ω driver
 ```
 
-VTT (terminator 전압) = VDDQ / 2. 약간 잘못되면 *eye diagram 변형* — bit error.
+VTT (terminator 전압)는 VDDQ / 2입니다. 약간만 잘못되어도 eye diagram이 변형되어 bit error가 발생합니다.
 
 ## DDR PHY와 Controller
 
@@ -210,7 +210,7 @@ VTT (terminator 전압) = VDDQ / 2. 약간 잘못되면 *eye diagram 변형* —
                     arbiter
 ```
 
-Cortex-A SoC (i.MX·STM32MP1·Zynq) — Synopsys uMCTL2 + DDR PHY가 표준.
+Cortex-A SoC (i.MX, STM32MP1, Zynq)에서는 Synopsys uMCTL2와 DDR PHY 조합이 표준입니다.
 
 ## Eye Diagram 측정
 
@@ -220,7 +220,7 @@ Oscilloscope (수 GHz BW) + DDR probe + signal trigger
 → 폭 좁으면 *jitter* 심함 → speed 낮추거나 layout 수정
 ```
 
-전문 도구 — Tektronix BERTScope·Keysight UXR.
+전문 도구로는 Tektronix BERTScope와 Keysight UXR가 있습니다.
 
 ## 자주 하는 실수
 
@@ -231,7 +231,7 @@ init_ddr();
 *((volatile uint32_t*)0x80000000) = 0xDEADBEEF;   // ← bus fault
 ```
 
-DDR init 후 *짧은 settle time* 필요 (~수 µs). PHY가 안정될 때까지.
+DDR init 후 짧은 settle time이 필요합니다. PHY가 안정될 때까지 수 µs 정도 기다려야 합니다.
 
 > ⚠️ Refresh interval 짧음
 
@@ -240,7 +240,7 @@ tREFI = 1000 ns;   // ← 너무 짧음 → bandwidth 손실
 tREFI = 7800 ns;   // ← 표준
 ```
 
-너무 길면 *데이터 손실*. 너무 짧으면 *throughput 손실*. JEDEC 따름.
+너무 길면 데이터가 손실되고, 너무 짧으면 throughput이 손실됩니다. 항상 JEDEC 사양을 따릅니다.
 
 > ⚠️ Temperature 무시
 
@@ -248,21 +248,21 @@ tREFI = 7800 ns;   // ← 표준
 DRAM 85°C 이상 — refresh rate 2x 필요 (tREFI 절반)
 ```
 
-Industrial·자동차 grade — 105°C까지 지원. 그 외 *temperature compensation* 필수.
+Industrial과 자동차 grade는 105°C까지 지원합니다. 그 외 환경에서는 temperature compensation이 필수입니다.
 
 > ⚠️ 8-bit×4 칩과 16-bit×2 칩 혼용
 
-같은 보드에 *organization 다른 chip* → controller 설정 깨짐. *동일 device 사용*.
+같은 보드에 organization이 다른 chip을 섞으면 controller 설정이 깨집니다. 반드시 동일 device를 사용해야 합니다.
 
 ## 정리
 
-- DDR init = **JEDEC sequence + timing parameter** 정확히.
-- **ZQ calibration·write leveling·DQS training** — controller 자동, 결과 확인.
-- **Walking bit + March test**로 bring-up 검증.
-- 보드 *length matching*이 high-speed 핵심.
-- 자동차·산업은 *temperature compensation* 필수.
+- DDR init은 **JEDEC sequence와 timing parameter**를 정확히 맞추는 작업입니다.
+- **ZQ calibration, write leveling, DQS training**은 controller가 자동 처리하지만 결과를 확인해야 합니다.
+- **Walking bit 테스트와 March 테스트**로 bring-up을 검증합니다.
+- 보드 length matching이 high-speed 동작의 핵심입니다.
+- 자동차와 산업 환경에서는 temperature compensation이 필수입니다.
 
-다음 편은 **PCIe BAR 매핑**.
+다음 편은 **PCIe BAR 매핑**입니다.
 
 ## 관련 항목
 
