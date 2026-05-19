@@ -1,10 +1,13 @@
 ---
-title: "항목 1: Abseil 소개 — Google의 오픈소스 C++ 라이브러리"
-date: 2026-05-18T01:00:00
-description: "Google의 Abseil 라이브러리 소개와 설계 철학, 주요 컴포넌트를 살펴봅니다."
-tags: [C++, Abseil, Google, Library]
-series: "Abseil C++ 라이브러리"
+title: "Part 1-01: Abseil 개요 — Google이 만든 이유, std::보완"
+date: 2026-05-23T01:00:00
+description: "Part 1-01: Abseil 개요 — Google이 std::의 한계를 보완하기 위해 만든 industrial-grade C++ 라이브러리."
+series: "Abseil Code Review"
 seriesOrder: 1
+tags: [cpp, abseil, google, library, overview]
+type: book-review
+bookTitle: "Abseil C++ Common Libraries"
+bookAuthor: "Google"
 draft: true
 ---
 

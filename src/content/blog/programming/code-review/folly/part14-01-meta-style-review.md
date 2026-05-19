@@ -1,10 +1,13 @@
 ---
-title: "항목 2: Folly 코드 리뷰 가이드 — Meta 스타일 코드 리뷰"
-date: 2026-05-18T02:00:00
-description: "Meta/Folly의 코드 리뷰 철학과 성능 중심 리뷰 가이드라인을 배웁니다."
-tags: [C++, Folly, Code Review, Performance, Best Practices]
-series: "Folly C++ 라이브러리"
-seriesOrder: 2
+title: "Part 14-01: Meta 스타일 code review"
+date: 2026-05-25T15:00:00
+description: "Part 14-01: Meta(Facebook) 사내 code review 문화 — performance-first lens."
+series: "Folly Code Review"
+seriesOrder: 61
+tags: [cpp, folly, code-review, meta, performance, best-practices]
+type: book-review
+bookTitle: "Folly C++ Common Libraries"
+bookAuthor: "Meta (Facebook)"
 draft: true
 ---
 

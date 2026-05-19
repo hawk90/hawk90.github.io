@@ -1,10 +1,13 @@
 ---
-title: "항목 3: Abseil 문자열 라이브러리 — StrCat, StrJoin, StrSplit"
-date: 2026-05-18T03:00:00
-description: "Abseil의 문자열 처리 라이브러리를 깊이 있게 살펴봅니다."
-tags: [C++, Abseil, Strings, Performance]
-series: "Abseil C++ 라이브러리"
-seriesOrder: 3
+title: "Part 4-08: Escaping — CHexEscape, WebSafeBase64"
+date: 2026-05-24T03:00:00
+description: "Part 4-08: absl::CEscape / WebSafeBase64Escape — 안전한 문자열 이스케이프와 base64 인코딩."
+series: "Abseil Code Review"
+seriesOrder: 26
+tags: [cpp, abseil, strings, escape, base64]
+type: book-review
+bookTitle: "Abseil C++ Common Libraries"
+bookAuthor: "Google"
 draft: true
 ---
 

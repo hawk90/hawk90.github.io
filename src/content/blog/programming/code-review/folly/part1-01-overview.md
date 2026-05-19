@@ -1,10 +1,13 @@
 ---
-title: "항목 1: Folly 소개 — Meta의 고성능 C++ 라이브러리"
-date: 2026-05-18T01:00:00
-description: "Meta(Facebook)의 Folly 라이브러리 소개와 설계 철학, 주요 컴포넌트를 살펴봅니다."
-tags: [C++, Folly, Meta, Facebook, Library]
-series: "Folly C++ 라이브러리"
+title: "Part 1-01: Folly 개요 — Meta가 production에서 검증한 utility"
+date: 2026-05-23T01:00:00
+description: "Part 1-01: Folly 개요 — Meta(Facebook)가 production에서 검증한 high-performance C++ 라이브러리."
+series: "Folly Code Review"
 seriesOrder: 1
+tags: [cpp, folly, meta, facebook, library, overview]
+type: book-review
+bookTitle: "Folly C++ Common Libraries"
+bookAuthor: "Meta (Facebook)"
 draft: true
 ---
 

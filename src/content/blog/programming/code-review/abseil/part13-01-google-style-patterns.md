@@ -1,10 +1,13 @@
 ---
-title: "항목 2: Abseil 코드 리뷰 가이드 — Google 스타일 코드 리뷰"
-date: 2026-05-18T02:00:00
-description: "Google/Abseil의 코드 리뷰 철학과 실전 가이드라인을 배웁니다."
-tags: [C++, Abseil, Code Review, Best Practices]
-series: "Abseil C++ 라이브러리"
-seriesOrder: 2
+title: "Part 13-01: Google 스타일의 Abseil 사용 패턴"
+date: 2026-05-25T20:00:00
+description: "Part 13-01: Google이 사내에서 Abseil을 어떻게 쓰는지 — code review에서 자주 보는 권장 패턴."
+series: "Abseil Code Review"
+seriesOrder: 66
+tags: [cpp, abseil, code-review, google-style, best-practices]
+type: book-review
+bookTitle: "Abseil C++ Common Libraries"
+bookAuthor: "Google"
 draft: true
 ---
 
