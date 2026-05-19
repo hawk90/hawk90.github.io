@@ -14,242 +14,228 @@ draft: true
 
 ## Avionics Actuator 분류
 
-```text
-LV·로켓 (Launch Vehicle):
-  TVC (Thrust Vector Control) — 추력 방향
-  RCS (Reaction Control System) — 가스 분사
-  Engine valve (turbopump·hypergolic)
-  Stage separation pyro
-  
-항공기 (Aircraft):
-  Control surface — aileron·elevator·rudder·flap
-  Engine — FADEC (Full Authority Digital Engine Control)
-  Trim·tab
-  Landing gear
-  Door·hatch
-  
-위성·우주선:
-  RCS thruster
-  Reaction wheel·CMG (Control Moment Gyro)
-  Magnetic torquer (LEO)
-  Solar panel deploy
-  Antenna gimbal
+**LV·로켓 (Launch Vehicle):**
+- TVC (Thrust Vector Control) — 추력 방향
+- RCS (Reaction Control System) — 가스 분사
+- Engine valve (turbopump·hypergolic)
+- Stage separation pyro
+
+**항공기 (Aircraft):**
+- Control surface — aileron·elevator·rudder·flap
+- Engine — FADEC (Full Authority Digital Engine Control)
+- Trim·tab
+- Landing gear
+- Door·hatch
+
+**위성·우주선:**
+- RCS thruster
+- Reaction wheel·CMG (Control Moment Gyro)
+- Magnetic torquer (LEO)
+- Solar panel deploy
+- Antenna gimbal
 
 대부분 — *전기 → 기계 변환* + *피드백 closed-loop*.
-```
 
 각 actuator — *제어 정밀도·응답 시간·power*.
 
 ## TVC — Thrust Vector Control
 
-```text
-TVC 종류:
+**TVC 종류:**
 
-1. Gimbaled nozzle:
-   엔진·노즐 전체 swiveling
-   ±5~10° typical
-   Hydraulic·electric actuator
-   사용 — 액체 추진 (RD-180, Merlin, KSLV-II)
+**1. Gimbaled nozzle:**
+- 엔진·노즐 전체 swiveling
+- ±5~10° typical
+- Hydraulic·electric actuator
+- 사용 — 액체 추진 (RD-180, Merlin, KSLV-II)
 
-2. Jet vane:
-   배기 노즐 안에 vane
-   고체 추진에 일반
-   Erosion 문제
-   사용 — Sidewinder missile, 일부 LV
+**2. Jet vane:**
+- 배기 노즐 안에 vane
+- 고체 추진에 일반
+- Erosion 문제
+- 사용 — Sidewinder missile, 일부 LV
 
-3. Flex bearing / Flex nozzle:
-   탄성체 nozzle
-   고체 추진 부분
-   사용 — Space Shuttle SRB
+**3. Flex bearing / Flex nozzle:**
+- 탄성체 nozzle
+- 고체 추진 부분
+- 사용 — Space Shuttle SRB
 
-4. LITVC (Liquid Injection TVC):
-   Liquid 분사로 flow deflection
-   사용 — Minuteman missile 일부
+**4. LITVC (Liquid Injection TVC):**
+- Liquid 분사로 flow deflection
+- 사용 — Minuteman missile 일부
 
-5. Fluidic / Movable strap:
-   덜 일반적
-```
+**5. Fluidic / Movable strap:** 덜 일반적.
 
 대부분 LV — *Gimbaled nozzle* (대형) 또는 *jet vane* (소형 missile).
 
 ## Electric vs Hydraulic Actuator
 
-```text
-Hydraulic TVC:
-  고압 hydraulic system (3000 psi)
-  Hydraulic motor → gear → nozzle
-  
-  장점:
-    높은 force
-    Compact
-    수십 년 history
-    
-  단점:
-    Fluid leak risk
-    Toxic fluid (older)
-    Pump·reservoir 별도
-    Heavy infrastructure
-  
-사용:
-  Atlas V·Delta IV·Falcon 9 (legacy)
-  Space Shuttle (APU 기반)
-  Russian rockets
+**Hydraulic TVC:**
+- 고압 hydraulic system (3000 psi)
+- Hydraulic motor → gear → nozzle
 
-Electric TVC (EMA):
-  Electric motor + ball screw
-  BLDC + harmonic drive
-  
-  장점:
-    No hydraulic infrastructure
-    Easier maintenance
-    Power efficiency
-    
-  단점:
-    High peak current
-    Heat
-    Backdrivable (또는 not)
-  
+장점:
+- 높은 force
+- Compact
+- 수십 년 history
+
+단점:
+- Fluid leak risk
+- Toxic fluid (older)
+- Pump·reservoir 별도
+- Heavy infrastructure
+
 사용:
-  Vega·Ariane 6
-  Falcon 9 (modern)
-  KSLV-II (likely electric on stages)
-  Electron (Rocket Lab)
-```
+- Atlas V·Delta IV·Falcon 9 (legacy)
+- Space Shuttle (APU 기반)
+- Russian rockets
+
+**Electric TVC (EMA):**
+- Electric motor + ball screw
+- BLDC + harmonic drive
+
+장점:
+- No hydraulic infrastructure
+- Easier maintenance
+- Power efficiency
+
+단점:
+- High peak current
+- Heat
+- Backdrivable (또는 not)
+
+사용:
+- Vega·Ariane 6
+- Falcon 9 (modern)
+- KSLV-II (likely electric on stages)
+- Electron (Rocket Lab)
 
 추세 — *Electric TVC*. 단순성·신뢰성.
 
 ## TVC Actuator — 제어 Loop
 
-```text
 Closed-loop TVC:
 
+```text
 Command (deg) → Controller → Motor → Mechanical → Nozzle position
                   ↑                                       │
                   └──── Position sensor (LVDT·encoder)────┘
-
-Control:
-  PID 또는 LQR
-  Frequency response — bandwidth 5~30 Hz
-  Latency budget — 10~30 ms (command → 90% position)
-  
-Position sensor:
-  LVDT (Linear Variable Differential Transformer)
-  Resolver (rotary)
-  Optical encoder
-  Hall encoder
-  
-Redundancy:
-  Dual sensor (primary·backup)
-  Cross-check
-  
-Fault detection:
-  Position error > threshold → fault
-  Current limit → mechanical jam
-  Timing — slow response → degraded
 ```
+
+**Control:**
+- PID 또는 LQR
+- Frequency response — bandwidth 5~30 Hz
+- Latency budget — 10~30 ms (command → 90% position)
+
+**Position sensor:**
+- LVDT (Linear Variable Differential Transformer)
+- Resolver (rotary)
+- Optical encoder
+- Hall encoder
+
+**Redundancy:**
+- Dual sensor (primary·backup)
+- Cross-check
+
+**Fault detection:**
+- Position error > threshold → fault
+- Current limit → mechanical jam
+- Timing — slow response → degraded
 
 TVC = *fast, accurate, robust*. LV 핵심.
 
 ## RCS — Reaction Control System
 
-```text
-RCS thruster:
-  Small thrust (1 N ~ 1 kN)
-  On-off (binary), pulsed
-  Bipropellant 또는 mono·cold gas
+**RCS thruster:**
+- Small thrust (1 N ~ 1 kN)
+- On-off (binary), pulsed
+- Bipropellant 또는 mono·cold gas
 
-종류:
+**종류:**
 
-Cold gas (N2·He):
-  Low Isp ~ 60 sec
-  CubeSat·small probes
-  
-Monopropellant (hydrazine):
-  Isp 220 sec
-  Catalytic decomposition
-  대부분 위성
+**Cold gas (N2·He):**
+- Low Isp ~ 60 sec
+- CubeSat·small probes
 
-Bipropellant (NTO·MMH):
-  Isp 280~320 sec
-  Larger spacecraft
+**Monopropellant (hydrazine):**
+- Isp 220 sec
+- Catalytic decomposition
+- 대부분 위성
 
-Electric (Hall·ion):
-  Isp 1500~5000 sec
-  Long-duration (위성 stationkeeping)
-  Low thrust
-  
-LV stage:
-  보통 cold gas 또는 hypergolic
-  Mid-flight roll·pitch control
-```
+**Bipropellant (NTO·MMH):**
+- Isp 280~320 sec
+- Larger spacecraft
+
+**Electric (Hall·ion):**
+- Isp 1500~5000 sec
+- Long-duration (위성 stationkeeping)
+- Low thrust
+
+**LV stage:**
+- 보통 cold gas 또는 hypergolic
+- Mid-flight roll·pitch control
 
 RCS — *attitude + small Δv*. Main engine 보조.
 
 ## RCS Valve·Driver
 
-```text
-Thruster valve:
-  Solenoid valve (on-off)
-  Or pintle valve (throttleable)
-  
-Driver:
-  High-current MOSFET·IGBT
-  Pulse width modulation (PWM)
-  Minimum impulse bit (MIB)
-    1~10 ms minimum on-time
-    
-Pulse sequence:
-  Attitude error → pulse width·rate
-  PWPF (Pulse-Width Pulse-Frequency)
-  
-Fault:
-  Stuck-open (catastrophic)
-  Stuck-closed (loss of authority)
-  Solenoid fail (electrical)
-  
-Detection:
-  Pressure sensor (downstream)
-  Current sense (driver)
-  Tank pressure trend
-  
-Redundancy:
-  보통 dual thruster per axis
-  N+1 또는 N+2
-```
+**Thruster valve:**
+- Solenoid valve (on-off)
+- Or pintle valve (throttleable)
+
+**Driver:**
+- High-current MOSFET·IGBT
+- Pulse width modulation (PWM)
+- Minimum impulse bit (MIB) — 1~10 ms minimum on-time
+
+**Pulse sequence:**
+- Attitude error → pulse width·rate
+- PWPF (Pulse-Width Pulse-Frequency)
+
+**Fault:**
+- Stuck-open (catastrophic)
+- Stuck-closed (loss of authority)
+- Solenoid fail (electrical)
+
+**Detection:**
+- Pressure sensor (downstream)
+- Current sense (driver)
+- Tank pressure trend
+
+**Redundancy:**
+- 보통 dual thruster per axis
+- N+1 또는 N+2
 
 RCS — *fault tolerance + 정밀 pulse*.
 
 ## Aircraft Control Surface — Servo
 
-```text
-Control surface:
-  Aileron (roll)
-  Elevator (pitch)
-  Rudder (yaw)
-  Flap·slat (lift)
-  Spoiler (drag·roll)
-  
-Actuator type:
+**Control surface:**
+- Aileron (roll)
+- Elevator (pitch)
+- Rudder (yaw)
+- Flap·slat (lift)
+- Spoiler (drag·roll)
 
-Hydraulic Servo (전통):
-  Hydraulic system (3000 psi)
-  Multiple redundant (triplex·quadplex)
-  Aircraft hydraulic system 의존
-  
-EHA (Electrohydrostatic Actuator):
-  Self-contained — motor + pump + cylinder
-  Less hydraulic infrastructure
-  
-EMA (Electromechanical Actuator):
-  Motor + gear·ball screw + linkage
-  Full electric
-  More-Electric Aircraft (MEA) trend
-  
-인증:
-  DO-178C + DO-254
-  ARP-4754A system safety
-  Triple·quad redundancy (commercial aircraft)
-```
+**Actuator type:**
+
+**Hydraulic Servo (전통):**
+- Hydraulic system (3000 psi)
+- Multiple redundant (triplex·quadplex)
+- Aircraft hydraulic system 의존
+
+**EHA (Electrohydrostatic Actuator):**
+- Self-contained — motor + pump + cylinder
+- Less hydraulic infrastructure
+
+**EMA (Electromechanical Actuator):**
+- Motor + gear·ball screw + linkage
+- Full electric
+- More-Electric Aircraft (MEA) trend
+
+**인증:**
+- DO-178C + DO-254
+- ARP-4754A system safety
+- Triple·quad redundancy (commercial aircraft)
 
 추세 — *MEA, EHA·EMA*. B787·A350·F-35.
 

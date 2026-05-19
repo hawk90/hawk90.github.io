@@ -265,17 +265,15 @@ Bluetooth Core Specification 5.4 (총 ~5,800 페이지)
 
 ## 자주 하는 오해
 
-```text
-오해                                          현실
-─────────────────────────────────────────────────────────────────────
-BLE는 Bluetooth의 저전력 버전이다            완전히 별도 프로토콜, 같은 칩에서 시분할
-BLE는 느려서 오디오 못 한다                    5.2부터 LE Audio (LC3 코덱)로 가능
-BLE 데이터율은 1 Mbps 고정                    PHY에 따라 125 kbps~2 Mbps
-BLE는 IPv6 못 쓴다                            6LoWPAN over BLE 가능 (RFC 7668)
-BLE는 보안이 약하다                            LESC (4.2+)는 ECDH P-256, 클래식보다 강함
-모든 폰이 BLE 5를 지원한다                    Coded PHY는 일부 폰만, Extended Adv도 미흡
-비콘은 페어링이 필요하다                       비콘은 advertising만, 연결도 페어링도 없음
-```
+| 오해 | 현실 |
+|------|------|
+| BLE는 Bluetooth의 저전력 버전이다 | 완전히 별도 프로토콜, 같은 칩에서 시분할 |
+| BLE는 느려서 오디오 못 한다 | 5.2부터 LE Audio (LC3 코덱)로 가능 |
+| BLE 데이터율은 1 Mbps 고정 | PHY에 따라 125 kbps~2 Mbps |
+| BLE는 IPv6 못 쓴다 | 6LoWPAN over BLE 가능 (RFC 7668) |
+| BLE는 보안이 약하다 | LESC (4.2+)는 ECDH P-256, 클래식보다 강함 |
+| 모든 폰이 BLE 5를 지원한다 | Coded PHY는 일부 폰만, Extended Adv도 미흡 |
+| 비콘은 페어링이 필요하다 | 비콘은 advertising만, 연결도 페어링도 없음 |
 
 ## 정리
 

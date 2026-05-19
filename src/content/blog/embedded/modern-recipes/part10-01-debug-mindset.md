@@ -21,13 +21,11 @@ tags: [recipes, debugging, methodology]
 
 좋은 디버거는 다음 다섯 가지를 항상 분리해 둡니다.
 
-```text
-1. 증상 (Symptom)    — 실제로 관찰된 것
-2. 모델 (Model)       — 코드가 어떻게 동작한다고 *내가 믿는지*
-3. 차이 (Discrepancy) — 모델과 증상 사이의 모순
-4. 가설 (Hypothesis)  — 모순을 만들 수 있는 *구체적* 원인
-5. 측정 (Measurement) — 가설을 깨거나 굳힐 단 한 번의 관찰
-```
+1. **증상 (Symptom)** — 실제로 관찰된 것
+2. **모델 (Model)** — 코드가 어떻게 동작한다고 *내가 믿는지*
+3. **차이 (Discrepancy)** — 모델과 증상 사이의 모순
+4. **가설 (Hypothesis)** — 모순을 만들 수 있는 *구체적* 원인
+5. **측정 (Measurement)** — 가설을 깨거나 굳힐 단 한 번의 관찰
 
 대부분의 막다른 디버깅은 *모델*을 의심하지 않는 데서 옵니다. "이 ISR은 분명 enable 되어 있다"는 *믿음*이지 *측정*이 아닙니다. 코드를 한 번 더 읽지 말고 NVIC pending register를 직접 찍어야 합니다.
 
@@ -166,8 +164,8 @@ if ((status & 0x01) != 0) handle();
 
 ## 측정 도구의 hierarchy
 
-```text
-부담 낮음 → 부담 큼
+부담 낮음 → 부담 큼:
+
 1. printf / log
 2. LED toggle
 3. GPIO pulse + 오실로스코프
@@ -175,7 +173,6 @@ if ((status & 0x01) != 0) handle();
 5. Logic analyzer
 6. JTAG halt + 메모리 dump
 7. ETM trace
-```
 
 가장 작은 부담으로 가장 큰 정보를 얻을 도구를 고릅니다. printf로 race가 사라지면 GPIO pulse로 옮겨 갑니다. Halt가 race를 망가뜨리면 RTT로 옮겨 갑니다.
 

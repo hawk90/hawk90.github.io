@@ -257,278 +257,241 @@ Air data — *항공기 핵심*. LV는 일부만.
 
 ## Star Tracker — 위성·우주선
 
-```text
-Star Tracker:
-  CCD·CMOS imager
-  Hot pixel·shutter
-  Star pattern recognition
-  Star catalog comparison
-  → Inertial attitude (quaternion)
-  
-Sensitivity:
-  Magnitude 5~7 (보통)
-  Field of view 10~30°
-  
-Accuracy:
-  1~10 arc-second (1σ)
-  
-Update rate:
-  1~10 Hz (slow)
-  
-Combined with:
-  Gyro (high rate, drift)
-  → Tight integration
-  → Star tracker가 *bias correct*
-  
-Use case:
-  Satellite attitude
-  Spacecraft (Lunar·Mars)
-  Deep space probe
-  Not for aircraft (cloud·daytime sky)
-  
-Vendors:
-  Sodern (Airbus)
-  Jena-Optronik (Germany)
-  Ball Aerospace
-  Terma
-  Sinclair Interplanetary
-  KARI 자체 (KOMPSAT 등)
-```
+**Star Tracker:**
+- CCD·CMOS imager
+- Hot pixel·shutter
+- Star pattern recognition
+- Star catalog comparison
+- Inertial attitude (quaternion)
+
+**Sensitivity:**
+- Magnitude 5~7 (보통)
+- Field of view 10~30°
+
+**Accuracy:** 1~10 arc-second (1σ).
+
+**Update rate:** 1~10 Hz (slow).
+
+**Combined with:**
+- Gyro (high rate, drift)
+- Tight integration
+- Star tracker가 *bias correct*
+
+**Use case:**
+- Satellite attitude
+- Spacecraft (Lunar·Mars)
+- Deep space probe
+- Not for aircraft (cloud·daytime sky)
+
+**Vendors:**
+- Sodern (Airbus)
+- Jena-Optronik (Germany)
+- Ball Aerospace
+- Terma
+- Sinclair Interplanetary
+- KARI 자체 (KOMPSAT 등)
 
 Star tracker — *우주 attitude의 표준*. Aircraft 미사용.
 
 ## Sun Sensor
 
-```text
-Sun Sensor:
-  Photodiode array
-  Coarse (cosine sensor) — wide angle, 정확도 ~1°
-  Fine (slit-based) — narrow angle, 0.01°
-  
-용도:
-  Coarse — initial attitude·safe mode
-  Fine — augment star tracker
-  
-용도:
-  위성·우주선
-  Aircraft 미사용 (sun이 visible 가정 어려움)
-```
+**Sun Sensor:**
+- Photodiode array
+- Coarse (cosine sensor) — wide angle, 정확도 ~1°
+- Fine (slit-based) — narrow angle, 0.01°
+
+**용도 (정밀도):**
+- Coarse — initial attitude·safe mode
+- Fine — augment star tracker
+
+**용도 (대상):**
+- 위성·우주선
+- Aircraft 미사용 (sun이 visible 가정 어려움)
 
 저렴·신뢰성 — *safe-mode 표준*.
 
 ## Magnetometer
 
-```text
-Magnetometer:
-  Earth magnetic field 측정
-  
-Types:
-  Fluxgate — 정확, 큰
-  Hall effect — small, less accurate
-  MEMS — IMU 통합
-  
-Use:
-  Heading reference (compass)
-  Earth orientation (위성·LEO)
-  Aircraft — backup
-  
-Issue:
-  Hard-iron / soft-iron — 자기물질 영향
-  Calibration 필수
-  
-LEO 위성 — magnetic field 약, 사용 가능
-GEO·deep space — 너무 약 (안 씀)
-```
+**Magnetometer:** Earth magnetic field 측정.
+
+**Types:**
+- Fluxgate — 정확, 큰
+- Hall effect — small, less accurate
+- MEMS — IMU 통합
+
+**Use:**
+- Heading reference (compass)
+- Earth orientation (위성·LEO)
+- Aircraft — backup
+
+**Issue:**
+- Hard-iron / soft-iron — 자기물질 영향
+- Calibration 필수
+
+LEO 위성 — magnetic field 약, 사용 가능. GEO·deep space — 너무 약 (안 씀).
 
 지구 자기 — *LEO 위성*에 유용. Aircraft 보조.
 
 ## Sensor Fusion — Kalman Filter
 
-```text
-Kalman Filter:
-  IMU + GPS + magnetometer + star tracker fusion
-  Optimal under Gaussian noise
-  
-Algorithm:
-  Predict — IMU integrate (high rate)
-  Update — GPS·magnetic·star (low rate)
-  Covariance propagation
-  
-EKF (Extended) — nonlinear
-UKF (Unscented) — nonlinear 고차
-Particle filter — non-Gaussian
+**Kalman Filter:**
+- IMU + GPS + magnetometer + star tracker fusion
+- Optimal under Gaussian noise
 
-Output:
-  Position·velocity·attitude·biases
-  Covariance (uncertainty)
-  
-Typical structure:
-  IMU at 200·400 Hz → predict
-  GPS at 10 Hz → update
-  Star at 1 Hz → update
-  
-효과:
-  Long-term — GPS·star 정확도
-  Short-term — IMU smooth·high-rate
-  Bias estimation — drift 보정
-```
+**Algorithm:**
+- Predict — IMU integrate (high rate)
+- Update — GPS·magnetic·star (low rate)
+- Covariance propagation
+
+**Variants:**
+- EKF (Extended) — nonlinear
+- UKF (Unscented) — nonlinear 고차
+- Particle filter — non-Gaussian
+
+**Output:**
+- Position·velocity·attitude·biases
+- Covariance (uncertainty)
+
+**Typical structure:**
+- IMU at 200·400 Hz → predict
+- GPS at 10 Hz → update
+- Star at 1 Hz → update
+
+**효과:**
+- Long-term — GPS·star 정확도
+- Short-term — IMU smooth·high-rate
+- Bias estimation — drift 보정
 
 Kalman = *avionics 표준*. 모든 GNC.
 
 ## Sensor Interface
 
-```text
-Common interfaces:
+**Common interfaces:**
 
-SPI:
-  IMU, magnetometer, pressure
-  10~100 Mbps
-  Master-slave
-  
-I2C:
-  Slow sensors (temp·humidity)
-  100~400 kbps
-  
-UART:
-  GPS (NMEA·UBX)
-  Star tracker (some)
-  Up to 1 Mbps
-  
-CAN·CANaerospace:
-  Engine sensors
-  Up to 1 Mbps
-  
-1553·SpaceWire·AFDX:
-  Subsystem-level (LRU)
-  Sensor module ↔ FCC
-  
-Analog:
-  Some pressure·temperature
-  ADC required
-  
-Discrete:
-  Switch·status (binary)
-  
-Time sync:
-  PPS (Pulse Per Second) — GPS·external
-  PTP (IEEE 1588) — AFDX/Ethernet
-  Highly precise
-```
+| Interface | 용도 | Bandwidth |
+|-----------|------|-----------|
+| SPI | IMU, magnetometer, pressure | 10~100 Mbps |
+| I2C | Slow sensors (temp·humidity) | 100~400 kbps |
+| UART | GPS (NMEA·UBX), Star tracker (some) | Up to 1 Mbps |
+| CAN·CANaerospace | Engine sensors | Up to 1 Mbps |
+| 1553·SpaceWire·AFDX | Subsystem-level (LRU), sensor module ↔ FCC | — |
+| Analog | Some pressure·temperature (ADC required) | — |
+| Discrete | Switch·status (binary) | — |
+
+**Time sync:**
+- PPS (Pulse Per Second) — GPS·external
+- PTP (IEEE 1588) — AFDX/Ethernet
+- Highly precise
 
 Sensor interface — *bandwidth + sync* 결정.
 
 ## Sensor Calibration
 
-```text
-Calibration procedure:
+**Calibration procedure:**
 
-1. Bench calibration (factory):
-   Controlled environment
-   Reference (rate table, gravity, magnetic shield)
-   Coefficient store (NVRAM)
-   
-2. Vehicle-level alignment:
-   IMU vs body frame
-   Misalignment matrix
-   
-3. In-flight calibration:
-   Kalman filter estimate bias
-   Adaptive coefficient
-   
-4. Periodic recalibration:
-   Lifetime drift
-   Service maintenance
+1. **Bench calibration (factory):**
+   - Controlled environment
+   - Reference (rate table, gravity, magnetic shield)
+   - Coefficient store (NVRAM)
 
-Example coefficients:
-  Gyro bias (3) + scale factor (3) + misalign (6)
-  Accel bias (3) + scale (3) + misalign (6)
-  Mag hard-iron (3) + soft-iron (6)
-  → 33 coefficients per IMU
-```
+2. **Vehicle-level alignment:**
+   - IMU vs body frame
+   - Misalignment matrix
+
+3. **In-flight calibration:**
+   - Kalman filter estimate bias
+   - Adaptive coefficient
+
+4. **Periodic recalibration:**
+   - Lifetime drift
+   - Service maintenance
+
+**Example coefficients:**
+- Gyro bias (3) + scale factor (3) + misalign (6)
+- Accel bias (3) + scale (3) + misalign (6)
+- Mag hard-iron (3) + soft-iron (6)
+- 33 coefficients per IMU
 
 각 IMU — *unique calibration*. Production·shipping data.
 
 ## Sensor Data Format
 
-```text
-Engineering unit conversion:
+**Engineering unit conversion:**
 
 ADC → physical:
-  V = ADC / ADC_max * V_ref
-  
-  Accelerometer:
-    a = (V - V_offset) * scale_factor / sensitivity
-    Unit: m/s²
-  
-  Gyro:
-    ω = (V - V_offset) * scale_factor
-    Unit: rad/s 또는 deg/s
-  
-  Pressure:
-    P = ... → altitude (barometric)
-  
-Body-frame:
-  Sensor → body misalignment matrix
-  body_vec = R_sensor_to_body * sensor_vec
-  
-Time tagging:
-  Sample timestamp (sync to system clock)
-  Latency compensation
-```
+
+$$V = \frac{\text{ADC}}{\text{ADC}_{\text{max}}} \cdot V_{\text{ref}}$$
+
+**Accelerometer:**
+
+$$a = \frac{(V - V_{\text{offset}}) \cdot \text{scale factor}}{\text{sensitivity}}$$
+
+Unit: m/s².
+
+**Gyro:**
+
+$$\omega = (V - V_{\text{offset}}) \cdot \text{scale factor}$$
+
+Unit: rad/s 또는 deg/s.
+
+**Pressure:** $P \rightarrow$ altitude (barometric).
+
+**Body-frame:** Sensor → body misalignment matrix.
+
+$$\vec{v}_{\text{body}} = R_{\text{sensor} \to \text{body}} \cdot \vec{v}_{\text{sensor}}$$
+
+**Time tagging:**
+- Sample timestamp (sync to system clock)
+- Latency compensation
 
 Engineering unit — *body frame + 시간*. GNC input.
 
 ## 인증·HW 요구
 
-```text
-DO-160 environmental qualification:
-  Temperature, altitude, humidity
-  Vibration, shock
-  Power input
-  EMI/EMC
-  Lightning
-  Icing
-  Salt spray, sand·dust
-  
-DO-254 (HW airworthiness):
-  Sensor electronics — DO-254 dependent
-  
-LV qualification:
-  Vibration profile (typical 20 g sine·random)
-  Shock (1000+ g)
-  Thermal cycle (-40 ~ +85°C)
-  Acoustic noise (140+ dB)
-  Pyroshock
-  Vacuum (위성, 100% relative)
-```
+**DO-160 environmental qualification:**
+- Temperature, altitude, humidity
+- Vibration, shock
+- Power input
+- EMI/EMC
+- Lightning
+- Icing
+- Salt spray, sand·dust
+
+**DO-254 (HW airworthiness):** Sensor electronics — DO-254 dependent.
+
+**LV qualification:**
+- Vibration profile (typical 20 g sine·random)
+- Shock (1000+ g)
+- Thermal cycle (-40 ~ +85°C)
+- Acoustic noise (140+ dB)
+- Pyroshock
+- Vacuum (위성, 100% relative)
 
 Sensor — *극한 환경 통과*. Aerospace 핵심.
 
 ## 한국 Sensor 산업
 
-```text
-국산 IMU·gyro:
-  ADD (국방과학연구소) — FOG·RLG 자체
-  Hanwha Aerospace — IMU 자체 + 일부 외산
-  LIG넥스원 — IMU 미사일용
-  KARI — KSLV-II IMU 자체
-  
-국산 GPS receiver:
-  KARI·ETRI — 위성용 자체
-  Defense 위주
-  
-국산 star tracker:
-  KARI — KOMPSAT·KPLO 자체
-  
-민간:
-  Nara MicroSystems
-  자율주행·드론 — MEMS IMU
+**국산 IMU·gyro:**
+- ADD (국방과학연구소) — FOG·RLG 자체
+- Hanwha Aerospace — IMU 자체 + 일부 외산
+- LIG넥스원 — IMU 미사일용
+- KARI — KSLV-II IMU 자체
 
-수입:
-  Honeywell FOG·RLG (high-end)
-  Sodern star tracker
-  Northrop Grumman LN-200·LN-100
-```
+**국산 GPS receiver:**
+- KARI·ETRI — 위성용 자체
+- Defense 위주
+
+**국산 star tracker:**
+- KARI — KOMPSAT·KPLO 자체
+
+**민간:**
+- Nara MicroSystems
+- 자율주행·드론 — MEMS IMU
+
+**수입:**
+- Honeywell FOG·RLG (high-end)
+- Sodern star tracker
+- Northrop Grumman LN-200·LN-100
 
 한국 — *국산 + 수입* 혼합. Defense·우주 자체화 진행.
 
@@ -536,37 +499,25 @@ Sensor — *극한 환경 통과*. Aerospace 핵심.
 
 > ⚠️ Sensor 1개 — single fail point
 
-```text
-1 IMU + 1 GPS → 한 sensor fail = mission fail
-```
+1 IMU + 1 GPS → 한 sensor fail = mission fail.
 
 → Redundant (보통 dual·triple).
 
 > ⚠️ Calibration overlook
 
-```text
-"Datasheet spec → 사용"
-→ Real bias 큼
-→ Navigation drift 폭증
-```
+"Datasheet spec만 보고 사용"하면 real bias가 커서 navigation drift가 폭증한다.
 
 → Bench calibration + alignment.
 
 > ⚠️ Time sync 누락
 
-```text
-IMU + GPS 다른 clock
-→ Fusion error
-```
+IMU + GPS가 다른 clock을 쓰면 fusion error가 생긴다.
 
 → PPS·PTP 동기.
 
 > ⚠️ Vibration profile 무시
 
-```text
-Lab test pass → flight vibration
-→ Sensor noise·bias 변화
-```
+Lab test pass → flight vibration에서 sensor noise·bias가 변할 수 있다.
 
 → Real vibration profile 시험.
 

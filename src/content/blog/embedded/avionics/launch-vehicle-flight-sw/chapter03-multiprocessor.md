@@ -14,59 +14,58 @@ draft: true
 
 ## SMP vs AMP — LV 적용
 
-```text
-SMP (Symmetric):
-  같은 OS — Linux 또는 PREEMPT_RT
-  모든 코어 공유
-  Mission management·telemetry에 적합
-  
-AMP (Asymmetric):
-  각 코어 별도 OS
-  Linux + RTOS 또는 RTOS + RTOS
-  Fault isolation 우수
-  LV에 *주류*
-```
+SMP (Symmetric)
+
+- 같은 OS — Linux 또는 PREEMPT_RT
+- 모든 코어 공유
+- Mission management·telemetry에 적합
+
+AMP (Asymmetric)
+
+- 각 코어 별도 OS
+- Linux + RTOS 또는 RTOS + RTOS
+- Fault isolation 우수
+- LV에 *주류*
 
 LV — *AMP가 일반적*. ASIL·DO-178C 인증 시 *격리 필수*.
 
 ## Heterogeneous AMP Architecture
 
-```text
-Zynq Ultrascale+ 사례:
-  
-  Cortex-A53 × 4 (APU):
-    OS: Linux PREEMPT_RT
-    Mission management
-    Telemetry encoding
-    Network·comm
-    
-  Cortex-R5 × 2 (RPU) DCLS:
-    OS: FreeRTOS·VxWorks
-    TVC control loop
-    Sensor fusion
-    Safety-critical
-    
-  PMU MicroBlaze:
-    Power management
-    
-  FPGA fabric (PL):
-    Custom timing·I/O
-    
+Zynq Ultrascale+ 사례
+
+Cortex-A53 × 4 (APU)
+
+- OS: Linux PREEMPT_RT
+- Mission management
+- Telemetry encoding
+- Network·comm
+
+Cortex-R5 × 2 (RPU) DCLS
+
+- OS: FreeRTOS·VxWorks
+- TVC control loop
+- Sensor fusion
+- Safety-critical
+
+PMU MicroBlaze
+
+- Power management
+
+FPGA fabric (PL)
+
+- Custom timing·I/O
+
 모두 *같은 SoC*. *공유 메모리·shared peripherals*.
-```
 
 ## OpenAMP — Linaro Framework
 
-```text
-OpenAMP layers:
-  1. libmetal       — HAL, memory map, IRQ
-  2. open-amp       — RPMsg, remoteproc, virtio-vring
-  3. application    — RPMsg endpoint
+OpenAMP layers
 
-Standardized:
-  Apache 2.0
-  Cortex-A·Cortex-R·DSP 모두 지원
-```
+1. **libmetal** — HAL, memory map, IRQ
+2. **open-amp** — RPMsg, remoteproc, virtio-vring
+3. **application** — RPMsg endpoint
+
+표준화 — Apache 2.0. Cortex-A·Cortex-R·DSP 모두 지원.
 
 KARI·NASA·ESA — *OpenAMP 채택 증가*.
 
@@ -124,64 +123,54 @@ OTA로 *RPU firmware만 교체* 가능. LV ground test에서 *iteration 빠름*.
 
 ## virtio-vring — Shared Memory
 
-```text
-DDR shared region:
-  vring_tx (APU → RPU):
-    desc[N]    buffer descriptors
-    avail      producer index
-    used       consumer index
-  
-  vring_rx (RPU → APU):
-    desc[N]
-    avail
-    used
-  
-  buffer_pool
+DDR shared region
 
-Memory attribute:
-  Non-cacheable 또는 명시 maintenance
-  Cortex-A·R 둘 다 일관성 유지
-```
+- `vring_tx` (APU → RPU): desc[N] buffer descriptors, avail (producer index), used (consumer index)
+- `vring_rx` (RPU → APU): desc[N], avail, used
+- `buffer_pool`
+
+Memory attribute — Non-cacheable 또는 명시 maintenance. Cortex-A·R 둘 다 일관성 유지.
 
 KVM virtio와 같은 protocol — *driver 재활용*.
 
 ## Role 분할 — LV FCC 사례
 
-```text
-APU (Linux):
-  GUI / ground operator interface (pre-launch)
-  Telemetry encoding (CCSDS)
-  GPS/INS fusion (high-level)
-  Mission timeline
-  Database (event log)
-  
-RPU (FreeRTOS):
-  Sensor sampling (1-10 kHz)
-  TVC actuator control
-  Engine cutoff timing
-  Stage separation logic
-  Hardware health monitor
-  
-FPGA:
-  IMU sampling (>10 kHz)
-  Reed-Solomon encoding
-  Custom protocols
-  Watchdog
-```
+APU (Linux)
+
+- GUI / ground operator interface (pre-launch)
+- Telemetry encoding (CCSDS)
+- GPS/INS fusion (high-level)
+- Mission timeline
+- Database (event log)
+
+RPU (FreeRTOS)
+
+- Sensor sampling (1-10 kHz)
+- TVC actuator control
+- Engine cutoff timing
+- Stage separation logic
+- Hardware health monitor
+
+FPGA
+
+- IMU sampling (>10 kHz)
+- Reed-Solomon encoding
+- Custom protocols
+- Watchdog
 
 각 영역 *deadline·언어·인증 요구* 다름.
 
 ## Fault Isolation
 
-```text
-AMP의 핵심 — fault 격리:
-  Linux 측 task가 hang → RPU 영향 0
-  RTOS 측 task가 crash → Linux 영향 0
-  
-ARINC-653 partitioning과 비슷:
-  Time partition (별도 시간 axis)
-  Space partition (별도 memory)
-```
+AMP의 핵심 — fault 격리
+
+- Linux 측 task가 hang → RPU 영향 0
+- RTOS 측 task가 crash → Linux 영향 0
+
+ARINC-653 partitioning과 비슷
+
+- Time partition (별도 시간 axis)
+- Space partition (별도 memory)
 
 ASIL-D·DO-178C Level A — *partition isolation 필수*. AMP는 *hardware-level* 격리.
 
@@ -230,22 +219,17 @@ APU: encode_ccsds(telemetry_data) → downlink_telemetry();
 
 ## ARINC-653 — APEX
 
-```text
-ARINC-653 (Avionics Application Standard Software Interface):
-  Partition based RTOS
-  Time partition (slots)
-  Space partition (memory)
-  
-  Each partition:
-    별도 task·driver
-    Inter-partition comm via *port* (queueing·sampling)
-    
-구현:
-  INTEGRITY·LynxOS·PikeOS·VxWorks 653
-  
-민항 사용:
-  A380·B787·B777X
-```
+ARINC-653 (Avionics Application Standard Software Interface)
+
+- Partition based RTOS
+- Time partition (slots)
+- Space partition (memory)
+- 각 partition별 task·driver
+- Inter-partition comm via *port* (queueing·sampling)
+
+구현 — INTEGRITY·LynxOS·PikeOS·VxWorks 653.
+
+민항 사용 — A380·B787·B777X.
 
 LV — ARINC-653 *부분 적용* 또는 *AMP로 대체*.
 

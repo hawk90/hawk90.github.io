@@ -54,83 +54,79 @@ draft: false
 
 ### 자주 쓰는 표준 서비스
 
-```text
-UUID    Service Name                       비고
-─────────────────────────────────────────────────────────────────────
-0x1800  Generic Access                    GAP 자체, 모든 디바이스 필수
-0x1801  Generic Attribute                 GATT 자체 (Service Changed)
-0x1802  Immediate Alert                   "Find My Phone"
-0x1803  Link Loss                         연결 끊김 알림
-0x1804  Tx Power                          송신 출력 보고
-0x1805  Current Time                      시간 동기
-0x1806  Reference Time Update             시간 보정 요청
-0x1807  Next DST Change                   DST 알림
-0x1808  Glucose                           혈당 (의료기기)
-0x1809  Health Thermometer                체온계
-0x180A  Device Information                제조사·모델·펌웨어 ★ 거의 모든 디바이스 사용
-0x180D  Heart Rate                        심박 모니터
-0x180E  Phone Alert Status                전화 알림
-0x180F  Battery Service                   배터리 ★ 거의 모든 디바이스 사용
-0x1810  Blood Pressure                    혈압계
-0x1811  Alert Notification                메시지 알림 (sms 등)
-0x1812  Human Interface Device (HID)      키보드·마우스·게임패드
-0x1813  Scan Parameters                   스캔 파라미터 보고
-0x1814  Running Speed and Cadence         러닝 센서
-0x1815  Automation IO                     IoT 일반 (LED·스위치 등)
-0x1816  Cycling Speed and Cadence         자전거 센서
-0x1818  Cycling Power                     자전거 파워미터
-0x1819  Location and Navigation           GPS 데이터
-0x181A  Environmental Sensing             온습도·기압 ★ IoT 센서 표준
-0x181B  Body Composition                  체성분
-0x181C  User Data                         사용자 프로필
-0x181D  Weight Scale                      체중계
-0x181E  Bond Management                   본드 관리
-0x181F  Continuous Glucose Monitoring     연속 혈당
-0x1820  Internet Protocol Support         IPv6 over BLE
-0x1822  Pulse Oximeter                    산소포화도
-0x1826  Fitness Machine                   러닝머신·로잉머신
-0x1827  Mesh Provisioning                 BLE Mesh
-0x1828  Mesh Proxy                        BLE Mesh
-0x1843  Audio Input Control               LE Audio
-0x1844  Volume Control                    LE Audio
-0x1849  Constant Tone Extension           AoA/AoD (5.1+)
-0x184E  Audio Stream Control              LE Audio
-0x1850  Published Audio Capabilities      LE Audio
-0x1851  Audio Input Control               LE Audio
-0x1856  Telephone Bearer                  LE Audio
-```
+| UUID | Service Name | 비고 |
+|------|--------------|------|
+| 0x1800 | Generic Access | GAP 자체, 모든 디바이스 필수 |
+| 0x1801 | Generic Attribute | GATT 자체 (Service Changed) |
+| 0x1802 | Immediate Alert | "Find My Phone" |
+| 0x1803 | Link Loss | 연결 끊김 알림 |
+| 0x1804 | Tx Power | 송신 출력 보고 |
+| 0x1805 | Current Time | 시간 동기 |
+| 0x1806 | Reference Time Update | 시간 보정 요청 |
+| 0x1807 | Next DST Change | DST 알림 |
+| 0x1808 | Glucose | 혈당 (의료기기) |
+| 0x1809 | Health Thermometer | 체온계 |
+| 0x180A | Device Information | 제조사·모델·펌웨어 ★ 거의 모든 디바이스 사용 |
+| 0x180D | Heart Rate | 심박 모니터 |
+| 0x180E | Phone Alert Status | 전화 알림 |
+| 0x180F | Battery Service | 배터리 ★ 거의 모든 디바이스 사용 |
+| 0x1810 | Blood Pressure | 혈압계 |
+| 0x1811 | Alert Notification | 메시지 알림 (sms 등) |
+| 0x1812 | Human Interface Device (HID) | 키보드·마우스·게임패드 |
+| 0x1813 | Scan Parameters | 스캔 파라미터 보고 |
+| 0x1814 | Running Speed and Cadence | 러닝 센서 |
+| 0x1815 | Automation IO | IoT 일반 (LED·스위치 등) |
+| 0x1816 | Cycling Speed and Cadence | 자전거 센서 |
+| 0x1818 | Cycling Power | 자전거 파워미터 |
+| 0x1819 | Location and Navigation | GPS 데이터 |
+| 0x181A | Environmental Sensing | 온습도·기압 ★ IoT 센서 표준 |
+| 0x181B | Body Composition | 체성분 |
+| 0x181C | User Data | 사용자 프로필 |
+| 0x181D | Weight Scale | 체중계 |
+| 0x181E | Bond Management | 본드 관리 |
+| 0x181F | Continuous Glucose Monitoring | 연속 혈당 |
+| 0x1820 | Internet Protocol Support | IPv6 over BLE |
+| 0x1822 | Pulse Oximeter | 산소포화도 |
+| 0x1826 | Fitness Machine | 러닝머신·로잉머신 |
+| 0x1827 | Mesh Provisioning | BLE Mesh |
+| 0x1828 | Mesh Proxy | BLE Mesh |
+| 0x1843 | Audio Input Control | LE Audio |
+| 0x1844 | Volume Control | LE Audio |
+| 0x1849 | Constant Tone Extension | AoA/AoD (5.1+) |
+| 0x184E | Audio Stream Control | LE Audio |
+| 0x1850 | Published Audio Capabilities | LE Audio |
+| 0x1851 | Audio Input Control | LE Audio |
+| 0x1856 | Telephone Bearer | LE Audio |
 
 각 서비스마다 *별도 Specification PDF*가 있습니다. *bluetooth.com/specifications/specs*에서 무료로 받을 수 있습니다.
 
 ### 자주 쓰는 표준 Characteristic
 
-```text
-UUID    Characteristic                     소속 Service
-─────────────────────────────────────────────────────────────
-0x2A00  Device Name                       Generic Access
-0x2A01  Appearance                        Generic Access
-0x2A04  Peripheral Preferred Conn Params  Generic Access
-0x2A05  Service Changed                   Generic Attribute
-0x2A19  Battery Level                     Battery Service
-0x2A24  Model Number String               Device Information
-0x2A25  Serial Number String              Device Information
-0x2A26  Firmware Revision String          Device Information
-0x2A27  Hardware Revision String          Device Information
-0x2A28  Software Revision String          Device Information
-0x2A29  Manufacturer Name String          Device Information
-0x2A37  Heart Rate Measurement            Heart Rate
-0x2A38  Body Sensor Location              Heart Rate
-0x2A39  Heart Rate Control Point          Heart Rate
-0x2A4D  Report                            HID
-0x2A4E  Protocol Mode                     HID
-0x2A50  PnP ID                            Device Information
-0x2A6D  Pressure                          Environmental Sensing
-0x2A6E  Temperature                       Environmental Sensing
-0x2A6F  Humidity                          Environmental Sensing
-0x2A76  UV Index                          Environmental Sensing
-0x2A77  Irradiance                        Environmental Sensing
-0x2AB4  Boolean                           Generic Boolean
-```
+| UUID | Characteristic | 소속 Service |
+|------|----------------|--------------|
+| 0x2A00 | Device Name | Generic Access |
+| 0x2A01 | Appearance | Generic Access |
+| 0x2A04 | Peripheral Preferred Conn Params | Generic Access |
+| 0x2A05 | Service Changed | Generic Attribute |
+| 0x2A19 | Battery Level | Battery Service |
+| 0x2A24 | Model Number String | Device Information |
+| 0x2A25 | Serial Number String | Device Information |
+| 0x2A26 | Firmware Revision String | Device Information |
+| 0x2A27 | Hardware Revision String | Device Information |
+| 0x2A28 | Software Revision String | Device Information |
+| 0x2A29 | Manufacturer Name String | Device Information |
+| 0x2A37 | Heart Rate Measurement | Heart Rate |
+| 0x2A38 | Body Sensor Location | Heart Rate |
+| 0x2A39 | Heart Rate Control Point | Heart Rate |
+| 0x2A4D | Report | HID |
+| 0x2A4E | Protocol Mode | HID |
+| 0x2A50 | PnP ID | Device Information |
+| 0x2A6D | Pressure | Environmental Sensing |
+| 0x2A6E | Temperature | Environmental Sensing |
+| 0x2A6F | Humidity | Environmental Sensing |
+| 0x2A76 | UV Index | Environmental Sensing |
+| 0x2A77 | Irradiance | Environmental Sensing |
+| 0x2AB4 | Boolean | Generic Boolean |
 
 ## 표준 서비스의 데이터 포맷
 

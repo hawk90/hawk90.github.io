@@ -136,14 +136,12 @@ throughput이 *수 배* 좋아집니다. 4.0에서 *7~10 KB/s* 수준이던 GATT
 
 5.0이 가져온 변화는 *물리 계층*입니다. 4.0~4.2의 *1 Mbps GFSK 고정*이 *3가지 PHY*로 분기했습니다.
 
-```text
-PHY            Data Rate    Symbol Rate    Range (옥외)
-─────────────────────────────────────────────────────────
-LE 1M          1 Mbps       1 Msym/s       ~30 m  (기본)
-LE 2M          2 Mbps       2 Msym/s       ~25 m  (고대역)
-LE Coded S=2   500 kbps     1 Msym/s × 2   ~60 m  (중간)
-LE Coded S=8   125 kbps     1 Msym/s × 8   ~120 m (long range)
-```
+| PHY | Data Rate | Symbol Rate | Range (옥외) |
+|-----|-----------|-------------|--------------|
+| LE 1M | 1 Mbps | 1 Msym/s | ~30 m (기본) |
+| LE 2M | 2 Mbps | 2 Msym/s | ~25 m (고대역) |
+| LE Coded S=2 | 500 kbps | 1 Msym/s × 2 | ~60 m (중간) |
+| LE Coded S=8 | 125 kbps | 1 Msym/s × 8 | ~120 m (long range) |
 
 *Coded PHY*는 *FEC(Forward Error Correction)*를 *2배 또는 8배* 적용해 *링크 budget을 +6~12 dB* 늘립니다. 옥외에서 *거리가 4배*까지 늘어납니다. 대신 *데이터율은 1/8*입니다.
 
@@ -313,17 +311,15 @@ adv data: 0xA8 4F C3 ... — AES 암호문, IRK로만 복호
 
 ## 자주 하는 실수
 
-```text
-실수                                            바로잡기
-─────────────────────────────────────────────────────────────────────
-4.0 칩으로 BLE 5 광고가 안 잡힌다고 불만        Extended Adv는 5.0+ 필요. Legacy로 떨어뜨리기
-4.2 칩에 Coded PHY 설정 시도                    Coded는 5.0+ 전용
-스마트폰이 4.2 LESC 자동 협상한다고 가정        구형 폰은 Legacy로 떨어질 수 있음
-LE Audio = BLE 5.2면 무조건 가능                칩 + 폰 + OS + 헤드폰 모두 지원해야 함
-PAwR 광고를 5.0 폰에서 받음                     5.4 미만은 PAwR 못 봄, 일반 periodic으로 fallback 안 됨
-GATT Caching이 자동으로 켜진다고 기대            Service Changed 옵션 켜야 함
-2M PHY를 advertising에 사용                     Legacy advertising은 1M 또는 Coded만, Extended Adv부터 2M 가능
-```
+| 실수 | 바로잡기 |
+|------|----------|
+| 4.0 칩으로 BLE 5 광고가 안 잡힌다고 불만 | Extended Adv는 5.0+ 필요. Legacy로 떨어뜨리기 |
+| 4.2 칩에 Coded PHY 설정 시도 | Coded는 5.0+ 전용 |
+| 스마트폰이 4.2 LESC 자동 협상한다고 가정 | 구형 폰은 Legacy로 떨어질 수 있음 |
+| LE Audio = BLE 5.2면 무조건 가능 | 칩 + 폰 + OS + 헤드폰 모두 지원해야 함 |
+| PAwR 광고를 5.0 폰에서 받음 | 5.4 미만은 PAwR 못 봄, 일반 periodic으로 fallback 안 됨 |
+| GATT Caching이 자동으로 켜진다고 기대 | Service Changed 옵션 켜야 함 |
+| 2M PHY를 advertising에 사용 | Legacy advertising은 1M 또는 Coded만, Extended Adv부터 2M 가능 |
 
 ## 정리
 

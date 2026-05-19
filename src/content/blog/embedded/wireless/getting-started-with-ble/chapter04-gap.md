@@ -396,18 +396,16 @@ fields.flags = BLE_HS_ADV_F_DISC_LTD | BLE_HS_ADV_F_BREDR_UNSUP;
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                            원인                              해결
-─────────────────────────────────────────────────────────────────────────────────────
-스마트폰이 디바이스 발견 못 함                   advertising 안 시작              ble_gap_adv_start 호출 확인
-스캔에 떴다 안 떴다 함                           광고 interval 너무 김             interval ↓
-RSSI 신호 강한데 연결 후 곧 끊김                  파라미터 협상 실패                connection update에서 iOS 정책 확인
-RPA 디바이스 어떻게 식별?                        IRK 모르면 못 함                  본드한 디바이스만 가능
-동시 connection 한계 초과                       SDK config에 max_connections     menuconfig에서 max 늘리기
-iOS와 연결 후 disconnect                        latency × interval > 2 s          latency ↓ 또는 interval ↓
-광고 interval 20 ms 안 됨                       4.0/4.1 non-conn은 100 ms 최소     4.2+ 칩 사용
-public address가 충돌                           OUI 미등록인데 public 사용          static random으로 전환
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 스마트폰이 디바이스 발견 못 함 | advertising 안 시작 | ble_gap_adv_start 호출 확인 |
+| 스캔에 떴다 안 떴다 함 | 광고 interval 너무 김 | interval ↓ |
+| RSSI 신호 강한데 연결 후 곧 끊김 | 파라미터 협상 실패 | connection update에서 iOS 정책 확인 |
+| RPA 디바이스 어떻게 식별? | IRK 모르면 못 함 | 본드한 디바이스만 가능 |
+| 동시 connection 한계 초과 | SDK config에 max_connections | menuconfig에서 max 늘리기 |
+| iOS와 연결 후 disconnect | latency × interval > 2 s | latency ↓ 또는 interval ↓ |
+| 광고 interval 20 ms 안 됨 | 4.0/4.1 non-conn은 100 ms 최소 | 4.2+ 칩 사용 |
+| public address가 충돌 | OUI 미등록인데 public 사용 | static random으로 전환 |
 
 ## 정리
 

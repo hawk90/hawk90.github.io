@@ -268,12 +268,10 @@ reset halt
 
 ## Brick 복구
 
-```text
 1. NRST + BOOT pin으로 *system bootloader* 강제
 2. STM32CubeProgrammer에서 *mass erase*
 3. RDP 재설정
 4. 펌웨어 재로드
-```
 
 마지막 수단입니다. *eFuse 잠금* 상태에서는 복구가 *불가*하므로 칩을 교체해야 합니다.
 
