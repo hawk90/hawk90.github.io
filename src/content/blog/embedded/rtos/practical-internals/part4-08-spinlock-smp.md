@@ -57,15 +57,10 @@ swpal   w0, w1, [x2]
 
 LDREX/STREX 루프 4~5 cycle이 `CASAL` 한 줄 *3 cycle*로 줄어듭니다. contention이 심할수록 차이가 더 벌어집니다.
 
-```text
-Cortex-A72, uncontended:
-  LDREX/STREX 루프     : ~5 cycle
-  CASAL (LSE)          : ~3 cycle
-
-같은 코어, 강한 contention:
-  LDREX/STREX retry    : 20~50 cycle
-  CASAL                : 30~80 cycle
-```
+| Cortex-A72 | LDREX/STREX | CASAL (LSE) |
+|---|---|---|
+| uncontended | ~5 cycle | ~3 cycle |
+| 강한 contention | 20~50 cycle | 30~80 cycle |
 
 embedded SMP에서 ARMv8.1+ chip을 쓴다면 LSE 활용이 표준입니다. compiler flag로 `-march=armv8.1-a` 또는 `-moutline-atomics`를 줘서 자동 선택하게 둡니다.
 
@@ -258,19 +253,12 @@ void critical_section(void) {
 
 uncontended와 contended 시 acquire latency 차이를 측정한 예입니다.
 
-```text
-대기 core 수 1 (uncontended):
-  basic test-and-set        : 12 cycle
-  TTAS                       : 13 cycle
-  ticket                     : 14 cycle
-  MCS                        : 18 cycle
-
-대기 core 수 4 (contended):
-  basic test-and-set        : 380 cycle
-  TTAS                       : 220 cycle
-  ticket                     : 160 cycle (fair)
-  MCS                        : 110 cycle (fair, cache-friendly)
-```
+| Lock 종류 | 대기 1 (uncontended) | 대기 4 (contended) |
+|---|---|---|
+| basic test-and-set | 12 cycle | 380 cycle |
+| TTAS | 13 cycle | 220 cycle |
+| ticket | 14 cycle | 160 cycle (fair) |
+| MCS | 18 cycle | 110 cycle (fair, cache-friendly) |
 
 contention 환경에서 *기본 test-and-set*이 가장 비싸고, MCS가 가장 우수합니다. 다만 MCS는 per-waiter node가 필요하므로 ISR에서 쓰기 까다롭습니다. embedded 4 core 환경의 *현실적 선택*은 *TTAS + IRQ disable* 또는 *ticket lock*입니다.
 
@@ -308,7 +296,7 @@ spinlock은 *짧은 critical section* 전용입니다. block이 가능한 RTOS A
 
 > 경고 — Nested lock의 ordering 무시
 
-```text
+```c
 core 0: spin_lock(&a); spin_lock(&b);
 core 1: spin_lock(&b); spin_lock(&a);
                                        /* → SMP deadlock */

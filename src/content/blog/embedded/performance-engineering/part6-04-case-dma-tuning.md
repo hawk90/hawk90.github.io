@@ -116,14 +116,9 @@ Useful transfer: 2048 byte / (320 ns + 20 ns) = ~94% 효율
 
 추가로 캡처 드라이버가 single descriptor 방식으로 동작하고 있었습니다. 한 frame을 받으면 CPU가 IRQ에서 다음 descriptor를 setup하고 DMA를 재시동하는 구조였습니다. Setup latency 동안 DMA가 idle 상태였습니다.
 
-```text
-Frame N transfer → IRQ → CPU setup descriptor → DMA restart
-                  └────── 평균 200 µs idle ──────┘
+![DMA Single Descriptor — Idle Overhead 문제](/images/blog/perf-eng/diagrams/part6-04-dma-timeline.svg)
 
-60 fps 기준 frame interval 16.6 ms
-  → 200 µs / 16.6 ms = 1.2% 손실... 작아 보이지만
-  → 실제로는 frame end-of-line 사이에도 동일 패턴 발생
-```
+60 fps 기준 frame interval 16.6 ms에서 200 us / 16.6 ms = 1.2% 손실처럼 작아 보이지만, 실제로는 frame end-of-line 사이에도 동일 패턴이 발생합니다.
 
 ## 해결 — Burst Size, Scatter-Gather, Double Buffer
 

@@ -178,13 +178,13 @@ source.c:92:6:log_event      64  static
 
 call graph를 따라 *worst path*를 합산합니다.
 
-```text
-task_entry(128) -> process(256) -> compute(512) = 896 byte
-+ ISR worst case stack    : 64
-+ context switch overhead : 64
-+ safety margin (25%)     : 256
-total                     : 1280 → round up to 2048
-```
+| 항목 | Byte |
+|---|---|
+| `task_entry(128) → process(256) → compute(512)` | 896 |
+| ISR worst case stack | +64 |
+| context switch overhead | +64 |
+| safety margin (25%) | +256 |
+| **total** | 1280 → round up to 2048 |
 
 운영 중에는 `uxTaskGetStackHighWaterMark`로 *실제 최대 사용량*을 측정합니다. 정적 분석값과 실측값이 *2배 이상 차이*나면 둘 중 하나가 틀린 것이므로 재검토합니다.
 
@@ -227,22 +227,10 @@ int main() {
 
 ## 안전 표준과의 정합성
 
-```text
-MISRA C:2012 Dir 4.12
-  "Dynamic memory allocation shall not be used."
-
-DO-178C Level A/B
-  "Dynamic memory allocation in flight software shall be avoided
-   unless thoroughly justified, analyzed, and verified."
-
-ISO 26262 ASIL-D
-  "Dynamic memory allocation should be avoided in safety-critical
-   execution paths."
-
-CERT C MEM30-C, MEM31-C, MEM34-C
-  "Various memory management rules that static allocation makes
-   trivially satisfied."
-```
+- **MISRA C:2012 Dir 4.12** — "Dynamic memory allocation shall not be used."
+- **DO-178C Level A/B** — "Dynamic memory allocation in flight software shall be avoided unless thoroughly justified, analyzed, and verified."
+- **ISO 26262 ASIL-D** — "Dynamic memory allocation should be avoided in safety-critical execution paths."
+- **CERT C MEM30-C, MEM31-C, MEM34-C** — "Various memory management rules that static allocation makes trivially satisfied."
 
 static allocation은 이 모든 규칙을 *공짜로 만족*시킵니다. 동적 할당을 써서 같은 규칙을 만족시키려면 WCET 분석, fragmentation 증명, OOM 경로 검증, robustness testing이 모두 필요합니다. 비용 차이는 *수십 인-월*이 됩니다.
 

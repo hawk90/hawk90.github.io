@@ -90,30 +90,21 @@ Mutex give 시점에 호출됩니다. **모든 mutex가 해제된 후에만 prio
 
 ## Multi-Mutex 시나리오
 
-```text
-T_low가 mutex A·B 동시 보유
-T_high1 → A 대기 → T_low priority boost (high1 level)
-T_high2 → B 대기 → 이미 boost된 상태면 변화 없음
-
-T_low release A:
-  uxMutexesHeld = 1
-  → priority 유지 (B 때문)
-T_low release B:
-  uxMutexesHeld = 0
-  → priority 복원
-```
+- `T_low`가 mutex A와 B를 동시 보유 중.
+- `T_high1`이 A를 대기하면 → `T_low`의 priority가 high1 level로 boost.
+- `T_high2`가 B를 대기하면 → 이미 boost된 상태이므로 변화 없음.
+- `T_low`가 A를 release하면 `uxMutexesHeld = 1`이 되어 priority는 B 때문에 유지됩니다.
+- `T_low`가 B를 release하면 `uxMutexesHeld = 0`이 되어 priority가 복원됩니다.
 
 ## Chained Inheritance
 
-```text
-T_high → mutex X 대기 → T_med 보유
-T_med → mutex Y 대기 → T_low 보유
+- `T_high`가 mutex X를 대기, `T_med`가 보유 중.
+- `T_med`는 mutex Y를 대기, `T_low`가 보유 중.
 
-T_high가 X를 대기할 때:
-  T_med priority boost (high level)
-T_med가 Y를 대기할 때:
-  T_low priority boost (high level — boost된 T_med의 level)
-```
+전파 순서
+
+1. `T_high`가 X를 대기할 때 `T_med`의 priority가 high level로 boost.
+2. `T_med`가 Y를 대기할 때 `T_low`의 priority도 high level로 boost (boost된 `T_med`의 level).
 
 `xTaskCheckForChainedInheritance()`가 *recursive boost*를 담당합니다.
 
@@ -135,11 +126,9 @@ Boost된 task는 *원래 같은 priority에 있던 다른 task*와 같은 레벨
 
 ## Implementation Overhead
 
-```text
-Inherit:    ~50 cycle (list remove + insert + bitmap update)
-Disinherit: ~50 cycle (역방향)
-Chain:      depth × inherit cost
-```
+- **Inherit** — ~50 cycle (list remove + insert + bitmap update)
+- **Disinherit** — ~50 cycle (역방향)
+- **Chain** — depth × inherit cost
 
 Cortex-M4 @ 168 MHz 기준 0.3 µs/op입니다. *무시 가능한 수준*입니다.
 

@@ -31,19 +31,7 @@ draft: false
 - **L1 I-cache** — 명령 전용 (read-only, no write-back)
 - **L1 D-cache** — 데이터 (read + write)
 
-```text
-        ┌──── CPU Core ────┐
-        │                  │
-        │   ┌───────────┐  │
-        │   │   L1 I    │  │ → instruction fetch
-        │   └───────────┘  │
-        │   ┌───────────┐  │
-        │   │   L1 D    │  │ → load/store
-        │   └───────────┘  │
-        └─────────┬────────┘
-                  ↓
-              [L2 Cache]
-```
+![L1 Split I/D Cache — fetch와 load/store 동시 처리](/images/blog/perf-eng/diagrams/part2-05-l1-split.svg)
 
 fetch와 load/store가 동시에 가능해 *structural hazard*를 회피합니다.
 

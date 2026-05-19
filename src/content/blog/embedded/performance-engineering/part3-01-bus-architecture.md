@@ -30,16 +30,7 @@ ARM Cortex-M은 AHB-Lite와 APB를 함께 씁니다. Cortex-A는 AXI에 CCI/CCN/
 
 ## AXI 5 채널
 
-```text
-Master                                       Slave
-  │                                             │
-  │ ── Address Read    (AR) ───────────────→  │
-  │ ←── Read Data      (R)  ───────────────  │
-  │                                             │
-  │ ── Address Write   (AW) ───────────────→  │
-  │ ── Write Data      (W)  ───────────────→  │
-  │ ←── Write Response (B)  ───────────────  │
-```
+![AXI 5 Channels — Read/Write 독립 Handshake](/images/blog/perf-eng/diagrams/part3-01-axi-channels.svg)
 
 5 채널은 각각 독립적으로 핸드셰이크합니다. Read와 Write가 동시에 진행되며, OoO 응답도 가능합니다.
 
@@ -138,38 +129,13 @@ Cortex-M에서는 보통 `[Cortex-M] ─ AHB ─ [bridge] ─ APB ─ [UART, tim
 
 ## NoC — Network-on-Chip
 
-```text
-Multi-core SoC:
-  [Cluster 0] ──┐
-                │
-                │            ┌── [DDR Controller]
-  [Cluster 1] ──┼── NoC ─────┤
-                │            ├── [GPU]
-                │            ├── [VPU]
-  [Cluster 2] ──┤            └── [PCIe]
-                │
-  [IO Master]  ─┘
-```
+![NoC — Network-on-Chip Multi-core SoC 구조](/images/blog/perf-eng/diagrams/part3-01-noc.svg)
 
 ARM CMN(Coherent Mesh Network)은 grid topology 구조로, server 및 고급 모바일 SoC에서 사용합니다.
 
 ## Cortex-A72 — Bus Hierarchy
 
-```text
-[Cortex-A72 core]
-  │
-[L1 D]  [L1 I]
-  │      │
-  └──┬───┘
-     ↓
-   [L2 (cluster 공유)]
-     ↓
-   [SCU + ACE]   ← cluster ACE master
-     ↓
-  [CCI-400 (cluster interconnect)]
-     ↓
-   [Memory Controller] → DDR
-```
+![Cortex-A72 Bus Hierarchy — L1/L2/SCU/CCI-400/DDR](/images/blog/perf-eng/diagrams/part3-01-cortex-a72-hierarchy.svg)
 
 각 stage는 AXI 또는 ACE로 연결됩니다. CCI-400은 4 cluster cache coherent interconnect입니다.
 

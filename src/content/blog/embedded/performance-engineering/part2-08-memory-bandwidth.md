@@ -53,21 +53,7 @@ for (i = 0; i < N; i++) c[i] = a[i] + 3.0 * b[i];   // Triad
 
 ## Roofline Model
 
-```text
-       Performance (GFLOPS)
-            ↑
-            │
-   Peak FP  ─────────────────  (compute roof)
-            │                ╱
-            │              ╱
-            │            ╱
-            │          ╱
-            │        ╱       ← memory roof (slope = peak bandwidth)
-            │      ╱
-            │    ╱
-            └─────────────────→  Arithmetic Intensity (FLOPS/byte)
-                ridge point
-```
+![Roofline Model — Memory vs Compute Bound 판별](/images/blog/perf-eng/diagrams/part2-08-roofline.svg)
 
 - 알고리즘의 *arithmetic intensity* (FLOPS / memory byte)를 계산합니다.
 - intensity가 ridge point보다 낮으면 memory-bound, 높으면 compute-bound입니다.
@@ -81,13 +67,7 @@ for (i = 0; i < N; i++) c[i] = a[i] + 3.0 * b[i];   // Triad
 
 Cortex-A57 이상 SoC는 4-cluster mesh 구조를 사용합니다.
 
-```text
-[Cluster 0]─[Cluster 1]
-     │           │
-[Memory Ctrl]─[I/O]
-     │
-[DDR3/4/5]
-```
+![ARM CCN — Coherent Mesh Network 구조](/images/blog/perf-eng/diagrams/part2-08-ccn-mesh.svg)
 
 L3 bandwidth는 DRAM bandwidth보다 훨씬 큽니다. 그래서 L3 hit율이 핵심입니다.
 

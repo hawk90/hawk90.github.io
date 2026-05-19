@@ -16,14 +16,13 @@ draft: false
 
 ## PCP 동작
 
-각 mutex M에 *priority ceiling* C(M)을 부여합니다. C(M)은 *이 mutex를 lock할 task 중 최고 priority*입니다.
+각 mutex M에 *priority ceiling* `C(M)`을 부여합니다. `C(M)`은 *이 mutex를 lock할 task 중 최고 priority*입니다.
 
-```text
-mutex X: C(X) = 5 (T_high의 priority)
-T_low (priority 1) take X 즉시 → T_low priority → 5
-T_med (priority 3) ready → 시작 못 함 (T_low의 5 < 3)
-T_low가 X release → priority → 1로 복원
-```
+예시 — mutex X: `C(X) = 5` (`T_high`의 priority)
+
+1. `T_low` (priority 1)가 X를 take하는 즉시 → `T_low`의 priority가 5로 boost.
+2. `T_med` (priority 3)가 ready 되어도 시작 못 함 (`T_low`의 5 > 3).
+3. `T_low`가 X를 release하면 priority가 1로 복원.
 
 PCP는 **take 즉시 boost**합니다. PI는 *conflict가 발생한 후에 boost*합니다.
 
@@ -38,17 +37,13 @@ PCP는 **take 즉시 boost**합니다. PI는 *conflict가 발생한 후에 boost
 
 ## Deadlock 방지 증명
 
-```text
-T1이 M1 보유 (ceiling 5) → T1 priority = 5
-T1이 M2 (ceiling 5)를 시도
+1. `T1`이 `M1` 보유 (ceiling 5) → `T1` priority = 5.
+2. `T1`이 `M2` (ceiling 5)를 시도.
+3. 만약 `T2`가 `M2`를 보유 중이면 → `T2` priority ≥ 5 (`M2`의 ceiling).
+4. `T2`의 priority가 5 이상이면 `T1`은 *시작도 못 함* — 모순.
+5. 따라서 `T2`가 `M2`를 보유할 수 없고, `M2`는 free 상태이므로 `T1`이 acquire 가능.
 
-만약 T2가 M2를 보유 중이면 → T2 priority ≥ 5 (M2의 ceiling)
-T2의 priority가 5 이상이면 T1은 *시작도 못 함* — 모순
-→ T2가 M2를 보유할 수 없음
-→ M2는 free 상태 → T1이 acquire
-
-결론: PCP를 쓰면 deadlock이 불가능
-```
+결론은 *PCP를 쓰면 deadlock이 불가능*하다는 것입니다.
 
 이것이 **PCP의 가장 큰 매력**입니다. *Lock order에 무관*하게 deadlock이 막힙니다.
 
@@ -69,15 +64,12 @@ FreeRTOS는 PCP를 지원하지 않습니다. *PI만* 제공합니다.
 
 ## System Ceiling — Original PCP
 
-```text
-SystemCeiling(t) = max(C(M) for M in locked mutexes at time t)
+`SystemCeiling(t) = max(C(M) for M in locked mutexes at time t)`
 
-T_new가 lock을 시도하면:
-  if T_new->priority > SystemCeiling:
-    OK — proceed
-  else:
-    block
-```
+`T_new`가 lock을 시도할 때
+
+- `T_new->priority > SystemCeiling`이면 proceed.
+- 그 외에는 block.
 
 구현이 복잡합니다. 그래서 Immediate 방식이 훨씬 흔합니다.
 
@@ -95,11 +87,7 @@ T_new가 lock을 시도하면:
 
 ## 단점 — Unnecessary Boost
 
-```text
-T_high가 mutex를 사용하지 않는 시점에도 T_low가 *T_high level로 boost*
-→ T_med·T_low가 *항상 starved*
-→ 시스템 throughput 감소
-```
+`T_high`가 mutex를 사용하지 않는 시점에도 `T_low`가 *`T_high` level로 boost*되어, `T_med`·`T_low`가 *항상 starved*되고 시스템 throughput이 감소합니다.
 
 PCP는 *worst case 안전*하지만 *best case 낭비*가 심합니다.
 

@@ -18,19 +18,13 @@ draft: false
 
 ### Tick Preemption
 
-```text
-시스템 tick (1 ms) → tick ISR → scheduler 호출 → 다음 task 결정
-                                 ↓
-                       Higher priority ready 있으면 전환
-```
+시스템 tick (1 ms) → tick ISR → scheduler 호출 → 다음 task 결정. Higher priority ready가 있으면 전환됩니다.
 
 매 tick(보통 1-10 ms)마다 scheduler를 확인합니다. *Time slice 만료* 또는 *higher-priority 등장* 시 전환됩니다.
 
 ### IRQ Preemption
 
-```text
-ISR 끝 → portYIELD_FROM_ISR(needYield) → 즉시 scheduler
-```
+ISR 종료 시 `portYIELD_FROM_ISR(needYield)`가 즉시 scheduler를 호출합니다.
 
 ISR이 *higher-priority task를 깨우면* (`xSemaphoreGiveFromISR` 등) ISR 종료 시 즉시 그 task로 전환됩니다.
 
@@ -148,9 +142,7 @@ configEXPECTED_IDLE_TIME_BEFORE_SLEEP = 2  // 2 tick 이상 idle 시 sleep
 
 다중 코어에서는 *코어별 독립*적으로 preemption이 일어납니다. 한 코어의 ISR이 다른 코어의 task에 직접 영향을 주지 않습니다. **Inter-Processor Interrupt (IPI)**로 다른 코어를 깨웁니다.
 
-```text
-Core 0: ISR → IPI → Core 1 wake → Core 1의 ready task 실행
-```
+예 — `Core 0: ISR → IPI → Core 1 wake → Core 1의 ready task 실행`.
 
 ## 흔한 함정
 

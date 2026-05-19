@@ -75,13 +75,10 @@ CCI->QoS[GPU]      = 0x8;   // medium
 
 ## STM32H7 — AXI Bus Matrix
 
-```text
-Slave 6개, master 7개 → 42 path
-각 path별 *fixed priority* or *round-robin* 설정
+Slave 6개, master 7개로 42 path가 만들어집니다. 각 path별로 *fixed priority* 또는 *round-robin*을 설정합니다.
 
-기본 — round-robin
-critical (LTDC for display) — fixed high priority
-```
+- 기본 — round-robin
+- critical (LTDC for display) — fixed high priority
 
 ```c
 /* HAL */
@@ -121,11 +118,9 @@ CCI가 대기 시간까지 고려해서, 오래 기다린 transaction일수록 p
 
 ARM CoreSight와 DSU PMU를 함께 활용합니다.
 
-```text
-Event: BUS_ACCESS_LD, BUS_ACCESS_ST
-Event: BUS_ACCESS_CHKD (외부 bus 접근만)
-Event: BUS_CYCLES (bus active cycle)
-```
+- **BUS_ACCESS_LD / BUS_ACCESS_ST** — Load/Store bus access events
+- **BUS_ACCESS_CHKD** — 외부 bus 접근만
+- **BUS_CYCLES** — bus active cycle
 
 $$U_{bus} = \frac{\text{BUS\_ACCESS}}{\text{BUS\_CYCLES}}$$
 
@@ -236,10 +231,7 @@ Token bucket 방식은 peak는 허용하면서 평균을 제한합니다. GPU와
 
 > ⚠️ 같은 master ID로 multi-thread
 
-```text
-Cortex-A core 4개가 모두 ID=0으로 transaction 발사
-  → AXI는 *같은 ID FIFO 순서* 강제 → OoO 못 함
-```
+Cortex-A core 4개가 모두 ID=0으로 transaction을 발사하면 AXI가 *같은 ID FIFO 순서*를 강제해 OoO를 못 합니다.
 
 Cluster와 Core별로 unique ID를 부여해야 합니다. Cortex-A72의 ARID는 `cluster|core|thread`로 encoding되어 있습니다.
 

@@ -144,10 +144,8 @@ void tlsf_free(tlsf_t *t, void *ptr) {
 
 Masmano의 원 논문은 TLSF의 단편화 상한을 수학적으로 정리합니다.
 
-```text
-Internal fragmentation  ≤ 1 / 2^SL_BITS  (SL_BITS=4 → 6.25%)
-Worst-case overhead     ≤ 25%  (대부분의 워크로드에서 실측)
-```
+- **Internal fragmentation** ≤ $1 / 2^{\text{SL\_BITS}}$ (SL_BITS=4 → 6.25%)
+- **Worst-case overhead** ≤ 25% (대부분의 워크로드에서 실측)
 
 heap_4의 단편화는 *unbounded*입니다. 워크로드가 나쁘면 가용 메모리의 90% 이상이 사용 불가 상태로 갈 수도 있습니다. TLSF는 *수학적으로 보장된 상한*을 갖는다는 점이 임베디드에서 큰 차이를 만듭니다.
 
@@ -185,15 +183,10 @@ void mem_add_region(void *base, size_t size) {
 
 Cortex-M4 168 MHz, 32 KB heap, random size alloc/free 100회를 섞은 워크로드입니다.
 
-```text
-heap_4:
-  alloc avg 1.5 µs,  worst 15 µs   ← 가변
-  free  avg 1.2 µs,  worst 10 µs
-
-TLSF:
-  alloc avg 0.8 µs,  worst 1.5 µs  ← bounded
-  free  avg 0.7 µs,  worst 1.3 µs
-```
+| Allocator | alloc avg | alloc worst | free avg | free worst |
+|---|---|---|---|---|
+| heap_4 | 1.5 µs | 15 µs (가변) | 1.2 µs | 10 µs |
+| TLSF | 0.8 µs | 1.5 µs (bounded) | 0.7 µs | 1.3 µs |
 
 평균은 두 배쯤 차이입니다. *worst case는 10배 차이*입니다. RT 시스템에서 의미 있는 차이는 평균이 아니라 *worst*입니다.
 

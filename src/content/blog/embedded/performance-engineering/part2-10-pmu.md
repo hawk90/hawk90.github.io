@@ -94,17 +94,7 @@ $$\text{Frontend bound} = \frac{\text{STALL\_FRONTEND}}{\text{CYCLES}}, \quad \t
 
 Intel이 먼저 도입했고, ARM도 비슷한 분류 체계를 사용합니다.
 
-```text
-4 카테고리 — CPU cycle 분배:
-1. Retiring          (실제 일 함, 좋은 cycle)
-2. Bad Speculation   (mispredict로 폐기)
-3. Frontend Bound    (fetch·decode 못 따라옴)
-4. Backend Bound     (compute·memory)
-   ├ Core Bound
-   └ Memory Bound
-       ├ L1 / L2 / L3 bound
-       └ DRAM bound
-```
+![Top-Down Microarchitecture Analysis — CPU cycle 분배 분석](/images/blog/perf-eng/diagrams/part2-10-topdown.svg)
 
 Bottleneck을 식별한 뒤 적절한 최적화를 적용합니다. cache miss라면 tiling, mispredict라면 branchless 변환이 그 예입니다.
 
