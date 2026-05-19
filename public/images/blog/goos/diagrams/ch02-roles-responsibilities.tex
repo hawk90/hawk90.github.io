@@ -1,7 +1,11 @@
-\documentclass[tikz,border=10pt]{standalone}
-\input{../../_design.tex}
-
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
 \begin{document}
+\input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
 % Title
