@@ -37,12 +37,12 @@ Edge AI 디바이스는 자원 폭이 매우 넓습니다.
 
 프레임워크 선택도 자원에 따라 달라집니다.
 
-```text
-MCU             TFLite Micro, CMSIS-NN, Ethos-U Vela
-Mobile/SBC      TFLite (full), ONNX Runtime, NNAPI, Core ML
-Edge GPU        TensorRT, ONNX Runtime CUDA, OpenVINO
-Server edge     TensorRT, vLLM, TGI
-```
+| 자원 등급 | 프레임워크 |
+|-----------|-----------|
+| MCU | TFLite Micro, CMSIS-NN, Ethos-U Vela |
+| Mobile/SBC | TFLite (full), ONNX Runtime, NNAPI, Core ML |
+| Edge GPU | TensorRT, ONNX Runtime CUDA, OpenVINO |
+| Server edge | TensorRT, vLLM, TGI |
 
 ONNX Runtime은 거의 모든 plat에 backend가 있어 *처음 portability가 필요할 때* 좋은 선택입니다. 성능을 끝까지 짜내려면 vendor SDK(TensorRT, Core ML, QNN)로 내려갑니다.
 
@@ -174,28 +174,26 @@ void pipeline_worker(frame_t *frames, int n) {
 
 같은 YOLOv8n model을 클래스별로 돌렸을 때 대략적인 latency입니다.
 
-```text
-Hardware                 Precision   Latency      Power     원격 가능?
-Cortex-M55 + Ethos-U55   INT8        50 ms (224)  0.1 W     ×
-Pi 5 CPU                 FP16        180 ms       3 W       ×
-Pi 5 + Hailo-8 NPU       INT8        10 ms        4 W       ×
-Jetson Orin Nano GPU     FP16        15 ms        7 W       ×
-Jetson AGX Orin GPU+DLA  INT8        3 ms         40 W      ×
-Cloud T4 GPU             FP16        8 ms + 80 ms RTT       ◯
-```
+| Hardware | Precision | Latency | Power | 원격 가능? |
+|----------|-----------|---------|-------|-----------|
+| Cortex-M55 + Ethos-U55 | INT8 | 50 ms (224) | 0.1 W | × |
+| Pi 5 CPU | FP16 | 180 ms | 3 W | × |
+| Pi 5 + Hailo-8 NPU | INT8 | 10 ms | 4 W | × |
+| Jetson Orin Nano GPU | FP16 | 15 ms | 7 W | × |
+| Jetson AGX Orin GPU+DLA | INT8 | 3 ms | 40 W | × |
+| Cloud T4 GPU | FP16 | 8 ms + 80 ms RTT | — | ◯ |
 
 Cloud는 inference 자체는 빠르지만 RTT가 더해져 *체감 latency*가 가장 큽니다. Edge가 답인 이유의 핵심입니다.
 
 전력당 throughput으로 보면 더 분명합니다.
 
-```text
-Hardware                fps/W
-Ethos-U55               500
-Hailo-8                 250
-Orin Nano               9
-AGX Orin                8
-T4 (cloud)              1.5
-```
+| Hardware | fps/W |
+|----------|-------|
+| Ethos-U55 | 500 |
+| Hailo-8 | 250 |
+| Orin Nano | 9 |
+| AGX Orin | 8 |
+| T4 (cloud) | 1.5 |
 
 전력 효율은 *전용 NPU·DLA*가 압도적입니다. Battery·passive cooling 환경에서는 NPU 선택이 거의 강제됩니다.
 

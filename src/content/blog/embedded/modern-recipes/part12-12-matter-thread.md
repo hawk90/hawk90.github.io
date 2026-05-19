@@ -40,13 +40,13 @@ Transport
 
 Thread는 *802.15.4 + 6LoWPAN + RPL routing*을 합친 mesh입니다.
 
-```text
-PHY/MAC          IEEE 802.15.4 2.4 GHz, 250 kbps, ~30 m
-Network          6LoWPAN (IPv6 over low-power)
-Routing          RPL mesh, multi-hop
-Roles            Router, REED, FED, Sleepy End Device
-Border Router    Thread ↔ Wi-Fi/Ethernet bridge
-```
+| Layer | 내용 |
+|-------|------|
+| PHY/MAC | IEEE 802.15.4 2.4 GHz, 250 kbps, ~30 m |
+| Network | 6LoWPAN (IPv6 over low-power) |
+| Routing | RPL mesh, multi-hop |
+| Roles | Router, REED, FED, Sleepy End Device |
+| Border Router | Thread ↔ Wi-Fi/Ethernet bridge |
 
 Thread 1.3에는 TCPlp(low-power TCP)와 Thread Domain(multi-network)이 들어왔습니다.
 
@@ -257,17 +257,14 @@ Production device는 link quality·RSSI를 telemetry로 보내 mesh 건강도를
 
 Thread mesh 1080 m² 가정, nRF52840 router 5개, sleepy device 10개 기준입니다.
 
-```text
-지표                              값
-Commissioning (BLE → CASE)         15~30 sec
-PASE handshake                      1~2 sec
-Light on/off command latency        50~150 ms (1-2 hop)
-                                   200~500 ms (3+ hop)
-Sleepy device wake → response       0.5~2 sec
-Mesh self-heal (router 추가/제거)   10~30 sec
-OTA 1 MB image                      2~5 min (Thread)
-                                   30~60 sec (Wi-Fi)
-```
+| 지표 | 값 |
+|------|------|
+| Commissioning (BLE → CASE) | 15~30 sec |
+| PASE handshake | 1~2 sec |
+| Light on/off command latency | 50~150 ms (1-2 hop), 200~500 ms (3+ hop) |
+| Sleepy device wake → response | 0.5~2 sec |
+| Mesh self-heal (router 추가/제거) | 10~30 sec |
+| OTA 1 MB image | 2~5 min (Thread), 30~60 sec (Wi-Fi) |
 
 Battery life (sleepy end device, CR2032 235 mAh)입니다.
 

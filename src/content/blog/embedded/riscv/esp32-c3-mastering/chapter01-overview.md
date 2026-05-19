@@ -90,47 +90,49 @@ C3는 *WiFi와 BLE를 동시에* 제공합니다. 두 라디오는 *분리된 PH
 
 ### WiFi 4 (802.11 b/g/n)
 
-```text
-WiFi 사양
-  Standard:    IEEE 802.11 b/g/n
-  Band:        2.4 GHz (5 GHz 미지원)
-  Throughput:  최대 150 Mbps (HT40)
-  Security:    WPA/WPA2/WPA3-Personal, WPA2/3-Enterprise
-  Antenna:     1T1R (single antenna)
-  Tx power:    +20 dBm (조정 가능)
-```
+WiFi 사양:
+
+- **Standard**: IEEE 802.11 b/g/n
+- **Band**: 2.4 GHz (5 GHz 미지원)
+- **Throughput**: 최대 150 Mbps (HT40)
+- **Security**: WPA/WPA2/WPA3-Personal, WPA2/3-Enterprise
+- **Antenna**: 1T1R (single antenna)
+- **Tx power**: +20 dBm (조정 가능)
 
 WiFi 5/6은 지원하지 않습니다. *IoT 디바이스*에 5 GHz와 MIMO는 *과잉*이라는 판단입니다. 대부분의 가정용 라우터는 2.4 GHz를 *동시 송출*하므로 호환성에 문제가 없습니다.
 
 ### BLE 5.0
 
-```text
-BLE 사양
-  Standard:    Bluetooth 5.0 (LE only, Classic BT 없음)
-  PHY:         LE 1M, LE 2M, LE Coded (S=2, S=8)
-  Range:       Coded PHY로 long-range 가능 (~1 km LoS)
-  Roles:       Central / Peripheral / Broadcaster / Observer
-  Mesh:        Bluetooth Mesh (NimBLE 스택)
-```
+BLE 사양:
+
+- **Standard**: Bluetooth 5.0 (LE only, Classic BT 없음)
+- **PHY**: LE 1M, LE 2M, LE Coded (S=2, S=8)
+- **Range**: Coded PHY로 long-range 가능 (~1 km LoS)
+- **Roles**: Central / Peripheral / Broadcaster / Observer
+- **Mesh**: Bluetooth Mesh (NimBLE 스택)
 
 LE 2M PHY로 *throughput 2배*, Coded PHY로 *거리 4배*를 얻습니다. 둘 다 BLE 5.0의 핵심 추가 기능입니다.
 
 ## 메모리·전력·패키지
 
-```text
-SRAM:        400 KB (실제 사용 가능 약 320 KB, 나머지는 ROM cache 등)
-ROM:         384 KB (boot ROM)
-Flash:       4 MB on-package (대부분 모듈, 8 MB 옵션 있음)
-External:    SPI flash 추가 가능
+메모리:
 
-Active:      ~80 mA @ WiFi TX
-Modem-sleep: ~15 mA (WiFi off)
-Light-sleep: ~140 µA
-Deep-sleep:  ~5 µA (RTC 메모리 유지 시 ~10 µA)
+- **SRAM**: 400 KB (실제 사용 가능 약 320 KB, 나머지는 ROM cache 등)
+- **ROM**: 384 KB (boot ROM)
+- **Flash**: 4 MB on-package (대부분 모듈, 8 MB 옵션 있음)
+- **External**: SPI flash 추가 가능
 
-Package:     QFN32, 5x5 mm
-Module:      ESP32-C3-WROOM-02, ESP32-C3-MINI-1
-```
+전력:
+
+- **Active**: ~80 mA @ WiFi TX
+- **Modem-sleep**: ~15 mA (WiFi off)
+- **Light-sleep**: ~140 µA
+- **Deep-sleep**: ~5 µA (RTC 메모리 유지 시 ~10 µA)
+
+패키지:
+
+- **Package**: QFN32, 5x5 mm
+- **Module**: ESP32-C3-WROOM-02, ESP32-C3-MINI-1
 
 *Deep-sleep 5 µA*는 *코인셀 배터리 수년* 운용을 가능하게 합니다. 센서 → BLE 전송 → 다시 슬립 패턴이 IoT의 핵심 use case입니다.
 

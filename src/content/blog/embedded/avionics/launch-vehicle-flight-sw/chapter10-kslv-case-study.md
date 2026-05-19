@@ -312,55 +312,39 @@ KARI
 
 ## 다음 학습 추천
 
-```text
-인접 series:
-  - Developing Safety-Critical SW (Rierson) book review
-  - Digital Avionics Handbook (Spitzer) book review
-  - Practical RTOS Internals (이미 완성)
-  - Modern Embedded Recipes (이미 완성)
-  - Embedded Performance Engineering (이미 완성)
-  
-Hands-on:
-  - PX4 contribution
-  - NASA cFS sample mission
-  - KARI internship·연구원 채용
-  
-Networking:
-  - 한국우주산업·위성기술협회 conference
-  - AIAA·KSAS 학회
-  - InnoSpace·Perigee·UNASTELLA 채용 fair
-```
+인접 series
+
+- Developing Safety-Critical SW (Rierson) book review
+- Digital Avionics Handbook (Spitzer) book review
+- Practical RTOS Internals (이미 완성)
+- Modern Embedded Recipes (이미 완성)
+- Embedded Performance Engineering (이미 완성)
+
+Hands-on
+
+- PX4 contribution
+- NASA cFS sample mission
+- KARI internship·연구원 채용
+
+Networking
+
+- 한국우주산업·위성기술협회 conference
+- AIAA·KSAS 학회
+- InnoSpace·Perigee·UNASTELLA 채용 fair
 
 ## 자주 하는 실수
 
 > ⚠️ "민간 우주 = SpaceX 같음"
 
-```text
-한국 민간 우주:
-  SpaceX 규모 X
-  Startup 단계 — 자본·인력 한계
-  그러나 *기술적 잠재력* 있음
-```
+한국 민간 우주는 SpaceX 규모가 아닙니다. Startup 단계에 자본·인력 한계가 있지만 *기술적 잠재력*은 있습니다.
 
 > ⚠️ KARI = 정부 = 보수적
 
-```text
-KARI도 현대화 진행:
-  Open source 채택 검토
-  Modern tooling 도입
-  AI·자율주행·UAM 연계
-```
+KARI도 현대화를 진행 중입니다. Open source 채택 검토, Modern tooling 도입, AI·자율주행·UAM 연계.
 
 > ⚠️ 우주 SW = 어렵고 인기 없음
 
-```text
-2024-2030 transition period:
-  - KASA·우주청 신설
-  - 민간 startup 확장
-  - 인력 수요 폭발
-  
-오히려 *지금이 entry point*.
-```
+2024-2030 transition period — KASA·우주청 신설, 민간 startup 확장, 인력 수요 폭발. 오히려 *지금이 entry point*입니다.
 
 ## 정리
 

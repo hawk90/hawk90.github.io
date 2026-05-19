@@ -435,22 +435,23 @@ Heart Rate Profile Specification 1.0
 
 대부분의 IoT 디바이스는 *표준 + custom의 혼합*입니다.
 
-```text
-[필수 표준 서비스]
-- Generic Access (0x1800)         ★ 모든 디바이스 필수
-- Generic Attribute (0x1801)      ★ 모든 디바이스 필수
-- Device Information (0x180A)     디바이스 식별
-- Battery Service (0x180F)        배터리 표시
+**필수 표준 서비스**
 
-[애플리케이션 표준 서비스 (해당되면)]
-- Environmental Sensing (0x181A)  온도·습도·압력 등
-- Heart Rate (0x180D)              헬스
-- HID (0x1812)                     키보드 등
+- Generic Access (0x1800) — ★ 모든 디바이스 필수
+- Generic Attribute (0x1801) — ★ 모든 디바이스 필수
+- Device Information (0x180A) — 디바이스 식별
+- Battery Service (0x180F) — 배터리 표시
 
-[Custom 서비스]
-- OTA Update Service              펌웨어 업데이트
-- Vendor Configuration Service    캘리브레이션 등 벤더 전용
-```
+**애플리케이션 표준 서비스 (해당되면)**
+
+- Environmental Sensing (0x181A) — 온도·습도·압력 등
+- Heart Rate (0x180D) — 헬스
+- HID (0x1812) — 키보드 등
+
+**Custom 서비스**
+
+- OTA Update Service — 펌웨어 업데이트
+- Vendor Configuration Service — 캘리브레이션 등 벤더 전용
 
 이 구성이 *모든 폰의 표준 앱과 호환*되면서 *벤더 전용 기능*도 모두 노출 가능합니다.
 

@@ -81,19 +81,19 @@ float *out = outputs[0].GetTensorMutableData<float>();
 
 ## Execution Provider — Hardware별 backend
 
-```text
-CPUExecutionProvider       모든 platform, fallback
-CUDAExecutionProvider      NVIDIA GPU
-TensorrtExecutionProvider  NVIDIA + TensorRT (속도 ↑)
-DmlExecutionProvider       DirectML (Windows GPU)
-CoreMLExecutionProvider    Apple GPU/ANE
-OpenVINOExecutionProvider  Intel CPU/GPU/NPU
-QNNExecutionProvider       Qualcomm Hexagon
-NNAPIExecutionProvider     Android NPU
-SnpeExecutionProvider      Qualcomm SNPE
-ROCMExecutionProvider      AMD GPU
-ACLExecutionProvider       ARM Compute Library
-```
+| Provider | 대상 |
+|----------|------|
+| `CPUExecutionProvider` | 모든 platform, fallback |
+| `CUDAExecutionProvider` | NVIDIA GPU |
+| `TensorrtExecutionProvider` | NVIDIA + TensorRT (속도 ↑) |
+| `DmlExecutionProvider` | DirectML (Windows GPU) |
+| `CoreMLExecutionProvider` | Apple GPU/ANE |
+| `OpenVINOExecutionProvider` | Intel CPU/GPU/NPU |
+| `QNNExecutionProvider` | Qualcomm Hexagon |
+| `NNAPIExecutionProvider` | Android NPU |
+| `SnpeExecutionProvider` | Qualcomm SNPE |
+| `ROCMExecutionProvider` | AMD GPU |
+| `ACLExecutionProvider` | ARM Compute Library |
 
 같은 코드, provider만 바꿈:
 
@@ -218,15 +218,15 @@ quantize_static('model.onnx', 'model.int8.onnx', MyReader(),
 
 같은 .onnx 한 파일로:
 
-```text
-Server (NVIDIA T4):    TensorRT EP → 250 fps
-Workstation (RTX 4090): CUDA EP   → 400 fps
-Jetson Orin:           TensorRT EP → 80 fps
-Mac M2:                CoreML EP   → 60 fps
-Windows + AMD GPU:     DML EP      → 50 fps
-Android (Qualcomm):    QNN EP      → 30 fps
-Linux ARM (RPi5):      CPU         → 5 fps
-```
+| Platform | EP | 성능 |
+|----------|-----|------|
+| Server (NVIDIA T4) | TensorRT EP | 250 fps |
+| Workstation (RTX 4090) | CUDA EP | 400 fps |
+| Jetson Orin | TensorRT EP | 80 fps |
+| Mac M2 | CoreML EP | 60 fps |
+| Windows + AMD GPU | DML EP | 50 fps |
+| Android (Qualcomm) | QNN EP | 30 fps |
+| Linux ARM (RPi5) | CPU | 5 fps |
 
 PyTorch → ONNX export 한 번, 6 platform 배포.
 

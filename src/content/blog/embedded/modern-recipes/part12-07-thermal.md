@@ -21,22 +21,22 @@ tags: [recipes, thermal, throttling, edge-ai, jetson, dvfs]
 
 Thermal throttle은 SoC가 *junction temperature*(Tj) 한계에 도달하면 frequency를 강제로 낮추는 방식으로 동작합니다. 보통 3단계입니다.
 
-```text
-60°C    fan ramp 시작 (있다면)
-85°C    soft throttle — frequency 단계 감소
-95°C    hard throttle — minimum freq
-105°C   shutdown
-```
+| 온도 | 동작 |
+|------|------|
+| 60°C | fan ramp 시작 (있다면) |
+| 85°C | soft throttle — frequency 단계 감소 |
+| 95°C | hard throttle — minimum freq |
+| 105°C | shutdown |
 
 DVFS(Dynamic Voltage and Frequency Scaling)가 throttle의 실제 mechanism입니다. Linux kernel이 thermal zone trip을 감지하면 cpufreq governor가 frequency를 떨어뜨리고, GPU·DLA는 vendor driver가 별도 관리합니다.
 
 Cooling은 세 옵션이 있습니다.
 
-```text
-Passive heatsink    fanless, 먼지/진동 영향 적음, 자동차/위성 표준
-Fan                 효율 좋음, 소비자 device, 먼지·실패 위험
-Liquid              대형 edge box·data center, 비싸지만 효율 압도적
-```
+| Cooling | 특성 |
+|---------|------|
+| Passive heatsink | fanless, 먼지/진동 영향 적음, 자동차/위성 표준 |
+| Fan | 효율 좋음, 소비자 device, 먼지·실패 위험 |
+| Liquid | 대형 edge box·data center, 비싸지만 효율 압도적 |
 
 자동차·ASIL ECU는 *fanless가 거의 강제*입니다. 먼지·진동·수명 문제로 fan을 못 쓰기 때문에 *처음부터 낮은 clock*으로 thermal headroom을 확보합니다.
 

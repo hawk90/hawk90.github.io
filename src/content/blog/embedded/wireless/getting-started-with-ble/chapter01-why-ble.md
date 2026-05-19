@@ -48,19 +48,17 @@ draft: false
 
 BLE의 뿌리는 *Nokia*입니다.
 
-```text
-2001  Nokia Research, 저전력 무선 프로젝트 시작
-2004  내부 코드명 "Wibree"
-2006  Nokia, Wibree 공개. 2.4GHz, 1Mbps, 코인셀 운용 목표
-2007  Bluetooth SIG가 Wibree를 흡수하기로 합의
-2009  Bluetooth Core Spec 4.0 작업 진행
-2010  Bluetooth Core Spec 4.0 발표 — "Bluetooth Low Energy" 포함
-2011  iPhone 4S, 첫 BLE 지원 스마트폰
-2013  iBeacon 발표, BLE 비콘 시장 폭발
-2014  Bluetooth 4.2 (LESC, DLE)
-2016  Bluetooth 5.0 (2M PHY, Coded PHY, Extended Adv)
-2023  Bluetooth 5.4 (PAwR)
-```
+- **2001** Nokia Research, 저전력 무선 프로젝트 시작
+- **2004** 내부 코드명 "Wibree"
+- **2006** Nokia, Wibree 공개. 2.4GHz, 1Mbps, 코인셀 운용 목표
+- **2007** Bluetooth SIG가 Wibree를 흡수하기로 합의
+- **2009** Bluetooth Core Spec 4.0 작업 진행
+- **2010** Bluetooth Core Spec 4.0 발표 — "Bluetooth Low Energy" 포함
+- **2011** iPhone 4S, 첫 BLE 지원 스마트폰
+- **2013** iBeacon 발표, BLE 비콘 시장 폭발
+- **2014** Bluetooth 4.2 (LESC, DLE)
+- **2016** Bluetooth 5.0 (2M PHY, Coded PHY, Extended Adv)
+- **2023** Bluetooth 5.4 (PAwR)
 
 Nokia가 Wibree로 *원한 것*은 단순합니다. *손목시계가 휴대폰의 알림을 받되, 코인셀로 1년을 가는 것*. 이 한 줄의 요구가 *모든 설계 결정*을 끌어옵니다.
 
@@ -77,13 +75,11 @@ BLE 마케팅의 첫 줄은 항상 *"코인셀로 1년"*입니다. 어떻게 가
 
 CR2032 코인셀 사양입니다.
 
-```text
-공칭 전압    3.0 V
-공칭 용량    220 mAh (현실은 200 mAh로 잡는 게 안전)
-저류 한계   ~15 mA (이상이면 전압 강하 심함)
-자가 방전   연 2~3% (1년 운용 시 무시 가능 수준은 아님)
-운영 온도   -20 ~ +60 °C
-```
+- **공칭 전압**: 3.0 V
+- **공칭 용량**: 220 mAh (현실은 200 mAh로 잡는 게 안전)
+- **저류 한계**: ~15 mA (이상이면 전압 강하 심함)
+- **자가 방전**: 연 2~3% (1년 운용 시 무시 가능 수준은 아님)
+- **운영 온도**: -20 ~ +60 °C
 
 1년 = 8,760시간. 200 mAh를 8,760시간에 나누면 *평균 전류 23 µA*가 한계입니다. BLE 라디오의 *active 전류는 7~15 mA*이므로, *깨어 있는 시간*이 *총 시간의 0.15% 이하*여야 합니다.
 

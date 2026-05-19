@@ -57,12 +57,12 @@ Non-secure 복귀
 
 PSA(Platform Security Architecture)는 ARM이 정의한 *vendor-agnostic security API*입니다.
 
-```text
-PSA Crypto         AES, ECDSA, RSA, key management
-PSA Storage        ITS (key·credential), PS (encrypted at rest)
-PSA Attestation    device identity + measurement token
-PSA Firmware Update over-the-air 표준
-```
+| API | 기능 |
+|-----|------|
+| PSA Crypto | AES, ECDSA, RSA, key management |
+| PSA Storage | ITS (key·credential), PS (encrypted at rest) |
+| PSA Attestation | device identity + measurement token |
+| PSA Firmware Update | over-the-air 표준 |
 
 같은 코드가 STM32·nRF·NXP·Renesas 어디서나 돌도록 설계되어 있습니다.
 
@@ -84,11 +84,11 @@ cmake --build . -- install
 
 산출물은 세 binary입니다.
 
-```text
-bl2.bin        MCUboot 2nd-stage bootloader
-tfm_s.bin      Secure firmware
-tfm_ns.bin     Non-Secure (사용자 앱 자리)
-```
+| Binary | 역할 |
+|--------|------|
+| `bl2.bin` | MCUboot 2nd-stage bootloader |
+| `tfm_s.bin` | Secure firmware |
+| `tfm_ns.bin` | Non-Secure (사용자 앱 자리) |
 
 ROM bootloader → BL2 → tfm_s → tfm_ns 순으로 chain이 구성됩니다.
 

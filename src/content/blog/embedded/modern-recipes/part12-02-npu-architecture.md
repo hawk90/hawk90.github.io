@@ -42,12 +42,12 @@ Systolic array (TPU style):
 
 ## Arm Ethos — Cortex-M 짝꿍 NPU
 
-```text
-Ethos-U55:   ~256 MAC, 32-512 GOPS, Cortex-M 결합
-Ethos-U65:   ~512 MAC, 1 TOPS
-Ethos-U85:   ~2048 MAC, 4 TOPS
-Ethos-N78:   대형 NPU, Cortex-A 결합, ~10 TOPS
-```
+| NPU | MAC | 성능 | 결합 |
+|-----|-----|------|------|
+| Ethos-U55 | ~256 | 32-512 GOPS | Cortex-M |
+| Ethos-U65 | ~512 | 1 TOPS | Cortex-M |
+| Ethos-U85 | ~2048 | 4 TOPS | Cortex-M |
+| Ethos-N78 | 대형 | ~10 TOPS | Cortex-A |
 
 Ethos-U55가 Cortex-M55와 결합한 시스템:
 
@@ -184,29 +184,28 @@ Calibration data 100~500장으로 scale을 결정. Accuracy 손실 1~3% 정도�
 
 ## Power vs Performance
 
-```text
-플랫폼              TOPS    전력     TOPS/W
-Cortex-M (CMSIS-NN)  0.001   0.001    1
-Ethos-U55            0.5     0.05     10
-Hexagon HMX          10      1.5      6.7
-Edge TPU             4       2        2
-Apple ANE M2         15.8    ~3       ~5
-Jetson Orin GPU      275     50       5.5
-Jetson Orin DLA      105     ~20      5.3
-A100 GPU             624     400      1.6
-```
+| 플랫폼 | TOPS | 전력 | TOPS/W |
+|--------|------|------|--------|
+| Cortex-M (CMSIS-NN) | 0.001 | 0.001 | 1 |
+| Ethos-U55 | 0.5 | 0.05 | 10 |
+| Hexagon HMX | 10 | 1.5 | 6.7 |
+| Edge TPU | 4 | 2 | 2 |
+| Apple ANE M2 | 15.8 | ~3 | ~5 |
+| Jetson Orin GPU | 275 | 50 | 5.5 |
+| Jetson Orin DLA | 105 | ~20 | 5.3 |
+| A100 GPU | 624 | 400 | 1.6 |
 
 작은 NPU일수록 TOPS/W 효율이 좋습니다. Cloud GPU는 절대 throughput 크지만 효율은 낮습니다.
 
 ## NPU Programming 인터페이스
 
-```text
-Arm Ethos:        Vela compiler → TFLite Micro + Ethos delegate
-Qualcomm Hexagon: SNPE SDK, QNN SDK
-Apple ANE:        Core ML (모델 변환 후)
-Google Edge TPU:  edgetpu_compiler → TFLite
-NVIDIA DLA:       TensorRT (with kDLA flag)
-```
+| 플랫폼 | 인터페이스 |
+|--------|-----------|
+| Arm Ethos | Vela compiler → TFLite Micro + Ethos delegate |
+| Qualcomm Hexagon | SNPE SDK, QNN SDK |
+| Apple ANE | Core ML (모델 변환 후) |
+| Google Edge TPU | `edgetpu_compiler` → TFLite |
+| NVIDIA DLA | TensorRT (with kDLA flag) |
 
 대부분 *모델 → 컴파일러 → device-specific binary* 흐름. CPU instruction이 직접 노출되지 않습니다.
 

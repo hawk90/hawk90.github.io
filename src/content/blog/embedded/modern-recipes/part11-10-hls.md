@@ -183,13 +183,12 @@ II=1이면 MAC loop는 매 cycle 시작합니다. DSP48E 32개는 32-tap MAC의 
 
 같은 32-tap FIR을 세 가지 합성 옵션으로 비교한 예입니다(Zynq UltraScale+ ZU3, 200 MHz 가정).
 
-```text
-구현                              II   throughput   DSP   LUT   BRAM
-Naive (UNROLL/PARTITION 없음)     32   6 MSPS       1     400   1
-UNROLL만                          32   6 MSPS       32    1500  1   ← partition 없어 직렬화
-UNROLL + PARTITION complete       1    200 MSPS     32    2154  2
-Dataflow 3-stage pipeline         1    200 MSPS    96    6400  6
-```
+| 구현 | II | throughput | DSP | LUT | BRAM | 비고 |
+|------|----|------------|-----|-----|------|------|
+| Naive (UNROLL/PARTITION 없음) | 32 | 6 MSPS | 1 | 400 | 1 | |
+| UNROLL만 | 32 | 6 MSPS | 32 | 1500 | 1 | partition 없어 직렬화 |
+| UNROLL + PARTITION complete | 1 | 200 MSPS | 32 | 2154 | 2 | |
+| Dataflow 3-stage pipeline | 1 | 200 MSPS | 96 | 6400 | 6 | |
 
 UNROLL만 추가하면 자원만 늘고 throughput은 그대로입니다. Array partition까지 같이 줘야 진짜 32-way 병렬이 나옵니다.
 

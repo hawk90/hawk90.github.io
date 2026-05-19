@@ -104,12 +104,12 @@ Flash layout (예: STM32 1MB flash):
 
 ### MCUboot mode 비교
 
-```text
-DIRECT_XIP       두 슬롯에 각각 link된 이미지. 더 빠르지만 빌드가 까다로움.
-SWAP_USING_SCRATCH   active 슬롯에서 실행. 업데이트 시 두 슬롯을 swap.
-SWAP_USING_MOVE  scratch 영역 불필요. 페이지 단위로 in-place swap.
-OVERWRITE_ONLY   secondary → primary 단순 복사. rollback 불가.
-```
+| 모드 | 설명 |
+|------|------|
+| `DIRECT_XIP` | 두 슬롯에 각각 link된 이미지. 더 빠르지만 빌드가 까다로움. |
+| `SWAP_USING_SCRATCH` | active 슬롯에서 실행. 업데이트 시 두 슬롯을 swap. |
+| `SWAP_USING_MOVE` | scratch 영역 불필요. 페이지 단위로 in-place swap. |
+| `OVERWRITE_ONLY` | secondary → primary 단순 복사. rollback 불가. |
 
 `SWAP_USING_MOVE`가 *근래 가장 권장*되는 모드입니다. scratch 영역이 따로 필요 없고, rollback도 지원합니다.
 

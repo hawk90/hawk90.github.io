@@ -206,27 +206,25 @@ __global__ void wmma_gemm(half *A, half *B, float *C) {
 
 Orin AGX, YOLOv8 시리즈, INT8 TensorRT, GPU + 2 DLA 동시 사용입니다.
 
-```text
-Model           Latency (GPU only)   Throughput (GPU+2DLA)   전력
-YOLOv8n           1.5 ms              1200 fps                25 W
-YOLOv8s           2.5 ms               800 fps                30 W
-YOLOv8m           5 ms                 450 fps                40 W
-YOLOv8l           9 ms                 220 fps                45 W
-YOLOv8x          18 ms                 110 fps                50 W
-```
+| Model | Latency (GPU only) | Throughput (GPU+2DLA) | 전력 |
+|-------|---------------------|------------------------|------|
+| YOLOv8n | 1.5 ms | 1200 fps | 25 W |
+| YOLOv8s | 2.5 ms | 800 fps | 30 W |
+| YOLOv8m | 5 ms | 450 fps | 40 W |
+| YOLOv8l | 9 ms | 220 fps | 45 W |
+| YOLOv8x | 18 ms | 110 fps | 50 W |
 
 YOLOv8n으로 자율주행 8-camera × 60 fps = 480 fps가 단일 Orin에서 처리 가능합니다.
 
 Power mode별 sustained 비교(YOLOv8m)입니다.
 
-```text
-Power mode      Sustained fps   Peak temp   Mode 적합
-MAXN  (60W)      140            96°C        burst demo
-50W              180            91°C        cooling 충분 시
-40W              170            87°C        production 권장
-30W              140            83°C        thermal 빠듯 시
-15W               85            73°C        battery·passive cooling
-```
+| Power mode | Sustained fps | Peak temp | Mode 적합 |
+|------------|----------------|-----------|-----------|
+| MAXN (60W) | 140 | 96°C | burst demo |
+| 50W | 180 | 91°C | cooling 충분 시 |
+| 40W | 170 | 87°C | production 권장 |
+| 30W | 140 | 83°C | thermal 빠듯 시 |
+| 15W | 85 | 73°C | battery·passive cooling |
 
 MAXN이 oversubscribe되어 sustained가 떨어지는 패턴이 흔합니다. 40W mode가 sweet spot인 경우가 많습니다.
 

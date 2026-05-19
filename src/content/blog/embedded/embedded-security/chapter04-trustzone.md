@@ -86,24 +86,23 @@ ARMv8-A에서 NS bit으로 분리되는 자원은 다음과 같습니다.
 
 EL3에서 동작하는 코드는 일반적으로 ARM Trusted Firmware-A(TF-A)의 BL31입니다. 오픈 소스이고 SoC 벤더가 platform port를 제공합니다. 책임은 다음과 같습니다.
 
-```text
-BL31 (Runtime EL3 firmware)의 역할
-  1. SMC 처리 — non-secure ↔ secure 디스패처
-  2. PSCI 구현 — CPU on/off, suspend/resume, system reset
-  3. Secure Partition Manager — secure EL1 payload (OP-TEE)와 통신
-  4. Interrupt routing — secure IRQ를 secure world로
-  5. SDEI (Software Delegated Exception) 디스패치
-```
+BL31 (Runtime EL3 firmware)의 역할:
+
+1. SMC 처리 — non-secure ↔ secure 디스패처
+2. PSCI 구현 — CPU on/off, suspend/resume, system reset
+3. Secure Partition Manager — secure EL1 payload (OP-TEE)와 통신
+4. Interrupt routing — secure IRQ를 secure world로
+5. SDEI (Software Delegated Exception) 디스패치
 
 BL31의 SMC 디스패치는 함수 ID 범위로 라우팅됩니다.
 
-```text
-0x00000000 ~ 0x0000FFFF — ARM Architecture Service (e.g. PSCI)
-0x82000000 ~ 0x8200FFFF — SiP (Silicon Provider) Service
-0x82000000 ~ 0xC1FFFFFF — OEM Service
-0xC2000000 ~ 0xC200FFFF — Standard Secure Service
-0x32000000 ~ 0x3200FFFF — Trusted OS Service (OP-TEE)
-```
+| SMC ID 범위 | 서비스 |
+|-------------|--------|
+| `0x00000000 ~ 0x0000FFFF` | ARM Architecture Service (e.g. PSCI) |
+| `0x82000000 ~ 0x8200FFFF` | SiP (Silicon Provider) Service |
+| `0x82000000 ~ 0xC1FFFFFF` | OEM Service |
+| `0xC2000000 ~ 0xC200FFFF` | Standard Secure Service |
+| `0x32000000 ~ 0x3200FFFF` | Trusted OS Service (OP-TEE) |
 
 OP-TEE call이 들어오면 BL31은 *world switch*를 수행합니다. 모든 레지스터를 secure context로 저장·복원하고, EL1S로 점프합니다. OP-TEE OS가 받아 적절한 Trusted Application으로 dispatch합니다. 이 흐름은 Ch 5에서 자세히 봅니다.
 

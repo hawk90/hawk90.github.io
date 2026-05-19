@@ -140,16 +140,14 @@ out_ctx:
 
 `TEEC_InvokeCommand`가 호출되는 순간 다음 일이 일어납니다.
 
-```text
-1. libteec가 ioctl(/dev/tee0, TEE_IOC_INVOKE, ...)
-2. OP-TEE Linux driver가 SMC 발사 (smc #0)
+1. libteec가 `ioctl(/dev/tee0, TEE_IOC_INVOKE, ...)`
+2. OP-TEE Linux driver가 SMC 발사 (`smc #0`)
 3. EL3 BL31이 받아 OP-TEE OS로 world switch
 4. OP-TEE core가 UUID로 TA를 찾아 (이미 load 안 됐으면 load)
 5. TA의 invoke entry를 호출
 6. TA가 작업 후 return
 7. OP-TEE core가 결과를 REE 측 driver에 RPC로 전달
 8. 다시 SMC return → ioctl return → libteec return
-```
 
 이 round trip의 latency는 platform에 따라 다르지만 일반적으로 *수십 µs*입니다. AES 한 블록을 호출하면 *blocksize/latency*가 압도적으로 latency가 큽니다. 따라서 *큰 단위로 호출*하는 것이 효율적입니다.
 
