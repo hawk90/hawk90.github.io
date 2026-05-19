@@ -69,7 +69,7 @@ lies in expanding the considerations writers can bring to bear, not in
 replacing the older tradition.
 ```
 
-이 reaction paper가 균형 잡혀 있습니다. Pinker의 강점 인정 + 두 가지 비판 + 다른 자료 연결 + 자기 입장 정리.
+이 reaction paper가 균형 잡혀 있습니다. Pinker의 강점 인정, 두 가지 비판, 다른 자료 연결, 자기 입장 정리가 모두 들어가 있습니다.
 
 ### Reaction Paper의 톤
 
@@ -109,7 +109,7 @@ careful scrutiny.
 
 ## Journal Review — 저널 심사 보고서
 
-석사·박사 과정 후반부터, 또는 학회 참여 시작 시점부터 저널 심사를 부탁받는 일이 생깁니다. 학술 공동체의 peer-review 활동의 일부입니다.
+석사와 박사 과정 후반부터, 또는 학회 참여 시작 시점부터 저널 심사를 부탁받는 일이 생깁니다. 학술 공동체의 peer-review 활동의 일부입니다.
 
 ### 심사 보고서의 표준 구조
 
@@ -145,7 +145,7 @@ The authors propose that early-evening intake represents a critical
 threshold.
 ```
 
-3–5 문장으로 충분합니다. 판단은 들어가지 않습니다.
+3-5 문장으로 충분합니다. 판단은 들어가지 않습니다.
 
 ### 2. Overall Assessment
 
@@ -159,11 +159,11 @@ the measurement of caffeine intake and the interpretation of the
 threshold effect.
 ```
 
-3–5 문장. 전체적 인상과 큰 방향성을 제시합니다.
+3-5 문장으로 짧게 씁니다. 전체적 인상과 큰 방향성을 제시합니다.
 
 ### 3. Major Issues — 주요 문제
 
-심사의 심장입니다. 출판 가부를 결정하는 문제들.
+심사의 심장입니다. 출판 가부를 결정하는 문제들을 다룹니다.
 
 ```text
 1. Measurement of Caffeine Intake (Methods, p. 7)
