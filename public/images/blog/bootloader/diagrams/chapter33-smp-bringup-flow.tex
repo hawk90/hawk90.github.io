@@ -1,0 +1,76 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  pbx/.style={cls, minimum width=48mm, minimum height=10mm, align=center, font=\sffamily\small},
+  sbx/.style={cls, minimum width=48mm, minimum height=10mm, align=center, font=\sffamily\small},
+  rom/.style={pbx, draw=nodebord, fill=nodefill},
+  tfa/.style={pbx, draw=conbord, fill=confill},
+  ub/.style ={pbx, draw=clibord, fill=clifill},
+  ker/.style={pbx, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  sec/.style={sbx, draw=absbord, fill=absfill},
+  secact/.style={sbx, draw=impbord, fill=impfill, font=\sffamily\bfseries\small},
+  ttl/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  hold/.style={font=\sffamily\footnotesize\itshape, text=mutec, align=center}
+]
+
+% Column headers
+\node[ttl] at (-3.5,  6.2) {Primary CPU};
+\node[ttl] at ( 4.5,  6.2) {Secondary CPU};
+
+% Primary column
+\node[rom] (p1) at (-3.5,  5.0) {BL1};
+\node[tfa] (p2) at (-3.5,  3.6) {BL2 — DDR / FIP};
+\node[tfa] (p3) at (-3.5,  2.2) {BL31 — runtime\_svc init};
+\node[ub]  (p4) at (-3.5,  0.8) {BL33 (U-Boot)};
+\node[ker] (p5) at (-3.5, -0.8) {Linux start\_kernel};
+\node[ker] (p6) at (-3.5, -2.4) {smp\_init → cpu\_up(N)};
+
+% Secondary column — hold until primary kicks
+\node[sec] (s1) at ( 4.5,  5.0) {hold / WFI};
+\node[sec] (s2) at ( 4.5,  3.6) {hold / WFI};
+\node[sec] (s3) at ( 4.5,  2.2) {hold / WFI};
+\node[sec] (s4) at ( 4.5,  0.8) {hold / WFI};
+\node[sec] (s5) at ( 4.5, -0.8) {hold / WFI};
+
+% Activation chain on secondary side (under cpu_up)
+\node[secact] (s6) at ( 4.5, -2.4) {BL31 warm boot};
+\node[secact] (s7) at ( 4.5, -3.8) {secondary\_entry};
+\node[secact] (s8) at ( 4.5, -5.2) {\_\_enable\_mmu};
+\node[secact] (s9) at ( 4.5, -6.6) {\_\_secondary\_switched};
+\node[secact] (sa) at ( 4.5, -8.0) {secondary\_start\_kernel};
+\node[secact] (sb) at ( 4.5, -9.4) {CPU ONLINE};
+
+% Primary continues at bottom
+\node[ker] (p7) at (-3.5, -9.4) {Brought up N CPUs};
+
+% Primary down flow
+\draw[flow] (p1) -- (p2);
+\draw[flow] (p2) -- (p3);
+\draw[flow] (p3) -- (p4);
+\draw[flow] (p4) -- (p5);
+\draw[flow] (p5) -- (p6);
+
+% Secondary down flow (activation)
+\draw[flow] (s6) -- (s7);
+\draw[flow] (s7) -- (s8);
+\draw[flow] (s8) -- (s9);
+\draw[flow] (s9) -- (sa);
+\draw[flow] (sa) -- (sb);
+
+% Cross arrow: PSCI CPU_ON SMC
+\draw[focus] (p6.east) -- node[font=\sffamily\footnotesize\bfseries, text=focusc, above, midway, align=center] {SMC\\[2pt]PSCI\_CPU\_ON} (s6.west);
+
+% Cross arrow: completion notify
+\draw[msgret] (sb.west) -- node[font=\sffamily\footnotesize, text=mutec, below, midway] {complete(\&cpu\_running)} (p7.east);
+
+% Side note about hold
+\node[hold, anchor=west] at (7.2, 1.4) {BL1\textasciitilde Linux primary\\[1pt]는 single-CPU};
+
+\end{tikzpicture}
+\end{document}

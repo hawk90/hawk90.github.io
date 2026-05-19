@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bx/.style={cls, minimum width=60mm, minimum height=14mm, align=center, font=\sffamily\small, inner sep=4pt},
+  el1/.style={bx, draw=hibord, fill=hifill},
+  vec/.style={bx, draw=conbord, fill=confill},
+  asmb/.style={bx, draw=clibord, fill=clifill},
+  disp/.style={bx, draw=absbord, fill=absfill},
+  svc/.style={bx, draw=impbord, fill=impfill},
+  side/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, align=left},
+  ltag/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=east, align=right}
+]
+
+% Step boxes — center column
+\node[el1]   (k)   at (0,  6.0) {Linux kernel (EL1)\\[2pt]\footnotesize \texttt{arm\_smccc\_smc(\#0)}};
+\node[vec]   (v)   at (0,  3.0) {vbar\_el3 + 0x400\\[2pt]\footnotesize sync\_exception\_aarch64};
+\node[asmb]  (e)   at (0,  0.0) {handle\_sync\_exception\\[2pt]\footnotesize ESR\_EL3.EC == SMC64?};
+\node[disp]  (d)   at (0, -3.0) {handle\_runtime\_svc\\[2pt]\footnotesize OEN $\rightarrow$ rt\_svc\_descs\_indices[]};
+\node[svc]   (s)   at (0, -6.0) {std\_svc\_smc\_handler\\[2pt]\footnotesize PSCI / SDEI / RAS};
+
+% Left tags — EL / file
+\node[ltag] at (-4.2,  6.0) {EL1};
+\node[ltag] at (-4.2,  3.0) {EL3 vector};
+\node[ltag] at (-4.2,  0.0) {runtime\_exceptions.S};
+\node[ltag] at (-4.2, -3.0) {runtime\_svc.c};
+\node[ltag] at (-4.2, -6.0) {service handler};
+
+% Right-side annotations
+\node[side] at ( 4.2,  6.0) {\texttt{smc \#0} instruction};
+\node[side] at ( 4.2,  3.0) {Lower EL, AArch64\\[2pt]sync exception};
+\node[side] at ( 4.2,  0.0) {EC 분기:\\[2pt]SMC32 / SMC64};
+\node[side] at ( 4.2, -3.0) {O(1) OEN lookup};
+\node[side] at ( 4.2, -6.0) {x0\textasciitilde x7 = 결과};
+
+% Forward (down) flow
+\draw[flow] (k) -- (v);
+\draw[flow] (v) -- (e);
+\draw[flow] (e) -- (d);
+\draw[flow] (d) -- (s);
+
+% Return path (left side, dashed up) — keep arrow well to the left of left tags
+\draw[msgret] (s.west) -- ++(-6.5, 0) |- node[pos=0.1, font=\sffamily\footnotesize, text=mutec, anchor=south east] {ERET (EL3 $\to$ EL1)\\SMC\_RET} (k.west);
+
+\end{tikzpicture}
+\end{document}

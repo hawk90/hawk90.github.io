@@ -1,0 +1,65 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bx/.style={cls, minimum width=58mm, minimum height=11mm, align=center, font=\sffamily\small, inner sep=4pt},
+  prim/.style={bx, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  sec/.style ={bx, draw=absbord, fill=absfill},
+  mem/.style ={bx, draw=clibord, fill=clifill},
+  src/.style ={bx, draw=conbord, fill=confill},
+  side/.style={font=\sffamily\footnotesize, text=mutec, align=left, anchor=west},
+  ttl/.style ={font=\sffamily\bfseries\small, text=inkc, align=center},
+  pnl/.style ={panel, inner sep=12pt}
+]
+
+% Column titles
+\node[ttl] at (-4.5,  5.6) {(a) spin-table — legacy};
+\node[ttl] at ( 4.5,  5.6) {(b) PSCI CPU\_ON — 표준};
+
+% Left column — spin-table
+\node[prim] (lp)  at (-4.5,  4.0) {Primary: store entry\\to release\_addr; SEV};
+\node[mem]  (lm)  at (-4.5,  2.2) {shared memory\\\texttt{cpu-release-addr}};
+\node[sec]  (ls)  at (-4.5,  0.4) {Secondary: WFE loop\\ldr / cbz / wfe};
+\node[sec]  (ls2) at (-4.5, -1.4) {wake on SEV $\to$ br x0};
+
+% Left flow arrows
+\draw[flow] (lp.south) -- (lm.north);
+\draw[arr]  (lm.south) -- (ls.north);
+\draw[flow] (ls.south) -- (ls2.north);
+
+% Right column — PSCI
+\node[prim] (rp)  at ( 4.5,  4.0) {Primary: \texttt{smc \#0}\\PSCI\_CPU\_ON};
+\node[bx, draw=prpbord, fill=prpfill] (rb) at ( 4.5,  2.2) {BL31 EL3\\pwr\_domain\_on()};
+\node[src]  (rsrc) at ( 4.5,  0.4) {SoC reset controller\\(SRC / CRU)};
+\node[sec]  (rs)   at ( 4.5, -1.4) {Secondary: warm boot\\[2pt]$\to$ secondary\_entry};
+
+% Right flow arrows
+\draw[flow] (rp.south)   -- (rb.north);
+\draw[flow] (rb.south)   -- (rsrc.north);
+\draw[flow] (rsrc.south) -- (rs.north);
+
+% Comparison footer — three rows
+\node[ttl, anchor=west] at (-7.5, -3.4) {비교};
+
+\node[side] at (-7.5, -4.2) {전력 상태};
+\node[side] at (-4.5, -4.2) {WFI/WFE — clock 그대로};
+\node[side] at ( 1.8, -4.2) {진정한 power-down 가능};
+
+\node[side] at (-7.5, -5.0) {HOTPLUG\_CPU};
+\node[side] at (-4.5, -5.0) {재진입 어려움};
+\node[side] at ( 1.8, -5.0) {CPU\_OFF로 완전 지원};
+
+\node[side] at (-7.5, -5.8) {DT 표기};
+\node[side] at (-4.5, -5.8) {\texttt{enable-method = "spin-table"}};
+\node[side] at ( 1.8, -5.8) {\texttt{enable-method = "psci"}};
+
+% Divider line between columns
+\draw[draw=mutec, dashed, line width=0.3pt] (0, 5.2) -- (0, -2.4);
+
+\end{tikzpicture}
+\end{document}

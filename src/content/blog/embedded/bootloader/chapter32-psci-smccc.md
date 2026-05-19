@@ -79,6 +79,10 @@ bit 30 (calling convention type):
    1 = SMC64 (AArch64 register, AArch64에서만 호출)
 ```
 
+비트필드 구조와 함께 자주 쓰는 한 예(`0xC400_0003` = PSCI_CPU_ON)를 그림으로 보면 다음과 같다.
+
+![SMCCC Function ID 32-bit 비트 레이아웃](/images/blog/bootloader/diagrams/chapter32-smccc-function-id.svg)
+
 OEN 영역은 6 bit이라 64 가지 service가 정의 가능하다. spec이 다음과 같이 예약했다.
 
 | OEN | 영역 | function ID 시작 |
@@ -225,6 +229,10 @@ int imx_pwr_domain_on(u_register_t mpidr)
 ```
 
 reset이 풀린 CPU는 BL31의 *warm boot entry*(`psci_warmboot_entrypoint`)에서 시작한다. 거기서 CPU 자신의 percpu context를 초기화한 뒤 caller가 넘긴 `entry`로 ERET한다. 자세한 secondary CPU 측 흐름은 [Ch 33](/blog/embedded/bootloader/chapter33-smp-secondary-cpu-bringup)에서 다룬다.
+
+CPU_ON의 전체 흐름을 그림으로 보면 다음과 같다.
+
+![PSCI CPU_ON sequence — primary CPU → BL31 → secondary CPU release](/images/blog/bootloader/diagrams/chapter32-psci-cpu-on-seq.svg)
 
 ## CPU_SUSPEND — power_state 인코딩
 

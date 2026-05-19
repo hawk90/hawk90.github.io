@@ -165,6 +165,10 @@ end_vector_entry sync_exception_aarch64
 
 `smc_handler64`가 *caller 컨텍스트(x0~x29)를 cpu_context에 저장*하고, function ID(x0)를 보고 dispatcher인 `handle_runtime_svc`를 호출한다.
 
+SMC 진입부터 service handler까지의 호출 흐름을 그림으로 정리하면 다음과 같다.
+
+![SMC dispatcher 흐름 — EL1에서 EL3로, vector entry에서 service handler까지](/images/blog/bootloader/diagrams/chapter31-smc-dispatcher.svg)
+
 ```c
 /* bl31/bl31_main.c */
 uintptr_t handle_runtime_svc(uint32_t smc_fid,

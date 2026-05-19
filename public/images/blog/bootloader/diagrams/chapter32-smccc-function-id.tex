@@ -1,0 +1,62 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bit/.style={rectangle, draw=nodebord, line width=0.4pt, minimum height=12mm, inner sep=2pt, align=center, font=\sffamily\footnotesize},
+  ft/.style  ={bit, fill=hifill,   draw=hibord},
+  cc/.style  ={bit, fill=confill,  draw=conbord},
+  oen/.style ={bit, fill=absfill,  draw=absbord},
+  mbz/.style ={bit, fill=neutfill, draw=neutbord, text=mutec},
+  fn/.style  ={bit, fill=impfill,  draw=impbord},
+  bnum/.style={font=\sffamily\scriptsize, text=mutec},
+  lab/.style ={font=\sffamily\footnotesize, anchor=west, align=left},
+  ttl/.style ={font=\sffamily\bfseries\small, text=inkc, align=center}
+]
+
+\node[ttl] at (0, 5.6) {SMCCC Function ID — 32-bit layout};
+
+% bit positions across — segments sized by # bits, total ~16cm
+% FT  = bit 31         (1 bit, 10mm)
+\node[ft,  minimum width=10mm] (b31) at (-7.5, 3.4) {FT};
+% CC  = bit 30         (1 bit, 10mm)
+\node[cc,  minimum width=10mm] (b30) at (-6.3, 3.4) {CC};
+% OEN = bits 29..24    (6 bits, 28mm)
+\node[oen, minimum width=28mm] (boen) at (-3.7, 3.4) {OEN};
+% MBZ = bits 23..16    (8 bits, 32mm)
+\node[mbz, minimum width=32mm] (bmbz) at ( 0.6, 3.4) {MBZ};
+% Function number = bits 15..0 (16 bits, 56mm)
+\node[fn,  minimum width=56mm] (bfn)  at ( 5.6, 3.4) {Function number};
+
+% Bit position labels — placed clearly above each cell with vertical offset
+\node[bnum] at ($(b31.north)+(0,2pt)$) {31};
+\node[bnum] at ($(b30.north)+(0,2pt)$) {30};
+\node[bnum] at ($(boen.north west)+(2pt,2pt)$) [anchor=south west] {29};
+\node[bnum] at ($(boen.north east)+(-2pt,2pt)$) [anchor=south east] {24};
+\node[bnum] at ($(bmbz.north west)+(2pt,2pt)$) [anchor=south west] {23};
+\node[bnum] at ($(bmbz.north east)+(-2pt,2pt)$) [anchor=south east] {16};
+\node[bnum] at ($(bfn.north west)+(2pt,2pt)$) [anchor=south west] {15};
+\node[bnum] at ($(bfn.north east)+(-2pt,2pt)$) [anchor=south east] {0};
+
+% Description blocks (separated, no dotted lines to avoid clutter)
+\node[lab] at (-8.0,  1.2) {\textbf{FT (bit 31)} — Fast(1) / Yielding(0)};
+\node[lab] at (-8.0,  0.2) {\textbf{CC (bit 30)} — SMC32(0) / SMC64(1)};
+\node[lab] at (-8.0, -0.8) {\textbf{OEN (29:24)} — 0x00 ARM / 0x02 SiP / 0x04 Std};
+\node[lab] at (-8.0, -1.8) {\textbf{MBZ (23:16)} — Must Be Zero};
+\node[lab] at (-8.0, -2.8) {\textbf{Function number (15:0)} — service 안 함수 번호};
+
+% Example box on right
+\node[note, anchor=north west, text width=64mm, align=left] at (2.0, 1.6)
+  {\textbf{예 — 0xC400\_0003}\\[4pt]
+   FT=1 (fast)\\[2pt]
+   CC=1 (SMC64)\\[2pt]
+   OEN=0x04 (Standard)\\[2pt]
+   func=0x0003\\[4pt]
+   $\Rightarrow$ PSCI\_CPU\_ON};
+
+\end{tikzpicture}
+\end{document}
