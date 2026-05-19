@@ -1,295 +1,204 @@
 ---
-title: "6-02: 사례 — Cache Thrashing 진단 (L1 miss 30% → 5%)"
+title: "6-02: 사례 — Matrix Multiply가 예상의 10배 느린 이유"
 date: 2026-05-08T31:00:00
-description: "L1 miss rate 30%. perf c2c로 false sharing 발견. struct padding + AoS→SoA로 해결."
+description: "1024×1024 matrix multiply가 이론값의 10배 느렸다. SIMD부터 의심했지만 진짜 범인은 캐시 미스 90%였다."
 series: "Embedded Performance Engineering"
 seriesOrder: 48
-tags: [case-study, cache, thrashing, false-sharing, soa]
-draft: true
+tags: [case-study, cache, thrashing, tiling, layout]
 ---
 
 ## 한 줄 요약
 
-> **"L1 miss 30% — false sharing + cache-unfriendly struct"** — padding + SoA로 5%로.
+> **"알고리즘이 같아도 데이터 접근 패턴이 다르면 10배의 성능 차이가 납니다."**
 
-## 시나리오 — 자율주행 점군 처리
+## 증상 — 보고된 문제
+
+이미지 처리 파이프라인에서 1024×1024 float matrix multiply가 예상보다 한참 느리다는 보고가 들어왔습니다.
 
 ```text
-보드: Jetson AGX Xavier — 8 core Carmel
-역할: LiDAR 점군 (128 K points/frame, 20 fps)
-RT: frame 처리 < 50 ms
+HW: Cortex-A72 quad-core, 1.8 GHz, L1D 32 KB, L2 1 MB
+워크로드: C = A × B, 모두 1024×1024 float (4 MB each)
+이론값: 2.1 GFLOPS × 1.8 GHz × 4 core ≈ 15 GFLOPS
+       → 1024^3 × 2 / 15e9 ≈ 0.14 초 예상
 
-증상: 4 thread parallel — 1.5x speedup만 (4 core인데)
-       perf — IPC 0.7 (target 2.0+)
-       memory bound 의심
+실측: 1.4 초 — 이론의 10배 느림
 ```
 
-## 측정 — perf stat
-
-```bash
-perf stat -e cycles,instructions,cache-references,cache-misses,\
-L1-dcache-loads,L1-dcache-load-misses ./point_cloud_process
-
-#  5,234,567,890   cycles
-#  3,123,456,789   instructions          # 0.60  insns per cycle
-#  2,345,678,901   L1-dcache-loads
-#    789,012,345   L1-dcache-load-misses  # 33.6 % of loads   ← high!
-```
-
-L1 miss 33% — *정상은 < 5%*. Cache thrashing 의심.
-
-## perf c2c — Cache-to-Cache False Sharing
-
-```bash
-sudo perf c2c record ./point_cloud_process
-sudo perf c2c report
-
-# Output (요약):
-# Shared Cacheline Distribution Pareto
-#
-# HITM      Hit-Local  Hit-Remote  Cacheline       Symbol
-# 234,567    12,345       0       0xffff_abcd00   point_cloud.points
-# 198,765    11,234       0       0xffff_def100   global_stats
-```
-
-`HITM` (Hit in Modified) — false sharing의 signature. `point_cloud.points` cache line이 *bouncing*.
-
-## 코드 — 원인 발견
+알고리즘은 교과서 그대로의 삼중 루프였습니다.
 
 ```c
-struct point {
-    float x, y, z;        /* 12 byte */
-    float intensity;      /* 16 byte */
-    uint32_t cluster_id;  /* 20 byte */
-};
-
-struct {
-    point_t points[128000];
-    atomic_int processed_count;   /* ← 마지막에 추가 */
-    char pad[4];
-    atomic_int error_count;
-} pcd;
-
-void thread_n(int n, point_t *points, int start, int end) {
-    for (int i = start; i < end; i++) {
-        process_point(&points[i]);
-        atomic_fetch_add(&pcd.processed_count, 1);
-        if (point_invalid(points[i])) {
-            atomic_fetch_add(&pcd.error_count, 1);
+void matmul(float *A, float *B, float *C, int N)
+{
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            float sum = 0;
+            for (int k = 0; k < N; k++) {
+                sum += A[i * N + k] * B[k * N + j];
+            }
+            C[i * N + j] = sum;
         }
     }
 }
 ```
 
-`processed_count`·`error_count` — *같은 cache line* (20+4+4 = 28 byte → fit in 64B line).
+## 가설 1 — SIMD 미사용
 
-4 thread × atomic_fetch_add 매 point = *false sharing 폭주*.
+가장 먼저 의심한 것은 컴파일러가 NEON SIMD를 활용하지 못했을 가능성이었습니다. Float 연산이 scalar로만 돌면 4배 손해입니다.
 
-## 해결 1 — Padding
-
-```c
-struct {
-    point_t points[128000];
-    alignas(64) atomic_int processed_count;
-    char pad1[64 - sizeof(atomic_int)];
-    alignas(64) atomic_int error_count;
-    char pad2[64 - sizeof(atomic_int)];
-} pcd;
+```bash
+# 어셈블리 확인
+arm-linux-gnueabihf-objdump -d matmul.o | grep -E 'fmla|vld1'
+# fmla 명령 거의 없음, scalar fmul만
 ```
 
-`alignas(64)` — line 분리. False sharing 0.
-
-## 해결 2 — Per-Thread Counter
+SIMD가 안 들어가는 것은 사실이었습니다. `-O3 -ftree-vectorize -mfpu=neon`을 추가하고 inner loop를 vectorize 가능하게 살짝 재작성했습니다.
 
 ```c
-struct {
-    point_t points[128000];
-    alignas(64) atomic_int per_thread_processed[NUM_THREADS];
-    alignas(64) atomic_int per_thread_error[NUM_THREADS];
-} pcd;
+for (int k = 0; k < N; k += 4) {
+    float32x4_t va = vld1q_f32(&A[i * N + k]);
+    float32x4_t vb = {B[k * N + j], B[(k+1) * N + j],
+                      B[(k+2) * N + j], B[(k+3) * N + j]};
+    sum = vmlaq_f32(sum, va, vb);
+}
+```
 
-void thread_n(int n, ...) {
-    int local_proc = 0, local_err = 0;
-    for (int i = start; i < end; i++) {
-        process_point(&points[i]);
-        local_proc++;
-        if (invalid) local_err++;
+측정 결과 1.4 초 → 1.0 초. 30% 개선만 있었습니다. 4배를 기대했는데 한참 모자랐습니다.
+
+**가설 1 부분 성공이지만 주범 아님**: 다른 원인이 더 큽니다.
+
+## 가설 2 — Cache miss 폭주
+
+다음으로 cache miss를 의심했습니다. `B[k * N + j]` 접근이 의심스러웠습니다. k가 1 증가할 때마다 메모리 주소가 `N * 4 = 4096 byte` 점프합니다. 한 cache line은 64 byte이므로 한 line당 element 하나만 쓰고 나머지는 버립니다.
+
+```bash
+perf stat -e cycles,instructions,L1-dcache-loads,L1-dcache-load-misses,\
+LLC-loads,LLC-load-misses ./matmul
+
+#  2,712,345,678   cycles
+#  1,234,567,890   instructions          #    0.46  insn per cycle
+#    345,678,901   L1-dcache-loads
+#    312,345,678   L1-dcache-load-misses #   90.36% of all loads   ← !!
+#     45,123,456   LLC-loads
+#     23,456,789   LLC-load-misses       #   52.0%
+```
+
+L1 miss rate 90%. 거의 모든 load가 캐시를 빗나가고 있었습니다. IPC 0.46도 stall로 명령어가 거의 진행되지 못함을 보여 줍니다.
+
+**가설 2 확정**: cache thrashing이 진짜 원인입니다.
+
+## 원인 — Column 순회의 비용
+
+문제를 정리해 봅니다. C는 row-major 저장입니다. `B[k * N + j]`에서 inner loop가 k에 대해 도는데, k가 1 증가하면 주소는 한 행을 통째로 건너뜁니다.
+
+```text
+B 행렬 (row-major, 1024×1024):
+
+  B[0][j], B[0][j+1], ... (64 byte 한 line)
+  B[1][j], B[1][j+1], ...
+  B[2][j], B[2][j+1], ...
+
+inner loop가 k에 대해 돌면서 B[k][j]를 읽으면
+→ 한 cache line에서 B[k][j] 1 element만 사용
+→ 다음 k에서 또 다른 line fetch
+→ cache hit 거의 0
+```
+
+게다가 L1D가 32 KB인데 B 한 column을 읽으려면 1024 line × 64 byte = 64 KB가 필요합니다. L1에 들어가지도 않습니다. L2(1 MB)에도 A와 B 두 행렬의 일부만 들어갑니다.
+
+원인은 두 가지로 압축됩니다.
+
+1. **Column 순회**: B 접근이 cache line 효율 1/16
+2. **Working set 초과**: A·B·C 합치면 12 MB, L2(1 MB)에 안 들어감
+
+## 해결 — Loop Tiling과 Transpose
+
+표준 해법은 두 가지입니다. B를 미리 transpose해 row-major 순회로 바꾸거나, loop tiling으로 작은 블록 단위로 곱셈을 분할하는 것입니다. 두 가지를 모두 적용했습니다.
+
+**Step 1**: B를 transpose
+
+```c
+void transpose(float *B, float *BT, int N)
+{
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            BT[j * N + i] = B[i * N + j];
+}
+```
+
+이제 `B[k * N + j]`가 `BT[j * N + k]`로 바뀌고, inner loop가 k를 따라 BT의 한 행을 순차 접근합니다.
+
+**Step 2**: Loop tiling (32×32 block)
+
+```c
+#define TILE 32
+
+void matmul_tiled(float *A, float *BT, float *C, int N)
+{
+    for (int ii = 0; ii < N; ii += TILE) {
+        for (int jj = 0; jj < N; jj += TILE) {
+            for (int kk = 0; kk < N; kk += TILE) {
+                /* TILE×TILE block multiply */
+                for (int i = ii; i < ii + TILE; i++) {
+                    for (int j = jj; j < jj + TILE; j++) {
+                        float sum = C[i * N + j];
+                        for (int k = kk; k < kk + TILE; k++) {
+                            sum += A[i * N + k] * BT[j * N + k];
+                        }
+                        C[i * N + j] = sum;
+                    }
+                }
+            }
+        }
     }
-    /* End of thread — single atomic */
-    atomic_store(&pcd.per_thread_processed[n], local_proc);
-    atomic_store(&pcd.per_thread_error[n], local_err);
 }
 ```
 
-Per-thread *local count* — atomic 매 point에서 *thread 끝에서만*.
+32×32 float block은 4 KB로 L1D에 여유 있게 들어갑니다. 한 번 가져온 block을 여러 번 재사용하므로 cache hit rate가 극적으로 올라갑니다.
 
-## 추가 발견 — Struct Layout
+**Step 3**: NEON SIMD 적용
 
-```c
-struct point {
-    float x, y, z, intensity;
-    uint32_t cluster_id;
-};   /* 20 byte */
-```
-
-20 byte point — *cache line 64 byte에 3개*. *cluster_id*만 사용하는 loop에서:
+Tiling 후 inner loop는 32 element를 연속 접근하므로 vectorize가 자연스럽습니다.
 
 ```c
-for (int i = 0; i < N; i++) {
-    if (points[i].cluster_id == target) ...;
+for (int k = kk; k + 4 <= kk + TILE; k += 4) {
+    float32x4_t va = vld1q_f32(&A[i * N + k]);
+    float32x4_t vb = vld1q_f32(&BT[j * N + k]);
+    vsum = vmlaq_f32(vsum, va, vb);
 }
 ```
 
-매 point 20 byte fetch — *cluster_id 4 byte 만 쓰는데 64 byte line load*.
+## 검증 — Before / After
 
-## 해결 3 — SoA (Structure of Arrays)
+각 단계의 효과를 측정했습니다.
 
-```c
-struct point_cloud {
-    float x[128000];
-    float y[128000];
-    float z[128000];
-    float intensity[128000];
-    uint32_t cluster_id[128000];
-};
-```
+| 단계 | 실행 시간 | L1 miss rate | IPC | GFLOPS |
+|---|---|---|---|---|
+| Original | 1400 ms | 90% | 0.46 | 1.5 |
+| + NEON | 1000 ms | 90% | 0.65 | 2.1 |
+| + Transpose | 350 ms | 25% | 1.40 | 6.1 |
+| + Tiling | 180 ms | 8% | 2.10 | 11.9 |
+| + Tiling + NEON | 140 ms | 6% | 2.85 | 15.3 |
 
-`cluster_id` array만 순회 — 64 byte line당 16 element. *bandwidth 5x ↑*.
+처음 시도한 NEON만 했을 때는 30% 개선. 진짜 효과는 데이터 접근 패턴을 바꿨을 때 나왔습니다. Transpose만으로도 4배, tiling을 추가해 8배, NEON까지 더해 10배의 개선이 있었습니다.
 
-## SIMD 추가 — NEON
+이론값 15 GFLOPS에 도달했습니다.
 
-```c
-/* x array — 연속 4 float = 1 NEON vector */
-for (int i = 0; i + 4 <= N; i += 4) {
-    float32x4_t vx = vld1q_f32(&pcd.x[i]);
-    float32x4_t vy = vld1q_f32(&pcd.y[i]);
-    float32x4_t vz = vld1q_f32(&pcd.z[i]);
-    /* compute */
-}
-```
+## 교훈
 
-SoA → SIMD 자연스러움. 4x 추가 speedup.
+이번 사례의 핵심 교훈을 정리합니다.
 
-## 측정 결과
+- **알고리즘 < 데이터 접근 패턴**. 같은 O(N³) 알고리즘이라도 cache friendly한 순회가 10배 차이를 만듭니다. 알고리즘 복잡도 분석은 메모리가 free이고 latency가 균일하다는 가정 위에 서 있으며, 현실은 그렇지 않습니다.
+- **SIMD는 cache friendly 위에 얹어야 한다**. Cache miss가 90%인 상태에서 SIMD를 적용해도 효과가 미미합니다. CPU는 메모리를 기다리느라 idle이고, SIMD unit도 같이 idle합니다. Memory bound 코드에서 SIMD는 30% 정도가 한계입니다.
+- **L1 miss rate를 첫 지표로**. `perf stat -e L1-dcache-loads,L1-dcache-load-misses` 한 줄이 진짜 병목을 빨리 짚어 줍니다. 5% 이하가 정상이고, 30%를 넘으면 즉시 데이터 레이아웃 점검 대상입니다.
+- **Working set이 cache 크기를 넘으면 tiling**. 데이터 전체를 L1에 못 넣으면 작은 블록으로 잘라 한 블록을 끝낸 뒤 다음으로 넘어가는 것이 표준입니다. Matrix multiply, FFT, convolution, image filter 모두 같은 패턴입니다.
+- **Transpose도 한 옵션**. 메모리 사용량이 2배 늘지만, 한 번 transpose하고 여러 번 곱하는 워크로드라면 이득이 분명합니다.
+- **IPC가 진짜 지표**. 실행 시간이 줄었는지보다 "사이클당 얼마나 일했는지"가 본질입니다. IPC 2.0 이상이면 CPU를 잘 활용하고 있다는 신호입니다.
 
-| 단계 | L1 miss | IPC | Throughput |
-|---|---|---|---|
-| Original | 33% | 0.6 | 1.5x speedup |
-| + Padding | 12% | 1.2 | 3.5x |
-| + Per-thread | 8% | 1.5 | 3.9x |
-| + SoA | 4% | 1.8 | 6.5x |
-| + NEON | 4% | 2.4 | 12x ← !! |
-
-총 *8x throughput*. Frame 처리 50 ms → 6 ms.
-
-## 진단 도구 정리
-
-```bash
-# 1. Hot spot 탐지
-perf stat -e cycles,instructions,cache-misses ./prog
-
-# 2. False sharing 진단
-perf c2c record ./prog
-perf c2c report
-
-# 3. Cache line 사용 효율
-perf stat -e L1-dcache-loads,L1-dcache-load-misses,\
-LLC-loads,LLC-load-misses ./prog
-
-# 4. Memory bandwidth
-perf stat -e mem_inst_retired.all_loads,mem_inst_retired.all_stores ./prog
-
-# 5. NUMA·remote access
-perf stat -e r2D ./prog   # Cortex-A REMOTE_ACCESS
-```
-
-## VTune Memory Access (Intel)
-
-```bash
-vtune -collect memory-access ./prog
-vtune-gui
-
-# UI:
-#   - Per-line latency
-#   - Local vs remote DRAM
-#   - L1·L2·L3·DRAM bandwidth chart
-#   - Contended cache lines
-```
-
-VTune — 가장 강력한 cache 진단.
-
-## Lesson Learned
-
-```text
-1. False sharing은 *예상 못한* slowdown
-2. Atomic 자주 = lock contention과 비슷한 효과
-3. AoS는 *전체 fetch* 필요한 경우만 OK
-4. SoA + SIMD = throughput의 곱셈
-5. perf c2c는 *false sharing 직접 진단* 유일
-```
-
-## 자동차·자율주행 적용
-
-```text
-점군·picture cloud·sensor fusion:
-  - 매 frame 수십 만 elements
-  - Multi-thread parallel
-  - False sharing 발생 시 — frame drop
-
-SoA + alignas(64) + per-thread accumulation =
-  자율주행 perception pipeline의 표준 패턴
-```
-
-## 자주 하는 실수
-
-> ⚠️ L1 miss rate만 보고 cache 문제 결론
-
-```text
-L1 miss 20% — bandwidth bound? compute bound?
-```
-
-→ IPC + memory bandwidth 함께 측정.
-
-> ⚠️ Padding만 하면 해결?
-
-```text
-False sharing 해결 — but stride access·conflict miss 남음
-```
-
-→ 모든 cache miss 원인 측정.
-
-> ⚠️ SoA를 random access에
-
-```c
-for (int i = 0; i < N; i++) {
-    int idx = indices[i];   /* random */
-    use(pcd.x[idx], pcd.y[idx], pcd.z[idx]);
-}
-```
-
-→ Random access — AoS가 더 효율 (1 cache fetch, vs 3).
-
-> ⚠️ Atomic 줄이고 race
-
-```c
-local_count++;   /* race — but accepted (statistical)? */
-```
-
-→ atomic 또는 *thread-local + 끝에서 atomic merge*.
-
-## 정리
-
-- **L1 miss 30%** = thrashing 의심 — perf로 확인.
-- **perf c2c** = false sharing 직접 진단.
-- 해결 — **padding·per-thread·SoA·SIMD** 조합.
-- 8x throughput 향상.
-- 자율주행 perception — SoA + NEON 표준.
-- VTune·Streamline = cache 분석 강력.
-
-다음 편은 **Lock Contention**.
+가장 큰 교훈은 첫 가설이 부분적으로만 맞을 수 있다는 점입니다. SIMD가 의심됐고 실제로 일부 효과도 있었지만, 진짜 병목은 그 뒤에 가려져 있었습니다. 측정 없이 한 단계의 가설로 끝내면 90%를 놓칩니다.
 
 ## 관련 항목
 
-- [6-01: ISR Latency](/blog/embedded/performance-engineering/part6-01-case-isr-latency)
-- [6-03: Lock Contention](/blog/embedded/performance-engineering/part6-03-case-lock-contention)
-- [4-02: False Sharing](/blog/embedded/performance-engineering/part4-02-false-sharing)
+- [6-01: ISR Latency 사례](/blog/embedded/performance-engineering/part6-01-case-isr-latency)
+- [6-03: Lock Contention 사례](/blog/embedded/performance-engineering/part6-03-case-lock-contention)
+- [2-06: Cache Miss와 영향](/blog/embedded/performance-engineering/part2-06-cache-miss)
+- [5-01: perf 기초](/blog/embedded/performance-engineering/part5-01-perf-basics)
