@@ -15,6 +15,22 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 들어가며 — 공유 메모리가 왜 그렇게 까다로운가
+
+도서관의 책장을 떠올려 보자. 한 사람이 책을 꽂는 동안 다른 사람이 그 자리에서 책을 꺼낸다. 꽂는 손과 꺼내는 손이 *같은 순간*에 같은 책에 닿는다. 이 사람이 본 책은 무엇인가. 꽂히기 전의 책인가, 꽂히는 중간의 무엇인가, 꽂힌 다음의 책인가.
+
+공유 메모리도 똑같다. 한 스레드가 변수에 값을 쓰는 *동안* 다른 스레드가 그 변수를 읽는다. 두 동작이 시간적으로 겹친다. 이때 무엇이 반환되는가 — 답은 "메모리가 어떤 종류인가"에 달려 있다.
+
+이 챕터의 핵심은 세 가지 책장을 구분하는 일이다.
+
+- **Safe register는 무질서한 책장이다.** 누가 책을 꽂는 동안 다른 사람이 같은 자리에 손을 뻗으면, 그 사람은 *책장 안의 어떤 책*이라도 손에 쥘 수 있다. 꽂힐 책도, 꽂히기 전의 책도, 심지어 그 자리에 *한 번도 없던 책*까지 — 단지 책장의 합법적 책 목록 안에만 있으면 된다. 다만 누구도 책을 꽂지 않는 순간에 손을 뻗으면 마지막으로 꽂힌 책을 정확히 얻는다.
+- **Regular register는 조금 더 정돈된 책장이다.** 꽂는 중에 손을 뻗어도, 꽂히기 직전의 책 또는 꽂히는 중인 새 책 둘 중 하나만 손에 들어온다. 그 사이의 "정체불명의 책"은 절대 나오지 않는다. 다만 두 사람이 *연속해서* 손을 뻗었을 때, 앞사람은 새 책을 봤는데 뒷사람은 옛 책을 다시 보는 일은 일어날 수 있다.
+- **Atomic register는 가장 잘 정돈된 책장이다.** 꽂는 동작이 *순간적*이다. 책이 어느 한 시점에 "갑자기" 자리에 들어가고, 그 이전엔 옛 책이 100% 보이고, 그 이후엔 새 책이 100% 보인다. 한 번 새 책을 본 사람은 그 다음에 옛 책으로 돌아갈 일이 없다.
+
+그리고 한 가지 더 — 책장이 여러 칸일 때 *한 순간의 모든 칸 상태*를 일관되게 보고 싶다면 어떻게 해야 하는가. 군중 사진을 찍는 일과 같다. 모두가 *같은 한 순간*에 정지해 있어야 그 사진이 일관된 한 장이 된다. 이것이 **Atomic snapshot**이다.
+
+이 세 책장과 한 장의 군중 사진 — 이 챕터의 전부다. 추상적인 정의 아래에는 실제 하드웨어의 까다로움이 깔려 있다. 약한 책장(safe)에서 강한 책장(atomic)을 만들어 내는 알고리즘이 존재한다는 사실이 이 챕터의 가장 우아한 결과 중 하나다.
+
 ## 4.1 무엇이 "메모리"인가
 
 지금까지 우리는 공유 메모리를 당연한 것처럼 사용했다. 4장은 그 가정을 해체한다.
@@ -538,6 +554,99 @@ void seq_cst_example(void) {
 - **lock-free 알고리즘**: 정확성 증명에 이 챕터의 정의들이 등장
 
 C++의 `memory_order_relaxed`는 safe / regular 수준에 가깝다. `memory_order_seq_cst`가 atomic. 그 차이가 정확히 이 챕터의 분류다.
+
+## 4.8 시스템 사례 — 책장의 모습
+
+지금까지 본 세 책장은 종이 위의 정의다. 실제 시스템에서 이 정의들이 어떤 모습으로 나타나는지 본다.
+
+### x86 TSO — 거의 잘 정돈된 책장
+
+x86 CPU의 메모리 모델은 **TSO**(Total Store Order)라 부른다. 책장에 비유하면, 꽂는 동작이 *거의 순간적*이지만 한 가지 예외가 있다.
+
+```text
+스레드 A:   write x = 1
+            read y  → 0  ?
+
+스레드 B:   write y = 1
+            read x  → 0  ?
+```
+
+직관적으로는 두 read 중 적어도 하나는 1을 봐야 할 듯하다. 그러나 x86에서 둘 다 0이 나올 수 있다. 이유는 **store buffer** — 꽂는 동작이 책장에 도달하기 전에 손에 잠시 머문다. 다른 사람의 시각에서는 아직 꽂히지 않은 책이다.
+
+```text
+A의 store buffer:  [x=1 대기 중]
+B의 store buffer:  [y=1 대기 중]
+공유 책장:         x=0, y=0
+
+A.read(y) → 책장의 y를 봄 → 0
+B.read(x) → 책장의 x를 봄 → 0
+```
+
+이 효과 하나를 빼면 x86은 atomic register에 매우 가깝다. 같은 변수에 대한 read/write 순서는 보장된다. 다른 변수 간의 read 다음 write 재배치만 일어난다.
+
+x86에서 이 store buffer 효과를 막으려면 `MFENCE` 명령 또는 `LOCK` 접두사를 쓴다. C++의 `memory_order_seq_cst` store는 x86에서 보통 `MOV` + `MFENCE` (또는 `XCHG`)로 컴파일된다.
+
+### ARM weak memory — 매우 무질서한 책장
+
+ARM과 RISC-V의 메모리 모델은 훨씬 약하다. 책장에 비유하면, 꽂는 동작과 꺼내는 동작이 거의 자유롭게 *재배치*된다. 같은 스레드 안의 두 write조차 다른 스레드 시각에서는 거꾸로 보일 수 있다.
+
+```text
+스레드 A:           스레드 B의 시각에서:
+  store x = 1         x = 0  여전히
+  store y = 1         y = 1
+                      x = 1  뒤늦게
+```
+
+A는 분명 x를 먼저 썼는데, B는 y를 먼저 본다. ARM 입장에선 합법적이다.
+
+이 모델 위에서 atomic register를 만들려면 명시적 barrier가 필요하다.
+
+| ARM 명령 | 역할 |
+|---|---|
+| `DMB ISH` | data memory barrier — 이전 메모리 연산이 다음보다 먼저 보임 |
+| `DSB` | 더 강한 barrier — 명령 완료까지 대기 |
+| `LDAR` / `STLR` | load-acquire / store-release — 페어로 동기화 관계 형성 |
+| `LDAXR` / `STLXR` | exclusive load/store — LL/SC, atomic RMW의 토대 |
+
+C++의 `memory_order_acquire` load는 ARMv8에서 `LDAR`로, `memory_order_release` store는 `STLR`로 컴파일된다. `memory_order_seq_cst`는 추가 `DMB ISH`가 붙거나, `LDAR`/`STLR`만으로도 일부 경우 처리된다.
+
+```text
+같은 코드, 다른 아키텍처:
+  C++:   x.store(1, memory_order_seq_cst);
+  x86:   MOV [x], 1  +  MFENCE
+  ARMv8: STLR W0, [x]
+  RISC-V: FENCE rw, w  +  SW x0, x  +  FENCE w, rw
+```
+
+### Lock-free hashing — 책장 여러 칸의 군중 사진
+
+실전에서 atomic snapshot이 가장 자주 필요한 곳이 **lock-free hash table** 리사이즈다. 테이블을 두 배로 키울 때, 기존 버킷의 모든 키-값 쌍을 새 테이블로 옮긴다. 이 동안에도 다른 스레드는 lookup / insert를 계속한다.
+
+```text
+old_table:  [k1, k3, k5, ...]
+new_table:  [_, _, _, ...]
+                  ↓
+            동시에 옮기는 중
+                  ↓
+new_table:  [k1, k3, ?, ...]   ← 일부는 옮겨졌고 일부는 아직
+```
+
+lookup 스레드는 어느 테이블을 봐야 하는가. 둘 다 봐야 한다. 그러나 *언제 어떤 테이블이 권위 있는가*를 일관되게 결정해야 한다.
+
+Cliff Click의 **NonBlockingHashMap** 같은 구현은 각 버킷에 상태 비트를 두고, 옮기는 동작이 진행되는 동안 *transition 상태*를 lock-free로 표현한다. 본질적으로 4장의 atomic snapshot 사고방식을 적용한다 — 두 번 읽어서 일관성 검증, 옮긴 스레드의 도움을 빌리는 helping 메커니즘.
+
+Java의 `ConcurrentHashMap` (JDK 8+)도 이 패턴을 쓴다. resize 중에 lookup 하는 스레드가 *forwarding node*를 만나면 새 테이블로 점프한다. forwarding node 자체가 "이 버킷은 이미 옮겨졌다"는 atomic snapshot의 한 슬라이스다.
+
+### 정리 — 정의와 하드웨어 사이
+
+| 이론 | 실제 하드웨어 | 메커니즘 |
+|---|---|---|
+| Safe register | 정렬 안 된 word 접근 | tear 가능, 단조성 없음 |
+| Regular register | aligned word write (x86) | store buffer로 일부 재배치 |
+| Atomic register | `LOCK`이 붙은 RMW (x86) | bus lock 또는 cache line lock |
+| Atomic snapshot | 두 번 collect + helping | timestamp + announce array |
+
+세 책장의 정의는 단순했지만, 그것을 실제 실리콘 위에서 보장하기 위해 CPU 설계자가 들이는 노력은 막대하다.
 
 ## 정리
 

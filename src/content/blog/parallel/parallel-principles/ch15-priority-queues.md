@@ -15,6 +15,20 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 비유로 먼저 — 영화관 줄·학교 학년반·가족 회의·등록처
+
+이 챕터의 어려움은 한 줄로 — *모든 extract가 root 한 점을 노린다*. 그 점에서 경합이 폭발한다. 그래서 15장의 모든 기법은 "그 한 점을 어떻게 흩을까"의 변주.
+
+**Bounded PQ — 영화관 좌석 등급별 줄.** VIP, R석, S석, A석, B석... 각 등급마다 *자기 줄*이 있다. 좌석 안내원은 *현재 비어 있지 않은 가장 높은 등급*의 줄을 본다. 같은 등급 안에서는 직렬이지만 등급 사이는 완전 병렬. 우선순위가 *작은 정수 집합*인 OS 스케줄러의 nice 값(-20..19)이 정확히 이 모델.
+
+**Tree of bins — 학교 학년·반.** 우선순위가 *임의 정수*면 영화관 줄로는 부족하다. 학년-반-번호의 *trie*로 일반화. 비트 단위로 좌/우 분기해 leaf에 도달. 가장 왼쪽 leaf가 최소.
+
+**Heap with per-node lock — 가족 회의.** 가족 단위로 결정을 내린다. 부모와 자식의 swap은 *두 가족만의 결정* — 옆 가족은 동시에 자기 회의를 진행할 수 있다. 다만 *큰집*(root)에서의 결정은 모두가 기다린다. 이게 Hunt et al.의 fine-grained heap.
+
+**SkipQueue — 등록처에 줄을 서는데 자연 정렬.** Skiplist가 이미 정렬되어 있으므로 head.next가 최소. 여러 사람이 동시에 *서로 다른 앞자리*에 마킹하면 자연스럽게 분산. 다만 모두가 *맨 앞을 노리는* 본성은 그대로라 cache line ping-pong은 남는다.
+
+비유에서 보다시피, PQ는 자연 병렬성이 *없다*. 13장 해시와 정반대. 그래서 어디까지 양보할지 — strict semantics를 깰지 말지 — 가 핵심 결정이다.
+
 ## 15.1 Priority Queue의 동시성 도전
 
 Priority Queue (PQ) — 우선순위가 가장 높은 원소를 빠르게 꺼낸다.
@@ -34,6 +48,22 @@ public:
 이게 PQ의 본질적 어려움. Stack/Queue/Hash와는 본질적으로 다르다.
 
 ## 15.1a BoundedPriorityQueue (Listing 15.4) — Bin Array
+
+### 다시 — 영화관 좌석 등급별 줄
+
+```text
+VIP 줄    ━━ [손님 a]
+R석 줄    ━━ [손님 b, c]
+S석 줄    ━━ [손님 d, e, f]
+A석 줄    ━━ [손님 g]
+B석 줄    ━━ []  ← 비었음
+```
+
+좌석 안내원은 *위에서부터* 비지 않은 줄을 찾아 첫 손님을 받는다. `extractMin()` = "VIP 비었으면 R, R 비었으면 S, ..."
+
+여러 안내원이 동시에 일해도 *같은 줄을 동시에 처리할 때만* 부딪힌다. 줄이 5개면 안내원 5명까지는 거의 부딪힐 일이 없다.
+
+이게 작동하는 조건은 *등급 수가 적어야* 한다는 것. 100명짜리 영화관에 좌석 등급을 100개 둘 수는 없다. 그래서 OS 스케줄러처럼 *우선순위가 작은 정수 집합*인 응용에 한정된다.
 
 가장 단순한 동시 PQ. 우선순위 값이 *작은 정수 범위*에 속한다고 가정.
 
@@ -138,6 +168,28 @@ class UnboundedPriorityQueue {
 다만 leftmost 검색이 다시 hot spot이 된다는 게 PQ의 본질적 한계.
 
 ## 15.2 Heap 기반 PQ
+
+### 비유 — 가족 회의
+
+Heap을 *가계도*로 본다. root는 가장 높은 어른, 그 아래로 자식, 손주.
+
+순차 heap의 sift-up — 새 가족원이 들어왔을 때 *부모와 비교해 자기가 더 우선이면 자리 바꿈*. 윗대까지 반복.
+
+이걸 동시에 하려면? 각 부모-자식 swap이 *두 사람만의 결정*이라는 점에 주목한다. 옆 가족(다른 형제 라인)은 *동시에* 자기 회의 가능.
+
+Hunt et al.의 트릭 — **부모-자식 두 노드의 락만 잡는다**. 부모와 자식이 swap을 결정하면 *그 두 락만*. 다른 가족 회의는 동시 진행.
+
+```text
+            [01]                ← root 락 (extract 중)
+           /    \
+        [03]    [02]             ← 가족 단위로 락
+        / \      / \
+      [07][05] [08][04]
+```
+
+문제 — root는 *모든 extract*가 노리는 점. 가족이 100가구라도 *큰집 결정* 한 번에 모두 멈춘다. fine-grained heap도 root 경합은 해결 못 한다.
+
+이게 PQ가 본질적으로 어려운 이유다.
 
 순차 PQ의 표준 — Binary Heap.
 
@@ -286,6 +338,22 @@ struct HeapNode {
 **문제** — root는 여전히 모든 extract의 hot spot. 그래서 다음 절들이 등장.
 
 ## 15.3 Skiplist 기반 PQ
+
+### 비유 — 미시간호 등록처
+
+대학 등록처에 학번 순으로 줄이 자연 정렬되어 있다. 가장 앞은 학번이 가장 낮은(=우선) 학생.
+
+직원 여러 명이 동시에 *맨 앞부터 한 명씩 처리*한다. 첫 직원이 1번 학생을 *마킹*하면 두 번째 직원은 자연스럽게 2번 학생으로 넘어간다. 세 번째는 3번. CAS 실패가 자연 back-off 역할.
+
+```text
+head ━ 1(mark)━ 2(mark)━ 3 ━ 4 ━ 5 ━ ...
+        ↑          ↑         ↑
+      직원 A     직원 B    직원 C가 노리는 자리
+```
+
+이게 SkipQueue의 영리한 점 — *엄밀한 strict PQ semantics를 유지하면서* 어느 정도 분산을 얻는다.
+
+다만 cache 관점에서는 여전히 *head 근처 line이 ping-pong*된다. 모두가 같은 영역을 마킹하기 때문. 스레드 수가 늘면 ping-pong 비용이 폭증한다. 그래서 다음 절들이 *semantics를 양보*해 분산을 더 얻는다.
 
 14장의 skiplist를 그대로 사용. 가장 작은 원소는 리스트의 head 다음 노드.
 
@@ -797,6 +865,34 @@ PQ를 강제로 lock-free로 만들 수는 있다. 그러나 **strict semantics 
 | 작업 스케줄링 | Multi-queue + work stealing | Multi-queue + work stealing |
 
 직접 lock-free PQ는 거의 항상 잘못. 라이브러리 사용 권장.
+
+## 시스템 사례 — 어디서 PQ가 살아 있나
+
+### Kafka delayed messages / time wheel
+
+Apache Kafka 같은 메시지 브로커가 *지연 전송*을 다룰 때 모든 메시지를 PQ에 넣어 *가장 빠른 만기*부터 처리한다 — 단순한 답.
+
+문제는 *수백만 timer*가 들어올 때 PQ의 root 경합이 폭발한다는 것. 그래서 시스템들은 *hierarchical timing wheel* (Varghese-Lauck 1987)을 쓴다. 우선순위(=시각)를 *시·분·초·밀리초*로 분해해 *여러 ring buffer*로 분산. 같은 ms 안 timer만 같은 슬롯에서 다툰다.
+
+이게 15장의 trick — **PQ의 hot spot을 피하려면 자료구조 자체를 바꾼다**. Kafka, Netty, kernel timer가 모두 timing wheel 기반.
+
+### Java `PriorityBlockingQueue`
+
+`java.util.concurrent`의 표준 동시 PQ. *binary heap + ReentrantLock + Condition*. 책의 15.10 표에서 "짧은 임계 + strict" 자리.
+
+이 구현은 *coarse-grained*다. 모든 작업이 단일 락 뒤에서 직렬. 그러나 *간결함과 strict semantics*가 매력. 워크로드가 작거나 락 경합이 본질적으로 작으면 충분.
+
+내부 trade-off — *queue full*은 unbounded라 막지 않지만 `take()`는 block한다. 그래서 `BlockingQueue` 인터페이스를 만족. Producer-Consumer 패턴의 보편적 답.
+
+### OS scheduler (Linux CFS, BFS, ...)
+
+리눅스의 CFS(Completely Fair Scheduler)는 *red-black tree*로 task를 정렬한다. 가장 작은 vruntime을 가진 task가 *최우선*. 형식적으로 정렬된 자료구조지만, *per-CPU runqueue*를 두고 task가 CPU 사이를 이주(load balance)하는 식으로 동시성 문제를 회피.
+
+즉 CFS는 *single-thread sort + multi-queue*. 13~15장의 비유로 보면 — 각 CPU가 자기 호텔을 운영, 손님 이주는 *주기적인 load balancer*가 담당. PQ 안의 동시 경합을 *동시 PQ 자체를 안 만드는* 방식으로 회피한 답.
+
+modern scheduler (Go, Tokio, Cilk)는 *work stealing*. 자기 큐가 비면 옆 큐의 *뒷부분*을 훔친다. 우선순위는 *대략적으로만* 유지 — relaxed semantics. 책 15.8과 같은 모델이다.
+
+세 사례가 보여주는 패턴 — *strict PQ를 동시에 만들지 말고 다른 모델로 우회하라*. 15장의 본질적 메시지다.
 
 ## 정리
 

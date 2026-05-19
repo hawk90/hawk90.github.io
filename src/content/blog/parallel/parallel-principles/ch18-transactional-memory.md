@@ -15,6 +15,32 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 일상의 비유로 보기
+
+이 책의 마지막 장은 *락의 대안*에 관한 것이다. 18장의 한 줄 — **락 대신 atomic block, 충돌하면 재시도**. 데이터베이스 트랜잭션의 메모리 버전이라고 생각하면 된다.
+
+은행 송금을 떠올린다. A 계좌에서 100원을 빼서 B 계좌에 더한다. 둘 사이에서 *돈이 증발*하거나 *복사*되면 안 된다. 두 계좌 모두 갱신이 성공하거나, 둘 다 갱신이 *없었던 것처럼* 취소되어야 한다. 데이터베이스 사람들이 ACID의 *A(Atomicity)*라고 부르는 성질이다. 트랜잭셔널 메모리는 *메모리 쓰기*에도 같은 보장을 주려는 시도다.
+
+각 개념을 한 줄로 정리한다.
+
+- **Transaction (atomic block)** — 은행 송금처럼 *전부 성공 또는 전부 취소*. 사용자는 `atomic { ... }` 블록 안에 일반 코드를 쓰고, 시스템이 commit/abort를 알아서 처리한다.
+- **STM (Software TM)** — 책 묶음 단위로 락을 거는 *조용한 도서관*. 책 한 권마다 락이 아니라 *해시 묶음*(stripe) 단위로 락을 건다. 락 비용을 줄이면서 충돌 감지를 한다.
+- **TL2 — striped locking** — STM의 표준 알고리즘. 글로벌 *버전 클럭*을 두고, 트랜잭션 시작 시점의 버전과 commit 시점의 버전을 비교해 *낡은 읽기*를 잡는다.
+- **HTM (Intel TSX)** — 공사 현장의 무전기. 한 트럭이 *공사 중* 무전을 켜면 다른 트럭은 잠깐 멈춘다. 일이 끝나면 공사 중을 끈다. 충돌이 나면 무전기가 *abort* 신호를 보내고, 트럭은 처음부터 다시 시도한다. CPU 캐시 코히런스 위에 얹은 HW 가속이다.
+- **Eager vs Lazy update** — 일을 *즉시* 처리실에 반영하는가, 결산이 끝난 *뒤*에 반영하는가의 차이. 즉시 반영(eager)은 commit이 빠른 대신 abort 시 *원복* 비용이 든다. 결산 후 반영(lazy)은 abort가 싸지만 commit 시 *모두 쓰기*가 한 번에 일어난다.
+
+| 비유 | 시스템 사례 |
+|------|------------|
+| 은행 송금의 all-or-nothing | Haskell STM, Clojure ref/dosync, Java Multiverse |
+| 책 묶음 단위 락 | TL2 striped lock (학술 STM) |
+| 공사 중 무전기 | Intel TSX (HLE/RTM), IBM POWER8+ HTM |
+| 즉시 vs 결산 후 반영 | Eager (TL2), Lazy (DSTM, NOrec) |
+| 락 없는 일반 코드 합성 | Haskell `atomically`, Clojure `dosync` (Ch3 7CM 합성 보장과 연결) |
+
+핵심 통찰은 두 가지다. 첫째, 락은 *합성이 안 된다* — 두 함수를 합쳐 쓰면 deadlock 위험. 트랜잭션은 *합성된다* — atomic block 안에 다른 atomic block을 넣을 수 있다. 둘째, *낙관적 동시성*(optimistic concurrency) — 일단 동시에 시작하고, 충돌이 *드물다*는 가정 아래 성능을 챙긴다. 충돌이 잦으면 retry overhead로 망한다.
+
+이 장은 그 약속의 *세부 알고리즘*과 *현실의 한계*를 풀어 간다.
+
 ## 18.1 락의 문제
 
 지금까지 본 모든 동기화 도구는 락 또는 lock-free 알고리즘. 둘 다 문제가 있다.
@@ -944,6 +970,57 @@ public:
 - **연구는 계속** — 매년 새 논문 나옴.
 
 실무자는 여전히 락 / lock-free 라이브러리 / 메시지 패싱을 쓴다. TM은 흥미로운 가능성이지만 마지막 도구가 되진 못했다.
+
+## 다시 송금과 무전기로 — 디자인 결정의 비유
+
+이 장에서 본 결정들을 일상 비유로 다시 묶는다. *어디서 누가 충돌을 감지하고, 누가 원복하는가* — 이게 모든 TM 시스템의 본질이다.
+
+**Eager update vs Lazy update**. 은행 송금 비유로 옮긴다. *즉시 반영*은 — A 계좌에서 100원을 *지금* 빼고, B에 *지금* 더한다. 충돌이 나면 *이미 반영된 변경*을 원복해야 한다. undo log가 필요하고, abort 비용이 크다. *결산 후 반영*은 — 송금 의도를 메모장(write set)에 적어 두고, commit 시점에 *한꺼번에* 반영한다. abort는 메모장을 버리면 끝이라 싸지만, commit이 길어 다른 트랜잭션을 막을 수 있다. TL2가 lazy update + striped lock의 대표 설계다.
+
+**Pessimistic locking vs Optimistic concurrency**. 도서관 비유. *비관적 락*은 책을 *읽기 전부터* 다른 사람이 못 보게 잠근다. 충돌은 막지만 *대부분의 시간*을 락 위에서 보낸다. *낙관적*은 일단 그냥 읽고 쓰고, *commit 시점에* "이 책이 그 사이 다른 사람 손을 안 거쳤나"를 검증한다. 검증 실패면 재시도. TM은 거의 다 낙관적이다 — 충돌이 *드물다*는 가정 위에서 성능이 나온다.
+
+**Version clock의 의미**. TL2의 글로벌 버전 클럭은 도서관의 *대여 일자 스탬프*다. 트랜잭션 시작 시 *지금까지의 모든 commit*을 포괄하는 timestamp $V$를 받는다. 읽은 모든 책의 *최근 대여 일자*가 $V$ 이하면 OK — 그 사이 누구도 손대지 않았다. 하나라도 $V$보다 크면 abort. *모든 검증*이 시작 시점의 단일 스냅샷에 대한 비교라 간결하다.
+
+**HTM의 캐시 코히런스 활용**. Intel TSX의 가장 영리한 부분 — *별도의 충돌 감지 하드웨어*를 만들지 않았다. 캐시 코히런스 프로토콜(MESI/MOESI)이 이미 *누가 어느 라인을 만졌는가*를 알고 있다. 트랜잭션 안에서 캐시 라인을 읽으면 *read set*에 추가, 쓰면 *write set*에 추가. 다른 코어가 그 라인의 invalidation을 보내면 *충돌*이라고 판단하고 abort한다. 무전기 비유 그대로 — 옆 트럭이 *내 자재 더미*에 다가오는 무전을 들으면 자기 작업을 abort.
+
+| 결정 | 비유 | 시스템 예 |
+|------|-----|----------|
+| Eager update | 즉시 송금 | undo-log 기반 STM |
+| Lazy update | 결산 후 송금 | TL2, NOrec |
+| Pessimistic | 잠가 두기 | 락 기반 (TM 아님) |
+| Optimistic | 일단 하고 검증 | 거의 모든 TM |
+| Version clock | 대여 일자 스탬프 | TL2 글로벌 클럭 |
+| Cache coherence 재사용 | 무전기 채널 | Intel TSX RTM |
+
+### 왜 TM이 주류가 못 되었나
+
+이 장의 알고리즘은 학문적으로는 우아하지만 *실무 도구*가 되지는 못했다. 이유는 비유로도 보인다.
+
+- **충돌이 잦으면 망한다**. 낙관적 동시성은 *충돌이 드물다*는 가정 위에 선다. 한 변수에 N 개 스레드가 몰리면 abort/retry가 폭주해 락보다 *느리다*. 카운터 같은 hot spot은 TM이 가장 약한 자리다.
+- **I/O가 어렵다**. 송금 비유로 — *돈을 보낸 뒤* abort가 일어나면 돈을 어떻게 회수할 것인가. 메모리는 원복할 수 있지만 *외부 시스템에 보낸 신호*는 원복할 수 없다. Haskell STM이 *타입 시스템*으로 IO를 막은 건 정확히 이 문제 때문이다.
+- **HTM의 정치적 좌초**. Intel TSX는 TAA(Transactional Asynchronous Abort) 부채널 취약점으로 컨슈머 CPU 대부분에서 영구 비활성화됐다(Skylake~Coffee Lake 마이크로코드). Alder Lake 이후 하이브리드 아키텍처에서는 미탑재. Sapphire Rapids 같은 서버 라인에만 잔존 — *학습 가치는 있지만 운영 가정은 금물*.
+- **대체재가 충분히 좋다**. RCU(Read-Copy-Update), Hazard Pointers, fine-grained lock, message passing(Erlang/Go/Rust channel), Actor model — 각자 영역에서 TM보다 잘 동작한다. *합성성*만이 TM의 진짜 차별점인데, 그것도 Haskell처럼 *순수성*이 받쳐 줄 때만 빛난다.
+
+### 비유 한 문장으로 시리즈를 맺으며
+
+이 책은 *카운터 한 개를 정확하게 늘리는 법*에서 출발해 *합성 가능한 atomic 블록*까지 왔다. 카페와 군대와 도서관과 송금이 모두 같은 문제 — *누가, 무엇을, 언제, 얼마나 확실하게 본다고 보장할 것인가* — 의 변주였다. 모든 시스템 코드는 이 문제 위에 서 있다.
+
+### 런타임별 TM 매핑
+
+학습용으로 한눈에 보는 TM 시스템 비교다.
+
+| 시스템 | 종류 | 비유 |
+|--------|------|------|
+| Haskell `STM` (`atomically`, `retry`, `orElse`) | STM | 도서관 + IO 격리 (타입으로 안전) |
+| Clojure `ref` + `dosync` + `alter`/`ensure` | STM | 도서관 + 변형 함수 |
+| Java Multiverse / ScalaSTM | STM | TL2 기반 striped lock |
+| GCC `-fgnu-tm` (C++ TM TS) | STM (실험적) | atomic 블록 문법 |
+| Intel TSX (HLE/RTM) | HTM | 무전기 (cache coherence) |
+| IBM POWER8+ TM | HTM | 무전기 (POWER 코어) |
+| HHVM RDS | runtime-dedicated TM | 페이스북 PHP 인터프리터 |
+| pgSQL `SERIALIZABLE` 격리 | DB 트랜잭션 (참고) | 책의 원조 비유 |
+
+Ch3의 *합성 가능성* 논의(7CM, Wait-free freedom from anomalies)와 이 장의 *atomic 블록 합성*은 같은 줄에 서 있다 — *작은 atomic 단위를 모아 더 큰 atomic 단위를 만들 수 있는가*. STM이 그 가능성을 일반 코드 영역으로 확장한 가장 야심찬 시도였다.
 
 ## 정리
 

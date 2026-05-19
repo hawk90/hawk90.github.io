@@ -15,6 +15,29 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 일상의 비유로 보기
+
+병렬 계산은 종종 *phase*로 나뉜다 — 1단계가 끝나야 2단계가 시작될 수 있고, 모든 스레드가 1단계를 끝낸 *뒤*에야 다음 단계로 넘어가야 한다. 이때 필요한 동기화가 **barrier**다.
+
+생활 속 비유로 옮긴다. 군대의 행진을 떠올린다. 한 부대가 한 마디씩 발을 맞춰 나아간다. 한 사람이 늦으면 *전원이 그 자리에 멈춰* 기다린다. 모두가 같은 발을 디딘 뒤에야 다음 마디로 넘어간다. 이게 barrier의 본질이다.
+
+각 변종을 한 줄로 정리한다.
+
+- **Simple barrier (counter)** — 부대원이 한 명씩 도착 지점에 모인다. 마지막 사람이 도착하면 *전원이* 다음 단계로 출발한다. 단순한 카운터 한 개로 구현할 수 있다. 다만 *재사용*하려면 문제가 생긴다 — 카운터가 0이 된 직후 새 단계가 시작되는데, 누군가는 아직 직전 단계에서 깨어나는 중이다.
+- **Sense-reversing barrier** — 단계마다 *깃발 색*이 바뀐다. 빨강 단계가 끝나면 파랑 깃발, 그다음은 다시 빨강. 각 스레드는 *지금 단계의 색*과 *다음 단계의 색*을 알기 때문에 잘못된 단계에서 깨어나지 않는다. C++20 `std::barrier`가 이 방식이다.
+- **Combining tree barrier** — 부대를 페어로 묶고, 페어가 합쳐 더 큰 페어를 이룬다. 토너먼트처럼 위로 올라간다. $N$명이 모이는 데 $O(\log N)$ 단계가 든다. 한 카운터에 모두 몰리는 경합을 분산한다.
+- **Dissemination barrier** — 회사의 슬랙 공지처럼 동작한다. 단계 $k$에서 각 스레드 $i$가 스레드 $(i + 2^k) \bmod N$에게 "나 끝났음"을 알린다. $\log_2 N$ 라운드면 모두가 모두의 도착을 안다. 메시지 한 건마다 두 스레드만 만나서 false sharing이 적다.
+
+| 비유 | 시스템 사례 |
+|------|------------|
+| 마지막 사람 도착하면 전진 | POSIX `pthread_barrier_t`, OpenMP `#pragma omp barrier` |
+| 색깔 바뀌는 깃발 | C++20 `std::barrier`, Java `CyclicBarrier` |
+| 페어 → 페어 → ... | Tournament/Combining-Tree (학술 구현) |
+| 슬랙 단체 공지 | MPI 일부 collective, dissemination barrier |
+| GPU thread block 동기화 | CUDA `__syncthreads()`, OpenCL `barrier(CLK_LOCAL_MEM_FENCE)` |
+
+핵심 통찰은 두 가지다. 첫째, *모두 모이는 동기화*가 표면적으로는 단순해 보이지만 캐시 라인 한 줄에 N 스레드가 몰리면 *bouncing*이 일어나 큰 비용이다. 둘째, 같은 의미론을 만족하면서 통신 패턴을 바꾸면 — tree, dissemination — 확장성이 극적으로 달라진다. 17장은 같은 barrier를 *어떻게 만드는가*의 카탈로그다.
+
 ## 17.1 Barrier란
 
 **Barrier** — N 개의 스레드가 모두 도착할 때까지 기다리는 동기화 지점.
@@ -787,6 +810,67 @@ GPU 프로그래밍에서 barrier는 핵심 도구.
 - **`__syncwarp()`** — warp 내 동기화
 
 GPU의 SIMT 모델에서 barrier가 정확한 데이터 흐름을 보장. 잘못 쓰면 **deadlock 또는 잘못된 결과**.
+
+## 다시 행진 대형으로 — 어떤 barrier를 고를까
+
+이 장의 알고리즘은 모두 *같은 보장*을 한다 — "전원이 도착할 때까지 모두 기다린다". 그런데 왜 이렇게 많은 변종이 존재할까. *비용 구조*가 다르기 때문이다.
+
+**카운터 한 개의 함정**. 가장 단순한 barrier는 atomic counter를 N에서 0까지 줄이는 것이다. 카페로 옮기면 *카운터 한 곳에 모두 도장을 찍는다*. 4명이면 괜찮다. 64명이면 한 줄에 64명이 줄을 선다 — 캐시 라인 한 줄을 64개 코어가 동시에 두드리니 *cache line bouncing*이 일어난다. CPU 한 사이클이 아니라 수백 사이클짜리 동기화가 된다.
+
+**트리로 분산**. 토너먼트 비유처럼, 페어 단위로 합의하고 한 단계 위로 올라간다. 통신은 $O(\log N)$ 단계에 걸쳐 일어나지만 각 단계의 *경합 폭*은 2다. 64명이라도 한 번에 두 명만 같은 라인을 두드린다. Combining tree, Tournament, Static tree barrier가 모두 이 계열이다.
+
+**Dissemination — 가장 균일한 통신**. 슬랙 단체 채널 비유. 각 스레드가 *자기 단계의 메시지*를 다른 한 명에게 보낸다. $\log_2 N$ 라운드 뒤에는 *모두가 모두의 도착*을 안다. 매 통신이 정확히 두 스레드 사이에서만 일어나므로 false sharing이 발생하지 않는다. 다만 메시지 수는 $N \log_2 N$로 가장 많다.
+
+| Barrier | 라운드 수 | 통신 폭 | 메시지 수 | 적합한 곳 |
+|---------|----------|---------|----------|----------|
+| Simple counter | 1 | $N$ | $N$ | $N \leq 8$ 정도 |
+| Combining tree | $\log_2 N$ | 2 | $N$ | 일반 |
+| Tournament | $\log_2 N$ | 2 | $N$ | NUMA 일반 |
+| Static tree | $\log_2 N$ | 2 | $N$ | 임베디드/cache-friendly |
+| Dissemination | $\log_2 N$ | 2 | $N \log_2 N$ | 최저 latency |
+
+**Latency vs throughput**. Dissemination이 *가장 빠르게* 모든 스레드를 통과시키지만 *메시지 총량*은 가장 많다. 트리 계열은 메시지 수가 적지만 *path length*가 길다. 한 phase의 *임계 경로*가 짧아야 하는 워크로드 — iterative solver의 매 iter — 에서는 dissemination이 좋고, *barrier 빈도가 낮은* 워크로드는 트리로도 충분하다.
+
+**One-shot인가 재사용인가**. 한 번만 만나는 동기화라면 *깃발 색을 바꿀 필요*가 없다. C++20 `std::latch`가 그 자리다 — 카운트가 0이 되면 *영원히* 통과 가능. 반복되는 phase 동기화는 *깃발 색을 매번 뒤집어야* 한다 — C++20 `std::barrier`, Java `CyclicBarrier`가 그 자리다.
+
+### GPU 한정 주의사항
+
+`__syncthreads()`는 *같은 thread block 안*에서만 동작한다. 다른 block 사이의 동기화는 kernel 종료가 유일한 방법이다 — 사실상 *호스트 측 barrier*다. SM(streaming multiprocessor) 단위 스케줄링과 맞물려 있어서, block 단위로 자체적인 phase가 끝나야 한다.
+
+또 하나의 함정 — `__syncthreads()`는 *모든 스레드가 도달*해야 한다. 분기문(`if`) 안에 두면 *일부 스레드만* 도달하고 나머지는 영원히 기다린다. CUDA의 가장 흔한 deadlock 패턴이다. 모든 스레드가 같은 path를 타도록 *공통 코드 경로*에 둬야 한다.
+
+```cuda
+// 잘못된 패턴 — 일부 스레드만 도달
+if (threadIdx.x < 16) {
+    // 무언가 작업
+    __syncthreads();   // 잘못 — 16개 스레드만 도달
+}
+
+// 올바른 패턴 — 모든 스레드 도달
+if (threadIdx.x < 16) {
+    // 무언가 작업
+}
+__syncthreads();   // OK — block 전체 도달
+```
+
+이 한 줄짜리 차이가 GPU 디버깅의 절반을 만든다. 행진 비유로 — *대형 일부만 다음 칸으로 가면 전 부대가 멈춘다*.
+
+### 런타임별 비유 매핑
+
+같은 barrier 의미론이 런타임마다 다른 API로 등장한다.
+
+| 런타임 | 재사용 가능 | 일회용 | 라운드 패턴 |
+|--------|-------------|--------|-------------|
+| C++20 | `std::barrier` | `std::latch` | sense-reversing 내장 |
+| POSIX | `pthread_barrier_t` | (직접 구현) | 구현 의존 |
+| Java | `CyclicBarrier`, `Phaser` | `CountDownLatch` | sense-reversing 또는 tournament |
+| Go | (없음 — `sync.WaitGroup`가 latch 유사) | `sync.WaitGroup` | counter 기반 |
+| Python | `threading.Barrier` | `threading.Event` | counter 기반 |
+| MPI | `MPI_Barrier` | (collective 한 번) | 구현 의존 (tree/dissemination) |
+| OpenMP | `#pragma omp barrier` | (없음 — implicit at parallel region end) | 구현 의존 |
+| CUDA | (없음 — kernel 종료가 barrier) | `__syncthreads()` (block 내) | hardware fence |
+
+`std::barrier`와 `std::latch`의 사용 자리를 한 문장으로 — *모임이 반복되면* barrier, *한 번뿐이면* latch.
 
 ## 정리
 

@@ -15,6 +15,22 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 들어가며 — *기다림*의 두 자세
+
+락을 못 잡았을 때 스레드는 무엇을 할 수 있는가. 두 가지뿐이다. *잠들거나*, *계속 시도하거나*. 잠드는 쪽은 OS의 도움이 필요하다. 깨우는 데에도 도움이 필요하다. 컨텍스트 스위치, 스케줄러 호출, TLB 비우기. 모두 합쳐 수 µs 단위의 비용이다.
+
+이 비용이 *락 보유 시간*보다 크다면 잠드는 쪽이 손해다. 짧게 잡고 짧게 쓰는 락이라면 그냥 *서서 기다리는* 편이 빠르다. 이 챕터는 그 *서서 기다리는* 락 — **스핀 락** — 의 설계를 다룬다.
+
+비유로 옮기면 다음과 같다.
+
+| 상황 | 잠들기 (blocking lock) | 서서 기다리기 (spin lock) |
+|---|---|---|
+| 화장실 줄 | 의자에 앉아 잡지 읽다 차례 오면 알림 | 문 앞에 서서 손잡이 계속 잡아당기기 |
+| 비용 | 의자로 가는 시간 + 알림 받는 시간 | 손잡이 잡아당기는 동안 다른 일 못 함 |
+| 유리한 조건 | 차례까지 오래 걸릴 때 | 차례가 *금방* 올 때 |
+
+이 챕터의 모든 알고리즘은 *서서 기다리는 방식*을 점점 정교하게 만든다. TAS는 무작정 잡아당긴다. TTAS는 *문틈으로 먼저 살핀다*. backoff는 *몇 초 기다렸다 다시 잡는다*. queue lock은 *번호표를 받아 줄을 선다*. 비유의 진화가 곧 알고리즘의 진화다.
+
 ## 7.1 왜 스핀 락인가
 
 뮤텍스 / 세마포어는 OS의 도움을 받는다. 락을 못 잡으면 OS가 스레드를 재운다 (block). 깨우는 데 컨텍스트 스위치 비용이 든다.
@@ -83,6 +99,8 @@ bool spinlock_try_lock(SpinLock* lock) {
 - 우선순위 역전 가능 시스템
 
 ## 7.2 가장 단순한 스핀 락 — TAS Lock
+
+> **비유** — *공용 화장실 문 앞에 선 사람들*. 모두가 손잡이를 *동시에* 잡아당긴다. 누군가 들어가면 손잡이가 잠긴 채로 돌아가지만, 다른 사람들은 그래도 *계속 잡아당긴다*. 손잡이를 잡아당기는 행위 자체가 *문에 흔들림*을 남긴다 — 안에 있는 사람도 그 진동을 느낀다. 이것이 *cache line invalidation*에 해당한다. 잡아당기는 사람이 많을수록 문은 더 흔들리고, 안의 사람도 일이 늦어진다.
 
 ```cpp
 // C++20 TAS Lock
@@ -173,6 +191,8 @@ TTAS 라이프사이클:
 
 ## 7.3 TTAS Lock — 캐시 친화적
 
+> **비유** — 손잡이를 잡아당기기 전에 *문틈으로 먼저 들여다본다*. 안에 사람이 보이면 그냥 *지켜만* 본다. 지켜보는 행위는 문에 흔들림을 주지 않는다. 안의 사람이 나오면 그제서야 모두가 손잡이를 잡아당긴다 — 이때만 짧게 혼란하다. 평소엔 조용하다.
+
 ```cpp
 // C++20 TTAS Lock
 #include <atomic>
@@ -243,6 +263,8 @@ TTAS: read만 반복 → cache hit
 성능이 크게 개선된다. 다만 락이 풀린 직후엔 여전히 모두가 동시에 exchange를 시도해 경합 발생.
 
 ## 7.4 Exponential Backoff
+
+> **비유** — 인터넷이 끊겨 모뎀이 재접속을 시도하는 광경. 첫 실패는 1초 후 재시도. 또 실패하면 2초. 다음은 4초. 8초. 모두가 같은 순간에 재시도하면 다시 충돌하기 때문에, 대기 시간을 점점 늘려 *부딪힐 확률*을 떨어뜨린다. Ethernet의 충돌 회피, TCP의 혼잡 제어가 같은 아이디어다.
 
 경합이 심하면 — **기다린다**.
 
@@ -363,6 +385,8 @@ TCP의 혼잡 제어와 비슷한 아이디어.
 **한계** — 여전히 모든 스레드가 같은 변수를 본다. 폭발적 경합에는 한계. 게다가 적절한 MIN/MAX는 *워크로드별*로 다르고, 자동 튜닝이 어렵다. Queue lock은 이 문제를 다른 방향으로 푼다.
 
 ## 7.5 Queue Locks — 공정한 락
+
+> **비유** — 은행 창구의 번호표 기계. 들어와서 *번호표*를 뽑으면 자기 순서가 정해진다. 자기 번호가 호출될 때까지 의자에 앉아 있는다. 누구도 새치기 못 한다. 도착 순서대로 처리된다. 호출은 직원이 *직접 마이크로 한 번* 부르고 끝 — 모두가 듣지만, 한 번만 부른다. 이것이 queue lock의 *공정성*과 *낮은 캐시 트래픽*의 본질이다.
 
 지금까지의 락은 **공정하지 않다**. 다른 스레드가 우연히 먼저 락을 잡을 수 있고, 어떤 스레드는 영원히 못 잡을 수도 있다 (starvation).
 
@@ -564,6 +588,8 @@ void clh_unlock(CLHLock* lock) {
 
 ## 7.8 MCS Lock
 
+> **비유** — 줄을 선 사람들이 *자기 어깨에만* 손을 얹고 기다린다. 앞 사람이 일을 마치면 *내 어깨를 톡 친다*. 나는 내 어깨만 보면 된다. 옆 사람의 어깨를 곁눈질할 필요도 없고, 앞 사람의 등을 볼 필요도 없다. 멀티 소켓 — NUMA — 환경에서 *내 어깨가 곧 내 메모리*이므로 모든 polling이 자기 소켓 안에서 끝난다.
+
 ```cpp
 // C++20 MCS Lock
 #include <atomic>
@@ -755,6 +781,81 @@ Linux 커널 / glibc의 락은 더 복잡하다.
 - **Hierarchical Lock** — NUMA 토폴로지를 고려
 
 이 챕터의 알고리즘들이 그 토대가 된다.
+
+## 7.12 시스템 사례 — 책 밖의 알고리즘
+
+이 챕터의 락이 실제 시스템 어디에 있는지 정리한다.
+
+**Linux kernel — qspinlock (queued spinlock)**
+
+리눅스 커널의 기본 spinlock은 2014년부터 *qspinlock*이다. 이름이 시사하듯 MCS의 변종이다. 4바이트 안에 *대기자 수 + tail 포인터*를 인코딩해 메모리를 아끼고, NUMA 친화적인 local spin을 유지한다.
+
+```text
+qspinlock 32비트 레이아웃:
+  [ tail (16b) | pending (1b) | locked (1b) | reserved ]
+  - locked = 1: 누가 락 잡음
+  - pending = 1: 첫 대기자 (큐를 만들기 전 fast path)
+  - tail: 큐 꼬리 CPU 번호 (MCS 노드 식별)
+```
+
+빠른 경로 — 경합 없을 때 — 는 cmpxchg 한 번. 경합이 보이면 *pending* 자리에 표시, 둘 이상이면 그제서야 진짜 MCS 큐를 만든다. 이 *점진적 전환*이 책의 TTAS-Backoff에서 queue lock으로 가는 흐름과 정확히 일치한다.
+
+**glibc — pthread_spin_lock**
+
+POSIX의 pthread spinlock은 가장 단순하다. 아키텍처별로 TAS 또는 TTAS. backoff도 큐도 없다. 짧은 critical section에 *직접* 쓰라는 인터페이스.
+
+```text
+glibc/nptl/pthread_spin_lock.c (x86):
+  while (atomic_exchange (lock, 1))
+    while (*lock)
+      __asm__ ("pause");
+```
+
+`pause` 명령어가 핵심이다. busy spin에서 CPU 파이프라인 stall을 피하고, hyperthreading 짝꿍에게 자원을 양보한다. *문틈으로 살피는 동안 숨 쉬기*에 해당한다.
+
+**Java — VarHandle과 LockSupport**
+
+Java의 표준 락은 `ReentrantLock`이지만, 내부 구현은 AQS(AbstractQueuedSynchronizer)다. AQS는 CLH의 변형 — 명시적 큐 노드를 만들고, `LockSupport.park()`로 스레드를 *재운다*. 책의 abortable queue lock과 거의 같다.
+
+JDK 9 이후 `VarHandle`이 등장하면서 사용자가 직접 atomic CAS / TAS 기반 락을 작성할 수 있게 됐다. 짧은 critical section을 위한 사용자 정의 spinlock이 가능해진 것.
+
+```java
+// Java 사용자 정의 TAS spinlock (개념적)
+import java.lang.invoke.VarHandle;
+import java.lang.invoke.MethodHandles;
+
+class TASLock {
+    private volatile int state = 0;
+    private static final VarHandle STATE;
+    static {
+        try {
+            STATE = MethodHandles.lookup()
+                .findVarHandle(TASLock.class, "state", int.class);
+        } catch (ReflectiveOperationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+    void lock() {
+        while ((int) STATE.compareAndExchange(this, 0, 1) != 0) {
+            Thread.onSpinWait();  // x86 pause 대응
+        }
+    }
+    void unlock() {
+        STATE.setRelease(this, 0);
+    }
+}
+```
+
+`Thread.onSpinWait()`가 JIT를 통해 `pause` 명령어로 내려간다 — glibc 구현과 같은 트릭이다.
+
+| 시스템 | 알고리즘 | 비고 |
+|---|---|---|
+| Linux kernel | qspinlock (MCS 변형) | fast path는 cmpxchg, contention 시 큐 |
+| glibc pthread | TTAS + pause | 단순, 사용자 책임으로 짧게 |
+| Java AQS | CLH 변형 + park | abortable, 다양한 동기화 도구의 토대 |
+| C++20 표준 | `std::atomic_flag::wait` | OS futex 위임 (실은 hybrid) |
+
+책의 추상 알고리즘이 *그대로* 실제 시스템에 들어가 있다. 다만 fast path 최적화, NUMA hint, 인터럽트 처리 같은 *현실의 잡음*이 코드를 덮는다.
 
 ## 정리
 

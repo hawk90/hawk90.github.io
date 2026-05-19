@@ -15,6 +15,26 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 들어가며 — 동기화 도구에 *권력*의 등급이 있다
+
+여러 사람이 모인 위원회를 떠올려 보자. 결정을 내리는 방식이 다양하다. 어떤 위원회는 발표 없이 각자 종이에 적은 답을 모아 보는 *비밀 투표*만 한다. 어떤 위원회는 **번호표 발급기** 하나를 가운데 두고, 받은 번호에 따라 순서를 정한다. 어떤 위원회는 의장의 **단호한 비교-확정** 한 마디로 결정이 끝난다.
+
+이 세 위원회는 같은 종류의 결정 — *만장일치 합의* — 을 할 수 있는가. 답은 *결정에 참여하는 인원수*에 따라 달라진다.
+
+- **메모 한 통만 주고받는 위원회**는 두 사람의 합의조차 보장하지 못한다. 한 사람이 메모를 쓰는 동안 다른 사람이 같은 메모를 읽으면, 둘은 영원히 서로 다른 결정에 머무를 수 있다.
+- **번호표 발급기 한 대를 둔 위원회**는 두 사람까지는 합의가 가능하다. 먼저 번호를 받은 사람의 결정을 따르면 되니까. 그러나 세 사람이 모이면 — 누가 1번이고 누가 2번인지가 곧 결정으로 환원되지 않아 — 합의가 깨진다.
+- **의장의 비교-확정**(compare-and-swap)이 있는 위원회는 *몇 명이 모이든* 합의가 가능하다. 의장이 "결정이 비어 있다면 내 의견으로 채운다"를 한 줄로 수행하면, 모든 사람이 그 결과를 따른다.
+
+이 차이가 곧 **권력의 등급**이다. Maurice Herlihy가 1991년에 증명한 충격적 결과 — 동기화 원시 사이에 *영원히 넘을 수 없는* 위계가 있다. 낮은 도구로 높은 도구를 시뮬레이션할 수 없다.
+
+위계를 재는 자는 **consensus**다. "N명의 위원이 wait-free로 만장일치 결정을 낼 수 있는가"라는 질문이 곧 도구의 능력을 가른다. 풀 수 있는 N의 최댓값을 **consensus number**라 부른다.
+
+- read/write 메모: **consensus number 1** — 두 명도 합의 불가
+- queue, stack, test-and-set, fetch-and-add: **consensus number 2** — 정확히 두 명까지
+- compare-and-swap, LL/SC: **consensus number ∞** — 인원 무제한
+
+이 챕터는 이 위계가 *왜* 존재하는지, *왜* 영원한지를 증명한다. 그리고 그 증명의 핵심 도구가 **critical state argument**다. 합의에 도달하는 모든 알고리즘은 어느 시점에 "0과 1 모두로 갈 수 있는 경계"를 통과해야만 하고, 그 경계에서 약한 도구는 결정을 갈라낼 *권력*이 없다는 것이 논증의 골자다.
+
 ## 5.1 왜 동기화의 "능력"인가
 
 하드웨어가 제공하는 동기화 프리미티브는 다양하다.
@@ -557,6 +577,83 @@ void cas_example(void) {
 | ARM | LDADD (FAA, ARMv8.1) | 2 |
 
 모던 CPU는 CAS 또는 LL/SC를 제공한다. 그래서 lock-free 알고리즘이 가능하다.
+
+### 시스템 사례 — 권력의 등급이 실제로 드러나는 곳
+
+이 위계가 단지 종이 위의 이론이 아니라는 사실은, 실제 시스템 설계의 결정들이 곧 위계의 결과라는 점에서 확인된다.
+
+**x86 CMPXCHG — 단 하나의 명령으로 위원회 의장 노릇**
+
+x86의 `LOCK CMPXCHG`는 한 명령으로 wait-free N-consensus를 푼다. 코드 한 줄에 들어가는 정보가 이 만큼이다.
+
+```text
+LOCK CMPXCHG [mem], reg
+  의미:  if (mem == EAX) { mem = reg;       ZF = 1; }
+         else            { EAX = mem;       ZF = 0; }
+  보장:  - 메모리 접근 전체가 atomic (bus lock 또는 cache line lock)
+         - 다른 코어의 CMPXCHG와 결과적으로 직렬화됨
+         - linearizable
+```
+
+이 한 명령이 곧 5장에서 본 CAS-based consensus의 핵심 단계다. `decision`이 초기값일 때 첫 번째 CMPXCHG만 성공하고, 그 뒤는 모두 실패하며 EAX에 결정값이 들어와 즉시 반환된다. consensus number ∞의 실증.
+
+x86이 `LOCK XADD` (fetch-and-add)와 `LOCK CMPXCHG` 둘 다 제공한다는 점이 의미심장하다. 전자는 consensus 2, 후자는 ∞. 같은 칩이 두 등급의 권력을 모두 노출한다.
+
+**ARM LL/SC — 분리된 두 명령으로 같은 권력**
+
+ARM은 CAS를 *단일 명령*으로 제공하지 않는다 (ARMv8.1 이전엔). 대신 두 명령으로 쪼갠다.
+
+```text
+loop:
+  LDXR    W0, [addr]      ; load-exclusive: addr의 값을 W0로, exclusive monitor 활성
+  CMP     W0, W_expected  ; 기대값과 비교
+  B.NE    fail
+  STXR    W1, W_new, [addr]  ; store-exclusive: monitor가 살아 있을 때만 성공
+  CBNZ    W1, loop        ; 실패하면 재시도
+```
+
+`LDXR`이 cache line에 *exclusive monitor*를 건다. 그 사이에 다른 코어가 같은 line에 접근하면 monitor가 풀린다. `STXR`은 monitor가 살아 있을 때만 store하고 0을, 풀렸으면 1을 반환한다.
+
+이 LL/SC 짝은 CAS와 정확히 같은 consensus 능력 — ∞ — 을 갖는다. 그러나 single-instruction이 아니므로 *spurious failure*가 발생할 수 있다. 컨텍스트 스위치, 인터럽트, 같은 line의 무관한 접근이 monitor를 깨뜨린다. 그래서 ARM의 LL/SC를 C++의 `compare_exchange_weak`에 매핑한다 — weak 버전은 spurious failure를 허용하므로 LL/SC와 자연스럽게 맞물린다.
+
+ARMv8.1부터는 `CAS` 명령이 추가됐다. 단일 명령으로 CAS를 수행한다. 하드웨어가 점점 더 강한 원시를 직접 제공하는 방향으로 진화한다.
+
+**Zookeeper와 Raft — 분산 합의의 consensus number**
+
+위 사례는 한 머신 안의 이야기다. 시야를 넓혀 분산 시스템으로 가면, 합의의 의미가 달라지고 그 비용도 달라진다.
+
+```text
+한 머신:  CAS = O(1) cycle = 수십 나노초
+분산:    consensus = O(network round trip) = 수 밀리초
+         그리고 노드 장애를 허용해야 함
+```
+
+Apache Zookeeper는 **ZAB**(Zookeeper Atomic Broadcast) 프로토콜로 합의를 구현한다. 모든 쓰기가 leader를 거치고, leader가 quorum에게 propose / ack 하여 단일 순서를 만든다. consensus number는 무한대이지만, 비용이 다르다.
+
+Raft는 같은 문제를 더 이해하기 쉬운 형태로 푼다. **leader election + log replication + safety**의 세 부분으로 나누어, 어느 노드든 leader만 되면 그가 의장 노릇을 한다 — 5장의 CAS-based consensus의 분산 버전.
+
+| 시스템 | 의장 | 비교-확정 단위 |
+|---|---|---|
+| x86 CMPXCHG | 한 명령 | 32/64-bit word |
+| ARM LL/SC | 두 명령 + 재시도 | 32/64-bit word |
+| Raft / ZAB | leader | log entry |
+| Multi-Paxos | 선출된 proposer | proposal |
+
+본질은 같다. *단 하나의 결정자가 단 한 번의 비교-확정을 한다.* 머신 안에서는 CPU가 cache coherence로, 분산에서는 quorum vote로 그 한 번을 보장한다.
+
+**lock-free 알고리즘이 CAS를 핵심에 둔 이유**
+
+5장의 결과가 곧 lock-free 라이브러리의 설계 결정이다. 거의 모든 lock-free queue, stack, list, hash table이 CAS 루프를 안고 있다. consensus number 2인 fetch-and-add만으로는 lock-free linked list조차 못 만든다 — 노드 삽입 시 *위치 합의*가 일반 N-consensus이기 때문.
+
+```cpp
+// lock-free list 노드 삽입의 핵심: CAS로 prev->next 갱신
+// FAA로는 불가능. 위치는 카운터가 아닌 *합의 대상*.
+while (!prev->next.compare_exchange_weak(expected, my_node, ...)) {
+    // ... 재탐색
+}
+```
+
+이 CAS를 무엇으로도 대체할 수 없다. 책의 5장 위계는 곧 라이브러리 설계의 *물리적 제약*이다.
 
 ## 5.11 Universal Construction 예고
 

@@ -15,9 +15,19 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+스택은 큐와 달리 *push와 pop의 짝이 자주 만난다* — LIFO 특성상 가장 최근의 push가 다음 pop의 대상이다. 동시 환경에서 이 만남은 두 의미를 가진다. 첫째, 두 연산이 같은 변수(top)를 두고 *경쟁*한다 — 모든 스레드가 한 꼭대기에서 다투는 형국. 둘째, 만남 자체가 *우회의 기회*다 — push와 pop이 서로 만나면 스택을 *안 거치고* 서로 상쇄될 수 있다. 이 챕터의 핵심 통찰은 *경합을 완화하는 게 아니라 우회한다*는 발상에 있다.
+
+먼저 Treiber stack을 본다. 단일 LIFO에서 *모든 사람이 꼭대기 한 자리를 두고 다투는* 가장 단순한 lock-free 구조. CAS 한 번으로 push/pop이 끝나지만, 경합이 높으면 cache line ping-pong으로 락보다 느려질 수 있다. 그 다음 elimination — *push와 pop이 만나면 서로 상쇄*되어 스택을 건드리지 않는다. 생산자와 소비자가 *직거래*하는 셈이다. 시장에서 사과를 사려는 사람과 팔려는 사람이 가게를 거치지 않고 길에서 만나 거래하는 풍경.
+
+elimination이 가능한 이유의 한 축은 *짝을 만날 확률*이다. **생일 역설** — 23명만 모이면 같은 생일을 가진 두 사람이 있을 확률이 50%를 넘는다. elimination array의 슬롯 수와 활성 스레드 수가 비슷할 때 *같은 슬롯에서 만나는* 짝이 자주 생긴다. 이 확률 계산이 elimination 디자인의 수학적 기반이다.
+
+실세계 시스템: Java의 `Exchanger` (두 스레드가 객체를 직접 교환하는 동기화 객체), RxJava의 `SerializedSubject` (이벤트 스트림의 직접 전달), 비동기 pool (생산자가 task를 들고 있고 free worker가 직접 pickup하는 구조)이 모두 elimination 패턴의 변형이다.
+
 ## 11.1 Lock-Free Stack — Treiber Stack
 
 가장 단순한 lock-free 자료구조.
+
+비유로 보면 — *모든 사람이 한 책상의 꼭대기 책*을 두고 다투는 풍경. 책을 올리는 사람도, 가져가는 사람도, 모두 같은 꼭대기를 노린다. 한 명만 성공하고 나머지는 다시 시도. 단순하지만 그 단순함이 경합 시 약점.
 
 ### C++20/23 구현
 
@@ -163,6 +173,8 @@ pop():
 
 성능 측정을 해 보면 — **경합이 심하면 매우 느리다**.
 
+비유 — 회의실 칠판에 *맨 위에만 글을 쓰는* 규칙이 있다고 하자. 모두가 칠판으로 달려가지만 한 번에 한 명만 쓸 수 있다. 쓰려는 사람이 8명이면 7명은 매번 헛걸음. 칠판이 *한 점*이라는 점이 본질적 병목이다.
+
 이유는 단순하다. 모든 스레드가 같은 변수(top)에 CAS를 시도한다. **Cache line contention**이 매우 크다.
 
 ```
@@ -179,6 +191,8 @@ pop():
 Herlihy의 우아한 통찰.
 
 > **Push와 Pop이 동시에 일어나면 — 그 두 작업은 서로 상쇄된다.**
+
+시장 비유가 잘 맞는다. 사과를 *팔려는* 사람과 *사려는* 사람이 가게에 가는 길에 우연히 만났다고 하자. 둘이 가게 안에 들어가서 줄을 서기보다, 그 자리에서 직접 주고받는 게 더 빠르다. 가게(스택)의 카운터(top)는 손도 안 댄다. 이게 *직거래* — elimination의 정수다.
 
 ```
 스택: [A, B, C]
@@ -428,6 +442,8 @@ bool elimination_stack_pop(EliminationStack* stack, int* out) {
 
 **경합이 심할 때** — central stack CAS 실패가 많지만, 그만큼 push/pop 짝이 많이 있다. Elimination array에서 만날 확률이 높음.
 
+비유 — 시장에 사람이 많을수록 *사려는 사람과 팔려는 사람이 길에서 우연히 만날 확률*도 높다. 한산한 시장에서는 직거래가 거의 불가능하지만, 붐비는 시장에서는 자주 일어난다. 이게 elimination이 *부하 적응적*인 이유.
+
 ```text
 경합 ↑ → CAS 실패 ↑ → 그러나 elimination 만남 ↑
         결과: 처리량 ↑
@@ -438,6 +454,8 @@ bool elimination_stack_pop(EliminationStack* stack, int* out) {
 ### Random Pairing의 통계
 
 elimination 슬롯은 *균등 분포로 무작위* 선택한다. 슬롯 수가 $k$, 동시 활성 스레드 수가 $n$일 때, 두 스레드가 같은 슬롯에 도착할 확률은 birthday paradox 형태로 분석된다.
+
+**생일 역설의 직관** — 1년 365일 중에서 23명만 모이면 같은 생일을 가진 두 사람이 있을 확률이 50%를 넘는다. "365가지 중 23명이면 작은 수 같은데"라는 첫 인상과 달리, 확률은 *쌍의 수*에 따라 증가한다. 23명에서 가능한 쌍은 $\binom{23}{2} = 253$개. 그래서 확률이 빨리 올라간다. elimination도 마찬가지 — 슬롯이 *적당히* 적으면 짝이 자주 만난다.
 
 - $k = n$이면 한 슬롯에 두 명이 모일 확률은 약 $1 - e^{-1/2} \approx 39\%$
 - $k = n/2$이면 약 $63\%$
@@ -463,6 +481,19 @@ Elimination:
 이게 책이 강조하는 *우회*다. 같은 bottleneck을 더 빠르게 지나가는 게 아니라, **bottleneck을 안 지나가는 경로**를 만든 것.
 
 비유: 고속도로 톨게이트에서 두 차가 서로 짐을 바꿔 싣고 둘 다 그 자리에서 돌아간다면, 톨게이트 처리량은 줄어들지만 *그 두 차의 목적은 달성*된다.
+
+### Bottleneck *우회* vs *완화*의 차이
+
+이 차이를 분명히 한다. 일반 lock-free 알고리즘은 bottleneck(top CAS)을 *완화*한다 — CAS를 더 빠르게, hardware backoff로 효율적으로, 그러나 *반드시 통과한다*. elimination은 *통과 자체를 회피*한다 — push와 pop이 만나면 top을 *건드리지도 않는다*.
+
+이게 *우회 알고리즘*의 발상이다. 비유:
+
+- **완화**: 톨게이트의 처리 속도를 빠르게 (자동 결제, 더 많은 부스)
+- **우회**: 톨게이트를 *안 지나가는* 경로 (옆길로 우회)
+
+elimination은 후자. 톨게이트를 더 빠르게 만드는 게 아니라, 차들끼리 *길에서 짐을 바꾸고* 둘 다 돌아간다. 톨게이트를 통과하는 차는 짝이 안 만난 차들뿐.
+
+후자가 가능하려면 *명세가 그걸 허용*해야 한다. 톨게이트가 *확인 도장*을 찍어야 하는 거라면 우회 불가 — 모두 통과해야 한다. 스택 명세는 LIFO이므로 *방금 들어와서 방금 나간* 시나리오를 허용한다.
 
 ## 11.6 Elimination Array의 설계
 
@@ -606,6 +637,39 @@ pop():
 
 이 자기 조절(self-tuning)이 elimination backoff stack을 *실용적인* 디자인으로 만든다. JSR-166의 `ConcurrentLinkedDeque`, `LinkedTransferQueue`가 비슷한 구조.
 
+## 11.7.2 시스템 사례 — Exchanger, RxJava, async pool
+
+elimination의 일반화된 형태가 *직접 핸드오프(direct handoff)*다. 생산자가 task를 들고, 소비자가 빈 손으로 기다리고, 둘이 만나면 *큐를 거치지 않고* 직접 전달한다. 세 가지 실세계 시스템에서 같은 패턴을 본다.
+
+**Java Exchanger (`java.util.concurrent.Exchanger`)** — Doug Lea가 작성한 표준 클래스. 두 스레드가 만나서 객체를 교환한다. 내부적으로 *arena*라 부르는 slot array를 두고, 경합이 적으면 한 슬롯, 많으면 여러 슬롯에 분산. JSR-166의 *adaptive arena*가 11.6의 elimination array의 정확한 일반화다.
+
+```java
+Exchanger<List<Item>> exchanger = new Exchanger<>();
+// 두 스레드가 각자 List를 들고 만나서 교환
+List<Item> myList = exchanger.exchange(myList);
+```
+
+**RxJava SerializedSubject / unicast bridge** — reactive stream에서 producer와 consumer를 *직접 연결*하는 패턴. 일반적인 backpressure 큐 대신, consumer가 *demand*를 표명하면 producer가 그만큼만 직접 전달한다. 큐의 메모리 비용을 줄이는 효과 — 사실상 capacity 0의 큐 = elimination.
+
+**Async work pool (Go, Rust async)** — Go의 `runtime`은 work-stealing scheduler를 쓴다. *handoff*라 부르는 최적화: 한 goroutine이 다른 goroutine을 spawn할 때, 자신이 *block* 직전이면 새 goroutine을 *직접* runnable queue에 넣지 않고 *running CPU에 핸드오프*한다. 스케줄러 큐를 거치지 않고 immediately. 같은 elimination 발상.
+
+| 시스템 | 핸드오프 대상 | elimination 효과 |
+|---|---|---|
+| Java Exchanger | 임의 객체 | arena를 통한 분산 매치 |
+| RxJava Unicast | stream 이벤트 | capacity-0 큐로 메모리 절감 |
+| Go runtime handoff | goroutine 실행권 | 스케줄러 큐 bypass |
+| Rust tokio mpsc::channel(0) | 메시지 | sender/receiver 직접 만남 |
+
+세 사례 모두 *큐를 만들고 통과시키는 비용 자체를 회피*한다는 점에서 elimination과 같다. 책의 stack 알고리즘은 이 일반 패턴의 *교과서 예제*인 셈.
+
+### Random Slot 선택의 *분산 정의*
+
+slot 선택을 균등 분포가 아닌 *thread-affinity 기반*으로 하면 더 빠를까? 직관적으로 같은 thread가 항상 같은 slot에 가면 cache locality가 좋을 것 같다. 그러나 결과적으로 짝이 안 만난다 — push thread와 pop thread가 *다른 slot*에 가둬지면 elimination 자체가 무력화.
+
+책의 권장은 *매 시도마다 랜덤*. 시장 비유로 — 매번 다른 골목에서 만나는 게 좋다. 같은 골목만 가면 거기에 짝이 *우연히* 와야 한다. 무작위로 골목을 바꾸면 짝과 만날 *전체 확률*이 균등하다.
+
+다만 *adaptive*: 매치 실패가 잦으면 다음 시도에서 slot 범위를 좁힌다 (짝이 적다는 신호). 매치 성공이 잦으면 범위를 넓힌다 (짝이 많아 충돌이 잦다는 신호). JSR-166의 `Exchanger.arena`가 정확히 이 동적 조정을 구현.
+
 ## 11.8 다른 elimination 응용
 
 이 아이디어는 stack에만 국한되지 않는다.
@@ -617,6 +681,21 @@ pop():
 서로 상쇄되는 작업 쌍이 있으면 elimination 적용 가능.
 
 다만 — **서로 상쇄 가능한지**가 자료구조의 명세에 달려 있다. Stack/Queue/Counter에서는 쉽다. 정렬된 구조에서는 어렵다.
+
+### Elimination이 *FIFO에서는 안 되는* 이유
+
+stack에서 elimination이 통하는 결정적 이유는 *LIFO 명세*다. "방금 push된 원소가 다음 pop의 대상" — 그래서 push와 pop이 만나면 stack을 *건드리지 않은* 시나리오가 명세에 정확히 부합한다.
+
+FIFO queue에서는 같은 트릭이 안 통한다. queue는 *가장 오래된 원소가 다음 dequeue의 대상*이라고 명세한다. 새로 enqueue된 원소를 즉시 dequeue가 받으면 — 명세 위반. queue에 *이미 들어 있던* 다른 원소들이 먼저 나와야 했다.
+
+```text
+Stack:                        Queue:
+  push(D), pop() 만남:           enqueue(D), dequeue() 만남:
+    pop이 D 받음 — OK              dequeue가 D 받음 — X!
+    (LIFO이므로 최신이 다음)         (FIFO이므로 가장 오래된 원소가 다음)
+```
+
+이게 elimination이 *자료구조 명세에 의존하는* 최적화임을 보여준다. 명세가 그렇게 허용해야만 가능. queue, sorted set, priority queue에서는 비슷한 우회를 다른 방식으로 찾아야 한다 (예: priority queue의 skip list 기반 lock-free 구현은 elimination 대신 *fine-grained locking*).
 
 ## 11.9 실용성
 

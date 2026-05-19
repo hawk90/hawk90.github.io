@@ -15,6 +15,24 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 들어가며 — *락 입자도*가 결정하는 것
+
+연결 리스트는 자료구조 교과서의 첫 장에 나오는 가장 단순한 구조다. *그러나* 동시 접근이 들어오는 순간 이 단순함이 깨진다. 단순한 만큼 *락을 어디까지 잘게 쪼개느냐*의 모든 가능성이 한 자료구조에서 펼쳐진다. 이 챕터의 다섯 단계는 그래서 *모든 동시성 자료구조 설계의 축소판*이다.
+
+핵심 질문은 항상 같다. *얼마나 많은 사람이, 얼마나 가까이서 함께 일할 수 있는가*. 도서관 비유로 펼치면 다음과 같다.
+
+| 단계 | 도서관 비유 | 락 입자도 |
+|---|---|---|
+| Coarse | *입구에서 한 명만* 들여보낸다. 안에는 한 사람뿐. | 리스트 전체에 락 하나 |
+| Fine | 책장마다 *손잡이*. 다음 책장 손잡이를 잡고 나서야 이전 책장 손잡이를 놓는다 (등반 안전벨트). | 노드마다 락, hand-over-hand |
+| Optimistic | *그냥 뛰어가서* 원하는 책장 앞에 도착, *그 자리에서만* 책장 두 개 손잡이를 잡고 확인. | 노드마다 락, 잡기 전엔 자유 통행 |
+| Lazy | 책에 *지워짐 스티커*를 먼저 붙이고 가지러 가는 일은 나중에. | logical / physical 삭제 분리 |
+| Lock-Free | 책장 손잡이가 없다. 책 자체에 *마킹*해 다른 사람에게 알린다. | atomic 마킹 비트 |
+
+각 단계는 직전 단계의 *어떤 사람이 어떤 사람을 막는가*를 줄인다. Coarse는 한 명이 들어오면 *모두를 막는다*. Fine은 인접 책장만 막는다. Optimistic은 *내가 일하는 짧은 순간만* 막는다. Lazy는 *읽는 사람을 거의 막지 않는다*. Lock-Free는 아무도 막지 않는다 — 모두가 동시에 진행하면서도 결과가 일관된다.
+
+물론 *공짜는 없다*. 입자도가 잘아질수록 코드가 복잡해지고, *원자성을 유지하는 비용*이 다른 형태로 돌아온다. CAS retry, memory reclamation, ABA 문제. 이 챕터는 그 trade-off를 다섯 단계로 보여 준다.
+
 ## 9.1 동시성 자료구조의 진화
 
 가장 단순한 자료구조 — 정렬된 연결 리스트 — 를 통해 동시성 자료구조 설계의 5단계 진화를 본다.
@@ -30,6 +48,8 @@ draft: false
 ```
 
 ## 9.2 Coarse-Grained — 거대 락
+
+> **비유** — 도서관 *입구*에 한 명의 안내 직원. 누가 들어오든 직원의 허가가 필요하고, 한 번에 *한 사람만* 들어갈 수 있다. 안에서 무엇을 하든 다른 사람은 입구에서 줄을 선다. 단순하고 확실하다. 그러나 책장 N개에 N명이 동시에 작업할 수 있는데도 *한 명만* 일하게 만든다.
 
 ```cpp
 // C++20 Coarse-Grained Linked List
@@ -234,6 +254,8 @@ throughput 측정:
 | 8 | < T | < 0.125× — 락 경합 때문에 단일 스레드보다 *느림* |
 
 ## 9.3 Fine-Grained — 노드별 락
+
+> **비유** — 암벽 등반의 *안전벨트 두 개 규칙*. 손이 두 개니까 항상 *한 손은 잡고* 다음 손을 옮긴다. 다음 손이 다음 홀드를 단단히 잡은 다음에야 이전 손을 놓는다. 절대 두 손이 *동시에* 비어 있지 않는다. linked list의 hand-over-hand가 정확히 이 패턴이다. 두 노드 락을 *겹쳐* 잡으며 전진한다. 안전하지만, 모든 사람이 같은 *방향*으로만 등반해야 한다.
 
 각 노드에 락. **Hand-over-hand locking** (또는 lock coupling).
 
@@ -465,6 +487,8 @@ linearization point — `add`의 경우 `pred->next = new_node`가 실행된 시
 throughput 분석은 비순환 워크로드(키가 균등 분포)에서 거의 선형 scaling. 다만 *짧은 리스트*는 hand-over-hand 오버헤드가 커서 coarse보다 느리다.
 
 ## 9.4 Optimistic — 낙관적 잠금
+
+> **비유** — 도서관 통로를 *그냥 뛰어간다*. 목적지 책장 앞에 도착해야 *그 자리에서만* 손잡이를 잡고, 잡은 뒤에 *내가 제대로 도착했는지* 다시 확인한다. 뛰는 동안 다른 사람이 뒤에서 책을 옮겼을 수도 있으니까. 보통은 안 옮긴다 — 그래서 *낙관적*이다. 옮겼으면 다시 뛴다. 손잡이를 잡지 않고 통과하는 비율이 압도적이므로 전체적으론 매우 빠르다.
 
 대부분의 시간에 경합이 없다는 가정. 락 없이 검색하고, 수정할 때만 락.
 
@@ -736,6 +760,8 @@ bool opt_contains(OptimisticList* list, int key) {
 
 ## 9.5 Lazy — 게으른 삭제
 
+> **비유** — 책장에서 책을 *치우는* 두 단계 작업. 먼저 책 표지에 *"폐기 예정" 스티커*를 붙인다 (logical delete). 책장에서 *실제로 빼는* 일은 나중에. 책을 *읽으러* 온 사람은 스티커만 확인하면 된다 — 책장 손잡이를 잡을 필요가 없다. 읽기 작업은 *락 없이* 진행된다. 쓰기 작업도 자신과 인접 노드만 잠그면 된다.
+
 삭제를 두 단계로.
 
 1. **Logical delete** — 노드에 `marked` 플래그
@@ -985,6 +1011,8 @@ contains의 linearization point:
 
 ## 9.6 Lock-Free Linked List
 
+> **비유** — 책장 손잡이 자체를 없앤다. 대신 책 *표지에 다른 색깔 마킹*을 한다. 책을 옮기려는 사람은 *옮기기 직전에* 마킹을 한다. 다른 사람이 같은 책에 마킹을 시도하면 *충돌이 보인다* (CAS 실패). 충돌이 보이면 다시 시도한다. 책장 자체에는 자물쇠가 없으므로, *누구도 다른 누구를 막을 수 없다*. 모두가 동시에 진행하면서도 일관성이 유지된다.
+
 CAS만 사용. 락 전혀 없음.
 
 ```cpp
@@ -1212,6 +1240,76 @@ Lock-free는 이론적으로 최고지만 구현 복잡도가 매우 크다 — 
 **5. 메모리 회수에 주의**
 
 Lock-free는 GC 또는 hazard pointer 필요.
+
+## 9.9 시스템 사례 — 실전 자료구조
+
+이 챕터의 다섯 단계가 실제 어디서 살아 움직이는지 본다.
+
+**Linux kernel — RCU (Read-Copy-Update)**
+
+리눅스 커널이 *읽기 압도적인* 자료구조 — VFS dentry, routing table, namespace — 에 광범위하게 쓰는 기법. 핵심 아이디어는 *읽기는 락 없이*, *쓰기는 복사본을 만들어 atomic 교체*다. 9.5절의 lazy + 9.6절의 lock-free 아이디어를 *읽기 쪽으로 극단화*한 것.
+
+```text
+RCU 핵심 의미론:
+  rcu_read_lock()        — 가벼운 마킹 (preempt off)
+  ptr = rcu_dereference(p) — 안전한 포인터 읽기 (memory barrier 포함)
+  rcu_read_unlock()      — 마킹 해제
+
+  쓰기:
+  new = kmalloc + copy
+  rcu_assign_pointer(p, new)  — atomic 포인터 swap
+  synchronize_rcu()           — 모든 reader가 끝날 때까지 기다림
+  kfree(old)                  — 안전하게 해제
+```
+
+읽기 비용이 *거의 0*에 가깝다. 쓰기는 비싸지만, *읽기:쓰기 = 1000:1*인 자료구조에서 압도적인 throughput을 낸다. 책의 lazy 리스트가 "logical delete → physical delete 분리"였다면, RCU는 그 분리를 *grace period*로 일반화한 것이다.
+
+**Java — ConcurrentSkipListSet / Map**
+
+Java 표준 라이브러리의 `ConcurrentSkipListMap`은 *lock-free skip list*다. 9.6절의 Harris-Michael 알고리즘에서 출발해 Doug Lea가 다듬은 구조. 동시 검색은 락 없이, 삽입과 삭제는 marked node + CAS로 처리한다.
+
+```java
+// 사용 예 — 동시 정렬된 집합
+import java.util.concurrent.ConcurrentSkipListSet;
+
+ConcurrentSkipListSet<Integer> set = new ConcurrentSkipListSet<>();
+// 여러 스레드가 동시에 호출 가능, 락 없음
+set.add(42);
+set.contains(42);
+set.remove(42);
+set.headSet(100);   // 범위 쿼리도 안전
+```
+
+JDK 소스에서 `markedNext`라는 표시 비트를 보면 책의 marked pointer 정확히 그대로다. 차이점은 *skip list*라 평균 O(log n) — 일반 linked list의 O(n)보다 훨씬 빠르다.
+
+**MongoDB WiredTiger — Hazard Pointer**
+
+MongoDB의 스토리지 엔진 WiredTiger는 B-tree 페이지 캐시를 *lock-free*로 관리한다. 읽기 스레드가 페이지에 접근할 때마다 *hazard pointer*를 등록한다. 페이지를 *제거*하려는 스레드는 모든 hazard pointer를 스캔해 *지금 누가 보고 있는지* 확인한다. 보고 있으면 제거를 *미룬다*.
+
+```text
+WiredTiger hazard pointer (개념):
+  reader:
+    hazard[my_slot] = page_ptr   — 등록
+    ... 페이지 사용 ...
+    hazard[my_slot] = NULL       — 해제
+
+  evictor:
+    for each reader:
+      if (reader.hazard == page_ptr) skip
+    if (no hazard) free page
+```
+
+이 패턴은 lock-free 자료구조의 *memory reclamation*을 푸는 표준 방법이다. RCU의 grace period가 *시간 기반*이라면, hazard pointer는 *명시적 등록 기반*이다.
+
+| 시스템 | 기법 | 책의 어느 단계 |
+|---|---|---|
+| Linux kernel VFS / network | RCU | Lazy의 극단 + lock-free 읽기 |
+| Java ConcurrentSkipListMap | Marked CAS skip list | Lock-Free (Harris-Michael 변형) |
+| MongoDB WiredTiger | Hazard pointer page eviction | Lock-Free + 명시적 reclamation |
+| Java ConcurrentHashMap | Bin-level lock + CAS | Fine-grained (segment) + optimistic |
+| C++ folly::ConcurrentHashMap | RCU + hazard pointer | 두 기법의 하이브리드 |
+
+책의 다섯 단계가 *모두* 실제 시스템에 존재한다. 자료구조마다 *어느 단계*가 최적인지가 다를 뿐이다. 읽기 비율, 쓰기 분포, 자료구조 크기, GC 유무 — 이 네 변수가 선택을 좌우한다.
 
 ## 정리
 

@@ -15,6 +15,24 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 들어가며 — *합의 한 가지로* 모든 것이 만들어진다
+
+위원회로 다시 돌아가 보자. 회의실에 의장이 한 명 앉아 있고, 그가 할 줄 아는 일은 단 하나 — *모두가 동의하는 결정* 한 번을 내리는 것이다. 그가 큐를 다룰 줄도, 스택을 쌓을 줄도, 우선순위를 정렬할 줄도 모른다. 단지 "이 안건에 대해 모두 같은 답을 내자"라는 한 가지만 한다.
+
+놀라운 사실은 이것이다. **이 의장 한 명만 있으면, 어떤 회의 절차도, 어떤 자료구조도, 어떤 동기화 객체도 만들 수 있다.** 큐, 스택, 우선순위 큐, 해시 테이블, 데이터베이스 트랜잭션 — 전부 의장의 단일 능력 위에 세울 수 있다.
+
+이것이 *보편성*(universality)이다. 5장에서 CAS의 consensus number가 무한대임을 봤다. 6장은 그 결과의 의미를 본격적으로 펼친다 — CAS 한 가지로 *모든* wait-free 동시 객체가 구현 가능하다.
+
+핵심 비유 세 가지로 이 챕터의 전체 그림이 잡힌다.
+
+- **Universal construction은 위원회 의장의 회의 운영법이다.** 의장은 회의록을 쥐고 있다. 누가 어떤 발언을 하든, 의장이 *합의된 순서*로 회의록에 적는다. 모든 위원이 같은 회의록을 들여다보면, 같은 결과를 추론한다. 회의의 종류 — 큐, 스택, 트랜잭션 — 가 무엇이든 운영법은 같다.
+- **Operation log는 그 회의록 자체다.** 각 작업이 한 줄로 추가되고, 줄들이 시간 순서로 이어진다. 회의록의 첫 줄부터 자기 줄까지 *재생*하면, 그 시점의 객체 상태가 나오고, 자기 작업의 결과도 거기서 결정된다.
+- **Helping mechanism은 동료의 일을 대신 적어 주는 협력이다.** 빠른 위원이 느린 위원의 발언을 회의록에 먼저 옮겨 적는다. 그래야 느린 위원도 "내 발언이 결국 기록된다"는 보장 — *wait-freedom* — 을 받는다. 도움 없이 각자가 자기 발언만 적으면, 한 위원이 영원히 차례를 못 잡는 starvation이 가능하다.
+
+이 세 조각이 합쳐지면 — 의장 한 명(CAS), 한 권의 회의록(operation log), 모두가 서로의 발언을 도와 적기(helping) — *어떤 순차 명세*든 wait-free 동시 객체로 자동 변환된다. 이게 universal construction이다.
+
+그러나 6장의 마지막 메시지는 다음과 같다. **이 우아한 보편성은 *이론*의 영광이지 *실용*의 도구가 아니다.** 회의록을 모두가 매번 처음부터 재생하면, 회의가 길어질수록 비용이 폭증한다. 실용에서는 자료구조 하나하나마다 *전용 lock-free 알고리즘*을 짠다. 그럼에도 universal construction은 "모든 문제가 풀린다"는 *존재성 증명*으로 영원한 가치를 갖는다.
+
 ## 6.1 Universal이란 무엇인가
 
 5장에서 CAS의 Consensus Number가 ∞임을 봤다. 그것이 "universal하다"는 뜻은 다음이다.
@@ -628,6 +646,100 @@ Universal Construction 맥락에서 진행 조건의 의미가 명확해진다.
 - **Obstruction-free**: 다른 스레드가 멈춰 있을 때만 진행
 
 실용적으로는 **lock-free**가 가장 자주 쓰인다. Wait-free는 helping 비용이 크고, obstruction-free는 보장이 너무 약하다.
+
+## 6.9 시스템 사례 — 회의록 패턴은 어디에나 있다
+
+universal construction의 *형태* — 합의된 연산 로그 + 재생 — 는 한 머신 안의 데이터 구조를 훨씬 넘어 분산 시스템 전반에 퍼져 있다. 6장의 추상 알고리즘이 실제 시스템에서 어떻게 변주되는지 본다.
+
+### Multi-Paxos — 회의록의 분산 버전
+
+Leslie Lamport의 Paxos는 단일 결정 하나를 합의한다. Multi-Paxos는 결정을 *연속해서* 합의한다 — 첫 결정의 합의가 끝나면 leader를 재선출하지 않고 그대로 다음 결정으로 넘어간다.
+
+```text
+Slot 0:  의장 후보 → propose → quorum ack → 결정 v_0
+Slot 1:  같은 의장 → propose → quorum ack → 결정 v_1
+Slot 2:  같은 의장 → propose → quorum ack → 결정 v_2
+...
+모든 노드가 같은 슬롯 시퀀스에 합의 → operation log
+```
+
+이 슬롯 시퀀스가 곧 6장의 operation log다. 각 노드는 결정된 슬롯들을 처음부터 차례로 적용하여 자기 로컬 state machine을 갱신한다 — 회의록 재생.
+
+```text
+client request → leader → consensus → log → state machine 적용
+       ↑                                          ↓
+       └─────────── response ─────────────────────┘
+```
+
+이 패턴을 **replicated state machine**이라 부른다. Universal construction의 분산 구현이다.
+
+### Raft — 더 분명한 회의록
+
+Diego Ongaro의 Raft는 Paxos의 본질을 더 명료하게 풀어쓴 합의 프로토콜이다. 세 가지 부분으로 나뉜다.
+
+- **Leader election** — 의장 한 명을 정한다. 임기(term)가 있고, 임기가 바뀌면 새 의장.
+- **Log replication** — 의장이 결정 로그를 다른 노드에 복제한다. quorum이 동의한 슬롯은 *committed*로 표시.
+- **Safety** — 의장 자격 조건을 제한하여, 한 슬롯에 두 개의 다른 결정이 들어가지 않도록.
+
+```text
+Term 1:  Leader A → log: [v_0, v_1, v_2 committed]
+Term 2:  Leader B → log: [v_0, v_1, v_2, v_3, v_4 committed]   (이어 받음)
+Term 3:  Leader C → log: [v_0, v_1, v_2, v_3, v_4, v_5 ...]
+```
+
+각 노드는 committed된 로그 항목을 차례로 *apply*한다. 모두 같은 항목을 같은 순서로 적용하므로 — 6.3절의 "list 순회하며 op 적용"의 분산 버전 — 결과 상태가 같다.
+
+Raft의 helping은 다소 다른 모양이다. follower가 응답하지 않으면 leader가 *AppendEntries*를 재전송하고, 따라잡지 못한 follower의 로그를 강제 동기화한다. 느린 노드를 빠른 노드(leader)가 끌고 가는 형태.
+
+### Etcd / Consul — 키-값 저장소의 회의록
+
+Etcd는 Raft를 그대로 가져다 키-값 저장소로 쓴다. 모든 `PUT`, `DELETE`, `CAS`가 Raft 로그에 들어간다. 클라이언트가 키를 읽으면 — 정확한 *linearizable read*를 원할 경우 — 읽기 자체도 로그에 들어간다 (또는 quorum read).
+
+```text
+client: PUT(/config, "v2")
+   ↓
+etcd leader: log append → replicate to followers → commit → apply
+   ↓
+local KV store: /config → "v2"
+```
+
+이게 6장 universal construction의 직접적 응용이다. 키-값 저장소라는 *순차 객체*를 wait-free linearizable로 만드는 분산 구현이다. 명령 = `PUT/GET/DELETE`, 합의 = Raft, 재생 = local apply.
+
+Etcd가 Kubernetes의 핵심 저장소인 이유 — 클러스터의 모든 상태(파드 목록, 서비스, 컨피그)가 *한 권의 회의록*에 적혀 있고, 모든 컨트롤러가 그것을 읽어 같은 결정을 내린다.
+
+### Apache BookKeeper — 회의록 *그 자체*가 서비스
+
+BookKeeper는 더 직접적이다 — 분산 *append-only log*를 일급 서비스로 제공한다. operation log 그 자체가 상품이다.
+
+```text
+Application:
+  ledger.addEntry(data) → quorum-replicated append
+  ledger.readEntry(idx) → 특정 위치 읽기
+
+ledger = immutable sequence of entries with strong ordering
+```
+
+Kafka, Pulsar 같은 메시지 큐가 이런 분산 로그 위에 세워진다. 메시지 = 회의록 한 줄. consumer = 재생하는 위원.
+
+Pravega, DistributedLog, Pulsar BookKeeper 모두 같은 모델이다. 명령 로그를 분산하여 *append*만 받고, 그 위에 어떤 stateful 서비스든 — 큐, 토픽, 트랜잭션, KV — 구현한다. Universal construction의 산업적 발현.
+
+### 패턴의 통일
+
+| 시스템 | "의장" | "회의록" | 명령 |
+|---|---|---|---|
+| 6장 universal construction | CAS | linked list | 함수 호출 |
+| Multi-Paxos | 선출된 proposer | slot sequence | 임의 결정 |
+| Raft | leader (term) | replicated log | command |
+| Etcd | Raft leader | wal log | PUT/DELETE/CAS |
+| BookKeeper | ensemble + quorum | ledger | append |
+| Kafka | partition leader | partition log | message |
+
+같은 패턴이 단일 머신 lock-free 자료구조에서 글로벌 분산 서비스까지 일관되게 흐른다. universal construction은 그 패턴의 *수학적 정수*다. 모든 구현은 다음 두 가지를 어떻게 다루느냐로 갈린다.
+
+- *의장의 결정 비용* — CAS 한 명령, network round trip, quorum vote
+- *helping의 모습* — 직접 op 대신 append, leader가 follower 따라잡기, gossip
+
+추상은 같고 비용만 다르다.
 
 ## 정리
 

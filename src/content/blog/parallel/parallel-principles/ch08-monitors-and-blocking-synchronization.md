@@ -15,6 +15,25 @@ draft: false
 >
 > 이 시리즈는 C++20/23과 C11을 사용하여 최신 문법으로 재구성했다.
 
+## 들어가며 — *잠들 권리*가 주는 효율
+
+7장의 spinlock은 *짧게 기다리는* 도구다. 락 보유 시간이 µs 단위로 끝날 때만 빛난다. 그 임계점을 넘어서는 순간 — I/O 대기, 큰 계산, 사용자 입력, 네트워크 응답 — CPU를 *서서 돌리는* 건 사치를 넘어 손해다. 8코어 머신에 8개 스레드가 모두 spin하면 시스템은 *진짜 일을 하는 코어가 0개*인 상태가 된다.
+
+이때 필요한 게 *잠들 권리*다. 락을 못 잡으면 OS에게 *재워 달라*고 부탁한다. OS는 그 스레드를 대기 큐에 넣고, CPU를 다른 스레드에 양보한다. 누군가 락을 풀면 *깨워 달라*고 표시해 둔다. 깨우는 비용은 µs 단위로 들지만, 그 동안 절약한 CPU 사용량이 훨씬 크다.
+
+이 챕터의 주연은 **monitor** — Hoare가 1974년 제안한 *상호 배제 + 조건 동기화*의 결합이다. 비유로 옮기면 *예약제 회의실*이다.
+
+| 요소 | 회의실 비유 | monitor 요소 |
+|---|---|---|
+| 회의실 키 | 안내 데스크에서 받는 열쇠 | mutex (한 번에 한 명만) |
+| 회의실에 들어옴 | 키로 문을 열고 입장 | `lock.acquire()` |
+| 조건이 안 맞으면 대기 | 회의 자료가 안 와서 *전화기 옆에서 잠들기* | `cond.wait()` (락 풀고 잠) |
+| 자료가 도착하면 깨움 | 비서가 *전화로 알림* | `cond.signal()` |
+| 일어나서 다시 확인 | 전화 받고 *진짜 자료 왔는지* 확인 | `while (!ready) wait()` |
+| 회의실 비움 | 키 반납 | `lock.release()` |
+
+이 비유는 *왜 `while`로 감싸야 하는가*, *왜 signal을 락 안에서 보내야 하는가*도 자연스럽게 설명한다. 비서의 전화가 *오작동*일 수도 있고(spurious wakeup), 자료가 *다른 사람한테 또 갈 수도* 있다(다른 스레드가 가로챔). 일어났다고 무조건 회의를 시작하지 말고, *반드시 자료를 다시 확인*한다.
+
 ## 8.1 스핀의 한계
 
 7장의 스핀 락은 좋다 — 락 보유 시간이 **매우 짧을 때**.
@@ -169,6 +188,8 @@ Java 5 이후 `java.util.concurrent.locks.ReentrantLock`이 *명시적* lock과 
 
 ## 8.3 Condition Variable
 
+> **비유** — 알람 시계. 회의실에 들어왔지만 *자료가 안 왔다*. 자료가 도착하면 깨워 달라고 알람을 *맞추고* 잠든다. 자료 가져오는 사람이 알람을 *울리면* 깨어난다. 알람의 핵심은 *잠들 때 회의실 키를 일단 놓는다*는 것. 그래야 자료 가진 사람이 회의실에 들어와 자료를 놓고 알람을 울릴 수 있다. 깨어나면 다시 키를 받아 입장한다.
+
 ```cpp
 // C++20 Condition Variable 인터페이스
 #include <mutex>
@@ -246,6 +267,8 @@ A:        ... 진짜 작업
 ```
 
 ## 8.4 왜 `while`인가 (spurious wakeup)
+
+> **비유** — *알람을 못 듣고 잠들어 버린다* (lost wakeup). 자료 도착 5초 전에 알람을 *맞추기 직전*이었는데, 그 사이 자료 가진 사람이 들어와 알람을 *울리고 떠났다*. 정작 나는 5초 뒤에 알람을 맞추고 잠들었으니 영원히 깨지 못한다. 해법은 두 가지가 같이 가야 한다. 알람 *맞추기 + 자료 확인*을 한 동작으로 묶고(monitor의 `wait` 의미), 깨어났을 때마다 *자료가 진짜 있는지* 재확인한다(`while`).
 
 condition variable 사용 시 가장 흔한 실수 — `if`를 쓰는 것.
 
@@ -424,6 +447,8 @@ public:
 ```
 
 ## 8.7 Reader-Writer Lock
+
+> **비유** — *도서관 열람실*. 책을 *읽는* 사람은 여럿이 함께 있을 수 있다. 같은 책을 동시에 보아도 서로 방해하지 않는다. 그러나 *책 내용을 수정*하는 사서가 들어오는 순간 모든 독자는 일단 나가 있어야 한다. 사서가 *혼자* 작업한 뒤 나오면 다시 독자들이 들어온다. 읽기는 *공유 모드*, 쓰기는 *단독 모드*. 읽기 비율이 압도적으로 높을 때 큰 이득이 있다.
 
 읽기는 여러 스레드 동시 OK, 쓰기는 단독.
 
@@ -765,6 +790,96 @@ int queue_take(BlockingQueue* q) {
 ```
 
 두 condition variable — full/empty 각각. signal로 정확히 필요한 쪽만 깨움.
+
+## 8.11 시스템 사례 — monitor가 살아있는 곳
+
+monitor 패턴은 거의 모든 동기화 라이브러리의 골격이다.
+
+**pthread mutex + cond — POSIX의 표준**
+
+POSIX는 monitor를 *두 객체로 분리*해 제공한다. `pthread_mutex_t`와 `pthread_cond_t`. 짝을 맞춰 쓰는 책임은 사용자에게 있다.
+
+```text
+pthread_mutex_t / pthread_cond_t 핵심 API:
+  pthread_mutex_lock(&m);
+  while (!ready) pthread_cond_wait(&c, &m);   // 락을 atomically 풀고 잠
+  // ... 일 ...
+  pthread_mutex_unlock(&m);
+
+  // 깨우는 쪽:
+  pthread_mutex_lock(&m);
+  ready = true;
+  pthread_cond_signal(&c);                     // 락 안에서 signal 권장
+  pthread_mutex_unlock(&m);
+```
+
+`pthread_cond_wait`이 *락 해제와 잠들기*를 한 동작으로 묶는다. 이게 monitor를 *언어 구조 없이* 구현하는 유일한 방법이다. 별도 API였다면 lost wakeup은 막을 수 없다.
+
+리눅스에서는 `pthread_cond_t`가 *futex* 위에 얹혀 있다. fast path는 사용자 공간 atomic, 실제 잠들기는 kernel.
+
+**Java synchronized + wait/notify — 언어 통합 monitor**
+
+Java는 monitor를 *모든 Object*에 내장한다. `synchronized` 키워드가 mutex를, `Object.wait()/notify()`가 condition variable을 제공한다. 별도의 자료형이 없다.
+
+```java
+// Java monitor — Object 자체에 내장
+class BoundedBuffer {
+    private final Object[] items;
+    private int head, tail, count;
+    BoundedBuffer(int n) { items = new Object[n]; }
+
+    public synchronized void put(Object x) throws InterruptedException {
+        while (count == items.length) wait();    // this의 monitor에 잠
+        items[tail] = x;
+        tail = (tail + 1) % items.length;
+        count++;
+        notifyAll();                              // 모든 대기 스레드 깨움
+    }
+
+    public synchronized Object take() throws InterruptedException {
+        while (count == 0) wait();
+        Object x = items[head];
+        head = (head + 1) % items.length;
+        count--;
+        notifyAll();
+        return x;
+    }
+}
+```
+
+한계는 *condition이 객체당 하나*라는 것. not_full과 not_empty를 분리할 수 없어 `notifyAll`로 모두 깨우고 각자 재검사해야 한다. 이 한계를 풀기 위해 Java 5는 `java.util.concurrent.locks.ReentrantLock`과 `Condition`을 도입했다 — 명시적 monitor.
+
+**C++20 std::condition_variable — RAII와 predicate**
+
+C++은 POSIX를 따르되 RAII와 predicate 람다로 미세 실수를 줄였다.
+
+```cpp
+std::unique_lock<std::mutex> lock(mtx);
+cv.wait(lock, [this] { return ready; });   // 내부에서 while 처리
+```
+
+`wait`의 두 번째 인자가 predicate. *spurious wakeup으로 깨어도* predicate가 false면 다시 잠든다. 사용자가 `while`을 잊어도 라이브러리가 처리한다.
+
+**Go — channel이 곧 monitor**
+
+Go는 monitor를 *직접 제공하지 않지만*, channel이 사실상 같은 역할을 한다. 송신은 buffer 가득 차면 잠들고, 수신은 빈 buffer면 잠든다. select 문이 condition variable의 역할.
+
+```text
+Go channel 의미론 (개념):
+  ch <- x       → buffer 가득 차면 goroutine 잠 (put + cond_wait)
+  x := <-ch     → buffer 비면 goroutine 잠 (take + cond_wait)
+  내부 구현      → runtime의 hchan + mutex + sema
+```
+
+| 시스템 | mutex + cond 표현 | 특이점 |
+|---|---|---|
+| POSIX pthread | 별도 두 객체 | 짝 맞추기 사용자 책임 |
+| Java synchronized | Object 내장 | condition 하나뿐, `notifyAll` 의존 |
+| Java JUC Lock | 명시적 Lock + Condition | 다중 condition, fairness 옵션 |
+| C++20 std::* | mutex + condition_variable | RAII + predicate |
+| Go | hchan (사용자 보이지 않음) | 언어 차원의 channel |
+
+API는 다르지만 *세 가지 핵심 의무*는 같다. 잠들기 전 락을 atomic하게 푼다. 깨어나면 condition을 재확인한다. signal/notify는 락 안에서 보낸다.
 
 ## 정리
 
