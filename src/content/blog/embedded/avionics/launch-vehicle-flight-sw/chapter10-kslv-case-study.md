@@ -14,199 +14,202 @@ draft: true
 
 ## KSLV-II 누리
 
-```text
-한국형 발사체 (KSLV-II) "누리":
-  Stage 1: 75톤급 액체엔진 × 4 (KRE-075)
-  Stage 2: 75톤급 × 1
-  Stage 3: 7톤급 (KRE-007)
-  Payload: 1500 kg to 700 km LEO
-  Mission duration: 16분
-  
-Development:
-  2010-2022 (12년)
-  $1.8 B 투자
-  KARI lead·한화에어로스페이스·KAI 등
-  
-Launches:
-  2021-10 (실패, 3단 조기 cutoff)
-  2022-06 (성공!)
-  2023-05 (성공)
-  2025-12 (예정·실용 위성 발사)
-```
+한국형 발사체 (KSLV-II) "누리"
+
+- Stage 1: 75톤급 액체엔진 × 4 (KRE-075)
+- Stage 2: 75톤급 × 1
+- Stage 3: 7톤급 (KRE-007)
+- Payload: 1500 kg to 700 km LEO
+- Mission duration: 16분
+
+Development
+
+- 2010-2022 (12년)
+- $1.8 B 투자
+- KARI lead·한화에어로스페이스·KAI 등
+
+Launches
+
+| 날짜 | 결과 |
+|---|---|
+| 2021-10 | 실패 (3단 조기 cutoff) |
+| 2022-06 | 성공 |
+| 2023-05 | 성공 |
+| 2025-12 | 예정 (실용 위성 발사) |
 
 세계 7번째 *자체 LV 보유국* (러시아·미국·중국·일본·유럽·인도·한국).
 
 ## 누리 Avionics
 
-```text
-공개 자료 (AIAA·IEEE paper·KARI 발표):
-  
-Flight Computer:
-  TMR architecture (3 modules)
-  PowerPC 또는 ARM (구체 비공개)
-  RTOS — VxWorks 또는 RTEMS (추정)
-  
-IMU:
-  Fiber Optic Gyro (FOG) — 정밀
-  MEMS backup
-  3-axis acceleration
-  
-Navigation:
-  GPS + INS
-  Star tracker (long mission 단계)
-  
-Communication:
-  S-band telemetry
-  CCSDS standard
-  Naro Space Center ground station
-  
-Software:
-  C language (DO-178C 기반)
-  Ada 일부 (legacy)
-  In-house developed
-```
+공개 자료 (AIAA·IEEE paper·KARI 발표) 기준입니다.
+
+Flight Computer
+
+- TMR architecture (3 modules)
+- PowerPC 또는 ARM (구체 비공개)
+- RTOS — VxWorks 또는 RTEMS (추정)
+
+IMU
+
+- Fiber Optic Gyro (FOG) — 정밀
+- MEMS backup
+- 3-axis acceleration
+
+Navigation
+
+- GPS + INS
+- Star tracker (long mission 단계)
+
+Communication
+
+- S-band telemetry
+- CCSDS standard
+- Naro Space Center ground station
+
+Software
+
+- C language (DO-178C 기반)
+- Ada 일부 (legacy)
+- In-house developed
 
 KARI — *자체 개발* (최소한의 라이선스 의존).
 
 ## 누리 Mission Phase
 
-```text
-T-12s : Engine start sequence
-T-0   : Liftoff (sea level thrust ~300 tons)
-T+10s : Clear tower
-T+1min: Max-Q (max aerodynamic pressure)
-T+2min: 1st stage separation
-T+3min: 2nd stage burn
-T+8min: Fairing jettison
-T+10min: 2nd stage cutoff
-T+11min: 3rd stage burn
-T+13min: 3rd stage cutoff (orbit insertion)
-T+15min: Payload separation
-T+16min: Mission complete (FCC end)
-```
+| 시각 | 이벤트 |
+|---|---|
+| T-12s | Engine start sequence |
+| T-0 | Liftoff (sea level thrust ~300 tons) |
+| T+10s | Clear tower |
+| T+1min | Max-Q (max aerodynamic pressure) |
+| T+2min | 1st stage separation |
+| T+3min | 2nd stage burn |
+| T+8min | Fairing jettison |
+| T+10min | 2nd stage cutoff |
+| T+11min | 3rd stage burn |
+| T+13min | 3rd stage cutoff (orbit insertion) |
+| T+15min | Payload separation |
+| T+16min | Mission complete (FCC end) |
 
 각 phase = *FSM state*. Pre-programmed timeline.
 
 ## 누리 SW 개발 Process
 
-```text
-KARI internal SW process:
-  Requirements (SRS·SRD)
-  Architecture (SAD)
-  Detailed design (SDD)
-  Implementation (C·Ada)
-  Unit test (LDRA·Cantata)
-  Integration test
-  HIL (Hardware-in-the-loop)
-  
-  V-model 또는 modified waterfall
-  IV&V (Independent Verification·Validation)
+KARI internal SW process
 
-Standards:
-  KARI internal (DO-178C 참고)
-  방사청 SW 신뢰성시험 일부
-  ECSS-Q-ST-80C (ESA, 참고)
-```
+1. Requirements (SRS·SRD)
+2. Architecture (SAD)
+3. Detailed design (SDD)
+4. Implementation (C·Ada)
+5. Unit test (LDRA·Cantata)
+6. Integration test
+7. HIL (Hardware-in-the-loop)
+
+V-model 또는 modified waterfall. IV&V (Independent Verification·Validation).
+
+Standards
+
+- KARI internal (DO-178C 참고)
+- 방사청 SW 신뢰성시험 일부
+- ECSS-Q-ST-80C (ESA, 참고)
 
 DO-178C *fully cert*는 아닌 — *Korea-adapted process*.
 
 ## 누리 사용된 기술
 
-```text
-공개된 정보:
-  - Fault detection·isolation·recovery (FDIR)
-  - Voting 3-of-3 또는 2-of-3
-  - Range Safety system 인터페이스
-  - Telemetry encoding (CCSDS-like)
-  - Stage separation logic
-  - Engine throttle control
+공개된 정보
 
-비공개 (보안·경쟁력):
-  - 정확한 CPU·RTOS 종류
-  - Control algorithm 상세
-  - 통신 protocol 세부
-  - SW source code
-```
+- Fault detection·isolation·recovery (FDIR)
+- Voting 3-of-3 또는 2-of-3
+- Range Safety system 인터페이스
+- Telemetry encoding (CCSDS-like)
+- Stage separation logic
+- Engine throttle control
+
+비공개 (보안·경쟁력)
+
+- 정확한 CPU·RTOS 종류
+- Control algorithm 상세
+- 통신 protocol 세부
+- SW source code
 
 ## InnoSpace (이노스페이스)
 
-```text
-InnoSpace:
-  창립 2017
-  본사: 충북 청주
-  타입: Sub-orbital → orbital
-  
-HANBIT (한빛):
-  Hybrid rocket engine (LNG + paraffin)
-  HANBIT-Nano  (~300 kg LEO, 2023 첫 발사)
-  HANBIT-Micro·Mini
-  
-첫 비행:
-  2023-03 브라질 알칸타라 (sub-orbital 성공)
-  2025+ 상업 발사 목표
+InnoSpace
 
-Avionics (공개 정보 한정):
-  ARM Cortex-A·M 기반
-  자체 flight SW
-  CCSDS-compatible telemetry
-```
+- 창립 2017
+- 본사: 충북 청주
+- 타입: Sub-orbital → orbital
+
+HANBIT (한빛)
+
+- Hybrid rocket engine (LNG + paraffin)
+- HANBIT-Nano (~300 kg LEO, 2023 첫 발사)
+- HANBIT-Micro·Mini
+
+첫 비행
+
+- 2023-03 브라질 알칸타라 (sub-orbital 성공)
+- 2025+ 상업 발사 목표
+
+Avionics (공개 정보 한정)
+
+- ARM Cortex-A·M 기반
+- 자체 flight SW
+- CCSDS-compatible telemetry
 
 한국 *최초 민간 LV*. SpaceX vs InnoSpace의 한국 버전.
 
 ## Perigee Aerospace (페리지)
 
-```text
-Perigee Aerospace:
-  창립 2018
-  본사: 대전
-  엔진: 액체 메탄 (methane-LOX)
-  
-Blue Whale (블루웨일):
-  Small LV
-  Payload 50-200 kg to LEO
-  재사용 목표 (장기)
-  
-2023-06: 시험 발사 (suborbital)
-2024+: 본격 시험 단계
-```
+Perigee Aerospace
+
+- 창립 2018
+- 본사: 대전
+- 엔진: 액체 메탄 (methane-LOX)
+
+Blue Whale (블루웨일)
+
+- Small LV
+- Payload 50-200 kg to LEO
+- 재사용 목표 (장기)
+
+2023-06에 시험 발사 (suborbital), 2024+ 본격 시험 단계.
 
 메탄 엔진 — *SpaceX Raptor류*. *재사용 친화*.
 
 ## UNASTELLA (우나스텔라)
 
-```text
-UNASTELLA:
-  본사: 부산
-  타입: 전기펌프 사이클 (electric pump-fed)
-  
-특징:
-  Rocket Lab Electron류 (전기펌프)
-  소형 LV (~100 kg LEO)
-  Suborbital tourism도 계획
-  
-2024-2025 시험 단계
-```
+UNASTELLA
+
+- 본사: 부산
+- 타입: 전기펌프 사이클 (electric pump-fed)
+
+특징
+
+- Rocket Lab Electron류 (전기펌프)
+- 소형 LV (~100 kg LEO)
+- Suborbital tourism도 계획
+- 2024-2025 시험 단계
 
 다양화된 한국 *민간 LV scene*.
 
 ## 한국 우주 로드맵
 
-```text
-2025+ 계획:
-  - 누리 4-6차 (~2027)
-  - KSLV-III (차세대, 50톤급 메탄 엔진)
-  - 누리 후속 reusable variant
-  - Lunar mission Pathfinder (KPLO)
-  
-Industry growth:
-  - 누리 기술 민간 이전 (한화에어로스페이스)
-  - 우주청 (KASA) 설립 (2024)
-  - 우주항공청 우주개발 진흥 (R&D 확대)
-  
-Workforce:
-  Embedded SW engineer 수요 ↑
-  RTOS·FPGA·DO-178C 전문성
-```
+2025+ 계획
+
+- 누리 4-6차 (~2027)
+- KSLV-III (차세대, 50톤급 메탄 엔진)
+- 누리 후속 reusable variant
+- Lunar mission Pathfinder (KPLO)
+
+Industry growth
+
+- 누리 기술 민간 이전 (한화에어로스페이스)
+- 우주청 (KASA) 설립 (2024)
+- 우주항공청 우주개발 진흥 (R&D 확대)
+
+Workforce — Embedded SW engineer 수요 증가. RTOS·FPGA·DO-178C 전문성.
 
 한국 — *국가 + 민간 우주 산업 확대*. SW engineer 채용 *증가*.
 

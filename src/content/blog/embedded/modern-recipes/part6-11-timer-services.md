@@ -103,22 +103,25 @@ void tick(void) {
 
 ## Hierarchical Wheel — Linux jiffies
 
-```text
-4-level wheel:
-  Level 0:   8 ms 단위 × 256 slot  → 0-2 sec
-  Level 1: 256 ms 단위 × 256 slot  → 0-65 sec
-  Level 2:  16 sec 단위 × 256 slot → 0-1 hour
-  Level 3:  ~1 hour 단위 × 256 slot → ~10 day
+**4-level wheel:**
 
-Add:
-  - 가까운 expiry → level 0
-  - 먼 expiry → 높은 level
+| Level | 단위 | 슬롯 | 범위 |
+|-------|------|------|------|
+| 0 | 8 ms | 256 | 0-2 sec |
+| 1 | 256 ms | 256 | 0-65 sec |
+| 2 | 16 sec | 256 | 0-1 hour |
+| 3 | ~1 hour | 256 | ~10 day |
 
-Tick (level 0 8ms):
-  - level 0 slot 처리
-  - 256 tick마다 → level 1의 slot 1개 *spread* to level 0
-  - 즉 level 1→0 *cascade*
-```
+**Add:**
+
+- 가까운 expiry → level 0
+- 먼 expiry → 높은 level
+
+**Tick (level 0 8ms):**
+
+- level 0 slot 처리
+- 256 tick마다 → level 1의 slot 1개 *spread* to level 0
+- 즉 level 1→0 *cascade*
 
 O(1) add + O(1) tick에 가끔 cascade가 들어갑니다. Linux kernel 5.0까지 jiffies로 사용했고, 5.0+에서는 *hash-only*로 바뀌었습니다(no cascade).
 
@@ -149,15 +152,15 @@ DPDK는 *skiplist 기반*입니다. add와 tick 모두 O(log N)입니다.
 
 ## 정확도 vs 효율
 
-```text
-Timer wheel 정확도 = tick frequency
-  - 1 ms tick → 1 ms 해상도
-  - 10 µs tick → 10 µs 해상도, but tick 비용 ↑
+**Timer wheel 정확도 = tick frequency**
 
-Tickless idle — sleep 중 *expiry까지 hardware timer set*
-  → tick freq 의미 적음
-  → 다음 expiry == hardware timer
-```
+- 1 ms tick → 1 ms 해상도
+- 10 µs tick → 10 µs 해상도, but tick 비용 ↑
+
+**Tickless idle** — sleep 중 *expiry까지 hardware timer set*
+
+- tick freq 의미 적음
+- 다음 expiry == hardware timer
 
 Modern Linux와 FreeRTOS는 *tickless*입니다.
 
@@ -245,12 +248,11 @@ void tick(void) {
 
 ## TCP Timeout — Wheel 사례
 
-```text
-Linux kernel TCP — connection 수만 timer 발생
-  - 각 socket: retransmit·delack·keepalive·... 4+ timer
-  - 1 M connection × 4 = 4 M timer
-  - Sorted list 불가능 → wheel 필수
-```
+Linux kernel TCP는 connection 수만큼 timer가 발생한다.
+
+- 각 socket: retransmit·delack·keepalive·... 4+ timer
+- 1 M connection × 4 = 4 M timer
+- Sorted list 불가능 → wheel 필수
 
 Linux kernel은 hashed wheel을 쓰고 cascade는 없습니다(4.8+).
 

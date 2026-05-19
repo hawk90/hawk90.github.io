@@ -14,22 +14,23 @@ draft: true
 
 ## AXI Interface 종류
 
-```text
-AXI4 (full):
-  Memory-mapped DMA
-  Burst·outstanding
-  GPU·NPU·custom accelerator
-  
-AXI-Lite:
-  Register interface
-  Single-beat only
-  Control·status registers
-  
-AXI-Stream:
-  Continuous data flow
-  No address
-  Video·audio·packet
-```
+AXI4 (full)
+
+- Memory-mapped DMA
+- Burst·outstanding
+- GPU·NPU·custom accelerator
+
+AXI-Lite
+
+- Register interface
+- Single-beat only
+- Control·status registers
+
+AXI-Stream
+
+- Continuous data flow
+- No address
+- Video·audio·packet
 
 LV — *AXI-Lite control + AXI-Stream data + AXI4 DMA*.
 
@@ -94,13 +95,7 @@ Xilinx SDK — `Xil_In32`/`Xil_Out32` 표준.
 
 ## IRQ Routing — GIC
 
-```text
-FPGA IP:
-  IRQ output → PL-PS IRQ port
-   → GIC SPI (Shared Peripheral Interrupt)
-   → Cortex-A·R IRQ
-   → kernel ISR or RTOS handler
-```
+FPGA IP의 IRQ output → PL-PS IRQ port → GIC SPI (Shared Peripheral Interrupt) → Cortex-A·R IRQ → kernel ISR 또는 RTOS handler.
 
 ```c
 /* Devicetree */
@@ -209,55 +204,53 @@ Vitis HLS 자동 생성 layout — *모든 HLS accelerator 동일*.
 
 ## AXI-Stream — Continuous
 
-```text
-AXI-Stream signals:
-  TDATA   — payload
-  TVALID  — valid
-  TREADY  — ready (backpressure)
-  TLAST   — packet end
-  TUSER   — sideband
-  TKEEP   — byte enable
-  
-Usage:
-  Camera CSI → AXI-Stream → DMA → DDR
-  ML inference → AXI-Stream → next stage
-```
+AXI-Stream signals
+
+- `TDATA` — payload
+- `TVALID` — valid
+- `TREADY` — ready (backpressure)
+- `TLAST` — packet end
+- `TUSER` — sideband
+- `TKEEP` — byte enable
+
+Usage
+
+- Camera CSI → AXI-Stream → DMA → DDR
+- ML inference → AXI-Stream → next stage
 
 DMA controller가 *AXI-Stream → AXI4* 변환.
 
 ## SpaceWire Interface
 
-```text
-SpaceWire (ECSS-E-ST-50-12C):
-  ESA space avionics standard
-  200 Mbit/s LVDS
-  RMAP (Remote Memory Access Protocol)
-  
-FPGA SpaceWire IP:
-  - GRSPW2 (Cobham/Gaisler)
-  - SpaceWire UART
-  - Wormhole router
+SpaceWire (ECSS-E-ST-50-12C)
 
-Linux SpaceWire driver:
-  /dev/spw0
-  ioctl·read/write
-```
+- ESA space avionics standard
+- 200 Mbit/s LVDS
+- RMAP (Remote Memory Access Protocol)
+
+FPGA SpaceWire IP
+
+- GRSPW2 (Cobham/Gaisler)
+- SpaceWire UART
+- Wormhole router
+
+Linux SpaceWire driver — `/dev/spw0`, ioctl·read/write.
 
 ESA mission 표준 — *Sentinel·BepiColombo·JUICE*.
 
 ## CompactPCI·VPX Backplane
 
-```text
-VPX (VITA 46):
-  6.25 Gbps SerDes lanes
-  PCIe·SRIO·SpaceWire·Ethernet 통합
-  OpenVPX standard topology
-  
-FPGA on VPX:
-  PCIe endpoint
-  SerDes lanes for data fabric
-  TPC (Trigger·Power·Control)
-```
+VPX (VITA 46)
+
+- 6.25 Gbps SerDes lanes
+- PCIe·SRIO·SpaceWire·Ethernet 통합
+- OpenVPX standard topology
+
+FPGA on VPX
+
+- PCIe endpoint
+- SerDes lanes for data fabric
+- TPC (Trigger·Power·Control)
 
 Mil-aero·LV FCC 백plane.
 
@@ -292,12 +285,10 @@ uint32_t result = fpga->RESPONSE;
 
 ## Test·Validation
 
-```text
-1. Unit — FPGA RTL simulation (Verilator·QuestaSim)
-2. Cosim — C + RTL co-simulation
-3. Hardware-in-loop (HIL) — FPGA + sensor·actuator
-4. Mission rehearsal — full system
-```
+1. **Unit** — FPGA RTL simulation (Verilator·QuestaSim)
+2. **Cosim** — C + RTL co-simulation
+3. **Hardware-in-loop (HIL)** — FPGA + sensor·actuator
+4. **Mission rehearsal** — full system
 
 LV — *각 단계 인증 문서* 필요.
 

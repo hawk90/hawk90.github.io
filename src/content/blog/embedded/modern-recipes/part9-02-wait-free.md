@@ -139,12 +139,11 @@ Reader와 writer는 절대 *같은 buffer*를 보지 않습니다.
 
 ## Wait-Free Queue — Kogan-Petrank
 
-```text
-2011년 Alex Kogan + Erez Petrank
-  - 모든 push/pop이 O(1)
-  - 매우 복잡 — 수백 줄 코드
-  - 일반 사용엔 부담
-```
+2011년 Alex Kogan + Erez Petrank이 제안한 wait-free queue:
+
+- 모든 push/pop이 O(1)
+- 매우 복잡 — 수백 줄 코드
+- 일반 사용엔 부담
 
 academic 영역입니다. 임베디드에서는 *SPSC lock-free*가 표준입니다.
 

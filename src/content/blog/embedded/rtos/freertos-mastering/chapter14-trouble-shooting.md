@@ -122,19 +122,17 @@ ARM Cortex-M은 *우선순위가 작을수록 높음*입니다. 거기에 `__NVI
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5
 ```
 
-```text
-[STM32 4-bit priority]
+STM32 4-bit priority:
 
-NVIC_SetPriority value      Raw register value      FreeRTOS API 호출 가능?
-─────────────────────────────────────────────────────────────────────────
-0 (가장 높음)               0x00                    X (커널 위, FromISR 호출 불가)
-1                           0x10                    X
-2                           0x20                    X
-3                           0x30                    X
-4                           0x40                    X
-5                           0x50                    O (configMAX_SYSCALL = 0x50 부터)
-6 ... 15                    0x60 ... 0xF0           O
-```
+| NVIC_SetPriority value | Raw register value | FreeRTOS API 호출 가능? |
+|------------------------|--------------------|--------------------------|
+| 0 (가장 높음) | 0x00 | X (커널 위, FromISR 호출 불가) |
+| 1 | 0x10 | X |
+| 2 | 0x20 | X |
+| 3 | 0x30 | X |
+| 4 | 0x40 | X |
+| 5 | 0x50 | O (configMAX_SYSCALL = 0x50 부터) |
+| 6 ... 15 | 0x60 ... 0xF0 | O |
 
 대부분의 *Hard Fault·이상 동작*이 *5보다 낮은 우선순위의 ISR이 FromISR API를 호출*해서 발생합니다. configASSERT가 켜져 있으면 *port.c에서 즉시 발견*됩니다.
 
@@ -290,21 +288,19 @@ arm-none-eabi-addr2line -e firmware.elf 0x08004532
 
 ## 흔한 함정 카탈로그
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-부팅 후 일정 시간 후 Hard Fault         NVIC priority 미설정                 configASSERT + priority 검토
-Stack overflow hook 트리거               peak stack 부족                      hwm 측정 + 25% 여유
-malloc fail 빈발                        heap 부족 또는 누수                  heap_4 + free 추적
-큐 send timeout 자주                     소비자가 느림 / 막힘                  trace로 소비자 확인
-mutex lockup                             priority inversion 또는 deadlock     mutex 사용 + 임계 영역 축소
-ISR 응답 늦음                            인터럽트 우선순위 잘못                NVIC priority 재설계
-Hard Fault에 PC=0xDEADBEEF              call site corruption                 stack overflow 가능성
-SMP에서 random crash                    공유 변수 보호 누락                  taskENTER_CRITICAL 또는 atomic
-vTaskDelay가 부정확                      tick 보정 실패 (tickless)             vTaskStepTick 점검
-WFI 후 wake 안 됨                       wake-up source 미설정                LPTIM/RTC interrupt 활성
-새로 만든 태스크가 안 동작              스택 너무 작거나 우선순위 0           스택 ≥ 256, 우선순위 ≥ 1
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 부팅 후 일정 시간 후 Hard Fault | NVIC priority 미설정 | configASSERT + priority 검토 |
+| Stack overflow hook 트리거 | peak stack 부족 | hwm 측정 + 25% 여유 |
+| malloc fail 빈발 | heap 부족 또는 누수 | heap_4 + free 추적 |
+| 큐 send timeout 자주 | 소비자가 느림 / 막힘 | trace로 소비자 확인 |
+| mutex lockup | priority inversion 또는 deadlock | mutex 사용 + 임계 영역 축소 |
+| ISR 응답 늦음 | 인터럽트 우선순위 잘못 | NVIC priority 재설계 |
+| Hard Fault에 PC=0xDEADBEEF | call site corruption | stack overflow 가능성 |
+| SMP에서 random crash | 공유 변수 보호 누락 | taskENTER_CRITICAL 또는 atomic |
+| vTaskDelay가 부정확 | tick 보정 실패 (tickless) | vTaskStepTick 점검 |
+| WFI 후 wake 안 됨 | wake-up source 미설정 | LPTIM/RTC interrupt 활성 |
+| 새로 만든 태스크가 안 동작 | 스택 너무 작거나 우선순위 0 | 스택 ≥ 256, 우선순위 ≥ 1 |
 
 ## 디버깅 워크플로
 

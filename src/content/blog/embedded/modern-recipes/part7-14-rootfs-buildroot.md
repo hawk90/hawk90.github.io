@@ -33,12 +33,10 @@ buildroot/
 
 기본 build cycle입니다.
 
-```text
-1. make <board>_defconfig
-2. make menuconfig (필요 시)
-3. make -jN
-4. dd if=output/images/sdcard.img of=/dev/sdX
-```
+1. `make <board>_defconfig`
+2. `make menuconfig` (필요 시)
+3. `make -jN`
+4. `dd if=output/images/sdcard.img of=/dev/sdX`
 
 한 줄로 정리하면 *Buildroot 한 디렉터리가 BSP의 single source*입니다.
 

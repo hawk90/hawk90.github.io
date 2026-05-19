@@ -17,14 +17,12 @@ tags: [recipes, debugging, interrupt, nvic]
 
 ## 핵심 개념 — IRQ 경로 6단계
 
-```text
-1. 외부/내부 event       — GPIO edge, UART byte, timer wrap
-2. Peripheral IRQ enable — USART_CR1.RXNEIE, TIM_DIER.UIE
-3. Peripheral event flag — USART_SR.RXNE, TIM_SR.UIF
-4. NVIC enable           — NVIC_ISER[n]
-5. NVIC priority         — < BASEPRI
-6. CPU PRIMASK / FAULTMASK  — global enable
-```
+1. **외부/내부 event** — GPIO edge, UART byte, timer wrap
+2. **Peripheral IRQ enable** — `USART_CR1.RXNEIE`, `TIM_DIER.UIE`
+3. **Peripheral event flag** — `USART_SR.RXNE`, `TIM_SR.UIF`
+4. **NVIC enable** — `NVIC_ISER[n]`
+5. **NVIC priority** — `< BASEPRI`
+6. **CPU PRIMASK / FAULTMASK** — global enable
 
 이 6단계가 모두 통과해야 ISR이 떨어집니다. 하나라도 막히면 *조용히* 사라집니다.
 

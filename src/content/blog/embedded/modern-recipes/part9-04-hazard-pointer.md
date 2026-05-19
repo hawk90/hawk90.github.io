@@ -29,20 +29,20 @@ scan                 retired list 처리 시점에 모든 thread의 hazard point
 
 기본 흐름입니다.
 
-```text
-reader
-1. p = atomic_load(&head)
-2. publish: my_hp = p
+**Reader:**
+
+1. `p = atomic_load(&head)`
+2. publish: `my_hp = p`
 3. p가 여전히 head인지 재확인 (re-validate)
 4. p를 안전하게 사용
-5. my_hp = NULL
+5. `my_hp = NULL`
 
-writer
-1. old = atomic_exchange(&head, new)
-2. retire(old)        /* free 즉시 X, retired list에 추가 */
+**Writer:**
+
+1. `old = atomic_exchange(&head, new)`
+2. `retire(old)` — free 즉시 X, retired list에 추가
 3. retired list 크기가 임계 초과 시 scan
 4. scan에서 어느 thread의 hp도 가리키지 않는 항목만 free
-```
 
 RCU와 비교하면 다음과 같습니다.
 

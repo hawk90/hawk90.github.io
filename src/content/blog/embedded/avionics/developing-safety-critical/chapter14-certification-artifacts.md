@@ -14,58 +14,48 @@ draft: true
 
 ## DO-178C 산출물 전체 — 22개
 
-```text
-5 Plans:
-  PSAC (Plan for SW Aspects of Certification)
-  SDP  (SW Development Plan)
-  SVP  (SW Verification Plan)
-  SCMP (SW Configuration Management Plan)
-  SQAP (SW Quality Assurance Plan)
+**5 Plans**:
 
-5 Standards:
-  SRS  (SW Requirements Standards)
-  SDS  (SW Design Standards)
-  SCS  (SW Code Standards)
-  + DO-331 Model Standards (MBD 시)
-  + DO-332 OO Standards (OO 시)
+- **PSAC** (Plan for SW Aspects of Certification)
+- **SDP** (SW Development Plan)
+- **SVP** (SW Verification Plan)
+- **SCMP** (SW Configuration Management Plan)
+- **SQAP** (SW Quality Assurance Plan)
 
-12 Data Items:
-  HLR  (High-Level Requirements)
-  LLR  (Low-Level Requirements)
-  SDD  (Software Design Description)
-  SC   (Source Code)
-  TC   (Test Cases)
-  TP   (Test Procedures)
-  TR   (Test Results)
-  SCI  (SW Configuration Index)
-  SECI (SW Environment Configuration Index)
-  SAS  (SW Accomplishment Summary)
-  SoC  (Software of Compliance)
-  PSL  (Problem·Status·Logs)
-```
+**5 Standards**:
+
+- **SRS** (SW Requirements Standards)
+- **SDS** (SW Design Standards)
+- **SCS** (SW Code Standards)
+- DO-331 Model Standards (MBD 시)
+- DO-332 OO Standards (OO 시)
+
+**12 Data Items**:
+
+- **HLR** (High-Level Requirements)
+- **LLR** (Low-Level Requirements)
+- **SDD** (Software Design Description)
+- **SC** (Source Code)
+- **TC** (Test Cases)
+- **TP** (Test Procedures)
+- **TR** (Test Results)
+- **SCI** (SW Configuration Index)
+- **SECI** (SW Environment Configuration Index)
+- **SAS** (SW Accomplishment Summary)
+- **SoC** (Software of Compliance)
+- **PSL** (Problem·Status·Logs)
 
 22 산출물 — 전체 인증 evidence.
 
 ## 5 Plans 정리 (Ch 3 보완)
 
-```text
-PSAC — FAA·EASA 제출 (외부)
-  Project overview, lifecycle, DAL, schedule
-  
-SDP — 개발 process (내부)
-  Phases, transitions, deliverables
-  
-SVP — verification (내부)
-  Reviews·analyses·test methods
-  
-SCMP — configuration (내부)
-  Versioning, baseline, CCB
-  
-SQAP — QA (내부)
-  Audits, independence, records
-  
-모두 *living document* — project 동안 update
-```
+- **PSAC** — FAA·EASA 제출 (외부). Project overview, lifecycle, DAL, schedule.
+- **SDP** — 개발 process (내부). Phases, transitions, deliverables.
+- **SVP** — verification (내부). Reviews·analyses·test methods.
+- **SCMP** — configuration (내부). Versioning, baseline, CCB.
+- **SQAP** — QA (내부). Audits, independence, records.
+
+모두 *living document* — project 동안 update.
 
 5 plans — *project 시작점*. Ch 3 자세히.
 

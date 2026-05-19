@@ -21,15 +21,14 @@ CI에서 자동 빌드, board 양산 시 자동 bitstream 생성, IP integration
 
 GUI 흐름:
 
-```text
-File → New Project
-  - name, location
-  - RTL Project
-  - Add source files (.v, .vhd, .sv)
-  - Add constraint (.xdc)
-  - Select target part (예: xc7a35tcpg236-1)
-  - Finish
-```
+**File → New Project**
+
+- name, location
+- RTL Project
+- Add source files (`.v`, `.vhd`, `.sv`)
+- Add constraint (`.xdc`)
+- Select target part (예: `xc7a35tcpg236-1`)
+- Finish
 
 TCL로 같은 일:
 

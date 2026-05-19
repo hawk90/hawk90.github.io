@@ -21,14 +21,9 @@ tags: [recipes, zero-copy, dma-buf, sendfile, io_uring, splice]
 
 세 갈래로 나눕니다.
 
-```text
-1. Buffer 공유      DMA-BUF, shared memory, mmap
-                    같은 page를 여러 주체가 본다
-2. Kernel 내 전송    sendfile, splice
-                    user space를 거치지 않고 fd→fd
-3. Kernel 우회      io_uring, XDP, DPDK
-                    syscall 자체를 줄이거나 없앤다
-```
+1. **Buffer 공유** — DMA-BUF, shared memory, mmap. 같은 page를 여러 주체가 본다.
+2. **Kernel 내 전송** — `sendfile`, `splice`. user space를 거치지 않고 fd→fd.
+3. **Kernel 우회** — io_uring, XDP, DPDK. syscall 자체를 줄이거나 없앤다.
 
 세 방식은 결합 가능합니다. V4L2 → DMA-BUF → encoder → splice → socket이 흔한 조합입니다.
 

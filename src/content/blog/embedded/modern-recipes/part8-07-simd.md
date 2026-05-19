@@ -21,19 +21,15 @@ tags: [recipes, simd, vectorization, intrinsics, openmp, ispc]
 
 세 가지 적용 전략을 알아둡니다.
 
-```text
-1. Auto-vectorization  컴파일러가 자동
-                       장점 코드 수정 0
-                       단점 조건이 까다로움
-
-2. Intrinsics          직접 명령 호출
-                       장점 정확한 통제
-                       단점 vendor-specific
-
-3. OpenMP SIMD pragma  컴파일러에 hint
-                       장점 portable, 간단
-                       단점 100% 자동은 아님
-```
+1. **Auto-vectorization** — 컴파일러가 자동.
+   - 장점: 코드 수정 0
+   - 단점: 조건이 까다로움
+2. **Intrinsics** — 직접 명령 호출.
+   - 장점: 정확한 통제
+   - 단점: vendor-specific
+3. **OpenMP SIMD pragma** — 컴파일러에 hint.
+   - 장점: portable, 간단
+   - 단점: 100% 자동은 아님
 
 세 방식은 보완 관계입니다. 보통 OpenMP pragma + `restrict`로 시작하고, 안 풀리는 hot loop만 intrinsics로 다시 짭니다.
 

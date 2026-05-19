@@ -21,11 +21,9 @@ FPGA accelerator도 마찬가지입니다. AXI-Lite로 노출된 control registe
 
 Mailbox는 세 가지 요소로 정의됩니다.
 
-```text
-1. Shared register / shared memory  — 명령과 응답이 놓이는 슬롯
-2. Doorbell                          — 상대편에게 "확인하라"고 알리는 IRQ
-3. Sequence·CRC·timeout              — 손실·중복·hang 방어
-```
+1. **Shared register / shared memory** — 명령과 응답이 놓이는 슬롯
+2. **Doorbell** — 상대편에게 "확인하라"고 알리는 IRQ
+3. **Sequence·CRC·timeout** — 손실·중복·hang 방어
 
 Polling만 쓰면 latency는 짧지만 CPU 한 코어가 항상 묶입니다. Doorbell IRQ를 더하면 CPU는 자유로워지지만 IRQ entry/exit 비용 5-50 µs가 붙습니다. 작은 message는 mailbox로, 큰 buffer는 mailbox로 "준비됐다"만 알리고 실제 데이터는 DMA로 나르는 분리가 자연스럽습니다.
 
@@ -174,13 +172,11 @@ Idempotent하지 않은 명령(예: "카운터 +1")은 sequence 중복 검사가
 
 ### Mailbox와 DMA 결합
 
-```text
 1. Host가 DMA buffer 준비
 2. Mailbox로 "buffer ready, addr=0xC0..., len=8K, seq=42"
 3. Device가 DMA 처리
 4. Device가 mailbox로 "done, seq=42, result=..."
 5. Host가 응답 register 읽음
-```
 
 작은 control은 mailbox, 큰 데이터는 DMA로 옮기는 분리 덕분에 register 폭도 작게 유지되고 DMA 채널 활용도 올라갑니다.
 

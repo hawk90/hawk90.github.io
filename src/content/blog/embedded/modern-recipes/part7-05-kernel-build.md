@@ -21,14 +21,12 @@ tags: [recipes, linux, kernel-build]
 
 빌드 흐름은 단순합니다.
 
-```text
-1. source 받기            git clone / tar -xJf
-2. defconfig 선택         make ARCH=... <board>_defconfig
-3. menuconfig             make ARCH=... menuconfig (옵션 조정)
-4. build                  make ARCH=... CROSS_COMPILE=... -jN
-5. install                make modules_install / 별도 target
-6. packaging              make deb-pkg / rpm-pkg
-```
+1. **source 받기** — `git clone` / `tar -xJf`
+2. **defconfig 선택** — `make ARCH=... <board>_defconfig`
+3. **menuconfig** — `make ARCH=... menuconfig` (옵션 조정)
+4. **build** — `make ARCH=... CROSS_COMPILE=... -jN`
+5. **install** — `make modules_install` / 별도 target
+6. **packaging** — `make deb-pkg` / `rpm-pkg`
 
 산출물입니다.
 

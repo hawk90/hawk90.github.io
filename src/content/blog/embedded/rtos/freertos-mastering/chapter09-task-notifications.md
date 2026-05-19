@@ -231,13 +231,11 @@ FreeRTOS 공식 비교(Cortex-M3 @ 16 MHz, GCC -O2 기준)입니다.
 
 Notification value는 *해당 태스크 한 명만* 읽을 수 있습니다. *broadcast가 필요한 경우 event group이 옳은 선택*입니다. 또한 *여러 producer가 같은 비트를 set*하면 그 사이를 *읽기 전에* 한꺼번에 누적될 수 있으므로, *읽은 즉시 처리*하는 패턴이 안전합니다.
 
-```text
-허용                                    회피
-─────────────────────────────────────────────────────
-ISR → Task                             Task A → Task B and Task C (둘 다 수신)
-Task A → Task B                        ISR → Multiple tasks (broadcast)
-Multiple producers → Single Task       Multiple consumers of one notification
-```
+| 허용 | 회피 |
+|------|------|
+| ISR → Task | Task A → Task B and Task C (둘 다 수신) |
+| Task A → Task B | ISR → Multiple tasks (broadcast) |
+| Multiple producers → Single Task | Multiple consumers of one notification |
 
 ## 인덱스 슬롯 활용
 
@@ -270,16 +268,14 @@ void motor_task(void *p)
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-xTaskNotify 후 즉시 보이지 않음          xClearOnEntry로 직전 값 지움         clear 마스크 정리
-NotifyGive 후 Take가 0 반환              eIncrement인데 Take가 너무 빠름      portMAX_DELAY 또는 적절 timeout
-다른 태스크도 같은 알림 받고 싶음        notification은 단일 수신자 only      event group 사용
-ISR에서 일반 Notify 호출 후 hard fault   non-FromISR API                     xTaskNotifyFromISR
-배열 인덱스 잘못 (slot 1 없음)          ARRAY_ENTRIES=1                     configTASK_NOTIFICATION_ARRAY_ENTRIES 늘림
-TaskHandle이 NULL인 상태로 보냄          create 직후 핸들 미저장              xTaskCreate의 &handle 저장
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| xTaskNotify 후 즉시 보이지 않음 | xClearOnEntry로 직전 값 지움 | clear 마스크 정리 |
+| NotifyGive 후 Take가 0 반환 | eIncrement인데 Take가 너무 빠름 | portMAX_DELAY 또는 적절 timeout |
+| 다른 태스크도 같은 알림 받고 싶음 | notification은 단일 수신자 only | event group 사용 |
+| ISR에서 일반 Notify 호출 후 hard fault | non-FromISR API | xTaskNotifyFromISR |
+| 배열 인덱스 잘못 (slot 1 없음) | ARRAY_ENTRIES=1 | configTASK_NOTIFICATION_ARRAY_ENTRIES 늘림 |
+| TaskHandle이 NULL인 상태로 보냄 | create 직후 핸들 미저장 | xTaskCreate의 &handle 저장 |
 
 가장 흔한 함정은 *수신자가 두 곳에서 읽으려는 시도*입니다. notification은 *오직 한 태스크 한 슬롯*입니다. 여러 곳에서 신호를 받아야 하면 *처음부터 event group이나 queue를 쓰는 편*이 옳습니다.
 

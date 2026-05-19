@@ -323,19 +323,17 @@ void EXTI3_IRQHandler(void) {
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                            원인                                해결
-─────────────────────────────────────────────────────────────────────────────────────────
-xTimerStart 후 콜백이 안 호출됨              vTaskStartScheduler 전에 호출         스케줄러 후로
-타이머 주기가 일정하지 않음                  데몬 우선순위가 낮음, 다른 태스크가 비잡  데몬 우선순위 ↑·콜백 짧게
-콜백 안에서 vTaskDelay → hang                데몬 태스크가 자기 자신을 block       콜백에서 블로킹 금지
-xTimerStop했는데 콜백이 한 번 더 호출됨      stop 명령이 큐에 들어갔으나 expire가 먼저 큐 길이↑·우선순위 조정
-configUSE_TIMERS=0인데 timer API 호출        link 에러                            configUSE_TIMERS=1
-xTimerCreate에 0 period                       assert                              최소 1 tick
-타이머 데몬 스택 부족 → HardFault            configTIMER_TASK_STACK_DEPTH 작음    2~4배로
-xTimerChangePeriod로 0 넘김                  assert                              최소 1 tick
-ISR에서 xTimerStart 직접 호출                crash                                FromISR 버전 사용
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| xTimerStart 후 콜백이 안 호출됨 | vTaskStartScheduler 전에 호출 | 스케줄러 후로 |
+| 타이머 주기가 일정하지 않음 | 데몬 우선순위가 낮음, 다른 태스크가 비잡 | 데몬 우선순위 ↑·콜백 짧게 |
+| 콜백 안에서 vTaskDelay → hang | 데몬 태스크가 자기 자신을 block | 콜백에서 블로킹 금지 |
+| xTimerStop했는데 콜백이 한 번 더 호출됨 | stop 명령이 큐에 들어갔으나 expire가 먼저 | 큐 길이↑·우선순위 조정 |
+| configUSE_TIMERS=0인데 timer API 호출 | link 에러 | configUSE_TIMERS=1 |
+| xTimerCreate에 0 period | assert | 최소 1 tick |
+| 타이머 데몬 스택 부족 → HardFault | configTIMER_TASK_STACK_DEPTH 작음 | 2~4배로 |
+| xTimerChangePeriod로 0 넘김 | assert | 최소 1 tick |
+| ISR에서 xTimerStart 직접 호출 | crash | FromISR 버전 사용 |
 
 ## 정리
 

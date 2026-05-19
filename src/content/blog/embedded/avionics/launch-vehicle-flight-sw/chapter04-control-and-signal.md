@@ -14,18 +14,18 @@ draft: true
 
 ## TVC — Thrust Vector Control
 
-```text
-발사체 자세 제어:
-  IMU → attitude estimate
-  Reference trajectory
-  Error → control law
-  TVC angle command → actuator
-  
-Loop frequency:
-  Inner loop (rate): 1 kHz
-  Outer loop (attitude): 100-400 Hz
-  Trajectory: 10 Hz
-```
+발사체 자세 제어
+
+1. IMU → attitude estimate
+2. Reference trajectory
+3. Error → control law
+4. TVC angle command → actuator
+
+Loop frequency
+
+- Inner loop (rate): 1 kHz
+- Outer loop (attitude): 100-400 Hz
+- Trajectory: 10 Hz
 
 각 layer — *다른 frequency·deadline*.
 
@@ -55,18 +55,21 @@ float pid_update(pid_t *p, float error, float dt) {
 
 ## LQR — Linear Quadratic Regulator
 
-```text
-Linear System:
-  ẋ = Ax + Bu
-  
-Cost function:
-  J = ∫(xᵀQx + uᵀRu) dt
-  
-LQR solution:
-  u = -Kx
-  K = R⁻¹BᵀP
-  ARE (Algebraic Riccati Equation): AᵀP + PA - PBR⁻¹BᵀP + Q = 0
-```
+Linear system
+
+$$\dot{x} = Ax + Bu$$
+
+Cost function
+
+$$J = \int (x^T Q x + u^T R u)\, dt$$
+
+LQR solution
+
+$$u = -Kx, \quad K = R^{-1} B^T P$$
+
+ARE (Algebraic Riccati Equation)
+
+$$A^T P + PA - PBR^{-1}B^T P + Q = 0$$
 
 ```c
 /* Pre-computed K matrix (offline) */
@@ -171,29 +174,31 @@ kalman_state[7] = gyro_bias_z;
 
 ## DSP·FPGA·ARM 분담
 
-```text
-FPGA (highest speed):
-  IMU sampling (>10 kHz)
-  Encoder pulse counting
-  Reed-Solomon CRC
-  PWM·timer
-  
-DSP (signal processing):
-  FIR·IIR filter (vibration removal)
-  FFT (motor analysis)
-  Notch filter (resonance)
-  100-400 Hz
-  
-ARM Cortex-R/M (control law):
-  PID·LQR·MPC compute
-  100-1000 Hz
-  
-ARM Cortex-A (mission):
-  Kalman filter (high-level)
-  Trajectory planning
-  Telemetry
-  10 Hz
-```
+FPGA (highest speed)
+
+- IMU sampling (>10 kHz)
+- Encoder pulse counting
+- Reed-Solomon CRC
+- PWM·timer
+
+DSP (signal processing)
+
+- FIR·IIR filter (vibration removal)
+- FFT (motor analysis)
+- Notch filter (resonance)
+- 100-400 Hz
+
+ARM Cortex-R/M (control law)
+
+- PID·LQR·MPC compute
+- 100-1000 Hz
+
+ARM Cortex-A (mission)
+
+- Kalman filter (high-level)
+- Trajectory planning
+- Telemetry
+- 10 Hz
 
 각 layer — *최적 hardware*.
 
@@ -221,15 +226,9 @@ CMSIS-DSP `arm_fir_f32` — NEON·MVE 최적화. 16-tap FIR ~ 50 cycle.
 
 ## Notch Filter — Resonance Removal
 
-```text
-Vibration mode at 50 Hz·100 Hz (rocket structural):
-  → IMU에 noise
-  → Control law 영향
-  
-Notch filter:
-  Reject narrow band around resonance freq
-  IIR biquad implementation
-```
+Vibration mode at 50 Hz·100 Hz (rocket structural) — IMU에 noise를 주고 control law에 영향을 줍니다.
+
+Notch filter는 resonance freq 주변의 narrow band를 reject합니다. IIR biquad로 구현합니다.
 
 ```c
 float notch_update(notch_t *n, float input) {
@@ -245,22 +244,19 @@ LV — *vibration이 제어 안정성 결정*. Notch filter는 *필수*.
 
 ## Slosh — 액체 추진제 출렁임
 
-```text
-Liquid rocket — 추진제 탱크 출렁임:
-  Mass shift → CG (center of gravity) 이동
-  → 자세 disturbance
-  → Control law가 보상
+Liquid rocket의 추진제 탱크 출렁임은 mass shift로 CG(center of gravity)를 이동시켜 자세 disturbance를 만들고, control law가 이를 보상합니다.
 
-Modeling:
-  Pendulum model
-  Spring-mass-damper
-  Slosh frequency 0.5-3 Hz
+Modeling
 
-Control compensation:
-  Notch filter at slosh frequency
-  Adaptive control
-  Anti-slosh baffle (hardware)
-```
+- Pendulum model
+- Spring-mass-damper
+- Slosh frequency 0.5-3 Hz
+
+Control compensation
+
+- Notch filter at slosh frequency
+- Adaptive control
+- Anti-slosh baffle (hardware)
 
 Apollo·Saturn V — *slosh 보상 SW* 핵심.
 
@@ -334,16 +330,16 @@ LV — *비행 phase별로 dynamics 변화*. Gain·model 변경.
 
 ## Adaptive Control
 
-```text
-Adaptive control:
-  Online parameter estimation
-  Gain adjustment based on flight data
-  
-LV 적용:
-  Adaptive notch (vibration frequency drift)
-  MRAC (Model Reference Adaptive Control)
-  L1 Adaptive Control (Univ. Illinois)
-```
+Adaptive control
+
+- Online parameter estimation
+- Gain adjustment based on flight data
+
+LV 적용
+
+- Adaptive notch (vibration frequency drift)
+- MRAC (Model Reference Adaptive Control)
+- L1 Adaptive Control (Univ. Illinois)
 
 미래 — *AI·learning 기반 control*도 시작.
 

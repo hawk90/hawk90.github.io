@@ -261,16 +261,14 @@ xTaskCreatePinnedToCore(consumer, "rx", 4096, sb, 5, NULL, 1);
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-두 태스크가 같이 send → 데이터 깨짐    단일 송신자 제약 위반                queue로 직렬화
-trigger level이 너무 커서 응답 느림     평균 메시지보다 큰 trigger          작은 값 + timeout 조합
-ISR send 후 yield 없음                  pxHigherPriorityTaskWoken 무시       portYIELD_FROM_ISR
-message buffer가 끝까지 못 채움          length prefix 4B 빠뜨림              size에 4B 여유
-듀얼 코어에서 동작 이상                 buffer가 cache 영역에 있음           DRAM/SHARED 섹션에 배치
-xStreamBufferSend 0 반환                buffer 가득 + timeout 짧음          충분한 timeout 또는 capacity
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 두 태스크가 같이 send → 데이터 깨짐 | 단일 송신자 제약 위반 | queue로 직렬화 |
+| trigger level이 너무 커서 응답 느림 | 평균 메시지보다 큰 trigger | 작은 값 + timeout 조합 |
+| ISR send 후 yield 없음 | pxHigherPriorityTaskWoken 무시 | portYIELD_FROM_ISR |
+| message buffer가 끝까지 못 채움 | length prefix 4B 빠뜨림 | size에 4B 여유 |
+| 듀얼 코어에서 동작 이상 | buffer가 cache 영역에 있음 | DRAM/SHARED 섹션에 배치 |
+| xStreamBufferSend 0 반환 | buffer 가득 + timeout 짧음 | 충분한 timeout 또는 capacity |
 
 가장 잦은 함정이 *"단일 reader/writer"라는 가정*을 어기는 것입니다. 큐는 자동으로 보호해 주지만, stream/message는 *조용히 데이터가 깨집니다*. 코드 리뷰 단계에서 *송신 호출 지점이 한 곳뿐*임을 점검합니다.
 

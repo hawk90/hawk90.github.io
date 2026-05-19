@@ -21,23 +21,21 @@ PCIe enumeration 자체와 BAR sizing은 [1-03 PCIe BAR](/blog/embedded/modern-r
 
 세 축으로 정리합니다.
 
-```text
-1. BAR 타입
-   - Memory BAR    (대부분)
-   - I/O BAR       (legacy, ARM 거의 없음)
-   - Prefetchable  / Non-prefetchable
+1. **BAR 타입**
+   - Memory BAR (대부분)
+   - I/O BAR (legacy, ARM 거의 없음)
+   - Prefetchable / Non-prefetchable
    - 32-bit / 64-bit (두 BAR pair)
 
-2. Interrupt
-   - INTx          (shared legacy)
-   - MSI           (최대 32 vector, 같은 message data)
-   - MSI-X         (최대 2048 vector, 독립 address/data)
+2. **Interrupt**
+   - INTx (shared legacy)
+   - MSI (최대 32 vector, 같은 message data)
+   - MSI-X (최대 2048 vector, 독립 address/data)
 
-3. Write/Read ordering
-   - Memory Write  — posted (fire and forget)
-   - Memory Read   — non-posted (round-trip)
+3. **Write/Read ordering**
+   - Memory Write — posted (fire and forget)
+   - Memory Read — non-posted (round-trip)
    - Producer-consumer rule, RO/IDO 비트
-```
 
 Prefetchable BAR은 root complex가 *부수효과 없다*고 가정하고 burst·prefetch·write-combining을 적용해도 좋다는 약속입니다. side-effect register는 non-prefetchable에 둡니다.
 

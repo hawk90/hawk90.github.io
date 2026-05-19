@@ -25,13 +25,12 @@ Pro         : Arria 10, Stratix 10, Agilex — 유료
 
 GUI:
 
-```text
-File → New Project Wizard
-  - location, name
-  - target device family + part (예: 10CL025YU256C8G)
-  - EDA tool (ModelSim, Synplify 등 선택)
-  - Finish
-```
+**File → New Project Wizard**
+
+- location, name
+- target device family + part (예: `10CL025YU256C8G`)
+- EDA tool (ModelSim, Synplify 등 선택)
+- Finish
 
 TCL:
 
@@ -108,12 +107,11 @@ Vivado의 WNS와 동일 개념. Slack 음수 path는 *highlight* 후 *resynthesi
 
 ## Bitstream Programming
 
-```text
-Tools → Programmer
-  - Mode: JTAG
-  - Add File: output_files/top.sof
-  - Start
-```
+**Tools → Programmer**
+
+- Mode: JTAG
+- Add File: `output_files/top.sof`
+- Start
 
 CLI:
 
@@ -214,12 +212,10 @@ void vec_add(int *a, int *b, int *c, int n) {
 
 큰 design의 *일부 영역*만 runtime에 교체. Cyclone V/Arria V 이상에서 지원.
 
-```text
 1. PR region 정의 (Project → Assignments → PR Region)
 2. Static region (기본 동작) + PR region (교체 대상) 분리
-3. Persona별 .rbf 생성
-4. Runtime에 PR_CONFIG_DATA에 .rbf write
-```
+3. Persona별 `.rbf` 생성
+4. Runtime에 `PR_CONFIG_DATA`에 `.rbf` write
 
 ```c
 // Runtime API
@@ -233,14 +229,13 @@ alt_partial_reconfig_block(PR_CONTROLLER_BASE,
 
 Vivado ILA의 Intel 버전.
 
-```text
-Tools → Signal Tap Logic Analyzer
-  - Add nodes: 보고 싶은 signal
-  - Trigger condition
-  - Compile (Signal Tap이 design에 포함)
-  - Program board
-  - Capture
-```
+**Tools → Signal Tap Logic Analyzer**
+
+- Add nodes: 보고 싶은 signal
+- Trigger condition
+- Compile (Signal Tap이 design에 포함)
+- Program board
+- Capture
 
 실제 hardware에서 wave를 잡습니다.
 

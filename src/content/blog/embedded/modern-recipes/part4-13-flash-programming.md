@@ -39,13 +39,11 @@ sector size가 *불균등*합니다. EEPROM emulation은 보통 sector 1, 2 (16K
 
 ### Erase / Write 규칙
 
-```text
 1. Erase 후 모든 비트는 1
 2. Write는 1 → 0만 가능
 3. 0을 1로 되돌리려면 *erase 필수*
 4. Erase 단위 = sector (16KB ~ 128KB)
 5. Write 단위 = byte/halfword/word/doubleword (PSIZE에 따라)
-```
 
 이 규칙 때문에 *한 byte 수정*도 *해당 sector 전체 erase 후 재기록*이 필요합니다.
 

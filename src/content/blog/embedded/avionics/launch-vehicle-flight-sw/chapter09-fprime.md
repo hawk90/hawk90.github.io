@@ -14,39 +14,34 @@ draft: true
 
 ## 배경 — JPL F´
 
-```text
-F-Prime (F´):
-  NASA JPL 개발
-  C++14
-  Apache 2.0 open source
-  
-github.com/nasa/fprime
+F-Prime (F´)
 
-Notable missions:
-  Mars Helicopter Ingenuity (2021, 가장 유명)
-  ASTERIA CubeSat (2017)
-  ISS SPHERES Astrobee
-  Lunar Trailblazer
-  SmallSat 다수
-```
+- NASA JPL 개발
+- C++14
+- Apache 2.0 open source
+- `github.com/nasa/fprime`
+
+Notable missions
+
+- Mars Helicopter Ingenuity (2021, 가장 유명)
+- ASTERIA CubeSat (2017)
+- ISS SPHERES Astrobee
+- Lunar Trailblazer
+- SmallSat 다수
 
 cFS와 *대조* — *더 modern·type-safe*.
 
 ## Architecture
 
-```text
-F-Prime model:
-  Component — encapsulated function
-  Port — typed input/output
-  Topology — components 연결도
-  Serializable — strong types
-  Commands·Events·Telemetry·Parameters
-  
-Build:
-  FPP files → autocoder → C++ stubs
-  사용자가 C++로 채움
-  Static topology
-```
+F-Prime model
+
+- **Component** — encapsulated function
+- **Port** — typed input/output
+- **Topology** — components 연결도
+- **Serializable** — strong types
+- Commands·Events·Telemetry·Parameters
+
+Build — FPP files → autocoder → C++ stubs. 사용자가 C++로 채움. Static topology.
 
 ## FPP — F-Prime Prompt 모델 언어
 
@@ -177,49 +172,38 @@ Static topology — runtime *connection 변경 안 됨*. 검증 쉬움.
 
 ## Mars Ingenuity 사용
 
-```text
-Ingenuity Mars Helicopter (2021-2024):
-  72 flights successful
-  Linux on Snapdragon 801
-  F-Prime on Cortex-M FCU
-  
-F-Prime의 첫 *deep space mission*
-  → 화성 표면 검증
-```
+Ingenuity Mars Helicopter (2021-2024)
 
-Ingenuity 성공이 F-Prime의 *space-grade validation*.
+- 72 flights successful
+- Linux on Snapdragon 801
+- F-Prime on Cortex-M FCU
+
+F-Prime의 첫 *deep space mission* — 화성 표면 검증. Ingenuity 성공이 F-Prime의 *space-grade validation*.
 
 ## Port Types
 
-```text
-sync port:    동기 호출 (function call)
-async port:   비동기 (queued, message)
-data port:    data transfer
-serial port:  generic serialization
-```
+- **sync port** — 동기 호출 (function call)
+- **async port** — 비동기 (queued, message)
+- **data port** — data transfer
+- **serial port** — generic serialization
 
-```text
-sync input port Run: Svc.Sched
-  → 동기, 호출자가 wait
-  
-async input port BufferSend: Fw.BufferSend
-  → queue·async, returns immediately
-```
+예
+
+- `sync input port Run: Svc.Sched` — 동기, 호출자가 wait
+- `async input port BufferSend: Fw.BufferSend` — queue·async, returns immediately
 
 Designer가 *명시 선택*. cFS에서는 *모두 message*.
 
 ## Commands·Events·Telemetry
 
-```text
-F-Prime: 모두 first-class concept
-  Commands  : ground → spacecraft 명령
-  Events    : spacecraft → ground 로그
-  Telemetry : 주기 측정값
-  Parameters: runtime config
-  
-각각 별도 dictionary 자동 생성:
-  Ground tool이 dictionary로 GUI·script 생성
-```
+F-Prime은 다음을 모두 first-class concept로 둡니다.
+
+- **Commands** — ground → spacecraft 명령
+- **Events** — spacecraft → ground 로그
+- **Telemetry** — 주기 측정값
+- **Parameters** — runtime config
+
+각각 별도 dictionary 자동 생성. Ground tool이 dictionary로 GUI·script를 생성합니다.
 
 `fprime-gds` ground software가 *dict 기반 자동 UI*.
 
@@ -297,16 +281,16 @@ Modern C++ — Ada-같은 *type safety*에 접근.
 
 ## XML to FPP Migration
 
-```text
-이전 F´ — XML 기반:
-  Long·verbose
-  Tooling 제한
+이전 F´ — XML 기반
 
-Modern — FPP 모델 언어:
-  Compact·readable
-  Type checking
-  IDE support 향상
-```
+- Long·verbose
+- Tooling 제한
+
+Modern — FPP 모델 언어
+
+- Compact·readable
+- Type checking
+- IDE support 향상
 
 새 프로젝트 — FPP. Legacy XML도 호환.
 
@@ -343,40 +327,33 @@ OSAL과 비슷 — *VxWorks·RTEMS·Linux·POSIX* abstraction.
 
 ### Ingenuity Mars Helicopter
 
-```text
-Ingenuity:
-  Linux on Snapdragon 801 (main)
-  F-Prime on Cortex-M FCU
-  
-  Components:
-    - Sensor reading
-    - Attitude estimation
-    - Motor control
-    - Communication with main computer
-  
-  72 flights, 무사고
-```
+- Linux on Snapdragon 801 (main)
+- F-Prime on Cortex-M FCU
+
+Components
+
+- Sensor reading
+- Attitude estimation
+- Motor control
+- Communication with main computer
+
+72 flights, 무사고.
 
 ### ASTERIA CubeSat
 
-```text
-ASTERIA:
-  6U CubeSat
-  Exoplanet observation
-  ARM Cortex-M
-  F-Prime stack
-  
-  Open source mission code on github
-```
+- 6U CubeSat
+- Exoplanet observation
+- ARM Cortex-M
+- F-Prime stack
+- Open source mission code on github
 
 ### Lunar Trailblazer
 
-```text
-Lunar Trailblazer (2024):
-  Small lunar orbiter
-  F-Prime mission SW
-  Water ice mapping
-```
+Lunar Trailblazer (2024)
+
+- Small lunar orbiter
+- F-Prime mission SW
+- Water ice mapping
 
 ## cFS vs F-Prime 비교
 
@@ -395,67 +372,43 @@ Lunar Trailblazer (2024):
 
 ## SmallSat·CubeSat에 적합
 
-```text
-F-Prime 강점 — SmallSat·CubeSat:
-  - 작은 footprint
-  - Modern C++ 친화
-  - Easy onboarding (학생·startup)
-  - Open source + GDS
-  - Ingenuity·ASTERIA proven
+F-Prime 강점 — SmallSat·CubeSat
 
-NASA·academic missions 채택 증가
-```
+- 작은 footprint
+- Modern C++ 친화
+- Easy onboarding (학생·startup)
+- Open source + GDS
+- Ingenuity·ASTERIA proven
 
-대형 mission — cFS (legacy + maturity). 소형 mission — F-Prime (modern).
+NASA·academic missions 채택 증가. 대형 mission — cFS (legacy + maturity). 소형 mission — F-Prime (modern).
 
 ## 한국 적용
 
-```text
-F-Prime — 한국 SmallSat·CubeSat·민간 LV에 *적합*
-  학생 satellite·민간 우주 startup
-  Modern toolchain·C++ 친화
-  Ingenuity validation
-  
-KARI·국방·민간 startup — *조사·채택 가능*
-  Open source + Apache 2.0 → 부담 적음
-```
+F-Prime은 한국 SmallSat·CubeSat·민간 LV에 *적합*합니다.
+
+- 학생 satellite·민간 우주 startup
+- Modern toolchain·C++ 친화
+- Ingenuity validation
+
+KARI·국방·민간 startup도 *조사·채택 가능*합니다. Open source + Apache 2.0이라 부담이 적습니다.
 
 ## 자주 하는 실수
 
 > ⚠️ FPP 없이 직접 C++
 
-```text
-"Component 직접 만들고 싶다"
-→ topology 통합 안 됨
-→ autocoder 기능 사용 못함
-```
-
-→ FPP 활용.
+"Component를 직접 만들고 싶다"고 FPP를 건너뛰면 topology 통합이 안 되고 autocoder 기능도 못 씁니다. FPP를 활용합니다.
 
 > ⚠️ Static topology에 dynamic logic
 
-```text
-runtime component creation 시도
-→ F-Prime은 *static* 설계
-```
-
-→ topology 재설계.
+Runtime component creation을 시도하면 막힙니다. F-Prime은 *static* 설계입니다. topology를 재설계합니다.
 
 > ⚠️ Cross-version XML+FPP
 
-```text
-Legacy XML + new FPP 혼용 → confusion
-```
-
-→ project 시작부터 *FPP* 통일.
+Legacy XML과 new FPP를 혼용하면 confusion이 생깁니다. project 시작부터 *FPP*로 통일합니다.
 
 > ⚠️ Async port abuse
 
-```text
-모든 port async → queue overflow
-```
-
-→ sync·async 명확 선택.
+모든 port를 async로 하면 queue overflow가 일어납니다. sync·async를 명확하게 선택합니다.
 
 ## 정리
 

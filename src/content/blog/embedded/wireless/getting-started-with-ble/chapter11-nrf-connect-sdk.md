@@ -329,18 +329,16 @@ hci_le_set_advertising_parameters(
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-west build 실패: "module not found"     pip 의존성 미설치                   pip install -r zephyr/scripts/req...
-west update 매우 느림                   모든 repo clone (수 GB)              초기 한 번만, 이후 incremental
-nRF Connect SDK 새 버전 후 빌드 실패    Kconfig 옵션 deprecated              릴리즈 노트 마이그레이션 가이드
-flash 후 동작 안 함                    bootloader / 응용 partition mismatch  pristine 빌드 + erase
-sleep 전류 100 µA에서 못 내려옴        peripheral driver 안 끄임             UART/GPIO suspend 명시
-Bond NVS 손실 (OTA)                    partition 변경                       Settings subsys 보존
-J-Link debug 끊김                      VCC mismatch                         외부 전원 + J-Link target 동일
-PPK II 측정값이 ±50%                   decoupling cap 부족                  100nF + 10µF DUT 가까이
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| west build 실패: "module not found" | pip 의존성 미설치 | pip install -r zephyr/scripts/req... |
+| west update 매우 느림 | 모든 repo clone (수 GB) | 초기 한 번만, 이후 incremental |
+| nRF Connect SDK 새 버전 후 빌드 실패 | Kconfig 옵션 deprecated | 릴리즈 노트 마이그레이션 가이드 |
+| flash 후 동작 안 함 | bootloader / 응용 partition mismatch | pristine 빌드 + erase |
+| sleep 전류 100 µA에서 못 내려옴 | peripheral driver 안 끄임 | UART/GPIO suspend 명시 |
+| Bond NVS 손실 (OTA) | partition 변경 | Settings subsys 보존 |
+| J-Link debug 끊김 | VCC mismatch | 외부 전원 + J-Link target 동일 |
+| PPK II 측정값이 ±50% | decoupling cap 부족 | 100nF + 10µF DUT 가까이 |
 
 가장 큰 함정은 *west update*에서 *NCS 버전 mismatch*입니다. `west.yml`의 *revision*을 *명시적으로 tag*로 고정하지 않으면 *팀원마다 다른 SDK*로 빌드해서 *재현 불능 버그*가 생깁니다. 양산 프로젝트는 *west manifest를 git으로 관리*하고 *tag 단위로 업그레이드*하는 것이 안전합니다.
 

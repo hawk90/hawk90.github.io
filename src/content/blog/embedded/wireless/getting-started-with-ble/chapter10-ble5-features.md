@@ -316,17 +316,15 @@ Encrypted advertising (BLE 5.4):
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-2M PHY 협상 실패                        central 미지원 또는 Coded PHY 우선   PHY update timing 조정
-Coded PHY 거리가 4배 안 나옴            장애물·반사·multipath                 옥외 LOS에서만 4×
-Extended Adv가 일반 폰에 안 잡힘        Legacy-only 스캐너                   Legacy + Extended 동시 광고
-Periodic Adv sync 실패                  scanner 옵션 잘못                    BT_LE_SCAN_OPT_FILTER_DUPLICATE 끄기
-LE Audio 재생이 끊김                    CIS interval과 codec frame 미스매치  preset (16_2, 24_2, 48_4) 검증
-Direction Finding IQ 데이터 노이즈      안테나 칼리브레이션 부족              제조사 calibration 절차 적용
-EAD 디코딩 실패                         key 분배 mismatch                    DK key 동기화 확인
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 2M PHY 협상 실패 | central 미지원 또는 Coded PHY 우선 | PHY update timing 조정 |
+| Coded PHY 거리가 4배 안 나옴 | 장애물·반사·multipath | 옥외 LOS에서만 4× |
+| Extended Adv가 일반 폰에 안 잡힘 | Legacy-only 스캐너 | Legacy + Extended 동시 광고 |
+| Periodic Adv sync 실패 | scanner 옵션 잘못 | BT_LE_SCAN_OPT_FILTER_DUPLICATE 끄기 |
+| LE Audio 재생이 끊김 | CIS interval과 codec frame 미스매치 | preset (16_2, 24_2, 48_4) 검증 |
+| Direction Finding IQ 데이터 노이즈 | 안테나 칼리브레이션 부족 | 제조사 calibration 절차 적용 |
+| EAD 디코딩 실패 | key 분배 mismatch | DK key 동기화 확인 |
 
 가장 흔한 *실용 함정*은 *Extended Advertising과 Legacy Advertising의 동시 운영*입니다. BLE 4 스캐너만 있는 환경에서는 *Legacy 광고가 필수*입니다. 새 BLE 5 칩만 받는 응용이 아니면, *둘 다 광고*하는 *advertising set 두 개*를 권장합니다.
 

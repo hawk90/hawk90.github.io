@@ -213,18 +213,16 @@ Active 3 s + Sleep 297 s, 사이클 300 s
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                  원인                              해결
-──────────────────────────────────────────────────────────────────────────────
-Deep sleep 전류가 50 µA 이상           외부 회로 leak (LED·pullup·LDO)  PCB 측정, 외부 회로 슬립
-RTC GPIO wake가 안 됨                  GPIO6 이상에 배치               GPIO0~5만 사용
-Light sleep 안 들어감                  peripheral lock 잡혀 있음        esp_pm_dump_locks(stdout)
-Deep sleep 후 변수 0                   RTC_DATA_ATTR 안 붙임            매크로 추가
-60초 wake가 50초쯤 깸                  RTC 클럭이 RC 8 MHz             외부 32 kHz XTAL 추가
-WiFi 연결 후 modem sleep 적용 안 됨   ps_type 설정 안 함               esp_wifi_set_ps 호출
-sleep current가 데이터시트 5배         brownout detector 활성           bod off 또는 LDO 안정화
-boot count가 매번 0                   reset 원인이 power-on             RTC SRAM은 power-on 시 초기화
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| Deep sleep 전류가 50 µA 이상 | 외부 회로 leak (LED·pullup·LDO) | PCB 측정, 외부 회로 슬립 |
+| RTC GPIO wake가 안 됨 | GPIO6 이상에 배치 | GPIO0~5만 사용 |
+| Light sleep 안 들어감 | peripheral lock 잡혀 있음 | esp_pm_dump_locks(stdout) |
+| Deep sleep 후 변수 0 | RTC_DATA_ATTR 안 붙임 | 매크로 추가 |
+| 60초 wake가 50초쯤 깸 | RTC 클럭이 RC 8 MHz | 외부 32 kHz XTAL 추가 |
+| WiFi 연결 후 modem sleep 적용 안 됨 | ps_type 설정 안 함 | esp_wifi_set_ps 호출 |
+| sleep current가 데이터시트 5배 | brownout detector 활성 | bod off 또는 LDO 안정화 |
+| boot count가 매번 0 | reset 원인이 power-on | RTC SRAM은 power-on 시 초기화 |
 
 가장 흔한 함정은 *외부 회로 leak*입니다. ESP32 본체는 5 µA에 도달해도, *LED 풀업 저항*, *센서 모듈의 sleep 미지원*, *LDO의 quiescent 전류*가 더해져 *실측이 50~200 µA*가 되곤 합니다. *모든 외부 부품의 sleep 전류*를 데이터시트로 확인하고, *MOSFET·load switch*로 *완전 차단*하는 설계가 필요합니다.
 

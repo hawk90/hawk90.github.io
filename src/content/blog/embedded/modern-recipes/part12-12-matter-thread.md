@@ -189,75 +189,53 @@ ESP32-H2가 Thread native, ESP32-C6은 Wi-Fi 6 + 802.15.4, ESP32-S3는 Wi-Fi onl
 
 ### Commissioning flow
 
-```text
-1. User scans QR code or NFC tag
-   Setup code + discriminator + commissioning info
-
-2. BLE advertisement (commissioning mode)
-   Phone (commissioner) discovers device
-
-3. PASE — Passcode Authenticated Session Establishment
-   Setup code → SPAKE2+ → ephemeral session
-
-4. Device sends certificates (DAC chain, CD)
-   Phone verifies against PAA (Product Attestation Authority)
-
-5. Phone (or Trusted Root) issues NOC (Node Operational Certificate)
-   Operational identity for this fabric
-
-6. Network credentials transferred
-   Thread network key OR Wi-Fi PSK
-
-7. CASE — Certificate Authenticated Session
-   Permanent secure channel using NOC
-```
+1. **User scans QR code or NFC tag** — Setup code + discriminator + commissioning info
+2. **BLE advertisement (commissioning mode)** — Phone (commissioner) discovers device
+3. **PASE — Passcode Authenticated Session Establishment** — Setup code → SPAKE2+ → ephemeral session
+4. **Device sends certificates (DAC chain, CD)** — Phone verifies against PAA (Product Attestation Authority)
+5. **Phone (or Trusted Root) issues NOC (Node Operational Certificate)** — Operational identity for this fabric
+6. **Network credentials transferred** — Thread network key OR Wi-Fi PSK
+7. **CASE — Certificate Authenticated Session** — Permanent secure channel using NOC
 
 전 과정이 end-to-end secure로 진행됩니다. Setup code 한 번이 평생 identity로 굳어집니다.
 
 ### Multi-fabric 추가
 
-```text
-Apple Home에 등록된 device가 *Google Home에도 등록*:
-  1. Apple Home에서 "share with Google" 선택
-     OR device를 commissioning mode로 다시 두고
-     Google Home app에서 add device
+Apple Home에 등록된 device를 *Google Home에도 등록*하려면:
 
-  2. Google이 다른 NOC를 발급
-     Device는 두 NOC를 모두 보관
-
-  3. 양쪽 controller에서 control 가능
-```
+1. Apple Home에서 "share with Google" 선택. 또는 device를 commissioning mode로 다시 두고 Google Home app에서 add device.
+2. Google이 다른 NOC를 발급. Device는 두 NOC를 모두 보관.
+3. 양쪽 controller에서 control 가능.
 
 Matter 1.3은 5 fabric, 1.4는 16+ fabric을 지원합니다.
 
 ### Border Router
 
-```text
-Thread Border Router:
-  Apple TV 4K (2nd gen+), HomePod mini, Nest Hub Gen 2+, Echo Hub
-  OR Raspberry Pi 4/5 + nRF52840 dongle (OpenThread BR)
+**Thread Border Router 후보:**
 
-기능:
-  - 802.15.4 Thread ↔ Wi-Fi/Ethernet IPv6 routing
-  - mDNS/DNS-SD service discovery
-  - BR election (multiple BRs)
-  - Thread Domain (multi-mesh)
-```
+- Apple TV 4K (2nd gen+), HomePod mini, Nest Hub Gen 2+, Echo Hub
+- 또는 Raspberry Pi 4/5 + nRF52840 dongle (OpenThread BR)
+
+**기능:**
+
+- 802.15.4 Thread ↔ Wi-Fi/Ethernet IPv6 routing
+- mDNS/DNS-SD service discovery
+- BR election (multiple BRs)
+- Thread Domain (multi-mesh)
 
 Border Router 없으면 Thread mesh가 local subnet 안에서만 동작합니다. 한 home에 보통 BR이 2~3개 있습니다.
 
 ### OTA — Matter Software Update
 
-```text
-Matter OTA Provider cluster (0x002A):
-  1. Vendor가 image를 cloud provider에 upload
-  2. Device가 query (vendor·product·current version)
-  3. Provider가 download URL 반환
-  4. Device가 image download (HTTPS over IPv6)
-  5. Signature verify (vendor key)
-  6. Apply on next boot
-  7. Confirm or revert
-```
+**Matter OTA Provider cluster (`0x002A`):**
+
+1. Vendor가 image를 cloud provider에 upload
+2. Device가 query (vendor·product·current version)
+3. Provider가 download URL 반환
+4. Device가 image download (HTTPS over IPv6)
+5. Signature verify (vendor key)
+6. Apply on next boot
+7. Confirm or revert
 
 PSA Firmware Update API와 호환되어 TF-M project와 자연스럽게 합쳐집니다.
 

@@ -456,19 +456,17 @@ Heart Rate Profile Specification 1.0
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-실수                                            해결
-─────────────────────────────────────────────────────────────────────
-표준 service UUID에 자기 정의 char 추가          spec 위반. custom service로 분리
-Battery Level을 32-bit float로 송신             spec은 uint8 0~100. spec 따르기
-Heart Rate를 1 byte로 송신 (spec은 flags+value) Flags byte 0x00 prefix 추가
-Custom service의 16-bit UUID 발급                16-bit는 SIG 등록 디바이스만. 128-bit 사용
-표준 service에 read 권한 빠뜨림                 Battery Level은 read 필수
-같은 service 두 instance 등록                   Spec이 *single instance only*면 위반
-NUS를 표준이라 부름                             De facto이지만 SIG 표준 아님. custom임을 명시
-Device Information을 안 넣음                    폰 설정에서 정보 안 뜸. 거의 필수
-Generic Access 빠뜨림                           BLE 스택이 자동 추가하지만 확인 필요
-```
+| 실수 | 해결 |
+|------|------|
+| 표준 service UUID에 자기 정의 char 추가 | spec 위반. custom service로 분리 |
+| Battery Level을 32-bit float로 송신 | spec은 uint8 0~100. spec 따르기 |
+| Heart Rate를 1 byte로 송신 (spec은 flags+value) | Flags byte 0x00 prefix 추가 |
+| Custom service의 16-bit UUID 발급 | 16-bit는 SIG 등록 디바이스만. 128-bit 사용 |
+| 표준 service에 read 권한 빠뜨림 | Battery Level은 read 필수 |
+| 같은 service 두 instance 등록 | Spec이 *single instance only*면 위반 |
+| NUS를 표준이라 부름 | De facto이지만 SIG 표준 아님. custom임을 명시 |
+| Device Information을 안 넣음 | 폰 설정에서 정보 안 뜸. 거의 필수 |
+| Generic Access 빠뜨림 | BLE 스택이 자동 추가하지만 확인 필요 |
 
 ## 정리
 

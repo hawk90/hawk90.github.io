@@ -17,12 +17,12 @@ ISR에서 printf를 부르면 µs가 ms가 되어 다른 timing이 깨집니다.
 
 ## 핵심 개념 — 비용 분리
 
-```text
-[로그 호출]    ISR / main에서 호출됨   — 빨라야 함 (µs)
-[저장]         RAM ring buffer       — 빠른 write
-[전송]         UART/SWO/USB          — background에서 천천히
-[해석]         host에서 binary → text — 느려도 됨
-```
+| 단계 | 위치 | 비용 |
+|------|------|------|
+| 로그 호출 | ISR / main에서 호출됨 | 빨라야 함 (µs) |
+| 저장 | RAM ring buffer | 빠른 write |
+| 전송 | UART/SWO/USB | background에서 천천히 |
+| 해석 | host에서 binary → text | 느려도 됨 |
 
 각 단계를 분리하면 hot path의 부담은 *RAM write 몇 byte*로 끝납니다.
 
@@ -185,14 +185,13 @@ Runtime에서 `g_log_tag_mask`를 바꿔 *어느 subsystem*의 로그만 볼지 
 
 ## Cost 측정
 
-```text
-방식                              cycles (Cortex-M4 @ 168 MHz)
-printf("hello %d\n", x)            ~1500
-log_emit (text, ring)              ~600
-log_binary (4 args)                ~50
-SEGGER RTT (4 byte)                ~30
-ITM SWO (1 byte)                   ~20
-```
+| 방식 | cycles (Cortex-M4 @ 168 MHz) |
+|------|------------------------------|
+| `printf("hello %d\n", x)` | ~1500 |
+| `log_emit` (text, ring) | ~600 |
+| `log_binary` (4 args) | ~50 |
+| SEGGER RTT (4 byte) | ~30 |
+| ITM SWO (1 byte) | ~20 |
 
 ISR에서 매번 부르려면 binary + RTT 조합이 답.
 
@@ -225,13 +224,12 @@ LOG_B는 ring buffer에 binary record만 적습니다. Idle task가 batch로 UAR
 
 자율주행 ECU 한 대 기준.
 
-```text
-Subsystem    log/s        bytes/event   bandwidth
-camera       30           48            1.4 KB/s
-control      1000         32            32 KB/s
-diagnostic   10           128           1.3 KB/s
-total                                    ~35 KB/s
-```
+| Subsystem | log/s | bytes/event | bandwidth |
+|-----------|-------|-------------|-----------|
+| camera | 30 | 48 | 1.4 KB/s |
+| control | 1000 | 32 | 32 KB/s |
+| diagnostic | 10 | 128 | 1.3 KB/s |
+| total |  |  | ~35 KB/s |
 
 UART 115200 baud (11 KB/s)로는 불가. 1 Mbps UART나 USB 사용. Binary record로 *text 대비 5배 압축*하면 230400 baud로도 됩니다.
 

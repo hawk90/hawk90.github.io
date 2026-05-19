@@ -287,19 +287,17 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                            원인                                해결
-─────────────────────────────────────────────────────────────────────────────────────────
-xTaskCreate가 pdFAIL                          heap 부족 또는 스택 크기 과대        스택 줄임·heap 늘림
-태스크 함수 return 후 HardFault              vTaskDelete(NULL) 없음              루프나 self-delete 추가
-높은 우선순위 태스크가 CPU 독점               블로킹 API 호출 없음                vTaskDelay·큐 wait 도입
-vTaskDelay(0) 호출                            yield 의미 (다음 same-priority로)   의도라면 OK, 아니면 1+
-정확한 주기가 안 맞음                          vTaskDelay 사용                     xTaskDelayUntil로 변경
-스택 크기 충분한데 HardFault                  ISR이 태스크 스택 위에서 동작        ISR 안 sprintf/printf 회피
-configMAX_PRIORITIES 16+                      RAM 낭비 (Ready list가 priority 수만큼) 보통 5~8이면 충분
-같은 우선순위 task가 dead-lock 비슷           time-slicing OFF                    configUSE_TIME_SLICING=1
-idle hook이 block                              시스템 hang                          hook 내 블로킹 API 금지
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| xTaskCreate가 pdFAIL | heap 부족 또는 스택 크기 과대 | 스택 줄임·heap 늘림 |
+| 태스크 함수 return 후 HardFault | vTaskDelete(NULL) 없음 | 루프나 self-delete 추가 |
+| 높은 우선순위 태스크가 CPU 독점 | 블로킹 API 호출 없음 | vTaskDelay·큐 wait 도입 |
+| vTaskDelay(0) 호출 | yield 의미 (다음 same-priority로) | 의도라면 OK, 아니면 1+ |
+| 정확한 주기가 안 맞음 | vTaskDelay 사용 | xTaskDelayUntil로 변경 |
+| 스택 크기 충분한데 HardFault | ISR이 태스크 스택 위에서 동작 | ISR 안 sprintf/printf 회피 |
+| configMAX_PRIORITIES 16+ | RAM 낭비 (Ready list가 priority 수만큼) | 보통 5~8이면 충분 |
+| 같은 우선순위 task가 dead-lock 비슷 | time-slicing OFF | configUSE_TIME_SLICING=1 |
+| idle hook이 block | 시스템 hang | hook 내 블로킹 API 금지 |
 
 ## 정리
 

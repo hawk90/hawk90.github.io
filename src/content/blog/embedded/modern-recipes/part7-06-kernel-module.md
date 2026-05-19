@@ -21,12 +21,10 @@ VMware·NVIDIA·WireGuard처럼 외부에서 배포하는 driver도 모두 modul
 
 Kernel module은 크게 네 가지 요소로 정의됩니다.
 
-```text
-1. 진입점        module_init / module_exit
-2. 메타데이터    MODULE_LICENSE / AUTHOR / DESCRIPTION
-3. 빌드          KBuild Makefile + 커널 source 트리
-4. 로드          insmod / rmmod / modprobe + depmod
-```
+1. **진입점** — `module_init` / `module_exit`
+2. **메타데이터** — `MODULE_LICENSE` / `AUTHOR` / `DESCRIPTION`
+3. **빌드** — KBuild Makefile + 커널 source 트리
+4. **로드** — `insmod` / `rmmod` / `modprobe` + `depmod`
 
 라이선스 문자열은 단순한 문서가 아니라 *taint flag*에 영향을 주는 실제 동작입니다. `"GPL"`이 아니면 `_GPL` 접미사가 붙은 export symbol에 접근할 수 없고, 커널 oops 메시지에 *Proprietary* 표시가 남습니다.
 

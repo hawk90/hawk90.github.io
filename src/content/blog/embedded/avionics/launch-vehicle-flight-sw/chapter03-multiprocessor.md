@@ -235,38 +235,31 @@ LV — ARINC-653 *부분 적용* 또는 *AMP로 대체*.
 
 ## Hypervisor 사용
 
-```text
-Cortex-A78AE + EL2 hypervisor:
-  Multiple VM
-  Each VM = partition
-  Strong isolation
-  Type-1 hypervisor: Xen·Bao·sysGo PikeOS
-  
-LV 가능성:
-  여러 mission function 통합
-  → ECU consolidation 트렌드
-```
+Cortex-A78AE + EL2 hypervisor
+
+- Multiple VM
+- Each VM = partition
+- Strong isolation
+- Type-1 hypervisor: Xen·Bao·sysGo PikeOS
+
+LV 가능성 — 여러 mission function 통합 (ECU consolidation 트렌드).
 
 자동차에서 시작 — LV 적용 점진.
 
 ## Time Sync — APU·RPU
 
-```text
-Shared timestamp:
-  ARM Generic Timer (CNTPCT)
-  All cores 같은 counter
-  → Linux clock_gettime · FreeRTOS xTaskGetTickCount sync
-  
-Application:
-  APU·RPU 메시지 *timestamp 일치*
-  Sensor·command·response correlation
-```
+Shared timestamp
+
+- ARM Generic Timer (CNTPCT)
+- All cores 같은 counter
+- Linux `clock_gettime`과 FreeRTOS `xTaskGetTickCount` sync
+
+Application — APU·RPU 메시지 *timestamp 일치*. Sensor·command·response correlation.
 
 CNTPCT는 SMP·AMP 모두에서 *unified time*.
 
 ## boot sequence
 
-```text
 1. ROM bootloader (mask ROM)
 2. First-Stage Bootloader (FSBL) — boot Cortex-R·M
 3. U-Boot 또는 TF-A — boot Cortex-A
@@ -275,54 +268,45 @@ CNTPCT는 SMP·AMP 모두에서 *unified time*.
 6. RPU FreeRTOS 시작
 7. OpenAMP channel establish
 8. Mission phase 진입
-```
 
 각 단계 *수 초*. LV — pre-launch에 *모든 boot 완료*.
 
 ## STM32MP1 사례
 
-```text
-STM32MP1:
-  Cortex-A7 × 2 — Linux
-  Cortex-M4 × 1 — FreeRTOS·bare-metal
-  
-LV·소형 위성에서 사용:
-  Small CubeSat
-  Pico/Nano satellite
-  
-Linux GUI + M4 sensor read
-```
+STM32MP1
+
+- Cortex-A7 × 2 — Linux
+- Cortex-M4 × 1 — FreeRTOS·bare-metal
+
+LV·소형 위성에서 사용
+
+- Small CubeSat
+- Pico/Nano satellite
+- Linux GUI + M4 sensor read
 
 소형 발사체·CubeSat — *비용 효율*.
 
 ## ESA SAVOIR / LEON
 
-```text
-ESA SAVOIR (Space Avionics Open Interface aRchitecture):
-  Standardized avionics
-  
-LEON processor:
-  SPARC V8 architecture
-  ESA/Gaisler open
-  Rad-hard variants
-  Linux·RTEMS support
-  
-ESA mission 표준
-```
+ESA SAVOIR (Space Avionics Open Interface aRchitecture) — Standardized avionics.
+
+LEON processor
+
+- SPARC V8 architecture
+- ESA/Gaisler open
+- Rad-hard variants
+- Linux·RTEMS support
+- ESA mission 표준
 
 ESA — *LEON + RTEMS* 표준. ARM 대안.
 
 ## Performance — RPMsg Latency
 
-```text
-Cortex-A53 ↔ Cortex-R5 RPMsg:
-  Message size 64 byte:
-    Latency: 5-20 µs
-    Throughput: ~100 MB/s (via shared memory)
-    
-Mailbox IRQ alone:
-  Latency: 1-2 µs
-```
+| 측정 | 값 |
+|---|---|
+| RPMsg latency (64 byte msg) | 5-20 µs |
+| RPMsg throughput | ~100 MB/s (via shared memory) |
+| Mailbox IRQ latency | 1-2 µs |
 
 LV control loop이 *수십 ms cycle*이라면 RPMsg는 *충분히 빠름*.
 
@@ -330,37 +314,19 @@ LV control loop이 *수십 ms cycle*이라면 RPMsg는 *충분히 빠름*.
 
 > ⚠️ Cache 일관성 가정
 
-```text
-APU cache + RPU cache + shared DDR
-→ stale data 가능
-```
-
-→ non-cacheable region 또는 명시 maintenance.
+APU cache + RPU cache + shared DDR — stale data 가능. non-cacheable region 또는 명시 maintenance가 필요합니다.
 
 > ⚠️ Vring 크기 underestimate
 
-```text
-Burst 시 vring full → message drop
-```
-
-→ peak rate 분석 + buffer pool sizing.
+Burst 시 vring full로 message drop이 일어납니다. peak rate 분석과 buffer pool sizing이 필요합니다.
 
 > ⚠️ Single endpoint everything
 
-```text
-1 RPMsg channel — 명령·streaming·log 모두
-→ priority inversion
-```
-
-→ separate channels.
+1개 RPMsg channel에 명령·streaming·log를 모두 실으면 priority inversion이 일어납니다. separate channels로 분리합니다.
 
 > ⚠️ RPU firmware update 시 APU dependency
 
-```text
-RPU restart → APU side 한참 hang
-```
-
-→ graceful handshake·timeout.
+RPU restart → APU side 한참 hang. graceful handshake·timeout이 필요합니다.
 
 ## 정리
 

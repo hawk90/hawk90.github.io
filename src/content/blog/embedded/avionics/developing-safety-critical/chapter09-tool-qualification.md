@@ -213,77 +213,52 @@ Tool *version freeze*. 예측성·재현성 우선.
 
 ## DO-330의 Tool 분류 예
 
-```text
-실제 도구 분류:
-
-Polyspace Bug Finder:
-  Verification tool (Type 2)
-  Critical (semantic analysis)
-  + Level A SW → TQL-4
-  
-Vector CAST:
-  Verification tool (Type 2)
-  + Level A SW → TQL-4·5
-  
-LDRA Testbed:
-  Verification + analysis
-  + Level A → TQL-4·5
-  
-Simulink Coder (code generator):
-  Development tool (Type 1)
-  + Level A → TQL-1
-  → 가장 엄격 qualification 필요
-  
-SCADE Suite (model + code gen):
-  Type 1 + Level A → TQL-1
-  
-GCC:
-  Type 1 (compiler)
-  + Level A → TQL-1 (이론)
-  실제 — object review 대체
-```
+| Tool | Type | + Level A → TQL |
+|---|---|---|
+| Polyspace Bug Finder | Verification (Type 2) | TQL-4 |
+| Vector CAST | Verification (Type 2) | TQL-4·5 |
+| LDRA Testbed | Verification + analysis | TQL-4·5 |
+| Simulink Coder (code generator) | Development (Type 1) | TQL-1 (가장 엄격) |
+| SCADE Suite (model + code gen) | Type 1 | TQL-1 |
+| GCC (compiler) | Type 1 | TQL-1 (이론) — 실제 object review 대체 |
 
 ## Korean Tool Practice
 
-```text
-방사청 SW 신뢰성시험:
-  - 도구 사용 명시 (test plan)
-  - Qualification status 일부 요구
-  - 한국 KISA·한국전자통신연구원(ETRI) 표준
-  
-KARI:
-  - Open source (GCC·gdb·LDRA limited)
-  - 자체 verification
-  
-한화·LIG:
-  - 자동차 분야 — AUTOSAR + qualified tool
-  - 항공·방산 — DO-178C-style qualification 도입 중
-```
+**방사청 SW 신뢰성시험**:
+
+- 도구 사용 명시 (test plan)
+- Qualification status 일부 요구
+- 한국 KISA·한국전자통신연구원(ETRI) 표준
+
+**KARI**:
+
+- Open source (GCC·gdb·LDRA limited)
+- 자체 verification
+
+**한화·LIG**:
+
+- 자동차 분야 — AUTOSAR + qualified tool
+- 항공·방산 — DO-178C-style qualification 도입 중
 
 한국 — *qualification 인식 확산*. 비용 부담은 큼.
 
 ## Tool Qualification Cost
 
-```text
-Cost estimate:
+**Cost estimate**:
 
-TQL-1 (compiler·code gen):
-  Vendor qualified kit — $100K~500K
-  Self-qualify — $1M+
-  
-TQL-2~3:
-  Vendor kit — $50K~200K
-  Self — $500K+
-  
-TQL-4~5:
-  Vendor kit — $10K~50K
-  Self — $100K~
+| TQL | Vendor kit | Self-qualify |
+|---|---|---|
+| TQL-1 (compiler·code gen) | $100K~500K | $1M+ |
+| TQL-2~3 | $50K~200K | $500K+ |
+| TQL-4~5 | $10K~50K | $100K~ |
 
-Project total tool QC:
-  Level A — $500K~2M
-  Level B·C — $100K~500K
-  Level D — minimal
-```
+**Project total tool QC**:
+
+| Level | Cost |
+|---|---|
+| Level A | $500K~2M |
+| Level B·C | $100K~500K |
+| Level D | minimal |
 
 Tool QC — *SW project 예산의 5~15%*.
 
@@ -291,38 +266,25 @@ Tool QC — *SW project 예산의 5~15%*.
 
 > ⚠️ Tool "qualified"라고만 명시, *configuration* 미명시
 
-```text
-"Polyspace qualified"
-→ TQL-? Version-? Config-?
-```
+"Polyspace qualified" → TQL-? Version-? Config-?
 
 → 구체적 *configuration + qualification scope*.
 
 > ⚠️ Tool output 무비판 수용
 
-```text
-Tool report → "100% pass" → 종료
-→ TOR 미충족 분야 있을 수 있음
-```
+Tool report → "100% pass" → 종료 → TOR 미충족 분야 있을 수 있음.
 
 → *Output sample manual review*.
 
 > ⚠️ Project mid에 Tool 변경
 
-```text
-Polyspace R2022a → R2024a (mid-project)
-→ Re-qualification 필요
-→ Schedule slip
-```
+Polyspace R2022a → R2024a (mid-project) → Re-qualification 필요 → Schedule slip.
 
 → Project start에 *tool freeze*.
 
 > ⚠️ Open source tool qualification 무시
 
-```text
-"GCC는 표준이니 qualification 불필요"
-→ 인증 시 *증명 책임 user에*
-```
+"GCC는 표준이니 qualification 불필요" → 인증 시 *증명 책임 user에*.
 
 → Output verification 또는 *qualified fork*.
 

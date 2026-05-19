@@ -29,7 +29,6 @@ UART RX가 가끔 깨진 byte를 받습니다. SPI flash가 가끔 잘못된 데
 
 ## Setup — Saleae Logic 2 예
 
-```text
 1. Probe ground를 보드 GND에 연결
 2. 신호선에 probe clip
 3. Capture 설정:
@@ -39,7 +38,6 @@ UART RX가 가끔 깨진 byte를 받습니다. SPI flash가 가끔 잘못된 데
 4. Capture
 5. Analyzer 추가 (Async Serial / SPI / I2C / CAN)
 6. 결과 표 확인
-```
 
 ## UART decode
 

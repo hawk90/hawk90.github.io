@@ -19,22 +19,19 @@ GC가 있는 언어(Java, C#)는 free 자체가 즉시 일어나지 않으므로
 
 ## 핵심 개념
 
-```text
-시나리오
-1. T1: read head → A
+시나리오:
+
+1. T1: `read head → A`
 2. T1: 멈춤
-3. T2: pop A → free A → allocate → 새 node가 같은 주소 A
-4. T1: CAS(head, A, A->next) → 성공 (그러나 A->next는 이미 stale)
-```
+3. T2: `pop A → free A → allocate → 새 node가 같은 주소 A`
+4. T1: `CAS(head, A, A->next)` → 성공 (그러나 `A->next`는 이미 stale)
 
 해결책 세 가지입니다.
 
-```text
-1. tagged pointer   pointer + tag (16-bit 또는 그 이상)
-2. version counter   별도 atomic counter를 CAS 일부에 포함
-3. hazard pointer    "지금 보호 중"을 광고해 free 자체를 막음
-4. epoch / RCU       grace period 동안 free 지연
-```
+1. **tagged pointer** — pointer + tag (16-bit 또는 그 이상)
+2. **version counter** — 별도 atomic counter를 CAS 일부에 포함
+3. **hazard pointer** — "지금 보호 중"을 광고해 free 자체를 막음
+4. **epoch / RCU** — grace period 동안 free 지연
 
 ARM64는 16-bit를 pointer 상위에 쓸 수 있으므로 tagged pointer가 자연스럽습니다. x86-64도 보통 16-bit가 free합니다. 또는 `__int128` DCAS로 64-bit pointer + 64-bit tag를 묶습니다.
 

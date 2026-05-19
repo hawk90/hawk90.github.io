@@ -326,18 +326,16 @@ void vApplicationMallocFailedHook(void)
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                          원인                                  해결
-─────────────────────────────────────────────────────────────────────────────────────────
-heap_1로 vQueueDelete 호출 → assert         heap_1은 free 불가                    heap_4로 변경 또는 큐를 안 지움
-configTOTAL_HEAP_SIZE 키웠는데 RAM 부족      heap이 .bss에 들어가는데 link script가 못 따라옴  ldscript의 RAM 크기 확인
-xMinimumEverFreeBytesRemaining이 0          한계까지 사용                          heap 늘리거나 객체 줄임
-heap_5인데 첫 xTaskCreate에서 NULL          vPortDefineHeapRegions 호출 전        main 초입에 호출
-malloc과 pvPortMalloc 혼용 시 깨짐         두 allocator가 같은 메모리 공유 안 함  하나만 쓰기
-정적 빌드인데 idle/timer가 메모리 없음 에러  hook 함수 미정의                       vApplicationGetIdleTaskMemory 정의
-heap_4의 free list 손상으로 hang            누군가 free한 메모리에 계속 씀          configCHECK_FOR_STACK_OVERFLOW=2 + sanitizer
-fragmentation으로 large alloc 실패           heap_2 또는 heap_3 사용              heap_4로 마이그레이션
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| heap_1로 vQueueDelete 호출 → assert | heap_1은 free 불가 | heap_4로 변경 또는 큐를 안 지움 |
+| configTOTAL_HEAP_SIZE 키웠는데 RAM 부족 | heap이 .bss에 들어가는데 link script가 못 따라옴 | ldscript의 RAM 크기 확인 |
+| xMinimumEverFreeBytesRemaining이 0 | 한계까지 사용 | heap 늘리거나 객체 줄임 |
+| heap_5인데 첫 xTaskCreate에서 NULL | vPortDefineHeapRegions 호출 전 | main 초입에 호출 |
+| malloc과 pvPortMalloc 혼용 시 깨짐 | 두 allocator가 같은 메모리 공유 안 함 | 하나만 쓰기 |
+| 정적 빌드인데 idle/timer가 메모리 없음 에러 | hook 함수 미정의 | vApplicationGetIdleTaskMemory 정의 |
+| heap_4의 free list 손상으로 hang | 누군가 free한 메모리에 계속 씀 | configCHECK_FOR_STACK_OVERFLOW=2 + sanitizer |
+| fragmentation으로 large alloc 실패 | heap_2 또는 heap_3 사용 | heap_4로 마이그레이션 |
 
 ## 정리
 

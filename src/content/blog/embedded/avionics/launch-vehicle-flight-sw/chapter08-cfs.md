@@ -36,30 +36,13 @@ NASA GSFC 시작 → *Apache 2.0 open source*.
 
 ## cFE — 4대 핵심 Service
 
-```text
-1. Executive Services (ES)
-   - App lifecycle (start·stop·restart)
-   - System health monitoring
-   - Reset·startup
-   - Memory utilization
-   
-2. Software Bus (SB)
-   - Message routing (publish/subscribe)
-   - CCSDS message format
-   - Inter-app communication
-   
-3. Time Services (TIME)
-   - Spacecraft time management
-   - CCSDS time codes
-   - Time correlation
-   
-4. Event Services (EVS)
-   - Event message generation
-   - Filtering·subscription
-   - Onboard logging
-```
+1. **Executive Services (ES)** — App lifecycle (start·stop·restart), System health monitoring, Reset·startup, Memory utilization
+2. **Software Bus (SB)** — Message routing (publish/subscribe), CCSDS message format, Inter-app communication
+3. **Time Services (TIME)** — Spacecraft time management, CCSDS time codes, Time correlation
+4. **Event Services (EVS)** — Event message generation, Filtering·subscription, Onboard logging
 
-추가:
+추가
+
 - **Table Services (TBL)** — runtime configuration
 - **File Services (FS)** — file system abstraction
 
@@ -158,35 +141,13 @@ void CFE_PSP_Main(void) {
 
 ## Mission Apps — 표준 cFS Apps
 
-```text
-SCH (Scheduler):
-  주기 task wakeup
-  Activity table 기반
-  
-HK (Housekeeping):
-  Telemetry collection
-  Compose HK packet
-  
-LC (Limit Checker):
-  Sensor value 한계 체크
-  Out-of-range → event
-  
-DS (Data Storage):
-  Telemetry to flash
-  Replay capability
-  
-CS (Checksum):
-  Memory integrity
-  Periodic checksum
-  
-FM (File Manager):
-  File operations
-  Directory listing
-  
-MM (Memory Manager):
-  Memory dump·load
-  Critical patching
-```
+- **SCH (Scheduler)** — 주기 task wakeup, Activity table 기반
+- **HK (Housekeeping)** — Telemetry collection, Compose HK packet
+- **LC (Limit Checker)** — Sensor value 한계 체크, Out-of-range → event
+- **DS (Data Storage)** — Telemetry to flash, Replay capability
+- **CS (Checksum)** — Memory integrity, Periodic checksum
+- **FM (File Manager)** — File operations, Directory listing
+- **MM (Memory Manager)** — Memory dump·load, Critical patching
 
 각 app — *github.com/nasa/* repository 공개.
 
@@ -250,48 +211,36 @@ Onboard profiling — downlink 가능.
 
 ## Mission 사례
 
-```text
-NASA flight missions using cFS:
-  LADEE (Lunar Atmosphere)        2013
-  MMS (Magnetospheric MultiScale) 2015
-  ICESat-2                         2018
-  SWOT                             2022
-  Lucy (asteroid)                  2021
-  Artemis 1 (SLS)                  2022
-  
-공개된 mission apps:
-  Github에 *전체 source 공개*
-  Educational·commercial use OK
-```
+NASA flight missions using cFS
+
+| Mission | 연도 |
+|---|---|
+| LADEE (Lunar Atmosphere) | 2013 |
+| MMS (Magnetospheric MultiScale) | 2015 |
+| ICESat-2 | 2018 |
+| Lucy (asteroid) | 2021 |
+| SWOT | 2022 |
+| Artemis 1 (SLS) | 2022 |
+
+공개된 mission apps — Github에 *전체 source 공개*. Educational·commercial use OK.
 
 NASA mission *생태계 표준*.
 
 ## cFS Bundles
 
-```text
-github.com/nasa/cFS:
-  공식 starter bundle
-  Cortex-M·A·RAD750 build support
-  
-github.com/nasa-itc/nos3:
-  NASA Operational Simulator
-  Full mission sim
-  
-github.com/nasa-jpl/F-Prime:
-  alternative framework
-  Mars Helicopter Ingenuity 사용
-```
+- **github.com/nasa/cFS** — 공식 starter bundle, Cortex-M·A·RAD750 build support
+- **github.com/nasa-itc/nos3** — NASA Operational Simulator, Full mission sim
+- **github.com/nasa-jpl/F-Prime** — alternative framework, Mars Helicopter Ingenuity 사용
 
 ## OS Support
 
-```text
-OSAL backends:
-  - VxWorks (workhorse, RAD750·LEON)
-  - RTEMS (NASA·ESA)
-  - Linux (development·sim)
-  - POSIX (generic)
-  - FreeRTOS (Cortex-M, in progress)
-```
+OSAL backends
+
+- VxWorks (workhorse, RAD750·LEON)
+- RTEMS (NASA·ESA)
+- Linux (development·sim)
+- POSIX (generic)
+- FreeRTOS (Cortex-M, in progress)
 
 LV에서 *VxWorks·RTEMS*가 일반.
 
@@ -333,18 +282,11 @@ App = *별도 ELF + dynamic load*. Reload 가능.
 
 ## Korean 적용 — KARI·Spacecraft
 
-```text
-KARI 일부 mission — cFS 활용 검토
-KOMPSAT (다목적실용위성):
-  자체 framework 위주
-  
-KSLV-II 누리 LV:
-  자체 RTEMS·VxWorks app
-  cFS-like architecture (message bus)
-  
-미래:
-  Lunar mission·cube sat — cFS 채택 증가 전망
-```
+KARI 일부 mission이 cFS 활용을 검토 중입니다.
+
+- **KOMPSAT (다목적실용위성)** — 자체 framework 위주
+- **KSLV-II 누리 LV** — 자체 RTEMS·VxWorks app, cFS-like architecture (message bus)
+- **미래** — Lunar mission·cube sat에서 cFS 채택 증가 전망
 
 cFS — *오픈 + 검증* = 한국 mission *적합도 ↑*.
 
@@ -364,18 +306,14 @@ Distributed mission (multi-CPU spacecraft) — SBN으로 *cFS 노드 묶음*.
 
 ## F´ (F-Prime) — JPL Alternative
 
-```text
-JPL F-Prime:
-  C++-based framework
-  Component·port model
-  Mars Helicopter Ingenuity 사용 (PX4 위)
-  Lunar Lander missions
-  
-다른 design philosophy:
-  Statically connected
-  Type-safe ports
-  XML-driven generation
-```
+JPL F-Prime
+
+- C++-based framework
+- Component·port model
+- Mars Helicopter Ingenuity 사용 (PX4 위)
+- Lunar Lander missions
+
+다른 design philosophy — Statically connected, Type-safe ports, XML-driven generation.
 
 NASA — *cFS (GSFC) vs F-Prime (JPL)* 두 표준. 다음 chapter.
 

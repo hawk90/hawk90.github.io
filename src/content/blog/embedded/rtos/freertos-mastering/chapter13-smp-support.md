@@ -218,17 +218,15 @@ IDLE              40123          41384             76%       77%
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-SMP 켰는데 한 코어만 사용                affinity가 한 쪽에 묶임              affinity mask = 0x3 (둘 다)
-공유 자료 corruption                    임계 영역 없이 접근                  taskENTER_CRITICAL 추가
-임계 영역 안에서 yield 시 deadlock      vTaskDelay/Wait 호출                 임계 영역에서 block 금지
-ESP-IDF에서 동작 다름                  fork vs mainline 차이                ESP-IDF 버전 + sdkconfig 확인
-RP2040 core 1이 안 부팅                multicore_launch 누락                Pico SDK가 자동 처리하는지 확인
-ISR이 한 코어에서만 처리                 인터럽트 라우팅 고정                필요한 코어에 routing 설정
-runtime stats가 IDLE만                   counter timebase 미설정              configGENERATE_RUN_TIME_STATS 매크로
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| SMP 켰는데 한 코어만 사용 | affinity가 한 쪽에 묶임 | affinity mask = 0x3 (둘 다) |
+| 공유 자료 corruption | 임계 영역 없이 접근 | taskENTER_CRITICAL 추가 |
+| 임계 영역 안에서 yield 시 deadlock | vTaskDelay/Wait 호출 | 임계 영역에서 block 금지 |
+| ESP-IDF에서 동작 다름 | fork vs mainline 차이 | ESP-IDF 버전 + sdkconfig 확인 |
+| RP2040 core 1이 안 부팅 | multicore_launch 누락 | Pico SDK가 자동 처리하는지 확인 |
+| ISR이 한 코어에서만 처리 | 인터럽트 라우팅 고정 | 필요한 코어에 routing 설정 |
+| runtime stats가 IDLE만 | counter timebase 미설정 | configGENERATE_RUN_TIME_STATS 매크로 |
 
 가장 잦은 함정이 *임계 영역 안에서 block API* 호출입니다. SMP에서 이건 *상대 코어가 spinlock을 영원히 못 푸는* deadlock 시나리오입니다. 임계 영역은 *cycle 단위로 짧게* 유지해야 합니다.
 

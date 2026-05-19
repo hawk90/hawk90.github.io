@@ -268,18 +268,16 @@ Digital Signature(DS) peripheral은 *RSA 서명을 하드웨어 가속*합니다
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                  원인                              해결
-──────────────────────────────────────────────────────────────────────────────
-서명된 binary가 부팅 거부             공개키 digest mismatch            keyfile 동일성 확인, 처음부터 다시
-"Flash encryption is in DEVELOPMENT"   release로 안 봉인됨               의도적이면 정상, 양산이면 RELEASE로
-JTAG 안 붙음                          Release 모드라 차단됨             Release 봉인 후엔 JTAG 영구 불가
-OTA가 "image header magic" 에러       서명·암호화 누락                 espsecure.py sign + encrypt
-secure_version mismatch               eFuse counter가 현재보다 큼       해당 디바이스 영구 폐기
-새 binary가 너무 큼 → 파티션 오버    encrypted binary는 약간 더 큼     OTA 슬롯 크기를 여유 있게
-키 분실                              백업 안 함                        해당 lot 전부 OTA 동결
-부팅 직후 무한 reset                 partition table 서명 누락         CONFIG_SECURE_BOOT_BUILD_SIGNED
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 서명된 binary가 부팅 거부 | 공개키 digest mismatch | keyfile 동일성 확인, 처음부터 다시 |
+| "Flash encryption is in DEVELOPMENT" | release로 안 봉인됨 | 의도적이면 정상, 양산이면 RELEASE로 |
+| JTAG 안 붙음 | Release 모드라 차단됨 | Release 봉인 후엔 JTAG 영구 불가 |
+| OTA가 "image header magic" 에러 | 서명·암호화 누락 | espsecure.py sign + encrypt |
+| secure_version mismatch | eFuse counter가 현재보다 큼 | 해당 디바이스 영구 폐기 |
+| 새 binary가 너무 큼 → 파티션 오버 | encrypted binary는 약간 더 큼 | OTA 슬롯 크기를 여유 있게 |
+| 키 분실 | 백업 안 함 | 해당 lot 전부 OTA 동결 |
+| 부팅 직후 무한 reset | partition table 서명 누락 | CONFIG_SECURE_BOOT_BUILD_SIGNED |
 
 가장 비싼 실수는 *키 분실*입니다. *서명 키는 hardware security module(HSM) 또는 air-gapped 시스템*에 보관하는 것이 표준입니다. 여러 사람이 *서로 다른 사본*을 보관해 single point of failure를 없앱니다.
 

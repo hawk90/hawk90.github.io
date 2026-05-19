@@ -51,14 +51,12 @@ SCB->VTOR = 0x08010000;   // app vector table 위치
 
 IRQ가 들어오면 hardware가 다음을 자동 수행합니다.
 
-```text
-1) PC, LR, R0~R3, R12, xPSR를 stack에 push (8 word = 32 byte)
-2) Vector table에서 handler 주소 fetch
-3) PC = handler 주소
-4) LR = EXC_RETURN
-5) Mode = handler mode
-6) Stack = MSP
-```
+1. PC, LR, R0~R3, R12, xPSR를 stack에 push (8 word = 32 byte)
+2. Vector table에서 handler 주소 fetch
+3. PC = handler 주소
+4. LR = `EXC_RETURN`
+5. Mode = handler mode
+6. Stack = MSP
 
 이 전체가 12 cycle(M3/M4 기준), no-cache 시 16 ~ 25 cycle 정도 걸립니다.
 

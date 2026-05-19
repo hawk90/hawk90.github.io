@@ -34,13 +34,13 @@ AXI4 full의 5 channel은 모두 *VALID·READY handshake*로 움직입니다.
 
 ![AXI4 5 channel — master와 slave 사이의 read/write 분리](/images/blog/modern-recipes/diagrams/part5-06-axi-channels.svg)
 
-```text
-AR  Address Read      master → slave
-R   Read Data         slave → master   (+ RLAST)
-AW  Address Write     master → slave
-W   Write Data        master → slave   (+ WLAST)
-B   Write Response    slave → master
-```
+| Channel | Name | 방향 | 비고 |
+|---------|------|------|------|
+| AR | Address Read | master → slave | |
+| R | Read Data | slave → master | + RLAST |
+| AW | Address Write | master → slave | |
+| W | Write Data | master → slave | + WLAST |
+| B | Write Response | slave → master | |
 
 VALID·READY 둘 다 1인 cycle에 한 beat가 옮겨집니다. Slave가 못 받으면 READY=0이 되고 master는 데이터를 유지합니다. 자연스러운 backpressure가 protocol에 박혀 있습니다.
 

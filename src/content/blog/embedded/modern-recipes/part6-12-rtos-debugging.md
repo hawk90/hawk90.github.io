@@ -21,12 +21,10 @@ tags: [recipes, rtos, debugging]
 
 처음부터 켜두면 좋은 네 가지 인프라입니다.
 
-```text
-1. Stack high-water mark   uxTaskGetStackHighWaterMark — 최대 사용량
-2. Overflow hook           vApplicationStackOverflowHook — overflow 즉시 trap
-3. Heap stats              xPortGetFreeHeapSize, xPortGetMinimumEverFreeHeapSize
-4. Trace recorder          SystemView/Tracealyzer — task/ISR timeline
-```
+1. **Stack high-water mark** — `uxTaskGetStackHighWaterMark`, 최대 사용량
+2. **Overflow hook** — `vApplicationStackOverflowHook`, overflow 즉시 trap
+3. **Heap stats** — `xPortGetFreeHeapSize`, `xPortGetMinimumEverFreeHeapSize`
+4. **Trace recorder** — SystemView/Tracealyzer, task/ISR timeline
 
 여기에 watchdog과 fault handler까지 더하면 양산 사고가 분석 가능한 형태로 남습니다.
 

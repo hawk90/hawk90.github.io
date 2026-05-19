@@ -261,16 +261,14 @@ void main_task(void *p)
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-xEventGroupSetBits 호출 후 즉시 wake X  daemon task 우선순위가 낮음          configTIMER_TASK_PRIORITY 상향
-auto-clear 후 다른 태스크가 못 깸       broadcast 비트를 clear함             clear하지 말거나 sync 사용
-EventBits_t가 16-bit만 동작             configUSE_16_BIT_TICKS=1             32-bit 모드로
-upper 8 bits 사용했을 때 동작 이상      커널 예약 비트 침범                  0xFFFFFF 이하만 사용
-ISR에서 SetBits 직후 ASSERT              non-FromISR 호출                    SetBitsFromISR 사용
-모든 비트 set인데도 wait 안 풀림         xWaitForAllBits=pdFALSE 오설정      AND 조건은 pdTRUE
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| xEventGroupSetBits 호출 후 즉시 wake X | daemon task 우선순위가 낮음 | configTIMER_TASK_PRIORITY 상향 |
+| auto-clear 후 다른 태스크가 못 깸 | broadcast 비트를 clear함 | clear하지 말거나 sync 사용 |
+| EventBits_t가 16-bit만 동작 | configUSE_16_BIT_TICKS=1 | 32-bit 모드로 |
+| upper 8 bits 사용했을 때 동작 이상 | 커널 예약 비트 침범 | 0xFFFFFF 이하만 사용 |
+| ISR에서 SetBits 직후 ASSERT | non-FromISR 호출 | SetBitsFromISR 사용 |
+| 모든 비트 set인데도 wait 안 풀림 | xWaitForAllBits=pdFALSE 오설정 | AND 조건은 pdTRUE |
 
 가장 잦은 실수가 *AND/OR 플래그 혼동*입니다. *"모두 set돼야 깨어남"이 OR 같아 보이지만 AND*입니다. 매개변수 이름이 `xWaitForAllBits`라는 점을 기억하면 헷갈리지 않습니다.
 

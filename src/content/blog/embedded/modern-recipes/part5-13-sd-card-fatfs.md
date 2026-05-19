@@ -33,18 +33,16 @@ draft: false
 
 ### SD card init sequence
 
-```text
 1. Power-up wait (74 clock cycles, CS high)
-2. CMD0 (GO_IDLE_STATE) → R1 = 0x01
-3. CMD8 (SEND_IF_COND) → check voltage range
-   응답 0x01: V2.0+ card
-   응답 0x05: V1.x card
-4. ACMD41 반복까지 R1 = 0x00 (ready)
-5. CMD58 (READ_OCR) → check CCS bit
-   CCS=1: SDHC/SDXC, block address
-   CCS=0: SDSC, byte address
-6. CMD16 (SET_BLOCKLEN) = 512 (SPI mode only)
-```
+2. `CMD0 (GO_IDLE_STATE)` → R1 = `0x01`
+3. `CMD8 (SEND_IF_COND)` → check voltage range
+   - 응답 `0x01`: V2.0+ card
+   - 응답 `0x05`: V1.x card
+4. ACMD41 반복까지 R1 = `0x00` (ready)
+5. `CMD58 (READ_OCR)` → check CCS bit
+   - CCS=1: SDHC/SDXC, block address
+   - CCS=0: SDSC, byte address
+6. `CMD16 (SET_BLOCKLEN)` = 512 (SPI mode only)
 
 각 단계마다 *response timeout* 처리. 안 그러면 missing card에서 hang.
 

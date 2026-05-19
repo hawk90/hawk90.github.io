@@ -14,22 +14,24 @@ draft: true
 
 ## CCSDS — Consultative Committee for Space Data Systems
 
-```text
-CCSDS:
-  1982년 설립
-  NASA·ESA·JAXA·KARI·CNES·국가 우주국 협력
-  Blue Book — 표준
-  Magenta Book — 권장
-  Yellow Book — 사례
+CCSDS
 
-Standards:
-  133.0-B  Space Packet Protocol
-  133.1-B  Encapsulation Service
-  232.0-B  TC Space Data Link Protocol
-  132.0-B  TM Space Data Link Protocol
-  727.0-B  CFDP (File Delivery Protocol)
-  301.0-B  Time Code Formats
-```
+- 1982년 설립
+- NASA·ESA·JAXA·KARI·CNES·국가 우주국 협력
+- Blue Book — 표준
+- Magenta Book — 권장
+- Yellow Book — 사례
+
+주요 표준
+
+| 번호 | 제목 |
+|---|---|
+| 133.0-B | Space Packet Protocol |
+| 133.1-B | Encapsulation Service |
+| 232.0-B | TC Space Data Link Protocol |
+| 132.0-B | TM Space Data Link Protocol |
+| 727.0-B | CFDP (File Delivery Protocol) |
+| 301.0-B | Time Code Formats |
 
 전세계 우주 데이터 표준 — *벤더 독립*.
 
@@ -103,22 +105,24 @@ Length = data field size - 1
 
 ## APID — Application Process Identifier
 
-```text
-11-bit, 0x000 - 0x7FF
-각 APID = 별도 producer·consumer
-역할:
-  Routing
-  Filtering
-  Telemetry channel 구분
+11-bit, `0x000 - 0x7FF`. 각 APID = 별도 producer·consumer.
 
-예 (가상):
-  0x100  Flight Control Computer (TM)
-  0x101  GPS data
-  0x102  IMU data
-  0x110  Engine telemetry
-  0x200  Ground command (TC)
-  0x7FF  Idle pattern
-```
+역할
+
+- Routing
+- Filtering
+- Telemetry channel 구분
+
+예 (가상)
+
+| APID | 용도 |
+|---|---|
+| 0x100 | Flight Control Computer (TM) |
+| 0x101 | GPS data |
+| 0x102 | IMU data |
+| 0x110 | Engine telemetry |
+| 0x200 | Ground command (TC) |
+| 0x7FF | Idle pattern |
 
 KARI·NASA — *APID allocation document* 명시.
 
@@ -149,13 +153,12 @@ if received_seq != expected:
 
 ## Secondary Header — Time·Ancillary
 
-```text
-Mission-specific format:
-  Time code (CCSDS 301.0-B)
-  Packet subtype
-  Source/destination
-  Ancillary data
-```
+Mission-specific format
+
+- Time code (CCSDS 301.0-B)
+- Packet subtype
+- Source/destination
+- Ancillary data
 
 ```c
 typedef struct __attribute__((packed)) {
@@ -167,19 +170,18 @@ typedef struct __attribute__((packed)) {
 
 ## CCSDS Time Code
 
-```text
-CDS (CCSDS Day Segmented):
-  Days from epoch (16-bit)
-  ms of day (32-bit)
-  µs of ms (16-bit)
-  
-CUC (CCSDS Unsegmented):
-  seconds from epoch (32-bit)
-  fraction (32-bit)
-  
-Epoch:
-  Mission-specific (보통 J2000.0 또는 launch time)
-```
+CDS (CCSDS Day Segmented)
+
+- Days from epoch (16-bit)
+- ms of day (32-bit)
+- µs of ms (16-bit)
+
+CUC (CCSDS Unsegmented)
+
+- seconds from epoch (32-bit)
+- fraction (32-bit)
+
+Epoch — Mission-specific (보통 J2000.0 또는 launch time).
 
 LV·satellite — *수십 시간 mission*. CUC 표준.
 
@@ -214,36 +216,23 @@ bool parse_ccsds(uint8_t *buf, int buf_len, ccsds_packet_t *out) {
 
 ## TC — Telecommand (Uplink)
 
-```text
-TC packet structure:
-  Primary header (type = TC)
-  Secondary header (option):
-    PUS Service·Subservice (ECSS-E-ST-70-41)
-    Sequence·ack flags
-  TC data:
-    Command parameters
-    
-Routing:
-  Ground → uplink → spacecraft TC system
-  TC system → APID-based routing → target subsystem
-```
+TC packet structure
+
+- Primary header (type = TC)
+- Secondary header (옵션) — PUS Service·Subservice (ECSS-E-ST-70-41), Sequence·ack flags
+- TC data — Command parameters
+
+Routing — Ground → uplink → spacecraft TC system → APID-based routing → target subsystem.
 
 ECSS PUS (Packet Utilization Standard) — *standardized TC services* (1·3·5·6·17·...).
 
 ## TM — Telemetry (Downlink)
 
-```text
-TM packet:
-  Primary header (type = TM)
-  Secondary header:
-    Time stamp
-    PUS Service·Subservice
-  TM data:
-    HK (housekeeping) values
-    Event reports
-    Memory dump
-    Calibration data
-```
+TM packet 구성
+
+- Primary header (type = TM)
+- Secondary header — Time stamp, PUS Service·Subservice
+- TM data — HK (housekeeping) values, Event reports, Memory dump, Calibration data
 
 LV — *주기적 HK telemetry*. Mission event time-stamped.
 
@@ -268,59 +257,44 @@ NASA cFE — *Apache 2.0*. Mars Rover·ISS·LV 채택.
 
 ## ESA PUS — Service-Based
 
-```text
-PUS Service ID:
-  1   Telecommand verification
-  3   Housekeeping & diagnostic
-  5   Event reporting
-  6   Memory management
-  8   Function management
-  9   Time management
-  11  Onboard operations scheduling
-  12  Onboard monitoring
-  13  Large data transfer
-  14  Packet routing
-  15  Mass storage
-  17  Test
-  18  Onboard control procedures
-  19  Event-action service
-  20  Onboard parameter management
-  21  Onboard storage·retrieval
-  ...
-```
+| Service ID | 용도 |
+|---|---|
+| 1 | Telecommand verification |
+| 3 | Housekeeping & diagnostic |
+| 5 | Event reporting |
+| 6 | Memory management |
+| 8 | Function management |
+| 9 | Time management |
+| 11 | Onboard operations scheduling |
+| 12 | Onboard monitoring |
+| 13 | Large data transfer |
+| 14 | Packet routing |
+| 15 | Mass storage |
+| 17 | Test |
+| 18 | Onboard control procedures |
+| 19 | Event-action service |
+| 20 | Onboard parameter management |
+| 21 | Onboard storage·retrieval |
 
 각 service = *별도 APID 또는 sub-APID*. Standardized command verification·event log.
 
 ## CCSDS Stack 통합
 
-```text
-Application layer:
-  CCSDS Space Packet (133.0-B)
-  
-Data Link layer:
-  CCSDS TC SDLP (232.0-B) for uplink
-  CCSDS TM SDLP (132.0-B) for downlink
-  
-Physical layer:
-  RF (S/X/Ka band)
-  Optical (DSOC)
-```
+- **Application layer** — CCSDS Space Packet (133.0-B)
+- **Data Link layer** — CCSDS TC SDLP (232.0-B) for uplink, CCSDS TM SDLP (132.0-B) for downlink
+- **Physical layer** — RF (S/X/Ka band), Optical (DSOC)
 
 LV launch — *S-band telemetry*. 200 kbps - 10 Mbps.
 
 ## Virtual Channel — Data Link
 
-```text
-TM frame contains 1+ packets
-TM frame has:
-  Virtual Channel ID (VC, 0-7 or more)
-  Used for routing different data streams
-  
-예:
-  VC 0 — Real-time telemetry (high priority)
-  VC 1 — Stored data dump
-  VC 2 — Memory access response
-```
+TM frame은 1개 이상의 packet을 담습니다. TM frame에는 Virtual Channel ID (VC, 0-7 또는 그 이상)가 있어 서로 다른 data stream의 routing에 사용됩니다.
+
+예
+
+- **VC 0** — Real-time telemetry (high priority)
+- **VC 1** — Stored data dump
+- **VC 2** — Memory access response
 
 Multiple VC = *prioritized data streams* over single RF.
 
@@ -340,18 +314,18 @@ Continuous downlink — *idle packet*으로 link 유지.
 
 ## KARI Adaptation
 
-```text
-KARI standards:
-  KARI-SPEC-001 (Space Packet)
-  KARI-SPEC-002 (TM/TC)
-  KARI-SPEC-003 (Time Code)
-  
-KSLV-II 누리 적용:
-  CCSDS Space Packet 기반
-  APID allocation table
-  PUS service subset
-  Mission-specific extensions
-```
+KARI standards
+
+- KARI-SPEC-001 (Space Packet)
+- KARI-SPEC-002 (TM/TC)
+- KARI-SPEC-003 (Time Code)
+
+KSLV-II 누리 적용
+
+- CCSDS Space Packet 기반
+- APID allocation table
+- PUS service subset
+- Mission-specific extensions
 
 한국형 — *CCSDS + KARI extensions*.
 
@@ -375,13 +349,7 @@ CCSDS는 *big-endian*. `htons`/`htonl` 필수.
 
 > ⚠️ APID 충돌
 
-```text
-Subsystem A: APID 0x100 (telemetry)
-Subsystem B: APID 0x100 (own data)
-→ Ground filter 혼란
-```
-
-→ APID allocation document·design 명확.
+Subsystem A가 APID 0x100을 telemetry로, Subsystem B가 같은 0x100을 own data로 쓰면 ground filter가 혼란됩니다. APID allocation document·design을 명확하게 합니다.
 
 > ⚠️ Sequence count wrap
 

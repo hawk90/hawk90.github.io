@@ -155,13 +155,11 @@ WiFi 있는 device는 즉시 cloud로, 없으면 flash에 두고 다음 boot에 
 
 Memfault SDK는 production에서 사용하는 상용 솔루션입니다. 오픈소스 대안의 base 패턴.
 
-```text
 1. Crash 시 register + stack + thread info를 *coredump format*으로 저장
 2. Reboot 후 chunk 단위로 cloud upload
 3. 서버에서 elf와 결합해 symbolicate
 4. 동일 root cause의 crash를 grouping
 5. 대시보드에서 firmware 버전별 crash rate 추적
-```
 
 핵심은 *대량의 device*에서 *동일 crash*를 자동 grouping하는 것입니다. Field 100대 중 5대가 같은 PC에서 reboot하면 한 그룹으로 묶입니다.
 
@@ -235,29 +233,26 @@ reset_reason_t get_reset_reason(void) {
 }
 ```
 
-```text
-RESET_POWER  : 정상 부팅 (전원 인가)
-RESET_PIN    : 사용자가 reset 버튼
-RESET_SW     : 우리가 NVIC_SystemReset
-RESET_IWDG   : Independent watchdog → 코드 hang
-RESET_WWDG   : Window watchdog → timing 위반
-RESET_BOR    : Brown-out → 전압 dip
-RESET_LOWPWR : Low-power mode escape failure
-```
+| Reason | 의미 |
+|--------|------|
+| `RESET_POWER` | 정상 부팅 (전원 인가) |
+| `RESET_PIN` | 사용자가 reset 버튼 |
+| `RESET_SW` | 우리가 `NVIC_SystemReset` |
+| `RESET_IWDG` | Independent watchdog → 코드 hang |
+| `RESET_WWDG` | Window watchdog → timing 위반 |
+| `RESET_BOR` | Brown-out → 전압 dip |
+| `RESET_LOWPWR` | Low-power mode escape failure |
 
 Cloud에서 reset reason 분포를 보면 *어떤 종류 crash가 흔한지* 한눈에 보입니다. IWDG 50%, BOR 30%, hardfault 20%면 *전원* 또는 *hang* 문제가 우선.
 
 ## Field Debug — 원격 진단
 
-```text
-USB 없이 ssh도 없는 device 어떻게 debug?
+USB 없이 ssh도 없는 device 어떻게 debug할까. 다음 옵션이 있다.
 
-옵션:
-1. NB-IoT / LTE-M / WiFi: 가벼운 telemetry
-2. BLE: 1m 거리에서 mobile app으로 dump 받기
-3. UART/SD card: 회수 후 분석
-4. 디바이스 자체에 dump-view UI
-```
+1. **NB-IoT / LTE-M / WiFi** — 가벼운 telemetry
+2. **BLE** — 1m 거리에서 mobile app으로 dump 받기
+3. **UART/SD card** — 회수 후 분석
+4. **디바이스 자체에 dump-view UI**
 
 크리티컬한 device는 *모든 reset마다* cloud에 reset reason과 mini-dump를 보냅니다. 한 사용자의 device에서만 발생하는 crash도 잡힙니다.
 

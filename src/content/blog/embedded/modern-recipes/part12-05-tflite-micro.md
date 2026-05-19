@@ -19,13 +19,11 @@ ARM Ethos-U NPU와 결합하면 Cortex-M55 + Ethos-U55 같은 *MCU급* AI infere
 
 ## 핵심 개념 — 디자인 원칙
 
-```text
-1. No dynamic memory after init (no malloc/free)
-2. Single .tflite model을 flash에 binary로 둠
+1. No dynamic memory after init (no `malloc`/`free`)
+2. Single `.tflite` model을 flash에 binary로 둠
 3. Tensor arena 한 덩어리 메모리에서 inference 동안 reuse
 4. Op resolver로 *사용 op만* link → flash 절약
 5. C++ static link
-```
 
 이 원칙이 *실시간 + 결정적 + 작은 memory* 환경에 맞습니다.
 
@@ -139,19 +137,21 @@ void loop(void) {
 
 Arena는 *intermediate tensor + scratch buffer*를 담는 단일 영역입니다.
 
-```text
-크기 결정:
-  1. 처음에 넉넉히 (예: 200 KB)
-  2. AllocateTensors 후 interp->arena_used_bytes() 호출
-  3. 실제 사용량 확인
-  4. 그 + 10% 정도로 줄임
+**크기 결정:**
 
-예시:
-  Person Detection 96×96:  ~70 KB
-  Speech Commands tiny:    ~10 KB
-  Keyword Spotter:         ~15 KB
-  Visual Wake Word:        ~50 KB
-```
+1. 처음에 넉넉히 (예: 200 KB)
+2. `AllocateTensors` 후 `interp->arena_used_bytes()` 호출
+3. 실제 사용량 확인
+4. 그 + 10% 정도로 줄임
+
+**예시:**
+
+| 모델 | Arena |
+|------|-------|
+| Person Detection 96×96 | ~70 KB |
+| Speech Commands tiny | ~10 KB |
+| Keyword Spotter | ~15 KB |
+| Visual Wake Word | ~50 KB |
 
 ## Op Resolver 최적화
 

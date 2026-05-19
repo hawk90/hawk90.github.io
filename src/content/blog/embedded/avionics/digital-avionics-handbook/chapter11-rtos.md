@@ -14,27 +14,23 @@ draft: true
 
 ## Avionics RTOS 요구
 
-```text
-일반 임베디드 RTOS vs Avionics RTOS:
+**일반 (FreeRTOS·Zephyr·ThreadX):**
+- Lightweight
+- 무료 or 저렴
+- Real-time scheduling
+- 인증 evidence 부재
+- Partitioning 약함
+- Vendor support 제한
 
-일반 (FreeRTOS·Zephyr·ThreadX):
-  + Lightweight
-  + 무료 or 저렴
-  + Real-time scheduling
-  - 인증 evidence 부재
-  - Partitioning 약함
-  - Vendor support 제한
-
-Avionics:
-  + DO-178C Level A 인증 evidence
-  + ARINC-653 partitioning
-  + 결정성 (WCET·timing 보장)
-  + Long-term support (~30년)
-  + Multi-core safe (CAST-32A)
-  + Tool qualification
-  - 비싸 (수십만 달러+)
-  - Vendor 제한 (Wind River·Green Hills·Lynx·SYSGO)
-```
+**Avionics:**
+- DO-178C Level A 인증 evidence
+- ARINC-653 partitioning
+- 결정성 (WCET·timing 보장)
+- Long-term support (~30년)
+- Multi-core safe (CAST-32A)
+- Tool qualification
+- 비싸 (수십만 달러+)
+- Vendor 제한 (Wind River·Green Hills·Lynx·SYSGO)
 
 Avionics RTOS — *인증 + safety + vendor support*.
 

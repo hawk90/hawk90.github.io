@@ -241,215 +241,176 @@ RCS — *fault tolerance + 정밀 pulse*.
 
 ## Fly-by-wire (FBW)
 
-```text
-Fly-by-wire:
-  Pilot control → electronic signal → actuator
-  Mechanical linkage 제거
-  
-Components:
-  Side stick·yoke·rudder pedal
-    → Position sensor
-    → FCC (Primary Flight Computer)
-    → Servo command
-    → Actuator
-    → Control surface
-  
-Redundant FCC:
-  Triple·quad
-  Voting·comparator
-  Diverse (different vendor·language)
-  
-FBW history:
-  Concorde (analog FBW, 1969)
-  A320 (1988, first digital FBW commercial)
-  B777 (1995, first US digital FBW commercial)
-  F-16 (1974, first FBW fighter)
-  Korean KF-21 (2022)
-```
+**Fly-by-wire:**
+- Pilot control → electronic signal → actuator
+- Mechanical linkage 제거
+
+**Components (signal chain):**
+
+Side stick·yoke·rudder pedal → Position sensor → FCC (Primary Flight Computer) → Servo command → Actuator → Control surface.
+
+**Redundant FCC:**
+- Triple·quad
+- Voting·comparator
+- Diverse (different vendor·language)
+
+**FBW history:**
+- Concorde (analog FBW, 1969)
+- A320 (1988, first digital FBW commercial)
+- B777 (1995, first US digital FBW commercial)
+- F-16 (1974, first FBW fighter)
+- Korean KF-21 (2022)
 
 FBW — *modern aircraft 표준*. SW 의존도 높음.
 
 ## Engine Actuator — FADEC
 
-```text
-FADEC (Full Authority Digital Engine Control):
-  Engine 전 자동 제어
-  
-Inputs:
-  Pilot throttle command
-  Air pressure·temperature
-  Fuel pressure
-  Engine RPM·temp
-  Burner pressure
-  
-Outputs:
-  Fuel valve position
-  Variable geometry vanes
-  Bleed valve
-  Ignition
-  
-Architecture:
-  Dual-channel (Channel A·B)
-  Cross-monitoring
-  Fail-operational
-  
-SW:
-  DO-178C Level A
-  Vendor — Honeywell·GE·Pratt·Rolls-Royce
-  자체 (한화·KAERO)
-  
-사용:
-  All modern jet engines
-  F-22·F-35·KF-21
-  B787·A350·A380
-```
+**FADEC (Full Authority Digital Engine Control):** Engine 전 자동 제어.
+
+**Inputs:**
+- Pilot throttle command
+- Air pressure·temperature
+- Fuel pressure
+- Engine RPM·temp
+- Burner pressure
+
+**Outputs:**
+- Fuel valve position
+- Variable geometry vanes
+- Bleed valve
+- Ignition
+
+**Architecture:**
+- Dual-channel (Channel A·B)
+- Cross-monitoring
+- Fail-operational
+
+**SW:**
+- DO-178C Level A
+- Vendor — Honeywell·GE·Pratt·Rolls-Royce
+- 자체 (한화·KAERO)
+
+**사용:**
+- All modern jet engines
+- F-22·F-35·KF-21
+- B787·A350·A380
 
 FADEC = engine *SW 종속*. Reliability critical.
 
 ## Reaction Wheel·CMG
 
-```text
-Reaction Wheel:
-  Flywheel + motor
-  Spin up → reaction torque → spacecraft rotate
-  
-  Issue: saturation
-  → momentum dump (RCS·magnetic torquer)
+**Reaction Wheel:**
+- Flywheel + motor
+- Spin up → reaction torque → spacecraft rotate
+- Issue: saturation → momentum dump (RCS·magnetic torquer)
 
 Use:
-  위성 attitude control (pointing)
-  KOMPSAT·Chollian 등
-  
+- 위성 attitude control (pointing)
+- KOMPSAT·Chollian 등
+
 Vendors:
-  Honeywell HR series
-  Bradford
-  Rockwell Collins
-  KARI·자체
+- Honeywell HR series
+- Bradford
+- Rockwell Collins
+- KARI·자체
 
-CMG (Control Moment Gyro):
-  Gimbaled spinning rotor
-  Higher torque than reaction wheel
-  
-Use:
-  ISS, Hubble
-  Large spacecraft
+**CMG (Control Moment Gyro):**
+- Gimbaled spinning rotor
+- Higher torque than reaction wheel
 
-Magnetic Torquer:
-  Coil in Earth magnetic field
-  Low torque
-  LEO 만 (magnetic field 필요)
-  
 Use:
-  CubeSat
-  Momentum unloading
-```
+- ISS, Hubble
+- Large spacecraft
+
+**Magnetic Torquer:**
+- Coil in Earth magnetic field
+- Low torque
+- LEO 만 (magnetic field 필요)
+
+Use:
+- CubeSat
+- Momentum unloading
 
 위성 attitude — *RW + CMG + magnetic*.
 
 ## Actuator Driver — Electronics
 
-```text
-BLDC Motor Driver:
-  3-phase inverter (6 MOSFET)
-  Hall sensor 또는 encoder
-  FOC (Field-Oriented Control)
-  PWM 10~20 kHz
-  
-Current sense:
-  Shunt resistor + amplifier
-  Hall current sensor
-  
-Position sense:
-  Encoder (incremental·absolute)
-  Resolver
-  Hall
-  LVDT
-  
-Control:
-  Cascaded loop:
-    Outer position
-    Mid velocity
-    Inner current/torque
-  
-MCU:
-  STM32G4·G7 (motor control optimized)
-  TI C2000
-  Microchip dsPIC
-  
-Aerospace:
-  Cortex-R safety MCU
-  Triple voted driver
-  Watchdog·current limit
-```
+**BLDC Motor Driver:**
+- 3-phase inverter (6 MOSFET)
+- Hall sensor 또는 encoder
+- FOC (Field-Oriented Control)
+- PWM 10~20 kHz
+
+**Current sense:**
+- Shunt resistor + amplifier
+- Hall current sensor
+
+**Position sense:**
+- Encoder (incremental·absolute)
+- Resolver
+- Hall
+- LVDT
+
+**Control (cascaded loop):**
+- Outer position
+- Mid velocity
+- Inner current/torque
+
+**MCU:**
+- STM32G4·G7 (motor control optimized)
+- TI C2000
+- Microchip dsPIC
+
+**Aerospace:**
+- Cortex-R safety MCU
+- Triple voted driver
+- Watchdog·current limit
 
 Actuator driver = *power electronics + control*.
 
 ## Fault Detection
 
-```text
-Actuator fault detection:
+**Position fault:**
+- Command vs sensed position error
+- > threshold → fault
+- Stuck (no movement)
 
-Position fault:
-  Command vs sensed position error
-  > threshold → fault
-  Stuck (no movement)
-  
-Current fault:
-  Overcurrent — mechanical jam
-  No current — driver fail
-  
-Timing fault:
-  Slow response — degraded
-  No response — fail
+**Current fault:**
+- Overcurrent — mechanical jam
+- No current — driver fail
 
-Sensor fault:
-  Out-of-range
-  Stuck value
-  Cross-comparison (dual sensor)
+**Timing fault:**
+- Slow response — degraded
+- No response — fail
 
-Driver fault:
-  Internal self-test
-  Voltage rail
-  Temperature
+**Sensor fault:**
+- Out-of-range
+- Stuck value
+- Cross-comparison (dual sensor)
 
-Action:
-  Trip 또는 isolate
-  Use redundant actuator
-  Re-route control
-  
-Logging:
-  Telemetry (fault ID + timestamp)
-  Maintenance record
-```
+**Driver fault:**
+- Internal self-test
+- Voltage rail
+- Temperature
+
+**Action:**
+- Trip 또는 isolate
+- Use redundant actuator
+- Re-route control
+
+**Logging:**
+- Telemetry (fault ID + timestamp)
+- Maintenance record
 
 Fault detection = *closed-loop integrity*. Critical for safety.
 
 ## Korean Actuator 사례
 
-```text
-KSLV-II 누리 TVC:
-  Electric (likely)
-  Gimbaled nozzle
-  자체 + 일부 commercial
-  
-KAI KF-21:
-  EHA·EMA — Control surface
-  Hydraulic backup
-  FADEC — F414 engine
-  
-KARI KOMPSAT·KPLO:
-  Reaction wheel — 일부 자체
-  Magnetic torquer
-  RCS — commercial + 자체
-  
-한화 미사일:
-  Jet vane·gimbal
-  자체 motor·driver
-  
-LIG넥스원:
-  Missile actuator
-  자체 + 외산
-```
+- **KSLV-II 누리 TVC:** Electric (likely). Gimbaled nozzle. 자체 + 일부 commercial.
+- **KAI KF-21:** EHA·EMA — Control surface. Hydraulic backup. FADEC — F414 engine.
+- **KARI KOMPSAT·KPLO:** Reaction wheel — 일부 자체. Magnetic torquer. RCS — commercial + 자체.
+- **한화 미사일:** Jet vane·gimbal. 자체 motor·driver.
+- **LIG넥스원:** Missile actuator. 자체 + 외산.
 
 한국 — *자체화 진행*. 핵심 actuator 국산화.
 
@@ -505,27 +466,25 @@ void tvc_position_loop(tvc_axis_t *axis, float dt) {
 
 ## 인증·환경
 
-```text
-Actuator 인증:
-  DO-178C + DO-254 (FCC·driver)
-  ARP-4754A·4761 (system safety)
-  DO-160 — environmental
-  
-LV qualification:
-  Hot fire test
-  Vibration·shock·acoustic
-  Vacuum
-  Thermal cycle
-  
-Aircraft:
-  Iron bird test (mockup)
-  Flight test
-  Service trial
-  
-신뢰성:
-  MTBF > 10,000 hour 일반
-  Million-cycle endurance test
-```
+**Actuator 인증:**
+- DO-178C + DO-254 (FCC·driver)
+- ARP-4754A·4761 (system safety)
+- DO-160 — environmental
+
+**LV qualification:**
+- Hot fire test
+- Vibration·shock·acoustic
+- Vacuum
+- Thermal cycle
+
+**Aircraft:**
+- Iron bird test (mockup)
+- Flight test
+- Service trial
+
+**신뢰성:**
+- MTBF > 10,000 hour 일반
+- Million-cycle endurance test
 
 Actuator = *physical critical*. 시험 광범위.
 
@@ -533,38 +492,25 @@ Actuator = *physical critical*. 시험 광범위.
 
 > ⚠️ Position feedback single sensor
 
-```text
-1 LVDT → sensor fail = position unknown
-→ Open-loop fall-back 불가
-```
+1 LVDT → sensor fail = position unknown. Open-loop fall-back 불가.
 
 → Dual sensor + cross-check.
 
 > ⚠️ Driver overcurrent protection 부족
 
-```text
-"Software current limit"
-→ HW current spike — driver burn
-```
+"Software current limit"만 두면 HW current spike에서 driver burn이 발생한다.
 
 → Hardware-level current limit.
 
 > ⚠️ Stuck detection 누락
 
-```text
-Command 5° → position 0°
-→ "still tracking" — no flag
-→ Mission compromised
-```
+Command 5° → position 0°인데도 "still tracking" 플래그가 안 뜨면 mission이 compromised된다.
 
 → Error + rate detection.
 
 > ⚠️ Backdrivability 무시
 
-```text
-Aerodynamic load → actuator backdrive
-→ Position deviation under no command
-```
+Aerodynamic load → actuator backdrive로 무지령 상태에서 position deviation이 생길 수 있다.
 
 → Brake 또는 high gear ratio.
 

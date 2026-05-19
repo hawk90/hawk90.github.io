@@ -30,12 +30,10 @@ call_rcu              callback을 grace period 후 호출 (sleep 안 하고 free
 
 전형적인 update 흐름입니다.
 
-```text
-1. new = copy + modify
-2. rcu_assign_pointer(global, new)
-3. synchronize_rcu (또는 call_rcu)
-4. free(old)
-```
+1. `new = copy + modify`
+2. `rcu_assign_pointer(global, new)`
+3. `synchronize_rcu` (또는 `call_rcu`)
+4. `free(old)`
 
 핵심 보장은 *모든 진행 중 reader가 끝난 후*에만 옛 객체가 free된다는 점입니다.
 

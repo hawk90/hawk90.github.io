@@ -21,12 +21,10 @@ tags: [recipes, rtos, scheduler]
 
 Scheduler가 호출되는 시점은 정확히 네 가지입니다.
 
-```text
-1. Tick interrupt        매 tick (보통 1 ms) — time-slice 회전
-2. Task가 block          delay, queue wait, semaphore take
-3. Task가 unblock        ISR이나 다른 task가 깨움
-4. yield/yield_from_isr  명시적 양보
-```
+1. **Tick interrupt** — 매 tick (보통 1 ms) — time-slice 회전
+2. **Task가 block** — delay, queue wait, semaphore take
+3. **Task가 unblock** — ISR이나 다른 task가 깨움
+4. **`yield` / `yield_from_isr`** — 명시적 양보
 
 이 네 시점에서만 가장 높은 priority의 ready task를 골라 실행합니다. 그 사이에는 현재 task가 계속 돕니다.
 
@@ -105,13 +103,12 @@ Idle task는 모든 다른 task가 block일 때만 도는 가장 낮은 priority
 
 ### Context switch 코드 (Cortex-M)
 
-```text
-PendSV에서 호출 — 핵심 4단계
-1. 현재 task의 SP 저장        R0~R12, LR, PSR은 HW가 자동 push
-2. ready list에서 다음 task 선택  prvSelectHighestPriorityTask
-3. 다음 task의 SP 복원
-4. exception return            HW가 R0~R12, LR, PSR 자동 pop
-```
+PendSV에서 호출되는 핵심 4단계.
+
+1. **현재 task의 SP 저장** — R0~R12, LR, PSR은 HW가 자동 push
+2. **ready list에서 다음 task 선택** — `prvSelectHighestPriorityTask`
+3. **다음 task의 SP 복원**
+4. **exception return** — HW가 R0~R12, LR, PSR 자동 pop
 
 Cortex-M은 hardware가 절반의 register를 알아서 push와 pop해줍니다. 그 결과 switch 비용이 1~3 µs로 작아집니다.
 

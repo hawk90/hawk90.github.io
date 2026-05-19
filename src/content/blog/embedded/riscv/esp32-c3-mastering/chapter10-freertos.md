@@ -53,17 +53,15 @@ void app_main(void)
 
 priority 0은 *idle 전용*입니다. 사용자 태스크는 1 이상을 씁니다. 시스템 task들의 일반적 우선순위입니다.
 
-```text
-priority    task                           역할
-─────────────────────────────────────────────────
-24          esp_timer_task                 고우선 타이머
-23          ipc_task                       부트 IPC
-22          WiFi task                      WiFi 드라이버
-20          BLE host task                  NimBLE
-19          tcpip_thread                   LwIP
-1           main_task                      app_main이 도는 task
-0           IDLE                           idle hook
-```
+| Priority | Task | 역할 |
+|----------|------|------|
+| 24 | esp_timer_task | 고우선 타이머 |
+| 23 | ipc_task | 부트 IPC |
+| 22 | WiFi task | WiFi 드라이버 |
+| 20 | BLE host task | NimBLE |
+| 19 | tcpip_thread | LwIP |
+| 1 | main_task | app_main이 도는 task |
+| 0 | IDLE | idle hook |
 
 사용자 task를 *너무 높게* 두면 WiFi/BLE 응답이 느려집니다. *5~10*이 일반 application의 안전 구간입니다.
 
@@ -314,18 +312,16 @@ ESP_LOGI("stack", "min free stack: %u bytes", high_water * sizeof(StackType_t));
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                  원인                              해결
-──────────────────────────────────────────────────────────────────────────────
-"Task watchdog got triggered"         high-priority task가 idle 굶김    vTaskDelay 또는 esp_task_wdt_reset
-ISR에서 ESP_LOGI 호출 후 crash        ISR에서 일반 함수 호출            ISR_safe 함수만 사용
-mutex 후 priority inversion           binary semaphore를 자원 보호에 씀  자원 보호엔 mutex
-queue가 한 번도 안 차는데 send 실패  ticks_to_wait=0 + 즉시 send       대기 시간 추가 또는 큐 크기 ↑
-stack overflow는 안 떴는데 panic     실제 overflow지만 검출 옵션 OFF   CHECK_STACKOVERFLOW=CANARY
-timer가 정확하지 않음                 timer service task가 막힘         timer 콜백을 가볍게, 무거운 일은 queue로
-light sleep 안 들어감                 peripheral lock 잡혀 있음          pm_lock 추적, UART idle 확인
-context switch 너무 자주               Tick rate 너무 높음               1000 Hz → 100 Hz 검토
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| "Task watchdog got triggered" | high-priority task가 idle 굶김 | vTaskDelay 또는 esp_task_wdt_reset |
+| ISR에서 ESP_LOGI 호출 후 crash | ISR에서 일반 함수 호출 | ISR_safe 함수만 사용 |
+| mutex 후 priority inversion | binary semaphore를 자원 보호에 씀 | 자원 보호엔 mutex |
+| queue가 한 번도 안 차는데 send 실패 | ticks_to_wait=0 + 즉시 send | 대기 시간 추가 또는 큐 크기 ↑ |
+| stack overflow는 안 떴는데 panic | 실제 overflow지만 검출 옵션 OFF | CHECK_STACKOVERFLOW=CANARY |
+| timer가 정확하지 않음 | timer service task가 막힘 | timer 콜백을 가볍게, 무거운 일은 queue로 |
+| light sleep 안 들어감 | peripheral lock 잡혀 있음 | pm_lock 추적, UART idle 확인 |
+| context switch 너무 자주 | Tick rate 너무 높음 | 1000 Hz → 100 Hz 검토 |
 
 가장 자주 보는 함정은 *task watchdog*입니다. 신규 펌웨어가 *반복적으로 reboot*하는데 panic 로그가 "Task watchdog got triggered"라면, *idle task가 굶고 있다*는 뜻입니다. 모든 사용자 task가 *최소 한 번씩* `vTaskDelay`로 양보하는지 검토합니다.
 

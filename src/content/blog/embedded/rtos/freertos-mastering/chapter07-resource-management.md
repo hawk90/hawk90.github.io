@@ -318,20 +318,18 @@ gatekeeper 패턴 요약
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                            원인                                     해결
-─────────────────────────────────────────────────────────────────────────────────────────────
-mutex로 시그널링 (ISR→task)                    의미 오용                              binary semaphore 사용
-binary semaphore로 자원 보호                   PI 없음 → priority inversion           mutex 사용
-mutex deadlock                                  같은 태스크가 두 번 take               recursive mutex 또는 설계 수정
-critical section 안에 printf                    임계 구역 매우 길어짐                  바깥에서 출력
-xSemaphoreTake(mutex, 0)으로 항상 fail          다른 태스크가 길게 잡고 있음           홀딩 시간 감소·portMAX_DELAY로
-priority inversion이 의심됨                     binary semaphore 사용                  mutex로 교체
-counting semaphore의 max count 너무 작음       waiter들이 모두 timeout               자원 수만큼 max로
-gatekeeper 큐 가득 참                           consumer 못 따라감                     consumer priority↑·큐 깊이↑
-take 후 give 빼먹음                             영구 lock                              RAII 패턴 (대안: cleanup 매크로)
-ISR에서 mutex take                              불가 (PI는 task 컨텍스트 전용)         ISR↔task 다리는 semaphore로
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| mutex로 시그널링 (ISR→task) | 의미 오용 | binary semaphore 사용 |
+| binary semaphore로 자원 보호 | PI 없음 → priority inversion | mutex 사용 |
+| mutex deadlock | 같은 태스크가 두 번 take | recursive mutex 또는 설계 수정 |
+| critical section 안에 printf | 임계 구역 매우 길어짐 | 바깥에서 출력 |
+| xSemaphoreTake(mutex, 0)으로 항상 fail | 다른 태스크가 길게 잡고 있음 | 홀딩 시간 감소·portMAX_DELAY로 |
+| priority inversion이 의심됨 | binary semaphore 사용 | mutex로 교체 |
+| counting semaphore의 max count 너무 작음 | waiter들이 모두 timeout | 자원 수만큼 max로 |
+| gatekeeper 큐 가득 참 | consumer 못 따라감 | consumer priority↑·큐 깊이↑ |
+| take 후 give 빼먹음 | 영구 lock | RAII 패턴 (대안: cleanup 매크로) |
+| ISR에서 mutex take | 불가 (PI는 task 컨텍스트 전용) | ISR↔task 다리는 semaphore로 |
 
 ## 정리
 

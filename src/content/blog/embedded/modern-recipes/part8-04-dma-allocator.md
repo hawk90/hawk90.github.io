@@ -21,13 +21,11 @@ Linux 드라이버에서는 IOMMU 없는 SoC에 `malloc`으로 잡은 buffer를 
 
 DMA buffer가 만족해야 할 다섯 가지입니다.
 
-```text
-1. Physically contiguous   — DMA는 MMU를 모름
-2. Cache 일관성            — coherent or 명시 maintenance
-3. Alignment              — burst, SIMD, cache line
-4. DMA addressable        — 32-bit 또는 64-bit 한계
-5. Allocator overhead 적음 — 자주 alloc/free하는 경우
-```
+1. **Physically contiguous** — DMA는 MMU를 모름
+2. **Cache 일관성** — coherent or 명시 maintenance
+3. **Alignment** — burst, SIMD, cache line
+4. **DMA addressable** — 32-bit 또는 64-bit 한계
+5. **Allocator overhead 적음** — 자주 alloc/free하는 경우
 
 Coherent와 streaming 두 모드를 구분해서 씁니다. Coherent는 *non-cacheable 또는 cache-coherent* 영역에서 잡아 매 접근마다 cache 관리를 생략합니다. Streaming은 일반 cacheable buffer를 *임시로* DMA에 빌려주고 시작·완료 시점에 cache flush/invalidate를 명시합니다.
 

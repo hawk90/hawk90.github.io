@@ -52,14 +52,15 @@ Bit 0:     OCF flag (operational control field)
 
 ### VC — Virtual Channel
 
-```text
-한 RF link 안 여러 VC 다중화:
-  VC 0  Real-time telemetry (high priority)
-  VC 1  Stored data (playback)
-  VC 2  Memory dump
-  VC 3  Idle (filler)
-  VC 4-7: mission-specific
-```
+한 RF link 안에 여러 VC를 다중화합니다.
+
+| VC | 용도 |
+|---|---|
+| 0 | Real-time telemetry (high priority) |
+| 1 | Stored data (playback) |
+| 2 | Memory dump |
+| 3 | Idle (filler) |
+| 4-7 | mission-specific |
 
 각 VC = *별도 queue*. 하나가 busy해도 다른 VC 진행.
 
@@ -84,19 +85,15 @@ TC는 *짧고 안전* 우선. Frame seq num + ACK.
 
 ## AOS — Advanced Orbiting Systems
 
-```text
-AOS (CCSDS 732.0-B):
-  TM 확장 — 더 큰 frame, 더 많은 VC
-  
-  Frame: 1024 byte 표준
-  VC: 64개 (6-bit)
-  Insert Service — fixed-position data
-  Bitstream Service — raw bits per frame
-  Async Insert Service — async data
-  
-Use:
-  ISS·Mars Rover·Big mission
-```
+AOS (CCSDS 732.0-B)는 TM 확장으로 더 큰 frame과 더 많은 VC를 지원합니다.
+
+- Frame: 1024 byte 표준
+- VC: 64개 (6-bit)
+- Insert Service — fixed-position data
+- Bitstream Service — raw bits per frame
+- Async Insert Service — async data
+
+Use — ISS·Mars Rover·Big mission.
 
 AOS = *큰 mission 표준*. KSLV·소형 위성은 일반 TM.
 
@@ -148,15 +145,13 @@ CLCW (Communications Link Control Word) — uplink 상태 ground에 보고.
 
 ## COP-1 — Communication Operation Procedure
 
-```text
-COP-1 (CCSDS 232.1-B):
-  Sliding window protocol
-  FOP (Frame Operation Procedure) — ground side
-  FARM (Frame Acceptance·Reporting Mechanism) — spacecraft side
-  
-Type A: confirmed (retransmit)
-Type B: unconfirmed (best-effort)
-```
+COP-1 (CCSDS 232.1-B)
+
+- Sliding window protocol
+- FOP (Frame Operation Procedure) — ground side
+- FARM (Frame Acceptance·Reporting Mechanism) — spacecraft side
+- Type A: confirmed (retransmit)
+- Type B: unconfirmed (best-effort)
 
 TCP-like reliable command transfer.
 
@@ -197,15 +192,13 @@ ASM — *frame 경계* 검출. Bit-sync 후 frame-sync.
 
 ## Reed-Solomon — Outer Coding
 
-```text
-RS(255, 223):
-  - 223 byte info + 32 byte parity
-  - Correct up to 16 byte errors per block
-  - Concatenated with convolutional inner
-  
-CCSDS 131.0-B:
-  RS(255, 223) interleaved depth I=1 to 8
-```
+RS(255, 223)
+
+- 223 byte info + 32 byte parity
+- Correct up to 16 byte errors per block
+- Concatenated with convolutional inner
+
+CCSDS 131.0-B — RS(255, 223) interleaved depth I=1 to 8.
 
 ```c
 /* Reed-Solomon encoding */
@@ -216,27 +209,23 @@ LV·deep space — RS 표준.
 
 ## LDPC — Modern Coding
 
-```text
-CCSDS 131.0-B:
-  LDPC rate 1/2, 2/3, 4/5
-  Frame: AR4JA codes
-  Better than RS+Conv
-  
-Apply:
-  Lunar Reconnaissance·Mars Reconnaissance Orbiter
-  ESA·NASA modern missions
-```
+CCSDS 131.0-B
+
+- LDPC rate 1/2, 2/3, 4/5
+- Frame: AR4JA codes
+- Better than RS+Conv
+
+Apply — Lunar Reconnaissance·Mars Reconnaissance Orbiter, ESA·NASA modern missions.
 
 LDPC — *near Shannon limit*. SDR로 decode.
 
 ## Turbo Coding
 
-```text
-CCSDS 131.0-B Turbo:
-  Rate 1/2, 1/3, 1/4, 1/6
-  CDMA2000·LTE도 같은 기술
-  Iterative decoding
-```
+CCSDS 131.0-B Turbo
+
+- Rate 1/2, 1/3, 1/4, 1/6
+- CDMA2000·LTE도 같은 기술
+- Iterative decoding
 
 Turbo·LDPC — *modern deep space*. RS는 *backward compatibility*.
 
@@ -279,18 +268,14 @@ LV — *RF link 항상 active*. Idle 없으면 ground receiver lose sync.
 
 ## Frame Loss·Retransmit
 
-```text
-Ground receives frame N=42:
-  Expected N=40 → gap! lost 41
-  
-Action:
-  TM (downlink): just log gap, can't retransmit
-  TC (uplink): re-send via COP-1
-  
-Critical data:
-  Stored on spacecraft
-  Re-downlink via dump command (별도 VC)
-```
+Ground이 frame N=42를 받았는데 N=40 다음을 기대하던 상황이면 N=41이 lost된 gap입니다.
+
+Action
+
+- TM (downlink) — gap을 log만 하고 retransmit 불가
+- TC (uplink) — COP-1로 재전송
+
+Critical data — Stored on spacecraft, dump command(별도 VC)로 re-downlink.
 
 LV mission — *짧음, retransmit 한정*. Reed-Solomon으로 *FEC 우선*.
 
@@ -311,67 +296,40 @@ Mission analysis — *각 telemetry packet 정확 시간*.
 
 ## SDR — Ground Station
 
-```text
-Ground SDR (Software Defined Radio):
-  GNU Radio·USRP·Ettus Research
-  
-Decode chain:
-  RF receive → demodulate → bit sync → frame sync (ASM) →
-  Convolutional decode → RS decode → frame parse → packet extract
-  
-KARI·NASA Deep Space Network — 사용
-```
+Ground SDR (Software Defined Radio) — GNU Radio·USRP·Ettus Research.
 
-오픈소스 SDR로도 *학생·hobbyist*가 CCSDS decode 가능.
+Decode chain — RF receive → demodulate → bit sync → frame sync (ASM) → Convolutional decode → RS decode → frame parse → packet extract.
+
+KARI·NASA Deep Space Network에서 사용. 오픈소스 SDR로도 *학생·hobbyist*가 CCSDS decode 가능.
 
 ## KSLV-II Telemetry
 
-```text
-누리 telemetry:
-  S-band downlink ~1 Mbps
-  CCSDS TM frames
-  Mission timeline·sensor·engine·attitude
-  Ground station (Naro·Daejeon)
-  
-Public release:
-  발사 후 KARI가 data 공개
-  Educational use
-```
+누리 telemetry
+
+- S-band downlink ~1 Mbps
+- CCSDS TM frames
+- Mission timeline·sensor·engine·attitude
+- Ground station (Naro·Daejeon)
+
+Public release — 발사 후 KARI가 data 공개, Educational use.
 
 ## 자주 하는 실수
 
 > ⚠️ Frame size 결정 잘못
 
-```text
-너무 작음 → header overhead 비율 ↑
-너무 큼 → frame error rate ↑ (FEC budget)
-```
-
-→ link margin·BER·overhead trade-off.
+Frame이 너무 작으면 header overhead 비율이 올라가고, 너무 크면 frame error rate가 올라갑니다 (FEC budget). link margin·BER·overhead trade-off로 결정합니다.
 
 > ⚠️ VC priority 무시
 
-```text
-모든 VC 같은 priority → high-priority 데이터 지연
-```
-
-→ explicit priority·bandwidth budget.
+모든 VC를 같은 priority로 두면 high-priority 데이터가 지연됩니다. explicit priority와 bandwidth budget으로 분리합니다.
 
 > ⚠️ COP-1 not implemented
 
-```text
-TC unreliable → command lost → mission impact
-```
-
-→ Type A COP-1.
+TC가 unreliable이면 command lost로 mission impact가 생깁니다. Type A COP-1을 씁니다.
 
 > ⚠️ Endian wrong
 
-```text
-Earth ground software bug → all frame parse fail
-```
-
-→ big-endian, htons·htonl.
+Earth ground software bug로 all frame parse가 실패합니다. big-endian, htons·htonl 필수.
 
 ## 정리
 

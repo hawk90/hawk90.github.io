@@ -235,19 +235,16 @@ LE Secure Connections + Bonding + 적절한 association model
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                           해결
-─────────────────────────────────────────────────────────────────────────────
-재연결마다 다시 페어링                   bond 저장 안 됨                ble_store_config_init() 호출
-                                                                       또는 NCS Settings subsys 활성화
-Just Works로 자동 떨어짐                I/O cap mismatch              양쪽 io_capability 정확히 신고
-LESC 협상 실패                          Legacy fallback 꺼져 있음     상대가 BLE 4.2+ 인지 확인
-OTA 후 bond 날아감                      NVS partition 변경           bond 보존 OTA 전략 적용
-NoMITM인데 키패드 요구                  AuthReq.MITM=1 설정         낮은 자산이면 MITM=0
-Pairing Failed (0x05)                  Pairing not supported       양쪽 SMP 활성화 확인
-Pairing Failed (0x06)                  Encryption key size 불충분    max_key_size=16 확인
-RPA가 해석 안 됨                        IRK 분배 안 했음             init/resp_key_dist에 ID_KEY 포함
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 재연결마다 다시 페어링 | bond 저장 안 됨 | ble_store_config_init() 호출 또는 NCS Settings subsys 활성화 |
+| Just Works로 자동 떨어짐 | I/O cap mismatch | 양쪽 io_capability 정확히 신고 |
+| LESC 협상 실패 | Legacy fallback 꺼져 있음 | 상대가 BLE 4.2+ 인지 확인 |
+| OTA 후 bond 날아감 | NVS partition 변경 | bond 보존 OTA 전략 적용 |
+| NoMITM인데 키패드 요구 | AuthReq.MITM=1 설정 | 낮은 자산이면 MITM=0 |
+| Pairing Failed (0x05) | Pairing not supported | 양쪽 SMP 활성화 확인 |
+| Pairing Failed (0x06) | Encryption key size 불충분 | max_key_size=16 확인 |
+| RPA가 해석 안 됨 | IRK 분배 안 했음 | init/resp_key_dist에 ID_KEY 포함 |
 
 가장 흔한 함정은 *재페어링 루프*입니다. 페어링은 성공했는데 다음 연결에서 또 페어링을 요구하는 증상은 *bond가 저장되지 않은 것*이 거의 100%입니다. NCS는 `CONFIG_BT_SETTINGS=y`, ESP-IDF NimBLE은 `ble_store_config_init()` 호출이 필수입니다.
 

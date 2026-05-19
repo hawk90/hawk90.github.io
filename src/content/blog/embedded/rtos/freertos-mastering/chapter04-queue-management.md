@@ -272,19 +272,17 @@ xTaskNotifyWait(/*clearOnEntry=*/0,
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                            원인                                해결
-─────────────────────────────────────────────────────────────────────────────────────────
-xQueueReceive가 항상 timeout                  큐가 정말 비어 있음                 producer 동작 확인, send 반환값 검사
-큐가 자주 가득 참                              consumer가 너무 느림                consumer 우선순위 ↑, 큐 깊이 ↑
-xQueueSend에 NULL pointer 넘김                컴파일러 경고 없이 죽음              컴파일 시 -Wall -Wnonnull
-sizeof(struct) 대신 sizeof(struct*) 큐 만듦   by-copy인데 포인터만 복사 (의도?)   의도면 OK, 아니면 sizeof(T)
-portMAX_DELAY로 무한 대기 → 응답 없음        INCLUDE_vTaskSuspend=0              FreeRTOSConfig.h에서 1로
-queue set 길이가 모자람                       send 누락                            모든 멤버 깊이 합 이상으로
-ISR에서 xQueueSend 호출                       crash                                xQueueSendFromISR 사용
-xQueueOverwrite로 큐 깊이 2+ 사용              assert (overwrite는 깊이 1만)        깊이 1로 만들기
-큐 내부 데이터 정렬 안 됨 (32-bit 멤버 4 byte 비정렬)  Cortex-M에서 misaligned fault  구조체에 padding 추가
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| xQueueReceive가 항상 timeout | 큐가 정말 비어 있음 | producer 동작 확인, send 반환값 검사 |
+| 큐가 자주 가득 참 | consumer가 너무 느림 | consumer 우선순위 ↑, 큐 깊이 ↑ |
+| xQueueSend에 NULL pointer 넘김 | 컴파일러 경고 없이 죽음 | 컴파일 시 -Wall -Wnonnull |
+| sizeof(struct) 대신 sizeof(struct*) 큐 만듦 | by-copy인데 포인터만 복사 (의도?) | 의도면 OK, 아니면 sizeof(T) |
+| portMAX_DELAY로 무한 대기 → 응답 없음 | INCLUDE_vTaskSuspend=0 | FreeRTOSConfig.h에서 1로 |
+| queue set 길이가 모자람 | send 누락 | 모든 멤버 깊이 합 이상으로 |
+| ISR에서 xQueueSend 호출 | crash | xQueueSendFromISR 사용 |
+| xQueueOverwrite로 큐 깊이 2+ 사용 | assert (overwrite는 깊이 1만) | 깊이 1로 만들기 |
+| 큐 내부 데이터 정렬 안 됨 (32-bit 멤버 4 byte 비정렬) | Cortex-M에서 misaligned fault | 구조체에 padding 추가 |
 
 ## 정리
 

@@ -247,19 +247,16 @@ events_per_second = 1000 / connection_interval_ms
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-연결 자주 끊김                          supervision timeout 너무 짧음        timeout 늘리기 (5-10s)
-iOS가 Update Request 거부               Apple 정책 위반                     interval/latency/timeout 재계산
-배터리 빨리 닳음                        interval 너무 짧음 또는 latency=0    응용 시나리오 별 표 참조
-처리량 100 kbps에서 멈춤                MTU 23 또는 DLE 27 B               MTU+DLE 협상 확인
-WiFi 켜면 packet 손실 증가             채널 충돌, AFH 미동작                AFH 활성, 채널 map 수동
-연결 후 1초간 데이터 안 옴              MTU 협상 진행 중                    MTU 협상 완료 wait
-                                                                          또는 미리 MTU 247로 시작
-notify가 다음 interval까지 지연         latency 큼                          중요한 notify는 latency=0
-DLE는 251 협상했는데 packet은 작음     상대 central 미지원                  log에서 tx/rx_max_len 확인
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 연결 자주 끊김 | supervision timeout 너무 짧음 | timeout 늘리기 (5-10s) |
+| iOS가 Update Request 거부 | Apple 정책 위반 | interval/latency/timeout 재계산 |
+| 배터리 빨리 닳음 | interval 너무 짧음 또는 latency=0 | 응용 시나리오 별 표 참조 |
+| 처리량 100 kbps에서 멈춤 | MTU 23 또는 DLE 27 B | MTU+DLE 협상 확인 |
+| WiFi 켜면 packet 손실 증가 | 채널 충돌, AFH 미동작 | AFH 활성, 채널 map 수동 |
+| 연결 후 1초간 데이터 안 옴 | MTU 협상 진행 중 | MTU 협상 완료 wait 또는 미리 MTU 247로 시작 |
+| notify가 다음 interval까지 지연 | latency 큼 | 중요한 notify는 latency=0 |
+| DLE는 251 협상했는데 packet은 작음 | 상대 central 미지원 | log에서 tx/rx_max_len 확인 |
 
 가장 큰 함정은 *iOS Update Request 거부*입니다. 원인이 *조용한 거부*라 알아채기 어렵습니다. 연결 직후 `bt_conn_le_param_update`의 *callback에서 실제 적용된 값을 확인*하는 것이 안전합니다.
 

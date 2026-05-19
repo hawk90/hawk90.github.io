@@ -183,21 +183,19 @@ Extended는 *central도 BLE 5 지원*해야 받습니다. iPhone 8 이상, Andro
 
 Apple이 2013년 발표한 *iBeacon*은 *ADV_NONCONN_IND*의 manufacturer data를 정해진 포맷으로 채운 것입니다. 별도 스펙이 아니라 *관행*입니다.
 
-```text
-[iBeacon manufacturer data - 25 byte]
+iBeacon manufacturer data (총 25 byte):
 
-Offset  크기  의미                값(예)
-─────────────────────────────────────────────
-0       1B    AD length            1A
-1       1B    AD type (0xFF)       FF
-2       2B    Company ID (Apple)   4C 00
-4       1B    iBeacon type         02
-5       1B    iBeacon length       15  (= 21 byte)
-6       16B   Proximity UUID       E2C56DB5-DFFB-48D2-B060-D0F5A71096E0
-22      2B    Major                00 01
-24      2B    Minor                00 02
-26      1B    Measured TX power    C5  (= -59 dBm @ 1m)
-```
+| Offset | 크기 | 의미 | 값(예) |
+|--------|------|------|--------|
+| 0 | 1B | AD length | 1A |
+| 1 | 1B | AD type (0xFF) | FF |
+| 2 | 2B | Company ID (Apple) | 4C 00 |
+| 4 | 1B | iBeacon type | 02 |
+| 5 | 1B | iBeacon length | 15 (= 21 byte) |
+| 6 | 16B | Proximity UUID | E2C56DB5-DFFB-48D2-B060-D0F5A71096E0 |
+| 22 | 2B | Major | 00 01 |
+| 24 | 2B | Minor | 00 02 |
+| 26 | 1B | Measured TX power | C5 (= -59 dBm @ 1m) |
 
 ```c
 // iBeacon payload 직접 구성
@@ -230,17 +228,15 @@ iOS는 *Proximity UUID를 앱이 미리 알고 있어야* 백그라운드에서 
 
 Google이 2015년 발표한 *Eddystone*은 *Service Data (type 0x16)*를 활용합니다. 2021년 GitHub repo가 archive 되어 *공식 deprecated*이지만, 인프라가 남아 있어 여전히 보입니다.
 
-```text
-[Eddystone-URL service data]
+Eddystone-URL service data:
 
-Offset  크기  의미                      예
-─────────────────────────────────────────────────
-0       2B    Eddystone Service UUID    AA FE
-2       1B    Frame Type (URL)          10
-3       1B    TX Power @ 0m             EE  (= -18 dBm)
-4       1B    URL scheme prefix         00  (http://www.)
-5       N B   Encoded URL               "example.com"
-```
+| Offset | 크기 | 의미 | 예 |
+|--------|------|------|-----|
+| 0 | 2B | Eddystone Service UUID | AA FE |
+| 2 | 1B | Frame Type (URL) | 10 |
+| 3 | 1B | TX Power @ 0m | EE (= -18 dBm) |
+| 4 | 1B | URL scheme prefix | 00 (http://www.) |
+| 5 | N B | Encoded URL | "example.com" |
 
 URL scheme prefix 코드:
 
@@ -266,17 +262,15 @@ Eddystone은 *UID* (16 B 식별자), *URL* (단축 URL), *TLM* (텔레메트리:
 
 Radius Networks의 *AltBeacon*은 *벤더 중립적 비콘*입니다. iBeacon의 Apple-only 정책에 대한 대안으로 만들어졌습니다.
 
-```text
-[AltBeacon manufacturer data]
+AltBeacon manufacturer data:
 
-Offset  크기  의미
-────────────────────────────────────────────────
-0       2B    Manufacturer ID (custom)
-2       2B    Beacon Code (0xBEAC)
-4       20B   Beacon ID (UUID 16B + Major 2B + Minor 2B 와 유사)
-24      1B    Reference RSSI
-25      1B    MFG reserved
-```
+| Offset | 크기 | 의미 |
+|--------|------|------|
+| 0 | 2B | Manufacturer ID (custom) |
+| 2 | 2B | Beacon Code (0xBEAC) |
+| 4 | 20B | Beacon ID (UUID 16B + Major 2B + Minor 2B 와 유사) |
+| 24 | 1B | Reference RSSI |
+| 25 | 1B | MFG reserved |
 
 Android는 *AltBeacon SDK*가 iBeacon보다 더 잘 동작합니다(스캔 제한이 적음). 다만 *플랫폼별 점유율*은 iBeacon이 압도적입니다.
 
@@ -309,17 +303,15 @@ Coin cell *CR2032*는 *235 mAh*가 표준입니다. 비콘 전류는 *광고 주
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                              해결
-─────────────────────────────────────────────────────────────────────────────────
-스캐너가 광고를 못 잡음                  scan window < adv interval        window 키우거나 active scan
-adv data가 32 B 이상이라 안 시작        Legacy 31B 한계                  Extended adv 사용 또는 분리
-iPhone이 iBeacon 인식 안 함            CoreLocation region 등록 누락     앱이 monitorRegion 등록
-배터리 한 달도 못 감                    광고 주기 100 ms                   500 ms 이상으로 늘리기
-WiFi 켜면 발견 시간 5배 늘어남          ch 37/38/39 ↔ WiFi 충돌          ch 39만 광고 시도
-Scan response 안 옴                    ADV_NONCONN_IND 또는 passive     ADV_IND + active scan
-Duplicates filter로 정보 손실           interval보다 짧은 변화 무시         filter 끄거나 polling 짧게
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 스캐너가 광고를 못 잡음 | scan window < adv interval | window 키우거나 active scan |
+| adv data가 32 B 이상이라 안 시작 | Legacy 31B 한계 | Extended adv 사용 또는 분리 |
+| iPhone이 iBeacon 인식 안 함 | CoreLocation region 등록 누락 | 앱이 monitorRegion 등록 |
+| 배터리 한 달도 못 감 | 광고 주기 100 ms | 500 ms 이상으로 늘리기 |
+| WiFi 켜면 발견 시간 5배 늘어남 | ch 37/38/39 ↔ WiFi 충돌 | ch 39만 광고 시도 |
+| Scan response 안 옴 | ADV_NONCONN_IND 또는 passive | ADV_IND + active scan |
+| Duplicates filter로 정보 손실 | interval보다 짧은 변화 무시 | filter 끄거나 polling 짧게 |
 
 가장 흔한 함정은 *adv data 31 byte 초과*입니다. service UUID 128-bit 한 개(17 byte) + 이름 10 byte + flags 3 byte면 이미 30 byte입니다. *manufacturer data를 추가*하면 광고가 안 시작됩니다. 이름을 scan response로 옮기거나 Extended Advertising으로 전환합니다.
 

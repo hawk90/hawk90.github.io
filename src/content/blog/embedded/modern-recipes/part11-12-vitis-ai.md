@@ -45,12 +45,10 @@ LUT, DSP, BRAM 사용량이 옵션에 따라 다릅니다. KV260은 보통 B4096
 
 ## 전체 흐름
 
-```text
 1. Model 학습 (TF/PyTorch)
 2. Quantize (FP32 → INT8) — calibration dataset 필요
 3. Compile (quantized → xmodel) — DPU arch 지정
 4. Deploy: VART API로 실행
-```
 
 ## Step 1 — Quantize
 
@@ -251,13 +249,11 @@ Thread 수는 *core 수*가 아니라 *queue depth*로 보면 됩니다.
 
 Vivado에서 DPU IP를 fabric에 instantiate:
 
-```text
 1. Vivado에 Vitis-AI DPU IP 추가
 2. Configure: B4096, single/multi DPU, RAM/URAM usage
-3. AXI 연결: M_AXI_HP 4개 (DDR), M_AXI_GP (control)
+3. AXI 연결: `M_AXI_HP` 4개 (DDR), `M_AXI_GP` (control)
 4. Generate bitstream
 5. petalinux로 PetaLinux 빌드, DPU driver 포함
-```
 
 Pre-built KV260 / ZCU104 image가 있으니 처음에는 그걸 그대로 사용.
 

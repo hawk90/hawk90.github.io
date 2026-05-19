@@ -23,18 +23,16 @@ draft: false
 
 ### 1) 전원 → main까지 순서
 
-```text
 1. 전원 인가
-2. CPU가 0x00000000 (또는 boot pin에 따른 alias)에서 MSP, Reset_Handler를 fetch
+2. CPU가 `0x00000000` (또는 boot pin에 따른 alias)에서 MSP, `Reset_Handler`를 fetch
 3. MSP를 R13에 적재
-4. Reset_Handler로 점프
-5. SystemInit() — 클럭, FPU
-6. .data 복사 (Flash → RAM)
-7. .bss 클리어 (RAM 0으로 채움)
-8. __libc_init_array() — C++ static constructor 호출
-9. main() 호출
-10. main이 반환되면 exit() → 무한 loop
-```
+4. `Reset_Handler`로 점프
+5. `SystemInit()` — 클럭, FPU
+6. `.data` 복사 (Flash → RAM)
+7. `.bss` 클리어 (RAM 0으로 채움)
+8. `__libc_init_array()` — C++ static constructor 호출
+9. `main()` 호출
+10. `main`이 반환되면 `exit()` → 무한 loop
 
 ### 2) Vector table
 

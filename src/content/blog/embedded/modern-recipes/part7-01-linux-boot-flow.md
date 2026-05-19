@@ -21,14 +21,12 @@ tags: [recipes, linux, boot]
 
 표준 5~6단계 흐름입니다.
 
-```text
-1. BootROM (SoC 내장)        on-chip ROM이 boot device 선택
-2. SPL (Secondary Program Loader) DRAM init, U-Boot 로드
-3. ATF (TF-A) / OP-TEE       secure world 초기화 (선택)
-4. U-Boot                     Linux Kernel + DTB + initramfs 로드
-5. Kernel                     driver init, root mount
-6. Init (systemd / busybox)   userland 서비스 시작
-```
+1. **BootROM (SoC 내장)** — on-chip ROM이 boot device 선택
+2. **SPL (Secondary Program Loader)** — DRAM init, U-Boot 로드
+3. **ATF (TF-A) / OP-TEE** — secure world 초기화 (선택)
+4. **U-Boot** — Linux Kernel + DTB + initramfs 로드
+5. **Kernel** — driver init, root mount
+6. **Init (systemd / busybox)** — userland 서비스 시작
 
 각 단계의 책임을 표로 보면 분명합니다.
 

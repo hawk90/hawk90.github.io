@@ -180,12 +180,11 @@ int main(void) {
 
 크리스털 솔더링을 재작업하니 정상 부팅. 100장 중 7장이 같은 문제. 위탁 PCBA의 stencil thickness 문제로 0402 cap 옆 8 MHz crystal의 솔더 양이 부족했습니다.
 
-```text
-교훈:
+**교훈:**
+
 1. 새 prototype은 *완성품 가정 금지*
 2. 멀티미터 + oscilloscope가 JTAG보다 먼저
 3. 같은 firmware로 동작하는 보드 1개를 기준 비교에 둠
-```
 
 ## Bootloader 활용 — JTAG 실패 시 백업
 

@@ -256,17 +256,15 @@ current
 
 ## 자주 하는 실수
 
-```text
-증상                                    원인                                해결
-─────────────────────────────────────────────────────────────────────────────────
-sleep 진입 후 wake 안 함                wake-up source 미설정               LPTIM/RTC interrupt 활성
-RTOS 시각이 점점 어긋남                 vTaskStepTick 인자 잘못              실측 tick 수로 보정
-deep sleep 후 SysTick reload 깨짐       reload 값 보존 누락                  pre-sleep에 저장
-UART 출력이 뚝뚝 끊김                   peripheral suspend 후 미복구         post-sleep에 init 다시
-GPIO에서 누설 mA                        floating GPIO                       analog + nopull
-SoftDevice 펌웨어가 lockup              sd_app_evt_wait 미사용              SD 환경에선 SD API 사용
-configEXPECTED_IDLE_TIME 너무 작음       매번 sleep 비용 > 절감               4~10 tick 권장
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| sleep 진입 후 wake 안 함 | wake-up source 미설정 | LPTIM/RTC interrupt 활성 |
+| RTOS 시각이 점점 어긋남 | vTaskStepTick 인자 잘못 | 실측 tick 수로 보정 |
+| deep sleep 후 SysTick reload 깨짐 | reload 값 보존 누락 | pre-sleep에 저장 |
+| UART 출력이 뚝뚝 끊김 | peripheral suspend 후 미복구 | post-sleep에 init 다시 |
+| GPIO에서 누설 mA | floating GPIO | analog + nopull |
+| SoftDevice 펌웨어가 lockup | sd_app_evt_wait 미사용 | SD 환경에선 SD API 사용 |
+| configEXPECTED_IDLE_TIME 너무 작음 | 매번 sleep 비용 > 절감 | 4~10 tick 권장 |
 
 가장 큰 함정은 *deep sleep 진입 후 clock 복구*입니다. STOP mode에서 깨어나면 *PLL이 꺼져서 16/8 MHz 기본 클럭*으로 돌아갑니다. `SystemClock_Config()`를 다시 호출하지 않으면 *작업이 10배 느려져서* 오히려 평균 전류가 늘 수도 있습니다.
 

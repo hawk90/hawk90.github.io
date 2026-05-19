@@ -211,25 +211,21 @@ Partition layout:
 
 ## STM32MP1 부팅 예
 
-```text
 1. BootROM (32 KB)
 2. FSBL (First Stage): TF-A BL2, 100 KB, internal SRAM
 3. SSBL (Second Stage): U-Boot, DDR로 로드
 4. Linux + DTB + extlinux script
-```
 
 `STM32CubeProgrammer`로 *flash·verify*를 수행합니다.
 
 ## i.MX8 부팅
 
-```text
 1. BootROM
 2. SCFW (System Controller Firmware): power·clock 관리 전용 ARM-M
 3. SECO (Security Controller): secure key 관리
 4. ATF BL31
 5. U-Boot
 6. Linux
-```
 
 이렇게 *멀티 프로세서* 부팅이 일어납니다. 자동차·산업 분야에서 표준입니다.
 

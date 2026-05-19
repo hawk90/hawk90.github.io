@@ -53,14 +53,12 @@ BLE 4.2 → 5.0의 핵심 차이입니다.
 
 *Coded PHY*가 이 시리즈에서 가장 흥미로운 항목입니다. FEC(Forward Error Correction)를 *S=2* 또는 *S=8* 배 적용해 *링크 budget을 12 dB 늘립니다*. 실제 옥외 환경에서 *거리가 4배*로 늘어납니다. 대신 *데이터 비율은 1/2 또는 1/8*입니다.
 
-```text
-PHY          Data Rate   Range (옥외)   용도
-─────────────────────────────────────────
-1M           1 Mbps      ~30 m          기본
-2M           2 Mbps      ~25 m          고대역
-Coded S=2    500 kbps    ~60 m          중간
-Coded S=8    125 kbps    ~120 m         long range
-```
+| PHY | Data Rate | Range (옥외) | 용도 |
+|-----|-----------|--------------|------|
+| 1M | 1 Mbps | ~30 m | 기본 |
+| 2M | 2 Mbps | ~25 m | 고대역 |
+| Coded S=2 | 500 kbps | ~60 m | 중간 |
+| Coded S=8 | 125 kbps | ~120 m | long range |
 
 ```c
 // NimBLE: 연결 후 PHY 변경
@@ -280,17 +278,15 @@ BLE:      ██    ███     ██     ██    ██
 
 ## 자주 하는 실수와 troubleshooting
 
-```text
-증상                                원인                              해결
-────────────────────────────────────────────────────────────────────────────
-폰이 디바이스를 발견 못 함            advertising 안 시작              ble_gap_adv_start 호출 확인
-연결 직후 끊김                       MTU 협상 실패 또는 power 부족    MTU = 247, decoupling cap 확인
-notify가 폰에 도착 안 함             CCCD 안 켬                       클라이언트에서 notify 활성화
-characteristic value 길이 초과       MTU 23 (default)에서 20 byte 한계 ble_att_set_preferred_mtu(247)
-페어링 후 reconnect에 다시 페어링    bond 저장 안 됨                  sm_bonding=1, NVS partition 확인
-Coded PHY 안 잡힘                   Central이 미지원                  Central 측 chipset 확인
-WiFi+BLE 동시에 짙은 끊김             SW coexistence 미활성             CONFIG_ESP_COEX_SW_COEXIST_ENABLE
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| 폰이 디바이스를 발견 못 함 | advertising 안 시작 | ble_gap_adv_start 호출 확인 |
+| 연결 직후 끊김 | MTU 협상 실패 또는 power 부족 | MTU = 247, decoupling cap 확인 |
+| notify가 폰에 도착 안 함 | CCCD 안 켬 | 클라이언트에서 notify 활성화 |
+| characteristic value 길이 초과 | MTU 23 (default)에서 20 byte 한계 | ble_att_set_preferred_mtu(247) |
+| 페어링 후 reconnect에 다시 페어링 | bond 저장 안 됨 | sm_bonding=1, NVS partition 확인 |
+| Coded PHY 안 잡힘 | Central이 미지원 | Central 측 chipset 확인 |
+| WiFi+BLE 동시에 짙은 끊김 | SW coexistence 미활성 | CONFIG_ESP_COEX_SW_COEXIST_ENABLE |
 
 가장 흔한 함정은 *MTU*입니다. BLE 기본 MTU는 23 byte이고, 헤더 빼면 *20 byte의 payload*만 됩니다. `ble_att_set_preferred_mtu(247)`로 키워야 *224 byte의 payload*가 한 packet에 실립니다. 클라이언트도 동의해야 협상이 성공합니다.
 

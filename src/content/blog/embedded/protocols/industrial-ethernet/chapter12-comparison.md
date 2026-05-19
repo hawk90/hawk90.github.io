@@ -41,15 +41,13 @@ draft: false
 
 가장 자주 묻는 축입니다. *반드시 짧을수록 좋은* 것은 아닙니다. *애플리케이션이 요구하는 만큼*이 정답입니다.
 
-```text
-cycle 요구 수준               대표 application
-─────────────                 ──────────────
-≤ 50 μs                       고속 모션·CNC·로봇 조인트 제어
-50 μs ~ 250 μs                일반 servo, 협동 로봇
-250 μs ~ 1 ms                 안전 PLC, 비전·force control
-1 ms ~ 10 ms                  공정 자동화, 분산 IO
-10 ms ~ 100 ms                상위 SCADA, HMI
-```
+| cycle 요구 수준 | 대표 application |
+|-----------------|------------------|
+| ≤ 50 μs | 고속 모션·CNC·로봇 조인트 제어 |
+| 50 μs ~ 250 μs | 일반 servo, 협동 로봇 |
+| 250 μs ~ 1 ms | 안전 PLC, 비전·force control |
+| 1 ms ~ 10 ms | 공정 자동화, 분산 IO |
+| 10 ms ~ 100 ms | 상위 SCADA, HMI |
 
 EtherCAT·PROFINET IRT·SERCOS III·POWERLINK는 *μs급 cycle*을 보장합니다. EtherNet/IP의 *기본 CIP*는 best-effort라서 *1 ms 이하는 어렵습니다*. CIP Sync + CIP Motion으로 *1 ms급*은 가능하지만, EtherCAT 수준의 *수 μs*는 안 나옵니다.
 

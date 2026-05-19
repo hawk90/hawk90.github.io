@@ -294,18 +294,16 @@ CONFIG_COMPILER_OPTIMIZATION_LTO=y
 
 ## 흔한 함정과 troubleshooting
 
-```text
-증상                                  원인                              해결
-──────────────────────────────────────────────────────────────────────────────
-"esp32 target not supported"          set-target 이 esp32 (기본)         idf.py set-target esp32c3
-sdkconfig diff 폭주                    sdkconfig를 git commit            sdkconfig.defaults만 커밋, sdkconfig 제외
-ESP_ERROR_CHECK fail = 0x103          flash size mismatch                menuconfig Flash size 모듈과 일치
-component header not found            REQUIRES 누락                      해당 컴포넌트를 REQUIRES에 추가
-링커 에러: undefined reference        PRIV_REQUIRES만 있고 헤더 노출 시도 REQUIRES로 승격
-OTA가 두 슬롯 인식 못 함               partitions.csv에 otadata 누락      otadata 파티션 추가
-managed_components가 매번 다운로드   .gitignore에 못 들어감             dependencies.lock 커밋, dir은 ignore
-빌드는 되는데 부팅 panic              파티션 offset 미정렬               offset을 0x1000 배수로
-```
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| "esp32 target not supported" | set-target 이 esp32 (기본) | idf.py set-target esp32c3 |
+| sdkconfig diff 폭주 | sdkconfig를 git commit | sdkconfig.defaults만 커밋, sdkconfig 제외 |
+| ESP_ERROR_CHECK fail = 0x103 | flash size mismatch | menuconfig Flash size 모듈과 일치 |
+| component header not found | REQUIRES 누락 | 해당 컴포넌트를 REQUIRES에 추가 |
+| 링커 에러: undefined reference | PRIV_REQUIRES만 있고 헤더 노출 시도 | REQUIRES로 승격 |
+| OTA가 두 슬롯 인식 못 함 | partitions.csv에 otadata 누락 | otadata 파티션 추가 |
+| managed_components가 매번 다운로드 | .gitignore에 못 들어감 | dependencies.lock 커밋, dir은 ignore |
+| 빌드는 되는데 부팅 panic | 파티션 offset 미정렬 | offset을 0x1000 배수로 |
 
 가장 자주 보는 함정은 *플래시 사이즈 mismatch*입니다. 4 MB로 설정해 빌드했는데 모듈이 2 MB라면, 부트로더가 *파티션 테이블 위치를 못 찾고* 즉시 reset 루프에 빠집니다. `esptool.py flash_id`로 *실제 칩 정보*를 먼저 확인합니다.
 

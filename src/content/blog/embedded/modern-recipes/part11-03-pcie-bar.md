@@ -78,16 +78,15 @@ pci_write_config_dword(dev, BAR0, orig);
 
 ## Enumeration 흐름
 
-```text
 Boot 시:
+
 1. Root Complex (CPU) — bus 0 scan
 2. Bus 0 device 0~31 × function 0~7 query
-3. Vendor ID = 0xFFFF — device 없음
+3. Vendor ID = `0xFFFF` — device 없음
 4. Bridge 발견 → 새 bus 번호 할당, recursive scan
 5. 각 endpoint device의 BAR sizing
 6. BIOS/BootROM이 free MMIO 영역에서 *주소 할당*
 7. Command register Enable Memory·I/O·Bus Master
-```
 
 ## Linux Driver — BAR 매핑
 
