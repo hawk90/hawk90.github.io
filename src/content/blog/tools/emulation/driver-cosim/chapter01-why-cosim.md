@@ -5,7 +5,7 @@ description: "Silicon 없이 driver 검증 — co-simulation의 의미."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 1
 tags: [cosim, dpi-c, pre-silicon, verification, npu]
-draft: true
+draft: false
 ---
 
 칩이 silicon으로 나오기 전에 그 칩용 driver를 *어떻게 검증하는가*. 이 질문이 이 시리즈의 출발점입니다. NPU·chiplet·SoC 프로젝트에서 driver 팀은 보통 RTL 팀과 *같은 분기 또는 그 다음 분기*에 코드를 내야 하는데, 정작 동작할 silicon은 그로부터 6개월에서 1년 뒤에 도착합니다. 그 사이에 driver를 *어디서* 돌려 보고 *무엇으로* 검증할지가 실전 문제입니다.

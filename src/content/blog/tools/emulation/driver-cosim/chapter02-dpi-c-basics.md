@@ -5,7 +5,7 @@ description: "Import·export·data type — SV와 C 사이의 다리."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 2
 tags: [dpi-c, systemverilog, import-dpi, export-dpi, ffi]
-draft: true
+draft: false
 ---
 
 cosim에서 driver의 C 함수와 RTL의 SystemVerilog 사이를 이어 주는 표준 인터페이스가 **DPI-C**(Direct Programming Interface for C)입니다. SystemVerilog LRM(IEEE 1800)에 *언어 표준의 일부*로 들어가 있어서, 어느 simulator를 쓰든 같은 syntax로 코드를 작성할 수 있습니다(세부 사항은 vendor마다 조금씩 다르지만, syntax는 통합).

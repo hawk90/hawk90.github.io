@@ -5,7 +5,7 @@ description: "RTL → C++ — driver code와 link되는 가장 빠른 simulator.
 series: "Driver-RTL Co-simulation"
 seriesOrder: 3
 tags: [verilator, simulator, open-source, c-plus-plus, cosim]
-draft: true
+draft: false
 ---
 
 **Verilator**는 SystemVerilog/Verilog를 *cycle-accurate C++ 클래스*로 변환하는 open-source compiler입니다. 결과물이 C++이라는 점이 결정적입니다. driver C 코드와 *같은 binary*에 link해서 cosim 환경을 native 속도로 돌릴 수 있고, GitHub Actions 같은 CI에 그대로 태울 수 있습니다.

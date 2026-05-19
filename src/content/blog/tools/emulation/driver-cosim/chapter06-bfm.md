@@ -5,7 +5,7 @@ description: "Driver와 RTL 사이의 protocol-aware adapter."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 6
 tags: [bfm, axi, pcie, protocol-checker, ahb]
-draft: true
+draft: false
 ---
 
 driver는 *MMIO write/read* 같은 high-level 추상을 다룹니다. RTL은 *AXI handshake와 timing*을 다룹니다. 두 추상 사이를 잇는 protocol-aware adapter가 **BFM**(Bus Functional Model)입니다.

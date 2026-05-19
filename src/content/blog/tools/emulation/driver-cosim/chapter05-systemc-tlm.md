@@ -5,7 +5,7 @@ description: "Cycle-accurate 너머 — high-speed virtual platform."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 5
 tags: [systemc, tlm, virtual-platform, abstraction, vp]
-draft: true
+draft: false
 ---
 
 cycle-accurate cosim은 *RTL의 진실*을 보여 주지만 느립니다. Hz~kHz 수준의 시뮬레이션 속도로는 Linux 한 번 boot시키기가 *몇 시간*이 걸리죠. driver의 *상위 레이어*(파일시스템 통합·user-space ioctl·multi-thread workload)를 검증하려면 이보다 *천 배 빠른* 환경이 필요합니다. 그 자리에 **SystemC TLM**(Transaction-Level Modeling)이 들어갑니다.

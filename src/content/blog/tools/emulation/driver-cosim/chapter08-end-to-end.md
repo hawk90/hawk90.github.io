@@ -5,7 +5,7 @@ description: "Verilator + DPI-C + Linux driver — 통합 cosim flow."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 8
 tags: [cosim, end-to-end, verilator, driver-integration, ci]
-draft: true
+draft: false
 ---
 
 마지막 장입니다. 지금까지 다룬 Verilator·DPI-C·CocoTB·BFM·reference model을 *하나의 환경*으로 묶어 봅니다. 실제 NPU prototype을 검증한다고 가정한 통합 청사진과 CI 파이프라인까지 그립니다. 시리즈 8장의 어휘를 모두 한 번에 쓰는 셈입니다.
