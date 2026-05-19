@@ -168,13 +168,12 @@ CAN은 *bit 1 sample point*까지 ±1% 안에 들어야 합니다. CAN bus calcu
 
 ## Trigger — 가끔 일어나는 사건 잡기
 
-```text
-Setup → Trigger:
-  - "SPI MOSI 0x9F" (RDID command가 떨어지는 순간)
-  - "UART 0xFF 0xFE 0x01" (sync pattern)
-  - "I2C NACK"
-  - "CAN ID 0x100"
-```
+**Setup → Trigger:**
+
+- "SPI MOSI 0x9F" (RDID command가 떨어지는 순간)
+- "UART 0xFF 0xFE 0x01" (sync pattern)
+- "I2C NACK"
+- "CAN ID 0x100"
 
 Trigger pre-capture로 *trigger 전*의 1ms도 함께 잡습니다. 깨진 byte가 보내진 *직전*에 무슨 일이 있었는지 보입니다.
 

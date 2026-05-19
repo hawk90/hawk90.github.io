@@ -215,13 +215,12 @@ vst1q_u8(out, r);
 
 1 M element float add (Cortex-A72)입니다.
 
-```text
-구현                    시간       speedup
-scalar -O2             3.20 ms    1.0x
-scalar -O3 auto-vec    0.85 ms    3.8x
-NEON intrinsic         0.78 ms    4.1x
-NEON + 4 acc           0.42 ms    7.6x
-```
+| 구현 | 시간 | speedup |
+|---|---|---|
+| scalar -O2 | 3.20 ms | 1.0x |
+| scalar -O3 auto-vec | 0.85 ms | 3.8x |
+| NEON intrinsic | 0.78 ms | 4.1x |
+| NEON + 4 acc | 0.42 ms | 7.6x |
 
 Auto-vectorize만 잘 풀려도 4배에 도달합니다. ILP까지 챙기면 한 단계 더 갑니다.
 

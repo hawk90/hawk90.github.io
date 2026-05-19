@@ -20,17 +20,15 @@ draft: false
 
 DRAM은 단순히 "전원 켜고 읽기/쓰기"가 안 되는 디바이스입니다. JEDEC 사양은 power-on부터 정상 동작까지 *수십 개*의 step을 정의합니다.
 
-```text
-1. PLL lock                — DDR clock 안정화
-2. Controller reset 해제   — uMCTL2/DENALI 등 IP 깨우기
-3. PHY 초기화              — DDR PHY (Synopsys DWC, Cadence) 깨우기
-4. Mode Register Set (MRS) — DRAM chip에 burst length, CAS latency 등 알림
-5. ZQ calibration          — 출력 임피던스 조정
-6. Write leveling          — 각 byte lane의 DQS 정렬
-7. Read leveling           — read 데이터의 sampling window 찾기
-8. ECC scrub               — ECC 모드면 메모리를 0으로 채워 syndrome 초기화
-9. 정상 동작 모드 진입     — refresh, self-refresh 활성화
-```
+1. **PLL lock** — DDR clock 안정화.
+2. **Controller reset 해제** — uMCTL2/DENALI 등 IP 깨우기.
+3. **PHY 초기화** — DDR PHY (Synopsys DWC, Cadence) 깨우기.
+4. **Mode Register Set (MRS)** — DRAM chip에 burst length, CAS latency 등 알림.
+5. **ZQ calibration** — 출력 임피던스 조정.
+6. **Write leveling** — 각 byte lane의 DQS 정렬.
+7. **Read leveling** — read 데이터의 sampling window 찾기.
+8. **ECC scrub** — ECC 모드면 메모리를 0으로 채워 syndrome 초기화.
+9. **정상 동작 모드 진입** — refresh, self-refresh 활성화.
 
 이 시퀀스 중 5~7번이 *training* 단계입니다. DRAM 칩과 SoC 사이의 PCB 트레이스 길이, 임피던스, 노이즈를 보고 PHY가 자동으로 sampling 시점을 조정합니다.
 

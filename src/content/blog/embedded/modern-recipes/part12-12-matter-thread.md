@@ -293,24 +293,22 @@ OTA 1 MB image                      2~5 min (Thread)
 
 Battery life (sleepy end device, CR2032 235 mAh)입니다.
 
-```text
-Poll period       Average current    Battery life
-1 sec               80 µA              4 개월
-5 sec               25 µA              13 개월
-30 sec              8 µA               3.4 년
-300 sec             3 µA               9 년
-```
+| Poll period | Average current | Battery life |
+|---|---|---|
+| 1 sec | 80 µA | 4 개월 |
+| 5 sec | 25 µA | 13 개월 |
+| 30 sec | 8 µA | 3.4 년 |
+| 300 sec | 3 µA | 9 년 |
 
 Door sensor·temperature sensor는 5분 poll로 *수년* 운영이 가능합니다.
 
 Power 비교 (light bulb 동등 idle)입니다.
 
-```text
-Transport          Idle power     평균 current
-Thread router      30 mW          7 mA @ 3.3V
-Thread SED         0.3 mW         100 µA
-Wi-Fi              200~500 mW     60-150 mA (DTIM 3)
-```
+| Transport | Idle power | 평균 current |
+|---|---|---|
+| Thread router | 30 mW | 7 mA @ 3.3V |
+| Thread SED | 0.3 mW | 100 µA |
+| Wi-Fi | 200~500 mW | 60-150 mA (DTIM 3) |
 
 Battery 운영 device는 사실상 *Thread*가 강제됩니다.
 

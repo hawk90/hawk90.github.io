@@ -30,11 +30,10 @@ recursive 옵션        있음             없음
 
 Owner 추적이 핵심입니다. Mutex는 "누가 잠갔는지"를 기억하므로 그 task에게만 release 권한이 있고, 더 높은 priority의 task가 기다리면 owner의 priority를 일시적으로 올려 빨리 끝내게 합니다.
 
-```text
-hold time이 길면          PI가 있어도 jitter 증가
-nested lock 두 개 이상    deadlock 위험 (lock order 필요)
-ISR에서 mutex             금지 (owner가 없으므로)
-```
+| hold time이 길면 | PI가 있어도 jitter 증가 |
+|---|---|
+| nested lock 두 개 이상 | deadlock 위험 (lock order 필요) |
+| ISR에서 mutex | 금지 (owner가 없으므로) |
 
 ## 코드 / 실제 사용 예
 

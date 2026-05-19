@@ -19,15 +19,14 @@ counter, flag, ring buffer head/tail처럼 *작은 공유 변수*를 lock 없이
 
 ## 핵심 개념
 
-```text
-memory_order            보장
-relaxed                  atomic만, 순서 보장 없음
-consume                  단일 dependency chain (실무에서 acquire로 격상)
-acquire                  load 이후의 메모리 동작이 *재배열 안 됨*
-release                  store 이전의 메모리 동작이 *재배열 안 됨*
-acq_rel                  acquire + release
-seq_cst                  global total order (가장 비쌈)
-```
+| memory_order | 보장 |
+|---|---|
+| relaxed | atomic만, 순서 보장 없음 |
+| consume | 단일 dependency chain (실무에서 acquire로 격상) |
+| acquire | load 이후의 메모리 동작이 *재배열 안 됨* |
+| release | store 이전의 메모리 동작이 *재배열 안 됨* |
+| acq_rel | acquire + release |
+| seq_cst | global total order (가장 비쌈) |
 
 ARMv8에서 매핑되는 명령어입니다.
 

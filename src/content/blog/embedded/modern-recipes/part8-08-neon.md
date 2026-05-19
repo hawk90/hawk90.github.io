@@ -259,12 +259,11 @@ float32x4_t v = vld1q_f32(p);   /* 16-byte align 권장 */
 
 > Interleaved vs planar 혼동
 
-```text
-vld1q_u8   sequential
-vld2q_u8   2-way (예: YUV422)
-vld3q_u8   3-way (예: RGB pixel)
-vld4q_u8   4-way (예: RGBA)
-```
+| vld1q_u8 | sequential |
+|---|---|
+| vld2q_u8 | 2-way (예: YUV422) |
+| vld3q_u8 | 3-way (예: RGB pixel) |
+| vld4q_u8 | 4-way (예: RGBA) |
 
 Data layout을 명확히 결정하고 nq의 숫자를 맞춰야 합니다.
 

@@ -21,16 +21,15 @@ Jetson을 고르는 이유는 세 가지입니다. 첫째, NVIDIA CUDA·cuDNN·T
 
 라인업은 power·compute로 정렬됩니다.
 
-```text
-Board               CPU              GPU                  NPU      INT8 TOPS   전력
-Jetson Nano (구)    4× A57           128 Maxwell          -          0.5       5-10 W
-Xavier NX           6× Carmel        384 Volta            2 DLA     21         10-20 W
-AGX Xavier          8× Carmel        512 Volta            2 DLA     32         10-30 W
-Orin Nano           6× A78AE         1024 Ampere          -         40         7-15 W
-Orin NX             8× A78AE         1024 Ampere          2 DLA     100        10-25 W
-AGX Orin            12× A78AE        2048 Ampere          2 DLA     275        15-60 W
-Thor (2025)         14× Neoverse V3  Blackwell + safety   -        1000+       40-130 W
-```
+| Board | CPU | GPU | NPU | INT8 TOPS | 전력 |
+|---|---|---|---|---|---|
+| Jetson Nano (구) | 4× A57 | 128 Maxwell | - | 0.5 | 5-10 W |
+| Xavier NX | 6× Carmel | 384 Volta | 2 DLA | 21 | 10-20 W |
+| AGX Xavier | 8× Carmel | 512 Volta | 2 DLA | 32 | 10-30 W |
+| Orin Nano | 6× A78AE | 1024 Ampere | - | 40 | 7-15 W |
+| Orin NX | 8× A78AE | 1024 Ampere | 2 DLA | 100 | 10-25 W |
+| AGX Orin | 12× A78AE | 2048 Ampere | 2 DLA | 275 | 15-60 W |
+| Thor (2025) | 14× Neoverse V3 | Blackwell + safety | - | 1000+ | 40-130 W |
 
 자율주행·로봇 production은 *AGX Orin·Thor*가 표준입니다. 개발·prototype·entry edge는 Orin Nano·Orin NX가 가성비가 좋습니다.
 

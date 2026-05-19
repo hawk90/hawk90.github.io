@@ -360,12 +360,10 @@ F:  include/configs/boardx.h
 
 commit은 *기능별로 분리*합니다. 통째로 한 patch보다 다음 흐름이 받아들여지기 좋습니다.
 
-```text
-patch 1: arm: dts: add boardx device tree
-patch 2: board: myvendor: add boardx board support
-patch 3: configs: add boardx_defconfig
-patch 4: doc: add boardx documentation
-```
+1. `arm: dts: add boardx device tree`
+2. `board: myvendor: add boardx board support`
+3. `configs: add boardx_defconfig`
+4. `doc: add boardx documentation`
 
 ## 자주 하는 실수
 

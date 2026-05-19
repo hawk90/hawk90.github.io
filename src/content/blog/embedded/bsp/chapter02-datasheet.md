@@ -100,17 +100,15 @@ BSP에서 가장 먼저 결정해야 할 것이 *boot mode*입니다. 같은 i.M
 
 Boot mode는 *보드 위 핀의 strap 저항*으로 결정됩니다. RM의 boot 챕터에 *BOOT_MODE0/1/2 핀의 표*가 있습니다.
 
-```text
-BOOT_MODE[2:0]   Boot Device
-─────────────────────────────
-3'b000           Reserved
-3'b001           USB Serial Download
-3'b010           eMMC (USDHC3)
-3'b011           SD Card (USDHC2)
-3'b100           QSPI NOR Flash
-3'b101           NAND Flash
-...
-```
+| `BOOT_MODE[2:0]` | Boot Device |
+|---|---|
+| `3'b000` | Reserved |
+| `3'b001` | USB Serial Download |
+| `3'b010` | eMMC (USDHC3) |
+| `3'b011` | SD Card (USDHC2) |
+| `3'b100` | QSPI NOR Flash |
+| `3'b101` | NAND Flash |
+| ... | ... |
 
 이 값이 *보드 회로도와 일치*해야 합니다. 일치하지 않으면 BootROM이 엉뚱한 미디어를 찾고, 시리얼에는 아무것도 안 나옵니다.
 
@@ -118,20 +116,18 @@ BOOT_MODE[2:0]   Boot Device
 
 SoC의 모든 외부 핀이 *여러 기능*을 가집니다. 한 핀이 UART_TX도, GPIO도, SPI MOSI도, I2S DATA도 될 수 있습니다. *어느 모드를 선택할지*가 pin mux입니다.
 
-i.MX 8M Plus의 GPIO1_IO00 핀의 alternate function 표입니다.
+i.MX 8M Plus의 SAI5_RXFS 핀(Ball K1)의 alternate function 표입니다.
 
-```text
-Pin: SAI5_RXFS  (Ball K1)
-
-ALT0   SAI5_RXFS         (SAI5 frame sync, default)
-ALT1   SAI1_TX_DATA0     (SAI1 transmit data 0)
-ALT2   PWM4_OUT
-ALT3   I2C6_SCL
-ALT4   UART3_DCE_RX
-ALT5   GPIO3_IO21        (general purpose IO)
-ALT6   SRC_BOOT_MODE3
-ALT7   EPDC_PWR_CTRL3
-```
+| ALT | Function |
+|---|---|
+| ALT0 | `SAI5_RXFS` — SAI5 frame sync (default) |
+| ALT1 | `SAI1_TX_DATA0` — SAI1 transmit data 0 |
+| ALT2 | `PWM4_OUT` |
+| ALT3 | `I2C6_SCL` |
+| ALT4 | `UART3_DCE_RX` |
+| ALT5 | `GPIO3_IO21` — general purpose IO |
+| ALT6 | `SRC_BOOT_MODE3` |
+| ALT7 | `EPDC_PWR_CTRL3` |
 
 각 ALT는 *IOMUXC 레지스터*의 MUX_MODE 필드에 해당합니다. RM 표를 보고 *우리 보드에서 어떤 ALT를 쓰는지*를 정해 *디바이스 트리의 pinctrl 노드*에 적습니다.
 
@@ -215,20 +211,17 @@ RM이 *SoC의 능력*을 보여준다면, 회로도는 *우리 보드가 그 능
 
 회로도에서 BSP에 직접 필요한 정보입니다.
 
-```text
-[검색해서 찾아 둘 것]
-□ XTAL 주파수 (보통 24MHz, 25MHz, 32.768kHz)
-□ BOOT_MODE 핀의 strap 저항값
-□ UART1 (또는 console UART)의 RX/TX 핀 번호
-□ 어느 USDHC가 SD에, 어느 USDHC가 eMMC에 연결되는지
-□ Ethernet PHY 모델 (Atheros AR8031, RTL8211 등) + MDIO 주소
-□ DDR 칩 모델 (Micron MT41K, SK Hynix H5AN 등)
-□ DDR 칩 개수 (1, 2, 4) → DRAM bus width 결정
-□ PMIC 모델 + I2C 주소
-□ Wi-Fi/BT 모듈 종류 (TI WL18xx, Cypress CYW43xx)
-□ 각 power rail의 voltage (1.0V, 1.1V, 1.8V, 3.3V)
-□ Reset 회로 (POR_B, watchdog reset)
-```
+- [ ] XTAL 주파수 (보통 24MHz, 25MHz, 32.768kHz)
+- [ ] `BOOT_MODE` 핀의 strap 저항값
+- [ ] UART1 (또는 console UART)의 RX/TX 핀 번호
+- [ ] 어느 USDHC가 SD에, 어느 USDHC가 eMMC에 연결되는지
+- [ ] Ethernet PHY 모델 (Atheros AR8031, RTL8211 등) + MDIO 주소
+- [ ] DDR 칩 모델 (Micron MT41K, SK Hynix H5AN 등)
+- [ ] DDR 칩 개수 (1, 2, 4) → DRAM bus width 결정
+- [ ] PMIC 모델 + I2C 주소
+- [ ] Wi-Fi/BT 모듈 종류 (TI WL18xx, Cypress CYW43xx)
+- [ ] 각 power rail의 voltage (1.0V, 1.1V, 1.8V, 3.3V)
+- [ ] Reset 회로 (`POR_B`, watchdog reset)
 
 이 목록을 *완전히* 채울 때까지 BSP 작업을 시작하지 않습니다. 빈칸이 있다면 *부팅 도중* 발견하게 되는데, 그 시점에는 디버깅 비용이 훨씬 큽니다.
 
@@ -266,18 +259,16 @@ RM이 *SoC의 능력*을 보여준다면, 회로도는 *우리 보드가 그 능
 
 **단계 1: 회로도 확인.** debug 헤더의 RX/TX 핀이 SoC의 *어떤 ball*에 연결되어 있는지 확인합니다. 결과: K17(UART2_RXD), L17(UART2_TXD).
 
-**단계 2: RM의 pin mux 표.** K17의 ALT 표를 봅니다.
+**단계 2: RM의 pin mux 표.** Ball K17의 ALT 표를 봅니다(`UART2_RXD` pad).
 
-```text
-Ball K17 = UART2_RXD pad
-
-ALT0   UART2_RXD       (UART2 default)
-ALT1   ECSPI3_SCLK
-ALT2   ENET2_RGMII_RD3
-ALT3   I2S6_DAT0
-ALT4   GPIO5_IO24
-ALT5   (reserved)
-```
+| ALT | Function |
+|---|---|
+| ALT0 | `UART2_RXD` (UART2 default) |
+| ALT1 | `ECSPI3_SCLK` |
+| ALT2 | `ENET2_RGMII_RD3` |
+| ALT3 | `I2S6_DAT0` |
+| ALT4 | `GPIO5_IO24` |
+| ALT5 | (reserved) |
 
 ALT0이 UART2 RX입니다.
 

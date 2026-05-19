@@ -131,12 +131,10 @@ mmc 0:1
 
 EFI 부팅을 켜면 UEFI Secure Boot를 그대로 쓸 수 있습니다. 키 계층은 PC와 동일합니다.
 
-```text
-PK   (Platform Key)         <- OEM/벤더
-KEK  (Key Exchange Key)     <- distro·OS
-db   (Allowed signatures)   <- 허용 이미지 해시·서명
-dbx  (Forbidden)            <- 폐기된 해시
-```
+- **PK** (Platform Key) — OEM/벤더.
+- **KEK** (Key Exchange Key) — distro·OS.
+- **db** (Allowed signatures) — 허용 이미지 해시·서명.
+- **dbx** (Forbidden) — 폐기된 해시.
 
 shim·grub·linux 모두 db에 들어 있는 키로 서명되어 있어야 부팅됩니다. U-Boot은 이 검증을 *Boot Services의 LoadImage 안*에서 수행합니다.
 

@@ -266,11 +266,10 @@ CPU 사용률이 1/9, memory bandwidth가 1/6으로 줄어듭니다. 같은 hard
 
 Multi-camera 8 stream input (Orin AGX) 비교입니다.
 
-```text
-구현                                  Total fps   Memory BW
-8× user-space copy pipeline             80          18 GB/s (saturated)
-8× NVMM zero-copy DeepStream           480           2.4 GB/s
-```
+| 구현 | Total fps | Memory BW |
+|---|---|---|
+| 8× user-space copy pipeline | 80 | 18 GB/s (saturated) |
+| 8× NVMM zero-copy DeepStream | 480 | 2.4 GB/s |
 
 자율주행 8-camera × 60 fps = 480 fps가 단일 보드에서 가능해지는 이유가 zero-copy입니다.
 

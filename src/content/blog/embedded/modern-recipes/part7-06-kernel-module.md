@@ -164,13 +164,12 @@ blacklist nouveau
 
 `.ko` 한 개 로드에 드는 시간은 대부분 1 ms 이하지만, 의존성이 깊거나 firmware blob을 같이 가져오면 수십 ms까지 늘어납니다.
 
-```text
-모듈                       size        load time
-sample (hello)             8 KB        0.4 ms
-sample + sysfs group       12 KB       0.5 ms
-ath10k_pci + firmware      540 KB      48 ms
-nvidia (proprietary)       28 MB       320 ms
-```
+| 모듈 | size | load time |
+|---|---|---|
+| sample (hello) | 8 KB | 0.4 ms |
+| sample + sysfs group | 12 KB | 0.5 ms |
+| ath10k_pci + firmware | 540 KB | 48 ms |
+| nvidia (proprietary) | 28 MB | 320 ms |
 
 부팅 시간을 줄여야 한다면 자주 쓰는 driver를 built-in으로 옮기고, drone·infotainment처럼 USB 디바이스 종류가 다양한 환경에서는 module로 유지해 hot-plug에 맞춥니다.
 

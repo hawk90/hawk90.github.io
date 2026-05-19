@@ -124,13 +124,12 @@ printf("%s", buf);
 
 출력 예입니다.
 
-```text
-Task            Abs Time         %
-idle            12345670         85
-task_imu        980000           6
-task_log        450000           3
-timer           12000            <1
-```
+| Task | Abs Time | % |
+|---|---|---|
+| idle | 12345670 | 85 |
+| task_imu | 980000 | 6 |
+| task_log | 450000 | 3 |
+| timer | 12000 | <1 |
 
 CPU 사용량이 task별로 표시됩니다. busy loop이 어디 있는지 즉시 보입니다.
 
@@ -175,14 +174,13 @@ Hardware watchdog을 software로 한 단계 감쌉니다. 어떤 task가 굶고 
 
 ## 측정 / 성능 비교
 
-```text
-인프라                            overhead
-configCHECK_FOR_STACK_OVERFLOW=1 (top of stack 검사)  0.1 µs / switch
-configCHECK_FOR_STACK_OVERFLOW=2 (canary)            0.3 µs / switch
-configGENERATE_RUN_TIME_STATS                        1 µs / switch (HW timer 1개 사용)
-SystemView (RTT 모드)                                2 µs / event
-Tracealyzer (J-Link 직접)                            0 µs (DAP로 RAM 직접 읽음)
-```
+| 인프라 | overhead |
+|---|---|
+| configCHECK_FOR_STACK_OVERFLOW=1 (top of stack 검사) | 0.1 µs / switch |
+| configCHECK_FOR_STACK_OVERFLOW=2 (canary) | 0.3 µs / switch |
+| configGENERATE_RUN_TIME_STATS | 1 µs / switch (HW timer 1개 사용) |
+| SystemView (RTT 모드) | 2 µs / event |
+| Tracealyzer (J-Link 직접) | 0 µs (DAP로 RAM 직접 읽음) |
 
 Canary 방식 stack 검사가 0.3 µs 정도 듭니다. 양산에서도 켜두는 편이 안전합니다.
 

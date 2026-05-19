@@ -46,13 +46,12 @@ llama.cpp             GGUF loader + LLM inference logic
 
 Backend selection이 backend·hardware에 따라 throughput을 결정합니다.
 
-```text
-GGML_CUDA       NVIDIA GPU, Jetson 포함
-GGML_METAL      Apple silicon
-GGML_VULKAN     Mali·Adreno·Intel·AMD 통합 GPU
-GGML_BLAS       OpenBLAS CPU
-NEON / AVX2     CPU SIMD (자동)
-```
+| GGML_CUDA | NVIDIA GPU, Jetson 포함 |
+|---|---|
+| GGML_METAL | Apple silicon |
+| GGML_VULKAN | Mali·Adreno·Intel·AMD 통합 GPU |
+| GGML_BLAS | OpenBLAS CPU |
+| NEON / AVX2 | CPU SIMD (자동) |
 
 Apple은 별도로 *MLX*라는 framework를 가지고 있어 Neural Engine까지 활용합니다. Qualcomm은 QNN backend가 llama.cpp에 통합되는 중입니다.
 

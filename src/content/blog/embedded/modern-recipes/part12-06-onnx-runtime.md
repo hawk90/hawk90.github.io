@@ -19,12 +19,11 @@ LLM serving (Phi, Llama via ONNX Runtime GenAI), audio model (Whisper), vision (
 
 ## 핵심 개념 — ONNX format
 
-```text
-ONNX (Open Neural Network Exchange):
-  - Protobuf 기반 그래프 representation
-  - Operator set version (opset)
-  - 모델 = nodes (ops) + initializers (weights) + I/O
-```
+**ONNX (Open Neural Network Exchange):**
+
+- Protobuf 기반 그래프 representation
+- Operator set version (opset)
+- 모델 = nodes (ops) + initializers (weights) + I/O
 
 ```python
 import torch

@@ -209,13 +209,11 @@ udevice 2: name="mmc@30b50000", driver=fsl-esdhc-mmc, uclass=UCLASS_MMC
 
 U-Boot이 *DT를 어떻게 driver로 변환*하는지가 binding입니다.
 
-```text
-1. U-Boot이 DT를 scan
-2. 각 노드의 compatible 프로퍼티 확인
-3. 모든 driver의 of_match 배열을 검색
-4. 매치되면 udevice 생성 + driver와 binding
-5. 부모 노드 우선 (root → soc → mmc@xxx 순)
-```
+1. U-Boot이 DT를 scan.
+2. 각 노드의 `compatible` 프로퍼티 확인.
+3. 모든 driver의 `of_match` 배열을 검색.
+4. 매치되면 udevice 생성 + driver와 binding.
+5. 부모 노드 우선 (root → soc → mmc@xxx 순).
 
 ```c
 /* drivers/core/lists.c */
@@ -250,18 +248,18 @@ int lists_bind_fdt(struct udevice *parent, ofnode node, ...)
 
 DM은 *bind*와 *probe*를 *분리*합니다.
 
-```text
-[bind]
-   - device 인스턴스 생성
-   - parent-child 관계 설정
-   - driver_data 포인터만 연결
-   - 빠름, 메모리만 차지
+**bind**
 
-[probe]
-   - 실제 hardware 초기화
-   - clock enable, pinmux, 레지스터 설정
-   - 첫 사용 시점까지 lazy
-```
+- device 인스턴스 생성
+- parent-child 관계 설정
+- driver_data 포인터만 연결
+- 빠름, 메모리만 차지
+
+**probe**
+
+- 실제 hardware 초기화
+- clock enable, pinmux, 레지스터 설정
+- 첫 사용 시점까지 lazy
 
 `probe`는 *해당 device가 처음 사용될 때*까지 *연기*됩니다. 부트 시간을 줄이기 위함입니다. MMC controller가 부트에 안 쓰이면 *probe 안 됩니다*.
 

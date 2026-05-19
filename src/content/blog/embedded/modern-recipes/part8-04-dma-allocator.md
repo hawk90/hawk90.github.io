@@ -201,12 +201,11 @@ struct rte_mempool *mp = rte_pktmbuf_pool_create("MP", 8192, 256, 0,
 
 STM32H7 ADC를 16 kHz로 받는 코드에서 buffer 위치를 바꿔 측정한 결과입니다.
 
-```text
-Buffer 위치                cache 관리        latency 변동
-AXI SRAM cacheable        Clean+Invalidate  큼 (수 µs jitter)
-DTCM (cacheable)          Clean+Invalidate  작음
-SRAM2 non-cacheable MPU   없음              가장 작음
-```
+| Buffer 위치 | cache 관리 | latency 변동 |
+|---|---|---|
+| AXI SRAM cacheable | Clean+Invalidate | 큼 (수 µs jitter) |
+| DTCM (cacheable) | Clean+Invalidate | 작음 |
+| SRAM2 non-cacheable MPU | 없음 | 가장 작음 |
 
 Cache 관리는 line 단위로 동작하므로 buffer 크기에 비례해 latency가 커집니다. RT 경로에서는 non-cacheable 영역이 가장 예측 가능합니다.
 

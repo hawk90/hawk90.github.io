@@ -196,11 +196,10 @@ SPDK (VFIO)              1.05 M             12 µs
 
 10 GbE NIC에서 64-byte packet을 forwarding했을 때입니다.
 
-```text
-스택                     PPS              latency
-Linux kernel + napi      2.3 Mpps         18 µs
-DPDK + VFIO              14.8 Mpps        2.5 µs
-```
+| 스택 | PPS | latency |
+|---|---|---|
+| Linux kernel + napi | 2.3 Mpps | 18 µs |
+| DPDK + VFIO | 14.8 Mpps | 2.5 µs |
 
 UIO는 보통 throughput보다 *간편함*이 이유입니다. FPGA bring-up에서 driver 한 줄도 새로 짜지 않고 register polling을 시작할 수 있다는 점이 큰 가치입니다.
 

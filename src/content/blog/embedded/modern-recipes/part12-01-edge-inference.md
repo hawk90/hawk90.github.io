@@ -25,14 +25,13 @@ tags: [recipes, edge-ai, inference, pipeline, tflite, onnx]
 
 Edge AI 디바이스는 자원 폭이 매우 넓습니다.
 
-```text
-Class           예시                  메모리      Compute            전력
-MCU             Cortex-M55+Ethos-U55  256 KB      0.5 TOPS INT8      0.1 W
-SBC             Raspberry Pi 5        8 GB        ~0.5 TFLOPS CPU    5 W
-Mobile SoC      Snapdragon X Elite    16 GB       45 TOPS NPU        15 W
-Edge GPU        Jetson Orin Nano      8 GB        40 TOPS            15 W
-Server edge     Jetson AGX Orin       64 GB       275 TOPS           60 W
-```
+| Class | 예시 | 메모리 | Compute | 전력 |
+|---|---|---|---|---|
+| MCU | Cortex-M55+Ethos-U55 | 256 KB | 0.5 TOPS INT8 | 0.1 W |
+| SBC | Raspberry Pi 5 | 8 GB | ~0.5 TFLOPS CPU | 5 W |
+| Mobile SoC | Snapdragon X Elite | 16 GB | 45 TOPS NPU | 15 W |
+| Edge GPU | Jetson Orin Nano | 8 GB | 40 TOPS | 15 W |
+| Server edge | Jetson AGX Orin | 64 GB | 275 TOPS | 60 W |
 
 전력 6배, compute 500배 차이입니다. 같은 model이 MCU에서 ms·SBC에서 100 ms·Orin에서 1 ms 단위로 나옵니다.
 

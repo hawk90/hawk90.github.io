@@ -162,13 +162,12 @@ UIO·VFIO가 매핑하는 영역은 자동으로 non-cacheable 또는 device mem
 
 1 GB 파일을 sequential하게 한 번 훑었을 때입니다.
 
-```text
-방식                                시간     CPU
-read(fd, 4K) 루프                  0.85 s   58%
-mmap + memcpy                      0.41 s   30%
-mmap + 직접 access                 0.30 s   18%
-mmap + MADV_SEQUENTIAL             0.24 s   16%
-```
+| 방식 | 시간 | CPU |
+|---|---|---|
+| read(fd, 4K) 루프 | 0.85 s | 58% |
+| mmap + memcpy | 0.41 s | 30% |
+| mmap + 직접 access | 0.30 s | 18% |
+| mmap + MADV_SEQUENTIAL | 0.24 s | 16% |
 
 TLB miss 영향이 큰 워크로드에 huge page를 적용했을 때입니다.
 

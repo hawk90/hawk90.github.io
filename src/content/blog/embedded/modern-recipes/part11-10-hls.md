@@ -195,12 +195,11 @@ UNROLL만 추가하면 자원만 늘고 throughput은 그대로입니다. Array 
 
 DDR burst 크기에 따른 streaming throughput도 큰 차이를 만듭니다.
 
-```text
-max_burst_length        effective bandwidth
-8                       0.4 GB/s
-64                      2.1 GB/s
-256                     6.8 GB/s (PCIe Gen3 x8 한계 근접)
-```
+| max_burst_length | effective bandwidth |
+|---|---|
+| 8 | 0.4 GB/s |
+| 64 | 2.1 GB/s |
+| 256 | 6.8 GB/s (PCIe Gen3 x8 한계 근접) |
 
 ## 자주 보는 함정
 

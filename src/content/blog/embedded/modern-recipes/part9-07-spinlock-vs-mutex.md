@@ -45,11 +45,10 @@ single-CPU            spinlock의 의미 없음 (preempt_disable로 대체)
 
 advanced spinlock variants도 있습니다.
 
-```text
-ticket lock          FIFO 보장 — fairness
-MCS lock             각 CPU가 자기 cache line에서 spin — 확장성
-qspinlock            Linux의 표준 — 짧은 contention은 ticket, 긴 건 MCS
-```
+| ticket lock | FIFO 보장 — fairness |
+|---|---|
+| MCS lock | 각 CPU가 자기 cache line에서 spin — 확장성 |
+| qspinlock | Linux의 표준 — 짧은 contention은 ticket, 긴 건 MCS |
 
 ## 코드 / 실제 사용 예
 
@@ -166,11 +165,10 @@ void mcs_unlock(mcs_node **tail, mcs_node *me) {
 
 ### qspinlock (Linux 표준 선택)
 
-```text
-짧은 contention      MCS 1단계 — 빠름
-긴 contention        MCS chain — fair
-0 contention         CAS 한 줄
-```
+| 짧은 contention | MCS 1단계 — 빠름 |
+|---|---|
+| 긴 contention | MCS chain — fair |
+| 0 contention | CAS 한 줄 |
 
 Linux는 4.2부터 qspinlock이 표준입니다. 일반 코드는 그냥 spin_lock을 부르면 됩니다.
 

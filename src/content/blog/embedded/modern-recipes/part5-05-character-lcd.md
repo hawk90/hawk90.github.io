@@ -22,18 +22,17 @@ draft: false
 
 ### HD44780 핀
 
-```text
-LCD 핀:        역할:
- 1 VSS        GND
- 2 VDD        +5V
- 3 VO         contrast (10k pot)
- 4 RS         0=command, 1=data
- 5 RW         0=write, 1=read (보통 GND로 묶음)
- 6 E          enable (rising edge에서 latch)
- 7-14 DB0-7  data bus
- 15 LED+      backlight + (220Ω 직렬)
- 16 LED-      backlight GND
-```
+| LCD 핀 | 역할 |
+|---|---|
+| 1 VSS | GND |
+| 2 VDD | +5V |
+| 3 VO | contrast (10k pot) |
+| 4 RS | 0=command, 1=data |
+| 5 RW | 0=write, 1=read (보통 GND로 묶음) |
+| 6 E | enable (rising edge에서 latch) |
+| 7-14 DB0-7 | data bus |
+| 15 LED+ | backlight + (220Ω 직렬) |
+| 16 LED- | backlight GND |
 
 4-bit mode에서는 DB4-7만 사용. **DB0-3은 floating으로 두거나 GND.**
 

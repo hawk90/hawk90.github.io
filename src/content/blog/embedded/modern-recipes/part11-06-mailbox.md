@@ -188,13 +188,12 @@ Idempotent하지 않은 명령(예: "카운터 +1")은 sequence 중복 검사가
 
 Zynq UltraScale+ APU(Cortex-A53)와 PL의 HLS accelerator 사이 mailbox round-trip을 측정한 예입니다.
 
-```text
-방식                                       RTT       CPU 사용
-APU polling (busy-wait)                   ~0.6 µs   100% one core
-APU doorbell IRQ + sleep                  ~7 µs     <1%
-APU mailbox + DMA 8KB                     ~9 µs     <1% (CPU)
-OpenAMP RPMsg (mailbox + virtio)          ~25 µs    <1%
-```
+| 방식 | RTT | CPU 사용 |
+|---|---|---|
+| APU polling (busy-wait) | ~0.6 µs | 100% one core |
+| APU doorbell IRQ + sleep | ~7 µs | <1% |
+| APU mailbox + DMA 8KB | ~9 µs | <1% (CPU) |
+| OpenAMP RPMsg (mailbox + virtio) | ~25 µs | <1% |
 
 RPMsg는 ring buffer, endpoint multiplex, name service까지 포함하므로 overhead가 mailbox 단독 대비 한 자릿수 µs 더 늘어납니다. 1 ms 주기 control loop처럼 latency가 직접 deadline에 박히는 경로에서는 raw mailbox가 유리합니다.
 

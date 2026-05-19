@@ -185,13 +185,12 @@ sudo perf c2c report
 
 Cortex-A72 quad core에서 atomic counter 두 개를 두 thread가 1억 번 fetch_add한 결과입니다.
 
-```text
-구조                        시간       throughput
-같은 line에 a, b           7.8 s      26 M ops/s
-alignas(64)만 (시작)       7.4 s      27 M ops/s
-element 사이 padding       0.9 s      222 M ops/s
-per-CPU sharding (4코어)   0.25 s     800 M ops/s
-```
+| 구조 | 시간 | throughput |
+|---|---|---|
+| 같은 line에 a, b | 7.8 s | 26 M ops/s |
+| alignas(64)만 (시작) | 7.4 s | 27 M ops/s |
+| element 사이 padding | 0.9 s | 222 M ops/s |
+| per-CPU sharding (4코어) | 0.25 s | 800 M ops/s |
 
 False sharing 제거가 8배 이상, sharding은 30배 이상의 throughput을 만듭니다.
 

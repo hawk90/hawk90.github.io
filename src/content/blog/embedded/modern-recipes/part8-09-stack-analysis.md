@@ -182,14 +182,13 @@ puncover --elf firmware.elf
 
 ## 측정 / 성능 비교
 
-```text
-인프라                            overhead
-high-water mark (한 번 채우기)    수십 µs (부팅 시)
-high-water 측정 (매 회)           수십 µs (영역 scan)
-FreeRTOS canary 검사              0.3 µs / context switch
-GCC stack protector               함수당 2~4 cycle 추가
-MPU guard                         0 cycle (HW)
-```
+| 인프라 | overhead |
+|---|---|
+| high-water mark (한 번 채우기) | 수십 µs (부팅 시) |
+| high-water 측정 (매 회) | 수십 µs (영역 scan) |
+| FreeRTOS canary 검사 | 0.3 µs / context switch |
+| GCC stack protector | 함수당 2~4 cycle 추가 |
+| MPU guard | 0 cycle (HW) |
 
 MPU guard는 가장 강력하면서 overhead가 없습니다. Cortex-M3 이상이라면 항상 켜는 것이 좋습니다.
 

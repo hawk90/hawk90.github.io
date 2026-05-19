@@ -174,12 +174,11 @@ pin reassign과 새로운 노드 추가를 fragment 두 개로 표현합니다.
 
 ## 측정 / 성능 비교
 
-```text
-방식                       빌드 시간    boot 영향
-base DT 전체 재컴파일     수십 초       SD 재flash 필요
-overlay (.dtbo) 추가      <1초          파일만 복사
-configfs runtime overlay  <100 ms       reboot 불필요
-```
+| 방식 | 빌드 시간 | boot 영향 |
+|---|---|---|
+| base DT 전체 재컴파일 | 수십 초 | SD 재flash 필요 |
+| overlay (.dtbo) 추가 | <1초 | 파일만 복사 |
+| configfs runtime overlay | <100 ms | reboot 불필요 |
 
 Overlay 작업이 모두 *증분* 작업이기 때문에 개발 속도가 크게 향상됩니다.
 

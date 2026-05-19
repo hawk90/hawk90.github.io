@@ -218,12 +218,11 @@ SPDK polling (VFIO)      280 k       2.4 M         12 µs
 
 Xilinx XDMA에서 H2C 8 KB transfer 측정 예입니다.
 
-```text
-방식                       throughput
-SQE 1개씩 doorbell         2.1 GB/s
-SQE 32개 batched           6.8 GB/s
-SG descriptor chain        7.4 GB/s (PCIe Gen3 x8 실효 한계)
-```
+| 방식 | throughput |
+|---|---|
+| SQE 1개씩 doorbell | 2.1 GB/s |
+| SQE 32개 batched | 6.8 GB/s |
+| SG descriptor chain | 7.4 GB/s (PCIe Gen3 x8 실효 한계) |
 
 Batching과 multi-queue가 SQ·CQ 모델의 진짜 가치를 끌어냅니다. 단일 queue에 매번 도어벨을 치는 구현은 device가 아무리 빨라도 PCIe MMIO 비용에 묶입니다.
 

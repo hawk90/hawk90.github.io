@@ -124,15 +124,13 @@ rauc install /tmp/boardX-v2026.05.0.raucb
 
 RAUC가 내부에서 다음을 합니다.
 
-```text
-1. bundle 서명 확인 (keyring.pem의 인증서로)
-2. compatible·version 검사
-3. 비활성 슬롯 결정 (현재 A면 B)
-4. 비활성 슬롯에 이미지 기록
-5. fw_setenv로 BOOT_SLOT=B, bootcount=0, upgrade_available=1
-6. (옵션) post-install handler 실행
-7. exit
-```
+1. bundle 서명 확인 (`keyring.pem`의 인증서로).
+2. compatible·version 검사.
+3. 비활성 슬롯 결정 (현재 A면 B).
+4. 비활성 슬롯에 이미지 기록.
+5. `fw_setenv`로 `BOOT_SLOT=B`, `bootcount=0`, `upgrade_available=1` 설정.
+6. (옵션) post-install handler 실행.
+7. exit.
 
 그다음 `reboot`은 사용자(또는 update agent)가 합니다. 자동 reboot이 *항상* 좋은 동작이 아니라 그렇게 분리한 설계입니다.
 

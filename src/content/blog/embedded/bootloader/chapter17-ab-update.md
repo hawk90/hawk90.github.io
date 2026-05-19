@@ -167,20 +167,15 @@ WantedBy=multi-user.target
 
 OTA 한 사이클의 단계를 정리하면 이렇습니다.
 
-```text
-1. (active=A) update agent가 새 boot.itb·rootfs.img 다운로드
-2. agent가 비활성 슬롯 B에 기록 (atomic write 또는 부분 sync 후 fsync)
-3. agent가 fw_setenv로
-       BOOT_SLOT=B
-       upgrade_available=1
-       bootcount=0
-       bootlimit=3
-4. reboot
-5. U-Boot이 bootcount=1로 올리고 B 부팅 시도
-6.a (성공) systemd가 mark-boot-success 실행 -> bootcount=0
-6.b (실패) U-Boot이 다음 부팅에서 bootcount=2 -> 또 실패 -> 3 -> altbootcmd
-7. altbootcmd가 BOOT_SLOT=A로 돌리고 A 부팅
-```
+1. (active=A) update agent가 새 `boot.itb`·`rootfs.img` 다운로드.
+2. agent가 비활성 슬롯 B에 기록 (atomic write 또는 부분 sync 후 fsync).
+3. agent가 `fw_setenv`로 `BOOT_SLOT=B`, `upgrade_available=1`, `bootcount=0`, `bootlimit=3`을 설정.
+4. reboot.
+5. U-Boot이 `bootcount=1`로 올리고 B 부팅 시도.
+6. 결과에 따라 분기.
+   - 성공: systemd가 `mark-boot-success` 실행 → `bootcount=0`.
+   - 실패: U-Boot이 다음 부팅에서 `bootcount=2` → 또 실패 → 3 → `altbootcmd`.
+7. `altbootcmd`가 `BOOT_SLOT=A`로 돌리고 A 부팅.
 
 업데이트 에이전트가 직접 `BOOT_SLOT`을 토글하는 게 아니라 *U-Boot에게 토글 권한을 주는* 점이 핵심입니다. agent가 토글하면 *agent를 트로이로 만들면* fallback 안전망이 동시에 깨집니다.
 

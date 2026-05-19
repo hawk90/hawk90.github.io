@@ -319,17 +319,17 @@ CI/CD에 그대로 연결.
 
 Cyclone V SoC는 *dual-core ARM Cortex-A9 + fabric*. Zynq 7000과 같은 위치.
 
-```text
-Hard processor system (HPS):
-  - 2× Cortex-A9
-  - L1/L2 cache
-  - DDR3 controller
-  - GMAC, USB, SD, UART, ...
+**Hard processor system (HPS):**
 
-FPGA fabric:
-  - LUT, FF, BRAM, DSP
-  - HPS-FPGA bridge (Lightweight HPS-to-FPGA, HPS-to-FPGA, FPGA-to-HPS)
-```
+- 2× Cortex-A9
+- L1/L2 cache
+- DDR3 controller
+- GMAC, USB, SD, UART, ...
+
+**FPGA fabric:**
+
+- LUT, FF, BRAM, DSP
+- HPS-FPGA bridge (Lightweight HPS-to-FPGA, HPS-to-FPGA, FPGA-to-HPS)
 
 HPS-FPGA bridge가 Zynq의 GP/HP/ACP에 해당.
 

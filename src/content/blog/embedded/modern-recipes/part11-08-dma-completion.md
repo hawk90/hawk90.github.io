@@ -195,12 +195,11 @@ writel(cq_head, cq_doorbell);
 
 UART 1 Mbps 입력을 세 방식으로 받아 본 결과입니다.
 
-```text
-방식                          CPU 사용     latency 변동
-byte당 IRQ                    32%          작음 (수 µs)
-DMA cyclic + half/full IRQ    0.6%         작음
-DMA cyclic + polling          1.5%         가장 작음 (sub-µs)
-```
+| 방식 | CPU 사용 | latency 변동 |
+|---|---|---|
+| byte당 IRQ | 32% | 작음 (수 µs) |
+| DMA cyclic + half/full IRQ | 0.6% | 작음 |
+| DMA cyclic + polling | 1.5% | 가장 작음 (sub-µs) |
 
 NVMe 4 KB 랜덤 read에서는 양상이 다릅니다.
 

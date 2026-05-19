@@ -29,13 +29,12 @@ power 소비 = V × I = V × (I_active × t_active + I_sleep × t_sleep) / t_tot
 
 대표 ARM Cortex-M sleep 단계입니다.
 
-```text
-mode              CPU clock  RAM 유지   peripheral   wake latency  대표 전류
-run               on         all        all          0             5~30 mA
-sleep             off        all        all          ~1 µs         1~10 mA
-stop / standby    off        partial    선택         10~100 µs     10~100 µA
-deep sleep        off        none       RTC만        ms            <1 µA
-```
+| mode | CPU clock | RAM 유지 | peripheral | wake latency | 대표 전류 |
+|---|---|---|---|---|---|
+| run | on | all | all | 0 | 5~30 mA |
+| sleep | off | all | all | ~1 µs | 1~10 mA |
+| stop / standby | off | partial | 선택 | 10~100 µs | 10~100 µA |
+| deep sleep | off | none | RTC만 | ms | <1 µA |
 
 각 칩별 mode는 datasheet의 "Power modes" 표가 가장 정확합니다.
 

@@ -19,15 +19,14 @@ tags: [recipes, performance, code-size]
 
 ## 핵심 개념
 
-```text
-1. -Os                          크기 최적화
-2. -ffunction-sections + --gc-sections   사용 안 된 함수 제거
-3. -flto                        링크 시 전역 최적화
-4. strip --strip-unneeded       symbol 제거
-5. newlib-nano                  작은 libc
-6. printf-tiny / iprintf        printf 단순화
-7. dead code 분석               nm, size, bloaty
-```
+| 1. -Os | 크기 최적화 |
+|---|---|
+| 2. -ffunction-sections + --gc-sections | 사용 안 된 함수 제거 |
+| 3. -flto | 링크 시 전역 최적화 |
+| 4. strip --strip-unneeded | symbol 제거 |
+| 5. newlib-nano | 작은 libc |
+| 6. printf-tiny / iprintf | printf 단순화 |
+| 7. dead code 분석 | nm, size, bloaty |
 
 각 단계가 누적적으로 효과를 냅니다.
 

@@ -241,16 +241,16 @@ Cortex-M7 480 MHz에서 ~200 ms/inference. CMSIS-NN으로 ~30 ms. Ethos-U55 추�
 
 ## Memory Layout
 
-```text
-Flash:
-  - Code:                ~ 200 KB (TFLite Micro + kernels)
-  - Model:               ~ 100~500 KB (.tflite as C array)
-  - Other code, libs:    ~ 100 KB
+**Flash:**
 
-RAM:
-  - Tensor arena:        ~ 50~200 KB
-  - System (stack, etc.): ~ 50 KB
-```
+- Code:                ~ 200 KB (TFLite Micro + kernels)
+- Model:               ~ 100~500 KB (.tflite as C array)
+- Other code, libs:    ~ 100 KB
+
+**RAM:**
+
+- Tensor arena:        ~ 50~200 KB
+- System (stack, etc.): ~ 50 KB
 
 Cortex-M4 보드는 RAM 128 KB / Flash 512 KB가 흔합니다. 적당한 모델이 들어갑니다. M7 (1 MB RAM)에는 더 큰 모델.
 

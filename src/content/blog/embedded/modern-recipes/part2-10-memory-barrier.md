@@ -127,17 +127,17 @@ smp_mb();
 
 ## Cortex-M Single Core — Barrier 적은 사용
 
-```text
-Cortex-M3/M4:
-  - Pipeline in-order
-  - No store buffer reorder for same address
-  - Single core — no SMP sync
-  
-DMB 필요 케이스:
-  - MMIO·DMA 와의 ordering
-  - Atomic 명령 (LDREX/STREX) 후
-  - Self-modifying code (DSB + ISB)
-```
+**Cortex-M3/M4:**
+
+- Pipeline in-order
+- No store buffer reorder for same address
+- Single core — no SMP sync
+
+**DMB 필요 케이스:**
+
+- MMIO·DMA 와의 ordering
+- Atomic 명령 (LDREX/STREX) 후
+- Self-modifying code (DSB + ISB)
 
 Single core의 lock-free는 *barrier 없이도 동작 가능*합니다(volatile + correct usage).
 

@@ -177,27 +177,25 @@ sudo jetson_clocks --restore /tmp/backup.conf
 
 Jetson AGX Orin에서 YOLOv8m INT8 추론을 power mode별로 sustained 측정한 예입니다.
 
-```text
-Power mode    GPU freq cap   Burst fps   Sustained fps   Peak temp
-MAXN (60W)    1300 MHz        220         140            96°C (throttle)
-50W           1200 MHz        200         180            92°C
-40W           1000 MHz        170         170            88°C
-30W            900 MHz        140         140            83°C
-15W            600 MHz         85          85            73°C
-```
+| Power mode | GPU freq cap | Burst fps | Sustained fps | Peak temp |
+|---|---|---|---|---|
+| MAXN (60W) | 1300 MHz | 220 | 140 | 96°C (throttle) |
+| 50W | 1200 MHz | 200 | 180 | 92°C |
+| 40W | 1000 MHz | 170 | 170 | 88°C |
+| 30W | 900 MHz | 140 | 140 | 83°C |
+| 15W | 600 MHz | 85 | 85 | 73°C |
 
 MAXN은 burst 220 fps라는 화려한 숫자가 나오지만 sustained는 140 fps로 떨어집니다. *40W mode*가 burst·sustained가 같은 가장 효율적인 지점입니다.
 
 Cooling 옵션별 비교(같은 SoC, 동일 workload)입니다.
 
-```text
-Cooling                      Peak temp   Sustained fps
-Passive heatsink (small)     105°C       40 (severe throttle)
-Passive heatsink (large)      92°C       110
-Active fan (stock)            78°C       150
-Active fan + ducting          70°C       180
-Liquid cooling                60°C       220
-```
+| Cooling | Peak temp | Sustained fps |
+|---|---|---|
+| Passive heatsink (small) | 105°C | 40 (severe throttle) |
+| Passive heatsink (large) | 92°C | 110 |
+| Active fan (stock) | 78°C | 150 |
+| Active fan + ducting | 70°C | 180 |
+| Liquid cooling | 60°C | 220 |
 
 Heatsink만 키워도 sustained가 2.5배 차이가 납니다. 가장 저렴한 thermal 투자가 가장 큰 효과를 냅니다.
 

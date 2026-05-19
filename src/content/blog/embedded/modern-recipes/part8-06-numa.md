@@ -195,12 +195,11 @@ CPU isolation으로 8~15번 코어를 OS scheduler에서 제외하고 그 위에
 
 2-socket Xeon에서 4 GB array sum 결과입니다.
 
-```text
-실행                                   시간       remote DRAM 비율
-default (anywhere)                    2.30 s     38%
-numactl --cpunodebind=0 --membind=0   1.45 s     2%
-numactl --interleave=all              1.70 s     50%
-```
+| 실행 | 시간 | remote DRAM 비율 |
+|---|---|---|
+| default (anywhere) | 2.30 s | 38% |
+| numactl --cpunodebind=0 --membind=0 | 1.45 s | 2% |
+| numactl --interleave=all | 1.70 s | 50% |
 
 Latency 위주면 single-node pin이 가장 빠르고, throughput 위주면 interleave가 안정적입니다.
 

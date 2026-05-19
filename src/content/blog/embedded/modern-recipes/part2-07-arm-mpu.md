@@ -50,30 +50,28 @@ SIZE field = log2(size_bytes) - 1
 
 ### 3) Access permission
 
-```text
-AP[2:0]     Privileged    Unprivileged
-000         None          None
-001         RW            None
-010         RW            RO
-011         RW            RW
-101         RO            None
-110         RO            RO
-111         RO            RO
-```
+| AP[2:0] | Privileged | Unprivileged |
+|---|---|---|
+| 000 | None | None |
+| 001 | RW | None |
+| 010 | RW | RO |
+| 011 | RW | RW |
+| 101 | RO | None |
+| 110 | RO | RO |
+| 111 | RO | RO |
 
 `AP = 001`은 OS kernel만 접근 가능, user task는 fault. RTOS에서 task 격리에 사용.
 
 ### 4) Attribute — Cacheable, Bufferable, Shareable, TEX
 
-```text
-TEX  C  B  S    Memory type
-000  0  0  -    Strongly-ordered
-000  0  1  -    Device
-000  1  0  S    Normal, write-through
-000  1  1  S    Normal, write-back, no allocate
-001  0  0  -    Normal, non-cacheable
-001  1  1  S    Normal, write-back, write-allocate
-```
+| TEX | C | B | S | Memory type |
+|---|---|---|---|---|
+| 000 | 0 | 0 | - | Strongly-ordered |
+| 000 | 0 | 1 | - | Device |
+| 000 | 1 | 0 | S | Normal, write-through |
+| 000 | 1 | 1 | S | Normal, write-back, no allocate |
+| 001 | 0 | 0 | - | Normal, non-cacheable |
+| 001 | 1 | 1 | S | Normal, write-back, write-allocate |
 
 DMA buffer에는 TEX=001, C=0, B=0(non-cacheable)를 자주 씁니다.
 

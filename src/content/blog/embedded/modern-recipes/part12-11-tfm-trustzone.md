@@ -278,28 +278,26 @@ Boot 초기에 SAU + MPC(memory protection controller)를 설정한 뒤 NSPE로 
 
 Cortex-M33 @ 80 MHz, TF-M profile_medium, software crypto 기준입니다.
 
-```text
-연산                              지연
-AES-128 GCM encrypt 1 KB           5 ms (200 KB/s)
-SHA-256 1 KB                       2 ms
-ECDSA P-256 sign                   50 ms
-ECDSA P-256 verify                100 ms
-RSA-2048 sign                     500 ms
-Initial attestation token         100 ms
-PSA service call overhead          ~50 µs (NSC + IPC)
-```
+| 연산 | 지연 |
+|---|---|
+| AES-128 GCM encrypt 1 KB | 5 ms (200 KB/s) |
+| SHA-256 1 KB | 2 ms |
+| ECDSA P-256 sign | 50 ms |
+| ECDSA P-256 verify | 100 ms |
+| RSA-2048 sign | 500 ms |
+| Initial attestation token | 100 ms |
+| PSA service call overhead | ~50 µs (NSC + IPC) |
 
 Hardware crypto accelerator(STM32U5 PKA, nRF5340 CryptoCell)가 있으면 ECDSA가 5~10 ms로 줄어 10배 빨라집니다. Production은 hardware crypto가 거의 필수입니다.
 
 PSA Certified Level별 비교입니다.
 
-```text
-Level         조건                                   기간
-Level 1       self-assessment, basic security        2주
-Level 2       lab test, side-channel 기본 검증       8주
-Level 3       DPA·glitching 등 advanced attack       3개월
-Level 4       Common Criteria EAL4+, 금융·정부      6개월+
-```
+| Level | 조건 | 기간 |
+|---|---|---|
+| Level 1 | self-assessment, basic security | 2주 |
+| Level 2 | lab test, side-channel 기본 검증 | 8주 |
+| Level 3 | DPA·glitching 등 advanced attack | 3개월 |
+| Level 4 | Common Criteria EAL4+, 금융·정부 | 6개월+ |
 
 EU CRA·UK PSTI는 *Level 1 minimum*을 사실상 요구합니다. Critical infrastructure는 Level 2+로 올라갑니다.
 

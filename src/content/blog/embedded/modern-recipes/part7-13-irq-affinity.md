@@ -143,20 +143,18 @@ NIC PMD나 multi-queue device는 자기가 *어디서 처리되면 좋겠는지*
 
 Cortex-A72 quad-core 보드에서 RT 루프(SCHED_FIFO 80, busy work)와 eth0 트래픽을 동시에 돌렸을 때입니다.
 
-```text
-설정                                          cyclictest p99
-기본 (irqbalance, IRQ가 RT 코어에도 진입)     180 µs
-isolcpus=2,3 + irqaffinity=0-1                12 µs
-isolcpus=2,3 + irqaffinity=0-1 + RT thread    8 µs
-```
+| 설정 | cyclictest p99 |
+|---|---|
+| 기본 (irqbalance, IRQ가 RT 코어에도 진입) | 180 µs |
+| isolcpus=2,3 + irqaffinity=0-1 | 12 µs |
+| isolcpus=2,3 + irqaffinity=0-1 + RT thread | 8 µs |
 
 x86 서버에서 NIC RSS를 활용했을 때입니다.
 
-```text
-설정                                          throughput  CPU
-single queue, CPU0 IRQ                        4.1 Gbps    CPU0 100%
-RSS 8 queue, 8 코어에 분배                    9.6 Gbps    CPU 평균 22%
-```
+| 설정 | throughput | CPU |
+|---|---|---|
+| single queue, CPU0 IRQ | 4.1 Gbps | CPU0 100% |
+| RSS 8 queue, 8 코어에 분배 | 9.6 Gbps | CPU 평균 22% |
 
 RT 시나리오에서는 단순히 IRQ를 옮기는 것만으로 p99가 10배 이상 좋아질 수 있고, throughput 시나리오에서는 분산만으로 line rate가 가까워집니다.
 

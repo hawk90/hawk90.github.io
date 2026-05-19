@@ -278,22 +278,15 @@ Loading args from MMC 0:1
 
 실제 측정값(BeagleBone Black, AM335x, 1GB DDR, SD card):
 
-```text
-[일반 부트]
-0.00 s  BootROM
-0.15 s  SPL (DDR init)
-0.30 s  U-Boot Proper start
-0.60 s  driver probe done
-1.20 s  bootcmd start
-1.80 s  Linux start
-4.50 s  user space
-
-[Falcon Mode]
-0.00 s  BootROM
-0.15 s  SPL (DDR init)
-0.50 s  Linux start
-3.20 s  user space
-```
+| 단계 | 일반 부트 | Falcon Mode |
+|------|----------|-------------|
+| BootROM | 0.00 s | 0.00 s |
+| SPL (DDR init) | 0.15 s | 0.15 s |
+| U-Boot Proper start | 0.30 s | — |
+| driver probe done | 0.60 s | — |
+| bootcmd start | 1.20 s | — |
+| Linux start | 1.80 s | 0.50 s |
+| user space | 4.50 s | 3.20 s |
 
 *1.3초 단축*입니다. Linux 부팅이 *상수 시간*이므로 *user space까지의 총 시간*에서 차이가 그대로 유지됩니다.
 

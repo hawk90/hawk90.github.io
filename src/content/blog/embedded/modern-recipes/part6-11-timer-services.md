@@ -193,12 +193,11 @@ esp_timer_start_periodic(timer, 500000);   /* 500 ms */
 
 ## FreeRTOS Software Timer Wheel?
 
-```text
-FreeRTOS의 xTimer 내부:
-  - Sorted list (linked, by expiry)
-  - Daemon task로 처리
-  - O(N) add — 적은 timer엔 OK
-```
+**FreeRTOS의 xTimer 내부:**
+
+- Sorted list (linked, by expiry)
+- Daemon task로 처리
+- O(N) add — 적은 timer엔 OK
 
 Modern Linux의 wheel과는 다릅니다. 임베디드에서는 timer 수가 적어 *수용 가능*합니다.
 

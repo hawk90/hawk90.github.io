@@ -235,13 +235,12 @@ FP16만 켜도 PyTorch 대비 6배 빨라집니다. INT8까지 가면 11배, mul
 
 YOLOv8m + Orin 기준 비교입니다.
 
-```text
-구현                         Latency     fps
-PyTorch FP32                  35 ms      29
-TensorRT FP16                  6 ms     167
-TensorRT INT8                  4 ms     250
-TensorRT INT8 + 2 stream       4 ms     500
-```
+| 구현 | Latency | fps |
+|---|---|---|
+| PyTorch FP32 | 35 ms | 29 |
+| TensorRT FP16 | 6 ms | 167 |
+| TensorRT INT8 | 4 ms | 250 |
+| TensorRT INT8 + 2 stream | 4 ms | 500 |
 
 자율주행 carrier 카메라 8대 × 30 fps = 240 fps가 single Orin AGX에서 처리 가능한 수준입니다.
 

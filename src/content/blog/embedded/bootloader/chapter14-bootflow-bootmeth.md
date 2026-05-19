@@ -28,12 +28,10 @@ draft: false
 
 부트는 다음 흐름입니다.
 
-```text
-1. bootdev 목록 = U-Boot가 인식한 부트 장치
-2. bootmeth 목록 = 빌드 시 포함된 부트 방법 드라이버
-3. 각 bootdev × bootmeth 조합을 시도 → bootflow 생성
-4. 성공한 bootflow를 boot
-```
+1. bootdev 목록 = U-Boot가 인식한 부트 장치.
+2. bootmeth 목록 = 빌드 시 포함된 부트 방법 드라이버.
+3. 각 bootdev × bootmeth 조합을 시도 → bootflow 생성.
+4. 성공한 bootflow를 boot.
 
 distro_bootcmd가 *환경 변수의 텍스트로 표현한 외곽선*이라면, bootflow는 *C 코드의 데이터 구조*입니다.
 

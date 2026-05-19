@@ -116,12 +116,10 @@ Filename 'pxelinux.cfg/01-00-11-22-33-44-55'.
 
 `pxe get`은 다음 순서로 설정 파일을 찾습니다.
 
-```text
-1. pxelinux.cfg/<UUID>
-2. pxelinux.cfg/01-<MAC address>    (MAC별 설정)
-3. pxelinux.cfg/<IP in hex>         (IP 기반)
-4. pxelinux.cfg/default             (fallback)
-```
+1. `pxelinux.cfg/<UUID>`
+2. `pxelinux.cfg/01-<MAC address>` — MAC별 설정
+3. `pxelinux.cfg/<IP in hex>` — IP 기반
+4. `pxelinux.cfg/default` — fallback
 
 파일은 *syslinux/extlinux 문법*입니다.
 

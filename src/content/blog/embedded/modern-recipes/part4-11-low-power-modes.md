@@ -35,25 +35,26 @@ draft: false
 
 ### Wake-up 메커니즘
 
-```text
-Sleep:
-  - 모든 IRQ (NVIC)
-  - WFI (wait for interrupt) / WFE (wait for event)
+**Sleep:**
 
-Stop:
-  - EXTI line (GPIO edge)
-  - RTC alarm / wake-up timer
-  - IWDG
-  - PVD (power voltage detector)
-  - Comparator
-  - 일부 USART (RXNE — STOP 1 only)
+- 모든 IRQ (NVIC)
+- WFI (wait for interrupt) / WFE (wait for event)
 
-Standby:
-  - WKUP pin (PA0 등, datasheet 확인)
-  - RTC alarm / wake-up
-  - IWDG
-  - reset
-```
+**Stop:**
+
+- EXTI line (GPIO edge)
+- RTC alarm / wake-up timer
+- IWDG
+- PVD (power voltage detector)
+- Comparator
+- 일부 USART (RXNE — STOP 1 only)
+
+**Standby:**
+
+- WKUP pin (PA0 등, datasheet 확인)
+- RTC alarm / wake-up
+- IWDG
+- reset
 
 깰 때 standby는 reset 동작과 유사하므로 Reset_Handler가 다시 호출됩니다. `PWR->CSR`의 SBF bit를 보면 "이게 standby에서 깬 것인지" 알 수 있습니다.
 
