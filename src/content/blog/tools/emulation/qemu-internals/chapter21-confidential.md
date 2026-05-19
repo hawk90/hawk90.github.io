@@ -2,114 +2,259 @@
 title: "Ch 21: Confidential Computing"
 date: 2026-05-17T21:00:00
 description: "SEV·SEV-SNP·TDX — secure VM 기반."
-tags: [QEMU, sev, tdx, confidential-computing]
+tags: [QEMU, sev, tdx, confidential-computing, cca]
 series: "QEMU Internals"
 seriesOrder: 21
 draft: true
 ---
 
-## 이 챕터의 의도
+**Confidential Computing**은 *cloud의 새로운 보안 모델*입니다. 기존의 *hypervisor를 신뢰*하는 모델을 넘어, *hypervisor도 guest의 메모리·상태를 볼 수 없게* 합니다. AMD **SEV** 시리즈·Intel **TDX**·ARM **CCA**가 그 표준 — QEMU가 이 모든 platform을 지원합니다.
 
-전통 VM은 hypervisor를 신뢰해야 한다. cloud 운영자가 guest 메모리를 볼 수 있다는 뜻이다. Confidential VM은 hypervisor도 볼 수 없는 메모리와 CPU 상태로 격리된다. AMD SEV-SNP, Intel TDX, ARM CCA가 이를 하드웨어로 보장한다. 2026 cloud의 기본 옵션으로 확산되고 있다.
+## 위협 모델 변화
 
-## 핵심 항목
+기존 cloud VM의 *신뢰 구조*.
 
-- ✦ Confidential VM 정의 — guest memory·register state가 *hypervisor도 볼 수 없도록* HW 격리
-- ✦ **AMD SEV 시리즈** (Secure Encrypted Virtualization)
-  - **SEV** (1st gen, 2016) — guest memory encryption only
-  - **SEV-ES** (Encrypted State) — vCPU register도 암호화
-  - **SEV-SNP** (Secure Nested Paging) — *integrity 보호*까지, 가장 강함
-- ✦ **Intel TDX** (Trust Domain Extensions, 2022~) — SEV-SNP 동등물, SGX보다 큰 단위
-- ✦ **ARM CCA** (Confidential Compute Architecture) — Realm Management Monitor, Armv9
-- ✦ Encrypted memory — AES-128/256, key는 *CPU 안에만*, hypervisor/host kernel 접근 불가
-- ✦ Launch measurement — VM 시작 시 image·firmware의 hash를 hardware가 측정
-- ✦ Attestation — *원격 verifier*가 measurement를 검증, *진짜 secure VM*임 확인
-- ✦ QEMU 옵션
-  - SEV: `-object sev-guest,id=sev0,policy=0x07,cbitpos=51,reduced-phys-bits=1`
-  - TDX: `-object tdx-guest,id=tdx0,sept-ve-disable=on,attestation-key-id=...`
-- ✦ KVM API — `KVM_MEMORY_ENCRYPT_OP` (SEV), `KVM_TDX_*` (TDX)
-- ✦ Boot 흐름
-  - QEMU: secure VM 객체 생성 → KVM 등록
-  - KVM: HW에 키 등록, image 측정
-  - Guest: 정상 부팅, 메모리는 자동 암호화
-  - Attest: 원격 verifier에 attestation report 전송
-- ✦ Use case
-  - **Cloud confidentiality** — AWS Nitro Enclaves, Azure Confidential VM, GCP Confidential Computing
-  - **Multi-tenant** — 같은 호스트의 다른 tenant·hypervisor admin이 못 봄
-  - **Confidential AI** — NVIDIA H100 Confidential Computing 모드와 결합
-  - **Confidential I/O** — TDISP/PCIe IDE로 device pass-through까지 (PCIe Ch 13)
-- ✦ Limitation — *측면 채널* 공격 일부 가능, microcode 패치 진행
-- ◦ SGX vs TDX — 둘 다 Intel, SGX는 enclave (작은 단위), TDX는 full VM (큰 단위)
+```text
+[ Trusted ]
+- Guest OS
+- Hardware
 
-## 다이어그램 (4)
+[ Trusted but potentially compromised ]
+- Hypervisor / VMM
+- Host OS
+- Cloud provider's admin
+```
 
-1. 전통 VM vs Confidential VM — hypervisor 접근 범위
-2. SEV-SNP integrity 보호 — page mapping 위·변조 차단
-3. Launch + attestation 흐름 (measurement → report → verifier)
-4. SEV / TDX / CCA 비교 매트릭스
+CSP(cloud service provider) 직원·hypervisor 버그·host root이 guest 데이터를 *볼 수 있는* 모델.
 
-## 코드 sketch
+**Confidential VM**의 신뢰 구조.
+
+```text
+[ Trusted ]
+- Guest OS
+- CPU + memory controller (HW)
+
+[ Not trusted ]
+- Hypervisor / VMM
+- Host OS
+- Cloud provider
+```
+
+CPU가 *guest memory를 암호화*해 hypervisor가 못 보게 함. *legal·regulated workload*(금융·의료)에 가능성.
+
+## AMD SEV (Secure Encrypted Virtualization)
+
+EPYC 1세대(2017)부터.
+
+| 단계 | 의미 |
+|------|------|
+| **SEV** | guest memory를 *guest-specific key*로 암호화 |
+| **SEV-ES** | + register state 암호화 |
+| **SEV-SNP** | + memory integrity 보장 (replay 공격 방지) |
 
 ```bash
-# QEMU SEV-SNP 부팅
-qemu-system-x86_64 -enable-kvm -cpu EPYC-v4 -m 4G \
-    -machine q35,confidential-guest-support=sev0,memory-encryption=sev0 \
-    -object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1 \
-    -bios OVMF.fd \
-    -kernel vmlinuz -initrd initrd
-
-# Intel TDX 부팅 (Sapphire Rapids+)
-qemu-system-x86_64 -enable-kvm -cpu host -m 4G \
-    -machine q35,confidential-guest-support=tdx0 \
-    -object tdx-guest,id=tdx0,sept-ve-disable=on \
-    -bios OVMF.fd -kernel vmlinuz
+qemu-system-x86_64 -enable-kvm \
+    -object sev-guest,id=sev0,policy=0x3 \
+    -machine memory-encryption=sev0 \
+    -kernel vmlinux ...
 ```
+
+`policy=0x3`이 *NO_DBG + NO_KS*. guest debug·key share 금지.
+
+## SEV-SNP — production confidential
+
+```bash
+-object sev-snp-guest,id=snp0,policy=0x30000 \
+-machine memory-encryption=snp0
+```
+
+SEV-SNP는 *attestation*도 표준화. guest가 *AMD-signed report*로 *자기 환경 증명*. 외부 verifier(client)가 *trust 결정*.
+
+## Intel TDX (Trust Domain Extensions)
+
+Intel의 동등한 기술. Sapphire Rapids(2023)부터.
+
+```bash
+qemu-system-x86_64 -enable-kvm \
+    -object tdx-guest,id=td0 \
+    -machine confidential-guest-support=td0,kernel-irqchip=split \
+    -kernel vmlinux ...
+```
+
+TDX는 *TD module*이라는 *Intel firmware*가 *kernel과 hypervisor 사이*에 위치해 보안 boundary 강제.
+
+## ARM CCA (Confidential Compute Architecture)
+
+ARMv9 도입. *Realm*이라는 새 world.
+
+```text
+EL3: Secure Monitor (root)
+EL2: 4-world model
+  - Normal world (기존 OS)
+  - Secure world (TrustZone)
+  - Realm (CCA confidential)
+  - Root
+```
+
+Realm은 *hypervisor와 분리* — RMM(Realm Management Monitor)이 격리.
+
+## QEMU의 confidential-guest framework
+
+`hw/i386/sev.c`·`hw/i386/tdx.c`·`hw/arm/cca.c` 등이 *platform-specific*. 공통 abstraction:
 
 ```c
-/* SEV launch — QEMU 측 (단순화) */
-static int sev_launch_start(SevGuest *sev) {
-    struct kvm_sev_launch_start start = {
-        .policy = sev->policy,
-        .handle = sev->handle,
-    };
-    int ret = sev_ioctl(sev->sev_fd, KVM_SEV_LAUNCH_START, &start, &fw_err);
-    if (ret < 0) return ret;
-    sev->handle = start.handle;
-    return 0;
-}
-
-/* Attestation report 받기 */
-static int sev_get_attestation(uint8_t *report, size_t *len) {
-    struct kvm_sev_attestation_report att = { .len = *len, .uaddr = (uintptr_t)report };
-    int ret = sev_ioctl(sev_fd, KVM_SEV_GET_ATTESTATION_REPORT, &att, &fw_err);
-    *len = att.len;
-    return ret;
-}
+struct ConfidentialGuestSupport {
+    Object parent;
+    /* ... */
+    bool (*kvm_init)(...);
+    bool (*launch_finish)(...);
+};
 ```
 
-```python
-# Attestation verifier (단순화) — AMD KDS / Intel TDX QVL 사용
-import sevsnpmeasure
-report = recv_attestation_report()
-expected = sevsnpmeasure.calc_launch_digest(ovmf=OVMF, kernel=Kernel, initrd=Initrd, cmdline=Cmd)
-assert report.measurement == expected, "tampered!"
-verify_chain(report.signature)   # AMD root key 검증
-print("Confidential VM trustworthy")
+QEMU의 *machine init flow*에서 *encryption setup*을 호출.
+
+## Memory encryption 흐름
+
+```text
+QEMU       → allocate guest memory (host RAM)
+KVM        → page register to TDX/SEV
+TDX/SEV HW → encrypt page with guest key
+Guest CPU  → page를 보면 자동 decrypt (guest's view)
+Hypervisor → 같은 page를 보면 *encrypted bytes*
 ```
 
-## 레퍼런스
+guest 입장에서는 *그냥 plaintext memory*. hypervisor·host process는 *random bytes*만 봄.
 
-- AMD SEV-SNP Whitepaper, SEV API spec
-- Intel TDX Module Spec, "Intel TDX Architecture"
-- ARM CCA — developer.arm.com/architectures/confidential-compute
-- QEMU `hw/i386/sev*.c`, `target/i386/sev.c`
-- Linux `arch/x86/kvm/svm/sev.c`, `arch/x86/kvm/vmx/tdx.c`
-- "AMD Secure Encrypted Virtualization (SEV)" — David Kaplan
-- LWN "Confidential computing" 시리즈
+## Attestation
+
+confidential VM의 *증명서*. guest가 *자기 환경*을 *외부에 증명*.
+
+```text
+1. Guest가 "내 환경" hash 생성 (kernel·init·OS image)
+2. CPU가 그 hash를 *signed report*로 wrap
+3. Guest가 report를 *verifier*에 전송
+4. Verifier가 *AMD/Intel public key*로 검증
+5. Verifier가 *trust 여부* 결정 (예: 회사 KMS key release)
+```
+
+이 흐름이 *cloud KMS·CDN secret*의 *조건부 noaccess* 메커니즘.
+
+## QEMU 측 attestation 노출
+
+```text
+(qemu) info sev
+SEV: enabled
+SEV-SNP: enabled
+Build ID: ...
+API ver: ...
+guest measurement: <hash>
+```
+
+이 measurement를 cloud orchestrator가 verifier에 forward.
+
+## VirtIO + confidential
+
+guest는 *VirtIO ring을 hypervisor와 공유*. 이게 *trust boundary 위반*?
+
+해법: ring은 *guest의 plaintext* 영역에. hypervisor가 *그 영역만* 볼 수 있고 *guest 다른 메모리*는 못 봄. swiotlb 같은 bounce buffer.
+
+```text
+Guest memory:
+  [encrypted ... GB] ← hypervisor 못 봄
+  [plaintext shared ... MB] ← VirtIO ring, bounce buffer
+```
+
+guest driver가 *swiotlb*를 통해 bounce. performance overhead 있지만 *보안 확보*.
+
+## Live migration 제한
+
+기본은 migration 불가 — destination이 *guest key* 모름. 해결책:
+
+- **SEV-SNP에 migration 추가** (proposed)
+- **encrypted state transfer with new key** — pre-shared
+
+production에서는 *current generation*에서 migration *비활성*이 보통.
+
+## 사용 사례
+
+| 도메인 | 이유 |
+|--------|------|
+| Healthcare | HIPAA — patient data가 *cloud admin에게도 비공개* |
+| Finance | trading algorithm·portfolio data 보호 |
+| Government | classified workload on commercial cloud |
+| ML inference | model weights 보호 (model marketplace) |
+| Cross-org collaboration | mutual distrust 환경 |
+
+## Performance overhead
+
+| Workload | overhead |
+|----------|----------|
+| CPU-intensive | ~3~5% (encryption은 HW이지만 page management 추가) |
+| Memory-intensive | 5~15% (cache miss 비용 증가) |
+| I/O intensive | 10~25% (bounce buffer) |
+| Network | similar |
+
+*"보안 == 성능 비용"*의 단단한 trade-off. 그 비용을 *justify*하는 workload에서만.
+
+## SEV vs TDX 비교
+
+| 측면 | SEV-SNP | TDX |
+|------|---------|-----|
+| Vendor | AMD | Intel |
+| 보호 단위 | per-VM key | per-TD key |
+| Attestation | AMD signed | Intel signed |
+| Memory integrity | RMP table | TDX module |
+| 가용성 | EPYC 3rd gen+ | Sapphire Rapids+ |
+| Linux 지원 | mature | 진화 중 |
+
+cloud provider별 *선호*가 갈림 — AWS는 *SEV-SNP*, Azure는 *TDX + SEV-SNP*, GCP는 *AMD SEV*.
+
+## QEMU 빌드
+
+```bash
+./configure --enable-kvm --target-list=x86_64-softmmu
+# SEV는 default 활성, TDX는 일부 patch 필요
+```
+
+production은 *vendor BSP*(Red Hat·SUSE·Canonical)의 QEMU 사용 권장. mainline은 *feature 변동* 큼.
+
+## RMM·CCA on ARM
+
+ARMv9 Cortex-X4·X5와 Neoverse가 지원. AWS Graviton 4 등이 채택 시 cloud에 도입 시작.
+
+```bash
+qemu-system-aarch64 -M virt,virtualization=on,confidential-guest-support=rmm0 \
+    -object rmm-guest,id=rmm0 \
+    -kernel Image ...
+```
+
+QEMU의 ARM CCA 지원은 *현재 진행 중*. mainline 도착 임박.
+
+## 흔한 함정
+
+- **CPU 미지원** — Ryzen은 SEV 미지원, EPYC만. lscpu로 *cpuid flags* 확인.
+- **kernel patch 누락** — TDX는 host kernel 6.5+ 권장.
+- **SMM/BIOS 의존** — confidential VM은 *최소 firmware*. OVMF 사용 시 *Linux only*.
+- **performance assume** — bouncer buffer로 *예상 외 슬로우*. workload-specific 측정.
+
+## 정리
+
+- **Confidential Computing**으로 *hypervisor도 guest 메모리를 못 봄*. cloud의 새 보안 모델.
+- AMD **SEV → SEV-ES → SEV-SNP**, Intel **TDX**, ARM **CCA**.
+- QEMU의 `-object sev-guest,...` 같은 confidential-guest-support framework.
+- **Memory encryption**: HW가 guest-specific key로. hypervisor는 encrypted bytes만.
+- **Attestation**으로 guest가 자기 환경 증명. cloud KMS 통합.
+- VirtIO ring은 *plaintext shared* region. bounce buffer 사용.
+- Overhead: CPU 3~5%, memory 5~15%, I/O 10~25%.
+- Live migration *제한적*. encrypted state transfer 진화 중.
+
+## 다음 장 예고
+
+마지막 장은 *데이터 보호의 다른 측면* — **snapshot vs live migration**의 메커니즘 비교.
 
 ## 관련 항목
 
-- [Ch 14: KVM accel](/blog/tools/emulation/qemu-internals/chapter14-kvm-accel)
-- [Ch 20: microvm](/blog/tools/emulation/qemu-internals/chapter20-microvm)
-- [Ch 22: Snapshot vs migration](/blog/tools/emulation/qemu-internals/chapter22-snapshot-vs-migration)
-- [PCIe Ch 13: vIOMMU/S-IOV/VirtIO-PCI/IDE/TDISP](/blog/embedded/hardware/pcie/) — Confidential I/O
+- [Ch 20: microvm Machine](/blog/tools/emulation/qemu-internals/chapter20-microvm)
+- [Ch 22: Snapshot vs Migration](/blog/tools/emulation/qemu-internals/chapter22-snapshot-vs-migration)
+- [QEMU Embedded — TrustZone](/blog/tools/emulation/qemu-embedded/chapter16-trustzone)
+- [Ch 10: 마이그레이션](/blog/tools/emulation/qemu-internals/chapter10-migration)

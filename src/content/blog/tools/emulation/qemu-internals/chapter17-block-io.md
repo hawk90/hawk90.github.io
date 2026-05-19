@@ -2,113 +2,271 @@
 title: "Ch 17: 블록 I/O Lifecycle"
 date: 2026-05-17T17:00:00
 description: "BDS·request stack·throttling·caching — block I/O 일대기."
-tags: [QEMU, block-layer, bds, throttling, write-cache]
+tags: [QEMU, block-layer, bds, throttling, write-cache, write-back]
 series: "QEMU Internals"
 seriesOrder: 17
 draft: true
 ---
 
-## 이 챕터의 의도
+Ch 5에서 본 block layer 위에서 *실제 I/O가 어떻게 흐르는지*를 따라갑니다. virtio-blk write 한 번이 *어떤 layer를 거쳐* host의 syscall이 되는지, 그 path의 throttle·cache·zero-copy까지.
 
-guest의 `write(fd, ...)` 한 줄이 QEMU 안에서는 qcow2 layer → backing file → throttle → host file까지 여러 계층을 거친다. QEMU block layer는 filter chain 구조로 caching, throttling, snapshot, encryption, mirroring을 합성한다. 이 장에서는 BDS, BlockBackend, driver chain, request lifecycle을 차례로 본다.
+## Write request의 일대기
 
-## 핵심 항목
+```text
+1. guest: write(/dev/vda, buf, 4KB)
+        │
+2. virtio-blk frontend: VirtIO ring에 descriptor enqueue + doorbell
+        │
+3. virtio-blk handler (host): vring에서 fetch + BB로 submit
+        │
+4. BlockBackend: throttle 검사 (iops/bps limit)
+        │
+5. BDS 1 (qcow2): L1/L2 lookup → cluster offset
+        │ (할당 안 됐으면 새로 cluster allocate)
+        │
+6. BDS 2 (luks, encryption layer): cluster를 암호화
+        │
+7. BDS 3 (file Protocol): host file의 offset에 write
+        │
+8. AIO backend (io_uring): kernel에 submit
+        │
+9. (host kernel page cache 또는 direct disk write)
+        │
+10. completion → coroutine resume → BDS chain unwinds
+        │
+11. virtio-blk: completion ring + IRQ inject
+        │
+12. guest: write returns
+```
 
-- ✦ 3계층 추상
-  - **BlockDriver** — qcow2, raw, vmdk, nbd, iscsi 등 *format/protocol*
-  - **BlockDriverState (BDS)** — 하나의 layer instance (하나의 file/connection)
-  - **BlockBackend** — frontend가 보는 추상, virtio-blk/scsi/ide가 이걸 사용
-- ✦ **Filter chain** — BDS가 다른 BDS를 wrap, 함수 호출 chain
-  - 예: `virtio-blk` → `BlockBackend` → `throttle BDS` → `qcow2 BDS` → `file BDS` → posix file
-- ✦ Request lifecycle
-  1. guest VIRTIO write request
-  2. virtio-blk frontend가 `blk_pwrite(blk, off, len, buf)` 호출
-  3. BlockBackend → 첫 BDS의 `bdrv_co_pwritev` (coroutine 안)
-  4. Filter chain 따라 위에서 아래로 — throttle wait, qcow2 metadata update, file write
-  5. 최하단 BDS가 host file/socket에 io_uring/linux-aio로 submit
-  6. AIO 완료 → 위로 callback chain → coroutine resume → guest IRQ
-- ✦ **Cache mode** — `cache=writeback|writethrough|none|directsync|unsafe`
-  - writeback: host page cache 사용, 빠름
-  - writethrough: 모든 write 즉시 flush, 안전
-  - none: O_DIRECT, host cache 우회 (DB·VM 표준)
-- ✦ **Throttle filter** — IOPS/throughput limit (`-drive ...,throttling.iops-total=...`)
-- ✦ **Backing chain** — qcow2 overlay 위에 base image, COW
-- ✦ **Snapshot semantics**
-  - Internal snapshot — qcow2 안에 metadata
-  - External snapshot — 새 overlay file
-- ✦ Drain — 모든 in-flight I/O 완료까지 대기, snapshot/migration 전 필수
-- ✦ Polled state — IOThread polling on
-- ✦ Flush — `bdrv_co_flush`, write barrier
-- ◦ Image streaming, mirror, commit 등 block job
+각 단계가 *coroutine yield 가능*하므로 *비동기*. main thread도 *block 안 됨*.
 
-## 다이어그램 (4)
+## BlockBackend (BB)
 
-1. 3계층 추상 — BlockDriver / BDS / BlockBackend 관계
-2. Filter chain — virtio-blk → throttle → qcow2 → file → posix
-3. Request lifecycle (guest write → 6단계)
-4. Cache mode 비교 — host page cache · O_DIRECT 흐름
+```c
+typedef struct BlockBackend {
+    BlockDriverState *root;
+    /* throttle */
+    ThrottleGroup *throttle_group;
+    /* I/O state */
+    QLIST_HEAD(, BlockBackendAioNotifier) aio_notifiers;
+    /* ... */
+} BlockBackend;
+```
 
-## 코드 sketch
+guest의 *device 측*과 *BDS chain*을 잇는 *연결 layer*. throttle·mirror·replication 같은 *host policy*를 적용.
 
-```bash
-# Filter chain 예
-qemu-system-x86_64 -enable-kvm \
-    -drive file=overlay.qcow2,if=none,id=hd0,format=qcow2,cache=none,aio=io_uring,\
-throttling.iops-total=1000 \
-    -device virtio-blk-pci,drive=hd0
+## BlockDriverState (BDS) chain
 
-# 결과 chain:
-# virtio-blk → blk0 (BlockBackend)
-#   → throttle BDS (iops cap 1000)
-#     → qcow2 BDS (overlay.qcow2)
-#       → backing: base.qcow2 (read-only)
-#       → metadata BDS (refcount table, L1/L2)
-#     → file BDS (overlay.qcow2 host file)
-#       → posix open + O_DIRECT + io_uring submit
+```text
+BB → BDS_1 (qcow2) → BDS_2 (luks) → BDS_3 (file)
+```
+
+각 BDS가 *bs->file* 또는 *bs->backing*을 통해 *다음 layer*로 위임.
+
+```c
+int coroutine_fn bdrv_co_preadv(BlockDriverState *bs, ...) {
+    /* qcow2 → luks → file */
+    return bs->drv->bdrv_co_preadv(bs, ...);
+}
+```
+
+각 driver의 callback이 *자기 처리 후* `bdrv_co_preadv(bs->file, ...)`로 *다음 BDS로 위임*.
+
+## qcow2의 cluster lookup
+
+```text
+File offset계산:
+  L1 idx  = guest_offset / (cluster_size * L2_entries)
+  L2 idx  = (guest_offset / cluster_size) % L2_entries
+
+  L1[L1_idx] → L2 table 위치
+  L2[L2_idx] → cluster 위치
 ```
 
 ```c
-/* Block backend API 사용 (coroutine context) */
-static int coroutine_fn my_op(BlockBackend *blk) {
-    /* qcow2 + throttle + file 전체 chain 자동 */
-    int ret = blk_co_pwrite(blk, 0x1000, 4096, buf, 0);
-    if (ret < 0) return ret;
+int coroutine_fn qcow2_co_preadv(BlockDriverState *bs, ...) {
+    /* L1·L2 lookup */
+    uint64_t cluster_offset = lookup(bs, offset);
 
-    /* flush — write barrier */
-    return blk_co_flush(blk);
-}
+    if (cluster_offset == 0) {
+        /* sparse — 한 번도 쓴 적 없음 */
+        memset(buf, 0, len);
+        return 0;
+    }
 
-/* Filter chain 내부 — throttle filter 예 */
-static int coroutine_fn throttle_co_pwritev(BlockDriverState *bs, int64_t off,
-                                             int64_t bytes, QEMUIOVector *qiov,
-                                             BdrvRequestFlags flags) {
-    ThrottleGroupMember *tgm = bs->opaque;
-    throttle_group_co_io_limits_intercept(tgm, bytes, true);   /* may yield */
-    return bdrv_co_pwritev(bs->file, off, bytes, qiov, flags); /* down chain */
+    /* file로 위임 */
+    return bdrv_co_preadv(bs->file, cluster_offset + sector, len, ...);
 }
 ```
+
+L1/L2 table은 *cache*되어 *자주 hit*. cold path만 disk 접근.
+
+## Write — copy on write
+
+```c
+int coroutine_fn qcow2_co_pwritev(BlockDriverState *bs, ...) {
+    uint64_t cluster_offset = lookup(bs, offset);
+
+    if (cluster_offset == 0 || /* allocate 필요 */ ) {
+        /* 새 cluster 할당 */
+        cluster_offset = allocate_cluster(bs);
+        update_l2_table(bs, ...);
+    }
+
+    /* file에 write */
+    return bdrv_co_pwritev(bs->file, cluster_offset, buf, len);
+}
+```
+
+sparse 영역에 처음 write 시 *cluster 할당 + L2 갱신*. write가 *느림*. fully-allocated 이미지는 빠름(`qemu-img create -o preallocation=full`).
+
+## Throttle
+
+```c
+typedef struct ThrottleConfig {
+    int64_t avg[BUCKETS_COUNT];     /* iops/bps */
+    int64_t max[BUCKETS_COUNT];
+    int64_t burst[BUCKETS_COUNT];
+} ThrottleConfig;
+```
+
+`throttle.c`가 *token bucket*으로 rate 제한.
 
 ```bash
-# Snapshot
-(qemu) snapshot_blkdev hd0 snap1.qcow2   # external
-(qemu) savevm s1                          # internal (state + RAM + block)
-(qemu) info block
-
-# Drain — snapshot 전 in-flight 완료
-(qemu) drive_backup -f hd0 backup.qcow2
+-drive file=disk.img,iops=1000,bps=50000000
 ```
 
-## 레퍼런스
+bucket이 비면 *coroutine yield* → token 채워질 때까지 대기 → resume.
 
-- QEMU `block.c`, `block/qcow2*.c`, `block/throttle.c`, `block/file-posix.c`
-- QEMU `Documentation/devel/block-coroutine-wrapper.rst`
-- QEMU `Documentation/system/qemu-block-drivers.rst`
-- "Live block operations" — KVM Forum talks
-- "QEMU Block Layer" — Kevin Wolf KVM Forum
+## Write cache modes
+
+```bash
+-drive file=disk.img,cache=writeback,...
+```
+
+| Mode | 동작 |
+|------|------|
+| `writeback` (default) | host page cache 사용. write 빠름, crash 시 risk |
+| `writethrough` | 매 write에 host fsync 강제 |
+| `none` (O_DIRECT) | page cache 우회 |
+| `directsync` | O_DIRECT + O_SYNC |
+| `unsafe` | guest fsync 무시. 가장 빠름, 위험 |
+
+production은 `writeback` + guest의 *명시적 fsync* 조합. cloud는 `none` 권장(double cache 회피).
+
+## flush — barrier
+
+guest가 *sync*를 호출하면.
+
+```c
+int coroutine_fn bdrv_co_flush(BlockDriverState *bs) {
+    /* qcow2: metadata flush + data flush */
+    /* luks: 아래로 위임 */
+    /* file: fsync syscall */
+    /* AIO: io_uring fsync */
+}
+```
+
+flush가 *모든 layer*를 거쳐 *host fsync*까지. 비싼 operation.
+
+## Zero-copy — vhost·dma-buf
+
+VirtIO + iothread + io_uring이 결합되면 *guest buffer*가 *host disk*로 *복사 없이* 직접.
+
+```text
+guest userspace buf
+    │
+    │ guest virt → guest phys (guest MMU)
+    │
+    ├ kernel skips copy
+    │
+    │ guest phys → host phys (EPT)
+    │
+    ├ io_uring SQE의 vector에 직접 register
+    │
+    ▼
+host kernel io_uring → disk
+```
+
+bouncing buffer 없음. *최고 throughput*.
+
+## Snapshot 시 I/O
+
+internal qcow2 snapshot 중 active write가 발생하면.
+
+```text
+Active L2 → modified cluster
+Snapshot L2 → 원본 cluster reference
+```
+
+snapshot이 *원본 보존*. active L2가 *새 cluster*에 write. snapshot은 *read-only* 보장.
+
+## Mirror — block job
+
+block layer의 *background job*. source의 모든 cluster를 destination에 copy.
+
+```c
+typedef struct BlockJobDriver {
+    int (*run)(BlockJob *job);
+    /* ... */
+} BlockJobDriver;
+```
+
+`drive_mirror`가 job 시작. background에서 *cluster 단위 복사*. 그 사이의 write는 *둘 다*에 적용.
+
+## drive Stream — backing 통합
+
+backing chain의 *cluster를 top layer*로 끌어옴.
+
+```bash
+qemu-img create -b backing.qcow2 -f qcow2 top.qcow2
+# top과 backing chain
+```
+
+```text
+(qemu) drive_stream -b backing top
+```
+
+backing의 모든 cluster를 top에 *copy → backing 의존 끊김*.
+
+## Request ordering
+
+block layer는 *coroutine 친화* — 같은 BDS의 *동시 request*가 *interleave*. 그러나 *barrier*(flush)는 *순서 보장*.
+
+```c
+/* serialized 모드 */
+bdrv_drained_begin(bs);
+/* 작업 */
+bdrv_drained_end(bs);
+```
+
+`drained_begin/end`가 *in-flight 모두 끝낼 때까지 대기*. snapshot·resize에 사용.
+
+## 흔한 함정
+
+- **cache=writeback + guest fsync 무시** — guest crash 시 data loss.
+- **direct I/O + 4KB alignment 위반** — `EIO`. buffer alignment 확인.
+- **throttle 너무 작음** — coroutine 항상 wait. guest perspective에서 slow.
+- **backing chain 깊이** — qcow2 chain이 20 level 깊으면 read latency 누적.
+
+## 정리
+
+- Block I/O 흐름: guest device → BB(throttle) → BDS chain(format) → Protocol → AIO backend → host syscall.
+- 각 단계가 *coroutine_fn* — yield 가능, async.
+- **qcow2**의 L1/L2 lookup으로 cluster 위치 확인. sparse·copy-on-write.
+- **Throttle**(`iops=`·`bps=`)은 token bucket. 부족 시 coroutine yield.
+- Write cache: writeback(default)·writethrough·none(O_DIRECT)·unsafe.
+- **Flush**가 가장 비싼 operation. guest fsync → host fsync.
+- VirtIO + iothread + io_uring으로 *zero-copy*.
+- **Block job**(mirror·stream·backup·commit)이 background에서 동작.
+
+## 다음 장 예고
+
+다음 장은 *device 레이어* — **VirtIO 구현 심화**. virtqueue 처리·virtio-blk·virtio-net의 host side.
 
 ## 관련 항목
 
-- [Ch 5: Block layer 기초](/blog/tools/emulation/qemu-internals/chapter05-block) (기존)
-- [Ch 15: Coroutine](/blog/tools/emulation/qemu-internals/chapter15-coroutine)
 - [Ch 16: AIO](/blog/tools/emulation/qemu-internals/chapter16-aio)
-- [Ch 22: Snapshot vs migration](/blog/tools/emulation/qemu-internals/chapter22-snapshot-vs-migration)
+- [Ch 18: VirtIO Impl](/blog/tools/emulation/qemu-internals/chapter18-virtio-impl)
+- [Ch 5: Block Layer](/blog/tools/emulation/qemu-internals/chapter05-block-layer)
