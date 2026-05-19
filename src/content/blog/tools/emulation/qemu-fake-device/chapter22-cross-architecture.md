@@ -8,86 +8,338 @@ seriesOrder: 22
 draft: true
 ---
 
-## 이 챕터의 의도
+시리즈 마지막 장입니다. 지금까지 device를 x86_64에서 개발했지만, 실 cloud는 *ARM Graviton·RISC-V*도. 같은 device가 *모든 architecture*에서 *일관되게* 동작하도록 *endian·alignment·timing*에 주의해야 합니다.
 
-같은 IP(NPU, sensor, NIC controller)가 x86 host PC, aarch64 자동차 ECU, RISC-V 임베디드에 모두 들어간다면 device model 하나로 세 host를 모두 검증해야 한다. QEMU는 multi-arch를 지원하지만 endianness, alignment, atomic 시맨틱이 host 아키텍처에 따라 달라지는 함정이 있다. 이 장에서는 그 함정과 회피법을 본다.
+## Cross-architecture의 의미
 
-## 핵심 항목
+| 의미 |
+|------|
+| QEMU device가 *모든 target architecture*(x86_64·aarch64·riscv64·ppc64)에서 동작 |
+| Linux driver가 *모든 host architecture*에서 동일하게 동작 |
+| 같은 cluster의 multi-arch host에서 *VM migration* (제한적) |
 
-- ✦ QEMU `softmmu-system-{x86_64,aarch64,riscv64}` — 같은 device code, 다른 host
-- ✦ `MemoryRegionOps.endianness` — `DEVICE_LITTLE_ENDIAN` / `BIG_ENDIAN` / `NATIVE_ENDIAN`
-  - PCIe spec은 little-endian → 대부분 `LITTLE_ENDIAN` 명시
-  - SoC IP에 따라 host endian (`NATIVE_ENDIAN`) 의도적 선택
-- ✦ Driver 측 — `readl`/`writel` (host endian) vs `ioread32be`/`iowrite32be` (강제 BE)
-- ✦ Alignment — ARMv7은 unaligned MMIO 일부 trap, ARMv8/x86은 대부분 허용
-- ✦ Atomic — `__atomic_*` semantic은 동일하나 *cache coherency 도메인*이 arch별 다름
-- ✦ DMA mask — 32-bit vs 64-bit, ARM 일부 SoC는 IOMMU 통한 IOVA 강제
-- ✦ Machine별 device 등록 — `virt` (ARM/RISC-V), `pc-q35` (x86) 각각 PCIe root complex 다름
-- ✦ Device 추가 — `-device my-pci,bus=pcie.0` (x86 q35), `bus=pcie.0` (ARM virt) — 공통 BDF
-- ✦ Cross-arch CI matrix — GitHub Actions per-arch runner, qemu-user-static
-- ✦ Driver portability test — 같은 driver 소스, 3개 arch 컴파일·실행
-- ◦ Virtio가 *legacy*에서 host-endian 문제 (modern은 LE 고정)
+cloud의 *Graviton·Ampere·SiFive*로 가는 길에서 *device portability*가 갈수록 중요.
 
-## 다이어그램 (3)
+## Endian — 가장 흔한 함정
 
-1. 같은 device model → x86/ARM/RISC-V QEMU 빌드 매트릭스
-2. Endianness handling — device LE vs host BE 시 byteswap 위치
-3. Cross-arch CI pipeline — build matrix → run → results aggregate
+| Architecture | 기본 endian |
+|--------------|-------------|
+| x86/x86_64 | LE |
+| ARM (modern) | LE (예외: powerpc·bigendian 모드) |
+| RISC-V | LE |
+| PowerPC | BE (legacy), LE (modern) |
+| MIPS | BE 또는 LE |
 
-## 코드 sketch
+대부분 LE지만 PowerPC·MIPS에 BE 잔존. device는 *항상 LE*로 정해 두면 안전.
+
+## device 측 endian
 
 ```c
-/* Device 측 — endianness 명시 */
-static const MemoryRegionOps my_csr_ops = {
-    .read       = my_csr_read,
-    .write      = my_csr_write,
-    .endianness = DEVICE_LITTLE_ENDIAN,   /* PCIe 표준 */
-    .impl       = { .min_access_size = 4, .max_access_size = 4 },
-    .valid      = { .min_access_size = 4, .max_access_size = 4 },
+static const MemoryRegionOps my_ops = {
+    .read = my_read,
+    .write = my_write,
+    .endianness = DEVICE_LITTLE_ENDIAN,    /* 명시 */
+    /* ... */
 };
-
-/* register 값을 dev struct에 저장할 때 host endian으로 자동 변환됨
-   (QEMU가 io read/write 시 endianness 옵션 보고 처리) */
 ```
+
+QEMU가 *guest의 endian과 device의 endian*이 다르면 *자동 byte swap*. callback은 *항상 LE*.
+
+## VirtIO modern endian
+
+VirtIO 1.0+는 *항상 LE*. 1.0 이전은 *target endian 따라감* (legacy).
 
 ```c
-/* Driver 측 — PCIe LE 명시적 처리 */
-static u32 my_read_reg(struct my_dev *d, u32 off) {
-    return le32_to_cpu(readl(d->mmio + off));   /* LE → host */
-}
-
-static void my_write_reg(struct my_dev *d, u32 off, u32 val) {
-    writel(cpu_to_le32(val), d->mmio + off);    /* host → LE */
+static void config_read(VirtIODevice *vdev, uint8_t *config) {
+    struct my_config cfg = {
+        .max_buf = cpu_to_le32(MAX_BUF),
+        .modes   = cpu_to_le32(supported_modes),
+    };
+    memcpy(config, &cfg, sizeof(cfg));
 }
 ```
+
+`cpu_to_le32`로 *host endian → little-endian* 변환. modern이면 *guest endian 무관*.
+
+## Driver — multi-arch 호환
+
+```c
+/* multi-arch safe */
+static int my_pci_init(struct my_dev *d) {
+    u32 ident = readl(d->mmio + REG_IDENT);
+    /* readl이 *little-endian access*. modern Linux는 항상 LE. */
+
+    if (ident != IDENT_MAGIC) {   /* 0x46414b45 — LE byte order */
+        return -ENODEV;
+    }
+    return 0;
+}
+```
+
+`readl`/`writel`은 *kernel API가 자동으로 LE access*. driver code는 *endian-agnostic*.
+
+## Big-endian byte arithmetic
+
+```c
+/* 회피 */
+u32 val = ((u8 *)mmio + REG_IDENT)[0] |
+          (((u8 *)mmio + REG_IDENT)[1] << 8) |
+          /* ... 명시적 byte order assumption */;
+
+/* good */
+u32 val = readl(mmio + REG_IDENT);   /* abstraction이 자동 처리 */
+```
+
+byte-level arithmetic은 *architecture에 의존*. abstraction 사용.
+
+## Alignment
+
+| Architecture | unaligned access |
+|--------------|------------------|
+| x86_64 | 허용 (성능 ↓) |
+| ARM (modern) | 허용 (성능 ↓) |
+| ARM (older) | 위반 시 fault |
+| RISC-V | 허용 또는 fault (구현 의존) |
+| MIPS | fault |
+
+device는 *aligned access만 허용*하도록.
+
+```c
+static const MemoryRegionOps my_ops = {
+    .impl.min_access_size = 4,
+    .impl.max_access_size = 4,
+    .valid.min_access_size = 4,
+    .valid.max_access_size = 4,
+};
+```
+
+driver의 misaligned access를 *조기에* 잡음.
+
+## DMA buffer alignment
+
+```c
+/* page-aligned + 적절한 size */
+buf = dma_alloc_coherent(&pdev->dev, PAGE_SIZE * 4,
+                          &dma_addr, GFP_KERNEL);
+```
+
+`dma_alloc_coherent`가 *naturally aligned* buffer 반환. 모든 arch에서.
+
+## Bitfield의 위험
+
+```c
+struct desc {
+    uint32_t flags:8;
+    uint32_t length:24;
+};
+```
+
+bitfield order가 *compiler/architecture에 따라* 다름. *명시적 mask·shift* 권장.
+
+```c
+#define DESC_FLAGS_MASK   GENMASK(7, 0)
+#define DESC_LEN_MASK     GENMASK(31, 8)
+
+desc.flags = FIELD_GET(DESC_FLAGS_MASK, raw);
+desc.length = FIELD_GET(DESC_LEN_MASK, raw);
+```
+
+`GENMASK`·`FIELD_GET`/`FIELD_PREP`이 *명시적*. cross-arch 안전.
+
+## Atomic ops
+
+driver의 *concurrent access*를 위한 atomic. Linux *모든 arch에서 호환*:
+
+```c
+atomic_t counter;
+atomic_inc(&counter);
+atomic_dec_and_test(&counter);
+atomic_cmpxchg(&counter, old, new);
+```
+
+architecture-specific intrinsic 사용 *금지*.
+
+## Memory barrier
+
+weak ordering architecture(ARM·RISC-V)에서 *명시적 barrier*.
+
+```c
+/* descriptor 작성 후 doorbell write */
+write_desc(d, idx, &desc);
+wmb();                       /* write barrier */
+writel(idx, d->mmio + REG_DOORBELL);
+```
+
+x86은 *strong order*라 종종 barrier가 *no-op*. ARM·RISC-V는 *진짜 barrier*.
+
+## QEMU build — multi-target
+
+```bash
+./configure --target-list=x86_64-softmmu,aarch64-softmmu,riscv64-softmmu \
+    --enable-debug
+make -j$(nproc)
+```
+
+같은 device가 *세 target 모두*에서 빌드.
+
+## Test matrix
 
 ```yaml
-# GitHub Actions cross-arch test
 strategy:
   matrix:
     target:
-      - { arch: x86_64,  qemu: qemu-system-x86_64,  machine: q35 }
-      - { arch: aarch64, qemu: qemu-system-aarch64, machine: virt }
-      - { arch: riscv64, qemu: qemu-system-riscv64, machine: virt }
-steps:
-  - run: |
-      ${{ matrix.target.qemu }} -M ${{ matrix.target.machine }} \
-          -kernel out/Image.${{ matrix.target.arch }} \
-          -device my-pci \
-          -append "console=ttyS0" -nographic -no-reboot \
-          -serial mon:stdio
+      - { arch: x86_64,  qemu: x86_64,  guest_arch: x86_64 }
+      - { arch: aarch64, qemu: aarch64, guest_arch: aarch64 }
+      - { arch: riscv64, qemu: riscv64, guest_arch: riscv64 }
 ```
 
-## 레퍼런스
+GitHub Actions가 *세 architecture* 동시 검증. driver의 *real portability* 보장.
 
-- QEMU `include/exec/memory.h::MemoryRegionOps`
-- QEMU `Documentation/devel/memory.rst` — endianness handling
-- Linux `Documentation/driver-api/device-io.rst` — `readl/writel` 의미
-- ARM Architecture Reference Manual §B2.3 (Atomic/memory ordering)
-- LWN "Cross-architecture kernel testing"
+## Migration cross-arch?
+
+QEMU live migration은 *같은 architecture*만. ARM → x86 같은 cross-arch migration은 *지원 안 됨*.
+
+| 가능 | 불가 |
+|------|------|
+| 같은 arch + 같은 CPU feature | 다른 arch |
+| 같은 arch + 호환 feature subset | CPU feature 누락 |
+| 같은 arch + 호환 machine type | 호환 안 되는 machine |
+
+cross-arch는 *cold migration* (VM 정지 → reboot)만.
+
+## userspace bin compat
+
+x86 binary를 ARM guest에서 실행하려면 *QEMU user-mode*.
+
+```bash
+# binfmt_misc 등록
+sudo apt install qemu-user-static
+
+# ARM guest 안에서 x86 binary 실행
+arm-guest$ /usr/bin/qemu-x86_64-static /path/to/x86-binary
+```
+
+`qemu-user` 자체가 *TCG*로 binary 번역. ARM·RISC-V cloud에서 *x86 container* 실행에 사용.
+
+## Endian-safe device protocol
+
+```c
+struct on_wire_packet {
+    uint32_t magic;     /* always LE */
+    uint32_t version;
+    uint64_t length;
+    /* ... */
+} __attribute__((packed));
+
+static void send_packet(struct my_dev *d, struct on_wire_packet *p) {
+    p->magic = cpu_to_le32(0x12345678);
+    p->version = cpu_to_le32(1);
+    p->length = cpu_to_le64(payload_len);
+    /* DMA로 device에 */
+}
+```
+
+*on-wire*는 *항상 LE*로 통일. host endian과 무관.
+
+## VirtIO-mmio 활용
+
+ARM·RISC-V virt 환경은 *virtio-mmio*가 표준. PCI bus 없는 microvm.
+
+```bash
+# ARM
+qemu-system-aarch64 -M virt -device virtio-blk-device,...
+
+# RISC-V
+qemu-system-riscv64 -M virt -device virtio-blk-device,...
+```
+
+device 정의는 *transport-agnostic*. mmio 변형이 자동.
+
+## 시리즈 종합
+
+22장 끝까지 왔습니다.
+
+| 영역 | 장 |
+|------|----|
+| 기본 | 1~2 (overview, build) |
+| Device model | 3~5 (QOM, PCI, MMIO) |
+| 통신 | 6~7 (IRQ, DMA) |
+| Driver | 8~9 (Linux driver, debugging) |
+| Testing | 10~11 (CI, advanced scenarios) |
+| 실 device | 12 (NVMe case study) |
+| Production patterns | 13~14 (register bank, SG-DMA) |
+| VirtIO | 15~16 (basics, advanced) |
+| Security | 17 (fuzzing) |
+| Performance | 18 |
+| Topology | 19~20 (multi-function, hotplug) |
+| RAS | 21 (AER) |
+| Portability | 22 (cross-arch) |
+
+이 어휘로 *production-grade fake device + Linux driver*를 *처음부터 끝까지* 만들 수 있습니다.
+
+## 시리즈 마무리
+
+22장을 끝까지 따라온 셈입니다. QEMU의 *가상 device 개발*은 *처음에 어색*하지만 *어휘만 잡히면* 매우 강력한 도구입니다. 보드 없이 driver 작성, CI에 통합, fuzz 검증까지 — *production driver 개발의 새 표준*.
+
+새 NPU·FPGA·NIC·storage device 만들 때 *이 시리즈*가 reference가 되기를 바랍니다.
+
+## 다음 단계
+
+- *내 SoC* QEMU에 추가 — Custom Machine Type(Internals Ch 11)
+- *driver-RTL cosim* — Driver-RTL Co-simulation 시리즈
+- *FPGA driver* — FPGA Driver via QEMU+VFIO 시리즈
+- *Embedded* — QEMU Embedded Emulation 시리즈
+- *RISC-V 깊이* — RISC-V QEMU 심화 시리즈
+- *QEMU 내부* — QEMU Internals 시리즈
+
+이 6개 시리즈가 *임베디드 + 시스템 + 시뮬레이션*의 완전한 지도입니다.
+
+## 흔한 함정 (마지막 정리)
+
+- **endian assumption** — `__attribute__((packed))` + `cpu_to_le*`/`le*_to_cpu`.
+- **alignment** — `aligned(4)` 명시. 4-byte access만 device callback.
+- **bitfield** — 사용 회피, GENMASK·FIELD_GET 사용.
+- **architecture-specific intrinsic** — 절대 금지.
+- **production-only test** — multi-arch CI matrix 필수.
+
+## 정리
+
+- Cross-architecture portability는 *endian·alignment·atomic·barrier* 일관성.
+- device는 *항상 LE* 표준. `DEVICE_LITTLE_ENDIAN` + `cpu_to_le*`.
+- Aligned access만 허용 — *최소·최대 4-byte*.
+- `readl`/`writel`로 *kernel abstraction* 활용. byte-level arithmetic 회피.
+- **GENMASK·FIELD_GET·FIELD_PREP**로 *명시적 bit manipulation*.
+- **Memory barrier** — ARM·RISC-V는 *진짜 barrier*. x86은 종종 no-op.
+- CI matrix(x86_64·aarch64·riscv64)로 *real portability* 보장.
+- Cross-arch migration은 *불가*. cold migration만.
+- *VirtIO-mmio*가 ARM·RISC-V virt의 표준 transport.
+
+## 시리즈 마무리 — 6개 인접 시리즈로
+
+22장이 끝났습니다. QEMU의 *가상 device + Linux driver*를 *완전히 어휘화*했습니다. 이제 *내 device·driver·system*에 적용해 보세요.
+
+다음 깊이는 *6개 인접 시리즈*에서 — 임베디드·RISC-V·FPGA·cosim·internals. 어느 쪽으로 가든 *이 시리즈가 launching pad*가 됩니다.
+
+QEMU와 함께 하시는 길 응원합니다.
 
 ## 관련 항목
 
-- [Ch 17: 디바이스 퍼징](/blog/tools/emulation/qemu-fake-device/chapter17-fuzzing)
-- [Ch 18: 성능 모델링](/blog/tools/emulation/qemu-fake-device/chapter18-performance-modeling)
-- [QEMU Embedded Emulation 시리즈](/blog/tools/emulation/qemu-embedded/) — ARM/RISC-V 깊이
+- [Ch 21: AER Emulation](/blog/tools/emulation/qemu-fake-device/chapter21-aer-emulation)
+- [Ch 1: 시리즈 시작](/blog/tools/emulation/qemu-fake-device/chapter01-overview) — 다시 보기
+
+## 관련 시리즈
+
+- [QEMU Internals](/blog/tools/emulation/qemu-internals/chapter01-architecture) — QEMU 내부
+- [QEMU Embedded](/blog/tools/emulation/qemu-embedded/chapter01-overview) — embedded workflow
+- [QEMU RISC-V](/blog/tools/emulation/qemu-riscv/chapter01-overview) — RISC-V 깊이
+- [FPGA Driver via QEMU+VFIO](/blog/tools/emulation/qemu-fpga-driver/chapter01-fpga-driver-challenge) — FPGA workflow
+- [Driver-RTL Co-simulation](/blog/tools/emulation/driver-cosim/chapter01-why-cosim) — pre-silicon
+- [QEMU Embedded — CI Matrix](/blog/tools/emulation/qemu-embedded/chapter20-ci-matrix)
+
+## 참고 자료
+
+- QEMU Documentation — qemu.org/docs/master/
+- PCIe Base Specification
+- Linux kernel `Documentation/PCI/`
+- Syzkaller — github.com/google/syzkaller
+- "Linux Device Drivers" (LDD3)
