@@ -294,33 +294,12 @@ idle 시 SysTick을 *다음 wake까지의 시간*으로 재설정하고 `WFI`로
 
 ## 새 아키텍처에 옮길 때 — 단계 절차
 
-```text
-1. Toolchain 준비
-   - GCC·LLVM·proprietary 컴파일러
-   - newlib 또는 musl libc
-
-2. Initial stack frame 결정
-   - 어느 레지스터를 stack에 미리 깔 것인가
-   - 첫 task entry로 어떻게 점프시킬 것인가
-
-3. Context switch 어셈블리
-   - callee-saved 레지스터 save/restore
-   - SP swap
-   - FPU/Vector 레지스터 lazy 전략
-
-4. Tick source
-   - SysTick·architectural timer·external timer
-   - IRQ 등록 + priority
-
-5. Critical section primitive
-   - IRQ disable/enable
-   - atomic 명령 (LDREX/STREX, LR/SC, csrrci)
-
-6. 검증
-   - 단순 task 두 개로 ping-pong delay
-   - semaphore·queue 단위 테스트
-   - stack overflow hook 동작 확인
-```
+1. **Toolchain 준비** — GCC·LLVM·proprietary 컴파일러, newlib 또는 musl libc.
+2. **Initial stack frame 결정** — 어느 레지스터를 stack에 미리 깔 것인가, 첫 task entry로 어떻게 점프시킬 것인가.
+3. **Context switch 어셈블리** — callee-saved 레지스터 save/restore, SP swap, FPU/Vector 레지스터 lazy 전략.
+4. **Tick source** — SysTick·architectural timer·external timer, IRQ 등록 + priority.
+5. **Critical section primitive** — IRQ disable/enable, atomic 명령 (LDREX/STREX, LR/SC, csrrci).
+6. **검증** — 단순 task 두 개로 ping-pong delay, semaphore·queue 단위 테스트, stack overflow hook 동작 확인.
 
 FreeRTOS는 `portable/` 아래 *port template*을 두고 있고, Zephyr는 `arch/template`이 있으니 그대로 복사해서 시작하는 편이 빠릅니다.
 

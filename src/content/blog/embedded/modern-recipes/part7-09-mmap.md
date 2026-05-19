@@ -171,13 +171,12 @@ UIO·VFIO가 매핑하는 영역은 자동으로 non-cacheable 또는 device mem
 
 TLB miss 영향이 큰 워크로드에 huge page를 적용했을 때입니다.
 
-```text
-구성                          TLB miss/sec   실행 시간
-4 KB page                     12 M           1.80 s
-THP (2 MB) 자동               1.4 M          1.05 s
-MAP_HUGETLB 명시 (2 MB)       0.9 M          0.92 s
-1 GB huge page                0.1 M          0.81 s
-```
+| 구성 | TLB miss/sec | 실행 시간 |
+|------|---------------|-----------|
+| 4 KB page | 12 M | 1.80 s |
+| THP (2 MB) 자동 | 1.4 M | 1.05 s |
+| `MAP_HUGETLB` 명시 (2 MB) | 0.9 M | 0.92 s |
+| 1 GB huge page | 0.1 M | 0.81 s |
 
 DPDK 성능 가이드가 huge page를 강하게 권장하는 이유가 여기에 있습니다.
 

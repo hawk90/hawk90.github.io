@@ -21,19 +21,19 @@ tags: [rt-thread, source-analysis, components, smart, finsh]
 
 ## 배경
 
-```text
-RT-Thread:
-  2006   Bernard Xiong 개인 프로젝트로 시작
-  2015~  중국 기업·IoT 시장 확산
-  2020~  글로벌 진출 (Apache 2.0 정식 채택)
-  현재   300+ BSP, 1000+ packages
+| 시기 | 이벤트 |
+|---|---|
+| 2006 | Bernard Xiong 개인 프로젝트로 시작 |
+| 2015~ | 중국 기업·IoT 시장 확산 |
+| 2020~ | 글로벌 진출 (Apache 2.0 정식 채택) |
+| 현재 | 300+ BSP, 1000+ packages |
 
-채택 사례:
-  China Mobile OneNET (IoT 클라우드)
-  BYD·길리 자동차 일부 ECU
-  DJI 일부 모듈
-  WCH·GD32·HK32 등 중국 MCU 표준 RTOS
-```
+채택 사례
+
+- China Mobile OneNET (IoT 클라우드)
+- BYD·길리 자동차 일부 ECU
+- DJI 일부 모듈
+- WCH·GD32·HK32 등 중국 MCU 표준 RTOS
 
 중국 vendor MCU(GD32, HK32, N32, WCH CH32V 등)는 *RT-Thread BSP를 공식으로 제공*하는 경우가 많아 사실상 표준 RTOS로 자리잡았습니다.
 
@@ -240,14 +240,12 @@ MSH_CMD_EXPORT(hello, simple hello command);
 
 `RT-Thread Smart`(rt-smart)는 MMU를 활용한 변종입니다. *Linux 같은 process와 user mode*를 지원하면서 RT-Thread의 결정성을 유지합니다.
 
-```text
-RT-Thread Smart:
-  대상 하드웨어  Cortex-A·RISC-V S-mode, 256 MB+ RAM
-  특징         user/kernel 분리, fork·exec·shared library
-  적용         자동차 인포테인먼트, 산업 HMI, 디지털 사이니지
+RT-Thread Smart
 
-위치       Linux는 너무 무겁고 RTOS는 부족한 중간 영역
-```
+- **대상 하드웨어** — Cortex-A·RISC-V S-mode, 256 MB+ RAM
+- **특징** — user/kernel 분리, fork·exec·shared library
+- **적용** — 자동차 인포테인먼트, 산업 HMI, 디지털 사이니지
+- **위치** — Linux는 너무 무겁고 RTOS는 부족한 중간 영역
 
 자동차 인포테인먼트나 HMI에서 *Linux를 쓸 만큼의 자원은 없지만 동적 application 로딩이 필요한* 시나리오에 사용됩니다.
 

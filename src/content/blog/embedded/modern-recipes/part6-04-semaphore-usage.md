@@ -188,12 +188,13 @@ counting semaphore take (count>0)  1.1 µs
 
 Notification이 semaphore보다 약 두 배 빠릅니다. 1:1 신호라면 거의 항상 notification이 더 낫습니다.
 
-```text
-RAM 사용량
-binary semaphore (dynamic)      80 B
-binary semaphore (static)       80 B (heap 0)
-task notification               4 B (TCB 내장)
-```
+RAM 사용량:
+
+| 종류 | 크기 |
+|------|------|
+| binary semaphore (dynamic) | 80 B |
+| binary semaphore (static) | 80 B (heap 0) |
+| task notification | 4 B (TCB 내장) |
 
 자원이 빠듯한 MCU에서는 notification으로 모아 두면 RAM이 분명히 줄어듭니다.
 

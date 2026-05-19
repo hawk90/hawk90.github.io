@@ -126,13 +126,13 @@ handler.c:78:6:compute       512  static
 
 call graph를 따라 *worst path*를 합산합니다.
 
-```text
-task_entry(128) → process(256) → compute(512) = 896 byte
-+ ISR worst case path                          : 192 byte
-+ context switch overhead                      : 64  byte
-+ safety margin (25%)                          : 288 byte
-total                                          ≈ 1440 byte → 2048
-```
+| 항목 | Byte |
+|---|---|
+| `task_entry(128) → process(256) → compute(512)` | 896 |
+| ISR worst case path | +192 |
+| context switch overhead | +64 |
+| safety margin (25%) | +288 |
+| **total** | ≈ 1440 → 2048 |
 
 수동으로 트리를 따라가는 것이 번거롭다면 *Memfault puncover* 같은 도구가 자동화해 줍니다. ELF와 `.su` 파일을 입력으로 받아 *call graph + stack 합산*을 보여 줍니다.
 
@@ -207,15 +207,16 @@ Cortex-M은 *MSP*(Main Stack Pointer, ISR용)와 *PSP*(Process Stack Pointer, ta
 
 [2-05편](/blog/embedded/rtos/practical-internals/part2-05-cortex-m-context)에서 본 것처럼 task는 PSP, ISR은 MSP를 씁니다. MSP 크기는 *모든 nested ISR worst case*를 합산해 정합니다.
 
-```text
-MSP 분석:
-  outer ISR worst       : 128 byte
-  + nested ISR worst    : 64  byte
-  + nested ISR worst    : 64  byte
-  + context switch frame: 64  byte
-  + margin (25%)        : 80  byte
-  MSP size              : 400 byte → 512
-```
+MSP 분석
+
+| 항목 | Byte |
+|---|---|
+| outer ISR worst | 128 |
+| nested ISR worst | +64 |
+| nested ISR worst | +64 |
+| context switch frame | +64 |
+| margin (25%) | +80 |
+| **MSP size** | 400 → 512 |
 
 MSP 크기는 linker script의 `_estack` 심볼로 정합니다. MSP overflow는 *PSP 검사로는 잡히지 않습니다*. 별도로 *MSP base 부근에 canary*를 두어 부팅 후 주기적으로 검사하는 패턴이 안전합니다.
 
@@ -257,20 +258,20 @@ embedded에서는 *`tinyprintf` / `mini-printf` / `embedded-printf`* 같은 *작
 
 safety-critical 도메인은 stack 분석을 *증명*해야 합니다.
 
-```text
-ASIL-D / DO-178C Level A:
-  - 모든 함수의 stack 사용량 *정적 분석*
-  - worst path 산출 및 문서화
-  - canary + MPU 둘 다 활성화
-  - 운영 중 watermark monitoring
-  - recursion 금지
+ASIL-D / DO-178C Level A
 
-KSLV-II 누리호 비행 컴퓨터:
-  - stack size *고정* + 50% margin
-  - 매 task 종료 시 watermark check
-  - telemetry로 ground에 전송
-  - canary 깨짐 시 즉시 redundant unit 전환
-```
+- 모든 함수의 stack 사용량 *정적 분석*
+- worst path 산출 및 문서화
+- canary + MPU 둘 다 활성화
+- 운영 중 watermark monitoring
+- recursion 금지
+
+KSLV-II 누리호 비행 컴퓨터
+
+- stack size *고정* + 50% margin
+- 매 task 종료 시 watermark check
+- telemetry로 ground에 전송
+- canary 깨짐 시 즉시 redundant unit 전환
 
 3중 4중 방어가 *과하다고 느껴질 정도*로 겹쳐 있습니다. 한 층의 실패가 *다른 층으로 흡수*되어야 *시스템 신뢰성*이 만들어집니다.
 

@@ -164,22 +164,22 @@ void shutdown_module(void) {
 
 ## 측정 / 성능 비교
 
-```text
-연산                              시간 (Cortex-M4 72 MHz)
-xTimerStart                       2.1 µs (queue로 명령 전달)
-SW timer callback latency         tick + 2 µs (보통 1 ms tick에 1 ms 지연)
-HW timer ISR                      0.4 µs (직접 ISR 진입)
-timer task per-tick overhead      0.6 µs (active timer 4개)
-```
+| 연산 | 시간 (Cortex-M4 72 MHz) |
+|------|--------------------------|
+| `xTimerStart` | 2.1 µs (queue로 명령 전달) |
+| SW timer callback latency | tick + 2 µs (보통 1 ms tick에 1 ms 지연) |
+| HW timer ISR | 0.4 µs (직접 ISR 진입) |
+| timer task per-tick overhead | 0.6 µs (active timer 4개) |
 
 SW timer는 tick 정밀입니다. 1 ms tick에서는 callback이 0~1 ms 늦게 호출될 수 있습니다.
 
-```text
-RAM 사용량
-SW timer 1개                      66 B
-HW timer                          0 B (peripheral 사용)
-timer task stack                  256 B (default)
-```
+RAM 사용량:
+
+| 종류 | 크기 |
+|------|------|
+| SW timer 1개 | 66 B |
+| HW timer | 0 B (peripheral 사용) |
+| timer task stack | 256 B (default) |
 
 Timer task 자체가 항상 살아있으니 RTOS 도입 시 256 B 정도가 기본으로 소비됩니다.
 
