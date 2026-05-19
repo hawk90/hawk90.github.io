@@ -95,6 +95,8 @@ _sidata = LOADADDR(.data); /* Flash 위치 */
 
 Reset_Handler에서 Flash의 `_sidata`에서 RAM의 `_sdata`로 복사합니다(Part 1-06 참조).
 
+> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter03-cortex-m-linker-memory)
+
 ## C++가 추가하는 섹션
 
 C 코드 빌드와 다른 C++ 특유의 섹션들입니다.

@@ -173,6 +173,8 @@ vPortSVCHandler:
 
 마지막 두 줄이 핵심입니다. LR에 0xFFFFFFFD를 만들어 두고 `bx r14`로 return 하면 HW가 *PSP를 사용하는 thread mode*로 떨어뜨립니다. 그 즉시 PC는 task 함수의 첫 명령을 가리키고 있습니다.
 
+> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter02-cortex-m-reset)
+
 ## SysTick — Time slice trigger
 
 매 tick마다 SysTick ISR이 호출됩니다. tick count를 늘리고, preempt가 필요하면 PendSV를 trigger합니다.

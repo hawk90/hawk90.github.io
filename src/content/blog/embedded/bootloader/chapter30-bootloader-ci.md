@@ -5,7 +5,7 @@ description: "여러 보드의 U-Boot/TF-A를 PR마다 빌드하고, QEMU·real 
 series: "Bootloader Internals"
 seriesOrder: 30
 tags: [embedded, bootloader, ci-cd, qemu, build-matrix]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약
@@ -243,12 +243,8 @@ fi
 ```bash
 #!/usr/bin/env bash
 # test.sh — bisect가 호출할 stub
-set -euo pipefail
-
-cd u-boot
-make qemu_arm64_defconfig >/dev/null
+cd u-boot && make qemu_arm64_defconfig >/dev/null
 make -j$(nproc) >/dev/null 2>&1 || exit 125  # build fail = skip
-
 ../scripts/qemu-boot-test.sh u-boot.bin || exit 1  # boot fail = bad
 exit 0  # boot ok = good
 ```
@@ -259,12 +255,11 @@ exit 0  # boot ok = good
 $ git bisect start && git bisect bad HEAD && git bisect good v2024.04
 $ git bisect run ./test.sh
 Bisecting: 187 revisions left to test after this (roughly 8 steps)
-... (8회 빌드·boot test 자동 반복)
 e7a9c1f0d is the first bad commit
     arm: Refactor MMU table generation
 ```
 
-8 단계면 *256 commit 범위*를 한 시간 안에 좁힙니다. self-hosted runner pool이 충분하면 *밤사이 자동 bisect*가 흔한 운영 패턴입니다. CI artifact를 보관할 때 *모든 commit의 ELF*를 두면 bisect를 *재빌드 없이* 돌릴 수도 있지만 retention 정책과 짝지어야 합니다.
+8 단계면 *256 commit 범위*를 한 시간 안에 좁힙니다. self-hosted runner pool이 충분하면 *밤사이 자동 bisect*가 흔한 운영 패턴입니다.
 
 ## artifact 아카이브
 
@@ -351,19 +346,17 @@ LAVA를 직접 통합하려면 *부트로더 빌드 → S3 업로드 → LAVA su
 
 ## 시리즈 마무리
 
-30장을 통해 부트로더가 *POR 직후의 죽은 CPU*에서 *Linux user space*까지 다리를 놓는 전 과정을 따라왔습니다. BootROM의 결정, SPL의 SRAM 안 좁은 공간, DDR training의 까다로움, U-Boot Proper의 driver model, ARMv8-A의 BL31·BL33 분업, secure boot의 chain of trust, A/B fallback의 *부팅을 끊어내지 않는* 설계, 그리고 마지막으로 그 모든 코드가 *PR마다 검증되는* CI까지.
+30장을 통해 부트로더가 *POR 직후의 죽은 CPU*에서 *Linux user space*까지 다리를 놓는 전 과정을 따라왔습니다. BootROM의 결정, SPL의 SRAM 안 좁은 공간, DDR training, U-Boot Proper의 driver model, ARMv8-A의 BL31·BL33 분업, secure boot의 chain of trust, A/B fallback의 *부팅을 끊어내지 않는* 설계, 그리고 그 모든 코드가 *PR마다 검증되는* CI까지가 한 줄로 이어집니다.
 
 부트로더는 *눈에 띄지 않는 시스템*입니다. 잘 만들어진 부트로더는 *0.5초 만에 사라지고* 사용자가 의식하지 않습니다. 잘못 만들어진 부트로더는 *제품을 brick으로 바꾸어* 라인 전체를 멈춥니다. 그 무게의 비대칭이 이 시리즈를 쓴 이유였습니다.
 
-다음 시리즈로 이어가고 싶은 방향이 셋 있습니다. 부트로더 다음에 *Linux kernel이 어떻게 시작*하는지를 따라가는 **Linux Kernel Internals**, 부트로더와 커널과 rootfs를 *한 product*로 묶어내는 **BSP Engineering**, 그리고 *대량 양산용 image 빌드 파이프라인*인 **Buildroot Practical**입니다.
+다음 시리즈로 이어가고 싶은 방향이 셋 있습니다.
 
 | 추천 시리즈 | 다루는 범위 | 부트로더와의 연결 |
 |---|---|---|
 | [Linux Kernel Internals](/blog/systems/linux-kernel) | head.S → start_kernel → init | 커널 진입 ABI 이후의 흐름 |
 | [BSP Engineering](/blog/embedded/bsp) | U-Boot 포팅·driver·DTS·image | 새 보드 전체 stack 통합 |
 | [Buildroot Practical](/blog/embedded/buildroot) | rootfs 빌드·OTA·SDK | image pipeline 자동화 |
-
-각 시리즈가 부트로더와 *한 면씩 맞붙어* 있어 자연스러운 확장이 됩니다.
 
 ## 정리
 

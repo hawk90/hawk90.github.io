@@ -144,6 +144,8 @@ extern "C" void Reset_Handler(void) {
 
 1, 2번이 안 끝난 상태에서 C++ 객체를 만지면 위험합니다. `.bss`가 0이 아닐 수 있고 `.data`가 random일 수 있습니다.
 
+> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter02-cortex-m-reset)
+
 ## `__libc_init_array` — C++ static 생성자 호출
 
 GCC와 newlib이 제공하는 함수입니다. 세 개의 섹션을 차례로 호출합니다.
