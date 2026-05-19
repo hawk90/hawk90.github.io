@@ -34,7 +34,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "22"
-          cache: npm
 
       - name: Cache node_modules
         id: node-cache
@@ -47,9 +46,22 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .astro
-          key: ${{ runner.os }}-astro-${{ hashFiles('src/content/**', 'astro.config.mjs', 'src/content.config.ts') }}
+          key: ${{ runner.os }}-astro-${{ hashFiles('astro.config.mjs', 'src/content.config.ts') }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-astro-${{ hashFiles('astro.config.mjs', 'src/content.config.ts') }}-
             ${{ runner.os }}-astro-
+
+      - name: Cache OG images
+        uses: actions/cache@v5
+        with:
+          path: |
+            public/og
+            public/og-default.png
+            .cache/og-manifest.json
+          key: ${{ runner.os }}-og-${{ hashFiles('src/lib/og-themes.data.mjs', 'scripts/build-og.mjs') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-og-${{ hashFiles('src/lib/og-themes.data.mjs', 'scripts/build-og.mjs') }}-
+            ${{ runner.os }}-og-
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
@@ -62,6 +74,7 @@ jobs:
         run: npm run build
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+          ASTRO_TELEMETRY_DISABLED: "1"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
