@@ -14,59 +14,60 @@ draft: true
 
 ## FCC 일반 구성
 
-```text
-FCC (Flight Control Computer):
-  Main CPU       — ARM Cortex-A·R 또는 RAD750 (PowerPC)
-  DSP            — Sensor filtering·FFT·convolution
-  FPGA           — Timing-critical I/O·CRC·DMA
-  Memory         — Rad-hard SRAM/MRAM
-  Storage        — Flash·MRAM
-  Backplane      — CompactPCI·VPX·SpaceWire
-  Power          — ±5V·±15V regulators
-  Interfaces     — MIL-STD-1553, CAN, ARINC-429, Ethernet
-```
+FCC (Flight Control Computer) 구성 요소
+
+- **Main CPU** — ARM Cortex-A·R 또는 RAD750 (PowerPC)
+- **DSP** — Sensor filtering·FFT·convolution
+- **FPGA** — Timing-critical I/O·CRC·DMA
+- **Memory** — Rad-hard SRAM/MRAM
+- **Storage** — Flash·MRAM
+- **Backplane** — CompactPCI·VPX·SpaceWire
+- **Power** — ±5V·±15V regulators
+- **Interfaces** — MIL-STD-1553, CAN, ARINC-429, Ethernet
 
 각 component — *최적 작업*에 분담.
 
 ## ARM Cortex 적용
 
-```text
-Cortex-A53:
-  Mission management
-  Telemetry encoding
-  Network·protocol
-  ~수십 MHz~수 GHz
+Cortex-A53
 
-Cortex-R52 (lock-step):
-  Safety-critical control
-  Hard real-time loop
-  DCLS (Dual-Core Lock Step)
-  자동차 ASIL-D 표준
-  
-Cortex-M7:
-  Sensor I/O
-  Mid-level real-time
-  Low-power option
-```
+- Mission management
+- Telemetry encoding
+- Network·protocol
+- ~수십 MHz~수 GHz
+
+Cortex-R52 (lock-step)
+
+- Safety-critical control
+- Hard real-time loop
+- DCLS (Dual-Core Lock Step)
+- 자동차 ASIL-D 표준
+
+Cortex-M7
+
+- Sensor I/O
+- Mid-level real-time
+- Low-power option
 
 LV — *R52 또는 M7* 가장 흔함. *A53*은 mission computer.
 
 ## DSP 적용
 
-```text
-TI C6000·C2000:
-  Sensor processing
-  Digital filter (FIR·IIR)
-  FFT (vibration analysis)
-  Sensor fusion (Kalman)
-  
-ADI SHARC:
-  Audio·high-precision math
-  Low-latency control
-  
-Custom DSP IP (FPGA 내장):
-  Vendor-specific
-```
+TI C6000·C2000
+
+- Sensor processing
+- Digital filter (FIR·IIR)
+- FFT (vibration analysis)
+- Sensor fusion (Kalman)
+
+ADI SHARC
+
+- Audio·high-precision math
+- Low-latency control
+
+Custom DSP IP (FPGA 내장)
+
+- Vendor-specific
 
 ARM NEON으로도 가능 — DSP는 *전용 power efficient*.
 

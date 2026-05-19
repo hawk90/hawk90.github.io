@@ -14,37 +14,36 @@ draft: true
 
 ## DAL별 Coverage 요구
 
-```text
-Level A — MC/DC + Decision + Statement
-Level B — Decision + Statement
-Level C — Statement
-Level D — None (requirements-based test only)
-Level E — None
-```
+| Level | Coverage |
+|---|---|
+| A | MC/DC + Decision + Statement |
+| B | Decision + Statement |
+| C | Statement |
+| D | None (requirements-based test only) |
+| E | None |
 
 DAL이 *상승할수록* coverage rigor 증가.
 
 ## Statement Coverage
 
-```text
-정의:
-  각 *statement*가 1번 이상 실행
-  
-예:
-  void f(int x) {
-    int y = 0;           // S1
-    if (x > 0) {
-      y = 1;             // S2
-    }
-    printf("y=%d", y);   // S3
+**정의** — 각 *statement*가 1번 이상 실행.
+
+```c
+void f(int x) {
+  int y = 0;           // S1
+  if (x > 0) {
+    y = 1;             // S2
   }
-  
-Test:
-  x=5 → S1·S2·S3 실행 (S1·S2·S3 covered)
-  x=-1 → S1·S3 실행 (S1·S3 covered)
-  
-Required: 2 test cases (모든 statement reached)
+  printf("y=%d", y);   // S3
+}
 ```
+
+**Test**:
+
+- x=5 → S1·S2·S3 실행 (S1·S2·S3 covered)
+- x=-1 → S1·S3 실행 (S1·S3 covered)
+
+**Required**: 2 test cases (모든 statement reached).
 
 가장 약한 coverage. *false sense of safety*.
 
@@ -64,26 +63,24 @@ int divide(int a, int b) {
 
 ## Decision Coverage
 
-```text
-정의:
-  각 *decision* (if·while·for·case)이 
-  true·false 양쪽으로 *최소 1번씩*
-  
-예:
-  void g(int x) {
-    if (x > 0) {        // decision
-      printf("pos");
-    } else {
-      printf("neg");
-    }
+**정의** — 각 *decision* (if·while·for·case)이 true·false 양쪽으로 *최소 1번씩*.
+
+```c
+void g(int x) {
+  if (x > 0) {        // decision
+    printf("pos");
+  } else {
+    printf("neg");
   }
-  
-Test:
-  x=5 → decision=true (true case)
-  x=-1 → decision=false (false case)
-  
-Required: 2 test cases (모든 decision true·false)
+}
 ```
+
+**Test**:
+
+- x=5 → decision=true (true case)
+- x=-1 → decision=false (false case)
+
+**Required**: 2 test cases (모든 decision true·false).
 
 Statement보다 *강함*. Level B 요구.
 

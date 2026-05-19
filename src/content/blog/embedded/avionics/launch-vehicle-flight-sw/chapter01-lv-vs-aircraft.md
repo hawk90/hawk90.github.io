@@ -14,17 +14,11 @@ draft: true
 
 ## 시간 스케일
 
-```text
-항공기 (B787·A350):
-  Mission 시간: 수 시간 ~ 수십 시간
-  운용 수명: 25-30년 (3만 사이클)
-  Daily availability: 99%+
-
-발사체 (Falcon 9·누리·SLS):
-  Mission 시간: 8-30분
-  운용 수명: 1회 (또는 Falcon 9 ~20회 재사용)
-  Daily: launch 1회/대
-```
+| 항목 | 항공기 (B787·A350) | 발사체 (Falcon 9·누리·SLS) |
+|---|---|---|
+| Mission 시간 | 수 시간 ~ 수십 시간 | 8-30분 |
+| 운용 수명 | 25-30년 (3만 사이클) | 1회 (Falcon 9는 ~20회 재사용) |
+| Daily availability | 99%+ | launch 1회/대 |
 
 항공기 SW = 수십 년 유지보수. LV SW = 짧고 정확 1회.
 
@@ -43,19 +37,19 @@ LV가 훨씬 가혹하지만 시간은 짧음.
 
 ## 이중화 패턴
 
-```text
-항공기:
-  Pilot + Co-pilot (human redundancy)
-  TMR FCC
-  Dispatch reliability (ground crew)
+항공기
 
-발사체:
-  완전 자율
-  Pilot 없음
-  Range Safety Officer (FTS)
-  TMR + voting 또는 lock-step
-  Sensor fusion
-```
+- Pilot + Co-pilot (human redundancy)
+- TMR FCC
+- Dispatch reliability (ground crew)
+
+발사체
+
+- 완전 자율
+- Pilot 없음
+- Range Safety Officer (FTS)
+- TMR + voting 또는 lock-step
+- Sensor fusion
 
 LV는 *autonomous decision* — 모든 fault detection·recovery가 비행 중.
 
@@ -76,29 +70,24 @@ LV는 NASA·ESA·각국 표준 변형.
 
 ### 항공기 FMS
 
-```text
-Continuous control over hours
-Crew interaction (display·input)
-Long-term state (logs·trends)
-Maintenance interface
-Database (nav·airport)
-```
+- Continuous control over hours
+- Crew interaction (display·input)
+- Long-term state (logs·trends)
+- Maintenance interface
+- Database (nav·airport)
 
 ### LV FCC
 
-```text
-Mission timeline pre-programmed
-Autonomous response only
-Real-time control (TVC, RCS)
-Telemetry downlink (not interactive)
-Single mission state machine
-```
+- Mission timeline pre-programmed
+- Autonomous response only
+- Real-time control (TVC, RCS)
+- Telemetry downlink (not interactive)
+- Single mission state machine
 
 LV — state machine 단순. 짧고 명확.
 
 ## Mission Phase 예
 
-```text
 1. T-3 hr: 연료 충전, GSE 점검
 2. T-10 min: ground sequence
 3. T-0: 점화 + 발사
@@ -108,79 +97,71 @@ LV — state machine 단순. 짧고 명확.
 7. T+3 min: 2단 점화
 8. T+8 min: 위성 분리
 9. T+30 min: 궤도 진입 확인
-```
 
 각 phase = 별도 SW state, sensor·actuator·제어법칙 다름.
 
 ## Real-Time 요구
 
-```text
-TVC (Thrust Vector Control):
-  1-10 kHz control loop
-  Sub-ms latency
-  Hard real-time deadline
+TVC (Thrust Vector Control)
 
-Sensor fusion:
-  IMU 1 kHz
-  GPS 10 Hz
-  Star tracker: 1 Hz
+- 1-10 kHz control loop
+- Sub-ms latency
+- Hard real-time deadline
 
-Mission event timing:
-  Stage separation: ±10 ms
-  Engine cutoff: ±10 ms
-```
+Sensor fusion
+
+- IMU 1 kHz
+- GPS 10 Hz
+- Star tracker: 1 Hz
+
+Mission event timing
+
+- Stage separation: ±10 ms
+- Engine cutoff: ±10 ms
 
 µs 단위 RT — 결정성 절대 요구.
 
 ## 재사용 — Falcon 9·Starship
 
-```text
-Falcon 9 reuse:
-  Booster return (boostback·entry·landing)
-  Refurbishment cycle
-  → 항공기 일부 요구 (long-run)
+Falcon 9 reuse
 
-새 SW 요구:
-  Reentry guidance
-  Grid fin control
-  Landing burn
-  Fault recovery for reuse
-```
+- Booster return (boostback·entry·landing)
+- Refurbishment cycle
+- 항공기 일부 요구 (long-run)
+
+새 SW 요구
+
+- Reentry guidance
+- Grid fin control
+- Landing burn
+- Fault recovery for reuse
 
 재사용은 항공기·LV의 hybrid — SpaceX가 redefining.
 
 ## Korean LV — KSLV-II 누리
 
-```text
-누리:
-  3-stage liquid (75톤·7톤·7톤 엔진)
-  Mission duration: 16분
-  Payload: 1500 kg to 700 km LEO
+누리
 
-Flight SW:
-  KARI 자체 개발
-  RTEMS·VxWorks
-  TMR FCC
-  CCSDS telemetry
+- 3-stage liquid (75톤·7톤·7톤 엔진)
+- Mission duration: 16분
+- Payload: 1500 kg to 700 km LEO
 
-2022·2023·2025 발사 성공
-```
+Flight SW
 
-KARI·한화에어로스페이스 협력.
+- KARI 자체 개발
+- RTEMS·VxWorks
+- TMR FCC
+- CCSDS telemetry
+
+2022·2023·2025 발사 성공. KARI·한화에어로스페이스 협력.
 
 ## SW 비용·규모
 
-```text
-항공기 FCC SW:
-  ~5-10M LoC
-  10년+ 개발
-  $1B+ certification
-
-LV Flight SW:
-  ~100K - 1M LoC
-  3-5년 개발
-  $100M - $1B
-```
+| 항목 | 항공기 FCC SW | LV Flight SW |
+|---|---|---|
+| 규모 | ~5-10M LoC | ~100K - 1M LoC |
+| 개발 기간 | 10년+ | 3-5년 |
+| 인증 비용 | $1B+ | $100M - $1B |
 
 LV는 훨씬 작지만 결정성·검증은 동등 이상.
 

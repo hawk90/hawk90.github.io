@@ -297,32 +297,33 @@ Coverage = *quality metric*. Plan에 *target 명시*.
 
 ## Test Tools
 
-```text
-Unit test:
-  - Vector CAST (TQL-1 qualified)
-  - LDRA TBrun
-  - Cantata++
-  - Google Test (자체 qualification)
-  
-Integration·system test:
-  - dSPACE — HIL
-  - National Instruments VeriStand
-  - Vector CANoe — bus test
-  - Mathworks Simulink Test
-  - Python·custom framework
-  
-Robustness·fault injection:
-  - dSPACE fault injection
-  - 자체 hook + simulator
-```
+**Unit test**:
+
+- Vector CAST (TQL-1 qualified)
+- LDRA TBrun
+- Cantata++
+- Google Test (자체 qualification)
+
+**Integration·system test**:
+
+- dSPACE — HIL
+- National Instruments VeriStand
+- Vector CANoe — bus test
+- Mathworks Simulink Test
+- Python·custom framework
+
+**Robustness·fault injection**:
+
+- dSPACE fault injection
+- 자체 hook + simulator
 
 각 tool — *DO-330 qualification* 필요.
 
 ## Trace Matrix — 양방향
 
-```text
 Trace 요구 (DO-178C 핵심):
 
+```text
 System Requirement (SyR)
   ↑↓
 HLR (High-Level Requirement)
@@ -334,123 +335,111 @@ Code
 Test Case
   ↑↓
 Test Result
-
-각 link — 양방향 trace 가능해야
-
-Tools:
-  - IBM DOORS (de facto)
-  - Polarion
-  - Jama
-  - 자체 DB + Excel
 ```
+
+각 link — 양방향 trace 가능해야 한다.
+
+**Tools**:
+
+- IBM DOORS (de facto)
+- Polarion
+- Jama
+- 자체 DB + Excel
 
 미흡한 trace — *audit 시 직접 fail 원인*.
 
 ## Verification Results — Document
 
-```text
-SVR (Software Verification Results):
-  Test summary
-  Pass·fail 통계
-  Coverage achieved
-  Anomaly 분석
-  Re-test history
-  
-SAS (Software Accomplishment Summary):
-  Final document — FAA·EASA 제출
-  All evidence 요약
-  Compliance to PSAC
-  Outstanding issues
-```
+**SVR (Software Verification Results)**:
+
+- Test summary
+- Pass·fail 통계
+- Coverage achieved
+- Anomaly 분석
+- Re-test history
+
+**SAS (Software Accomplishment Summary)**:
+
+- Final document — FAA·EASA 제출
+- All evidence 요약
+- Compliance to PSAC
+- Outstanding issues
 
 SVR + SAS — *certification artifacts*. Ch 14 자세히.
 
 ## Re-verification
 
-```text
-Code change → re-verification:
-  - Same test re-run
-  - Coverage re-check
-  - Analysis re-run
-  - Review re-do
-  
-Regression strategy:
-  Full re-run 또는 impact analysis
-  Trace matrix 활용
-  
-DO-178C 권장:
-  Sufficient regression test
-  Modification 영향 분석 + adequate test
-```
+Code change → re-verification.
+
+- Same test re-run
+- Coverage re-check
+- Analysis re-run
+- Review re-do
+
+**Regression strategy** — Full re-run 또는 impact analysis. Trace matrix 활용.
+
+**DO-178C 권장** — Sufficient regression test. Modification 영향 분석 + adequate test.
 
 Code change minor라도 *충분 regression* 권장.
 
 ## Automation
 
-```text
-CI·CD for safety-critical:
-  Build automation (CMake·Make)
-  Unit test automation
-  Coverage automation
-  Static analysis automation
-  Report generation
-  
-Tools:
-  - Jenkins·GitLab CI·Bamboo
-  - 자체 + Python
-  
-주의:
-  Tool 자체 qualification (DO-330)
-  Build·test reproducibility
-  Audit trail
-  Tool version control
-```
+**CI·CD for safety-critical**:
+
+- Build automation (CMake·Make)
+- Unit test automation
+- Coverage automation
+- Static analysis automation
+- Report generation
+
+**Tools**:
+
+- Jenkins·GitLab CI·Bamboo
+- 자체 + Python
+
+**주의**:
+
+- Tool 자체 qualification (DO-330)
+- Build·test reproducibility
+- Audit trail
+- Tool version control
 
 Automation — *발전 추세*. 단 qualification 부담.
 
 ## Korean Verification — 방사청·IV&V
 
-```text
-방사청 SW 신뢰성시험:
-  보통 IV&V 회사 contract
-  표준화시험원·신뢰성 시험원·중소 IV&V 회사
-  
-IV&V 활동:
-  Requirements review
-  Design review
-  Code review
-  Test cases·procedures review
-  Test execution
-  Coverage·analysis 결과 verify
-  Final report
-  
-한국 특수:
-  방사청·국방기술품질원 (DTAQ) 표준 따름
-  방사청 directive 적용
-```
+**방사청 SW 신뢰성시험** — 보통 IV&V 회사 contract. 표준화시험원·신뢰성 시험원·중소 IV&V 회사.
+
+**IV&V 활동**:
+
+- Requirements review
+- Design review
+- Code review
+- Test cases·procedures review
+- Test execution
+- Coverage·analysis 결과 verify
+- Final report
+
+**한국 특수** — 방사청·국방기술품질원 (DTAQ) 표준 따름. 방사청 directive 적용.
 
 IV&V — 방사청 *권고 또는 필수*. 한국 방산 표준.
 
 ## Verification Effort
 
-```text
 SW Development effort distribution (typical):
 
-Plans·Standards     5%
-Requirements        10%
-Design              10%
-Code                15%
-Verification        50% ← 최대
-Configuration·QA    10%
+| Phase | Effort |
+|---|---|
+| Plans·Standards | 5% |
+| Requirements | 10% |
+| Design | 10% |
+| Code | 15% |
+| **Verification** | **50% ← 최대** |
+| Configuration·QA | 10% |
 
-Level A·B 인증:
-  Verification effort가 *development 보다 더 큼*
-  
-DO-178C "expensive" 이유:
-  Verification rigor
-  Documentation
-  Tool qualification
-```
+**Level A·B 인증** — Verification effort가 *development 보다 더 큼*.
+
+**DO-178C "expensive" 이유** — Verification rigor, Documentation, Tool qualification.
 
 Cost 50% — *verification에 투입*. Plan·budget 시 고려.
 
@@ -458,39 +447,25 @@ Cost 50% — *verification에 투입*. Plan·budget 시 고려.
 
 > ⚠️ Coverage만 챙기고 *requirement-based test 부족*
 
-```text
-"100% coverage 달성"
-→ Coverage는 *어디 실행*만, *왜·언제* 아님
-→ HLR·LLR이 명시 test 없으면 fail
-```
+"100% coverage 달성" → Coverage는 *어디 실행*만, *왜·언제* 아님 → HLR·LLR이 명시 test 없으면 fail.
 
 → *requirement → test 양방향 trace*.
 
 > ⚠️ Robustness test skip
 
-```text
-Normal case 100% → robustness 미실시
-→ Edge case·boundary·fault 미검증
-→ 실제 비행 시 corner case crash
-```
+Normal case 100% → robustness 미실시 → Edge case·boundary·fault 미검증 → 실제 비행 시 corner case crash.
 
 → *robustness test 필수*.
 
 > ⚠️ Re-verification 누락
 
-```text
-Bug fix → 해당 test만 재실행
-→ Side effect catch 못함
-```
+Bug fix → 해당 test만 재실행 → Side effect catch 못함.
 
 → *impact analysis + regression test*.
 
 > ⚠️ Manual review skip
 
-```text
-"Static analyzer pass → 충분"
-→ Algorithmic·semantic 결함 catch 불가
-```
+"Static analyzer pass → 충분" → Algorithmic·semantic 결함 catch 불가.
 
 → *manual review 필수*.
 

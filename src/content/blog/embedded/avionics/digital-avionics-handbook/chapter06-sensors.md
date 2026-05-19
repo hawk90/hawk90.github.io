@@ -14,264 +14,244 @@ draft: true
 
 ## Avionics Sensor 분류
 
-```text
-관성 (Inertial):
-  Accelerometer (linear acceleration)
-  Gyroscope (angular rate)
-  Magnetometer (Earth magnetic field)
-  → IMU (Inertial Measurement Unit) — 통합 package
+**관성 (Inertial):**
+- Accelerometer (linear acceleration)
+- Gyroscope (angular rate)
+- Magnetometer (Earth magnetic field)
+- IMU (Inertial Measurement Unit) — 통합 package
 
-항법 (Navigation):
-  GPS·GNSS receiver (position)
-  Star tracker (orientation)
-  Earth horizon sensor
-  Sun sensor (rough orientation)
-  Radio altimeter
+**항법 (Navigation):**
+- GPS·GNSS receiver (position)
+- Star tracker (orientation)
+- Earth horizon sensor
+- Sun sensor (rough orientation)
+- Radio altimeter
 
-대기·환경 (Air data):
-  Static pressure (altitude)
-  Dynamic pressure (airspeed)
-  Temperature
-  Angle of attack (AOA)
-  Sideslip angle (β)
+**대기·환경 (Air data):**
+- Static pressure (altitude)
+- Dynamic pressure (airspeed)
+- Temperature
+- Angle of attack (AOA)
+- Sideslip angle (β)
 
-기타:
-  Engine sensors (RPM·temperature·pressure)
-  Fuel level·flow
-  Strain gauge
-  Vibration·shock
-  Radiation·dose
-```
+**기타:**
+- Engine sensors (RPM·temperature·pressure)
+- Fuel level·flow
+- Strain gauge
+- Vibration·shock
+- Radiation·dose
 
 각 sensor — *physical phenomenon → digital*.
 
 ## IMU 구성
 
-```text
-6-DOF IMU (Inertial Measurement Unit):
-  3-axis accelerometer
-    Measure: linear acceleration (m/s²)
-    Earth gravity 포함
-    
-  3-axis gyroscope
-    Measure: angular rate (rad/s 또는 deg/s)
-    
-9-DOF IMU:
-  + 3-axis magnetometer
-    Measure: Earth magnetic field (Gauss)
+**6-DOF IMU (Inertial Measurement Unit):**
 
-Output rate:
-  1~10 kHz typical
-  Avionics — 100~1000 Hz
-  
-Grade:
-  Tactical (low-cost)
-  Industrial
-  Tactical+
-  Strategic
-  Navigation grade
-```
+3-axis accelerometer:
+- Measure: linear acceleration (m/s²)
+- Earth gravity 포함
+
+3-axis gyroscope:
+- Measure: angular rate (rad/s 또는 deg/s)
+
+**9-DOF IMU:** + 3-axis magnetometer
+- Measure: Earth magnetic field (Gauss)
+
+**Output rate:**
+- 1~10 kHz typical
+- Avionics — 100~1000 Hz
+
+**Grade:**
+- Tactical (low-cost)
+- Industrial
+- Tactical+
+- Strategic
+- Navigation grade
 
 LV·항공기 — *Navigation 또는 Strategic grade*. 정확도 1~3 NM/hr.
 
 ## Accelerometer — 원리
 
-```text
-원리:
-  Proof mass + spring·capacitor
-  Acceleration → force → displacement
-  Capacitance change → voltage
-  
-Types:
-  MEMS — 작고 저렴, 정확도 mid
-    예: Bosch BMI088, Analog Devices ADXL355
-  Pendulous force-rebalance — high-end
-    Honeywell QA series
-  Quartz vibrating beam — strategic
-    Honeywell QFLEX
-  
-Specs:
-  Bias stability — μg
-  Scale factor stability — ppm
-  Noise — μg/√Hz
-  Temperature compensation
-  
-Output:
-  Analog → ADC → digital
-  Or digital SPI/I2C
-```
+**원리:**
+- Proof mass + spring·capacitor
+- Acceleration → force → displacement
+- Capacitance change → voltage
+
+**Types:**
+- MEMS — 작고 저렴, 정확도 mid (Bosch BMI088, Analog Devices ADXL355)
+- Pendulous force-rebalance — high-end (Honeywell QA series)
+- Quartz vibrating beam — strategic (Honeywell QFLEX)
+
+**Specs:**
+- Bias stability — μg
+- Scale factor stability — ppm
+- Noise — μg/√Hz
+- Temperature compensation
+
+**Output:**
+- Analog → ADC → digital
+- Or digital SPI/I2C
 
 Accelerometer = *3축 force* 측정. Bias = 정지 시 출력.
 
 ## Gyroscope — 원리
 
-```text
-Types:
+**Types:**
 
-MEMS:
-  Vibrating mass (Coriolis effect)
-  Low cost, 1~100°/hr drift
-  Bosch, Analog Devices, STMicro
-  
-FOG (Fiber-Optic Gyro):
-  Light propagation in coil
-  Sagnac effect
-  Bias < 0.01°/hr (navigation grade)
-  Northrop Grumman, KVH
-  
-RLG (Ring Laser Gyro):
-  Laser in cavity
-  Sagnac
-  Bias < 0.001°/hr (strategic)
-  Honeywell GG1320
-  
-HRG (Hemispherical Resonator Gyro):
-  Vibrating quartz hemisphere
-  Bias < 0.001°/hr, very stable
-  Northrop Grumman SCALAR
-  
-LV·우주 trend:
-  FOG·HRG (예: KSLV-II)
-  RLG (legacy aircraft)
-  MEMS (UAV, small sat, augment)
-```
+**MEMS:**
+- Vibrating mass (Coriolis effect)
+- Low cost, 1~100°/hr drift
+- Bosch, Analog Devices, STMicro
+
+**FOG (Fiber-Optic Gyro):**
+- Light propagation in coil
+- Sagnac effect
+- Bias < 0.01°/hr (navigation grade)
+- Northrop Grumman, KVH
+
+**RLG (Ring Laser Gyro):**
+- Laser in cavity
+- Sagnac
+- Bias < 0.001°/hr (strategic)
+- Honeywell GG1320
+
+**HRG (Hemispherical Resonator Gyro):**
+- Vibrating quartz hemisphere
+- Bias < 0.001°/hr, very stable
+- Northrop Grumman SCALAR
+
+**LV·우주 trend:**
+- FOG·HRG (예: KSLV-II)
+- RLG (legacy aircraft)
+- MEMS (UAV, small sat, augment)
 
 각 gyro — *grade·cost·application*.
 
 ## IMU Error Model
 
-```text
-Measurement model:
-  ω_meas = ω_true + bias + scale_factor*ω + noise + ...
+**Measurement model:**
 
-주요 error:
+$$\omega_{\text{meas}} = \omega_{\text{true}} + \text{bias} + (\text{scale factor}) \cdot \omega + \text{noise} + \cdots$$
 
-Bias (drift):
-  Static — stable offset
-  Dynamic — slow change over time·temp
-  Random walk — sqrt(time) drift
+**주요 error:**
 
-Scale Factor:
-  Output/input ratio 오차
-  Temperature dependence
-  
-Misalignment:
-  Sensor axes vs body axes 각도 오차
-  
-Noise:
-  ARW (Angle Random Walk) — gyro noise
-  VRW (Velocity Random Walk) — accel noise
-  Bias instability — flicker
+**Bias (drift):**
+- Static — stable offset
+- Dynamic — slow change over time·temp
+- Random walk — sqrt(time) drift
 
-Cross-axis sensitivity:
-  X gyro가 Y rotation에 반응
+**Scale Factor:**
+- Output/input ratio 오차
+- Temperature dependence
+
+**Misalignment:** Sensor axes vs body axes 각도 오차.
+
+**Noise:**
+- ARW (Angle Random Walk) — gyro noise
+- VRW (Velocity Random Walk) — accel noise
+- Bias instability — flicker
+
+**Cross-axis sensitivity:** X gyro가 Y rotation에 반응.
 
 각 error — *calibration + filter*.
-```
 
 IMU = *imperfect*. Sensor fusion으로 완화.
 
 ## GPS·GNSS Receiver
 
-```text
-GNSS 시스템:
-  GPS (US) — 31 satellites
-  GLONASS (Russia) — 24
-  Galileo (EU) — 26
-  BeiDou (China) — 35+
-  QZSS (Japan, regional)
-  NavIC (India, regional)
-  
-Bands:
-  L1 — 1575.42 MHz (civil C/A code)
-  L2 — 1227.60 MHz (P(Y) code, dual freq)
-  L5 — 1176.45 MHz (modern, safety)
-  
-Output:
-  Position (lat·lon·alt)
-  Velocity (3D)
-  Time (UTC + offset)
-  Number of satellites
-  HDOP·VDOP·PDOP (accuracy)
-  Fix status (3D·2D·DGPS·RTK)
+**GNSS 시스템:**
 
-Update rate:
-  1·5·10·20 Hz typical
-  
-Accuracy:
-  Standalone C/A — 5~10 m
-  WAAS·EGNOS — 1~3 m
-  DGPS — sub-meter
-  RTK — cm
-  PPP — cm (long convergence)
-```
+| 시스템 | 국가 | 위성 수 |
+|--------|------|---------|
+| GPS | US | 31 |
+| GLONASS | Russia | 24 |
+| Galileo | EU | 26 |
+| BeiDou | China | 35+ |
+| QZSS | Japan | regional |
+| NavIC | India | regional |
+
+**Bands:**
+- L1 — 1575.42 MHz (civil C/A code)
+- L2 — 1227.60 MHz (P(Y) code, dual freq)
+- L5 — 1176.45 MHz (modern, safety)
+
+**Output:**
+- Position (lat·lon·alt)
+- Velocity (3D)
+- Time (UTC + offset)
+- Number of satellites
+- HDOP·VDOP·PDOP (accuracy)
+- Fix status (3D·2D·DGPS·RTK)
+
+**Update rate:** 1·5·10·20 Hz typical.
+
+**Accuracy:**
+- Standalone C/A — 5~10 m
+- WAAS·EGNOS — 1~3 m
+- DGPS — sub-meter
+- RTK — cm
+- PPP — cm (long convergence)
 
 GPS = position + velocity + *exact time*.
 
 ## GPS Receiver — Avionics
 
-```text
-TSO·인증 GPS:
-  TSO-C129 — non-precision approach
-  TSO-C145·146 — WAAS
-  
-Aerospace receiver:
-  Garmin GTN·GNS
-  Honeywell KGS·KLN
-  Rockwell Collins
-  Trimble (military)
-  
-LV·우주:
-  NovAtel OEM7·OEM6
-  Septentrio AsteRx
-  Spirent (simulator)
-  CSAC + GPS (high accuracy time)
-  
-Output protocol:
-  NMEA-0183 (standard, ASCII)
-  RTCM (correction)
-  UBX (u-blox, binary)
-  RXM (raw measurements)
-  
-Anti-jamming·spoofing:
-  Military M-code
-  CRPA (Controlled Reception Pattern Antenna)
-  Inertial integration (resist jamming)
-```
+**TSO·인증 GPS:**
+- TSO-C129 — non-precision approach
+- TSO-C145·146 — WAAS
+
+**Aerospace receiver:**
+- Garmin GTN·GNS
+- Honeywell KGS·KLN
+- Rockwell Collins
+- Trimble (military)
+
+**LV·우주:**
+- NovAtel OEM7·OEM6
+- Septentrio AsteRx
+- Spirent (simulator)
+- CSAC + GPS (high accuracy time)
+
+**Output protocol:**
+- NMEA-0183 (standard, ASCII)
+- RTCM (correction)
+- UBX (u-blox, binary)
+- RXM (raw measurements)
+
+**Anti-jamming·spoofing:**
+- Military M-code
+- CRPA (Controlled Reception Pattern Antenna)
+- Inertial integration (resist jamming)
 
 GPS — *모든 LV·aircraft 표준*. 단 jamming 취약.
 
 ## Pressure·Air Data
 
-```text
-Pitot-static system:
-  Pitot tube — dynamic pressure (airspeed)
-  Static port — static pressure (altitude)
-  Difference → IAS (Indicated Airspeed)
-  
-Static pressure → altitude:
-  Barometric formula
-  Sea level reference (QNH) 또는 standard (29.92 inHg)
-  
-Pressure sensor:
-  MEMS — 일반 항공기
-  Vibrating cylinder — high-end
-  Differential pressure transducer
-  
-LV·우주:
-  Cabin pressure (위성 cargo, crew capsule)
-  Tank pressure (LOX·LH2·hypergolic)
-  Engine combustion chamber pressure
-  
-Aircraft:
-  Air Data Computer (ADC)
-  Multiple redundant pitot
-  Heated pitot (icing 방지)
-  
-Famous accident:
-  AF447 (2009) — pitot icing → loss of airspeed
-  → 후속 — heated pitot 강화
-```
+**Pitot-static system:**
+- Pitot tube — dynamic pressure (airspeed)
+- Static port — static pressure (altitude)
+- Difference → IAS (Indicated Airspeed)
+
+**Static pressure → altitude:**
+- Barometric formula
+- Sea level reference (QNH) 또는 standard (29.92 inHg)
+
+**Pressure sensor:**
+- MEMS — 일반 항공기
+- Vibrating cylinder — high-end
+- Differential pressure transducer
+
+**LV·우주:**
+- Cabin pressure (위성 cargo, crew capsule)
+- Tank pressure (LOX·LH2·hypergolic)
+- Engine combustion chamber pressure
+
+**Aircraft:**
+- Air Data Computer (ADC)
+- Multiple redundant pitot
+- Heated pitot (icing 방지)
+
+**Famous accident:** AF447 (2009) — pitot icing → loss of airspeed. 후속 — heated pitot 강화.
 
 Air data — *항공기 핵심*. LV는 일부만.
 
