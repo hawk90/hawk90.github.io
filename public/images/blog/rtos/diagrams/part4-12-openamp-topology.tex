@@ -54,7 +54,6 @@
 
 % Mailbox
 \node[mbox] (mbA) at (0, 2.0) {Mailbox / MU};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at (mbA.south) {(IRQ both ways)};
 
 % ============================================================
 % Connections — straight horizontal
@@ -68,10 +67,9 @@
 \draw[arr, draw=hibord] (mvirt.west) -- (vtx.east |- mvirt.west);
 \draw[arr, draw=hibord] (mvirt.west) -- (vrx.east |- mvirt.west);
 
-% Mailbox IRQ both ways — from libmetal hal
-\draw[focus, line width=0.7pt, <->] (lhal.east) -- (mbA.west |- lhal.east)
-  node[midway, above, font=\sffamily\scriptsize, text=focusc] {IRQ};
-\draw[focus, line width=0.7pt, <->] (mhal.west) -- (mbA.east |- mhal.west);
+% Mailbox IRQ both ways — connect Cortex-A53 / Cortex-M7 cores to Mailbox
+\draw[focus, line width=0.7pt, dashed, <->] (acore.east) to[bend right=18] node[midway, above, sloped, font=\sffamily\scriptsize, text=focusc] {IRQ} (mbA.west);
+\draw[focus, line width=0.7pt, dashed, <->] (mcore.west) to[bend left=18] node[midway, above, sloped, font=\sffamily\scriptsize, text=focusc] {IRQ} (mbA.east);
 
 % ============================================================
 % Bottom caption

@@ -34,9 +34,13 @@
 
 % Cross link (remote access) — diagonal
 \draw[focus, draw=warnbord, line width=0.7pt, dashed]
-  (s0.east) to[bend right=20] node[midway, above=2pt, font=\sffamily\footnotesize, text=warnbord, align=center] {remote 130 ns \\[2pt] 60 GB/s (1.6x slower)} (d1.north);
+  (s0.east) to[bend right=20] (d1.north);
 \draw[focus, draw=warnbord, line width=0.7pt, dashed]
   (s1.west) to[bend left=20] (d0.north);
+
+% Remote label — placed below sockets, between the two crossing arcs, away from line paths
+\node[font=\sffamily\footnotesize, text=warnbord, align=center, fill=white, inner sep=2pt]
+  at (7, 3.9) {remote 130 ns \\[2pt] 60 GB/s (1.6x slower)};
 
 % Bottom legend
 \node[font=\sffamily\footnotesize, text=impbord, anchor=west] at (0, 0.5) {— local: 같은 node 안 access};
