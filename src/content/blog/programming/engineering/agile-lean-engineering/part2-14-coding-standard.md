@@ -1,13 +1,16 @@
 ---
-title: "Chapter 14:  The Value of Time"
-date: 2026-05-13T14:00:00
-description: " The Value of Time"
-series: "Extreme Programming Explained"
-seriesOrder: 14
-tags: [xp, agile, kent-beck]
+title: "Part 2-14: Coding Standard"
+date: 2026-05-20T22:00:00
+description: "강제 vs 자율 — XP에서 coding standard의 자리.'
+series: 'Agile & Lean Software Engineering"
+seriesOrder: 22
+tags: [agile, xp, coding-standard, style-guide]
+type: book-review
+bookTitle: "Extreme Programming Explained: Embrace Change"
+bookAuthor: "Kent Beck"
 draft: true
 ---
 
-> **Extreme Programming Explained** Chapter 14 요약
+> Outline — collective ownership·pair programming의 전제 조건. 자동 포매터(prettier·gofmt) 시대의 의미. lint rule과 styleguide.
 
 (작성 예정)

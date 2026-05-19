@@ -1,13 +1,16 @@
 ---
-title: "Chapter 18: Taylorism and Software"
-date: 2026-05-13T18:00:00
-description: "Taylorism and Software"
-series: "Extreme Programming Explained"
-seriesOrder: 18
-tags: [xp, agile, kent-beck]
+title: "Part 2-18: Planning Game · Planning Poker"
+date: 2026-05-20T26:00:00
+description: "XP의 release planning과 iteration planning — Planning Poker의 기원.'
+series: 'Agile & Lean Software Engineering"
+seriesOrder: 26
+tags: [agile, xp, planning-poker, estimation]
+type: book-review
+bookTitle: "Extreme Programming Explained: Embrace Change"
+bookAuthor: "Kent Beck"
 draft: true
 ---
 
-> **Extreme Programming Explained** Chapter 18 요약
+> Outline — XP의 planning game. James Grenning의 Planning Poker(2002) 등장. Wideband Delphi와의 연결. Part 6과 cross-ref.
 
 (작성 예정)
