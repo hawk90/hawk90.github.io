@@ -215,25 +215,27 @@ Workforce — Embedded SW engineer 수요 증가. RTOS·FPGA·DO-178C 전문성.
 
 ## 채용 시장 — Avionics SW
 
-```text
-KARI:
-  Senior research engineer
-  연구원·박사급
-  
-한화에어로스페이스:
-  민간 우주 발사체·위성 사업
-  Embedded SW·firmware
-  
-민간 LV (InnoSpace·Perigee·UNASTELLA):
-  Avionics SW lead·engineer
-  FCC integration
-  Ground software
-  
-방산 (LIG넥스원·KAI·풍산):
-  Missile guidance
-  Defense satellite
-  Tactical comm
-```
+KARI
+
+- Senior research engineer
+- 연구원·박사급
+
+한화에어로스페이스
+
+- 민간 우주 발사체·위성 사업
+- Embedded SW·firmware
+
+민간 LV (InnoSpace·Perigee·UNASTELLA)
+
+- Avionics SW lead·engineer
+- FCC integration
+- Ground software
+
+방산 (LIG넥스원·KAI·풍산)
+
+- Missile guidance
+- Defense satellite
+- Tactical comm
 
 요구 skill:
 - C·C++ embedded
@@ -246,79 +248,65 @@ KARI:
 
 ## 우대사항 — 공통 패턴
 
-```text
-일반 우대:
-  - 항공·우주·방산 SW 경력 3년+
-  - DO-178C Level B+ 인증 경험
-  - AUTOSAR·ARINC-653 (자동차 연계)
-  - 영문 기술 문서 작성
-  - 학사 이상 (대학원 ↑)
-  
-선호 backgrounds:
-  - 컴퓨터공학·항공우주공학·전자공학
-  - KAIST·서울대·POSTECH·항공대·연세대
-  - 군대 (방위산업·통신부대)
-  - 박사 (KARI·연구원)
-```
+일반 우대
+
+- 항공·우주·방산 SW 경력 3년+
+- DO-178C Level B+ 인증 경험
+- AUTOSAR·ARINC-653 (자동차 연계)
+- 영문 기술 문서 작성
+- 학사 이상 (대학원 ↑)
+
+선호 backgrounds
+
+- 컴퓨터공학·항공우주공학·전자공학
+- KAIST·서울대·POSTECH·항공대·연세대
+- 군대 (방위산업·통신부대)
+- 박사 (KARI·연구원)
 
 ## 산업체 특화 우대
 
-```text
-KARI:
-  RTOS internals
-  Mission SW architecture
-  Cross-disciplinary (mechanical·electrical 협업)
-  
-한화에어로스페이스:
-  Embedded C++
-  Functional safety
-  System integration
-  
-민간 LV startup:
-  Modern dev tooling (Git·CI·Python)
-  Open source 친화
-  빠른 prototyping
-  Multi-disciplinary
-```
+KARI
+
+- RTOS internals
+- Mission SW architecture
+- Cross-disciplinary (mechanical·electrical 협업)
+
+한화에어로스페이스
+
+- Embedded C++
+- Functional safety
+- System integration
+
+민간 LV startup
+
+- Modern dev tooling (Git·CI·Python)
+- Open source 친화
+- 빠른 prototyping
+- Multi-disciplinary
 
 ## Open Source — 학습 진입점
 
-```text
-PX4 Autopilot:
-  드론·UAV
-  자율 비행 control law
-  NuttX 위
-  https://px4.io
-  
-NASA cFS:
-  Flight SW framework
-  https://github.com/nasa/cFS
-  
-NASA F-Prime:
-  Modern flight SW
-  https://github.com/nasa/fprime
-  
-KSP Mod·Realism Overhaul:
-  Spaceflight 시뮬레이션
-  실제 mission planning 학습
-```
+- **PX4 Autopilot** — 드론·UAV 자율 비행 control law. NuttX 위. [px4.io](https://px4.io)
+- **NASA cFS** — Flight SW framework. [github.com/nasa/cFS](https://github.com/nasa/cFS)
+- **NASA F-Prime** — Modern flight SW. [github.com/nasa/fprime](https://github.com/nasa/fprime)
+- **KSP Mod·Realism Overhaul** — Spaceflight 시뮬레이션, 실제 mission planning 학습
 
 모두 *open + Apache 2.0/BSD*. 입사 전 *학습 자산*.
 
 ## 시리즈 정리 — Launch Vehicle Flight SW
 
-```text
-Ch 1: LV vs Aircraft       — 도메인 차이
-Ch 2: FCC Architecture     — Heterogeneous SoC
-Ch 3: Multiprocessor       — AMP·OpenAMP
-Ch 4: Control·Signal       — PID·LQR·Kalman
-Ch 5: FPGA-SW              — AXI·DMA·IRQ
-Ch 6: CCSDS Space Packet   — APID·sequence
-Ch 7: CCSDS Data Link      — TM/TC·VC·COP-1
-Ch 8: NASA cFS             — Message bus framework
-Ch 9: F-Prime              — Modern C++ framework
-Ch 10: KSLV-II Case        — 한국 적용·산업
-```
+| Ch | 주제 |
+|---|---|
+| 1 | LV vs Aircraft — 도메인 차이 |
+| 2 | FCC Architecture — Heterogeneous SoC |
+| 3 | Multiprocessor — AMP·OpenAMP |
+| 4 | Control·Signal — PID·LQR·Kalman |
+| 5 | FPGA-SW — AXI·DMA·IRQ |
+| 6 | CCSDS Space Packet — APID·sequence |
+| 7 | CCSDS Data Link — TM/TC·VC·COP-1 |
+| 8 | NASA cFS — Message bus framework |
+| 9 | F-Prime — Modern C++ framework |
+| 10 | KSLV-II Case — 한국 적용·산업 |
 
 **Launch Vehicle Flight Software 시리즈 완성** — 10편.
 

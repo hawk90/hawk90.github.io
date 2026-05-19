@@ -209,12 +209,11 @@ q_flush_doorbell(q);                     /* MMIO write 1번 */
 
 같은 NVMe SSD를 어떻게 다루느냐에 따라 IOPS와 latency가 크게 갈립니다.
 
-```text
-모델                     QD=1 IOPS   QD=32 IOPS   p99 latency
-Single queue + IRQ       180 k       420 k         95 µs
-16 queue + IRQ           180 k       1.6 M         55 µs
-SPDK polling (VFIO)      280 k       2.4 M         12 µs
-```
+| 모델 | QD=1 IOPS | QD=32 IOPS | p99 latency |
+|------|-----------|------------|-------------|
+| Single queue + IRQ | 180 k | 420 k | 95 µs |
+| 16 queue + IRQ | 180 k | 1.6 M | 55 µs |
+| SPDK polling (VFIO) | 280 k | 2.4 M | 12 µs |
 
 Xilinx XDMA에서 H2C 8 KB transfer 측정 예입니다.
 

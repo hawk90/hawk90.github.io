@@ -36,168 +36,154 @@ Avionics RTOS — *인증 + safety + vendor support*.
 
 ## 주요 Avionics RTOS
 
-```text
-Wind River VxWorks 653:
-  ARINC-653 Part 1
-  Multi-core (3.0+)
-  사용 — B787·A380·A350 (일부)·F-22 일부
-  License — 수십만 달러+
+**Wind River VxWorks 653:**
+- ARINC-653 Part 1
+- Multi-core (3.0+)
+- 사용 — B787·A380·A350 (일부)·F-22 일부
+- License — 수십만 달러+
 
-Green Hills INTEGRITY-178 tuMP:
-  MILS (Multiple Independent Levels of Security)
-  Multi-core
-  사용 — F-22·F-35·B777X·Eurocopter
-  Highest certification (Level A + EAL 6+)
+**Green Hills INTEGRITY-178 tuMP:**
+- MILS (Multiple Independent Levels of Security)
+- Multi-core
+- 사용 — F-22·F-35·B777X·Eurocopter
+- Highest certification (Level A + EAL 6+)
 
-Lynx LynxOS-178:
-  Linux 호환 (POSIX subset)
-  사용 — F-22·B787 일부
-  
-SYSGO PikeOS:
-  Hypervisor 기반
-  Multi-arch (PowerPC·ARM·x86)
-  사용 — A350·Eurofighter·KAI일부
+**Lynx LynxOS-178:**
+- Linux 호환 (POSIX subset)
+- 사용 — F-22·B787 일부
 
-DDC-I Deos:
-  Stack analyzer integration
-  Smaller market
+**SYSGO PikeOS:**
+- Hypervisor 기반
+- Multi-arch (PowerPC·ARM·x86)
+- 사용 — A350·Eurofighter·KAI 일부
 
-WITTENSTEIN SafeRTOS:
-  FreeRTOS 인증 fork
-  DO-178C Level B·A subset
-  IEC 61508·26262
-  자동차·항공·의료
+**DDC-I Deos:**
+- Stack analyzer integration
+- Smaller market
 
-RTEMS (open source):
-  NASA·ESA 광범위 사용
-  Apache 2.0 license
-  자체 인증 또는 ESA support
-```
+**WITTENSTEIN SafeRTOS:**
+- FreeRTOS 인증 fork
+- DO-178C Level B·A subset
+- IEC 61508·26262
+- 자동차·항공·의료
+
+**RTEMS (open source):**
+- NASA·ESA 광범위 사용
+- Apache 2.0 license
+- 자체 인증 또는 ESA support
 
 각 RTOS — *target·license·인증 패키지 비교*.
 
 ## VxWorks 653 — Wind River
 
-```text
-VxWorks 653:
-  Wind River (Intel subsidiary)
-  Industry leader
-  
-특징:
-  - ARINC-653 P1 Supplement 4
-  - Multi-core (3.0+)
-  - PowerPC·ARM·x86·SPARC
-  - Workbench IDE
-  - VxSim simulator
-  
-인증:
-  DO-178C Level A
-  DO-330 tool qualification
-  DO-297 IMA Platform Certification
-  
-사용 사례:
-  Boeing 787 Common Core System
-  Airbus A380·A350 (일부)
-  KAI F-X·KF-X·KUH (일부)
-  NASA Curiosity·Perseverance Mars rovers
-  
-가격:
-  Development license — 수만~수십만 달러
-  Production royalty — 추가
-  Certification package — 별도 (수십만 달러)
-```
+**VxWorks 653:**
+- Wind River (Intel subsidiary)
+- Industry leader
+
+**특징:**
+- ARINC-653 P1 Supplement 4
+- Multi-core (3.0+)
+- PowerPC·ARM·x86·SPARC
+- Workbench IDE
+- VxSim simulator
+
+**인증:**
+- DO-178C Level A
+- DO-330 tool qualification
+- DO-297 IMA Platform Certification
+
+**사용 사례:**
+- Boeing 787 Common Core System
+- Airbus A380·A350 (일부)
+- KAI F-X·KF-X·KUH (일부)
+- NASA Curiosity·Perseverance Mars rovers
+
+**가격:**
+- Development license — 수만~수십만 달러
+- Production royalty — 추가
+- Certification package — 별도 (수십만 달러)
 
 VxWorks — *최대 시장 점유*. Wind River support.
 
 ## INTEGRITY-178 — Green Hills
 
-```text
-INTEGRITY-178 tuMP:
-  Green Hills Software
-  Time-Variant Unified Multi-Processing
-  
-특징:
-  - MILS (Multiple Independent Levels of Security)
-  - Multi-core (deterministic)
-  - Memory protection (MMU + HW partition)
-  - ARINC-653
-  - C++ heavy support
-  - Compiler integrated
-  
-인증:
-  DO-178C Level A
-  EAL 6+ (Common Criteria - 최고 security level)
-  ISO 26262 ASIL-D
-  IEC 62304 (medical)
-  
-사용 사례:
-  Lockheed F-22 Raptor
-  Lockheed F-35 Lightning II
-  Boeing 777X
-  Eurocopter Tiger
-  
-강점:
-  Highest security + safety
-  MILS architecture
-  Time partitioning multi-core
-```
+**INTEGRITY-178 tuMP:**
+- Green Hills Software
+- Time-Variant Unified Multi-Processing
+
+**특징:**
+- MILS (Multiple Independent Levels of Security)
+- Multi-core (deterministic)
+- Memory protection (MMU + HW partition)
+- ARINC-653
+- C++ heavy support
+- Compiler integrated
+
+**인증:**
+- DO-178C Level A
+- EAL 6+ (Common Criteria — 최고 security level)
+- ISO 26262 ASIL-D
+- IEC 62304 (medical)
+
+**사용 사례:**
+- Lockheed F-22 Raptor
+- Lockheed F-35 Lightning II
+- Boeing 777X
+- Eurocopter Tiger
+
+**강점:**
+- Highest security + safety
+- MILS architecture
+- Time partitioning multi-core
 
 INTEGRITY — *highest cert*. Defense·high-security.
 
 ## LynxOS-178 — Lynx Software
 
-```text
-LynxOS-178:
-  Lynx Software Technologies (구 LynuxWorks)
-  
-특징:
-  - Linux 호환 (POSIX subset)
-  - ARINC-653
-  - 모든 commercial Linux app 일부 호환
-  
-인증:
-  DO-178C Level A
-  
-사용 사례:
-  Lockheed F-22 (Mission Computer)
-  Boeing 787 부분
-  Lockheed F-35 일부
-  
-강점:
-  Linux 친화 — developer onboarding 쉬움
-  Open standard
-```
+**LynxOS-178:** Lynx Software Technologies (구 LynuxWorks).
+
+**특징:**
+- Linux 호환 (POSIX subset)
+- ARINC-653
+- 모든 commercial Linux app 일부 호환
+
+**인증:** DO-178C Level A.
+
+**사용 사례:**
+- Lockheed F-22 (Mission Computer)
+- Boeing 787 부분
+- Lockheed F-35 일부
+
+**강점:**
+- Linux 친화 — developer onboarding 쉬움
+- Open standard
 
 LynxOS — *Linux compatibility*. Modern development friendly.
 
 ## PikeOS — SYSGO
 
-```text
-PikeOS:
-  SYSGO (Thales 자회사)
-  
-특징:
-  - Microkernel + Hypervisor
-  - ARINC-653 + POSIX
-  - Multi-arch (PowerPC·ARM·x86·SPARC)
-  - Multi-core deterministic
-  
-인증:
-  DO-178C Level A
-  ISO 26262
-  IEC 62304
-  EUROCAE ED-153
-  
-사용 사례:
-  Airbus A350·A220
-  Eurofighter Typhoon
-  Brazilian Embraer KC-390
-  KARI 일부 검토
-  Honda Jet
-  
-유럽 강세:
-  Airbus partnership
-```
+**PikeOS:** SYSGO (Thales 자회사).
+
+**특징:**
+- Microkernel + Hypervisor
+- ARINC-653 + POSIX
+- Multi-arch (PowerPC·ARM·x86·SPARC)
+- Multi-core deterministic
+
+**인증:**
+- DO-178C Level A
+- ISO 26262
+- IEC 62304
+- EUROCAE ED-153
+
+**사용 사례:**
+- Airbus A350·A220
+- Eurofighter Typhoon
+- Brazilian Embraer KC-390
+- KARI 일부 검토
+- Honda Jet
+
+**유럽 강세:** Airbus partnership.
 
 PikeOS — *유럽 표준*. Hypervisor 가능.
 

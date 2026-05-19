@@ -21,16 +21,14 @@ draft: false
 
 ## 한눈에 보는 버전 변천
 
-```text
-2010 v4.0 — BLE 최초 도입. GAP, GATT, ATT, SMP, L2CAP, LL, PHY 모두 등장
-2013 v4.1 — 호스트·컨트롤러 분리 명확화, LL Topology 개선, 동시 master/slave
-2014 v4.2 — LE Secure Connections (ECDH), Data Length Extension, LE Privacy 1.2
-2016 v5.0 — 2M PHY (2× 속도), Coded PHY (4× 거리), Extended Advertising
-2019 v5.1 — Direction Finding (AoA/AoD), GATT Caching, Periodic Adv Sync Transfer
-2020 v5.2 — LE Audio: Isochronous Channels, LC3 코덱, Multi-Stream
-2021 v5.3 — Periodic Adv 강화, Channel Classification 개선
-2023 v5.4 — PAwR (Periodic Adv with Responses), Encrypted Advertising Data
-```
+- **2010 v4.0** — BLE 최초 도입. GAP, GATT, ATT, SMP, L2CAP, LL, PHY 모두 등장
+- **2013 v4.1** — 호스트·컨트롤러 분리 명확화, LL Topology 개선, 동시 master/slave
+- **2014 v4.2** — LE Secure Connections (ECDH), Data Length Extension, LE Privacy 1.2
+- **2016 v5.0** — 2M PHY (2× 속도), Coded PHY (4× 거리), Extended Advertising
+- **2019 v5.1** — Direction Finding (AoA/AoD), GATT Caching, Periodic Adv Sync Transfer
+- **2020 v5.2** — LE Audio: Isochronous Channels, LC3 코덱, Multi-Stream
+- **2021 v5.3** — Periodic Adv 강화, Channel Classification 개선
+- **2023 v5.4** — PAwR (Periodic Adv with Responses), Encrypted Advertising Data
 
 각 버전이 *기존 기기와의 호환성을 깨지 않습니다*. 4.0 디바이스와 5.4 폰이 만나면, *연결이 4.0 기능으로 맺어집니다*. 새 기능은 *양쪽이 다 지원할 때만* 활성화됩니다.
 

@@ -252,13 +252,12 @@ cache invalidate를 kernel이 자동 처리.
 
 Zynq Z-7020, 100 MHz fabric, 533 MHz DDR3 기준입니다.
 
-```text
-인터페이스      bandwidth (이론)     실측 (sustained)
-M_AXI_GP        32-bit × 100 MHz     ~80 MB/s (write), ~50 MB/s (read)
-S_AXI_HP        64-bit × 150 MHz     ~600 MB/s
-S_AXI_ACP       64-bit × 150 MHz     ~400 MB/s (cache hit), ~150 MB/s (miss)
-4× S_AXI_HP     parallel             ~2 GB/s aggregate
-```
+| 인터페이스 | bandwidth (이론) | 실측 (sustained) |
+|------------|------------------|-------------------|
+| `M_AXI_GP` | 32-bit × 100 MHz | ~80 MB/s (write), ~50 MB/s (read) |
+| `S_AXI_HP` | 64-bit × 150 MHz | ~600 MB/s |
+| `S_AXI_ACP` | 64-bit × 150 MHz | ~400 MB/s (cache hit), ~150 MB/s (miss) |
+| 4× `S_AXI_HP` | parallel | ~2 GB/s aggregate |
 
 Camera 1080p60 (~370 MB/s)는 *HP 하나*면 충분. 4K60 raw 12-bit (~3 GB/s)는 *4× HP* 또는 압축 필요.
 

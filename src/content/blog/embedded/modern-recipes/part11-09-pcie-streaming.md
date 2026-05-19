@@ -185,12 +185,11 @@ PCIe DMA 64 KB write (card→host) ~12 GB/s
 
 NVMe 4 KB read를 host stack에 따라 비교한 결과입니다.
 
-```text
-스택                              IOPS (QD=64)   p99 latency
-Linux block + libaio              500 k          90 µs
-Linux block + io_uring (poll)     780 k          55 µs
-SPDK polling (VFIO)               2.4 M          12 µs
-```
+| 스택 | IOPS (QD=64) | p99 latency |
+|------|--------------|-------------|
+| Linux block + libaio | 500 k | 90 µs |
+| Linux block + io_uring (poll) | 780 k | 55 µs |
+| SPDK polling (VFIO) | 2.4 M | 12 µs |
 
 10 GbE NIC line rate(14.88 Mpps)에서 64-byte packet forwarding을 측정하면 Linux kernel stack은 2-3 Mpps에서 막히고, DPDK+VFIO는 단일 코어로 14.8 Mpps에 도달합니다. 차이는 PCIe link 자체가 아니라 *host side software*에서 발생합니다.
 

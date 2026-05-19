@@ -107,14 +107,13 @@ Cortex-M의 MCU는 더 단순합니다. 보통 두세 단계입니다.
 
 공개키 자체를 OTP에 저장하지는 않습니다. 공개키는 수백 바이트 또는 더 길어서 OTP 공간(보통 수 KB 이하)에 비싸기 때문입니다. 대신 *공개키의 SHA-256 hash* (32 bytes)만 OTP에 굽고, 공개키 자체는 부트 이미지에 동봉합니다.
 
-```text
 검증 시:
-  1. 이미지에서 public_key 추출
-  2. computed_hash = SHA-256(public_key)
-  3. otp_hash = read_from_otp()
-  4. computed_hash == otp_hash 확인
-  5. 통과하면 그 public_key로 signature 검증
-```
+
+1. 이미지에서 public_key 추출
+2. computed_hash = SHA-256(public_key)
+3. otp_hash = read_from_otp()
+4. computed_hash == otp_hash 확인
+5. 통과하면 그 public_key로 signature 검증
 
 이 구조의 장점은 *키 회전*이 가능하다는 점입니다. 보통 OTP에 2~4개의 hash slot을 두고, 한 키가 노출되면 그 slot을 *revoke* (별도의 revocation fuse 굽기)하고 다른 slot의 키로 전환합니다.
 
@@ -122,21 +121,17 @@ Cortex-M의 MCU는 더 단순합니다. 보통 두세 단계입니다.
 
 ST의 STM32 시리즈는 Read-Out Protection(RDP) 세 단계로 부팅 보안의 *기본*을 제공합니다.
 
-```text
-RDP Level 0 (기본)
-  • 모든 디버그 인터페이스 열림
-  • 양산 출하용이 아니라 *개발용*
-
-RDP Level 1
-  • JTAG/SWD에서 internal flash 읽기 불가
-  • SRAM은 읽힘. 하지만 디버그 자체는 가능
-  • RDP를 다시 Level 0으로 되돌리면 *flash 전체 자동 erase*
-
-RDP Level 2 (영구)
-  • JTAG/SWD 완전 비활성화
-  • 한 번 설정하면 *영구* — 칩 회수 불가
-  • 양산 출하 시 적용
-```
+- **RDP Level 0 (기본)**
+  - 모든 디버그 인터페이스 열림
+  - 양산 출하용이 아니라 *개발용*
+- **RDP Level 1**
+  - JTAG/SWD에서 internal flash 읽기 불가
+  - SRAM은 읽힘. 하지만 디버그 자체는 가능
+  - RDP를 다시 Level 0으로 되돌리면 *flash 전체 자동 erase*
+- **RDP Level 2 (영구)**
+  - JTAG/SWD 완전 비활성화
+  - 한 번 설정하면 *영구* — 칩 회수 불가
+  - 양산 출하 시 적용
 
 Option byte 한 줄 변경입니다. STM32CubeProgrammer에서 설정하거나 코드에서 굽습니다.
 

@@ -21,13 +21,13 @@ FPGA로 카메라 frame을 stream-처리하거나, ML inference의 한 layer를 
 
 가장 자주 손대는 pragma는 다섯 가지입니다.
 
-```text
-INTERFACE        외부 신호 — m_axi, s_axilite, axis, ap_memory
-PIPELINE         loop를 매 cycle iteration 시작 (II=1)
-UNROLL           loop body를 N개 복제 (병렬 + resource ×N)
-ARRAY_PARTITION  배열을 여러 BRAM/register로 쪼개 동시 access
-DATAFLOW         함수 사이 producer-consumer pipeline
-```
+| Pragma | 역할 |
+|--------|------|
+| `INTERFACE` | 외부 신호 — `m_axi`, `s_axilite`, `axis`, `ap_memory` |
+| `PIPELINE` | loop를 매 cycle iteration 시작 (II=1) |
+| `UNROLL` | loop body를 N개 복제 (병렬 + resource ×N) |
+| `ARRAY_PARTITION` | 배열을 여러 BRAM/register로 쪼개 동시 access |
+| `DATAFLOW` | 함수 사이 producer-consumer pipeline |
 
 Pipeline II(Initiation Interval)는 새 iteration이 시작되는 주기입니다. II=1이면 매 cycle 한 iteration을 시작하므로 throughput은 clock rate와 같아집니다. II가 더 큰 이유는 거의 항상 *데이터 의존성*이거나 *메모리 port 부족*입니다.
 

@@ -61,144 +61,92 @@ draft: true
 
 ## 5 Standards 정리
 
-```text
-SRS (Requirements Standards):
-  Notation, format, naming, traceability format
-  Verifiability criteria
-
-SDS (Design Standards):
-  Architecture notation, module structure
-  Interface definition
-
-SCS (Code Standards):
-  Language subset (MISRA·CERT·JSF C++)
-  Naming, error handling
-
-DO-331 Model Standards (MBD 시):
-  Model notation, simulation, code gen config
-
-DO-332 OO Standards (OO 시):
-  OO subset, inheritance limit, exception policy
-```
+- **SRS (Requirements Standards)** — Notation, format, naming, traceability format. Verifiability criteria.
+- **SDS (Design Standards)** — Architecture notation, module structure. Interface definition.
+- **SCS (Code Standards)** — Language subset (MISRA·CERT·JSF C++). Naming, error handling.
+- **DO-331 Model Standards** (MBD 시) — Model notation, simulation, code gen config.
+- **DO-332 OO Standards** (OO 시) — OO subset, inheritance limit, exception policy.
 
 Standards = *concrete rules*. Engineers daily reference.
 
 ## 12 Data Items 상세
 
-```text
-HLR (High-Level Requirements):
-  System requirement에서 derive
-  External behavior 명시
-  형식 — DOORS, table, document
+**HLR (High-Level Requirements)** — System requirement에서 derive. External behavior 명시. 형식 — DOORS, table, document.
 
-LLR (Low-Level Requirements):
-  HLR refinement
-  Implementation 직전
-  Pseudo-code, formula 가능
-  Algorithm spec
+**LLR (Low-Level Requirements)** — HLR refinement. Implementation 직전. Pseudo-code, formula 가능. Algorithm spec.
 
-SDD (Software Design Description):
-  Architecture
-  Module structure
-  Interfaces
-  Data·control flow
+**SDD (Software Design Description)** — Architecture, Module structure, Interfaces, Data·control flow.
 
-SC (Source Code):
-  Implementation
-  Comments per SCS
-  Traceability to LLR
+**SC (Source Code)** — Implementation. Comments per SCS. Traceability to LLR.
 
-TC (Test Cases):
-  Each HLR·LLR test 1+
-  Input·expected output
-  Pre·post condition
+**TC (Test Cases)** — Each HLR·LLR test 1+. Input·expected output. Pre·post condition.
 
-TP (Test Procedures):
-  Test execution step
-  Setup·teardown
-  Environment
+**TP (Test Procedures)** — Test execution step. Setup·teardown. Environment.
 
-TR (Test Results):
-  Pass·fail
-  Coverage achieved
-  Anomaly
+**TR (Test Results)** — Pass·fail. Coverage achieved. Anomaly.
 
-SCI (SW Configuration Index):
-  Each SW item 정의
-  Version·baseline
-  Deliverable list
+**SCI (SW Configuration Index)** — Each SW item 정의. Version·baseline. Deliverable list.
 
-SECI (SW Environment Config Index):
-  Tool list with version·qualification
-  OS·hardware environment
+**SECI (SW Environment Config Index)** — Tool list with version·qualification. OS·hardware environment.
 
-SAS (SW Accomplishment Summary):
-  Final summary — FAA·EASA 제출
-  All evidence reference
-  Compliance to PSAC
+**SAS (SW Accomplishment Summary)** — Final summary, FAA·EASA 제출. All evidence reference. Compliance to PSAC.
 
-SoC (Statement of Compliance):
-  Vendor·third-party SW declaration
-  Reusable SW evidence
+**SoC (Statement of Compliance)** — Vendor·third-party SW declaration. Reusable SW evidence.
 
-PSL (Problem Reports·Status·Logs):
-  Defect tracking
-  Change history
-  Re-verification record
-```
+**PSL (Problem Reports·Status·Logs)** — Defect tracking. Change history. Re-verification record.
 
 각 *deliverable + signoff*.
 
 ## SCI vs SECI
 
+**SCI (Configuration Index)** — *Product* configuration. Source code, binary, data file. Each item version.
+
+예시 entries:
+
 ```text
-SCI (Configuration Index):
-  *Product* configuration
-  Source code, binary, data file
-  Each item version
+altitude_filter.c v3.2.1
+altitude_filter.h v3.2.0
+control_law.c v2.1.5
+main.c v4.0.1
+```
 
-  Example entries:
-    altitude_filter.c v3.2.1
-    altitude_filter.h v3.2.0
-    control_law.c v2.1.5
-    main.c v4.0.1
+**SECI (Environment Configuration Index)** — *Tool·Environment* configuration. Build tool, OS, hardware. Each tool version.
 
-SECI (Environment Configuration Index):
-  *Tool·Environment* configuration
-  Build tool, OS, hardware
-  Each tool version
+예시 entries:
 
-  Example entries:
-    GCC ARM Embedded 11.3.0
-    Polyspace R2024a (TQL-4 qualified)
-    VectorCAST 2024 SP1
-    Ubuntu 22.04 LTS
-    Build server: HP ProLiant DL380
+```text
+GCC ARM Embedded 11.3.0
+Polyspace R2024a (TQL-4 qualified)
+VectorCAST 2024 SP1
+Ubuntu 22.04 LTS
+Build server: HP ProLiant DL380
 ```
 
 SCI·SECI 차이 — *product 자체* vs *환경·도구*.
 
 ## Trace Matrix — Master Artifact
 
-```text
 Trace matrix (DO-178C 권장):
 
+```text
 System Req ←→ HLR ←→ LLR ←→ SC ←→ TC ←→ TR
-
-각 link 양방향 가능
-
-도구:
-  - IBM DOORS (de facto)
-  - Polarion
-  - Jama Connect
-  - 자체 Excel·DB
-
-Trace metrics:
-  HLR coverage  - 모든 HLR이 LLR 가짐?
-  LLR coverage  - 모든 LLR이 SC 가짐?
-  Test coverage - 모든 LLR이 TC 가짐?
-  Reverse trace - 모든 SC가 LLR derived?
 ```
+
+각 link 양방향 가능.
+
+**도구**:
+
+- IBM DOORS (de facto)
+- Polarion
+- Jama Connect
+- 자체 Excel·DB
+
+**Trace metrics**:
+
+- HLR coverage — 모든 HLR이 LLR 가짐?
+- LLR coverage — 모든 LLR이 SC 가짐?
+- Test coverage — 모든 LLR이 TC 가짐?
+- Reverse trace — 모든 SC가 LLR derived?
 
 Trace missing — *audit 직접 fail*. 모든 SW item 양방향.
 

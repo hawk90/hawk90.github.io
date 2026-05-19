@@ -200,12 +200,12 @@ DDR controller arbiter가 QOS 비트를 보고 우선순위를 결정합니다. 
 
 ### Zynq UltraScale+ PS-PL port
 
-```text
-HP  (High Performance) × 4    DDR bypass cache, full bandwidth
-HPC (HP Cache-coherent) × 2   coherent with APU L2
-ACP (Accelerator Coherency)   coherent, low-latency
-GP  (General Purpose) × 4    control register용
-```
+| Port | 수량 | 설명 |
+|------|------|------|
+| HP (High Performance) | × 4 | DDR bypass cache, full bandwidth |
+| HPC (HP Cache-coherent) | × 2 | coherent with APU L2 |
+| ACP (Accelerator Coherency) | — | coherent, low-latency |
+| GP (General Purpose) | × 4 | control register용 |
 
 FPGA accelerator → AXI HP → DDR이 가장 일반적인 데이터 path입니다. CPU와 sharing이 잦으면 HPC나 ACP로 coherent 영역을 잡습니다.
 

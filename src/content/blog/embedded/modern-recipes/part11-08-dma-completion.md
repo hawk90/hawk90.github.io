@@ -204,12 +204,11 @@ UART 1 Mbps 입력을 세 방식으로 받아 본 결과입니다.
 
 NVMe 4 KB 랜덤 read에서는 양상이 다릅니다.
 
-```text
-방식                          QD=1 lat    QD=32 IOPS    CPU/IOP
-IRQ-driven (kernel)           65 µs       420 k         높음
-Hybrid NAPI 방식              48 µs       900 k         중간
-SPDK polling                  12 µs       2.4 M         가장 낮음 (per IOP)
-```
+| 방식 | QD=1 lat | QD=32 IOPS | CPU/IOP |
+|------|----------|------------|---------|
+| IRQ-driven (kernel) | 65 µs | 420 k | 높음 |
+| Hybrid NAPI 방식 | 48 µs | 900 k | 중간 |
+| SPDK polling | 12 µs | 2.4 M | 가장 낮음 (per IOP) |
 
 IRQ 한 번의 비용은 보통 1.5-3 µs입니다. Transfer가 그보다 짧으면 polling이 이깁니다. 길어지면 IRQ 비용이 무뎌지고 CPU를 양보하는 IRQ 모델이 유리해집니다.
 
