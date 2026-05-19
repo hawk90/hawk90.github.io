@@ -1,316 +1,167 @@
 ---
-title: "6-07: 온디바이스 LLM — llama.cpp·GGML·MLX·Qualcomm AI Engine"
+title: "6-07: 온디바이스 LLM — llama.cpp·GGUF·MLX·KV Cache·NPU Backend"
 date: 2026-05-21T07:00:00
-description: "Edge LLM 실행. llama.cpp Q4_K_M, Apple MLX, Qualcomm AI Engine. Pi 5·M-series·Jetson 사례."
+description: "4-bit 양자화된 LLM이 모바일·edge에서 동작하는 시대. llama.cpp/GGUF, Apple MLX, KV cache 메모리, 백엔드 선택을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 37
-tags: [recipes, edge-ai, llm, llama-cpp, ggml, mlx]
-draft: true
+tags: [recipes, edge-ai, llm, llama-cpp, ggml, mlx, gguf]
 ---
 
 ## 한 줄 요약
 
-> **"Edge LLM = 4-bit quantization + KV cache + NPU"** — 7B 모델이 Raspberry Pi에서 동작.
+> **"4-bit 양자화 + KV cache + NPU backend가 LLM을 edge로 내려보냈습니다."** Llama 3 8B Q4가 4.5 GB로 줄어 Raspberry Pi 5·iPhone·Jetson에서 돌고, Phi-3 mini는 2 GB로 더 작은 device에도 들어갑니다.
 
-## Edge LLM 시대 (2024-)
+## 어떤 상황에서 쓰나
+
+오프라인 voice assistant, 자율주행 cabin dialogue, 산업 진단 챗봇, 의료기기 음성 인터페이스, 카메라 자연어 명령처럼 *연결이 끊긴 채로 자연어 처리가 필요한 모든 사례*가 후보입니다.
+
+Cloud LLM이 더 똑똑하지만 세 가지 한계가 있습니다. Privacy(대화·이미지 raw가 device 밖으로 나감), latency(round-trip 1~3초), cost(token당 과금). 의료·법률·기업 internal·industrial 같은 영역은 cloud가 답이 아닙니다.
+
+2024년 이후 4-bit quantization과 GGUF format이 안정되면서 7B~8B model이 *consumer 하드웨어*에서 의미 있는 속도로 동작하기 시작했습니다. Phi-3 mini(3.8B) 같은 small model은 더 빠르게 mobile에 침투하고 있습니다.
+
+## 핵심 개념
+
+LLM 추론의 memory 구성은 *weight + KV cache + activation*입니다.
 
 ```text
-2023: Llama 2 7B FP16 — 14 GB, server only
-2024: Llama 3 8B Q4 — 4 GB, mobile·edge
-2025: Llama 3 70B Q4 — 35 GB, edge box·M3 Max
+Weight                        FP16     INT8     INT4
+Llama 3 8B                    16 GB    8 GB     4.5 GB
+Llama 3 70B                   140 GB   70 GB    35 GB
+Phi-3 mini (3.8B)             7.6 GB   3.8 GB   2.1 GB
+
+KV cache (Llama 3 8B FP16, 4k ctx)        1 GB
+KV cache (4k ctx, INT8)                   500 MB
+KV cache (32k ctx, FP16)                  8 GB
 ```
 
-자율주행·로봇·IoT — *온디바이스 추론* 필수. Privacy + latency + cost.
+KV cache가 *context length × layers × heads × head_dim × 2*로 quadratic 비슷하게 자랍니다. Long context를 원하면 KV cache 메모리부터 계산해야 OOM이 안 납니다.
 
-## llama.cpp
+llama.cpp는 *GGUF format*과 *GGML* tensor library로 구성됩니다.
+
+```text
+GGUF                  single-file model + metadata + quantization
+GGML                  backend tensor compute (CPU SIMD, CUDA, Metal, Vulkan, BLAS)
+llama.cpp             GGUF loader + LLM inference logic
+```
+
+Backend selection이 backend·hardware에 따라 throughput을 결정합니다.
+
+```text
+GGML_CUDA       NVIDIA GPU, Jetson 포함
+GGML_METAL      Apple silicon
+GGML_VULKAN     Mali·Adreno·Intel·AMD 통합 GPU
+GGML_BLAS       OpenBLAS CPU
+NEON / AVX2     CPU SIMD (자동)
+```
+
+Apple은 별도로 *MLX*라는 framework를 가지고 있어 Neural Engine까지 활용합니다. Qualcomm은 QNN backend가 llama.cpp에 통합되는 중입니다.
+
+## 코드 / 실제 사용 예
+
+### 빌드
 
 ```bash
-# Build
 git clone https://github.com/ggerganov/llama.cpp
 cd llama.cpp
-make -j8
 
-# 또는 CUDA·Metal·Vulkan
-make GGML_CUDA=1 -j8
-make GGML_METAL=1 -j8   # macOS
-make GGML_VULKAN=1 -j8
+# CPU only
+cmake -B build && cmake --build build -j
 
-# Download model
-wget https://huggingface.co/.../llama-3-8b-instruct-Q4_K_M.gguf
+# CUDA (Jetson, x86)
+cmake -B build -DGGML_CUDA=ON && cmake --build build -j
 
-# Inference
-./llama-cli -m model.gguf -p "Hello" -n 100
+# Metal (macOS)
+cmake -B build -DGGML_METAL=ON && cmake --build build -j
+
+# Vulkan (Mali, Adreno, RPi 5)
+cmake -B build -DGGML_VULKAN=ON && cmake --build build -j
 ```
 
-## GGUF Format
+Backend는 build time에 결정됩니다. 한 binary가 여러 backend를 동시에 가지지는 않습니다.
 
-```text
-GGUF (GPT-Generated Unified Format):
-  - llama.cpp 표준
-  - Single file
-  - Metadata embed
-  - Quantization variants
-  
-Variants:
-  Q2_K       2-bit   3.5 GB   많은 accuracy ↓
-  Q3_K_M     3-bit   3.7 GB
-  Q4_K_M     4-bit   4.6 GB   recommended
-  Q5_K_M     5-bit   5.5 GB
-  Q6_K       6-bit   6.3 GB
-  Q8_0       8-bit   8.5 GB   거의 FP16
-  F16        16-bit  16 GB
+### CLI 추론
+
+```bash
+# Phi-3 mini Q4 on Raspberry Pi 5
+wget https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf
+
+./build/bin/llama-cli \
+    -m Phi-3-mini-4k-instruct-q4.gguf \
+    -t 4 \
+    -c 2048 \
+    -p "Explain edge AI in two sentences." \
+    -n 200
+
+# Jetson Orin AGX with full GPU offload
+./build/bin/llama-cli \
+    -m llama-3-8b-instruct-Q4_K_M.gguf \
+    -ngl 99 \
+    -c 4096 \
+    -p "Hello"
 ```
 
-## llama.cpp C API
+`-ngl 99`는 *모든 layer를 GPU에 offload*하라는 의미입니다. RAM이 부족하면 일부 layer만 GPU에 두고 나머지를 CPU에 둘 수 있습니다.
+
+### C API 사용
 
 ```c
 #include "llama.h"
 
-llama_init();
+llama_backend_init();
 
-struct llama_model_params model_params = llama_model_default_params();
-struct llama_model *model = llama_load_model_from_file("model.gguf", model_params);
+struct llama_model_params mparams = llama_model_default_params();
+mparams.n_gpu_layers = 99;
+struct llama_model *model = llama_load_model_from_file(
+    "llama-3-8b-Q4_K_M.gguf", mparams);
 
-struct llama_context_params ctx_params = llama_context_default_params();
-ctx_params.n_ctx = 4096;   /* context length */
-struct llama_context *ctx = llama_new_context_with_model(model, ctx_params);
+struct llama_context_params cparams = llama_context_default_params();
+cparams.n_ctx = 4096;
+cparams.n_threads = 6;
+struct llama_context *ctx = llama_new_context_with_model(model, cparams);
 
 /* Tokenize */
 llama_token tokens[1024];
-int n = llama_tokenize(model, prompt, strlen(prompt), tokens, 1024, true, true);
+int n = llama_tokenize(model, prompt, strlen(prompt),
+                        tokens, 1024, true, true);
 
-/* Inference */
-llama_batch batch = llama_batch_init(512, 0, 1);
+/* Encode prompt */
+struct llama_batch batch = llama_batch_init(512, 0, 1);
 for (int i = 0; i < n; i++) {
-    llama_batch_add(batch, tokens[i], i, {0}, false);
+    llama_batch_add(batch, tokens[i], i, NULL, 0, false);
 }
 batch.logits[batch.n_tokens - 1] = true;
-
 llama_decode(ctx, batch);
 
-/* Sample next token */
-float *logits = llama_get_logits_ith(ctx, batch.n_tokens - 1);
-llama_token next = sample_top_p(logits, n_vocab, 0.9);
-```
-
-## KV Cache
-
-```text
-LLM 추론:
-  Input prompt: 50 token
-  Generation: 1 token at a time
-  
-KV cache:
-  Key·Value 각 layer × 각 head 저장
-  새 token만 compute, 이전은 cache
-  → 매 token compute O(N) vs O(N²)
-```
-
-```c
-ctx_params.n_ctx = 4096;   /* KV cache capacity */
-/* 8B model FP16 KV cache: ~2 GB */
-/* Q4: ~500 MB */
-```
-
-KV cache가 *큰 메모리 차지*. Long context = 더 큰 RAM 필요.
-
-## Apple MLX
-
-```python
-import mlx.core as mx
-from mlx_lm import load, generate
-
-model, tokenizer = load("mlx-community/Llama-3-8B-Instruct-4bit")
-
-response = generate(model, tokenizer, prompt="Hello",
-                     max_tokens=100, verbose=True)
-print(response)
-```
-
-Apple MLX — *M-series Neural Engine 활용*. Metal compute + ANE.
-
-```text
-M3 Max:
-  Llama 3 8B Q4: 40 token/s
-  Llama 3 70B Q4: 5 token/s
-```
-
-## Qualcomm AI Engine
-
-```text
-Snapdragon 8 Gen 3·X Elite:
-  - Hexagon NPU 45 TOPS
-  - llama.cpp QNN backend
-  - Qualcomm Stable LM·Stable Diffusion 데모
-  
-Mobile LLM:
-  - 7B model on phone
-  - 20+ token/s
-```
-
-```bash
-# Qualcomm AI Hub
-qai-hub upload-model model.onnx
-qai-hub compile --target snapdragon-8-gen-3
-```
-
-## Jetson Orin AGX — LLM
-
-```bash
-# llama.cpp CUDA
-./llama-cli -m llama-3-8b-Q4_K_M.gguf -ngl 99 -c 4096 \
-            -p "What is autonomous driving?" -n 200
-
-# Performance:
-# 30-50 token/s with full GPU offload
-```
-
-`-ngl 99` — *모든 layer GPU offload*. RAM 8GB+ 필요.
-
-## Raspberry Pi 5
-
-```bash
-# Pi 5 (8GB) — CPU only
-./llama-cli -m llama-3-8b-Q4_K_M.gguf -t 4 -c 2048 \
-            -p "Hello" -n 50
-
-# Performance:
-# ~4 token/s (slow but functional)
-```
-
-Pi 5 + Llama 8B Q4 — *오프라인 LLM*. Hobbyist·IoT.
-
-## NPU Offload — llama.cpp Backends
-
-```text
-Backends:
-  GGML_CUDA       NVIDIA
-  GGML_METAL      Apple
-  GGML_VULKAN     Mali·Adreno·Intel·AMD
-  GGML_KOMPUTE    cross-GPU Vulkan
-  GGML_BLAS       OpenBLAS CPU
-  GGML_OPENBLAS   CPU SIMD
-  GGML_CLBLAST    OpenCL
-  
-Embedded:
-  Cortex-A SIMD (NEON) — default
-  Qualcomm QNN backend (in progress)
-```
-
-자동차·로봇 — Vulkan 또는 *vendor NPU*.
-
-## Context Length — Memory Trade-off
-
-```text
-Llama 3 8B context length:
-  2K context  → 0.5 GB KV cache
-  4K context  → 1 GB
-  8K context  → 2 GB
-  32K context → 8 GB
-  128K context → 32 GB
-```
-
-KV cache *quadratic*. Long context — 별도 mechanism (FlashAttention·sliding window).
-
-## FlashAttention
-
-```text
-FlashAttention v2/v3:
-  - Tiled attention computation
-  - Memory ↓ 10x
-  - Speed ↑ 2-3x
-  - Long context 가능
-```
-
-CUDA·Metal 표준. llama.cpp 통합.
-
-## Speculative Decoding
-
-```text
-Draft model (작음, 빠름) — N token 미리 생성
-Target model (큼, 정확) — verify
-  Match: accept
-  Mismatch: reject, target 사용
-  
-Speedup: 2-3x with same quality
-```
-
-Edge — *작은 draft model* + main model.
-
-## Mixed Precision
-
-```text
-Layer별:
-  Embedding         Q4
-  Attention QKV     Q5
-  Attention out     Q4
-  FFN up·gate       Q3
-  FFN down          Q4
-  Layer norm        FP16
-```
-
-Quality 유지 + size 최소. llama.cpp `K_quant` variants.
-
-## RoPE — Rotary Position Embedding
-
-```c
-/* Modern LLM — RoPE position encoding */
-/* Context extension via NTK scaling */
-
-ctx_params.rope_freq_base = 10000.0;
-ctx_params.rope_freq_scale = 0.5;   /* 2x context */
-```
-
-NTK-aware scaling — *trained 2K context를 8K로 확장*.
-
-## Chat Template
-
-```c
-/* Llama 3 chat format */
-const char *prompt =
-    "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n"
-    "You are a helpful assistant.<|eot_id|>\n"
-    "<|start_header_id|>user<|end_header_id|>\n"
-    "%s<|eot_id|>\n"
-    "<|start_header_id|>assistant<|end_header_id|>\n";
-
-char buf[4096];
-snprintf(buf, sizeof(buf), prompt, user_input);
-```
-
-각 모델 *별도 format*. Mistral·Llama·Gemma·Phi.
-
-## Streaming Output
-
-```c
-while (1) {
-    llama_decode(ctx, batch);
+/* Sample loop */
+for (int t = 0; t < 200; t++) {
     float *logits = llama_get_logits_ith(ctx, batch.n_tokens - 1);
-    llama_token next = sample(logits);
-    
-    if (next == eos_token) break;
-    
-    char text[256];
-    llama_token_to_piece(model, next, text, sizeof(text), 0, false);
-    printf("%s", text);
-    fflush(stdout);
-    
-    /* Next batch */
+    llama_token next = sample_top_p(logits, llama_n_vocab(model), 0.9f);
+    if (next == llama_token_eos(model)) break;
+
+    char piece[256];
+    int plen = llama_token_to_piece(model, next, piece, sizeof(piece), 0, false);
+    fwrite(piece, 1, plen, stdout); fflush(stdout);
+
     llama_batch_clear(batch);
-    llama_batch_add(batch, next, batch.n_tokens, {0}, true);
+    llama_batch_add(batch, next, n + t, NULL, 0, true);
+    llama_decode(ctx, batch);
 }
+
+llama_free(ctx);
+llama_free_model(model);
+llama_backend_free();
 ```
 
-User-facing — *streaming output*이 표준 UX.
+매 token마다 *decode → sample → 다음 batch*를 반복합니다. KV cache가 누적되어 매번 한 token만 compute합니다.
 
-## OpenAI-Compatible Server
+### llama-server — OpenAI compatible
 
 ```bash
-# llama.cpp server
-./llama-server -m model.gguf --port 8080 --host 0.0.0.0
+./build/bin/llama-server \
+    -m llama-3-8b-Q4_K_M.gguf \
+    --host 0.0.0.0 --port 8080 \
+    -ngl 99 -c 4096
 ```
-
-OpenAI API 호환:
 
 ```bash
 curl http://localhost:8080/v1/chat/completions \
@@ -322,78 +173,169 @@ curl http://localhost:8080/v1/chat/completions \
   }'
 ```
 
-Local LLM·privacy-first app — OpenAI API drop-in.
+OpenAI API 호환 endpoint를 노출합니다. Local-first application은 같은 client 코드로 cloud·local을 switch할 수 있습니다.
 
-## Edge Use Case
+### Quantize 직접 수행
+
+```bash
+# HuggingFace → GGUF FP16
+python convert_hf_to_gguf.py models/llama-3-8b/ \
+       --outfile llama-3-8b-f16.gguf
+
+# Q4_K_M (권장)
+./llama-quantize llama-3-8b-f16.gguf \
+                  llama-3-8b-Q4_K_M.gguf Q4_K_M
+
+# Imatrix calibration (더 좋은 quantize)
+./llama-imatrix -m llama-3-8b-f16.gguf -f calibration.txt \
+                -o imatrix.dat
+./llama-quantize --imatrix imatrix.dat \
+                  llama-3-8b-f16.gguf llama-3-8b-IQ4_NL.gguf IQ4_NL
+```
+
+`IQ4_NL`처럼 imatrix를 활용한 *importance-aware* quantize가 같은 size에서 더 좋은 quality를 줍니다.
+
+### Apple MLX
+
+```python
+import mlx.core as mx
+from mlx_lm import load, generate
+
+model, tokenizer = load("mlx-community/Llama-3-8B-Instruct-4bit")
+
+response = generate(model, tokenizer,
+                     prompt="Explain edge AI",
+                     max_tokens=200, verbose=True)
+```
+
+Apple silicon에서 Metal compute + Neural Engine을 활용합니다. M3 Max에서 Llama 3 8B Q4가 40 tok/s, 70B Q4가 5 tok/s 정도 나옵니다.
+
+### Context length·KV cache 계산
+
+```c
+/* KV cache size 추정 */
+size_t kv_bytes = n_layers * 2 /*K+V*/ * n_heads * head_dim
+                * n_ctx * sizeof(half);
+
+/* Llama 3 8B: 32 layers, 8 KV heads (GQA), 128 head_dim */
+/* 4k ctx: 32 * 2 * 8 * 128 * 4096 * 2 = 512 MB (FP16) */
+/* 32k ctx: 32 * 2 * 8 * 128 * 32768 * 2 = 4 GB */
+```
+
+Grouped Query Attention(GQA)이 표준이 되면서 KV cache가 1/4로 줄어 long context가 현실화됐습니다.
+
+### Chat template
+
+```c
+const char *llama3_template =
+    "<|begin_of_text|>"
+    "<|start_header_id|>system<|end_header_id|>\n\n"
+    "%s<|eot_id|>"
+    "<|start_header_id|>user<|end_header_id|>\n\n"
+    "%s<|eot_id|>"
+    "<|start_header_id|>assistant<|end_header_id|>\n\n";
+
+snprintf(prompt, sizeof(prompt), llama3_template, system_msg, user_msg);
+```
+
+모델마다 chat template이 다릅니다. Llama·Mistral·Gemma·Phi가 모두 다른 special token을 씁니다. GGUF metadata에 template이 들어 있는 경우 `llama-cli`가 자동으로 적용합니다.
+
+## 측정 / 성능 비교
+
+Llama 3 8B Q4_K_M, 동일 prompt 추론 throughput입니다.
 
 ```text
-1. Voice assistant (offline):
-   Wake word detection — small NN
-   ASR (whisper.cpp) — 300M model
-   LLM (Llama 3B) — local
-   TTS — local
-   → 완전 offline·privacy
-
-2. 자율주행 dialogue:
-   Cortex-A78 + GPU
-   Small LLM for cabin interaction
-   No internet 의존
-
-3. Industrial diagnostic:
-   Sensor data + LLM 해석
-   Real-time alert
-   Off-grid operation
+Device                       Backend       Token/sec   First token latency
+Raspberry Pi 5 (8 GB)        NEON CPU       4 t/s       ~3 sec
+RPi 5 + Hailo-8              실험 단계
+Mac mini M2 (16 GB)          Metal         25 t/s       ~0.8 sec
+Mac Studio M3 Max (64 GB)    Metal         45 t/s       ~0.4 sec
+Jetson Orin Nano (8 GB)      CUDA          18 t/s       ~1 sec
+Jetson AGX Orin (64 GB)      CUDA          45 t/s       ~0.4 sec
+iPhone 15 Pro                Metal         15 t/s       ~1 sec
+Snapdragon 8 Gen 3           QNN (실험)    20 t/s       ~1 sec
 ```
 
-## 자주 하는 실수
+Pi 5 4 t/s는 단어 단위로는 사람이 읽는 속도와 비슷합니다. 실용 가능한 첫 baseline입니다.
 
-> ⚠️ FP16 model on edge
+KV cache 메모리 (Llama 3 8B, GQA 8 heads)입니다.
+
+```text
+Context       KV cache (FP16)   KV cache (INT8)
+2k             256 MB             128 MB
+4k             512 MB             256 MB
+8k             1 GB               512 MB
+32k            4 GB               2 GB
+128k           16 GB              8 GB
+```
+
+Weight 4.5 GB + KV cache + 약간의 working memory가 합산되므로 8 GB 보드에서는 4~8k context가 현실적 상한입니다.
+
+## 자주 보는 함정
+
+> FP16 model을 edge로
 
 ```bash
-./llama-cli -m llama-3-8b-f16.gguf   # 16 GB — OOM on most edge
+./llama-cli -m llama-3-8b-f16.gguf   # 16 GB OOM
 ```
 
-→ Q4_K_M 또는 Q5_K_M.
+Q4_K_M·Q5_K_M으로 quantize한 변형을 씁니다.
 
-> ⚠️ Long context without enough RAM
+> Context length를 무조건 늘림
 
 ```c
-ctx_params.n_ctx = 32768;   /* 8 GB KV cache */
-/* OOM */
+cparams.n_ctx = 32768;   /* KV cache 4 GB → OOM */
 ```
 
-→ context length 측정·제한.
+KV cache 메모리를 먼저 계산하고 context length를 결정합니다.
 
-> ⚠️ No GPU offload
+> CPU only로 sluggish
 
 ```bash
-# 빠르지 않다 — CPU only
-./llama-cli -m model.gguf   # 기본 CPU
+./llama-cli -m model.gguf   # default CPU — 2 t/s
 ```
 
-→ `-ngl 99` for GPU.
+`-ngl 99`로 GPU offload하거나 backend(`GGML_VULKAN` 등)를 build time에 켭니다.
 
-> ⚠️ Sample method 잘못
+> Sampling 잘못
 
 ```c
-/* Greedy — repetitive */
-next = argmax(logits);
+next = argmax(logits);   /* greedy → 반복 출력 */
 ```
 
-→ Temperature + top-p·top-k.
+Temperature 0.7 + top-p 0.9 정도가 baseline입니다.
+
+> Chat template 누락
+
+```c
+prompt = "Hello";   /* special token 없음 → 모델이 chat mode로 안 들어감 */
+```
+
+모델별 chat template을 적용하거나 `--chat-template` 옵션을 활용합니다.
+
+> mmap 비활성화
+
+```bash
+./llama-cli --no-mmap   /* 모델 전체를 RAM에 — 32 GB 필요 */
+```
+
+기본 mmap을 그대로 두면 OS가 page를 on-demand로 불러와 메모리 사용량이 크게 줄어듭니다.
 
 ## 정리
 
-- Edge LLM = **4-bit quantization** + **KV cache** + **NPU**.
-- **llama.cpp** = 표준 edge inference engine.
-- **GGUF** format — Q4_K_M 권장.
-- Apple MLX·Qualcomm QNN — NPU 백엔드.
-- Jetson Orin 30-50 token/s, Pi 5 ~4 token/s.
-- **OpenAI-compatible server** — local 통합 쉬움.
+- 4-bit quantization + KV cache + NPU backend로 7B~8B LLM이 edge에서 실용 가능해졌습니다.
+- llama.cpp + GGUF + GGML이 사실상 표준 stack입니다.
+- Q4_K_M이 size·quality·speed의 sweet spot입니다.
+- KV cache는 context length × layers × heads × head_dim × 2로 자라므로 메모리 계산이 필수입니다.
+- Backend는 build time에 결정합니다(CUDA·Metal·Vulkan·BLAS).
+- Apple silicon은 MLX로 Metal + Neural Engine을 함께 활용합니다.
+- llama-server는 OpenAI API 호환 endpoint를 노출해 local-first 앱 통합이 쉽습니다.
+- Pi 5에서 4 t/s, Mac Studio M3에서 45 t/s, Jetson Orin AGX에서 45 t/s 수준입니다.
 
-다음 편은 **TF-M·TrustZone**.
+다음 편은 **TF-M·TrustZone secure firmware**입니다.
 
 ## 관련 항목
 
-- [6-06: Zero-Copy Camera](/blog/embedded/modern-recipes/part6-06-zero-copy-camera)
+- [6-03: Quantization](/blog/embedded/modern-recipes/part6-03-quantization)
+- [6-02: TensorRT](/blog/embedded/modern-recipes/part6-02-tensorrt)
 - [6-08: TF-M TrustZone](/blog/embedded/modern-recipes/part6-08-tfm-trustzone)
