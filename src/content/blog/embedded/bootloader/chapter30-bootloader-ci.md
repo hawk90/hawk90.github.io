@@ -5,7 +5,7 @@ description: "여러 보드의 U-Boot/TF-A를 PR마다 빌드하고, QEMU·real 
 series: "Bootloader Internals"
 seriesOrder: 30
 tags: [embedded, bootloader, ci-cd, qemu, build-matrix]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
@@ -230,9 +230,9 @@ fi
 | **u-boot.bin text size** | `size u-boot` | +2% / PR |
 | **u-boot-spl size** | `size u-boot-spl` | SRAM 한도 - 5% |
 | **boot time** | 첫 printk timestamp 대비 `=>` 시각 | +100 ms / PR |
-| **memory test pass rate** | `mtest` 명령 결과 | 100% 미만 즉시 fail |
 | **DDR training time** | SPL 시작 ~ DDR pass anchor | +50 ms / PR |
-| **secure boot signature verify time** | BL2가 BL31 검증한 시간 | +20 ms / PR |
+| **secure verify time** | BL2가 BL31 검증한 시간 | +20 ms / PR |
+| **memory test pass rate** | `mtest` 명령 결과 | 100% 미만 즉시 fail |
 
 [Ch 25: 부트 시간 측정](/blog/embedded/bootloader/chapter25-boot-time)에서 본 timestamp 기반 측정을 *CI metric pipeline에 통합*하면 회귀 추세가 자동으로 잡힙니다.
 
@@ -265,15 +265,14 @@ e7a9c1f0d is the first bad commit
 
 부트로더 artifact는 *6개월 ~ 1년 보관*이 표준입니다. 양산 image가 필드에 깔린 뒤 *그 commit의 ELF + map + DTB*가 있어야 *core dump 해석*과 *crash address 역추적*이 가능합니다.
 
-| 산출물 | 크기 (typical) | 보관 기간 | 용도 |
-|---|---|---|---|
-| `u-boot.bin` | 700 KB | 1년 | flash 가능한 image |
-| `u-boot` (ELF, with debug) | 30 ~ 80 MB | 1년 | gdb·addr2line |
-| `u-boot.map` | 1 MB | 1년 | symbol 위치 |
-| `u-boot.dtb` | 30 KB | 1년 | runtime device tree |
-| `System.map` | 500 KB | 1년 | kallsyms 매칭 |
-| `flash.bin` (TF-A + U-Boot 통합) | 1.2 MB | 1년 | 양산용 flash image |
-| boot log | 50 KB | 6개월 | 회귀 비교 |
+| 산출물 | 크기 (typical) | 용도 |
+|---|---|---|
+| `u-boot.bin` | 700 KB | flash 가능한 image |
+| `u-boot` (ELF, with debug) | 30 ~ 80 MB | gdb·addr2line |
+| `u-boot.map` / `System.map` | 1 MB / 500 KB | symbol 위치 / kallsyms 매칭 |
+| `u-boot.dtb` | 30 KB | runtime device tree |
+| `flash.bin` (TF-A + U-Boot) | 1.2 MB | 양산용 flash image |
+| boot log | 50 KB | 회귀 비교 (6개월 보관) |
 
 ```bash
 # scripts/archive.sh — image + 메타데이터를 함께 보관
@@ -364,8 +363,7 @@ LAVA를 직접 통합하려면 *부트로더 빌드 → S3 업로드 → LAVA su
 - build matrix는 U-Boot·TF-A·OP-TEE를 *DAG로 묶어* 병렬화합니다. 차원은 보드 × variant × secure가 표준입니다.
 - QEMU boot test는 `=>` prompt anchor를 잡는 expect script로 가볍게 시작합니다. `version`·`bdinfo` 같은 *읽기 전용 명령*만 검증에 씁니다.
 - 실 보드 farm은 LAVA(대규모)와 self-hosted runner(소규모) 두 갈래입니다. PDU로 전원 cycle, USB-to-UART로 콘솔 캡처가 공통 패턴입니다.
-- regression metric은 image size·boot time·DDR training time·secure verify time이 표준입니다. 임계는 *+2% 또는 +10 KB* 정도가 운영 가능합니다.
-- `git bisect run ./test.sh` + `exit 125`로 *빌드 실패는 skip*. 8 step이면 256 commit 범위를 좁힙니다.
+- regression metric은 image size·boot time·DDR training time이 표준이고 임계는 *+2% 또는 +10 KB* 정도가 운영 가능합니다. `git bisect run`에서 빌드 실패는 반드시 *exit 125*로 skip 처리합니다.
 - artifact는 `u-boot.bin`·ELF·map·DTB·flash.bin + `meta.json`을 1년 보관. SHA·tag·board가 묶여 있어야 *6개월 뒤 추적*이 됩니다.
 - secure boot 키는 *ephemeral CI key*와 *production HSM key*를 분리합니다. CI runner는 production key를 *볼 수 없어야* 합니다.
 - 흔한 함정은 *flash farm 단일 보드*, *expect timing fragile*, *키 leak*, *artifact 폭증*, *bisect skip 누락* 다섯입니다.
