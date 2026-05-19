@@ -14,9 +14,7 @@ draft: false
 
 ## 부트로더 CI의 어려움
 
-application CI는 unit test로 끝납니다. 부트로더 CI는 그렇게 끝낼 수 없습니다. 컴파일러가 통과시킨 코드가 실 보드에서 *DDR training에 실패해 hang*하는 일이 자주 일어납니다. 어셈블리 한 줄, linker script 한 항목, DTB 한 노드의 변경이 *boot 자체를 막을 수* 있고, 그 사실은 *실행해 봐야* 알 수 있습니다.
-
-부트로더 CI를 어렵게 만드는 요소가 네 가지입니다.
+application CI는 unit test로 끝납니다. 부트로더 CI는 그렇게 끝낼 수 없습니다. 컴파일러가 통과시킨 코드가 실 보드에서 *DDR training에 실패해 hang*하는 일이 자주 일어나고, 어셈블리 한 줄·linker script 한 항목·DTB 한 노드의 변경이 *boot 자체를 막을 수* 있습니다. 그 사실은 *실행해 봐야* 알 수 있습니다. 어려움을 만드는 요소가 네 가지입니다.
 
 | 요소 | 내용 | 영향 |
 |---|---|---|
@@ -25,13 +23,11 @@ application CI는 unit test로 끝납니다. 부트로더 CI는 그렇게 끝낼
 | **artifact 크기** | debug ELF가 50 ~ 100 MB. multi-target이면 GB 단위 | CI artifact limit 압박 |
 | **부팅 자체가 1단계 검증** | 빌드 성공 ≠ boot 성공 | QEMU/real board 자동 boot test 필수 |
 
-[Ch 21: 새 보드 포팅](/blog/embedded/bootloader/chapter21-board-porting)에서 본 것처럼 한 보드의 U-Boot defconfig가 정상화되는 데 *수십 commit*이 들어갑니다. 그 사이 *과거 정상 보드*가 회귀하지 않게 하려면 CI matrix가 *모든 보드를 매 PR마다* 검증해야 합니다.
-
-이 장은 그 pipeline을 다섯 단으로 쌓아 갑니다. build matrix → QEMU boot test → 실 보드 farm → regression 검출 → secure boot 키 관리의 순서입니다.
+[Ch 21: 새 보드 포팅](/blog/embedded/bootloader/chapter21-board-porting)에서 본 것처럼 한 보드의 U-Boot defconfig가 정상화되는 데 *수십 commit*이 들어갑니다. 그 사이 *과거 정상 보드*가 회귀하지 않게 하려면 CI matrix가 *모든 보드를 매 PR마다* 검증해야 합니다. 이 장은 pipeline을 build matrix → QEMU boot test → 실 보드 farm → regression 검출 → secure boot 키 관리의 다섯 단으로 쌓아 갑니다.
 
 ## build matrix — defconfig·TF-A·OP-TEE 동시
 
-U-Boot은 단독 빌드가 아닙니다. ARMv8-A에서는 *TF-A의 BL31*과 *옵션 OP-TEE*가 함께 묶여야 부팅 가능한 image가 됩니다. CI matrix를 짤 때 세 trees가 *동시 build*에 들어가는 것을 전제로 합니다.
+U-Boot은 단독 빌드가 아닙니다. ARMv8-A에서는 *TF-A의 BL31*과 *옵션 OP-TEE*가 함께 묶여야 부팅 가능한 image가 됩니다. CI matrix는 세 trees가 *동시 build*에 들어가는 것을 전제로 합니다.
 
 ```yaml
 # .gitlab-ci.yml — U-Boot · TF-A · OP-TEE를 DAG로 묶음
@@ -85,7 +81,7 @@ matrix 차원은 세 가지가 표준입니다.
 
 ## QEMU boot test 자동화
 
-빌드가 끝나면 *실제 boot까지 가는지* 확인해야 의미가 있습니다. ARMv8-A U-Boot은 *QEMU virt*에서 `-bios u-boot.bin` 한 줄로 뜹니다. CI에서 expect script로 *부팅 로그의 anchor*를 잡아 검증합니다.
+ARMv8-A U-Boot은 *QEMU virt*에서 `-bios u-boot.bin` 한 줄로 뜹니다. CI에서 expect script로 *부팅 로그의 anchor*를 잡아 검증합니다.
 
 ```bash
 #!/usr/bin/env bash
@@ -112,25 +108,13 @@ echo "[FAIL] U-Boot prompt not reached"; tail -30 "$LOG"
 kill $QEMU_PID 2>/dev/null || true; exit 1
 ```
 
-이 script가 검증하는 것은 *DRAM training 통과 + driver probe 통과 + console init 통과*입니다. `=>` 한 줄이 뜨려면 U-Boot이 *명령 인터프리터에 진입*해야 하므로 부트 체인의 절반 이상이 살아 있다는 신호입니다.
-
-더 깊은 검증은 expect로 `version`·`bdinfo` 같은 *읽기 전용 명령*의 응답까지 확인합니다. write 명령(`mw`, `setenv saveenv`)은 CI에서 돌리면 *flash backing store가 더러워져* 다음 run이 영향을 받으므로 피합니다.
+이 script가 검증하는 것은 *DRAM training + driver probe + console init 통과*입니다. `=>` 한 줄이 뜨려면 U-Boot이 *명령 인터프리터에 진입*해야 하므로 부트 체인의 절반 이상이 살아 있다는 신호입니다. 더 깊은 검증은 expect로 `version`·`bdinfo` 같은 *읽기 전용 명령*의 응답까지 확인합니다. write 명령(`mw`, `setenv saveenv`)은 *flash backing store가 더러워져* 다음 run이 영향을 받으므로 피합니다.
 
 [Ch 22: 디버깅 워크플로](/blog/embedded/bootloader/chapter22-debugging)에서 본 *로그 anchor 기반 검증*이 CI 자동 boot test의 본체입니다.
 
 ## LAVA — 실 보드 farm
 
-QEMU로는 잡히지 않는 회귀가 있습니다. 실제 DDR controller, PMIC 시퀀스, eMMC bus, ethernet PHY는 *real silicon*에서만 드러납니다. Linaro의 **LAVA**(Linaro Automated Validation Architecture)는 이 문제를 위한 *오픈소스 board farm 관리자*입니다.
-
-LAVA의 핵심 개념 세 가지.
-
-| 개념 | 역할 |
-|---|---|
-| **device** | 등록된 실 보드 한 대. 전원·콘솔·flash 경로 모두 명세 |
-| **job** | 한 device에 *flash → boot → test → log* 시퀀스 실행 |
-| **dispatcher** | device 옆에 두는 worker. USB·UART·PDU를 잡고 LAVA 서버와 통신 |
-
-LAVA job은 YAML로 기술합니다.
+QEMU로는 잡히지 않는 회귀가 있습니다. 실제 DDR controller, PMIC 시퀀스, eMMC bus, ethernet PHY는 *real silicon*에서만 드러납니다. Linaro의 **LAVA**(Linaro Automated Validation Architecture)는 이 문제를 위한 *오픈소스 board farm 관리자*입니다. 세 가지 개념이 본체입니다. *device*는 등록된 실 보드, *job*은 한 device의 flash→boot→test 시퀀스, *dispatcher*는 device 옆에서 USB·UART·PDU를 잡는 worker입니다.
 
 ```yaml
 # imx8mp-boot.yaml — deploy → boot → test의 3단
@@ -154,13 +138,11 @@ actions:
             from: git, path: smoke.yaml, name: smoke }
 ```
 
-dispatcher는 *USB-to-UART*로 콘솔을 잡고, *PDU(Power Distribution Unit)*로 전원을 껐다 켭니다. flash는 보드별 SDP/uuu/J-Link를 통합한 *deploy method*가 처리합니다.
-
-LAVA의 실 가치는 *trace 보관*입니다. 모든 job의 boot log·command output·timing이 *영구 저장*되어 6개월 뒤 *어느 commit에서 어떤 boot 메시지가 바뀌었는지*를 git bisect와 함께 추적할 수 있습니다.
+dispatcher는 *USB-to-UART*로 콘솔을 잡고 *PDU(Power Distribution Unit)*로 전원을 껐다 켭니다. flash는 보드별 SDP/uuu/J-Link를 통합한 *deploy method*가 처리합니다. LAVA의 실 가치는 *trace 보관*입니다. 모든 job의 boot log·command output·timing이 *영구 저장*되어 6개월 뒤 *어느 commit에서 어떤 boot 메시지가 바뀌었는지*를 git bisect와 함께 추적할 수 있습니다.
 
 ## Buildbot·self-hosted runner
 
-LAVA가 부담스러우면 *self-hosted runner + USB flash*로 더 가볍게 갈 수 있습니다. GitLab Runner나 GitHub Actions self-hosted runner를 *보드 옆 PC*에 설치하고, runner가 *USB 케이블을 통해 flash → reset → console 캡처*를 직접 수행합니다.
+LAVA가 부담스러우면 *self-hosted runner + USB flash*로 더 가볍게 갈 수 있습니다. GitHub Actions self-hosted runner를 *보드 옆 PC*에 설치하고, runner가 USB 케이블로 flash·reset·console 캡처를 직접 수행합니다.
 
 ```yaml
 # .github/workflows/board-test.yml — self-hosted runner가 USB flash → boot
@@ -184,22 +166,18 @@ jobs:
         with: { name: console-imx8mp, path: console.log }
 ```
 
-`[self-hosted, board-imx8mp]` label로 *해당 보드가 연결된 runner*에만 job을 라우팅합니다. PDU script가 *USB controllable power strip*을 제어합니다. 보드 단일 dependency는 단점이지만 *학습 곡선이 낮고* 초기 비용이 작아 1~2 보드 단계에서 충분합니다.
+`[self-hosted, board-imx8mp]` label로 *해당 보드가 연결된 runner*에만 job을 라우팅합니다. PDU script가 *USB controllable power strip*을 제어합니다. 보드 단일 dependency는 단점이지만 학습 곡선이 낮고 초기 비용이 작아 1~2 보드 단계에서 충분합니다. 옵션을 비교하면 다음과 같습니다.
 
-board farm 옵션을 비교하면 다음과 같습니다.
-
-| 옵션 | 보드 수 | 학습 비용 | 운영 | 적합 |
-|---|---|---|---|---|
-| **LAVA** | 수십 ~ 수백 | 높음 | dispatcher·서버 별도 | 양산 라인, 검증 팀 |
-| **self-hosted runner** | 1 ~ 10 | 낮음 | runner 머신만 | 소규모 팀, 초기 |
-| **Buildbot worker** | 5 ~ 50 | 중간 | worker per board | 자유도 높은 lab |
-| **수동 boot test** | 1 ~ 3 | 0 | 사람이 직접 | prototyping 단계 |
+| 옵션 | 보드 수 | 학습 비용 | 적합 |
+|---|---|---|---|
+| **LAVA** | 수십 ~ 수백 | 높음 | 양산 라인, 검증 팀 |
+| **self-hosted runner** | 1 ~ 10 | 낮음 | 소규모 팀, 초기 |
+| **Buildbot worker** | 5 ~ 50 | 중간 | 자유도 높은 lab |
+| **수동 boot test** | 1 ~ 3 | 0 | prototyping 단계 |
 
 ## regression 검출
 
-빌드가 통과하고 boot가 떠도 *조용한 회귀*가 있습니다. image size가 *서서히 자라* SPL SRAM 한계를 넘기 직전이거나, boot time이 *50 ms씩 누적*되어 사용자가 체감할 만큼 느려지는 일입니다.
-
-CI에 *수치 metric*을 박아두고 PR마다 baseline과 비교합니다.
+빌드가 통과하고 boot가 떠도 *조용한 회귀*가 있습니다. image size가 *서서히 자라* SPL SRAM 한계에 가까워지거나, boot time이 *50 ms씩 누적*되는 일입니다. CI에 *수치 metric*을 박아두고 PR마다 baseline과 비교합니다.
 
 ```bash
 $ size u-boot u-boot-spl/u-boot-spl
@@ -263,7 +241,7 @@ e7a9c1f0d is the first bad commit
 
 ## artifact 아카이브
 
-부트로더 artifact는 *6개월 ~ 1년 보관*이 표준입니다. 양산 image가 필드에 깔린 뒤 *그 commit의 ELF + map + DTB*가 있어야 *core dump 해석*과 *crash address 역추적*이 가능합니다.
+부트로더 artifact는 *6개월 ~ 1년 보관*이 표준입니다. 양산 image가 필드에 깔린 뒤 그 commit의 ELF·map·DTB가 있어야 core dump 해석과 crash address 역추적이 가능합니다.
 
 | 산출물 | 크기 (typical) | 용도 |
 |---|---|---|
@@ -295,9 +273,7 @@ aws s3 cp meta.json "${DEST}/meta.json"
 
 ## secure boot CI
 
-서명된 image를 만드는 pipeline은 *키 관리가 본체*입니다. [Ch 27: 신뢰 체인](/blog/embedded/bootloader/chapter27-chain-of-trust)에서 본 *production key*를 CI runner에 그대로 둘 수는 없습니다.
-
-키 정책은 두 단계로 분리합니다.
+서명된 image pipeline은 *키 관리가 본체*입니다. [Ch 27: 신뢰 체인](/blog/embedded/bootloader/chapter27-chain-of-trust)에서 본 *production key*를 CI runner에 그대로 둘 수는 없습니다. 키 정책은 두 단계로 분리합니다.
 
 | 키 종류 | 용도 | 저장소 | 접근 |
 |---|---|---|---|
@@ -321,7 +297,7 @@ vault write -field=valid transit/verify/${KEY_ID}/sha2-256 \
 # 출력: true 가 나와야 함
 ```
 
-production pipeline은 *별도 branch protection*과 *별도 runner pool*을 둡니다. release tag(`v*`)에만 trigger되고, 그 runner는 *HSM이 연결된 단일 호스트*입니다. CI 일반 runner는 production key를 *볼 수 없도록* network·secret level 양쪽에서 차단합니다.
+production pipeline은 *별도 branch protection*과 *별도 runner pool*을 둡니다. release tag(`v*`)에만 trigger되고 그 runner는 *HSM이 연결된 단일 호스트*입니다. CI 일반 runner는 production key를 *볼 수 없도록* network·secret level 양쪽에서 차단합니다.
 
 ## 흔한 함정
 
@@ -341,7 +317,7 @@ production pipeline은 *별도 branch protection*과 *별도 runner pool*을 둡
 | **Buildbot** | builders × steps | worker per board | secret module | 내장 |
 | **Drone** | matrix | docker runner | secret refs | webhook |
 
-LAVA를 직접 통합하려면 *부트로더 빌드 → S3 업로드 → LAVA submit-job → polling → 결과 회수*의 5단을 CI에서 묶어야 합니다. Buildbot은 *LAVA worker가 builder로 직접 노출*되어 통합이 가장 짧습니다.
+LAVA를 직접 통합하려면 *빌드 → S3 업로드 → LAVA submit-job → polling → 결과 회수*의 5단을 묶어야 합니다. Buildbot은 *LAVA worker가 builder로 직접 노출*되어 통합이 가장 짧습니다.
 
 ## 시리즈 마무리
 
