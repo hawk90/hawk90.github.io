@@ -10,6 +10,19 @@ draft: false
 
 스레드는 생성되고, 작업을 수행하고, 종료된다. 이 장에서는 스레드의 생애 주기를 관리하는 방법을 다룬다. `join`과 `detach`의 선택, 예외 안전성을 위한 RAII 가드, 인자 전달의 함정, `std::thread`의 이동 의미론, 그리고 런타임 스레드 수 결정과 스레드 식별까지 살펴본다.
 
+### 스레드 생성과 소유권은 *자원 관리* 문제다
+
+스레드를 다루는 모든 문제의 출발점은 단 한 가지다. **스레드는 자원이고, 자원은 *소유자*가 있어야 하며, 소유자가 사라질 때 *정리 의무*가 따라온다.** 힙 메모리, 파일 디스크립터, 소켓, 데이터베이스 커넥션과 본질이 같다. 단지 *비싸기 때문에* 더 신중하게 다뤄야 할 뿐이다.
+
+C++의 답은 늘 같다. **RAII(Resource Acquisition Is Initialization)**다. 객체의 생성자에서 자원을 잡고, 소멸자에서 자원을 놓는다. `std::unique_ptr`이 힙 메모리를 그렇게 다루고, `std::fstream`이 파일 디스크립터를 그렇게 다룬다. `std::thread`도 같은 가족이다. 다만 표준이 *자동 정리*를 굳이 강제하지 않은 점이 특이하다. 소유한 스레드를 정리하지 않은 채 소멸하면 `std::terminate()`로 프로그램이 즉시 죽는다. 이 단호함은 의도된 설계다.
+
+왜 침묵 정리(silent cleanup)를 거부했는가? 두 가지 답이 가능했다.
+
+- **소멸자가 자동 join한다.** 안전하지만 *호출자의 의도를 모른 채* 무기한 대기에 들어갈 수 있다. 함수가 빠르게 끝나야 하는데 백그라운드 스레드가 30분짜리 작업 중이면 프로그램이 멈춘다.
+- **소멸자가 자동 detach한다.** 빠르지만 *살아 있는 스레드를 백그라운드로 던지는* 결과가 된다. 그 스레드가 caller의 스택 변수에 참조를 갖고 있다면 즉시 댕글링이다.
+
+두 답 모두 *틀린 답을 조용히* 만든다. C++ 표준이 택한 것은 *세 번째 길*이다. "프로그래머가 명시적으로 결정하라. 안 하면 죽인다." 강력하지만 솔직한 계약이다. 그래서 이 장의 모든 절은 사실상 *그 결정의 다양한 형태*를 다룬다. join할 것인가, detach할 것인가, RAII 가드로 위임할 것인가, `std::jthread`로 자동화할 것인가.
+
 ## 2.1 스레드 시작
 
 ### std::thread 생성자
@@ -184,6 +197,17 @@ std::cout << "Main continues.\n";
 ```
 
 detach된 스레드는 데몬(daemon) 스레드가 된다. 메인 함수가 종료되면 함께 종료된다. C++ 런타임은 detached 스레드의 자원을 관리하지만, 그 스레드가 *접근하는 데이터*의 수명은 여전히 작성자의 책임이다.
+
+### join과 detach — 도서관 책 비유
+
+두 동작의 차이는 도서관에서 *책을 다루는 두 방식*으로 보면 한 번에 잡힌다.
+
+- **`join` — 책을 직접 반납한다.** 책을 빌린 사람이 카운터까지 가서, 직원이 검사하고 시스템에 반납 처리하는 것까지 *눈으로 확인*한 뒤 떠난다. 시간이 걸리지만, 어느 책이 어디 있는지 *언제든 알 수 있다*.
+- **`detach` — 책을 반납함에 던지고 떠난다.** 도서관 문 앞 무인 반납함에 책을 넣고 곧장 나간다. 직원이 언제 처리할지 모르고, 사람은 더 이상 그 책에 대한 *관심도, 책임도, 알 권리도* 없다.
+
+비유가 강조하는 핵심은 **반납함에 들어간 책에 다시 손댈 수 없다**는 점이다. detach한 스레드는 더 이상 `std::thread` 객체로 식별·취소·동기화할 수 없다. 그 스레드가 들고 있던 자원의 수명은 *전적으로 그 스레드 자신과 데이터 작성자의 책임*이 된다.
+
+또 한 가지. 도서관 영업이 끝나면(=프로세스 종료) 반납함에 들어 있던 책도 어떻게 처리될지 보장이 없다. detach된 스레드는 메인 함수가 끝나면 함께 강제 종료되며, 그 시점에 작업 중이었다면 *작업이 어디서 끊어졌는지 알 수 없다*. 부분적으로 쓴 파일, 부분적으로 보낸 네트워크 패킷, 부분적으로 잠근 뮤텍스가 그대로 남는다.
 
 ### join vs detach 선택 기준
 
@@ -364,6 +388,20 @@ void caller() {
 ### move-only 자원으로서의 std::thread
 
 `std::thread`는 운영 체제의 실행 자원을 *유일하게* 소유한다. 두 `std::thread` 객체가 같은 OS 스레드를 가리키지 못한다. 이 의미론은 `std::unique_ptr`과 똑같다. 둘 다 RAII로 자원을 소유하고, 둘 다 복사가 금지되며, 둘 다 `std::move`로만 이전할 수 있다.
+
+비유로 말하면 `std::thread`는 *집 열쇠 한 벌*과 같다. 집은 OS 스레드, 열쇠는 `std::thread` 객체다. 열쇠는 한 사람이 한 번에 한 벌만 가질 수 있고, 다른 사람에게 *건네줄(이동)* 수는 있지만 *복제(복사)*할 수는 없다. 빈 열쇠고리(`joinable() == false`)에 키를 끼우는 것은 자유다. 그러나 이미 키가 끼워진 열쇠고리에 새 키를 *대충 덮어쓰면* 기존 키가 행방불명된다. 그래서 `std::thread`의 이동 대입은 *기존 키를 자동으로 회수하지 않고* 그냥 죽인다(`std::terminate()`).
+
+`std::unique_ptr`이 *기존 자원을 자동으로 delete*해 주는 것과 *대조적*이라는 점이 핵심이다.
+
+```cpp
+std::unique_ptr<int> p(new int(1));
+p = std::make_unique<int>(2);   // OK. 1은 자동 delete.
+
+std::thread t(work);
+t = std::thread(other_work);    // 💥 t가 joinable이면 std::terminate.
+```
+
+이유는 *비용의 차이*다. 메모리 한 블록을 자동으로 해제하는 것은 거의 공짜다. 그러나 *살아 있는 OS 스레드를 자동으로 join하는* 것은 임의의 시간 동안 멈출 수 있고, 자동 detach는 더 위험하다. C++ 표준은 "사용자가 명시하지 않으면 알아서 처리하지 않는다"는 원칙을 택했다.
 
 | 측면 | `std::unique_ptr<T>` | `std::thread` |
 |------|----------------------|---------------|
@@ -891,6 +929,107 @@ int worker(void* arg) {
 ```
 
 C11 `thrd_join`은 반환값을 받지만 C++ `std::thread::join()`은 받지 않는다. C++에서 결과를 받으려면 `std::future`를 쓴다. 4장에서 다룬다.
+
+## 시스템 사례 — 다른 스레드 라이브러리는 어떻게 설계했는가
+
+`std::thread`가 어떤 결정을 내렸는지는 *다른 라이브러리의 결정*과 비교하면 선명해진다. 세 가지 비교 대상을 본다. C++ 표준이 등장하기 전에 사실상의 표준이었던 Boost.Thread, GUI 프레임워크의 대표 사례인 Qt QThread, 그리고 같은 C++ 표준 안에서 더 높은 수준의 추상을 제공하는 `std::async`다.
+
+### Boost.Thread — std::thread의 직계 조상
+
+C++11 이전, *이식 가능한 스레드*가 필요한 모든 프로젝트는 Boost.Thread를 썼다. 인터페이스는 거의 `std::thread`와 같다.
+
+```cpp
+#include <boost/thread.hpp>
+
+void worker() { /* ... */ }
+
+boost::thread t(worker);
+t.join();
+```
+
+C++11이 표준화하면서 Boost.Thread의 설계가 거의 그대로 표준에 들어왔다. 차이는 *오히려 Boost가 더 풍부*하다는 점이다.
+
+| 기능 | `std::thread` (C++17) | Boost.Thread |
+|------|----------------------|---------------|
+| 기본 생성·이동 | 동일 | 동일 |
+| `interrupt()` (협력적 인터럽트) | 없음 | 있음 (`boost::this_thread::interruption_point()`) |
+| `boost::thread_group` | 없음 | 있음 (스레드 묶음 관리) |
+| 시간 제한 잠금 | C++14 `timed_mutex` | 있음 |
+| `shared_mutex` | C++17 | 있음 (먼저 도입) |
+
+C++20의 `std::jthread` + `std::stop_token`은 사실 Boost의 `interrupt()` 메커니즘을 표준 형태로 다듬은 것이다. 새 코드는 표준을 우선하되, Boost 환경에서는 *표준이 아직 갖지 못한* 도구가 있다는 점은 알아두면 좋다.
+
+### Qt QThread — GUI 시그널·슬롯과의 통합
+
+Qt 프레임워크의 `QThread`는 *목적이 다르다*. 단순한 OS 스레드 래퍼가 아니라 *Qt 객체 시스템과 통합된* 스레드 추상이다.
+
+```cpp
+#include <QThread>
+#include <QObject>
+
+class Worker : public QObject {
+    Q_OBJECT
+public slots:
+    void doWork() {
+        // 이 슬롯은 Worker가 *moveToThread*된 스레드의 컨텍스트에서 실행됨
+    }
+signals:
+    void finished();
+};
+
+QThread thread;
+Worker* worker = new Worker;
+worker->moveToThread(&thread);
+QObject::connect(&thread, &QThread::started, worker, &Worker::doWork);
+QObject::connect(worker, &Worker::finished, &thread, &QThread::quit);
+thread.start();
+```
+
+핵심은 **객체의 *thread affinity***다. Qt의 모든 `QObject`는 *자신이 속한 스레드*를 알고, 시그널·슬롯 호출은 자동으로 *올바른 스레드의 이벤트 루프로 디스패치*된다. GUI 객체는 메인 스레드에서만 만들고 다뤄야 한다는 Qt의 규칙이 이 위에 서 있다.
+
+`std::thread`에는 이런 *프레임워크 통합*이 없다. 같은 일을 하려면 `std::condition_variable`로 큐를 만들고, 메인 스레드에서 명시적으로 디스패치해야 한다. Qt가 그것을 자동화한 대가로 *Qt 의존성*이 따라붙는 셈이다.
+
+### std::async vs std::thread — 결과 받기와 자동 join
+
+같은 C++ 표준 안에서도 `std::async`는 `std::thread`보다 *한 단계 높은* 추상이다.
+
+```cpp
+#include <future>
+
+int compute() {
+    return 42;
+}
+
+void demo() {
+    std::future<int> f = std::async(std::launch::async, compute);
+    // 다른 일을 하다가…
+    int result = f.get();   // compute가 끝날 때까지 대기. 결과 수신.
+}
+```
+
+차이를 정리하면 다음과 같다.
+
+| 측면 | `std::thread` | `std::async` |
+|------|---------------|---------------|
+| 반환값 수신 | 불가능 (out 인자나 future 직접 구성 필요) | `std::future<T>` 반환 |
+| 예외 전파 | 호출자에 자동 전파 안 됨 | `future::get()`에서 자동 재던지기 |
+| 정리 | `join` 또는 `detach` 강제 | `future` 소멸 시 자동 동기화 (정책 따라) |
+| 스레드 풀 사용 | 매번 새 OS 스레드 | 구현에 따라 풀 사용 가능 |
+| 정책 | 없음 | `std::launch::async` / `std::launch::deferred` |
+
+`std::async`의 두 함정. 첫째, `std::launch::deferred`만 쓰면 *지연 호출*이 되어 `get()` 시점에 동기 실행된다(=새 스레드 없음). 기본 정책은 `async | deferred`로 구현이 임의 선택하므로, *반드시* 비동기여야 하면 `std::launch::async`를 명시한다. 둘째, async 정책의 `std::future` 소멸자는 *블로킹된다*. 임시 future는 그 자리에서 블록되니 "왜 함수 끝에서 멈추지?"의 원인이 된다.
+
+세 라이브러리의 *철학 차이*를 한 표로 본다.
+
+| 라이브러리 | 추상 수준 | 자동 join | 결과 수신 | 통합 |
+|------------|----------|-----------|-----------|------|
+| `std::thread` | 최저 (OS 스레드 래퍼) | 없음 (`std::terminate`) | 없음 | 없음 |
+| `std::jthread` (C++20) | 중간 | 자동 | 없음 | `stop_token` |
+| `std::async` | 중간 | future 소멸 시 (정책 의존) | `future<T>` | 예외 전파 |
+| Boost.Thread | 중간 | 없음 | 없음 | `interrupt`, `thread_group` |
+| Qt `QThread` | 높음 (프레임워크 객체) | 있음 (`quit`/`wait`) | 시그널·슬롯 | 이벤트 루프 통합 |
+
+새 코드를 시작할 때의 선택 가이드는 이렇다. **결과를 받아야 한다면 `std::async`나 `std::packaged_task`**, **수명 관리만 자동화하고 협력적 취소가 필요하면 `std::jthread`**, **최저 수준 제어가 필요한 라이브러리 작성이면 `std::thread` + RAII 가드**다. Qt 환경이라면 `QThread`가 자연스러운 선택이지만, *비-Qt 코드와 섞일* 때는 두 세계의 스레드 모델이 충돌하지 않는지 점검해야 한다.
 
 ## 정리
 

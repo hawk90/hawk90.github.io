@@ -10,6 +10,111 @@ draft: false
 
 스레드 안전한 자료구조를 설계하는 방법을 다룬다. 단순히 뮤텍스를 감싸는 것 이상으로, 인터페이스 설계와 락 입자도가 중요하다. 6장은 lock-based 설계, 7장은 lock-free 설계로 자연스럽게 이어진다.
 
+## 6장이 푸는 단 하나의 문제
+
+3장의 락은 *충돌을 막는 도구*였고, 4장의 condition variable과 future는 *기다림을 조직하는 도구*였다. 6장이 묻는 것은 한 단계 더 위다. **이 도구들로 자료구조를 만들 때, 락의 입자도가 동시성과 correctness를 동시에 결정한다**. 너무 굵으면 동시성이 사라지고, 너무 가늘면 데드락과 인터페이스 race가 자란다. 그 사이의 균형이 이 장 전체의 주제다.
+
+거칠게 말하면 결정은 셋이다. *락을 어디에 두느냐*, *인터페이스를 어떻게 묶느냐*, *예외 가능 작업을 락 안에 두느냐 밖에 두느냐*. 이 셋이 정해지면 자료구조의 동시성 상한이 정해진다.
+
+### 비유로 잡는 락 입자도
+
+같은 자료구조라도 락을 거는 방식에 따라 *얼마나 많은 사람이 동시에 일할 수 있는가*가 달라진다. 도서관 비유로 잡아 두면 이 장의 모든 설계가 같은 척도 위에 놓인다.
+
+| 입자도 | 비유 | 본질 |
+|--------|------|------|
+| Coarse lock (단일 mutex) | 도서관 *입구*에서 한 명만 통제 | 어떤 책장이든 동시에 한 명만 |
+| Fine-grained (책장 단위) | *책장별* 락 — 다른 책장은 동시에 가능 | bucket / segment / shard 분리 |
+| Hand-over-hand (노드별) | 책 *한 권씩* 손에서 손으로 락 이동 | linked list traversal, 항상 같은 방향 |
+| Reader-writer | 열람은 여럿, *반납·정리*는 혼자 | reader-heavy일 때만 이득 |
+
+도서관 입구에서 한 명만 통과시키면 충돌은 없지만 *대기 줄*이 자라난다. 책장별로 락을 나누면 동시 작업자가 늘지만, *두 책장을 동시에 잡아야 하는 작업*에서 데드락이 살아난다. Hand-over-hand는 두 손이 항상 *같은 방향*으로만 락을 잡아야 데드락이 안 생긴다. Reader-writer는 *비율을 측정한 뒤*에야 이득이 보인다. 6장의 코드는 모두 이 격자 안에서 움직인다.
+
+### 인터페이스 race — 가장 자주 놓치는 함정
+
+락만 잘 걸면 끝이 아니다. 더 자주 놓치는 것은 *인터페이스 그 자체가 race를 만드는* 경우다. 책의 핵심 예가 `top()`과 `pop()`의 분리다.
+
+도서관 비유로 옮기면 이렇다. 사서가 *책장의 맨 위에 무슨 책이 있는지* 알려 주는 함수와, *그 책을 꺼내 가는* 함수가 따로 있다고 하자. 한 손님이 "맨 위에 무슨 책이지?" 하고 묻고, *그 답을 듣는 순간*에 다른 손님이 그 책을 채갈 수 있다. 첫 손님이 다시 가서 꺼내면 *전혀 다른 책*이 손에 잡힌다. 각 함수의 락은 완벽했지만, *두 호출 사이의 틈*에서 race가 살아난다.
+
+해법은 단 하나다. *질의와 변경을 한 호출로 묶어* 사서가 *책을 들고 있는 동안에는 절대 놓지 않게* 한다. `pop()` 하나에 "최상단 확인 + 꺼내기"를 합치는 것이 6장의 표준 패턴이다. 락 입자도와 무관하게, 인터페이스의 *원자성*이 우선이다.
+
+### 시스템에서 만나는 같은 패턴
+
+이 장의 결론은 라이브러리·커널·런타임이 이미 산업 규모로 적용해 둔 것과 같다. 같은 격자를 두 번 보면 의도가 빠르게 잡힌다.
+
+- **Java `ConcurrentHashMap` segments**: 초기에는 16개의 *segment*마다 독립 mutex. 키의 해시 일부로 segment를 골라 그 안에서만 락. C++로 옮기면 *bucket 별 mutex*의 hash map과 같은 모델이다. Java 8 이후로는 bin-level CAS로 더 가늘어졌다.
+- **Linux radix tree**: 페이지 캐시의 인덱스. 트리 노드 단위의 spinlock과 RCU 읽기 경로의 조합. *hand-over-hand가 아닌* RCU로 reader-heavy 워크로드를 극단까지 최적화한 예.
+- **Folly `ConcurrentHashMap`**: Facebook의 production hash map. SIMD-friendly bucket layout과 fine-grained lock의 조합. 책의 6장 hash map 절을 *실전 규모*로 확장하면 이런 모습이 된다.
+- **Rust `parking_lot::RwLock`**: 표준의 `std::sync::RwLock`보다 작은 메모리·빠른 fast path. 6장의 reader-writer 논의가 *실제 어떤 변수*로 구현되는지 보여 준다.
+- **PostgreSQL buffer pool**: shared buffer마다 lightweight lock과 spinlock의 두 층. 6장의 *예외 가능 작업을 락 밖으로* 원칙을 DB 차원에서 끝까지 밀어붙인 예.
+
+이름은 segment / shard / partition / stripe / lane으로 갈리지만, 모두 *같은 결정의 변주*다. *공유의 단위를 작게 자르고, 인터페이스를 원자 단위로 묶고, 예외 가능 작업을 락 밖으로 뺀다*.
+
+### 설계 결정의 표준 체크리스트
+
+스레드 안전 자료구조를 설계할 때마다 동일한 다섯 질문이 등장한다. 본문의 모든 예제(stack, queue, hash map, linked list)는 이 격자 위에서 다른 답을 고른다. 머리에 두고 읽으면 *왜 이 자료구조는 head/tail을 나누고, 저 자료구조는 못 나누는가*가 분명해진다.
+
+1. **불변(invariant)이 깨지는 *순간*이 어디인가?** 락은 그 구간을 덮어야 한다. push의 *링크 갱신*, hand-over-hand traversal의 *두 노드 사이*가 그 자리다.
+2. **인터페이스 race를 만드는 *함수 쌍*이 있는가?** 있다면 한 호출로 합친다. `top` + `pop`, `find` + `erase`, `contains` + `insert`가 흔한 함정.
+3. **자료구조의 *부분*들이 독립적으로 변할 수 있는가?** stack은 못 나누지만 queue는 head/tail이 분리되고, hash map은 bucket이 자연스럽게 나뉜다.
+4. **예외 가능 작업이 락 안에 있는가?** 사용자 타입의 copy/move, 할당, allocator, 콜백. 모두 락 밖으로 빼야 강한 예외 보장이 가능하다.
+5. **락 획득 *순서*는 모든 멤버 함수에서 일관되는가?** 두 락을 잡을 때마다 항상 같은 방향. 일관되지 않으면 데드락은 *언제든* 발생한다.
+
+다섯 질문에 모두 답이 나오면 자료구조의 모양은 거의 정해진다. 본문은 각 자료구조마다 이 다섯을 차례로 짚는다. 답이 막히는 자리가 *그 자료구조의 본질적 한계*다. Lock-free로 넘어가야 할 자리가 거기에서 드러난다.
+
+### 인터페이스 race의 최소 예제
+
+말로 풀면 자주 놓치는 함정이라, 가장 짧은 코드로 한 번 더 잡아 둔다. 다음은 *각 함수의 락이 완벽한데도* race가 살아 있는 코드다.
+
+```cpp
+// 회피 — 각 함수는 안전, 인터페이스는 race
+template<typename T>
+class ConcurrentStack {
+public:
+    bool empty() const {
+        std::lock_guard<std::mutex> lk(mtx_);
+        return data_.empty();
+    }
+    T top() const {
+        std::lock_guard<std::mutex> lk(mtx_);
+        return data_.top();  // throws if empty
+    }
+    void pop() {
+        std::lock_guard<std::mutex> lk(mtx_);
+        data_.pop();
+    }
+private:
+    mutable std::mutex mtx_;
+    std::stack<T> data_;
+};
+
+// 사용자 코드 — 동시에 실행되면 무너진다
+if (!s.empty()) {   // (A) lock + unlock
+    T v = s.top();  // (B) lock + unlock   ← 사이에 다른 스레드 pop 가능
+    s.pop();        // (C) lock + unlock   ← 사이에 다른 스레드 pop 가능 → throw
+    process(v);
+}
+```
+
+세 함수 각각은 자신의 락을 정확히 잡는다. 그런데 사용자 코드의 *세 줄 사이*가 무방비다. (A)와 (B) 사이에 다른 스레드가 push/pop을 끼워 넣으면 (B)는 다른 값을 본다. (B)와 (C) 사이에 다른 스레드가 pop하면 (C)는 *없는 원소*를 제거하려다 `top`이 던졌을 예외 대신 *조용한 데이터 손실*을 만든다.
+
+```cpp
+// Good — 질의 + 변경을 한 호출로 묶는다
+template<typename T>
+class ConcurrentStack {
+public:
+    bool try_pop(T& out) {
+        std::lock_guard<std::mutex> lk(mtx_);
+        if (data_.empty()) return false;
+        out = std::move(data_.top());
+        data_.pop();
+        return true;
+    }
+    // top() / empty() 분리 인터페이스는 *제공하지 않는다*
+};
+```
+
+`try_pop` 하나로 "확인 + 꺼내기"를 락 안에서 끝낸다. 본문 6.2~6.3의 모든 자료구조는 이 원칙을 따른다. *분리된 함수의 락이 완벽해도 인터페이스의 시간 틈에서 race가 자란다*.
+
 ## 6.1 동시성을 위한 설계가 의미하는 것
 
 ### 스레드 안전의 두 측면
