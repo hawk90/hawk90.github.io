@@ -57,7 +57,7 @@ featured: true
 
 ## 시리즈 구성
 
-**총 6개 Part, 50개 글**로 구성됩니다.
+**총 6개 Part, 53개 글**로 구성됩니다.
 
 성능 분석의 기초부터 마이크로아키텍처, 시스템 레벨, 병렬 처리, 도구 활용, 실전 사례까지 체계적으로 다룹니다.
 
@@ -99,7 +99,7 @@ featured: true
 
 ---
 
-### Part 3: System Level Performance (10개)
+### Part 3: System Level Performance (11개)
 
 시스템 수준의 병목을 분석합니다.
 
@@ -115,6 +115,7 @@ featured: true
 | 3-08 | Peripheral Clock | 클럭 설정, 전력-성능 trade-off |
 | 3-09 | Power vs Performance | DVFS, 저전력 모드 영향 |
 | 3-10 | Thermal Throttling | 온도 모니터링, 성능 저하 |
+| 3-11 | CXL·Interconnect | CXL 2.0/3.1, Neoverse V2, AI 메모리 대역폭 |
 
 ---
 
@@ -137,7 +138,7 @@ featured: true
 
 ---
 
-### Part 5: Profiling Tools (8개)
+### Part 5: Profiling Tools (10개)
 
 도구별 실전 가이드를 제공합니다.
 
@@ -151,6 +152,8 @@ featured: true
 | 5-06 | ARM DS / Lauterbach | 임베디드 전용 도구 |
 | 5-07 | Bare-metal 프로파일링 | GPIO, DWT, cycle counter |
 | 5-08 | Nsight Systems | GPU/NPU 포함 시스템 |
+| 5-09 | Tracy·Hotspot·uftrace | 저오버헤드 모던 프로파일러 |
+| 5-10 | Parca·Pixie·Cilium | eBPF 연속 프로파일링 |
 
 ---
 

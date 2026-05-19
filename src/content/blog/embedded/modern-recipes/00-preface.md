@@ -42,7 +42,7 @@ featured: true
 
 ## 시리즈 구성
 
-**총 11개 Part, 145개 레시피**로 구성됩니다.
+**총 11개 Part, 148개 레시피**로 구성됩니다.
 
 임베디드 레시피의 구조를 참고하여, 하드웨어 기초부터 프로세서, RTOS, Linux, FPGA, Edge AI까지 체계적인 학습 경로를 제공합니다.
 
@@ -273,7 +273,7 @@ FPGA, 가속기, 이기종 시스템과의 통합을 다룹니다.
 
 ---
 
-### Part 11: Edge AI & NPU (10개)
+### Part 11: Edge AI & NPU (13개)
 
 Edge AI와 NPU 활용을 다룹니다.
 
@@ -289,6 +289,9 @@ Edge AI와 NPU 활용을 다룹니다.
 | 11-08 | Zero-copy 파이프라인 | 카메라 → NPU → 출력 |
 | 11-09 | Thermal 관리 | 발열, 스로틀링 |
 | 11-10 | 벤치마킹 | FPS, latency, 전력 측정 |
+| 11-11 | 온디바이스 LLM | llama.cpp·GGML·MLX, 4/5/8-bit quantization, KV cache |
+| 11-12 | TF-M·TrustZone | Cortex-M33/M55 secure firmware, PSA Certified |
+| 11-13 | Matter·Thread | IoT 표준 프로토콜, OpenThread, 802.15.4 mesh |
 
 ---
 
