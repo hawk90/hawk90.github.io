@@ -47,6 +47,10 @@ invariant(예: course 추가 시 학점 한도 검증)가 *모든 우회 경로*
 - collection mutation에 *invariant* 또는 *부수효과* (notify, log, validation)가 필요하다.
 - thread safety 또는 transactional 변경이 중요하다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 13 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern13-encapsulate-collection.svg)
+
 ## 절차 (Mechanics)
 
 1. 아직 [Encapsulate Variable](/blog/programming/design/refactoring-catalog/pattern06-encapsulate-variable) 안 됐다면 적용.

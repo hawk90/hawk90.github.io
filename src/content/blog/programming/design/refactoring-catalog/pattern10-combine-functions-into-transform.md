@@ -44,6 +44,10 @@ Transform 함수는 입력 객체의 *깊은 복사*를 만들고 *파생 필드
 - 동시성 안전성이 중요.
 - 입력 객체를 *원본 그대로* 유지하고 싶다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 10 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern10-combine-functions-into-transform.svg)
+
 ## 절차 (Mechanics)
 
 1. Transform 함수를 만든다. 입력 객체의 *깊은 복사*를 반환하는 게 시작.

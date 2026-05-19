@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — duplicated inline};
+\node[con, text width=42mm, align=left, minimum height=10mm] (i1) at (-4.5, 1.8)
+  {found = false;\\for x in list: ...};
+\node[con, text width=42mm, align=left, minimum height=10mm] (i2) at (-4.5, 0.2)
+  {found = false;\\for x in list: ...};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — single function};
+\node[imp, text width=42mm, align=left, minimum height=8mm] (fn) at (4.5, 2.0)
+  {\textbf{contains(list, x)}};
+\node[hi, text width=42mm, align=left, minimum height=10mm] (callers) at (4.5, 0.2)
+  {contains(list, x)\\contains(list, y)};
+\draw[arr] (callers.north) -- (fn.south);
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1) -- node[above, font=\footnotesize]{Inline $\rightarrow$ Call} (1.8, 1);
+
+\end{tikzpicture}
+\end{document}

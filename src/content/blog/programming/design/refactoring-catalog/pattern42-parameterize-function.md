@@ -63,6 +63,10 @@ raise(employee, 0.05);
 - 두 함수가 *우연히 비슷하지만 다른 이유*로 존재 — 분리 유지가 의도 명확.
 - *over-engineering* — 한 호출자뿐인데 일반화는 과잉.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 42 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern42-parameterize-function.svg)
+
 ## 절차 (Mechanics)
 
 1. **차이 식별** — 두 함수 비교, *변하는 값*과 *공통 패턴* 구분.

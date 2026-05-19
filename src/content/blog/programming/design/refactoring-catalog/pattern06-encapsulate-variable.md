@@ -42,6 +42,10 @@ bookAuthor: "Martin Fowler"
 - 데이터를 *immutable*로 만들고 싶다.
 - 함수가 데이터를 직접 만지는 것이 *도메인 의미*와 어긋난다 (예: `customer.name = "..."` 대신 `customer.rename("...")`).
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 6 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern06-encapsulate-variable.svg)
+
 ## 절차 (Mechanics)
 
 1. **변수에 대한 encapsulation 함수**(getter, setter)를 만든다.

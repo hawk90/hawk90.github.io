@@ -73,6 +73,10 @@ const target = heatingPlan.targetTemperature(thermostat.selectedTemperature);
 - caller가 *전부 같은 값*을 전달 — 매개변수가 *항상 동일*하면 query가 더 단순.
 - query가 *implementation detail*에 속함.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 46 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern46-replace-query-with-parameter.svg)
+
 ## 절차 (Mechanics)
 
 1. **query**를 [Extract Variable](/blog/programming/design/refactoring-catalog/pattern03-extract-variable)로 추출.

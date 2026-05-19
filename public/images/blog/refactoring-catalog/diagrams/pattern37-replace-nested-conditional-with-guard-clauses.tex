@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — pyramid};
+\node[con, text width=50mm, align=left, minimum height=26mm] (b) at (-4.5, 1)
+  {if (alive) \{\\\quad if (separated) \{\\\quad\quad if (retired) \{\\\quad\quad\quad result = retiredRate;\\\quad\quad \} else \{ ... \}\\\quad \}\\\}};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — guards};
+\node[imp, text width=50mm, align=left, minimum height=26mm] (a) at (4.5, 1)
+  {if (!alive) return 0;\\if (!separated) return normal;\\if (!retired) return ...;\\[4pt]result = retiredRate;};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1) -- node[above, font=\footnotesize]{Guard Clauses} (1.8, 1);
+
+\end{tikzpicture}
+\end{document}

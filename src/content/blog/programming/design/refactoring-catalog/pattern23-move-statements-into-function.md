@@ -55,6 +55,10 @@ sendConfirmation(order);
 - 그 statement가 함수의 *전·후처리*에 해당 (log, setup, teardown).
 - 함수 책임이 *자기 동작을 알리는 것*까지 포함하는 게 자연스러움.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 23 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern23-move-statements-into-function.svg)
+
 ## 절차 (Mechanics)
 
 1. **모든 호출처 확인** — 정말 *전부* 같은 statement가 있는지.

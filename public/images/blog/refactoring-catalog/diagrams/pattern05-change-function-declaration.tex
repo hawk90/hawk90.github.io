@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 2.6) {Before};
+\node[con, text width=50mm, align=left, minimum height=14mm] (b) at (-4.5, 1)
+  {\texttt{circum(radius)}\\\textit{의미 모호 · 이름 약함}};
+
+\node[font=\sffamily\bfseries] at (4.5, 2.6) {After};
+\node[imp, text width=50mm, align=left, minimum height=14mm] (a) at (4.5, 1)
+  {\texttt{circumference(radius)}\\\textit{이름이 의도를 드러냄}};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1) -- node[above, font=\footnotesize]{Change Declaration} (1.8, 1);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -0.8)
+  {Migration 패턴: 신·구를 잠시 공존시키고 호출자를 점진 마이그레이션};
+
+\end{tikzpicture}
+\end{document}

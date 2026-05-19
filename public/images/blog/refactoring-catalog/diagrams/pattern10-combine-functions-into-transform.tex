@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[hi, minimum width=24mm] (raw) at (-4.5, 1.6) {raw data};
+\node[con, minimum width=24mm] (f1) at (-7, -0.2) {calcA(data)};
+\node[con, minimum width=24mm] (f2) at (-4.5, -0.2) {calcB(data)};
+\node[con, minimum width=24mm] (f3) at (-2, -0.2) {calcC(data)};
+\draw[arr] (raw.south) -- (f1.north);
+\draw[arr] (raw.south) -- (f2.north);
+\draw[arr] (raw.south) -- (f3.north);
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After};
+\node[hi, minimum width=22mm] (raw2) at (1.5, 1.6) {raw};
+\node[imp, minimum width=30mm] (xform) at (4.5, 1.6) {enrich(data)};
+\node[hi, text width=26mm, align=center, minimum height=12mm] (out) at (7.6, 1.6) {enriched\\(a, b, c)};
+\draw[arr] (raw2.east) -- (xform.west);
+\draw[arr] (xform.east) -- (out.west);
+
+\draw[->, edgec, line width=1.2pt] (-0.4, 0.6) -- node[above, font=\footnotesize]{Combine into Transform} (1.4, 1.4);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -1.4)
+  {파생 값 계산을 한 곳으로 — single source of truth};
+
+\end{tikzpicture}
+\end{document}

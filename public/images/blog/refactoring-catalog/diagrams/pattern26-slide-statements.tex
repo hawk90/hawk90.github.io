@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — scattered};
+\node[con, text width=42mm, align=left, minimum height=22mm] (b) at (-4.5, 1.2)
+  {let a = ...;\\\quad ...\\\quad ...\\let b = ...;\\\quad ...\\use(a, b);};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — grouped};
+\node[imp, text width=42mm, align=left, minimum height=22mm] (a) at (4.5, 1.2)
+  {let a = ...;\\let b = ...;\\\quad ...\\\quad ...\\use(a, b);};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{Slide Statements} (1.9, 1.2);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -1.4)
+  {관련 코드를 가까이 — Extract Function의 발판};
+
+\end{tikzpicture}
+\end{document}

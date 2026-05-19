@@ -43,6 +43,10 @@ bookAuthor: "Martin Fowler"
 - 단위·타입이 *코드를 읽어야 알 수 있는* 상태.
 - DB column이나 API 응답까지 *함께 마이그레이션 가능*한 상황.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 31 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern31-rename-field.svg)
+
 ## 절차 (Mechanics)
 
 캡슐화 여부에 따라 두 갈래.

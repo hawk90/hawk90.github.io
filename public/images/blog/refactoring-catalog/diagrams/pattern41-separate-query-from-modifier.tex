@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — mixed};
+\node[con, text width=50mm, align=left, minimum height=18mm] (b) at (-4.5, 1.2)
+  {\textbf{getTotalAndSendBill()}\\\quad sendBill();\\\quad return total;};
+\node[font=\footnotesize\itshape, mutec, text width=50mm, align=center] at (-4.5, -1)
+  {두 번 호출 → 두 번 부수효과};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — separated};
+\node[imp, text width=46mm, align=left, minimum height=8mm] (q) at (4.5, 2.0)
+  {\textbf{total()} — query};
+\node[imp, text width=46mm, align=left, minimum height=8mm] (m) at (4.5, 0.4)
+  {\textbf{sendBill()} — command};
+\draw[arr] (q.south) -- (m.north);
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{CQS} (1.8, 1.2);
+
+\end{tikzpicture}
+\end{document}

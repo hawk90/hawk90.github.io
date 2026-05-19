@@ -78,6 +78,10 @@ class Order {
 - query가 *외부 의존* (DB, API) — 함수의 *순수성 깨짐*.
 - *함수의 재사용성* 감소.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 45 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern45-replace-parameter-with-query.svg)
+
 ## 절차 (Mechanics)
 
 1. **query function** 추출/존재 확인.

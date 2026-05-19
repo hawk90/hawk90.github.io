@@ -65,6 +65,10 @@ function isNotEligibleForDisability(employee) {
 - 조건들이 *독립적*이고 한 가지 결과는 *우연의 일치*.
 - 조건 *순서*가 의미 (e.g., 짧은 조건 먼저 평가로 성능 최적화) — 측정 후 결정.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 36 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern36-consolidate-conditional-expression.svg)
+
 ## 절차 (Mechanics)
 
 1. *모든 조건에 side effect 없음* 확인.

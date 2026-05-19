@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[imp, minimum width=22mm] (live1) at (-6, 1.6) {used};
+\node[imp, minimum width=22mm] (live2) at (-3, 1.6) {used};
+\node[con, minimum width=22mm] (dead1) at (-6, 0) {dead\_fn};
+\node[con, minimum width=22mm] (dead2) at (-3, 0) {dead\_var};
+\node[con, minimum width=22mm] (dead3) at (-4.5, -1.6) {unreachable};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After};
+\node[imp, minimum width=22mm] (a1) at (3, 1.6) {used};
+\node[imp, minimum width=22mm] (a2) at (6, 1.6) {used};
+
+\draw[->, edgec, line width=1.2pt] (-1.0, 0.5) -- node[above, font=\footnotesize]{Remove Dead Code} (2.0, 1.6);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -2.6)
+  {Git이 기억한다 — 망설이지 말고 제거};
+
+\end{tikzpicture}
+\end{document}

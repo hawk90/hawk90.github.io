@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[con, text width=50mm, align=left, minimum height=18mm] (b) at (-4.5, 1.2)
+  {finalPrice(basePrice, discountLevel)\\[4pt]caller:\\\quad finalPrice(p, this.level())};
+\node[font=\footnotesize\itshape, mutec] at (-4.5, -1) {caller가 매번 같은 query};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After};
+\node[imp, text width=50mm, align=left, minimum height=18mm] (a) at (4.5, 1.2)
+  {finalPrice(basePrice)\\\quad level = this.level();\\\quad ...};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{Param $\rightarrow$ Query} (1.8, 1.2);
+
+\end{tikzpicture}
+\end{document}

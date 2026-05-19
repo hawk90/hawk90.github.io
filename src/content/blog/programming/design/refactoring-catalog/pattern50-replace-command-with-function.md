@@ -69,6 +69,10 @@ const c = charge(customer, usage, provider);
 - 분해된 *private method 가치*.
 - *Plugin 시스템*에서 Command interface 필요.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 50 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern50-replace-command-with-function.svg)
+
 ## 절차 (Mechanics)
 
 1. **execute body** 분석 — 함수로 충분한지 확인.

@@ -67,6 +67,10 @@ class Order {
 - 결과를 *외부 시스템에 저장*해야 함 (예: DB의 indexed column).
 - *event sourcing*에서는 일부러 derived를 저장하기도 (snapshot).
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 32 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern32-replace-derived-variable-with-query.svg)
+
 ## 절차 (Mechanics)
 
 1. **derived field의 모든 갱신 지점**을 식별.

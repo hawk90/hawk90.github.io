@@ -37,6 +37,10 @@ bookAuthor: "Martin Fowler"
 - 도메인 모델 발견 — *값 객체*나 *별도 엔티티*가 보인다.
 - 한 변경이 *여러 클래스를 동시에* 건드린다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 22 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern22-move-field.svg)
+
 ## 절차 (Mechanics)
 
 1. **source 필드를 캡슐화**한다. [Encapsulate Variable](/blog/programming/design/refactoring-catalog/pattern06-encapsulate-variable) — 외부가 함수로만 접근.

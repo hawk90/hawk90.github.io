@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — Command class};
+\node[con, text width=44mm, align=left, minimum height=22mm] (b) at (-4.5, 1.2)
+  {\textbf{ChargeCalculator}\\\hrulefill\\customer, days\\\hrulefill\\execute()};
+\node[font=\footnotesize\itshape, mutec] at (-4.5, -1.4) {execute 하나뿐 — 과한 구조};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — plain function};
+\node[imp, text width=44mm, align=left, minimum height=14mm] (a) at (4.5, 1.6)
+  {\textbf{charge(customer, days)}\\\quad return ...;};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{Command $\rightarrow$ fn} (1.9, 1.6);
+
+\end{tikzpicture}
+\end{document}

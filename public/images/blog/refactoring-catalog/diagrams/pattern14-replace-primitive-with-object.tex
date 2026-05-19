@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 2.8) {Before — primitive};
+\node[con, text width=46mm, align=left, minimum height=18mm] (b) at (-4.5, 1)
+  {\texttt{priority: string}\\\texttt{= "high"}\\\textit{문자열 비교, 검증 분산}};
+
+\node[font=\sffamily\bfseries] at (4.5, 2.8) {After — value object};
+\node[imp, text width=46mm, align=left, minimum height=22mm] (a) at (4.5, 0.8)
+  {\textbf{Priority}\\\hrulefill\\\texttt{- value}\\\hrulefill\\\texttt{+ equals()}\\\texttt{+ higherThan()}\\\texttt{+ toString()}};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1) -- node[above, font=\footnotesize]{Replace Primitive} (2.1, 1);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -1.6)
+  {type safety + 도메인 행위가 한 곳에};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[con, text width=44mm, align=left, minimum height=22mm] (b) at (-4.5, 1.2)
+  {if (a.seniority < 2)\\\quad return 0;\\if (a.monthsDisabled > 12)\\\quad return 0;\\if (a.isPartTime)\\\quad return 0;};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After};
+\node[imp, text width=46mm, align=left, minimum height=18mm] (a) at (4.5, 1.4)
+  {if (isNotEligible(a))\\\quad return 0;};
+\node[hi, text width=46mm, align=left, minimum height=6mm] (fn) at (4.5, -0.6)
+  {isNotEligible() = a || b || c};
+\draw[arr] (a.south) -- (fn.north);
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{Consolidate} (1.8, 1.4);
+
+\end{tikzpicture}
+\end{document}

@@ -73,6 +73,10 @@ person.id = 999;   // 에러 — getter only
 - ORM이 *setter로 hydrate* — 제거 시 hydration 깨짐 (특수 메서드/reflection 필요).
 - *serialization framework*가 setter 의존.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 47 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern47-remove-setting-method.svg)
+
 ## 절차 (Mechanics)
 
 1. **setter 호출처 조사** — IDE find usages.

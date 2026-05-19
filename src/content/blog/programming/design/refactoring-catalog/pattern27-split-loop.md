@@ -49,6 +49,10 @@ bookAuthor: "Martin Fowler"
 - [Extract Function](/blog/programming/design/refactoring-catalog/pattern01-extract-function)을 *준비*.
 - [Replace Loop with Pipeline](/blog/programming/design/refactoring-catalog/pattern28-replace-loop-with-pipeline)을 *준비*.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 27 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern27-split-loop.svg)
+
 ## 절차 (Mechanics)
 
 1. **loop 본문을 복사**해 두 loop로 만든다.

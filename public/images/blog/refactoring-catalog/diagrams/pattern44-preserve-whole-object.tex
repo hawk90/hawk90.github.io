@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — exploded};
+\node[con, text width=48mm, align=left, minimum height=18mm] (b) at (-4.5, 1.2)
+  {check(person.age,\\\quad person.height,\\\quad person.weight)};
+\node[font=\footnotesize\itshape, mutec] at (-4.5, -1) {새 field 추가 시 signature 변경};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — whole object};
+\node[imp, text width=48mm, align=left, minimum height=18mm] (a) at (4.5, 1.2)
+  {check(person)\\\quad ...uses age, height, weight};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{Preserve Whole} (1.8, 1.2);
+
+\end{tikzpicture}
+\end{document}

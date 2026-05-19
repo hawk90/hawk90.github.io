@@ -29,6 +29,10 @@ bookAuthor: "Martin Fowler"
 
 판단은 *통계*로 한다. 함수 본문에서 호출되는 멤버 중 *현 클래스 멤버 비율*과 *다른 클래스 멤버 비율*을 세어 본다. 후자가 더 크면 이사가 답이다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 21 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern21-move-function.svg)
+
 ## 절차 (Mechanics)
 
 1. **함수가 의존하는 모든 요소를 식별**한다. 현 컨텍스트(필드, 헬퍼, 외부 상수)와 목적지 컨텍스트 양쪽.

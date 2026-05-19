@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 2.6) {Before};
+\node[con, text width=50mm, align=left, minimum height=18mm] (b) at (-4.5, 0.8)
+  {\textbf{getPrice()}\\\quad basePrice = qty * price;\\\quad return basePrice * discount;};
+
+\node[font=\sffamily\bfseries] at (4.5, 2.6) {After};
+\node[imp, text width=50mm, align=left, minimum height=10mm] (q) at (4.5, 1.8)
+  {\textbf{basePrice()}\\return qty * price;};
+\node[imp, text width=50mm, align=left, minimum height=10mm] (g) at (4.5, 0.0)
+  {\textbf{getPrice()}\\return basePrice() * discount;};
+\draw[arr] (g.north) -- (q.south);
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 0.8) -- node[above, font=\footnotesize]{Replace Temp with Query} (1.8, 0.8);
+
+\end{tikzpicture}
+\end{document}

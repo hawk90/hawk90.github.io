@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[hi, minimum width=24mm] (data) at (-4.5, 1.2) {data};
+\node[con, minimum width=20mm] (c1) at (-7, -0.2) {caller A};
+\node[con, minimum width=20mm] (c2) at (-4.5, -0.2) {caller B};
+\node[con, minimum width=20mm] (c3) at (-2, -0.2) {caller C};
+\draw[arr] (c1.north) -- (data.south);
+\draw[arr] (c2.north) -- (data.south);
+\draw[arr] (c3.north) -- (data.south);
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After};
+\node[imp, minimum width=28mm] (g) at (4.5, 1.6) {get/set()};
+\node[hi, minimum width=24mm] (d2) at (4.5, 0.2) {data (hidden)};
+\node[con, minimum width=20mm] (c4) at (2, -1.4) {caller A};
+\node[con, minimum width=20mm] (c5) at (4.5, -1.4) {caller B};
+\node[con, minimum width=20mm] (c6) at (7, -1.4) {caller C};
+\draw[arr] (c4.north) -- (g.south);
+\draw[arr] (c5.north) -- (g.south);
+\draw[arr] (c6.north) -- (g.south);
+\draw[arr] (g.south) -- (d2.north);
+
+\node[font=\footnotesize\itshape, mutec, text width=70mm, align=center] at (0, -2.6)
+  {모든 접근을 함수 뒤로 — 변경에 hook 가능};
+
+\end{tikzpicture}
+\end{document}

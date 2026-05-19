@@ -65,6 +65,10 @@ function regularCharge() { return quantity * plan.regularRate + plan.regularServ
 - 같은 조건을 *재사용*하려는 신호.
 - *테스트 케이스*가 조건 단위로 작성되어야 함.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 35 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern35-decompose-conditional.svg)
+
 ## 절차 (Mechanics)
 
 1. **조건식**을 [Extract Function](/blog/programming/design/refactoring-catalog/pattern01-extract-function)으로 추출, *질문 형태* 이름 (`isSummer`, `canAffordLoan`).

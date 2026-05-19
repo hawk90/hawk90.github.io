@@ -67,6 +67,10 @@ const within = withinRange(room);
 - 객체 *전체 의존이 의도된 단점* (좁은 surface 유지).
 - 테스트에서 *mock 부담* 증가.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 44 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern44-preserve-whole-object.svg)
+
 ## 절차 (Mechanics)
 
 1. **새 매개변수**(객체)를 받는 함수 작성. 본문에서 *기존 매개변수를 객체에서 추출*.

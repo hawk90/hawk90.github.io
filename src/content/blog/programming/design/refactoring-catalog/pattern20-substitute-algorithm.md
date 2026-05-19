@@ -44,6 +44,10 @@ bookAuthor: "Martin Fowler"
 - 새 알고리즘이 *검증된 라이브러리*.
 - 옛 알고리즘이 *불필요한 복잡도*를 가짐.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 20 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern20-substitute-algorithm.svg)
+
 ## 절차 (Mechanics)
 
 1. 새 알고리즘이 *기존 동작과 동일*함을 검증할 *테스트를 충분히* 갖춘다. 부족하면 추가.

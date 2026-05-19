@@ -77,6 +77,10 @@ const e2 = createManager("Bob");
 - 단순 생성 — constructor가 충분.
 - Java/C# *constructor가 더 관용적*인 컨텍스트.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 48 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern48-replace-constructor-with-factory-function.svg)
+
 ## 절차 (Mechanics)
 
 1. **factory function** 작성 — 적절 이름.

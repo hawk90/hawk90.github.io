@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 2.6) {Before};
+\node[con, text width=44mm, align=left, minimum height=14mm] (b) at (-4.5, 1)
+  {\texttt{let a = h * 1.8 + 32;}\\\textit{a가 무엇인지 불명}};
+
+\node[font=\sffamily\bfseries] at (4.5, 2.6) {After};
+\node[imp, text width=46mm, align=left, minimum height=14mm] (a) at (4.5, 1)
+  {\texttt{let fahrenheit =}\\\quad\texttt{celsius * 1.8 + 32;}};
+
+\draw[->, edgec, line width=1.2pt] (-1.6, 1) -- node[above, font=\footnotesize]{Rename Variable} (1.8, 1);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -0.8)
+  {이름 = 가장 가벼운 문서 — 더 나은 이름이 떠오르면 바로};
+
+\end{tikzpicture}
+\end{document}

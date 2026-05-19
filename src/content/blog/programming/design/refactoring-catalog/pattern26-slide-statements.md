@@ -53,6 +53,10 @@ Slide는 *작은 리팩토링*이지만 [Extract Function](/blog/programming/des
 - [Extract Function](/blog/programming/design/refactoring-catalog/pattern01-extract-function)을 *준비*한다.
 - 코드 review에서 *왜 이게 여기 있지?* 의문이 든다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 26 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern26-slide-statements.svg)
+
 ## 절차 (Mechanics)
 
 1. **이동할 statement**의 *side effect와 dependency* 분석.

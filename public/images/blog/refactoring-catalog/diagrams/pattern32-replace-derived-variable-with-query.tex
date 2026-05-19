@@ -1,0 +1,24 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — stored derived};
+\node[con, text width=46mm, align=left, minimum height=22mm] (b) at (-4.5, 1.2)
+  {\textbf{Order}\\\hrulefill\\items[]\\\textbf{total} (synced)\\\hrulefill\\addItem(x) \{ ..., updateTotal() \}};
+\node[font=\footnotesize\itshape, mutec, text width=46mm, align=center] at (-4.5, -1.4)
+  {invariant 깨질 위험};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — query};
+\node[imp, text width=46mm, align=left, minimum height=22mm] (a) at (4.5, 1.2)
+  {\textbf{Order}\\\hrulefill\\items[]\\\hrulefill\\addItem(x)\\\textbf{total()} \{ return sum(items) \}};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{$\rightarrow$ Query} (2.0, 1.2);
+
+\end{tikzpicture}
+\end{document}

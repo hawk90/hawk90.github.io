@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — feature envy};
+\node[con, text width=42mm, align=left, minimum height=18mm] (a1) at (-6.2, 1)
+  {\textbf{Account}\\\hrulefill\\overdraftCharge()\\\textit{Type 만 만짐}};
+\node[hi, text width=30mm, align=left, minimum height=14mm] (t1) at (-2.8, 1)
+  {\textbf{AccountType}\\\hrulefill\\isPremium\\rate};
+\draw[arr] (a1.east) -- node[above, font=\scriptsize]{reads} (t1.west);
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — moved};
+\node[con, text width=30mm, align=left, minimum height=14mm] (a2) at (2.2, 1)
+  {\textbf{Account}\\\hrulefill\\type};
+\node[imp, text width=42mm, align=left, minimum height=18mm] (t2) at (6, 1)
+  {\textbf{AccountType}\\\hrulefill\\overdraftCharge()};
+\draw[arr] (a2.east) -- (t2.west);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -0.8)
+  {함수를 진짜 주인에게 — 결합도 ↓};
+
+\end{tikzpicture}
+\end{document}

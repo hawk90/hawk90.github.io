@@ -35,6 +35,10 @@ bookAuthor: "Martin Fowler"
 - *책임 분리*가 필요한 시점.
 - 함수가 너무 많은 일을 하기 시작.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 24 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern24-move-statements-to-callers.svg)
+
 ## 절차 (Mechanics)
 
 1. **statement를 *모든 호출 사이트*로 복사** — 한 호출자씩 옮긴다.

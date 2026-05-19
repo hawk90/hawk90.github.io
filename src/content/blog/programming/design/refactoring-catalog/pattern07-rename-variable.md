@@ -45,6 +45,10 @@ bookAuthor: "Martin Fowler"
 - 약어가 모호하다.
 - *컨텍스트가 확장*되어 짧은 이름이 더 이상 충분하지 않다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 7 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern07-rename-variable.svg)
+
 ## 절차 (Mechanics)
 
 ### 로컬 변수 (한 함수 안에만)

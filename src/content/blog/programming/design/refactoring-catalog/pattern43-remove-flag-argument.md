@@ -75,6 +75,10 @@ process(order, true);   // true가 "express"라는 의미
 - flag가 *선택적 동작 옵션* (e.g., `fetch(url, { cache: false })`). config object의 일부.
 - *내부 helper*에서 두 함수를 묶는 implementation 디테일.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 43 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern43-remove-flag-argument.svg)
+
 ## 절차 (Mechanics)
 
 1. **각 모드별로 explicit 함수** 작성.

@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3.2) {Before};
+\node[con, text width=38mm, align=left, minimum height=20mm] (b) at (-4.5, 1.5)
+  {\textbf{Organization}\\[3pt]name\\[2pt]\textbf{country}};
+
+\node[font=\sffamily\bfseries] at (4.5, 3.2) {After};
+\node[imp, text width=38mm, align=left, minimum height=20mm] (a) at (4.5, 1.5)
+  {\textbf{Organization}\\[3pt]title\\[2pt]\textbf{countryCode}};
+
+\draw[->, edgec, line width=1.2pt] (-2.5, 1.5) -- node[above, font=\footnotesize]{Rename Field} (2.5, 1.5);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -1.0)
+  {Encapsulate Record 후 단계적 마이그레이션};
+
+\end{tikzpicture}
+\end{document}

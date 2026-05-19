@@ -50,6 +50,10 @@ Fowler가 강조하는 흐름:
 - 함수 추출을 *준비* — 변수가 추출 경계에 걸리는 경우.
 - 변수가 *함수 외부* 의미를 가지기 시작.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 15 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern15-replace-temp-with-query.svg)
+
 ## 절차 (Mechanics)
 
 1. **변수가 side effect 없이 한 번만 할당**되는지 확인.

@@ -49,6 +49,10 @@ bookAuthor: "Martin Fowler"
 - *옛 기능 제거* 마무리.
 - 코드 리뷰에서 dead code 발견.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 29 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern29-remove-dead-code.svg)
+
 ## 절차 (Mechanics)
 
 1. **dead 여부 확신** — 동적 호출, reflection, 외부 lib 사용 안 함 확인.

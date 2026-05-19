@@ -37,6 +37,10 @@ bookAuthor: "Martin Fowler"
 - 너무 많은 위임(delegation)으로 호출 chain이 길다.
 - 한 함수가 *함수 자체로 존재할 정당성*보다 *호출자 안에서의 표현*이 더 직접적이다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 2 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern02-inline-function.svg)
+
 ## 절차 (Mechanics)
 
 1. **다형성 함수 (override)** 인지 확인. override가 있으면 인라인 *불가* — 메서드 디스패치를 잃는다.

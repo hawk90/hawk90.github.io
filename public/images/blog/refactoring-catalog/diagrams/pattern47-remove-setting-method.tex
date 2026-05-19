@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before};
+\node[con, text width=46mm, align=left, minimum height=22mm] (b) at (-4.5, 1.2)
+  {\textbf{Person}\\\hrulefill\\\texttt{getId() / setId(x)}\\\texttt{getName() / setName(x)}};
+\node[font=\footnotesize\itshape, mutec] at (-4.5, -1.4) {id가 변경 가능해 보임};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After};
+\node[imp, text width=46mm, align=left, minimum height=22mm] (a) at (4.5, 1.2)
+  {\textbf{Person}\\\hrulefill\\\texttt{getId()  (immutable)}\\\texttt{getName() / setName(x)}};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{Remove Setter} (1.8, 1.2);
+
+\end{tikzpicture}
+\end{document}

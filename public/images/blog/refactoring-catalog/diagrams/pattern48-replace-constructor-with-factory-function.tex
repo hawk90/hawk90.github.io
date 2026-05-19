@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries] at (-4.5, 3) {Before — constructor};
+\node[con, text width=46mm, align=left, minimum height=20mm] (b) at (-4.5, 1.2)
+  {new Employee(name, 'E')\\new Employee(name, 'M')\\[4pt]\textit{'E'/'M'은 무엇?}};
+
+\node[font=\sffamily\bfseries] at (4.5, 3) {After — factory};
+\node[imp, text width=46mm, align=left, minimum height=20mm] (a) at (4.5, 1.2)
+  {createEngineer(name)\\createManager(name)\\[4pt]\textit{이름이 의도}};
+
+\draw[->, edgec, line width=1.2pt] (-1.7, 1.2) -- node[above, font=\footnotesize]{$\rightarrow$ Factory} (1.8, 1.2);
+
+\node[font=\footnotesize\itshape, mutec, text width=80mm, align=center] at (0, -1.6)
+  {subtype 반환·conditional 생성도 가능};
+
+\end{tikzpicture}
+\end{document}

@@ -59,6 +59,10 @@ for (const x of items) sum += x;
 - 이름이 *한 의미만* 담아 *다른 사용처 의도 불명*.
 - *immutable*로 만들고 싶다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 30 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern30-split-variable.svg)
+
 ## 절차 (Mechanics)
 
 1. **첫 번째 할당 + 사용처**에 새 이름 부여.

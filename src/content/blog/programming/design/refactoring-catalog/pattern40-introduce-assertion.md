@@ -89,6 +89,10 @@ function calculateAverage(values) {
 - 같은 invariant가 *여러 곳*에 가정됨.
 - *디버깅 어려운* bug의 root cause 추적.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 40 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern40-introduce-assertion.svg)
+
 ## 절차 (Mechanics)
 
 1. **암묵적 가정** 식별 (주석, 작명, 변수 사용 패턴에서 단서).

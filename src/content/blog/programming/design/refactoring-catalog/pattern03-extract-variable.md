@@ -37,6 +37,10 @@ bookAuthor: "Martin Fowler"
 - 표현식이 너무 길어 한 줄에 안 들어간다.
 - 표현식이 *의미를 가지는데 이름이 없다*.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 3 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern03-extract-variable.svg)
+
 ## 절차 (Mechanics)
 
 1. **추출할 표현식이 side effect 없는지** 확인. 있다면 인라인 후 호출 횟수가 변해 동작이 바뀐다.

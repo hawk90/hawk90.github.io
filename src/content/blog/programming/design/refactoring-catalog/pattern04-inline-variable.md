@@ -37,6 +37,10 @@ bookAuthor: "Martin Fowler"
 - 변수가 한 번만 쓰이며 의미를 더하지 않는다.
 - 변수가 *너무 짧은 라이프타임*을 가져 *불필요한 인지 비용*만 만든다.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 4 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern04-inline-variable.svg)
+
 ## 절차 (Mechanics)
 
 1. **표현식이 side effect 없는지** 확인. 있다면 인라인 시 동작이 바뀐다.

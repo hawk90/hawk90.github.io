@@ -82,6 +82,10 @@ function getPayAmount(employee) {
 - 두 분기가 *동등한 본문* (if/else 유지).
 - 함수가 *너무 길어* return이 분산되면 추적 어려움.
 
+변환 구조를 한눈에 보면 다음과 같다.
+
+![Pattern 37 — before/after 구조](/images/blog/refactoring-catalog/diagrams/pattern37-replace-nested-conditional-with-guard-clauses.svg)
+
 ## 절차 (Mechanics)
 
 1. 가장 *바깥쪽 조건*을 보고, 그것이 *예외인지 본 path인지* 결정.
