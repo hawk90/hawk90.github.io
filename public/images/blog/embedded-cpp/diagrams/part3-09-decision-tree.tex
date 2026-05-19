@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+    grow=south,
+    level 1/.style={sibling distance=5.5cm, level distance=1.5cm},
+    level 2/.style={sibling distance=2.2cm, level distance=1.4cm},
+    every node/.style={
+        draw=conbord,
+        fill=confill,
+        rounded corners=3pt,
+        minimum height=0.7cm,
+        font=\sffamily\small,
+        text width=2.4cm,
+        align=center
+    },
+    edge from parent/.style={draw=conbord, thick},
+    root/.style={fill=absfill, draw=absbord, text width=3.5cm},
+    leaf/.style={fill=white, draw=nodebord}
+]
+\node[root] {객체 lifetime을\\누가 관리?}
+    child { node {한 명\\(단일 owner)}
+        child { node[leaf] {일반 객체\\{\tiny\texttt{unique\_ptr<T>}}} }
+        child { node[leaf] {배열\\{\tiny\texttt{unique\_ptr<T[]>}}} }
+        child { node[leaf] {Pool 할당\\{\tiny\texttt{+PoolDeleter}}} }
+    }
+    child { node {여러 명\\(진짜 공유)}
+        child { node[leaf] {정말 필요?\\{\tiny\texttt{shared\_ptr<T>}}} }
+        child { node[leaf] {cycle 방지\\{\tiny\texttt{weak\_ptr<T>}}} }
+    }
+    child { node {안 관리\\(non-owning)}
+        child { node[leaf] {매개변수\\{\tiny\texttt{T\&}, \texttt{const T*}}} }
+        child { node[leaf] {멤버\\{\tiny\texttt{T*}}} }
+        child { node[leaf] {nullable\\{\tiny\texttt{T*}}} }
+    };
+\end{tikzpicture}
+\end{document}

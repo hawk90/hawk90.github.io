@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+    level 1/.style={sibling distance=3cm, level distance=1.2cm},
+    level 2/.style={sibling distance=2.5cm, level distance=1.2cm},
+    every node/.style={
+        draw=conbord,
+        fill=confill,
+        rounded corners=3pt,
+        minimum width=2cm,
+        minimum height=0.7cm,
+        font=\sffamily\small
+    },
+    edge from parent/.style={draw=conbord, thick}
+]
+\node {Operating}
+    child { node {Idle} }
+    child { node {Working}
+        child { node {Reading} }
+        child { node {Writing} }
+    }
+    child { node {Error} };
+\end{tikzpicture}
+\end{document}
