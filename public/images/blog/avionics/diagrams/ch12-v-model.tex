@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  dev/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=30mm, minimum height=9mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  ver/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+    minimum width=30mm, minimum height=9mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  code/.style={rectangle, rounded corners=2pt, draw=hibord, fill=hifill,
+    minimum width=30mm, minimum height=9mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small}
+]
+
+% Left descending arm (development)
+\node[dev] (req)  at (-4.5, 4.5) {Requirements};
+\node[dev] (des)  at (-3.0, 3.0) {Design};
+\node[dev] (impl) at (-1.5, 1.5) {Implementation};
+
+% Bottom — code (V vertex)
+\node[code] (code) at (0, 0) {Code};
+
+% Right ascending arm (verification)
+\node[ver] (ut)  at ( 1.5, 1.5) {Unit Test};
+\node[ver] (st)  at ( 3.0, 3.0) {Integration / System};
+\node[ver] (at)  at ( 4.5, 4.5) {Acceptance / Flight};
+
+% V edges
+\draw[edge, line width=0.6pt] (req.south)  -- (des.north);
+\draw[edge, line width=0.6pt] (des.south)  -- (impl.north);
+\draw[edge, line width=0.6pt] (impl.south) -- (code.north west);
+\draw[edge, line width=0.6pt] (code.north east) -- (ut.south);
+\draw[edge, line width=0.6pt] (ut.north)   -- (st.south);
+\draw[edge, line width=0.6pt] (st.north)   -- (at.south);
+
+% Horizontal correspondences (dashed)
+\draw[alt] (req.east) -- (at.west);
+\draw[alt] (des.east) -- (st.west);
+\draw[alt] (impl.east) -- (ut.west);
+
+% Side labels
+\node[font=\sffamily\footnotesize\bfseries, text=mutec] at (-4.6, 5.4) {Development};
+\node[font=\sffamily\footnotesize\bfseries, text=mutec] at ( 4.6, 5.4) {Verification};
+
+\end{tikzpicture}
+\end{document}

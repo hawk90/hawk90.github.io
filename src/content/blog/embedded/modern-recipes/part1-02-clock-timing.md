@@ -25,19 +25,14 @@ draft: false
 
 대부분의 MCU는 여러 단계로 클럭을 만듭니다.
 
-```text
-HSE (External crystal, 8 MHz)
-        │
-        ▼
-       PLL (× N)
-        │
-        ▼  168 MHz
-   System bus
-        │
-        ├─ AHB (168 MHz)
-        ├─ APB1 (42 MHz, /4)
-        └─ APB2 (84 MHz, /2)
-```
+| 단계 | 클럭 | 비고 |
+| --- | --- | --- |
+| 소스 | HSE = 8 MHz | 외부 크리스털 |
+| PLL 출력 | 168 MHz | × N 체배 |
+| 시스템 버스 | 168 MHz | SYSCLK |
+| AHB | 168 MHz | HCLK (/1) |
+| APB1 | 42 MHz | PCLK1 (/4) |
+| APB2 | 84 MHz | PCLK2 (/2) |
 
 STM32F4 기준 예시입니다. 외부 8 MHz 크리스털을 PLL로 168 MHz까지 끌어올리고, 버스마다 prescaler로 나눠 분배합니다.
 

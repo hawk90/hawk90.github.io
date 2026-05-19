@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-state.tex}
+\begin{tikzpicture}[blog, state,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center}
+]
+
+\node[hdr] at (0, 5.4) {FreeRTOS Task State Machine};
+
+% Initial pseudo-state
+\node[initial] (init) at (-5.5, 3.4) {};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=south] at (init.north) {xTaskCreate};
+
+% States
+\node[stateImp] (ready) at (-2.8, 3.4) {READY};
+\node[stateCon] (running) at (1.4, 3.4) {RUNNING};
+\node[stateNeut] (blocked) at (1.4, 0.0) {BLOCKED \\[2pt] {\footnotesize (time / event)}};
+\node[stateWarn] (suspended) at (5.8, 0.0) {SUSPENDED \\[2pt] {\footnotesize (manual)}};
+
+% Create -> Ready
+\draw[trans] (init.east) -- (ready.west);
+
+% Ready <-> Running
+\draw[trans] ($(ready.east)+(0,0.25)$) -- node[transLabel] {scheduler picks} ($(running.west)+(0,0.25)$);
+\draw[trans] ($(running.west)+(0,-0.25)$) -- node[transLabel] {preempted} ($(ready.east)+(0,-0.25)$);
+
+% Running -> Blocked
+\draw[trans] ($(running.south)+(-0.25,0)$) -- node[transLabel, pos=0.5] {block call} ($(blocked.north)+(-0.25,0)$);
+% Blocked -> Ready (unblock condition met -> ready)
+\draw[trans] (blocked.west) to[bend left=20] node[transLabel, pos=0.5] {unblock / timeout} (ready.south);
+
+% Running -> Suspended (via vTaskSuspend)
+\draw[trans] (running.south east) to[bend left=15] node[transLabel, pos=0.5] {vTaskSuspend} (suspended.north);
+% Suspended -> Ready
+\draw[trans] (suspended.north west) to[bend left=25] node[transLabel, pos=0.5] {vTaskResume} ($(ready.south)+(0.4,0)$);
+
+% Blocked -> Suspended
+\draw[transAlt] (blocked.east) -- node[transLabel, pos=0.5] {vTaskSuspend} (suspended.west);
+
+% Caption / footnote
+\node[font=\sffamily\footnotesize, text=mutec, anchor=north, text width=12cm, align=center]
+  at (0, -1.6) {\textit{vTaskDelete}는 어느 상태에서나 가능 — 삭제 후 idle task가 메모리 회수.};
+
+\end{tikzpicture}
+\end{document}

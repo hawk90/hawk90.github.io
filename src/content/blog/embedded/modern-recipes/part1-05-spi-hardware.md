@@ -23,14 +23,6 @@ draft: false
 
 ### 1) 4선 구성
 
-```text
-Master (MCU)            Slave (예: SPI flash)
-  SCK    ─────────────→  SCK
-  MOSI   ─────────────→  MOSI
-  MISO   ←─────────────  MISO
-  CS#    ─────────────→  CS#
-```
-
 | 핀 | 방향 | 의미 |
 | --- | --- | --- |
 | SCK | M → S | Serial clock (master가 만듬) |

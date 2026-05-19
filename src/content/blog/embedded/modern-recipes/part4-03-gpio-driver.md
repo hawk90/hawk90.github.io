@@ -49,13 +49,12 @@ GPIOA->AFR[PIN / 8] |=  (AF7  << ((PIN % 8) * 4));  // AF7 = USART1
 
 ### Mode 4가지의 의미
 
-```text
-Input         Output        Alternate      Analog
-PA5 ───┐      PA5 ──────    PA5 ──────     PA5 ──────
-       │       │ PP/OD       │ peripheral   │ ADC/DAC
-       ↓       ↓             ↓             ↓
-      IDR    ODR/BSRR      USART/SPI/...  ADC mux
-```
+| Mode | 데이터 경로 | 비고 |
+| --- | --- | --- |
+| Input | pin → IDR | digital read |
+| Output | ODR / BSRR → pin | PP 또는 OD |
+| Alternate | peripheral ↔ pin | USART / SPI / TIM 등 |
+| Analog | pin ↔ ADC mux / DAC | digital buffer off |
 
 - **Input**: digital input, IDR로 읽기.
 - **Output**: digital output, BSRR/ODR로 쓰기.
@@ -66,14 +65,11 @@ Analog 모드는 *소비전력 측면에서도 중요*합니다. 사용하지 �
 
 ### Push-Pull vs Open-Drain
 
-```text
-Push-Pull           Open-Drain
-3.3V ──┐            (no VCC pull)
-       PMOS
-       ├── pin       NMOS
-       NMOS          ├── pin
-GND ──┘             GND
-```
+| 구성 | Push-Pull | Open-Drain |
+| --- | --- | --- |
+| 3.3 V 측 | PMOS (1 drive) | 없음 (외부 pull-up 필요) |
+| GND 측 | NMOS (0 drive) | NMOS (0 drive) |
+| 1 출력 | active high | high-Z (외부 풀업이 끌어올림) |
 
 - **Push-Pull**: 0과 1을 *모두 능동적으로* drive. 일반 출력.
 - **Open-Drain**: 0만 drive, 1은 *high-Z* (외부 pull-up 필요). I2C, level shifter, wired-OR에 사용.

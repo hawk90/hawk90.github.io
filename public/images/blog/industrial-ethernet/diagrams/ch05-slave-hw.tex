@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={cls, minimum width=72mm, minimum height=18mm, align=center},
+  rj/.style={font=\sffamily\footnotesize, text=inkc}
+]
+
+\node[panel, minimum width=92mm, minimum height=82mm, anchor=center] (board) at (0, -3) {};
+\node[panelTitle, anchor=north] at (board.north) {EtherCAT Slave Board};
+
+\node[rj] (rin) at (-2.5, 0.5) {RJ45 (IN)};
+\node[rj] (rout) at ( 2.5, 0.5) {RJ45 (OUT)};
+\draw[arr] (rin) -- ++(0, -1);
+\draw[arr] ($(rout) + (0,-1)$) -- (rout);
+
+\node[blk, fill=absfill, draw=absbord, align=center] (esc) at (0, -2.5)
+  {ESC (LAN9252) \\[2pt] \footnotesize 2 PHY embedded \\[1pt] \footnotesize FMMU, SM, DC, DPRAM};
+
+\draw[uses] (esc.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {SPI (10 MHz)} ++(0, -1);
+
+\node[blk, fill=impfill, draw=impbord, align=center] (mcu) at (0, -5.5)
+  {STM32F4 (or similar) \\[2pt] \footnotesize Application logic \\[1pt] \footnotesize Sensor/actuator drivers};
+
+\end{tikzpicture}
+\end{document}

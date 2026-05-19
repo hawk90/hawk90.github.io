@@ -99,15 +99,7 @@ Avionics — *예측 가능성 + 신뢰성 > 성능*.
 
 Topology:
 
-```text
-┌─────┐    Bus    ┌─────┐    ┌─────┐
-│ BC  │←─────────→│ RT1 │ ── │ RT2 │ ── ...
-└─────┘            └─────┘    └─────┘
-                     │
-                   Stub
-                     │
-                   Device
-```
+![1553B Bus topology — BC + RT + stub devices](/images/blog/avionics/diagrams/ch05-1553-topology.svg)
 
 Single-master — *deterministic 보장*. 모든 통신 BC가 schedule.
 

@@ -22,13 +22,12 @@ SPI는 sensor·flash·display·SD card·radio module이 가장 자주 쓰는 버
 
 ### SPI 신호선
 
-```text
-Master                  Slave
-SCK   ──────────────►   SCK
-MOSI  ──────────────►   MOSI
-MISO  ◄──────────────   MISO
-NSS   ──────────────►   NSS (CS)
-```
+| 신호 | 방향 | 비고 |
+| --- | --- | --- |
+| SCK | Master → Slave | serial clock |
+| MOSI | Master → Slave | data out |
+| MISO | Master ← Slave | data in |
+| NSS / CS | Master → Slave | active-low chip select |
 
 NSS (또는 CS, SS)는 *active-low*입니다. 둘 이상의 slave가 있으면 *master 측 GPIO* 여러 개로 각 slave의 CS를 제어합니다. STM32의 HW NSS는 한 핀만 지원해 multi-slave에서는 *수동 CS*가 표준입니다.
 

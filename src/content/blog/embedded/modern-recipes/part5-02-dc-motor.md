@@ -22,22 +22,15 @@ draft: false
 
 ### H-bridge 토폴로지
 
-```text
-            VBAT
-             │
-       Q1 ── ── Q3
-       │  ┌───┐  │
-       └──┤ M ├──┘
-       │  └───┘  │
-       Q2 ── ── Q4
-             │
-            GND
+H-bridge는 4개 스위치 (Q1·Q3 high-side, Q2·Q4 low-side)와 모터로 구성됩니다. VBAT — Q1·Q3 — Motor — Q2·Q4 — GND.
 
-방향 1: Q1 on, Q4 on → 좌→우 전류
-방향 2: Q3 on, Q2 on → 우→좌 전류
-Brake : Q1 on, Q3 on (또는 Q2/Q4) → short, 빠른 정지
-Coast : 모두 off → 자유 회전
-```
+| 동작 | ON 스위치 | 결과 |
+| --- | --- | --- |
+| 방향 1 (forward) | Q1, Q4 | 좌 → 우 전류 |
+| 방향 2 (reverse) | Q3, Q2 | 우 → 좌 전류 |
+| Brake | Q1+Q3 (또는 Q2+Q4) | 모터 단락 — 빠른 정지 |
+| Coast | 모두 off | 자유 회전 |
+| Shoot-through (금지) | Q1+Q2 또는 Q3+Q4 | 전원 short, IC 파손 |
 
 대각선 두 스위치가 켜지면 한 방향, 반대 대각선이면 반대 방향. Q1+Q2 또는 Q3+Q4 동시 ON은 *shoot-through* (short-circuit) — 절대 금지.
 

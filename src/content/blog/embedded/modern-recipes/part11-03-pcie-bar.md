@@ -39,20 +39,12 @@ PCIe extended config는 4 KB까지 확장됩니다 (PCIe Spec). 일반 OS는 0x1
 
 ## BAR Layout
 
-```text
-BAR (32-bit register):
-
-  31                          4  3  2 1  0
-  ┌─────────────────────────────┬──┬──┬──┐
-  │ Base Address              0 │ P│Ty│M │
-  └─────────────────────────────┴──┴──┴──┘
-
-  M (bit 0): 0 = Memory, 1 = I/O
-  Type (bit 1-2 for memory):
-    00 = 32-bit
-    10 = 64-bit (다음 BAR과 pair)
-  P (bit 3): Prefetchable
-```
+| 비트 | 폭 | 필드 | 의미 |
+| --- | --- | --- | --- |
+| 31:4 | 28 | Base Address | 자연 정렬, 하위는 0 |
+| 3 | 1 | P | Prefetchable |
+| 2:1 | 2 | Type | 00 = 32-bit, 10 = 64-bit (다음 BAR과 pair) |
+| 0 | 1 | M | 0 = Memory, 1 = I/O space |
 
 64-bit BAR은 인접한 두 BAR을 사용합니다 (예: BAR0 + BAR1).
 

@@ -53,37 +53,7 @@ draft: false
 
 ## 구성요소 한 장 정리
 
-```text
-                       BSP
-   ┌──────────────────────────────────────┐
-   │                                      │
-   │   [부트로더]                          │
-   │     U-Boot SPL  (DDR init, clk, mux) │
-   │     U-Boot proper (env, boot cmd)    │
-   │                                      │
-   │   [Secure monitor]  (ARMv8 only)     │
-   │     TF-A BL31                        │
-   │     OP-TEE  (선택)                    │
-   │                                      │
-   │   [커널]                              │
-   │     vmlinux + Image                  │
-   │     보드 패치, in-tree 드라이버      │
-   │     out-of-tree 모듈 (Wi-Fi 등)      │
-   │                                      │
-   │   [디바이스 트리]                     │
-   │     <soc>.dtsi                       │
-   │     <board>.dts                      │
-   │     <board>-<variant>.dtso (overlay) │
-   │                                      │
-   │   [빌드 통합]                         │
-   │     Buildroot defconfig 또는         │
-   │     Yocto meta-<vendor> layer        │
-   │                                      │
-   └──────────────────────────────────────┘
-                       │
-                       ▼
-              [애플리케이션 영역]
-```
+![BSP 구성요소 — 부트로더, secure monitor, 커널, 디바이스 트리, 빌드 통합](/images/blog/bsp/diagrams/chapter01-bsp-components.svg)
 
 각 컴포넌트가 *어디서 시작해 어디서 끝나는지*가 BSP 작업의 출발점입니다.
 

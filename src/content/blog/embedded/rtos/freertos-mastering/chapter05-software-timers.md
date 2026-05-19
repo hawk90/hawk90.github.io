@@ -35,27 +35,7 @@ draft: false
 
 ## 타이머 데몬의 구조
 
-```text
-                          ┌──────────────────────────────┐
-                          │       Timer Daemon Task      │
-                          │  (configTIMER_TASK_PRIORITY) │
-                          │                              │
-   xTimerStart()  ──────► │  command queue (length=10)   │
-   xTimerStop()           │  ┌──┬──┬──┬──┬──┬──┬──┐      │
-   xTimerReset() ───────► │  │  │  │  │  │  │  │  │      │
-   xTimerChangePeriod()   │  └──┴──┴──┴──┴──┴──┴──┘      │
-                          │                              │
-                          │  active timer list (정렬)    │
-                          │   ─ Timer A: 다음 expire 10ms │
-                          │   ─ Timer B: 다음 expire 50ms │
-                          │   ─ Timer C: 다음 expire 100ms│
-                          │                              │
-                          │  loop:                       │
-                          │   1. 다음 expire까지 wait    │
-                          │   2. expire한 타이머 콜백 호출│ ──► callback()
-                          │   3. command queue 처리      │
-                          └──────────────────────────────┘
-```
+![Timer Daemon Task의 구조 — command queue와 active timer list](/images/blog/rtos/diagrams/chapter05-timer-daemon.svg)
 
 핵심은 *두 가지*입니다.
 

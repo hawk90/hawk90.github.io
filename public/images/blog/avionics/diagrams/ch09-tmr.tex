@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ch/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=22mm, minimum height=11mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  voter/.style={rectangle, rounded corners=2pt, draw=hibord, fill=hifill,
+    minimum width=36mm, minimum height=10mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  outn/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+    minimum width=24mm, minimum height=9mm, inner sep=2pt, align=center,
+    font=\sffamily\bfseries\small}
+]
+
+\node[ch] (c1) at (-3.4, 3.2) {Channel 1};
+\node[ch] (c2) at ( 0.0, 3.2) {Channel 2};
+\node[ch] (c3) at ( 3.4, 3.2) {Channel 3};
+
+\node[voter] (v) at (0, 1.4) {Voter — majority 2-of-3};
+
+\node[outn] (o) at (0, -0.4) {Output};
+
+\draw[arr] (c1.south) -- (c1.south |- v.north);
+\draw[arr] (c2.south) -- (v.north);
+\draw[arr] (c3.south) -- (c3.south |- v.north);
+\draw[arr, line width=0.6pt] (v.south) -- (o.north);
+
+\end{tikzpicture}
+\end{document}

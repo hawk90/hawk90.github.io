@@ -109,24 +109,7 @@ PROFINET은 *역할*을 세 가지로 정의합니다.
 
 EtherCAT의 *master-slave*가 명확한 역할 구분이라면, PROFINET은 *Supervisor*라는 *제3자*를 추가로 둡니다. 이게 *PLC 프로그래머 워크플로*와 잘 맞습니다. *PC에서 PLC와 슬레이브를 모니터링하면서 디버깅*하는 절차가 표준화되어 있습니다.
 
-```text
-PROFINET application 흐름
-  ┌────────────────────┐
-  │  IO-Supervisor (PC)│ ← TIA Portal
-  └─────────┬──────────┘
-            │ TCP/IP (best-effort)
-   ─────────┼─────────────────────────────────────────────
-            │
-  ┌─────────┴──────────┐
-  │  IO-Controller     │ ← S7-1500 PLC
-  │   (PLC scan)       │
-  └─────────┬──────────┘
-            │ PROFINET RT/IRT (cyclic)
-            ↓
-  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-  │  IO-Device 1 │  │  IO-Device 2 │  │  IO-Device 3 │
-  └──────────────┘  └──────────────┘  └──────────────┘
-```
+![PROFINET application 흐름 — Supervisor(PC)는 TCP/IP로 Controller에, Controller는 RT/IRT로 Device들에 연결](/images/blog/industrial-ethernet/diagrams/ch06-profinet-hierarchy.svg)
 
 Controller-Device 사이는 *주기 PDO*가, Supervisor는 *비주기 진단*이 흐릅니다.
 

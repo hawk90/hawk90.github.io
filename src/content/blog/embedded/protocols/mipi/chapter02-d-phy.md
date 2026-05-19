@@ -32,15 +32,7 @@ draft: true
 
 ## LP / HS Dual-Mode
 
-```text
-┌─────────────────────────────────────────────────────┐
-│ LP-11 (idle, 둘 다 1.2V)                             │
-│   ↓ LP-01, LP-00, ...  (mode entry sequence)        │
-│ HS Sync (00011101)                                  │
-│   ↓ HS payload — DDR, ±200mV                        │
-│ HS Trail → LP-11 복귀                                │
-└─────────────────────────────────────────────────────┘
-```
+![D-PHY 시퀀스 — LP-11 idle → mode entry → HS Sync → HS payload → HS Trail → LP-11 복귀](/images/blog/mipi/diagrams/ch02-d-phy-states.svg)
 
 ### LP (Low-Power) Mode
 

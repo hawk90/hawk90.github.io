@@ -121,31 +121,7 @@ priority  0  ─── idle (Idle task 전용)
 
 ## 태스크 상태 머신 — 4상태
 
-```text
-                  xTaskCreate
-                       │
-                       ▼
-                  ┌─────────┐
-                  │  READY  │ ◄──── Higher priority Ready
-                  └─────────┘       선점 당함
-                    │     ▲
-        선택됨      │     │ blocking 조건이 풀림
-                    ▼     │ (큐에 데이터, 시간 경과, 세마포 give, ...)
-                  ┌─────────┐
-                  │ RUNNING │
-                  └─────────┘
-                    │     ▲
-  vTaskSuspend()    │     │ vTaskResume()
-                    │     │
-                    ▼     │
-                  ┌─────────┐         ┌──────────┐
-                  │ BLOCKED │ ──────► │ SUSPENDED│
-                  │ (time/  │         │ (수동)   │
-                  │  event) │         └──────────┘
-                  └─────────┘
-
-벡터: vTaskDelete()는 어느 상태에서나 → 삭제
-```
+![FreeRTOS Task 상태 머신](/images/blog/rtos/diagrams/chapter03-task-states.svg)
 
 | 상태 | 진입 방법 | 빠져나가는 조건 |
 |------|----------|----------------|

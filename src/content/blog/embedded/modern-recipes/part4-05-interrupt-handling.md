@@ -58,15 +58,13 @@ void USART1_IRQHandler(void) {
 
 ### NVIC 구성
 
-```text
-                  ┌─────────────────┐
-peripheral IRQ ──→│   NVIC          │──→ CPU
-                  │  - enable        │
-                  │  - pending       │
-                  │  - active        │
-                  │  - priority      │
-                  └─────────────────┘
-```
+| 흐름 | NVIC 내부 상태 / 필드 | 비고 |
+| --- | --- | --- |
+| peripheral IRQ → NVIC | enable mask | 받을지 결정 |
+| NVIC 내부 | pending | 미처리 IRQ 표시 |
+| NVIC 내부 | active | 처리 중 표시 |
+| NVIC 내부 | priority | 작을수록 높음 |
+| NVIC → CPU | 가장 높은 priority의 pending 선택 | CPU에 인터럽트 신호 |
 
 세 가지 API가 핵심입니다.
 

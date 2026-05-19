@@ -18,20 +18,7 @@ EtherCAT은 표준 Ethernet 위에 *자기 EtherType*을 얹는 방식입니다.
 
 ## Ethernet 프레임 안에 EtherCAT
 
-```text
-표준 Ethernet 프레임 (Ethernet II)
-  ┌─────────┬──────────┬─────────┬────────────────────┬─────┐
-  │ DA (6B) │ SA (6B)  │EtherType│      Payload       │ FCS │
-  └─────────┴──────────┴─────────┴────────────────────┴─────┘
-                            ↑
-                       0x88A4 = EtherCAT
-                       
-EtherCAT Payload 구조
-  ┌──────────────┬──────────┬──────────┬─────┬──────────┐
-  │ EtherCAT Hdr │Datagram 1│Datagram 2│ ... │Datagram N│
-  │   (2 byte)   │          │          │     │          │
-  └──────────────┴──────────┴──────────┴─────┴──────────┘
-```
+![EtherCAT 프레임 — Ethernet II에서 시작하여 Payload가 EtherCAT Header + Datagram chain으로 확장되고, 각 datagram은 Cmd/Idx/Address/Len/IRQ/Data/WKC 구조](/images/blog/industrial-ethernet/diagrams/ch04-ethercat-frame.svg)
 
 EtherType `0x88A4`가 EtherCAT의 시그니처입니다. Wireshark는 이 EtherType을 보고 *EtherCAT dissector*를 활성화합니다.
 
@@ -48,21 +35,14 @@ Type=0x1이 대부분입니다. Type=0x4는 *Network Variables*, Type=0x5는 *Ma
 
 ## Datagram 구조
 
-```text
-EtherCAT Datagram (12 byte header + data + 2 byte WKC)
-  ┌────┬────┬─────────┬──────┬──────┬─────────┬─────────┬──────┐
-  │Cmd │Idx │ Address │ Len  │ Rsv  │ IRQ Bit │  Data   │ WKC  │
-  │1B  │1B  │  4B     │ 11b  │ 3b   │  16b    │ N byte  │ 2B   │
-  └────┴────┴─────────┴──────┴──────┴─────────┴─────────┴──────┘
-                                        ↑
-                              0=마지막, 1=뒤에 datagram 더 있음
+Datagram 필드 의미:
 
-  Cmd: 명령 코드 (다음 표)
-  Idx: 마스터가 응답 매칭에 쓰는 ID
-  Address: 명령에 따라 의미가 다름
-  Len: data 길이 (11 bit, 최대 1486 byte)
-  WKC: 슬레이브들이 *각자 1씩 증가*시킨 카운터
-```
+- **Cmd** (1B): 명령 코드 (다음 표)
+- **Idx** (1B): 마스터가 응답 매칭에 쓰는 ID
+- **Address** (4B): 명령에 따라 의미가 다름
+- **Len** (11b): data 길이 (최대 1486 byte)
+- **IRQ Bit** (16b): 0=마지막 datagram, 1=뒤에 datagram 더 있음
+- **WKC** (2B): 슬레이브들이 *각자 1씩 증가*시킨 카운터
 
 ## 명령 코드 — 핵심 표
 

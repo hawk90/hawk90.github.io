@@ -105,16 +105,7 @@ Partition = process group + 자원. Linux process != ARINC partition.
 
 예 — 100 ms major frame:
 
-```text
-┌────────────────────────────────────┐
-│ P1: 0-20 ms (20 ms slice)          │
-│ P2: 20-50 ms (30 ms slice)         │
-│ P3: 50-70 ms (20 ms slice)         │
-│ P4: 70-90 ms (20 ms slice)         │
-│ Idle: 90-100 ms (10 ms slack)      │
-└────────────────────────────────────┘
-← cycle 반복
-```
+![ARINC-653 Major Frame — 100ms cycle with 4 partitions](/images/blog/avionics/diagrams/ch03-arinc653-major-frame.svg)
 
 각 partition — 자기 slice만 CPU 사용. 다른 partition — *영향 0* (time isolation).
 

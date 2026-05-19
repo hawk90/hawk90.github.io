@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=4mm,
+  comp/.style={cls, minimum width=92mm, minimum height=20mm, align=left, font=\footnotesize, inner sep=6pt, text width=84mm},
+  bootB/.style={comp, fill=absfill, draw=absbord},
+  secB/.style={comp, fill=prpfill, draw=prpbord},
+  kerB/.style={comp, fill=impfill, draw=impbord},
+  dtB/.style={comp, fill=hifill, draw=hibord},
+  buildB/.style={comp, fill=tealfill, draw=tealbord},
+  appB/.style={cls, fill=neutfill, draw=neutbord, minimum width=60mm, minimum height=10mm, font=\footnotesize\itshape, align=center}
+]
+
+\node[font=\footnotesize\bfseries\itshape] (title) at (0, 0) {BSP};
+
+\node[bootB, below=4mm of title] (boot) {%
+  \textbf{[부트로더]}\\[3pt]
+  U-Boot SPL (DDR init, clk, mux)\\[2pt]
+  U-Boot proper (env, boot cmd)};
+
+\node[secB, below=2mm of boot] (sec) {%
+  \textbf{[Secure monitor]} \textit{(ARMv8 only)}\\[3pt]
+  TF-A BL31\\[2pt]
+  OP-TEE (선택)};
+
+\node[kerB, below=2mm of sec] (ker) {%
+  \textbf{[커널]}\\[3pt]
+  vmlinux + Image\\[2pt]
+  보드 패치, in-tree 드라이버\\[2pt]
+  out-of-tree 모듈 (Wi-Fi 등)};
+
+\node[dtB, below=2mm of ker] (dt) {%
+  \textbf{[디바이스 트리]}\\[3pt]
+  \texttt{<soc>.dtsi}\\[2pt]
+  \texttt{<board>.dts}\\[2pt]
+  \texttt{<board>-<variant>.dtso} (overlay)};
+
+\node[buildB, below=2mm of dt] (build) {%
+  \textbf{[빌드 통합]}\\[3pt]
+  Buildroot defconfig 또는\\[2pt]
+  Yocto \texttt{meta-<vendor>} layer};
+
+\begin{scope}[on background layer]
+  \node[draw=groupbord, line width=0.5pt, rounded corners=4pt,
+        fit=(boot)(sec)(ker)(dt)(build),
+        inner sep=4mm, fill=black!2] (bsp) {};
+\end{scope}
+
+\node[appB, below=6mm of bsp] (app) {[애플리케이션 영역]};
+
+\draw[flow] (bsp.south) -- (app.north);
+
+\end{tikzpicture}
+\end{document}

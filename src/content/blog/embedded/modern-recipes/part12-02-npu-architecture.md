@@ -51,13 +51,12 @@ Systolic array (TPU style):
 
 Ethos-U55가 Cortex-M55와 결합한 시스템:
 
-```text
-[Cortex-M55] ←→ [Ethos-U55]
-   |                  |
-   | (control)        | (MAC array)
-   |                  |
-   └──── AXI ────── DDR/SRAM
-```
+| 블록 | 역할 | 연결 |
+| --- | --- | --- |
+| Cortex-M55 | kernel dispatch, control | Ethos-U55 (control), AXI |
+| Ethos-U55 | MAC array, NN inference | Cortex-M55 (control), AXI |
+| AXI bus | shared interconnect | DDR / SRAM |
+| DDR / SRAM | weight·activation 저장 | M55·U55 모두 접근 |
 
 CPU가 kernel을 dispatch, NPU가 MAC을 처리. MCU급 power budget(수십 mW)에서 1 TOPS.
 

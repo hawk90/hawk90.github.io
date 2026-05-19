@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={rectangle, rounded corners=2pt, draw=nodebord, line width=0.5pt,
+    minimum width=22mm, minimum height=10mm, inner sep=3pt, align=center,
+    font=\sffamily\small},
+  ctrl/.style={blk, fill=absfill, draw=absbord, font=\sffamily\bfseries\small},
+  drv/.style={blk, fill=impfill, draw=impbord},
+  outn/.style={blk, fill=hifill, draw=hibord, font=\sffamily\bfseries\small},
+  sens/.style={blk, fill=clifill, draw=clibord, font=\sffamily\footnotesize}
+]
+
+\node[font=\sffamily\bfseries, text=inkc, anchor=east] (cmd) at (-3.0, 1.5) {Command (deg)};
+\node[ctrl] (c)   at (-0.6, 1.5) {Controller};
+\node[drv]  (m)   at ( 2.0, 1.5) {Motor};
+\node[drv]  (mech) at (4.6, 1.5) {Mechanical};
+\node[outn] (n)   at ( 7.2, 1.5) {Nozzle\\position};
+
+\node[sens] (s) at (3.0, -0.6) {Position sensor (LVDT · encoder)};
+
+% Forward path
+\draw[arr, line width=0.6pt] (cmd.east) -- (c.west);
+\draw[arr, line width=0.6pt] (c.east) -- (m.west);
+\draw[arr, line width=0.6pt] (m.east) -- (mech.west);
+\draw[arr, line width=0.6pt] (mech.east) -- (n.west);
+
+% Feedback path
+\draw[arr, line width=0.5pt, draw=conbord] (n.south) |- (s.east);
+\draw[arr, line width=0.5pt, draw=conbord] (s.west) -| (c.south);
+
+\node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=west] at (5.4, -0.6) {(feedback)};
+
+\end{tikzpicture}
+\end{document}

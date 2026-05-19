@@ -25,15 +25,12 @@ draft: false
 
 I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 연결되고, 외부 풀업 저항으로 idle 시 1을 유지합니다.
 
-```text
-VDD ─┬───────── Rp ───────── Rp
-     │           │            │
-     │           SDA         SCL
-     │           │            │
-   Master ───────┴────────────┘
-                 │            │
-                Slave ────────┘
-```
+| 신호 | 연결 | 역할 |
+| --- | --- | --- |
+| VDD → Rp → SDA | 풀업 (2.2 ~ 10 kΩ) | idle 시 1 유지 |
+| VDD → Rp → SCL | 풀업 (2.2 ~ 10 kΩ) | idle 시 1 유지 |
+| Master ↔ SDA/SCL | open-drain | wired-AND 출력 |
+| Slave  ↔ SDA/SCL | open-drain | wired-AND 출력 |
 
 누구든 한 디바이스가 0을 출력하면 line은 0이 됩니다. 모두가 high-Z(release)일 때만 풀업이 1로 끌어올립니다. 이 wired-AND 특성이 multi-master arbitration의 기반입니다.
 

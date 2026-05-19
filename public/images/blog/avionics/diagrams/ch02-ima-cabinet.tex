@@ -1,0 +1,53 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  gpm/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=22mm, minimum height=15mm, inner sep=3pt, align=center,
+    font=\sffamily\footnotesize},
+  io/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+    minimum width=34mm, minimum height=10mm, inner sep=3pt, align=center,
+    font=\sffamily\footnotesize},
+  sw/.style={rectangle, draw=hibord, fill=hifill, line width=0.6pt,
+    minimum width=92mm, minimum height=4mm, inner sep=1pt, align=center,
+    font=\sffamily\footnotesize\bfseries},
+  cab/.style={rectangle, rounded corners=4pt, draw=neutbord, line width=0.6pt,
+    inner sep=8pt, fill=neutfill!40}
+]
+
+% GPM row
+\node[gpm] (g1) at (-3.4, 4.0) {GPM 1\\[2pt]\footnotesize{CPU + RAM}};
+\node[gpm] (g2) at ( 0.0, 4.0) {GPM 2\\[2pt]\footnotesize{CPU + RAM}};
+\node[gpm] (g3) at ( 3.4, 4.0) {GPM 3\\[2pt]\footnotesize{CPU + RAM}};
+
+% Switch
+\node[sw] (s) at (0, 2.0) {AFDX Switch};
+
+% I/O row
+\node[io] (i1) at (-2.4, 0.4) {I/O Module 1\\[2pt]\footnotesize{analog · digital}};
+\node[io] (i2) at ( 2.4, 0.4) {I/O Module 2\\[2pt]\footnotesize{1553 · ARINC-429}};
+
+% Edges
+\draw[arr] (g1.south) -- (g1.south |- s.north);
+\draw[arr] (g2.south) -- (g2.south |- s.north);
+\draw[arr] (g3.south) -- (g3.south |- s.north);
+\draw[arr] (i1.north) -- (i1.north |- s.south);
+\draw[arr] (i2.north) -- (i2.north |- s.south);
+
+% External LRU
+\node[font=\sffamily\footnotesize, text=mutec] (ext) at (0, -1.0) {각 LRU · sensor · actuator};
+\draw[arr, draw=mutec] (i1.south) -- ($(ext.north) + (-2.4, 0)$);
+\draw[arr, draw=mutec] (i2.south) -- ($(ext.north) + ( 2.4, 0)$);
+
+% Cabinet group
+\begin{pgfonlayer}{background}
+  \node[cab, fit=(g1)(g3)(i1)(i2)(s), label={[font=\sffamily\bfseries\small, text=inkc]above:Cabinet (ARINC-664 / AFDX 기반)}] (cab) {};
+\end{pgfonlayer}
+
+\end{tikzpicture}
+\end{document}

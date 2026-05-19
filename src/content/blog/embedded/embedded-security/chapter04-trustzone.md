@@ -209,35 +209,7 @@ GTZC_TZSC_S->SECCFGR3 |= GTZC_TZSC_SECCFGR3_LPTIM1_Pos;
 
 ARM PSA(Platform Security Architecture)는 TrustZone-M 위에서 동작하는 *표준 reference architecture*입니다. TF-M(Trusted Firmware-M)이 그 구현체입니다.
 
-```text
-┌─────────────────────────────────┐
-│        Non-Secure World         │
-│  ┌────────────────────────────┐ │
-│  │  Application / RTOS        │ │
-│  │  (FreeRTOS, Zephyr, …)     │ │
-│  └────────────────────────────┘ │
-│              │                  │
-│              │ PSA Function ID  │
-│              │ via veneer       │
-└──────────────┼──────────────────┘
-               │ SG instruction
-┌──────────────┼──────────────────┐
-│              ▼   Secure World   │
-│  ┌────────────────────────────┐ │
-│  │  TF-M SPM (SP Manager)     │ │
-│  └─────┬──────────────────────┘ │
-│        │                        │
-│  ┌─────┴────┐ ┌──────────┐      │
-│  │ Crypto   │ │ Internal │      │
-│  │  Service │ │  Trusted │      │
-│  │          │ │  Storage │      │
-│  └──────────┘ └──────────┘      │
-│  ┌──────────┐ ┌──────────┐      │
-│  │ Initial  │ │ Firmware │      │
-│  │  Attest  │ │  Update  │      │
-│  └──────────┘ └──────────┘      │
-└─────────────────────────────────┘
-```
+![TF-M PSA 아키텍처 — Non-Secure App → SG → Secure SPM + 4 services](/images/blog/embedded-security/diagrams/ch04-tfm-psa.svg)
 
 PSA가 제공하는 *4개의 표준 service*가 있습니다.
 

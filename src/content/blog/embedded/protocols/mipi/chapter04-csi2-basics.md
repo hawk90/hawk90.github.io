@@ -14,19 +14,7 @@ draft: true
 
 ## CSI-2 — 4 layer 모델
 
-```text
-┌────────────────────────┐
-│ Application Layer       │ (RAW Bayer, YUV, RGB 데이터)
-├────────────────────────┤
-│ Pixel-to-Byte Packing   │ (RAW10 → byte stream, etc.)
-├────────────────────────┤
-│ Low-Level Protocol      │ (Short/Long Packet, ECC, CRC)
-├────────────────────────┤
-│ Lane Distribution       │ (1 stream → N lane byte interleave)
-├────────────────────────┤
-│ PHY (D-PHY / C-PHY)     │ (이전 챕터)
-└────────────────────────┘
-```
+![CSI-2 4-layer model — Application · Pixel-to-Byte Packing · Low-Level Protocol · Lane Distribution · PHY](/images/blog/mipi/diagrams/ch04-csi2-layers.svg)
 
 이 시리즈는 *Low-Level Protocol*과 *Application* 중심. 데이터 형식은 5편(Data Types).
 

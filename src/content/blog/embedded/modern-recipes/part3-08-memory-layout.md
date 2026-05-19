@@ -23,19 +23,14 @@ draft: false
 
 ### 1) 전형적인 RAM 레이아웃
 
-```text
-0x20000000 ┌──────────────────┐
-           │ .data            │  ← 초기화된 전역 (Flash → RAM 복사)
-           ├──────────────────┤
-           │ .bss             │  ← 0으로 초기화된 전역
-           ├──────────────────┤
-           │ heap             │  ← malloc/free
-           │      ↓ (위로)    │
-           │                  │
-           │      ↑ (아래로)  │
-           │ stack            │  ← 함수 call/local 변수
-0x2001FFFF └──────────────────┘  ← _estack (initial MSP)
-```
+| 주소 (낮음 → 높음) | 영역 | 설명 |
+| --- | --- | --- |
+| 0x20000000 | `.data` | 초기화된 전역 (Flash → RAM 복사) |
+| ↓ | `.bss` | 0으로 초기화된 전역 |
+| ↓ | heap | malloc/free (위로 자람) |
+| (빈 공간) | — | heap·stack 사이 여유 |
+| ↑ | stack | 함수 call frame / local 변수 (아래로 자람) |
+| 0x2001FFFF | `_estack` | initial MSP |
 
 heap은 위로, stack은 아래로 자랍니다. 가운데 빈 공간이 둘의 안전 여유입니다.
 

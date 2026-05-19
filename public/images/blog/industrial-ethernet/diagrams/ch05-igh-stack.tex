@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={cls, minimum width=58mm, minimum height=12mm, align=center}
+]
+
+\node[blk, fill=clifill, draw=clibord] (app) at (0, 0)
+  {User application};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.5, 0) {ecrt\_master\_*() API};
+
+\draw[uses] (app.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {ioctl} ++(0, -1);
+
+\node[blk, fill=absfill, draw=absbord] (ulib) at (0, -2) {IgH userspace lib};
+\draw[uses] (ulib.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {/dev/EtherCAT0} ++(0, -1);
+
+\node[blk, fill=prpfill, draw=prpbord] (kern) at (0, -4) {IgH kernel module};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.5, -4) {자체 NIC driver patch};
+
+\draw[uses] (kern.south) -- ++(0, -1);
+
+\node[blk, fill=impfill, draw=impbord, minimum width=58mm] (nic) at (0, -6) {NIC + EtherCAT wire};
+
+\end{tikzpicture}
+\end{document}

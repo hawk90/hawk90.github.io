@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  addrlbl/.style={font=\sffamily\footnotesize\ttfamily, text=mutec, anchor=east},
+  rightlbl/.style={font=\sffamily\footnotesize, text=inkc, anchor=west},
+  slot/.style={rectangle, draw=nodebord, line width=0.5pt, fill=nodefill, minimum width=42mm, minimum height=10mm, inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  topslot/.style={slot, fill=confill, draw=conbord},
+  frameslot/.style={slot, fill=hifill, draw=hibord, minimum height=14mm},
+  endslot/.style={slot, fill=neutfill, draw=neutbord, minimum height=4mm, font=\sffamily\scriptsize},
+  overflowslot/.style={slot, fill=warnfill, draw=warnbord, minimum height=10mm, font=\sffamily\footnotesize\bfseries},
+  heapslot/.style={slot, fill=neutfill, draw=neutbord, minimum height=10mm, font=\sffamily\footnotesize}
+]
+
+\node[hdr] at (0, 5.4) {Cortex-M Stack — grows downward};
+
+% Top: stack base
+\node[topslot] (top) at (0, 4.2) {stack base (high)};
+\node[addrlbl] at (top.west) {0x20002000};
+\node[rightlbl] at (top.east) {top of task stack};
+
+% Current frame
+\node[frameslot, below=0mm of top] (frame) {current frame \\[2pt] \footnotesize (SP here)};
+\node[rightlbl] at (frame.east) {grows toward low addr};
+
+% Stack end
+\node[endslot, below=0mm of frame] (end) {stack end (low, 1 KB)};
+\node[addrlbl] at (end.west) {0x20001000};
+
+% Overflow region — adjacent task TCB / heap
+\node[overflowslot, below=2mm of end] (other) {other task TCB};
+\node[addrlbl] at (other.west) {0x20000FF0};
+\node[rightlbl] at (other.east) {overflow corrupts here};
+
+\node[heapslot, below=0mm of other] (heap) {heap};
+
+% Arrow showing growth direction
+\draw[arr, draw=focusc, line width=0.7pt] ($(top.east)+(1.6,-0.2)$) -- ($(frame.east)+(1.6,0)$)
+  node[midway, right, font=\sffamily\scriptsize, text=focusc] {SP};
+
+% Caption
+\node[font=\sffamily\footnotesize, text=mutec, anchor=north, text width=12cm, align=center]
+  at (0, -3.8) {\textit{침범 첫 byte부터 fault가 나지 않는다 — CPU는 모름. 소프트웨어/MPU 검사가 필요.}};
+
+\end{tikzpicture}
+\end{document}

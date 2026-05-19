@@ -21,23 +21,7 @@ OSI 7계층처럼 BLE도 *계층화*되어 있습니다. 다만 OSI와는 다르
 
 ## 전체 그림 — 7계층
 
-```text
-┌─────────────────────────────────────────┐
-│      Application                        │   ← 사용자 코드
-├─────────────────────────────────────────┤
-│      GAP        │     GATT              │   ← Profile (역할·데이터 모델)
-├─────────────────────────────────────────┤
-│  SMP            │     ATT               │   ← 보안 / 속성 프로토콜
-├─────────────────────────────────────────┤
-│      L2CAP                              │   ← 채널 다중화
-├─────────────────────────────────────────┤             Host
-│      HCI                                │   ← 분리선 (UART/SPI/USB or 내부)
-├─────────────────────────────────────────┤             Controller
-│      Link Layer (LL)                    │   ← 상태기계, 패킷 큐, 호핑
-├─────────────────────────────────────────┤
-│      Physical Layer (PHY)               │   ← 2.4GHz 무선
-└─────────────────────────────────────────┘
-```
+![BLE 프로토콜 스택 — 7계층 (Application부터 PHY까지)](/images/blog/ble/diagrams/ch03-ble-stack.svg)
 
 위 그림은 *논리적*입니다. 실제로는 *GAP과 GATT가 SMP/ATT를 호출*하고, *L2CAP은 그 아래에서 채널만 관리*합니다. 직선 적층이 아니라 *교차 의존*이 있습니다.
 
@@ -102,23 +86,7 @@ ESP32-C3
 
 LL은 *PHY 위에서 패킷을 만들고, 채널을 골라서, 상태를 관리*하는 계층입니다. 5개 상태로 구성됩니다.
 
-```text
-                ┌─────────┐
-                │ Standby │  ← 시작 상태
-                └────┬────┘
-                     │
-       ┌─────────────┼──────────────┐
-       ↓             ↓              ↓
-  ┌─────────┐  ┌─────────┐    ┌──────────┐
-  │Advertise│  │  Scan   │    │Initiating│
-  └────┬────┘  └────┬────┘    └────┬─────┘
-       │            │              │
-       └────────────┼──────────────┘
-                    ↓
-              ┌──────────┐
-              │Connection│
-              └──────────┘
-```
+![Link Layer 5개 상태 — Standby에서 시작해 Advertising / Scanning / Initiating 중 하나를 거쳐 Connection으로](/images/blog/ble/diagrams/ch03-ll-state.svg)
 
 | 상태 | 역할 | 발신/수신 |
 |------|------|----------|
@@ -130,24 +98,11 @@ LL은 *PHY 위에서 패킷을 만들고, 채널을 골라서, 상태를 관리*
 
 ### LL PDU 포맷
 
-```text
-LL Packet (PHY 위로 송신되는 raw bytes)
-┌─────────┬──────┬──────────────────────────┬──────┐
-│Preamble │Access│   PDU (Header + Payload) │ CRC  │
-│ 1 or 2B │ Addr │       2 ~ 257 byte       │  3B  │
-│         │  4B  │                          │      │
-└─────────┴──────┴──────────────────────────┴──────┘
+![LL Packet 구조 — Preamble · Access Address · PDU · CRC와 PDU Header 16-bit 세부](/images/blog/ble/diagrams/ch03-ll-packet.svg)
 
-광고 패킷 Access Address: 0x8E89BED6 (고정)
-데이터 패킷 Access Address: connect 시 32-bit 랜덤 결정
+광고 패킷 Access Address: `0x8E89BED6` (고정). 데이터 패킷 Access Address: connect 시 32-bit 랜덤 결정.
 
-PDU Header
-┌──┬──┬──┬──┬──────┬──┬──┐
-│  │  │  │  │length│  │  │
-│4b│1b│1b│1b│  8b  │1b│1b│   = 16 bit
-└──┴──┴──┴──┴──────┴──┴──┘
- type RFU TxAdd RxAdd  RFU MD
-```
+PDU Header 16 bit는 LLID(4b) · NESN(1b) · SN(1b) · MD(1b) · Length(8b) · RFU(1b)로 구성됩니다.
 
 ### ADV_IND 패킷 예 (광고)
 

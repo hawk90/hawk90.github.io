@@ -22,13 +22,12 @@ draft: false
 
 ### MAC vs PHY
 
-```text
-MCU                       External PHY
-─────                     ────────────
-ETH MAC ←── RMII ──────► LAN8742  ←── RJ45 ── network
-  │                         │
-  └── MDIO/MDC ─────────────┘   (link status, speed 협상)
-```
+| 단 | 인터페이스 | 역할 |
+| --- | --- | --- |
+| MCU 내부 (ETH MAC) | RMII data → PHY | frame TX/RX, DMA |
+| MCU ↔ PHY (LAN8742 등) | MDIO / MDC | link status, speed 협상 |
+| External PHY | RJ45 + transformer | 물리 신호, encoding |
+| RJ45 → 네트워크 | UTP cable | Cat5e/Cat6 |
 
 - **MAC (Media Access Controller)**: MCU 내부. frame parsing, DMA, IP/TCP는 한 단계 위.
 - **PHY (Physical layer)**: 외부 chip. transformer + RJ45와 직접 연결, voltage level, encoding 처리.

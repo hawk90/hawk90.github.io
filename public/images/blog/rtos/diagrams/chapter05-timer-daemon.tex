@@ -1,0 +1,68 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  daemon/.style={rectangle, rounded corners=4pt, draw=impbord, line width=0.5pt, fill=impfill, inner sep=12pt},
+  cmd/.style={rectangle, draw=conbord, line width=0.4pt, fill=confill, minimum width=8mm, minimum height=6mm, inner sep=0pt, font=\sffamily\scriptsize},
+  apicall/.style={font=\sffamily\footnotesize\ttfamily, text=inkc, anchor=east, align=right},
+  tlist/.style={rectangle, draw=neutbord, line width=0.35pt, fill=neutfill, minimum width=60mm, inner sep=4pt, font=\sffamily\footnotesize, align=left},
+  loopbox/.style={rectangle, draw=okbord, line width=0.4pt, fill=okfill, inner sep=5pt, font=\sffamily\footnotesize, align=left},
+  sectionlbl/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west}
+]
+
+\node[hdr] at (0.5, 9.0) {Software Timer Daemon — command queue + active list};
+
+% ===== API call list (left of daemon) =====
+\node[apicall] (a1) at (-5.6, 7.4) {xTimerStart()};
+\node[apicall] (a2) at (-5.6, 6.7) {xTimerStop()};
+\node[apicall] (a3) at (-5.6, 6.0) {xTimerReset()};
+\node[apicall] (a4) at (-5.6, 5.3) {xTimerChangePeriod()};
+
+% ===== Daemon contents =====
+% Section 1: command queue
+\node[sectionlbl] (cqlabel) at (-2.4, 7.4) {command queue (length=10)};
+\foreach \i in {0,...,6} {
+  \node[cmd] (q\i) at ({-1.8 + \i*0.9}, 6.6) {};
+}
+
+% Section 2: active timer list
+\node[sectionlbl] (alLabel) at (-2.4, 5.4) {active timer list (sorted by expire)};
+\node[tlist, anchor=north west] (list) at (-2.4, 5.0) {
+  $\bullet$ Timer A — next expire 10\,ms \\[3pt]
+  $\bullet$ Timer B — next expire 50\,ms \\[3pt]
+  $\bullet$ Timer C — next expire 100\,ms
+};
+
+% Section 3: loop
+\node[loopbox, anchor=north west] (loop) at (-2.4, 2.6) {
+  \textbf{loop:} \\[3pt]
+  \quad 1.\ wait until next expire \\[3pt]
+  \quad 2.\ invoke expired timer callback \\[3pt]
+  \quad 3.\ drain command queue
+};
+
+% Daemon container background
+\begin{pgfonlayer}{background}
+  \node[daemon, fit=(cqlabel) (q0) (q6) (alLabel) (list) (loop)] (dbg) {};
+\end{pgfonlayer}
+
+% Daemon title above
+\node[hdr, font=\sffamily\bfseries\footnotesize, anchor=south] at ($(dbg.north)+(0,0.1)$)
+  {Timer Daemon Task \quad (configTIMER\_TASK\_PRIORITY)};
+
+% API -> queue arrows (only the relevant ones)
+\draw[arr] (a1.east) -- (q0.west);
+\draw[arr] (a3.east) -- (q1.west);
+
+% Callback arrow
+\node[font=\sffamily\footnotesize\ttfamily, anchor=west] (cb) at (5.6, 1.0) {callback()};
+\draw[arr, draw=focusc, line width=0.6pt] (loop.east) -- (cb.west);
+
+\end{tikzpicture}
+\end{document}

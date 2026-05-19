@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1mm, y=1mm,
+  fld/.style={cls, align=center, font=\sffamily\footnotesize, minimum height=11mm, inner sep=2pt},
+  ttl/.style={font=\sffamily\bfseries\small, text=inkc, anchor=west}
+]
+
+% Ethernet II frame (top)
+\node[ttl] at (0, 12) {Ethernet II Frame};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=16mm] (da) at (8, 0) {DA \\[2pt]6 B};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=16mm] (sa) at (25, 0) {SA \\[2pt]6 B};
+\node[fld, fill=clifill, draw=clibord, minimum width=20mm] (et) at (44, 0) {EtherType \\[2pt]0x88A4};
+\node[fld, fill=impfill, draw=impbord, minimum width=58mm] (pl) at (84, 0) {Payload};
+\node[fld, fill=warnfill, draw=warnbord, minimum width=14mm] (fcs) at (121, 0) {FCS \\[2pt]4 B};
+
+% EtherCAT block (middle) — expansion of Payload
+\node[ttl] at (0, -20) {EtherCAT Payload};
+\node[fld, fill=clifill, draw=clibord, minimum width=24mm] (eh) at (12, -30) {EtherCAT Hdr \\[2pt]2 B};
+\node[fld, fill=impfill, draw=impbord, minimum width=22mm] (dg1) at (37, -30) {Datagram 1};
+\node[fld, fill=impfill, draw=impbord, minimum width=22mm] (dg2) at (61, -30) {Datagram 2};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=12mm] (dots) at (80, -30) {$\cdots$};
+\node[fld, fill=impfill, draw=impbord, minimum width=22mm] (dgn) at (101, -30) {Datagram N};
+
+% connector
+\draw[draw=edgesc, line width=0.4pt, densely dashed] (pl.south west) -- (eh.north west);
+\draw[draw=edgesc, line width=0.4pt, densely dashed] (pl.south east) -- (dgn.north east);
+
+% Datagram detail (bottom) — expansion of Datagram 1
+\node[ttl] at (0, -50) {Datagram 구조};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=10mm] (cmd) at ( 7, -60) {Cmd \\[2pt]1B};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=10mm] (idx) at (18, -60) {Idx \\[2pt]1B};
+\node[fld, fill=absfill, draw=absbord, minimum width=18mm] (addr) at (33, -60) {Address \\[2pt]4B};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=12mm] (len) at (49, -60) {Len \\[2pt]11b};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=12mm] (rsv) at (62, -60) {Rsv \\[2pt]3b};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=14mm] (irq) at (76, -60) {IRQ Bit \\[2pt]16b};
+\node[fld, fill=impfill, draw=impbord, minimum width=18mm] (data) at (92, -60) {Data \\[2pt]N byte};
+\node[fld, fill=warnfill, draw=warnbord, minimum width=10mm] (wkc) at (108, -60) {WKC \\[2pt]2B};
+
+\draw[draw=edgesc, line width=0.4pt, densely dashed] (dg1.south west) -- (cmd.north west);
+\draw[draw=edgesc, line width=0.4pt, densely dashed] (dg1.south east) -- (wkc.north east);
+
+\end{tikzpicture}
+\end{document}

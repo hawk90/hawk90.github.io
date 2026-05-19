@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  layer/.style={cls, minimum width=80mm, minimum height=9mm, font=\sffamily\small},
+  half/.style={cls, minimum width=39mm, minimum height=9mm, font=\sffamily\small},
+  side/.style={font=\sffamily\footnotesize, text=mutec, anchor=west}
+]
+
+\node[layer, fill=clifill, draw=clibord] (app) at (0, 0) {Application};
+\node[side] at (4.2, 0) {사용자 코드};
+
+\node[half, fill=absfill, draw=absbord] (gap) at (-2, -1) {GAP};
+\node[half, fill=absfill, draw=absbord] (gatt) at (2, -1) {GATT};
+\node[side] at (4.2, -1) {Profile (역할 · 데이터 모델)};
+
+\node[half, fill=prpfill, draw=prpbord] (smp) at (-2, -2) {SMP};
+\node[half, fill=prpfill, draw=prpbord] (att) at (2, -2) {ATT};
+\node[side] at (4.2, -2) {보안 / 속성 프로토콜};
+
+\node[layer, fill=impfill, draw=impbord] (l2cap) at (0, -3) {L2CAP};
+\node[side] at (4.2, -3) {채널 다중화};
+
+\node[layer, fill=tealfill, draw=tealbord] (hci) at (0, -4) {HCI};
+\node[side] at (4.2, -4) {UART / SPI / USB or 내부};
+
+\node[layer, fill=confill, draw=conbord] (ll) at (0, -5) {Link Layer (LL)};
+\node[side] at (4.2, -5) {상태기계 · 패킷 큐 · 호핑};
+
+\node[layer, fill=hifill, draw=hibord] (phy) at (0, -6) {Physical Layer (PHY)};
+\node[side] at (4.2, -6) {2.4 GHz 무선};
+
+% Host / Controller bracket
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=east] at (-4.5, -1.5) {Host};
+\draw[draw=edgec, line width=0.5pt] (-4.3, -3.6) -- (-4.3, 0.5) -- (-4.5, 0.5);
+\draw[draw=edgec, line width=0.5pt] (-4.3, -3.6) -- (-4.5, -3.6);
+
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=east] at (-4.5, -5) {Controller};
+\draw[draw=edgec, line width=0.5pt] (-4.3, -4) -- (-4.3, -6.5) -- (-4.5, -6.5);
+\draw[draw=edgec, line width=0.5pt] (-4.3, -4) -- (-4.5, -4);
+
+\end{tikzpicture}
+\end{document}

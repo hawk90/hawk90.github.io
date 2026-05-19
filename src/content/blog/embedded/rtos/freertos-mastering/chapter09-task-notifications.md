@@ -18,17 +18,12 @@ draft: false
 
 각 태스크의 TCB는 다음 두 필드를 갖습니다.
 
-```text
-TCB (per task):
-┌─────────────────────────────────┐
-│ ucNotifyState [N]               │  ← N = configTASK_NOTIFICATION_ARRAY_ENTRIES
-│   - taskNOT_WAITING_NOTIFICATION │
-│   - taskWAITING_NOTIFICATION     │
-│   - taskNOTIFICATION_RECEIVED    │
-│                                 │
-│ ulNotifiedValue [N]             │  ← 32-bit value
-└─────────────────────────────────┘
-```
+| TCB 필드 | 크기 | 값 |
+|----------|------|-----|
+| `ucNotifyState[N]` | 1 byte × N | `taskNOT_WAITING_NOTIFICATION` / `taskWAITING_NOTIFICATION` / `taskNOTIFICATION_RECEIVED` |
+| `ulNotifiedValue[N]` | 4 byte × N | 32-bit 알림 값 |
+
+여기서 `N = configTASK_NOTIFICATION_ARRAY_ENTRIES` 입니다.
 
 기본 `configTASK_NOTIFICATION_ARRAY_ENTRIES`는 1입니다. 즉 *태스크당 노티 슬롯 하나*. v10.4부터 *배열로 확장 가능*해서, 한 태스크가 *여러 종류의 알림을 별도 슬롯*으로 관리할 수 있습니다.
 

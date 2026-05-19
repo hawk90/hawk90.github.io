@@ -1,0 +1,61 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ca/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+    minimum width=120mm, minimum height=11mm, inner sep=3pt, align=center,
+    font=\sffamily\small},
+  drv/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=120mm, minimum height=11mm, inner sep=3pt, align=center,
+    font=\sffamily\small},
+  os/.style={rectangle, rounded corners=2pt, draw=conbord, fill=confill,
+    minimum width=120mm, minimum height=11mm, inner sep=3pt, align=center,
+    font=\sffamily\small},
+  ta/.style={rectangle, rounded corners=2pt, draw=hibord, fill=hifill,
+    minimum width=22mm, minimum height=14mm, inner sep=2pt, align=center,
+    font=\sffamily\footnotesize\bfseries},
+  panelNS/.style={rectangle, rounded corners=4pt, draw=impbord, line width=0.6pt,
+    inner sep=10pt, fill=impfill!18},
+  panelS/.style={rectangle, rounded corners=4pt, draw=conbord, line width=0.6pt,
+    inner sep=10pt, fill=confill!22}
+]
+
+% Non-Secure side
+\node[ca]  (ca)  at (0, 11.2) {CA (Client Application) — user space (fTPM daemon, LUKS-TPM\ldots)};
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (0, 9.9) {GP TEE Client API (libteec.so)};
+\node[drv] (drv) at (0, 8.6)  {Linux kernel — OP-TEE driver (drivers/tee/optee)};
+
+% SMC boundary
+\node[font=\sffamily\footnotesize\bfseries, text=inkc] at (0, 6.8) {SMC → BL31 Secure Monitor (EL3)};
+\draw[arr, line width=0.7pt] (0, 7.5) -- (0, 6.0);
+
+% Secure side
+\node[os] (os) at (0, 4.8) {OP-TEE OS (BL32) — S-EL1 · scheduler · IPC · MMU · RPC to REE};
+
+% TAs
+\node[ta] (t1) at (-4.5, 2.4) {TA \#1\\[2pt]\footnotesize DRM\\[2pt]\scriptsize S-EL0};
+\node[ta] (t2) at (-1.5, 2.4) {TA \#2\\[2pt]\footnotesize Crypto\\[2pt]\scriptsize S-EL0};
+\node[ta] (t3) at ( 1.5, 2.4) {TA \#3\\[2pt]\footnotesize Storage\\[2pt]\scriptsize S-EL0};
+\node[ta] (t4) at ( 4.5, 2.4) {pTA\\[2pt]\footnotesize kernel\\[2pt]\scriptsize S-EL1};
+
+\foreach \t in {t1,t2,t3,t4} {
+  \draw[edge] (\t.north) -- (\t.north |- os.south);
+}
+
+% Panel labels (placed to the side, outside panels)
+\node[font=\sffamily\bfseries\small, text=impbord, anchor=west] at (6.5, 11.2) {Non-Secure (REE)};
+\node[font=\sffamily\bfseries\small, text=conbord, anchor=west] at (6.5, 4.8)  {Secure (TEE)};
+
+% Panels
+\begin{pgfonlayer}{background}
+  \node[panelNS, fit=(ca)(drv)] {};
+  \node[panelS,  fit=(os)(t1)(t4)] {};
+\end{pgfonlayer}
+
+\end{tikzpicture}
+\end{document}

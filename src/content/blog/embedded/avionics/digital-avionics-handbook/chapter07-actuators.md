@@ -115,11 +115,7 @@ draft: true
 
 Closed-loop TVC:
 
-```text
-Command (deg) → Controller → Motor → Mechanical → Nozzle position
-                  ↑                                       │
-                  └──── Position sensor (LVDT·encoder)────┘
-```
+![TVC closed-loop — controller, motor, mechanical, nozzle with position feedback](/images/blog/avionics/diagrams/ch07-tvc-loop.svg)
 
 **Control:**
 - PID 또는 LQR

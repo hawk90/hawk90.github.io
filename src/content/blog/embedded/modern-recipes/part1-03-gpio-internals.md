@@ -25,18 +25,11 @@ draft: false
 
 GPIO 출력은 보통 두 개의 트랜지스터로 구성됩니다.
 
-```text
-Push-Pull                    Open-Drain
-   VDD                          VDD (외부 풀업)
-    │                            │
-    │ ─── P-MOS (1 출력)         R (10k 등)
-    │                            │
-   OUT ──── pin              OUT ──── pin
-    │                            │
-    │ ─── N-MOS (0 출력)         │ ─── N-MOS (0 출력만)
-    │                            │
-   GND                          GND
-```
+| 구조 요소 | Push-Pull | Open-Drain |
+| --- | --- | --- |
+| VDD 측 | P-MOS (1 출력) | 외부 풀업 저항 (10 kΩ 등) |
+| OUT → pin | 양방향 driver | drain only |
+| GND 측 | N-MOS (0 출력) | N-MOS (0 출력만, high-Z로 1) |
 
 | 구분 | Push-Pull | Open-Drain |
 | --- | --- | --- |

@@ -23,17 +23,7 @@ tags: [stack-overflow, canary, mpu, watermark]
 
 Cortex-M의 stack은 *높은 주소에서 낮은 주소로* 자랍니다. SP가 stack base보다 작아지는 순간 *인접한 메모리 영역*을 덮어쓰기 시작합니다.
 
-```text
-0x20002000 ┌────────────────┐ ← stack base (high)
-           │   ...           │
-           │   현재 frame    │ ← SP
-           │   (자라는 방향) │
-           ▼
-0x20001000 ├────────────────┤ ← stack 끝 (low, 1 KB)
-0x20000FF0 │ 다른 task TCB   │ ← overflow 시 침범 영역
-           │ heap            │
-           │ ...             │
-```
+![Cortex-M stack은 높은 주소에서 낮은 주소로 자라며, overflow 시 인접 메모리를 침범한다](/images/blog/rtos/diagrams/part4-06-stack-layout.svg)
 
 침범 첫 byte부터 *fault가 나는 것은 아닙니다*. read/write가 *그냥 성공*합니다. CPU는 침범을 모릅니다. 그래서 *소프트웨어 또는 MPU가 명시적으로 검사*해야 합니다.
 

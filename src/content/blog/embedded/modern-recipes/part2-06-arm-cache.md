@@ -25,13 +25,12 @@ draft: false
 
 대부분의 캐시 있는 ARM은 L1을 instruction(I-Cache)과 data(D-Cache)로 분리합니다.
 
-```text
-   CPU
-    │
-    ├─ I-Cache (16 ~ 64 KB)  ─┐
-    │                          ├─ L2 (256 KB ~ 1 MB) ─ Memory
-    └─ D-Cache (16 ~ 64 KB)  ─┘
-```
+| 단계 | 종류 | 크기 | 비고 |
+| --- | --- | --- | --- |
+| L1 | I-Cache | 16 ~ 64 KB | instruction fetch |
+| L1 | D-Cache | 16 ~ 64 KB | load/store |
+| L2 | unified | 256 KB ~ 1 MB | I + D 공유 |
+| Memory | — | — | L2 miss 시 접근 |
 
 분리하는 이유는 동시 fetch와 load/store가 가능하기 때문입니다.
 

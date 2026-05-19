@@ -195,21 +195,7 @@ while (running) {
 
 IgH(EtherCAT Master, Ingenieurgemeinschaft IgH가 개발)는 *커널 모듈 + userspace 라이브러리* 구조입니다.
 
-```text
-┌──────────────────────┐
-│   User application   │ ← ecrt_master_*() API
-└──────────┬───────────┘
-           │ ioctl
-┌──────────┴───────────┐
-│   IgH userspace lib  │
-└──────────┬───────────┘
-           │ /dev/EtherCAT0
-┌──────────┴───────────┐
-│   IgH kernel module  │ ← 자체 NIC driver patch
-└──────────┬───────────┘
-           ↓
-        NIC HW
-```
+![IgH 구조 — userspace API → ioctl → userspace lib → /dev/EtherCAT0 → 커널 모듈 → NIC](/images/blog/industrial-ethernet/diagrams/ch05-igh-stack.svg)
 
 IgH가 SOEM보다 빠른 이유는 *NIC 드라이버 자체를 패치*해서 *DMA 경로*를 RT-friendly하게 만들기 때문입니다. e1000e, igb, r8169 같은 일반 드라이버에 *고유 패치*가 들어갑니다.
 
@@ -298,24 +284,7 @@ TwinCAT의 강점은 *모션·CNC·visualization 통합*입니다. SOEM/IgH는 *
 
 대부분의 슬레이브 보드는 *MCU 한 개 + ESC 칩 한 개* 구조입니다.
 
-```text
-일반 EtherCAT 슬레이브 보드
-   ┌────────────────────────────────────────────────┐
-   │   RJ45 (IN)         RJ45 (OUT)                  │
-   │      ↓                  ↑                       │
-   │   ┌──────────────────────────────┐             │
-   │   │  ESC (LAN9252)               │             │
-   │   │  - 2 PHY embedded             │             │
-   │   │  - FMMU, SM, DC, DPRAM        │             │
-   │   └──────────────┬───────────────┘             │
-   │                  │ SPI (10 MHz)                │
-   │   ┌──────────────┴───────────────┐             │
-   │   │  STM32F4 (or similar)        │             │
-   │   │  - Application logic         │             │
-   │   │  - Sensor/actuator drivers   │             │
-   │   └──────────────────────────────┘             │
-   └────────────────────────────────────────────────┘
-```
+![EtherCAT 슬레이브 보드 — RJ45 IN/OUT, LAN9252 ESC, SPI로 STM32F4 연결](/images/blog/industrial-ethernet/diagrams/ch05-slave-hw.svg)
 
 STM32 측 application은 *EtherCAT Slave Stack*을 돌립니다. Beckhoff가 *Slave Stack Code (SSC)* tool로 자동 생성 코드를 제공합니다. ETG 가입사라면 무료로 받을 수 있습니다.
 

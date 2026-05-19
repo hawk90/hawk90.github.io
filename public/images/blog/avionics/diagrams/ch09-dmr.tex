@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ch/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=22mm, minimum height=11mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  cmp/.style={rectangle, rounded corners=2pt, draw=hibord, fill=hifill,
+    minimum width=36mm, minimum height=10mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  okn/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+    minimum width=24mm, minimum height=8mm, inner sep=2pt, align=center,
+    font=\sffamily\footnotesize\bfseries},
+  bad/.style={rectangle, rounded corners=2pt, draw=warnbord, fill=warnfill,
+    minimum width=36mm, minimum height=8mm, inner sep=2pt, align=center,
+    font=\sffamily\footnotesize\bfseries}
+]
+
+\node[ch] (c1) at (-2.6, 3.2) {Channel 1};
+\node[ch] (c2) at ( 2.6, 3.2) {Channel 2};
+
+\node[cmp] (cmp) at (0, 1.4) {Compare};
+
+\node[bad] (mis) at (-3.2, -0.6) {Mismatch → halt / alarm};
+\node[okn] (mok) at ( 3.0, -0.6) {Match → output};
+
+\draw[arr] (c1.south) -- (cmp.west);
+\draw[arr] (c2.south) -- (cmp.east);
+\draw[arr, draw=warnbord] (cmp.south) -- (mis.north);
+\draw[arr, draw=impbord]  (cmp.south) -- (mok.north);
+
+\end{tikzpicture}
+\end{document}

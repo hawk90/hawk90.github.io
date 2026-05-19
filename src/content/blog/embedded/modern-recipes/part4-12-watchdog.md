@@ -51,19 +51,12 @@ Examples:
 
 WWDG는 *window 안에서만 refresh가 허용*됩니다.
 
-```text
-Counter: 0x7F (=127) → 0x40 (=64): refresh OK
-Counter: > 0x80 = ?? : 초기상태
-Counter: < 0x40: refresh가 오면 reset
-
-       ┌─────────────┐
-       │   Window     │   refresh 가능
-       │  W=0x50      │
-   ┌───┘             └──┐
-   │ refresh 너무 빠름  │ refresh 너무 늦음
-   ↓                   ↓
-   reset             reset
-```
+| Counter 범위 | 동작 |
+| --- | --- |
+| > 0x80 | 초기 상태 (start 전) |
+| 0x7F ~ 0x50 | refresh 너무 빠름 → reset |
+| 0x50 ~ 0x40 (window) | refresh OK |
+| < 0x40 | refresh 너무 늦음 → reset |
 
 너무 빠른 refresh는 *bug*로 본다는 철학입니다. 정확한 주기로 refresh되는지 검증하는 도구.
 

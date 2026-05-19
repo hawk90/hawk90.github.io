@@ -16,30 +16,7 @@ draft: false
 
 ## Thermal framework 구조
 
-```text
-┌────────────────────────────────────────────────────┐
-│ Sensor (CPU 내부 또는 외부 thermistor)              │
-│   현재 온도 측정. millicelsius 단위.                │
-└──────────────┬─────────────────────────────────────┘
-               │
-               ▼
-┌────────────────────────────────────────────────────┐
-│ Thermal zone (DT의 thermal-zones)                  │
-│   sensor를 묶고 trip point·governor·cooling 정의   │
-└──────────────┬─────────────────────────────────────┘
-               │
-               ▼
-┌────────────────────────────────────────────────────┐
-│ Trip point                                         │
-│   active, passive, hot, critical                   │
-└──────────────┬─────────────────────────────────────┘
-               │
-               ▼
-┌────────────────────────────────────────────────────┐
-│ Cooling device                                     │
-│   CPU throttling, fan PWM, GPU throttling          │
-└────────────────────────────────────────────────────┘
-```
+![Thermal framework — Sensor → Thermal zone → Trip point → Cooling device](/images/blog/bsp/diagrams/chapter14-thermal-flow.svg)
 
 ## DT의 thermal-zones
 

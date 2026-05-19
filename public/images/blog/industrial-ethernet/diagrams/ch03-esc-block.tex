@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={cls, minimum width=36mm, minimum height=9mm, align=center}
+]
+
+\node[font=\sffamily\footnotesize, text=mutec] (phy0) at (-3, 0) {Ethernet PHY (port 0)};
+\node[font=\sffamily\footnotesize, text=mutec] (phy1) at ( 3, 0) {Ethernet PHY (port 1)};
+
+\draw[arr] (phy0) -- ++(0, -0.7);
+\draw[arr] ($(phy1) + (0,-0.7)$) -- (phy1);
+
+% ESC enclosure
+\node[panel, minimum width=92mm, minimum height=58mm, anchor=north] (esc) at (0, -0.9) {};
+\node[panelTitle, anchor=north] at (esc.north) {EtherCAT Slave Controller};
+
+\node[blk, fill=impfill, draw=impbord] (eb) at (-2.3, -2.5) {EBus Loop};
+\node[blk, fill=absfill, draw=absbord] (dp) at ( 2.3, -2.5) {DPRAM (8 KB max)};
+
+\node[blk, fill=prpfill, draw=prpbord] (fm) at (-2.3, -3.8) {FMMU $\times$ 8};
+\node[blk, fill=prpfill, draw=prpbord] (sm) at ( 2.3, -3.8) {Sync Manager $\times$ 8};
+
+\node[blk, fill=clifill, draw=clibord] (dc) at (-2.3, -5.1) {DC Unit};
+\node[blk, fill=clifill, draw=clibord] (rg) at ( 2.3, -5.1) {ESC Registers};
+
+\node[font=\sffamily\footnotesize, text=inkc, anchor=center] at (0, -6.3) {PDI (SPI / $\mu$C / 16-bit interface)};
+
+\draw[uses, <->] (eb) -- (dp);
+
+% to MCU
+\draw[arr] (0, -7.0) -- (0, -7.7);
+\node[blk, fill=hifill, draw=hibord, minimum width=44mm, minimum height=11mm, align=center] (mcu) at (0, -8.7)
+  {Slave 호스트 MCU \\[1pt] \footnotesize (애플리케이션 로직)};
+
+\end{tikzpicture}
+\end{document}

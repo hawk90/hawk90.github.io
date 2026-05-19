@@ -48,19 +48,13 @@ void  vPortFree(void *pv);
 
 가장 단순합니다. *내부 `ucHeap[]` 배열에서 차례로 떼어 줄 뿐* 자유가 없습니다. `vPortFree`를 호출하면 *assert로 실패*합니다.
 
-```text
-heap_1 메모리 레이아웃
-────────────────────────────────────────────────────────────────
-ucHeap[configTOTAL_HEAP_SIZE]
-┌───────────────────────────────────────────────────────────┐
-│ TCB1 │ Stack1 │ Queue1 │ TCB2 │ Stack2 │   ...   │ (free) │
-└───────────────────────────────────────────────────────────┘
-       ↑                                          ↑
-       0                                  pxNextFreeByte
+`ucHeap[configTOTAL_HEAP_SIZE]` 배열을 *왼쪽부터 차례로 떼어 쓰는* 구조입니다.
 
-각 호출이 pxNextFreeByte만 증가시킴
-free 불가 → fragmentation 원천 차단
-```
+| 위치 | 0 → | → | → | → | → | `pxNextFreeByte` | → end |
+|------|-----|---|---|---|---|------------------|-------|
+| 내용 | TCB1 | Stack1 | Queue1 | TCB2 | Stack2 | ... (free) | |
+
+각 호출이 `pxNextFreeByte`만 증가시키고, free가 불가능하므로 *fragmentation을 원천 차단*합니다.
 
 언제 쓰나? *모든 RTOS 객체를 부팅 시 한 번만 만들고 영원히 유지하는 시스템*입니다. 예를 들어 *고정된 5개 태스크·3개 큐*가 끝인 펌웨어라면 heap_1이 *가장 안전*합니다. *결정론적이고 빠르고, 분석이 쉽습니다*.
 
@@ -305,24 +299,13 @@ void vApplicationMallocFailedHook(void)
 
 ## 어떤 heap을 골라야 하나
 
-```text
-결정 트리
-
-부팅 후 객체를 더 안 만든다?
-├─ 예 → heap_1
-└─ 아니오 ↓
-
-표준 malloc 환경이 잘 갖춰져 있고 단순한 게 좋다?
-├─ 예 → heap_3
-└─ 아니오 ↓
-
-메모리 영역이 비인접 (외부 SDRAM 등)?
-├─ 예 → heap_5
-└─ 아니오 → heap_4 (디폴트)
-
-안전 인증 필요·완전 결정론?
-└─ static allocation 사용 (heap_X는 그래도 idle/timer용으로 필요)
-```
+| 조건 | 선택 |
+|------|------|
+| 부팅 후 객체를 더 안 만든다 | **heap_1** |
+| 표준 malloc 환경이 잘 갖춰져 있고 단순한 게 좋다 | **heap_3** |
+| 메모리 영역이 비인접 (외부 SDRAM 등) | **heap_5** |
+| 그 외 일반적인 상황 | **heap_4** (디폴트) |
+| 안전 인증 필요·완전 결정론 | **static allocation** (idle/timer용으로 heap_X는 그대로 필요) |
 
 ## 자주 하는 실수와 troubleshooting
 

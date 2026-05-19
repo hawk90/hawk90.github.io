@@ -20,30 +20,13 @@ draft: false
 
 각 stage가 어떤 환경에서 무엇을 하는지 단계별로 정리합니다.
 
-```text
-1. BootROM (chip 내장, mask ROM)
-   ├ 8-32 KB
-   ├ DDR 미초기화 — internal SRAM에서 실행
-   └ 다음 부트 매체 select (SD·eMMC·NOR·USB)
-        ↓
-2. SPL (Secondary Program Loader) — U-Boot의 first stage
-   ├ ~64 KB, internal SRAM 또는 일부 ROM 후
-   ├ DDR 초기화 *수행*
-   └ U-Boot proper를 DDR로 로드
-        ↓
-3. U-Boot (full)
-   ├ 수 MB, DDR에서 실행
-   ├ 환경 변수·script·shell
-   ├ Kernel·DTB·initrd 로드
-   └ 'bootm' / 'booti' 명령으로 jump
-        ↓
-4. Linux kernel
-   ├ DTB 파싱, drivers init
-   └ init process 시작
-        ↓
-5. systemd / busybox init
-   └ 응용 시작
-```
+| 단계 | 크기 | 실행 위치 | 주 역할 |
+| --- | --- | --- | --- |
+| 1. BootROM | 8 ~ 32 KB | internal SRAM (DDR 미초기화) | 부트 매체 select (SD·eMMC·NOR·USB) |
+| 2. SPL | ~64 KB | internal SRAM, ROM 후 | DDR 초기화, U-Boot proper 로드 |
+| 3. U-Boot (full) | 수 MB | DDR | env·script·shell, Kernel·DTB·initrd 로드, `bootm` 점프 |
+| 4. Linux kernel | 수십 MB | DDR | DTB 파싱, driver init, init 시작 |
+| 5. systemd / busybox init | rootfs | rootfs mount 후 | 응용 시작 |
 
 ## BootROM
 

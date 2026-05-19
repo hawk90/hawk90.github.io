@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={cls, minimum width=82mm, minimum height=16mm, align=center, font=\footnotesize, inner sep=4pt},
+  sensorB/.style={box, fill=absfill, draw=absbord},
+  zoneB/.style={box, fill=prpfill, draw=prpbord},
+  tripB/.style={box, fill=hifill, draw=hibord},
+  coolB/.style={box, fill=okfill, draw=okbord}
+]
+
+\node[sensorB] (s) at (0, 6) {%
+  \textbf{Sensor} \textit{(CPU 내부 또는 외부 thermistor)}\\[2pt]
+  현재 온도 측정 — millicelsius 단위};
+
+\node[zoneB] (z) at (0, 4) {%
+  \textbf{Thermal zone} \textit{(DT의 thermal-zones)}\\[2pt]
+  sensor를 묶고 trip point·governor·cooling 정의};
+
+\node[tripB] (t) at (0, 2) {%
+  \textbf{Trip point}\\[2pt]
+  active, passive, hot, critical};
+
+\node[coolB] (c) at (0, 0) {%
+  \textbf{Cooling device}\\[2pt]
+  CPU throttling, fan PWM, GPU throttling};
+
+\draw[flow] (s.south) -- (z.north);
+\draw[flow] (z.south) -- (t.north);
+\draw[flow] (t.south) -- (c.north);
+
+\end{tikzpicture}
+\end{document}

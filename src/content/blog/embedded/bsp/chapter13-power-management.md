@@ -16,25 +16,12 @@ draft: false
 
 ## 4개의 PM 축
 
-```text
-┌──────────────────────────────────────────────────────┐
-│ System sleep (suspend-to-RAM / disk)                 │
-│   사용자 명시. 전체 시스템 정지.                       │
-│   echo mem > /sys/power/state                        │
-├──────────────────────────────────────────────────────┤
-│ Runtime PM                                           │
-│   디바이스별 dynamic suspend. 사용 안 하면 자동 OFF.   │
-│   pm_runtime_get / pm_runtime_put                    │
-├──────────────────────────────────────────────────────┤
-│ cpuidle                                              │
-│   CPU의 짧은 idle 진입. C-state 진입/탈출.            │
-│   /sys/devices/system/cpu/cpu*/cpuidle/              │
-├──────────────────────────────────────────────────────┤
-│ cpufreq                                              │
-│   동작 중 CPU의 frequency·voltage 조정 (DVFS).        │
-│   /sys/devices/system/cpu/cpu*/cpufreq/              │
-└──────────────────────────────────────────────────────┘
-```
+| 축 | 동작 | 주 인터페이스 |
+|----|------|--------------|
+| **System sleep** (suspend-to-RAM / disk) | 사용자 명시, 전체 시스템 정지 | `echo mem > /sys/power/state` |
+| **Runtime PM** | 디바이스별 dynamic suspend. 사용 안 하면 자동 OFF | `pm_runtime_get` / `pm_runtime_put` |
+| **cpuidle** | CPU의 짧은 idle 진입, C-state 진입·탈출 | `/sys/devices/system/cpu/cpu*/cpuidle/` |
+| **cpufreq** | 동작 중 CPU의 frequency·voltage 조정 (DVFS) | `/sys/devices/system/cpu/cpu*/cpufreq/` |
 
 각 축은 *독립적*으로 동작하지만 같은 PMIC, 같은 regulator를 공유합니다.
 

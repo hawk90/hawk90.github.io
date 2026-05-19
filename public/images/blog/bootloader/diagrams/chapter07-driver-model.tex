@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={cls, minimum width=78mm, minimum height=18mm, align=center, font=\footnotesize, inner sep=4pt},
+  uclassB/.style={box, fill=absfill, draw=absbord},
+  driverB/.style={box, fill=impfill, draw=impbord},
+  devB/.style={box, fill=hifill, draw=hibord},
+  side/.style={font=\scriptsize\itshape, text=mutec, anchor=west},
+  rel/.style={font=\scriptsize, anchor=west, text=mutec}
+]
+
+\node[uclassB] (uc) at (0, 6) {%
+  \textbf{uclass (인터페이스)}\\[2pt]
+  class별 operation 시그니처 정의};
+\node[side] at (uc.east) {\,UCLASS\_MMC, UCLASS\_GPIO, \ldots};
+
+\node[driverB] (drv) at (0, 3) {%
+  \textbf{driver (구현)}\\[2pt]
+  특정 hardware의 코드\\[2pt]
+  compatible string으로 device와 매칭};
+\node[side] at (drv.east) {\,fsl\_esdhc, mvneta, \ldots};
+
+\node[devB] (dev) at (0, 0) {%
+  \textbf{udevice (인스턴스)}\\[2pt]
+  DT 노드 1개당 udevice 1개\\[2pt]
+  driver\_data + 보드 상태 보관};
+\node[side] at (dev.east) {\,mmc@30b40000, eth@30be0000, \ldots};
+
+\draw[flow] (uc.south) -- node[rel, right] {\,구현} (drv.north);
+\draw[flow] (drv.south) -- node[rel, right] {\,인스턴스화} (dev.north);
+
+\end{tikzpicture}
+\end{document}

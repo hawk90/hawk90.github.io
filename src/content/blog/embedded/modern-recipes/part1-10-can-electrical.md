@@ -23,12 +23,10 @@ draft: false
 
 ### 1) 차동 신호 — CAN_H / CAN_L
 
-```text
-   Recessive (1)        Dominant (0)
-   CAN_H ── 2.5 V       CAN_H ── 3.5 V
-   CAN_L ── 2.5 V       CAN_L ── 1.5 V
-   diff   = 0 V         diff   = 2 V
-```
+| 상태 | CAN_H | CAN_L | 차동 (H − L) |
+| --- | --- | --- | --- |
+| Recessive (1) | 2.5 V | 2.5 V | 0 V |
+| Dominant (0)  | 3.5 V | 1.5 V | 2 V |
 
 두 라인의 *차이*가 신호입니다. common-mode 노이즈가 두 라인에 똑같이 들어오면 차이는 그대로 유지되므로, 외부 노이즈에 강합니다.
 

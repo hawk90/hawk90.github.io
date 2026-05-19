@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  app/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+    minimum width=78mm, minimum height=12mm, inner sep=3pt, align=center,
+    font=\sffamily\small},
+  spm/.style={rectangle, rounded corners=2pt, draw=hibord, fill=hifill,
+    minimum width=78mm, minimum height=11mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  svc/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=32mm, minimum height=11mm, inner sep=2pt, align=center,
+    font=\sffamily\footnotesize},
+  panelNS/.style={rectangle, rounded corners=4pt, draw=impbord, line width=0.6pt,
+    inner sep=10pt, fill=impfill!18},
+  panelS/.style={rectangle, rounded corners=4pt, draw=conbord, line width=0.6pt,
+    inner sep=10pt, fill=confill!22}
+]
+
+% Non-Secure
+\node[app] (app) at (0, 8.0) {Application / RTOS\\[2pt]\footnotesize FreeRTOS, Zephyr, \ldots};
+
+% SG boundary
+\node[font=\sffamily\footnotesize\bfseries, text=inkc] at (0, 6.2) {SG instruction (veneer · PSA Function ID)};
+\draw[arr, line width=0.7pt] (0, 6.9) -- (0, 5.5);
+
+% Secure
+\node[spm] (spm) at (0, 4.3) {TF-M SPM (Secure Partition Manager)};
+
+\node[svc] (crypto) at (-2.8, 1.8) {Crypto\\[2pt]\footnotesize Service};
+\node[svc] (its)    at ( 2.8, 1.8) {Internal Trusted\\[2pt]\footnotesize Storage (ITS)};
+\node[svc] (attest) at (-2.8, -0.7) {Initial\\[2pt]\footnotesize Attestation};
+\node[svc] (fwu)    at ( 2.8, -0.7) {Firmware\\[2pt]\footnotesize Update};
+
+\draw[edge] (spm.south) -- (crypto.north);
+\draw[edge] (spm.south) -- (its.north);
+\draw[edge] (crypto.south) -- (attest.north);
+\draw[edge] (its.south)    -- (fwu.north);
+
+% Panel labels (placed to the side)
+\node[font=\sffamily\bfseries\small, text=impbord, anchor=west] at (5.5, 8.0)  {Non-Secure World};
+\node[font=\sffamily\bfseries\small, text=conbord, anchor=west] at (5.5, 4.3)  {Secure World};
+
+% Panels
+\begin{pgfonlayer}{background}
+  \node[panelNS, fit=(app)] {};
+  \node[panelS,  fit=(spm)(attest)(fwu)] {};
+\end{pgfonlayer}
+
+\end{tikzpicture}
+\end{document}

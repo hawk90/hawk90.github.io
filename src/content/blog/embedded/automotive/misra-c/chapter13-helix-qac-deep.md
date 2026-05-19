@@ -25,7 +25,7 @@ draft: false
 
 QAC 프로젝트는 *.prj* 파일과 일련의 *컴포넌트*로 구성.
 
-```
+```text
 project_root/
 ├── helix-qac/
 │   ├── EPB_ECU.prj                  ← 메인 프로젝트

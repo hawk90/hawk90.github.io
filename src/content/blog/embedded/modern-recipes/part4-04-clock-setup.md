@@ -22,16 +22,14 @@ reset 직후 STM32는 *HSI 16 MHz로 동작*합니다. 동작은 하지만 100 M
 
 ### Clock tree 전체 그림
 
-```text
-HSI 16 MHz ─┐
-HSE 8 MHz  ─┤
-LSI 32 kHz ─┤   ┌──────┐    SYSCLK    ┌──── HCLK = AHB clock
-LSE 32 kHz ─┴──→│ MUX  │───────────┬──→│
-                └──────┘           │   └──── /1,/2,/4 → APB1 (max 42MHz)
-                                   └──── /1,/2,/4 → APB2 (max 84MHz)
-PLL_M=8 → 1MHz → PLL_N=336 → 336MHz → PLL_P=2 → 168MHz (SYSCLK)
-                                    → PLL_Q=7 →  48MHz (USB OTG)
-```
+| 단계 | 입력 | 출력 | 비고 |
+| --- | --- | --- | --- |
+| Source candidates | HSI 16 MHz / HSE 8 MHz / LSI 32 kHz / LSE 32 kHz | — | MUX 입력 |
+| SYSCLK MUX | source 중 하나 | SYSCLK | PLL 출력도 입력 가능 |
+| AHB prescaler | SYSCLK | HCLK | /1 기본 |
+| APB1 prescaler | HCLK | PCLK1 (max 42 MHz) | /1, /2, /4 |
+| APB2 prescaler | HCLK | PCLK2 (max 84 MHz) | /1, /2, /4 |
+| PLL chain | HSE 8 MHz | 168 MHz SYSCLK / 48 MHz USB | M=8 → 1 MHz → N=336 → 336 MHz → P=2, Q=7 |
 
 - **HSE** (High-Speed External): 외부 crystal, 보통 8/16/25 MHz. 정밀도 ±20 ppm.
 - **HSI** (High-Speed Internal): 내부 RC, 16 MHz. 정밀도 ±1% (온도에 따라).

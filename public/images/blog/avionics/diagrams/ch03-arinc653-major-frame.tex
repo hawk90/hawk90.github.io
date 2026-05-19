@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  slot/.style={rectangle, draw=nodebord, line width=0.4pt,
+    minimum height=10mm, inner sep=2pt, align=center,
+    font=\sffamily\small},
+  slotP/.style={slot, fill=absfill, draw=absbord},
+  slotI/.style={slot, fill=neutfill, draw=neutbord, font=\sffamily\footnotesize\itshape}
+]
+
+% Major frame slots — width proportional to time slice (100ms total scaled to 100mm)
+% P1: 0-20  (20mm)  P2: 20-50 (30mm) P3: 50-70 (20mm) P4: 70-90 (20mm) Idle: 90-100 (10mm)
+
+\node[slotP, minimum width=20mm, anchor=west] (p1) at (0, 0)    {P1\\[2pt]\footnotesize 20\,ms};
+\node[slotP, minimum width=30mm, anchor=west] (p2) at (p1.east) {P2\\[2pt]\footnotesize 30\,ms};
+\node[slotP, minimum width=20mm, anchor=west] (p3) at (p2.east) {P3\\[2pt]\footnotesize 20\,ms};
+\node[slotP, minimum width=20mm, anchor=west] (p4) at (p3.east) {P4\\[2pt]\footnotesize 20\,ms};
+\node[slotI, minimum width=10mm, anchor=west] (id) at (p4.east) {Idle\\[2pt]\footnotesize 10\,ms};
+
+% Time axis
+\draw[arr] (p1.south west) ++(0, -2mm) -- ++(105mm, 0);
+\foreach \x/\t in {0/0, 20/20, 50/50, 70/70, 90/90, 100/100} {
+  \draw[draw=mutec, line width=0.3pt] (\x mm, -1mm) -- (\x mm, -3mm);
+  \node[font=\sffamily\footnotesize, text=mutec, anchor=north] at (\x mm, -4mm) {\t};
+}
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (108mm, -3mm) {ms};
+
+% Cycle label
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (50mm, -12mm) {← Major Frame 100\,ms · cycle 반복 →};
+
+% Title
+\node[font=\sffamily\bfseries, text=inkc, anchor=south] at (50mm, 7mm) {ARINC-653 Major Frame (100\,ms · 4 partition)};
+
+\end{tikzpicture}
+\end{document}

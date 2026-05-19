@@ -198,13 +198,12 @@ VTT (terminator 전압)는 VDDQ / 2입니다. 약간만 잘못되어도 eye diag
 
 ## DDR PHY와 Controller
 
-```text
-[CPU] ─ AXI ─ [Memory Controller] ─ PHY ─ [DRAM chip]
-                  │                  │
-                  └ scheduling       └ analog (PLL, IO buf)
-                    refresh
-                    arbiter
-```
+| 블록 | 인접 연결 | 담당 기능 |
+| --- | --- | --- |
+| CPU | ↔ AXI | master 요청 |
+| Memory Controller | AXI ↔ PHY | scheduling, refresh, arbiter |
+| DDR PHY | controller ↔ DRAM | analog (PLL, IO buffer, training) |
+| DRAM chip | ↔ PHY | 실제 storage |
 
 Cortex-A SoC (i.MX, STM32MP1, Zynq)에서는 Synopsys uMCTL2와 DDR PHY 조합이 표준입니다.
 

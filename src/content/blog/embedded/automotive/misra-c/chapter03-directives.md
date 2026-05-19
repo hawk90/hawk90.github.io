@@ -75,7 +75,7 @@ clang -Weverything -Wno-padded -Wno-c++98-compat
 
 외부 라이브러리(HAL, RTOS, vendor SDK)는 일반적으로 MISRA 위반을 한다. 다음과 같이 *경계*를 그어 격리한다.
 
-```
+```text
 프로젝트/
 ├── src/                ← MISRA 적용 (deviation 보고 대상)
 ├── third_party/        ← MISRA 면제 (Permit-EXT-001)

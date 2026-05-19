@@ -161,28 +161,7 @@ Cortex-M0+ @ 48 MHz, 32 KB RAM, 256 KB Flash:
 
 위협 모델의 마지막 산출물은 *신뢰 경계 다이어그램*입니다. 시스템을 박스로 나누고, *데이터가 박스 사이를 건널 때 어떤 검증이 일어나는지*를 표시합니다.
 
-```text
-┌─────────────────┐   signed FW   ┌─────────────────┐
-│  Cloud server   │ ───────────▶  │  Device         │
-│ (TLS endpoint)  │               │ ┌─────────────┐ │
-└─────────────────┘               │ │ Non-Secure  │ │
-        │                         │ │ World (NS)  │ │
-        │ TLS 1.3 mutual auth     │ └──┬──────────┘ │
-        ▼                         │    │ SMC        │
-┌─────────────────┐               │    ▼            │
-│   CA root       │               │ ┌─────────────┐ │
-│   (RoT)         │               │ │ Secure      │ │
-└─────────────────┘               │ │ World (S)   │ │
-                                  │ │ + TEE       │ │
-                                  │ └──┬──────────┘ │
-                                  │    │            │
-                                  │    ▼            │
-                                  │ ┌─────────────┐ │
-                                  │ │ OTP / fuse  │ │
-                                  │ │ (root keys) │ │
-                                  │ └─────────────┘ │
-                                  └─────────────────┘
-```
+![신뢰 경계 — Cloud, CA root, Device의 NS/S/OTP 계층](/images/blog/embedded-security/diagrams/ch01-trust-boundaries.svg)
 
 박스 사이의 화살표 *각각*이 검증 지점입니다. Cloud → Device는 mutual TLS, NS → S는 SMC 인터페이스의 입력 검증, S → OTP는 access control 검사가 들어갑니다. 신뢰 경계가 그려지면 그 다음 챕터들이 다루는 메커니즘(Secure Boot, TrustZone, TEE)이 *어디서 어떤 경계를 지키는지* 분명해집니다.
 

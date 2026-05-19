@@ -307,17 +307,7 @@ Lockstep — 자동차·산업 *주력*. Avionics actuator 진입.
 
 구성:
 
-```text
-┌──────┐   ┌──────┐   ┌──────┐
-│ CPU1 │   │ CPU2 │   │ CPU3 │
-└───┬──┘   └───┬──┘   └───┬──┘
-    ↓          ↓          ↓
- ┌──────────────────────────┐
- │       Voter (HW·SW)       │
- └──────────────────────────┘
-            ↓
-        Output
-```
+![TMR — Triple Modular Redundancy with voter](/images/blog/avionics/diagrams/ch04-tmr.svg)
 
 **사용처:**
 - Space Shuttle — 4 main + 1 backup

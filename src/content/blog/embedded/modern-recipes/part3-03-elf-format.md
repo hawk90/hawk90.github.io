@@ -23,24 +23,16 @@ draft: false
 
 ### 1) ELF 전체 구조
 
-```text
-┌────────────────────────┐
-│ ELF Header             │  ← 어디에 뭐가 있는지 안내
-├────────────────────────┤
-│ Program Headers        │  ← loader용 (어디에 올릴지)
-│   PT_LOAD              │
-│   PT_NOTE              │
-├────────────────────────┤
-│ .text                  │  ← 실행 코드
-│ .rodata                │  ← 상수
-│ .data                  │  ← 초기화된 변수
-│ .bss                   │  ← 0으로 초기화 (실제 데이터 없음)
-│ .debug_info            │  ← 디버그 정보
-│ ...                    │
-├────────────────────────┤
-│ Section Headers        │  ← linker/tool용 (각 섹션 metadata)
-└────────────────────────┘
-```
+| 영역 | 내용 | 역할 |
+| --- | --- | --- |
+| ELF Header | 매직 + 포인터 | 어디에 뭐가 있는지 안내 |
+| Program Headers | PT_LOAD, PT_NOTE 등 | loader용 — 어디에 올릴지 |
+| `.text` | 실행 코드 | runtime 실행 |
+| `.rodata` | 상수 | read-only data |
+| `.data` | 초기화된 변수 | RAM 초기값 |
+| `.bss` | 0 초기화 | 실제 데이터 없음, 크기만 |
+| `.debug_info` | DWARF 등 | 디버그 정보 |
+| Section Headers | section metadata | linker / objdump / gdb |
 
 ### 2) Program Header vs Section Header
 

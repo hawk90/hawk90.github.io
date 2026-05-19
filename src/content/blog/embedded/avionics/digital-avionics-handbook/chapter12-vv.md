@@ -16,15 +16,7 @@ draft: true
 
 V Model — Avionics 전형:
 
-```text
-Requirements ───┐         ┌─── Acceptance Test
-                │         │
-   Design ─────┐│         ││─── System Test
-              ││         ││
-       Code ──┐│└─── Unit Test
-              │└─── Integration Test
-              └─── Module Test
-```
+![V Model — development arm (left) mirrored by verification arm (right)](/images/blog/avionics/diagrams/ch12-v-model.svg)
 
 좌측 — Development. 우측 — Verification. 각 level — 좌우 대응.
 
@@ -75,12 +67,11 @@ V&V — *complementary*. 둘 다 인증 필수.
 
 구조:
 
-```text
-┌────────────────┐    ┌────────────────┐
-│ Production SW  │←──→│ Plant Simulator│
-│ (C code)       │    │ (Simulink·자체)│
-└────────────────┘    └────────────────┘
-```
+| 좌측 (control) | 우측 (plant) |
+|---|---|
+| **Production SW** (C code, host) | **Plant Simulator** (Simulink · 자체) |
+
+— 양방향 closed-loop.
 
 **사용:**
 - Control law verification
@@ -113,12 +104,11 @@ SIL — *early algorithm verify*. Production timing 부족.
 
 구조:
 
-```text
-┌────────────────┐    ┌────────────────┐
-│ Algorithm Model│←──→│ Plant Model    │
-│ (Simulink)     │    │ (Simulink)     │
-└────────────────┘    └────────────────┘
-```
+| 좌측 (control) | 우측 (plant) |
+|---|---|
+| **Algorithm Model** (Simulink) | **Plant Model** (Simulink) |
+
+— 양방향 closed-loop.
 
 **사용:**
 - Initial design
@@ -148,13 +138,11 @@ MIL → SIL → PIL → HIL 진행.
 
 구조:
 
-```text
-┌────────────────┐    ┌────────────────┐
-│ Target board   │←──→│ Plant Simulator│
-│ (PowerPC·ARM)  │    │ (host computer)│
-│ Production SW  │    │                │
-└────────────────┘    └────────────────┘
-```
+| 좌측 (control) | 우측 (plant) |
+|---|---|
+| **Target board** (PowerPC · ARM) — Production SW | **Plant Simulator** (host computer) |
+
+— 양방향 closed-loop.
 
 **사용:**
 - Code optimization verify
@@ -185,15 +173,11 @@ PIL — *target-specific verify*. WCET·precision.
 
 구조:
 
-```text
-┌────────────────┐    ┌────────────────┐
-│ Flight Computer│←──→│ Real-time plant│
-│ (real FCC)     │    │ simulator      │
-│ Real I/O bus   │    │ (dSPACE·       │
-│ (1553·AFDX)    │    │  speedgoat·    │
-│                │    │  NI VeriStand) │
-└────────────────┘    └────────────────┘
-```
+| 좌측 (real HW) | 우측 (plant) |
+|---|---|
+| **Flight Computer** — real FCC, real I/O bus (1553 · AFDX) | **Real-time plant simulator** (dSPACE · Speedgoat · NI VeriStand) |
+
+— 양방향 closed-loop, real-time.
 
 **사용:**
 - Integrated test

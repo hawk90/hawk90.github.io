@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bc/.style={rectangle, rounded corners=2pt, draw=hibord, fill=hifill,
+    minimum width=18mm, minimum height=10mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  rt/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=18mm, minimum height=10mm, inner sep=3pt, align=center,
+    font=\sffamily\bfseries\small},
+  dev/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+    minimum width=34mm, minimum height=10mm, inner sep=2pt, align=center,
+    font=\sffamily\footnotesize}
+]
+
+% Bus label above
+\node[font=\sffamily\footnotesize, text=mutec, anchor=south] at (0, 3.0) {1553B Bus — single master, deterministic};
+
+% Bus line (horizontal)
+\draw[draw=edgec, line width=1.2pt] (-6.0, 2.6) -- (6.0, 2.6);
+
+% Nodes
+\node[bc] (bc) at (-4.5, 0.6) {BC};
+\node[rt] (r1) at (-1.5, 0.6) {RT 1};
+\node[rt] (r2) at ( 1.5, 0.6) {RT 2};
+\node[font=\sffamily, text=mutec] (more) at (4.5, 0.6) {\ldots\ RT 31};
+
+% Stubs (vertical)
+\foreach \x in {-4.5, -1.5, 1.5, 4.5} {
+  \draw[edge] (\x, 1.1) -- (\x, 2.6);
+}
+
+% Device under RT1
+\node[dev] (d) at (-1.5, -1.4) {Device (sensor / actuator)};
+\draw[edge, dashed] (r1.south) -- (d.north);
+
+\end{tikzpicture}
+\end{document}

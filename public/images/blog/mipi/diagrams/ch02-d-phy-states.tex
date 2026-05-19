@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  row/.style={cls, minimum width=80mm, minimum height=8mm, align=left, inner sep=4pt, font=\sffamily\footnotesize}
+]
+
+\node[panel, minimum width=90mm, minimum height=58mm, anchor=north] (p) at (0, 0) {};
+\node[panelTitle, anchor=north] at (p.north) {D-PHY 시퀀스};
+
+\node[row, fill=clifill, draw=clibord] (r1) at (0, -1.3) {LP-11 (idle, 둘 다 1.2V)};
+\node[row, fill=prpfill, draw=prpbord] (r2) at (0, -2.3) {$\downarrow$ LP-01, LP-00, $\ldots$ (mode entry sequence)};
+\node[row, fill=hifill, draw=hibord] (r3) at (0, -3.3) {HS Sync (00011101)};
+\node[row, fill=impfill, draw=impbord] (r4) at (0, -4.3) {$\downarrow$ HS payload --- DDR, $\pm$200mV};
+\node[row, fill=warnfill, draw=warnbord] (r5) at (0, -5.3) {HS Trail $\rightarrow$ LP-11 복귀};
+
+\end{tikzpicture}
+\end{document}

@@ -23,15 +23,13 @@ draft: false
 
 ### 1) LVDS 신호 정의
 
-```text
-   driver                           receiver
-   +─── LVDS+ ────┐ 100Ω ┌──── LVDS+
-                  ├──┤├──┤
-   ─── LVDS- ────┘      └──── LVDS-
-
-   각 line: 약 1.2 V common-mode
-   차동: ±350 mV (logic high = +350 mV, low = -350 mV)
-```
+| 항목 | 값 |
+| --- | --- |
+| Driver | 전류 모드 (3.5 mA) |
+| 종단 | receiver 쪽 100 Ω 차동 저항 |
+| Common-mode | 약 1.2 V |
+| 차동 swing | ±350 mV (high = +350, low = −350) |
+| 계산 | V = I × R = 3.5 mA × 100 Ω = 350 mV |
 
 전류 모드 driver(3.5 mA)가 종단 저항 100Ω을 통해 흐릅니다. V = I × R = 3.5 mA × 100Ω = 350 mV.
 

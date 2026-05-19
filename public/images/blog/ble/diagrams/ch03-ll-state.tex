@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  st/.style={cls, minimum width=24mm, minimum height=10mm, rounded corners=3pt}
+]
+
+\node[st, fill=clifill, draw=clibord] (standby) at (0, 0) {Standby};
+
+\node[st, fill=impfill, draw=impbord] (adv) at (-5, -2.5) {Advertising};
+\node[st, fill=absfill, draw=absbord] (scan) at (0, -2.5) {Scanning};
+\node[st, fill=prpfill, draw=prpbord] (init) at (5, -2.5) {Initiating};
+
+\node[st, fill=hifill, draw=hibord, minimum width=30mm, minimum height=11mm] (conn) at (0, -5) {Connection};
+
+\draw[uses] (standby) -- (adv);
+\draw[uses] (standby) -- (scan);
+\draw[uses] (standby) -- (init);
+
+\draw[uses] (adv.south) -- (conn.north west);
+\draw[uses] (scan.south) -- (conn.north);
+\draw[uses] (init.south) -- (conn.north east);
+
+\node[font=\sffamily\footnotesize, text=mutec, anchor=center, align=center] at (0, -6.5)
+  {Standby에서 시작 → Advertise/Scan/Init 중 하나 → Connection};
+
+\end{tikzpicture}
+\end{document}

@@ -22,23 +22,13 @@ UART에서 1 KB를 받거나, ADC로 1024 sample을 모으거나, SPI로 framebu
 
 ### DMA architecture
 
-```text
-              ┌────────────────┐
-              │  DMA Controller │
-              │  ┌─────────┐    │
-              │  │ Stream0 │    │  ←── trigger source
-              │  │ Stream1 │    │      (UART, SPI, ADC, TIM, ...)
-              │  │   ...    │    │
-              │  │ Stream7 │    │
-              │  └─────────┘    │
-              └────────────────┘
-                  │  AHB
-              ┌────────────────┐
-              │  Bus matrix     │
-              └────────────────┘
-              │            │
-           SRAM        Peripheral
-```
+| 블록 | 역할 |
+| --- | --- |
+| DMA Controller | Stream0 ~ Stream7, 각 stream은 channel로 trigger source 선택 (UART·SPI·ADC·TIM 등) |
+| AHB bus | DMA → bus matrix 연결 |
+| Bus matrix | SRAM과 peripheral로 분기 |
+| SRAM | data buffer 위치 |
+| Peripheral | source 또는 destination |
 
 STM32F4는 *DMA1, DMA2 controller 각 8 stream*, 각 stream은 *8 channel*에서 trigger source를 고릅니다. 어느 peripheral이 어느 stream·channel을 쓰는지는 datasheet의 *DMA request mapping table*을 참조합니다.
 
@@ -57,16 +47,11 @@ STM32F4는 *DMA1, DMA2 controller 각 8 stream*, 각 stream은 *8 channel*에서
 
 DMA는 *NDTR의 절반과 전체*에 도달했을 때 IRQ를 발생시킬 수 있습니다. circular buffer를 두 영역으로 나눠 *한쪽이 차는 동안 다른 쪽 처리* 패턴(double buffering)이 표준입니다.
 
-```text
-DMA buffer (1024 bytes, circular):
-
-   ┌─────────────────┬─────────────────┐
-   │   first half    │   second half    │
-   └─────────────────┴─────────────────┘
-   ↑                  ↑                  ↑
-   start            HT IRQ              TC IRQ
-                   (process A)         (process B)
-```
+| offset | 영역 | trigger event | CPU 동작 |
+| --- | --- | --- | --- |
+| 0 | first half (512 B) | start | (DMA fill 시작) |
+| 512 | (HT 도달) | HT IRQ | process first half (A) |
+| 1024 | second half end | TC IRQ | process second half (B), wrap |
 
 ### Data width와 burst
 
