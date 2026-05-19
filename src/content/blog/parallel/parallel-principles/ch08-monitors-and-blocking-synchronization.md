@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, amp, monitor, condition-variable, sem
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
-draft: true
+draft: false
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 8 요약

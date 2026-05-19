@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, amp, linked-list, lock-free, C++, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
-draft: true
+draft: false
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 9 요약

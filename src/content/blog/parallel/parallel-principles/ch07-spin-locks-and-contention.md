@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, amp, spinlock, mcs, clh, cache, C++, 
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
-draft: true
+draft: false
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 7 요약
