@@ -8,7 +8,6 @@ tags: [cpp, abseil, code-review, google-style, best-practices]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
 ---
 
 ## Google 코드 리뷰의 핵심 원칙
@@ -349,13 +348,16 @@ absl::StatusOr<User> GetUser(int id) {
 > - After: p50=1ms, p99=15ms
 ```
 
-## 다음 단계
+## 다음 장 예고
 
-- **항목 3**: Abseil 문자열 라이브러리 심층 분석
-- **항목 4**: 컨테이너 성능 비교와 선택 가이드
+[Part 13-02: 자주 보는 anti-pattern](/blog/programming/code-review/abseil/part13-02-anti-patterns) — 리뷰에서 반복적으로 지적되는 실수 모음.
 
-## 참고 자료
+## 관련 항목
 
+- [Part 13-02: 자주 보는 anti-pattern](/blog/programming/code-review/abseil/part13-02-anti-patterns)
+- [Part 13-03: std → absl 마이그레이션 전략](/blog/programming/code-review/abseil/part13-03-std-to-absl-migration)
+- [Part 1-02: Design philosophy](/blog/programming/code-review/abseil/part1-02-design-philosophy)
+- [Part 3-01: absl::Status](/blog/programming/code-review/abseil/part3-01-status)
 - [Google Engineering Practices - Code Review](https://google.github.io/eng-practices/review/)
 - [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 - [Abseil C++ Tips](https://abseil.io/tips/)
