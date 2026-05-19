@@ -46,6 +46,20 @@ $ output/images/start-qemu.sh
 
 이 셋을 포기한 대가로 얻는 것이 *전체 구조를 한눈에 이해할 수 있는 단순함*입니다. 빌드가 무엇을 하고 있는지 `make V=1`로 한 줄씩 따라갈 수 있고, 잘못되면 어느 단계에서 잘못됐는지 즉시 파악됩니다.
 
+## 빌드 시간이 어디로 가는가
+
+Buildroot가 *왜* 빠르다고 하는지는 빌드 단계별 분포를 보면 명확합니다. QEMU AArch64 + busybox + 20개 패키지로 만든 최소 시스템 기준 첫 빌드.
+
+| 단계 | 시간 | 비율 |
+|---|---|---|
+| Toolchain 부트스트랩 | 15 ~ 25분 | 50 ~ 60% |
+| 커널 빌드 | 5 ~ 8분 | 15 ~ 20% |
+| Userland 패키지 | 5 ~ 10분 | 15 ~ 25% |
+| 이미지 생성 (fakeroot·mkfs) | 1 ~ 2분 | 3 ~ 5% |
+| **합계** | **30 ~ 45분** | **100%** |
+
+같은 구성을 Yocto로 빌드하면 *첫 빌드 90분 ~ 3시간*입니다. 이유는 *recipe 메타데이터 파싱*, *sstate signature 계산*, *per-recipe sysroot* 같은 인프라가 추가되기 때문입니다. 두 번째 빌드부터는 *Yocto의 sstate*가 거의 무료가 되어 단번에 뒤집힙니다. 즉 *첫 빌드만 보는가, 매 빌드를 보는가*에 따라 답이 달라집니다.
+
 ## Yocto의 설계 철학
 
 Yocto는 정반대 방향으로 갑니다. 핵심에 BitBake라는 별도의 빌드 엔진이 있고, *recipe*마다 *task*가 있고, *task*마다 *cache key*가 있어 *signature*가 같으면 사전 빌드된 sstate를 재사용합니다.
@@ -106,6 +120,42 @@ $ bitbake core-image-minimal
 
 조직이 커지고 제품 라인이 늘어나면 Buildroot의 단순함이 *제약*으로 바뀝니다. 그 시점이 Yocto로 옮길 적기입니다.
 
+## 실제로 어디에 쓰이는가
+
+설계 철학만 보면 흐릿한 그림이 채택 사례로 구체화됩니다.
+
+**Buildroot 채택 사례**
+
+- **OpenWrt** — Buildroot 기반에서 분기한 라우터·게이트웨이 시스템. 1,000개 이상의 라우터 모델이 사용 중.
+- **Synology DSM 일부 모델** — NAS의 저사양 라인업 firmware.
+- **Google Coral**, **NVIDIA Jetson Nano** 일부 reference image — 빠른 SDK 배포용.
+- **소형 가전·IoT 게이트웨이 다수** — vendor-branded 제품의 *내부 OS*. 공개되지 않을 뿐 광범위.
+- **자율주행·로봇 *내부 SoC*** — main computer는 Yocto/Linux이지만 sensor module·MCU subsystem의 Linux는 Buildroot가 흔함.
+
+**Yocto/OE 채택 사례**
+
+- **Tesla 차량 내부 인포테인먼트** — Yocto 기반.
+- **BMW iDrive 8** — Yocto + meta-bmw.
+- **Mercedes MBUX** — Yocto.
+- **NXP·TI·Xilinx·Qualcomm vendor BSP** — *모두* Yocto layer 형태 (meta-imx, meta-ti, meta-xilinx, meta-qcom).
+- **Tizen, AGL (Automotive Grade Linux), webOS Open Source Edition** — Yocto 기반 distribution들.
+
+이 분포가 한 가지를 시사합니다. *대형 제품·자동차·vendor BSP는 Yocto, 소형 IoT·게이트웨이·prototyping은 Buildroot*. 두 도구가 정확히 다른 시장을 잡고 있어 *둘 다 살아남았습니다*. 한쪽이 다른 쪽을 *대체*하지 않습니다.
+
+## 결정 트리
+
+당장 어느 쪽으로 갈지 막막하면 다음 흐름이 도움이 됩니다.
+
+| 질문 | 답이 *Yes*면 | 답이 *No*면 |
+|---|---|---|
+| 1. Vendor BSP가 *Yocto layer*로만 옵니까? | Yocto | 2번으로 |
+| 2. 보드 수가 3개 이상이거나 *동시에 SoC 변형*이 있습니까? | Yocto | 3번으로 |
+| 3. *외부 개발자에게 SDK를 배포*해야 합니까? | Yocto | 4번으로 |
+| 4. *OTA·A/B 부팅·delta update*가 필수입니까? | Yocto (또는 Buildroot + RAUC) | 5번으로 |
+| 5. 빌드 시스템 전담 인력이 있습니까? | 둘 다 가능 | Buildroot |
+
+이 표가 모든 경우를 잡지는 못합니다. 다만 *어디서부터 망설일지*의 지도가 됩니다.
+
 ## 그 외 옵션
 
 선택지가 둘만 있는 것은 아닙니다.
@@ -141,6 +191,22 @@ Image  rootfs.ext2  rootfs.ext4  start-qemu.sh
 ```
 
 `Image`는 커널, `rootfs.ext4`는 파일시스템, `start-qemu.sh`는 QEMU 부팅 스크립트입니다. 이 단순한 산출물 구조 자체가 Buildroot의 정체성입니다.
+
+## 숫자로 보는 비교
+
+마지막으로 *체감 차이*를 숫자로 정리합니다. 같은 "AArch64 busybox + nginx + sshd + Python 3" rootfs를 양쪽 도구로 만든 기준입니다.
+
+| 항목 | Buildroot 2024.02 | Yocto Scarthgap |
+|---|---|---|
+| **트리 크기 (`du -sh`)** | 290 MB | 2.1 GB |
+| **첫 빌드 시간** | 32분 | 110분 |
+| **두 번째 빌드 (no change)** | 5초 | 8초 |
+| **두 번째 빌드 (1 package 수정)** | 25초 | 12초 (sstate hit) |
+| **rootfs 크기 (`-stripped`)** | 38 MB | 92 MB (디폴트 image-base 포함) |
+| **`dl/` cache 크기** | 1.2 GB | 4.5 GB (sstate 포함) |
+| **메타데이터 파일 수** | 270 (`.mk` + `Config.in`) | 1,800 (`.bb` + `.conf`) |
+
+같은 결과를 얻는 데 *Yocto가 7배*의 메타데이터, *5배*의 첫 빌드 시간, *3.7배*의 dl 캐시를 요구합니다. 그 대신 *두 번째 빌드 이후의 incremental*은 Yocto가 훨씬 정확합니다. 5번째 빌드부터는 Yocto가 빠른 경우가 많아집니다.
 
 ## 자주 하는 오해
 
