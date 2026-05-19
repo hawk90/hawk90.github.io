@@ -1,43 +1,41 @@
-\documentclass[border=10pt,tikz]{standalone}
-\usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
-\usepackage{kotex}
-\begin{document}
+\documentclass[tikz,border=10pt]{standalone}
 \input{../../_design.tex}
+
+\begin{document}
 \begin{tikzpicture}[blog]
 
 % Outside-In section
-\node[font=\sffamily\bfseries\small] at (-3.5, 4.2) {Outside-In (London/Mockist)};
+\node[font=\sffamily\bfseries\small] at (-3.5, 4.5) {Outside-In (London/Mockist)};
 
 % Outside-In boxes
-\node[hi, minimum width=24mm] (oi-ui) at (-3.5, 3) {UI};
-\node[abs, minimum width=24mm] (oi-svc) at (-3.5, 1.5) {Service};
+\node[hi, minimum width=24mm] (oi-ui) at (-3.5, 3.2) {UI};
+\node[abs, minimum width=24mm] (oi-svc) at (-3.5, 1.6) {Service};
 \node[imp, minimum width=24mm] (oi-dom) at (-3.5, 0) {Domain};
 
 % Outside-In arrows and labels
 \draw[arr] (oi-ui) -- (oi-svc);
 \draw[arr] (oi-svc) -- (oi-dom);
-\node[font=\sffamily\tiny, anchor=west, text=hibord] at (-2, 3) {테스트 시작};
-\node[font=\sffamily\tiny, anchor=west, text=mutec] at (-2, 1.5) {Mock으로 협력자 정의};
-\node[font=\sffamily\tiny, anchor=west, text=mutec] at (-2, 0) {마지막에 구현};
+\node[font=\sffamily\tiny, anchor=west, text=hibord] at (-1.8, 3.2) {테스트 시작};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (-1.8, 1.6) {Mock으로 협력자 정의};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (-1.8, 0) {마지막에 구현};
 
 % Inside-Out section
-\node[font=\sffamily\bfseries\small] at (3.5, 4.2) {Inside-Out (Detroit/Classical)};
+\node[font=\sffamily\bfseries\small] at (3.5, 4.5) {Inside-Out (Detroit/Classical)};
 
 % Inside-Out boxes
-\node[con, minimum width=24mm] (io-ui) at (3.5, 3) {UI};
-\node[abs, minimum width=24mm] (io-svc) at (3.5, 1.5) {Service};
+\node[con, minimum width=24mm] (io-ui) at (3.5, 3.2) {UI};
+\node[abs, minimum width=24mm] (io-svc) at (3.5, 1.6) {Service};
 \node[hi, minimum width=24mm] (io-dom) at (3.5, 0) {Domain};
 
 % Inside-Out arrows and labels
 \draw[arr] (io-svc) -- (io-ui);
 \draw[arr] (io-dom) -- (io-svc);
-\node[font=\sffamily\tiny, anchor=east, text=mutec] at (5, 3) {마지막에 통합};
-\node[font=\sffamily\tiny, anchor=east, text=mutec] at (5, 1.5) {실제 객체로 테스트};
-\node[font=\sffamily\tiny, anchor=east, text=hibord] at (5, 0) {테스트 시작};
+\node[font=\sffamily\tiny, anchor=east, text=mutec] at (5.2, 3.2) {마지막에 통합};
+\node[font=\sffamily\tiny, anchor=east, text=mutec] at (5.2, 1.6) {실제 객체로 테스트};
+\node[font=\sffamily\tiny, anchor=east, text=hibord] at (5.2, 0) {테스트 시작};
 
 % Divider line
-\draw[draw=gridc, line width=0.5pt, dashed] (0, 4.5) -- (0, -0.8);
+\draw[draw=gridc, line width=0.5pt, dashed] (0, 5) -- (0, -0.8);
 
 \end{tikzpicture}
 \end{document}
