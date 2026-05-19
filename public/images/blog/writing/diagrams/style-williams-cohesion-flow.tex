@@ -1,0 +1,77 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  sentBox/.style={rectangle, rounded corners=3pt, draw=nodebord, line width=0.4pt,
+                  fill=nodefill, minimum height=12mm, inner sep=4pt,
+                  font=\sffamily\small, align=center},
+  oldB/.style={rectangle, rounded corners=2pt, fill=absfill, draw=absbord,
+               line width=0.3pt, inner xsep=3pt, inner ysep=2pt,
+               font=\sffamily\bfseries\small},
+  newB/.style={rectangle, rounded corners=2pt, fill=hifill, draw=hibord,
+               line width=0.3pt, inner xsep=3pt, inner ysep=2pt,
+               font=\sffamily\bfseries\small},
+  hand/.style={-{Stealth[length=2.8mm]}, draw=focusc, line width=0.7pt},
+  lab/.style={font=\sffamily\footnotesize, text=mutec}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (0, 5.4)
+  {Cohesion — Old-to-New Chain};
+\node[caption] at (0, 4.9) {각 문장은 익숙한 정보로 시작하고 새 정보로 끝난다};
+
+% Sentence 1
+\node[lab, anchor=east] at (-7.5, 3.5) {S1};
+\node[oldB] (o1) at (-5.3, 3.5) {Climate change};
+\node[lab] at (-3.5, 3.5) {affects};
+\node[newB] (n1) at (-0.4, 3.5) {polar ice caps};
+
+% Sentence 2
+\node[lab, anchor=east] at (-7.5, 2.0) {S2};
+\node[oldB] (o2) at (-5.0, 2.0) {The melting of ice};
+\node[lab] at (-2.7, 2.0) {raises};
+\node[newB] (n2) at (-0.1, 2.0) {sea levels};
+
+% Sentence 3
+\node[lab, anchor=east] at (-7.5, 0.5) {S3};
+\node[oldB] (o3) at (-4.7, 0.5) {Rising sea levels};
+\node[lab] at (-2.6, 0.5) {threaten};
+\node[newB] (n3) at (0.4, 0.5) {coastal cities};
+
+% Sentence 4
+\node[lab, anchor=east] at (-7.5, -1.0) {S4};
+\node[oldB] (o4) at (-5.5, -1.0) {These cities};
+\node[lab] at (-2.2, -1.0) {house most of the world's};
+\node[newB] (n4) at (1.8, -1.0) {population};
+
+% Old-to-new connecting arcs
+\draw[hand] (n1.south) to[bend right=25] (o2.north);
+\draw[hand] (n2.south) to[bend right=25] (o3.north);
+\draw[hand] (n3.south) to[bend right=25] (o4.north);
+
+% Right side legend / labels
+\node[oldB, anchor=west] at (3.6, 3.5) {Old info};
+\node[lab, anchor=west, text width=6cm] at (5.4, 3.5)
+  {익숙한 정보 — 문장 \textbf{시작}};
+
+\node[newB, anchor=west] at (3.6, 2.0) {New info};
+\node[lab, anchor=west, text width=6cm] at (5.4, 2.0)
+  {새 정보 — 문장 \textbf{끝}};
+
+\node[font=\sffamily\footnotesize\bfseries, text=focusc, anchor=west] at (3.6, 0.5)
+  {chain $\to$};
+\node[lab, anchor=west, text width=6cm] at (5.4, 0.5)
+  {끝의 new가 다음 문장의 old};
+
+% Bottom caption
+\node[caption, text width=15cm] at (0, -2.5)
+  {이 패턴이 깨지면 — 같은 주제라도 독자가 매 문장 새로 시작해야 한다.
+   주어 = old, 끝 = new가 영어 cohesion의 핵심.};
+
+\end{tikzpicture}
+\end{document}

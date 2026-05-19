@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  movebox/.style={rectangle, rounded corners=4pt, line width=0.5pt,
+                  minimum width=50mm, minimum height=22mm,
+                  inner sep=6pt, align=center, font=\sffamily\bfseries\small},
+  m1/.style={movebox, fill=absfill, draw=absbord},
+  m2/.style={movebox, fill=confill, draw=conbord},
+  m3/.style={movebox, fill=impfill, draw=impbord},
+  substep/.style={rectangle, rounded corners=2pt, draw=mutec, line width=0.3pt,
+                  fill=nodefill, minimum width=46mm, minimum height=7mm,
+                  inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  flow/.style={-{Stealth[length=3mm]}, draw=edgec, line width=0.7pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (0, 4.6)
+  {Swales CARS Model — Creating a Research Space};
+
+% Three main moves — horizontal
+\node[m1] (m1) at (-6, 2) {Move 1\\[2pt] Establishing\\ a Territory};
+\node[m2] (m2) at ( 0, 2) {Move 2\\[2pt] Establishing\\ a Niche};
+\node[m3] (m3) at ( 6, 2) {Move 3\\[2pt] Occupying\\ the Niche};
+
+% Arrows between moves
+\draw[flow] (m1.east) -- (m2.west);
+\draw[flow] (m2.east) -- (m3.west);
+
+% Substeps under each move
+\node[substep] (s1a) at (-6,  0.0) {1A — 중요성 주장};
+\node[substep] (s1b) at (-6, -0.9) {1B — 일반화 / 배경};
+\node[substep] (s1c) at (-6, -1.8) {1C — 기존 연구 리뷰};
+
+\node[substep] (s2a) at ( 0,  0.0) {2A — Counter-claim};
+\node[substep] (s2b) at ( 0, -0.9) {2B — Gap 지적};
+\node[substep] (s2c) at ( 0, -1.8) {2C — Question 제기};
+\node[substep] (s2d) at ( 0, -2.7) {2D — 전통 잇기};
+
+\node[substep] (s3a) at ( 6,  0.0) {3A — 목적 명시};
+\node[substep] (s3b) at ( 6, -0.9) {3B — 발견 사전 공개};
+\node[substep] (s3c) at ( 6, -1.8) {3C — 논문 구조 안내};
+
+% Tagline under each
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (-6, -3.4) {``이 분야는 중요하다''};
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at ( 0, -3.6) {``그러나 이 부분이 빠져 있다''};
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at ( 6, -3.4) {``그래서 우리가 이걸 한다''};
+
+% Bottom caption
+\node[caption, text width=15cm] at (0, -4.6)
+  {각 Move는 substep 중 하나 이상으로 구성. Move 2는 *부드러운 부정* (however, less attention) 필수.};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,62 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  sect/.style={rectangle, rounded corners=4pt, line width=0.5pt,
+               minimum width=34mm, minimum height=20mm,
+               inner sep=4pt, align=center, font=\sffamily\bfseries\small},
+  intro/.style={sect, fill=absfill, draw=absbord},
+  meth/.style={sect, fill=clifill, draw=clibord},
+  res/.style={sect, fill=impfill, draw=impbord},
+  disc/.style={sect, fill=hifill, draw=hibord},
+  role/.style={font=\sffamily\footnotesize, text=mutec, align=center, text width=34mm},
+  qarrow/.style={-{Stealth[length=3mm]}, draw=edgec, line width=0.7pt},
+  funnelGuide/.style={draw=mutec, line width=0.3pt, dashed}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (0, 4.2)
+  {IMRaD — Research Paper의 표준 구조};
+
+% Sections in a row
+\node[intro] (i) at (-6.6, 1.8) {I\\[2pt] Introduction};
+\node[meth]  (m) at (-2.2, 1.8) {M\\[2pt] Methods};
+\node[res]   (r) at ( 2.2, 1.8) {R\\[2pt] Results};
+\node[disc]  (d) at ( 6.6, 1.8) {D\\[2pt] Discussion};
+
+% Arrows between sections
+\draw[qarrow] (i.east) -- (m.west);
+\draw[qarrow] (m.east) -- (r.west);
+\draw[qarrow] (r.east) -- (d.west);
+
+% Role labels under each
+\node[role] at (-6.6, 0.2) {\textbf{왜?}\\[2pt] background, gap, purpose};
+\node[role] at (-2.2, 0.2) {\textbf{어떻게?}\\[2pt] materials, procedure};
+\node[role] at ( 2.2, 0.2) {\textbf{무엇?}\\[2pt] findings, data, figures};
+\node[role] at ( 6.6, 0.2) {\textbf{그래서?}\\[2pt] interpret, compare, limit};
+
+% Funnel shape annotation (wide → narrow → wide)
+\begin{scope}[on background layer]
+  \draw[funnelGuide] (-9, -1.4) -- (-5, -2.6);
+  \draw[funnelGuide] (-4.4, -2.6) -- (-2.2, -2.85);
+  \draw[funnelGuide] ( 2.2, -2.85) -- ( 4.4, -2.6);
+  \draw[funnelGuide] ( 5, -2.6) -- ( 9, -1.4);
+\end{scope}
+
+% Shape labels
+\node[font=\sffamily\footnotesize, text=mutec] at (-7, -1.7) {넓음};
+\node[font=\sffamily\footnotesize, text=mutec] at (0, -2.95) {좁음 (specific data)};
+\node[font=\sffamily\footnotesize, text=mutec] at ( 7, -1.7) {넓음};
+
+% Bottom caption
+\node[caption, text width=15cm] at (0, -3.9)
+  {모래시계 구조 — 일반에서 시작해 specific data로 좁아진 뒤 다시 넓은 함의로.
+   분야마다 비율은 다르지만 네 섹션의 역할은 보편적.};
+
+\end{tikzpicture}
+\end{document}

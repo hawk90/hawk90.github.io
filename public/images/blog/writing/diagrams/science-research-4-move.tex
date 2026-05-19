@@ -1,0 +1,71 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  move/.style={rectangle, rounded corners=3pt, draw=nodebord, line width=0.5pt,
+               inner sep=6pt, align=center, font=\sffamily\small},
+  m1/.style={move, fill=absfill, draw=absbord},
+  m2/.style={move, fill=impfill, draw=impbord},
+  m3/.style={move, fill=confill, draw=conbord},
+  m4/.style={move, fill=hifill, draw=hibord, font=\sffamily\bfseries\small},
+  funnelEdge/.style={draw=mutec, line width=0.4pt, dashed},
+  desc/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, align=left},
+  bigarr/.style={-{Stealth[length=3mm]}, draw=edgec, line width=0.7pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (0, 7.3)
+  {Glasman-Deal 4-Move Model};
+\node[caption] at (0, 6.75) {Introduction — wide background에서 specific contribution으로};
+
+% Hourglass funnel guides (background)
+\begin{scope}[on background layer]
+  \draw[funnelEdge] (-6, 6) -- (-1.6, 1.6);
+  \draw[funnelEdge] ( 6, 6) -- ( 1.6, 1.6);
+  \draw[funnelEdge] (-1.6, 1.6) -- (-6, -2.8);
+  \draw[funnelEdge] ( 1.6, 1.6) -- ( 6, -2.8);
+\end{scope}
+
+% Move 1 — widest (top)
+\node[m1, minimum width=92mm, minimum height=12mm] (m1) at (0, 5.4)
+  {\textbf{Move 1 — Establish Importance}\\[2pt]
+   \footnotesize 이 주제는 왜 중요한가 (넓은 배경)};
+
+% Move 2 — narrower
+\node[m2, minimum width=72mm, minimum height=12mm] (m2) at (0, 3.4)
+  {\textbf{Move 2 — Provide Background}\\[2pt]
+   \footnotesize 지금까지 무엇이 알려졌나 (기존 연구)};
+
+% Move 3 — narrowest (the gap)
+\node[m3, minimum width=46mm, minimum height=12mm] (m3) at (0, 1.4)
+  {\textbf{Move 3 — Define the Gap}\\[2pt]
+   \footnotesize 그러나 무엇이 빠져 있나};
+
+% Move 4 — widens again (the contribution)
+\node[m4, minimum width=72mm, minimum height=12mm] (m4) at (0, -1.0)
+  {\textbf{Move 4 — Present This Work}\\[2pt]
+   \footnotesize 그래서 이 논문은 무엇을 하는가};
+
+% Arrows
+\draw[bigarr] (m1.south) -- (m2.north);
+\draw[bigarr] (m2.south) -- (m3.north);
+\draw[bigarr] (m3.south) -- (m4.north);
+
+% Side annotations
+\node[desc, text width=3.6cm] at (5.6, 5.4) {일반 → 분야\\[3pt] \footnotesize 가장 넓은 입구};
+\node[desc, text width=3.6cm] at (5.6, 3.4) {기존 연구 정리\\[3pt] \footnotesize 보통 가장 김};
+\node[desc, text width=3.6cm] at (5.6, 1.4) {\textbf{모래시계의 허리}\\[3pt] \footnotesize 핵심 — 부드러운 부정};
+\node[desc, text width=3.6cm] at (5.6, -1.0) {자기 기여 선언\\[3pt] \footnotesize 구체 동사};
+
+% Bottom caption
+\node[caption, text width=14cm] at (0, -2.8)
+  {Move 1·2가 넓게 시작해 Move 3에서 가장 좁아진다 (gap 선언).
+   Move 4에서 다시 펼쳐지며 자기 연구의 자리를 차지한다.};
+
+\end{tikzpicture}
+\end{document}

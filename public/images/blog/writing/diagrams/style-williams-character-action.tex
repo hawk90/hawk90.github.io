@@ -1,0 +1,84 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  panel/.style={rectangle, rounded corners=4pt, line width=0.5pt,
+                minimum width=82mm, minimum height=58mm,
+                inner sep=8pt, align=left},
+  bad/.style={panel, fill=confill!40, draw=conbord},
+  good/.style={panel, fill=impfill!50, draw=impbord},
+  hdr/.style={font=\sffamily\bfseries\small, anchor=north west, inner sep=2pt},
+  hlS/.style={rectangle, rounded corners=2pt, fill=clifill, draw=clibord,
+              line width=0.3pt, inner xsep=2pt, inner ysep=1pt,
+              font=\sffamily\bfseries\small},
+  hlV/.style={rectangle, rounded corners=2pt, fill=hifill, draw=hibord,
+              line width=0.3pt, inner xsep=2pt, inner ysep=1pt,
+              font=\sffamily\bfseries\small},
+  lbl/.style={font=\sffamily\footnotesize, text=mutec},
+  bar/.style={font=\sffamily\scriptsize\bfseries, inner sep=1.5pt, rounded corners=1.5pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (0, 4.6)
+  {Williams — Character + Action};
+\node[caption] at (0, 4.1) {주어는 character (행위자), 동사는 그 character의 행위};
+
+% Bad panel (left)
+\node[bad] (bad) at (-4.6, -0.6) {};
+\node[hdr, text=conbord] at ($(bad.north west)+(0.15,-0.15)$) {회피 — 추상 주어 + 약한 동사};
+
+% Bad sentence with highlights
+\node[anchor=north west, text width=78mm, font=\sffamily\small,
+      inner sep=0pt] at ($(bad.north west)+(0.2,-0.85)$) {
+  ``\textcolor{conbord}{\textbf{The implementation}} of the policy
+  \textcolor{conbord}{\textbf{resulted in}} the transformation
+  of the organization.''
+};
+
+\node[lbl, anchor=north west, text width=78mm] at ($(bad.north west)+(0.2,-2.5)$) {
+  \textbf{주어} (\textit{The implementation}) — 추상 명사 \\[1pt]
+  \textbf{동사} (\textit{resulted in}) — 약함, 모호 \\[1pt]
+  누가 implement했는지 사라짐
+};
+
+% Markers under bad
+\node[bar, fill=clifill, draw=clibord] at ($(bad.south west)+(1.6,0.8)$) {Subject (추상)};
+\node[bar, fill=hifill, draw=hibord] at ($(bad.south west)+(5.0,0.8)$) {Verb (약함)};
+
+% Good panel (right)
+\node[good] (good) at ( 4.6, -0.6) {};
+\node[hdr, text=impbord] at ($(good.north west)+(0.15,-0.15)$) {선호 — Character 주어 + 강한 동사};
+
+\node[anchor=north west, text width=78mm, font=\sffamily\small,
+      inner sep=0pt] at ($(good.north west)+(0.2,-0.85)$) {
+  ``When \textcolor{impbord}{\textbf{we}} \textcolor{impbord}{\textbf{implemented}}
+  the policy, \textcolor{impbord}{\textbf{the organization}}
+  \textcolor{impbord}{\textbf{transformed}}.''
+};
+
+\node[lbl, anchor=north west, text width=78mm] at ($(good.north west)+(0.2,-2.7)$) {
+  \textbf{주어} (\textit{we, the organization}) — character \\[1pt]
+  \textbf{동사} (\textit{implemented, transformed}) — 강함 \\[1pt]
+  누가 무엇을 하는지 즉시 보임
+};
+
+\node[bar, fill=clifill, draw=clibord] at ($(good.south west)+(1.7,0.8)$) {Subject (character)};
+\node[bar, fill=hifill, draw=hibord] at ($(good.south west)+(5.2,0.8)$) {Verb (강함)};
+
+% Arrow between panels — both labels above to avoid bottom-row collisions
+\draw[-{Stealth[length=3.2mm]}, draw=focusc, line width=0.9pt]
+  (bad.east) -- node[above=2pt, font=\sffamily\footnotesize\bfseries, text=focusc, align=center]
+                  {수정\\[1pt] \scriptsize \textmd{nominalization 제거}} (good.west);
+
+% Bottom caption
+\node[caption, text width=15cm] at (0, -4.6)
+  {두 원칙 동시 적용 — 명사화한 동사를 되돌리고, 행위자를 주어로 끌어올리면
+   거의 모든 흐릿한 문장이 명확해진다.};
+
+\end{tikzpicture}
+\end{document}
