@@ -157,29 +157,25 @@ Memory region마다 속도와 용량의 trade-off가 다릅니다. Linker script
 
 ## 자동차와 항공: Static Only
 
-```text
-ASIL-D ECU:
-  - 모든 task stack — static
-  - 모든 buffer — compile-time fixed
-  - 모든 message queue — static
-  - malloc 자체 *제외*
-```
+ASIL-D ECU에서는
+
+- 모든 task stack을 static으로 둡니다.
+- 모든 buffer를 compile-time fixed로 잡습니다.
+- 모든 message queue를 static으로 만듭니다.
+- malloc 자체를 *제외*합니다.
 
 KSLV-II 누리호 flight computer에는 malloc이 아예 없습니다. 모든 메모리는 부팅 시점에 고정됩니다.
 
 ## DO-178C Level A에서 Heap 사용
 
-```text
-가능하나 — *극도로 어려움*:
-  - WCET 분석
-  - Worst-case fragmentation 증명
-  - 모든 path coverage
-  - Robustness testing
-  
-→ 보통 *피함*. ITAR·NIST 같은 표준도 같은 방향.
-```
+가능은 하지만 *극도로 어렵습니다*.
 
-이 모든 항목을 증명하는 비용이 크기 때문에 보통은 heap을 피합니다. ITAR이나 NIST 같은 표준도 같은 방향을 권장합니다.
+- WCET 분석
+- Worst-case fragmentation 증명
+- 모든 path coverage
+- Robustness testing
+
+이 모든 항목을 증명하는 비용이 크기 때문에 보통은 heap을 *피합니다*. ITAR이나 NIST 같은 표준도 같은 방향을 권장합니다.
 
 ## 자주 하는 실수
 

@@ -38,18 +38,18 @@ draft: false
 
 크로스 컴파일러는 단일 binary가 아니라 세트입니다.
 
-```text
-arm-none-eabi-gcc         — C 컴파일러 driver
-arm-none-eabi-g++         — C++ 컴파일러 driver
-arm-none-eabi-as          — assembler
-arm-none-eabi-ld          — linker
-arm-none-eabi-objcopy     — ELF → bin/hex 변환
-arm-none-eabi-objdump     — 디스어셈블, section dump
-arm-none-eabi-nm          — symbol list
-arm-none-eabi-size        — section size
-arm-none-eabi-gdb         — debugger
-arm-none-eabi-newlib      — C library
-```
+| Tool | 역할 |
+|------|------|
+| `arm-none-eabi-gcc` | C 컴파일러 driver |
+| `arm-none-eabi-g++` | C++ 컴파일러 driver |
+| `arm-none-eabi-as` | assembler |
+| `arm-none-eabi-ld` | linker |
+| `arm-none-eabi-objcopy` | ELF → bin/hex 변환 |
+| `arm-none-eabi-objdump` | 디스어셈블, section dump |
+| `arm-none-eabi-nm` | symbol list |
+| `arm-none-eabi-size` | section size |
+| `arm-none-eabi-gdb` | debugger |
+| `arm-none-eabi-newlib` | C library |
 
 이들은 모두 host(x86)에서 실행되지만, 출력은 target(ARM)용입니다.
 

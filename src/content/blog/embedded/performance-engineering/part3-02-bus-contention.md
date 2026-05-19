@@ -50,10 +50,7 @@ Master A weight=3, B weight=1, C weight=1
 
 ### QoS-Based (AXI)
 
-```text
-ARQOS = 4-bit (0-15)
-Arbiter — *높은 QoS 우선*, 같으면 round-robin
-```
+![QoS-based arbitration — ARQOS 4-bit priority로 master 선택](/images/blog/perf-eng/diagrams/part3-02-arbitration.svg)
 
 ARM CCI-400과 CMN의 표준 방식이며, Cortex-A SoC에서 흔히 사용합니다.
 

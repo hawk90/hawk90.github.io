@@ -157,12 +157,11 @@ io_uring은 *작업 자체*를 비동기로 제출하는 인터페이스라 `rea
 
 x86 서버에서 idle connection 비율이 매우 높은 가상 워크로드를 돌렸습니다. 매 iteration마다 fd 한 개에 데이터가 들어오는 상황입니다.
 
-```text
-fd 수      select         poll           epoll(LT)      epoll(ET)
-1 K        1.2 ms         1.0 ms         12 µs          9 µs
-10 K       -- 한계       11 ms          18 µs          11 µs
-100 K      --             120 ms         25 µs          14 µs
-```
+| fd 수 | select | poll | epoll(LT) | epoll(ET) |
+|-------|--------|------|-----------|-----------|
+| 1 K | 1.2 ms | 1.0 ms | 12 µs | 9 µs |
+| 10 K | -- 한계 | 11 ms | 18 µs | 11 µs |
+| 100 K | -- | 120 ms | 25 µs | 14 µs |
 
 ARM Cortex-A72 게이트웨이에서 동시 5000 connection을 받은 web socket 서버는 LT에서 평균 CPU 22%, ET에서 13%를 썼습니다. ET는 syscall 횟수가 더 적기 때문입니다. 다만 ET 전환은 코드 복잡도가 같이 늘어나니 throughput이 실제로 부족할 때만 도입하는 편이 좋습니다.
 

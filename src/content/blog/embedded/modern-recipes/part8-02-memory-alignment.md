@@ -19,23 +19,24 @@ UART나 BLE로 받은 byte stream을 struct로 캐스팅해서 읽으려고 할 
 
 ## 핵심 개념
 
-```text
-natural alignment
-  uint8_t   1-byte 경계 (어디든)
-  uint16_t  2-byte 경계
-  uint32_t  4-byte 경계
-  uint64_t  8-byte 경계 (32-bit ARM은 4-byte로 처리)
-  double    8-byte 경계
-  pointer   architecture word size
-```
+**Natural alignment:**
+
+| Type | 경계 |
+|------|------|
+| `uint8_t` | 1-byte (어디든) |
+| `uint16_t` | 2-byte |
+| `uint32_t` | 4-byte |
+| `uint64_t` | 8-byte (32-bit ARM은 4-byte로 처리) |
+| `double` | 8-byte |
+| pointer | architecture word size |
 
 C 표준은 모든 type에 *natural alignment*를 요구합니다. struct field 사이에 *padding*이 자동으로 들어가 이 규칙을 지킵니다.
 
-```text
-ARM ARMv6/M0       unaligned access → BUS FAULT
-ARM ARMv7+/M3+     unaligned 허용, 2배 cycle
-x86                unaligned 허용, 거의 0 cost
-```
+| Architecture | Unaligned access |
+|--------------|-------------------|
+| ARM ARMv6/M0 | → BUS FAULT |
+| ARM ARMv7+/M3+ | 허용, 2배 cycle |
+| x86 | 허용, 거의 0 cost |
 
 ARM Cortex-M0/M3에서는 정렬을 놓치면 hard fault로 reset됩니다. 정렬 비용이 무료가 아닙니다.
 

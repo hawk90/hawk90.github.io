@@ -21,11 +21,11 @@ C++26에서 표준 라이브러리(`std::hazard_pointer`)에 들어올 예정입
 
 ## 핵심 개념
 
-```text
-hazard pointer       각 thread가 "지금 보호 중인 pointer"를 공개
-retired list         삭제 예정 객체들의 thread-local 모음
-scan                 retired list 처리 시점에 모든 thread의 hazard pointer를 확인
-```
+| 요소 | 역할 |
+|------|------|
+| hazard pointer | 각 thread가 "지금 보호 중인 pointer"를 공개 |
+| retired list | 삭제 예정 객체들의 thread-local 모음 |
+| scan | retired list 처리 시점에 모든 thread의 hazard pointer를 확인 |
 
 기본 흐름입니다.
 
@@ -46,14 +46,13 @@ scan                 retired list 처리 시점에 모든 thread의 hazard point
 
 RCU와 비교하면 다음과 같습니다.
 
-```text
-                 RCU                  Hazard Pointer
-reader cost     ~0 (preempt disable)  atomic store + reload
-writer cost     grace period 대기      retired list scan
-memory bound    grace period에 의존    O(thread 수)
-sleep in reader 금지 (전통적)         가능
-C++ 표준        없음                   C++26 std::hazard_pointer
-```
+| 항목 | RCU | Hazard Pointer |
+|------|-----|----------------|
+| reader cost | ~0 (preempt disable) | atomic store + reload |
+| writer cost | grace period 대기 | retired list scan |
+| memory bound | grace period에 의존 | O(thread 수) |
+| sleep in reader | 금지 (전통적) | 가능 |
+| C++ 표준 | 없음 | C++26 `std::hazard_pointer` |
 
 ## 코드 / 실제 사용 예
 

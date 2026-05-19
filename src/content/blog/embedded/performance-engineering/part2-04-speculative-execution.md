@@ -43,24 +43,7 @@ mul r8, ...     stall → ldr 완료 후 실행
 
 ## OoO 핵심 구성요소
 
-```text
-            ┌──────────────────────────────────┐
-Fetch  →  │  Decode + Rename                  │
-            └────────────┬────────────────────┘
-                         ↓
-                ┌────────────────┐
-                │  Issue Queue   │  (reservation station)
-                └────┬────┬─────┘
-                     ↓    ↓
-                   [ALU0][ALU1][LSU][FPU]   ← 병렬 실행
-                     │    │    │    │
-                     ↓    ↓    ↓    ↓
-                ┌────────────────┐
-                │ Reorder Buffer │  (in-order commit)
-                └────┬───────────┘
-                     ↓
-                Architectural Register
-```
+![Out-of-Order 실행 구조 — Fetch, Decode, Issue Queue, Execution Units, ROB, Commit](/images/blog/perf-eng/diagrams/part2-04-ooo-structure.svg)
 
 ## Register Renaming
 

@@ -34,14 +34,13 @@ spinlock (busy lock)
 
 판단 기준입니다.
 
-```text
-hold time             coreware
-< 1 µs (수십 cycle)    spinlock 또는 atomic
-1~10 µs               spinlock (SMP) / mutex (UP)
-> 10 µs               mutex
-ISR context           반드시 spinlock(_irqsave)
-single-CPU            spinlock의 의미 없음 (preempt_disable로 대체)
-```
+| hold time | 권장 |
+|-----------|------|
+| < 1 µs (수십 cycle) | spinlock 또는 atomic |
+| 1~10 µs | spinlock (SMP) / mutex (UP) |
+| > 10 µs | mutex |
+| ISR context | 반드시 `spinlock(_irqsave)` |
+| single-CPU | spinlock의 의미 없음 (`preempt_disable`로 대체) |
 
 advanced spinlock variants도 있습니다.
 

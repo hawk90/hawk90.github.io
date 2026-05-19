@@ -58,15 +58,7 @@ $$\text{OI} = \frac{\text{FLOP}}{\text{byte loaded}}$$
 
 ### Roofline 그래프
 
-```text
-Performance (GFLOPS)
-    ↑
-Peak│         ━━━━━━━━━━━ Peak FLOPS (compute roof)
-    │      ╱
-    │   ╱
-    │ ╱  Memory bandwidth (memory roof) = BW × OI
-    └────────────────────→ OI (FLOP/byte)
-```
+![Roofline 모델 — memory roof와 compute roof, ridge point에서 bound 전환](/images/blog/perf-eng/diagrams/part1-07-roofline.svg)
 
 알고리즘의 OI가 ridge point보다 작으면 **Memory-bound**입니다.
 알고리즘의 OI가 ridge point 이상이면 **Compute-bound**입니다.

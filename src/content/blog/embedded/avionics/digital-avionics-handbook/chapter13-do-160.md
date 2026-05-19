@@ -425,65 +425,55 @@ Qual facility — *국가급 시설*. 한국 능력 확대.
 
 ## SW 환경 영향
 
-```text
-DO-160 — HW + 환경
-하지만 SW에 *간접 영향*:
+DO-160 — HW + 환경. 하지만 SW에 *간접 영향*.
 
-Temperature:
-  Cache·memory timing
-  Clock drift
-  Watchdog calibration
-  Real-time guarantee
-  
-Vibration:
-  Connector·flash memory
-  Bit flip
-  Mechanical actuator
-  
-EMI:
-  Bus errors (1553·CAN·Ethernet)
-  Sensor noise
-  
-Radiation:
-  SEU·SEFI
-  ECC·CRC·voter
-  
-SW 대응:
-  Robustness test (extended temp·voltage)
-  Filter·debounce
-  Self-test (BIT)
-  Health monitor
-```
+**Temperature:**
+- Cache·memory timing
+- Clock drift
+- Watchdog calibration
+- Real-time guarantee
+
+**Vibration:**
+- Connector·flash memory
+- Bit flip
+- Mechanical actuator
+
+**EMI:**
+- Bus errors (1553·CAN·Ethernet)
+- Sensor noise
+
+**Radiation:**
+- SEU·SEFI
+- ECC·CRC·voter
+
+**SW 대응:**
+- Robustness test (extended temp·voltage)
+- Filter·debounce
+- Self-test (BIT)
+- Health monitor
 
 SW — *환경 변화에 robust*. BIT·HM 중요.
 
 ## DO-160 vs DO-178C·DO-254 분업
 
-```text
-LRU certification flow:
+**LRU certification flow:**
 
-HW design → DO-254 (airworthiness)
-            → DO-160 (environmental)
-            
-SW design → DO-178C (airworthiness)
+- HW design → DO-254 (airworthiness) + DO-160 (environmental)
+- SW design → DO-178C (airworthiness)
+- System integration → ARP-4754A·4761
 
-System integration → ARP-4754A·4761
+각 trace: Requirement → design → implementation → test → 인증.
 
-각 trace:
-  Requirement → design → implementation → test → 인증
+각 standard — *separate evidence stream*. 각 deliverable — FAA·EASA 제출.
 
-각 standard — *separate evidence stream*.
-각 deliverable — FAA·EASA 제출.
+**Equipment manufacturer 책임:**
+- HW airworthiness (DO-254)
+- 환경 qualification (DO-160)
+- SW airworthiness (DO-178C)
 
-Equipment manufacturer 책임:
-  - HW airworthiness (DO-254)
-  - 환경 qualification (DO-160)
-  - SW airworthiness (DO-178C)
-  
-Aircraft integrator:
-  - System safety (ARP-4754A·4761)
-  - Aircraft-level cert
-```
+**Aircraft integrator:**
+- System safety (ARP-4754A·4761)
+- Aircraft-level cert
 
 각 표준 — *명확 분업*.
 
@@ -491,39 +481,25 @@ Aircraft integrator:
 
 > ⚠️ Category 잘못 선택
 
-```text
-"Cat A1 (cabin) 선택" → 실제 avionics bay 설치
-→ Temperature·EMI 부족
-→ In-service fail
-```
+"Cat A1 (cabin) 선택"으로 실제 avionics bay 설치 시 temperature·EMI 부족으로 in-service fail이 발생한다.
 
 → 정확 installation 위치 → category.
 
 > ⚠️ Sequential test order 무시
 
-```text
-Test order — DO-160 권고
-→ "편한 순서" 임의 선택
-→ Cumulative damage 누락
-```
+Test order는 DO-160 권고를 따라야 한다. "편한 순서"를 임의 선택하면 cumulative damage가 누락된다.
 
 → Standard sequence 준수.
 
 > ⚠️ LV·우주에 DO-160만 적용
 
-```text
-"DO-160 통과 = 우주 OK"
-→ Vacuum·acoustic·pyroshock 부재
-```
+"DO-160 통과 = 우주 OK"는 잘못된 가정이다. Vacuum·acoustic·pyroshock이 부재하다.
 
 → NASA·ESA·MIL 표준 추가.
 
 > ⚠️ Re-qualification 무시
 
-```text
-Component change → re-qual 불요 가정
-→ Lot variation·new failure mode
-```
+Component change에서 re-qual 불요로 가정하면 lot variation·new failure mode가 새 위험이 된다.
 
 → Delta analysis + selective re-qual.
 

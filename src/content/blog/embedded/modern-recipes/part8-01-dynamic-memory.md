@@ -197,14 +197,13 @@ void *tracked_malloc(size_t n) {
 
 ## 측정 / 성능 비교
 
-```text
-allocator                alloc time       free time      fragmentation
-static + pool            O(1) ~50 ns      O(1) ~30 ns    0
-arena                    O(1) ~20 ns      n/a            전체 reset만
-FreeRTOS heap_4          O(N) 0.5~5 µs    O(N) 1~10 µs   중간
-TLSF                     O(1) ~200 ns     O(1) ~150 ns   매우 낮음
-newlib malloc            가변, 길어질 수 있음            높음
-```
+| allocator | alloc time | free time | fragmentation |
+|-----------|------------|-----------|----------------|
+| static + pool | O(1) ~50 ns | O(1) ~30 ns | 0 |
+| arena | O(1) ~20 ns | n/a | 전체 reset만 |
+| FreeRTOS heap_4 | O(N) 0.5~5 µs | O(N) 1~10 µs | 중간 |
+| TLSF | O(1) ~200 ns | O(1) ~150 ns | 매우 낮음 |
+| newlib malloc | 가변, 길어질 수 있음 | — | 높음 |
 
 실시간 control loop에서는 TLSF 이상이거나 static + pool이 안전합니다.
 

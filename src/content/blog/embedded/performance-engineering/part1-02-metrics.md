@@ -18,11 +18,7 @@ draft: false
 
 **한 작업이 완료되기까지 걸리는 시간**을 의미합니다.
 
-```text
-요청 → ── 처리 ── → 응답
-       │←────────→│
-            latency
-```
+![요청부터 응답까지의 latency 구간](/images/blog/perf-eng/diagrams/part1-02-latency-request.svg)
 
 단위는 µs, ms, s입니다. 측정 방식은 single request 시간이거나 *분포*(p50·p99·max)입니다.
 
@@ -66,11 +62,7 @@ $$L = \lambda \cdot W$$
 
 ## Service Time vs Response Time
 
-```text
-요청 도착 → 큐 대기 → 처리 시작 → 처리 종료 → 응답
-         │← Queue →│         │← Service →│
-         │←─────────── Response ─────────→│
-```
+![Service time과 Response time의 관계 — queue 대기 시간 포함 여부](/images/blog/perf-eng/diagrams/part1-02-service-vs-response.svg)
 
 - **Service Time**은 실제 *처리 시간*입니다(queue 제외).
 - **Response Time**은 *대기와 처리*를 합한 시간이며, 사용자가 체감하는 값입니다.
@@ -147,19 +139,7 @@ Histogram:
 
 ## Saturation 측정
 
-```text
-Resource 사용률 vs 응답 시간
-
-R/T (ms)
-  100 │                              ●
-      │                           ●
-   50 │                       ●
-      │                   ●
-   10 │              ●
-    1 │  ●  ●  ●  ●
-      └──┴──┴──┴──┴──┴──┴──┴──→  Utilization (%)
-         20  40  60  80 100
-```
+![Resource 사용률과 응답 시간의 관계 — 80% 이상에서 exponential 증가](/images/blog/perf-eng/diagrams/part1-02-saturation-curve.svg)
 
 80%를 넘으면 exponential하게 증가합니다. 그래서 **70-80%가 안전 한계**입니다.
 

@@ -30,13 +30,13 @@ tags: [recipes, linux, kernel-build]
 
 산출물입니다.
 
-```text
-arch/arm64/boot/Image           kernel image
-arch/arm64/boot/dts/<vendor>/*.dtb   device tree blob
-*.ko (`find . -name '*.ko'`)    loadable modules
-System.map                       symbol map
-.config                          현재 build config
-```
+| Path | 내용 |
+|------|------|
+| `arch/arm64/boot/Image` | kernel image |
+| `arch/arm64/boot/dts/<vendor>/*.dtb` | device tree blob |
+| `*.ko` (`find . -name '*.ko'`) | loadable modules |
+| `System.map` | symbol map |
+| `.config` | 현재 build config |
 
 Cross-compile은 두 환경 변수가 핵심입니다.
 
@@ -166,22 +166,22 @@ make -j8 prepare modules_prepare
 
 ## 측정 / 성능 비교
 
-```text
-빌드 환경                   완전 빌드(no cache)
-4 코어 노트북               45 분
-16 코어 desktop             8 분
-16 코어 + ccache (재빌드)   90 초
-```
+| 빌드 환경 | 완전 빌드(no cache) |
+|-----------|----------------------|
+| 4 코어 노트북 | 45 분 |
+| 16 코어 desktop | 8 분 |
+| 16 코어 + ccache (재빌드) | 90 초 |
 
 CI 환경에서는 ccache와 KBUILD output dir 분리가 시간을 크게 줄입니다.
 
-```text
-산출물 크기 (arm64 defconfig)
-Image                        ~20 MB
-Image.gz                     ~7 MB
-zImage 압축률                약 65%
-modules 전체                 100~300 MB (option 따라)
-```
+산출물 크기 (arm64 defconfig):
+
+| 산출물 | 크기 |
+|--------|------|
+| `Image` | ~20 MB |
+| `Image.gz` | ~7 MB |
+| `zImage` 압축률 | 약 65% |
+| modules 전체 | 100~300 MB (option 따라) |
 
 ## 자주 보는 함정
 

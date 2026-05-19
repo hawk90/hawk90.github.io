@@ -14,21 +14,7 @@ draft: false
 
 ## Concurrency vs Parallelism
 
-```text
-Concurrency — 여러 일을 *동시 진행 중*으로 보이게 (한 코어로도 가능)
-Parallelism — 정말 *동시 실행* (multi-core 필요)
-```
-
-```text
-Single core + concurrency:
-  Time → [Task A]──[Task B]──[Task A]──[Task C]──[Task B]
-         time-slice context switch
-         
-Multi-core + parallelism:
-  Core 0: [Task A continuous]
-  Core 1: [Task B continuous]
-  Core 2: [Task C continuous]
-```
+![Concurrency vs Parallelism — single core time-slicing과 multi-core 동시 실행 비교](/images/blog/perf-eng/diagrams/part4-01-concurrency.svg)
 
 단일 코어 RTOS는 concurrency만 제공하고, SMP Linux는 둘 다 제공합니다.
 

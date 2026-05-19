@@ -211,11 +211,12 @@ BR2_CCACHE=y
 | rootfs 최소 크기 | ~2 MB (busybox) | ~50 MB (core-image-minimal) |
 | package 수 | ~3000 | ~10000 |
 
-```text
-부팅 시간 (i.MX8M Mini + rootfs.ext4)
-busybox + dropbear         1.8 s
-systemd minimal            6.2 s
-```
+부팅 시간 (i.MX8M Mini + `rootfs.ext4`):
+
+| Init | 시간 |
+|------|------|
+| busybox + dropbear | 1.8 s |
+| systemd minimal | 6.2 s |
 
 부팅 시간을 우선시한다면 BusyBox init이 결정적으로 유리합니다.
 

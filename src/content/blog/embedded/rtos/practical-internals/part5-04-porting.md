@@ -21,16 +21,14 @@ tags: [porting, architecture, port-c, context-switch, tick]
 
 ## 포팅 대상 — 여섯 가지 함수
 
-```text
-1. pxPortInitialiseStack    — 초기 stack frame을 만들어 둠
-2. xPortStartScheduler      — 첫 task로 진입
-3. vPortYield               — 수동 reschedule trigger
-4. xPortSysTickHandler      — tick interrupt 진입점
-5. vPortEnterCritical       — IRQ disable + nesting
-6. vPortExitCritical        — IRQ enable + nesting
+1. `pxPortInitialiseStack` — 초기 stack frame을 만들어 둠
+2. `xPortStartScheduler` — 첫 task로 진입
+3. `vPortYield` — 수동 reschedule trigger
+4. `xPortSysTickHandler` — tick interrupt 진입점
+5. `vPortEnterCritical` — IRQ disable + nesting
+6. `vPortExitCritical` — IRQ enable + nesting
 
-+ Context switch 본체 (PendSV·trap·SWI 어셈블리)
-```
+여기에 Context switch 본체(PendSV·trap·SWI 어셈블리)가 추가됩니다.
 
 이 여섯 가지가 RTOS 본체와 아키텍처 사이의 *유일한 인터페이스*입니다. 다른 코드는 모두 C 표준에 머뭅니다.
 
@@ -210,18 +208,15 @@ RISC-V는 *trap entry가 한 곳*으로 모입니다. timer interrupt, ecall, ex
 
 Cortex-A는 컨텍스트가 훨씬 큽니다.
 
-```text
-Cortex-A 컨텍스트:
-  R0-R15 + CPSR + 모드별 SPSR
-  VFP/NEON s0-s31 또는 d0-d31
-  여러 mode (SVC·IRQ·FIQ·Abort·System·User)
-  MMU page table base (TTBR0/TTBR1)
-  L1·L2 cache 영향
+Cortex-A 컨텍스트
 
-포팅 분량: Cortex-M port의 약 5배
-```
+- R0-R15 + CPSR + 모드별 SPSR
+- VFP/NEON s0-s31 또는 d0-d31
+- 여러 mode (SVC·IRQ·FIQ·Abort·System·User)
+- MMU page table base (TTBR0/TTBR1)
+- L1·L2 cache 영향
 
-GIC를 통한 interrupt routing, generic timer 기반 tick, EL0/EL1 분리(armv8) 같은 요소가 추가됩니다.
+포팅 분량은 Cortex-M port의 약 5배입니다. GIC를 통한 interrupt routing, generic timer 기반 tick, EL0/EL1 분리(armv8) 같은 요소가 추가됩니다.
 
 ```c
 void vPortSetupTimerInterrupt(void)

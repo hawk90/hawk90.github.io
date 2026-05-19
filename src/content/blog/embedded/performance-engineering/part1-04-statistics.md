@@ -163,19 +163,7 @@ p99를 신뢰하려면 *최소 N=1000* 이상이 필요합니다(1% 케이스를
 
 ## Box Plot
 
-```text
-     ┌───┬─────┐
-     │   │     │  ── max
-─────┤   │     ├───── outliers
-     │   │     │  ── p75
-     │   │     │
-     │   │     │  ── median (p50)
-     │   │     │
-     │   │     │  ── p25
-─────┤   │     ├───── outliers
-     │   │     │  ── min
-     └───┴─────┘
-```
+![Box plot 구조 — min, p25, median, p75, max와 outlier 표시](/images/blog/perf-eng/diagrams/part1-04-box-plot.svg)
 
 5-number summary를 시각화합니다. 여러 측정을 *비교*할 때 좋습니다.
 

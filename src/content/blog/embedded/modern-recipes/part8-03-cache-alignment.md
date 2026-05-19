@@ -36,13 +36,13 @@ long line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
 
 칩별 line 크기를 기억해두는 편이 좋습니다.
 
-```text
-ARM Cortex-M7       : 32 B
-ARM Cortex-A53/A72  : 64 B
-Intel/AMD x86       : 64 B
-Apple M1/M2         : 128 B
-IBM POWER           : 128 B
-```
+| Architecture | Line size |
+|--------------|-----------|
+| ARM Cortex-M7 | 32 B |
+| ARM Cortex-A53/A72 | 64 B |
+| Intel/AMD x86 | 64 B |
+| Apple M1/M2 | 128 B |
+| IBM POWER | 128 B |
 
 ## 코드 / 실제 사용 예
 

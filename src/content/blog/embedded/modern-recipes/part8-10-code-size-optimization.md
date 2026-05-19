@@ -30,14 +30,15 @@ tags: [recipes, performance, code-size]
 
 각 단계가 누적적으로 효과를 냅니다.
 
-```text
-효과 (참고)
--Os         vs -O2              -15~25%
-+ LTO                           -5~15% 추가
-+ section gc                    -5~10% 추가
-+ newlib-nano                   -20~50% (libc heavy 코드)
-+ printf-tiny                   -10~30% (printf 많이 쓰면)
-```
+효과 (참고):
+
+| Step | 효과 |
+|------|------|
+| `-Os` vs `-O2` | -15~25% |
+| + LTO | -5~15% 추가 |
+| + section gc | -5~10% 추가 |
+| + newlib-nano | -20~50% (libc heavy 코드) |
+| + printf-tiny | -10~30% (printf 많이 쓰면) |
 
 ## 코드 / 실제 사용 예
 

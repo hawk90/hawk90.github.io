@@ -25,16 +25,7 @@ draft: false
 
 내부적으로는 *8개 register의 hardware push*와 *vector fetch*, *pipeline refill*로 구성됩니다.
 
-```text
-IRQ assert
-  ↓
-+1 cycle: current instruction 완료
-+8 cycle: R0-R3, R12, LR, PC, xPSR 자동 push (stack)
-+2 cycle: vector table read (ISR address)
-+1 cycle: pipeline refill
-─────────────────
-12 cycle 후 ISR 첫 명령
-```
+![Cortex-M interrupt latency 구성 — instruction 완료, register push, vector fetch, pipeline refill](/images/blog/perf-eng/diagrams/part3-05-irq-latency.svg)
 
 ## Tail-Chaining - 핵심 트릭
 

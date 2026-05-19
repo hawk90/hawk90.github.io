@@ -16,16 +16,7 @@ draft: false
 
 Cortex-A 시리즈의 표준입니다. 128-bit register 32개(`v0-v31`)를 제공합니다.
 
-```text
-NEON register Q0 (128 bit):
-  ┌──────┬──────┬──────┬──────┐
-  │  f32 │  f32 │  f32 │  f32 │   ← 4 × float (SP)
-  └──────┴──────┴──────┴──────┘
-  ┌────┬────┬────┬────┬────┬────┬────┬────┐
-  │ i16│ i16│ i16│ i16│ i16│ i16│ i16│ i16│   ← 8 × int16
-  └────┴────┴────┴────┴────┴────┴────┴────┘
-  16 × int8 / 2 × float64 / 2 × int64 also
-```
+![NEON 128-bit register의 다양한 해석 — 4xf32, 8xi16, 16xi8 등](/images/blog/perf-eng/diagrams/part2-09-neon-register.svg)
 
 ## Auto-Vectorization — 첫 시도
 

@@ -62,15 +62,16 @@ TLB hit이면 1 cycle, miss이면 page table walk(2 ~ 4 cycle, cached) 또는 ma
 
 각 page는 자체 attribute를 갖습니다(read-only, executable, user/kernel, cacheable 등). PTE(Page Table Entry)의 bit으로 표현됩니다.
 
-```text
-ARMv8 PTE attribute:
-   AF       — Access Flag (page 접근 적이 있나)
-   AP[2:1]  — read/write, user/kernel
-   NS       — non-secure
-   SH[1:0]  — shareability
-   AttrIdx  — memory attribute index
-   PXN/UXN  — privileged/user execute never
-```
+**ARMv8 PTE attribute:**
+
+| Bit | 의미 |
+|-----|------|
+| AF | Access Flag (page 접근 적이 있나) |
+| AP[2:1] | read/write, user/kernel |
+| NS | non-secure |
+| SH[1:0] | shareability |
+| AttrIdx | memory attribute index |
+| PXN/UXN | privileged/user execute never |
 
 `PXN = 1, UXN = 1`이면 그 page는 코드 실행 불가. heap, stack에는 보통 NX(execute never)가 설정됩니다.
 

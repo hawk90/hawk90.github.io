@@ -19,17 +19,17 @@ per-thread counter array를 만들었는데 thread를 늘릴수록 throughput이
 
 ## 핵심 개념
 
-```text
-cache line          코어가 한 번에 fetch/invalidate하는 단위
-  ARM Cortex-M7         32 B
-  ARM Cortex-A53/A72    64 B
-  Intel/AMD x86         64 B
-  Apple M1/M2           128 B
-  IBM POWER             128 B
+Cache line은 코어가 한 번에 fetch/invalidate하는 단위다.
 
-같은 line에 있는 두 변수는 SMP 관점에서 *하나*처럼 움직임
-한 코어가 write하면 다른 코어의 그 line은 invalidate
-```
+| Architecture | Line size |
+|--------------|-----------|
+| ARM Cortex-M7 | 32 B |
+| ARM Cortex-A53/A72 | 64 B |
+| Intel/AMD x86 | 64 B |
+| Apple M1/M2 | 128 B |
+| IBM POWER | 128 B |
+
+같은 line에 있는 두 변수는 SMP 관점에서 *하나*처럼 움직인다. 한 코어가 write하면 다른 코어의 그 line은 invalidate된다.
 
 해결책은 한 줄로 정리됩니다.
 

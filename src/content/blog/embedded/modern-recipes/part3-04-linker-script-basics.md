@@ -92,12 +92,12 @@ MEMORY
 
 기본 패턴:
 
-```text
-*(.text)         — 모든 .text 입력
-*(.text*)        — .text, .text.foo, .text.bar 등 모두
-file.o(.data*)   — 특정 file의 .data*
-KEEP(*(.x))      — GC 대상 제외 (gc-sections에서 보호)
-```
+| 패턴 | 의미 |
+|------|------|
+| `*(.text)` | 모든 `.text` 입력 |
+| `*(.text*)` | `.text`, `.text.foo`, `.text.bar` 등 모두 |
+| `file.o(.data*)` | 특정 file의 `.data*` |
+| `KEEP(*(.x))` | GC 대상 제외 (`gc-sections`에서 보호) |
 
 ### 4) `>` (VMA)와 `AT >` (LMA)
 

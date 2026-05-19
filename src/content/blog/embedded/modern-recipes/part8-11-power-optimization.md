@@ -147,13 +147,12 @@ void cpu_set_freq(int mhz) {
 
 ### µA-level 측정
 
-```text
-도구             특징
-multimeter      mA 이상만 정확, µA는 noise floor에 묻힘
-shunt + scope   shunt 저항 + oscilloscope, profile 가능
-Otii Arc / EEM  µA부터 mA까지, profile + sync trigger
-Power Profiler Kit (Nordic) µA부터 mA, BLE 친화
-```
+| 도구 | 특징 |
+|------|------|
+| multimeter | mA 이상만 정확, µA는 noise floor에 묻힘 |
+| shunt + scope | shunt 저항 + oscilloscope, profile 가능 |
+| Otii Arc / EEM | µA부터 mA까지, profile + sync trigger |
+| Power Profiler Kit (Nordic) | µA부터 mA, BLE 친화 |
 
 µA 단위 측정은 multimeter로는 불가능합니다. 전용 power profiler가 필요합니다.
 
@@ -170,14 +169,13 @@ floating input은 noise로 input buffer가 진동해 µA가 새어 나옵니다.
 
 대표 BLE sensor의 평균 전류 측정값입니다.
 
-```text
-시나리오                          평균 전류        배터리(CR2032) 수명
-WFI 없이 run loop                 5 mA            ~44 시간
-WFI in idle                       1.2 mA          ~180 시간
-+ peripheral clock gating         800 µA          ~11 일
-+ stop mode (1초마다 wake)        80 µA           ~115 일
-+ tickless idle + RTC wake-up     8 µA            ~3 년
-```
+| 시나리오 | 평균 전류 | 배터리(CR2032) 수명 |
+|----------|-----------|-----------------------|
+| WFI 없이 run loop | 5 mA | ~44 시간 |
+| WFI in idle | 1.2 mA | ~180 시간 |
+| + peripheral clock gating | 800 µA | ~11 일 |
+| + stop mode (1초마다 wake) | 80 µA | ~115 일 |
+| + tickless idle + RTC wake-up | 8 µA | ~3 년 |
 
 각 단계가 *한 자릿수씩* 개선됩니다. 누적이 중요합니다.
 

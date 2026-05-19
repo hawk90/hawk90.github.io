@@ -60,11 +60,11 @@ dma_unmap_single(dev, dma, len, DMA_TO_DEVICE);
 
 방향별 cache 동작입니다.
 
-```text
-DMA_TO_DEVICE      flush before, no invalidate after
-DMA_FROM_DEVICE    no flush, invalidate after
-DMA_BIDIRECTIONAL  flush before, invalidate after
-```
+| Direction | Cache 동작 |
+|-----------|-------------|
+| `DMA_TO_DEVICE` | flush before, no invalidate after |
+| `DMA_FROM_DEVICE` | no flush, invalidate after |
+| `DMA_BIDIRECTIONAL` | flush before, invalidate after |
 
 일반 cacheable buffer를 그대로 활용할 수 있어 CPU read/write가 잦은 경우 coherent보다 빠릅니다.
 

@@ -43,12 +43,7 @@ In-order는 자동으로 처리되고, OoO는 renaming으로 처리합니다.
 
 ## Forwarding (Bypass)
 
-```text
-add r0, r1, r2    F D E   ─→ result available end of E
-                     │     │
-                     ↓ forwarding
-sub r3, r0, r4       F D E
-```
+![Forwarding path — EX 단계 출력을 다음 명령의 EX 입력으로 직접 연결](/images/blog/perf-eng/diagrams/part2-02-forwarding.svg)
 
 EX 단계의 출력을 다음 명령의 EX 입력에 직접 연결합니다. *별도 wire*로 register file을 우회합니다. ARM Cortex-A에는 Operand Forwarding Unit이 있습니다.
 

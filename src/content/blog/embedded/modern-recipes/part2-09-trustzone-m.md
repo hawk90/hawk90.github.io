@@ -38,14 +38,13 @@ TrustZone-M은 같은 CPU에서 두 모드로 동작합니다.
 
 ### 2) Memory 분류 — Secure / NS / NSC
 
-```text
-주소 영역별 보안 속성:
+주소 영역별 보안 속성.
 
-S (Secure)            — NS에서 접근 불가
-NS (Non-Secure)       — 누구나 접근 가능
-NSC (Non-Secure       — NS가 S 함수를 호출할 수 있는
-     Callable)          gateway 영역
-```
+| 속성 | 의미 |
+|------|------|
+| S (Secure) | NS에서 접근 불가 |
+| NS (Non-Secure) | 누구나 접근 가능 |
+| NSC (Non-Secure Callable) | NS가 S 함수를 호출할 수 있는 gateway 영역 |
 
 `NSC` 영역은 S 코드인데 NS에서 진입을 허용합니다. SG(Secure Gateway) 명령으로 진입합니다.
 

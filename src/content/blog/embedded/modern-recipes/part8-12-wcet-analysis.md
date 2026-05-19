@@ -19,15 +19,16 @@ tags: [recipes, performance, wcet]
 
 ## 핵심 개념
 
-```text
-ACET    Average-Case Execution Time
-WCET    Worst-Case Execution Time
-BCET    Best-Case Execution Time
+| 약어 | 의미 |
+|------|------|
+| ACET | Average-Case Execution Time |
+| WCET | Worst-Case Execution Time |
+| BCET | Best-Case Execution Time |
 
-WCET 분석 두 갈래
-- measurement-based   여러 입력으로 측정해 worst를 추정
-- static analysis     control flow + 칩 모델로 상한 증명
-```
+WCET 분석은 두 갈래로 나뉜다.
+
+- **measurement-based** — 여러 입력으로 측정해 worst를 추정
+- **static analysis** — control flow + 칩 모델로 상한 증명
 
 WCET를 키우는 4대 요인입니다.
 
@@ -37,11 +38,11 @@ WCET를 키우는 4대 요인입니다.
 | 3. cache | miss/hit이 stream에 따라 달라짐 |
 | 4. ISR | 다른 IRQ가 끼어들어 elongate |
 
-```text
-hard real-time     WCET ≤ deadline 필수 (mathematical guarantee)
-firm real-time     일부 miss 허용 (quality 저하)
-soft real-time     늦으면 useless이지만 안전엔 무관
-```
+| 등급 | 의미 |
+|------|------|
+| hard real-time | WCET ≤ deadline 필수 (mathematical guarantee) |
+| firm real-time | 일부 miss 허용 (quality 저하) |
+| soft real-time | 늦으면 useless이지만 안전엔 무관 |
 
 ## 코드 / 실제 사용 예
 

@@ -93,11 +93,9 @@ void prvTimerTask(void *p) {
 
 가장 단순합니다. 만기 tick 오름차순으로 linked list를 유지합니다.
 
-```text
-insert: O(N) — 적절한 위치 찾기
-expire check: O(1) — head만 확인
-pop expired: O(1)
-```
+- **insert** — O(N), 적절한 위치 찾기
+- **expire check** — O(1), head만 확인
+- **pop expired** — O(1)
 
 timer 수가 적으면(수십 개) 충분합니다. FreeRTOS가 이 구조를 씁니다.
 
@@ -123,10 +121,8 @@ slot[2]   → timer C
 slot[N-1] → timer D
 ```
 
-```text
-insert: O(1) — slot index = expiry_tick % N
-expire check: O(slot 안 timer 수) — 보통 O(1)
-```
+- **insert** — O(1), `slot index = expiry_tick % N`
+- **expire check** — O(slot 안 timer 수), 보통 O(1)
 
 Linux kernel의 `hrtimer`는 *hierarchical timer wheel*을 씁니다. 수 ms 정확도에서 *수천 개 timer를 O(1)*로 다룹니다.
 
@@ -136,21 +132,11 @@ priority queue로 구현하면 *insert와 pop 모두 O(log N)*입니다. Linux `
 
 ### 비교
 
-```text
-timer 수 10개:
-  sorted list   : insert 5 cycle 평균
-  timer wheel   : insert 4 cycle (slot 접근)
-
-timer 수 1000개:
-  sorted list   : insert 500 cycle 평균 (worst 1000)
-  min-heap      : insert ~30 cycle (log₂ 1000 ≈ 10 단계)
-  timer wheel   : insert 4 cycle (slot 접근)
-
-timer 수 10000개:
-  sorted list   : 사실상 못 씀
-  min-heap      : insert ~40 cycle
-  timer wheel   : insert 4 cycle
-```
+| Timer 수 | Sorted list | Min-heap | Timer wheel |
+|---|---|---|---|
+| 10 | insert 5 cycle 평균 | — | 4 cycle (slot 접근) |
+| 1000 | 500 cycle 평균 (worst 1000) | ~30 cycle (log₂ 1000 ≈ 10) | 4 cycle |
+| 10000 | 사실상 못 씀 | ~40 cycle | 4 cycle |
 
 embedded에서 timer 수가 수십 개라면 sorted list로 충분합니다. 수백 개 이상이면 wheel이 답입니다.
 
@@ -262,14 +248,10 @@ ISR에서 *복잡한 처리를 직접 하지 않고* daemon으로 미루는 *def
 
 software timer의 정확도는 *tick 주기 + daemon scheduling*의 합으로 제한됩니다.
 
-```text
-configTICK_RATE_HZ = 100 → tick 주기 = 10 ms
-timer 만기 50 ms 설정 → 5 tick 후 daemon이 처리
+`configTICK_RATE_HZ = 100`이면 tick 주기는 10 ms입니다. timer 만기를 50 ms로 설정하면 5 tick 후에 daemon이 처리합니다.
 
-best case: 50.0 ms
-worst case: 50 ms + daemon 대기 + 다른 callback 처리 시간
-          → 보통 51~52 ms, 부하 심하면 60+ ms
-```
+- **best case** — 50.0 ms
+- **worst case** — 50 ms + daemon 대기 + 다른 callback 처리 시간 → 보통 51~52 ms, 부하 심하면 60+ ms
 
 수 µs 정확도가 필요한 control loop은 *hardware timer + semaphore*로 가야 합니다.
 

@@ -14,22 +14,7 @@ draft: false
 
 ## Clock Tree — STM32H743 예
 
-```text
-HSE 25 MHz
-    ↓
-[PLL1 ×64] → 400 MHz (SYSCLK)
-    ├ AHB1·2·3·4 = SYSCLK / 2 = 200 MHz
-    │   ├ APB1 = 100 MHz (timer kernel: 200 MHz)
-    │   ├ APB2 = 100 MHz
-    │   ├ APB3
-    │   └ APB4
-    ├ HSI 64 MHz (backup)
-    ↓
-[PLL2 ×40] → 200 MHz (PER_CK)
-    └ ADC, SPI, USART (별도 source)
-
-[PLL3] → 48 MHz (USB), 24 MHz (LCD-TFT pixel clock)
-```
+![STM32H7 clock tree — HSE, PLL1/2/3, AHB/APB divider, peripheral clock source 선택](/images/blog/perf-eng/diagrams/part3-08-clock-tree.svg)
 
 각 peripheral은 별도의 clock source를 선택할 수 있고, 이렇게 하면 power를 최적화할 수 있습니다.
 

@@ -170,15 +170,15 @@ gpio_init(GPIOB, 0, &(gpio_config_t){.mode=GPIO_MODE_ANALOG});
 
 저전력 전류 측정은 µA meter (Joulescope, Nordic Power Profiler Kit II, Qoitech Otii)가 필요합니다. 일반 멀티미터는 µA 분해능이 낮고 측정 자체가 부담입니다.
 
-```text
 Joulescope 측정 예 (PPK2도 유사):
 
-  Run mode (loop):       30.2 mA  @ 3.3V
-  __WFI sleep (SysTick): 5.1 mA   ← SysTick 1 kHz가 깨움
-  Stop mode (EXTI):      98 µA    ← regulator main
-  Stop mode + LPDS:      32 µA    ← low-power regulator
-  Standby + RTC:         1.8 µA
-```
+| Mode | 전류 @ 3.3V | 비고 |
+|------|--------------|------|
+| Run mode (loop) | 30.2 mA | |
+| `__WFI` sleep (SysTick) | 5.1 mA | SysTick 1 kHz가 깨움 |
+| Stop mode (EXTI) | 98 µA | regulator main |
+| Stop mode + LPDS | 32 µA | low-power regulator |
+| Standby + RTC | 1.8 µA | |
 
 예상보다 안 줄어들면 어떤 peripheral이 살아 있는지 확인합니다. RCC ENR register dump가 빠릅니다.
 

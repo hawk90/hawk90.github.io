@@ -34,13 +34,12 @@ NSS (또는 CS, SS)는 *active-low*입니다. 둘 이상의 slave가 있으면 *
 
 ### CPOL / CPHA (Mode 0~3)
 
-```text
-Mode  CPOL CPHA  Idle clock  Sample edge
-  0    0    0      LOW       Rising
-  1    0    1      LOW       Falling
-  2    1    0      HIGH      Falling
-  3    1    1      HIGH      Rising
-```
+| Mode | CPOL | CPHA | Idle clock | Sample edge |
+|------|------|------|------------|--------------|
+| 0 | 0 | 0 | LOW | Rising |
+| 1 | 0 | 1 | LOW | Falling |
+| 2 | 1 | 0 | HIGH | Falling |
+| 3 | 1 | 1 | HIGH | Rising |
 
 대부분의 sensor·flash·SD card는 **Mode 0**. 일부 ADC, audio codec은 다른 모드를 씁니다. datasheet의 "SPI timing diagram"을 항상 확인합니다.
 

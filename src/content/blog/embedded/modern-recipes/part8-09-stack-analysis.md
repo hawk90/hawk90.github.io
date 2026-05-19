@@ -19,21 +19,18 @@ tags: [recipes, memory, stack]
 
 ## 핵심 개념
 
-```text
-high-water mark   stack 시작 시 패턴(0xA5A5)을 채워두고
-                  가장 깊이까지 덮어쓴 위치를 찾는 기법
-overflow hook     SP가 stack 끝에 도달하면 trap
-canary            stack 끝에 magic 값을 두고 함수 진입/탈출 시 확인
-MPU guard         stack 끝 다음 page를 read-only로 만들어 HW가 trap
-```
+| 기법 | 동작 |
+|------|------|
+| high-water mark | stack 시작 시 패턴(`0xA5A5`)을 채워두고 가장 깊이까지 덮어쓴 위치를 찾는 기법 |
+| overflow hook | SP가 stack 끝에 도달하면 trap |
+| canary | stack 끝에 magic 값을 두고 함수 진입/탈출 시 확인 |
+| MPU guard | stack 끝 다음 page를 read-only로 만들어 HW가 trap |
 
 세 기법은 *층층이* 쌓는 것이 안전합니다.
 
-```text
-1차    high-water mark로 평소 사용량 측정 → size 결정
-2차    overflow hook으로 사고 발생 시 즉시 trap
-3차    MPU guard로 HW 차원 보호
-```
+1. **1차** — high-water mark로 평소 사용량 측정 → size 결정
+2. **2차** — overflow hook으로 사고 발생 시 즉시 trap
+3. **3차** — MPU guard로 HW 차원 보호
 
 ## 코드 / 실제 사용 예
 
