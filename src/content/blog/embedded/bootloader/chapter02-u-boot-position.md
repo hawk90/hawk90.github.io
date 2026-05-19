@@ -110,6 +110,8 @@ void bl2_main(void)
 
 TF-A 없이 U-Boot만으로도 ARMv8-A를 부팅할 수 있지만, *PSCI가 없으니 SMP를 못 쓰고*, *power management도 한계*가 있습니다. 양산용은 *대부분 TF-A 사용*입니다.
 
+> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter06-tfa-bl1-bl2)
+
 ## EDK II — UEFI 표준 준수
 
 Intel이 시작한 *UEFI reference 구현*입니다. 현재는 TianoCore 프로젝트로 *오픈소스*입니다. UEFI 표준의 모든 인터페이스(boot service, runtime service, protocol)를 제공합니다.

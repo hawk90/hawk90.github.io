@@ -50,6 +50,8 @@ ARM Trusted Firmware의 *공식 단계 이름*은 다음과 같습니다.
 | BL32 | OP-TEE | 수 MB |
 | BL33 | U-Boot | 약 1 MB |
 
+> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter05-tfa-4stage)
+
 ## U-Boot의 SPL/TPL 모델
 
 U-Boot은 *자체 다단 모델*인 SPL/TPL을 가집니다. TF-A를 안 쓰는 ARMv7-A에서는 *이 모델 단독*으로 동작합니다.
