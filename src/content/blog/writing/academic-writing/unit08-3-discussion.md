@@ -10,7 +10,7 @@ bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
 ---
 
-연구 논문의 마지막 큰 섹션은 Discussion입니다. Results가 무엇을 발견했는지였다면, Discussion은 그것이 무엇을 의미하는지입니다. AWG 시리즈의 마지막 글로, Discussion의 표준 구조와 함께 전체 시리즈를 정리합니다.
+연구 논문의 마지막 큰 섹션은 Discussion입니다. Results가 "무엇을 발견했는지"였다면, Discussion은 "그것이 무엇을 의미하는지"입니다. AWG 시리즈의 마지막 글로, Discussion의 표준 구조와 함께 전체 시리즈를 정리합니다.
 
 ## Discussion의 목적
 
@@ -22,7 +22,7 @@ bookAuthor: "John M. Swales, Christine B. Feak"
 5. 다음 연구 방향 — 학문 공동체로 환원
 ```
 
-Discussion은 모래시계의 아래쪽 깔때기 — 좁은 Results에서 시작해 다시 넓은 함의로 확장합니다.
+Discussion은 모래시계의 아래쪽 깔때기입니다. 좁은 Results에서 시작해 다시 넓은 함의로 확장합니다.
 
 ## Discussion의 표준 구조
 
@@ -52,10 +52,11 @@ was not observed, suggesting that timing effects may be more uniform
 across individuals than previously hypothesized.
 ```
 
-분석:
-- 첫 문장 — 연구 목적의 재진술 (Move 3을 그대로)
-- 둘째 문장 — 주된 발견 (가설 지지)
-- 셋째 문장 — 예상 외 발견 (가설 미지지)
+분석해 보면 다음과 같습니다.
+
+- 첫 문장은 연구 목적의 재진술입니다(Move 3을 그대로).
+- 둘째 문장은 주된 발견입니다(가설 지지).
+- 셋째 문장은 예상 외 발견입니다(가설 미지지).
 
 이 세 문장이 Discussion 전체의 나침반입니다.
 
@@ -85,7 +86,7 @@ vs. M = 180 mg in Kim's study) may have produced more detectable
 effects.
 ```
 
-불일치를 인정하고 가능한 설명을 제시. 학술적 정직성.
+불일치를 인정하고 가능한 설명을 제시합니다. 학술적 정직성입니다.
 
 ### 부정 결과의 처리
 
@@ -99,7 +100,7 @@ may overwhelm individual differences once a threshold is crossed,
 producing similar effects across metabolic profiles.
 ```
 
-부정 결과도 분석의 대상. 두 가지 해석을 제시하는 것이 하나의 단정보다 학술적.
+부정 결과도 분석의 대상입니다. 두 가지 해석을 제시하는 것이 하나의 단정보다 학술적입니다.
 
 ## 3. 한계 인정 — Limitations
 
@@ -135,7 +136,7 @@ Statistical power may have been insufficient to detect smaller effects.
 
 ### 한계의 균형
 
-너무 길고 깊은 한계 섹션은 논문의 신뢰를 약화시킵니다. 주요 한계 2–4개에 집중합니다.
+너무 길고 깊은 한계 섹션은 논문의 신뢰를 약화시킵니다. 주요 한계 2-4개에 집중합니다.
 
 ```text
 잘못된 한계 (피해야 할 함정):
@@ -157,9 +158,9 @@ Statistical power may have been insufficient to detect smaller effects.
 
 ### 이론적 함의
 
-```text
-이 발견은 무엇을 더 알게 했는가? 이론을 어떻게 바꾸는가?
+이 발견은 무엇을 더 알게 했는가, 이론을 어떻게 바꾸는가를 묻습니다.
 
+```text
 These findings extend existing theory in three ways. First, ...
 The results suggest that the [X model] should be modified to include ...
 This study provides empirical support for [Y framework] ...
@@ -168,9 +169,9 @@ The findings challenge the assumption that ...
 
 ### 실용적 함의
 
-```text
-이 발견이 실제 세계에서 무엇을 시사하는가?
+이 발견이 실제 세계에서 무엇을 시사하는가를 묻습니다.
 
+```text
 These results have practical implications for [field / practitioners].
 Specifically, [practitioners] should consider ...
 The findings suggest a need for changes in [policy / practice].
@@ -204,10 +205,11 @@ pathways through which caffeine timing influences sleep, potentially
 explaining the unexpected absence of metabolism-based moderation.
 ```
 
-좋은 next steps의 조건:
-- 자기 연구의 한계에 직접 응답
-- 구체적이고 실행 가능
-- 논문의 함의를 자연스럽게 확장
+좋은 next steps의 조건은 다음과 같습니다.
+
+- 자기 연구의 한계에 직접 응답합니다.
+- 구체적이고 실행 가능해야 합니다.
+- 논문의 함의를 자연스럽게 확장합니다.
 
 ## Discussion 마지막 — Closing
 
@@ -225,7 +227,7 @@ behaviors shape sleep quality and, by extension, broader health
 outcomes.
 ```
 
-요약의 반복이 아니라 논문의 자리를 학술 대화 안에 두는 마무리.
+요약의 반복이 아니라, 논문의 자리를 학술 대화 안에 두는 마무리입니다.
 
 ## Conclusion 섹션 (별도)
 
@@ -233,11 +235,11 @@ outcomes.
 
 ### Conclusion의 역할
 
-```text
-- Discussion보다 간결
-- 핵심 발견 + 핵심 함의 + 다음 단계의 재진술
-- 보통 1–2 단락
-```
+Conclusion의 역할은 다음과 같습니다.
+
+- Discussion보다 간결합니다.
+- 핵심 발견, 핵심 함의, 다음 단계를 재진술합니다.
+- 보통 1-2 단락입니다.
 
 ```text
 This study examined the relationship between caffeine timing and sleep
@@ -259,7 +261,7 @@ Discussion이 길게 다룬 것을 짧게 압축해 반복합니다.
 긴 분야: 3,000–5,000 단어 (인문학·교육학)
 ```
 
-Discussion이 Results보다 짧으면 학술적 검토에서 문제 — 결과 해석이 부족하다는 인상.
+Discussion이 Results보다 짧으면 학술적 검토에서 문제가 됩니다. 결과 해석이 부족하다는 인상을 줍니다.
 
 ## Academic Writing 시리즈 마무리
 

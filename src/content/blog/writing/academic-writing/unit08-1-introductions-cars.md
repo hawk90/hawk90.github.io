@@ -60,7 +60,7 @@ Several studies have examined the effects of caffeine on sleep
 Research in this area has focused primarily on adults aged 30–50.
 ```
 
-대부분의 도입은 Step 1B + Step 1C를 결합합니다 — 일반 배경 + 관련 연구.
+대부분의 도입은 Step 1B와 Step 1C를 결합합니다(일반 배경 + 관련 연구).
 
 ### Move 1의 예
 
@@ -74,15 +74,15 @@ quality, particularly in young adults whose consumption patterns differ
 markedly from earlier generations (Lee, 2019).
 ```
 
-❶ — Step 1B (일반화 + 통계). ❷ — Step 1C (기존 연구). ❸ — Step 1C (최근 흐름).
+❶은 Step 1B(일반화 + 통계)입니다. ❷는 Step 1C(기존 연구)입니다. ❸은 Step 1C(최근 흐름)입니다.
 
 ## Move 2 — Establishing a Niche
 
-기존 연구의 빈 자리를 찾는 단계. Step 1A나 1B 중 하나입니다.
+기존 연구의 빈 자리를 찾는 단계입니다. Step 1A나 1B 중 하나입니다.
 
 ### Step 2A — Counter-Claiming
 
-기존 연구의 결과나 해석을 반박.
+기존 연구의 결과나 해석을 반박합니다.
 
 ```text
 However, this conclusion has been challenged by recent findings ...
@@ -92,7 +92,7 @@ This explanation, while widely accepted, fails to account for ...
 
 ### Step 2B — Indicating a Gap
 
-기존 연구가 다루지 않은 영역을 지적.
+기존 연구가 다루지 않은 영역을 지적합니다.
 
 ```text
 However, little research has examined this relationship in college students.
@@ -103,7 +103,7 @@ The mechanisms underlying this effect are not well characterized.
 
 ### Step 2C — Question-Raising
 
-기존 연구의 남은 질문 제기.
+기존 연구의 남은 질문을 제기합니다.
 
 ```text
 This raises the question of whether ...
@@ -113,7 +113,7 @@ It is unclear how [X] relates to [Y].
 
 ### Step 2D — Continuing a Tradition
 
-자기 연구가 기존 흐름을 잇는다는 입장.
+자기 연구가 기존 흐름을 잇는다는 입장입니다.
 
 ```text
 Building on this work, the present study extends ...
@@ -149,11 +149,11 @@ differences in measurement, but it may also indicate that individual
 factors moderate the relationship between caffeine timing and sleep.
 ```
 
-❹ — Step 2B (gap, focus가 quantity에 머묾). ❺ — 모순된 결과 제시. ❻ — Question-raising + hedge (may).
+❹는 Step 2B(gap, focus가 quantity에 머묾)입니다. ❺는 모순된 결과 제시입니다. ❻은 Question-raising과 hedge(`may`)입니다.
 
 ## Move 3 — Occupying the Niche
 
-자기 연구가 그 빈 자리를 채운다는 선언. Step 3A가 핵심이고, 3B, 3C는 선택.
+자기 연구가 그 빈 자리를 채운다는 선언입니다. Step 3A가 핵심이고, 3B와 3C는 선택입니다.
 
 ### Step 3A — 자기 연구의 목적 / 질문 명시
 
@@ -171,7 +171,7 @@ Our results show that ...
 We find that ...
 ```
 
-자연과학에 흔합니다. 인문학에서는 보통 결론 사전 공개를 피합니다.
+자연과학에 흔합니다. 인문학에서는 보통 결론을 사전 공개하지 않습니다.
 
 ### Step 3C — 논문 구조 안내 (선택)
 
@@ -180,7 +180,7 @@ The paper is organized as follows. Section 2 reviews ... Section 3
 describes ... Section 4 presents ... Section 5 discusses ...
 ```
 
-길고 복잡한 논문에 흔합니다. 짧은 논문에서는 생략.
+길고 복잡한 논문에 흔합니다. 짧은 논문에서는 생략합니다.
 
 ### Move 3의 예
 
@@ -194,7 +194,7 @@ reduced sleep efficiency, and that this association will be moderated by
 genetic variation in caffeine clearance.
 ```
 
-❼ — Step 3A (목적 명시). ❽ — 가설 (sub-step).
+❼은 Step 3A(목적 명시)입니다. ❽은 가설(sub-step)입니다.
 
 ## 전체 도입의 흐름
 
@@ -270,22 +270,22 @@ and various security and military uses.
 periodic and occurs less often.
 ```
 
-분석:
+분석해 보면 다음과 같습니다.
 
-- ❶–❷ — Move 1, Step 1B (배경)
-- ❸ — Move 2, Step 2B (gap — power 문제)
-- ❹–❺ — 현재 해결책의 한계 (배터리)
-- ❻ — Move 2 강화 (이 한계가 막고 있음)
-- ❼ — Move 1 (해결의 한 방향 — energy scavenging)
-- ❽ — 그 중 kinetic energy 강조
-- ❾ — Move 2, Step 2B (gap — 고주파수 한정)
-- ❿–⓫ — Gap의 결과 (응용 영역 배제)
+- ❶–❷는 Move 1, Step 1B(배경)입니다.
+- ❸은 Move 2, Step 2B(gap — power 문제)입니다.
+- ❹–❺는 현재 해결책의 한계(배터리)입니다.
+- ❻은 Move 2 강화입니다(이 한계가 막고 있음).
+- ❼은 Move 1(해결의 한 방향 — energy scavenging)입니다.
+- ❽은 그 중 kinetic energy를 강조합니다.
+- ❾는 Move 2, Step 2B(gap — 고주파수 한정)입니다.
+- ❿–⓫은 Gap의 결과(응용 영역 배제)입니다.
 
-여러 Move 1과 Move 2가 교차합니다. Move 3은 아직 — 다음 단락에서 자기 연구가 그 빈 자리를 채움을 선언할 것입니다. CARS는 단순한 1-2-3 순서가 아니라 반복적 깔때기가 될 수 있습니다.
+여러 Move 1과 Move 2가 교차합니다. Move 3은 아직 나오지 않았습니다. 다음 단락에서 자기 연구가 그 빈 자리를 채움을 선언할 것입니다. CARS는 단순한 1-2-3 순서가 아니라 반복적 깔때기가 될 수 있습니다.
 
 ## Negative Openings in Move 2
 
-Move 2는 부정적 표현이 자주 등장합니다. 학술 영어의 부드러운 부정 어휘.
+Move 2는 부정적 표현이 자주 등장합니다. 학술 영어의 부드러운 부정 어휘를 씁니다.
 
 ```text
 부드러운 부정:
@@ -327,13 +327,13 @@ role of consumption timing has received less systematic attention.
 
 ## 정리
 
-- 연구 논문 Introduction의 표준 구조 — **CARS 모델**
-- **Move 1** — Territory (영역 설정, 배경, 기존 연구)
-- **Move 2** — Niche (빈 자리 — counter-claim, gap, question)
-- **Move 3** — Occupying the Niche (자기 연구의 목적·가설)
-- 부드러운 부정이 Move 2의 핵심 — however, less attention, remains unclear
-- 분야별 변형 — 자연과학(짧음), 사회과학(긴 Move 1), 인문학(다른 패턴)
-- CARS는 단순한 1-2-3이 아니라 반복 깔때기일 수도
+- 연구 논문 Introduction의 표준 구조는 **CARS 모델**입니다.
+- **Move 1**은 Territory입니다(영역 설정, 배경, 기존 연구).
+- **Move 2**는 Niche입니다(빈 자리 — counter-claim, gap, question).
+- **Move 3**은 Occupying the Niche입니다(자기 연구의 목적과 가설).
+- 부드러운 부정이 Move 2의 핵심입니다(however, less attention, remains unclear).
+- 분야별 변형이 있습니다. 자연과학은 짧고, 사회과학은 Move 1이 길며, 인문학은 다른 패턴을 씁니다.
+- CARS는 단순한 1-2-3이 아니라 반복 깔때기가 될 수도 있습니다.
 
 ## 한국 학생의 CARS 함정
 
@@ -358,7 +358,7 @@ role of consumption timing has received less systematic attention.
 
 ## 다음 글 예고
 
-다음은 **Unit 8.2: Citation, Tense, Purpose Statements**.
+다음은 **Unit 8.2: Citation, Tense, Purpose Statements**입니다.
 
 ## 관련 항목
 

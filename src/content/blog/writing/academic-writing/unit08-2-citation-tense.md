@@ -23,7 +23,7 @@ Smith (2019) found that caffeine reduces sleep quality.
 Brown (2020) examined this relationship in college students.
 ```
 
-특정 연구의 발견. 과거에 일어난 일로 봅니다. 가장 흔한 형태.
+특정 연구의 발견을 표현합니다. 과거에 일어난 일로 봅니다. 가장 흔한 형태입니다.
 
 ### Present Simple
 
@@ -32,7 +32,7 @@ Smith (2019) argues that caffeine reduces sleep quality.
 Caffeine reduces sleep quality (Smith, 2019).
 ```
 
-저자의 주장이 현재도 유효하다고 볼 때, 또는 합의된 사실. 일반화 / 이론적 진술에 자주.
+저자의 주장이 현재도 유효하다고 볼 때, 또는 합의된 사실을 다룰 때 씁니다. 일반화나 이론적 진술에 자주 등장합니다.
 
 ### Present Perfect
 
@@ -42,7 +42,7 @@ Several studies have shown that caffeine reduces sleep quality
 Recent research has documented this pattern.
 ```
 
-과거에서 현재까지 이어지는 연구 흐름. 여러 출처를 묶을 때, 최근 흐름을 강조할 때.
+과거에서 현재까지 이어지는 연구 흐름을 표현합니다. 여러 출처를 묶을 때나 최근 흐름을 강조할 때 씁니다.
 
 ### 시제 선택의 패턴
 
@@ -82,7 +82,7 @@ Brown, 2020; Lee, 2021). The relationship has been documented in
 adults (Smith, 2019) and college students (Brown, 2020).
 ```
 
-저자보다 발견의 합의에 초점. 괄호 인용이 흐름을 안 끊습니다.
+저자보다 발견의 합의에 초점을 둡니다. 괄호 인용이 흐름을 끊지 않습니다.
 
 ### 인문학 / 사회과학 — Integral 자주
 
@@ -93,7 +93,7 @@ college students, while Lee (2021) introduces a methodological
 refinement that addresses Brown's measurement concerns.
 ```
 
-저자들의 지적 관계가 중요. 본문이 학문적 대화처럼 흐릅니다.
+저자들의 지적 관계가 중요합니다. 본문이 학문적 대화처럼 흐릅니다.
 
 ### 두 형태의 혼합
 
@@ -106,7 +106,7 @@ attention. Building on this observation, Lee (2021) examined
 consumption windows and ...
 ```
 
-저자 이름이 중요한 자리에 integral, 발견의 합의에는 non-integral.
+저자 이름이 중요한 자리에는 integral을 쓰고, 발견의 합의에는 non-integral을 씁니다.
 
 ## Negative Openings of Move 2
 
@@ -185,7 +185,7 @@ Future / will:
 This paper will examine ...   ← 약간 격식적
 ```
 
-Present simple이 가장 흔하고 자연스럽습니다. Will은 논문 시작 시점에서의 약속이라는 뉘앙스 — 약간 격식적입니다.
+Present simple이 가장 흔하고 자연스럽습니다. `Will`은 논문 시작 시점에서의 약속이라는 뉘앙스가 있어 약간 격식적입니다.
 
 ### Purpose Statement의 동사
 
@@ -233,7 +233,7 @@ sleep efficiency, and whether this association is moderated by
 individual variation in caffeine metabolism.
 ```
 
-짧은 논문은 짧은 진술, 긴 논문은 확장된 진술. 가설이 여러 개면 각각을 명시합니다.
+짧은 논문은 짧은 진술을 쓰고, 긴 논문은 확장된 진술을 씁니다. 가설이 여러 개면 각각을 명시합니다.
 
 ### Research Questions vs Hypotheses
 
@@ -283,7 +283,7 @@ Following a review of the relevant literature, we describe ...
 
 ### 짧은 논문 — 생략
 
-논문이 5–10 페이지이면 sign-posting을 생략하는 경우가 많습니다. 구조가 명백하기 때문입니다.
+논문이 5-10 페이지이면 sign-posting을 생략하는 경우가 많습니다. 구조가 명백하기 때문입니다.
 
 ## 도입의 길이 — 분야별
 
@@ -322,23 +322,23 @@ moderates this relationship. ❼ We hypothesize that consumption within
 this effect is stronger in slow caffeine metabolizers.
 ```
 
-분석:
+분석해 보면 다음과 같습니다.
 
-- 시제 — ❶ present (사실), ❷–❸ present perfect (분야의 흐름), ❹–❺ present (현재 상태), ❻–❼ present (자기 목적)
-- 인용 — non-integral 위주 (자연과학적 톤)
-- Move 2 — Despite, mixed results, remains unclear (부드러운 부정)
-- Move 3 — addresses gaps, hypothesize (목적 + 가설)
+- 시제는 ❶은 present(사실), ❷–❸은 present perfect(분야의 흐름), ❹–❺는 present(현재 상태), ❻–❼은 present(자기 목적)입니다.
+- 인용은 non-integral이 위주입니다(자연과학적 톤).
+- Move 2에서 `Despite`, `mixed results`, `remains unclear` 같은 부드러운 부정을 씁니다.
+- Move 3에서 `addresses gaps`, `hypothesize`로 목적과 가설을 함께 제시합니다.
 
-각 Move가 2–3 문장. 도입 전체가 약 200 단어. 자연과학·공학적 길이.
+각 Move가 2-3 문장입니다. 도입 전체가 약 200 단어로, 자연과학과 공학적 길이입니다.
 
 ## 정리
 
-- 도입의 시제 — Present simple(배경), Present perfect(흐름), Past simple(특정 연구), Present(현재 상태와 자기 목적)
-- Integral / Non-integral 인용 — 분야와 자리에 따라 선택
-- Move 2의 부드러운 부정 — Despite, however, less, remains unclear
-- Purpose Statement — 동사 선택이 연구의 성격 표시 (examine, test, characterize, develop ...)
-- Research questions vs Hypotheses vs Aims — 분야 표준
-- 긴 논문은 Sign-posting으로 도입 마무리
+- 도입의 시제는 Present simple(배경), Present perfect(흐름), Past simple(특정 연구), Present(현재 상태와 자기 목적)로 갑니다.
+- Integral과 Non-integral 인용은 분야와 자리에 따라 선택합니다.
+- Move 2의 부드러운 부정은 `Despite`, `however`, `less`, `remains unclear` 등을 씁니다.
+- Purpose Statement의 동사 선택이 연구의 성격을 표시합니다(`examine`, `test`, `characterize`, `develop` 등).
+- Research questions, Hypotheses, Aims 가운데 분야 표준을 따릅니다.
+- 긴 논문은 Sign-posting으로 도입을 마무리합니다.
 
 ## 한국 학생의 Citation / Tense 함정
 
@@ -361,7 +361,7 @@ this effect is stronger in slow caffeine metabolizers.
 
 ## 다음 글 예고
 
-Unit 8 마지막, AWG 시리즈의 마지막 글은 **Unit 8.3: Discussion Sections와 마무리**.
+Unit 8 마지막이자 AWG 시리즈의 마지막 글은 **Unit 8.3: Discussion Sections와 마무리**입니다.
 
 ## 관련 항목
 

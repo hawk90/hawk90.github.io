@@ -10,7 +10,7 @@ bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
 ---
 
-Results 섹션은 발견을 보고하는 자리입니다. 해석은 Discussion에서 — Results는 무엇을 봤는지에 집중합니다. 이 글은 Results의 표현 패턴, 통계 보고 형식, Data Commentary와의 관계를 다룹니다.
+Results 섹션은 발견을 보고하는 자리입니다. 해석은 Discussion에서 합니다. Results는 무엇을 봤는지에 집중합니다. 이 글은 Results의 표현 패턴, 통계 보고 형식, Data Commentary와의 관계를 다룹니다.
 
 ## Results의 목적과 어조
 
@@ -51,10 +51,11 @@ The sample consisted of 245 participants (M_age = 22.3 years, SD = 3.1;
 in Table 1. Groups did not differ on any baseline variable (all p > .15).
 ```
 
-핵심 정보:
-- 표본 크기, 인구 통계
-- 기본 변수의 분포 (평균, SD)
-- 그룹 간 baseline 차이 없음 (실험 연구의 경우)
+핵심 정보는 다음과 같습니다.
+
+- 표본 크기와 인구 통계
+- 기본 변수의 분포(평균, SD)
+- 그룹 간 baseline 차이 없음(실험 연구의 경우)
 - Table 1 또는 첫 그림 참조
 
 ## 그림·표 참조
@@ -104,11 +105,12 @@ intake.
 Group A scored higher than Group B, t(243) = 3.45, p = .001, d = 0.44.
 ```
 
-핵심:
+핵심은 다음과 같습니다.
+
 - t 값
-- 자유도 (괄호 안)
+- 자유도(괄호 안)
 - p 값
-- 효과 크기 (Cohen's d, η², r 등)
+- 효과 크기(Cohen's d, η², r 등)
 
 ### ANOVA
 
@@ -156,7 +158,7 @@ A significant difference emerged ...
 The findings suggest ...
 ```
 
-Suggest는 Discussion에 더 가까운 동사 — Results에서는 demonstrate, indicate, show가 더 흔합니다.
+`Suggest`는 Discussion에 더 가까운 동사입니다. Results에서는 `demonstrate`, `indicate`, `show`가 더 흔합니다.
 
 ### 발견의 강도
 
@@ -274,7 +276,7 @@ did not significantly differ
 approached significance (p = .07)
 ```
 
-Approached significance는 학술 비판을 받기 쉬운 표현입니다. not significant but in the predicted direction 같은 더 정확한 표현이 안전합니다.
+`Approached significance`는 학술 비판을 받기 쉬운 표현입니다. `not significant but in the predicted direction` 같은 더 정확한 표현이 안전합니다.
 
 ## Results의 함정
 
@@ -318,7 +320,7 @@ see Table 1 for details).
 [모든 결과 보고, 부정 결과도 명확히]
 ```
 
-Publication bias를 만드는 행위. 학술 정직성에 어긋납니다.
+Publication bias를 만드는 행위입니다. 학술 정직성에 어긋납니다.
 
 ### 4. 추가 분석의 post hoc 라벨
 
@@ -343,13 +345,13 @@ Unit 7에서 다룬 것:
 7.3 Results Section 작성 (이 글)
 ```
 
-핵심:
+핵심은 다음과 같습니다.
 
-- 학술 출판의 다양한 형식, **IMRD**의 모래시계 모양
-- Methods — 재현 가능성, 수동·과거
-- Results — 발견 자체, 해석은 Discussion으로
-- 통계 표기 형식의 분야 표준
-- Data Commentary 도구가 Results의 세부 도구
+- 학술 출판의 다양한 형식과 **IMRD**의 모래시계 모양을 살폈습니다.
+- Methods는 재현 가능성이 목적이고, 수동태와 과거 시제를 씁니다.
+- Results는 발견 자체에 집중하고, 해석은 Discussion으로 미룹니다.
+- 통계 표기 형식은 분야 표준을 따릅니다.
+- Data Commentary 도구가 Results의 세부 도구가 됩니다.
 
 ## 한국 학생의 Results 함정
 
@@ -371,7 +373,7 @@ Unit 7에서 다룬 것:
 
 ## 다음 Unit 예고
 
-다음은 **Unit 8: Constructing a Research Paper II**.
+다음은 **Unit 8: Constructing a Research Paper II**입니다.
 
 ## 관련 항목
 

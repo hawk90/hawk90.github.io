@@ -183,7 +183,7 @@ and (b) if not, present the analysis as exploratory and call for
 replication.
 ```
 
-좋은 major issue 보고의 구조:
+좋은 major issue 보고의 구조는 다음과 같습니다.
 
 ```text
 1. 어디에 문제가 있는지 (페이지, 섹션)
@@ -191,7 +191,7 @@ replication.
 3. 어떻게 수정할 수 있는지 (제안)
 ```
 
-"이 부분이 약하다" 같은 모호한 평가는 도움이 되지 않습니다.
+"이 부분이 약합니다" 같은 모호한 평가는 도움이 되지 않습니다.
 
 ### 4. Minor Issues — 작은 문제
 
@@ -202,7 +202,7 @@ replication.
 - Figure 1: Y-axis label is unclear; please specify units
 ```
 
-타이포, 표 형식, 인용 누락 등 수정 가능한 작은 문제.
+타이포, 표 형식, 인용 누락 등 수정 가능한 작은 문제들입니다.
 
 ### 5. Recommendation
 
@@ -215,7 +215,7 @@ Major revision     — 상당한 수정 후 재심사
 Reject             — 출판 부적합
 ```
 
-이 결정은 Major issues의 심각성으로 결정됩니다. Minor issues만 있으면 Minor revision. Major issues가 있어도 수정 가능하면 Major revision. 수정이 어려운 근본 문제가 있으면 Reject.
+이 결정은 Major issues의 심각성으로 정해집니다. Minor issues만 있으면 Minor revision입니다. Major issues가 있어도 수정 가능하면 Major revision입니다. 수정이 어려운 근본 문제가 있으면 Reject입니다.
 
 ## 심사 보고서의 톤
 
@@ -305,13 +305,13 @@ Unit 6에서 다룬 것:
 6.3 Reaction Papers와 Journal Reviews (이 글)
 ```
 
-핵심:
+핵심은 다음과 같습니다.
 
-- 학술 비평의 톤 — 균형과 근거
-- 평가어의 스펙트럼 이해 — 강함 vs 부드러움
-- Critical Reading이 비평의 토대
-- Reaction Paper — 강의 토론의 준비, 짧고 균형
-- Journal Review — peer-review의 의무, 건설적·구체적
+- 학술 비평의 톤은 균형과 근거를 갖춰야 합니다.
+- 평가어의 스펙트럼을 이해해야 합니다(강함과 부드러움).
+- Critical Reading이 비평의 토대입니다.
+- Reaction Paper는 강의 토론의 준비이고, 짧고 균형 잡혀야 합니다.
+- Journal Review는 peer-review의 의무이고, 건설적이며 구체적이어야 합니다.
 
 ## 한국 학생의 Reaction / Peer Review 함정
 
@@ -335,7 +335,7 @@ Unit 6에서 다룬 것:
 
 ## 다음 Unit 예고
 
-다음은 **Unit 7: Constructing a Research Paper I**.
+다음은 **Unit 7: Constructing a Research Paper I**입니다.
 
 ## 관련 항목
 
