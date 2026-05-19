@@ -204,15 +204,7 @@ Presentation Format Descriptor (0x2904):
 
 HID 키보드는 *Report Reference Descriptor (0x2908)*로 *Report ID와 종류*를 명시합니다. 키 한 번에 *수 byte*가 흐릅니다.
 
-```text
-HID Keyboard Input Report (예)
-┌──────┬──────┬────────┬────────┬────────┬────────┬────────┬────────┐
-│ Mod  │ Resv │ Key1   │ Key2   │ Key3   │ Key4   │ Key5   │ Key6   │
-│ 1 B  │ 1 B  │ 1 B    │ 1 B    │ 1 B    │ 1 B    │ 1 B    │ 1 B    │
-└──────┴──────┴────────┴────────┴────────┴────────┴────────┴────────┘
-Modifier: bit 0=LeftCtrl, 1=LeftShift, 2=LeftAlt, ...
-Key1~6: USB HID usage code (0x04='a', 0x05='b', ...)
-```
+![HID Keyboard Input Report — 8 byte 구조](/images/blog/ble/diagrams/ch06-hid-keyboard-report.svg)
 
 ## Generic Access & Device Information — 모든 디바이스 필수
 

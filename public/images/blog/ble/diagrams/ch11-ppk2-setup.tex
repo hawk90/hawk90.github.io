@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  box/.style={cls, minimum width=34mm, minimum height=16mm, font=\sffamily\small, align=center}
+]
+
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=south] at (0, 4)
+  {PPK II — current measurement \& power supply for DUT};
+
+% USB 5V
+\node[box, fill=clifill, draw=clibord] (usb) at (-7, 2) {USB 5V \\ \footnotesize host};
+
+% PPK II
+\node[box, fill=hifill, draw=hibord, minimum width=40mm, minimum height=22mm]
+  (ppk) at (-1, 2) {PPK II \\[2pt] \footnotesize shunt + ADC};
+
+% DUT
+\node[box, fill=impfill, draw=impbord, minimum width=40mm, minimum height=22mm]
+  (dut) at (7, 2) {DUT (nRF52 DK) \\[2pt] \footnotesize VDD};
+
+% PC
+\node[box, fill=prpfill, draw=prpbord] (pc) at (7, -2) {PC \\ \footnotesize Power Profiler app};
+
+% J-Link separate path
+\node[box, fill=neutfill, draw=neutbord, minimum width=30mm] (jl) at (-1, -2)
+  {J-Link OB \\ \footnotesize separate USB};
+
+% Connections
+\draw[->, draw=edgec, line width=0.6pt] (usb.east) -- node[font=\tiny, above]{USB 5V} (ppk.west);
+
+\draw[->, draw=edgec, line width=0.7pt] (ppk.east) --
+  node[font=\tiny, above, align=center]{VOUT}
+  node[font=\tiny, below, align=center]{shunt I}
+  (dut.west);
+
+\draw[->, draw=edgesc, line width=0.5pt] (dut.south) --
+  node[font=\tiny, right]{SWD debug} (jl.east);
+
+\draw[->, draw=edgesc, line width=0.5pt] (ppk.south) -|
+  node[font=\tiny, right, pos=0.7]{measurement stream} (pc.north);
+
+\draw[->, draw=edgesc, line width=0.5pt] (jl.south) |- (-1, -4) -- (pc.south west);
+
+\end{tikzpicture}
+\end{document}

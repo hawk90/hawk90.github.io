@@ -30,13 +30,7 @@ GAP은 디바이스를 *4가지 역할*로 분류합니다.
 | Peripheral | O | X | X | O | 센서, 시계, 잠금, HID |
 | Central | X | O | O | O | 스마트폰, 게이트웨이 |
 
-```text
-       광고 송신    스캔 수신    연결 시작    연결 수락
-Broadcaster   O       X          X          X
-Observer      X       O          X          X
-Peripheral    O       X          X          O
-Central       X       O          O          O
-```
+![BLE 4가지 GAP 역할 — Broadcaster/Observer는 연결 없이 광고만 흐르고, Peripheral/Central은 양방향 connection을 맺는다](/images/blog/ble/diagrams/ch04-gap-roles.svg)
 
 ### Broadcaster
 
@@ -66,18 +60,9 @@ Central       X       O          O          O
 
 ### 동시 운영
 
-Bluetooth 4.1부터 *한 디바이스가 여러 역할을 동시에* 할 수 있습니다. 예를 들어 *BLE 메시 게이트웨이*는 한 칩으로 다음을 동시에 합니다.
+Bluetooth 4.1부터 *한 디바이스가 여러 역할을 동시에* 할 수 있습니다. 예를 들어 *BLE 메시 게이트웨이*는 한 칩으로 *Central(센서 쪽)*과 *Peripheral(스마트폰 쪽)*을 동시에 운영합니다.
 
-```text
-            ┌────────────┐
-센서 ──────►│           │◄────── 다른 센서
-(BLE)       │ 게이트웨이 │
-            │           │
-스마트폰◄───┤           │──────► 클라우드 (WiFi)
-(BLE)       └────────────┘
-
-게이트웨이 = Central (센서들과)  +  Peripheral (스마트폰에)
-```
+![BLE 게이트웨이 — 한 칩이 센서에는 Central, 스마트폰에는 Peripheral로 동시에 동작하고, WiFi로 클라우드와 연결](/images/blog/ble/diagrams/ch04-gateway-topology.svg)
 
 칩 사양에 *동시 connection 개수*가 적혀 있습니다. Nordic nRF52840 NimBLE은 *최대 20개 동시 연결*, ESP32-C3 NimBLE은 *기본 3개, 최대 9개*까지 가능합니다.
 

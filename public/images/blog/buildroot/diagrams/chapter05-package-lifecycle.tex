@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  phase/.style={cls, minimum width=24mm, minimum height=14mm, align=center, font=\sffamily\small, inner sep=3pt, text width=22mm},
+  s1/.style={phase, draw=tealbord, fill=tealfill},
+  s2/.style={phase, draw=clibord, fill=clifill},
+  s3/.style={phase, draw=absbord, fill=absfill},
+  s4/.style={phase, draw=impbord, fill=impfill},
+  s5/.style={phase, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  stamp/.style={font=\sffamily\scriptsize\ttfamily, text=mutec, align=center, text width=24mm},
+  cmd/.style={font=\sffamily\footnotesize\ttfamily, text=inkc, align=center, text width=24mm}
+]
+
+\node[s1] (src)   at (0, 4)    {\textbf{source}\\[2pt]\footnotesize tarball fetch\\+ hash 검증};
+\node[s1] (ext)   at (3.2, 4)  {\textbf{extract}\\[2pt]\footnotesize tar xf\\into \texttt{output/build/}};
+\node[s2] (pat)   at (6.4, 4)  {\textbf{patch}\\[2pt]\footnotesize 0001-*.patch\\(번호 순)};
+\node[s3] (cfg)   at (9.6, 4)  {\textbf{configure}\\[2pt]\footnotesize \texttt{./configure}\\or \texttt{cmake -B}};
+\node[s4] (bld)   at (12.8, 4) {\textbf{build}\\[2pt]\footnotesize \texttt{make all}\\cross-compile};
+\node[s5] (ins)   at (16, 4)   {\textbf{install}\\[2pt]\footnotesize staging + target\\\texttt{DESTDIR=}};
+
+\draw[flow] (src) -- (ext);
+\draw[flow] (ext) -- (pat);
+\draw[flow] (pat) -- (cfg);
+\draw[flow] (cfg) -- (bld);
+\draw[flow] (bld) -- (ins);
+
+\node[cmd] at (src.north)  [above=2mm] {\texttt{<pkg>-source}};
+\node[cmd] at (ext.north)  [above=2mm] {\texttt{<pkg>-extract}};
+\node[cmd] at (pat.north)  [above=2mm] {\texttt{<pkg>-patch}};
+\node[cmd] at (cfg.north)  [above=2mm] {\texttt{<pkg>-configure}};
+\node[cmd] at (bld.north)  [above=2mm] {\texttt{<pkg>-build}};
+\node[cmd] at (ins.north)  [above=2mm] {\texttt{<pkg>-install}};
+
+\node[stamp] at (src.south)  [below=2mm] {.stamp\_downloaded};
+\node[stamp] at (ext.south)  [below=2mm] {.stamp\_extracted};
+\node[stamp] at (pat.south)  [below=2mm] {.stamp\_patched};
+\node[stamp] at (cfg.south)  [below=2mm] {.stamp\_configured};
+\node[stamp] at (bld.south)  [below=2mm] {.stamp\_built};
+\node[stamp] at (ins.south)  [below=2mm] {.stamp\_target\_installed};
+
+\node[font=\sffamily\footnotesize, text=mutec, anchor=center] at (8, -1.6)
+  {각 단계는 \texttt{output/build/<pkg>-<ver>/.stamp\_*}로 표시.\,stamp 파일을 삭제하면 그 단계부터 재실행};
+
+\end{tikzpicture}
+\end{document}

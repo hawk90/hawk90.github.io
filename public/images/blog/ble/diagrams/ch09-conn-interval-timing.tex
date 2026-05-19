@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=10mm, y=6mm,
+  axis/.style={draw=edgec, line width=0.4pt},
+  evt/.style={draw=hibord, line width=1.0pt, fill=hifill!70},
+  evtp/.style={draw=impbord, line width=1.0pt, fill=impfill!70},
+  marker/.style={draw=edgesc, line width=0.3pt, dotted}
+]
+
+\node[font=\sffamily\bfseries\footnotesize, anchor=south] at (6, 5.8)
+  {Connection Interval = 50 ms, Slave Latency = 4, Supervision Timeout = 5 s};
+
+% Master row
+\node[font=\sffamily\footnotesize\bfseries, text=hibord, anchor=east] at (-0.8, 3.6) {Master};
+\draw[axis] (0, 3.6) -- (12.5, 3.6);
+\foreach \x in {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} {
+  \fill[evt] (\x, 3.3) rectangle (\x+0.2, 3.9);
+}
+
+% Peripheral row
+\node[font=\sffamily\footnotesize\bfseries, text=impbord, anchor=east] at (-0.8, 1.5) {Peripheral};
+\draw[axis] (0, 1.5) -- (12.5, 1.5);
+\foreach \x in {0, 5, 10} {
+  \fill[evtp] (\x, 1.2) rectangle (\x+0.2, 1.8);
+}
+
+% Time markers — below the rows, well spaced
+\foreach \x/\t in {0/0, 2.5/125, 5/250, 7.5/375, 10/500} {
+  \draw[marker] (\x, 0.3) -- (\x, 4.5);
+  \node[font=\tiny, text=mutec, anchor=north] at (\x, 0.3) {\t\,ms};
+}
+
+% Skip span annotation (separated from rows)
+\draw[<->, draw=warnbord, line width=0.5pt] (0.3, -0.7) -- (4.9, -0.7);
+\node[font=\sffamily\scriptsize, text=warnbord, anchor=south] at (2.6, -0.7)
+  {peripheral skip (latency = 4)};
+
+% Interval span annotation
+\draw[<->, draw=edgec, line width=0.4pt] (0.3, 4.7) -- (1.0, 4.7);
+\node[font=\sffamily\scriptsize, anchor=south] at (0.65, 4.7) {50 ms};
+
+% Constraint equation
+\node[font=\sffamily\scriptsize, text=mutec, anchor=north west, align=left] at (-0.8, -2.5)
+  {Constraint: Supervision Timeout $>$ (1 + Latency) $\times$ Interval $\times$ 2 \\[3pt]
+   \quad\quad = (1 + 4) $\times$ 50 ms $\times$ 2 = 500 ms $<$ 5000 ms \quad ✓};
+
+\end{tikzpicture}
+\end{document}

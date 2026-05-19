@@ -186,6 +186,10 @@ output/
 - **`output/build/<pkg>-<version>/`** — 해당 패키지의 *압축 풀린 소스*. 빌드 실패 디버깅 시 들어갑니다.
 - **`output/images/`** — flash하거나 QEMU에 던질 최종 산출물.
 
+네 디렉터리의 역할을 한 장으로 정리하면 다음과 같습니다.
+
+![output 디렉터리 4구역](/images/blog/buildroot/diagrams/chapter02-output-layout.svg)
+
 빌드를 처음부터 다시 시작하고 싶을 때는 `make clean`이 *target만* 지우고, `output/host/`(toolchain)는 남깁니다. 정말 깨끗하게는 `rm -rf output/` 또는 `make distclean`을 씁니다.
 
 ## dl/ — 다운로드 캐시
@@ -260,6 +264,10 @@ output/images/rootfs.<format>
                           + u-boot.img (boot/uboot/)
                           + sdcard.img (board/<board>/genimage.cfg)
 ```
+
+같은 흐름을 그림으로 보면 다음과 같습니다.
+
+![Buildroot 빌드 데이터 흐름](/images/blog/buildroot/diagrams/chapter02-build-flow.svg)
 
 이 흐름 한 장이 머릿속에 들어가면 빌드 어디서 실패해도 *어느 디렉터리를 봐야 하는지* 즉시 짚을 수 있습니다.
 

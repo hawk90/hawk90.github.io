@@ -34,32 +34,7 @@ BLE 보안은 *세 단계*로 보면 헷갈리지 않습니다. 첫째, *Pairing
 
 이후 LL이 *Encryption Start* 절차를 돌려 링크가 암호화됩니다. *Legacy Pairing*은 3·4·5단계에서 ECDH 없이 *TK(Temporary Key)*만 쓰기 때문에 수동 sniffer로 *키를 복원*당할 수 있습니다. 2014년 BLE 4.2부터 추가된 *LE Secure Connections*는 ECDH로 수동 공격을 차단합니다.
 
-```text
-[Pairing 흐름 - LE Secure Connections]
-Initiator                              Responder
-   │                                       │
-   ├─── Pairing Request ──────────────────►│
-   │◄── Pairing Response ──────────────────┤
-   │                                       │
-   ├─── Public Key (Pka, 64B) ────────────►│
-   │◄── Public Key (Pkb, 64B) ─────────────┤
-   │                                       │
-   │    (양쪽 각각 ECDH 계산)               │
-   │    DHKey = ECDH(SK_local, PK_remote)  │
-   │                                       │
-   │◄── Pairing Confirm (Cb) ──────────────┤
-   ├─── Pairing Random (Na) ──────────────►│
-   │◄── Pairing Random (Nb) ───────────────┤
-   │                                       │
-   │    (association model 별 검증)         │
-   │                                       │
-   ├─── DHKey Check (Ea) ─────────────────►│
-   │◄── DHKey Check (Eb) ──────────────────┤
-   │                                       │
-   ├─── LL_ENC_REQ ───────────────────────►│
-   │◄── LL_ENC_RSP ────────────────────────┤
-   │    (AES-CCM 암호화 시작)               │
-```
+![LE Secure Connections pairing — public key exchange, confirm/random, DHKey check, encryption start](/images/blog/ble/diagrams/ch07-pairing-lesc-seq.svg)
 
 여기서 *association model*은 4·5단계의 *Pairing Confirm/Random*을 어떤 방식으로 검증할지를 결정합니다. I/O capability를 양쪽이 신고하면 *Volume 3 Part H Table 2.8*의 매트릭스로 자동 결정됩니다.
 

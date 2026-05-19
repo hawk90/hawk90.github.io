@@ -27,23 +27,9 @@ draft: false
 | Slave Latency | interval 수 | 0 ~ 499 | peripheral이 *깨어나지 않아도* 되는 interval 수 |
 | Supervision Timeout | 10 ms (raw × 10 ms) | 10 ~ 3200 (= 100 ms ~ 32 s) | 마지막 packet 후 이 시간 무응답이면 연결 끊김 판정 |
 
-```text
-[Connection Interval = 50ms, Slave Latency = 4, Supervision Timeout = 5s]
+![Connection interval timing — Master 50 ms cadence, Peripheral skips 4 (latency=4)](/images/blog/ble/diagrams/ch09-conn-interval-timing.svg)
 
-Master:      ▌   ▌   ▌   ▌   ▌   ▌   ▌   ▌   ▌   ▌   ▌   ▌
-             0   50  100 150 200 250 300 350 400 450 500 550 ms
-             ↑   ↑                       ↑                       
-             깨어남                    데이터 송신                
-                                                                
-Peripheral: ▌                       ▌                       ▌
-            0                       250                     500 ms
-            (4 interval skip 후 깨어남, latency=4)            
-
-만약 250ms 슬롯에서 packet 손실:
-  → 다음 슬롯 500ms도 손실
-  → 손실 누적이 5초(5000ms)를 넘기면 연결 끊김
-  → 따라서 5초 < supervision_timeout 이면 안전
-```
+만약 250 ms 슬롯에서 packet 손실이 누적되어 *5 s*를 넘기면 연결이 끊긴다고 판정합니다. *5 s < supervision_timeout*이면 안전입니다.
 
 이 세 숫자 사이의 *제약*은 다음 식 하나로 정리됩니다.
 
@@ -145,25 +131,7 @@ bt_le_set_chan_map(chmap_avoid_wifi);
 
 BLE 4.0의 *LL payload*는 *최대 27 byte*였습니다. ATT MTU 23 byte와 비슷한 한계로 *처리량이 처참*했습니다. BLE 4.2의 *Data Length Extension*은 LL payload를 *최대 251 byte*로 늘렸습니다.
 
-```text
-[LL packet 구조 - DLE 적용 전후]
-
-Pre-DLE (BLE 4.0/4.1):
-┌────┬────────────┬─────────────┬─────┐
-│ 1B │ 1B         │ 0~27B       │ 3B  │
-│ LL │ Length     │ LL payload  │ CRC │
-│ Hdr│            │             │     │
-└────┴────────────┴─────────────┴─────┘
-total ≈ 33 B per packet
-
-DLE (BLE 4.2+):
-┌────┬────────────┬─────────────────────────────┬─────┐
-│ 1B │ 1B         │ 27~251B                     │ 3B  │
-│ LL │ Length     │ LL payload                  │ CRC │
-│ Hdr│            │                             │     │
-└────┴────────────┴─────────────────────────────┴─────┘
-total ≈ 33~258 B per packet
-```
+![LL packet — Pre-DLE 27 B payload limit vs DLE 251 B (BLE 4.2+)](/images/blog/ble/diagrams/ch09-ll-packet-dle.svg)
 
 DLE는 LL Length Update procedure로 *연결 중*에 협상됩니다.
 

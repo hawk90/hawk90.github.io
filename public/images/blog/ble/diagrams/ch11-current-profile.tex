@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=10mm, y=6mm,
+  axis/.style={draw=edgec, line width=0.5pt, -{Stealth[length=2mm]}},
+  pulse/.style={draw=hibord, line width=1.0pt, fill=hifill!80},
+  sleepline/.style={draw=impbord, line width=0.9pt},
+  marker/.style={draw=edgesc, line width=0.3pt, dashed},
+  lbl/.style={font=\sffamily\scriptsize, anchor=east}
+]
+
+\node[font=\sffamily\bfseries\footnotesize, anchor=south] at (5.5, 5.0)
+  {BLE peripheral current — 100 ms adv interval};
+
+% Axes
+\draw[axis] (0, 0) -- (12, 0) node[font=\tiny, anchor=west] {time};
+\draw[axis] (0, 0) -- (0, 4.5) node[font=\tiny, anchor=south] {current};
+
+% Y ticks
+\node[lbl] at (-0.1, 0.3) {3 µA};
+\node[lbl] at (-0.1, 4.0) {10 mA};
+\draw[draw=edgesc, line width=0.3pt, dotted] (0, 4.0) -- (12, 4.0);
+\draw[draw=edgesc, line width=0.3pt, dotted] (0, 0.3) -- (12, 0.3);
+
+% Sleep baseline + two TX bursts at 100ms and 200ms
+\draw[sleepline] (0, 0.3) -- (2, 0.3);
+\fill[pulse] (2, 0.3) rectangle (2.4, 4.0);
+\draw[sleepline] (2.4, 0.3) -- (6, 0.3);
+\fill[pulse] (6, 0.3) rectangle (6.4, 4.0);
+\draw[sleepline] (6.4, 0.3) -- (10, 0.3);
+\fill[pulse] (10, 0.3) rectangle (10.4, 4.0);
+\draw[sleepline] (10.4, 0.3) -- (12, 0.3);
+
+% X ticks
+\foreach \x/\t in {0/0, 2/100, 6/200, 10/300} {
+  \draw[marker] (\x, -0.4) -- (\x, 4.7);
+  \node[font=\tiny, anchor=north] at (\x, -0.4) {\t\,ms};
+}
+
+% Annotations
+\node[font=\tiny, text=hibord, anchor=south, align=center] at (2.2, 4.1) {TX/RX \\ $\sim$ 10 mA};
+\node[font=\tiny, text=impbord, anchor=south] at (4.5, 0.4) {sleep $\sim$ 3 µA};
+
+% Average note
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west, align=left] at (0, -1.5)
+  {평균 $\approx$ (10 mA $\times$ 2 ms + 3 µA $\times$ 98 ms) / 100 ms $\approx$ 200 µA};
+
+\end{tikzpicture}
+\end{document}

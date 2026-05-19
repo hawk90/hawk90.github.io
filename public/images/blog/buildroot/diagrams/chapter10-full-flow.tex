@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cstep/.style={cls, minimum width=42mm, minimum height=16mm, align=center, font=\sffamily\small, inner sep=4pt, text width=40mm},
+  defc/.style={cstep, draw=clibord, fill=clifill},
+  buildc/.style={cstep, draw=impbord, fill=impfill},
+  imgc/.style={cstep, draw=absbord, fill=absfill},
+  ddc/.style={cstep, draw=conbord, fill=confill},
+  bootc/.style={cstep, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  cmd/.style={font=\sffamily\scriptsize\ttfamily, text=mutec, align=center, text width=42mm, anchor=north}
+]
+
+\node[defc]  (def)  at (0, 6)     {\textbf{defconfig}\\[2pt]\footnotesize \texttt{acme\_bbb\_defconfig}\\[2pt]\footnotesize 외부 트리에서 관리};
+\node[buildc](bld)  at (5.0, 6)   {\textbf{make}\\[2pt]\footnotesize cross-toolchain,\\[2pt]\footnotesize kernel, U-Boot, BusyBox};
+\node[imgc]  (img)  at (10.0, 6)  {\textbf{post-image}\\[2pt]\footnotesize \texttt{genimage} → \\[2pt]\footnotesize \texttt{sdcard.img} (401 MB)};
+\node[ddc]   (dd)   at (15.0, 6)  {\textbf{dd}\\[2pt]\footnotesize \texttt{dd if=sdcard.img}\\[2pt]\footnotesize \texttt{of=/dev/sdb bs=4M}};
+\node[bootc] (boot) at (20.0, 6)  {\textbf{Power on}\\[2pt]\footnotesize USER 버튼 + 전원\\[2pt]\footnotesize SD 우선 부팅};
+
+\draw[flow] (def) -- (bld);
+\draw[flow] (bld) -- (img);
+\draw[flow] (img) -- (dd);
+\draw[flow] (dd) -- (boot);
+
+\node[cmd] at ([yshift=-6mm]def.south)  {Ch 3,\,6};
+\node[cmd] at ([yshift=-6mm]bld.south)  {Ch 5,\,7,\,9};
+\node[cmd] at ([yshift=-6mm]img.south)  {Ch 7,\,8};
+\node[cmd] at ([yshift=-6mm]dd.south)   {host에서 실행};
+\node[cmd] at ([yshift=-6mm]boot.south) {\texttt{acme-bbb login:}};
+
+% Sub-flow under boot — boot chain on the board
+\node[cls, draw=nodebord, fill=nodefill, minimum width=18mm, minimum height=8mm, font=\sffamily\scriptsize, align=center]
+  (br) at (14.5, 1.6) {BootROM};
+\node[cls, draw=nodebord, fill=nodefill, minimum width=14mm, minimum height=8mm, font=\sffamily\scriptsize, align=center]
+  (mlo) at (16.7, 1.6) {MLO};
+\node[cls, draw=nodebord, fill=nodefill, minimum width=18mm, minimum height=8mm, font=\sffamily\scriptsize, align=center]
+  (ub) at (18.9, 1.6) {U-Boot};
+\node[cls, draw=nodebord, fill=nodefill, minimum width=18mm, minimum height=8mm, font=\sffamily\scriptsize, align=center]
+  (kn) at (21.1, 1.6) {Linux};
+
+\draw[arr] (br) -- (mlo);
+\draw[arr] (mlo) -- (ub);
+\draw[arr] (ub) -- (kn);
+\draw[flow, dashed] ([yshift=-6mm]boot.south) -- (kn.north);
+
+\end{tikzpicture}
+\end{document}

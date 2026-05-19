@@ -75,23 +75,7 @@ static void le_phy_updated(struct bt_conn *conn,
 | S=2 | 1/2 (각 bit 2 symbol) | 500 kbps | +6 dB ≈ 2× 거리 |
 | S=8 | 1/8 (각 bit 8 symbol) | 125 kbps | +12 dB ≈ 4× 거리 |
 
-```text
-[Coded PHY 패킷 구조]
-
-1M / 2M:
-┌──────┬──────┬─────────────┬───┐
-│ Pre  │ AA   │ PDU + MIC   │ CRC│
-│ 1/2B │ 4B   │ 2~258B      │ 3B │
-└──────┴──────┴─────────────┴───┘
-
-Coded:
-┌──────┬─────────────┬──────┬─────────────┬───┬──┐
-│ Pre  │ AA + CI + TERM1 │ PDU + CRC + TERM2     │
-│ 10B  │ S=8 coded       │ S=2 또는 S=8 coded     │
-└──────┴─────────────────┴────────────────────────┘
-
-CI=Coding Indicator: S=8 (S2=0) or S=2 (S2=1)
-```
+![Coded PHY packet — 10 B preamble, AA/CI/TERM1 in S=8, PDU/CRC/TERM2 in S=2 or S=8](/images/blog/ble/diagrams/ch10-coded-phy-packet.svg)
 
 ```c
 // nRF Connect SDK - Coded PHY S=8
@@ -109,30 +93,7 @@ Coded PHY는 *광고에도 적용 가능*합니다(*Extended Advertising만*). l
 
 Legacy Advertising은 *31 byte payload* 한계로 service UUID 128-bit + 이름 + manufacturer data를 모두 못 담는 경우가 많았습니다. Extended Advertising은 *secondary channel*에 *최대 254 B*를 싣고, *chained PDU*로 *최대 1650 B*까지 누적합니다.
 
-```text
-[Extended Advertising 흐름]
-
-Primary advertising channel (37/38/39):
-  ┌──────────────────┐
-  │ ADV_EXT_IND      │
-  │ (헤더 + 포인터)   │ ──┐
-  └──────────────────┘   │ "data is on channel X at time T"
-                          │
-Secondary advertising channel (0~36):
-                          ▼
-  ┌──────────────────┐
-  │ AUX_ADV_IND      │
-  │ (~254 B data)    │ ──┐
-  └──────────────────┘   │ "more data..."
-                          │
-                          ▼
-  ┌──────────────────┐
-  │ AUX_CHAIN_IND    │
-  │ (~254 B data)    │ ──┐
-  └──────────────────┘   │
-                          ▼
-  ... (최대 6개까지 chain, 총 ~1650 B)
-```
+![Extended Advertising — ADV_EXT_IND on primary, AUX_ADV_IND + AUX_CHAIN_IND on secondary, up to ~1650 B](/images/blog/ble/diagrams/ch10-extended-adv-chain.svg)
 
 ```c
 // nRF Connect SDK - Extended Advertising
@@ -162,23 +123,7 @@ int main(void)
 
 Extended Advertising 위에 *Periodic Advertising*이 올라갑니다. 비콘이 *정확한 주기로 데이터를 송출*하면 scanner가 *한 번 sync*한 후 그 슬롯에만 깨어나서 받을 수 있습니다. *극단적 저전력 비콘 수신*에 쓰입니다.
 
-```text
-[Periodic Advertising sync 절차]
-
-1. Scanner가 ADV_EXT_IND를 발견하고 SyncInfo를 봄
-   ┌──────────────┐
-   │ SyncInfo:    │
-   │  - Interval  │  (예: 100 ms)
-   │  - Offset    │  (다음 periodic 발생까지 µs)
-   │  - PHY       │
-   │  - SID       │  (advertising Set ID)
-   └──────────────┘
-
-2. Scanner가 LE Periodic Advertising Create Sync 요청
-
-3. 이후 scanner는 매 100ms마다 짧게 깨어나서 periodic data 수신
-   광고 디바이스는 모름 (one-way broadcast)
-```
+![Periodic Advertising sync — scanner sees SyncInfo in ADV_EXT_IND, then wakes only at sync slot](/images/blog/ble/diagrams/ch10-periodic-adv-sync.svg)
 
 ```c
 // nRF Connect SDK - Periodic Advertising sync
@@ -210,20 +155,7 @@ BLE 5.2의 *LE Audio*는 BLE를 *Bluetooth Classic A2DP의 대체*로 끌어 올
 | Connected Isochronous Stream | CIS | 양방향 단일 연결 audio | 헤드셋, 보청기 |
 | Broadcast Isochronous Stream | BIS | one-to-many broadcast audio | 공항, 강당 (Auracast) |
 
-```text
-[CIS - 두 ear bud에 동시 송신]
-
-Phone ──┬── CIS_1 ────► Left ear bud
-        └── CIS_2 ────► Right ear bud
-        (같은 CIG = CIS Group, 동기화 보장)
-
-[BIS - Auracast broadcast]
-
-Stadium ───┬───► All paired headphones
-broadcast  │     (sub-second sync)
-TX         ├───► Hearing aids
-           └───► Tour guide receivers
-```
+![LE Audio CIS vs BIS — paired audio to two ear buds vs Auracast broadcast](/images/blog/ble/diagrams/ch10-le-audio-cis-bis.svg)
 
 *LC3 (Low Complexity Communications Codec)*가 새 표준 codec입니다. SBC와 AAC를 대체하며 *훨씬 낮은 비트레이트에서 더 좋은 음질*을 냅니다.
 
@@ -258,20 +190,7 @@ BLE 5.1의 *Direction Finding*은 *위치 추적*을 새 차원으로 끌어 올
 | AoA | 수신측 (예: 게이트웨이) | tag 위치 추적 (locator beacons) |
 | AoD | 송신측 (예: 비콘) | smartphone 위치 표시 (실내 navigation) |
 
-```text
-[AoA - 4개 안테나 array가 도착 각도 측정]
-
-Transmitter (BLE tag, CTE 송신):
-                     │
-                     │
-                     ▼  (CTE = Constant Tone Extension)
-                     
-       ┌─Ant0─Ant1─Ant2─Ant3─┐
-       │  4-element array     │
-       │                      │  IQ 샘플의 phase difference
-       │  CPU: AoA 계산       │  → 도착 각도 θ
-       └──────────────────────┘
-```
+![AoA — 4-element antenna array measures IQ phase difference of the incoming CTE](/images/blog/ble/diagrams/ch10-aoa-array.svg)
 
 *CTE(Constant Tone Extension)*은 packet 끝에 *modulation 없는 constant 신호*를 더 보내는 것입니다. 수신측이 안테나를 *switching*하며 *IQ phase difference*를 측정합니다.
 
@@ -295,22 +214,7 @@ bt_df_adv_cte_tx_enable(adv);
 
 BLE 5.4의 *EAD*는 광고 페이로드 자체를 *암호화*합니다. 비콘이 *민감한 정보*(예: 일련번호, 위치)를 광고하고 싶을 때, 키를 공유한 디바이스만 해독합니다.
 
-```text
-[EAD 구조]
-
-Plain advertising:
-  ┌─────────────────────────────┐
-  │ Anyone can read everything   │
-  └─────────────────────────────┘
-
-Encrypted advertising (BLE 5.4):
-  ┌─────────────┬─────────────────┐
-  │ Public info │ Encrypted blob   │
-  │ (flag, UUID)│ (AES-CCM)        │
-  └─────────────┴─────────────────┘
-                  ↑
-                only key holders decrypt
-```
+![EAD (BLE 5.4) — public info in clear, sensitive payload encrypted with AES-CCM](/images/blog/ble/diagrams/ch10-ead-structure.svg)
 
 응용은 *Find My Network* 같은 시스템입니다. 분실 디바이스가 광고하는 데이터가 *암호화*되어 있어 *주인만 해독*하고, 다른 사람들의 폰은 *암호문을 그냥 forward*만 합니다.
 

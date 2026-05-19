@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  role/.style={cls, minimum width=34mm, minimum height=14mm, align=center},
+  rcap/.style={font=\sffamily\bfseries\small, text=inkc},
+  rsub/.style={font=\sffamily\footnotesize, text=mutec},
+  signal/.style={-{Stealth[length=2.2mm]}, draw=conbord, line width=0.6pt, dashed},
+  link/.style={-{Stealth[length=2.6mm]}, draw=edgec, line width=0.7pt},
+  panel/.style={rounded corners=3pt, draw=groupbord, line width=0.4pt, fill=neutfill, inner sep=4pt}
+]
+
+% ── Top row: Broadcaster ─ Observer ─────────────────────
+\node[role, fill=clifill, draw=clibord] (bcast) at (-3.2, 2.8) {
+  {\bfseries Broadcaster}\\[2pt]
+  {\footnotesize 광고만, 연결 없음}\\[1pt]
+  {\footnotesize iBeacon · 센서}
+};
+
+\node[role, fill=tealfill, draw=tealbord] (obs) at (3.2, 2.8) {
+  {\bfseries Observer}\\[2pt]
+  {\footnotesize 스캔만, 응답 없음}\\[1pt]
+  {\footnotesize 비콘 수집기}
+};
+
+% Bcast → Obs (광고 일방향)
+\draw[signal] (bcast.east) -- node[above, font=\sffamily\footnotesize, text=mutec]{ADV (one-way)} (obs.west);
+
+% ── Bottom row: Peripheral ─ Central ────────────────────
+\node[role, fill=impfill, draw=impbord] (peri) at (-3.2, -1.0) {
+  {\bfseries Peripheral}\\[2pt]
+  {\footnotesize 광고 + 연결 수락}\\[1pt]
+  {\footnotesize 시계 · 잠금 · HID}
+};
+
+\node[role, fill=hifill, draw=hibord] (cent) at (3.2, -1.0) {
+  {\bfseries Central}\\[2pt]
+  {\footnotesize 스캔 + 연결 시작}\\[1pt]
+  {\footnotesize 스마트폰 · 게이트웨이}
+};
+
+% Peri ↔ Cent (양방향 connection)
+\draw[link, <->] (peri.east) -- node[above, font=\sffamily\footnotesize, text=mutec]{Connection} node[below, font=\sffamily\footnotesize, text=mutec]{(GATT · ATT)} (cent.west);
+
+% Section labels (left side)
+\node[rsub, anchor=east] at (-5.2, 2.8) {Connectionless};
+\node[rsub, anchor=east] at (-5.2, -1.0) {Connected};
+
+% Horizontal divider
+\draw[draw=groupbord, line width=0.3pt, dashed] (-6.4, 0.9) -- (6.4, 0.9);
+
+\end{tikzpicture}
+\end{document}

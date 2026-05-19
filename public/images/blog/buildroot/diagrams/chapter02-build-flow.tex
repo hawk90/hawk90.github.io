@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cstep/.style={cls, minimum width=78mm, minimum height=11mm, align=center, font=\sffamily\small, inner sep=4pt},
+  source/.style={cstep, draw=clibord, fill=clifill},
+  config/.style={cstep, draw=absbord, fill=absfill},
+  cache/.style={cstep, draw=tealbord, fill=tealfill},
+  build/.style={cstep, draw=impbord, fill=impfill},
+  target/.style={cstep, draw=prpbord, fill=prpfill},
+  image/.style={cstep, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  side/.style={font=\sffamily\footnotesize, text=mutec, anchor=west}
+]
+
+\node[source] (def) at (0, 9.6)  {\texttt{configs/<board>\_defconfig}\\[2pt]\footnotesize 시작점이 되는 defconfig};
+\node[config] (cfg) at (0, 7.2)  {\texttt{.config}\\[2pt]\footnotesize Kconfig 전개 결과 (수천 줄)};
+\node[cache]  (dl)  at (0, 4.8)  {\texttt{dl/<pkg>/<tarball>}\\[2pt]\footnotesize 다운로드 캐시, 없으면 fetch};
+\node[build]  (bd)  at (0, 2.4)  {\texttt{output/build/<pkg>-<ver>/}\\[2pt]\footnotesize 압축 해제 + patch + configure + build};
+\node[target] (tg)  at (0, 0)    {\texttt{output/target/}\\[2pt]\footnotesize 조립 중인 staged rootfs};
+\node[image]  (im)  at (0, -2.4) {\texttt{output/images/}\\[2pt]\footnotesize Image, rootfs.ext4, sdcard.img};
+
+\node[side] at (def.east) {\,\texttt{make <board>\_defconfig}};
+\node[side] at (cfg.east) {\,\texttt{make}};
+\node[side] at (dl.east)  {\,wget / git fetch};
+\node[side] at (bd.east)  {\,cross-compile (\texttt{TARGET\_CC})};
+\node[side] at (tg.east)  {\,\texttt{fs/<format>/} packagers};
+\node[side] at (im.east)  {\,+ kernel, U-Boot, genimage};
+
+\draw[flow] (def) -- (cfg);
+\draw[flow] (cfg) -- (dl);
+\draw[flow] (dl)  -- (bd);
+\draw[flow] (bd)  -- (tg);
+\draw[flow] (tg)  -- (im);
+
+\end{tikzpicture}
+\end{document}

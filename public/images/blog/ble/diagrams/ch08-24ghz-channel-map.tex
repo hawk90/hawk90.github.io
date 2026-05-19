@@ -1,0 +1,65 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1mm, y=4mm,
+  axis/.style={draw=edgec, line width=0.4pt},
+  tick/.style={draw=edgec, line width=0.3pt},
+  ticklbl/.style={font=\tiny, text=mutec, anchor=north}
+]
+
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=south] at (50, 7.5)
+  {2.4 GHz ISM Band — BLE Advertising vs WiFi};
+
+% Y position: WiFi ch at y=4.5, BLE adv at y=2.5, data ch at y=1
+% X: 2400~2500 MHz mapped to 0~100 mm (1 MHz = 1 mm)
+
+% Frequency axis
+\draw[axis] (0, 0) -- (100, 0);
+\foreach \mhz/\x in {2400/0, 2420/20, 2440/40, 2460/60, 2480/80, 2500/100} {
+  \draw[tick] (\x, 0) -- (\x, -0.3);
+  \node[ticklbl] at (\x, -0.3) {\mhz};
+}
+\node[font=\tiny, text=mutec, anchor=west] at (101, 0) {MHz};
+
+% WiFi channels (22 MHz wide centered at 2412, 2437, 2462)
+\node[font=\footnotesize\bfseries, text=conbord, anchor=east] at (-1, 4.5) {WiFi};
+\fill[confill, draw=conbord, line width=0.5pt, fill opacity=0.65]
+  (1, 4) rectangle (23, 5);
+\node[font=\tiny, text=conbord, anchor=center] at (12, 4.5) {ch 1 (2412)};
+\fill[confill, draw=conbord, line width=0.5pt, fill opacity=0.65]
+  (26, 4) rectangle (48, 5);
+\node[font=\tiny, text=conbord, anchor=center] at (37, 4.5) {ch 6 (2437)};
+\fill[confill, draw=conbord, line width=0.5pt, fill opacity=0.65]
+  (51, 4) rectangle (73, 5);
+\node[font=\tiny, text=conbord, anchor=center] at (62, 4.5) {ch 11 (2462)};
+
+% BLE adv channels (2 MHz wide at 2402, 2426, 2480)
+\node[font=\footnotesize\bfseries, text=hibord, anchor=east] at (-1, 2.5) {BLE adv};
+\fill[hifill, draw=hibord, line width=0.6pt]
+  (1, 2) rectangle (3, 3);
+\node[font=\tiny, text=hibord, anchor=south] at (2, 3) {37};
+\fill[hifill, draw=hibord, line width=0.6pt]
+  (25, 2) rectangle (27, 3);
+\node[font=\tiny, text=hibord, anchor=south] at (26, 3) {38};
+\fill[hifill, draw=hibord, line width=0.6pt]
+  (79, 2) rectangle (81, 3);
+\node[font=\tiny, text=hibord, anchor=south] at (80, 3) {39};
+
+% BLE data channels (37 channels at 2404, 2406, ..., skipping adv)
+\node[font=\footnotesize\bfseries, text=impbord, anchor=east] at (-1, 1) {BLE data};
+\foreach \ch/\mhz in {0/4, 1/6, 2/8, 3/10, 4/12, 5/14, 6/16, 7/18, 8/20, 9/22, 10/24, 11/28, 12/30, 13/32, 14/34, 15/36, 16/38, 17/40, 18/42, 19/44, 20/46, 21/48, 22/50, 23/52, 24/54, 25/56, 26/58, 27/60, 28/62, 29/64, 30/66, 31/68, 32/70, 33/72, 34/74, 35/76, 36/78} {
+  \fill[impfill, draw=impbord, line width=0.3pt]
+    (\mhz, 0.5) rectangle (\mhz+2, 1.5);
+}
+
+% Legend
+\node[font=\tiny, anchor=west, text=mutec] at (0, -2)
+  {37 (2402), 38 (2426), 39 (2480)는 WiFi 1/6/11 사이에 끼어 있어 충돌이 통계적으로 줄어듦};
+
+\end{tikzpicture}
+\end{document}

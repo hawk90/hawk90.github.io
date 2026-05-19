@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  src/.style={cls, fill=hifill, draw=hibord, minimum width=24mm, minimum height=12mm, font=\sffamily\bfseries\small},
+  dst/.style={cls, fill=impfill, draw=impbord, minimum width=24mm, minimum height=10mm, font=\sffamily\footnotesize}
+]
+
+% CIS panel (left)
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=south] at (-3, 4.2)
+  {CIS — bidirectional, paired audio};
+
+\node[src] (phone) at (-7, 2) {Phone};
+\node[dst] (le) at (-2, 3) {Left ear bud};
+\node[dst] (re) at (-2, 1) {Right ear bud};
+
+\draw[->, draw=hibord, line width=0.7pt] (phone.east) -- node[font=\tiny, above, sloped, text=hibord]{CIS\_1} (le.west);
+\draw[->, draw=hibord, line width=0.7pt] (phone.east) -- node[font=\tiny, below, sloped, text=hibord]{CIS\_2} (re.west);
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=center, text width=50mm] at (-4.5, -0.5)
+  {같은 CIG (CIS Group) — 두 ear bud 동기화 보장};
+
+% Divider
+\draw[draw=groupbord, line width=0.4pt, dashed] (1.5, 4.5) -- (1.5, -2);
+
+% BIS panel (right)
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=south] at (8, 4.2)
+  {BIS — one-to-many broadcast (Auracast)};
+
+\node[src, fill=conbord!30, draw=conbord] (tx) at (3.5, 1.5) {Auracast \\ TX};
+\node[dst] (hp) at (10, 3) {Paired headphones};
+\node[dst] (ha) at (10, 1.5) {Hearing aids};
+\node[dst] (tg) at (10, 0) {Tour guide receivers};
+
+\draw[->, draw=conbord, line width=0.7pt] (tx.east) -- (hp.west);
+\draw[->, draw=conbord, line width=0.7pt] (tx.east) -- (ha.west);
+\draw[->, draw=conbord, line width=0.7pt] (tx.east) -- (tg.west);
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=center, text width=58mm] at (7, -1)
+  {sub-second sync, no pairing — 공항·강당·박물관};
+
+\end{tikzpicture}
+\end{document}

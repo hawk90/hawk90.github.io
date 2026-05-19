@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+\node[actor]    (i) at (0,   0) {Initiator (Central)};
+\node[actorAlt] (r) at (10,  0) {Responder (Peripheral)};
+
+\draw[lifeline] (i) -- ++(0,-13.5);
+\draw[lifeline] (r) -- ++(0,-13.5);
+
+% Phase 1: feature exchange
+\draw[msgsync] (i |- 0,-1.0) -- node[msglabel]{Pairing Request (IO cap, AuthReq=SC+Bond)} (r |- 0,-1.0);
+\draw[msgret]  (r |- 0,-1.8) -- node[msglabel]{Pairing Response (협상 결과)} (i |- 0,-1.8);
+
+\node[seqnote, anchor=center, text width=80mm] at (5,-2.8)
+  {Phase 1: feature \& I/O capability exchange};
+
+% Phase 2: public key exchange
+\draw[msgsync] (i |- 0,-3.9) -- node[msglabel]{Public Key Pka (64 B)} (r |- 0,-3.9);
+\draw[msgret]  (r |- 0,-4.6) -- node[msglabel]{Public Key Pkb (64 B)} (i |- 0,-4.6);
+
+\node[seqnote, anchor=center, text width=80mm] at (5,-5.5)
+  {양쪽 각각 ECDH 계산: DHKey = ECDH(SK\_local, PK\_remote)};
+
+% Phase 3: confirm + random
+\draw[msgret]  (r |- 0,-6.7) -- node[msglabel]{Pairing Confirm Cb = f4(Pkb, Pka, Nb, rb)} (i |- 0,-6.7);
+\draw[msgsync] (i |- 0,-7.5) -- node[msglabel]{Pairing Random Na (16 B)} (r |- 0,-7.5);
+\draw[msgret]  (r |- 0,-8.2) -- node[msglabel]{Pairing Random Nb (16 B)} (i |- 0,-8.2);
+
+\node[seqnote, anchor=center, text width=80mm] at (5,-9.1)
+  {association model 별 사용자 검증 (Numeric Comparison 등)};
+
+% Phase 4: DHKey check
+\draw[msgsync] (i |- 0,-10.2) -- node[msglabel]{DHKey Check Ea = f6(\ldots)} (r |- 0,-10.2);
+\draw[msgret]  (r |- 0,-10.9) -- node[msglabel]{DHKey Check Eb = f6(\ldots)} (i |- 0,-10.9);
+
+% Encryption start
+\draw[msgsync] (i |- 0,-12.1) -- node[msglabel]{LL\_ENC\_REQ} (r |- 0,-12.1);
+\draw[msgret]  (r |- 0,-12.8) -- node[msglabel]{LL\_ENC\_RSP \quad (AES-CCM 시작)} (i |- 0,-12.8);
+
+\end{tikzpicture}
+\end{document}

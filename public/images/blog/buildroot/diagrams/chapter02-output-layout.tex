@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  col/.style={cls, minimum width=38mm, minimum height=14mm, align=center, font=\sffamily\small, inner sep=4pt, text width=36mm},
+  root/.style={cls, minimum width=32mm, minimum height=8mm, draw=nodebord, fill=nodefill, font=\sffamily\bfseries\small},
+  hostc/.style={col, draw=clibord, fill=clifill},
+  buildc/.style={col, draw=impbord, fill=impfill},
+  targetc/.style={col, draw=prpbord, fill=prpfill},
+  imagec/.style={col, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  ccap/.style={font=\sffamily\footnotesize, text=mutec, align=center, text width=38mm, anchor=north}
+]
+
+\node[root] (out) at (8.4, 8.6) {\texttt{output/}};
+
+\node[hostc]   (host)   at (0, 5)    {\textbf{host/}\\[2pt]\footnotesize cross-toolchain\\[2pt]\footnotesize (gcc, ld, …)};
+\node[buildc]  (build)  at (5.6, 5)  {\textbf{build/}\\[2pt]\footnotesize \texttt{<pkg>-<ver>/}\\[2pt]\footnotesize extracted sources};
+\node[targetc] (target) at (11.2, 5) {\textbf{target/}\\[2pt]\footnotesize staged rootfs\\[2pt]\footnotesize (\texttt{/etc}, \texttt{/usr}, …)};
+\node[imagec]  (images) at (16.8, 5) {\textbf{images/}\\[2pt]\footnotesize \texttt{Image}, \texttt{rootfs.ext4}\\[2pt]\footnotesize \texttt{sdcard.img}};
+
+\node[ccap] at ([yshift=-6mm]host.south)   {host에서 실행되는\\[2pt] cross-compiler가 거주};
+\node[ccap] at ([yshift=-6mm]build.south)  {모든 패키지가\\[2pt] 이 안에서 빌드};
+\node[ccap] at ([yshift=-6mm]target.south) {조립 중인 rootfs.\\[2pt] \texttt{fs/}의 입력};
+\node[ccap] at ([yshift=-6mm]images.south) {플래시·QEMU에\\[2pt] 던질 최종 산물};
+
+\draw[arr] (out) -- (host.north);
+\draw[arr] (out) -- (build.north);
+\draw[arr] (out) -- (target.north);
+\draw[arr] (out) -- (images.north);
+
+\draw[flow, dashed] (build.east) -- node[above, font=\sffamily\scriptsize, text=mutec, yshift=1pt]{install} (target.west);
+\draw[flow, dashed] (target.east) -- node[above, font=\sffamily\scriptsize, text=mutec, yshift=1pt]{\texttt{fs/<format>}} (images.west);
+
+\node[font=\sffamily\footnotesize, text=mutec, anchor=east] at (18.5, 1.8) {*.gitignore 대상};
+
+\end{tikzpicture}
+\end{document}

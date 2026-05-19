@@ -213,6 +213,10 @@ $ make BR2_EXTERNAL=~/work/br2-acme:~/work/br2-project-x \
 
 회사 공통은 `br2-acme/`에, 제품별 차이는 `br2-product-x/`에 두는 식의 *2단 레이어*가 실무에서 가장 흔한 구성입니다.
 
+세 층의 관계를 그림으로 보면 다음과 같습니다.
+
+![Buildroot 본체 + 회사 트리 + 제품 트리 3단 레이어](/images/blog/buildroot/diagrams/chapter06-br2-external-layers.svg)
+
 ## defconfig를 외부 트리로 옮기기
 
 기존 defconfig를 외부 트리로 옮길 때 자주 빠지는 함정은 *path가 외부 트리 안에 있어야 한다*는 점입니다.

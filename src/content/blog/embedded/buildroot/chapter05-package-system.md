@@ -354,6 +354,10 @@ $ make myapp-install
 
 단계별로 끊어 들어가면 *어느 단계*에서 실패하는지 명확합니다. 각 단계의 산물은 `output/build/myapp-<ver>/.stamp_<단계>`로 표시되므로, 해당 stamp 파일을 지우면 그 단계부터 재실행합니다.
 
+여섯 단계의 진행과 각 단계에 대응되는 make 타깃, stamp 파일을 한 장으로 정리하면 다음과 같습니다.
+
+![Buildroot 패키지 빌드 6단계](/images/blog/buildroot/diagrams/chapter05-package-lifecycle.svg)
+
 ## 자주 하는 실수
 
 - **`<NAME>_*` 변수 prefix를 패키지명과 안 맞춥니다.** 패키지가 *조용히 무시*됩니다. 항상 `make show-info | grep <name>`으로 인식 여부 확인.

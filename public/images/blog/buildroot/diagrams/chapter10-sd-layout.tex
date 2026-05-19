@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\small, anchor=south] at (8, 8.4) {sdcard.img — BeagleBone Black SD 카드 layout};
+
+% Outer image bar
+\draw[draw=nodebord, line width=0.5pt, fill=neutfill] (0, 5.6) rectangle (16, 7.2);
+
+% Boot (vfat) partition
+\draw[draw=clibord, line width=0.5pt, fill=clifill] (0.1, 5.7) rectangle (1.6, 7.1);
+\node[font=\sffamily\bfseries\small, text=inkc] at (0.85, 6.4) {boot};
+\node[font=\sffamily\scriptsize, text=mutec] at (0.85, 5.3) {16 MB};
+\node[font=\sffamily\scriptsize, text=mutec] at (0.85, 4.95) {vfat};
+
+% Rootfs (squashfs)
+\draw[draw=impbord, line width=0.5pt, fill=impfill] (1.7, 5.7) rectangle (9.6, 7.1);
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.65, 6.4) {rootfs (read-only)};
+\node[font=\sffamily\scriptsize, text=mutec] at (5.65, 5.3) {256 MB};
+\node[font=\sffamily\scriptsize, text=mutec] at (5.65, 4.95) {squashfs (zstd)};
+
+% Data (ext4)
+\draw[draw=prpbord, line width=0.5pt, fill=prpfill] (9.7, 5.7) rectangle (15.9, 7.1);
+\node[font=\sffamily\bfseries\small, text=inkc] at (12.8, 6.4) {data};
+\node[font=\sffamily\scriptsize, text=mutec] at (12.8, 5.3) {128 MB};
+\node[font=\sffamily\scriptsize, text=mutec] at (12.8, 4.95) {ext4 (rw)};
+
+% Partition type labels above
+\node[font=\sffamily\scriptsize, text=mutec, anchor=south] at (0.85, 7.3) {p1, type 0x0C};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=south] at (5.65, 7.3) {p2, type 0x83};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=south] at (12.8, 7.3) {p3, type 0x83};
+
+% Boot partition contents
+\node[font=\sffamily\footnotesize\bfseries, text=inkc, anchor=north west] at (0, 3.6) {boot.vfat 내용:};
+\node[draw=clibord, fill=clifill, rounded corners=2pt, font=\sffamily\scriptsize\ttfamily, inner sep=2pt, anchor=north west] at (0, 3) {MLO};
+\node[draw=clibord, fill=clifill, rounded corners=2pt, font=\sffamily\scriptsize\ttfamily, inner sep=2pt, anchor=north west] at (1.4, 3) {u-boot.img};
+\node[draw=clibord, fill=clifill, rounded corners=2pt, font=\sffamily\scriptsize\ttfamily, inner sep=2pt, anchor=north west] at (3.8, 3) {zImage};
+\node[draw=clibord, fill=clifill, rounded corners=2pt, font=\sffamily\scriptsize\ttfamily, inner sep=2pt, anchor=north west] at (5.6, 3) {am335x-boneblack.dtb};
+\node[draw=clibord, fill=clifill, rounded corners=2pt, font=\sffamily\scriptsize\ttfamily, inner sep=2pt, anchor=north west] at (10.4, 3) {uEnv.txt};
+
+% Rootfs contents
+\node[font=\sffamily\footnotesize\bfseries, text=inkc, anchor=north west] at (0, 1.8) {rootfs.squashfs 내용 (예):};
+\node[font=\sffamily\scriptsize\ttfamily, text=mutec, anchor=north west] at (0, 1.0)
+  {/usr/sbin/led-blink,\, /usr/bin/htop,\, /etc/hostname=acme-bbb,\, /etc/init.d/S99led-blink};
+
+% Boot flow caption (text only)
+\node[font=\sffamily\scriptsize, text=mutec, anchor=south] at (8, 8.0) {부팅 흐름: BootROM → MLO → u-boot.img → zImage};
+
+\end{tikzpicture}
+\end{document}

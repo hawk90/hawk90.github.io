@@ -19,6 +19,8 @@ draft: false
 
 이번 장에서는 *Attribute의 4가지 요소*, *Service/Characteristic 선언이 실제로 어떤 Attribute로 풀리는지*, *CCCD가 왜 별개의 Descriptor인지*, *MTU 협상으로 throughput을 어떻게 끌어올리는지*를 다룹니다.
 
+![GATT 3계층 — Service가 Characteristic을 묶고, Characteristic 옆에 Descriptor(CCCD 등)가 붙는다](/images/blog/ble/diagrams/ch05-gatt-hierarchy.svg)
+
 ## Attribute — 모든 것의 기본 단위
 
 GATT 트리의 *모든 노드*는 *Attribute*입니다. Attribute는 *4가지 요소*로 구성됩니다.

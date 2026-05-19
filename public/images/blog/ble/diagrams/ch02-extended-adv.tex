@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  pkt/.style={cls, minimum height=12mm, minimum width=26mm, font=\sffamily\small, align=center},
+  ch/.style={font=\sffamily\footnotesize, text=mutec},
+  hop/.style={-{Stealth[length=2.4mm]}, draw=conbord, line width=0.6pt}
+]
+
+% ── Legacy Adv (top) ────────────────────────────────────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.5, 3.6) {Legacy Advertising (4.0+)};
+
+\node[pkt, fill=clifill, draw=clibord] (lp1) at (-5.0, 2.4) {ADV\_IND\\[2pt]\footnotesize $\le 31$ B};
+\node[pkt, fill=clifill, draw=clibord] (lp2) at (-1.0, 2.4) {ADV\_IND\\[2pt]\footnotesize $\le 31$ B};
+\node[pkt, fill=clifill, draw=clibord] (lp3) at ( 3.0, 2.4) {ADV\_IND\\[2pt]\footnotesize $\le 31$ B};
+
+\node[ch, below=2pt of lp1] {ch 37 · 2402 MHz};
+\node[ch, below=2pt of lp2] {ch 38 · 2426 MHz};
+\node[ch, below=2pt of lp3] {ch 39 · 2480 MHz};
+
+\node[ch, anchor=west, text width=22mm, align=left] at (5.7, 2.4) {primary 채널 3개};
+
+% Divider
+\draw[draw=groupbord, line width=0.3pt, dashed] (-7.5, 0.6) -- (7.5, 0.6);
+
+% ── Extended Adv (bottom) ───────────────────────────────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.5, -0.2) {Extended Advertising (5.0+)};
+
+% Primary header (small)
+\node[pkt, fill=hifill, draw=hibord, minimum width=24mm] (ehp) at (-5.0, -1.8) {AUX\_ADV\_IND\\[2pt]\footnotesize header only};
+
+% Secondary payload (large)
+\node[pkt, fill=impfill, draw=impbord, minimum width=44mm, minimum height=14mm] (esp) at ( 2.0, -1.8) {AUX\_ADV payload\\[2pt]\footnotesize $\le 255$ B (chained $\le 1650$ B)};
+
+% Pointer
+\draw[hop] (ehp.east) -- node[above, font=\sffamily\footnotesize, text=mutec]{AuxPtr} (esp.west);
+
+\node[ch, anchor=north] at ([yshift=-2pt]ehp.south) {ch 37/38/39};
+\node[ch, anchor=north] at ([yshift=-2pt]esp.south) {ch 0\textendash 36};
+
+\end{tikzpicture}
+\end{document}

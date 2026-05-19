@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1mm,
+  fld/.style={cls, align=center, font=\sffamily\footnotesize, minimum height=14mm, inner sep=2pt},
+  capt/.style={font=\sffamily\scriptsize, text=mutec, anchor=north, align=center}
+]
+
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=south] at (60, 12) {HID Keyboard Input Report (8 byte)};
+
+\node[fld, fill=hifill, draw=hibord, minimum width=14mm] (mod) at (7, 0)
+  {Modifier \\[2pt] 1 B};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=14mm] (rsv) at (22, 0)
+  {Reserved \\[2pt] 1 B};
+\node[fld, fill=impfill, draw=impbord, minimum width=14mm] (k1) at (37, 0) {Key 1 \\[2pt] 1 B};
+\node[fld, fill=impfill, draw=impbord, minimum width=14mm] (k2) at (52, 0) {Key 2 \\[2pt] 1 B};
+\node[fld, fill=impfill, draw=impbord, minimum width=14mm] (k3) at (67, 0) {Key 3 \\[2pt] 1 B};
+\node[fld, fill=impfill, draw=impbord, minimum width=14mm] (k4) at (82, 0) {Key 4 \\[2pt] 1 B};
+\node[fld, fill=impfill, draw=impbord, minimum width=14mm] (k5) at (97, 0) {Key 5 \\[2pt] 1 B};
+\node[fld, fill=impfill, draw=impbord, minimum width=14mm] (k6) at (112, 0) {Key 6 \\[2pt] 1 B};
+
+\node[capt, anchor=north, text width=50mm] at (7, -8)
+  {bit0=LeftCtrl \\[1pt] bit1=LeftShift \\[1pt] bit2=LeftAlt ...};
+\node[capt, anchor=north, text width=80mm] at (75, -8)
+  {USB HID usage code \\[1pt] (0x04='a', 0x05='b', 0x1D='z', ...)};
+
+\end{tikzpicture}
+\end{document}

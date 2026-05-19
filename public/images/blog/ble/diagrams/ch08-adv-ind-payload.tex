@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1mm,
+  fld/.style={cls, align=center, font=\sffamily\footnotesize, minimum height=12mm, inner sep=2pt},
+  tlv/.style={cls, align=center, font=\sffamily\scriptsize, minimum height=8mm, inner sep=2pt},
+  capt/.style={font=\sffamily\scriptsize, text=mutec, anchor=west, align=left}
+]
+
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=south] at (60, 12)
+  {ADV\_IND payload — Legacy 31 byte};
+
+% Top: ADV_IND outline
+\node[fld, fill=clifill, draw=clibord, minimum width=18mm] (hdr) at (10, 0)
+  {Header \\[2pt] 2 B};
+\node[fld, fill=absfill, draw=absbord, minimum width=30mm] (adva) at (35, 0)
+  {AdvA \\[2pt] 6 B};
+\node[fld, fill=impfill, draw=impbord, minimum width=60mm] (advdata) at (85, 0)
+  {AdvData (TLV stream) \\[2pt] 0 $\sim$ 31 B};
+
+% TLV decomposition below
+\node[font=\sffamily\footnotesize, text=mutec, anchor=north] at (85, -6)
+  {AdvData = sequence of (length, type, data) TLVs:};
+
+\node[tlv, fill=neutfill, draw=neutbord, minimum width=10mm] (l1) at (15, -16) {len};
+\node[tlv, fill=hifill, draw=hibord, minimum width=10mm] (t1) at (26, -16) {type};
+\node[tlv, fill=impfill, draw=impbord, minimum width=22mm] (d1) at (43, -16) {data};
+\node[capt] at (56, -16) {예: 02 01 06 \,→ Flags};
+
+\node[tlv, fill=neutfill, draw=neutbord, minimum width=10mm] (l2) at (15, -21) {len};
+\node[tlv, fill=hifill, draw=hibord, minimum width=10mm] (t2) at (26, -21) {type};
+\node[tlv, fill=impfill, draw=impbord, minimum width=22mm] (d2) at (43, -21) {data};
+\node[capt] at (56, -21) {예: 03 03 0F 18 \,→ Battery Service (0x180F)};
+
+\node[tlv, fill=neutfill, draw=neutbord, minimum width=10mm] (l3) at (15, -26) {len};
+\node[tlv, fill=hifill, draw=hibord, minimum width=10mm] (t3) at (26, -26) {type};
+\node[tlv, fill=impfill, draw=impbord, minimum width=22mm] (d3) at (43, -26) {data};
+\node[capt] at (56, -26) {예: 0A 09 "MySensor" \,→ Complete Local Name};
+
+% connector
+\draw[draw=edgesc, line width=0.4pt, densely dashed] (advdata.south west) -- (5, -11);
+\draw[draw=edgesc, line width=0.4pt, densely dashed] (advdata.south east) -- (115, -11);
+\draw[draw=edgesc, line width=0.4pt, densely dashed] (5, -11) -- (5, -28);
+\draw[draw=edgesc, line width=0.4pt, densely dashed] (115, -11) -- (115, -28);
+
+\end{tikzpicture}
+\end{document}

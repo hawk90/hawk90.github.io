@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  svc/.style={cls, minimum width=64mm, minimum height=10mm, fill=absfill, draw=absbord, font=\sffamily\bfseries\small, align=center},
+  chr/.style={cls, minimum width=50mm, minimum height=10mm, fill=impfill, draw=impbord, align=center},
+  desc/.style={cls, minimum width=38mm, minimum height=8mm, fill=prpfill, draw=prpbord, align=center, font=\sffamily\footnotesize},
+  tree/.style={draw=edgec, line width=0.45pt},
+  hdl/.style={font=\sffamily\footnotesize, text=mutec, anchor=west},
+  legend/.style={font=\sffamily\footnotesize, text=mutec, anchor=west}
+]
+
+% ── Service (root) ──────────────────────────────────────
+\node[svc] (svc) at (0, 3.7) {Service (0x180D Heart Rate)\\[2pt]\footnotesize Primary Service Decl. — UUID 0x2800};
+
+% ── Characteristics (level 2) ───────────────────────────
+\node[chr] (c1) at (-3.6, 1.6) {Heart Rate Measurement\\[2pt]\footnotesize 0x2A37 · Notify};
+\node[chr] (c2) at ( 3.6, 1.6) {Body Sensor Location\\[2pt]\footnotesize 0x2A38 · Read};
+
+% Tree edges svc → chrs
+\draw[tree] (svc.south) -- ++(0, -0.4) -| (c1.north);
+\draw[tree] (svc.south) -- ++(0, -0.4) -| (c2.north);
+
+% ── Descriptors (level 3) ───────────────────────────────
+\node[desc] (d1a) at (-5.0, -0.8) {CCCD\\[1pt]\footnotesize 0x2902};
+\node[desc] (d1b) at (-2.0, -0.8) {User Desc.\\[1pt]\footnotesize 0x2901};
+\node[desc] (d2a) at ( 3.6, -0.8) {Pres. Format\\[1pt]\footnotesize 0x2904};
+
+% Tree edges chrs → descs
+\draw[tree] (c1.south) -- ++(0, -0.3) -| (d1a.north);
+\draw[tree] (c1.south) -- ++(0, -0.3) -| (d1b.north);
+\draw[tree] (c2.south) -- (d2a.north);
+
+% Side captions
+\node[hdl] at ( 5.0, 3.7) {Service};
+\node[hdl] at ( 5.0, 1.6) {Characteristic};
+\node[hdl] at ( 5.0, -0.8) {Descriptor};
+
+% Bottom legend
+\node[legend] at (-6.6, -2.4) {모든 노드 = Attribute (handle + type + value + permission)};
+\node[legend] at (-6.6, -2.95) {CCCD에 0x0001 쓰면 → 이후 서버가 Notification 송신};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1mm,
+  fld/.style={cls, align=center, font=\sffamily\footnotesize, minimum height=14mm, inner sep=2pt},
+  capt/.style={font=\sffamily\scriptsize, text=mutec, anchor=east, align=right}
+]
+
+% Plain advertising
+\node[capt] at (-4, 4) {Plain \\[1pt] advertising};
+\node[fld, fill=neutfill, draw=neutbord, minimum width=130mm] at (70, 4)
+  {Anyone can read everything (flags, UUID, manufacturer data, \ldots)};
+
+% Encrypted advertising
+\node[capt] at (-4, -6) {EAD \\[1pt] (BLE 5.4)};
+\node[fld, fill=clifill, draw=clibord, minimum width=44mm] (pub) at (25, -6)
+  {Public info \\[2pt] flags, Service UUID};
+\node[fld, fill=warnfill, draw=warnbord, minimum width=80mm] (enc) at (90, -6)
+  {Encrypted blob \\[2pt] AES-CCM payload};
+
+% Annotation arrow
+\draw[->, draw=conbord, line width=0.6pt] (115, -12) -- (115, -8);
+\node[font=\sffamily\scriptsize, text=conbord, anchor=north, align=center] at (115, -12.5)
+  {key holders만 해독 가능};
+
+\end{tikzpicture}
+\end{document}

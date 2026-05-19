@@ -222,34 +222,9 @@ BLE 펌웨어의 *진짜 검증*은 *전류 프로파일*입니다. *PPK II*는 
 | 샘플레이트 | 100 kSa/s |
 | 가격 | $99 |
 
-```text
-[PPK II 측정 setup]
+![PPK II 측정 setup — USB 5V → PPK II → DUT VDD, J-Link separate, PC receives stream](/images/blog/ble/diagrams/ch11-ppk2-setup.svg)
 
-PPK II ──┬──► 외부 5V 입력 (USB)
-         │
-         ├──► VOUT pin → DUT의 VDD
-         │
-         └──► VIN+/VIN- → 직렬 션트 (전류 측정)
-
-DUT (nRF52 DK):                     PC:
-  VDD에 PPK II VOUT 연결           Power Profiler 앱 (nRF Connect 부속)
-  J-Link은 별도 USB로 디버그       시간-전류 plot, average 계산
-```
-
-```text
-[전형적 BLE 전류 프로파일 - peripheral, 100ms interval]
-
-current
-  │      ┌─10mA─┐                ┌─10mA─┐
-  │      │      │                │      │     ← TX/RX 활성 구간
-  │      │      │                │      │
-  │──────┘      └────────────────┘      └────  ← sleep ~3µA
-  │
-  └─────────────────────────────────────────►
-              100ms                  200ms
-
-평균 ≈ (10mA × 2ms + 3µA × 98ms) / 100ms ≈ ~200µA
-```
+![BLE peripheral current profile — 10 mA TX bursts every 100 ms over 3 µA sleep baseline](/images/blog/ble/diagrams/ch11-current-profile.svg)
 
 PPK II로 측정하면 *광고 주기 결정*이 *과학*이 됩니다. 1초 주기에서 평균 50 µA가 나오는지 *실측 확인* 후 양산 단가와 배터리를 정합니다. 측정 없이 *데이터시트 추정*만으로는 거의 항상 *50% 이상 오차*가 납니다.
 

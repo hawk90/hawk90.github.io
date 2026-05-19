@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={cls, minimum width=50mm, minimum height=8mm, font=\sffamily\small},
+  chip/.style={rounded corners=4pt, draw=mutec, line width=0.6pt, fill=neutfill, inner sep=4pt},
+  caption/.style={font=\sffamily\bfseries\small, text=inkc},
+  ex/.style={font=\sffamily\footnotesize, text=mutec, align=center, text width=52mm},
+  link/.style={-{Stealth[length=2.4mm]}, draw=conbord, line width=0.7pt}
+]
+
+% ────────── LEFT: Single-chip ───────────────────────────
+\node[caption, anchor=south] at (-5.2, 4.6) {Single-chip};
+
+\node[blk, fill=clifill, draw=clibord] (sapp) at (-5.2, 3.7) {Application};
+\node[blk, fill=absfill, draw=absbord] (shost) at (-5.2, 2.7) {Host (L2CAP · ATT · GATT · SMP · GAP)};
+\node[blk, fill=prpfill, draw=prpbord] (shci) at (-5.2, 1.7) {HCI (소프트웨어 API)};
+\node[blk, fill=confill, draw=conbord] (sctrl) at (-5.2, 0.7) {Controller (LL)};
+\node[blk, fill=hifill, draw=hibord] (sphy) at (-5.2, -0.3) {PHY (2.4 GHz radio)};
+
+% Chip outline
+\node[chip, fit=(sapp)(sphy), inner xsep=4pt, inner ysep=3pt] (schip) {};
+
+\node[ex, anchor=north] at (-5.2, -1.2) {모두 한 칩\\[2pt]nRF52840 · ESP32-C3 · CC2640};
+
+% ────────── RIGHT: Dual-chip ────────────────────────────
+\node[caption, anchor=south] at (5.2, 4.6) {Dual-chip (HCI over UART)};
+
+% Host side
+\node[blk, fill=clifill, draw=clibord] (dapp) at (5.2, 3.7) {Application};
+\node[blk, fill=absfill, draw=absbord] (dhost) at (5.2, 2.7) {Host (BlueZ / Zephyr)};
+\node[chip, fit=(dapp)(dhost), inner xsep=4pt, inner ysep=3pt] (dhostchip) {};
+
+% UART link in middle
+\node[blk, fill=prpfill, draw=prpbord] (duart) at (5.2, 1.4) {HCI over UART / USB};
+
+\draw[link] (dhost.south) -- (duart.north);
+
+% Controller side
+\node[blk, fill=confill, draw=conbord] (dctrl) at (5.2, 0.1) {Controller (LL)};
+\node[blk, fill=hifill, draw=hibord] (dphy) at (5.2, -0.9) {PHY (2.4 GHz radio)};
+\node[chip, fit=(dctrl)(dphy), inner xsep=4pt, inner ysep=3pt] (dctrlchip) {};
+
+\draw[link] (duart.south) -- (dctrl.north);
+
+\node[ex, anchor=north] at (5.2, -1.8) {두 칩, OS와 펌웨어 분리\\[2pt]Raspberry Pi · USB dongle};
+
+\end{tikzpicture}
+\end{document}

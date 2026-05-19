@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathmorphing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ant/.style={circle, draw=impbord, line width=0.7pt, fill=impfill, minimum size=6mm, inner sep=0pt, font=\sffamily\tiny\bfseries},
+  tag/.style={cls, fill=hifill, draw=hibord, minimum width=22mm, minimum height=10mm, font=\sffamily\bfseries\small}
+]
+
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=south] at (0, 4.5)
+  {AoA — 4-element array measures phase difference};
+
+% Transmitter
+\node[tag] (tx) at (0, 3) {BLE tag (TX) \\[2pt] \footnotesize CTE 송신};
+
+% Wave-like arrow from tag to array
+\draw[->, draw=hibord, line width=1.2pt, decoration={snake, amplitude=0.4mm, segment length=2mm}, decorate]
+  (tx.south) -- (0, 0.6);
+
+% Array (4 antennas in a row)
+\node[ant] (a0) at (-3, 0) {Ant0};
+\node[ant] (a1) at (-1, 0) {Ant1};
+\node[ant] (a2) at (1, 0)  {Ant2};
+\node[ant] (a3) at (3, 0)  {Ant3};
+
+% Array enclosure
+\node[draw=neutbord, line width=0.5pt, rounded corners=3pt, fill=neutfill!50,
+  fit=(a0)(a3), inner sep=4mm] (array) {};
+\node[font=\sffamily\footnotesize\bfseries, anchor=north] at (array.north) {4-element antenna array};
+
+% CPU/processing box
+\node[cls, fill=prpfill, draw=prpbord, minimum width=40mm, minimum height=8mm,
+  font=\sffamily\footnotesize] (cpu) at (0, -1.8)
+  {Receiver CPU: IQ phase difference → AoA $\theta$};
+
+\draw[->, draw=edgec, line width=0.4pt] (array.south) -- (cpu.north);
+
+% Annotation
+\node[font=\sffamily\scriptsize, text=mutec, anchor=center] at (0, -3.3)
+  {CTE = Constant Tone Extension — packet 끝에 modulation 없는 신호 추가};
+
+\end{tikzpicture}
+\end{document}

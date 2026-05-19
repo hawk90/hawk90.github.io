@@ -27,17 +27,7 @@ BLE는 *2.4 GHz ISM 대역*(2402~2480 MHz)에 40개의 *2 MHz 폭 채널*을 둡
 | 38 | 2426 MHz | WiFi ch 1(2412)과 ch 6(2437) 사이 |
 | 39 | 2480 MHz | WiFi ch 11(2462) 위 |
 
-```text
-2.4 GHz ISM 대역 (2400~2500 MHz)
-
-WiFi:    [────── ch1 ─────][────── ch6 ─────][────── ch11 ─────]
-         2401              2437              2473
-
-BLE adv:  ▲          ▲                                    ▲
-         37 (2402)   38 (2426)                            39 (2480)
-
-BLE data:  0  1  2  ...  10  11  12  ...  35  36  (2 MHz 간격, 37/38/39 제외)
-```
+![2.4 GHz ISM band map — BLE advertising channels (37/38/39) tucked between WiFi 1/6/11](/images/blog/ble/diagrams/ch08-24ghz-channel-map.svg)
 
 광고 시 peripheral은 *세 채널을 순차적으로 송신*합니다 — 37 → 38 → 39 → (advDelay 0~10ms 랜덤) → 다시 37. 한 번에 모든 채널을 *동시에* 보낼 수는 없습니다(라디오 한 개). 그래서 scanner가 *어느 한 채널에 머무는 동안* peripheral의 광고를 잡으려면 *광고 주기 ≥ scan window* 관계가 성립해야 합니다.
 
@@ -92,24 +82,7 @@ int main(void)
 | ADV_SCAN_IND | no | yes | undirected | 비콘인데 추가 데이터 필요 |
 | ADV_EXT_IND (BLE 5) | varies | varies | varies | Extended Advertising 포인터 |
 
-```text
-[ADV_IND 페이로드 구조 - Legacy 31 byte]
-
-┌─────────────┬─────────────────┬─────────────────────────────────┐
-│ Header (2B) │ AdvA (6B)       │ AdvData (0~31B)                 │
-└─────────────┴─────────────────┴─────────────────────────────────┘
-
-AdvData는 (length, type, data) TLV 시퀀스:
-
-┌─────┬──────┬──────────────────┐
-│ Len │ Type │ Data             │
-├─────┼──────┼──────────────────┤
-│ 02  │ 01   │ 06               │ ← Flags: LE General Discoverable + BR/EDR not supported
-│ 03  │ 03   │ 0F 18            │ ← Complete 16-bit Service UUIDs: Battery (0x180F)
-│ 0A  │ 09   │ 4D 79 53 65 6E   │ ← Complete Local Name: "MySensor"
-│     │      │ 73 6F 72 00 00   │
-└─────┴──────┴──────────────────┘
-```
+![ADV_IND payload — Header + AdvA + AdvData (TLV stream) in Legacy 31 byte](/images/blog/ble/diagrams/ch08-adv-ind-payload.svg)
 
 AdvData의 *type 코드*는 *Bluetooth Assigned Numbers*에 정의되어 있습니다. 자주 쓰는 것은 다음과 같습니다.
 

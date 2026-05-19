@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  dev/.style={cls, minimum width=30mm, minimum height=12mm, align=center},
+  gw/.style={cls, minimum width=46mm, minimum height=26mm, align=center, fill=hifill, draw=hibord, font=\sffamily\bfseries\small},
+  ble/.style={-{Stealth[length=2.4mm]}, draw=conbord, line width=0.6pt},
+  net/.style={-{Stealth[length=2.4mm]}, draw=tealbord, line width=0.7pt, dashed},
+  lbl/.style={font=\sffamily\footnotesize, text=mutec}
+]
+
+% ── Gateway (center) ─────────────────────────────────────
+\node[gw] (gw) at (0, 0) {Gateway\\[3pt]
+  {\footnotesize Central + Peripheral}\\[1pt]
+  {\footnotesize 동시 운영}
+};
+
+% ── Sensors (far left) ──────────────────────────────────
+\node[dev, fill=impfill, draw=impbord] (s1) at (-6.8, 1.6) {온도 센서\\[1pt]\footnotesize (Peripheral)};
+\node[dev, fill=impfill, draw=impbord] (s2) at (-6.8, -1.6) {도어 센서\\[1pt]\footnotesize (Peripheral)};
+
+\draw[ble] (s1.east) -- (gw.west |- s1.east);
+\draw[ble] (s2.east) -- (gw.west |- s2.east);
+\node[lbl, anchor=south] at (-3.7, 1.7) {BLE};
+\node[lbl, anchor=south] at (-3.7, -1.5) {BLE};
+
+% ── Phone (top right) ───────────────────────────────────
+\node[dev, fill=clifill, draw=clibord] (phone) at (6.8, 1.6) {스마트폰\\[1pt]\footnotesize (Central)};
+
+\draw[ble] (gw.east |- phone.west) -- (phone.west);
+\node[lbl, anchor=south] at (3.8, 1.7) {BLE};
+
+% ── Cloud (bottom right) ────────────────────────────────
+\node[dev, fill=tealfill, draw=tealbord] (cloud) at (6.8, -1.6) {클라우드\\[1pt]\footnotesize (HTTP/MQTT)};
+
+\draw[net] (gw.east |- cloud.west) -- (cloud.west);
+\node[lbl, anchor=south] at (3.8, -1.5) {WiFi};
+
+% ── Role annotations on gateway sides ───────────────────
+\node[font=\sffamily\footnotesize, text=mutec, anchor=south] at ([yshift=4pt]gw.north) {Central 측 (왼쪽) · Peripheral 측 (오른쪽)};
+
+\end{tikzpicture}
+\end{document}

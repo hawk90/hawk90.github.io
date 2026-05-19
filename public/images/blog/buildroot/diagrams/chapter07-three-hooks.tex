@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cstep/.style={cls, minimum width=70mm, minimum height=11mm, align=center, font=\sffamily\small, inner sep=4pt},
+  build/.style={cstep, draw=nodebord, fill=nodefill},
+  hook/.style={cls, minimum width=78mm, minimum height=13mm, draw=hibord, fill=hifill, font=\sffamily\bfseries\small, align=center, inner sep=4pt},
+  done/.style={cstep, draw=impbord, fill=impfill, font=\sffamily\bfseries\small},
+  side/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, text width=58mm, align=left}
+]
+
+\node[build] (tc)    at (0, 13.5) {toolchain build};
+\node[build] (pkg)   at (0, 11.0) {package build\\[2pt]\footnotesize cross-compile + install to \texttt{\$(TARGET\_DIR)}};
+\node[hook]  (ovl)   at (0, 8.3)  {\textsc{BR2\_ROOTFS\_OVERLAY}\\[2pt]\footnotesize 디렉터리 트리 \textit{그대로} 복사};
+\node[hook]  (pb)    at (0, 5.5)  {\textsc{BR2\_ROOTFS\_POST\_BUILD\_SCRIPT}\\[2pt]\footnotesize \texttt{\$(TARGET\_DIR)} 마지막 수정};
+\node[build] (fakr)  at (0, 2.8)  {fakeroot + rootfs format 생성\\[2pt]\footnotesize ext4, squashfs, cpio, …};
+\node[hook]  (pi)    at (0, 0)    {\textsc{BR2\_ROOTFS\_POST\_IMAGE\_SCRIPT}\\[2pt]\footnotesize \texttt{output/images/} 안에서 조립};
+\node[done]  (img)   at (0, -2.4) {\texttt{output/images/} 완성};
+
+\node[side] at (ovl.east) {\,정적 파일.\\[2pt]\,권한·삭제 표현 불가};
+\node[side] at (pb.east)  {\,build-date, revision,\\[2pt]\,permission, 동적 conf};
+\node[side] at (pi.east)  {\,\texttt{genimage} 호출,\\[2pt]\,SD 카드 layout 조립};
+
+\draw[flow] (tc)   -- (pkg);
+\draw[flow] (pkg)  -- (ovl);
+\draw[flow] (ovl)  -- (pb);
+\draw[flow] (pb)   -- (fakr);
+\draw[flow] (fakr) -- (pi);
+\draw[flow] (pi)   -- (img);
+
+\end{tikzpicture}
+\end{document}

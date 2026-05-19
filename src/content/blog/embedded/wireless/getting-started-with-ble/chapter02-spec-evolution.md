@@ -174,6 +174,8 @@ Extended Advertising (5.0+)
 
 primary 채널(37/38/39)에서는 *짧은 헤더*만 보내고, *실제 payload는 데이터 채널*에 따로 송신합니다. *비콘 시장의 정보량 부족* 문제를 해결했습니다.
 
+![Legacy vs Extended Advertising — primary 채널의 헤더가 AuxPtr로 secondary 데이터 채널의 페이로드를 가리킨다](/images/blog/ble/diagrams/ch02-extended-adv.svg)
+
 ### Periodic Advertising
 
 연결 없이도 *주기적으로 정확한 시각에* 데이터를 뿌립니다. 수신자는 *언제 광고가 올지를 안다*. 매번 *전체 스캔할 필요가 없어* 전력이 훨씬 좋습니다.

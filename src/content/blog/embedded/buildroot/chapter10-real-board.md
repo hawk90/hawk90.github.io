@@ -25,6 +25,10 @@ draft: false
 - *내 overlay*: `/etc/hostname`을 `acme-bbb`로 설정 (Ch 7)
 - *결과물*: `sdcard.img` 하나. `dd`로 SD 카드에 굽고 보드에 꽂으면 부팅.
 
+이 장의 전체 흐름은 다음과 같습니다.
+
+![defconfig → make → dd → 부팅 전체 흐름](/images/blog/buildroot/diagrams/chapter10-full-flow.svg)
+
 ## 준비물
 
 | 항목 | 사양 |
@@ -355,6 +359,10 @@ image sdcard.img {
 $ chmod +x ~/work/br2-acme/board/acme/bbb/post-build.sh
 $ chmod +x ~/work/br2-acme/board/acme/bbb/post-image.sh
 ```
+
+이 `genimage.cfg`가 만들어 내는 SD 카드 layout을 그림으로 보면 다음과 같습니다.
+
+![sdcard.img 3-파티션 layout](/images/blog/buildroot/diagrams/chapter10-sd-layout.svg)
 
 ## Step 7: uEnv.txt — U-Boot 환경
 

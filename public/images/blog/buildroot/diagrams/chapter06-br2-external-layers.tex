@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  layer/.style={rectangle, rounded corners=4pt, draw=nodebord, line width=0.4pt,
+                minimum width=130mm, minimum height=22mm, align=left, inner sep=8pt,
+                text width=124mm},
+  base/.style={layer, draw=absbord, fill=absfill},
+  company/.style={layer, draw=impbord, fill=impfill},
+  product/.style={layer, draw=hibord, fill=hifill},
+  title/.style={font=\sffamily\bfseries\small, text=inkc, anchor=north west, inner sep=0pt},
+  detail/.style={font=\sffamily\footnotesize, text=mutec, anchor=north west, inner sep=0pt},
+  side/.style={font=\sffamily\scriptsize, text=mutec, anchor=west, align=left}
+]
+
+\node[base]    (br)  at (0, 6.6) {};
+\node[title]   at ([shift={(4mm, -3mm)}]br.north west) {Buildroot 본체 \texttt{buildroot/}};
+\node[detail]  at ([shift={(4mm, -9mm)}]br.north west)
+  {\texttt{package/} (2,000+),\, \texttt{board/},\, \texttt{configs/},\, \texttt{fs/},\, \texttt{linux/},\, \texttt{boot/}};
+\node[detail]  at ([shift={(4mm, -15mm)}]br.north west)
+  {read-only. \,LTS 업그레이드는 \texttt{git pull --rebase}};
+
+\node[company] (acme) at (0, 3.6) {};
+\node[title]   at ([shift={(4mm, -3mm)}]acme.north west) {회사 트리 \texttt{br2-acme/} (BR2\_EXTERNAL\_ACME\_PATH)};
+\node[detail]  at ([shift={(4mm, -9mm)}]acme.north west)
+  {\texttt{external.desc},\, \texttt{external.mk},\, \texttt{Config.in},\, \texttt{package/acme-firmware/},\, \texttt{board/acme/}};
+\node[detail]  at ([shift={(4mm, -15mm)}]acme.north west)
+  {회사 공통 패키지 + defconfig. \,base 위에 add-on};
+
+\node[product] (px) at (0, 0.6) {};
+\node[title]   at ([shift={(4mm, -3mm)}]px.north west) {제품 트리 \texttt{br2-product-x/} (BR2\_EXTERNAL\_PROJECT\_X\_PATH)};
+\node[detail]  at ([shift={(4mm, -9mm)}]px.north west)
+  {\texttt{configs/product\_x\_defconfig},\, \texttt{board/acme/product-x/} overlay};
+\node[detail]  at ([shift={(4mm, -15mm)}]px.north west)
+  {제품별 변형. \,같은 옵션은 \textbf{뒤에 오는 트리가 override}};
+
+\node[font=\sffamily\bfseries\footnotesize, text=mutec, anchor=west] at (14, 6.6)  {base};
+\node[font=\sffamily\bfseries\footnotesize, text=mutec, anchor=west] at (14, 3.6)  {layer 1};
+\node[font=\sffamily\bfseries\footnotesize, text=mutec, anchor=west] at (14, 0.6)  {layer 2};
+
+\node[font=\sffamily\footnotesize\ttfamily, text=inkc, anchor=west] at (-0.4, -1.4)
+  {make BR2\_EXTERNAL=\textasciitilde/work/br2-acme:\textasciitilde/work/br2-product-x ...};
+
+\end{tikzpicture}
+\end{document}

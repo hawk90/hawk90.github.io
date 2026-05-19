@@ -20,27 +20,7 @@ Buildroot는 패키지 시스템이 강력하지만, 실제 보드에는 항상 
 
 빌드 흐름에서 셋이 어디에 끼는지부터 정리합니다.
 
-```text
-toolchain build
-        │
-        ▼
-package build  (cross-compile + install to $(TARGET_DIR))
-        │
-        ▼
-BR2_ROOTFS_OVERLAY      ← 디렉터리 트리를 그대로 복사
-        │
-        ▼
-BR2_ROOTFS_POST_BUILD_SCRIPT  ← $(TARGET_DIR)를 마지막으로 수정
-        │
-        ▼
-fakeroot + rootfs format 생성 (ext4, squashfs, ...)
-        │
-        ▼
-BR2_ROOTFS_POST_IMAGE_SCRIPT  ← .img·.tar 등이 만들어진 뒤
-        │
-        ▼
-output/images/  완성
-```
+![세 hook의 빌드 흐름 내 위치](/images/blog/buildroot/diagrams/chapter07-three-hooks.svg)
 
 | Hook | 시점 | 수정 대상 | 전형적 용도 |
 |------|------|----------|------------|
@@ -298,6 +278,10 @@ BR2_ROOTFS_POST_SCRIPT_ARGS="acme-edge production"
 BR2_ROOTFS_DEVICE_TABLE="system/device_table.txt $(BR2_EXTERNAL_ACME_PATH)/board/acme/edge/device_table.txt"
 BR2_PACKAGE_HOST_GENIMAGE=y
 ```
+
+각 파일이 어떤 defconfig 옵션으로 참조되는지 그림으로 보면 다음과 같습니다.
+
+![보드 디렉터리 파일과 참조 옵션 매핑](/images/blog/buildroot/diagrams/chapter07-board-tree.svg)
 
 ## Troubleshooting
 
