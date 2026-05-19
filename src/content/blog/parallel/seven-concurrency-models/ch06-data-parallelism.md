@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, data-parallel, gpu, opencl, cuda, sim
 type: book-review
 bookTitle: "Seven Concurrency Models in Seven Weeks"
 bookAuthor: "Paul Butcher"
-draft: true
+draft: false
 ---
 
 > **Seven Concurrency Models in Seven Weeks** Chapter 6 요약. 책의 6장 "Data Parallelism"은 GPU를 범용 계산 장치로 다루는 *GPGPU* 사고를 OpenCL로 풀어냅니다. Day 1에서 첫 kernel을 작성하고, Day 2에서 다차원 데이터로 넓힌 다음, Day 3에서 reduction과 profiling 같은 실전 패턴을 정리합니다.

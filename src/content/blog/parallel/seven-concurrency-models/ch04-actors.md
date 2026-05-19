@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, actors, erlang, elixir, supervisor]
 type: book-review
 bookTitle: "Seven Concurrency Models in Seven Weeks"
 bookAuthor: "Paul Butcher"
-draft: true
+draft: false
 ---
 
 Chapter 4는 Actor 모델을 다룹니다. Paul Butcher는 Elixir로 예제를 풀어갑니다. Elixir는 Erlang VM(BEAM) 위에서 동작하는 함수형 언어입니다. Erlang은 1980년대 후반 Ericsson에서 통신 교환기를 만들기 위해 태어났고, 그 결과 *동시성*과 *장애 복구*가 언어 차원의 1급 시민으로 자리잡았습니다.

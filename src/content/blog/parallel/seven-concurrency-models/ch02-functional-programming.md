@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, functional, haskell, clojure]
 type: book-review
 bookTitle: "Seven Concurrency Models in Seven Weeks"
 bookAuthor: "Paul Butcher"
-draft: true
+draft: false
 ---
 
 > **Seven Concurrency Models in Seven Weeks** Chapter 2 요약 — Day 1·Day 2·Day 3 구조로 Clojure 위에서 함수형 동시성을 본다.

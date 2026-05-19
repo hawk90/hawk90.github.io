@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, lambda-architecture, hadoop, storm, s
 type: book-review
 bookTitle: "Seven Concurrency Models in Seven Weeks"
 bookAuthor: "Paul Butcher"
-draft: true
+draft: false
 ---
 
 > **Seven Concurrency Models in Seven Weeks** Chapter 7 요약
