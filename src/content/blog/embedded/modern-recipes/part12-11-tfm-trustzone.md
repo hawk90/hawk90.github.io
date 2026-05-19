@@ -248,8 +248,6 @@ imgtool sign \
 
 Boot 시 BL2가 manifest signature와 anti-rollback counter를 verify합니다. Pass하면 image로 jump, fail하면 secondary로 fallback하거나 halt합니다.
 
-> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter11-secure-boot-chain)
-
 ### SAU 설정
 
 ```c

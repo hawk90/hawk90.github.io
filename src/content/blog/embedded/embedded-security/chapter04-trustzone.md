@@ -106,8 +106,6 @@ BL31의 SMC 디스패치는 함수 ID 범위로 라우팅됩니다.
 
 OP-TEE call이 들어오면 BL31은 *world switch*를 수행합니다. 모든 레지스터를 secure context로 저장·복원하고, EL1S로 점프합니다. OP-TEE OS가 받아 적절한 Trusted Application으로 dispatch합니다. 이 흐름은 Ch 5에서 자세히 봅니다.
 
-> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter11-secure-boot-chain)
-
 ## Cortex-M TrustZone-M — MCU의 분리
 
 Cortex-A의 TrustZone은 *OS-level 분리*입니다. Linux와 OP-TEE가 동시에 동작합니다. Cortex-M의 TrustZone-M은 *MCU의 single binary 안에서의 분리*입니다. M23, M33, M55, M85가 지원합니다.

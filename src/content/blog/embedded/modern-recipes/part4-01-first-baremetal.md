@@ -44,8 +44,6 @@ main():
 
 vector table은 *Flash의 시작 주소*에 위치해야 합니다. Cortex-M3/M4/M7은 `SCB->VTOR`로 재배치 가능하지만, 첫 boot은 `0x00000000`(또는 `0x08000000`이 alias)에서 시작합니다.
 
-> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter01-boot-overview)
-
 ### LED와 GPIO
 
 STM32 Nucleo·Discovery 보드의 user LED는 보드마다 다릅니다. 대표 예시는 다음과 같습니다.
