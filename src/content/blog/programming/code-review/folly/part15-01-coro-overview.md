@@ -144,6 +144,14 @@ folly::coro::Task<UserProfile> GetUserProfile(UserId id) {
 
 같은 패턴을 `folly::Future`로 짜면 `collect(...)` + `.thenValue([](auto&& tup) { ... })` + lambda capture가 줄줄이 따라온다. 코루틴은 *호출 구조와 데이터 흐름이 같은 모양*이라는 게 가장 큰 가독성 이득.
 
+## suspend / resume 모델
+
+C++ coroutine은 *stackless*다. 호출 스택을 쥐고 있지 않고, 필요한 상태만 heap frame에 저장하고 caller에 반환한다.
+
+![Coroutine suspend / resume](/images/blog/cpp-concepts/diagrams/coroutine-suspend-resume.svg)
+
+suspend 시점에 frame에 resume 주소와 locals를 저장하고 caller 스택은 즉시 풀린다. resume 시 frame을 다시 활성화 — 그래서 같은 스레드 보장이 없고, 따라서 *executor 바인딩*이 필수가 된다.
+
 ## 내부 구현 개념
 
 ```cpp

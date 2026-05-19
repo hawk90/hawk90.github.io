@@ -54,6 +54,8 @@ folly::StringPiece sp = s;
 
 `fbstring`의 24-byte 객체는 마지막 byte로 카테고리를 식별한다.
 
+![FBString 24-byte layout](/images/blog/folly/diagrams/part5-01-fbstring-sso.svg)
+
 ```cpp
 // folly/FBString.h 의 약식
 struct MediumLarge {
@@ -116,6 +118,14 @@ char* mutableData() {
 ```
 
 이 unshare는 `operator[]`의 non-const 오버로드, `data()` non-const, iterator 시작에서 호출된다. const 접근은 분리하지 않는다.
+
+### Copy-on-Write 동작 그림
+
+Large 영역에서 vs1 = vs2가 일어나면 ptr만 복사 + refcount++. 둘 중 하나가 *수정 시*에 비로소 새 버퍼를 떼낸다.
+
+![Copy-on-Write split](/images/blog/cpp-concepts/diagrams/cow-copy-on-write.svg)
+
+이 lazy split이 큰 페이로드의 함수 인자 전달을 사실상 무료로 만든다. 다만 멀티스레드에서 atomic refcount의 contention 비용이 있어 large가 read-heavy일 때 가장 잘 동작한다.
 
 ### Why 254, not 255?
 

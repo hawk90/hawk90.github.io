@@ -35,6 +35,14 @@ if (r) {
 
 `bool` 변환으로 분기, `*` 또는 `value()`로 값, `error()`로 오류. 간단해 보이지만 monadic 조합에서 진가가 나온다.
 
+### Monadic 흐름 — 그림
+
+`Expected`의 진가는 chain에서 나온다. 각 단계가 OK면 통과, ERR면 short-circuit.
+
+![Monadic Expected](/images/blog/cpp-concepts/diagrams/monadic-status-or.svg)
+
+`.then(f)` / `.thenError(g)` / `EXPECTED_OR_RETURN` 모두 이 모델의 다른 표현이다. `absl::StatusOr`, `std::expected` (C++23)도 같은 그림 위에 있다.
+
 ## API
 
 ```cpp
@@ -78,6 +86,8 @@ void Use() {
 - `value_or(default)` — 오류면 default.
 
 ## Monadic 조합
+
+![Expected monadic chain](/images/blog/folly/diagrams/part16-01-expected-states.svg)
 
 ```cpp
 folly::Expected<User, Error> LookupUser(UserId id);

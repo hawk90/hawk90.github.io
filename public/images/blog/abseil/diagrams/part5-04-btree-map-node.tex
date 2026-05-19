@@ -1,0 +1,76 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  key/.style={rectangle, draw=absbord, fill=absfill, minimum width=10mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  ptr/.style={rectangle, draw=clibord, fill=clifill, minimum width=4mm, minimum height=8mm, inner sep=0pt},
+  rb/.style={circle, draw=conbord, fill=confill, minimum size=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.4) {btree\_map 노드 (fanout $\sim$64) vs RB-tree};
+
+% B-tree side title
+\node[font=\sffamily\bfseries\footnotesize, text=absbord] at (-4.4, 4.4) {absl::btree\_map};
+
+% B-tree internal node — alternating ptr/key
+\node[ptr]                          at (-7.2, 2.9) {};
+\node[key]                          at (-6.5, 2.9) {k1};
+\node[ptr]                          at (-5.8, 2.9) {};
+\node[key]                          at (-5.1, 2.9) {k2};
+\node[ptr]                          at (-4.4, 2.9) {};
+\node[key]                          at (-3.7, 2.9) {k3};
+\node[ptr]                          at (-3.0, 2.9) {};
+\node[key]                          at (-2.3, 2.9) {...};
+\node[ptr]                          at (-1.6, 2.9) {};
+
+\node[font=\sffamily\footnotesize, text=mutec] at (-4.4, 3.8) {한 노드 = cache line 여러 개};
+
+% Children (3 leaves)
+\node[key, minimum width=18mm]      at (-6.5, 0.6) {leaf};
+\node[key, minimum width=18mm]      at (-4.4, 0.6) {leaf};
+\node[key, minimum width=18mm]      at (-2.3, 0.6) {leaf};
+
+\draw[arr] (-7.2, 2.5) -- (-6.5, 1.0);
+\draw[arr] (-5.8, 2.5) -- (-5.5, 1.0);
+\draw[arr] (-4.4, 2.5) -- (-4.4, 1.0);
+\draw[arr] (-3.0, 2.5) -- (-3.3, 1.0);
+\draw[arr] (-1.6, 2.5) -- (-2.3, 1.0);
+
+\node[font=\sffamily\footnotesize, text=mutec] at (-4.4, -0.2) {fanout $\sim$64, depth $\log_{64} N$};
+
+% RB-tree side title
+\node[font=\sffamily\bfseries\footnotesize, text=conbord] at (4.4, 4.4) {std::map (RB-tree)};
+
+% RB-tree
+\node[rb] (r1) at (4.4, 3.0) {30};
+\node[rb] (r2) at (3.1, 1.7) {15};
+\node[rb] (r3) at (5.7, 1.7) {45};
+\node[rb] (r4) at (2.3, 0.4) {10};
+\node[rb] (r5) at (3.9, 0.4) {22};
+\node[rb] (r6) at (5.1, 0.4) {40};
+\node[rb] (r7) at (6.5, 0.4) {55};
+\draw[edge] (r1) -- (r2); \draw[edge] (r1) -- (r3);
+\draw[edge] (r2) -- (r4); \draw[edge] (r2) -- (r5);
+\draw[edge] (r3) -- (r6); \draw[edge] (r3) -- (r7);
+\node[font=\sffamily\footnotesize, text=mutec] at (4.4, -0.5) {한 노드당 별도 heap alloc};
+
+% Comparison
+\node[noteL, text width=60mm] at (-7.0, -1.5) {%
+  \textbf{B-tree 장점}\\[3pt]
+  키가 한 노드에 묶여 cache 친화.\\[3pt]
+  lookup $\sim$8-16$\times$ 빠름.
+};
+\node[noteL, text width=60mm, draw=warnbord, fill=warnfill] at (0.5, -1.5) {%
+  \textbf{단점}\\[3pt]
+  insert/erase 시 노드 분할.\\[3pt]
+  trivially copyable일수록 효율.
+};
+
+\end{tikzpicture}
+\end{document}

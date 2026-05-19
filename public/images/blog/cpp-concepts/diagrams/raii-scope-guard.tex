@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  scope/.style={rectangle, draw=neutbord, line width=0.5pt, minimum width=66mm, minimum height=64mm, inner sep=4pt, fill=neutfill!50, rounded corners=4pt},
+  line/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=58mm, minimum height=6mm, inner sep=2pt, fill=white, font=\sffamily\footnotesize\ttfamily, anchor=west, align=left},
+  ctor/.style={line, fill=impfill, draw=impbord},
+  body/.style={line, fill=nodefill, draw=nodebord},
+  dtor/.style={line, fill=confill, draw=conbord},
+  except/.style={line, fill=warnfill, draw=warnbord}
+]
+
+% ─── Normal path ───────────────────────────────
+\node[scope] (S1) at (-4.2, 0) {};
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=north] at (-4.2, 3.4) {Normal exit};
+
+\node[ctor]   at (-7.2, 2.6) {File f("a.txt");  // open};
+\node[body]   at (-7.2, 1.9) {use(f);};
+\node[body]   at (-7.2, 1.2) {f.read(...);};
+\node[body]   at (-7.2, 0.5) {process(...);};
+\node[body]   at (-7.2, -0.2) {// ... more work};
+\node[body]   at (-7.2, -0.9) {return result;};
+\node[dtor]   at (-7.2, -1.6) {\~{}File();  // close (auto)};
+
+% scope-exit arrow
+\draw[focus, line width=0.7pt, ->] (-1.3, 2.6) to[bend left=25] node[right, font=\sffamily\scriptsize, text=focusc, align=left] {scope\\[2pt]exit} (-1.3, -1.6);
+
+% ─── Exception path ───────────────────────────
+\node[scope] (S2) at (4.2, 0) {};
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=north] at (4.2, 3.4) {Exception path};
+
+\node[ctor]   at (1.2, 2.6) {File f("a.txt");  // open};
+\node[body]   at (1.2, 1.9) {use(f);};
+\node[except] at (1.2, 1.2) {throw runtime\_error(...);};
+\node[body, text=mutec] at (1.2, 0.5) {// skipped};
+\node[body, text=mutec] at (1.2, -0.2) {// skipped};
+\node[body, text=mutec] at (1.2, -0.9) {// skipped};
+\node[dtor]   at (1.2, -1.6) {\~{}File();  // close (still!)};
+
+\draw[focus, line width=0.7pt, ->] (7.1, 1.2) to[bend right=25] node[right, font=\sffamily\scriptsize, text=focusc, align=left] {stack\\[2pt]unwind} (7.1, -1.6);
+
+% ─── Caption ───────────────────────────────────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.5, -3.0) {RAII / scope guard 원리};
+
+\node[font=\sffamily\footnotesize, text=mutec, align=left, text width=170mm, anchor=north west] at (-7.5, -3.4) {%
+  생성자에서 자원 획득, 소멸자에서 해제. \textbf{어느 경로}로 scope를 빠져나가도\\[2pt]
+  소멸자는 호출된다 \textendash{} 정상 return, early return, throw 모두 동일.\\[2pt]
+  활용: \texttt{std::lock\_guard}, \texttt{unique\_ptr}, \texttt{absl::Cleanup}, \texttt{folly::ScopeGuard}.};
+
+\end{tikzpicture}
+\end{document}

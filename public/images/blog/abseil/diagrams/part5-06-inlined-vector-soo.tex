@@ -1,0 +1,62 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  slot/.style={rectangle, draw=impbord, fill=impfill, minimum width=9mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  slotE/.style={rectangle, draw=neutbord, fill=neutfill, minimum width=9mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  heap/.style={rectangle, draw=hibord, fill=hifill, minimum width=9mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 4.8) {InlinedVector<T, 8> — small size optimization};
+
+% Case A: small (n=3, fits inline)
+\node[font=\sffamily\bfseries\footnotesize, text=impbord, anchor=west] at (-7.5, 3.6) {Case A — n=3 (inline, no heap)};
+\node[panel, fit={(-7.5, 1.5) (1.0, 3.2)}, inner sep=4pt] (pa) {};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-7.4, 2.9) {stack:};
+\node[slot] at (-6.4, 2.5) {a};
+\node[slot] at (-5.5, 2.5) {b};
+\node[slot] at (-4.6, 2.5) {c};
+\node[slotE] at (-3.7, 2.5) {};
+\node[slotE] at (-2.8, 2.5) {};
+\node[slotE] at (-1.9, 2.5) {};
+\node[slotE] at (-1.0, 2.5) {};
+\node[slotE] at (-0.1, 2.5) {};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-7.4, 1.8) {size=3,\, capacity=8 (inline)};
+
+% Case B: overflow (n=10, heap)
+\node[font=\sffamily\bfseries\footnotesize, text=hibord, anchor=west] at (-7.5, 0.5) {Case B — n=10 (overflow, heap)};
+\node[panel, fit={(-7.5, -3.4) (1.0, 0.1)}, inner sep=4pt] (pb) {};
+
+% Stack-side: pointer + size
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-7.4, -0.5) {stack (reused):};
+\node[hi, minimum width=24mm] (pp) at (-5.5, -1.1) {heap ptr};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-4.0, -1.1) {size=10};
+
+% Heap
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-7.4, -2.0) {heap:};
+\foreach \i/\v in {0/a, 1/b, 2/c, 3/d, 4/e, 5/f, 6/g, 7/h, 8/i, 9/j} {
+  \pgfmathsetmacro{\x}{-6.4 + \i*0.7}
+  \node[heap, minimum width=7mm] at (\x, -2.6) {\v};
+}
+\draw[arr] (pp.south) -- ++(0, -0.3) -| (-5.8, -2.3);
+
+% Right notes
+\node[noteL, text width=46mm] at (2.0, 3.6) {%
+  \textbf{핵심}\\[3pt]
+  $n \le N$ 시 alloc 0회.\\[3pt]
+  초과 시 heap fallback.
+};
+\node[noteL, text width=46mm, draw=warnbord, fill=warnfill] at (2.0, 0.4) {%
+  \textbf{비용}\\[3pt]
+  객체 크기 $= N \cdot \mathrm{sizeof}(T)$.\\[3pt]
+  $N$이 크면 스택 비용 증가.
+};
+
+\end{tikzpicture}
+\end{document}

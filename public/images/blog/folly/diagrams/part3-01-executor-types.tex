@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (6.0, 5.5) {Folly Executor Types — when to use};
+
+% Column headers
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=center] at (1.5, 4.6) {Executor};
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=center] at (5.0, 4.6) {Thread Model};
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=center] at (8.5, 4.6) {Use Case};
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=center] at (11.5, 4.6) {Avoid};
+
+\draw[line width=0.4pt, draw=mutec] (0, 4.4) -- (13.0, 4.4);
+
+% Rows
+\foreach \i/\name/\thr/\use/\avoid in {
+  0/Inline/caller thread/lightweight callback/blocking work,
+  1/CPUThreadPool/N worker threads/compute-bound work/I/O,
+  2/IOThreadPool/N event loops/I/O multiplexing/long CPU work,
+  3/Manual/explicit drive()/tests / simulation/production code,
+  4/EventBase/single event loop/network I/O on one thread/parallel compute%
+} {
+  \pgfmathsetmacro{\y}{4.0 - \i*0.75}
+  \node[font=\sffamily\footnotesize, text=inkc, anchor=center] at (1.5, \y) {\name};
+  \node[font=\sffamily\footnotesize, text=mutec, anchor=center] at (5.0, \y) {\thr};
+  \node[font=\sffamily\footnotesize, text=impbord, anchor=center] at (8.5, \y) {\use};
+  \node[font=\sffamily\footnotesize, text=conbord, anchor=center] at (11.5, \y) {\avoid};
+  \ifnum\i<4
+    \draw[line width=0.2pt, draw=gridc] (0, \y-0.4) -- (13.0, \y-0.4);
+  \fi
+}
+
+\end{tikzpicture}
+\end{document}

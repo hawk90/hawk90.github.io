@@ -1,0 +1,66 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  lane/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=80mm, minimum height=8mm, inner sep=2pt, fill=nodefill, font=\sffamily\footnotesize, rounded corners=2pt},
+  frame/.style={rectangle, draw=hibord, fill=hifill, line width=0.5pt, minimum width=40mm, minimum height=22mm, inner sep=3pt, font=\sffamily\footnotesize\ttfamily, align=left, rounded corners=3pt},
+  marker/.style={font=\sffamily\bfseries\small, text=focusc}
+]
+
+% Headers
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-8, 4.3) {Caller};
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-8, 2.8) {Coroutine body};
+
+% Timeline ticks
+\foreach \t/\lbl in {-6.5/t0, -4.5/t1, -2.5/t2, -0.5/t3, 1.5/t4, 3.5/t5} {
+  \draw[draw=mutec, line width=0.3pt] (\t, 4.7) -- (\t, 2.4);
+  \node[font=\sffamily\scriptsize, text=mutec, anchor=south] at (\t, 4.7) {\lbl};
+}
+
+% Caller lane segments
+\draw[draw=absbord, line width=2pt] (-6.5, 4.1) -- (-4.5, 4.1);
+\draw[draw=absbord, line width=2pt] (-2.5, 4.1) -- (-0.5, 4.1);
+\draw[draw=absbord, line width=2pt] (3.5, 4.1) -- (5.5, 4.1);
+
+% Coroutine lane segments
+\draw[draw=impbord, line width=2pt] (-4.5, 2.6) -- (-2.5, 2.6);
+\draw[draw=impbord, line width=2pt] (1.5, 2.6) -- (3.5, 2.6);
+
+% Suspension gap
+\draw[draw=mutec, line width=0.6pt, dashed] (-2.5, 2.6) -- (1.5, 2.6);
+
+% Labels under timeline
+\node[font=\sffamily\footnotesize, anchor=north] at (-5.5, 2.3) {co\_await io};
+\node[font=\sffamily\footnotesize, anchor=north] at (-1.5, 2.3) {return to caller};
+\node[font=\sffamily\footnotesize, anchor=north] at (0.5, 2.3) {(suspended)};
+\node[font=\sffamily\footnotesize, anchor=north] at (2.5, 2.3) {resume on IO done};
+
+% Suspend point marker
+\node[marker] at (-2.5, 3.4) {suspend};
+\node[marker] at (1.5, 3.4) {resume};
+
+% ─── Coroutine frame (heap-allocated) ──────────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-8, 0.8) {Coroutine frame (heap)};
+
+\node[frame] (cf) at (-3, -0.9) {
+  \textbf{saved state}\\[2pt]
+  resume\_addr\\
+  promise\_obj\\
+  locals: \texttt{int i, ...}\\
+  awaiter
+};
+
+\node[font=\sffamily\footnotesize\linespread{1.35}\selectfont, text=mutec, align=left, text width=68mm, anchor=north west] at (0.5, 0.5) {%
+  stackless coroutine은 호출 스택에 의존하지 않는다. suspend 시점에 필요한 locals와 다음 resume 주소를 frame에 저장하고, caller의 스택 프레임은 즉시 풀린다. resume 시 frame을 다시 활성화 — 같은 스레드 보장 없음.};
+
+% Bottom: comparison
+\node[font=\sffamily\footnotesize, text=inkc, align=center, text width=170mm] at (0, -3.0) {%
+  스레드 1개로 수많은 in-flight 작업 표현 가능 (각 작업 = 1 frame, 보통 수십 \textendash 수백 B)};
+
+\end{tikzpicture}
+\end{document}

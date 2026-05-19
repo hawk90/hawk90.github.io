@@ -51,6 +51,8 @@ t.join();
 
 ## loop 종류
 
+![EventBase loop iteration](/images/blog/folly/diagrams/part3-05-eventbase-loop.svg)
+
 ```cpp
 class EventBase {
  public:

@@ -71,6 +71,14 @@ class CPUThreadPoolExecutor : public ThreadPoolExecutor {
 2. **ThreadFactory** — thread 생성/이름/affinity
 3. **CPUTask** — task 자체
 
+### 모델 위치
+
+CPUThreadPoolExecutor는 *Fixed thread pool* 모델 — 공유 큐 + N 워커.
+
+![Executor models compared](/images/blog/cpp-concepts/diagrams/executor-models.svg)
+
+평행성을 얻고 스레드 수를 bounded로 유지하는 균형점이다. 단일 큐가 hot이면 work-stealing(또는 priority queue로 분리)으로 contention을 분산할 수 있다.
+
 ## Queue 선택
 
 ```cpp

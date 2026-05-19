@@ -187,6 +187,10 @@ bool absl::StrContains(absl::string_view haystack, absl::string_view needle);
 
 `string_view`는 데이터의 소유권이 없다. 멤버 변수로 보관하면 dangling 위험이 생긴다.
 
+소유와 view의 관계, 그리고 위험한 dangling 케이스를 그림으로 보면 다음과 같다.
+
+![string_view lifetime](/images/blog/abseil/diagrams/part4-01-string-view-lifetime.svg)
+
 ```cpp
 // 회피
 class UserCache {

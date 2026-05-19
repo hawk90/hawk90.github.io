@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.5, 0.6) {Fibers — cooperative swap};
+
+\node[actor]    (m) at (0,    0) {Main};
+\node[actorAlt] (s) at (3.6,  0) {Scheduler};
+\node[actor]    (a) at (7.2,  0) {Fiber A};
+\node[actor]    (b) at (10.8, 0) {Fiber B};
+
+\draw[lifeline] (m) -- ++(0,-8);
+\draw[lifeline] (s) -- ++(0,-8);
+\draw[lifeline] (a) -- ++(0,-8);
+\draw[lifeline] (b) -- ++(0,-8);
+
+\node[activation, minimum height=10mm] at (m |- 0,-1.0) {};
+\node[activation, minimum height=10mm] at (a |- 0,-2.4) {};
+\node[activation, minimum height=10mm] at (b |- 0,-4.0) {};
+\node[activation, minimum height=10mm] at (a |- 0,-5.6) {};
+\node[activation, minimum height=10mm] at (m |- 0,-7.2) {};
+
+\draw[msgsync] (m |- 0,-1.0) -- node[msglabel]{addTask(A)} (s |- 0,-1.0);
+\draw[msgsync] (s |- 0,-2.4) -- node[msglabel]{resume}     (a |- 0,-2.4);
+\draw[msgret]  (a |- 0,-3.2) -- node[msglabel]{await/suspend} (s |- 0,-3.2);
+
+\draw[msgsync] (s |- 0,-4.0) -- node[msglabel]{resume}     (b |- 0,-4.0);
+\draw[msgret]  (b |- 0,-4.8) -- node[msglabel]{await/suspend} (s |- 0,-4.8);
+
+\draw[msgsync] (s |- 0,-5.6) -- node[msglabel]{resume}     (a |- 0,-5.6);
+\draw[msgret]  (a |- 0,-6.4) -- node[msglabel]{complete}   (s |- 0,-6.4);
+
+\draw[msgret]  (s |- 0,-7.2) -- node[msglabel]{idle}       (m |- 0,-7.2);
+
+\node[seqnote, anchor=north] at (5.5, -8.5)
+  {context switch 은 user-space 에서 stack 교체 — kernel 개입 없음 ($\sim$100 ns)};
+
+\end{tikzpicture}
+\end{document}

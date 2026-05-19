@@ -270,6 +270,10 @@ RETURN_IF_ERROR(Op());  // 일부 구현에서 깨질 수 있음
 
 ## std::expected의 monadic operations와 비교
 
+매크로와 monadic 메서드는 *같은 그림*을 다르게 표현한 것이다.
+
+![Monadic StatusOr / Expected](/images/blog/cpp-concepts/diagrams/monadic-status-or.svg)
+
 C++23의 `std::expected`는 매크로 대신 monadic operations를 제공한다.
 
 ```cpp

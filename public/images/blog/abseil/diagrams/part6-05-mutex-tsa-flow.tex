@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.0) {Mutex annotation → TSA flow};
+
+% Step 1: source
+\node[cls, minimum width=44mm, align=left, font=\sffamily\footnotesize\ttfamily\linespread{1.4}\selectfont, draw=absbord, fill=absfill] (src) at (-5.5, 3.2) {%
+class S \{\\[2pt]
+~~Mutex mu\_;\\[2pt]
+~~int n\_ GUARDED\_BY(mu\_);\\[2pt]
+\}; };
+
+% Step 2: compiler with TSA
+\node[cls, minimum width=36mm, draw=impbord, fill=impfill, font=\sffamily\footnotesize, align=center] (cc) at (1.0, 3.2) {Clang\\[3pt] -Wthread-safety};
+
+% Step 3a: protected — OK
+\node[cls, minimum width=46mm, draw=okbord, fill=okfill, font=\sffamily\footnotesize\ttfamily, align=center] (ok) at (6.4, 4.4) {MutexLock l(\&mu\_);\\[3pt] n\_++;\, OK};
+
+% Step 3b: unprotected — warn
+\node[cls, minimum width=46mm, draw=warnbord, fill=warnfill, font=\sffamily\footnotesize\ttfamily, align=center] (warn) at (6.4, 1.9) {n\_++;  // no lock\\[3pt] WARN compile};
+
+\draw[arr] (src.east) -- (cc.west);
+\draw[arr] (cc.east) -- (ok.west);
+\draw[arr] (cc.east) -- (warn.west);
+
+% Annotation arsenal
+\node[panel, fit={(-7.5, -3.6) (7.5, 0.4)}, inner sep=6pt] (p) {};
+\node[anchor=north west, font=\sffamily\bfseries\footnotesize, text=inkc] at (-7.3, 0.2) {주요 annotation};
+
+\node[anchor=north west, font=\sffamily\footnotesize\ttfamily, text=inkc] at (-7.3, -0.4) {ABSL\_GUARDED\_BY(mu)};
+\node[anchor=north west, font=\sffamily\footnotesize, text=mutec] at (-7.3, -0.9) {필드: mu 잡고 접근};
+
+\node[anchor=north west, font=\sffamily\footnotesize\ttfamily, text=inkc] at (-1.0, -0.4) {EXCLUSIVE\_LOCKS\_REQUIRED};
+\node[anchor=north west, font=\sffamily\footnotesize, text=mutec] at (-1.0, -0.9) {함수: 진입 시 잠금 요구};
+
+\node[anchor=north west, font=\sffamily\footnotesize\ttfamily, text=inkc] at (-7.3, -1.8) {SHARED\_LOCKS\_REQUIRED};
+\node[anchor=north west, font=\sffamily\footnotesize, text=mutec] at (-7.3, -2.3) {함수: reader lock 요구};
+
+\node[anchor=north west, font=\sffamily\footnotesize\ttfamily, text=inkc] at (-1.0, -1.8) {LOCKS\_EXCLUDED(mu)};
+\node[anchor=north west, font=\sffamily\footnotesize, text=mutec] at (-1.0, -2.3) {함수: 미보유 요구};
+
+\node[anchor=north west, font=\sffamily\footnotesize\ttfamily, text=inkc] at (-7.3, -2.9) {NO\_THREAD\_SAFETY\_ANALYSIS};
+\node[anchor=north west, font=\sffamily\footnotesize, text=mutec] at (-7.3, -3.4) {분석 비활성 (탈출구)};
+
+\node[anchor=north west, font=\sffamily\footnotesize\ttfamily, text=inkc] at (-1.0, -2.9) {PT\_GUARDED\_BY(mu)};
+\node[anchor=north west, font=\sffamily\footnotesize, text=mutec] at (-1.0, -3.4) {포인터 deref가 mu 요구};
+
+\end{tikzpicture}
+\end{document}

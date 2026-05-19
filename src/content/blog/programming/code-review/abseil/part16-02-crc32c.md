@@ -25,6 +25,10 @@ CRC32C(Castagnoli)는 *두 측면 모두에서 좋은 균형*이다.
 
 Google이 GFS·Spanner·BigTable·Colossus 어디서나 쓰는 표준이고 protobuf의 `Cord` 체크섬도 이 알고리즘이다.
 
+런타임에 hardware/software 경로가 갈리는 흐름은 다음과 같다.
+
+![CRC32C SSE4.2 vs software fallback](/images/blog/abseil/diagrams/part16-02-crc32c-hardware.svg)
+
 ## API와 사용법
 
 ```cpp

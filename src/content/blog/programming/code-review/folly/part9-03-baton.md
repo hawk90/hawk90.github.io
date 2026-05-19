@@ -155,6 +155,14 @@ cv:
 
 cv는 *mutex 두 개* (사용자 mutex + cv 내부)를 잡았다 놓는다. Baton은 0개. 따라서 cv보다 3-5배 빠른 시그널.
 
+### release/acquire가 보장하는 것
+
+Baton의 `state.store(POSTED, release)` + `state.load(acquire)`가 mutex 없이 publish-subscribe를 안전하게 만드는 이유.
+
+![Happens-before via release/acquire](/images/blog/cpp-concepts/diagrams/memory-ordering-happens-before.svg)
+
+release store 이전의 모든 쓰기가 acquire load 이후의 모든 읽기에 visible. poster가 채워 놓은 데이터를 waiter가 그대로 읽을 수 있다. 이게 lock-free 자료구조의 토대다.
+
 ## 사용 사례
 
 ### 1. Future/Promise 내부

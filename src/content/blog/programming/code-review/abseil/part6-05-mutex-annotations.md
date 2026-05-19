@@ -21,6 +21,10 @@ race condition은 보통 *간헐적* 버그다. 테스트가 안 잡고 producti
 
 clang은 `-Wthread-safety` 플래그로 lock 규약을 추적한다. abseil은 그 매크로를 portable한 형태로 제공한다.
 
+전체 흐름을 그림으로 보면 다음과 같다.
+
+![Mutex annotation TSA flow](/images/blog/abseil/diagrams/part6-05-mutex-tsa-flow.svg)
+
 ## 핵심 매크로
 
 | 매크로 | 의미 | 부착 위치 |

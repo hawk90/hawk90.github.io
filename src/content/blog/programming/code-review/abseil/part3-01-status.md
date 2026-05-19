@@ -58,6 +58,10 @@ void Handle(const Request& req) {
 
 ## 17개의 Canonical Code
 
+17개 코드를 색으로 분류해 보면 다음과 같다.
+
+![Status canonical codes](/images/blog/abseil/diagrams/part3-01-status-codes.svg)
+
 ```cpp
 namespace absl {
 enum class StatusCode : int {

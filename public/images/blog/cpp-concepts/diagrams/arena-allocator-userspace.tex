@@ -1,0 +1,69 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  slot/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=12mm, minimum height=8mm, inner sep=2pt, font=\sffamily\footnotesize},
+  used/.style={slot, fill=impfill, draw=impbord},
+  free/.style={slot, fill=neutfill, draw=neutbord},
+  frag/.style={slot, fill=warnfill, draw=warnbord}
+]
+
+% ─── Top: Arena allocator ────────────────────────────
+\node[font=\sffamily\bfseries\small, text=inkc] at (-7.5, 4.6) {Arena allocator};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (-8.6, 4.0) {연속 블록 + bump pointer, free는 전체 한 번에};
+
+% arena slab
+\node[used] (a1) at (-7, 3.0) {obj1};
+\node[used] (a2) at (-6, 3.0) {obj2};
+\node[used] (a3) at (-5, 3.0) {obj3};
+\node[used] (a4) at (-4, 3.0) {obj4};
+\node[free] (a5) at (-3, 3.0) {};
+\node[free] (a6) at (-2, 3.0) {};
+\node[free] (a7) at (-1, 3.0) {};
+\node[free] (a8) at (0, 3.0) {};
+
+% bump pointer marker
+\draw[focus, line width=0.7pt] (-2.5, 4.3) -- (-2.5, 3.55);
+\node[font=\sffamily\footnotesize\bfseries, text=focusc, anchor=south] at (-2.5, 4.3) {bump ptr};
+
+% allocate next: ptr += sizeof(T)
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (-8.6, 1.9) {alloc(T): \texttt{p = ptr; ptr += sizeof(T);  return p;}};
+\node[font=\sffamily\footnotesize, text=impbord, anchor=west] at (-8.6, 1.3) {$\Rightarrow$ O(1), no metadata per object, no fragmentation};
+
+% free whole arena
+\draw[flow] (-7, 0.6) -- (0, 0.6);
+\node[font=\sffamily\footnotesize, text=okbord, anchor=west] at (-8.6, 0.6) {free():};
+\node[font=\sffamily\footnotesize, text=okbord, anchor=west] at (-1.5, 0.6) {reset ptr};
+
+% ─── Bottom: Heap (general allocator) ────────────────
+\node[font=\sffamily\bfseries\small, text=inkc] at (-7.5, -0.6) {Heap (malloc/free)};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (-8.6, -1.2) {임의 위치 + per-object 헤더, 잦은 free로 단편화};
+
+% heap slab — gaps and frag
+\node[used] (h1) at (-7, -2.4) {A};
+\node[frag] (h2) at (-6, -2.4) {hole};
+\node[used] (h3) at (-5, -2.4) {B};
+\node[used] (h4) at (-4, -2.4) {C};
+\node[frag] (h5) at (-3, -2.4) {hole};
+\node[used] (h6) at (-2, -2.4) {D};
+\node[frag] (h7) at (-1, -2.4) {hole};
+\node[used] (h8) at (0, -2.4) {E};
+
+% header indicators (small ticks)
+\foreach \x in {-7,-5,-4,-2,0} {
+  \draw[draw=conbord, line width=0.5pt] (\x-0.5, -1.95) -- (\x-0.4, -1.95);
+}
+\node[font=\sffamily\scriptsize, text=conbord, anchor=west] at (-8.6, -1.95) {hdr};
+
+\node[font=\sffamily\footnotesize, text=warnbord, anchor=west] at (-8.6, -3.4) {$\Rightarrow$ free list 탐색, coalescing, per-obj 8\textendash16 B 오버헤드};
+
+% legend
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (-8.6, -4.4) {용도: 짧은 lifetime의 많은 작은 객체 (parser, request, IOBuf, Cord 노드)};
+
+\end{tikzpicture}
+\end{document}

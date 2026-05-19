@@ -1,0 +1,61 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  src/.style={rectangle, draw=absbord, fill=absfill, minimum width=84mm, align=left, font=\sffamily\footnotesize\ttfamily\linespread{1.4}\selectfont, inner sep=4pt},
+  st/.style={rectangle, draw=impbord, fill=impfill, minimum width=22mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  field/.style={rectangle, draw=clibord, fill=clifill, minimum width=14mm, minimum height=6mm, font=\sffamily\footnotesize, inner sep=0pt}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 6.0) {AbslHashValue — friend 함수로 hash 확장};
+
+% User struct (left)
+\node[src] (s) at (-3.6, 3.8) {%
+struct Point \{\\[2pt]
+~~int x; int y;\\[2pt]
+~~template <typename H>\\[2pt]
+~~friend H AbslHashValue(\\[2pt]
+~~~~H h, const Point\& p) \{\\[2pt]
+~~~~return H::combine(\\[2pt]
+~~~~~~std::move(h), p.x, p.y);\\[2pt]
+~~\}\\[2pt]
+\};};
+
+% Right call
+\node[hi, minimum width=44mm] (call) at (5.2, 5.5) {absl::HashOf(point)};
+
+% HashState pipeline
+\node[st] (h0) at (-5.6, 1.0) {seed};
+\node[field] (f1) at (-2.6, 1.0) {x};
+\node[field] (f2) at (-1.0, 1.0) {y};
+\node[st] (h1) at ( 1.6, 1.0) {combine};
+\node[st] (h2) at ( 4.6, 1.0) {finalize};
+\node[hi, minimum width=22mm] (h3) at (7.0, 1.0) {size\_t};
+
+\draw[arr] (h0) -- (f1);
+\draw[arr] (f1) -- (f2);
+\draw[arr] (f2) -- (h1);
+\draw[arr] (h1) -- (h2);
+\draw[arr] (h2) -- (h3);
+
+\draw[arr, draw=absbord] (call.south) -- ++(0, -0.3) -| (h0.north);
+
+% Bottom notes
+\node[note, anchor=north west, text width=64mm] at (-7.0, -0.2) {%
+  \textbf{핵심}\\[3pt]
+  friend 함수로 struct 안 선언.\\[3pt]
+  template H는 HashState.
+};
+\node[note, anchor=north west, text width=64mm, draw=okbord, fill=okfill] at (0.5, -0.2) {%
+  \textbf{이점}\\[3pt]
+  flat\_hash\_map 즉시 사용.\\[3pt]
+  std::hash specialize 불필요.
+};
+
+\end{tikzpicture}
+\end{document}

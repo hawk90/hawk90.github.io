@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.0, 4.8) {CancellationToken — tree-wide propagation};
+
+% Root token
+\node[cls, draw=warnbord, fill=warnfill, minimum width=32mm] (root) at (5.0, 3.7) {Root Token};
+
+% Level 1 children
+\node[cls, draw=conbord, fill=confill] (a) at (1.5, 2.0) {Task A};
+\node[cls, draw=conbord, fill=confill] (b) at (5.0, 2.0) {Task B};
+\node[cls, draw=conbord, fill=confill] (c) at (8.5, 2.0) {Task C};
+
+% Level 2 children
+\node[clsSm, draw=conbord, fill=confill] (a1) at (0.5, 0.4) {A.1};
+\node[clsSm, draw=conbord, fill=confill] (a2) at (2.5, 0.4) {A.2};
+\node[clsSm, draw=conbord, fill=confill] (b1) at (5.0, 0.4) {B.1};
+\node[clsSm, draw=conbord, fill=confill] (c1) at (8.5, 0.4) {C.1};
+
+% Edges from root
+\draw[focus, draw=warnbord] (root.south) -- (a.north);
+\draw[focus, draw=warnbord] (root.south) -- (b.north);
+\draw[focus, draw=warnbord] (root.south) -- (c.north);
+
+% Edges to grandchildren
+\draw[focus, draw=warnbord] (a.south) -- (a1.north);
+\draw[focus, draw=warnbord] (a.south) -- (a2.north);
+\draw[focus, draw=warnbord] (b.south) -- (b1.north);
+\draw[focus, draw=warnbord] (c.south) -- (c1.north);
+
+% cancel() label on root
+\node[font=\sffamily\bfseries\footnotesize, text=warnbord, anchor=west] at (7.0, 3.9)
+  {.requestCancellation()};
+
+% Bottom note
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (0.0, -0.6)
+  {cancel(root) $\to$ 모든 자손 task 가 동시에 cancellation 신호 수신};
+
+\end{tikzpicture}
+\end{document}

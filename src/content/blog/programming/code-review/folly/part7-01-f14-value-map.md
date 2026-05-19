@@ -71,7 +71,17 @@ for (int i = 0; i < 100; ++i) m[i] = "x";   // rehash 가능
 
 ## 내부 구현
 
+### Open addressing 기반 위에 chunk
+
+F14는 *open addressing* 위에 SIMD-friendly *chunk*를 얹은 구조다. 먼저 일반 open addressing의 기본 동작이 어떻게 흐르는지부터.
+
+![Open addressing probing](/images/blog/cpp-concepts/diagrams/hash-table-probing.svg)
+
+hash로 첫 위치를 잡고, 충돌이면 probe하며 이어진다. 일반 구현은 한 slot씩 비교하지만, F14는 *14-slot chunk*를 한 단위로 묶어 SIMD로 한 번에 비교한다 — probe count가 평균 1\~2 chunk로 떨어진다.
+
 ### Chunk 구조
+
+![F14 chunk layout](/images/blog/folly/diagrams/part7-01-f14-chunk-layout.svg)
 
 ```text
 [ control bytes (16B) | slot[0] | slot[1] | ... | slot[13] | overflow counter (1B) ]

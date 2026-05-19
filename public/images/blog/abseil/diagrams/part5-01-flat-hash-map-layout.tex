@@ -1,0 +1,68 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ctrl/.style={rectangle, draw=absbord, fill=absfill, minimum width=8mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  ctrlH/.style={rectangle, draw=hibord, fill=hifill, minimum width=8mm, minimum height=8mm, font=\sffamily\bfseries\footnotesize, inner sep=0pt},
+  ctrlE/.style={rectangle, draw=neutbord, fill=neutfill, minimum width=8mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  slot/.style={rectangle, draw=impbord, fill=impfill, minimum width=8mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=0pt, align=center},
+  slotH/.style={rectangle, draw=hibord, fill=hifill, minimum width=8mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=0pt, align=center},
+  slotE/.style={rectangle, draw=neutbord, fill=neutfill, minimum width=8mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=0pt},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.0) {flat\_hash\_map 메모리 레이아웃 (Swiss Table)};
+
+% Hash input
+\node[hi, minimum width=42mm] (hash) at (-4.5, 3.7) {hash(key) = 0x9F3A...};
+
+% H1/H2 split
+\node[absSm, minimum width=24mm] (h1) at (-7.0, 2.2) {H1 (57 bit)\\[3pt] slot index};
+\node[hi,    minimum width=28mm, font=\sffamily\bfseries\footnotesize] (h2) at (-2.0, 2.2) {H2 (7 bit) = 0x3A};
+
+\draw[arr] (hash.south) -- ++(0, -0.3) -| (h1.north);
+\draw[arr] (hash.south) -- ++(0, -0.3) -| (h2.north);
+
+% ctrl row
+\node[anchor=east, font=\sffamily\bfseries\footnotesize, text=inkc] at (-4.6, 0.4) {ctrl[]};
+\node[ctrlE] (c0) at (-4.0, 0.4) {--};
+\node[ctrl]  (c1) at (-3.2, 0.4) {12};
+\node[ctrlH] (c2) at (-2.4, 0.4) {3A};
+\node[ctrl]  (c3) at (-1.6, 0.4) {88};
+\node[ctrlE] (c4) at (-0.8, 0.4) {--};
+\node[ctrlH] (c5) at ( 0.0, 0.4) {3A};
+\node[ctrl]  (c6) at ( 0.8, 0.4) {C1};
+\node[ctrlE] (c7) at ( 1.6, 0.4) {--};
+
+% slot row
+\node[anchor=east, font=\sffamily\bfseries\footnotesize, text=inkc] at (-4.6, -1.2) {slot[]};
+\node[slotE] at (-4.0, -1.2) {};
+\node[slot]  at (-3.2, -1.2) {kv$_1$};
+\node[slotH] (s2) at (-2.4, -1.2) {kv$_2$};
+\node[slot]  at (-1.6, -1.2) {kv$_3$};
+\node[slotE] at (-0.8, -1.2) {};
+\node[slotH] (s5) at ( 0.0, -1.2) {kv$_5$};
+\node[slot]  at ( 0.8, -1.2) {kv$_6$};
+\node[slotE] at ( 1.6, -1.2) {};
+
+% Right notes
+\node[noteL, text width=46mm] (n1) at (3.0, 1.0) {%
+  \textbf{SIMD match}\\[3pt]
+  movemask로 16 byte 비교.\\[3pt]
+  H2 일치 비트마스크.
+};
+\draw[focus] (h2.east) -- (n1.west);
+
+\node[noteL, text width=46mm, draw=okbord, fill=okfill] at (3.0, -1.4) {%
+  \textbf{후보 슬롯}\\[3pt]
+  c2, c5\\[3pt]
+  key 비교는 이 후보만
+};
+
+\end{tikzpicture}
+\end{document}

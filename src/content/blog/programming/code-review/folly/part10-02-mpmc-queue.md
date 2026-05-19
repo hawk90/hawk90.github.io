@@ -22,6 +22,14 @@ ticket-based 알고리즘은 다른 접근이다. 모든 producer가 `fetch_add(
 
 이 알고리즘은 Vyukov의 bounded MPMC queue로 잘 알려져 있고, Folly는 그것을 cache-line 정렬과 적응형 spin/block까지 더해 production-ready로 다듬었다.
 
+### Producer/Consumer 그림
+
+MPMC는 producer N + consumer M의 가장 일반적인 형태다.
+
+![Producer / consumer queue](/images/blog/cpp-concepts/diagrams/producer-consumer-queue.svg)
+
+여러 생산자/소비자가 공유 큐를 두고 경쟁한다. capacity가 차면 producer가 block, 비면 consumer가 block — 양방향 backpressure가 자연스럽게 생긴다.
+
 ## API
 
 ```cpp
@@ -44,6 +52,8 @@ q.read(t);                // non-blocking, false on empty
 
 ## 내부 구현 — slot의 sequence
 
+![MPMC ticket-based queue](/images/blog/folly/diagrams/part10-02-mpmc-queue.svg)
+
 ```cpp
 struct Slot {
   std::atomic<uint32_t> sequence;
@@ -58,6 +68,12 @@ alignas(cacheline) std::atomic<uint64_t> popTicket_;
 ```
 
 각 슬롯에 `sequence`가 있다. 초기값은 슬롯 인덱스다(slot[0].sequence = 0, slot[1].sequence = 1, ...).
+
+`alignas(cacheline)`이 *왜* 필요한지 짚어 보자. push 쪽과 pop 쪽이 같은 cache line에 있으면:
+
+![False sharing on cache line](/images/blog/cpp-concepts/diagrams/false-sharing-cacheline.svg)
+
+producer가 `pushTicket_++`만 해도 consumer의 cache line이 invalidate되어 `popTicket_` 읽기에 cache miss가 난다 — 두 변수가 *독립*인데도 그렇다. cache-line aligned로 두 변수를 분리하면 ping-pong이 사라진다.
 
 ### enqueue 알고리즘
 

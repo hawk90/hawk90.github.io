@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  layer/.style={rectangle, rounded corners=3pt, draw=nodebord, line width=0.5pt, minimum height=10mm, font=\sffamily\bfseries\footnotesize, align=center, inner sep=4pt},
+  L1/.style={layer, draw=absbord, fill=absfill, minimum width=140mm},
+  L2/.style={layer, draw=impbord, fill=impfill, minimum width=110mm},
+  L3/.style={layer, draw=clibord, fill=clifill, minimum width=80mm},
+  L4/.style={layer, draw=hibord,  fill=hifill,  minimum width=50mm},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 6.4) {Abseil — 계층형 아키텍처 (의존은 아래로만)};
+
+% Top — high-level features
+\node[L4] (l4) at (0, 5.2) {strings, log, flags, status};
+
+% Mid-high — containers, time, hash
+\node[L3] (l3a) at (-3.0, 3.7) {container};
+\node[L3, minimum width=66mm] (l3b) at (3.5, 3.7) {time, status, hash};
+
+% Mid — numeric, strings, types
+\node[L2] (l2) at (0, 2.2) {numeric, types (optional, variant, span)};
+
+% Mid-low — meta, debugging
+\node[L2, minimum width=140mm] (l2b) at (0, 0.8) {meta, debugging (stacktrace, symbolize), utility};
+
+% Base
+\node[L1] (l1) at (0, -0.6) {base — *플랫폼 추상화*};
+
+% Arrows
+\draw[arr, draw=mutec] (l4.south) -- (3.0, 4.4);
+\draw[arr, draw=mutec] (l4.south) -- (-3.0, 4.4);
+\draw[arr, draw=mutec] (l3a.south) -- (l2.north -| l3a);
+\draw[arr, draw=mutec] (l3b.south) -- (l2.north -| l3b);
+\draw[arr, draw=mutec] (l2.south)  -- (l2b.north);
+\draw[arr, draw=mutec] (l2b.south) -- (l1.north);
+
+% Side legend
+\node[noteL, text width=62mm] at (-7.0, -1.8) {%
+  \textbf{원칙}\\[3pt]
+  상위 → 하위 일방향 의존.\\[3pt]
+  순환 없음 (CI cycle detector).
+};
+\node[noteL, text width=62mm, draw=okbord, fill=okfill] at (1.0, -1.8) {%
+  \textbf{결과}\\[3pt]
+  부분 채택 가능 (status만 등).\\[3pt]
+  일관 ABI \& LTS 정책.
+};
+
+\end{tikzpicture}
+\end{document}

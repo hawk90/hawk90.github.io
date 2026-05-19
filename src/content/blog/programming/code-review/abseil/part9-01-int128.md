@@ -20,6 +20,10 @@ bookAuthor: "Google"
 
 Clang/GCC는 `__int128`을 비표준 확장으로 제공하지만 MSVC는 없다. Abseil은 *모든 플랫폼*에 동일 인터페이스를 보장한다.
 
+비트 레이아웃과 carry 처리는 다음과 같다.
+
+![uint128 비트 레이아웃과 carry](/images/blog/abseil/diagrams/part9-01-int128-bit-layout.svg)
+
 ```cpp
 #include "absl/numeric/int128.h"
 

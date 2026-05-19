@@ -37,6 +37,10 @@ void Process(absl::string_view input) {
 }
 ```
 
+두 경우의 메모리 배치를 그림으로 보면 다음과 같다.
+
+![FixedArray stack vs heap](/images/blog/abseil/diagrams/part5-05-fixed-array-stack.svg)
+
 ## API와 사용법
 
 ```cpp

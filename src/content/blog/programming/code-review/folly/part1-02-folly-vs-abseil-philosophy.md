@@ -69,6 +69,14 @@ Folly를 도입하면 *생태계 전체*가 들어온다. 패키지 매니저로
 
 Abseil은 `LTS branch`를 유지한다(예: `20240722`). LTS 안에서는 API 호환성을 약속한다. Folly에는 그런 약속이 없다. 외부 사용자는 *특정 commit*에 고정해서 쓰는 게 일반적이다.
 
+#### pImpl을 안 쓰는 라이브러리
+
+두 라이브러리 모두 *pImpl을 거의 안 쓴다*. ABI 안정성보다 zero-overhead가 우선이라는 결정이다.
+
+![pImpl vs header-only](/images/blog/cpp-concepts/diagrams/pimpl-vs-header-only.svg)
+
+pImpl은 heap 1번 + indirection 1번이라 hot path에서 측정 가능한 비용이다. Folly/Abseil은 internal type을 header에 노출하는 대신 ABI 호환성 책임을 *사용자에게* 떠넘긴다 — 같은 컴파일러로 통째로 빌드하라는 식.
+
 ### 4. Async 모델
 
 ```cpp

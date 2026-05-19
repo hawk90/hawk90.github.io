@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  slot/.style={rectangle, draw=nodebord, line width=0.45pt, minimum width=11mm, minimum height=9mm, inner sep=2pt, fill=nodefill, font=\sffamily\footnotesize\ttfamily, align=center},
+  occ/.style={slot, fill=impfill, draw=impbord},
+  col/.style={slot, fill=confill, draw=conbord},
+  hit/.style={slot, fill=hifill, draw=hibord, font=\sffamily\footnotesize\ttfamily\bfseries},
+  emp/.style={slot, fill=neutfill, draw=neutbord},
+  idx/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+% ─── Top: bucket array ─────────────────────────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.5, 4.6) {Open addressing — bucket array (size 8)};
+
+\foreach \i/\type/\val in {0/occ/Bob, 1/emp/, 2/occ/Eve, 3/col/Tom, 4/col/Sam, 5/hit/Joe, 6/emp/, 7/occ/Ann} {
+  \pgfmathsetmacro{\x}{-6.6 + \i*1.15}
+  \node[\type] at (\x, 3.5) {\val};
+  \node[idx] at (\x, 4.15) {[\i]};
+}
+
+% ─── Hash + probe sequence ─────────────────────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.5, 2.4) {Insert "Joe"};
+
+\node[font=\sffamily\footnotesize\ttfamily, anchor=west] at (-7.5, 1.7) {1. h = hash("Joe") \% 8 \quad = \quad 3};
+
+% probe steps — show small markers below each bucket
+\node[font=\sffamily\scriptsize, text=focusc, anchor=north] at (-3.05, 2.95) {busy};
+\node[font=\sffamily\scriptsize, text=focusc, anchor=north] at (-1.9, 2.95) {busy};
+\node[font=\sffamily\scriptsize, text=focusc, anchor=north] at (-0.75, 2.95) {free $\Leftarrow$};
+\draw[focus, line width=0.7pt, ->] (-3.05, 2.6) to[bend right=30] (-1.9, 2.6);
+\draw[focus, line width=0.7pt, ->] (-1.9, 2.6) to[bend right=30] (-0.75, 2.6);
+
+\node[font=\sffamily\footnotesize\ttfamily, anchor=west] at (-7.5, 1.1) {2. slot[3] busy $\rightarrow$ probe slot[4] busy $\rightarrow$ slot[5] empty $\rightarrow$ insert};
+
+% ─── Probing strategies (compact) ──────────────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.5, 0.3) {Probing strategies};
+
+\node[font=\sffamily\footnotesize, anchor=west] at (-7.5, -0.5) {%
+  \textbf{Linear:} $h, h{+}1, h{+}2, \ldots$ \quad cache-friendly, clustering};
+\node[font=\sffamily\footnotesize, anchor=west] at (-7.5, -1.0) {%
+  \textbf{Quadratic:} $h, h{+}1, h{+}4, h{+}9, \ldots$ \quad cluster 완화, 일부만 도달};
+\node[font=\sffamily\footnotesize, anchor=west] at (-7.5, -1.5) {%
+  \textbf{Double hash:} $h_1{+}k \cdot h_2$ \quad 균등 분포, cache miss 증가};
+
+% ─── Bottom: load factor ───────────────────────
+\node[font=\sffamily\footnotesize, text=warnbord, anchor=west, text width=170mm] at (-7.5, -2.5) {%
+  \textbf{Load factor가 높을수록} 충돌 확률 $\uparrow$, probe 길이 $\uparrow$ $\rightarrow$ 보통 0.5\textendash 0.875에서 rehash. \\[2pt]
+  Swiss Table (absl), F14 (folly)는 \textbf{SIMD로 한 그룹(16 slot)을 1 cmp}로 검사해 probe 비용 상쇄.};
+
+\end{tikzpicture}
+\end{document}

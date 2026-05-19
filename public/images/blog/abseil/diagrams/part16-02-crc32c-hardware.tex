@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  reg/.style={rectangle, draw=absbord, fill=absfill, minimum width=22mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.6) {CRC32C — SSE4.2 hardware vs software fallback};
+
+% Top: dispatcher
+\node[hi, minimum width=46mm] (d) at (0, 4.4) {ComputeCrc32c(span)};
+
+% Decision
+\node[q, minimum width=46mm, aspect=3] (q) at (0, 3.0) {cpuid: SSE4.2?};
+\draw[arr] (d) -- (q);
+
+% Hardware path
+\node[panel, fit={(-7.4, 0.4) (-0.5, 2.4)}, inner sep=6pt] (ph) {};
+\node[anchor=north, font=\sffamily\bfseries\footnotesize, text=okbord] at (-3.9, 2.4) {Hardware (CRC32 instr)};
+\node[reg] (h1) at (-5.7, 1.4) {load 8B};
+\node[reg, draw=hibord, fill=hifill] (h2) at (-3.2, 1.4) {crc32q};
+\node[reg] (h3) at (-1.2, 1.4) {accum};
+\draw[arr] (h1) -- (h2);
+\draw[arr] (h2) -- (h3);
+\node[anchor=north, font=\sffamily\footnotesize, text=mutec] at (-3.9, 0.8) {$\sim$25 GB/s};
+
+% Software path
+\node[panel, fit={(0.5, 0.4) (7.4, 2.4)}, inner sep=6pt] (ps) {};
+\node[anchor=north, font=\sffamily\bfseries\footnotesize, text=conbord] at (3.9, 2.4) {Software fallback};
+\node[reg, draw=conbord, fill=confill] (s1) at (1.6, 1.4) {byte};
+\node[reg, draw=conbord, fill=confill] (s2) at (3.9, 1.4) {table lookup};
+\node[reg, draw=conbord, fill=confill] (s3) at (6.2, 1.4) {XOR};
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\node[anchor=north, font=\sffamily\footnotesize, text=mutec] at (3.9, 0.8) {$\sim$0.5\,GB/s};
+
+\draw[arr] (q.west) -| node[font=\sffamily\footnotesize, fill=white, inner sep=2pt]{yes} (ph.north);
+\draw[arr] (q.east) -| node[font=\sffamily\footnotesize, fill=white, inner sep=2pt]{no}  (ps.north);
+
+% Bottom notes
+\node[noteL, text width=70mm] at (-7.0, -0.4) {%
+  \textbf{ARM64}\\[3pt]
+  \texttt{\_\_crc32cb/h/w/x} 명령으로 fast path.
+};
+\node[noteL, text width=70mm, draw=okbord, fill=okfill] at (0.5, -0.4) {%
+  \textbf{API}\\[3pt]
+  호출자는 한 함수만, Abseil이 dispatch.
+};
+
+\end{tikzpicture}
+\end{document}

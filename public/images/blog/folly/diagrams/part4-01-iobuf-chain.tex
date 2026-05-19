@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.5, 4.6) {IOBuf chain — circular doubly linked list};
+
+% head label
+\node[font=\sffamily\bfseries\footnotesize, text=hibord, anchor=south east] at (-0.2, 3.0) {head};
+\draw[uses, draw=hibord] (-0.2, 2.85) -- (0.2, 2.85);
+
+% 4 IOBuf nodes
+\foreach \i/\x/\cap/\len in {0/0.5/256/120, 1/3.7/256/256, 2/6.9/512/300, 3/10.1/128/80} {
+  \draw[draw=absbord, fill=absfill, line width=0.4pt]
+    (\x, 2.0) rectangle ({\x+2.8}, 3.6);
+  \node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at ({\x+1.4}, 3.55) {IOBuf \i};
+  \node[font=\sffamily\scriptsize, text=inkc, anchor=west] at ({\x+0.15}, 2.95) {data*};
+  \node[font=\sffamily\scriptsize, text=inkc, anchor=west] at ({\x+0.15}, 2.62) {length: \len};
+  \node[font=\sffamily\scriptsize, text=inkc, anchor=west] at ({\x+0.15}, 2.30) {capacity: \cap};
+}
+
+% Forward chain arrows
+\foreach \i/\xa/\xb in {0/3.3/3.7, 1/6.5/6.9, 2/9.7/10.1} {
+  \draw[uses, draw=edgec] (\xa, 2.8) -- (\xb, 2.8);
+}
+
+% Circular back
+\draw[uses, draw=edgesc, dashed] (12.9, 2.3) -- (12.9, 1.5) -- (0.5, 1.5) -- (0.5, 2.0);
+\node[font=\sffamily\footnotesize, text=mutec] at (6.7, 1.35) {next $\to$ head (circular)};
+
+% Data buffers below
+\foreach \i/\x/\w in {0/0.7/2.4, 1/3.9/2.4, 2/7.1/2.4, 3/10.3/2.4} {
+  \draw[draw=impbord, fill=impfill, line width=0.3pt]
+    (\x, 0.6) rectangle ({\x+\w}, 1.0);
+  \node[font=\sffamily\scriptsize, text=mutec] at ({\x+\w/2}, 0.8) {data buffer \i};
+}
+
+% data* pointers down to buffers
+\foreach \x/\xt in {0.5/0.9, 3.7/4.1, 6.9/7.3, 10.1/10.5} {
+  \draw[uses, draw=edgesc, line width=0.3pt] ({\x+1.4}, 2.05) -- (\xt, 1.0);
+}
+
+\end{tikzpicture}
+\end{document}

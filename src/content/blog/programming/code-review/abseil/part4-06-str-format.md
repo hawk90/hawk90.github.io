@@ -29,6 +29,10 @@ snprintf(buf, 4, "%s", "too long");                     // 잘림 — 실수 잡
 
 C++의 `std::stringstream`은 안전하지만 형식 표현력이 떨어지고 locale에 묶인다. `absl::StrFormat`은 printf의 표현력 + C++의 type 안전성을 결합한다.
 
+format spec과 인자 타입이 컴파일 타임에 매칭되는 흐름은 다음과 같다.
+
+![StrFormat type-safe printf](/images/blog/abseil/diagrams/part4-06-str-format-spec.svg)
+
 ## API와 사용법
 
 ```cpp

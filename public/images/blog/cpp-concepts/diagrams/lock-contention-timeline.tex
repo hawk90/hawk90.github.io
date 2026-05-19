@@ -1,0 +1,72 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  run/.style={rectangle, draw=impbord, fill=impfill, line width=0.4pt, minimum height=6mm, inner sep=0pt, font=\sffamily\scriptsize, align=center},
+  wait/.style={rectangle, draw=conbord, fill=confill, line width=0.4pt, minimum height=6mm, inner sep=0pt, font=\sffamily\scriptsize, align=center},
+  crit/.style={rectangle, draw=hibord, fill=hifill, line width=0.4pt, minimum height=6mm, inner sep=0pt, font=\sffamily\scriptsize\bfseries, align=center}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.6, 4.6) {Lock contention timeline (3 threads, 1 mutex)};
+
+% Time axis
+\draw[->, draw=mutec, line width=0.5pt] (-7.6, -1.0) -- (8.0, -1.0) node[right, font=\sffamily\footnotesize] {time};
+
+% ─── Thread T1 ────────────────────────────────
+\node[font=\sffamily\bfseries\footnotesize, anchor=east] at (-7.4, 3.7) {T1};
+\node[run, minimum width=14mm] at (-6.5, 3.7) {work};
+\node[crit, minimum width=20mm] (t1c) at (-3.5, 3.7) {CS};
+\node[run, minimum width=16mm] at (0.5, 3.7) {work};
+\node[wait, minimum width=10mm] (t1w) at (4.5, 3.7) {wait};
+\node[crit, minimum width=12mm] at (7.5, 3.7) {CS};
+
+% ─── Thread T2 ────────────────────────────────
+\node[font=\sffamily\bfseries\footnotesize, anchor=east] at (-7.4, 2.4) {T2};
+\node[run, minimum width=10mm] at (-6.8, 2.4) {work};
+\node[wait, minimum width=18mm] (t2w) at (-3.9, 2.4) {wait};
+\node[crit, minimum width=18mm] (t2c) at (0.5, 2.4) {CS};
+\node[run, minimum width=20mm] at (5.0, 2.4) {work};
+
+% ─── Thread T3 ────────────────────────────────
+\node[font=\sffamily\bfseries\footnotesize, anchor=east] at (-7.4, 1.1) {T3};
+\node[run, minimum width=20mm] at (-6.0, 1.1) {work};
+\node[wait, minimum width=30mm] (t3w) at (0.0, 1.1) {wait};
+\node[crit, minimum width=12mm] (t3c) at (5.0, 1.1) {CS};
+\node[run, minimum width=18mm] at (7.4, 1.1) {work};
+
+% Mutex holder arrows
+\draw[draw=mutec, line width=0.3pt, dashed] (-3.5, 4.05) -- (-3.5, 0.5);
+\draw[draw=mutec, line width=0.3pt, dashed] (0.5, 4.05) -- (0.5, 0.5);
+\draw[draw=mutec, line width=0.3pt, dashed] (5.0, 4.05) -- (5.0, 0.5);
+
+% Brace under critical sections
+\draw[decorate, decoration={brace, amplitude=4pt, mirror}, draw=hibord] (-4.5, 0.0) -- (-2.5, 0.0);
+\node[font=\sffamily\scriptsize, text=hibord] at (-3.5, -0.3) {CS by T1};
+
+\draw[decorate, decoration={brace, amplitude=4pt, mirror}, draw=hibord] (-0.4, 0.0) -- (1.4, 0.0);
+\node[font=\sffamily\scriptsize, text=hibord] at (0.5, -0.3) {CS by T2};
+
+\draw[decorate, decoration={brace, amplitude=4pt, mirror}, draw=hibord] (4.4, 0.0) -- (5.6, 0.0);
+\node[font=\sffamily\scriptsize, text=hibord] at (5.0, -0.3) {CS by T3};
+
+% Legend
+\node[run, minimum width=8mm] at (-6.5, -1.9) {};
+\node[font=\sffamily\footnotesize, anchor=west] at (-5.9, -1.9) {work};
+\node[wait, minimum width=8mm] at (-3.5, -1.9) {};
+\node[font=\sffamily\footnotesize, anchor=west] at (-2.9, -1.9) {wait (lock blocked)};
+\node[crit, minimum width=8mm] at (1.5, -1.9) {};
+\node[font=\sffamily\footnotesize, anchor=west] at (2.1, -1.9) {critical section};
+
+% Bottom narrative
+\node[font=\sffamily\footnotesize, text=warnbord, align=center, text width=170mm] at (0.0, -3.0) {%
+  CS는 직렬화된다 — 동시에 1 스레드만 진입. 짧은 CS + 적은 호출이 핵심.\\[2pt]
+  contention 비용 = wait time. 측정 도구: \texttt{perf lock}, \texttt{folly::Synchronized} stats.};
+
+\end{tikzpicture}
+\end{document}

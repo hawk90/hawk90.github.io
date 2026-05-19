@@ -67,6 +67,8 @@ m.empty();
 
 ### Sharding
 
+![ConcurrentHashMap shards](/images/blog/folly/diagrams/part8-04-concurrent-hash-map-shards.svg)
+
 ```cpp
 // 약식
 template <typename K, typename V>

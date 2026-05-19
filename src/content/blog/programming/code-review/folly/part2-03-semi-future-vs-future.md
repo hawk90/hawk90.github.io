@@ -101,6 +101,8 @@ class Future {
 
 ## 변환 흐름
 
+![SemiFuture .via Executor Future](/images/blog/folly/diagrams/part2-03-semifuture-via.svg)
+
 ```text
 makeSemiFuture(v) ──▶ SemiFuture<T> ──.via(e)──▶ Future<T>
                                                     │

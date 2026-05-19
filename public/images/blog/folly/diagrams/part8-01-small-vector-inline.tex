@@ -1,0 +1,63 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.5, 5.0) {SmallVector$<$T, 4$>$ — inline 4 slots, then heap};
+
+% ── Inline mode (left) ───────────────────────────────────────
+\node[font=\sffamily\bfseries\footnotesize, text=impbord, anchor=west] at (0, 4.2)
+  {size $\leq$ 4: inline};
+
+\draw[draw=mutec, line width=0.4pt]
+  (0, 2.0) rectangle (4.2, 3.9);
+
+% Inline slots
+\foreach \i/\v in {0/A, 1/B, 2/C, 3/{}} {
+  \draw[draw=impbord, fill=impfill, line width=0.3pt]
+    ({0.25+\i*0.85}, 2.7) rectangle ({0.25+(\i+1)*0.85}, 3.4);
+  \node[font=\sffamily\small, text=inkc] at ({0.25+(\i+0.5)*0.85}, 3.05) {\v};
+}
+\node[font=\sffamily\footnotesize, text=inkc, anchor=west] at (0.25, 2.3)
+  {size + flag (1 byte)};
+
+% ── Heap mode (right) ────────────────────────────────────────
+\node[font=\sffamily\bfseries\footnotesize, text=conbord, anchor=west] at (7.5, 4.2)
+  {size $>$ 4: heap};
+
+\draw[draw=mutec, line width=0.4pt]
+  (7.5, 2.0) rectangle (11.7, 3.9);
+
+\draw[draw=conbord, fill=confill, line width=0.3pt]
+  (7.75, 2.85) rectangle (9.5, 3.4);
+\node[font=\sffamily\footnotesize, text=inkc] at (8.62, 3.12) {data*};
+
+\draw[draw=conbord, fill=confill, line width=0.3pt]
+  (9.6, 2.85) rectangle (10.5, 3.4);
+\node[font=\sffamily\footnotesize, text=inkc] at (10.05, 3.12) {size};
+
+\draw[draw=conbord, fill=confill, line width=0.3pt]
+  (10.6, 2.85) rectangle (11.5, 3.4);
+\node[font=\sffamily\footnotesize, text=inkc] at (11.05, 3.12) {cap};
+
+% Heap buffer
+\draw[draw=mutec, line width=0.4pt, dashed]
+  (7.5, 0.6) rectangle (12.5, 1.1);
+\foreach \i/\v in {0/A,1/B,2/C,3/D,4/E,5/F,6/G,7/H} {
+  \node[font=\sffamily\footnotesize, text=mutec] at ({7.75+\i*0.6}, 0.85) {\v};
+}
+
+\draw[uses, draw=conbord] (8.62, 2.8) to[bend right=15] (7.75, 1.1);
+
+% Transition arrow (label above)
+\draw[uses, draw=hibord, line width=0.7pt] (4.4, 3.0) -- (7.4, 3.0);
+\node[font=\sffamily\footnotesize, text=hibord] at (5.9, 3.3)
+  {push\_back $\to$ overflow};
+
+\end{tikzpicture}
+\end{document}

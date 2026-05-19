@@ -60,6 +60,18 @@ absl::Status Process(const char* path) {
 
 분기 추가에도 정리는 영향받지 않는다. 스코프를 벗어날 때 lambda가 한 번 실행된다.
 
+## RAII 원리 — 무엇을 보장하는가
+
+`Cleanup`은 결국 RAII / scope guard 패턴의 한 instance다. scope를 *어느 경로로 빠져나가도* 소멸자가 호출된다는 보장이 핵심.
+
+![RAII scope guard](/images/blog/cpp-concepts/diagrams/raii-scope-guard.svg)
+
+정상 return, early return, exception throw 모두 동일하게 cleanup이 실행된다. C API에서 `goto cleanup` 패턴을 쓰던 자리를 그대로 대체할 수 있고, exception 안전성이 *자동으로* 따라온다.
+
+scope 진입부터 종료까지의 시점별 동작은 다음과 같다.
+
+![Cleanup RAII scope flow](/images/blog/abseil/diagrams/part14-01-cleanup-raii.svg)
+
 ## API와 사용법
 
 ```cpp

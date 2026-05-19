@@ -34,6 +34,8 @@ if (last->tailroom() >= newData.size()) {
 
 ## 기본 사용
 
+![IOBufQueue append/trim](/images/blog/folly/diagrams/part4-02-iobuf-queue.svg)
+
 ```cpp
 #include <folly/io/IOBufQueue.h>
 

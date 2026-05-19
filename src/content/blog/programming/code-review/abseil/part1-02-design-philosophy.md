@@ -22,6 +22,10 @@ C++ 라이브러리를 설계하는 사람은 세 가지 질문에 답해야 한
 
 Abseil은 이 셋에 대해 일관된 답을 가지고 있고, 그 답이 사용자의 코드에도 영향을 준다.
 
+Abseil 전체의 의존 구조를 계층으로 보면 다음과 같다.
+
+![Abseil 계층형 아키텍처](/images/blog/abseil/diagrams/part1-02-design-philosophy.svg)
+
 ## 원칙 1: Compatibility with std
 
 Abseil의 polyfill 타입은 std 버전과 *교환 가능*하도록 설계되어 있다. C++17이 표준화한 `std::optional`을 예로 보면 다음과 같다.
@@ -99,6 +103,14 @@ absl/
 작은 inline 함수(`string_view::operator[]`)는 헤더에 둔다. 큰 함수(`StrCat` 구현)와 정적 데이터(`Status::OkStatus()`의 singleton)는 .cc에 둔다.
 
 이 결정은 컴파일 시간뿐 아니라 ABI에도 영향을 준다. .cc에 들어간 코드는 사용자 컴파일러 버전에 영향을 받지 않지만, header에 들어간 코드는 inline namespace로 격리해야 한다.
+
+### pImpl과 같은 동기
+
+같은 trade-off가 pImpl idiom에서도 일어난다.
+
+![pImpl vs header-only](/images/blog/cpp-concepts/diagrams/pimpl-vs-header-only.svg)
+
+header에 implementation을 노출하면 client가 internal type을 transitively include하게 되어 컴파일 시간과 ABI break 위험이 커진다. .cc로 옮기는 것은 *pImpl pointer*를 한 단계 덜 형식적으로 적용하는 것과 같다 — internal 변경이 header를 건드리지 않게 격리한다.
 
 ## 원칙 5: 의존성은 최소
 

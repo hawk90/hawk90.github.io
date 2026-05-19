@@ -31,6 +31,10 @@ specific values:
 - `0b1xxxxxxx`: empty=`0b10000000`, deleted=`0b11111110`, sentinel=`0b11111111`
 - `0b0xxxxxxx`: full, 하위 7비트가 H2
 
+전체 동작을 한눈에 정리하면 다음과 같다.
+
+![Swiss Table H1/H2 split과 SIMD match](/images/blog/abseil/diagrams/part5-07-swiss-table-internals.svg)
+
 ## H1, H2 분할
 
 64비트 해시를 두 부분으로 나눈다.
@@ -72,6 +76,14 @@ uint16_t mask = _mm_movemask_epi8(eq);
 ```
 
 16개 슬롯을 1 cycle에 비교한다. 후보가 평균 0~1개이므로 실제 key 비교는 거의 없다.
+
+### scalar vs SIMD probe — 그림
+
+이 한 줄 SIMD가 어떤 차이를 만드는지 직관적으로 보면:
+
+![SIMD parallel probing](/images/blog/cpp-concepts/diagrams/simd-parallel-probing.svg)
+
+scalar 구현은 16번의 직렬 비교가 필요하지만, `_mm_cmpeq_epi8`는 단일 명령으로 16-way 비교를 수행한다. 결과 비트마스크는 `_mm_movemask_epi8`로 16-bit 정수로 압축되고 `bsf`로 첫 매치 인덱스를 뽑는다. 평균 probe 길이를 10\~16배 줄이는 핵심 트릭이다.
 
 ## NEON / portable fallback
 

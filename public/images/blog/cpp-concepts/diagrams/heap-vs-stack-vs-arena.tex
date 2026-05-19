@@ -1,0 +1,62 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  region/.style={rectangle, draw=nodebord, line width=0.5pt, minimum width=44mm, minimum height=68mm, inner sep=0pt, fill=nodefill, rounded corners=3pt},
+  cell/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=34mm, minimum height=7mm, inner sep=2pt, font=\sffamily\footnotesize},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center}
+]
+
+% Three regions side-by-side
+\node[region] (S) at (-5.5, 0) {};
+\node[region] (H) at (0, 0) {};
+\node[region] (A) at (5.5, 0) {};
+
+% Headers
+\node[hdr] at (-5.5, 4) {Stack};
+\node[hdr] at (0, 4) {Heap};
+\node[hdr] at (5.5, 4) {Arena};
+
+\node[font=\sffamily\footnotesize, text=mutec] at (-5.5, 3.4) {LIFO, scope};
+\node[font=\sffamily\footnotesize, text=mutec] at (0, 3.4) {random, manual};
+\node[font=\sffamily\footnotesize, text=mutec] at (5.5, 3.4) {bump, bulk-free};
+
+% ─── Stack column (LIFO frames) ───
+\node[cell, fill=clifill, draw=clibord] at (-5.5, 2.4) {main()};
+\node[cell, fill=clifill, draw=clibord] at (-5.5, 1.4) {foo()};
+\node[cell, fill=hifill, draw=hibord] at (-5.5, 0.4) {bar()  $\leftarrow$ top};
+\node[cell, fill=neutfill, draw=neutbord, minimum height=20mm] at (-5.5, -1.6) {(unused)};
+\draw[focus, line width=0.7pt] (-7.7, -0.6) -- (-7.7, 0.45) node[midway, left, font=\sffamily\footnotesize, text=focusc] {SP};
+\node[font=\sffamily\footnotesize, text=mutec, align=center, text width=42mm] at (-5.5, -2.8) {push/pop으로 자동\\[2pt]ns 단위, no syscall};
+
+% ─── Heap column (random allocations) ───
+\node[cell, fill=absfill, draw=absbord, minimum width=18mm] at (-0.8, 2.4) {obj A};
+\node[cell, fill=warnfill, draw=warnbord, minimum width=14mm] at (1.0, 2.4) {hole};
+\node[cell, fill=absfill, draw=absbord, minimum width=24mm] at (0.0, 1.4) {obj B};
+\node[cell, fill=warnfill, draw=warnbord, minimum width=10mm] at (-1.2, 0.4) {hole};
+\node[cell, fill=absfill, draw=absbord, minimum width=20mm] at (0.6, 0.4) {obj C};
+\node[cell, fill=absfill, draw=absbord, minimum width=16mm] at (-0.5, -0.6) {obj D};
+\node[cell, fill=warnfill, draw=warnbord, minimum width=16mm] at (1.1, -0.6) {hole};
+\node[cell, fill=absfill, draw=absbord, minimum width=24mm] at (0.0, -1.6) {obj E};
+\node[font=\sffamily\footnotesize, text=mutec, align=center, text width=42mm] at (0, -2.8) {free list 탐색\\[2pt]$\mu$s, 단편화};
+
+% ─── Arena column (bump pointer) ───
+\node[cell, fill=impfill, draw=impbord] at (5.5, 2.4) {chunk 1: o,o,o,o};
+\node[cell, fill=impfill, draw=impbord] at (5.5, 1.4) {chunk 2: o,o,o};
+\node[cell, fill=hifill, draw=hibord] at (5.5, 0.4) {chunk 3: o,o $\leftarrow$ next};
+\node[cell, fill=neutfill, draw=neutbord, minimum height=20mm] at (5.5, -1.6) {(unused)};
+\draw[focus, line width=0.7pt] (7.7, -0.6) -- (7.7, 0.45) node[midway, right, font=\sffamily\footnotesize, text=focusc] {bp};
+\node[font=\sffamily\footnotesize, text=mutec, align=center, text width=42mm] at (5.5, -2.8) {bump pointer\\[2pt]O(1), bulk reset};
+
+% Summary band
+\node[font=\sffamily\footnotesize, text=inkc, align=center, text width=160mm] at (0, -4.4) {%
+  \textbf{Lifetime}: stack = 자동 scope $\bullet$ heap = 명시 \texttt{delete} $\bullet$ arena = 일괄 해제 (request, frame)
+};
+
+\end{tikzpicture}
+\end{document}

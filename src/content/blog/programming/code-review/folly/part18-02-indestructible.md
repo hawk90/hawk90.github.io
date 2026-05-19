@@ -87,6 +87,14 @@ class Indestructible {
 
 placement new로 `T`를 생성하지만 소멸자에서 *아무것도 안 한다*. memory는 `Indestructible` 객체와 함께 reclaim되지만 `T::~T()`는 호출 안 됨.
 
+### 메모리 영역 관점
+
+`Indestructible<T>`은 사실 *static 영역의 byte 슬롯*을 arena처럼 쓴다. 객체 lifetime이 process 전 구간이므로 free가 의미 없는 영역이다.
+
+![Heap vs stack vs arena](/images/blog/cpp-concepts/diagrams/heap-vs-stack-vs-arena.svg)
+
+이 그림의 arena와 본질이 같다 — 한 번 자리잡으면 process가 끝날 때 OS가 통째로 회수한다. heap에 두고 leak시키는 것과 차이는 *어디서 reclaim하는가*일 뿐이다.
+
 ## 왜 destructor를 건너뛰는가
 
 ```cpp

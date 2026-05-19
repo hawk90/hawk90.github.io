@@ -1,0 +1,65 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.6) {absl::Time/Duration vs std::chrono};
+
+% Two columns
+\node[panel, fit={(-7.0, -3.2) (-0.4, 4.8)}, inner sep=8pt] (pa) {};
+\node[panel, fit={( 0.4, -3.2) ( 7.0, 4.8)}, inner sep=8pt] (pb) {};
+
+\node[anchor=north, font=\sffamily\bfseries\footnotesize, text=absbord] at (-3.7, 4.7) {absl::Time / Duration};
+\node[anchor=north, font=\sffamily\bfseries\footnotesize, text=conbord] at ( 3.7, 4.7) {std::chrono};
+
+% Row 1: type
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.8, 3.7) {타입};
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at (-6.8, 3.1) {Duration};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-6.8, 2.6) {단일 타입};
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at ( 0.6, 3.1) {duration<R, P>};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at ( 0.6, 2.6) {템플릿 (us, ms)};
+
+\draw[draw=mutec, line width=0.3pt, dashed] (-6.8, 2.1) -- (-0.6, 2.1);
+\draw[draw=mutec, line width=0.3pt, dashed] ( 0.6, 2.1) -- ( 6.8, 2.1);
+
+% Row 2: unit
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.8, 1.7) {단위};
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at (-6.8, 1.1) {Seconds(2.5)};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-6.8, 0.6) {팩토리, 실수 OK};
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at ( 0.6, 1.1) {duration\_cast};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at ( 0.6, 0.6) {explicit cast};
+
+\draw[draw=mutec, line width=0.3pt, dashed] (-6.8, 0.1) -- (-0.6, 0.1);
+\draw[draw=mutec, line width=0.3pt, dashed] ( 0.6, 0.1) -- ( 6.8, 0.1);
+
+% Row 3: time point
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.8, -0.3) {시점};
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at (-6.8, -0.9) {Time};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-6.8, -1.4) {단일, civil 연동};
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at ( 0.6, -0.9) {time\_point<C,D>};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at ( 0.6, -1.4) {clock별 타입};
+
+\draw[draw=mutec, line width=0.3pt, dashed] (-6.8, -1.9) -- (-0.6, -1.9);
+\draw[draw=mutec, line width=0.3pt, dashed] ( 0.6, -1.9) -- ( 6.8, -1.9);
+
+% Row 4: format
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.8, -2.2) {포맷};
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at (-6.8, -2.8) {FormatTime / ParseTime};
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=inkc] at ( 0.6, -2.2) {포맷};
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at ( 0.6, -2.8) {C++20 std::format};
+
+% Bottom verdict
+\node[noteL, text width=140mm] at (-7.0, -3.6) {%
+  \textbf{선택 기준}\\[3pt]
+  새 코드는 absl::Time/Duration로 통일하면 unit 혼동 없고 civil time 연동 강력.
+};
+
+\end{tikzpicture}
+\end{document}

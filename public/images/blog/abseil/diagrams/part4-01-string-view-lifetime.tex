@@ -1,0 +1,64 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  byte/.style={rectangle, draw=impbord, fill=impfill, minimum width=7mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  byteD/.style={rectangle, draw=warnbord, fill=warnfill, minimum width=7mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=0pt},
+  ptr/.style={rectangle, draw=absbord, fill=absfill, minimum width=24mm, minimum height=8mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.0) {string\_view — non-owning view};
+
+% Case A: safe
+\node[font=\sffamily\bfseries\footnotesize, text=okbord, anchor=west] at (-7.0, 4.0) {Case A — owner alive (safe)};
+\node[panel, fit={(-7.0, 1.0) (1.4, 3.6)}, inner sep=4pt] {};
+
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily, text=mutec] at (-6.9, 3.2) {string owner = "hello world";};
+\foreach \i/\c in {0/h, 1/e, 2/l, 3/l, 4/o, 5/\,, 6/w, 7/o, 8/r, 9/l, 10/d} {
+  \pgfmathsetmacro{\x}{-5.5 + \i*0.6}
+  \node[byte] at (\x, 2.3) {\c};
+}
+
+\node[ptr] (sv) at (-3.0, 1.4) {string\_view sv};
+\draw[arr, draw=okbord] (sv.north) -- ++(0, 0.2) -| (-5.5, 2.7);
+
+% Case B: dangling
+\node[font=\sffamily\bfseries\footnotesize, text=warnbord, anchor=west] at (-7.0, 0.1) {Case B — owner destroyed (dangling)};
+\node[panel, fit={(-7.0, -3.2) (1.4, -0.3)}, inner sep=4pt] {};
+
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily, text=mutec] at (-6.9, -0.7) {sv = MakeName();  // temp return};
+\foreach \i/\c in {0/t, 1/m, 2/p} {
+  \pgfmathsetmacro{\x}{-5.5 + \i*0.6}
+  \node[byteD] at (\x, -1.6) {\c};
+}
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=warnbord] at (-3.0, -1.6) {임시 즉시 소멸};
+
+\node[ptr, draw=warnbord, fill=warnfill] (sv2) at (-3.0, -2.6) {string\_view sv};
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=warnbord] at (-1.5, -2.6) {dangling!};
+\draw[arr, draw=warnbord, dashed] (sv2.north) -- ++(0, 0.2) -| (-5.5, -1.2);
+
+% Right notes
+\node[noteL, text width=42mm] at (2.5, 4.0) {%
+  \textbf{핵심}\\[3pt]
+  view는 외부 메모리를 본다.\\[3pt]
+  owner lifetime을 포함해야 안전.
+};
+\node[noteL, text width=42mm, draw=warnbord, fill=warnfill] at (2.5, 1.4) {%
+  \textbf{흔한 함정}\\[3pt]
+  임시 string 반환\\[3pt]
+  멤버로 보유
+};
+\node[noteL, text width=42mm, draw=okbord, fill=okfill] at (2.5, -1.4) {%
+  \textbf{안전 패턴}\\[3pt]
+  파라미터 in only.\\[3pt]
+  함수 안에서만 쓰고 끝낸다.
+};
+
+\end{tikzpicture}
+\end{document}

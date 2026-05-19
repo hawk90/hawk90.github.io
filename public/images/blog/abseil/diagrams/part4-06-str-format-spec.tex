@@ -1,0 +1,62 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  src/.style={rectangle, draw=absbord, fill=absfill, minimum width=84mm, minimum height=8mm, font=\sffamily\footnotesize\ttfamily, inner sep=2pt, align=left},
+  cc/.style={rectangle, draw=impbord, fill=impfill, minimum width=40mm, minimum height=8mm, font=\sffamily\bfseries\footnotesize, inner sep=2pt, align=center},
+  outb/.style={rectangle, draw=hibord, fill=hifill, minimum width=84mm, minimum height=8mm, font=\sffamily\footnotesize\ttfamily, inner sep=2pt, align=left},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.6) {StrFormat — 타입 안전 printf};
+
+% Step 1: source code
+\node[src] (s1) at (0, 4.4) {%
+absl::StrFormat("\%s = \%d (\%.2f\%\%)", name, count, ratio);};
+
+% Step 2: compile-time parsing
+\node[cc] (s2) at (0, 3.0) {compile-time parse};
+\draw[arr] (s1) -- (s2);
+
+% Step 3: type check matrix
+\node[panel, fit={(-7.5, 0.4) (7.5, 2.2)}, inner sep=6pt] (pa) {};
+\node[anchor=north west, font=\sffamily\bfseries\footnotesize, text=inkc] at (-7.4, 2.1) {format spec $\to$ 인자 타입};
+
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at (-7.4, 1.4) {\%s};
+\node[anchor=west, font=\sffamily\footnotesize] at (-6.4, 1.4) {string};
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=okbord] at (-1.8, 1.4) {↔ name};
+
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at (-7.4, 0.9) {\%d};
+\node[anchor=west, font=\sffamily\footnotesize] at (-6.4, 0.9) {정수형};
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=okbord] at (-1.8, 0.9) {↔ count};
+
+\node[anchor=west, font=\sffamily\footnotesize\ttfamily] at (1.0, 1.4) {\%.2f};
+\node[anchor=west, font=\sffamily\footnotesize] at (2.4, 1.4) {부동소수};
+\node[anchor=west, font=\sffamily\bfseries\footnotesize, text=okbord] at (5.2, 1.4) {↔ ratio};
+
+\draw[arr] (s2.south) -- (-3.0, 1.6);
+
+% Step 4: output
+\node[outb] (s3) at (0, -0.6) {%
+output: "alice = 42 (87.50\%)"};
+\draw[arr] (pa.south) -- (s3);
+
+% Right notes
+\node[noteL, text width=66mm] at (-7.0, -1.5) {%
+  \textbf{컴파일 시 검사}\\[3pt]
+  \texttt{ABSL\_PRINTF\_ATTRIBUTE}\\[3pt]
+  Abseil은 constexpr 검사 추가.
+};
+\node[noteL, text width=66mm, draw=okbord, fill=okfill] at (0.5, -1.5) {%
+  \textbf{vs printf}\\[3pt]
+  va\_arg 없음 (type-safe).\\[3pt]
+  string 직접 받음, extensible.
+};
+
+\end{tikzpicture}
+\end{document}

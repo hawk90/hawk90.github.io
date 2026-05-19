@@ -55,6 +55,14 @@ f.thenTry([](Try<int> t) -> R {
 | `thenError<E>(fn)` | `E const&` | 일치하는 예외만 catch |
 | `thenTry(fn)` | `Try<T>` | 직접 처리 |
 
+### 체인의 그림
+
+세 변형은 결국 같은 chain 모델 위에 다른 *분기 규칙*을 얹은 것이다.
+
+![Promise/Future split and chain](/images/blog/cpp-concepts/diagrams/future-promise-chain.svg)
+
+값 흐름이 정상 경로를 타다 예외가 나면 thenError 핸들러로 분기. 중간 thenValue들은 자동으로 건너뛴다. callback hell 없이 평탄한 파이프라인을 유지하는 핵심이다.
+
 ## thenValue — 가장 흔한 변형
 
 ```cpp
@@ -137,6 +145,8 @@ f.then([](Try<int> t) { ... });
 이름이 의도를 드러내지 못한다. 새 코드는 `.thenValue`, `.thenError`, `.thenTry` 중 하나를 명시적으로 골라야 한다. 코드 리뷰에서 `.then` 사용은 *항상* 지적한다.
 
 ## 내부 — callback 등록과 실행
+
+![Future.then continuation chain](/images/blog/folly/diagrams/part2-04-then-chain-seq.svg)
 
 ```cpp
 // folly/futures/detail/Core.h (요약)

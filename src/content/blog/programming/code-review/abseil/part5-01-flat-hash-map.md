@@ -31,6 +31,10 @@ draft: false
 
 Swiss Table 자체의 내부 구조는 [Part 5-07 — Swiss Table internals](/blog/programming/code-review/abseil/part5-07-swiss-table-internals)에서 본다. 여기서는 사용 측면.
 
+구조를 한눈에 보면 다음과 같다.
+
+![flat_hash_map 메모리 레이아웃](/images/blog/abseil/diagrams/part5-01-flat-hash-map-layout.svg)
+
 ## API와 사용법
 
 ```cpp
@@ -57,6 +61,14 @@ std::unordered_map<K, V> m;
 // after
 absl::flat_hash_map<K, V> m;
 ```
+
+## 내부 구현 — open addressing
+
+`flat_hash_map`은 *open addressing* hash table이다. node chain 대신 flat 배열에 직접 slot을 둔다.
+
+![Open addressing probing](/images/blog/cpp-concepts/diagrams/hash-table-probing.svg)
+
+hash 충돌 시 다음 slot으로 probe해 빈 자리를 찾는다. cache locality는 좋지만 load factor가 높을수록 probe 길이가 늘어 rehash가 필요해진다. Swiss Table은 여기에 *SIMD로 16-slot 그룹을 1 cmp로 검사*하는 트릭을 더해 probe 비용을 상쇄한다 (Part 5-07).
 
 ## 내부 구현 — heterogeneous lookup
 

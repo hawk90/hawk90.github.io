@@ -25,6 +25,14 @@ MPMC(multi-producer multi-consumer) 큐는 보편적이지만 비싸다. 매 pus
 
 이런 경우 MPMC를 쓰는 것은 낭비다. SPSC를 쓰면 **CAS 없이 단순 load/store + memory barrier**만으로 충분하다. Folly의 측정으로 동일 메시지 크기 기준 MPMC 대비 RTT가 3-5배 줄어든다.
 
+### Producer/Consumer 일반 패턴
+
+SPSC, MPSC, MPMC 모두 이 일반 형태의 *변종*이다.
+
+![Producer / consumer queue](/images/blog/cpp-concepts/diagrams/producer-consumer-queue.svg)
+
+생산자가 큐에 enqueue, 소비자가 dequeue. capacity가 차면 backpressure — 생산자가 block / fail / drop. 변종은 producer/consumer 수와 blocking 정책(blocking vs lock-free, bounded vs unbounded)으로 갈린다.
+
 ## API
 
 ```cpp
@@ -51,6 +59,8 @@ if (q.read(v)) {
 3. **non-blocking**. queue가 가득/비어 있으면 write/read가 즉시 false를 돌려준다. busy wait은 호출자가 처리한다.
 
 ## 내부 구현 — read/write index의 분리
+
+![SPSC ring buffer](/images/blog/folly/diagrams/part10-01-spsc-queue-ring.svg)
 
 ```cpp
 template <class T>

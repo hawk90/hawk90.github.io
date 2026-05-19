@@ -32,6 +32,10 @@ out parameter는 다음 문제를 가진다.
 
 `StatusOr<T>`는 결과와 에러를 함께 묶어 이 문제를 해결한다.
 
+상태 전이를 그림으로 보면 다음과 같다.
+
+![StatusOr 상태 다이어그램](/images/blog/abseil/diagrams/part3-02-status-or-states.svg)
+
 ```cpp
 absl::StatusOr<User> GetUser(int id);
 
@@ -198,6 +202,14 @@ absl::Status BootUp(const std::string& path) {
 ```
 
 장황하다. 다음 편의 `ASSIGN_OR_RETURN` 매크로로 단축된다.
+
+### Monadic 흐름 — 그림
+
+이 패턴은 함수형 언어에서 `map` / `flat_map` / `Result` 모나드라고 부른다. happy path는 흐르고, error는 단락(short-circuit)된다.
+
+![Monadic StatusOr / Expected](/images/blog/cpp-concepts/diagrams/monadic-status-or.svg)
+
+`ASSIGN_OR_RETURN`이 하는 일은 이 그림의 error path를 *언어 매크로*로 흉내내는 것이다. C++23 `std::expected`의 `.and_then()` / `.transform()`은 같은 모델을 메서드로 노출한다.
 
 ## 코드 리뷰 포인트
 

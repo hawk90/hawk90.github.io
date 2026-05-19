@@ -32,6 +32,14 @@ v.push_back(1); v.push_back(2);  // heap 할당 0
 v.resize(10);                    // 이때 heap으로 spill
 ```
 
+### 어디에 살게 되는가
+
+`small_vector<T, N>`은 N개까지 stack(또는 그 객체가 사는 곳), 그 이상은 heap. 메모리 영역 자체의 차이를 짚고 가자.
+
+![Heap vs stack vs arena](/images/blog/cpp-concepts/diagrams/heap-vs-stack-vs-arena.svg)
+
+stack은 LIFO + 자동 해제, heap은 임의 위치 + 명시 free, arena는 bump + bulk free. small_vector는 *stack에 머무는 한* 할당 비용이 0이고, spill되는 순간 heap의 모든 비용을 전부 짊어진다.
+
 ## API & 사용법
 
 `std::vector`와 같은 인터페이스 + template 파라미터.
@@ -61,6 +69,8 @@ for (auto x : tokens) Use(x);
 ## 내부 구현
 
 ### Layout
+
+![SmallVector inline vs heap](/images/blog/folly/diagrams/part8-01-small-vector-inline.svg)
 
 ```cpp
 // 약식

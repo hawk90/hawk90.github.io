@@ -21,6 +21,10 @@ Abseil은 두 가지 핵심 타입만 둔다.
 
 그 외 달력은 `absl::CivilDay`, 시간대는 `absl::TimeZone`으로 분리한다. 각 타입이 한 가지 의미만 가지므로 함수 시그니처에 의도가 그대로 드러난다.
 
+`std::chrono`와의 차이를 항목별로 비교하면 다음과 같다.
+
+![absl::Time/Duration vs std::chrono](/images/blog/abseil/diagrams/part7-01-time-vs-chrono.svg)
+
 ## 단위 안전 — Duration이 부동소수처럼 보이는 이유
 
 `absl::Duration`은 내부적으로 nanosecond resolution이지만 사용자는 단위를 의식하지 않는다.

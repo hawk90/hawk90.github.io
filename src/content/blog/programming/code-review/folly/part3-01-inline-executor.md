@@ -36,7 +36,17 @@ class InlineExecutor : public Executor {
 
 callback을 schedule하지 않고 *호출자 thread에서 그대로 실행*한다. 비동기성을 *없애는* Executor다.
 
+### Executor 4가지 모델 비교
+
+Inline은 4가지 흔한 executor 모델 중 *가장 단순한* 끝에 있다.
+
+![Executor models compared](/images/blog/cpp-concepts/diagrams/executor-models.svg)
+
+Inline → Queued (single worker) → Fixed pool → Work-stealing 순으로 동시성과 복잡도가 올라간다. Inline은 0 오버헤드지만 deadlock과 stack overflow 위험이 있고, work-stealing은 로드밸런싱이 좋지만 cross-thread 동기화 비용이 든다.
+
 ## 사용 사례
+
+![Folly Executor types](/images/blog/folly/diagrams/part3-01-executor-types.svg)
 
 ### 1. 단위 테스트
 

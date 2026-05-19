@@ -1,0 +1,80 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  panel/.style={rectangle, draw=neutbord, line width=0.5pt, minimum width=70mm, minimum height=48mm, inner sep=4pt, fill=neutfill!50, rounded corners=4pt},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, anchor=north west},
+  sub/.style={font=\sffamily\footnotesize, text=mutec, anchor=north west},
+  task/.style={circle, draw=hibord, fill=hifill, minimum size=6mm, inner sep=0pt, font=\sffamily\scriptsize\bfseries},
+  worker/.style={rectangle, draw=impbord, fill=impfill, minimum width=12mm, minimum height=7mm, inner sep=1pt, font=\sffamily\scriptsize, rounded corners=2pt},
+  q/.style={rectangle, draw=absbord, fill=absfill, minimum width=22mm, minimum height=7mm, inner sep=1pt, font=\sffamily\scriptsize, rounded corners=2pt}
+]
+
+% ─── Panel 1: Inline ──────────────────────────
+\node[panel] (P1) at (-4, 3) {};
+\node[hdr] at (-7.4, 4.8) {1. Inline};
+\node[sub] at (-7.4, 4.3) {호출 스레드가 즉시 실행};
+
+\node[task] (t1) at (-6.4, 3.3) {T};
+\draw[focus] (t1.east) -- node[above, font=\sffamily\scriptsize] {execute()} (-3.7, 3.3);
+\node[worker] at (-2.5, 3.3) {caller};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (-7.4, 2.0) {장점: 0 overhead, 같은 스레드};
+\node[font=\sffamily\scriptsize, text=warnbord, anchor=west] at (-7.4, 1.6) {위험: deadlock, stack 깊이};
+
+% ─── Panel 2: Queued (single worker) ──────────
+\node[panel] (P2) at (4, 3) {};
+\node[hdr] at (0.6, 4.8) {2. Queued (single worker)};
+\node[sub] at (0.6, 4.3) {FIFO 큐 + 1 스레드};
+
+\node[task] at (1.0, 3.4) {T3};
+\node[task] at (1.7, 3.4) {T2};
+\node[task] at (2.4, 3.4) {T1};
+\draw[arr] (3.0, 3.4) -- (4.0, 3.4);
+\node[q] at (5.2, 3.4) {FIFO queue};
+\draw[arr] (6.4, 3.4) -- (7.2, 3.4);
+\node[worker] at (8.0, 3.4) {worker};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0.6, 2.0) {장점: 순차 실행, lock-free 패턴};
+\node[font=\sffamily\scriptsize, text=warnbord, anchor=west] at (0.6, 1.6) {위험: head-of-line blocking};
+
+% ─── Panel 3: Fixed thread pool ───────────────
+\node[panel] (P3) at (-4, -2.5) {};
+\node[hdr] at (-7.4, -0.7) {3. Fixed thread pool};
+\node[sub] at (-7.4, -1.2) {공유 큐 + N 워커};
+
+\node[task] at (-7.0, -2.0) {T2};
+\node[task] at (-6.3, -2.0) {T1};
+\draw[arr] (-5.8, -2.0) -- (-5.0, -2.0);
+\node[q] at (-4.2, -2.0) {shared};
+\draw[arr] (-3.4, -2.0) -- (-2.7, -1.4);
+\draw[arr] (-3.4, -2.0) -- (-2.7, -2.0);
+\draw[arr] (-3.4, -2.0) -- (-2.7, -2.6);
+\node[worker] at (-1.6, -1.4) {W0};
+\node[worker] at (-1.6, -2.0) {W1};
+\node[worker] at (-1.6, -2.6) {W2};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (-7.4, -3.6) {장점: 평행성, bounded 스레드};
+\node[font=\sffamily\scriptsize, text=warnbord, anchor=west] at (-7.4, -4.0) {위험: 단일 큐 contention};
+
+% ─── Panel 4: Work-stealing ───────────────────
+\node[panel] (P4) at (4, -2.5) {};
+\node[hdr] at (0.6, -0.7) {4. Work-stealing};
+\node[sub] at (0.6, -1.2) {워커마다 deque, 빈 워커가 steal};
+
+\node[q, minimum width=14mm] (q0) at (2.2, -1.8) {Q0: T0,T3};
+\node[q, minimum width=14mm] (q1) at (2.2, -2.5) {Q1: \textit{empty}};
+\node[q, minimum width=14mm] (q2) at (2.2, -3.2) {Q2: T1};
+\node[worker] (w0) at (4.5, -1.8) {W0};
+\node[worker] (w1) at (4.5, -2.5) {W1};
+\node[worker] (w2) at (4.5, -3.2) {W2};
+\draw[arr] (q0) -- (w0);
+\draw[arr] (q2) -- (w2);
+\draw[focus] (q0.east) to[bend right=18] node[above, font=\sffamily\scriptsize, text=focusc, sloped] {steal} (w1.west);
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0.6, -3.85) {장점: 로드밸런싱};
+\node[font=\sffamily\scriptsize, text=warnbord, anchor=west] at (0.6, -4.2) {복잡도: cross-thread sync};
+
+\end{tikzpicture}
+\end{document}

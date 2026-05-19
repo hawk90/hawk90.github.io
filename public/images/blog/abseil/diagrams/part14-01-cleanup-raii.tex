@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 6.0) {absl::Cleanup — RAII로 try/finally 대체};
+
+% Scope panel
+\node[panel, fit={(-7.0, -0.4) (7.0, 5.2)}, inner sep=8pt] (sc) {};
+\node[anchor=north west, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.9, 5.1) {함수 scope \{};
+\node[anchor=south west, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.9, -0.3) {\}  // scope 종료};
+
+% Step 1: acquire
+\node[cls, minimum width=120mm, align=left, font=\sffamily\footnotesize\ttfamily, draw=absbord, fill=absfill] (s1) at (0, 4.0) {%
+FILE* f = std::fopen("data", "r");};
+
+% Step 2: register cleanup
+\node[cls, minimum width=120mm, align=left, font=\sffamily\footnotesize\ttfamily, draw=impbord, fill=impfill] (s2) at (0, 2.9) {%
+auto guard = MakeCleanup([\&]\{ std::fclose(f); \});};
+
+% Step 3
+\node[cls, minimum width=120mm, align=left, font=\sffamily\footnotesize\ttfamily, draw=clibord, fill=clifill] (s3) at (0, 1.8) {%
+if (!ParseHeader(f)) return absl::InvalidArgument(...);};
+
+% Step 4: do work
+\node[cls, minimum width=120mm, align=left, font=\sffamily\footnotesize\ttfamily, draw=clibord, fill=clifill] (s4) at (0, 0.7) {%
+DoWork(f);};
+
+% Step 5: scope end — destructor invokes
+\node[cls, minimum width=120mm, align=left, font=\sffamily\bfseries\footnotesize, draw=hibord, fill=hifill] (s5) at (0, -1.4) {%
+~~guard 소멸자 호출 → fclose(f) 항상 실행};
+
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\draw[focus] (sc.south) -- (s5);
+
+% Side benefit notes
+\node[noteL, text width=60mm] at (-7.0, -2.4) {%
+  \textbf{핵심}\\[3pt]
+  goto cleanup, try/finally 없음.\\[3pt]
+  early return/throw 안전.
+};
+\node[noteL, text width=60mm, draw=okbord, fill=okfill] at (0.5, -2.4) {%
+  \textbf{취소}\\[3pt]
+  std::move(guard).Cancel() 호출 시\\[3pt]
+  람다 실행 안 함.
+};
+
+\end{tikzpicture}
+\end{document}

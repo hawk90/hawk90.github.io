@@ -26,6 +26,10 @@ draft: false
 
 `FixedArray`는 크기 변경이 안 된다. `vector`는 alloc이 강제다. 그 사이가 `InlinedVector`다.
 
+작은 경우와 큰 경우의 저장 위치를 그림으로 보면 다음과 같다.
+
+![InlinedVector 인라인 vs 힙](/images/blog/abseil/diagrams/part5-06-inlined-vector-soo.svg)
+
 ```cpp
 absl::InlinedVector<int, 4> v;
 v.push_back(1); v.push_back(2); v.push_back(3);

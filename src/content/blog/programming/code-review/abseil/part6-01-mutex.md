@@ -28,6 +28,10 @@ draft: false
 
 `absl::Mutex`는 하나의 타입에서 모두 처리한다. 추가로 *함수형 조건 표현*(Await)을 지원해 `condition_variable` 패턴을 단순화한다.
 
+표준 mutex 대비 acquire 지연을 시나리오별로 비교하면 다음과 같다.
+
+![absl::Mutex vs std::mutex 성능](/images/blog/abseil/diagrams/part6-01-mutex-vs-std-perf.svg)
+
 ## API와 사용법
 
 ```cpp
@@ -181,6 +185,14 @@ absl::RegisterMutexProfiler(&MyProfiler);
 ```
 
 production에서 hot mutex를 식별하는 데 쓴다. `std::mutex`로는 직접 wrapping 없이는 불가능.
+
+### contention이 무엇을 의미하는가
+
+profiler가 보여 주는 *contention*은 결국 wait 시간이다.
+
+![Lock contention timeline](/images/blog/cpp-concepts/diagrams/lock-contention-timeline.svg)
+
+CS 자체는 짧아도 자주 호출되면 대기 행렬이 길어진다. profiler의 hot mutex는 보통 *CS가 긴 것*이 아니라 *호출 빈도가 너무 높은 것*이다. 그래서 fix는 CS를 줄이는 게 아니라 *lock을 쪼개거나 lock-free 자료구조로 옮기는* 방향이 된다.
 
 ## fairness
 

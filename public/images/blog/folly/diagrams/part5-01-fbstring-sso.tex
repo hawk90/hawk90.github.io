@@ -1,0 +1,72 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% ─── Title ──────────────────────────────────────────────────
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.0, 4.4) {FBString 24-byte layout};
+
+% ─── SSO mode (top) ─────────────────────────────────────────
+\node[font=\sffamily\bfseries\footnotesize, text=impbord, anchor=west] at (0, 3.5) {SSO ($\leq$ 23 chars) — inline};
+
+% Byte grid: 24 cells, each 0.42 wide
+\foreach \i in {0,...,22} {
+  \draw[draw=impbord, fill=impfill, line width=0.3pt]
+    ({\i*0.42}, 2.6) rectangle ({(\i+1)*0.42}, 3.1);
+}
+% Last byte: size/marker
+\draw[draw=hibord, fill=hifill, line width=0.4pt]
+  ({23*0.42}, 2.6) rectangle ({24*0.42}, 3.1);
+
+% Sample text "Hello, folly!" filled into first 13 bytes
+\foreach \i/\c in {0/H,1/e,2/l,3/l,4/o,5/{,},6/{ },7/f,8/o,9/l,10/l,11/y,12/{!}} {
+  \node[font=\sffamily\scriptsize, text=inkc] at ({\i*0.42+0.21}, 2.85) {\c};
+}
+\node[font=\sffamily\scriptsize, text=mutec] at ({23*0.42+0.21}, 2.85) {S};
+
+% Annotations below SSO row
+\draw[decorate, decoration={brace, mirror, amplitude=3pt}, draw=mutec, line width=0.3pt]
+  (0, 2.5) -- ({23*0.42}, 2.5);
+\node[font=\sffamily\footnotesize, text=mutec, anchor=north] at ({23*0.42/2}, 2.4)
+  {23 bytes character data};
+
+\draw[uses, draw=hibord] ({24*0.42+0.05}, 2.85) -- ++(1.0, 0)
+  node[anchor=west, font=\sffamily\footnotesize, text=hibord] {byte 23: size + flag};
+
+% ─── Heap mode (bottom) ─────────────────────────────────────
+\node[font=\sffamily\bfseries\footnotesize, text=conbord, anchor=west] at (0, 1.5) {Heap ($>$ 23 chars) — pointer + size + capacity};
+
+% 3 fields: data* (8B), size (8B), capacity (8B)
+\draw[draw=conbord, fill=confill, line width=0.4pt]
+  (0, 0.55) rectangle ({8*0.42}, 1.1);
+\node[font=\sffamily\footnotesize, text=inkc] at ({8*0.42/2}, 0.82) {data* (8 B)};
+
+\draw[draw=conbord, fill=confill, line width=0.4pt]
+  ({8*0.42}, 0.55) rectangle ({16*0.42}, 1.1);
+\node[font=\sffamily\footnotesize, text=inkc] at ({(8+8)*0.42/1}, 0.82) {};
+\node[font=\sffamily\footnotesize, text=inkc] at ({(8*0.42+16*0.42)/2}, 0.82) {size (8 B)};
+
+\draw[draw=conbord, fill=confill, line width=0.4pt]
+  ({16*0.42}, 0.55) rectangle ({24*0.42}, 1.1);
+\node[font=\sffamily\footnotesize, text=inkc] at ({(16*0.42+24*0.42)/2}, 0.82) {capacity (8 B)};
+
+% Heap buffer
+\draw[draw=mutec, line width=0.4pt, dashed]
+  (5.0, -0.5) rectangle (10.5, -0.05);
+\node[font=\sffamily\footnotesize, text=mutec] at (7.75, -0.27) {heap buffer (capacity bytes)};
+
+\draw[uses, draw=conbord] ({4*0.42}, 0.5) to[bend right=15] (5.0, -0.27);
+
+% ─── Total size note ────────────────────────────────────────
+\draw[decorate, decoration={brace, mirror, amplitude=3pt}, draw=mutec, line width=0.3pt]
+  (0, 0.45) -- ({24*0.42}, 0.45);
+\node[font=\sffamily\footnotesize, text=mutec, anchor=north] at ({24*0.42/2}, 0.35)
+  {24 bytes (same struct size — discriminated by last byte)};
+
+\end{tikzpicture}
+\end{document}

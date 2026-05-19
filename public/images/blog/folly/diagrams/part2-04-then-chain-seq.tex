@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.5, 0.8) {Future.then() continuation chain};
+
+\node[actor]    (c)  at (0,    0)   {Caller};
+\node[actorAlt] (f1) at (3.8,  0)   {Future-1};
+\node[actorAlt] (f2) at (7.6,  0)   {Future-2};
+\node[actorAlt] (f3) at (11.4, 0)   {Future-3};
+
+\draw[lifeline] (c)  -- ++(0,-9.5);
+\draw[lifeline] (f1) -- ++(0,-9.5);
+\draw[lifeline] (f2) -- ++(0,-9.5);
+\draw[lifeline] (f3) -- ++(0,-9.5);
+
+\node[activation, minimum height=10mm] at (f1 |- 0,-1.2) {};
+\node[activation, minimum height=10mm] at (f2 |- 0,-4.6) {};
+\node[activation, minimum height=10mm] at (f3 |- 0,-8.0) {};
+
+\draw[msgsync] (c  |- 0,-1.2) -- node[msglabel]{.then(f)}    (f1 |- 0,-1.2);
+\draw[msgret]  (f1 |- 0,-2.6) -- node[msglabel]{Future-2}  (c  |- 0,-2.6);
+
+\draw[msgasync] (f1 |- 0,-4.6) -- node[msglabel]{value $\to$ f}   (f2 |- 0,-4.6);
+\draw[msgsync]  (c  |- 0,-6.0) -- node[msglabel]{.then(g)}        (f2 |- 0,-6.0);
+
+\draw[msgasync] (f2 |- 0,-8.0) -- node[msglabel]{value $\to$ g}   (f3 |- 0,-8.0);
+\draw[msgret]   (f3 |- 0,-9.2) -- node[msglabel]{result}          (c  |- 0,-9.2);
+
+\node[seqnote, anchor=north] at (5.7, -10.0)
+  {각 .then() 은 새 Future 반환 — 연쇄로 monadic pipeline 구성};
+
+\end{tikzpicture}
+\end{document}

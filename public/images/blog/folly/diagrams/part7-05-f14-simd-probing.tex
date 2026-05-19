@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.5, 5.0) {F14 SIMD probing — 3-step search};
+
+% Step 1: tags
+\node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=west] at (0, 4.0) {1. tags (14 bytes)};
+\foreach \i/\v in {0/3F,1/A1,2/0E,3/A1,4/77,5/12,6/A1,7/55,8/9C,9/2B,10/A1,11/04,12/E0,13/8A} {
+  \draw[draw=absbord, fill=absfill, line width=0.3pt]
+    ({\i*0.6}, 3.2) rectangle ({(\i+1)*0.6}, 3.7);
+  \node[font=\sffamily\scriptsize, text=inkc] at ({\i*0.6+0.3}, 3.45) {\v};
+}
+
+% Target tag
+\node[font=\sffamily\footnotesize, text=conbord, anchor=west] at (9.0, 3.45)
+  {target: \texttt{A1}};
+
+% Step 2: SIMD compare → bitmap
+\node[font=\sffamily\bfseries\footnotesize, text=hibord, anchor=west] at (0, 2.4) {2. SIMD compare $\to$ match bitmap};
+\foreach \i/\m in {0/0,1/1,2/0,3/1,4/0,5/0,6/1,7/0,8/0,9/0,10/1,11/0,12/0,13/0} {
+  \ifnum\m=1
+    \draw[draw=hibord, fill=hifill, line width=0.4pt]
+      ({\i*0.6}, 1.6) rectangle ({(\i+1)*0.6}, 2.1);
+  \else
+    \draw[draw=mutec, fill=neutfill, line width=0.3pt]
+      ({\i*0.6}, 1.6) rectangle ({(\i+1)*0.6}, 2.1);
+  \fi
+  \node[font=\sffamily\scriptsize, text=inkc] at ({\i*0.6+0.3}, 1.85) {\m};
+}
+
+% Step 3: scan only matched slots
+\node[font=\sffamily\bfseries\footnotesize, text=impbord, anchor=west] at (0, 0.8) {3. key 비교는 matched slot 만 (3개)};
+\foreach \i in {1,3,6,10} {
+  \draw[draw=impbord, fill=impfill, line width=0.4pt]
+    ({\i*0.6}, 0.0) rectangle ({(\i+1)*0.6}, 0.5);
+  \node[font=\sffamily\scriptsize, text=inkc] at ({\i*0.6+0.3}, 0.25) {v\i};
+}
+\foreach \i in {0,2,4,5,7,8,9,11,12,13} {
+  \draw[draw=mutec, fill=neutfill!50, line width=0.3pt, dashed]
+    ({\i*0.6}, 0.0) rectangle ({(\i+1)*0.6}, 0.5);
+}
+
+% Right side annotation
+\node[note, anchor=west, text width=4.2cm] at (9.0, 0.6)
+  {key 비교 횟수:\\[2pt]14 $\to$ 평균 1\,$\sim$\,2};
+
+\end{tikzpicture}
+\end{document}

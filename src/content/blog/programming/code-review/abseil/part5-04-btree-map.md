@@ -35,6 +35,10 @@ overhead per key: 노드 헤더 / N
 
 Abseil의 `btree_map`은 노드 크기를 cache line의 배수에 맞춰 설계해 modern CPU에서 `std::map`보다 2~4배 빠른 lookup을 보인다.
 
+두 자료구조의 차이를 그림으로 비교하면 다음과 같다.
+
+![btree_map 노드 vs RB-tree](/images/blog/abseil/diagrams/part5-04-btree-map-node.svg)
+
 ## API와 사용법
 
 ```cpp

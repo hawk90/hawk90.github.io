@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  side/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=32mm, minimum height=12mm, inner sep=3pt, fill=nodefill, font=\sffamily\footnotesize, align=center, rounded corners=3pt},
+  prom/.style={side, fill=confill, draw=conbord},
+  fut/.style={side, fill=absfill, draw=absbord},
+  cont/.style={rectangle, draw=impbord, fill=impfill, line width=0.45pt, minimum width=26mm, minimum height=9mm, inner sep=2pt, font=\sffamily\footnotesize\ttfamily, align=center, rounded corners=2pt},
+  state/.style={rectangle, draw=hibord, fill=hifill, line width=0.45pt, minimum width=38mm, minimum height=14mm, inner sep=3pt, font=\sffamily\footnotesize, align=center, rounded corners=3pt}
+]
+
+% Producer side (Promise)
+\node[font=\sffamily\bfseries\small, text=inkc] at (-6, 4.2) {Producer side};
+\node[prom] (P) at (-6, 3.2) {Promise<int>};
+\node[font=\sffamily\footnotesize\ttfamily, text=conbord] at (-6, 2.3) {p.setValue(42);};
+
+% Shared state in the middle
+\node[state] (S) at (0, 3.2) {shared state\\[2pt]\textit{value}, \textit{ready}};
+
+% Consumer side (Future)
+\node[font=\sffamily\bfseries\small, text=inkc] at (6, 4.2) {Consumer side};
+\node[fut] (F) at (6, 3.2) {Future<int>};
+
+% Wire promise/future to state
+\draw[focus, line width=0.8pt] (P.east) -- node[above, font=\sffamily\scriptsize, text=focusc] {set} (S.west);
+\draw[uses, line width=0.5pt] (S.east) -- node[above, font=\sffamily\scriptsize] {get / .then} (F.west);
+
+% Split label
+\node[font=\sffamily\footnotesize, text=mutec] at (0, 2.3) {makePromiseContract()};
+\node[font=\sffamily\footnotesize, text=mutec] at (0, 1.85) {$\rightarrow$ (Promise, Future) pair};
+
+% Chain (continuations)
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7, 0.3) {Continuation chain};
+\node[fut] (F0) at (-5.5, -0.8) {Future<int>};
+\node[cont] (C1) at (-1.5, -0.8) {.thenValue(\\[2pt]f1)};
+\node[cont] (C2) at (1.8, -0.8) {.thenValue(\\[2pt]f2)};
+\node[cont] (C3) at (5.0, -0.8) {.thenError(\\[2pt]handler)};
+\node[fut] (FR) at (8.2, -0.8) {Future<R>};
+
+\draw[arr] (F0) -- (C1);
+\draw[arr] (C1) -- (C2);
+\draw[arr] (C2) -- (C3);
+\draw[arr] (C3) -- (FR);
+
+% Notes
+\node[font=\sffamily\footnotesize, text=mutec, align=center, text width=120mm] at (1.0, -2.4) {%
+  값 흐름: \texttt{int $\rightarrow$ f1 $\rightarrow$ f2 $\rightarrow$ R} \quad\quad
+  에러 흐름: 예외 발생 시 중간 단계 건너뛰고 \texttt{thenError}로};
+
+\node[font=\sffamily\footnotesize, text=warnbord, align=center, text width=140mm] at (0, -3.4) {%
+  callback hell 해소: 콜백 중첩이 아니라 평탄한 \texttt{.then(...).then(...)} 체인};
+
+\end{tikzpicture}
+\end{document}

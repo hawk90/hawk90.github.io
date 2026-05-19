@@ -78,6 +78,14 @@ class MicroSpinLock {
 };
 ```
 
+### acquire / release가 보장하는 것
+
+lock의 try-set은 `ACQUIRE`, clear는 `RELEASE`다. 이 조합이 mutex의 의미를 만든다.
+
+![Happens-before via release/acquire](/images/blog/cpp-concepts/diagrams/memory-ordering-happens-before.svg)
+
+unlock 이전의 CS 안 쓰기들이 다음에 lock을 잡는 스레드의 읽기에 visible해진다. spin-lock도 결국 release/acquire pair로 데이터 visibility를 보장하는 도구다.
+
 핵심은 셋.
 
 1. **test_and_set** — atomic 1-bit set. acquire fence.

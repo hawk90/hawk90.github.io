@@ -32,6 +32,10 @@ struct hash<MyPoint> {
 
 Abseil은 *멤버처럼 정의하는 friend 함수* 를 통해 이 둘을 모두 해결한다.
 
+friend 함수 → HashState chain의 흐름은 다음과 같다.
+
+![AbslHashValue friend 패턴](/images/blog/abseil/diagrams/part10-01-absl-hash-value.svg)
+
 ## AbslHashValue — friend ADL 기반
 
 ```cpp

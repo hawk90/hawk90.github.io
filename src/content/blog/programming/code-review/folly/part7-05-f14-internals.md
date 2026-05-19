@@ -81,6 +81,16 @@ H2가 일치하면 *key 비교 후보*가 된다. 다르면 100% miss.
 
 ## SIMD probing — SSE2
 
+![F14 SIMD probing 3-step](/images/blog/folly/diagrams/part7-05-f14-simd-probing.svg)
+
+### 왜 SIMD가 본질적인가
+
+scalar vs SIMD 차이를 일반화해 보면:
+
+![SIMD parallel probing](/images/blog/cpp-concepts/diagrams/simd-parallel-probing.svg)
+
+F14의 chunk size = 14 (SSE2 16 중 14 slot + 1 control header + 1 overflow counter)도 같은 논리에서 나온다. SIMD register 폭에 chunk를 맞춰야 비교가 1 instruction으로 끝난다.
+
 ```cpp
 // folly/container/detail/F14Mask.h 약식
 struct DenseMaskIter {

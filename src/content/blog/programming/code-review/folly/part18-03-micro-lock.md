@@ -87,6 +87,8 @@ s.lock.init();   // 명시적 init
 
 ## 내부 구현
 
+![MicroLock 1-byte vs std::mutex 40-byte](/images/blog/folly/diagrams/part18-03-micro-lock-byte.svg)
+
 ```cpp
 // folly/MicroLock.h 약식
 class MicroLock {
@@ -204,6 +206,14 @@ LMAX, robin-hood hash, F14 같은 데이터 구조가 비슷한 trade-off.
 | recursive | non-recursive | non-recursive | non-recursive |
 
 `MicroLock`은 sleep-capable, `MicroSpinLock`은 spin-only(다음 절).
+
+### false sharing — 왜 같은 line 안에 두는가
+
+per-object lock의 핵심은 *lock과 보호되는 데이터를 한 cache line에 묶는 것*이다. 그 이유는 false sharing의 역방향이다.
+
+![False sharing on cache line](/images/blog/cpp-concepts/diagrams/false-sharing-cacheline.svg)
+
+서로 다른 변수가 같은 line에 있으면 한 코어의 쓰기가 다른 코어의 line을 invalidate한다. MicroLock은 보호 대상 데이터의 메타 byte로 자기 자신을 박아 *항상 함께 invalidate되도록* 한다 — 어차피 lock을 잡으면 데이터를 읽을 테니 같이 fetch되는 게 이득이다.
 
 ## 코드 리뷰 포인트
 

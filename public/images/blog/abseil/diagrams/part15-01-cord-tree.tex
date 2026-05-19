@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  inner/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill, minimum width=22mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  leaf/.style ={rectangle, rounded corners=2pt, draw=impbord, fill=impfill, minimum width=22mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.4) {absl::Cord — 불변 chunk 트리 (concat O(log n))};
+
+% root
+\node[inner] (r) at (0, 4.0) {Concat\\[3pt] \scriptsize len=42};
+
+% level 1
+\node[inner] (a) at (-3.5, 2.3) {Concat\\[3pt] \scriptsize len=20};
+\node[inner] (b) at ( 3.5, 2.3) {Concat\\[3pt] \scriptsize len=22};
+
+\draw[arr] (r.south) -- (a.north);
+\draw[arr] (r.south) -- (b.north);
+
+% level 2 — leaves
+\node[leaf] (l1) at (-5.0, 0.5) {flat\\[3pt] \scriptsize 12B};
+\node[leaf] (l2) at (-2.0, 0.5) {ext\\[3pt] \scriptsize 8B (mmap)};
+\node[leaf] (l3) at ( 2.0, 0.5) {flat\\[3pt] \scriptsize 15B};
+\node[leaf] (l4) at ( 5.0, 0.5) {flat\\[3pt] \scriptsize 7B};
+
+\draw[arr] (a.south) -- (l1.north);
+\draw[arr] (a.south) -- (l2.north);
+\draw[arr] (b.south) -- (l3.north);
+\draw[arr] (b.south) -- (l4.north);
+
+% Legend
+\node[anchor=west, font=\sffamily\footnotesize, text=absbord] at (-7.0, -1.4) {\textbullet\ 내부 = Concat (자식 길이 합)};
+\node[anchor=west, font=\sffamily\footnotesize, text=impbord] at (-7.0, -2.0) {\textbullet\ 리프 = 불변 chunk (refcount)};
+
+\node[noteL, text width=58mm] at (1.0, -1.4) {%
+  \textbf{Append/Substring}\\[3pt]
+  새 노드만 추가, 리프 복사 없음.\\[3pt]
+  자가 균형으로 깊이 $\log n$.
+};
+
+\end{tikzpicture}
+\end{document}

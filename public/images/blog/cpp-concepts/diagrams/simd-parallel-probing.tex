@@ -1,0 +1,75 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  byte/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=7mm, minimum height=7mm, inner sep=0pt, font=\sffamily\scriptsize\ttfamily, fill=nodefill},
+  match/.style={byte, fill=hifill, draw=hibord, font=\sffamily\scriptsize\ttfamily\bfseries},
+  cmp/.style={rectangle, draw=conbord, fill=confill, line width=0.4pt, minimum width=14mm, minimum height=6mm, inner sep=1pt, font=\sffamily\scriptsize, align=center, rounded corners=2pt},
+  vcmp/.style={rectangle, draw=impbord, fill=impfill, line width=0.5pt, minimum width=120mm, minimum height=9mm, inner sep=2pt, font=\sffamily\footnotesize, align=center, rounded corners=2pt}
+]
+
+% ─── Top: Scalar — 16 sequential compares ─────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.5, 4.4) {Scalar: 16 compares, one at a time};
+
+% control bytes (matches at indices 2,6,11,14)
+\foreach \i/\v in {0/12,1/4A,3/2C,4/77,5/5E,7/8B,8/F0,9/12,10/3D,12/A0,13/19,15/CC} {
+  \pgfmathsetmacro{\x}{-7.0 + \i*0.8}
+  \node[byte] at (\x, 3.5) {\v};
+}
+\foreach \i in {2,6,11,14} {
+  \pgfmathsetmacro{\x}{-7.0 + \i*0.8}
+  \node[match] at (\x, 3.5) {91};
+}
+
+\node[font=\sffamily\footnotesize, anchor=east] at (-7.3, 3.5) {ctrl[]};
+
+% Sequential cmps as small boxes
+\foreach \i in {0,...,15} {
+  \pgfmathsetmacro{\x}{-7.0 + \i*0.8}
+  \node[cmp, minimum width=6.5mm] at (\x, 2.5) {cmp\i};
+}
+\node[font=\sffamily\footnotesize, anchor=east, text=conbord] at (-7.3, 2.5) {time};
+
+% time arrow
+\draw[->, draw=conbord, line width=0.6pt] (-7.0, 1.95) -- (5.0, 1.95);
+\node[font=\sffamily\scriptsize, text=conbord, anchor=west] at (5.05, 1.95) {16 cycles};
+
+% ─── Bottom: SIMD — 1 vector compare ──────────
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-7.5, 0.7) {SIMD: 1 wide compare across all 16 lanes};
+
+\foreach \i/\v in {0/12,1/4A,3/2C,4/77,5/5E,7/8B,8/F0,9/12,10/3D,12/A0,13/19,15/CC} {
+  \pgfmathsetmacro{\x}{-7.0 + \i*0.8}
+  \node[byte] at (\x, -0.2) {\v};
+}
+\foreach \i in {2,6,11,14} {
+  \pgfmathsetmacro{\x}{-7.0 + \i*0.8}
+  \node[match] at (\x, -0.2) {91};
+}
+\node[font=\sffamily\footnotesize, anchor=east] at (-7.3, -0.2) {ctrl[]};
+
+% Single SIMD compare lane
+\node[vcmp] at (-1.0, -1.5) {pcmpeqb / vpcmpeqb (1 instruction, 16 bytes wide)};
+
+% Broadcast key
+\node[font=\sffamily\footnotesize\ttfamily, anchor=west, text=focusc] at (-7.5, -1.5) {key=91};
+
+% Result bitmap
+\node[font=\sffamily\footnotesize, anchor=west] at (-7.5, -2.6) {result mask:};
+\node[font=\sffamily\footnotesize\ttfamily, text=hibord, anchor=west] at (-3.4, -2.6) {0010 0010 0010 0010};
+\node[font=\sffamily\footnotesize, anchor=west, text=mutec] at (1.6, -2.6) {$\rightarrow$ movemask + bsf for matched index};
+
+% Speedup
+\draw[decorate, decoration={brace, amplitude=4pt, mirror}, draw=focusc] (-7.0, -3.4) -- (5.0, -3.4);
+\node[font=\sffamily\footnotesize\bfseries, text=focusc] at (-1.0, -3.9) {$\sim$10\textendash 16$\times$ faster probing};
+
+% Bottom
+\node[font=\sffamily\footnotesize, text=inkc, align=center, text width=170mm] at (0, -4.7) {%
+  적용: Swiss Table (\texttt{absl::flat\_hash\_map}), F14 (\texttt{folly::F14ValueMap}) — 16-slot group을 1 SIMD cmp로 검사};
+
+\end{tikzpicture}
+\end{document}

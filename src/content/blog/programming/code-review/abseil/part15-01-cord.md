@@ -36,6 +36,18 @@ std::string head = body.substr(0, 1024);
 - **shared ownership** — chunk는 reference count로 공유. substring·copy가 zero-copy.
 - **balanced tree** — concat이 O(log n), 매우 큰 데이터에서도 일정 비용.
 
+내부 tree 구조를 그림으로 보면 다음과 같다.
+
+![Cord 불변 chunk tree](/images/blog/abseil/diagrams/part15-01-cord-tree.svg)
+
+## 메모리 모델 — arena가 왜 어울리나
+
+Cord는 작은 chunk 노드를 *수없이* 만들고 *짧은 lifetime*에 모았다 푼다. 이 패턴은 일반 `malloc/free`보다 arena allocator가 훨씬 잘 맞는다.
+
+![Arena allocator userspace](/images/blog/cpp-concepts/diagrams/arena-allocator-userspace.svg)
+
+bump pointer로 O(1) 할당, request 끝에 통째로 reset — per-object 헤더와 단편화가 사라진다. Cord의 CordRep 노드, IOBuf의 buffer 메타데이터, 임시 parser AST 등이 모두 동일한 동기로 arena를 쓴다.
+
 ## 데이터 모델
 
 `Cord`는 두 가지 표현을 가진다.

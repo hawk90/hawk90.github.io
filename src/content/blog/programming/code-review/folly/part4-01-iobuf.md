@@ -32,7 +32,17 @@ header IOBuf ──▶ body IOBuf ──▶ trailer IOBuf
 
 write 시에는 *scatter-gather* I/O(`writev`)로 각 buffer를 그대로 socket에 보낸다. 끝까지 *zero-copy*다.
 
+## 할당 모델 — 왜 arena가 자연스러운가
+
+IOBuf 노드 자체와 그 옆의 짧은 lifetime 객체(parser 상태, decoder context 등)는 request 단위로 묶여 만들어지고 응답이 나가면 한꺼번에 사라진다. 이런 패턴엔 arena가 정확히 맞다.
+
+![Arena allocator userspace](/images/blog/cpp-concepts/diagrams/arena-allocator-userspace.svg)
+
+bump pointer로 노드 alloc은 O(1)이고, request 끝에 arena를 reset해 모든 노드를 한 번에 free한다. per-node free list 탐색이나 단편화가 없다.
+
 ## 메모리 레이아웃
+
+![IOBuf circular chain](/images/blog/folly/diagrams/part4-01-iobuf-chain.svg)
 
 ```cpp
 // folly/io/IOBuf.h (요약)

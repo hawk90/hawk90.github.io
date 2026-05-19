@@ -56,6 +56,10 @@ b->writableData()[0] = 'x';   // a는 영향 없음
 
 `unshare`는 *write 전 분리*다. 자기만의 buffer로 copy하고 ref-count를 분리한다. *copy-on-write*의 수동 버전이다.
 
+![Copy-on-Write split](/images/blog/cpp-concepts/diagrams/cow-copy-on-write.svg)
+
+`fbstring`이 write를 가로채 자동으로 unshare를 수행한다면, IOBuf는 *명시적으로* `unshare()`를 부르는 모델이다. 같은 원리, 다른 정책 — IOBuf의 buffer는 보통 더 크고 unshare 비용이 더 크기 때문에 의사 결정을 호출자에게 위임한다.
+
 ```cpp
 // folly/io/IOBuf.cpp (개념)
 void IOBuf::unshareOne() {

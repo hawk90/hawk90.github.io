@@ -37,6 +37,14 @@ folly::Synchronized<std::vector<int>> data;
 data.wlock()->push_back(1);    // wlock 안에서만 가능
 ```
 
+### lock 위에 올라간 비용을 시각화
+
+`Synchronized`는 *어떤 lock을 어디서 잡았는가*를 명시할 뿐, contention 비용은 그대로다. 같은 critical section을 두고 여러 스레드가 다투면 직렬화된다.
+
+![Lock contention timeline](/images/blog/cpp-concepts/diagrams/lock-contention-timeline.svg)
+
+CS는 동시에 1 스레드만 들어간다. 짧은 CS, lock-free 자료구조, fine-grained lock으로 wait 영역을 줄이는 것이 핵심이다. `folly::Synchronized`의 통계 훅으로 wait time을 직접 측정할 수 있다.
+
 ## API & 사용법
 
 ```cpp
@@ -79,6 +87,8 @@ folly::Synchronized<std::vector<int>, std::mutex> v;   // mutex type 선택
 기본 mutex는 `folly::SharedMutex`(reader-writer). `std::mutex`, `std::recursive_mutex` 등도 template parameter로 지정 가능.
 
 ## 내부 구현
+
+![Synchronized RAII lock guard](/images/blog/folly/diagrams/part9-01-synchronized-wrapper.svg)
 
 ```cpp
 // 약식 — folly/Synchronized.h

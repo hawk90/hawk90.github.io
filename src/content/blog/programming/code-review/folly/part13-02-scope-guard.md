@@ -59,6 +59,14 @@ SCOPE_EXIT { free(buf); };
 
 `SCOPE_EXIT { ... };`는 매크로다. 등록 시점부터 scope 종료까지 람다를 보관하다가, 종료 시점(정상/예외 모두) 실행.
 
+### RAII 원리 — 그림
+
+`SCOPE_EXIT`는 익명 RAII 객체를 만드는 macro다. 동작은 일반 RAII와 같다.
+
+![RAII scope guard](/images/blog/cpp-concepts/diagrams/raii-scope-guard.svg)
+
+정상 return이든 throw든 scope를 빠져나가면 destructor가 호출된다 — 그래서 `goto cleanup` 사다리가 필요 없다.
+
 ### dismissible variant — makeGuard
 
 ```cpp

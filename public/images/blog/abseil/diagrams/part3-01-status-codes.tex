@@ -1,0 +1,53 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ok/.style={rectangle, rounded corners=2pt, draw=okbord, fill=okfill, minimum width=34mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  notf/.style={rectangle, rounded corners=2pt, draw=clibord, fill=clifill, minimum width=34mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  err/.style={rectangle, rounded corners=2pt, draw=conbord, fill=confill, minimum width=34mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  sys/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill, minimum width=34mm, minimum height=10mm, font=\sffamily\footnotesize, inner sep=2pt, align=center},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 6.4) {absl::StatusCode — 17개 canonical 코드 (gRPC 동일)};
+
+% OK
+\node[ok] (c0) at (0, 5.2) {kOk = 0\\[3pt] \scriptsize success};
+
+% Caller / Bad arg
+\node[notf] (c1) at (-7.5, 3.6)  {InvalidArgument\\[3pt] \scriptsize 입력 잘못};
+\node[notf] (c2) at (-3.7, 3.6)  {NotFound\\[3pt] \scriptsize 자원 없음};
+\node[notf] (c3) at ( 0.0, 3.6)  {AlreadyExists\\[3pt] \scriptsize 중복};
+\node[notf] (c4) at ( 3.7, 3.6)  {OutOfRange\\[3pt] \scriptsize 범위 초과};
+\node[notf] (c5) at ( 7.5, 3.6)  {FailedPrecondition\\[3pt] \scriptsize 상태 부적합};
+
+% Permission / Quota
+\node[notf] (c6) at (-7.5, 1.9)  {PermissionDenied\\[3pt] \scriptsize 인증 부족};
+\node[notf] (c7) at (-3.7, 1.9)  {Unauthenticated\\[3pt] \scriptsize 자격 없음};
+\node[notf] (c8) at ( 0.0, 1.9)  {ResourceExhausted\\[3pt] \scriptsize quota 초과};
+\node[notf] (c9) at ( 3.7, 1.9)  {Cancelled\\[3pt] \scriptsize 호출자 취소};
+\node[notf] (ca) at ( 7.5, 1.9)  {DeadlineExceeded\\[3pt] \scriptsize 시간 초과};
+
+% System / Transient
+\node[err]  (cb) at (-7.5, 0.2) {Aborted\\[3pt] \scriptsize 동시성 충돌};
+\node[err]  (cc) at (-3.7, 0.2) {Unavailable\\[3pt] \scriptsize 일시 장애};
+\node[err]  (cd) at ( 0.0, 0.2) {DataLoss\\[3pt] \scriptsize 복구 불가};
+
+% Internal / Unknown
+\node[sys]  (ce) at ( 3.7, 0.2) {Internal\\[3pt] \scriptsize 불변식 깨짐};
+\node[sys]  (cf) at ( 7.5, 0.2) {Unknown\\[3pt] \scriptsize 분류 실패};
+\node[sys]  (cg) at (-7.5, -1.5) {Unimplemented\\[3pt] \scriptsize 미구현};
+
+% Legend
+\node[noteL, text width=100mm] at (-3.3, -0.6) {%
+  \textbf{색 분류}\\[3pt]
+  {\color{okbord}Ok}\, {\color{clibord}Caller (4xx)}\, {\color{conbord}Transient}\, {\color{absbord}System (5xx)}
+};
+
+\end{tikzpicture}
+\end{document}

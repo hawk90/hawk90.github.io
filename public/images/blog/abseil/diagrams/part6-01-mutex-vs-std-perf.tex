@@ -1,0 +1,66 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bar/.style={rectangle, draw=nodebord, line width=0.4pt, anchor=south west},
+  absb/.style={bar, fill=absfill, draw=absbord},
+  conb/.style={bar, fill=confill, draw=conbord},
+  ax/.style={draw=mutec, line width=0.4pt},
+  axlbl/.style={font=\sffamily\footnotesize, text=mutec},
+  vlbl/.style={font=\sffamily\bfseries\footnotesize, text=inkc},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.0, 8.2) {absl::Mutex vs std::mutex — acquire 지연 (ns)};
+
+% Axes
+\draw[ax] (0, 0) -- (10.5, 0);
+\draw[ax] (0, 0) -- (0, 6.0);
+
+% Y axis ticks
+\foreach \v/\y in {0/0, 50/1.4, 100/2.8, 150/4.2, 200/5.6} {
+  \draw[ax] (-0.1, \y) -- (0.1, \y);
+  \node[axlbl, anchor=east] at (-0.15, \y) {\v};
+}
+
+% Scenario 1: uncontended
+\node[absb, minimum width=14mm, minimum height=22mm] (b1a) at (0.8, 0)  {};
+\node[conb, minimum width=14mm, minimum height=28mm] (b1b) at (2.4, 0)  {};
+\node[vlbl, above=1mm of b1a] {18};
+\node[vlbl, above=1mm of b1b] {22};
+\node[axlbl, anchor=north, text=inkc] at (2.0, -0.2) {uncontended};
+
+% Scenario 2: contended (4 threads)
+\node[absb, minimum width=14mm, minimum height=42mm] (b2a) at (4.4, 0)  {};
+\node[conb, minimum width=14mm, minimum height=70mm] (b2b) at (6.0, 0)  {};
+\node[vlbl, above=1mm of b2a] {72};
+\node[vlbl, above=1mm of b2b] {138};
+\node[axlbl, anchor=north, text=inkc] at (5.6, -0.2) {contended (4T)};
+
+% Scenario 3: reader-writer
+\node[absb, minimum width=14mm, minimum height=14mm] (b3a) at (8.0, 0)  {};
+\node[conb, minimum width=14mm, minimum height=46mm] (b3b) at (9.6, 0)  {};
+\node[vlbl, above=1mm of b3a] {12};
+\node[vlbl, above=1mm of b3b] {82};
+\node[axlbl, anchor=north, text=inkc] at (9.2, -0.2) {reader (8T)};
+
+% Legend
+\node[absb, minimum width=8mm, minimum height=4mm] at (0.3, 5.5) {};
+\node[axlbl, anchor=west, text=absbord] at (1.0, 5.7) {absl::Mutex};
+\node[conb, minimum width=8mm, minimum height=4mm] at (3.0, 5.5) {};
+\node[axlbl, anchor=west, text=conbord] at (3.7, 5.7) {std::mutex};
+
+% Note
+\node[noteL, text width=100mm] at (0.0, -1.4) {%
+  \textbf{출처}\\[3pt]
+  Abseil 마이크로벤치 일반화.\\[3pt]
+  uncontended는 비슷, contended에서 차이.
+};
+
+\end{tikzpicture}
+\end{document}

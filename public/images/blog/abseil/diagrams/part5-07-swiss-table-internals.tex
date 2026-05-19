@@ -1,0 +1,80 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bit/.style={rectangle, draw=nodebord, minimum width=4mm, minimum height=5mm, font=\sffamily\scriptsize, inner sep=0pt},
+  bitH/.style={rectangle, draw=hibord, fill=hifill, minimum width=4mm, minimum height=5mm, font=\sffamily\bfseries\scriptsize, inner sep=0pt},
+  bit1/.style={rectangle, draw=absbord, fill=absfill, minimum width=4mm, minimum height=5mm, font=\sffamily\scriptsize, inner sep=0pt},
+  ctrl/.style={rectangle, draw=absbord, fill=absfill, minimum width=6mm, minimum height=6mm, font=\sffamily\scriptsize, inner sep=0pt},
+  ctrlH/.style={rectangle, draw=hibord, fill=hifill, minimum width=6mm, minimum height=6mm, font=\sffamily\bfseries\scriptsize, inner sep=0pt},
+  ctrlE/.style={rectangle, draw=neutbord, fill=neutfill, minimum width=6mm, minimum height=6mm, font=\sffamily\scriptsize, inner sep=0pt},
+  noteL/.style={note, anchor=north west, font=\sffamily\footnotesize\linespread{1.4}\selectfont, align=left}
+]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.6) {Swiss Table — H1/H2 split, group probing, SIMD match};
+
+% 64-bit hash bit layout
+\node[anchor=east, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.5, 4.4) {hash:};
+\foreach \i in {0,...,6} {
+  \pgfmathsetmacro{\x}{-6.2 + \i*0.45}
+  \node[bitH] at (\x, 4.4) {};
+}
+\foreach \i in {0,...,12} {
+  \pgfmathsetmacro{\x}{-3.05 + \i*0.45}
+  \node[bit1] at (\x, 4.4) {};
+}
+\node[anchor=west, font=\sffamily\footnotesize, text=hibord]  at (3.0, 4.6) {7-bit H2};
+\node[anchor=west, font=\sffamily\footnotesize, text=absbord] at (3.0, 4.2) {57-bit H1};
+
+% control byte group (16 slots, one cache line)
+\node[anchor=east, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.5, 2.6) {ctrl group:};
+\node[ctrlE] at (-6.0, 2.6) {--};
+\node[ctrl]  at (-5.4, 2.6) {12};
+\node[ctrlH] at (-4.8, 2.6) {3A};
+\node[ctrl]  at (-4.2, 2.6) {88};
+\node[ctrlE] at (-3.6, 2.6) {--};
+\node[ctrlH] at (-3.0, 2.6) {3A};
+\node[ctrl]  at (-2.4, 2.6) {C1};
+\node[ctrl]  at (-1.8, 2.6) {2F};
+\node[ctrl]  at (-1.2, 2.6) {17};
+\node[ctrlE] at (-0.6, 2.6) {--};
+\node[ctrl]  at ( 0.0, 2.6) {99};
+\node[ctrlH] at ( 0.6, 2.6) {3A};
+\node[ctrl]  at ( 1.2, 2.6) {AB};
+\node[ctrlE] at ( 1.8, 2.6) {--};
+\node[ctrl]  at ( 2.4, 2.6) {44};
+\node[ctrl]  at ( 3.0, 2.6) {77};
+
+% SIMD register
+\node[hi, minimum width=80mm, minimum height=7mm] (simd) at (-1.5, 1.2) {SSE2: 16 byte == H2 (3A)};
+\draw[arr] (-1.5, 2.2) -- (simd.north);
+
+% match result
+\node[anchor=east, font=\sffamily\bfseries\footnotesize, text=inkc] at (-6.5, -0.2) {mask:};
+\foreach \i/\v in {0/0, 1/0, 2/1, 3/0, 4/0, 5/1, 6/0, 7/0, 8/0, 9/0, 10/0, 11/1, 12/0, 13/0, 14/0, 15/0} {
+  \pgfmathsetmacro{\x}{-6.0 + \i*0.6}
+  \ifnum\v=1 \node[bitH, minimum width=6mm, minimum height=6mm] at (\x, -0.2) {\v};
+  \else \node[bit, minimum width=6mm, minimum height=6mm] at (\x, -0.2) {\v}; \fi
+}
+
+% Iterate matches
+\node[noteL, text width=80mm] at (-7.0, -1.4) {%
+  \textbf{probing}\\[3pt]
+  매칭 비트마다 슬롯 가서 key 동등성 검사.\\[3pt]
+  group 안 모두 fail이면 다음 group으로 quadratic probe.
+};
+
+% Probe path on right
+\node[noteL, text width=58mm, draw=okbord, fill=okfill] at (1.5, -1.4) {%
+  \textbf{group = 16 슬롯}\\[3pt]
+  ctrl group이 보통 한 cache line.\\[3pt]
+  SIMD 1회로 전체 스캔.
+};
+
+\end{tikzpicture}
+\end{document}

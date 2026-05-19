@@ -131,6 +131,8 @@ folly::coro::Task<void> ReadWithCleanup(int fd) {
 
 ## 트리 전파
 
+![CancellationToken tree propagation](/images/blog/folly/diagrams/part20-04-cancellation-propagation.svg)
+
 ```cpp
 folly::CancellationSource root;
 auto rootToken = root.getToken();

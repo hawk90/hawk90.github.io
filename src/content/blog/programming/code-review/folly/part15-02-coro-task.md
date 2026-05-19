@@ -106,6 +106,16 @@ folly::coro::Task<void> Log(std::string msg) {
 
 ## 내부 구조
 
+![coro::Task state machine](/images/blog/folly/diagrams/part15-02-coro-task-states.svg)
+
+### stackless suspend의 그림
+
+state machine 안의 각 suspend point는 *frame에 진행 상황을 저장하고 caller에 돌아가는* 지점이다.
+
+![Coroutine suspend / resume](/images/blog/cpp-concepts/diagrams/coroutine-suspend-resume.svg)
+
+Task의 promise_type, awaiter, executor handle 등이 모두 이 frame 안에 산다 — 보통 수십에서 수백 바이트. 한 스레드가 수많은 in-flight Task를 표현할 수 있는 이유다.
+
 ```cpp
 // folly/coro/Task.h 약식
 template <class T>

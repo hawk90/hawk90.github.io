@@ -26,6 +26,14 @@ UnboundedQueue는 "평소엔 작게, 필요할 때만 크게"의 정신이다.
 
 대가는 segment 경계에서 한 번의 atomic CAS와, 동적 할당 비용이다. 그러나 segment 크기가 충분하면 amortized 비용이 매우 낮다.
 
+### unbounded variant도 같은 모델
+
+unbounded라고 해서 모델이 바뀌는 건 아니다. capacity 제약을 *느슨하게* 했을 뿐 producer/consumer 구도는 동일하다.
+
+![Producer / consumer queue](/images/blog/cpp-concepts/diagrams/producer-consumer-queue.svg)
+
+차이는 *backpressure 정책*뿐 — bounded는 가득 차면 producer가 block, unbounded는 segment를 늘려 producer를 절대 막지 않는다. 단, *시스템 전체*에서는 producer가 무한정 빨라지면 memory pressure로 다른 곳이 막힌다. backpressure를 미는 게 아니라 옮긴 것이다.
+
 ## API
 
 ```cpp

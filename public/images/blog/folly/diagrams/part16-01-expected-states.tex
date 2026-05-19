@@ -1,0 +1,34 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-state.tex}
+\begin{tikzpicture}[blog, state]
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (6.0, 5.2) {Expected$<$T, E$>$ — monadic chain};
+
+\node[initial] (i) at (-0.5, 3.3) {};
+\node[stateBox] (s0) at (1.5, 3.3) {empty};
+\node[stateOk]   (s1) at (5.0, 4.4) {has\_value};
+\node[stateWarn] (s2) at (5.0, 2.2) {has\_error};
+\node[stateOk]   (s3) at (9.0, 4.4) {has\_value2};
+\node[stateWarn] (s4) at (9.0, 2.2) {has\_error};
+\node[stateOk]   (s5) at (12.6, 3.3) {value};
+
+\draw[trans] (i) -- (s0);
+\draw[trans] (s0.east) -- node[transLabel]{ok}  (s1.west);
+\draw[trans] (s0.east) -- node[transLabel]{err} (s2.west);
+\draw[trans] (s1) -- node[transLabel]{.then(f)} (s3);
+\draw[transError] (s2) -- node[transLabel]{propagate} (s4);
+\draw[trans] (s3.east) -- node[transLabel]{.value()} (s5.west);
+
+% Chain note (below)
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (0.0, 0.8)
+  {has\_error 는 .then() 을 \textbf{skip} 하고 그대로 chain 끝까지 전파 — try/catch 불필요};
+
+\end{tikzpicture}
+\end{document}
