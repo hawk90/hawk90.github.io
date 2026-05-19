@@ -340,39 +340,25 @@ DO-178C와 유사한 구조 — *한국 적응*.
 
 > ⚠️ Plan 작성 후 *읽지 않음*
 
-```text
-"Plan 완료, 이제 개발 시작"
-→ team이 plan 따르지 않음
-→ Audit 시 *plan vs actual* mismatch → fail
-```
+"Plan 완료, 이제 개발 시작" → team이 plan 따르지 않음 → Audit 시 *plan vs actual* mismatch → fail.
 
 → *kick-off에서 team 교육*.
 
 > ⚠️ Plan 너무 generic
 
-```text
-"이 SW는 DO-178C 준수합니다"
-→ 구체성 부족
-→ Inspector "어떻게?" → reject
-```
+"이 SW는 DO-178C 준수합니다" → 구체성 부족 → Inspector "어떻게?" → reject.
 
 → 명확한 *method·tool·activity*.
 
 > ⚠️ Update 안 함
 
-```text
-Project 변경 → plan 그대로
-→ Plan과 reality mismatch
-```
+Project 변경 → plan 그대로 → Plan과 reality mismatch.
 
 → Living document.
 
 > ⚠️ Independence 가짜
 
-```text
-같은 사람이 *2 hat* (Author + Reviewer)
-→ Audit fail
-```
+같은 사람이 *2 hat* (Author + Reviewer) → Audit fail.
 
 → 명확한 team separation.
 

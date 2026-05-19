@@ -14,86 +14,76 @@ draft: true
 
 ## Avionics Processor 요구
 
-```text
-일반 임베디드 vs Avionics:
+**일반 임베디드 vs Avionics:**
 
-일반 임베디드 (commercial):
-  + 고성능
-  + 저전력
-  + 저비용
-  + 최신 process node
-  
-Avionics:
-  + Deterministic (predictable execution)
-  + Fault tolerance (lockstep·TMR)
-  + 방사선 내성 (rad-hard, rad-tolerant)
-  + 인증 friendly (manual·architecture 공개)
-  + Long supply (~20-30년)
-  + Wide temp (-55°C ~ +125°C)
-  + Vibration·shock
-  + 신뢰성 (MIL spec)
-  
-  - 성능 (commercial 대비 10년 뒤)
-  - 비용 (10x~100x)
-```
+**일반 임베디드 (commercial):**
+- 고성능
+- 저전력
+- 저비용
+- 최신 process node
+
+**Avionics:**
+- Deterministic (predictable execution)
+- Fault tolerance (lockstep·TMR)
+- 방사선 내성 (rad-hard, rad-tolerant)
+- 인증 friendly (manual·architecture 공개)
+- Long supply (~20-30년)
+- Wide temp (-55°C ~ +125°C)
+- Vibration·shock
+- 신뢰성 (MIL spec)
+
+**Avionics trade-off:**
+- 성능 (commercial 대비 10년 뒤)
+- 비용 (10x~100x)
 
 성능 ≠ 1순위. *예측 가능성 + 신뢰성*.
 
 ## Radiation Effect — 우주 특수
 
-```text
-SEU (Single Event Upset):
-  중성자·양성자·중이온 → 메모리 bit flip
-  Transient (영구 손상 X)
-  → ECC + scrubbing
-  
-SEFI (Single Event Functional Interrupt):
-  Logic 단계 영향
-  Reset·recovery 필요
-  
-SEL (Single Event Latch-up):
-  CMOS 회로 latch-up → 영구 손상
-  → 즉시 power cycle
-  → SEL-immune CMOS
-  
-TID (Total Ionizing Dose):
-  Cumulative dose → 성능 저하
-  단위 — krad(Si)
-  LEO 위성 → 10~50 krad over 10년
-  Deep space → 100s krad
-  
-DD (Displacement Damage):
-  Atom dislocation
-  Long-term degradation
-```
+**SEU (Single Event Upset):**
+- 중성자·양성자·중이온 → 메모리 bit flip
+- Transient (영구 손상 X)
+- 대응: ECC + scrubbing
+
+**SEFI (Single Event Functional Interrupt):**
+- Logic 단계 영향
+- Reset·recovery 필요
+
+**SEL (Single Event Latch-up):**
+- CMOS 회로 latch-up → 영구 손상
+- 즉시 power cycle
+- SEL-immune CMOS
+
+**TID (Total Ionizing Dose):**
+- Cumulative dose → 성능 저하
+- 단위 — krad(Si)
+- LEO 위성 → 10~50 krad over 10년
+- Deep space → 100s krad
+
+**DD (Displacement Damage):**
+- Atom dislocation
+- Long-term degradation
 
 방사선 = *deep space + 위성*. LV (수십 분) → 영향 적음.
 
 ## Rad-hard vs Rad-tolerant
 
-```text
-Rad-hard (Radiation-Hardened):
-  설계·공정 자체로 SEU·SEL·TID 내성
-  Si-on-Insulator (SOI), redundant cell
-  Performance·비용 trade-off
-  
-  예 — BAE RAD750, BAE RAD5500
-  
-Rad-tolerant:
-  Commercial part 기반 + 일부 보강
-  ECC·TMR for SEU mitigation
-  TID 제한적
-  
-  예 — Cobham GR716·GR740 (LEON SPARC)
-  Microchip ATmega rad-tol
-  
-COTS (Commercial Off-The-Shelf):
-  표준 commercial part
-  Mitigation은 *system 차원* (TMR·ECC·watchdog)
-  
-  예 — Raspberry Pi (early CubeSat)
-  Nvidia Jetson (Mars Ingenuity)
-```
+**Rad-hard (Radiation-Hardened):**
+- 설계·공정 자체로 SEU·SEL·TID 내성
+- Si-on-Insulator (SOI), redundant cell
+- Performance·비용 trade-off
+- 예 — BAE RAD750, BAE RAD5500
+
+**Rad-tolerant:**
+- Commercial part 기반 + 일부 보강
+- ECC·TMR for SEU mitigation
+- TID 제한적
+- 예 — Cobham GR716·GR740 (LEON SPARC), Microchip ATmega rad-tol
+
+**COTS (Commercial Off-The-Shelf):**
+- 표준 commercial part
+- Mitigation은 *system 차원* (TMR·ECC·watchdog)
+- 예 — Raspberry Pi (early CubeSat), Nvidia Jetson (Mars Ingenuity)
 
 각 trade-off — *mission profile에 따라*.
 

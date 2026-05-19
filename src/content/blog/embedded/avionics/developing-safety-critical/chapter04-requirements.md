@@ -14,74 +14,56 @@ draft: true
 
 ## Requirements 종류
 
-```text
-System Requirements (System SR):
-  Aircraft·LV system level
-  ARP-4754A에서 작성
-  → SW 또는 HW로 allocation
+**System Requirements (System SR)**:
 
-High-Level Requirements (HLR):
-  SW functional·non-functional
-  "What" 정의 (Behavior)
-  System requirements에서 derive
+- Aircraft·LV system level
+- ARP-4754A에서 작성
+- → SW 또는 HW로 allocation
 
-Low-Level Requirements (LLR):
-  Module·unit level
-  "How" 정의 (Architecture·design)
-  HLR에서 derive
+**High-Level Requirements (HLR)**:
 
-Derived Requirements:
-  Source가 *higher level에 없는* 추가 requirement
-  보통 design decision에서 발생
-  → Safety assessment에 영향 review 필요
-```
+- SW functional·non-functional
+- "What" 정의 (Behavior)
+- System requirements에서 derive
+
+**Low-Level Requirements (LLR)**:
+
+- Module·unit level
+- "How" 정의 (Architecture·design)
+- HLR에서 derive
+
+**Derived Requirements**:
+
+- Source가 *higher level에 없는* 추가 requirement
+- 보통 design decision에서 발생
+- → Safety assessment에 영향 review 필요
 
 ## HLR 작성 표준
 
-```text
-SRS (SW Requirements Standards) — Ch 3 SDP에서 정의:
-  Notation: 자연어 + 수식
-  Each requirement: ID·text·rationale·source
-  Verifiable (testable·measurable)
-  Unambiguous
-  Single requirement per statement
-  Numbered (HLR-001·...)
+SRS (SW Requirements Standards) — Ch 3 SDP에서 정의.
 
-Example:
-  HLR-1.1.1: 
-    "The system shall display airspeed
-     with accuracy ±0.5 kt within 100 ms
-     of receiving the air data input."
-  Source: SR-1.2.3
-  Rationale: Pilot situational awareness
-  Verification: Test·Analysis·Review
-```
+- **Notation**: 자연어 + 수식
+- Each requirement: ID·text·rationale·source
+- Verifiable (testable·measurable)
+- Unambiguous
+- Single requirement per statement
+- Numbered (HLR-001·...)
+
+**Example**:
+
+- **HLR-1.1.1**: "The system shall display airspeed with accuracy ±0.5 kt within 100 ms of receiving the air data input."
+- **Source**: SR-1.2.3
+- **Rationale**: Pilot situational awareness
+- **Verification**: Test·Analysis·Review
 
 ## Requirements Quality Attributes
 
-```text
-Verifiable:
-  Test·analysis로 확인 가능
-  "shall display" — yes
-  "shall provide good response" — vague
-
-Unambiguous:
-  "Within 100 ms" — clear
-  "Quick response" — interpretable
-
-Complete:
-  All conditions covered
-  Edge case 명시
-
-Consistent:
-  Other req와 충돌 X
-
-Modifiable:
-  Single change point per change
-
-Traceable:
-  Source·destination link
-```
+- **Verifiable** — Test·analysis로 확인 가능. "shall display" — yes. "shall provide good response" — vague.
+- **Unambiguous** — "Within 100 ms" — clear. "Quick response" — interpretable.
+- **Complete** — All conditions covered. Edge case 명시.
+- **Consistent** — Other req와 충돌 X.
+- **Modifiable** — Single change point per change.
+- **Traceable** — Source·destination link.
 
 각 req — *5+ attribute* 통과.
 

@@ -192,17 +192,14 @@ struct dram_timing_info dram_timing = {
 
 DDR4 / LPDDR4 이후의 SoC는 *부팅 시 PHY training*을 합니다. SoC가 *실제로 데이터를 보내 보면서* 각 lane의 *최적 sampling 위치*를 찾는 과정입니다.
 
-```text
-[DDR Init 흐름]
+DDR Init 흐름은 다음과 같습니다.
 
-1. DDRC와 PHY를 기본 설정으로 초기화
-2. DDR 칩에게 *initialization sequence* 전송
-   (MR0 ~ MR12 mode register 쓰기)
-3. PHY training firmware 적재 (1D, 2D)
-4. Training 실행 — DRAM이 *대답*하는 시간 측정
-5. Training 결과를 CSR(Configuration and Status Register)에 저장
-6. Frequency change 점들을 미리 계산해 둠 (DVFS용)
-```
+1. DDRC와 PHY를 기본 설정으로 초기화.
+2. DDR 칩에게 *initialization sequence* 전송 (MR0 ~ MR12 mode register 쓰기).
+3. PHY training firmware 적재 (1D, 2D).
+4. Training 실행 — DRAM이 *대답*하는 시간 측정.
+5. Training 결과를 CSR(Configuration and Status Register)에 저장.
+6. Frequency change 점들을 미리 계산해 둠 (DVFS용).
 
 Training firmware는 SoC 벤더가 제공하는 *blob*입니다. NXP의 경우 `firmware-imx` 패키지에 들어 있고, BL2에 함께 link됩니다.
 
