@@ -1,6 +1,6 @@
 ---
 title: "5-01: FreeRTOS 소스 분석 — tasks.c·queue.c·port.c"
-date: 2026-05-20T02:00:00
+date: 2026-05-07T02:00:00
 description: "FreeRTOS-Kernel 저장소의 핵심 파일 셋을 따라가며 xTaskCreate부터 PendSV까지의 흐름을 정리합니다. TCB·ready list·port 계층 사이의 경계가 어떻게 그어져 있는지 source 수준에서 살펴봅니다."
 series: "Practical RTOS Internals"
 seriesOrder: 46

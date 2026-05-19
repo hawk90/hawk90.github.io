@@ -1,20 +1,20 @@
 ---
 title: "1-04: Preemption과 Cooperation — 강제 전환 vs 자발 양보"
-date: 2026-05-08T04:00:00
-description: "Preemptive: tick·IRQ에서 강제 전환. Cooperative: yield 명시. trade-off — latency vs predictability."
+date: 2026-05-07T04:00:00
+description: "Preemptive는 tick과 IRQ에서 강제로 전환합니다. Cooperative는 yield를 명시해야 합니다. latency와 predictability의 trade-off를 다룹니다."
 series: "Practical RTOS Internals"
 seriesOrder: 4
 tags: [rtos, preemption, cooperative, yield, tick]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Preemption = 실시간성, Cooperation = 단순성"** — 둘 중 하나 선택. 임베디드 RTOS는 거의 다 preemptive.
+> **"Preemption은 실시간성을, Cooperation은 단순성을 제공합니다."** 둘 중 하나를 선택합니다. 임베디드 RTOS는 거의 다 preemptive를 씁니다.
 
 ## Preemption — 강제 전환
 
-높은 priority task가 ready 되면 *현재 running task를 강제 중단*. 두 트리거:
+높은 priority task가 ready 되면 *현재 running task를 강제로 중단*시킵니다. 두 가지 트리거가 있습니다.
 
 ### Tick Preemption
 
@@ -24,7 +24,7 @@ draft: true
                        Higher priority ready 있으면 전환
 ```
 
-매 tick (보통 1-10 ms)마다 scheduler 확인. *Time slice 만료* 또는 *higher-priority 등장* 시 전환.
+매 tick(보통 1-10 ms)마다 scheduler를 확인합니다. *Time slice 만료* 또는 *higher-priority 등장* 시 전환됩니다.
 
 ### IRQ Preemption
 
@@ -32,11 +32,11 @@ draft: true
 ISR 끝 → portYIELD_FROM_ISR(needYield) → 즉시 scheduler
 ```
 
-ISR이 *higher-priority task를 깨움* (`xSemaphoreGiveFromISR` 등) → ISR 종료 시 즉시 그 task로 전환.
+ISR이 *higher-priority task를 깨우면* (`xSemaphoreGiveFromISR` 등) ISR 종료 시 즉시 그 task로 전환됩니다.
 
 ## Cooperation — 자발 양보
 
-각 task가 *명시적 yield*로만 전환.
+각 task가 *명시적 yield*로만 전환합니다.
 
 ```c
 void taskA(void *arg) {
@@ -47,7 +47,7 @@ void taskA(void *arg) {
 }
 ```
 
-또는 *blocking API*가 implicit yield. `vTaskDelay()`·`xQueueReceive()` 등은 *내부적으로 yield*.
+또는 *blocking API*가 implicit yield 역할을 합니다. `vTaskDelay()`, `xQueueReceive()` 등은 *내부적으로 yield*합니다.
 
 ### Cooperative만 사용 시
 
@@ -55,7 +55,7 @@ void taskA(void *arg) {
 configUSE_PREEMPTION = 0   // FreeRTOS
 ```
 
-Tick 인터럽트는 *time keeping만* — task 전환 트리거 X. 오직 *task가 yield*할 때만 scheduler 동작.
+Tick 인터럽트는 *time keeping만* 담당하고 task 전환 트리거 역할을 하지 않습니다. 오직 *task가 yield*할 때만 scheduler가 동작합니다.
 
 ## 비교 — Preemptive vs Cooperative 타임라인
 
@@ -77,21 +77,21 @@ Tick 인터럽트는 *time keeping만* — task 전환 트리거 X. 오직 *task
 
 ### 시나리오: 1 task가 5 ms 작업 + 다른 task가 1 ms 주기 PID
 
-**Preemptive**:
-- PID가 매 ms 깨어남, 즉시 실행
-- 1 ms PID 만족 ✓
-- 5 ms 작업이 *조각조각* 진행됨 → 6-7 ms 안에 끝남
+**Preemptive**의 경우:
+- PID가 매 ms 깨어나 즉시 실행됩니다.
+- 1 ms PID를 만족합니다.
+- 5 ms 작업이 *조각조각* 진행되어 6-7 ms 안에 끝납니다.
 
-**Cooperative**:
-- 5 ms 작업이 *통째로* 실행, 그 동안 PID 못 함
-- PID가 *최대 5 ms 지연* → deadline miss
-- 5 ms 작업이 *깨끗하게* 5 ms에 끝남
+**Cooperative**의 경우:
+- 5 ms 작업이 *통째로* 실행되고, 그 동안 PID를 못 합니다.
+- PID가 *최대 5 ms 지연*되어 deadline을 miss합니다.
+- 5 ms 작업이 *깨끗하게* 5 ms에 끝납니다.
 
-→ *Deadline 있으면* preemptive. *없으면* cooperative.
+*Deadline이 있으면* preemptive를 쓰고, *없으면* cooperative를 씁니다.
 
 ## Preemption Disable (Critical Section)
 
-Preemptive RTOS에서도 *짧은 구간은 preemption disable* 필요.
+Preemptive RTOS에서도 *짧은 구간은 preemption disable*이 필요합니다.
 
 ```c
 taskENTER_CRITICAL();
@@ -100,15 +100,15 @@ shared_buffer[idx++] = value;
 taskEXIT_CRITICAL();
 ```
 
-`taskENTER_CRITICAL()` = *interrupt mask (BASEPRI)* + *scheduler suspend*. 짧게 유지가 핵심.
+`taskENTER_CRITICAL()`은 *interrupt mask (BASEPRI)*와 *scheduler suspend*를 합친 것입니다. 짧게 유지하는 게 핵심입니다.
 
 ## ISR과 Preemption
 
-ISR은 *task가 아님* — 단순히 *현재 task를 잠시 빼앗는* 코드. ISR 도중에는:
+ISR은 *task가 아닙니다*. 단순히 *현재 task를 잠시 빼앗는* 코드입니다. ISR 도중에는 다음 규칙이 적용됩니다.
 
-- task 전환 안 함 (ISR 끝까지)
-- 다른 ISR이 *더 높은 priority*면 nested IRQ 가능
-- ISR이 *task wake* 시 → ISR 끝 직후 scheduler 호출
+- task 전환을 하지 않습니다 (ISR이 끝날 때까지).
+- 다른 ISR이 *더 높은 priority*면 nested IRQ가 가능합니다.
+- ISR이 *task wake* 시 ISR 끝 직후 scheduler를 호출합니다.
 
 ```c
 void TIM1_IRQHandler(void) {
@@ -131,22 +131,22 @@ void TIM1_IRQHandler(void) {
 | 1 kHz | 1 ms | **표준** — 대부분 RTOS 기본 |
 | 10 kHz | 0.1 ms | 고정밀, ISR overhead 큼 |
 
-FreeRTOS의 `configTICK_RATE_HZ = 1000`이 기본. 100 Hz면 *vTaskDelay(1)*이 *10 ms 지연*임에 주의.
+FreeRTOS의 `configTICK_RATE_HZ = 1000`이 기본값입니다. 100 Hz면 *vTaskDelay(1)*이 *10 ms 지연*임에 주의해야 합니다.
 
 ## Tickless Mode
 
-Idle 시 *tick interrupt 멈춤* → CPU sleep 더 길게. 배터리 동작에 필수.
+Idle 시 *tick interrupt를 멈추면* CPU sleep을 더 길게 할 수 있습니다. 배터리 동작에 필수입니다.
 
 ```c
 configUSE_TICKLESS_IDLE = 1
 configEXPECTED_IDLE_TIME_BEFORE_SLEEP = 2  // 2 tick 이상 idle 시 sleep
 ```
 
-다음 task wake 시간을 알아내 *그 시점까지 timer 동적 설정*. 정밀한 hw timer 필요.
+다음 task의 wake 시간을 알아내 *그 시점까지 timer를 동적으로 설정*합니다. 정밀한 hw timer가 필요합니다.
 
 ## SMP에서 Preemption
 
-다중 코어 — *코어별 독립* preemption. 한 코어의 ISR이 다른 코어의 task에 직접 영향 X. **Inter-Processor Interrupt (IPI)**로 다른 코어 깨움.
+다중 코어에서는 *코어별 독립*적으로 preemption이 일어납니다. 한 코어의 ISR이 다른 코어의 task에 직접 영향을 주지 않습니다. **Inter-Processor Interrupt (IPI)**로 다른 코어를 깨웁니다.
 
 ```text
 Core 0: ISR → IPI → Core 1 wake → Core 1의 ready task 실행
@@ -156,29 +156,29 @@ Core 0: ISR → IPI → Core 1 wake → Core 1의 ready task 실행
 
 > ⚠️ ISR에서 long work
 
-Preemptive RTOS도 *ISR 도중*은 어떤 task도 실행 못 함. ISR은 *짧게* (수 µs), 긴 작업은 *deferred task*로.
+Preemptive RTOS에서도 *ISR 도중*에는 어떤 task도 실행하지 못합니다. ISR은 *짧게* 유지하고(수 µs), 긴 작업은 *deferred task*로 넘깁니다.
 
 > ⚠️ Critical Section 너무 김
 
-`taskENTER_CRITICAL()` 안에 printf 같은 *수 ms 작업* → 그 동안 *모든 ISR·task 막힘*. 짧게.
+`taskENTER_CRITICAL()` 안에 printf 같은 *수 ms 작업*을 넣으면 그 동안 *모든 ISR과 task가 막힙니다*. 짧게 유지해야 합니다.
 
 > ⚠️ Cooperative에서 무한 루프
 
-Yield 없는 무한 루프 → 시스템 행. *while(1)에 항상 wait API* 또는 yield.
+Yield 없는 무한 루프는 시스템을 행 상태로 만듭니다. *while(1)에 항상 wait API*나 yield를 넣습니다.
 
 > ⚠️ Tick rate 너무 높음
 
-10 kHz tick = 매 100 µs ISR. CPU 부담 ↑. 1 kHz로 충분.
+10 kHz tick은 매 100 µs마다 ISR이 발생합니다. CPU 부담이 커집니다. 1 kHz로 충분합니다.
 
 ## 정리
 
-- **Preemptive** = tick·IRQ에서 강제 전환 → 실시간성 보장.
-- **Cooperative** = yield만 → 단순하지만 deadline 보장 X.
-- 임베디드 RTOS는 거의 **preemptive** 사용.
-- Critical section은 *짧게* — preemption disable 구간이 latency 결정.
-- Tickless mode가 배터리 동작 핵심.
+- **Preemptive**는 tick과 IRQ에서 강제로 전환하여 실시간성을 보장합니다.
+- **Cooperative**는 yield만으로 전환되어 단순하지만 deadline을 보장하지 못합니다.
+- 임베디드 RTOS는 거의 **preemptive**를 사용합니다.
+- Critical section은 *짧게* 유지해야 합니다. preemption disable 구간이 latency를 결정합니다.
+- Tickless mode가 배터리 동작의 핵심입니다.
 
-다음 편은 **인터럽트와 RTOS** — ISR context, deferred processing, FromISR API.
+다음 편에서는 **인터럽트와 RTOS**를 다룹니다. ISR context, deferred processing, FromISR API를 살펴봅니다.
 
 ## 관련 항목
 

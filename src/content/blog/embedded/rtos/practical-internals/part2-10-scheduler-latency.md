@@ -1,16 +1,16 @@
 ---
 title: "2-10: Scheduler Latency 측정 — GPIO Toggle, DWT, ftrace, cyclictest"
-date: 2026-05-08T20:00:00
+date: 2026-05-07T20:00:00
 description: "ISR 종료 → ready task 실행까지의 시간. 측정 방법과 worst-case 추적."
 series: "Practical RTOS Internals"
 seriesOrder: 20
 tags: [scheduler, latency, measurement, dwt, gpio, ftrace, cyclictest]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Scheduler latency = ISR 끝 → task 시작"** — 평균이 아닌 worst-case가 hard real-time의 진실.
+> **"Scheduler latency는 ISR이 끝난 시점부터 task가 실행을 시작하기까지의 시간입니다."** Hard real-time에서 의미가 있는 값은 평균이 아니라 worst-case입니다.
 
 ## Latency 구간 정의
 
@@ -58,7 +58,7 @@ void rx_task(void *arg) {
 }
 ```
 
-**로직 분석기**로 GPIO 펄스 폭 측정. ISR 시작·끝·task 시작이 *3 edge*로 보임.
+로직 분석기로 GPIO 펄스 폭을 측정합니다. ISR 시작, ISR 끝, task 시작이 세 개의 edge로 나타납니다.
 
 ```text
 Pin:  ─┐      ┌────┐
@@ -95,7 +95,7 @@ void task(void *arg) {
 }
 ```
 
-**1-cycle 정밀**. 168 MHz면 6 ns. *Worst-case*만 보관 후 *주기 로그*.
+1 cycle 단위로 측정합니다. 168 MHz면 약 6 ns의 해상도입니다. worst-case 값만 보관해 두고 주기적으로 로그를 남기면 충분합니다.
 
 ## ftrace — Linux RT 환경
 
@@ -109,11 +109,11 @@ echo 1 > /sys/kernel/debug/tracing/tracing_on
 cat /sys/kernel/debug/tracing/trace
 ```
 
-Linux kernel의 *모든 function entry/exit* 추적. Schedule 호출 시점 분석.
+Linux kernel의 모든 function entry/exit를 추적합니다. schedule 호출 시점을 살펴볼 수 있습니다.
 
 ### irqsoff Tracer
 
-가장 긴 *interrupt disabled* 구간 자동 추적.
+가장 길게 interrupt가 disable되어 있던 구간을 자동으로 추적합니다.
 
 ```bash
 echo irqsoff > /sys/kernel/debug/tracing/current_tracer
@@ -148,11 +148,11 @@ T: 0 (12345) P:80 I:1000 C:100000 Min:5      Avg:7      Max:23
 T: 1 (12346) P:80 I:1500 C: 66667 Min:6      Avg:8      Max:31
 ```
 
-**Max** = worst-case wake latency. Hard real-time이면 *deadline 안*.
+여기서 Max 값이 worst-case wake latency입니다. Hard real-time이라면 이 값이 deadline 안에 들어와야 합니다.
 
 ## SystemView — Segger 시각화
 
-J-Link + SystemView app — *RTOS event 실시간 트레이스*. Context switch, IRQ, API call 모두 timeline에 표시.
+J-Link와 SystemView app을 사용하면 RTOS event를 실시간으로 트레이스할 수 있습니다. Context switch, IRQ, API 호출이 모두 timeline 위에 표시됩니다.
 
 ```c
 // Init
@@ -161,18 +161,18 @@ SEGGER_SYSVIEW_Conf();
 // Trace 자동 — FreeRTOS trace macro 활용
 ```
 
-GUI에서 *각 task 실행 구간 + IRQ 구간*을 색깔로 시각화. Latency 즉시 식별.
+GUI에서 task 실행 구간과 IRQ 구간을 색으로 구분해 보여 줍니다. Latency 문제를 즉시 식별할 수 있습니다.
 
 ## Tracealyzer
 
-비슷한 도구. Percepio.
+Percepio의 비슷한 도구입니다.
 
 ```c
 vTraceEnable(TRC_START);
 // 자동 trace
 ```
 
-Recording → PC tool로 분석. RTOS-specific (FreeRTOS·Zephyr·ThreadX).
+Recording을 PC tool로 분석합니다. FreeRTOS, Zephyr, ThreadX 등 RTOS별로 특화되어 있습니다.
 
 ## Latency 원인 분류
 
@@ -206,7 +206,7 @@ for (int i = 0; i < 100; i++) {
 }
 ```
 
-**Histogram + max** — p99·p999·max 모두 추적. *Long tail*이 위험.
+Histogram과 max를 함께 기록하면 p99, p999, max를 모두 추적할 수 있습니다. 위험한 것은 평균이 아니라 long tail입니다.
 
 ## 실제 측정 사례
 
@@ -219,34 +219,34 @@ for (int i = 0; i < 100; i++) {
 | Xenomai | 5 µs | 15 µs | 50 µs | Cobalt core |
 | QNX | 3 µs | 10 µs | 30 µs | Hard RT 인증 |
 
-Bare-metal Cortex-M이 *가장 deterministic*. Linux는 *PREEMPT_RT 가도 100 µs*.
+Bare-metal Cortex-M이 가장 deterministic한 결과를 보입니다. Linux는 PREEMPT_RT를 적용해도 100 µs 수준에 머무릅니다.
 
 ## 자주 하는 실수
 
-> ⚠️ 평균만 보고 OK 판정
+> ⚠️ 평균만 보고 OK라고 판정합니다
 
-Hard real-time이면 *max가 deadline 이내*. Avg 1 µs도 max 1 ms면 fail.
+Hard real-time에서는 max가 deadline 이내에 들어와야 합니다. 평균이 1 µs라도 max가 1 ms면 그 시스템은 실패한 것입니다.
 
-> ⚠️ 측정 환경 ≠ 실 환경
+> ⚠️ 측정 환경이 실 환경과 다릅니다
 
-Bench에서 빠른데 *실 환경*에 cache·DMA·bus contention 추가. 실 환경에서 *수일 측정*.
+Bench에서는 빠른데 실 환경에서는 cache, DMA, bus contention이 더해집니다. 실제 운용 조건에서 며칠 단위로 측정해야 의미가 있습니다.
 
-> ⚠️ DWT 빠짐
+> ⚠️ DWT를 켜는 것을 잊습니다
 
-`CoreDebug->DEMCR`·`DWT->CTRL` 활성 안 함 → CYCCNT 0 유지.
+`CoreDebug->DEMCR`와 `DWT->CTRL`를 활성화하지 않으면 CYCCNT가 0에 머무릅니다.
 
-> ⚠️ cyclictest priority 너무 낮음
+> ⚠️ cyclictest의 priority가 너무 낮습니다
 
-p1 (낮음)이면 다른 task에 preempt → 측정 부정확. *최고 priority + mlockall*.
+p1 같은 낮은 priority로 돌리면 다른 task에 preempt되어 측정이 부정확해집니다. 최고 priority에 `mlockall`을 함께 적용해야 합니다.
 
 ## 정리 — Part 2 마무리
 
-- Scheduler latency = **ISR 끝 → ready task 시작**.
-- 측정 방법 — **GPIO + 로직 분석기**, **DWT CYCCNT**, **ftrace**, **cyclictest**, **SystemView**.
-- **Worst-case (max)**가 hard real-time의 진실 — 평균 무용.
-- Bare-metal RTOS ≈ 1-2 µs, Linux PREEMPT_RT ≈ 30-100 µs.
+- Scheduler latency는 ISR이 끝난 시점부터 ready task가 실행을 시작하기까지의 시간을 말합니다.
+- 측정 방법은 GPIO와 로직 분석기, DWT CYCCNT, ftrace, cyclictest, SystemView가 대표적입니다.
+- 평균은 거의 의미가 없습니다. Hard real-time의 진실은 worst-case (max)입니다.
+- Bare-metal RTOS는 1-2 µs 수준, Linux PREEMPT_RT는 30-100 µs 수준입니다.
 
-**Part 2 (Scheduler & Context Switch) 종료**. Part 3은 *IPC & Sync 내부 구현*.
+이로써 Part 2 (Scheduler & Context Switch)를 마무리합니다. Part 3에서는 IPC와 Sync 내부 구현으로 넘어갑니다.
 
 ## 관련 항목
 

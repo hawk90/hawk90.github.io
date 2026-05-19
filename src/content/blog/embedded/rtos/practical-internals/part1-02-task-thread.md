@@ -1,16 +1,16 @@
 ---
 title: "1-02: Task와 Thread 개념 — TCB, 상태 머신, 생명 주기"
-date: 2026-05-08T02:00:00
-description: "Task = stack + TCB + 상태. 5상태 머신 (Running·Ready·Blocked·Suspended·Deleted)와 그 전이."
+date: 2026-05-07T02:00:00
+description: "Task는 stack과 TCB, 상태로 구성됩니다. 5상태 머신(Running·Ready·Blocked·Suspended·Deleted)과 그 전이를 다룹니다."
 series: "Practical RTOS Internals"
 seriesOrder: 2
 tags: [rtos, task, tcb, state-machine, lifecycle]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Task = stack + TCB + state"** — 세 가지가 갖춰지면 RTOS가 task로 인식.
+> **"Task = stack + TCB + state"입니다.** 세 가지가 갖춰지면 RTOS가 task로 인식합니다.
 
 ## Task의 본질 — 세 가지 구성
 
@@ -20,7 +20,7 @@ draft: true
 | **TCB** (Task Control Block) | 메타데이터 (state, priority, stack pointer, ...) |
 | **State** | Running / Ready / Blocked / ... |
 
-이 셋이 있으면 RTOS scheduler가 *교대로 실행*할 수 있음.
+이 셋이 있으면 RTOS scheduler가 *교대로 실행*할 수 있습니다.
 
 ## TCB — Task Control Block
 
@@ -41,11 +41,11 @@ typedef struct tskTaskControlBlock {
 } tskTCB;
 ```
 
-핵심 — **pxTopOfStack**이 *context switch의 모든 것*. 다른 task로 전환 시 *현재 task의 모든 레지스터*를 그 stack에 push, 다음 task의 *pxTopOfStack에서 pop*.
+핵심은 **pxTopOfStack**이 *context switch의 모든 것*이라는 점입니다. 다른 task로 전환할 때 *현재 task의 모든 레지스터*를 그 stack에 push하고, 다음 task의 *pxTopOfStack에서 pop*합니다.
 
 ## Stack — Task별 독립
 
-각 task가 *자기 stack* 보유. 보통 256-2048 byte. 함수 호출 깊이·로컬 변수·ISR 시 자동 push되는 레지스터를 모두 담음.
+각 task가 *자기 stack*을 보유합니다. 보통 256-2048 byte입니다. 함수 호출 깊이, 로컬 변수, ISR 시 자동 push되는 레지스터를 모두 담습니다.
 
 ```c
 void pid_task(void *arg) {
@@ -60,7 +60,7 @@ xTaskCreate(pid_task, "PID", 256, NULL, 3, NULL);
 //                            256 × sizeof(StackType_t) = 1 KB (32-bit)
 ```
 
-> ⚠️ **Stack overflow**가 임베디드 디버깅의 80%. Canary·MPU·configCHECK_FOR_STACK_OVERFLOW 활용.
+> ⚠️ **Stack overflow**가 임베디드 디버깅의 80%를 차지합니다. Canary, MPU, configCHECK_FOR_STACK_OVERFLOW를 활용합니다.
 
 ## Task State — 5 상태 머신
 
@@ -68,11 +68,11 @@ xTaskCreate(pid_task, "PID", 256, NULL, 3, NULL);
 
 | State | 의미 |
 | --- | --- |
-| **Running** | *지금 CPU 차지* — 한 코어당 *정확히 1개* |
-| **Ready** | 실행 가능, CPU 대기 (scheduler가 골라줘야) |
+| **Running** | *지금 CPU 차지*. 한 코어당 *정확히 1개*입니다. |
+| **Ready** | 실행 가능, CPU 대기 (scheduler가 골라줘야 합니다) |
 | **Blocked** | 이벤트 대기 (semaphore·queue·delay·notification) |
-| **Suspended** | 명시적 vTaskSuspend — scheduler가 *고려 안 함* |
-| **Deleted** | vTaskDelete — TCB만 살아있고 idle task가 정리 |
+| **Suspended** | 명시적 vTaskSuspend. scheduler가 *고려하지 않습니다*. |
+| **Deleted** | vTaskDelete. TCB만 살아있고 idle task가 정리합니다. |
 
 ### 전이 — 누가 트리거하나
 
@@ -86,7 +86,7 @@ xTaskCreate(pid_task, "PID", 256, NULL, 3, NULL);
 | Suspended → Ready | vTaskResume() |
 | 모두 → Deleted | vTaskDelete() — 자기 또는 다른 task가 호출 |
 
-> 💡 **Running → Blocked는 자발적**, **Running → Ready는 강제적**. 둘이 본질적으로 다름.
+> 💡 **Running → Blocked는 자발적이고, Running → Ready는 강제적입니다.** 둘은 본질적으로 다릅니다.
 
 ## Task 생성 — FreeRTOS 예
 
@@ -107,12 +107,12 @@ if (result != pdPASS) {
 }
 ```
 
-이 *한 줄*에서 RTOS는:
-1. TCB 할당 (heap_X 또는 static)
-2. Stack 할당
-3. Stack에 *가짜 context* (return address = pid_task, 등) 쌓음
-4. Ready list에 추가
-5. 만약 새 task가 *더 높은 priority*면 즉시 preempt
+이 *한 줄*에서 RTOS는 다음 일을 합니다.
+1. TCB를 할당합니다 (heap_X 또는 static).
+2. Stack을 할당합니다.
+3. Stack에 *가짜 context* (return address = pid_task 등)를 쌓습니다.
+4. Ready list에 추가합니다.
+5. 만약 새 task가 *더 높은 priority*면 즉시 preempt합니다.
 
 ## Task 함수의 패턴
 
@@ -132,7 +132,7 @@ void pid_task(void *arg) {
 }
 ```
 
-> ⚠️ **task 함수에서 return 하면 *RTOS 충돌***. 명시적 `vTaskDelete(NULL)` 또는 무한루프.
+> ⚠️ **task 함수에서 return 하면 *RTOS가 충돌*합니다.** 명시적 `vTaskDelete(NULL)` 또는 무한루프를 사용합니다.
 
 ## Idle Task — 항상 존재하는 최저 우선순위 task
 
@@ -148,7 +148,7 @@ void prvIdleTask(void *pvParameters) {
 }
 ```
 
-다른 모든 task가 Blocked·Suspended일 때만 실행. **0** priority. CPU sleep 모드 진입 trigger.
+다른 모든 task가 Blocked나 Suspended일 때만 실행됩니다. priority는 **0**입니다. CPU sleep 모드 진입을 trigger합니다.
 
 ## Static vs Dynamic 할당
 
@@ -160,11 +160,11 @@ void prvIdleTask(void *pvParameters) {
 | Code size | 약간 작음 | malloc 코드 포함 |
 | 안전 인증 | 선호 (MISRA·DO-178C) | 회피 |
 
-Safety-critical (자동차·항공·의료)은 **static**, 일반 IoT는 **dynamic** 흔함.
+Safety-critical (자동차·항공·의료) 분야는 **static**을 선호하고, 일반 IoT는 **dynamic**이 흔합니다.
 
 ## Thread vs Task — 용어 차이
 
-RTOS 세계의 *전통적 용어*는 **task**. POSIX/Zephyr·일부 자료에선 **thread**.
+RTOS 세계의 *전통적 용어*는 **task**입니다. POSIX, Zephyr, 일부 자료에서는 **thread**를 씁니다.
 
 | 용어 | 사용처 |
 | --- | --- |
@@ -172,35 +172,35 @@ RTOS 세계의 *전통적 용어*는 **task**. POSIX/Zephyr·일부 자료에선
 | **Thread** | Zephyr, POSIX (pthread), Windows |
 | **Process** | Linux (별도 메모리 공간) |
 
-본질은 같음 — 독립 stack + 공유 메모리. *Linux의 Process*만 격리된 메모리.
+본질은 같습니다. 독립 stack과 공유 메모리를 가집니다. *Linux의 Process*만 격리된 메모리를 가집니다.
 
 ## 자주 하는 실수
 
 > ⚠️ Stack 너무 작음
 
-256 word (1 KB)는 *대부분 충분*하지만, 큰 로컬 배열·printf·재귀 사용 시 *오버플로*. `uxTaskGetStackHighWaterMark()`로 사용량 측정.
+256 word (1 KB)는 *대부분 충분*하지만, 큰 로컬 배열, printf, 재귀를 사용하면 *오버플로*가 발생합니다. `uxTaskGetStackHighWaterMark()`로 사용량을 측정합니다.
 
 > ⚠️ Task에서 return
 
-위에서 언급. **무한 루프 + delay**가 표준 패턴.
+위에서 언급했듯이 **무한 루프 + delay**가 표준 패턴입니다.
 
 > ⚠️ ISR에서 normal API 호출
 
-ISR에서 `xQueueSend()` 호출 → 데드락 또는 크래시. **FromISR 변종** 사용.
+ISR에서 `xQueueSend()`를 호출하면 데드락이나 크래시가 발생합니다. **FromISR 변종**을 사용합니다.
 
 > ⚠️ Priority 인플레이션
 
-모든 task를 high priority로 설정 → 의미 없음. *task 간 상대적* 순서가 중요.
+모든 task를 high priority로 설정해도 의미가 없습니다. *task 간 상대적* 순서가 중요합니다.
 
 ## 정리
 
-- Task = **Stack + TCB + State**.
-- 5 상태 — Running·Ready·Blocked·Suspended·Deleted.
-- 전이는 *자발적* (blocked) 또는 *강제적* (preempted).
-- **Idle Task**가 항상 존재 — tickless·정리 담당.
-- Stack overflow가 임베디드 디버깅 1위 — canary·MPU 필수.
+- Task는 **Stack과 TCB, State**로 구성됩니다.
+- 5 상태가 있습니다 (Running, Ready, Blocked, Suspended, Deleted).
+- 전이는 *자발적*(blocked) 또는 *강제적*(preempted)입니다.
+- **Idle Task**가 항상 존재하여 tickless와 정리를 담당합니다.
+- Stack overflow는 임베디드 디버깅 1위 원인입니다. canary와 MPU가 필수입니다.
 
-다음 편은 **스케줄링 알고리즘** — Round Robin, Priority-based, EDF, Rate Monotonic.
+다음 편에서는 **스케줄링 알고리즘**을 다룹니다. Round Robin, Priority-based, EDF, Rate Monotonic을 살펴봅니다.
 
 ## 관련 항목
 

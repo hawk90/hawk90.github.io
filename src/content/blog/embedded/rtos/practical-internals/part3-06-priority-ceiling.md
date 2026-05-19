@@ -1,29 +1,31 @@
 ---
 title: "3-06: Priority Ceiling Protocol — Immediate vs Original"
-date: 2026-05-08T03:00:00
+date: 2026-05-07T03:00:00
 description: "PI의 대안. 각 mutex에 정적 ceiling — take 즉시 boost. Deadlock 방지."
 series: "Practical RTOS Internals"
 seriesOrder: 27
 tags: [priority-ceiling, pcp, deadlock-free]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Mutex에 ceiling 정적 부여 → take 즉시 boost"** — PI의 *take-then-conflict* 와 다른 사전 적극적 접근.
+> **"Mutex에 ceiling을 정적으로 부여하고 take 즉시 boost한다"** — PI의 *take-then-conflict* 방식과 달리, 사전에 적극적으로 막는 접근입니다.
+
+이번 글에서는 Priority Ceiling Protocol(PCP)을 살펴봅니다. PI보다 덜 알려졌지만 deadlock 보장 측면에서 강력합니다.
 
 ## PCP 동작
 
-각 mutex M에 *priority ceiling* C(M) = *이 mutex를 lock할 task 중 최고 priority*.
+각 mutex M에 *priority ceiling* C(M)을 부여합니다. C(M)은 *이 mutex를 lock할 task 중 최고 priority*입니다.
 
 ```text
 mutex X: C(X) = 5 (T_high의 priority)
 T_low (priority 1) take X 즉시 → T_low priority → 5
 T_med (priority 3) ready → 시작 못 함 (T_low의 5 < 3)
-T_low가 X release → priority → 1 복원
+T_low가 X release → priority → 1로 복원
 ```
 
-**Take 즉시 boost** — PI는 *conflict 후 boost*.
+PCP는 **take 즉시 boost**합니다. PI는 *conflict가 발생한 후에 boost*합니다.
 
 ## Immediate PCP vs Original PCP
 
@@ -37,18 +39,18 @@ T_low가 X release → priority → 1 복원
 ## Deadlock 방지 증명
 
 ```text
-T1 holds M1 (ceiling 5) → T1 priority = 5
-T1 needs M2 (ceiling 5) — 시도
+T1이 M1 보유 (ceiling 5) → T1 priority = 5
+T1이 M2 (ceiling 5)를 시도
 
-만약 T2가 M2 보유 → T2 priority ≥ 5 (M2의 ceiling)
+만약 T2가 M2를 보유 중이면 → T2 priority ≥ 5 (M2의 ceiling)
 T2의 priority가 5 이상이면 T1은 *시작도 못 함* — 모순
-→ T2가 M2 보유 못 함
-→ M2는 free → T1이 acquire
+→ T2가 M2를 보유할 수 없음
+→ M2는 free 상태 → T1이 acquire
 
-결론: PCP 사용 시 deadlock 불가능
+결론: PCP를 쓰면 deadlock이 불가능
 ```
 
-이게 **PCP의 큰 매력** — *lock order 무관*.
+이것이 **PCP의 가장 큰 매력**입니다. *Lock order에 무관*하게 deadlock이 막힙니다.
 
 ## 구현 — RTOS API
 
@@ -63,21 +65,21 @@ k_mutex_init(&mtx);
 mtx.ceiling = HIGH_PRIO;
 ```
 
-FreeRTOS는 PCP 미지원 — *PI만*.
+FreeRTOS는 PCP를 지원하지 않습니다. *PI만* 제공합니다.
 
 ## System Ceiling — Original PCP
 
 ```text
 SystemCeiling(t) = max(C(M) for M in locked mutexes at time t)
 
-T_new가 lock 시도:
+T_new가 lock을 시도하면:
   if T_new->priority > SystemCeiling:
     OK — proceed
   else:
     block
 ```
 
-복잡. Immediate가 더 흔함.
+구현이 복잡합니다. 그래서 Immediate 방식이 훨씬 흔합니다.
 
 ## PI vs PCP 비교
 
@@ -94,12 +96,12 @@ T_new가 lock 시도:
 ## 단점 — Unnecessary Boost
 
 ```text
-T_high가 mutex 사용 안 할 때도 T_low가 *T_high level로 boost*
+T_high가 mutex를 사용하지 않는 시점에도 T_low가 *T_high level로 boost*
 → T_med·T_low가 *항상 starved*
 → 시스템 throughput 감소
 ```
 
-PCP는 *worst case 안전* but *best case 낭비*.
+PCP는 *worst case 안전*하지만 *best case 낭비*가 심합니다.
 
 ## 적용 사례
 
@@ -111,7 +113,7 @@ PCP는 *worst case 안전* but *best case 낭비*.
 | QNX | PI | PCP |
 | RTAI | PI | — |
 
-**대부분 시스템 = PI**. PCP는 *deadlock 회피가 critical*인 곳.
+**대부분의 시스템은 PI를 기본으로** 씁니다. PCP는 *deadlock 회피가 critical*인 환경에서 선택됩니다.
 
 ## Immediate PCP 구현 예
 
@@ -126,7 +128,7 @@ typedef struct {
 int mutex_pcp_take(mutex_pcp_t *m) {
     taskENTER_CRITICAL();
     if (m->locked) {
-        /* 누가 보유 — 대기 (priority ≥ ceiling이므로 wait 없을 것) */
+        /* 누가 보유 중 — 대기 (priority ≥ ceiling이므로 wait가 없어야 정상) */
         taskEXIT_CRITICAL();
         return ERROR;
     }
@@ -156,27 +158,27 @@ int mutex_pcp_give(mutex_pcp_t *m) {
 
 ## 자주 하는 실수
 
-> ⚠️ Ceiling 계산 잘못
+> ⚠️ Ceiling 계산 실수
 
-`max(이 mutex 쓰는 task priority)` 정확히. 누락 시 *PI가 안 되어 inversion 가능*.
+`max(이 mutex를 쓰는 task priority)`로 정확히 잡아야 합니다. 빠지면 *PI가 적용되지 않아 inversion이 발생*합니다.
 
-> ⚠️ FreeRTOS에서 PCP 시도
+> ⚠️ FreeRTOS에서 PCP를 시도
 
-지원 안 함. PI만.
+지원하지 않습니다. PI만 가능합니다.
 
-> ⚠️ 동적 시스템에 PCP
+> ⚠️ 동적 시스템에 PCP 적용
 
-새 task가 *높은 priority로 mutex 사용* 시 ceiling 재계산. 동적 어려움.
+새 task가 *더 높은 priority로 mutex를 사용*하면 ceiling을 재계산해야 합니다. 동적 환경에서는 어렵습니다.
 
 ## 정리
 
-- PCP = **mutex에 정적 ceiling + take 즉시 boost**.
-- **Immediate vs Original** — Immediate가 흔함.
-- **Deadlock 방지 자동** — lock order 무관.
-- Priority 사전 결정 필요 — 동적 시스템 어려움.
-- 채택 — *VxWorks·Zephyr*. FreeRTOS는 PI만.
+- PCP는 **mutex에 정적 ceiling을 두고 take 즉시 boost**합니다.
+- **Immediate vs Original** 중 Immediate가 훨씬 흔합니다.
+- **Deadlock 방지가 자동**이며 lock order에 무관합니다.
+- Priority 사전 결정이 필요해서 동적 시스템에서는 적용이 어렵습니다.
+- 채택 사례는 *VxWorks·Zephyr*입니다. FreeRTOS는 PI만 지원합니다.
 
-다음 편은 **Queue 내부 구현**.
+다음 편은 **Queue 내부 구현**입니다.
 
 ## 관련 항목
 

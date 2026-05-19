@@ -1,6 +1,6 @@
 ---
 title: "4-02: FreeRTOS Heap_1~5 — 5종 Allocator의 구조와 트레이드오프"
-date: 2026-05-19T14:00:00
+date: 2026-05-07T14:00:00
 description: "FreeRTOS가 제공하는 다섯 가지 heap 구현을 source 수준에서 비교합니다. heap_1의 bump부터 heap_5의 multi-region까지, 실시간성과 단편화 관점에서 어떤 워크로드에 어떤 구현이 맞는지 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 34

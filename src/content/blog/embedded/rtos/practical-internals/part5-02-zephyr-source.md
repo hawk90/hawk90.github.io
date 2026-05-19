@@ -1,6 +1,6 @@
 ---
 title: "5-02: Zephyr 커널 분석 — k_thread·k_sem·Driver Model"
-date: 2026-05-20T03:00:00
+date: 2026-05-07T03:00:00
 description: "Zephyr 커널 서브트리를 따라가며 sched.c·thread.c·sem.c의 핵심을 읽습니다. devicetree로 드라이버 인스턴스가 만들어지는 경로와 KConfig·west 빌드 체계까지 한 지도 위에 모읍니다."
 series: "Practical RTOS Internals"
 seriesOrder: 47

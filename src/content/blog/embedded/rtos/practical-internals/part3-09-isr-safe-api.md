@@ -1,16 +1,16 @@
 ---
 title: "3-09: ISR-Safe API — FromISR 패턴·Higher Priority Wake·Deferred Work"
-date: 2026-05-08T06:00:00
-description: "*FromISR API 내부 — pxHigherPriorityTaskWoken·yield 결정·deferred work pattern."
+date: 2026-05-07T06:00:00
+description: "FromISR API 내부 구조와 pxHigherPriorityTaskWoken, yield 결정, deferred work 패턴을 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 30
 tags: [isr-safe, fromisr, higher-priority, deferred]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"FromISR API = block 불가 + yield 명시"** — *task API와 분리*해 안전성 확보.
+> **"FromISR API는 block이 불가능하고 yield를 명시해야 합니다"** — task API와 분리해 안전성을 확보합니다.
 
 ## API 명명 규칙
 
@@ -24,7 +24,7 @@ xQueueSendFromISR(q, &item, &xHigherPriorityTaskWoken);
 xSemaphoreGiveFromISR(sem, &xHigherPriorityTaskWoken);
 ```
 
-차이점:
+두 API의 차이를 정리하면 다음과 같습니다.
 
 | 항목 | Task API | ISR API |
 |---|---|---|
@@ -33,9 +33,9 @@ xSemaphoreGiveFromISR(sem, &xHigherPriorityTaskWoken);
 | Wake 결과 | 자동 yield | `pxHigherPriorityTaskWoken` 반환 |
 | Reschedule | 함수 내부 | 호출자가 명시 |
 
-## pxHigherPriorityTaskWoken — 왜 필요한가
+## pxHigherPriorityTaskWoken은 왜 필요한가
 
-ISR이 task wake → 깨어난 task의 priority가 *interrupted task*보다 높으면 *ISR 종료 후 context switch*. 그러나 ISR 자체는 *task switch 직접 호출 못 함* — pending 비트만 set, ISR exit 시점에 처리.
+ISR이 어떤 task를 wake했을 때, 깨어난 task의 priority가 interrupted task보다 높으면 ISR 종료 후 context switch가 발생합니다. 그러나 ISR 자체는 task switch를 직접 호출할 수 없습니다. 대신 pending 비트만 set해 두고, ISR exit 시점에 실제 switch가 처리됩니다.
 
 ```c
 void uart_rx_isr(void) {
@@ -49,7 +49,7 @@ void uart_rx_isr(void) {
 }
 ```
 
-`portYIELD_FROM_ISR` — Cortex-M에서는 `SCB->ICSR = PENDSVSET` → PendSV 호출.
+`portYIELD_FROM_ISR`은 Cortex-M에서 `SCB->ICSR = PENDSVSET`을 통해 PendSV를 호출합니다.
 
 ## portENTER_CRITICAL_FROM_ISR
 
@@ -61,7 +61,7 @@ uint32_t saved = portSET_INTERRUPT_MASK_FROM_ISR();
 portCLEAR_INTERRUPT_MASK_FROM_ISR(saved);
 ```
 
-ISR 내부에서 *더 높은 priority ISR* 차단 — `BASEPRI` 설정. 기존 BASEPRI 값을 *save/restore*.
+ISR 내부에서 더 높은 priority ISR을 차단할 때는 `BASEPRI`를 설정합니다. 이때 기존 BASEPRI 값을 save/restore하는 것이 핵심입니다.
 
 ```c
 static inline uint32_t portSET_INTERRUPT_MASK_FROM_ISR(void) {
@@ -78,7 +78,7 @@ static inline uint32_t portSET_INTERRUPT_MASK_FROM_ISR(void) {
 }
 ```
 
-## ISR 내부 Block 금지 이유
+## ISR 내부에서 Block을 금지하는 이유
 
 ```c
 void some_isr(void) {
@@ -86,11 +86,13 @@ void some_isr(void) {
 }
 ```
 
-- ISR은 *task가 아님* — TCB 없음, block list에 못 들어감
-- Block → 다른 ISR/task 무한 대기 → deadlock
-- ISR 길이 = system response time 결정
+이유를 정리하면 다음과 같습니다.
 
-**규칙** — ISR은 *비동기 신호 송신*만, 처리 자체는 *task에 위임*.
+- ISR은 task가 아니므로 TCB가 없고 block list에도 들어갈 수 없습니다.
+- Block이 발생하면 다른 ISR이나 task가 무한 대기에 빠져 deadlock으로 이어집니다.
+- ISR 길이가 곧 system response time을 결정합니다.
+
+**규칙은 단순합니다.** ISR은 비동기 신호 송신만 담당하고, 실제 처리는 task에 위임해야 합니다.
 
 ## Deferred Interrupt Pattern
 
@@ -114,10 +116,11 @@ void uart_irq(void) {
 }
 ```
 
-장점:
-- ISR 길이 최소화 (수 µs)
-- Task context에서 *blocking API 사용 가능*
-- Priority 조정으로 *latency 제어*
+장점은 세 가지입니다.
+
+- ISR 길이를 수 µs 수준으로 최소화할 수 있습니다.
+- Task context에서 blocking API를 자유롭게 사용할 수 있습니다.
+- Priority 조정으로 latency를 제어할 수 있습니다.
 
 ## Timer Service (Daemon) Task
 
@@ -140,7 +143,7 @@ void prvTimerTask(void *p) {
 }
 ```
 
-ISR이 *복잡한 작업* 필요 시:
+ISR이 복잡한 작업을 수행해야 한다면 다음과 같이 위임합니다.
 
 ```c
 void heavy_isr(void) {
@@ -151,11 +154,11 @@ void heavy_isr(void) {
 }
 ```
 
-Daemon task가 `do_heavy_work(arg1, arg2)` 실행.
+이렇게 하면 daemon task가 `do_heavy_work(arg1, arg2)`를 대신 실행합니다.
 
-## ISR Priority — configMAX_SYSCALL_INTERRUPT_PRIORITY
+## ISR Priority와 configMAX_SYSCALL_INTERRUPT_PRIORITY
 
-FreeRTOS API는 *낮은 priority ISR*에서만 호출 가능.
+FreeRTOS API는 낮은 priority ISR에서만 호출할 수 있습니다.
 
 ```c
 /* FreeRTOSConfig.h */
@@ -173,7 +176,7 @@ FreeRTOS API는 *낮은 priority ISR*에서만 호출 가능.
 0xFF (255) ──┴─── Kernel·Tick·SysCall (lowest)
 ```
 
-> ⚠️ Cortex-M priority *수치 ↑ = priority ↓*. 헷갈리기 쉬움.
+> ⚠️ Cortex-M에서 priority는 수치가 클수록 실제 우선순위가 낮아집니다. 헷갈리기 쉬운 부분입니다.
 
 ## taskYIELD_FROM_ISR (Cortex-M)
 
@@ -191,12 +194,12 @@ FreeRTOS API는 *낮은 priority ISR*에서만 호출 가능.
 portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 ```
 
-`xHigherPriorityTaskWoken == pdFALSE` → 그대로 ISR 종료, 같은 task 복귀.
-`xHigherPriorityTaskWoken == pdTRUE` → ISR 종료 직후 PendSV → context switch.
+`xHigherPriorityTaskWoken == pdFALSE`이면 그대로 ISR이 종료되고 같은 task로 복귀합니다.
+`xHigherPriorityTaskWoken == pdTRUE`이면 ISR 종료 직후 PendSV가 발생하고 context switch가 일어납니다.
 
-## Atomic Operation — ISR ↔ Task Variable
+## ISR과 Task 간 공유 변수의 Atomic Operation
 
-ISR이 task와 공유 변수 R/W 시 *barrier* 필요.
+ISR이 task와 공유 변수를 읽고 쓸 때는 barrier가 필요합니다.
 
 ```c
 volatile uint32_t shared_counter;
@@ -213,11 +216,11 @@ void isr(void) {
 }
 ```
 
-32-bit alignment + 32-bit access는 *Cortex-M에서 atomic*. 64-bit 변수는 *split read* — critical section 필수.
+Cortex-M에서 32-bit alignment에 32-bit access는 atomic입니다. 그러나 64-bit 변수는 split read가 발생하므로 critical section이 반드시 필요합니다.
 
 ## 자주 하는 실수
 
-> ⚠️ ISR에서 Task API 호출
+> ⚠️ ISR에서 Task API를 호출하는 경우
 
 ```c
 void isr(void) {
@@ -225,9 +228,9 @@ void isr(void) {
 }
 ```
 
-Block 가능 → 컴파일은 됨, 런타임에 *hard fault* 또는 *데이터 corruption*. 항상 `*FromISR` 사용.
+이 코드는 block이 가능한 API를 ISR에서 부르는 형태입니다. 컴파일은 통과하지만 런타임에 hard fault나 데이터 corruption이 발생합니다. 항상 `*FromISR` 변형을 사용해야 합니다.
 
-> ⚠️ pxHigherPriorityTaskWoken 누락
+> ⚠️ pxHigherPriorityTaskWoken을 누락하는 경우
 
 ```c
 void isr(void) {
@@ -237,29 +240,29 @@ void isr(void) {
 }
 ```
 
-Wake 발생해도 *yield 안 함* → high-priority task 대기. *Latency 증가*.
+Wake가 발생해도 yield가 일어나지 않으므로 high-priority task는 다음 스케줄링 시점까지 기다려야 합니다. 그만큼 latency가 늘어납니다.
 
-> ⚠️ ISR Priority가 configMAX_SYSCALL_INTERRUPT_PRIORITY 위
+> ⚠️ ISR Priority가 configMAX_SYSCALL_INTERRUPT_PRIORITY보다 높은 경우
 
 ```c
 NVIC_SetPriority(UART1_IRQn, 0);   // Highest — FreeRTOS API 금지 영역
 ```
 
-여기서 `xQueueSendFromISR` 호출 시 *kernel data 손상*. 항상 *낮은 priority*.
+이 영역에서 `xQueueSendFromISR`을 호출하면 kernel data가 손상됩니다. 항상 낮은 priority로 설정해야 합니다.
 
-> ⚠️ Critical section 안 nested ISR
+> ⚠️ Critical section 안에서 nested ISR이 BASEPRI를 직접 변경하는 경우
 
-낮은 priority IRQ 안 `portENTER_CRITICAL_FROM_ISR()` 후 *직접 BASEPRI 변경*. Stack 깨짐.
+낮은 priority IRQ 안에서 `portENTER_CRITICAL_FROM_ISR()`을 호출한 뒤 BASEPRI를 직접 바꾸면 stack이 깨집니다.
 
 ## 정리
 
-- ISR API = **non-blocking + 명시 yield**.
-- **pxHigherPriorityTaskWoken**으로 task wake 결과 전달.
-- **portYIELD_FROM_ISR** = PendSV pending → ISR 종료 후 switch.
-- **Deferred handler**로 ISR 짧게, 무거운 처리는 task에서.
-- **configMAX_SYSCALL_INTERRUPT_PRIORITY** 위 IRQ는 FreeRTOS API 금지.
+- ISR API는 non-blocking이며 yield를 명시적으로 호출해야 합니다.
+- `pxHigherPriorityTaskWoken`을 통해 task wake 결과를 전달합니다.
+- `portYIELD_FROM_ISR`은 PendSV를 pending시켜 ISR 종료 후 switch를 일으킵니다.
+- Deferred handler를 사용해 ISR을 짧게 유지하고 무거운 처리는 task에 맡깁니다.
+- `configMAX_SYSCALL_INTERRUPT_PRIORITY`보다 우선순위가 높은 IRQ에서는 FreeRTOS API를 호출하면 안 됩니다.
 
-다음 편은 **Deadlock 패턴** — 발견·예방.
+다음 편에서는 deadlock 패턴의 발견과 예방을 다룹니다.
 
 ## 관련 항목
 

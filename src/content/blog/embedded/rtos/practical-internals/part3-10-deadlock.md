@@ -1,29 +1,29 @@
 ---
 title: "3-10: Deadlock — 4 조건·Wait-for Graph·Lock Ordering·Timeout"
-date: 2026-05-08T07:00:00
-description: "Coffman 4 조건. Wait-for graph 분석. Lock ordering·timeout·hierarchical locking."
+date: 2026-05-07T07:00:00
+description: "Coffman의 네 조건과 wait-for graph 분석, lock ordering, timeout, hierarchical locking을 살펴봅니다."
 series: "Practical RTOS Internals"
 seriesOrder: 31
 tags: [deadlock, detection, avoidance, lock-ordering]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Deadlock = 4 조건 동시 성립"** — 그 중 *하나만 깨도* 회피 가능.
+> **"Deadlock은 네 조건이 동시에 성립할 때 발생합니다."** 그중 하나만 깨도 회피할 수 있습니다.
 
-## Coffman 4 조건 (1971)
+## Coffman의 네 조건 (1971)
 
 | 조건 | 의미 | 어떻게 깰까 |
 |---|---|---|
-| **Mutual Exclusion** | 자원이 *한 task만* 보유 | Mutex 대신 lock-free 사용 |
-| **Hold and Wait** | 자원 보유 *중 다른 자원 요청* | Try-lock·atomic acquire |
-| **No Preemption** | 강제 회수 불가 | Timeout·rollback |
+| **Mutual Exclusion** | 자원이 한 task만 보유 | Mutex 대신 lock-free 사용 |
+| **Hold and Wait** | 자원 보유 중 다른 자원 요청 | Try-lock 또는 atomic acquire |
+| **No Preemption** | 강제 회수 불가 | Timeout과 rollback |
 | **Circular Wait** | A→B→C→A 순환 대기 | **Lock ordering** |
 
-4 가지 *모두* 만족해야 deadlock. 하나라도 깨면 회피.
+네 가지를 모두 만족할 때만 deadlock이 성립합니다. 하나라도 깨면 회피할 수 있습니다.
 
-## 전형적 시나리오 — 2 Mutex 순환
+## 전형적 시나리오: 2 Mutex 순환
 
 ```c
 SemaphoreHandle_t mtx_A, mtx_B;
@@ -42,7 +42,7 @@ void task2(void *p) {
 }
 ```
 
-Task1: A 보유, B 대기 / Task2: B 보유, A 대기 → 영원 정지.
+Task1은 A를 잡은 채 B를 기다리고, Task2는 B를 잡은 채 A를 기다립니다. 두 task가 서로를 영원히 막아 시스템이 정지합니다.
 
 ## Wait-for Graph
 
@@ -55,11 +55,11 @@ Task1: A 보유, B 대기 / Task2: B 보유, A 대기 → 영원 정지.
        mtx_A    ←── waiting for ── mtx_B
 ```
 
-Graph에 *cycle 있음 = deadlock*. RTOS는 이 graph를 *컴파일 타임에 확인 불가* — 동적.
+Graph에 cycle이 있으면 곧 deadlock입니다. RTOS는 이 graph가 동적으로 만들어지므로 컴파일 타임에 확인할 수 없습니다.
 
-## 해결 1: Lock Ordering — 가장 흔함
+## 해결 1: Lock Ordering (가장 흔한 방법)
 
-**규칙** — 모든 mutex에 *전역 순서* 부여. 항상 *낮은 순서부터* take.
+규칙은 간단합니다. 모든 mutex에 전역 순서를 부여하고, 항상 낮은 순서부터 take합니다.
 
 ```c
 /* Convention — 알파벳/주소/ID 기준 */
@@ -79,9 +79,9 @@ void any_task(void) {
 }
 ```
 
-장점 — *컴파일 타임에 검증 가능* (도구·문서로). Linux kernel·DB 엔진 등에서 표준.
+이 방식의 장점은 컴파일 타임에 도구나 문서로 검증할 수 있다는 점입니다. Linux 커널이나 DB 엔진에서도 표준 관행입니다.
 
-## 해결 2: Timeout (No Preemption 깨기)
+## 해결 2: Timeout으로 No Preemption 깨기
 
 ```c
 if (xSemaphoreTake(mtx_A, pdMS_TO_TICKS(100)) != pdPASS) {
@@ -94,9 +94,9 @@ if (xSemaphoreTake(mtx_B, pdMS_TO_TICKS(100)) != pdPASS) {
 }
 ```
 
-*감지 + 복구*. 모든 lock acquisition에 *유한 timeout* — `portMAX_DELAY` 사용 자제.
+감지와 복구를 한 번에 처리할 수 있습니다. 모든 lock acquisition에 유한 timeout을 지정하고, `portMAX_DELAY` 사용은 자제해야 합니다.
 
-## 해결 3: Try-Lock + Rollback (Hold and Wait 깨기)
+## 해결 3: Try-Lock과 Rollback으로 Hold and Wait 깨기
 
 ```c
 if (!xSemaphoreTake(mtx_A, 0)) return EBUSY;
@@ -109,7 +109,7 @@ xSemaphoreGive(mtx_B);
 xSemaphoreGive(mtx_A);
 ```
 
-또는 *all-or-nothing*:
+또는 all-or-nothing 패턴으로 작성합니다.
 
 ```c
 bool try_acquire_all(void) {
@@ -127,9 +127,9 @@ while (!try_acquire_all()) {
 }
 ```
 
-## 해결 4: Hierarchical Locking (Linux lockdep)
+## 해결 4: Hierarchical Locking (Linux lockdep 방식)
 
-각 lock에 *level*. 같은 level lock 동시 보유 금지. 다른 level은 *오름차순* 으로만.
+각 lock에 level을 부여합니다. 같은 level의 lock을 동시에 보유할 수 없고, 다른 level은 오름차순으로만 잡을 수 있습니다.
 
 ```c
 typedef struct {
@@ -152,7 +152,7 @@ bool hier_take(hier_mutex_t *m, TickType_t timeout) {
 }
 ```
 
-*Runtime 검증*. Linux lockdep — 실제 deadlock 발생 전에 발견.
+Runtime에서 lock 순서를 검증하는 방식입니다. Linux lockdep이 이 기법으로 실제 deadlock이 발생하기 전에 위반을 잡아냅니다.
 
 ## Reader-Writer Lock Deadlock
 
@@ -164,9 +164,9 @@ read_lock(&rw);
 write_lock(&rw);   // ✗ Recursive read-then-write
 ```
 
-같은 task가 *read lock 보유* 중 *write lock* 시도 → 자기 자신 wait → deadlock. 해결 — recursive variant 또는 lock upgrade API.
+같은 task가 read lock을 보유한 상태에서 write lock을 요청하면 자기 자신을 기다리는 deadlock에 빠집니다. recursive variant나 lock upgrade API로 해결합니다.
 
-## ABA Variation — Priority Inversion 결합
+## ABA 변형: Priority Inversion 결합
 
 ```text
 Low task L:  mtx 보유, M에 의해 선점
@@ -174,7 +174,7 @@ Med task M:  CPU 점유 (mtx 안 씀)
 High task H: mtx 대기 → L 못 풀고 M이 CPU → unbounded wait
 ```
 
-Deadlock 아니지만 *비슷한 효과*. **Priority Inheritance**로 해결 (3-05).
+엄밀히 deadlock은 아니지만 효과는 비슷합니다. Priority Inheritance로 해결합니다 (3-05 참고).
 
 ## 검출 도구
 
@@ -193,13 +193,13 @@ for (int i = 0; i < N; i++) {
 }
 ```
 
-모든 task가 *blocked* 상태 + tick 진행 없음 → deadlock 의심.
+모든 task가 blocked 상태이고 tick도 진행되지 않으면 deadlock을 의심합니다.
 
-### Static Analysis — Coverity·Klocwork
+### Static Analysis (Coverity, Klocwork)
 
-함수 호출 그래프 + lock acquire 순서 분석 → *lock order inconsistency* 경고.
+함수 호출 그래프와 lock acquire 순서를 함께 분석해 lock order inconsistency를 경고합니다.
 
-### Runtime — Watchdog
+### Runtime Watchdog
 
 ```c
 void wd_task(void *p) {
@@ -221,9 +221,9 @@ void main_task(void *p) {
 }
 ```
 
-Lock acquisition timeout + watchdog reset = *최후의 보루*.
+Lock acquisition timeout과 watchdog reset의 조합은 최후의 보루입니다.
 
-## Livelock — Deadlock의 사촌
+## Livelock: Deadlock의 사촌
 
 ```c
 while (try_take_all() == false) {
@@ -232,7 +232,7 @@ while (try_take_all() == false) {
 }
 ```
 
-Task A와 Task B가 *동시 release + retry* → 영원 retry. **Random backoff**:
+Task A와 Task B가 동시에 release하고 다시 retry하는 패턴이 반복되면 영원히 진전이 없습니다. random backoff로 해결합니다.
 
 ```c
 vTaskDelay(pdMS_TO_TICKS(rand() % 10));
@@ -240,15 +240,15 @@ vTaskDelay(pdMS_TO_TICKS(rand() % 10));
 
 ## 자주 하는 실수
 
-> ⚠️ `portMAX_DELAY` 남발
+> ⚠️ `portMAX_DELAY`를 남용하는 경우
 
 ```c
 xSemaphoreTake(mtx, portMAX_DELAY);   // ✗ deadlock 감지 불가
 ```
 
-Production code엔 *유한 timeout*. Debug build에선 OK.
+Production code에는 반드시 유한한 timeout을 지정해야 합니다. Debug build에서만 무한 대기를 허용합니다.
 
-> ⚠️ Recursive lock 잘못
+> ⚠️ Recursive lock을 잘못 사용하는 경우
 
 ```c
 xSemaphoreTake(mtx, ...);
@@ -256,9 +256,9 @@ xSemaphoreTake(mtx, ...);
 xSemaphoreTake(mtx, ...);   // ✗ Self-deadlock (mutex 아닌 binary semaphore)
 ```
 
-Recursive 필요 시 *recursive variant* 명시.
+같은 task가 mutex를 두 번 잡는 패턴이 필요하면 recursive variant를 명시적으로 사용해야 합니다.
 
-> ⚠️ ISR과 task 간 lock 공유
+> ⚠️ ISR과 task가 lock을 공유하는 경우
 
 ```c
 xSemaphoreTake(mtx, ...);
@@ -266,26 +266,26 @@ some_isr_disable_func();
 /* ISR 발생 → 같은 mtx 시도 → ✗ */
 ```
 
-ISR ↔ task 동기화엔 *queue·event group·semaphore* (mutex 아님).
+ISR과 task 간 동기화에는 mutex가 아니라 queue, event group, semaphore를 사용합니다.
 
-> ⚠️ Lock holder 중 long-blocking API
+> ⚠️ Lock 보유 중 long-blocking API를 호출하는 경우
 
 ```c
 xSemaphoreTake(mtx_A, ...);
 xQueueReceive(q, &item, portMAX_DELAY);   // ✗ mtx_A 보유 중 무한 대기
 ```
 
-*Lock hold time*은 짧게. Blocking call 전에 release.
+Lock hold time은 짧게 유지하고, blocking call 전에는 반드시 release합니다.
 
 ## 정리
 
-- Deadlock = **Coffman 4 조건 동시 성립**.
-- **Lock ordering**이 가장 실용적 — 모든 lock에 전역 순서.
-- **Timeout + rollback**으로 감지·복구.
-- **Hierarchical lock**으로 runtime 검증.
-- 모든 production lock에 *유한 timeout* + watchdog.
+- Deadlock은 Coffman의 네 조건이 동시에 성립할 때 발생합니다.
+- Lock ordering이 가장 실용적인 해결책이며 모든 lock에 전역 순서를 부여합니다.
+- Timeout과 rollback으로 감지하고 복구할 수 있습니다.
+- Hierarchical lock으로 runtime에 lock 순서를 검증할 수 있습니다.
+- 모든 production lock에는 유한 timeout과 watchdog을 함께 두어야 합니다.
 
-다음 part는 **Memory Management** — heap·stack·MPU.
+다음 part에서는 memory management를 다룹니다. heap, stack, MPU 순서로 살펴봅니다.
 
 ## 관련 항목
 

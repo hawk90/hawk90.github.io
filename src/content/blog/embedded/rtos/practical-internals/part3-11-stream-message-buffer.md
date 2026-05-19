@@ -1,6 +1,6 @@
 ---
 title: "3-11: Stream Buffer와 Message Buffer — FreeRTOS 10의 Lock-Free SPSC"
-date: 2026-05-08T08:00:00
+date: 2026-05-07T08:00:00
 description: "FreeRTOS 10+ 추가된 Stream/Message Buffer. Lock-free SPSC ring buffer로 queue보다 10배 빠른 IPC. ISR-safe variant, byte stream vs variable-length frame의 선택."
 series: "Practical RTOS Internals"
 seriesOrder: 32

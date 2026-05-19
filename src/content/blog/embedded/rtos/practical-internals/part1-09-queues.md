@@ -1,20 +1,20 @@
 ---
 title: "1-09: 큐와 메시지 패싱 — Producer-Consumer, Ring Buffer, By-Value vs By-Reference"
-date: 2026-05-08T09:00:00
-description: "Task 간 데이터 전달의 표준. FreeRTOS는 by-value copy. 대용량은 pointer queue."
+date: 2026-05-07T09:00:00
+description: "Task 간 데이터 전달의 표준입니다. FreeRTOS는 by-value copy이며, 대용량은 pointer queue로 처리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 9
 tags: [queue, message-passing, producer-consumer, ring-buffer]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"공유 메모리 + lock보다 message passing"** — 큐는 *데이터 + 동기화*를 한 번에.
+> **"공유 메모리 + lock보다 message passing"** — 큐는 데이터와 동기화를 한 번에 처리합니다.
 
 ## Queue — Task 간 통신의 정답
 
-Mutex + 공유 buffer 패턴:
+Mutex와 공유 buffer 패턴을 먼저 보겠습니다.
 
 ```c
 SemaphoreHandle_t mtx;
@@ -42,7 +42,7 @@ void consumer(void *arg) {
 }
 ```
 
-→ Polling 필요·복잡. 대안 — **Queue**.
+Polling이 필요하고 복잡합니다. 대안이 **Queue**입니다.
 
 ```c
 QueueHandle_t q = xQueueCreate(10, sizeof(Data_t));
@@ -63,13 +63,13 @@ void consumer(void *arg) {
 }
 ```
 
-*Mutex + signal + buffer*가 통합되어 *한 줄*에 producer-consumer.
+Mutex와 signal, buffer가 통합되어 producer-consumer를 한 줄로 표현할 수 있습니다.
 
 ## Queue 내부 — Ring Buffer
 
 ![Queue ring buffer + 2 wait lists](/images/blog/practical-internals/diagrams/part1-09-queue-ringbuffer.svg)
 
-FreeRTOS의 큐 구현:
+FreeRTOS의 큐 구현은 다음과 같습니다.
 
 ```c
 typedef struct QueueDefinition {
@@ -85,7 +85,7 @@ typedef struct QueueDefinition {
 } Queue_t;
 ```
 
-**Ring buffer + 2 wait list**. 송신자·수신자 모두 block 가능.
+**Ring buffer와 2개의 wait list**로 구성됩니다. 송신자와 수신자 모두 block 가능합니다.
 
 ## Send/Receive 흐름
 
@@ -114,13 +114,13 @@ BaseType_t xQueueSend(QueueHandle_t q, const void *item, TickType_t timeout) {
 
 ### Receive
 
-대칭. Empty 시 *xTasksWaitingToReceive에 block*, 새 item 도착 시 wake.
+Send와 대칭입니다. Empty 시 xTasksWaitingToReceive에 block 하고, 새 item이 도착하면 wake 합니다.
 
 ## By-Value vs By-Reference
 
 ### By-Value (FreeRTOS 기본)
 
-큐가 *item 전체를 copy*. 안전하지만 *대용량 data*에 비효율.
+큐가 item 전체를 copy 합니다. 안전하지만 대용량 데이터에는 비효율적입니다.
 
 ```c
 typedef struct {
@@ -132,11 +132,11 @@ typedef struct {
 QueueHandle_t q = xQueueCreate(5, sizeof(BigMsg_t));
 ```
 
-5개 × 1 KB = 5 KB 큐 RAM. + 매 send/receive 1 KB copy.
+5개 × 1 KB = 5 KB의 큐 RAM이 필요하고, 매 send/receive마다 1 KB를 copy 해야 합니다.
 
 ### By-Reference (Pointer Queue)
 
-Pointer만 큐에 — *copy 없음*. 빠르지만 *수명 관리*가 발신자/수신자 책임.
+Pointer만 큐에 넣어 copy가 없습니다. 빠르지만 수명 관리는 발신자와 수신자의 책임입니다.
 
 ```c
 QueueHandle_t q = xQueueCreate(5, sizeof(BigMsg_t *));
@@ -157,13 +157,13 @@ void consumer(void *arg) {
 }
 ```
 
-> ⚠️ **수명 관리**가 까다로움 — sender가 msg 재사용·free 시 데이터 깨짐. *메모리 풀*과 결합.
+> ⚠️ **수명 관리**가 까다롭습니다. sender가 msg를 재사용하거나 free 하면 데이터가 깨집니다. 메모리 풀과 결합해 쓰는 것이 좋습니다.
 
 ## Queue 변종
 
 ### Stream Buffer (FreeRTOS 10+)
 
-바이트 stream 전용 (UART RX 등). 1:1 producer/consumer 전제.
+바이트 stream 전용입니다(UART RX 등). 1:1 producer/consumer를 전제합니다.
 
 ```c
 StreamBufferHandle_t sb = xStreamBufferCreate(256, 1);
@@ -171,11 +171,11 @@ xStreamBufferSend(sb, data, len, timeout);
 xStreamBufferReceive(sb, buf, sizeof(buf), timeout);
 ```
 
-가변 길이·effiicient. *Multi-producer는 외부 동기화*.
+가변 길이이고 효율적입니다. Multi-producer 환경에서는 외부 동기화가 필요합니다.
 
 ### Message Buffer (FreeRTOS 10+)
 
-가변 길이 message. 각 message에 length prefix.
+가변 길이 message를 다룹니다. 각 message에 length prefix가 붙습니다.
 
 ```c
 MessageBufferHandle_t mb = xMessageBufferCreate(1024);
@@ -186,14 +186,14 @@ xMessageBufferSend(mb, "World!", 6, timeout);
 
 ### Mailbox
 
-큐 항상 *1 슬롯*만. 가장 최근 데이터만 유지 — 옛 데이터 덮어씀.
+큐가 항상 1 슬롯만 가집니다. 가장 최근 데이터만 유지하며, 옛 데이터를 덮어씁니다.
 
 ```c
 xQueueOverwrite(q, &data);   // 큐 full이어도 OK, 옛것 덮어씀
 xQueuePeek(q, &data, 0);     // 비파괴 read
 ```
 
-상태 broadcast (battery level 등)에 유용.
+상태 broadcast(예: battery level)에 유용합니다.
 
 ## 동기화 vs 통신
 
@@ -205,7 +205,7 @@ xQueuePeek(q, &data, 0);     // 비파괴 read
 | 가변 byte stream | Stream Buffer |
 | 가변 길이 message | Message Buffer |
 
-Queue가 *데이터 전달 + 동기화*를 통합 — 가장 흔히 쓰이는 IPC.
+Queue는 데이터 전달과 동기화를 통합합니다. 가장 흔히 쓰이는 IPC입니다.
 
 ## Performance — Copy 비용
 
@@ -217,7 +217,7 @@ xQueueSend(q, &data, ...);   // memcpy 32 byte ≈ 8 cycle on 32-bit MCU
 xQueueSend(q, &big, ...);    // memcpy 1 KB ≈ 250 cycle
 ```
 
-ARMv7-M memcpy ≈ 4 byte/cycle. 작은 message는 *by-value 충분히 빠름*.
+ARMv7-M memcpy는 약 4 byte/cycle입니다. 작은 message는 by-value로도 충분히 빠릅니다.
 
 ## ISR에서 사용
 
@@ -228,7 +228,7 @@ xQueueSendFromISR(q, &data, &woken);
 portYIELD_FROM_ISR(woken);
 ```
 
-**Top-half ISR + Bottom-half task** 패턴의 표준 도구.
+**Top-half ISR + Bottom-half task** 패턴의 표준 도구입니다.
 
 ## Static 할당
 
@@ -244,13 +244,13 @@ QueueHandle_t q = xQueueCreateStatic(
 );
 ```
 
-Safety-critical에서 표준.
+Safety-critical에서 표준으로 씁니다.
 
 ## 자주 하는 실수
 
 > ⚠️ Queue 가득 차 block 됨
 
-`xQueueSend` 호출 시 *queue full*이면 *sender block*. 의도와 다르면 *timeout=0*으로 non-blocking.
+`xQueueSend` 호출 시 queue가 full이면 sender가 block 됩니다. 의도와 다르다면 timeout=0으로 non-blocking 모드를 씁니다.
 
 > ⚠️ By-reference 후 메모리 free
 
@@ -259,24 +259,24 @@ xQueueSend(q, &ptr, ...);
 free(ptr);   // ← 수신자가 read 전에 free → crash
 ```
 
-수신자가 *free 책임* 또는 *메모리 풀* 사용.
+수신자가 free 책임을 지거나 메모리 풀을 사용해야 합니다.
 
 > ⚠️ ISR에서 normal queue send
 
-`xQueueSend()` (FromISR 아님) → crash. 항상 FromISR.
+`xQueueSend()`(FromISR 아님)를 호출하면 crash 합니다. 항상 FromISR 버전을 써야 합니다.
 
 > ⚠️ Item size mismatch
 
-`xQueueCreate(10, sizeof(int))`로 만들고 `Data_t` send → memory corruption. Item size 일치 확인.
+`xQueueCreate(10, sizeof(int))`로 만들고 `Data_t`를 send 하면 memory corruption이 발생합니다. Item size 일치를 반드시 확인해야 합니다.
 
 ## 정리
 
-- Queue = **Ring buffer + 2 wait list** — 데이터 + 동기화 통합.
-- **By-value (copy)**가 기본, 안전. **By-reference (pointer)**가 빠르나 수명 관리.
-- **Stream Buffer** (byte), **Message Buffer** (가변), **Mailbox** (overwrite) 변종.
-- ISR ↔ task 표준 패턴.
+- Queue는 **Ring buffer + 2 wait list** 구조로, 데이터와 동기화를 통합합니다.
+- **By-value(copy)**가 기본이며 안전합니다. **By-reference(pointer)**는 빠르지만 수명 관리가 필요합니다.
+- 변종으로 **Stream Buffer**(byte), **Message Buffer**(가변), **Mailbox**(overwrite)가 있습니다.
+- ISR과 task 사이의 표준 패턴입니다.
 
-다음 편 (Part 1 마지막) — **실시간성 분석** — Latency·Jitter·Deadline·WCET.
+다음 편(Part 1 마지막)에서는 **실시간성 분석**으로 Latency, Jitter, Deadline, WCET를 다룹니다.
 
 ## 관련 항목
 

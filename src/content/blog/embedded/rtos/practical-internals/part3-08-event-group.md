@@ -1,16 +1,18 @@
 ---
 title: "3-08: Event Group — Bit Flag·AND/OR Wait·Sync Barrier"
-date: 2026-05-08T05:00:00
+date: 2026-05-07T05:00:00
 description: "FreeRTOS Event Group — 24-bit flag, AND·OR semantics, clear-on-exit, multi-task sync."
 series: "Practical RTOS Internals"
 seriesOrder: 29
 tags: [event-group, bit-flag, and-or, sync-barrier]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Event Group = 24-bit flag + wait list"** — *여러 task 한 번에 wake* 가능한 게 핵심.
+> **"Event Group은 24-bit flag와 wait list로 구성된다"** — *여러 task를 한 번에 wake*할 수 있다는 점이 핵심입니다.
+
+이번 글에서는 Event Group의 자료구조와 동작을 살펴봅니다. SetBits, WaitBits, Sync barrier까지 한꺼번에 다룹니다.
 
 ## 자료 구조
 
@@ -27,9 +29,9 @@ typedef uint32_t EventBits_t;
 #define eventEVENT_BITS_CONTROL_BYTES  0xff000000UL   // 상위 8-bit 예약
 ```
 
-24-bit user flag — 그 외 컨트롤 비트 (clear-on-exit, wait-for-all, unblocked).
+24-bit는 사용자 flag로 쓰이고, 나머지는 컨트롤 비트(clear-on-exit, wait-for-all, unblocked)로 예약돼 있습니다.
 
-## SetBits — Bit 켜기 + Wake
+## SetBits — Bit 켜기와 Wake
 
 ```c
 EventBits_t xEventGroupSetBits(EventGroupHandle_t xEventGroup,
@@ -81,7 +83,7 @@ EventBits_t xEventGroupSetBits(EventGroupHandle_t xEventGroup,
 }
 ```
 
-핵심 — *모든 대기 task* 순회하며 조건 만족하는 *모두* wake. Queue/Mutex와 다른 점.
+핵심은 *모든 대기 task를 순회하면서 조건을 만족하는 task를 모두 wake*한다는 점입니다. Queue나 Mutex와 다른 부분이 바로 여기입니다.
 
 ## WaitBits — AND/OR/Clear-on-exit
 
@@ -97,7 +99,7 @@ EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
     {
         EventBits_t uxCurrentEventBits = xEventGroup->uxEventBits;
         
-        /* 즉시 만족? */
+        /* 즉시 만족하는가? */
         if (xWaitForAllBits == pdFALSE) {
             /* OR */
             if ((uxCurrentEventBits & uxBitsToWaitFor) != 0) {
@@ -120,7 +122,7 @@ EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
             }
         }
         
-        /* 만족 안 — block */
+        /* 만족하지 않음 — block */
         if (xTicksToWait != 0) {
             EventBits_t uxControlBits = 0;
             if (xClearOnExit) uxControlBits |= eventCLEAR_EVENTS_ON_EXIT_BIT;
@@ -133,7 +135,7 @@ EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
     xTaskResumeAll();
     portYIELD_WITHIN_API();
     
-    /* Wake 후 — list item value에 결과 인코딩 */
+    /* Wake 후 — list item value에 결과가 인코딩돼 있음 */
     uxReturn = uxTaskResetEventItemValue();
     return uxReturn & ~eventEVENT_BITS_CONTROL_BYTES;
 }
@@ -156,11 +158,11 @@ EventBits_t xEventGroupSync(EventGroupHandle_t xEventGroup,
 void task_a(void *p) {
     /* ... work ... */
     xEventGroupSync(eg, TASK_A_DONE, ALL_DONE, portMAX_DELAY);
-    /* 셋 다 도착해야 여기 */
+    /* 셋 다 도착해야 여기에 도달 */
 }
 ```
 
-*Set + Wait + Auto-clear* 원자적. 3 task 모두 도착하면 셋 다 wake.
+*Set과 Wait, Auto-clear*가 원자적으로 묶여 있습니다. 3개 task가 모두 도착하면 세 task가 동시에 wake됩니다.
 
 ## ISR-safe variant
 
@@ -170,11 +172,11 @@ BaseType_t xEventGroupSetBitsFromISR(EventGroupHandle_t eg,
                                       BaseType_t *pxHigherPriorityTaskWoken);
 ```
 
-ISR에서 *task 깨우는 작업*은 **timer service task에 defer** — daemon task가 set 처리. ISR 길이 짧게 유지.
+ISR에서 *task를 깨우는 작업*은 **timer service task에 defer**됩니다. daemon task가 실제 set 처리를 맡습니다. 이렇게 해야 ISR이 짧게 유지됩니다.
 
 ```text
 ISR → xTimerPendFunctionCallFromISR(set_bits_fn, eg, bits)
-        → Daemon task가 깨어나서 실제 SetBits 호출
+        → Daemon task가 깨어나 실제 SetBits 호출
 ```
 
 ## 사용 예 — Wi-Fi 연결 상태 머신
@@ -195,7 +197,7 @@ void wifi_event_handler(wifi_event_t e) {
 }
 
 void app_task(void *p) {
-    /* 세 가지 모두 만족할 때까지 */
+    /* 세 조건이 모두 만족될 때까지 대기 */
     xEventGroupWaitBits(net_eg, BIT_ALL_READY,
         pdFALSE, pdTRUE /* AND */, portMAX_DELAY);
     
@@ -203,7 +205,7 @@ void app_task(void *p) {
 }
 ```
 
-Multi-event 의존 task 동기화 — *binary semaphore 3 개*보다 깔끔.
+여러 event에 의존하는 task를 동기화할 때 *binary semaphore를 3개* 두는 것보다 훨씬 깔끔합니다.
 
 ## Performance
 
@@ -219,23 +221,23 @@ WaitBits (즉시 만족): 30 cycle
 WaitBits (block + wake): ~200 cycle
 ```
 
-Critical section 대신 *scheduler suspend* 사용 — ISR 잠금 없음.
+Critical section 대신 *scheduler suspend*를 사용하므로 ISR 잠금이 발생하지 않습니다.
 
 ## 자주 하는 실수
 
-> ⚠️ 24-bit 초과 사용
+> ⚠️ 24-bit를 넘는 사용
 
-`(1 << 24)` 이상 → 컨트롤 비트와 충돌. `configUSE_16_BIT_TICKS=1` 시 *8-bit*만 가능.
+`(1 << 24)` 이상은 컨트롤 비트와 충돌합니다. `configUSE_16_BIT_TICKS=1` 환경에서는 *8-bit*만 가능합니다.
 
-> ⚠️ Clear-on-exit·Wait-for-all 혼동
+> ⚠️ Clear-on-exit와 Wait-for-all 혼동
 
-`xClearOnExit=pdTRUE` + `xWaitForAllBits=pdFALSE` — *wait한 모든 bit clear* (현재 set bit만 아님). 의도와 다른 동작.
+`xClearOnExit=pdTRUE` + `xWaitForAllBits=pdFALSE` 조합은 *wait한 모든 bit를 clear*합니다(현재 set된 bit만이 아닙니다). 의도와 다른 동작이 자주 일어나는 지점입니다.
 
 > ⚠️ Polling 식 SetBits
 
-`while(...) xEventGroupSetBits(eg, X);` — wait list 매번 walk → CPU 낭비. *상태 변화 시*만.
+`while(...) xEventGroupSetBits(eg, X);` 패턴은 wait list를 매번 walk해 CPU를 낭비합니다. *상태가 변할 때*만 호출합니다.
 
-> ⚠️ Race — Test-and-set 없음
+> ⚠️ Race — Test-and-set이 없음
 
 ```c
 bits = xEventGroupGetBits(eg);
@@ -245,17 +247,17 @@ if (bits & BIT_X) {
 }
 ```
 
-`xEventGroupWaitBits + ClearOnExit`로 원자성.
+`xEventGroupWaitBits + ClearOnExit`로 원자성을 확보하는 것이 안전합니다.
 
 ## 정리
 
-- Event Group = **24-bit flag + wait list**.
-- **AND / OR / Clear-on-exit** 세 조합으로 다양한 동기화.
-- **SetBits** = 모든 대기 task 동시 wake (queue/mutex와 다른 점).
-- **xEventGroupSync** = barrier — 다중 task rendezvous.
-- ISR set은 *daemon task에 defer*.
+- Event Group은 **24-bit flag와 wait list** 조합입니다.
+- **AND / OR / Clear-on-exit** 세 조합으로 다양한 동기화 패턴을 만들 수 있습니다.
+- **SetBits**는 모든 대기 task를 동시에 wake합니다(queue/mutex와 다른 점입니다).
+- **xEventGroupSync**는 barrier 역할을 합니다. 다중 task rendezvous에 적합합니다.
+- ISR에서의 set은 *daemon task에 defer*됩니다.
 
-다음 편은 **ISR-safe API** — *FromISR* 함수군 내부.
+다음 편은 **ISR-safe API**, 즉 *FromISR* 함수군의 내부 구현입니다.
 
 ## 관련 항목
 

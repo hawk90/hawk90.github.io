@@ -1,6 +1,6 @@
 ---
 title: "4-04: Static Allocation — 컴파일 타임 결정으로 모든 동적 위험 제거"
-date: 2026-05-19T16:00:00
+date: 2026-05-07T16:00:00
 description: "모든 RTOS 객체를 컴파일 타임에 fixed로 두는 패턴입니다. FreeRTOS Static API, Zephyr 매크로, linker section 배치, MISRA/DO-178C 호환성까지 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 36

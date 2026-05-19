@@ -1,16 +1,16 @@
 ---
 title: "3-02: Semaphore 내부 구현 — Counter, Wait List, ISR-Safe Variant"
-date: 2026-05-08T23:00:00
+date: 2026-05-07T23:00:00
 description: "FreeRTOS semaphore = Queue wrapper. Counter + priority-sorted wait list."
 series: "Practical RTOS Internals"
 seriesOrder: 23
 tags: [semaphore, wait-list, counter, queue, isr-safe]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"FreeRTOS Semaphore = 0-byte item Queue"** — Counter는 Queue의 `uxMessagesWaiting`.
+> **"FreeRTOS Semaphore는 item size가 0인 Queue로 구현되어 있습니다."** Counter 역할은 Queue의 `uxMessagesWaiting`이 그대로 맡습니다.
 
 ## FreeRTOS Trick — Semaphore = Queue
 
@@ -22,7 +22,7 @@ draft: true
 #define xSemaphoreGive(sem)      xQueueGenericSend(sem, NULL, 0, queueSEND_TO_BACK)
 ```
 
-**Item size = 0**. Queue의 *counter*만 활용. Code 재사용 = *작은 footprint*.
+Item size를 0으로 두고 Queue의 counter만 활용합니다. 같은 코드를 재사용하기 때문에 footprint도 작게 유지됩니다.
 
 ## Counter 동작
 
@@ -76,7 +76,7 @@ SemaphoreHandle_t sem = xSemaphoreCreateCounting(10, 0);
 //                                            max   initial
 ```
 
-uxLength = 10. **Counter가 0-10 사이** → 10개 자원 풀.
+`uxLength`가 10이고 counter는 0과 10 사이를 오갑니다. 자원 풀이 10개인 셈입니다.
 
 ## Priority-Sorted Wait List
 
@@ -84,7 +84,7 @@ uxLength = 10. **Counter가 0-10 사이** → 10개 자원 풀.
 List_t xTasksWaitingToReceive;   // sorted by task priority
 ```
 
-Give 시 *highest priority waiter 우선* wake — fair share 아닌 *RTOS priority 존중*.
+Give 시점에 가장 높은 priority의 waiter를 먼저 깨웁니다. fair share가 아니라 RTOS priority를 우선합니다.
 
 ```c
 void prvAddCurrentTaskToWaitList(List_t *pxEventList) {
@@ -97,7 +97,7 @@ void prvAddCurrentTaskToWaitList(List_t *pxEventList) {
 }
 ```
 
-높은 priority = *작은 value* → list 앞쪽. Pop head = highest priority.
+높은 priority일수록 value가 작아 list 앞쪽에 배치됩니다. head를 pop하면 자연스럽게 highest priority가 나옵니다.
 
 ## ISR-Safe Variant
 
@@ -123,10 +123,11 @@ BaseType_t xSemaphoreGiveFromISR(SemaphoreHandle_t sem, BaseType_t *pxHigherPrio
 }
 ```
 
-다른 점:
-- `taskENTER_CRITICAL_FROM_ISR()` (BASEPRI 저장·복원)
-- *Block 없음* — 즉시 return
-- `pxHigherPriorityTaskWoken` 출력 — *ISR exit 시 yield 결정*
+차이점은 다음과 같습니다.
+
+- `taskENTER_CRITICAL_FROM_ISR()`로 BASEPRI를 저장·복원합니다.
+- Block 동작이 없으며 즉시 return합니다.
+- `pxHigherPriorityTaskWoken` 출력으로 ISR exit 시 yield 여부를 결정합니다.
 
 ## Take with Timeout
 
@@ -154,7 +155,7 @@ BaseType_t xSemaphoreTake(SemaphoreHandle_t sem, TickType_t xTicksToWait) {
 }
 ```
 
-타임아웃 처리 — *Delayed list*에도 동시 등록. timeout 만료 → tick ISR이 wake.
+timeout 처리에서는 task를 delayed list에도 함께 등록합니다. timeout이 만료되면 tick ISR이 해당 task를 깨웁니다.
 
 ## Lost Wakeup 방지
 
@@ -166,7 +167,7 @@ if (!flag) {
 // ISR이 flag=1로 만들고 signal — wait() 전이라면 lost
 ```
 
-해결 — **Counter + critical section**:
+이 문제는 counter와 critical section을 함께 써서 해결합니다.
 
 ```c
 portENTER_CRITICAL();
@@ -177,7 +178,7 @@ if (counter == 0) {
 }
 ```
 
-ISR이 *counter 보고 wake 결정* + critical section이 *race 차단*.
+ISR은 counter를 보고 wake 여부를 결정하고, critical section은 race를 차단합니다.
 
 ## 메모리
 
@@ -187,11 +188,11 @@ sizeof(Queue_t) ≈ 80 byte
 + (Counting sem은 추가 메모리 없음 — 동일 80 byte)
 ```
 
-작음 — 임베디드에 부담 적음.
+전체적으로 작은 편이라 임베디드 환경에 부담이 적습니다.
 
 ## Mutex와의 차이
 
-Mutex도 *내부적으로 Queue* (`queueQUEUE_TYPE_MUTEX`):
+Mutex 역시 내부적으로 Queue를 사용합니다(`queueQUEUE_TYPE_MUTEX`).
 
 | | Semaphore | Mutex |
 | --- | --- | --- |
@@ -200,7 +201,7 @@ Mutex도 *내부적으로 Queue* (`queueQUEUE_TYPE_MUTEX`):
 | Priority inheritance | ✗ | ✓ |
 | ISR Give | ✓ | ✗ |
 
-Mutex의 추가 로직 = *owner check + PI*. 3-03에서 자세히.
+Mutex의 추가 로직은 owner check와 priority inheritance입니다. 3-03에서 자세히 살펴봅니다.
 
 ## Zephyr — k_sem
 
@@ -212,35 +213,35 @@ struct k_sem {
 };
 ```
 
-비슷한 *counter + wait queue*. FreeRTOS의 Queue trick 없이 *전용 구조*.
+기본 구성은 counter와 wait queue로 같습니다. 다만 FreeRTOS의 Queue trick 없이 전용 구조를 둔다는 점이 다릅니다.
 
 ## 자주 하는 실수
 
-> ⚠️ Counting sem max 초과 give
+> ⚠️ Counting semaphore의 max를 넘겨 give합니다
 
-추가 give → `errQUEUE_FULL` 반환, counter 변화 X. 정상 동작이지만 *return value 확인*.
+추가로 give를 호출하면 `errQUEUE_FULL`이 반환되고 counter는 변하지 않습니다. 동작 자체는 정상이지만 return value를 반드시 확인해야 합니다.
 
-> ⚠️ Wait list가 FIFO라고 가정
+> ⚠️ Wait list가 FIFO라고 가정합니다
 
-FreeRTOS는 *priority-sorted*. 같은 priority일 때만 FIFO.
+FreeRTOS의 wait list는 priority-sorted입니다. FIFO 순서가 보장되는 것은 같은 priority의 task끼리뿐입니다.
 
-> ⚠️ ISR에서 Take
+> ⚠️ ISR에서 Take를 시도합니다
 
-`xSemaphoreTakeFromISR`도 있지만 *timeout 0만 의미* — block 못 함. ISR ↔ task signal엔 *Give만 ISR*.
+`xSemaphoreTakeFromISR`도 존재하지만 timeout 0 의미밖에 없어서 block할 수 없습니다. ISR과 task 간 신호 전달은 ISR에서 Give만 하는 패턴으로 설계합니다.
 
-> ⚠️ Binary semaphore 초기값 가정
+> ⚠️ Binary semaphore의 초기값을 임의로 가정합니다
 
-`xSemaphoreCreateBinary()`는 *count = 0* — 첫 take 즉시 block. *available 시작*이면 직후 `xSemaphoreGive()`.
+`xSemaphoreCreateBinary()`는 count가 0으로 시작합니다. 첫 take가 즉시 block에 걸리므로 처음부터 available 상태가 필요하다면 생성 직후 `xSemaphoreGive()`를 호출해야 합니다.
 
 ## 정리
 
-- FreeRTOS Semaphore = **0-byte item Queue** 재활용.
-- Counter + **priority-sorted wait list**.
-- `xSemaphoreGiveFromISR` + `pxHigherPriorityTaskWoken` = ISR signal 표준.
-- Lost wakeup은 *counter + critical section*으로 차단.
-- Mutex와는 *owner·PI*가 차이.
+- FreeRTOS Semaphore는 item size가 0인 Queue를 재활용한 구조입니다.
+- counter와 priority-sorted wait list가 핵심입니다.
+- `xSemaphoreGiveFromISR`와 `pxHigherPriorityTaskWoken` 조합이 ISR signal의 표준 패턴입니다.
+- Lost wakeup은 counter와 critical section의 조합으로 차단합니다.
+- Mutex와 비교했을 때 차이는 owner 추적과 priority inheritance입니다.
 
-다음 편은 **Mutex 내부 구현** — Owner tracking + Priority Inheritance.
+다음 편에서는 **Mutex 내부 구현**에서 owner tracking과 priority inheritance를 다룹니다.
 
 ## 관련 항목
 

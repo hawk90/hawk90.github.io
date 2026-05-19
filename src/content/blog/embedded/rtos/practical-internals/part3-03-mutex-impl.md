@@ -1,16 +1,16 @@
 ---
 title: "3-03: Mutex 내부 구현 — Owner 추적, Recursion Count, ISR 금지"
-date: 2026-05-08T24:00:00
+date: 2026-05-07T24:00:00
 description: "Mutex = Semaphore + pxMutexHolder + uxBasePriority. Recursive variant는 lock-count."
 series: "Practical RTOS Internals"
 seriesOrder: 24
 tags: [mutex, owner, recursion, lock-count, queue]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Mutex = Semaphore + pxMutexHolder"** — owner 추적만 추가하면 PI까지 가능.
+> **"Mutex는 Semaphore에 `pxMutexHolder`만 추가한 형태입니다."** owner를 추적할 수 있게 되면 priority inheritance까지 자연스럽게 구현됩니다.
 
 ## FreeRTOS Mutex 구조
 
@@ -31,7 +31,7 @@ union {
 } u;
 ```
 
-Queue의 *공용 영역*을 mutex 시 *owner + recursion count*로 재해석.
+Queue의 공용 영역을 mutex 모드에서는 owner와 recursion count로 재해석합니다.
 
 ## Take 흐름
 
@@ -110,7 +110,7 @@ void vTaskPriorityInherit(TaskHandle_t pxMutexHolder) {
 }
 ```
 
-대기 task가 *owner의 priority 임시 상속*. Take 시점에 호출.
+대기 task가 owner의 priority를 일시적으로 상속하도록 만듭니다. take 시점에 이 함수가 호출됩니다.
 
 ## Priority Disinheritance — 복원
 
@@ -129,7 +129,7 @@ BaseType_t vTaskPriorityDisinherit(TaskHandle_t pxMutexHolder) {
 }
 ```
 
-Mutex give 시 *원래 priority* 복원. Chain inheritance (mutex 여러 개)도 정확히 처리.
+Mutex를 give할 때 원래 priority로 복원합니다. mutex가 여러 개 얽힌 chain inheritance도 정확하게 처리합니다.
 
 ## Recursive Mutex
 
@@ -142,7 +142,7 @@ xSemaphoreGiveRecursive(mtx);        // count = 1
 xSemaphoreGiveRecursive(mtx);        // count = 0 → release
 ```
 
-`uxRecursiveCallCount`로 *재진입 횟수* 추적. Owner check + count로 안전.
+`uxRecursiveCallCount`로 재진입 횟수를 추적합니다. owner check와 count를 함께 검증하므로 안전합니다.
 
 ## ISR 금지 이유
 
@@ -150,7 +150,7 @@ xSemaphoreGiveRecursive(mtx);        // count = 0 → release
 xSemaphoreTakeFromISR(mutex, ...);   // ✗ 컴파일 에러
 ```
 
-ISR은 *task가 아님* — owner 될 수 없음. *pxMutexHolder가 무의미*. 사용 시 *논리 오류 + PI 깨짐*.
+ISR은 task가 아니므로 owner가 될 수 없습니다. `pxMutexHolder`가 의미를 잃어버리기 때문에 ISR에서 사용하면 logic이 깨지고 priority inheritance가 동작하지 않습니다.
 
 ## Deadlock — Lock Ordering
 
@@ -164,7 +164,7 @@ xSemaphoreTake(mtx_Y, ...);
 xSemaphoreTake(mtx_X, ...);
 ```
 
-**Circular wait** → deadlock. 해결 — *글로벌 lock order* 강제 (예: 항상 X 먼저).
+circular wait가 발생해 deadlock으로 이어집니다. 해결 방법은 글로벌 lock order를 강제하는 것입니다. 예를 들어 항상 X를 먼저 take하도록 규칙을 정합니다.
 
 ## Timeout 활용
 
@@ -175,13 +175,13 @@ if (xSemaphoreTake(mtx, pdMS_TO_TICKS(100)) != pdTRUE) {
 }
 ```
 
-`portMAX_DELAY` 대신 *유한 timeout* — deadlock 감지·복구.
+`portMAX_DELAY` 대신 유한한 timeout을 두면 deadlock을 감지하고 복구할 수 있습니다.
 
 ## Mutex Hold Time — 짧게
 
-Mutex 보유 task의 priority가 *높게 boost된 상태*. Hold time이 길수록 *다른 task에 영향* + *PI 효과 길어짐*.
+Mutex를 보유한 task의 priority는 boost된 상태에 머무릅니다. Hold time이 길어질수록 다른 task에 미치는 영향이 커지고 priority inheritance 효과도 오래 지속됩니다.
 
-목표 — *수 µs 이하*.
+목표는 수 µs 이하로 유지하는 것입니다.
 
 ## Static Allocation
 
@@ -190,7 +190,7 @@ StaticSemaphore_t mtx_buf;
 SemaphoreHandle_t mtx = xSemaphoreCreateMutexStatic(&mtx_buf);
 ```
 
-Safety-critical (자동차·항공) 표준.
+자동차나 항공처럼 safety-critical 영역에서는 정적 할당이 표준입니다.
 
 ## Zephyr — k_mutex
 
@@ -203,35 +203,35 @@ struct k_mutex {
 };
 ```
 
-비슷한 구조 + *내장 PI*.
+기본 구조는 비슷하고 priority inheritance가 내장되어 있습니다.
 
 ## 자주 하는 실수
 
-> ⚠️ Non-owner give
+> ⚠️ Non-owner가 give를 호출합니다
 
-return `pdFAIL` — 무시하면 logic 깨짐. 항상 return 확인.
+`pdFAIL`이 반환되는데, 이를 무시하면 logic이 그대로 깨집니다. 항상 return 값을 확인합니다.
 
-> ⚠️ Recursive mutex 잘못 사용
+> ⚠️ Recursive mutex를 잘못 사용합니다
 
-`xSemaphoreTake` 와 `xSemaphoreTakeRecursive` 혼용 → 미정의 동작. 시작 시 *한 종류 정함*.
+`xSemaphoreTake`와 `xSemaphoreTakeRecursive`를 섞어 쓰면 미정의 동작으로 이어집니다. 시작 시 한 종류로 정해 두는 편이 좋습니다.
 
-> ⚠️ ISR에서 mutex
+> ⚠️ ISR에서 mutex를 사용합니다
 
-ISR ↔ task signal엔 semaphore 또는 task notification. Mutex 금지.
+ISR과 task 사이의 신호 전달에는 semaphore나 task notification을 사용합니다. Mutex는 ISR에서 사용하면 안 됩니다.
 
-> ⚠️ Mutex 후 long blocking
+> ⚠️ Mutex를 잡은 채 long blocking을 합니다
 
-다른 mutex take·queue receive (infinite timeout) → cascading wait·deadlock.
+다른 mutex take나 queue receive를 infinite timeout으로 호출하면 cascading wait가 발생하고 deadlock으로 이어지기 쉽습니다.
 
 ## 정리
 
-- Mutex = **Queue + pxMutexHolder + uxRecursiveCallCount**.
-- Owner 검증으로 *non-owner give 차단*.
-- **Priority Inheritance** = take 시 boost, give 시 복원.
-- Recursive variant는 *count* 추적.
-- ISR에서 사용 불가 — semaphore·task notification 대체.
+- Mutex는 Queue에 `pxMutexHolder`와 `uxRecursiveCallCount`를 추가한 구조입니다.
+- Owner를 검증하여 non-owner가 give를 호출하는 경우를 차단합니다.
+- Priority inheritance는 take 시 priority를 boost하고 give 시 복원합니다.
+- Recursive variant는 count로 재진입을 추적합니다.
+- ISR에서는 사용할 수 없으며 semaphore나 task notification으로 대체합니다.
 
-다음 편은 **Priority Inversion 문제** — Mars Pathfinder 상세.
+다음 편에서는 **Priority Inversion 문제**를 Mars Pathfinder 사례와 함께 자세히 살펴봅니다.
 
 ## 관련 항목
 

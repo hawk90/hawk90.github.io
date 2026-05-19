@@ -1,6 +1,6 @@
 ---
 title: "5-04: RTOS 포팅 가이드 — 새 아키텍처에 옮기는 절차"
-date: 2026-05-20T05:00:00
+date: 2026-05-07T05:00:00
 description: "FreeRTOS와 Zephyr의 port 계층을 따라가며 새 아키텍처에 RTOS를 옮기는 절차를 정리합니다. initial stack frame, context switch assembly, tick source, critical section primitive까지 한 번에 잡습니다."
 series: "Practical RTOS Internals"
 seriesOrder: 49

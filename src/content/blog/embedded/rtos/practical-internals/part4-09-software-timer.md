@@ -1,6 +1,6 @@
 ---
 title: "4-09: Software Timer — Daemon Task, 자료구조, ISR-Safe API"
-date: 2026-05-19T21:00:00
+date: 2026-05-07T21:00:00
 description: "FreeRTOS Software Timer 내부를 따라가며 daemon task 구조, sorted list와 timer wheel 자료구조, one-shot/auto-reload 동작, xTimerStartFromISR과 xTimerPendFunctionCall을 통한 ISR 워크 deferral을 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 41

@@ -1,6 +1,6 @@
 ---
 title: "4-06: Stack Overflow 탐지 — Canary, MPU, Watermark의 3중 방어"
-date: 2026-05-19T18:00:00
+date: 2026-05-07T18:00:00
 description: "임베디드 가장 흔한 silent bug가 스택 오버플로우입니다. FreeRTOS canary, MPU region 기반 hardware 보호, high-water mark 측정, 정적 분석 도구까지 다층 방어 전략을 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 38

@@ -1,30 +1,31 @@
 ---
 title: "4-01: 실시간 메모리 요구사항 — Determinism·Fragmentation·WCET"
-date: 2026-05-19T13:00:00
-description: "동적 할당의 한계. Fragmentation. WCET-bounded allocator. Safety-critical 기준."
+date: 2026-05-07T13:00:00
+description: "동적 할당의 한계와 fragmentation, WCET-bounded allocator, safety-critical 기준을 살펴봅니다."
 series: "Practical RTOS Internals"
 seriesOrder: 33
 tags: [memory, determinism, fragmentation, wcet]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"RT 시스템 = bounded allocation time"** — `malloc`의 가변 시간은 *deadline 위협*.
+> **"RT 시스템에서는 allocation 시간이 bounded해야 합니다."** `malloc`의 가변 시간은 deadline을 위협합니다.
 
-## 일반 `malloc` 문제
+## 일반 `malloc`의 문제
 
 ```c
 void *ptr = malloc(1024);
 ```
 
-내부:
-- Free list 순회 (size class)
-- Block split
-- Coalesce 검사
-- Lock acquire (heap)
+내부에서는 다음과 같은 단계가 일어납니다.
 
-→ 실행 시간 *수 µs ~ 수 ms* 가변. WCET 보장 *어려움*.
+- Size class별 free list를 순회합니다.
+- Block을 split합니다.
+- Coalesce 가능 여부를 검사합니다.
+- Heap lock을 acquire합니다.
+
+그 결과 실행 시간이 수 µs에서 수 ms까지 들쭉날쭉합니다. WCET 보장이 어려워집니다.
 
 ## Fragmentation
 
@@ -36,12 +37,16 @@ Free 영역:  ████░░██░░███░░██  (총 free 6KB
 → 6 KB free 있어도 *연속 8 KB 없음* → 할당 실패
 ```
 
+총 free 메모리가 충분해도 연속 영역이 부족해 할당이 실패하는 상황입니다.
+
 ### Internal Fragmentation
 
 ```text
 요청: 100 byte
 할당: 128 byte block (size class) → 28 byte 낭비
 ```
+
+Size class에 맞춰 올림 할당하면서 발생하는 낭비입니다.
 
 ## RT 시스템의 메모리 전략
 
@@ -80,7 +85,7 @@ allocate(size):
   - O(1)
 ```
 
-상세 — 4-03 편.
+자세한 내용은 4-03 편에서 다룹니다.
 
 ## Static Allocation 패턴
 
@@ -93,7 +98,7 @@ TaskHandle_t xTaskCreateStatic(
     NULL, 5, task1_stack, &task1_tcb);
 ```
 
-FreeRTOS·Zephyr·Wind River — 모두 *static variant* 제공.
+FreeRTOS, Zephyr, Wind River 모두 static variant API를 제공합니다.
 
 ## Memory Pool
 
@@ -112,11 +117,11 @@ void pool_free(void *ptr) {
 }
 ```
 
-크기 고정 — *fragmentation 0*, WCET 보장.
+Block 크기를 고정해 fragmentation이 0이 되고 WCET도 보장됩니다.
 
 ## Buddy Allocator
 
-Linux kernel·일부 RTOS:
+Linux 커널과 일부 RTOS에서 사용하는 방식입니다.
 
 ```text
 초기:  [   2MB   ]
@@ -125,9 +130,9 @@ Linux kernel·일부 RTOS:
    할당하나 free 3개
 ```
 
-Power-of-2 split·coalesce. *Bounded* O(log N).
+Power-of-2 단위로 split하고 coalesce하므로 bounded O(log N)을 보장합니다.
 
-## 측정 — Heap 상태
+## 측정: Heap 상태
 
 ```c
 /* FreeRTOS */
@@ -138,9 +143,9 @@ vPortGetHeapStats(&stats);
 /* stats.xMaximumFreeBlockSize, xNumberOfFreeBlocks */
 ```
 
-`xMaximumFreeBlockSize` 작음 + `xNumberOfFreeBlocks` 많음 → *fragmentation 심함*.
+`xMaximumFreeBlockSize`가 작은데 `xNumberOfFreeBlocks`가 많으면 fragmentation이 심하다는 신호입니다.
 
-## Embedded — DRAM/SRAM 분리
+## Embedded에서 DRAM과 SRAM 분리
 
 ```c
 __attribute__((section(".dtcm"))) uint8_t fast_buf[8192];   /* TCM */
@@ -148,9 +153,9 @@ __attribute__((section(".sdram"))) uint8_t big_buf[256 * 1024]; /* ext SDRAM */
 __attribute__((section(".sram"))) uint8_t medium_buf[16384];
 ```
 
-Memory region별 *속도·용량 trade-off*. Linker script로 명시.
+Memory region마다 속도와 용량의 trade-off가 다릅니다. Linker script로 영역을 명시합니다.
 
-## 자동차·항공 — Static Only
+## 자동차와 항공: Static Only
 
 ```text
 ASIL-D ECU:
@@ -160,7 +165,7 @@ ASIL-D ECU:
   - malloc 자체 *제외*
 ```
 
-KSLV-II 누리 flight computer — *malloc 없음*. 모든 메모리 *부팅 시 fixed*.
+KSLV-II 누리호 flight computer에는 malloc이 아예 없습니다. 모든 메모리는 부팅 시점에 고정됩니다.
 
 ## DO-178C Level A에서 Heap 사용
 
@@ -174,18 +179,20 @@ KSLV-II 누리 flight computer — *malloc 없음*. 모든 메모리 *부팅 시
 → 보통 *피함*. ITAR·NIST 같은 표준도 같은 방향.
 ```
 
+이 모든 항목을 증명하는 비용이 크기 때문에 보통은 heap을 피합니다. ITAR이나 NIST 같은 표준도 같은 방향을 권장합니다.
+
 ## 자주 하는 실수
 
-> ⚠️ Heap 사용 결정
+> ⚠️ Production 코드에서 heap을 안일하게 사용하는 경우
 
 ```c
 /* Production code에 */
 void *buf = malloc(rand() % 1024);
 ```
 
-→ Embedded에선 *malloc 자체* 피하는 게 안전.
+Embedded 환경에서는 malloc 자체를 피하는 편이 안전합니다.
 
-> ⚠️ Fragmentation 인지 못함
+> ⚠️ Fragmentation을 인지하지 못하는 경우
 
 ```c
 malloc(100); free();
@@ -195,34 +202,34 @@ malloc(50);  free();
 malloc(150);   /* ← 가능하나 fragmented free 영역 search */
 ```
 
-→ Memory pool 또는 TLSF.
+이 패턴이 반복되면 free list가 흩어집니다. memory pool이나 TLSF로 대체해야 합니다.
 
-> ⚠️ Stack도 dynamic
+> ⚠️ Stack을 dynamic하게 할당하는 경우
 
 ```c
 xTaskCreate(... uxStackDepth ... );
 /* → heap에서 stack 할당 */
 ```
 
-→ `xTaskCreateStatic`.
+대신 `xTaskCreateStatic`을 사용합니다.
 
-> ⚠️ ISR이 malloc
+> ⚠️ ISR에서 malloc을 호출하는 경우
 
 ```c
 ISR: malloc(...);   /* ✗ heap lock — deadlock */
 ```
 
-ISR은 *static buffer*만.
+ISR에서는 static buffer만 사용해야 합니다.
 
 ## 정리
 
-- RT 메모리 = **bounded allocation + no fragmentation**.
-- Safety-critical (MISRA·DO-178C·ASIL) — `malloc` 금지/회피.
-- 대안 — **static / memory pool / TLSF / buddy**.
-- 측정 — FreeRTOS `vPortGetHeapStats`.
-- LV·자동차 — 거의 *static-only*.
+- RT 메모리는 bounded allocation과 no fragmentation을 동시에 충족해야 합니다.
+- Safety-critical 표준(MISRA, DO-178C, ASIL)에서는 `malloc`을 금지하거나 회피합니다.
+- 대안으로 static 할당, memory pool, TLSF, buddy allocator가 있습니다.
+- 상태 측정은 FreeRTOS의 `vPortGetHeapStats`로 확인합니다.
+- 발사체나 자동차 ECU는 거의 static-only로 운영합니다.
 
-다음 편은 **FreeRTOS Heap_1~5**.
+다음 편에서는 FreeRTOS Heap_1부터 Heap_5까지 다섯 가지 구현을 비교합니다.
 
 ## 관련 항목
 

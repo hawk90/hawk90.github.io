@@ -1,6 +1,6 @@
 ---
 title: "4-12: AMP·OpenAMP — Heterogeneous SoC·RPMsg·remoteproc"
-date: 2026-05-20T00:00:00
+date: 2026-05-07T00:00:00
 description: "Cortex-A와 Cortex-M이 한 칩 위에서 별도의 OS를 돌리는 AMP 구조를 정리합니다. OpenAMP framework(libmetal/RPMsg/remoteproc), virtio-vring 기반 shared memory IPC, mailbox 인터럽트, i.MX·STM32MP·RP2350 사례까지 다룹니다."
 series: "Practical RTOS Internals"
 seriesOrder: 44

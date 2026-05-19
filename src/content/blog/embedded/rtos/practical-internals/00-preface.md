@@ -1,6 +1,6 @@
 ---
 title: "Practical RTOS Internals: 서문"
-date: 2026-05-12
+date: 2026-05-07
 description: "RTOS를 사용하는 것이 아니라 이해하고 구현하는 법. Scheduler, context switch, memory allocator의 내부 동작을 소스 코드 수준에서 분석합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 0
