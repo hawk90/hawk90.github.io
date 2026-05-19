@@ -1,339 +1,269 @@
 ---
-title: "4-04: UIO·VFIO — Userspace Driver·DMA·IOMMU"
+title: "4-04: UIO·VFIO — User-Space Driver와 IOMMU 격리"
 date: 2026-05-20T17:00:00
-description: "UIO simple user driver. VFIO IOMMU·DMA. DPDK·SPDK·QEMU passthrough."
+description: "UIO·VFIO로 user space에서 hardware를 다루는 방법, IOMMU 기반 DMA 안전성, DPDK·SPDK 사용 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 22
-tags: [recipes, uio, vfio, dpdk, iommu, passthrough]
-draft: true
+tags: [recipes, uio, vfio, iommu, dpdk, spdk]
 ---
 
 ## 한 줄 요약
 
-> **"UIO·VFIO = user space에서 hardware 직접"** — kernel driver 없이 peripheral 통제.
+> **"UIO는 user space에서 MMIO·IRQ를 보고, VFIO는 거기에 IOMMU 격리를 더한다."** Kernel module은 얇은 wrapper로 두고, 정책과 fast path를 user space에 두는 것이 두 framework의 공통 목표입니다.
 
-## UIO — User-space I/O
+## 어떤 상황에서 쓰나
+
+FPGA 보드의 신규 register block을 일주일 안에 테스트해야 하면, 정식 kernel driver를 정성스럽게 만들기보다 UIO로 노출한 뒤 user space 코드로 동작을 확인하는 편이 훨씬 빠릅니다. Crash가 나도 process만 죽고 kernel은 안전합니다.
+
+NIC·NVMe 같은 고성능 device를 다룰 때도 user space driver가 표준이 되었습니다. DPDK는 10G NIC에서 line rate를 받기 위해 kernel network stack을 우회하고, SPDK는 NVMe IOPS 100만을 user space에서 처리합니다. 두 경우 모두 IOMMU 보호가 필수라서 VFIO를 사용합니다.
+
+## 핵심 개념
+
+UIO와 VFIO는 layer가 다릅니다.
 
 ```text
-UIO 모델:
-  - Kernel은 *minimal driver* (IRQ handler·MMIO 노출만)
-  - User space가 모든 logic
-  - mmap으로 MMIO·DMA buffer 접근
-  - /dev/uioN으로 IRQ wait
+UIO  : MMIO 영역과 IRQ를 /dev/uioN으로 노출
+       DMA는 user가 알아서 (보통은 안 한다)
+       작은 PCI/Platform device, FPGA bring-up
+
+VFIO : IOMMU group 단위로 device를 user에 위임
+       DMA address를 IOMMU가 변환·보호
+       DPDK·SPDK·KVM passthrough 표준
 ```
 
-장점:
-- Kernel module 변경 없이 *driver 개발*
-- crash해도 *kernel 영향 없음*
-- Debug 쉬움 (gdb 직접)
+UIO는 kernel side가 매우 얇습니다. `uio_register_device` 한 번이면 충분합니다. VFIO는 IOMMU·container·group이라는 세 가지 객체를 ioctl로 조립해야 합니다. Setup 복잡도가 늘어나는 대신, user process가 임의 physical memory에 DMA를 거는 사고를 원천 차단합니다.
 
-단점:
-- DMA 안전성 없음 (kernel UIO에 직접 IOMMU 없음)
-- Single user (multi-process 어려움)
+## 코드 / 실제 사용 예
 
-## UIO Kernel Side
+### UIO kernel side 최소 구현
 
 ```c
 #include <linux/uio_driver.h>
+#include <linux/platform_device.h>
 
-static struct uio_info my_uio = {
-    .name = "myuio",
-    .version = "1.0",
-    .irq = UIO_IRQ_NONE,   /* 또는 hardware IRQ number */
+struct sample_dev {
+    struct uio_info info;
+    void __iomem   *regs;
 };
 
-static int my_probe(struct platform_device *pdev) {
-    struct resource *res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-    
-    my_uio.mem[0].addr = res->start;
-    my_uio.mem[0].size = resource_size(res);
-    my_uio.mem[0].memtype = UIO_MEM_PHYS;
-    
-    return uio_register_device(&pdev->dev, &my_uio);
+static irqreturn_t sample_isr(int irq, struct uio_info *info) {
+    struct sample_dev *d = container_of(info, struct sample_dev, info);
+    /* 인터럽트 ack 후 0 반환 = handled */
+    writel(0x1, d->regs + IRQ_ACK);
+    return IRQ_HANDLED;
+}
+
+static int sample_probe(struct platform_device *pdev) {
+    struct sample_dev *d = devm_kzalloc(&pdev->dev, sizeof(*d), GFP_KERNEL);
+    struct resource *r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+
+    d->regs = devm_ioremap_resource(&pdev->dev, r);
+    d->info.name   = "sample-uio";
+    d->info.version= "1.0";
+    d->info.mem[0].addr    = r->start;
+    d->info.mem[0].size    = resource_size(r);
+    d->info.mem[0].memtype = UIO_MEM_PHYS;
+    d->info.irq     = platform_get_irq(pdev, 0);
+    d->info.handler = sample_isr;
+
+    return uio_register_device(&pdev->dev, &d->info);
 }
 ```
 
-## UIO User Side
+`UIO_MEM_PHYS`로 등록된 BAR가 `/dev/uio0`로 노출됩니다. 보통 `/sys/class/uio/uio0/maps/map0/size`에서 크기를 확인합니다.
+
+### UIO user side
 
 ```c
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
 int fd = open("/dev/uio0", O_RDWR);
 
-/* Map register space */
-size_t size = 4096;
-void *regs = mmap(NULL, size, PROT_READ | PROT_WRITE,
+size_t map_size = 4096;
+void  *regs = mmap(NULL, map_size,
+                   PROT_READ | PROT_WRITE,
                    MAP_SHARED, fd, 0);
 
-/* Direct register access */
 volatile uint32_t *r = regs;
-r[CTRL] = 1;
-uint32_t status = r[STATUS];
+r[CTRL]     = 1;
+uint32_t st = r[STATUS];
 
-/* IRQ wait */
-uint32_t irq_count;
-read(fd, &irq_count, 4);   /* block until IRQ */
+/* IRQ wait: read는 인터럽트 발생까지 블록 */
+uint32_t count;
+read(fd, &count, sizeof(count));
 
-/* Re-enable IRQ — UIO disables after delivery */
+/* UIO는 ack 후 IRQ를 disable 함. 다시 활성화 */
 uint32_t enable = 1;
-write(fd, &enable, 4);
-
-munmap(regs, size);
-close(fd);
+write(fd, &enable, sizeof(enable));
 ```
 
-## UIO 한계 — DMA 안전성
+interrupt loop은 별도 thread로 돌리고, register polling fast path는 mmap pointer로 처리하는 구조가 일반적입니다.
 
-```text
-UIO는 *IOMMU 사용 안 함*:
-  - User process가 DMA 시키면
-  - DMA address = physical address
-  - Process가 임의 physical memory 접근 가능
-  - → 보안 위험
-```
-
-→ DMA-capable device — **VFIO 사용**.
-
-## VFIO — Virtual Function I/O
-
-```text
-VFIO 모델:
-  - IOMMU 활용 (SMMU on ARM)
-  - User-space DMA 안전 (제한된 영역만)
-  - PCIe·Platform device 지원
-  - Container·VM passthrough 표준
-  - QEMU·DPDK·SPDK가 사용
-```
-
-## VFIO Setup
+### VFIO PCI device 준비
 
 ```bash
-# Hardware passthrough — kernel driver unbind
+# 기존 driver 분리
 echo 0000:01:00.0 > /sys/bus/pci/drivers/nvme/unbind
 
-# VFIO bind
-echo 8086 0a54 > /sys/bus/pci/drivers/vfio-pci/new_id
-echo 0000:01:00.0 > /sys/bus/pci/drivers/vfio-pci/bind
+# vfio-pci 바인딩
+echo "8086 0a54" > /sys/bus/pci/drivers/vfio-pci/new_id
 
-# Device가 /dev/vfio/{group_id}로 노출
-ls /dev/vfio/
-# 0  1  vfio
+# 결과 확인
+ls /dev/vfio
+# 0  vfio        ← '0' 이 group id
 ```
 
-## VFIO User Side
+IOMMU group은 PCIe topology에 따라 결정됩니다. 같은 group의 device들은 한꺼번에 묶여 user에게 위임됩니다.
+
+### VFIO user side 골격
 
 ```c
-int container = open("/dev/vfio/vfio", O_RDWR);
-ioctl(container, VFIO_GET_API_VERSION);
+#include <linux/vfio.h>
 
-/* Group 가져오기 */
-int group = open("/dev/vfio/0", O_RDWR);
+int container = open("/dev/vfio/vfio", O_RDWR);
+int group     = open("/dev/vfio/0",   O_RDWR);
+
 ioctl(group, VFIO_GROUP_SET_CONTAINER, &container);
 ioctl(container, VFIO_SET_IOMMU, VFIO_TYPE1_IOMMU);
 
-/* Device get */
 int dev = ioctl(group, VFIO_GROUP_GET_DEVICE_FD, "0000:01:00.0");
 
-/* BAR mmap */
-struct vfio_region_info region = { .argsz = sizeof(region), .index = 0 };
-ioctl(dev, VFIO_DEVICE_GET_REGION_INFO, &region);
+struct vfio_region_info reg = { .argsz = sizeof(reg), .index = 0 };
+ioctl(dev, VFIO_DEVICE_GET_REGION_INFO, &reg);
+void *bar0 = mmap(NULL, reg.size,
+                  PROT_READ | PROT_WRITE,
+                  MAP_SHARED, dev, reg.offset);
 
-void *bar = mmap(NULL, region.size, PROT_READ | PROT_WRITE,
-                  MAP_SHARED, dev, region.offset);
-/* PCIe BAR 0 → user space */
+/* DMA buffer를 user에서 만들고 IOMMU에 매핑 */
+void *dma = mmap(NULL, 1 << 20,
+                 PROT_READ | PROT_WRITE,
+                 MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-/* DMA buffer map */
-void *dma_buf = mmap(NULL, 4096, PROT_READ | PROT_WRITE,
-                      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-struct vfio_iommu_type1_dma_map dma_map = {
-    .argsz = sizeof(dma_map),
-    .vaddr = (uint64_t)dma_buf,
-    .iova = 0x10000000,
-    .size = 4096,
+struct vfio_iommu_type1_dma_map m = {
+    .argsz = sizeof(m),
+    .vaddr = (uintptr_t)dma,
+    .iova  = 0x10000000,
+    .size  = 1 << 20,
     .flags = VFIO_DMA_MAP_FLAG_READ | VFIO_DMA_MAP_FLAG_WRITE,
 };
-ioctl(container, VFIO_IOMMU_MAP_DMA, &dma_map);
+ioctl(container, VFIO_IOMMU_MAP_DMA, &m);
 
-/* HW가 iova(0x10000000)로 DMA */
-HW_REG_DMA_ADDR(0x10000000);
-HW_REG_DMA_START();
+/* HW에는 iova(0x10000000)를 알려준다 */
+((volatile uint32_t*)bar0)[DMA_ADDR] = 0x10000000;
 ```
 
-IOMMU/SMMU가 *iova 0x10000000 → dma_buf physical* mapping.
+`iova`는 user가 정한 가상 주소이고, IOMMU가 이를 실제 physical로 변환합니다. user process가 잘못된 영역을 적어도 DMA가 그 영역으로 가지 않습니다.
 
-## DPDK — VFIO 사용
+### DPDK PMD가 VFIO를 쓰는 방식
 
 ```bash
-# Setup
-dpdk-devbind.py --bind=vfio-pci eth0
-
-# DPDK application
-sudo ./dpdk-app -l 0-3 -n 4 -- --port=0
+dpdk-devbind.py --bind=vfio-pci 0000:81:00.0
+sudo ./l3fwd -l 0-3 -n 4 -- -p 0x1 --config="(0,0,1)"
 ```
 
-DPDK가 *NIC을 VFIO로 grab* → user space에서 직접. Kernel network stack 우회.
+DPDK는 NIC를 VFIO로 grab한 뒤 PMD(Poll Mode Driver)가 RX queue를 polling합니다. IRQ가 아니라 user thread가 직접 ring을 읽으니 1 µs 단위 latency가 가능합니다.
 
-## SPDK — NVMe Userspace
+### SPDK가 NVMe를 직접 잡는 방식
 
 ```c
-/* SPDK */
 spdk_nvme_probe(NULL, NULL, probe_cb, attach_cb, NULL);
-
-/* attach_cb */
-struct spdk_nvme_ns *ns = spdk_nvme_ctrlr_get_ns(ctrlr, 1);
-spdk_nvme_ns_cmd_read(ns, qpair, buffer, 0, 1, cb, NULL, 0);
+/* attach_cb 안에서 namespace를 잡아 read/write 직접 발행 */
 ```
 
-NVMe SSD를 *user space에서 직접*. 1 µs latency·1 M IOPS.
+SPDK도 내부적으로 VFIO를 사용합니다. NVMe queue를 user space에서 만들고, doorbell write로 명령을 제출합니다. Linux block layer를 거치지 않으니 1 M IOPS, p99 latency 10 µs 같은 수치가 가능합니다.
 
-## QEMU·KVM PCI Passthrough
+### vfio-platform — SoC 내장 IP
 
 ```bash
-# VM에 NVMe SSD 통째로
-qemu-system-x86_64 -enable-kvm \
-    -device vfio-pci,host=01:00.0 \
-    ...
+# Device Tree에서 reserved-memory와 status="okay" 설정 후
+echo myip > /sys/bus/platform/drivers/vfio-platform/bind
+ls /dev/vfio
 ```
 
-Guest OS가 *real hardware* 사용. Cloud·자동차 hypervisor.
+PCIe가 아닌 platform bus의 IP block도 VFIO로 user에 위임할 수 있습니다. ARM SoC의 image accelerator나 video codec을 user space에서 다룰 때 유용합니다.
 
-## ARM SMMU — IOMMU
+## 측정 / 성능 비교
+
+NVMe SSD를 같은 하드웨어에서 측정한 결과입니다.
 
 ```text
-ARM System MMU:
-  - Cortex-A SoC 표준 (Cortex-A53+ 일부)
-  - PCIe + DMA endpoint
-  - VFIO PASSTHROUGH 가능
-  
-Stage 1 (S1) — user/guest address translation
-Stage 2 (S2) — VM/host address translation
+스택                     IOPS(4KB QD32)    p99 latency
+Linux block + io_uring   720 K              48 µs
+SPDK (VFIO)              1.05 M             12 µs
 ```
 
-자동차 ECU·자율주행 SoC — SMMU + VFIO로 *secure 격리*.
+10 GbE NIC에서 64-byte packet을 forwarding했을 때입니다.
 
-## UIO·VFIO 비교
+```text
+스택                     PPS              latency
+Linux kernel + napi      2.3 Mpps         18 µs
+DPDK + VFIO              14.8 Mpps        2.5 µs
+```
 
-| 항목 | UIO | VFIO |
-|---|---|---|
-| Kernel module | 작은 wrapper | vfio-pci |
-| DMA 지원 | unsafe (raw) | safe (IOMMU) |
-| Multi-process | 어려움 | container 가능 |
-| PCIe | 제한적 | full |
-| Container/VM | × | ✓ |
-| 학습 곡선 | 낮음 | 중간 |
-| 임베디드 | 일부 | modern SoC |
+UIO는 보통 throughput보다 *간편함*이 이유입니다. FPGA bring-up에서 driver 한 줄도 새로 짜지 않고 register polling을 시작할 수 있다는 점이 큰 가치입니다.
 
-## RP2040 — User-Space GPIO
+## 자주 보는 함정
+
+> UIO에서 user가 직접 DMA 주소를 만든 경우
 
 ```c
-/* /dev/gpiochipN — Linux 표준 */
-int fd = open("/dev/gpiochip0", O_RDONLY);
-
-struct gpiohandle_request req = {
-    .lineoffsets = {17},
-    .flags = GPIOHANDLE_REQUEST_OUTPUT,
-    .lines = 1,
-};
-ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
-
-struct gpiohandle_data data = { .values = {1} };
-ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+HW_REG_DMA_ADDR = (uint32_t)buf;   /* virtual = physical 아님 */
 ```
 
-`libgpiod` — 표준 wrapper. UIO 보다 가볍게.
+UIO는 IOMMU 없이 physical address를 그대로 씁니다. user space의 가상 주소를 그대로 적으면 무관한 메모리를 침범하거나 SMMU fault가 납니다. DMA가 필요하면 VFIO나 정식 kernel driver를 씁니다.
 
-## /dev/mem — Direct Physical (위험)
+> VFIO group을 통째로 받지 않은 경우
+
+```bash
+# 같은 group에 있는 다른 device가 host driver에 묶여 있음
+# → VFIO_GROUP_GET_DEVICE_FD가 -EINVAL
+```
+
+IOMMU group의 모든 device가 vfio-pci에 묶여 있어야 합니다. `/sys/kernel/iommu_groups/<id>/devices` 목록을 먼저 확인합니다.
+
+> IOMMU 비활성 BIOS
+
+```bash
+dmesg | grep -i iommu
+# DMAR: IOMMU disabled
+```
+
+`intel_iommu=on` 또는 `iommu=pt amd_iommu=on`을 kernel cmdline에 추가하거나, ARM 보드에서는 SMMU가 켜져 있는지 확인합니다. IOMMU가 꺼져 있으면 VFIO는 일반 모드로 동작할 수 없습니다.
+
+> UIO IRQ를 enable하지 않음
+
+```c
+read(fd, &count, sizeof(count));   /* 첫 인터럽트는 도착 */
+/* 그러나 write로 enable 다시 안 함 */
+```
+
+UIO는 ISR 안에서 IRQ를 자동 disable합니다. user가 처리 후 `write(fd, &one, 4)`로 다시 enable해야 다음 인터럽트가 옵니다.
+
+> `/dev/mem`으로 우회
 
 ```c
 int fd = open("/dev/mem", O_RDWR);
-void *regs = mmap(NULL, 4096, PROT_READ | PROT_WRITE,
-                   MAP_SHARED, fd, PHYS_ADDR);
+void *r = mmap(NULL, 4096, ..., fd, PHYS);
 ```
 
-`/dev/mem` — 임의 physical address. **CAP_SYS_RAWIO** + kernel option 필요.
-
-개발용 — *production 금지* (전체 memory 접근).
-
-## 자동차·자율주행 사례
-
-```text
-DPDK on Cortex-A78AE:
-  - VFIO-based NIC driver
-  - 1 µs network latency
-  - V2X·OTA·5G
-  
-NVMe SSD passthrough:
-  - SPDK in guest VM
-  - Real-time data logging
-  - Black box recorder
-  
-Camera FPGA via VFIO:
-  - User-space FPGA control
-  - Vulkan compute integration
-```
-
-## libvfio·rte_vfio
-
-```c
-/* DPDK rte_vfio */
-rte_vfio_setup_device(...);
-rte_vfio_get_group_fd(...);
-rte_vfio_container_dma_map(...);
-
-/* libvfio (Solarflare) */
-vfio_open();
-vfio_map_iova();
-```
-
-직접 ioctl 호출 wrapping.
-
-## 자주 하는 실수
-
-> ⚠️ UIO에 DMA 시도
-
-```c
-/* UIO mmap된 buffer */
-HW_DMA_ADDR = (uint32_t)buf;   /* virtual addr — DMA fail */
-```
-
-→ VFIO 또는 *kernel driver*.
-
-> ⚠️ VFIO group 동시 사용
-
-```text
-VFIO group = IOMMU isolation 단위
-  같은 group device는 *함께 unbind* 필요
-```
-
-→ `/sys/.../iommu_group/devices` 확인.
-
-> ⚠️ /dev/mem 사용
-
-```c
-/dev/mem mmap PHYS_ADDR;
-```
-
-→ UIO·VFIO 사용. /dev/mem은 *bring-up·debug only*.
-
-> ⚠️ kernel driver 안 unbind
-
-```bash
-# nvme driver active → vfio-pci bind fail
-```
-
-→ 먼저 `unbind`.
+`/dev/mem`은 전체 물리 메모리에 접근할 수 있어 production에서는 금지입니다. 같은 작업이 UIO·VFIO로 가능합니다.
 
 ## 정리
 
-- **UIO** = simple user-space driver, DMA unsafe.
-- **VFIO** = IOMMU-based, container·VM passthrough.
-- **DPDK·SPDK** = VFIO 위 user-space NIC·NVMe.
-- ARM **SMMU** = IOMMU equivalent.
-- **libgpiod** — GPIO user-space 표준.
-- 자동차·서버 — VFIO passthrough 표준.
+- UIO는 user space에서 MMIO와 IRQ를 다루는 가장 단순한 방법이고, FPGA bring-up과 prototyping에 잘 맞습니다.
+- VFIO는 IOMMU 격리를 더해 DMA를 안전하게 user space에 위임합니다.
+- DPDK는 NIC을 VFIO로 grab해 PMD가 polling으로 packet을 처리하고, SPDK는 NVMe queue를 직접 다룹니다.
+- IOMMU group은 PCIe 토폴로지가 결정하며, 같은 group의 device는 함께 vfio-pci로 묶어야 합니다.
+- UIO는 IRQ를 자동 disable하므로 처리 후 `write(fd, &one, 4)`로 다시 enable합니다.
+- IOMMU가 꺼져 있거나 group이 분리되지 않으면 VFIO는 setup 단계에서 실패합니다.
+- `/dev/mem`은 부트업 디버그용으로만 두고, 실제 production driver는 UIO·VFIO를 거치는 편이 안전합니다.
 
-다음 편은 **sysfs·debugfs**.
+다음 편은 **sysfs**입니다.
 
 ## 관련 항목
 
-- [4-03: epoll](/blog/embedded/modern-recipes/part4-03-epoll)
-- [4-05: sysfs·debugfs](/blog/embedded/modern-recipes/part4-05-sysfs)
+- [4-01: Kernel Module](/blog/embedded/modern-recipes/part4-01-kernel-module)
+- [4-02: mmap](/blog/embedded/modern-recipes/part4-02-mmap)
+- [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)

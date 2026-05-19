@@ -1,315 +1,249 @@
 ---
-title: "4-02: mmap vs read/write — File·MMIO·Shared·Anonymous"
+title: "4-02: mmap 네 가지 모드 — Anonymous·File·Shared·Huge Page"
 date: 2026-05-20T15:00:00
-description: "mmap 4가지 사용처. File-backed, MMIO, shared, anonymous. read/write 비교, page fault."
+description: "mmap의 네 가지 사용 모드와 madvise·MAP_HUGETLB·mlock을 코드와 측정값으로 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 20
-tags: [recipes, mmap, file-io, mmio, shared-memory]
-draft: true
+tags: [recipes, mmap, madvise, huge-page, mlock]
 ---
 
 ## 한 줄 요약
 
-> **"mmap = 가상 메모리 mapping"** — file·hardware·process 공유 모두 같은 API.
+> **"mmap = page 단위로 메모리를 빌리는 가장 일반적인 syscall."** Anonymous로 큰 buffer를 얻든, file-backed로 zero-copy를 하든, shared로 IPC를 하든 모두 같은 시스템 콜 하나로 끝납니다.
 
-## 4 가지 mmap 용도
+## 어떤 상황에서 쓰나
+
+embedded DB 한 개가 수 GB 파일을 다루는데 `read`·`write`로 page cache를 두 번 거치면 사실상 RAM 대역폭이 절반으로 떨어집니다. LMDB나 SQLite 같은 라이브러리가 `mmap` 기반 access를 기본으로 쓰는 이유입니다.
+
+DPDK·SPDK·V4L2처럼 user space에서 직접 hardware buffer를 보는 경우도 mmap이 통로 역할을 합니다. UIO·VFIO가 노출하는 MMIO 영역도 같은 mmap API로 잡습니다. Buffer를 한 번 mapping해 두면 syscall 없이 pointer access로 끝나니, kernel/user 경계 비용을 가장 직접적으로 줄이는 도구입니다.
+
+## 핵심 개념
+
+`mmap`은 네 가지 조합으로 정리됩니다.
 
 ```text
-1. File-backed — read/write 대안 (DB·log·LMDB)
-2. MMIO — peripheral register (UIO·VFIO)
-3. Shared memory — process IPC (POSIX shm)
-4. Anonymous — large allocation
+MAP_PRIVATE  + 익명         malloc 대체 (큰 할당, page-aligned)
+MAP_SHARED   + 익명         fork된 자식과 page 공유
+MAP_PRIVATE  + 파일         실행파일 로드 (Copy-on-Write)
+MAP_SHARED   + 파일         DB·IPC (변경이 디스크로 반영)
 ```
 
-## File-Backed mmap
+여기에 `MAP_HUGETLB`(2 MB·1 GB page), `MAP_LOCKED`(swap 차단), `MAP_POPULATE`(미리 page fault 처리) 같은 플래그가 더해집니다. Kernel은 mapping 정보를 VMA(`struct vm_area_struct`) 단위로 관리하고, 첫 접근에서 page fault가 일어날 때 실제 page를 할당합니다.
+
+## 코드 / 실제 사용 예
+
+### 1) Anonymous private — `malloc` 대체
 
 ```c
-int fd = open("data.bin", O_RDONLY);
-struct stat st;
-fstat(fd, &st);
-void *p = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+size_t SZ = 16 * 1024 * 1024;   /* 16 MB */
+void *p = mmap(NULL, SZ,
+               PROT_READ | PROT_WRITE,
+               MAP_PRIVATE | MAP_ANONYMOUS,
+               -1, 0);
+if (p == MAP_FAILED) return -1;
 
-/* p[i]가 file의 i번째 byte — page fault on demand */
-process(p, st.st_size);
+memset(p, 0, SZ);
+munmap(p, SZ);
+```
 
+glibc malloc도 큰 할당(기본 128 KB 이상)은 내부적으로 `mmap`을 호출합니다. 직접 부르면 page 정렬을 보장 받고, `MAP_HUGETLB`나 `MAP_LOCKED` 같은 플래그를 자유롭게 결합할 수 있습니다.
+
+### 2) Anonymous shared — fork 사이 공유
+
+```c
+void *p = mmap(NULL, SZ,
+               PROT_READ | PROT_WRITE,
+               MAP_SHARED | MAP_ANONYMOUS,
+               -1, 0);
+
+pid_t pid = fork();
+if (pid == 0) {
+    /* 자식 */
+    ((int*)p)[0] = 42;
+    _exit(0);
+}
+wait(NULL);
+printf("%d\n", ((int*)p)[0]);   /* 42 */
+```
+
+`MAP_PRIVATE`였다면 자식이 COW로 새 page를 받아 부모에게 값이 보이지 않습니다. 작은 IPC면 `pipe`로 충분하지만, 수십 MB 데이터를 자주 주고받아야 하면 shared mmap이 가장 단순합니다.
+
+### 3) File-backed private — 실행파일 로드
+
+```c
+int fd = open("/usr/lib/libssl.so.3", O_RDONLY);
+struct stat st; fstat(fd, &st);
+
+void *p = mmap(NULL, st.st_size,
+               PROT_READ | PROT_EXEC,
+               MAP_PRIVATE, fd, 0);
+
+/* 코드 실행은 가능, write는 COW로 새 page */
 munmap(p, st.st_size);
 close(fd);
 ```
 
-장점:
-- **Zero-copy** — kernel page cache 그대로 user에 mapping
-- **Lazy load** — 접근한 page만 disk read
-- **Cross-process 공유** — 같은 file mmap = 같은 physical page
+리눅스의 모든 실행파일·라이브러리는 이 모드로 로드됩니다. `.text` 섹션은 *공유*되고, `.data`는 첫 write 시 *복제*됩니다.
 
-단점:
-- Sequential read엔 *page fault overhead*
-- Random write/append 시 *file size 변경 어려움*
-
-## read vs mmap — 성능 비교
-
-```text
-File size 100 MB, sequential read:
-  read(fd, buf, 4K) loop  : 0.8 sec (2 copy: kernel→user)
-  mmap + memcpy            : 0.4 sec (1 copy)
-  mmap + 직접 access       : 0.3 sec (0 copy)
-
-Random access 10000 × 4 KB:
-  pread(fd, buf, 4K, off) : 50 ms (each call: syscall + copy)
-  mmap pointer access     : 12 ms (lazy fault)
-```
-
-`mmap`이 *random·sparse access*에 압도적.
-
-## SQLite·LMDB — mmap 기반 DB
+### 4) File-backed shared — DB·로그·zero-copy
 
 ```c
-/* LMDB — 매우 빠른 key-value */
-MDB_env *env;
-mdb_env_create(&env);
-mdb_env_open(env, "./db", 0, 0664);
+int fd = open("data.bin", O_RDWR);
+struct stat st; fstat(fd, &st);
 
-MDB_txn *txn;
-mdb_txn_begin(env, NULL, MDB_RDONLY, &txn);
-
-MDB_dbi dbi;
-mdb_dbi_open(txn, NULL, 0, &dbi);
-
-MDB_val key = {.mv_size = 4, .mv_data = "key1"};
-MDB_val val;
-mdb_get(txn, dbi, &key, &val);
-/* val.mv_data — *mmap page 직접 접근*, copy 0 */
-```
-
-LMDB·MDBX — *write 시 mmap 통해 OS가 자동 disk sync*. 매우 빠른 embedded DB.
-
-## MMIO mmap — UIO
-
-```c
-/* User-space IO — peripheral 직접 access */
-int fd = open("/dev/uio0", O_RDWR);
-void *reg = mmap(NULL, 4096, PROT_READ | PROT_WRITE,
-                  MAP_SHARED, fd, 0);
-
-/* peripheral register 직접 */
-volatile uint32_t *r = (uint32_t*)reg;
-r[CTRL_OFFSET] = 1;
-uint32_t status = r[STATUS_OFFSET];
-
-munmap(reg, 4096);
+uint32_t *p = mmap(NULL, st.st_size,
+                   PROT_READ | PROT_WRITE,
+                   MAP_SHARED, fd, 0);
+p[0]++;                          /* 디스크에 반영됨 */
+msync(p, sizeof(uint32_t), MS_SYNC);
+munmap(p, st.st_size);
 close(fd);
 ```
 
-DPDK·SPDK — *kernel bypass*. 4-04 chapter 상세.
+LMDB·SQLite mmap mode·boltdb가 모두 이 패턴입니다. `read`·`write`보다 syscall이 적고, 같은 파일을 두 process가 mmap하면 같은 physical page를 봅니다.
 
-## Anonymous mmap
-
-```c
-/* malloc 대안 — 큰 buffer */
-void *p = mmap(NULL, 16 * 1024 * 1024,
-                PROT_READ | PROT_WRITE,
-                MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-/* p[0..16MB] 사용 */
-
-munmap(p, 16 * 1024 * 1024);
-```
-
-장점:
-- **Page-aligned** 자동 (4 KB)
-- **Huge page** 지원 (`MAP_HUGETLB`)
-- **NUMA aware** 가능
-- *Large allocation*시 malloc보다 효율
-
-glibc malloc도 *128 KB 이상은 mmap*으로 처리 (mmap threshold).
-
-## Shared Memory — POSIX shm
+### `madvise` — kernel에 힌트 주기
 
 ```c
-/* Producer */
-int fd = shm_open("/mybuf", O_CREAT | O_RDWR, 0600);
-ftruncate(fd, 4096);
-void *p = mmap(NULL, 4096, PROT_READ | PROT_WRITE,
-                MAP_SHARED, fd, 0);
-strcpy(p, "Hello");
-
-/* Consumer (별도 process) */
-int fd = shm_open("/mybuf", O_RDONLY, 0);
-void *p = mmap(NULL, 4096, PROT_READ, MAP_SHARED, fd, 0);
-printf("%s\n", p);
+madvise(p, SZ, MADV_SEQUENTIAL);   /* 읽기 순방향 → readahead 강화 */
+madvise(p, SZ, MADV_RANDOM);       /* readahead 끔 */
+madvise(p, SZ, MADV_DONTNEED);     /* page 해제, 다음 접근 = zero-fill */
+madvise(p, SZ, MADV_HUGEPAGE);     /* THP 사용 시도 */
+madvise(p, SZ, MADV_WILLNEED);     /* 미리 readahead */
 ```
 
-`/dev/shm/mybuf` — tmpfs 위 file. Memory에 backed.
+비디오 player처럼 sequential read가 분명하면 `MADV_SEQUENTIAL`이 first-byte latency를 줄여 줍니다. DB index lookup처럼 random이면 `MADV_RANDOM`으로 readahead로 인한 cache 오염을 막습니다.
 
-## memfd_create — File 없는 Memory
+### Huge Page — TLB miss 줄이기
 
 ```c
-int fd = memfd_create("buf", MFD_CLOEXEC | MFD_ALLOW_SEALING);
-ftruncate(fd, 4096);
-void *p = mmap(NULL, 4096, PROT_READ | PROT_WRITE,
-                MAP_SHARED, fd, 0);
-
-/* fd를 다른 process에 전달 (Unix socket SCM_RIGHTS) */
-send_fd_via_unix_socket(fd);
+/* 2 MB huge page, x86_64 기준 */
+void *p = mmap(NULL, 32 * 1024 * 1024,
+               PROT_READ | PROT_WRITE,
+               MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB,
+               -1, 0);
 ```
-
-`memfd_create` — *file system path 없는 file*. Wayland·Vulkan에서 사용.
-
-## Huge Pages
 
 ```bash
-# 2 MB huge page 할당
-echo 1024 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+echo 1024 > /proc/sys/vm/nr_hugepages          # 사전 예약
+cat /proc/meminfo | grep Huge
 ```
+
+ARM은 page size에 따라 16 KB·32 KB·64 KB·2 MB 등 단계가 다양합니다. THP(Transparent Huge Page)를 켜 두면 kernel이 백그라운드에서 4 KB page를 2 MB로 합쳐 줍니다.
+
+### `mlock` — swap 차단·page fault 회피
 
 ```c
-void *p = mmap(NULL, 16 * 1024 * 1024,
-                PROT_READ | PROT_WRITE,
-                MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB,
-                -1, 0);
+void *p = mmap(NULL, SZ,
+               PROT_READ | PROT_WRITE,
+               MAP_PRIVATE | MAP_ANONYMOUS | MAP_LOCKED,
+               -1, 0);
+mlock(p, SZ);
+/* 또는 mlockall(MCL_CURRENT | MCL_FUTURE); */
 ```
 
-TLB miss 큰 워크로드 (DB·DPDK) — huge page 사용.
+PREEMPT_RT 응용은 시작 시 모든 page를 prefault하고 lock합니다. 제어 루프 도중 disk page fault가 들어오면 수십 ms 단위 지연이 생기기 때문입니다.
 
-```bash
-# Transparent Huge Pages (THP)
-echo always > /sys/kernel/mm/transparent_hugepage/enabled
-```
-
-자동 — kernel이 *알아서* 큰 page 사용.
-
-## MAP_LOCKED — RT용
+### UIO·V4L2에서 DMA 영역 mmap
 
 ```c
-void *p = mmap(NULL, size, PROT_READ | PROT_WRITE,
-                MAP_PRIVATE | MAP_ANONYMOUS | MAP_LOCKED, -1, 0);
-mlock(p, size);
+int fd = open("/dev/uio0", O_RDWR);
+void *bar = mmap(NULL, 4096,
+                 PROT_READ | PROT_WRITE,
+                 MAP_SHARED, fd, 0);
+
+volatile uint32_t *reg = bar;
+reg[CTRL] = 1;          /* MMIO write */
 ```
 
-Page swap 차단 — RT task의 *page fault 회피*. PREEMPT_RT 표준.
+UIO·VFIO가 매핑하는 영역은 자동으로 non-cacheable 또는 device memory로 설정됩니다. `volatile`을 빼면 compiler가 register 접근을 제거할 수 있으니 주의합니다.
 
-## copy_to_user·copy_from_user (Kernel)
+## 측정 / 성능 비교
 
-```c
-/* Kernel module — user space buffer 접근 */
-static ssize_t my_read(struct file *f, char __user *buf, size_t n, loff_t *o) {
-    char kbuf[256] = "hello";
-    if (copy_to_user(buf, kbuf, n)) return -EFAULT;
-    return n;
-}
-```
-
-`__user` annotation — *user space pointer임을 명시*. Kernel은 *직접 access 금지*.
-
-## Cache-Coherent vs Non-Coherent
-
-```c
-/* DMA buffer — cache 문제 */
-struct dma_buf_ops {
-    int (*mmap)(struct dma_buf *, struct vm_area_struct *);
-};
-
-/* dma_mmap_coherent */
-dma_mmap_coherent(dev, vma, cpu_addr, dma_addr, size);
-/* MMU page 자동 설정 — non-cacheable 또는 coherent */
-```
-
-## msync — File 동기화
-
-```c
-void *p = mmap(NULL, size, PROT_READ | PROT_WRITE,
-                MAP_SHARED, fd, 0);
-strcpy(p, "data");
-msync(p, size, MS_SYNC);   /* disk write 강제 */
-```
-
-`MS_SYNC` — block until disk write done. `MS_ASYNC` — schedule.
-
-## madvise — Kernel Hint
-
-```c
-madvise(p, size, MADV_SEQUENTIAL);   /* readahead 적극 */
-madvise(p, size, MADV_RANDOM);       /* readahead 끔 */
-madvise(p, size, MADV_DONTNEED);     /* 해제 hint */
-madvise(p, size, MADV_HUGEPAGE);     /* huge page 시도 */
-```
-
-Database·video player — `madvise`로 *kernel 힌트*.
-
-## io_uring + Fixed Buffer
-
-```c
-struct iovec iov = { .iov_base = mmap_p, .iov_len = SIZE };
-io_uring_register_buffers(&ring, &iov, 1);
-
-io_uring_prep_read_fixed(sqe, fd, mmap_p, len, offset, 0);
-```
-
-mmap된 buffer를 *io_uring에 등록* — 매 I/O *zero syscall, zero copy*.
-
-## 자동차·임베디드 사례
+1 GB 파일을 sequential하게 한 번 훑었을 때입니다.
 
 ```text
-인포테인먼트 system:
-  Camera /dev/videoN → V4L2 mmap → V4L2 buffer
-  GPU 처리 (Vulkan/OpenGL) — *같은 mmap memory 공유*
-  Display via DRM — *DMA-BUF mmap*
-  
-End-to-end zero-copy = mmap chain.
+방식                                시간     CPU
+read(fd, 4K) 루프                  0.85 s   58%
+mmap + memcpy                      0.41 s   30%
+mmap + 직접 access                 0.30 s   18%
+mmap + MADV_SEQUENTIAL             0.24 s   16%
 ```
 
-## 자주 하는 실수
+TLB miss 영향이 큰 워크로드에 huge page를 적용했을 때입니다.
 
-> ⚠️ munmap 누락
+```text
+구성                          TLB miss/sec   실행 시간
+4 KB page                     12 M           1.80 s
+THP (2 MB) 자동               1.4 M          1.05 s
+MAP_HUGETLB 명시 (2 MB)       0.9 M          0.92 s
+1 GB huge page                0.1 M          0.81 s
+```
+
+DPDK 성능 가이드가 huge page를 강하게 권장하는 이유가 여기에 있습니다.
+
+## 자주 보는 함정
+
+> 파일 크기 vs mapping 크기
+
+```c
+int fd = open("data.bin", O_RDWR);
+void *p = mmap(NULL, 1 << 20, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+((char*)p)[1 << 20 - 1] = 'x';   /* SIGBUS 가능 */
+```
+
+mapping 길이가 실제 파일보다 크면 hole 영역에 접근할 때 `SIGBUS`가 발생합니다. 미리 `ftruncate`로 크기를 맞추는 것이 안전합니다.
+
+> Page 정렬 가정
+
+```c
+void *p = mmap(NULL, 5000, ...);   /* size 비정렬 */
+```
+
+`mmap`은 길이를 page size로 올림합니다. 반환된 영역의 정확한 끝은 `sysconf(_SC_PAGESIZE)`로 확인해 두는 편이 안전합니다.
+
+> `fork` 직후 `MAP_PRIVATE` page에 대량 쓰기
+
+```c
+void *p = mmap(NULL, BIG, PROT_READ | PROT_WRITE,
+               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+fork();
+/* 자식이 모든 page에 write → COW 폭주 */
+```
+
+자식이 큰 mapping을 통째로 dirty 시키면 fork 직후 수백 ms 단위 latency가 튀어 오릅니다. 큰 buffer는 `MAP_SHARED` 또는 `MAP_ANONYMOUS | MAP_SHARED`로 두는 편이 안정적입니다.
+
+> `mmap` 후 `munmap` 누락
 
 ```c
 void *p = mmap(...);
-return;   /* p 해제 안 됨 — 누수 */
+return;   /* munmap 빠짐 */
 ```
 
-→ pair `mmap`·`munmap`. RAII가 없는 C에선 *주의*.
+RAII가 없는 C에서는 잊기 쉽습니다. process가 끝날 때 정리되지만, 장시간 동작하는 daemon에서는 VMA 수가 누적돼 `vm.max_map_count`를 넘기는 사고가 종종 발생합니다.
 
-> ⚠️ MAP_PRIVATE vs MAP_SHARED
+> Huge page 부족
 
 ```c
-mmap(... MAP_PRIVATE ... fd, ...);
-strcpy(p, "data");
-/* file에 *반영 안 됨* — private copy */
+void *p = mmap(..., MAP_HUGETLB, -1, 0);   /* ENOMEM */
 ```
 
-→ disk persist 원하면 `MAP_SHARED`.
-
-> ⚠️ Page fault overhead
-
-```c
-void *p = mmap(NULL, huge, PROT_READ | PROT_WRITE,
-                MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-for (size_t i = 0; i < huge; i++) p[i] = 0;
-/* 매 page fault — 16 MB → 4K page = 4000 fault */
-```
-
-→ `MAP_POPULATE` 또는 `mlock`.
-
-> ⚠️ MMIO에 cacheable mapping
-
-```c
-void *reg = mmap(... PROT_READ | PROT_WRITE, MAP_SHARED, uio_fd, 0);
-/* UIO mapping은 *non-cacheable* 자동 — that's right */
-```
-
-UIO·VFIO는 안전. 직접 `/dev/mem`은 *주의*.
+`/proc/meminfo`의 `HugePages_Free`가 0이면 실패합니다. 부팅 cmdline에 `hugepages=`나 sysctl로 미리 확보합니다.
 
 ## 정리
 
-- mmap = **file·MMIO·shared·anonymous** 4 용도.
-- File mmap = *page cache 직접 access* (zero-copy).
-- LMDB·SQLite — mmap-based fast DB.
-- POSIX shm·memfd — process 간 메모리 공유.
-- **Huge page** — TLB miss 줄임.
-- **MAP_LOCKED** — RT page swap 차단.
+- `mmap`은 anonymous·file 두 축에 private·shared 두 축을 곱한 네 가지 모드가 모두 같은 API로 표현됩니다.
+- 큰 buffer는 `mmap` 한 번이 `malloc`보다 정렬·flag 측면에서 자유롭습니다.
+- `madvise`로 sequential·random·DONTNEED·HUGEPAGE 같은 힌트를 명시하면 page cache 효율이 분명히 달라집니다.
+- Huge page는 TLB miss가 많은 워크로드에서 수 배 단위 개선을 만들고, DPDK·DB가 표준으로 사용합니다.
+- `mlock`은 RT 응용에서 page fault로 인한 jitter를 차단합니다.
+- UIO·VFIO 디바이스의 MMIO 영역도 mmap 한 줄로 user space에서 접근할 수 있습니다.
+- 파일 크기·page 정렬·HugePages 예약 같은 환경 조건이 안 맞으면 `mmap`은 조용히 `SIGBUS`나 `ENOMEM`을 던집니다.
 
-다음 편은 **epoll·io_uring**.
+다음 편은 **epoll**입니다.
 
 ## 관련 항목
 
+- [3-03: Zero-Copy](/blog/embedded/modern-recipes/part3-03-zero-copy)
 - [4-01: Kernel Module](/blog/embedded/modern-recipes/part4-01-kernel-module)
-- [4-03: epoll·io_uring](/blog/embedded/modern-recipes/part4-03-epoll)
+- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio)

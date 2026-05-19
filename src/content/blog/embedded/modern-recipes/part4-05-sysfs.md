@@ -1,373 +1,252 @@
 ---
-title: "4-05: sysfs·debugfs·procfs — Kernel ↔ Userspace 통신"
+title: "4-05: sysfs·configfs — kobject 기반 User 인터페이스"
 date: 2026-05-20T18:00:00
-description: "sysfs (device attribute), debugfs (debug), procfs (process info). Driver tuning, monitoring."
+description: "sysfs attribute, attribute group, configfs로 user space에서 driver를 제어하는 표준 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 23
-tags: [recipes, sysfs, debugfs, procfs, kernel-userspace]
-draft: true
+tags: [recipes, sysfs, configfs, kobject, udev]
 ---
 
 ## 한 줄 요약
 
-> **"sysfs = device, debugfs = debug, procfs = process info"** — kernel/user 인터페이스 3종.
+> **"sysfs = driver가 user에 보여주는 작은 텍스트 파일."** kobject 트리에 attribute를 매다는 한 줄로 LED 밝기든 fan 속도든 똑같은 모양의 인터페이스가 됩니다.
 
-## sysfs — Device 속성 노출
+## 어떤 상황에서 쓰나
+
+LED 모듈에 brightness 값을 외부에서 바꾸고 싶거나, 산업용 ECU에서 fan PWM duty를 실시간으로 조절해야 할 때 ioctl보다 sysfs가 훨씬 단순합니다. `echo 80 > /sys/class/leds/status/brightness` 한 줄로 끝나니, 쉘 스크립트·systemd unit·monitoring agent에서 그대로 쓸 수 있습니다.
+
+자동차나 산업 장비의 운영 모니터링도 거의 sysfs로 끝납니다. 온도, 회전수, fault count를 모두 sysfs로 노출하면 별도의 daemon 없이 텍스트 파일 폴링만으로 telemetry가 만들어집니다. configfs는 *user space가 새 객체를 만드는* 정반대의 흐름인데, USB gadget이나 target framework가 표준으로 씁니다.
+
+## 핵심 개념
+
+sysfs는 kobject 트리의 *외부 표현*입니다.
 
 ```text
-/sys/class/        — device class
-/sys/devices/       — device tree
-/sys/bus/           — bus type (pci, i2c, etc.)
-/sys/module/        — loaded modules
-/sys/firmware/      — firmware info
-/sys/kernel/        — kernel settings
+struct kobject       sysfs 디렉터리에 대응
+struct attribute     디렉터리 안의 파일 하나
+struct sysfs_ops     read/write 처리 함수 테이블
+DEVICE_ATTR 매크로   show/store 두 함수를 한 번에 묶는 helper
 ```
 
-```bash
-# CPU frequency
-cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-# performance
+규칙은 단순합니다. attribute 파일 하나는 *값 하나*를 가지고, ASCII로 표현하며, 마지막에 newline을 둡니다. 한 파일에 여러 값을 채우면 race가 생기고 user side 파싱도 복잡해집니다.
 
-# GPIO
-ls /sys/class/gpio/
-# gpiochip0  export  unexport
+configfs는 sysfs와 비슷한 모양이지만 *user가 mkdir로 새 객체를 만들 수 있다*는 점이 다릅니다. USB gadget을 새로 만들거나 NVMe target subsystem을 등록하는 등 *생성·파괴*가 동적이어야 하는 경우에 쓰입니다.
 
-# Network
-cat /sys/class/net/eth0/speed
-# 1000
+## 코드 / 실제 사용 예
 
-# Thermal
-cat /sys/class/thermal/thermal_zone0/temp
-# 45000  (°C × 1000)
-
-# Block
-cat /sys/block/sda/queue/scheduler
-# [mq-deadline] kyber bfq none
-```
-
-각 driver가 *attribute file* 노출.
-
-## sysfs Attribute — Driver 측
+### Device attribute 한 개
 
 ```c
-/* Show — read */
-static ssize_t my_show(struct device *dev, struct device_attribute *attr,
-                        char *buf) {
-    struct my_data *d = dev_get_drvdata(dev);
-    return sprintf(buf, "%d\n", d->value);
+#include <linux/device.h>
+
+static unsigned int g_value;
+static DEFINE_MUTEX(g_lock);
+
+static ssize_t value_show(struct device *dev, struct device_attribute *a,
+                          char *buf) {
+    unsigned int v;
+    mutex_lock(&g_lock);
+    v = g_value;
+    mutex_unlock(&g_lock);
+    return sysfs_emit(buf, "%u\n", v);
 }
 
-/* Store — write */
-static ssize_t my_store(struct device *dev, struct device_attribute *attr,
-                         const char *buf, size_t count) {
-    struct my_data *d = dev_get_drvdata(dev);
-    int v;
-    if (kstrtoint(buf, 10, &v)) return -EINVAL;
-    d->value = v;
+static ssize_t value_store(struct device *dev, struct device_attribute *a,
+                           const char *buf, size_t count) {
+    unsigned int v;
+    if (kstrtouint(buf, 10, &v)) return -EINVAL;
+    if (v > 100) return -ERANGE;
+
+    mutex_lock(&g_lock);
+    g_value = v;
+    mutex_unlock(&g_lock);
     return count;
 }
 
-static DEVICE_ATTR(value, 0664, my_show, my_store);
-                         /* mode  read    write */
-
-/* Probe */
-device_create_file(&pdev->dev, &dev_attr_value);
+static DEVICE_ATTR_RW(value);
 ```
 
-```bash
-cat /sys/devices/.../value     # show 호출
-echo 42 > /sys/devices/.../value   # store 호출
-```
+`DEVICE_ATTR_RW`는 mode `0644`로 read/write attribute를 등록합니다. 읽기 전용은 `_RO`, 쓰기 전용은 `_WO`를 씁니다. 출력에는 `sprintf` 대신 buffer 길이를 안전하게 처리하는 `sysfs_emit`을 사용합니다.
 
-## Attribute Group
+### Attribute group으로 한 번에 등록
 
 ```c
-static struct attribute *my_attrs[] = {
+static struct attribute *sample_attrs[] = {
     &dev_attr_value.attr,
+    &dev_attr_mode.attr,
     &dev_attr_status.attr,
-    &dev_attr_config.attr,
     NULL,
 };
 
-static const struct attribute_group my_attr_group = {
-    .name = "control",
-    .attrs = my_attrs,
+static const struct attribute_group sample_group = {
+    .name  = "control",       /* /sys/.../control/ 디렉터리 생성 */
+    .attrs = sample_attrs,
 };
 
-sysfs_create_group(&pdev->dev.kobj, &my_attr_group);
+static int sample_probe(struct platform_device *pdev) {
+    int rc = sysfs_create_group(&pdev->dev.kobj, &sample_group);
+    if (rc) return rc;
+
+    /* devm 형 helper도 있다 */
+    return devm_device_add_group(&pdev->dev, &sample_group);
+}
 ```
 
-→ `/sys/devices/.../control/value`, `/control/status`, `/control/config`.
+`devm_device_add_group`을 쓰면 driver unbind 시 자동으로 정리됩니다. 잘 쓰면 `remove`에서 cleanup을 빠뜨릴 일이 없습니다.
 
-## udev Rules — sysfs Event 반응
+### 결과 모양
+
+```bash
+$ ls /sys/devices/platform/sample/control/
+mode  status  value
+
+$ cat /sys/devices/platform/sample/control/value
+0
+
+$ echo 42 > /sys/devices/platform/sample/control/value
+$ cat /sys/devices/platform/sample/control/value
+42
+```
+
+device class와 결합하면 `/sys/class/...`에 안정된 symlink가 생기고, udev rule이 이걸 보고 hot-plug 동작을 정의합니다.
+
+### udev rule과 결합
 
 ```text
-# /etc/udev/rules.d/99-myrule.rules
-SUBSYSTEM=="usb", ATTR{idVendor}=="1234", ATTR{idProduct}=="5678", \
-    RUN+="/usr/local/bin/myhandler.sh"
+# /etc/udev/rules.d/90-sample.rules
+SUBSYSTEM=="sample", ACTION=="add", \
+    RUN+="/usr/bin/setup-sample.sh %k"
 
-SUBSYSTEM=="net", KERNEL=="eth*", ACTION=="add", \
-    RUN+="/usr/local/bin/setup-net.sh"
+KERNEL=="leds*", ATTR{brightness}="64"
 ```
 
-USB·hot-plug device → udev가 *sysfs 변화 감지* → handler 실행.
+device가 들어오면 udev가 sysfs 트리를 보고 rule을 매칭합니다. 초기값 설정은 udev로 처리하는 편이 driver 안에 hard-code하는 것보다 깔끔합니다.
 
-## debugfs — Debug 전용
+### Binary attribute — 큰 데이터
 
 ```c
-#include <linux/debugfs.h>
-
-static struct dentry *debug_dir;
-
-static int my_show(struct seq_file *s, void *v) {
-    struct my_data *d = s->private;
-    seq_printf(s, "counter: %u\n", d->counter);
-    seq_printf(s, "errors:  %u\n", d->errors);
-    return 0;
+static ssize_t fw_read(struct file *f, struct kobject *k,
+                       struct bin_attribute *a,
+                       char *buf, loff_t off, size_t count) {
+    if (off >= fw_size) return 0;
+    if (off + count > fw_size) count = fw_size - off;
+    memcpy(buf, fw_data + off, count);
+    return count;
 }
 
-static int my_open(struct inode *inode, struct file *file) {
-    return single_open(file, my_show, inode->i_private);
-}
-
-static const struct file_operations my_fops = {
-    .open    = my_open,
-    .read    = seq_read,
-    .llseek  = seq_lseek,
-    .release = single_release,
+static struct bin_attribute fw_attr = {
+    .attr = { .name = "firmware", .mode = 0444 },
+    .read = fw_read,
+    .size = 0,                /* runtime 결정 */
 };
 
-/* Init */
-debug_dir = debugfs_create_dir("mydriver", NULL);
-debugfs_create_file("stats", 0444, debug_dir, my_data, &my_fops);
-
-/* Cleanup */
-debugfs_remove_recursive(debug_dir);
+sysfs_create_bin_file(&pdev->dev.kobj, &fw_attr);
 ```
+
+ASCII 텍스트가 어색한 firmware blob·calibration data는 binary attribute로 노출합니다. 일반 attribute는 page size(보통 4 KB) 제한이 있어 큰 데이터에는 부적합합니다.
+
+### configfs — user가 객체를 만든다
 
 ```bash
-# Mount (usually auto)
-mount -t debugfs none /sys/kernel/debug
+mount -t configfs none /sys/kernel/config
 
-cat /sys/kernel/debug/mydriver/stats
+# USB gadget 인스턴스 생성
+mkdir /sys/kernel/config/usb_gadget/g1
+echo 0x1d6b > /sys/kernel/config/usb_gadget/g1/idVendor
+echo 0x0104 > /sys/kernel/config/usb_gadget/g1/idProduct
+
+mkdir /sys/kernel/config/usb_gadget/g1/configs/c.1
+mkdir /sys/kernel/config/usb_gadget/g1/functions/acm.0
+ln -s ../../functions/acm.0 ../../configs/c.1/
+echo musb-hdrc.0 > /sys/kernel/config/usb_gadget/g1/UDC
 ```
 
-debugfs — *개발용*. Production kernel은 *비활성화 권장*.
+`mkdir` 한 번이 kernel 객체 하나의 생성에 대응합니다. USB gadget, NVMe-oF target, LIO iSCSI target이 같은 패턴을 사용합니다.
 
-## debugfs vs sysfs 사용 구분
-
-```text
-sysfs:
-  - Stable interface
-  - Document하면 ABI 보장
-  - 한 file = 한 value
-  - User-visible (production OK)
-  
-debugfs:
-  - Unstable (kernel 버전 따라 변경)
-  - 복잡한 데이터 가능
-  - 개발·디버그 전용
-```
-
-## procfs — Process Info
-
-```text
-/proc/cpuinfo
-/proc/meminfo
-/proc/version
-/proc/uptime
-/proc/stat
-/proc/<pid>/status
-/proc/<pid>/maps
-/proc/<pid>/fd/
-/proc/<pid>/sched
-/proc/interrupts
-/proc/net/...
-```
-
-```bash
-# Process info
-cat /proc/$(pidof myapp)/status
-# Name:   myapp
-# State:  R (running)
-# Pid:    1234
-# VmRSS:  4096 kB
-# Threads: 4
-
-# Memory map
-cat /proc/$(pidof myapp)/maps
-# 00400000-00404000 r-xp 00000000 fd:00 12345 /usr/bin/myapp
-# ...
-
-# Kernel call stack of thread
-cat /proc/$(pidof myapp)/stack
-```
-
-## /proc/sys — Kernel Tunables
-
-```bash
-# Display
-cat /proc/sys/kernel/sched_latency_ns
-
-# Modify
-echo 10000000 > /proc/sys/kernel/sched_latency_ns
-
-# Persistent — /etc/sysctl.d/
-echo "kernel.sched_latency_ns = 10000000" > /etc/sysctl.d/99-rt.conf
-```
-
-`sysctl` — 표준 도구:
-
-```bash
-sysctl -a | grep sched
-sysctl -w kernel.sched_latency_ns=10000000
-```
-
-## procfs entry — Driver
+### sysfs_notify로 user에게 신호 보내기
 
 ```c
-/* Legacy — proc_create_seq_data */
-static const struct proc_ops my_proc_ops = {
-    .proc_open    = my_open,
-    .proc_read    = seq_read,
-    .proc_lseek   = seq_lseek,
-    .proc_release = single_release,
-};
-
-proc_create("mydriver", 0444, NULL, &my_proc_ops);
+/* 값이 바뀌었음을 알린다 */
+sysfs_notify(&pdev->dev.kobj, NULL, "value");
 ```
 
-Modern Linux — `proc_create_seq_data` 권장. 새 driver는 *sysfs·debugfs 우선*.
+user 쪽에서는 `poll`이나 `epoll`로 attribute 파일을 감시하다가 변화 시점에 깨어납니다. 주기적 polling 없이 이벤트 기반 monitoring이 가능합니다.
 
-## seq_file — 큰 출력 안전
+## 측정 / 성능 비교
+
+sysfs read/write 자체는 가벼운 syscall + kernel function call입니다. fast path 인터페이스가 아니라 *제어 plane*이라는 점만 잊지 않으면 됩니다.
+
+```text
+인터페이스                  one round-trip cost
+sysfs read (단일 정수)      3~5 µs
+ioctl (단순 명령)           2~3 µs
+netlink unicast             8~12 µs
+shared memory pointer       <50 ns
+```
+
+LED brightness나 fan duty 같은 *초당 수십 회 미만*의 제어에는 sysfs로 충분합니다. 1 kHz 이상의 sensor sampling이나 audio stream을 sysfs로 빼면 syscall 비용이 누적되어 빠르게 한계에 부딪힙니다.
+
+## 자주 보는 함정
+
+> 한 파일에 여러 값
 
 ```c
-static int my_seq_show(struct seq_file *m, void *v) {
-    int i;
-    for (i = 0; i < 1000; i++) {
-        seq_printf(m, "line %d\n", i);
-    }
-    return 0;
+return sysfs_emit(buf, "%u %u %u\n", a, b, c);
+```
+
+규약상 *한 attribute = 한 값*입니다. 여러 값을 모아 두면 parser가 깨지고, store 쪽에서 partial write도 처리하기 어렵습니다. 값마다 별도 attribute로 쪼개는 편이 좋습니다.
+
+> store 안에서 긴 작업
+
+```c
+static ssize_t reset_store(...) {
+    msleep(500);   /* user는 echo 동안 차단 */
+    return count;
 }
 ```
 
-`seq_file` — kernel buffer management 자동. user-space `read()`에 page 단위로 전달.
+`echo`가 500 ms 멈춥니다. 긴 작업은 work queue에 큐잉하고 `store`는 즉시 반환합니다. 완료 통지는 `sysfs_notify`로 보냅니다.
 
-## netlink — Kernel ↔ Userspace Async
-
-```c
-/* Kernel */
-struct sock *nl_sk = netlink_kernel_create(&init_net, NETLINK_USERSOCK, &cfg);
-struct sk_buff *skb = nlmsg_new(...);
-nlmsg_unicast(nl_sk, skb, pid);
-
-/* User */
-int sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_USERSOCK);
-bind(sock, ...);
-recv(sock, buf, sizeof(buf), 0);
-```
-
-NetworkManager·systemd·dbus — *netlink로 kernel event 수신*.
-
-## perf events — sysfs/perf
-
-```bash
-ls /sys/devices/cpu/events/
-# branches  cache-misses  cpu-cycles  instructions  ...
-ls /sys/devices/cpu/format/
-# event  inv  cmask  ...
-
-# perf 사용
-perf stat -e cpu/event=0x4d/ ./prog
-```
-
-PMU event names — sysfs 통해 노출.
-
-## 자동차 ECU — sysfs 운영 모니터링
+> Lock 없이 share state read·write
 
 ```c
-/* Driver provides */
-DEVICE_ATTR(temperature, 0444, temp_show, NULL);
-DEVICE_ATTR(rpm, 0444, rpm_show, NULL);
-DEVICE_ATTR(fault_count, 0444, fault_show, NULL);
-DEVICE_ATTR(mode, 0664, mode_show, mode_store);
+return sysfs_emit(buf, "%u\n", g_value);   /* tearing 가능 */
+```
 
-/* Monitor process — periodic poll */
-while (1) {
-    int fd = open("/sys/devices/myecu/temperature", O_RDONLY);
-    read(fd, buf, sizeof(buf));
-    close(fd);
-    sleep(1);
+여러 user가 동시에 read/write하면 32비트 이상의 값에서 tearing이 일어날 수 있습니다. mutex 또는 atomic으로 보호합니다.
+
+> ASCII 규약 무시
+
+```c
+return sysfs_emit(buf, "%08x", v);   /* 마지막 newline 누락 */
+```
+
+마지막 newline이 빠지면 `cat` 출력이 prompt와 붙고, 일부 parser가 EOF를 잘못 잡습니다. `\n`을 잊지 않습니다.
+
+> Cleanup 누락
+
+```c
+static void sample_remove(struct platform_device *pdev) {
+    /* sysfs_remove_group 누락 */
 }
 ```
 
-자동차 *diagnostic tools* — sysfs로 데이터 노출 + udev로 *event*.
-
-## sysfs Best Practices
-
-```text
-1. 한 attribute = 한 value
-2. ASCII text (binary 피함)
-3. Newline로 끝남
-4. Lock 짧게
-5. Static name (PCI bus·device 위치 의존 안 함)
-```
-
-Linux Documentation: `Documentation/ABI/`.
-
-## 자주 하는 실수
-
-> ⚠️ sysfs에 큰 binary
-
-```c
-static ssize_t firmware_show(...) {
-    return memcpy(buf, firmware_data, 1024*1024);   /* 1 MB — sysfs 4 KB limit */
-}
-```
-
-→ `binattr` (binary attribute) 또는 *별도 char device*.
-
-> ⚠️ debugfs production 활성
-
-```text
-CONFIG_DEBUG_FS=y → debugfs 노출
-   → 보안 위험·complexity
-```
-
-→ production kernel 비활성.
-
-> ⚠️ procfs로 새 driver
-
-```c
-proc_create(...);   /* 옛 방식 */
-```
-
-→ sysfs·debugfs 권장.
-
-> ⚠️ Lock 안 짧음
-
-```c
-static ssize_t my_show(...) {
-    mutex_lock(&m);
-    msleep(100);   /* ← sysfs read 100ms? — block */
-    mutex_unlock(&m);
-}
-```
-
-→ 짧게.
+다음 bind 때 `sysfs: cannot create duplicate filename` 오류가 납니다. `devm_device_add_group` 같은 managed API로 등록과 해제를 한 쌍으로 묶는 편이 안전합니다.
 
 ## 정리
 
-- **sysfs** = device attribute, stable ABI, production.
-- **debugfs** = debug, unstable, dev 전용.
-- **procfs** = process·system info.
-- **udev rules** — sysfs event 반응.
-- **netlink** — async kernel event.
-- Driver tuning·monitoring 표준.
+- sysfs는 driver state를 ASCII 한 줄로 노출하는 가장 단순한 인터페이스입니다.
+- 한 attribute = 한 값, 마지막 newline 포함이라는 규약을 지켜야 user 도구와 호환됩니다.
+- `DEVICE_ATTR_RW`·`sysfs_emit`·`devm_device_add_group`을 묶어 쓰면 등록·해제·출력 모두 안전하게 처리됩니다.
+- udev rule은 sysfs 트리를 보고 동작을 정의하므로 driver와 자연스럽게 결합됩니다.
+- `sysfs_notify`는 user 쪽 polling을 이벤트 기반으로 바꿔 줍니다.
+- configfs는 정반대로 user가 객체를 *만드는* 인터페이스이고, USB gadget·NVMe target이 대표 사례입니다.
+- sysfs는 *제어 plane*이라는 점을 기억합니다. 고빈도 data path는 mmap·io_uring·char device로 보내야 합니다.
 
-다음 편은 **IRQ Affinity·RPS**.
+다음 편은 **IRQ Affinity**입니다.
 
 ## 관련 항목
 
-- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio)
+- [1-04: Device Tree](/blog/embedded/modern-recipes/part1-04-device-tree)
+- [4-01: Kernel Module](/blog/embedded/modern-recipes/part4-01-kernel-module)
 - [4-06: IRQ Affinity](/blog/embedded/modern-recipes/part4-06-irq-affinity)
