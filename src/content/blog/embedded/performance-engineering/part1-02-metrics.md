@@ -5,18 +5,18 @@ description: "3 핵심 지표 + 임베디드 추가 — Jitter·Deadline. Servic
 series: "Embedded Performance Engineering"
 seriesOrder: 2
 tags: [performance, latency, throughput, utilization, jitter, deadline]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Latency·Throughput·Utilization"** — 3 축으로 성능을 그린다. 임베디드는 *jitter·deadline* 추가.
+> **"Latency·Throughput·Utilization"** 세 축으로 성능을 그립니다. 임베디드에서는 *jitter·deadline*이 추가됩니다.
 
 ## 3 핵심 지표
 
 ### Latency
 
-**한 작업이 *완료되기까지의 시간***.
+**한 작업이 완료되기까지 걸리는 시간**을 의미합니다.
 
 ```text
 요청 → ── 처리 ── → 응답
@@ -24,11 +24,11 @@ draft: true
             latency
 ```
 
-단위 — µs, ms, s. 측정 — single request 시간 또는 *분포* (p50·p99·max).
+단위는 µs, ms, s입니다. 측정 방식은 single request 시간이거나 *분포*(p50·p99·max)입니다.
 
 ### Throughput
 
-**단위 시간당 처리량**.
+**단위 시간당 처리량**을 의미합니다.
 
 ```text
 초당 요청 수 (req/s)
@@ -36,11 +36,11 @@ draft: true
 초당 프레임 수 (FPS)
 ```
 
-단위 — req/s, bytes/s, ops/s.
+단위는 req/s, bytes/s, ops/s입니다.
 
 ### Utilization
 
-**자원 사용률 (%)**.
+**자원 사용률(%)**을 의미합니다.
 
 ```text
 CPU U = (busy time) / (total time)
@@ -48,11 +48,11 @@ Memory U = used / total
 Bus U = (active cycles) / (total cycles)
 ```
 
-100% 도달 = *saturation* → queueing → latency 증가.
+100%에 도달하면 saturation 상태가 되고, queueing이 발생하면서 latency가 증가합니다.
 
 ## Latency vs Throughput — 상호 의존
 
-작은 시스템에서 보통 *trade-off* 또는 *직교*:
+작은 시스템에서는 보통 trade-off거나 직교 관계입니다.
 
 ```text
 초기 (utilization 낮음):  throughput↑ → latency 거의 변화 X
@@ -60,14 +60,14 @@ Bus U = (active cycles) / (total cycles)
 포화 (90%+):             throughput 한계 → latency 폭증
 ```
 
-**Queueing Theory** (Little's Law):
+**Queueing Theory** (Little's Law)는 다음과 같습니다.
 
 ```
 L = λ × W
 L = 평균 대기 수, λ = 도착률, W = 평균 대기 시간
 ```
 
-자원 utilization 100% 근접 시 *W → ∞*. 임베디드에서 *80% 한계* 권장.
+자원 utilization이 100%에 근접하면 *W → ∞*가 됩니다. 그래서 임베디드에서는 *80% 한계*를 권장합니다.
 
 ## Service Time vs Response Time
 
@@ -77,14 +77,14 @@ L = 평균 대기 수, λ = 도착률, W = 평균 대기 시간
          │←─────────── Response ─────────→│
 ```
 
-- **Service Time** = 실제 *처리 시간* (queue 제외)
-- **Response Time** = *대기 + 처리* (사용자 체감)
+- **Service Time**은 실제 *처리 시간*입니다(queue 제외).
+- **Response Time**은 *대기와 처리*를 합한 시간이며, 사용자가 체감하는 값입니다.
 
-평균 service time이 좋아도 *queue 적체 시 response time 폭증*.
+평균 service time이 좋아도 *queue 적체가 일어나면 response time이 폭증*합니다.
 
 ## 임베디드 — Jitter
 
-Latency의 *변동성*.
+Latency의 *변동성*을 의미합니다.
 
 ```text
 주기적 1ms PID task:
@@ -92,7 +92,7 @@ Latency의 *변동성*.
 Jitter = max - min = 6 µs
 ```
 
-평균 양호한데 jitter 크면 *실시간 제어 불가*. Audio·motor·camera 동기에 치명.
+평균이 양호한데 jitter가 크면 *실시간 제어가 불가능*합니다. Audio, motor, camera 동기처럼 동기화가 핵심인 영역에서는 치명적입니다.
 
 ### Jitter 측정
 
@@ -108,11 +108,11 @@ while (1) {
 }
 ```
 
-Histogram 누적 → 분포 분석.
+Histogram을 누적하면서 분포를 분석합니다.
 
 ## 임베디드 — Deadline
 
-작업이 *반드시 끝나야 할 시점*.
+작업이 *반드시 끝나야 할 시점*을 의미합니다.
 
 | Type | Miss 결과 |
 | --- | --- |
@@ -120,7 +120,7 @@ Histogram 누적 → 분포 분석.
 | **Firm** | 결과 무효 (실시간 거래) |
 | **Soft** | 품질 저하 (비디오 frame drop) |
 
-Latency *대신* Deadline 만족이 metric — *deadline 안에 들어왔나? 몇 % 들어왔나?*
+Latency 대신 deadline 만족 여부가 metric이 됩니다. 즉, *deadline 안에 들어왔는가? 몇 % 들어왔는가?*를 봅니다.
 
 ## Percentile 표기
 
@@ -133,7 +133,7 @@ p9999         — 0.01%
 max           — worst-case
 ```
 
-Hard real-time = *max ≤ deadline*. Soft = *p99·p999 ≤ deadline*.
+Hard real-time은 *max ≤ deadline*을 요구합니다. Soft는 *p99·p999 ≤ deadline*이면 됩니다.
 
 ## Long Tail
 
@@ -145,9 +145,9 @@ Histogram:
    1   10           100              1000 ms
 ```
 
-평균 10 ms, p99 100 ms, max 1 s. *Long tail*이 사용자 체감 결정.
+평균 10 ms, p99 100 ms, max 1 s인 분포입니다. 사용자 체감을 결정하는 것은 *long tail*입니다.
 
-원인 — *cache miss·GC·context switch·bus contention*. RAS (Reliability·Availability·Serviceability) 도구로 추적.
+원인으로는 cache miss, GC, context switch, bus contention이 있습니다. RAS(Reliability·Availability·Serviceability) 도구로 추적합니다.
 
 ## Saturation 측정
 
@@ -165,13 +165,13 @@ R/T (ms)
          20  40  60  80 100
 ```
 
-80% 넘으면 *exponential*. **70-80%가 안전 한계**.
+80%를 넘으면 exponential하게 증가합니다. 그래서 **70-80%가 안전 한계**입니다.
 
 ## 임베디드 추가 지표
 
 ### IPC (Instructions Per Cycle)
 
-`PMU CPU_CYCLES`·`INST_RETIRED` ratio.
+`PMU CPU_CYCLES`와 `INST_RETIRED`의 ratio입니다.
 
 ```text
 IPC = 0.5  — 스트레스 (memory bound, stall)
@@ -179,7 +179,7 @@ IPC = 1.0  — 정상
 IPC = 2.0+ — 슈퍼스칼라 활용
 ```
 
-낮으면 *왜?* — cache miss, branch mispredict, stall.
+IPC가 낮으면 *왜 낮은지* 분석합니다. 원인은 cache miss, branch mispredict, stall 등입니다.
 
 ### Cache Hit Rate
 
@@ -187,11 +187,11 @@ IPC = 2.0+ — 슈퍼스칼라 활용
 double hit_rate = 1.0 - (cache_miss / cache_access);
 ```
 
-L1 보통 95-99%, L2 80-95%, L3 60-80%. *임베디드 (1-2 KB L1)*는 *작은 working set* 가정.
+L1은 보통 95-99%, L2는 80-95%, L3는 60-80%입니다. *임베디드(1-2 KB L1)*에서는 *작은 working set*을 가정합니다.
 
 ### MIPS / DMIPS
 
-옛 단위. **MIPS** = millions of instructions per second. **DMIPS** = Dhrystone MIPS (벤치).
+옛 단위입니다. **MIPS**는 millions of instructions per second입니다. **DMIPS**는 Dhrystone MIPS 벤치마크입니다.
 
 ```text
 Cortex-M0+ @ 50 MHz: 45 DMIPS
@@ -199,11 +199,11 @@ Cortex-M4 @ 168 MHz: 350 DMIPS
 Cortex-A53 @ 1.5 GHz: 3500 DMIPS
 ```
 
-DMIPS는 *아주 거친* 비교. CoreMark·EEMBC 등 *더 정밀* 벤치.
+DMIPS는 *아주 거친* 비교에만 적합합니다. 더 정밀하게 비교하려면 CoreMark나 EEMBC를 씁니다.
 
 ### CoreMark
 
-비영리 EEMBC의 임베디드 표준 벤치. *Standardized integer workload*.
+비영리 EEMBC가 만든 임베디드 표준 벤치입니다. *Standardized integer workload*를 측정합니다.
 
 ```text
 Cortex-M0+ @ 50 MHz:  100 CoreMark
@@ -211,7 +211,7 @@ Cortex-M4F @ 168 MHz: 850 CoreMark
 RISC-V SiFive E31:     150 CoreMark
 ```
 
-CoreMark/MHz가 *효율* (architecture 능력) 비교.
+CoreMark/MHz가 *효율*(architecture 능력)을 비교하는 지표입니다.
 
 ## 측정 — Time Source
 
@@ -252,30 +252,30 @@ void print_hist(void) {
 
 > ⚠️ 평균만 보고 OK 판정
 
-Median이 좋아도 *long tail* 인지 못함. 항상 *p99·max*.
+Median이 좋아도 *long tail*은 보이지 않습니다. 항상 *p99·max*를 함께 봅니다.
 
 > ⚠️ Utilization 90%+ 목표
 
-Queueing latency 폭증. **70-80% 한계**.
+Queueing latency가 폭증합니다. **70-80%가 한계**입니다.
 
 > ⚠️ Tick rate으로 µs 측정 시도
 
-1 kHz tick으로 *µs latency* 측정 → 0 또는 1 ms로만 보임. *DWT* 또는 hw timer.
+1 kHz tick으로 *µs latency*를 측정하면 0 또는 1 ms로만 보입니다. 이때는 *DWT* 또는 hw timer를 씁니다.
 
 > ⚠️ Throughput만 최적화
 
-Throughput 2× 빠르게 했는데 *p99 latency 3× 느려짐* → 사용자에겐 *느림*. Trade-off 인지.
+Throughput을 2배 빠르게 했는데 *p99 latency가 3배 느려지면* 사용자에게는 오히려 느려진 셈입니다. Trade-off를 인지해야 합니다.
 
 ## 정리
 
-- 3 핵심 — **Latency · Throughput · Utilization**.
-- 임베디드 추가 — **Jitter · Deadline**.
-- Service time ≠ Response time (queueing 영향).
-- Percentile + max로 *long tail* 추적.
-- Utilization 70-80% 한계, 그 위는 *queueing 폭발*.
-- IPC·CoreMark가 *아키텍처 효율* 비교.
+- 3 핵심 지표는 **Latency, Throughput, Utilization**입니다.
+- 임베디드에서는 **Jitter와 Deadline**이 추가됩니다.
+- Service time과 Response time은 다릅니다(queueing 영향).
+- Percentile과 max로 *long tail*을 추적합니다.
+- Utilization은 70-80%가 한계이며, 그 위에서는 *queueing이 폭발*합니다.
+- IPC와 CoreMark가 *아키텍처 효율*을 비교합니다.
 
-다음 편은 **측정의 기본** — wall-clock, CPU cycle, instruction count.
+다음 편은 **측정의 기본**입니다. wall-clock, CPU cycle, instruction count를 다룹니다.
 
 ## 관련 항목
 

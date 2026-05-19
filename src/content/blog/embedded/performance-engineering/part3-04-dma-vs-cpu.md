@@ -1,16 +1,16 @@
 ---
-title: "3-04: DMA vs CPU Copy — Break-even, Setup Overhead, 실측"
+title: "3-04: DMA vs CPU Copy - Break-even, Setup Overhead, 실측"
 date: 2026-05-08T03:00:00
 description: "DMA setup overhead. CPU memcpy 최적화. Break-even size. 실측 데이터."
 series: "Embedded Performance Engineering"
 seriesOrder: 22
 tags: [dma, memcpy, cpu, break-even]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"DMA가 항상 빠른 건 아니다"** — 작은 transfer엔 *CPU memcpy*가 우세.
+> **"DMA가 항상 빠른 것은 아닙니다."** 작은 transfer에서는 *CPU memcpy*가 우세합니다.
 
 ## CPU memcpy 성능 (Cortex-M4)
 
@@ -28,7 +28,7 @@ Newlib 또는 컴파일러 inline 버전:
 | 1024 | 350 | 2.9 |
 | 4096 | 1400 | 2.9 |
 
-@ 168 MHz Cortex-M4 → 4 KB copy = 8 µs.
+168 MHz Cortex-M4 기준으로 4 KB copy가 8 µs입니다.
 
 ## DMA setup overhead
 
@@ -44,7 +44,7 @@ HAL_DMA_Start(&hdma, src, dst, len);
 | Wake task (RTOS) | ~100 |
 | Total overhead | **~200 cycle** |
 
-200 cycle ≈ 60 byte CPU memcpy.
+200 cycle은 약 60 byte의 CPU memcpy에 해당합니다.
 
 ## Break-even Point
 
@@ -56,12 +56,12 @@ Equal when: N/3 = 200 + N
             N/3 - N = 200
             negative N → DMA가 절대 안 빠름? 
 
-* CPU는 transfer 중 *다른 일 못함* → 실 이득 = CPU offload
+* CPU는 transfer 중에 *다른 일을 못 하므로* 실제 이득은 CPU offload
 ```
 
-실제 break-even은 *CPU가 할 일*에 달림. CPU가 idle이면 — *CPU copy*가 빠름.
+실제 break-even은 *CPU가 할 다른 일*에 달려 있습니다. CPU가 idle이면 *CPU copy*가 빠릅니다.
 
-## 실 break-even — CPU가 다른 일 할 때
+## 실 break-even - CPU가 다른 일 할 때
 
 ```c
 // Path A: CPU copy, 다른 일 못 함
@@ -74,9 +74,9 @@ do_other_work();           // 병행 가능
 wait_dma();                // DMA 완료 대기 (또는 IRQ)
 ```
 
-Path B 이득 = *do_other_work 시간 만큼*. 작은 transfer는 *setup이 곧 끝남* → 이득 적음.
+Path B의 이득은 *do_other_work 시간만큼*입니다. 작은 transfer는 *setup이 곧 끝나서* 이득이 적습니다.
 
-> **Rule of thumb**: < 64 byte → CPU. > 256 byte → DMA. 사이는 *벤치*.
+> **Rule of thumb**: 64 byte 미만은 CPU, 256 byte 초과는 DMA. 그 사이는 *직접 벤치*해야 합니다.
 
 ## 4-byte word memcpy (Cortex-M4 optimal)
 
@@ -86,7 +86,7 @@ void fast_memcpy_word(uint32_t *dst, const uint32_t *src, size_t words) {
 }
 ```
 
-Cortex-M4 ldr/str = 2 cycle each. 1.0 byte/cycle.
+Cortex-M4의 ldr/str은 각각 2 cycle로 1.0 byte/cycle 수준입니다.
 
 Loop unroll + LDM/STM:
 
@@ -104,7 +104,7 @@ void fast_memcpy_ldm(uint32_t *dst, const uint32_t *src, size_t words) {
 }
 ```
 
-8-word burst → bus efficient.
+8-word burst를 쓰면 bus 효율이 좋습니다.
 
 ## ARM Cortex-A NEON memcpy
 
@@ -121,19 +121,19 @@ void neon_memcpy(uint8_t *dst, const uint8_t *src, size_t n) {
 }
 ```
 
-DDR bandwidth saturate — *DMA와 비슷한 속도*.
+DDR bandwidth를 saturate시켜서 *DMA와 비슷한 속도*를 냅니다.
 
-## glibc memcpy — Optimal
+## glibc memcpy - Optimal
 
-glibc `memcpy` (ARM aarch64) 사용:
+glibc `memcpy` (ARM aarch64)는 다음 기법을 씁니다.
 - SIMD vector load/store
-- *Non-temporal* (큰 size 시)
+- *Non-temporal* (큰 size일 때)
 - Loop unroll 64-byte burst
 - Page-aligned check + dispatch
 
-수십 KB 이상 — *DMA와 동등*. CPU offload 효과만 다름.
+수십 KB 이상이면 *DMA와 동등한 속도*가 나옵니다. CPU offload 효과만 다릅니다.
 
-## DMA 우세 케이스
+## DMA가 유리한 경우
 
 ### 1. Peripheral ↔ Memory
 
@@ -143,7 +143,7 @@ HAL_UART_Receive_DMA(&huart, rx_buf, 256);
 /* UART byte 도착 시 DMA 자동 transfer */
 ```
 
-CPU polling = *CPU 100% blocking*. DMA = *CPU 0% (IRQ만 가끔)*.
+CPU polling은 *CPU 100% blocking*이지만 DMA는 *CPU 0%* (가끔 IRQ만)으로 동작합니다.
 
 ### 2. 연속 / 주기 transfer
 
@@ -152,7 +152,7 @@ CPU polling = *CPU 100% blocking*. DMA = *CPU 0% (IRQ만 가끔)*.
 HAL_DCMI_Start_DMA(&hdcmi, MODE_CONTINUOUS, frame_buf, frame_size);
 ```
 
-CPU copy면 매 frame 33 ms × CPU 100% — *전체 CPU 점유*. DMA = 0%.
+CPU copy로 처리하면 매 frame 33 ms 동안 CPU 100%로 *전체 CPU를 점유*합니다. DMA는 0%입니다.
 
 ### 3. Cache pollution 회피
 
@@ -162,9 +162,9 @@ memcpy(dst, src, 1MB);
 /* → hot working set 깨짐 */
 ```
 
-DMA는 *cache 우회 가능* (또는 non-temporal). CPU 다른 일의 cache 보존.
+DMA는 *cache를 우회*할 수 있고 non-temporal도 지원합니다. 덕분에 CPU가 하는 다른 일의 cache가 보존됩니다.
 
-## CPU 우세 케이스
+## CPU가 유리한 경우
 
 ### 1. Small transfer
 
@@ -185,7 +185,7 @@ load_config(buf, 4096);   // boot 시 한 번
 /* DMA channel 부족 — UART/SPI 우선 점유 */
 ```
 
-## 측정 — Benchmark
+## 측정 - Benchmark
 
 ```c
 __DSB(); uint32_t t0 = DWT->CYCCNT;
@@ -200,7 +200,7 @@ __DSB(); t1 = DWT->CYCCNT;
 printf("DMA: %u cycle\n", t1 - t0);
 ```
 
-각 size별 측정 → break-even chart.
+각 size별로 측정해 break-even chart를 만듭니다.
 
 ## STM32H743 실측 (170 MHz Cortex-M7 + 1.4 GB/s DDR3)
 
@@ -211,9 +211,9 @@ printf("DMA: %u cycle\n", t1 - t0);
 | 4 KB | 2,800 cycle | 3,200 cycle | 3,200 - other |
 | 64 KB | 45,000 | 50,000 | 50,000 - other |
 
-CPU offload 효과 빼면 *비슷*. 단, CPU 다른 일 가능 시 *DMA 압승*.
+CPU offload 효과를 빼면 둘 다 *비슷*합니다. 다만 CPU가 다른 일을 할 수 있는 상황에서는 *DMA가 압승*입니다.
 
-## Cortex-A — memcpy 라이브러리
+## Cortex-A - memcpy 라이브러리
 
 | 라이브러리 | 특징 |
 |---|---|
@@ -222,7 +222,7 @@ CPU offload 효과 빼면 *비슷*. 단, CPU 다른 일 가능 시 *DMA 압승*.
 | Bionic (Android) | SoC-specific 최적화 |
 | Cortex-Strings (Arm) | per-Cortex 최적 |
 
-`-mtune=cortex-a72`로 컴파일 — 적절한 memcpy 자동 선택.
+`-mtune=cortex-a72`로 컴파일하면 적절한 memcpy가 자동으로 선택됩니다.
 
 ## DMA 손해 보는 함정
 
@@ -235,7 +235,7 @@ for (i = 0; i < 1000; i++) {
 }
 ```
 
-→ *one-shot 큰 transfer* 또는 *chain transfer*.
+*one-shot 큰 transfer*나 *chain transfer*로 묶는 것이 좋습니다.
 
 > ⚠️ CPU가 polling
 
@@ -244,7 +244,7 @@ HAL_DMA_Start(...);
 while (DMA->NDTR != 0);   // ← CPU 100% busy
 ```
 
-→ IRQ 또는 *task sleep*.
+IRQ나 *task sleep*으로 바꿔야 합니다.
 
 > ⚠️ Buffer alignment 비매칭
 
@@ -253,7 +253,7 @@ uint8_t buf[100];   // 보장 align 1
 HAL_DMA_Start(..., buf, ...);   // ← word align 안 됨 → split
 ```
 
-→ `__attribute__((aligned(32)))`.
+`__attribute__((aligned(32)))`로 정렬을 명시해야 합니다.
 
 ## 자주 하는 실수
 
@@ -263,11 +263,11 @@ HAL_DMA_Start(..., buf, ...);   // ← word align 안 됨 → split
 HAL_DMA_Start(&hdma, &val, &reg, 4);   // ← overkill
 ```
 
-ARMv7 stm → 1 cycle. DMA 200 cycle. 1 register 쓰기는 *직접 write*.
+ARMv7의 stm은 1 cycle인데 DMA는 200 cycle입니다. register 한 개 쓰기에는 *직접 write*가 맞습니다.
 
 > ⚠️ DMA의 cache 영향 무시
 
-큰 transfer DMA *non-cacheable* 안 쓰면 — *evict pressure로 working set 깨짐*.
+큰 transfer DMA에서 *non-cacheable*을 쓰지 않으면 *evict pressure로 working set이 깨집니다*.
 
 > ⚠️ memcpy 대신 직접 loop
 
@@ -275,22 +275,22 @@ ARMv7 stm → 1 cycle. DMA 200 cycle. 1 register 쓰기는 *직접 write*.
 for (i = 0; i < N; i++) dst[i] = src[i];
 ```
 
-`-O2`면 컴파일러가 memcpy로 변환 — 그러나 `volatile`은 안 됨. 직접 `memcpy(dst, src, N)` 안전.
+`-O2`에서는 컴파일러가 알아서 memcpy로 변환합니다. 다만 `volatile`은 변환되지 않으므로 직접 `memcpy(dst, src, N)`을 쓰는 편이 안전합니다.
 
 > ⚠️ DMA throttle
 
-DMA 너무 빠름 → bus saturation → 다른 master starvation. **bandwidth limiter** 설정.
+DMA가 너무 빠르면 bus saturation이 일어나 다른 master가 starvation에 빠집니다. **bandwidth limiter**를 설정해야 합니다.
 
 ## 정리
 
-- DMA setup overhead = *60-200 byte 등가 CPU 작업*.
-- 작은 copy (<64 B) — CPU. 큰 copy·peripheral — DMA.
-- 진짜 이득 = *CPU offload* — CPU가 다른 일 할 때만.
-- Cortex-M4 memcpy = ~3 byte/cycle (ldmia/stmia 최적).
-- Cortex-A NEON memcpy = DDR bandwidth saturate.
-- 매 size별 *측정해서 break-even 확인*.
+- DMA setup overhead는 *60-200 byte 등가의 CPU 작업*에 해당합니다.
+- 작은 copy(<64 B)는 CPU, 큰 copy와 peripheral은 DMA가 유리합니다.
+- 진짜 이득은 *CPU offload*이며 CPU가 다른 일을 할 때만 의미가 있습니다.
+- Cortex-M4 memcpy는 ldmia/stmia 최적화 기준 약 3 byte/cycle입니다.
+- Cortex-A NEON memcpy는 DDR bandwidth를 saturate시킵니다.
+- size별로 *직접 측정해서 break-even을 확인*해야 합니다.
 
-다음 편은 **Interrupt Latency**.
+다음 편은 **Interrupt Latency**를 다룹니다.
 
 ## 관련 항목
 

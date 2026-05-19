@@ -5,18 +5,18 @@ description: "어떻게 측정하나. DWT, PMU, clock_gettime, GPIO + 로직 분
 series: "Embedded Performance Engineering"
 seriesOrder: 3
 tags: [measurement, dwt, pmu, clock-gettime, gpio]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"무엇을 측정하느냐가 절반"** — wall-clock·cycle·instruction이 *다른 답*을 준다.
+> **"무엇을 측정하느냐가 절반"**입니다. wall-clock, cycle, instruction은 *각각 다른 답*을 줍니다.
 
 ## 3 종류의 시간
 
 ### Wall-Clock Time
 
-*실제 경과 시간* — 사용자 체감.
+*실제 경과 시간*입니다. 사용자가 체감하는 값과 같습니다.
 
 ```c
 struct timespec t1, t2;
@@ -26,11 +26,11 @@ clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
 long ns = (t2.tv_sec - t1.tv_sec) * 1e9 + (t2.tv_nsec - t1.tv_nsec);
 ```
 
-장점 — 직관적. 단점 — *context switch·IRQ·DMA 포함* 시 부정확.
+직관적이라는 장점이 있습니다. 다만 *context switch, IRQ, DMA가 포함*되면 코드 자체의 시간으로는 부정확해집니다.
 
 ### CPU Cycle (CPU Time)
 
-*실제 코드 실행 cycle*. IRQ·idle 제외.
+*실제 코드가 실행된 cycle*입니다. IRQ나 idle은 제외됩니다.
 
 ```c
 // Cortex-M
@@ -39,11 +39,11 @@ work();
 uint32_t cycles = DWT->CYCCNT;
 ```
 
-*pure compute time*. Context switch 영향 X (CYCCNT는 cycle 그대로).
+*pure compute time*에 가깝습니다. CYCCNT는 cycle을 그대로 세기 때문에 context switch의 영향을 받지 않습니다.
 
 ### Instruction Count
 
-PMU의 `INST_RETIRED` event.
+PMU의 `INST_RETIRED` event를 씁니다.
 
 ```c
 read_pmu(INST_RETIRED);
@@ -51,11 +51,11 @@ work();
 uint64_t insts = read_pmu(INST_RETIRED) - start;
 ```
 
-IPC = inst / cycle. *architecture 효율* 분석.
+IPC는 inst / cycle로 계산합니다. *architecture 효율*을 분석할 때 씁니다.
 
 ## Bare-Metal — DWT_CYCCNT
 
-Cortex-M3+ 내장 32-bit cycle counter.
+Cortex-M3+에 내장된 32-bit cycle counter입니다.
 
 ```c
 // Initialization (once)
@@ -70,11 +70,11 @@ uint32_t cycles = DWT->CYCCNT - start;
 uint32_t us = cycles / (SystemCoreClock / 1000000);
 ```
 
-**1-cycle 정밀**. 32-bit @ 168 MHz → ~25 sec wraparound. *짧은 측정만*.
+**1-cycle 정밀**이 장점입니다. 32-bit @ 168 MHz에서는 약 25초마다 wraparound가 일어나므로 *짧은 측정*에만 적합합니다.
 
 ### Cortex-M0 — DWT 없음
 
-ARMv6-M에는 DWT 없음. **SysTick** 사용:
+ARMv6-M에는 DWT가 없습니다. 그래서 **SysTick**을 씁니다.
 
 ```c
 uint32_t systick_get_us(void) {
@@ -82,7 +82,7 @@ uint32_t systick_get_us(void) {
 }
 ```
 
-Reload value에 의존 — *카운터가 reload될 때* tick interrupt. 측정 *> 1 tick* 시 누적.
+Reload value에 의존합니다. *카운터가 reload될 때* tick interrupt가 발생하므로, 측정이 *1 tick을 넘으면* 누적해서 계산해야 합니다.
 
 ## Linux — clock_gettime
 
@@ -94,7 +94,7 @@ clock_gettime(CLOCK_MONOTONIC_RAW, &t);
 // CLOCK_THREAD_CPUTIME_ID = 이 thread만
 ```
 
-각 clock의 의미:
+각 clock의 의미는 다음과 같습니다.
 
 | Clock | 의미 |
 | --- | --- |
@@ -106,7 +106,7 @@ clock_gettime(CLOCK_MONOTONIC_RAW, &t);
 
 ## RDTSC — x86
 
-Intel/AMD의 cycle counter.
+Intel과 AMD의 cycle counter입니다.
 
 ```c
 static inline uint64_t rdtsc(void) {
@@ -116,11 +116,11 @@ static inline uint64_t rdtsc(void) {
 }
 ```
 
-⚠️ **out-of-order execution** — 진짜 측정엔 `rdtscp` + `cpuid` barrier.
+⚠️ **out-of-order execution** 때문에 진짜 측정에는 `rdtscp`와 `cpuid` barrier가 필요합니다.
 
 ## PMU — Hardware Performance Counters
 
-Cortex-A·Cortex-M55+의 *Performance Monitor Unit*. 다양한 event 카운트.
+Cortex-A와 Cortex-M55+에 있는 *Performance Monitor Unit*입니다. 다양한 event를 카운트할 수 있습니다.
 
 ```c
 // ARMv8 cortex-a (EL1)
@@ -128,18 +128,19 @@ uint64_t cnt;
 asm volatile ("mrs %0, pmccntr_el0" : "=r"(cnt));   // CPU cycles
 ```
 
-흔한 event:
+흔히 쓰는 event는 다음과 같습니다.
+
 - `CPU_CYCLES` (0x11)
 - `INST_RETIRED` (0x08)
 - `L1D_CACHE_REFILL` (0x03)
 - `L2D_CACHE_REFILL` (0x17)
 - `BR_MIS_PRED` (0x10)
 
-각 PMU는 *제한된 counter 수* (보통 4-6). `perf` (Linux)이 다중 event 시 *time-multiplex*.
+각 PMU는 *제한된 counter 수*(보통 4-6개)만 가집니다. Linux의 `perf`는 다중 event를 측정할 때 *time-multiplex*로 처리합니다.
 
 ## GPIO + 로직 분석기 — 외부 측정
 
-가장 *비침습적*. 코드에 GPIO toggle만.
+가장 *비침습적*인 방법입니다. 코드에 GPIO toggle만 추가합니다.
 
 ```c
 void critical_function(void) {
@@ -149,7 +150,7 @@ void critical_function(void) {
 }
 ```
 
-**Saleae·Sigrok**으로 펄스 폭 측정. CPU 자체 측정 도구의 *overhead 0*.
+**Saleae나 Sigrok**으로 펄스 폭을 측정합니다. CPU 자체의 측정 도구가 가지는 *overhead가 0*입니다.
 
 ### Latency between events
 
@@ -161,11 +162,11 @@ ISR_EXIT;
 TASK_START: GPIO_TOGGLE(TASK_PIN);
 ```
 
-두 pin 사이 *시간 차*로 scheduler latency 측정.
+두 pin 사이의 *시간 차*로 scheduler latency를 측정합니다.
 
 ## Overhead 줄이기
 
-측정 코드 자체가 시스템 영향.
+측정 코드 자체가 시스템에 영향을 줍니다.
 
 | 측정 | Overhead |
 | --- | --- |
@@ -175,7 +176,7 @@ TASK_START: GPIO_TOGGLE(TASK_PIN);
 | `printf` | 수 µs-ms |
 | Trace ring buffer | 수십 cycle |
 
-**Lightweight tracing**:
+**Lightweight tracing**의 예는 다음과 같습니다.
 
 ```c
 struct trace_record {
@@ -194,11 +195,11 @@ static volatile int trace_idx;
 } while (0)
 ```
 
-각 trace = *5 cycle*. 1000개 = 5 KB. 충분.
+각 trace가 *5 cycle* 정도입니다. 1000개를 모아도 5 KB라 충분합니다.
 
 ## SystemView / Segger RTT
 
-Production-grade tracer. J-Link로 *수 MB/s* 전송 가능.
+Production-grade tracer입니다. J-Link로 *수 MB/s* 전송이 가능합니다.
 
 ```c
 #include "SEGGER_SYSVIEW.h"
@@ -207,13 +208,13 @@ SEGGER_SYSVIEW_RecordEnterISR();
 SEGGER_SYSVIEW_RecordExitISR();
 ```
 
-PC 측 *Timeline viewer* — ms 단위 시각화.
+PC 측에서는 *Timeline viewer*로 ms 단위로 시각화합니다.
 
 ## Hardware Trace (ETM·ITM)
 
-Cortex-M3+의 **Embedded Trace Macrocell (ETM)** — *모든 명령 trace*. J-Trace 같은 비싼 도구 필요.
+Cortex-M3+의 **Embedded Trace Macrocell (ETM)**은 *모든 명령을 trace*합니다. J-Trace 같은 비싼 도구가 필요합니다.
 
-**ITM (Instrumentation Trace Macrocell)** — *32 channel debug print*. RTT보다 가벼움.
+**ITM (Instrumentation Trace Macrocell)**은 *32 channel debug print*를 제공하며, RTT보다 가볍습니다.
 
 ```c
 ITM->PORT[0].u8 = 'A';   // 1 cycle, non-intrusive
@@ -232,35 +233,35 @@ gcc -fprofile-generate -o app app.c
 gcc -fprofile-use -O3 -o app app.c
 ```
 
-컴파일러가 *hot path* 우대. Branch prediction·inline 결정 개선.
+컴파일러가 *hot path*를 우대해서 처리합니다. Branch prediction과 inline 결정이 개선됩니다.
 
 ## 자주 하는 실수
 
 > ⚠️ Wall-clock으로 CPU 시간 측정
 
-DMA·context switch 포함 → 코드 자체 시간 과대 추정.
+DMA와 context switch가 포함되면서 코드 자체의 시간이 과대 추정됩니다.
 
 > ⚠️ DWT_CYCCNT init 누락
 
-`DEMCR.TRCENA` 활성 안 함 → CYCCNT 항상 0.
+`DEMCR.TRCENA`를 활성화하지 않으면 CYCCNT는 항상 0입니다.
 
 > ⚠️ Out-of-order CPU에서 단순 RDTSC
 
-명령 reorder로 *측정 영역 밖*에 실행됨. `rdtscp` + memory barrier.
+명령이 reorder되면서 *측정 영역 밖*에서 실행됩니다. `rdtscp`와 memory barrier로 해결합니다.
 
 > ⚠️ printf로 timing 측정
 
-printf 자체가 ms 단위. *Trace buffer* 또는 GPIO.
+printf 자체가 ms 단위입니다. 그래서 *Trace buffer*나 GPIO를 씁니다.
 
 ## 정리
 
-- Wall-clock·CPU cycle·instruction은 *다른 답* 제공.
-- **DWT_CYCCNT** (Cortex-M3+)가 µs 측정의 표준.
-- Linux는 `CLOCK_MONOTONIC_RAW` + PMU.
-- **GPIO + 로직 분석기**가 외부 정밀 측정.
-- Trace buffer로 *lightweight production tracing*.
+- Wall-clock, CPU cycle, instruction은 *각각 다른 답*을 제공합니다.
+- **DWT_CYCCNT**(Cortex-M3+)가 µs 측정의 표준입니다.
+- Linux에서는 `CLOCK_MONOTONIC_RAW`와 PMU를 씁니다.
+- **GPIO + 로직 분석기**가 외부 정밀 측정 수단입니다.
+- Trace buffer로 *lightweight production tracing*을 구현합니다.
 
-다음 편은 **통계적 분석** — percentile, histogram.
+다음 편은 **통계적 분석**입니다. percentile과 histogram을 다룹니다.
 
 ## 관련 항목
 

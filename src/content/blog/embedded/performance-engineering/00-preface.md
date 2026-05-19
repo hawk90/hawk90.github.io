@@ -1,6 +1,6 @@
 ---
 title: "Embedded Performance Engineering: 서문"
-date: 2026-05-12
+date: 2026-05-08
 description: "왜 느린가? Cache miss, pipeline stall, bus contention부터 profiling 도구 활용까지. 임베디드 시스템 성능 분석의 모든 것."
 series: "Embedded Performance Engineering"
 seriesOrder: 0

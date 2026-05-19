@@ -5,12 +5,12 @@ description: "64-byte line alignment, software prefetch, false sharing 회피, S
 series: "Embedded Performance Engineering"
 seriesOrder: 15
 tags: [cache, line, alignment, prefetch, false-sharing]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Cache line 활용 = spatial locality 활용"** — 한 번 fetch한 line 안에서 *최대한 일 처리*.
+> **"Cache line 활용 = spatial locality 활용"**입니다. 한 번 fetch한 line 안에서 최대한 많은 일을 처리합니다.
 
 ## Cache Line 크기
 
@@ -54,7 +54,7 @@ alignas(64) struct Foo { ... };
 __attribute__((aligned(64))) static int matrix[1024][1024];
 ```
 
-DMA·SIMD에서 필수. Misaligned access는 *2 cycle* 또는 *fault* (Cortex-M0).
+DMA와 SIMD에서는 필수입니다. Misaligned access는 2 cycle을 추가로 소모하거나 Cortex-M0에서는 fault를 일으킵니다.
 
 64-byte line 안의 데이터 배치가 성능을 결정합니다. 같은 line에 무엇이 들어 있느냐에 따라 좋은/나쁜 패턴이 갈립니다.
 
@@ -76,7 +76,7 @@ struct counters {
 };
 ```
 
-SMP 환경 — false sharing이 *10x slowdown* 흔함. 측정 — `cache-references` 폭증.
+SMP 환경에서는 false sharing이 10x slowdown을 일으키는 경우가 흔합니다. 측정 시에는 `cache-references`가 폭증합니다.
 
 ## Hot-Cold Splitting
 
@@ -103,7 +103,7 @@ struct guest_cold {
 };
 ```
 
-hot loop이 *guest_hot만* 순회 — cache 효율 ↑.
+hot loop이 guest_hot만 순회하므로 cache 효율이 올라갑니다.
 
 ## SoA vs AoS
 
@@ -125,7 +125,7 @@ for (i = 0; i < N; i++) {
 }
 ```
 
-SIMD에 최적 — *연속 x 4개*를 NEON 벡터로 load. 게임 엔진·물리 시뮬에서 표준.
+SIMD에 최적입니다. 연속된 x 4개를 NEON 벡터로 load할 수 있습니다. 게임 엔진과 물리 시뮬에서는 표준 패턴입니다.
 
 ## Software Prefetch
 
@@ -136,7 +136,7 @@ for (i = 0; i < N; i++) {
 }
 ```
 
-매개변수:
+매개변수는 다음과 같습니다.
 
 | 인자 | 의미 |
 |---|---|
@@ -144,7 +144,7 @@ for (i = 0; i < N; i++) {
 | rw | 0 = read, 1 = write (write intent) |
 | locality | 0 = NTA (non-temporal), 1-3 = temporal hint (3=highest) |
 
-ARM 명령:
+ARM 명령은 다음과 같습니다.
 
 ```asm
 pld [r0, #64]    ; preload data
@@ -152,11 +152,11 @@ pldw [r0, #64]   ; preload data for write
 pli [r0, #64]    ; preload instruction
 ```
 
-거리 = *latency / cycle per iter*. L1 miss 12 cycle / iter 3 cycle → 4 element 앞.
+거리는 *latency / cycle per iter*로 잡습니다. L1 miss가 12 cycle이고 iter가 3 cycle이면 4 element 앞을 prefetch합니다.
 
 ## Hardware Prefetcher 활성화
 
-Cortex-A 자동 — stride detect. Cortex-M7 — `MEMCTL` register:
+Cortex-A는 stride를 자동으로 감지합니다. Cortex-M7은 `MEMCTL` register로 제어합니다.
 
 ```c
 SCB->CCR |= SCB_CCR_BP_Msk;   // Branch prediction enable
@@ -171,13 +171,13 @@ for (i = 0; i < N; i++) {
 }
 ```
 
-ARM `STNP` (Store Non-temporal Pair) — *cache 우회 store*. x86 `MOVNT`.
+ARM `STNP`(Store Non-temporal Pair)는 cache를 우회하는 store입니다. x86에서는 `MOVNT`에 해당합니다.
 
 ```c
 __builtin_nontemporal_store(value, &arr[i]);
 ```
 
-큰 buffer 초기화·copy에 효과. Cache pollution 방지.
+큰 buffer 초기화나 copy에서 효과를 보며 cache pollution을 방지합니다.
 
 ## Cache Line Pad — Producer/Consumer Queue
 
@@ -193,7 +193,7 @@ struct spsc_queue {
 };
 ```
 
-Producer·consumer가 *다른 CPU core*일 때 false sharing 회피.
+Producer와 consumer가 서로 다른 CPU core에 있을 때 false sharing을 회피할 수 있습니다.
 
 ## Cache Maintenance — DMA·Coherence
 
@@ -230,9 +230,9 @@ __attribute__((hot)) void critical_function(void) { ... }
 __attribute__((cold)) void error_handler(void) { ... }
 ```
 
-GCC가 hot 함수를 *연속 배치* → I-cache locality 향상.
+GCC가 hot 함수를 연속 배치해 I-cache locality를 향상시킵니다.
 
-`-fprofile-use`로 *PGO* (Profile-Guided Optimization) — 실제 실행 분포로 배치.
+`-fprofile-use`로 PGO(Profile-Guided Optimization)를 적용하면 실제 실행 분포에 따라 배치합니다.
 
 ## 자주 하는 실수
 
@@ -246,7 +246,7 @@ struct {
 } thing;             // → 12 byte? sizeof 확인
 ```
 
-ARMv6+ misaligned access 일부 지원하나 *느림*. Cortex-M0/M1은 *fault*.
+ARMv6+에서는 misaligned access를 일부 지원하지만 느립니다. Cortex-M0/M1은 fault를 일으킵니다.
 
 > ⚠️ Prefetch 거리 잘못
 
@@ -255,7 +255,7 @@ __builtin_prefetch(&arr[i + 1]);   // 너무 가까움 — 효과 없음
 __builtin_prefetch(&arr[i + 1000]); // 너무 멈 — evict 가능
 ```
 
-벤치 측정해서 *최적 거리* 찾기.
+벤치마크 측정으로 최적 거리를 찾습니다.
 
 > ⚠️ Volatile + cache line padding
 
@@ -263,21 +263,21 @@ __builtin_prefetch(&arr[i + 1000]); // 너무 멈 — evict 가능
 volatile struct { alignas(64) int a; alignas(64) int b; } v;
 ```
 
-`volatile`은 *컴파일러 캐싱 차단*. False sharing은 *hardware 차원* — 두 개념 별개.
+`volatile`은 컴파일러의 캐싱을 차단합니다. False sharing은 hardware 차원의 문제로 두 개념은 별개입니다.
 
 > ⚠️ SoA를 모든 경우에 사용
 
-Random access나 *한 객체의 여러 field 동시 사용*은 *AoS가 유리*. 적용 시 *접근 패턴* 분석.
+Random access나 한 객체의 여러 field를 동시에 사용하는 패턴에서는 AoS가 유리합니다. 적용 전에 반드시 접근 패턴을 분석해야 합니다.
 
 ## 정리
 
-- Cache line **64 byte** (Cortex-A·Intel) — alignas로 정렬.
-- **False sharing** — multi-CPU 변수 *line 분리*.
-- **SoA**가 SIMD·streaming에 유리.
-- **Software prefetch** — 적절한 거리에서만 효과.
-- Cortex-M7 DMA — *cache maintenance* 필수.
+- Cache line은 Cortex-A와 Intel에서 **64 byte**이며 `alignas`로 정렬합니다.
+- **False sharing**은 multi-CPU 변수를 line 단위로 분리해 회피합니다.
+- **SoA**는 SIMD와 streaming에 유리합니다.
+- **Software prefetch**는 적절한 거리에서만 효과가 있습니다.
+- Cortex-M7에서 DMA를 쓸 때는 cache maintenance가 필수입니다.
 
-다음 편은 **Memory Bandwidth**.
+다음 편은 **Memory Bandwidth**입니다.
 
 ## 관련 항목
 

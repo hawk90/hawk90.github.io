@@ -5,16 +5,16 @@ description: "ARM NEON 128-bit, SVE 가변폭. Auto-vectorize (-O3). Intrinsics.
 series: "Embedded Performance Engineering"
 seriesOrder: 17
 tags: [simd, neon, sve, helium, intrinsics]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"SIMD = 한 명령으로 여러 데이터"** — 4x speedup 흔함.
+> **"SIMD = 한 명령으로 여러 데이터"**입니다. 4배 speedup이 흔합니다.
 
 ## ARM NEON — 128-bit Vector
 
-Cortex-A 시리즈 표준. *32 × 128-bit register* (`v0-v31`).
+Cortex-A 시리즈의 표준입니다. 128-bit register 32개(`v0-v31`)를 제공합니다.
 
 ```text
 NEON register Q0 (128 bit):
@@ -41,13 +41,14 @@ void scale(float *a, float k, int N) {
 }
 ```
 
-`-O3` 시 자동으로 NEON `fmul.f32 q0, q1, q2` 4-way 처리.
+`-O3`를 켜면 컴파일러가 자동으로 NEON `fmul.f32 q0, q1, q2`로 4-way 처리합니다.
 
-조건:
-- 명확한 stride (보통 1)
-- Alias 없음 (`restrict` 키워드 도움)
-- Branch 없음
-- 길이가 vector width의 배수 또는 epilogue 처리
+조건은 다음과 같습니다.
+
+- 명확한 stride가 있어야 합니다 (보통 1).
+- Alias가 없어야 합니다 (`restrict` 키워드가 도움이 됩니다).
+- Branch가 없어야 합니다.
+- 길이가 vector width의 배수이거나 epilogue로 처리 가능해야 합니다.
 
 ## restrict로 vectorizer 도움
 
@@ -64,7 +65,7 @@ void add(float * restrict a, float * restrict b, float * restrict c, int N) {
 }
 ```
 
-## NEON Intrinsics — Manual
+## NEON Intrinsics로 직접 작성
 
 ```c
 #include <arm_neon.h>
@@ -82,7 +83,7 @@ void add_neon(float *a, float *b, float *c, int N) {
 }
 ```
 
-자주 쓰는 intrinsic:
+자주 쓰는 intrinsic은 다음과 같습니다.
 
 | Intrinsic | 동작 |
 |---|---|
@@ -114,11 +115,11 @@ float dot(const float *a, const float *b, int N) {
 }
 ```
 
-Scalar 대비 *3-4x* 빠름.
+Scalar 대비 3-4배 빠릅니다.
 
 ## Helium (MVE) — Cortex-M 용 SIMD
 
-Cortex-M55·M85 — *MVE* (M-profile Vector Extension).
+Cortex-M55와 M85에서는 MVE(M-profile Vector Extension)를 제공합니다.
 
 ```c
 #include <arm_mve.h>
@@ -133,16 +134,17 @@ void add_mve(int16_t *a, int16_t *b, int16_t *c, int N) {
 }
 ```
 
-NEON과 다른 점:
-- *Beat scheme* — 4 beat 한 cycle씩 (low power)
-- *Predication* — tail handle 자동
-- 8 register만 (NEON은 32)
+NEON과 다른 점은 다음과 같습니다.
 
-DSP·오디오·ML inference 용.
+- *Beat scheme*: 4 beat를 한 cycle씩 처리합니다 (low power).
+- *Predication*: tail handling을 자동으로 처리합니다.
+- 레지스터가 8개뿐입니다 (NEON은 32개).
+
+주로 DSP, 오디오, ML inference에 사용합니다.
 
 ## SVE — 가변폭 SIMD
 
-Cortex-A510·A78·X1 등에 SVE 또는 *SVE2*. 폭 = 128~2048 bit (구현마다).
+Cortex-A510·A78·X1 등에 SVE 또는 SVE2가 들어 있습니다. 폭은 구현에 따라 128 ~ 2048 bit으로 다양합니다.
 
 ```c
 #include <arm_sve.h>
@@ -160,9 +162,9 @@ void add_sve(float *a, float *b, float *c, int N) {
 }
 ```
 
-**Predication** (mask)로 *tail handling 자동* — 길이 모르는 loop도 안전.
+**Predication**(mask)으로 tail handling이 자동으로 됩니다. 길이를 모르는 loop도 안전합니다.
 
-같은 binary가 128-bit·256-bit SVE 둘 다에서 동작.
+같은 binary가 128-bit, 256-bit SVE 양쪽에서 그대로 동작합니다.
 
 ## 측정 — IPC와 Throughput
 
@@ -178,7 +180,7 @@ float32x4_t va = vld1q_f32(...);
 // 이론 4x — 실측 3.2-3.8x (load/store가 병목)
 ```
 
-`perf` 또는 DWT CYCCNT로 측정.
+`perf` 또는 DWT CYCCNT로 측정합니다.
 
 ## Reduction Pattern
 
@@ -209,20 +211,20 @@ __attribute__((aligned(16))) float a[1024];
 float32x4_t v = vld1q_f32(a);   // ← aligned load 빠름
 ```
 
-NEON은 *misaligned 가능*하나 정렬 시 *10-20% 빠름*. Cortex-M MVE는 *정렬 권장*.
+NEON은 misaligned 접근도 가능하지만, 정렬해 두면 10-20% 더 빠릅니다. Cortex-M MVE는 정렬을 권장합니다.
 
 ## SIMD 적용 어려운 경우
 
-- **Branch 많음** — predicated 명령으로 회피
-- **Indirect access** — gather/scatter (SVE2만 지원)
-- **Cross-element dependency** — recurrence (e.g. prefix sum)
-- **Bit-level operation** — bit manipulation은 *vector unfriendly*
+- **Branch가 많은 경우**: predicated 명령으로 회피합니다.
+- **Indirect access**: gather/scatter를 써야 하는데 SVE2만 지원합니다.
+- **Cross-element dependency**: prefix sum 같은 recurrence가 어렵습니다.
+- **Bit-level operation**: bit manipulation은 vector에 친화적이지 않습니다.
 
 ## 자주 하는 실수
 
 > ⚠️ Auto-vectorize 신뢰
 
-`gcc -O3`가 항상 vectorize 안 함. `-fopt-info-vec`로 확인:
+`gcc -O3`라고 해서 항상 vectorize되는 것은 아닙니다. `-fopt-info-vec`로 확인합니다.
 
 ```bash
 gcc -O3 -fopt-info-vec -c src.c
@@ -230,7 +232,7 @@ gcc -O3 -fopt-info-vec -c src.c
 # loop turned into non-loop                 ← 다른 최적화
 ```
 
-Vectorize 안 됐으면 intrinsics 또는 OpenMP `#pragma omp simd`.
+Vectorize가 안 되었다면 intrinsics를 쓰거나 OpenMP `#pragma omp simd`를 적용합니다.
 
 > ⚠️ Tail handling 누락
 
@@ -240,7 +242,7 @@ for (i = 0; i < N; i += 4) {   // N=10이면 i=8까지 → tail 2 남음
 }
 ```
 
-→ tail scalar 처리 또는 SVE predicate.
+tail은 scalar로 처리하거나 SVE predicate으로 마무리합니다.
 
 > ⚠️ Mixed precision 무시
 
@@ -249,22 +251,22 @@ int16_t a[N]; float b[N];
 for (i) b[i] = (float)a[i] * 2.0f;   // ← conversion 비쌈
 ```
 
-NEON `vcvtq_f32_s16` 명시. 또는 *fixed-point* 유지.
+NEON `vcvtq_f32_s16`를 명시하거나, 아예 fixed-point로 유지합니다.
 
 > ⚠️ FP exception 가정
 
-NEON에서 *NaN/Inf* 동작이 IEEE-754 *flush-to-zero* mode일 수 있음. 정밀 수치 코드는 *주의*.
+NEON에서는 NaN/Inf 동작이 IEEE-754 flush-to-zero 모드일 수 있습니다. 정밀 수치 코드를 다룬다면 주의가 필요합니다.
 
 ## 정리
 
-- ARM NEON = **128-bit, 4 × float**.
-- Auto-vectorize는 *조건 까다로움* — `-O3 -ftree-vectorize` + restrict.
-- Manual **intrinsics**로 확실한 통제.
-- Cortex-M55+ — **Helium MVE**.
-- 모던 Cortex-A — **SVE/SVE2** 가변폭.
-- Reduction은 *multiple accumulator*로 RAW 회피.
+- ARM NEON은 **128-bit, 4 × float** 구조입니다.
+- Auto-vectorize는 조건이 까다롭습니다. `-O3 -ftree-vectorize`와 restrict를 함께 씁니다.
+- **Intrinsics**로 직접 작성하면 확실하게 통제할 수 있습니다.
+- Cortex-M55 이상은 **Helium MVE**를 지원합니다.
+- 모던 Cortex-A는 **SVE/SVE2**로 가변폭을 제공합니다.
+- Reduction은 multiple accumulator로 RAW chain을 회피합니다.
 
-다음 편은 **PMU**.
+다음 편에서는 **PMU**를 다룹니다.
 
 ## 관련 항목
 

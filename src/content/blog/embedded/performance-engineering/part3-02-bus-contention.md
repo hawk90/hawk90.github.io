@@ -5,12 +5,12 @@ description: "Round-robin·priority·QoS arbitration. Master 다수 시 starvati
 series: "Embedded Performance Engineering"
 seriesOrder: 20
 tags: [bus, contention, arbitration, qos, starvation]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Contention = 여러 master 한 slave 동시 access"** — arbiter가 *공평 vs 빠름* trade-off.
+> **"Contention = 여러 master가 한 slave에 동시에 접근하는 상황"**입니다. arbiter는 공평과 빠름 사이에서 trade-off를 선택합니다.
 
 ## Arbitration 정책
 
@@ -26,7 +26,7 @@ Cycle 4: D
 Cycle 5: A
 ```
 
-장점 — *공평*, 굶주림 없음. 단점 — 우선순위 없음.
+장점은 공평하고 굶주림이 없다는 점입니다. 단점은 우선순위를 지정할 수 없다는 점입니다.
 
 ### Priority
 
@@ -37,7 +37,7 @@ Master:  A (P0) B (P1) C (P2) D (P3)
 A·B·C·D 동시 요청 → D 먼저
 ```
 
-장점 — critical master 보장. 단점 — *low priority starvation*.
+장점은 critical master를 보장한다는 점입니다. 단점은 low priority master가 starvation에 빠질 수 있다는 점입니다.
 
 ### Weighted Round-Robin
 
@@ -46,7 +46,7 @@ Master A weight=3, B weight=1, C weight=1
 순환: A A A B C A A A B C ...
 ```
 
-대역폭을 *비율로 분배*.
+대역폭을 정해진 비율로 분배하는 방식입니다.
 
 ### QoS-Based (AXI)
 
@@ -55,7 +55,7 @@ ARQOS = 4-bit (0-15)
 Arbiter — *높은 QoS 우선*, 같으면 round-robin
 ```
 
-ARM CCI-400·CMN 표준. Cortex-A SoC에서 흔히 사용.
+ARM CCI-400과 CMN의 표준 방식이며, Cortex-A SoC에서 흔히 사용합니다.
 
 ## Cortex-A SoC — CCI-400 사례
 
@@ -67,7 +67,7 @@ ARM CCI-400·CMN 표준. Cortex-A SoC에서 흔히 사용.
 [VPU (video)]          AXI ─→
 ```
 
-CCI-400 — *5 master, 3 slave* 가능. Per-master QoS regulator + bandwidth limiter.
+CCI-400은 5 master와 3 slave까지 지원합니다. master별 QoS regulator와 bandwidth limiter를 함께 제공합니다.
 
 ```c
 /* CCI-400 register */
@@ -94,6 +94,8 @@ HAL_AXIBusMatrix_ConfigPriority(M5_LTDC, AXI_PRIORITY_HIGH);
 
 ## Starvation 시나리오
 
+다음과 같은 상황에서 starvation이 발생합니다.
+
 ```text
 Master A: 매 cycle DMA burst 요청 (high priority)
 Master B: 가끔 read 요청 (low priority)
@@ -108,7 +110,7 @@ B의 latency-sensitive 작업 (LCD refresh) → frame drop
 CCI->BW_REGULATOR[A] = LIMIT_50_PCT;   // A는 50%만 사용
 ```
 
-A의 throughput 손실 + B의 latency 개선.
+A의 throughput을 일부 손실하는 대신 B의 latency를 개선할 수 있습니다.
 
 ### 해결 2: Latency-based QoS
 
@@ -116,11 +118,11 @@ A의 throughput 손실 + B의 latency 개선.
 ARQOS = LATENCY_CRITICAL;   // arbiter가 *delay 안 우선*
 ```
 
-CCI가 *대기 시간*도 고려. 옛 transaction일수록 priority boost.
+CCI가 대기 시간까지 고려해서, 오래 기다린 transaction일수록 priority를 올려 줍니다.
 
 ## 측정 — AXI Monitor
 
-ARM CoreSight + DSU PMU:
+ARM CoreSight와 DSU PMU를 함께 활용합니다.
 
 ```text
 Event: BUS_ACCESS_LD, BUS_ACCESS_ST
@@ -137,6 +139,8 @@ perf stat -e r19,r1d ./prog
 
 ## VTune Memory Bandwidth Analysis
 
+VTune의 time-series chart는 다음과 같이 표시됩니다.
+
 ```text
 Time-series chart:
   CPU: ────░░░░░░░░░░░──── (10%)
@@ -145,7 +149,7 @@ Time-series chart:
   Total: ░░░░░░░░██████░░  (saturation)
 ```
 
-색칠된 부분 = active. *총합 100% 가까이 = saturation*.
+색칠된 부분이 active 상태입니다. 총합이 100%에 가까워지면 saturation입니다.
 
 ## DMA·CPU 충돌 해결
 
@@ -160,7 +164,7 @@ void critical_isr(void) {
 }
 ```
 
-DTCM·ITCM = *CPU 전용 bus* — bus matrix 우회.
+DTCM과 ITCM은 CPU 전용 bus라서 bus matrix를 우회합니다.
 
 ### Cache Locking
 
@@ -170,7 +174,7 @@ write_l2_lockdown(WAY_0, 1);   // way 0 lock
 /* 특정 line이 evict 안 됨 — predictable latency */
 ```
 
-WCET 보장이 critical한 경우.
+WCET 보장이 critical한 경우에 사용합니다.
 
 ### Master 분리 SoC 디자인
 
@@ -180,7 +184,7 @@ GPU ─→ DDR1   (분리된 channel)
 DMA ─→ DDR2
 ```
 
-서로 다른 *DDR channel*로 access → contention 0. 고가 SoC만 가능 (BGA 핀 ↑).
+서로 다른 DDR channel로 access하면 contention이 0이 됩니다. 다만 BGA 핀 수가 늘어나 고가 SoC에서만 가능합니다.
 
 ## Cortex-M Bus Matrix — STM32 사례
 
@@ -204,7 +208,7 @@ Slave:     S0 Flash
    동시 — *4 simultaneous transfer*
 ```
 
-bus matrix 덕분 — 같은 buffer 안 쓰면 *대역폭 4x*.
+bus matrix 덕분에 같은 buffer만 쓰지 않으면 대역폭이 4배까지 늘어납니다.
 
 ## QoS 동적 조정 — 자동차 사례
 
@@ -217,7 +221,7 @@ void on_brake_event(void) {
 }
 ```
 
-차량 상태별 *동적 priority*. ASIL-D ECU에선 정적 *최악 case* 보장 우선.
+차량 상태에 따라 priority를 동적으로 조정합니다. 다만 ASIL-D ECU에서는 정적으로 worst case를 보장하는 쪽을 우선합니다.
 
 ## Bandwidth Regulator
 
@@ -229,7 +233,7 @@ CCI->REG_THROTTLE[GPU] = TOKEN_BUCKET(
 );
 ```
 
-Token bucket — peak 허용, 평균 제한. GPU·DPU에 흔히 사용 (frame drop 방지하면서 CPU도 보장).
+Token bucket 방식은 peak는 허용하면서 평균을 제한합니다. GPU와 DPU에 흔히 사용하며, frame drop을 막으면서도 CPU 대역폭을 함께 보장합니다.
 
 ## 자주 하는 실수
 
@@ -240,7 +244,7 @@ Cortex-A core 4개가 모두 ID=0으로 transaction 발사
   → AXI는 *같은 ID FIFO 순서* 강제 → OoO 못 함
 ```
 
-Cluster·Core별로 *unique ID*. Cortex-A72 ARID = `cluster|core|thread` encoding.
+Cluster와 Core별로 unique ID를 부여해야 합니다. Cortex-A72의 ARID는 `cluster|core|thread`로 encoding되어 있습니다.
 
 > ⚠️ QoS 모든 master 최대
 
@@ -250,11 +254,11 @@ CCI->QOS[GPU] = 15;
 CCI->QOS[DMA] = 15;
 ```
 
-다 max → 의미 없음 (모두 동등) → round-robin으로 fallback.
+모두 max로 설정하면 의미가 없어집니다. 결과적으로 모두 동등해져 round-robin으로 fallback됩니다.
 
 > ⚠️ Bus contention 측정 안 함
 
-성능 problem이 *CPU 부족* vs *bus saturation* 구분 안 됨. PMU `BUS_ACCESS`·`STALL_BACKEND_MEM` 비교.
+이렇게 두면 성능 문제가 CPU 부족 때문인지 bus saturation 때문인지 구분이 안 됩니다. PMU의 `BUS_ACCESS`와 `STALL_BACKEND_MEM`을 비교해야 합니다.
 
 > ⚠️ DMA가 CPU 깨움 패턴
 
@@ -263,18 +267,18 @@ HAL_DMA_Start(...);
 while (!dma_done) { CPU 대기 }   // CPU도 bus 점유 — 의미 없음
 ```
 
-CPU sleep (WFI) 또는 *다른 일* 시킴 — bus 양보.
+CPU를 sleep(WFI) 상태로 두거나 다른 일을 시켜서 bus를 양보해야 합니다.
 
 ## 정리
 
-- Arbitration — **round-robin·priority·weighted·QoS**.
-- AXI **ARQOS** 4-bit으로 master별 우선순위.
-- **Starvation** 방지 — bandwidth regulator·latency-based QoS.
-- STM32H7 — *7×6 bus matrix*로 parallel transfer.
-- 자동차 — *상황별 동적 QoS*.
-- 측정 — PMU `BUS_ACCESS`·`BUS_CYCLES`.
+- Arbitration 방식은 **round-robin, priority, weighted, QoS**가 있습니다.
+- AXI는 **ARQOS** 4-bit으로 master별 우선순위를 표현합니다.
+- **Starvation** 방지를 위해 bandwidth regulator와 latency-based QoS를 활용합니다.
+- STM32H7은 7×6 bus matrix로 parallel transfer를 지원합니다.
+- 자동차 시스템에서는 상황에 따라 QoS를 동적으로 조정합니다.
+- 측정은 PMU의 `BUS_ACCESS`와 `BUS_CYCLES`로 수행합니다.
 
-다음 편은 **DMA Performance**.
+다음 편에서는 **DMA Performance**를 다룹니다.
 
 ## 관련 항목
 

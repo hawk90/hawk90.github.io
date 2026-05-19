@@ -5,12 +5,12 @@ description: "ARMv8 PMU 6+ counter, RISC-V HPM. CYCLE·INST_RETIRED·CACHE·BRAN
 series: "Embedded Performance Engineering"
 seriesOrder: 18
 tags: [pmu, hardware-counter, arm, riscv, perf]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"PMU = CPU 내장 프로파일러"** — 측정 overhead 거의 0.
+> **"PMU = CPU 내장 프로파일러"**입니다. 측정 overhead가 거의 0에 가깝습니다.
 
 ## ARMv8 PMU 구조
 
@@ -48,7 +48,7 @@ asm volatile ("mrs %0, pmccntr_el0" : "=r"(cycles));
 | 0x23 | STALL_FRONTEND | front-end stall |
 | 0x24 | STALL_BACKEND | back-end stall |
 
-각 CPU별 *Technical Reference Manual* 확인 — implementation-specific event 추가 있음.
+각 CPU별 Technical Reference Manual을 확인해야 합니다. CPU마다 implementation-specific event가 추가로 정의되어 있습니다.
 
 ## Linux perf — 가장 흔한 도구
 
@@ -68,7 +68,7 @@ perf record -e cycles -g ./prog
 perf report
 ```
 
-`perf record` 결과는 *function별 cycle 분포* — hotspot 발견.
+`perf record` 결과로 function별 cycle 분포를 확인할 수 있고, 이를 통해 hotspot을 발견합니다.
 
 ## 핵심 비율 — IPC·MPKI
 
@@ -93,7 +93,7 @@ Backend bound = STALL_BACKEND / CYCLES
 
 ## Top-Down Microarchitecture Analysis
 
-Intel가 도입, ARM도 비슷.
+Intel이 먼저 도입했고, ARM도 비슷한 분류 체계를 사용합니다.
 
 ```text
 4 카테고리 — CPU cycle 분배:
@@ -107,11 +107,11 @@ Intel가 도입, ARM도 비슷.
        └ DRAM bound
 ```
 
-Bottleneck 식별 → 적절한 최적화 (cache miss → tiling, mispredict → branchless).
+Bottleneck을 식별한 뒤 적절한 최적화를 적용합니다. cache miss라면 tiling, mispredict라면 branchless 변환이 그 예입니다.
 
 ## Cortex-M PMU
 
-Cortex-M3/M4 — 작은 PMU:
+Cortex-M3/M4는 작은 PMU를 가집니다.
 
 ```c
 DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
@@ -120,7 +120,7 @@ uint32_t cycles_start = DWT->CYCCNT;
 uint32_t cycles_end = DWT->CYCCNT;
 ```
 
-Cortex-M7+ — 추가 counter (LSU·FOLD·CPI 등):
+Cortex-M7 이상은 LSU·FOLD·CPI 등 추가 counter를 제공합니다.
 
 ```c
 DWT->LSUCNT  // load/store cycle
@@ -143,7 +143,7 @@ mhpmcounter3 — mhpmcounter31 — 28 programmable counter
 mhpmevent3  — mhpmevent31    — event ID 선택
 ```
 
-Event ID는 vendor-specific. SiFive U74:
+Event ID는 vendor마다 다릅니다. SiFive U74 예시는 다음과 같습니다.
 
 | ID | 의미 |
 |---|---|
@@ -166,27 +166,28 @@ perf record -F 1000 -g ./prog   # 1000 Hz sampling
 perf report --stdio
 ```
 
-매 1 ms마다 *PC + call stack 캡쳐*. Flamegraph로 시각화:
+매 1 ms마다 PC와 call stack을 캡쳐합니다. Flamegraph로 시각화하면 다음과 같습니다.
 
 ```bash
 perf script | stackcollapse-perf.pl | flamegraph.pl > flame.svg
 ```
 
-매우 적은 overhead (~1-3%) — production 환경에서도 가능.
+overhead가 1-3% 정도로 매우 적어서 production 환경에서도 사용할 수 있습니다.
 
 ## Streamline (ARM) / VTune (Intel)
 
-GUI 도구:
-- **ARM Streamline** — Cortex-A/M *target에서* perf 데이터 수집
-- **Intel VTune** — Top-down 자동 분석
-- **Apple Instruments** — macOS·iOS
-- **NVIDIA Nsight** — GPU + CPU
+대표적인 GUI 도구들은 다음과 같습니다.
 
-학습 곡선 가파르지만 강력.
+- **ARM Streamline**: Cortex-A/M target에서 perf 데이터를 수집합니다.
+- **Intel VTune**: Top-down 자동 분석을 제공합니다.
+- **Apple Instruments**: macOS·iOS용입니다.
+- **NVIDIA Nsight**: GPU와 CPU를 함께 봅니다.
+
+학습 곡선이 가파르지만 강력합니다.
 
 ## 자동차·항공 — RTOS PMU 활용
 
-자동차 ECU (NXP S32K3, Cortex-M7) — PMU로 *WCET 분석*:
+자동차 ECU(NXP S32K3, Cortex-M7)에서는 PMU로 WCET 분석을 수행합니다.
 
 ```c
 void task(void) {
@@ -200,11 +201,11 @@ void task(void) {
 }
 ```
 
-KSLV-II 누리 flight computer에서도 *task별 cycle budget* 측정 — 안전 마진 확보.
+KSLV-II 누리 flight computer에서도 task별 cycle budget을 측정해 안전 마진을 확보합니다.
 
 ## Event Multiplexing
 
-PMU counter 6개인데 *측정하고 싶은 event 12개* — *time-sharing*.
+PMU counter는 6개인데 측정하고 싶은 event가 12개라면 time-sharing이 필요합니다.
 
 ```bash
 perf stat -e r03,r04,r10,r11,r17,r23,r24 ./prog
@@ -212,7 +213,7 @@ perf stat -e r03,r04,r10,r11,r17,r23,r24 ./prog
 # perf가 결과를 normalize (scaling factor)
 ```
 
-다만 *sampling이라 정확도 ↓*. 가능하면 counter 수 이하.
+다만 sampling 방식이라 정확도는 떨어집니다. 가능하면 측정 event 수를 counter 수 이하로 유지하는 것이 좋습니다.
 
 ## 자주 하는 실수
 
@@ -224,7 +225,7 @@ do_work();
 uint32_t end = DWT->CYCCNT;
 ```
 
-OoO CPU에선 `do_work` 시작이 *start 측정 전*에 일어날 수도:
+OoO CPU에서는 `do_work` 시작이 start 측정 전에 일어날 수도 있습니다. 다음과 같이 barrier를 넣습니다.
 
 ```c
 __DSB(); __ISB();
@@ -236,33 +237,33 @@ uint32_t end = DWT->CYCCNT;
 
 > ⚠️ Counter overflow
 
-32-bit @ 1 GHz = *4 sec*면 overflow. 긴 측정은 overflow handler 또는 *64-bit cycle counter* (ARMv8 PMCCNTR).
+32-bit 카운터를 1 GHz에서 돌리면 약 4초만에 overflow가 납니다. 긴 측정에서는 overflow handler를 두거나 64-bit cycle counter(ARMv8 PMCCNTR)를 사용합니다.
 
 > ⚠️ User-mode PMU 접근
 
-기본은 *kernel mode only*. Linux는 `/proc/sys/kernel/perf_event_paranoid`로 제어:
+기본적으로 PMU 접근은 kernel mode 전용입니다. Linux에서는 `/proc/sys/kernel/perf_event_paranoid`로 제어합니다.
 
 ```bash
 echo 0 | sudo tee /proc/sys/kernel/perf_event_paranoid   # user access
 ```
 
-Production server에선 *보안 위험* — 신중.
+Production 서버에서는 보안 위험이 있으므로 신중하게 적용해야 합니다.
 
 > ⚠️ ISR이 측정 손상
 
-PMU counter는 *ISR도 카운트*. ISR 빈번하면 *측정 결과 노이즈*. ISR-free 구간 또는 ISR 빼는 방법.
+PMU counter는 ISR도 함께 카운트합니다. ISR이 빈번하면 측정 결과에 노이즈가 섞입니다. ISR-free 구간을 잡거나, 측정에서 ISR을 빼는 방법을 씁니다.
 
 ## 정리
 
-- PMU = **CPU 내장 hardware counter** — overhead ~0.
-- ARMv8 — *6 counter + cycle counter*.
-- 핵심 metric — **IPC·MPKI·mispredict rate·STALL**.
-- Linux `perf`가 표준 도구.
-- Cortex-M = **DWT counter**, Cortex-A = PMU.
-- RISC-V — `mhpmcounter` programmable.
-- WCET 검증·hotspot 파악·top-down 분석에 핵심.
+- PMU는 **CPU 내장 hardware counter**입니다. overhead가 거의 0입니다.
+- ARMv8은 6개 counter와 별도의 cycle counter를 제공합니다.
+- 핵심 metric은 **IPC, MPKI, mispredict rate, STALL**입니다.
+- Linux `perf`가 사실상 표준 도구입니다.
+- Cortex-M은 **DWT counter**, Cortex-A는 PMU를 씁니다.
+- RISC-V는 `mhpmcounter`로 programmable counter를 제공합니다.
+- WCET 검증, hotspot 파악, top-down 분석에 핵심적인 도구입니다.
 
-다음 part는 **Compiler & Optimization**.
+다음 파트에서는 **Compiler & Optimization**을 다룹니다.
 
 ## 관련 항목
 

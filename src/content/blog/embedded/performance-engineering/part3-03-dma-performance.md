@@ -1,26 +1,26 @@
 ---
-title: "3-03: DMA 성능 — Burst·Scatter-Gather·Chain·Cache 일관성"
+title: "3-03: DMA 성능 - Burst·Scatter-Gather·Chain·Cache 일관성"
 date: 2026-05-08T02:00:00
 description: "Burst size 최적화. Scatter-gather, chain. Cache clean/invalidate, double buffer."
 series: "Embedded Performance Engineering"
 seriesOrder: 21
 tags: [dma, burst, scatter-gather, cache, double-buffer]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"DMA = CPU 우회 데이터 이동"** — burst size·alignment·cache가 핵심.
+> **"DMA는 CPU를 우회한 데이터 이동입니다."** burst size와 alignment, cache가 핵심을 결정합니다.
 
 ## DMA Throughput 결정 요소
 
 | 요소 | 영향 |
 |---|---|
-| **Burst size** | 클수록 ↑ (overhead 분산) |
-| **Beat size** | bus 폭 매칭 — 32-bit bus엔 32-bit beat |
-| **Alignment** | misaligned 시 split 발생 |
-| **Outstanding** | DMA controller 동시 transaction |
-| **Bus contention** | 다른 master 영향 |
+| **Burst size** | 클수록 throughput이 올라갑니다 (overhead 분산) |
+| **Beat size** | bus 폭에 맞춥니다. 32-bit bus는 32-bit beat가 적합합니다 |
+| **Alignment** | misaligned면 split이 발생합니다 |
+| **Outstanding** | DMA controller가 동시에 처리하는 transaction 수입니다 |
+| **Bus contention** | 다른 master의 영향을 받습니다 |
 
 ## Burst Size 영향
 
@@ -36,9 +36,9 @@ HAL_DMA_Init(&hdma,
 /* → 16-byte per transaction → 10x throughput */
 ```
 
-`Burst length × Beat size` = 한 AXI transaction 크기. 64-byte (cache line)이 sweet spot.
+`Burst length × Beat size`가 한 AXI transaction의 크기입니다. cache line 크기인 64-byte가 sweet spot입니다.
 
-## STM32H7 MDMA — Master DMA
+## STM32H7 MDMA - Master DMA
 
 ```c
 MDMA_HandleTypeDef hmdma;
@@ -56,7 +56,7 @@ hmdma.Init.BufferTransferLength = 128;   // burst length
 HAL_MDMA_Start(&hmdma, src, dst, len, 1);
 ```
 
-`MDMA` = AXI master, *DRAM ↔ DRAM* copy 가능. 일반 DMA1/2는 *peripheral ↔ memory만*.
+`MDMA`는 AXI master여서 *DRAM ↔ DRAM* copy까지 가능합니다. 일반 DMA1/2는 *peripheral ↔ memory*만 지원합니다.
 
 ## Scatter-Gather
 
@@ -86,7 +86,7 @@ dma_desc_t descriptors[4] = {
 };
 ```
 
-CPU 개입 0 — DMA controller가 *전체 chain 자동 처리*.
+CPU 개입이 전혀 없습니다. DMA controller가 *전체 chain을 자동으로 처리*합니다.
 
 ## Chain Transfer (Linked List)
 
@@ -98,7 +98,7 @@ Frame 2 capture: DMA → buf_b
                    ...
 ```
 
-Camera·display·audio에서 *연속 스트림*. CPU는 *processing*에만 집중.
+Camera·display·audio에서 *연속 스트림*을 처리할 때 씁니다. CPU는 *processing*에만 집중합니다.
 
 ## Double Buffer
 
@@ -120,9 +120,9 @@ void HAL_DMA_M1CpltCallback(DMA_HandleTypeDef *hdma) {
 }
 ```
 
-DMA·CPU 동시 — *throughput ~2x*.
+DMA와 CPU가 동시에 동작하면서 *throughput이 약 2배*로 늘어납니다.
 
-## Cache 일관성 — Cortex-M7
+## Cache 일관성 - Cortex-M7
 
 ### CPU가 buffer write → DMA가 send
 
@@ -132,7 +132,7 @@ SCB_CleanDCache_by_Addr(tx_buf, 256);   // ← memory에 flush
 HAL_UART_Transmit_DMA(&huart1, tx_buf, 256);
 ```
 
-`Clean` = cache → memory (write-back).
+`Clean`은 cache 내용을 memory로 write-back합니다.
 
 ### DMA가 buffer fill → CPU가 read
 
@@ -143,7 +143,7 @@ SCB_InvalidateDCache_by_Addr(rx_buf, 256);   // ← cache 폐기
 process(rx_buf);
 ```
 
-`Invalidate` = stale cache line 폐기 → CPU 다음 read는 *fresh from memory*.
+`Invalidate`는 stale cache line을 폐기합니다. 이후 CPU read는 *memory에서 fresh*하게 읽어옵니다.
 
 ### Misalignment 함정
 
@@ -151,7 +151,7 @@ process(rx_buf);
 SCB_CleanDCache_by_Addr(buf, 100);   // 100 byte
 ```
 
-Cache line = 32 byte. `buf`가 *32-byte aligned*가 아니거나 `len`이 *line 배수 아니면* — *이웃 line도 영향*.
+Cache line이 32 byte라고 가정합니다. `buf`가 *32-byte aligned*가 아니거나 `len`이 *line 배수가 아니면* 이웃 line까지 영향을 받습니다.
 
 ```c
 __attribute__((aligned(32))) uint8_t buf[128];   // line aligned
@@ -174,20 +174,20 @@ HAL_MPU_ConfigRegion(&region);
 __attribute__((section(".uncached"))) uint8_t dma_buf[4096];
 ```
 
-DMA 전용 buffer는 *non-cacheable*로 — *cache maintenance overhead 0*.
+DMA 전용 buffer는 *non-cacheable*로 두면 *cache maintenance overhead가 사라집니다*.
 
 ## DMA Latency
 
 ```text
-Setup overhead — 매 transfer 시작 비용:
+Setup overhead - 매 transfer 시작 비용:
   STM32 DMA: ~5 cycle
   i.MX SDMA: ~50 cycle (FW 실행)
   Linux dmaengine: ~100 cycle + IRQ
 ```
 
-작은 transfer (< 256 byte) — *DMA setup이 더 비쌈*. CPU memcpy가 빠름.
+작은 transfer (< 256 byte)에서는 *DMA setup 비용이 더 큽니다*. 이 구간은 CPU memcpy가 빠릅니다.
 
-## CPU vs DMA — 손익 분기점
+## CPU vs DMA - 손익 분기점
 
 ```text
 memcpy: 1 byte ≈ 0.5 cycle (Cortex-M4)
@@ -198,10 +198,10 @@ DMA setup ~50 cycle + transfer cost (~ 1 byte/cycle)
   DMA: cost = 50 + 1 × N
   cross-over: 50 + N = 0.5N → N = -100 (?)
   
-실제 — DMA가 CPU 자유롭게 함 → *CPU offload가 진짜 이득*
+실제로는 DMA가 CPU를 자유롭게 만들어 *CPU offload가 진짜 이득*
 ```
 
-작은 copy — CPU. 큰 copy(>256 byte) — DMA. CPU가 *다른 일 할 수 있을 때* DMA 무조건 유리.
+작은 copy는 CPU가 유리합니다. 큰 copy(>256 byte)는 DMA가 유리합니다. CPU가 *다른 일을 할 수 있을 때*는 DMA가 무조건 유리합니다.
 
 ## Linux dmaengine API
 
@@ -218,9 +218,9 @@ dma_async_issue_pending(chan);
 dma_sync_wait(chan, cookie);
 ```
 
-Linux에서 *peripheral driver*가 dmaengine 사용 — DMA controller 추상화.
+Linux에서는 *peripheral driver*가 dmaengine을 사용해 DMA controller를 추상화합니다.
 
-## DMA · IRQ · Polling 비교
+## DMA, IRQ, Polling 비교
 
 | 방식 | CPU 사용 | Latency | Throughput |
 |---|---|---|---|
@@ -243,11 +243,11 @@ void send_data(void) {
 }
 ```
 
-DMA buffer는 *static*·*heap*·*전역*. Stack 위는 *함수 return 시 깨짐*.
+DMA buffer는 *static*, *heap*, *전역* 중 하나에 둬야 합니다. Stack 위에 두면 *함수 return 시점에 깨집니다*.
 
 > ⚠️ Cache flush 안 함
 
-DMA가 *cache stale data 봄* 또는 *CPU가 옛 data*. 매 transfer 전후 *clean/invalidate*.
+DMA가 *cache stale data를 보거나* CPU가 *옛 data를 읽게* 됩니다. 매 transfer 전후로 *clean/invalidate*를 수행해야 합니다.
 
 > ⚠️ MPU 영역 잘못 설정
 
@@ -255,21 +255,21 @@ DMA가 *cache stale data 봄* 또는 *CPU가 옛 data*. 매 transfer 전후 *cle
 region.Size = MPU_REGION_SIZE_4KB;
 ```
 
-DMA buffer가 *region 경계 넘어가면* — 일부는 cacheable, 일부는 non-cacheable → 미정의 동작.
+DMA buffer가 *region 경계를 넘어가면* 일부는 cacheable, 일부는 non-cacheable이 됩니다. 결과는 미정의 동작입니다.
 
 > ⚠️ Burst size > slave 지원
 
-Peripheral FIFO depth가 *4*인데 burst length 16 → slave가 4-cycle마다 backpressure → throughput 손실.
+Peripheral FIFO depth가 *4*인데 burst length가 16이면 slave가 4-cycle마다 backpressure를 걸어 throughput이 손실됩니다.
 
 ## 정리
 
-- DMA 성능 = **burst size·alignment·outstanding·bus contention**.
-- **Scatter-gather + chain**으로 CPU 개입 최소화.
-- **Double buffer**로 throughput 2x.
-- Cortex-M7 — **clean/invalidate** 필수, *non-cacheable region* 옵션.
-- 작은 copy는 CPU memcpy, 큰 copy·peripheral은 DMA.
+- DMA 성능은 **burst size, alignment, outstanding, bus contention**으로 결정됩니다.
+- **Scatter-gather와 chain**으로 CPU 개입을 최소화합니다.
+- **Double buffer**로 throughput을 2배로 끌어올립니다.
+- Cortex-M7에서는 **clean/invalidate**가 필수이고 *non-cacheable region*도 선택지입니다.
+- 작은 copy는 CPU memcpy, 큰 copy와 peripheral은 DMA가 유리합니다.
 
-다음 편은 **DMA vs CPU 손익 분석**.
+다음 편은 **DMA vs CPU 손익 분석**을 다룹니다.
 
 ## 관련 항목
 

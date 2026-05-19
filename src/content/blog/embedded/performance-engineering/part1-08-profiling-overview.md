@@ -1,20 +1,20 @@
 ---
 title: "1-08: 프로파일링 개요 — Sampling vs Instrumentation, PGO·LTO"
 date: 2026-05-08T08:00:00
-description: "두 큰 접근 — Sampling (perf, low overhead) vs Instrumentation (gprof, accurate but slow). PGO로 최적화."
+description: "두 가지 큰 접근을 비교합니다. Sampling은 perf처럼 가볍고 Instrumentation은 gprof처럼 정확하지만 무겁습니다. PGO로 최적화하는 방법도 다룹니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 8
 tags: [profiling, sampling, instrumentation, gprof, perf, pgo, lto]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Sampling = 가볍지만 noisy, Instrumentation = 정확하지만 무거움"** — 상황에 맞춰.
+> **Sampling은 가볍지만 noisy하고, Instrumentation은 정확하지만 무겁습니다.** 상황에 맞춰 골라야 합니다.
 
 ## Sampling Profiling
 
-**주기적 interrupt**로 *현재 PC 캡처*. 통계적 추정.
+**주기적 interrupt**로 *현재 PC를 캡처*하는 통계적 추정 방식입니다.
 
 ```text
 1000 Hz timer interrupt:
@@ -25,22 +25,22 @@ draft: true
 
 ### 장단점
 
-✓ **낮은 overhead** (1-5%)
-✓ Production에서 사용 가능
-✓ 외부 sampling tool — *코드 수정 X*
-✗ 짧은 함수 (< 1ms) 놓침
-✗ Sample rate × 시간 sample size
+- **낮은 overhead** (1-5%)입니다.
+- Production에서 사용할 수 있습니다.
+- 외부 sampling tool이므로 *코드 수정이 필요 없습니다*.
+- 짧은 함수 (< 1ms)는 놓칠 수 있습니다.
+- Sample size는 sample rate에 시간을 곱한 값입니다.
 
 ### 대표 도구
 
-- **perf** (Linux) — 1 kHz 기본
-- **gperftools** (Google) — user-space
+- **perf** (Linux) — 1 kHz 기본입니다.
+- **gperftools** (Google) — user-space입니다.
 - **Instruments** (macOS)
 - **Visual Studio Profiler** (Windows)
 
 ## Instrumentation Profiling
 
-각 함수 진입·exit에 *카운터 + 시간 기록*.
+각 함수 진입과 exit에 *카운터와 시간을 기록*합니다.
 
 ```c
 // 컴파일러가 자동 삽입 (-pg)
@@ -53,18 +53,18 @@ void func() {
 
 ### 장단점
 
-✓ **정확** — 모든 호출 카운트
-✓ Call graph 정확
-✓ 짧은 함수 잡힘
-✗ 큰 overhead (20-200%)
-✗ 측정값이 *현실과 다름* (probe effect)
+- **정확합니다.** 모든 호출이 카운트됩니다.
+- Call graph가 정확합니다.
+- 짧은 함수도 잡힙니다.
+- Overhead가 큽니다 (20-200%).
+- 측정값이 *현실과 다를 수* 있습니다 (probe effect).
 
 ### 대표 도구
 
-- **gprof** — `-pg` 컴파일
-- **callgrind** (Valgrind) — 시뮬레이션
-- **dtrace** — 동적 instrumentation
-- **eBPF** — kernel·user-space dynamic
+- **gprof** — `-pg`로 컴파일합니다.
+- **callgrind** (Valgrind) — 시뮬레이션 방식입니다.
+- **dtrace** — 동적 instrumentation입니다.
+- **eBPF** — kernel과 user-space 모두 동적 가능합니다.
 
 ## perf — Linux 표준
 
@@ -85,11 +85,11 @@ perf record -F 99 -g ./app
 perf script | stackcollapse-perf.pl | flamegraph.pl > out.svg
 ```
 
-CPU 사용 분포 *시각화* — hot path 즉시 인식.
+CPU 사용 분포가 *시각화*되어 hot path를 즉시 인식할 수 있습니다.
 
 ## eBPF — 모던 Dynamic Tracing
 
-Linux kernel + user-space *bytecode 주입*. 정확 + low overhead.
+Linux kernel과 user-space에 *bytecode를 주입*합니다. 정확하면서 low overhead입니다.
 
 ```bash
 # bpftrace
@@ -101,7 +101,7 @@ biolatency         # disk I/O latency
 funclatency        # function latency
 ```
 
-CSV·flamegraph·histogram 자동 출력. *Brendan Gregg* 추천 도구.
+CSV, flamegraph, histogram을 자동 출력합니다. *Brendan Gregg*가 추천하는 도구입니다.
 
 ## ftrace — Linux Kernel Tracer
 
@@ -113,23 +113,23 @@ echo 1 > /sys/kernel/debug/tracing/tracing_on
 cat /sys/kernel/debug/tracing/trace
 ```
 
-Kernel-only. *Function entry/exit* + *latency·event tracers*.
+Kernel-only입니다. *Function entry/exit*와 *latency·event tracers*를 제공합니다.
 
 ## 임베디드 — RTOS Tracer
 
 | 도구 | RTOS | 특징 |
 | --- | --- | --- |
-| **Tracealyzer** (Percepio) | FreeRTOS·Zephyr·SafeRTOS | 상용, 강력 |
-| **SystemView** (Segger) | FreeRTOS·embOS·µC/OS | 무료, J-Link 필수 |
-| **Zephyr Tracing** | Zephyr | 내장 |
-| **CTF** (Common Trace Format) | 모든 | 표준 포맷 |
+| **Tracealyzer** (Percepio) | FreeRTOS·Zephyr·SafeRTOS | 상용이며 강력합니다 |
+| **SystemView** (Segger) | FreeRTOS·embOS·µC/OS | 무료지만 J-Link가 필수입니다 |
+| **Zephyr Tracing** | Zephyr | 내장입니다 |
+| **CTF** (Common Trace Format) | 모든 RTOS | 표준 포맷입니다 |
 
 ```c
 SEGGER_SYSVIEW_OnTaskStartExec(task);
 SEGGER_SYSVIEW_OnTaskStopExec();
 ```
 
-자동 hook + GUI viewer = *Linux ftrace 같은 시각화*.
+자동 hook과 GUI viewer로 *Linux ftrace 같은 시각화*가 가능합니다.
 
 ## Profile-Guided Optimization (PGO)
 
@@ -144,7 +144,7 @@ gcc -fprofile-generate -o app app.c
 gcc -fprofile-use -O3 -o app app.c
 ```
 
-**컴파일러가 hot path 우대** — branch prediction·inline·register 할당.
+**컴파일러가 hot path를 우대**합니다. Branch prediction, inline, register 할당이 모두 최적화됩니다.
 
 ### 효과
 
@@ -153,9 +153,9 @@ Without PGO:  100 ms
 With PGO:      85-90 ms (10-15% 개선)
 ```
 
-- *Branch unlikely* 자동 hint
-- Hot function inline
-- Layout optimization (hot code clustering)
+- *Branch unlikely* 자동 hint를 줍니다.
+- Hot function이 inline됩니다.
+- Layout optimization (hot code clustering)이 적용됩니다.
 
 ## Link-Time Optimization (LTO)
 
@@ -163,7 +163,7 @@ With PGO:      85-90 ms (10-15% 개선)
 gcc -flto -O3 -o app *.c
 ```
 
-링크 시점에 *전체 프로그램 보기* — cross-file inline·DCE·constant prop.
+링크 시점에 *전체 프로그램을 볼 수 있어서* cross-file inline, DCE, constant propagation이 가능합니다.
 
 ### 효과
 
@@ -173,7 +173,7 @@ With LTO:      90-95 ms (5-10%)
 With PGO + LTO: 80-85 ms (15-20%)
 ```
 
-조합 시 *순수 algorithmic 변화 없이* 15-20% 개선.
+조합하면 *순수 algorithmic 변화 없이도* 15-20%가 개선됩니다.
 
 ## 임베디드 적용
 
@@ -182,9 +182,9 @@ arm-none-eabi-gcc -flto -O2 -ffunction-sections -fdata-sections \
   -Wl,--gc-sections -o firmware.elf
 ```
 
-- `-flto` — link-time optimization
-- `-ffunction-sections -fdata-sections` + `--gc-sections` — 미사용 코드 제거
-- 코드 크기 *10-20% 감소* + 성능 *5-10% 향상*
+- `-flto`는 link-time optimization을 켭니다.
+- `-ffunction-sections -fdata-sections` + `--gc-sections`로 미사용 코드를 제거합니다.
+- 코드 크기는 *10-20% 감소*하고 성능은 *5-10% 향상*됩니다.
 
 ## Microbenchmark vs System Benchmark
 
@@ -193,9 +193,9 @@ arm-none-eabi-gcc -flto -O2 -ffunction-sections -fdata-sections \
 | 대상 | 단일 함수 | 전체 app |
 | Overhead | 작음 | 큼 |
 | 결과 활용 | 알고리즘 비교 | 사용자 경험 |
-| 위험 | *현실 안 반영* | *어디가 느린지 X* |
+| 위험 | *현실을 반영하지 못합니다* | *어디가 느린지 알 수 없습니다* |
 
-**둘 다 필요** — System bench로 *bottleneck 식별* → Microbench로 *대안 비교*.
+**둘 다 필요합니다.** System bench로 *bottleneck을 식별*하고, Microbench로 *대안을 비교*합니다.
 
 ## Profiler Output 해석
 
@@ -209,7 +209,7 @@ Overhead  Command  Shared Object  Symbol
   15.0%   app      [kernel]       [k] schedule
 ```
 
-**Self vs Cumulative** — self는 *그 함수 자체*, cumulative는 *호출한 모든 함수 포함*.
+**Self vs Cumulative**가 중요합니다. self는 *그 함수 자체*만, cumulative는 *호출한 모든 함수를 포함*합니다.
 
 ### gprof output
 
@@ -219,7 +219,7 @@ Overhead  Command  Shared Object  Symbol
 20.00    0.5     1.5       memcpy_call_chain
 ```
 
-함수별 *시간 + call count*. Call graph 별도 섹션.
+함수별 *시간과 call count*가 표시됩니다. Call graph는 별도 섹션으로 나옵니다.
 
 ## Inclusive vs Exclusive Time
 
@@ -234,35 +234,35 @@ foo의 inclusive: 100 ms (모든 호출 포함)
 foo의 exclusive (self): 10 ms (bar·baz 제외)
 ```
 
-**Exclusive (self) time이 큰 함수 = 직접 최적화 대상**.
+**Exclusive (self) time이 큰 함수가 직접 최적화 대상**입니다.
 
 ## 자주 하는 실수
 
 > ⚠️ Sample rate 너무 낮음
 
-10 Hz로 5초 sampling → 50 sample. 결론 X. **최소 99 Hz × 30+ sec**.
+10 Hz로 5초 sampling은 50 sample뿐이라 결론을 낼 수 없습니다. **최소 99 Hz × 30초 이상**이 필요합니다.
 
 > ⚠️ Debug build profile
 
-`-O0`로 측정한 hot path와 `-O2` hot path는 *완전 다름*. **Release build로 profile**.
+`-O0`로 측정한 hot path와 `-O2` hot path는 *완전히 다릅니다*. **Release build로 profile**해야 합니다.
 
 > ⚠️ Profile 후 *예상* 함수 수정
 
-Profile 결과가 *예상과 다를 때* 진짜 학습 — *측정이 답*.
+Profile 결과가 *예상과 다를 때* 진짜 학습이 됩니다. *측정이 답*입니다.
 
 > ⚠️ Production에서 instrumentation
 
-20-200% overhead로 *production 망가짐*. *Sampling만 production*.
+20-200% overhead로 *production이 망가집니다*. *Production에서는 sampling만* 사용해야 합니다.
 
 ## 정리 — Part 1 마무리
 
-- **Sampling** (low overhead, statistical) vs **Instrumentation** (accurate, heavy).
-- **perf** = Linux 표준, **eBPF** = 모던 dynamic.
-- **SystemView·Tracealyzer** = 임베디드 RTOS trace.
-- **PGO + LTO** = 15-20% 무료 성능.
-- Release build로 profile + production은 sampling만.
+- **Sampling**은 low overhead의 statistical 방식이고, **Instrumentation**은 accurate하지만 heavy합니다.
+- **perf**는 Linux 표준이고, **eBPF**는 모던 dynamic tracing입니다.
+- **SystemView, Tracealyzer**는 임베디드 RTOS trace에 씁니다.
+- **PGO와 LTO**를 결합하면 15-20%의 무료 성능을 얻습니다.
+- Release build로 profile하고 production에서는 sampling만 사용합니다.
 
-**Part 1 (Performance Analysis Fundamentals) 종료**. Part 2부터 CPU·Microarchitecture deep dive.
+**Part 1 (Performance Analysis Fundamentals)이 끝났습니다.** Part 2부터는 CPU와 Microarchitecture를 깊이 다룹니다.
 
 ## 관련 항목
 

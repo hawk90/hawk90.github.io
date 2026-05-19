@@ -5,12 +5,12 @@ description: "False sharing 원인. Cache coherence ping-pong. Padding으로 lin
 series: "Embedded Performance Engineering"
 seriesOrder: 30
 tags: [false-sharing, cacheline, padding, coherence]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"False Sharing = 다른 변수, 같은 cache line"** — 코어 간 ping-pong으로 10-100x slowdown.
+> **"False Sharing = 다른 변수, 같은 cache line"** 입니다. 코어 간 ping-pong이 일어나 10~100배까지 느려집니다.
 
 ## 메커니즘
 
@@ -34,7 +34,7 @@ CPU 1: writes counter_b
 * 매 access마다 *line bounces between caches* (ping-pong)
 ```
 
-**아무 데이터도 실제 공유 안 됨 — 그러나 같은 line이라 coherence 동작.**
+실제로 공유되는 데이터는 하나도 없는데, 단지 같은 line에 들어 있다는 이유로 coherence가 계속 동작합니다.
 
 그림으로 보면 두 코어가 *같은 line*을 두고 핑퐁하는 모습이 분명해집니다.
 
@@ -49,7 +49,7 @@ S (Shared)    — 여러 cache valid, clean
 I (Invalid)   — 무효
 ```
 
-State 변화:
+State 변화는 다음과 같이 일어납니다.
 
 ```text
 CPU 0 write: I → M, 다른 cache invalidate broadcast
@@ -81,7 +81,7 @@ void thread2_func(void *p) {
 }
 ```
 
-실측 (Cortex-A72 4-core):
+Cortex-A72 4-core 환경에서 실측한 결과는 다음과 같습니다.
 
 ```text
 Bad (false sharing):  4.2 sec
@@ -112,7 +112,7 @@ struct alignas(std::hardware_destructive_interference_size) Counter {
 std::array<Counter, 4> counters;   // 각 element가 다른 line
 ```
 
-`hardware_destructive_interference_size` = 일반적으로 64. Apple M1 = 128.
+`hardware_destructive_interference_size`는 일반적으로 64이고, Apple M1은 128입니다.
 
 ## 흔한 false sharing 패턴
 
@@ -124,7 +124,7 @@ each cpu: counters[cpu]++
 → false sharing
 ```
 
-→ padding 또는 *per-CPU memory*:
+padding을 넣거나 per-CPU memory로 분리해야 합니다.
 
 ```c
 struct counter_per_cpu {
@@ -143,7 +143,7 @@ struct queue {
 };
 ```
 
-P·C가 다른 코어 → head·tail이 *같은 line* → ping-pong.
+producer와 consumer가 다른 코어에서 동작하면 head와 tail이 같은 line에 들어가서 ping-pong이 발생합니다.
 
 ```c
 struct queue {
@@ -165,7 +165,7 @@ struct {
 } resource;
 ```
 
-→ lock과 data 분리 line.
+lock과 data를 서로 다른 line에 분리해야 합니다.
 
 ## perf c2c — Cache-to-Cache 진단
 
@@ -179,14 +179,15 @@ sudo perf c2c report
 # - Source code location
 ```
 
-Linux kernel 4.10+. 가장 강력한 false sharing 탐지.
+Linux kernel 4.10 이상에서 사용할 수 있으며, false sharing을 탐지하는 가장 강력한 도구입니다.
 
 ## Intel VTune Memory Access
 
-VTune Memory Access analysis:
+VTune의 Memory Access analysis는 다음과 같은 정보를 제공합니다.
+
 - Per cache line latency
 - Local vs Remote DRAM access
-- *Contended cache lines* 보고
+- Contended cache lines 보고
 
 ## Embedded — Cortex-A SMP
 
@@ -198,11 +199,11 @@ DEFINE_PER_CPU(int, my_counter);   // 자동 padded
 static atomic_t counters[NUM_CORES] __attribute__((aligned(64)));
 ```
 
-Zephyr — `Z_KERNEL_STACK_DEFINE` 등 자동 정렬.
+Zephyr는 `Z_KERNEL_STACK_DEFINE` 등을 통해 자동으로 정렬을 맞춰 줍니다.
 
 ## False Sharing은 항상 나쁜가?
 
-**아니.** Workload에 따라:
+반드시 그렇지는 않습니다. Workload에 따라 다음과 같이 갈립니다.
 
 ```text
 - Read 위주 → 모든 cache S state, ping-pong 없음, OK
@@ -210,7 +211,7 @@ Zephyr — `Z_KERNEL_STACK_DEFINE` 등 자동 정렬.
 - 가끔 write → 측정해서 결정
 ```
 
-매 변수 padding하면 *cache 효율 떨어짐* (line 하나당 정보 1 byte).
+모든 변수에 padding을 넣으면 line 하나당 실제 정보가 1 byte 수준으로 줄어 cache 효율이 떨어집니다.
 
 ## True Sharing — 진짜 공유 시
 
@@ -219,8 +220,9 @@ atomic_int global_counter;
 /* 모든 thread가 update */
 ```
 
-이건 *진짜* 공유 — false 아님. 해결:
-- Per-CPU 누적 + 주기적 합산
+이런 경우는 진짜 공유이지 false sharing이 아닙니다. 해결책으로는 다음 두 가지가 있습니다.
+
+- Per-CPU에서 누적한 뒤 주기적으로 합산
 - Sharded counter
 
 ```c
@@ -233,7 +235,7 @@ int total(void) {
 }
 ```
 
-Read는 가끔, write는 자주 → per-CPU shard.
+Read는 가끔이고 write가 자주 일어나는 경우라면 per-CPU shard를 쓰는 편이 좋습니다.
 
 ## Lock-free Queue 디자인
 
@@ -245,7 +247,7 @@ struct lockfree_spsc {
 };
 ```
 
-각 *hot field*가 다른 line — false sharing 0.
+각 hot field가 서로 다른 line에 놓이도록 해서 false sharing을 0으로 만듭니다.
 
 ## 자주 하는 실수
 
@@ -256,7 +258,7 @@ alignas(64) int a;
 int b;                 // ← a 같은 line에 들어감
 ```
 
-`a` 뒤 64 byte는 *다른 변수*도 차지. 변수 *모두* alignas 또는 *명시 pad*.
+`a` 뒤 64 byte 영역은 다른 변수가 차지할 수 있습니다. 모든 변수에 alignas를 붙이거나 명시적으로 pad를 넣어야 합니다.
 
 > ⚠️ Padding 안에 다른 data
 
@@ -277,7 +279,7 @@ void func(void) {
 }
 ```
 
-GCC `-mstackrealign` 또는 *heap·static*에 두기.
+GCC의 `-mstackrealign` 옵션을 쓰거나, 해당 변수를 heap이나 static 영역에 두는 방식으로 해결합니다.
 
 > ⚠️ 작은 시스템에서 over-pad
 
@@ -286,18 +288,18 @@ GCC `-mstackrealign` 또는 *heap·static*에 두기.
 alignas(64) int x;   // ← 32 byte로 충분
 ```
 
-Embedded는 *cache line size 확인* 후 정확히 align.
+Embedded 환경에서는 cache line size를 확인한 다음 정확히 그 크기에 맞춰 align해야 합니다.
 
 ## 정리
 
-- False sharing = **다른 변수, 같은 line** → coherence ping-pong.
-- **Padding alignas(64)** (또는 line size에 맞춰).
-- **perf c2c**로 진단.
-- Producer/consumer queue·per-CPU counter는 *기본 padding*.
-- True sharing은 *별도 문제* — sharding으로 해결.
-- Cache line size = 32 (M7), 64 (대부분), 128 (Apple M1).
+- False sharing은 **다른 변수가 같은 line**에 있어서 coherence ping-pong이 발생하는 현상입니다.
+- 해결책은 line size에 맞춘 **`alignas(64)` padding**입니다.
+- 진단에는 **perf c2c**를 사용합니다.
+- Producer/consumer queue와 per-CPU counter는 기본적으로 padding을 넣어야 합니다.
+- True sharing은 별도의 문제이며, sharding으로 해결합니다.
+- Cache line size는 Cortex-M7에서 32, 대부분의 CPU에서 64, Apple M1에서 128입니다.
 
-다음 편은 **Lock Contention**.
+다음 편은 **Lock Contention**을 다룹니다.
 
 ## 관련 항목
 

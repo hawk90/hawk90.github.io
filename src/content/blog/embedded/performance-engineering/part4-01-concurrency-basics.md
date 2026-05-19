@@ -5,12 +5,12 @@ description: "Concurrency vs Parallelism (Rob Pike). Race condition. Memory mode
 series: "Embedded Performance Engineering"
 seriesOrder: 29
 tags: [concurrency, parallel, race, memory-model]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
 
-> **"Concurrency = 처리할 일들의 조직, Parallelism = 동시 실행"** — Rob Pike.
+> **"Concurrency는 처리할 일들의 조직이고, Parallelism은 동시 실행"** 이라는 Rob Pike의 정의가 출발점입니다.
 
 ## Concurrency vs Parallelism
 
@@ -30,11 +30,11 @@ Multi-core + parallelism:
   Core 2: [Task C continuous]
 ```
 
-RTOS 단일 코어 = concurrency only. SMP Linux = both.
+단일 코어 RTOS는 concurrency만 제공하고, SMP Linux는 둘 다 제공합니다.
 
 ## Race Condition — 정의
 
-**여러 thread가 *순서 보장 없이* 공유 자원 access**.
+여러 thread가 순서 보장 없이 공유 자원에 접근하는 상황을 race condition이라 합니다.
 
 ```c
 int counter = 0;
@@ -55,7 +55,7 @@ write 1
                     write 1            ← 1 (잘못! 2여야)
 ```
 
-`counter++` = *3 명령* → 중간 인터럽트 가능.
+`counter++`는 실제로는 3개의 명령으로 나뉘기 때문에, 중간에 인터럽트가 들어올 수 있습니다.
 
 ## Atomic
 
@@ -66,7 +66,7 @@ atomic_int counter = 0;
 atomic_fetch_add(&counter, 1);   // 원자적
 ```
 
-Hardware 지원 — ARM `LDREX/STREX`, x86 `LOCK XADD`.
+Hardware 지원으로는 ARM의 `LDREX/STREX`와 x86의 `LOCK XADD`가 대표적입니다.
 
 ```asm
 ; ARM atomic add
@@ -88,9 +88,9 @@ if (y == 1)
     assert(x == 1);   // ← 항상 참? OoO·cache 때문에 *아닐 수 있음*
 ```
 
-CPU·컴파일러가 *명령 재정렬* → Thread 2가 y=1 보고 x=0 본 가능.
+CPU와 컴파일러가 명령을 재정렬할 수 있기 때문에, Thread 2가 y=1을 보고도 x=0을 볼 가능성이 생깁니다.
 
-**Memory model** = 어떤 재정렬이 허용되는지 *정의*.
+**Memory model**은 어떤 재정렬이 허용되는지를 정의합니다.
 
 ## ARM Memory Model — Weak
 
@@ -102,7 +102,7 @@ ARMv7/v8: weakly ordered
   Store → Store: 재정렬 OK
 ```
 
-→ explicit barrier 없이는 *순서 보장 없음*.
+explicit barrier 없이는 어떤 순서도 보장되지 않습니다.
 
 ```c
 __DMB();   // 이전 access 모두 완료 보장
@@ -118,7 +118,7 @@ x86 (TSO — Total Store Order):
   Store → Load: *재정렬 가능* (store buffer)
 ```
 
-x86은 약한 재정렬만 — 거의 sequential. ARM·POWER는 *훨씬 자유*.
+x86은 약한 재정렬만 허용해서 거의 sequential에 가깝지만, ARM과 POWER는 훨씬 자유롭게 재정렬됩니다.
 
 ## C11/C++11 Atomic — Memory Order
 
@@ -136,7 +136,7 @@ int v = atomic_load_explicit(&y, memory_order_acquire);
 | `acq_rel` | both | 보통 |
 | `seq_cst` | 모든 thread 같은 순서 (sequential consistency) | 비쌈 |
 
-Default = `seq_cst` (안전, 느림).
+기본값은 `seq_cst`이고, 안전한 대신 가장 느립니다.
 
 ## Acquire-Release Pattern
 
@@ -151,7 +151,7 @@ if (atomic_load_explicit(&ready, memory_order_acquire) == 1) {
 }
 ```
 
-Release가 *write barrier*, acquire가 *read barrier*. 가장 흔한 lock-free 패턴.
+Release는 write barrier 역할을, acquire는 read barrier 역할을 합니다. 가장 흔한 lock-free 패턴입니다.
 
 ## Sequential Consistency vs Acquire-Release
 
@@ -168,7 +168,7 @@ r2 = x.load(seq_cst);
 /* acq_rel: r1==0 && r2==0 *가능* — 양쪽 store가 다른 thread에 *다른 순서*로 보임 */
 ```
 
-Sequential consistency = 모든 thread가 *같은 글로벌 순서* 봄.
+Sequential consistency는 모든 thread가 같은 글로벌 순서를 보게 만드는 모델입니다.
 
 ## ARM·POWER에서 SC 비용
 
@@ -187,9 +187,9 @@ __DSB();   // Data Sync Barrier — *모든* access *완료*까지 대기
 __ISB();   // Instruction Sync Barrier — pipeline flush, instruction refetch
 ```
 
-`DMB` — atomic·lock에 사용.
-`DSB` — clock enable, MPU 변경 후.
-`ISB` — self-modifying code, mode change.
+`DMB`는 atomic과 lock에 사용합니다.
+`DSB`는 clock enable이나 MPU 변경 후에 사용합니다.
+`ISB`는 self-modifying code나 mode change 시점에 사용합니다.
 
 ## Concurrent Data Structure
 
@@ -217,7 +217,7 @@ bool push(T item) {
 }
 ```
 
-Producer·consumer 분리된 경우 — lock 없이 가능. 더 빠름.
+Producer와 consumer가 분리되어 있는 경우에는 lock 없이도 안전하게 동작하므로, 더 빠릅니다.
 
 ## False Sharing — 다음 편 주제
 
@@ -228,7 +228,7 @@ struct {
 } stats;
 ```
 
-같은 cache line — 매 update가 *다른 CPU cache invalidate* → 100x slowdown.
+같은 cache line에 있으면 update가 일어날 때마다 다른 CPU의 cache를 invalidate시켜 100배까지 느려질 수 있습니다.
 
 ## ABA Problem
 
@@ -243,7 +243,7 @@ pop():
     cas(&top, old, old->next);  // ← 성공! 그러나 잘못된 next
 ```
 
-해결 — **tagged pointer** (top + version) 또는 *hazard pointer*.
+해결책으로는 **tagged pointer** (top + version) 또는 hazard pointer를 사용합니다.
 
 ## 자주 하는 실수
 
@@ -254,11 +254,11 @@ volatile int counter;
 counter++;   // ← 여전히 RMW, atomic 아님
 ```
 
-`volatile` = 컴파일러 차단만. Atomic은 *별도*.
+`volatile`은 컴파일러의 최적화를 차단할 뿐이고, atomic은 그것과 별개입니다.
 
 > ⚠️ Lock-free가 항상 빠름
 
-작은 데이터·낮은 contention — lock보다 *비슷 또는 더 느림*. CAS retry overhead.
+작은 데이터에 낮은 contention 상황에서는 lock과 비슷하거나 오히려 더 느립니다. CAS retry overhead 때문입니다.
 
 > ⚠️ Memory order 무시
 
@@ -267,7 +267,7 @@ atomic_store(&flag, 1);    // default seq_cst → 비쌈
 atomic_load(&flag);         // seq_cst → barrier
 ```
 
-→ `memory_order_release/acquire`가 충분한 경우 많음.
+실제로는 `memory_order_release/acquire`만으로 충분한 경우가 많습니다.
 
 > ⚠️ Race condition은 *희박해서 무시*
 
@@ -275,18 +275,18 @@ atomic_load(&flag);         // seq_cst → barrier
 Race가 1M 중 1회 발생 → 1 day in production → bug
 ```
 
-UI bug보다 무서움 — *재현 안 됨*.
+UI bug보다 훨씬 무섭습니다. 재현이 되지 않기 때문입니다.
 
 ## 정리
 
-- **Concurrency = 조직, Parallelism = 동시 실행**.
-- Race condition은 *atomic + memory order*로 해결.
-- ARM·POWER = **weak memory model** — explicit barrier 필요.
-- x86 = TSO (거의 strong).
-- C11 `memory_order_*` 정확히 선택.
-- Acquire-release가 *seq_cst*보다 *가볍고 충분*한 경우 많음.
+- **Concurrency는 조직이고, Parallelism은 동시 실행**입니다.
+- Race condition은 atomic과 memory order의 조합으로 해결합니다.
+- ARM과 POWER는 **weak memory model**이라 explicit barrier가 필요합니다.
+- x86은 TSO 모델이라 거의 strong에 가깝습니다.
+- C11의 `memory_order_*`는 상황에 맞게 정확히 선택해야 합니다.
+- Acquire-release가 *seq_cst*보다 가볍고 충분한 경우가 많습니다.
 
-다음 편은 **False Sharing**.
+다음 편은 **False Sharing**을 다룹니다.
 
 ## 관련 항목
 
