@@ -295,15 +295,13 @@ SD/eMMC slot도 거의 DT만으로 동작합니다.
 
 이 경우 다음 절차입니다.
 
-```text
-1. drivers/<subsystem>/<vendor>_<chip>.c 작성
-2. Kconfig·Makefile 등록
-3. Documentation/devicetree/bindings/<subsystem>/<vendor>,<chip>.yaml 작성
-4. DT 노드 작성
-5. probe·remove·suspend·resume 구현
-6. devm_* 자원 관리
-7. 검토 후 upstream 제안
-```
+1. `drivers/<subsystem>/<vendor>_<chip>.c` 작성.
+2. Kconfig·Makefile 등록.
+3. `Documentation/devicetree/bindings/<subsystem>/<vendor>,<chip>.yaml` 작성.
+4. DT 노드 작성.
+5. probe·remove·suspend·resume 구현.
+6. `devm_*` 자원 관리.
+7. 검토 후 upstream 제안.
 
 최소 골격은 다음과 같습니다.
 

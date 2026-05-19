@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Axis labels
+\node[font=\sffamily\small, rotate=90, anchor=south] at (-0.8,2) {가치};
+\node[font=\sffamily\small] at (3,-0.5) {비용};
+
+% Axis arrows
+\draw[arr] (0,0) -- (0,4.2);
+\draw[arr] (0,0) -- (6.2,0);
+
+% High/Low labels
+\node[font=\sffamily\footnotesize, text=gray] at (-0.4,3.5) {높음};
+\node[font=\sffamily\footnotesize, text=gray] at (-0.4,0.8) {낮음};
+\node[font=\sffamily\footnotesize, text=gray] at (1.5,-0.3) {낮음};
+\node[font=\sffamily\footnotesize, text=gray] at (4.5,-0.3) {높음};
+
+% Good test box (high value, moderate cost)
+\node[imp, minimum width=28mm, minimum height=14mm] at (2,3) {좋은 테스트};
+
+% Useless test box (low value, low cost)
+\node[neut, minimum width=28mm, minimum height=14mm] at (1.5,1) {쓸모없는\\[2pt]테스트};
+
+% Bad test box (low value, high cost)
+\node[con, minimum width=28mm, minimum height=14mm] at (4.5,1) {나쁜 테스트};
+
+% Annotations
+\node[font=\sffamily\footnotesize, text=impbord] at (2,1.8) {유지};
+\node[font=\sffamily\footnotesize, text=gray] at (1.5,-0.1) {삭제 고려};
+\node[font=\sffamily\footnotesize, text=conbord] at (4.5,-0.1) {반드시 삭제};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,42 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Specification base class
+\node[abs, text width=5.5cm, align=center] (spec) at (0, 0) {
+    \textbf{Specification}\\[2pt]
+    \hrulefill\\[2pt]
+    + is\_satisfied\_by(candidate) → bool\\[2pt]
+    + and(other: Specification) → Specification\\[2pt]
+    + or(other: Specification) → Specification\\[2pt]
+    + not() → Specification
+};
+
+% Concrete specifications
+\node[con, text width=2.8cm, align=center] (hazardous) at (-3.5, -3.5) {
+    \textbf{Hazardous}\\[2pt]
+    \textbf{Spec}
+};
+
+\node[con, text width=2.8cm, align=center] (destination) at (0, -3.5) {
+    \textbf{Destination}\\[2pt]
+    \textbf{Spec}
+};
+
+\node[con, text width=2.8cm, align=center] (capacity) at (3.5, -3.5) {
+    \textbf{Capacity}\\[2pt]
+    \textbf{Spec}
+};
+
+% Inheritance arrows
+\draw[realize] (hazardous.north) -- (spec.south west |- hazardous.north) -- (spec.south west);
+\draw[realize] (destination.north) -- (spec.south);
+\draw[realize] (capacity.north) -- (spec.south east |- capacity.north) -- (spec.south east);
+
+\end{tikzpicture}
+\end{document}

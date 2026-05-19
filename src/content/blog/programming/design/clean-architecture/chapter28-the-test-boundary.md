@@ -20,24 +20,7 @@ draft: true
 
 ## 테스트의 위치
 
-```
-                        ┌────────────────────────┐
-                        │  Frameworks & Drivers   │
-                        │  + Tests                │  ← 테스트가 여기
-                        │                        │
-                        │   ┌──────────────────┐ │
-                        │   │ Interface Adapters│ │
-                        │   │                  │ │
-                        │   │   ┌────────────┐ │ │
-                        │   │   │ Use Cases   │ │ │
-                        │   │   │             │ │ │
-                        │   │   │  ┌────────┐ │ │ │
-                        │   │   │  │Entities │ │ │ │
-                        │   │   │  └────────┘ │ │ │
-                        │   │   └────────────┘ │ │
-                        │   └──────────────────┘ │
-                        └────────────────────────┘
-```
+![테스트의 위치 — 가장 바깥쪽 층에서 단방향 의존](/images/blog/clean-architecture/diagrams/ch28-test-in-layers.svg)
 
 테스트는 시스템의 어떤 부분이든 호출할 수 있다 (가장 바깥). 그러나 다른 어떤 컴포넌트도 테스트에 의존하지 않는다 (단방향).
 
@@ -100,13 +83,7 @@ public void test() {
 
 Martin은 **Testing API**라는 별도 컨셉을 권한다.
 
-```
-[Application]
-   ↑
-   │ Testing API (테스트 전용 인터페이스)
-   │
-[Tests]
-```
+![Testing API — 시스템과 테스트 사이의 명시적 인터페이스](/images/blog/clean-architecture/diagrams/ch28-testing-api.svg)
 
 Application과 Tests 사이에 명시적인 인터페이스를 두고, 테스트는 그 인터페이스만 사용한다. 시스템 내부는 자유롭게 변경 가능.
 
@@ -125,28 +102,13 @@ Martin이 강조하는 두 가지 결합 종류.
 
 테스트가 시스템의 클래스 구조, 메서드 시그니처 등에 직접 결합.
 
-```
-ServiceA → AHelper → ALowLevel
-   ↑           ↑          ↑
-   │           │          │
-TestA      TestHelper  TestLowLevel
-```
+![구조적 결합 — 시스템 클래스와 테스트가 1:1 대응](/images/blog/clean-architecture/diagrams/ch28-structural-coupling.svg)
 
 시스템 안 모든 클래스마다 대응되는 테스트. 시스템 구조가 바뀌면 테스트 구조도 바뀌어야 한다.
 
 **2. 행동적 결합 (Behavioral Coupling)**
 
-테스트가 시스템의 **행동**(공개 API의 입출력)에만 결합.
-
-```
-[System] (구조는 자유)
-   ↑
-   │ public API
-   │
-[Tests]
-```
-
-시스템 구조가 바뀌어도 행동이 같으면 테스트는 그대로.
+테스트가 시스템의 **행동**(공개 API의 입출력)에만 결합. 시스템 구조가 바뀌어도 행동이 같으면 테스트는 그대로.
 
 좋은 테스트는 **행동적 결합**을 추구한다. 구조적 결합은 피한다.
 

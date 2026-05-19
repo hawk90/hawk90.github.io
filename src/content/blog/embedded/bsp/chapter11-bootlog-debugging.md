@@ -313,17 +313,15 @@ console=ttymxc0,115200 console=tty0
 
 ## 부팅 실패 진단 체크리스트
 
-```text
-[ ] 시리얼 어디까지 나왔나?  (마지막 5줄 캡처)
-[ ] baud rate가 맞나? (다른 속도 2~3개 시도)
-[ ] BootROM/SPL/ATF/U-Boot/kernel 중 어디서 멈췄나?
-[ ] earlycon이 인자에 있나?
-[ ] bootargs의 root=, console= 가 보드와 일치하나?
-[ ] dmesg -l err 에 의심 라인 있나?
-[ ] /proc/cmdline 가 부팅 인자와 일치하나?
-[ ] driver probe가 실패한 디바이스 있나?
-[ ] OOM 또는 watchdog reboot loop 인가?
-```
+- [ ] 시리얼 어디까지 나왔나? (마지막 5줄 캡처)
+- [ ] baud rate가 맞나? (다른 속도 2~3개 시도)
+- [ ] BootROM / SPL / ATF / U-Boot / kernel 중 어디서 멈췄나?
+- [ ] `earlycon`이 인자에 있나?
+- [ ] `bootargs`의 `root=`, `console=`가 보드와 일치하나?
+- [ ] `dmesg -l err`에 의심 라인 있나?
+- [ ] `/proc/cmdline`이 부팅 인자와 일치하나?
+- [ ] driver probe가 실패한 디바이스 있나?
+- [ ] OOM 또는 watchdog reboot loop인가?
 
 ## 흔한 실수
 

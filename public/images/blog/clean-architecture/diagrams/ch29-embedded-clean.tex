@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Layer 4: MCU + Hardware Driver (outermost)
+\fill[neutfill] (0,0) circle (3.8cm);
+\draw[neutbord, line width=0.6pt] (0,0) circle (3.8cm);
+
+% Layer 3: HAL / OS Abstraction
+\fill[clifill] (0,0) circle (2.9cm);
+\draw[clibord, line width=0.5pt] (0,0) circle (2.9cm);
+
+% Layer 2: Use Cases
+\fill[impfill] (0,0) circle (2.0cm);
+\draw[impbord, line width=0.5pt] (0,0) circle (2.0cm);
+
+% Layer 1: Domain (innermost)
+\fill[absfill] (0,0) circle (1.1cm);
+\draw[absbord, line width=0.5pt] (0,0) circle (1.1cm);
+
+% Labels
+\node[font=\sffamily\bfseries\footnotesize, text=absbord, align=center] at (0,0) {Domain\\[2pt](센서 처리)};
+\node[font=\sffamily\footnotesize, text=impbord] at (0,1.55) {Use Cases};
+\node[font=\sffamily\footnotesize, text=clibord] at (0,2.45) {HAL / OS Abst.};
+\node[font=\sffamily\footnotesize, text=neutbord, align=center] at (0,3.35) {Microcontroller\\[2pt]+ Hardware Driver};
+
+% Annotation
+\node[font=\sffamily\footnotesize, text=inkc, align=center, anchor=west] at (4.5,0) {같은 4겹\\[2pt]의존성 규칙 동일};
+
+\end{tikzpicture}
+\end{document}

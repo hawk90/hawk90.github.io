@@ -1,0 +1,33 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Domain Layer
+\node[prp, text width=10cm, align=left] (domain) at (0, 0) {
+    \textbf{Domain Layer}\\[4pt]
+    \hrulefill\\[4pt]
+    패턴이 도메인 의미를 가질 때만 사용:\\[4pt]
+    • Strategy → FreightPolicy (운임 정책)\\[2pt]
+    • Composite → RouteComponent (경로 구성)\\[2pt]
+    • State → DeliveryState (인도 상태)\\[2pt]
+    • Specification → RouteSpecification (경로 요구사항)
+};
+
+% Infrastructure Layer
+\node[imp, text width=10cm, align=left, below=0.8cm of domain] (infra) {
+    \textbf{Infrastructure Layer}\\[4pt]
+    \hrulefill\\[4pt]
+    기술적 패턴 사용:\\[4pt]
+    • Repository implementation (구현체)\\[2pt]
+    • Factory for persistence\\[2pt]
+    • Adapter for external services\\[2pt]
+    • Observer for system events
+};
+
+\end{tikzpicture}
+\end{document}

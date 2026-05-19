@@ -62,14 +62,7 @@ loan-app.jar                loan-app.jar
 
 양방향 인터페이스 대신 한쪽 방향만 인터페이스를 둔다.
 
-```
-[단방향]                            [양방향, 완전]
-─────────                          ───────────────
-ClientCode                          ClientCode → IService
-   ↓                                              ↑
-ServiceImpl                                   ServiceImpl
-                                              IClientCallback ← 콜백 인터페이스
-```
+![단방향 vs 양방향 경계](/images/blog/clean-architecture/diagrams/ch24-one-dimensional-boundary.svg)
 
 단방향은 GoF Strategy 패턴이다. Service 호출만 하고, 콜백은 없다. 더 단순하지만 격리도가 낮다.
 

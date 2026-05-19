@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5) {테스트 → 설계 피드백};
+
+% Test difficulty block
+\node[con, minimum width=50mm, minimum height=28mm] (diff) at (0, 3.3) {};
+\node[font=\sffamily\bfseries\small, text=conbord] at (0, 4.2) {테스트하기 어렵다면:};
+\node[font=\sffamily\tiny, text width=44mm, align=left] at (0, 3) {%
+• 객체가 너무 많은 책임을 가짐\\[1pt]%
+• 협력자가 너무 많음\\[1pt]%
+• 문맥에 의존함};
+
+% Arrow
+\draw[focus] (0, 1.8) -- (0, 1.3);
+
+% Solution block
+\node[abs, minimum width=50mm, minimum height=22mm] (sol) at (0, 0.3) {};
+\node[font=\sffamily\bfseries\small, text=absbord] at (0, 1) {해결책:};
+\node[font=\sffamily\tiny, text width=44mm, align=left] at (0, 0) {%
+• 책임 분리 (SRP)\\[1pt]%
+• 의존성 주입 (DI)\\[1pt]%
+• 인터페이스 도입};
+
+% Arrow
+\draw[focus] (0, -0.8) -- (0, -1.3);
+
+% Result block
+\node[imp, minimum width=50mm, minimum height=22mm] (result) at (0, -2.3) {};
+\node[font=\sffamily\bfseries\small, text=impbord] at (0, -1.6) {결과:};
+\node[font=\sffamily\tiny, text width=44mm, align=left] at (0, -2.6) {%
+• 테스트하기 쉬움\\[1pt]%
+• 변경하기 쉬움\\[1pt]%
+• 좋은 설계};
+
+\end{tikzpicture}
+\end{document}

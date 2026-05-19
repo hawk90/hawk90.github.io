@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5) {좋은 객체의 특성};
+
+% Small box
+\node[abs, minimum width=55mm, minimum height=22mm] (small) at (0, 3.5) {};
+\node[font=\sffamily\bfseries\small, text=absbord, anchor=north west] at (-2.5, 4.3) {작음 (Small)};
+\node[font=\sffamily\tiny, text width=48mm, align=left] at (0, 3.2) {%
+• 한 화면에 들어감\\[1pt]%
+• 이해하기 쉬움\\[1pt]%
+• 테스트하기 쉬움};
+
+% Focused box
+\node[imp, minimum width=55mm, minimum height=22mm] (focused) at (0, 1.5) {};
+\node[font=\sffamily\bfseries\small, text=impbord, anchor=north west] at (-2.5, 2.3) {명확한 역할 (Focused)};
+\node[font=\sffamily\tiny, text width=48mm, align=left] at (0, 1.2) {%
+• "이 객체가 무엇을 하는가?"에 한 문장으로 답\\[1pt]%
+• "그리고" 없이 설명 가능\\[1pt]%
+• 변경 이유가 하나};
+
+% Cohesive box
+\node[cli, minimum width=55mm, minimum height=22mm] (cohesive) at (0, -0.5) {};
+\node[font=\sffamily\bfseries\small, text=clibord, anchor=north west] at (-2.5, 0.3) {높은 응집도 (Cohesive)};
+\node[font=\sffamily\tiny, text width=48mm, align=left] at (0, -0.8) {%
+• 모든 메서드가 모든 필드를 사용\\[1pt]%
+• 관련 없는 것은 다른 객체로};
+
+\end{tikzpicture}
+\end{document}

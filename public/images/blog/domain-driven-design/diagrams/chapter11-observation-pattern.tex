@@ -1,0 +1,43 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[prp, text width=11cm, align=center] (title) at (0, 0) {
+    \textbf{Observation}
+};
+
+% Observable
+\node[con, text width=3cm, align=left] (observable) at (-3, -2) {
+    \textbf{Observable}\\[2pt]
+    (Cargo)
+};
+
+% ObservationType
+\node[con, text width=3.5cm, align=left] (obstype) at (2.5, -2) {
+    \textbf{ObservationType}\\[2pt]
+    (LocationCheck,\\[2pt]
+    TemperatureCheck)
+};
+
+% Observation
+\node[con, text width=4.5cm, align=left] (obs) at (0, -4.5) {
+    \textbf{Observation}\\[2pt]
+    \hrulefill\\[2pt]
+    observable: Observable\\[2pt]
+    type: ObservationType\\[2pt]
+    observed\_at: datetime\\[2pt]
+    value: ObservationValue
+};
+
+% Arrows
+\draw[arr] (obs.north) -- (obs.north |- -3.3, 0) -- (observable.south);
+\draw[arr] (obs.north) -- (obs.north |- -3.3, 0) -- (obstype.south);
+
+\end{tikzpicture}
+\end{document}

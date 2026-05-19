@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5.5) {테스트의 역할};
+
+% Traditional view
+\node[con, minimum width=45mm, minimum height=12mm] (trad) at (-3, 4) {};
+\node[font=\sffamily\bfseries\footnotesize, text=conbord] at (-3, 4.3) {전통적 관점};
+\node[font=\sffamily\tiny] at (-3, 3.7) {"코드를 작성한 후 테스트로 검증"};
+
+% TDD view
+\node[imp, minimum width=45mm, minimum height=12mm] (tdd) at (3, 4) {};
+\node[font=\sffamily\bfseries\footnotesize, text=impbord] at (3, 4.3) {TDD 관점};
+\node[font=\sffamily\tiny] at (3, 3.7) {"테스트가 코드의 첫 번째 사용자"};
+
+% Main diagram box
+\node[group, minimum width=65mm, minimum height=40mm] (main) at (0, 1.2) {};
+
+% Test node
+\node[hi, minimum width=30mm] (test) at (0, 2.8) {Test};
+
+% Arrow and question
+\draw[arr] (0, 2.2) -- (0, 1.5);
+\node[font=\sffamily\tiny, text=mutec, anchor=west] at (0.3, 1.85) {"어떻게 사용할까?"};
+
+% Object under test
+\node[abs, minimum width=40mm, minimum height=12mm] (obj) at (0, 0.6) {};
+\node[font=\sffamily\footnotesize] at (0, 0.9) {Object Under};
+\node[font=\sffamily\footnotesize] at (0, 0.4) {Test};
+
+% Label
+\node[font=\sffamily\tiny, text=mutec] at (0, -0.4) {"인터페이스 발견"};
+
+% Bottom questions
+\node[font=\sffamily\footnotesize, text width=60mm, align=left] at (0, -1.8) {%
+테스트 작성 시:\\[3pt]%
+• 어떤 메서드가 필요한가?\\[1pt]%
+• 어떤 파라미터가 필요한가?\\[1pt]%
+• 어떤 반환값이 적절한가?\\[3pt]%
+→ 사용자 관점에서 인터페이스 결정};
+
+\end{tikzpicture}
+\end{document}

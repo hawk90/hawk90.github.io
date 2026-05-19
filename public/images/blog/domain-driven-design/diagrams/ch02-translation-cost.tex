@@ -1,0 +1,54 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[abs, text width=10cm, align=center] at (5.5, 11) {번역 없는 세계 vs 있는 세계};
+
+% Section 1: 번역이 필요한 경우
+\node[text=conbord, font=\bfseries] at (5.5, 9.8) {번역이 필요한 경우:};
+
+\node[con, text width=10cm, align=left] (expert1) at (5.5, 9) {
+  도메인 전문가: ``화물의 배송 경로를 확인해주세요''
+};
+
+\node[text=conbord] at (5.5, 8.2) {▼ (번역)};
+
+\node[imp, text width=10cm, align=left] (dev1) at (5.5, 7.5) {
+  개발자: ``Shipment 객체의 route 필드요?''
+};
+
+\node[text=conbord] at (5.5, 6.7) {▼ (번역)};
+
+\node[con, text width=10cm, align=left] (expert2) at (5.5, 6) {
+  도메인 전문가: ``아니요, 그게 아니라...''
+};
+
+\node[prp, text width=10cm, align=center] at (5.5, 5) {
+  → 오해, 재작업, 버그
+};
+
+% Divider line
+\draw[conbord, thick] (0.5, 4.2) -- (10.5, 4.2);
+
+% Section 2: 유비쿼터스 언어 사용
+\node[text=conbord, font=\bfseries] at (5.5, 3.6) {유비쿼터스 언어 사용:};
+
+\node[con, text width=10cm, align=left] (expert3) at (5.5, 2.8) {
+  도메인 전문가: ``Cargo의 Itinerary를 확인해주세요''
+};
+
+\node[text=conbord] at (5.5, 2) {▼ (번역 없음!)};
+
+\node[imp, text width=10cm, align=left] (dev3) at (5.5, 1.3) {
+  개발자: ``cargo.itinerary 확인했습니다''
+};
+
+\node[prp, text width=10cm, align=center] at (5.5, 0.3) {
+  → 즉각적인 이해, 정확한 구현
+};
+
+\end{tikzpicture}
+\end{document}

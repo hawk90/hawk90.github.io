@@ -1,0 +1,35 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+\node[prp, text width=9cm, align=left] at (0, 0) {
+    \textbf{실험 사이클}\\[4pt]
+    \hrulefill\\[6pt]
+    불편함 발견\\[2pt]
+    \quad ↓\\[2pt]
+    도메인 전문가와 대화\\[2pt]
+    \quad ↓\\[2pt]
+    가설 수립\\[2pt]
+    "이런 개념이 있는 게 아닐까?"\\[2pt]
+    \quad ↓\\[2pt]
+    작은 실험\\[2pt]
+    (브랜치에서 프로토타입)\\[2pt]
+    \quad ↓\\[2pt]
+    검증\\[2pt]
+    • 도메인 전문가 피드백\\[2pt]
+    • 코드가 더 나아졌나?\\[2pt]
+    • Ubiquitous Language가 풍부해졌나?\\[2pt]
+    \quad ↓\\[2pt]
+    \quad ├──────────┐\\[2pt]
+    \quad ↓\hspace{2.5cm}↓\\[2pt]
+    성공: 적용\hspace{1cm}실패: 폐기\\[2pt]
+    (merge)\hspace{1.3cm}(delete branch)
+};
+
+\end{tikzpicture}
+\end{document}

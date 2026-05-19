@@ -16,20 +16,20 @@ draft: false
 
 ## 부팅 단계 — 큰 그림
 
-```text
-[0 ms]   Power on
-[~5 ms]  BootROM (mask ROM)
-[~50 ms] SPL / U-Boot SPL
-[~150 ms] ATF BL31
-[~200 ms] U-Boot proper
-[~600 ms] bootcmd 실행, kernel/dtb/initramfs 로드
-[~1.0 s] Kernel decompress
-[~1.2 s] start_kernel()
-[~1.5 s] Driver probe
-[~2.0 s] initramfs 또는 root filesystem mount
-[~2.5 s] systemd 또는 BusyBox init
-[~5.0 s] getty 시작 → login prompt
-```
+| 시각 | 단계 |
+|---|---|
+| 0 ms | Power on |
+| ~5 ms | BootROM (mask ROM) |
+| ~50 ms | SPL / U-Boot SPL |
+| ~150 ms | ATF BL31 |
+| ~200 ms | U-Boot proper |
+| ~600 ms | bootcmd 실행, kernel/dtb/initramfs 로드 |
+| ~1.0 s | Kernel decompress |
+| ~1.2 s | `start_kernel()` |
+| ~1.5 s | Driver probe |
+| ~2.0 s | initramfs 또는 root filesystem mount |
+| ~2.5 s | systemd 또는 BusyBox init |
+| ~5.0 s | getty 시작 → login prompt |
 
 타이밍은 보드와 스토리지 속도에 따라 ±50% 변동이 흔합니다. 핵심은 *순서*와 *어떤 signal이 나오느냐*입니다.
 

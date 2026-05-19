@@ -1,0 +1,28 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog, node distance=1cm]
+
+% Component labels
+\node[con] (a) at (0,2) {A};
+\node[con] (b) at (1.5,2) {B};
+\node[con] (c) at (3,2) {C};
+\node[con] (d) at (4.5,2) {D};
+\node[con] (e) at (6,2) {E};
+
+% Central stable component
+\node[abs, text width=2cm, align=center] (x) at (3,0) {X\\[2pt](5개가 의존)};
+
+% Dependencies
+\draw[arr] (a) -- (x);
+\draw[arr] (b) -- (x);
+\draw[arr] (c) -- (x);
+\draw[arr] (d) -- (x);
+\draw[arr] (e) -- (x);
+
+% Annotation
+\node[below=0.5cm of x] {변경 어려움 = 안정적};
+
+\end{tikzpicture}
+\end{document}

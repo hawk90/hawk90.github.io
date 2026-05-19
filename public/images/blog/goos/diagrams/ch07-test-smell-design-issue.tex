@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 4.5) {테스트 냄새 → 설계 문제};
+
+% Header row
+\node[font=\sffamily\bfseries\footnotesize, text=conbord] at (-3, 3.5) {테스트 냄새};
+\node[font=\sffamily\bfseries\footnotesize, text=absbord] at (3, 3.5) {가능한 설계 문제};
+
+% Divider
+\draw[draw=gridc, line width=0.5pt] (0, 3.2) -- (0, -1.5);
+
+% Smell-Problem pairs
+\node[font=\sffamily\tiny, anchor=east, text width=32mm, align=right] at (-0.3, 2.6) {셋업이 너무 복잡};
+\node[font=\sffamily\tiny, anchor=west, text width=32mm, align=left] at (0.3, 2.6) {객체가 너무 많은 의존성};
+
+\node[font=\sffamily\tiny, anchor=east, text width=32mm, align=right] at (-0.3, 1.9) {Mock이 너무 많음};
+\node[font=\sffamily\tiny, anchor=west, text width=32mm, align=left] at (0.3, 1.9) {객체가 너무 많은 협력자};
+
+\node[font=\sffamily\tiny, anchor=east, text width=32mm, align=right] at (-0.3, 1.2) {테스트가 깨지기 쉬움};
+\node[font=\sffamily\tiny, anchor=west, text width=32mm, align=left] at (0.3, 1.2) {구현 세부사항에 결합};
+
+\node[font=\sffamily\tiny, anchor=east, text width=32mm, align=right] at (-0.3, 0.5) {테스트 이름이 어색};
+\node[font=\sffamily\tiny, anchor=west, text width=32mm, align=left] at (0.3, 0.5) {객체의 책임이 불명확};
+
+\node[font=\sffamily\tiny, anchor=east, text width=32mm, align=right] at (-0.3, -0.2) {assertion이 많음};
+\node[font=\sffamily\tiny, anchor=west, text width=32mm, align=left] at (0.3, -0.2) {한 테스트에 여러 동작 검증};
+
+\node[font=\sffamily\tiny, anchor=east, text width=32mm, align=right] at (-0.3, -0.9) {테스트 코드 중복};
+\node[font=\sffamily\tiny, anchor=west, text width=32mm, align=left] at (0.3, -0.9) {추상화 부족};
+
+% Bottom insight
+\node[hi, minimum width=60mm] at (0, -2.2) {\footnotesize "테스트하기 어렵다" = "사용하기 어렵다"};
+
+\end{tikzpicture}
+\end{document}

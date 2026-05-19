@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (2.5,4.5) {테스트 결과 매트릭스};
+
+% Column headers
+\node[font=\sffamily\bfseries\small] at (2,3.5) {기능 정상};
+\node[font=\sffamily\bfseries\small] at (5,3.5) {기능 고장};
+
+% Row headers
+\node[font=\sffamily\bfseries\small, anchor=east] at (-0.2,2) {테스트 통과};
+\node[font=\sffamily\bfseries\small, anchor=east] at (-0.2,0.5) {테스트 실패};
+
+% Grid
+\draw[edge] (0.5,1.25) -- (6.5,1.25);
+\draw[edge] (3.5,3) -- (3.5,-0.25);
+
+% True Negative (top-left) - good
+\node[ok, minimum width=28mm, minimum height=16mm, align=center] at (2,2)
+    {True Negative\\[2pt](정상)};
+\node[font=\sffamily\small, text=okbord] at (2,0.9) {$\checkmark$};
+
+% False Negative (top-right) - bad
+\node[con, minimum width=28mm, minimum height=16mm, align=center] at (5,2)
+    {False Negative\\[2pt](버그 놓침)};
+\node[font=\sffamily\small, text=conbord] at (5,0.9) {$\times$};
+
+% False Positive (bottom-left) - bad
+\node[cli, minimum width=28mm, minimum height=16mm, align=center] at (2,0.5)
+    {False Positive\\[2pt](신뢰 저하)};
+\node[font=\sffamily\small, text=clibord] at (2,-0.6) {$\times$};
+
+% True Positive (bottom-right) - good
+\node[ok, minimum width=28mm, minimum height=16mm, align=center] at (5,0.5)
+    {True Positive\\[2pt](버그 발견)};
+\node[font=\sffamily\small, text=okbord] at (5,-0.6) {$\checkmark$};
+
+% Annotation
+\node[font=\sffamily\footnotesize, text=gray, align=center] at (3.5,-1.5)
+    {리팩토링 내성 = False Positive 최소화};
+
+\end{tikzpicture}
+\end{document}

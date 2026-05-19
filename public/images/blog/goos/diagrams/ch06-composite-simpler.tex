@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5) {전체가 부분의 합보다 단순해야 한다};
+
+% Complex system (left)
+\node[font=\sffamily\bfseries\small, text=conbord] at (-4, 3.8) {복잡한 시스템:};
+
+\node[group, minimum width=45mm, minimum height=30mm] (complex) at (-4, 1.8) {};
+\node[clsSm, minimum width=18mm] (a) at (-5.2, 2.8) {\tiny Component A};
+\node[clsSm, minimum width=18mm] (b) at (-2.8, 2.8) {\tiny Component B};
+\node[clsSm, minimum width=18mm] (c) at (-4, 1.5) {\tiny Component C};
+\node[clsSm, minimum width=18mm] (d) at (-4, 0.3) {\tiny Component D};
+
+% Complex arrows (messy)
+\draw[arr, <->] (a) -- (b);
+\draw[arr] (a) -- (c);
+\draw[arr] (b) -- (c);
+\draw[arr] (c) -- (d);
+
+% Good design (right)
+\node[font=\sffamily\bfseries\small, text=impbord] at (4, 3.8) {좋은 설계에서는:};
+
+\node[group, minimum width=55mm, minimum height=30mm] (good) at (4, 1.8) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=north] at (4, 3.4) {Composite (단순한 인터페이스)};
+
+\node[clsSm, minimum width=14mm] (ga) at (2.5, 1.5) {\tiny A};
+\node[clsSm, minimum width=14mm] (gb) at (4, 1.5) {\tiny B};
+\node[clsSm, minimum width=14mm] (gc) at (5.5, 1.5) {\tiny C};
+
+\node[font=\sffamily\tiny, text=mutec] at (4, 0.5) {(내부 복잡성은 숨김)};
+
+% Bottom note
+\node[font=\sffamily\footnotesize, text=mutec] at (0, -0.8) {→ 외부에서 보면 단순, 내부에서는 협력};
+
+\end{tikzpicture}
+\end{document}

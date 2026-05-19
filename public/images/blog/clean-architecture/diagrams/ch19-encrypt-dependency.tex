@@ -1,0 +1,24 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% High level - encrypt
+\node[abs, minimum width=3cm, minimum height=1cm] (encrypt) at (0, 0)
+  {\textbf{encrypt}\\[2pt]\small(높은 수준)};
+
+% Low level - translate and write
+\node[con, minimum width=2.5cm, minimum height=1cm] (translate) at (-3, -3)
+  {\textbf{translate}\\[2pt]\small(낮은 수준)};
+
+\node[con, minimum width=2.5cm, minimum height=1cm] (write) at (3, -3)
+  {\textbf{write}\\[2pt]\small(낮은 수준)};
+
+% Dependencies - upward arrows with interface labels
+\draw[arr] (translate.north) -- ++(0, 0.5) node[midway, left, font=\footnotesize] {TranslateInterface} -- (encrypt.south -| translate.north);
+
+\draw[arr] (write.north) -- ++(0, 0.5) node[midway, right, font=\footnotesize] {WriteInterface} -- (encrypt.south -| write.north);
+
+\end{tikzpicture}
+\end{document}

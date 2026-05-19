@@ -38,23 +38,7 @@ draft: true
 
 DDD는 4개 계층을 제안한다:
 
-```
-┌─────────────────────────────────────────────┐
-│          User Interface (UI)                │
-│     사용자와 상호작용 / HTTP 요청 처리         │
-├─────────────────────────────────────────────┤
-│          Application Layer                  │
-│     작업 조율 / 트랜잭션 / 얇은 계층           │
-├─────────────────────────────────────────────┤
-│          Domain Layer ★                     │
-│     비즈니스 로직 / 핵심 모델 / 규칙          │
-├─────────────────────────────────────────────┤
-│          Infrastructure Layer               │
-│     DB / 메시지 큐 / 파일 시스템 / 외부 API   │
-└─────────────────────────────────────────────┘
-
-의존 방향: 위 → 아래 (단방향)
-```
+![Layered Architecture](/images/blog/domain-driven-design/diagrams/ch04-layered-architecture.svg)
 
 ### 각 계층의 책임
 
@@ -515,24 +499,7 @@ Infrastructure Layer는:
 
 ## 의존성 방향
 
-```
-┌────────────────────────────────┐
-│           UI Layer             │
-│              │                 │
-│              ▼                 │
-│      Application Layer         │
-│              │                 │
-│              ▼                 │
-│        Domain Layer ★          │  ← 핵심! 아무것도 의존하지 않음
-│              ▲                 │
-│              │ (역전!)          │
-│     Infrastructure Layer       │
-└────────────────────────────────┘
-
-Domain → Infrastructure 의존 역전:
-• Domain은 인터페이스만 정의
-• Infrastructure가 구현
-```
+![의존성 역전](/images/blog/domain-driven-design/diagrams/ch04-dependency-inversion.svg)
 
 ### 의존성 역전 예시
 

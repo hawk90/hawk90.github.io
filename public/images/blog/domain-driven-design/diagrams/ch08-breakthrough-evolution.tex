@@ -1,0 +1,59 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[text=conbord, font=\bfseries] at (5.5, 9) {점진적 정제 vs 도약};
+
+% Progress bars
+\node[text=conbord, font=\small, anchor=west] at (0.5, 8) {Day 1:};
+\draw[fill=conbord] (2, 7.8) rectangle (4, 8.2);
+\draw[conbord] (4, 7.8) rectangle (10, 8.2);
+\node[text=conbord, font=\small] at (11, 8) {20\%};
+
+\node[text=conbord, font=\small, anchor=west] at (0.5, 7.2) {Day 10:};
+\draw[fill=conbord] (2, 7) rectangle (5, 7.4);
+\draw[conbord] (5, 7) rectangle (10, 7.4);
+\node[text=conbord, font=\small] at (11, 7.2) {30\%};
+
+\node[text=conbord, font=\small, anchor=west] at (0.5, 6.4) {Day 20:};
+\draw[fill=conbord] (2, 6.2) rectangle (6, 6.6);
+\draw[conbord] (6, 6.2) rectangle (10, 6.6);
+\node[text=conbord, font=\small] at (11, 6.4) {40\%};
+
+\node[text=conbord, font=\small, anchor=west] at (0.5, 5.6) {Day 30:};
+\draw[fill=conbord] (2, 5.4) rectangle (7, 5.8);
+\draw[conbord] (7, 5.4) rectangle (10, 5.8);
+\node[text=conbord, font=\small] at (11, 5.6) {50\%};
+
+% Ellipsis
+\node[text=conbord, font=\Large] at (5.5, 4.8) {...};
+
+% Breakthrough moment
+\node[prp, text width=10cm, align=center] at (5.5, 4) {
+  그러다 어느 순간 도약 (Breakthrough)
+};
+
+\node[text=conbord, font=\small, anchor=west] at (0.5, 3) {Day 31:};
+\draw[fill=prpbord] (2, 2.8) rectangle (10, 3.2);
+\node[text=prpbord, font=\small] at (11, 3) {100\% 💡};
+
+% Before/After comparison
+\node[con, text width=10cm, align=left, minimum height=2.5cm] (before) at (5.5, 1) {
+  \textbf{Before:}\\[2pt]
+  • 복잡하고 어색한 모델\\[2pt]
+  • 예외 케이스가 많음\\[2pt]
+  • ``뭔가 이상한데...'' 느낌
+};
+
+\node[prp, text width=10cm, align=left, minimum height=2.5cm] (after) at (5.5, -1.8) {
+  \textbf{After:}\\[2pt]
+  • 단순하고 명확한 모델\\[2pt]
+  • 예외가 자연스럽게 처리됨\\[2pt]
+  • ``이게 맞다!'' 확신
+};
+
+\end{tikzpicture}
+\end{document}

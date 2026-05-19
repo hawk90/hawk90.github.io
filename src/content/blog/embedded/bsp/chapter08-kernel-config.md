@@ -72,16 +72,16 @@ make menuconfig
 
 이 결정이 BSP의 색을 정합니다.
 
-```text
-y (built-in)    → vmlinux/Image 안에 포함. 부팅 즉시 가능
-m (module)      → .ko 파일. rootfs에서 modprobe로 로드
-n (disabled)    → 빌드 안 함
-```
+| 값 | 의미 |
+|---|---|
+| `y` (built-in) | `vmlinux`/`Image` 안에 포함. 부팅 즉시 가능 |
+| `m` (module) | `.ko` 파일. rootfs에서 `modprobe`로 로드 |
+| `n` (disabled) | 빌드 안 함 |
 
 기준은 명확합니다.
 
-```text
-[빌트인이 옳은 것]
+**빌트인이 옳은 것**
+
 - 부트 콘솔 드라이버 (8250, imx-uart, pl011)
 - rootfs를 마운트하는 스토리지 드라이버 (mmc, ufs, scsi, nvme)
 - rootfs 파일시스템 (ext4, squashfs, f2fs)
@@ -90,7 +90,8 @@ n (disabled)    → 빌드 안 함
 - IOMMU (DMA 보안 요구 시)
 - 핵심 네트워크 (root over NFS일 경우)
 
-[모듈이 옳은 것]
+**모듈이 옳은 것**
+
 - USB 호스트, USB 디바이스 (필요시 로드)
 - 사운드 (ALSA SoC 드라이버)
 - WiFi, Bluetooth (firmware도 같이)
@@ -98,11 +99,11 @@ n (disabled)    → 빌드 안 함
 - 비디오 코덱 (V4L2)
 - 카메라 sensor 드라이버
 
-[빌트인 vs 모듈 — 케이스 바이 케이스]
+**빌트인 vs 모듈 — 케이스 바이 케이스**
+
 - 이더넷 — NFS root면 빌트인, 일반 부팅이면 모듈
 - I2C 컨트롤러 — EEPROM이 부팅 직후 필요하면 빌트인
 - SPI flash — 부팅 후 환경설정 읽으면 빌트인
-```
 
 `Image`가 작아야 할 이유가 있다면 (eMMC partition 크기, NOR flash 등) 모듈로 미루는 옵션이 유리합니다. 반대로 부팅 속도가 중요한 자동차 ECU, 가전 등에서는 빌트인이 모듈 로드 비용을 절약합니다.
 

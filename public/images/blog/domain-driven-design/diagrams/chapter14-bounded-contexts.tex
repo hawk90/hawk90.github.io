@@ -1,0 +1,55 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Main system box
+\node[prp, text width=11cm, align=center] (system) at (0, 0) {
+    \textbf{화물 해운 시스템}
+};
+
+% Booking Context
+\node[con, text width=4.5cm, align=left] (booking) at (-3, -2.5) {
+    \textbf{Booking}\\[2pt]
+    \textbf{Context}\\[4pt]
+    • Cargo\\[2pt]
+    \quad (예약 정보)\\[2pt]
+    • Itinerary\\[2pt]
+    \quad (계획 경로)\\[2pt]
+    • Customer
+};
+
+% Shipping Context
+\node[con, text width=4.5cm, align=left] (shipping) at (3, -2.5) {
+    \textbf{Shipping}\\[2pt]
+    \textbf{Context}\\[4pt]
+    • Cargo\\[2pt]
+    \quad (물리 화물)\\[2pt]
+    • Location\\[2pt]
+    \quad (현재 위치)\\[2pt]
+    • HandlingEvent
+};
+
+% Billing Context
+\node[con, text width=4.5cm, align=left] (billing) at (-3, -6.5) {
+    \textbf{Billing}\\[2pt]
+    \textbf{Context}\\[4pt]
+    • Invoice\\[2pt]
+    • Charge\\[2pt]
+    • Payment
+};
+
+% Reporting Context
+\node[con, text width=4.5cm, align=left] (reporting) at (3, -6.5) {
+    \textbf{Reporting}\\[2pt]
+    \textbf{Context}\\[4pt]
+    • CargoSummary\\[2pt]
+    • VoyageStats
+};
+
+\end{tikzpicture}
+\end{document}

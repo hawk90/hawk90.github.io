@@ -116,18 +116,7 @@ actor와 use case를 묶어 컴포넌트로.
 
 컴포넌트 사이의 의존을 그린다.
 
-```
-[Frameworks & Drivers]
-       ↓ (depends on)
-[Interface Adapters]
-       ↓
-[Author UC]  [Viewer UC]  [Admin UC]
-       ↓           ↓           ↓
-       └───────────┴───────────┘
-                   ↓
-            [Shared Kernel]
-            (Entities)
-```
+![컴포넌트 의존성 그래프](/images/blog/clean-architecture/diagrams/ch33-component-dependency-graph.svg)
 
 모든 의존이 안쪽(Shared Kernel)을 향한다. 의존성 규칙 만족.
 

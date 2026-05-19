@@ -30,14 +30,7 @@ Dijkstra의 통찰 — **goto를 없애면 모든 프로그램을 세 가지 구
 2. **선택(selection)** — 조건에 따라 A 또는 B
 3. **반복(iteration)** — 조건이 성립하는 동안 A 반복
 
-```
-순차:        선택:           반복:
-
-A            if (c)          while (c)
-↓              A               A
-B            else              ↑┐
-             B                  └┘
-```
+![순차, 선택, 반복 — 세 가지 기본 제어 구조](/images/blog/clean-architecture/diagrams/ch04-control-structures.svg)
 
 이 셋만 있으면 모든 계산이 가능하다. **튜링 완전**(Turing complete). 1936년 Böhm과 Jacopini가 수학적으로 증명했다.
 
@@ -55,14 +48,7 @@ B            else              ↑┐
 
 Dijkstra의 진짜 목표는 증명이었지만, 더 큰 결과는 **분해 가능성**이었다.
 
-```
-큰 프로그램
-   ↓ 분해
-모듈 A      모듈 B      모듈 C
-   ↓           ↓           ↓
-함수 a1     함수 b1     함수 c1
-함수 a2     함수 b2     함수 c2
-```
+![프로그램 분해 — 모듈과 함수](/images/blog/clean-architecture/diagrams/ch04-decomposition.svg)
 
 각 함수는 입력과 출력만 명확하면 다른 함수와 독립적으로 다룰 수 있다. 한 함수를 고치는 게 다른 함수에 영향을 주지 않는다. 이게 모든 모던 모듈화의 토대다.
 

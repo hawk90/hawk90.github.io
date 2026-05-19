@@ -1,0 +1,36 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Main Cargo System
+\node[prp, text width=7cm, align=left] (cargo) at (0, 0) {
+    \textbf{Main Cargo System}\\[4pt]
+    Booking, Shipping, Billing
+};
+
+% No integration label
+\node[align=center, font=\Large] at (0, -2) {
+    ✕ 통합하지 않음 ✕
+};
+
+% HR System
+\node[imp, text width=7cm, align=left] (hr) at (0, -4) {
+    \textbf{HR / Employee System}\\[4pt]
+    Employee, Payroll, Leave\\[2pt]
+    (화물과 무관한 도메인)
+};
+
+% Legacy Warehouse
+\node[imp, text width=7cm, align=left] (warehouse) at (0, -6.5) {
+    \textbf{Legacy Warehouse System}\\[4pt]
+    (통합 비용 > 수동 처리 비용)\\[2pt]
+    → Excel로 데이터 교환
+};
+
+\end{tikzpicture}
+\end{document}

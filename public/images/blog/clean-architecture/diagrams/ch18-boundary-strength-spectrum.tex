@@ -1,0 +1,41 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Arrow line
+\draw[line width=1.2pt, conbord, -{Stealth[length=3mm]}] (0, 0) -- (13, 0);
+
+% Labels above
+\node[above, text=contxt, font=\small] at (0, 0.3) {약함};
+\node[above, text=contxt, font=\small] at (13, 0.3) {강함};
+
+% Four boundary types
+\node[con, minimum width=2.5cm, minimum height=1.8cm, align=center] (func) at (1.5, -2)
+  {\textbf{함수 호출}\\[4pt]
+   \small 같은 바이너리\\[2pt]
+   \small 같은 프로세스};
+
+\node[imp, minimum width=2.5cm, minimum height=1.8cm, align=center] (comp) at (5, -2)
+  {\textbf{컴포넌트}\\[2pt]
+   \small\textbf{(동적링킹)}\\[4pt]
+   \small 같은 프로세스};
+
+\node[imp, minimum width=2.5cm, minimum height=1.8cm, align=center] (proc) at (8.5, -2)
+  {\textbf{로컬 프로세스}\\[4pt]
+   \small 다른 바이너리\\[2pt]
+   \small 같은 머신};
+
+\node[abs, minimum width=2.5cm, minimum height=1.8cm, align=center] (serv) at (11.5, -2)
+  {\textbf{서비스}\\[4pt]
+   \small 다른 머신};
+
+% Connect to spectrum line
+\draw[line width=0.8pt, text=contxt!60] (func.north) -- (1.5, 0);
+\draw[line width=0.8pt, text=contxt!60] (comp.north) -- (5, 0);
+\draw[line width=0.8pt, text=contxt!60] (proc.north) -- (8.5, 0);
+\draw[line width=0.8pt, text=contxt!60] (serv.north) -- (11.5, 0);
+
+\end{tikzpicture}
+\end{document}

@@ -120,25 +120,7 @@ void worker(os_t* os) {
 
 22장의 동심원을 임베디드 컨텍스트로 옮기면.
 
-```
-                ┌──────────────────────┐
-                │ Microcontroller Code  │
-                │ + Hardware Driver     │
-                │                      │
-                │  ┌──────────────────┐ │
-                │  │  HAL / OS Abst.  │ │
-                │  │                  │ │
-                │  │  ┌────────────┐  │ │
-                │  │  │ Use Cases   │  │ │
-                │  │  │             │  │ │
-                │  │  │  ┌────────┐ │  │ │
-                │  │  │  │Domain   │ │  │ │
-                │  │  │  │(센서 처리)│  │ │
-                │  │  │  └────────┘ │  │ │
-                │  │  └────────────┘  │ │
-                │  └──────────────────┘ │
-                └──────────────────────┘
-```
+![임베디드 Clean Architecture — MCU/Driver, HAL, Use Cases, Domain](/images/blog/clean-architecture/diagrams/ch29-embedded-clean.svg)
 
 같은 4겹. 의존성 규칙도 동일 — 안쪽으로만.
 

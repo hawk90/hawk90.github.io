@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% ─── Before (Traditional) ───
+\node[font=\sffamily\bfseries\small, anchor=south] at (1.5,4) {역전 전};
+
+\node[abs, minimum width=32mm] (high1) at (1.5,3) {높은 수준 (정책)};
+\node[con, minimum width=32mm] (mid1)  at (1.5,1.5) {중간 수준};
+\node[imp, minimum width=32mm] (low1)  at (1.5,0) {낮은 수준 (디테일)};
+
+\draw[arr] (high1) -- (mid1);
+\draw[arr] (mid1) -- (low1);
+
+% ─── After (Inverted) ───
+\node[font=\sffamily\bfseries\small, anchor=south] at (7,4) {역전 후};
+
+\node[abs, minimum width=32mm] (high2) at (7,3) {높은 수준 (정책)};
+\node[prp, minimum width=24mm, font=\sffamily\itshape\footnotesize] (if1) at (7,2.1) {Interface};
+\node[con, minimum width=32mm] (mid2) at (7,1.2) {중간 수준};
+\node[prp, minimum width=24mm, font=\sffamily\itshape\footnotesize] (if2) at (7,0.3) {Interface};
+\node[imp, minimum width=32mm] (low2) at (7,-0.6) {낮은 수준 (디테일)};
+
+% Arrows for inverted dependencies
+\draw[arr] (high2) -- (if1);
+\draw[arr] (mid2.north) -- (if1.south);
+\draw[arr] (mid2.south) -- (if2.north);
+\draw[arr] (low2.north) -- (if2.south);
+
+% Annotation
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (9.2,2.1) {정책 측이 소유};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (9.2,-0.6) {디테일이 구현};
+
+\end{tikzpicture}
+\end{document}

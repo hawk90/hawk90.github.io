@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 3) {Walking Skeleton};
+
+% Subtitle
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (0, 2.4) {"돌아다닐 수 있을 정도의 최소한의 뼈대"};
+
+% Layer boxes
+\node[cli, minimum width=22mm] (ui) at (-4.5, 1) {UI\\[2pt]\footnotesize(stub)};
+\node[abs, minimum width=22mm] (svc) at (-1.5, 1) {Service\\[2pt]\footnotesize(stub)};
+\node[imp, minimum width=22mm] (dom) at (1.5, 1) {Domain\\[2pt]\footnotesize(stub)};
+\node[con, minimum width=22mm] (db) at (4.5, 1) {DB\\[2pt]\footnotesize(real)};
+
+% Arrows between layers
+\draw[arr] (ui) -- (svc);
+\draw[arr] (svc) -- (dom);
+\draw[arr] (dom) -- (db);
+
+% Bottom note
+\node[font=\sffamily\footnotesize, text=mutec] at (0, -0.3) {모든 계층이 연결되어 있지만, 기능은 최소한};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5.5) {Anti-Corruption Layer};
+
+% Subtitle
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (0, 4.9) {외부 시스템의 개념이 내 도메인을 "오염"시키지 않게 보호};
+
+% My Domain section
+\node[group, minimum width=80mm, minimum height=22mm] (mydomain) at (0, 3.5) {};
+\node[font=\sffamily\bfseries\small, anchor=north west] at (-3.8, 4.4) {My Domain};
+
+\node[absSm, minimum width=18mm] (auction) at (-2.2, 3.2) {\tiny Auction};
+\node[impSm, minimum width=18mm] (sniper) at (0, 3.2) {\tiny Sniper};
+\node[clsSm, draw=clibord, fill=clifill, minimum width=18mm] (bidding) at (2.2, 3.2) {\tiny Bidding};
+
+\node[font=\sffamily\tiny\itshape, text=mutec] at (0, 2.5) {(내 도메인 언어)};
+
+% ACL layer
+\draw[arr] (0, 2.2) -- (0, 1.5);
+\node[hi, minimum width=25mm] (acl) at (0, 1) {ACL};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (1.5, 1) {← 번역 계층};
+
+% External system
+\draw[arr] (0, 0.5) -- (0, -0.2);
+
+\node[panel, minimum width=80mm, minimum height=22mm] (external) at (0, -1.4) {};
+\node[font=\sffamily\bfseries\small, anchor=north west] at (-3.8, -0.5) {External System (XMPP)};
+
+\node[clsSm, draw=neutbord, fill=neutfill, minimum width=18mm] (jid) at (-2.2, -1.7) {\tiny JID};
+\node[clsSm, draw=neutbord, fill=neutfill, minimum width=18mm] (msg) at (0, -1.7) {\tiny Message};
+\node[clsSm, draw=neutbord, fill=neutfill, minimum width=18mm] (sess) at (2.2, -1.7) {\tiny Session};
+
+\node[font=\sffamily\tiny\itshape, text=mutec] at (0, -2.4) {(외부 도메인 언어)};
+
+\end{tikzpicture}
+\end{document}

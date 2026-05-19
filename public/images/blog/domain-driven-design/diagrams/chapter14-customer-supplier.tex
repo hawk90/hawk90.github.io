@@ -1,0 +1,32 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Booking Context (Upstream/Supplier)
+\node[prp, text width=7cm, align=left] (booking) at (0, 0) {
+    \textbf{Booking Context}\\[2pt]
+    \textbf{(Upstream = Supplier)}\\[4pt]
+    "운송팀이 필요한 이벤트를 발행해줄게"\\[4pt]
+    CargoBooked 이벤트 발행\\[2pt]
+    ItineraryChanged 이벤트 발행
+};
+
+% Shipping Context (Downstream/Customer)
+\node[cli, text width=8cm, align=left] (shipping) at (0, -4) {
+    \textbf{Shipping Context}\\[2pt]
+    \textbf{(Downstream = Customer)}\\[4pt]
+    "예약 정보가 필요해요, 이런 형식으로요"\\[4pt]
+    CargoBooked 수신 → Cargo 생성\\[2pt]
+    ItineraryChanged 수신 → 경로 업데이트
+};
+
+% Arrow
+\draw[arr, line width=1.5pt] (booking.south) -- (shipping.north);
+
+\end{tikzpicture}
+\end{document}

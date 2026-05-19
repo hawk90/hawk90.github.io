@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5.5) {외부 코드 테스트 전략};
+
+% Unit test section
+\node[imp, minimum width=50mm, minimum height=28mm] (unit) at (-2.8, 3.5) {};
+\node[font=\sffamily\bfseries\small, text=impbord] at (-2.8, 4.5) {단위 테스트 (빠름, 많음)};
+\node[font=\sffamily\tiny, text width=44mm, align=left] at (-2.8, 3.2) {%
+• 내 코드만 테스트\\[1pt]%
+• Wrapper 인터페이스 Mock\\[1pt]%
+• 비즈니스 로직 검증\\[1pt]%
+• 외부 코드 접근 안 함};
+
+% Integration test section
+\node[cli, minimum width=50mm, minimum height=28mm] (integ) at (2.8, 3.5) {};
+\node[font=\sffamily\bfseries\small, text=clibord] at (2.8, 4.5) {통합 테스트 (느림, 적음)};
+\node[font=\sffamily\tiny, text width=44mm, align=left] at (2.8, 3.2) {%
+• Wrapper + 실제 외부 코드\\[1pt]%
+• 연결, 에러 처리 검증\\[1pt]%
+• 메시지 형식 검증\\[1pt]%
+• 실제 서버 또는 가짜 서버};
+
+% Architecture diagram
+\node[abs, minimum width=35mm] (domain) at (0, 1) {도메인 로직};
+\draw[arr] (0, 0.4) -- (0, -0.1);
+\node[prp, minimum width=35mm] (wrap) at (0, -0.6) {Wrapper};
+\node[font=\sffamily\tiny, anchor=west, text=impbord] at (2, -0.6) {← 단위: Mock};
+\draw[arr] (0, -1.1) -- (0, -1.6);
+\node[neut, minimum width=35mm] (ext) at (0, -2.1) {외부 코드};
+\node[font=\sffamily\tiny, anchor=west, text=clibord] at (2, -2.1) {← 통합: 실제};
+
+\end{tikzpicture}
+\end{document}

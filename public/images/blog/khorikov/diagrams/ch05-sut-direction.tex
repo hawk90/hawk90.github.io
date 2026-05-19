@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4.5) {Mock vs Stub 방향성};
+
+% SUT
+\node[hi, minimum width=50mm, minimum height=14mm] (sut) at (0,2.5) {SUT};
+
+% Dependencies
+\node[abs, minimum width=22mm] (stub1) at (-3.5,0) {Stub};
+\node[con, minimum width=22mm] (mock) at (0,0) {Mock};
+\node[abs, minimum width=22mm] (stub2) at (3.5,0) {Stub};
+
+% Arrows from SUT
+\draw[arr] (sut.south) -- ++(0,-0.4) -| (stub1.north);
+\draw[arr] (sut.south) -- (mock.north);
+\draw[arr] (sut.south) -- ++(0,-0.4) -| (stub2.north);
+
+% Sub-labels (purpose)
+\node[font=\sffamily\footnotesize, align=center] at (-3.5,-0.9) {입력 제공};
+\node[font=\sffamily\footnotesize, align=center, text=conbord] at (0,-0.9) {출력 검증};
+\node[font=\sffamily\footnotesize, align=center] at (3.5,-0.9) {입력 제공};
+
+% Direction labels
+\node[font=\sffamily\scriptsize, text=absbord] at (-3.5,-1.4) {(incoming)};
+\node[font=\sffamily\scriptsize, text=conbord] at (0,-1.4) {(outgoing)};
+\node[font=\sffamily\scriptsize, text=absbord] at (3.5,-1.4) {(incoming)};
+
+\end{tikzpicture}
+\end{document}

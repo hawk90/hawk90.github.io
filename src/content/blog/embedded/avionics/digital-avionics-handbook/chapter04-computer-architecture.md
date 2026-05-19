@@ -89,432 +89,385 @@ draft: true
 
 ## BAE RAD750 — 우주 표준
 
-```text
-BAE Systems RAD750:
-  PowerPC 750 기반 (Apple G3)
-  
-Specs:
-  Process — 250 nm or 150 nm CMOS SOI
-  Clock — 110~200 MHz
-  Performance — 240 MIPS
-  Memory — onboard cache + external SDRAM
-  Rad-hard:
-    SEU LET threshold > 75 MeV-cm²/mg
-    TID > 1 Mrad(Si)
-    SEL — immune
-  Power — 5 W
-  
-Cost:
-  ~$200K per chip
-  
-사용처:
-  Mars Curiosity (2012)
-  Mars Perseverance (2020)
-  Mars Reconnaissance Orbiter
-  James Webb Space Telescope (JWST)
-  Juno (Jupiter)
-  Orion (NASA crew vehicle)
-  
-한계:
-  - 매우 비싸다
-  - 성능 1990년대 수준
-```
+**BAE Systems RAD750:** PowerPC 750 기반 (Apple G3).
+
+**Specs:**
+- Process — 250 nm or 150 nm CMOS SOI
+- Clock — 110~200 MHz
+- Performance — 240 MIPS
+- Memory — onboard cache + external SDRAM
+- Rad-hard:
+  - SEU LET threshold > 75 MeV-cm²/mg
+  - TID > 1 Mrad(Si)
+  - SEL — immune
+- Power — 5 W
+
+**Cost:** ~$200K per chip.
+
+**사용처:**
+- Mars Curiosity (2012)
+- Mars Perseverance (2020)
+- Mars Reconnaissance Orbiter
+- James Webb Space Telescope (JWST)
+- Juno (Jupiter)
+- Orion (NASA crew vehicle)
+
+**한계:**
+- 매우 비싸다
+- 성능 1990년대 수준
 
 NASA·ESA deep-space의 *de facto*.
 
 ## BAE RAD5500 — 차세대
 
-```text
-BAE Systems RAD5500:
-  PowerPC e5500 기반
-  
-Specs:
-  Quad-core 64-bit
-  Clock — 466 MHz
-  Performance — 5500 DMIPS
-  4 GB DDR2/3 ECC
-  Rad-hard
-  Power — 25 W
-  
-사용처:
-  Future Mars missions
-  Lunar Gateway
-```
+**BAE Systems RAD5500:** PowerPC e5500 기반.
+
+**Specs:**
+- Quad-core 64-bit
+- Clock — 466 MHz
+- Performance — 5500 DMIPS
+- 4 GB DDR2/3 ECC
+- Rad-hard
+- Power — 25 W
+
+**사용처:**
+- Future Mars missions
+- Lunar Gateway
 
 RAD750 → RAD5500 — *10x 성능*. 여전히 commercial 대비 뒤짐.
 
 ## Cobham GR716 — LEON SPARC
 
-```text
-Cobham Gaisler GR716·GR740·GR716B:
-  LEON SPARC V8 architecture
-  ESA 후원 — 유럽 우주 표준
-  
-GR716 (single-core, 150 MHz):
-  Rad-tolerant
-  LEON3 SPARC
-  
-GR740 (quad-core, 250 MHz):
-  Rad-hard
-  Performance — 1700 DMIPS
-  ECC, lockstep, watchdog
-  AMBA AHB bus
-  
-사용처:
-  ESA missions
-  Galileo
-  Lisa Pathfinder
-  ExoMars
-  
-KARI 사용 검토:
-  KSLV·KOMPSAT 자체 alternatively
-```
+**Cobham Gaisler GR716·GR740·GR716B:**
+- LEON SPARC V8 architecture
+- ESA 후원 — 유럽 우주 표준
+
+**GR716 (single-core, 150 MHz):**
+- Rad-tolerant
+- LEON3 SPARC
+
+**GR740 (quad-core, 250 MHz):**
+- Rad-hard
+- Performance — 1700 DMIPS
+- ECC, lockstep, watchdog
+- AMBA AHB bus
+
+**사용처:**
+- ESA missions
+- Galileo
+- Lisa Pathfinder
+- ExoMars
+
+**KARI 사용 검토:** KSLV·KOMPSAT 자체 alternatively.
 
 ESA — LEON SPARC *공식 architecture*. Commercial한 RAD-hard.
 
 ## ARM Cortex-R52 — Safety
 
-```text
-ARM Cortex-R52:
-  Safety-critical real-time CPU
-  Lockstep variant
-  
-Specs:
-  ARMv8-R (32-bit)
-  Lockstep dual-core (DCLS)
-  Cache·TCM
-  MPU (no MMU)
-  ASIL-D / DAL-A certifiable
-  
-사용처:
-  Aerospace (Airbus 일부)
-  Automotive ECU (자동차 ECU)
-  Industrial safety
-  Avionics actuator·sensor controller
-  
-Vendor:
-  STMicro STM32MP
-  TI Hercules safety MCU
-  NXP S32R safety SoC
-```
+**ARM Cortex-R52:**
+- Safety-critical real-time CPU
+- Lockstep variant
+
+**Specs:**
+- ARMv8-R (32-bit)
+- Lockstep dual-core (DCLS)
+- Cache·TCM
+- MPU (no MMU)
+- ASIL-D / DAL-A certifiable
+
+**사용처:**
+- Aerospace (Airbus 일부)
+- Automotive ECU (자동차 ECU)
+- Industrial safety
+- Avionics actuator·sensor controller
+
+**Vendor:**
+- STMicro STM32MP
+- TI Hercules safety MCU
+- NXP S32R safety SoC
 
 Cortex-R52 = *safety-critical actuator·sensor*. Avionics 보조 컴퓨터.
 
 ## Xilinx·AMD Zynq — Hybrid SoC
 
-```text
-Xilinx Zynq UltraScale+ MPSoC:
-  ARM Cortex-A53 (4 cores) + FPGA fabric
-  + ARM Cortex-R5 (lockstep)
-  + GPU·DSP
-  
-Aerospace variants:
-  KU025 / KU040 / KU060 Space Grade
-  Rad-tolerant (5~10 krad)
-  Lockstep R5 for safety-critical
-  
-사용처:
-  - Software-defined radio (SDR)
-  - Sensor processing
-  - Communication
-  - Image processing (camera·SAR)
-  - DSP heavy (FFT·MIMO·beamforming)
-  
-LV usage:
-  KSLV-II — telemetry encoder
-  Falcon 9 — partial
-  
-인증:
-  DO-254 (HW) + DO-178C (SW)
-  FPGA design — DO-254 인증 요구
-```
+**Xilinx Zynq UltraScale+ MPSoC:**
+- ARM Cortex-A53 (4 cores) + FPGA fabric
+- ARM Cortex-R5 (lockstep)
+- GPU·DSP
+
+**Aerospace variants:**
+- KU025 / KU040 / KU060 Space Grade
+- Rad-tolerant (5~10 krad)
+- Lockstep R5 for safety-critical
+
+**사용처:**
+- Software-defined radio (SDR)
+- Sensor processing
+- Communication
+- Image processing (camera·SAR)
+- DSP heavy (FFT·MIMO·beamforming)
+
+**LV usage:**
+- KSLV-II — telemetry encoder
+- Falcon 9 — partial
+
+**인증:**
+- DO-254 (HW) + DO-178C (SW)
+- FPGA design — DO-254 인증 요구
 
 Zynq — *SDR·DSP·FPGA 통합*. Avionics에 modern 도입.
 
 ## Cortex-M·R 일반 사용
 
-```text
-Cortex-M (microcontroller):
-  M4·M7·M33·M55 — actuator·sensor controller
-  ASIL-B·D capable (R5 lockstep)
-  
-ST·NXP·Microchip 등 공급
+**Cortex-M (microcontroller):**
+- M4·M7·M33·M55 — actuator·sensor controller
+- ASIL-B·D capable (R5 lockstep)
 
-사용:
-  - Servo controller
-  - Engine monitor
-  - I/O controller
-  - Power management
-  - 작은 LRU controller
+ST·NXP·Microchip 등 공급.
 
-Avionics-friendly variants:
-  ST STM32H7 — 480 MHz, lockstep
-  Microchip ATSAMV71 — automotive·aerospace
-  
-LV·위성 — Cortex-M0/M3 (low power, simple task)
-```
+**사용:**
+- Servo controller
+- Engine monitor
+- I/O controller
+- Power management
+- 작은 LRU controller
+
+**Avionics-friendly variants:**
+- ST STM32H7 — 480 MHz, lockstep
+- Microchip ATSAMV71 — automotive·aerospace
+
+LV·위성 — Cortex-M0/M3 (low power, simple task).
 
 대량 사용 — *actuator·sensor*. Main FCC는 더 강력 chip.
 
 ## Multi-core 인증 도전
 
-```text
-Multi-core 위험:
-  Cache contention
-  Memory bus arbitration
-  Interrupt routing
-  Cross-core noise
-  
-WCET 분석 어려움:
-  Single-core — 비교적 predictable
-  Multi-core — *worst-case가 매우 큼*
-  
-인증 가이드:
-  CAST-32A (FAA)
-  AMC 20-193 (EASA·FAA, 2021)
-  
-Mitigation:
-  - Single-active core (cert simplification)
-  - Lockstep (DCLS·TCLS)
-  - Static partitioning
-  - Cache locking
-  - Memory bandwidth allocation
-  - Interrupt routing isolation
-  
-실제 추세:
-  F-35 — multi-core 도입
-  B787 — single → multi-core upgrade 검토
-  민간 LV — multi-core 자유
-```
+**Multi-core 위험:**
+- Cache contention
+- Memory bus arbitration
+- Interrupt routing
+- Cross-core noise
+
+**WCET 분석 어려움:**
+- Single-core — 비교적 predictable
+- Multi-core — *worst-case가 매우 큼*
+
+**인증 가이드:**
+- CAST-32A (FAA)
+- AMC 20-193 (EASA·FAA, 2021)
+
+**Mitigation:**
+- Single-active core (cert simplification)
+- Lockstep (DCLS·TCLS)
+- Static partitioning
+- Cache locking
+- Memory bandwidth allocation
+- Interrupt routing isolation
+
+**실제 추세:**
+- F-35 — multi-core 도입
+- B787 — single → multi-core upgrade 검토
+- 민간 LV — multi-core 자유
 
 Multi-core IMA — *적극 인증 활동* 영역.
 
 ## Lockstep — Hardware Redundancy
 
-```text
-DCLS (Dual-Core Lock-Step):
-  Same instruction → 2 core simultaneously
-  Output compare → mismatch detect
-  Fault → halt 또는 recover
-  
-Cortex-R5 / R52 / R82 — DCLS 내장
-TI Hercules — TCLS (Triple)
-Infineon AURIX — TCLS·DMR
+**DCLS (Dual-Core Lock-Step):**
+- Same instruction → 2 core simultaneously
+- Output compare → mismatch detect
+- Fault → halt 또는 recover
 
-장점:
-  Random fault detect (SEU·logic upset)
-  Hardware-level safety
-  
-단점:
-  Performance 2x cost (2 core)
-  Power 2x
+Cortex-R5 / R52 / R82 — DCLS 내장. TI Hercules — TCLS (Triple). Infineon AURIX — TCLS·DMR.
 
-LV 사용:
-  비교적 적음 (mission time 짧음)
-  자동차 ASIL-D 더 많음
-  
-항공·우주 사용:
-  Cortex-R52 — actuator·sensor controller
-  RAD750 lockstep variant
-```
+**장점:**
+- Random fault detect (SEU·logic upset)
+- Hardware-level safety
+
+**단점:**
+- Performance 2x cost (2 core)
+- Power 2x
+
+**LV 사용:**
+- 비교적 적음 (mission time 짧음)
+- 자동차 ASIL-D 더 많음
+
+**항공·우주 사용:**
+- Cortex-R52 — actuator·sensor controller
+- RAD750 lockstep variant
 
 Lockstep — 자동차·산업 *주력*. Avionics actuator 진입.
 
 ## TMR — Triple Modular Redundancy
 
-```text
-TMR (Triple Modular Redundancy):
-  3 identical processor
-  Vote majority (2-of-3)
-  Mismatch → faulty processor isolate
-  
-구성:
-  ┌──────┐   ┌──────┐   ┌──────┐
-  │ CPU1 │   │ CPU2 │   │ CPU3 │
-  └───┬──┘   └───┬──┘   └───┬──┘
-      ↓          ↓          ↓
-   ┌──────────────────────────┐
-   │       Voter (HW·SW)       │
-   └──────────────────────────┘
-              ↓
-          Output
+**TMR (Triple Modular Redundancy):**
+- 3 identical processor
+- Vote majority (2-of-3)
+- Mismatch → faulty processor isolate
 
-사용처:
-  Space Shuttle — 4 main + 1 backup
-  Boeing 777·787 — triple redundant flight control
-  Ariane 5·6 — triple flight computer
-  KSLV-II — dual (cost trade-off)
-  
-구현:
-  Hardware voter (FPGA·ASIC)
-  Software voter (consensus)
-  Hybrid
+구성:
+
+```text
+┌──────┐   ┌──────┐   ┌──────┐
+│ CPU1 │   │ CPU2 │   │ CPU3 │
+└───┬──┘   └───┬──┘   └───┬──┘
+    ↓          ↓          ↓
+ ┌──────────────────────────┐
+ │       Voter (HW·SW)       │
+ └──────────────────────────┘
+            ↓
+        Output
 ```
+
+**사용처:**
+- Space Shuttle — 4 main + 1 backup
+- Boeing 777·787 — triple redundant flight control
+- Ariane 5·6 — triple flight computer
+- KSLV-II — dual (cost trade-off)
+
+**구현:**
+- Hardware voter (FPGA·ASIC)
+- Software voter (consensus)
+- Hybrid
 
 TMR — *고가 fault tolerance*. Critical mission.
 
 ## FCC Architecture 사례
 
-```text
-Boeing 787 PFC (Primary Flight Computer):
-  Triple architecture (3 lanes)
-  Each lane:
-    - General-purpose computer (PowerPC)
-    - Independent vendor
-    - Different language (Ada·C·...)
-  Diverse design — common-mode fault 회피
-  AFDX network
-  
-F-35 ICP:
-  Multi-core (modern PowerPC)
-  Single-failure-tolerant
-  Backup architecture
-  
-KSLV-II FCC:
-  Dual-redundant ARM Cortex
-  자체 + 일부 commercial parts
-  Cross-comparison
-  
-SpaceX Falcon 9:
-  Dual flight computer (x86 LEM)
-  Linux + custom RTOS
-  Software-level redundancy
-```
+**Boeing 787 PFC (Primary Flight Computer):**
+- Triple architecture (3 lanes)
+- Each lane:
+  - General-purpose computer (PowerPC)
+  - Independent vendor
+  - Different language (Ada·C·...)
+- Diverse design — common-mode fault 회피
+- AFDX network
+
+**F-35 ICP:**
+- Multi-core (modern PowerPC)
+- Single-failure-tolerant
+- Backup architecture
+
+**KSLV-II FCC:**
+- Dual-redundant ARM Cortex
+- 자체 + 일부 commercial parts
+- Cross-comparison
+
+**SpaceX Falcon 9:**
+- Dual flight computer (x86 LEM)
+- Linux + custom RTOS
+- Software-level redundancy
 
 각 사례 — *redundancy + diversity*.
 
 ## FPGA·DSP in Avionics
 
-```text
-FPGA roles:
-  - Sensor data acquisition (high-speed)
-  - DSP (FFT·filter·correlation)
-  - Bus interface (1553·SpaceWire·AFDX)
-  - Control loops (low-latency)
-  - Image processing
-  - Crypto·security
-  - Camera·radar processing
-  
-Aerospace FPGA:
-  Xilinx — UltraScale+ KU025/KU060 Space Grade
-  Microchip (Microsemi) — RTAX·RTG4·PolarFire SoC
-  
-인증:
-  DO-254 (HW airworthiness)
-  Complex hardware design assurance
-  
-DSP:
-  TI C6000·C7000 series
-  ADI Sharc·TigerSHARC
-  FPGA-embedded DSP
-  
-LV usage:
-  KSLV-II — DSP for IMU·GPS fusion
-  Falcon 9 — Zynq for SDR·telemetry
-  Mars Ingenuity — Snapdragon (commercial Linux)
-```
+**FPGA roles:**
+- Sensor data acquisition (high-speed)
+- DSP (FFT·filter·correlation)
+- Bus interface (1553·SpaceWire·AFDX)
+- Control loops (low-latency)
+- Image processing
+- Crypto·security
+- Camera·radar processing
+
+**Aerospace FPGA:**
+- Xilinx — UltraScale+ KU025/KU060 Space Grade
+- Microchip (Microsemi) — RTAX·RTG4·PolarFire SoC
+
+**인증:**
+- DO-254 (HW airworthiness)
+- Complex hardware design assurance
+
+**DSP:**
+- TI C6000·C7000 series
+- ADI Sharc·TigerSHARC
+- FPGA-embedded DSP
+
+**LV usage:**
+- KSLV-II — DSP for IMU·GPS fusion
+- Falcon 9 — Zynq for SDR·telemetry
+- Mars Ingenuity — Snapdragon (commercial Linux)
 
 FPGA·DSP — *avionics 진화*. 학습 가치 큼.
 
 ## Memory Architecture
 
-```text
-Memory hierarchy (typical avionics):
+**Memory hierarchy (typical avionics):**
 
-L1 cache (CPU built-in)
-  - SEU mitigation: ECC parity
-  
-L2 cache (CPU built-in)
-  - ECC
-  
-SDRAM (external):
-  - ECC SODIMM (Single error correct, Double detect)
-  - Scrubbing (background read·rewrite)
-  - DDR ECC standard
-  
-Flash (boot·data):
-  - SEU rare but matters
-  - Watchdog·CRC
-  
-NVRAM·MRAM·FRAM:
-  - Non-volatile, rad-tolerant
-  - Critical state
+**L1 cache (CPU built-in):**
+- SEU mitigation: ECC parity
 
-Memory protection:
-  - MMU (with OS support)
-  - MPU (no OS or hard real-time)
-  - ARINC-653 partition memory
-```
+**L2 cache (CPU built-in):**
+- ECC
+
+**SDRAM (external):**
+- ECC SODIMM (Single error correct, Double detect)
+- Scrubbing (background read·rewrite)
+- DDR ECC standard
+
+**Flash (boot·data):**
+- SEU rare but matters
+- Watchdog·CRC
+
+**NVRAM·MRAM·FRAM:**
+- Non-volatile, rad-tolerant
+- Critical state
+
+**Memory protection:**
+- MMU (with OS support)
+- MPU (no OS or hard real-time)
+- ARINC-653 partition memory
 
 Memory — *ECC + scrubbing* 표준. SEU mitigation.
 
 ## 한국 Aerospace Processor
 
-```text
-KARI KSLV-II Flight Computer:
-  ARM Cortex-based (자세한 spec 비공개)
-  자체 BSP + RTOS
-  단일 또는 dual redundant
-  
-KAI KF-21:
-  Mission computer — multi-core
-  국산 + 일부 commercial
-  
-한화 미사일·LV:
-  Cortex-R·M
-  Commercial parts (Microchip·ST)
-  자체 board·firmware
-  
-KARI KOMPSAT·KPLO:
-  ESA·NASA 협력 — LEON SPARC 일부
-  자체 + commercial parts (rad-tol)
-
-국산 rad-hard 개발:
-  ETRI·KAIST 연구
-  ASIC·FPGA 개발 추진
-```
+- **KARI KSLV-II Flight Computer:** ARM Cortex-based (자세한 spec 비공개). 자체 BSP + RTOS. 단일 또는 dual redundant.
+- **KAI KF-21:** Mission computer — multi-core. 국산 + 일부 commercial.
+- **한화 미사일·LV:** Cortex-R·M. Commercial parts (Microchip·ST). 자체 board·firmware.
+- **KARI KOMPSAT·KPLO:** ESA·NASA 협력 — LEON SPARC 일부. 자체 + commercial parts (rad-tol).
+- **국산 rad-hard 개발:** ETRI·KAIST 연구. ASIC·FPGA 개발 추진.
 
 한국 — *국산 + commercial 혼합*. Rad-hard 개발 진행.
 
 ## Processor Selection Criteria
 
-```text
-선택 기준:
+**선택 기준:**
 
-Performance:
-  MIPS·MFLOPS
-  Memory bandwidth
-  I/O throughput
+**Performance:**
+- MIPS·MFLOPS
+- Memory bandwidth
+- I/O throughput
 
-Reliability:
-  MTBF
-  Failure mode
-  Fault tolerance (lockstep·TMR)
+**Reliability:**
+- MTBF
+- Failure mode
+- Fault tolerance (lockstep·TMR)
 
-Radiation:
-  Mission orbit·duration
-  TID·SEU tolerance
+**Radiation:**
+- Mission orbit·duration
+- TID·SEU tolerance
 
-Power:
-  Operating power·peak·idle
-  Thermal envelope
+**Power:**
+- Operating power·peak·idle
+- Thermal envelope
 
-Certification:
-  DO-178C / DO-254 evidence
-  Vendor support (manual·errata)
+**Certification:**
+- DO-178C / DO-254 evidence
+- Vendor support (manual·errata)
 
-Supply:
-  Long-term availability (20+ years)
-  Obsolescence plan
+**Supply:**
+- Long-term availability (20+ years)
+- Obsolescence plan
 
-Cost:
-  Per unit
-  Total program (qual·integration)
+**Cost:**
+- Per unit
+- Total program (qual·integration)
 
-Toolchain:
-  Compiler·debugger·tool qualification
-  RTOS support
-```
+**Toolchain:**
+- Compiler·debugger·tool qualification
+- RTOS support
 
 각 mission — *적합 processor 선택*.
 
@@ -522,41 +475,25 @@ Toolchain:
 
 > ⚠️ Commercial part 직접 사용
 
-```text
-LEO 위성에 commercial ARM
-→ SEU 누적
-→ Mission 단축
-```
+LEO 위성에 commercial ARM을 그대로 쓰면 SEU 누적으로 mission이 단축된다.
 
 → Rad-tol 또는 rad-hard.
 
 > ⚠️ Multi-core 성능만 보고 도입
 
-```text
-"Quad-core → 4x 성능"
-→ WCET 폭증
-→ 인증 어려움
-```
+"Quad-core → 4x 성능"이라는 단순 가정은 WCET 폭증과 인증 부담을 가져온다.
 
 → CAST-32A·AMC 20-193 분석.
 
 > ⚠️ Lockstep 잘못 사용
 
-```text
-"Lockstep CPU → 자동 안전"
-→ Voter·comparator도 fail 가능
-→ Power·clock 공통 fault
-```
+"Lockstep CPU → 자동 안전"은 틀린다. Voter·comparator도 fail 가능하고, power·clock의 공통 fault도 있다.
 
 → Full redundancy + diversity.
 
 > ⚠️ 20년 supply 무시
 
-```text
-"이번 program만 위한 chip"
-→ 5년 뒤 EOL
-→ Migration 비용 폭발
-```
+"이번 program만 위한 chip"으로 고르면 5년 뒤 EOL로 migration 비용이 폭발한다.
 
 → Long-term supply guarantee.
 

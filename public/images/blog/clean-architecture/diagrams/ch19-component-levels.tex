@@ -1,0 +1,24 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Low level component
+\node[con, minimum width=5cm, minimum height=1.2cm] (low) at (0, 0)
+  {\textbf{낮은 수준 컴포넌트}\\[2pt]\small I/O, DB, UI};
+
+% Mid level component
+\node[imp, minimum width=5cm, minimum height=1.2cm] (mid) at (0, 2.5)
+  {\textbf{중간 수준 컴포넌트}\\[2pt]\small use case orchestration};
+
+% High level component
+\node[abs, minimum width=5cm, minimum height=1.2cm] (high) at (0, 5)
+  {\textbf{높은 수준 컴포넌트}\\[2pt]\small 비즈니스 규칙};
+
+% Dependencies - upward arrows
+\draw[arr] (low.north) -- (mid.south);
+\draw[arr] (mid.north) -- (high.south);
+
+\end{tikzpicture}
+\end{document}

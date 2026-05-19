@@ -137,28 +137,7 @@ public void Successful_purchase()
 
 ### 이유 2: 테스트 단위는 "동작"
 
-```
-London의 "단위 = 클래스"
-
-    ┌─────────────────────────────────────┐
-    │          한 클래스                   │
-    │   ┌─────────────────────────────┐   │
-    │   │ Method1  Method2  Method3   │   │
-    │   └─────────────────────────────┘   │
-    └─────────────────────────────────────┘
-            (인위적인 경계)
-
-
-Classical의 "단위 = 동작"
-
-    ┌─────────────────────────────────────┐
-    │      하나의 비즈니스 동작            │
-    │                                     │
-    │   Class A ─── Class B ─── Class C   │
-    │                                     │
-    └─────────────────────────────────────┘
-            (자연스러운 경계)
-```
+!["단위"의 정의 차이](/images/blog/khorikov/diagrams/ch02-unit-definition.svg)
 
 **동작의 예:**
 - "고객이 제품을 구매한다"
@@ -271,20 +250,7 @@ var mockEmailSender = new Mock<IEmailSender>();
 mockEmailSender.Verify(e => e.Send(It.IsAny<Email>()));  // SUT의 호출 검증
 ```
 
-```
-        ┌─────────────────┐
-        │       SUT       │
-        └────────┬────────┘
-                 │
-    ┌────────────┼────────────┐
-    │            │            │
-    ▼            ▼            ▼
- Stub         Mock         Stub
-  │            │             │
-  ▼            ▼             ▼
-입력 제공   호출 검증     입력 제공
-(incoming) (outgoing)   (incoming)
-```
+![Stub vs Mock 방향](/images/blog/khorikov/diagrams/ch02-stub-mock-flow.svg)
 
 ## 정리
 

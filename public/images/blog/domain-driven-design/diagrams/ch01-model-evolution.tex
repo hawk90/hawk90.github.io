@@ -1,0 +1,44 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[abs, text width=10cm, align=center] at (5.5, 10) {모델 진화 단계};
+
+% Stage 1
+\node[con, text width=9cm, align=left] (stage1) at (5.5, 8.5) {
+  \textbf{1단계: 순진한 모델 (Naive Model)}\\[2pt]
+  └─ Cargo \{ origin, destination \}\\[2pt]
+  └─ 도메인의 표면만 긁음
+};
+
+% Stage 2
+\node[con, text width=9cm, align=left] (stage2) at (5.5, 6.5) {
+  \textbf{2단계: 구조적 모델 (Structural Model)}\\[2pt]
+  └─ Cargo \{ itinerary: [Leg] \}\\[2pt]
+  └─ 핵심 개념 등장
+};
+
+% Stage 3
+\node[con, text width=9cm, align=left] (stage3) at (5.5, 4.5) {
+  \textbf{3단계: 심층 모델 (Deep Model)}\\[2pt]
+  └─ Cargo, Leg, Voyage, CarrierMovement\\[2pt]
+  └─ 도메인의 실제 구조 반영
+};
+
+% Stage 4
+\node[con, text width=9cm, align=left] (stage4) at (5.5, 2.3) {
+  \textbf{4단계+: 통찰 기반 모델 (Insight-driven Model)}\\[2pt]
+  └─ 비즈니스 규칙과 제약 표현\\[2pt]
+  └─ 계속 진화
+};
+
+% Arrows
+\draw[arr] (stage1.south) -- (stage2.north);
+\draw[arr] (stage2.south) -- (stage3.north);
+\draw[arr] (stage3.south) -- (stage4.north);
+
+\end{tikzpicture}
+\end{document}

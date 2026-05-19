@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 4.5) {프로젝트 시작의 두 가지 위험};
+
+% Technical Risk box
+\node[con, minimum width=55mm, minimum height=30mm] (tech) at (-3, 2.5) {};
+\node[font=\sffamily\bfseries\small, text=conbord] at (-3, 3.7) {1. 기술적 위험};
+\node[font=\sffamily\tiny, text width=48mm, align=left] at (-3, 2.2) {%
+• 기술 스택이 함께 동작하는가?\\[1pt]%
+• 성능 요구사항을 만족하는가?\\[1pt]%
+• 배포가 가능한가?};
+
+% Requirements Risk box
+\node[cli, minimum width=55mm, minimum height=30mm] (req) at (3, 2.5) {};
+\node[font=\sffamily\bfseries\small, text=clibord] at (3, 3.7) {2. 요구사항 위험};
+\node[font=\sffamily\tiny, text width=48mm, align=left] at (3, 2.2) {%
+• 요구사항을 제대로 이해했는가?\\[1pt]%
+• 사용자가 원하는 것을 만드는가?\\[1pt]%
+• 도메인 모델이 올바른가?};
+
+% Solution arrow
+\draw[focus] (0, 0.7) -- (0, 0);
+\node[font=\sffamily\footnotesize, text=mutec] at (0, 1) {Walking Skeleton};
+
+% Result box
+\node[hi, minimum width=50mm] at (0, -0.6) {\footnotesize 기술적 위험을 먼저 제거};
+
+\end{tikzpicture}
+\end{document}

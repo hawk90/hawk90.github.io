@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5) {Thin Wrapper 원칙};
+
+% Thin principle
+\node[abs, minimum width=60mm, minimum height=20mm] (thin) at (0, 3.5) {};
+\node[font=\sffamily\bfseries\small, text=absbord, anchor=north west] at (-2.8, 4.2) {1. 얇게 유지 (Thin)};
+\node[font=\sffamily\tiny, text width=52mm, align=left] at (0, 3.2) {%
+• 외부 API를 내 API로 번역만\\[1pt]%
+• 비즈니스 로직 없음\\[1pt]%
+• 복잡한 조건문 없음};
+
+% Domain language
+\node[imp, minimum width=60mm, minimum height=20mm] (domain) at (0, 1.5) {};
+\node[font=\sffamily\bfseries\small, text=impbord, anchor=north west] at (-2.8, 2.2) {2. 내 도메인 언어 사용};
+\node[font=\sffamily\tiny, text width=52mm, align=left] at (0, 1.2) {%
+• 외부: connection.send\_to(jid, message)\\[1pt]%
+• 내부: auction.bid(amount)\\[1pt]%
+• 도메인 개념으로 번역};
+
+% Error translation
+\node[cli, minimum width=60mm, minimum height=20mm] (error) at (0, -0.5) {};
+\node[font=\sffamily\bfseries\small, text=clibord, anchor=north west] at (-2.8, 0.2) {3. 에러 번역};
+\node[font=\sffamily\tiny, text width=52mm, align=left] at (0, -0.8) {%
+• 외부: XmppException, NetworkError\\[1pt]%
+• 내부: AuctionError, ConnectionLost\\[1pt]%
+• 내 예외 타입으로 변환};
+
+\end{tikzpicture}
+\end{document}

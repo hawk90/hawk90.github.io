@@ -1,0 +1,61 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Published Language box
+\node[prp, text width=10cm, align=center] (pl) at (0, 0) {
+    \textbf{Published Language}\\[2pt]
+    (공유 스키마/프로토콜)
+};
+
+% JSON Schema
+\node[cli, text width=9cm, align=left, font=\small] (json) at (0, -1.8) {
+    \textbf{cargo-schema.json (JSON Schema)}\\[2pt]
+    \hrulefill\\[2pt]
+    \{\\[2pt]
+    \quad "tracking\_id": "string (ABC-123456)",\\[2pt]
+    \quad "origin": "string (UN/LOCODE)",\\[2pt]
+    \quad "destination": "string (UN/LOCODE)",\\[2pt]
+    \quad "status": "enum [booked, shipped, ...]"\\[2pt]
+    \}
+};
+
+% Protocol Buffers
+\node[cli, text width=9cm, align=left, font=\small] (proto) at (0, -5) {
+    \textbf{cargo\_events.proto (Protocol Buffers)}\\[2pt]
+    \hrulefill\\[2pt]
+    message CargoBooked \{\\[2pt]
+    \quad string tracking\_id = 1;\\[2pt]
+    \quad string origin = 2;\\[2pt]
+    \quad ...\\[2pt]
+    \}
+};
+
+% Consumer contexts
+\node[con, text width=2.2cm, align=center] (booking) at (-3.5, -7.5) {
+    \textbf{Booking}\\[2pt]
+    \textbf{Context}
+};
+
+\node[con, text width=2.2cm, align=center] (shipping) at (0, -7.5) {
+    \textbf{Shipping}\\[2pt]
+    \textbf{Context}
+};
+
+\node[con, text width=2.2cm, align=center] (billing) at (3.5, -7.5) {
+    \textbf{Billing}\\[2pt]
+    \textbf{Context}
+};
+
+% Arrows
+\draw[arr] (proto.south) -- (booking.north);
+\draw[arr] (proto.south) -- (shipping.north);
+\draw[arr] (proto.south) -- (billing.north);
+
+\end{tikzpicture}
+\end{document}

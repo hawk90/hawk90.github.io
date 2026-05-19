@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 3.5) {Mock의 역할};
+
+% SUT label
+\node[font=\sffamily\footnotesize, text=mutec] at (-2.5, 2.8) {SUT (System Under Test):};
+
+% SUT box
+\node[hi, minimum width=40mm] (sut) at (0, 2) {MessageTranslator};
+\node[font=\sffamily\tiny, anchor=west, text=hibord] at (2.3, 2) {테스트 대상};
+
+% Arrow down
+\draw[arr] (0, 1.3) -- (0, 0.5) node[midway, right, font=\sffamily\tiny, text=mutec] {협력};
+
+% Mock box
+\node[prp, minimum width=40mm, minimum height=16mm] (mock) at (0, -0.5) {};
+\node[font=\sffamily\small] at (0, -0.2) {AuctionEvent};
+\node[font=\sffamily\small] at (0, -0.7) {Listener (Mock)};
+\node[font=\sffamily\tiny, anchor=west, text=prpbord] at (2.3, -0.5) {Mock 객체\\(협력자 역할 수행)};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,32 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[abs, text width=11cm, align=center] at (5.5, 8.5) {소프트웨어 성공의 핵심};
+
+% Hierarchy
+\node[con, text width=4cm, align=center] (code) at (5.5, 6.5) {코드};
+\node[right=0.3cm of code.east, anchor=west, text=conbord] {← 도구일 뿐};
+
+\node[con, text width=5cm, align=center] (model) at (5.5, 4.5) {도메인 모델};
+\node[right=0.3cm of model.east, anchor=west, text=conbord] {← 핵심 자산};
+
+\node[con, text width=6cm, align=center] (knowledge) at (5.5, 2.5) {도메인 지식};
+\node[right=0.3cm of knowledge.east, anchor=west, text=conbord] {← 진짜 가치};
+
+% Arrows
+\draw[arr] (code.south) -- (model.north);
+\draw[arr] (model.south) -- (knowledge.north);
+
+% Label: 기술적 우수성
+\node[above=0.3cm of code.north] {\small 기술적 우수성};
+
+% Quote box
+\node[imp, text width=10cm, align=center] at (5.5, 0.3)
+  {``도메인을 이해하지 못하면 아무것도 만들 수 없다''};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,39 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+\node[prp, text width=11cm, align=left, font=\small] at (0, 0) {
+    \textbf{Domain Vision Statement}\\[2pt]
+    \textbf{화물 해운 예약 시스템}\\[4pt]
+    \hrulefill\\[4pt]
+    \textbf{비전}\\[2pt]
+    \hrulefill\\[2pt]
+    세계 최고의 화물 경로 최적화를 통해 고객에게\\[2pt]
+    최저 비용과 최단 시간의 배송을 제공한다.\\[4pt]
+    \textbf{핵심 차별화 요소}\\[2pt]
+    \hrulefill\\[2pt]
+    1. 실시간 다변수 경로 최적화 알고리즘\\[2pt]
+    \quad - 날씨, 연료비, 항구 혼잡도 반영\\[2pt]
+    \quad - 경쟁사 대비 15\% 비용 절감\\[4pt]
+    2. 지능형 화물 적재 시스템\\[2pt]
+    \quad - 하역 순서 최적화로 항구 체류 시간 30\% 단축\\[2pt]
+    \quad - 무게 균형 자동 계산\\[4pt]
+    \textbf{Core Domain 경계}\\[2pt]
+    \hrulefill\\[2pt]
+    포함: RouteOptimizer, CargoAllocator,\\[2pt]
+    \quad\quad\quad VoyagePlanner, LoadBalancer\\[2pt]
+    제외: Booking CRUD, Billing, Reporting\\[4pt]
+    \textbf{전략적 방향}\\[2pt]
+    \hrulefill\\[2pt]
+    - 경로 최적화 알고리즘에 R\&D 투자 집중\\[2pt]
+    - 머신러닝 기반 수요 예측 도입 계획\\[2pt]
+    - Supporting 영역은 효율성 중심으로 개발
+};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,22 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Axes
+\draw[arr] (0,0) -- (8,0) node[anchor=west] {시간};
+\draw[arr] (0,0) -- (0,4) node[anchor=south] {생산성};
+
+% Team A curve (declining)
+\draw[conbord, very thick] (0.5,3.5)
+    .. controls (2,3.3) and (3,2.8) .. (4,2.2)
+    .. controls (5,1.6) and (6,1) .. (7.5,0.5)
+    node[anchor=west, text=conbord] {팀 A};
+
+% Team B line (constant)
+\draw[impl, very thick] (0.5,2.2) -- (7.5,2.2)
+    node[anchor=west, text=impl] {팀 B};
+
+\end{tikzpicture}
+\end{document}

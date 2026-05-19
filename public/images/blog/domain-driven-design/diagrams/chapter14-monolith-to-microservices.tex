@@ -1,0 +1,70 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Monolith
+\node[prp, text width=8cm, align=center] (monolith) at (0, 0) {
+    \textbf{Monolith}
+};
+
+\node[cli, text width=2cm, align=center] (book-mod) at (-3, -1.5) {
+    \textbf{Booking}\\[2pt]
+    \textbf{Module}
+};
+
+\node[cli, text width=2cm, align=center] (ship-mod) at (0, -1.5) {
+    \textbf{Shipping}\\[2pt]
+    \textbf{Module}
+};
+
+\node[cli, text width=2cm, align=center] (bill-mod) at (3, -1.5) {
+    \textbf{Billing}\\[2pt]
+    \textbf{Module}
+};
+
+\node[imp, text width=6cm, align=center] (db) at (0, -3.5) {
+    공유 DB
+};
+
+% Transformation arrow
+\draw[arr, line width=2pt] (0, -4.5) -- node[right, text width=3cm] {DDD로\\[2pt]경계 식별} (0, -5.5);
+
+% Microservices
+\node[con, text width=2.5cm, align=center] (book-svc) at (-3.5, -7) {
+    \textbf{Booking}\\[2pt]
+    \textbf{Service}\\[4pt]
+    자체 DB
+};
+
+\node[con, text width=2.5cm, align=center] (ship-svc) at (0, -7) {
+    \textbf{Shipping}\\[2pt]
+    \textbf{Service}\\[4pt]
+    자체 DB
+};
+
+\node[con, text width=2.5cm, align=center] (bill-svc) at (3.5, -7) {
+    \textbf{Billing}\\[2pt]
+    \textbf{Service}\\[4pt]
+    자체 DB
+};
+
+\node[align=center] at (0, -9) {
+    이벤트 기반 통합
+};
+
+% Connections between modules and DB
+\draw[arr] (book-mod.south) -- (db.north);
+\draw[arr] (ship-mod.south) -- (db.north);
+\draw[arr] (bill-mod.south) -- (db.north);
+
+% Connections between microservices
+\draw[arr] (book-svc.east) -- (ship-svc.west);
+\draw[arr] (ship-svc.east) -- (bill-svc.west);
+
+\end{tikzpicture}
+\end{document}

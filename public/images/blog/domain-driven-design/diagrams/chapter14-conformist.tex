@@ -1,0 +1,36 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% External API
+\node[imp, text width=7cm, align=left] (external) at (0, 0) {
+    \textbf{External Shipping API}\\[2pt]
+    \textbf{(우리가 통제 불가)}\\[4pt]
+    \{\\[2pt]
+    \quad "shipment\_ref": "ABC123",\\[2pt]
+    \quad "status\_code": "IN\_TRANSIT",\\[2pt]
+    \quad "loc": \{"port": "KRPUS", ...\}\\[2pt]
+    \}
+};
+
+% Our Context (Conformist)
+\node[cli, text width=7cm, align=left] (our) at (0, -4.5) {
+    \textbf{Our Tracking Context}\\[2pt]
+    \textbf{(Conformist)}\\[4pt]
+    class ShipmentRef:  \# 그들의 용어\\[2pt]
+    \quad ...\\[2pt]
+    class StatusCode:   \# 그들의 상태 코드\\[2pt]
+    \quad IN\_TRANSIT = "IN\_TRANSIT"\\[2pt]
+    \quad ...
+};
+
+% Arrow with label
+\draw[arr, line width=1.5pt] (external.south) -- node[right, text width=3cm] {그냥 따를 수밖에...} (our.north);
+
+\end{tikzpicture}
+\end{document}

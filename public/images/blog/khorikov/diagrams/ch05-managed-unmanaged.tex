@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4.5) {Managed vs Unmanaged 의존};
+
+% Root
+\node[hi, minimum width=24mm] (dep) at (0,3.2) {의존};
+
+% Level 1
+\node[imp, minimum width=30mm] (managed) at (-3,1.5) {Managed 의존\\[2pt](시스템 내부)};
+\node[con, minimum width=30mm] (unmanaged) at (3,1.5) {Unmanaged 의존\\[2pt](시스템 외부)};
+
+\draw[arr] (dep.south) -- ++(0,-0.3) -| (managed.north);
+\draw[arr] (dep.south) -- ++(0,-0.3) -| (unmanaged.north);
+
+% Level 2 - Managed
+\node[cls, minimum width=20mm, font=\sffamily\footnotesize] (db) at (-4,-0.2) {DB};
+\node[cls, minimum width=20mm, font=\sffamily\footnotesize] (file) at (-2,-0.2) {파일 시스템};
+
+\draw[arr] (managed.south) -- ++(0,-0.25) -| (db.north);
+\draw[arr] (managed.south) -- ++(0,-0.25) -| (file.north);
+
+% Level 2 - Unmanaged
+\node[cls, minimum width=20mm, font=\sffamily\footnotesize] (api) at (2,-0.2) {HTTP API};
+\node[cls, minimum width=20mm, font=\sffamily\footnotesize] (mq) at (4,-0.2) {메시지 큐};
+
+\draw[arr] (unmanaged.south) -- ++(0,-0.25) -| (api.north);
+\draw[arr] (unmanaged.south) -- ++(0,-0.25) -| (mq.north);
+
+% Labels
+\node[font=\sffamily\footnotesize, text=gray] at (-4,-0.9) {(직접 소유)};
+\node[font=\sffamily\footnotesize, text=gray] at (4,-0.9) {(결제/이메일)};
+
+% Mock guidance
+\node[font=\sffamily\footnotesize, text=impbord] at (-3,-1.5) {Mock 지양};
+\node[font=\sffamily\footnotesize, text=conbord] at (3,-1.5) {Mock 권장};
+
+\end{tikzpicture}
+\end{document}

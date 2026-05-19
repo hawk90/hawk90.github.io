@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 4.5) {테스트 피라미드};
+
+% Pyramid layers
+% E2E (top - smallest)
+\fill[hifill] (-1, 3) -- (1, 3) -- (0, 4) -- cycle;
+\draw[draw=hibord, line width=0.5pt] (-1, 3) -- (1, 3) -- (0, 4) -- cycle;
+\node[font=\sffamily\footnotesize\bfseries] at (0, 3.3) {E2E};
+
+% Integration (middle)
+\fill[clifill] (-2, 1.8) -- (2, 1.8) -- (1, 3) -- (-1, 3) -- cycle;
+\draw[draw=clibord, line width=0.5pt] (-2, 1.8) -- (2, 1.8) -- (1, 3) -- (-1, 3) -- cycle;
+\node[font=\sffamily\footnotesize\bfseries] at (0, 2.3) {통합};
+
+% Unit (bottom - largest)
+\fill[impfill] (-3, 0.3) -- (3, 0.3) -- (2, 1.8) -- (-2, 1.8) -- cycle;
+\draw[draw=impbord, line width=0.5pt] (-3, 0.3) -- (3, 0.3) -- (2, 1.8) -- (-2, 1.8) -- cycle;
+\node[font=\sffamily\footnotesize\bfseries] at (0, 1) {단위};
+
+% Labels on right
+\node[font=\sffamily\footnotesize, anchor=west, text=mutec] at (1.3, 3.5) {인수 테스트};
+\node[font=\sffamily\footnotesize, anchor=west, text=mutec] at (2.3, 2.4) {통합 테스트};
+\node[font=\sffamily\footnotesize, anchor=west, text=mutec] at (3.3, 1.05) {단위 테스트};
+
+% Arrows showing quantity/speed
+\draw[arr] (-4.5, 3.5) -- (-4.5, 0.5);
+\node[font=\sffamily\tiny, anchor=east] at (-4.5, 3.5) {적음 / 느림};
+\node[font=\sffamily\tiny, anchor=east] at (-4.5, 0.5) {많음 / 빠름};
+
+\end{tikzpicture}
+\end{document}

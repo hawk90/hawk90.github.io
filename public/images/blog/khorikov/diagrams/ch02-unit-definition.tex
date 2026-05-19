@@ -1,0 +1,53 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4.5) {"단위"의 정의 차이};
+
+% London side (left)
+\node[font=\sffamily\bfseries] at (-4,3.5) {London의 "단위 = 클래스"};
+
+% London box - single class boundary
+\begin{scope}[shift={(-4,0)}]
+  \draw[draw=conbord, fill=confill!30, rounded corners=4pt, line width=0.5pt]
+      (-2,-0.8) rectangle (2,2.2);
+  \node[font=\sffamily\footnotesize, text=gray] at (0,2.5) {(인위적인 경계)};
+
+  \node[cls, minimum width=20mm] at (0,1.5) {Method1};
+  \node[cls, minimum width=20mm] at (0,0.5) {Method2};
+  \node[cls, minimum width=20mm] at (0,-0.5) {Method3};
+
+  \node[font=\sffamily\small, text=conbord, anchor=north] at (0,-1.2) {한 클래스};
+\end{scope}
+
+% Classical side (right)
+\node[font=\sffamily\bfseries] at (4,3.5) {Classical의 "단위 = 동작"};
+
+% Classical box - behavior boundary spanning multiple classes
+\begin{scope}[shift={(4,0)}]
+  \draw[draw=impbord, fill=impfill!30, rounded corners=4pt, line width=0.5pt]
+      (-2.5,-0.6) rectangle (2.5,2.2);
+  \node[font=\sffamily\footnotesize, text=gray] at (0,2.5) {(자연스러운 경계)};
+
+  \node[cls, minimum width=16mm] (a) at (-1.5,0.8) {Class A};
+  \node[cls, minimum width=16mm] (b) at (0,0.8) {Class B};
+  \node[cls, minimum width=16mm] (c) at (1.5,0.8) {Class C};
+
+  \draw[arr] (a.east) -- (b.west);
+  \draw[arr] (b.east) -- (c.west);
+
+  \node[font=\sffamily\small, text=impbord, anchor=north] at (0,-1) {하나의 비즈니스 동작};
+\end{scope}
+
+% Divider
+\draw[edge, dashed] (0,4) -- (0,-1.5);
+
+\end{tikzpicture}
+\end{document}

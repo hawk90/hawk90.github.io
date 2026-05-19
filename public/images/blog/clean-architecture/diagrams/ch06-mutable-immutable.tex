@@ -1,0 +1,27 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Mutable component (top)
+\node[con, text width=6cm, align=center] (mut) at (0,3) {
+    가변 컴포넌트 (작게 유지)\\[2pt]
+    - 트랜잭션 메모리\\[2pt]
+    - DB 갱신\\[2pt]
+    - 외부 I/O
+};
+
+% Immutable component (bottom)
+\node[impl, text width=6cm, align=center] (immut) at (0,0) {
+    불변 컴포넌트 (대부분)\\[2pt]
+    - 비즈니스 로직\\[2pt]
+    - 계산\\[2pt]
+    - 변환
+};
+
+% Bidirectional arrow
+\draw[arr, <->] (mut.south) -- (immut.north);
+
+\end{tikzpicture}
+\end{document}

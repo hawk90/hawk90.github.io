@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Refined separation (5 layers)
+\node[cli, minimum width=44mm] (uiformat) at (0,4) {UI 형태 (텍스트/그래픽)};
+\node[prp, minimum width=44mm] (lang) at (0,3) {언어 인터페이스};
+\node[abs, minimum width=44mm] (rules) at (0,2) {게임 규칙};
+\node[prp, minimum width=44mm] (storage) at (0,1) {저장 인터페이스};
+\node[imp, minimum width=44mm] (impl) at (0,0) {저장 구현};
+
+\draw[arr] (uiformat) -- (lang);
+\draw[arr] (lang) -- (rules);
+\draw[arr] (rules) -- (storage);
+\draw[arr] (storage) -- (impl);
+
+% Boundary annotations
+\node[font=\sffamily\footnotesize, text=prpbord, anchor=west] at (2.8,3.5) {경계 1};
+\node[font=\sffamily\footnotesize, text=prpbord, anchor=west] at (2.8,2.5) {경계 2};
+\node[font=\sffamily\footnotesize, text=prpbord, anchor=west] at (2.8,1.5) {경계 3};
+\node[font=\sffamily\footnotesize, text=prpbord, anchor=west] at (2.8,0.5) {경계 4};
+
+% Change axes
+\node[font=\sffamily\footnotesize, text=mutec, anchor=east] at (-2.8,4) {UI 축};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=east] at (-2.8,3) {언어 축};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=east] at (-2.8,2) {규칙 축};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=east] at (-2.8,0.5) {저장 축};
+
+\end{tikzpicture}
+\end{document}

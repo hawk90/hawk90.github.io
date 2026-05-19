@@ -1,0 +1,55 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[prp, text width=11cm, align=center] (title) at (0, 0) {
+    \textbf{Accountability}
+};
+
+% Party
+\node[con, text width=2.5cm, align=left] (party) at (-3, -2) {
+    \textbf{Party}\\[2pt]
+    \hrulefill\\[2pt]
+    name
+};
+
+% AccountabilityType
+\node[con, text width=3.5cm, align=left] (type) at (2.5, -2) {
+    \textbf{AccountabilityType}\\[2pt]
+    \hrulefill\\[2pt]
+    name
+};
+
+% Person and Organization
+\node[con, text width=2cm, align=center] (person) at (-4.5, -4.5) {
+    \textbf{Person}
+};
+
+\node[con, text width=2.5cm, align=center] (org) at (-1.5, -4.5) {
+    \textbf{Organization}
+};
+
+% Accountability class
+\node[con, text width=3.5cm, align=left] (acc) at (2.5, -5) {
+    \textbf{Accountability}\\[2pt]
+    \hrulefill\\[2pt]
+    commissioner → Party\\[2pt]
+    responsible → Party\\[2pt]
+    type → Type\\[2pt]
+    time\_period → DateRange
+};
+
+% Arrows
+\draw[arr] (party) -- (type);
+\draw[realize] (person.north) -- (person.north |- -3.3, 0) -- (party.south);
+\draw[realize] (org.north) -- (org.north |- -3.3, 0) -- (party.south);
+\draw[arr] (acc.north) -- (type.south);
+
+\end{tikzpicture}
+\end{document}

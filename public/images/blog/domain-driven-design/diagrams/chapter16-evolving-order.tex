@@ -1,0 +1,38 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Wrong approach
+\node[align=center] at (-5, 0.5) {잘못된 접근:};
+
+\node[imp, text width=5.5cm, align=left] (wrong) at (-5, -2.5) {
+    아키텍트가 처음에\\[2pt]
+    완벽한 구조 설계\\[2pt]
+    \quad ↓\\[2pt]
+    개발팀에 강요\\[2pt]
+    \quad ↓\\[2pt]
+    현실과 맞지 않아 무시됨\\[2pt]
+    \quad ↓\\[2pt]
+    구조 없는 혼돈
+};
+
+% Right approach
+\node[align=center] at (5, 0.5) {올바른 접근:};
+
+\node[prp, text width=5.5cm, align=left] (right) at (5, -2.5) {
+    최소한의 구조로 시작\\[2pt]
+    \quad ↓\\[2pt]
+    개발하면서 패턴 발견\\[2pt]
+    \quad ↓\\[2pt]
+    구조 점진적 정립\\[2pt]
+    \quad ↓\\[2pt]
+    팀이 자연스럽게 따름
+};
+
+\end{tikzpicture}
+\end{document}

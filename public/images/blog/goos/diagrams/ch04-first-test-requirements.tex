@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 4.2) {바깥에서 시작하라 (Start from the Outside)};
+
+% Outer acceptance test box
+\node[group, minimum width=70mm, minimum height=35mm] (outer) at (0, 2) {};
+\node[font=\sffamily\bfseries\small, anchor=north west] at (-3.2, 3.7) {Acceptance Test};
+
+% Inner question box
+\node[hi, minimum width=55mm, minimum height=14mm] (question) at (0, 2.2) {};
+\node[font=\sffamily\footnotesize] at (0, 2.2) {"시스템이 실제로 동작하는가?"};
+
+% Bullet points below
+\node[font=\sffamily\footnotesize, text width=60mm, align=left] at (0, -0.2) {%
+첫 인수 테스트는:\\[3pt]%
+• 가장 단순한 성공 시나리오\\[1pt]%
+• 모든 계층을 관통\\[1pt]%
+• 최소한의 비즈니스 로직\\[1pt]%
+• 빌드/배포 파이프라인 필요};
+
+\end{tikzpicture}
+\end{document}

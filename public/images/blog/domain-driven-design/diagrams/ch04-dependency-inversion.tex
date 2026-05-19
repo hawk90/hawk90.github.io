@@ -1,0 +1,44 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[text=conbord, font=\bfseries] at (5.5, 7.5) {Domain → Infrastructure 의존 역전};
+
+% Domain Layer
+\node[con, text width=4cm, align=center] (domain) at (5.5, 6) {Domain Layer};
+
+% Interface in domain
+\node[abs, text width=9cm, align=left] (interface) at (5.5, 4.5) {
+  \texttt{CargoRepository} (인터페이스)\\[2pt]
+  • find(id): Cargo\\[2pt]
+  • save(cargo): void\\[2pt]
+  • nextTrackingId(): TrackingId
+};
+
+% Infrastructure Layer
+\node[imp, text width=4cm, align=center] (infra) at (5.5, 2.5) {Infrastructure Layer};
+
+% Implementation in infrastructure
+\node[cli, text width=4.5cm, align=left] (sql) at (2.5, 1) {
+  \texttt{SqlCargoRepository}\\[2pt]
+  (구현)
+};
+
+\node[cli, text width=4.5cm, align=left] (mem) at (8.5, 1) {
+  \texttt{InMemoryCargoRepo}\\[2pt]
+  (테스트용)
+};
+
+% Arrows
+\draw[arr, dashed] (sql.north) -- (interface.south);
+\draw[arr, dashed] (mem.north) -- (interface.south);
+
+% Labels
+\node[text=conbord, font=\small] at (1, 2.8) {구현};
+\node[text=conbord, font=\small] at (10, 2.8) {구현};
+
+\end{tikzpicture}
+\end{document}

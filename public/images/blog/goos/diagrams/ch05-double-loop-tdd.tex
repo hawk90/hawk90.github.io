@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5.5) {이중 루프 TDD};
+
+% Outer loop box
+\node[group, minimum width=90mm, minimum height=65mm] (outer) at (0, 1.8) {};
+\node[font=\sffamily\bfseries\small, anchor=north west, text=absbord] at (-4.3, 4.9) {Outer Loop (인수 테스트 수준)};
+
+% Step 1 - failing acceptance test
+\node[con, minimum width=60mm, minimum height=10mm] (s1) at (0, 3.8) {\footnotesize 1. 실패하는 인수 테스트 작성};
+
+% Arrow down
+\draw[arr] (0, 3.2) -- (0, 2.8);
+
+% Inner loop box
+\node[panel, minimum width=75mm, minimum height=25mm] (inner) at (0, 1.3) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west, text=impbord] at (-3.5, 2.4) {Inner Loop (단위 테스트 수준)};
+
+% Inner loop cycle
+\node[con, minimum width=16mm] (red) at (-2.2, 0.8) {\tiny RED};
+\node[imp, minimum width=16mm] (green) at (0, 0.8) {\tiny GREEN};
+\node[cli, minimum width=20mm] (refac) at (2.5, 0.8) {\tiny REFACTOR};
+
+\draw[arr] (red) -- (green);
+\draw[arr] (green) -- (refac);
+\draw[arr, bend right=30] (refac.south) to (red.south);
+
+\node[font=\sffamily\tiny, text=mutec] at (0, -0.2) {(필요한 만큼 반복)};
+
+% Arrow down from inner
+\draw[arr] (0, -0.6) -- (0, -1.2);
+
+% Step 2 - acceptance test passes
+\node[imp, minimum width=60mm, minimum height=10mm] (s2) at (0, -1.7) {\footnotesize 2. 인수 테스트 통과!};
+
+% Arrow to next cycle
+\draw[arr] (0, -2.3) -- (0, -2.8);
+\node[font=\sffamily\footnotesize, text=mutec] at (0, -3.2) {3. 다음 기능을 위한 실패하는 인수 테스트 작성};
+
+\end{tikzpicture}
+\end{document}

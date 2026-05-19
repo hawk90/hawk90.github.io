@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 4) {객체의 본질};
+
+% Procedural section
+\node[font=\sffamily\bfseries\small, text=conbord] at (-3.5, 3) {절차적 프로그래밍};
+
+\node[con, minimum width=24mm, minimum height=12mm] (data) at (-4.5, 1.8) {데이터};
+\node[abs, minimum width=24mm, minimum height=12mm] (func) at (-2.5, 1.8) {함수};
+\node[font=\sffamily\footnotesize, text=mutec] at (-3.5, 0.8) {분리됨};
+
+% Object-oriented section
+\node[font=\sffamily\bfseries\small, text=impbord] at (3, 3) {객체지향 프로그래밍};
+
+% Combined object box
+\node[imp, minimum width=50mm, minimum height=22mm] (obj) at (3, 1.5) {};
+\node[font=\sffamily\bfseries\small] at (3, 2.3) {객체};
+
+% Inner boxes for data and behavior
+\node[con, minimum width=20mm, minimum height=10mm] (odata) at (2, 1.2) {\footnotesize 데이터\\[1pt]\tiny(private)};
+\node[abs, minimum width=20mm, minimum height=10mm] (obehav) at (4, 1.2) {\footnotesize 행동\\[1pt]\tiny(public)};
+
+\node[font=\sffamily\footnotesize, text=mutec] at (3, 0.1) {결합됨};
+
+\end{tikzpicture}
+\end{document}

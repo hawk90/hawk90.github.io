@@ -1,0 +1,35 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog, node distance=1.5cm]
+
+% Good DAG
+\begin{scope}
+\node[above] at (0,3) {\textbf{좋음 (DAG)}};
+\node[con] (a1) at (0,2) {A};
+\node[con] (b1) at (0,0.5) {B};
+\node[con] (c1) at (2,0.5) {C};
+\node[con] (d1) at (0,-1) {D};
+
+\draw[arr] (a1) -- (b1);
+\draw[arr] (b1) -- (c1);
+\draw[arr] (b1) -- (d1);
+\end{scope}
+
+% Bad cycle
+\begin{scope}[xshift=6cm]
+\node[above] at (0,3) {\textbf{나쁨 (순환)}};
+\node[conbord] (a2) at (0,2) {A};
+\node[conbord] (b2) at (2,2) {B};
+\node[conbord] (c2) at (2,0.5) {C};
+\node[conbord] (d2) at (0,0.5) {D};
+
+\draw[arr] (a2) -- (b2);
+\draw[arr] (b2) -- (c2);
+\draw[arr] (c2) -- (d2);
+\draw[arr] (d2) -- (a2);
+\end{scope}
+
+\end{tikzpicture}
+\end{document}

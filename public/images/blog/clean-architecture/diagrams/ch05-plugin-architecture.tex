@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Core policy box
+\node[abs, minimum width=50mm, minimum height=12mm, font=\sffamily\bfseries\small] (core) at (0,2) {핵심 정책};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3,2) {변경 거의 없음};
+
+% Interface line
+\node[font=\sffamily\footnotesize\itshape, text=prpbord] at (0,1.2) {인터페이스};
+
+% Plugin region
+\begin{scope}[on background layer]
+\fill[neutfill] (-3,-0.6) rectangle (3,0.6);
+\draw[neutbord, line width=0.5pt, rounded corners=3pt] (-3,-0.6) rectangle (3,0.6);
+\end{scope}
+
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.2,0) {자유롭게 교체};
+
+% Plugin boxes
+\node[impSm, minimum width=18mm] (db) at (-2,0) {DB-A};
+\node[conSm, minimum width=18mm] (ui) at (0,0) {UI-X};
+\node[clsSm, draw=clibord, fill=clifill, minimum width=18mm] (api) at (2,0) {API};
+
+% Arrows from plugins to interface
+\draw[realize] (db.north) -- ++(0,0.6);
+\draw[realize] (ui.north) -- ++(0,0.6);
+\draw[realize] (api.north) -- ++(0,0.6);
+
+% Label
+\node[font=\sffamily\footnotesize, text=neutbord] at (0,-1.1) {플러그인 영역};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,26 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Triangle vertices
+\coordinate (ccp) at (0,4);
+\coordinate (rep) at (-3,0);
+\coordinate (crp) at (3,0);
+
+% Triangle
+\draw[conbord, very thick] (ccp) -- (rep) -- (crp) -- cycle;
+
+% Labels at vertices
+\node[above=0.2cm of ccp] {\textbf{CCP}\\[2pt]변경 빈도};
+\node[below left=0.1cm of rep] {\textbf{REP}\\[2pt]재사용};
+\node[below right=0.1cm of crp] {\textbf{CRP}\\[2pt]사용 의존};
+
+% Edge annotations
+\node[rotate=60, anchor=south] at (-1.8,2.3) {너무 큼};
+\node[rotate=-60, anchor=south] at (1.8,2.3) {빈번한 변경};
+\node[below] at (0,-0.5) {불필요한 의존};
+
+\end{tikzpicture}
+\end{document}

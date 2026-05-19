@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5) {인프라 우선의 이유};
+
+% Reason boxes
+\node[abs, minimum width=55mm, minimum height=18mm] (r1) at (0, 3.8) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west] at (-2.5, 4.4) {1. 피드백 루프 확립};
+\node[font=\sffamily\tiny, text width=48mm] at (0, 3.5) {코드 변경 → 테스트 실행 → 결과 확인\\이 루프가 없으면 TDD 불가능};
+
+\node[imp, minimum width=55mm, minimum height=18mm] (r2) at (0, 2) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west] at (-2.5, 2.6) {2. 통합 문제 조기 발견};
+\node[font=\sffamily\tiny, text width=48mm] at (0, 1.7) {"내 컴퓨터에서는 동작해요" 방지\\환경 차이 문제 조기 해결};
+
+\node[cli, minimum width=55mm, minimum height=18mm] (r3) at (0, 0.2) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west] at (-2.5, 0.8) {3. 배포 가능성 증명};
+\node[font=\sffamily\tiny, text width=48mm] at (0, -0.1) {개발 마지막에 배포 시도 → 위험\\처음부터 배포 가능 → 안전};
+
+\node[hi, minimum width=55mm, minimum height=18mm] (r4) at (0, -1.6) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west] at (-2.5, -1) {4. 팀 협업 기반};
+\node[font=\sffamily\tiny, text width=48mm] at (0, -1.9) {누구나 빌드/테스트 가능\\일관된 개발 환경};
+
+\end{tikzpicture}
+\end{document}

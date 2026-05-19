@@ -1,0 +1,41 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog, node distance=1.2cm]
+
+% Top level
+\node[abs] (prog) {큰 프로그램};
+\node[below=0.3cm of prog] (label) {분해};
+
+% Modules
+\node[con, below=1cm of prog, xshift=-3cm] (moda) {모듈 A};
+\node[con, below=1cm of prog] (modb) {모듈 B};
+\node[con, below=1cm of prog, xshift=3cm] (modc) {모듈 C};
+
+% Functions
+\node[cli, below=of moda] (a1) {함수 a1};
+\node[cli, below=of a1] (a2) {함수 a2};
+
+\node[cli, below=of modb] (b1) {함수 b1};
+\node[cli, below=of b1] (b2) {함수 b2};
+
+\node[cli, below=of modc] (c1) {함수 c1};
+\node[cli, below=of c1] (c2) {함수 c2};
+
+% Arrows
+\draw[arr] (prog) -- (moda);
+\draw[arr] (prog) -- (modb);
+\draw[arr] (prog) -- (modc);
+
+\draw[arr] (moda) -- (a1);
+\draw[arr] (a1) -- (a2);
+
+\draw[arr] (modb) -- (b1);
+\draw[arr] (b1) -- (b2);
+
+\draw[arr] (modc) -- (c1);
+\draw[arr] (c1) -- (c2);
+
+\end{tikzpicture}
+\end{document}

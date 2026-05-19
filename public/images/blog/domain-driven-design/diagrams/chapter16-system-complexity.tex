@@ -1,0 +1,35 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Small system
+\node[align=center] at (0, 0.5) {작은 시스템:};
+
+\node[prp, text width=6cm, align=center] (small) at (0, -1) {
+    모든 개발자가 전체 이해\\[2pt]
+    "이건 여기에 넣으면 돼"
+};
+
+% Large system
+\node[align=center] at (0, -3) {큰 시스템:};
+
+\node[imp, text width=10cm, align=left] (large) at (0, -5.5) {
+    \begin{tikzpicture}
+        \foreach \x in {0,1,...,7} {
+            \node[draw, fill=white, minimum width=0.8cm, minimum height=0.8cm] at (\x*1.2, 0) {};
+        }
+        \node[align=center] at (4.5, -1) {
+            "새 기능은 어디에 넣어야 하지?"\\[2pt]
+            "이 모듈은 저 모듈을 참조해도 되나?"\\[2pt]
+            "전체 구조가 뭐지?"
+        };
+    \end{tikzpicture}
+};
+
+\end{tikzpicture}
+\end{document}

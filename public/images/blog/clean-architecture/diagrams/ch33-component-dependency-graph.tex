@@ -1,0 +1,41 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Top layer - Frameworks & Drivers
+\node[con, minimum width=8cm, minimum height=1cm] (frameworks) at (0, 0)
+  {\textbf{Frameworks \& Drivers}};
+
+% Second layer - Interface Adapters
+\node[con, minimum width=8cm, minimum height=1cm] (adapters) at (0, -2)
+  {\textbf{Interface Adapters}};
+
+% Third layer - Use Cases (three components)
+\node[imp, minimum width=2.2cm, minimum height=1.2cm] (author) at (-3, -4.5)
+  {Author UC};
+\node[imp, minimum width=2.2cm, minimum height=1.2cm] (viewer) at (0, -4.5)
+  {Viewer UC};
+\node[imp, minimum width=2.2cm, minimum height=1.2cm] (admin) at (3, -4.5)
+  {Admin UC};
+
+% Bottom layer - Shared Kernel (Entities)
+\node[abs, minimum width=6cm, minimum height=1cm] (kernel) at (0, -7)
+  {\textbf{Shared Kernel}\\[2pt]\small(Entities)};
+
+% Dependencies - downward arrows
+\draw[arr] (frameworks.south) -- (adapters.north);
+\draw[arr] (adapters.south) -- ++(0, -0.3) -- ++(-3, 0) -- (author.north);
+\draw[arr] (adapters.south) -- (viewer.north);
+\draw[arr] (adapters.south) -- ++(0, -0.3) -- ++(3, 0) -- (admin.north);
+
+\draw[arr] (author.south) -- ++(0, -0.3) -- (kernel.north -| author.south);
+\draw[arr] (viewer.south) -- (kernel.north);
+\draw[arr] (admin.south) -- ++(0, -0.3) -- (kernel.north -| admin.south);
+
+% Labels on arrows
+\node[right, font=\footnotesize, text=contxt] at (0.2, -1) {depends on};
+
+\end{tikzpicture}
+\end{document}

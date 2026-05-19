@@ -1,0 +1,55 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[prp, text width=11cm, align=center] (title) at (0, 0) {
+    \textbf{Context Map + Distillation 결합}
+};
+
+% System box
+\node[imp, text width=10cm, align=center] (system) at (0, -1.5) {
+    \textbf{화물 해운 시스템}
+};
+
+% Core Domain (emphasized)
+\node[con, text width=7cm, align=center] (core) at (0, -3) {
+    \textbf{CORE DOMAIN}\\[4pt]
+    \textbf{Route Optimization}\\[2pt]
+    \textbf{Context}\\[2pt]
+    (경로 최적화)
+};
+
+\node[align=right] at (6, -3) {← 최고 투자};
+
+% Supporting contexts
+\node[cli, text width=3cm, align=center] (booking) at (-4, -5.5) {
+    \textbf{Booking}\\[2pt]
+    \textbf{Context}\\[2pt]
+    (Supporting)
+};
+
+\node[cli, text width=3cm, align=center] (billing) at (0, -5.5) {
+    \textbf{Billing}\\[2pt]
+    \textbf{Context}\\[2pt]
+    (Supporting)
+};
+
+% Generic context
+\node[imp, text width=3cm, align=center] (auth) at (4, -5.5) {
+    \textbf{Auth}\\[2pt]
+    \textbf{Context}\\[2pt]
+    (Generic)
+};
+
+% Arrows
+\draw[arr] (core.south) -- (booking.north);
+\draw[arr] (core.south) -- (billing.north);
+
+\end{tikzpicture}
+\end{document}

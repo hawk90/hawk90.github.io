@@ -1,0 +1,50 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[prp, text width=11cm, align=center] (title) at (0, 0) {
+    \textbf{Strategic Design의 세 기둥}
+};
+
+% Three pillars
+\node[con, text width=3cm, align=center] (context) at (-4, -2) {
+    \textbf{Context}\\[2pt]
+    \textbf{Map}
+};
+
+\node[con, text width=3cm, align=center] (distill) at (0, -2) {
+    \textbf{Distillation}
+};
+
+\node[con, text width=3cm, align=center] (structure) at (4, -2) {
+    \textbf{Large-Scale}\\[2pt]
+    \textbf{Structure}
+};
+
+% Labels below
+\node[align=center] at (-4, -3.5) {경계와 관계};
+\node[align=center] at (0, -3.5) {핵심 식별};
+\node[align=center] at (4, -3.5) {전체 일관성};
+
+% Integration box
+\node[prp, text width=8cm, align=left] (integration) at (0, -6) {
+    \textbf{통합된 전략적 설계}\\[4pt]
+    • 무엇이 핵심인가?\\[2pt]
+    • 어떻게 분리하는가?\\[2pt]
+    • 어떻게 연결하는가?\\[2pt]
+    • 전체가 어떻게 맞물리는가?
+};
+
+% Arrows
+\draw[arr] (context.south) -- (context.south |- -4.5, 0) -- (integration.north);
+\draw[arr] (distill.south) -- (integration.north);
+\draw[arr] (structure.south) -- (structure.south |- -4.5, 0) -- (integration.north);
+
+\end{tikzpicture}
+\end{document}

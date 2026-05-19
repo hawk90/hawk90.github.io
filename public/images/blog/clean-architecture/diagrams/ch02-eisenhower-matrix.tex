@@ -1,0 +1,45 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Grid
+\draw[neutbord, line width=0.5pt] (0,0) rectangle (8,4);
+\draw[neutbord, line width=0.5pt] (4,0) -- (4,4);
+\draw[neutbord, line width=0.5pt] (0,2) -- (8,2);
+
+% Column headers
+\node[font=\sffamily\small\bfseries] at (2,4.4) {긴급};
+\node[font=\sffamily\small\bfseries] at (6,4.4) {긴급하지 않음};
+
+% Row headers
+\node[font=\sffamily\small\bfseries, anchor=east] at (-0.3,3) {중요};
+\node[font=\sffamily\small\bfseries, anchor=east] at (-0.3,1) {중요하지\\[2pt]않음};
+
+% Quadrant 1: Urgent + Important (top-left)
+\fill[hifill!50] (0.05,2.05) rectangle (3.95,3.95);
+\node[font=\sffamily\bfseries\small, text=hibord] at (2,3.4) {1. 긴급+중요};
+\node[font=\sffamily\footnotesize, text=mutec] at (2,2.7) {(즉시 처리)};
+
+% Quadrant 2: Not Urgent + Important (top-right)
+\fill[absfill!50] (4.05,2.05) rectangle (7.95,3.95);
+\node[font=\sffamily\bfseries\small, text=absbord] at (6,3.4) {2. 중요+미긴급};
+\node[font=\sffamily\footnotesize, text=mutec] at (6,2.7) {(계획 / 투자)};
+
+% Quadrant 3: Urgent + Not Important (bottom-left)
+\fill[clifill!50] (0.05,0.05) rectangle (3.95,1.95);
+\node[font=\sffamily\bfseries\small, text=clibord] at (2,1.4) {3. 긴급+안중요};
+\node[font=\sffamily\footnotesize, text=mutec] at (2,0.7) {(위임 / 거절)};
+
+% Quadrant 4: Not Urgent + Not Important (bottom-right)
+\fill[neutfill] (4.05,0.05) rectangle (7.95,1.95);
+\node[font=\sffamily\bfseries\small, text=neutbord] at (6,1.4) {4. 안긴급+안중요};
+\node[font=\sffamily\footnotesize, text=mutec] at (6,0.7) {(무시)};
+
+\end{tikzpicture}
+\end{document}

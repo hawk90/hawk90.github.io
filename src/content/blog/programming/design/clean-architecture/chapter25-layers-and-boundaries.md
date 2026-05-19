@@ -69,29 +69,13 @@ You are in room 12.        // 영어
 
 전통적인 UI / Business / DB 3겹으로 이걸 표현하려면.
 
-```
-[UI]                ← UI 축 + 언어 축이 섞임
-   ↓
-[Business Rules]    ← 게임 규칙 축
-   ↓
-[Data]              ← 저장 축
-```
+![전통적 3계층 — UI 축과 언어 축이 섞임](/images/blog/clean-architecture/diagrams/ch25-three-layer.svg)
 
 문제: UI 층이 두 축(UI 형태 + 언어)을 동시에 가진다. UI 변경과 언어 변경이 같은 코드를 만진다. SRP 위반.
 
 해법은 **두 축을 별도 경계로 분리**하는 것이다.
 
-```
-[UI 형태 (텍스트/그래픽)]
-        ↓
-[언어 인터페이스]
-        ↓
-[게임 규칙]
-        ↓
-[저장 인터페이스]
-        ↓
-[저장 구현]
-```
+![개선된 계층 분리 — 변경 축마다 경계](/images/blog/clean-architecture/diagrams/ch25-refined-layers.svg)
 
 여기서 경계는 4개다. 3겹이 아니라.
 
@@ -114,30 +98,13 @@ You are in room 12.        // 영어
 
 같은 시스템 안에 여러 데이터 흐름이 공존한다.
 
-```
-흐름 1 (사용자 요청): UI → Use Case → DB
-흐름 2 (비동기 이벤트): 외부 시스템 → Listener → Use Case → DB
-흐름 3 (배치): Scheduler → Use Case → DB
-흐름 4 (조회): UI → Use Case → DB read-only
-```
-
 각 흐름이 다른 경계를 가로지를 수 있다. 그리고 그 흐름들이 같은 Use Case들을 공유하면서도 다른 Adapter들을 거친다.
 
 ## 다이어그램의 일반화
 
 Clean Architecture 22장의 4겹은 한 종류의 데이터 흐름을 그린 것이다. 실제 시스템은 더 복잡한 그림을 가진다.
 
-```
-                Use Cases (중심)
-                  ↑   ↑   ↑   ↑
-                 │   │   │   │
-            ┌────┘   │   │   └────┐
-            │        │   │        │
-     UI Adapter  Event   Batch   Read Model
-                Listener Worker
-            │        │   │        │
-    HTTP/REST    MessageQ  Cron    DB Replica
-```
+![다중 데이터 흐름 — 여러 진입점이 중앙 Use Cases를 공유](/images/blog/clean-architecture/diagrams/ch25-multiple-flows.svg)
 
 여러 진입점, 여러 출구. 그러나 의존성 규칙은 그대로 — 모든 화살표가 안쪽으로 향한다.
 

@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Application (system)
+\node[abs, minimum width=42mm, minimum height=14mm, font=\sffamily\bfseries\small] (app) at (0,2) {Application};
+
+% Testing API interface
+\node[prp, minimum width=42mm, font=\sffamily\itshape\small] (api) at (0,0.8) {Testing API};
+
+% Tests
+\node[warn, minimum width=42mm, minimum height=10mm, font=\sffamily\bfseries\small] (test) at (0,-0.6) {Tests};
+
+% Arrows
+\draw[realize] (test.north) -- (api.south);
+\draw[uses] (api.north) -- (app.south);
+
+% Annotations
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (2.8,2) {내부 자유롭게 변경};
+\node[font=\sffamily\footnotesize, text=prpbord, anchor=west] at (2.8,0.8) {테스트 전용 인터페이스};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (2.8,-0.6) {공개 API만 사용};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,53 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Before distillation
+\node[align=center] at (0, 0.5) {증류 전:};
+
+\node[imp, text width=9cm, align=center] (before) at (0, -1) {
+    \textbf{화물 해운 시스템}\\[4pt]
+    예약  운송  청구  인증  로깅  알림  보고서  ...\\[2pt]
+    ?     ?    ?    ?    ?    ?     ?\\[4pt]
+    어디에 집중해야 하나?
+};
+
+% After distillation
+\node[align=center] at (0, -3.5) {증류 후:};
+
+\node[prp, text width=9cm, align=left] (after) at (0, -5.5) {
+    \textbf{화물 해운 시스템}
+};
+
+\node[con, text width=7cm, align=center] (core) at (0, -7) {
+    \textbf{CORE DOMAIN}\\[2pt]
+    예약 최적화 / 경로 계획\\[2pt]
+    (최고의 인재, 최고의 설계)
+};
+
+\node[align=right, text width=2cm] at (5, -7) {← 차별화};
+
+\node[cli, text width=2cm, align=center] (supporting) at (-3, -9) {
+    \textbf{Supporting}\\[2pt]
+    청구
+};
+
+\node[cli, text width=2cm, align=center] (generic1) at (0, -9) {
+    \textbf{Generic}\\[2pt]
+    인증
+};
+
+\node[cli, text width=2cm, align=center] (generic2) at (3, -9) {
+    \textbf{Generic}\\[2pt]
+    로깅
+};
+
+\node[align=left, text width=3cm] at (5.8, -9) {← 구매/위임};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,40 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Left side - One-dimensional
+\node[font=\bfseries, text=contxt] at (-3, 2.5) {단방향};
+
+\node[cli, minimum width=2.5cm, minimum height=1cm] (client1) at (-3, 1)
+  {ClientCode};
+
+\node[con, minimum width=2.5cm, minimum height=1cm] (service1) at (-3, -1)
+  {ServiceImpl};
+
+\draw[arr] (client1.south) -- (service1.north);
+
+% Right side - Bidirectional
+\node[font=\bfseries, text=contxt] at (3.5, 2.5) {양방향, 완전};
+
+\node[cli, minimum width=2.5cm, minimum height=1cm] (client2) at (3.5, 1)
+  {ClientCode};
+
+\node[prp, minimum width=2.5cm, minimum height=0.7cm] (iservice) at (3.5, -0.3)
+  {IService};
+
+\node[con, minimum width=2.5cm, minimum height=1cm] (service2) at (3.5, -2)
+  {ServiceImpl};
+
+\node[prp, minimum width=2.5cm, minimum height=0.7cm] (icallback) at (3.5, -3.5)
+  {IClientCallback};
+
+\draw[arr] (client2.south) -- (iservice.north);
+\draw[arr] (service2.north) -- (iservice.south);
+\draw[arr] (client2.south) -- ++(0, -0.8) -- ++(-1.5, 0) -- ++(0, -3.5) -- (icallback.west);
+
+\node[right, font=\footnotesize, text=contxt] at (5.8, -3.5) {콜백 인터페이스};
+
+\end{tikzpicture}
+\end{document}

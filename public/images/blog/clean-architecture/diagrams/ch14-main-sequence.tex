@@ -1,0 +1,37 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Axes
+\draw[arr] (0,0) -- (6,0) node[anchor=west] {I};
+\draw[arr] (0,0) -- (0,6) node[anchor=south] {A};
+
+% Tick marks
+\node[left] at (0,5) {1};
+\node[below] at (5,0) {1};
+\node[left] at (0,0) {0};
+\node[below] at (0,0) {0};
+
+% Main Sequence
+\draw[impl, very thick] (0,5) -- (5,0);
+\node[anchor=south west, text=impl] at (2.5,2.5) {Main Sequence};
+
+% Zone of Uselessness
+\node[text=conbord, align=center, text width=3cm] at (1,4.5) {
+    Zone of\\[2pt]Uselessness\\[5pt]
+    {\small 최대 추상,}\\[2pt]
+    {\small 최대 안정}\\[2pt]
+    {\small (누구도 안 씀)}
+};
+
+% Zone of Pain
+\node[text=conbord, align=center, text width=3cm] at (4.5,0.8) {
+    Zone of Pain\\[5pt]
+    {\small (구체, 안정}\\[2pt]
+    {\small — 변경 불가)}
+};
+
+\end{tikzpicture}
+\end{document}

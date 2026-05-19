@@ -14,291 +14,261 @@ draft: true
 
 ## Avionics Bus 요구사항
 
-```text
-일반 IT bus vs Avionics bus:
+**일반 IT (Ethernet, USB, PCIe):**
+- 고대역폭
+- 표준화·범용
+- Plug-and-play
+- Best-effort (deterministic 보장 ↓)
+- Single point of failure
 
-일반 IT (Ethernet, USB, PCIe):
-  + 고대역폭
-  + 표준화·범용
-  + Plug-and-play
-  - Best-effort (deterministic 보장 ↓)
-  - Single point of failure
-  
-Avionics:
-  + Deterministic (bounded latency)
-  + Redundant (dual·triple bus)
-  + Long supply (~20-30년)
-  + Wide environmental
-  + 인증 (DO-254·DO-178C 호환)
-  + EMI·rad immunity
-  - 대역폭 보통 낮음
-  - 비용 ↑
-```
+**Avionics:**
+- Deterministic (bounded latency)
+- Redundant (dual·triple bus)
+- Long supply (~20-30년)
+- Wide environmental
+- 인증 (DO-254·DO-178C 호환)
+- EMI·rad immunity
+- 대역폭 보통 낮음
+- 비용 ↑
 
 Avionics — *예측 가능성 + 신뢰성 > 성능*.
 
 ## 3 주요 표준
 
-```text
-MIL-STD-1553B (군용):
-  1970s 개발
-  1 Mbps, command-response
-  Boeing F-15·F-16·F-22·F-35
-  Aircraft·LV·위성
-  
-ARINC-429 (민항):
-  1977
-  100 kbps (high speed) 또는 12.5 kbps
-  Point-to-point
-  Boeing 727·737·747·777
-  
-ARINC-664 / AFDX (modern):
-  2002
-  100 Mbps·1 Gbps
-  Switched Ethernet 기반
-  Airbus A380·A350, Boeing 787
-```
+**MIL-STD-1553B (군용):**
+- 1970s 개발
+- 1 Mbps, command-response
+- Boeing F-15·F-16·F-22·F-35
+- Aircraft·LV·위성
+
+**ARINC-429 (민항):**
+- 1977
+- 100 kbps (high speed) 또는 12.5 kbps
+- Point-to-point
+- Boeing 727·737·747·777
+
+**ARINC-664 / AFDX (modern):**
+- 2002
+- 100 Mbps·1 Gbps
+- Switched Ethernet 기반
+- Airbus A380·A350, Boeing 787
 
 각 *세대의 산업 표준*. 공존 중.
 
 ## MIL-STD-1553B — 군용 표준
 
-```text
-표준명:
-  MIL-STD-1553B (Military Standard 1553)
-  Aircraft Internal Time Division Command/Response 
-  Multiplex Data Bus
-  
-역사:
-  1973 — 1553A
-  1978 — 1553B (current de facto)
-  1996 — Notice 2 (clarification)
+**표준명:**
+- MIL-STD-1553B (Military Standard 1553)
+- Aircraft Internal Time Division Command/Response Multiplex Data Bus
 
-물리층:
-  Manchester encoding
-  1 Mbps
-  Twisted-pair, shielded
-  Transformer-coupled
-  Stub up to 6 m
-  Bus length up to 100 m
+**역사:**
+- 1973 — 1553A
+- 1978 — 1553B (current de facto)
+- 1996 — Notice 2 (clarification)
 
-Topology:
-  Multi-drop (single bus)
-  Up to 32 terminals
-  Dual-redundant standard
-```
+**물리층:**
+- Manchester encoding
+- 1 Mbps
+- Twisted-pair, shielded
+- Transformer-coupled
+- Stub up to 6 m
+- Bus length up to 100 m
+
+**Topology:**
+- Multi-drop (single bus)
+- Up to 32 terminals
+- Dual-redundant standard
 
 40년 — *여전히 현역*. 군 표준 안정성.
 
 ## 1553B Topology — BC·RT·MT
 
-```text
-Bus Controller (BC):
-  Master — 모든 transaction 시작
-  Command word issue
-  보통 1개 active (대개 redundant standby 있음)
+**Bus Controller (BC):**
+- Master — 모든 transaction 시작
+- Command word issue
+- 보통 1개 active (대개 redundant standby 있음)
 
-Remote Terminal (RT):
-  Slave — BC 명령 응답
-  최대 31 RT per bus (address 0-30)
-  Sensor·actuator·subcomputer
-  
-Bus Monitor (BM):
-  Passive listener
-  Logging·debug·analysis
-  
+**Remote Terminal (RT):**
+- Slave — BC 명령 응답
+- 최대 31 RT per bus (address 0-30)
+- Sensor·actuator·subcomputer
+
+**Bus Monitor (BM):**
+- Passive listener
+- Logging·debug·analysis
+
 Topology:
-  ┌─────┐    Bus    ┌─────┐    ┌─────┐
-  │ BC  │←─────────→│ RT1 │ ── │ RT2 │ ── ...
-  └─────┘            └─────┘    └─────┘
-                       │
-                     Stub
-                       │
-                     Device
+
+```text
+┌─────┐    Bus    ┌─────┐    ┌─────┐
+│ BC  │←─────────→│ RT1 │ ── │ RT2 │ ── ...
+└─────┘            └─────┘    └─────┘
+                     │
+                   Stub
+                     │
+                   Device
 ```
 
 Single-master — *deterministic 보장*. 모든 통신 BC가 schedule.
 
 ## 1553B Message Type
 
-```text
-Word format (20 bit):
-  3 bit sync
-  16 bit data·command
-  1 bit parity
+**Word format (20 bit):**
+- 3 bit sync
+- 16 bit data·command
+- 1 bit parity
 
-Word types:
-  Command Word (CW) — BC issued
-    RT addr (5 bit)
-    T/R bit (1 = RT→BC)
-    Subaddr (5 bit)
-    Word count (5 bit)
-    
-  Data Word (DW)
-    16 bit data
-    
-  Status Word (SW) — RT response
-    RT addr
-    Message·status bits
+**Word types:**
 
-Message types:
-  BC → RT      (Receive)
-  RT → BC      (Transmit)
-  RT → RT      (BC mediation)
-  Mode Command (system control)
-  Broadcast
-```
+**Command Word (CW)** — BC issued:
+- RT addr (5 bit)
+- T/R bit (1 = RT→BC)
+- Subaddr (5 bit)
+- Word count (5 bit)
+
+**Data Word (DW):** 16 bit data.
+
+**Status Word (SW)** — RT response:
+- RT addr
+- Message·status bits
+
+**Message types:**
+- BC → RT (Receive)
+- RT → BC (Transmit)
+- RT → RT (BC mediation)
+- Mode Command (system control)
+- Broadcast
 
 Word 20 bit, Message 1~32 data words. Frame deterministic.
 
 ## 1553B Schedule — Major Frame
 
-```text
-Major Frame (typical 50·100 ms):
-  Periodic schedule of messages
-  
+**Major Frame (typical 50·100 ms):** Periodic schedule of messages.
+
 예 — 100 ms major frame:
-  0-10 ms:  IMU data (RT 5 → BC)
-  10-20:    GPS data (RT 8 → BC)
-  20-25:    Cmd RT 3 — actuator (BC → RT 3)
-  25-30:    Telemetry (BC → RT 10)
-  30-50:    ...
-  50-100:   Reserved · aperiodic
-  
-Bus utilization:
-  보통 < 50% (slack for aperiodic·jitter)
-  
-Multiplexing:
-  Time-division multiplex (TDM)
-  No collision possible
-```
+
+| Time slot | Message |
+|-----------|---------|
+| 0-10 ms | IMU data (RT 5 → BC) |
+| 10-20 ms | GPS data (RT 8 → BC) |
+| 20-25 ms | Cmd RT 3 — actuator (BC → RT 3) |
+| 25-30 ms | Telemetry (BC → RT 10) |
+| 30-50 ms | ... |
+| 50-100 ms | Reserved · aperiodic |
+
+**Bus utilization:** 보통 < 50% (slack for aperiodic·jitter).
+
+**Multiplexing:**
+- Time-division multiplex (TDM)
+- No collision possible
 
 Schedule — *predetermined*. Real-time guarantee.
 
 ## 1553B 사용 사례
 
-```text
-LV·우주:
-  Apollo (1960s) — 1553 precursor
-  Space Shuttle
-  ISS (multiple buses)
-  KSLV-II (likely)
-  Falcon 9 (partial)
-  
-Aircraft:
-  F-16·F/A-18 (military)
-  KC-46·B707 retrofit
-  Eurofighter·Rafale
-  KAI KF-21·KUH 수리온
-  
-Helicopters:
-  Apache·Black Hawk
-  Tiger·NH90
+**LV·우주:**
+- Apollo (1960s) — 1553 precursor
+- Space Shuttle
+- ISS (multiple buses)
+- KSLV-II (likely)
+- Falcon 9 (partial)
 
-Modern alternatives:
-  Faster MIL-STD-1553 (수 Mbps 변형)
-  Mil-Std-1773 (fiber-optic 변형)
-```
+**Aircraft:**
+- F-16·F/A-18 (military)
+- KC-46·B707 retrofit
+- Eurofighter·Rafale
+- KAI KF-21·KUH 수리온
+
+**Helicopters:**
+- Apache·Black Hawk
+- Tiger·NH90
+
+**Modern alternatives:**
+- Faster MIL-STD-1553 (수 Mbps 변형)
+- Mil-Std-1773 (fiber-optic 변형)
 
 40년 — *legacy + modern* 공존.
 
 ## ARINC-429 — 민항 표준
 
-```text
-표준명:
-  ARINC Specification 429
-  Mark 33 Digital Information Transfer System (DITS)
-  
-역사:
-  1977 발간
-  지속 update
+**표준명:**
+- ARINC Specification 429
+- Mark 33 Digital Information Transfer System (DITS)
 
-물리층:
-  RZ (Return-to-Zero) encoding
-  100 kbps high-speed, 12.5 kbps low-speed
-  Twisted-pair, shielded
-  
-Topology:
-  Unidirectional point-to-point
-  1 transmitter → up to 20 receivers
-  No bidirectional!
-  No bus arbitration needed
-  
-Word format (32 bit):
-  8 bit label (data type)
-  2 bit SDI (source/destination identifier)
-  19 bit data
-  2 bit SSM (sign/status matrix)
-  1 bit parity
-```
+**역사:**
+- 1977 발간
+- 지속 update
+
+**물리층:**
+- RZ (Return-to-Zero) encoding
+- 100 kbps high-speed, 12.5 kbps low-speed
+- Twisted-pair, shielded
+
+**Topology:**
+- Unidirectional point-to-point
+- 1 transmitter → up to 20 receivers
+- No bidirectional
+- No bus arbitration needed
+
+**Word format (32 bit):**
+- 8 bit label (data type)
+- 2 bit SDI (source/destination identifier)
+- 19 bit data
+- 2 bit SSM (sign/status matrix)
+- 1 bit parity
 
 각 transmitter — 자기 만 전송. *간단·robust*.
 
 ## ARINC-429 Label
 
-```text
-Label (8 bit) — 데이터 type 식별:
+**Label (8 bit)** — 데이터 type 식별.
 
 대표 label (3 digit octal):
-  101 — selected course
-  102 — selected heading
-  103 — selected altitude
-  201 — airspeed
-  203 — altitude
-  204 — vertical speed
-  210 — true airspeed
-  310 — present position latitude
-  311 — present position longitude
-  314 — true heading
-  ...
 
-ARINC-429 공인 label catalog — 1000+
-각 system·subsystem 별 표준 label 사용
-```
+| Label | 의미 |
+|-------|------|
+| 101 | selected course |
+| 102 | selected heading |
+| 103 | selected altitude |
+| 201 | airspeed |
+| 203 | altitude |
+| 204 | vertical speed |
+| 210 | true airspeed |
+| 310 | present position latitude |
+| 311 | present position longitude |
+| 314 | true heading |
+
+ARINC-429 공인 label catalog — 1000+. 각 system·subsystem 별 표준 label 사용.
 
 Label — *self-describing data*. 수신자가 type 판단.
 
 ## ARINC-429 사용
 
-```text
-Boeing 727·737·747·757·767·777:
-  수십~수백 ARINC-429 wire
-  Each box → 다른 box로 한 wire
-  
-Airbus A320·A330·A340:
-  ARINC-429 위주
-  ARINC-664/AFDX 도입 부분 (A350)
-  
-Smaller aircraft·biz jet:
-  ARINC-429 widely
-  비용·복잡도 낮음
-  
-LV·위성:
-  덜 일반적 (1553 위주)
-```
+- **Boeing 727·737·747·757·767·777:** 수십~수백 ARINC-429 wire. Each box → 다른 box로 한 wire.
+- **Airbus A320·A330·A340:** ARINC-429 위주. ARINC-664/AFDX 도입 부분 (A350).
+- **Smaller aircraft·biz jet:** ARINC-429 widely. 비용·복잡도 낮음.
+- **LV·위성:** 덜 일반적 (1553 위주).
 
 배선 무게 — 항공기 *수백 kg*. AFDX로 *근본 해결*.
 
 ## ARINC-664 / AFDX — Switched Ethernet
 
-```text
-표준명:
-  ARINC-664 Part 7
-  AFDX (Avionics Full-Duplex Switched Ethernet)
-  Airbus trademark — ARINC-664P7가 표준
-  
-기반:
-  IEEE 802.3 Ethernet
-  100 Mbps full-duplex
-  + Avionics extension
-  
-Avionics extension:
-  Virtual Link (VL)
-    Bandwidth Allocation Gap (BAG)
-    Maximum Frame Size
-  Redundant dual-channel (A·B)
-  Deterministic routing
-```
+**표준명:**
+- ARINC-664 Part 7
+- AFDX (Avionics Full-Duplex Switched Ethernet)
+- Airbus trademark — ARINC-664P7가 표준
+
+**기반:**
+- IEEE 802.3 Ethernet
+- 100 Mbps full-duplex
+- Avionics extension
+
+**Avionics extension:**
+- Virtual Link (VL)
+  - Bandwidth Allocation Gap (BAG)
+  - Maximum Frame Size
+- Redundant dual-channel (A·B)
+- Deterministic routing
 
 Modern — *Ethernet의 deterministic 변형*.
 

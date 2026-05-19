@@ -58,22 +58,7 @@ public class FakeUserRepository : IUserRepository
 
 ### 방향성 차이
 
-```
-                 ┌─────────────────┐
-                 │       SUT       │
-                 └────────┬────────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-        ▼                 ▼                 ▼
-     ┌─────┐          ┌─────┐          ┌─────┐
-     │Stub │          │Mock │          │Stub │
-     └──┬──┘          └──┬──┘          └──┬──┘
-        │                │                │
-        ▼                ▼                ▼
-    입력 제공        출력 검증        입력 제공
-   (incoming)      (outgoing)      (incoming)
-```
+![Mock vs Stub 방향성](/images/blog/khorikov/diagrams/ch05-sut-direction.svg)
 
 | 구분 | Mock | Stub |
 |------|------|------|
@@ -193,19 +178,7 @@ public void User_matches_email_case_insensitively()
 
 ### Managed vs Unmanaged
 
-```
-                    의존
-                     │
-        ┌────────────┴────────────┐
-        ▼                         ▼
-   Managed 의존              Unmanaged 의존
-  (시스템 내부)              (시스템 외부)
-        │                         │
-   ┌────┴────┐               ┌────┴────┐
-   ▼         ▼               ▼         ▼
-  DB       파일           HTTP API    메시지 큐
-(직접 소유)  시스템        결제 게이트웨이  이메일
-```
+![Managed vs Unmanaged 의존](/images/blog/khorikov/diagrams/ch05-managed-unmanaged.svg)
 
 | 유형 | 정의 | 예시 | Mock 여부 |
 |------|------|------|-----------|

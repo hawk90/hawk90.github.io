@@ -1,0 +1,24 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+\node[prp, text width=10cm, align=left] at (0, 0) {
+    \textbf{리팩토링의 두 수준}\\[4pt]
+    \hrulefill\\[4pt]
+    1. 모델 안에서 리팩토링\\[2pt]
+    \quad → 기존 개념 유지\\[2pt]
+    \quad → 코드 구조 개선\\[2pt]
+    \quad → Extract Method, Rename, etc.\\[4pt]
+    2. 모델 자체를 리팩토링\\[2pt]
+    \quad → 새로운 개념 도입\\[2pt]
+    \quad → 기존 개념 폐기\\[2pt]
+    \quad → Ubiquitous Language 변경
+};
+
+\end{tikzpicture}
+\end{document}

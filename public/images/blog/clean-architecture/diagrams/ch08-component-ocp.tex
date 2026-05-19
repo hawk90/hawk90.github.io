@@ -1,0 +1,20 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog, node distance=1.5cm]
+
+% Components
+\node[abs] (a) {Component A\\[2pt](상위 정책)};
+\node[con, below=of a] (b) {Component B\\[2pt](중간)};
+\node[cli, below=of b] (c) {Component C\\[2pt](저수준 디테일)};
+
+% Arrows
+\draw[arr] (c) -- (b);
+\draw[arr] (b) -- (a);
+
+% Annotation
+\node[anchor=west, text width=4cm] at (4,0) {C의 변경은 B에 영향.\\[2pt]A는 영향 안 받음.};
+
+\end{tikzpicture}
+\end{document}

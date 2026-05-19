@@ -1,0 +1,41 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Creation
+\node[cli, text width=3.5cm, align=center] (create) at (5.5, 7) {생성 (Creation)};
+
+% Active state
+\node[con, text width=9cm, align=left, minimum height=2.2cm] (active) at (5.5, 4.8) {
+  \textbf{활성 상태 (Active)}\\[2pt]
+  • 메모리에 존재\\[2pt]
+  • 비즈니스 로직 수행\\[2pt]
+  • 상태 변경
+};
+
+% Store and Delete
+\node[imp, text width=3.5cm, align=center] (store) at (3, 2.5) {저장 (Store)};
+\node[prp, text width=3.5cm, align=center] (delete) at (8, 2.5) {삭제 (Delete)};
+
+% Stored state
+\node[cli, text width=9cm, align=left, minimum height=2cm] (stored) at (5.5, 0.8) {
+  \textbf{보관 상태 (Stored)}\\[2pt]
+  • DB에 영속화\\[2pt]
+  • 메모리에서 해제
+};
+
+% Reconstitute
+\node[imp, text width=3.5cm, align=center] (recon) at (9.5, 4.8) {재구성\\[2pt](Reconstitute)};
+
+% Arrows
+\draw[arr] (create.south) -- (active.north);
+\draw[arr] (active.south) -| (store.north);
+\draw[arr] (active.south) -| (delete.north);
+\draw[arr] (store.south) -- (stored.north);
+\draw[arr] (stored.east) -- +(1.5,0) |- (recon.south);
+\draw[arr] (recon.west) -- (active.east);
+
+\end{tikzpicture}
+\end{document}

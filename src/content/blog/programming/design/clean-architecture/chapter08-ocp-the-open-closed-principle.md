@@ -74,13 +74,7 @@ class FinancialReport {
 
 **OCP의 본질은 의존성 방향 통제다.**
 
-```
-높은 수준 모듈 (정책, 안 바뀐다)
-    ↑
-    │ (의존)
-    │
-낮은 수준 모듈 (디테일, 바뀐다)
-```
+![의존성 방향 — 디테일이 정책에 의존](/images/blog/clean-architecture/diagrams/ch08-dependency-direction.svg)
 
 낮은 수준이 높은 수준에 의존해야 한다. 그 반대가 되면 — 즉 높은 수준이 낮은 수준에 의존하면 — 낮은 수준의 변경이 높은 수준을 흔든다.
 
@@ -90,15 +84,7 @@ class FinancialReport {
 
 OCP는 클래스 수준에서만 작동하지 않는다. **컴포넌트 수준**에서 더 강력하다.
 
-```
-Component A (상위 정책)
-    ↑
-    │
-Component B (중간)
-    ↑
-    │
-Component C (저수준 디테일)
-```
+![컴포넌트 수준 OCP — 변경의 차단](/images/blog/clean-architecture/diagrams/ch08-component-ocp.svg)
 
 C의 변경은 B에 영향을 줄 수 있다. 그러나 A는 영향을 받지 않는다 — 컴포넌트 경계가 차단한다.
 

@@ -1,0 +1,17 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog, node distance=2cm]
+
+% Components
+\node[con] (a) {컴포넌트 A};
+\node[con, right=of a] (b) {컴포넌트 B};
+\node[cli, below=1.5cm of $(a)!0.5!(b)$] (c) {컴포넌트 C\\[2pt](큰 라이브러리)};
+
+% Dependencies
+\draw[arr] (a) -- (c);
+\draw[arr] (b) -- (c);
+
+\end{tikzpicture}
+\end{document}

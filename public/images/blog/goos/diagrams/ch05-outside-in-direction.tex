@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 4.5) {Outside-In 방향};
+
+% Left label
+\node[font=\sffamily\footnotesize, text=mutec, anchor=east] at (-4, 3) {인수 테스트 실패};
+
+% Arrow down
+\draw[arr] (-3.5, 2.8) -- (-3.5, 2.2);
+
+% UI layer
+\node[cli, minimum width=30mm] (ui) at (0, 2) {UI / Entry};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (1.8, 2) {여기서 시작?};
+
+% Arrow
+\draw[arr] (0, 1.3) -- (0, 0.8);
+
+% Translator layer
+\node[abs, minimum width=30mm] (trans) at (0, 0.3) {Translator};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (1.8, 0.3) {아니면 여기?};
+
+% Arrow
+\draw[arr] (0, -0.4) -- (0, -0.9);
+
+% Sniper layer
+\node[hi, minimum width=30mm] (sniper) at (0, -1.4) {Sniper};
+\node[font=\sffamily\tiny, anchor=west, text=hibord] at (1.8, -1.4) {핵심 로직은 여기};
+
+% Bottom recommendation
+\node[font=\sffamily\footnotesize, text width=55mm, align=center, text=mutec] at (0, -2.6) {%
+GOOS 권장: 도메인 로직(Sniper)부터 시작\\[2pt]%
+→ Mock을 사용해 협력자 정의};
+
+\end{tikzpicture}
+\end{document}

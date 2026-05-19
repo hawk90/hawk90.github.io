@@ -26,13 +26,7 @@ draft: true
 
 컴포넌트 의존 그래프에 순환이 없어야 한다.
 
-```
-좋음 (DAG):              나쁨 (순환):
-
-A → B → C                A → B
-    ↓                    ↑   ↓
-    D                    D ← C
-```
+![좋은 DAG vs 나쁜 순환 의존](/images/blog/clean-architecture/diagrams/ch14-dag-vs-cycle.svg)
 
 왜 순환이 문제인가? 순환은 컴포넌트들을 **하나의 큰 단위**로 묶어 버린다. A를 빌드하려면 B가 필요하고, B를 빌드하려면 C가 필요하고, C를 빌드하려면 A가 필요하다 — 그러면 셋을 동시에 빌드할 수밖에 없다.
 
@@ -82,14 +76,7 @@ A → B → A (순환)            A → C ← B
 
 무엇이 컴포넌트를 안정적으로 만드는가? **그것에 의존하는 컴포넌트의 수**다. 많은 컴포넌트가 의존하는 컴포넌트는 변경이 어렵다 — 모든 의존자에게 영향을 주기 때문이다.
 
-```
-컴포넌트 A   B   C   D   E
-       ↓   ↓   ↓   ↓   ↓
-        ↘  ↓  ↙  ↓  ↙
-            X (5개가 의존)
-              ↑
-              | 변경 어려움 = 안정적
-```
+![컴포넌트 안정성 — 많은 의존자](/images/blog/clean-architecture/diagrams/ch14-stability-visual.svg)
 
 이제 SDP를 다시 본다.
 
@@ -150,23 +137,7 @@ A의 범위도 [0, 1].
 
 I와 A를 함께 그리면 평면이 만들어진다.
 
-```
-A
-1 ┤  Zone of Uselessness
-  │     (최대 추상, 최대 안정 — 누구도 안 씀)
-  │
-  │  ╲
-  │   ╲   Main Sequence
-  │    ╲  (이상적 위치)
-  │     ╲
-  │      ╲
-0 ┤  Zone  ╲
-  │  of    ╲
-  │  Pain   ╲
-  │ (구체, 안정 — 변경 불가)
-  └──────────────────────  I
-  0                       1
-```
+![Main Sequence — Abstractness vs Instability](/images/blog/clean-architecture/diagrams/ch14-main-sequence.svg)
 
 **Main Sequence** — A + I = 1 직선. 이 직선 위에 있는 컴포넌트가 이상적이다.
 

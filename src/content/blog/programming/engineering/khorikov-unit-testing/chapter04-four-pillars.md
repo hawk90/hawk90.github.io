@@ -95,16 +95,7 @@ public void Full_application_startup()
 
 ### 거짓 양성의 비용
 
-```
-            기능 정상              기능 고장
-           ─────────────────────────────────
-테스트 통과│   ✓ True Negative    │ ✗ False Negative │
-           │   (정상)              │   (버그 놓침)     │
-           ─────────────────────────────────
-테스트 실패│   ✗ False Positive   │ ✓ True Positive  │
-           │   (신뢰 저하)         │   (버그 발견)     │
-           ─────────────────────────────────
-```
+![테스트 결과 매트릭스](/images/blog/khorikov/diagrams/ch04-confusion-matrix.svg)
 
 **거짓 양성이 많으면:**
 - 테스트 스위트에 대한 신뢰 하락
@@ -262,23 +253,7 @@ public void Premium_customer_can_purchase_over_limit()
 
 회귀 보호, 리팩토링 내성, 빠른 피드백 중 **2개만** 최대화 가능:
 
-```
-                    회귀 보호
-                       △
-                      ╱ ╲
-                     ╱   ╲
-              E2E   ╱     ╲  ???
-                   ╱       ╲
-                  ╱    X    ╲
-                 ╱           ╲
-                ▽─────────────▽
-        리팩토링 내성        빠른 피드백
-              │                 │
-           통합 테스트       단위 테스트
-              └───────┬────────┘
-                      │
-              (유지보수성은 항상 최대화)
-```
+![불가능한 삼각형](/images/blog/khorikov/diagrams/ch04-impossible-triangle.svg)
 
 ### 각 테스트 유형의 위치
 

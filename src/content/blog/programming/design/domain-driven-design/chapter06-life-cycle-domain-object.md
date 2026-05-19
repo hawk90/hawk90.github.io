@@ -12,33 +12,7 @@ draft: true
 
 Entity는 생명주기를 가진다:
 
-```
-생성 (Creation)
-    │
-    ▼
-┌───────────────────────────────────────┐
-│           활성 상태 (Active)           │
-│  • 메모리에 존재                        │
-│  • 비즈니스 로직 수행                   │
-│  • 상태 변경                           │
-└───────────────────────────────────────┘
-    │                 │
-    ▼                 ▼
-저장 (Store)      삭제 (Delete)
-    │
-    ▼
-┌───────────────────────────────────────┐
-│          보관 상태 (Stored)            │
-│  • DB에 영속화                         │
-│  • 메모리에서 해제                      │
-└───────────────────────────────────────┘
-    │
-    ▼
-재구성 (Reconstitute)
-    │
-    ▼
-활성 상태로 복귀
-```
+![도메인 객체 생명주기](/images/blog/domain-driven-design/diagrams/ch06-lifecycle.svg)
 
 이 생명주기를 관리하는 3가지 패턴:
 
@@ -73,28 +47,9 @@ Entity는 생명주기를 가진다:
 
 ### Aggregate 정의
 
-```
 Aggregate = 관련 객체들의 클러스터 + 일관성 규칙
 
-┌─────────────────────────────────────────┐
-│            Cargo Aggregate              │
-│  ┌─────────────────────────────────┐   │
-│  │     Cargo (Aggregate Root)      │   │
-│  └─────────────────────────────────┘   │
-│         │                │              │
-│         ▼                ▼              │
-│  ┌───────────┐    ┌───────────────┐    │
-│  │ Itinerary │    │   Delivery    │    │
-│  └───────────┘    └───────────────┘    │
-│         │                               │
-│         ▼                               │
-│    ┌─────────┐                          │
-│    │   Leg   │                          │
-│    └─────────┘                          │
-└─────────────────────────────────────────┘
-      ↑
-      │ 외부에서는 Root만 접근
-```
+![Aggregate 구조](/images/blog/domain-driven-design/diagrams/ch06-aggregate-structure.svg)
 
 ### Aggregate Root
 
@@ -223,19 +178,7 @@ class Cargo:
 
 ### 다른 Aggregate 참조
 
-```
-Aggregate 간에는 ID로만 참조:
-
-┌─────────────────────┐     ┌─────────────────────┐
-│   Cargo Aggregate   │     │  Voyage Aggregate   │
-│                     │     │                     │
-│  Leg.voyageId ──────┼────►│  Voyage             │
-│  (ID만 저장)         │     │                     │
-└─────────────────────┘     └─────────────────────┘
-
-잘못된 방법: Leg가 Voyage 객체를 직접 참조
-올바른 방법: Leg가 VoyageId(식별자)만 저장
-```
+![Aggregate 간 참조](/images/blog/domain-driven-design/diagrams/ch06-aggregate-reference.svg)
 
 **C++**
 

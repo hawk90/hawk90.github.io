@@ -1,0 +1,56 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Booking Context with Published API
+\node[prp, text width=9cm, align=left] (booking) at (0, 0) {
+    \textbf{Booking Context}\\[2pt]
+    \textbf{(Open Host Service)}
+};
+
+\node[cli, text width=8cm, align=left] (api) at (0, -2) {
+    \textbf{Published API}\\[4pt]
+    GET  /api/v1/bookings/\{id\}\\[2pt]
+    POST /api/v1/bookings\\[2pt]
+    GET  /api/v1/bookings/\{id\}/\\[2pt]
+    \quad\quad\quad itinerary\\[4pt]
+    Events:\\[2pt]
+    - booking.created\\[2pt]
+    - booking.confirmed\\[2pt]
+    - itinerary.assigned
+};
+
+% Consumer contexts
+\node[con, text width=2cm, align=center] (shipping) at (-4.5, -6) {
+    \textbf{Shipping}\\[2pt]
+    \textbf{Context}
+};
+
+\node[con, text width=2cm, align=center] (billing) at (-1.5, -6) {
+    \textbf{Billing}\\[2pt]
+    \textbf{Context}
+};
+
+\node[con, text width=2cm, align=center] (reporting) at (1.5, -6) {
+    \textbf{Reporting}\\[2pt]
+    \textbf{Context}
+};
+
+\node[con, text width=2cm, align=center] (partner) at (4.5, -6) {
+    \textbf{Partner}\\[2pt]
+    \textbf{Systems}
+};
+
+% Arrows
+\draw[arr] (api.south) -- (shipping.north);
+\draw[arr] (api.south) -- (billing.north);
+\draw[arr] (api.south) -- (reporting.north);
+\draw[arr] (api.south) -- (partner.north);
+
+\end{tikzpicture}
+\end{document}

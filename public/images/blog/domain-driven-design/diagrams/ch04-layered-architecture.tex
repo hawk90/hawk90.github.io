@@ -1,0 +1,39 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Layers
+\node[cli, text width=10cm, align=center, minimum height=1.2cm] (ui) at (5.5, 7) {
+  \textbf{User Interface (UI)}\\[2pt]
+  사용자와 상호작용 / HTTP 요청 처리
+};
+
+\node[cli, text width=10cm, align=center, minimum height=1.2cm] (app) at (5.5, 5.3) {
+  \textbf{Application Layer}\\[2pt]
+  작업 조율 / 트랜잭션 / 얇은 계층
+};
+
+\node[con, text width=10cm, align=center, minimum height=1.2cm] (domain) at (5.5, 3.6) {
+  \textbf{Domain Layer ★}\\[2pt]
+  비즈니스 로직 / 핵심 모델 / 규칙
+};
+
+\node[imp, text width=10cm, align=center, minimum height=1.2cm] (infra) at (5.5, 1.9) {
+  \textbf{Infrastructure Layer}\\[2pt]
+  DB / 메시지 큐 / 파일 시스템 / 외부 API
+};
+
+% Dependency arrows
+\draw[arr] (ui.south) -- (app.north);
+\draw[arr] (app.south) -- (domain.north);
+\draw[arr, dashed] (infra.north) -- (domain.south);
+
+% Dependency label
+\node[text=conbord, font=\small] at (11.5, 5.3) {의존 방향:};
+\node[text=conbord, font=\small] at (11.5, 4.8) {위 → 아래};
+\node[text=conbord, font=\small] at (11.5, 3.1) {(역전!)};
+
+\end{tikzpicture}
+\end{document}

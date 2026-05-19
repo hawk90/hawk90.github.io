@@ -1,0 +1,30 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+\node[prp, text width=10cm, align=left] at (0, 0) {
+    \textbf{Supple Design}\\[4pt]
+    \hrulefill\\[4pt]
+    1. Intention-Revealing Interfaces\\[2pt]
+    \quad → 메서드 이름이 의도를 드러냄\\[4pt]
+    2. Side-Effect-Free Functions\\[2pt]
+    \quad → 상태 변경 없이 값 반환 (Query)\\[4pt]
+    3. Assertions\\[2pt]
+    \quad → 사전/사후조건, 불변식 명시\\[4pt]
+    4. Conceptual Contours\\[2pt]
+    \quad → 도메인 개념의 자연스러운 경계\\[4pt]
+    5. Standalone Classes\\[2pt]
+    \quad → 의존성 최소화\\[4pt]
+    6. Closure of Operations\\[2pt]
+    \quad → 같은 타입 in/out → 조합 자유\\[4pt]
+    7. Declarative Design\\[2pt]
+    \quad → 무엇을 원하는지 표현
+};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,33 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[abs, text width=10cm, align=center] at (5, 7) {지식 추출 사이클};
+
+% Cycle nodes
+\node[con, text width=3cm, align=center] (talk) at (5, 5.5) {대화};
+\node[right=0.3cm of talk.east, anchor=west, text=conbord] {← 도메인 전문가와 이야기};
+
+\node[con, text width=3cm, align=center] (model) at (5, 4) {모델링};
+\node[right=0.3cm of model.east, anchor=west, text=conbord] {← 개념을 구조화};
+
+\node[con, text width=3cm, align=center] (code) at (5, 2.5) {코드};
+\node[right=0.3cm of code.east, anchor=west, text=conbord] {← 모델을 코드로 표현};
+
+\node[con, text width=3cm, align=center] (feedback) at (5, 1) {피드백};
+\node[right=0.3cm of feedback.east, anchor=west, text=conbord] {← ``이게 맞나요?''};
+
+% Arrows
+\draw[arr] (talk.south) -- (model.north);
+\draw[arr] (model.south) -- (code.north);
+\draw[arr] (code.south) -- (feedback.north);
+\draw[arr] (feedback.west) -- +(-1.5,0) |- (talk.west);
+
+% Loop label
+\node[text=conbord] at (1.5, 3.5) {반복};
+
+\end{tikzpicture}
+\end{document}

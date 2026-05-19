@@ -1,0 +1,37 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[text=conbord, font=\bfseries] at (5.5, 5.5) {Aggregate 간에는 ID로만 참조};
+
+% Cargo Aggregate
+\node[con, text width=4.5cm, align=center, minimum height=3cm] (cargo) at (2.5, 3) {
+  Cargo Aggregate
+};
+\node[imp, text width=3cm, align=center] at (2.5, 2.5) {
+  Leg.voyageId\\[2pt]
+  (ID만 저장)
+};
+
+% Voyage Aggregate
+\node[con, text width=4.5cm, align=center, minimum height=3cm] (voyage) at (8.5, 3) {
+  Voyage Aggregate
+};
+\node[imp, text width=3cm, align=center] at (8.5, 2.8) {
+  Voyage
+};
+
+% Reference arrow
+\draw[arr, thick] (cargo.east) -- (voyage.west);
+
+% Annotations
+\node[prp, text width=9cm, align=left] at (5.5, 0.3) {
+  잘못된 방법: Leg가 Voyage 객체를 직접 참조\\[2pt]
+  올바른 방법: Leg가 VoyageId(식별자)만 저장
+};
+
+\end{tikzpicture}
+\end{document}

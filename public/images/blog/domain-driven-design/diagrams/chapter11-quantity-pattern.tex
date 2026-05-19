@@ -1,0 +1,35 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[prp, text width=8cm, align=center] (title) at (0, 0) {
+    \textbf{Quantity}
+};
+
+% Quantity class
+\node[con, text width=3cm, align=left] (quantity) at (-2, -2) {
+    \textbf{Quantity}\\[2pt]
+    \hrulefill\\[2pt]
+    amount: number\\[2pt]
+    unit: Unit
+};
+
+% Unit class
+\node[con, text width=3cm, align=left] (unit) at (2.5, -2) {
+    \textbf{Unit}\\[2pt]
+    \hrulefill\\[2pt]
+    name: string\\[2pt]
+    symbol: string
+};
+
+% Association arrow
+\draw[arr] (quantity) -- (unit);
+
+\end{tikzpicture}
+\end{document}

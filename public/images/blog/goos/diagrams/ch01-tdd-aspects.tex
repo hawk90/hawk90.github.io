@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 3.5) {TDD의 두 가지 측면};
+
+% Testing box
+\node[abs, minimum width=38mm, minimum height=30mm] (testing) at (-2.2, 1) {};
+\node[font=\sffamily\bfseries\small, text=absbord] at (-2.2, 2.1) {검증 (Testing)};
+\node[font=\sffamily\footnotesize, text width=32mm, align=center] at (-2.2, 0.7) {코드가 의도대로\\[2pt]동작하는지 확인};
+
+% Design box
+\node[imp, minimum width=38mm, minimum height=30mm] (design) at (2.2, 1) {};
+\node[font=\sffamily\bfseries\small, text=impbord] at (2.2, 2.1) {설계 (Design)};
+\node[font=\sffamily\footnotesize, text width=32mm, align=center] at (2.2, 0.7) {테스트가 처음으로\\[2pt]코드를 사용하면서\\[2pt]인터페이스 발견};
+
+% Arrows down
+\draw[arr] (-2.2, -0.3) -- (-0.6, -1.5);
+\draw[arr] (2.2, -0.3) -- (0.6, -1.5);
+
+% TDD result box
+\node[hi, minimum width=35mm, minimum height=14mm] (tdd) at (0, -2.2) {};
+\node[font=\sffamily\bfseries\small] at (0, -1.9) {TDD};
+\node[font=\sffamily\footnotesize] at (0, -2.5) {Test-Driven Design};
+
+\end{tikzpicture}
+\end{document}

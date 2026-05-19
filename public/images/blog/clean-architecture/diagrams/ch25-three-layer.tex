@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Traditional 3-layer
+\node[cli, minimum width=38mm] (ui) at (0,2) {UI};
+\node[abs, minimum width=38mm] (biz) at (0,1) {Business Rules};
+\node[imp, minimum width=38mm] (data) at (0,0) {Data};
+
+\draw[arr] (ui) -- (biz);
+\draw[arr] (biz) -- (data);
+
+% Annotations showing problem
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (2.5,2) {UI 축 + 언어 축 섞임};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (2.5,1) {게임 규칙 축};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (2.5,0) {저장 축};
+
+% Problem indicator
+\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=west] at (2.5,2.5) {문제: 두 축이 한 층에};
+
+\end{tikzpicture}
+\end{document}

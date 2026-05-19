@@ -1,0 +1,17 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog, node distance=2cm]
+
+% High level
+\node[abs, text width=5cm, align=center] (high) {높은 수준 모듈\\[2pt](정책, 안 바뀐다)};
+
+% Low level
+\node[cli, text width=5cm, align=center, below=of high] (low) {낮은 수준 모듈\\[2pt](디테일, 바뀐다)};
+
+% Upward dependency arrow
+\draw[arr] (low) -- (high) node[midway, right] {의존};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Central Use Cases
+\node[abs, minimum width=30mm, minimum height=12mm, font=\sffamily\bfseries\small] (uc) at (0,0) {Use Cases\\[2pt](중심)};
+
+% Entry points (multiple adapters)
+\node[conSm, minimum width=22mm] (uiadapter) at (-3.5,2) {UI Adapter};
+\node[impSm, minimum width=22mm] (event) at (-1.2,2) {Event\\[2pt]Listener};
+\node[clsSm, draw=clibord, fill=clifill, minimum width=22mm] (batch) at (1.2,2) {Batch\\[2pt]Worker};
+\node[prp, minimum width=22mm, minimum height=6mm, font=\sffamily\footnotesize] (read) at (3.5,2) {Read Model};
+
+% External systems
+\node[font=\sffamily\footnotesize, text=mutec] at (-3.5,3) {HTTP/REST};
+\node[font=\sffamily\footnotesize, text=mutec] at (-1.2,3) {MessageQ};
+\node[font=\sffamily\footnotesize, text=mutec] at (1.2,3) {Cron};
+\node[font=\sffamily\footnotesize, text=mutec] at (3.5,3) {DB Replica};
+
+% Arrows to Use Cases (all point inward)
+\draw[arr] (uiadapter.south) -- (uc.north west);
+\draw[arr] (event.south) -- (uc.north);
+\draw[arr] (batch.south) -- (uc.north);
+\draw[arr] (read.south) -- (uc.north east);
+
+% Annotation
+\node[font=\sffamily\footnotesize, text=inkc, align=center] at (0,-1.5) {여러 진입점, 여러 출구\\[2pt]의존성 규칙 동일 — 안쪽으로};
+
+\end{tikzpicture}
+\end{document}

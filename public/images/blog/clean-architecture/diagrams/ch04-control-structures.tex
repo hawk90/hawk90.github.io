@@ -1,0 +1,35 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog, node distance=0.8cm]
+
+% Sequence
+\begin{scope}
+\node[abs] (seqtitle) {순차};
+\node[cli, below=of seqtitle] (a1) {A};
+\node[cli, below=of a1] (b1) {B};
+\draw[arr] (a1) -- (b1);
+\end{scope}
+
+% Selection
+\begin{scope}[xshift=4cm]
+\node[abs] (seltitle) {선택};
+\node[cli, below=of seltitle] (cond) {if (c)};
+\node[cli, below left=of cond, xshift=-0.5cm] (a2) {A};
+\node[cli, below right=of cond, xshift=0.5cm] (b2) {B};
+\draw[arr] (cond) -- (a2) node[midway, left] {참};
+\draw[arr] (cond) -- (b2) node[midway, right] {거짓};
+\end{scope}
+
+% Iteration
+\begin{scope}[xshift=8cm]
+\node[abs] (itertitle) {반복};
+\node[cli, below=of itertitle] (while) {while (c)};
+\node[cli, below=of while] (a3) {A};
+\draw[arr] (while) -- (a3);
+\draw[arr] (a3.east) -- ++(0.8,0) |- (while.east);
+\end{scope}
+
+\end{tikzpicture}
+\end{document}

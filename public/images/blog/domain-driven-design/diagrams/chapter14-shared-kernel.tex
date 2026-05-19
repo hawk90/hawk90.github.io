@@ -1,0 +1,45 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Booking Context
+\node[con, text width=4.5cm, align=center] (booking) at (-3.5, 0) {
+    \textbf{Booking}\\[2pt]
+    \textbf{Context}
+};
+
+\node[cli, text width=3.5cm, align=center] (booking-spec) at (-3.5, -1.5) {
+    \textbf{Booking}\\[2pt]
+    \textbf{specific}
+};
+
+% Shipping Context
+\node[con, text width=4.5cm, align=center] (shipping) at (3.5, 0) {
+    \textbf{Shipping}\\[2pt]
+    \textbf{Context}
+};
+
+\node[cli, text width=3.5cm, align=center] (shipping-spec) at (3.5, -1.5) {
+    \textbf{Shipping}\\[2pt]
+    \textbf{specific}
+};
+
+% Shared Kernel
+\node[prp, text width=7cm, align=left] (kernel) at (0, -3.5) {
+    \textbf{Shared Kernel}\\[4pt]
+    • TrackingId (Value Object)\\[2pt]
+    • Location (Value Object)\\[2pt]
+    • CargoSize (Value Object)
+};
+
+% Arrows
+\draw[arr] (booking-spec.south) -- (kernel.north west);
+\draw[arr] (shipping-spec.south) -- (kernel.north east);
+
+\end{tikzpicture}
+\end{document}

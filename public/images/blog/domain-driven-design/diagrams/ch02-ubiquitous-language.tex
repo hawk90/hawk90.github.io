@@ -1,0 +1,32 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[abs, text width=10cm, align=center] at (5.5, 7) {유비쿼터스 언어의 범위};
+
+% Domain Model (top)
+\node[con, text width=4cm, align=center] (domain) at (5.5, 5.5) {도메인\\[2pt]모델};
+
+% Three pillars
+\node[imp, text width=2.5cm, align=center] (code) at (1.5, 3) {코드\\[6pt]Cargo\\[2pt]Voyage};
+\node[imp, text width=2.5cm, align=center] (talk) at (5.5, 3) {대화\\[6pt]``화물''\\[2pt]``항해''};
+\node[imp, text width=2.5cm, align=center] (doc) at (9.5, 3) {문서\\[6pt]Cargo\\[2pt]다이어그램};
+
+% Connections from domain to pillars
+\draw[arr] (domain.south) -- (code.north);
+\draw[arr] (domain.south) -- (talk.north);
+\draw[arr] (domain.south) -- (doc.north);
+
+% Equality symbols
+\node[text=conbord, font=\Large] at (3.5, 3) {=};
+\node[text=conbord, font=\Large] at (7.5, 3) {=};
+
+% Bottom message
+\node[con, text width=10cm, align=center] at (5.5, 0.8)
+  {모든 곳에서 같은 언어, 같은 의미};
+
+\end{tikzpicture}
+\end{document}

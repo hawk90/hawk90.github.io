@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 5) {통합 지점 점검};
+
+% Components vertically
+\node[neut, minimum width=45mm] (fake1) at (0, 4) {FakeAuctionServer};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (2.5, 3.5) {XMPP Message};
+\draw[arr] (0, 3.6) -- (0, 3.1);
+
+\node[cli, minimum width=45mm] (trans) at (0, 2.6) {AuctionMessageTranslator};
+\node[font=\sffamily\tiny, anchor=west, text=clibord] at (2.5, 2.6) {메시지 파싱 필요};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (2.5, 2.1) {current\_price() 호출};
+\draw[arr] (0, 2.1) -- (0, 1.6);
+
+\node[hi, minimum width=45mm] (sniper) at (0, 1.1) {AuctionSniper};
+\node[font=\sffamily\tiny, anchor=west, text=impbord] at (2.5, 1.1) {구현 완료};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (2.5, 0.6) {bid() 호출};
+\draw[arr] (0, 0.6) -- (0, 0.1);
+
+\node[abs, minimum width=45mm] (xmpp) at (0, -0.4) {XMPPAuction};
+\node[font=\sffamily\tiny, anchor=west, text=absbord] at (2.5, -0.4) {XMPP 메시지 전송 필요};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (2.5, -0.9) {XMPP Message};
+\draw[arr] (0, -0.9) -- (0, -1.4);
+
+\node[neut, minimum width=45mm] (fake2) at (0, -1.9) {FakeAuctionServer};
+
+% Bottom note
+\node[font=\sffamily\footnotesize, text=conbord] at (0, -2.8) {→ Translator와 XMPPAuction 구현 필요};
+
+\end{tikzpicture}
+\end{document}

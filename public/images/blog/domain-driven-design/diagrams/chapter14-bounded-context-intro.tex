@@ -1,0 +1,46 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Small system
+\node[prp, text width=6cm, align=center] (small) at (0, 0) {
+    \textbf{작은 시스템:}\\[4pt]
+    \textbf{단일 도메인 모델}\\[2pt]
+    Cargo, Voyage, Customer, ...\\[2pt]
+    모든 팀이 공유
+};
+
+% Large system label
+\node[align=center] at (0, -2.2) {큰 시스템:};
+
+% Three teams
+\node[cli, text width=2.5cm, align=center] (booking) at (-3.5, -4) {
+    \textbf{예약팀}\\[2pt]
+    Cargo?\\[2pt]
+    의미 A
+};
+
+\node[cli, text width=2.5cm, align=center] (shipping) at (0, -4) {
+    \textbf{운송팀}\\[2pt]
+    Cargo?\\[2pt]
+    의미 B
+};
+
+\node[cli, text width=2.5cm, align=center] (billing) at (3.5, -4) {
+    \textbf{정산팀}\\[2pt]
+    Cargo?\\[2pt]
+    의미 C
+};
+
+% Problem label
+\node[align=center, text width=5cm] at (0, -5.8) {
+    같은 이름, 다른 의미 = 혼란
+};
+
+\end{tikzpicture}
+\end{document}

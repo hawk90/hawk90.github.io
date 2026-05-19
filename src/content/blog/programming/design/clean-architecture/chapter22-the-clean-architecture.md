@@ -14,35 +14,7 @@ draft: true
 
 ## 동심원 다이어그램
 
-```
-                        ┌────────────────────────┐
-                        │  Frameworks & Drivers   │
-                        │  (Web, DB, Devices)     │
-                        │                        │
-                        │   ┌──────────────────┐ │
-                        │   │ Interface Adapters│ │
-                        │   │ (Controllers,    │ │
-                        │   │  Presenters,     │ │
-                        │   │  Gateways)       │ │
-                        │   │                  │ │
-                        │   │   ┌────────────┐ │ │
-                        │   │   │ Use Cases   │ │ │
-                        │   │   │ (App-specific│ │ │
-                        │   │   │  business    │ │ │
-                        │   │   │  rules)      │ │ │
-                        │   │   │             │ │ │
-                        │   │   │  ┌────────┐ │ │ │
-                        │   │   │  │Entities │ │ │ │
-                        │   │   │  │(Core    │ │ │ │
-                        │   │   │  │ Business│ │ │ │
-                        │   │   │  │ Rules)  │ │ │ │
-                        │   │   │  └────────┘ │ │ │
-                        │   │   └────────────┘ │ │
-                        │   └──────────────────┘ │
-                        └────────────────────────┘
-
-           ←━━━━━━━━━━━━━━━━━━━━━ 의존성 화살표는 안쪽으로만 ━━━━━━━━━━━━━━━━━━━━━←
-```
+![Clean Architecture 동심원 다이어그램 — Entities, Use Cases, Adapters, Frameworks](/images/blog/clean-architecture/diagrams/ch22-concentric-circles.svg)
 
 4겹 동심원이다.
 

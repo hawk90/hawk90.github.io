@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,5) {불가능한 삼각형};
+
+% Triangle vertices
+\coordinate (top) at (0,3.5);
+\coordinate (bl) at (-3,0);
+\coordinate (br) at (3,0);
+
+% Triangle outline
+\draw[edge, line width=0.6pt] (top) -- (bl) -- (br) -- cycle;
+
+% Vertex labels
+\node[hi, minimum width=24mm] at (top) {회귀 보호};
+\node[abs, minimum width=28mm] at (bl) {리팩토링 내성};
+\node[imp, minimum width=26mm] at (br) {빠른 피드백};
+
+% Edge labels
+\node[font=\sffamily\footnotesize, text=gray] at (-2.2,2) {E2E};
+\node[font=\sffamily\footnotesize, text=gray] at (2.2,2) {???};
+\node[font=\sffamily\footnotesize, text=gray] at (0,-0.6) {단위 / 통합};
+
+% Center X
+\node[font=\sffamily\bfseries\large, text=conbord] at (0,1.5) {X};
+
+% Note
+\node[font=\sffamily\footnotesize, text=gray, align=center] at (0,-1.5)
+    {3개 중 2개만 최대화 가능\\[2pt](유지보수성은 항상 최대화)};
+
+\end{tikzpicture}
+\end{document}

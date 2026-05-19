@@ -1,0 +1,44 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% External API
+\node[imp, text width=7cm, align=center] (external) at (0, 0) {
+    \textbf{External Shipping API}\\[4pt]
+    shipment\_ref, status\_code, loc, eta
+};
+
+% ACL
+\node[prp, text width=8cm, align=left] (acl) at (0, -2.5) {
+    \textbf{Anticorruption Layer (ACL)}
+};
+
+\node[cli, text width=3cm, align=center] (adapter) at (-2, -4) {
+    \textbf{Adapter}\\[2pt]
+    (API 호출)
+};
+
+\node[cli, text width=3cm, align=center] (translator) at (2, -4) {
+    \textbf{Translator}\\[2pt]
+    (모델 변환)
+};
+
+% Our Context
+\node[con, text width=7cm, align=left] (our) at (0, -6.5) {
+    \textbf{Our Shipping Context}\\[4pt]
+    TrackingId, DeliveryStatus, Location\\[2pt]
+    (우리의 Ubiquitous Language)
+};
+
+% Arrows
+\draw[arr] (external.south) -- (acl.north);
+\draw[arr] (adapter.east) -- (translator.west);
+\draw[arr] (translator.south) -- (our.north);
+
+\end{tikzpicture}
+\end{document}

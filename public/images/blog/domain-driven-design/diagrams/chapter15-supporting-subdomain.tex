@@ -1,0 +1,40 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+\node[align=center] at (0, 0.5) {\textbf{Supporting Subdomains:}};
+
+\node[cli, text width=3cm, align=left] (customer) at (-4, -1.5) {
+    \textbf{고객 관리}\\[4pt]
+    • 고객 정보\\[2pt]
+    • 계약 관리\\[2pt]
+    • 신용 평가\\[4pt]
+    → 내부 개발\\[2pt]
+    \quad (덜 복잡)
+};
+
+\node[cli, text width=3cm, align=left] (billing) at (0, -1.5) {
+    \textbf{청구/정산}\\[4pt]
+    • 운임 계산\\[2pt]
+    • 청구서\\[2pt]
+    • 수금\\[4pt]
+    → 내부 개발\\[2pt]
+    \quad (덜 복잡)
+};
+
+\node[cli, text width=3cm, align=left] (reporting) at (4, -1.5) {
+    \textbf{보고서}\\[4pt]
+    • 통계\\[2pt]
+    • 대시보드\\[2pt]
+    • 분석\\[4pt]
+    → 내부 개발\\[2pt]
+    \quad (덜 복잡)
+};
+
+\end{tikzpicture}
+\end{document}
