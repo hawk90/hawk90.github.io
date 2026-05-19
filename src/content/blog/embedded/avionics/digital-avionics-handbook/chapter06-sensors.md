@@ -8,4 +8,604 @@ tags: [avionics, sensor, imu, gps, star-tracker]
 draft: true
 ---
 
-> Outline — IMU (accelerometer·gyro·magnetometer)의 bias·drift·noise 모델. GPS·GNSS receiver — code/carrier·PPS·NMEA·UBX. Star tracker — orientation determination. 압력·온도·전기 센서. *interface* — SPI·I2C·UART·CAN·1553. *raw → engineering unit* 변환과 calibration.
+## 한 줄 요약
+
+> **"Sensor = raw measurement → engineering unit"** — bias·drift·noise·fusion이 본질.
+
+## Avionics Sensor 분류
+
+```text
+관성 (Inertial):
+  Accelerometer (linear acceleration)
+  Gyroscope (angular rate)
+  Magnetometer (Earth magnetic field)
+  → IMU (Inertial Measurement Unit) — 통합 package
+
+항법 (Navigation):
+  GPS·GNSS receiver (position)
+  Star tracker (orientation)
+  Earth horizon sensor
+  Sun sensor (rough orientation)
+  Radio altimeter
+
+대기·환경 (Air data):
+  Static pressure (altitude)
+  Dynamic pressure (airspeed)
+  Temperature
+  Angle of attack (AOA)
+  Sideslip angle (β)
+
+기타:
+  Engine sensors (RPM·temperature·pressure)
+  Fuel level·flow
+  Strain gauge
+  Vibration·shock
+  Radiation·dose
+```
+
+각 sensor — *physical phenomenon → digital*.
+
+## IMU 구성
+
+```text
+6-DOF IMU (Inertial Measurement Unit):
+  3-axis accelerometer
+    Measure: linear acceleration (m/s²)
+    Earth gravity 포함
+    
+  3-axis gyroscope
+    Measure: angular rate (rad/s 또는 deg/s)
+    
+9-DOF IMU:
+  + 3-axis magnetometer
+    Measure: Earth magnetic field (Gauss)
+
+Output rate:
+  1~10 kHz typical
+  Avionics — 100~1000 Hz
+  
+Grade:
+  Tactical (low-cost)
+  Industrial
+  Tactical+
+  Strategic
+  Navigation grade
+```
+
+LV·항공기 — *Navigation 또는 Strategic grade*. 정확도 1~3 NM/hr.
+
+## Accelerometer — 원리
+
+```text
+원리:
+  Proof mass + spring·capacitor
+  Acceleration → force → displacement
+  Capacitance change → voltage
+  
+Types:
+  MEMS — 작고 저렴, 정확도 mid
+    예: Bosch BMI088, Analog Devices ADXL355
+  Pendulous force-rebalance — high-end
+    Honeywell QA series
+  Quartz vibrating beam — strategic
+    Honeywell QFLEX
+  
+Specs:
+  Bias stability — μg
+  Scale factor stability — ppm
+  Noise — μg/√Hz
+  Temperature compensation
+  
+Output:
+  Analog → ADC → digital
+  Or digital SPI/I2C
+```
+
+Accelerometer = *3축 force* 측정. Bias = 정지 시 출력.
+
+## Gyroscope — 원리
+
+```text
+Types:
+
+MEMS:
+  Vibrating mass (Coriolis effect)
+  Low cost, 1~100°/hr drift
+  Bosch, Analog Devices, STMicro
+  
+FOG (Fiber-Optic Gyro):
+  Light propagation in coil
+  Sagnac effect
+  Bias < 0.01°/hr (navigation grade)
+  Northrop Grumman, KVH
+  
+RLG (Ring Laser Gyro):
+  Laser in cavity
+  Sagnac
+  Bias < 0.001°/hr (strategic)
+  Honeywell GG1320
+  
+HRG (Hemispherical Resonator Gyro):
+  Vibrating quartz hemisphere
+  Bias < 0.001°/hr, very stable
+  Northrop Grumman SCALAR
+  
+LV·우주 trend:
+  FOG·HRG (예: KSLV-II)
+  RLG (legacy aircraft)
+  MEMS (UAV, small sat, augment)
+```
+
+각 gyro — *grade·cost·application*.
+
+## IMU Error Model
+
+```text
+Measurement model:
+  ω_meas = ω_true + bias + scale_factor*ω + noise + ...
+
+주요 error:
+
+Bias (drift):
+  Static — stable offset
+  Dynamic — slow change over time·temp
+  Random walk — sqrt(time) drift
+
+Scale Factor:
+  Output/input ratio 오차
+  Temperature dependence
+  
+Misalignment:
+  Sensor axes vs body axes 각도 오차
+  
+Noise:
+  ARW (Angle Random Walk) — gyro noise
+  VRW (Velocity Random Walk) — accel noise
+  Bias instability — flicker
+
+Cross-axis sensitivity:
+  X gyro가 Y rotation에 반응
+
+각 error — *calibration + filter*.
+```
+
+IMU = *imperfect*. Sensor fusion으로 완화.
+
+## GPS·GNSS Receiver
+
+```text
+GNSS 시스템:
+  GPS (US) — 31 satellites
+  GLONASS (Russia) — 24
+  Galileo (EU) — 26
+  BeiDou (China) — 35+
+  QZSS (Japan, regional)
+  NavIC (India, regional)
+  
+Bands:
+  L1 — 1575.42 MHz (civil C/A code)
+  L2 — 1227.60 MHz (P(Y) code, dual freq)
+  L5 — 1176.45 MHz (modern, safety)
+  
+Output:
+  Position (lat·lon·alt)
+  Velocity (3D)
+  Time (UTC + offset)
+  Number of satellites
+  HDOP·VDOP·PDOP (accuracy)
+  Fix status (3D·2D·DGPS·RTK)
+
+Update rate:
+  1·5·10·20 Hz typical
+  
+Accuracy:
+  Standalone C/A — 5~10 m
+  WAAS·EGNOS — 1~3 m
+  DGPS — sub-meter
+  RTK — cm
+  PPP — cm (long convergence)
+```
+
+GPS = position + velocity + *exact time*.
+
+## GPS Receiver — Avionics
+
+```text
+TSO·인증 GPS:
+  TSO-C129 — non-precision approach
+  TSO-C145·146 — WAAS
+  
+Aerospace receiver:
+  Garmin GTN·GNS
+  Honeywell KGS·KLN
+  Rockwell Collins
+  Trimble (military)
+  
+LV·우주:
+  NovAtel OEM7·OEM6
+  Septentrio AsteRx
+  Spirent (simulator)
+  CSAC + GPS (high accuracy time)
+  
+Output protocol:
+  NMEA-0183 (standard, ASCII)
+  RTCM (correction)
+  UBX (u-blox, binary)
+  RXM (raw measurements)
+  
+Anti-jamming·spoofing:
+  Military M-code
+  CRPA (Controlled Reception Pattern Antenna)
+  Inertial integration (resist jamming)
+```
+
+GPS — *모든 LV·aircraft 표준*. 단 jamming 취약.
+
+## Pressure·Air Data
+
+```text
+Pitot-static system:
+  Pitot tube — dynamic pressure (airspeed)
+  Static port — static pressure (altitude)
+  Difference → IAS (Indicated Airspeed)
+  
+Static pressure → altitude:
+  Barometric formula
+  Sea level reference (QNH) 또는 standard (29.92 inHg)
+  
+Pressure sensor:
+  MEMS — 일반 항공기
+  Vibrating cylinder — high-end
+  Differential pressure transducer
+  
+LV·우주:
+  Cabin pressure (위성 cargo, crew capsule)
+  Tank pressure (LOX·LH2·hypergolic)
+  Engine combustion chamber pressure
+  
+Aircraft:
+  Air Data Computer (ADC)
+  Multiple redundant pitot
+  Heated pitot (icing 방지)
+  
+Famous accident:
+  AF447 (2009) — pitot icing → loss of airspeed
+  → 후속 — heated pitot 강화
+```
+
+Air data — *항공기 핵심*. LV는 일부만.
+
+## Star Tracker — 위성·우주선
+
+```text
+Star Tracker:
+  CCD·CMOS imager
+  Hot pixel·shutter
+  Star pattern recognition
+  Star catalog comparison
+  → Inertial attitude (quaternion)
+  
+Sensitivity:
+  Magnitude 5~7 (보통)
+  Field of view 10~30°
+  
+Accuracy:
+  1~10 arc-second (1σ)
+  
+Update rate:
+  1~10 Hz (slow)
+  
+Combined with:
+  Gyro (high rate, drift)
+  → Tight integration
+  → Star tracker가 *bias correct*
+  
+Use case:
+  Satellite attitude
+  Spacecraft (Lunar·Mars)
+  Deep space probe
+  Not for aircraft (cloud·daytime sky)
+  
+Vendors:
+  Sodern (Airbus)
+  Jena-Optronik (Germany)
+  Ball Aerospace
+  Terma
+  Sinclair Interplanetary
+  KARI 자체 (KOMPSAT 등)
+```
+
+Star tracker — *우주 attitude의 표준*. Aircraft 미사용.
+
+## Sun Sensor
+
+```text
+Sun Sensor:
+  Photodiode array
+  Coarse (cosine sensor) — wide angle, 정확도 ~1°
+  Fine (slit-based) — narrow angle, 0.01°
+  
+용도:
+  Coarse — initial attitude·safe mode
+  Fine — augment star tracker
+  
+용도:
+  위성·우주선
+  Aircraft 미사용 (sun이 visible 가정 어려움)
+```
+
+저렴·신뢰성 — *safe-mode 표준*.
+
+## Magnetometer
+
+```text
+Magnetometer:
+  Earth magnetic field 측정
+  
+Types:
+  Fluxgate — 정확, 큰
+  Hall effect — small, less accurate
+  MEMS — IMU 통합
+  
+Use:
+  Heading reference (compass)
+  Earth orientation (위성·LEO)
+  Aircraft — backup
+  
+Issue:
+  Hard-iron / soft-iron — 자기물질 영향
+  Calibration 필수
+  
+LEO 위성 — magnetic field 약, 사용 가능
+GEO·deep space — 너무 약 (안 씀)
+```
+
+지구 자기 — *LEO 위성*에 유용. Aircraft 보조.
+
+## Sensor Fusion — Kalman Filter
+
+```text
+Kalman Filter:
+  IMU + GPS + magnetometer + star tracker fusion
+  Optimal under Gaussian noise
+  
+Algorithm:
+  Predict — IMU integrate (high rate)
+  Update — GPS·magnetic·star (low rate)
+  Covariance propagation
+  
+EKF (Extended) — nonlinear
+UKF (Unscented) — nonlinear 고차
+Particle filter — non-Gaussian
+
+Output:
+  Position·velocity·attitude·biases
+  Covariance (uncertainty)
+  
+Typical structure:
+  IMU at 200·400 Hz → predict
+  GPS at 10 Hz → update
+  Star at 1 Hz → update
+  
+효과:
+  Long-term — GPS·star 정확도
+  Short-term — IMU smooth·high-rate
+  Bias estimation — drift 보정
+```
+
+Kalman = *avionics 표준*. 모든 GNC.
+
+## Sensor Interface
+
+```text
+Common interfaces:
+
+SPI:
+  IMU, magnetometer, pressure
+  10~100 Mbps
+  Master-slave
+  
+I2C:
+  Slow sensors (temp·humidity)
+  100~400 kbps
+  
+UART:
+  GPS (NMEA·UBX)
+  Star tracker (some)
+  Up to 1 Mbps
+  
+CAN·CANaerospace:
+  Engine sensors
+  Up to 1 Mbps
+  
+1553·SpaceWire·AFDX:
+  Subsystem-level (LRU)
+  Sensor module ↔ FCC
+  
+Analog:
+  Some pressure·temperature
+  ADC required
+  
+Discrete:
+  Switch·status (binary)
+  
+Time sync:
+  PPS (Pulse Per Second) — GPS·external
+  PTP (IEEE 1588) — AFDX/Ethernet
+  Highly precise
+```
+
+Sensor interface — *bandwidth + sync* 결정.
+
+## Sensor Calibration
+
+```text
+Calibration procedure:
+
+1. Bench calibration (factory):
+   Controlled environment
+   Reference (rate table, gravity, magnetic shield)
+   Coefficient store (NVRAM)
+   
+2. Vehicle-level alignment:
+   IMU vs body frame
+   Misalignment matrix
+   
+3. In-flight calibration:
+   Kalman filter estimate bias
+   Adaptive coefficient
+   
+4. Periodic recalibration:
+   Lifetime drift
+   Service maintenance
+
+Example coefficients:
+  Gyro bias (3) + scale factor (3) + misalign (6)
+  Accel bias (3) + scale (3) + misalign (6)
+  Mag hard-iron (3) + soft-iron (6)
+  → 33 coefficients per IMU
+```
+
+각 IMU — *unique calibration*. Production·shipping data.
+
+## Sensor Data Format
+
+```text
+Engineering unit conversion:
+
+ADC → physical:
+  V = ADC / ADC_max * V_ref
+  
+  Accelerometer:
+    a = (V - V_offset) * scale_factor / sensitivity
+    Unit: m/s²
+  
+  Gyro:
+    ω = (V - V_offset) * scale_factor
+    Unit: rad/s 또는 deg/s
+  
+  Pressure:
+    P = ... → altitude (barometric)
+  
+Body-frame:
+  Sensor → body misalignment matrix
+  body_vec = R_sensor_to_body * sensor_vec
+  
+Time tagging:
+  Sample timestamp (sync to system clock)
+  Latency compensation
+```
+
+Engineering unit — *body frame + 시간*. GNC input.
+
+## 인증·HW 요구
+
+```text
+DO-160 environmental qualification:
+  Temperature, altitude, humidity
+  Vibration, shock
+  Power input
+  EMI/EMC
+  Lightning
+  Icing
+  Salt spray, sand·dust
+  
+DO-254 (HW airworthiness):
+  Sensor electronics — DO-254 dependent
+  
+LV qualification:
+  Vibration profile (typical 20 g sine·random)
+  Shock (1000+ g)
+  Thermal cycle (-40 ~ +85°C)
+  Acoustic noise (140+ dB)
+  Pyroshock
+  Vacuum (위성, 100% relative)
+```
+
+Sensor — *극한 환경 통과*. Aerospace 핵심.
+
+## 한국 Sensor 산업
+
+```text
+국산 IMU·gyro:
+  ADD (국방과학연구소) — FOG·RLG 자체
+  Hanwha Aerospace — IMU 자체 + 일부 외산
+  LIG넥스원 — IMU 미사일용
+  KARI — KSLV-II IMU 자체
+  
+국산 GPS receiver:
+  KARI·ETRI — 위성용 자체
+  Defense 위주
+  
+국산 star tracker:
+  KARI — KOMPSAT·KPLO 자체
+  
+민간:
+  Nara MicroSystems
+  자율주행·드론 — MEMS IMU
+
+수입:
+  Honeywell FOG·RLG (high-end)
+  Sodern star tracker
+  Northrop Grumman LN-200·LN-100
+```
+
+한국 — *국산 + 수입* 혼합. Defense·우주 자체화 진행.
+
+## 자주 하는 실수
+
+> ⚠️ Sensor 1개 — single fail point
+
+```text
+1 IMU + 1 GPS → 한 sensor fail = mission fail
+```
+
+→ Redundant (보통 dual·triple).
+
+> ⚠️ Calibration overlook
+
+```text
+"Datasheet spec → 사용"
+→ Real bias 큼
+→ Navigation drift 폭증
+```
+
+→ Bench calibration + alignment.
+
+> ⚠️ Time sync 누락
+
+```text
+IMU + GPS 다른 clock
+→ Fusion error
+```
+
+→ PPS·PTP 동기.
+
+> ⚠️ Vibration profile 무시
+
+```text
+Lab test pass → flight vibration
+→ Sensor noise·bias 변화
+```
+
+→ Real vibration profile 시험.
+
+## 정리
+
+- IMU = *accel + gyro + (mag)*, bias·drift·noise 모델.
+- GPS·GNSS — 위치·속도·*정확 시간*.
+- Pressure·air data — aircraft 핵심.
+- Star tracker — 위성 attitude 표준.
+- Sensor fusion — *Kalman filter*.
+- Interface — SPI·I2C·UART·CAN·1553·SpaceWire·AFDX.
+- DO-160 + LV qualification — 극한 환경.
+- 한국 — *국산 + 수입* 혼합, 자체화 진행.
+
+다음 편은 **Actuators — TVC·RCS·서보**.
+
+## 관련 항목
+
+- [Ch 5: Buses](/blog/embedded/avionics/digital-avionics-handbook/chapter05-buses)
+- [Ch 7: Actuators](/blog/embedded/avionics/digital-avionics-handbook/chapter07-actuators)
+- [Ch 8: FMS](/blog/embedded/avionics/digital-avionics-handbook/chapter08-fms)
+- [Launch Vehicle Flight SW Ch 4: Control Signal](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter04-control-signal)
