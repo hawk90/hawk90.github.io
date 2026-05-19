@@ -5,7 +5,6 @@ description: "Method name을 string으로 — reflection 기반 dispatch. xUnit 
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 38
 tags: [tdd, beck, pluggable-selector, reflection]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,11 +12,11 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 메서드 이름을 *문자열로 저장*하고 *reflection으로 호출*. 동적 dispatch — *xUnit test runner*의 본질.
+> 메서드 이름을 문자열로 저장하고 reflection으로 호출. 동적 dispatch — xUnit test runner의 본질.
 
-## 동기 (Motivation)
+## 동기
 
-객체마다 *다른 메서드를 호출*해야 하는 상황:
+객체마다 다른 메서드를 호출해야 하는 상황:
 
 ```python
 if type == "add":      return self.test_add()
@@ -27,34 +26,34 @@ elif type == "multiply": return self.test_multiply()
 
 분기 폭증.
 
-**Pluggable Selector**는 메서드 이름을 *문자열로 저장* + *동적 호출*.
+**Pluggable Selector**는 메서드 이름을 문자열로 저장 + 동적 호출.
 
 ### 신호
 
 - *type/name별 method 분기*가 길어짐.
-- 새 동작 추가가 *모든 switch* 수정.
-- *동적 등록* 필요 (plug-in).
+- 새 동작 추가가 모든 switch 수정.
+- 동적 등록 필요 (plug-in).
 - *test runner / dispatcher* 같은 framework.
 
 ### 언제 적용하는가
 
-- *동적 언어* (Python, JS, Ruby).
-- *plug-in 시스템*.
-- *test runner*.
-- *command dispatcher*.
+- 동적 언어 (Python, JS, Ruby).
+- plug-in 시스템.
+- test runner.
+- command dispatcher.
 
 ### 언제 적용하지 않는가
 
-- *정적 언어 + type safety 중요*.
-- *성능 hot path*.
-- *IDE 지원* (자동완성, refactor) 필요.
+- 정적 언어 + type safety 중요.
+- 성능 hot path.
+- IDE 지원 (자동완성, refactor) 필요.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **method 이름을 string** field로.
-2. **dispatch**가 *reflection*으로 method 찾고 호출.
-3. (안전) *whitelist*로 *허용된 method만*.
-4. 예외 처리 — 없는 method 시 *명확한 에러*.
+2. **dispatch**가 reflection으로 method 찾고 호출.
+3. (안전) whitelist로 허용된 method만.
+4. 예외 처리 — 없는 method 시 명확한 에러.
 
 ## 예시 1 — xUnit test runner
 
@@ -80,7 +79,7 @@ for name in ["test_add", "test_subtract"]:
     MyTest(name).run()
 ```
 
-`getattr`로 *method 동적 lookup*. xUnit의 원형.
+`getattr`로 method 동적 lookup. xUnit의 원형.
 
 ## 예시 2 — 언어별 syntax
 
@@ -131,26 +130,32 @@ class SafeCalculator:
     # ...
 ```
 
-*외부 입력*으로 method 호출 시 *반드시 whitelist*.
+외부 입력으로 method 호출 시 반드시 whitelist.
 
 ## 자주 보는 안티패턴
 
-### 1. *임의 method 호출*
-사용자 입력으로 `getattr` → *임의 method 실행* (보안). whitelist.
+### 1. 임의 method 호출
 
-### 2. *IDE refactor 깨짐*
-method 이름 *rename* 시 *string은 자동 변경 안 됨*. 검색 필수.
+사용자 입력으로 `getattr` → 임의 method 실행 (보안). whitelist.
 
-### 3. *Typo 런타임 실패*
+### 2. IDE refactor 깨짐
+
+method 이름 rename 시 string은 자동 변경 안 됨. 검색 필수.
+
+### 3. Typo 런타임 실패
+
 `getattr(self, "tset_add")` → 실행 시점에 *AttributeError*. 사전 검증.
 
-### 4. *Type checker 우회*
-mypy/typescript가 *동적 호출* 못 잡음 → 보호 약함.
+### 4. Type checker 우회
 
-### 5. *Strategy 적합한데 selector*
-Strategy로 *type-safe + IDE 지원* 가능한데 굳이 selector.
+mypy/typescript가 동적 호출 못 잡음 → 보호 약함.
 
-### 6. *Reflection 비용*
+### 5. Strategy 적합한데 selector
+
+Strategy로 type-safe + IDE 지원 가능한데 굳이 selector.
+
+### 6. Reflection 비용
+
 hot path에서 reflection → 느림 (특히 JVM/.NET). cache.
 
 ## Modern variants
@@ -166,7 +171,7 @@ operations = {
 result = operations[name](a, b)
 ```
 
-dict로 *명시적 dispatch*. type-safe, IDE-friendly.
+dict로 명시적 dispatch. type-safe, IDE-friendly.
 
 ### Pattern matching
 
@@ -196,7 +201,7 @@ class Dispatcher:
 def add(a, b): return a + b
 ```
 
-Flask/Django 라우팅 같은 *decorator dispatch*.
+Flask/Django 라우팅 같은 decorator dispatch.
 
 ### Enum + match (Rust/Kotlin)
 
@@ -210,7 +215,7 @@ fn execute(op: Op, a: i32, b: i32) -> i32 {
 }
 ```
 
-*exhaustive + type-safe*.
+exhaustive + type-safe.
 
 ### Method resolution by annotation
 
@@ -244,10 +249,10 @@ class scan으로 dispatcher 자동.
 
 ## 성능 고려
 
-- Reflection은 *직접 호출보다 느림*.
-- JVM/.NET은 *method handle*로 cache 가능.
-- Python `getattr`는 *상대적으로 빠름*.
-- Hot path는 *dict dispatch* 또는 *직접 호출*.
+- Reflection은 직접 호출보다 느림.
+- JVM/.NET은 method handle로 cache 가능.
+- Python `getattr`는 상대적으로 빠름.
+- Hot path는 dict dispatch 또는 직접 호출.
 
 ## 관련 패턴
 

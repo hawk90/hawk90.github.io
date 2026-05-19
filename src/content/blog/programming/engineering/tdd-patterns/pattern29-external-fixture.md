@@ -5,7 +5,6 @@ description: "Process·resource에 걸친 fixture — DB·file·network 관리."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 29
 tags: [xunit, external-fixture, integration, beck]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,39 +12,39 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 데이터베이스·파일·네트워크 같은 *외부 리소스*를 테스트에서 관리. *격리 vs 속도* 트레이드오프.
+> 데이터베이스·파일·네트워크 같은 외부 리소스를 테스트에서 관리. 격리 vs 속도 트레이드오프.
 
-## 동기 (Motivation)
+## 동기
 
-일반 fixture는 *메모리 안*에서 동작. 실제 시스템은 *외부 리소스*에 의존:
+일반 fixture는 메모리 안에서 동작. 실제 시스템은 외부 리소스에 의존:
 
 - DB, file system, network service, message queue, cache server.
 
-**External Fixture**가 이런 리소스의 *설정과 정리*를 다룬다.
+**External Fixture**가 이런 리소스의 설정과 정리를 다룬다.
 
 ### 신호
 
 - test가 *real DB/file*에 의존.
-- *test 후 cleanup 누락*으로 다음 test 영향.
-- *환경 차이* (local vs CI) 때문에 실패.
-- *test 속도* 매우 느림.
+- test 후 cleanup 누락으로 다음 test 영향.
+- 환경 차이 (local vs CI) 때문에 실패.
+- test 속도 매우 느림.
 
 ### 언제 적용하는가
 
-- *integration test*가 필수.
-- *외부 시스템 동작 검증* (ORM 쿼리, file format).
-- *unit test mock으로 한계*가 있음.
+- integration test가 필수.
+- 외부 시스템 동작 검증 (ORM 쿼리, file format).
+- unit test mock으로 한계가 있음.
 
 ### 언제 적용하지 않는가
 
-- *순수 비즈니스 로직* — mock으로 충분.
-- 외부 자원이 *너무 비싸* (전용 hardware).
+- 순수 비즈니스 로직 — mock으로 충분.
+- 외부 자원이 너무 비싸 (전용 hardware).
 
-## 절차 (Mechanics)
+## 절차
 
 1. **외부 자원 식별** — DB, file, network.
 2. **격리 전략 선택** — transaction rollback, fresh container, isolated namespace.
-3. **fixture 작성** — 자원 *획득 + cleanup*.
+3. **fixture 작성** — 자원 획득 + cleanup.
 4. **scope 결정** — session (비싼 자원) / function (mutating).
 5. **에러 시 cleanup 보장** — finally 또는 yield.
 
@@ -65,7 +64,7 @@ def transactional_db(db):
     db.rollback()   # 모든 변경 취소
 ```
 
-가장 *빠르고 안전*. 매 test가 *clean state*로 시작.
+가장 빠르고 안전. 매 test가 clean state로 시작.
 
 ## 예시 2 — Testcontainers
 
@@ -98,11 +97,12 @@ def test_file_write(tmp_path):
     # 자동 정리됨
 ```
 
-pytest의 `tmp_path` — 매 test마다 *새 디렉토리*, 끝나면 *자동 cleanup*.
+pytest의 `tmp_path` — 매 test마다 새 디렉토리, 끝나면 자동 cleanup.
 
 ## 자주 보는 안티패턴
 
-### 1. *Cleanup 누락*
+### 1. Cleanup 누락
+
 ```python
 @pytest.fixture
 def db():
@@ -110,23 +110,28 @@ def db():
 ```
 connection leak. yield 또는 finally.
 
-### 2. *Production DB 사용*
-실수로 *production DB connect* → 데이터 손상. *별도 test DB*, *환경 검증*.
+### 2. Production DB 사용
 
-### 3. *Test 순서 의존*
+실수로 production DB connect → 데이터 손상. 별도 test DB, 환경 검증.
+
+### 3. Test 순서 의존
+
 ```python
 def test_create(): db.execute("INSERT ...")
 def test_read(): assert db.query("SELECT ...") == ...   # ← test_create 가정
 ```
-독립성 깨짐. *transaction rollback* 또는 *fresh state*.
+독립성 깨짐. transaction rollback 또는 fresh state.
 
-### 4. *Session scope mutating*
-session scope DB에 *write* → 다른 test 영향. *function scope + transaction*.
+### 4. Session scope mutating
 
-### 5. *Network test가 flaky*
-real network → 가끔 fail. *mock + 별도 integration test*.
+session scope DB에 write → 다른 test 영향. function scope + transaction.
 
-### 6. *Container 시작 비용*
+### 5. Network test가 flaky
+
+real network → 가끔 fail. mock + 별도 integration test.
+
+### 6. Container 시작 비용
+
 매 test마다 container → 분 단위 소요. *module/session scope* + 격리.
 
 ## Modern variants
@@ -141,7 +146,7 @@ def db(session_db):
     session_db.rollback()
 ```
 
-session DB 한 번 + transaction *per-test*.
+session DB 한 번 + transaction per-test.
 
 ### Snapshot/restore
 
@@ -153,7 +158,7 @@ def db(session_db):
     session_db.restore(snapshot)
 ```
 
-비싼 setup을 *한 번*, 매 test 후 *snapshot 복원*.
+비싼 setup을 한 번, 매 test 후 snapshot 복원.
 
 ### Containers
 
@@ -181,7 +186,7 @@ def test_api():
     requests.get(...)   # 첫 실행 녹화, 이후 재생
 ```
 
-real HTTP을 *cassette*로.
+real HTTP을 cassette로.
 
 ### Localstack (AWS)
 
@@ -220,7 +225,7 @@ def user_factory(db):
         db.delete(user)
 ```
 
-생성된 자원을 *추적해 일괄 cleanup*.
+생성된 자원을 추적해 일괄 cleanup.
 
 ## 격리 vs 속도 트레이드오프
 
@@ -231,7 +236,7 @@ def user_factory(db):
 | In-memory replacement (sqlite for postgres) | 매우 빠름 | 좋음 (단 차이) |
 | Mock | 가장 빠름 | 완벽 (단 fake) |
 
-기본은 *session container + per-test transaction*.
+기본은 session container + per-test transaction.
 
 ## 도구 / IDE
 
@@ -247,11 +252,11 @@ def user_factory(db):
 
 ## 성능 고려
 
-- *Container start* 5-30초 — session scope.
-- *Transaction* 매우 빠름 (ms).
-- *Filesystem* OS-level (수 ms).
-- *Network mock* 즉시.
-- 큰 test suite는 *parallel* + 자원 *namespace 격리*.
+- Container start 5-30초 — session scope.
+- Transaction 매우 빠름 (ms).
+- Filesystem OS-level (수 ms).
+- Network mock 즉시.
+- 큰 test suite는 parallel + 자원 namespace 격리.
 
 ## 관련 패턴
 

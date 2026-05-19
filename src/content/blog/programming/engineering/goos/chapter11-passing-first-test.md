@@ -5,13 +5,13 @@ description: "Worked Example 8 챕터 압축 — 점진적 기능 추가, 리팩
 tags: [TDD, Case Study, Mock]
 series: "Growing Object-Oriented Software"
 seriesOrder: 11
-draft: true
+draft: false
 ---
 
 > "Make it work, make it right, make it fast."
 > — Kent Beck
 
-이 장에서는 책의 Chapter 11-18에 해당하는 **Worked Example**을 통합하여 다룬다. Walking Skeleton을 기반으로 Auction Sniper의 기능을 점진적으로 확장하는 과정을 보여준다.
+이 장은 책의 Chapter 11-18에 해당하는 **Worked Example**을 한 글로 압축해 다룬다. Walking Skeleton을 기반으로 Auction Sniper의 기능이 어떻게 점진적으로 자라는지, 매 사이클마다 어떤 설계 결정이 따라오는지 본다. 본문이 길지만 흐름 자체는 단순하다. 매번 인수 테스트 하나를 실패시키고, 단위 테스트로 협력 관계를 정의하고, 통과시키고, 리팩토링한다.
 
 ---
 
@@ -1190,3 +1190,11 @@ class AuctionSniper(AuctionEventListener):
 ## 다음 장 예고
 
 다음 장에서는 **Listening to the Tests**를 다룬다. 테스트가 설계에 대해 말해주는 것들, 테스트 작성이 어려울 때 설계를 개선하는 방법을 배운다.
+
+## 관련 항목
+
+- [Ch 10: Walking Skeleton](/blog/programming/engineering/goos/chapter10-walking-skeleton) — 이전 장
+- [Ch 19: Listening to the Tests](/blog/programming/engineering/goos/chapter19-listening-to-tests) — 다음 장
+- [TDD by Example Ch 1](/blog/programming/engineering/tdd-by-example/chapter01-multi-currency-money) — Kent Beck의 점진적 기능 추가 방식과 비교
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/chapter05-tdd-patterns) — Worked Example에서 사용된 패턴 카탈로그
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/section-introduction) — REFACTOR 단계의 도구

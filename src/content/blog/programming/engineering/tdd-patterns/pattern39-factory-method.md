@@ -5,7 +5,6 @@ description: "Constructor 우회 — flexibility·naming. Money.dollar(5) 같은
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 39
 tags: [tdd, beck, factory-method, gof]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,9 +12,9 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 생성자 대신 *static factory method*로 *의도 명확* + *유연성*. `Money.dollar(5)` vs `Money(5, "USD")`.
+> 생성자 대신 static factory method로 의도 명확 + 유연성. `Money.dollar(5)` vs `Money(5, "USD")`.
 
-## 동기 (Motivation)
+## 동기
 
 ```python
 # 무슨 뜻?
@@ -25,34 +24,34 @@ money = Money(5, "USD")
 money = Money.dollar(5)
 ```
 
-생성자는 *class 이름 + 위치 인자*만 — *의도 약함*. Factory method가 *이름으로 표현*.
+생성자는 class 이름 + 위치 인자만 — 의도 약함. Factory method가 이름으로 표현.
 
 ### 신호
 
-- 같은 type 다른 *생성 모드* 빈번 (`Money(5, "USD")`, `Money(5, "CHF")`).
-- 생성에 *복잡 로직* (조건부, validation).
-- *subtype 결정*이 입력에 따라.
+- 같은 type 다른 생성 모드 빈번 (`Money(5, "USD")`, `Money(5, "CHF")`).
+- 생성에 복잡 로직 (조건부, validation).
+- subtype 결정이 입력에 따라.
 - *캐싱/singleton* 필요.
 
 ### 언제 적용하는가
 
-- *의미 있는 이름* 필요.
-- *subtype 반환*.
-- *조건부 생성*.
+- 의미 있는 이름 필요.
+- subtype 반환.
+- 조건부 생성.
 - *cache / pool*.
-- *async 생성*.
+- async 생성.
 
 ### 언제 적용하지 않는가
 
 - 단순 생성 — constructor 충분.
 - *Java/C# 관용*이 constructor.
 
-## 절차 (Mechanics)
+## 절차
 
-1. **factory method 작성** — `@classmethod` 또는 *별도 함수*.
+1. **factory method 작성** — `@classmethod` 또는 별도 함수.
 2. **명명** — `dollar`, `from_string`, `of`, `create_admin` 등.
-3. (옵션) constructor를 *private*화.
-4. 호출처 *factory로 교체*.
+3. (옵션) constructor를 private화.
+4. 호출처 factory로 교체.
 
 ## 예시 1 — Money
 
@@ -80,7 +79,7 @@ ten_francs = Money.franc(10)
 thousand_won = Money.won(1000)
 ```
 
-호출 사이트가 *self-documenting*.
+호출 사이트가 self-documenting.
 
 ## 예시 2 — Subtype 반환
 
@@ -100,7 +99,7 @@ class Connection:
 conn = Connection.create("https://api.example.com")
 ```
 
-caller가 *구체 type 결정 불필요*.
+caller가 구체 type 결정 불필요.
 
 ## 예시 3 — From-something 파싱
 
@@ -120,27 +119,33 @@ date1 = Date.from_string("2024-01-15")
 date2 = Date.from_timestamp(1705276800)
 ```
 
-각 *입력 형식*마다 명명된 factory.
+각 입력 형식마다 명명된 factory.
 
 ## 자주 보는 안티패턴
 
-### 1. *Factory + Constructor 공존*
+### 1. Factory + Constructor 공존
+
 public constructor + factory 모두 → 어느 걸 쓸지 혼란. constructor private화.
 
-### 2. *Factory에 비즈니스 로직*
-factory가 *비즈니스 검증, 통계* → 책임 폭증. 분리.
+### 2. Factory에 비즈니스 로직
 
-### 3. *Factory 이름 모호*
-`create`, `make` — 의미 없음. *무엇을 생성*하는지.
+factory가 비즈니스 검증, 통계 → 책임 폭증. 분리.
 
-### 4. *Subtype 정보 leak*
-caller가 `if isinstance(c, HttpsConnection)` → 다형성 무력. *interface*만 사용.
+### 3. Factory 이름 모호
 
-### 5. *Async factory*
+`create`, `make` — 의미 없음. 무엇을 생성하는지.
+
+### 4. Subtype 정보 leak
+
+caller가 `if isinstance(c, HttpsConnection)` → 다형성 무력. interface만 사용.
+
+### 5. Async factory
+
 sync에서 async factory 호출 → await 누락. type system 검증.
 
-### 6. *너무 많은 factory*
-class에 20개 factory → 보다. *grouping* 또는 *builder*.
+### 6. 너무 많은 factory
+
+class에 20개 factory → 보다. grouping 또는 builder.
 
 ## Modern variants
 
@@ -152,7 +157,7 @@ public static Money dollar(BigDecimal amount) {
 }
 ```
 
-Bloch *Effective Java* "Consider static factory methods" — 표준.
+Bloch Effective Java "Consider static factory methods" — 표준.
 
 ### Kotlin companion object
 
@@ -176,7 +181,7 @@ impl Money {
 }
 ```
 
-Rust는 *constructor 개념 없음* — *모두 factory*.
+Rust는 constructor 개념 없음 — 모두 factory.
 
 ### TypeScript
 
@@ -197,7 +202,7 @@ order = Order.for_user(user)\
     .build()
 ```
 
-factory가 *builder 시작점*.
+factory가 builder 시작점.
 
 ### Dependency injection
 
@@ -234,7 +239,7 @@ DI container가 factory.
 
 ## 성능 고려
 
-factory method *호출 추가* — JIT inline. 무관. *cache/pool*은 *생성 비용 절감*.
+factory method 호출 추가 — JIT inline. 무관. *cache/pool*은 생성 비용 절감.
 
 ## 관련 패턴
 

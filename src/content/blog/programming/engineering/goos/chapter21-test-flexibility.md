@@ -5,12 +5,12 @@ description: "유연한 테스트 — over-specified mocks 회피. Custom matche
 tags: [TDD, Flexibility, Matchers]
 series: "Growing Object-Oriented Software"
 seriesOrder: 21
-draft: true
+draft: false
 ---
 
 ## 테스트 유연성의 중요성
 
-테스트는 코드의 **본질적인 동작**을 검증해야 한다. 구현 세부사항에 결합된 테스트는 코드가 변경될 때마다 깨진다. 이런 테스트는 리팩토링의 적이 된다.
+테스트는 코드의 **본질적인 동작**을 검증해야 한다. 구현 세부사항에 결합된 테스트는 코드가 바뀔 때마다 깨진다. 이런 테스트는 리팩토링을 가로막는다. Khorikov가 *Unit Testing*에서 fragility를 단위 테스트의 네 축 중 하나로 꼽은 것도 같은 이유다. GOOS의 mockist 스타일은 강력하지만 over-specification에 취약하므로, 유연성을 의식적으로 설계해야 한다.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -873,3 +873,10 @@ EXPECT_CALL(listener, sniperStateChanged(HasState(SniperState::WON)))
 ## 다음 장 예고
 
 다음 장에서는 **Test Diagnostics**를 다룬다. 테스트 실패 시 문제를 빠르게 진단하는 방법, 좋은 실패 메시지 작성법을 배운다.
+
+## 관련 항목
+
+- [Ch 20: Test Readability](/blog/programming/engineering/goos/chapter20-test-readability) — 이전 장
+- [Ch 22: Test Diagnostics](/blog/programming/engineering/goos/chapter22-test-diagnostics) — 다음 장
+- [Khorikov Ch 5: Mock과 테스트 취약성](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility) — over-specification이 fragility로 직결되는 이유
+- [Khorikov Ch 6: 단위 테스트의 세 가지 스타일](/blog/programming/engineering/khorikov-unit-testing/chapter06-styles) — output-based 테스트가 가장 유연한 이유

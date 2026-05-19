@@ -5,7 +5,6 @@ description: "Single·collection 같은 interface — 재귀 처리. xUnit Test/
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 41
 tags: [tdd, beck, composite, gof]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,11 +12,11 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 단일 객체와 객체 컬렉션을 *동일 interface*로. *재귀 처리*. xUnit `Test`/`TestSuite`의 원형.
+> 단일 객체와 객체 컬렉션을 동일 interface로. 재귀 처리. xUnit `Test`/`TestSuite`의 원형.
 
-## 동기 (Motivation)
+## 동기
 
-단일과 집합을 *다르게 처리*하면:
+단일과 집합을 다르게 처리하면:
 
 ```python
 if isinstance(test, TestSuite):
@@ -26,33 +25,33 @@ else:
     test.run()
 ```
 
-호출 사이트 *복잡*. **Composite**는 *같은 interface*로 다룬다.
+호출 사이트 복잡. **Composite**는 같은 interface로 다룬다.
 
 ### 신호
 
-- *트리 구조* (file system, UI, AST).
-- *단일 vs 집합 분기* 반복.
-- *재귀 알고리즘*이 자연.
+- 트리 구조 (file system, UI, AST).
+- 단일 vs 집합 분기 반복.
+- 재귀 알고리즘이 자연.
 - xUnit suite 구조.
 
 ### 언제 적용하는가
 
-- *트리 데이터* — file, org chart, UI.
-- *재귀 처리* 도메인.
-- *uniform treatment*.
+- 트리 데이터 — file, org chart, UI.
+- 재귀 처리 도메인.
+- uniform treatment.
 
 ### 언제 적용하지 않는가
 
 - 단순 list — Composite overhead 과잉.
-- Leaf와 Composite *동작 크게 다름*.
+- Leaf와 Composite 동작 크게 다름.
 - 깊이 제한 시스템.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **Component interface** 정의.
 2. **Leaf class** 구현.
 3. **Composite class** 구현 — children + 재귀 호출.
-4. 호출자가 *interface*로만 사용.
+4. 호출자가 interface로만 사용.
 
 ## 예시 1 — xUnit Test/TestSuite
 
@@ -84,7 +83,7 @@ class TestSuite(Test):                 # Composite
         return sum(t.count_test_cases() for t in self.tests)
 ```
 
-xUnit의 *핵심 구조*. 중첩 가능.
+xUnit의 핵심 구조. 중첩 가능하다.
 
 ## 예시 2 — Money Sum (Beck)
 
@@ -127,27 +126,33 @@ class Directory(Node):                  # Composite
         return sum(c.size() for c in self._children)
 ```
 
-총 크기 = *재귀 합*.
+총 크기 = 재귀 합.
 
 ## 자주 보는 안티패턴
 
-### 1. *Leaf에 Composite 메서드*
+### 1. Leaf에 Composite 메서드
+
 Component에 `add()` 두면 Leaf에서도 `add()` → meaningless 또는 error.
 
-### 2. *깊이 무제한*
-재귀가 *깊으면 stack overflow*. iterative 또는 depth limit.
+### 2. 깊이 무제한
 
-### 3. *Cycle 방치*
-composite가 *자신 포함* → 무한 루프. cycle 검출.
+재귀가 깊으면 stack overflow. iterative 또는 depth limit.
 
-### 4. *Parent reference 누락*
-Leaf가 *parent 모름* → 일부 알고리즘 불가. parent pointer.
+### 3. Cycle 방치
 
-### 5. *Mixed concerns*
-Component에 *너무 많은 메서드* → 모든 Leaf/Composite가 구현. *interface segregation*.
+composite가 자신 포함 → 무한 루프. cycle 검출.
 
-### 6. *Type cast 빈번*
-caller가 `isinstance(node, Directory)` → 다형성 효과 잃음. *Component method*로 표현.
+### 4. Parent reference 누락
+
+Leaf가 parent 모름 → 일부 알고리즘 불가. parent pointer.
+
+### 5. Mixed concerns
+
+Component에 너무 많은 메서드 → 모든 Leaf/Composite가 구현. interface segregation.
+
+### 6. Type cast 빈번
+
+caller가 `isinstance(node, Directory)` → 다형성 효과 잃음. Component method로 표현.
 
 ## Modern variants
 
@@ -160,7 +165,7 @@ def walk(node, fn):
     return [walk(c, fn) for c in node.children]
 ```
 
-함수형으로 *visitor 분리*.
+함수형으로 visitor 분리.
 
 ### Visitor pattern 조합
 
@@ -177,7 +182,7 @@ class SizeVisitor(Visitor):
         return sum(c.accept(self) for c in d.children)
 ```
 
-새 연산 추가가 *visitor 추가*.
+새 연산 추가가 visitor 추가.
 
 ### AST 트리 (compiler)
 
@@ -188,7 +193,7 @@ class BinaryOp(Node):
     def __init__(self, op, left, right): ...
 ```
 
-언어 처리는 *Composite의 전형*.
+언어 처리는 Composite의 전형.
 
 ### React component tree
 
@@ -221,9 +226,9 @@ element.children.forEach(...)
 
 ## 성능 고려
 
-- *재귀 깊이*는 stack 비용. 매우 깊으면 *iterative*.
-- *Composite 순회*는 O(n) (n = 노드 수).
-- *cache* (size 등) 자주.
+- 재귀 깊이는 stack 비용. 매우 깊으면 iterative.
+- Composite 순회는 O(n) (n = 노드 수).
+- cache (size 등) 자주.
 
 ## 관련 패턴
 

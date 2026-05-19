@@ -5,10 +5,10 @@ description: "Google Test, pytest, Mock 라이브러리. C++과 Python 테스트
 tags: [TDD, Tools, GoogleTest, pytest]
 series: "Growing Object-Oriented Software"
 seriesOrder: 3
-draft: true
+draft: false
 ---
 
-TDD를 실천하려면 적절한 도구가 필요하다. C++과 Python 환경에서 사용하는 테스트 프레임워크와 Mock 라이브러리를 살펴본다.
+TDD를 실천하려면 적절한 도구가 필요하다. 원서는 Java + JUnit + JMock 조합을 쓰지만, 같은 원칙은 C++과 Python에서도 그대로 통한다. 이 장에서는 두 언어의 테스트 프레임워크와 Mock 라이브러리를 살펴본다. 도구가 달라져도 변하지 않는 것은 두 가지다. **테스트가 첫 사용자**이고, **Mock이 협력 관계를 드러낸다**는 사실이다.
 
 ## 3.1 테스트 프레임워크
 
@@ -473,3 +473,10 @@ def test_saves_order(database):
 ## 다음 장 예고
 
 다음 장에서는 TDD 사이클을 시작하는 방법을 다룬다. Walking Skeleton으로 첫 End-to-End 테스트를 작성하는 과정을 살펴본다.
+
+## 관련 항목
+
+- [Ch 2: TDD with Objects](/blog/programming/engineering/goos/chapter02-test-driven-with-objects) — 이전 장
+- [Ch 4: Kick-Starting the TDD Cycle](/blog/programming/engineering/goos/chapter04-kick-starting) — 다음 장
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/chapter05-tdd-patterns) — Kent Beck의 TDD 패턴 카탈로그, Builder/Fixture 등이 도구 위에서 어떻게 결합되는가
+- [Khorikov Ch 7: 단위 테스트 리팩토링](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring) — Builder와 fixture가 테스트 가독성에 미치는 영향

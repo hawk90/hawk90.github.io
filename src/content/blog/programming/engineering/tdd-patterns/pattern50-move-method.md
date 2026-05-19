@@ -5,7 +5,6 @@ description: "Method가 다른 class에서 더 잘 살면 — 이사. Feature En
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 50
 tags: [tdd, beck, move-method, feature-envy]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,9 +12,9 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> Method가 *다른 class의 데이터*를 더 많이 사용하면 그 class로 이동. *Feature Envy* 해소.
+> Method가 다른 class의 데이터를 더 많이 사용하면 그 class로 이동. Feature Envy 해소.
 
-## 동기 (Motivation)
+## 동기
 
 ```python
 class Order:
@@ -30,33 +29,33 @@ class Order:
         return 0
 ```
 
-`calculate_discount`가 *customer 정보만* 사용. *Customer*에 있어야.
+`calculate_discount`가 customer 정보만 사용. Customer에 있어야.
 
 ### 신호
 
-- method가 *자기 class 데이터 거의 사용 안 함*.
-- *다른 class 메서드만 호출*.
-- *getter chaining* — `self.other.data.value`.
-- *Demeter 위반*.
+- method가 자기 class 데이터 거의 사용 안 함.
+- 다른 class 메서드만 호출.
+- getter chaining — `self.other.data.value`.
+- Demeter 위반.
 
 ### 언제 적용하는가
 
-- *Feature envy* 명확.
-- 데이터와 행동을 *함께 둠*.
-- *응집도 ↑*.
+- Feature envy 명확.
+- 데이터와 행동을 함께 둠.
+- 응집도 ↑.
 
 ### 언제 적용하지 않는가
 
-- method가 *진짜 양쪽 데이터 사용*.
-- *순환 의존* 만들지 않게 주의.
-- *interface 노출* 부적절.
+- method가 진짜 양쪽 데이터 사용.
+- 순환 의존 만들지 않게 주의.
+- interface 노출 부적절.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **대상 class에 method 복사**.
-2. *self 참조 수정* (this.customer.X → this.X).
+2. self 참조 수정 (this.customer.X → this.X).
 3. **원본을 delegate**로.
-4. *호출자 점진 이전*.
+4. 호출자 점진 이전.
 5. **원본 제거**.
 
 ## 예시 1 — Discount → Customer
@@ -77,7 +76,7 @@ class Order:
         return subtotal * (1 - discount)
 ```
 
-데이터와 행동 *함께*.
+데이터와 행동 함께.
 
 ## 예시 2 — Parameter 활용
 
@@ -117,27 +116,33 @@ class Order:
         self.customer.notify_order(self)
 ```
 
-self를 *parameter로* 넘김.
+self를 parameter로 넘김.
 
 ## 자주 보는 안티패턴
 
-### 1. *양방향 의존 만들기*
-이동 후 *Customer → Order, Order → Customer* 모두 → 순환. *단방향* 유지.
+### 1. 양방향 의존 만들기
 
-### 2. *Polymorphism 깨기*
-override되는 method 이동 → 다형성 깨짐. *전체 계층* 함께.
+이동 후 Customer → Order, Order → Customer 모두 → 순환. 단방향 유지.
 
-### 3. *Move 후 caller 누락*
-일부 caller가 *원본 호출* → 일관성 깨짐. find usages.
+### 2. Polymorphism 깨기
 
-### 4. *Encapsulation 위반*
-이동 method가 *private state 접근* → 캡슐 깨짐. *public API*만.
+override되는 method 이동 → 다형성 깨짐. 전체 계층 함께.
 
-### 5. *Test 깨짐*
-test가 *원본 위치 의존* → 이동 후 깨짐. test도 함께 이동.
+### 3. Move 후 caller 누락
 
-### 6. *Move + Rename 동시*
-한 commit에 둘 → 검토 어려움. *단계 분리*.
+일부 caller가 원본 호출 → 일관성 깨짐. find usages.
+
+### 4. Encapsulation 위반
+
+이동 method가 private state 접근 → 캡슐 깨짐. public API만.
+
+### 5. Test 깨짐
+
+test가 원본 위치 의존 → 이동 후 깨짐. test도 함께 이동.
+
+### 6. Move + Rename 동시
+
+한 commit에 둘 → 검토 어려움. 단계 분리.
 
 ## Modern variants
 
@@ -162,7 +167,7 @@ class Order:
         self.customer = customer
 ```
 
-이동 후 *interface 추출* — DIP.
+이동 후 interface 추출 — DIP.
 
 ### Refactoring [Pattern 21: Move Function](/blog/programming/design/refactoring-catalog/pattern21-move-function)
 
@@ -183,7 +188,7 @@ extension function — 원본 class 수정 없이 method 추가.
 
 ### Service object
 
-method가 *어느 entity에도 자연스럽지 않으면* — service object.
+method가 어느 entity에도 자연스럽지 않으면 — service object.
 
 ```python
 class DiscountCalculator:
@@ -201,7 +206,7 @@ class DiscountCalculator:
 
 ## 성능 고려
 
-이동 자체는 *런타임 무관*. 호출 *depth 1단계* 추가는 JIT inline.
+이동 자체는 런타임 무관. 호출 depth 1단계 추가는 JIT inline.
 
 ## Feature Envy 감별
 
@@ -220,4 +225,4 @@ if N_other(X) > N_self:
 - [Pattern 49: Extract Interface](/blog/programming/engineering/tdd-patterns/pattern49-extract-interface) — 인터페이스 추출
 - [Pattern 51: Method Object](/blog/programming/engineering/tdd-patterns/pattern51-method-object) — 메서드를 class로
 - Refactoring [Pattern 21: Move Function](/blog/programming/design/refactoring-catalog/pattern21-move-function)
-- *원칙*: "Tell, don't ask"
+- 원칙: "Tell, don't ask"

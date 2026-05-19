@@ -5,7 +5,6 @@ description: "테스트에 어떤 데이터를 쓸지 — 의도가 드러나는
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 6
 tags: [tdd, beck, test-data]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,28 +12,28 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 테스트 데이터는 *그 테스트의 의도*를 드러내는 값으로. magic number와 *과도한 fixture*를 피한다.
+> 테스트 데이터는 그 테스트의 의도를 드러내는 값으로. magic number와 과도한 fixture를 피한다.
 
-## 동기 (Motivation)
+## 동기
 
 테스트에 어떤 값을 쓸지는 사소해 보이지만 중요하다. 잘못된 데이터 선택은:
 
-- *의도를 숨김*.
-- *유지보수* 어려움.
-- *버그를 놓침*.
+- 의도를 숨김.
+- 유지보수 어려움.
+- 버그를 놓침.
 
 좋은 테스트 데이터는:
 
-- *검증 대상*을 드러냄.
-- *경계 조건* 잡음.
-- 읽는 사람이 *"왜 이 값인가"*를 앎.
+- 검증 대상을 드러냄.
+- 경계 조건 잡음.
+- 읽는 사람이 "왜 이 값인가"를 앎.
 
 ### 신호
 
-- 테스트에 `42`, `"abc"`, `123` 같은 *맥락 없는 magic value*.
-- 같은 값이 여러 테스트에 *우연히 등장*.
-- 테스트 데이터가 *production 같지 않음* (`"test"`만).
-- 데이터가 *너무 많아* 핵심이 묻힘.
+- 테스트에 `42`, `"abc"`, `123` 같은 맥락 없는 magic value.
+- 같은 값이 여러 테스트에 우연히 등장.
+- 테스트 데이터가 production 같지 않음 (`"test"`만).
+- 데이터가 너무 많아 핵심이 묻힘.
 
 ### 데이터 선택 전략
 
@@ -45,13 +44,13 @@ bookAuthor: "Kent Beck"
 | **Special** | null, 빈 collection, NaN |
 | **Realistic** | production과 비슷 |
 
-## 절차 (Mechanics)
+## 절차
 
 1. **검증 대상**을 식별. 어떤 동작을 테스트?
-2. *대표 + 경계 + 특수* 케이스 분리.
-3. 각 케이스에 *의도가 드러나는 값* 선택.
-4. *최소* fixture만 setup.
-5. magic number 발견 시 *변수명 + 계산식*으로 의도 표현.
+2. 대표 + 경계 + 특수 케이스 분리.
+3. 각 케이스에 의도가 드러나는 값 선택.
+4. 최소 fixture만 setup.
+5. magic number 발견 시 변수명 + 계산식으로 의도 표현.
 
 ## 예시 1 — Magic number 제거
 
@@ -81,7 +80,7 @@ def test_double_positive_number():
     assert result == 14
 ```
 
-값에 *이름 + 계산*. 읽는 사람이 *왜*를 안다.
+값에 이름 + 계산. 읽는 사람이 왜를 안다.
 
 ## 예시 2 — 경계값 케이스
 
@@ -97,7 +96,7 @@ def test_max_login_attempts():
     assert not allow_login(4) # 초과
 ```
 
-경계 *직전/직후*가 *버그의 단골 위치*.
+경계 *직전/직후*가 버그의 단골 위치.
 
 ## 예시 3 — Realistic data
 
@@ -115,43 +114,49 @@ def test_parse_email():
     assert parsed.domain == "subdomain.example.com"
 ```
 
-production-like data가 *숨은 edge case* 발견.
+production-like data가 숨은 edge case 발견.
 
 ## 자주 보는 안티패턴
 
-### 1. *과도한 fixture*
-필요 없는 field까지 setup → 노이즈. Assert First로 *최소* 추출.
+### 1. 과도한 fixture
 
-### 2. *동일 값 우연한 사용*
+필요 없는 field까지 setup → 노이즈. Assert First로 최소 추출.
+
+### 2. 동일 값 우연한 사용
+
 ```python
 def test_double(): assert double(42) == 84
 def test_triple(): assert triple(42) == 126   # 같은 42 — 왜?
 ```
-*각 테스트 의도에 맞는* 값.
+각 테스트 의도에 맞는 값.
 
-### 3. *Random data*
+### 3. Random data
+
 ```python
 def test_x():
     val = random.randint(0, 100)
     assert process(val) == val * 2
 ```
-flaky test 위험. *property-based*로 명시적으로.
+flaky test 위험. property-based로 명시적으로.
 
-### 4. *Production data 직접 사용*
-실제 DB row를 *복사*해서 fixture로 → *민감 정보 누출*, *결합*. 익명화.
+### 4. Production data 직접 사용
 
-### 5. *Date now() 사용*
+실제 DB row를 복사해서 fixture로 → 민감 정보 누출, 결합. 익명화.
+
+### 5. Date now() 사용
+
 ```python
 def test_x():
     assert is_recent(datetime.now())
 ```
-실행 시점에 따라 결과 다름 — *고정 시간 주입*.
+실행 시점에 따라 결과 다름 — 고정 시간 주입.
 
-### 6. *너무 작아서 의미 모호*
+### 6. 너무 작아서 의미 모호
+
 ```python
 assert add(1, 1) == 2   # commutative? identity? sum?
 ```
-의도를 *값으로 표현*.
+의도를 값으로 표현.
 
 ## Modern variants
 
@@ -170,7 +175,7 @@ class UserBuilder:
 user = UserBuilder().with_name("Alice").build()
 ```
 
-복잡한 객체를 *fluent*하게.
+복잡한 객체를 fluent하게.
 
 ### Object Mother
 
@@ -184,7 +189,7 @@ class UserMother:
 user = UserMother.alice()
 ```
 
-자주 쓰는 fixture를 *factory function*.
+자주 쓰는 fixture를 factory function.
 
 ### Test data factory
 
@@ -198,7 +203,7 @@ class UserFactory(factory.Factory):
 user = UserFactory.create()
 ```
 
-Django factory_boy, FactoryBot (Ruby) — *fake 라이브러리* 통합.
+Django factory_boy, FactoryBot (Ruby) — fake 라이브러리 통합.
 
 ### Property-based
 
@@ -208,7 +213,7 @@ def test_double_positive(n):
     assert double(n) >= n
 ```
 
-값 선택을 *strategy에 위임*.
+값 선택을 strategy에 위임.
 
 ### Anonymous test value pattern
 
@@ -219,7 +224,7 @@ def test_x():
     assert process(irrelevant_id) == expected
 ```
 
-값이 *무관*임을 *명시*.
+값이 무관임을 명시.
 
 ## 도구 / IDE
 
@@ -235,9 +240,9 @@ def test_x():
 
 ## 성능 고려
 
-- *대량 fixture 생성*은 setup 시간 증가. *지연 생성* (lazy) 활용.
-- *Factory*는 일반적 fixture보다 빠를 수도 (필요한 field만).
-- *DB seed* test는 *truncate + reload* 비용.
+- 대량 fixture 생성은 setup 시간 증가. 지연 생성 (lazy) 활용.
+- Factory는 일반적 fixture보다 빠를 수도 (필요한 field만).
+- DB seed test는 truncate + reload 비용.
 
 ## 관련 패턴
 

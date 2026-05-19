@@ -5,7 +5,6 @@ description: "Exception·error 경로 검증 — robustness의 절반."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 31
 tags: [xunit, exception-test, error-path, beck]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,11 +12,11 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 예외가 *올바르게 발생*하는지 테스트. *에러 경로*의 정확성 검증이 robustness의 절반.
+> 예외가 올바르게 발생하는지 테스트. 에러 경로의 정확성 검증이 robustness의 절반.
 
-## 동기 (Motivation)
+## 동기
 
-코드는 *정상 경로*만 있는 게 아니다. *에러 경로*도 검증되어야:
+코드는 정상 경로만 있는 게 아니다. 에러 경로도 검증되어야:
 
 ```python
 def divide(a, b):
@@ -26,29 +25,29 @@ def divide(a, b):
     return a / b
 ```
 
-이 에러 처리가 *정확히 동작*하는지 테스트.
+이 에러 처리가 정확히 동작하는지 테스트.
 
 ### 신호
 
-- production에서 *예외 처리 버그* 발견.
-- *positive case만* 테스트, negative 빠짐.
-- catch 블록이 *test 안 됨*.
-- *wrong exception type* 발생.
+- production에서 예외 처리 버그 발견.
+- positive case만 테스트, negative 빠짐.
+- catch 블록이 test 안 됨.
+- wrong exception type 발생.
 
 ### 언제 적용하는가
 
-- 모든 *raised exception* 경로.
-- *입력 검증* 코드.
-- *비즈니스 규칙 violation*.
-- *외부 자원 실패*.
+- 모든 raised exception 경로.
+- 입력 검증 코드.
+- 비즈니스 규칙 violation.
+- 외부 자원 실패.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **예외 발생 조건** 식별.
 2. **테스트 작성** — `pytest.raises` 또는 `assertRaises`.
 3. **정확한 exception type** 지정.
 4. (필요시) *메시지/속성 검증*.
-5. **negative case**도 — 정상 입력은 예외 없음.
+5. **negative case**도 — 정상 입력은 예외 없다.
 
 ## 예시 1 — 기본 패턴
 
@@ -65,7 +64,7 @@ def test_divide_by_zero_message():
     assert "0으로 나눌 수 없습니다" in str(exc_info.value)
 ```
 
-`pytest.raises`가 *context manager*로 검증.
+`pytest.raises`가 context manager로 검증.
 
 ## 예시 2 — 다양한 시나리오
 
@@ -89,7 +88,7 @@ def test_duplicate_registration():
         register_user("alice@example.com")
 ```
 
-각 *예외 시나리오 명시*.
+각 예외 시나리오 명시.
 
 ## 예시 3 — Exception 속성 검증
 
@@ -104,11 +103,12 @@ def test_validation_error_details():
     assert len(error.details) == 2
 ```
 
-custom exception의 *상세 속성*까지 검증.
+custom exception의 상세 속성까지 검증.
 
 ## 자주 보는 안티패턴
 
 ### 1. *수동 try/except*
+
 ```python
 def test_bad():
     try:
@@ -117,38 +117,43 @@ def test_bad():
     except ZeroDivisionError:
         pass
 ```
-*프레임워크 API* 사용 (`pytest.raises`).
+프레임워크 API 사용 (`pytest.raises`).
 
-### 2. *Exception 전체 catch*
+### 2. Exception 전체 catch
+
 ```python
 with pytest.raises(Exception):   # 너무 넓음
     divide(10, 0)
 ```
-*정확한 type* 명시.
+정확한 type 명시.
 
-### 3. *Exception type만 검증*
+### 3. Exception type만 검증
+
 ```python
 with pytest.raises(ValueError):
     parse(input)
 ```
 *어떤 ValueError*인지 — message/code도 검증.
 
-### 4. *Message text 정확 일치*
+### 4. Message text 정확 일치
+
 ```python
 assert str(error) == "Invalid email: alice@x.com at line 42"
 ```
-fragile. *substring 또는 code* 검증.
+fragile. substring 또는 code 검증.
 
-### 5. *Negative path 없음*
+### 5. Negative path 없음
+
 정상 입력으로 예외 안 발생 검증 누락. 명시.
 
-### 6. *raises 안에 추가 assert*
+### 6. raises 안에 추가 assert
+
 ```python
 with pytest.raises(...):
     divide(10, 0)
     assert something   # ← never reached
 ```
-exception 후 코드는 *unreachable*. raises 밖으로.
+exception 후 코드는 unreachable. raises 밖으로.
 
 ## Modern variants
 
@@ -193,7 +198,7 @@ fn test_divide_by_zero_result() {
 }
 ```
 
-`#[should_panic]` 또는 *Result pattern matching*.
+`#[should_panic]` 또는 Result pattern matching.
 
 ### TypeScript
 
@@ -213,7 +218,7 @@ def test_division_by_zero(a):
         divide(a, 0)
 ```
 
-모든 a에 대해 *0 나누기는 항상 예외*.
+모든 a에 대해 0 나누기는 항상 예외.
 
 ### Error wrapping (Go)
 
@@ -225,7 +230,7 @@ if errors.As(err, &myErr) {
 }
 ```
 
-Go는 *errors.As* 패턴.
+Go는 errors.As 패턴.
 
 ## 도구 / IDE
 
@@ -240,7 +245,7 @@ Go는 *errors.As* 패턴.
 
 ## 성능 고려
 
-exception throw는 *expensive* (stack unwind). hot path에서 자제. test 자체는 빠름.
+exception throw는 expensive (stack unwind). hot path에서 자제. test 자체는 빠름.
 
 ## 관련 패턴
 

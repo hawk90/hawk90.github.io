@@ -5,7 +5,6 @@ description: "모든 호출에 같은 값 전달 — constructor로 옮기기. D
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 53
 tags: [tdd, beck, constructor-parameter, refactor]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,9 +12,9 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> Method 호출마다 *같은 값* 전달한다면 *constructor로 옮겨* field 보관. *Dependency Injection*의 기초.
+> Method 호출마다 같은 값 전달한다면 constructor로 옮겨 field 보관. Dependency Injection의 기초.
 
-## 동기 (Motivation)
+## 동기
 
 ```python
 class OrderService:
@@ -32,7 +31,7 @@ service.create_order(items, db)
 service.get_order(1, db)
 ```
 
-`database`가 *항상 같은 인스턴스*. constructor로.
+`database`가 항상 같은 인스턴스. constructor로.
 
 ```python
 class OrderService:
@@ -48,32 +47,32 @@ service.create_order(items)
 service.get_order(1)
 ```
 
-호출이 *간결*해지고 *의존이 명시*.
+호출이 간결해지고 의존이 명시.
 
 ### 신호
 
-- 같은 *인자가 method마다 반복*.
-- 객체 생명주기 동안 *고정된 의존성*.
-- *호출 site 복잡*.
+- 같은 인자가 method마다 반복.
+- 객체 생명주기 동안 고정된 의존성.
+- 호출 site 복잡.
 
 ### 언제 적용하는가
 
 - *의존성/설정*은 constructor.
-- *입력 데이터*는 method parameter.
-- *DI* 적용 시.
+- 입력 데이터는 method parameter.
+- DI 적용 시.
 
 ### 언제 적용하지 않는가
 
-- 호출마다 *다른 값* — method parameter 유지.
-- 객체가 *짧은 수명* — 생성 비용.
+- 호출마다 다른 값 — method parameter 유지.
+- 객체가 짧은 수명 — 생성 비용.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **constructor에 parameter 추가** — 기본값 옵션.
 2. **field 보관**.
-3. **method 본문**에서 *field 사용*.
-4. *method parameter 제거*.
-5. **호출처 수정** — *생성 시 1번 전달*.
+3. **method 본문**에서 field 사용.
+4. method parameter 제거.
+5. **호출처 수정** — 생성 시 1번 전달.
 
 ## 예시 1 — DB 의존
 
@@ -119,27 +118,33 @@ us.calculate(items)
 eu.calculate(items)
 ```
 
-설정별 *인스턴스 생성* + 같은 method.
+설정별 인스턴스 생성 + 같은 method.
 
 ## 자주 보는 안티패턴
 
-### 1. *모든 것을 constructor로*
-호출마다 다른 값까지 constructor → *매번 새 instance*. 의미 없음.
+### 1. 모든 것을 constructor로
 
-### 2. *Constructor 폭증*
-parameter 10개+ → 호출 부담. *parameter object* 또는 *builder*.
+호출마다 다른 값까지 constructor → 매번 새 instance. 의미 없다.
 
-### 3. *Singleton 회피 (다시 Singleton)*
-DI한다고 한 후 *전역 instance 유지* → 다시 Singleton 안티패턴.
+### 2. Constructor 폭증
 
-### 4. *Mutable field*
-constructor parameter를 *mutate* → 의도 모호. *immutable* 우선.
+parameter 10개+ → 호출 부담. parameter object 또는 builder.
 
-### 5. *Optional dependency 강제*
-모든 dependency를 *required* → test 부담. *None 허용 + NullObject*.
+### 3. Singleton 회피 (다시 Singleton)
 
-### 6. *생성 cost 무시*
-test마다 *비싼 setup* — fixture로 공유.
+DI한다고 한 후 전역 instance 유지 → 다시 Singleton 안티패턴.
+
+### 4. Mutable field
+
+constructor parameter를 mutate → 의도 모호. immutable 우선.
+
+### 5. Optional dependency 강제
+
+모든 dependency를 required → test 부담. *None 허용 + NullObject*.
+
+### 6. 생성 cost 무시
+
+test마다 비싼 setup — fixture로 공유.
 
 ## Modern variants
 
@@ -157,7 +162,7 @@ public class OrderService {
 }
 ```
 
-Spring, Guice, Dagger가 *자동 wire*.
+Spring, Guice, Dagger가 자동 wire.
 
 ### Pytest fixture
 
@@ -207,7 +212,7 @@ def make_order_service(db):
     return {"create": create_order, "get": get_order}
 ```
 
-closure가 *constructor* 역할.
+closure가 constructor 역할.
 
 ## 도구 / IDE
 
@@ -220,9 +225,9 @@ closure가 *constructor* 역할.
 
 ## 성능 고려
 
-- *생성 cost* 한 번 — 호출마다 절약.
-- *field access* vs *parameter access* — 거의 무관.
-- *Constructor injection*은 *test cycle*에서 자주 — fixture caching.
+- 생성 cost 한 번 — 호출마다 절약.
+- field access vs parameter access — 거의 무관.
+- Constructor injection은 test cycle에서 자주 — fixture caching.
 
 ## 관련 패턴
 
@@ -235,7 +240,7 @@ closure가 *constructor* 역할.
 
 **TDD by Example — Patterns Deep Dive** 시리즈 53개 패턴 모두 살펴봤다.
 
-Kent Beck의 *Test-Driven Development: By Example*에서 소개된 이 패턴들은 *Red-Green-Refactor* 사이클 각 단계의 *도구*다.
+Kent Beck의 Test-Driven Development: By Example에서 소개된 이 패턴들은 Red-Green-Refactor 사이클 각 단계의 도구다.
 
 | 그룹 | 패턴 번호 | 주제 |
 | --- | --- | --- |
@@ -245,9 +250,9 @@ Kent Beck의 *Test-Driven Development: By Example*에서 소개된 이 패턴들
 | 디자인 패턴 | 33-43 | TDD에서 자주 쓰는 GoF |
 | 리팩터링 패턴 | 44-53 | 안전한 코드 개선 |
 
-TDD는 단순히 *테스트 먼저 작성*이 아니다 — *설계를 이끄는 피드백 루프*. 이 패턴들이 *내재화*되면 *더 빠르고 안전하고 좋은 코드*를 작성할 수 있다.
+TDD는 단순히 테스트 먼저 작성이 아니다 — 설계를 이끄는 피드백 루프. 이 패턴들이 내재화되면 더 빠르고 안전하고 좋은 코드를 작성할 수 있다.
 
 **다음 추천 시리즈**:
 - [Refactoring Catalog (Fowler 2nd ed)](/blog/programming/design/refactoring-catalog/pattern01-extract-function) — 61개 리팩터링 패턴 (방금 완료)
-- *Working Effectively with Legacy Code* (Michael Feathers)
-- *Growing Object-Oriented Software Guided by Tests* (Freeman/Pryce)
+- Working Effectively with Legacy Code (Michael Feathers)
+- Growing Object-Oriented Software Guided by Tests (Freeman/Pryce)

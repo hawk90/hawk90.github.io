@@ -5,13 +5,13 @@ description: "Sniper의 최소 e2e — 한 경매 join → loss 알림."
 tags: [TDD, Walking Skeleton]
 series: "Growing Object-Oriented Software"
 seriesOrder: 10
-draft: true
+draft: false
 ---
 
 > "Get the skeleton walking first."
 > — 먼저 뼈대를 걷게 하라
 
-이 장에서는 Auction Sniper의 **Walking Skeleton**을 구축한다. 가장 단순한 시나리오(경매 참가 → 즉시 종료 → 패배)를 end-to-end로 동작하게 만든다.
+이 장에서는 Auction Sniper의 **Walking Skeleton**을 구축한다. 가장 단순한 시나리오(경매 참가 → 즉시 종료 → 패배)를 end-to-end로 동작하게 만든다. 이 단계의 목표는 기능이 아니라 통합이다. UI, 도메인 로직, 외부 프로토콜이 한 번에 흐르는 가장 얇은 길을 뚫어 둬야, 이후 모든 기능 추가가 안전해진다.
 
 ---
 
@@ -1073,3 +1073,11 @@ auction-sniper/
 ## 다음 장 예고
 
 다음 장에서는 첫 번째 인수 테스트를 **실제로 통과**시킨다. XMPP 연결을 구현하고, 메시지를 주고받으며, UI에 상태를 표시하는 전체 흐름을 완성한다.
+
+## 관련 항목
+
+- [Ch 9: Commitment](/blog/programming/engineering/goos/chapter09-commitment) — 이전 장
+- [Ch 11-18: Passing the First Test → Final Features](/blog/programming/engineering/goos/chapter11-passing-first-test) — 다음 장
+- [Ch 4: Kick-Starting](/blog/programming/engineering/goos/chapter04-kick-starting) — Walking Skeleton의 개념 정리
+- [Khorikov Ch 2: 단위 테스트란 무엇인가](/blog/programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test) — E2E vs 단위 테스트의 현대적 경계
+- [Agile/Lean Engineering — TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-16-tdd-as-xp) — 통합 우선 사고의 XP 뿌리

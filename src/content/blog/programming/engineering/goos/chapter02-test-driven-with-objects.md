@@ -5,10 +5,10 @@ description: "객체와 협력 — Tell Don't Ask. 역할 / 책임 중심 설계
 tags: [TDD, OO, Tell Don't Ask]
 series: "Growing Object-Oriented Software"
 seriesOrder: 2
-draft: true
+draft: false
 ---
 
-TDD와 객체지향은 자연스럽게 결합된다. 객체의 협력 관계를 테스트가 발견하고, 테스트가 좋은 객체 설계를 이끈다.
+TDD와 객체지향은 자연스럽게 결합된다. 객체의 협력 관계를 테스트가 발견하고, 그 테스트가 다시 좋은 객체 설계를 이끈다. GOOS의 핵심 주장은 단순하다. **객체는 메시지를 주고받는 단위**이며, 테스트는 그 메시지가 옳게 흐르는지 검증하는 자리다. 이 관점에서 Mock은 우회 도구가 아니라 협력자를 명시하는 설계 언어다.
 
 ## 2.1 객체지향의 핵심
 
@@ -411,3 +411,10 @@ TEST(AuctionSniperTest, BidsHigherWhenNewPriceArrives) {
 ## 다음 장 예고
 
 다음 장에서는 TDD에 사용되는 도구와 기술을 다룬다. Google Test, pytest, Mock 라이브러리 등 C++과 Python 테스트 환경을 살펴본다.
+
+## 관련 항목
+
+- [Ch 1: What Is TDD?](/blog/programming/engineering/goos/chapter01-what-is-tdd) — 이전 장
+- [Ch 3: Tools and Techniques](/blog/programming/engineering/goos/chapter03-tools-techniques) — 다음 장
+- [Khorikov Ch 6: 단위 테스트의 세 가지 스타일](/blog/programming/engineering/khorikov-unit-testing/chapter06-styles) — output / state / communication 분류, 본 장의 mockist 접근에 대한 균형점
+- [Khorikov Ch 5: Mock과 테스트 취약성](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility) — Mock 남용의 위험

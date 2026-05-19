@@ -5,10 +5,10 @@ description: "DB 테스트, 스레드 / 비동기 테스트, 시리즈 마무리
 tags: [TDD, Persistence, Threading]
 series: "Growing Object-Oriented Software"
 seriesOrder: 23
-draft: true
+draft: false
 ---
 
-이 장에서는 GOOS 원서의 Chapter 23-27의 고급 주제를 통합하여 다룬다.
+이 장은 GOOS 원서의 Chapter 23-27 고급 주제를 한 글로 통합한다. 영속성, 스레드, 비동기, 그리고 시리즈 마무리까지 함께 다룬다. 각 주제는 한 권의 책으로 빠질 만큼 깊지만, 공통된 원칙은 단순하다. **외부 경계는 wrapper로 격리하고, 도메인은 그 wrapper에 대해서만 테스트한다.**
 
 ---
 
@@ -1090,5 +1090,15 @@ GOOS 스타일 TDD의 핵심:
 **TDD는 기술이 아니라 습관이다.**
 
 ---
+
+## 관련 항목
+
+- [Ch 22: Test Diagnostics](/blog/programming/engineering/goos/chapter22-test-diagnostics) — 이전 장
+- [Ch 1: What Is TDD?](/blog/programming/engineering/goos/chapter01-what-is-tdd) — 시리즈 시작점
+- [TDD by Example](/blog/programming/engineering/tdd-by-example/chapter01-multi-currency-money) — Detroit school을 정면으로 다루는 자매 시리즈
+- [Khorikov: 단위 테스트의 원칙과 관행](/blog/programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test) — GOOS 스타일에 대한 현대적 비판과 보완
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/chapter05-tdd-patterns) — TDD를 실천하기 위한 패턴 카탈로그
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/section-introduction) — REFACTOR 단계를 위한 카탈로그
+- [원서 — Growing Object-Oriented Software, Guided by Tests](https://www.growing-object-oriented-software.com/)
 
 *시리즈 완결*

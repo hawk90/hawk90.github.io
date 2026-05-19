@@ -5,7 +5,6 @@ description: "변경 영역을 격리 — 리팩터링 위험 감소, 테스트 
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 45
 tags: [tdd, beck, isolate-change, scaffolding]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,9 +12,9 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 변경할 부분을 *먼저 격리*해 *리팩터링 위험* 감소. 격리된 단위에 *전용 테스트* 추가 후 안전하게 수정.
+> 변경할 부분을 먼저 격리해 리팩터링 위험 감소. 격리된 단위에 전용 테스트 추가 후 안전하게 수정.
 
-## 동기 (Motivation)
+## 동기
 
 큰 method 일부만 수정해야 할 때:
 
@@ -27,30 +26,30 @@ def process_order(self, order):
     # 10줄 알림
 ```
 
-*전체 이해 필요*하면 위험. **Isolate Change**는 *수정 영역 분리*.
+전체 이해 필요하면 위험. **Isolate Change**는 수정 영역 분리.
 
 ### 신호
 
-- 큰 method *일부 수정* 빈번.
-- 변경이 *다른 곳에 영향* 의심.
-- *테스트 단위*가 너무 큼.
-- *legacy code* 수정.
+- 큰 method 일부 수정 빈번.
+- 변경이 다른 곳에 영향 의심.
+- 테스트 단위가 너무 큼.
+- legacy code 수정.
 
 ### 언제 적용하는가
 
-- *부분 수정* 필요.
-- *테스트 단위* 작게 만들고 싶음.
-- *리팩터링 안전망* 확보.
+- 부분 수정 필요.
+- 테스트 단위 작게 만들고 싶음.
+- 리팩터링 안전망 확보.
 - 큰 method/class 분해.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **변경 영역 식별**.
-2. **Extract Method/Class**로 *격리*.
+2. **Extract Method/Class**로 격리.
 3. **격리된 단위에 테스트** 추가.
-4. *전체 테스트 green* 확인.
+4. 전체 테스트 green 확인.
 5. **격리된 단위만 수정** — 안전망 위에서.
-6. (필요 시) 격리 코드 *통합 환원* 또는 *유지*.
+6. (필요 시) 격리 코드 통합 환원 또는 유지.
 
 ## 예시 1 — Method 격리
 
@@ -82,7 +81,7 @@ def test_calculate_total_basic():
 
 ## 예시 2 — Class 격리
 
-복잡한 책임을 *별도 class*로:
+복잡한 책임을 별도 class로:
 
 ```python
 # Before — 한 class에 모든 것
@@ -110,7 +109,7 @@ class PriceCalculator:
         return self._subtotal(order) - self._discount(order) + self._tax(order)
 ```
 
-각 class가 *독립 테스트 가능*.
+각 class가 독립 테스트 가능하다.
 
 ## 예시 3 — Scaffolding (temp 이름)
 
@@ -132,23 +131,29 @@ def _validate_payment_TEMP(self, payment):
 
 ## 자주 보는 안티패턴
 
-### 1. *Big-bang 추출*
-한 번에 *여러 method 추출* → 어디서 깨지는지 모름. 한 번에 *하나*.
+### 1. Big-bang 추출
 
-### 2. *추출 후 테스트 없음*
-격리만 하고 *test 안 씀* → 안전망 없음. 항상 *test 동반*.
+한 번에 여러 method 추출 → 어디서 깨지는지 모름. 한 번에 하나.
 
-### 3. *과도한 분해*
-모든 줄을 method로 → noise. *의미 단위*.
+### 2. 추출 후 테스트 없음
 
-### 4. *Private method test 결합*
-*private method 직접 test* → 리팩터링 시 *test도 깨짐*. *behavior test*.
+격리만 하고 test 안 씀 → 안전망 없음. 항상 test 동반.
 
-### 5. *통합 환원 잊음*
-임시 격리가 영구 남음 → 의도 모호. 끝나면 *환원 또는 정식화*.
+### 3. 과도한 분해
 
-### 6. *Class 격리 + 양방향 의존*
-새 class가 *원본도 의존* → 순환. *단방향*.
+모든 줄을 method로 → noise. 의미 단위.
+
+### 4. Private method test 결합
+
+private method 직접 test → 리팩터링 시 test도 깨짐. behavior test.
+
+### 5. 통합 환원 잊음
+
+임시 격리가 영구 남음 → 의도 모호. 끝나면 환원 또는 정식화.
+
+### 6. Class 격리 + 양방향 의존
+
+새 class가 원본도 의존 → 순환. 단방향.
 
 ## Modern variants
 
@@ -164,7 +169,7 @@ def _sprout(self, x):
     ...
 ```
 
-기존 코드 *건드리지 않고* 새 동작 추가.
+기존 코드 건드리지 않고 새 동작 추가.
 
 ### Sprout Class
 
@@ -188,7 +193,7 @@ def method(self, x):
     return result
 ```
 
-원본 *변경 없이 wrap*.
+원본 변경 없이 wrap.
 
 ### Branch by abstraction
 
@@ -196,7 +201,7 @@ interface 도입 → 점진적 마이그레이션.
 
 ### Feature flag
 
-flag로 *new code 분리* + rollback 쉬움.
+flag로 new code 분리 + rollback 쉬움.
 
 ```python
 if flag("new_calculation"):
@@ -206,7 +211,7 @@ return old_calculate(order)
 
 ### Strangler Fig
 
-old system 옆에 *new system* — 점진적 대체.
+old system 옆에 new system — 점진적 대체.
 
 ## 도구 / IDE
 
@@ -219,7 +224,7 @@ old system 옆에 *new system* — 점진적 대체.
 
 ## 성능 고려
 
-method/class 추출은 *JIT inline* — 런타임 무관. *분해된 코드*는 *cache locality* 약간 변화 가능 — 측정.
+method/class 추출은 JIT inline — 런타임 무관. 분해된 코드는 cache locality 약간 변화 가능 — 측정.
 
 ## 관련 패턴
 

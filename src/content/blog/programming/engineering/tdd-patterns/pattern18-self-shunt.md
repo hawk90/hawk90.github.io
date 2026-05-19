@@ -5,7 +5,6 @@ description: "Test class 자신이 collaborator 인터페이스 구현 — mock 
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 18
 tags: [tdd, beck, self-shunt, mock-light]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,41 +12,41 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 테스트 클래스가 *직접 협력 객체 인터페이스를 구현*하여 *mock framework 없이* 간단한 stub을 만든다.
+> 테스트 클래스가 직접 협력 객체 인터페이스를 구현하여 mock framework 없이 간단한 stub을 만든다.
 
-## 동기 (Motivation)
+## 동기
 
-외부 mock 라이브러리 없이도 *callback/listener* 같은 단순 협력을 테스트하고 싶다. 협력 객체가 간단할 때 *test 클래스 자체가 그 역할*을 할 수 있다.
+외부 mock 라이브러리 없이도 *callback/listener* 같은 단순 협력을 테스트하고 싶다. 협력 객체가 간단할 때 test 클래스 자체가 그 역할을 할 수 있다.
 
-이것이 **Self Shunt** — 테스트가 *스스로를 SUT에 주입*한다.
+이것이 **Self Shunt** — 테스트가 스스로를 SUT에 주입한다.
 
 ### 신호
 
 - *간단한 listener / observer / callback* 인터페이스.
-- mock library 도입 *부담*.
-- 협력 객체가 *한 두 메서드만*.
-- *상태 기록*이 핵심 검증.
+- mock library 도입 부담.
+- 협력 객체가 한 두 메서드만.
+- 상태 기록이 핵심 검증.
 
 ### 언제 적용하는가
 
-- 인터페이스가 *작음*.
-- *기록 + 검증*만 필요.
-- mock 라이브러리 의존 *최소화* 원함.
+- 인터페이스가 작음.
+- 기록 + 검증만 필요.
+- mock 라이브러리 의존 최소화 원함.
 
 ### 언제 적용하지 않는가
 
-- 인터페이스가 *큼* (메서드 10개+) — test 클래스 부담.
-- *복잡한 동작* (조건부 응답, exception).
-- mock 라이브러리가 *이미 표준*.
+- 인터페이스가 큼 (메서드 10개+) — test 클래스 부담.
+- 복잡한 동작 (조건부 응답, exception).
+- mock 라이브러리가 이미 표준.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **협력 객체 interface** 식별.
 2. **test 클래스가 interface 구현** (또는 duck typing).
 3. **기록용 field** 추가 (`self.received_events = []`).
-4. interface method가 *기록*.
-5. SUT 생성 시 `self`를 *주입*.
-6. test에서 *기록 검증*.
+4. interface method가 기록.
+5. SUT 생성 시 `self`를 주입.
+6. test에서 기록 검증.
 
 ## 예시 1 — Event listener
 
@@ -67,7 +66,7 @@ class TestEventPublisher:
         assert "event_1" in self.received_events
 ```
 
-mock library *없음*. 명확하고 가벼움.
+mock library 없음. 명확하고 가벼움.
 
 ## 예시 2 — Java (상속)
 
@@ -95,7 +94,7 @@ public class OrderTest implements OrderListener {
 }
 ```
 
-interface implementation은 *컴파일러가 강제*.
+interface implementation은 컴파일러가 강제.
 
 ## 예시 3 — Method ordering
 
@@ -121,27 +120,33 @@ class TestOrderWorkflow:
         assert self.call_log == ["validate", "process", "complete"]
 ```
 
-호출 *순서*를 자연스럽게 검증. *Log String*과 결합.
+호출 순서를 자연스럽게 검증. Log String과 결합.
 
 ## 자주 보는 안티패턴
 
-### 1. *모든 mock을 self shunt로*
-복잡한 interaction까지 test 클래스에 → *test 클래스 폭증*. *복잡하면 Mock*.
+### 1. 모든 mock을 self shunt로
 
-### 2. *Interface 메서드 폭증*
-self shunt가 *10개 메서드* 구현 — *책임 분산*. *별도 stub class*.
+복잡한 interaction까지 test 클래스에 → test 클래스 폭증. 복잡하면 Mock.
 
-### 3. *State 검증 안 함*
-기록만 하고 *assertion 없음* → useful 테스트 아님. 기록 *검증* 필수.
+### 2. Interface 메서드 폭증
 
-### 4. *Interface 변경에 취약*
-production interface 변경 시 *모든 self shunt 클래스* 함께 수정. 자동화 없음.
+self shunt가 10개 메서드 구현 — 책임 분산. 별도 stub class.
 
-### 5. *Threading*
-async/multi-thread 환경에서 *기록 race* — synchronization 필요.
+### 3. State 검증 안 함
 
-### 6. *Cross-test 공유*
-class-level field로 *test 간 공유* → 격리 깨짐. instance.
+기록만 하고 assertion 없음 → useful 테스트 아님. 기록 검증 필수.
+
+### 4. Interface 변경에 취약
+
+production interface 변경 시 모든 self shunt 클래스 함께 수정. 자동화 없다.
+
+### 5. Threading
+
+async/multi-thread 환경에서 기록 race — synchronization 필요하다.
+
+### 6. Cross-test 공유
+
+class-level field로 test 간 공유 → 격리 깨짐. instance.
 
 ## Modern variants
 
@@ -157,7 +162,7 @@ def test_listener():
     assert "event_1" in received
 ```
 
-*closure*로 더 짧게. 작은 callback에 자연.
+closure로 더 짧게. 작은 callback에 자연.
 
 ### Duck typing
 
@@ -175,7 +180,7 @@ def test():
     # ...
 ```
 
-별도 *작은 fake class*. self shunt와 *대등*.
+별도 작은 fake class. self shunt와 대등.
 
 ### Mock library + spy
 
@@ -187,11 +192,11 @@ publisher.publish("x")
 listener.on_event.assert_called_with("x")
 ```
 
-mock 라이브러리로 *동적*. self shunt와 *competing*.
+mock 라이브러리로 동적. self shunt와 competing.
 
 ### Functional callback
 
-JS/Rust/Go 등에서 *함수 자체*를 전달:
+JS/Rust/Go 등에서 함수 자체를 전달:
 
 ```rust
 publisher.on_event(|e| received.push(e.clone()));
@@ -204,7 +209,7 @@ interface 없이.
 | 도구 | Self Shunt 지원 |
 | --- | --- |
 | 모든 IDE | interface implementation 자동 생성 |
-| (특별 도구 없음) | 패턴 자체가 *수동 작성* |
+| (특별 도구 없음) | 패턴 자체가 수동 작성 |
 
 ## Self Shunt vs Mock
 
@@ -218,7 +223,7 @@ interface 없이.
 
 ## 성능 고려
 
-self shunt는 *진짜 함수 호출* — overhead 0. mock보다 약간 빠를 수도. 일반적으로 무관.
+self shunt는 진짜 함수 호출 — overhead 0. mock보다 약간 빠를 수도. 일반적으로 무관.
 
 ## 관련 패턴
 

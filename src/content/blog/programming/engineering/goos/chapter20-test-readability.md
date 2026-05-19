@@ -5,13 +5,13 @@ description: "Test as documentation. AAA / Given-When-Then. Helper / Builder 패
 tags: [TDD, Readability, Builder]
 series: "Growing Object-Oriented Software"
 seriesOrder: 20
-draft: true
+draft: false
 ---
 
 > "Tests are executable documentation."
 > — 테스트는 실행 가능한 문서다
 
-좋은 테스트는 코드가 무엇을 하는지 명확히 설명한다. 이 장에서는 테스트를 문서처럼 읽을 수 있게 만드는 방법을 배운다.
+좋은 테스트는 코드가 무엇을 하는지 명확히 설명한다. 이 장에서는 테스트를 문서처럼 읽을 수 있게 만드는 방법을 다룬다. 도구는 단순하다. 의미 있는 이름, AAA 또는 Given-When-Then 구조, Builder와 Object Mother로 셋업을 압축하기, 그리고 도메인 언어를 닮은 헬퍼다. 한 가지 원칙으로 묶으면, **테스트가 무엇을 하는지 한 화면 안에서 읽힐 것**.
 
 ---
 
@@ -688,3 +688,10 @@ class FakeAuctionServer:
 ## 다음 장 예고
 
 다음 장에서는 **Test Flexibility**를 다룬다. 테스트가 코드 변경에 유연하게 대응하는 방법, 테스트 결합도를 낮추는 방법을 배운다.
+
+## 관련 항목
+
+- [Ch 19: Listening to the Tests](/blog/programming/engineering/goos/chapter19-listening-to-tests) — 이전 장
+- [Ch 21: Test Flexibility](/blog/programming/engineering/goos/chapter21-test-flexibility) — 다음 장
+- [Khorikov Ch 7: 단위 테스트 리팩토링](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring) — Builder/Object Mother로 테스트 가독성 끌어올리기
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/chapter05-tdd-patterns) — Kent Beck의 가독성 패턴 카탈로그

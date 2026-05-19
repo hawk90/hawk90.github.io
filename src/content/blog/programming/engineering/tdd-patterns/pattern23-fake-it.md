@@ -5,7 +5,6 @@ description: "Constant return부터 — 가장 빠른 green bar."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 23
 tags: [tdd, beck, fake-it, green-bar]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,11 +12,11 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 테스트를 통과시키기 위해 *우선 상수를 반환*하고, 나중에 일반화. *가장 작은 스텝*으로 *가장 빠른 green*.
+> 테스트를 통과시키기 위해 우선 상수를 반환하고, 나중에 일반화. 가장 작은 스텝으로 가장 빠른 green.
 
-## 동기 (Motivation)
+## 동기
 
-TDD의 목표는 *빠르게 green bar*에 도달하는 것. 가장 빠른 방법은?
+TDD의 목표는 빠르게 green bar에 도달하는 것. 가장 빠른 방법은?
 
 ```python
 def test_sum():
@@ -28,34 +27,34 @@ def sum(numbers):
     return 6
 ```
 
-*비웃음 받을* 만한 구현이지만 *가장 작은 스텝*. *심리적 안전 + 작은 스텝 강제*.
+비웃음 받을 만한 구현이지만 가장 작은 스텝. 심리적 안전 + 작은 스텝 강제.
 
 ### 신호
 
-- 구현 방향이 *불확실*.
-- *완벽한 구현* 작성하다 막힘.
-- Red bar가 *길어짐*.
-- *어디부터 시작*할지 모름.
+- 구현 방향이 불확실.
+- 완벽한 구현 작성하다 막힘.
+- Red bar가 길어짐.
+- 어디부터 시작할지 모름.
 
 ### 언제 적용하는가
 
-- 구현 *방향 불확실*.
-- *복잡한 알고리즘* 시작 시.
-- *외부 의존성*이 있을 때 (interface 먼저).
+- 구현 방향 불확실.
+- 복잡한 알고리즘 시작 시.
+- 외부 의존성이 있을 때 (interface 먼저).
 - 자신감 낮음.
 
 ### 언제 적용하지 않는가
 
-- 구현이 *명확함* → [Obvious Implementation](/blog/programming/engineering/tdd-patterns/pattern25-obvious-implementation).
+- 구현이 명확함 → [Obvious Implementation](/blog/programming/engineering/tdd-patterns/pattern25-obvious-implementation).
 - 이미 비슷한 코드 존재.
-- 단순 *위임 (delegation)*.
+- 단순 위임 (delegation).
 
-## 절차 (Mechanics)
+## 절차
 
 1. **테스트 작성** + Red 확인.
 2. **상수 반환**으로 통과 (Fake It).
 3. Green 확인.
-4. *두 번째 테스트* 추가 → 상수로 fail → [Triangulate](/blog/programming/engineering/tdd-patterns/pattern24-triangulate)로 일반화.
+4. 두 번째 테스트 추가 → 상수로 fail → [Triangulate](/blog/programming/engineering/tdd-patterns/pattern24-triangulate)로 일반화.
 5. Refactor.
 
 ## 예시 1 — 단계별 일반화
@@ -78,7 +77,7 @@ def plus(a, b):
     return a + b
 ```
 
-Fake → 부분 Fake → Real. 각 단계 *안전한 green*.
+Fake → 부분 Fake → Real. 각 단계 안전한 green.
 
 ## 예시 2 — Collection 상수
 
@@ -122,23 +121,29 @@ def create_order(user_id, amount):
 
 ## 자주 보는 안티패턴
 
-### 1. *Fake It만 하고 끝*
-"테스트 통과했네" → 일반화 안 함 → production 깨짐. 항상 *Triangulate* 따라옴.
+### 1. Fake It만 하고 끝
 
-### 2. *너무 복잡한 Fake*
-*if 분기* 가득한 Fake → 이미 *진짜 구현*. 진짜 fake는 *상수 한 줄*.
+"테스트 통과했네" → 일반화 안 함 → production 깨짐. 항상 Triangulate 따라옴.
 
-### 3. *Test가 Fake에 결합*
-test가 *특정 값에만 의존* → fake에 *과도하게 맞춤*. test가 *동작*을 검증해야.
+### 2. 너무 복잡한 Fake
 
-### 4. *Fake 단계 건너뜀*
-명확하지도 않은데 *real implementation 시도* → 막힘. fake로 시작.
+if 분기 가득한 Fake → 이미 진짜 구현. 진짜 fake는 상수 한 줄.
 
-### 5. *Fake가 production에 commit*
-Fake 단계에서 *PR open* → reviewer 혼란. *Triangulate까지 한 commit*.
+### 3. Test가 Fake에 결합
 
-### 6. *Fake가 부적절*
-constant 반환이 *진짜 production의 single-case*일 수도 — 그땐 *진짜 implementation*.
+test가 특정 값에만 의존 → fake에 과도하게 맞춤. test가 동작을 검증해야.
+
+### 4. Fake 단계 건너뜀
+
+명확하지도 않은데 real implementation 시도 → 막힘. fake로 시작.
+
+### 5. Fake가 production에 commit
+
+Fake 단계에서 PR open → reviewer 혼란. Triangulate까지 한 commit.
+
+### 6. Fake가 부적절
+
+constant 반환이 진짜 production의 single-case일 수도 — 그땐 진짜 implementation.
 
 ## Modern variants
 
@@ -150,7 +155,7 @@ fn plus(a: i32, b: i32) -> i32 {
 }
 ```
 
-`todo!()` / `unimplemented!()` — 타입 system이 *signature 검증*, 본문은 fake.
+`todo!()` / `unimplemented!()` — 타입 system이 signature 검증, 본문은 fake.
 
 ### Mock library의 stub
 
@@ -159,7 +164,7 @@ mock = Mock()
 mock.return_value = "fake"
 ```
 
-mock의 *return_value*가 Fake It의 변형.
+mock의 return_value가 Fake It의 변형.
 
 ### Property-based + Fake
 
@@ -173,11 +178,11 @@ property로 강제 일반화 — fake로는 통과 불가.
 
 ### "Cucumber driven development"
 
-acceptance test 먼저 → 점진적 step 구현. fake 단계가 *자연스러움*.
+acceptance test 먼저 → 점진적 step 구현. fake 단계가 자연스러움.
 
 ### "Walking skeleton"
 
-end-to-end *최소 동작* → 모든 layer가 *fake*. 점진적 실화.
+end-to-end 최소 동작 → 모든 layer가 fake. 점진적 실화.
 
 ## Fake It 사이클
 
@@ -188,7 +193,7 @@ Test → Red → Fake (constant) → Green
      → Refactor
 ```
 
-작은 사이클의 *반복* — *큰 도약 없이* 진화.
+작은 사이클의 반복 — 큰 도약 없이 진화.
 
 ## 도구 / IDE
 
@@ -201,13 +206,13 @@ Test → Red → Fake (constant) → Green
 
 ## 성능 고려
 
-Fake 자체는 *극히 빠름*. cycle 속도 향상 효과. 단 *Fake가 production*에 남으면 functional bug.
+Fake 자체는 극히 빠름. cycle 속도 향상 효과. 단 Fake가 production에 남으면 functional bug.
 
 ## Beck의 조언
 
 > "Fake it은 비웃음 받지만, 가장 실용적인 기법이다. 나도 자주 쓴다."
 
-작은 스텝이 *자신감*을 만들고, 자신감이 *더 큰 스텝*을 가능하게.
+작은 스텝이 자신감을 만들고, 자신감이 더 큰 스텝을 가능하게.
 
 ## 관련 패턴
 

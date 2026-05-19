@@ -5,7 +5,6 @@ description: "Single-item에서 collection으로 — 점진적 일반화. 알고
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 26
 tags: [tdd, beck, one-to-many, collection]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,9 +12,9 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> Collection을 다룰 때 *단일 항목부터* 시작해 점진적으로 *여러 항목*으로 확장. 알고리즘의 *본질* 발견.
+> Collection을 다룰 때 단일 항목부터 시작해 점진적으로 여러 항목으로 확장. 알고리즘의 본질 발견.
 
-## 동기 (Motivation)
+## 동기
 
 리스트 합계 구현 — 바로 반복문?
 
@@ -24,38 +23,38 @@ def test_sum():
     assert sum([1, 2, 3, 4, 5]) == 15
 ```
 
-TDD는 *더 작은 스텝* — **단일 항목부터**.
+TDD는 더 작은 스텝 — **단일 항목부터**.
 
 이유:
-- *알고리즘 핵심*이 *단일 처리 + 결합*이라는 통찰.
-- *경계 조건* 자연스럽게 고려.
-- *Reduce 패턴*으로 자연 진화.
+- 알고리즘 핵심이 단일 처리 + 결합이라는 통찰.
+- 경계 조건 자연스럽게 고려.
+- Reduce 패턴으로 자연 진화.
 
 ### 신호
 
 - collection을 다루는 새 기능 시작.
 - 바로 반복문 작성 충동.
-- 빈 collection, 단일 처리 *잊음*.
-- *알고리즘 본질*이 흐림.
+- 빈 collection, 단일 처리 잊음.
+- 알고리즘 본질이 흐림.
 
 ### 언제 적용하는가
 
-- Map/Reduce/Filter 같은 *collection 알고리즘*.
-- *복잡한 collection 변환*.
+- Map/Reduce/Filter 같은 collection 알고리즘.
+- 복잡한 collection 변환.
 - 도메인 객체 집합 처리.
 
 ### 언제 적용하지 않는가
 
-- 이미 *standard library*가 처리 (`sum()`, `max()`).
-- 구현이 *Obvious*.
+- 이미 standard library가 처리 (`sum()`, `max()`).
+- 구현이 Obvious.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **빈 collection** 테스트 (경계).
 2. **단일 항목** 테스트 — 핵심 처리.
 3. **두 항목** 테스트 — 결합 방식 등장.
 4. **여러 항목** 테스트 — 일반화 강제.
-5. *reduce/fold 패턴* 발견 가능.
+5. *reduce/fold 패턴* 발견 가능하다.
 
 ## 예시 1 — Sum
 
@@ -94,7 +93,7 @@ def sum(numbers):
     return total
 ```
 
-알고리즘이 *점진적으로* 모습.
+알고리즘이 점진적으로 모습.
 
 ## 예시 2 — Max
 
@@ -136,23 +135,29 @@ def filter_evens(items):
 
 ## 자주 보는 안티패턴
 
-### 1. *바로 loop 작성*
-"sum은 reduce지" → 단일 처리 *못 봄*. TDD 정신 위배.
+### 1. 바로 loop 작성
 
-### 2. *경계 무시*
-빈 collection test 없음 → production에서 IndexError. *항상 빈 case*.
+"sum은 reduce지" → 단일 처리 못 봄. TDD 정신 위배.
 
-### 3. *너무 잘게*
-단일 → 두 개 → 세 개 → 네 개... → *과한 분해*. *두 단계*면 충분.
+### 2. 경계 무시
 
-### 4. *Reduce 강제*
-모든 collection을 *reduce로* → 단순 sum 같은 case는 *built-in*이 명확.
+빈 collection test 없음 → production에서 IndexError. 항상 빈 case.
+
+### 3. 너무 잘게
+
+단일 → 두 개 → 세 개 → 네 개... → 과한 분해. 두 단계면 충분.
+
+### 4. Reduce 강제
+
+모든 collection을 reduce로 → 단순 sum 같은 case는 built-in이 명확하다.
 
 ### 5. *Stream/iterator 무시*
-list만 가정 → infinite stream에서 깨짐. *iterable* 처리.
 
-### 6. *Production code도 one-by-one*
-test는 점진적이지만 production은 *최종 일반화*. test 진화와 production 진화 *동시*.
+list만 가정 → infinite stream에서 깨짐. iterable 처리.
+
+### 6. Production code도 one-by-one
+
+test는 점진적이지만 production은 최종 일반화. test 진화와 production 진화 동시.
 
 ## Modern variants
 
@@ -163,7 +168,7 @@ def sum(items):
     return reduce(lambda acc, x: acc + x, items, 0)
 ```
 
-reduce는 *one-to-many의 자연 결론*.
+reduce는 one-to-many의 자연 결론.
 
 ### Generator / lazy
 
@@ -197,7 +202,7 @@ def parallel_sum(items, chunk_size=1000):
         return sum(ex.map(sum, chunks))
 ```
 
-성능 critical에서 *fork-join*.
+성능 critical에서 fork-join.
 
 ### Stream API (Java, Kotlin)
 
@@ -230,10 +235,10 @@ Test List for sum():
 
 ## 성능 고려
 
-알고리즘 패턴 자체는 *Big-O 결정* (O(n), O(n log n)). 단일→다중 *최적화 기회* 식별:
-- *Built-in 사용* (C 수준 빠름).
-- *Vectorized* (NumPy, pandas).
-- *Parallel*.
+알고리즘 패턴 자체는 Big-O 결정 (O(n), O(n log n)). 단일→다중 최적화 기회 식별:
+- Built-in 사용 (C 수준 빠름).
+- Vectorized (NumPy, pandas).
+- Parallel.
 
 ## 관련 패턴
 

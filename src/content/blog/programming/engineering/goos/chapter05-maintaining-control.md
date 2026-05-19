@@ -5,10 +5,10 @@ description: "외부 → 내부 (outside-in). 인수 → 단위 테스트로 좁
 tags: [TDD, Outside-In]
 series: "Growing Object-Oriented Software"
 seriesOrder: 5
-draft: true
+draft: false
 ---
 
-Walking Skeleton이 완성되면 본격적인 개발이 시작된다. TDD 사이클을 어떻게 유지하면서 기능을 추가해 나갈 수 있을까?
+Walking Skeleton이 완성되면 본격적인 개발이 시작된다. 이때부터의 과제는 TDD 사이클을 유지하면서 기능을 점진적으로 쌓아 가는 일이다. GOOS는 이를 위해 **이중 루프**를 제시한다. 바깥 루프는 인수 테스트로 사용자 시나리오를 정의하고, 안쪽 루프는 단위 테스트로 객체 협력을 다듬는다.
 
 ## 5.1 이중 루프 TDD
 
@@ -554,3 +554,11 @@ def _transition_to(self, new_state: SniperState) -> None:
 ## 다음 장 예고
 
 다음 장에서는 객체지향 스타일에 대해 다룬다. 좋은 객체는 어떤 특성을 가지며, TDD가 어떻게 좋은 설계를 이끌어내는지 살펴본다.
+
+## 관련 항목
+
+- [Ch 4: Kick-Starting](/blog/programming/engineering/goos/chapter04-kick-starting) — 이전 장
+- [Ch 6: Object-Oriented Style](/blog/programming/engineering/goos/chapter06-object-oriented-style) — 다음 장
+- [Ch 19: Listening to the Tests](/blog/programming/engineering/goos/chapter19-listening-to-tests) — 이중 루프가 막힐 때 신호 해석
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/section-introduction) — REFACTOR 단계에서 사용하는 리팩토링 카탈로그
+- [TDD by Example Ch 32](/blog/programming/engineering/tdd-by-example/chapter32-test-driven-development-patterns) — Detroit school의 사이클 운영

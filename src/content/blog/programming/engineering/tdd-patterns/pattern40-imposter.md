@@ -1,11 +1,10 @@
 ---
 title: "Pattern 40: Imposter"
 date: 2026-05-10T16:00:00
-description: "다른 객체 *척하기* — duck typing 기반 polymorphism. Mock/Stub/Fake의 상위 개념."
+description: "다른 객체 척하기 — duck typing 기반 polymorphism. Mock/Stub/Fake의 상위 개념."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 40
 tags: [tdd, beck, imposter, duck-typing]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,24 +12,24 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 기존 객체와 *동일 인터페이스*를 구현해 *테스트에서 진짜처럼* 행세. *Mock/Stub/Fake의 상위 개념*.
+> 기존 객체와 동일 인터페이스를 구현해 테스트에서 진짜처럼 행세. *Mock/Stub/Fake의 상위 개념*.
 
-## 동기 (Motivation)
+## 동기
 
-테스트에서 *실제 객체 사용 어려움*:
+테스트에서 실제 객체 사용 어려움:
 
 ```python
 # 실제 server 요청? 느림 + 불안정
 response = http_client.get("https://api.example.com/users")
 ```
 
-**Imposter**는 *같은 인터페이스*를 가진 *가짜 객체*. *duck typing*에 기반.
+**Imposter**는 같은 인터페이스를 가진 가짜 객체. duck typing에 기반.
 
 ### 신호
 
 - 외부 자원 의존이 test 어렵게 만듦.
 - Mock library 의존 부담.
-- *flexible substitution* 필요.
+- flexible substitution 필요.
 
 ### Imposter vs 다른 패턴
 
@@ -41,26 +40,26 @@ response = http_client.get("https://api.example.com/users")
 | Fake | 동작하는 단순 구현 |
 | **Imposter** | 같은 인터페이스, 다른 구현 (일반) |
 
-Imposter는 *상위 개념*. Mock/Stub/Fake/NullObject 모두 Imposter의 한 형태.
+Imposter는 상위 개념. Mock/Stub/Fake/NullObject 모두 Imposter의 한 형태.
 
 ### 언제 적용하는가
 
-- *외부 자원 격리*.
-- *test seam* 만들기.
-- *interface가 작고 명확*.
-- *동적 언어*에서 자연.
+- 외부 자원 격리.
+- test seam 만들기.
+- interface가 작고 명확.
+- 동적 언어에서 자연.
 
 ### 언제 적용하지 않는가
 
-- 실제 동작 검증이 *핵심* (integration test).
-- *큰 interface* — Imposter 작성 부담.
+- 실제 동작 검증이 핵심 (integration test).
+- 큰 interface — Imposter 작성 부담.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **target interface** 식별.
 2. **Imposter class** 작성 — 같은 method signature.
 3. **본문**은 *no-op / stub response / error throw* 등.
-4. SUT가 *interface로 의존*.
+4. SUT가 interface로 의존.
 5. test에서 Imposter 주입.
 
 ## 예시 1 — Fake HttpClient
@@ -118,7 +117,7 @@ process(RealDatabase())
 process(FakeDatabase())
 ```
 
-method 시그니처만 *맞으면 OK*.
+method 시그니처만 맞으면 OK.
 
 ## 예시 3 — Protocol type (Python 3.8+)
 
@@ -141,27 +140,33 @@ def process(db: Database):   # Protocol 기반
     ...
 ```
 
-*명시적 interface* + duck typing.
+명시적 interface + duck typing.
 
 ## 자주 보는 안티패턴
 
-### 1. *Imposter가 너무 다름*
-behavior가 *production과 차이 큼* → silent bug. 핵심 동작 유사 유지.
+### 1. Imposter가 너무 다름
 
-### 2. *Interface drift*
-production에 method 추가 → *Imposter에 누락* → silent. abstract base class로 강제.
+behavior가 production과 차이 큼 → silent bug. 핵심 동작 유사 유지.
 
-### 3. *모든 곳에 Imposter*
-모든 collaborator를 Imposter로 → *integration 검증 부재*. 일부 *real*도.
+### 2. Interface drift
 
-### 4. *Test과 의도 결합*
-Imposter behavior가 *test 결과 강결합* → 리팩터링 시 *test 깨짐*. *interface*만 의존.
+production에 method 추가 → Imposter에 누락 → silent. abstract base class로 강제.
 
-### 5. *Interface 너무 큼*
-20+ method 모두 구현 부담 → *segregation* (작은 interface).
+### 3. 모든 곳에 Imposter
 
-### 6. *Static language에서 boilerplate*
-Java/C# 등에서 Imposter 작성이 *많은 코드* → mock library 사용.
+모든 collaborator를 Imposter로 → integration 검증 부재. 일부 real도.
+
+### 4. Test과 의도 결합
+
+Imposter behavior가 test 결과 강결합 → 리팩터링 시 test 깨짐. interface만 의존.
+
+### 5. Interface 너무 큼
+
+20+ method 모두 구현 부담 → segregation (작은 interface).
+
+### 6. Static language에서 boilerplate
+
+Java/C# 등에서 Imposter 작성이 많은 코드 → mock library 사용.
 
 ## Modern variants
 
@@ -200,7 +205,7 @@ func (f *FakeDb) Query(sql string) []Row { ... }
 var db Database = &FakeDb{}   // OK
 ```
 
-Go의 *structural typing*.
+Go의 structural typing.
 
 ### Trait (Rust)
 
@@ -234,11 +239,11 @@ class FakeDb(Database):
     def query(self, sql): ...
 ```
 
-abstract → *implementation 누락 시 에러*.
+abstract → implementation 누락 시 에러.
 
 ### Hexagonal architecture (Ports & Adapters)
 
-interface (port) + 여러 adapter — Imposter가 *test adapter*.
+interface (port) + 여러 adapter — Imposter가 test adapter.
 
 ## 도구 / IDE
 
@@ -253,7 +258,7 @@ interface (port) + 여러 adapter — Imposter가 *test adapter*.
 
 ## 성능 고려
 
-Imposter는 *직접 호출* — 거의 무관. mock library의 reflection은 약간 느림. test 자체에선 무시.
+Imposter는 직접 호출 — 거의 무관. mock library의 reflection은 약간 느림. test 자체에선 무시.
 
 ## 관련 패턴
 

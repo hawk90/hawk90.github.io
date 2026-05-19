@@ -1,14 +1,13 @@
 ---
 title: "Ch 11: Unit Testing Anti-Patterns"
 date: 2026-05-10T11:00:00
-description: "흔한 안티패턴 — private method 테스트, time leak, code pollution. 시리즈 마무리."
+description: "Private 메서드 테스트, 시간 누수, 코드 오염, 구체 클래스 Mock 등 흔한 안티패턴과 해결책."
 tags: [TDD, Anti-Patterns]
 series: "Khorikov Unit Testing"
 seriesOrder: 11
-draft: true
 ---
 
-안티패턴을 알면 좋은 테스트를 작성하기 쉬워진다. 마지막 장에서는 흔한 실수와 해결책을 살펴본다.
+안티패턴을 알면 좋은 테스트를 작성하기 쉬워진다. 마지막 장에서는 흔한 실수와 해결책을 살펴보고, 시리즈 전체를 마무리한다.
 
 ## 11.1 Private Method 직접 테스트
 
@@ -19,7 +18,7 @@ public class PriceCalculator
 {
     public decimal Calculate(Order order)
     {
-        var discount = CalculateDiscount(order);  // private
+        var discount = CalculateDiscount(order);
         return order.Total * (1 - discount);
     }
 
@@ -31,7 +30,7 @@ public class PriceCalculator
     }
 }
 
-// ❌ private 메서드 직접 테스트 — 리플렉션 사용
+// 회피 — private 메서드를 리플렉션으로 호출한다
 [Test]
 public void CalculateDiscount_returns_10_percent_for_large_orders()
 {
@@ -45,17 +44,11 @@ public void CalculateDiscount_returns_10_percent_for_large_orders()
 }
 ```
 
-**왜 문제인가:**
-- 구현 세부사항에 결합
-- 리팩토링 시 깨짐
-- 테스트하기 어려운 설계 신호
+이 테스트는 구현 세부사항에 결합되어 있고, 메서드 이름만 바뀌어도 깨진다. 또한 private 메서드를 직접 테스트해야 한다는 사실 자체가 설계가 잘못되었다는 신호다.
 
-### 해결책
-
-#### 1. Public API를 통해 테스트
+### 해결책 1: Public API를 통해 테스트
 
 ```csharp
-// ✅ public 메서드를 통해 간접 테스트
 [Test]
 public void Large_order_gets_10_percent_discount()
 {
@@ -64,14 +57,15 @@ public void Large_order_gets_10_percent_discount()
 
     var result = calculator.Calculate(order);
 
-    Assert.That(result, Is.EqualTo(1350m));  // 1500 * 0.9
+    Assert.That(result, Is.EqualTo(1350m));
 }
 ```
 
-#### 2. 클래스 추출 (로직이 복잡할 때)
+### 해결책 2: 클래스 추출
+
+private 로직이 충분히 복잡하다면 별도 클래스로 끌어올린다.
 
 ```csharp
-// private이 복잡하면 별도 클래스로
 public class DiscountCalculator
 {
     public decimal Calculate(decimal orderTotal)
@@ -82,7 +76,6 @@ public class DiscountCalculator
     }
 }
 
-// 직접 테스트 가능
 [Test]
 public void Large_order_gets_10_percent()
 {
@@ -98,42 +91,43 @@ public void Large_order_gets_10_percent()
 
 ### 문제
 
+`DateTime.Now`에 직접 의존하면 테스트가 비결정적이 된다.
+
 ```csharp
 public class Delivery
 {
     public bool IsValid()
     {
-        return Date > DateTime.Now;  // 💥 시간 의존
+        return Date > DateTime.Now;
     }
 }
 
-// ❌ 비결정적 테스트
+// 회피 — 비결정적 테스트
 [Test]
 public void Future_delivery_is_valid()
 {
     var delivery = new Delivery { Date = DateTime.Now.AddDays(1) };
 
-    // 자정 직전에 실행하면 실패할 수 있음!
+    // 자정 직전에 실행하면 실패할 수 있다
     Assert.That(delivery.IsValid(), Is.True);
 }
 ```
 
-### 해결책
+### 해결책 1: 시간 주입
 
-#### 1. 시간 주입
+메서드 인자로 시간을 받는다. 가장 단순한 해법이다.
 
 ```csharp
 public class Delivery
 {
     public DateTime Date { get; set; }
 
-    public bool IsValid(DateTime now)  // 시간 주입
+    public bool IsValid(DateTime now)
     {
         return Date > now;
     }
 }
 
-// ✅ 결정적 테스트
 [Test]
 public void Future_delivery_is_valid()
 {
@@ -144,7 +138,9 @@ public void Future_delivery_is_valid()
 }
 ```
 
-#### 2. Clock 인터페이스
+### 해결책 2: Clock 인터페이스
+
+서비스 수준에서는 `IClock` 추상화를 두고 의존성 주입으로 다룬다.
 
 ```csharp
 public interface IClock
@@ -177,7 +173,6 @@ public class DeliveryService
     }
 }
 
-// 테스트
 [Test]
 public void Future_delivery_is_valid()
 {
@@ -193,12 +188,12 @@ public void Future_delivery_is_valid()
 
 ### 문제
 
-프로덕션 코드에 테스트 전용 로직이 들어감:
+테스트 전용 분기가 프로덕션 코드에 섞여 들어간다.
 
 ```csharp
 public class UserService
 {
-    private readonly bool _isTestMode;  // 💥 테스트 전용 플래그
+    private readonly bool _isTestMode;
 
     public UserService(bool isTestMode = false)
     {
@@ -207,30 +202,28 @@ public class UserService
 
     public void CreateUser(string email)
     {
-        // ... 유저 생성 ...
+        // 유저 생성 로직
 
-        if (!_isTestMode)  // 💥 테스트 분기
+        if (!_isTestMode)
         {
             SendWelcomeEmail(email);
         }
     }
 }
 
-// 테스트
 [Test]
 public void CreateUser_does_not_send_email_in_test_mode()
 {
-    var service = new UserService(isTestMode: true);  // 💥
+    var service = new UserService(isTestMode: true);
     service.CreateUser("test@example.com");
 }
 ```
 
-**문제점:**
-- 프로덕션 코드 복잡도 증가
-- 버그 가능성 증가
-- 테스트가 실제 동작 검증 안 함
+프로덕션 코드 복잡도가 늘어나고, 정작 테스트는 실제 동작 경로를 검증하지 못한다.
 
 ### 해결책: 의존성 주입
+
+테스트 분기를 두지 않고, 이메일 발송을 의존으로 빼낸다.
 
 ```csharp
 public interface IEmailService
@@ -249,12 +242,11 @@ public class UserService
 
     public void CreateUser(string email)
     {
-        // ... 유저 생성 ...
+        // 유저 생성 로직
         _email.SendWelcomeEmail(email);
     }
 }
 
-// 테스트 — Mock 사용
 [Test]
 public void CreateUser_sends_welcome_email()
 {
@@ -271,16 +263,13 @@ public void CreateUser_sends_welcome_email()
 
 ### 문제
 
+구체 클래스를 Mock하면 virtual 메서드만 가로챌 수 있고, 생성자가 실행되어 의도치 않은 부작용이 발생한다.
+
 ```csharp
-// ❌ 구체 클래스 Mock
-var mockService = new Mock<UserService>();  // 가상 메서드만 가능
+// 회피 — 구체 클래스 Mock
+var mockService = new Mock<UserService>();
 mockService.Setup(s => s.GetUser(1)).Returns(user);
 ```
-
-**문제점:**
-- 가상(virtual) 메서드만 Mock 가능
-- 생성자 실행됨
-- 의도치 않은 부작용
 
 ### 해결책: 인터페이스 사용
 
@@ -291,9 +280,8 @@ public interface IUserService
     void CreateUser(string email);
 }
 
-public class UserService : IUserService { ... }
+public class UserService : IUserService { /* ... */ }
 
-// ✅ 인터페이스 Mock
 var mockService = new Mock<IUserService>();
 mockService.Setup(s => s.GetUser(1)).Returns(user);
 ```
@@ -302,8 +290,10 @@ mockService.Setup(s => s.GetUser(1)).Returns(user);
 
 ### 문제
 
+내부 호출 순서와 횟수를 검증하면 리팩토링에 매우 취약해진다.
+
 ```csharp
-// ❌ 구현 세부사항 검증
+// 회피 — 구현 세부사항 검증
 [Test]
 public void CreateOrder_calls_correct_methods()
 {
@@ -312,7 +302,6 @@ public void CreateOrder_calls_correct_methods()
 
     service.CreateOrder(request);
 
-    // 내부 호출 순서와 횟수 검증 — 취약
     mockRepo.Verify(r => r.BeginTransaction(), Times.Once);
     mockRepo.Verify(r => r.Save(It.IsAny<Order>()), Times.Once);
     mockRepo.Verify(r => r.Commit(), Times.Once);
@@ -322,7 +311,6 @@ public void CreateOrder_calls_correct_methods()
 ### 해결책: 결과 검증
 
 ```csharp
-// ✅ 관찰 가능한 결과 검증
 [Test]
 public void CreateOrder_persists_order()
 {
@@ -340,15 +328,14 @@ public void CreateOrder_persists_order()
 
 ### 문제
 
+테스트만을 위해 `internal`이나 `public`을 부여하면 캡슐화가 깨진다.
+
 ```csharp
 public class ShoppingCart
 {
-    internal List<Item> InternalItems { get; }  // 💥 테스트용 노출
-
-    // 원래 private이어야 할 것을 internal로
+    internal List<Item> InternalItems { get; }  // 테스트용 노출
 }
 
-// ❌ 테스트
 [Test]
 public void AddItem_adds_to_internal_list()
 {
@@ -356,23 +343,24 @@ public void AddItem_adds_to_internal_list()
 
     cart.AddItem(item);
 
-    Assert.That(cart.InternalItems, Contains.Item(item));  // 내부 구현 의존
+    Assert.That(cart.InternalItems, Contains.Item(item));
 }
 ```
 
-### 해결책: Public API 사용
+### 해결책: 의미 있는 Public API
+
+읽기 전용 노출이나 파생 속성을 통해 의도를 표현한다.
 
 ```csharp
 public class ShoppingCart
 {
     private readonly List<Item> _items = new();
 
-    public IReadOnlyList<Item> Items => _items.AsReadOnly();  // 읽기 전용 노출
+    public IReadOnlyList<Item> Items => _items.AsReadOnly();
     public int ItemCount => _items.Count;
     public decimal Total => _items.Sum(i => i.Price);
 }
 
-// ✅ public API로 검증
 [Test]
 public void AddItem_increases_item_count()
 {
@@ -389,16 +377,17 @@ public void AddItem_increases_item_count()
 
 ### 문제
 
+테스트가 SUT의 계산식을 그대로 복제하면 버그가 있어도 통과한다.
+
 ```csharp
-// ❌ 테스트가 도메인 로직 복제
+// 회피 — 테스트가 로직을 복제한다
 [Test]
 public void Calculate_discount_correctly()
 {
     var calculator = new DiscountCalculator();
     var order = new Order { Total = 1500m };
 
-    // 테스트가 로직을 알고 있음
-    var expected = order.Total * 0.1m;  // 💥 로직 복제
+    var expected = order.Total * 0.1m;  // 로직 복제
 
     var result = calculator.Calculate(order);
 
@@ -406,14 +395,9 @@ public void Calculate_discount_correctly()
 }
 ```
 
-**문제점:**
-- 로직 변경 시 테스트도 변경 필요
-- 버그가 있어도 테스트 통과 가능
-
 ### 해결책: 하드코딩된 기대값
 
 ```csharp
-// ✅ 구체적인 기대값
 [Test]
 public void Large_order_gets_10_percent_discount()
 {
@@ -422,62 +406,86 @@ public void Large_order_gets_10_percent_discount()
 
     var result = calculator.Calculate(order);
 
-    Assert.That(result, Is.EqualTo(150m));  // 계산하지 않고 직접 명시
+    Assert.That(result, Is.EqualTo(150m));
 }
 ```
+
+기대값은 사람이 직접 계산하거나 명세에서 도출한 값이어야 한다.
 
 ## 11.8 안티패턴 체크리스트
 
 | 안티패턴 | 증상 | 해결 |
 |----------|------|------|
-| Private 테스트 | 리플렉션 사용 | Public API 또는 추출 |
-| 시간 의존 | DateTime.Now 직접 사용 | 시간 주입 |
+| Private 테스트 | 리플렉션 사용 | Public API 또는 클래스 추출 |
+| 시간 의존 | DateTime.Now 직접 사용 | 시간 주입 또는 Clock 인터페이스 |
 | 코드 오염 | isTestMode 플래그 | 의존성 주입 |
-| 구체 클래스 Mock | virtual 필요 | 인터페이스 |
+| 구체 클래스 Mock | virtual 강요 | 인터페이스 |
 | 구현 검증 | Verify 남용 | 결과 검증 |
-| 상태 노출 | internal/public 오용 | 적절한 public API |
+| 상태 노출 | internal 오용 | 의미 있는 Public API |
 | 로직 복제 | 테스트에서 계산 | 하드코딩된 값 |
 
 ## 11.9 시리즈 마무리
 
 ### 핵심 원칙 요약
 
-```
-1. 테스트의 목적 = 지속 가능한 성장
-2. 단위 = 동작 (클래스 아님)
-3. 4가지 기둥 = 회귀 + 리팩토링 + 피드백 + 유지보수
-4. Mock = 시스템 경계에서만
-5. Output-based > State-based > Communication-based
-6. 코드 4사분면 → 각각 다른 전략
-```
+이 시리즈가 반복해서 강조한 여섯 가지 원칙은 다음과 같다.
+
+1. 테스트의 목적은 지속 가능한 프로젝트 성장이다.
+2. 단위는 동작이며 클래스가 아니다.
+3. 좋은 테스트는 회귀 보호, 리팩토링 내성, 빠른 피드백, 유지보수성의 네 기둥으로 평가한다.
+4. Mock은 시스템 경계에서만 쓴다.
+5. Output-based가 State-based보다, State-based가 Communication-based보다 우선이다.
+6. 코드를 4사분면으로 분류하고 각각 다른 전략을 적용한다.
 
 ### 관련 도서
 
 | 책 | 저자 | 특징 |
 |----|------|------|
-| **TDD by Example** | Kent Beck | TDD 입문 |
-| **GOOS** | Freeman & Pryce | London 학파 |
-| **xUnit Test Patterns** | Meszaros | 패턴 카탈로그 |
-| **이 책** | Khorikov | Classical + 현대적 시각 |
+| TDD by Example | Kent Beck | TDD 입문서 |
+| GOOS | Freeman & Pryce | London 학파의 대표 |
+| xUnit Test Patterns | Meszaros | 패턴 카탈로그 |
+| Working Effectively with Legacy Code | Feathers | 테스트 없는 코드 다루기 |
+| 이 책 | Khorikov | Classical 학파의 현대적 정리 |
 
 ### 마지막 질문들
 
-테스트를 작성할 때마다:
-1. 이 테스트가 프로젝트 성장에 기여하는가?
-2. 동작을 테스트하는가, 구현을 테스트하는가?
-3. 4가지 기둥 중 어디가 약한가?
-4. Mock이 경계에 있는가?
-5. 안티패턴에 해당하는가?
+테스트를 작성할 때마다 다음 다섯 가지를 자문한다.
+
+- 이 테스트가 프로젝트 성장에 기여하는가?
+- 동작을 테스트하는가, 구현을 테스트하는가?
+- 4가지 기둥 중 어디가 약한가?
+- Mock이 경계에 있는가?
+- 어떤 안티패턴에 가까운가?
+
+## 자주 보는 함정
+
+- **안티패턴을 한 번에 모두 없애려 함**: 큰 변경은 거짓 양성 폭발로 이어진다. 점진적으로 정리한다.
+- **Private 메서드 추출을 거부**: 도메인 모델이 자라야 할 곳에서 자라지 못한다.
+- **Clock 인터페이스를 모든 곳에 강요**: 단순 함수라면 시간을 인자로 받는 편이 더 깔끔하다.
+- **인터페이스를 mock 용도로만 사용**: 추상화 자체가 필요한지 검토하지 않으면 결합도가 흩어진다.
+- **체크리스트만 만족하면 끝났다고 생각**: 안티패턴이 없어도 가치 없는 테스트는 가치가 없다.
 
 ## 정리
 
-| 안티패턴 | 핵심 |
-|----------|------|
-| **Private 테스트** | 리플렉션 대신 public API |
-| **시간 누수** | DateTime.Now 주입 |
-| **코드 오염** | 테스트 플래그 제거 |
-| **구체 클래스 Mock** | 인터페이스 사용 |
-| **구현 검증** | 결과에 집중 |
+- Private 메서드는 Public API 또는 추출된 클래스를 통해 간접적으로 테스트한다.
+- 시간 의존은 시간 주입이나 Clock 인터페이스로 제거한다.
+- 테스트 전용 분기를 프로덕션 코드에 두지 않는다.
+- 구체 클래스 대신 인터페이스를 Mock한다.
+- 구현 세부사항이 아닌 관찰 가능한 결과를 검증한다.
+- 테스트만을 위한 상태 노출은 피하고 의미 있는 Public API를 제공한다.
 
-**최종 질문:**
+최종 질문은 다음과 같다.
+
 > 이 테스트가 미래의 나에게 도움이 되는가, 아니면 짐이 되는가?
+
+## 관련 항목
+
+- [Ch 1: The Goal of Unit Testing](/blog/programming/engineering/khorikov-unit-testing/chapter01-goal-of-unit-testing)
+- [Ch 5: Mocks and Test Fragility](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility)
+- [Ch 9: Mocking Best Practices](/blog/programming/engineering/khorikov-unit-testing/chapter09-mocking-best-practices)
+- [TDD by Example](/blog/programming/engineering/tdd-by-example/) — TDD의 기본 리듬
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/) — 안티패턴 회피를 돕는 보조 패턴
+- [GOOS](/blog/programming/engineering/goos/) — Outside-In 흐름과 Mock 경계 짓기
+- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/) — Seam과 Sprout으로 안티패턴 정리
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/) — Extract Class, Replace Conditional 등의 어휘
+- [TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-08-tdd-as-xp) — TDD가 작동하기 위한 사회적 조건

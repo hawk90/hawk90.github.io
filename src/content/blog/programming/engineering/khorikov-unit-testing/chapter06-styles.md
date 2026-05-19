@@ -1,11 +1,10 @@
 ---
 title: "Ch 6: Styles of Unit Testing"
 date: 2026-05-10T06:00:00
-description: "Output / State / Communication 3 스타일. functional core vs imperative shell."
+description: "Output, State, Communication 세 가지 스타일. Functional Core와 Imperative Shell."
 tags: [TDD, Styles, Functional Core]
 series: "Khorikov Unit Testing"
 seriesOrder: 6
-draft: true
 ---
 
 단위 테스트에는 세 가지 스타일이 있다. 각 스타일은 다른 방식으로 SUT를 검증하며, 4가지 기둥에서 서로 다른 강점을 보인다.
@@ -14,25 +13,21 @@ draft: true
 
 | 스타일 | 영어 | 검증 대상 |
 |--------|------|-----------|
-| **출력 기반** | Output-based | 반환값 |
-| **상태 기반** | State-based | 최종 상태 |
-| **통신 기반** | Communication-based | 협력자 호출 |
+| 출력 기반 | Output-based | 반환값 |
+| 상태 기반 | State-based | 최종 상태 |
+| 통신 기반 | Communication-based | 협력자 호출 |
 
-```
-             ┌─────────────────┐
-    입력 ──▶ │       SUT       │ ──▶ 출력
-             └────────┬────────┘
-                      │
-              ┌───────┴───────┐
-              ▼               ▼
-          상태 변경       협력자 호출
-```
+SUT의 동작은 다음 세 경로로 외부에 드러난다. 어느 경로를 검증할 것인지에 따라 스타일이 정해진다.
+
+- 입력에 대해 반환값을 돌려준다.
+- 자신이나 협력자의 상태를 변경한다.
+- 협력자의 메서드를 호출한다.
 
 ## 6.2 Output-based 테스트
 
 ### 정의
 
-SUT에 입력을 주고 **반환값**만 검증한다:
+SUT에 입력을 주고 반환값만 검증한다.
 
 ```csharp
 public class PriceCalculator
@@ -53,7 +48,6 @@ public class PriceCalculator
     }
 }
 
-// Output-based 테스트
 [Test]
 public void Premium_customer_with_5_years_gets_20_percent_discount()
 {
@@ -64,7 +58,7 @@ public void Premium_customer_with_5_years_gets_20_percent_discount()
         isPremium: true,
         loyaltyYears: 5);
 
-    Assert.That(price, Is.EqualTo(80m));  // 출력만 검증
+    Assert.That(price, Is.EqualTo(80m));
 }
 ```
 
@@ -72,21 +66,17 @@ public void Premium_customer_with_5_years_gets_20_percent_discount()
 
 | 장점 | 이유 |
 |------|------|
-| **리팩토링 내성 최고** | 구현에 결합 없음 |
-| **유지보수 쉬움** | 단순한 입출력 |
-| **부수효과 없음** | 순수 함수 |
+| 리팩토링 내성 최고 | 구현에 결합되지 않는다 |
+| 유지보수가 쉽다 | 입력과 출력만 보면 된다 |
+| 부수효과가 없다 | 순수 함수에 해당한다 |
 
-### 제약
-
-- SUT가 **순수 함수**여야 함
-- 부수효과가 있으면 불가능
+제약은 분명하다. SUT가 순수 함수여야 한다. 부수효과가 있으면 Output-based로는 검증할 수 없다.
 
 ```csharp
-// ❌ Output-based 불가능 — 부수효과 있음
+// Output-based 불가능 — 부수효과만 있다
 public void SendEmail(string to, string body)
 {
-    _emailService.Send(to, body);  // 부수효과
-    // 반환값 없음
+    _emailService.Send(to, body);
 }
 ```
 
@@ -94,7 +84,7 @@ public void SendEmail(string to, string body)
 
 ### 정의
 
-작업 수행 후 SUT의 **최종 상태**를 검증한다:
+작업을 수행한 뒤 SUT의 최종 상태를 검증한다.
 
 ```csharp
 public class ShoppingCart
@@ -114,7 +104,6 @@ public class ShoppingCart
     }
 }
 
-// State-based 테스트
 [Test]
 public void Adding_item_increases_total()
 {
@@ -123,30 +112,23 @@ public void Adding_item_increases_total()
 
     cart.AddItem(item);
 
-    Assert.That(cart.Total, Is.EqualTo(20m));  // 상태 검증
+    Assert.That(cart.Total, Is.EqualTo(20m));
     Assert.That(cart.Items, Has.Count.EqualTo(1));
 }
 ```
 
 ### 특징
 
-| 장점 | 단점 |
-|------|------|
-| 직관적 | 상태 노출 필요 |
-| 널리 사용 | 테스트가 상태에 결합 |
-| OOP 친화적 | Output보다 취약 |
-
-### 주의: 테스트를 위한 상태 노출
+직관적이고 OOP에 친화적이지만, 검증을 위해 상태를 노출해야 할 수도 있다. 노출은 공개 API의 자연스러운 일부일 때만 받아들이고, 테스트를 위한 노출은 피한다.
 
 ```csharp
-// ❌ 테스트를 위해 내부 상태 노출
+// 회피 — 테스트를 위해 내부 상태를 노출한다
 public class Order
 {
-    // 테스트에서만 사용되는 프로퍼티
-    internal List<Item> InternalItems => _items;  // 코드 오염
+    internal List<Item> InternalItems => _items;
 }
 
-// ✅ 공개 API를 통해 검증
+// Good — 공개 API로 노출하고 검증한다
 public class Order
 {
     public IReadOnlyList<Item> Items => _items.AsReadOnly();
@@ -158,7 +140,7 @@ public class Order
 
 ### 정의
 
-SUT와 **협력자 간의 통신**을 검증한다:
+SUT와 협력자 사이의 통신을 검증한다.
 
 ```csharp
 public class OrderService
@@ -172,7 +154,6 @@ public class OrderService
     }
 }
 
-// Communication-based 테스트
 [Test]
 public void CompleteOrder_sends_confirmation_email()
 {
@@ -182,57 +163,31 @@ public void CompleteOrder_sends_confirmation_email()
 
     service.CompleteOrder(order);
 
-    // 통신 검증
     mockEmail.Verify(e => e.SendConfirmation("test@example.com"), Times.Once);
 }
 ```
 
-### 특징
-
-| 장점 | 단점 |
-|------|------|
-| 부수효과 테스트 가능 | 구현에 결합 |
-| 협력자 검증 | 리팩토링 내성 낮음 |
-| | 취약한 테스트 |
-
-### 언제 사용?
-
-**적절한 사용:**
-- 시스템 경계 (외부 API)
-- 관찰 가능한 부수효과
-
-**부적절한 사용:**
-- 내부 클래스 간 통신
-- 구현 세부사항
+부수효과 검증이 가능하다는 장점이 있지만, 구현에 결합되기 쉽고 리팩토링 내성이 낮다. 시스템 경계에서 관찰 가능한 부수효과(외부 API 호출, 이메일 발송 등)에만 쓴다. 내부 클래스 사이의 통신에는 쓰지 않는다.
 
 ## 6.5 스타일 비교
 
-### 4가지 기둥 관점
-
 | 스타일 | 회귀 보호 | 리팩토링 내성 | 빠른 피드백 | 유지보수성 |
 |--------|-----------|---------------|-------------|------------|
-| **Output** | 중간 | **최고** | 최고 | **최고** |
-| **State** | 중간 | 높음 | 최고 | 높음 |
-| **Communication** | 중간 | **낮음** | 최고 | 낮음 |
+| Output | 중간 | 최고 | 최고 | 최고 |
+| State | 중간 | 높음 | 최고 | 높음 |
+| Communication | 중간 | 낮음 | 최고 | 낮음 |
 
-### 권장 순서
+권장 순서는 분명하다.
 
-```
-1순위: Output-based
-       └─ 가능하면 항상 선택
-
-2순위: State-based
-       └─ Output 불가능할 때
-
-3순위: Communication-based
-       └─ 외부 시스템 연동에만
-```
+- 1순위: Output-based — 가능하면 항상 선택한다.
+- 2순위: State-based — Output이 불가능할 때 쓴다.
+- 3순위: Communication-based — 외부 시스템 연동에만 쓴다.
 
 ## 6.6 Functional Core, Imperative Shell
 
 ### 문제
 
-현실의 코드는 대부분 부수효과가 있어 Output-based가 어렵다:
+현실의 코드는 대부분 부수효과가 있어 Output-based로 직접 검증하기 어렵다.
 
 ```csharp
 public class UserService
@@ -257,20 +212,18 @@ public class UserService
 
 ### 해결: 아키텍처 분리
 
-**Functional Core:**
-- 순수 함수로 비즈니스 로직
-- Output-based 테스트 가능
+Functional Core와 Imperative Shell이라는 패턴이 해법이다. 핵심 비즈니스 로직은 순수 함수로 두고(Functional Core), 부수효과는 얇은 셸이 담당한다(Imperative Shell).
 
-**Imperative Shell:**
-- 부수효과 담당
-- 최소한의 로직
-- 통합 테스트로 커버
+| 영역 | 역할 | 테스트 방식 |
+|------|------|--------------|
+| Functional Core | 비즈니스 결정 | Output-based 단위 테스트 |
+| Imperative Shell | 부수효과 실행 | 통합 테스트로 커버 |
 
 ![Functional Core / Imperative Shell](/images/blog/khorikov/diagrams/ch06-functional-core.svg)
 
 ### 리팩토링 예시
 
-**Before:**
+원래 구조는 비즈니스 결정과 부수효과가 한 메서드 안에 섞여 있다.
 
 ```csharp
 public class UserService
@@ -279,7 +232,6 @@ public class UserService
     {
         var user = _repo.GetById(userId);
 
-        // 비즈니스 로직이 부수효과와 섞임
         if (user.Email == newEmail)
             return;
 
@@ -293,7 +245,7 @@ public class UserService
 }
 ```
 
-**After:**
+결정 부분을 순수 함수로 떼어내고, 결과를 받아 부수효과만 실행하도록 다시 짠다.
 
 ```csharp
 // Functional Core — 순수 함수
@@ -319,7 +271,6 @@ public class EmailChangeResult
     }
 }
 
-// Output-based 테스트 가능!
 [Test]
 public void Same_email_returns_no_update()
 {
@@ -338,18 +289,15 @@ public void Different_email_returns_update_and_notify()
     Assert.That(result.ShouldNotify, Is.True);
 }
 
-
-// Imperative Shell — 부수효과만
+// Imperative Shell — 부수효과만 담는다
 public class UserService
 {
     public void ChangeEmail(int userId, string newEmail)
     {
         var user = _repo.GetById(userId);
 
-        // Functional Core 호출
         var result = EmailChangeResult.Create(user.Email, newEmail);
 
-        // 부수효과 실행
         if (result.ShouldUpdate)
         {
             user.ChangeEmail(result.NewEmail);
@@ -364,23 +312,23 @@ public class UserService
 
 ## 6.7 도메인 모델에서의 적용
 
-### User 클래스 리팩토링
+도메인 모델 안에 외부 의존이 박혀 있으면 Output-based로 검증하기 어렵다. 외부 의존을 호출 측에서 주입받게 하면 모델은 순수해진다.
 
 ```csharp
-// Before — 부수효과 포함
+// Before — 부수효과를 포함한다
 public class User
 {
     public void ChangeEmail(string newEmail, IEmailValidator validator)
     {
-        if (!validator.IsValid(newEmail))  // 외부 의존
+        if (!validator.IsValid(newEmail))
             throw new InvalidEmailException();
 
         Email = newEmail;
-        ModifiedAt = DateTime.Now;  // 비결정적
+        ModifiedAt = DateTime.Now;  // 비결정적이다
     }
 }
 
-// After — 순수 함수
+// After — 순수 함수다
 public class User
 {
     public EmailChangeResult ChangeEmail(string newEmail, bool isValidEmail, DateTime now)
@@ -393,7 +341,6 @@ public class User
     }
 }
 
-// Output-based 테스트
 [Test]
 public void Valid_email_change_succeeds()
 {
@@ -410,48 +357,42 @@ public void Valid_email_change_succeeds()
 
 ## 6.8 스타일 선택 가이드
 
-### 의사결정 트리
+스타일은 다음 흐름으로 결정한다.
 
-```
-SUT가 값을 반환하는가?
-    │
-    ├─ Yes ──▶ Output-based ✓
-    │
-    └─ No
-        │
-        └─ SUT가 상태를 변경하는가?
-            │
-            ├─ Yes ──▶ State-based ✓
-            │
-            └─ No (외부 호출만)
-                │
-                └─ Communication-based ✓
-                   (단, 시스템 경계에서만)
-```
+1. SUT가 값을 반환하는가? 그렇다면 Output-based로 검증한다.
+2. SUT가 상태를 변경하는가? 그렇다면 State-based로 검증한다.
+3. 외부로 나가는 호출만 있는가? 그렇다면 Communication-based로 검증하되, 시스템 경계에 한정한다.
 
-### 실제 코드에서의 비율
+좋은 테스트 스위트의 대략적인 비율은 Output 60%, State 30%, Communication 10% 정도가 자주 인용된다. 비율 자체보다는 가능한 한 Output을 늘리고 Communication을 줄이는 방향이 중요하다.
 
-```
-좋은 테스트 스위트:
+## 자주 보는 함정
 
-Output-based     ████████████████████  60%
-State-based      ██████████            30%
-Communication    ████                  10%
-```
+- **상태 검증을 위해 internal 접근자 추가**: 테스트만을 위한 노출은 결국 캡슐화를 무너뜨린다.
+- **Communication-based를 내부 협력자에 적용**: 구현 검증으로 미끄러져 리팩토링 내성이 사라진다.
+- **DateTime.Now에 의존**: 같은 코드가 시점마다 다르게 동작해 Output-based의 결정성이 깨진다.
+- **Functional Core를 만들었다고 안심**: 셸의 통합 테스트를 빼먹으면 부수효과 경로가 검증되지 않는다.
+- **세 스타일을 한 테스트에 섞기**: 반환값도 보고, 상태도 보고, 호출도 보면 의도가 흐려진다.
 
 ## 정리
 
-| 개념 | 핵심 |
-|------|------|
-| **Output-based** | 반환값 검증, 최선 |
-| **State-based** | 상태 검증, 차선 |
-| **Communication-based** | 호출 검증, 경계에서만 |
-| **Functional Core** | 비즈니스 로직을 순수 함수로 |
-| **Imperative Shell** | 부수효과는 얇은 레이어로 |
+- 단위 테스트에는 Output, State, Communication 세 가지 스타일이 있다.
+- Output-based는 4가지 기둥에서 가장 균형이 좋다.
+- State-based는 차선이며 직관적이지만 상태 노출에 주의해야 한다.
+- Communication-based는 시스템 경계의 부수효과 검증에만 쓴다.
+- Functional Core는 비즈니스 결정을 순수 함수로 분리한 영역이다.
+- Imperative Shell은 결정을 받아 부수효과를 실행하는 얇은 레이어다.
 
-**핵심 질문:**
+핵심 질문은 다음과 같다.
+
 > 이 테스트를 Output-based로 만들 수 있는가?
 
 ## 다음 장 예고
 
 다음 장에서는 가치 있는 테스트를 향한 리팩토링을 다룬다. 코드를 4가지 사분면으로 분류하고, 각 사분면에 맞는 테스트 전략을 살펴본다.
+
+## 관련 항목
+
+- [Ch 5: Mocks and Test Fragility](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility)
+- [Ch 7: Refactoring Toward Valuable Unit Tests](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring)
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/) — Self-Shunt, Imposter 등 스타일 보조 패턴
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/) — Extract Function, Split Phase 같은 어휘

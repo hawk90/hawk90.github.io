@@ -5,13 +5,13 @@ description: "테스트가 어렵다 = 디자인이 어렵다. 신호 / 해석 /
 tags: [TDD, Test Smells]
 series: "Growing Object-Oriented Software"
 seriesOrder: 19
-draft: true
+draft: false
 ---
 
 > "The tests are telling us something about our design."
 > — 테스트가 설계에 대해 말하고 있다
 
-테스트 작성이 어렵다면, 그것은 설계가 어렵다는 신호다. 이 장에서는 테스트가 주는 피드백을 해석하고, 설계를 개선하는 방법을 배운다.
+테스트 작성이 어렵다면 그것은 설계가 어렵다는 신호다. GOOS 19장은 이 시리즈에서 가장 자주 인용되는 장이며, 책의 사상을 한 문장으로 압축한다. 이 장에서는 테스트가 보내는 피드백을 어떻게 읽고 어떻게 설계 개선으로 옮기는지 본다. 핵심 신호는 다섯 가지다. Mock이 너무 많다, 셋업이 길다, 깨지기 쉽다, 진단이 어렵다, 그리고 무엇을 검증하는지 모르겠다.
 
 ---
 
@@ -897,3 +897,11 @@ class OrderProcessor:
 ## 다음 장 예고
 
 다음 장에서는 **Test Readability**를 다룬다. 테스트를 문서처럼 읽을 수 있게 만드는 방법, 테스트 이름 짓기, 구조화 기법을 배운다.
+
+## 관련 항목
+
+- [Ch 11-18: Worked Example](/blog/programming/engineering/goos/chapter11-passing-first-test) — 이전 장
+- [Ch 20: Test Readability](/blog/programming/engineering/goos/chapter20-test-readability) — 다음 장
+- [Khorikov Ch 5: Mock과 테스트 취약성](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility) — Mock 남용을 신호로 다루는 현대적 관점
+- [Khorikov Ch 7: 단위 테스트 리팩토링](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring) — 테스트 신호를 코드 개선으로 옮기는 절차
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/section-introduction) — 신호를 받아 적용할 리팩토링

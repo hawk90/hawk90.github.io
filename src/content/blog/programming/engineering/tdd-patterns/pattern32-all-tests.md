@@ -5,7 +5,6 @@ description: "모든 test를 한 번에 — 변경의 안전망, CI의 토대."
 series: "TDD by Example — Patterns Deep Dive"
 seriesOrder: 32
 tags: [xunit, all-tests, test-suite, beck]
-draft: true
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
@@ -13,11 +12,11 @@ bookAuthor: "Kent Beck"
 
 ## 한 줄 요약
 
-> 시스템의 *모든 테스트를 한 명령*으로 실행 → 변경이 *기존 동작을 깨뜨리지 않았는지* 확인.
+> 시스템의 모든 테스트를 한 명령으로 실행 → 변경이 기존 동작을 깨뜨리지 않았는지 확인.
 
-## 동기 (Motivation)
+## 동기
 
-코드 변경 후 — 내가 *수정한 부분*은 테스트했는데 *다른 곳에 영향*은?
+코드 변경 후 — 내가 수정한 부분은 테스트했는데 다른 곳에 영향은?
 
 ```bash
 pytest        # 모든 test
@@ -26,21 +25,21 @@ go test ./...
 cargo test
 ```
 
-**All Tests**가 *변경의 안전망*. *Continuous Integration*의 토대.
+**All Tests**가 변경의 안전망. Continuous Integration의 토대.
 
 ### 신호
 
-- 변경 후 *unit test만* 돌림 → 다른 곳 깨짐 발견 늦음.
-- *전체 실행 명령*이 *팀마다 다름*.
-- *느려서* 전체 안 돌림.
-- CI에서 *처음 발견*하는 깨짐.
+- 변경 후 unit test만 돌림 → 다른 곳 깨짐 발견 늦음.
+- 전체 실행 명령이 팀마다 다름.
+- 느려서 전체 안 돌림.
+- CI에서 처음 발견하는 깨짐.
 
 ### 언제 적용하는가
 
-- *commit 전* (pre-commit hook).
-- *push 전*.
-- *PR 생성 + merge 전* (CI).
-- *deploy 전*.
+- commit 전 (pre-commit hook).
+- push 전.
+- PR 생성 + merge 전 (CI).
+- deploy 전.
 
 ## Test pyramid
 
@@ -54,9 +53,9 @@ cargo test
  /────────────\
 ```
 
-빠른 *unit*은 자주, 느린 *E2E*는 가끔.
+빠른 unit은 자주, 느린 E2E는 가끔.
 
-## 절차 (Mechanics)
+## 절차
 
 1. **단일 명령**으로 모든 test 실행.
 2. **분류** — unit/integration/e2e marker.
@@ -112,7 +111,7 @@ jobs:
       - run: pytest -m e2e
 ```
 
-빠른 단계 *실패 시 즉시 중단* → 비싼 단계 skip.
+빠른 단계 실패 시 즉시 중단 → 비싼 단계 skip.
 
 ## 예시 3 — 빠른 피드백 옵션
 
@@ -138,23 +137,29 @@ pytest --testmon
 
 ## 자주 보는 안티패턴
 
-### 1. *Unit만 돌림*
-변경 후 unit만 → integration 깨진 채 PR. 항상 *전체* 또는 명시적 *해당 영역*.
+### 1. Unit만 돌림
 
-### 2. *Slow test 누적*
-test suite *30분+* → 사람들이 *우회*. *속도 모니터*.
+변경 후 unit만 → integration 깨진 채 PR. 항상 전체 또는 명시적 해당 영역.
 
-### 3. *Flaky test*
-가끔 fail → *re-run으로 통과*. 근본 원인 추적 또는 격리.
+### 2. Slow test 누적
 
-### 4. *CI만 의존*
-local에서 안 돌리고 *push 후 fail 확인*. local에서 *빠른 unit*는 매번.
+test suite 30분+ → 사람들이 우회. 속도 모니터.
 
-### 5. *Marker 없음*
-분류 안 됨 → *선택 실행 불가*. 처음부터 marker.
+### 3. Flaky test
 
-### 6. *전체 실행이 deploy 후*
-deploy 전 *full suite 통과* 보장. 실패해도 *되돌릴 수 있어야*.
+가끔 fail → re-run으로 통과. 근본 원인 추적 또는 격리.
+
+### 4. CI만 의존
+
+local에서 안 돌리고 push 후 fail 확인. local에서 빠른 unit는 매번.
+
+### 5. Marker 없음
+
+분류 안 됨 → 선택 실행 불가. 처음부터 marker.
+
+### 6. 전체 실행이 deploy 후
+
+deploy 전 full suite 통과 보장. 실패해도 되돌릴 수 있어야.
 
 ## Modern variants
 
@@ -171,7 +176,7 @@ jest --changedSince=main
 mutmut run   # 코드를 mutate → test가 잡는지
 ```
 
-테스트가 *진짜 검증*하는지.
+테스트가 진짜 검증하는지.
 
 ### Coverage gate
 
@@ -179,7 +184,7 @@ mutmut run   # 코드를 mutate → test가 잡는지
 - run: pytest --cov=src --cov-fail-under=80
 ```
 
-coverage *기준 미달 시 fail*.
+coverage 기준 미달 시 fail.
 
 ### Parallelism
 
@@ -198,11 +203,11 @@ cores 활용.
 if: github.ref == 'refs/heads/main'
 ```
 
-PR branch는 *unit*, main은 *full*.
+PR branch는 unit, main은 full.
 
 ### Trunk-based CI
 
-매 commit이 *full pipeline 통과* → main 항상 deploy 가능.
+매 commit이 full pipeline 통과 → main 항상 deploy 가능하다.
 
 ### Visual regression (UI)
 
@@ -211,7 +216,7 @@ percy snapshot
 chromatic
 ```
 
-UI 변경을 *시각적 diff*.
+UI 변경을 시각적 diff.
 
 ## 속도 vs 빈도
 
@@ -241,11 +246,11 @@ UI 변경을 *시각적 diff*.
 
 ## 성능 고려
 
-- *Hot test suite* (자주 변경되는 영역) 빠르게 분리.
-- *Slow E2E* 별도 schedule (nightly).
-- *Cache* test fixture, dependency, container.
-- *Parallel + isolation*.
-- *Test selection* — 변경 영역만.
+- Hot test suite (자주 변경되는 영역) 빠르게 분리.
+- Slow E2E 별도 schedule (nightly).
+- Cache test fixture, dependency, container.
+- Parallel + isolation.
+- Test selection — 변경 영역만.
 
 ## 관련 패턴
 
