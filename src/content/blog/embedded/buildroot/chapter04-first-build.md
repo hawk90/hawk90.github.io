@@ -185,6 +185,67 @@ exec qemu-system-aarch64 \
 
 Buildroot가 *직접 만들어 주는* 이 스크립트는 학습용으로도 좋습니다. 옵션 하나하나의 의미가 임베디드 부팅 매개변수의 표준 예시이기 때문에, 그대로 보드 부팅 환경(U-Boot bootargs)에도 응용할 수 있습니다.
 
+## output 디렉터리 해부
+
+`make` 한 번이 만들어 내는 `output/`은 *5개 핵심 디렉터리*로 나뉩니다. 각각의 역할을 한 번 짚어두면 디버깅이 훨씬 쉽습니다.
+
+```text
+output/
+├── host/         ─ 호스트가 실행하는 도구·toolchain. PATH에 추가됨
+├── build/        ─ 패키지별 source + 빌드 산출물. 디버깅의 중심
+├── staging/      ─ symlink → host/<tuple>/sysroot. 패키지가 *링크할* 헤더·.so
+├── target/       ─ 최종 rootfs의 *staging area*. 여기를 archive하면 rootfs
+├── images/       ─ 최종 산출물 (Image, rootfs.ext4, U-Boot binary 등)
+└── build-time.log ─ 패키지별 빌드 시간
+```
+
+| 디렉터리 | 누구의 시선 | 들어가 보는 이유 |
+|---|---|---|
+| `host/` | 빌드 호스트 | 망가진 binary, 잘못된 wrapper 추적 |
+| `build/` | 빌드 시점 | source 직접 확인, `make V=1` 재현 |
+| `staging/` | *cross-compile 시점*의 target | 헤더·`.so` 누락 확인 |
+| `target/` | runtime 시점의 target | rootfs 내용 미리 보기, init script 확인 |
+| `images/` | 배포 산출물 | flash, archive |
+
+`staging/`과 `target/`의 차이가 *처음에는 헷갈립니다*. 한 줄로 요약하면 *staging은 link 시점, target은 run 시점*입니다. `libfoo`라는 패키지가 다른 패키지를 위해 `libfoo.h`와 `libfoo.so`를 제공한다면, 헤더와 `.so`의 *symlinks*는 staging에 들어가야 다음 패키지가 *링크*할 수 있습니다. 동시에 `.so`는 target에도 복사돼야 *런타임*에 dlopen이 가능합니다. 이 구분이 `BR2_INSTALL_STAGING=YES`의 의미입니다.
+
+## .stamp_ — 단계 추적의 정체
+
+각 패키지 디렉터리(`output/build/<pkg>-<ver>/`) 안에는 *빈 stamp 파일들*이 있습니다.
+
+```text
+$ ls output/build/openssl-3.2.1/ | grep stamp
+.stamp_configured
+.stamp_built
+.stamp_host_installed
+.stamp_images_installed
+.stamp_staging_installed
+.stamp_target_installed
+```
+
+Buildroot는 *각 단계가 끝나면 stamp 파일을 생성*합니다. 다음 빌드가 시작될 때 *stamp가 있으면 그 단계를 skip*합니다. 즉 incremental의 *진실*은 이 파일들에 있습니다.
+
+| stamp 파일 | 의미 |
+|---|---|
+| `.stamp_downloaded` | tarball 다운로드·hash 검증 완료 |
+| `.stamp_extracted` | tarball 압축 풀림 |
+| `.stamp_patched` | `0001-*.patch`까지 적용 완료 |
+| `.stamp_configured` | `./configure` 또는 동등 단계 통과 |
+| `.stamp_built` | `make`로 object·바이너리 생성 완료 |
+| `.stamp_staging_installed` | 헤더·`.so`가 `staging/`에 복사 |
+| `.stamp_target_installed` | 산출물이 `target/`에 복사 |
+| `.stamp_host_installed` | host용 산출물이 `host/`에 복사 |
+| `.stamp_images_installed` | 이미지가 `images/`에 복사 |
+
+특정 단계부터 다시 시작하려면 *해당 stamp를 지우면* 됩니다.
+
+```text
+$ rm output/build/openssl-3.2.1/.stamp_built
+$ make openssl                 # build부터 다시
+```
+
+`make openssl-rebuild`는 *내부적으로* `.stamp_built`와 그 이후의 stamp를 지운 뒤 `make openssl`을 호출합니다. `make openssl-reconfigure`는 `.stamp_configured`부터 지웁니다. 명령 이름이 *stamp의 의미*와 정확히 1:1 대응한다는 것을 알면 어디까지 되돌릴지 정밀하게 선택할 수 있습니다.
+
 ## 첫 부팅
 
 ```text
