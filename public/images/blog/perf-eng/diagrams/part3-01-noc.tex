@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cluster/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=22mm, minimum height=9mm, font=\sffamily\footnotesize, align=center, line width=0.4pt},
+  periph/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+    minimum width=22mm, minimum height=9mm, font=\sffamily\footnotesize, align=center, line width=0.4pt},
+  noc/.style={rectangle, rounded corners=4pt, draw=prpbord, fill=prpfill,
+    minimum width=14mm, minimum height=40mm, font=\sffamily\bfseries\footnotesize, align=center, line width=0.5pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (2.5, 4.5) {NoC — Network-on-Chip (Multi-core SoC)};
+
+% Clusters (left side)
+\node[cluster] (c0) at (0, 3) {Cluster 0};
+\node[cluster] (c1) at (0, 1.5) {Cluster 1};
+\node[cluster] (c2) at (0, 0) {Cluster 2};
+\node[cluster, draw=clibord, fill=clifill] (io) at (0, -1.5) {IO Master};
+
+% NoC center
+\node[noc] (noc) at (3.2, 0.75) {NoC};
+
+% Peripherals (right side)
+\node[periph, draw=hibord, fill=hifill] (ddr) at (6.5, 3) {DDR Controller};
+\node[periph] (gpu) at (6.5, 1.5) {GPU};
+\node[periph] (vpu) at (6.5, 0) {VPU};
+\node[periph, draw=clibord, fill=clifill] (pcie) at (6.5, -1.5) {PCIe};
+
+% Connections left
+\draw[arr] (c0.east) -- (noc.west |- c0.east);
+\draw[arr] (c1.east) -- (noc.west |- c1.east);
+\draw[arr] (c2.east) -- (noc.west |- c2.east);
+\draw[arr] (io.east) -- (noc.west |- io.east);
+
+% Connections right
+\draw[arr] (noc.east |- ddr.west) -- (ddr.west);
+\draw[arr] (noc.east |- gpu.west) -- (gpu.west);
+\draw[arr] (noc.east |- vpu.west) -- (vpu.west);
+\draw[arr] (noc.east |- pcie.west) -- (pcie.west);
+
+% Annotation
+\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at (3.2, -2.5) {ARM CMN (Coherent Mesh Network) — grid topology};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,53 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (4, 3.0) {DMA Single Descriptor — Idle Overhead};
+
+% Timeline axis
+\draw[arr, line width=0.6pt] (0, 0) -- (9, 0);
+\node[font=\sffamily\footnotesize, text=mutec, anchor=north] at (9, -0.15) {time};
+
+% Frame N transfer block
+\fill[fill=impfill] (0.5, 0.8) rectangle (3.5, 1.6);
+\draw[draw=impbord, line width=0.5pt] (0.5, 0.8) rectangle (3.5, 1.6);
+\node[font=\sffamily\footnotesize] at (2, 1.2) {Frame N transfer};
+
+% IRQ marker
+\draw[draw=hibord, line width=0.8pt] (3.5, 0.5) -- (3.5, 1.9);
+\node[font=\sffamily\scriptsize, text=hibord, anchor=south] at (3.5, 1.9) {IRQ};
+
+% CPU setup block
+\fill[fill=clifill] (3.7, 0.8) rectangle (5.2, 1.6);
+\draw[draw=clibord, line width=0.5pt] (3.7, 0.8) rectangle (5.2, 1.6);
+\node[font=\sffamily\footnotesize, align=center] at (4.45, 1.2) {CPU setup\\[-1pt] \scriptsize descriptor};
+
+% DMA restart
+\draw[draw=hibord, line width=0.8pt] (5.2, 0.5) -- (5.2, 1.9);
+\node[font=\sffamily\scriptsize, text=hibord, anchor=south] at (5.2, 1.9) {restart};
+
+% Next frame start
+\fill[fill=impfill] (5.4, 0.8) rectangle (8.4, 1.6);
+\draw[draw=impbord, line width=0.5pt] (5.4, 0.8) rectangle (8.4, 1.6);
+\node[font=\sffamily\footnotesize] at (6.9, 1.2) {Frame N+1};
+
+% Brace for idle time
+\draw[decorate, decoration={brace, amplitude=4pt, mirror}, line width=0.5pt, draw=conbord]
+  (3.5, 0.3) -- (5.2, 0.3) node[midway, below=5pt, font=\sffamily\scriptsize, text=conbord] {평균 200 $\mu$s idle};
+
+% Annotation
+\node[note, anchor=north west, text width=58mm] at (0.5, -0.8) {
+  \textbf{문제점}\\[2pt]
+  매 frame마다 CPU 개입 필요.\\[1pt]
+  Setup latency 동안 DMA idle 상태.
+};
+
+\end{tikzpicture}
+\end{document}

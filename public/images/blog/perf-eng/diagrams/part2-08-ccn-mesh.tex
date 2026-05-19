@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  meshnode/.style={rectangle, rounded corners=2pt, draw=absbord, fill=absfill,
+    minimum width=26mm, minimum height=10mm, font=\sffamily\footnotesize, align=center, line width=0.5pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (2.0, 3.5) {ARM CCN — Coherent Mesh Network};
+
+% Cluster 0
+\node[meshnode] (c0) at (0, 2) {Cluster 0};
+
+% Cluster 1
+\node[meshnode] (c1) at (3.5, 2) {Cluster 1};
+
+% Memory Controller
+\node[meshnode, draw=impbord, fill=impfill] (mem) at (0, 0) {Memory Ctrl};
+
+% I/O
+\node[meshnode, draw=clibord, fill=clifill] (io) at (3.5, 0) {I/O};
+
+% DDR
+\node[meshnode, draw=hibord, fill=hifill] (ddr) at (0, -2) {DDR3/4/5};
+
+% Connections (mesh)
+\draw[edge, line width=0.6pt] (c0.east) -- (c1.west);
+\draw[edge, line width=0.6pt] (c0.south) -- (mem.north);
+\draw[edge, line width=0.6pt] (c1.south) -- (io.north);
+\draw[edge, line width=0.6pt] (mem.east) -- (io.west);
+\draw[arr, line width=0.6pt] (mem.south) -- (ddr.north);
+
+% Annotation
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (4.5, 1.0) {mesh interconnect};
+
+\end{tikzpicture}
+\end{document}

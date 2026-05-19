@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  proto/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+    minimum width=42mm, minimum height=9mm, font=\sffamily\footnotesize, align=center, line width=0.4pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 4.2) {CXL 세 프로토콜 — PCIe 5.0 PHY 위에서 시분할};
+
+% CXL link (container)
+\node[rectangle, rounded corners=4pt, draw=absbord, fill=absfill!30,
+      minimum width=50mm, minimum height=50mm, line width=0.6pt] (link) at (0, 1.5) {};
+\node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at (0, 4.0) {CXL link (PCIe 5.0 x16 PHY)};
+
+% Three protocols
+\node[proto, draw=impbord, fill=impfill] (cxlio) at (0, 2.8) {CXL.io};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (2.3, 2.8) {configuration, legacy DMA};
+
+\node[proto, draw=clibord, fill=clifill] (cxlcache) at (0, 1.5) {CXL.cache};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (2.3, 1.5) {accelerator caches host memory};
+
+\node[proto, draw=hibord, fill=hifill] (cxlmem) at (0, 0.2) {CXL.mem};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (2.3, 0.2) {host accesses device memory};
+
+% Brace on left
+\draw[decorate, decoration={brace, amplitude=5pt, mirror}, line width=0.5pt, draw=edgec]
+  (-2.6, -0.3) -- (-2.6, 3.3) node[midway, anchor=east, font=\sffamily\scriptsize, text=mutec, xshift=-5pt] {Flex Bus\\[1pt] 시분할};
+
+\end{tikzpicture}
+\end{document}

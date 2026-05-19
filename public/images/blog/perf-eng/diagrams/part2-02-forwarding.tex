@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  stcell/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=10mm, minimum height=7mm, inner sep=2pt, font=\sffamily\footnotesize, align=center, fill=nodefill},
+  stF/.style={stcell, fill=absfill, draw=absbord},
+  stD/.style={stcell, fill=clifill, draw=clibord},
+  stE/.style={stcell, fill=impfill, draw=impbord},
+  rowlbl/.style={font=\sffamily\small, text=inkc, anchor=east}
+]
+
+% Instruction 1: add r0, r1, r2
+\node[rowlbl] at (-0.3, 0) {\texttt{add r0,r1,r2}};
+\node[stF] (i1f) at (1.2, 0) {F};
+\node[stD] (i1d) at (2.4, 0) {D};
+\node[stE] (i1e) at (3.6, 0) {E};
+
+% Forwarding arrow from E to next E
+\draw[focus, line width=0.7pt, -{Stealth[length=2.2mm]}]
+  (i1e.south) .. controls (3.6, -0.6) and (3.6, -1.5) .. (3.6, -1.1);
+
+% Instruction 2: sub r3, r0, r4
+\node[rowlbl] at (-0.3, -1.1) {\texttt{sub r3,r0,r4}};
+\node[stF] at (2.4, -1.1) {F};
+\node[stD] at (3.6, -1.1) {D};
+\node[stE] at (4.8, -1.1) {E};
+
+% Forwarding annotation
+\node[font=\sffamily\footnotesize, text=focusc, anchor=west] at (5.5, -0.5) {forwarding};
+
+% Cycle numbers
+\foreach \c/\x in {1/1.2, 2/2.4, 3/3.6, 4/4.8} {
+  \node[font=\sffamily\scriptsize, text=mutec] at (\x, 0.7) {\c};
+}
+
+% Caption
+\node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=north west] at (0, -2) {%
+EX 결과를 다음 명령의 EX 입력에 직접 연결\\[2pt]
+register file을 우회해 stall을 방지};
+
+\end{tikzpicture}
+\end{document}

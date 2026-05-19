@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  comp/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+    minimum width=48mm, minimum height=8mm, font=\sffamily\footnotesize, align=left, inner xsep=4pt, line width=0.4pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 4.0) {ARM Development Studio 구성};
+
+% Main container (ARM DS)
+\node[rectangle, rounded corners=4pt, draw=absbord, fill=absfill!30,
+      minimum width=55mm, minimum height=48mm, line width=0.6pt] (ds) at (0, 1.5) {};
+\node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at (0, 3.9) {ARM DS};
+
+% Components
+\node[comp, draw=impbord, fill=impfill] (ds5) at (0, 2.8) {DS-5 (legacy, 통합됨)};
+\node[comp, draw=clibord, fill=clifill] (stream) at (0, 1.7) {Streamline Performance Analyzer};
+\node[comp, draw=hibord, fill=hifill] (probe) at (0, 0.6) {DSTREAM / DSTREAM-PT probe};
+\node[comp, draw=prpbord, fill=prpfill] (debug) at (0, -0.5) {Cortex-A/R/M 전 코어 디버깅};
+
+% Tree structure lines (left side)
+\draw[draw=edgesc, line width=0.4pt] (-2.5, 2.8) -- (-2.3, 2.8);
+\draw[draw=edgesc, line width=0.4pt] (-2.5, 1.7) -- (-2.3, 1.7);
+\draw[draw=edgesc, line width=0.4pt] (-2.5, 0.6) -- (-2.3, 0.6);
+\draw[draw=edgesc, line width=0.4pt] (-2.5, -0.5) -- (-2.3, -0.5);
+\draw[draw=edgesc, line width=0.4pt] (-2.5, 2.8) -- (-2.5, -0.5);
+
+\end{tikzpicture}
+\end{document}

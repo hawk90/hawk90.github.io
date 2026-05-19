@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Axes
+\draw[arr, line width=0.6pt] (0, 0) -- (8, 0);
+\draw[arr, line width=0.6pt] (0, 0) -- (0, 5.5);
+
+% Axis labels
+\node[font=\sffamily\footnotesize, anchor=north] at (4, -0.3) {Arithmetic Intensity (FLOPS/byte)};
+\node[font=\sffamily\footnotesize, anchor=east, rotate=90] at (-0.5, 2.75) {Performance (GFLOPS)};
+
+% Peak compute line (horizontal roof)
+\draw[line width=1pt, draw=absbord] (4, 4) -- (7.5, 4);
+\node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=south west] at (5.5, 4.1) {Peak FLOPS (compute roof)};
+
+% Memory bandwidth line (sloped)
+\draw[line width=1pt, draw=impbord] (0.3, 0.3) -- (4, 4);
+\node[font=\sffamily\footnotesize, text=impbord, anchor=south east, rotate=45] at (2.5, 2.3) {Memory BW × OI};
+
+% Ridge point
+\fill[hibord] (4, 4) circle (4pt);
+\node[font=\sffamily\bfseries\footnotesize, text=hibord, anchor=south] at (4, 4.3) {Ridge Point};
+
+% Memory-bound region
+\node[font=\sffamily\footnotesize, text=impbord, align=center] at (1.5, 3.5) {Memory\\[1pt]Bound};
+
+% Compute-bound region
+\node[font=\sffamily\footnotesize, text=absbord, align=center] at (6, 3) {Compute\\[1pt]Bound};
+
+% Example algorithm markers
+\fill[conbord] (1.2, 1.2) circle (3pt);
+\node[font=\sffamily\scriptsize, text=conbord, anchor=west] at (1.4, 1.2) {STREAM};
+
+\fill[prpbord] (5.5, 4) circle (3pt);
+\node[font=\sffamily\scriptsize, text=prpbord, anchor=south west] at (5.6, 3.6) {matmul (tiled)};
+
+% Caption
+\node[font=\sffamily\footnotesize, text=mutec, align=center, anchor=north] at (4, -0.9) {%
+알고리즘의 OI가 ridge point 보다 작으면 memory-bound,\\[1pt]
+높으면 compute-bound};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  block/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+    minimum width=28mm, minimum height=9mm, font=\sffamily\footnotesize, align=center, line width=0.4pt},
+  link/.style={font=\sffamily\scriptsize, text=prpbord}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (3, 3.5) {Neoverse V2 + CHI-E + CXL};
+
+% Neoverse V2 core
+\node[block, draw=absbord, fill=absfill] (core) at (0, 2) {Neoverse V2 core};
+
+% CHI-E link label
+\node[link] at (1.7, 2) {CHI-E};
+
+% Mesh
+\node[block, draw=prpbord, fill=prpfill] (mesh) at (3.5, 2) {Mesh};
+
+% CHI-E link label
+\node[link] at (5.3, 2) {CHI-E};
+
+% CXL controller
+\node[block, draw=impbord, fill=impfill] (cxlctrl) at (7, 2) {CXL controller};
+
+% CXL link
+\draw[arr, line width=0.6pt, draw=hibord] (cxlctrl.south) -- ++(0, -0.8) node[midway, right, font=\sffamily\scriptsize, text=hibord] {CXL link};
+
+% Type 2/3 device
+\node[block, draw=hibord, fill=hifill] (device) at (7, 0) {Type 2/3 device};
+
+% Connections
+\draw[arr, draw=prpbord, line width=0.5pt] (core.east) -- (mesh.west);
+\draw[arr, draw=prpbord, line width=0.5pt] (mesh.east) -- (cxlctrl.west);
+\draw[arr, draw=hibord, line width=0.5pt] (cxlctrl.south) ++(0,-0.8) -- (device.north);
+
+% Annotation
+\node[note, anchor=north west, text width=50mm] at (-0.5, -0.8) {
+  \textbf{CHI-E (Coherent Hub Interface)}\\[2pt]
+  Directory-based coherency.\\[1pt]
+  CXL device를 coherency domain에 등록.
+};
+
+\end{tikzpicture}
+\end{document}

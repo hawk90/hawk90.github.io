@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  block/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+    minimum width=30mm, minimum height=9mm, font=\sffamily\footnotesize, align=center, line width=0.4pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.5) {Cortex-A72 — Bus Hierarchy};
+
+% Core
+\node[block, draw=absbord, fill=absfill] (core) at (0, 4.3) {Cortex-A72 core};
+
+% L1 caches
+\node[block, draw=impbord, fill=impfill, minimum width=14mm] (l1d) at (-1, 3) {L1 D};
+\node[block, draw=impbord, fill=impfill, minimum width=14mm] (l1i) at (1, 3) {L1 I};
+
+% L2
+\node[block, draw=clibord, fill=clifill] (l2) at (0, 1.7) {L2 (cluster 공유)};
+
+% SCU + ACE
+\node[block, draw=prpbord, fill=prpfill] (scu) at (0, 0.4) {SCU + ACE};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (1.8, 0.4) {$\leftarrow$ cluster ACE master};
+
+% CCI-400
+\node[block, draw=hibord, fill=hifill] (cci) at (0, -0.9) {CCI-400};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (1.8, -0.9) {cluster interconnect};
+
+% Memory Controller
+\node[block] (memctrl) at (0, -2.2) {Memory Controller};
+
+% DDR
+\node[block, draw=conbord, fill=confill] (ddr) at (0, -3.5) {DDR};
+
+% Arrows
+\draw[arr] (core.south) -- ++(0, -0.3) -| (l1d.north);
+\draw[arr] (core.south) -- ++(0, -0.3) -| (l1i.north);
+\draw[arr] (l1d.south) -- ++(0, -0.15) -| ($(l2.north) + (-0.3,0)$);
+\draw[arr] (l1i.south) -- ++(0, -0.15) -| ($(l2.north) + (0.3,0)$);
+\draw[arr] (l2.south) -- (scu.north);
+\draw[arr] (scu.south) -- (cci.north);
+\draw[arr] (cci.south) -- (memctrl.north);
+\draw[arr] (memctrl.south) -- (ddr.north);
+
+\end{tikzpicture}
+\end{document}

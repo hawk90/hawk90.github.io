@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cat/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+    minimum width=28mm, minimum height=8mm, font=\sffamily\footnotesize, align=center, line width=0.4pt},
+  subcat/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
+    minimum width=24mm, minimum height=7mm, font=\sffamily\scriptsize, align=center, line width=0.35pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (2.5, 4.5) {Top-Down Microarchitecture Analysis};
+
+% Level 1 - 4 categories
+\node[cat, draw=impbord, fill=impfill] (ret) at (-3, 2.8) {Retiring\\[1pt] \scriptsize (좋은 cycle)};
+\node[cat, draw=conbord, fill=confill] (bad) at (0, 2.8) {Bad Speculation\\[1pt] \scriptsize (mispredict 폐기)};
+\node[cat, draw=clibord, fill=clifill] (fe) at (3, 2.8) {Frontend Bound\\[1pt] \scriptsize (fetch/decode)};
+\node[cat, draw=absbord, fill=absfill] (be) at (6.5, 2.8) {Backend Bound\\[1pt] \scriptsize (compute/memory)};
+
+% Level 2 - Backend breakdown
+\node[subcat, draw=prpbord, fill=prpfill] (core) at (5.5, 0.8) {Core Bound};
+\node[subcat, draw=hibord, fill=hifill] (mem) at (7.8, 0.8) {Memory Bound};
+
+% Level 3 - Memory breakdown
+\node[subcat] (l1) at (6.3, -0.8) {L1 Bound};
+\node[subcat] (l2) at (8.0, -0.8) {L2 Bound};
+\node[subcat] (l3) at (6.3, -1.8) {L3 Bound};
+\node[subcat] (dram) at (8.0, -1.8) {DRAM Bound};
+
+% Connections
+\draw[arr] (be.south) -- ++(0, -0.4) -| (core.north);
+\draw[arr] (be.south) -- ++(0, -0.4) -| (mem.north);
+
+\draw[arr] (mem.south) -- ++(0, -0.3) -| (l1.north);
+\draw[arr] (mem.south) -- ++(0, -0.3) -| (l2.north);
+\draw[arr] (l1.south) -- (l3.north);
+\draw[arr] (l2.south) -- (dram.north);
+
+% Subtitle
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (-3.5, 1.5) {CPU cycle 분배 분석 — Intel·ARM 공통 프레임워크};
+
+\end{tikzpicture}
+\end{document}

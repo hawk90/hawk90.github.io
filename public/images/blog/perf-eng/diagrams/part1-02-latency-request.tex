@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  process/.style={rectangle, draw=impbord, fill=impfill, minimum width=40mm, minimum height=6mm, inner sep=2pt},
+  endpoint/.style={circle, draw=absbord, fill=absfill, minimum size=6mm, inner sep=1pt, font=\sffamily\footnotesize},
+  brace/.style={decorate, decoration={brace, amplitude=5pt, raise=3pt}}
+]
+
+% Request and response endpoints
+\node[endpoint] (req) at (0, 0) {요청};
+\node[process] (proc) at (4, 0) {처리};
+\node[endpoint] (res) at (8, 0) {응답};
+
+% Arrows
+\draw[arr, line width=0.6pt] (req) -- (proc);
+\draw[arr, line width=0.6pt] (proc) -- (res);
+
+% Latency brace
+\draw[brace, draw=hibord] (0, -0.6) -- (8, -0.6);
+\node[font=\sffamily\bfseries\small, text=hibord, anchor=north] at (4, -1.1) {latency};
+
+% Unit annotation
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (8.5, -1.1) {단위: µs, ms, s};
+
+\end{tikzpicture}
+\end{document}
