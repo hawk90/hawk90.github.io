@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  laneN/.style={rectangle, draw=impbord, fill=impfill, line width=0.4pt, minimum width=58mm, minimum height=4.5mm, inner sep=2pt, font=\sffamily\footnotesize, align=left},
+  clkN/.style={rectangle, draw=hibord, fill=hifill, line width=0.4pt, minimum width=58mm, minimum height=4.5mm, inner sep=2pt, font=\sffamily\footnotesize\bfseries, align=left},
+  sbN/.style={rectangle, draw=prpbord, fill=prpfill, line width=0.4pt, minimum width=58mm, minimum height=4.5mm, inner sep=2pt, font=\sffamily\footnotesize, align=left},
+  arr/.style={-{Stealth[length=1.8mm]}, draw=edgec, line width=0.5pt},
+  arrbi/.style={{Stealth[length=1.8mm]}-{Stealth[length=1.8mm]}, draw=edgec, line width=0.5pt}
+]
+
+\node[laneN] (l0) at (0, 7) {lane[0]};
+\node[laneN, below=0pt of l0] (l1) {lane[1]};
+\node[laneN, below=0pt of l1] (l2) {lane[2]};
+\node[laneN, below=0pt of l2, font=\sffamily\footnotesize\itshape, text=mutec, align=center] (ldots) {\ldots};
+\node[laneN, below=0pt of ldots] (l15) {lane[15]};
+\node[font=\sffamily\footnotesize\bfseries, text=impbord, anchor=west] at ($(l2.east)+(0.4,0)$) {16 × data lane};
+
+\foreach \n in {l0,l1,l2,l15} {
+  \draw[arr] ($(\n.east)+(0.05,0)$) -- ++(0.4,0);
+}
+
+\node[clkN, below=4mm of l15] (clk) {fwd\_clk};
+\node[font=\sffamily\footnotesize\bfseries, text=hibord, anchor=west] at ($(clk.east)+(0.4,0)$) {1 × forwarded clock};
+\draw[arr] ($(clk.east)+(0.05,0)$) -- ++(0.4,0);
+
+\node[sbN, below=4mm of clk] (sb0) {sb[0]};
+\node[sbN, below=0pt of sb0] (sb1) {sb[1]};
+\node[font=\sffamily\footnotesize\bfseries, text=prpbord, anchor=west] at ($(sb0.east)+(0.4,0)$) {N × sideband (보통 2--4)};
+\draw[arrbi] ($(sb0.east)+(0.05,0)$) -- ++(0.4,0);
+\draw[arrbi] ($(sb1.east)+(0.05,0)$) -- ++(0.4,0);
+
+\node[draw=nodebord, line width=0.5pt, rounded corners=2pt, inner sep=4mm,
+      fit=(l0)(l15)(clk)(sb1), label={[font=\sffamily\bfseries\small, text=inkc]above:Slice (단방향)}] {};
+
+\end{tikzpicture}
+\end{document}

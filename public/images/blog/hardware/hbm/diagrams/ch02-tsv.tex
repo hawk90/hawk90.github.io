@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  cu/.style={rectangle, draw=hibord, fill=hifill, line width=0.5pt, minimum width=6mm, minimum height=22mm, inner sep=0pt},
+  bump/.style={circle, draw=conbord, fill=confill, line width=0.5pt, minimum size=4mm, inner sep=0pt}
+]
+
+% Die outline
+\draw[draw=absbord, fill=absfill, line width=0.5pt, opacity=0.5] (-4.5, 0) rectangle (4.5, 4.0);
+
+% Active layer
+\draw[draw=mutec, line width=0.4pt, dashed] (-4.5, 3.4) -- (4.5, 3.4);
+\node[font=\sffamily\footnotesize, text=mutec, anchor=south west] at (-4.4, 3.45) {active layer (트랜지스터)};
+
+% TSV pillars
+\foreach \x in {-2.5, 0, 2.5} {
+  \node[cu] at (\x, 1.8) {};
+  \draw[-{Stealth[length=2mm]}, line width=0.5pt, draw=mutec] (\x, 3.1) -- (\x, 2.95);
+}
+
+% Labels
+\node[font=\sffamily\footnotesize\bfseries, text=hibord, anchor=south] at (0, 3.0) {TSV (수직 구리 기둥)};
+\node[font=\sffamily\footnotesize, text=hibord, anchor=west] at (3.0, 1.8) {직경 ${\sim}5\,\mu$m};
+
+% Microbumps below
+\foreach \x in {-2.5, 0, 2.5} {
+  \node[bump] at (\x, -0.3) {};
+  \draw[-{Stealth[length=2mm]}, line width=0.5pt, draw=mutec] (\x, 0.4) -- (\x, 0.1);
+}
+\node[font=\sffamily\footnotesize, text=conbord, anchor=west] at (3.0, -0.3) {microbump (다음 die로)};
+
+\node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=west] at (-4.5, 4.3) {DRAM die ($\sim$50\,$\mu$m thick)};
+
+\end{tikzpicture}
+\end{document}

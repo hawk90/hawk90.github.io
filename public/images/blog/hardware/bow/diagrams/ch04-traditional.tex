@@ -1,0 +1,21 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  bx/.style={rectangle, rounded corners=3pt, draw=#1, fill=#1!13, line width=0.5pt, inner sep=4pt, align=left, font=\sffamily\small},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt}
+]
+
+\node[bx=hibord, minimum width=70mm] (soc) at (0, 4) {SoC (CPU + Memory Controller)\\[2pt]\footnotesize\hspace*{1em}$\cdot$ core\\\footnotesize\hspace*{1em}$\cdot$ L2/L3 cache\\\footnotesize\hspace*{1em}$\cdot$ DDR PHY};
+
+\node[bx=impbord, minimum width=30mm, align=center] (dimm) at (0, 0) {DIMM};
+
+\draw[arr] (soc.south) -- (dimm.north) node[font=\sffamily\footnotesize, text=mutec, midway, right=2pt] {DDR4/5 (PCB trace, 6--7 Gbps/lane)};
+
+\end{tikzpicture}
+\end{document}

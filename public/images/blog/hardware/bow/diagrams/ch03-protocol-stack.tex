@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  layerS/.style={rectangle, draw=#1, fill=#1!15, line width=0.5pt, minimum width=48mm, minimum height=14mm, inner sep=3pt, align=center, font=\sffamily\small},
+  layerD/.style={rectangle, draw=mutec, fill=neutfill, dashed, line width=0.5pt, minimum width=48mm, minimum height=14mm, inner sep=3pt, align=center, font=\sffamily\small\itshape, text=mutec},
+  ttl/.style={font=\sffamily\bfseries\small, text=inkc}
+]
+
+% UCIe stack (left)
+\node[ttl] (uciTitle) at (0, 5.6) {UCIe 스택};
+\node[layerS=absbord] (u1) at (0, 4) {Protocol Layer\\[1pt]\scriptsize(CXL.io, PCIe, etc.)};
+\node[layerS=clibord, below=0pt of u1] (u2) {D2D Adapter Layer\\[1pt]\scriptsize(CRC, retry, FEC)};
+\node[layerS=conbord, below=0pt of u2] (u3) {Physical Layer\\[1pt]\scriptsize(lane, clock, sb)};
+
+% BoW stack (right)
+\node[ttl] (bowTitle) at (7, 5.6) {BoW 스택};
+\node[layerD] (b1) at (7, 4) {(사용자 정의)\\[1pt]\scriptsize CXL, AXI, custom};
+\node[layerD, below=0pt of b1] (b2) {(사용자 정의)\\[1pt]\scriptsize 필요 시 직접 구현};
+\node[layerS=conbord, below=0pt of b2] (b3) {Physical Layer\\[1pt]\scriptsize(lane, clock, sb)};
+
+\end{tikzpicture}
+\end{document}

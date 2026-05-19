@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  L/.style={rectangle, draw=#1, fill=#1!13, line width=0.5pt, minimum width=80mm, minimum height=9mm, inner sep=2pt, align=center, font=\sffamily\footnotesize}
+]
+
+\node[L=tealbord] (cp) at (0, 8) {Cold plate (Cu) — liquid 또는 vapor chamber};
+\node[L=mutec, below=0pt of cp] (tim2) {TIM2 (액체 metal)};
+\node[L=clibord, below=0pt of tim2] (lid) {Lid};
+\node[L=mutec, below=0pt of lid] (tim1) {TIM1 (high-conductive)};
+\node[L=hibord, below=0pt of tim1, minimum height=12mm] (die) {GPU die + HBM stacks (interposer 위)};
+\node[L=impbord, below=0pt of die] (under) {Underfill};
+\node[L=conbord, below=0pt of under] (sub) {Organic substrate};
+\node[L=absbord, below=0pt of sub] (bga) {Ball grid array};
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 8.9) {H100 / H200 / B200 cooling stack};
+
+\end{tikzpicture}
+\end{document}

@@ -76,28 +76,13 @@ HBM3 12-Hi stack heat density
 
 *surface 기준 열 밀도*는 GPU보다 *낮습니다*. 그러나 문제는 *3D 적층 구조*입니다. *맨 위 die*에서 발생한 열이 *11장의 die를 통과해* *base die까지 빠져나가야* 합니다.
 
-```text
-열 흐름 (3D stack)
+![3D stack 열 흐름 — cold plate에서 흡수, base die가 가장 뜨거움](/images/blog/hardware/hbm/diagrams/ch06-heat-flow.svg)
 
-         ← cooling 표면 (cold plate)
-   top   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         │  DRAM die 12  ←━ refresh, sense amp 활동
-         │  TIM (thermal interface)
-         │  DRAM die 11
-         │  TIM
-         │  ...
-         │
-         │  DRAM die 1
-         │  TIM
-   base  │  Base die        ←━ PHY가 가장 뜨거움
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         ← interposer (열 발산 잘 안 됨)
+문제는 *위에서 아래로의 열 흐름*입니다.
 
-문제: 위에서 아래로 열 흐름
-- TIM resistance × 12층 = 누적 저항
-- base die가 가장 뜨거움 (PHY + 모든 die 열이 모임)
-- 윗단 DRAM은 그나마 cold plate로 직접 발산
-```
+- *TIM resistance × 12층*이 누적됩니다.
+- *base die가 가장 뜨겁습니다* (PHY 발열 + 모든 die의 열이 모임).
+- 윗단 DRAM은 그나마 *cold plate로 직접 발산*됩니다.
 
 *base die의 정션 온도*가 *85~95°C*에 쉽게 도달합니다. *thermal throttling*이 *바로 그 지점*에서 발동합니다.
 
@@ -192,27 +177,7 @@ AI inference workload는 *대부분 active state*에 있어 *power state 전환 
 
 HBM이 *interposer 위*에 *GPU/NPU 옆*에 붙어 있으면 *cooling*이 *둘을 동시에* 처리해야 합니다.
 
-```text
-H100/H200/B200 cooling stack
-
-      ┌────────────────────────┐
-      │   Cold plate (Cu)      │   ← liquid 또는 vapor chamber
-      ├────────────────────────┤
-      │   TIM2 (액체 metal)    │
-      ├────────────────────────┤
-      │   Lid                  │
-      ├────────────────────────┤
-      │   TIM1 (high-conductive)│
-      ├────────────────────────┤
-      │   GPU die + HBM stacks │   ← interposer 위
-      ├────────────────────────┤
-      │   Underfill            │
-      ├────────────────────────┤
-      │   Organic substrate    │
-      ├────────────────────────┤
-      │   Ball grid array      │
-      └────────────────────────┘
-```
+![H100 / H200 / B200 cooling stack — cold plate에서 BGA까지 단면](/images/blog/hardware/hbm/diagrams/ch06-cooling-stack.svg)
 
 *공기 냉각의 한계*는 *500~600 W*입니다. NVIDIA H100 SXM이 *700 W*인데 *공기로 어렵습니다*. 그래서 *서버 차원에서 liquid cooling*이 *기본*이 됐습니다.
 

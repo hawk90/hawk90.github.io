@@ -35,15 +35,13 @@ advanced packaging의 진입 장벽
 
 bump pitch가 작을수록 같은 면적에 더 많은 lane이 들어갑니다. 그런데 *작을수록 양산이 어렵습니다*. organic substrate의 *현실적 한계*는 *130~150 μm*입니다.
 
-```text
-substrate별 최소 bump pitch
-                          [μm]
-organic (standard)        130~150
-organic (high-density)    100~130
-silicon bridge            45~55
-silicon interposer        25~45
-hybrid bonding            5~10
-```
+| substrate | 최소 bump pitch |
+|-----------|------------------|
+| organic (standard) | 130~150 μm |
+| organic (high-density) | 100~130 μm |
+| silicon bridge | 45~55 μm |
+| silicon interposer | 25~45 μm |
+| hybrid bonding | 5~10 μm |
 
 130 μm로 잡으면 *기존 organic 라인*에서 *수율 손실 없이* 양산 가능합니다. 100 μm는 *high-density organic*이 필요하고, 일부 라인에서만 가능합니다. Flexi는 *최대 양산성*을 노려 *130 μm*를 표준으로 정했습니다.
 
@@ -73,22 +71,7 @@ bandwidth density는 *절반*이지만, *시스템에서 충분한 경우가 많
 
 Flexi의 *50 mm reach*는 floorplan에 큰 자유를 줍니다.
 
-```text
-BoW Standard (reach ~25 mm)
-┌─────────────────────────────┐
-│   Die A   Die B   Die C     │ ← 모두 한 줄로 인접 배치 필요
-└─────────────────────────────┘
-
-BoW Flexi (reach ~50 mm)
-┌─────────────────────────────────────┐
-│  Die A                              │
-│                                     │
-│                                     │
-│                       Die B         │ ← 대각선 배치도 가능
-│                                     │
-│  Die C                              │
-└─────────────────────────────────────┘
-```
+![Reach 비교 — Standard는 한 줄, Flexi는 자유로운 배치](/images/blog/hardware/bow/diagrams/ch05-reach.svg)
 
 이 자유도가 *thermal management*에도 유리합니다. 발열이 큰 compute die와 IO die를 *분리해 배치*해 *국소 hotspot을 피합니다*. silicon interposer는 die 간 거리가 좁아 *열이 한쪽에 집중*되기 쉽습니다.
 
@@ -96,34 +79,25 @@ BoW Flexi (reach ~50 mm)
 
 Eliyan은 BoW Flexi와 *유사한 PHY*인 NuLink를 발표했습니다. 사양상 100% 일치는 아니지만 *동일한 시장*을 노립니다. 핵심 특징입니다.
 
-```text
-Eliyan NuLink 개요
+Eliyan NuLink의 주요 spec입니다.
+
 - per-lane: 16 Gbps (Flexi 스펙보다 높음, 자체 개선)
 - bump pitch: 130 μm (organic 호환)
 - reach: ~50 mm
 - power: 0.5 pJ/bit
 - application: AI accelerator + memory chiplet
-```
 
 Eliyan은 *Compute Die와 HBM-class 메모리*를 *organic substrate*에 묶는 레퍼런스를 *수차례 시연*했습니다. *CoWoS 없이 HBM-급 대역폭*을 만든다는 점에서 *큰 화제*가 됐습니다.
 
-```text
-NuLink 시연 구성
-        organic substrate
-┌─────────────────────────────────────────┐
-│                                         │
-│  ┌─────────┐   NuLink    ┌──────────┐   │
-│  │ AI core │ ◄────────► │  HBM     │   │
-│  │  die    │  ~1 TB/s   │  stack   │   │
-│  └─────────┘             └──────────┘   │
-│                                         │
-└─────────────────────────────────────────┘
+![NuLink 시연 — AI core die와 HBM stack을 organic substrate에 NuLink로](/images/blog/hardware/bow/diagrams/ch05-nulink.svg)
 
-전통 구성 (CoWoS)        대안 구성 (NuLink/Flexi)
-- silicon interposer     - organic substrate
-- ~3 TB/s per stack      - ~1 TB/s per stack
-- 단가 200~300달러       - 단가 5~10달러
-```
+두 packaging 옵션의 비용·대역폭 비교는 다음과 같습니다.
+
+| 항목 | 전통 구성 (CoWoS) | 대안 구성 (NuLink / Flexi) |
+|------|-------------------|----------------------------|
+| substrate | silicon interposer | organic substrate |
+| bandwidth | ~3 TB/s per stack | ~1 TB/s per stack |
+| 단가 | $200~$300 | $5~$10 |
 
 bandwidth는 *1/3 수준*이지만, *비용은 1/20~1/30* 수준입니다. AI 추론용이라면 *충분히 매력적인 trade-off*입니다.
 
@@ -182,15 +156,11 @@ unterminated 4 Gbps와 terminated 8 Gbps가 *PHY 옵션*입니다. 같은 die에
 
 같은 회사가 *제품 라인*마다 BoW Flexi와 advanced packaging을 *나눠 쓰는 구성*이 점점 흔합니다.
 
-```text
-한 회사의 제품 라인 예
-                    BoW Flexi   BoW Standard   UCIe Advanced
-                    (organic)   (Si bridge)    (CoWoS)
-                    
-Entry SoC           ●
-Mainstream SoC                  ●
-HPC/AI SoC                                     ●
-```
+| 제품 라인 | BoW Flexi (organic) | BoW Standard (Si bridge) | UCIe Advanced (CoWoS) |
+|-----------|---------------------|--------------------------|------------------------|
+| Entry SoC | ● | | |
+| Mainstream SoC | | ● | |
+| HPC/AI SoC | | | ● |
 
 *공정 IP*와 *PHY IP*는 *공유*하지만, *packaging*만 *제품에 맞춰* 선택합니다. 이게 *칩렛 시대의 다층 전략*입니다.
 

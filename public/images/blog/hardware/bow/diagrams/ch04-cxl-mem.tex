@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  bx/.style={rectangle, rounded corners=3pt, draw=#1, fill=#1!13, line width=0.5pt, inner sep=4pt, align=center, font=\sffamily\small, minimum width=50mm, minimum height=18mm},
+  bowL/.style={{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}, draw=conbord, line width=0.8pt},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt}
+]
+
+\node[bx=hibord] (host) at (-3.5, 2) {Host SoC\\[2pt]\footnotesize(CPU + CXL.mem master)};
+\node[bx=impbord] (mem) at (3.5, 2) {Memory Expander\\[2pt]\footnotesize(CXL.mem slave + DDR5 controller)};
+\node[bx=clibord, minimum width=22mm, minimum height=10mm] (dimm) at (3.5, -1.2) {DIMM};
+
+\draw[bowL] (host.east) -- (mem.west) node[font=\sffamily\footnotesize\bfseries, text=conbord, midway, above=1pt] {BoW};
+\draw[arr] (mem.south) -- (dimm.north) node[font=\sffamily\footnotesize, text=mutec, midway, right=2pt] {DDR5};
+
+\end{tikzpicture}
+\end{document}

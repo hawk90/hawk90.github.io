@@ -1,0 +1,61 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  axisLine/.style={draw=inkc, line width=0.6pt, -{Stealth[length=2.2mm]}},
+  tick/.style={draw=mutec, line width=0.4pt},
+  ticklabel/.style={font=\sffamily\footnotesize, text=mutec},
+  pt/.style={circle, fill=#1, draw=#1!70!black, line width=0.3pt, inner sep=1.6pt},
+  ptlabel/.style={font=\sffamily\footnotesize, text=inkc, anchor=west}
+]
+
+% Axes
+\draw[axisLine] (0,0) -- (12,0) node[ticklabel, below=4pt, midway, yshift=-12pt] {bump pitch (μm)};
+\draw[axisLine] (0,0) -- (0,7) node[ticklabel, left=4pt, midway, xshift=-22pt, rotate=90] {대역폭 밀도 (Tbps/mm²)};
+
+% Y ticks
+\foreach \y/\lab in {0.6/1, 1.2/2, 2.5/4, 3.7/6, 4.9/8, 6.1/10} {
+  \draw[tick] (-0.1, \y) -- (0.1, \y);
+  \node[ticklabel, anchor=east] at (-0.15, \y) {\lab};
+}
+
+% X ticks (note: larger pitch = left, smaller pitch = right)
+\foreach \x/\lab in {1.2/130, 3.2/100, 6.5/45, 10.0/25} {
+  \draw[tick] (\x, -0.1) -- (\x, 0.1);
+  \node[ticklabel, anchor=north] at (\x, -0.15) {\lab};
+}
+
+% Packaging regions (background bands)
+\begin{scope}[on background layer]
+  \fill[impfill, opacity=0.35] (0.2, 0.05) rectangle (4.3, 6.8);
+  \fill[clifill, opacity=0.35] (4.3, 0.05) rectangle (8.0, 6.8);
+  \fill[absfill, opacity=0.35] (8.0, 0.05) rectangle (11.6, 6.8);
+\end{scope}
+
+\node[font=\sffamily\footnotesize\itshape, text=impbord, anchor=south] at (2.25, 6.85) {organic};
+\node[font=\sffamily\footnotesize\itshape, text=clibord, anchor=south] at (6.15, 6.85) {Si bridge};
+\node[font=\sffamily\footnotesize\itshape, text=absbord, anchor=south] at (9.8, 6.85) {Si interposer};
+
+% Data points
+\node[pt=hibord] (flexi) at (1.0, 0.6) {};
+\node[ptlabel, text=hibord] at (1.25, 0.55) {BoW Flexi (130μm, organic)};
+
+\node[pt=conbord] (bow) at (3.2, 1.2) {};
+\node[ptlabel, text=conbord] at (3.45, 1.2) {BoW Standard (100μm)};
+
+\node[pt=clibord] (ucies) at (6.5, 3.1) {};
+\node[ptlabel, text=clibord] at (6.75, 3.1) {UCIe Standard (Si bridge, 45μm)};
+
+\node[pt=absbord] (uciea) at (10.0, 6.1) {};
+\node[ptlabel, text=absbord, anchor=east] at (9.85, 6.1) {UCIe Advanced (Si interposer, 25μm)\ \ };
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (6, 7.8) {D2D 표준의 bump pitch vs 대역폭 밀도};
+
+\end{tikzpicture}
+\end{document}

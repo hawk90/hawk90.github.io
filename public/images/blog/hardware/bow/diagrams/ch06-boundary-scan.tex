@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  die/.style={rectangle, rounded corners=4pt, draw=hibord, fill=hifill, line width=0.5pt, minimum width=50mm, minimum height=42mm, inner sep=3pt, align=center, font=\sffamily\small},
+  phy/.style={rectangle, rounded corners=2pt, draw=conbord, fill=confill, line width=0.5pt, minimum width=36mm, minimum height=20mm, inner sep=2pt, align=center, font=\sffamily\footnotesize},
+  tap/.style={rectangle, rounded corners=2pt, draw=prpbord, fill=prpfill, line width=0.5pt, minimum width=30mm, minimum height=6mm, inner sep=2pt, font=\sffamily\footnotesize},
+  bow/.style={{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}, draw=conbord, line width=0.8pt},
+  jtag/.style={draw=prpbord, line width=0.7pt},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[die] (dA) at (-4, 2) {};
+\node[font=\sffamily\bfseries\small, text=hibord, anchor=north west] at ($(dA.north west)+(0.15,-0.15)$) {Die A};
+\node[phy] (pA) at (-4, 2.6) {BoW PHY\\[1pt]\scriptsize $\uparrow$ scan cells};
+\node[tap, below=4mm of pA] (tA) {TAP controller};
+
+\node[die] (dB) at (4, 2) {};
+\node[font=\sffamily\bfseries\small, text=hibord, anchor=north west] at ($(dB.north west)+(0.15,-0.15)$) {Die B};
+\node[phy] (pB) at (4, 2.6) {BoW PHY\\[1pt]\scriptsize $\uparrow$ scan cells};
+\node[tap, below=4mm of pB] (tB) {TAP controller};
+
+\draw[bow] (pA.east) -- (pB.west) node[font=\sffamily\footnotesize\bfseries, text=conbord, midway, above=1pt] {BoW};
+
+% JTAG chain at bottom
+\draw[jtag] (tA.south) -- ++(0,-0.6) -| (tB.south);
+\node[font=\sffamily\footnotesize, text=prpbord, anchor=north] at (0, -0.4) {JTAG chain};
+
+\node[rectangle, rounded corners=2pt, draw=mutec, fill=neutfill, inner sep=4pt, font=\sffamily\footnotesize, align=center] (te) at (0, -2.4) {Test equipment};
+\draw[arr] (0, -0.6) -- (te.north);
+
+\end{tikzpicture}
+\end{document}

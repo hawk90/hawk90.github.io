@@ -172,21 +172,14 @@ __global__ void triad(double *a, double *b, double *c, double s, int n) {
 
 H100 (3.35 TB/s spec)의 *STREAM triad* 결과는 일반적으로 *2.5~2.8 TB/s* 정도입니다. *spec 대비 75~83%* 효율입니다.
 
-```text
-sustained BW 측정 결과 (대략)
-
-NVIDIA A100 80GB (2.0 TB/s spec):
-  STREAM triad:    1.65 TB/s (82%)
-  cuBLAS sgemm:    1.50 TB/s (75%)
-  random access:   0.55 TB/s (28%) ← worst case
-
-NVIDIA H100 80GB (3.35 TB/s spec):
-  STREAM triad:    2.75 TB/s (82%)
-  LLM inference:   2.40 TB/s (72%)
-
-AMD MI300X (5.3 TB/s spec):
-  STREAM triad:    4.20 TB/s (79%)
-```
+| 카드 | 워크로드 | sustained BW | 효율 |
+|------|---------|--------------|------|
+| A100 80GB (2.0 TB/s spec) | STREAM triad | 1.65 TB/s | 82% |
+| A100 80GB | cuBLAS sgemm | 1.50 TB/s | 75% |
+| A100 80GB | random access | 0.55 TB/s | 28% (worst case) |
+| H100 80GB (3.35 TB/s spec) | STREAM triad | 2.75 TB/s | 82% |
+| H100 80GB | LLM inference | 2.40 TB/s | 72% |
+| MI300X (5.3 TB/s spec) | STREAM triad | 4.20 TB/s | 79% |
 
 *random access*가 *27% 효율*까지 떨어지는 게 충격적입니다. 이는 *row hit 비율 낮음, bank conflict 다발*이 겹친 *worst case*입니다.
 
@@ -194,27 +187,9 @@ AMD MI300X (5.3 TB/s spec):
 
 *Roofline*은 *compute와 memory bandwidth*의 관계를 *한 그림*에 보여 줍니다.
 
-```text
-Roofline plot (log-log)
+![Roofline 모델 — memory bound와 compute bound 영역, knee point](/images/blog/hardware/hbm/diagrams/ch05-roofline.svg)
 
-Performance (FLOPS)
-       │
-   ████┤━━━━━━━━━━━━━━━━━━━━ peak compute (e.g. 1000 TFLOPS)
-       │                ╱
-       │              ╱      ← compute bound
-       │            ╱
-       │          ╱
-       │        ╱  ← knee point (arithmetic intensity = peak/BW)
-       │      ╱
-       │    ╱        ← memory bound
-       │  ╱
-       │╱
-       └────────────────────────
-          Arithmetic Intensity (FLOPS / Byte)
-
-knee = peak_compute / peak_BW
-NVIDIA H100: 1000 TFLOPS / 3.35 TB/s = 298 FLOPS/Byte
-```
+knee = peak_compute / peak_BW. NVIDIA H100 기준 *1000 TFLOPS / 3.35 TB/s = 298 FLOPS/Byte*입니다.
 
 *Arithmetic Intensity*는 *byte 1개당 몇 FLOP*를 하는지입니다. AI workload별로 보면:
 
@@ -235,27 +210,9 @@ H100의 *knee = 298 FLOPS/Byte*인데 *대부분 AI workload*가 *10~100 FLOPS/B
 
 *compute*와 *memory BW*의 *증가 속도 차이*가 *벌어지고 있습니다*.
 
-```text
-Memory wall (relative growth)
+![Memory wall — compute는 25배, memory BW는 9배만 늘어 격차 확대](/images/blog/hardware/hbm/diagrams/ch05-memory-wall.svg)
 
-  growth factor (vs 2017)
-       │
-   200 ┤                                ████ compute (FP16)
-   150 ┤                          ████
-   100 ┤                    ████
-    50 ┤              ████
-    25 ┤        ████
-    10 ┤  ████
-     5 ┤                                ──── memory BW
-     1 ┤████─────────────────────────
-       └─────────────────────────────────────────
-        V100  A100  H100  H200  B200  Rubin
-        2017  2020  2022  2024  2024  2026
-
-compute 25× growth, memory BW 9× growth
-→ knee point가 오른쪽으로 이동
-→ 더 많은 workload가 memory bound로
-```
+compute *25배* growth 동안 memory BW *9배* growth. *knee point가 오른쪽으로 이동*하며 *더 많은 workload*가 *memory bound*로 떨어집니다.
 
 같은 GPU 안에서 *compute 25배*가 늘 동안 *memory BW는 9배*만 늘었습니다. *knee가 오른쪽으로 이동*하며 *더 많은 workload*가 *memory bound*로 떨어집니다.
 

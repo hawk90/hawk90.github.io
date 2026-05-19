@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={rectangle, rounded corners=2pt, draw=#1, fill=#1!13, line width=0.5pt, minimum width=36mm, minimum height=14mm, inner sep=3pt, align=center, font=\sffamily\small}
+]
+
+\node[blk=absbord] (phy) at (0, 4) {HBM PHY\\[1pt]\scriptsize(1024-bit)};
+\node[blk=clibord] (ch) at (5, 4) {Channel\\controller};
+\node[blk=impbord] (bist) at (0, 2) {Test logic\\[1pt]\scriptsize(BIST)};
+\node[blk=conbord] (rep) at (5, 2) {Repair /\\redundancy};
+\node[blk=hibord] (ref) at (0, 0) {Refresh\\controller};
+\node[blk=prpbord] (ecc) at (5, 0) {ECC engine\\[1pt]\scriptsize(옵션)};
+
+\node[draw=mutec, rounded corners=4pt, fill=neutfill!40, inner sep=6mm,
+  fit=(phy)(ch)(bist)(rep)(ref)(ecc),
+  label={[font=\sffamily\bfseries\small, text=inkc]above:Base die}] (bd) {};
+
+\draw[-{Stealth[length=2.4mm]}, line width=0.6pt, draw=mutec] (bd.south west) ++(2, 0) -- ++(0, -0.6) node[font=\sffamily\footnotesize, text=mutec, below=1pt] {microbump (외부)};
+\draw[-{Stealth[length=2.4mm]}, line width=0.6pt, draw=mutec] (bd.south east) ++(-2, 0) -- ++(0, -0.6) node[font=\sffamily\footnotesize, text=mutec, below=1pt] {TSV (내부, 위로)};
+
+\end{tikzpicture}
+\end{document}

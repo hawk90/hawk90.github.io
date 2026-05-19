@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,patterns}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  arr/.style={rectangle, draw=impbord, fill=impfill, line width=0.4pt, minimum width=40mm, minimum height=10mm, inner sep=2pt, font=\sffamily\footnotesize, align=center}
+]
+
+% die outline
+\draw[draw=mutec, line width=0.5pt, rounded corners=2pt] (-6, -2.6) rectangle (6, 3.0);
+
+% top row
+\node[arr] at (-3.5, 2.2) {Ch0 PC0 bank 0..15};
+\node[arr] at (3.5, 2.2) {Ch0 PC1 bank 0..15};
+
+\node[arr] at (-3.5, 1.0) {Ch1 PC0 ...};
+\node[arr] at (3.5, 1.0) {Ch1 PC1 ...};
+
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (-3.5, 0.3) {\ldots};
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (3.5, 0.3) {\ldots};
+
+\node[arr] at (-3.5, -0.4) {Ch7 PC0 ...};
+\node[arr] at (3.5, -0.4) {Ch7 PC1 ...};
+
+% TSV array center
+\node[rectangle, draw=hibord, fill=hifill, line width=0.5pt, minimum width=20mm, minimum height=42mm, inner sep=0pt] at (0, 0.5) {};
+\node[font=\sffamily\footnotesize\bfseries, text=hibord, align=center, fill=white, inner sep=2pt] at (0, 0.5) {TSV\\array\\(중앙)};
+
+% bottom row
+\node[arr] at (-3.5, -1.6) {Ch8 ...};
+\node[arr] at (3.5, -1.6) {Ch9 ...};
+\node[font=\sffamily\footnotesize\itshape, text=mutec, align=center] at (0, -2.4) {DRAM array (TSV에서 거리에 따라 latency 다름)};
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 3.4) {HBM3 DRAM die top-down (24 Gb)};
+
+\end{tikzpicture}
+\end{document}

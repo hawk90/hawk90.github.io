@@ -42,15 +42,13 @@ KV cache (sequence에 비례):
 
 *KV cache가 weight보다 4배 큽니다*. 이게 *LLM serving의 메모리 폭증*입니다.
 
-```text
-HBM 가속기 한 장의 capacity 비교
-
-NVIDIA H100 80GB:  80 GB  ← LLaMA 70B FP16 weight도 단독 안 됨
-NVIDIA H200 144GB: 144 GB ← weight + 짧은 KV
-NVIDIA B200 192GB: 192 GB ← weight + 중간 KV
-AMD MI300X 192GB:  192 GB ← weight + 중간 KV
-AMD MI325X 288GB:  288 GB ← LLaMA 70B + 큰 KV
-```
+| 가속기 | HBM capacity | 한 장으로 가능한 것 |
+|--------|--------------|---------------------|
+| NVIDIA H100 80GB | 80 GB | LLaMA 70B FP16 weight도 단독 안 됨 |
+| NVIDIA H200 | 144 GB | weight + 짧은 KV |
+| NVIDIA B200 | 192 GB | weight + 중간 KV |
+| AMD MI300X | 192 GB | weight + 중간 KV |
+| AMD MI325X | 288 GB | LLaMA 70B + 큰 KV |
 
 H100 *80 GB*로 LLaMA 70B를 *serving하려면* *모델 4분할 + KV cache 별도 호스트*가 필요합니다. H200·B200으로 가야 *한 장에 weight*가 들어갑니다.
 
@@ -221,27 +219,13 @@ H100 shared memory: 228 KB per SM
 
 대표적인 inference workload의 *측정치*입니다.
 
-```text
-LLaMA 70B inference on H100 (FP16, batch=1)
+LLaMA 70B inference on H100(FP16)의 측정치는 다음과 같습니다.
 
-prefill (seq=2048):
-  - latency: 80 ms
-  - MFU: 35%
-  - MBU: 50%
-  - compute bound (큰 matmul)
-
-decode (token by token):
-  - latency: 30 ms/token
-  - MFU: 5%
-  - MBU: 80%
-  - memory bound (small batch matmul)
-
-batch=64 decode:
-  - latency: 50 ms/token (slight increase)
-  - MFU: 30%
-  - MBU: 75%
-  - amortize weight read across batch
-```
+| 단계 | latency | MFU | MBU | 특징 |
+|------|---------|-----|-----|------|
+| prefill (seq=2048, batch=1) | 80 ms | 35% | 50% | compute bound (큰 matmul) |
+| decode (batch=1) | 30 ms/token | 5% | 80% | memory bound (small batch matmul) |
+| decode (batch=64) | 50 ms/token | 30% | 75% | weight read를 batch에 amortize |
 
 *batch가 클수록 MFU 상승*합니다. weight read가 *batch 전체에 amortize*되기 때문입니다. *batch 1*에서는 *weight 140 GB*를 *읽기만 하면 42 ms*인데 *batch 64*에서는 *그대로 42 ms*입니다 (capacity 한계까지).
 
@@ -262,100 +246,36 @@ batch sweet spot:
 
 현세대 AI 가속기 카드의 *HBM 구성*입니다.
 
-```text
-NVIDIA H100 80GB SXM5
-├── 5 × HBM3 stack × 16 GB = 80 GB
-├── 5 × 819 GB/s = 4 TB/s theoretical
-├── spec 3.35 TB/s (after efficiency)
-└── TDP 700 W
-
-NVIDIA H200 SXM5
-├── 6 × HBM3E stack × 24 GB = 144 GB
-├── 6 × 1.18 TB/s = 7 TB/s theoretical
-├── spec 4.8 TB/s
-└── TDP 700 W (cooled by liquid)
-
-NVIDIA B100/B200 SXM6
-├── 8 × HBM3E stack × 24 GB = 192 GB
-├── 8 × 1.0 TB/s = 8 TB/s theoretical
-├── spec 8 TB/s (B200)
-└── TDP 1000 W (liquid mandatory)
-
-NVIDIA B300 (예정)
-├── 8 × HBM3E stack × 36 GB = 288 GB
-└── spec 9 TB/s
-
-AMD MI300X
-├── 8 × HBM3 stack × 24 GB = 192 GB
-├── 5.3 TB/s
-├── chiplet 기반 (3D V-cache 적층)
-└── TDP 750 W
-
-AMD MI325X
-├── 8 × HBM3E stack × 32 GB = 256 GB
-├── 6.0 TB/s
-└── TDP 750 W
-
-Google TPU v5p
-├── 4 × HBM3 stack
-├── 95 GB total
-└── 2.8 TB/s
-```
+| 카드 | HBM 구성 | capacity | spec BW | TDP |
+|------|----------|----------|---------|-----|
+| NVIDIA H100 80GB SXM5 | 5 × HBM3 × 16 GB | 80 GB | 3.35 TB/s | 700 W |
+| NVIDIA H200 SXM5 | 6 × HBM3E × 24 GB | 144 GB | 4.8 TB/s | 700 W (liquid) |
+| NVIDIA B100 / B200 SXM6 | 8 × HBM3E × 24 GB | 192 GB | 8 TB/s | 1000 W (liquid 필수) |
+| NVIDIA B300 (예정) | 8 × HBM3E × 36 GB | 288 GB | 9 TB/s | — |
+| AMD MI300X | 8 × HBM3 × 24 GB (chiplet) | 192 GB | 5.3 TB/s | 750 W |
+| AMD MI325X | 8 × HBM3E × 32 GB | 256 GB | 6.0 TB/s | 750 W |
+| Google TPU v5p | 4 × HBM3 | 95 GB | 2.8 TB/s | — |
 
 한국 NPU의 경우입니다.
 
-```text
-Rebellions Atom Pro (예정, 2025)
-├── HBM3E 4 stack
-├── 96 GB
-├── LLM inference 특화
-└── 컨트롤러가 attention 패턴 최적화
-
-Sapeon X330 (SK Telecom)
-├── GDDR6 사용 (HBM 아님!)
-├── 32 GB
-├── inference 전용, cost 최적화
-└── 다음 세대는 HBM 채택 검토
-
-Samsung MACH-1 (메모리-가속기 융합 칩, 연구 중)
-├── HBM 일부 die를 PIM(Processing-in-Memory)로
-├── on-die 가속
-└── 메모리 traffic 자체 감소
-```
+| 칩 | 메모리 | capacity | 특징 |
+|-----|--------|----------|------|
+| Rebellions Atom Pro (2025) | HBM3E 4 stack | 96 GB | LLM inference 특화, 컨트롤러가 attention 패턴 최적화 |
+| Sapeon X330 (SK Telecom) | GDDR6 (HBM 아님!) | 32 GB | inference 전용, cost 최적화, 차세대는 HBM 검토 |
+| Samsung MACH-1 (연구 중) | HBM die 일부를 PIM | — | on-die 가속으로 memory traffic 자체 감소 |
 
 ## CXL과의 결합 — Memory Tiering
 
 *HBM 192 GB*로도 *대형 LLM weight + 전체 KV cache*를 *담지 못합니다*. *CXL*이 *낮은 tier*의 메모리를 제공합니다.
 
-```text
-Memory tiering
+![AI 가속기의 메모리 tiering — SRAM / HBM / CXL / NVMe / 네트워크 메모리](/images/blog/hardware/hbm/diagrams/ch08-tiering.svg)
 
-Tier 0: on-chip SRAM (L2 cache 50~80 MB)
-  ├── latency: 5 ns
-  └── bandwidth: 10 TB/s+
+LLM serving 매핑은 다음과 같습니다.
 
-Tier 1: HBM (per accelerator 80~288 GB)
-  ├── latency: 100 ns
-  └── bandwidth: 3~8 TB/s
-
-Tier 2: CXL-attached DRAM (TB 단위)
-  ├── latency: 150 ns
-  └── bandwidth: 64 GB/s (PCIe 5.0 x16)
-
-Tier 3: NVMe SSD (수십 TB)
-  ├── latency: 30~100 μs
-  └── bandwidth: 7 GB/s
-
-Tier 4: 네트워크 메모리 풀 (UALink, RDMA)
-  ├── latency: 1~10 μs
-  └── bandwidth: 400 Gbps+
-
-LLM serving 매핑:
-  hot KV cache → HBM
-  warm KV cache → CXL
-  cold KV cache → SSD
-  weight (정적) → HBM (전부 캐시)
-```
+- *hot KV cache* → HBM
+- *warm KV cache* → CXL
+- *cold KV cache* → SSD
+- *weight (정적)* → HBM (전부 캐시)
 
 vLLM·SGLang 같은 *현세대 serving framework*는 *KV cache를 tier 1~3에 자동 분산*합니다. *paged attention*이라고 부르는 기법이 *대표적*입니다.
 

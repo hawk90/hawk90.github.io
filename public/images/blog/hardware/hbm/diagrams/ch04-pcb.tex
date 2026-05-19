@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  chip/.style={rectangle, draw=conbord, fill=confill, line width=0.5pt, minimum width=12mm, minimum height=10mm, font=\sffamily\footnotesize\bfseries, text=conbord},
+  gpu/.style={rectangle, draw=hibord, fill=hifill, line width=0.6pt, minimum width=40mm, minimum height=24mm, font=\sffamily\small\bfseries, text=hibord},
+  trace/.style={draw=mutec, line width=0.5pt}
+]
+
+% Top row of chips
+\foreach \x/\name in {-3.6/M0, -1.8/M1, 0/M2} {
+  \node[chip] at (\x, 2.6) {\name};
+}
+
+% Bottom row
+\foreach \x/\name in {-3.6/M3, -1.8/M4, 0/M5} {
+  \node[chip] at (\x, -2.6) {\name};
+}
+
+% GPU die
+\node[gpu] (gpu) at (2.5, 0) {GPU die};
+
+% Length-matched traces (snake patterns)
+\foreach \x in {-3.6, -1.8, 0} {
+  \draw[trace] (\x, 2.05) -- (\x, 1.6) -- (\x+0.3, 1.4) -- (\x+0.2, 1.1) -- (\x+0.5, 0.9) -- ($(gpu.west)+(-0.2, 0.4)$);
+  \draw[trace] (\x, -2.05) -- (\x, -1.6) -- (\x+0.3, -1.4) -- (\x+0.2, -1.1) -- (\x+0.5, -0.9) -- ($(gpu.west)+(-0.2, -0.4)$);
+}
+
+\node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=west] at (3.5, 2.6) {length-matched\\traces};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.5, -1.5) {GDDR6X 384-bit:\\$\cdot$ tolerance: $\pm 0.5$ mm\\$\cdot$ PCB layer: 10--12\\$\cdot$ 임피던스: 40\,$\Omega$ $\pm 5\%$};
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 3.6) {GDDR6X 384-bit PCB layout (RTX 4090 기준)};
+
+\end{tikzpicture}
+\end{document}

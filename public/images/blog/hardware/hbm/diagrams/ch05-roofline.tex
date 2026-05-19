@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  axisLine/.style={draw=inkc, line width=0.6pt, -{Stealth[length=2.2mm]}},
+  ticklabel/.style={font=\sffamily\footnotesize, text=mutec},
+  ttl/.style={font=\sffamily\bfseries\small, text=inkc}
+]
+
+% Axes
+\draw[axisLine] (0,0) -- (11,0) node[ticklabel, below=4pt, midway, yshift=-12pt] {Arithmetic Intensity (FLOPS / Byte)};
+\draw[axisLine] (0,0) -- (0,6) node[ticklabel, left=4pt, midway, xshift=-22pt, rotate=90] {Performance (FLOPS, log)};
+
+% Memory-bound diagonal (BW limit)
+\draw[draw=absbord, line width=1.2pt] (0,0) -- (5, 4.5);
+
+% Compute-bound plateau
+\draw[draw=conbord, line width=1.2pt] (5, 4.5) -- (11, 4.5);
+
+% Knee point dot
+\fill[hibord] (5, 4.5) circle (3pt);
+\node[font=\sffamily\footnotesize\bfseries, text=hibord, anchor=south west] at (5.1, 4.5) {knee point};
+\node[font=\sffamily\footnotesize, text=hibord, anchor=west] at (5.5, 4.0) {Intensity = peak / BW};
+
+% Region labels
+\node[font=\sffamily\footnotesize\bfseries, text=absbord, rotate=42, anchor=south] at (2.0, 2.0) {memory bound};
+\node[font=\sffamily\footnotesize\bfseries, text=conbord, anchor=south] at (8.0, 4.55) {compute bound};
+
+% Peak compute label
+\node[ticklabel, anchor=east] at (-0.1, 4.5) {peak compute};
+
+\node[ttl] at (5.5, 6.6) {Roofline 모델 (log-log)};
+
+\end{tikzpicture}
+\end{document}

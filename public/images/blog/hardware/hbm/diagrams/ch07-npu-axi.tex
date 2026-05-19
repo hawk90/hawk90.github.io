@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={rectangle, rounded corners=3pt, draw=#1, fill=#1!13, line width=0.5pt, minimum width=58mm, minimum height=14mm, inner sep=4pt, align=center, font=\sffamily\small},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt},
+  note/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, align=left}
+]
+
+\node[blk=hibord] (npu) at (0, 8) {NPU compute};
+\node[blk=prpbord, below=5mm of npu] (axi) {AXI-S wrapper};
+\node[blk=impbord, below=5mm of axi, minimum height=20mm] (ctrl) {HBM controller IP\\[1pt]\scriptsize $\cdot$ address mapping\\\scriptsize $\cdot$ bank schedule\\\scriptsize $\cdot$ per-bank queue};
+\node[blk=conbord, below=5mm of ctrl] (phy) {HBM PHY};
+
+\foreach \a/\b in {npu/axi, axi/ctrl, ctrl/phy} {
+  \draw[arr] (\a.south) -- (\b.north);
+}
+
+\node[note] at ($(axi.east)+(0.4,0)$) {NPU 입장의 표준 인터페이스\\$\cdot$ tdata\\$\cdot$ tvalid / tready\\$\cdot$ tuser (channel id)};
+
+\end{tikzpicture}
+\end{document}

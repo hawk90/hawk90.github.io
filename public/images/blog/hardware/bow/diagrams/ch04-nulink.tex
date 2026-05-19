@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  die/.style={rectangle, rounded corners=3pt, draw=#1, fill=#1!13, line width=0.5pt, minimum width=34mm, minimum height=20mm, inner sep=3pt, align=center, font=\sffamily\small},
+  bowL/.style={{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}, draw=conbord, line width=0.8pt},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.7pt}
+]
+
+% organic substrate
+\node[draw=mutec, dashed, line width=0.5pt, rounded corners=4pt, fill=neutfill!50, minimum width=125mm, minimum height=44mm, inner sep=0pt] (sub) at (0, 2) {};
+\node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=south west] at (sub.south west) {\quad organic substrate};
+
+\node[die=hibord] (cpu) at (-3.5, 2) {Compute\\Die};
+\node[die=impbord] (mc) at (3.5, 2) {Memory\\Controller Die\\[2pt]\scriptsize(DDR5 PHY)};
+
+\draw[bowL] (cpu.east) -- (mc.west) node[font=\sffamily\footnotesize\bfseries, text=conbord, midway, above=1pt] {BoW Slice×8};
+
+\node[die=clibord, minimum width=22mm, minimum height=10mm] (dimm) at (3.5, -2.8) {DIMM};
+\draw[arr] (mc.south) -- (dimm.north) node[font=\sffamily\footnotesize, text=mutec, midway, right=2pt] {DDR5};
+
+\node[font=\sffamily\footnotesize\itshape, text=mutec, align=left, anchor=north west] at (-6, -3.4) {BoW: 8 Slice × 16 lane × 12 Gbps = 1.5 Tbps (192 GB/s)\\DDR5: 4 channel × DDR5-6400 = ${\sim}$200 GB/s};
+
+\end{tikzpicture}
+\end{document}

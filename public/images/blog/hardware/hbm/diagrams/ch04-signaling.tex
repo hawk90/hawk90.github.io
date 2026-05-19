@@ -1,0 +1,69 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  ax/.style={draw=mutec, line width=0.5pt},
+  sig/.style={draw=#1, line width=1.0pt},
+  ticklabel/.style={font=\sffamily\footnotesize, text=mutec},
+  ttl/.style={font=\sffamily\bfseries\small, text=inkc}
+]
+
+% Common parameters
+\def\xstep{0.7}
+
+% Section 1: NRZ
+\node[ttl] (t1) at (0, 4.4) {NRZ (1 bit / UI)};
+\foreach \y/\lab in {3.4/0V, 4.2/+V} {
+  \draw[ax] (-0.2, \y) -- (5.0, \y);
+  \node[ticklabel, anchor=east] at (-0.3, \y) {\lab};
+}
+% NRZ waveform: 1,0,1,1,0,0,1
+\draw[sig=absbord]
+  (0, 4.2) -- (\xstep, 4.2) -- (\xstep, 3.4) -- (2*\xstep, 3.4) --
+  (2*\xstep, 4.2) -- (3*\xstep, 4.2) -- (3*\xstep, 4.2) -- (4*\xstep, 4.2) --
+  (4*\xstep, 3.4) -- (5*\xstep, 3.4) -- (5*\xstep, 3.4) -- (6*\xstep, 3.4) --
+  (6*\xstep, 4.2) -- (7*\xstep, 4.2);
+\foreach \i in {1,...,7} {
+  \draw[ax, dashed] (\i*\xstep, 3.3) -- (\i*\xstep, 4.3);
+}
+\node[ticklabel, anchor=west] at (5.2, 3.8) {GDDR6 (16 Gbps)};
+
+% Section 2: PAM4
+\node[ttl] (t2) at (0, 2.4) {PAM4 (2 bit / UI, 4-level)};
+\foreach \y/\lab in {1.0/{$-V$}, 1.3/{$-V/3$}, 1.6/{$+V/3$}, 1.9/{$+V$}} {
+  \draw[ax] (-0.2, \y) -- (5.0, \y);
+  \node[ticklabel, anchor=east] at (-0.3, \y) {\lab};
+}
+\draw[sig=conbord]
+  (0, 1.9) -- (\xstep, 1.9) -- (\xstep, 1.3) -- (2*\xstep, 1.3) --
+  (2*\xstep, 1.6) -- (3*\xstep, 1.6) -- (3*\xstep, 1.0) -- (4*\xstep, 1.0) --
+  (4*\xstep, 1.6) -- (5*\xstep, 1.6) -- (5*\xstep, 1.3) -- (6*\xstep, 1.3) --
+  (6*\xstep, 1.9) -- (7*\xstep, 1.9);
+\foreach \i in {1,...,7} {
+  \draw[ax, dashed] (\i*\xstep, 0.95) -- (\i*\xstep, 1.95);
+}
+\node[ticklabel, anchor=west] at (5.2, 1.45) {GDDR6X (24 Gbps)};
+
+% Section 3: PAM3
+\node[ttl] (t3) at (0, 0.0) {PAM3 (1.5 bit / UI, 3-level)};
+\foreach \y/\lab in {-1.4/{$-V$}, -1.0/{$0V$}, -0.6/{$+V$}} {
+  \draw[ax] (-0.2, \y) -- (5.0, \y);
+  \node[ticklabel, anchor=east] at (-0.3, \y) {\lab};
+}
+\draw[sig=hibord]
+  (0, -0.6) -- (\xstep, -0.6) -- (\xstep, -1.0) -- (2*\xstep, -1.0) --
+  (2*\xstep, -1.4) -- (3*\xstep, -1.4) -- (3*\xstep, -0.6) -- (4*\xstep, -0.6) --
+  (4*\xstep, -1.0) -- (5*\xstep, -1.0) -- (5*\xstep, -0.6) -- (6*\xstep, -0.6) --
+  (6*\xstep, -1.4) -- (7*\xstep, -1.4);
+\foreach \i in {1,...,7} {
+  \draw[ax, dashed] (\i*\xstep, -1.45) -- (\i*\xstep, -0.55);
+}
+\node[ticklabel, anchor=west] at (5.2, -1.0) {GDDR7 (32 Gbps)};
+
+\end{tikzpicture}
+\end{document}

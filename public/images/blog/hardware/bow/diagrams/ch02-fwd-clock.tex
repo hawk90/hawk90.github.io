@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={rectangle, rounded corners=2pt, draw=#1, fill=#1!12, line width=0.5pt, minimum width=35mm, minimum height=10mm, inner sep=4pt, align=center, font=\sffamily\small},
+  sigA/.style={-{Stealth[length=2.4mm]}, draw=conbord, line width=0.7pt},
+  sigC/.style={-{Stealth[length=2.4mm]}, draw=hibord, line width=0.8pt},
+  siglab/.style={font=\sffamily\footnotesize, text=#1, anchor=south}
+]
+
+\node[blk=conbord] (ser) at (0,2) {serializer};
+\node[blk=hibord, below=8mm of ser] (clk) {clock\_gen};
+\node[blk=conbord] (des) at (8,2) {deserializer};
+\node[blk=hibord, below=8mm of des] (samp) {sampler};
+
+\node[draw=nodebord, rounded corners=3pt, inner sep=4mm, fit=(ser)(clk), label={[font=\sffamily\bfseries\small, text=inkc]above:TX 쪽}] {};
+\node[draw=nodebord, rounded corners=3pt, inner sep=4mm, fit=(des)(samp), label={[font=\sffamily\bfseries\small, text=inkc]above:RX 쪽}] {};
+
+\draw[sigA] (ser.east) -- (des.west) node[siglab=conbord, midway, yshift=2pt] {data[0..15]};
+\draw[sigC] (clk.east) -- (samp.west) node[siglab=hibord, midway, yshift=2pt] {fwd\_clk};
+
+\end{tikzpicture}
+\end{document}

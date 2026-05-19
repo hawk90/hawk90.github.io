@@ -231,27 +231,17 @@ AI training cluster에서 *수만 개의 stack*이 *24시간 가동*되면 *soft
 
 세대별 *stack 1개*의 *bandwidth* 진화입니다.
 
-```text
-Stack BW (GB/s)
+![세대별 stack 1개의 bandwidth 진화](/images/blog/hardware/hbm/diagrams/ch03-stack-bw.svg)
 
-   2000 ┤                                ┌──── HBM4 (예정)
-   1500 ┤
-   1250 ┤                          ████ HBM3E
-   1000 ┤
-    819 ┤                    ████ HBM3
-    500 ┤              ████ HBM2E
-    307 ┤        ████ HBM2
-    128 ┤  ████ HBM
-      0 └────────────────────────────────────────
-         2015  2018  2020  2022  2024  2026
+GPU/NPU 카드 한 장의 총 BW(stack 5~8개)는 다음과 같습니다.
 
-GPU/NPU 한 카드의 총 BW (stack 5~8개):
-- V100  : 4 stack × 307 GB/s × 73% = 900 GB/s
-- A100  : 5 stack × 461 GB/s × 87% = 2.0 TB/s
-- H100  : 5 stack × 819 GB/s × 82% = 3.35 TB/s
-- H200  : 6 stack × 1.2 TB/s × 67% = 4.8 TB/s
-- B200  : 8 stack × 1.0 TB/s × 100% = 8 TB/s
-```
+| 카드 | stack 수 | per-stack | 효율 | 총 BW |
+|------|---------|-----------|------|--------|
+| V100 | 4 | 307 GB/s | 73% | 900 GB/s |
+| A100 | 5 | 461 GB/s | 87% | 2.0 TB/s |
+| H100 | 5 | 819 GB/s | 82% | 3.35 TB/s |
+| H200 | 6 | 1.2 TB/s | 67% | 4.8 TB/s |
+| B200 | 8 | 1.0 TB/s | 100% | 8 TB/s |
 
 *8년 만에 6.25배*가 늘었습니다. 같은 기간 *GPU compute*는 *25배*(FP16 기준)가 늘었습니다. *compute가 더 빠르게 늘어* *memory가 병목*이 되는 흐름이 확실합니다. Ch 5에서 이 *memory wall*을 자세히 봅니다.
 

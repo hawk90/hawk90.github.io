@@ -86,27 +86,7 @@ HBM3 방식 (H100):
 
 핵심 지표 하나를 짚고 가야 합니다. *pin 1개당 데이터 전송률*입니다.
 
-```text
-세대별 per-pin rate
-
-  pin rate (Gbps)
-       │
-   36  ┤                                ████ GDDR7 (PAM3)
-   32  ┤                          ████
-   24  ┤                ████ GDDR6X (PAM4)
-   18  ┤
-   16  ┤      ████ GDDR6 (NRZ)
-   14  ┤
-   12  ┤
-   10  ┤              ████ HBM3E
-    9  ┤
-    7  ┤        ████ HBM3
-    5  ┤
-    4  ┤  ████ HBM2E
-    2  ┤████ HBM2
-    0  └───────────────────────────────────
-         2018   2020   2022   2024   2026
-```
+![세대별 per-pin rate — HBM vs GDDR 비교](/images/blog/hardware/hbm/diagrams/ch01-per-pin-rate.svg)
 
 GDDR은 *세대마다 pin rate가 두 배*에 가깝게 뛰었습니다. NRZ에서 PAM4, 다시 PAM3으로 *signaling 자체를 바꿔* 가며 *clock을 짜낸* 결과입니다.
 
@@ -153,33 +133,10 @@ HBM3   1 TB/s : 약 25 W (stack 2개 × 12 W)
 
 이런 트레이드오프 때문에 시장이 *깨끗하게 갈립니다*.
 
-```text
-2025년 출하 카테고리
-
-┌──────────────────────────────────────────────────┐
-│  HBM 진영                                        │
-│  ├── NVIDIA H100/H200/B100/B200/B300              │
-│  ├── AMD MI300X / MI325X / MI350                  │
-│  ├── Google TPU v5p / v6                          │
-│  ├── Intel Gaudi 3                                │
-│  └── Korea: Sapeon X330, Rebellions Atom (NPU)    │
-│                                                  │
-│  특징: training·대형 추론, 대당 $20K~$40K          │
-│        per-rack 100~200 kW                        │
-└──────────────────────────────────────────────────┘
-
-┌──────────────────────────────────────────────────┐
-│  GDDR 진영                                       │
-│  ├── NVIDIA RTX 30/40/50 시리즈                   │
-│  ├── AMD RX 7000/8000 시리즈                      │
-│  ├── PlayStation 5, Xbox Series X                 │
-│  ├── 데이터센터 추론 카드 (L4·L40·H100 PCIe NVL) │
-│  └── 네트워킹 SoC (Marvell, Broadcom)             │
-│                                                  │
-│  특징: 그래픽·게임·소형 추론, 대당 $500~$8K       │
-│        per-card 250~450 W                         │
-└──────────────────────────────────────────────────┘
-```
+| 진영 | 대표 제품 | 특징 |
+|------|-----------|------|
+| **HBM** | NVIDIA H100/H200/B100/B200/B300<br>AMD MI300X/MI325X/MI350<br>Google TPU v5p/v6<br>Intel Gaudi 3<br>Korea: Sapeon X330, Rebellions Atom (NPU) | training·대형 추론<br>대당 $20K~$40K<br>per-rack 100~200 kW |
+| **GDDR** | NVIDIA RTX 30/40/50 시리즈<br>AMD RX 7000/8000 시리즈<br>PlayStation 5, Xbox Series X<br>데이터센터 추론 카드 (L4·L40·H100 PCIe NVL)<br>네트워킹 SoC (Marvell, Broadcom) | 그래픽·게임·소형 추론<br>대당 $500~$8K<br>per-card 250~450 W |
 
 같은 NVIDIA 안에서도 H100은 HBM, RTX 4090은 GDDR입니다. *분기점은 명확*합니다. *capacity가 100 GB를 넘어야 하고, 대역폭이 1.5 TB/s 이상 필요*하면 HBM 외에는 선택지가 없습니다.
 

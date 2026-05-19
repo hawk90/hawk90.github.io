@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  dram/.style={rectangle, draw=absbord, fill=absfill, line width=0.4pt, minimum width=70mm, minimum height=5mm, inner sep=2pt, font=\sffamily\footnotesize, align=left},
+  base/.style={rectangle, draw=conbord, fill=confill, line width=0.5pt, minimum width=70mm, minimum height=7mm, inner sep=2pt, font=\sffamily\footnotesize\bfseries, text=conbord, align=left},
+  bump/.style={rectangle, draw=hibord, fill=hifill, line width=0.4pt, minimum width=70mm, minimum height=4mm, inner sep=2pt, font=\sffamily\footnotesize, align=left},
+  num/.style={font=\sffamily\footnotesize, text=mutec, anchor=east},
+  note/.style={font=\sffamily\footnotesize\itshape, text=mutec, anchor=west}
+]
+
+\foreach \i/\y/\lab in {12/6.0/{DRAM die \#12 (top)}, 11/5.5/{DRAM die \#11}, 10/5.0/{DRAM die \#10}, 9/4.5/{DRAM die \#9}, 8/4.0/{DRAM die \#8}, 7/3.5/{DRAM die \#7}, 6/3.0/{DRAM die \#6}, 5/2.5/{DRAM die \#5}, 4/2.0/{DRAM die \#4}, 3/1.5/{DRAM die \#3}, 2/1.0/{DRAM die \#2}, 1/0.5/{DRAM die \#1 (bottom)}} {
+  \node[dram] (d\i) at (0, \y) {\lab};
+  \node[num] at (-3.7, \y) {\i};
+}
+
+\node[base] (bd) at (0, -0.05) {Base die (logic, PHY)};
+\node[num] at (-3.7, -0.05) {0};
+
+\node[bump] (bp) at (0, -0.65) {microbump (HBM bump field)};
+
+\node[note] at (3.7, 6.0) {24 Gb DRAM};
+\node[note] at (3.7, -0.05) {로직 공정 ($\sim$12 nm)};
+\node[note] at (3.7, -0.65) {55 $\mu$m pitch};
+
+\draw[-{Stealth[length=2.4mm]}, line width=0.7pt, draw=mutec] (bp.south) -- ++(0, -0.4) node[font=\sffamily\footnotesize, text=mutec, midway, right=2pt] {interposer로 연결};
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 6.8) {HBM3E 12-Hi stack 단면};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  tier/.style={rectangle, rounded corners=2pt, draw=#1, fill=#1!13, line width=0.5pt, inner sep=4pt, font=\sffamily\small, align=center},
+  note/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, align=left}
+]
+
+\node[tier=warnbord, minimum width=40mm, minimum height=10mm] (t0) at (0, 8) {Tier 0: on-chip SRAM\\\scriptsize(L2 cache 50--80 MB)};
+\node[note] at (3.0, 8) {latency 5 ns\\bandwidth 10 TB/s+};
+
+\node[tier=hibord, minimum width=60mm, minimum height=12mm] (t1) at (0, 6.0) {Tier 1: HBM\\\scriptsize(per accelerator 80--288 GB)};
+\node[note] at (3.5, 6.0) {latency 100 ns\\bandwidth 3--8 TB/s};
+
+\node[tier=clibord, minimum width=80mm, minimum height=12mm] (t2) at (0, 4.0) {Tier 2: CXL-attached DRAM\\\scriptsize(TB 단위)};
+\node[note] at (4.5, 4.0) {latency 150 ns\\bandwidth 64 GB/s (PCIe 5.0 x16)};
+
+\node[tier=impbord, minimum width=100mm, minimum height=12mm] (t3) at (0, 2.0) {Tier 3: NVMe SSD\\\scriptsize(수십 TB)};
+\node[note] at (5.5, 2.0) {latency 30--100 $\mu$s\\bandwidth 7 GB/s};
+
+\node[tier=absbord, minimum width=120mm, minimum height=12mm] (t4) at (0, 0) {Tier 4: 네트워크 메모리 풀 (UALink, RDMA)};
+\node[note] at (6.5, 0) {latency 1--10 $\mu$s\\bandwidth 400 Gbps+};
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 9.2) {AI 가속기의 메모리 tiering};
+
+\end{tikzpicture}
+\end{document}

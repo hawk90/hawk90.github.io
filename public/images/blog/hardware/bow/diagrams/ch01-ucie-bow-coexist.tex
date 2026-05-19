@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  die/.style={rectangle, rounded corners=3pt, draw=#1, line width=0.5pt, fill=#1!10, minimum width=40mm, minimum height=14mm, inner sep=3pt, align=center, font=\sffamily\small},
+  linklab/.style={font=\sffamily\footnotesize\bfseries, text=#1},
+  link/.style={-{Stealth[length=2.4mm]}, draw=#1, line width=0.7pt}
+]
+
+% Compute die (top)
+\node[rectangle, rounded corners=3pt, draw=hibord, line width=0.6pt, fill=hifill, minimum width=70mm, minimum height=18mm, inner sep=3pt, align=center, font=\sffamily\bfseries\small] (cpu) at (0, 4) {Compute Die\\[2pt]\footnotesize\mdseries (UCIe + BoW PHY)};
+
+% Left: HBM
+\node[rectangle, rounded corners=3pt, draw=absbord, line width=0.5pt, fill=absfill, minimum width=42mm, minimum height=18mm, inner sep=3pt, align=center, font=\sffamily\small] (hbm) at (-4.5, 0) {HBM stack\\[2pt]\footnotesize(silicon interposer)};
+
+% Right: I/O chiplet
+\node[rectangle, rounded corners=3pt, draw=impbord, line width=0.5pt, fill=impfill, minimum width=42mm, minimum height=18mm, inner sep=3pt, align=center, font=\sffamily\small] (io) at (4.5, 0) {I/O Chiplet\\[2pt]\footnotesize(organic substrate)};
+
+% Links
+\draw[link=absbord] (cpu.south west) ++(0.5, 0) -- (hbm.north);
+\node[linklab=absbord, anchor=east] at (-1.6, 2.1) {UCIe link};
+
+\draw[link=impbord] (cpu.south east) ++(-0.5, 0) -- (io.north);
+\node[linklab=impbord, anchor=west] at (1.6, 2.1) {BoW link};
+
+% Caption
+\node[font=\sffamily\footnotesize\itshape, text=mutec, align=center] at (0, -1.4) {한 패키지 안에서 UCIe(고대역폭)와 BoW(저비용 I/O)가 공존};
+
+\end{tikzpicture}
+\end{document}

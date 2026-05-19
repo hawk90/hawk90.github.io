@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  axisLine/.style={draw=inkc, line width=0.6pt, -{Stealth[length=2.2mm]}},
+  tick/.style={draw=mutec, line width=0.4pt},
+  ticklabel/.style={font=\sffamily\footnotesize, text=mutec},
+  bargd/.style={draw=conbord, fill=confill, line width=0.4pt},
+  barhb/.style={draw=absbord, fill=absfill, line width=0.4pt},
+  pl/.style={font=\sffamily\footnotesize, text=#1, anchor=west}
+]
+
+\draw[axisLine] (0,0) -- (11.5,0) node[ticklabel, below=4pt, midway, yshift=-12pt] {연도};
+\draw[axisLine] (0,0) -- (0,8) node[ticklabel, left=4pt, midway, xshift=-22pt, rotate=90] {per-pin rate (Gbps)};
+
+\foreach \y/\lab in {0.5/2, 1.0/4, 1.5/7, 2.25/10, 3.5/16, 4.0/18, 5.5/24, 7.0/32, 7.8/36} {
+  \draw[tick] (-0.1, \y) -- (0.1, \y);
+  \node[ticklabel, anchor=east] at (-0.15, \y) {\lab};
+}
+\foreach \x/\lab in {1.0/2018, 3.5/2020, 6.0/2022, 8.5/2024, 11.0/2026} {
+  \draw[tick] (\x, -0.1) -- (\x, 0.1);
+  \node[ticklabel, anchor=north] at (\x, -0.15) {\lab};
+}
+
+% HBM bars (left side)
+\foreach \x/\y/\lab in {1.6/0.5/HBM2, 4.0/1.0/HBM2E, 6.4/1.5/HBM3, 8.8/2.25/HBM3E} {
+  \draw[barhb] (\x-0.25, 0) rectangle (\x+0.25, \y);
+  \node[pl=absbord, anchor=south, font=\sffamily\scriptsize\bfseries] at (\x, \y+0.03) {\lab};
+}
+
+% GDDR bars
+\foreach \x/\y/\lab in {3.2/3.5/{GDDR6 (NRZ)}, 6.4/5.5/{GDDR6X (PAM4)}, 9.5/7.0/{GDDR7 (PAM3)}} {
+  \draw[bargd] (\x-0.25, 0) rectangle (\x+0.25, \y);
+  \node[pl=conbord, anchor=south, font=\sffamily\scriptsize\bfseries] at (\x, \y+0.03) {\lab};
+}
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.5, 8.7) {세대별 per-pin rate (HBM vs GDDR)};
+
+% Legend
+\node[font=\sffamily\footnotesize, text=absbord, anchor=west] at (8.5, 1.4) {$\bullet$ HBM};
+\node[font=\sffamily\footnotesize, text=conbord, anchor=west] at (8.5, 0.9) {$\bullet$ GDDR};
+
+\end{tikzpicture}
+\end{document}

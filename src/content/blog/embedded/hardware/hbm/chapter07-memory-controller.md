@@ -311,36 +311,9 @@ NVIDIA H100은 *system-level ECC*를 *on*으로 출하합니다. 데이터센터
 
 컨트롤러는 *수십 개의 outstanding request*를 *동시에 추적*해 *bank 별로 schedule*합니다.
 
-```text
-컨트롤러 내부 큐 구조
+![HBM 컨트롤러 내부 큐 — address mapping, per-bank queue, scheduler, bus](/images/blog/hardware/hbm/diagrams/ch07-controller-queue.svg)
 
-           ┌─────────────────────────────┐
-           │  Address mapping (XOR)       │
-           └──────────┬──────────────────┘
-                      │
-           ┌──────────▼──────────────────┐
-           │  Per-bank queue (× 512)      │
-           │                              │
-           │  bank 0: [req] [req] ...     │
-           │  bank 1: [req]               │
-           │  ...                         │
-           │  bank 511: [req] [req] [req] │
-           └──────────┬──────────────────┘
-                      │
-           ┌──────────▼──────────────────┐
-           │  Scheduler (FR-FCFS)         │
-           │  - Row hit 우선              │
-           │  - Bank conflict 회피        │
-           │  - WR/RD batch grouping      │
-           └──────────┬──────────────────┘
-                      │
-           ┌──────────▼──────────────────┐
-           │  Command/Address bus to HBM  │
-           └─────────────────────────────┘
-
-FR-FCFS = First-Ready, First-Come-First-Served
-같은 row에 있는 request 우선 처리
-```
+FR-FCFS는 *First-Ready, First-Come-First-Served*입니다. *같은 row에 있는 request*가 우선 처리됩니다.
 
 큐 깊이가 *32~64 per bank*에 달합니다. *AI workload의 outstanding miss 수*가 *수천*에 달하기 때문에 *queue가 깊어야* 합니다.
 
@@ -383,28 +356,7 @@ Sapeon X330 (SK Telecom NPU)
 
 NPU·FPGA 설계에서 *HBM 컨트롤러*를 *AXI-Stream*으로 *추상화*하는 경우가 많습니다.
 
-```text
-HBM ↔ NPU 인터페이스
-
-           NPU compute
-                │
-           ┌────▼────┐
-           │ AXI-S   │  ← NPU 입장의 표준 인터페이스
-           │ wrapper │     - tdata
-           └────┬────┘     - tvalid/tready
-                │          - tuser (channel id)
-                │
-           ┌────▼────────────────────────┐
-           │ HBM controller IP           │
-           │ - address mapping            │
-           │ - bank schedule              │
-           │ - per-bank queue             │
-           └────┬────────────────────────┘
-                │
-           ┌────▼────┐
-           │ HBM PHY │
-           └─────────┘
-```
+![HBM ↔ NPU 인터페이스 — AXI-S wrapper가 NPU에 표준 인터페이스 제공](/images/blog/hardware/hbm/diagrams/ch07-npu-axi.svg)
 
 Xilinx HBM Controller IP가 *AXI-Stream wrapper*로 *32-channel access*를 제공합니다. 각 channel은 *256-bit*로 동작하고 *내부적으로 16개 HBM channel*로 분산됩니다.
 

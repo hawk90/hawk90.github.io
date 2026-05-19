@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  slc/.style={rectangle, draw=impbord, fill=impfill, line width=0.4pt, minimum width=55mm, minimum height=6mm, inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  die/.style={rectangle, rounded corners=3pt, draw=hibord, fill=hifill, line width=0.5pt, minimum width=22mm, minimum height=50mm, inner sep=3pt, align=center, font=\sffamily\small\bfseries},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[die] (txd) at (-5, 0) {TX die};
+\node[die] (rxd) at (5, 0) {RX die};
+
+\foreach \i/\y/\lab in {0/2.4/{Slice 0 (lane 0..15)},1/1.6/{Slice 1 (lane 16..31)},2/0.8/{Slice 2 (lane 32..47)},3/0.0/{Slice 3 (lane 48..63)},4/-0.8/{Slice 4 (lane 64..79)},5/-1.6/{Slice 5 (lane 80..95)},6/-2.4/{Slice 6 (lane 96..111)}} {
+  \node[slc] (s\i) at (0, \y) {\lab};
+}
+\node[slc] (s7) at (0, -3.2) {Slice 7 (lane 112..127)};
+
+\draw[arr] (txd.east) -- (-2.85, 0);
+\draw[arr] (2.85, 0) -- (rxd.west);
+
+\node[font=\sffamily\footnotesize\itshape, text=focusc, align=center] at (0, -4.0) {Slice 간 skew도 보정 (training 시 word boundary 정렬)};
+
+\end{tikzpicture}
+\end{document}

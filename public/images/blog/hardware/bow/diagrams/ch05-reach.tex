@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  pkg/.style={rectangle, rounded corners=4pt, draw=mutec, line width=0.5pt, fill=neutfill!50, inner sep=4mm},
+  die/.style={rectangle, rounded corners=3pt, draw=#1, fill=#1!13, line width=0.5pt, minimum width=22mm, minimum height=14mm, inner sep=2pt, align=center, font=\sffamily\small}
+]
+
+% Standard panel
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-5, 4.4) {BoW Standard (reach ${\sim}25$ mm)};
+\node[die=conbord] (sa) at (-3.4, 2.8) {Die A};
+\node[die=clibord, right=4mm of sa] (sb) {Die B};
+\node[die=hibord, right=4mm of sb] (sc) {Die C};
+\node[pkg, fit=(sa)(sb)(sc), inner sep=3mm] (spkg) {};
+\node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=south] at ($(spkg.south)+(0,0.05)$) {모두 한 줄로 인접 배치 필요};
+
+% Flexi panel
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-5, 0.2) {BoW Flexi (reach ${\sim}50$ mm)};
+\node[die=conbord] (fa) at (-4.0, -1.6) {Die A};
+\node[die=clibord] (fb) at (1.0, -2.3) {Die B};
+\node[die=hibord] (fc) at (-4.0, -3.4) {Die C};
+\node[pkg, fit=(fa)(fb)(fc), inner sep=4mm] (fpkg) {};
+\node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=south] at ($(fpkg.south)+(0,0.05)$) {대각선 배치도 가능 — 발열 분산 유리};
+
+\end{tikzpicture}
+\end{document}
