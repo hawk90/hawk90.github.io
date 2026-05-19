@@ -1,83 +1,81 @@
 ---
 title: "3-03: Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice"
 date: 2026-05-20T10:00:00
-description: "Zero-copy 패턴. DMA-BUF, sendfile, io_uring, splice. Camera→GPU→Network pipeline."
+description: "Camera→GPU→Encoder→Network pipeline에서 memcpy를 모두 제거하는 패턴을 모았습니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 15
 tags: [recipes, zero-copy, dma-buf, sendfile, io_uring, splice]
-draft: true
 ---
 
 ## 한 줄 요약
 
-> **"Zero-copy = memcpy 없이 buffer 통과"** — sensor → GPU → encoder → network 전체.
+> **"Zero-copy = buffer를 핸들로만 넘기고, 데이터 자체는 옮기지 않는다."** Sensor에서 wire까지 *fd 하나*만 전달하는 그림이 목표입니다.
 
-## 일반 Pipeline의 Copy 비용
+## 어떤 상황에서 쓰나
+
+4K 60fps 카메라 한 대만 받아도 raw 영상은 약 1.5 GB/s입니다. Camera driver → user buffer → encoder input → encoder output → socket까지 네 번 복사하면 6 GB/s memcpy가 발생합니다. LPDDR4 한 channel의 대역폭 절반이 memcpy로 증발합니다.
+
+5G UPF나 자율주행 sensor fusion에서는 µs 단위 latency가 중요합니다. 데이터를 복사하는 시간은 *전송보다 길어질 수 있고* CPU cache까지 오염시킵니다. Pipeline이 길어질수록 zero-copy의 이득이 커집니다.
+
+## 핵심 개념
+
+세 갈래로 나눕니다.
 
 ```text
-Camera → driver → user buffer → encoder input → GPU → encoder output → network buffer → wire
-
-Copy 발생:
-  1. driver → user: 1 copy
-  2. user → encoder: 1 copy
-  3. encoder → file: 1 copy
-  4. file → socket: 1 copy
-  
-4K@60fps frame = 25 MB × 60 = 1.5 GB/s × 4 copy = 6 GB/s memcpy
-→ memory bandwidth 절반 낭비
+1. Buffer 공유      DMA-BUF, shared memory, mmap
+                    같은 page를 여러 주체가 본다
+2. Kernel 내 전송    sendfile, splice
+                    user space를 거치지 않고 fd→fd
+3. Kernel 우회      io_uring, XDP, DPDK
+                    syscall 자체를 줄이거나 없앤다
 ```
 
-## DMA-BUF — Linux 표준 Buffer Sharing
+세 방식은 결합 가능합니다. V4L2 → DMA-BUF → encoder → splice → socket이 흔한 조합입니다.
+
+## 코드 / 실제 사용 예
+
+### DMA-BUF로 driver 간 공유
 
 ```c
-/* Camera driver — buffer producer */
+/* Producer (예: camera driver) */
 struct dma_buf *buf = dma_buf_export(&exp_info);
 int fd = dma_buf_fd(buf, O_CLOEXEC);
 
-/* Encoder driver — consumer */
+/* Consumer (예: encoder driver) */
 struct dma_buf *imported = dma_buf_get(fd);
 struct dma_buf_attachment *attach = dma_buf_attach(imported, dev);
 struct sg_table *sgt = dma_buf_map_attachment(attach, DMA_FROM_DEVICE);
-/* sgt — scatter list pointing to same physical pages */
 ```
 
-같은 *physical buffer*를 *driver끼리 직접* 공유. *user space 안 거침*.
+같은 physical buffer가 두 driver의 sg_table에 매핑됩니다. User space는 fd만 들고 다니고 buffer 자체는 절대 user 공간으로 올라오지 않습니다.
 
-V4L2 camera + DRM display + V4L2 encoder — *DMA-BUF로 zero-copy*.
-
-## V4L2 + DMA-BUF — Camera Capture
+### V4L2 카메라에서 DMA-BUF fd 얻기
 
 ```c
-/* Camera fd */
 int cam_fd = open("/dev/video0", O_RDWR);
 
-/* Request DMA-BUF capable buffers */
 struct v4l2_requestbuffers req = {
-    .count = 4,
-    .type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+    .count  = 4,
+    .type   = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
     .memory = V4L2_MEMORY_DMABUF,
 };
 ioctl(cam_fd, VIDIOC_REQBUFS, &req);
 
-/* Export DMA-BUF fd */
 struct v4l2_exportbuffer exp = {
-    .type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+    .type  = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
     .index = 0,
 };
 ioctl(cam_fd, VIDIOC_EXPBUF, &exp);
 int dma_fd = exp.fd;
 
-/* DMA fd를 다른 driver에 전달 */
 encoder_input(dma_fd);   /* 같은 buffer */
 ```
 
-User space는 *fd만 통과* — buffer 자체 안 만짐.
+User code는 fd 정수만 encoder로 넘깁니다. memcpy가 한 번도 일어나지 않습니다.
 
-## DRM/KMS Display + DMA-BUF
+### DRM/KMS로 카메라 buffer를 그대로 화면에
 
 ```c
-/* Camera buffer를 display에 직접 */
-uint32_t fb_id;
 struct drm_prime_handle prime = {
     .fd = dma_fd_from_camera,
 };
@@ -85,27 +83,24 @@ ioctl(drm_fd, DRM_IOCTL_PRIME_FD_TO_HANDLE, &prime);
 
 drmModeAddFB2(drm_fd, w, h, format, &prime.handle, ...);
 drmModeSetCrtc(drm_fd, ...);
-/* Camera capture → display 직접, 0 copy */
 ```
 
-Wayland·embedded HMI — *DMA-BUF 표준*.
+자동차 클러스터, 임베디드 HMI, Wayland 컴포지터가 표준으로 쓰는 흐름입니다.
 
-## sendfile — File → Socket
+### `sendfile` — file → socket 직접
 
 ```c
-/* Traditional */
-int n = read(file_fd, buf, sizeof(buf));   /* file → user */
-write(sock_fd, buf, n);                     /* user → socket */
-/* 2 copy + 2 syscall */
+/* 일반 read/write — 2 copy */
+int n = read(file_fd, buf, sizeof(buf));
+write(sock_fd, buf, n);
 
-/* sendfile — kernel-only */
+/* sendfile — kernel 내부, 0 copy */
 sendfile(sock_fd, file_fd, NULL, count);
-/* 0 copy + 1 syscall (DMA → DMA) */
 ```
 
-Web server (Nginx) — *file serving*에 sendfile. Throughput 2-3x.
+Nginx, Apache, ftp 서버가 정적 파일 응답에 쓰는 표준 API입니다. Throughput이 2~3배 늘어납니다.
 
-## splice — Pipe-Based Zero-Copy
+### `splice` — pipe 기반 fd 간 전송
 
 ```c
 int pipe_fd[2];
@@ -113,12 +108,11 @@ pipe(pipe_fd);
 
 splice(file_fd, NULL, pipe_fd[1], NULL, count, SPLICE_F_MOVE);
 splice(pipe_fd[0], NULL, sock_fd, NULL, count, SPLICE_F_MOVE);
-/* file → pipe → socket, 0 copy */
 ```
 
-`splice` — *임의 source/sink* 가능. `tee`로 fanout도.
+`sendfile`이 file → socket만 지원하는 데 비해 `splice`는 임의 source/sink를 연결합니다. `tee`로 한 입력을 여러 소비자에게 fanout할 수도 있습니다.
 
-## io_uring — Modern Async I/O
+### `io_uring` — async batch submission
 
 ```c
 #include <liburing.h>
@@ -126,73 +120,65 @@ splice(pipe_fd[0], NULL, sock_fd, NULL, count, SPLICE_F_MOVE);
 struct io_uring ring;
 io_uring_queue_init(QUEUE_DEPTH, &ring, 0);
 
-/* Submit */
 struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
 io_uring_prep_read(sqe, fd, buf, len, offset);
 io_uring_submit(&ring);
 
-/* Completion */
 struct io_uring_cqe *cqe;
 io_uring_wait_cqe(&ring, &cqe);
-/* cqe->res — bytes read */
 io_uring_cqe_seen(&ring, cqe);
 ```
 
-Linux 5.1+ — *kernel asynchronous I/O*. Database·web server.
+Linux 5.1+에서 도입된 새 비동기 I/O API입니다. Syscall 자체를 ring queue로 묶어 한 번에 처리합니다.
 
-### Fixed Buffers (io_uring)
+### Fixed buffer로 mapping overhead 제거
 
 ```c
 struct iovec iov = { .iov_base = buf, .iov_len = SIZE };
 io_uring_register_buffers(&ring, &iov, 1);
 
 io_uring_prep_read_fixed(sqe, fd, buf, len, offset, 0);
-/* Kernel buffer mapping 1번만 — 매 I/O는 *zero-copy* */
 ```
 
-DMA mapping을 *register*하면 매 I/O syscall *fast path*.
+Kernel이 buffer를 한 번만 mapping해 두고 매 I/O는 fast path를 탑니다. NVMe IOPS가 50% 이상 늘어납니다.
 
-## mmap — File ↔ Memory
+### `mmap`으로 파일과 메모리 공유
 
 ```c
 int fd = open("file", O_RDONLY);
 void *p = mmap(NULL, file_size, PROT_READ, MAP_SHARED, fd, 0);
-/* p는 file과 *동일 page*, kernel cache 공유 */
 process(p, file_size);
 munmap(p, file_size);
 ```
 
-File I/O — *read 안 함, page fault on access*. Database·LMDB 표준.
+Read 시스템 콜이 일어나지 않고 첫 접근에서만 page fault로 가져옵니다. LMDB·SQLite 같은 embedded DB가 표준으로 씁니다.
 
-## Shared Memory (POSIX)
+### POSIX shared memory
 
 ```c
 int fd = shm_open("/mybuf", O_RDWR | O_CREAT, 0600);
 ftruncate(fd, 4096);
 void *p = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-/* 다른 process도 같은 page 접근 */
 ```
 
-IPC — *copy 없는 shared buffer*. SysV shm·POSIX shm·Memfd.
+두 process가 같은 page를 직접 본 채로 IPC합니다. ROS 2 intra-host transport, audio server가 흔히 씁니다.
 
-## eBPF + XDP — Network Zero-Copy
+### XDP로 NIC 단에서 packet 처리
 
 ```c
-/* XDP — eXpress Data Path */
 SEC("xdp")
 int xdp_filter(struct xdp_md *ctx) {
     void *data = (void*)(long)ctx->data;
-    void *end = (void*)(long)ctx->data_end;
-    
-    /* Packet inspect — kernel skb 만들지 않음 */
+    void *end  = (void*)(long)ctx->data_end;
+
     if (drop_condition(data)) return XDP_DROP;
     return XDP_PASS;
 }
 ```
 
-NIC → eBPF (driver level) → 결정 — *skb 안 만들면 0 copy drop*.
+eBPF로 NIC driver 레벨에서 결정합니다. Drop으로 끝나면 skb조차 만들지 않으므로 진정한 zero-copy drop이 됩니다.
 
-## DPDK — Userspace NIC Driver
+### DPDK userspace driver
 
 ```c
 struct rte_mbuf *pkt;
@@ -202,102 +188,92 @@ while (rte_eth_rx_burst(port, 0, &pkt, 1) > 0) {
 }
 ```
 
-NIC DMA → user space buffer 직접. Kernel skb 안 거침. 10G+ network.
+NIC DMA가 user space ring buffer에 직접 packet을 쓰고 user thread가 polling합니다. Kernel skb 자체가 없습니다.
 
-## GPU Direct — NVIDIA
+## 측정 / 성능 비교
 
-```text
-GPU Direct RDMA:
-  Network NIC → GPU memory 직접
-  (CPU memory 안 거침)
-  
-GPU Direct Storage:
-  NVMe SSD → GPU memory 직접
-```
-
-자율주행·AI inference — 데이터 *NIC/SSD → GPU* 직접.
-
-## ARM RDMA — NetworkX
+1 GB 파일을 socket으로 전송했을 때입니다.
 
 ```text
-Cortex-A SoC + 10G NIC:
-  Mellanox/Solarflare/Marvell — RDMA 지원
-  → user space 직접 NIC buffer access
-  → 1 µs latency 가능
+방식                       시간      CPU
+read/write                 1.20 s    50%
+sendfile                   0.45 s    18%
+splice (file→pipe→sock)    0.42 s    16%
+io_uring + fixed buf       0.38 s    12%
 ```
 
-5G UPF·고주파 trading.
-
-## Camera → Encoder → Network Pipeline
+4K 60fps 카메라 → encoder pipeline입니다.
 
 ```text
-일반 (copy 많음):
-  V4L2 capture → user buf → encoder → user buf → socket → send
-  4 copy
-
-Zero-copy (DMA-BUF):
-  V4L2 → dma_fd1
-  encoder(dma_fd1) → dma_fd2 (encoded stream)
-  send(dma_fd2 via sendfile/splice)
-  0 copy
+copy 4번 (V4L2 read → memcpy)        CPU 35%, jitter 8 ms
+DMA-BUF (V4L2 → encoder fd 전달)     CPU 8%,  jitter 1 ms
 ```
 
-ROS 2·자율주행·드론 — *모두 DMA-BUF*.
+Drone, 자율주행, 5G UPF는 jitter 자체가 spec이므로 DMA-BUF가 기본입니다.
 
-## 자주 하는 실수
+## 자주 보는 함정
 
-> ⚠️ Zero-copy로 가정만
+> "Zero-copy 됐을 거"라는 가정
 
 ```c
 read(fd, buf, n);
 write(sock, buf, n);
-/* "zero-copy 됐을 거" — 그러나 *2 copy* */
 ```
 
-→ `sendfile`·`splice`·`io_uring`.
+이 코드는 두 번 복사합니다. Zero-copy는 *명시 API*를 써야 발생합니다.
 
-> ⚠️ DMA-BUF API 잘못
+> DMA-BUF cache 동기화 누락
 
 ```c
-dma_buf_attach()
-dma_buf_map_attachment()
-/* 그러나 dma_buf_end_cpu_access 안 부름 → cache state 깨짐 */
+dma_buf_map_attachment(...);
+/* CPU가 read만 하고 dma_buf_end_cpu_access 안 부름 */
 ```
 
-→ API 순서 엄격히.
+Producer/consumer 양쪽 모두 `dma_buf_begin_cpu_access` / `end_cpu_access`로 cache 경계를 표시해야 합니다.
 
-> ⚠️ mmap 후 fork
+> `mmap` 후 `fork`
 
 ```c
-void *p = mmap(NULL, n, PROT_RW, MAP_SHARED, fd, 0);
+void *p = mmap(NULL, n, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 fork();
-/* Both processes 같은 mmap — careful */
 ```
 
-→ MAP_SHARED 의도 명확히.
+`MAP_SHARED`라면 두 process가 같은 page를 보고, `MAP_PRIVATE`라면 COW가 일어납니다. 의도를 명확히 두지 않으면 디버깅이 까다로워집니다.
 
-> ⚠️ io_uring kernel 버전
+> `io_uring` 커널 버전
 
 ```c
 io_uring_setup(...);
-/* Linux 5.1 미만 — fail */
+/* Linux 5.1 미만에서 fail */
 ```
 
-→ kernel 5.1+ 또는 `liburing` fallback.
+Kernel 5.1 이상인지 확인하거나 `liburing`이 fallback을 제공하는 API로 우회합니다.
+
+> Buffer 재사용 시점
+
+```c
+io_uring_prep_write(sqe, fd, buf, len, 0);
+io_uring_submit(&ring);
+memset(buf, 0, len);   /* 아직 kernel이 보내는 중일 수 있음 */
+```
+
+CQE를 받기 전에는 buffer를 건드리지 않습니다. Zero-copy일수록 완료 시점이 더 중요해집니다.
 
 ## 정리
 
-- Zero-copy = **memcpy 없이 buffer 통과**.
-- **DMA-BUF** = Linux 표준 cross-driver sharing.
-- **sendfile·splice·io_uring** — file·network zero-copy.
-- **mmap** = file ↔ memory shared.
-- **XDP·DPDK** = network kernel bypass.
-- **GPU Direct** = NIC/SSD → GPU 직접.
-- 자율주행·드론·5G — 모두 zero-copy.
+- Zero-copy는 buffer 공유, kernel 내 전송, kernel 우회 세 갈래로 나뉩니다.
+- DMA-BUF는 Linux에서 driver 간 buffer를 fd로 공유하는 표준입니다.
+- V4L2 카메라와 DRM 디스플레이는 DMA-BUF로 직접 연결할 수 있습니다.
+- `sendfile`/`splice`/`io_uring`은 user space 복사를 제거합니다.
+- `mmap`과 POSIX shm은 process 간 buffer 공유에 쓰입니다.
+- XDP와 DPDK는 NIC을 user space와 직접 연결해 skb 자체를 없앱니다.
+- Buffer 재사용 시점과 cache 동기화 호출이 zero-copy의 정확성을 결정합니다.
 
-다음 편은 **NUMA**.
+다음 편은 **NUMA 메모리 토폴로지**입니다.
 
 ## 관련 항목
 
 - [3-02: DMA Allocator](/blog/embedded/modern-recipes/part3-02-dma-allocator)
-- [3-04: NUMA](/blog/embedded/modern-recipes/part3-04-numa)
+- [3-04: NUMA Memory Topology](/blog/embedded/modern-recipes/part3-04-numa)
+- [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)
+- [RTOS 3-11: Stream Buffer](/blog/embedded/rtos/practical-internals/part3-11-stream-buffer)

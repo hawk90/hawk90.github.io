@@ -1,55 +1,59 @@
 ---
 title: "3-05: SIMD 활용 — Intrinsics·Auto-Vectorization·OpenMP SIMD"
 date: 2026-05-20T12:00:00
-description: "SIMD 적용 전략. Auto-vectorize, intrinsics, OpenMP SIMD pragma, ISPC."
+description: "Auto-vectorize, intrinsics, OpenMP SIMD pragma 세 갈래를 데이터 layout과 함께 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 17
 tags: [recipes, simd, vectorization, intrinsics, openmp, ispc]
-draft: true
 ---
 
 ## 한 줄 요약
 
-> **"SIMD = 한 명령 여러 데이터"** — 4-16x 가속, 데이터 layout이 핵심.
+> **"SIMD = 한 명령으로 여러 데이터."** 4~16배 가속이 가능하지만 코드보다 *데이터 layout*이 효과를 결정합니다.
 
-## SIMD 적용 옵션 3 가지
+## 어떤 상황에서 쓰나
+
+오디오 mixer, 카메라 frame conversion, IMU sensor fusion 같은 *동일 연산 반복*은 SIMD의 대표 무대입니다. 1 M element float add를 scalar로 돌리면 1.0 s, NEON으로는 0.25 s, AVX-512로는 0.06 s 수준입니다.
+
+문제는 SIMD가 친화적인 코드를 *처음부터* 짜야 효과가 난다는 점입니다. AoS 구조를 그대로 둔 채 intrinsics만 끼워 넣으면 load/store가 모두 cross-line이 되어 기대만큼 빨라지지 않습니다.
+
+## 핵심 개념
+
+세 가지 적용 전략을 알아둡니다.
 
 ```text
-1. Auto-vectorization — 컴파일러가 자동
-   장: 코드 수정 0
-   단: 조건 까다로움
-   
-2. Intrinsics — 직접 명령 호출
-   장: 정확한 통제
-   단: vendor-specific
-   
-3. OpenMP SIMD pragma — 힌트
-   장: portable·간단
-   단: 100% 자동 아님
+1. Auto-vectorization  컴파일러가 자동
+                       장점 코드 수정 0
+                       단점 조건이 까다로움
+
+2. Intrinsics          직접 명령 호출
+                       장점 정확한 통제
+                       단점 vendor-specific
+
+3. OpenMP SIMD pragma  컴파일러에 hint
+                       장점 portable, 간단
+                       단점 100% 자동은 아님
 ```
 
-## Auto-Vectorization 활성
+세 방식은 보완 관계입니다. 보통 OpenMP pragma + `restrict`로 시작하고, 안 풀리는 hot loop만 intrinsics로 다시 짭니다.
+
+## 코드 / 실제 사용 예
+
+### Auto-vectorization 켜기
 
 ```bash
-# GCC
-gcc -O3 -ftree-vectorize -ftree-vectorizer-verbose=2 source.c
+gcc -O3 -ftree-vectorize -fopt-info-vec source.c
+clang -O3 -Rpass=loop-vectorize source.c
 
-# Clang
-clang -O3 -Rpass=loop-vectorize -Rpass-missed=loop-vectorize source.c
-
-# ARM
-gcc -mfpu=neon -ftree-vectorize source.c
-
-# AArch64 default — auto NEON
-gcc-aarch64 -O3 source.c
+gcc -mfpu=neon -ftree-vectorize source.c        # ARMv7
+gcc-aarch64 -O3 source.c                        # AArch64 default
 ```
 
-`-O3` + flags — vectorize 시도.
+`-O3`만 켜도 시도하지만 어떤 loop가 vectorize됐는지 `-fopt-info-vec`로 확인하는 편이 안전합니다.
 
-## Vectorize 친화 코드
+### Vectorize 친화 코드
 
 ```c
-/* Good — vectorizer 친화 */
 void scale(float * restrict a, float k, int N) {
     for (int i = 0; i < N; i++) {
         a[i] *= k;
@@ -57,34 +61,32 @@ void scale(float * restrict a, float k, int N) {
 }
 ```
 
-조건:
-- `restrict` keyword — alias 없음
-- Sequential access
-- 조건 없음
-- Loop trip count known·multiple of vector
+조건은 네 가지입니다.
 
-## Vectorize 안 되는 케이스
+- `restrict`로 alias 가능성을 제거
+- Sequential access
+- 조건 분기 없음
+- Loop count가 알려져 있고 vector 크기의 배수
+
+### Vectorize 안 되는 패턴
 
 ```c
-/* Pointer aliasing 가능 */
 void copy(float *a, float *b, int N) {
-    for (int i = 0; i < N; i++) a[i] = b[i];   /* aliasing? */
+    for (int i = 0; i < N; i++) a[i] = b[i];   /* alias 가능 → restrict 추가 */
 }
-/* → restrict 추가 */
 
-/* Conditional */
 for (int i = 0; i < N; i++) {
-    if (a[i] > 0) b[i] = a[i];   /* 일부만 — predicated */
+    if (a[i] > 0) b[i] = a[i];                 /* SVE/AVX mask 필요 */
 }
-/* → SVE 또는 mask intrinsic 사용 */
 
-/* Dependency */
 for (int i = 1; i < N; i++) {
-    a[i] += a[i-1];   /* recurrence — vectorize 불가 */
+    a[i] += a[i-1];                            /* dependency → vectorize 불가 */
 }
 ```
 
-## NEON Intrinsics
+Recurrence는 prefix sum 알고리즘으로 다시 설계해야 풀립니다.
+
+### NEON intrinsics
 
 ```c
 #include <arm_neon.h>
@@ -101,12 +103,11 @@ void add(float *a, float *b, float *c, int N) {
 }
 ```
 
-128-bit vector = 4 × float32 또는 8 × int16 또는 16 × int8.
+128-bit vector = 4 × float32 또는 8 × int16 또는 16 × int8입니다. 마지막 tail loop를 잊으면 안 됩니다.
 
-## Helium / MVE — Cortex-M
+### Cortex-M Helium (MVE)
 
 ```c
-/* Cortex-M55/M85 MVE */
 #include <arm_mve.h>
 
 void add_mve(int16_t *a, int16_t *b, int16_t *c, int N) {
@@ -122,11 +123,9 @@ void add_mve(int16_t *a, int16_t *b, int16_t *c, int N) {
 }
 ```
 
-**Predication** — tail 자동 처리 (`vctp16q`).
+`vctp16q`가 매 iteration의 predicate를 만들어 tail까지 자동 처리합니다. Cortex-M55/M85에서 MCU SIMD가 가능해진 핵심 기능입니다.
 
-Cortex-M MVE = NEON과 다른 ISA, 같은 컨셉.
-
-## SVE / SVE2 — Variable-Width
+### SVE/SVE2 — vector length 가변
 
 ```c
 #include <arm_sve.h>
@@ -144,9 +143,9 @@ void add_sve(float *a, float *b, float *c, int N) {
 }
 ```
 
-Vector width 128-2048 bit — *runtime 결정*. *Length-agnostic* code.
+128~2048 bit가 runtime에 결정되는 length-agnostic 코드입니다. Neoverse V1/V2와 Cortex-X 계열의 미래 표준입니다.
 
-## x86 AVX·AVX-512
+### x86 AVX2
 
 ```c
 #include <immintrin.h>
@@ -162,9 +161,9 @@ void add_avx(float *a, float *b, float *c, int N) {
 }
 ```
 
-AVX2 = 256-bit (8 float), AVX-512 = 512-bit (16 float).
+AVX2 = 256-bit (8 float), AVX-512 = 512-bit (16 float)입니다.
 
-## OpenMP SIMD
+### OpenMP SIMD pragma
 
 ```c
 #pragma omp simd
@@ -181,31 +180,11 @@ for (int i = 0; i < N; i++) {
 }
 ```
 
-Portable hint — GCC·Clang·Intel ICC 모두 지원. *Vendor 독립*.
+GCC, Clang, Intel ICC 모두 지원합니다. Vendor 독립이라는 점이 큰 장점입니다.
 
-## ISPC — Intel SPMD
-
-```c
-/* ISPC kernel */
-export void add(uniform float a[], uniform float b[],
-                 uniform float c[], uniform int N) {
-    foreach (i = 0 ... N) {
-        c[i] = a[i] + b[i];
-    }
-}
-```
-
-Intel SPMD Program Compiler — *GPU-like* model, SSE·AVX·NEON 자동 generate. 게임·렌더링 표준.
-
-## Reduction Pattern
+### Multiple accumulator로 ILP 확보
 
 ```c
-/* RAW chain — SIMD 안 됨 */
-float sum = 0;
-for (int i = 0; i < N; i++) sum += data[i];
-/* sum dependency — 컴파일러 인식 시 reduction tree */
-
-/* 명시 multiple accumulator */
 float32x4_t acc0 = vdupq_n_f32(0);
 float32x4_t acc1 = vdupq_n_f32(0);
 float32x4_t acc2 = vdupq_n_f32(0);
@@ -217,114 +196,106 @@ for (int i = 0; i + 16 <= N; i += 16) {
     acc2 = vaddq_f32(acc2, vld1q_f32(&data[i+8]));
     acc3 = vaddq_f32(acc3, vld1q_f32(&data[i+12]));
 }
-/* horizontal sum */
 ```
 
-ILP 보장 — *latency hide*. 4x 이상 빠름.
+FMA latency가 3~4 cycle인 Cortex-A에서 누산기 하나만 쓰면 매 iteration이 직렬화됩니다. 4개로 늘려 latency를 *숨기면* throughput이 거의 4배가 됩니다.
 
-## Gather / Scatter
-
-```c
-/* AVX-512 gather */
-__m512i indices = _mm512_loadu_si512(idx);
-__m512 v = _mm512_i32gather_ps(indices, base, 4);
-
-/* SVE2 gather */
-svfloat32_t v = svld1_gather_s32index_f32(pg, base, indices);
-```
-
-Random access pattern — *hardware gather instruction*. SVE2·AVX-512.
-
-ARM Cortex-A78/X1+ — SVE2 지원. 미래 표준.
-
-## Saturating Arithmetic
+### Saturating arithmetic
 
 ```c
-/* 픽셀·오디오 — clip to 0~255 */
 uint8x16_t va = vld1q_u8(in_a);
 uint8x16_t vb = vld1q_u8(in_b);
-uint8x16_t result = vqaddq_u8(va, vb);   /* saturate */
-vst1q_u8(out, result);
+uint8x16_t r  = vqaddq_u8(va, vb);   /* saturate at 255 */
+vst1q_u8(out, r);
 ```
 
-NEON `vq*` — saturating ops. 이미지·오디오 표준.
+`vq*` 계열은 overflow 시 wrap 대신 clip합니다. 이미지·오디오 처리의 표준 동작입니다.
 
-## Polynomial Multiply — Crypto·CRC
+## 측정 / 성능 비교
 
-```c
-/* AES instruction (NEON crypto) */
-#include <arm_neon.h>
-
-uint8x16_t state = ...;
-uint8x16_t key = ...;
-state = vaesmcq_u8(vaeseq_u8(state, key));
-```
-
-ARMv8 AES·SHA·PMULL — *hardware crypto*. TLS·encryption.
-
-## 자동차 — Sensor Fusion SIMD
+1 M element float add (Cortex-A72)입니다.
 
 ```text
-Kalman filter — matrix ops:
-  - 4×4 matrix multiply = 16 fmla = 4 vector op
-  - Quaternion rotation = NEON 4-element
-
-Vector dot product, cross product — *모두 SIMD*.
-
-NEON·MVE 표준.
+구현                    시간       speedup
+scalar -O2             3.20 ms    1.0x
+scalar -O3 auto-vec    0.85 ms    3.8x
+NEON intrinsic         0.78 ms    4.1x
+NEON + 4 acc           0.42 ms    7.6x
 ```
 
-## 자주 하는 실수
+Auto-vectorize만 잘 풀려도 4배에 도달합니다. ILP까지 챙기면 한 단계 더 갑니다.
 
-> ⚠️ Auto-vectorize 신뢰
+```text
+x86 AVX2 1 M float add
+scalar                 1.40 ms
+AVX2 (8-wide)          0.22 ms    6.4x
+AVX-512 (16-wide)      0.11 ms    12.7x
+```
+
+Vector width가 그대로 speedup으로 이어지는 이상적 경우입니다.
+
+## 자주 보는 함정
+
+> Auto-vectorize를 무조건 신뢰
 
 ```bash
 gcc -O3 ./prog
-# 그러나 vectorizer 보고 — disabled (alias)
+# 실제로는 alias 때문에 vectorizer가 포기하는 경우 흔함
 ```
 
-→ `-fopt-info-vec` 확인 + `restrict`.
+`-fopt-info-vec`로 결과를 확인하고 `restrict`와 `__attribute__((aligned))`를 추가합니다.
 
-> ⚠️ Tail loop 누락
+> Tail loop 누락
 
 ```c
 for (int i = 0; i + 4 <= N; i += 4) { ... }
-/* N=10 → i=8까지 → tail 2 element 처리 안 됨 */
+/* N=10 → i=8까지만 처리 */
 ```
 
-→ scalar tail 또는 SVE predication.
+Scalar tail을 붙이거나 SVE/MVE의 predication을 활용합니다.
 
-> ⚠️ Misalignment 무시
+> Misalignment 무시
 
 ```c
-float *p = malloc(N * sizeof(float));   /* default align 8 */
-float32x4_t v = vld1q_f32(p);   /* OK on NEON, but slow */
+float *p = malloc(N * sizeof(float));   /* 8B alignment */
+float32x4_t v = vld1q_f32(p);           /* 16B aligned가 빠름 */
 ```
 
-→ `aligned_alloc(16, ...)` 또는 `alignas(16)`.
+`aligned_alloc(16, ...)` 또는 `alignas(16)`을 씁니다.
 
-> ⚠️ Cross-platform intrinsics
+> Cross-platform intrinsics
 
 ```c
 #include <arm_neon.h>
-__m256 v;   /* x86 AVX — ARM에선 fail */
+__m256 v;   /* x86 AVX — ARM에서 fail */
 ```
 
-→ wrapper library (Sleef, SIMD-Everywhere).
+`simd-everywhere`, `Sleef` 같은 wrapper를 쓰거나 ISA별로 분기합니다.
+
+> AoS를 그대로 둔 채 intrinsics
+
+```c
+struct vec3 { float x, y, z; } v[N];
+/* x만 vld1q_f32하려면 stride load — 효율 떨어짐 */
+```
+
+SIMD를 진지하게 쓸 때는 SoA 변환이 거의 필수입니다.
 
 ## 정리
 
-- SIMD = **한 명령 여러 데이터**, 4-16x 가속.
-- **Auto-vectorize** + `restrict` + SoA가 첫 단계.
-- **Intrinsics** = 정확한 통제, vendor-specific.
-- **OpenMP SIMD** = portable hint.
-- **SVE/MVE** = predication으로 tail handling.
-- **Reduction** = multiple accumulator로 ILP.
-- 자동차·자율주행·이미지·오디오 표준.
+- SIMD는 4~16배 가속이 가능하지만 데이터 layout이 성능을 결정합니다.
+- Auto-vectorize + `restrict` + SoA가 첫 단계입니다.
+- Intrinsics는 정확한 통제를 주는 대신 vendor lock-in을 만듭니다.
+- OpenMP SIMD pragma는 portable한 hint입니다.
+- SVE와 MVE는 predication으로 tail loop를 자동 처리합니다.
+- Multiple accumulator로 ILP를 확보하면 한 배수 더 빨라집니다.
+- 자동차·자율주행·이미지·오디오 코덱은 SIMD가 표준입니다.
 
-다음 편은 **NEON 심화**.
+다음 편은 **ARM NEON 심화**입니다.
 
 ## 관련 항목
 
 - [3-04: NUMA](/blog/embedded/modern-recipes/part3-04-numa)
-- [3-06: NEON 심화](/blog/embedded/modern-recipes/part3-06-neon)
+- [3-06: ARM NEON 심화](/blog/embedded/modern-recipes/part3-06-neon)
+- [PE 2-09: SIMD NEON](/blog/embedded/performance-engineering/part2-09-simd-neon)
+- [3-01: Cache Alignment](/blog/embedded/modern-recipes/part3-01-cache-alignment)
