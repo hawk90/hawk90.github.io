@@ -1,0 +1,60 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+
+  % Column titles
+  \node[panelTitle, anchor=south] at ( 0.0, 4.0) {입력 시퀀스};
+  \node[panelTitle, anchor=south] at ( 5.0, 4.0) {future per item};
+  \node[panelTitle, anchor=south] at (10.0, 4.0) {결과 lazy seq};
+
+  % Input collection (왼쪽)
+  \foreach \i/\v in {0/1, 1/2, 2/3, 3/4, 4/5} {
+    \node[neut, minimum width=14mm, minimum height=8mm]
+      (in\i) at (0.0, 3.2 - 0.95*\i) {\texttt{\v}};
+  }
+
+  % Futures column (가운데)
+  \foreach \i/\v in {0/1, 1/2, 2/3, 3/4, 4/5} {
+    \node[prp, minimum width=36mm, minimum height=8mm]
+      (fut\i) at (5.0, 3.2 - 0.95*\i)
+      {\texttt{future} :: slow-square \v};
+  }
+
+  % Output collection (오른쪽)
+  \node[ok, minimum width=14mm, minimum height=8mm] (out0) at (10.0, 3.2)        {\texttt{1}};
+  \node[ok, minimum width=14mm, minimum height=8mm] (out1) at (10.0, 3.2 - 0.95) {\texttt{4}};
+  \node[ok, minimum width=14mm, minimum height=8mm] (out2) at (10.0, 3.2 - 1.90) {\texttt{9}};
+  \node[ok, minimum width=14mm, minimum height=8mm] (out3) at (10.0, 3.2 - 2.85) {\texttt{16}};
+  \node[ok, minimum width=14mm, minimum height=8mm] (out4) at (10.0, 3.2 - 3.80) {\texttt{25}};
+
+  % Arrows in
+  \foreach \i in {0,1,2,3,4} {
+    \draw[arr] (in\i) -- (fut\i);
+    \draw[arr] (fut\i) -- (out\i);
+  }
+
+  % Thread brace on futures
+  \draw[decorate, decoration={brace, amplitude=4pt, mirror}, draw=mutec, line width=0.4pt]
+    ($(fut0.north east) + (1.4, 0)$) -- ($(fut4.south east) + (1.4, 0)$);
+  \node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=west]
+    at ($(fut2.east) + (2.0, 0)$) {각 항목\\별도 스레드};
+
+  % Timing notes
+  \node[note, text width=110mm, align=center]
+    at (5.0, -2.0)
+    {\textbf{순차 map}: 5 항목 $\times$ 1초 $= 5$초.\quad
+     \textbf{pmap}: 모든 항목 동시 $\Rightarrow$ $\approx 1$초.};
+
+  \node[caption, text width=120mm, align=center]
+    at (5.0, -3.2)
+    {다만 항목당 계산이 코디네이션 비용보다 충분히 클 때만 이득.\\
+     너무 작은 작업이면 \texttt{partition-all}로 청킹 권장.};
+
+\end{tikzpicture}
+\end{document}

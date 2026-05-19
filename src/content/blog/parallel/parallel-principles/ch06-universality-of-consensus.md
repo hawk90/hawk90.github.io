@@ -23,6 +23,26 @@ draft: false
 
 이걸 증명하는 알고리즘이 **Universal Construction**이다. 6장의 핵심 내용.
 
+### Universal Object의 형식 정의
+
+책의 **Section 6.2**에서 universal object를 다음과 같이 정의한다.
+
+```text
+주어진 것:
+  sequential object S — 순차 명세 (state + operations)
+  consensus object    — wait-free consensus 구현 (CAS로 만들 수 있음)
+
+목표:
+  S의 *linearizable + wait-free* 동시 구현 C(S)를 만드는 일반적 절차.
+
+"보편적"의 의미:
+  *어떤 sequential object S에 대해서도* 동일한 절차로 C(S) 생성 가능.
+  S의 내부 의미에 의존하지 않음 — operation의 응답을
+  순차 명세에 따라 계산할 수 있다는 사실만 요구.
+```
+
+이는 *알고리즘적 환원*이다. consensus와 read/write만 있으면, 다른 모든 동기화 원시는 불필요하다 — 순차 명세를 가지고 일관되게 적용하면 된다.
+
 ## 6.2 기본 아이디어 — 명령의 순서 합의
 
 순차 객체에 대한 동시 접근을 다음과 같이 본다.
@@ -187,6 +207,41 @@ int uc_apply(UniversalConstruction* uc, Operation op) {
 4. 합의된 순서대로 명령을 재생하면 결과가 나온다
 
 CAS가 명령 순서에 합의하는 역할을 한다.
+
+### 자료구조 — Operation Log
+
+이 구조를 정리하면 다음과 같다.
+
+```text
+operation log =  단방향 linked list of nodes
+
+  Node 구성:
+    op       : function (T&) → R                # 순차 객체에 적용할 명령
+    next     : atomic<Node*>                    # 다음 명령
+    seq      : atomic<size_t>                   # 합의된 순서 번호 (0 = pending)
+    invoker  : thread id                        # 누가 호출했는지
+    result   : atomic<R>                        # 계산된 결과 (op 결과)
+
+  Head 포인터:
+    head : atomic<Node*>                        # 마지막으로 합의된 노드
+
+  Sentinel 시작 노드:
+    head 초기값 = sentinel (seq = 0, op = no-op)
+```
+
+각 스레드가 한 작업을 수행할 때, 자기 노드를 만들어 announce 슬롯에 넣고, 모든 스레드가 함께 협력하여 **하나의 일관된 순서**를 만든다.
+
+```text
+실행 흐름:
+  1. thread t가 op_t를 만든다 → my_node_t
+  2. my_node_t를 announce[t]에 둔다 (다른 스레드도 도와줄 수 있도록)
+  3. 가장 오래된 pending op을 찾아 list에 append (CAS) — 자기 것이든 남의 것이든
+  4. my_node_t.seq가 0이 아닐 때까지 반복 (즉 list에 연결될 때까지)
+  5. sentinel부터 my_node_t까지 list 순회하며 op들을 차례로 적용
+  6. my_node_t.result 반환
+```
+
+이 단방향 list가 사실상 **operation의 history log**다. 순차 객체 S에 적용할 명령의 전순서 — 모든 스레드가 합의한 — 가 list의 head→tail 방향으로 기록된다.
 
 ## 6.4 Wait-Free 보장
 
@@ -376,6 +431,59 @@ int wfuc_apply(WaitFreeUC* uc, int thread_id, int op_type, int op_value) {
 ```
 
 이게 wait-free의 비용 — N 스레드가 있으면 모든 작업이 O(N) 단위로 동작한다.
+
+### 정확성 — Linearizability 증명 스케치
+
+이 알고리즘이 *진짜로* 순차 객체 S의 linearizable 구현인지 증명해야 한다.
+
+```text
+Step 1 — 합의된 순서의 존재:
+   각 노드는 consensus 객체로 자기 sequence number를 결정한다.
+   서로 다른 노드는 서로 다른 sequence number를 갖는다.
+   (consensus의 agreement 속성)
+
+Step 2 — Linearization point 지정:
+   operation op의 linearization point := op의 노드가 list에 성공적으로
+   연결된 순간 (CAS 성공 시점).
+   이 순간은 op의 호출 구간 [invocation, response] 사이에 있음.
+
+Step 3 — 동등성:
+   linearization point의 순서로 op들을 sequential하게 적용한 결과
+   = 우리 구현에서 각 op이 반환한 결과.
+
+   왜? 각 노드는 자기 앞의 모든 노드 (즉 자기보다 작은 sequence number)
+   를 replay하여 결과를 계산하기 때문. linearization 순서와 일치.
+```
+
+따라서 모든 가능한 실행에 대해, 동등한 순차 실행이 존재한다 — 정의에 의해 linearizable.
+
+### 정확성 — Wait-Freedom 증명 스케치
+
+wait-freedom 부분은 helping 메커니즘에서 나온다.
+
+```text
+관찰:
+  apply(thread_id, op)이 호출되면 my_node를 announce[thread_id]에 둔다.
+
+  본 알고리즘의 main loop는 announce array의 모든 슬롯을 순회하며,
+  pending 노드를 모두 list에 append하려 시도한다.
+
+핵심 보조정리:
+  어떤 노드 N이 announce array에 들어간 후,
+  최대 N개의 스레드만이 N보다 *먼저* sequence를 받을 수 있다.
+
+  왜? 모든 스레드가 announce array를 스캔하며 helping하므로,
+  N의 pending 상태를 본 어떤 스레드라도 N을 append하려 시도한다.
+
+  따라서 announce 후 최대 O(N) 작업 안에 my_node가
+  list에 연결되고 sequence number를 받는다.
+
+결론:
+  Wait-freedom 보장 — 모든 호출은 O(N²) step 안에 종료.
+  (N개의 helping 라운드 × 각 라운드 O(N) work)
+```
+
+이게 wait-free universal construction의 핵심 증명이다. **helping이 starvation을 방지**한다 — 다른 스레드들이 끊임없이 새 op을 announce하더라도, 자기 op도 그들의 도움에 의해 결국 처리된다.
 
 ## 6.5 실용성 — Universal vs 실제
 

@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+
+% =================== Actor (top) ===================
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west]
+     at (-6.5, 3.6) {Actor — direct addressing};
+
+\node[con]        (a1) at (-5, 2.4) {P1};
+\node[con]        (a2) at ( 0, 2.4) {P2};
+
+% P1 knows P2 (direct arrow with name on it)
+\draw[uses, line width=0.7pt]
+     (a1) -- node[font=\sffamily\footnotesize, fill=white, inner sep=2pt]
+                 {message \emph{to P2}} (a2);
+
+\node[font=\sffamily\footnotesize\itshape, text=conbord, anchor=west, text width=8.5cm]
+     at (-6.5, 1.2) {sender가 receiver의 identity를 안다 — 결합 (coupled)};
+
+% =================== CSP (bottom) ===================
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west]
+     at (-6.5, -0.2) {CSP — channel-mediated};
+
+\node[imp]        (c1) at (-5, -1.4) {P1};
+\node[prp]        (ch) at ( 0, -1.4) {channel};
+\node[imp]        (c2) at ( 5, -1.4) {P2};
+
+\draw[uses, line width=0.7pt]
+     (c1) -- node[font=\sffamily\footnotesize, fill=white, inner sep=2pt] {send} (ch);
+\draw[uses, line width=0.7pt]
+     (c2) -- node[font=\sffamily\footnotesize, fill=white, inner sep=2pt] {recv} (ch);
+
+\node[font=\sffamily\footnotesize\itshape, text=impbord, anchor=west, text width=10cm]
+     at (-6.5, -2.6) {sender와 receiver가 서로를 모른다 — 채널이 first-class};
+
+\end{tikzpicture}
+\end{document}

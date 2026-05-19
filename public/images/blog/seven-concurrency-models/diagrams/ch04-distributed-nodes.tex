@@ -1,0 +1,73 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+
+  % ─── Node one ─────────────────────────────────────
+  \node[panel, minimum width=46mm, minimum height=34mm, anchor=center]
+    (n1) at (0, 0) {};
+  \node[panelTitle, anchor=north west]
+    at ($(n1.north west) + (0.1, -0.05)$) {one@host};
+  \node[vxi] (p1) at ($(n1.center) + (-0.8, 0.2)$) {p};
+  \node[vxi] (p2) at ($(n1.center) + (0.8, 0.2)$) {q};
+  \node[vxi] (p3) at ($(n1.center) + (0, -0.8)$) {r};
+  \draw[arr] (p1) -- (p2);
+  \draw[arr] (p2) -- (p3);
+
+  % ─── Node two ─────────────────────────────────────
+  \node[panel, minimum width=46mm, minimum height=34mm, anchor=center]
+    (n2) at (7, 0) {};
+  \node[panelTitle, anchor=north west]
+    at ($(n2.north west) + (0.1, -0.05)$) {two@host};
+  \node[vxi] (q1) at ($(n2.center) + (-0.8, 0.2)$) {a};
+  \node[vxi] (q2) at ($(n2.center) + (0.8, 0.2)$) {b};
+  \node[vxi] (q3) at ($(n2.center) + (0, -0.8)$) {c};
+  \draw[arr] (q1) -- (q2);
+  \draw[arr] (q2) -- (q3);
+
+  % ─── Node three ───────────────────────────────────
+  \node[panel, minimum width=46mm, minimum height=34mm, anchor=center]
+    (n3) at (3.5, -5) {};
+  \node[panelTitle, anchor=north west]
+    at ($(n3.north west) + (0.1, -0.05)$) {three@host};
+  \node[vxi] (r1) at ($(n3.center) + (-0.8, 0.2)$) {x};
+  \node[vxi] (r2) at ($(n3.center) + (0.8, 0.2)$) {y};
+  \node[vxi] (r3) at ($(n3.center) + (0, -0.8)$) {z};
+  \draw[arr] (r1) -- (r2);
+  \draw[arr] (r2) -- (r3);
+
+  % ─── Cluster connections ──────────────────────────
+  \draw[{Stealth[length=2.6mm]}-{Stealth[length=2.6mm]},
+        draw=tealbord, line width=0.7pt]
+    (n1.east) -- node[font=\sffamily\footnotesize, above, text=inkc]
+      {Node.connect}
+      node[font=\sffamily\footnotesize, below, text=mutec]
+      {(쿠키 인증)} (n2.west);
+
+  \draw[{Stealth[length=2.6mm]}-{Stealth[length=2.6mm]},
+        draw=tealbord, line width=0.7pt]
+    (n1.south east) -- (n3.north west);
+
+  \draw[{Stealth[length=2.6mm]}-{Stealth[length=2.6mm]},
+        draw=tealbord, line width=0.7pt]
+    (n2.south west) -- (n3.north east);
+
+  % ─── Cross-node message example ──────────────────
+  \draw[msgasync, draw=conbord, line width=0.65pt]
+    (p2.east) to[bend left=12]
+    node[font=\sffamily\footnotesize, above, text=inkc, sloped]
+    {send(pid, msg)} (q1.west);
+
+  % ─── Caption ─────────────────────────────────────
+  \node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=north,
+        text width=110mm, align=center]
+    at (3.5, -7.3)
+    {위치 투명성 — 로컬 pid와 원격 pid는 같은 API.\\코드는 노드 경계를 모른다.};
+
+\end{tikzpicture}
+\end{document}

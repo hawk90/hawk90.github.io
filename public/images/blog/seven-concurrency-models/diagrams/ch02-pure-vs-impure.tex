@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+
+  % ─────────────────── Pure (왼쪽) ───────────────────
+  \node[panelTitle] (pTitle) at (0, 4.6) {Pure function — \texttt{(square x)}};
+
+  \node[neut, minimum width=18mm, minimum height=9mm] (pin)  at (0, 3.2) {input\\[2pt]\texttt{x = 4}};
+  \node[imp,  minimum width=24mm, minimum height=10mm] (pfn) at (3.6, 3.2) {square\\[2pt]\textit{pure}};
+  \node[ok,   minimum width=18mm, minimum height=9mm] (pout) at (7.2, 3.2) {output\\[2pt]\texttt{16}};
+
+  \draw[flow] (pin)  -- (pfn);
+  \draw[flow] (pfn)  -- (pout);
+
+  \node[note, text width=68mm, align=center, anchor=north]
+       at ($(pfn) + (0, -2.0)$)
+       {같은 입력 $\Rightarrow$ 항상 같은 출력.\\[2pt]
+        외부 상태 읽기/쓰기 없음 — race가 발생할 지점 자체가 없음.};
+
+  % ─────────────────── Impure (오른쪽) ───────────────────
+  \node[panelTitle] (iTitle) at (0, -1.6) {Impure function — \texttt{(log-and-double x)}};
+
+  \node[neut, minimum width=18mm, minimum height=9mm] (iin)  at (0, -3.0) {input\\[2pt]\texttt{x = 4}};
+  \node[con,  minimum width=24mm, minimum height=10mm] (ifn) at (3.6, -3.0) {log-and-double\\[2pt]\textit{impure}};
+  \node[ok,   minimum width=18mm, minimum height=9mm] (iout) at (7.2, -3.0) {output\\[2pt]\texttt{8}};
+
+  \draw[flow] (iin) -- (ifn);
+  \draw[flow] (ifn) -- (iout);
+
+  % side effects — into world
+  \node[warn, minimum width=22mm, minimum height=8mm] (world) at (3.6, -5.4) {외부 세계\\[2pt]stdout / 시간 / 파일};
+
+  \draw[focus] (ifn.south) -- node[right=2pt, font=\sffamily\footnotesize, text=focusc]{side effect} (world.north);
+  \draw[alt]   (world.east) .. controls +(2.0, 0.0) and +(1.5, -1.2) .. (ifn.east)
+       node[pos=0.55, right=2pt, font=\sffamily\footnotesize, text=mutec]{시간/순서 의존};
+
+  \node[note, text width=68mm, align=center, anchor=north, fill=warnfill, draw=warnbord]
+       at ($(ifn) + (0, -3.6)$)
+       {호출마다 출력에 영향 — 호출 횟수/순서/스레드에 따라 결과가 변함.\\[2pt]
+        병렬 호출 시 race / 순서 의존 등장.};
+
+\end{tikzpicture}
+\end{document}

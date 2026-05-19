@@ -62,14 +62,7 @@ class Counter {
 
 이 코드를 두 스레드에서 각각 10,000번씩 호출하면 결과가 20,000이어야 하지만, 실제로는 거의 항상 더 작은 값이 나옵니다. `count++`은 단일 연산이 아니라 *읽기 — 더하기 — 쓰기*의 세 단계이기 때문입니다.
 
-```text
-Thread A: load count (=5)
-Thread B: load count (=5)
-Thread A: add 1     (local=6)
-Thread B: add 1     (local=6)
-Thread A: store 6
-Thread B: store 6   ← 한 번의 증가가 사라짐
-```
+![count++ race condition — 한 번의 증가가 사라짐](/images/blog/seven-concurrency-models/diagrams/ch01-race-condition.svg)
 
 책의 표현으로는 *두 일을 한 번에 하려고 한다(Two Things at Once)*는 문제입니다. 해결은 `synchronized` 키워드입니다.
 
@@ -159,6 +152,8 @@ class Counter {
 
 `synchronized`가 *왜* 가시성을 보장하는지도 짚어 둘 만합니다. monitor의 release는 모든 쓰기를 메모리로 flush합니다. acquire는 캐시를 무효화합니다. 즉 같은 monitor를 잡는 두 스레드 사이에는 *happens-before* 관계가 성립합니다. 이는 Java Memory Model의 정의입니다.
 
+![Java Memory Model — monitor release/acquire가 만드는 happens-before](/images/blog/seven-concurrency-models/diagrams/ch01-happens-before.svg)
+
 ## Day 2 — Beyond Intrinsic Locks
 
 `synchronized`는 단순합니다. 그러나 곧 한계가 드러납니다. 락을 *시도만* 해 보고 싶다든지, 대기 중에 인터럽트를 받고 싶다든지, 여러 조건 변수를 따로 두고 싶다든지. 책의 Day 2는 이런 요구를 해결하는 `java.util.concurrent.locks` 패키지를 소개합니다.
@@ -185,6 +180,8 @@ class Account {
 // Thread B: b.transfer(a, 50)   → b.lock 잡음 → a.lock 대기
 // → 영원히 대기
 ```
+
+![Deadlock — 두 스레드가 서로의 락을 기다리는 순환 대기](/images/blog/seven-concurrency-models/diagrams/ch01-deadlock-cycle.svg)
 
 ### 회피 — 락 순서 고정
 
@@ -341,13 +338,7 @@ class SortedList {
 
 CAS 기반 자료구조는 락을 안 쓰지만 *ABA 문제*에 노출됩니다. 어떤 변수가 A에서 B로 갔다가 다시 A로 돌아왔을 때, CAS는 *변하지 않았다*고 판단합니다. 그러나 그 사이 다른 일이 일어났을 수 있습니다.
 
-```text
-T1: head를 읽음 → A
-T2: A를 pop → head=B
-T2: B를 pop → head=C
-T2: A를 다시 push → head=A
-T1: CAS(head, A, A.next)  ← 성공하지만 A.next는 이제 무효한 노드
-```
+![ABA 문제 — 값은 같지만 그 사이 일어난 일을 CAS는 모름](/images/blog/seven-concurrency-models/diagrams/ch01-aba-problem.svg)
 
 해결은 *버전 카운터*입니다. Java의 `AtomicStampedReference`가 정확히 이를 위한 도구입니다.
 
@@ -430,6 +421,8 @@ for (int i = 0; i < tasks.size(); i++) {
 ## 1.11 Fork/Join Framework
 
 Java 7부터의 Fork/Join은 분할 정복 알고리즘에 특화된 풀입니다. 핵심 아이디어는 *워크 스틸링(work stealing)*입니다. 각 워커 스레드가 자기 deque에서 작업을 꺼내 처리하고, 비어 있으면 다른 워커의 deque에서 *훔쳐* 옵니다.
+
+![Fork/Join — 분할 정복 트리와 work stealing](/images/blog/seven-concurrency-models/diagrams/ch01-fork-join-tree.svg)
 
 책은 `RecursiveTask`로 합을 구하는 예제를 보여 줍니다.
 

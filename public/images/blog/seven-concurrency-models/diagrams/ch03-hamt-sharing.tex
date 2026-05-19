@@ -1,0 +1,73 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+  % Title labels
+  \node[font=\sffamily\bfseries, anchor=south] at (3, 5.6) {v1 (원본)};
+  \node[font=\sffamily\bfseries, anchor=south] at (11, 5.6) {v2 = (assoc v1 5000 :changed)};
+
+  % ===== v1 tree =====
+  \node[hi] (r1) at (3, 5) {root};
+  % Level 1 — 32-way trie (show 5 branches conceptually)
+  \node[abs, minimum width=12mm, minimum height=7mm] (a1) at (0.5, 3.4) {b\textsubscript{0}};
+  \node[abs, minimum width=12mm, minimum height=7mm] (a2) at (1.9, 3.4) {b\textsubscript{1}};
+  \node[abs, minimum width=12mm, minimum height=7mm] (a3) at (3.3, 3.4) {b\textsubscript{2}};
+  \node[abs, minimum width=12mm, minimum height=7mm] (a4) at (4.7, 3.4) {\ldots};
+  \node[abs, minimum width=12mm, minimum height=7mm] (a5) at (6.1, 3.4) {b\textsubscript{31}};
+
+  \draw[arr] (r1) -- (a1);
+  \draw[arr] (r1) -- (a2);
+  \draw[arr] (r1) -- (a3);
+  \draw[arr] (r1) -- (a4);
+  \draw[arr] (r1) -- (a5);
+
+  % Level 2 — leaves under a3 (the "changed" path)
+  \node[imp, minimum width=10mm, minimum height=6mm] (l1) at (2.0, 1.6) {leaf};
+  \node[imp, minimum width=10mm, minimum height=6mm] (l2) at (3.3, 1.6) {leaf};
+  \node[imp, minimum width=10mm, minimum height=6mm] (l3) at (4.6, 1.6) {leaf};
+
+  \draw[arr] (a3) -- (l1);
+  \draw[arr] (a3) -- (l2);
+  \draw[arr] (a3) -- (l3);
+
+  % Element on l2
+  \node[font=\sffamily\footnotesize, text=mutec, below=1pt of l2] {[5000] = 5000};
+
+  % ===== v2 tree — new root + new path =====
+  \node[hi, draw=focusc, line width=0.8pt] (r2) at (11, 5) {root'};
+  % v2 reuses b0, b1, b3..b31 ; replaces b2
+  \node[abs, draw=focusc, line width=0.8pt, minimum width=12mm, minimum height=7mm] (b3) at (10, 3.4) {b\textsubscript{2}'};
+  % new edge from r2 to b3
+  \draw[focus] (r2) -- (b3);
+
+  % New leaves under b3 — one is new, others shared
+  \node[imp, draw=focusc, line width=0.8pt, minimum width=10mm, minimum height=6mm] (l2new) at (10, 1.6) {leaf'};
+  \draw[focus] (b3) -- (l2new);
+  \node[font=\sffamily\footnotesize, text=focusc, below=1pt of l2new] {[5000] = :changed};
+
+  % shared edges from r2 to a1, a2, a4, a5
+  \draw[arr, draw=mutec, dashed] (r2) to[bend right=10] (a1);
+  \draw[arr, draw=mutec, dashed] (r2) to[bend right=8] (a2);
+  \draw[arr, draw=mutec, dashed] (r2) to[bend left=10] (a4);
+  \draw[arr, draw=mutec, dashed] (r2) to[bend left=12] (a5);
+
+  % shared edges from b3 to l1, l3
+  \draw[arr, draw=mutec, dashed] (b3) to[bend right=10] (l1);
+  \draw[arr, draw=mutec, dashed] (b3) to[bend left=10] (l3);
+
+  % Legend
+  \node[note, anchor=west, text width=58mm] at (-1.5, -0.6)
+       {\textcolor{focusc}{\textbf{새 노드}} = 변경 경로의 \(\log_{32} N\) 개\\[2pt]
+        \textcolor{mutec}{\textbf{점선}} = 공유 참조 (재사용)\\[2pt]
+        \textcolor{edgec}{\textbf{실선}} = 원래 트리의 구조};
+
+  \node[note, anchor=west, text width=55mm] at (7.5, -0.6)
+       {\(N = 10000\) 일 때 변경 경로 깊이 $\approx 3$~$4$\\[2pt]
+        나머지 $\approx 10000$개 노드는 그대로 공유};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,63 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  band/.style={rectangle, rounded corners=2pt, line width=0.5pt,
+               inner sep=4pt, font=\sffamily\bfseries\small,
+               minimum height=12mm, align=center},
+  ann/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, align=left},
+  size/.style={font=\sffamily\footnotesize\bfseries, text=inkc, anchor=east},
+  speed/.style={font=\sffamily\footnotesize\itshape, text=focusc, anchor=west}
+]
+
+% Pyramid built from 4 trapezoid-like bands (wider at bottom = global, narrowest at top = private)
+% Y centers spaced by 1.4 cm
+
+% Layer 1 (top, smallest = Private)
+\node[band, draw=hibord, fill=hifill, minimum width=22mm]
+     (priv) at (0, 4.2) {Private};
+% Layer 2 (Local)
+\node[band, draw=impbord, fill=impfill, minimum width=44mm]
+     (loc) at (0, 2.8) {Local};
+% Layer 3 (Constant)
+\node[band, draw=clibord, fill=clifill, minimum width=66mm]
+     (con) at (0, 1.4) {Constant};
+% Layer 4 (bottom, biggest = Global)
+\node[band, draw=absbord, fill=absfill, minimum width=88mm]
+     (glob) at (0, 0.0) {Global};
+
+% Right-side annotations: size / speed / scope
+% Private
+\node[ann] at (5.6, 4.55) {수십 bytes};
+\node[ann] at (5.6, 4.20) {\textbf{가장 빠름}};
+\node[ann] at (5.6, 3.85) {work-item 전용};
+% Local
+\node[ann] at (5.6, 3.15) {KB 단위};
+\node[ann] at (5.6, 2.80) {\textbf{매우 빠름}};
+\node[ann] at (5.6, 2.45) {work-group 안에서 공유};
+% Constant
+\node[ann] at (5.6, 1.75) {작음};
+\node[ann] at (5.6, 1.40) {\textbf{캐시됨}};
+\node[ann] at (5.6, 1.05) {읽기 전용, 모든 work-item};
+% Global
+\node[ann] at (5.6, 0.35) {GB 단위};
+\node[ann] at (5.6, 0.00) {\textbf{수백 cycle}};
+\node[ann] at (5.6, -0.35) {모든 work-item 공유};
+
+% Left-side arrow showing speed direction
+\draw[focus, line width=0.7pt]
+     (-6.0, 0.0) -- (-6.0, 4.2)
+     node[midway, left, font=\sffamily\footnotesize, text=focusc, align=center,
+          xshift=-1mm]{빠름\\$\uparrow$\\느림};
+
+% Bottom caption
+\node[font=\sffamily\footnotesize\itshape, text=mutec, align=center]
+     at (0, -1.2) {위로 올라갈수록 작고 빠름 — 데이터를 한 번 올려두고 반복해서 읽기};
+
+\end{tikzpicture}
+\end{document}

@@ -126,14 +126,43 @@ int balancer_traverse(Balancer* b) {
 
 이 balancer들을 트리로 엮으면 — N 입력이 N 출력으로 균등하게 분배된다. **counting** = 각 출력 라인의 호출 횟수가 거의 같음.
 
-### Bitonic Counting Network
+### Balancer의 형식 정의
+
+책은 balancer를 *수학적 객체*로 정의한다. 한 balancer가 받은 토큰 수를 $x_0, x_1$, 내보낸 토큰 수를 $y_0, y_1$이라 하면:
+
+- **보존 (conservation)**: $x_0 + x_1 = y_0 + y_1$
+- **균등 (step property)**: $y_0 = \lceil (x_0 + x_1) / 2 \rceil$, $y_1 = \lfloor (x_0 + x_1) / 2 \rfloor$
+
+즉 들어온 토큰을 정확히 둘로 쪼개되, 홀수면 0번 출력이 하나 더 받는다. 이게 *step property*다.
+
+**Quiescent state**: 모든 입력 토큰이 출력에 도달한 상태. counting network는 quiescent에서만 step property를 보장. 작동 중에는 일시적으로 불균등할 수 있다.
+
+### Bitonic Counting Network — 재귀적 구성
 
 가장 유명한 counting network. Bitonic sorting network와 같은 구조.
 
+$\mathrm{Bitonic}[2k]$를 재귀적으로 정의한다.
+
+```text
+Bitonic[2]:        하나의 balancer
+Bitonic[2k]:
+   1. 입력을 두 그룹으로 나눠 각각 Bitonic[k] 적용
+   2. 그 결과를 Merger[2k]로 합침
+
+Merger[2k]:
+   1. 두 그룹의 *짝수 인덱스끼리*, *홀수 인덱스끼리* 각각 Merger[k]
+   2. 출력 인접 쌍에 balancer 한 층
 ```
+
+깊이 점화식: $D(2k) = D(k) + M(2k)$, $M(2k) = M(k) + 1$, $M(2) = 1$.
+
+해를 풀면 $D(2k) = \binom{\log 2k + 1}{2} = \Theta(\log^2 N)$. **폭** $N$, **깊이** $O(\log^2 N)$, balancer 총 수 $O(N \log^2 N)$.
+
+```text
 8 입력 → 8 출력
-깊이: O(log² N)
-폭: N
+깊이: O(log² N) = 6
+폭: N = 8
+balancer 수: N(log² N)/4 = 12
 ```
 
 ## 12.4 왜 Network인가
@@ -149,6 +178,37 @@ Counting network는 그 분배를 **하드웨어 없이 분산적으로** 해결
 ```
 
 여러 카운터의 합 = 전체 카운트. 각 카운터의 경합은 N분의 1.
+
+## 12.4.1 Diffracting Tree — 깊이 O(log N)
+
+Bitonic counting network는 깊이가 $O(\log^2 N)$이다. **Diffracting Tree**는 깊이 $O(\log N)$의 대안. Shavit-Zemach(1994)가 제안.
+
+기본 아이디어 — 각 노드에 *prism*이라 부르는 작은 elimination array를 둔다. 11장의 elimination과 같은 발상이다.
+
+```text
+요청이 balancer 노드에 도착:
+    if prism에서 다른 요청과 만남:
+        두 요청이 *서로 반대 출력*으로 분기 — balancer는 안 거침
+    else:
+        평소대로 balancer를 거쳐 자식 노드로
+```
+
+두 요청이 prism에서 매치되면 한 명은 왼쪽 자식, 다른 한 명은 오른쪽 자식으로 향한다. balancer를 건드리지 않고도 step property를 유지한다 — 두 명이 각각 다른 출력으로 갔으므로 conservation 만족.
+
+```text
+        ┌─ balancer ─┐
+        │   prism    │
+   요청1│            │요청2
+        └─ 매치 → 분기┘
+```
+
+| 자료구조 | 깊이 | balancer 경합 |
+|---|---|---|
+| Combining Tree | $\log N$ | 트리 노드마다 |
+| Bitonic Counting | $\log^2 N$ | balancer마다 |
+| Diffracting Tree | $\log N$ | prism에 흡수됨 |
+
+이론적으로 가장 우아한 분산 카운터. 실용성은 prism의 elimination 오버헤드 때문에 제한적.
 
 ## 12.5 Sorting Network
 
@@ -240,12 +300,63 @@ void bitonic_sort(int* arr, int low, int count, int ascending) {
 
 **Bitonic Sorting Network** — N 개의 값을 O(log² N) 깊이로 정렬.
 
-```
+```text
 입력: [3, 1, 4, 1, 5, 9, 2, 6]
 출력: [1, 1, 2, 3, 4, 5, 6, 9]
 ```
 
 CPU의 SIMD 명령어나 GPU에서 정렬을 구현할 때 자주 사용. 깊이가 작아서 병렬화에 유리.
+
+### 0/1 Principle — Sorting Network 검증의 마법
+
+비교 기반 sorting network의 *모든* 입력에 대해 정확성을 검증하려면 $N!$ 순열을 확인해야 한다. 그러나 다음 정리로 단순화된다.
+
+> **0/1 Principle**: comparator로만 구성된 네트워크가 모든 0/1 시퀀스(총 $2^N$ 개)를 정렬한다면, 모든 입력을 정렬한다.
+
+**증명 직관**: 어떤 수 $x$에 대해 "$x$보다 큰가?"를 묻는 함수 $f_x$를 모든 원소에 적용하면 0/1 시퀀스가 된다. comparator는 monotonic하므로 이 변환을 통과시킨다. 따라서 0/1 시퀀스가 정렬되면 원래 시퀀스도 정렬.
+
+이 정리 덕분에 — **$N!$이 아니라 $2^N$만 검증**하면 sorting network의 정확성이 증명된다. Bitonic, Odd-Even Merge, AKS network 모두 이 원리로 검증.
+
+### Counting Network ↔ Sorting Network 대응
+
+책의 우아한 관찰 — counting network에서 balancer를 comparator로 *그대로 바꾸면* sorting network가 된다.
+
+```text
+Balancer(x₀, x₁):  토큰을 두 출력에 균등 분배
+Comparator(a, b):  min/max를 두 출력에 분배
+
+같은 토폴로지에서:
+  balancer 사용 → counting network
+  comparator 사용 → sorting network
+```
+
+이게 책 Theorem 12.4의 핵심: *step property*를 만족하는 토폴로지는 0/1 시퀀스에 대한 정렬과 동치다. 그래서 모든 counting network는 자동으로 sorting network이고, 그 역도 (충분히 균형 잡힌 토폴로지면) 성립.
+
+## 12.5.1 Sample Sort — 큰 데이터의 병렬 정렬 (책 12.7)
+
+Sorting network는 깊이가 $O(\log^2 N)$이라 데이터가 크면 무겁다. 큰 데이터에는 **Sample Sort**가 표준이다.
+
+```text
+1. 데이터 N개를 P개 스레드에 균등 분배 (각자 N/P개)
+2. 각 스레드가 자기 몫에서 P-1개를 *샘플* 추출
+3. 모든 샘플(P(P-1)개)을 모아 정렬, 균등 간격으로 *splitter* P-1개 선택
+4. 각 스레드가 자기 데이터를 splitter에 따라 P 버킷으로 분배
+5. 버킷 i를 스레드 i가 받음 (all-to-all 통신)
+6. 각 스레드가 자기 버킷을 sequential sort
+```
+
+`splitter`가 *quantile에 가까운* 값이라서 각 버킷이 대략 $N/P$ 크기. 부하 균형이 좋다.
+
+| 단계 | 복잡도 | 통신 |
+|---|---|---|
+| 샘플 정렬 | $O(P^2 \log P)$ | 중앙 |
+| 버킷 분배 | $O(N/P \cdot \log P)$ | 로컬 |
+| All-to-all | $O(N/P)$ per pair | 글로벌 |
+| 로컬 정렬 | $O((N/P) \log(N/P))$ | 없음 |
+
+총 작업량 $O(N \log N)$, 통신은 $O(N)$ — 거의 최적.
+
+이게 MPI 클러스터, 분산 데이터베이스의 정렬에 흔히 쓰이는 알고리즘. Hadoop의 TeraSort도 sample sort 계열.
 
 ## 12.6 Combining Tree vs Counting Network
 
@@ -258,6 +369,29 @@ CPU의 SIMD 명령어나 GPU에서 정렬을 구현할 때 자주 사용. 깊이
 | 실용성 | 가끔 사용 | 거의 안 사용 |
 
 Counting network는 이론적으로 우아하지만 실용성은 제한적. Combining tree나 sharded counter가 더 흔히 쓰인다.
+
+## 12.6.1 분산 카운팅 성능 — 누가 이기는가 (책 figure 12.19)
+
+책 12.10의 실험은 다음 카운터들을 동시 스레드 수에 따라 비교한다.
+
+| 카운터 | 16 thread | 64 thread | 256 thread |
+|---|---|---|---|
+| Single fetch_add | 매우 빠름 | 정체 | 후퇴 |
+| Combining Tree | 중간 | 빠름 | 빠름 |
+| Bitonic Counting | 느림 | 중간 | 매우 빠름 |
+| Diffracting Tree | 중간 | 빠름 | 매우 빠름 |
+
+**해석**:
+
+- **저병렬 (16 이하)**: single atomic이 이긴다. 분산 구조는 오버헤드만 추가.
+- **중병렬 (64)**: combining tree가 이긴다. 트리 합산이 효과를 본다.
+- **고병렬 (256+)**: counting / diffracting tree가 이긴다. 분산이 필수.
+
+이 *crossover*가 분산 자료구조의 일반적 패턴이다 — 임계점 이하에서는 단순 구조가 항상 이긴다. 임계점은 하드웨어 (캐시 일관성 비용, 코어 수)에 따라 다르다.
+
+**현대 적용**: NUMA 서버는 노드당 수십 코어이므로 임계점이 자주 넘는다. AWS의 Graviton3는 64코어, Intel Sapphire Rapids는 60코어 — 단일 fetch_add가 병목이 되는 워크로드가 흔하다.
+
+그래서 **단순한 sharded counter (12.7절)가 실용적인 답**이 된다. counting network의 학술적 우아함은 입증되었지만, 구현 복잡도 대비 sharded counter의 이득이 크다.
 
 ## 12.7 실용적 대안 — Sharded Counter
 

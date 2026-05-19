@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-state.tex}
+\begin{tikzpicture}[blog, state, x=1cm, y=1cm]
+
+  % ───────────────── future panel (위) ─────────────────
+  \node[panelTitle] at (-0.2, 5.4) {\texttt{future} — 백그라운드 계산의 약속};
+
+  \node[initial]                (fs)    at (0.0, 4.0) {};
+  \node[stateBox]               (frun)  at (3.0, 4.0) {Running};
+  \node[stateBox, draw=okbord, fill=okfill] (fdone) at (8.0, 4.0)
+        {Realized\\[2pt]\textit{값 결정됨}};
+  \node[stateWarn]              (fcanc) at (5.5, 2.0) {Cancelled};
+
+  \draw[trans] (fs)   -- node[transLabel]{\texttt{(future expr)}} (frun);
+  \draw[trans] (frun) -- node[transLabel]{계산 완료} (fdone);
+  \draw[transAlt] (frun.south) to[bend right=15]
+        node[transLabel, near end]{\texttt{future-cancel}} (fcanc.west);
+
+  \draw[trans] (fdone.north) to[loop above]
+        node[transLabel]{\texttt{@f} = 같은 값 (immutable)} (fdone.north);
+
+  % ───────────────── promise panel (아래) ─────────────────
+  \node[panelTitle] at (-0.2, 0.4) {\texttt{promise} — 외부가 채워 넣을 약속};
+
+  \node[initial]                  (ps)    at (0.0, -0.8) {};
+  \node[stateBox]                 (ppend) at (3.0, -0.8) {Pending\\[2pt]\textit{값 없음}};
+  \node[stateBox, draw=okbord, fill=okfill] (pdel) at (8.0, -0.8)
+        {Delivered\\[2pt]\textit{값 결정됨}};
+
+  \draw[trans] (ps)    -- node[transLabel]{\texttt{(promise)}} (ppend);
+  \draw[trans] (ppend) -- node[transLabel]{\texttt{(deliver p v)}\\첫 호출만 적용} (pdel);
+
+  % 무시되는 두 번째 deliver
+  \draw[transError] (pdel.north) to[loop above]
+        node[transLabel, text=warnbord]{두 번째 \texttt{deliver} — 무시} (pdel.north);
+
+  % deref always blocks until delivered
+  \draw[transAlt] (ppend.south) to[bend right=30]
+        node[transLabel, below]{\texttt{@p} 호출자 블로킹}
+        (pdel.south);
+
+  % ───────────────── 비교 노트 ─────────────────
+  \node[note, text width=140mm, align=left, anchor=north]
+       at (5.0, -3.6)
+       {\textbf{핵심 차이}.\\[2pt]
+        \texttt{future}: 생성 즉시 계산 시작 — 결과는 비동기로 \textit{도착}한다.\\[2pt]
+        \texttt{promise}: 누군가 \texttt{deliver}하기 전까지는 값이 없음 — 스레드 간 \textit{시그널} 전용.\\[2pt]
+        두 경우 모두 \textbf{한 번 결정된 값은 immutable} — \texttt{@}로 몇 번을 받아도 같은 snapshot.};
+
+\end{tikzpicture}
+\end{document}

@@ -29,21 +29,40 @@ draft: false
 
 ## 5.2 Consensus 문제
 
-위계를 정의하는 도구는 **consensus**다.
+위계를 정의하는 도구는 **consensus**다. 형식적으로 다음 세 속성을 동시에 만족하는 wait-free 객체를 가리킨다.
 
-**Consensus 문제**:
-- N개의 스레드가 각자 입력값을 가진다
-- 모두가 같은 출력값에 동의해야 한다
-- 그 출력값은 누군가의 입력값이어야 한다
-- **Wait-free**해야 한다
+```text
+N-process Consensus Object:
 
+  proposed[i] = 스레드 i가 제안한 입력
+  decide(i)   = 스레드 i가 받는 결정값
+
+  속성:
+  (1) Consistency / Agreement
+      ∀ i, j:  decide(i) == decide(j)
+      모든 스레드는 같은 값을 결정한다.
+
+  (2) Validity
+      ∃ i:  decide(j) == proposed[i] for all j
+      결정값은 *누군가가 실제로 제안한 값*이어야 한다.
+      "기본값 42를 항상 반환" 같은 trivial한 풀이는 무효.
+
+  (3) Wait-Freedom
+      decide()는 유한한 step 안에 반드시 반환한다.
+      다른 스레드의 진행 속도와 무관.
 ```
-스레드 1: input = 5
-스레드 2: input = 7
-스레드 3: input = 9
 
-→ 모두 같은 출력 (5 또는 7 또는 9 중 하나)
+```text
+예시 — 3-process consensus:
+  스레드 1: input = 5
+  스레드 2: input = 7
+  스레드 3: input = 9
+
+  → 모두 같은 출력. 5, 7, 9 중 하나. (구현에 따라 달라짐)
+  → 단, 출력은 셋 중 하나여야 함 — 임의 값 안 됨.
 ```
+
+Wait-freedom이 가장 까다로운 조건이다. 다음 절들에서 보겠지만, 어떤 객체는 *겹치는 호출이 없을 때*에는 쉽게 풀지만, *겹칠 때*는 무한 루프에 빠질 수 있다. 그런 풀이는 consensus를 "푼다"고 부르지 않는다.
 
 ## 5.3 Consensus Number
 
@@ -53,15 +72,58 @@ draft: false
 
 ## 5.4 Read/Write의 Consensus Number
 
-**놀라운 사실** — read/write 레지스터만으로는 **2-consensus도 못 푼다**.
+**놀라운 사실** — read/write 레지스터만으로는 **2-consensus도 못 푼다**. 책의 **Theorem 5.4.1**.
 
-증명은 우아하다. 2 스레드 consensus를 read/write만으로 풀려고 시도하면, 어느 시점에서 두 스레드의 상태가 구분 불가능한 "두 가지 가능한 결과"의 상태에 도달할 수 있고, 그 상태에서 어느 쪽이 먼저 작업해도 결과가 갈린다 — wait-free 불가능.
+### Critical State 증명 기법
+
+증명은 "critical state argument"라 불리는 우아한 기법을 쓴다.
+
+```text
+정의 (state의 분류):
+  bivalent  — 이 상태에서 0/1 모두 미래 결정값으로 가능.
+  0-valent  — 어떤 step 순서로도 결정값은 0이 됨.
+  1-valent  — 어떤 step 순서로도 결정값은 1이 됨.
+  univalent = 0-valent ∪ 1-valent.
+
+  critical state — bivalent이면서, 두 스레드 A, B의
+                   다음 한 step만 다르게 실행하면 0-valent / 1-valent로
+                   각각 갈리는 상태.
+```
+
+이런 critical state는 *반드시 존재한다*. 초기 상태는 두 스레드의 입력이 (0,1)이면 bivalent — 누가 먼저 어떻게 진행하든 0이 결정될 수도, 1이 결정될 수도 있는 시작점. 알고리즘이 진행하면 결국 univalent에 도달해야 한다 (그래야 합의가 성립). 그 경계 어딘가에 critical state가 있다.
+
+### 모순 도출
+
+이제 critical state에서 무슨 일이 일어나는지 본다. A의 다음 step과 B의 다음 step이 모두 read/write라고 가정.
+
+```text
+case 1 — A와 B가 *서로 다른 레지스터*에 작업:
+   A가 자기 레지스터 r_A에 read/write.
+   B는 r_A를 본 적도, 볼 일도 없음.
+   그러므로 B의 시각에서 "A가 한 step 했는지 안 했는지" 구분 불가.
+   → A step 후의 상태에서 B만 단독으로 끝까지 실행한 결과
+     = A가 아무것도 안 한 상태에서 B만 단독으로 실행한 결과.
+   둘은 같은 결정값을 내야 함. 그런데 가정상 둘은 0/1로 갈린다 — 모순.
+
+case 2 — A와 B가 *같은 레지스터 r*에 작업:
+   2a) 둘 다 read:    r에 변화 없음 — case 1과 같은 모순.
+   2b) A write, B read:
+        A가 먼저 write하든 안 하든, B가 단독 실행하는 동안
+        한 번 더 read해서 A의 흔적을 본다 할지라도,
+        B 혼자만 실행할 때 결정은 미리 정해져 있어야 함 — 모순 도출.
+   2c) 둘 다 write:
+        write 순서가 어떻든 *마지막에 남는 값은 둘째 write*.
+        즉 A 먼저 write → B write 한 상태 = B만 single-write한 상태.
+        두 시나리오에서 결정값은 같아야 함 — 모순.
+```
+
+모든 경우가 모순이므로, critical state 자체가 존재할 수 없다 — 그러나 critical state는 위에서 봤듯 반드시 존재해야 한다. 가정이 잘못된 것이다. 가정은 "read/write만으로 wait-free 2-consensus가 풀린다". 따라서 이 가정은 거짓.
 
 ```
-Read/Write의 Consensus Number = 1
+∴  Read/Write의 Consensus Number = 1
 ```
 
-이게 5장의 핵심 결과 중 하나다. **read/write만으로는 wait-free 동기화를 거의 못 한다**.
+이게 5장의 핵심 결과 중 하나다. **read/write만으로는 wait-free 동기화를 거의 못 한다**. Critical state 기법은 이후 모든 lower bound 증명에서 재활용된다.
 
 ## 5.5 Test-and-Set, FAA의 Consensus Number
 
@@ -176,6 +238,48 @@ int tas_consensus_decide(TASConsensus* c, int my_input) {
 Test-and-Set, FAA의 Consensus Number = 2
 ```
 
+### FIFO Queue의 Consensus Number — Theorem 5.6.2
+
+같은 카테고리에 **FIFO queue**가 들어간다. 큐의 consensus number가 정확히 2임을 증명한다.
+
+```text
+2-consensus 풀이 (queue를 보조 객체로 사용):
+
+  shared queue Q = init [WINNER, LOSER]   // 두 token 미리 enqueue
+  shared int proposed[2]                  // 각자의 입력 기록
+
+  decide(i, my_input):
+      proposed[i] = my_input
+      token = Q.dequeue()                 // 둘 중 하나 받음
+      if token == WINNER:
+          return proposed[i]
+      else:
+          return proposed[1 - i]
+```
+
+WINNER를 받은 스레드의 입력이 결정값. queue의 FIFO 속성이 단 한 명의 winner를 보장한다.
+
+그러나 *3-consensus*는 큐만으로 못 푼다. 증명은 critical state 기법의 변형 — 두 스레드 A, B가 모두 큐에 next step으로 dequeue를 한다고 하자.
+
+```text
+case — A와 B가 모두 큐의 다음 dequeue 권한을 노림:
+   A가 먼저 dequeue: A는 head, B는 그 다음 element를 가져감.
+   B가 먼저 dequeue: B는 head, A는 그 다음 element를 가져감.
+
+   queue 입장에서 보면, 두 시나리오에서 *남은 queue 상태*가 다르다.
+   그러나 *제3의 스레드 C* 단독으로 끝까지 실행하면,
+   C는 어느 시나리오에서든 같은 결정을 내야 함 — 그런데 큐 상태가 다르니
+   C가 다른 token을 받을 수 있고, 결정이 갈릴 수 있음.
+```
+
+좀 더 정밀한 인자가 필요하지만, 결론은: FIFO queue로는 정확히 2 스레드까지만 wait-free consensus 가능하다.
+
+```
+FIFO Queue의 Consensus Number = 2
+```
+
+같은 결과가 stack, fetch-and-add, test-and-set, swap에도 성립한다. 이들은 모두 **2-consensus까지만 풀 수 있는 "synchronization primitives의 두 번째 계층"**이다.
+
 ## 5.6 Compare-and-Swap의 Consensus Number
 
 ```cpp
@@ -282,9 +386,51 @@ int cas_consensus_decide(CASConsensus* c, int my_input) {
 
 CAS는 **첫 번째 시도자만 성공**하게 만든다. 나머지는 그 결과를 따른다. 스레드 수가 N개여도 작동한다.
 
+### Theorem 5.10.1 — CAS의 N-consensus 보편 풀이
+
+이게 책의 **Theorem 5.10.1**의 핵심이다. CAS가 임의의 N에 대해 wait-free N-consensus를 푸는 알고리즘이 존재한다.
+
+```text
+정확성 분석:
+
+  agreement:
+    decision 객체는 단 한 번 NULL → v 로만 천이.
+    이후 어떤 CAS도 expected=NULL과 매칭 실패 → 모두 같은 v를 받음.
+
+  validity:
+    v는 어떤 스레드의 my_input이었음 — 누군가가 실제로 제안한 값.
+
+  wait-freedom:
+    CAS 한 번이면 종료. 실패해도 expected에 결정값이 들어와 즉시 반환.
+    재시도 루프 없음 — 정확히 O(1) step.
+```
+
+이게 wait-free 보장의 가장 강한 형태다. **Bounded wait-free** — 단 한 번의 atomic operation으로 끝난다.
+
 ```
 CAS의 Consensus Number = ∞
 ```
+
+### Wait-Free Hierarchy의 시사점
+
+5장 마지막에서 책은 **Wait-Free Hierarchy Theorem**을 정리한다.
+
+```text
+Consensus number c인 객체로는,
+  c개 이하의 스레드 환경에서만 임의의 wait-free 동시 객체를 구현 가능.
+  c+1 이상의 스레드에 대해서는 *어떤 객체* 구현이 원천 불가능.
+```
+
+이게 6장의 **Universal Construction**으로 가는 다리다. CAS는 consensus number ∞이므로, **모든** N에 대해 모든 객체를 wait-free로 구현할 수 있다 — 즉 universal.
+
+```text
+Hierarchy 위계 요약:
+  level 1:  read/write 단독       — wait-free 객체 구현 거의 불가능
+  level 2:  TAS, FAA, queue, stack — 2 스레드까지만 OK
+  level ∞:  CAS, LL/SC             — 임의 N에서 OK (universal)
+```
+
+이 위계는 *영원하다* — read/write를 백날 조합해도 TAS를 못 만들고, TAS를 백날 조합해도 CAS를 못 만든다. 하드웨어가 그 능력을 직접 제공해야 한다.
 
 ## 5.7 결과 — 동기화 위계
 

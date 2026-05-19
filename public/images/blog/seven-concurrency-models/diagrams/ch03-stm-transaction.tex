@@ -1,0 +1,60 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq, x=1cm, y=1cm]
+  % Three actors: transaction A, ref shared, transaction B
+  \node[actor]    (a)  at (0,  0) {Tx A};
+  \node[actorAlt] (r1) at (4,  0) {\texttt{account-a}};
+  \node[actorAlt] (r2) at (8,  0) {\texttt{account-b}};
+  \node[actor]    (b)  at (12, 0) {Tx B};
+
+  \draw[lifeline] (a)  -- ++(0,-9.5);
+  \draw[lifeline] (r1) -- ++(0,-9.5);
+  \draw[lifeline] (r2) -- ++(0,-9.5);
+  \draw[lifeline] (b)  -- ++(0,-9.5);
+
+  % Tx A begin (t_start)
+  \draw[msgsync] (a |- 0,-1.2) -- node[msglabel]{begin (t\textsubscript{A})} (r1 |- 0,-1.2);
+
+  % Tx A reads ref1 — local snapshot
+  \draw[msgsync] (a |- 0,-2.2) -- node[msglabel]{deref $\to$ 100} (r1 |- 0,-2.2);
+
+  % Tx A alters ref1 in local copy
+  \draw[msgself] (a |- 0,-3.2) -- ++(0.9,0) |- (a |- 0,-3.6)
+                 node[msglabel, midway, right, xshift=8pt, fill=white, fill opacity=0.85, text opacity=1]{alter $\to$ local 50};
+
+  % Tx B begin (concurrent)
+  \draw[msgsync] (b |- 0,-3.0) -- node[msglabel]{begin (t\textsubscript{B})} (r2 |- 0,-3.0);
+
+  % Tx B commits FIRST — modifies ref2
+  \draw[msgsync] (b |- 0,-4.4) -- node[msglabel]{commit: alter @b} (r2 |- 0,-4.4);
+  \node[seqnote, anchor=west, text width=30mm] at ($(r2 |- 0,-4.4) + (1.5,0)$)
+       {Tx B 성공};
+
+  % Tx A tries to alter ref2 (but value already changed)
+  \draw[msgsync] (a |- 0,-5.4) -- node[msglabel]{alter $\to$ local 250} (r2 |- 0,-5.4);
+
+  % Tx A commit attempt — conflict detected
+  \draw[msgsync] (a |- 0,-6.6) -- node[msglabel]{commit?} (r2 |- 0,-6.6);
+  \draw[msgdestroy] (r2 |- 0,-7.2) -- node[msglabel, fill=warnfill]{conflict $\to$ abort} (a |- 0,-7.2);
+
+  % Tx A retry: read latest, recompute
+  \draw[msgsync] (a |- 0,-8.2) -- node[msglabel]{retry: begin (t\textsubscript{A2})} (r1 |- 0,-8.2);
+  \draw[msgsync] (a |- 0,-9.0) -- node[msglabel]{commit: ok} (r2 |- 0,-9.0);
+
+  % Frame to indicate retry region
+  \node[frame, fit={(-0.5,-7.7) (12.5,-9.4)}, label={[framelabel]north west:retry}] {};
+
+  % Note about MVCC
+  \node[seqnote, anchor=north west, text width=72mm] at (0, -10.0)
+       {**MVCC**: 각 Tx는 시작 시각 t의 스냅샷을 본다.\\[2pt]
+        commit 시 다른 Tx가 더 최신이면 abort + 재시도.\\[2pt]
+        부수 효과가 트랜잭션 본체에 있으면 *여러 번 실행됨*.};
+\end{tikzpicture}
+\end{document}

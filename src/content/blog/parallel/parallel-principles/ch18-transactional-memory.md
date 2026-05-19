@@ -32,7 +32,22 @@ draft: false
 
 **Transactional Memory** (TM)는 이 둘의 대안 약속.
 
-## 18.2 Transactional Memory의 약속
+## 18.2 Serializability와 Linearizability
+
+TM의 정확성은 두 기준의 *조합*으로 정의된다.
+
+- **Serializability** (DB 트랜잭션의 기준) — 동시 실행된 트랜잭션들의 결과가 *어떤* 순차 실행 순서와 동등하다.
+- **Linearizability** (책 Ch3의 기준) — 각 연산이 호출과 반환 *사이의* 어느 한 순간에 일어난 것처럼 보이고, 그 순간 순서는 실제 *실시간*과 일치한다.
+
+DB는 보통 serializability만으로 충분. 그러나 메모리 트랜잭션은 *외부 관찰자*(다른 atomic 블록, 또는 lock-free 코드)가 있을 수 있다. 책은 두 가지를 합친 기준을 채택한다.
+
+> **TM의 정확성**: 트랜잭션 시퀀스가 *직렬화 가능*하고, 직렬화 순서가 *실시간 순서*를 존중한다.
+
+쉬운 말로: 두 트랜잭션 A, B가 *겹쳤다면* 어느 쪽이 먼저든 OK. *A가 완전히 끝난 뒤* B가 시작했다면 A → B 순서로 직렬화되어야 한다.
+
+이게 깨지면 — 예컨대 트랜잭션이 *오래된* 값을 읽고 commit하면 — *write skew*나 *phantom* 같은 DB anomaly가 발생.
+
+## 18.3 Transactional Memory의 약속
 
 ```cpp
 // 이상적인 TM 문법 (C++에는 없음)
@@ -51,7 +66,57 @@ atomic {
 
 락 없이. 코드는 마치 단일 스레드인 것처럼 작성.
 
-## 18.3 STM — Software Transactional Memory
+## 18.4 Atomic Block의 의미론
+
+책 18.4절은 `atomic` 블록의 *언어 수준* 의미를 정리한다. 단순한 락 lookalike가 아니다.
+
+**1. Nesting**
+
+```cpp
+// 중첩된 atomic — flat / closed / open nesting
+void outer() {
+    atomic {
+        update_a();
+        inner();         // atomic { update_b(); } 이 안에서
+    }
+}
+```
+
+- **Flat nesting** — 가장 단순. 안쪽 `atomic`이 바깥과 합쳐짐. 안쪽 abort = 바깥도 abort.
+- **Closed nesting** — 안쪽이 abort해도 바깥은 살아남음. 부분 실패 처리 가능.
+- **Open nesting** — 안쪽이 *독립적으로* commit. 바깥과 의미가 분리. 위험하지만 유연.
+
+대부분 시스템은 flat nesting. closed/open은 학술적.
+
+**2. Retry와 OrElse (Haskell STM)**
+
+```haskell
+-- Haskell STM의 control flow
+withdraw acc amount = atomically $ do
+  bal <- readTVar acc
+  if bal >= amount
+    then writeTVar acc (bal - amount)
+    else retry        -- 트랜잭션 abort 후, 읽은 값이 바뀔 때까지 대기
+```
+
+`retry`는 *조건이 거짓이면 잠들었다가, 읽었던 변수 중 하나가 바뀌면 깨어남*. 모니터의 `wait`와 비슷하지만 *조건 자체*가 트랜잭션의 read set으로 자동 정의.
+
+`orElse`로 두 트랜잭션을 *대안*으로 묶기.
+
+```haskell
+withdrawEither a b amount =
+  atomically $ withdraw a amount `orElse` withdraw b amount
+```
+
+a에서 retry되면 자동으로 b 시도. 락으로는 *깨끗하게* 표현 불가능.
+
+**3. I/O와 Atomic의 충돌**
+
+`atomic` 안에서 `printf`, file write, network send는 모두 위험. 트랜잭션이 abort되어 *없던 일*이 되더라도 외부 효과는 *없던 일이 안 됨*.
+
+Haskell은 타입으로 막음 — `STM` monad는 `IO`와 분리. 다른 언어는 프로그래머의 양심.
+
+## 18.5 STM — Software Transactional Memory
 
 소프트웨어로 TM을 구현.
 
@@ -284,7 +349,177 @@ void transfer_money(TVar_int* from, TVar_int* to, int amount) {
 **장점**: 일반 코드처럼 자연스럽다. 합성 가능.
 **단점**: 충돌 시 abort → 재실행 비용.
 
-## 18.4 합성성 — TM의 가장 큰 가치
+## STM의 설계 결정
+
+위의 예는 가장 단순한 STM 한 가지 그림. 책 18.5는 *설계 공간*을 네 축으로 정리한다.
+
+### 1. Eager vs Lazy Update
+
+**Eager (Direct write)**
+
+쓰기를 *즉시* 메모리에 반영하고, 옛 값은 *undo log*에 기록.
+
+```
+write x = 7:
+  log.push((x, x.read()))    // 옛 값 백업
+  x.write(7)                 // 즉시 반영
+
+commit:    그냥 락 해제
+abort:     undo log 역순으로 복원
+```
+
+장점: commit이 싸다. 단점: abort 비용 크고, *다른 트랜잭션이 미완성 쓰기를 봄* → 격리 위해 더 비싼 락/버전 필요.
+
+**Lazy (Deferred write)**
+
+쓰기를 *redo log*에 모았다가, commit에서 한 번에 반영.
+
+```
+write x = 7:
+  redo_log[x] = 7            // 로컬 버퍼
+
+read x:
+  if redo_log.has(x) return redo_log[x]  // 자기 쓰기 우선
+  else return x.read()
+
+commit:    redo log를 메모리에 flush
+abort:     log 버리기 (값 자체는 그대로)
+```
+
+장점: abort가 거의 free. 단점: read에서 매번 *redo log 검색*, commit 시점에 *모든 쓰기*를 한꺼번에 — long commit phase.
+
+대부분 STM은 *lazy* (TL2 포함). abort가 흔하다는 가정에 맞기 때문.
+
+### 2. Read Set / Write Set
+
+트랜잭션은 두 집합을 유지한다.
+
+| 집합 | 내용 | 용도 |
+|---|---|---|
+| **Read set** | (var, observed_version) 쌍 | commit 시 *검증* — 그 사이 바뀌었나? |
+| **Write set** | (var, new_value) 쌍 | commit 시 *반영* |
+
+read set이 크면 검증 비용 폭발. 그래서 *주의 깊게 작성된* 트랜잭션은 read set을 작게 유지.
+
+```cpp
+// 큰 read set 회피: 불필요한 읽기 제거
+atomic {
+    int total = 0;
+    for (auto& acc : accounts) {        // 모든 계좌 read → 거대 read set
+        total += acc.balance;
+    }
+    summary.total = total;
+}
+
+// 줄이기: 미리 합계를 *유지*하는 자료구조
+atomic {
+    summary.total = total_cache.value;  // read set = 1
+}
+```
+
+### 3. Validation 전략
+
+read set이 still valid인지 *언제* 확인하는가.
+
+**Pessimistic validation** — 매 read마다 모든 이전 read를 재검증.
+
+비용: $O(n^2)$ 검증 (n = read 수). 그러나 *불일치를 빨리 발견* → 헛수고 줄임. Read-heavy long transaction에 좋음.
+
+**Optimistic validation** — commit 시점에만 한꺼번에 검증.
+
+비용: $O(n)$. 그러나 *abort까지의 헛수고*가 큼. 충돌 적은 워크로드에 적합.
+
+대부분 STM은 optimistic + *간단한 빠른 체크* — 매 read에서 *전역 시계*만 비교 (TL2).
+
+### 4. Word vs Object Granularity
+
+충돌을 *어느 단위*로 감지하는가.
+
+```cpp
+// Word granularity — 메모리 워드별 버전
+class Node {
+    int x;     // version_x
+    int y;     // version_y
+    // 한 노드의 x, y에 다른 트랜잭션이 동시에 써도 충돌 아님
+};
+
+// Object granularity — 객체 전체에 한 버전
+class Node {
+    int x, y;
+    int version;   // 객체 전체
+    // x만 바꾸는 트랜잭션과 y만 바꾸는 트랜잭션이 *false conflict*
+};
+```
+
+| 단위 | 장점 | 단점 |
+|---|---|---|
+| Word | 정확한 충돌 감지 | 메타데이터 폭증, cache pressure |
+| Object | 메타데이터 작음 | False conflict 흔함 |
+
+TL2는 *word*(엄밀히는 *주소 해시*를 통한 *lock 줄무늬*)를 쓴다. Java DSTM2는 *object*. 트레이드오프가 명확한 영역.
+
+## TL2 — Transactional Locking II
+
+**TL2** (Dice, Shalev, Shavit 2006)는 가장 영향력 있는 STM. 책 18.5.3에 그 구조가 소개된다.
+
+핵심 아이디어 두 가지.
+
+**1. 전역 버전 시계 (Global Version Clock)**
+
+모든 commit이 단일 atomic counter를 증가. 트랜잭션은 시작 시점에 이 시계를 *snapshot*.
+
+```cpp
+std::atomic<uint64_t> global_clock{0};
+
+uint64_t tx_start() { return global_clock.load(); }
+uint64_t tx_commit() { return global_clock.fetch_add(1) + 1; }
+```
+
+**2. 줄무늬 락 (Striped Locks)**
+
+메모리 주소를 해시해 $L$개의 락 슬롯 중 하나에 매핑. 각 슬롯은 *버전 번호*(보통 60bit) + *lock bit*(1bit) 결합 워드.
+
+```
+lock_word[hash(addr)] = (version << 1) | lock_bit
+```
+
+읽기는 락 없음. 쓰기는 *commit*에서만 락 잡음.
+
+**TL2 트랜잭션 흐름**
+
+```
+1. start_version = global_clock.load()
+
+2. 본문 실행:
+   read(addr):
+     lock_word_before = lock_word[hash(addr)]
+     value = *addr
+     lock_word_after  = lock_word[hash(addr)]
+     if lock_bit_set or version > start_version: abort
+     read_set.add(addr, version)
+     return value
+
+   write(addr, val):
+     write_set[addr] = val   // lazy
+
+3. commit:
+   a) 모든 write_set 주소의 lock을 *순서대로* 획득 (lock acquire)
+   b) commit_version = global_clock.fetch_add(1) + 1
+   c) 모든 read_set 항목 재검증 — version 변화 없고 lock-free
+   d) 실패 시 락 해제 후 abort
+   e) write_set 메모리에 반영, lock_word의 version을 commit_version으로 갱신
+```
+
+**특징**
+
+- 읽기는 거의 free — 메타데이터 두 번 읽고 비교만.
+- 쓰기는 commit 시점에만 락 — short critical section.
+- 전역 clock이 *유일한 hot variable* — fetch_add 하나당 한 commit.
+- 빠르고, *불변* invariant가 명확.
+
+대부분의 후속 STM은 TL2의 변형. GCC의 `libitm`, Clojure의 STM, 학계의 여러 시스템.
+
+## 18.6 합성성 — TM의 가장 큰 가치
 
 락의 가장 큰 문제는 **합성 불가**.
 
@@ -422,6 +657,73 @@ void critical_section_with_tsx(void) {
 
 **장점**: 매우 빠름 — 충돌 없으면 거의 free.
 **단점**: 작은 트랜잭션만 가능 (cache line 수 제한), 항상 fallback path 필요.
+
+### HTM의 Hint와 Abort Code
+
+책 18.7은 HTM이 *순수 HW*가 아니라 *HW + SW의 협력*임을 강조한다. `_xbegin()`의 반환값은 abort 이유를 담고, SW는 그 정보로 *정책*을 결정한다.
+
+```cpp
+// TSX abort 코드 분류
+unsigned status = _xbegin();
+if (status != _XBEGIN_STARTED) {
+    if (status & _XABORT_EXPLICIT) {
+        // _xabort()로 명시적 abort
+        unsigned arg = _XABORT_CODE(status);
+    }
+    if (status & _XABORT_RETRY) {
+        // 일시적 충돌 — 재시도 권장
+    }
+    if (status & _XABORT_CONFLICT) {
+        // 다른 트랜잭션과 데이터 경합
+    }
+    if (status & _XABORT_CAPACITY) {
+        // L1 cache 용량 초과 — 재시도해도 무의미, fallback
+    }
+    if (status & _XABORT_DEBUG) {
+        // 디버그 이벤트 (breakpoint)
+    }
+    if (status & _XABORT_NESTED) {
+        // 중첩 트랜잭션 abort
+    }
+}
+```
+
+전략 차이가 크다.
+
+| Abort 이유 | 정책 |
+|---|---|
+| `RETRY` | 짧게 backoff 후 재시도 |
+| `CONFLICT` | 약간의 backoff + 재시도, 반복되면 fallback |
+| `CAPACITY` | 즉시 fallback (재시도 무의미) |
+| `EXPLICIT` | 의도된 abort — SW 로직대로 |
+| `DEBUG` | fallback (디버그 중) |
+
+**XTEST와 Conditional Commit**
+
+`_xtest()`로 *현재 트랜잭션 안에 있는지* 검사. lock elision 패턴에서 핵심.
+
+```cpp
+void unlock() {
+    if (_xtest()) {
+        // 트랜잭션 안 — commit
+        _xend();
+    } else {
+        // fallback 락 사용 중 — 일반 unlock
+        real_unlock();
+    }
+}
+```
+
+**HTM의 한계 — Hardware Capacity**
+
+L1 캐시(보통 32KB, 512 cache line)를 *트랜잭션 read/write set*으로 씀. 다음은 capacity abort를 유발:
+
+- 너무 많은 메모리 접근 (수백 cache line)
+- Set associativity 한계 — 같은 set에 너무 많은 cache line이 trans적으로 들어옴
+- 컨텍스트 스위치 — OS가 끼어들면 abort
+- 시스템 콜, 인터럽트, page fault
+
+그래서 트랜잭션 본문은 *짧고, 가벼운 자료 접근만, syscall 없이*가 원칙. 책의 표현: "HTM은 짧은 critical section의 락을 *공짜로* 만드는 도구이지, STM 같은 일반 추상화가 아니다."
 
 ## 18.7 HTM의 사용 패턴 — Lock Elision
 

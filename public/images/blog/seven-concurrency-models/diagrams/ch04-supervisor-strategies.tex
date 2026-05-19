@@ -1,0 +1,80 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+
+  % ============ Panel 1: one_for_one ============
+  \node[font=\sffamily\bfseries\small, text=inkc, anchor=north]
+    at (2.5, 0.4) {:one\_for\_one};
+
+  \node[hi, minimum width=18mm] (s1) at (2.5, -0.6) {Supervisor};
+  \node[imp, minimum width=14mm] (a1) at (0.6, -2.4) {A};
+  \node[warn, minimum width=14mm] (b1) at (2.5, -2.4) {B};
+  \node[imp, minimum width=14mm] (c1) at (4.4, -2.4) {C};
+
+  \draw[edge] (s1.south) -- (a1.north);
+  \draw[edge] (s1.south) -- (b1.north);
+  \draw[edge] (s1.south) -- (c1.north);
+
+  \draw[focus, line width=0.7pt] ($(b1.south) + (0, -0.3)$) -- ($(b1.south) + (0, -0.02)$);
+  \node[font=\sffamily\footnotesize, text=warnbord, anchor=north]
+    at ($(b1.south) + (0, -0.3)$) {B만 재시작};
+
+  % ─── Divider ─────────────────────────────────────
+  \draw[draw=groupbord, line width=0.4pt, dashed]
+    (5.4, 0.5) -- (5.4, -3.7);
+
+  % ============ Panel 2: one_for_all ============
+  \node[font=\sffamily\bfseries\small, text=inkc, anchor=north]
+    at (8.5, 0.4) {:one\_for\_all};
+
+  \node[hi, minimum width=18mm] (s2) at (8.5, -0.6) {Supervisor};
+  \node[warn, minimum width=14mm] (a2) at (6.6, -2.4) {A};
+  \node[warn, minimum width=14mm] (b2) at (8.5, -2.4) {B};
+  \node[warn, minimum width=14mm] (c2) at (10.4, -2.4) {C};
+
+  \draw[edge] (s2.south) -- (a2.north);
+  \draw[edge] (s2.south) -- (b2.north);
+  \draw[edge] (s2.south) -- (c2.north);
+
+  \node[font=\sffamily\footnotesize, text=warnbord, anchor=north, align=center,
+        text width=44mm]
+    at ($(b2.south) + (0, -0.3)$) {B가 죽으면 A, B, C 모두 재시작};
+
+  % ─── Divider ─────────────────────────────────────
+  \draw[draw=groupbord, line width=0.4pt, dashed]
+    (11.4, 0.5) -- (11.4, -3.7);
+
+  % ============ Panel 3: rest_for_one ============
+  \node[font=\sffamily\bfseries\small, text=inkc, anchor=north]
+    at (14.5, 0.4) {:rest\_for\_one};
+
+  \node[hi, minimum width=18mm] (s3) at (14.5, -0.6) {Supervisor};
+  \node[imp, minimum width=14mm] (a3) at (12.6, -2.4) {A};
+  \node[warn, minimum width=14mm] (b3) at (14.5, -2.4) {B};
+  \node[warn, minimum width=14mm] (c3) at (16.4, -2.4) {C};
+
+  \draw[edge] (s3.south) -- (a3.north);
+  \draw[edge] (s3.south) -- (b3.north);
+  \draw[edge] (s3.south) -- (c3.north);
+
+  \node[font=\sffamily\footnotesize, text=warnbord, anchor=north, align=center,
+        text width=44mm]
+    at ($(b3.south) + (0, -0.3)$) {B와 그 뒤(C) 재시작. A는 그대로};
+
+  % ─── Legend ──────────────────────────────────────
+  \node[legendkey, draw=impbord, fill=impfill] (lk1) at (3.5, -4.4) {};
+  \node[anchor=west, font=\sffamily\footnotesize, text=inkc]
+    at ($(lk1.east) + (0.15, 0)$) {정상};
+
+  \node[legendkey, draw=warnbord, fill=warnfill] (lk2) at (7.5, -4.4) {};
+  \node[anchor=west, font=\sffamily\footnotesize, text=inkc]
+    at ($(lk2.east) + (0.15, 0)$) {재시작 대상 (B가 crash)};
+
+\end{tikzpicture}
+\end{document}

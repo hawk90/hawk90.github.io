@@ -1,0 +1,73 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  branch/.style={cls, draw=absbord, fill=absfill, minimum width=24mm, minimum height=9mm,
+                 font=\sffamily\small},
+  leaf/.style={cls, draw=impbord, fill=impfill, minimum width=20mm, minimum height=9mm,
+               font=\sffamily\small},
+  forklabel/.style={font=\sffamily\footnotesize, text=mutec, fill=white,
+                    inner sep=1.5pt, midway}
+]
+  % Root
+  \node[branch] (r) at (0, 4) {Sum[0..8000)\\[2pt]\footnotesize size=8000};
+
+  % Level 1
+  \node[branch] (l1) at (-4, 2) {Sum[0..4000)};
+  \node[branch] (r1) at ( 4, 2) {Sum[4000..8000)};
+
+  % Level 2
+  \node[branch] (l2a) at (-6, 0) {Sum[0..2000)};
+  \node[branch] (l2b) at (-2, 0) {Sum[2000..4000)};
+  \node[branch] (r2a) at ( 2, 0) {Sum[4000..6000)};
+  \node[branch] (r2b) at ( 6, 0) {Sum[6000..8000)};
+
+  % Leaves (sequential — THRESHOLD met)
+  \node[leaf] (la1) at (-7, -2.4) {seq sum};
+  \node[leaf] (la2) at (-5, -2.4) {seq sum};
+  \node[leaf] (lb1) at (-3, -2.4) {seq sum};
+  \node[leaf] (lb2) at (-1, -2.4) {seq sum};
+  \node[leaf] (ra1) at ( 1, -2.4) {seq sum};
+  \node[leaf] (ra2) at ( 3, -2.4) {seq sum};
+  \node[leaf] (rb1) at ( 5, -2.4) {seq sum};
+  \node[leaf] (rb2) at ( 7, -2.4) {seq sum};
+
+  % Edges with fork/join labels
+  \draw[arr] (r) -- node[forklabel, left]{fork} (l1);
+  \draw[arr] (r) -- node[forklabel, right]{compute} (r1);
+  \draw[arr] (l1) -- node[forklabel, left]{fork} (l2a);
+  \draw[arr] (l1) -- node[forklabel, right]{compute} (l2b);
+  \draw[arr] (r1) -- node[forklabel, left]{fork} (r2a);
+  \draw[arr] (r1) -- node[forklabel, right]{compute} (r2b);
+
+  \draw[edge] (l2a) -- (la1);
+  \draw[edge] (l2a) -- (la2);
+  \draw[edge] (l2b) -- (lb1);
+  \draw[edge] (l2b) -- (lb2);
+  \draw[edge] (r2a) -- (ra1);
+  \draw[edge] (r2a) -- (ra2);
+  \draw[edge] (r2b) -- (rb1);
+  \draw[edge] (r2b) -- (rb2);
+
+  % Side annotations
+  \node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=west]
+       at (8, 4) {분할 (fork)};
+  \node[font=\sffamily\bfseries\footnotesize, text=impbord, anchor=west]
+       at (8, -2.4) {THRESHOLD 도달\\$\rightarrow$ 순차 처리};
+
+  % Join arrows (curved, dashed — bottom-up)
+  \node[font=\sffamily\bfseries\footnotesize, text=hibord, anchor=west]
+       at (8, 1) {join — 합산\\(아래에서 위로)};
+
+  % Work-stealing note
+  \node[note, anchor=north, text width=110mm, align=center]
+       at (0, -3.6)
+       {각 워커는 자기 deque에서 작업을 꺼냄.\\
+        비어 있으면 다른 워커의 deque에서 \emph{훔쳐} 옴 (work stealing).};
+\end{tikzpicture}
+\end{document}

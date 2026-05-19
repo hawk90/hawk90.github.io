@@ -206,6 +206,28 @@ Phase 2: 다음 await에서 local_sense를 true로 → wait until sense=true
 
 재사용 안전. 그러나 여전히 sense 변수에 모두가 spin — cache bouncing.
 
+### Phase-Sensitive Bit의 의미
+
+책 Listing 17.3의 핵심은 *전역 sense*와 *지역 sense*의 비대칭이다. 각 스레드는 자신의 `local_sense`(스택/TLS 변수)를 기억하고, 매 barrier 통과 시 *뒤집은 후* 전역과 비교한다.
+
+```
+Phase 0:    전역 sense = false
+            모든 스레드 local_sense = false (초기값)
+            barrier 진입: local_sense = !false = true
+                          기다림: 전역 sense == true 가 될 때까지
+            마지막 스레드: 전역 sense = local_sense = true → 모두 풀림
+
+Phase 1:    전역 sense = true
+            각 스레드 local_sense = true (이전 phase 결과)
+            barrier 진입: local_sense = !true = false
+                          기다림: 전역 sense == false 가 될 때까지
+            마지막 스레드: 전역 sense = false → 모두 풀림
+```
+
+**왜 동작하는가** — 두 phase가 *같은 sense 값을 두 번* 보지 않는다. 그러므로 phase k의 늦은 도착자가 phase k+1의 전역 sense 변경을 phase k의 신호로 *오인*할 수 없다. counter 0 리셋만으로는 막을 수 없던 race가 sense bit 한 줄로 사라진다.
+
+비용은 여전히 모든 스레드가 같은 sense 위치를 spin — 한 cache line에 P개 스레드 invalidation. P가 수십을 넘으면 다른 알고리즘이 필요해진다.
+
 ## 17.4 Combining Tree Barrier
 
 12장의 combining tree와 같은 아이디어.
@@ -294,6 +316,43 @@ public:
 
 **장점**: 경합 분산.
 **단점**: 깊이 O(log N) → 지연시간 증가.
+
+### Listing 17.7의 노드 동작
+
+책 Listing 17.7은 각 노드를 *독립된 sense barrier*로 본다. 노드는 자기 자식 수만큼의 카운터를 가지고, 마지막 자식이 도착하면 부모에게 *한 번* 알린다.
+
+```cpp
+// Combining Tree 노드 — 의사 코드 (Listing 17.7 변형)
+struct CombiningNode {
+    std::atomic<int> count;    // 남은 자식 수
+    int children;              // 총 자식 수
+    CombiningNode* parent;
+    std::atomic<bool> sense;   // 이 부분 트리의 sense
+};
+
+void combining_wait(int tid) {
+    bool my_sense = local_sense_[tid] = !local_sense_[tid];
+    CombiningNode* n = leaf_for(tid);
+    while (n != nullptr) {
+        int remaining = n->count.fetch_sub(1) - 1;
+        if (remaining == 0) {
+            n->count.store(n->children);   // 리셋
+            if (n->parent == nullptr) {
+                // 루트 — 모든 부분트리 sense 흘려보냄
+                broadcast_sense_down(my_sense);
+                return;
+            }
+            n = n->parent;          // 부모로 전파
+        } else {
+            // 자식 중 하나가 마지막이 아님 — 대기
+            while (n->sense.load() != my_sense) std::this_thread::yield();
+            return;
+        }
+    }
+}
+```
+
+중요한 디테일은 wake-up 단계도 트리를 *내려가며* 전파한다는 점. 노드별로 한 명만 부모와 통신하므로 매 cache line의 invalidation이 자식 수만큼만 발생.
 
 ## 17.5 Dissemination Barrier
 
@@ -423,7 +482,85 @@ T3 → T1
 
 가장 빠른 barrier로 알려짐.
 
-## 17.6 Static Tree Barrier
+### Listing 17.15의 라운드 구조
+
+책 Listing 17.15는 각 스레드가 *자기 flag 배열*만 spin하도록 신호 위치를 *수신자별로* 정렬한다. 즉 round r에서 스레드 i가 spin하는 위치는 `flags[r][i]` — partner가 *그 위치에* write.
+
+```cpp
+// Dissemination 한 라운드의 핵심 (Listing 17.15)
+for (int r = 0; r < num_rounds; ++r) {
+    int partner = (id + (1 << r)) % N;
+    // 보내기: 내가 partner의 flag를 set
+    flags[r][partner].store(true, std::memory_order_release);
+    // 받기: 내 flag가 set될 때까지
+    while (!flags[r][id].load(std::memory_order_acquire)) {
+        std::this_thread::yield();
+    }
+    flags[r][id].store(false, std::memory_order_relaxed); // 다음 phase 위해 리셋
+}
+```
+
+매 라운드는 *논리적으로 독립*된 P/2 쌍의 통신. 각 cache line에 작가 1명, 독자 1명 — false sharing조차 발생하지 않는다. log₂N 라운드 뒤 모두가 모두의 도착을 *간접적으로* 알게 된다.
+
+흥미로운 점은 *대칭성*. 어떤 스레드도 특별하지 않고, 모두 같은 일을 한다. Sense-reversing의 "마지막 도착자"같은 비대칭이 없어 분기 예측에도 좋다.
+
+## 17.6 Tournament Barrier
+
+Dissemination이 *모든 쌍*을 매 라운드 묶는다면, **Tournament barrier**(Hensgen et al.; 책 17.6)는 *토너먼트처럼* 한쪽이 다른 쪽을 기다리는 구조다.
+
+```
+Round 0:  T0 vs T1     T2 vs T3     T4 vs T5     T6 vs T7
+          |            |            |            |
+          (winner=T0)  (winner=T2)  (winner=T4)  (winner=T6)
+
+Round 1:  T0 vs T2                  T4 vs T6
+          |                         |
+          (winner=T0)               (winner=T4)
+
+Round 2:  T0 vs T4
+          |
+          (champion=T0)
+
+Wake-up:  champion이 트리를 거꾸로 내려가며 깨움
+```
+
+규칙은 단순하다: 매 라운드 한 스레드가 *상대를 기다리고*, 다른 스레드는 *상대에게 신호하고 끝*. 승자가 다음 라운드에 진출.
+
+```cpp
+// Tournament Barrier (책 17.6 의사 코드)
+struct Slot {
+    std::atomic<bool> flag{false};
+    int role;   // WINNER, LOSER, BYE, CHAMPION
+    int opponent;
+};
+// roles[round][thread] 미리 계산
+
+void tournament_wait(int tid) {
+    bool my_sense = local_sense_[tid] = !local_sense_[tid];
+    // 올라가기 (winner들이 진출)
+    for (int r = 0; r < num_rounds_; ++r) {
+        auto& s = roles[r][tid];
+        if (s.role == LOSER) {
+            flags[r][s.opponent].store(my_sense);
+            while (flags[r][tid].load() != my_sense) ;  // wake-up 대기
+            break;  // loser는 여기서 끝
+        } else if (s.role == WINNER) {
+            while (flags[r][tid].load() != my_sense) ;
+        } // BYE는 그냥 통과
+    }
+    // 내려가기 (champion → ... → 모든 loser 깨움)
+    for (int r = num_rounds_ - 1; r >= 0; --r) {
+        auto& s = roles[r][tid];
+        if (s.role == WINNER || s.role == CHAMPION) {
+            flags[r][s.opponent].store(my_sense);
+        }
+    }
+}
+```
+
+장점은 **각 스레드가 자기 flag만 spin** — false sharing 없음. 단점은 dissemination보다 *깊이* 깊다 (2 log N — 올라가고 내려가는 두 phase). HPC에서는 dissemination이 보통 더 빠르고, 캐시 일관성 비용이 비싼 NUMA에서는 tournament가 경쟁력 있다.
+
+## 17.7 Static Tree Barrier
 
 각 스레드가 자기 부모와 자식만 본다.
 
@@ -443,7 +580,47 @@ T3 → T1
 **장점**: 각 스레드가 자기 노드만 spin — false sharing 없음.
 **단점**: O(log N) 깊이, 두 phase (도착 + 깨우기).
 
-## 17.7 C++20 std::barrier와 std::latch
+## Static vs Dynamic Barrier
+
+지금까지 본 모든 barrier는 *N이 고정*이라 가정한다. 책 17.7은 그 가정이 깨지는 경우를 다룬다.
+
+**Static Barrier** — 참여 스레드 수가 컴파일/초기화 시점에 결정.
+
+```cpp
+// C++20 — std::barrier는 N 고정
+std::barrier sync(4);    // 4 스레드 고정
+```
+
+대부분의 HPC 시나리오. 알고리즘이 *처음부터 끝까지* P개 스레드를 쓴다고 약속.
+
+**Dynamic Barrier** — 매 phase마다 참여자 수가 바뀜.
+
+```cpp
+// std::barrier의 arrive_and_drop — 빠지기
+std::barrier sync(N);
+
+// phase 1: N명 참여
+sync.arrive_and_wait();
+
+// 일부 스레드가 작업 끝났음 — barrier에서 탈퇴
+sync.arrive_and_drop();   // 다음 phase부터 N-1명
+
+// phase 2: 남은 스레드들만
+sync.arrive_and_wait();
+```
+
+이게 필요한 워크로드 — 가지치기(branch-and-bound), 적응형 메시 재정의, 동적 스레드 풀.
+
+| 종류 | 사용처 | 구현 |
+|---|---|---|
+| Static | iterative solver, BSP | counter / sense / tree |
+| Dynamic | branch-and-bound, adaptive AMR | C++20 `arrive_and_drop`, custom |
+
+책의 통찰은 dynamic이 *훨씬 어렵다*는 점. counter 기반은 N을 atomically 바꿔야 하고, tree 기반은 *재구성*이 필요할 수도. 그래서 dynamic barrier는 보통 *느슨한* 보장만 — "현재 등록된 스레드들의 도착을 기다림."
+
+대안: 일회용 `std::latch`를 phase마다 새로 만드는 패턴. 단순하고 dynamic.
+
+## 17.8 C++20 std::barrier와 std::latch
 
 ```cpp
 // C++20 — std::barrier with completion function

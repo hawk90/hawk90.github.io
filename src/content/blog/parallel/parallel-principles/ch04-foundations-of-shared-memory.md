@@ -33,6 +33,17 @@ draft: false
 
 Herlihy와 Shavit는 메모리의 정확성을 세 단계로 정의한다.
 
+세 단계는 **읽기와 쓰기가 시간적으로 겹칠 때** 어떤 값이 허용되는지를 점점 좁혀 가는 정의다. 정의의 차이는 "겹침"(overlap)을 어떻게 다루느냐에 있다.
+
+```text
+시간 ──────────────────────────────►
+  W:   [─── write(v) ───]
+  R:              [─── read() → ? ───]
+                  ↑ overlap
+```
+
+`R`이 `W`와 겹치는 한 호출이라면, 반환 가능한 값의 집합이 클래스마다 다르다.
+
 ### Safe Register
 
 가장 약한 보장.
@@ -42,9 +53,9 @@ Herlihy와 Shavit는 메모리의 정확성을 세 단계로 정의한다.
 경합이 있을 때 (concurrent with write): 어떤 값이든 반환 가능 (legal value 안에서)
 ```
 
-읽기가 쓰기와 겹치면 — **임의의 값**이 반환될 수 있다. 다만 그 값은 레지스터가 가질 수 있는 합법적 값이어야 한다.
+읽기가 쓰기와 겹치면 **임의의 합법값**이 반환될 수 있다. 1-bit safe register에서 현재 0이 적혀 있고 누가 1을 쓰는 중이라면, 읽기는 0이든 1이든 무엇이든 반환할 수 있다. 심지어 "직전에 결코 쓰지 않은 값"도 — 단지 도메인 안에 있기만 하면 — 합법이다.
 
-**예**: 1-bit safe register에서 0이 쓰여 있는데, 누군가 1을 쓰는 동안 읽으면 0이든 1이든 반환 가능.
+이 약함이 직관에 반하지만 의의가 있다. 실제 하드웨어 셀이 비트를 flip하는 도중에 transient한 값을 노출할 수 있는 상황을 모델링한다. 그럼에도 *겹치지 않는* 읽기는 항상 마지막 쓰기를 반영한다 — 이게 safe의 최소 보장이다.
 
 ### Regular Register
 
@@ -55,9 +66,16 @@ Herlihy와 Shavit는 메모리의 정확성을 세 단계로 정의한다.
 경합이 있을 때: 직전에 쓴 값 또는 현재 쓰는 값 중 하나
 ```
 
-읽기가 쓰기와 겹쳐도 **"오래된 값"** 또는 **"새 값"** 중 하나는 보장된다 — 그 사이의 가짜 값은 안 나온다.
+읽기가 쓰기와 겹쳐도 **이전 값 또는 새 값** 둘 중 하나만 가능하다 — 그 사이의 "가짜 값"은 안 나온다. Regular는 safe보다 강하지만 atomic보다는 약하다. 그 차이는 다음 시나리오에서 드러난다.
 
-다만 **"새 값을 한 번 봤다가 다시 옛 값을 보는"** 현상은 허용된다.
+```text
+시간 ──────────────────────────────────────────►
+  W:    [── write(1) ──]
+  R1:      [── read → 1 ──]   ← 새 값을 봤다
+  R2:           [── read → 0 ──]  ← 옛 값을 다시 본다 (regular는 허용)
+```
+
+직렬적으로 보면 비논리적이다. 그러나 regular의 정의는 *각 읽기*가 독립적으로 "이전/현재" 중 하나를 받으면 충분하다고 본다. 두 읽기 사이의 **단조성**(monotonicity)은 요구하지 않는다.
 
 ![Writer가 write(1) 진행 중 Reader가 새 값을 본 뒤 옛 값을 다시 보는 것이 허용](/images/blog/parallel-principles/diagrams/ch04-read-after-write.svg)
 
@@ -70,7 +88,15 @@ Herlihy와 Shavit는 메모리의 정확성을 세 단계로 정의한다.
 한 번 새 값을 봤다면, 그 이후의 읽기는 새 값 또는 더 새 값만 반환
 ```
 
-직관적으로 우리가 보통 "메모리"라고 부르는 것에 가장 가깝다.
+직관적으로 우리가 보통 "메모리"라고 부르는 것에 가장 가깝다. Atomic은 regular의 모든 보장에 더해 **단조성**을 강제한다.
+
+```text
+세 보장의 관계:
+  safe   ⊂ regular ⊂ atomic
+  (포함 방향 — atomic은 더 좁은 행위 집합)
+```
+
+따라서 atomic register는 safe이고 regular이지만, 그 역은 거짓이다.
 
 ## 4.3 SRSW / MRSW / MRMW
 
@@ -155,20 +181,75 @@ bool regular_bit_read(RegularBit* r) {
 
 **핵심 아이디어** — 같은 값을 두 번 쓰지 않는다. 그러면 safe 레지스터의 "임의 값 반환" 동작이 regular의 "이전/현재 값" 동작이 된다 (두 값이 같으니 항상 옳다).
 
-### Multi-Bit 확장
+이 변환을 책에서는 **Construction 4.1**로 부른다. 정확성 논증의 골자는 다음과 같다.
 
-여러 비트를 사용할 때는 더 복잡하다. 한 비트만 바뀌었는데 읽는 동안 그 비트만 다른 값으로 읽히면 — 전체 값이 의도와 다른 결과가 된다.
+```text
+case A — 읽기와 쓰기가 겹치지 않음:
+        safe 정의에 의해 마지막 값을 반환. OK.
 
-해법은 **단조 인코딩**(monotonic encoding) — 값이 한 방향으로만 변하는 인코딩.
+case B — 읽기와 쓰기가 겹침, 그러나 새 값 == 옛 값:
+        write가 실제로 bit를 건드리지 않음 (skip).
+        safe register의 "concurrent" 모드 자체가 발동 안 함.
+        → 마지막 값 = 새 값 = 옛 값, 셋 다 동일. OK.
 
+case C — 읽기와 쓰기가 겹침, 새 값 ≠ 옛 값:
+        safe register는 0 또는 1을 반환.
+        둘 중 무엇이 반환되어도 "옛 값 또는 새 값" 정의에 부합. OK.
 ```
-값 0: 000
-값 1: 001
-값 2: 011
-값 3: 111  (단조 증가)
+
+이렇게 safe 한 레지스터로 regular을 만든다 — 추가 비용은 writer 측의 비교 한 번뿐.
+
+### SRSW Boolean → SRSW Multi-Valued Regular
+
+다음 단계는 단일 비트 regular register를 M-진 값 register로 끌어올리는 것이다 — 책의 **Construction 4.3**.
+
+핵심은 **단조 인코딩**(monotonic encoding). 값 v를 M-비트 unary 표현으로 저장한다 — 처음 v개 비트가 1, 나머지가 0.
+
+```text
+값 0:  0 0 0 0 0
+값 1:  1 0 0 0 0
+값 2:  1 1 0 0 0
+값 3:  1 1 1 0 0
+값 4:  1 1 1 1 0
 ```
 
-이런 인코딩에서는 bit를 하나씩만 바꾸므로, 읽기와 쓰기가 겹쳐도 의도된 값들 중 하나가 반환된다.
+writer는 새 값 v를 쓰기 위해 다음을 수행한다.
+
+```text
+write(v):
+  # 인덱스 v-1까지 1을 채우거나, v 이상의 1을 0으로 지운다
+  if v > current:
+      for i in (current..v-1): bits[i].write(1)
+  else:
+      for i in (v..current-1): bits[i].write(0)
+  current = v
+```
+
+reader는 가장 왼쪽의 0의 인덱스를 찾는다 — 그것이 곧 값.
+
+```text
+read():
+  for i in 0..M-1:
+      if bits[i].read() == 0: return i
+  return M
+```
+
+겹치는 동안 reader가 보는 단조성이 핵심이다. writer가 비트를 한 방향으로만 갱신하므로, reader가 본 0/1 패턴이 비록 부분적으로 옛값 + 부분적으로 새값이어도, 그것이 **합법적인 중간 인코딩** 중 하나에 해당한다. 따라서 반환값은 옛 값 ≤ v_returned ≤ 새 값 사이의 어떤 값 — regular의 정의를 만족한다.
+
+### MRSW Boolean Regular → MRMW Boolean Atomic
+
+여러 writer를 허용하려면 누구의 쓰기가 "마지막"인지를 정해야 한다. 책의 해법은 **timestamp + Bakery 스타일 우선순위**다.
+
+```text
+각 writer i는 자기 슬롯 reg[i]에 (value, timestamp)를 쓴다.
+read는 모든 슬롯을 collect하여 가장 큰 timestamp를 선택한다.
+writer는 자기 timestamp를 정하기 전에 모든 슬롯을 한 번 읽어
+최대값 + 1을 자기 timestamp로 쓴다.
+```
+
+이게 4장 후반에서 다루는 **timestamp-based MRMW atomic register** 구성의 골격이다. 각 writer가 자기 전용 MRSW slot에 쓰고, reader는 모든 slot을 모아 최신을 고른다. timestamp 동률은 writer id로 깨면 (i, ts)의 lexicographic 순서로 전순서가 보장된다.
+
+이 모든 단계가 합쳐지면 — `1-bit SRSW safe`만 출발점으로 줘도 `M-valued MRMW atomic`까지 완전히 만들 수 있다. 책의 가장 우아한 결과 중 하나다.
 
 ## 4.5 Atomic Snapshot
 
@@ -354,6 +435,35 @@ public:
 다른 스레드가 두 번 쓰는 동안 자신의 snapshot이 완료되지 못했다면 — 그 다른 스레드가 가진 snapshot이 자신이 원하는 시간 구간을 포괄하므로 그것을 빌려 쓸 수 있다.
 
 **핵심 통찰** — 두 번의 쓰기 사이에 한 번의 snapshot이 끼어 있으므로, 두 번째 쓰기의 snapshot은 사용 가능.
+
+### Wait-Free 증명 스케치
+
+알고리즘이 wait-free임을 보이려면 **유한 횟수 안에 종료**됨을 증명해야 한다.
+
+```text
+정의:
+  clean double-collect = 두 번의 collect가 동일한 (value, timestamp) 결과를 냄.
+  moved 스레드 = 한 스레드의 timestamp가 두 collect 사이에 바뀌었음.
+
+관찰:
+  실패는 항상 어떤 스레드 j가 moved 되었기 때문이다.
+  j가 처음 moved되었을 때는 단순히 다시 시도한다.
+  j가 두 번째 moved될 때는 j 자신이 그 사이에 update를 완료했으므로
+  j의 슬롯 안에 *j의 최근 snapshot*이 들어 있다.
+```
+
+이 j의 snapshot은 (j의 두 update 사이에 완료된 시점 ≥ 우리 snapshot의 시작 시점)이므로, 우리 snapshot 호출의 *linearization point*로 받아쓸 수 있다.
+
+```text
+경계 분석:
+  N개의 스레드. 각 스레드는 우리 collect 동안 최대 2번까지만 moved될 수 있음
+  (두 번째 moved에서 즉시 그의 snapshot을 차용).
+  따라서 collect 시도는 최대 2N + 1 번.
+  매 collect는 O(N) — 모든 슬롯을 한 번씩.
+  총 비용: O(N²) — wait-free.
+```
+
+이게 책의 **Lemma 4.14** 흐름이다 — "어떤 collect 끝에서든 N개의 스레드 모두에 대해 moved 카운트가 2 미만이면 직접 일관된 결과, 아니면 차용된 snapshot이 존재한다."
 
 ## 4.6 C++/C Memory Order와의 대응
 

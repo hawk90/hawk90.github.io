@@ -66,6 +66,43 @@ W. Pugh가 1989년 발명한 자료구조. 균형 트리의 대안.
 - 평균 O(log N) 검색
 - 균형 트리와 같은 성능, 그러나 회전 없음
 
+### Sequential Skiplist 베이스라인 + 레벨 분포
+
+Pugh의 원본 분석. 노드 높이는 기하 분포 `Pr[height ≥ k] = p^(k−1)`. 보통 `p = 1/2` 또는 `p = 1/4`.
+
+```text
+P = 1/2일 때 기댓값:
+  레벨 0의 노드 수: N
+  레벨 1: N/2
+  레벨 2: N/4
+  ...
+  레벨 k: N/2^k
+
+  총 노드 포인터 수: N (1 + 1/2 + 1/4 + ...) ≤ 2N
+  → 노드당 평균 2개 next 포인터
+```
+
+검색의 기대 비용. 레벨 `L = ⌈log₂ N⌉`부터 시작해 아래로 내려가면서 각 레벨마다 평균 `1/p` 번의 비교. 따라서 `O((log N) / p) = O(log N)`.
+
+```cpp
+// Sequential Skiplist 검색 — 락 없는 baseline
+Node* find(int key, Node** preds, Node** succs) {
+    Node* pred = head;
+    for (int lv = MAX_LEVEL - 1; lv >= 0; --lv) {
+        Node* curr = pred->next[lv];
+        while (curr != tail && curr->key < key) {
+            pred = curr;
+            curr = curr->next[lv];
+        }
+        preds[lv] = pred;
+        succs[lv] = curr;
+    }
+    return (succs[0] != tail && succs[0]->key == key) ? succs[0] : nullptr;
+}
+```
+
+이 baseline은 모든 동시 변형의 골격이다. `LazySkipList`도 `LockFreeSkipList`도 첫 번째 단계는 *각 레벨에서 predecessor/successor 쌍을 모으는 동일한 traversal*. 차이는 그 뒤의 검증과 변경 방식.
+
 ### C++20/23 Skiplist 노드
 
 ```cpp
@@ -577,9 +614,79 @@ bool lf_skiplist_add(LockFreeSkipList* sl, int key, int value) {
 
 세부 구현은 매우 복잡 — Pugh가 1989년에 단순화한 lock-based 버전을 제시하고, Fraser/Harris 등이 2000년대에 lock-free 버전을 완성.
 
+### Find 헬퍼 — 마킹된 노드의 물리적 제거
+
+`LockFreeSkipListSet`의 `find()`는 단순히 위치를 찾는 게 아니다. *지나가면서 marked 노드를 물리적으로 떼어낸다* (Listing 14.18의 핵심).
+
+```cpp
+// LockFreeSkipListSet::find — 책 Listing 14.18의 핵심 로직
+bool find(int key, Node** preds, Node** succs) {
+retry:
+    Node* pred = head;
+    for (int lv = MAX_LEVEL - 1; lv >= 0; --lv) {
+        Node* curr = unmark(pred->next[lv].load());
+        while (true) {
+            auto [succ, marked] = unpack(curr->next[lv].load());
+            // 마킹된 curr는 *그 자리에서 잘라낸다*
+            while (marked) {
+                Node* expected = curr;
+                if (!pred->next[lv].compare_exchange_strong(expected, succ))
+                    goto retry;  // 다른 스레드가 변경 → 재시도
+                curr = succ;
+                std::tie(succ, marked) = unpack(curr->next[lv].load());
+            }
+            if (curr->key >= key) break;
+            pred = curr;
+            curr = succ;
+        }
+        preds[lv] = pred;
+        succs[lv] = curr;
+    }
+    return succs[0]->key == key;
+}
+```
+
+이게 Harris-Michael 패턴의 skiplist 확장. **삭제는 두 단계**.
+
+1. **Logical 삭제** — 노드의 모든 레벨에서 next 포인터의 mark bit 설정 (위 레벨부터 아래로).
+2. **Physical 삭제** — find()가 지나가면서 잘라낸다.
+
+logical 삭제가 끝나는 순간 그 노드는 set에서 *사라진 것으로 간주*. 물리적 unlink는 lazy.
+
 ## 14.6 Lazy Skiplist
 
 복잡한 lock-free 대신 lazy 패턴 (9장과 같은 방식) 적용한 skiplist.
+
+### LazySkipListSet (Listing 14.7) — fullyLinked + marked
+
+책 Listing 14.7의 핵심 두 플래그.
+
+- **`fullyLinked`** — 노드가 *모든 레벨에 연결*되었는가. 삽입의 lineariztion point.
+- **`marked`** — 노드가 logically 삭제되었는가. 삭제의 linearization point.
+
+`contains(x)`는 락을 전혀 잡지 않는다. 단지.
+
+```cpp
+// LazySkipListSet::contains — 책 Listing 14.7
+bool contains(int key) {
+    Node *preds[MAX_LEVEL], *succs[MAX_LEVEL];
+    int lFound = find(key, preds, succs);
+    return lFound != -1
+        && succs[lFound]->fullyLinked.load()
+        && !succs[lFound]->marked.load();
+}
+```
+
+**완전한 wait-free 검색**. 락 없이 두 atomic flag만 확인.
+
+`add(x)`는.
+
+1. `find()`로 위치와 found 레벨 확인. found이고 marked 아님 → fullyLinked 기다린 후 false 반환.
+2. found 아님 → topLevel까지의 *모든 predecessor*에 락 획득.
+3. **검증** — 잡은 락이 여전히 유효한가 (각 pred가 marked 아니고 그 next가 여전히 succ).
+4. 유효하면 새 노드 삽입 (아래 레벨부터 위로) → `fullyLinked = true`.
+
+검증 단계가 lazy의 본질. 락이 잡힌 뒤에도 *상태가 변하지 않았음*을 확인. 아니면 풀고 처음부터.
 
 ### C++20/23 Lazy Skiplist
 
@@ -775,6 +882,23 @@ public:
 ```
 
 Lock-free보다 단순하면서 비슷한 성능. 실용적으로 자주 쓰이는 형태.
+
+### 성능 비교 — 균형 트리 vs Skiplist
+
+Herlihy-Shavit이 14장 말미에서 보고하는 측정. 평균적으로.
+
+| 척도 | 균형 BST (Red-Black) | Lock-Free Skiplist |
+|------|---------------------|--------------------|
+| 검색 평균 | log₂ N (정확) | log₂ N (확률적) |
+| 삽입 평균 | O(log N) + 1~2 rotation | O(log N) + CAS 수회 |
+| 동시 변경 친화성 | 매우 낮음 (회전이 큰 부분 만짐) | 매우 높음 (국소적) |
+| Cache 친화성 | 높음 (자식이 인접 가능) | 낮음 (노드 크기 가변) |
+| Lock-free 구현 난이도 | 극도로 어려움 | 어렵지만 가능 |
+| Worst case | 보장 (log N) | 확률적 (매우 드문 worst) |
+
+이게 **lock-free에서 skiplist가 사실상 표준**이 된 이유. 정확성과 구현 가능성의 균형.
+
+다만 *순차 환경에서는* 균형 트리가 cache 친화성으로 여전히 우세. `std::map`이 RB-tree인 이유다.
 
 ## 14.7 다른 정렬 자료구조
 

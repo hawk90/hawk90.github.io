@@ -19,7 +19,7 @@ draft: false
 
 해시 테이블은 동시성 자료구조 중 가장 친화적이다. 이유 — **자연스러운 병렬성**.
 
-```
+```text
 키 X → bucket[h(X)]
 키 Y → bucket[h(Y)]
 키 Z → bucket[h(Z)]
@@ -30,6 +30,23 @@ draft: false
 대부분의 작업이 서로 다른 bucket을 만진다. 락을 bucket마다 잡으면 거의 경합 없음.
 
 이게 해시 테이블의 동시성 친화성. **Sharded by hash**가 자연스럽다.
+
+### 자연스러운 병렬성의 정의
+
+Herlihy와 Shavit은 13장 도입에서 **자연스러운 병렬성(natural parallelism)** 을 다음과 같이 정의한다.
+
+> 한 자료구조가 자연스러운 병렬성을 가진다는 것은, *서로 다른 입력에 대한 메서드 호출이 동일한 메모리 위치를 거의 만지지 않는다* 는 뜻이다.
+
+해시 함수 `h: K → [0, N)`가 키를 균등 분포로 흩는다면, `put(x)`와 `put(y)` (단, `x ≠ y`)는 거의 확률 `1 − 1/N` 으로 다른 bucket을 건드린다. 다시 말해 *충돌하지 않는다*. 이 충돌 없음이 **synchronization 없이도 진행 가능**의 토대다.
+
+반대로 **부자연스러운 병렬성(unnatural parallelism)** 의 예 — priority queue. 모든 `extractMin` 호출이 head 한 점을 다툰다 (15장의 주제).
+
+자연스러운 병렬성의 강도를 측정하는 척도는 두 가지.
+
+- **읽기 충돌(read conflict)** — 두 호출이 같은 위치를 읽는가
+- **쓰기 충돌(write conflict)** — 두 호출이 같은 위치를 쓰는가
+
+쓰기-쓰기 충돌이 가장 비싸다. 해시는 이 충돌을 본질적으로 분산시킨다.
 
 ## 13.2 단순 동시 해시 테이블
 
@@ -235,6 +252,49 @@ bool striped_hash_remove(StripedHashTable* ht, int key) {
 
 **Striped locking** — 락 수 < bucket 수도 OK. 락 하나가 여러 bucket을 보호.
 
+### StripedHash (Listing 13.7) — 고정 락 배열
+
+책 Listing 13.7의 `StripedHashSet`이 모범. 불변량.
+
+- 락의 개수 `L`은 **생성 후 고정** (resize에도 그대로)
+- bucket 배열 크기 `N`은 자유롭게 변한다
+- bucket `b`의 락은 `lock[b mod L]`
+- resize는 모든 L개 락을 순서대로 획득 후 진행
+
+```cpp
+// StripedHash — 책 Listing 13.7의 핵심
+template<typename T>
+class StripedHash {
+    static constexpr size_t L = 16;
+    std::array<std::mutex, L> locks;
+    std::vector<std::list<T>> table;
+    std::atomic<size_t> setSize{0};
+
+    void resize() {
+        size_t oldCap = table.size();
+        for (auto& l : locks) l.lock();
+        if (oldCap == table.size()) {
+            auto oldTable = std::move(table);
+            table.assign(2 * oldCap, {});
+            for (auto& bucket : oldTable)
+                for (auto& x : bucket)
+                    table[std::hash<T>{}(x) % table.size()].push_back(x);
+        }
+        for (auto it = locks.rbegin(); it != locks.rend(); ++it) it->unlock();
+    }
+public:
+    bool add(const T& x) {
+        locks[std::hash<T>{}(x) % L].lock();
+        // ... bucket에 삽입
+        locks[std::hash<T>{}(x) % L].unlock();
+        if (setSize / table.size() > 4) resize();
+        return true;
+    }
+};
+```
+
+`add()`는 락 *하나만*. `resize()`는 *모두*. 두 연산이 자연스럽게 배제된다.
+
 **문제** — **resizing**. bucket 수가 바뀌면 어떻게?
 
 ## 13.3 Resize의 동시성 문제
@@ -254,7 +314,57 @@ bool striped_hash_remove(StripedHashTable* ht, int key) {
 - 일부 entry는 옛 위치, 일부는 새 위치
 - get이 어디를 찾아야 하나?
 
-## 13.4 Stop-The-World Resize
+## 13.3a Open Addressing와 StripedCuckooHash (Listing 13.18)
+
+지금까지의 closed-address(=separate chaining) 외에 **open addressing**이 있다. 각 bucket은 *최대 1개* 원소만 갖고, 충돌 시 다른 bucket으로 이동한다.
+
+대표적 open addressing — **cuckoo hashing**. Pagh와 Rodler(2001)의 알고리즘. 두 해시 함수 `h0`, `h1`를 쓰며 원소 `x`는 `table[0][h0(x)]` 또는 `table[1][h1(x)]` 중 하나에 산다.
+
+```text
+add(x):
+    h0(x) 위치가 비었다면 → 거기에 놓음
+    그렇지 않으면 → 그 자리의 y를 쫓아내고 (cuckoo!)
+                   y의 *다른 후보 위치*로 옮김
+                   재귀적으로 반복
+    cycle이 너무 길면 → resize
+```
+
+책 Listing 13.18의 **StripedCuckooHash** — 두 테이블에 각각 striped locking을 적용.
+
+```cpp
+// StripedCuckooHash — 책 Listing 13.18의 핵심
+template<typename T>
+class StripedCuckooHash {
+    static constexpr int LIMIT = 32;
+    std::array<std::array<std::mutex, 16>, 2> locks;
+    std::array<std::vector<std::optional<T>>, 2> table;
+
+    void acquire(const T& x) {
+        locks[0][std::hash<T>{}(x) % 16].lock();
+        locks[1][(std::hash<T>{}(x) >> 16) % 16].lock();
+    }
+public:
+    bool add(const T& x) {
+        acquire(x);
+        std::optional<T> displaced = x;
+        int side = 0;
+        for (int k = 0; k < LIMIT; ++k) {
+            size_t idx = std::hash<T>{}(*displaced) % table[side].size();
+            std::swap(displaced, table[side][idx]);
+            if (!displaced) return true;  // 빈 자리 찾음
+            side = 1 - side;
+        }
+        // LIMIT 초과 → resize 후 재삽입
+        return false;
+    }
+};
+```
+
+**Cuckoo의 매력** — `contains(x)`는 항상 **두 위치만 검사**. O(1) worst case. Closed-address(체이닝)는 worst case O(N).
+
+**약점** — `add`의 displacement chain이 길 수 있다. 평균은 O(1)이지만 cycle 가능. 그래서 LIMIT을 두고 초과 시 resize.
+
+
 
 가장 단순 — resize 시 모든 락을 잡는다.
 
@@ -293,6 +403,46 @@ void StripedHashTable<K, V, NumLocks>::resize(size_t newSize) {
 ## 13.5 Refinable Lock — 락 자체를 동적 분할
 
 `bucketLock[i]`의 i가 hash(key) mod (lock count)에 의존. lock count도 변할 수 있다면?
+
+### RefinableHash (Listing 13.11) — 락 배열을 함께 resize
+
+StripedHash는 락 수가 고정. bucket이 늘어도 *한 락이 더 많은 bucket을 보호* 하게 된다. 8개 락 + 1024 bucket이라면 락 하나가 128 bucket의 충돌을 받는다.
+
+**RefinableHash**는 bucket과 함께 락 배열도 키운다. 어떤 스레드가 락을 잡은 동안 락 배열을 바꾸면 정합성이 깨진다. 책 Listing 13.11의 방어 패턴 — **double-checked snapshot**.
+
+```cpp
+// RefinableHash — 책 Listing 13.11의 acquire 패턴
+void acquire(const T& x) {
+    while (true) {
+        // 1) resize 중이면 대기
+        while (mark.load() != 0) std::this_thread::yield();
+        // 2) 현재 락 배열 스냅샷
+        auto snap = locks.load();
+        size_t idx = std::hash<T>{}(x) % snap->locks.size();
+        snap->locks[idx].lock();
+        // 3) 락 잡은 사이에 배열이 바뀌지 않았는지
+        if (snap == locks.load() && mark.load() == 0) return;
+        snap->locks[idx].unlock();  // 재시도
+    }
+}
+
+void resize(size_t newCap) {
+    if (!owner.compare_exchange_strong(zero, me)) return;
+    mark.store(1);
+    // quiesce: 모든 락을 한 번씩 잡았다 풀어 진행 중 작업 종료 보장
+    for (auto& m : locks.load()->locks) { m.lock(); m.unlock(); }
+    locks.store(std::make_shared<LockArray>(newCap));
+    // bucket 재분배 ...
+    mark.store(0);
+}
+```
+
+핵심.
+
+1. `acquire`는 스냅샷으로 락을 잡고 *그 사이 배열이 바뀌지 않았는지* 재검사.
+2. `resize`는 `mark=1`로 새 acquire를 막고, 기존 락들을 일일이 잡았다 풀어 진행 중 작업이 끝났음을 보장한 뒤 새 배열을 publish.
+
+
 
 ### C++20/23 Refinable Lock 패턴
 
@@ -425,6 +575,63 @@ static inline uint32_t make_split_ordered_key(uint32_t key, uint32_t bucket_size
 ```
 
 비트 뒤집기를 하면 — 같은 bucket의 키들이 리스트에서 연속하게 된다. 그리고 bucket이 늘어났을 때 새 bucket이 가리킬 위치가 정확히 리스트 안에 있다.
+
+### LockFreeHashSet (Listing 13.24) — Recursive Split-Ordering
+
+Shalev-Shavit의 핵심 통찰 — *비트를 뒤집은 키로 정렬* 하면 bucket이 2배가 될 때 새 bucket의 시작점이 *기존 리스트의 어느 한 위치를 정확히 가리킨다*.
+
+```text
+초기 (size = 2):
+  키 0, 1, 2, 3을 비트-뒤집은 순서로
+  binary: 00, 01, 10, 11
+  reversed: 00, 10, 01, 11 → 0, 4, 2, 6 (8-bit 가정)
+
+  bucket[0]은 reversed=0 (sentinel) 위치를 가리킴
+  bucket[1]은 reversed=4 위치를 가리킴 (key=1)
+
+resize → size = 4:
+  bucket[2]는 reversed=2 위치 (key=2)
+  bucket[3]는 reversed=6 위치 (key=3)
+
+  *기존 리스트에 그 위치가 이미 있다!*
+  단지 새 sentinel을 끼워넣기만 하면 됨.
+```
+
+이게 **recursive split-ordering**. bucket[i]는 i의 비트 뒤집기 위치에 sentinel이 있다. resize는 그 sentinel을 lock-free linked list에 삽입할 뿐.
+
+```cpp
+// LockFreeHashSet — 책 Listing 13.24의 핵심
+class LockFreeHashSet {
+    // bucket의 lazy 초기화 — 처음 접근 시 sentinel 삽입
+    void initializeBucket(size_t bucket) {
+        // 가장 높은 비트를 끈 위치가 부모 bucket
+        size_t parent = bucket & (bucket - 1) ? bucket - (bucket & -bucket) : 0;
+        if (buckets[parent].load() == nullptr) initializeBucket(parent);
+        // 새 sentinel을 부모 리스트에 lock-free 삽입
+        Node* sentinel = new Node{reverseBits(bucket), -1, 0};
+        // ... CAS로 끼워넣기
+        buckets[bucket].store(sentinel);
+    }
+
+    bool add(int x) {
+        size_t bucket = std::hash<int>{}(x) % bucketCount.load();
+        Node* start = getBucketList(bucket);
+        size_t key = reverseBits(std::hash<int>{}(x)) | 0x1;  // regular key
+        // start부터 정렬된 위치 찾아 lock-free 삽입 ...
+        if (setSize.fetch_add(1) / bucketCount > 4)
+            bucketCount.compare_exchange_strong(/* ... 2배 */);
+        return true;
+    }
+};
+```
+
+**우아한 점**.
+
+- bucket 배열은 *리스트의 lazy index*. 데이터 이동 없음.
+- 모든 변경은 lock-free linked list 연산.
+- bucket을 늘리는 것 = lock-free 삽입 한 번.
+
+이게 lock-free hash table의 정점. 다만 sentinel 키 LSB로 regular key와 구분하는 등 디테일이 많다.
 
 ## 13.7 Split-Ordered List의 우아함
 

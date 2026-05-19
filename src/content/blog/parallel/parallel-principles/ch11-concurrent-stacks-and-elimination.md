@@ -132,6 +132,33 @@ bool treiber_stack_pop(TreiberStack* stack, int* out) {
 
 **핵심** — top 포인터에 대한 CAS 한 번. 매우 단순하고 빠르다.
 
+### Treiber의 원래 알고리즘 (책 Listing 11.4)
+
+Treiber(1986)는 IBM 보고서에서 이 알고리즘을 제시했다. 책은 그 골격을 거의 그대로 따른다.
+
+```text
+push(v):
+    new = Node(v)
+    repeat:
+        old_top = top
+        new.next = old_top
+    until CAS(top, old_top, new) succeeds
+
+pop():
+    repeat:
+        old_top = top
+        if old_top == null: return EMPTY
+        new_top = old_top.next
+    until CAS(top, old_top, new_top) succeeds
+    return old_top.value
+```
+
+**linearization point**: 성공한 CAS의 시점. 그 외 모든 시도는 *시도되지 않은* 것처럼 본다 (failed attempts는 무효).
+
+**Lock-freedom 증명 스케치**: 어떤 스레드가 무한히 실패한다면, 다른 스레드가 무한히 자주 성공해야 한다 (top이 바뀌어야 내 CAS가 실패하므로). 따라서 시스템 전체로는 항상 누군가 진행한다 — lock-free.
+
+**Wait-freedom은 보장 안 함**: 한 스레드가 끝없이 양보될 수 있다. 그래서 책은 11.6에서 starvation-free 변형을 별도로 다룬다.
+
 ## 11.2 Treiber Stack의 한계
 
 성능 측정을 해 보면 — **경합이 심하면 매우 느리다**.
@@ -401,12 +428,41 @@ bool elimination_stack_pop(EliminationStack* stack, int* out) {
 
 **경합이 심할 때** — central stack CAS 실패가 많지만, 그만큼 push/pop 짝이 많이 있다. Elimination array에서 만날 확률이 높음.
 
-```
+```text
 경합 ↑ → CAS 실패 ↑ → 그러나 elimination 만남 ↑
         결과: 처리량 ↑
 ```
 
 직관적으로 모순이지만 — **경합이 심할수록 elimination이 더 잘 작동**한다.
+
+### Random Pairing의 통계
+
+elimination 슬롯은 *균등 분포로 무작위* 선택한다. 슬롯 수가 $k$, 동시 활성 스레드 수가 $n$일 때, 두 스레드가 같은 슬롯에 도착할 확률은 birthday paradox 형태로 분석된다.
+
+- $k = n$이면 한 슬롯에 두 명이 모일 확률은 약 $1 - e^{-1/2} \approx 39\%$
+- $k = n/2$이면 약 $63\%$
+- $k = 2n$이면 약 $22\%$
+
+책의 권장은 **활성 스레드 수에 비례한 array 크기**다. 너무 작으면 같은 슬롯의 세 명 이상이 충돌해 모두 실패. 너무 크면 짝이 거의 안 만남.
+
+**adaptive sizing**: 슬롯이 비어 있을 때마다 array 크기를 줄이고, 충돌이 많을 때 늘리는 동적 조정. JSR-166의 `Exchanger`는 비슷한 dynamic backoff를 쓴다.
+
+### Bottleneck을 *우회*하는 elimination
+
+핵심 통찰 — elimination은 stack의 bottleneck인 top 포인터를 *건드리지 않는다*. push와 pop이 만나는 순간 둘 다 종료된다.
+
+```text
+일반 Treiber:
+  10 thread → top CAS 경쟁 → 1명만 진행, 9명 재시도
+
+Elimination:
+  10 thread → 5쌍이 array에서 만남 → 5명 즉시 종료
+            → 5명만 top CAS 경쟁 → 1명 진행, 4명 재시도
+```
+
+이게 책이 강조하는 *우회*다. 같은 bottleneck을 더 빠르게 지나가는 게 아니라, **bottleneck을 안 지나가는 경로**를 만든 것.
+
+비유: 고속도로 톨게이트에서 두 차가 서로 짐을 바꿔 싣고 둘 다 그 자리에서 돌아간다면, 톨게이트 처리량은 줄어들지만 *그 두 차의 목적은 달성*된다.
 
 ## 11.6 Elimination Array의 설계
 
@@ -486,6 +542,69 @@ public:
 ![Thread X의 push와 Thread Y의 pop이 elimination에서 매치되는 linearization](/images/blog/parallel-principles/diagrams/ch11-elimination.svg)
 
 X와 Y가 elimination으로 만나는 시점이 linearization point. 그 시점에 push와 pop이 동시에 일어났다고 해석. Linearizability 정의 만족.
+
+### Linearizability 증명 스케치 (책 11.5)
+
+세 경우로 나눠 증명한다.
+
+**Case 1 — 둘 다 central stack을 사용**: 두 작업의 linearization point는 각자의 CAS 성공 시점. Treiber stack과 동일.
+
+**Case 2 — 둘 다 elimination으로 매치**: push와 pop이 같은 exchanger 슬롯에서 만남.
+- linearization point = `state.CAS(WAITING, BUSY)` 성공 시점
+- 그 순간: push가 *논리적으로* 먼저, pop이 *직후* 일어났다고 본다
+- 결과: pop은 push의 값을 받음 — sequential 명세 만족
+
+**Case 3 — 한쪽만 elimination**: 불가능. exchange는 매치되거나 둘 다 타임아웃. 한쪽만 성공하는 경로 없음.
+
+핵심 관찰 — 두 작업이 elimination으로 만나면 *그 시점에 stack은 변화가 없었다*. 어떤 다른 작업도 둘 사이를 *순서적으로 관찰할 수 없다*. 그래서 사실 두 작업 모두 같은 시점에 일어났다고 봐도 sequential 명세를 만족한다.
+
+```text
+시간축:    push 시작 ─── exchange match ─── push 종료
+           pop 시작  ─── exchange match ─── pop 종료
+                              ↑
+                       linearization point
+                       (push 먼저, pop 직후)
+```
+
+이 증명이 **stack에서만 통하는** 이유: stack은 *LIFO이므로 가장 최근 push가 가장 먼저 pop된다*. 따라서 "방금 들어와서 방금 나간" 시나리오가 명세에 정확히 부합한다. FIFO queue에서는 같은 트릭이 안 된다 — 가장 오래된 원소가 dequeue되어야 하므로 elimination이 명세 위반.
+
+## 11.7.1 EliminationBackoffStack — CAS 실패 시에만 elimination (책 Listing 11.10)
+
+책의 권장 디자인은 *낙관적이다*. push와 pop이 먼저 central stack을 시도하고, **실패했을 때만** elimination array로 백오프한다.
+
+```text
+push(v):
+    new = Node(v)
+    repeat:
+        if try_push_central(new):
+            return                      // 빠른 경로
+        // CAS 실패 — 경합 신호
+        slot = random_slot()
+        if elimination[slot].exchange(v, timeout) matched:
+            return                      // pop과 매치
+        // 매치 실패 — 다시 central 시도
+
+pop():
+    repeat:
+        result = try_pop_central()
+        if result.has_value:
+            return result
+        slot = random_slot()
+        partner = elimination[slot].exchange(nullptr, timeout)
+        if partner matched and partner has value:
+            return partner.value
+        // 매치 실패 — 다시 central 시도
+```
+
+이 구조의 묘미는 **저경합 = elimination 비활성**이라는 점이다. CAS가 성공하면 array를 건드릴 일이 없다. Treiber보다 추가 비용이 거의 없다. 고경합에서는 CAS 실패가 자동으로 elimination을 활성화 — 부하 적응적이다.
+
+| 부하 | 빠른 경로 (central CAS) | elimination 활성도 |
+|---|---|---|
+| 저경합 | 거의 항상 성공 | 거의 안 씀 |
+| 중경합 | 가끔 실패 | 절반 정도 매치 |
+| 고경합 | 자주 실패 | 짝이 많아 매치율 높음 |
+
+이 자기 조절(self-tuning)이 elimination backoff stack을 *실용적인* 디자인으로 만든다. JSR-166의 `ConcurrentLinkedDeque`, `LinkedTransferQueue`가 비슷한 구조.
 
 ## 11.8 다른 elimination 응용
 

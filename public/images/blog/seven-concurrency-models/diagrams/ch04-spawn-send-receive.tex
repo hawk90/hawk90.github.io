@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq, x=1cm, y=1cm]
+
+  % ─── Actors ──────────────────────────────────────
+  \node[actor]    (par) at (0, 0) {Parent};
+  \node[actorAlt] (mb)  at (4.5, 0) {Mailbox(Child)};
+  \node[actor]    (ch)  at (9, 0) {Child};
+
+  % ─── Lifelines ───────────────────────────────────
+  \draw[lifeline] (par) -- ++(0, -7.3);
+  \draw[lifeline] (mb)  -- ++(0, -7.3);
+  \draw[lifeline] (ch)  -- ++(0, -7.3);
+
+  % ─── 1. spawn ────────────────────────────────────
+  \draw[msgcreate] (par |- 0,-1.2) --
+    node[msglabel]{spawn(fn)} (ch |- 0,-1.2);
+  \node[seqnote, anchor=west]
+    at ($(ch |- 0,-1.2) + (0.45, 0)$) {pid 반환};
+
+  % ─── 2. send ─────────────────────────────────────
+  \draw[msgasync] (par |- 0,-2.7) --
+    node[msglabel]{send(pid, \{self(), :ping\})} (mb |- 0,-2.7);
+  \node[seqnote, anchor=east]
+    at ($(par |- 0,-3.4) + (-0.3, 0)$) {즉시 반환 (비동기)};
+
+  % ─── 3. mailbox to child receive ────────────────
+  \draw[msgsync] (mb |- 0,-4.3) --
+    node[msglabel]{receive 매치}  (ch |- 0,-4.3);
+
+  % activation on child
+  \node[activation, minimum height=14mm]
+    at (ch |- 0,-4.3) {};
+
+  % ─── 4. reply ────────────────────────────────────
+  \draw[msgret] (ch |- 0,-5.7) --
+    node[msglabel]{send(parent, \{:pong\})} (par |- 0,-5.7);
+
+  % ─── 5. parent receives ─────────────────────────
+  \draw[msgsync, draw=focusc, line width=0.7pt]
+    ($(par |- 0,-6.5) + (-0.3, 0)$) -- ++(0.3, 0);
+  \node[anchor=west, font=\sffamily\footnotesize, text=focusc]
+    at ($(par |- 0,-6.5)$) {parent receive \{:pong\}};
+
+  % ─── Note ────────────────────────────────────────
+  \node[seqnote, anchor=north, text width=86mm, align=center]
+    at ($(par)!.5!(ch) + (0, -7.7)$)
+    {spawn → pid, send → mailbox, receive → 패턴 매칭으로 꺼내기.\\
+     mailbox는 receiver actor의 소유. 메시지는 복사된다.};
+
+\end{tikzpicture}
+\end{document}

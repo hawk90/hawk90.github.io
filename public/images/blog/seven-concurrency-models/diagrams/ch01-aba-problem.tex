@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq, x=1cm, y=1cm]
+  \node[actor]    (t1) at (0, 0)  {Thread 1};
+  \node[actorAlt] (h)  at (5, 0)  {head};
+  \node[actor]    (t2) at (10, 0) {Thread 2};
+
+  \draw[lifeline] (t1) -- ++(0,-8.5);
+  \draw[lifeline] (h)  -- ++(0,-8.5);
+  \draw[lifeline] (t2) -- ++(0,-8.5);
+
+  % T1 reads A
+  \draw[msgsync] (t1 |- 0,-1.0) -- node[msglabel]{read $\to$ A} (h |- 0,-1.0);
+  \node[seqnote, anchor=east, text width=32mm]
+       at ($(t1) + (-0.3, -1.7)$) {head = A 기억\\(중단)};
+
+  % T2 pop A
+  \draw[msgsync] (t2 |- 0,-2.6) -- node[msglabel]{pop A} (h |- 0,-2.6);
+  \node[seqnote, anchor=west] at ($(h) + (0.4, -2.6)$) {head $\to$ B};
+
+  % T2 pop B
+  \draw[msgsync] (t2 |- 0,-3.6) -- node[msglabel]{pop B} (h |- 0,-3.6);
+  \node[seqnote, anchor=west] at ($(h) + (0.4, -3.6)$) {head $\to$ C};
+
+  % T2 push A back
+  \draw[msgsync] (t2 |- 0,-4.6) -- node[msglabel]{push A (재사용)} (h |- 0,-4.6);
+  \node[seqnote, anchor=west] at ($(h) + (0.4, -4.6)$) {head $\to$ A (다시!)};
+
+  % T1 resumes, CAS succeeds
+  \draw[msgsync] (t1 |- 0,-6.0) -- node[msglabel]{CAS(head, A, A.next)} (h |- 0,-6.0);
+  \node[seqnote, draw=warnbord, fill=warnfill, anchor=east, text width=42mm]
+       at ($(t1) + (-0.3, -6.8)$) {성공 — 값이 같으므로.\\하지만 A.next는 \\이미 무효};
+
+  % Bottom warning
+  \node[seqnote, draw=warnbord, fill=warnfill, anchor=north, text width=95mm, align=center]
+       at ($(t1)!.5!(t2) + (0,-7.7)$)
+       {ABA — 값이 같아도 그 사이 일어난 일을 CAS는 모름.\\해결: \texttt{AtomicStampedReference} (값 + 버전 스탬프)};
+\end{tikzpicture}
+\end{document}

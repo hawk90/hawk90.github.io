@@ -256,6 +256,59 @@ void peterson_unlock(int id) {
 }
 ```
 
+### LockOne을 왜 못 쓰는가 — 자세히
+
+LockOne은 책이 첫 시도로 보여주는 알고리즘이다. 각 스레드가 "들어간다"는 신호로 자기 플래그를 켜고, 상대 플래그가 꺼질 때까지 기다린다.
+
+**상호 배제는 성립한다**. A와 B가 동시에 임계 영역에 있다고 가정하자. A의 진입 직전 마지막 읽기가 `read(flag[B]) == false`였다. 이 읽기 시점에 B의 플래그는 꺼져 있었다. 그런데 B도 진입했으므로 어느 시점에 `write(flag[B] = true)`가 일어났다. happens-before 관계를 따져 보면 두 플래그 쓰기가 서로 상대의 읽기보다 앞서야 하는데 모순이다.
+
+**그러나 데드락 가능**.
+
+```text
+1. A: flag[0] = true
+2. B: flag[1] = true
+3. A: while (flag[1]) → 영원히 true
+4. B: while (flag[0]) → 영원히 true
+```
+
+두 스레드가 거의 동시에 flag을 켜면 둘 다 무한 대기. 데드락-프리 조건을 위반한다.
+
+### LockTwo도 마찬가지
+
+LockTwo는 정반대 전략이다. 진입 시도 시 자기를 **victim**으로 선언하고, 자신이 victim이 아닐 때까지 기다린다.
+
+```text
+A: victim = 0
+A: while (victim == 0) → B가 들어오기를 기다림
+```
+
+A가 혼자 실행되면 누구도 victim을 바꿔주지 않아 무한 대기. **혼자 실행되는데도 진행 못 한다** — 데드락-프리 조건의 더 강한 위반이다.
+
+### Peterson = LockOne + LockTwo
+
+두 알고리즘의 약점이 정반대다.
+
+| 알고리즘 | 둘이 동시 시도 | 혼자 시도 |
+|---------|----------------|-----------|
+| LockOne | 데드락 | OK |
+| LockTwo | OK | 데드락 |
+
+Peterson은 둘을 **합친다**. flag으로 "들어갈 의사 있음"을 알리고, victim으로 "충돌 시 누가 양보할지" 정한다. 둘이 동시에 시도하면 victim 메커니즘이 작동하여 한 쪽이 양보한다. 혼자면 상대 flag이 꺼져 있어 즉시 진입한다.
+
+```cpp
+void lock(int id) {
+    int other = 1 - id;
+    flag[id].store(true, std::memory_order_seq_cst);   // LockOne 부분
+    victim.store(id, std::memory_order_seq_cst);        // LockTwo 부분
+    while (flag[other].load(std::memory_order_seq_cst) &&  // ← AND
+           victim.load(std::memory_order_seq_cst) == id) {
+        // spin
+    }
+}
+```
+
+`&&`가 핵심이다. 둘 중 **하나라도** 거짓이면 진입. LockOne만 있으면 동시 시도 시 둘 다 무한 대기. LockTwo만 있으면 단독 시도 시 무한 대기. 합치면 둘 다 해결된다.
+
 ### Peterson 정확성 증명
 
 **Lemma 2.3.1 (상호 배제)**
@@ -406,6 +459,46 @@ void filter_lock_unlock(FilterLock* lock, int id) {
 - **기아-프리**: ✓
 - **공간**: O(n)
 - **시간**: O(n) 레벨 통과
+
+### Wait-free 전이 논증 (Filter Lock의 진행성)
+
+책은 Filter Lock의 진행성을 **귀납적 논증**으로 증명한다.
+
+**주장**: 레벨 $L$의 임계 영역에 있을 수 있는 스레드는 최대 $n - L$명이다.
+
+**기저**: 레벨 0에서는 모든 스레드가 가능하므로 최대 $n - 0 = n$명. 자명하다.
+
+**귀납**: 레벨 $L-1$까지 최대 $n - L + 1$명이 있다고 가정. 레벨 $L$에 들어가려면 다음 조건을 모두 통과해야 한다.
+
+```text
+level[me] = L
+victim[L] = me
+while (∃k ≠ me: level[k] ≥ L) AND (victim[L] == me)
+    spin
+```
+
+레벨 $L$에 동시에 있는 스레드들을 보자. 그 중 마지막으로 `victim[L] = me`를 쓴 스레드를 $T$라 하자. 그 시점 이후 다른 어떤 스레드도 `victim[L]`을 자기로 덮어쓰지 않는다 (이미 들어갔거나 들어가지 못한 상태). 따라서 $T$는 `victim[L] == T`를 영원히 본다.
+
+다른 스레드들은 `victim[L] ≠ self`이므로 즉시 통과한다. **$T$만 갇혀 있고 나머지는 진행**. 따라서 레벨 $L$에 영원히 머무는 스레드는 최대 1명, 진입한 스레드는 최대 $(n - L + 1) - 1 = n - L$명이다. ∎
+
+### 데드락-프리는 자동으로 따라온다
+
+레벨 $n-1$은 최대 1명만 들어갈 수 있다. 그게 임계 영역이다. 어떤 스레드가 락을 시도하면, 자신보다 앞선 스레드들이 모두 임계 영역을 떠나는 한 결국 레벨 $n-1$에 도달한다. **혼자 시도하면 누구도 자신을 victim으로 만들지 않고 다른 레벨에 머물지 않으므로 모든 레벨을 즉시 통과**.
+
+### 기아 가능성 — Filter의 약점
+
+Filter Lock은 데드락-프리지만 **bounded waiting을 보장하지 않는다**. 다른 스레드들이 끊임없이 자신을 victim으로 만들면 영원히 갇힐 수 있다.
+
+```text
+시나리오:
+- A가 레벨 L에 진입, victim[L] = A
+- B가 레벨 L에 진입, victim[L] = B (A 풀려남)
+- A가 다시 레벨 L 진입, victim[L] = A (B 풀려남)
+- ... 끝없이 반복 ...
+- 그 사이 C, D, ... 가 임계 영역을 들락날락
+```
+
+이게 Bakery로 가는 동기다. Bakery는 **FCFS**를 보장한다.
 
 ---
 
@@ -575,6 +668,62 @@ auto less_than = [](int a, int i, int b, int j) {
 - **공간**: O(n)
 - **번호 크기**: **무한** (이론적 한계)
 
+### Bakery 정확성 — 책의 증명
+
+책은 두 가지를 증명한다. (1) 상호 배제, (2) FCFS.
+
+**상호 배제 증명**
+
+A와 B가 동시에 임계 영역에 있다고 가정. WLOG `(label[A], A) < (label[B], B)` (사전식 순서).
+
+A가 진입했다는 것은 마지막 검사에서 B에 대해 다음 중 하나가 참이었다는 뜻이다.
+
+```text
+조건 i:   flag[B] == false
+조건 ii:  label[B] == 0
+조건 iii: my_label < other_label
+조건 iv:  my_label == other_label && id < other_id
+```
+
+A의 가정 `(label[A], A) < (label[B], B)`이므로 (iii) 또는 (iv) 중 하나가 성립한다.
+
+이제 B의 입장에서 보자. B도 A를 통과해야 임계 영역에 들어갈 수 있다. B가 A를 검사할 때:
+
+- B는 `flag[A] == false`이거나 `label[A] == 0`이거나 `(label[B], B) < (label[A], A)`를 봐야 한다.
+- 그런데 A가 임계 영역에 있으므로 `flag[A] = true`이고 `label[A] ≠ 0`.
+- `(label[B], B) < (label[A], A)`도 거짓 (가정에 의해 반대).
+
+따라서 B는 A를 통과할 수 없다. **모순** ∎
+
+핵심은 `flag[A] = true && label[A] != 0` 동안 B는 A의 번호표를 정확히 읽고, 자신과 비교해서 더 크면 양보한다는 것.
+
+**FCFS 증명**
+
+A가 B보다 먼저 도착했다고 하자 (A의 `doorway`가 B의 `doorway`보다 앞). 그러면 A의 `label[A]` 쓰기가 B가 max를 계산하는 동안 일어났거나 그 전에 일어났다.
+
+따라서 `label[B] ≥ label[A] + 1 > label[A]`. 사전식 순서로 `(label[A], A) < (label[B], B)`. 위의 상호 배제 증명에 의해 A가 먼저 들어간다. ∎
+
+이 FCFS 보장이 Filter Lock과 결정적으로 다른 점이다.
+
+### Doorway 개념
+
+책은 락 알고리즘을 **doorway**(번호표 뽑기, wait-free 부분)와 **waiting**(대기, blocking 부분)으로 나눠 분석한다.
+
+```text
+Bakery의 doorway:
+1. flag[me] = true
+2. label[me] = max(label) + 1
+3. flag[me] = false
+(여기까지는 spin 없이 유한 단계에 완료)
+
+Bakery의 waiting:
+for k != me:
+    while flag[k]: spin
+    while (label[k], k) < (label[me], me): spin
+```
+
+doorway가 wait-free라는 것은 **번호표 뽑기는 다른 스레드 행동과 무관하게 끝난다**는 뜻. 이게 FCFS의 기초가 된다. doorway에서 결정된 순서가 곧 입장 순서다.
+
 ---
 
 ## 2.6 한계와 불가능성
@@ -630,6 +779,53 @@ void tas_unlock(void) {
     atomic_store(&locked, false);
 }
 ```
+
+### Theorem 2.7.1 — 읽기/쓰기 레지스터의 한계
+
+책의 메인 불가능성 결과.
+
+> **Theorem 2.7.1**: n-스레드 데드락-프리 상호 배제 알고리즘은 **최소 n개의 단일-쓰기, 다중-읽기 레지스터**(또는 그에 상응하는 다중-쓰기 레지스터)를 필요로 한다.
+
+이 결과는 **읽기/쓰기 연산만**을 가정한다 (CAS, TAS 같은 RMW는 제외). 즉 메모리 명령이 단순 load/store뿐인 모델.
+
+### 증명 스케치 — Covering State 논증
+
+증명의 핵심은 **covering state**라는 개념이다. 스레드 $T$가 어떤 레지스터에 곧 쓸 상태(다음 명령이 그 레지스터 쓰기)에 있으면, $T$가 그 레지스터를 **cover**한다고 한다.
+
+귀류법: 레지스터가 $n - 1$개 이하인 n-스레드 데드락-프리 알고리즘 $A$가 있다고 가정.
+
+**1단계** — 스레드 0 혼자 락을 잡고 임계 영역에 들어간다. 이는 데드락-프리이므로 가능.
+
+**2단계** — 스레드 1을 깨워서 진입을 시도하게 한다. 스레드 1이 임계 영역에 들어가려면 어떤 레지스터에 자기 흔적을 남겨야 한다 (그렇지 않으면 0이 0과 1을 구별할 수 없다). 스레드 1이 첫 쓰기를 하기 직전 상태에서 멈춘다. 이 상태에서 1은 어떤 레지스터 $R_1$을 cover.
+
+**3단계** — 스레드 2도 진입 시도. 스레드 2도 첫 쓰기 직전에 멈춘다. 1이 cover한 $R_1$과는 다른 레지스터를 써야 한다 (같으면 2의 쓰기가 즉시 1의 쓰기를 덮어쓰고, 0이 둘을 구별할 수 없다). 따라서 2는 $R_2 \neq R_1$을 cover.
+
+**...n단계** — 같은 방식으로 스레드 $k$는 새로운 레지스터 $R_k$를 cover. 모든 $R_k$가 서로 다르다.
+
+스레드 $1, 2, \ldots, n-1$이 각각 다른 레지스터를 cover. 레지스터가 $n - 1$개 이하이므로 비둘기집 원리에 의해 모순.
+
+따라서 알고리즘 $A$는 최소 $n$개의 레지스터가 필요. ∎
+
+### Theorem의 의미
+
+이 결과는 **소프트웨어만으로 효율적인 락이 불가능함**을 형식적으로 보여준다.
+
+```text
+n = 100 threads:
+- 단순 load/store만 → 최소 100개의 레지스터 필요
+- O(n) 공간 → 스레드 수에 비례하여 메모리 사용
+- O(n) 시간 → 각 락 시도마다 모든 레지스터 검사
+```
+
+이건 점근적 하한이지만 실용적 함의가 크다. 100개 스레드가 락 하나 잡으려고 100개 메모리 위치를 매번 읽어야 한다. 캐시 미스 폭증, 확장성 0.
+
+**해결**: Read-Modify-Write 명령. CAS, TAS, fetch-and-add 같은 단일 명령으로 **읽기와 쓰기를 원자적으로** 수행하면 $O(1)$ 메모리로 충분하다 (예: 단일 atomic_flag).
+
+### Bakery는 왜 이 한계를 안 피하는가
+
+Bakery는 $O(n)$ 공간을 쓴다. 이는 Theorem 2.7.1과 정확히 일치한다. Bakery는 RMW를 안 쓰는 순수 SW 알고리즘이므로 이론적 하한 $n$개에 도달한 것.
+
+CAS를 쓰는 TAS Lock은 단일 atomic_bool로 충분 — $O(1)$. 이게 하드웨어 RMW의 위력이다.
 
 ---
 

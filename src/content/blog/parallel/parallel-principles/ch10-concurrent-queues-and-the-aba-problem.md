@@ -157,6 +157,84 @@ bool tl_dequeue(TwoLockQueue* q, int* out_item) {
 
 **Sentinel node** 트릭 — `head`는 항상 dummy를 가리킨다. `head.next`가 실제 첫 항목. 이게 enqueue/dequeue를 분리하기 쉽게 한다.
 
+## 10.2.1 BoundedQueue — Lock-Free 변형
+
+책 Listing 10.6, 10.7은 capacity가 고정된 lock-free 큐다. 노드를 재사용하는 것이 두 lock 변형과 다르다.
+
+```cpp
+// C++20 BoundedQueueLockFree (책 10.6 재구성)
+#include <atomic>
+#include <optional>
+
+template <typename T>
+class BoundedQueueLockFree {
+    struct Node {
+        std::optional<T> item;
+        std::atomic<Node*> next{nullptr};
+    };
+
+    std::atomic<Node*> head_;
+    std::atomic<Node*> tail_;
+    std::atomic<int> size_{0};
+    const int capacity_;
+
+public:
+    explicit BoundedQueueLockFree(int cap) : capacity_(cap) {
+        Node* sentinel = new Node();
+        head_.store(sentinel);
+        tail_.store(sentinel);
+    }
+
+    bool enqueue(T item) {
+        // capacity 검사 — relaxed로 빠르게
+        int s = size_.load(std::memory_order_relaxed);
+        if (s >= capacity_) return false;
+
+        Node* new_node = new Node();
+        new_node->item = std::move(item);
+
+        while (true) {
+            Node* last = tail_.load(std::memory_order_acquire);
+            Node* next = last->next.load(std::memory_order_acquire);
+            if (last != tail_.load(std::memory_order_acquire)) continue;
+
+            if (next == nullptr) {
+                Node* expected = nullptr;
+                if (last->next.compare_exchange_weak(expected, new_node)) {
+                    tail_.compare_exchange_strong(last, new_node);
+                    size_.fetch_add(1, std::memory_order_release);
+                    return true;
+                }
+            } else {
+                tail_.compare_exchange_strong(last, next);
+            }
+        }
+    }
+
+    std::optional<T> dequeue() {
+        while (true) {
+            Node* first = head_.load(std::memory_order_acquire);
+            Node* last = tail_.load(std::memory_order_acquire);
+            Node* next = first->next.load(std::memory_order_acquire);
+            if (first != head_.load(std::memory_order_acquire)) continue;
+
+            if (first == last) {
+                if (next == nullptr) return std::nullopt;
+                tail_.compare_exchange_strong(last, next);
+            } else {
+                T value = std::move(*next->item);
+                if (head_.compare_exchange_strong(first, next)) {
+                    size_.fetch_sub(1, std::memory_order_release);
+                    return value;
+                }
+            }
+        }
+    }
+};
+```
+
+**관찰**: `size_`는 정확한 카운트가 아니라 *근사*다. 두 producer가 동시에 마지막 자리를 잡으면 capacity를 잠시 초과한다. 책은 `permits` 패턴(reservation 먼저, 실제 enqueue는 뒤)으로 정확히 제한하는 변형도 보여준다.
+
 ## 10.3 Michael-Scott Lock-Free Queue
 
 가장 유명한 lock-free queue. 표준 라이브러리들이 자주 이 알고리즘 사용.
@@ -344,6 +422,52 @@ bool ms_dequeue(MSQueue* q, int* out_item) {
 
 이게 lock-free의 핵심 — **다른 스레드가 멈춰 있어도 진행 가능**.
 
+### Enqueue 단계별 추적 (책 Listing 10.10)
+
+책의 enqueue는 두 CAS로 나뉘어 있다. 한 enqueue 작업은 두 단계로 보인다.
+
+| 단계 | 작업 | 실패 시 |
+|---|---|---|
+| 1 | `last->next`를 nullptr→new_node로 CAS | 다른 enqueue가 먼저 — 처음부터 다시 |
+| 2 | `tail`을 last→new_node로 CAS (advance) | 다른 스레드가 도와줌 — 무시 |
+
+두 단계 사이에 있는 큐를 *quiescent*라고 부른다. 이 중간 상태에서 다른 스레드가 들어오면 `last->next != nullptr`을 본다. 이때 "도와주기"가 발동한다 — tail이 뒤처졌으므로 다른 스레드가 tail을 advance해 준다.
+
+```text
+초기:    head → S, tail → S
+enqueue A 단계 1 후:  head → S → A, tail → S (뒤처짐!)
+enqueue A 단계 2 후:  head → S → A, tail → A
+
+여기서 enqueue B가 단계 1만 한 채 멈추면:
+   head → S → A → B, tail → A (뒤처짐!)
+
+enqueue C가 들어와서 last == tail == A, last->next == B를 본다.
+→ tail.CAS(A, B)로 도와줌. B를 거치고 자신은 단계 1을 시도.
+```
+
+**linearization point**: enqueue는 *단계 1의 성공*. dequeue는 *head CAS의 성공*.
+
+### Dequeue의 미묘한 케이스 (책 Listing 10.11)
+
+dequeue가 처리해야 할 케이스는 셋이다.
+
+1. **비어 있음**: `first == last && next == nullptr` → `null` 반환
+2. **tail 뒤처짐**: `first == last && next != nullptr` → tail advance 도와주고 재시도
+3. **정상**: `first != last` → `next`의 item 읽고 head advance
+
+case 2를 빠뜨리면 — empty 상태와 "enqueue 진행 중" 상태를 구별 못 한다. 잘못된 `null` 반환이 가능.
+
+```cpp
+// 잘못된 dequeue (case 2 누락)
+if (first == last) return std::nullopt;  // 버그!
+```
+
+이러면 enqueue 단계 1과 단계 2 사이에 dequeue가 들어오면 *큐에 원소가 있는데도 비었다고 반환*한다. Linearizability 위반.
+
+### tail의 lagging
+
+흥미롭게도 tail은 *반드시* 정확할 필요가 없다. enqueue도 dequeue도 lagging tail을 견디도록 짜여 있다. 이 약한 invariant 덕분에 enqueue가 두 CAS로 쪼개질 수 있다 — 만약 tail을 항상 정확하게 유지하려 했다면 두 변수를 atomic으로 함께 갱신해야 했을 것이다.
+
 ## 10.4 ABA 문제
 
 Lock-free 자료구조의 악명 높은 함정.
@@ -361,6 +485,19 @@ Lock-free 자료구조의 악명 높은 함정.
 ```
 
 A → B → A로 돌아왔다. CAS는 단순히 "값이 같으면 성공"이므로 이 변화를 못 잡는다.
+
+### ABA가 *재사용된 노드*에서 발생하는 이유
+
+책의 핵심 통찰 — ABA는 임의의 값 변화가 아니라 *메모리 재사용*에서 온다. 새 노드를 매번 새 주소에 할당하면 ABA는 거의 불가능하다. 그러나 lock-free 자료구조는 보통 free list로 노드를 재활용한다.
+
+```text
+1. dequeue가 node X를 free list로 보냄
+2. enqueue가 free list에서 X를 다시 꺼내 새 항목으로 사용
+3. 다른 스레드는 여전히 *옛 X 포인터*를 들고 있음
+4. 옛 X와 새 X의 주소가 같음 → CAS 통과 → 잘못된 next로 이어짐
+```
+
+이래서 책은 ABA 해법과 *메모리 회수* 해법이 같은 문제임을 강조한다. 두 문제는 결국 "언제 노드를 자유롭게 재사용할 수 있는가?"라는 한 질문으로 수렴한다.
 
 ### 왜 위험한가
 
@@ -507,6 +644,45 @@ void vstack_push(VersionedStack* s, int item) {
 **문제** — 64비트 atomic만 보장되는 시스템에서는 ptr (8 byte) + version (8 byte) = 16 byte의 atomic이 필요. **DCAS** (double CAS) 또는 128비트 atomic 필요.
 
 x86-64는 `CMPXCHG16B` 명령어 제공. C++에서는 `std::atomic<__int128>`.
+
+### Java AtomicStampedReference 대응
+
+책은 Java의 `AtomicStampedReference<T>`를 사용한다. C++로 대응하려면 다음 두 가지가 있다.
+
+```cpp
+// 방법 1 — 포인터의 상위 비트에 stamp packing (포인터 정렬 활용)
+// 64-bit 시스템에서 user-space 포인터는 상위 16비트가 0
+struct StampedPointer {
+    static constexpr uint64_t PTR_MASK = 0x0000'FFFF'FFFF'FFFFULL;
+    static constexpr uint64_t STAMP_SHIFT = 48;
+
+    static uint64_t pack(void* p, uint16_t stamp) {
+        return reinterpret_cast<uint64_t>(p) |
+               (static_cast<uint64_t>(stamp) << STAMP_SHIFT);
+    }
+    static void* ptr(uint64_t v) {
+        return reinterpret_cast<void*>(v & PTR_MASK);
+    }
+    static uint16_t stamp(uint64_t v) {
+        return static_cast<uint16_t>(v >> STAMP_SHIFT);
+    }
+};
+
+// std::atomic<uint64_t>로 한 번에 CAS — 8 byte로 ABA 방어
+```
+
+장점은 평범한 8-byte CAS만 쓴다는 점. 단점은 stamp가 16비트뿐이라 *충분히 빠른 재사용*에서는 wrap-around로 ABA 재발 가능. 보통은 보안용 stamp wrap이 일어날 만큼 빠르지 않지만, 책은 "stamp가 충분히 큰지" 검증해야 한다고 강조한다.
+
+```cpp
+// 방법 2 — 128-bit atomic (x86-64 CMPXCHG16B / ARM LDXP-STXP)
+struct alignas(16) PackedRef {
+    void* ptr;
+    uint64_t stamp;  // 64-bit stamp는 wrap이 사실상 불가능
+};
+std::atomic<PackedRef> ref;  // gcc/clang은 -mcx16 필요
+```
+
+64-bit stamp는 매 사이클 1ns 증가해도 wrap에 ~584년 걸린다. 안전.
 
 ## 10.6 ABA 해법 — Hazard Pointer
 
@@ -703,6 +879,50 @@ std::atomic<size_t> EpochBasedReclamation<T>::next_id_{0};
 **단점**: 한 스레드가 epoch을 안 진행하면 모든 회수가 멈춤.
 
 Rust의 `crossbeam-epoch`이 이 방식.
+
+### Free List + Epoch 결합
+
+책은 노드 *재사용*을 위해 epoch-based free list를 제안한다. 메모리 할당자를 거치지 않고 자체 free list로 캐시 친화적인 재사용을 노린다.
+
+```cpp
+// 개념적 구조 — 책 figure 10.x 재구성
+template <typename T>
+class EpochFreeList {
+    struct Node { T value; Node* next; };
+    static constexpr int NUM_EPOCHS = 3;
+
+    // 각 epoch별 free 리스트 — 한 번에 한 epoch에만 추가
+    std::array<std::atomic<Node*>, NUM_EPOCHS> bins_;
+    std::atomic<int> current_epoch_{0};
+
+public:
+    void retire(Node* n) {
+        int e = current_epoch_.load(std::memory_order_acquire);
+        Node* old = bins_[e].load(std::memory_order_relaxed);
+        do {
+            n->next = old;
+        } while (!bins_[e].compare_exchange_weak(old, n));
+    }
+
+    Node* acquire() {
+        // 2 epoch 전의 bin에서 안전하게 재사용
+        int e = current_epoch_.load(std::memory_order_acquire);
+        int safe = (e + NUM_EPOCHS - 2) % NUM_EPOCHS;
+        // bin에서 pop... (실제로는 thread-local free list 권장)
+    }
+};
+```
+
+**왜 작동하는가**: 모든 스레드가 epoch을 두 번 진행하는 사이에 들렀던 노드는 더 이상 누구도 보고 있지 않다 — quiescent 보장. 그래서 *2 epoch 전*의 bin은 안전하게 재사용 가능.
+
+| 회수 전략 | 안전성 | 처리량 | 메모리 효율 |
+|---|---|---|---|
+| 즉시 `delete` | ABA 위험 | 빠름 | 좋음 |
+| Hazard Pointer | 매우 안전 | 보통 | 좋음 |
+| Epoch | 안전 (stall 시 메모리 누적) | 빠름 | 보통 |
+| Epoch + Free list | 안전 + 할당 회피 | 매우 빠름 | 약간 손해 |
+
+Linux 커널의 RCU(Read-Copy-Update)도 epoch과 같은 원리. grace period가 epoch이다.
 
 ## 10.8 GC 언어의 이점
 

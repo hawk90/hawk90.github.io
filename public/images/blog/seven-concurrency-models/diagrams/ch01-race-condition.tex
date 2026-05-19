@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq, x=1cm, y=1cm]
+  % Actors
+  \node[actor]    (a) at (0, 0) {Thread A};
+  \node[actorAlt] (m) at (5, 0) {count (메모리)};
+  \node[actor]    (b) at (10, 0) {Thread B};
+
+  % Lifelines
+  \draw[lifeline] (a) -- ++(0,-7);
+  \draw[lifeline] (m) -- ++(0,-7);
+  \draw[lifeline] (b) -- ++(0,-7);
+
+  % T1: A loads 5
+  \draw[msgsync] (a |- 0,-1.2) -- node[msglabel]{load $\to$ 5} (m |- 0,-1.2);
+  % T2: B loads 5
+  \draw[msgsync] (b |- 0,-2.2) -- node[msglabel]{load $\to$ 5} (m |- 0,-2.2);
+
+  % T3: A computes locally
+  \node[seqnote, anchor=east] at ($(a) + (-0.3, -3.2)$) {local = 5 + 1 = 6};
+  % T4: B computes locally
+  \node[seqnote, anchor=west] at ($(b) + (0.3, -3.9)$) {local = 5 + 1 = 6};
+
+  % T5: A stores 6
+  \draw[msgsync] (a |- 0,-4.9) -- node[msglabel]{store 6} (m |- 0,-4.9);
+  % T6: B stores 6 (overwrites)
+  \draw[msgsync] (b |- 0,-5.7) -- node[msglabel]{store 6} (m |- 0,-5.7);
+
+  % Note: lost update
+  \node[seqnote, draw=warnbord, fill=warnfill, anchor=north, text width=85mm, align=center]
+       at ($(a)!.5!(b) + (0,-6.4)$)
+       {한 번의 증가가 사라짐 — 기대값 7, 실제값 6};
+\end{tikzpicture}
+\end{document}

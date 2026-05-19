@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+  % Root decision
+  \node[q, minimum width=44mm, minimum height=10mm] (q1) at (6, 6) {coordinated?\\(여러 ref?)};
+
+  % "yes" branch — ref
+  \node[q, minimum width=36mm, minimum height=9mm] (q2yes) at (2, 3.6) {(yes)};
+  \node[con, minimum width=22mm, minimum height=12mm] (ref) at (2, 1)
+       {\textbf{ref}\\[2pt]\footnotesize + STM (\texttt{dosync})};
+
+  % "no" branch — second decision
+  \node[q, minimum width=44mm, minimum height=10mm] (q3) at (10, 3.6) {sync or async?};
+
+  % sync -> atom
+  \node[imp, minimum width=22mm, minimum height=12mm] (atom) at (8, 1)
+       {\textbf{atom}\\[2pt]\footnotesize CAS swap!};
+
+  % async -> agent
+  \node[prp, minimum width=22mm, minimum height=12mm] (agent) at (12, 1)
+       {\textbf{agent}\\[2pt]\footnotesize send / send-off};
+
+  % Edges
+  \draw[arr] (q1) -- node[font=\sffamily\footnotesize, fill=white, fill opacity=0.85, text opacity=1, inner sep=2pt]{yes} (q2yes);
+  \draw[arr] (q1) -- node[font=\sffamily\footnotesize, fill=white, fill opacity=0.85, text opacity=1, inner sep=2pt]{no}  (q3);
+  \draw[arr] (q2yes) -- (ref);
+  \draw[arr] (q3) -- node[font=\sffamily\footnotesize, fill=white, fill opacity=0.85, text opacity=1, inner sep=2pt]{sync}  (atom);
+  \draw[arr] (q3) -- node[font=\sffamily\footnotesize, fill=white, fill opacity=0.85, text opacity=1, inner sep=2pt]{async} (agent);
+
+  % Property table on the right
+  \node[panel, anchor=north west, text width=78mm, align=left, inner sep=8pt] (props) at (15, 7)
+       {\textbf{도구별 특성}\\[4pt]
+        \begin{tabular}{@{}lccc@{}}
+        & atom & ref & agent \\\hline
+        coord & no & \textbf{yes} & no \\
+        sync  & yes & yes & \textbf{no} \\
+        retry & CAS & Tx & 없음 \\
+        side-fx & X & X & \textbf{O} \\
+        \end{tabular}};
+
+  % Notes underneath
+  \node[note, anchor=west, text width=48mm] at (-1, -1)
+       {\textbf{ref + STM}\\[2pt]여러 변수를 atomic하게};
+
+  \node[note, anchor=west, text width=42mm] at (6.5, -1)
+       {\textbf{atom}\\[2pt]단일 변수 동기 갱신};
+
+  \node[note, anchor=west, text width=44mm] at (11.0, -1)
+       {\textbf{agent}\\[2pt]비동기 작업 큐\\side-effect 허용};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+  % Title
+  \node[font=\sffamily\bfseries, anchor=west] at (-0.5, 4.3) {Identity \texttt{alice}};
+  \node[font=\sffamily\bfseries, anchor=west] at (-0.5, 1.3) {Values (불변 스냅샷)};
+
+  % Time axis at top
+  \draw[arr, draw=mutec] (-0.2, 3.4) -- (12.2, 3.4) node[font=\sffamily\footnotesize, text=mutec, above left, xshift=-2pt]{time};
+
+  % Identity node (a single persistent reference)
+  \node[hi, minimum width=18mm, minimum height=10mm] (idA) at (1.6, 3.9) {\texttt{alice}\\[2pt]\footnotesize atom};
+  \node[hi, minimum width=18mm, minimum height=10mm] (idB) at (6.0, 3.9) {\texttt{alice}\\[2pt]\footnotesize atom};
+  \node[hi, minimum width=18mm, minimum height=10mm] (idC) at (10.4, 3.9) {\texttt{alice}\\[2pt]\footnotesize atom};
+
+  % Connecting bracket showing same identity through time
+  \draw[arr, draw=hibord, line width=0.6pt] (idA) -- (idB);
+  \draw[arr, draw=hibord, line width=0.6pt] (idB) -- (idC);
+
+  % Value snapshots below
+  \node[abs, minimum width=28mm, minimum height=16mm, align=center] (v1) at (1.6, 0.8)
+       {\{:name "Alice"\\:age 30\}};
+  \node[abs, minimum width=28mm, minimum height=16mm, align=center] (v2) at (6.0, 0.8)
+       {\{:name "Alice"\\:age 31\}};
+  \node[abs, minimum width=28mm, minimum height=16mm, align=center] (v3) at (10.4, 0.8)
+       {\{:name "Alice Smith"\\:age 31\}};
+
+  % Identity -> Value pointers
+  \draw[uses, draw=conbord, line width=0.6pt] (idA) -- (v1);
+  \draw[uses, draw=conbord, line width=0.6pt] (idB) -- (v2);
+  \draw[uses, draw=conbord, line width=0.6pt] (idC) -- (v3);
+
+  % swap! labels between identity transitions
+  \node[font=\sffamily\footnotesize, text=inkc, fill=white, fill opacity=0.9, text opacity=1, inner sep=2pt]
+       at (3.8, 3.9) {\texttt{swap!}};
+  \node[font=\sffamily\footnotesize, text=inkc, fill=white, fill opacity=0.9, text opacity=1, inner sep=2pt]
+       at (8.2, 3.9) {\texttt{swap!}};
+
+  % Annotations on left
+  \node[note, anchor=east, text width=42mm] at (-0.7, 3.9)
+       {**같은 identity**\\[2pt]시간에 따라 다른 값을 가리킴};
+  \node[note, anchor=east, text width=42mm] at (-0.7, 0.8)
+       {**서로 다른 value**\\[2pt]각각 영구 불변 — 옛 스냅샷을 들고 있는 스레드는 그 값을 그대로 본다};
+
+  % Bottom caption — t1/t2/t3 markers
+  \node[font=\sffamily\footnotesize, text=mutec] at (1.6, -0.6) {$t_1$};
+  \node[font=\sffamily\footnotesize, text=mutec] at (6.0, -0.6) {$t_2$};
+  \node[font=\sffamily\footnotesize, text=mutec] at (10.4, -0.6) {$t_3$};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,72 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+  % ─── Spout (left) ───
+  \node[cli, minimum width=24mm, minimum height=14mm, align=center, text width=22mm]
+        (spout) at (0, 0)
+        {\textbf{Spout}\\[2pt]\footnotesize TwitterSpout\\(Kafka, queue)};
+
+  % ─── Split bolts (4 instances) ───
+  \node[prp, minimum width=22mm, minimum height=8mm, align=center] (s1) at (5,  2.4) {SplitBolt \#1};
+  \node[prp, minimum width=22mm, minimum height=8mm, align=center] (s2) at (5,  0.8) {SplitBolt \#2};
+  \node[prp, minimum width=22mm, minimum height=8mm, align=center] (s3) at (5, -0.8) {SplitBolt \#3};
+  \node[prp, minimum width=22mm, minimum height=8mm, align=center] (s4) at (5, -2.4) {SplitBolt \#4};
+
+  % ─── Count bolts (4 instances) ───
+  \node[imp, minimum width=22mm, minimum height=8mm, align=center] (c1) at (10.5,  2.4) {CountBolt \#1};
+  \node[imp, minimum width=22mm, minimum height=8mm, align=center] (c2) at (10.5,  0.8) {CountBolt \#2};
+  \node[imp, minimum width=22mm, minimum height=8mm, align=center] (c3) at (10.5, -0.8) {CountBolt \#3};
+  \node[imp, minimum width=22mm, minimum height=8mm, align=center] (c4) at (10.5, -2.4) {CountBolt \#4};
+
+  % ─── Sink (right) ───
+  \node[hi, minimum width=24mm, minimum height=14mm, align=center, text width=22mm]
+        (sink) at (15, 0)
+        {\textbf{Speed View}\\[2pt]\footnotesize Redis\\(\#tag, count)};
+
+  % ─── Spout → Split bolts: shuffleGrouping (all-to-all) ───
+  \draw[uses, dashed, draw=edgesc] (spout.east) -- (s1.west);
+  \draw[uses, dashed, draw=edgesc] (spout.east) -- (s2.west);
+  \draw[uses, dashed, draw=edgesc] (spout.east) -- (s3.west);
+  \draw[uses, dashed, draw=edgesc] (spout.east) -- (s4.west);
+
+  % ─── Split → Count: fieldsGrouping (each split sends each hashtag to fixed count bolt) ───
+  % Show all 4x4 mappings lightly
+  \draw[uses] (s1.east) -- (c1.west);
+  \draw[uses] (s1.east) -- (c2.west);
+  \draw[uses] (s1.east) -- (c3.west);
+  \draw[uses] (s1.east) -- (c4.west);
+  \draw[uses] (s2.east) -- (c1.west);
+  \draw[uses] (s2.east) -- (c2.west);
+  \draw[uses] (s2.east) -- (c3.west);
+  \draw[uses] (s2.east) -- (c4.west);
+  \draw[uses] (s3.east) -- (c1.west);
+  \draw[uses] (s3.east) -- (c2.west);
+  \draw[uses] (s3.east) -- (c3.west);
+  \draw[uses] (s3.east) -- (c4.west);
+  \draw[uses] (s4.east) -- (c1.west);
+  \draw[uses] (s4.east) -- (c2.west);
+  \draw[uses] (s4.east) -- (c3.west);
+  \draw[uses] (s4.east) -- (c4.west);
+
+  % ─── Count → Sink ───
+  \draw[flow] (c1.east) -- (sink.west |- c1.east);
+  \draw[flow] (c2.east) -- (sink.west);
+  \draw[flow] (c3.east) -- (sink.west);
+  \draw[flow] (c4.east) -- (sink.west |- c4.east);
+
+  % ─── Stream labels ───
+  \node[badge, anchor=south] at (2.5, 2.7) {shuffleGrouping};
+  \node[badge, anchor=south] at (7.7, 2.7) {fieldsGrouping("hashtag")};
+
+  % ─── Caption ───
+  \node[caption, anchor=north, text width=150mm]
+       at (7.5, -3.8)
+       {Spout가 외부 소스에서 튜플을 방출하고, bolt 인스턴스들이 stream으로 연결된 DAG를 이룬다. shuffleGrouping은 무작위 분산, fieldsGrouping은 같은 필드 값을 같은 인스턴스로 보낸다.};
+\end{tikzpicture}
+\end{document}

@@ -347,9 +347,35 @@ $$
 - **p**: 병렬화 가능 비율
 - **n**: 프로세서 수
 
+### 공식 유도
+
+책은 단순한 논리에서 공식을 끌어낸다. 단일 프로세서에서 전체 작업 시간을 1로 정규화한다.
+
+$$
+T_1 = 1 = \underbrace{(1-p)}_{\text{순차 부분}} + \underbrace{p}_{\text{병렬 부분}}
+$$
+
+n개 프로세서를 쓰면 순차 부분은 그대로지만, 병렬 부분은 n분의 1로 줄어든다.
+
+$$
+T_n = (1-p) + \frac{p}{n}
+$$
+
+speedup은 두 시간의 비.
+
+$$
+S_n = \frac{T_1}{T_n} = \frac{1}{(1-p) + p/n}
+$$
+
+n이 무한대로 가면 분모가 $1-p$로 수렴한다. 따라서 이론적 상한은:
+
+$$
+S_\infty = \lim_{n \to \infty} \frac{1}{(1-p) + p/n} = \frac{1}{1-p}
+$$
+
 ### 예시
 
-```
+```text
 90% 병렬화 가능, 10코어:
 Speedup = 1 / (0.1 + 0.9/10) = 1 / 0.19 ≈ 5.3x
 
@@ -360,7 +386,73 @@ Speedup = 1 / (0.1 + 0.9/100) = 1 / 0.109 ≈ 9.2x
 Speedup = 1 / 0.1 = 10x (최대)
 ```
 
-**결론**: 순차 부분이 전체를 지배한다.
+### 워크드 예제 — 책에서
+
+10시간 걸리는 작업이 있다. 그 중 1시간이 본질적으로 순차적이라면 ($p = 0.9$):
+
+```text
+n=1:    T = 10h,              S = 1.0x
+n=2:    T = 1 + 9/2  = 5.5h,  S = 1.82x
+n=4:    T = 1 + 9/4  = 3.25h, S = 3.08x
+n=8:    T = 1 + 9/8  = 2.125h,S = 4.71x
+n=16:   T = 1 + 9/16 = 1.56h, S = 6.40x
+n=64:   T = 1 + 9/64 = 1.14h, S = 8.77x
+n=∞:    T = 1h,               S = 10.0x   ← 상한
+```
+
+코어가 64개 있어도 8.77배밖에 안 나온다. **순차 1시간이 전체를 결정한다**. 95% 병렬화로 끌어올리면 상한이 20배로 두 배가 된다.
+
+| $p$ | $S_\infty$ | $n = 64$일 때 |
+|-----|-----------|---------------|
+| 0.50 | 2.0x | 1.97x |
+| 0.75 | 4.0x | 3.88x |
+| 0.90 | 10.0x | 8.77x |
+| 0.95 | 20.0x | 15.42x |
+| 0.99 | 100.0x | 39.26x |
+| 0.999 | 1000.0x | 60.32x |
+
+**결론**: 순차 부분이 전체를 지배한다. 병렬화율을 1%만 올려도 상한이 극적으로 바뀐다.
+
+### Gustafson의 법칙 — 또 다른 시각
+
+Amdahl은 **문제 크기 고정**을 가정한다. Gustafson(1988)은 다른 시각을 제시했다. 코어가 늘어나면 사람들은 **더 큰 문제**를 풀고 싶어한다.
+
+n 프로세서 환경에서 작업의 순차 시간 비율이 $s$, 병렬 시간 비율이 $1-s$라 하자. 이 작업을 단일 프로세서로 환산하면:
+
+$$
+T_1 = s + n(1-s)
+$$
+
+병렬 부분이 n개 프로세서에 분산된 결과이기 때문이다. 따라서 scaled speedup:
+
+$$
+S_{\text{Gustafson}}(n) = \frac{s + n(1-s)}{s + (1-s)} = s + n(1-s) = n - s(n-1)
+$$
+
+이 공식은 **n에 선형**이다. Amdahl과 정반대 결론. 핵심 차이는 가정이다.
+
+| 법칙 | 가정 | 결론 |
+|------|------|------|
+| Amdahl | 문제 크기 고정 ($p$ 비율 고정) | 코어 늘려도 상한 존재 |
+| Gustafson | 시간 고정, 문제 크기 확장 | 코어에 비례한 선형 speedup |
+
+실제 워크로드 — 시뮬레이션, 머신러닝 학습, 빅데이터 — 는 Gustafson 모델에 가깝다. 데이터셋이 클수록 병렬 부분이 절대적으로 늘어나기 때문이다.
+
+### 강한 확장성 vs 약한 확장성
+
+```text
+Strong scaling (Amdahl):
+  - 문제 크기 고정
+  - 코어 추가 시 각 코어의 일이 줄어듦
+  - 통신/동기화 오버헤드가 지배적
+
+Weak scaling (Gustafson):
+  - 코어당 일이 일정
+  - 코어 추가 시 전체 문제 크기 증가
+  - 통신이 잘 설계되면 선형
+```
+
+벤치마크할 때 둘을 구분하지 않으면 잘못된 결론을 내린다. HPC 벤치마크는 두 가지 모두 보고하는 게 표준이다.
 
 ### C++17 병렬 알고리즘으로 측정
 
@@ -394,6 +486,192 @@ int main() {
     std::println("Speedup:    {:.2f}x", seq_time / par_time);
 }
 ```
+
+---
+
+## 1.6.5 Hard vs Soft Real-time
+
+책 1.5절은 동시성 시스템의 시간 보장을 두 부류로 나눈다.
+
+### Hard real-time
+
+> 데드라인을 **놓치면 시스템이 실패**한다.
+
+- 항공기 제어, 자동차 브레이크, 의료 기기, 산업용 로봇
+- 응답 시간이 결정론적(deterministic)이어야 한다
+- 평균이 아닌 **최악(worst-case)** 시간을 보장해야 한다
+- wait-free 알고리즘이 필수에 가깝다 — 모든 호출이 유한 단계에서 끝나야 한다
+
+### Soft real-time
+
+> 데드라인을 **놓쳐도 결과가 열화**될 뿐 시스템은 계속 동작한다.
+
+- 비디오 재생(프레임 드롭), 게임(스터터링), VOIP(음성 끊김)
+- 평균 응답 시간이 중요하지 최악 시간은 통계적 한계로 충분
+- lock-free 또는 잘 튜닝된 lock 기반으로 충분
+
+### 비교 표
+
+| 항목 | Hard real-time | Soft real-time |
+|------|----------------|----------------|
+| 데드라인 위반 | 시스템 실패 | 품질 저하 |
+| 응답 시간 보장 | 결정론적 worst-case | 확률적/평균 |
+| 동기화 | wait-free 선호 | lock-free / mutex |
+| 가비지 컬렉션 | 금지 또는 결정론적 GC | 일반 GC 허용 |
+| 스케줄러 | 우선순위 기반 RTOS | 일반 OS |
+| 예시 | 항공, 자동차, 의료 | 비디오, 오디오, 게임 |
+
+### Hard real-time의 함정
+
+```text
+일반 OS의 함정:
+- 페이지 폴트 → 디스크 IO → 수십 ms 지연
+- 가비지 컬렉션 stop-the-world
+- 우선순위 역전 (Mars Pathfinder, 1997)
+- 캐시 미스로 인한 지연 변동성
+- mutex의 priority inheritance 없으면 무한 대기 가능
+
+해결책:
+- 메모리 핀(mlockall)
+- 미리 할당된 객체 풀
+- 우선순위 상속 mutex (PTHREAD_PRIO_INHERIT)
+- wait-free 자료구조
+- RTOS (FreeRTOS, Zephyr, VxWorks, QNX)
+```
+
+이 책의 후반부 자료구조 — lock-free queue, wait-free counter — 가 왜 중요한지 여기서 동기가 나온다. 실시간 시스템은 평균이 아닌 최악을 다뤄야 한다.
+
+---
+
+## 1.6.7 Producer-Consumer with Bounded Buffer
+
+책 1.2절의 대표 예제. 한 스레드가 데이터를 생성하고 다른 스레드가 소비한다. 버퍼는 유한 크기.
+
+### 의사 코드
+
+```text
+shared:
+    buffer[N]           ─ 원형 버퍼
+    head, tail          ─ 인덱스
+    not_full, not_empty ─ 조건 변수
+    mtx                 ─ 뮤텍스
+
+producer():
+    loop:
+        item = produce()
+        acquire(mtx)
+        while (count == N):
+            wait(not_full, mtx)
+        buffer[tail] = item
+        tail = (tail + 1) mod N
+        count = count + 1
+        signal(not_empty)
+        release(mtx)
+
+consumer():
+    loop:
+        acquire(mtx)
+        while (count == 0):
+            wait(not_empty, mtx)
+        item = buffer[head]
+        head = (head + 1) mod N
+        count = count - 1
+        signal(not_full)
+        release(mtx)
+        consume(item)
+```
+
+### C++20 구현
+
+```cpp
+#include <mutex>
+#include <condition_variable>
+#include <optional>
+#include <array>
+
+template <typename T, size_t N>
+class BoundedBuffer {
+    std::array<T, N> buffer;
+    size_t head = 0, tail = 0, count = 0;
+    mutable std::mutex mtx;
+    std::condition_variable not_full, not_empty;
+
+public:
+    void put(T item) {
+        std::unique_lock lock(mtx);
+        not_full.wait(lock, [this] { return count < N; });
+        buffer[tail] = std::move(item);
+        tail = (tail + 1) % N;
+        ++count;
+        not_empty.notify_one();
+    }
+
+    T take() {
+        std::unique_lock lock(mtx);
+        not_empty.wait(lock, [this] { return count > 0; });
+        T item = std::move(buffer[head]);
+        head = (head + 1) % N;
+        --count;
+        not_full.notify_one();
+        return item;
+    }
+};
+```
+
+### C11 구현
+
+```c
+#include <threads.h>
+#include <stdbool.h>
+
+#define BUF_SIZE 256
+
+typedef struct {
+    int buffer[BUF_SIZE];
+    size_t head, tail, count;
+    mtx_t mtx;
+    cnd_t not_full, not_empty;
+} BoundedBuffer;
+
+void bb_init(BoundedBuffer* bb) {
+    bb->head = bb->tail = bb->count = 0;
+    mtx_init(&bb->mtx, mtx_plain);
+    cnd_init(&bb->not_full);
+    cnd_init(&bb->not_empty);
+}
+
+void bb_put(BoundedBuffer* bb, int item) {
+    mtx_lock(&bb->mtx);
+    while (bb->count == BUF_SIZE) {
+        cnd_wait(&bb->not_full, &bb->mtx);
+    }
+    bb->buffer[bb->tail] = item;
+    bb->tail = (bb->tail + 1) % BUF_SIZE;
+    bb->count++;
+    cnd_signal(&bb->not_empty);
+    mtx_unlock(&bb->mtx);
+}
+
+int bb_take(BoundedBuffer* bb) {
+    mtx_lock(&bb->mtx);
+    while (bb->count == 0) {
+        cnd_wait(&bb->not_empty, &bb->mtx);
+    }
+    int item = bb->buffer[bb->head];
+    bb->head = (bb->head + 1) % BUF_SIZE;
+    bb->count--;
+    cnd_signal(&bb->not_full);
+    mtx_unlock(&bb->mtx);
+    return item;
+}
+```
+
+### 두 가지 핵심 — 책의 강조
+
+1. **상호 배제**: `count`, `head`, `tail`이 일관되게 갱신되려면 mutex로 보호해야 한다.
+2. **조건 동기화**: 버퍼가 가득/비어 있으면 단순 spin이 아니라 **조건 변수**로 대기. CPU 낭비도 없고, 깨어날 때 조건을 다시 검사한다 (`while` 루프, `if`가 아니다 — spurious wakeup 때문).
+
+이 패턴은 14장의 lock-free queue에서 다시 등장한다. 거기서는 mutex 없이 같은 일을 한다.
 
 ---
 

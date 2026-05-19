@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+
+  % ─── Actor A (sender) ─────────────────────────────
+  \node[neut, minimum width=42mm, minimum height=32mm, anchor=north west]
+    (boxA) at (0, 0) {};
+  \node[anchor=north, font=\sffamily\bfseries\small, text=inkc]
+    at ($(boxA.north) + (0,-0.15)$) {Actor A};
+
+  \node[impSm, minimum width=24mm, anchor=center]
+    (stateA) at ($(boxA.center) + (0, 0.55)$) {state};
+  \node[absSm, minimum width=24mm, anchor=center]
+    (mboxA) at ($(boxA.center) + (0, -0.25)$) {mailbox};
+  \node[font=\sffamily\footnotesize, text=mutec, anchor=center]
+    at ($(boxA.south) + (0, 0.35)$) {receive loop};
+
+  % ─── Actor B (receiver) ───────────────────────────
+  \node[neut, minimum width=42mm, minimum height=32mm, anchor=north west]
+    (boxB) at (7, 0) {};
+  \node[anchor=north, font=\sffamily\bfseries\small, text=inkc]
+    at ($(boxB.north) + (0,-0.15)$) {Actor B};
+
+  \node[impSm, minimum width=24mm, anchor=center]
+    (stateB) at ($(boxB.center) + (0, 0.55)$) {state};
+  \node[absSm, minimum width=24mm, anchor=center]
+    (mboxB) at ($(boxB.center) + (0, -0.25)$) {mailbox};
+  \node[font=\sffamily\footnotesize, text=mutec, anchor=center]
+    at ($(boxB.south) + (0, 0.35)$) {receive loop};
+
+  % ─── Messages flowing into B's mailbox ────────────
+  \node[conSm, minimum width=14mm, anchor=center] (m1)
+    at ($(mboxB.east) + (1.0, 0.6)$) {msg 3};
+  \node[conSm, minimum width=14mm, anchor=center] (m2)
+    at ($(m1) + (1.4, 0)$) {msg 2};
+  \node[conSm, minimum width=14mm, anchor=center] (m3)
+    at ($(m2) + (1.4, 0)$) {msg 1};
+
+  % Asynchronous send arrow from A to mailbox queue
+  \draw[msgasync] (boxA.east) -- node[font=\sffamily\footnotesize, above, text=inkc]
+    {send (비동기)} ($(m3.east) + (0.4, 0)$);
+
+  % Mailbox-to-actor pull
+  \draw[msgsync] (m1.west) -- node[font=\sffamily\footnotesize, above, text=inkc]
+    {receive} (mboxB.east);
+
+  % ─── Caption ─────────────────────────────────────
+  \node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=north, align=center]
+    at ($(boxA.south)!.5!(boxB.south) + (0, -0.4)$)
+    {각 actor = 격리된 state + 자기만의 mailbox.\\공유 메모리 없음, 메시지는 복사된다.};
+
+\end{tikzpicture}
+\end{document}

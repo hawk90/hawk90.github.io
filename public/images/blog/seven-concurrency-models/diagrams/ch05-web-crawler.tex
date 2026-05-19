@@ -1,0 +1,69 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  chn/.style={rectangle, rounded corners=2pt,
+              draw=prpbord, fill=prpfill, line width=0.45pt,
+              minimum height=8mm, minimum width=22mm,
+              font=\sffamily\small\bfseries, align=center}]
+
+% =================== Seed (left) ===================
+\node[cli, minimum width=22mm] (seed) at (-6.5, 0) {seed URL};
+
+% =================== urls channel ===================
+\node[chn] (urls) at (-2.5, 0) {urls\\\textit{(chan 100)}};
+
+\draw[uses, line width=0.7pt] (seed) -- (urls);
+
+% =================== Worker pool ===================
+\node[imp, minimum width=24mm] (w1) at (2,  2.4) {worker 1 (go)};
+\node[imp, minimum width=24mm] (w2) at (2,  1.0) {worker 2 (go)};
+\node[imp, minimum width=24mm] (w3) at (2, -0.4) {worker 3 (go)};
+\node[font=\sffamily\footnotesize, text=mutec] at (2, -1.4) {\vdots};
+\node[imp, minimum width=24mm] (wN) at (2, -2.4) {worker N (go)};
+
+% urls fan-out to workers
+\draw[uses] (urls.east) -- (w1.west);
+\draw[uses] (urls.east) -- (w2.west);
+\draw[uses] (urls.east) -- (w3.west);
+\draw[uses] (urls.east) -- (wN.west);
+
+% =================== thread (HTTP IO) — far right column ===================
+\node[tealn, minimum width=24mm] (http) at (7, 0)
+     {\texttt{thread}\\\textit{HTTP slurp}};
+
+\draw[uses, line width=0.6pt] (w1.east) to[bend left=10]  (http.north west);
+\draw[uses, line width=0.6pt] (w2.east) -- (http.west |- w2.east);
+\draw[uses, line width=0.6pt] (w3.east) -- (http.west |- w3.east);
+\draw[uses, line width=0.6pt] (wN.east) to[bend right=10] (http.south west);
+
+% Return from HTTP back to workers (dashed)
+\draw[alt] (http.north) to[bend left=22] node[font=\sffamily\footnotesize, fill=white, inner sep=1pt]{body} (w1.north);
+
+% =================== extract-links feedback ===================
+% Workers extract new urls and push back to urls channel
+\draw[uses, line width=0.55pt, draw=focusc]
+     (w1.north) to[bend left=45] node[font=\sffamily\footnotesize, fill=white, inner sep=1pt, text=focusc]{extract-links} (urls.north);
+
+% =================== results channel (down) ===================
+\node[chn] (results) at (2, -4.2) {results\\\textit{(chan 100)}};
+
+\draw[uses, line width=0.6pt] (w1.south) -- (results.north);
+\draw[uses, line width=0.6pt] (w2.south) -- (results.north);
+\draw[uses, line width=0.6pt] (w3.south) -- (results.north);
+\draw[uses, line width=0.6pt] (wN.south) -- (results.north);
+
+% =================== Annotation ===================
+\node[note, anchor=north west, text width=11cm]
+     at (-6.5, -4.0)
+     {workers는 같은 \texttt{urls} 채널에서 일을 빼간다.\\[2pt]
+      추출된 새 URL이 다시 \texttt{urls}로 흐른다 (focus 화살표).\\[2pt]
+      작업 분배 로직이 따로 필요 없다 — 채널이 곧 dispatcher.};
+
+\end{tikzpicture}
+\end{document}

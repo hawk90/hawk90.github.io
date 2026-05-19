@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\setmainhangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\setsanshangulfont{Apple SD Gothic Neo}[BoldFont={Apple SD Gothic Neo Bold}]
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+
+  % ─── Panel 1: link (bi-directional) ───────────────
+  \node[font=\sffamily\bfseries\small, text=inkc, anchor=north west]
+    at (0, 0.6) {Process.link / spawn\_link};
+
+  \node[cli, minimum width=24mm] (lp) at (1.5, -0.8) {Process P};
+  \node[cli, minimum width=24mm] (lq) at (5.5, -0.8) {Process Q};
+
+  % Bi-directional arrow between P and Q
+  \draw[{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}, draw=conbord, line width=0.6pt]
+    (lp.east) -- node[font=\sffamily\footnotesize, above, text=inkc]{link}
+                 node[font=\sffamily\footnotesize, below, text=mutec]{양방향} (lq.west);
+
+  % Crash propagation note
+  \node[font=\sffamily\footnotesize, text=mutec, anchor=north, align=center,
+        text width=70mm]
+    at ($(lp)!.5!(lq) + (0, -0.9)$)
+    {한쪽이 crash $\Rightarrow$ 다른 쪽도 종료\\(또는 trap\_exit로 신호 수신)};
+
+  % ─── Divider ─────────────────────────────────────
+  \draw[draw=groupbord, line width=0.4pt, dashed]
+    (-0.3, -3.6) -- (8.3, -3.6);
+
+  % ─── Panel 2: monitor (uni-directional) ───────────
+  \node[font=\sffamily\bfseries\small, text=inkc, anchor=north west]
+    at (0, -3.9) {Process.monitor};
+
+  \node[cli, minimum width=24mm] (mp) at (1.5, -5.3) {Watcher P};
+  \node[cli, minimum width=24mm] (mq) at (5.5, -5.3) {Target Q};
+
+  % Uni-directional arrow: P monitors Q
+  \draw[uses, line width=0.55pt, draw=tealbord]
+    (mp.east) -- node[font=\sffamily\footnotesize, above, text=inkc]{monitor}
+                  node[font=\sffamily\footnotesize, below, text=mutec]{단방향} (mq.west);
+
+  % :DOWN message back
+  \draw[msgret, draw=tealbord]
+    ($(mq.south) + (-0.2, 0)$) to[bend left=22]
+    node[font=\sffamily\footnotesize, below, text=inkc]{\{:DOWN, ref, ...\}}
+    ($(mp.south) + (0.2, 0)$);
+
+  \node[font=\sffamily\footnotesize, text=mutec, anchor=north, align=center,
+        text width=70mm]
+    at ($(mp)!.5!(mq) + (0, -1.45)$)
+    {Q가 죽으면 P는 mailbox로 알림만 받는다.\\P는 함께 죽지 않는다.};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  th/.style={cls, draw=absbord, fill=absfill, minimum width=28mm, minimum height=10mm,
+             font=\sffamily\bfseries\small},
+  lk/.style={cls, draw=conbord, fill=confill, minimum width=22mm, minimum height=10mm,
+             font=\sffamily\bfseries\small},
+  holds/.style={-{Stealth[length=2.6mm]}, draw=impbord, line width=0.6pt},
+  waits/.style={-{Stealth[length=2.6mm]}, dashed, draw=conbord, line width=0.6pt}
+]
+  % Threads on left/right, locks in middle (cycle)
+  \node[th] (ta) at (-4, 1.5) {Thread A\\[2pt]\footnotesize\mdseries transfer(a, b)};
+  \node[th] (tb) at ( 4, 1.5) {Thread B\\[2pt]\footnotesize\mdseries transfer(b, a)};
+
+  \node[lk] (la) at (-1.5, -1) {a.lock};
+  \node[lk] (lb) at ( 1.5, -1) {b.lock};
+
+  % Holds (solid green)
+  \draw[holds] (ta.south) -- node[font=\sffamily\footnotesize, text=impbord, fill=white,
+                                  inner sep=1.5pt, midway, left=2pt]{holds} (la.north);
+  \draw[holds] (tb.south) -- node[font=\sffamily\footnotesize, text=impbord, fill=white,
+                                  inner sep=1.5pt, midway, right=2pt]{holds} (lb.north);
+
+  % Waits-for (dashed red — cross arrows)
+  \draw[waits] (ta.east) .. controls (0, 0.8) .. (lb.north west)
+       node[font=\sffamily\footnotesize, text=conbord, fill=white, inner sep=1.5pt,
+            pos=0.55, above]{waits for};
+  \draw[waits] (tb.west) .. controls (0, 0.8) .. (la.north east)
+       node[font=\sffamily\footnotesize, text=conbord, fill=white, inner sep=1.5pt,
+            pos=0.55, above]{waits for};
+
+  % Center label
+  \node[font=\sffamily\bfseries\large, text=warnbord] at (0, -2.8) {circular wait};
+
+  % Bottom note
+  \node[note, draw=warnbord, fill=warnfill, anchor=north, text width=95mm, align=center]
+       at (0, -3.6)
+       {두 스레드 모두 영원히 대기 — 둘 다 자신의 락을 놓지 않은 채 상대의 락을 기다림};
+\end{tikzpicture}
+\end{document}

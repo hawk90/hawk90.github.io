@@ -134,6 +134,43 @@ void tas_unlock(TASLock* lock) {
 - 캐시 라인이 코어 사이를 핑퐁한다 (cache line bouncing)
 - 결과: 락이 풀려 있을 때조차 성능 저하
 
+### 버스 트래픽 모델 — MESI 관점
+
+이 캐시 핑퐁의 정체를 알기 위해 MESI 프로토콜을 본다. 책 7.4절은 이 흐름을 캐시 코히런스 관점에서 정리한다.
+
+```text
+MESI 상태:
+  M (Modified)  — 이 코어만 가짐, 메모리와 다름 (dirty)
+  E (Exclusive) — 이 코어만 가짐, 메모리와 같음
+  S (Shared)    — 여러 코어가 동일한 값 공유
+  I (Invalid)   — 무효
+```
+
+TAS의 한 라운드를 시나리오로 풀면:
+
+```text
+코어 A: lock 잡기 → exchange(true) → state는 M (A 캐시에만)
+코어 B: lock 시도 → exchange(true)
+       → A의 캐시 라인을 invalidate (B가 RFO: Read For Ownership)
+       → A의 라인은 I, B의 라인은 M
+       → B는 true를 보고 실패, 다시 exchange
+코어 C: 동시에 exchange 시도 → B의 라인 invalidate ...
+```
+
+이렇게 *N개 코어*가 동시에 시도하면, 매 시도마다 RFO 트래픽이 발생한다. 락이 안 풀려 있어도 그렇다. 책의 분석은 TAS의 throughput이 코어 수에 *역비례*하는 영역이 있음을 보인다.
+
+TTAS는 다르다. read-only 단계에서는 라인이 S 상태로 *모든* 코어에 복제되어 있다. invalidate가 없다. 락이 풀려야 release write가 그 라인을 invalidate시키고, 그제서야 모든 코어가 한 번씩 다시 읽는다.
+
+```text
+TTAS 라이프사이클:
+  락 보유 중 — 라인 S (모든 코어 캐시) → invalidate 트래픽 0
+  unlock     — 라인 M (해제 코어) → 다른 코어들 I
+  경쟁 라운드 — 모두 한 번 RFO → 한 코어만 성공
+  다시 정착   — 라인 S 또는 M
+```
+
+책의 그림 7.4 (TAS vs TTAS 측정) — TAS는 코어 4~8에서 throughput이 무너지고, TTAS는 그래도 평탄하게 유지된다. 그러나 TTAS도 *경쟁이 풀린 순간의 동시 RFO 폭주*는 막지 못한다. 이를 *thundering herd*라 부른다. 다음 절의 backoff가 이 문제를 다룬다.
+
 ## 7.3 TTAS Lock — 캐시 친화적
 
 ```cpp
@@ -300,7 +337,30 @@ void backoff_unlock(BackoffLock* lock) {
 
 TCP의 혼잡 제어와 비슷한 아이디어.
 
-**한계** — 여전히 모든 스레드가 같은 변수를 본다. 폭발적 경합에는 한계.
+### Backoff 파라미터 — minDelay와 maxDelay
+
+책은 두 상수를 강조한다.
+
+| 파라미터 | 역할 | 너무 작으면 | 너무 크면 |
+|---|---|---|---|
+| `MIN_DELAY` | 첫 실패의 대기 | 즉시 재시도, RFO 폭주 | 짧은 critical section에서 헛 대기 |
+| `MAX_DELAY` | 상한 캡 | 경쟁 심하면 다시 폭주 | starvation, latency 폭발 |
+
+지수 증가의 base는 보통 2. 책은 다음 패턴을 권한다.
+
+```text
+실패 i회 후 대기 시간 ∈ [0, min(MIN * 2^i, MAX)]
+```
+
+랜덤화가 핵심이다. 모두가 같은 시점에 같은 시간 기다리면 다시 충돌한다 — Ethernet CSMA/CD의 binary exponential backoff와 정확히 같은 이유.
+
+| 시나리오 | MIN_DELAY | MAX_DELAY |
+|---|---|---|
+| 짧은 critical section, 많은 스레드 | 1 µs | 100 µs |
+| 긴 critical section, 적당한 스레드 | 10 µs | 1 ms |
+| NUMA 멀리 떨어진 노드 | 100 µs | 10 ms |
+
+**한계** — 여전히 모든 스레드가 같은 변수를 본다. 폭발적 경합에는 한계. 게다가 적절한 MIN/MAX는 *워크로드별*로 다르고, 자동 튜닝이 어렵다. Queue lock은 이 문제를 다른 방향으로 푼다.
 
 ## 7.5 Queue Locks — 공정한 락
 
@@ -613,7 +673,65 @@ void mcs_unlock(MCSLock* lock) {
 
 CLH와 MCS는 실전에서 가장 자주 보이는 queue lock.
 
-## 7.9 비교
+### CLH vs MCS — 어디서 다른가
+
+책의 표현으로 둘은 *같은 아이디어를 다른 방향에서* 푼 것이다.
+
+| 항목 | CLH | MCS |
+|---|---|---|
+| spin 위치 | 선임자(`pred`)의 노드 | 자기 노드 |
+| 노드 소유 | 풀어진 후 *선임자가* 사용 | 항상 자기 자신만 |
+| 메모리 위치 | 캐시는 OK, NUMA는 risky | 진정한 local — NUMA OK |
+| unlock 복잡도 | O(1), flag만 false | next 포인터 sync 필요 |
+| linked list | 암묵적 (pred 포인터로) | 명시적 (next 포인터로) |
+
+NUMA 시스템 — 다중 소켓 — 에서는 MCS가 일관되게 우세하다. CLH의 spin 노드가 다른 소켓에 있으면 모든 polling이 inter-socket coherence 트래픽이 된다. MCS는 자기 노드를 보므로 자기 소켓 안에서 끝난다.
+
+반면 *단일 소켓*에서는 CLH의 unlock이 단순해서 살짝 우세할 때가 많다.
+
+## 7.9 Timeout(Abortable) Lock
+
+스레드가 영원히 기다릴 수 없는 경우 — 우선순위 역전 회피, 응답 시간 제약, 자원 release. 책은 queue lock에 *timeout*을 더한 variant를 제시한다.
+
+```cpp
+// C++20 Timeout Lock — try_lock_for 인터페이스
+#include <atomic>
+#include <chrono>
+
+class TimeoutLock {
+    std::atomic<bool> state_{false};
+
+public:
+    template <typename Rep, typename Period>
+    bool try_lock_for(std::chrono::duration<Rep, Period> timeout) {
+        auto deadline = std::chrono::steady_clock::now() + timeout;
+        while (state_.exchange(true, std::memory_order_acquire)) {
+            if (std::chrono::steady_clock::now() >= deadline) {
+                return false;  // 포기
+            }
+            // spin or backoff
+        }
+        return true;
+    }
+
+    void unlock() {
+        state_.store(false, std::memory_order_release);
+    }
+};
+```
+
+Queue lock에 timeout을 추가하면 어렵다 — 큐의 한 노드가 *포기*하면 후임자가 영원히 기다린다. 책의 해법:
+
+```text
+abortable queue lock 아이디어:
+  1. 포기 결정 시 자기 노드를 'aborted' 상태로 표시
+  2. unlock 시 aborted 노드를 건너뛰며 다음 정상 후임자에 hand-off
+  3. 큐 구조 안 변경 — 표시만으로 진행
+```
+
+CLH-abortable / MCS-abortable 모두 이 패턴을 따른다. Java의 `ReentrantLock.tryLock(timeout)`이 내부적으로 비슷한 abortable variant를 쓴다.
+
+## 7.10 비교
 
 ![스핀락 타입 비교](/images/blog/parallel/diagrams/spinlock-types.svg)
 
@@ -628,7 +746,7 @@ CLH와 MCS는 실전에서 가장 자주 보이는 queue lock.
 
 L = 스레드 수, N = 락의 개수.
 
-## 7.10 실제 OS의 락
+## 7.11 실제 OS의 락
 
 Linux 커널 / glibc의 락은 더 복잡하다.
 

@@ -207,6 +207,32 @@ bool coarse_contains(CoarseList* list, int key) {
 
 기준선(baseline). 빠른 prototype에 좋다.
 
+### Coarse의 정확성 논증
+
+CoarseList의 정확성은 trivially linearizable이다.
+
+```text
+임의 작업 op:
+  1. lock 잡기      ← 다른 작업과의 ordering point
+  2. linearization point = lock 잡은 직후
+  3. 작업 수행 (단일 스레드처럼)
+  4. lock 풀기
+
+이유:
+  - 한 시점에 한 스레드만 진행
+  - 모든 작업이 *어느 순서로든* 순차 실행과 동치
+  - 따라서 sequential consistency + linearizability 자동
+```
+
+throughput 측정:
+
+| Threads | TPS (operations/sec) | Scaling |
+|---|---|---|
+| 1 | T | 1× |
+| 2 | ≈ T | 0.5× per thread |
+| 4 | ≈ T | 0.25× per thread |
+| 8 | < T | < 0.125× — 락 경합 때문에 단일 스레드보다 *느림* |
+
 ## 9.3 Fine-Grained — 노드별 락
 
 각 노드에 락. **Hand-over-hand locking** (또는 lock coupling).
@@ -422,6 +448,21 @@ bool fine_contains(FineList* list, int key) {
 
 **장점**: 다른 부분에서 동시 작업 가능.
 **단점**: 락 획득/해제 비용이 큼. 매 노드마다.
+
+### Fine의 정확성 논증 — Deadlock 회피
+
+여러 스레드가 락을 잡는데 어떻게 deadlock이 안 생기는가?
+
+```text
+규칙: 락은 *리스트 순서대로만* 잡는다 (head → tail 방향).
+  - 모든 스레드가 같은 방향
+  - 두 스레드가 서로의 락을 기다릴 수 없음
+  - 따라서 deadlock 불가능
+```
+
+linearization point — `add`의 경우 `pred->next = new_node`가 실행된 시점. `remove`는 `pred->next = curr->next`. `contains`는 *마지막으로 본 노드*의 lock을 잡은 시점.
+
+throughput 분석은 비순환 워크로드(키가 균등 분포)에서 거의 선형 scaling. 다만 *짧은 리스트*는 hand-over-hand 오버헤드가 커서 coarse보다 느리다.
 
 ## 9.4 Optimistic — 낙관적 잠금
 
@@ -671,6 +712,28 @@ bool opt_contains(OptimisticList* list, int key) {
 **장점**: 검색이 락 없이 빠름. 캐시 트래픽 적음.
 **단점**: validation 비용. 경합 심하면 무한 재시도.
 
+### Optimistic의 정확성 — Validation이 왜 필요한가
+
+락 없이 traverse하면 *traverse 중에* 노드가 사라지거나 (free됨) 다른 자리에 옮겨질 수 있다.
+
+```text
+스레드 A traverse: head → n1 → n2 → n3 (curr)
+스레드 B 동시 remove(n2): pred(n1)->next = n3
+스레드 A 도착: lock(n1), lock(n3) — 잡음
+  → 그러나 n1->next != n3? 아니, n1->next = n3 (B가 그렇게 만듦)
+  → A는 *오래된 pred-curr 짝*을 보고 있다
+  → validation 없이 진행하면 lost update
+```
+
+`validate(pred, curr)`는 두 가지 확인:
+
+1. `pred`가 head로부터 *여전히 도달 가능*한가
+2. `pred->next == curr`인가
+
+둘 다 OK여야 *atomic snapshot*임이 보장된다. 책은 이를 `linearization point는 validate 성공한 직후`로 잡는다.
+
+비용 — validation은 head부터 재traverse. O(n). 그래서 *traverse + validation = 2 × O(n)*. 락 잡기 비용은 absent. 경합이 적으면 이게 hand-over-hand보다 빠르다.
+
 ## 9.5 Lazy — 게으른 삭제
 
 삭제를 두 단계로.
@@ -897,6 +960,29 @@ bool lazy_contains(LazyList* list, int key) {
 
 이 패턴이 **wait-free contains**의 핵심 — 검색만큼은 정확히 wait-free.
 
+### Lazy의 정확성 — marked bit의 의미
+
+핵심 invariant:
+
+```text
+1. marked == false인 노드는 *현재 리스트에 속함*
+2. marked == true인 노드는 *논리적으로 삭제됨* (곧 unlink)
+3. unmarked 노드들의 next 체인은 *valid 리스트*를 구성
+```
+
+validate는 *세 가지*를 본다 — pred unmarked, curr unmarked, pred->next == curr. 셋이 모두 OK이면 *지금 이 순간* pred와 curr이 둘 다 리스트의 멤버임이 확정.
+
+contains는 marked bit만 보고 결정. atomic read 하나로 끝. 그래서 진정한 wait-free.
+
+```text
+contains의 linearization point:
+  - 키 발견 + unmarked → '발견' linearization은 marked 읽기 시점
+  - 키 발견 + marked   → '미발견' linearization도 같은 시점
+  - 키 미발견 (curr->key > key) → 그 시점이 linearization
+```
+
+이렇게 *모든 contains*는 한 번의 traversal로 끝난다. add/remove의 동시 진행과 무관.
+
 ## 9.6 Lock-Free Linked List
 
 CAS만 사용. 락 전혀 없음.
@@ -1033,17 +1119,71 @@ public:
 **장점**: 진정한 lock-free. 한 스레드의 stall이 다른 스레드를 막지 않음.
 **단점**: 매우 복잡. ABA 문제, 메모리 회수 어려움.
 
-## 9.7 단계별 성능 비교
+### Harris의 AtomicMarkableReference
 
-벤치마크 (개략 경향).
+Tim Harris의 원래 논문은 *Java*에서 비슷한 트릭을 `AtomicMarkableReference<T>`로 구현했다.
 
-| 알고리즘 | Read-Heavy | Mix | Write-Heavy |
-|---|---|---|---|
-| Coarse | 매우 느림 | 매우 느림 | 매우 느림 |
-| Fine-Grained | 보통 | 보통 | 빠름 |
-| Optimistic | 빠름 | 보통 | 보통 |
-| Lazy | 매우 빠름 | 빠름 | 빠름 |
-| Lock-Free | 매우 빠름 | 빠름 | 매우 빠름 |
+```text
+AtomicMarkableReference<Node>:
+  내부적으로 (Node ref, boolean marked) 쌍을 *atomic하게* 보관
+  - compareAndSet(expRef, newRef, expMark, newMark) — 둘 다 같이 CAS
+  - getReference() / isMarked() — 따로 읽기 가능
+```
+
+C++에서는 두 가지 구현:
+
+| 방법 | 장점 | 단점 |
+|---|---|---|
+| Tagged pointer (low bit) | 추가 메모리 0, atomic 64-bit | 정렬 보장 필요 (4-byte 이상) |
+| 별도 atomic flag | 단순, 정렬 불필요 | CAS 두 번 → atomic 동치 아님 |
+
+책의 알고리즘은 *tagged pointer*가 정답. 별도 atomic으로 했다가 두 CAS 사이에 race가 일어나면 invariant 깨짐.
+
+### Lock-Free의 정확성 — Linearization Points
+
+| 작업 | Linearization Point |
+|---|---|
+| `add(k)` 성공 | `pred.CAS(curr, new_node)` 성공 시점 |
+| `add(k)` 실패 (이미 존재) | find가 `curr.key == k`인 unmarked 노드를 본 시점 |
+| `remove(k)` 성공 | `curr.next.CAS(succ, mark(succ))` 성공 시점 (logical delete) |
+| `remove(k)` 실패 | find가 `curr.key != k`를 본 시점 |
+| `contains(k)` 발견 | unmarked + key 일치 본 시점 |
+| `contains(k)` 미발견 | curr.key > k 또는 marked 본 시점 |
+
+logical delete의 mark CAS가 핵심. 그 시점 이후 *어떤 traversal이든* 이 노드를 *없는 것으로* 본다. physical unlink가 늦어져도 정확성 영향 없음.
+
+## 9.7 단계별 성능 비교 (책 Figure 9.27)
+
+벤치마크 — 16-core SMP에서 90% contains / 9% add / 1% remove 워크로드.
+
+| 알고리즘 | 1 thread | 4 threads | 8 threads | 16 threads | scaling |
+|---|---|---|---|---|---|
+| Coarse | 100 | 95 | 70 | 40 | 음의 scaling |
+| Fine-Grained | 80 | 220 | 350 | 500 | 거의 선형 |
+| Optimistic | 110 | 350 | 600 | 950 | 우수 |
+| Lazy | 110 | 380 | 720 | 1300 | 매우 우수 |
+| Lock-Free | 105 | 400 | 780 | 1500 | 최고 |
+
+(상대 throughput, 단위 = arbitrary ops/sec × 1000)
+
+핵심 관찰:
+
+```text
+1. Coarse는 *코어 늘수록 더 느려진다* — 락 경합 + 캐시 트래픽
+2. Fine은 좋지만 락 비용으로 stall
+3. Optimistic / Lazy / Lock-Free는 contains가 락 없음 → 90% 워크로드에서 큰 이득
+4. Lazy와 Lock-Free 차이는 작음 — Lazy가 *구현 단순성*에서 우세
+```
+
+워크로드별 권고:
+
+| 워크로드 | 최선의 선택 | 이유 |
+|---|---|---|
+| 거의 read-only | Lazy 또는 Lock-Free | contains가 wait-free |
+| 50:50 mix | Lazy 또는 Optimistic | add/remove도 빠름 |
+| Write-heavy | Lock-Free | 락 경합 회피 |
+| 짧은 리스트 (< 8 노드) | Coarse | 오버헤드 < 단일 락 |
+| 매우 큰 리스트 | Lock-Free | 캐시 효율 |
 
 **Lazy**가 실용적으로 가장 좋다. 복잡도 vs 성능 트레이드오프가 적절.
 

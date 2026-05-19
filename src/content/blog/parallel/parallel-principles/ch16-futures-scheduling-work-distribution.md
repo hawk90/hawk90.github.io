@@ -109,7 +109,48 @@ bool future_is_done(Future* f) {
 
 C++의 `std::future`, JavaScript의 `Promise`, Rust의 `Future` 트레잇 — 모두 같은 아이디어.
 
-## 16.2 Future의 가치
+## 16.2 Java의 Future와 ExecutorService
+
+책의 모델은 Java의 `java.util.concurrent`. 핵심은 세 가지 추상화의 분리다.
+
+- `Runnable` / `Callable<V>` — *무엇*을 할지
+- `Future<V>` — 결과의 *핸들*
+- `ExecutorService` — *어떻게* / *어디서* 실행할지
+
+```java
+// Java — Herlihy & Shavit Ch16의 기본 모델
+import java.util.concurrent.*;
+
+ExecutorService exec = Executors.newFixedThreadPool(4);
+
+Callable<Integer> task = () -> {
+    Thread.sleep(100);
+    return 42;
+};
+
+Future<Integer> f = exec.submit(task);
+
+// 다른 일을 하다가 결과 회수
+int result = f.get();      // 완료까지 블록
+exec.shutdown();
+```
+
+핵심 통찰은 스레드 생성과 작업 표현의 분리다. 호출자는 스레드를 *생성*하지 않고 작업을 *제출*만 한다. 실행 정책은 `ExecutorService` 구현체가 결정한다 — fixed pool, cached pool, fork-join pool.
+
+```cpp
+// C++20 — 같은 모델의 C++ 대응
+#include <future>
+#include <thread>
+#include <functional>
+
+// std::async가 ExecutorService 역할 (한정적)
+auto f = std::async(std::launch::async, [] { return 42; });
+int r = f.get();
+```
+
+C++의 `std::async`는 정책을 두 가지(`async`, `deferred`)만 가진다. 진짜 풀은 직접 구현하거나 `oneTBB`, `Boost.Asio` 같은 외부 라이브러리가 필요하다.
+
+## 16.3 Future의 가치
 
 스레드를 직접 다루는 것보다 future가 좋은 이유.
 
@@ -165,7 +206,87 @@ int main() {
 
 future가 예외/실패를 캡처해 `get()`에서 전파.
 
-## 16.3 Fork-Join 패턴
+## 16.4 Future로 행렬 곱
+
+책 Listing 16.4의 멀티스레드 행렬 곱은 future의 표현력을 잘 보여준다. 결과 행렬을 사분면으로 쪼개 재귀로 내려간다.
+
+$$
+C = A \cdot B \quad\Longrightarrow\quad
+\begin{pmatrix}C_{00} & C_{01}\\ C_{10} & C_{11}\end{pmatrix}
+= \begin{pmatrix}A_{00}B_{00}+A_{01}B_{10} & A_{00}B_{01}+A_{01}B_{11}\\ A_{10}B_{00}+A_{11}B_{10} & A_{10}B_{01}+A_{11}B_{11}\end{pmatrix}
+$$
+
+각 항이 독립이라 8개 곱이 병렬, 그다음 4개 덧셈이 병렬.
+
+```cpp
+// C++20 — 분할 정복 행렬 곱 (Ch16 Listing 16.4 재현)
+#include <future>
+#include <vector>
+
+using Matrix = std::vector<std::vector<double>>;
+
+void multiply(const Matrix& A, const Matrix& B, Matrix& C,
+              int row, int col, int n) {
+    if (n == 1) {
+        C[row][col] += A[row][col] * B[row][col];
+        return;
+    }
+    int half = n / 2;
+    // 8개 곱을 future로 fork
+    std::vector<std::future<void>> mults;
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            for (int k = 0; k < 2; ++k) {
+                mults.push_back(std::async(std::launch::async,
+                    multiply, std::cref(A), std::cref(B), std::ref(C),
+                    row + i * half, col + j * half, half));
+            }
+        }
+    }
+    for (auto& f : mults) f.get();   // join
+}
+```
+
+흥미로운 점은 *모든 곱이 동시에 시작 가능*하다는 것이다. 합은 누산이라 더 신중해야 하지만, 핵심 통찰은 작업 의존 그래프가 **DAG**(directed acyclic graph)이고 future가 그 간선을 표현한다는 것.
+
+## 16.5 Multithreaded Fibonacci
+
+가장 작은 예 — Fibonacci로 fork/join의 비용/이득 균형을 본다.
+
+```cpp
+// C++20 — Fork/Join Fibonacci (Ch16의 첫 예)
+#include <future>
+
+long fib(int n) {
+    if (n < 2) return n;
+    auto left = std::async(std::launch::async, fib, n - 1);
+    long right = fib(n - 2);
+    return left.get() + right;
+}
+```
+
+이 코드는 *틀린 건 아니지만* 비용이 폭발한다. 매 호출이 스레드를 만들면 $O(\phi^n)$개의 스레드. 책의 교훈은 두 가지다.
+
+- 작업 단위(grain)가 fork 비용보다 *훨씬 커야* 한다.
+- threshold를 둬 작은 입력은 순차 처리.
+
+```cpp
+// C++20 — Threshold가 있는 fib
+long fib_par(int n, int cutoff) {
+    if (n < cutoff) {
+        // 순차 — 일반 재귀 fib
+        if (n < 2) return n;
+        return fib_par(n - 1, cutoff) + fib_par(n - 2, cutoff);
+    }
+    auto left = std::async(std::launch::async, fib_par, n - 1, cutoff);
+    long right = fib_par(n - 2, cutoff);
+    return left.get() + right;
+}
+```
+
+`cutoff = 25` 정도가 보통의 fork/join 풀에서 합리적인 trade-off. 너무 크면 병렬성 부족, 너무 작으면 overhead 폭발.
+
+## 16.6 Fork-Join 패턴
 
 병렬 알고리즘의 기본 구조.
 
@@ -256,7 +377,44 @@ long parallel_sum(const int* arr, size_t n) {
 
 병렬 정렬, 병렬 reduce, 병렬 검색 등이 모두 이 패턴.
 
-## 16.4 작업 분산의 문제
+## 16.7 정적 vs 동적 작업 할당
+
+작업 단위를 P개의 스레드에 어떻게 나눌지가 작업 분산의 출발점이다. 책은 두 축을 명확히 가른다.
+
+**정적 할당 (Static)**
+
+```cpp
+// C++20 — 균등 정적 분할
+void parallel_for_static(int begin, int end, int P,
+                         std::function<void(int)> body) {
+    std::vector<std::jthread> ts;
+    int chunk = (end - begin) / P;
+    for (int p = 0; p < P; ++p) {
+        int lo = begin + p * chunk;
+        int hi = (p == P - 1) ? end : lo + chunk;
+        ts.emplace_back([=] {
+            for (int i = lo; i < hi; ++i) body(i);
+        });
+    }
+}
+```
+
+장점은 단순성과 0에 가까운 스케줄링 overhead. 단점은 *불균등한 작업*에 약함 — 한 스레드가 일찍 끝나면 idle.
+
+**동적 할당 (Dynamic)**
+
+- *Centralized queue* — 공유 큐에서 일감 하나씩 꺼냄. 부하 균형은 자동, 큐 자체가 병목.
+- *Work stealing* — 각자 큐 + 비면 훔침. 보통 가장 좋은 절충.
+
+| 방식 | 부하 균형 | Overhead | 좋은 경우 |
+|---|---|---|---|
+| Static | 나쁨 | 거의 0 | 입력이 균등할 때 |
+| Centralized queue | 좋음 | 큐 경합 | P 작고 작업 큰 경우 |
+| Work stealing | 매우 좋음 | 낮음 | 일반 |
+
+책은 이후 절들 내내 동적 할당, 특히 work stealing을 다룬다.
+
+## 16.8 작업 분산의 문제
 
 Fork-join을 효율적으로 실행하려면.
 
@@ -594,7 +752,32 @@ $$
 
 병목은 critical path (T_∞)에 있음. critical path가 짧은 작업일수록 병렬화 효과 크다.
 
-## 16.9 실제 구현체
+## Critical-Path 길이 분석
+
+책 16.6절의 *work*와 *span*(critical path) 개념을 더 들여다본다.
+
+- **Work** $T_1$ — 단일 스레드 총 작업량
+- **Span** $T_\infty$ — 작업 DAG의 *가장 긴 경로* 길이 (자원 무한해도 못 줄임)
+- **Speedup** $T_1 / T_P \le P$
+- **Parallelism** $T_1 / T_\infty$ — 무한 스레드일 때의 이상적 speedup
+
+Brent의 정리와 work-stealing 분석을 합쳐 P 스레드 실행시간 상한:
+
+$$T_P \le \frac{T_1}{P} + O(T_\infty)$$
+
+즉, 작업이 *충분히 평행*($T_1 / T_\infty \gg P$)하면 거의 선형 가속. 예: Fibonacci $T(n)$.
+
+| 양 | $\text{fib}(n)$ |
+|---|---|
+| Work $T_1$ | $\Theta(\phi^n)$ |
+| Span $T_\infty$ | $\Theta(n)$ |
+| Parallelism | $\Theta(\phi^n / n)$ |
+
+행렬 곱(분할 정복, 책 Listing 16.4)은 $T_1 = \Theta(n^3)$, $T_\infty = \Theta(\log^2 n)$로 parallelism이 $\Theta(n^3 / \log^2 n)$. 매우 평행.
+
+설계 교훈은 명확하다: **알고리즘을 짤 때 span을 줄여라**. 순차 의존 사슬을 짧게 유지하면 P가 커져도 이득을 본다.
+
+## 16.10 실제 구현체
 
 Work stealing은 모든 모던 동시성 런타임의 기반.
 
@@ -638,6 +821,34 @@ int main() {
 ```
 
 내부적으로 work stealing 스케줄러 사용 (구현체에 따라 다름).
+
+## Yielding Deque와 Balancing Pool
+
+책 Ch16.5.2~16.5.3은 work-stealing deque의 *한계 케이스*들을 다룬다.
+
+**Yielding Deque** (Listing 16.14 변형) — bottom과 top이 만났을 때 도둑이 owner와 *CAS 경쟁*을 한다. 두 명 모두 실패할 수 있고, 그러면 owner는 자기 작업을 잃고 도둑도 빈 손이다. Herlihy & Shavit는 마지막 원소를 다툴 때 owner가 우선권을 갖도록 약간의 양보(yield) 로직을 추가한 변형을 제안한다.
+
+```cpp
+// 단순화한 Yielding 의도 — 마지막 원소에서 owner 우선
+std::optional<T> pop_yielding() {
+    // 일반 pop와 같음. 다만 마지막 원소 경합 시
+    // CAS 실패 후 잠시 yield하고 재시도 — owner가 더 자주 이김
+    // (책: bottom이 top을 따라잡기 직전, owner가 short yield)
+}
+```
+
+**Balancing Pool** (책 16.5.3) — work stealing의 *상위* 추상화로, 큐가 비기 전에도 큐 사이 작업을 *밀어* 옮기는 풀. 임의의 두 큐의 길이 차가 일정 임계 이상이면 긴 쪽이 짧은 쪽으로 작업을 옮긴다.
+
+```
+work stealing          balancing pool
+─────────────          ───────────────
+idle 후 훔침            "거의 idle"이 되기 전에 미리 옮김
+reactive               proactive
+```
+
+장점은 도둑이 일을 찾는 *latency*를 줄임. 단점은 적극적 이동이 *오히려* cache locality를 망칠 수 있음.
+
+실무에서는 work stealing이 표준. Balancing pool은 특정 워크로드(긴 작업의 정적 추정이 가능한 경우)에 한정.
 
 ## 16.11 Continuation Stealing
 

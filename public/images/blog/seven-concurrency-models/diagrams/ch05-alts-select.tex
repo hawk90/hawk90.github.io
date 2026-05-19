@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+
+% =================== Input channels (left) ===================
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west]
+     at (-7, 3.6) {input channels};
+
+\node[prp] (c1) at (-5.5,  2.4) {c1 (recv)};
+\node[prp] (c2) at (-5.5,  0.8) {c2 (send :hello)};
+\node[prp] (c3) at (-5.5, -0.8) {timeout 1000};
+\node[prp] (c4) at (-5.5, -2.4) {:default};
+
+% =================== alts! selector (center) ===================
+\node[hi, minimum width=28mm, minimum height=20mm,
+      font=\sffamily\bfseries\small]
+     (alts) at (0, 0) {alts!\\[2pt]\textit{multiplexer}};
+
+\draw[uses] (c1.east) -- (alts.west |- c1.east);
+\draw[uses] (c2.east) -- (alts.west |- c2.east);
+\draw[uses] (c3.east) -- (alts.west |- c3.east);
+\draw[uses] (c4.east) -- (alts.west |- c4.east);
+
+% =================== Result (right) ===================
+\node[con, minimum width=30mm, minimum height=12mm]
+     (res) at (5, 0) {[v ch]\\\textit{= 첫 준비된 채널}};
+
+\draw[uses, line width=0.7pt] (alts.east) -- (res.west);
+
+% =================== Annotations (under each input) ===================
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west, text width=4.5cm]
+     at (-7, 2.4 - 0.7) {채널에서 받기};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west, text width=4.5cm]
+     at (-7, 0.8 - 0.7) {\texttt{[c2 :hello]} 형식 — 보내기};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west, text width=4.5cm]
+     at (-7, -0.8 - 0.7) {N ms 후 닫히는 채널};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west, text width=4.5cm]
+     at (-7, -2.4 - 0.7) {아무것도 준비 안 됨 → 즉시 반환};
+
+% =================== Options panel ===================
+\node[note, anchor=north west, text width=6cm]
+     at (2.2, -1.5)
+     {기본: 동시 준비 시 \textbf{무작위}\\[2pt]
+      \texttt{:priority true} → 벡터 순서대로\\[2pt]
+      \texttt{:default v} → 폴링};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,69 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+  % ─── Stage labels (top row) ───
+  \node[font=\sffamily\bfseries\small, text=inkc] at (-0.5, 0.8) {Input};
+  \node[font=\sffamily\bfseries\small, text=inkc] at (2.5, 0.8) {Map};
+  \node[font=\sffamily\bfseries\small, text=inkc] at (6.5, 0.8) {Shuffle \& Sort};
+  \node[font=\sffamily\bfseries\small, text=inkc] at (10.8, 0.8) {Reduce};
+  \node[font=\sffamily\bfseries\small, text=inkc] at (14, 0.8) {Output};
+
+  % ─── Input splits (left) ───
+  \node[neut, minimum width=18mm, minimum height=7mm] (i1) at (-0.5,  0)   {split 1};
+  \node[neut, minimum width=18mm, minimum height=7mm] (i2) at (-0.5, -1.5) {split 2};
+  \node[neut, minimum width=18mm, minimum height=7mm] (i3) at (-0.5, -3)   {split 3};
+
+  % ─── Mappers ───
+  \node[imp, minimum width=22mm, minimum height=10mm, align=center] (m1) at (2.5,  0)
+    {mapper 1\\[2pt]\footnotesize (Hello,1) (world,1)};
+  \node[imp, minimum width=22mm, minimum height=10mm, align=center] (m2) at (2.5, -1.5)
+    {mapper 2\\[2pt]\footnotesize (Hello,1) (there,1)};
+  \node[imp, minimum width=22mm, minimum height=10mm, align=center] (m3) at (2.5, -3)
+    {mapper 3\\[2pt]\footnotesize (world,1) (is,1) (wide,1)};
+
+  % ─── Shuffle box ───
+  \node[prp, minimum width=32mm, minimum height=44mm, align=center, text width=30mm] (sh) at (6.5, -1.5)
+    {\textbf{shuffle}\\[2pt]\footnotesize same key\\$\rightarrow$ same reducer\\[3pt]
+     \scriptsize Hello: [1,1]\\there: [1]\\world: [1,1]\\is: [1]\\wide: [1]};
+
+  % ─── Reducers ───
+  \node[con, minimum width=22mm, minimum height=10mm, align=center] (r1) at (10.8,  0)
+    {reducer 1\\[2pt]\footnotesize (Hello,2)\\(there,1)};
+  \node[con, minimum width=22mm, minimum height=10mm, align=center] (r2) at (10.8, -1.5)
+    {reducer 2\\[2pt]\footnotesize (world,2)\\(is,1)};
+  \node[con, minimum width=22mm, minimum height=10mm, align=center] (r3) at (10.8, -3)
+    {reducer 3\\[2pt]\footnotesize (wide,1)};
+
+  % ─── Output (HDFS) ───
+  \node[cli, minimum width=22mm, minimum height=24mm, align=center, text width=20mm] (out) at (14, -1.5)
+    {\textbf{HDFS}\\[3pt]\footnotesize part-00000\\part-00001\\part-00002};
+
+  % ─── Edges ───
+  \draw[uses] (i1) -- (m1);
+  \draw[uses] (i2) -- (m2);
+  \draw[uses] (i3) -- (m3);
+
+  \draw[uses] (m1.east) -- (sh.west |- m1.east);
+  \draw[uses] (m2.east) -- (sh.west);
+  \draw[uses] (m3.east) -- (sh.west |- m3.east);
+
+  \draw[uses] (sh.east |- r1.west) -- (r1.west);
+  \draw[uses] (sh.east) -- (r2.west);
+  \draw[uses] (sh.east |- r3.west) -- (r3.west);
+
+  \draw[uses] (r1.east) -- (out.west |- r1.east);
+  \draw[uses] (r2.east) -- (out.west);
+  \draw[uses] (r3.east) -- (out.west |- r3.east);
+
+  % ─── Caption ───
+  \node[caption, anchor=north, text width=140mm]
+       at (6.8, -4.4)
+       {입력 분할이 mapper로 흩어지고, shuffle이 같은 키를 같은 reducer로 모은 뒤 결과가 HDFS로 기록된다.};
+\end{tikzpicture}
+\end{document}

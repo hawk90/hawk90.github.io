@@ -29,6 +29,8 @@ Actor 모델은 Carl Hewitt이 1973년에 제안했습니다. 핵심은 **공유
 
 Actor A가 메시지를 보내면 Actor B의 mailbox에 들어가고, B는 자기 페이스로 처리합니다. 두 actor의 state는 절대 공유되지 않습니다. 상태 공유가 없으므로 *락 없음*, *데이터 레이스 없음*입니다.
 
+![Actor 모델 — state + mailbox + receive](/images/blog/seven-concurrency-models/diagrams/ch04-actor-model.svg)
+
 이 모델은 Chapter 2의 스레드·락 모델과 정반대 지점에 있습니다. 락은 같은 메모리를 *순서대로 만지기 위해* 필요했습니다. Actor는 *애초에 메모리를 공유하지 않으니까* 락이 필요 없습니다.
 
 | 항목 | OS Thread (Ch 2) | Erlang Process |
@@ -77,6 +79,8 @@ send(pid, {:celebrate, "Louie", 16})
 - `spawn/1` — 새 프로세스를 만들고 pid를 돌려줍니다
 - `send(pid, msg)` — 비동기 전송. 호출 즉시 반환합니다
 - `receive do ... end` — mailbox에서 패턴에 맞는 메시지를 꺼냅니다
+
+![spawn → send → receive sequence](/images/blog/seven-concurrency-models/diagrams/ch04-spawn-send-receive.svg)
 
 `receive`는 *블로킹*입니다. 매치되는 메시지가 mailbox에 없으면 도착할 때까지 기다립니다. 매치되면 그 메시지를 꺼내 해당 절을 실행하고, 끝에서 `loop()`를 재귀 호출해 다음 메시지를 기다립니다. 함수형 언어에서 가변 상태를 흉내내는 표준 패턴입니다.
 
@@ -236,6 +240,8 @@ end
 | 자기 종료 여부 | 기본은 함께 종료 | 종료 안 함 |
 | 주 용도 | supervisor ↔ child | 임시 관찰, 일회성 작업 |
 
+![link (양방향) vs monitor (단방향)](/images/blog/seven-concurrency-models/diagrams/ch04-link-vs-monitor.svg)
+
 Supervisor는 link 기반입니다. 자식이 죽으면 supervisor가 알게 되고, 재시작 정책을 적용합니다.
 
 ### 4.10 Supervisor — 프로세스 트리
@@ -279,6 +285,8 @@ Supervisor 아래 Worker A, B, C가 *이 순서로* 선언되어 있고 B가 죽
 - `:one_for_one` — B만 재시작
 - `:one_for_all` — A, B, C 모두 재시작
 - `:rest_for_one` — B, C 재시작 (A는 그대로)
+
+![supervisor 재시작 전략 3가지](/images/blog/seven-concurrency-models/diagrams/ch04-supervisor-strategies.svg)
 
 여기에 *max_restarts*와 *max_seconds* 한도가 붙습니다. 짧은 시간 안에 너무 자주 재시작되면 supervisor 자신도 종료합니다. 그러면 *그 위의* supervisor가 트리 전체를 손봅니다. 장애를 위로 *전염*시키는 게 의도입니다.
 
@@ -346,6 +354,8 @@ send(pid, {:greet, "Huey"})
 ```
 
 이 *location transparency*가 Erlang 분산의 매력입니다. 코드는 노드 경계를 모릅니다.
+
+![Node.connect로 묶인 클러스터 토폴로지](/images/blog/seven-concurrency-models/diagrams/ch04-distributed-nodes.svg)
 
 ### 4.14 글로벌 이름 — :global
 

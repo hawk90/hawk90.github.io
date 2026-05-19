@@ -144,6 +144,29 @@ int buffer_take(BoundedBuffer* buf) {
 1. **Lock** — 한 번에 한 스레드만 메서드 실행
 2. **Condition Variable** — 조건이 안 맞으면 대기, 다른 스레드가 깨움
 
+### Monitor의 lock+condition 짝 vs Java synchronized
+
+책의 monitor는 *명시적 lock + 명시적 condition*이다. Java의 `synchronized` 블록은 같은 개념이지만 *암묵적*이다.
+
+```text
+Hoare/Herlihy-Shavit monitor:
+  lock.lock()
+  while (!ready) condition.await()
+  // ...
+  lock.unlock()
+
+Java synchronized 모델:
+  synchronized(obj) {
+    while (!ready) obj.wait();
+    // ...
+  }
+  obj.notifyAll();
+```
+
+Java의 `Object`는 *모든 객체*가 monitor를 내장한다. lock과 condition이 객체 자체에 묶여 있고, condition은 *하나뿐*이다. 그래서 다른 조건을 기다리는 스레드들을 분리할 수 없다 — 결국 `notifyAll()`로 모두 깨워야 한다.
+
+Java 5 이후 `java.util.concurrent.locks.ReentrantLock`이 *명시적* lock과 *다수의 Condition*을 제공해 이 한계를 푼다. 책이 다루는 monitor 모델과 정확히 일치한다.
+
 ## 8.3 Condition Variable
 
 ```cpp
@@ -255,6 +278,21 @@ OS가 이유 없이 깨울 수 있다 (실패 신호, 신호 처리 등). 깨어
 
 따라서 항상 **조건을 다시 확인**한다.
 
+### Lost-wakeup hazard
+
+책의 그림 8.6은 이 함정을 다룬다. signal을 *락 없이* 보내면:
+
+```text
+스레드 A: condition 확인 → false
+[여기서 컨텍스트 스위치]
+스레드 B: condition = true; signal()  ← A는 아직 wait()를 호출하지 않음!
+스레드 A: wait() → 영원히 대기 (lost wakeup)
+```
+
+해법은 두 가지. 첫째, signal을 *항상 같은 락 안에서* 보낸다. 둘째, 조건은 *언제나* `while`로 재확인한다. 둘 다 지켜야 안전하다. 한쪽만으로는 부족.
+
+C++ `std::condition_variable::notify_one()`은 락을 *요구하지 않지만*, 책의 권고와 POSIX 권고 모두 *조건 변수를 보호하는 락 안에서* signal을 보내는 것이다. 그래야 *signal 순서*와 *상태 변경 순서*가 같다.
+
 ## 8.5 Signal vs SignalAll
 
 **notify_one()** — 대기 중인 한 스레드만 깨움.
@@ -308,6 +346,58 @@ void use_resource(void) {
 
 **Binary Semaphore** (count = 0 or 1) = mutex.
 **Counting Semaphore** = N개의 자원 풀.
+
+### Counting Semaphore from Monitor (책 Listing 8.13)
+
+semaphore가 *기본 동기화 도구가 아닐 때*는 monitor로 직접 만들 수 있다. 책은 이를 monitor의 일반성을 보이는 예로 든다.
+
+```cpp
+// Monitor로 구현한 Counting Semaphore
+#include <mutex>
+#include <condition_variable>
+
+class CountingSemaphore {
+    std::mutex mtx_;
+    std::condition_variable cv_;
+    int count_;
+    const int max_count_;
+
+public:
+    explicit CountingSemaphore(int initial, int max_count = INT_MAX)
+        : count_(initial), max_count_(max_count) {}
+
+    void acquire() {
+        std::unique_lock lock(mtx_);
+        cv_.wait(lock, [this] { return count_ > 0; });
+        --count_;
+    }
+
+    void release() {
+        std::lock_guard lock(mtx_);
+        if (count_ < max_count_) {
+            ++count_;
+            cv_.notify_one();
+        }
+    }
+
+    bool try_acquire() {
+        std::lock_guard lock(mtx_);
+        if (count_ <= 0) return false;
+        --count_;
+        return true;
+    }
+};
+```
+
+핵심 — `acquire`는 *count > 0*을 기다리고, `release`는 count를 늘리고 한 명을 깨운다. 단일 condition으로 충분한 이유는 *모두가 같은 조건*(count > 0)을 기다리기 때문이다.
+
+반대로 `BoundedBuffer`처럼 *두 다른 조건*(not_full, not_empty)이 있으면 condition을 둘로 분리해야 한다. 단일 condition으로 가능하지만 `notify_all`만 가능하고 비효율.
+
+```text
+조건의 수 = condition variable의 수
+한 condition으로 N개 다른 조건을 다루려면 → notify_all + while로 재검사
+별도 condition으로 분리하면 → notify_one으로 정확히 한 명만 깨움 (효율)
+```
 
 ```cpp
 // 연결 풀 예제 (C++20)
@@ -409,6 +499,112 @@ void data_write(ThreadSafeData* d, size_t index, int value) {
 - 읽기 작업이 충분히 길어서 동시 실행 이득이 클 때
 
 **함정** — Writer Starvation. 읽기가 끊임없이 들어오면 writer가 영원히 못 잡을 수도 있다. **fairness policy**(reader 도착 시 대기 중 writer가 있으면 양보) 필요.
+
+### Reader Preference 구현 (책 Listing 8.6)
+
+reader가 항상 우선이라면 writer는 굶을 수 있다. 그러나 reader-heavy 워크로드에서는 throughput이 최대.
+
+```cpp
+// Reader Preference RW Lock — monitor로 직접 구현
+#include <mutex>
+#include <condition_variable>
+
+class ReaderPreferRWLock {
+    std::mutex mtx_;
+    std::condition_variable cv_;
+    int readers_ = 0;
+    bool writer_ = false;
+
+public:
+    void read_lock() {
+        std::unique_lock lock(mtx_);
+        cv_.wait(lock, [this] { return !writer_; });
+        ++readers_;
+    }
+
+    void read_unlock() {
+        std::lock_guard lock(mtx_);
+        if (--readers_ == 0) cv_.notify_all();
+    }
+
+    void write_lock() {
+        std::unique_lock lock(mtx_);
+        // writer는 readers와 다른 writer 모두 끝날 때까지 대기
+        cv_.wait(lock, [this] { return !writer_ && readers_ == 0; });
+        writer_ = true;
+    }
+
+    void write_unlock() {
+        std::lock_guard lock(mtx_);
+        writer_ = false;
+        cv_.notify_all();
+    }
+};
+```
+
+writer는 *readers_ == 0*을 기다린다. 그 사이 새 reader가 와도 읽기를 시작한다 — writer가 무기한 대기.
+
+### FIFO RW Lock (책 Listing 8.9)
+
+FIFO 정책 — 도착 순서대로. writer starvation 방지.
+
+```cpp
+// FIFO RW Lock — writer가 큐에 들어오면 새 reader는 대기
+#include <mutex>
+#include <condition_variable>
+
+class FairRWLock {
+    std::mutex mtx_;
+    std::condition_variable cv_;
+    int active_readers_ = 0;
+    int waiting_writers_ = 0;
+    bool active_writer_ = false;
+
+public:
+    void read_lock() {
+        std::unique_lock lock(mtx_);
+        // 대기 중인 writer가 있으면 양보
+        cv_.wait(lock, [this] {
+            return !active_writer_ && waiting_writers_ == 0;
+        });
+        ++active_readers_;
+    }
+
+    void read_unlock() {
+        std::lock_guard lock(mtx_);
+        if (--active_readers_ == 0) cv_.notify_all();
+    }
+
+    void write_lock() {
+        std::unique_lock lock(mtx_);
+        ++waiting_writers_;
+        cv_.wait(lock, [this] {
+            return !active_writer_ && active_readers_ == 0;
+        });
+        --waiting_writers_;
+        active_writer_ = true;
+    }
+
+    void write_unlock() {
+        std::lock_guard lock(mtx_);
+        active_writer_ = false;
+        cv_.notify_all();
+    }
+};
+```
+
+핵심은 reader의 wait 조건에 `waiting_writers_ == 0`을 추가한 것. writer가 줄을 섰으면 reader는 양보.
+
+### Java ReentrantReadWriteLock 비교
+
+| 항목 | C++ `std::shared_mutex` | Java `ReentrantReadWriteLock` |
+|---|---|---|
+| Fairness 옵션 | 없음 (구현 정의) | 생성자 `new ReentrantReadWriteLock(true)` |
+| Reentrant | 없음 (held이면 deadlock) | 같은 스레드 다시 잡기 OK |
+| Downgrade (write→read) | 없음 | 가능 — write 잡고 read 잡고 write 푼다 |
+| Upgrade (read→write) | 없음 | 없음 (deadlock 위험) |
+
+Java의 reentrant + downgrade가 monitor 패턴과 잘 어울린다. 책의 reader-writer 변형이 정확히 Java JUC의 토대.
 
 ## 8.8 C++20/23 동기화 기능 비교
 

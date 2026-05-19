@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  layer/.style={rectangle, rounded corners=3pt, line width=0.5pt,
+                minimum height=11mm, inner sep=4pt,
+                font=\sffamily\bfseries\small, align=center},
+  desc/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, align=left},
+  host/.style={rectangle, rounded corners=3pt, draw=neutbord, fill=neutfill,
+               line width=0.4pt, minimum width=42mm, minimum height=9mm,
+               inner sep=2pt, font=\sffamily\bfseries\small, align=center}
+]
+
+% Host on the left
+\node[host] (host) at (0, 1.0) {Host (Java / C++)};
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (0, 0.0)
+     {clEnqueue* 호출};
+
+% Arrow from host to stack
+\draw[flow] (host.east) -- ++(1.2, 0);
+
+% Layered stack (right side)
+\begin{scope}[xshift=5.2cm]
+  % Layer 1: Platform (top)
+  \node[layer, draw=absbord, fill=absfill, minimum width=58mm]
+       (plat) at (2.9, 4.6) {Platform \\ {\normalfont\footnotesize Intel / NVIDIA / AMD / Apple 등 OpenCL 구현체}};
+  % Layer 2: Device
+  \node[layer, draw=impbord, fill=impfill, minimum width=52mm]
+       (dev) at (2.9, 3.1) {Device \\ {\normalfont\footnotesize CPU, GPU, FPGA — 실제 계산 장치}};
+  % Layer 3: Context
+  \node[layer, draw=clibord, fill=clifill, minimum width=44mm]
+       (ctx) at (2.9, 1.6) {Context \\ {\normalfont\footnotesize device들을 묶는 실행 환경, 메모리 공유 단위}};
+  % Layer 4: Command queue (bottom — closest to host call)
+  \node[layer, draw=hibord, fill=hifill, minimum width=36mm]
+       (q) at (2.9, 0.1) {Command Queue \\ {\normalfont\footnotesize host → device 일감을 전달}};
+
+  % Containment arrows (top-down)
+  \draw[uses] (plat.south) -- (dev.north);
+  \draw[uses] (dev.south) -- (ctx.north);
+  \draw[uses] (ctx.south) -- (q.north);
+
+  % Right-side captions
+  \node[desc] at (6.7, 4.6) {1. Platform 선택};
+  \node[desc] at (6.7, 3.1) {2. Device 잡기};
+  \node[desc] at (6.7, 1.6) {3. Context 생성};
+  \node[desc] at (6.7, 0.1) {4. Queue로 일감 enqueue};
+\end{scope}
+
+% Bottom caption
+\node[font=\sffamily\footnotesize\itshape, text=mutec]
+     at (6.0, -1.2) {위계 — 위로 갈수록 추상적, 아래로 갈수록 실행에 가까움};
+
+\end{tikzpicture}
+\end{document}

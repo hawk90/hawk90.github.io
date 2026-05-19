@@ -33,6 +33,110 @@ public:
 
 이게 PQ의 본질적 어려움. Stack/Queue/Hash와는 본질적으로 다르다.
 
+## 15.1a BoundedPriorityQueue (Listing 15.4) — Bin Array
+
+가장 단순한 동시 PQ. 우선순위 값이 *작은 정수 범위*에 속한다고 가정.
+
+```text
+priority 0 ┐
+priority 1 │── 각 우선순위마다 lock-free queue (bin)
+priority 2 │
+...        │
+priority M ┘
+```
+
+각 bin이 독립 큐. `insert(item, p)`는 `bin[p].enqueue(item)`. `extractMin()`은 *비어 있지 않은 가장 낮은 인덱스의 bin*에서 dequeue.
+
+```cpp
+// BoundedPriorityQueue — 책 Listing 15.4의 핵심
+template<typename T, int M>
+class BoundedPriorityQueue {
+    std::array<LockFreeQueue<T>, M> bins;  // 10장의 lock-free queue 재사용
+    std::atomic<int> minHint{0};            // 어디서부터 검색 시작할지 hint
+
+public:
+    void insert(T item, int p) {
+        bins[p].enqueue(std::move(item));
+        // hint 갱신: 더 작은 priority면 업데이트
+        int curr = minHint.load(std::memory_order_relaxed);
+        while (p < curr &&
+               !minHint.compare_exchange_weak(curr, p)) { /* retry */ }
+    }
+
+    std::optional<T> extractMin() {
+        int start = minHint.load(std::memory_order_acquire);
+        for (int p = start; p < M; ++p) {
+            if (auto item = bins[p].dequeue()) {
+                // hint를 p로 (이후 다른 스레드 도움)
+                int curr = minHint.load(std::memory_order_relaxed);
+                if (curr < p) minHint.compare_exchange_weak(curr, p);
+                return item;
+            }
+        }
+        return std::nullopt;
+    }
+};
+```
+
+**장점** — bin이 독립이라 같은 우선순위 작업은 자연스러운 병렬성. lock-free queue가 그대로 활용된다.
+
+**한계** — `M`이 작아야 한다 (모든 bin 스캔이 `O(M)`). 우선순위가 *연속된 작은 정수*인 응용에만 적합. OS 스케줄러의 priority class(예: nice -20..19)처럼.
+
+## 15.1b UnboundedPriorityQueue (Listing 15.10) — Tree of Bins
+
+우선순위가 큰 범위거나 실수면 bin 배열이 불가능. **트리로 일반화**.
+
+책 Listing 15.10의 `UnboundedPriorityQueue` — bin들을 **이진 트리**로 조직. 트리의 각 leaf가 우선순위 구간 하나의 bin이고, 트리의 high bit부터 우선순위를 따라 내려간다.
+
+```text
+                  [0, ∞)
+                 /       \
+          [0, M/2)        [M/2, ∞)
+           /    \           /    \
+         ...    ...       ...    ...
+        bin    bin       bin    bin
+```
+
+`insert(item, p)`는 트리를 따라 내려가서 leaf bin에 넣는다. 새 leaf가 필요하면 트리를 확장.
+
+```cpp
+// UnboundedPriorityQueue — 책 Listing 15.10의 핵심 개념
+template<typename T>
+class UnboundedPriorityQueue {
+    struct TreeNode {
+        std::atomic<TreeNode*> left{nullptr};
+        std::atomic<TreeNode*> right{nullptr};
+        LockFreeQueue<T> bin;  // leaf만 의미 있음
+    };
+
+    TreeNode* root;
+
+    void insert(T item, uint64_t p) {
+        TreeNode* node = root;
+        for (int bit = 63; bit >= 0; --bit) {
+            // 비트별로 좌/우 분기 (CAS로 lazy하게 자식 노드 생성)
+            std::atomic<TreeNode*>& child =
+                (p & (1ULL << bit)) ? node->right : node->left;
+            TreeNode* next = child.load();
+            if (!next) {
+                next = new TreeNode();
+                TreeNode* exp = nullptr;
+                if (!child.compare_exchange_strong(exp, next)) {
+                    delete next;
+                    next = exp;
+                }
+            }
+            node = next;
+        }
+        node->bin.enqueue(std::move(item));
+    }
+};
+```
+
+**핵심** — 트리가 *우선순위 비트의 trie*. extract는 항상 leftmost 살아있는 leaf로. 무한히 많은 우선순위를 다룰 수 있다.
+
+다만 leftmost 검색이 다시 hot spot이 된다는 게 PQ의 본질적 한계.
+
 ## 15.2 Heap 기반 PQ
 
 순차 PQ의 표준 — Binary Heap.
@@ -149,6 +253,38 @@ void heap_insert(ConcurrentHeap* heap, int value) {
 
 복잡하다. 그리고 root 근처에서 경합이 폭발.
 
+### FineGrainedHeap — 노드별 락 + percolation
+
+책 15.2절의 `FineGrainedHeap`은 위 Hunt et al. 패턴을 더 정밀화. **각 노드마다 락 + 상태 enum**.
+
+```cpp
+// FineGrainedHeap의 노드 상태
+enum class Status { EMPTY, AVAILABLE, BUSY };
+
+struct HeapNode {
+    int priority;
+    std::atomic<Status> status;
+    std::thread::id owner;  // BUSY일 때 작업 중인 스레드
+    std::mutex mtx;
+};
+```
+
+**Bottom-up insert** (percolate up).
+
+1. `size++`로 leaf 자리 확보 → `status = BUSY` + `owner = me`.
+2. 부모 락 잡고 비교. 부모 priority가 더 크면 swap.
+3. 부모로 올라가서 반복. 도착하면 `status = AVAILABLE`.
+
+**Top-down extract** (percolate down).
+
+1. root 락 → 마지막 leaf와 swap → leaf 제거.
+2. root에서 *더 작은 자식*과 비교하며 내려감 (sift-down).
+3. 매 단계 자식 락 획득. 부모-자식 *둘만* 락 — 그래서 fine-grained.
+
+이게 책 15.2의 핵심. **두 방향 percolation이 동시 진행 가능**하다는 게 동시성 이득.
+
+**문제** — root는 여전히 모든 extract의 hot spot. 그래서 다음 절들이 등장.
+
 ## 15.3 Skiplist 기반 PQ
 
 14장의 skiplist를 그대로 사용. 가장 작은 원소는 리스트의 head 다음 노드.
@@ -238,6 +374,52 @@ bool skiplist_extract_min(SkiplistPQ* pq, int* out_value) {
 ```
 
 **문제** — extractMin도 결국 head 근처에서 경합. Skiplist의 동시성 이득이 PQ에서는 약함.
+
+### SkipQueue (Listing 15.15) — Skiplist 기반 정식 PQ
+
+책 Listing 15.15의 `SkipQueue` — 14장 `LockFreeSkipListSet`을 PQ로 그대로 활용. 핵심은.
+
+- `insert(p)` = skiplist에 `p`를 add.
+- `extractMin()` = head부터 *마킹되지 않은 첫 노드*를 마킹하고 반환.
+
+```cpp
+// SkipQueue — 책 Listing 15.15의 핵심
+template<typename T>
+class SkipQueue {
+    LockFreeSkipList<int, T> list;
+
+public:
+    void insert(int prio, T item) {
+        list.add(prio, std::move(item));
+    }
+
+    std::optional<T> extractMin() {
+        Node* curr = list.head->next[0].load();
+        while (curr != list.tail) {
+            // CAS로 marked 설정 시도
+            uintptr_t next = curr->next[0].load();
+            if (!isMarked(next)) {
+                uintptr_t marked = next | 1;
+                if (curr->next[0].compare_exchange_strong(next, marked)) {
+                    // 성공 — 이 노드를 internal find()가 나중에 unlink
+                    return curr->value;
+                }
+            }
+            curr = getRef(curr->next[0].load());
+        }
+        return std::nullopt;  // 비었음
+    }
+};
+```
+
+**왜 두 단계가 다른가**.
+
+- Skiplist의 `remove(key)` — 키로 위치 찾고 마킹. O(log N).
+- `extractMin()` — 항상 head.next부터 순차. 평균 O(1)이지만 *경합 시 O(스레드 수)*.
+
+여러 스레드가 동시에 extract하면 각자 head, head.next, head.next.next ... 를 시도한다. CAS 실패가 자연스러운 **back-off** 역할 — 결과적으로 N개 스레드가 N개의 서로 다른 minimum-after-mark 노드를 가져간다.
+
+이게 SkipQueue의 영리한 점. *엄밀한 strict PQ semantics를 유지하면서* 어느 정도 분산을 얻는다. 다만 N이 커지면 cache line ping-pong이 심해진다.
 
 ## 15.4 Relaxed Priority Queue
 

@@ -1,0 +1,62 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm]
+  % ─── Timeline axis ───
+  \draw[->, draw=mutec, line width=0.6pt] (-0.5, 0) -- (14, 0);
+  \node[caption, anchor=west] at (14, 0) {time};
+
+  % ─── Time markers ───
+  \draw[draw=mutec, line width=0.4pt] (1.5, 0.15) -- (1.5, -0.15);
+  \node[caption, anchor=north] at (1.5, -0.15) {T-7d};
+  \draw[draw=mutec, line width=0.4pt] (5.5, 0.15) -- (5.5, -0.15);
+  \node[caption, anchor=north] at (5.5, -0.15) {T-1d (어제 자정)};
+  \draw[draw=mutec, line width=0.4pt] (12, 0.15) -- (12, -0.15);
+  \node[caption, anchor=north] at (12, -0.15) {now};
+
+  % ─── Batch view band (T-7d → T-1d) ───
+  \fill[absfill, draw=absbord, line width=0.4pt, rounded corners=2pt]
+       (1.5, 0.5) rectangle (5.5, 1.8);
+  \node[font=\sffamily\bfseries\small, text=absbord] at (3.5, 1.45) {batch view};
+  \node[font=\sffamily\footnotesize, text=absbord] at (3.5, 0.95) {[T-7d, T-1d]  정확};
+
+  % ─── Speed view band (T-1d → now) ───
+  \fill[confill, draw=conbord, line width=0.4pt, rounded corners=2pt]
+       (5.5, 0.5) rectangle (12, 1.8);
+  \node[font=\sffamily\bfseries\small, text=conbord] at (8.75, 1.45) {speed view};
+  \node[font=\sffamily\footnotesize, text=conbord] at (8.75, 0.95) {[T-1d, now]  근사 / 실시간};
+
+  % ─── Query (above) ───
+  \node[hi, minimum width=42mm, minimum height=10mm, align=center, text width=40mm]
+        (q) at (6.7, 4.2)
+        {\textbf{query(URL)}\\[2pt]\footnotesize merge(batch, speed)};
+
+  % Arrows from query down to both bands
+  \draw[uses] (q.south) to[out=-90,in=90] (3.5, 1.8);
+  \draw[uses] (q.south) to[out=-90,in=90] (8.75, 1.8);
+
+  % ─── Boundary arrow: batch view advances when re-computed ───
+  \draw[->, dashed, draw=okbord, line width=0.6pt] (5.5, 2.3) -- (5.5, 1.85);
+  \node[note, anchor=south, text width=46mm, draw=okbord, fill=okfill] at (5.5, 2.4)
+       {\footnotesize batch 재계산 시 경계가 우측으로 이동\\ $\to$ 같은 구간이 speed view에서 만료};
+
+  % ─── Math expression of merge ───
+  \node[panel, minimum width=130mm, minimum height=16mm, anchor=north,
+        align=left, text width=125mm, draw=neutbord]
+        (eq) at (6.7, -1.0)
+       {\textbf{merge function:}\\[2pt]
+        \quad \texttt{query(URL) = batch\_view[URL] \,+\, speed\_view[URL]}\\[3pt]
+        \quad 카운트는 합산, 평균은 (sum, count) 쌍을 따로 합한 뒤 마지막에 나눔,\\
+        \quad Top-K는 Count-Min Sketch 같은 근사 자료구조로 결합한다.};
+
+  % ─── Caption ───
+  \node[caption, anchor=north, text width=160mm]
+       at (6.7, -3.6)
+       {Batch view는 과거 전 구간을 정확하게 담고, speed view는 가장 최근 구간만 근사로 담는다. 두 view의 경계가 갱신마다 우측으로 이동한다.};
+\end{tikzpicture}
+\end{document}
