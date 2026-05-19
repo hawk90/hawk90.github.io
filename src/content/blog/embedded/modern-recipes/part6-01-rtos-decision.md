@@ -32,14 +32,13 @@ RTOS가 주는 것은 time-slicing이 아니라 blocking primitive입니다. `wa
 
 비용을 숫자로 보면 결정이 쉽습니다.
 
-```text
-항목                     super-loop     FreeRTOS (4 task)
-Flash 추가               0              6~10 KB
-RAM 추가                 0              4~8 KB (task stack 포함)
-context switch           없음           1~3 µs (Cortex-M4)
-디버깅 난이도            낮음           중간 (race, deadlock)
-소스 재사용              낮음           높음 (driver 표준화)
-```
+| 항목 | super-loop | FreeRTOS (4 task) |
+|------|------------|---------------------|
+| Flash 추가 | 0 | 6~10 KB |
+| RAM 추가 | 0 | 4~8 KB (task stack 포함) |
+| context switch | 없음 | 1~3 µs (Cortex-M4) |
+| 디버깅 난이도 | 낮음 | 중간 (race, deadlock) |
+| 소스 재사용 | 낮음 | 높음 (driver 표준화) |
 
 ## 코드 / 실제 사용 예
 
@@ -128,13 +127,11 @@ void task_motor(void *arg) {
 
 Cortex-M4 72 MHz에서 같은 펌웨어를 두 구조로 구현해 latency를 측정한 결과입니다.
 
-```text
-시나리오                    super-loop      FreeRTOS
-ISR → main loop dispatch   2 µs            2 µs
-event → task wake          n/a             8 µs (context switch 포함)
-4개 동시 마감 시 worst jitter
-                           220 µs          22 µs
-```
+| 시나리오 | super-loop | FreeRTOS |
+|----------|------------|----------|
+| ISR → main loop dispatch | 2 µs | 2 µs |
+| event → task wake | n/a | 8 µs (context switch 포함) |
+| 4개 동시 마감 시 worst jitter | 220 µs | 22 µs |
 
 마감이 하나일 때는 super-loop이 빠르지만, 동시 마감이 많아질수록 RTOS의 우선순위 기반 스케줄링이 jitter를 크게 줄입니다.
 

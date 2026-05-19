@@ -122,25 +122,23 @@ State space exhaustive — *모든 path*. Combinatorial explosion 단점.
 
 ## Model Checking 예 — Mutex
 
-```text
-Property: "lock·unlock 항상 paired"
+**Property** — "lock·unlock 항상 paired".
 
-LTL: G(lock → F(unlock))
-  G = always
-  F = eventually
-  
-SPIN으로 verify:
-  Promela model:
-    proctype mutex_user() {
-      lock;
-      // critical section
-      unlock;
-    }
-  
-  → State space exhaustive
-  → All paths가 lock→unlock 보장 확인
-  → 또는 counter-example 제시
+**LTL**: $G(\text{lock} \rightarrow F(\text{unlock}))$ — $G$ = always, $F$ = eventually.
+
+SPIN으로 verify. Promela model:
+
+```text
+proctype mutex_user() {
+  lock;
+  // critical section
+  unlock;
+}
 ```
+
+- → State space exhaustive
+- → All paths가 lock→unlock 보장 확인
+- → 또는 counter-example 제시
 
 Concurrent code — model checking *강점*. RTOS·protocol verify.
 

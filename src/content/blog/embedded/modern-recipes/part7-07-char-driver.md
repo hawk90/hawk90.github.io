@@ -19,12 +19,12 @@ tags: [recipes, linux, char-driver]
 
 ## 핵심 개념
 
-```text
-major / minor    /dev node를 driver에 매핑하는 번호
-cdev             kernel 내부 char device 객체
-file_operations  syscall과 driver 함수의 mapping 표
-class / device   /sys/class/foo/ 와 /dev/foo 자동 생성
-```
+| 요소 | 역할 |
+|------|------|
+| major / minor | `/dev` node를 driver에 매핑하는 번호 |
+| `cdev` | kernel 내부 char device 객체 |
+| `file_operations` | syscall과 driver 함수의 mapping 표 |
+| class / device | `/sys/class/foo/`와 `/dev/foo` 자동 생성 |
 
 가장 단순한 골격입니다.
 

@@ -43,18 +43,20 @@ tags: [amp, openamp, heterogeneous, rpmsg, remoteproc, imx, stm32mp]
 
 ## AMP의 기본 구조
 
-```text
-DDR / SRAM:
-  0x4000_0000 ~ 0xBFFF_FFFF : Linux 점유
-  0xBFF0_0000 ~ 0xBFFF_FFFF : 공유 (vring + buffer pool, reserved-memory)
-  0x8000_0000 ~ 0x8007_FFFF : Cortex-M firmware 전용
+DDR / SRAM 분할 예시
 
-Boot:
-  1. SoC reset → Cortex-A가 부트, ROM → SPL → U-Boot → Linux
-  2. Linux remoteproc driver가 Cortex-M firmware load
-  3. Cortex-M boot, OpenAMP 초기화
-  4. 두 OS가 RPMsg endpoint를 통해 통신
-```
+| 영역 | 용도 |
+|---|---|
+| 0x4000_0000 ~ 0xBFFF_FFFF | Linux 점유 |
+| 0xBFF0_0000 ~ 0xBFFF_FFFF | 공유 (vring + buffer pool, reserved-memory) |
+| 0x8000_0000 ~ 0x8007_FFFF | Cortex-M firmware 전용 |
+
+Boot
+
+1. SoC reset → Cortex-A가 부트, ROM → SPL → U-Boot → Linux
+2. Linux remoteproc driver가 Cortex-M firmware load
+3. Cortex-M boot, OpenAMP 초기화
+4. 두 OS가 RPMsg endpoint를 통해 통신
 
 각 코어는 *자기 메모리에서 자기 OS만 본다*는 점이 핵심입니다. 공유 영역은 *device tree에 reserved-memory로 명시*되어 Linux가 일반 메모리로 사용하지 못하게 막습니다. 이 영역만이 두 코어가 동시에 접근하는 통로가 됩니다.
 
@@ -62,12 +64,11 @@ Boot:
 
 OpenAMP는 원래 Mentor Graphics와 Xilinx가 시작한 라이브러리였고, 지금은 Linaro 산하 OpenAMP project로 표준화되어 있습니다. BSD-3-Clause 오픈소스입니다.
 
-```text
-OpenAMP 3 layer:
-  1. libmetal       HAL — memory map, IRQ register, atomic
-  2. open-amp       RPMsg / remoteproc / virtio-vring 구현
-  3. application    RPMsg endpoint를 통한 통신
-```
+OpenAMP 3 layer
+
+1. **libmetal** — HAL: memory map, IRQ register, atomic
+2. **open-amp** — RPMsg / remoteproc / virtio-vring 구현
+3. **application** — RPMsg endpoint를 통한 통신
 
 전체 topology를 한 장으로 보면 이렇습니다. 두 코어가 각자의 libmetal HAL 위에 RPMsg/virtio를 올리고, 공유 DDR의 vring과 buffer pool을 매개로 메시지를 주고받습니다. mailbox IRQ가 상대 코어를 깨우는 신호입니다.
 
@@ -170,13 +171,13 @@ firmware ELF에는 *resource table*이라는 섹션이 들어 있고, 여기에 
 
 vring으로 데이터를 옮기는 것은 *async polling*만으로도 가능하지만, *상대를 깨우기*에는 인터럽트가 필요합니다. SoC마다 다른 hardware peripheral을 씁니다.
 
-```text
-NXP i.MX  : MU (Messaging Unit)
-ST  STM32MP : IPCC (Inter-Processor Communication Controller)
-Xilinx Zynq : IPI (Inter-Processor Interrupt)
-TI AM62x   : Mailbox cluster
-RP2350     : SIO doorbell + FIFO
-```
+| SoC | Mailbox peripheral |
+|---|---|
+| NXP i.MX | MU (Messaging Unit) |
+| ST STM32MP | IPCC (Inter-Processor Communication Controller) |
+| Xilinx Zynq | IPI (Inter-Processor Interrupt) |
+| TI AM62x | Mailbox cluster |
+| RP2350 | SIO doorbell + FIFO |
 
 A-core가 mailbox register에 쓰면 M-core쪽에 *고정된 IRQ*가 발생합니다. M-core 측 OpenAMP는 이 IRQ handler에서 *vring used/avail index를 확인*하고 endpoint callback을 dispatch합니다. 반대 방향도 같은 방식입니다.
 
@@ -282,21 +283,28 @@ dual M0+ 시절의 RP2040은 *hardware coherency가 없는* 전형이라 SIO FIF
 
 ## Inter-Core Message Latency 측정
 
-```text
-i.MX 8M Plus, A53 ↔ M7, OpenAMP over MU + reserved DDR (non-cacheable):
-  단방향 minimum payload (4 B)  : 8 ~ 12 µs
-  64 B payload                   : 9 ~ 14 µs
-  1 KB payload                   : 18 ~ 30 µs
-  RTT (echo)                     : 18 ~ 28 µs
+i.MX 8M Plus, A53 ↔ M7, OpenAMP over MU + reserved DDR (non-cacheable)
 
-STM32MP1, A7 ↔ M4, IPCC + SRAM:
-  단방향 4 B                     : 4 ~ 6 µs
-  RTT                            : 9 ~ 14 µs
+| Payload | Latency |
+|---|---|
+| 단방향 4 B | 8 ~ 12 µs |
+| 64 B | 9 ~ 14 µs |
+| 1 KB | 18 ~ 30 µs |
+| RTT (echo) | 18 ~ 28 µs |
 
-RP2040, M0+ ↔ M0+, SIO FIFO:
-  단방향 4 B                     : ~50 ns (≈10 cycle)
-  RTT                            : ~120 ns
-```
+STM32MP1, A7 ↔ M4, IPCC + SRAM
+
+| Payload | Latency |
+|---|---|
+| 단방향 4 B | 4 ~ 6 µs |
+| RTT | 9 ~ 14 µs |
+
+RP2040, M0+ ↔ M0+, SIO FIFO
+
+| Payload | Latency |
+|---|---|
+| 단방향 4 B | ~50 ns (≈10 cycle) |
+| RTT | ~120 ns |
 
 대형 SoC의 OpenAMP는 *마이크로초 단위*, 같은 칩 안의 작은 SIO FIFO는 *나노초 단위*입니다. 두 자릿수 차이의 원인은 *mailbox IRQ 진입/탈출 비용*과 *cache maintenance*입니다.
 

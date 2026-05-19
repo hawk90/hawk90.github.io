@@ -19,12 +19,12 @@ tags: [recipes, irq-affinity, isolcpus, irqbalance, preempt-rt]
 
 ## 핵심 개념
 
-```text
-/proc/interrupts                    IRQ별 코어별 카운트
-/proc/irq/N/smp_affinity            bitmask (예: 0x2 = CPU1)
-/proc/irq/N/smp_affinity_list       사람이 읽기 쉬운 형식 (예: 1-3)
-/proc/irq/N/affinity_hint           driver가 제안하는 mask
-```
+| 경로 | 내용 |
+|------|------|
+| `/proc/interrupts` | IRQ별 코어별 카운트 |
+| `/proc/irq/N/smp_affinity` | bitmask (예: `0x2` = CPU1) |
+| `/proc/irq/N/smp_affinity_list` | 사람이 읽기 쉬운 형식 (예: `1-3`) |
+| `/proc/irq/N/affinity_hint` | driver가 제안하는 mask |
 
 `smp_affinity`는 *kernel hint*입니다. irqbalance daemon이 켜져 있으면 자동으로 덮어쓸 수 있습니다. 수동 pinning이 필요하면 irqbalance를 끄거나 ban 목록을 지정합니다.
 

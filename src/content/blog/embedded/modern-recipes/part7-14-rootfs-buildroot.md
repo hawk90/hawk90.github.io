@@ -40,15 +40,16 @@ buildroot/
 
 한 줄로 정리하면 *Buildroot 한 디렉터리가 BSP의 single source*입니다.
 
-```text
-Buildroot vs Yocto
-크기                   ~수십 MB           ~수 GB
-빌드 시간 (첫 빌드)    1~3시간            6~12시간
-학습 곡선              완만               가파름
-package 수             ~3000              ~10000
-multi-image, layer     제한적             강력
-적합 규모              small footprint     enterprise BSP
-```
+**Buildroot vs Yocto:**
+
+| 항목 | Buildroot | Yocto |
+|------|-----------|-------|
+| 크기 | ~수십 MB | ~수 GB |
+| 빌드 시간 (첫 빌드) | 1~3시간 | 6~12시간 |
+| 학습 곡선 | 완만 | 가파름 |
+| package 수 | ~3000 | ~10000 |
+| multi-image, layer | 제한적 | 강력 |
+| 적합 규모 | small footprint | enterprise BSP |
 
 ## 코드 / 실제 사용 예
 
@@ -202,14 +203,13 @@ BR2_CCACHE=y
 
 ## 측정 / 성능 비교
 
-```text
-지표                       Buildroot           Yocto (poky)
-첫 빌드 (16 코어)          ~90분               ~6시간
-재빌드 (1 package 추가)    ~5분                ~15분
-disk 사용량               ~5 GB                ~50 GB
-rootfs 최소 크기          ~2 MB (busybox)      ~50 MB (core-image-minimal)
-package 수                ~3000                ~10000
-```
+| 지표 | Buildroot | Yocto (poky) |
+|------|-----------|---------------|
+| 첫 빌드 (16 코어) | ~90분 | ~6시간 |
+| 재빌드 (1 package 추가) | ~5분 | ~15분 |
+| disk 사용량 | ~5 GB | ~50 GB |
+| rootfs 최소 크기 | ~2 MB (busybox) | ~50 MB (core-image-minimal) |
+| package 수 | ~3000 | ~10000 |
 
 ```text
 부팅 시간 (i.MX8M Mini + rootfs.ext4)

@@ -19,14 +19,15 @@ tags: [recipes, rtos, event]
 
 ## 핵심 개념
 
-```text
-EventBits_t = uint24_t (FreeRTOS) — 24개 bit
-xEventGroupCreate            새 group
-xEventGroupSetBits           특정 비트 set, wait중 task 깨움 여부 평가
-xEventGroupClearBits         특정 비트 clear
-xEventGroupWaitBits          AND or OR 조건 대기
-xEventGroupSync              여러 task의 rendezvous
-```
+`EventBits_t = uint24_t` (FreeRTOS) — 24개 bit.
+
+| API | 동작 |
+|-----|------|
+| `xEventGroupCreate` | 새 group |
+| `xEventGroupSetBits` | 특정 비트 set, wait중 task 깨움 여부 평가 |
+| `xEventGroupClearBits` | 특정 비트 clear |
+| `xEventGroupWaitBits` | AND or OR 조건 대기 |
+| `xEventGroupSync` | 여러 task의 rendezvous |
 
 가장 중요한 API가 `xEventGroupWaitBits`입니다.
 

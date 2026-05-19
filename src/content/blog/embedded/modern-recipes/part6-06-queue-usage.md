@@ -19,21 +19,21 @@ ISR이 ADC 샘플을 받아 task에 넘기고, BLE stack이 packet을 applicatio
 
 ## 핵심 개념
 
-```text
-xQueueCreate(N, sizeof(T))     N개 슬롯, 항목 크기 sizeof(T)
-xQueueSend                      뒤에 추가 (by value, 복사)
-xQueueSendToFront               앞에 추가 (긴급 신호)
-xQueueReceive                   앞에서 제거 (by value, 복사)
-xQueuePeek                      제거하지 않고 읽기
-```
+| API | 동작 |
+|-----|------|
+| `xQueueCreate(N, sizeof(T))` | N개 슬롯, 항목 크기 `sizeof(T)` |
+| `xQueueSend` | 뒤에 추가 (by value, 복사) |
+| `xQueueSendToFront` | 앞에 추가 (긴급 신호) |
+| `xQueueReceive` | 앞에서 제거 (by value, 복사) |
+| `xQueuePeek` | 제거하지 않고 읽기 |
 
 Queue는 내부에서 `memcpy(slot, &item, sizeof(T))`를 합니다. 그래서 `sizeof(T)`가 크면 send 비용이 그만큼 늘어납니다.
 
-```text
-by-value     T가 32 B 이하 — 단순, 안전, lifetime 걱정 없음
-by-pointer   T가 큼 — pool에서 받아 pointer만 send
-zero-copy    DMA buffer를 미리 할당, index만 queue로 전달
-```
+| 방식 | 적합한 경우 |
+|------|------------|
+| by-value | T가 32 B 이하 — 단순, 안전, lifetime 걱정 없음 |
+| by-pointer | T가 큼 — pool에서 받아 pointer만 send |
+| zero-copy | DMA buffer를 미리 할당, index만 queue로 전달 |
 
 Backpressure는 queue가 full일 때 producer가 어떻게 행동할지의 정책입니다. block, drop, replace 세 가지 중 선택합니다.
 

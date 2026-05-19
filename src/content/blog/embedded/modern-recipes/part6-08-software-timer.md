@@ -26,12 +26,12 @@ SW timer        timer task 한 개 = N개 가상 timer, tick 정밀(보통 1 ms)
 
 FreeRTOS software timer 구조입니다.
 
-```text
-xTimerCreate                callback, period, auto-reload 옵션
-xTimerStart                 timer command queue로 명령 전달
-xTimerStop / xTimerDelete   같은 queue로 전달
-timer task                  매 tick마다 만료 timer를 골라 callback 호출
-```
+| API | 동작 |
+|-----|------|
+| `xTimerCreate` | callback, period, auto-reload 옵션 |
+| `xTimerStart` | timer command queue로 명령 전달 |
+| `xTimerStop` / `xTimerDelete` | 같은 queue로 전달 |
+| timer task | 매 tick마다 만료 timer를 골라 callback 호출 |
 
 Callback은 timer task의 context에서 실행됩니다. 따라서 callback에서 block하거나 무거운 일을 하면 다른 timer가 지연됩니다.
 

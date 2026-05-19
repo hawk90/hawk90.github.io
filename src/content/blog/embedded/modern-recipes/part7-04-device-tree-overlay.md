@@ -19,13 +19,13 @@ Raspberry Pi와 BeagleBone이 overlay를 표준 운영 방식으로 사용하기
 
 ## 핵심 개념
 
-```text
-fragment       overlay의 단위 — 하나의 target 노드에 적용
-target         어디에 덮어쓸지 — base DT의 phandle 참조
-__symbols__    base DT가 노출한 label → path 매핑
-plugin;        overlay 선언 (dtc -@로 컴파일)
-status         "okay" / "disabled" — 활성 여부 토글
-```
+| 요소 | 역할 |
+|------|------|
+| fragment | overlay의 단위 — 하나의 target 노드에 적용 |
+| target | 어디에 덮어쓸지 — base DT의 phandle 참조 |
+| `__symbols__` | base DT가 노출한 label → path 매핑 |
+| `plugin;` | overlay 선언 (`dtc -@`로 컴파일) |
+| status | `"okay"` / `"disabled"` — 활성 여부 토글 |
 
 overlay 한 장의 골격입니다.
 

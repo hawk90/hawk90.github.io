@@ -30,14 +30,13 @@ tags: [recipes, linux, boot]
 
 각 단계의 책임을 표로 보면 분명합니다.
 
-```text
-단계        실행 환경     주요 작업               전형적 시간
-BootROM    SRAM (on-chip) boot mode 결정         ~10 ms
-SPL        SRAM           DRAM init, U-Boot load  100 ms
-U-Boot     DRAM           Kernel+DTB load         200~500 ms
-Kernel     DRAM           driver init             500 ms ~ 수 s
-Init       DRAM           service start           수 s
-```
+| 단계 | 실행 환경 | 주요 작업 | 전형적 시간 |
+|------|-----------|-----------|--------------|
+| BootROM | SRAM (on-chip) | boot mode 결정 | ~10 ms |
+| SPL | SRAM | DRAM init, U-Boot load | 100 ms |
+| U-Boot | DRAM | Kernel+DTB load | 200~500 ms |
+| Kernel | DRAM | driver init | 500 ms ~ 수 s |
+| Init | DRAM | service start | 수 s |
 
 ATF/OP-TEE는 ARMv8 secure world에서 EL3/secure EL1을 담당하며, 일반 ARMv7 시스템이라면 보통 생략합니다.
 
@@ -100,12 +99,12 @@ bootargs=console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait
 
 ### Init 선택
 
-```text
-systemd                 풀스택 service manager, dependency graph, 빠른 parallel boot
-busybox init            단순한 SysV-style, RAM과 부팅 시간 최소
-runit / s6              middle ground, supervision tree
-custom init             /sbin/init으로 직접 만든 binary
-```
+| Init | 특성 |
+|------|------|
+| systemd | 풀스택 service manager, dependency graph, 빠른 parallel boot |
+| busybox init | 단순한 SysV-style, RAM과 부팅 시간 최소 |
+| runit / s6 | middle ground, supervision tree |
+| custom init | `/sbin/init`으로 직접 만든 binary |
 
 차량 인포테인먼트나 산업 device는 빠른 boot와 minimal RAM을 위해 busybox나 custom init을 선택하는 경우가 많고, Yocto/Debian 기반은 systemd가 표준입니다.
 

@@ -19,14 +19,14 @@ SoC의 내장 UART, I2C 컨트롤러, PWM, 자체 IP를 다룰 때 platform driv
 
 ## 핵심 개념
 
-```text
-platform_driver       driver 측 — probe, remove, of_match_table
-platform_device       device 측 — DT에서 자동 생성
-of_match_table        DT compatible 문자열 매핑
-probe                 device 발견 시 자원 획득 + 초기화
-remove                cleanup
-devm_*                device-managed API — auto cleanup
-```
+| 요소 | 역할 |
+|------|------|
+| `platform_driver` | driver 측 — probe, remove, `of_match_table` |
+| `platform_device` | device 측 — DT에서 자동 생성 |
+| `of_match_table` | DT compatible 문자열 매핑 |
+| `probe` | device 발견 시 자원 획득 + 초기화 |
+| `remove` | cleanup |
+| `devm_*` | device-managed API — auto cleanup |
 
 전형적인 driver 한 장의 골격입니다.
 

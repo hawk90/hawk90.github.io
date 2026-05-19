@@ -21,21 +21,21 @@ RTOS를 켜는 순간 가장 먼저 결정해야 할 것이 task 분할입니다
 
 세 가지 표준 패턴이 있습니다.
 
-```text
-Periodic         일정 주기로 실행 (sensor 10 ms, control 1 ms)
-Event-driven     외부 신호로 시작 (button, packet 도착)
-State machine    상태 전이가 긴 흐름 (BLE connect, file upload)
-```
+| 패턴 | 설명 |
+|------|------|
+| Periodic | 일정 주기로 실행 (sensor 10 ms, control 1 ms) |
+| Event-driven | 외부 신호로 시작 (button, packet 도착) |
+| State machine | 상태 전이가 긴 흐름 (BLE connect, file upload) |
 
 Priority는 마감이 짧을수록 높게 줍니다. Rate Monotonic이 가장 단순한 출발점입니다.
 
-```text
-period 1 ms      priority 5 (가장 높음)
-period 10 ms     priority 4
-period 100 ms    priority 3
-event-driven UI  priority 2
-background log   priority 1 (가장 낮음)
-```
+| Task | Priority |
+|------|----------|
+| period 1 ms | 5 (가장 높음) |
+| period 10 ms | 4 |
+| period 100 ms | 3 |
+| event-driven UI | 2 |
+| background log | 1 (가장 낮음) |
 
 같은 우선순위에 task가 여러 개 모이면 round-robin이 되지만, 디버깅이 어려워지므로 우선순위는 가능한 한 유일하게 줍니다.
 
@@ -155,22 +155,22 @@ int main(void) {
 
 같은 product를 task 분할만 바꿔서 jitter를 측정해본 사례입니다.
 
-```text
-구조                              control jitter
-모든 일을 task 하나에 (priority 3) 8 ms
-control만 분리 (priority 5)        0.2 ms
-control + sensor 분리              0.3 ms
-sensor를 우선순위 5로 (실수)        12 ms (control이 굶음)
-```
+| 구조 | control jitter |
+|------|-----------------|
+| 모든 일을 task 하나에 (priority 3) | 8 ms |
+| control만 분리 (priority 5) | 0.2 ms |
+| control + sensor 분리 | 0.3 ms |
+| sensor를 우선순위 5로 (실수) | 12 ms (control이 굶음) |
 
 가장 짧은 마감을 가진 task에 가장 높은 priority를 주는 것만으로도 jitter가 한 자릿수 µs 수준으로 떨어집니다.
 
-```text
-context switch 비용 (Cortex-M4 72 MHz)
-task 2개                  3.5 µs / switch
-task 8개                  3.5 µs / switch (task 수 무관)
-ISR → task wake           1.8 µs
-```
+Context switch 비용 (Cortex-M4 72 MHz):
+
+| 시나리오 | 시간 |
+|----------|------|
+| task 2개 | 3.5 µs / switch |
+| task 8개 | 3.5 µs / switch (task 수 무관) |
+| ISR → task wake | 1.8 µs |
 
 Context switch는 task 수와 무관합니다. 다만 task가 너무 많으면 디버깅과 stack RAM이 부담입니다.
 

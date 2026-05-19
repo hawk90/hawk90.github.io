@@ -23,20 +23,19 @@ ARM이 Cortex-M33/M55/M85에 도입한 **TrustZone for Armv8-M**이 이 문제�
 
 ## 두 세계 — Secure와 Non-Secure
 
-```text
-Cortex-M33/M55/M85 — TrustZone for Armv8-M
+Cortex-M33/M55/M85에서 TrustZone for Armv8-M은 두 세계를 만듭니다.
 
-Secure World (S):
-  TF-M 또는 자체 secure firmware
-  crypto, secure storage, attestation, secure boot root
+Secure World (S)
 
-Non-Secure World (NS):
-  FreeRTOS / Zephyr / application
-  일반 펌웨어 코드
+- TF-M 또는 자체 secure firmware
+- crypto, secure storage, attestation, secure boot root
 
-같은 CPU, 같은 메모리, 같은 peripheral
-→ region별 attribute로 분리
-```
+Non-Secure World (NS)
+
+- FreeRTOS / Zephyr / application
+- 일반 펌웨어 코드
+
+같은 CPU, 같은 메모리, 같은 peripheral — region별 attribute로 분리합니다.
 
 두 세계가 같은 칩 위에서 어떻게 갈라지는지 그림으로 보면 이렇습니다. Secure Flash/SRAM/Peripheral과 Non-Secure 영역이 attribute로 분리되고, NSC veneer가 둘 사이의 유일한 합법 통로가 됩니다.
 
@@ -162,16 +161,15 @@ Linux의 `copy_from_user`와 같은 사상으로, *user/kernel pointer 분리*�
 
 **Trusted Firmware-M**(TF-M)은 ARM이 공식으로 유지하는 Secure World reference implementation입니다. Apache 2.0 오픈소스로 공개되어 있고, STM32L5/U5, nRF5340, MPS3 등 대부분의 Cortex-M33 보드가 TF-M 포팅을 제공합니다.
 
-```text
-TF-M 구성:
-  BL2 (MCUboot 기반)        boot stage 2, 서명 검증
-  TF-M Core                 SPM (Secure Partition Manager)
-  Crypto partition          PSA Crypto API 구현 (Mbed TLS 기반)
-  ITS partition             Internal Trusted Storage
-  PS partition              Protected Storage (encrypted at rest)
-  Attestation partition     EAT/CWT 토큰 생성
-  Firmware Update partition PSA FWU API
-```
+TF-M 구성
+
+- **BL2 (MCUboot 기반)** — boot stage 2, 서명 검증
+- **TF-M Core** — SPM (Secure Partition Manager)
+- **Crypto partition** — PSA Crypto API 구현 (Mbed TLS 기반)
+- **ITS partition** — Internal Trusted Storage
+- **PS partition** — Protected Storage (encrypted at rest)
+- **Attestation partition** — EAT/CWT 토큰 생성
+- **Firmware Update partition** — PSA FWU API
 
 NS application은 *PSA API*만 호출합니다. PSA API는 TF-M에 의해 NSC veneer로 노출되고, 내부에서는 Secure Partition Manager가 적절한 secure partition으로 IPC를 보냅니다. 즉 NS 입장에서는 *단순한 함수 호출*이지만, 내부는 *RPC over NSC*입니다.
 
@@ -229,15 +227,10 @@ upload_to_server(challenge, token, token_len);
 
 ## Secure Boot Chain
 
-```text
-1. ROM Boot Loader (RBL)        chip mask ROM, 변경 불가
-   └ root key hash로 BL2 서명 검증
-2. Secure Bootloader (BL2/MCUboot)
-   └ TF-M secure firmware 서명 검증
-3. TF-M Secure firmware
-   └ Non-Secure application 서명 검증
-4. Non-Secure RTOS + application 실행
-```
+1. **ROM Boot Loader (RBL)** — chip mask ROM, 변경 불가. root key hash로 BL2 서명 검증.
+2. **Secure Bootloader (BL2/MCUboot)** — TF-M secure firmware 서명 검증.
+3. **TF-M Secure firmware** — Non-Secure application 서명 검증.
+4. **Non-Secure RTOS + application** 실행.
 
 각 단계는 *다음 단계의 서명을 검증*한 뒤에만 jump합니다. trust anchor는 eFuse에 *한 번만 굽힌* root key hash입니다. provisioning 단계에서 한 번 굽고, 그 뒤로는 변경할 수 없습니다. 이 chain 전체를 **measured boot**로 부르고, 단계별 hash가 attestation token에 그대로 들어갑니다.
 
@@ -256,61 +249,46 @@ ETSI EN 303 645, NIST IR 8259, EU CRA(Cyber Resilience Act) 같은 규제·표�
 
 ## SoC 사례 — Cortex-M33 칩들
 
-```text
-STM32L5 / STM32U5 (ST):
-  TF-M 공식 지원, CubeIDE에 dual-project template
-  Secure firmware 프로젝트 + Non-Secure RTOS 프로젝트가 함께 빌드
+**STM32L5 / STM32U5 (ST)** — TF-M 공식 지원, CubeIDE에 dual-project template. Secure firmware 프로젝트 + Non-Secure RTOS 프로젝트가 함께 빌드됩니다.
 
-nRF5340 / nRF54L15 (Nordic):
-  Application core (M33) + Network core (BLE controller)
-  Application core에 TrustZone, TF-M 또는 Zephyr TF-M 통합
+**nRF5340 / nRF54L15 (Nordic)** — Application core (M33) + Network core (BLE controller). Application core에 TrustZone, TF-M 또는 Zephyr TF-M 통합.
 
-NXP LPC55Sxx / MCXNxxx:
-  PUF(Physically Unclonable Function) 기반 root key
-  TF-M 포팅 제공
+**NXP LPC55Sxx / MCXNxxx** — PUF(Physically Unclonable Function) 기반 root key, TF-M 포팅 제공.
 
-Microchip SAM L11 / PIC32CM LS:
-  진입형 TrustZone-M, 자체 secure firmware 권장
+**Microchip SAM L11 / PIC32CM LS** — 진입형 TrustZone-M, 자체 secure firmware 권장.
 
-RP2350 (Raspberry Pi):
-  dual Cortex-M33, TrustZone 지원
-  Secure boot, OTP 기반 root key
-```
+**RP2350 (Raspberry Pi)** — dual Cortex-M33, TrustZone 지원, Secure boot, OTP 기반 root key.
 
 ## 자동차 ECU — TrustZone 활용
 
 자동차 ECU는 OTA 서명 검증, V2X 인증서 보관, immobilizer key 같은 보안 자원을 별도 *HSM* 칩이나 Cortex-M33의 TrustZone으로 처리합니다.
 
-```text
-NXP S32K3 family:
-  M7 core    일반 control loop, AUTOSAR application
-  M33 core   TrustZone, HSM 역할
-              ├ secure key storage
-              ├ OTA signature verify
-              └ secure debug
+**NXP S32K3 family**
 
-i.MX 8M Plus:
-  A53 cluster   Linux + OP-TEE (TrustZone-A)
-  M7 core       deterministic control
-  공동 attestation chain
-```
+- M7 core — 일반 control loop, AUTOSAR application
+- M33 core — TrustZone, HSM 역할 (secure key storage, OTA signature verify, secure debug)
+
+**i.MX 8M Plus**
+
+- A53 cluster — Linux + OP-TEE (TrustZone-A)
+- M7 core — deterministic control
+- 공동 attestation chain
 
 ## Cross-World Call Overhead
 
 NSC veneer 호출은 평범한 함수 호출보다 비쌉니다.
 
-```text
-Cortex-M33 @ 110 MHz 측정:
-  일반 함수 호출         : ~5 cycle
-  NSC veneer 호출 (NS→S) : ~25 cycle (SG + 검증 + stacking)
-  NSC return (S→NS)     : ~20 cycle
-  cmse_check_address    : ~10 cycle (TT 명령 1회)
-  ────────────────────────────────────────
-  최소 round-trip       : ~55 cycle (≈0.5 µs)
+Cortex-M33 @ 110 MHz 측정
 
-PSA AES-GCM 128 B 암호화 : ~12000 cycle (≈109 µs)
-PSA ECDSA P-256 서명     : ~3.5 M cycle (≈32 ms, HW accel 없을 때)
-```
+| 항목 | Cycle |
+|---|---|
+| 일반 함수 호출 | ~5 |
+| NSC veneer 호출 (NS→S) | ~25 (SG + 검증 + stacking) |
+| NSC return (S→NS) | ~20 |
+| cmse_check_address | ~10 (TT 명령 1회) |
+| 최소 round-trip | ~55 (≈0.5 µs) |
+| PSA AES-GCM 128 B 암호화 | ~12000 (≈109 µs) |
+| PSA ECDSA P-256 서명 | ~3.5 M (≈32 ms, HW accel 없을 때) |
 
 veneer 자체 비용은 크지 않습니다. 대부분의 시간은 *실제 crypto 연산*에 들어가고, 그래서 hardware crypto accelerator(AES-CCM, SHA, PKA)가 있는 칩이 권장됩니다.
 

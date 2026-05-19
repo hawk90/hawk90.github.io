@@ -19,11 +19,11 @@ ADC 변환이 끝났음을 task에 알리고 싶을 때, EXTI button 한 번 눌
 
 ## 핵심 개념
 
-```text
-Binary semaphore     0 또는 1 — ISR 신호
-Counting semaphore   0 ~ N    — 자원 풀
-Mutex                0 또는 1 + owner — mutual exclusion
-```
+| 종류 | 값 | 용도 |
+|------|-----|------|
+| Binary semaphore | 0 또는 1 | ISR 신호 |
+| Counting semaphore | 0 ~ N | 자원 풀 |
+| Mutex | 0 또는 1 + owner | mutual exclusion |
 
 Semaphore의 두 가지 핵심 동작입니다.
 

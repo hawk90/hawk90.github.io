@@ -222,33 +222,25 @@ Level A — *object coverage* 추가 검증.
 
 ## Coverage 측정 — Instrumentation
 
-```text
-Coverage tool 방식:
+Coverage tool 방식.
 
-Source instrumentation:
-  Compiler가 각 branch·decision에 counter 삽입
-  Test 실행 → counter 누적
-  
-  void f(int x) {
-    coverage_inc(F_S1);
-    if (x > 0) {
-      coverage_inc(F_S2);
-      ...
-    }
+**Source instrumentation** — Compiler가 각 branch·decision에 counter 삽입. Test 실행 → counter 누적.
+
+```c
+void f(int x) {
+  coverage_inc(F_S1);
+  if (x > 0) {
+    coverage_inc(F_S2);
+    ...
   }
-  
-  장점 — 정확
-  단점 — overhead, timing 영향
-
-Binary instrumentation:
-  실행 코드 직접 modify
-  덜 정확하지만 source 안 건드림
-  
-Hardware tracing:
-  ARM ETM·ETB·CoreSight
-  Object code coverage 측정
-  Real-time, no overhead
+}
 ```
+
+장점 — 정확. 단점 — overhead, timing 영향.
+
+**Binary instrumentation** — 실행 코드 직접 modify. 덜 정확하지만 source 안 건드림.
+
+**Hardware tracing** — ARM ETM·ETB·CoreSight. Object code coverage 측정. Real-time, no overhead.
 
 방식 별 *trade-off*. Real target — hardware tracing.
 
@@ -313,30 +305,27 @@ Coverage가 *목적이 아닌 결과*. Trace의 의미.
 
 ## Test·Coverage Tool 통합
 
-```text
-Workflow:
+**Workflow**:
 
-1. Source code → coverage instrumentation
-   $ vcast --instrument source.c
-   
-2. Build instrumented binary
-   $ make -C build/instrumented
-   
-3. Run tests
-   $ vcast --run all-tests
-   
-4. Analyze coverage
-   $ vcast --coverage-report
-   
-5. Identify gaps
-   - Add test
-   - Justify defensive
-   - Remove dead
-   
+1. Source code → coverage instrumentation:
+   ```bash
+   vcast --instrument source.c
+   ```
+2. Build instrumented binary:
+   ```bash
+   make -C build/instrumented
+   ```
+3. Run tests:
+   ```bash
+   vcast --run all-tests
+   ```
+4. Analyze coverage:
+   ```bash
+   vcast --coverage-report
+   ```
+5. Identify gaps — Add test, Justify defensive, Remove dead
 6. Iterate
-   
 7. Final report
-```
 
 CI·CD 통합 — 매 commit coverage check.
 

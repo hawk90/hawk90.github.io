@@ -19,14 +19,13 @@ tags: [recipes, rtos, mutex]
 
 ## 핵심 개념
 
-```text
-                      Mutex            Binary semaphore
-owner 추적            yes              no
-priority inheritance  yes              no
-ISR에서 give          금지             가능
-recursive 옵션        있음             없음
-용도                  mutual excl.     signal
-```
+| 속성 | Mutex | Binary semaphore |
+|------|-------|-------------------|
+| owner 추적 | yes | no |
+| priority inheritance | yes | no |
+| ISR에서 give | 금지 | 가능 |
+| recursive 옵션 | 있음 | 없음 |
+| 용도 | mutual excl. | signal |
 
 Owner 추적이 핵심입니다. Mutex는 "누가 잠갔는지"를 기억하므로 그 task에게만 release 권한이 있고, 더 높은 priority의 task가 기다리면 owner의 priority를 일시적으로 올려 빨리 끝내게 합니다.
 

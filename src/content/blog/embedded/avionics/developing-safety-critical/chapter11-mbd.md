@@ -221,28 +221,30 @@ Hybrid = *standard practice*. 100% MBD 또는 100% manual은 드뭄.
 
 ## SCADE 예 — Synchronous
 
-```text
 SCADE node (간단):
 
+```text
 node altitude_filter(meas: real, dt: real) returns (est: real)
 let
   delta = meas - prev_est;
   est = prev_est + 0.1 * delta;
   prev_est = pre est;
 tel
+```
 
 Generated C:
-  void altitude_filter(real_t meas, real_t dt, 
-                       real_t *est) {
-    static real_t prev_est = 0.0;
-    real_t delta = meas - prev_est;
-    *est = prev_est + 0.1f * delta;
-    prev_est = *est;
-  }
 
-장점:
-  Formal semantics — model = code 등가성 proof
+```c
+void altitude_filter(real_t meas, real_t dt,
+                     real_t *est) {
+  static real_t prev_est = 0.0;
+  real_t delta = meas - prev_est;
+  *est = prev_est + 0.1f * delta;
+  prev_est = *est;
+}
 ```
+
+장점 — Formal semantics: model = code 등가성 proof.
 
 SCADE — *formal equivalence*. 인증 audit 친화.
 

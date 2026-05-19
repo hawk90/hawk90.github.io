@@ -512,27 +512,11 @@ KSLV-II — *iterative V&V improvement*. 한국 우주 V&V history.
 
 ## Korean V&V Industry
 
-```text
-KARI V&V:
-  자체 HIL·SIL 시설
-  Mission control 통합
-  
-KAI V&V:
-  KF-21·FA-50·KUH iron bird
-  Flight test (사천 공항·다양 군 비행장)
-  
-한화·LIG V&V:
-  Missile·LV ground test
-  Test ranges (마라도·서산·태안)
-  
-국방기술품질원 (DTAQ):
-  방산 V&V 검증
-  IV&V
-  
-민간 LV (인노스페이스·페리지):
-  Brazil 발사장 (Alcantara)
-  자체 ground test·flight test
-```
+- **KARI V&V:** 자체 HIL·SIL 시설. Mission control 통합.
+- **KAI V&V:** KF-21·FA-50·KUH iron bird. Flight test (사천 공항·다양 군 비행장).
+- **한화·LIG V&V:** Missile·LV ground test. Test ranges (마라도·서산·태안).
+- **국방기술품질원 (DTAQ):** 방산 V&V 검증. IV&V.
+- **민간 LV (인노스페이스·페리지):** Brazil 발사장 (Alcantara). 자체 ground test·flight test.
 
 한국 — *V&V infrastructure 강화*. KARI·KAI·한화 핵심.
 
@@ -540,40 +524,25 @@ KAI V&V:
 
 > ⚠️ HIL skip → Flight first
 
-```text
-"HIL 부족 → 곧장 flight test"
-→ Bug catch flight 단계
-→ Schedule slip·cost ↑
-```
+"HIL 부족 → 곧장 flight test"는 bug catch가 flight 단계에서 일어나 schedule slip·cost ↑로 이어진다.
 
 → HIL bench 충분 활용.
 
 > ⚠️ Validation vs Verification 혼동
 
-```text
-"V&V — same"
-→ Verification 만 강조 (process)
-→ Validation 부족 (operational)
-```
+"V&V — same"으로 보면 verification만 강조 (process)되고 validation (operational)이 부족하다.
 
 → Both required.
 
 > ⚠️ Flight test count 부족
 
-```text
-Cert 최소 hours 만족
-→ Edge case 미검증
-→ In-service issue
-```
+Cert 최소 hours만 만족하면 edge case가 미검증되어 in-service issue로 이어진다.
 
 → Adequate envelope expansion.
 
 > ⚠️ Trace 부분만
 
-```text
-"중요 req만 trace"
-→ Audit fail
-```
+"중요 req만 trace"는 audit fail의 원인이다.
 
 → Complete bidirectional.
 

@@ -226,35 +226,27 @@ C++ 추세 — *modern aerospace · 자동차 영향*.
 
 ## F-Prime — JPL C++ Framework
 
-```text
-F-Prime (F´):
-  JPL 개발 — Mars helicopter Ingenuity 등 채택
-  
-특징:
-  - C++11
-  - Component-based
-  - Topology (event-driven)
-  - Code auto-gen from XML
-  - Telemetry·command
-  - Open source (Apache 2.0)
-  
-DO-178C status:
-  Not directly certified
-  자체 verification
-  필요 시 user가 re-cert
-  
-구조:
-  Component {
-    Input port → input port handler
-    Output port → output port handler
-    Command port → command handler
-    Telemetry port → telemetry update
-  }
-  
-Topology:
-  Components 연결
-  Auto-generated boilerplate
-```
+**F-Prime (F´)** — JPL 개발, Mars helicopter Ingenuity 등 채택.
+
+**특징**:
+
+- C++11
+- Component-based
+- Topology (event-driven)
+- Code auto-gen from XML
+- Telemetry·command
+- Open source (Apache 2.0)
+
+**DO-178C status** — Not directly certified. 자체 verification. 필요 시 user가 re-cert.
+
+**구조 — Component**:
+
+- Input port → input port handler
+- Output port → output port handler
+- Command port → command handler
+- Telemetry port → telemetry update
+
+**Topology** — Components 연결, Auto-generated boilerplate.
 
 F-Prime = NASA *modern C++ framework*. Open source 재사용.
 
