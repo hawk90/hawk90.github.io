@@ -94,12 +94,6 @@ CAN 비트는 *4 segment*로 분할:
 
 **Sample Point** = (Sync + Prop + Phase1) / (총 TQ). 보통 **75-87.5%** 사이.
 
-```text
-   |── SS ──|── PROP_SEG ──|── PHASE_SEG1 ──|── PHASE_SEG2 ──|
-   1 TQ                                     ↑
-                                       Sample Point (87.5%)
-```
-
 긴 버스일수록 *prop_seg*을 키워야 (광속 전파 지연 흡수). 1 km @ 50 kbps는 prop_seg가 큰 비중.
 
 ### 표준 권장 Sample Point

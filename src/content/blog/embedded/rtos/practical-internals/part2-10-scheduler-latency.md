@@ -60,13 +60,9 @@ void rx_task(void *arg) {
 
 로직 분석기로 GPIO 펄스 폭을 측정합니다. ISR 시작, ISR 끝, task 시작이 세 개의 edge로 나타납니다.
 
-```text
-Pin:  ─┐      ┌────┐
-       │      │    │
-       └──────┘    └─────
-       t2     t4   t7
-       └─ISR─┘ └ Sch ┘
-```
+![GPIO debug pin — ISR width, scheduler latency, task wake](/images/blog/rtos/diagrams/part2-10-gpio-isr-trace.svg)
+
+세 edge — t2(ISR 시작), t4(ISR 끝), t7(task 시작) — 사이의 폭으로 *ISR 길이*와 *scheduler latency*를 분리해 측정합니다.
 
 ## DWT Cycle Counter — Cortex-M
 

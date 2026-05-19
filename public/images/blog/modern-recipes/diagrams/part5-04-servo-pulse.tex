@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  sig/.style={thick, draw=absbord},
+  lbl/.style={font=\sffamily\footnotesize, text=inkc},
+  sublbl/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+% Period = 20 ms; show 2 periods. Use 1 unit = 1 ms.
+% Pulse width = 1.5 ms (center).
+
+\def\T{20.0}
+\def\pw{1.5}
+
+\node[lbl, anchor=east] at (-0.3, 1.0) {Servo};
+
+% Two periods
+\foreach \i in {0, 1} {
+  \pgfmathsetmacro{\x}{\i*\T}
+  \draw[sig]
+    (\x, 0.5) -- (\x, 1.5) -- (\x + \pw, 1.5) -- (\x + \pw, 0.5) -- (\x + \T, 0.5);
+}
+% close
+\draw[sig] (2*\T, 0.5) -- (2*\T + 1.5, 0.5);
+
+% Pulse width annotation
+\draw[<->, draw=focusc, line width=0.4pt] (0, 1.85) -- (\pw, 1.85);
+\node[sublbl, text=focusc, anchor=south] at (\pw/2, 1.85) {1.5 ms (center, 0\textdegree)};
+
+% Period brace
+\draw[decorate, decoration={brace, amplitude=4pt, mirror},
+      draw=mutec, line width=0.4pt]
+  (0, 0.1) -- (\T, 0.1);
+\node[sublbl, anchor=north] at (\T/2, 0.0) {20 ms (50 Hz period)};
+
+% Voltage levels
+\node[sublbl, anchor=east] at (-0.4, 1.5) {3.3 V};
+\node[sublbl, anchor=east] at (-0.4, 0.5) {0 V};
+
+% Range table at top-right
+\node[lbl, anchor=north west] at (\T + 2.5, 2.5)
+  {pulse $\to$ 각도};
+\node[sublbl, anchor=north west] at (\T + 2.5, 2.1)
+  {1.0 ms $\to$ -45\textdegree};
+\node[sublbl, anchor=north west] at (\T + 2.5, 1.75)
+  {1.5 ms $\to$ \phantom{+}0\textdegree};
+\node[sublbl, anchor=north west] at (\T + 2.5, 1.4)
+  {2.0 ms $\to$ +45\textdegree};
+
+\end{tikzpicture}
+\end{document}

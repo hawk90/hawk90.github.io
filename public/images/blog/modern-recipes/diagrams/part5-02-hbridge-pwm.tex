@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  sig/.style={thick, draw=absbord},
+  avg/.style={dashed, draw=focusc, line width=0.5pt},
+  lbl/.style={font=\sffamily\footnotesize, text=inkc},
+  sublbl/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+% 50% duty @ 20 kHz: period 50 us, half on (25 us)
+\def\T{4.0}
+\def\dC{2.0}
+
+\node[lbl, anchor=east] at (-0.3, 1.0) {Motor V};
+\foreach \i in {0, 1, 2} {
+  \pgfmathsetmacro{\x}{\i*\T}
+  \draw[sig]
+    (\x, 0.5) -- (\x, 1.5) -- (\x + \dC, 1.5) -- (\x + \dC, 0.5) -- (\x + \T, 0.5);
+}
+
+% Voltage scale
+\node[sublbl, anchor=east] at (-0.35, 1.5) {12 V};
+\node[sublbl, anchor=east] at (-0.35, 0.5) {0 V};
+
+% Average line at 6V (midway)
+\draw[avg] (0, 1.0) -- (3*\T, 1.0);
+\node[sublbl, text=focusc, anchor=west] at (3*\T + 0.15, 1.0) {평균 $\approx$ 6 V};
+
+% Duty annotation
+\draw[<->, draw=mutec, line width=0.3pt] (0, 1.85) -- (\dC, 1.85);
+\node[sublbl, anchor=south] at (\dC/2, 1.85) {25 \textmu s duty};
+\draw[<->, draw=mutec, line width=0.3pt] (\dC, 1.85) -- (\T, 1.85);
+\pgfmathsetmacro{\xmid}{(\dC + \T)/2}
+\node[sublbl, anchor=south] at (\xmid, 1.85) {25 \textmu s off};
+
+% Period brace
+\draw[decorate, decoration={brace, amplitude=3pt, mirror},
+      draw=mutec, line width=0.4pt]
+  (0, 0.15) -- (\T, 0.15);
+\node[sublbl, anchor=north] at (\T/2, 0.05) {50 \textmu s (20 kHz), 50\% duty};
+
+\end{tikzpicture}
+\end{document}

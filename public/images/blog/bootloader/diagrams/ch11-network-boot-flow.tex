@@ -1,0 +1,43 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  box/.style={rectangle, draw=nodebord, fill=#1, minimum width=22mm, minimum height=10mm, font=\sffamily\small},
+  pkt/.style={-{Stealth[length=2mm]}, line width=0.8pt, draw=#1}
+]
+
+% Title
+\node[font=\sffamily\bfseries] at (3.5, 5) {네트워크 부트 흐름};
+
+% Board side
+\node[box=absfill] (board) at (0, 3) {Board\\(U-Boot)};
+
+% Server side
+\node[box=impfill] (dhcp) at (7, 4) {DHCP\\Server};
+\node[box=clifill] (tftp) at (7, 2) {TFTP\\Server};
+\node[box=hifill] (nfs) at (7, 0) {NFS\\Server};
+
+% DHCP flow
+\draw[pkt=absbord] (board.east) ++(0, 0.3) -- ++(1.5, 0) |- node[above, pos=0.25, font=\sffamily\tiny] {DISCOVER} (dhcp.west);
+\draw[pkt=impbord] (dhcp.west) ++(0, -0.3) -- ++(-1.5, 0) |- node[below, pos=0.25, font=\sffamily\tiny] {OFFER + next-server} ([yshift=0.1cm]board.east);
+
+% TFTP flow
+\draw[pkt=absbord] ([yshift=-0.2cm]board.east) -- node[above, font=\sffamily\tiny] {tftp Image} ([yshift=0.2cm]tftp.west);
+\draw[pkt=clibord] ([yshift=-0.2cm]tftp.west) -- node[below, font=\sffamily\tiny] {kernel + dtb} ([yshift=-0.4cm]board.east);
+
+% NFS flow (after boot)
+\draw[pkt=absbord, densely dashed] ([yshift=-0.6cm]board.east) -- node[above, font=\sffamily\tiny, text=mutec] {mount rootfs} (nfs.west);
+
+% Timeline labels
+\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-1.5, 4) {1. IP 획득};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-1.5, 2.5) {2. 커널 다운로드};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-1.5, 0) {3. rootfs 마운트};
+
+% Note
+\node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=north west] at (-1.5, -1) {%
+TFTP: UDP/69, 인증 없음\\
+NFS: ip=dhcp in bootargs 필수};
+
+\end{tikzpicture}
+\end{document}

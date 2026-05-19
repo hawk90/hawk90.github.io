@@ -38,36 +38,7 @@ ARMv8-A는 *부트가 진행됨에 따라* EL3 → EL3 → EL3 → (EL2 → EL1)
 
 ARM Trusted Firmware의 *공식 단계 이름*은 다음과 같습니다.
 
-```text
-[BootROM]              ← SoC mask ROM (BL0이라 부르기도)
-   │
-   ▼
-[BL1]   - boot ROM 직후의 trusted code
-        - EL3, secure SRAM
-        - BL2 무결성 검증
-   │
-   ▼
-[BL2]   - trusted boot firmware
-        - EL3 → EL1 (secure)
-        - DDR init, BL31/BL32/BL33 적재
-   │
-   ▼
-[BL31]  - EL3 runtime firmware
-        - PSCI handler, SMC dispatcher
-        - 부팅 후에도 살아있음
-   │
-   ▼
-[BL32]  - secure-EL1 payload (선택)
-        - OP-TEE, ATF-A의 secure OS
-   │
-   ▼
-[BL33]  - non-trusted firmware
-        - U-Boot Proper 또는 EDK II
-        - EL2 (Linux는 EL2에서 받음)
-   │
-   ▼
-[Linux Kernel]
-```
+![ARMv8-A 부트 단계 — BL1 → BL2 → BL31 → BL33 → Linux와 EL 권한](/images/blog/bootloader/diagrams/chapter04-armv8-boot-stages.svg)
 
 각 BL은 *별도 binary*입니다. *별도 프로젝트*에서 빌드합니다.
 

@@ -223,12 +223,7 @@ void i2c_bus_recover(void) {
 
 로직 애널라이저로 SCL·SDA를 보면 전체 transaction이 보입니다.
 
-```text
-SDA  ──┐ ABCDEFG7──ACK──┌DATA──ACK──┌─
-       │                  │           │
-SCL  ───────_│└┘└┘└┘└┘└┘└┘_│└┘└┘└┘└┘└┘_
-START      addr7      data        STOP
-```
+![I2C transaction — START, address+ACK, data+ACK, STOP](/images/blog/modern-recipes/diagrams/part4-09-i2c-transaction.svg)
 
 가장 흔한 진단:
 - **ACK가 NACK로 보이면**: device address가 틀렸거나 device가 power-off.

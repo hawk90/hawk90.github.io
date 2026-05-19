@@ -1,0 +1,60 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  stage/.style={rectangle, draw=nodebord, fill=#1, minimum width=32mm, minimum height=8mm, font=\sffamily\small},
+  check/.style={diamond, draw=nodebord, fill=warnfill, aspect=2, inner sep=1pt, font=\sffamily\scriptsize}
+]
+
+% Title
+\node[font=\sffamily\bfseries] at (0, 6.5) {DDR 초기화 시퀀스};
+
+% Stages - left column (Controller)
+\node[stage=absfill] (pll) at (-2.5, 5) {PLL Lock};
+\node[stage=absfill] (ctrl) at (-2.5, 3.5) {Controller Reset};
+\node[stage=absfill] (phy) at (-2.5, 2) {PHY 초기화};
+\node[stage=impfill] (mrs) at (-2.5, 0.5) {MRS 설정};
+
+% Stages - right column (Training)
+\node[stage=clifill] (zq) at (2.5, 5) {ZQ Calibration};
+\node[stage=clifill] (wl) at (2.5, 3.5) {Write Leveling};
+\node[stage=clifill] (rl) at (2.5, 2) {Read Leveling};
+\node[stage=hifill] (done) at (0, -1) {정상 동작};
+
+% Check node
+\node[check] (chk) at (2.5, 0.5) {Pass?};
+
+% Arrows - left column
+\draw[arr] (pll) -- (ctrl);
+\draw[arr] (ctrl) -- (phy);
+\draw[arr] (phy) -- (mrs);
+
+% Arrow from left to right
+\draw[arr] (mrs.east) -- ++(1, 0) |- (zq.west);
+
+% Arrows - right column
+\draw[arr] (zq) -- (wl);
+\draw[arr] (wl) -- (rl);
+\draw[arr] (rl) -- (chk);
+
+% Check outcomes
+\draw[arr] (chk.south) -- node[right, font=\sffamily\tiny, text=impbord] {Yes} (chk |- done.north) -- (done.north);
+\node[font=\sffamily\tiny, text=conbord, anchor=west] at (3.3, 0.5) {No → Hang};
+
+% Labels
+\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-4.5, 5) {clock 안정화};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-4.5, 3.5) {DDRC 레지스터};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-4.5, 2) {DWC/Cadence};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-4.5, 0.5) {CL, BL 등};
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (4.5, 5) {임피던스 보정};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (4.5, 3.5) {DQS 정렬};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (4.5, 2) {sampling window};
+
+% Section labels
+\node[font=\sffamily\footnotesize\bfseries, text=absbord] at (-2.5, 5.8) {Controller Setup};
+\node[font=\sffamily\footnotesize\bfseries, text=clibord] at (2.5, 5.8) {PHY Training};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  sigh/.style={thick, draw=absbord},
+  sigl/.style={thick, draw=conbord},
+  dtfill/.style={fill=hifill, fill opacity=0.5, draw=hibord, line width=0.3pt},
+  lbl/.style={font=\sffamily\footnotesize, text=inkc},
+  sublbl/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+% Geometry — period ~6 units
+\def\dt{0.3}
+
+% PWM_H (high-side) at y=2
+% Profile: high for 2.5, low for 3.5
+\node[lbl, anchor=east] at (-0.2, 2.4) {PWM\_H};
+\draw[sigh] (0, 2.0) -- (0, 2.7) -- (2.5, 2.7) -- (2.5, 2.0) -- (6, 2.0);
+
+% PWM_L (low-side, complementary with dead-time) at y=0
+% Off until 2.5 + dt; on from 2.5+dt to 6 - dt; then off
+\node[lbl, anchor=east] at (-0.2, 0.4) {PWM\_L};
+\draw[sigl] (0, 0.0) -- (2.5 + \dt, 0.0)
+  -- (2.5 + \dt, 0.7) -- (6 - \dt, 0.7)
+  -- (6 - \dt, 0.0) -- (6, 0.0);
+
+% Dead-time highlight rectangles spanning both signals
+\fill[dtfill] (2.5, -0.05) rectangle (2.5 + \dt, 2.75);
+\fill[dtfill] (6 - \dt, -0.05) rectangle (6, 2.75);
+
+% Dead-time labels
+\draw[<->, draw=hibord, line width=0.4pt]
+  (2.5, 1.4) -- (2.5 + \dt, 1.4);
+\node[sublbl, text=hibord, anchor=south] at (2.5 + \dt/2, 1.45) {DT};
+
+\draw[<->, draw=hibord, line width=0.4pt]
+  (6 - \dt, 1.4) -- (6, 1.4);
+\node[sublbl, text=hibord, anchor=south] at (6 - \dt/2, 1.45) {DT};
+
+% Caption
+\node[sublbl, anchor=north] at (3, -0.4) {DT = dead-time (양쪽 OFF 보장, shoot-through 방지)};
+
+\end{tikzpicture}
+\end{document}

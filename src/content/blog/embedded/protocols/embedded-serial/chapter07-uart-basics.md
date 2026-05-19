@@ -30,10 +30,7 @@ SPI·I²C는 동기 — 마스터가 클럭을 흘립니다. UART는 *비동기*
 
 ## Frame 형식
 
-```text
-Idle (High) ── Start (Low) ── Data 0 ── Data 1 ── ... ── Data N ── [Parity] ── Stop (High) ── Idle
-              │  1 bit  │ │   N bits (보통 8)         │   │ 1 bit │ │ 1-2 bit │
-```
+위 다이어그램이 한 frame의 흐름 — `Start (Low) → Data 0..N (LSB first) → [Parity] → Stop (High) → Idle (High)` 순.
 
 ### 표기법 `8N1`
 

@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  sig/.style={thick, draw=absbord},
+  tick/.style={draw=mutec, line width=0.3pt},
+  lbl/.style={font=\sffamily\footnotesize, text=inkc},
+  sublbl/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+% Bit width represents one bit time (104 us at 9600 baud); 16 samples per bit
+\def\bw{9.6}
+% Start bit: falling edge at x=0, bit ends at x=\bw
+% Show one start bit followed by D0 high
+
+% Falling edge at 0
+\draw[sig] (-1.5, 1) -- (0, 1) -- (0, 0) -- (\bw, 0) -- (\bw, 1) -- (\bw + 1.5, 1);
+
+% 16 oversample ticks across start bit
+\foreach \i in {1,...,16} {
+  \draw[tick] (\i * \bw / 16 - \bw/16/2, -0.15) -- (\i * \bw / 16 - \bw/16/2, 0);
+}
+
+% Highlight samples 8, 9, 10
+\foreach \s in {8, 9, 10} {
+  \fill[hifill, draw=hibord, line width=0.3pt]
+    (\s * \bw / 16 - \bw/16/2 - 0.08, -0.2) rectangle
+    (\s * \bw / 16 - \bw/16/2 + 0.08, 0.05);
+}
+
+% Sample annotation
+\node[sublbl, text=hibord, anchor=north] at (\bw/2, -0.45)
+  {sample 8, 9, 10 $\to$ majority vote};
+
+% Edge arrow
+\draw[->, draw=focusc, line width=0.5pt]
+  (-0.6, 1.4) -- (0, 1.05);
+\node[lbl, text=focusc, anchor=south east] at (-0.4, 1.4) {start edge};
+
+% Bit boundary labels
+\node[lbl, anchor=east] at (-1.6, 1) {idle};
+\node[lbl] at (\bw/2, 1.4) {Start bit};
+\node[lbl] at (\bw + 0.75, 1.4) {D0};
+
+% Time annotation
+\draw[<->, draw=mutec, line width=0.3pt] (0, -0.95) -- (\bw, -0.95);
+\node[sublbl] at (\bw/2, -1.15) {1 bit = 104 \textmu s @ 9600 baud};
+
+% Level annotations
+\node[lbl, anchor=east] at (-1.65, 0) {0};
+
+\end{tikzpicture}
+\end{document}

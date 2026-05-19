@@ -221,18 +221,7 @@ void spi_deselect(const spi_slave_t *s) {
 
 로직 애널라이저로 SCK·MOSI·MISO·CS 4채널을 보면 *완전한 transaction*이 보입니다.
 
-```text
-CS   ──┐                              ┌──
-       └──────────────────────────────┘
-
-SCK    _│└┘└┘└┘└┘└┘└┘└┘└┘__│└┘...─────_
-
-MOSI   ──<A5><01>──────────<B3><...>──
-
-MISO   ────────────<00><42><FF><...>──
-        ↑                  ↑
-      address           data byte
-```
+![SPI transaction — CS · SCK · MOSI · MISO 4채널](/images/blog/modern-recipes/diagrams/part4-08-spi-transaction.svg)
 
 `while(BSY)` 빠뜨림은 *CS edge가 마지막 SCK falling보다 빠른* 패턴으로 보입니다. 마지막 비트가 잘립니다.
 

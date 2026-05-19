@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  sig/.style={thick, draw=absbord},
+  lbl/.style={font=\sffamily\footnotesize, text=inkc},
+  sublbl/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+% Period 50 us (4 units); 25% and 75% duties
+
+% --- 25% duty (top) ---
+\def\T{4.0}
+\def\dA{1.0}     % 25%
+\def\dB{3.0}     % 75%
+
+\node[lbl, anchor=east] at (-0.3, 3.0) {25\%};
+\foreach \i in {0, 1, 2} {
+  \pgfmathsetmacro{\x}{\i*\T}
+  \draw[sig]
+    (\x, 2.6) -- (\x, 3.3) -- (\x + \dA, 3.3) -- (\x + \dA, 2.6) -- (\x + \T, 2.6);
+}
+% Duty annotation
+\draw[<->, draw=focusc, line width=0.4pt] (0, 3.55) -- (\dA, 3.55);
+\node[sublbl, text=focusc, anchor=south] at (\dA/2, 3.55) {12.5 \textmu s on};
+
+% --- 75% duty (bottom) ---
+\node[lbl, anchor=east] at (-0.3, 1.0) {75\%};
+\foreach \i in {0, 1, 2} {
+  \pgfmathsetmacro{\x}{\i*\T}
+  \draw[sig]
+    (\x, 0.6) -- (\x, 1.3) -- (\x + \dB, 1.3) -- (\x + \dB, 0.6) -- (\x + \T, 0.6);
+}
+\draw[<->, draw=focusc, line width=0.4pt] (0, 1.55) -- (\dB, 1.55);
+\node[sublbl, text=focusc, anchor=south] at (\dB/2, 1.55) {37.5 \textmu s on};
+
+% Period brace for 75% block
+\draw[decorate, decoration={brace, amplitude=3pt, mirror},
+      draw=mutec, line width=0.4pt]
+  (0, 0.25) -- (\T, 0.25);
+\node[sublbl, anchor=north] at (\T/2, 0.15) {50 \textmu s (20 kHz)};
+
+\end{tikzpicture}
+\end{document}

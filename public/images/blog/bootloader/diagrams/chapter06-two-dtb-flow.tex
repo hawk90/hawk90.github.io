@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  stg/.style={cls, minimum width=44mm, minimum height=12mm, align=center, font=\sffamily\small, inner sep=4pt},
+  spl/.style={stg, draw=impbord, fill=impfill},
+  ub/.style={stg, draw=clibord, fill=clifill},
+  kn/.style={stg, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  dt/.style={cls, minimum width=42mm, minimum height=10mm, align=center, font=\sffamily\footnotesize, draw=prpbord, fill=prpfill, inner sep=3pt},
+  rowlab/.style={font=\sffamily\bfseries\footnotesize, text=mutec, anchor=east}
+]
+
+% Row 1 — stages
+\node[spl] (spl) at (0, 7) {SPL};
+\node[ub]  (ub)  at (7, 7) {U-Boot Proper};
+\node[kn]  (lk)  at (14, 7) {Linux Kernel};
+
+% Row labels (left of the rows)
+\node[rowlab] at (-3.0, 7)   {부트 단계};
+\node[rowlab] at (-3.0, 4)   {control DTB};
+\node[rowlab] at (-3.0, 1)   {OS DTB};
+
+% Row 2 — control DTBs
+\node[dt] (cd1) at (0, 4) {control DTB (SPL용)\\[2pt]\scriptsize embed};
+\node[dt] (cd2) at (7, 4) {control DTB (자신용)\\[2pt]\scriptsize embed / separate};
+
+% Row 3 — OS DTB and kernel x0
+\node[dt] (osd) at (7, 1) {OS DTB\\[2pt]\scriptsize mmc에서 load};
+\node[font=\sffamily\footnotesize, text=mutec, align=center, text width=42mm] at (14, 1) {DTB physical address $\to$ x0};
+
+% Vertical dashed: control DTB feeds stage
+\draw[uses, dashed, draw=prpbord] (cd1) -- (spl);
+\draw[uses, dashed, draw=prpbord] (cd2) -- (ub);
+% OS DTB flows up into U-Boot and right to kernel
+\draw[uses, dashed, draw=prpbord] (osd.east) -- (14, 1);
+
+% Stage flow arrows (above the boxes to avoid label collisions)
+\draw[flow] (spl) -- node[font=\sffamily\footnotesize, text=inkc, midway, above, align=center] {Proper + DTB 적재} (ub);
+\draw[flow] (ub)  -- node[font=\sffamily\footnotesize, text=inkc, midway, above, align=center] {fixup + booti} (lk);
+
+\end{tikzpicture}
+\end{document}

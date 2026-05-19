@@ -122,15 +122,7 @@ B2 4C 8A         ← CRC (3 byte)
 
 연결이 맺어지면 *Connection Interval*마다 한 번씩 *connection event*가 열립니다.
 
-```text
-Connection Interval (7.5 ms ~ 4 s)
-┌──────────────────────────────────┬────...
-│  CE 1                            │  CE 2  ...
-│ ┌────┐┌────┐┌────┐               │ ┌────┐...
-│ │M→S ││S→M ││M→S │ (반복)         │ │M→S │
-│ └────┘└────┘└────┘               │ └────┘
-└──────────────────────────────────┴────...
-```
+![BLE Connection Event — alternating M→S and S→M packets within each CE](/images/blog/ble/diagrams/ch03-connection-event-timing.svg)
 
 매 CE에서 *Master가 먼저 송신*, *Slave가 응답*. 패킷이 없어도 *empty packet*을 주고받아 연결을 유지합니다. *Slave Latency*는 *Slave가 N번까지 응답 안 해도 disconnect 안 함*을 정합니다. 절전에 결정적입니다.
 

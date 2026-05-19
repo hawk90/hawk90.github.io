@@ -189,17 +189,9 @@ void servo_set_angle_cal(int16_t deg) {
 
 스코프로 signal 핀을 봅니다.
 
-```text
-50 Hz, center (1.5 ms):
+![Servo PWM — 50 Hz period, 1.5 ms center pulse](/images/blog/modern-recipes/diagrams/part5-04-servo-pulse.svg)
 
-   ┌─────┐                              ┌─────┐
-   │     │                              │     │
-───┘     └──────────────────────────────┘     └──
-   ← 1.5 ms ─→                          ← 1.5 ms
-   ←─────────── 20 ms ──────────────────→
-
-각도 변경 → pulse width만 바뀜 (period는 고정)
-```
+각도 변경 시 pulse width만 바뀝니다 (period는 20 ms 고정).
 
 physical 회전 각도와 명령 각도가 *어긋나면* calibration 다시.
 

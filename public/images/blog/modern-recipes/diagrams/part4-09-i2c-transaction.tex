@@ -1,0 +1,84 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  sda/.style={thick, draw=absbord},
+  scl/.style={thick, draw=impbord},
+  cell/.style={draw=mutec, fill=clifill, line width=0.3pt},
+  ackcell/.style={draw=conbord, fill=confill, line width=0.3pt},
+  marker/.style={font=\sffamily\scriptsize\bfseries, text=focusc},
+  lbl/.style={font=\sffamily\footnotesize, text=inkc},
+  bitlbl/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+\def\ysda{2.0}
+\def\yscl{0.0}
+
+% SDA: START, address cell, ACK cell, DATA cell, ACK cell, STOP
+% START marker at x=0
+\node[lbl, anchor=east] at (-0.3, \ysda + 0.3) {SDA};
+% pre-START high
+\draw[sda] (-0.5, \ysda + 0.7) -- (0.2, \ysda + 0.7);
+% START: 1 -> 0
+\draw[sda] (0.2, \ysda + 0.7) -- (0.2, \ysda) -- (0.5, \ysda);
+% Address byte (7 bits)
+\draw[cell] (0.5, \ysda) rectangle (3.2, \ysda + 0.6);
+\node[bitlbl] at (1.85, \ysda + 0.3) {addr (7-bit + R/W)};
+% ACK
+\draw[ackcell] (3.3, \ysda) rectangle (3.7, \ysda + 0.6);
+\node[bitlbl, text=conbord] at (3.5, \ysda + 0.3) {A};
+% Data byte
+\draw[cell] (3.8, \ysda) rectangle (6.5, \ysda + 0.6);
+\node[bitlbl] at (5.15, \ysda + 0.3) {data byte};
+% ACK
+\draw[ackcell] (6.6, \ysda) rectangle (7.0, \ysda + 0.6);
+\node[bitlbl, text=conbord] at (6.8, \ysda + 0.3) {A};
+% STOP: 0 -> 1
+\draw[sda] (7.0, \ysda + 0.3) -- (7.3, \ysda + 0.3)
+  -- (7.3, \ysda) -- (7.5, \ysda)
+  -- (7.5, \ysda + 0.7) -- (8.0, \ysda + 0.7);
+
+% SCL: pulses synchronized with SDA cells
+\node[lbl, anchor=east] at (-0.3, \yscl + 0.3) {SCL};
+\draw[scl] (-0.5, \yscl + 0.7) -- (0.5, \yscl + 0.7);
+% 8 pulses for address (7 + R/W) + 1 for ACK
+\foreach \i in {0, ..., 7} {
+  \pgfmathsetmacro{\x}{0.5 + \i*0.3 + 0.04}
+  \draw[scl] (\x, \yscl + 0.7) -- (\x, \yscl)
+    -- (\x + 0.22, \yscl) -- (\x + 0.22, \yscl + 0.7);
+}
+% Close out: high tops connected
+\draw[scl] (0.5, \yscl + 0.7) -- (0.54, \yscl + 0.7);
+\foreach \i in {0, ..., 6} {
+  \pgfmathsetmacro{\x}{0.5 + \i*0.3 + 0.26}
+  \pgfmathsetmacro{\xn}{0.5 + (\i+1)*0.3 + 0.04}
+  \draw[scl] (\x, \yscl + 0.7) -- (\xn, \yscl + 0.7);
+}
+% After ACK gap until next byte starts at 3.8
+\draw[scl] (0.5 + 7*0.3 + 0.26, \yscl + 0.7) -- (3.8 + 0.04, \yscl + 0.7);
+% 9 pulses for data + ACK
+\foreach \i in {0, ..., 8} {
+  \pgfmathsetmacro{\x}{3.8 + \i*0.3 + 0.04}
+  \draw[scl] (\x, \yscl + 0.7) -- (\x, \yscl)
+    -- (\x + 0.22, \yscl) -- (\x + 0.22, \yscl + 0.7);
+}
+\foreach \i in {0, ..., 7} {
+  \pgfmathsetmacro{\x}{3.8 + \i*0.3 + 0.26}
+  \pgfmathsetmacro{\xn}{3.8 + (\i+1)*0.3 + 0.04}
+  \draw[scl] (\x, \yscl + 0.7) -- (\xn, \yscl + 0.7);
+}
+\draw[scl] (3.8 + 8*0.3 + 0.26, \yscl + 0.7) -- (8.0, \yscl + 0.7);
+
+% START / STOP markers
+\node[marker] at (0.2, \ysda + 1.0) {START};
+\draw[->, draw=focusc, line width=0.4pt] (0.2, \ysda + 0.85) -- (0.2, \ysda + 0.75);
+\node[marker] at (7.5, \ysda + 1.0) {STOP};
+\draw[->, draw=focusc, line width=0.4pt] (7.5, \ysda + 0.85) -- (7.5, \ysda + 0.75);
+
+\end{tikzpicture}
+\end{document}

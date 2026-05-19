@@ -18,16 +18,7 @@ U-Boot 소스 트리를 처음 열면 *수만 개의 파일*에 압도됩니다.
 
 U-Boot 빌드는 *세 단계*입니다.
 
-```text
-1. defconfig 적용       make <board>_defconfig
-   → configs/<board>_defconfig를 .config로 복사
-
-2. (선택) 옵션 조정     make menuconfig
-   → .config 편집
-
-3. 빌드                 make -j$(nproc)
-   → u-boot.bin, u-boot-spl.bin 등 산출물
-```
+![U-Boot 빌드 흐름 — defconfig → menuconfig → make와 주요 산출물](/images/blog/bootloader/diagrams/chapter03-build-flow.svg)
 
 가장 자주 쓰는 흐름은 다음과 같습니다.
 

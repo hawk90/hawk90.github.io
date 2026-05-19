@@ -1,0 +1,47 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  part/.style={rectangle, draw=nodebord, fill=#1, minimum height=8mm, font=\sffamily\scriptsize, anchor=west}
+]
+
+% Title
+\node[font=\sffamily\bfseries] at (4, 5.5) {eMMC 부트 파티션 레이아웃};
+
+% eMMC structure
+\node[font=\sffamily\small\bfseries, text=inkc, anchor=west] at (0, 4.5) {Boot Partition 0};
+\draw[draw=nodebord, fill=absfill] (0, 3.6) rectangle (8, 4.2);
+\node[font=\sffamily\scriptsize, anchor=west] at (0.2, 3.9) {SPL (33KB offset)};
+\node[font=\sffamily\scriptsize, anchor=east] at (7.8, 3.9) {U-Boot + FIT};
+
+% Boot Partition 1
+\node[font=\sffamily\small\bfseries, text=inkc, anchor=west] at (0, 3) {Boot Partition 1};
+\draw[draw=nodebord, fill=gridb] (0, 2.1) rectangle (8, 2.7);
+\node[font=\sffamily\scriptsize, text=mutec, anchor=center] at (4, 2.4) {(backup 또는 미사용)};
+
+% User Area with GPT
+\node[font=\sffamily\small\bfseries, text=inkc, anchor=west] at (0, 1.5) {User Area (GPT)};
+
+% GPT partitions
+\draw[draw=nodebord, fill=impfill] (0, 0.3) rectangle (1.5, 0.9);
+\node[font=\sffamily\tiny] at (0.75, 0.6) {boot};
+
+\draw[draw=nodebord, fill=clifill] (1.6, 0.3) rectangle (5.5, 0.9);
+\node[font=\sffamily\tiny] at (3.55, 0.6) {rootfs};
+
+\draw[draw=nodebord, fill=prpfill] (5.6, 0.3) rectangle (8, 0.9);
+\node[font=\sffamily\tiny] at (6.8, 0.6) {data};
+
+% Offset annotations
+\draw[draw=mutec, densely dashed] (0, 3.6) -- (0, -0.3);
+\node[font=\sffamily\tiny, text=mutec, anchor=north] at (0, -0.4) {0x0};
+
+\draw[draw=mutec, densely dashed] (1, 3.6) -- (1, 3.2);
+\node[font=\sffamily\tiny, text=mutec, anchor=south] at (1, 4.3) {33KB};
+
+% Legend
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (0, -1) {BootROM이 Boot Partition 0의 33KB 오프셋에서 SPL을 읽음};
+
+\end{tikzpicture}
+\end{document}

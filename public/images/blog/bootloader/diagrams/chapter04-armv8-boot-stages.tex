@@ -1,0 +1,45 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bx/.style={cls, minimum width=46mm, minimum height=14mm, align=center, font=\sffamily\small, inner sep=4pt},
+  rom/.style={bx, draw=nodebord, fill=nodefill},
+  tfa/.style={bx, draw=conbord, fill=confill},
+  optee/.style={bx, draw=prpbord, fill=prpfill},
+  uboot/.style={bx, draw=clibord, fill=clifill},
+  kern/.style={bx, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  lab/.style={font=\sffamily\footnotesize, text=mutec, anchor=west},
+  el/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=east}
+]
+
+\node[rom]   (rom) at (0, 11) {BootROM\\[2pt]\footnotesize mask ROM (BL0)};
+\node[tfa]   (b1)  at (0, 8.6) {BL1\\[2pt]\footnotesize trusted ROM code};
+\node[tfa]   (b2)  at (0, 6.2) {BL2\\[2pt]\footnotesize trusted boot firmware};
+\node[tfa]   (b31) at (0, 3.8) {BL31\\[2pt]\footnotesize EL3 runtime (PSCI/SMC)};
+\node[optee] (b32) at (8.0, 3.8) {BL32 (선택)\\[2pt]\footnotesize OP-TEE secure OS};
+\node[uboot] (b33) at (0, 1.4) {BL33\\[2pt]\footnotesize U-Boot Proper};
+\node[kern]  (lk)  at (0, -1.0) {Linux Kernel};
+
+% Side labels (project / EL) — kept short to avoid running into BL32
+\node[lab] at (rom.east) {\,SoC mask ROM};
+\node[lab] at (b1.east)  {\,TF-A · EL3 secure};
+\node[lab] at (b2.east)  {\,TF-A · EL3 / EL1-S};
+\node[lab] at (b31.east) {\,TF-A · EL3 runtime};
+\node[lab] at (b32.east) {\,EL1-S};
+\node[lab] at (b33.east) {\,U-Boot · EL2 non-secure};
+\node[lab] at (lk.east)  {\,EL2 $\to$ EL1};
+
+\draw[flow] (rom) -- (b1);
+\draw[flow] (b1) -- (b2);
+\draw[flow] (b2) -- (b31);
+\draw[uses, dashed, draw=prpbord] (b31) -- (b32);
+\draw[flow] (b31) -- (b33);
+\draw[flow] (b33) -- (lk);
+
+\end{tikzpicture}
+\end{document}

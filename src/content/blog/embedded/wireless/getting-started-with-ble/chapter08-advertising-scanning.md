@@ -41,22 +41,7 @@ BLE data:  0  1  2  ...  10  11  12  ...  35  36  (2 MHz 간격, 37/38/39 제외
 
 광고 시 peripheral은 *세 채널을 순차적으로 송신*합니다 — 37 → 38 → 39 → (advDelay 0~10ms 랜덤) → 다시 37. 한 번에 모든 채널을 *동시에* 보낼 수는 없습니다(라디오 한 개). 그래서 scanner가 *어느 한 채널에 머무는 동안* peripheral의 광고를 잡으려면 *광고 주기 ≥ scan window* 관계가 성립해야 합니다.
 
-```text
-[광고와 스캔의 듀티 사이클 매칭]
-
-Peripheral adv (interval=100ms):
-  ch37 ▌──────────────────── ▌──────────────────── ▌
-  ch38   ▌────────────────── ▌────────────────── ▌
-  ch39     ▌──────────────── ▌──────────────── ▌
-         │  │  │             │  │  │
-         0ms                100ms                200ms
-
-Central scan (window=30ms, interval=100ms):
-  ch37 ████████              ████████
-                  (다음에 ch38로 hop)
-
-→ ch37 scan window 안에 peripheral의 ch37 광고가 들어와야 발견
-```
+![BLE advertising — 3-channel sweep vs central scan, hit when ch37 packet falls in scan window](/images/blog/ble/diagrams/ch08-adv-channel-timing.svg)
 
 *advDelay*는 0~10 ms 랜덤이라 *경합 회피*에 쓰입니다. 같은 시각에 여러 디바이스가 광고하면 충돌이 나는데, 매 광고마다 시작 시각이 약간씩 흔들리면 다음 슬롯에서 살아남을 확률이 생깁니다.
 

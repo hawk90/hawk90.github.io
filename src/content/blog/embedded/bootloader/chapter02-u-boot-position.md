@@ -27,21 +27,7 @@ draft: false
 
 같은 보드에 *여러 개가 동시에* 들어갑니다. NXP i.MX 8M Plus 양산 보드의 부트 체인은 다음과 같습니다.
 
-```text
-BootROM (i.MX 내부)
-   │
-   ▼
-SPL (U-Boot 빌드의 SPL 단계)  ← DDR init
-   │
-   ▼
-BL31 (TF-A)                    ← secure monitor
-   │
-   ▼
-U-Boot Proper (BL33)            ← 부트 정책
-   │
-   ▼
-Linux Kernel
-```
+![i.MX 8M Plus 부트 체인 — BootROM → SPL → BL31 → U-Boot Proper → Kernel](/images/blog/bootloader/diagrams/chapter02-imx-boot-chain.svg)
 
 SPL과 U-Boot Proper는 모두 *U-Boot 소스 트리*에서 빌드되지만 *완전히 다른 바이너리*입니다. BL31은 *TF-A 소스 트리*에서 빌드됩니다. 두 프로젝트가 *서로의 결과물을 link*해서 최종 부트 이미지를 만듭니다.
 

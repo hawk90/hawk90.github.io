@@ -190,15 +190,7 @@ void motor_protect_task(void) {
 
 스코프로 motor 양단 voltage를 봅니다.
 
-```text
-50% duty @ 20 kHz, 12V supply:
-   12V ┐__┌──┐__┌──┐__┌──
-        │  │  │  │  │  │
-    0V ─┘  └──┘  └──┘  └──
-       ← 25 µs duty ←→ 25 µs off ←
-
-평균 전압 ≈ 6V (motor가 절반 속도로 회전)
-```
+![H-bridge 50% duty @ 20 kHz — 평균 6 V](/images/blog/modern-recipes/diagrams/part5-02-hbridge-pwm.svg)
 
 current sensing이 있으면 ADC로 transient를 봅니다.
 

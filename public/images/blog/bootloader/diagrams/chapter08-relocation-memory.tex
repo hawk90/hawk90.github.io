@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  reg/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=44mm, inner sep=4pt, align=center, font=\sffamily\footnotesize},
+  sram/.style={reg, fill=clifill, draw=clibord},
+  ubox/.style={reg, fill=hifill, draw=hibord},
+  dead/.style={reg, fill=neutfill, draw=neutbord, text=mutec},
+  tit/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  sub/.style={font=\sffamily\footnotesize\itshape, text=mutec, align=center},
+  addr/.style={font=\sffamily\scriptsize\ttfamily, text=mutec, anchor=west}
+]
+
+% Left column — board_init_f
+\node[tit] at (0, 9.6) {board\_init\_f (pre-reloc)};
+\node[sub] at (0, 9.0) {SoC SRAM에서 실행};
+
+\node[sram, minimum height=8mm]  (s_text) at (0, 7.8) {text (U-Boot 코드)};
+\node[sram, minimum height=6mm, below=0pt of s_text]  (s_data) {data};
+\node[sram, minimum height=6mm, below=0pt of s_data]  (s_bss)  {bss};
+\node[sram, minimum height=6mm, below=0pt of s_bss]   (s_stk)  {stack (작음)};
+\node[sram, minimum height=6mm, below=0pt of s_stk]   (s_mal)  {malloc (작음)};
+
+\node[addr] at (2.6, 7.8) {0x920000};
+\node[addr] at (2.6, 5.3) {SoC SRAM 128KB};
+
+\node[dead, minimum height=14mm] (s_dram) at (0, 2.8) {DRAM\\[3pt] (사용 불가)};
+\node[addr] at (2.6, 2.8) {0x40000000};
+
+% Right column — board_init_r
+\node[tit] at (10, 9.6) {board\_init\_r (post-reloc)};
+\node[sub] at (10, 9.0) {DRAM의 맨 위로 옮겨감};
+
+\node[dead, minimum height=10mm] (r_sram) at (10, 7.8) {SoC SRAM\\[3pt] (해제됨)};
+
+\node[ubox, minimum height=8mm]  (r_free) at (10, 5.8) {빈 영역 (커널 적재)};
+\node[ubox, minimum height=6mm, below=0pt of r_free]  (r_mal)  {malloc (큼)};
+\node[ubox, minimum height=6mm, below=0pt of r_mal]   (r_stk)  {stack (큼)};
+\node[ubox, minimum height=6mm, below=0pt of r_stk]   (r_bss)  {bss};
+\node[ubox, minimum height=6mm, below=0pt of r_bss]   (r_data) {data};
+\node[ubox, minimum height=8mm, below=0pt of r_data]  (r_text) {text (relocated)};
+
+\node[addr] at (12.6, 5.8) {0x40000000};
+\node[addr] at (12.6, 1.0) {0xBFE00000};
+\node[addr] at (12.6, 0.4) {(relocaddr)};
+
+% Relocation arrow — far above so it doesn't cross labels
+\draw[focus] (s_text.north) to[bend left=25] node[font=\sffamily\footnotesize\bfseries, text=focusc, midway, above] {relocate\_code} (r_text.west);
+
+\end{tikzpicture}
+\end{document}

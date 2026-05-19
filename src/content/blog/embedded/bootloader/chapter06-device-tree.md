@@ -321,23 +321,7 @@ void fdt_chosen(void *fdt)
 
 전체 부트에서 DTB가 *어떻게 전파*되는지 봅니다.
 
-```text
-[SPL]
-  control DTB (SPL용, embed) → MMC/USDHC driver를 통해 U-Boot Proper + DTB 적재
-                              │
-                              ▼
-[U-Boot Proper]
-  control DTB (자신용, embed 또는 separate)
-       │
-       └── Driver Model이 사용
-  OS DTB (커널용, 부트 미디어에서 적재)
-       │
-       └── fdt addr / fixup / chosen → booti
-                                        │
-                                        ▼
-                                     [Linux Kernel]
-                                       DTB physical address가 x0
-```
+![두 DTB 흐름 — SPL/U-Boot의 control DTB와 커널로 넘기는 OS DTB](/images/blog/bootloader/diagrams/chapter06-two-dtb-flow.svg)
 
 control DTB와 OS DTB는 *다른 메모리 위치*에 있습니다.
 

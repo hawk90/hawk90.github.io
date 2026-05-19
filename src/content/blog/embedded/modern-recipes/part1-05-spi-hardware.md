@@ -43,14 +43,7 @@ draft: false
 | 2 | 1 | 0 | high | falling edge |
 | 3 | 1 | 1 | high | rising edge |
 
-```text
-Mode 0 (CPOL=0, CPHA=0)
-SCK   ───┐ ┌─┐ ┌─┐ ┌─┐ ┌─
-         └─┘ └─┘ └─┘ └─┘
-MOSI  ──XXX─D7─XXX─D6─XXX─D5─XXX
-            ↑   ↑   ↑   ↑
-         sample at rising edge
-```
+![SPI Mode 0 — SCK idle low, sample at rising edge](/images/blog/modern-recipes/diagrams/part1-05-spi-mode0.svg)
 
 대부분의 디바이스는 **Mode 0**을 씁니다. 데이터시트의 timing diagram을 보고 CPOL/CPHA를 결정합니다.
 

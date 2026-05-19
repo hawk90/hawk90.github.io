@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bstep/.style={cls, minimum width=66mm, minimum height=12mm, align=center, font=\sffamily\small, inner sep=4pt},
+  rom/.style={bstep, draw=nodebord, fill=nodefill},
+  spl/.style={bstep, draw=impbord, fill=impfill},
+  atf/.style={bstep, draw=conbord, fill=confill},
+  uboot/.style={bstep, draw=clibord, fill=clifill},
+  kern/.style={bstep, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  side/.style={font=\sffamily\footnotesize, text=mutec, anchor=west}
+]
+
+\node[rom] (rom) at (0, 8) {BootROM\\[2pt]\footnotesize i.MX 내부 mask ROM};
+\node[spl] (spl) at (0, 5.6) {SPL (u-boot-spl.bin)\\[2pt]\footnotesize U-Boot 트리, DDR init};
+\node[atf] (bl31) at (0, 3.2) {BL31 (bl31.bin)\\[2pt]\footnotesize TF-A 트리, secure monitor};
+\node[uboot] (ub) at (0, 0.8) {U-Boot Proper (BL33)\\[2pt]\footnotesize U-Boot 트리, 부트 정책};
+\node[kern] (lk) at (0, -1.6) {Linux Kernel};
+
+\node[side] at (rom.east) {\,EL3, SRAM에서 SPL 적재};
+\node[side] at (spl.east) {\,SRAM, DDR training, BL31 적재};
+\node[side] at (bl31.east) {\,EL3, PSCI / SMC, runtime};
+\node[side] at (ub.east) {\,EL2, bootcmd, kernel 적재};
+\node[side] at (lk.east) {\,EL2 $\to$ EL1, normal world};
+
+\draw[flow] (rom) -- (spl);
+\draw[flow] (spl) -- (bl31);
+\draw[flow] (bl31) -- (ub);
+\draw[flow] (ub) -- (lk);
+
+\end{tikzpicture}
+\end{document}

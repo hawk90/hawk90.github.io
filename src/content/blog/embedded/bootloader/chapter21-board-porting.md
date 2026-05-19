@@ -313,32 +313,22 @@ sudo dd if=flash.bin of=/dev/sdb bs=1k seek=33 conv=fsync
 
 이 흐름이 사실상 표준 디버깅 순서입니다.
 
+![새 보드 첫 부팅의 5단계 — 멈춘 단계가 의심 대상](/images/blog/bootloader/diagrams/chapter21-first-boot-stages.svg)
+
+각 단계에서 어떤 출력이 나오는지 예시:
+
 ```text
-1. CONFIG_DEBUG_UART=y, CONFIG_DEBUG_UART_NS16550=y로 SPL보다도
-   이른 시점의 직접 UART 출력을 켠다.
-   -> 글자만이라도 나오면 UART 핀mux·클럭이 살아 있다는 뜻
+[2] U-Boot SPL 2026.04 (May 09 2026 - 16:01:23)
+    DDRINFO: start DRAM init
+    DDRINFO: DRAM rate 3000MTS
+    DDRINFO: ddrphy calibration done
+    DDRINFO: complete DRAM PHY training
 
-2. SPL 부팅:
-   U-Boot SPL 2026.04 (May 09 2026 - 16:01:23)
-   DDRINFO: start DRAM init
-   DDRINFO: DRAM rate 3000MTS
-   DDRINFO: ddrphy calibration done
-   DDRINFO: complete DRAM PHY training
-   -> DDR이 살아 있다는 뜻
-
-3. SPL이 U-Boot proper로 점프:
-   U-Boot 2026.04 (May 09 2026 - 16:01:23)
-   CPU:   i.MX8MM rev1.0 1600 MHz (running at 1200 MHz)
-   ...
-   Net:   eth0: ethernet@30be0000
-   Hit any key to stop autoboot:
-   -> Proper U-Boot 살아 있음
-
-4. autoboot 진입, MMC/Net에서 boot.itb 로드
-   -> 부팅 흐름 완성
-
-5. bootm/booti로 Linux kernel handoff
-   -> Linux부팅 시작
+[3] U-Boot 2026.04 (May 09 2026 - 16:01:23)
+    CPU:   i.MX8MM rev1.0 1600 MHz (running at 1200 MHz)
+    ...
+    Net:   eth0: ethernet@30be0000
+    Hit any key to stop autoboot:
 ```
 
 각 단계에서 멈추면 그 구간의 코드가 의심 대상입니다. 1단계가 안 되면 *DEBUG_UART 설정·UART pinmux·UART clock*, 2단계가 안 되면 *DDR timing*, 3단계가 안 되면 *cache/MMU/clock*, 4단계가 안 되면 *MMC/Net driver*, 5단계가 안 되면 *DTB·cmdline·kernel ABI*입니다.

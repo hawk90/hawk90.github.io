@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  st/.style={cls, minimum width=58mm, minimum height=14mm, align=center, font=\sffamily\small, inner sep=4pt},
+  s1/.style={st, draw=nodebord, fill=nodefill},
+  s2/.style={st, draw=impbord, fill=impfill},
+  s3/.style={st, draw=clibord, fill=clifill},
+  s4/.style={st, draw=prpbord, fill=prpfill},
+  s5/.style={st, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
+  susp/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, align=left, text width=66mm}
+]
+
+\node[s1] (a1) at (0, 12)  {1. DEBUG\_UART 한 글자\\[2pt]\footnotesize SPL 이전, raw UART};
+\node[s2] (a2) at (0, 9)   {2. SPL banner + DDRINFO\\[2pt]\footnotesize DRAM training 완료};
+\node[s3] (a3) at (0, 6)   {3. U-Boot Proper banner\\[2pt]\footnotesize relocation 성공};
+\node[s4] (a4) at (0, 3)   {4. autoboot $\to$ boot.itb\\[2pt]\footnotesize MMC / Net 적재};
+\node[s5] (a5) at (0, 0)   {5. booti $\to$ Linux Kernel};
+
+\node[susp] at (a1.east) {\,멈추면 의심: UART pinmux, UART clock};
+\node[susp] at (a2.east) {\,멈추면 의심: DDR timing, PMIC 전압};
+\node[susp] at (a3.east) {\,멈추면 의심: cache, MMU, clock, relocation};
+\node[susp] at (a4.east) {\,멈추면 의심: MMC / Net driver, boot mode 핀};
+\node[susp] at (a5.east) {\,멈추면 의심: DTB, cmdline, kernel ABI};
+
+\draw[flow] (a1) -- (a2);
+\draw[flow] (a2) -- (a3);
+\draw[flow] (a3) -- (a4);
+\draw[flow] (a4) -- (a5);
+
+\end{tikzpicture}
+\end{document}

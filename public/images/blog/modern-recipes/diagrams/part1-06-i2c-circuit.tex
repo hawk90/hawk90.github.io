@@ -1,0 +1,45 @@
+\documentclass[tikz,border=2mm]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% VDD rail
+\draw[thick] (0, 4) -- (8, 4);
+\node[text=blogtext, above] at (4, 4) {VDD};
+
+% Pull-up resistors
+\draw[thick] (3, 4) -- (3, 3.5);
+\draw[thick] (2.8, 3.5) -- (2.8, 3) -- (3.2, 3) -- (3.2, 2.5);
+\node[text=blogtext, right=2mm] at (3, 3) {Rp};
+\draw[thick] (3, 2.5) -- (3, 2);
+
+\draw[thick] (5, 4) -- (5, 3.5);
+\draw[thick] (4.8, 3.5) -- (4.8, 3) -- (5.2, 3) -- (5.2, 2.5);
+\node[text=blogtext, right=2mm] at (5, 3) {Rp};
+\draw[thick] (5, 2.5) -- (5, 2);
+
+% Bus lines
+\draw[ultra thick, con] (1, 2) -- (7, 2);
+\node[text=blogtext, above] at (3, 2.1) {SDA};
+\node[circle, fill=con, inner sep=1.5pt] at (3, 2) {};
+
+\draw[ultra thick, con] (1, 1) -- (7, 1);
+\node[text=blogtext, above] at (5, 1.1) {SCL};
+\node[circle, fill=con, inner sep=1.5pt] at (5, 1) {};
+
+% Master device
+\draw[thick, fill=blogbg] (1, 0) rectangle (2.5, 3);
+\node[text=blogtext, align=center] at (1.75, 1.5) {Master};
+\draw[thick] (2.5, 2) -- (3, 2);
+\draw[thick] (2.5, 1) -- (5, 1);
+
+% Slave device
+\draw[thick, fill=blogbg] (5.5, 0) rectangle (7, 3);
+\node[text=blogtext, align=center] at (6.25, 1.5) {Slave};
+\draw[thick] (5, 2) -- (5, 2);
+\draw[thick] (5.5, 2) -- (5, 2);
+\draw[thick] (5.5, 1) -- (5, 1);
+
+\end{tikzpicture}
+\end{document}

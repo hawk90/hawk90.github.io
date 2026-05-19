@@ -203,19 +203,7 @@ sine table을 PWM duty로 출력 + RC filter → 사인파 generator. simple cla
 
 스코프로 PWM 출력을 봅니다.
 
-```text
-20 kHz, 25% duty:
-  ┌──┐           ┌──┐
-  │  │           │  │
-──┘  └───────────┘  └──
-  ←──── 50 µs ────→
-   ← 12.5 µs duty
-
-20 kHz, 75% duty:
-  ┌──────────┐   ┌──────────┐
-──┘          └───┘          └──
-  ← 37.5 µs duty
-```
+![20 kHz PWM, 25% vs 75% duty](/images/blog/modern-recipes/diagrams/part5-01-pwm-duty-compare.svg)
 
 LED의 경우 RC 적분기 같은 사람 눈이 시간 평균을 봅니다. duty 50%면 정확히 max의 절반 밝기 (실제로는 log 인지라 더 밝게 보임).
 

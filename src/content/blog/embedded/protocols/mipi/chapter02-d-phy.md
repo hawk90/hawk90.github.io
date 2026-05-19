@@ -60,11 +60,7 @@ draft: true
 
 매 데이터 packet마다 LP→HS→LP 전환. 정지 중엔 LP-11 (절전), 데이터 보낼 때만 HS.
 
-```text
-시간 → 
-LP-11 ── LP-01 ── LP-00 ── HS-Zero ── HS Sync ── HS data ─── HS Trail ── LP-11
-       └─ entry ─┘         └ pre-amble┘                       └─ exit ──┘
-```
+![D-PHY burst mode timing — LP-11 idle → entry → HS payload → trail → LP-11](/images/blog/mipi/diagrams/ch02-d-phy-lp-hs-timing.svg)
 
 각 단계의 *타이밍 사양*이 표준에 정확히 명시 (`THS-PREPARE`, `THS-SETTLE`, `THS-TRAIL` 등).
 

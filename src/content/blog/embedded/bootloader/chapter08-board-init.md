@@ -38,35 +38,7 @@ U-Boot이 시작하는 순간 *어디서 동작*하는지를 봅니다. SoC SRAM
 
 board_init_f와 board_init_r의 *환경 차이*를 메모리 맵으로 봅니다.
 
-```text
-[board_init_f 시점]
-
-SoC SRAM (0x920000 ~ 0x940000, 128 KB)
-├── text     (U-Boot 코드)
-├── data     (전역 변수)
-├── bss      (zero-init 데이터)
-├── stack    (작음, KB 단위)
-└── malloc   (작음)
-
-DRAM (0x40000000 ~ )
-   (아직 사용 불가, board_init_f가 깨움)
-
-[board_init_r 시점]
-
-SoC SRAM
-   (해제됨, 또는 SPL이 사용)
-
-DRAM (0x40000000 ~ )
-├── 사용 영역
-│   ...
-├── U-Boot relocated (예: 0x80000000)
-│   ├── text
-│   ├── data
-│   ├── bss
-│   ├── stack (큼)
-│   └── malloc (큼)
-└── 빈 공간
-```
+![board_init_f vs board_init_r 메모리 모델 — SRAM에서 DRAM으로 relocation](/images/blog/bootloader/diagrams/chapter08-relocation-memory.svg)
 
 board_init_r 시점에는 *DRAM의 충분한 공간*에서 동작합니다. 스택이 크고, malloc 영역도 크고, 마음껏 driver를 probe합니다.
 

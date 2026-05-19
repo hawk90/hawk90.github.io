@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  sig/.style={thick, draw=absbord},
+  sigm/.style={thick, draw=impbord},
+  lbl/.style={font=\sffamily\footnotesize, text=inkc},
+  bitlbl/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+% Geometry: 4 bits drawn. Each half-cycle = 0.6. So one cycle = 1.2.
+\def\hc{0.6}
+
+% SCK at y=2 (idle low, CPOL=0)
+\node[lbl, anchor=east] at (-0.2, 2) {SCK};
+\draw[sig] (0, 2)
+  -- (\hc, 2) -- (\hc, 2.7) -- (2*\hc, 2.7) -- (2*\hc, 2)
+  -- (3*\hc, 2) -- (3*\hc, 2.7) -- (4*\hc, 2.7) -- (4*\hc, 2)
+  -- (5*\hc, 2) -- (5*\hc, 2.7) -- (6*\hc, 2.7) -- (6*\hc, 2)
+  -- (7*\hc, 2) -- (7*\hc, 2.7) -- (8*\hc, 2.7) -- (8*\hc, 2)
+  -- (8*\hc + 0.3, 2);
+
+% Rising edges = sample points
+\foreach \i in {1, 3, 5, 7} {
+  \draw[->, draw=focusc, line width=0.5pt]
+    (\i*\hc, 1.55) -- (\i*\hc, 2);
+}
+
+% MOSI at y=0 — data bits transition on falling edges, stable at rising
+% D7=1, D6=0, D5=1, D4=1
+\node[lbl, anchor=east] at (-0.2, 0) {MOSI};
+\draw[sigm]
+  (0, 0)
+  -- (0, 0.7) -- (2*\hc, 0.7)               % D7 = 1
+  -- (2*\hc, 0)  -- (4*\hc, 0)              % D6 = 0
+  -- (4*\hc, 0.7) -- (6*\hc, 0.7)           % D5 = 1
+  -- (6*\hc, 0.7) -- (8*\hc, 0.7)           % D4 = 1
+  -- (8*\hc, 0.7) -- (8*\hc + 0.3, 0.7);
+
+% Bit labels under MOSI cells
+\foreach \i/\b in {1/D7, 3/D6, 5/D5, 7/D4} {
+  \node[bitlbl] at (\i*\hc, -0.35) {\b};
+}
+
+% Sample-edge annotation
+\node[lbl, text=focusc, anchor=west] at (8*\hc + 0.5, 1.75)
+  {$\uparrow$ sample at rising edge};
+
+% Title
+\node[lbl, anchor=south west] at (-0.7, 3.2) {Mode 0 (CPOL=0, CPHA=0)};
+
+\end{tikzpicture}
+\end{document}

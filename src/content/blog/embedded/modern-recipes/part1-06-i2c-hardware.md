@@ -36,14 +36,7 @@ I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 
 
 ### 2) 프레임 — START, address, data, ACK, STOP
 
-```text
-   ┌──START
-   │     ┌──── 7-bit addr ──── R/W ──┐  ┌── ACK ──┐
-SDA│  ──┐│A6 A5 A4 A3 A2 A1 A0  │   ├──┤         ├── data ...
-   │     ││  ││  ││  ││  ││  ││ │   │  │ NACK if │
-SCL│  ───│┘└─┘└─┘└─┘└─┘└─┘└─┘└─┘─┐ │  │ no slave│
-                                  └─┘  └─────────┘
-```
+![I2C 프레임 — START, 7-bit address, R/W, ACK](/images/blog/modern-recipes/diagrams/part1-06-i2c-frame.svg)
 
 - **START**: SCL=1인 상태에서 SDA를 1 → 0으로 떨어뜨림
 - **STOP**: SCL=1인 상태에서 SDA를 0 → 1로 올림

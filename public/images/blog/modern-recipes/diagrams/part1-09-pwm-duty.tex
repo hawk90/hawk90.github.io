@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog,
+  sig/.style={thick, draw=absbord},
+  avg/.style={dashed, draw=focusc, line width=0.5pt},
+  lbl/.style={font=\sffamily\footnotesize, text=inkc},
+  sublbl/.style={font=\sffamily\scriptsize, text=mutec}
+]
+
+% 50% duty at top
+\def\T{2.0}
+\def\dA{1.0} % 50%
+\def\dB{1.5} % 75%
+
+% Two waveforms stacked. Top: 50%. Bottom: 75%.
+
+% --- 50% duty ---
+\node[lbl, anchor=east] at (-0.3, 2.8) {Duty 50\%};
+\foreach \i in {0, 1, 2} {
+  \pgfmathsetmacro{\x}{\i*\T}
+  \draw[sig]
+    (\x, 2.4) -- (\x, 3.1) -- (\x + \dA, 3.1) -- (\x + \dA, 2.4) -- (\x + \T, 2.4);
+}
+% Average line at 50%
+\draw[avg] (0, 2.75) -- (3*\T, 2.75);
+\node[sublbl, text=focusc, anchor=west] at (3*\T + 0.25, 2.75) {평균 $=$ 0.5 $\times$ V\textsubscript{H}};
+
+% --- 75% duty ---
+\node[lbl, anchor=east] at (-0.3, 0.8) {Duty 75\%};
+\foreach \i in {0, 1, 2} {
+  \pgfmathsetmacro{\x}{\i*\T}
+  \draw[sig]
+    (\x, 0.4) -- (\x, 1.1) -- (\x + \dB, 1.1) -- (\x + \dB, 0.4) -- (\x + \T, 0.4);
+}
+% Average line at 75%
+\draw[avg] (0, 0.925) -- (3*\T, 0.925);
+\node[sublbl, text=focusc, anchor=west] at (3*\T + 0.25, 0.925) {평균 $=$ 0.75 $\times$ V\textsubscript{H}};
+
+% Period brace
+\draw[decorate, decoration={brace, amplitude=3pt, mirror},
+      draw=mutec, line width=0.4pt]
+  (0, 0.05) -- (\T, 0.05);
+\node[sublbl, anchor=north] at (\T/2, -0.05) {Period T};
+
+\end{tikzpicture}
+\end{document}
