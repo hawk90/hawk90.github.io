@@ -653,6 +653,20 @@ end
 | **Command + Composite** | 복합 명령(매크로), 여러 명령을 하나로 |
 | **Command + Factory** | 사용자 입력에서 명령 객체 생성 |
 
+## 자주 하는 실수
+
+Undo/Redo 구현에서 흔히 빠지는 함정이다.
+
+| 실수 | 증상 | 해결 |
+|------|------|------|
+| **상태 저장 불완전** | undo 후 원래 상태 복원 실패 → 데이터 손상 | execute 전 필요한 모든 정보 저장. delta 또는 memento 활용 |
+| **복합 명령 역순 누락** | 여러 명령 undo 시 순서 잘못 → 불일치 | COMPOSITE_COMMAND의 undo는 역순. `reversed` 반복 |
+| **히스토리 제한 없음** | 무한 히스토리 → 메모리 폭발 | BOUNDED_HISTORY로 최대 크기 제한. 오래된 것 제거 |
+| **Redo 스택 관리 실수** | 새 명령 실행 후 Redo 가능 → 일관성 깨짐 | record 시 redo_stack.wipe_out 필수 |
+| **Undo 불가 명령 혼란** | 저장, 출력 등도 Undo 대상 → 기대 불일치 | is_undoable 플래그. Undo 불가 명령은 히스토리에 안 넣음 |
+| **execute/undo 비대칭** | undo가 execute의 정확한 역이 아님 → 상태 드리프트 | 역원성 테스트. `undo(execute(s)) = s` 검증 |
+| **명령 객체 재사용** | 같은 명령 객체를 여러 번 execute → 상태 꼬임 | 명령 객체는 일회용. 필요하면 복제(Prototype) |
+
 ## 정리
 
 - **Command 패턴**: 동작을 객체로 캡슐화

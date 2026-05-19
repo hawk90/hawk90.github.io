@@ -530,6 +530,20 @@ typedef struct _CommandClassPart {
 | 매크로로 반복 줄이기 | `#define DEFINE_CLASS(name) ...` |
 | 문서화 | 어떤 함수가 "가상"인지 명시 |
 
+## 자주 하는 실수
+
+비OO 환경에서 OO 에뮬레이션 시 흔히 빠지는 함정이다.
+
+| 실수 | 증상 | 해결 |
+|------|------|------|
+| **vtable 초기화 누락** | 함수 포인터가 NULL → 크래시, 정의되지 않은 동작 | 생성자에서 vtable 설정. `shape_init(&self->base, &circle_vtable, ...)` 필수 |
+| **업캐스팅 안전성 무시** | 첫 멤버가 아닌 위치에서 캐스팅 → 메모리 손상 | 기본 타입을 항상 첫 멤버로. `struct Circle { Shape base; ... }` |
+| **소멸자 가상화 누락** | 부모 포인터로 삭제 시 자식 정리 안 됨 → 메모리 누수 | vtable에 destroy 포함. 항상 가상 소멸자 호출 |
+| **타입 캐스팅 오남용** | `(Circle*)shape` 타입 검사 없이 → 잘못된 타입 접근, 크래시 | 런타임 타입 체크. type_id 필드 또는 vtable 비교 |
+| **명명 규칙 불일치** | `push`, `Stack_push`, `stackPush` 혼용 → 가독성 저하, 오류 | 일관된 규칙. `type_method(Type* self, ...)` 패턴 |
+| **메모리 관리 혼란** | create/destroy 쌍 불일치 → 메모리 누수, 이중 해제 | 소유권 명확히. 문서화 또는 명명으로 책임 표시 |
+| **계약 검증 생략** | assert 없이 구현 → 잘못된 상태에서 진행, 디버깅 어려움 | assert로 전조건/후조건. 개발 중 검증, 릴리스 시 제거 |
+
 ## 정리
 
 - **캡슐화**: 불완전 타입(opaque pointer)으로 구현 숨김
