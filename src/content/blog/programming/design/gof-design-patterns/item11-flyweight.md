@@ -51,6 +51,10 @@ Flyweight가 이 구조입니다.
 
 Factory가 풀을 관리 — 같은 key 요청 시 캐시된 객체 반환.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item11-flyweight-seq.svg" alt="Flyweight 시퀀스 — Factory가 공유 인스턴스 반환, Extrinsic은 호출 시 전달" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 어플리케이션이 **다수의 객체**를 사용 (수만~수백만)

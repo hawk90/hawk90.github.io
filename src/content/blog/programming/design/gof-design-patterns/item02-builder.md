@@ -81,6 +81,10 @@ Builder ── 메서드 체인 ── build() ──► Product
 
 Director는 "어떤 순서로 부품을 조립할까", Builder는 "각 부품을 어떻게 만들까".
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item02-builder-seq.svg" alt="Builder 시퀀스 — Director가 Builder의 단계 호출" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 생성자 인자가 4~5개를 넘어가는 객체

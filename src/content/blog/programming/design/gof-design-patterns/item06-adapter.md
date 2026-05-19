@@ -44,6 +44,10 @@ Adapter가 정확히 이 구조입니다.
 
 Adapter가 Target을 구현하면서 내부적으로 Adaptee에게 위임.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item06-adapter-seq.svg" alt="Adapter 시퀀스 — Adapter가 Target 호출을 Adaptee 호출로 변환" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 두 형태
 
 | 형태 | 방식 | 장단점 |

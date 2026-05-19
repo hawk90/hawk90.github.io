@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+\node[actor]    (cli) at (0,    0) {Client};
+\node[actorAlt] (reg) at (3.8,  0) {Registry};
+\node[actor]    (pro) at (7.6,  0) {Prototype};
+\node[actor]    (cln) at (11.4, 0) {Clone};
+
+\draw[lifeline] (cli) -- ++(0,-6.5);
+\draw[lifeline] (reg) -- ++(0,-6.5);
+\draw[lifeline] (pro) -- ++(0,-6.5);
+\draw[lifeline] (cln) -- ++(0,-6.5);
+
+\node[activation, minimum height=20mm] at (reg |- 0,-1.0) {};
+\node[activation, minimum height= 8mm] at (pro |- 0,-1.8) {};
+
+\draw[msgsync]   (cli |- 0,-1.0) -- node[msglabel]{get("orc")}    (reg |- 0,-1.0);
+\draw[msgsync]   (reg |- 0,-1.8) -- node[msglabel]{clone()}       (pro |- 0,-1.8);
+\draw[msgcreate] (pro |- 0,-2.6) -- node[msglabel]{copy state}    (cln |- 0,-2.6);
+\draw[msgret]    (pro |- 0,-3.2) -- node[msglabel]{clone}         (reg |- 0,-3.2);
+\draw[msgret]    (reg |- 0,-3.8) -- node[msglabel]{clone}         (cli |- 0,-3.8);
+
+\node[activation, minimum height=6mm] at (cln |- 0,-4.6) {};
+\draw[msgsync]   (cli |- 0,-4.6) -- node[msglabel]{customize()}   (cln |- 0,-4.6);
+
+\node[seqnote, anchor=north] at (5.7,-5.4)
+  {원본 Prototype은 그대로, Clone만 수정 — class 없이 인스턴스 복제};
+
+\end{tikzpicture}
+\end{document}

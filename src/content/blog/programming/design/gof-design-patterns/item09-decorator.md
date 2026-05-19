@@ -65,6 +65,10 @@ N개 토핑 → N개 데코레이터 클래스 (조합 폭발 없음).
 
 Decorator도 Component 구현. 내부에 **다른 Component를 보유** → 위임 + 추가 동작.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item09-decorator-seq.svg" alt="Decorator 시퀀스 — 각 Decorator가 자기 책임 추가 후 다음에 위임" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 개별 객체에 책임을 **동적·투명**하게 추가

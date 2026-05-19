@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+\node[actor]    (cli) at (0,    0) {Client};
+\node[actorAlt] (d2)  at (3.6,  0) {Encrypted\\Decorator};
+\node[actorAlt] (d1)  at (7.2,  0) {Buffered\\Decorator};
+\node[actor]    (cmp) at (10.8, 0) {FileStream\\(Component)};
+
+\draw[lifeline] (cli) -- ++(0,-6.0);
+\draw[lifeline] (d2)  -- ++(0,-6.0);
+\draw[lifeline] (d1)  -- ++(0,-6.0);
+\draw[lifeline] (cmp) -- ++(0,-6.0);
+
+\node[activation, minimum height=26mm] at (d2  |- 0,-1.0) {};
+\node[activation, minimum height=18mm] at (d1  |- 0,-1.8) {};
+\node[activation, minimum height= 8mm] at (cmp |- 0,-2.6) {};
+
+\draw[msgsync] (cli |- 0,-1.0) -- node[msglabel]{write(data)}    (d2  |- 0,-1.0);
+\draw[msgself] (d2  |- 0,-1.6) .. controls (4.6,-1.4) and (4.6,-1.8) ..
+   node[right=3pt, font=\footnotesize, text=inkc]{encrypt} (d2 |- 0,-1.8);
+\draw[msgsync] (d2  |- 0,-2.2) -- node[msglabel]{write(enc)}     (d1  |- 0,-2.2);
+\draw[msgself] (d1  |- 0,-2.6) .. controls (8.2,-2.4) and (8.2,-2.8) ..
+   node[right=3pt, font=\footnotesize, text=inkc]{buffer} (d1 |- 0,-2.8);
+\draw[msgsync] (d1  |- 0,-3.2) -- node[msglabel]{write(raw)}     (cmp |- 0,-3.2);
+\draw[msgret]  (cmp |- 0,-3.8) -- (d1  |- 0,-3.8);
+\draw[msgret]  (d1  |- 0,-4.4) -- (d2  |- 0,-4.4);
+
+\node[seqnote, anchor=north] at (5.4,-5.2)
+  {각 Decorator가 자기 책임 추가 후 다음에 위임 — 동적 합성};
+
+\end{tikzpicture}
+\end{document}

@@ -56,6 +56,10 @@ GoF 책 표현: *"Decouple an abstraction from its implementation so that the tw
 
 두 계층이 **독립적으로** 확장.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item07-bridge-seq.svg" alt="Bridge 시퀀스 — Abstraction이 Implementor 원시 연산 조합" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 추상과 구현 사이의 **영구적 결합**을 피하고 싶을 때 (런타임 교체)

@@ -61,6 +61,10 @@ e.evaluate();   // 9
 
 <img src="/images/blog/gof/diagrams/item15-interpreter.svg" alt="Interpreter 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item15-interpreter-seq.svg" alt="Interpreter 시퀀스 — AST 노드 재귀 평가" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 - **Terminal**: 리프 (Number, Variable)
 - **Nonterminal**: 자식 보유 (Add, Multiply)
 

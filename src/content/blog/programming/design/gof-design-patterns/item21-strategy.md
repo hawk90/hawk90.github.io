@@ -69,6 +69,10 @@ c.compress(data);
 
 <img src="/images/blog/gof/diagrams/item21-strategy.svg" alt="Strategy 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item21-strategy-seq.svg" alt="Strategy 시퀀스 — Context는 그대로, Strategy 교체로 알고리즘 전환" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 관련된 클래스가 동작만 다를 때 — 동작을 매개변수화

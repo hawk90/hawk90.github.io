@@ -67,6 +67,10 @@ img->display();   // 첫 호출 시에만 로드 + 권한 검사 + (원격이면
 
 Proxy는 Subject 구현 + RealSubject 참조 + **추가 동작**(lazy/auth/log/...).
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item12-proxy-seq.svg" alt="Proxy 시퀀스 — Proxy가 RealSubject 호출 전후 정책 삽입" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가 (종류별)
 
 - 비용 큰 객체의 lazy load → **Virtual Proxy**

@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+\node[actor]    (btn) at (0,    0) {Button};
+\node[actorAlt] (med) at (4.0,  0) {Dialog\\(Mediator)};
+\node[actor]    (txt) at (8.0,  0) {TextField};
+\node[actor]    (lbl) at (12.0, 0) {Label};
+
+\draw[lifeline] (btn) -- ++(0,-6.0);
+\draw[lifeline] (med) -- ++(0,-6.0);
+\draw[lifeline] (txt) -- ++(0,-6.0);
+\draw[lifeline] (lbl) -- ++(0,-6.0);
+
+\node[activation, minimum height=24mm] at (med |- 0,-1.0) {};
+\node[activation, minimum height= 6mm] at (txt |- 0,-1.8) {};
+\node[activation, minimum height= 6mm] at (lbl |- 0,-2.8) {};
+
+\draw[msgsync] (btn |- 0,-1.0) -- node[msglabel]{notify(click)}   (med |- 0,-1.0);
+\draw[msgsync] (med |- 0,-1.8) -- node[msglabel]{getValue()}      (txt |- 0,-1.8);
+\draw[msgret]  (txt |- 0,-2.4) -- node[msglabel]{value}           (med |- 0,-2.4);
+\draw[msgsync] (med |- 0,-2.8) -- node[msglabel]{setText(value)}  (lbl |- 0,-2.8);
+\draw[msgret]  (lbl |- 0,-3.4) -- (med |- 0,-3.4);
+
+\node[seqnote, anchor=north] at (6.0,-4.4)
+  {Colleague끼리 직접 통신 X — Mediator를 통해서만};
+\node[seqnote, anchor=north] at (6.0,-5.2)
+  {n × n 결합 → n × 1로 축소};
+
+\end{tikzpicture}
+\end{document}

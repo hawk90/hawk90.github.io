@@ -58,6 +58,10 @@ Singleton은 사실상 **전역 변수**입니다. 다음 단점이 있습니다
 
 생성자가 private — 외부에서 못 만듦. 유일 진입점이 `getInstance()`.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item05-singleton-seq.svg" alt="Singleton 시퀀스 — 두 Client가 같은 instance 공유" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 헷갈리는 패턴과의 차이
 
 | 비교 대상 | 무엇이 다른가 |

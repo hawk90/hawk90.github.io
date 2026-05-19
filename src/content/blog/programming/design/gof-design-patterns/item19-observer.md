@@ -74,6 +74,10 @@ public:
 
 <img src="/images/blog/gof/diagrams/item19-observer.svg" alt="Observer 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item19-observer-seq.svg" alt="Observer 시퀀스 — setState 후 등록된 모든 Observer.update 호출" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 상태 변경 → `notify()` → 모든 등록된 observer의 `update()` 호출.
 
 ## Push vs Pull 모델

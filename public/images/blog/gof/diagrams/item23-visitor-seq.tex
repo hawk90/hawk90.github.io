@@ -1,0 +1,40 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+\node[actor]    (cli) at (0,    0) {Client};
+\node[actor]    (n1)  at (3.6,  0) {Add\\(Element)};
+\node[actor]    (n2)  at (7.2,  0) {Number\\(Element)};
+\node[actorAlt] (vis) at (10.8, 0) {Evaluator\\(Visitor)};
+
+\draw[lifeline] (cli) -- ++(0,-6.5);
+\draw[lifeline] (n1)  -- ++(0,-6.5);
+\draw[lifeline] (n2)  -- ++(0,-6.5);
+\draw[lifeline] (vis) -- ++(0,-6.5);
+
+\node[activation, minimum height=26mm] at (n1  |- 0,-1.0) {};
+\node[activation, minimum height=20mm] at (vis |- 0,-1.8) {};
+\node[activation, minimum height= 6mm] at (n2  |- 0,-2.6) {};
+\node[activation, minimum height= 6mm] at (vis |- 0,-3.2) {};
+
+\draw[msgsync] (cli |- 0,-1.0) -- node[msglabel]{accept(ev)}     (n1  |- 0,-1.0);
+\draw[msgsync] (n1  |- 0,-1.8) -- node[msglabel]{visitAdd(this)} (vis |- 0,-1.8);
+\draw[msgsync] (vis |- 0,-2.6) -- node[msglabel]{accept(ev)}     (n2  |- 0,-2.6);
+\draw[msgsync] (n2  |- 0,-3.2) -- node[msglabel]{visitNumber(this)} (vis |- 0,-3.2);
+\draw[msgret]  (vis |- 0,-3.8) -- (n2  |- 0,-3.8);
+\draw[msgret]  (n2  |- 0,-4.4) -- (vis |- 0,-4.4);
+\draw[msgret]  (vis |- 0,-5.0) -- (n1  |- 0,-5.0);
+\draw[msgret]  (n1  |- 0,-5.6) -- (cli |- 0,-5.6);
+
+\node[seqnote, anchor=north] at (5.4,-6.2)
+  {double dispatch: accept → visit*(element 타입별)};
+
+\end{tikzpicture}
+\end{document}

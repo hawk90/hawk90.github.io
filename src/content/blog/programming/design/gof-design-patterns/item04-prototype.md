@@ -65,6 +65,10 @@ for (int i = 0; i < 100; ++i) {
 
 견본 객체에게 "복사본 줘"라고만 요청하면 됨.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item04-prototype-seq.svg" alt="Prototype 시퀀스 — Registry → clone() → 복제 후 커스터마이즈" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 인스턴스화할 클래스가 **런타임에 결정**될 때

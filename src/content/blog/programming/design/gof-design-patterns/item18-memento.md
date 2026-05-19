@@ -62,6 +62,10 @@ void undoSomething() {
 
 <img src="/images/blog/gof/diagrams/item18-memento.svg" alt="Memento 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item18-memento-seq.svg" alt="Memento 시퀀스 — Originator가 봉투 생성, Caretaker가 보관 후 복원" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 3개 역할:
 
 | 역할 | 책임 |

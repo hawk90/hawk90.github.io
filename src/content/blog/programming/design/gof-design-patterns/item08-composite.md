@@ -67,6 +67,10 @@ node->size();   // File이든 Directory든 OK
 
 Composite의 `operation()`은 자식들에게 재귀 위임 → 트리 전체가 자연스럽게 처리됨.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item08-composite-seq.svg" alt="Composite 시퀀스 — Composite가 자식들에게 재귀 위임" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 안전성 vs 투명성 — 인터페이스 결정
 
 `add`/`remove` 같은 자식 관리 메서드를 어디 둘지가 핵심 설계 결정.

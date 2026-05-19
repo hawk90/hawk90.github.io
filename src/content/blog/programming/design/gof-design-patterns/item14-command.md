@@ -54,6 +54,10 @@ cmd->undo();    // ◄── 객체이기 때문에 가능
 
 <img src="/images/blog/gof/diagrams/item14-command.svg" alt="Command 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item14-command-seq.svg" alt="Command 시퀀스 — Invoker → Command → Receiver의 execute/undo" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 - **Receiver**: 실제 동작 수행
 - **Command**: Receiver 호출을 캡슐화
 - **Invoker**: Command 보유·실행 (메뉴, 버튼, 큐)

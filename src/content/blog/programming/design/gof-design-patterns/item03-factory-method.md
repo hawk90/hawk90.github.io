@@ -95,6 +95,10 @@ public:
 
 Creator가 "객체가 필요하다"는 책임을, ConcreteCreator가 "구체적으로 무엇을 만들지"를 분담.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item03-factory-method-seq.svg" alt="Factory Method 시퀀스 — operation 안에서 factoryMethod 호출" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 클래스가 자신이 만들 객체의 구체 클래스를 **미리 알 수 없을 때**

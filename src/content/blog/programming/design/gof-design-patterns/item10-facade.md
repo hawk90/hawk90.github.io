@@ -45,6 +45,10 @@ c.compile("source.cpp", "output.exe");   // 한 줄
 
 Facade는 클라이언트와 서브시스템 **사이의 얇은 층**.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item10-facade-seq.svg" alt="Facade 시퀀스 — Facade가 여러 서브시스템 오케스트레이션" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 복잡한 서브시스템에 **단순한 인터페이스**가 필요할 때

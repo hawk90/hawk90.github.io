@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+% --- Actors ---
+\node[actor]    (cli) at (0,    0) {Client};
+\node[actor]    (inv) at (3.6,  0) {Invoker\\(History)};
+\node[actorAlt] (cmd) at (7.2,  0) {Command};
+\node[actor]    (rcv) at (10.8, 0) {Receiver\\(Editor)};
+
+% --- Lifelines ---
+\draw[lifeline] (cli) -- ++(0,-7.5);
+\draw[lifeline] (inv) -- ++(0,-7.5);
+\draw[lifeline] (cmd) -- ++(0,-7.5);
+\draw[lifeline] (rcv) -- ++(0,-7.5);
+
+% --- Activations ---
+\node[activation, minimum height=20mm] at (inv |- 0,-1.0) {};
+\node[activation, minimum height=10mm] at (cmd |- 0,-1.8) {};
+\node[activation, minimum height= 6mm] at (rcv |- 0,-2.4) {};
+\node[activation, minimum height=20mm] at (inv |- 0,-4.5) {};
+\node[activation, minimum height=10mm] at (cmd |- 0,-5.3) {};
+\node[activation, minimum height= 6mm] at (rcv |- 0,-5.9) {};
+
+% --- Messages (execute path) ---
+\draw[msgsync] (cli |- 0,-1.0) -- node[msglabel]{execute(cmd)} (inv |- 0,-1.0);
+\draw[msgsync] (inv |- 0,-1.8) -- node[msglabel]{execute()}    (cmd |- 0,-1.8);
+\draw[msgsync] (cmd |- 0,-2.4) -- node[msglabel]{insert(\dots)}  (rcv |- 0,-2.4);
+\draw[msgret]  (rcv |- 0,-3.0) -- (cmd |- 0,-3.0);
+\draw[msgret]  (cmd |- 0,-3.6) -- (inv |- 0,-3.6);
+\draw[msgself] (inv |- 0,-4.2) .. controls (4.7,-4.0) and (4.7,-4.4) ..
+   node[right=3pt, font=\footnotesize, text=inkc]{stack.push(cmd)} (inv |- 0,-4.4);
+
+% --- Messages (undo path) ---
+\draw[msgsync] (cli |- 0,-4.5) -- node[msglabel]{undo()}    (inv |- 0,-4.5);
+\draw[msgsync] (inv |- 0,-5.3) -- node[msglabel]{undo()}    (cmd |- 0,-5.3);
+\draw[msgsync] (cmd |- 0,-5.9) -- node[msglabel]{erase(\dots)} (rcv |- 0,-5.9);
+\draw[msgret]  (rcv |- 0,-6.5) -- (cmd |- 0,-6.5);
+\draw[msgret]  (cmd |- 0,-7.1) -- (inv |- 0,-7.1);
+
+\end{tikzpicture}
+\end{document}

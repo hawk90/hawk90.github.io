@@ -82,6 +82,10 @@ void mineJson(const std::string& path) {
 
 `templateMethod()`는 **non-virtual** — 호출 흐름이 derived에서 바뀌면 안 됨.
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item22-template-method-seq.svg" alt="Template Method 시퀀스 — 고정 단계 + hook override" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 ## 언제 쓰면 좋은가
 
 - 알고리즘의 **불변 부분**을 한 번만 구현, **변형 부분**을 서브클래스에

@@ -65,6 +65,10 @@ Optimizer op; e->accept(op);   // 최적화
 
 <img src="/images/blog/gof/diagrams/item23-visitor.svg" alt="Visitor 패턴 클래스 다이어그램" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
 
+런타임 상호작용은 다음과 같습니다.
+
+<img src="/images/blog/gof/diagrams/item23-visitor-seq.svg" alt="Visitor 시퀀스 — accept → visit*의 double dispatch" style="max-width:100%; background:white; padding:8px; border-radius:6px;" />
+
 **double dispatch**:
 1. `element.accept(visitor)` — element 타입 결정
 2. `visitor.visit(*this)` — visitor가 element의 정확한 타입에 맞는 visit 호출
