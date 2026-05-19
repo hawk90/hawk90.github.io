@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% 참조 동등성 예시
+\node[font=\sffamily\bfseries\small, text=mutec] at (-2.5, 3.5) {참조 동등성};
+
+\node[cli, minimum width=12mm] (p1) at (-4, 2.5) {p1};
+\node[cli, minimum width=12mm] (p2) at (-4, 1.5) {p2};
+\node[abs, minimum width=30mm] (objA) at (-1, 2) {POINT A\\x=3.0, y=4.0};
+
+\draw[arr] (p1) -- (objA);
+\draw[arr] (p2) -- (objA);
+
+\node[cli, minimum width=12mm] (p3) at (-4, 0.3) {p3};
+\node[abs, minimum width=30mm] (objB) at (-1, 0.3) {POINT B\\x=3.0, y=4.0};
+\draw[arr] (p3) -- (objB);
+
+\node[font=\sffamily\footnotesize, text=mutec, align=left] at (-2.5, -0.8) {p1 = p2: True (같은 객체)\\p1 = p3: False (다른 객체)\\p1 \textasciitilde{} p3: True (값이 같음)};
+
+% 복사 예시
+\node[font=\sffamily\bfseries\small, text=mutec] at (4.5, 3.5) {얕은 vs 깊은 복사};
+
+\node[cli, minimum width=12mm] (orig) at (2.5, 2.3) {원본};
+\node[con, minimum width=20mm] (person1) at (4.5, 2.3) {PERSON};
+\node[imp, minimum width=18mm] (addr1) at (7, 2.3) {ADDRESS A};
+
+\draw[arr] (orig) -- (person1);
+\draw[arr] (person1) -- (addr1);
+
+\node[cli, minimum width=12mm] (shallow) at (2.5, 1) {얕은};
+\node[con, minimum width=20mm] (person2) at (4.5, 1) {PERSON'};
+\draw[arr] (shallow) -- (person2);
+\draw[arr] (person2) -- (addr1);
+
+\node[cli, minimum width=12mm] (deep) at (2.5, -0.3) {깊은};
+\node[con, minimum width=20mm] (person3) at (4.5, -0.3) {PERSON''};
+\node[imp, minimum width=18mm] (addr2) at (7, -0.3) {ADDRESS B};
+\draw[arr] (deep) -- (person3);
+\draw[arr] (person3) -- (addr2);
+
+\node[font=\sffamily\footnotesize, text=mutec] at (7, 1) {(공유)};
+\node[font=\sffamily\footnotesize, text=mutec] at (7, -0.9) {(복사)};
+
+\end{tikzpicture}
+\end{document}

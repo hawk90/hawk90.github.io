@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% 나쁜 분할
+\node[font=\sffamily\bfseries\small, text=mutec] at (-2.5, 3) {나쁜 분할};
+
+\node[warn, minimum width=10mm] (a1) at (-4, 1.5) {A};
+\node[warn, minimum width=10mm] (b1) at (-2.5, 1.5) {B};
+\node[warn, minimum width=10mm] (c1) at (-1, 1.5) {C};
+\node[warn, minimum width=10mm] (d1) at (-4, 0) {D};
+\node[warn, minimum width=10mm] (e1) at (-2.5, 0) {E};
+\node[warn, minimum width=10mm] (f1) at (-1, 0) {F};
+
+% 완전 연결
+\draw[arr] (a1) -- (b1);
+\draw[arr] (b1) -- (c1);
+\draw[arr] (a1) -- (d1);
+\draw[arr] (b1) -- (e1);
+\draw[arr] (c1) -- (f1);
+\draw[arr] (d1) -- (e1);
+\draw[arr] (e1) -- (f1);
+\draw[arr] (a1) -- (e1);
+\draw[arr] (b1) -- (d1);
+\draw[arr] (b1) -- (f1);
+\draw[arr] (c1) -- (e1);
+
+\node[font=\sffamily\footnotesize, text=mutec] at (-2.5, -1) {$O(n^2)$ 연결};
+
+% 좋은 분할
+\node[font=\sffamily\bfseries\small, text=mutec] at (4, 3) {좋은 분할};
+
+\node[hi, minimum width=20mm] (app) at (4, 2) {Application};
+\node[ok, minimum width=14mm] (s1) at (2.8, 0.8) {Service};
+\node[ok, minimum width=14mm] (s2) at (5.2, 0.8) {Service};
+\node[imp, minimum width=14mm] (r1) at (2.8, -0.4) {Repository};
+\node[imp, minimum width=14mm] (r2) at (5.2, -0.4) {Repository};
+
+\draw[arr] (app) -- (s1);
+\draw[arr] (app) -- (s2);
+\draw[arr] (s1) -- (r1);
+\draw[arr] (s2) -- (r2);
+
+\node[font=\sffamily\footnotesize, text=mutec] at (4, -1.3) {$O(n)$ 연결};
+
+\end{tikzpicture}
+\end{document}

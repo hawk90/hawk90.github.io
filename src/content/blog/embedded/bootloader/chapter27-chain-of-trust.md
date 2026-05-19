@@ -5,7 +5,7 @@ description: "BootROM PK hash → BL2 signed by ROTPK → BL31/BL33 signed by tr
 series: "Bootloader Internals"
 seriesOrder: 27
 tags: [embedded, bootloader, secure-boot, chain-of-trust, signing]
-draft: true
+draft: false
 ---
 
 [Ch 16](/blog/embedded/bootloader/chapter16-verified-boot)에서 U-Boot의 FIT verified boot 한 단계를 봤습니다. 이 장에서는 시야를 넓혀 *전체 체인*을 끝에서 끝까지 따라갑니다. eFuse에 박힌 PK hash에서 시작해 BootROM, BL1·BL2·BL31, U-Boot Proper, 커널, 그리고 커널 모듈까지. 각 단계가 *어떤 키로* *무엇을 검증*하는지, 한 단계라도 깨지면 어디서 어떻게 거부되는지 봅니다.

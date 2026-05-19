@@ -5,7 +5,7 @@ description: "전원 인가 직후 mask ROM이 무엇을 하는지, eFuse/OTP에
 series: "Bootloader Internals"
 seriesOrder: 23
 tags: [embedded, bootloader, bootrom, efuse, otp, secure-boot]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

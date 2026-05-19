@@ -5,7 +5,7 @@ description: "양산 firmware의 flash layout 설계 — 부트로더·env·kern
 series: "Bootloader Internals"
 seriesOrder: 28
 tags: [embedded, bootloader, flash, nand, emmc, ubi, partition]
-draft: true
+draft: false
 ---
 
 Flash layout은 *한 번 결정하면 양산 내내 끌고 가는* 결정입니다. 부트로더 크기, env 위치, A/B 슬롯 크기, OTA staging 영역, 사용자 데이터 영역을 *처음에 잘 잘라 두지 않으면* 두 번째 펌웨어 배포에서 막힙니다. 매체별 특성도 다릅니다. NAND는 bad block을 평생 누적하고, NOR은 byte addressable이지만 erase가 느리고, eMMC는 controller가 보이지 않는 데서 wear leveling을 하고, QSPI NOR은 DRAM 없이 XIP가 됩니다. layout 결정은 매체 특성과 양산 운영 정책이 만나는 자리입니다.

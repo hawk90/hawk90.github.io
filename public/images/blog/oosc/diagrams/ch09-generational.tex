@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=mutec] at (0, 3.5) {Generational Collection};
+
+% Young generation
+\node[draw=okbord, fill=okfill!30, minimum width=35mm, minimum height=15mm] (young) at (-2, 2) {};
+\node[font=\sffamily\footnotesize, text=mutec] at (-2, 2.9) {Young Gen};
+\node[ok, minimum width=6mm, font=\tiny] at (-3.2, 2) {1};
+\node[ok, minimum width=6mm, font=\tiny] at (-2.4, 2) {2};
+\node[ok, minimum width=6mm, font=\tiny] at (-1.6, 2) {3};
+\node[ok, minimum width=6mm, font=\tiny] at (-0.8, 2) {4};
+
+% Old generation
+\node[draw=conbord, fill=confill!30, minimum width=45mm, minimum height=15mm] (old) at (3, 2) {};
+\node[font=\sffamily\footnotesize, text=mutec] at (3, 2.9) {Old Gen};
+\node[con, minimum width=8mm, font=\tiny] at (1.5, 2) {A};
+\node[con, minimum width=8mm, font=\tiny] at (2.6, 2) {B};
+\node[con, minimum width=8mm, font=\tiny] at (3.7, 2) {C};
+
+% Promotion arrow
+\draw[arr, thick] (-0.3, 2) -- (0.8, 2) node[midway, above, font=\sffamily\tiny, text=mutec] {승격};
+
+% Characteristics table-like info
+\node[font=\sffamily\footnotesize, text=mutec, align=left] at (-2, 0.5) {
+작은 영역\\[2pt]
+빈번한 수거\\[2pt]
+대부분 여기서 소멸
+};
+
+\node[font=\sffamily\footnotesize, text=mutec, align=left] at (3, 0.5) {
+큰 영역\\[2pt]
+드문 수거\\[2pt]
+오래 사는 객체
+};
+
+\end{tikzpicture}
+\end{document}

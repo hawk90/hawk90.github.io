@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% 확장성 낮음
+\node[font=\sffamily\bfseries\small, text=mutec] at (-2.5, 2.2) {확장성 낮음};
+\node[warn, minimum width=50mm, minimum height=12mm] (mono) at (-2.5, 1) {거대한 단일 모듈};
+\node[font=\sffamily\footnotesize, text=mutec] at (-2.5, -0.2) {어디를 고쳐도 전체에 영향};
+
+% 확장성 높음
+\node[font=\sffamily\bfseries\small, text=mutec] at (4, 2.2) {확장성 높음};
+\node[ok, minimum width=10mm] (a) at (2, 1) {A};
+\node[ok, minimum width=10mm] (b) at (3.2, 1) {B};
+\node[ok, minimum width=10mm] (c) at (4.4, 1) {C};
+\node[ok, minimum width=10mm] (d) at (5.6, 1) {D};
+\node[font=\sffamily\footnotesize, text=mutec] at (4, -0.2) {B만 고치면 됨};
+
+% 화살표
+\draw[arr] (a) -- (b);
+\draw[arr] (b) -- (c);
+\draw[arr] (c) -- (d);
+
+\end{tikzpicture}
+\end{document}

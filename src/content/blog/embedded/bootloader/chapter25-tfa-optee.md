@@ -5,7 +5,7 @@ description: "ARMv8 secure boot의 표준 단계화 — Trusted Firmware-A의 BL
 series: "Bootloader Internals"
 seriesOrder: 25
 tags: [embedded, bootloader, tf-a, atf, op-tee, secure-boot, armv8]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

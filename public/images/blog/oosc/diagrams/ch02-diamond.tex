@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% 노드
+\node[abs] (person) at (0, 3) {PERSON};
+\node[con] (student) at (-2, 1.5) {STUDENT};
+\node[con] (employee) at (2, 1.5) {EMPLOYEE};
+\node[hi] (ta) at (0, 0) {TEACHING\_ASSISTANT};
+
+% 상속 화살표
+\draw[inh] (student) -- (person);
+\draw[inh] (employee) -- (person);
+\draw[inh] (ta) -- (student);
+\draw[inh] (ta) -- (employee);
+
+% 레이블
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (0, -1) {다이아몬드 문제: PERSON이 두 경로로 상속됨};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=mutec] at (0, 4.5) {Copying Collection};
+
+% Before collection
+\node[font=\sffamily\footnotesize, text=mutec] at (-2.5, 3.5) {수거 전};
+
+% From-space before
+\node[draw=conbord, minimum width=50mm, minimum height=12mm] (from1) at (-2.5, 2.5) {};
+\node[ok, minimum width=10mm] at (-4.2, 2.5) {A};
+\node[warn, minimum width=10mm] at (-3, 2.5) {B};
+\node[ok, minimum width=10mm] at (-1.8, 2.5) {C};
+\node[warn, minimum width=10mm] at (-0.6, 2.5) {D};
+\node[font=\sffamily\tiny, text=mutec] at (-2.5, 1.7) {From-space};
+
+% To-space before (empty)
+\node[draw=conbord, minimum width=50mm, minimum height=12mm, fill=white] (to1) at (3.5, 2.5) {};
+\node[font=\sffamily\tiny, text=mutec] at (3.5, 1.7) {To-space (빈 상태)};
+
+% Arrow
+\draw[->, thick, mutec] (0.5, 1.2) -- (0.5, 0.3);
+
+% After collection
+\node[font=\sffamily\footnotesize, text=mutec] at (-2.5, -0.3) {수거 후};
+
+% From-space after (empty, now To-space)
+\node[draw=conbord, minimum width=50mm, minimum height=12mm, fill=white] (from2) at (-2.5, -1.3) {};
+\node[font=\sffamily\tiny, text=mutec] at (-2.5, -2.1) {빈 상태 (새 To-space)};
+
+% To-space after (compacted, now From-space)
+\node[draw=conbord, minimum width=50mm, minimum height=12mm] (to2) at (3.5, -1.3) {};
+\node[ok, minimum width=10mm] at (2, -1.3) {A'};
+\node[ok, minimum width=10mm] at (3.2, -1.3) {C'};
+\node[font=\sffamily\tiny, text=mutec] at (3.5, -2.1) {새 From-space (압축됨)};
+
+% Note
+\node[font=\sffamily\footnotesize, text=mutec, align=center] at (0.5, -3) {도달 가능한 A, C만 복사\\[2pt]단편화 없음};
+
+\end{tikzpicture}
+\end{document}

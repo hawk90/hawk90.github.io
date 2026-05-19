@@ -1,0 +1,26 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,trees}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+    level 1/.style={sibling distance=40mm, level distance=15mm},
+    level 2/.style={sibling distance=22mm, level distance=15mm},
+    edge from parent/.style={draw, inh}
+]
+
+% Root
+\node[abs, minimum width=22mm] {SHAPE}
+    child {node[con, minimum width=24mm] {RECTANGLE}
+        child {node[imp, minimum width=20mm] {SQUARE}}
+        child {node[imp, minimum width=24mm, font=\sffamily\tiny] {ROUNDED\\RECT}}
+    }
+    child {node[con, minimum width=20mm] {CIRCLE}}
+    child {node[con, minimum width=22mm] {POLYGON}
+        child {node[imp, minimum width=22mm] {TRIANGLE}}
+        child {node[imp, minimum width=20mm] {HEXAGON}}
+    };
+
+\end{tikzpicture}
+\end{document}

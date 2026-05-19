@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% 이식성 낮음
+\node[font=\sffamily\bfseries\small, text=mutec] at (-2.5, 3.5) {이식성 낮음};
+\node[warn, minimum width=45mm, minimum height=10mm] at (-2.5, 2.3) {비즈니스 로직 + Win32 API};
+\node[font=\sffamily\footnotesize, text=mutec] at (-2.5, 1.2) {Windows 전용};
+
+% 이식성 높음
+\node[font=\sffamily\bfseries\small, text=mutec] at (4, 3.5) {이식성 높음};
+\node[abs, minimum width=45mm] (biz) at (4, 2.5) {비즈니스 로직};
+\node[prp, minimum width=45mm] (abs) at (4, 1.3) {플랫폼 추상화 계층};
+\node[ok, minimum width=14mm] (win) at (2.5, 0.1) {Win32};
+\node[ok, minimum width=14mm] (posix) at (4, 0.1) {POSIX};
+\node[ok, minimum width=14mm] (etc) at (5.5, 0.1) {...};
+
+% 연결
+\draw[uses] (biz) -- (abs);
+\draw[uses] (abs.south) -- (win.north);
+\draw[uses] (abs.south) -- (posix.north);
+\draw[uses] (abs.south) -- (etc.north);
+
+\end{tikzpicture}
+\end{document}

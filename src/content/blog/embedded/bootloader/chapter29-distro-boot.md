@@ -5,7 +5,7 @@ description: "보드별 다른 부트 스크립트를 표준화 — U-Boot Distr
 series: "Bootloader Internals"
 seriesOrder: 29
 tags: [embedded, bootloader, u-boot, distro-boot, extlinux]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=mutec] at (0, 4) {불변식 검사 시점};
+
+% Timeline
+\draw[thick, mutec] (-4, 2.5) -- (4, 2.5);
+
+% Events on timeline
+\node[ok, minimum width=18mm, minimum height=8mm, font=\sffamily\tiny] (create) at (-3, 2.5) {create};
+\node[con, minimum width=18mm, minimum height=8mm, font=\sffamily\tiny] (call1) at (-0.5, 2.5) {deposit};
+\node[con, minimum width=18mm, minimum height=8mm, font=\sffamily\tiny] (call2) at (2.5, 2.5) {withdraw};
+
+% Invariant check markers
+\node[prp, minimum width=3mm, minimum height=3mm, font=\sffamily\tiny] (inv1) at (-2, 2.5) {};
+\node[prp, minimum width=3mm, minimum height=3mm, font=\sffamily\tiny] (inv2) at (0.8, 2.5) {};
+\node[prp, minimum width=3mm, minimum height=3mm, font=\sffamily\tiny] (inv3) at (3.8, 2.5) {};
+
+% Labels
+\node[font=\sffamily\tiny, text=mutec] at (-2, 1.8) {INV};
+\node[font=\sffamily\tiny, text=mutec] at (0.8, 1.8) {INV};
+\node[font=\sffamily\tiny, text=mutec] at (3.8, 1.8) {INV};
+
+% Explanation
+\node[font=\sffamily\footnotesize, text=mutec, align=center] at (0, 0.8) {
+생성 후, 각 루틴 완료 후 불변식 검사\\[2pt]
+루틴 실행 중에는 일시적 위반 허용
+};
+
+\end{tikzpicture}
+\end{document}

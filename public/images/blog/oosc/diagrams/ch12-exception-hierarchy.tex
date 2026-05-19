@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,trees}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+    level 1/.style={sibling distance=38mm, level distance=15mm},
+    level 2/.style={sibling distance=20mm, level distance=12mm},
+    edge from parent/.style={draw, inh}
+]
+
+% Root
+\node[abs, minimum width=25mm] {EXCEPTION}
+    child {node[con, minimum width=28mm, font=\sffamily\tiny] {PRECONDITION\\VIOLATION}}
+    child {node[con, minimum width=28mm, font=\sffamily\tiny] {POSTCONDITION\\VIOLATION}}
+    child {node[con, minimum width=25mm, font=\sffamily\tiny] {INVARIANT\\VIOLATION}}
+    child {node[con, minimum width=25mm, font=\sffamily\tiny] {HARDWARE\\EXCEPTION}
+        child {node[imp, minimum width=22mm, font=\sffamily\tiny] {NO\_MORE\\MEMORY}}
+        child {node[imp, minimum width=22mm, font=\sffamily\tiny] {FLOAT\\ERROR}}
+    }
+    child {node[con, minimum width=25mm, font=\sffamily\tiny] {DEVELOPER\\EXCEPTION}};
+
+\end{tikzpicture}
+\end{document}

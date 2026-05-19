@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=mutec] at (0, 4.5) {rescue 흐름};
+
+% do block
+\node[con, minimum width=30mm, minimum height=12mm] (doblock) at (0, 3) {do 블록 실행};
+
+% Exception occurs
+\node[warn, minimum width=25mm, minimum height=10mm, font=\sffamily\footnotesize] (exc) at (0, 1.5) {예외 발생};
+
+% rescue block
+\node[prp, minimum width=30mm, minimum height=12mm] (rescue) at (0, 0) {rescue 블록};
+
+% Retry path
+\node[ok, minimum width=20mm, minimum height=10mm, font=\sffamily\footnotesize] (retry) at (-3, -1.5) {retry};
+
+% Propagate path
+\node[warn, minimum width=20mm, minimum height=10mm, font=\sffamily\footnotesize] (prop) at (3, -1.5) {예외 전파};
+
+% Arrows
+\draw[arr] (doblock) -- (exc);
+\draw[arr] (exc) -- (rescue);
+\draw[arr] (rescue) -- (retry);
+\draw[arr] (rescue) -- (prop);
+
+% Retry arrow back to do
+\draw[arr] (retry) to[out=180,in=180] (doblock);
+
+% Labels
+\node[font=\sffamily\tiny, text=mutec] at (-2.5, -0.7) {복구 시도};
+\node[font=\sffamily\tiny, text=mutec] at (2.5, -0.7) {복구 불가};
+
+\end{tikzpicture}
+\end{document}

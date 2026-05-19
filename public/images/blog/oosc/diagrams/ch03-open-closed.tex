@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% ACCOUNT (닫힘 - 안정)
+\node[abs, minimum width=40mm, minimum height=16mm] (account) at (0, 2) {
+\begin{tabular}{c}
+\textbf{ACCOUNT}\\[2pt]
+\footnotesize balance, deposit, withdraw
+\end{tabular}
+};
+
+% 파생 클래스들 (열림 - 확장)
+\node[con, minimum width=38mm] (savings) at (-2.5, -0.5) {SAVINGS\_ACCOUNT};
+\node[con, minimum width=38mm] (checking) at (2.5, -0.5) {CHECKING\_ACCOUNT};
+
+% 상속
+\draw[inh] (savings) -- (account);
+\draw[inh] (checking) -- (account);
+
+% 레이블
+\node[badge] at (2.5, 2.8) {Closed};
+\node[badge, fill=okfill, draw=okbord] at (-2.5, 0.3) {Open};
+\node[badge, fill=okfill, draw=okbord] at (2.5, 0.3) {Open};
+
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (0, -1.5) {ACCOUNT 수정 없이 새 계좌 유형 추가 가능};
+
+\end{tikzpicture}
+\end{document}

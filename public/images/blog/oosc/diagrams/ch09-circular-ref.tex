@@ -1,0 +1,34 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\usepackage{kotex}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Circular reference example
+\node[font=\sffamily\bfseries\small, text=mutec] at (0, 3) {순환 참조 문제};
+
+\node[con, minimum width=30mm, minimum height=12mm] (nodeA) at (-1.5, 1.5) {NODE A\\[2pt]refcount=1};
+\node[con, minimum width=30mm, minimum height=12mm] (nodeB) at (2.5, 1.5) {NODE B\\[2pt]refcount=1};
+
+% Arrows forming cycle
+\draw[arr] (nodeA.east) to[bend left=20] node[above, font=\sffamily\footnotesize, text=mutec] {next} (nodeB.west);
+\draw[arr] (nodeB.west) to[bend left=20] node[below, font=\sffamily\footnotesize, text=mutec] {next} (nodeA.east);
+
+% External references removed
+\node[cli, minimum width=12mm, minimum height=8mm, fill=white, draw=gray!30, text=gray!50] (a) at (-4, 1.5) {a};
+\node[cli, minimum width=12mm, minimum height=8mm, fill=white, draw=gray!30, text=gray!50] (b) at (5.5, 1.5) {b};
+
+\draw[->, dashed, gray!40] (a) -- (nodeA);
+\draw[->, dashed, gray!40] (b) -- (nodeB);
+
+% Explanation
+\node[font=\sffamily\footnotesize, text=mutec, align=left] at (0.5, -0.3) {
+외부 참조 a, b := Void 후에도\\[2pt]
+서로를 참조하므로 refcount > 0\\[2pt]
+$\rightarrow$ 메모리 누수
+};
+
+\end{tikzpicture}
+\end{document}
