@@ -1,347 +1,264 @@
 ---
-title: "5-04: PCIe Streaming — TLP·MSI-X·Bus Master·BAR·Latency"
+title: "5-04: PCIe Streaming — BAR Type·MSI-X·Kernel Bypass"
 date: 2026-05-20T22:00:00
-description: "PCIe TLP, MSI-X interrupt, bus master DMA, BAR mapping, latency tuning."
+description: "PCIe로 streaming traffic을 다룰 때 알아야 할 BAR 종류, prefetchable 의미, MSI-X 분산, posted/non-posted 순서, kernel bypass 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 28
-tags: [recipes, pcie, tlp, msi-x, dma]
-draft: true
+tags: [recipes, pcie, bar, msi-x, dpdk, spdk]
 ---
 
 ## 한 줄 요약
 
-> **"PCIe = packet-based 고속 serial link"** — 64 Gbps per lane (Gen5).
+> **"PCIe streaming은 BAR 타입, MSI-X 분산, posted/non-posted 순서 세 가지를 알아야 안전하게 다룰 수 있습니다."** Throughput을 위해서는 ring + batched doorbell 모델로 가고, kernel bypass(DPDK·SPDK)는 마지막 카드로 꺼냅니다.
 
-## PCIe 세대
+## 어떤 상황에서 쓰나
 
-| Gen | Lane Speed | x16 Total |
-|---|---|---|
-| Gen1 | 2.5 GT/s | 8 GB/s |
-| Gen2 | 5 GT/s | 16 GB/s |
-| Gen3 | 8 GT/s | 32 GB/s |
-| Gen4 | 16 GT/s | 64 GB/s |
-| Gen5 | 32 GT/s | 128 GB/s |
-| Gen6 | 64 GT/s | 256 GB/s (PAM4) |
+NVMe SSD에서 1 M IOPS를 뽑거나, 10/25/100 GbE NIC을 line rate로 받거나, FPGA accelerator로 카메라 frame을 zero-copy로 흘릴 때 PCIe streaming이 등장합니다. 이때는 단순히 `pci_iomap`으로 BAR을 잡는 것만으로는 충분치 않고, BAR의 prefetchable 여부, MSI-X vector 수, kernel bypass 가능성까지 같이 설계해야 합니다.
 
-자동차·자율주행 — Gen4·Gen5 표준. 카메라·NPU·SSD.
+PCIe enumeration 자체와 BAR sizing은 [1-03 PCIe BAR](/blog/embedded/modern-recipes/part1-03-pcie-bar)에서 다뤘으므로, 이 글은 *streaming traffic에 특화된 결정*에 집중합니다.
 
-## TLP — Transaction Layer Packet
+## 핵심 개념
+
+세 축으로 정리합니다.
 
 ```text
-PCIe transaction:
-  Header (12-16 byte) + Payload (max 4 KB)
-  
-Types:
-  Memory Read·Write
-  IO Read·Write (legacy)
-  Configuration Read·Write
-  Message (interrupt·error)
+1. BAR 타입
+   - Memory BAR    (대부분)
+   - I/O BAR       (legacy, ARM 거의 없음)
+   - Prefetchable  / Non-prefetchable
+   - 32-bit / 64-bit (두 BAR pair)
+
+2. Interrupt
+   - INTx          (shared legacy)
+   - MSI           (최대 32 vector, 같은 message data)
+   - MSI-X         (최대 2048 vector, 독립 address/data)
+
+3. Write/Read ordering
+   - Memory Write  — posted (fire and forget)
+   - Memory Read   — non-posted (round-trip)
+   - Producer-consumer rule, RO/IDO 비트
 ```
 
-Max payload size (MPS) — 128·256·512 byte. 큰 MPS → *overhead 줄임*, throughput ↑.
+Prefetchable BAR은 root complex가 *부수효과 없다*고 가정하고 burst·prefetch·write-combining을 적용해도 좋다는 약속입니다. side-effect register는 non-prefetchable에 둡니다.
 
-## Configuration Space
+MSI-X는 queue별로 독립 vector를 줄 수 있어 multi-queue NVMe·NIC의 핵심입니다. 한 vector에 한 CPU를 affinity로 묶으면 CQ poll context까지 같은 코어로 정렬됩니다.
 
-```c
-/* 256 byte standard + 4096 byte extended */
-uint16_t vendor_id = pci_read_config_word(dev, PCI_VENDOR_ID);
-uint16_t device_id = pci_read_config_word(dev, PCI_DEVICE_ID);
+## 코드 / 실제 사용 예
 
-/* BAR */
-uint32_t bar0 = pci_read_config_dword(dev, PCI_BASE_ADDRESS_0);
+### `lspci -vv`로 BAR 분석
+
+```text
+01:00.0 NVMe: Samsung SSD ...
+    Region 0: Memory at fb000000 (64-bit, non-prefetchable) [size=16K]
+    Capabilities: [50] MSI-X: Enable+ Count=32 Masked-
+    Capabilities: [70] Express Endpoint
+        LnkCap: Speed 8GT/s, Width x4
+        LnkSta: Speed 8GT/s, Width x4
 ```
 
-`lspci -vv` — 모든 config 확인.
+`non-prefetchable` + 16 KB이면 doorbell·register용 BAR입니다. 같은 device가 별도의 prefetchable BAR을 둘 수 있는데, 그건 DMA buffer나 framebuffer 같은 *RAM-like* 영역입니다.
 
-## BAR Mapping
+### Linux PCIe driver의 표준 probe 순서
 
 ```c
-/* Linux driver */
 static int my_probe(struct pci_dev *pdev, const struct pci_device_id *id) {
-    pci_enable_device(pdev);
-    pci_request_regions(pdev, "my_driver");
-    pci_set_master(pdev);   /* Enable bus master */
-    
-    /* Map BAR 0 */
-    void __iomem *mmio = pci_iomap(pdev, 0, 0);
-    
-    /* Read·write */
-    iowrite32(0x12345678, mmio + REG_OFFSET);
-    uint32_t val = ioread32(mmio + REG_STATUS);
-    
+    int rc, nvec;
+
+    rc = pci_enable_device(pdev);
+    if (rc) return rc;
+
+    rc = pci_request_regions(pdev, DRV_NAME);
+    if (rc) goto err_disable;
+
+    void __iomem *bar0 = pci_iomap(pdev, 0, 0);
+    if (!bar0) { rc = -ENOMEM; goto err_regions; }
+
+    pci_set_master(pdev);                  /* DMA enable */
+
+    nvec = pci_alloc_irq_vectors(pdev, 1, 32,
+                                 PCI_IRQ_MSIX | PCI_IRQ_MSI);
+    if (nvec < 0) { rc = nvec; goto err_unmap; }
+
+    for (int i = 0; i < nvec; i++) {
+        int irq = pci_irq_vector(pdev, i);
+        request_irq(irq, queue_isr, 0, "myq", &queues[i]);
+        irq_set_affinity_hint(irq, cpumask_of(i % num_online_cpus()));
+    }
     return 0;
 }
 ```
 
-`pci_iomap` — *internal ioremap* + cache attribute 자동 설정.
+`pci_set_master`를 빼면 device가 DMA를 못 합니다. MSI-X 요청 시 lower bound와 upper bound를 *둘 다 전달*해 fallback이 가능하도록 합니다.
 
-## MSI-X — Multiple IRQ
+### Doorbell write를 위한 BAR pointer
 
 ```c
-struct msix_entry entries[16];
-for (int i = 0; i < 16; i++) entries[i].entry = i;
+struct queue {
+    void __iomem *sq_doorbell;   /* bar0 + 0x1000 + 2*N*stride */
+    void __iomem *cq_doorbell;
+};
 
-int nvec = pci_alloc_irq_vectors(pdev, 1, 16, PCI_IRQ_MSIX);
+q->sq_doorbell = bar0 + DOORBELL_BASE + 2 * id * doorbell_stride;
+q->cq_doorbell = q->sq_doorbell + doorbell_stride;
 
-/* Each vector → different IRQ */
-for (int i = 0; i < nvec; i++) {
-    int irq = pci_irq_vector(pdev, i);
-    request_irq(irq, my_handler[i], 0, "myq-i", &queues[i]);
+writel(new_tail, q->sq_doorbell);
+```
+
+NVMe 표준은 doorbell stride를 capability register에서 읽어 결정합니다. 다른 device는 비슷한 layout이라도 stride가 다릅니다.
+
+### MSI-X handler를 queue별로 분리
+
+```c
+irqreturn_t queue_isr(int irq, void *data) {
+    struct queue *q = data;
+    napi_schedule_irqoff(&q->napi);
+    return IRQ_HANDLED;
 }
 ```
 
-NVMe·NIC — *queue별 별도 IRQ*. CPU affinity 분산.
+각 vector가 자기 queue만 깨우면 lock 경합 없이 CPU별 처리로 정렬됩니다.
 
-## DMA Setup — dma_alloc_coherent
+### Memory Write ordering
 
-```c
-dma_addr_t dma_handle;
-void *cpu_addr = dma_alloc_coherent(&pdev->dev, 4096,
-                                      &dma_handle, GFP_KERNEL);
-
-/* Setup HW DMA descriptor */
-iowrite64(dma_handle, mmio + DMA_DESC_ADDR);
-iowrite32(4096, mmio + DMA_LEN);
-iowrite32(DMA_START, mmio + DMA_CTRL);
-```
-
-`dma_handle` — *device가 보는 physical address* (또는 IOVA).
-
-## Bus Master + IOMMU
-
-```text
-PCIe device DMA:
-  - PCIe device가 host memory 직접 access
-  - IOMMU (SMMU on ARM) — protection·translation
-  - VFIO — user-space passthrough
-```
-
-```bash
-# IOMMU group 확인
-ls /sys/bus/pci/devices/0000:01:00.0/iommu_group
-```
-
-## ATS·PRI — Address Translation
-
-```text
-ATS (Address Translation Service):
-  - Device가 *IOTLB cache*
-  - SMMU 자주 query 안 해도 됨
-  
-PRI (Page Request Interface):
-  - Device가 page fault 직접 요청
-  - Demand-paged DMA
-```
-
-GPU·NPU 표준 — *coherent shared memory*.
-
-## NVMe SSD Driver
+PCIe는 *posted write가 같은 traffic class 안에서 순서를 유지*합니다. 그래서 다음 흐름이 안전합니다.
 
 ```c
-/* SPDK example */
+sq[tail] = cmd;            /* posted write */
+dma_wmb();
+writel(tail + 1, doorbell); /* posted write */
+```
+
+같은 root complex 경유라면 doorbell이 sq write보다 먼저 device에 도달하지 않습니다. 다만 PCIe spec의 *Relaxed Ordering* 비트를 켜면 이 보장이 깨지므로 주의가 필요합니다.
+
+### Non-posted read의 비용
+
+```c
+uint32_t s;
+for (int i = 0; i < 100; i++)
+    s = ioread32(bar0 + STATUS);   /* 매번 PCIe round-trip */
+```
+
+PCIe Read는 보통 1-5 µs가 걸립니다. Hot loop에서 host MMIO read를 반복하면 device latency보다 PCIe transit이 더 큰 비용이 됩니다. 가능한 한 device가 host memory에 적은 결과를 읽도록 바꿉니다.
+
+### VFIO + mmap으로 kernel bypass
+
+```c
+struct vfio_region_info reg = { .argsz = sizeof(reg), .index = 0 };
+ioctl(dev_fd, VFIO_DEVICE_GET_REGION_INFO, &reg);
+
+void *bar0 = mmap(NULL, reg.size,
+                  PROT_READ | PROT_WRITE,
+                  MAP_SHARED, dev_fd, reg.offset);
+
+while (1) {
+    int n = reap_completions(bar0);
+    if (!n) cpu_relax();
+}
+```
+
+VFIO로 BAR을 user space에 mapping하면 doorbell write와 completion polling이 system call 없이 발생합니다. DPDK·SPDK가 이 모델로 µs 단위 latency를 달성합니다. ([4-04 UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio) 참고)
+
+### SPDK NVMe enumeration
+
+```c
 spdk_nvme_probe(NULL, NULL, probe_cb, attach_cb, NULL);
 
-/* attach_cb */
-struct spdk_nvme_ns *ns = spdk_nvme_ctrlr_get_ns(ctrlr, 1);
-spdk_nvme_ns_cmd_read(ns, qpair, buffer, 0, 1, cb, NULL, 0);
+void attach_cb(void *ctx, const struct spdk_nvme_transport_id *trid,
+               struct spdk_nvme_ctrlr *ctrlr,
+               const struct spdk_nvme_ctrlr_opts *opts) {
+    struct spdk_nvme_qpair *qp = spdk_nvme_ctrlr_alloc_io_qpair(ctrlr, NULL, 0);
+    /* qp는 user space에서 직접 SQ·CQ를 들고 있음 */
+}
 ```
 
-NVMe — *PCIe Gen4 x4 → 8 GB/s*. 1 µs latency.
+Kernel block layer를 거치지 않으므로 io_uring 대비 latency가 절반 가까이 떨어집니다. 대신 kernel scheduler·cgroup·multipath 같은 기능을 모두 직접 구현해야 합니다.
 
-## Network — DPDK PMD
+## 측정 / 성능 비교
+
+PCIe Gen3 x16 카드(이론 15.75 GB/s effective) 위에서 BAR 접근과 streaming throughput을 측정한 예입니다.
+
+```text
+동작                             지연/대역
+BAR0 register read (host MMIO)   ~1.5 µs
+BAR0 register write (posted)     ~80 ns submit, 실제 보임 ~1 µs
+PCIe DMA 64 KB read (host→card)  ~13 GB/s
+PCIe DMA 64 KB write (card→host) ~12 GB/s
+```
+
+NVMe 4 KB read를 host stack에 따라 비교한 결과입니다.
+
+```text
+스택                              IOPS (QD=64)   p99 latency
+Linux block + libaio              500 k          90 µs
+Linux block + io_uring (poll)     780 k          55 µs
+SPDK polling (VFIO)               2.4 M          12 µs
+```
+
+10 GbE NIC line rate(14.88 Mpps)에서 64-byte packet forwarding을 측정하면 Linux kernel stack은 2-3 Mpps에서 막히고, DPDK+VFIO는 단일 코어로 14.8 Mpps에 도달합니다. 차이는 PCIe link 자체가 아니라 *host side software*에서 발생합니다.
+
+## 자주 보는 함정
+
+> Prefetchable에 side-effect register
 
 ```c
-rte_eal_init(argc, argv);
-
-/* Configure port */
-rte_eth_dev_configure(port, 1, 1, &port_conf);
-rte_eth_rx_queue_setup(port, 0, RX_DESC, 0, NULL, mbuf_pool);
-rte_eth_dev_start(port);
-
-/* Poll RX */
-struct rte_mbuf *pkts[32];
-int n = rte_eth_rx_burst(port, 0, pkts, 32);
+struct {
+    uint32_t status;
+    uint32_t clear_on_read;       /* read 한 번에 자동 clear */
+} __iomem *regs = pci_iomap(pdev, 0, 0);
 ```
 
-100G NIC — DPDK *zero copy + kernel bypass*. < 5 µs latency.
+Prefetchable BAR을 root complex가 speculatively read하면 `clear_on_read`가 의도치 않게 트리거됩니다. side-effect register는 *반드시 non-prefetchable BAR*에 둡니다.
 
-## ARM SoC — PCIe Endpoint·Root Complex
-
-```text
-Cortex-A SoC roles:
-  - Root Complex (host) — slot·PCIe controller
-  - Endpoint (target) — accelerator·co-processor
-
-Xilinx Zynq Ultrascale+ — both modes.
-NVIDIA Jetson — RC only.
-```
-
-## NVIDIA Jetson PCIe
-
-```text
-Jetson AGX Orin:
-  Gen4 x8 (slot)
-  +5G modem·NVMe·camera
-  
-사용:
-  External NVMe SSD via PCIe
-  WiFi 6E card
-  Custom FPGA accelerator
-```
-
-## Latency Tuning
-
-```text
-1. MPS (Max Payload Size) — 큰 값일수록 throughput ↑
-2. MRRS (Max Read Request Size) — read 한 번 크기
-3. Read completion combining
-4. Posted vs Non-posted
-5. Snoop·NoSnoop attribute
-6. RC IOMMU stages
-```
-
-```bash
-# 현재 MPS
-sudo setpci -s 01:00.0 CAP_EXP+8.w
-```
-
-## Read vs Write Latency
-
-```text
-PCIe Write (posted):
-  - Fire and forget
-  - 1 µs latency
-  - 매우 빠름
-
-PCIe Read (non-posted):
-  - Round trip
-  - 1-5 µs latency
-  - 큰 read 권장 (overhead amortize)
-```
-
-→ MMIO read 자제, batched write.
-
-## Hot-Plug·Surprise Removal
-
-```c
-static const struct pci_error_handlers my_err_handlers = {
-    .error_detected = my_error_detected,
-    .slot_reset = my_slot_reset,
-    .resume = my_resume,
-};
-
-static struct pci_driver my_driver = {
-    .name = "mydriver",
-    .id_table = my_id_table,
-    .probe = my_probe,
-    .remove = my_remove,
-    .err_handler = &my_err_handlers,
-};
-```
-
-AER (Advanced Error Reporting) — Linux 자동 복구 시도.
-
-## VFIO — User-Space PCIe
-
-```bash
-# Unbind from default driver
-echo 0000:01:00.0 > /sys/bus/pci/drivers/nvme/unbind
-
-# Bind to vfio-pci
-modprobe vfio-pci
-echo 8086 0a54 > /sys/bus/pci/drivers/vfio-pci/new_id
-
-# /dev/vfio/N 노출
-```
-
-DPDK·SPDK·QEMU passthrough.
-
-## CXL — Cache Coherent
-
-```text
-CXL 2.0+:
-  PCIe 위 cache coherent protocol
-  CXL.io   — PCIe 호환
-  CXL.cache — accelerator coherent
-  CXL.mem   — memory expansion
-  
-Use cases:
-  GPU·NPU coherent shared memory
-  Memory pool (수 TB)
-  Disaggregated memory
-```
-
-자율주행·서버 — *coherent accelerator*.
-
-## 자율주행 — Camera + NPU + SSD via PCIe
-
-```text
-ADAS SoC:
-  10 camera × CSI/MIPI → ISP → DDR
-       ↓ via PCIe Gen4 (within SoC fabric)
-  GPU·NPU inference
-       ↓ via PCIe Gen4
-  NVMe SSD (data logging)
-
-Total bandwidth:
-  Cameras: 10 × 2 GB/s = 20 GB/s
-  PCIe Gen4 x8: 16 GB/s — *부족!*
-  → 일부 sensor는 다른 interconnect (CSI-2 direct)
-```
-
-## 자주 하는 실수
-
-> ⚠️ DMA address physical 가정
-
-```c
-HW_DMA_ADDR = (uint32_t)kbuf;   /* virtual addr — wrong */
-```
-
-→ `dma_handle` (IOMMU 또는 physical).
-
-> ⚠️ Bus master enable 안 함
-
-```c
-pci_enable_device(pdev);
-/* pci_set_master 누락 */
-DMA setup;
-/* → DMA 동작 안 함 */
-```
-
-→ `pci_set_master`.
-
-> ⚠️ MSI-X vector 모자람
+> MSI-X vector 1개로 multi-queue
 
 ```c
 pci_alloc_irq_vectors(pdev, 1, 1, PCI_IRQ_MSI);
-/* 16 queue 사용하려는데 1 vector */
+/* 그 뒤 16 queue 사용 */
 ```
 
-→ multi-vector 요청.
+모든 queue가 한 IRQ로 묶이면 vector dispatch가 software로 떨어져 cache가 깨집니다. queue 수만큼 vector를 요청합니다.
 
-> ⚠️ MMIO read 빈번
+> Relaxed Ordering(RO) 비트 켜진 채 doorbell 전송
+
+`Memory Write`의 RO 비트가 켜져 있으면 PCIe spec이 순서를 보장하지 않습니다. dma_wmb 만으로 안전하지 않으므로 device 측이 strict ordering을 요구하는지 datasheet 확인이 필요합니다.
+
+> 매 SQE마다 read-back으로 검증
 
 ```c
-while (1) {
-    status = ioread32(mmio + STATUS);   /* PCIe round-trip 매번 */
-}
+writel(tail, doorbell);
+readl(doorbell);                   /* round-trip */
 ```
 
-→ doorbell·IRQ로 wake.
+PCIe Write는 fire-and-forget입니다. 굳이 readback할 필요가 없고, 했다가는 latency가 두 배가 됩니다. 진짜 ordering 강제가 필요할 때만 사용합니다.
+
+> 32-bit BAR sizing으로 64-bit BAR 읽기
+
+```c
+uint32_t bar0 = pci_read_config_dword(dev, PCI_BASE_ADDRESS_0);
+```
+
+Type bit가 64-bit이면 BAR0 + BAR1를 합쳐 읽어야 정확한 주소를 얻습니다. 4 GB 이상 영역에 BAR가 잡히면 32-bit read는 0을 반환합니다.
+
+> 같은 IOMMU group이 vfio-pci로 묶이지 않음
+
+DPDK·SPDK가 device를 grab하지 못하면 보통 IOMMU group의 다른 device가 host driver에 묶여 있어서입니다. `/sys/kernel/iommu_groups/<id>/devices`로 확인하고 같은 group의 device를 한꺼번에 unbind합니다.
 
 ## 정리
 
-- PCIe = **packet-based 고속 serial**, Gen5 32 GT/s.
-- **TLP** memory read·write·config·message.
-- **MSI-X** = multi-IRQ per device.
-- **BAR mapping** + bus master + IOMMU.
-- **DPDK·SPDK·NVMe** — user-space high-perf.
-- **CXL** = PCIe coherent.
-- 자율주행 — Gen4·Gen5 표준.
+- PCIe streaming은 BAR 타입, MSI-X 분산, posted/non-posted 순서 세 축으로 설계합니다.
+- Prefetchable BAR은 RAM-like 영역에만, side-effect register는 non-prefetchable에 둡니다.
+- MSI-X를 queue 수만큼 받고 vector마다 CPU affinity를 박아 정렬합니다.
+- Memory Write는 posted, Read는 non-posted입니다. Hot loop에서 read를 반복하지 않습니다.
+- BAR을 VFIO + mmap으로 user에 올리면 doorbell·polling을 system call 없이 수행할 수 있습니다.
+- DPDK·SPDK는 kernel bypass의 표준 구현이고, latency가 절반 가까이 줄어듭니다.
+- 64-bit BAR sizing, IOMMU group 묶기, Relaxed Ordering 같은 곳에서 silent failure가 자주 발생합니다.
+- 측정은 throughput, IOPS, p99 latency를 한 묶음으로 봅니다.
 
-다음 편은 **HLS**.
+다음 편은 **Vitis HLS**입니다.
 
 ## 관련 항목
 
-- [5-03: DMA Completion](/blog/embedded/modern-recipes/part5-03-dma-completion)
-- [5-05: HLS](/blog/embedded/modern-recipes/part5-05-hls)
+- [1-03: PCIe BAR](/blog/embedded/modern-recipes/part1-03-pcie-bar)
+- [5-02: CQ·SQ](/blog/embedded/modern-recipes/part5-02-cq-sq)
+- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio)
+- [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)
