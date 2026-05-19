@@ -5,7 +5,7 @@ description: "post-build·post-image·post-fakeroot 세 hook의 정확한 차이
 series: "Buildroot Practical"
 seriesOrder: 15
 tags: [embedded, buildroot, post-build, post-image, genimage, fakeroot]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

@@ -5,7 +5,7 @@ description: "Buildroot가 U-Boot를 가져와 빌드·패키징하는 방식과
 series: "Buildroot Practical"
 seriesOrder: 13
 tags: [embedded, buildroot, u-boot, bootloader, fw-env]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

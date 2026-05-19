@@ -5,7 +5,7 @@ description: "Buildroot의 캐싱 계층 — dl/ source 캐시, ccache compile �
 series: "Buildroot Practical"
 seriesOrder: 14
 tags: [embedded, buildroot, ccache, caching, performance]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

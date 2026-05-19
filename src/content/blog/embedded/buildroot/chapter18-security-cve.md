@@ -5,7 +5,7 @@ description: "Buildroot의 CVE 추적·legal info 산출·SBOM·reproducible bui
 series: "Buildroot Practical"
 seriesOrder: 18
 tags: [embedded, buildroot, security, cve, sbom, reproducible-builds]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

@@ -5,7 +5,7 @@ description: "Buildroot에서 RAUC·swupdate·Mender를 통합해 A/B 부팅·at
 series: "Buildroot Practical"
 seriesOrder: 16
 tags: [embedded, buildroot, ota, rauc, swupdate, mender, ab-update]
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
