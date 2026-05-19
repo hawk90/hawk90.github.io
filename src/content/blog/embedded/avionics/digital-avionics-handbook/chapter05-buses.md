@@ -274,236 +274,190 @@ Modern — *Ethernet의 deterministic 변형*.
 
 ## AFDX Virtual Link (VL)
 
-```text
-Virtual Link (VL) 개념:
-  Logical unidirectional path
-  Source → multiple destinations
-  
-Parameters:
-  VL ID (16 bit)
-  BAG (Bandwidth Allocation Gap):
-    Min interval between frames
-    1, 2, 4, ..., 128 ms
-  Maximum Frame Size (MFS):
-    64 ~ 1518 bytes
-  
-Schedule:
-  Source — VL별 BAG·MFS 준수
-  Switch — VL별 enforce + policing
-  
-효과:
-  Bounded latency
-  Bounded jitter
-  No congestion (policed)
-  
-사용:
-  보통 수백~수천 VL
-  각 logical message type별
-```
+**Virtual Link (VL) 개념:**
+- Logical unidirectional path
+- Source → multiple destinations
+
+**Parameters:**
+- VL ID (16 bit)
+- BAG (Bandwidth Allocation Gap):
+  - Min interval between frames
+  - 1, 2, 4, ..., 128 ms
+- Maximum Frame Size (MFS):
+  - 64 ~ 1518 bytes
+
+**Schedule:**
+- Source — VL별 BAG·MFS 준수
+- Switch — VL별 enforce + policing
+
+**효과:**
+- Bounded latency
+- Bounded jitter
+- No congestion (policed)
+
+**사용:**
+- 보통 수백~수천 VL
+- 각 logical message type별
 
 VL — *deterministic Ethernet*. AFDX 핵심.
 
 ## AFDX Network — Dual Channel
 
-```text
 Topology:
 
+```text
 End System (ES1) → Switch A1 ── Switch A2 → ES2
-                                            
-End System (ES1) → Switch B1 ── Switch B2 → ES2
 
-각 frame — A·B 동시 송신
-Receiver — first valid frame 사용 (deduplication)
-한 channel fail → 다른 channel continue
-  
-인증:
-  DO-254 (HW), DO-178C (SW)
-  Switch + ES 인증 packet
-  
-Vendor:
-  Thales TSC-A380
-  Honeywell·BAE AFDX modules
-  TTTech AFDX
+End System (ES1) → Switch B1 ── Switch B2 → ES2
 ```
+
+각 frame — A·B 동시 송신. Receiver — first valid frame 사용 (deduplication). 한 channel fail → 다른 channel continue.
+
+**인증:**
+- DO-254 (HW), DO-178C (SW)
+- Switch + ES 인증 packet
+
+**Vendor:**
+- Thales TSC-A380
+- Honeywell·BAE AFDX modules
+- TTTech AFDX
 
 Dual redundancy — *기본 내장*. Fault tolerance.
 
 ## AFDX 사용
 
-```text
-Airbus A380·A350·A220:
-  AFDX 표준
-  ~수백 VL
-  100 Mbps 또는 1 Gbps
-  
-Boeing 787 Dreamliner:
-  CDN (Common Data Network) = AFDX 변형
-  
-Boeing 777X:
-  AFDX 도입 (777 classic은 ARINC-429 위주)
-  
-Embraer E2:
-  AFDX
-  
-Bombardier·Mitsubishi:
-  AFDX
-  
-LV·위성:
-  AFDX 도입 부분 (Ariane 6, Vulcan)
-  
-TTEthernet (Time-Triggered Ethernet):
-  AFDX의 확장 — TT scheduling
-  Orion·Ariane 6
-  IEEE 802.1AS (PTP) 기반
-```
+- **Airbus A380·A350·A220:** AFDX 표준. ~수백 VL. 100 Mbps 또는 1 Gbps.
+- **Boeing 787 Dreamliner:** CDN (Common Data Network) = AFDX 변형.
+- **Boeing 777X:** AFDX 도입 (777 classic은 ARINC-429 위주).
+- **Embraer E2:** AFDX.
+- **Bombardier·Mitsubishi:** AFDX.
+- **LV·위성:** AFDX 도입 부분 (Ariane 6, Vulcan).
+
+**TTEthernet (Time-Triggered Ethernet):**
+- AFDX의 확장 — TT scheduling
+- Orion·Ariane 6
+- IEEE 802.1AS (PTP) 기반
 
 AFDX — *현대 대형기 표준*. 우주로 확산.
 
 ## SpaceWire — 우주 전용
 
-```text
-SpaceWire (ECSS-E-ST-50-12C):
-  ESA·NASA·JAXA 공동 표준
-  우주선 (위성·심우주) 위주
-  
-물리층:
-  LVDS (Low-Voltage Differential Signaling)
-  4 wire (2 pair) — Data·Strobe each direction
-  2 ~ 400 Mbps
-  Cable up to 10 m
-  
-프로토콜:
-  Packet-based
-  Routing (path 또는 logical addressing)
-  Flow control
-  
-사용:
-  ESA missions
-  NASA New Horizons·MMS
-  ISS Columbus
-  KOMPSAT (일부)
-  KARI 위성 자체
-  
-인증:
-  ECSS standard
-  NASA NPR 7150.2
+**SpaceWire (ECSS-E-ST-50-12C):**
+- ESA·NASA·JAXA 공동 표준
+- 우주선 (위성·심우주) 위주
 
-장점:
-  높은 대역폭 (vs 1553)
-  Modular routing
-  
-단점:
-  Avionics standard라기보단 우주 특화
-  Aircraft 미사용
-```
+**물리층:**
+- LVDS (Low-Voltage Differential Signaling)
+- 4 wire (2 pair) — Data·Strobe each direction
+- 2 ~ 400 Mbps
+- Cable up to 10 m
+
+**프로토콜:**
+- Packet-based
+- Routing (path 또는 logical addressing)
+- Flow control
+
+**사용:**
+- ESA missions
+- NASA New Horizons·MMS
+- ISS Columbus
+- KOMPSAT (일부)
+- KARI 위성 자체
+
+**인증:**
+- ECSS standard
+- NASA NPR 7150.2
+
+**장점:**
+- 높은 대역폭 (vs 1553)
+- Modular routing
+
+**단점:**
+- Avionics standard라기보단 우주 특화
+- Aircraft 미사용
 
 SpaceWire — *위성·심우주의 1553*. 우주 전용.
 
 ## TTP·CAN·FlexRay — 자동차·산업
 
-```text
-TTP (Time-Triggered Protocol):
-  TTTech 개발
-  100 Mbps·1 Gbps
-  Deterministic
-  자동차·항공 일부
+**TTP (Time-Triggered Protocol):**
+- TTTech 개발
+- 100 Mbps·1 Gbps
+- Deterministic
+- 자동차·항공 일부
 
-CAN (Controller Area Network):
-  자동차 표준 (Bosch 1986)
-  1 Mbps
-  Aerospace — actuator·sensor 통신 일부
-  CANaerospace·ARINC-825 (CAN 변형)
+**CAN (Controller Area Network):**
+- 자동차 표준 (Bosch 1986)
+- 1 Mbps
+- Aerospace — actuator·sensor 통신 일부
+- CANaerospace·ARINC-825 (CAN 변형)
 
-FlexRay:
-  자동차 — 차세대 CAN
-  10 Mbps
-  Aerospace 일부
+**FlexRay:**
+- 자동차 — 차세대 CAN
+- 10 Mbps
+- Aerospace 일부
 
-Aerospace 사용:
-  ARINC-825 — CAN-based avionics standard
-  CANopen·CANaerospace
-  Small aircraft·UAV·LV subsystem
-```
+**Aerospace 사용:**
+- ARINC-825 — CAN-based avionics standard
+- CANopen·CANaerospace
+- Small aircraft·UAV·LV subsystem
 
 자동차 표준 — *avionics 도용*. Cost-effective.
 
 ## Bus 비교 표
 
-```text
-Standard      | Bandwidth | Topology       | Determinism | Use
-─────────────────────────────────────────────────────────────────
-MIL-STD-1553B | 1 Mbps   | Multidrop      | High        | Military
-ARINC-429    | 100 kbps  | P2P            | High        | Civil
-ARINC-664/   | 100Mbps~  | Switched Eth   | High (VL)   | Modern
-AFDX         | 1 Gbps    |                |             | civil
-SpaceWire    | 400 Mbps  | Point/Router   | High        | Space
-TTEthernet   | 1 Gbps    | Switched Eth   | High (TT)   | Space·new
-CAN/ARINC-825| 1 Mbps    | Bus            | Medium      | Smaller
-TTP          | 100 Mbps  | Bus            | High        | Auto·Aero
-```
+| Standard | Bandwidth | Topology | Determinism | Use |
+|----------|-----------|----------|-------------|-----|
+| MIL-STD-1553B | 1 Mbps | Multidrop | High | Military |
+| ARINC-429 | 100 kbps | P2P | High | Civil |
+| ARINC-664 / AFDX | 100 Mbps ~ 1 Gbps | Switched Eth | High (VL) | Modern civil |
+| SpaceWire | 400 Mbps | Point/Router | High | Space |
+| TTEthernet | 1 Gbps | Switched Eth | High (TT) | Space·new |
+| CAN/ARINC-825 | 1 Mbps | Bus | Medium | Smaller |
+| TTP | 100 Mbps | Bus | High | Auto·Aero |
 
 각 — *역사적 기원 + 현재 niche*.
 
 ## Avionics Bus Selection
 
-```text
-선택 기준:
+**선택 기준:**
 
-Bandwidth:
-  Voice·basic data → 1553·429
-  Camera·SAR·heavy data → AFDX·SpaceWire
-  
-Determinism:
-  All — deterministic
-  AFDX BAG 보장
-  
-Redundancy:
-  1553 — dual standard
-  AFDX — dual A·B
-  SpaceWire — programmable redundancy
-  
-Cost:
-  Cheapest — 429 (point-to-point)
-  Mid — 1553
-  Premium — AFDX·SpaceWire
-  
-Legacy:
-  Retrofit aircraft → 기존 bus 호환
-  New design → AFDX preferred
-  
-Certification:
-  All — DO-178C·DO-254 호환 evidence 존재
-  AFDX·SpaceWire — switch·router 추가 인증
-```
+**Bandwidth:**
+- Voice·basic data → 1553·429
+- Camera·SAR·heavy data → AFDX·SpaceWire
+
+**Determinism:**
+- All — deterministic
+- AFDX BAG 보장
+
+**Redundancy:**
+- 1553 — dual standard
+- AFDX — dual A·B
+- SpaceWire — programmable redundancy
+
+**Cost:**
+- Cheapest — 429 (point-to-point)
+- Mid — 1553
+- Premium — AFDX·SpaceWire
+
+**Legacy:**
+- Retrofit aircraft → 기존 bus 호환
+- New design → AFDX preferred
+
+**Certification:**
+- All — DO-178C·DO-254 호환 evidence 존재
+- AFDX·SpaceWire — switch·router 추가 인증
 
 선택 — *legacy + future + budget*.
 
 ## 한국 Avionics Bus
 
-```text
-KAI KF-21 보라매:
-  AFDX (mission system)
-  1553 (legacy weapons interface)
-  
-KAI FA-50:
-  1553 + ARINC-429
-  
-한화·LIG 미사일:
-  1553 + custom
-  Smaller — CAN
-  
-KARI KSLV-II:
-  1553-like + custom serial
-  SpaceWire 일부
-  
-KARI KOMPSAT·KPLO:
-  SpaceWire + 1553
-  ECSS·NASA 호환
-  
-인노스페이스·페리지:
-  Custom serial + Ethernet
-  AFDX-style 표준 도입 검토
-```
+- **KAI KF-21 보라매:** AFDX (mission system). 1553 (legacy weapons interface).
+- **KAI FA-50:** 1553 + ARINC-429.
+- **한화·LIG 미사일:** 1553 + custom. Smaller — CAN.
+- **KARI KSLV-II:** 1553-like + custom serial. SpaceWire 일부.
+- **KARI KOMPSAT·KPLO:** SpaceWire + 1553. ECSS·NASA 호환.
+- **인노스페이스·페리지:** Custom serial + Ethernet. AFDX-style 표준 도입 검토.
 
 한국 — *1553·AFDX·SpaceWire 모두 사용*. 자체 + commercial.
 
@@ -555,40 +509,25 @@ void rt_message_handler(uint8_t subaddr, uint8_t tx_rx,
 
 > ⚠️ AFDX without VL config
 
-```text
-"AFDX = Ethernet" → 일반 IP traffic
-→ BAG·MFS unspecified
-→ Determinism 깨짐
-```
+"AFDX = Ethernet"으로 보고 일반 IP traffic처럼 쓰면 BAG·MFS unspecified로 determinism이 깨진다.
 
 → VL 설계·configuration 우선.
 
 > ⚠️ 1553 schedule overrun
 
-```text
-Major frame 100% 채움 + jitter
-→ Overrun·deadline miss
-```
+Major frame을 100% 채우면 jitter 시 overrun·deadline miss가 난다.
 
 → 50% 슬랙 권장.
 
 > ⚠️ Redundant channel 한쪽만 검증
 
-```text
-"A channel test pass"
-→ B channel switch test 미실시
-→ Real fault 시 fail
-```
+"A channel test pass"만으로 끝내고 B channel switch test를 안 하면 real fault에서 fail한다.
 
 → Cross-over test 필수.
 
 > ⚠️ Bus integration 늦음
 
-```text
-"Subsystem 개발 후 integration 시작"
-→ Bus traffic·scheduling 충돌
-→ Last-minute rework
-```
+"Subsystem 개발 후 integration 시작"하면 bus traffic·scheduling 충돌로 last-minute rework가 생긴다.
 
 → Early bus design + budget.
 

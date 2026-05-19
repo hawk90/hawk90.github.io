@@ -14,188 +14,182 @@ draft: true
 
 ## DO-178C Verification 3축
 
-```text
-Review (정적, 사람·문서 중심):
-  - HLR review
-  - LLR review
-  - Architecture review
-  - Code review
-  - Test cases·procedures review
-  - Test results review
-  
-Analysis (도구·수학적):
-  - Static code analysis (MISRA·CERT)
-  - Control flow analysis
-  - Data flow analysis
-  - Timing analysis (WCET)
-  - Stack analysis
-  - Coverage analysis (Ch 8)
-  
-Test (실행 기반):
-  - Requirements-based test (HLR·LLR)
-  - Robustness test
-  - Hardware·Software integration test
-  - System test
-  - Stress test
-```
+**Review** (정적, 사람·문서 중심):
+
+- HLR review
+- LLR review
+- Architecture review
+- Code review
+- Test cases·procedures review
+- Test results review
+
+**Analysis** (도구·수학적):
+
+- Static code analysis (MISRA·CERT)
+- Control flow analysis
+- Data flow analysis
+- Timing analysis (WCET)
+- Stack analysis
+- Coverage analysis (Ch 8)
+
+**Test** (실행 기반):
+
+- Requirements-based test (HLR·LLR)
+- Robustness test
+- Hardware·Software integration test
+- System test
+- Stress test
 
 DO-178C Annex A — *71 objectives*. Verification이 *최대 비중*.
 
 ## Review — Process Detail
 
-```text
-Review checklist 예 (HLR):
-  [ ] 명확성 (clarity)
-  [ ] 검증 가능 (verifiability)
-  [ ] 일관성 (consistency)
-  [ ] 완전성 (completeness)
-  [ ] 수정 가능 (modifiability)
-  [ ] 추적 가능 (traceability)
-  [ ] System requirement에 trace
-  
-Review meeting:
-  Author + reviewer 2+ + QA + 가끔 customer
-  Comment 분류:
-    - Defect (수정 필요)
-    - Suggestion (선택)
-    - Question (clarification)
-  
-Resolution:
-  Comment별 author 응답
-  Re-review 후 close
-```
+**Review checklist 예 (HLR)**:
+
+- [ ] 명확성 (clarity)
+- [ ] 검증 가능 (verifiability)
+- [ ] 일관성 (consistency)
+- [ ] 완전성 (completeness)
+- [ ] 수정 가능 (modifiability)
+- [ ] 추적 가능 (traceability)
+- [ ] System requirement에 trace
+
+**Review meeting** — Author + reviewer 2+ + QA + 가끔 customer.
+
+Comment 분류:
+
+- **Defect** (수정 필요)
+- **Suggestion** (선택)
+- **Question** (clarification)
+
+**Resolution** — Comment별 author 응답. Re-review 후 close.
 
 Audit trail — *who·when·what comment·resolution*.
 
 ## Independence in Review
 
-```text
-DAL 별 independence 요구:
+**DAL 별 independence 요구**:
 
-Level A: HLR·LLR·architecture·test 모두 independence 필요
-Level B: HLR·LLR·architecture independence 필요
-Level C: HLR·architecture independence 필요
-Level D: Independence 권장
+- **Level A** — HLR·LLR·architecture·test 모두 independence 필요
+- **Level B** — HLR·LLR·architecture independence 필요
+- **Level C** — HLR·architecture independence 필요
+- **Level D** — Independence 권장
 
-Independence = "검증자 ≠ 개발자"
-  같은 회사 가능
-  다른 팀 권장
-  IV&V (Independent Verification & Validation) 별도 회사도 가능
-```
+**Independence** = "검증자 ≠ 개발자".
+
+- 같은 회사 가능
+- 다른 팀 권장
+- IV&V (Independent Verification & Validation) 별도 회사도 가능
 
 방위·우주 — *IV&V 회사 별도 계약* 흔함.
 
 ## Analysis — Control Flow
 
-```text
-Control flow analysis:
-  - Cyclomatic complexity (McCabe)
-  - Function·module별 path 수
-  - Unreachable code 검출
-  - Infinite loop 검출
-  
-도구:
-  - LDRA Testbed
-  - Polyspace
-  - Coverity
-  - QA·C/C++
-  - 자체 + clang
-  
-Output:
-  Function별 complexity score
-  Unreachable code 경고
-  Recommendation
-```
+**Control flow analysis**:
+
+- Cyclomatic complexity (McCabe)
+- Function·module별 path 수
+- Unreachable code 검출
+- Infinite loop 검출
+
+**도구**:
+
+- LDRA Testbed
+- Polyspace
+- Coverity
+- QA·C/C++
+- 자체 + clang
+
+**Output**:
+
+- Function별 complexity score
+- Unreachable code 경고
+- Recommendation
 
 Cyclomatic > 10 — *경고*. > 15 — *refactor*.
 
 ## Analysis — Data Flow
 
-```text
-Data flow analysis:
-  - Uninitialized variable read
-  - Unused variable·function
-  - Variable lifetime
-  - Race condition
-  - Use-after-free
-  
-도구:
-  - 위와 동일
-  - Polyspace (formal — abstract interpretation)
-  - Frama-C (C)
-  - SPARK (Ada)
-```
+**Data flow analysis**:
+
+- Uninitialized variable read
+- Unused variable·function
+- Variable lifetime
+- Race condition
+- Use-after-free
+
+**도구**:
+
+- 위와 동일
+- Polyspace (formal — abstract interpretation)
+- Frama-C (C)
+- SPARK (Ada)
 
 Race·use-after-free — *전형적 결함*. Catch 가능.
 
 ## Analysis — Timing·WCET
 
-```text
-WCET (Worst-Case Execution Time) analysis:
-  Static — 코드·아키텍처 기반 *수학적 상한*
-  Dynamic — measurement 기반 *통계*
-  
-도구:
-  - aiT (AbsInt) — static WCET (de facto)
-  - RapiTime — measurement
-  - Heap·stack analysis 별도
-  
-중요성:
-  Hard real-time deadline 보장
-  Interrupt latency 분석
-  Cache·pipeline 효과 고려
-  
-예:
-  Flight control loop period = 1 ms
-  → 모든 함수 WCET 합 < 1 ms 필수
-```
+**WCET (Worst-Case Execution Time) analysis**:
+
+- **Static** — 코드·아키텍처 기반 *수학적 상한*
+- **Dynamic** — measurement 기반 *통계*
+
+**도구**:
+
+- aiT (AbsInt) — static WCET (de facto)
+- RapiTime — measurement
+- Heap·stack analysis 별도
+
+**중요성**:
+
+- Hard real-time deadline 보장
+- Interrupt latency 분석
+- Cache·pipeline 효과 고려
+
+예 — Flight control loop period = 1 ms → 모든 함수 WCET 합 < 1 ms 필수.
 
 DO-178C Level A·B — *WCET evidence* 요구.
 
 ## Analysis — Stack
 
+**Stack analysis** — Static analyzer가 각 function 스택 사용량 계산. Call tree 따라 최대 누적.
+
+**Tools**:
+
+- GCC `-fstack-usage` (per-function)
+- 자체 script + linker map
+- AbsInt StackAnalyzer
+
+예시 call tree:
+
 ```text
-Stack analysis:
-  Static analyzer가 각 function 스택 사용량 계산
-  Call tree 따라 최대 누적
-  
-Tools:
-  - GCC -fstack-usage (per-function)
-  - 자체 script + linker map
-  - AbsInt StackAnalyzer
-  
-예:
-  Function       Stack    Cumulative
-  main           32       32
-   → init        128      160
-   → loop        16       
-    → control    256      304
-    → telemetry  64       
-  
-Max stack: 304 bytes
-Allocated:  1024 bytes  ← 충분
+Function       Stack    Cumulative
+main           32       32
+ → init        128      160
+ → loop        16       
+  → control    256      304
+  → telemetry  64       
 ```
+
+Max stack 304 bytes / Allocated 1024 bytes ← 충분.
 
 Stack overflow — *flight 중 catastrophic*. WCET와 함께 *증명 필수*.
 
 ## Test — Requirements-based
 
-```text
-HLR-based test (high-level requirement):
-  각 HLR마다 test case 1+
-  Black-box (interface 위주)
-  System·integration level
-  
-LLR-based test (low-level requirement):
-  각 LLR마다 test case 1+
-  White-box (internal 위주)
-  Unit·module level
-  
-DO-178C 핵심:
-  HLR이 *not just covered*
-  → 명시적 *test가 존재*해야
-  Coverage만으로 부족
-```
+**HLR-based test** (high-level requirement):
+
+- 각 HLR마다 test case 1+
+- Black-box (interface 위주)
+- System·integration level
+
+**LLR-based test** (low-level requirement):
+
+- 각 LLR마다 test case 1+
+- White-box (internal 위주)
+- Unit·module level
+
+**DO-178C 핵심** — HLR이 *not just covered* → 명시적 *test가 존재*해야. Coverage만으로 부족.
 
 각 *requirement → test case → test result* trace.
 
@@ -241,73 +235,63 @@ Verdict: PASS
 
 ## Test — Robustness
 
-```text
-Robustness test:
-  보통 input 외 *경계·invalid·overflow*
-  
-Examples:
-  - NaN·Inf input
-  - Negative time
-  - Out-of-range temperature
-  - Communication timeout
-  - Memory corruption
-  - Power glitch (HW + SW)
-  - Stack overflow
-  - Buffer overflow
-  
-DO-178C — *robustness test* per requirement 권장
-```
+**Robustness test** — 보통 input 외 *경계·invalid·overflow*.
+
+**Examples**:
+
+- NaN·Inf input
+- Negative time
+- Out-of-range temperature
+- Communication timeout
+- Memory corruption
+- Power glitch (HW + SW)
+- Stack overflow
+- Buffer overflow
+
+DO-178C — *robustness test* per requirement 권장.
 
 Robustness = *비정상 input에 graceful 대응*. Not crash.
 
 ## Test — Coverage
 
-```text
-Coverage 종류 (Ch 8 자세히):
+Coverage 종류 (Ch 8 자세히).
 
-Statement coverage (Level C+):
-  각 statement 1번 이상 실행
+- **Statement coverage (Level C+)** — 각 statement 1번 이상 실행.
+- **Decision coverage (Level B+)** — 각 if·while·for의 true·false 각각.
+- **MC/DC (Modified Condition/Decision Coverage, Level A)** — 각 condition이 *독립적으로 outcome 결정*.
 
-Decision coverage (Level B+):
-  각 if·while·for의 true·false 각각
+예 — `if (A && B) { ... }`:
 
-MC/DC (Modified Condition/Decision Coverage, Level A):
-  각 condition이 *독립적으로 outcome 결정*
-  
-예:
-  if (A && B) { ... }
-  → A=T,B=T (decision=T)
-  → A=F,B=T (decision=F, A가 결정)
-  → A=T,B=F (decision=F, B가 결정)
-  → 3 test 필요
-```
+- A=T, B=T (decision=T)
+- A=F, B=T (decision=F, A가 결정)
+- A=T, B=F (decision=F, B가 결정)
+- → 3 test 필요
 
 Coverage = *quality metric*. Plan에 *target 명시*.
 
 ## HW·SW Integration Test
 
-```text
-HW·SW Integration Test (HSIT):
-  Real HW + real SW
-  Final integration step
-  
-환경:
-  Actual FCC board
-  Real sensor·actuator (또는 simulator)
-  Real bus (1553·SpaceWire·UART)
-  
-Test:
-  Boot·initialization
-  Sensor read (정밀도·timing)
-  Actuator command
-  Communication
-  Error injection (sensor fail·comm loss)
-  
-Coverage:
-  HW·SW interface 100%
-  Init·shutdown
-  All operational modes
-```
+**HW·SW Integration Test (HSIT)** — Real HW + real SW. Final integration step.
+
+**환경**:
+
+- Actual FCC board
+- Real sensor·actuator (또는 simulator)
+- Real bus (1553·SpaceWire·UART)
+
+**Test**:
+
+- Boot·initialization
+- Sensor read (정밀도·timing)
+- Actuator command
+- Communication
+- Error injection (sensor fail·comm loss)
+
+**Coverage**:
+
+- HW·SW interface 100%
+- Init·shutdown
+- All operational modes
 
 소프트웨어만 아닌 *통합 시스템* test.
 

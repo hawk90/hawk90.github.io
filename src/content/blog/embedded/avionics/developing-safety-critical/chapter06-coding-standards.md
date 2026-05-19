@@ -409,40 +409,25 @@ Project SCS sample (요약).
 
 > ⚠️ MISRA "준수"라고만 명시, *어느 version* 미명시
 
-```text
-"MISRA C 준수" → audit 시 어느 version?
-→ MISRA C:2012 vs 2023 차이 있음
-```
+"MISRA C 준수" → audit 시 어느 version? MISRA C:2012 vs 2023 차이 있음.
 
 → Plan에 *명확한 version + amendment level*.
 
 > ⚠️ Static analyzer만 신뢰
 
-```text
-Polyspace pass → "안전하다"
-→ 분석 한계 (path explosion·undefined call)
-→ Algorithmic 결함 catch 불가
-```
+Polyspace pass → "안전하다" → 분석 한계 (path explosion·undefined call) → Algorithmic 결함 catch 불가.
 
 → Static analysis + *manual review + test*.
 
 > ⚠️ Tool deviation report 미관리
 
-```text
-Static analyzer가 false positive 100건
-→ "모두 무시"
-→ 진짜 violation 묻힘
-```
+Static analyzer가 false positive 100건 → "모두 무시" → 진짜 violation 묻힘.
 
 → Each deviation — *review·document·justify*.
 
 > ⚠️ C++ subset 무리 적용
 
-```text
-C++03 subset → C++17 코드와 혼재
-→ Compile fail
-→ Subset rule 모순
-```
+C++03 subset → C++17 코드와 혼재 → Compile fail → Subset rule 모순.
 
 → *Single language version*.
 
