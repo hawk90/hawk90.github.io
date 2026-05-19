@@ -59,6 +59,10 @@ void schedule(int core) {
 
 단점은 *부하가 자동으로 맞춰지지 않는다*는 것입니다. core 0의 list에 task 10개가 쌓이고 core 1이 idle이어도, *명시적 load balancing이 없으면* core 1은 계속 놀게 됩니다. periodic balance나 work stealing 같은 추가 메커니즘이 필요합니다.
 
+두 구조를 나란히 놓고 보면 trade-off가 분명해집니다. Global은 하나의 lock 위에 코어가 모이고, Per-Core는 코어마다 자기 list를 만지지만 migration이 별도로 필요합니다.
+
+![SMP global vs per-core ready list](/images/blog/rtos/diagrams/part4-07-smp-ready-lists.svg)
+
 ### 어느 쪽을 고를까
 
 | 항목 | Global | Per-Core |

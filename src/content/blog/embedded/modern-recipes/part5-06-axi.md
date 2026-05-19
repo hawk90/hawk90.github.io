@@ -32,6 +32,8 @@ AXI-Stream     address 없음, valid/ready/last/keep/user
 
 AXI4 full의 5 channel은 모두 *VALID·READY handshake*로 움직입니다.
 
+![AXI4 5 channel — master와 slave 사이의 read/write 분리](/images/blog/modern-recipes/diagrams/part5-06-axi-channels.svg)
+
 ```text
 AR  Address Read      master → slave
 R   Read Data         slave → master   (+ RLAST)

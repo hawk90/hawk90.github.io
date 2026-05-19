@@ -1,6 +1,6 @@
 ---
 title: "3-05: Priority Inheritance 구현 — Inherit·Disinherit·Chain"
-date: 2026-05-13T02:00:00
+date: 2026-05-08T02:00:00
 description: "FreeRTOS PI 코드 분석 — vTaskPriorityInherit, vTaskPriorityDisinherit, chain handling."
 series: "Practical RTOS Internals"
 seriesOrder: 26
@@ -81,6 +81,10 @@ BaseType_t xTaskPriorityDisinherit(TaskHandle_t pxMutexHolder) {
 ```
 
 Mutex give 시 호출. **모든 mutex 해제된 후에만 priority 복원** — 여러 mutex 보유 시 단계적 복원.
+
+시간축 위에서 보면 boost의 의미가 분명해집니다. High가 mutex M을 기다리는 순간 Low의 priority가 일시적으로 High level까지 올라가, Mid가 그 사이를 끼어들지 못합니다.
+
+![Priority inheritance timeline](/images/blog/rtos/diagrams/part3-05-priority-inheritance.svg)
 
 ## Multi-Mutex 시나리오
 

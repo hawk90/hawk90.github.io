@@ -1,6 +1,6 @@
 ---
 title: "1-07: Semaphore 개념 — Counting, Binary, P/V 연산"
-date: 2026-05-12T07:00:00
+date: 2026-05-08T07:00:00
 description: "Dijkstra의 P/V (1965). Counting (N 자원) vs Binary (신호). ISR → task 신호의 표준 도구."
 series: "Practical RTOS Internals"
 seriesOrder: 7

@@ -1,6 +1,6 @@
 ---
 title: "1-03: 측정의 기본 — Wall-Clock, CPU Cycle, Instruction Count"
-date: 2026-05-12T03:00:00
+date: 2026-05-08T03:00:00
 description: "어떻게 측정하나. DWT, PMU, clock_gettime, GPIO + 로직 분석기. Overhead 줄이기."
 series: "Embedded Performance Engineering"
 seriesOrder: 3

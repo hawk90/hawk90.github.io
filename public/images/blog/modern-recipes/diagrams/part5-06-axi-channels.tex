@@ -1,0 +1,58 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  side/.style={cls, minimum width=32mm, minimum height=66mm, align=center, font=\sffamily\bfseries\small},
+  mst/.style={side, draw=absbord, fill=absfill},
+  slv/.style={side, draw=impbord, fill=impfill},
+  chan/.style={font=\sffamily\bfseries\small}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (7, 7.2) {AXI4 5-Channel — Master $\leftrightarrow$ Slave};
+
+% Two sides
+\node[mst] (m) at (0, 3.2) {Master \\[3pt] (CPU / DMA)};
+\node[slv] (s) at (14, 3.2) {Slave \\[3pt] (DDR / Periph)};
+
+% 5 channels (top to bottom)
+% AR — master to slave (read addr)
+\node[chan, text=hibord] at (7, 6.1) {AR — Read Address};
+\draw[flow, draw=hibord] (m.east |- 0, 5.8) -- (s.west |- 0, 5.8);
+
+% R — slave to master (read data)
+\node[chan, text=hibord] at (7, 5.3) {R — Read Data (+ RLAST)};
+\draw[flow, draw=hibord] (s.west |- 0, 5.0) -- (m.east |- 0, 5.0);
+
+% AW — master to slave (write addr)
+\node[chan, text=conbord] at (7, 4.0) {AW — Write Address};
+\draw[flow, draw=conbord] (m.east |- 0, 3.7) -- (s.west |- 0, 3.7);
+
+% W — master to slave (write data)
+\node[chan, text=conbord] at (7, 3.2) {W — Write Data (+ WLAST)};
+\draw[flow, draw=conbord] (m.east |- 0, 2.9) -- (s.west |- 0, 2.9);
+
+% B — slave to master (write response)
+\node[chan, text=prpbord] at (7, 2.0) {B — Write Response};
+\draw[flow, draw=prpbord] (s.west |- 0, 1.7) -- (m.east |- 0, 1.7);
+
+% Bottom: handshake annotation
+\node[font=\sffamily\footnotesize, text=mutec, anchor=center, text width=10cm, align=center]
+  at (7, 0.6) {모든 channel = VALID / READY handshake \\[2pt] (transmitter VALID = 1, receiver READY = 1일 때 한 beat 전송)};
+
+% Legend on side
+\node[font=\sffamily\footnotesize, text=hibord, anchor=west]   at (0, -0.4) {— Read 그룹: AR, R};
+\node[font=\sffamily\footnotesize, text=conbord, anchor=west]  at (5, -0.4) {— Write 그룹: AW, W};
+\node[font=\sffamily\footnotesize, text=prpbord, anchor=west]  at (10, -0.4) {— Response: B};
+
+% Bottom focus
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=14cm]
+  at (0, -1.3) {Read / Write가 독립 channel — outstanding transaction과 out-of-order completion 가능};
+
+\end{tikzpicture}
+\end{document}

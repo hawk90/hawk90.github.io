@@ -1,6 +1,6 @@
 ---
 title: "2-05: Cache 기초 — L1·L2·L3·Set Associative·Replacement Policy"
-date: 2026-05-13T12:00:00
+date: 2026-05-08T12:00:00
 description: "Cache hierarchy. Direct mapped vs N-way set associative. LRU·PLRU·Random."
 series: "Embedded Performance Engineering"
 seriesOrder: 13
@@ -22,7 +22,9 @@ draft: true
 | **L3 Cache** (있다면) | 30-50 cycle | 4-8MB | SoC 공유 |
 | **DRAM** | 100-300 cycle | GB | external |
 
-매 단계 *10배 느려짐, 10배 커짐*.
+매 단계 *10배 느려짐, 10배 커짐*. 그림으로 보면 hierarchy의 폭과 latency가 한눈에 들어옵니다.
+
+![L1/L2/L3/DRAM 메모리 hierarchy — 단계마다 약 10배 커지고 10배 느려진다](/images/blog/perf-eng/diagrams/part2-05-cache-hierarchy.svg)
 
 ## L1 — Split I/D (Harvard)
 

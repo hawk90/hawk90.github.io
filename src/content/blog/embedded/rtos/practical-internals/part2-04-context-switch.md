@@ -1,6 +1,6 @@
 ---
 title: "2-04: Context Switch 원리 — 레지스터 저장·복원·Stack Frame"
-date: 2026-05-12T14:00:00
+date: 2026-05-08T14:00:00
 description: "Context switch는 결국 CPU의 모든 가시 상태를 task 스택에 통째로 복제하는 일입니다. 어디서 발생하고, 무엇을 저장하고, 비용은 얼마인지 아키텍처 중립적으로 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 14

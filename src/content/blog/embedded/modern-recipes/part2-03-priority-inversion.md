@@ -14,6 +14,10 @@ draft: true
 
 ## 시나리오
 
+세 task가 시간축에서 어떻게 얽히는지 timeline으로 보면 한눈에 들어옵니다.
+
+![Priority inversion timeline — High이 Low의 mutex를 기다리는 동안 Medium에 차단됨](/images/blog/modern-recipes/diagrams/part2-03-priority-inversion.svg)
+
 ```text
 Task H (high) — periodic, 10 ms deadline
 Task M (medium) — 일반 작업

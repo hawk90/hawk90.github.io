@@ -69,6 +69,10 @@ OpenAMP 3 layer:
   3. application    RPMsg endpoint를 통한 통신
 ```
 
+전체 topology를 한 장으로 보면 이렇습니다. 두 코어가 각자의 libmetal HAL 위에 RPMsg/virtio를 올리고, 공유 DDR의 vring과 buffer pool을 매개로 메시지를 주고받습니다. mailbox IRQ가 상대 코어를 깨우는 신호입니다.
+
+![OpenAMP heterogeneous SoC topology](/images/blog/rtos/diagrams/part4-12-openamp-topology.svg)
+
 `libmetal`이 *플랫폼 추상화*입니다. 같은 OpenAMP 코드가 Linux 위에서도 FreeRTOS/Zephyr 위에서도 빌드되도록 *memory map, interrupt register, polling/blocking wait*를 추상화합니다.
 
 ```c

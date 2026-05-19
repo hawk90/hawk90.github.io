@@ -28,7 +28,9 @@ Cache coherence protocol은 이 문제를 hardware 차원에서 자동으로 해
 | S (Shared) | 여러 cache valid, clean | 가능 (S) | latest |
 | I (Invalid) | 무효 | — | — |
 
-각 cache line이 이 네 상태 중 하나를 가지며, read와 write에 따라 상태가 전이됩니다.
+각 cache line이 이 네 상태 중 하나를 가지며, read와 write에 따라 상태가 전이됩니다. 그림으로 보면 어떤 동작이 어떤 전이를 일으키는지 한눈에 보입니다.
+
+![MESI 상태 전이 — local read/write(초록)와 remote read/write(빨강)](/images/blog/perf-eng/diagrams/part4-09-mesi-states.svg)
 
 ## MESI 상태 전이
 

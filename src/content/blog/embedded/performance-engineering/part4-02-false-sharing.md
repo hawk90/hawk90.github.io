@@ -36,6 +36,10 @@ CPU 1: writes counter_b
 
 **아무 데이터도 실제 공유 안 됨 — 그러나 같은 line이라 coherence 동작.**
 
+그림으로 보면 두 코어가 *같은 line*을 두고 핑퐁하는 모습이 분명해집니다.
+
+![두 코어가 같은 cache line의 다른 변수에 접근할 때의 invalidate ping-pong](/images/blog/perf-eng/diagrams/part4-02-false-sharing.svg)
+
 ## MESI Protocol
 
 ```text

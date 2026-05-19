@@ -1,6 +1,6 @@
 ---
 title: "2-08: Memory Bandwidth — STREAM·Roofline·Bus Saturation"
-date: 2026-05-13T15:00:00
+date: 2026-05-08T15:00:00
 description: "STREAM benchmark (Copy·Scale·Add·Triad). Roofline. PMU BUS_ACCESS · DDR bandwidth."
 series: "Embedded Performance Engineering"
 seriesOrder: 16

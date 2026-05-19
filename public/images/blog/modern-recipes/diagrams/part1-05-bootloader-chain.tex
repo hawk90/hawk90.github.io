@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  stage/.style={cls, minimum width=26mm, minimum height=14mm, align=center, font=\sffamily\bfseries\small},
+  s1/.style={stage, draw=conbord, fill=confill},
+  s2/.style={stage, draw=clibord, fill=clifill},
+  s3/.style={stage, draw=hibord, fill=hifill},
+  s4/.style={stage, draw=prpbord, fill=prpfill},
+  s5/.style={stage, draw=impbord, fill=impfill},
+  meta/.style={font=\sffamily\scriptsize, text=mutec, align=center}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (7, 4.6) {Cortex-A Boot Chain — BootROM에서 init까지};
+
+% Five stages horizontally
+\node[s1] (rom)  at (0,    2) {BootROM};
+\node[s2] (spl)  at (3.5,  2) {SPL};
+\node[s3] (uboot) at (7,   2) {U-Boot};
+\node[s4] (krn)  at (10.5, 2) {Kernel};
+\node[s5] (init) at (14,   2) {init};
+
+% Size / location annotations under each stage
+\node[meta, below=2mm of rom]   {8--32 KB \\[2pt] mask ROM \\[2pt] internal SRAM};
+\node[meta, below=2mm of spl]   {$\sim$64 KB \\[2pt] SD/eMMC/NOR \\[2pt] SRAM 실행};
+\node[meta, below=2mm of uboot] {수 MB \\[2pt] eMMC/MMC \\[2pt] DDR 실행};
+\node[meta, below=2mm of krn]   {수십 MB \\[2pt] FIT image \\[2pt] DDR 실행};
+\node[meta, below=2mm of init]  {systemd \\[2pt] busybox \\[2pt] rootfs};
+
+% Role annotations above
+\node[font=\sffamily\footnotesize, text=conbord, above=2mm of rom]   {부트 매체 select};
+\node[font=\sffamily\footnotesize, text=clibord, above=2mm of spl]   {DDR 초기화};
+\node[font=\sffamily\footnotesize, text=hibord,  above=2mm of uboot] {Kernel/DTB 로드};
+\node[font=\sffamily\footnotesize, text=prpbord, above=2mm of krn]   {DTB 파싱, drivers};
+\node[font=\sffamily\footnotesize, text=impbord, above=2mm of init]  {응용 시작};
+
+% Arrows
+\draw[flow] (rom)   -- (spl);
+\draw[flow] (spl)   -- (uboot);
+\draw[flow] (uboot) -- (krn);
+\draw[flow] (krn)   -- (init);
+
+% Bottom note
+\node[font=\sffamily\footnotesize, text=focusc, anchor=west, text width=14cm]
+  at (0, -1.6) {각 stage는 *환경을 점진적으로 확장* — SRAM only $\to$ DDR available $\to$ filesystem mount $\to$ user space.};
+
+\end{tikzpicture}
+\end{document}

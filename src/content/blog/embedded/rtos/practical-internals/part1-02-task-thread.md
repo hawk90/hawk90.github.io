@@ -1,6 +1,6 @@
 ---
 title: "1-02: Task와 Thread 개념 — TCB, 상태 머신, 생명 주기"
-date: 2026-05-12T02:00:00
+date: 2026-05-08T02:00:00
 description: "Task = stack + TCB + 상태. 5상태 머신 (Running·Ready·Blocked·Suspended·Deleted)와 그 전이."
 series: "Practical RTOS Internals"
 seriesOrder: 2

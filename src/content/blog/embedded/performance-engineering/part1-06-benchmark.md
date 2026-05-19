@@ -1,6 +1,6 @@
 ---
 title: "1-06: 벤치마킹 기초 — 재현성, Warmup, 노이즈 제거"
-date: 2026-05-12T06:00:00
+date: 2026-05-08T06:00:00
 description: "신뢰할 수 있는 벤치마크 — warmup, isolation, multi-run. CoreMark·Dhrystone·SPEC."
 series: "Embedded Performance Engineering"
 seriesOrder: 6

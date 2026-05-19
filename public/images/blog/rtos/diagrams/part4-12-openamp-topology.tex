@@ -1,0 +1,85 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  subhdr/.style={font=\sffamily\bfseries\footnotesize, text=mutec, align=center},
+  core/.style={rectangle, rounded corners=3pt, draw=absbord, line width=0.5pt, fill=absfill, minimum width=40mm, minimum height=10mm, inner sep=3pt, font=\sffamily\bfseries\footnotesize, align=center},
+  swlayer/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=40mm, minimum height=7mm, inner sep=2pt, font=\sffamily\footnotesize, align=center, fill=white},
+  oalayer/.style={swlayer, draw=impbord, fill=impfill},
+  applayer/.style={swlayer, draw=conbord, fill=confill},
+  vring/.style={rectangle, rounded corners=2pt, draw=hibord, line width=0.5pt, fill=hifill, minimum width=36mm, minimum height=7mm, inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  mbox/.style={rectangle, draw=warnbord, line width=0.5pt, fill=warnfill, minimum width=24mm, minimum height=8mm, inner sep=2pt, font=\sffamily\footnotesize\bfseries, text=warnbord, align=center}
+]
+
+% ===== Title =====
+\node[hdr] at (0, 9.0) {OpenAMP — Heterogeneous SoC IPC};
+
+% ============================================================
+% LEFT: Cortex-A side (Linux)
+% ============================================================
+\node[hdr, text=inkc] at (-6.5, 8.0) {Cortex-A (Linux)};
+
+\node[applayer] (lapp) at (-6.5, 6.8) {User App / \texttt{/dev/rpmsg0}};
+\node[oalayer, below=2mm of lapp] (lrp) {RPMsg};
+\node[oalayer, below=2mm of lrp] (lvirt) {remoteproc + virtio};
+\node[oalayer, below=2mm of lvirt] (lhal) {libmetal HAL};
+\node[core, below=3mm of lhal] (acore) {Cortex-A53};
+
+% ============================================================
+% RIGHT: Cortex-M side (RTOS)
+% ============================================================
+\node[hdr, text=inkc] at (6.5, 8.0) {Cortex-M (RTOS)};
+
+\node[applayer] (mapp) at (6.5, 6.8) {RTOS Task (sensor)};
+\node[oalayer, below=2mm of mapp] (mrp) {RPMsg};
+\node[oalayer, below=2mm of mrp] (mvirt) {open-amp virtio};
+\node[oalayer, below=2mm of mvirt] (mhal) {libmetal HAL};
+\node[core, below=3mm of mhal] (mcore) {Cortex-M7};
+
+% ============================================================
+% CENTER: Shared resources
+% ============================================================
+\node[subhdr, align=center] at (0, 7.6) {Shared DDR \\[2pt] \footnotesize (reserved-memory, non-cacheable)};
+
+% vring TX (A->M)
+\node[vring] (vtx) at (0, 6.2) {vring TX (A$\to$M)};
+\node[vring, below=3mm of vtx] (vrx) {vring RX (M$\to$A)};
+\node[vring, below=3mm of vrx, draw=tealbord, fill=tealfill] (bpool) {buffer pool};
+
+% Mailbox
+\node[mbox] (mbA) at (0, 2.0) {Mailbox / MU};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at (mbA.south) {(IRQ both ways)};
+
+% ============================================================
+% Connections — straight horizontal
+% ============================================================
+% Linux virtio <-> vring TX
+\draw[arr, draw=hibord] (lvirt.east) -- (vtx.west |- lvirt.east);
+% Linux virtio <-> vring RX
+\draw[arr, draw=hibord] (lvirt.east) -- (vrx.west |- lvirt.east);
+
+% Mcore virtio <-> vring TX
+\draw[arr, draw=hibord] (mvirt.west) -- (vtx.east |- mvirt.west);
+\draw[arr, draw=hibord] (mvirt.west) -- (vrx.east |- mvirt.west);
+
+% Mailbox IRQ both ways — from libmetal hal
+\draw[focus, line width=0.7pt, <->] (lhal.east) -- (mbA.west |- lhal.east)
+  node[midway, above, font=\sffamily\scriptsize, text=focusc] {IRQ};
+\draw[focus, line width=0.7pt, <->] (mhal.west) -- (mbA.east |- mhal.west);
+
+% ============================================================
+% Bottom caption
+% ============================================================
+\node[caption, text width=17cm, anchor=north, align=center] at (0, 0.2) {
+  Linux remoteproc가 M-core firmware load $\to$ 양쪽 OpenAMP가 같은 vring과 buffer pool을 매핑.\\[3pt]
+  RPMsg endpoint로 메시지 송수신. mailbox로 상대 코어 깨움.
+};
+
+\end{tikzpicture}
+\end{document}

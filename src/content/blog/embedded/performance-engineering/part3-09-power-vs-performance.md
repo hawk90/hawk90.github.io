@@ -1,6 +1,6 @@
 ---
 title: "3-09: Power vs Performance — DVFS·Race-to-Idle·Big.LITTLE"
-date: 2026-05-19T08:00:00
+date: 2026-05-08T08:00:00
 description: "DVFS governor, race-to-idle, big.LITTLE, CPU 코어 hotplug, 측정·tuning."
 series: "Embedded Performance Engineering"
 seriesOrder: 27

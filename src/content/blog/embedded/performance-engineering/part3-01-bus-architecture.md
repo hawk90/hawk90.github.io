@@ -1,6 +1,6 @@
 ---
 title: "3-01: Bus Architecture — AHB·AXI·CHI 진화와 5-Channel"
-date: 2026-05-19T00:00:00
+date: 2026-05-08T00:00:00
 description: "ARM AMBA — AHB·APB·AXI·ACE·CHI. AXI 5 channel, burst, outstanding transaction."
 series: "Embedded Performance Engineering"
 seriesOrder: 19
@@ -23,6 +23,10 @@ draft: true
 | **CHI** (Coherent Hub Interface) | 2014 | Mesh, scalable | server-class SoC |
 
 ARM Cortex-M = *AHB-Lite + APB*. Cortex-A = *AXI + CCI/CCN/CMN(CHI)*.
+
+두 세대를 한 장의 그림으로 비교하면 master/slave 연결 구조의 차이가 잘 드러납니다.
+
+![AHB-Lite + APB(Cortex-M)와 AXI Interconnect(Cortex-A) 비교](/images/blog/perf-eng/diagrams/part3-01-bus-architecture.svg)
 
 ## AXI 5 채널
 

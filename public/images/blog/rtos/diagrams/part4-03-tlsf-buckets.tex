@@ -1,0 +1,105 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc},
+  subhdr/.style={font=\sffamily\bfseries\footnotesize, text=mutec},
+  bitcell/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=6.5mm, minimum height=6mm, inner sep=0pt, font=\sffamily\footnotesize, fill=white, align=center},
+  bitset/.style={bitcell, fill=hifill, draw=hibord, font=\sffamily\bfseries\footnotesize},
+  flhdr/.style={rectangle, draw=absbord, line width=0.4pt, fill=absfill, minimum width=20mm, minimum height=6mm, inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  flhi/.style={flhdr, draw=hibord, fill=hifill, font=\sffamily\bfseries\footnotesize},
+  block/.style={rectangle, draw=impbord, line width=0.45pt, fill=impfill, minimum width=14mm, minimum height=6mm, inner sep=2pt, font=\sffamily\scriptsize, align=center}
+]
+
+% ===== Title =====
+\node[hdr] at (0, 6.6) {TLSF — Two-Level Segregated Fit};
+
+% ===== FL bitmap row =====
+\node[subhdr, anchor=east] at (-3.3, 5.4) {\texttt{fl\_bitmap} (32-bit)};
+
+\foreach \i [count=\xi from 0] in {31,...,0} {
+  \ifnum\i=6
+    \node[bitset] (fl\i) at ({-3.0 + \xi*0.4}, 5.4) {1};
+  \else
+    \ifnum\i=8
+      \node[bitset] (fl\i) at ({-3.0 + \xi*0.4}, 5.4) {1};
+    \else
+      \node[bitcell, minimum width=4mm] (fl\i) at ({-3.0 + \xi*0.4}, 5.4) {};
+    \fi
+  \fi
+}
+\node[font=\sffamily\scriptsize, text=mutec] at (fl31.south) [below=1pt] {bit 31};
+\node[font=\sffamily\scriptsize, text=hibord] at (fl8.south) [below=1pt] {\textbf{8}};
+\node[font=\sffamily\scriptsize, text=hibord] at (fl6.south) [below=1pt] {\textbf{6}};
+\node[font=\sffamily\scriptsize, text=mutec] at (fl0.south) [below=1pt] {0};
+
+% ===== FL buckets (first level) =====
+\node[subhdr, anchor=east] at (-3.6, 3.6) {First Level};
+\node[flhdr] (b4) at (-2.4, 3.6) {FL[4]: 16-31};
+\node[flhdr] (b5) at (-0.4, 3.6) {FL[5]: 32-63};
+\node[flhi]  (b6) at (1.6, 3.6) {FL[6]: 64-127};
+\node[flhdr] (b7) at (3.6, 3.6) {FL[7]: 128-255};
+\node[flhi]  (b8) at (5.6, 3.6) {FL[8]: 256-511};
+
+% Arrows from fl bitmap bits to set bucket headers
+\draw[arr, draw=hibord, line width=0.4pt] (fl6.south) to[out=-90,in=90] (b6.north);
+\draw[arr, draw=hibord, line width=0.4pt] (fl8.south) to[out=-90,in=90] (b8.north);
+
+% ===== SL bitmap for FL[6] (expanded) =====
+\node[subhdr, anchor=east] at (-2.4, 1.8) {\texttt{sl\_bitmap[6]}};
+
+\foreach \i [count=\xi from 0] in {15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0} {
+  \ifnum\i=2
+    \node[bitset] (sl\i) at ({-2.0 + \xi*0.45}, 1.8) {1};
+  \else
+    \ifnum\i=10
+      \node[bitset] (sl\i) at ({-2.0 + \xi*0.45}, 1.8) {1};
+    \else
+      \node[bitcell, minimum width=4.5mm] (sl\i) at ({-2.0 + \xi*0.45}, 1.8) {};
+    \fi
+  \fi
+}
+\node[font=\sffamily\scriptsize, text=mutec] at (sl15.south) [below=1pt] {15};
+\node[font=\sffamily\scriptsize, text=hibord] at (sl10.south) [below=1pt] {\textbf{10}};
+\node[font=\sffamily\scriptsize, text=hibord] at (sl2.south) [below=1pt] {\textbf{2}};
+\node[font=\sffamily\scriptsize, text=mutec] at (sl0.south) [below=1pt] {0};
+
+% Connect FL[6] to its SL bitmap
+\draw[arr, dashed, draw=hibord, line width=0.4pt] (b6.south) to[out=-90,in=90] ($(sl8.north)+(-0.3, 0)$);
+
+% Range annotation
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (5.5, 1.8) {SL[0]: 64-67 \dots\ SL[15]: 124-127};
+
+% ===== Free list heads for SL[2] and SL[10] =====
+\node[subhdr, anchor=east] at (-2.4, 0.0) {\texttt{blocks[6][SL]}};
+
+% SL[2] free list: head -> block1 -> block2 -> NULL
+\node[flhi, minimum width=14mm, minimum height=6mm] (h2) at (-1.0, 0.0) {SL[2] head};
+\node[block, right=4mm of h2] (bk1) {72 B};
+\node[block, right=3mm of bk1] (bk2) {72 B};
+\draw[arr] (h2.east) -- (bk1.west);
+\draw[arr] (bk1.east) -- (bk2.west);
+\draw[arr] (bk2.east) -- ++(0.4, 0) node[right, font=\sffamily\scriptsize, text=mutec] {NULL};
+
+% SL[10] free list
+\node[flhi, minimum width=14mm, minimum height=6mm] (h10) at (-1.0, -1.4) {SL[10] head};
+\node[block, right=4mm of h10] (bk3) {104 B};
+\draw[arr] (h10.east) -- (bk3.west);
+\draw[arr] (bk3.east) -- ++(0.4, 0) node[right, font=\sffamily\scriptsize, text=mutec] {NULL};
+
+% Connect SL bits to heads
+\draw[arr, draw=hibord, line width=0.4pt] (sl2.south) to[out=-90,in=90] ($(h2.north)+(0,0)$);
+\draw[arr, draw=hibord, line width=0.4pt] (sl10.south) to[out=-90,in=180] ($(h10.west)+(-0.1, 0)$);
+
+% ===== Caption =====
+\node[caption, text width=14cm, anchor=north] at (1.5, -2.6) {
+  \texttt{malloc(80)} $\to$ FL=6, SL=4. \texttt{sl\_bitmap[6] \& (\textasciitilde 0 << 4)}로 SL=10 발견 $\to$ \texttt{blocks[6][10]} 머리 pop. 모두 CLZ/CTZ로 O(1).
+};
+
+\end{tikzpicture}
+\end{document}

@@ -1,6 +1,6 @@
 ---
 title: "3-09: ISR-Safe API — FromISR 패턴·Higher Priority Wake·Deferred Work"
-date: 2026-05-13T06:00:00
+date: 2026-05-08T06:00:00
 description: "*FromISR API 내부 — pxHigherPriorityTaskWoken·yield 결정·deferred work pattern."
 series: "Practical RTOS Internals"
 seriesOrder: 30

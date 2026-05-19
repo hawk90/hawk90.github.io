@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  stage/.style={cls, minimum width=30mm, minimum height=18mm, align=center, font=\sffamily\bfseries\small},
+  cam/.style={stage, draw=conbord, fill=confill},
+  buf/.style={stage, draw=clibord, fill=clifill},
+  gpu/.style={stage, draw=prpbord, fill=prpfill},
+  disp/.style={stage, draw=impbord, fill=impfill},
+  fd/.style={font=\sffamily\bfseries\footnotesize, text=hibord}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (7, 6.0) {Zero-Copy Camera Pipeline — DMA-BUF로 묶인 한 physical page};
+
+% Four stages
+\node[cam]  (c)  at (0,    3) {Camera \\[2pt] (ISP)};
+\node[buf]  (v)  at (4.5,  3) {V4L2 buffer \\[2pt] (DMA-BUF)};
+\node[gpu]  (g)  at (9.0,  3) {GPU / NPU \\[2pt] (EGL/CUDA)};
+\node[disp] (d)  at (13.5, 3) {Display \\[2pt] (DRM/KMS)};
+
+% Flow arrows
+\draw[flow] (c) -- node[midway, above, font=\sffamily\footnotesize, text=conbord] {capture} (v);
+\draw[flow] (v) -- node[midway, above, font=\sffamily\footnotesize, text=prpbord] {import} (g);
+\draw[flow] (g) -- node[midway, above, font=\sffamily\footnotesize, text=impbord] {scanout} (d);
+
+% Shared physical page — represented as a long horizontal bar BELOW all stages
+\node[cls, minimum width=130mm, minimum height=10mm,
+      draw=hibord, fill=hifill, font=\sffamily\bfseries\small]
+  (page) at (6.75, 0.6) {Shared physical page (한 frame)};
+
+% fd connections from each stage to page
+\draw[uses, draw=hibord, line width=0.6pt, dashed] (v.south) -- node[midway, right, fd] {fd} (v.south |- page.north);
+\draw[uses, draw=hibord, line width=0.6pt, dashed] (g.south) -- node[midway, right, fd] {fd} (g.south |- page.north);
+\draw[uses, draw=hibord, line width=0.6pt, dashed] (d.south) -- node[midway, right, fd] {fd} (d.south |- page.north);
+\draw[uses, draw=hibord, line width=0.6pt, dashed] (c.south) -- node[midway, right, fd] {fd} (c.south |- page.north);
+
+% Roles below stages
+\node[font=\sffamily\footnotesize, text=conbord] at (0,    4.4) {VIDIOC\_EXPBUF};
+\node[font=\sffamily\footnotesize, text=prpbord] at (9.0,  4.4) {cudaImport...};
+\node[font=\sffamily\footnotesize, text=impbord] at (13.5, 4.4) {drmModeAddFB2};
+\node[font=\sffamily\footnotesize, text=clibord] at (4.5,  4.4) {fd 발급};
+
+% Bottom note
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=14cm]
+  at (-0.5, -1.2) {fd 하나로 모든 driver가 같은 physical page를 share — copy 0회, refcount는 kernel이 관리};
+
+\end{tikzpicture}
+\end{document}

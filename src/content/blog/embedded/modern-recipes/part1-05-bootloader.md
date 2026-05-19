@@ -1,6 +1,6 @@
 ---
 title: "1-05: Bootloader 체인 — BootROM·SPL·U-Boot·Kernel·Secure Boot"
-date: 2026-05-13T22:00:00
+date: 2026-05-07T22:00:00
 description: "Cortex-A 부팅 단계. BootROM → SPL → U-Boot → Linux. Secure boot, FIT image, A/B."
 series: "Modern Embedded Recipes"
 seriesOrder: 5
@@ -13,6 +13,12 @@ draft: true
 > **"부팅 = 점진적 환경 확장"** — 작은 ROM에서 출발해 전체 OS로.
 
 ## 일반 ARM Cortex-A 부팅 단계
+
+부트 체인을 그림으로 보면 다음과 같습니다.
+
+![Bootloader chain — BootROM에서 init까지](/images/blog/modern-recipes/diagrams/part1-05-bootloader-chain.svg)
+
+각 stage가 어떤 환경에서 무엇을 하는지 단계별로 정리합니다.
 
 ```text
 1. BootROM (chip 내장, mask ROM)

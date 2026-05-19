@@ -1,6 +1,6 @@
 ---
 title: "1-03: PCIe BAR 매핑 — Config Space·Enumeration·MMIO 접근"
-date: 2026-05-13T20:00:00
+date: 2026-05-07T20:00:00
 description: "PCIe BAR (Base Address Register), enumeration, sizing, MMIO 매핑, ioremap."
 series: "Modern Embedded Recipes"
 seriesOrder: 3

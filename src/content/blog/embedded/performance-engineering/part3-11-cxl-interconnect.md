@@ -67,6 +67,10 @@ Type 2가 가장 흥미롭습니다. GPU가 자기 HBM도 가지고 있으면서
 
 Type 3는 데이터센터에서 *DRAM bottleneck 완화*에 쓰입니다. CPU 소켓의 DIMM slot 수가 모자랄 때 CXL.mem expander로 *수 TB*를 추가할 수 있습니다.
 
+세 타입의 topology와 어떤 프로토콜이 어디로 흐르는지 한 그림으로 정리하면 다음과 같습니다.
+
+![CXL Type 1/2/3 device topology — accelerator, accelerator+mem, memory expander](/images/blog/perf-eng/diagrams/part3-11-cxl-types.svg)
+
 ## Neoverse V2와 CHI-E
 
 ARM Neoverse V2(2023)는 서버급 코어로, *CHI-E*(Coherent Hub Interface, Enhanced) interconnect 위에 올라갑니다. CHI-E는 CXL과 직접 mapping이 가능하게 설계되었습니다.

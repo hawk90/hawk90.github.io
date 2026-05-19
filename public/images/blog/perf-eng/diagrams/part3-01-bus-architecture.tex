@@ -1,0 +1,82 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  master/.style={rectangle, rounded corners=2pt, draw=absbord, line width=0.45pt, minimum width=24mm, minimum height=9mm, inner sep=3pt, fill=absfill, font=\sffamily\footnotesize, align=center},
+  slave/.style={rectangle, rounded corners=2pt, draw=impbord, line width=0.45pt, minimum width=24mm, minimum height=9mm, inner sep=3pt, fill=impfill, font=\sffamily\footnotesize, align=center},
+  bus/.style={rectangle, draw=hibord, line width=0.5pt, fill=hifill, minimum height=7mm, inner sep=3pt, font=\sffamily\bfseries\footnotesize, align=center},
+  bridge/.style={rectangle, rounded corners=2pt, draw=clibord, line width=0.5pt, fill=clifill, minimum width=22mm, minimum height=9mm, inner sep=2pt, font=\sffamily\footnotesize, align=center}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.6) {AMBA Bus 진화 — AHB-Lite, AXI, CHI};
+
+% =============== Top: AHB-Lite (Cortex-M) ===============
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west] at (-8, 4.6) {Cortex-M (AHB-Lite + APB)};
+
+\node[master] (mcore) at (-6, 3.8) {Cortex-M Core};
+\node[master] (mdma)  at (-2, 3.8) {DMA};
+
+\node[bus, minimum width=110mm] (ahb) at (0, 2.8) {AHB-Lite Bus};
+
+\node[slave] (sram) at (-5, 1.8) {SRAM};
+\node[slave] (flash) at (-1.5, 1.8) {Flash};
+\node[bridge] (apbb) at (2.0, 1.8) {APB Bridge};
+
+\draw[arr] (mcore.south) -- (mcore.south |- ahb.north);
+\draw[arr] (mdma.south)  -- (mdma.south |- ahb.north);
+\draw[arr] (ahb.south -| sram.north) -- (sram.north);
+\draw[arr] (ahb.south -| flash.north) -- (flash.north);
+\draw[arr] (ahb.south -| apbb.north) -- (apbb.north);
+
+% APB peripherals
+\node[bus, minimum width=42mm, fill=clifill, draw=clibord] (apb) at (4.4, 0.6) {APB};
+\node[slave, minimum width=14mm] (uart) at (3.2, -0.5) {UART};
+\node[slave, minimum width=14mm] (timer) at (4.8, -0.5) {Timer};
+\node[slave, minimum width=14mm] (gpio) at (6.4, -0.5) {GPIO};
+
+\draw[arr] (apbb.east) -- ($(apbb.east) + (0.6, 0)$) |- (apb.west);
+\draw[arr] (apb.south -| uart.north)  -- (uart.north);
+\draw[arr] (apb.south -| timer.north) -- (timer.north);
+\draw[arr] (apb.south -| gpio.north)  -- (gpio.north);
+
+% Divider
+\draw[dashed, draw=mutec, line width=0.3pt] (-8, -1.4) -- (8, -1.4);
+
+% =============== Bottom: AXI (Cortex-A) ===============
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west] at (-8, -2.0) {Cortex-A (AXI interconnect + CHI 확장)};
+
+\node[master] (acore0) at (-6, -2.9) {Cortex-A Core};
+\node[master] (acore1) at (-2.5, -2.9) {GPU};
+\node[master] (acore2) at ( 1.0, -2.9) {NPU};
+\node[master] (acore3) at ( 4.5, -2.9) {DMA};
+
+\node[bus, minimum width=130mm, fill=hifill, draw=hibord] (axi) at (-1, -4.0) {AXI Interconnect — 5 channel (AR, R, AW, W, B)};
+
+\node[slave, minimum width=28mm] (dram) at (-5, -5.2) {DDR Controller};
+\node[slave, minimum width=28mm] (sysmem) at (-1, -5.2) {System SRAM};
+\node[slave, minimum width=28mm] (chi)  at ( 3, -5.2) {CHI / CCI};
+
+\draw[arr] (acore0.south) -- (acore0.south |- axi.north);
+\draw[arr] (acore1.south) -- (acore1.south |- axi.north);
+\draw[arr] (acore2.south) -- (acore2.south |- axi.north);
+\draw[arr] (acore3.south) -- (acore3.south |- axi.north);
+
+\draw[arr] (axi.south -| dram.north)   -- (dram.north);
+\draw[arr] (axi.south -| sysmem.north) -- (sysmem.north);
+\draw[arr] (axi.south -| chi.north)    -- (chi.north);
+
+% Legend
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west] at (-8, -6.6) {Color:};
+\node[master, minimum width=14mm, minimum height=5mm] at (-6.4, -6.6) {Master};
+\node[slave, minimum width=14mm, minimum height=5mm]  at (-4.4, -6.6) {Slave};
+\node[bus, minimum width=14mm, minimum height=5mm]    at (-2.4, -6.6) {Bus};
+\node[bridge, minimum width=14mm, minimum height=5mm] at (-0.4, -6.6) {Bridge};
+
+\end{tikzpicture}
+\end{document}

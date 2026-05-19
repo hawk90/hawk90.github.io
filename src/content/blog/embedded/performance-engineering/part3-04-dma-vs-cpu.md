@@ -1,6 +1,6 @@
 ---
 title: "3-04: DMA vs CPU Copy — Break-even, Setup Overhead, 실측"
-date: 2026-05-19T03:00:00
+date: 2026-05-08T03:00:00
 description: "DMA setup overhead. CPU memcpy 최적화. Break-even size. 실측 데이터."
 series: "Embedded Performance Engineering"
 seriesOrder: 22

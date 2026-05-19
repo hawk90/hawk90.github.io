@@ -1,6 +1,6 @@
 ---
 title: "3-06: Priority Ceiling Protocol — Immediate vs Original"
-date: 2026-05-13T03:00:00
+date: 2026-05-08T03:00:00
 description: "PI의 대안. 각 mutex에 정적 ceiling — take 즉시 boost. Deadlock 방지."
 series: "Practical RTOS Internals"
 seriesOrder: 27

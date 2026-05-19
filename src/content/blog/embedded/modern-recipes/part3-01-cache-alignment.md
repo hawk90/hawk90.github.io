@@ -19,6 +19,10 @@ DMA buffer를 cacheable 영역에 두면 line 경계가 어긋난 곳에서 inva
 
 ## 핵심 개념
 
+두 hot counter가 같은 line에 있을 때와 line이 분리된 경우의 차이를 그림으로 먼저 봅니다.
+
+![Cache line alignment — false sharing 회피](/images/blog/modern-recipes/diagrams/part3-01-cache-alignment.svg)
+
 Cache line은 CPU가 한 번에 fetch·invalidate하는 단위입니다. Cortex-A53/A72와 Intel/AMD x86은 64B, Apple M1과 IBM POWER는 128B, Cortex-M7은 32B입니다. 같은 line에 있는 두 변수는 멀티코어 관점에서 *하나의 변수*처럼 움직입니다.
 
 ```c

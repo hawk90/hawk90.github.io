@@ -1,6 +1,6 @@
 ---
 title: "1-08: 프로파일링 개요 — Sampling vs Instrumentation, PGO·LTO"
-date: 2026-05-12T08:00:00
+date: 2026-05-08T08:00:00
 description: "두 큰 접근 — Sampling (perf, low overhead) vs Instrumentation (gprof, accurate but slow). PGO로 최적화."
 series: "Embedded Performance Engineering"
 seriesOrder: 8

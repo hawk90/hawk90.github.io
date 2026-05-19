@@ -1,0 +1,74 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,patterns}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bar/.style={rectangle, draw=nodebord, line width=0.3pt, minimum height=8mm, inner sep=0pt, anchor=west}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (7, 5.8) {Priority Inversion — Mars Pathfinder 시나리오};
+
+% Three task rows; y positions
+% H at y=4, M at y=2.5, L at y=1
+% Time axis from x=0 to x=14
+
+% Row labels
+\node[font=\sffamily\bfseries\small, text=conbord, anchor=east] at (-0.2, 4.5) {High};
+\node[font=\sffamily\bfseries\small, text=clibord, anchor=east] at (-0.2, 3.0) {Medium};
+\node[font=\sffamily\bfseries\small, text=impbord, anchor=east] at (-0.2, 1.5) {Low};
+
+% Row baselines (light)
+\draw[draw=gridc, line width=0.3pt] (0, 4.5) -- (13.5, 4.5);
+\draw[draw=gridc, line width=0.3pt] (0, 3.0) -- (13.5, 3.0);
+\draw[draw=gridc, line width=0.3pt] (0, 1.5) -- (13.5, 1.5);
+
+% Low task runs first, takes mutex at t=0..2
+\node[bar, fill=impfill, draw=impbord, minimum width=22mm] at (0, 1.2) {};
+\node[font=\sffamily\scriptsize, text=impbord] at (1.1, 1.5) {take(mtx)};
+
+% High preempts at t=2, runs briefly, then blocks at t=3
+\node[bar, fill=confill, draw=conbord, minimum width=11mm] at (2.2, 4.2) {};
+\node[font=\sffamily\scriptsize, text=conbord] at (2.75, 4.5) {run};
+% Then High tries take(mtx) at t=3.3 -> blocked
+\node[font=\sffamily\scriptsize, text=conbord] at (3.7, 5.0) {take(mtx)};
+\node[font=\sffamily\scriptsize\bfseries, text=warnbord] at (6.8, 5.0) {BLOCKED — High이 mutex 대기};
+% Blocked region (hatched / muted)
+\node[bar, fill=warnfill!50, draw=warnbord, minimum width=70mm, pattern color=warnbord] at (3.3, 4.2) {};
+
+% Medium becomes runnable at t=3.5, preempts Low (since Low < Medium)
+\node[bar, fill=clifill, draw=clibord, minimum width=66mm] at (3.5, 2.7) {};
+\node[font=\sffamily\scriptsize, text=clibord] at (6.8, 3.0) {Medium 실행 — mutex 무관};
+
+% Low waiting at row 1 (cannot run)
+\node[font=\sffamily\scriptsize, text=mutec] at (6.8, 1.5) {Low ready, 그러나 Medium에 막힘};
+
+% High deadline marker at t=10.3
+\draw[draw=warnbord, line width=0.5pt, dashed] (10.3, 0.5) -- (10.3, 5.2);
+\node[font=\sffamily\scriptsize\bfseries, text=warnbord, anchor=south] at (10.3, 5.2) {High deadline};
+
+% After Medium done at t=10, Low resumes, releases mutex t=11
+\node[bar, fill=impfill, draw=impbord, minimum width=13mm] at (10.1, 1.2) {};
+\node[font=\sffamily\scriptsize, text=impbord] at (10.75, 1.5) {give(mtx)};
+
+% Then High runs at t=11.4
+\node[bar, fill=confill, draw=conbord, minimum width=18mm] at (11.4, 4.2) {};
+\node[font=\sffamily\scriptsize, text=conbord] at (12.3, 4.5) {finally};
+
+% Time axis
+\draw[arr] (0, 0.4) -- (13.7, 0.4) node[right, font=\sffamily\footnotesize] {time};
+\foreach \t/\l in {0/0, 2/2, 4/4, 6/6, 8/8, 10/10, 12/12} {
+  \draw[draw=mutec] (\t, 0.35) -- (\t, 0.45);
+  \node[font=\sffamily\scriptsize, text=mutec, anchor=north] at (\t, 0.3) {\l ms};
+}
+
+% Bottom diagnosis
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=13cm]
+  at (0, -0.7) {High가 Low의 mutex를 기다리는 동안, Medium이 CPU를 점유 — High는 자기와 무관한 Medium에 가로막힘};
+
+\end{tikzpicture}
+\end{document}

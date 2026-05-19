@@ -1,6 +1,6 @@
 ---
 title: "1-01: 성능 분석 방법론 — Measure → Analyze → Optimize"
-date: 2026-05-12T01:00:00
+date: 2026-05-08T01:00:00
 description: "감으로 최적화 금지. USE·RED 메서드, 임베디드 적용. 과학적 접근의 시작."
 series: "Embedded Performance Engineering"
 seriesOrder: 1

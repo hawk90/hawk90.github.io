@@ -1,6 +1,6 @@
 ---
 title: "3-02: Semaphore 내부 구현 — Counter, Wait List, ISR-Safe Variant"
-date: 2026-05-12T23:00:00
+date: 2026-05-08T23:00:00
 description: "FreeRTOS semaphore = Queue wrapper. Counter + priority-sorted wait list."
 series: "Practical RTOS Internals"
 seriesOrder: 23

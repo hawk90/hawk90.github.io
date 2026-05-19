@@ -88,6 +88,10 @@ stackcollapse-jstack.pl jstack.txt > out.folded
 
 `a`가 30%의 시간을 쓰고 `b`가 70%라면, `b`의 자식 중 가장 넓은 것이 가장 큰 hot spot입니다. 폭이 좁은 leaf는 무시해도 됩니다.
 
+해부도로 정리하면 hot leaf와 무시할 좁은 bar의 차이가 분명해집니다.
+
+![Flamegraph 해부 — x축 sample 비율, y축 call depth, hot leaf 강조](/images/blog/perf-eng/diagrams/part5-05-flamegraph-anatomy.svg)
+
 ## Off-CPU Flamegraph
 
 일반 flamegraph는 on-CPU 시간만 보여 줍니다. 즉 sleep, I/O 대기, lock 대기 같은 blocked 시간은 빠집니다. 100ms 응답 시간 중 99ms를 I/O로 대기하면 on-CPU flamegraph는 1ms 영역만 보여 줍니다.

@@ -1,6 +1,6 @@
 ---
 title: "2-03: Scheduler 알고리즘 구현 — Next-Task Selection 로직"
-date: 2026-05-12T13:00:00
+date: 2026-05-08T13:00:00
 description: "FreeRTOS pxCurrentTCB 결정. CLZ 최적화, tie-breaking, scheduler entry points."
 series: "Practical RTOS Internals"
 seriesOrder: 13

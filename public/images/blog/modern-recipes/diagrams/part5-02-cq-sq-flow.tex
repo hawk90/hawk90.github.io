@@ -1,0 +1,63 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  side/.style={cls, minimum width=42mm, minimum height=14mm, align=center, font=\sffamily\bfseries\small},
+  host/.style={side, draw=absbord, fill=absfill},
+  dev/.style={side, draw=impbord, fill=impfill},
+  ring/.style={cls, minimum width=58mm, minimum height=12mm, align=center, draw=clibord, fill=clifill, font=\sffamily\small},
+  cring/.style={cls, minimum width=58mm, minimum height=12mm, align=center, draw=prpbord, fill=prpfill, font=\sffamily\small},
+  db/.style={cls, minimum width=20mm, minimum height=7mm, align=center, font=\sffamily\bfseries\footnotesize, draw=hibord, fill=hifill}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (7, 6.4) {NVMe SQ / CQ Flow — host와 device의 비동기 통신};
+
+% Two sides
+\node[host] (h) at (0, 4) {Host \\[2pt] (CPU)};
+\node[dev]  (d) at (14, 4) {Device \\[2pt] (NVMe SSD)};
+
+% SQ ring (top middle) — host writes, device reads
+\node[ring] (sq) at (7, 4.6) {SQ — Submission Queue};
+% CQ ring (bottom middle) — device writes, host reads
+\node[cring] (cq) at (7, 1.0) {CQ — Completion Queue};
+
+% Step 1: host pushes commands to SQ
+\draw[flow, draw=conbord] (h.east |- sq.west) -- (sq.west);
+\node[font=\sffamily\footnotesize, text=conbord] at (2.9, 4.9) {1. push cmd};
+
+% Step 2: doorbell to device
+\node[db] (db1) at (10.5, 3.4) {SQ doorbell};
+\draw[uses, draw=hibord, line width=0.6pt] (sq.south) -- (db1.north);
+\draw[uses, draw=hibord, line width=0.6pt] (db1.east) -- (d.west |- db1.east);
+\node[font=\sffamily\footnotesize, text=hibord] at (12.2, 3.9) {2. MMIO};
+
+% Step 3: device pops and processes
+\draw[flow, draw=impbord] (d.west |- sq.east) -- (sq.east);
+\node[font=\sffamily\footnotesize, text=impbord] at (11.4, 4.9) {3. pop + process};
+
+% Step 4: device pushes completion to CQ
+\draw[flow, draw=impbord] (d.west |- cq.east) -- (cq.east);
+\node[font=\sffamily\footnotesize, text=impbord] at (11.4, 0.7) {4. push completion};
+
+% Step 5: IRQ + doorbell back
+\node[db] (db2) at (3.5, 2.4) {CQ doorbell};
+\draw[uses, draw=hibord, line width=0.6pt] (cq.north) -- (db2.south);
+\draw[uses, draw=hibord, line width=0.6pt] (db2.west) -- (h.east |- db2.west);
+\node[font=\sffamily\footnotesize, text=hibord] at (1.7, 2.85) {5. IRQ};
+
+% Step 6: host reads CQ
+\draw[flow, draw=conbord] (h.east |- cq.west) -- (cq.west);
+\node[font=\sffamily\footnotesize, text=conbord] at (2.9, 0.7) {6. consume};
+
+% Bottom note
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=14cm]
+  at (0, -0.7) {두 ring + 두 doorbell — host와 device가 서로 막지 않고 batched submit 가능. Multi-queue로 CPU별 복제 시 거의 lock-free};
+
+\end{tikzpicture}
+\end{document}

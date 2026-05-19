@@ -1,6 +1,6 @@
 ---
 title: "1-01: RTOS가 필요한 이유"
-date: 2026-05-12T01:00:00
+date: 2026-05-08T01:00:00
 description: "Super-loop의 한계 — 모든 작업이 직렬화되어 deadline 보장 못 함. RTOS가 답 — preemption과 우선순위로 실시간성 확보."
 series: "Practical RTOS Internals"
 seriesOrder: 1

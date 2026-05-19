@@ -1,0 +1,79 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc},
+  bitcell/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=6.5mm, minimum height=6.5mm, inner sep=0pt, font=\sffamily\footnotesize, fill=white, align=center},
+  bitset/.style={bitcell, fill=hifill, draw=hibord, font=\sffamily\bfseries\footnotesize},
+  listhead/.style={rectangle, draw=impbord, line width=0.45pt, minimum width=20mm, minimum height=8mm, inner sep=2pt, fill=impfill, font=\sffamily\footnotesize, align=center},
+  tcb/.style={rectangle, draw=conbord, line width=0.45pt, minimum width=14mm, minimum height=7mm, inner sep=2pt, fill=confill, font=\sffamily\footnotesize, align=center},
+  emptyhead/.style={listhead, fill=neutfill, draw=neutbord, text=mutec}
+]
+
+% ===== Title =====
+\node[hdr] at (0, 7.6) {Ready List = Bitmap + Linked List per Priority};
+
+% ===== Bitmap (32-bit uxTopReadyPriority) =====
+\node[hdr, anchor=west] at (-8.2, 6.5) {\texttt{uxTopReadyPriority} (32-bit bitmap)};
+
+% Draw 32 cells, bits 31 down to 0 left-to-right
+\foreach \i [count=\xi from 0] in {31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0} {
+  \pgfmathtruncatemacro{\xpos}{\xi}
+  \ifnum\i=12
+    \node[bitset] (b\i) at ({-8.2 + \xi*0.5}, 5.8) {1};
+  \else
+    \ifnum\i=5
+      \node[bitset] (b\i) at ({-8.2 + \xi*0.5}, 5.8) {1};
+    \else
+      \node[bitcell] (b\i) at ({-8.2 + \xi*0.5}, 5.8) {0};
+    \fi
+  \fi
+}
+
+% Bit index labels (under each cell, but only key ones)
+\node[font=\sffamily\scriptsize, text=mutec] at (b31.south) [below=1pt] {31};
+\node[font=\sffamily\scriptsize, text=hibord] at (b12.south) [below=1pt] {\textbf{12}};
+\node[font=\sffamily\scriptsize, text=hibord] at (b5.south) [below=1pt] {\textbf{5}};
+\node[font=\sffamily\scriptsize, text=mutec] at (b0.south) [below=1pt] {0};
+
+% ===== CLZ box =====
+\node[note, anchor=west, text width=66mm] at (-8.2, 3.4) {
+  \texttt{clz r1, r0} $\rightarrow$ leading zeros = 19 \\[2pt]
+  \texttt{rsb r1, r1, \#31} $\rightarrow$ top prio = \textbf{12} \\[2pt]
+  \footnotesize\textit{1 cycle로 가장 높은 priority}
+};
+
+% ===== Right side: list array =====
+\node[hdr, anchor=west] at (1.8, 6.5) {\texttt{pxReadyTasksLists[]}};
+
+% Priority 12 list head + chain
+\node[listhead] (h12) at (3.4, 4.6) {priority 12};
+\node[tcb, right=4mm of h12] (t12a) {TaskA};
+\node[tcb, right=3mm of t12a] (t12b) {TaskB};
+\draw[arr] (h12.east) -- (t12a.west);
+\draw[arr] (t12a.east) -- (t12b.west);
+\draw[arr] (t12b.east) -- ++(0.4, 0) node[right, font=\sffamily\scriptsize, text=mutec] {NULL};
+
+% Priority 5 list head + chain
+\node[emptyhead] (h11) at (3.4, 3.6) {priority 11 (empty)};
+\node[listhead] (h5) at (3.4, 2.6) {priority 5};
+\node[tcb, right=4mm of h5] (t5a) {TaskC};
+\draw[arr] (h5.east) -- (t5a.west);
+\draw[arr] (t5a.east) -- ++(0.4, 0) node[right, font=\sffamily\scriptsize, text=mutec] {NULL};
+
+\node[emptyhead] (h0) at (3.4, 1.6) {priority 0 (empty)};
+
+% ===== Arrows from bitmap bits to list heads — start below labels to avoid overlap =====
+\draw[focus, line width=0.6pt] ($(b12.south)+(0,-0.35)$) to[out=-90, in=180] ($(h12.west) + (-0.2, 0)$);
+\draw[focus, line width=0.6pt] ($(b5.south)+(0,-0.35)$) to[out=-90, in=180] ($(h5.west) + (-0.2, 0)$);
+
+% ===== Caption =====
+\node[caption, text width=14cm] at (0, 0.6) {bit $N$이 1이면 priority $N$ list에 ready task가 있다. CLZ로 \emph{가장 높은 set bit} 위치를 1 cycle에 얻는다.};
+
+\end{tikzpicture}
+\end{document}

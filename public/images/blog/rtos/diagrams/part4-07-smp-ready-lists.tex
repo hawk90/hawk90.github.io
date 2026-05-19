@@ -1,0 +1,123 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  subhdr/.style={font=\sffamily\bfseries\footnotesize, text=mutec},
+  core/.style={rectangle, rounded corners=3pt, draw=absbord, line width=0.5pt, fill=absfill, minimum width=18mm, minimum height=8mm, inner sep=2pt, font=\sffamily\bfseries\footnotesize, align=center},
+  rlist/.style={rectangle, draw=impbord, line width=0.5pt, fill=impfill, minimum width=28mm, minimum height=8mm, inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  taskq/.style={rectangle, draw=conbord, line width=0.4pt, fill=confill, minimum width=8mm, minimum height=5mm, inner sep=1pt, font=\sffamily\scriptsize, align=center},
+  lockicon/.style={rectangle, rounded corners=1pt, draw=warnbord, line width=0.4pt, fill=warnfill, minimum width=12mm, minimum height=4mm, inner sep=1pt, font=\sffamily\scriptsize\bfseries, text=warnbord},
+  panelG/.style={rectangle, rounded corners=4pt, draw=neutbord, line width=0.45pt, fill=neutfill!50, inner sep=10pt}
+]
+
+% ===== Title =====
+\node[hdr] at (0, 7.4) {SMP Ready List — Global vs Per-Core};
+
+% ============================================================
+% LEFT PANEL — Global ready list
+% ============================================================
+\node[hdr, text=inkc] at (-5.5, 6.5) {Global Ready List};
+
+% Cores share one list
+\node[core] (c0g) at (-7.5, 5.4) {CPU 0};
+\node[core] (c1g) at (-5.5, 5.4) {CPU 1};
+\node[core] (c2g) at (-3.5, 5.4) {CPU 2};
+
+% Lock badge above list
+\node[lockicon] (glock) at (-5.5, 3.8) {global\_lock};
+
+% One shared list
+\node[rlist, minimum width=44mm, minimum height=9mm] (gl) at (-5.5, 2.8) {Global Ready List};
+
+% Tasks shown below
+\node[taskq] (gt1) at (-7.0, 1.6) {T1};
+\node[taskq] (gt2) at (-5.5, 1.6) {T2};
+\node[taskq] (gt3) at (-4.0, 1.6) {T3};
+\draw[arr, draw=conbord, line width=0.4pt] (gl.south) -- (gt2.north);
+\draw[edge, draw=conbord] (gt1.east) -- (gt2.west);
+\draw[edge, draw=conbord] (gt2.east) -- (gt3.west);
+
+% Arrows from cores to global list
+\draw[arr, draw=absbord] (c0g.south) -- ($(glock.north)+(-1.6,0)$);
+\draw[arr, draw=absbord] (c1g.south) -- (glock.north);
+\draw[arr, draw=absbord] (c2g.south) -- ($(glock.north)+(1.6,0)$);
+
+% Annotation
+\node[font=\sffamily\footnotesize, anchor=north, text width=46mm, align=left, text=inkc]
+  at (-5.5, 0.5) {
+  $\bullet$ 자동 load balance \\[2pt]
+  $\bullet$ \textbf{lock contention}: 코어 수 ↑ \\[2pt]
+  $\bullet$ cache line 핑퐁 \\[2pt]
+  $\bullet$ FreeRTOS 11 SMP
+};
+
+% Panel background
+\coordinate (gAnchor) at (-5.5, -1.6);
+\coordinate (gAnchorL) at (-8.4, -1.6);
+\coordinate (gAnchorR) at (-2.6, -1.6);
+\begin{pgfonlayer}{background}
+  \node[panelG, fit=(c0g) (c2g) (gl) (gAnchor) (gAnchorL) (gAnchorR)] {};
+\end{pgfonlayer}
+
+% ============================================================
+% RIGHT PANEL — Per-core ready list
+% ============================================================
+\node[hdr, text=inkc] at (5.5, 6.5) {Per-Core Ready List};
+
+\node[core] (c0p) at (3.0, 5.4) {CPU 0};
+\node[core] (c1p) at (5.5, 5.4) {CPU 1};
+\node[core] (c2p) at (8.0, 5.4) {CPU 2};
+
+% Per-core locks
+\node[lockicon] (l0) at (3.0, 4.2) {lock};
+\node[lockicon] (l1) at (5.5, 4.2) {lock};
+\node[lockicon] (l2) at (8.0, 4.2) {lock};
+
+\node[rlist, minimum width=18mm] (rl0) at (3.0, 3.0) {RL[0]};
+\node[rlist, minimum width=18mm] (rl1) at (5.5, 3.0) {RL[1]};
+\node[rlist, minimum width=18mm] (rl2) at (8.0, 3.0) {RL[2]};
+
+% Per-core tasks
+\node[taskq] (t1) at (3.0, 1.8) {T1};
+\node[taskq] (t2a) at (5.0, 1.8) {T2};
+\node[taskq] (t2b) at (6.0, 1.8) {T3};
+
+\draw[arr, draw=conbord, line width=0.4pt] (rl0.south) -- (t1.north);
+\draw[arr, draw=conbord, line width=0.4pt] (rl1.south) -- (5.5, 2.1);
+
+% Direct arrows core to lock
+\draw[arr, draw=absbord] (c0p.south) -- (l0.north);
+\draw[arr, draw=absbord] (c1p.south) -- (l1.north);
+\draw[arr, draw=absbord] (c2p.south) -- (l2.north);
+\draw[arr, draw=absbord] (l0.south) -- (rl0.north);
+\draw[arr, draw=absbord] (l1.south) -- (rl1.north);
+\draw[arr, draw=absbord] (l2.south) -- (rl2.north);
+
+% Migration arrow (T2 from CPU1 to CPU2 idle)
+\draw[focus, line width=0.7pt, ->] (rl1.east) to[bend right=25]
+  node[midway, above, font=\sffamily\scriptsize, text=focusc] {migrate} (rl2.west);
+
+% Annotation
+\node[font=\sffamily\footnotesize, anchor=north, text width=46mm, align=left, text=inkc]
+  at (5.5, 0.5) {
+  $\bullet$ lock 분리, 확장성 ↑ \\[2pt]
+  $\bullet$ cache locality 좋음 \\[2pt]
+  $\bullet$ \textbf{load balance 필요} (push/pull) \\[2pt]
+  $\bullet$ Linux CFS, Zephyr SMP
+};
+
+\coordinate (pAnchor) at (5.5, -1.6);
+\coordinate (pAnchorL) at (2.1, -1.6);
+\coordinate (pAnchorR) at (8.9, -1.6);
+\begin{pgfonlayer}{background}
+  \node[panelG, fit=(c0p) (c2p) (rl0) (rl2) (pAnchor) (pAnchorL) (pAnchorR)] {};
+\end{pgfonlayer}
+
+\end{tikzpicture}
+\end{document}

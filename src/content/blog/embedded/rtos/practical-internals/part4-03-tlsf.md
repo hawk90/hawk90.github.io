@@ -40,6 +40,10 @@ Level 2 (second-level, SL) — 각 FL bucket을 2^M 등분 (보통 M=4 → 16등
 
 각 SL bucket이 *별도의 free list*를 갖습니다. 그리고 어느 bucket에 free block이 *있는지 없는지*를 추적하는 두 단계 bitmap이 핵심 자료구조입니다.
 
+전체 구조를 한 장으로 정리하면 이렇습니다. FL bitmap에서 set bit를 찾고, 해당 FL[i]의 SL bitmap에서 다시 set bit를 찾아 `blocks[FL][SL]` free list 머리에 도달합니다. CTZ 두 번에 적합 bucket이 결정됩니다.
+
+![TLSF two-level segregated buckets](/images/blog/rtos/diagrams/part4-03-tlsf-buckets.svg)
+
 ```c
 typedef struct tlsf {
     uint32_t fl_bitmap;          /* FL bucket 점유 여부 — 32 bit */

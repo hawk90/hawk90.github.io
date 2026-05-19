@@ -21,6 +21,10 @@ DMA-BUF는 Linux kernel의 *cross-driver buffer sharing* mechanism입니다. V4L
 
 ## 핵심 개념
 
+Camera부터 display까지 한 frame이 한 physical page를 유지하는 모습을 그림으로 정리합니다.
+
+![Zero-copy camera pipeline — DMA-BUF fd로 묶인 한 page](/images/blog/modern-recipes/diagrams/part6-06-zero-copy-camera.svg)
+
 DMA-BUF는 *file descriptor*로 buffer를 share합니다.
 
 ```text

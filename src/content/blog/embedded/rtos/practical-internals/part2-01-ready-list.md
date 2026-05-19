@@ -1,6 +1,6 @@
 ---
 title: "2-01: Ready List 자료구조 — Linked List, Bitmap, O(1) Scheduler"
-date: 2026-05-12T11:00:00
+date: 2026-05-08T11:00:00
 description: "Ready 상태 task를 보관하는 자료구조 선택이 곧 스케줄러 latency를 결정합니다. FreeRTOS의 array-of-lists, bitmap + CLZ 최적화, uC/OS의 8×8 LUT까지 한 번에 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 11
@@ -86,6 +86,10 @@ List_t pxReadyTasksLists[configMAX_PRIORITIES];
 ```
 
 `uxTopReadyPriority`는 *32 bit bitmap*입니다. priority 5에 task가 하나라도 있으면 bit 5가 켜집니다.
+
+Ready list의 자료구조를 그림으로 보면 이렇습니다. priority bitmap의 set bit 위치가 곧 list array의 index가 되고, CLZ 한 명령으로 가장 높은 priority를 찾습니다.
+
+![Ready list bitmap과 priority별 linked list](/images/blog/rtos/diagrams/part2-01-ready-list-bitmap.svg)
 
 ### CLZ — 1 cycle로 가장 높은 priority 찾기
 

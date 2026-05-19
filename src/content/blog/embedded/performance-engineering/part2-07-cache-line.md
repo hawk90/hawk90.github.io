@@ -1,6 +1,6 @@
 ---
 title: "2-07: Cache Line 최적화 — Alignment·Prefetch·False Sharing"
-date: 2026-05-13T14:00:00
+date: 2026-05-08T14:00:00
 description: "64-byte line alignment, software prefetch, false sharing 회피, SoA·AoS 선택."
 series: "Embedded Performance Engineering"
 seriesOrder: 15
@@ -55,6 +55,10 @@ __attribute__((aligned(64))) static int matrix[1024][1024];
 ```
 
 DMA·SIMD에서 필수. Misaligned access는 *2 cycle* 또는 *fault* (Cortex-M0).
+
+64-byte line 안의 데이터 배치가 성능을 결정합니다. 같은 line에 무엇이 들어 있느냐에 따라 좋은/나쁜 패턴이 갈립니다.
+
+![64-byte cache line의 세 가지 배치 — 섞임/분리/false sharing](/images/blog/perf-eng/diagrams/part2-07-cache-line-layout.svg)
 
 ## False Sharing 방지
 

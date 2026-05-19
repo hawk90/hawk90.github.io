@@ -1,0 +1,70 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  corebox/.style={rectangle, rounded corners=3pt, draw=absbord, line width=0.5pt, minimum width=46mm, minimum height=12mm, inner sep=4pt, fill=absfill, font=\sffamily\bfseries\footnotesize, align=center},
+  cachebox/.style={rectangle, draw=clibord, line width=0.5pt, minimum width=58mm, minimum height=22mm, inner sep=4pt, fill=clifill, align=center},
+  membox/.style={rectangle, draw=hibord, line width=0.5pt, minimum width=86mm, minimum height=14mm, inner sep=4pt, fill=hifill, align=center},
+  varA/.style={rectangle, draw=impbord, line width=0.4pt, fill=impfill, minimum width=14mm, minimum height=7mm, inner sep=1pt, font=\sffamily\bfseries\footnotesize},
+  varB/.style={rectangle, draw=conbord, line width=0.4pt, fill=confill, minimum width=14mm, minimum height=7mm, inner sep=1pt, font=\sffamily\bfseries\footnotesize},
+  blank/.style={rectangle, draw=nodebord, line width=0.3pt, fill=nodefill, minimum width=14mm, minimum height=7mm, inner sep=1pt, font=\sffamily\footnotesize}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.6) {False Sharing — 다른 변수, 같은 64-byte line};
+
+% Core 0 (left) and Core 1 (right)
+\node[corebox] (c0) at (-6, 4.2) {Core 0\\[2pt] writes \texttt{a}};
+\node[corebox] (c1) at ( 6, 4.2) {Core 1\\[2pt] writes \texttt{b}};
+
+% Cache on each core — label outside the box
+\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (-6, 3.0) {L1 Cache (Core 0)};
+\node[cachebox] (cache0) at (-6, 1.85) {};
+\node[varA] at (-7.5, 1.85) {a};
+\node[varB] at (-6.0, 1.85) {b};
+\node[blank] at (-4.5, 1.85) {...};
+
+\node[font=\sffamily\bfseries\footnotesize, text=inkc] at ( 6, 3.0) {L1 Cache (Core 1)};
+\node[cachebox] (cache1) at ( 6, 1.85) {};
+\node[varA] at (4.5, 1.85) {a};
+\node[varB] at (6.0, 1.85) {b};
+\node[blank] at (7.5, 1.85) {...};
+
+\draw[arr] (c0.south) -- (cache0.north);
+\draw[arr] (c1.south) -- (cache1.north);
+
+% State labels
+\node[font=\sffamily\footnotesize, text=conbord] at (-6, 0.4) {MESI: M $\leftrightarrow$ I 반복};
+\node[font=\sffamily\footnotesize, text=conbord] at ( 6, 0.4) {MESI: I $\leftrightarrow$ M 반복};
+
+% Coherence traffic — ping pong
+\draw[focus, draw=warnbord, line width=0.9pt, <->] (cache0.east) .. controls (-2, 2.4) and (2, 2.4) .. (cache1.west);
+\node[font=\sffamily\bfseries\footnotesize, text=warnbord, align=center, fill=white, inner sep=2pt] at (0, 2.6) {coherence \\[2pt] ping-pong};
+
+% Shared memory — single 64-byte line
+\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (0, -0.6) {64-byte cache line in DRAM};
+\node[membox] (mem) at (0, -1.6) {};
+\node[varA] at (-3.5, -1.6) {a};
+\node[varB] at (-2.0, -1.6) {b};
+\node[blank, minimum width=46mm] at (1.8, -1.6) {... padding / other vars ...};
+
+\draw[arr, draw=mutec] (cache0.south) -- ($(cache0.south)+(0,-0.4)$) -| (mem.north -| -3.5, 0);
+\draw[arr, draw=mutec] (cache1.south) -- ($(cache1.south)+(0,-0.4)$) -| (mem.north -| 2.0, 0);
+
+% Bottom annotation
+\node[note, anchor=north, text width=160mm, align=left] at (0, -3.0) {
+  \textbf{문제}: \texttt{a}와 \texttt{b}는 서로 다른 변수지만 같은 64-byte line에 속함. \\[2pt]
+  Core 0이 \texttt{a}에 write할 때마다 Core 1 line이 invalidate, 다음 \texttt{b} write가 line을 다시 fetch. \\[2pt]
+  \textbf{결과}: 매 write마다 cross-core coherence traffic. 측정 시 10$\sim$100배 slowdown 흔함.
+};
+\node[note, anchor=north, fill=okfill, draw=okbord, text width=160mm, align=left] at (0, -5.6) {
+  \textbf{해결}: \texttt{alignas(64)}로 각 변수를 별도 line에 배치. False sharing 사라지고 성능 회복.
+};
+
+\end{tikzpicture}
+\end{document}

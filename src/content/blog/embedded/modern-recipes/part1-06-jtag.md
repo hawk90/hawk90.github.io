@@ -1,6 +1,6 @@
 ---
 title: "1-06: JTAG·SWD 안 붙을 때 — 핀·전압·속도·세션"
-date: 2026-05-13T23:00:00
+date: 2026-05-07T23:00:00
 description: "JTAG·SWD 디버깅 체크리스트. Pin·voltage·clock·daisy chain·security 잠금."
 series: "Modern Embedded Recipes"
 seriesOrder: 6

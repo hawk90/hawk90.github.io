@@ -1,6 +1,6 @@
 ---
 title: "2-10: PMU·HPM — 하드웨어 카운터로 진단"
-date: 2026-05-13T17:00:00
+date: 2026-05-08T17:00:00
 description: "ARMv8 PMU 6+ counter, RISC-V HPM. CYCLE·INST_RETIRED·CACHE·BRANCH. perf 활용."
 series: "Embedded Performance Engineering"
 seriesOrder: 18

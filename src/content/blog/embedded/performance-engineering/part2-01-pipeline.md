@@ -1,6 +1,6 @@
 ---
 title: "2-01: CPU 파이프라인 — 5-stage·Cortex-M·Cortex-A 비교"
-date: 2026-05-13T08:00:00
+date: 2026-05-08T08:00:00
 description: "Fetch·Decode·Execute·Memory·Writeback 5-stage. Cortex-M3/M4 3-stage, Cortex-A 8~15-stage 비교."
 series: "Embedded Performance Engineering"
 seriesOrder: 9
@@ -31,6 +31,10 @@ Inst4:                 [F] [D] [E] [M] [W]
 ```
 
 이상적 — *매 cycle 1 명령 완료* (IPC = 1.0).
+
+실제로는 데이터 의존성 때문에 stall이 발생합니다. 다음은 RAW(Read-After-Write) hazard 하나로 뒤따르는 명령들이 한 cycle씩 밀리는 모습입니다.
+
+![5-stage pipeline에 RAW hazard 하나가 들어왔을 때의 stall 전파](/images/blog/perf-eng/diagrams/part2-01-pipeline-stages.svg)
 
 ## Cortex-M0/M0+ — 2-Stage
 

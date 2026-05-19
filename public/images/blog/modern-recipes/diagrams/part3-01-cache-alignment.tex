@@ -1,0 +1,69 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  slot/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=14mm, minimum height=10mm, inner sep=0pt, font=\sffamily\footnotesize, align=center},
+  hot/.style={slot, fill=confill, draw=conbord},
+  cold/.style={slot, fill=clifill, draw=clibord},
+  pad/.style={slot, fill=neutfill, draw=neutbord, text=mutec}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (5.6, 7.6) {Cache Line Alignment — 64B line};
+
+% ==================== BAD (top) ====================
+\node[font=\sffamily\bfseries\small, text=conbord, anchor=west] at (0, 6.6) {회피 — 두 hot counter가 같은 64B line};
+
+% 8 slots, each 8B = 64B line
+\node[hot]  at (0*1.45, 5.4) {cnt\_a};
+\node[hot]  at (1*1.45, 5.4) {cnt\_b};
+\node[cold] at (2*1.45, 5.4) {meta1};
+\node[cold] at (3*1.45, 5.4) {meta2};
+\node[pad]  at (4*1.45, 5.4) {pad};
+\node[pad]  at (5*1.45, 5.4) {pad};
+\node[pad]  at (6*1.45, 5.4) {pad};
+\node[pad]  at (7*1.45, 5.4) {pad};
+
+% Line bracket
+\draw[decorate, decoration={brace, mirror, amplitude=4pt}, draw=mutec]
+  (-0.78, 4.78) -- (10.93, 4.78)
+  node[midway, below=4pt, font=\sffamily\footnotesize, text=mutec] {64 byte cache line — 8 byte slots};
+
+% Annotation
+\node[font=\sffamily\footnotesize, text=warnbord, anchor=west, text width=13cm] at (0, 3.8)
+  {Core 0이 cnt\_a 증가, Core 1이 cnt\_b 증가 — 같은 line 공유로 매 store마다 ping-pong (false sharing)};
+
+% ==================== GOOD (bottom) ====================
+\node[font=\sffamily\bfseries\small, text=impbord, anchor=west] at (0, 2.7) {권장 — alignas(64)로 line 분리};
+
+% Line A (cnt_a + 7 pad slots)
+\node[hot] at (0*1.45, 1.5) {cnt\_a};
+\foreach \i in {1,...,7} {
+  \node[pad] at (\i*1.45, 1.5) {pad};
+}
+
+% Line B (cnt_b + 7 pad slots)
+\node[hot] at (0*1.45, 0.4) {cnt\_b};
+\foreach \i in {1,...,7} {
+  \node[pad] at (\i*1.45, 0.4) {pad};
+}
+
+% Brackets
+\draw[decorate, decoration={brace, amplitude=4pt}, draw=impbord]
+  (10.93, 0.95) -- (10.93, 2.05)
+  node[midway, right=4pt, font=\sffamily\footnotesize, text=impbord] {line A};
+\draw[decorate, decoration={brace, amplitude=4pt}, draw=impbord]
+  (10.93, -0.15) -- (10.93, 0.95)
+  node[midway, right=4pt, font=\sffamily\footnotesize, text=impbord] {line B};
+
+% Annotation
+\node[font=\sffamily\footnotesize, text=focusc, anchor=west, text width=13cm] at (0, -1.1)
+  {각 counter가 독립 line $\to$ coherency traffic 없음, scaling 회복};
+
+\end{tikzpicture}
+\end{document}

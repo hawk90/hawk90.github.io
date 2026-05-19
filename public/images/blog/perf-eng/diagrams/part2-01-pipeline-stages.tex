@@ -1,0 +1,84 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  stcell/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=11mm, minimum height=8mm, inner sep=2pt, font=\sffamily\footnotesize, align=center, fill=nodefill},
+  stF/.style={stcell, fill=absfill, draw=absbord},
+  stD/.style={stcell, fill=clifill, draw=clibord},
+  stE/.style={stcell, fill=impfill, draw=impbord},
+  stM/.style={stcell, fill=hifill, draw=hibord},
+  stW/.style={stcell, fill=prpfill, draw=prpbord},
+  stall/.style={stcell, fill=warnfill, draw=warnbord, font=\sffamily\bfseries\footnotesize},
+  rowlbl/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=east},
+  collbl/.style={font=\sffamily\footnotesize, text=mutec, anchor=south}
+]
+
+% Column header
+\foreach \c in {1,...,9} {
+  \node[collbl] at (\c*1.5, 0.6) {\c};
+}
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=south] at (5*1.5, 1.4) {Cycle (시간 $\rightarrow$)};
+
+% Row 1 — I1
+\node[rowlbl] at (0.5, 0) {I1: \texttt{ld r0,[r1]}};
+\node[stF] at (1*1.5, 0) {F};
+\node[stD] at (2*1.5, 0) {D};
+\node[stE] at (3*1.5, 0) {E};
+\node[stM] at (4*1.5, 0) {M};
+\node[stW] at (5*1.5, 0) {W};
+
+% Row 2 — I2 dependent
+\node[rowlbl] at (0.5, -1.1) {I2: \texttt{add r2,r0,r3}};
+\node[stF] at (2*1.5, -1.1) {F};
+\node[stD] at (3*1.5, -1.1) {D};
+\node[stall] at (4*1.5, -1.1) {stall};
+\node[stE] at (5*1.5, -1.1) {E};
+\node[stM] at (6*1.5, -1.1) {M};
+\node[stW] at (7*1.5, -1.1) {W};
+
+% Row 3 — I3
+\node[rowlbl] at (0.5, -2.2) {I3: \texttt{sub r4,r5,r6}};
+\node[stF] at (3*1.5, -2.2) {F};
+\node[stD] at (4*1.5, -2.2) {D};
+\node[stall] at (5*1.5, -2.2) {stall};
+\node[stE] at (6*1.5, -2.2) {E};
+\node[stM] at (7*1.5, -2.2) {M};
+\node[stW] at (8*1.5, -2.2) {W};
+
+% Row 4 — I4
+\node[rowlbl] at (0.5, -3.3) {I4: \texttt{mul r7,r8,r9}};
+\node[stF] at (4*1.5, -3.3) {F};
+\node[stall] at (5*1.5, -3.3) {stall};
+\node[stD] at (6*1.5, -3.3) {D};
+\node[stE] at (7*1.5, -3.3) {E};
+\node[stM] at (8*1.5, -3.3) {M};
+\node[stW] at (9*1.5, -3.3) {W};
+
+% Hazard annotation — point to stall column
+\draw[focus, draw=warnbord, line width=0.7pt] (4*1.5, -0.5) .. controls (4*1.5+1, -0.7) and (5*1.5+1, -0.9) .. (6*1.5, -1.1);
+\node[font=\sffamily\bfseries\footnotesize, text=warnbord, align=left, text width=44mm, anchor=west] at (10*1.5+0.3, -1.6) {RAW hazard:\\[2pt] I1의 M 결과를\\[1pt] I2가 E에서 필요};
+
+% Legend — single row, well-separated
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west] at (0, -4.7) {Stage:};
+\node[stF, minimum width=8mm] at (1.6, -4.7) {F};
+\node[font=\sffamily\footnotesize, anchor=west] at (2.0, -4.7) {Fetch};
+\node[stD, minimum width=8mm] at (4.1, -4.7) {D};
+\node[font=\sffamily\footnotesize, anchor=west] at (4.5, -4.7) {Decode};
+\node[stE, minimum width=8mm] at (6.9, -4.7) {E};
+\node[font=\sffamily\footnotesize, anchor=west] at (7.3, -4.7) {Execute};
+\node[stM, minimum width=8mm] at (9.8, -4.7) {M};
+\node[font=\sffamily\footnotesize, anchor=west] at (10.2, -4.7) {Memory};
+\node[stW, minimum width=8mm] at (12.5, -4.7) {W};
+\node[font=\sffamily\footnotesize, anchor=west] at (12.9, -4.7) {Writeback};
+
+\node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=west, text width=170mm] at (0, -5.5) {
+  이상 IPC = 1.0. 한 cycle stall로 전체 throughput 20\% 손실 — forwarding으로 줄일 수 있다.
+};
+
+\end{tikzpicture}
+\end{document}

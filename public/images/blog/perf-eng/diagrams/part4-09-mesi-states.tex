@@ -1,0 +1,71 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  st/.style={circle, draw=nodebord, line width=0.6pt, minimum size=22mm, inner sep=0pt, font=\sffamily\bfseries\small, align=center, fill=nodefill},
+  stM/.style={st, fill=warnfill, draw=warnbord},
+  stE/.style={st, fill=hifill,   draw=hibord},
+  stS/.style={st, fill=absfill,  draw=absbord},
+  stI/.style={st, fill=neutfill, draw=neutbord}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 6.6) {MESI 4-State — 핵심 전이만};
+
+% Wide rectangular layout: I (left) -> E -> M (top right), S below
+\node[stI] (I) at (-7,  0) {I\\[2pt] \footnotesize Invalid};
+\node[stE] (E) at ( 0,  3) {E\\[2pt] \footnotesize Exclusive};
+\node[stM] (M) at ( 7,  3) {M\\[2pt] \footnotesize Modified};
+\node[stS] (S) at ( 0, -3) {S\\[2pt] \footnotesize Shared};
+
+% Cold miss: I -> E (local read, line not in any cache)
+\draw[arr] (I.north east) -- (E.west)
+  node[font=\sffamily\footnotesize, text=impbord, midway, above, sloped, fill=white, inner sep=1.5pt] {local read (cold)};
+
+% Shared miss: I -> S (local read, others have it)
+\draw[arr] (I.south east) -- (S.west)
+  node[font=\sffamily\footnotesize, text=impbord, midway, above, sloped, fill=white, inner sep=1.5pt] {local read (others share)};
+
+% Write to invalid: I -> M (RFO)
+\draw[arr] (I.east) -- (M.south west)
+  node[font=\sffamily\footnotesize, text=impbord, pos=0.55, fill=white, inner sep=1.5pt] {local write (RFO)};
+
+% E -> M (local write, no broadcast needed)
+\draw[arr] (E.east) -- (M.west)
+  node[font=\sffamily\footnotesize, text=impbord, midway, above, fill=white, inner sep=1.5pt] {local write};
+
+% S -> M (local write, invalidate others)
+\draw[arr] (S.east) .. controls (5, -2) and (7, 0) .. (M.south)
+  node[font=\sffamily\footnotesize, text=impbord, pos=0.7, right=2pt, fill=white, inner sep=1.5pt] {local write \\ (invalidate)};
+
+% Remote read: E -> S, M -> S
+\draw[arr, draw=conbord] (E.south) -- (S.north)
+  node[font=\sffamily\footnotesize, text=conbord, midway, right=2pt, fill=white, inner sep=1.5pt] {remote read};
+\draw[arr, draw=conbord] (M.south west) -- (S.north east)
+  node[font=\sffamily\footnotesize, text=conbord, midway, above, sloped, fill=white, inner sep=1.5pt] {remote read (flush)};
+
+% Remote write: M -> I, E -> I, S -> I
+\draw[arr, draw=conbord] (M.north) .. controls (7, 5.5) and (-7, 5.5) .. (I.north)
+  node[font=\sffamily\footnotesize, text=conbord, midway, above, fill=white, inner sep=1.5pt] {remote write $\Rightarrow$ I};
+\draw[arr, draw=conbord] (S.south west) .. controls (-3.5, -5) and (-7, -2) .. (I.south)
+  node[font=\sffamily\footnotesize, text=conbord, midway, below, fill=white, inner sep=1.5pt] {remote write};
+
+% Legend
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west] at (-8, -6.0) {Legend:};
+\draw[arr] (-7, -6.0) -- (-6, -6.0);
+\node[font=\sffamily\footnotesize, text=impbord, anchor=west] at (-5.9, -6.0) {local read/write (이 코어 동작)};
+\draw[arr, draw=conbord] (0.5, -6.0) -- (1.5, -6.0);
+\node[font=\sffamily\footnotesize, text=conbord, anchor=west] at (1.6, -6.0) {remote read/write (snoop/directory)};
+
+% State key
+\node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=west, text width=180mm] at (-8, -6.8) {
+  \textbf{M}: 이 캐시만 valid, dirty $\,\cdot\,$ \textbf{E}: 이 캐시만 valid, clean $\,\cdot\,$ \textbf{S}: 여러 캐시 valid, clean $\,\cdot\,$ \textbf{I}: 무효
+};
+
+\end{tikzpicture}
+\end{document}

@@ -1,6 +1,6 @@
 ---
 title: "3-10: Deadlock — 4 조건·Wait-for Graph·Lock Ordering·Timeout"
-date: 2026-05-13T07:00:00
+date: 2026-05-08T07:00:00
 description: "Coffman 4 조건. Wait-for graph 분석. Lock ordering·timeout·hierarchical locking."
 series: "Practical RTOS Internals"
 seriesOrder: 31

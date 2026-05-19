@@ -1,6 +1,6 @@
 ---
 title: "2-03: Branch Prediction — Static·2-bit·BTB·BHT·Mispredict 비용"
-date: 2026-05-13T10:00:00
+date: 2026-05-08T10:00:00
 description: "BTFNT, 2-bit saturating counter, BTB·BHT. Mispredict 10-20 cycle. PMU BR_MIS_PRED."
 series: "Embedded Performance Engineering"
 seriesOrder: 11

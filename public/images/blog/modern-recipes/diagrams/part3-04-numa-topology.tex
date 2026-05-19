@@ -1,0 +1,48 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  sock/.style={cls, minimum width=44mm, minimum height=20mm, align=center, font=\sffamily\bfseries\small, draw=absbord, fill=absfill},
+  dram/.style={cls, minimum width=44mm, minimum height=14mm, align=center, font=\sffamily\small, draw=impbord, fill=impfill},
+  qpi/.style={cls, minimum width=20mm, minimum height=8mm, align=center, font=\sffamily\bfseries\footnotesize, draw=hibord, fill=hifill}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (7, 7.6) {2-socket NUMA — local vs remote access};
+
+% Socket 0 column (left)
+\node[sock] (s0) at (1.6, 5.5) {Socket 0 \\[2pt] CPU 0--15};
+\node[dram] (d0) at (1.6, 2.8) {DDR 64 GB \\[2pt] (NUMA node 0)};
+
+% Socket 1 column (right)
+\node[sock] (s1) at (12.4, 5.5) {Socket 1 \\[2pt] CPU 16--31};
+\node[dram] (d1) at (12.4, 2.8) {DDR 64 GB \\[2pt] (NUMA node 1)};
+
+% Local access arrows
+\draw[flow, draw=impbord, line width=0.9pt] (s0.south) -- node[midway, right, font=\sffamily\footnotesize, text=impbord, align=left] {local \\[2pt] 80 ns \\[2pt] 100 GB/s} (d0.north);
+\draw[flow, draw=impbord, line width=0.9pt] (s1.south) -- node[midway, left,  font=\sffamily\footnotesize, text=impbord, align=right] {local \\[2pt] 80 ns \\[2pt] 100 GB/s} (d1.north);
+
+% QPI/UPI between sockets
+\node[qpi] (qpi) at (7, 5.5) {QPI / UPI};
+\draw[uses, draw=hibord, line width=0.7pt] (s0.east) -- (qpi.west);
+\draw[uses, draw=hibord, line width=0.7pt] (qpi.east) -- (s1.west);
+
+% Cross link (remote access) — diagonal
+\draw[focus, draw=warnbord, line width=0.7pt, dashed]
+  (s0.east) to[bend right=20] node[midway, above=2pt, font=\sffamily\footnotesize, text=warnbord, align=center] {remote 130 ns \\[2pt] 60 GB/s (1.6x slower)} (d1.north);
+\draw[focus, draw=warnbord, line width=0.7pt, dashed]
+  (s1.west) to[bend left=20] (d0.north);
+
+% Bottom legend
+\node[font=\sffamily\footnotesize, text=impbord, anchor=west] at (0, 0.5) {— local: 같은 node 안 access};
+\node[font=\sffamily\footnotesize, text=warnbord, anchor=west] at (0, -0.1) {-- remote: cross-socket access (QPI 경유)};
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=14cm]
+  at (0, -1.0) {NUMA tuning의 기본은 *CPU affinity*와 *memory binding*을 같은 node에 묶는 것};
+
+\end{tikzpicture}
+\end{document}

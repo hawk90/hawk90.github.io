@@ -1,6 +1,6 @@
 ---
 title: "1-10: 실시간성 분석 — Latency, Jitter, Deadline, WCET, RMA"
-date: 2026-05-12T10:00:00
+date: 2026-05-08T10:00:00
 description: "4 핵심 지표 — Latency·Jitter·Deadline·WCET. Hard vs Soft real-time. Rate Monotonic Analysis로 schedulability 증명."
 series: "Practical RTOS Internals"
 seriesOrder: 10

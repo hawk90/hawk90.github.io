@@ -1,6 +1,6 @@
 ---
 title: "2-04: Speculative Execution — OoO·Reorder Buffer·Register Renaming"
-date: 2026-05-13T11:00:00
+date: 2026-05-08T11:00:00
 description: "Out-of-order execution. ROB·issue queue·rename. Spectre 측면. Cortex-A 사례."
 series: "Embedded Performance Engineering"
 seriesOrder: 12

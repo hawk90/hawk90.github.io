@@ -1,6 +1,6 @@
 ---
 title: "3-04: Priority Inversion 문제 — Mars Pathfinder, Bounded vs Unbounded"
-date: 2026-05-13T01:00:00
+date: 2026-05-08T01:00:00
 description: "고우선 task가 저우선 task 때문에 막힘. 1997 화성 탐사선 reset의 원인."
 series: "Practical RTOS Internals"
 seriesOrder: 25

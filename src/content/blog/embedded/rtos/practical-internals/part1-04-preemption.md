@@ -1,6 +1,6 @@
 ---
 title: "1-04: Preemption과 Cooperation — 강제 전환 vs 자발 양보"
-date: 2026-05-12T04:00:00
+date: 2026-05-08T04:00:00
 description: "Preemptive: tick·IRQ에서 강제 전환. Cooperative: yield 명시. trade-off — latency vs predictability."
 series: "Practical RTOS Internals"
 seriesOrder: 4

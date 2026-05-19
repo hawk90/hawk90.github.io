@@ -1,6 +1,6 @@
 ---
 title: "2-06: Cache Miss — 3C Model·Compulsory·Capacity·Conflict"
-date: 2026-05-13T13:00:00
+date: 2026-05-08T13:00:00
 description: "Cold/Compulsory, Capacity (working set > cache), Conflict (associativity 한계)."
 series: "Embedded Performance Engineering"
 seriesOrder: 14

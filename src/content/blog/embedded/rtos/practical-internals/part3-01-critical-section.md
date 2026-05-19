@@ -1,6 +1,6 @@
 ---
 title: "3-01: Critical Section 구현 — IRQ Disable, BASEPRI, Spinlock"
-date: 2026-05-12T22:00:00
+date: 2026-05-08T22:00:00
 description: "3 가지 구현 — cpsid/BASEPRI mask, taskENTER_CRITICAL, SMP spinlock. Hold time이 latency 결정."
 series: "Practical RTOS Internals"
 seriesOrder: 22

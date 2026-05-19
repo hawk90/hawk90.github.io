@@ -1,6 +1,6 @@
 ---
 title: "3-06: Interrupt Storm — NAPI·Rate-Limit·Polling 전환"
-date: 2026-05-19T05:00:00
+date: 2026-05-08T05:00:00
 description: "IRQ flooding으로 main loop 봉쇄. NAPI 패턴, rate limit, interrupt coalescing."
 series: "Embedded Performance Engineering"
 seriesOrder: 24

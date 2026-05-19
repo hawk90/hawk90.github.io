@@ -1,6 +1,6 @@
 ---
 title: "1-05: 인터럽트와 RTOS — ISR Context, Deferred Processing, FromISR API"
-date: 2026-05-12T05:00:00
+date: 2026-05-08T05:00:00
 description: "ISR은 task가 아님 — context도 따로. Long work는 deferred task로. FromISR API 패턴."
 series: "Practical RTOS Internals"
 seriesOrder: 5

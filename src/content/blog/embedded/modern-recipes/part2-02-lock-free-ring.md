@@ -14,6 +14,10 @@ draft: true
 
 ## 기본 SPSC Ring
 
+Ring 안에서 head와 tail이 어떻게 움직이는지 그림으로 먼저 잡고 코드를 봅니다.
+
+![SPSC ring buffer — head는 producer, tail은 consumer](/images/blog/modern-recipes/diagrams/part2-02-lock-free-ring.svg)
+
 ```c
 #define RING_SIZE 64   /* power of 2 */
 #define RING_MASK (RING_SIZE - 1)

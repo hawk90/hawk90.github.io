@@ -1,6 +1,6 @@
 ---
 title: "1-03: 스케줄링 알고리즘 — RR, Priority, EDF, RMS"
-date: 2026-05-12T03:00:00
+date: 2026-05-08T03:00:00
 description: "Round Robin, Priority-based preemptive, Earliest Deadline First, Rate Monotonic. 임베디드 RTOS는 대부분 fixed-priority preemptive."
 series: "Practical RTOS Internals"
 seriesOrder: 3

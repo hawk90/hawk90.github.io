@@ -1,6 +1,6 @@
 ---
 title: "3-08: Event Group — Bit Flag·AND/OR Wait·Sync Barrier"
-date: 2026-05-13T05:00:00
+date: 2026-05-08T05:00:00
 description: "FreeRTOS Event Group — 24-bit flag, AND·OR semantics, clear-on-exit, multi-task sync."
 series: "Practical RTOS Internals"
 seriesOrder: 29

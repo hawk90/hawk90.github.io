@@ -38,6 +38,10 @@ Non-Secure World (NS):
 → region별 attribute로 분리
 ```
 
+두 세계가 같은 칩 위에서 어떻게 갈라지는지 그림으로 보면 이렇습니다. Secure Flash/SRAM/Peripheral과 Non-Secure 영역이 attribute로 분리되고, NSC veneer가 둘 사이의 유일한 합법 통로가 됩니다.
+
+![TrustZone-M secure / non-secure world](/images/blog/rtos/diagrams/part4-11-trustzone-worlds.svg)
+
 두 세계는 *별도의 register bank*를 가집니다. MSP와 PSP가 각각 `MSP_S/MSP_NS`, `PSP_S/PSP_NS`로 나뉘고, world 전환 시 hardware가 자동으로 stack을 바꿉니다. PRIMASK, BASEPRI 같은 mask register도 두 벌입니다. NS에서 IRQ를 막아도 Secure IRQ는 계속 들어옵니다.
 
 ## Memory 분할 — SAU와 IDAU

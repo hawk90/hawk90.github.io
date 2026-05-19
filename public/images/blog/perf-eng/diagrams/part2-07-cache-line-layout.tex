@@ -1,0 +1,93 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  byte/.style={rectangle, draw=nodebord, line width=0.3pt, minimum width=4mm, minimum height=6mm, inner sep=0pt, font=\sffamily\tiny, align=center, fill=nodefill},
+  hot/.style={byte, fill=hifill, draw=hibord},
+  cold/.style={byte, fill=absfill, draw=absbord},
+  cdr0/.style={byte, fill=impfill, draw=impbord},
+  cdr1/.style={byte, fill=confill, draw=conbord},
+  hdr/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.8) {64-byte cache line — 세 가지 배치 비교};
+
+% Layout: x=-7..-7+64*0.16=2.24 (right edge)
+% Use 0.16cm per byte
+
+% ----- 1. Hot/Cold mixed (bad) -----
+\node[hdr] at (-7, 4.8) {(1) Hot + Cold 섞임 — 회피};
+\foreach \i in {0,...,63} {
+  \pgfmathsetmacro{\xpos}{-7 + (\i+0.5)*0.16}
+  \pgfmathtruncatemacro{\group}{int(mod(\i, 8))}
+  \ifnum\group<2
+    \node[hot] at (\xpos, 4.2) {};
+  \else
+    \node[cold] at (\xpos, 4.2) {};
+  \fi
+}
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west, text width=130mm] at (-7, 3.55) {hot 2 byte + cold 6 byte 반복 — hot만 쓰려 해도 line의 75\%가 \textbf{낭비된 fetch}.};
+
+% ----- 2. Hot/Cold split (good) -----
+\node[hdr] at (-7, 2.6) {(2) Hot/Cold 분리 — Good};
+\foreach \i in {0,...,63} {
+  \pgfmathsetmacro{\xpos}{-7 + (\i+0.5)*0.16}
+  \ifnum\i<24
+    \node[hot] at (\xpos, 2.0) {};
+  \else
+    \node[cold] at (\xpos, 2.0) {};
+  \fi
+}
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west, text width=130mm] at (-7, 1.35) {hot 24 byte 연속, cold는 별도 line — hot path가 한 line에 \textbf{밀집}.};
+
+% ----- 3. False sharing (bad) -----
+\node[hdr] at (-7, 0.6) {(3) False Sharing — 두 코어 충돌};
+\foreach \i in {0,...,63} {
+  \pgfmathsetmacro{\xpos}{-7 + (\i+0.5)*0.16}
+  \ifnum\i<4
+    \node[cdr0] at (\xpos, -0.6) {};
+  \else
+    \ifnum\i<8
+      \node[cdr1] at (\xpos, -0.6) {};
+    \else
+      \node[byte] at (\xpos, -0.6) {};
+    \fi
+  \fi
+}
+% C0/C1 labels to the right of bytes (less crowded)
+\node[font=\sffamily\bfseries\footnotesize, text=impbord, anchor=west] at (-7+8*0.16+0.3, -0.4) {C0 = a};
+\node[font=\sffamily\bfseries\footnotesize, text=conbord, anchor=west] at (-7+8*0.16+0.3, -0.8) {C1 = b};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west, text width=130mm] at (-7, -1.45) {Core 0의 \texttt{a}, Core 1의 \texttt{b}가 같은 line — write마다 cache invalidate \textbf{ping-pong}.};
+
+% Byte ruler — bottom, only at 0, 32, 63
+\foreach \i in {0,32,63} {
+  \pgfmathsetmacro{\xpos}{-7 + (\i+0.5)*0.16}
+  \node[font=\sffamily\scriptsize, text=mutec] at (\xpos, -2.25) {\i};
+  \draw[draw=mutec, line width=0.3pt] (\xpos, -2.0) -- (\xpos, -2.1);
+}
+\draw[draw=mutec, line width=0.3pt] (-6.9, -2.05) -- (-7+64*0.16+0.1, -2.05);
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (-7+64*0.16+0.4, -2.25) {byte offset};
+
+% Legend
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west] at (-7, -3.2) {Legend:};
+\node[hot, minimum width=8mm] at (-5.6, -3.2) {};
+\node[font=\sffamily\footnotesize, anchor=west] at (-5.1, -3.2) {hot field};
+\node[cold, minimum width=8mm] at (-3.0, -3.2) {};
+\node[font=\sffamily\footnotesize, anchor=west] at (-2.5, -3.2) {cold field};
+\node[cdr0, minimum width=8mm] at (-0.3, -3.2) {};
+\node[font=\sffamily\footnotesize, anchor=west] at (0.2, -3.2) {Core 0 변수};
+\node[cdr1, minimum width=8mm] at (2.4, -3.2) {};
+\node[font=\sffamily\footnotesize, anchor=west] at (2.9, -3.2) {Core 1 변수};
+
+\node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=west, text width=150mm] at (-7, -4.0) {
+  해결: hot/cold splitting + \texttt{alignas(64)}로 두 atomic 변수를 각자의 line에 배치.
+};
+
+\end{tikzpicture}
+\end{document}

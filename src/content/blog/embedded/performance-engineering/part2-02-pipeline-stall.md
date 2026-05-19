@@ -1,6 +1,6 @@
 ---
 title: "2-02: Pipeline Stall — Data·Structural·Control Hazard + Forwarding"
-date: 2026-05-13T09:00:00
+date: 2026-05-08T09:00:00
 description: "Stall = pipeline bubble. RAW·WAR·WAW hazard, forwarding, PMU STALL counter."
 series: "Embedded Performance Engineering"
 seriesOrder: 10

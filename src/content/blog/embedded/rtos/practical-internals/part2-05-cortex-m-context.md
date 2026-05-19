@@ -1,6 +1,6 @@
 ---
 title: "2-05: ARM Cortex-M Context Switch — PendSV, MSP/PSP, 어셈블리"
-date: 2026-05-12T15:00:00
+date: 2026-05-08T15:00:00
 description: "Cortex-M context switch는 PendSV 예외와 dual-stack 모델로 압축됩니다. FreeRTOS port의 PendSV 핸들러 어셈블리를 한 줄씩 따라가며 EXC_RETURN, BASEPRI, lazy FPU까지 풀어봅니다."
 series: "Practical RTOS Internals"
 seriesOrder: 15
@@ -73,6 +73,10 @@ Exception return → PSP로 task code 진입
 ```
 
 CONTROL register의 *bit 1 (SPSEL)* 이 0이면 MSP, 1이면 PSP입니다.
+
+전체 그림을 한 장으로 정리하면 이렇습니다. HW가 자동 push하는 8개 레지스터와 SW가 push하는 R4-R11이 어떻게 stack에 쌓이고, EXC_RETURN 값이 어떻게 return mode를 결정하는지가 한눈에 보입니다.
+
+![Cortex-M context switch stack frame](/images/blog/rtos/diagrams/part2-05-pendsv-context-save.svg)
 
 ## PendSV 핸들러 — 한 줄씩 풀기
 

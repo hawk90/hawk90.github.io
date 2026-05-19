@@ -1,6 +1,6 @@
 ---
 title: "2-08: Tick과 타이머 — SysTick, Generic Timer, configTICK_RATE_HZ"
-date: 2026-05-12T18:00:00
+date: 2026-05-08T18:00:00
 description: "RTOS의 심장 박동. SysTick 1 kHz가 표준 — Hz 선택의 trade-off."
 series: "Practical RTOS Internals"
 seriesOrder: 18

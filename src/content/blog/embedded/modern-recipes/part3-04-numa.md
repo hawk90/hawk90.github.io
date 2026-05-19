@@ -19,6 +19,10 @@ tags: [recipes, numa, memory, hbm, cxl]
 
 ## 핵심 개념
 
+2-socket 서버의 토폴로지를 그림으로 보면 local과 remote의 차이가 분명합니다.
+
+![2-socket NUMA topology — local 80 ns, remote 130 ns](/images/blog/modern-recipes/diagrams/part3-04-numa-topology.svg)
+
 ```text
 Server 2-socket
   Socket 0 (CPU 0~15) ── DDR 64 GB (node 0)

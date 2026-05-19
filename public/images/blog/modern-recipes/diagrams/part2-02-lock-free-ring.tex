@@ -1,0 +1,54 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cell/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=13mm, minimum height=12mm, inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  used/.style={cell, fill=clifill, draw=clibord},
+  freeC/.style={cell, fill=white},
+  ptr/.style={font=\sffamily\bfseries\footnotesize}
+]
+
+% Title
+\node[font=\sffamily\bfseries\normalsize, text=inkc] at (4.6, 3.4) {SPSC Ring Buffer — capacity 8};
+
+% 8 cells horizontally — slots 2..5 contain data
+\node[freeC] (c0) at (0*1.4, 0) {};
+\node[freeC] (c1) at (1*1.4, 0) {};
+\node[used]  (c2) at (2*1.4, 0) {D2};
+\node[used]  (c3) at (3*1.4, 0) {D3};
+\node[used]  (c4) at (4*1.4, 0) {D4};
+\node[used]  (c5) at (5*1.4, 0) {D5};
+\node[freeC] (c6) at (6*1.4, 0) {};
+\node[freeC] (c7) at (7*1.4, 0) {};
+
+% Indices below
+\foreach \i in {0,...,7} {
+  \node[font=\sffamily\scriptsize, text=mutec, below=2pt of c\i] {\i};
+}
+
+% Tail pointer (consumer)
+\node[ptr, text=impbord] (tail) at (2*1.4, 1.7) {tail (consumer)};
+\draw[arr, draw=impbord, line width=0.6pt] (tail.south) -- (c2.north);
+
+% Head pointer (producer)
+\node[ptr, text=conbord] (head) at (6*1.4, 1.7) {head (producer)};
+\draw[arr, draw=conbord, line width=0.6pt] (head.south) -- (c6.north);
+
+% Bracket showing filled region
+\draw[decorate, decoration={brace, mirror, amplitude=4pt}, draw=clibord]
+  ($(c2.south west)+(0,-0.8)$) -- ($(c5.south east)+(0,-0.8)$)
+  node[midway, below=4pt, font=\sffamily\footnotesize, text=clibord] {filled (4 items)};
+
+% Side notes
+\node[font=\sffamily\footnotesize, text=conbord, anchor=west] at (0, -2.6) {Producer: 빈자리 확인 $\to$ data 쓰기 $\to$ head++ (release)};
+\node[font=\sffamily\footnotesize, text=impbord, anchor=west] at (0, -3.2) {Consumer: head 읽기 (acquire) $\to$ data 읽기 $\to$ tail++};
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=12cm]
+  at (0, -4.0) {각자가 *자기 pointer만* 쓰므로 lock 없이도 안전 — atomic + acquire/release면 충분};
+
+\end{tikzpicture}
+\end{document}

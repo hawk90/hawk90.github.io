@@ -1,0 +1,79 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bar/.style={rectangle, draw=nodebord, line width=0.3pt, minimum height=8mm, inner sep=2pt, font=\sffamily\footnotesize, align=center},
+  hot/.style={bar, fill=warnfill, draw=warnbord, font=\sffamily\bfseries\footnotesize},
+  cool/.style={bar, fill=clifill, draw=clibord},
+  cool2/.style={bar, fill=hifill, draw=hibord},
+  cool3/.style={bar, fill=impfill, draw=impbord},
+  cool4/.style={bar, fill=absfill, draw=absbord}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 6.6) {Flamegraph 해부 — x축 = sample 비율, y축 = call depth};
+
+% Y-axis label
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, rotate=90] at (-7.6, 2.4) {call depth $\rightarrow$};
+
+% Level 0 — main (full width)
+\node[cool4, minimum width=130mm, anchor=west] at (-6.5, 0.0) {main()};
+% Level 1
+\node[cool,  minimum width=88mm, anchor=west] at (-6.5, 0.85) {process\_request()};
+\node[cool4, minimum width=18mm, anchor=west] at ( 2.3, 0.85) {log()};
+\node[cool4, minimum width=20mm, anchor=west] at ( 4.3, 0.85) {write\_resp()};
+
+% Level 2
+\node[cool3, minimum width=14mm, anchor=west] at (-6.5, 1.70) {parse};
+\node[cool3, minimum width=18mm, anchor=west] at (-5.1, 1.70) {db};
+\node[cool2, minimum width=54mm, anchor=west] at (-3.3, 1.70) {compute()};
+
+% Level 3
+\node[hot,   minimum width=48mm, anchor=west] at (-3.0, 2.55) {matrix\_mul()};
+\node[cool3, minimum width=2.8mm, anchor=west] at (-3.3, 2.55) {};
+
+% Level 4
+\node[hot, minimum width=40mm, anchor=west] at (-2.5, 3.40) {inner\_loop()};
+
+% Annotations — pushed higher and to the side
+\draw[focus, draw=focusc, line width=0.7pt] (0.0, 3.85) -- (4.6, 5.6);
+\node[note, fill=warnfill, draw=warnbord, anchor=south west, text width=42mm] at (4.6, 5.6) {
+  \textbf{hot leaf}\\[2pt]
+  가장 넓은 stack의 가장 위.\\[1pt]
+  최우선 최적화 대상.
+};
+
+\draw[focus, draw=focusc, line width=0.7pt] (-6.2, 1.7) -- (-5.6, 5.6);
+\node[note, anchor=south west, text width=36mm] at (-7.4, 5.6) {
+  \textbf{좁은 bar}\\[2pt]
+  sample 적음. 최적화 가치 낮음.
+};
+
+\draw[focus, draw=focusc, line width=0.7pt] (-0.5, 1.7) -- (0.4, 5.6);
+\node[note, anchor=south west, fill=hifill, draw=hibord, text width=38mm] at (-0.6, 5.6) {
+  \textbf{넓은 bar}\\[2pt]
+  전체 시간의 큰 부분. 먼저 검토.
+};
+
+% X-axis tick line
+\draw[draw=mutec, line width=0.3pt, ->] (-7.0, -0.6) -- (7.0, -0.6);
+\foreach \i in {-6.5, -3.5, -0.5, 2.5, 5.5} {
+  \draw[draw=mutec, line width=0.3pt] (\i, -0.6) -- (\i, -0.78);
+}
+\node[font=\sffamily\scriptsize, text=mutec] at (-6.5, -1.0) {0\%};
+\node[font=\sffamily\scriptsize, text=mutec] at (-0.5, -1.0) {50\%};
+\node[font=\sffamily\scriptsize, text=mutec] at ( 5.5, -1.0) {100\%};
+\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (0, -1.5) {sample count $\rightarrow$ (전체 시간 비율)};
+
+% Bottom note
+\node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=west, text width=150mm] at (-7.5, -2.5) {
+  색상은 의미 없음 (시각 구분용). 정렬은 알파벳 순 — 시간 순서 아님. on-CPU flamegraph는 sleep/IO 제외.
+};
+
+\end{tikzpicture}
+\end{document}
