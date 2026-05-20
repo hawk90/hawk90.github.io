@@ -1,0 +1,55 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=8mm]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4.5) {Order Processing Activity};
+
+% Start
+\node[circle, fill=inkc, inner sep=2.5pt] (start) at (0,3.5) {};
+
+% Activity 1
+\node[cls, minimum width=30mm, minimum height=8mm, below=of start] (receive) {주문 접수};
+
+% Decision
+\node[q, minimum width=24mm, below=of receive] (stock) {재고 확인};
+
+% Activity 3 / 4 (branches)
+\node[cls, minimum width=24mm, minimum height=8mm] (ship) at (-3.2,-0.5) {출고};
+\node[cls, minimum width=24mm, minimum height=8mm] (order) at (3.2,-0.5) {발주};
+
+% Fork bar
+\node[rectangle, fill=inkc, minimum width=42mm, minimum height=1.6mm] (fork) at (0,-2) {};
+
+% Parallel branches
+\node[cls, minimum width=24mm, minimum height=8mm] (delivery) at (-3.2,-3.2) {배송};
+\node[cls, minimum width=24mm, minimum height=8mm] (notify)   at ( 3.2,-3.2) {고객 알림};
+
+% Join bar
+\node[rectangle, fill=inkc, minimum width=42mm, minimum height=1.6mm] (join) at (0,-4.4) {};
+
+% Final
+\node[circle, draw=inkc, line width=0.6pt, inner sep=2.5pt] (final) at (0,-5.6) {};
+\node[circle, fill=inkc, inner sep=1pt] at (final) {};
+
+% Edges
+\draw[arr] (start) -- (receive);
+\draw[arr] (receive) -- (stock);
+\draw[arr] (stock) -| node[above, near start, font=\footnotesize] {있음} (ship);
+\draw[arr] (stock) -| node[above, near start, font=\footnotesize] {없음} (order);
+\draw[arr] (ship)  -- ($(fork.west)+(-0,0)$) ;
+\draw[arr] (order) -- ($(fork.east)+(0,0)$);
+\draw[arr] (fork.south -| delivery) -- (delivery.north);
+\draw[arr] (fork.south -| notify)   -- (notify.north);
+\draw[arr] (delivery.south) -- (join.north -| delivery);
+\draw[arr] (notify.south)   -- (join.north -| notify);
+\draw[arr] (join.south) -- (final);
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,53 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4.6) {Traffic Management System Layers};
+
+% --- TMC layer ---
+\node[hi, minimum width=32mm, minimum height=12mm] (op)    at (-5,3) {Operator\\[2pt]Console};
+\node[hi, minimum width=32mm, minimum height=12mm] (strat) at ( 0,3) {Strategy\\[2pt]Manager};
+\node[hi, minimum width=32mm, minimum height=12mm] (dw)    at ( 5,3) {Data Warehouse\\[2pt]\& Analytics};
+
+\node[panel, fit=(op)(strat)(dw), inner sep=8pt] (tmc) {};
+\node[panelTitle] at (tmc.north west) {TMC};
+
+% --- Zone layer ---
+\node[con, minimum width=32mm, minimum height=10mm] (z1) at (-5,0) {Zone\\Controller};
+\node[con, minimum width=32mm, minimum height=10mm] (z2) at ( 0,0) {Zone\\Controller};
+\node[con, minimum width=32mm, minimum height=10mm] (z3) at ( 5,0) {Zone\\Controller};
+
+\node[panel, fit=(z1)(z2)(z3), inner sep=8pt] (zone) {};
+\node[panelTitle] at (zone.north west) {Zone};
+
+% --- Local layer ---
+\node[imp, minimum width=32mm, minimum height=10mm] (l1) at (-5,-3) {Local\\(교차로)};
+\node[imp, minimum width=32mm, minimum height=10mm] (l2) at ( 0,-3) {Local\\(교차로)};
+\node[imp, minimum width=32mm, minimum height=10mm] (l3) at ( 5,-3) {Local\\(교차로)};
+
+\node[panel, fit=(l1)(l2)(l3), inner sep=8pt] (local) {};
+\node[panelTitle] at (local.north west) {Local};
+
+% --- Vertical connections ---
+\draw[arr] (op.south)    -- (z1.north);
+\draw[arr] (strat.south) -- (z2.north);
+\draw[arr] (dw.south)    -- (z3.north);
+
+\draw[arr] (z1.south) -- (l1.north);
+\draw[arr] (z2.south) -- (l2.north);
+\draw[arr] (z3.south) -- (l3.north);
+
+% --- Annotations on the right ---
+\node[caption, anchor=west] at (7.5,3)  {전체 감시 / 전략 / 비상};
+\node[caption, anchor=west] at (7.5,0)  {구역 조율 / 녹색파};
+\node[caption, anchor=west] at (7.5,-3) {센서 \& 액추에이터};
+
+\end{tikzpicture}
+\end{document}

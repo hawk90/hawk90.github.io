@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (8,1.4) {Order Processing Sequence};
+
+% Actors at top
+\node[actor] (cli)  at ( 0,0) {Client};
+\node[actor] (ctl)  at ( 4,0) {OrderController};
+\node[actor] (svc)  at ( 8,0) {OrderService};
+\node[actor] (inv)  at (12,0) {Inventory};
+\node[actor] (pay)  at (16,0) {Payment};
+
+% Lifelines (dashed vertical)
+\draw[lifeline] (cli.south) -- ++(0,-11);
+\draw[lifeline] (ctl.south) -- ++(0,-11);
+\draw[lifeline] (svc.south) -- ++(0,-11);
+\draw[lifeline] (inv.south) -- ++(0,-11);
+\draw[lifeline] (pay.south) -- ++(0,-11);
+
+% Messages — y decreases as time advances
+\draw[msgsync] (cli |- 0,-1.2) -- node[msglabel]{1. createOrder()} (ctl |- 0,-1.2);
+\draw[msgsync] (ctl |- 0,-2.4) -- node[msglabel]{2. createOrder()} (svc |- 0,-2.4);
+\draw[msgsync] (svc |- 0,-3.6) -- node[msglabel]{3. checkStock()}  (inv |- 0,-3.6);
+\draw[msgret]  (inv |- 0,-4.6) -- node[msglabel]{4. available}     (svc |- 0,-4.6);
+\draw[msgsync] (svc |- 0,-5.8) -- node[msglabel]{5. authorize()}   (pay |- 0,-5.8);
+\draw[msgret]  (pay |- 0,-6.8) -- node[msglabel]{6. success}       (svc |- 0,-6.8);
+\draw[msgsync] (svc |- 0,-8.0) -- node[msglabel]{7. reserve()}     (inv |- 0,-8.0);
+\draw[msgret]  (svc |- 0,-9.2) -- node[msglabel]{8. OrderDto}      (ctl |- 0,-9.2);
+\draw[msgret]  (ctl |- 0,-10.4) -- node[msglabel]{9. response}     (cli |- 0,-10.4);
+
+\end{tikzpicture}
+\end{document}

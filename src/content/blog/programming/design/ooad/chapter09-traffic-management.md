@@ -260,39 +260,17 @@ public class AdaptiveStrategy implements ControlStrategy {
 
 ### 계층 구조
 
-```text
-교통 관리 시스템 계층:
+교통 관리 시스템은 3-계층 — TMC, Zone Controller, Local Controller.
 
-┌─────────────────────────────────────────────────────────┐
-│              Traffic Management Center (TMC)            │
-│  ┌───────────┐  ┌───────────┐  ┌───────────────────┐   │
-│  │ Operator  │  │ Strategy  │  │ Data Warehouse    │   │
-│  │ Console   │  │ Manager   │  │ & Analytics       │   │
-│  └─────┬─────┘  └─────┬─────┘  └─────────┬─────────┘   │
-└────────┼──────────────┼────────────────────┼───────────┘
-         │              │                    │
-    ═════╪══════════════╪════════════════════╪═════════
-         │              │                    │
-┌────────┼──────────────┼────────────────────┼───────────┐
-│        ▼              ▼                    ▼           │
-│  ┌───────────┐  ┌───────────┐  ┌───────────────────┐   │
-│  │ Zone      │  │ Zone      │  │ Zone              │   │
-│  │ Controller│  │ Controller│  │ Controller        │   │
-│  └─────┬─────┘  └─────┬─────┘  └─────────┬─────────┘   │
-│        │              │                    │           │
-│   ─────┼──────────────┼────────────────────┼─────      │
-│        │              │                    │           │
-│  ┌─────┴─────┐  ┌─────┴─────┐  ┌─────────┴─────────┐   │
-│  │Local Ctrl │  │Local Ctrl │  │   Local Ctrl      │   │
-│  │(교차로)    │  │(교차로)    │  │   (교차로)        │   │
-│  └───────────┘  └───────────┘  └───────────────────┘   │
-└─────────────────────────────────────────────────────────┘
+![Traffic Management System Layers](/images/blog/ooad/diagrams/ch09-system-layers.svg)
 
-계층 역할:
-  TMC: 전체 네트워크 감시, 전략 결정, 비상 대응
-  Zone: 구역 내 교차로 조율, 연동 제어
-  Local: 개별 교차로 제어, 센서/액추에이터 인터페이스
-```
+| 계층 | 역할 |
+|------|------|
+| TMC (Traffic Management Center) | 전체 네트워크 감시, 전략 결정, 비상 대응 |
+| Zone | 구역 내 교차로 조율, 연동 제어 (녹색파) |
+| Local | 개별 교차로 제어, 센서/액추에이터 인터페이스 |
+
+데이터 흐름은 양방향. 아래에서 위로 — 센서 측정값과 상태 보고. 위에서 아래로 — 전략 명령과 비상 우선 명령.
 
 ### 로컬 컨트롤러
 
@@ -654,70 +632,28 @@ public class EmergencyVehiclePreemption {
 
 ### 교차로 제어 상태
 
-```text
-교차로 컨트롤러 상태:
+![Intersection Controller State Machine](/images/blog/ooad/diagrams/ch09-intersection-state.svg)
 
-              ●
-              │
-              ▼
-       ┌─────────────┐
-       │ Initializing│
-       └──────┬──────┘
-              │ hardware OK
-              ▼
-       ┌─────────────┐     preemption    ┌─────────────┐
-   ┌──▶│   Normal    │─────────────────▶│  Preemption │
-   │   └──────┬──────┘                   └──────┬──────┘
-   │          │                                 │
-   │     comm lost                         cleared
-   │          │                                 │
-   │          ▼                                 │
-   │   ┌─────────────┐                          │
-   │   │  Standalone │◀─────────────────────────┘
-   │   └──────┬──────┘
-   │          │
-   │     comm restored
-   │          │
-   └──────────┘
-
-상태 설명:
-  Normal: 상위 제어기와 연동, 정상 운행
-  Standalone: 통신 두절, 독립 운행
-  Preemption: 비상 차량 우선 신호
-```
+| 상태 | 의미 |
+|------|------|
+| `Initializing` | 부팅·하드웨어 자가 진단 |
+| `Normal` | 상위 제어기와 연동, 정상 운행 |
+| `Standalone` | 통신 두절, 독립 운행 |
+| `Preemption` | 비상 차량 우선 신호 |
 
 ### 신호 상태
 
-```text
-신호 상태 머신:
+개별 신호의 색상 상태 머신.
 
-       ●
-       │
-       ▼
-   ┌───────┐   greenOn    ┌───────┐
-   │  OFF  │─────────────▶│ GREEN │
-   └───┬───┘              └───┬───┘
-       │                      │
-       │ flashYellow    timeout/demand
-       │                      │
-       ▼                      ▼
-   ┌───────┐              ┌───────┐
-   │ FLASH │              │YELLOW │
-   └───────┘              └───┬───┘
-                              │
-                          timeout
-                              │
-                              ▼
-                          ┌───────┐
-                          │  RED  │
-                          └───────┘
+![Signal State Machine](/images/blog/ooad/diagrams/ch09-signal-state.svg)
 
-전이 조건:
-  GREEN → YELLOW: 시간 만료 또는 충돌 요청
-  YELLOW → RED: 황색 시간 경과
-  RED → GREEN: 해당 페이즈 활성화
-  * → FLASH: 고장 또는 야간 모드
-```
+| 전이 | 조건 |
+|------|------|
+| `OFF` → `GREEN` | 페이즈 활성화 (`greenOn`) |
+| `GREEN` → `YELLOW` | 시간 만료 또는 충돌 요청 |
+| `YELLOW` → `RED` | 황색 시간 경과 |
+| `RED` → `GREEN` | 다음 페이즈 활성화 |
+| 임의 → `FLASH` | 고장 또는 야간 모드 |
 
 ## 정리
 

@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (5,2.8) {Order State Machine};
+
+% Start indicator
+\node[circle, fill=inkc, inner sep=2pt] (start) at (-1.5,1.2) {};
+
+% States — linear flow
+\node[cls, minimum width=22mm, minimum height=10mm] (draft)    at ( 1,1.2) {Draft};
+\node[abs, minimum width=22mm, minimum height=10mm] (pending)  at ( 5,1.2) {Pending};
+\node[imp, minimum width=22mm, minimum height=10mm] (paid)     at ( 9,1.2) {Paid};
+\node[imp, minimum width=22mm, minimum height=10mm] (shipped)  at (13,1.2) {Shipped};
+\node[hi,  minimum width=22mm, minimum height=10mm] (delivered) at (13,-1.6) {Delivered};
+
+% Off-track state
+\node[con, minimum width=22mm, minimum height=10mm] (cancelled) at (5,-1.6) {Cancelled};
+
+% Final state (double circle approximation)
+\node[circle, draw=inkc, line width=0.6pt, inner sep=2.5pt] (final) at (13,-3.6) {};
+\node[circle, fill=inkc, inner sep=1pt] at (final) {};
+
+% Transitions
+\draw[arr] (start) -- (draft);
+\draw[arr] (draft) -- node[above, font=\footnotesize] {place()} (pending);
+\draw[arr] (pending) -- node[above, font=\footnotesize] {pay()} (paid);
+\draw[arr] (paid) -- node[above, font=\footnotesize] {ship()} (shipped);
+\draw[arr] (shipped) -- node[right, font=\footnotesize] {deliver()} (delivered);
+\draw[arr] (delivered) -- (final);
+
+% Cancel branch
+\draw[arr] (pending) -- node[right, font=\footnotesize] {cancel()} (cancelled);
+
+\end{tikzpicture}
+\end{document}

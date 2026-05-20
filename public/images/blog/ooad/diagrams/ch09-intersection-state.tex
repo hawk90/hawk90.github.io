@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (1.5,4) {Intersection Controller State Machine};
+
+% Start indicator
+\node[circle, fill=inkc, inner sep=2pt] (start) at (-4,2.5) {};
+
+% States
+\node[abs, minimum width=28mm, minimum height=10mm] (init) at (-1.5,2.5) {Initializing};
+\node[imp, minimum width=28mm, minimum height=10mm] (normal) at (-1.5,0) {Normal};
+\node[con, minimum width=28mm, minimum height=10mm] (preempt) at (4.5,0) {Preemption};
+\node[hi, minimum width=28mm, minimum height=10mm] (standalone) at (-1.5,-2.5) {Standalone};
+
+% Transitions
+\draw[arr] (start) -- (init);
+\draw[arr] (init) -- node[right, font=\footnotesize] {hardware OK} (normal);
+\draw[arr] (normal) -- node[above, font=\footnotesize] {preemption} (preempt);
+\draw[arr] (preempt.south) to[bend left=15] node[below right, font=\footnotesize] {cleared} (standalone.east);
+\draw[arr] (normal.west) to[bend right=45] node[left, font=\footnotesize] {comm lost} (standalone.west);
+\draw[arr] (standalone.north east) to[bend right=15] node[right, font=\footnotesize] {comm restored} (normal.south east);
+
+\end{tikzpicture}
+\end{document}

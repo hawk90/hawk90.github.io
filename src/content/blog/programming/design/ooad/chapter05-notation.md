@@ -146,19 +146,9 @@ bookAuthor: "Grady Booch"
 
 주문 처리 시나리오 — 참여자: `Client`, `OrderController`, `OrderService`, `Inventory`, `Payment`.
 
-| # | 발신 | 수신 | 메시지 | 종류 |
-|---|------|------|--------|------|
-| 1 | Client | OrderController | `createOrder()` | sync |
-| 2 | OrderController | OrderService | `createOrder()` | sync |
-| 3 | OrderService | Inventory | `checkStock()` | sync |
-| 4 | Inventory | OrderService | `available` | return |
-| 5 | OrderService | Payment | `authorize()` | sync |
-| 6 | Payment | OrderService | `success` | return |
-| 7 | OrderService | Inventory | `reserve()` | sync |
-| 8 | OrderService | OrderController | `OrderDto` | return |
-| 9 | OrderController | Client | `response` | return |
+![Order Processing Sequence Diagram](/images/blog/ooad/diagrams/ch05-sequence-order.svg)
 
-읽는 법: `OrderService`가 *오케스트레이터*입니다. 재고 확인 → 결제 승인 → 재고 차감의 순서가 보장됩니다. 결제가 실패하면 7번이 실행되지 않아 재고가 그대로 남습니다.
+읽는 법: `OrderService`가 *오케스트레이터*입니다. 재고 확인 → 결제 승인 → 재고 차감의 순서가 보장됩니다. 결제가 실패하면 7번 `reserve()`가 실행되지 않아 재고가 그대로 남습니다.
 
 ### 조합 프래그먼트
 
@@ -207,15 +197,7 @@ exit / cleanup()
 
 주문 상태 머신 — 초기 상태 ● → `Draft` 진입.
 
-| 출발 상태 | 이벤트 | 도착 상태 |
-|-----------|--------|-----------|
-| (초기) ● | — | `Draft` |
-| `Draft` | `place()` | `Pending` |
-| `Pending` | `pay()` | `Paid` |
-| `Pending` | `cancel()` | `Cancelled` |
-| `Paid` | `ship()` | `Shipped` |
-| `Shipped` | `deliver()` | `Delivered` |
-| `Delivered` | — | (최종) ◎ |
+![Order State Machine](/images/blog/ooad/diagrams/ch05-order-state.svg)
 
 읽는 법: `Pending`은 두 갈래 — 결제하면 `Paid`로, 취소하면 `Cancelled`로. `Shipped` 이후로는 취소 불가능합니다. `Cancelled`는 최종 상태가 아니라 별도 종료점으로 표시할 수도 있습니다.
 
@@ -259,27 +241,17 @@ exit / cleanup()
 
 | 요소 | 표기 | 의미 |
 |------|------|------|
-| 시작 | 채운 원 ● | 흐름 시작점 |
+| 시작 | 채운 원 | 흐름 시작점 |
 | 활동 | 둥근 사각형 | 작업 한 단위 |
-| 결정 | 다이아몬드 ◆ | 가드 조건에 따른 분기 |
-| 합류 | 다이아몬드 ◆ | 여러 분기가 하나로 모임 |
-| 포크 | 굵은 가로선 ═══ | 병렬 분기 시작 |
-| 조인 | 굵은 가로선 ═══ | 병렬 분기 종료 (모두 끝나야 다음) |
-| 종료 | 이중원 ◎ | 흐름 끝 |
+| 결정 | 다이아몬드 | 가드 조건에 따른 분기 |
+| 합류 | 다이아몬드 | 여러 분기가 하나로 모임 |
+| 포크 | 굵은 가로 막대 | 병렬 분기 시작 |
+| 조인 | 굵은 가로 막대 | 병렬 분기 종료 (모두 끝나야 다음) |
+| 종료 | 이중원 | 흐름 끝 |
 
 예 — 주문 처리 워크플로우.
 
-| 단계 | 종류 | 다음 |
-|------|------|------|
-| 1. `주문 접수` | 활동 | 2 |
-| 2. `재고 확인` ◆ | 결정 | 있음 → 3, 없음 → 4 |
-| 3. `출고` | 활동 | 5 |
-| 4. `발주` | 활동 | 5 |
-| 5. 포크 ═══ | 병렬 시작 | 6a, 6b |
-| 6a. `배송` | 활동 | 7 |
-| 6b. `고객 알림` | 활동 | 7 |
-| 7. 조인 ═══ | 병렬 종료 | 8 |
-| 8. ◎ | 종료 | — |
+![Order Processing Activity Diagram](/images/blog/ooad/diagrams/ch05-activity-order.svg)
 
 배송과 알림은 *동시에* 진행되며, 둘 다 끝나야 종료에 도달합니다.
 
