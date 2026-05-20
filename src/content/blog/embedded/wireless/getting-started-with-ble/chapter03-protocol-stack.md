@@ -155,31 +155,20 @@ HCI Packet 종류 (1 byte indicator로 구분)
 
 ### Command 패킷 포맷
 
-```text
-HCI Command Packet
-┌────┬──────────┬───────┬─────────────────────┐
-│0x01│ OpCode   │ Param │  Parameters         │
-│    │  2 byte  │Total  │  (variable)         │
-│    │          │Length │                     │
-│    │          │ 1 byte│                     │
-└────┴──────────┴───────┴─────────────────────┘
+![HCI Command Packet](/images/blog/ble/diagrams/ch03-hci-command-frame.svg)
 
-OpCode = OGF(6 bit) | OCF(10 bit)
-  OGF = OpCode Group Field (명령 그룹)
-  OCF = OpCode Command Field (그룹 내 번호)
+OpCode 16 bit는 다시 두 필드로 쪼개집니다 — *OGF*(OpCode Group Field, 6 bit, 명령 그룹) | *OCF*(OpCode Command Field, 10 bit, 그룹 내 번호). 합성 식은 `OpCode = (OGF << 10) | OCF`.
 
-OGF 종류
-  0x01 Link Control
-  0x02 Link Policy
-  0x03 Controller & Baseband
-  0x04 Informational Parameters
-  0x05 Status Parameters
-  0x06 Testing
-  0x08 LE Controller  ← BLE 전용
-  0x3F Vendor Specific
-
-OpCode 합성: OpCode = (OGF << 10) | OCF
-```
+| OGF | 그룹 |
+|-----|------|
+| `0x01` | Link Control |
+| `0x02` | Link Policy |
+| `0x03` | Controller & Baseband |
+| `0x04` | Informational Parameters |
+| `0x05` | Status Parameters |
+| `0x06` | Testing |
+| `0x08` | LE Controller (BLE 전용) |
+| `0x3F` | Vendor Specific |
 
 ### 자주 보는 LE 명령 OpCode
 
@@ -222,18 +211,9 @@ Controller → Host
 
 데이터는 *ACL (Asynchronous Connection-Less) packet*으로 흐릅니다.
 
-```text
-HCI ACL Data Packet
-┌────┬──────────┬───────┬─────────────────────┐
-│0x02│ Handle + │Data   │  L2CAP Data         │
-│    │ Flags    │Total  │  (variable)         │
-│    │  2 byte  │Length │                     │
-│    │          │ 2 byte│                     │
-└────┴──────────┴───────┴─────────────────────┘
+![HCI ACL Data Packet](/images/blog/ble/diagrams/ch03-acl-data-frame.svg)
 
-Handle (12 bit) = 연결 식별자, BC_Flag(2) + PB_Flag(2) | Handle(12)
-PB Flag (Packet Boundary): 0=continue, 1=start non-flush, 2=start flush
-```
+PB Flag (Packet Boundary): `0` = continue, `1` = start non-flush, `2` = start flush.
 
 ## L2CAP — 채널 다중화
 
@@ -249,13 +229,7 @@ LE L2CAP CID 매핑
 
 ### L2CAP Frame
 
-```text
-L2CAP Frame (B-Frame, 가장 흔한 형태)
-┌──────────┬──────┬─────────────────┐
-│ Length   │ CID  │  Information    │
-│  2 byte  │ 2 B  │  (variable)     │
-└──────────┴──────┴─────────────────┘
-```
+![L2CAP B-Frame](/images/blog/ble/diagrams/ch03-l2cap-frame.svg)
 
 ATT 트래픽을 보면 거의 항상 *CID 0x0004*입니다.
 
@@ -274,18 +248,7 @@ ATT는 *원시 read/write 연산*만 제공합니다. *모든 GATT 트래픽이 
 
 ### ATT PDU 포맷
 
-```text
-ATT PDU
-┌──────┬──────────────────┬────────────┐
-│OpCode│ Attribute Params │ Signature  │
-│ 1 B  │   (variable)     │ optional   │
-└──────┴──────────────────┴────────────┘
-
-OpCode bit 구조
-  bit 7: command flag (1 = no response expected)
-  bit 6: authentication signature flag
-  bits 5..0: method
-```
+![ATT PDU](/images/blog/ble/diagrams/ch03-att-pdu.svg)
 
 ### 자주 보는 ATT OpCode
 

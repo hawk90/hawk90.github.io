@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4.5,2.2) {HCI ACL Data Packet};
+
+\node[hi,  minimum width=14mm, minimum height=16mm, anchor=west] (id)  at (0.0,0)  {0x02\\\small indicator};
+\node[abs, minimum width=24mm, minimum height=16mm, anchor=west] (h)   at (1.4,0)  {Handle + Flags\\\small 2 B};
+\node[con, minimum width=24mm, minimum height=16mm, anchor=west] (len) at (3.8,0)  {Data Total\\Length\\\small 2 B};
+\node[imp, minimum width=32mm, minimum height=16mm, anchor=west] (l2)  at (6.2,0)  {L2CAP Data\\\small (variable)};
+
+\node[caption, anchor=west, align=left] at (0,-1.6)
+  {Handle = BC\_Flag (2 bit) + PB\_Flag (2 bit) | Handle (12 bit) — 연결 식별자};
+
+\end{tikzpicture}
+\end{document}

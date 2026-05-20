@@ -370,21 +370,20 @@ Heart Rate Profile Specification 1.0
 
 ### Service Specification의 표 구조
 
-```text
-3. Service Characteristics
-┌──────────────────────────────┬──────────────┬──────────────┐
-│ Characteristic Name          │ Requirement  │ Properties   │
-├──────────────────────────────┼──────────────┼──────────────┤
-│ Heart Rate Measurement       │ Mandatory    │ Notify       │
-│ Body Sensor Location         │ Optional     │ Read         │
-│ Heart Rate Control Point     │ Conditional* │ Write        │
-└──────────────────────────────┴──────────────┴──────────────┘
-* Conditional: "Energy Expended를 지원하면 필수"
+§3 *Service Characteristics* — Heart Rate Service의 Characteristic 목록.
 
-4. Characteristic Descriptors
+| Characteristic Name | Requirement | Properties |
+|---------------------|-------------|------------|
+| Heart Rate Measurement | Mandatory | Notify |
+| Body Sensor Location | Optional | Read |
+| Heart Rate Control Point | Conditional\* | Write |
+
+\* Conditional — *Energy Expended*를 지원하면 필수.
+
+§4 *Characteristic Descriptors*:
+
 - Heart Rate Measurement에는 CCCD가 필수
 - Heart Rate Control Point에는 권한 정보 descriptor 필요
-```
 
 ### Profile Specification의 행동 사양
 
@@ -407,21 +406,7 @@ Heart Rate Profile Specification 1.0
 
 ## SIG-Adopted vs Custom — 결정 흐름
 
-```text
-새 데이터를 추가해야 함
-  │
-  ├─ 표준 service에 *정확히* 매칭됨?
-  │     Yes → 표준 service 사용
-  │
-  ├─ 표준 service에 *비슷하게* 매칭됨?
-  │     → 가능하면 표준 따라 구현 (Optional char 추가)
-  │     → spec에 정의 없는 데이터는 *제외* 또는 *별도 custom service*
-  │
-  └─ 표준에 전혀 없음?
-        → Custom service 만들기
-        → uuidgen으로 base UUID 1개 생성
-        → 16-bit offset으로 service/char 구성
-```
+![SIG-Adopted vs Custom Decision Flow](/images/blog/ble/diagrams/ch06-sig-vs-custom-flow.svg)
 
 ### 혼합 패턴 — 가장 흔한 양산 구성
 

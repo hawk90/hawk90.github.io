@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6,2.0) {iBeacon Advertising Payload};
+
+% Frame fields
+\node[hi,  minimum width=10mm, minimum height=14mm, anchor=west] (type) at (0.0,0) {FF\\\small type};
+\node[hi,  minimum width=10mm, minimum height=14mm, anchor=west] (len)  at (1.0,0) {02\\\small len};
+\node[abs, minimum width=22mm, minimum height=14mm, anchor=west] (apple) at (2.0,0) {Apple ID\\\small 4C 00};
+\node[con, minimum width=32mm, minimum height=14mm, anchor=west] (uuid) at (4.2,0) {UUID\\\small 16 byte};
+\node[imp, minimum width=18mm, minimum height=14mm, anchor=west] (maj)  at (7.4,0) {Major\\\small 2 byte};
+\node[imp, minimum width=18mm, minimum height=14mm, anchor=west] (min)  at (9.2,0) {Minor\\\small 2 byte};
+\node[cls, minimum width=22mm, minimum height=14mm, anchor=west] (mp)   at (11.0,0) {measured\\power 1 B};
+
+\end{tikzpicture}
+\end{document}

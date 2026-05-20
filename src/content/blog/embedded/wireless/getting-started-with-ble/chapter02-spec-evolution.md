@@ -113,16 +113,7 @@ LE Secure Connections (4.2+)
 
 LL packet payload가 *27 byte → 251 byte*로 *9.3배* 늘었습니다. ATT MTU도 *517 byte까지* 협상 가능해졌습니다.
 
-```text
-LL Data PDU
-┌────────┬──────────┬─────────┐
-│ Header │ Payload  │ MIC     │
-│  2 B   │ 0~251 B  │ 0 또는 4│
-└────────┴──────────┴─────────┘
-
-이전 (4.0/4.1): payload ≤ 27 byte
-이후 (4.2+):    payload ≤ 251 byte
-```
+![LL Data PDU (4.2+ Data Length Extension)](/images/blog/ble/diagrams/ch02-ll-data-pdu.svg)
 
 throughput이 *수 배* 좋아집니다. 4.0에서 *7~10 KB/s* 수준이던 GATT가 *4.2에서는 30 KB/s+*까지 올라갑니다.
 
@@ -156,21 +147,6 @@ Coded S=8 sensitivity: -103 dBm 수준
 ### Extended Advertising
 
 광고 패킷이 *31 byte → 255 byte*로 늘었습니다. 더 큰 manufacturer data, 더 긴 device name, *URL이나 IPv6 라우팅 정보*까지 실립니다.
-
-```text
-Legacy Advertising (4.0+)
-┌────────────────────┐
-│ adv data ≤ 31 B    │  채널 37, 38, 39
-└────────────────────┘
-
-Extended Advertising (5.0+)
-┌──────────┐    ┌────────────────────────┐
-│primary   │ →  │ secondary (data 채널)  │
-│ADV_EXT_  │    │ adv data ≤ 255 B       │
-│IND 헤더만│    │ chained로 1650 B 가능 │
-└──────────┘    └────────────────────────┘
-채널 37,38,39      채널 0~36
-```
 
 primary 채널(37/38/39)에서는 *짧은 헤더*만 보내고, *실제 payload는 데이터 채널*에 따로 송신합니다. *비콘 시장의 정보량 부족* 문제를 해결했습니다.
 

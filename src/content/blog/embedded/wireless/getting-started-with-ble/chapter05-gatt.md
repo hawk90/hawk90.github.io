@@ -25,16 +25,7 @@ draft: false
 
 GATT 트리의 *모든 노드*는 *Attribute*입니다. Attribute는 *4가지 요소*로 구성됩니다.
 
-```text
-┌─────────────────────────────────────┐
-│         Attribute                   │
-├─────────────────────────────────────┤
-│ Handle      : uint16 (예: 0x002A)   │ ← 위치 식별자, 1부터 시작
-│ Type        : UUID (16 또는 128 bit) │ ← 무엇인지 (Service? Char? ...)
-│ Value       : variable byte         │ ← 실제 데이터
-│ Permission  : read/write/auth/...   │ ← 누가 어떻게 접근 가능
-└─────────────────────────────────────┘
-```
+![GATT Attribute structure](/images/blog/ble/diagrams/ch05-attribute.svg)
 
 | 요소 | 크기 | 의미 |
 |------|------|------|
@@ -125,21 +116,18 @@ Characteristic은 *한 데이터 항목*입니다. *두 개의 Attribute*로 표
 
 ### Properties Byte
 
-```text
-Properties (1 byte)
-┌────┬────┬────┬────┬────┬────┬────┬────┐
-│Bcst│Read│WrNR│Wrte│Ntfy│Indc│SgnW│Ext │
-└────┴────┴────┴────┴────┴────┴────┴────┘
- 0x01 0x02 0x04 0x08 0x10 0x20 0x40 0x80
+![Characteristic Properties Byte](/images/blog/ble/diagrams/ch05-properties-byte.svg)
 
-Read   (0x02): ATT Read Request로 읽기 가능
-WrNR   (0x04): Write Without Response (응답 없는 쓰기)
-Wrte   (0x08): Write Request (응답 있는 쓰기)
-Ntfy   (0x10): Notification (서버 → 클라, 응답 없음)
-Indc   (0x20): Indication (서버 → 클라, 확인 응답 필요)
-SgnW   (0x40): Authenticated Signed Write
-Ext    (0x80): Extended Properties (별도 descriptor에 추가)
-```
+| Bit (mask) | 이름 | 의미 |
+|-----------|------|------|
+| `0x01` | Bcst | Broadcast |
+| `0x02` | Read | ATT Read Request로 읽기 가능 |
+| `0x04` | WrNR | Write Without Response (응답 없는 쓰기) |
+| `0x08` | Wrte | Write Request (응답 있는 쓰기) |
+| `0x10` | Ntfy | Notification (서버 → 클라, 응답 없음) |
+| `0x20` | Indc | Indication (서버 → 클라, 확인 응답 필요) |
+| `0x40` | SgnW | Authenticated Signed Write |
+| `0x80` | Ext | Extended Properties (별도 descriptor에 추가) |
 
 흔한 조합입니다.
 
@@ -228,29 +216,18 @@ Format Byte 종류 (자주 쓰는 것).
 
 표준 *Heart Rate Service (0x180D)*의 GATT 데이터베이스입니다.
 
-```text
-┌────────┬────────┬─────────────────────────────────┬─────────┬────────────┐
-│ Handle │  Type  │           Description           │  Value  │ Permission │
-├────────┼────────┼─────────────────────────────────┼─────────┼────────────┤
-│ 0x0010 │ 0x2800 │ Primary Service                 │ 0x180D  │ R          │
-│ 0x0011 │ 0x2803 │ Characteristic Declaration       │ 10|12,00│ R          │
-│        │        │ Properties=Notify(0x10)         │ |37,2A  │            │
-│        │        │ ValueHandle=0x0012, UUID=0x2A37 │         │            │
-│ 0x0012 │ 0x2A37 │ Heart Rate Measurement (value)  │ ...     │ none*      │
-│ 0x0013 │ 0x2902 │ CCCD                            │ 00 00   │ R/W        │
-│ 0x0014 │ 0x2803 │ Characteristic Declaration       │ 02|15,00│ R          │
-│        │        │ Properties=Read(0x02)           │ |38,2A  │            │
-│        │        │ ValueHandle=0x0015, UUID=0x2A38 │         │            │
-│ 0x0015 │ 0x2A38 │ Body Sensor Location (value)    │ 0x02    │ R          │
-│ 0x0016 │ 0x2803 │ Characteristic Declaration       │ 08|17,00│ R          │
-│        │        │ Properties=Write(0x08)          │ |39,2A  │            │
-│        │        │ ValueHandle=0x0017, UUID=0x2A39 │         │            │
-│ 0x0017 │ 0x2A39 │ Heart Rate Control Point (val)  │ ...     │ W          │
-└────────┴────────┴─────────────────────────────────┴─────────┴────────────┘
+| Handle | Type | Description | Value | Permission |
+|--------|------|-------------|-------|------------|
+| `0x0010` | `0x2800` | Primary Service | `0x180D` | R |
+| `0x0011` | `0x2803` | Characteristic Declaration — Properties=Notify(0x10), ValueHandle=0x0012, UUID=0x2A37 | `10|12,00|37,2A` | R |
+| `0x0012` | `0x2A37` | Heart Rate Measurement (value) | … | none\* |
+| `0x0013` | `0x2902` | CCCD | `00 00` | R/W |
+| `0x0014` | `0x2803` | Characteristic Declaration — Properties=Read(0x02), ValueHandle=0x0015, UUID=0x2A38 | `02|15,00|38,2A` | R |
+| `0x0015` | `0x2A38` | Body Sensor Location (value) | `0x02` | R |
+| `0x0016` | `0x2803` | Characteristic Declaration — Properties=Write(0x08), ValueHandle=0x0017, UUID=0x2A39 | `08|17,00|39,2A` | R |
+| `0x0017` | `0x2A39` | Heart Rate Control Point (val) | … | W |
 
-* Notify-only는 ATT read permission이 없어도 됨
-* 클라이언트는 CCCD에 0x0001을 써서 notify 활성화
-```
+\* Notify-only는 ATT read permission이 없어도 됨. 클라이언트는 CCCD에 `0x0001`을 써서 notify를 활성화합니다.
 
 이 트리를 *클라이언트는 어떻게 발견*하는가?
 

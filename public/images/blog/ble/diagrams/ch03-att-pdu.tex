@@ -1,0 +1,21 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4,2.4) {ATT PDU};
+
+\node[hi,  minimum width=18mm, minimum height=14mm, anchor=west] (op)  at (0.0,0)  {OpCode\\\small 1 B};
+\node[abs, minimum width=42mm, minimum height=14mm, anchor=west] (par) at (1.8,0)  {Attribute Params\\\small (variable)};
+\node[con, minimum width=26mm, minimum height=14mm, anchor=west] (sig) at (6.0,0)  {Signature\\\small optional};
+
+\node[caption, anchor=west, align=left] at (0,-1.6)
+  {OpCode bit 구조 — bit 7: command flag (1 = no response), bit 6: auth signature, bits 5..0: method};
+
+\end{tikzpicture}
+\end{document}

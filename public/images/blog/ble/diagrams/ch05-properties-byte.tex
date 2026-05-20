@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4,2.2) {Characteristic Properties Byte (1 B)};
+
+% 8 bits left to right (bit 7 → bit 0)
+\node[hi, minimum width=10mm, minimum height=12mm, anchor=west] (b7) at (0.0,0) {Ext};
+\node[hi, minimum width=10mm, minimum height=12mm, anchor=west] (b6) at (1.0,0) {SgnW};
+\node[hi, minimum width=10mm, minimum height=12mm, anchor=west] (b5) at (2.0,0) {Indc};
+\node[hi, minimum width=10mm, minimum height=12mm, anchor=west] (b4) at (3.0,0) {Ntfy};
+\node[hi, minimum width=10mm, minimum height=12mm, anchor=west] (b3) at (4.0,0) {Wrte};
+\node[hi, minimum width=10mm, minimum height=12mm, anchor=west] (b2) at (5.0,0) {WrNR};
+\node[hi, minimum width=10mm, minimum height=12mm, anchor=west] (b1) at (6.0,0) {Read};
+\node[hi, minimum width=10mm, minimum height=12mm, anchor=west] (b0) at (7.0,0) {Bcst};
+
+% Bit position labels above
+\node[caption] at (0.5, 0.8) {bit 7};
+\node[caption] at (7.5, 0.8) {bit 0};
+
+% Mask values below
+\node[caption] at (0.5,-0.9) {0x80};
+\node[caption] at (1.5,-0.9) {0x40};
+\node[caption] at (2.5,-0.9) {0x20};
+\node[caption] at (3.5,-0.9) {0x10};
+\node[caption] at (4.5,-0.9) {0x08};
+\node[caption] at (5.5,-0.9) {0x04};
+\node[caption] at (6.5,-0.9) {0x02};
+\node[caption] at (7.5,-0.9) {0x01};
+
+\end{tikzpicture}
+\end{document}

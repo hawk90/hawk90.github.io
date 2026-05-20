@@ -79,30 +79,11 @@ CONFIG_BT_NIMBLE_ROLE_BROADCASTER=y
 
 BLE 디바이스는 *48-bit 주소*로 식별됩니다. 클래식 BT와 같은 형식이지만, *주소 종류가 4가지*입니다.
 
-```text
-주소 48 bit 구조
-┌────────────────┬────────────┐
-│   상위 2 bit   │ 하위 46 bit│
-└────────────────┴────────────┘
-
-상위 2 bit (Random Address일 때만 의미)
-0b11 = Static Random Address
-0b01 = Resolvable Private Address (RPA)
-0b00 = Non-Resolvable Private Address (NRPA)
-```
+![BLE Device Address — 48 bits](/images/blog/ble/diagrams/ch04-bd-addr.svg)
 
 ### 1. Public Address
 
-```text
-포맷: IEEE 48-bit MAC 주소 (OUI + NIC)
-┌──────────┬──────────┐
-│ OUI 24b  │ NIC 24b  │
-└──────────┴──────────┘
-
-예: A0:B1:C2:D3:E4:F5
-    A0 B1 C2 = OUI (제조사 등록 번호)
-    D3 E4 F5 = 디바이스 고유 번호
-```
+Public Address는 *IEEE에 등록*된 48-bit MAC을 그대로 씁니다.
 
 *IEEE에 등록*된 OUI를 사용합니다. 등록비가 있어서 *대형 제조사*만 사용합니다 (Apple, Samsung, Nordic 등). *세상에 unique한 주소*입니다.
 
@@ -179,19 +160,7 @@ iPhone과 Android 모두 *기본으로 RPA를 사용*합니다. 스마트폰의 
 
 ### ADV_IND — 가장 흔한 광고
 
-```text
-페이로드 최대 31 byte (legacy)
-┌──────┬─────────────────────────────┐
-│ AdvA │  AdvData (AD structures)    │
-│  6 B │      0~31 B                 │
-└──────┴─────────────────────────────┘
-
-AD structure (TLV 형식)
-┌────┬──────┬─────────────┐
-│Len │ Type │   Value     │
-│ 1B │  1B  │ Len-1 byte  │
-└────┴──────┴─────────────┘
-```
+![ADV_IND Payload + AD structure TLV](/images/blog/ble/diagrams/ch04-adv-ind-payload.svg)
 
 자주 쓰는 AD Type입니다.
 

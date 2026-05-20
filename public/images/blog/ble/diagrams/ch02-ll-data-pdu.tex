@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5,2.0) {LL Data PDU (4.2+ Data Length Extension)};
+
+\node[hi,  minimum width=18mm, minimum height=14mm, anchor=west] (hdr) at (0.0,0)  {Header\\\small 2 B};
+\node[abs, minimum width=60mm, minimum height=14mm, anchor=west] (pl)  at (1.8,0)  {Payload\\\small 0 – 251 B};
+\node[con, minimum width=22mm, minimum height=14mm, anchor=west] (mic) at (7.8,0)  {MIC\\\small 0 또는 4 B};
+
+% Note
+\node[caption, anchor=west] at (0,-1.4)  {이전 (4.0 / 4.1): payload $\leq$ 27 B};
+\node[caption, anchor=west] at (0,-1.9)  {이후 (4.2+): payload $\leq$ 251 B};
+
+\end{tikzpicture}
+\end{document}

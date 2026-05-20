@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,3.4) {GATT Attribute};
+
+% Title strip
+\node[abs, minimum width=110mm, minimum height=10mm] (title) at (0,2.2) {\textbf{Attribute}};
+
+% 4 fields stacked vertically
+\node[cls, minimum width=110mm, minimum height=10mm, align=left, inner sep=6pt] (h) at (0, 1.0)
+  {\texttt{Handle}\quad : uint16 (예: \texttt{0x002A})\hfill\small\textit{위치 식별자, 1부터 시작}};
+\node[cls, minimum width=110mm, minimum height=10mm, align=left, inner sep=6pt] (t) at (0,-0.2)
+  {\texttt{Type}\quad : UUID (16 또는 128 bit)\hfill\small\textit{무엇인지 (Service / Char / ...)}};
+\node[cls, minimum width=110mm, minimum height=10mm, align=left, inner sep=6pt] (v) at (0,-1.4)
+  {\texttt{Value}\quad : variable byte\hfill\small\textit{실제 데이터}};
+\node[cls, minimum width=110mm, minimum height=10mm, align=left, inner sep=6pt] (p) at (0,-2.6)
+  {\texttt{Permission}\quad : read / write / auth / ...\hfill\small\textit{누가 어떻게 접근 가능}};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5,2.2) {HCI Command Packet};
+
+\node[hi,  minimum width=14mm, minimum height=18mm, anchor=west] (id)  at (0.0,0)  {0x01\\\small packet\\indicator};
+\node[abs, minimum width=22mm, minimum height=18mm, anchor=west] (op)  at (1.4,0)  {OpCode\\\small 2 B\\OGF | OCF};
+\node[con, minimum width=22mm, minimum height=18mm, anchor=west] (len) at (3.6,0)  {Param Total\\Length\\\small 1 B};
+\node[imp, minimum width=40mm, minimum height=18mm, anchor=west] (par) at (5.8,0)  {Parameters\\\small (variable)};
+
+% Note about OpCode decomposition
+\node[caption, anchor=west] at (0,-1.8) {OpCode = OGF (6 bit) | OCF (10 bit)};
+
+\end{tikzpicture}
+\end{document}

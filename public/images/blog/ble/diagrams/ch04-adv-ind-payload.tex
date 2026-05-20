@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4,3.2) {ADV\_IND Payload (legacy, $\leq$ 31 B)};
+
+% Top: AdvA + AdvData
+\node[hi,  minimum width=18mm, minimum height=14mm, anchor=west] (adva) at (0.0,1.5)  {AdvA\\\small 6 B};
+\node[abs, minimum width=58mm, minimum height=14mm, anchor=west] (data) at (1.8,1.5)  {AdvData (AD structures)\\\small 0 – 31 B};
+
+% Below: AD structure TLV breakdown
+\node[font=\sffamily\bfseries] at (4, 0.0) {AD Structure — TLV format};
+
+\node[con, minimum width=16mm, minimum height=12mm, anchor=west] (l) at (1.0,-1.5)  {Len\\\small 1 B};
+\node[hi,  minimum width=16mm, minimum height=12mm, anchor=west] (t) at (2.6,-1.5)  {Type\\\small 1 B};
+\node[imp, minimum width=42mm, minimum height=12mm, anchor=west] (v) at (4.2,-1.5)  {Value\\\small Len $-$ 1 byte};
+
+\end{tikzpicture}
+\end{document}
