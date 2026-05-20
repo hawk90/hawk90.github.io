@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5,3.6) {Weather Data Processing Pipeline};
+
+% Top row — raw → validation → calibration → conversion
+\node[abs, minimum width=22mm, minimum height=10mm] (raw)   at ( 0,1.6) {Raw Data};
+\node[imp, minimum width=22mm, minimum height=10mm] (val)   at ( 3.5,1.6) {Validation};
+\node[imp, minimum width=22mm, minimum height=10mm] (cal)   at ( 7,1.6) {Calibration};
+\node[imp, minimum width=22mm, minimum height=10mm] (conv)  at (10.5,1.6) {Unit Conversion};
+
+% Mid row — quality / stat calc
+\node[hi,  minimum width=26mm, minimum height=10mm] (qual)  at ( 3.5,-0.4) {Quality Flag};
+\node[hi,  minimum width=32mm, minimum height=10mm] (stat)  at (10.5,-0.4) {Statistical\\Calculation};
+
+% Aggregation
+\node[hi,  minimum width=26mm, minimum height=10mm] (agg)   at ( 7,-2.4) {Aggregation};
+
+% Alert + storage
+\node[warn, minimum width=26mm, minimum height=10mm] (alert) at ( 3.5,-2.4) {Alert Check};
+\node[con,  minimum width=30mm, minimum height=10mm] (store) at ( 0,-2.4) {Storage / Event};
+
+% Top horizontal chain
+\draw[flow] (raw)  -- (val);
+\draw[flow] (val)  -- (cal);
+\draw[flow] (cal)  -- (conv);
+
+% Verticals
+\draw[arr] (val)  -- (qual);
+\draw[arr] (conv) -- (stat);
+
+% Bottom chain — agg ← stat,  alert ← agg, store ← alert
+\draw[arr] (stat) -- (agg);
+\draw[arr] (agg)  -- (alert);
+\draw[arr] (qual) -- (alert);
+\draw[arr] (alert) -- (store);
+
+\end{tikzpicture}
+\end{document}

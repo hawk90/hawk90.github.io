@@ -116,25 +116,7 @@ public class VigenereCipher extends Cipher {
 
 ### 분석 엔진
 
-```text
-분석 계층:
-
-<<interface>>
-Analyzer
-    │
-    ├── FrequencyAnalyzer
-    │     ├── MonogramAnalyzer
-    │     ├── BigramAnalyzer
-    │     └── TrigramAnalyzer
-    │
-    ├── PatternAnalyzer
-    │     ├── RepeatingPatternAnalyzer
-    │     └── StructuralAnalyzer
-    │
-    └── StatisticalAnalyzer
-          ├── ChiSquareAnalyzer
-          └── IndexOfCoincidenceAnalyzer
-```
+![Cryptanalysis Analyzer Hierarchy](/images/blog/ooad/diagrams/ch10-analyzer-hierarchy.svg)
 
 ```java
 // 분석기 인터페이스

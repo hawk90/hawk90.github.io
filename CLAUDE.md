@@ -217,11 +217,22 @@ class OrderProcessor {
 | YAML / JSON / TOML / INI | ` ```yaml ` / ` ```json ` / ` ```toml ` / ` ```ini ` |
 | HTML / CSS | ` ```html ` / ` ```css ` |
 | SQL | ` ```sql ` |
-| 한국어 평문 (예외적 박스 표시) | ` ```text ` (그러나 산문은 보통 *블록에 안 넣는다*) |
 
 **`shell` 태그는 피한다** — `bash`/`text` 둘 중에 선택. `shell`은 expressive-code가 *프롬프트·키워드*를 과하게 강조해 트리·출력이 어색해진다.
 
-**Korean 일반 텍스트는 코드 블록에 *넣지 않는다***. 산문은 markdown 본문으로, 비교·매핑은 표로.
+**코드 블록은 "기계가 읽는 것" 전용**. *한국어 산문·설명문은 코드 블록에 넣지 않는다*. 그 외는 거의 다 OK.
+
+| 허용 | 금지 |
+|------|------|
+| 소스 코드 (언어 태그 필수) | 한국어 산문·정의·설명 |
+| `bash` 명령·셸 세션 | "특징:" 같은 항목 나열만 (불릿으로 빼라) |
+| 컴파일러·툴 출력·로그·에러 메시지 | 비교·매핑 — 표로 |
+| 디렉토리 트리 | ASCII 박스 다이어그램 — TikZ로 |
+| pseudocode (알고리즘) | |
+| UML·문법 표기 sample (`- balance : Money = 0 {readOnly}`) | |
+| 설정 파일 (YAML·JSON·TOML·Makefile·CMake) | |
+
+판단 기준: "이 블록 안 내용을 *한국어로 풀어 읽으면 자연스러운가*?" *그렇다면 산문이고, 본문으로 빼야 한다.* "기계가 파싱하는 형식이거나 출력이라면" 코드 블록 OK.
 
 ### 코드 길이
 
@@ -246,11 +257,11 @@ class OrderProcessor {
 
 #### 결정 규칙
 
-1. **표/리스트로 표현 가능?** → 그걸로. 가장 단순하고 검색·복사 가능.
-2. **수식?** → KaTeX.
-3. **그 외 모든 그림** → TikZ. 정밀 좌표, 비례 폭, 일관된 디자인 시스템(`_design.tex` / `_design-math.tex` / `_design-sequence.tex` / `_design-state.tex`) 활용.
+1. **시각 정보인가?** (공간 배치·관계·흐름·계층·상태 전이 — state machine, sequence, architecture, dataflow, class/component diagram, layout, pyramid, network topology, timeline 등) → **TikZ가 최우선**.
+2. **순수 데이터·카탈로그인가?** (symbol → meaning 매핑, 비교 매트릭스, 메트릭 값, 단계 *목록* 자체) → 표/리스트.
+3. **수식?** → KaTeX.
 
-> **회피 원칙**: ASCII 박스 다이어그램(`┌──┐`)을 *결과물*로 남기지 않는다.
+> **ASCII art → TikZ 우선**: ASCII 박스 다이어그램(`┌──┐`)을 마주치면 *기본 변환 대상은 TikZ*. 표는 시각 정보가 없을 때만 fallback. 모호하면 TikZ로 간다.
 > **Mermaid 사용 안 함**: sequence/state는 `_design-sequence.tex` / `_design-state.tex`로. graph·flowchart는 `_design.tex`로. 모든 다이어그램이 *pre-built SVG*로 통일.
 
 ### 다이어그램 파일 배치

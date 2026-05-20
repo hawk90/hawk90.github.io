@@ -1,0 +1,66 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,4.6) {Weather Sensor Hierarchy};
+
+% Interface
+\node[abs, minimum width=28mm, minimum height=11mm] (iface) at (0,3.2)
+  {\textit{$<<$interface$>>$}\\Sensor};
+
+% Level-2 (5 children, spread out)
+\node[imp, minimum width=32mm, minimum height=9mm] (temp)   at (-8,1.2) {TemperatureSensor};
+\node[imp, minimum width=32mm, minimum height=9mm] (hum)    at (-4,1.2) {HumiditySensor};
+\node[imp, minimum width=32mm, minimum height=9mm] (pres)   at ( 0,1.2) {PressureSensor};
+\node[imp, minimum width=32mm, minimum height=9mm] (wind)   at ( 4,1.2) {WindSensor};
+\node[imp, minimum width=36mm, minimum height=9mm] (prec)   at ( 8,1.2) {PrecipitationSensor};
+
+% Level-3
+\node[impSm, minimum width=30mm] (therm)  at (-9,-1)   {ThermistorSensor};
+\node[impSm, minimum width=30mm] (rtd)    at (-6.5,-1) {RTDSensor};
+
+\node[impSm, minimum width=30mm] (cap)    at (-5,-2.5) {CapacitiveSensor};
+\node[impSm, minimum width=30mm] (res)    at (-2.5,-2.5) {ResistiveSensor};
+
+\node[impSm, minimum width=32mm] (baro)   at ( 0,-1)   {BarometricSensor};
+
+\node[impSm, minimum width=30mm] (anemo)  at ( 3,-2.5) {Anemometer};
+\node[impSm, minimum width=30mm] (vane)   at ( 5.5,-2.5) {WindVane};
+
+\node[impSm, minimum width=36mm] (tip)    at ( 7,-1)   {TippingBucketGauge};
+\node[impSm, minimum width=36mm] (weigh)  at ( 9.5,-1) {WeighingGauge};
+
+% Captions on wind children
+\node[caption, anchor=north] at (anemo.south) {(속도)};
+\node[caption, anchor=north] at (vane.south)  {(방향)};
+
+% Inheritance (level 2 → interface)
+\draw[inh] (temp.north) -- (iface.south west);
+\draw[inh] (hum.north)  -- (iface.south west);
+\draw[inh] (pres.north) -- (iface.south);
+\draw[inh] (wind.north) -- (iface.south east);
+\draw[inh] (prec.north) -- (iface.south east);
+
+% Inheritance (level 3 → level 2)
+\draw[inh] (therm.north) -- (temp.south);
+\draw[inh] (rtd.north)   -- (temp.south);
+
+\draw[inh] (cap.north)   -- (hum.south);
+\draw[inh] (res.north)   -- (hum.south);
+
+\draw[inh] (baro.north)  -- (pres.south);
+
+\draw[inh] (anemo.north) -- (wind.south);
+\draw[inh] (vane.north)  -- (wind.south);
+
+\draw[inh] (tip.north)   -- (prec.south);
+\draw[inh] (weigh.north) -- (prec.south);
+
+\end{tikzpicture}
+\end{document}

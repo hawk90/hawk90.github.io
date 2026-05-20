@@ -129,22 +129,7 @@ public record DetectorReading(
 
 ### 제어 알고리즘 추상화
 
-```text
-제어 전략 계층:
-
-<<interface>>
-ControlStrategy
-    │
-    ├── FixedTimeStrategy      (고정 시간)
-    ├── ActuatedStrategy       (감응식)
-    │     ├── VolumeActuated   (교통량)
-    │     └── DensityActuated  (밀도)
-    ├── AdaptiveStrategy       (적응형)
-    │     ├── SCOOT
-    │     └── SCATS
-    └── CoordinatedStrategy    (연동)
-          └── GreenWaveStrategy
-```
+![Control Strategy Hierarchy](/images/blog/ooad/diagrams/ch09-control-strategy-hierarchy.svg)
 
 ```java
 // 제어 전략 인터페이스

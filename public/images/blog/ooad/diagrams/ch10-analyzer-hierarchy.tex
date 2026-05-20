@@ -1,0 +1,51 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,4.6) {Cryptanalysis Analyzer Hierarchy};
+
+% Interface
+\node[abs, minimum width=36mm, minimum height=11mm] (iface) at (0,3.2)
+  {\textit{$<<$interface$>>$}\\Analyzer};
+
+% Level-2 children
+\node[imp, minimum width=34mm, minimum height=9mm] (freq)   at (-5,1.2) {FrequencyAnalyzer};
+\node[imp, minimum width=34mm, minimum height=9mm] (pat)    at ( 0,1.2) {PatternAnalyzer};
+\node[imp, minimum width=34mm, minimum height=9mm] (stat)   at ( 5,1.2) {StatisticalAnalyzer};
+
+% Level-3 — frequency
+\node[impSm, minimum width=30mm] (mono)  at (-6,-0.8) {MonogramAnalyzer};
+\node[impSm, minimum width=30mm] (bi)    at (-3,-0.8) {BigramAnalyzer};
+\node[impSm, minimum width=30mm] (tri)   at ( 0,-0.8) {TrigramAnalyzer};
+
+% Level-3 — pattern
+\node[impSm, minimum width=40mm] (rep)   at (-2,-2.5) {RepeatingPatternAnalyzer};
+\node[impSm, minimum width=30mm] (struc) at ( 2,-2.5) {StructuralAnalyzer};
+
+% Level-3 — statistical
+\node[impSm, minimum width=30mm] (chi)   at ( 4.2,-0.8) {ChiSquareAnalyzer};
+\node[impSm, minimum width=40mm] (ioc)   at ( 5.7,-2.5) {IndexOfCoincidenceAnalyzer};
+
+% Inheritance
+\draw[inh] (freq.north) -- (iface.south west);
+\draw[inh] (pat.north)  -- (iface.south);
+\draw[inh] (stat.north) -- (iface.south east);
+
+\draw[inh] (mono.north)  -- (freq.south);
+\draw[inh] (bi.north)    -- (freq.south);
+\draw[inh] (tri.north)   -- (freq.south);
+
+\draw[inh] (rep.north)   -- (pat.south);
+\draw[inh] (struc.north) -- (pat.south);
+
+\draw[inh] (chi.north) -- (stat.south);
+\draw[inh] (ioc.north) -- (stat.south);
+
+\end{tikzpicture}
+\end{document}

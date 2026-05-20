@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,4.6) {Control Strategy Hierarchy};
+
+% Interface
+\node[abs, minimum width=44mm, minimum height=11mm] (iface) at (0,3.2)
+  {\textit{$<<$interface$>>$}\\ControlStrategy};
+
+% Level-2 children
+\node[imp, minimum width=32mm, minimum height=9mm] (fixed)  at (-6,1) {FixedTimeStrategy};
+\node[imp, minimum width=32mm, minimum height=9mm] (act)    at (-2,1) {ActuatedStrategy};
+\node[imp, minimum width=32mm, minimum height=9mm] (adapt)  at ( 2,1) {AdaptiveStrategy};
+\node[imp, minimum width=32mm, minimum height=9mm] (coord)  at ( 6,1) {CoordinatedStrategy};
+
+% Level-3
+\node[impSm, minimum width=28mm] (vol)   at (-3.6,-1) {VolumeActuated};
+\node[impSm, minimum width=28mm] (den)   at (-0.4,-1) {DensityActuated};
+\node[impSm, minimum width=22mm] (scoot) at ( 1.0,-1) {SCOOT};
+\node[impSm, minimum width=22mm] (scats) at ( 3.5,-1) {SCATS};
+\node[impSm, minimum width=32mm] (gw)    at ( 6.0,-1) {GreenWaveStrategy};
+
+% Captions under level-2 nodes
+\node[caption] at (-6, 0.0) {(고정 시간)};
+\node[caption] at (-2, 0.0) {(감응식)};
+\node[caption] at ( 2, 0.0) {(적응형)};
+\node[caption] at ( 6, 0.0) {(연동)};
+
+% Inheritance (open triangle to parent interface)
+\draw[inh] (fixed.north) -- (iface.south west);
+\draw[inh] (act.north)   -- (iface.south);
+\draw[inh] (adapt.north) -- (iface.south);
+\draw[inh] (coord.north) -- (iface.south east);
+
+\draw[inh] (vol.north)   -- (act.south west);
+\draw[inh] (den.north)   -- (act.south east);
+\draw[inh] (scoot.north) -- (adapt.south west);
+\draw[inh] (scats.north) -- (adapt.south east);
+\draw[inh] (gw.north)    -- (coord.south);
+
+\end{tikzpicture}
+\end{document}

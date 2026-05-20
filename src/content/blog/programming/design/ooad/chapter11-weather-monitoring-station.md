@@ -48,31 +48,7 @@ bookAuthor: "Grady Booch"
 
 ### 센서 계층
 
-```text
-센서 계층:
-
-<<interface>>
-Sensor
-    │
-    ├── TemperatureSensor
-    │     ├── ThermistorSensor
-    │     └── RTDSensor
-    │
-    ├── HumiditySensor
-    │     ├── CapacitiveSensor
-    │     └── ResistiveSensor
-    │
-    ├── PressureSensor
-    │     └── BarometricSensor
-    │
-    ├── WindSensor
-    │     ├── Anemometer (속도)
-    │     └── WindVane (방향)
-    │
-    └── PrecipitationSensor
-          ├── TippingBucketGauge
-          └── WeighingGauge
-```
+![Weather Sensor Hierarchy](/images/blog/ooad/diagrams/ch11-sensor-hierarchy.svg)
 
 ```java
 // 센서 인터페이스
@@ -274,21 +250,7 @@ public record SensorChannel(
 
 ### 파이프라인 구조
 
-```text
-데이터 처리 파이프라인:
-
-Raw Data ──▶ Validation ──▶ Calibration ──▶ Unit Conversion
-                │                               │
-                ▼                               ▼
-          Quality Flag                   Statistical
-                │                        Calculation
-                │                               │
-                ▼                               ▼
-          Alert Check ◀─────────────── Aggregation
-                │
-                ▼
-          Storage / Event
-```
+![Weather Data Processing Pipeline](/images/blog/ooad/diagrams/ch11-pipeline.svg)
 
 ```java
 // 파이프라인 인터페이스
