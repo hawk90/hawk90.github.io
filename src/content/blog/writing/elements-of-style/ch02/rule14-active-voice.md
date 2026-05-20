@@ -16,10 +16,10 @@ bookAuthor: "William Strunk Jr., E.B. White"
 
 ## 기본 대조
 
-```
-능동: I shall always remember my first visit to Boston.
-수동: My first visit to Boston will always be remembered by me.
-```
+| 분류 | 예문 |
+|---|---|
+| 능동 | I shall always remember my first visit to Boston. |
+| 수동 | My first visit to Boston will always be remembered by me. |
 
 수동태가 더 길고 어색합니다. 주어 → 동사 → 목적어의 자연 순서가 능동태입니다.
 

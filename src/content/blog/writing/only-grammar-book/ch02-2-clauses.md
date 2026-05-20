@@ -50,10 +50,10 @@ who lives next door
 
 이들은 *단독으로 쓰면 단편 문장*입니다.
 
-```text
-회피: When she arrived.
-바름: When she arrived, we started the meeting.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | When she arrived. |
+| 바름 | When she arrived, we started the meeting. |
 
 종속절은 문장 안에서 *명사, 형용사, 부사*의 역할을 합니다.
 
@@ -122,10 +122,10 @@ I don't know if she will come.
 
 전치사 뒤에서는 *whether*만 가능.
 
-```text
-바름: We discussed whether to accept the offer.
-회피: We discussed if to accept the offer.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | We discussed whether to accept the offer. |
+| 회피 | We discussed if to accept the offer. |
 
 ## 형용사절 (Adjective / Relative Clause)
 
@@ -199,10 +199,10 @@ The man (whom) I met yesterday is a doctor.
 
 주격은 생략 불가.
 
-```text
-바름: The book that is on the table is mine.
-회피: The book is on the table is mine.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | The book that is on the table is mine. |
+| 회피 | The book is on the table is mine. |
 
 ## 부사절 (Adverb Clause)
 
@@ -226,12 +226,11 @@ The man (whom) I met yesterday is a doctor.
 - 부사절이 *앞*에 오면 *쉼표* 필요
 - *뒤*에 오면 쉼표 없음 (일반적)
 
-```text
-바름: When she arrived, we started the meeting.
-바름: We started the meeting when she arrived.
-
-회피: We started the meeting, when she arrived.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | When she arrived, we started the meeting. |
+| 바름 | We started the meeting when she arrived. |
+| 회피 | We started the meeting, when she arrived. |
 
 ### 부사절 축약
 
@@ -300,44 +299,42 @@ If I had known about the meeting, I would have attended. (조건절)
 
 ### 1. 종속절을 단독 문장으로 (단편)
 
-```text
-회피: Because it was raining.
-바름: Because it was raining, we stayed home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Because it was raining. |
+| 바름 | Because it was raining, we stayed home. |
 
 ### 2. 제한적 vs 비제한적 쉼표 오류
 
-```text
-회피: The car, that I bought, is red.    (제한적에 쉼표 X)
-바름: The car that I bought is red.
-
-회피: My brother who lives in Seoul called.   (자매 여럿 중 한정 X)
-바름: My brother, who lives in Seoul, called.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The car, that I bought, is red.    (제한적에 쉼표 X) |
+| 바름 | The car that I bought is red. |
+| 회피 | My brother who lives in Seoul called.   (자매 여럿 중 한정 X) |
+| 바름 | My brother, who lives in Seoul, called. |
 
 ### 3. *if* / *whether* 혼동
 
-```text
-회피: I asked him if to come.
-바름: I asked him whether to come.
-
-회피: She is thinking about if she should leave.
-바름: She is thinking about whether she should leave.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I asked him if to come. |
+| 바름 | I asked him whether to come. |
+| 회피 | She is thinking about if she should leave. |
+| 바름 | She is thinking about whether she should leave. |
 
 ### 4. 가정법의 *was* / *were*
 
-```text
-회피: If I was you, I would accept.
-바름: If I were you, I would accept.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | If I was you, I would accept. |
+| 바름 | If I were you, I would accept. |
 
 ### 5. 관계대명사 일치
 
-```text
-회피: I am the one who am responsible.   (어색)
-바름: I am the one who is responsible.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I am the one who am responsible.   (어색) |
+| 바름 | I am the one who is responsible. |
 
 관계대명사가 가리키는 *선행사*에 동사가 일치.
 

@@ -108,12 +108,10 @@ priority  0  ─── idle (Idle task 전용)
 
 스케줄러의 규칙은 단순합니다.
 
-```text
 1. Ready 상태인 태스크 중 가장 높은 우선순위가 Running이 된다.
 2. 같은 최고 우선순위가 여럿이면 time-slicing으로 돌아간다.
 3. 더 높은 우선순위가 Ready가 되면 현재 태스크를 즉시 선점한다.
 4. Running 태스크가 블로킹하면 다음으로 높은 Ready 태스크가 실행된다.
-```
 
 `configUSE_PREEMPTION=0`이면 *협력형(cooperative)*입니다. 태스크가 *스스로 yield하지 않으면* 다음 태스크가 안 옵니다. 실전에서는 거의 안 씁니다.
 

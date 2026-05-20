@@ -1,0 +1,49 @@
+\documentclass[tikz,border=10pt]{standalone}
+\input{../../_design.tex}
+
+\begin{document}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries] at (4, 4.5) {부트 시간 분해 (i.MX8M 기준)};
+
+% Timeline bar
+\draw[draw=nodebord, line width=1pt] (0, 3) -- (8, 3);
+
+% Segments with different colors
+\fill[absfill] (0, 2.6) rectangle (0.8, 3.4);    % BootROM
+\fill[impfill] (0.8, 2.6) rectangle (2, 3.4);   % SPL
+\fill[clifill] (2, 2.6) rectangle (3.2, 3.4);   % U-Boot
+\fill[hifill] (3.2, 2.6) rectangle (5.5, 3.4);  % Kernel
+\fill[prpfill] (5.5, 2.6) rectangle (8, 3.4);   % Userspace
+
+% Borders
+\draw[draw=nodebord] (0, 2.6) rectangle (0.8, 3.4);
+\draw[draw=nodebord] (0.8, 2.6) rectangle (2, 3.4);
+\draw[draw=nodebord] (2, 2.6) rectangle (3.2, 3.4);
+\draw[draw=nodebord] (3.2, 2.6) rectangle (5.5, 3.4);
+\draw[draw=nodebord] (5.5, 2.6) rectangle (8, 3.4);
+
+% Labels above
+\node[font=\sffamily\tiny, anchor=south] at (0.4, 3.5) {ROM};
+\node[font=\sffamily\tiny, anchor=south] at (1.4, 3.5) {SPL};
+\node[font=\sffamily\tiny, anchor=south] at (2.6, 3.5) {U-Boot};
+\node[font=\sffamily\tiny, anchor=south] at (4.35, 3.5) {Kernel};
+\node[font=\sffamily\tiny, anchor=south] at (6.75, 3.5) {Userspace};
+
+% Time markers
+\node[font=\sffamily\tiny, text=mutec] at (0, 2.2) {0s};
+\node[font=\sffamily\tiny, text=mutec] at (0.8, 2.2) {0.2s};
+\node[font=\sffamily\tiny, text=mutec] at (2, 2.2) {0.5s};
+\node[font=\sffamily\tiny, text=mutec] at (3.2, 2.2) {1.0s};
+\node[font=\sffamily\tiny, text=mutec] at (5.5, 2.2) {2.5s};
+\node[font=\sffamily\tiny, text=mutec] at (8, 2.2) {5.0s};
+
+% Optimization targets
+\node[font=\sffamily\scriptsize, text=conbord, anchor=west] at (0, 1.2) {최적화 대상:};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.6) {• SPL: Falcon Mode로 건너뛰기};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.1) {• Kernel: initcall 병렬화, 불필요 드라이버 제거};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, -0.4) {• Userspace: systemd 최적화, socket activation};
+
+\end{tikzpicture}
+\end{document}

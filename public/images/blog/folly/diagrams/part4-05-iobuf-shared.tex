@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4,3.6) {IOBuf — node vs shared buffer};
+
+% IOBuf node (left)
+\node[con, minimum width=36mm, minimum height=24mm, align=left, inner sep=4pt] (node) at (0,1)
+  {\textbf{IOBuf node}\\[2pt]
+   \texttt{data\_, length}\\
+   \texttt{next\_, prev\_}\\
+   \texttt{shared\_}\\
+   \texttt{flags}};
+
+% Actual buffer + SharedInfo (right)
+\node[abs, minimum width=44mm, minimum height=24mm, align=left, inner sep=4pt] (buf) at (7,1)
+  {\textbf{actual buffer (SharedInfo)}\\[2pt]
+   \texttt{uint8\_t[capacity]}\\[2pt]
+   \texttt{SharedInfo*}\\
+   \footnotesize (refcount, free fn)};
+
+% Edges
+\draw[arr] (node.east |- 0,1.6) -- node[above, font=\footnotesize] {\texttt{data\_}} (buf.west |- 0,1.6);
+\draw[arr] (node.east |- 0, 0.4) -- node[above, font=\footnotesize] {ref-count} (buf.west |- 0, 0.4);
+
+\end{tikzpicture}
+\end{document}

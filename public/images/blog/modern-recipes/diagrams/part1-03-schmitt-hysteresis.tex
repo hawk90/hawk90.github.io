@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4,3.0) {Schmitt Trigger Hysteresis};
+
+% Output waveform — high level then drops at V_IL threshold
+\draw[focus, line width=0.7pt]
+  (0,0) -- (0,1.4) -- (3.5,1.4) -- (3.5,0) -- (8,0);
+
+% Threshold annotations
+\draw[mutec, dashed, line width=0.3pt] (1.0,-0.3) -- (1.0,1.8);
+\node[caption, anchor=north] at (1.0,-0.3) {$V_{IH}$};
+
+\draw[mutec, dashed, line width=0.3pt] (3.5,-0.3) -- (3.5,1.8);
+\node[caption, anchor=north] at (3.5,-0.3) {$V_{IL}$};
+
+% Hysteresis band annotation
+\draw[<->, line width=0.4pt, draw=focusc] (1.0,1.9) -- (3.5,1.9);
+\node[caption, anchor=south, text=focusc] at (2.25,1.9) {hysteresis ($V_{IH} > V_{IL}$)};
+
+\end{tikzpicture}
+\end{document}

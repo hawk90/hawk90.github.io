@@ -114,16 +114,16 @@ Hyland(2004)의 코퍼스 연구에서 시각 자료 참조에 가장 자주 쓰
 
 ### 능동과 수동의 선택
 
-```text
-능동: 표 / 그림이 적극적으로 보여 줌을 강조
-수동: 정보가 그 안에 있다는 사실을 차분히 알림
-```
+| 분류 | 예문 |
+|---|---|
+| 능동 | 표 / 그림이 적극적으로 보여 줌을 강조 |
+| 수동 | 정보가 그 안에 있다는 사실을 차분히 알림 |
 
-```text
-능동: Table 1 shows the response rate.
-수동: The response rate is shown in Table 1.
-수동: As shown in Table 1, the response rate ...
-```
+| 분류 | 예문 |
+|---|---|
+| 능동 | Table 1 shows the response rate. |
+| 수동 | The response rate is shown in Table 1. |
+| 수동 | As shown in Table 1, the response rate ... |
 
 세 형태가 같은 정보를 다른 흐름으로 전달합니다. 단락 안에서 변화를 주기 위해 섞어 쓰는 것이 일반적입니다.
 

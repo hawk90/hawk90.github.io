@@ -1,0 +1,45 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5,3.6) {ESP32-C3 GPIO Matrix — 256 $\times$ 256 Crossbar};
+
+% Left — peripheral signals
+\node[abs, minimum width=28mm, minimum height=8mm] (u0t) at (0, 2.4) {\texttt{UART0\_TX}};
+\node[abs, minimum width=28mm, minimum height=8mm] (u0r) at (0, 1.5) {\texttt{UART0\_RX}};
+\node[abs, minimum width=28mm, minimum height=8mm] (sck) at (0, 0.6) {\texttt{SPI2\_CLK}};
+\node[abs, minimum width=28mm, minimum height=8mm] (sm)  at (0,-0.3) {\texttt{SPI2\_MOSI}};
+\node[abs, minimum width=28mm, minimum height=8mm] (sda) at (0,-1.2) {\texttt{I2C0\_SDA}};
+\node[caption] at (0,-2.1) {\ldots};
+
+% Matrix center
+\node[hi, minimum width=50mm, minimum height=44mm, align=center] (mat) at (5, 0.5)
+  {\textbf{GPIO Matrix}\\\small (256 $\times$ 256)};
+
+% Right — GPIO pins
+\node[con, minimum width=24mm, minimum height=8mm] (g0)  at (10, 2.4) {GPIO 0};
+\node[con, minimum width=24mm, minimum height=8mm] (g1)  at (10, 1.5) {GPIO 1};
+\node[con, minimum width=24mm, minimum height=8mm] (g2)  at (10, 0.6) {GPIO 2};
+\node[caption] at (10,-0.3) {\ldots};
+\node[con, minimum width=24mm, minimum height=8mm] (g21) at (10,-1.2) {GPIO 21};
+
+% Edges (sparse, illustrative)
+\draw[edgec, line width=0.3pt] (u0t.east) -- (mat.west |- u0t);
+\draw[edgec, line width=0.3pt] (u0r.east) -- (mat.west |- u0r);
+\draw[edgec, line width=0.3pt] (sck.east) -- (mat.west |- sck);
+\draw[edgec, line width=0.3pt] (sm.east) -- (mat.west |- sm);
+\draw[edgec, line width=0.3pt] (sda.east) -- (mat.west |- sda);
+
+\draw[edgec, line width=0.3pt] (mat.east |- g0)  -- (g0.west);
+\draw[edgec, line width=0.3pt] (mat.east |- g1)  -- (g1.west);
+\draw[edgec, line width=0.3pt] (mat.east |- g2)  -- (g2.west);
+\draw[edgec, line width=0.3pt] (mat.east |- g21) -- (g21.west);
+
+\end{tikzpicture}
+\end{document}

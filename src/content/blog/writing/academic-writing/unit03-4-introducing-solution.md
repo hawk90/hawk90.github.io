@@ -38,10 +38,10 @@ It remains unclear what causes inflation.
 
 직접 의문문의 주어-동사 도치가 사라지고, 평서문처럼 정상 어순이 됩니다.
 
-```text
-직접: Why does the response vary?
-간접: ... why the response varies.   ← does가 사라지고, vary가 varies로 바뀜
-```
+| 분류 | 예문 |
+|---|---|
+| 직접 | Why does the response vary? |
+| 간접 | ... why the response varies.   ← does가 사라지고, vary가 varies로 바뀜 |
 
 ### 간접 의문문을 도입하는 표현
 

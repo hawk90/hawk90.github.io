@@ -250,10 +250,10 @@ calibrate, normalize, fit, deconvolve
 
 ### 1. 시제 일관성 누락
 
-```
-회피: We collected samples. They are analyzed using GC-MS.
-선호: We collected samples. They were analyzed using GC-MS.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | We collected samples. They are analyzed using GC-MS. |
+| 바름 | We collected samples. They were analyzed using GC-MS. |
 
 같은 연구의 절차는 모두 과거 시제로 통일합니다.
 
@@ -269,19 +269,19 @@ calibrate, normalize, fit, deconvolve
 
 ### 3. 디테일 부족
 
-```
-회피: The cells were treated with the drug.
-선호: The cells were treated with 10 μM of the drug for 24 h at 37°C.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The cells were treated with the drug. |
+| 바름 | The cells were treated with 10 μM of the drug for 24 h at 37°C. |
 
 재현 가능성에 필요한 디테일을 빠뜨리지 않습니다.
 
 ### 4. 결과 섞임
 
-```
-회피: We measured the response. The response was 30% higher.
-선호: We measured the response. [결과는 Section 3 Results에]
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | We measured the response. The response was 30% higher. |
+| 바름 | We measured the response. [결과는 Section 3 Results에] |
 
 Methodology에는 어떻게 했는지만 적습니다. 결과는 Results 섹션의 몫입니다.
 

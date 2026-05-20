@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5,2.6) {PMP Entry — pmpcfg + pmpaddr};
+
+% pmpcfg byte — 8 bits
+\node[font=\sffamily\bfseries] at (1.6,1.5) {\texttt{pmpcfgN} (8 bits)};
+
+\node[hi, minimum width=8mm, minimum height=10mm, anchor=west] (b7) at (0.0,0) {L};
+\node[neut, minimum width=8mm, minimum height=10mm, anchor=west] (b6) at (0.8,0) {--};
+\node[neut, minimum width=8mm, minimum height=10mm, anchor=west] (b5) at (1.6,0) {--};
+\node[abs, minimum width=8mm, minimum height=10mm, anchor=west] (b4) at (2.4,0) {A};
+\node[abs, minimum width=8mm, minimum height=10mm, anchor=west] (b3) at (3.2,0) {A};
+\node[imp, minimum width=8mm, minimum height=10mm, anchor=west] (b2) at (4.0,0) {X};
+\node[imp, minimum width=8mm, minimum height=10mm, anchor=west] (b1) at (4.8,0) {W};
+\node[imp, minimum width=8mm, minimum height=10mm, anchor=west] (b0) at (5.6,0) {R};
+
+% Bit position labels
+\node[caption] at (0.4,-0.8) {7};
+\node[caption] at (1.2,-0.8) {6};
+\node[caption] at (2.0,-0.8) {5};
+\node[caption] at (2.8,-0.8) {4};
+\node[caption] at (3.6,-0.8) {3};
+\node[caption] at (4.4,-0.8) {2};
+\node[caption] at (5.2,-0.8) {1};
+\node[caption] at (6.0,-0.8) {0};
+
+% pmpaddr
+\node[font=\sffamily\bfseries] at (9.0,1.5) {\texttt{pmpaddrN} (32 bits)};
+\node[con, minimum width=40mm, minimum height=10mm, anchor=west] (addr) at (7.0,0)
+  {\texttt{base >>\ 2}};
+
+\end{tikzpicture}
+\end{document}

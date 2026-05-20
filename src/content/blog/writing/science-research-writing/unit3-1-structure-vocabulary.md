@@ -323,22 +323,17 @@ The results appear to indicate that ...
 
 ### 1. 해석 섞임
 
-```
-회피: Group A scored higher, suggesting the training was effective.
-선호: Group A scored higher than Group B (Results).
-       [Discussion에서: The higher score may reflect the
-       effectiveness of the training.]
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Group A scored higher, suggesting the training was effective. |
+| 바름 | Group A scored higher than Group B (Results). [Discussion에서: The higher score may reflect the effectiveness of the training.] |
 
 ### 2. 모든 숫자 반복
 
-```
-회피: Group A had a mean of 45.32 (SD = 5.61, range = 32–58),
-       while Group B had a mean of 41.87 (SD = 6.23, range = 28–55) ...
-
-선호: Group A scored higher than Group B (t = 3.45, p = .001;
-       see Table 1 for details).
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Group A had a mean of 45.32 (SD = 5.61, range = 32–58), while Group B had a mean of 41.87 (SD = 6.23, range = 28–55) ... |
+| 바름 | Group A scored higher than Group B (t = 3.45, p = .001; see Table 1 for details). |
 
 표가 모든 숫자를 보여 줍니다. 본문은 핵심만 적습니다.
 

@@ -16,10 +16,10 @@ bookAuthor: "Susan Thurman"
 
 대명사(pronoun)는 명사를 대신합니다. 같은 명사를 반복하지 않게 함으로써 문장을 간결하게 만듭니다.
 
-```text
-회피: John said John would call John's friend.
-바름: John said he would call his friend.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | John said John would call John's friend. |
+| 바름 | John said he would call his friend. |
 
 대명사의 어려움은 두 가지입니다. *어떤 명사를 가리키는지*(antecedent) 명확해야 하고, *어느 자리에 어느 격*이 와야 하는지 정확해야 합니다.
 
@@ -202,34 +202,24 @@ Some of the apples are rotten. (복수)
 
 ## 예문
 
-```text
-She and I will attend the meeting.
-그녀와 나는 회의에 참석할 것입니다.
-
-Please send the report to him and me.
-보고서를 그와 저에게 보내 주세요.
-
-The student whose essay won the prize is here.
-에세이가 상을 받은 학생이 여기 있습니다.
-
-Each of the candidates has submitted his or her resume.
-각 지원자는 자신의 이력서를 제출했습니다.
-
-Everyone should bring their own laptop.
-모두가 자신의 노트북을 가져와야 합니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| She and I will attend the meeting. | 그녀와 나는 회의에 참석할 것입니다. |
+| Please send the report to him and me. | 보고서를 그와 저에게 보내 주세요. |
+| The student whose essay won the prize is here. | 에세이가 상을 받은 학생이 여기 있습니다. |
+| Each of the candidates has submitted his or her resume. | 각 지원자는 자신의 이력서를 제출했습니다. |
+| Everyone should bring their own laptop. | 모두가 자신의 노트북을 가져와야 합니다. |
 
 ## 자주 보는 함정
 
 ### 1. *me*와 *I*를 뒤집어 쓰는 경우
 
-```text
-회피: He gave it to John and I.
-바름: He gave it to John and me.
-
-회피: Me and Sarah went to the store.
-바름: Sarah and I went to the store.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | He gave it to John and I. |
+| 바름 | He gave it to John and me. |
+| 회피 | Me and Sarah went to the store. |
+| 바름 | Sarah and I went to the store. |
 
 ### 2. *they* / *their* 단수 사용
 
@@ -246,10 +236,10 @@ Everyone should bring their own laptop.
 
 대명사가 *어느 명사를 가리키는지* 불명확하면 다시 명사로 돌립니다.
 
-```text
-회피: When Mary met Susan, she was tired.   (she = Mary? Susan?)
-바름: When Mary met Susan, Mary was tired.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | When Mary met Susan, she was tired.   (she = Mary? Susan?) |
+| 바름 | When Mary met Susan, Mary was tired. |
 
 ### 4. *its* vs *it's*
 

@@ -109,7 +109,9 @@ make menuconfig
 
 ## savedefconfig — 변경사항 저장
 
-`menuconfig`로 설정을 바꾸면 `.config`가 생성됩니다. 이를 그대로 vendor 트리에 커밋하면 안 됩니다. `.config`는 수천 줄이고, 대부분이 *기본값과 같은* 항목입니다. 그래서 `savedefconfig`가 *최소 차이*만 추출합니다.
+`menuconfig`로 설정을 바꾸면 `.config`가 생성됩니다. 이를 그대로 vendor 트리에 커밋하면 안 됩니다. `.config`는 수천 줄이고, 대부분이 *기본값과 같은* 항목입니다. 그래서 `savedefconfig`가 *최소 차이*만 추출합니다. 다음 그림은 이 설정 흐름을 보여줍니다.
+
+![커널 설정 흐름 — defconfig에서 menuconfig를 거쳐 savedefconfig까지](/images/blog/bsp/diagrams/ch08-kernel-config-flow.svg)
 
 ```bash
 make savedefconfig
@@ -120,6 +122,38 @@ git diff arch/arm64/configs/myboard_defconfig
 ```
 
 `savedefconfig`의 출력은 입력 `.config`와 *의미적으로 동일*합니다. 다만 표현이 짧을 뿐입니다. 새 보드를 추가할 때는 vendor 가까운 보드의 defconfig를 복사해서 시작합니다.
+
+### defconfig 비교와 merge 예시
+
+기존 defconfig에서 변경된 옵션만 확인하는 방법입니다.
+
+```bash
+# 현재 .config와 원본 defconfig 비교
+make savedefconfig
+diff -u arch/arm64/configs/imx_v8_defconfig defconfig
+
+# 변경 사항만 추출
+scripts/diffconfig arch/arm64/configs/imx_v8_defconfig .config
+# 출력 예시:
+# +CONFIG_LOCALVERSION="-myboard"
+# -CONFIG_USB_XHCI_HCD=m
+# +CONFIG_USB_XHCI_HCD=y
+```
+
+merge_config.sh는 여러 config fragment를 합칩니다. BSP별 옵션을 fragment로 관리할 때 유용합니다.
+
+```bash
+# 기본 defconfig + BSP 오버레이 + 디버그 옵션
+./scripts/kconfig/merge_config.sh \
+    arch/arm64/configs/defconfig \
+    myboard.config \
+    debug.config
+
+# myboard.config 내용 예시
+CONFIG_LOCALVERSION="-myboard"
+CONFIG_USB_XHCI_HCD=y
+CONFIG_SPI_IMX=y
+```
 
 ## Kconfig 의존성
 

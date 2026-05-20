@@ -52,15 +52,7 @@ GPIO9 (BOOT)    GPIO8         부팅 모드
 
 GPIO Matrix는 *256-input × 256-output crossbar switch*입니다. 어떤 페리퍼럴 신호도 어떤 IO에 *런타임에 매핑*할 수 있습니다.
 
-```text
-페리퍼럴 신호                           IO MUX
-  UART0_TX  ─┐                          ┌─→ GPIO 0
-  UART0_RX  ─┤                          ├─→ GPIO 1
-  SPI2_CLK  ─┤    GPIO Matrix           ├─→ GPIO 2
-  SPI2_MOSI ─┤    (256 × 256)           ├─→ ...
-  I2C0_SDA  ─┤                          ├─→ GPIO 21
-  ...       ─┘                          └─→
-```
+![ESP32-C3 GPIO Matrix — 256 × 256 Crossbar](/images/blog/esp32-c3/diagrams/ch04-gpio-matrix.svg)
 
 ESP-IDF가 이 매핑을 *자동*으로 합니다.
 

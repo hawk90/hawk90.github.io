@@ -137,22 +137,7 @@ CONFIG_SPL_BSS_MAX_SIZE=0x2000
 
 SPL이 SRAM에 어떻게 배치되는지는 linker script로 결정됩니다. `arch/arm/cpu/armv8/u-boot-spl.lds`가 기본 골격입니다.
 
-```text
-SRAM (예: i.MX 8M, 0x00910000 ~ 0x00940000, 192 KB)
-┌──────────────────────────────┐ 0x00910000
-│ .text  (코드)                │
-│ .rodata (상수 + DTB)         │
-├──────────────────────────────┤
-│ .data  (초기화된 전역)        │
-├──────────────────────────────┤
-│ .bss   (0으로 초기화 전역)    │
-├──────────────────────────────┤
-│ heap   (있다면)              │
-├──────────────────────────────┤
-│           ↓ grows down       │
-│         stack                │
-└──────────────────────────────┘ 0x00940000
-```
+![SPL SRAM Layout — i.MX 8M, 192 KB](/images/blog/bootloader/diagrams/ch24-spl-sram-layout.svg)
 
 linker script 핵심 부분을 발췌하면 다음과 같습니다.
 

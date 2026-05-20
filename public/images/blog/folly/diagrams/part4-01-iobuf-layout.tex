@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5,2.6) {IOBuf Memory Layout};
+
+% Three regions of the buffer
+\node[neut, minimum width=24mm, minimum height=14mm, anchor=west] (head) at (0,0)
+  {headroom};
+\node[hi,   minimum width=24mm, minimum height=14mm, anchor=west] (data) at (2.4,0)
+  {data};
+\node[neut, minimum width=44mm, minimum height=14mm, anchor=west] (tail) at (4.8,0)
+  {tailroom};
+
+% Pointer marks above
+\draw[arr, line width=0.5pt] (0.0,1.3) -- (0.0,0.85);
+\node[caption, anchor=south] at (0.0,1.3) {\texttt{buf\_}};
+
+\draw[arr, line width=0.5pt] (2.4,1.3) -- (2.4,0.85);
+\node[caption, anchor=south] at (2.4,1.3) {\texttt{data\_}};
+
+\draw[arr, line width=0.5pt] (4.8,1.3) -- (4.8,0.85);
+\node[caption, anchor=south] at (4.8,1.3) {\texttt{data\_ + length\_}};
+
+\draw[arr, line width=0.5pt] (9.2,1.3) -- (9.2,0.85);
+\node[caption, anchor=south] at (9.2,1.3) {\texttt{buf\_ + capacity\_}};
+
+\end{tikzpicture}
+\end{document}

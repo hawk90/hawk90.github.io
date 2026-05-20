@@ -17,15 +17,7 @@ draft: false
 
 IOBuf의 구조를 다시 본다.
 
-```text
-IOBuf node                          actual buffer (SharedInfo)
-┌──────────────┐                    ┌─────────────────────────┐
-│ data_, length│ ──────data_ ─────▶ │  uint8_t[capacity]      │
-│ next_, prev_ │                    │                          │
-│ shared_   ───┼───── ref-count ──▶ │  SharedInfo*             │
-│ flags        │                    │  (refcount, free fn)     │
-└──────────────┘                    └─────────────────────────┘
-```
+![IOBuf — node vs shared buffer](/images/blog/folly/diagrams/part4-05-iobuf-shared.svg)
 
 **buffer**는 *실제 byte 영역*과 SharedInfo다. **node**는 *그 buffer를 가리키는 IOBuf 객체*다.
 

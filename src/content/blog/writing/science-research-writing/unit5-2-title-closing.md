@@ -85,34 +85,28 @@ bookAuthor: "Hilary Glasman-Deal"
 
 ### 2. 너무 길음
 
-```
-회피: An investigation into the effects of various concentrations of
-       caffeine consumed at different times of day on the sleep
-       efficiency of college students at three universities
-
-선호: Caffeine timing and sleep efficiency in college students
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | An investigation into the effects of various concentrations of caffeine consumed at different times of day on the sleep efficiency of college students at three universities |
+| 바름 | Caffeine timing and sleep efficiency in college students |
 
 20 단어를 넘으면 검색에서 잘립니다. 핵심을 추려야 합니다.
 
 ### 3. Jargon 과다
 
-```
-회피: SOTA SSL methods for downstream task evaluation in NLP
-
-선호: Self-supervised learning methods for natural language tasks:
-       A benchmark comparison
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | SOTA SSL methods for downstream task evaluation in NLP |
+| 바름 | Self-supervised learning methods for natural language tasks: A benchmark comparison |
 
 분야 외부 독자도 이해할 수 있어야 합니다. 약어는 논문 안에서 정의되지만, 제목에서는 풀어 씁니다.
 
 ### 4. 과장
 
-```
-회피: Revolutionary new approach to AI
-
-선호: A new approach to AI alignment via constitutional methods
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Revolutionary new approach to AI |
+| 바름 | A new approach to AI alignment via constitutional methods |
 
 *Revolutionary*, *Breakthrough*, *Novel* 같은 단어는 심사에서 점수가 깎입니다.
 

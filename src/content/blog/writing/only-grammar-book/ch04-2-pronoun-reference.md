@@ -22,33 +22,30 @@ bookAuthor: "Susan Thurman"
 
 ### 두 명사 중 어느 것인지 불분명
 
-```text
-회피: When Mary met Susan, she was tired.   (she = Mary? Susan?)
-바름: When Mary met Susan, Mary was tired.
-바름: Mary was tired when she met Susan.    (she = Mary 명확)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | When Mary met Susan, she was tired.   (she = Mary? Susan?) |
+| 바름 | When Mary met Susan, Mary was tired. |
+| 바름 | Mary was tired when she met Susan.    (she = Mary 명확) |
 
 ### 멀리 떨어진 선행사
 
 대명사와 선행사가 *너무 멀면* 참조가 약해집니다.
 
-```text
-회피: The book was on the table. The cat was sleeping under the table.
-       The lamp was bright. It had been there for years.
-       (it = book? table? cat? lamp?)
-바름: ... The lamp had been there for years.   (명사 반복)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The book was on the table. The cat was sleeping under the table. The lamp was bright. It had been there for years. (it = book? table? cat? lamp?) |
+| 바름 | ... The lamp had been there for years.   (명사 반복) |
 
 ### 형용사·소유격을 선행사로
 
 엄밀히 말하면 *명사*가 아니어서 모호.
 
-```text
-회피: In Lincoln's speech, he addressed the nation.
-       (he의 선행사가 Lincoln인지 Lincoln's인지 모호)
-바름: In his speech, Lincoln addressed the nation.
-바름: Lincoln, in his speech, addressed the nation.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | In Lincoln's speech, he addressed the nation. (he의 선행사가 Lincoln인지 Lincoln's인지 모호) |
+| 바름 | In his speech, Lincoln addressed the nation. |
+| 바름 | Lincoln, in his speech, addressed the nation. |
 
 ## 막연한 *this, that, it, which*
 
@@ -56,34 +53,28 @@ bookAuthor: "Susan Thurman"
 
 ### 회피 — *this/that*만 단독
 
-```text
-회피: The project failed due to poor planning, lack of resources,
-       and miscommunication. This led to layoffs.
-       (this = ?)
-바름: The project failed due to poor planning, lack of resources,
-       and miscommunication. These failures led to layoffs.
-바름: The project failed due to poor planning, lack of resources,
-       and miscommunication. This failure led to layoffs.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The project failed due to poor planning, lack of resources, and miscommunication. This led to layoffs. (this = ?) |
+| 바름 | The project failed due to poor planning, lack of resources, and miscommunication. These failures led to layoffs. |
+| 바름 | The project failed due to poor planning, lack of resources, and miscommunication. This failure led to layoffs. |
 
 *this/that* 뒤에 *명사*를 붙여 *무엇을* 가리키는지 명시.
 
 ### 회피 — *which*가 막연
 
-```text
-회피: She missed the deadline, which caused problems.
-       (which = ?)
-바름: She missed the deadline, an error that caused problems.
-바름: She missed the deadline. This delay caused problems.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She missed the deadline, which caused problems. (which = ?) |
+| 바름 | She missed the deadline, an error that caused problems. |
+| 바름 | She missed the deadline. This delay caused problems. |
 
 ### 회피 — *it*이 막연
 
-```text
-회피: In the article it says that climate change is accelerating.
-       (it = ?)
-바름: The article says that climate change is accelerating.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | In the article it says that climate change is accelerating. (it = ?) |
+| 바름 | The article says that climate change is accelerating. |
 
 ## 대명사-선행사 수 일치
 
@@ -107,11 +98,11 @@ bookAuthor: "Susan Thurman"
 
 한 글 안에서 *일관성*.
 
-```text
-회피: The team played its best. They won the game.
-바름: The team played its best. It won the game.   (단수 일관)
-바름: The team played their best. They won the game.   (복수 일관)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The team played its best. They won the game. |
+| 바름 | The team played its best. It won the game.   (단수 일관) |
+| 바름 | The team played their best. They won the game.   (복수 일관) |
 
 ### 부정대명사
 
@@ -157,12 +148,11 @@ bookAuthor: "Susan Thurman"
 
 한 글 안에서 *인칭*이 일관되어야 합니다.
 
-```text
-회피: When you arrive at a hotel, one should check in immediately.
-       (you와 one 혼용)
-바름: When you arrive at a hotel, you should check in immediately.
-바름: When one arrives at a hotel, one should check in immediately.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | When you arrive at a hotel, one should check in immediately. (you와 one 혼용) |
+| 바름 | When you arrive at a hotel, you should check in immediately. |
+| 바름 | When one arrives at a hotel, one should check in immediately. |
 
 ### 학술 글의 인칭
 
@@ -170,27 +160,27 @@ bookAuthor: "Susan Thurman"
 - **2인칭** *you* — 회피 (수신자가 막연)
 - **3인칭** *he, she, they, one, the reader* — 학술 글의 기본
 
-```text
-회피: You can see from the data that ...
-바름: The data show that ...
-바름: As the reader can see from the data, ...
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | You can see from the data that ... |
+| 바름 | The data show that ... |
+| 바름 | As the reader can see from the data, ... |
 
 ## 회피의 대안
 
 ### 회피 1: 능동·복수로 변환
 
-```text
-회피: A student should turn in his or her assignment on time.
-바름: Students should turn in their assignments on time.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | A student should turn in his or her assignment on time. |
+| 바름 | Students should turn in their assignments on time. |
 
 ### 회피 2: 대명사 제거
 
-```text
-회피: A student should turn in his or her assignment.
-바름: A student should turn in the assignment.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | A student should turn in his or her assignment. |
+| 바름 | A student should turn in the assignment. |
 
 ### 회피 3: *Singular they*
 
@@ -233,13 +223,12 @@ The person whom I spoke to is my uncle.
 
 (Chapter 1.2 복습)
 
-```text
-회피: Please contact myself with questions.
-바름: Please contact me with questions.
-
-회피: John and myself will attend.
-바름: John and I will attend.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Please contact myself with questions. |
+| 바름 | Please contact me with questions. |
+| 회피 | John and myself will attend. |
+| 바름 | John and I will attend. |
 
 반사대명사는 *주어와 목적어가 같을 때만*.
 
@@ -253,16 +242,14 @@ The person whom I spoke to is my uncle.
 
 (Chapter 3.5 복습)
 
-```text
-회피: The dog wagged it's tail.
-바름: The dog wagged its tail.
-
-회피: Who's book is this?
-바름: Whose book is this?
-
-회피: They're house is here.
-바름: Their house is here.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The dog wagged it's tail. |
+| 바름 | The dog wagged its tail. |
+| 회피 | Who's book is this? |
+| 바름 | Whose book is this? |
+| 회피 | They're house is here. |
+| 바름 | Their house is here. |
 
 ## 예문
 
@@ -288,19 +275,18 @@ The students who completed the assignment received extra credit.
 
 ### 1. 모호한 *she/he/it*
 
-```text
-회피: After Tom called Mike, he said he was busy.
-       (he = ?)
-바름: After Tom called Mike, Mike said he (Mike) was busy.
-바름: Tom called Mike to say that he (Tom) was busy.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | After Tom called Mike, he said he was busy. (he = ?) |
+| 바름 | After Tom called Mike, Mike said he (Mike) was busy. |
+| 바름 | Tom called Mike to say that he (Tom) was busy. |
 
 ### 2. 막연한 *this/that*
 
-```text
-회피: She rejected the proposal. This was unexpected.
-바름: She rejected the proposal. This rejection was unexpected.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She rejected the proposal. This was unexpected. |
+| 바름 | She rejected the proposal. This rejection was unexpected. |
 
 ### 3. *Each, every* 복수 대명사 (전통 규칙)
 
@@ -312,10 +298,10 @@ The students who completed the assignment received extra credit.
 
 ### 4. 인칭 혼용
 
-```text
-회피: You should always check your work before one submits it.
-바름: You should always check your work before you submit it.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | You should always check your work before one submits it. |
+| 바름 | You should always check your work before you submit it. |
 
 ### 5. *Who/Whom* 오용
 
@@ -327,10 +313,10 @@ The students who completed the assignment received extra credit.
 
 ### 6. 반사대명사 강조 사용
 
-```text
-회피: My team and myself will handle this.
-바름: My team and I will handle this.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | My team and myself will handle this. |
+| 바름 | My team and I will handle this. |
 
 ## 정리
 

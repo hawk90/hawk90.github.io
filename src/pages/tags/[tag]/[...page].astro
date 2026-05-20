@@ -3,19 +3,21 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PostCard from '../../../components/blog/PostCard.astro';
 import BlogSidebar from '../../../components/blog/BlogSidebar.astro';
 import Breadcrumb from '../../../components/common/Breadcrumb.astro';
-import { getPublishedPosts, getAllTags, filterByTag, type BlogPost } from '../../../lib/posts';
+import { getPublishedPosts, getTagsForPageGeneration, filterByTag, type BlogPost } from '../../../lib/posts';
 import type { PaginateFunction } from 'astro';
 
 
 export async function getStaticPaths({ paginate }: { paginate: PaginateFunction }) {
   const allPosts = await getPublishedPosts();
-  const allTags = getAllTags(allPosts);
+  // 빌드 시간 단축: 2개 이상의 게시물이 있는 태그만 페이지 생성.
+  // 1-post 태그가 전체의 ~70%라 페이지 생성 비용의 대부분을 차지함.
+  const allTags = getTagsForPageGeneration(allPosts, 2);
 
   return allTags.flatMap((tag) => {
     const posts = filterByTag(allPosts, tag);
     return paginate(posts, {
       params: { tag: tag.toLowerCase() },
-      pageSize: 12,
+      pageSize: 24,
       props: { tag, allPosts },
     });
   });

@@ -131,40 +131,37 @@ Future research should examine ...
 
 ### 1. 너무 일반적인 도입
 
-```
-회피: This study examines an important topic.
-선호: This study examines the relationship between caffeine timing
-       and sleep quality in young adults.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | This study examines an important topic. |
+| 바름 | This study examines the relationship between caffeine timing and sleep quality in young adults. |
 
 구체성이 검색 키워드를 만듭니다.
 
 ### 2. 결과 미명시
 
-```
-회피: We found interesting effects.
-선호: Caffeine consumption within 6 hours of bedtime was associated
-       with reduced sleep efficiency.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | We found interesting effects. |
+| 바름 | Caffeine consumption within 6 hours of bedtime was associated with reduced sleep efficiency. |
 
 무엇이 발견되었는지 명시해야 합니다.
 
 ### 3. Statistical 디테일 누락
 
-```
-회피: Differences were significant.
-선호: Differences were significant (t = 3.45, p < .001, d = 0.44).
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Differences were significant. |
+| 바름 | Differences were significant (t = 3.45, p < .001, d = 0.44). |
 
 가능하면 효과 크기와 p-value를 포함합니다(분야 표준에 따릅니다).
 
 ### 4. Methodology 디테일 부족
 
-```
-회피: We analyzed the data.
-선호: We analyzed the data using mixed-effects models with random
-       intercepts for participants.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | We analyzed the data. |
+| 바름 | We analyzed the data using mixed-effects models with random intercepts for participants. |
 
 심사자가 방법의 적절성을 abstract만 보고 평가할 수 있어야 합니다.
 

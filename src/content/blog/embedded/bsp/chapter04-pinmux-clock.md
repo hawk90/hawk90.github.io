@@ -300,29 +300,31 @@ DT 예시입니다.
 
 새 보드에서 *U-Boot의 시리얼이 안 뜨는* 상황에서 점검하는 순서입니다.
 
-```text
-[1] 하드웨어 점검
-    □ USB-TTL의 TX/RX 교차 확인
-    □ GND 연결
-    □ baud rate 일치 (보통 115200)
-    □ 보드에 *전원*이 정상으로 들어오는지 (LED 확인)
+**[1] 하드웨어 점검**
 
-[2] 부트 미디어 점검
-    □ BOOT_MODE 핀이 SD/eMMC 중 옳은 미디어로 설정됐는지
-    □ SPL/U-Boot 이미지가 SD에 올바른 오프셋에 있는지
-    □ SD가 SPL이 찾을 수 있는 포맷 (보통 raw write to offset 1KB)
+- [ ] USB-TTL의 TX/RX 교차 확인
+- [ ] GND 연결
+- [ ] baud rate 일치 (보통 115200)
+- [ ] 보드에 *전원*이 정상으로 들어오는지 (LED 확인)
 
-[3] Pin mux 점검
-    □ board_early_init_f()에서 console UART pad가 설정됐는지
-    □ 매크로의 ALT가 맞는지 (UART2_RXD vs UART_TX는 자주 헷갈림)
-    □ PAD_CTL의 pull 설정 (input은 pull-up 권장)
+**[2] 부트 미디어 점검**
 
-[4] Clock 점검
-    □ SYS_PLL1이 enable됐는지
-    □ UART_CLK_ROOT의 parent가 옳은지
-    □ ccgr (clock gate) 비트가 켜져 있는지
-    □ U-Boot의 CONFIG_DEBUG_UART_CLOCK이 *실제 주파수*와 같은지
-```
+- [ ] BOOT_MODE 핀이 SD/eMMC 중 옳은 미디어로 설정됐는지
+- [ ] SPL/U-Boot 이미지가 SD에 올바른 오프셋에 있는지
+- [ ] SD가 SPL이 찾을 수 있는 포맷 (보통 raw write to offset 1KB)
+
+**[3] Pin mux 점검**
+
+- [ ] board_early_init_f()에서 console UART pad가 설정됐는지
+- [ ] 매크로의 ALT가 맞는지 (UART2_RXD vs UART_TX는 자주 헷갈림)
+- [ ] PAD_CTL의 pull 설정 (input은 pull-up 권장)
+
+**[4] Clock 점검**
+
+- [ ] SYS_PLL1이 enable됐는지
+- [ ] UART_CLK_ROOT의 parent가 옳은지
+- [ ] ccgr (clock gate) 비트가 켜져 있는지
+- [ ] U-Boot의 CONFIG_DEBUG_UART_CLOCK이 *실제 주파수*와 같은지
 
 ARM Trusted Firmware-A를 쓰는 보드라면 *BL2가 console UART을 설정*합니다. BL2 단계에서 이미 막힌 거라면 BL2의 console 코드를 확인합니다.
 

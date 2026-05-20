@@ -166,21 +166,20 @@ endmenu
 
 `make menuconfig`는 *대화식 TUI*로 .config를 편집합니다.
 
-```text
-┌────────── U-Boot Configuration ──────────┐
-│  General setup --->                       │
-│  ARM architecture --->                    │
-│  Boot media --->                          │
-│  Boot images --->                         │
-│  Boot timing --->                         │
-│  Boot count support --->                  │
-│  Console --->                             │
-│  Device Tree Control --->                 │
-│  Environment --->                         │
-│  Network --->                             │
-│  Library routines --->                    │
-└───────────────────────────────────────────┘
-```
+**U-Boot Configuration** 최상위 메뉴:
+
+- General setup --->
+- ARM architecture --->
+- Boot media --->
+- Boot images --->
+- Boot timing --->
+- Boot count support --->
+- Console --->
+- Device Tree Control --->
+- Environment --->
+- Network --->
+- Library routines --->
+
 
 옵션을 검색하려면 `/`를 누르고 검색어를 입력합니다.
 

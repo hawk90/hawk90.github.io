@@ -99,11 +99,9 @@ and their parents make decisions.
 
 ### 세 commentary 비교
 
-```text
 Student A — 구체적 항목 나열 (91%, 88%, 56%, 64%, ...). 그러나 큰 그림이 약하다.
 Student B — 큰 그림을 잡음 (sex 차이는 한 항목만). 다른 패턴은 무시.
 Student C — 두 큰 그림 (성별 유사함 + 결정 유형별 차이). 가장 균형 잡힘.
-```
 
 Student C가 가장 좋은 highlighting입니다. 데이터의 두 가지 큰 패턴을 인식하고, 세부 사항을 분류해서 보입니다.
 

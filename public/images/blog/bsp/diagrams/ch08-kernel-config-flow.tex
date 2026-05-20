@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  file/.style={cls, minimum width=30mm, minimum height=8mm, font=\sffamily\small},
+  tool/.style={rectangle, rounded corners=3pt, draw=nodebord, fill=warnfill, minimum width=24mm, minimum height=8mm, font=\sffamily\small}
+]
+
+% Title
+\node[font=\sffamily\bfseries] at (2, 5.5) {커널 설정 흐름};
+
+% defconfig path
+\node[file, draw=absbord, fill=absfill] (defconfig) at (0, 4) {board\_defconfig};
+\node[tool] (make) at (0, 2.5) {make defconfig};
+\node[file, draw=impbord, fill=impfill] (dotconfig) at (0, 1) {.config};
+
+\draw[arr] (defconfig) -- (make);
+\draw[arr] (make) -- (dotconfig);
+
+% menuconfig path
+\node[tool] (menu) at (4, 2.5) {make menuconfig};
+\node[file, draw=clibord, fill=clifill] (newconfig) at (4, 1) {.config (수정)};
+
+\draw[arr] (dotconfig.east) -- (menu.west);
+\draw[arr] (menu) -- (newconfig);
+
+% savedefconfig
+\node[tool] (save) at (4, -0.5) {make savedefconfig};
+\node[file, draw=hibord, fill=hifill] (newdef) at (4, -2) {defconfig (갱신)};
+
+\draw[arr] (newconfig) -- (save);
+\draw[arr] (save) -- (newdef);
+
+% Annotations
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (5.5, 4) {arch/arm64/configs/};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (5.5, 1) {커널 루트 디렉터리};
+
+% Loop back
+\draw[arr, densely dashed] (newdef.west) -- ++(-2, 0) |- node[left, pos=0.75, font=\sffamily\tiny, text=mutec] {git commit} (defconfig.south);
+
+\end{tikzpicture}
+\end{document}

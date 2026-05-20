@@ -262,32 +262,32 @@ and the committee approved it without any changes.
 
 종지부 없이 절들을 *나열*.
 
-```text
-회피: She studied hard she still failed.
-바름: She studied hard, but she still failed.
-바름: She studied hard; she still failed.
-바름: She studied hard. She still failed.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She studied hard she still failed. |
+| 바름 | She studied hard, but she still failed. |
+| 바름 | She studied hard; she still failed. |
+| 바름 | She studied hard. She still failed. |
 
 ### 2. Comma splice
 
 두 독립절을 *쉼표만으로* 연결.
 
-```text
-회피: She came, he left.
-바름: She came, and he left.
-바름: She came; he left.
-바름: She came. He left.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She came, he left. |
+| 바름 | She came, and he left. |
+| 바름 | She came; he left. |
+| 바름 | She came. He left. |
 
 ### 3. 종속절 단편
 
 종속절을 *단독으로*.
 
-```text
-회피: Because it was raining.
-바름: Because it was raining, we stayed home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Because it was raining. |
+| 바름 | Because it was raining, we stayed home. |
 
 ### 4. 너무 긴 중복문
 

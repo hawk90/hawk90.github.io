@@ -199,10 +199,10 @@ She arrived at the station.        (동사 수식 — 부사적)
 
 전치사구가 *멀리 떨어지면* 의미 혼동이 생깁니다 (Chapter 4.3 참고).
 
-```text
-회피: She gave the book to the boy with the red cover.
-바름: She gave the book with the red cover to the boy.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She gave the book to the boy with the red cover. |
+| 바름 | She gave the book with the red cover to the boy. |
 
 ## 문장 끝의 전치사
 
@@ -220,22 +220,13 @@ She arrived at the station.        (동사 수식 — 부사적)
 
 ## 예문
 
-```text
-She has been studying English since January.
-그녀는 1월부터 영어를 공부해 왔습니다.
-
-The meeting is scheduled for Friday at 3 PM in the conference room.
-회의는 금요일 오후 3시에 회의실에서 잡혀 있습니다.
-
-We agreed on a strategy to deal with the problem.
-우리는 그 문제를 다룰 전략에 합의했습니다.
-
-He is responsible for the project's success.
-그는 그 프로젝트의 성공에 책임이 있습니다.
-
-The solution to the problem depends on your priorities.
-그 문제의 해결책은 당신의 우선순위에 달려 있습니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| She has been studying English since January. | 그녀는 1월부터 영어를 공부해 왔습니다. |
+| The meeting is scheduled for Friday at 3 PM in the conference room. | 회의는 금요일 오후 3시에 회의실에서 잡혀 있습니다. |
+| We agreed on a strategy to deal with the problem. | 우리는 그 문제를 다룰 전략에 합의했습니다. |
+| He is responsible for the project's success. | 그는 그 프로젝트의 성공에 책임이 있습니다. |
+| The solution to the problem depends on your priorities. | 그 문제의 해결책은 당신의 우선순위에 달려 있습니다. |
 
 ## 자주 보는 함정
 
@@ -254,20 +245,19 @@ The solution to the problem depends on your priorities.
 - **at** — 작은 장소: *arrive at the station, at the airport, at the hotel*
 - **in** — 큰 장소: *arrive in Seoul, in Korea, in Asia*
 
-```text
-회피: She arrived to Seoul.
-바름: She arrived in Seoul.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She arrived to Seoul. |
+| 바름 | She arrived in Seoul. |
 
 ### 3. *discuss about* / *mention about* — 잘못된 전치사 추가
 
-```text
-회피: We discussed about the plan.
-바름: We discussed the plan.
-
-회피: She mentioned about the problem.
-바름: She mentioned the problem.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | We discussed about the plan. |
+| 바름 | We discussed the plan. |
+| 회피 | She mentioned about the problem. |
+| 바름 | She mentioned the problem. |
 
 *discuss, mention, enter, marry, contact* 등은 *전치사 없이* 바로 목적어.
 

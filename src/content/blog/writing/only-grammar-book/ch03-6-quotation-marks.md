@@ -32,10 +32,10 @@ He said, "I will be there at noon."
 
 #### 간접 인용은 따옴표 없음
 
-```text
-바름: She said that she would come.
-회피: She said that "she would come."
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | She said that she would come. |
+| 회피 | She said that "she would come." |
 
 ### 용도 2: 짧은 작품의 제목
 
@@ -322,10 +322,10 @@ The sign read, "No exit [sic] this way."
 
 ### 2. 간접 인용에 따옴표
 
-```text
-회피: She said that "she would come."
-바름: She said that she would come.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She said that "she would come." |
+| 바름 | She said that she would come. |
 
 ### 3. 반어 따옴표 남발
 
@@ -338,19 +338,19 @@ The sign read, "No exit [sic] this way."
 
 ### 4. 작품 제목 부호 혼동
 
-```text
-회피: I read "War and Peace" last summer.   (긴 작품 — 이탤릭)
-바름: I read *War and Peace* last summer.
-바름: I read Tolstoy's "Three Deaths".    (단편 — 따옴표)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I read "War and Peace" last summer.   (긴 작품 — 이탤릭) |
+| 바름 | I read *War and Peace* last summer. |
+| 바름 | I read Tolstoy's "Three Deaths".    (단편 — 따옴표) |
 
 ### 5. 괄호 안 마침표 위치
 
-```text
-회피: She finished early (despite the delays.).
-바름: She finished early (despite the delays).
-바름: She finished. (The delays were unexpected.)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She finished early (despite the delays.). |
+| 바름 | She finished early (despite the delays). |
+| 바름 | She finished. (The delays were unexpected.) |
 
 ### 6. 미국식·영국식 혼용
 

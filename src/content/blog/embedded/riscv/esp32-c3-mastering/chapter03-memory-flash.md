@@ -252,17 +252,12 @@ OTA(Over-The-Air) 업데이트는 *현재 안 쓰는 ota 파티션에 새 이미
 
 ### 부트 흐름
 
-```text
-boot →  otadata 읽기  →  사용할 app 파티션 결정
-                             ↓
-                       ┌─────┴─────┐
-                       │           │
-                    factory     ota_0  또는  ota_1
-                       ↓           ↓
-                    실행         이미지 verify
-                                  ↓
-                                 실행
-```
+| 단계 | 동작 |
+|------|------|
+| boot | `otadata` 읽기 |
+| select | 사용할 app 파티션 결정 |
+| → `factory` | 즉시 실행 |
+| → `ota_0` 또는 `ota_1` | 이미지 verify → 실행 |
 
 부팅 후 *firmware가 정상 동작 확인*되면 *valid mark*를 합니다. valid가 안 찍힌 채 재부팅되면 *otadata가 자동으로 이전 파티션으로 롤백*합니다.
 

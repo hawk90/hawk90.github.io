@@ -104,13 +104,12 @@ Tom's and Jerry's cars
 - **사람·동물**: 보통 `'s` — *the dog's bowl, John's car*
 - **사물·추상**: 보통 *of* — *the top of the page, the cost of living*
 
-```text
-회피: the page's top
-바름: the top of the page
-
-회피: the company's history's most important moment
-바름: the most important moment in the company's history
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | the page's top |
+| 바름 | the top of the page |
+| 회피 | the company's history's most important moment |
+| 바름 | the most important moment in the company's history |
 
 `'s`가 연속되면 *어색*하니 *of*로 풀어 씁니다.
 
@@ -210,14 +209,13 @@ dotting the i's and crossing the t's
 | **its** | 소유격 (it의) | The cat licked its paws. |
 | **it's** | 축약 (it is, it has) | It's raining. |
 
-```text
-바름: The dog wagged its tail.
-바름: It's a beautiful day.
-바름: It's been a long day. (it has)
-
-회피: The dog wagged it's tail.    ← 가장 흔한 실수
-회피: Its raining.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | The dog wagged its tail. |
+| 바름 | It's a beautiful day. |
+| 바름 | It's been a long day. (it has) |
+| 회피 | The dog wagged it's tail.    ← 가장 흔한 실수 |
+| 회피 | Its raining. |
 
 #### 점검 요령
 
@@ -235,24 +233,22 @@ It's raining.                    → *It is raining.* ✓ → it's ✓
 | **whose** | 소유격 (누구의) |
 | **who's** | 축약 (who is, who has) |
 
-```text
-바름: Whose book is this?
-바름: Who's coming to dinner?
-바름: Who's been here? (who has)
-
-회피: Who's book is this?
-회피: Whose coming?
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | Whose book is this? |
+| 바름 | Who's coming to dinner? |
+| 바름 | Who's been here? (who has) |
+| 회피 | Who's book is this? |
+| 회피 | Whose coming? |
 
 ### 3. *your* vs *you're*
 
-```text
-바름: This is your book.
-바름: You're welcome.
-
-회피: Your welcome.    ← 매우 흔한 실수
-회피: You're book is here.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | This is your book. |
+| 바름 | You're welcome. |
+| 회피 | Your welcome.    ← 매우 흔한 실수 |
+| 회피 | You're book is here. |
 
 ### 4. *their* vs *they're* vs *there*
 
@@ -262,41 +258,37 @@ It's raining.                    → *It is raining.* ✓ → it's ✓
 | **they're** | 축약 (they are) |
 | **there** | 부사 (저기) / 도치 (there is) |
 
-```text
-바름: This is their house.
-바름: They're coming tomorrow.
-바름: The book is over there.
-
-회피: There coming tomorrow.
-회피: They're house is here.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | This is their house. |
+| 바름 | They're coming tomorrow. |
+| 바름 | The book is over there. |
+| 회피 | There coming tomorrow. |
+| 회피 | They're house is here. |
 
 ### 5. 복수 표시에 아포스트로피
 
 가장 자주 보는 *잘못된 사용*. 상점·메뉴에서 흔히 발견됨.
 
-```text
-회피: We sell apple's and orange's.
-바름: We sell apples and oranges.
-
-회피: The 1990's were eventful.
-바름: The 1990s were eventful.
-
-회피: The Smith's are coming.
-바름: The Smiths are coming.
-
-회피: I have two PhD's.
-바름: I have two PhDs.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | We sell apple's and orange's. |
+| 바름 | We sell apples and oranges. |
+| 회피 | The 1990's were eventful. |
+| 바름 | The 1990s were eventful. |
+| 회피 | The Smith's are coming. |
+| 바름 | The Smiths are coming. |
+| 회피 | I have two PhD's. |
+| 바름 | I have two PhDs. |
 
 이런 잘못된 아포스트로피를 *"greengrocer's apostrophe"*라고 부릅니다.
 
 ### 6. 동사에 아포스트로피
 
-```text
-회피: The dog wag's its tail.
-바름: The dog wags its tail.   (3인칭 단수 동사 — 아포스트로피 X)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The dog wag's its tail. |
+| 바름 | The dog wags its tail.   (3인칭 단수 동사 — 아포스트로피 X) |
 
 ### 7. *let's* vs *lets*
 
@@ -305,12 +297,11 @@ It's raining.                    → *It is raining.* ✓ → it's ✓
 | **let's** | 축약 (let us — 제안) |
 | **lets** | 동사 (let의 3인칭 단수) |
 
-```text
-바름: Let's go.
-바름: She lets her dog run free.
-
-회피: Lets go.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | Let's go. |
+| 바름 | She lets her dog run free. |
+| 회피 | Lets go. |
 
 ## 예문
 

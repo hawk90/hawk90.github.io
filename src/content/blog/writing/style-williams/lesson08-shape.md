@@ -144,10 +144,8 @@ shifting priorities."
 
 좋은 단락은 다양한 길이의 문장으로 이루어진다.
 
-```text
 짧은 문장. 그 다음 더 길게 펼쳐 가는 문장이 와도 좋고, 그 안에 
 또 작은 분기와 부연을 두면 리듬이 살아 난다. 다시 짧다.
-```
 
 ```text
 This was important. It changed everything. People came together, 

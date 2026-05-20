@@ -62,15 +62,7 @@ class IOBuf {
 
 핵심 관계.
 
-```text
-buf_ ───────────────────────────────────► buf_ + capacity_
-       │            data_      data_ + length_              │
-       │             │             │                        │
-       ▼             ▼             ▼                        ▼
-       ┌─────────────┬─────────────┬────────────────────────┐
-       │ headroom    │   data      │     tailroom           │
-       └─────────────┴─────────────┴────────────────────────┘
-```
+![IOBuf Memory Layout](/images/blog/folly/diagrams/part4-01-iobuf-layout.svg)
 
 - **headroom** — `data_ - buf_`. *앞쪽 여유*. prepend 시 사용.
 - **tailroom** — `capacity_ - (data_ - buf_) - length_`. *뒤쪽 여유*. append 시 사용.

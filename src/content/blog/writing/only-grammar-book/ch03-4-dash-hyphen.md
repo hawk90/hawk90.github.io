@@ -52,13 +52,12 @@ a state-of-the-art device
 
 ### *-ly* 부사 뒤 — 하이픈 없음
 
-```text
-회피: a highly-skilled worker
-바름: a highly skilled worker
-
-회피: a quickly-made decision
-바름: a quickly made decision
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | a highly-skilled worker |
+| 바름 | a highly skilled worker |
+| 회피 | a quickly-made decision |
+| 바름 | a quickly made decision |
 
 *-ly* 부사가 *형용사를 수식*하는 것이 명확하므로 하이픈 불필요.
 
@@ -134,11 +133,11 @@ the Tokyo–Seoul flight
 
 *from*과는 함께 쓰지 않습니다.
 
-```text
-바름: pages 10–20
-바름: from page 10 to page 20
-회피: from pages 10–20
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | pages 10–20 |
+| 바름 | from page 10 to page 20 |
+| 회피 | from pages 10–20 |
 
 ### 용도 2: 연결·관계
 
@@ -223,18 +222,16 @@ She was certain of one thing—he was lying.
 
 한국어 표준에서 *대시*는 *—* 양옆에 *공백*. 영어 본문이 섞이지 않은 한국어 글에서는 *—* 사용.
 
-```text
-한국어 표준: 사실은 — 결정이 어려웠다 — 그래도 답이 있었다.
-```
+> 한국어 표준: 사실은 — 결정이 어려웠다 — 그래도 답이 있었다.
 
 ### CLAUDE.md의 권고
 
 이 블로그의 톤 규칙은 *em-dash 체인 회피*를 강조합니다.
 
-```text
-회피: Google C++ Style Guide — Google 사내에서 — 수렴된 규칙.
-바름: Google C++ Style Guide는 Google 사내에서 수렴된 규칙이다.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Google C++ Style Guide — Google 사내에서 — 수렴된 규칙. |
+| 바름 | Google C++ Style Guide는 Google 사내에서 수렴된 규칙이다. |
 
 한 문장에 *em dash 두 번 이상*은 번역체 신호.
 
@@ -280,42 +277,41 @@ He realized—too late—that he had made a mistake.
 
 ### 1. 세 가로선 혼동
 
-```text
-회피: pages 10-20         (hyphen 자리에 hyphen)
-바름: pages 10–20          (en dash)
-
-회피: She left - suddenly.
-바름: She left—suddenly.   (em dash)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | pages 10-20         (hyphen 자리에 hyphen) |
+| 바름 | pages 10–20          (en dash) |
+| 회피 | She left - suddenly. |
+| 바름 | She left—suddenly.   (em dash) |
 
 ### 2. 복합 형용사 위치
 
-```text
-바름: a well-known author (명사 앞)
-회피: The author is well-known. (명사 뒤 — 하이픈 X)
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | a well-known author (명사 앞) |
+| 회피 | The author is well-known. (명사 뒤 — 하이픈 X) |
 
 ### 3. *-ly* 부사에 하이픈
 
-```text
-회피: a highly-respected scholar
-바름: a highly respected scholar
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | a highly-respected scholar |
+| 바름 | a highly respected scholar |
 
 ### 4. *from X–Y*
 
-```text
-회피: from pages 10–20
-바름: pages 10–20
-바름: from page 10 to page 20
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | from pages 10–20 |
+| 바름 | pages 10–20 |
+| 바름 | from page 10 to page 20 |
 
 ### 5. em dash 남발
 
-```text
-회피: She was tired — exhausted — but kept working — to finish — the project.
-바름: She was tired, exhausted; but she kept working to finish the project.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She was tired — exhausted — but kept working — to finish — the project. |
+| 바름 | She was tired, exhausted; but she kept working to finish the project. |
 
 한 문장에 em dash *두 번 이상*은 회피.
 

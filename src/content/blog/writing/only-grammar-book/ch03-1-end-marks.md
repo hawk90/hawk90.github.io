@@ -51,13 +51,12 @@ Pass the salt, please.
 
 다른 사람의 질문을 *전달*하는 문장은 마침표.
 
-```text
-회피: She asked what time it was?
-바름: She asked what time it was.
-
-회피: I wonder if she will come?
-바름: I wonder if she will come.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She asked what time it was? |
+| 바름 | She asked what time it was. |
+| 회피 | I wonder if she will come? |
+| 바름 | I wonder if she will come. |
 
 직접 의문문만 물음표.
 
@@ -80,10 +79,10 @@ Pass the salt, please.
 
 마침표는 *하나만*.
 
-```text
-바름: He earned a Ph.D.
-회피: He earned a Ph.D..
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | He earned a Ph.D. |
+| 회피 | He earned a Ph.D.. |
 
 ### 약어의 현대 추세
 
@@ -150,11 +149,11 @@ Is she coming today or tomorrow?
 
 #### 간접 의문문
 
-```text
-바름: She asked what time it was.
-바름: I wonder if she is coming.
-회피: She asked what time it was?
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | She asked what time it was. |
+| 바름 | I wonder if she is coming. |
+| 회피 | She asked what time it was? |
 
 #### 정중한 요청 (의문형이지만 요청)
 
@@ -230,20 +229,19 @@ Hooray!
 
 학술·기술·비즈니스 글에서는 *거의 사용하지 않습니다*. 평범한 진술에 강조를 위해 느낌표를 쓰는 것은 *유치한* 인상.
 
-```text
-회피: It was a wonderful presentation!
-바름: It was a wonderful presentation.
-
-회피: The results are amazing!
-바름: The results are remarkable.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | It was a wonderful presentation! |
+| 바름 | It was a wonderful presentation. |
+| 회피 | The results are amazing! |
+| 바름 | The results are remarkable. |
 
 ### 다중 느낌표 회피
 
-```text
-회피: That's amazing!!!
-바름: That's amazing!
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | That's amazing!!! |
+| 바름 | That's amazing! |
 
 격식 글에서는 *!*도 자제.
 
@@ -275,10 +273,10 @@ I can't believe she said "OK"!  (전체가 감탄)
 
 원칙적으로 한 문장은 *하나의 종지부*.
 
-```text
-회피: She asked, "Are you coming?".
-바름: She asked, "Are you coming?"
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She asked, "Are you coming?". |
+| 바름 | She asked, "Are you coming?" |
 
 인용 안의 의문문이 문장 끝에 오면 *마침표를 추가하지 않습니다*.
 
@@ -331,31 +329,31 @@ Watch out for the car!
 
 ### 1. 간접 의문문에 물음표
 
-```text
-회피: I want to know if she is coming?
-바름: I want to know if she is coming.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I want to know if she is coming? |
+| 바름 | I want to know if she is coming. |
 
 ### 2. 평서문에 느낌표 남발
 
-```text
-회피: I had a great time at the party!
-바름: I had a great time at the party.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I had a great time at the party! |
+| 바름 | I had a great time at the party. |
 
 ### 3. 약어 끝의 이중 마침표
 
-```text
-회피: She has a Ph.D..
-바름: She has a Ph.D.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She has a Ph.D.. |
+| 바름 | She has a Ph.D. |
 
 ### 4. 인용 부호와 마침표 위치 (미국식)
 
-```text
-회피: She said, "I will be there".
-바름: She said, "I will be there."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She said, "I will be there". |
+| 바름 | She said, "I will be there." |
 
 ### 5. 문장 끝의 약어 + 다른 종지부
 

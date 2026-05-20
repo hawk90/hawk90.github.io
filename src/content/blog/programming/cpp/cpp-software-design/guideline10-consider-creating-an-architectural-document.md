@@ -346,13 +346,9 @@ Client            Service           Database
   │                  │←── ack ──────────│
   │                  │── publish event ─→ EventBus
   │←── confirmation ─│                  │
-```
-
 복잡한 흐름은 sequence diagram이 잘 맞는다.
 
 ## 의존성 다이어그램
-
-```
 domain (의존 없음)
   ↑
 application

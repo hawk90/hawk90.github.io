@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4.5,2.6) {CAN Bit Timing (TQ segments)};
+
+% Four segments — width roughly proportional
+\node[hi,  minimum width=10mm, minimum height=14mm, anchor=west] (sync)  at (0.0,0)
+  {Sync\\\small (1 TQ)};
+\node[abs, minimum width=30mm, minimum height=14mm, anchor=west] (prop)  at (1.0,0)
+  {Prop\_Seg\\\small (1 – 8 TQ)};
+\node[imp, minimum width=24mm, minimum height=14mm, anchor=west] (ph1)   at (4.0,0)
+  {Phase1\\\small (1 – 8 TQ)};
+\node[con, minimum width=24mm, minimum height=14mm, anchor=west] (ph2)   at (6.4,0)
+  {Phase2\\\small (1 – 8 TQ)};
+
+% Sample point arrow between Phase1 / Phase2
+\draw[focus, line width=0.6pt] (6.4,-1.0) -- (6.4,-0.4);
+\node[caption, anchor=north, align=center] at (6.4,-1.0) {sample point\\\small (보통 75 – 87.5\%)};
+
+\end{tikzpicture}
+\end{document}

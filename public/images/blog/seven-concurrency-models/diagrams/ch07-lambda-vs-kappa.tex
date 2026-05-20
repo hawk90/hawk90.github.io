@@ -8,25 +8,25 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog, x=1cm, y=1cm]
   % ═══════════════════════════════════════════════════════════
-  % LAMBDA (top half)
+  % LAMBDA (top half) — title moved well above nodes
   % ═══════════════════════════════════════════════════════════
   \node[font=\sffamily\bfseries\normalsize, text=inkc, anchor=west]
-        at (-0.5, 3.6) {Lambda Architecture};
+        at (-0.5, 4.5) {Lambda Architecture};
 
   \node[cli, minimum width=22mm, minimum height=10mm, align=center, text width=20mm]
-        (Lraw) at (0.5, 2.3) {Raw\\\footnotesize event stream};
+        (Lraw) at (0.5, 2.3) {Raw\\[2pt]\footnotesize event stream};
 
   \node[prp, minimum width=26mm, minimum height=10mm, align=center, text width=24mm]
-        (Lmaster) at (4.5, 3.2) {Master Dataset\\\footnotesize HDFS, immutable};
+        (Lmaster) at (4.5, 3.2) {Master Dataset\\[2pt]\footnotesize HDFS, immutable};
 
   \node[abs, minimum width=26mm, minimum height=10mm, align=center, text width=24mm]
-        (Lbatch) at (8.5, 3.2) {Batch Layer\\\footnotesize Hadoop};
+        (Lbatch) at (8.5, 3.2) {Batch Layer\\[2pt]\footnotesize Hadoop};
 
   \node[con, minimum width=26mm, minimum height=10mm, align=center, text width=24mm]
-        (Lspeed) at (4.5, 1.4) {Speed Layer\\\footnotesize Storm};
+        (Lspeed) at (4.5, 1.4) {Speed Layer\\[2pt]\footnotesize Storm};
 
   \node[hi, minimum width=26mm, minimum height=10mm, align=center, text width=24mm]
-        (Lserve) at (12.5, 2.3) {Serving\\\footnotesize merge(batch, speed)};
+        (Lserve) at (12.5, 2.3) {Serving\\[2pt]\footnotesize merge(batch, speed)};
 
   \draw[flow] (Lraw.north east) to[out=30,in=180] (Lmaster.west);
   \draw[flow] (Lraw.south east) to[out=-30,in=180] (Lspeed.west);
@@ -34,38 +34,38 @@
   \draw[uses] (Lbatch.east) to[out=0,in=120] (Lserve.north);
   \draw[uses] (Lspeed.east) to[out=0,in=-120] (Lserve.south);
 
-  % ─── Lambda annotation (right) ───
+  % ─── Lambda annotation (right) — moved right of Lserve to avoid overlap ───
   \node[note, anchor=north west, text width=42mm, draw=clibord]
-        at (15.3, 3.8)
+        at (16.0, 4.0)
        {\textbf{두 코드베이스}\\[2pt]
-        \footnotesize batch 로직 / speed 로직을\\
-        두 번 작성. 결과의 수렴을\\
+        \footnotesize batch 로직 / speed 로직을\\[1pt]
+        두 번 작성. 결과의 수렴을\\[1pt]
         테스트해야 한다.};
 
   % ═══════════════════════════════════════════════════════════
   % Divider
   % ═══════════════════════════════════════════════════════════
-  \draw[draw=mutec, line width=0.3pt, dashed] (-1, -0.3) -- (20, -0.3);
+  \draw[draw=mutec, line width=0.3pt, dashed] (-1, -0.3) -- (22, -0.3);
 
   % ═══════════════════════════════════════════════════════════
-  % KAPPA (bottom half)
+  % KAPPA (bottom half) — title above row
   % ═══════════════════════════════════════════════════════════
   \node[font=\sffamily\bfseries\normalsize, text=inkc, anchor=west]
         at (-0.5, -1.0) {Kappa Architecture};
 
   \node[cli, minimum width=22mm, minimum height=10mm, align=center, text width=20mm]
-        (Kraw) at (0.5, -2.4) {Raw\\\footnotesize event stream};
+        (Kraw) at (0.5, -2.4) {Raw\\[2pt]\footnotesize event stream};
 
-  \node[prp, minimum width=34mm, minimum height=12mm, align=center, text width=32mm]
+  \node[prp, minimum width=34mm, minimum height=14mm, align=center, text width=32mm]
         (Klog) at (5.5, -2.4)
-        {Persistent Log\\\footnotesize Kafka topic\\(replayable)};
+        {Persistent Log\\[2pt]\footnotesize Kafka topic\\[1pt](replayable)};
 
-  \node[tealn, minimum width=34mm, minimum height=12mm, align=center, text width=32mm]
+  \node[tealn, minimum width=34mm, minimum height=14mm, align=center, text width=32mm]
         (Kstream) at (11, -2.4)
-        {Stream Engine\\\footnotesize Flink / Kafka Streams};
+        {Stream Engine\\[2pt]\footnotesize Flink / Kafka Streams};
 
   \node[hi, minimum width=24mm, minimum height=10mm, align=center, text width=22mm]
-        (Kserve) at (15.8, -2.4) {Serving\\\footnotesize single view};
+        (Kserve) at (15.8, -2.4) {Serving\\[2pt]\footnotesize single view};
 
   \draw[flow] (Kraw.east) -- (Klog.west);
   \draw[flow] (Klog.east) -- (Kstream.west);
@@ -73,19 +73,20 @@
 
   % Replay arrow (reprocess from log)
   \draw[->, dashed, draw=focusc, line width=0.7pt]
-        (Kstream.south) to[out=-150,in=-30] node[caption, below=2pt, text=focusc]{replay from offset 0}
+        (Kstream.south) to[out=-150,in=-30]
+        node[caption, below=2pt, text=focusc]{replay from offset 0}
         (Klog.south);
 
-  % ─── Kappa annotation (right) ───
+  % ─── Kappa annotation (right) — well right of Kserve ───
   \node[note, anchor=north west, text width=42mm, draw=okbord, fill=okfill]
-        at (15.3, -1.0)
+        at (18.5, -1.3)
        {\textbf{단일 코드베이스}\\[2pt]
-        \footnotesize 재처리도 같은 스트리밍 잡이\\
+        \footnotesize 재처리도 같은 스트리밍 잡이\\[1pt]
         log를 처음부터 다시 흘려 처리.};
 
-  % ─── Caption ───
-  \node[caption, anchor=north, text width=180mm]
-       at (9, -4.4)
+  % ─── Caption — narrower width to stay inside picture frame ───
+  \node[caption, anchor=north, text width=160mm, align=center]
+       at (10, -5.0)
        {Lambda는 batch와 speed 두 경로의 결과를 merge한다. Kappa는 모든 데이터를 영속 로그에 두고 스트리밍 엔진 하나로 처리하며, 재처리가 필요하면 로그를 처음부터 재생한다.};
 \end{tikzpicture}
 \end{document}

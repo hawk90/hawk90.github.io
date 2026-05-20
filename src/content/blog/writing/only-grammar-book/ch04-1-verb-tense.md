@@ -29,19 +29,16 @@ bookAuthor: "Susan Thurman"
 
 ### 직접 화법 → 간접 화법
 
-```text
-직접: She said, "I am tired."
-간접: She said that she was tired.
-
-직접: She said, "I will come."
-간접: She said that she would come.
-
-직접: She said, "I have finished."
-간접: She said that she had finished.
-
-직접: She said, "I saw him."
-간접: She said that she had seen him.
-```
+| 분류 | 예문 |
+|---|---|
+| 직접 | She said, "I am tired." |
+| 간접 | She said that she was tired. |
+| 직접 | She said, "I will come." |
+| 간접 | She said that she would come. |
+| 직접 | She said, "I have finished." |
+| 간접 | She said that she had finished. |
+| 직접 | She said, "I saw him." |
+| 간접 | She said that she had seen him. |
 
 ### 시제 이동 규칙
 
@@ -94,18 +91,16 @@ bookAuthor: "Susan Thurman"
 
 *yesterday, last week, in 2020, ago, when, what time* 같은 *명시적 과거 시점*은 *현재완료와 함께 못 씁니다*.
 
-```text
-회피: I have visited Paris last summer.
-바름: I visited Paris last summer.
-바름: I have visited Paris.   (시점 안 명시)
-바름: I have visited Paris three times.   (경험 횟수)
-
-회피: She has graduated in 2020.
-바름: She graduated in 2020.
-
-회피: When have you arrived?
-바름: When did you arrive?
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I have visited Paris last summer. |
+| 바름 | I visited Paris last summer. |
+| 바름 | I have visited Paris.   (시점 안 명시) |
+| 바름 | I have visited Paris three times.   (경험 횟수) |
+| 회피 | She has graduated in 2020. |
+| 바름 | She graduated in 2020. |
+| 회피 | When have you arrived? |
+| 바름 | When did you arrive? |
 
 ### 현재완료의 네 용법 (Chapter 1.3 복습)
 
@@ -159,12 +154,10 @@ I had never seen such a beautiful sunset before that day.
 
 매 과거 사건에 과거완료를 쓸 필요는 없습니다.
 
-```text
-회피: She had walked to the store. She had bought milk.
-       She had come home. She had made coffee.
-바름: She walked to the store. She bought milk.
-       She came home. She made coffee.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She had walked to the store. She had bought milk. She had come home. She had made coffee. |
+| 바름 | She walked to the store. She bought milk. She came home. She made coffee. |
 
 순차적 사건은 *단순 과거*로.
 
@@ -276,40 +269,40 @@ If she were more careful, she would have avoided the accident.
 
 ### 1. 현재완료에 과거 시점
 
-```text
-회피: I have met him last week.
-바름: I met him last week.
-바름: I have met him recently.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I have met him last week. |
+| 바름 | I met him last week. |
+| 바름 | I have met him recently. |
 
 ### 2. 과거에 *for + 기간*
 
-```text
-회피: I have been studying English for I was a child.
-바름: I have been studying English since I was a child.
-바름: I have been studying English for many years.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I have been studying English for I was a child. |
+| 바름 | I have been studying English since I was a child. |
+| 바름 | I have been studying English for many years. |
 
 ### 3. 시제 일치 실패
 
-```text
-회피: She said that she will come tomorrow.
-바름: She said that she would come the next day.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She said that she will come tomorrow. |
+| 바름 | She said that she would come the next day. |
 
 ### 4. 가정법의 *was*
 
-```text
-회피: If I was you, I would accept.
-바름: If I were you, I would accept.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | If I was you, I would accept. |
+| 바름 | If I were you, I would accept. |
 
 ### 5. 무근거한 시제 전환
 
-```text
-회피: She entered the room and sees the chaos.
-바름: She entered the room and saw the chaos.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She entered the room and sees the chaos. |
+| 바름 | She entered the room and saw the chaos. |
 
 ### 6. 과거완료의 누락
 
@@ -321,22 +314,13 @@ If she were more careful, she would have avoided the accident.
 
 ## 예문
 
-```text
-By the time she finished the report, everyone had gone home.
-그녀가 보고서를 끝낼 즈음에는 모두가 집에 갔습니다.
-
-I have been studying English for ten years and still learn something new every day.
-저는 영어를 10년 동안 공부해 왔고 여전히 매일 새로운 것을 배웁니다.
-
-She said that she would attend the meeting if she had time.
-그녀는 시간이 있으면 회의에 참석하겠다고 말했습니다.
-
-If I had known about the schedule change, I would not have missed the meeting.
-일정 변경을 알았더라면 회의를 놓치지 않았을 것입니다.
-
-The teacher explained that the Earth revolves around the Sun.
-교사는 지구가 태양 주위를 돈다고 설명했습니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| By the time she finished the report, everyone had gone home. | 그녀가 보고서를 끝낼 즈음에는 모두가 집에 갔습니다. |
+| I have been studying English for ten years and still learn something new every day. | 저는 영어를 10년 동안 공부해 왔고 여전히 매일 새로운 것을 배웁니다. |
+| She said that she would attend the meeting if she had time. | 그녀는 시간이 있으면 회의에 참석하겠다고 말했습니다. |
+| If I had known about the schedule change, I would not have missed the meeting. | 일정 변경을 알았더라면 회의를 놓치지 않았을 것입니다. |
+| The teacher explained that the Earth revolves around the Sun. | 교사는 지구가 태양 주위를 돈다고 설명했습니다. |
 
 ## 정리
 

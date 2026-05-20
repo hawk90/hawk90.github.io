@@ -91,14 +91,10 @@ George Orwell의 *1984*에서 유래한 개념이다. 언어 자체로 진실을
 
 미국 정부가 "Plain Writing Act of 2010"을 통과시켰다. 정부 문서는 명확해야 한다는 법이다.
 
-```text
-Before: "Each application shall be reviewed by the appropriate 
-       administrative authority for compliance with the regulations 
-       set forth herein."
-
-After: "We will review your application to make sure it follows 
-       the rules."
-```
+| 분류 | 예문 |
+|---|---|
+| Before | "Each application shall be reviewed by the appropriate administrative authority for compliance with the regulations set forth herein." |
+| After | "We will review your application to make sure it follows the rules." |
 
 법, 의료, 금융 분야 모두에서 plain language 운동이 일어난다.
 

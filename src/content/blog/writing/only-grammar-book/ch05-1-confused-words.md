@@ -241,11 +241,11 @@ many books, many ideas, many problems
 | **amount** | 불가산 |
 | **number** | 가산 |
 
-```text
-바름: a large amount of water
-바름: a large number of students
-회피: a large amount of students
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | a large amount of water |
+| 바름 | a large number of students |
+| 회피 | a large amount of students |
 
 ### Between / Among
 
@@ -427,42 +427,41 @@ Whose responsibility is it to ensure who's accountable?
 
 ### 1. *its / it's*
 
-```text
-회피: The cat licked it's paws.
-바름: The cat licked its paws.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The cat licked it's paws. |
+| 바름 | The cat licked its paws. |
 
 ### 2. *your / you're*
 
-```text
-회피: Your welcome.
-바름: You're welcome.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Your welcome. |
+| 바름 | You're welcome. |
 
 ### 3. *affect / effect*
 
-```text
-회피: The weather effects my mood.
-바름: The weather affects my mood.
-
-회피: The affect was significant.
-바름: The effect was significant.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The weather effects my mood. |
+| 바름 | The weather affects my mood. |
+| 회피 | The affect was significant. |
+| 바름 | The effect was significant. |
 
 ### 4. *less / fewer*
 
-```text
-회피: Less people came than expected.
-바름: Fewer people came than expected.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Less people came than expected. |
+| 바름 | Fewer people came than expected. |
 
 ### 5. *lie / lay*
 
-```text
-회피: I'm going to lay down for a nap.
-바름: I'm going to lie down for a nap.
-바름: I'm going to lay the baby down for a nap.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I'm going to lay down for a nap. |
+| 바름 | I'm going to lie down for a nap. |
+| 바름 | I'm going to lay the baby down for a nap. |
 
 ### 6. *who / whom*
 

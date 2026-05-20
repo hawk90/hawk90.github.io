@@ -1,0 +1,37 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,3.6) {Diffracting Tree — Prism on Balancer};
+
+% Balancer outer box
+\node[abs, minimum width=70mm, minimum height=44mm, align=center] (bal) at (0,1)
+  {};
+\node[panelTitle] at (bal.north west) {balancer};
+
+% Prism inside
+\node[hi, minimum width=44mm, minimum height=14mm] (prism) at (0,2.2) {prism};
+
+% Two requests entering from sides
+\node[con, minimum width=22mm, minimum height=8mm] (r1) at (-4.5,2.2) {요청 1};
+\node[con, minimum width=22mm, minimum height=8mm] (r2) at ( 4.5,2.2) {요청 2};
+\draw[arr] (r1.east) -- (prism.west);
+\draw[arr] (r2.west) -- (prism.east);
+
+% Match → branch (down-left and down-right children)
+\node[caption, anchor=north] at (0, 1.4) {매치 → 분기};
+
+\node[imp, minimum width=22mm, minimum height=10mm] (lc) at (-2.4,-0.6) {left child};
+\node[imp, minimum width=22mm, minimum height=10mm] (rc) at ( 2.4,-0.6) {right child};
+
+\draw[arr] (prism.south west) -- (lc.north);
+\draw[arr] (prism.south east) -- (rc.north);
+
+\end{tikzpicture}
+\end{document}

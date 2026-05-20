@@ -287,11 +287,9 @@ broader health outcomes.
 
 ### Conclusion의 역할
 
-```
 - Discussion보다 간결합니다.
 - 핵심 발견, 핵심 함의, 다음 단계를 재진술합니다.
 - 보통 1-2 단락입니다.
-```
 
 ```
 This study examined the relationship between caffeine timing and

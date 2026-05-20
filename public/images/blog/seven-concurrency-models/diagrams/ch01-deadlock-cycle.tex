@@ -27,13 +27,14 @@
   \draw[holds] (tb.south) -- node[font=\sffamily\footnotesize, text=impbord, fill=white,
                                   inner sep=1.5pt, midway, right=2pt]{holds} (lb.north);
 
-  % Waits-for (dashed red — cross arrows)
+  % Waits-for (dashed red — cross arrows). Labels offset along path so they
+  % don't pile up at the crossing point.
   \draw[waits] (ta.east) .. controls (0, 0.8) .. (lb.north west)
        node[font=\sffamily\footnotesize, text=conbord, fill=white, inner sep=1.5pt,
-            pos=0.55, above]{waits for};
+            pos=0.25, above]{waits for};
   \draw[waits] (tb.west) .. controls (0, 0.8) .. (la.north east)
        node[font=\sffamily\footnotesize, text=conbord, fill=white, inner sep=1.5pt,
-            pos=0.55, above]{waits for};
+            pos=0.75, above]{waits for};
 
   % Center label
   \node[font=\sffamily\bfseries\large, text=warnbord] at (0, -2.8) {circular wait};

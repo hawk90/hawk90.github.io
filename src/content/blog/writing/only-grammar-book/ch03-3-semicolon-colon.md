@@ -37,21 +37,21 @@ She was exhausted; the marathon had been brutal.
 
 ### 양쪽이 *반드시 독립절*
 
-```text
-회피: Mary likes apples; and John likes oranges.   (and 불필요)
-회피: The road was long; tiring journey.            (오른쪽이 절 X)
-바름: Mary likes apples; John likes oranges.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Mary likes apples; and John likes oranges.   (and 불필요) |
+| 회피 | The road was long; tiring journey.            (오른쪽이 절 X) |
+| 바름 | Mary likes apples; John likes oranges. |
 
 ### 용도 2: 접속 부사 뒤
 
 *however, therefore, moreover, furthermore, nevertheless, consequently* 등 접속 부사는 *접속사가 아닙니다*. 쉼표만으로 두 절을 잇지 못합니다.
 
-```text
-회피: She studied hard, however she failed.
-바름: She studied hard; however, she failed.
-바름: She studied hard. However, she failed.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She studied hard, however she failed. |
+| 바름 | She studied hard; however, she failed. |
+| 바름 | She studied hard. However, she failed. |
 
 ### 자주 쓰는 접속 부사
 
@@ -82,11 +82,11 @@ on June 20, 2026, in Tokyo; and on July 5, 2026, in Beijing.
 
 원칙적으로 세미콜론 뒤에 *등위접속사*는 오지 않습니다.
 
-```text
-회피: She tried hard; but she failed.
-바름: She tried hard, but she failed.
-바름: She tried hard; she failed.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She tried hard; but she failed. |
+| 바름 | She tried hard, but she failed. |
+| 바름 | She tried hard; she failed. |
 
 예외 — 절들이 매우 길고 내부에 쉼표가 있을 때.
 
@@ -111,20 +111,20 @@ The recipe calls for the following ingredients: flour, sugar, and eggs.
 
 가장 자주 실수하는 자리입니다.
 
-```text
-회피: My favorite fruits are: apples, bananas, and grapes.
-바름: My favorite fruits are apples, bananas, and grapes.
-바름: I love three fruits: apples, bananas, and grapes.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | My favorite fruits are: apples, bananas, and grapes. |
+| 바름 | My favorite fruits are apples, bananas, and grapes. |
+| 바름 | I love three fruits: apples, bananas, and grapes. |
 
 #### 점검 요령
 
 콜론 앞 부분을 *마침표로 끝낼 수 있어야* 합니다.
 
-```text
-바름: I have three goals.   → I have three goals: ...
-회피: My goals are.          → My goals are: ... (X)
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | I have three goals.   → I have three goals: ... |
+| 회피 | My goals are.          → My goals are: ... (X) |
 
 ### 용도 2: 부연·설명
 
@@ -260,33 +260,33 @@ He realized the truth: she had been right all along.
 
 ### 1. 콜론 앞이 불완전한 문장
 
-```text
-회피: My favorite colors are: red, blue, and green.
-바름: My favorite colors are red, blue, and green.
-바름: I like three colors: red, blue, and green.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | My favorite colors are: red, blue, and green. |
+| 바름 | My favorite colors are red, blue, and green. |
+| 바름 | I like three colors: red, blue, and green. |
 
 ### 2. 접속 부사 앞에 쉼표
 
-```text
-회피: She tried hard, however, she failed.
-바름: She tried hard; however, she failed.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She tried hard, however, she failed. |
+| 바름 | She tried hard; however, she failed. |
 
 ### 3. 세미콜론 뒤 등위접속사
 
-```text
-회피: She came; and he left.
-바름: She came, and he left.
-바름: She came; he left.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She came; and he left. |
+| 바름 | She came, and he left. |
+| 바름 | She came; he left. |
 
 ### 4. 세미콜론 양쪽 중 한쪽이 절이 아님
 
-```text
-회피: She is smart; like her mother.
-바름: She is smart, like her mother.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She is smart; like her mother. |
+| 바름 | She is smart, like her mother. |
 
 ### 5. 콜론 다음 문장 첫 글자 대소문자 혼동
 

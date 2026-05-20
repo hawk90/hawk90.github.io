@@ -256,12 +256,10 @@ read():
 
 여러 writer를 허용하려면 누구의 쓰기가 "마지막"인지를 정해야 한다. 책의 해법은 **timestamp + Bakery 스타일 우선순위**다.
 
-```text
 각 writer i는 자기 슬롯 reg[i]에 (value, timestamp)를 쓴다.
 read는 모든 슬롯을 collect하여 가장 큰 timestamp를 선택한다.
 writer는 자기 timestamp를 정하기 전에 모든 슬롯을 한 번 읽어
 최대값 + 1을 자기 timestamp로 쓴다.
-```
 
 이게 4장 후반에서 다루는 **timestamp-based MRMW atomic register** 구성의 골격이다. 각 writer가 자기 전용 MRSW slot에 쓰고, reader는 모든 slot을 모아 최신을 고른다. timestamp 동률은 writer id로 깨면 (i, ts)의 lexicographic 순서로 전순서가 보장된다.
 

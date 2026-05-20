@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4,2.0) {Fail-safe Biasing};
+
+% +5V rail
+\node[hi, minimum width=14mm, minimum height=8mm] (vcc) at (0,1) {+5 V};
+
+% Pull-up resistor → A
+\draw[edgec, line width=0.5pt] (vcc.east) -- (1.4,1);
+\node[abs, minimum width=14mm, minimum height=8mm] (r1) at (2.6,1) {680 $\Omega$};
+\draw[edgec, line width=0.5pt] (r1.east) -- (5.0,1);
+\node[focus, font=\sffamily\bfseries] at (5.4,1) {A};
+
+% B line → pull-down → GND
+\node[focus, font=\sffamily\bfseries] at (5.4,-0.2) {B};
+\draw[edgec, line width=0.5pt] (5.0,-0.2) -- (5.8,-0.2);
+\node[abs, minimum width=14mm, minimum height=8mm] (r2) at (6.6,-0.2) {680 $\Omega$};
+\draw[edgec, line width=0.5pt] (r2.east) -- (8.0,-0.2);
+\node[hi, minimum width=14mm, minimum height=8mm] (gnd) at (8.7,-0.2) {GND};
+
+% Caption
+\node[caption, anchor=north] at (4,-1.4) {idle 시 A $>$ B (살짝 양수) $\rightarrow$ receiver가 1 출력};
+
+\end{tikzpicture}
+\end{document}

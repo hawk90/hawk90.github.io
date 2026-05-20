@@ -119,6 +119,24 @@ export function getAllTags(posts: BlogPost[]): string[] {
 }
 
 /**
+ * Tag 페이지를 생성할 가치가 있는 태그만 — 빌드 시간 단축용.
+ * 1-post 태그가 전체의 ~70%라 페이지 생성 비용이 크다.
+ * Threshold 이상 게시물이 있는 태그만 페이지를 만든다.
+ */
+export function getTagsForPageGeneration(posts: BlogPost[], minPosts = 2): string[] {
+  const counts = new Map<string, number>();
+  for (const p of posts) {
+    for (const t of p.data.tags) {
+      counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .filter(([, c]) => c >= minPosts)
+    .map(([t]) => t)
+    .sort((a, b) => a.localeCompare(b));
+}
+
+/**
  * 포스트에서 모든 고유 시리즈 추출 (알파벳순)
  */
 export function getAllSeries(posts: BlogPost[]): string[] {

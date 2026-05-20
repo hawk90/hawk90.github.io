@@ -140,29 +140,20 @@ Five sheep are in the field.
 - **사람·동물**: 보통 `'s`를 선호 — *John's car, the dog's bowl*
 - **사물·추상**: 보통 *of*를 선호 — *the top of the page, the cost of living*
 
-```text
-회피: the page's top
-바름: the top of the page
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | the page's top |
+| 바름 | the top of the page |
 
 ## 예문
 
-```text
-The committee has reached its decision.
-위원회는 결정을 내렸습니다.
-
-She gave me valuable advice about my career.
-그녀는 내 진로에 대해 귀중한 조언을 해 주었습니다.
-
-The children's playground was renovated last month.
-아이들의 놀이터가 지난달 보수되었습니다.
-
-Three pieces of equipment are missing from the lab.
-세 점의 장비가 연구실에서 사라졌습니다.
-
-James's analysis of the data was thorough.
-James의 자료 분석은 철저했습니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| The committee has reached its decision. | 위원회는 결정을 내렸습니다. |
+| She gave me valuable advice about my career. | 그녀는 내 진로에 대해 귀중한 조언을 해 주었습니다. |
+| The children's playground was renovated last month. | 아이들의 놀이터가 지난달 보수되었습니다. |
+| Three pieces of equipment are missing from the lab. | 세 점의 장비가 연구실에서 사라졌습니다. |
+| James's analysis of the data was thorough. | James의 자료 분석은 철저했습니다. |
 
 ## 자주 보는 함정
 

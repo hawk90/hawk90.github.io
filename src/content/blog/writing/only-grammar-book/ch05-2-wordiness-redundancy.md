@@ -71,12 +71,11 @@ should have no unnecessary lines and a machine no unnecessary parts.
 | it should be noted that | (생략) |
 | the fact that | that |
 
-```text
-회피: At this point in time, it is interesting to note that the project
-       is in the process of being completed.
-바름: Now, the project is being completed.
-바름: The project is being completed.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | At this point in time, it is interesting to note that the project is in the process of being completed. |
+| 바름 | Now, the project is being completed. |
+| 바름 | The project is being completed. |
 
 ### 명사화의 과도한 사용 (Nominalization)
 
@@ -95,13 +94,12 @@ should have no unnecessary lines and a machine no unnecessary parts.
 | make an assumption | assume |
 | make a comparison | compare |
 
-```text
-회피: The committee will make a decision regarding the proposal.
-바름: The committee will decide on the proposal.
-
-회피: We need to give consideration to all options.
-바름: We need to consider all options.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The committee will make a decision regarding the proposal. |
+| 바름 | The committee will decide on the proposal. |
+| 회피 | We need to give consideration to all options. |
+| 바름 | We need to consider all options. |
 
 ### 빈 도입어
 
@@ -114,176 +112,153 @@ should have no unnecessary lines and a machine no unnecessary parts.
 | The reason is because | because (또는 the reason is that) |
 | The thing is that | (생략) |
 
-```text
-회피: There are many problems that exist in the system.
-바름: Many problems exist in the system.
-바름: The system has many problems.
-
-회피: It is essential that we make a decision soon.
-바름: We must decide soon.
-
-회피: The reason is because she was tired.
-바름: She was tired.
-바름: The reason was that she was tired.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | There are many problems that exist in the system. |
+| 바름 | Many problems exist in the system. |
+| 바름 | The system has many problems. |
+| 회피 | It is essential that we make a decision soon. |
+| 바름 | We must decide soon. |
+| 회피 | The reason is because she was tired. |
+| 바름 | She was tired. |
+| 바름 | The reason was that she was tired. |
 
 ## 약한 동사 → 강한 동사
 
 ### *Be* 동사의 남발
 
-```text
-회피: She is in agreement with the proposal.
-바름: She agrees with the proposal.
-
-회피: He was the one who completed the report.
-바름: He completed the report.
-
-회피: The conference was a successful event.
-바름: The conference succeeded.
-바름: The conference was successful.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She is in agreement with the proposal. |
+| 바름 | She agrees with the proposal. |
+| 회피 | He was the one who completed the report. |
+| 바름 | He completed the report. |
+| 회피 | The conference was a successful event. |
+| 바름 | The conference succeeded. |
+| 바름 | The conference was successful. |
 
 ### *Have* 동사의 남발
 
-```text
-회피: She has a habit of arriving late.
-바름: She habitually arrives late.
-
-회피: He had a discussion with the team.
-바름: He discussed it with the team.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She has a habit of arriving late. |
+| 바름 | She habitually arrives late. |
+| 회피 | He had a discussion with the team. |
+| 바름 | He discussed it with the team. |
 
 ### 수동의 남발
 
 수동은 *행위자가 불명·무관*일 때만. 능동이 *더 짧고 강력*.
 
-```text
-회피: A decision was made by the committee.
-바름: The committee decided.
-
-회피: It was found that the results were significant.
-바름: We found significant results.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | A decision was made by the committee. |
+| 바름 | The committee decided. |
+| 회피 | It was found that the results were significant. |
+| 바름 | We found significant results. |
 
 ## 중복적 수식
 
 ### 같은 의미의 형용사·부사 반복
 
-```text
-회피: a tall, high mountain
-바름: a tall mountain
-바름: a high mountain
-
-회피: completely and totally unacceptable
-바름: unacceptable
-바름: completely unacceptable
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | a tall, high mountain |
+| 바름 | a tall mountain |
+| 바름 | a high mountain |
+| 회피 | completely and totally unacceptable |
+| 바름 | unacceptable |
+| 바름 | completely unacceptable |
 
 ### 의미가 자동으로 포함된 수식
 
-```text
-회피: nodded his head
-바름: nodded
-       (nod는 머리로만 함 — head 불필요)
-
-회피: shrugged her shoulders
-바름: shrugged
-       (shrug은 어깨로만 함)
-
-회피: clenched his fist
-바름: clenched
-       (또는 clenched his hand — 다른 부위와 구분)
-
-회피: blinked her eyes
-바름: blinked
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | nodded his head |
+| 바름 | nodded (nod는 머리로만 함 — head 불필요) |
+| 회피 | shrugged her shoulders |
+| 바름 | shrugged (shrug은 어깨로만 함) |
+| 회피 | clenched his fist |
+| 바름 | clenched (또는 clenched his hand — 다른 부위와 구분) |
+| 회피 | blinked her eyes |
+| 바름 | blinked |
 
 ### 절대 형용사의 강조
 
 (Chapter 1.4 복습) — *unique, perfect, complete*은 절대적 의미.
 
-```text
-회피: very unique
-바름: unique
-바름: rare
-
-회피: most perfect
-바름: perfect
-바름: nearly perfect
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | very unique |
+| 바름 | unique |
+| 바름 | rare |
+| 회피 | most perfect |
+| 바름 | perfect |
+| 바름 | nearly perfect |
 
 ## 장황한 표현 줄이기
 
 ### 관계절 축약
 
-```text
-회피: The man who is standing by the door is my uncle.
-바름: The man standing by the door is my uncle.
-
-회피: The book that was written by Hemingway became famous.
-바름: The book written by Hemingway became famous.
-
-회피: She is a person who is always reliable.
-바름: She is always reliable.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The man who is standing by the door is my uncle. |
+| 바름 | The man standing by the door is my uncle. |
+| 회피 | The book that was written by Hemingway became famous. |
+| 바름 | The book written by Hemingway became famous. |
+| 회피 | She is a person who is always reliable. |
+| 바름 | She is always reliable. |
 
 ### 부사절 축약
 
-```text
-회피: When she finished her homework, she went to bed.
-바름: After finishing her homework, she went to bed.   (구로)
-바름: Having finished her homework, she went to bed.   (분사구)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | When she finished her homework, she went to bed. |
+| 바름 | After finishing her homework, she went to bed.   (구로) |
+| 바름 | Having finished her homework, she went to bed.   (분사구) |
 
 ### 전치사구의 정리
 
-```text
-회피: The report of the committee on the issue of taxes
-바름: The committee's tax report
-
-회피: The decision of the manager regarding the matter of the project
-바름: The manager's decision about the project
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The report of the committee on the issue of taxes |
+| 바름 | The committee's tax report |
+| 회피 | The decision of the manager regarding the matter of the project |
+| 바름 | The manager's decision about the project |
 
 ## 평행 구조와 간결성
 
 평행 구조(parallel structure)를 지키면 *반복*을 줄일 수 있습니다.
 
-```text
-회피: She likes swimming, hiking, and to read books.
-바름: She likes swimming, hiking, and reading.
-
-회피: The committee will discuss the budget, the schedule, and they will
-       review the staffing.
-바름: The committee will discuss the budget, the schedule, and the staffing.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She likes swimming, hiking, and to read books. |
+| 바름 | She likes swimming, hiking, and reading. |
+| 회피 | The committee will discuss the budget, the schedule, and they will review the staffing. |
+| 바름 | The committee will discuss the budget, the schedule, and the staffing. |
 
 ## *Concrete*하고 *Specific*하게
 
 추상적·일반적인 단어보다 *구체적*인 단어가 더 *짧고 강력*합니다.
 
-```text
-회피: She conveyed her thoughts to him.
-바름: She told him.
-
-회피: He proceeded to the location.
-바름: He went there.
-
-회피: The animal made a sound.
-바름: The dog barked.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She conveyed her thoughts to him. |
+| 바름 | She told him. |
+| 회피 | He proceeded to the location. |
+| 바름 | He went there. |
+| 회피 | The animal made a sound. |
+| 바름 | The dog barked. |
 
 ## 약화 어구의 제거
 
 *아마도, 어쩌면, 다소* 같은 어구가 *과도하면* 글이 흐릿해집니다.
 
-```text
-회피: It seems that perhaps the data might possibly suggest that there
-       could be a relationship between the variables.
-
-바름: The data suggest a relationship between the variables.
-바름: The data show a relationship between the variables.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | It seems that perhaps the data might possibly suggest that there could be a relationship between the variables. |
+| 바름 | The data suggest a relationship between the variables. |
+| 바름 | The data show a relationship between the variables. |
 
 학술 글에서는 *정확한 조심성*은 필요하지만, *과도한* hedging은 약함을 드러냅니다.
 
@@ -339,77 +314,68 @@ I think we should consider implementing this proposal soon.
 
 ## 예문
 
-```text
-Before: It is necessary that we take into consideration the fact that
-        the deadline is approaching at a rapid pace.
-After:  We must consider that the deadline is approaching quickly.
-
-Before: There are many reasons why the proposal was rejected by the committee.
-After:  The committee rejected the proposal for many reasons.
-
-Before: She made the decision to leave the company in order to pursue
-        her career in a different field.
-After:  She left the company to pursue a different career.
-
-Before: The book that was written by Hemingway and which was published in
-        1929 is considered to be one of his best works.
-After:  Hemingway's 1929 novel is considered one of his best.
-```
+| 분류 | 예문 |
+|---|---|
+| Before | It is necessary that we take into consideration the fact that the deadline is approaching at a rapid pace. |
+| After | We must consider that the deadline is approaching quickly. |
+| Before | There are many reasons why the proposal was rejected by the committee. |
+| After | The committee rejected the proposal for many reasons. |
+| Before | She made the decision to leave the company in order to pursue her career in a different field. |
+| After | She left the company to pursue a different career. |
+| Before | The book that was written by Hemingway and which was published in 1929 is considered to be one of his best works. |
+| After | Hemingway's 1929 novel is considered one of his best. |
 
 ## 자주 보는 함정
 
 ### 1. *In order to*
 
-```text
-회피: She studied hard in order to pass the exam.
-바름: She studied hard to pass the exam.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She studied hard in order to pass the exam. |
+| 바름 | She studied hard to pass the exam. |
 
 대부분의 경우 *in order to → to*.
 
 ### 2. *Due to the fact that*
 
-```text
-회피: Due to the fact that it was raining, we stayed home.
-바름: Because it was raining, we stayed home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Due to the fact that it was raining, we stayed home. |
+| 바름 | Because it was raining, we stayed home. |
 
 ### 3. *Make a decision* / *Reach a conclusion*
 
-```text
-회피: The team made a decision.
-바름: The team decided.
-
-회피: The researcher reached a conclusion.
-바름: The researcher concluded.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The team made a decision. |
+| 바름 | The team decided. |
+| 회피 | The researcher reached a conclusion. |
+| 바름 | The researcher concluded. |
 
 ### 4. *Past history*, *Future plans*
 
-```text
-회피: Her past history of success is impressive.
-바름: Her history of success is impressive.
-
-회피: We need to make future plans.
-바름: We need to make plans.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Her past history of success is impressive. |
+| 바름 | Her history of success is impressive. |
+| 회피 | We need to make future plans. |
+| 바름 | We need to make plans. |
 
 ### 5. *There are* 도입의 남발
 
-```text
-회피: There are many factors that influence the outcome.
-바름: Many factors influence the outcome.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | There are many factors that influence the outcome. |
+| 바름 | Many factors influence the outcome. |
 
 ### 6. 약한 동사 + 명사
 
-```text
-회피: He has a tendency to procrastinate.
-바름: He tends to procrastinate.
-
-회피: She gave assistance to the team.
-바름: She assisted the team.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | He has a tendency to procrastinate. |
+| 바름 | He tends to procrastinate. |
+| 회피 | She gave assistance to the team. |
+| 바름 | She assisted the team. |
 
 ## 정리
 

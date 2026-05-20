@@ -1078,66 +1078,53 @@ dav1d 최적화 기법:
 
 ### 디코더 구현 완료 체크리스트
 
-```
-=== AV1 디코더 구현 체크리스트 ===
-
-[ ] 1. 비트스트림 파싱
-    [ ] OBU 헤더 파싱
-    [ ] Sequence Header 파싱
-    [ ] Frame Header 파싱
-    [ ] Tile Group 파싱
-    [ ] Metadata OBU 파싱
-
-[ ] 2. 엔트로피 디코딩
-    [ ] MSAC (Multi-Symbol Arithmetic Coding)
-    [ ] CDF 테이블 관리
-    [ ] CDF 업데이트
-
-[ ] 3. 파티셔닝
-    [ ] 슈퍼블록 파싱 (128×128, 64×64)
-    [ ] 10가지 파티션 모드
-    [ ] 재귀적 분할
-
-[ ] 4. Intra 예측
-    [ ] 13가지 각도 모드
-    [ ] DC, SMOOTH 모드
-    [ ] Paeth 예측
-    [ ] 필터 적용
-
-[ ] 5. Inter 예측
-    [ ] 모션 벡터 예측
-    [ ] 참조 프레임 관리
-    [ ] 서브픽셀 보간
-    [ ] 컴파운드 예측
-    [ ] OBMC
-
-[ ] 6. 변환 및 양자화
-    [ ] DCT, ADST, Identity 변환
-    [ ] 역양자화
-    [ ] 16가지 변환 타입
-
-[ ] 7. 루프 필터
-    [ ] Deblocking Filter
-    [ ] CDEF (Constrained Directional Enhancement Filter)
-    [ ] Loop Restoration (Wiener, SGR)
-
-[ ] 8. Film Grain
-    [ ] 그레인 템플릿 생성
-    [ ] 블록별 스케일링
-    [ ] 그레인 합성
-
-[ ] 9. 고급 기능
-    [ ] Superres
-    [ ] 타일 디코딩
-    [ ] 세그멘테이션
-
-[ ] 10. 테스트 및 검증
-    [ ] Intra-only 테스트 벡터 통과
-    [ ] Inter 테스트 벡터 통과
-    [ ] Film Grain 테스트 벡터 통과
-    [ ] 타일 테스트 벡터 통과
-    [ ] 8-bit Main Profile 전체 통과
-```
+- [ ] **비트스트림 파싱**
+  - [ ] OBU 헤더 파싱
+  - [ ] Sequence Header 파싱
+  - [ ] Frame Header 파싱
+  - [ ] Tile Group 파싱
+  - [ ] Metadata OBU 파싱
+- [ ] **엔트로피 디코딩**
+  - [ ] MSAC (Multi-Symbol Arithmetic Coding)
+  - [ ] CDF 테이블 관리
+  - [ ] CDF 업데이트
+- [ ] **파티셔닝**
+  - [ ] 슈퍼블록 파싱 (128×128, 64×64)
+  - [ ] 10가지 파티션 모드
+  - [ ] 재귀적 분할
+- [ ] **Intra 예측**
+  - [ ] 13가지 각도 모드
+  - [ ] DC, SMOOTH 모드
+  - [ ] Paeth 예측
+  - [ ] 필터 적용
+- [ ] **Inter 예측**
+  - [ ] 모션 벡터 예측
+  - [ ] 참조 프레임 관리
+  - [ ] 서브픽셀 보간
+  - [ ] 컴파운드 예측
+  - [ ] OBMC
+- [ ] **변환 및 양자화**
+  - [ ] DCT, ADST, Identity 변환
+  - [ ] 역양자화
+  - [ ] 16가지 변환 타입
+- [ ] **루프 필터**
+  - [ ] Deblocking Filter
+  - [ ] CDEF (Constrained Directional Enhancement Filter)
+  - [ ] Loop Restoration (Wiener, SGR)
+- [ ] **Film Grain**
+  - [ ] 그레인 템플릿 생성
+  - [ ] 블록별 스케일링
+  - [ ] 그레인 합성
+- [ ] **고급 기능**
+  - [ ] Superres
+  - [ ] 타일 디코딩
+  - [ ] 세그멘테이션
+- [ ] **테스트 및 검증**
+  - [ ] Intra-only 테스트 벡터 통과
+  - [ ] Inter 테스트 벡터 통과
+  - [ ] Film Grain 테스트 벡터 통과
+  - [ ] 타일 테스트 벡터 통과
+  - [ ] 8-bit Main Profile 전체 통과
 
 ### 테스트 벡터 통과 현황 추적
 

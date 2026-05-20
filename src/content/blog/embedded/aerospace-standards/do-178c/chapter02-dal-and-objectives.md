@@ -599,12 +599,13 @@ A-3-7  HLR 알고리즘 정확         ✓+I ✓+I ✓  -
 ```
 
 전체 71 obj 분포:
-```
-DAL A : 71 obj 의무 (~30 with I)
-DAL B : 69 obj 의무 (~15 with I)
-DAL C : 62 obj 의무 (~5 with I)
-DAL D : 26 obj 의무 (~5 with I)
-```
+
+| DAL | 의무 obj | Independence 필요 |
+|---|---|---|
+| A | 71 | ~30 |
+| B | 69 | ~15 |
+| C | 62 | ~5 |
+| D | 26 | ~5 |
 
 ## 정리
 

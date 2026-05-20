@@ -63,25 +63,17 @@ SYM_FUNC_END(__arm_smccc_smc)
 
 SMCCC function ID는 *정확히 32-bit*로 정의된 비트필드다. 어느 service에 속하는지, fast call인지 yielding call인지, AArch32용인지 AArch64용인지가 한 워드에 다 들어 있다.
 
-```text
-bit  31  30           24 23      16 15           0
-   ┌────┬──────────────┬──────────┬──────────────┐
-   │ FT │  OEN         │ MBZ      │ Function num │
-   └────┴──────────────┴──────────┴──────────────┘
-     │      │              │          │
-     │      │              │          └─ service 안 함수 번호
-     │      │              └─ Must Be Zero
-     │      └─ Owning Entity Number (어떤 service)
-     └─ Fast(1) / Yielding(0)
-
-bit 30 (calling convention type):
-   0 = SMC32 (AArch32 register)
-   1 = SMC64 (AArch64 register, AArch64에서만 호출)
-```
-
-비트필드 구조와 함께 자주 쓰는 한 예(`0xC400_0003` = PSCI_CPU_ON)를 그림으로 보면 다음과 같다.
-
 ![SMCCC Function ID 32-bit 비트 레이아웃](/images/blog/bootloader/diagrams/chapter32-smccc-function-id.svg)
+
+비트 필드 정의:
+
+| 비트 | 이름 | 의미 |
+|------|------|------|
+| 31 | FT | Fast(1) / Yielding(0) |
+| 30 | (calling convention) | SMC32(0) / SMC64(1) |
+| 29 – 24 | OEN | Owning Entity Number (어떤 service) |
+| 23 – 16 | MBZ | Must Be Zero |
+| 15 – 0 | Function num | service 안 함수 번호 |
 
 OEN 영역은 6 bit이라 64 가지 service가 정의 가능하다. spec이 다음과 같이 예약했다.
 
@@ -238,25 +230,14 @@ CPU_ON의 전체 흐름을 그림으로 보면 다음과 같다.
 
 CPU_SUSPEND는 *얼마나 깊은 sleep으로 들어갈지*를 power_state 인자에 인코딩한다. PSCI v1.0 이후로는 두 인코딩이 공존한다.
 
-```text
-[Original power_state — PSCI v0.2]
-bit  31 30 29 28 27 26 25 24    23 22 21 20 19 18 17 16    15 14 13 12 11 10  9  8 7    0
-   ┌──┬──┬──────────────────┬────────────────────────┬──────────────────────────┬─────┐
-   │SF│ 0│ StateType        │ StateID                │ AffinityLevel            │ MBZ │
-   └──┴──┴──────────────────┴────────────────────────┴──────────────────────────┴─────┘
-     │     │                                              │
-     │     │                                              └─ 0=CPU, 1=cluster, 2=system
-     │     └─ 0=standby (WFI), 1=power-down (state lost)
-     └─ Shallow(0) / Deep(1)
+![PSCI power_state Encoding (Original v0.2 vs Extended v1.0+)](/images/blog/bootloader/diagrams/ch32-power-state.svg)
 
-[Extended power_state — PSCI v1.0+ (선호)]
-bit  31 30           24 23      16 15            0
-   ┌──┬───────────────┬──────────┬───────────────┐
-   │PD│ MBZ           │ Level    │ StateID       │
-   └──┴───────────────┴──────────┴───────────────┘
-     │
-     └─ Power-down(1) / Standby(0)
-```
+부가 설명:
+
+- **SF** — Shallow(0) / Deep(1)
+- **StateType** — 0 = standby (WFI), 1 = power-down (state lost)
+- **AffinityLevel** — 0 = CPU, 1 = cluster, 2 = system
+- **PD (Extended)** — Power-down(1) / Standby(0)
 
 extended 인코딩이 더 단순하고 platform이 StateID로 *vendor 자체 정의 sleep mode*를 표현한다. 예를 들어 i.MX 8M Plus는 다음 StateID를 정의한다.
 

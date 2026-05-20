@@ -239,14 +239,8 @@ OLED에 픽셀이 보이면 success. 안 보이면:
 
 scope로 SPI 전송 확인.
 
-```text
-update 한 번 (1024 byte @ 10 MHz):
-  ┌── 820 µs ──┐
-  CS low | data... | CS high
-  
-60 Hz update:
-  매 16.6 ms마다 위 transaction 발생
-```
+- **update 한 번**: 1024 byte @ 10 MHz → 약 **820 µs** transaction (`CS low` → data → `CS high`)
+- **60 Hz update**: 매 **16.6 ms**마다 위 transaction 한 번 발생
 
 ## 자주 보는 함정
 

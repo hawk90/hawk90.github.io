@@ -108,28 +108,7 @@ end
 
 ### 얕은 복사 vs 깊은 복사
 
-```text
-원본 객체:
-  ┌──────────┐
-  │ PERSON   │
-  │ name ────┼──→ "Kim"
-  │ address ─┼──→ ADDRESS 객체
-  └──────────┘
-
-얕은 복사 (twin):
-  ┌──────────┐
-  │ PERSON   │
-  │ name ────┼──→ "Kim" (공유!)
-  │ address ─┼──→ ADDRESS 객체 (공유!)
-  └──────────┘
-
-깊은 복사 (deep_twin):
-  ┌──────────┐
-  │ PERSON   │
-  │ name ────┼──→ "Kim" (새 복사본)
-  │ address ─┼──→ ADDRESS 객체 (새 복사본)
-  └──────────┘
-```
+![Shallow vs Deep Copy (Eiffel)](/images/blog/oosc/diagrams/ch25-shallow-vs-deep-copy.svg)
 
 ### copy 프로시저
 

@@ -61,10 +61,10 @@ He came and we left.       (짧고 가까운 의미)
 
 ### 한 주어의 두 동사 — 쉼표 없음
 
-```text
-바름: She wrote the report and submitted it on time.
-회피: She wrote the report, and submitted it on time.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | She wrote the report and submitted it on time. |
+| 회피 | She wrote the report, and submitted it on time. |
 
 주어가 *같으면* 두 번째 절이 *완전한 독립절이 아니므로* 쉼표 없음.
 
@@ -119,12 +119,11 @@ She wasn't happy, nor was she sad.
 - **종속절이 앞**: 쉼표 필요
 - **종속절이 뒤**: 보통 쉼표 없음
 
-```text
-바름: When she arrived, we started the meeting.
-바름: We started the meeting when she arrived.
-
-회피: We started the meeting, when she arrived.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | When she arrived, we started the meeting. |
+| 바름 | We started the meeting when she arrived. |
+| 회피 | We started the meeting, when she arrived. |
 
 ### *because* vs *since* vs *as*
 
@@ -180,14 +179,13 @@ Whether you like it or not, we have to do it.
 
 상관접속사의 *양쪽*은 *같은 문법 형태*여야 합니다.
 
-```text
-회피: She is not only smart but also works hard.
-바름: She is not only smart but also hardworking.   (둘 다 형용사)
-
-회피: He likes either to read or going to movies.
-바름: He likes either to read or to go to movies.   (둘 다 부정사)
-바름: He likes either reading or going to movies.   (둘 다 동명사)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She is not only smart but also works hard. |
+| 바름 | She is not only smart but also hardworking.   (둘 다 형용사) |
+| 회피 | He likes either to read or going to movies. |
+| 바름 | He likes either to read or to go to movies.   (둘 다 부정사) |
+| 바름 | He likes either reading or going to movies.   (둘 다 동명사) |
 
 ### *neither … nor*의 동사 일치
 
@@ -208,11 +206,11 @@ Neither the employees nor the manager is happy.    (manager — 단수)
 
 ### 접속 부사 함정
 
-```text
-회피: She studied hard, however she failed.       (comma splice)
-바름: She studied hard; however, she failed.
-바름: She studied hard. However, she failed.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She studied hard, however she failed.       (comma splice) |
+| 바름 | She studied hard; however, she failed. |
+| 바름 | She studied hard. However, she failed. |
 
 ### 자주 쓰는 접속 부사
 
@@ -224,22 +222,13 @@ in addition, in contrast, on the other hand, for example, for instance
 
 ## 예문
 
-```text
-She finished the report, and she submitted it on time.
-그녀는 보고서를 끝내고 제때에 제출했습니다.
-
-Although it was raining, we decided to go for a walk.
-비가 왔지만 우리는 산책하러 가기로 했습니다.
-
-He neither apologized nor explained his behavior.
-그는 사과하지도 행동을 설명하지도 않았습니다.
-
-Not only did she win the race, but she also broke the record.
-그녀는 경주에서 이겼을 뿐만 아니라 기록도 깼습니다.
-
-The meeting was canceled; therefore, we went home early.
-회의가 취소되어 우리는 일찍 집에 갔습니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| She finished the report, and she submitted it on time. | 그녀는 보고서를 끝내고 제때에 제출했습니다. |
+| Although it was raining, we decided to go for a walk. | 비가 왔지만 우리는 산책하러 가기로 했습니다. |
+| He neither apologized nor explained his behavior. | 그는 사과하지도 행동을 설명하지도 않았습니다. |
+| Not only did she win the race, but she also broke the record. | 그녀는 경주에서 이겼을 뿐만 아니라 기록도 깼습니다. |
+| The meeting was canceled; therefore, we went home early. | 회의가 취소되어 우리는 일찍 집에 갔습니다. |
 
 ## 자주 보는 함정
 
@@ -257,26 +246,26 @@ She tried hard. But she failed.   (강조 효과)
 
 두 독립절을 *쉼표만으로 연결*하는 오류.
 
-```text
-회피: She came, he left.
-바름: She came, and he left.
-바름: She came; he left.
-바름: She came. He left.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She came, he left. |
+| 바름 | She came, and he left. |
+| 바름 | She came; he left. |
+| 바름 | She came. He left. |
 
 ### 3. 종속절만으로 문장 만들기 (단편)
 
-```text
-회피: Because it was raining.
-바름: Because it was raining, we stayed home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Because it was raining. |
+| 바름 | Because it was raining, we stayed home. |
 
 ### 4. *between you and I*
 
-```text
-회피: Between you and I, ...
-바름: Between you and me, ...
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Between you and I, ... |
+| 바름 | Between you and me, ... |
 
 *between*은 전치사 — 뒤에 *목적격*.
 

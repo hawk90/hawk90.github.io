@@ -7,12 +7,12 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog, x=1cm, y=1cm]
-  % ─── Stage labels (top row) ───
-  \node[font=\sffamily\bfseries\small, text=inkc] at (-0.5, 0.8) {Input};
-  \node[font=\sffamily\bfseries\small, text=inkc] at (2.5, 0.8) {Map};
-  \node[font=\sffamily\bfseries\small, text=inkc] at (6.5, 0.8) {Shuffle \& Sort};
-  \node[font=\sffamily\bfseries\small, text=inkc] at (10.8, 0.8) {Reduce};
-  \node[font=\sffamily\bfseries\small, text=inkc] at (14, 0.8) {Output};
+  % ─── Stage labels (top row) — raised above the tallest box (shuffle, top at y=0.7) ───
+  \node[font=\sffamily\bfseries\small, text=inkc] at (-0.5, 1.4) {Input};
+  \node[font=\sffamily\bfseries\small, text=inkc] at (2.5, 1.4) {Map};
+  \node[font=\sffamily\bfseries\small, text=inkc] at (6.5, 1.4) {Shuffle \& Sort};
+  \node[font=\sffamily\bfseries\small, text=inkc] at (10.8, 1.4) {Reduce};
+  \node[font=\sffamily\bfseries\small, text=inkc] at (14, 1.4) {Output};
 
   % ─── Input splits (left) ───
   \node[neut, minimum width=18mm, minimum height=7mm] (i1) at (-0.5,  0)   {split 1};

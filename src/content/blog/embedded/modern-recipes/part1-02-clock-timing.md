@@ -80,14 +80,7 @@ PCB 트레이스는 보통 6 ns / m 정도 지연을 줍니다.
 
 플립플롭이 데이터를 안정적으로 잡으려면 클럭 에지 직전·직후에 데이터가 변하지 않아야 합니다.
 
-```text
-Data  ──────┐     ┌──────
-            │     │
-            └─────┘
-        ←T_su→ ←T_h→
-Clock ─────────│↑│─────────
-              clock edge
-```
+![Setup time / Hold time](/images/blog/modern-recipes/diagrams/part1-02-setup-hold.svg)
 
 `T_setup`을 어기면 metastability(준안정 상태)에 빠지고, 결과가 0인지 1인지 불확정해집니다.
 

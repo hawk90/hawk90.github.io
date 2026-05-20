@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,4.0) {F14 Chunk Layout ($\sim$120 byte)};
+
+% Stacked fields
+\node[hi,   minimum width=110mm, minimum height=12mm, align=left, inner sep=6pt] (ctl)
+  at (0,2.8) {\textbf{controls[16]} — 16 byte 메타 (SIMD register 한 번에 load)};
+\node[abs,  minimum width=110mm, minimum height=8mm, align=left, inner sep=6pt] (ovf)
+  at (0,1.6) {\texttt{outboundOverflowCount} (1 byte)};
+\node[abs,  minimum width=110mm, minimum height=8mm, align=left, inner sep=6pt] (host)
+  at (0,0.6) {\texttt{hostedOverflow} (1 byte)};
+\node[imp,  minimum width=110mm, minimum height=22mm, align=left, inner sep=6pt] (slots)
+  at (0,-1.0) {\textbf{slots[14]} — actual Item (Key / Value / Index)};
+
+% Side note
+\node[caption, anchor=west] at (5.7,-3.0) {16 - 2 (overflow + sentinel) = 14 슬롯};
+
+\end{tikzpicture}
+\end{document}

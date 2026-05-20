@@ -136,15 +136,12 @@ The water sample contained ...
 
 ### 모범 논문에서 점검
 
-```
-회피: We used spectrometer to record spectra.
-선호: We used a spectrometer to record the spectra.
-       (a spectrometer — 처음 언급, the spectra — 특정)
-
-회피: Spectrometer was calibrated using standard.
-선호: The spectrometer was calibrated using a standard.
-       또는: A spectrometer was used; it was calibrated using a standard.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | We used spectrometer to record spectra. |
+| 바름 | We used a spectrometer to record the spectra. (a spectrometer — 처음 언급, the spectra — 특정) |
+| 회피 | Spectrometer was calibrated using standard. |
+| 바름 | The spectrometer was calibrated using a standard. 또는: A spectrometer was used; it was calibrated using a standard. |
 
 자기 분야 모범 논문의 관사 사용을 자세히 보면 패턴이 보입니다. 한국어 화자가 가장 자주 빠뜨리는 것이 *the*입니다.
 

@@ -76,12 +76,7 @@ GPIOA->OSPEEDR |= (0b11 << (5 * 2));   // very high speed
 
 입력 비교기는 일반 비교기가 아니라 히스테리시스가 있는 Schmitt trigger입니다. 0 → 1 임계와 1 → 0 임계가 다릅니다.
 
-```text
-       ┌─────┐
-1 ─────┘     │
-        ↑     ↓
-   V_IH   V_IL  (V_IH > V_IL → hysteresis)
-```
+![Schmitt Trigger Hysteresis](/images/blog/modern-recipes/diagrams/part1-03-schmitt-hysteresis.svg)
 
 이 덕분에 천천히 변하는 신호도 입력단에서 잡음 없이 디지털로 변환됩니다.
 

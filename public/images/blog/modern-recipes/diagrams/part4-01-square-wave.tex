@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (4.5,2.0) {PA5 Output — Square Wave};
+
+% Y-axis labels
+\node[caption, anchor=east] at (-0.2,1.4) {3.3 V};
+\node[caption, anchor=east] at (-0.2, 0.0) {0 V};
+
+% Square wave
+\draw[focus, line width=0.7pt]
+  (0,1.4) -- (1.2,1.4) -- (1.2,0) -- (2.4,0) -- (2.4,1.4) -- (3.6,1.4) -- (3.6,0)
+  -- (4.8,0) -- (4.8,1.4) -- (6.0,1.4) -- (6.0,0) -- (7.2,0);
+
+% Period annotation
+\draw[<->, line width=0.4pt, draw=mutec] (1.2,-0.5) -- (3.6,-0.5);
+\node[caption, anchor=north] at (2.4,-0.5) {$\sim$ 60 ms};
+
+\end{tikzpicture}
+\end{document}

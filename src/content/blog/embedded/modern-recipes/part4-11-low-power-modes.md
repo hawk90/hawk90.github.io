@@ -60,12 +60,7 @@ draft: false
 
 ### Duty-cycling 전략
 
-```text
-1 sec 주기, active 10 ms, sleep 990 ms:
-  Run   ─┐                ┌─┐                ┌─
-   1.0%  │   30 mA × 10 ms / 1000 ms = 0.3 mA avg
-  Stop   ┴──── 100 µA ────┴──── 100 µA ────┴
-```
+예 — 1 s 주기로 10 ms active (30 mA) + 990 ms Stop (100 µA). active 비중 1 %. 평균 전류 ≈ `30 mA × 10 ms / 1000 ms = 0.3 mA`. 슬립 구간이 길수록 평균이 µA 수준에 가까워집니다.
 
 평균 전류 = (active × active_time + sleep × sleep_time) / period.
 

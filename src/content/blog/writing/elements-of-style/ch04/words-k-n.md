@@ -213,10 +213,10 @@ Many + 복수 명사 + 복수 동사:
 
 *Momento*가 아닙니다.
 
-```
-선호: "She kept the photo as a memento."
-회피: "momento" — 흔한 철자 실수
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | "She kept the photo as a memento." |
+| 회피 | "momento" — 흔한 철자 실수 |
 
 ```
 어원:

@@ -7,12 +7,13 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog, x=1cm, y=1cm]
-  % Title
-  \node[font=\sffamily\bfseries, anchor=west] at (-0.5, 4.3) {Identity \texttt{alice}};
-  \node[font=\sffamily\bfseries, anchor=west] at (-0.5, 1.3) {Values (불변 스냅샷)};
+  % Title — above time axis with safe gap to identity boxes (10mm tall, top at y≈4.4)
+  \node[font=\sffamily\bfseries, anchor=west] at (-0.5, 5.2) {Identity \texttt{alice}};
+  \node[font=\sffamily\bfseries, anchor=west] at (-0.5, 2.0) {Values (불변 스냅샷)};
 
-  % Time axis at top
-  \draw[arr, draw=mutec] (-0.2, 3.4) -- (12.2, 3.4) node[font=\sffamily\footnotesize, text=mutec, above left, xshift=-2pt]{time};
+  % Time axis between title and identity row
+  \draw[arr, draw=mutec] (-0.2, 4.65) -- (12.2, 4.65)
+        node[font=\sffamily\footnotesize, text=mutec, above left, xshift=-2pt]{time};
 
   % Identity node (a single persistent reference)
   \node[hi, minimum width=18mm, minimum height=10mm] (idA) at (1.6, 3.9) {\texttt{alice}\\[2pt]\footnotesize atom};

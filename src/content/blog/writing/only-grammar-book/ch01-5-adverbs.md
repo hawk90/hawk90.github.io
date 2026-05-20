@@ -136,11 +136,11 @@ He works hard.           (부사)
 friendly, lovely, lonely, ugly, silly, deadly, costly, weekly, daily
 ```
 
-```text
-회피: She smiled friendly.
-바름: She smiled in a friendly manner.
-바름: She gave me a friendly smile.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She smiled friendly. |
+| 바름 | She smiled in a friendly manner. |
+| 바름 | She gave me a friendly smile. |
 
 ### *hard* vs *hardly*
 
@@ -181,10 +181,10 @@ He answered the question carefully.
 
 *동사와 목적어 사이에는 일반적으로 안 놓음*.
 
-```text
-회피: She sang beautifully the song.
-바름: She sang the song beautifully.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She sang beautifully the song. |
+| 바름 | She sang the song beautifully. |
 
 ### 빈도 부사
 
@@ -275,35 +275,25 @@ to boldly go where no one has gone before
 
 ## 예문
 
-```text
-She quickly finished the report and left the office.
-그녀는 보고서를 빨리 끝내고 사무실을 떠났습니다.
-
-He hardly ever complains about his work.
-그는 자신의 일에 대해 거의 불평하지 않습니다.
-
-Fortunately, the meeting was rescheduled to next week.
-다행히 회의가 다음 주로 다시 잡혔습니다.
-
-The team works extremely well under pressure.
-그 팀은 압박 속에서 매우 잘 일합니다.
-
-She has been studying English very hard lately.
-그녀는 최근에 영어를 매우 열심히 공부해 왔습니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| She quickly finished the report and left the office. | 그녀는 보고서를 빨리 끝내고 사무실을 떠났습니다. |
+| He hardly ever complains about his work. | 그는 자신의 일에 대해 거의 불평하지 않습니다. |
+| Fortunately, the meeting was rescheduled to next week. | 다행히 회의가 다음 주로 다시 잡혔습니다. |
+| The team works extremely well under pressure. | 그 팀은 압박 속에서 매우 잘 일합니다. |
+| She has been studying English very hard lately. | 그녀는 최근에 영어를 매우 열심히 공부해 왔습니다. |
 
 ## 자주 보는 함정
 
 ### 1. *good* (형용사) vs *well* (부사)
 
-```text
-회피: She sings good.
-바름: She sings well.
-바름: She is a good singer.
-
-회피: He plays the piano good.
-바름: He plays the piano well.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She sings good. |
+| 바름 | She sings well. |
+| 바름 | She is a good singer. |
+| 회피 | He plays the piano good. |
+| 바름 | He plays the piano well. |
 
 *well*은 *건강하다*의 뜻으로 *형용사*도 됩니다.
 
@@ -313,23 +303,21 @@ How are you? — I am well.   (건강함)
 
 ### 2. 형용사를 부사 자리에
 
-```text
-회피: He drives careful.
-바름: He drives carefully.
-
-회피: She solved the problem easy.
-바름: She solved the problem easily.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | He drives careful. |
+| 바름 | He drives carefully. |
+| 회피 | She solved the problem easy. |
+| 바름 | She solved the problem easily. |
 
 ### 3. 빈도 부사 위치 오류
 
-```text
-회피: She always is on time.
-바름: She is always on time.
-
-회피: Always I drink coffee in the morning.
-바름: I always drink coffee in the morning.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She always is on time. |
+| 바름 | She is always on time. |
+| 회피 | Always I drink coffee in the morning. |
+| 바름 | I always drink coffee in the morning. |
 
 ### 4. *very* vs *too*
 
@@ -346,11 +334,11 @@ The tea is too hot to drink.
 - **almost** — 부사 *거의*
 - **most** — 형용사·대명사 *대부분의*
 
-```text
-회피: Most all people agree.
-바름: Almost all people agree.
-바름: Most people agree.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Most all people agree. |
+| 바름 | Almost all people agree. |
+| 바름 | Most people agree. |
 
 ## 정리
 

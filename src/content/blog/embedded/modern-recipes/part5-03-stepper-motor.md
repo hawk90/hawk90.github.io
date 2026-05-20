@@ -200,16 +200,8 @@ void stepper_set_microstep(uint8_t div) {
 
 스코프로 STEP 핀을 보면 *step rate*가 보입니다.
 
-```text
-1000 step/s 등속:
-   ┌┐ ┌┐ ┌┐ ┌┐ ┌┐ ┌┐
-───┘└─┘└─┘└─┘└─┘└─┘└──
-   ← 1 ms 주기 →
-
-Trapezoidal ramp:
-  주파수가 점차 증가 → 일정 → 감소
-  steps 누적이 정확히 target과 일치해야 함
-```
+- **등속 1000 step/s** — 1 ms 주기 균등 펄스 트레인
+- **Trapezoidal ramp** — 주파수가 점차 증가 → 일정 → 감소. step 누적이 정확히 target과 일치해야 함
 
 stepper가 *step을 잃으면* 회전 각도가 명령과 다릅니다. 가능한 진단:
 - *가속이 너무 가파름* → ramp 완화

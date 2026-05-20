@@ -201,13 +201,7 @@ LED가 깜빡이면 다음이 모두 검증된 것입니다.
 
 오실로스코프로 PA5를 보면 사각파가 명확히 보입니다. delay(500000)에 nop 1-cycle 기준이면 약 0.06초 주기 (16MHz / 500000 × 2 ≈ 16 Hz)가 나옵니다.
 
-```text
-Scope: PA5
-   3.3V ┐    ┌────┐    ┌────┐    ┌────┐
-        │    │    │    │    │    │    │
-     0V ┘────┘    └────┘    └────┘    └
-        ←  ~60ms ↓
-```
+![PA5 Output — Square Wave](/images/blog/modern-recipes/diagrams/part4-01-square-wave.svg)
 
 빠르게 깜빡이면 사람 눈에는 연속 점등으로 보입니다. 그래서 delay를 늘려 1Hz 정도로 맞춥니다.
 

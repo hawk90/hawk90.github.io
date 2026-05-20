@@ -113,20 +113,18 @@ OTP(One-Time Programmable)는 더 일반적인 용어입니다. eFuse는 OTP의 
 
 eFuse가 저장하는 정보는 크게 네 분류입니다.
 
-```text
-┌────────────────────────────────────────────────────┐
-│ eFuse Bank Layout (i.MX 8M Plus — 단순화)          │
-├────────────────────────────────────────────────────┤
-│ Bank 0 │ Lock bits, factory config              [R] │
-│ Bank 1 │ BOOT_CFG, BT_FUSE_SEL, USB_PHY_CFG         │
-│ Bank 2 │ Unique chip ID (read-only, factory burned)│
-│ Bank 3 │ MAC address #1, #2                         │
-│ Bank 6 │ SRK_HASH[255:0] — Root of Trust 키 해시   │
-│ Bank 7 │ SRK_REVOKE — 키 revocation 4 bit          │
-│ Bank 9 │ SEC_CONFIG[1:0], JTAG disable, monotonic  │
-│ Bank 9 │ SRTC/HMAC keys                             │
-└────────────────────────────────────────────────────┘
-```
+eFuse Bank Layout — i.MX 8M Plus (단순화):
+
+| Bank | 내용 |
+|------|------|
+| 0 | Lock bits, factory config (read-only) |
+| 1 | `BOOT_CFG`, `BT_FUSE_SEL`, `USB_PHY_CFG` |
+| 2 | Unique chip ID (read-only, factory burned) |
+| 3 | MAC address #1, #2 |
+| 6 | `SRK_HASH[255:0]` — Root of Trust 키 해시 |
+| 7 | `SRK_REVOKE` — 키 revocation 4 bit |
+| 9 | `SEC_CONFIG[1:0]`, JTAG disable, monotonic |
+| 9 | SRTC / HMAC keys |
 
 이 영역을 한 번에 다 보고 싶으면 U-Boot에서 `fuse sense`로 읽을 수 있습니다.
 

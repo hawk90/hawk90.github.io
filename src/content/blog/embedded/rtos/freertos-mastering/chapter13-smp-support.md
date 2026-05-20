@@ -234,15 +234,13 @@ IDLE              40123          41384             76%       77%
 
 기존 단일 코어 코드를 SMP로 올릴 때 체크리스트입니다.
 
-```text
-[ ] configNUMBER_OF_CORES = 2 (또는 N)
-[ ] 전역 변수 접근에 임계 영역 또는 atomic 적용
-[ ] ISR이 어느 코어에서 실행되는지 명확화
-[ ] 두 코어가 같은 페리페럴을 만지지 않게 분리
-[ ] cache flush/invalidate 필요한 DMA 경로 확인
-[ ] vTaskGetRunTimeStats로 부하 분포 확인
-[ ] 임계 영역 길이 측정 (스코프 또는 GPIO 토글)
-```
+- [ ] configNUMBER_OF_CORES = 2 (또는 N)
+- [ ] 전역 변수 접근에 임계 영역 또는 atomic 적용
+- [ ] ISR이 어느 코어에서 실행되는지 명확화
+- [ ] 두 코어가 같은 페리페럴을 만지지 않게 분리
+- [ ] cache flush/invalidate 필요한 DMA 경로 확인
+- [ ] vTaskGetRunTimeStats로 부하 분포 확인
+- [ ] 임계 영역 길이 측정 (스코프 또는 GPIO 토글)
 
 단일 코어에서는 *드러나지 않던 race*가 SMP에서 폭발합니다. *전역 카운터, 링버퍼 인덱스, 상태 머신 변수*가 흔한 후보입니다.
 

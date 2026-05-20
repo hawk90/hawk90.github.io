@@ -17,13 +17,7 @@ draft: false
 
 비동기 시스템에서 자주 등장하는 구조는 *여러 작업의 결과를 모으는 것*이다.
 
-```text
-   ┌──▶ fetch(a) ──┐
-   │               │
-req┼──▶ fetch(b) ──┼──▶ aggregate
-   │               │
-   └──▶ fetch(c) ──┘
-```
+![Fan-in: collect / collectAll / collectAny](/images/blog/folly/diagrams/part2-05-collect-fanin.svg)
 
 이를 일반화하면 세 가지 패턴이 보인다.
 

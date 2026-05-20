@@ -18,7 +18,9 @@ draft: false
 
 ## 단계별 시간 모델
 
-부트는 다음 단계로 나뉩니다.
+부트는 다음 단계로 나뉩니다. 다음 그림은 각 단계의 시간 비중을 시각화합니다.
+
+![부트 시간 분석 — ROM부터 Application까지 각 단계의 시간 비중](/images/blog/bsp/diagrams/ch15-boot-time-breakdown.svg)
 
 | 단계 | 일반 BSP | 최적화 후 |
 |------|----------|-----------|
@@ -101,6 +103,38 @@ dmesg에 모든 initcall이 시간과 함께 찍힙니다.
 ```
 
 232ms 걸린 `pci_subsys_init`이 PCIe를 쓰지 않는 보드라면 제거 후보입니다.
+
+### 부트 시간 측정 스크립트 예시
+
+자동화된 측정을 위해 시리얼 로그를 파싱하는 스크립트입니다.
+
+```bash
+#!/bin/bash
+# boot-time-analyze.sh - dmesg에서 부트 단계별 시간 추출
+
+# 커널 부트 완료 시점
+KERNEL_DONE=$(dmesg | grep "Freeing unused kernel" | awk '{print $1}' | tr -d '[]')
+
+# systemd 도달 시점
+SYSTEMD_START=$(dmesg | grep "systemd\[1\]: Detected" | awk '{print $1}' | tr -d '[]')
+
+# 가장 느린 initcall 상위 10개
+echo "=== Slowest initcalls ==="
+dmesg | grep "initcall.*returned 0 after" | \
+    sed 's/.*initcall \(.*\) returned 0 after \([0-9]*\) msecs/\2 \1/' | \
+    sort -rn | head -10
+
+echo ""
+echo "Kernel boot: ${KERNEL_DONE}s"
+echo "systemd reached: ${SYSTEMD_START}s"
+```
+
+U-Boot의 bootstage 정보를 환경 변수로 내보내 커널에서 전체 부트 시간을 추적할 수도 있습니다.
+
+```text
+=> bootstage stash 0x83000000 0x1000
+=> setenv bootargs "${bootargs} bootstage.stash=0x83000000,0x1000"
+```
 
 ## SPL과 U-Boot 단계 — Falcon mode
 

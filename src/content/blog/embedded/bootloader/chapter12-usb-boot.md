@@ -381,21 +381,18 @@ RAM에서 띄운 *임시 U-Boot*가 SPI flash의 본체 U-Boot를 다시 굽는 
 
 양산 라인에서 *빈 PCB → 검증된 완제품*까지 가는 USB 워크플로를 정리하겠습니다. 핵심은 *한 명령으로 모든 단계*가 끝나는 자동화입니다.
 
-```text
-[빈 PCB] → [jig 장착] → [USB 연결] → [전원 인가]
-                                         ↓
-                              BootROM USB SDP enumerate
-                                         ↓
-                              uuu script 실행 (호스트)
-                                         ↓
-              ┌──────────────────────────┼──────────────────────────┐
-              ↓                          ↓                          ↓
-       SPL → SRAM             U-Boot → DDR              fastboot 모드 진입
-                                                                   ↓
-                                                       partition 단위 flash
-                                                                   ↓
-                                                            reboot 및 검증
-```
+| # | 단계 |
+|---|------|
+| 1 | 빈 PCB → jig 장착 → USB 연결 → 전원 인가 |
+| 2 | BootROM USB SDP enumerate |
+| 3 | uuu 스크립트 실행 (호스트) |
+| 4a | SPL → SRAM 적재 |
+| 4b | U-Boot → DDR 적재 |
+| 4c | fastboot 모드 진입 |
+| 5 | partition 단위 flash |
+| 6 | reboot 및 검증 |
+
+4a / 4b / 4c는 uuu 스크립트가 *순차로* 진행하는 단계입니다.
 
 전형적인 `factory.uuu` 스크립트입니다.
 

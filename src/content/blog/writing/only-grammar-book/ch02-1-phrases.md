@@ -111,10 +111,10 @@ In the morning, she went jogging. (문장 수식)
 
 전치사구의 자리가 잘못되면 의미가 바뀝니다 (Chapter 4.3 참고).
 
-```text
-회피: She gave the book to the boy with the red cover.   (boy가 red cover?)
-바름: She gave the book with the red cover to the boy.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She gave the book to the boy with the red cover.   (boy가 red cover?) |
+| 바름 | She gave the book with the red cover to the boy. |
 
 ## 부정사구 (Infinitive Phrase)
 
@@ -233,11 +233,10 @@ Broken by the storm, the tree fell across the road.
 
 명사 *바로 옆*에 놓아야 합니다. 멀어지면 *현수 분사*(dangling participle)가 됩니다 (Chapter 4.3 참고).
 
-```text
-회피: Walking down the street, the building was tall.
-       (걷고 있는 것이 건물?)
-바름: Walking down the street, I saw a tall building.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Walking down the street, the building was tall. (걷고 있는 것이 건물?) |
+| 바름 | Walking down the street, I saw a tall building. |
 
 ## 절대 구문 (Absolute Phrase)
 
@@ -270,22 +269,13 @@ My friend, Susan, called me.       (친구가 한 명 — Susan은 부가 정보
 
 ## 예문
 
-```text
-The woman in the red dress is my neighbor.
-빨간 드레스를 입은 여성은 제 이웃입니다.
-
-To finish the project on time, we need more resources.
-프로젝트를 제때 끝내려면 더 많은 자원이 필요합니다.
-
-Reading novels in English helps me improve my vocabulary.
-영어 소설 읽기는 어휘력 향상에 도움이 됩니다.
-
-The report submitted yesterday has been approved.
-어제 제출된 보고서가 승인되었습니다.
-
-She is working on a research project about climate change.
-그녀는 기후 변화에 관한 연구 프로젝트를 하고 있습니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| The woman in the red dress is my neighbor. | 빨간 드레스를 입은 여성은 제 이웃입니다. |
+| To finish the project on time, we need more resources. | 프로젝트를 제때 끝내려면 더 많은 자원이 필요합니다. |
+| Reading novels in English helps me improve my vocabulary. | 영어 소설 읽기는 어휘력 향상에 도움이 됩니다. |
+| The report submitted yesterday has been approved. | 어제 제출된 보고서가 승인되었습니다. |
+| She is working on a research project about climate change. | 그녀는 기후 변화에 관한 연구 프로젝트를 하고 있습니다. |
 
 ## 자주 보는 함정
 
@@ -293,44 +283,42 @@ She is working on a research project about climate change.
 
 구는 *완전한 문장이 아닙니다*.
 
-```text
-회피: Walking down the street.
-바름: Walking down the street, I saw a rainbow.
-바름: I was walking down the street.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Walking down the street. |
+| 바름 | Walking down the street, I saw a rainbow. |
+| 바름 | I was walking down the street. |
 
 ### 2. 전치사구의 위치 오류
 
-```text
-회피: I bought a book in the bookstore with a red cover.
-바름: I bought a book with a red cover in the bookstore.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I bought a book in the bookstore with a red cover. |
+| 바름 | I bought a book with a red cover in the bookstore. |
 
 ### 3. 부정사 / 동명사 동사 혼동
 
-```text
-회피: I avoid to drive at night.
-바름: I avoid driving at night.
-
-회피: I decided going home.
-바름: I decided to go home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I avoid to drive at night. |
+| 바름 | I avoid driving at night. |
+| 회피 | I decided going home. |
+| 바름 | I decided to go home. |
 
 ### 4. 현수 분사
 
-```text
-회피: Driving to work, the traffic was heavy.
-       (driving의 주체가 traffic?)
-바름: Driving to work, I encountered heavy traffic.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Driving to work, the traffic was heavy. (driving의 주체가 traffic?) |
+| 바름 | Driving to work, I encountered heavy traffic. |
 
 ### 5. 동격의 쉼표 누락
 
-```text
-회피: My sister Jane who lives in London called.
-바름: My sister Jane, who lives in London, called.   (Jane이 유일한 자매면)
-바름: My sister Jane who lives in London called.    (자매 여럿 중 Jane을 한정)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | My sister Jane who lives in London called. |
+| 바름 | My sister Jane, who lives in London, called.   (Jane이 유일한 자매면) |
+| 바름 | My sister Jane who lives in London called.    (자매 여럿 중 Jane을 한정) |
 
 ## 정리
 

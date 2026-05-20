@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,4.4) {ESP-MESH — Tree Topology (최대 6-layer)};
+
+% Root
+\node[con, minimum width=30mm, minimum height=10mm, align=center] (root) at (0,3) {Root\\\small STA $\rightarrow$ Router};
+
+% Layer 1 — three children
+\node[hi, minimum width=22mm, minimum height=8mm] (l1a) at (-4,1) {L1};
+\node[hi, minimum width=22mm, minimum height=8mm] (l1b) at ( 0,1) {L1};
+\node[hi, minimum width=22mm, minimum height=8mm] (l1c) at ( 4,1) {L1};
+
+% Layer 2
+\node[abs, minimum width=22mm, minimum height=8mm] (l2a) at (-4,-0.8) {L2};
+\node[abs, minimum width=22mm, minimum height=8mm] (l2b) at ( 0,-0.8) {L2};
+\node[abs, minimum width=22mm, minimum height=8mm] (l2c) at ( 4,-0.8) {L2};
+
+% Layer 3 (deeper)
+\node[imp, minimum width=22mm, minimum height=8mm] (l3)  at (-4,-2.4) {L3};
+
+% Tree edges
+\draw[arr] (root.south) -- (l1a.north);
+\draw[arr] (root.south) -- (l1b.north);
+\draw[arr] (root.south) -- (l1c.north);
+
+\draw[arr] (l1a.south) -- (l2a.north);
+\draw[arr] (l1b.south) -- (l2b.north);
+\draw[arr] (l1c.south) -- (l2c.north);
+
+\draw[arr] (l2a.south) -- (l3.north);
+
+% Caption
+\node[caption, anchor=west] at (-4.0,-3.4) {각 노드는 STA(부모에게) + SoftAP(자식에게) 동시 역할};
+
+\end{tikzpicture}
+\end{document}

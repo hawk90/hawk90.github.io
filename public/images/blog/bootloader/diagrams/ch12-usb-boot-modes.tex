@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  mode/.style={cls, minimum width=26mm, minimum height=12mm, font=\sffamily\small, align=center}
+]
+
+% Title
+\node[font=\sffamily\bfseries] at (3, 4.5) {USB 부트 모드};
+
+% Three modes
+\node[mode, draw=absbord, fill=absfill] (serial) at (0, 2.5) {Serial Download\\(SDP)};
+\node[mode, draw=impbord, fill=impfill] (fastboot) at (3, 2.5) {fastboot\\Protocol};
+\node[mode, draw=clibord, fill=clifill] (ums) at (6, 2.5) {USB Mass\\Storage};
+
+% Descriptions
+\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (0, 0.8) {BootROM 단계\\이미지 주입\\NXP uuu, sdp};
+\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (3, 0.8) {U-Boot 단계\\파티션 flash\\Android 호환};
+\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (6, 0.8) {eMMC를 PC에\\USB 디스크로\\dd, gparted};
+
+% Flow arrows
+\draw[arr] (serial) -- node[above, font=\sffamily\tiny] {SPL 적재} (fastboot);
+\draw[arr] (fastboot) -- node[above, font=\sffamily\tiny] {ums 0 mmc 0} (ums);
+
+% Stage labels
+\node[font=\sffamily\tiny, text=absbord] at (0, 3.4) {ROM 단계};
+\node[font=\sffamily\tiny, text=impbord] at (3, 3.4) {U-Boot 단계};
+\node[font=\sffamily\tiny, text=clibord] at (6, 3.4) {U-Boot 단계};
+
+% Commands
+\node[font=\ttfamily\tiny, text=inkc, anchor=north] at (0, -0.2) {uuu board.uuu};
+\node[font=\ttfamily\tiny, text=inkc, anchor=north] at (3, -0.2) {fastboot flash boot};
+\node[font=\ttfamily\tiny, text=inkc, anchor=north] at (6, -0.2) {dd if=img of=/dev/sdX};
+
+\end{tikzpicture}
+\end{document}

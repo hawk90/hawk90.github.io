@@ -55,13 +55,12 @@ bookAuthor: "William Strunk Jr., E.B. White"
 
 군더더기 표현입니다.
 
-```
-회피: "He is a man who is very ambitious."
-선호: "He is very ambitious."
-
-회피: "She is a person who likes books."
-선호: "She likes books."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "He is a man who is very ambitious." |
+| 바름 | "He is very ambitious." |
+| 회피 | "She is a person who likes books." |
+| 바름 | "She likes books." |
 
 *Is a man who*, *Is a person who* 패턴은 거의 항상 제거할 수 있습니다.
 
@@ -220,10 +219,10 @@ bookAuthor: "William Strunk Jr., E.B. White"
 
 *Regardless*가 맞습니다. *Irregardless*는 이중 부정(ir- + -less)으로 비표준입니다.
 
-```
-회피: "Irregardless of the weather, we will proceed."
-선호: "Regardless of the weather, we will proceed."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "Irregardless of the weather, we will proceed." |
+| 바름 | "Regardless of the weather, we will proceed." |
 
 ### It is
 

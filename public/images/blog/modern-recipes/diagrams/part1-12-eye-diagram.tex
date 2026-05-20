@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (3.5,2.4) {Eye Diagram — 신호 품질};
+
+% Many overlaid pulses forming an eye
+% Two crossing curves making "eye"
+\draw[focus, line width=0.6pt, opacity=0.7]
+  (0,0) -- (1,0) .. controls (1.4,0) and (1.4,1) .. (1.8,1) -- (4.2,1) .. controls (4.6,1) and (4.6,0) .. (5,0) -- (6,0);
+\draw[focus, line width=0.6pt, opacity=0.7]
+  (0,1) -- (1,1) .. controls (1.4,1) and (1.4,0) .. (1.8,0) -- (4.2,0) .. controls (4.6,0) and (4.6,1) .. (5,1) -- (6,1);
+
+% Eye mask (good)
+\draw[ok, dashed, line width=0.4pt] (2.5,0.2) -- (3.5,0.2) -- (3.5,0.8) -- (2.5,0.8) -- cycle;
+
+% Labels
+\node[caption, anchor=west] at (6.4,0.9) {좋은 신호 — eye가 wide open};
+\node[caption, anchor=west] at (6.4,0.5) {nominal mask 안에 trace 없음};
+\node[caption, anchor=west] at (6.4,0.1) {좁아지면: reflection, jitter, 손실};
+
+\end{tikzpicture}
+\end{document}

@@ -51,20 +51,20 @@
   % ─── Serving to Client ───
   \draw[uses] (serve.east) -- (q.west);
 
-  % ─── Group rectangles for layers ───
-  \node[group, fit=(master) (batch), inner sep=8pt, draw=absbord, dashed] (gb) {};
-  \node[glabel, text=absbord] at (gb.north west) {Batch Path};
+  % ─── Group rectangles for layers — extra inner sep to clear the labels ───
+  \node[group, fit=(master) (batch), inner sep=12pt, draw=absbord, dashed] (gb) {};
+  \node[glabel, text=absbord, anchor=south west, yshift=2pt] at (gb.north west) {Batch Path};
 
-  \node[group, fit=(speed), inner sep=8pt, draw=conbord, dashed] (gs) {};
-  \node[glabel, text=conbord] at (gs.north west) {Speed Path};
+  \node[group, fit=(speed), inner sep=12pt, draw=conbord, dashed] (gs) {};
+  \node[glabel, text=conbord, anchor=north west, yshift=-2pt] at (gs.south west) {Speed Path};
 
-  % ─── Latency labels on flows ───
-  \node[caption, anchor=south, text=absbord] at (6.7,  2.95) {\footnotesize 시간\,$\sim$\,일 주기};
-  \node[caption, anchor=north, text=conbord] at (5.5, -2.95) {\footnotesize 밀리초\,$\sim$\,초 주기};
+  % ─── Latency labels — positioned outside the group rectangles ───
+  \node[caption, anchor=south, text=absbord] at (6.7,  4.4) {\footnotesize 시간\,$\sim$\,일 주기};
+  \node[caption, anchor=north, text=conbord] at (5.5, -4.4) {\footnotesize 밀리초\,$\sim$\,초 주기};
 
-  % ─── Caption ───
-  \node[caption, anchor=north, text width=170mm]
-       at (8.5, -4.4)
+  % ─── Caption — narrower to stay within picture frame ───
+  \node[caption, anchor=north, text width=155mm, align=center]
+       at (8.5, -5.5)
        {Raw 데이터는 두 갈래로 흐른다. Batch path는 master dataset에서 정확한 view를 재계산하고, Speed path는 같은 raw에서 최근 데이터를 즉시 처리해 보정 view를 만든다. Serving layer가 둘을 합쳐 쿼리에 응답한다.};
 \end{tikzpicture}
 \end{document}

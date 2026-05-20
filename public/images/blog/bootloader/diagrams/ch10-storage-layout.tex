@@ -1,10 +1,12 @@
-\documentclass[tikz,border=10pt]{standalone}
-\input{../../_design.tex}
-
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
-\begin{tikzpicture}[blog,
-  part/.style={rectangle, draw=nodebord, fill=#1, minimum height=8mm, font=\sffamily\scriptsize, anchor=west}
-]
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
 
 % Title
 \node[font=\sffamily\bfseries] at (4, 5.5) {eMMC 부트 파티션 레이아웃};
@@ -17,7 +19,7 @@
 
 % Boot Partition 1
 \node[font=\sffamily\small\bfseries, text=inkc, anchor=west] at (0, 3) {Boot Partition 1};
-\draw[draw=nodebord, fill=gridb] (0, 2.1) rectangle (8, 2.7);
+\draw[draw=nodebord, fill=neutfill] (0, 2.1) rectangle (8, 2.7);
 \node[font=\sffamily\scriptsize, text=mutec, anchor=center] at (4, 2.4) {(backup 또는 미사용)};
 
 % User Area with GPT

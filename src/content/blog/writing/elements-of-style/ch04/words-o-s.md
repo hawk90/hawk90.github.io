@@ -61,11 +61,9 @@ ongoing project     current project / project under way
 "One must watch one's step."
 ```
 
-```
 미국 회화는 *his / her*도 받아들이지만, 학술·격식 글은 *one's*로 유지합니다.
 
 영국 영어는 더 엄격해서 항상 *one ... one's*입니다.
-```
 
 ### One of the most
 
@@ -270,10 +268,10 @@ in communications."
 
 *First*, *second*, *third*가 더 직접적입니다. *Firstly*, *secondly*는 과잉 격식입니다.
 
-```
-회피: "Firstly, ... Secondly, ... Thirdly, ..."
-선호: "First, ... Second, ... Third, ..."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "Firstly, ... Secondly, ... Thirdly, ..." |
+| 바름 | "First, ... Second, ... Third, ..." |
 
 ### Shall / Will
 
@@ -357,10 +355,10 @@ in communications."
 
 거의 항상 *students*가 더 낫습니다.
 
-```
-회피: "The student body voted on the proposal."
-선호: "The students voted on the proposal."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "The student body voted on the proposal." |
+| 바름 | "The students voted on the proposal." |
 
 비슷한 패턴:
 ```

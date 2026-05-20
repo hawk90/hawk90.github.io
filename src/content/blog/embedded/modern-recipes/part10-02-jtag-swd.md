@@ -133,10 +133,8 @@ DBGMCU->CR |= DBGMCU_CR_DBG_SLEEP | DBGMCU_CR_DBG_STOP;
 
 ## Step 7: Bootloader가 Debug 차단
 
-```text
 Secure boot 시 BootROM이 *디버깅을 차단* 후 application으로 jump합니다.
 Application에서 *debug enable*을 다시 하지 않으면 connect가 실패합니다.
-```
 
 ESP32에서는 `efuse_disable_debug`가 가능합니다 (영구). Nordic은 `APPROTECT`를 씁니다.
 

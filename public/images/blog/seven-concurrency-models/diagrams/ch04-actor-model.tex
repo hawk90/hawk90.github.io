@@ -42,12 +42,14 @@
   \node[conSm, minimum width=14mm, anchor=center] (m3)
     at ($(m2) + (1.4, 0)$) {msg 1};
 
-  % Asynchronous send arrow from A to mailbox queue
-  \draw[msgasync] (boxA.east) -- node[font=\sffamily\footnotesize, above, text=inkc]
-    {send (비동기)} ($(m3.east) + (0.4, 0)$);
+  % Asynchronous send arrow from A — routed ABOVE message boxes so the
+  % "send (비동기)" label has clear space and doesn't collide with msg nodes
+  \draw[msgasync] (boxA.north east) ++(0,-0.3) coordinate (asrc)
+        (asrc) to[out=20, in=160] ($(m3.north) + (0, 0.6)$)
+        node[font=\sffamily\footnotesize, midway, above, text=inkc] {send (비동기)};
 
-  % Mailbox-to-actor pull
-  \draw[msgsync] (m1.west) -- node[font=\sffamily\footnotesize, above, text=inkc]
+  % Mailbox-to-actor pull — label below to keep it off the msg row
+  \draw[msgsync] (m1.west) -- node[font=\sffamily\footnotesize, below=1pt, text=inkc]
     {receive} (mboxB.east);
 
   % ─── Caption ─────────────────────────────────────

@@ -171,10 +171,10 @@ cheating or both?"
 
 `Whether` 하나로 충분합니다.
 
-```
-회피: "the question as to whether"
-선호: "the question whether" 또는 "whether"
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "the question as to whether" |
+| 바름 | "the question whether" 또는 "whether" |
 
 ### As yet
 
@@ -191,22 +191,21 @@ cheating or both?"
 
 `Regard ... as` 뒤에 `being`은 군더더기입니다.
 
-```
-회피: "He is regarded as being the best dancer in the club."
-선호: "He is regarded as the best dancer in the club."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "He is regarded as being the best dancer in the club." |
+| 바름 | "He is regarded as the best dancer in the club." |
 
 ### But
 
 `Doubt`와 `help` 뒤의 `but`은 불필요합니다.
 
-```
-회피: "I have no doubt but that he will come."
-선호: "I have no doubt that he will come."
-
-회피: "I cannot help but admire him."
-선호: "I cannot help admiring him."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "I have no doubt but that he will come." |
+| 바름 | "I have no doubt that he will come." |
+| 회피 | "I cannot help but admire him." |
+| 바름 | "I cannot help admiring him." |
 
 `But`을 자주 쓰면 Loose sentence(Rule 18) 함정에 빠지기 쉽습니다.
 
@@ -229,22 +228,21 @@ May → 허가 / 가능성
 
 대부분 불필요합니다.
 
-```
-회피: "In many cases, the rooms lacked air conditioning."
-선호: "Many of the rooms lacked air conditioning."
-
-회피: "In some cases, the problem can be solved."
-선호: "Sometimes the problem can be solved."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "In many cases, the rooms lacked air conditioning." |
+| 바름 | "Many of the rooms lacked air conditioning." |
+| 회피 | "In some cases, the problem can be solved." |
+| 바름 | "Sometimes the problem can be solved." |
 
 ### Center around
 
 *Center on*이 맞습니다. 중심은 어디에 있는 것입니다.
 
-```
-회피: "The story centers around a young boy."
-선호: "The story centers on a young boy."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "The story centers around a young boy." |
+| 바름 | "The story centers on a young boy." |
 
 ### Certainly
 
@@ -264,13 +262,12 @@ will review the matter."
 
 `Acts of a hostile character`는 `hostile acts`로 줄입니다. 자주 빼낼 수 있는 단어입니다.
 
-```
-회피: "His remarks were of a critical character."
-선호: "His remarks were critical."
-
-회피: "The decisions were of a controversial character."
-선호: "The decisions were controversial."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "His remarks were of a critical character." |
+| 바름 | "His remarks were critical." |
+| 회피 | "The decisions were of a controversial character." |
+| 바름 | "The decisions were controversial." |
 
 ### Claim (verb)
 
@@ -335,10 +332,10 @@ Compare with → 같은 종류 사이의 *차이* 따짐 (비교)
 
 타동사로서의 *contact*는 모호하고 거만하게 들립니다.
 
-```
-회피: "I will contact him."
-선호: "I will phone him." / "I will email him." / "I will meet him."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "I will contact him." |
+| 바름 | "I will phone him." / "I will email him." / "I will meet him." |
 
 *Get in touch with*, *look up*, *phone*, *find*, *meet* 중 더 구체적인 것을 씁니다.
 

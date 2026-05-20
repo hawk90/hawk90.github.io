@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5,2.6) {I2S DMA Ring (Circular Linked List)};
+
+% Three descriptors
+\node[abs, minimum width=30mm, minimum height=14mm, align=left, inner sep=4pt] (d0) at (0.5,0)
+  {\textbf{desc 0}\\\small \texttt{buf + sz}};
+\node[abs, minimum width=30mm, minimum height=14mm, align=left, inner sep=4pt] (d1) at (4.5,0)
+  {\textbf{desc 1}\\\small \texttt{buf + sz}};
+\node[abs, minimum width=30mm, minimum height=14mm, align=left, inner sep=4pt] (d2) at (8.5,0)
+  {\textbf{desc 2}\\\small \texttt{buf + sz}};
+
+% Forward arrows
+\draw[arr] (d0.east) -- (d1.west);
+\draw[arr] (d1.east) -- (d2.west);
+
+% Wrap-around arrow
+\draw[arr] (d2.south) .. controls (8.5,-1.5) and (0.5,-1.5) .. (d0.south)
+  node[midway, below, font=\footnotesize] {wrap (순환)};
+
+\end{tikzpicture}
+\end{document}

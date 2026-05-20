@@ -209,19 +209,19 @@ Phew, that was a close one.
 
 ### 1. 학술 글에서 사용
 
-```text
-회피: Wow, the experiment yielded surprising results!
-바름: The experiment yielded surprising results.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Wow, the experiment yielded surprising results! |
+| 바름 | The experiment yielded surprising results. |
 
 ### 2. 느낌표 남발
 
 감탄사 외 일반 문장에 느낌표를 자주 쓰는 것은 *유치한* 인상.
 
-```text
-회피: It was a wonderful day! We had so much fun!
-바름: It was a wonderful day. We had so much fun.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | It was a wonderful day! We had so much fun! |
+| 바름 | It was a wonderful day. We had so much fun. |
 
 ### 3. 약한 감탄사에 강한 느낌표
 

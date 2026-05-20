@@ -7,43 +7,49 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  state/.style={cls, align=center, font=\footnotesize\bfseries, minimum width=36mm, minimum height=18mm},
+  state/.style={cls, align=center, font=\footnotesize\bfseries, text width=32mm, minimum height=20mm},
   transition/.style={-{Stealth[length=2.5mm]}, draw=edgec, line width=0.6pt},
-  trlabel/.style={font=\scriptsize, fill=white, inner sep=2pt}
+  trlabel/.style={font=\scriptsize, fill=white, inner sep=2pt},
+  notebox/.style={font=\scriptsize, align=left, anchor=north west, inner sep=4pt, text width=48mm}
 ]
 
-\node[state, draw=okbord, fill=okfill] (active) at (0, 0) {Error Active\\\scriptsize TEC < 128\\\scriptsize REC < 128};
-\node[state, draw=warnbord, fill=warnfill] (passive) at (8, 0) {Error Passive\\\scriptsize TEC ≥ 128 또는\\\scriptsize REC ≥ 128};
-\node[state, draw=warnbord, fill=warnfill!60, line width=1.5pt] (busoff) at (16, 0) {Bus Off\\\scriptsize TEC ≥ 256\\\scriptsize 송신 불가};
+\node[state, draw=okbord, fill=okfill] (active) at (0, 0)
+  {Error Active\\[2pt]\scriptsize TEC < 128\\[1pt]\scriptsize REC < 128};
+\node[state, draw=warnbord, fill=warnfill] (passive) at (9, 0)
+  {Error Passive\\[2pt]\scriptsize TEC ≥ 128 또는\\[1pt]\scriptsize REC ≥ 128};
+\node[state, draw=warnbord, fill=warnfill!60, line width=1.5pt] (busoff) at (18, 0)
+  {Bus Off\\[2pt]\scriptsize TEC ≥ 256\\[1pt]\scriptsize 송신 불가};
 
 % Transitions
 \draw[transition] (active.east) -- node[trlabel, above] {counter ↑} (passive.west);
 \draw[transition] (passive.east) -- node[trlabel, above] {TEC ≥ 256} (busoff.west);
 
-\draw[transition, bend left=30] (passive.north west) to node[trlabel, above] {counter ↓} (active.north east);
-\draw[transition, bend right=40] (busoff.south west) to node[trlabel, below, align=center] {128 × 11 consecutive\\recessive bits} (active.south east);
+\draw[transition, bend left=30] (passive.north west) to
+  node[trlabel, above] {counter ↓} (active.north east);
+\draw[transition, bend right=40] (busoff.south west) to
+  node[trlabel, below, align=center] {128 × 11 consecutive\\[1pt]recessive bits} (active.south east);
 
 % Initial state arrow
 \node[font=\scriptsize] at (-3, 0) {start →};
 
-% Behavior notes
-\node[font=\scriptsize, align=left, anchor=north west, draw=edgec, fill=hifill!20, inner sep=4pt] at (-3, -3) {
-  \textbf{Error Active}\\
-  \textbullet\ Active Error Flag (6 dominant bit) 송신\\
+% Behavior notes — wider spacing to prevent overlap (8cm gap each)
+\node[notebox, draw=edgec, fill=hifill!20] at (-3, -3) {
+  \textbf{Error Active}\\[2pt]
+  \textbullet\ Active Error Flag (6 dominant bit) 송신\\[1pt]
   \textbullet\ 다른 노드도 인지 → 프레임 무효
 };
 
-\node[font=\scriptsize, align=left, anchor=north west, draw=edgec, fill=hifill!20, inner sep=4pt] at (5, -3) {
-  \textbf{Error Passive}\\
-  \textbullet\ Passive Error Flag (6 recessive bit)\\
-  \textbullet\ 다른 노드에 전파 안 됨\\
+\node[notebox, draw=edgec, fill=hifill!20] at (6, -3) {
+  \textbf{Error Passive}\\[2pt]
+  \textbullet\ Passive Error Flag (6 recessive bit)\\[1pt]
+  \textbullet\ 다른 노드에 전파 안 됨\\[1pt]
   \textbullet\ 자기 에러는 알지만 영향 ↓
 };
 
-\node[font=\scriptsize, align=left, anchor=north west, draw=warnbord, fill=warnfill!50, inner sep=4pt] at (13, -3) {
-  \textbf{Bus Off}\\
-  \textbullet\ 송신 시도 못 함\\
-  \textbullet\ 수신만\\
+\node[notebox, draw=warnbord, fill=warnfill!50] at (15, -3) {
+  \textbf{Bus Off}\\[2pt]
+  \textbullet\ 송신 시도 못 함\\[1pt]
+  \textbullet\ 수신만\\[1pt]
   \textbullet\ Auto-recovery 또는 manual
 };
 

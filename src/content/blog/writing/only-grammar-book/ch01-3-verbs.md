@@ -30,13 +30,12 @@ bookAuthor: "Susan Thurman"
 - **Intransitive** (자동사): 목적어 없음 — *She sleeps. The bird flies.*
 - **Transitive** (타동사): 목적어 필요 — *She wrote a letter. He bought a car.*
 
-```text
-회피: She mentioned.        (mention은 타동사 — 목적어 필요)
-바름: She mentioned the problem.
-
-회피: The accident happened to him.   (happen은 자동사 — 수동 불가)
-바름: The accident happened.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She mentioned.        (mention은 타동사 — 목적어 필요) |
+| 바름 | She mentioned the problem. |
+| 회피 | The accident happened to him.   (happen은 자동사 — 수동 불가) |
+| 바름 | The accident happened. |
 
 ## 시제 (Tense)와 상 (Aspect)
 
@@ -146,10 +145,10 @@ Future:  I will have been walking for three hours by 5 PM.
 
 전통적으로 학술 글은 *수동*을 선호했지만, 현대 학술 글은 *명확한 능동*을 권장합니다.
 
-```text
-회피: It was found that the results were significant.
-바름: We found that the results were significant.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | It was found that the results were significant. |
+| 바름 | We found that the results were significant. |
 
 ## 법 (Mood)
 
@@ -222,13 +221,12 @@ I suggest that she go now.                            (goes X)
 - 3인칭 단수에 `-s` 없음 — *She can swim* (NOT *She cans swim*)
 - 두 조동사를 *겹쳐 쓰지 못함* — *She will must go* X
 
-```text
-회피: She must to go.        (must는 to 없이)
-바름: She must go.
-
-회피: He cans do it.         (조동사는 -s 없음)
-바름: He can do it.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She must to go.        (must는 to 없이) |
+| 바름 | She must go. |
+| 회피 | He cans do it.         (조동사는 -s 없음) |
+| 바름 | He can do it. |
 
 ## 동사의 일치 (간단)
 
@@ -241,53 +239,44 @@ They run.        (복수 — s 없음)
 
 ## 예문
 
-```text
-By next year, I will have been working here for ten years.
-내년이면 여기서 일한 지 10년이 됩니다.
-
-If she had studied harder, she would have passed the exam.
-그녀가 더 열심히 공부했다면 시험에 합격했을 것입니다.
-
-The report has just been submitted to the committee.
-보고서가 방금 위원회에 제출되었습니다.
-
-We suggest that the proposal be reconsidered.
-우리는 그 제안이 재고되어야 한다고 제안합니다.
-
-She must have left already; her car is gone.
-그녀가 이미 떠난 것이 틀림없습니다. 차가 없네요.
-```
+| 영어 | 한국어 |
+|---|---|
+| By next year, I will have been working here for ten years. | 내년이면 여기서 일한 지 10년이 됩니다. |
+| If she had studied harder, she would have passed the exam. | 그녀가 더 열심히 공부했다면 시험에 합격했을 것입니다. |
+| The report has just been submitted to the committee. | 보고서가 방금 위원회에 제출되었습니다. |
+| We suggest that the proposal be reconsidered. | 우리는 그 제안이 재고되어야 한다고 제안합니다. |
+| She must have left already; her car is gone. | 그녀가 이미 떠난 것이 틀림없습니다. 차가 없네요. |
 
 ## 자주 보는 함정
 
 ### 1. 시제 일치 부족
 
-```text
-회피: She said she will come tomorrow.
-바름: She said she would come the next day.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She said she will come tomorrow. |
+| 바름 | She said she would come the next day. |
 
 ### 2. 현재완료와 과거 혼동
 
-```text
-회피: I have seen him yesterday.
-바름: I saw him yesterday.
-바름: I have seen him recently.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I have seen him yesterday. |
+| 바름 | I saw him yesterday. |
+| 바름 | I have seen him recently. |
 
 ### 3. 가정법의 *was* / *were*
 
-```text
-회피: If I was rich, I would travel.
-바름: If I were rich, I would travel.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | If I was rich, I would travel. |
+| 바름 | If I were rich, I would travel. |
 
 ### 4. 조동사 뒤 *to*
 
-```text
-회피: She must to attend the meeting.
-바름: She must attend the meeting.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She must to attend the meeting. |
+| 바름 | She must attend the meeting. |
 
 ### 5. 불규칙 동사의 과거형·과거분사
 

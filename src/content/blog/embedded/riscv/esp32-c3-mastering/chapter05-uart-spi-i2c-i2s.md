@@ -331,16 +331,7 @@ void play_sine(void) {
 
 ESP-IDF가 *내부적으로 link list*를 만듭니다.
 
-```text
-DMA ring (i2s)
-  ┌─────────┐    ┌─────────┐    ┌─────────┐
-  │ desc 0  │ →  │ desc 1  │ →  │ desc 2  │ ──┐
-  │ buf+sz  │    │ buf+sz  │    │ buf+sz  │   │
-  └─────────┘    └─────────┘    └─────────┘   │
-       ↑                                       │
-       └───────────────────────────────────────┘
-                       (순환)
-```
+![I2S DMA Ring (Circular Linked List)](/images/blog/esp32-c3/diagrams/ch05-dma-ring.svg)
 
 기본 *2 descriptor, 240 sample/desc* (= 약 5.4 ms @ 44.1 kHz)입니다. 더 깊은 buffer는 *지연 증가 vs underrun 감소*의 트레이드오프입니다. `dma_desc_num` / `dma_frame_num`을 `chan_cfg`에서 조정합니다.
 

@@ -59,10 +59,10 @@ You can stay here, or you can come with us.
 
 ### 같은 주어의 두 동사 — 쉼표 없음
 
-```text
-바름: She wrote the report and submitted it on time.
-회피: She wrote the report, and submitted it on time.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | She wrote the report and submitted it on time. |
+| 회피 | She wrote the report, and submitted it on time. |
 
 ### 짧은 절 — 쉼표 생략 가능
 
@@ -80,10 +80,10 @@ Although it was raining, we went out.
 
 종속절이 *뒤에* 올 때는 보통 쉼표 없음.
 
-```text
-바름: The cat ran away when the dog barked.
-회피: The cat ran away, when the dog barked.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | The cat ran away when the dog barked. |
+| 회피 | The cat ran away, when the dog barked. |
 
 ## 표준 용법 4: 비제한 관계절·동격
 
@@ -174,10 +174,10 @@ He said, "I will be there."
 
 ### 인용이 *that* 절로 — 쉼표 없음
 
-```text
-바름: She said that she would come.
-회피: She said, that she would come.
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | She said that she would come. |
+| 회피 | She said, that she would come. |
 
 간접 인용은 쉼표 없음.
 
@@ -249,47 +249,47 @@ a beautiful old wooden box
 
 ### 1. 주어와 동사 사이
 
-```text
-회피: The dog, barked loudly.
-바름: The dog barked loudly.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The dog, barked loudly. |
+| 바름 | The dog barked loudly. |
 
 주어가 *매우 길어도* 원칙적으로 쉼표 없음.
 
 ### 2. 동사와 목적어 사이
 
-```text
-회피: She said, that she would come.
-바름: She said that she would come.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She said, that she would come. |
+| 바름 | She said that she would come. |
 
 ### 3. 제한 관계절
 
-```text
-회피: The book, that I read, was excellent.
-바름: The book that I read was excellent.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The book, that I read, was excellent. |
+| 바름 | The book that I read was excellent. |
 
 ### 4. *and/or*가 두 항목만 연결할 때
 
-```text
-회피: I bought apples, and oranges.
-바름: I bought apples and oranges.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I bought apples, and oranges. |
+| 바름 | I bought apples and oranges. |
 
 ### 5. 같은 주어의 두 동사
 
-```text
-회피: She finished the report, and submitted it.
-바름: She finished the report and submitted it.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She finished the report, and submitted it. |
+| 바름 | She finished the report and submitted it. |
 
 ### 6. 부사절이 뒤에 올 때 (일반적)
 
-```text
-회피: We went out, although it was raining.
-바름: We went out although it was raining.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | We went out, although it was raining. |
+| 바름 | We went out although it was raining. |
 
 ## Comma Splice (쉼표 연결 오류)
 
@@ -333,12 +333,12 @@ The report, which was submitted on May 14, 2026, has been approved.
 
 ### 1. Comma splice
 
-```text
-회피: It was raining, we stayed home.
-바름: It was raining, so we stayed home.
-바름: Because it was raining, we stayed home.
-바름: It was raining; we stayed home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | It was raining, we stayed home. |
+| 바름 | It was raining, so we stayed home. |
+| 바름 | Because it was raining, we stayed home. |
+| 바름 | It was raining; we stayed home. |
 
 ### 2. Oxford comma 누락
 
@@ -349,36 +349,35 @@ The report, which was submitted on May 14, 2026, has been approved.
 
 ### 3. 도입 구에 쉼표 누락
 
-```text
-회피: After the meeting we went home.
-바름: After the meeting, we went home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | After the meeting we went home. |
+| 바름 | After the meeting, we went home. |
 
 긴 도입 구는 *반드시* 쉼표.
 
 ### 4. 제한·비제한 혼동
 
-```text
-회피: My brother, who lives in Seoul, called me.   (자매 중 한 명을 한정)
-바름: My brother who lives in Seoul called me.    (자매 여럿)
-
-회피: The car that I bought, is red.
-바름: The car that I bought is red.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | My brother, who lives in Seoul, called me.   (자매 중 한 명을 한정) |
+| 바름 | My brother who lives in Seoul called me.    (자매 여럿) |
+| 회피 | The car that I bought, is red. |
+| 바름 | The car that I bought is red. |
 
 ### 5. 호명에 쉼표 누락
 
-```text
-회피: Hello John how are you?
-바름: Hello, John. How are you?
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Hello John how are you? |
+| 바름 | Hello, John. How are you? |
 
 ### 6. 직렬 사이에 쉼표 누락
 
-```text
-회피: She brought books pens and paper.
-바름: She brought books, pens, and paper.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She brought books pens and paper. |
+| 바름 | She brought books, pens, and paper. |
 
 ## 정리
 

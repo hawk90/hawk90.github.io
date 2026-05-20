@@ -37,13 +37,12 @@ They walk every day.        (복수 — walk)
 
 3인칭 단수 *현재 시제*에서 동사에 *-s*. 가장 자주 빠뜨리는 자리.
 
-```text
-회피: She walk to school.
-바름: She walks to school.
-
-회피: The dog bark loudly.
-바름: The dog barks loudly.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She walk to school. |
+| 바름 | She walks to school. |
+| 회피 | The dog bark loudly. |
+| 바름 | The dog barks loudly. |
 
 ## 까다로운 주어
 
@@ -51,15 +50,12 @@ They walk every day.        (복수 — walk)
 
 전치사구·관계절이 주어와 동사 사이에 끼어들 때 *진짜 주어*에 일치.
 
-```text
-회피: The book on the shelves are mine.
-바름: The book on the shelves is mine.
-       (주어 = book — 단수)
-
-회피: The students who attended the conference was tired.
-바름: The students who attended the conference were tired.
-       (주어 = students — 복수)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The book on the shelves are mine. |
+| 바름 | The book on the shelves is mine. (주어 = book — 단수) |
+| 회피 | The students who attended the conference was tired. |
+| 바름 | The students who attended the conference were tired. (주어 = students — 복수) |
 
 점검 — 주어와 동사 사이의 *구·절*을 *제외*하고 봅니다.
 
@@ -269,59 +265,47 @@ She is the only one of the students who studies hard.
 
 ## 예문
 
-```text
-The book on the shelves is mine.
-선반에 있는 책은 제 것입니다.
-
-Each of the candidates has submitted a proposal.
-각 지원자는 제안서를 제출했습니다.
-
-Neither the manager nor the employees are happy with the decision.
-관리자도 직원들도 그 결정에 만족하지 않습니다.
-
-A number of issues have been raised at the meeting.
-회의에서 여러 문제가 제기되었습니다.
-
-Mathematics is the foundation of physics.
-수학은 물리학의 토대입니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| The book on the shelves is mine. | 선반에 있는 책은 제 것입니다. |
+| Each of the candidates has submitted a proposal. | 각 지원자는 제안서를 제출했습니다. |
+| Neither the manager nor the employees are happy with the decision. | 관리자도 직원들도 그 결정에 만족하지 않습니다. |
+| A number of issues have been raised at the meeting. | 회의에서 여러 문제가 제기되었습니다. |
+| Mathematics is the foundation of physics. | 수학은 물리학의 토대입니다. |
 
 ## 자주 보는 함정
 
 ### 1. 주어와 동사 사이의 명사에 일치
 
-```text
-회피: The list of items are on the desk.
-바름: The list of items is on the desk.
-       (주어 = list)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The list of items are on the desk. |
+| 바름 | The list of items is on the desk. (주어 = list) |
 
 ### 2. *each*, *every*, *neither* 복수 처리
 
-```text
-회피: Each of the students have a desk.
-바름: Each of the students has a desk.
-
-회피: Neither answer are correct.
-바름: Neither answer is correct.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Each of the students have a desk. |
+| 바름 | Each of the students has a desk. |
+| 회피 | Neither answer are correct. |
+| 바름 | Neither answer is correct. |
 
 ### 3. *there is / there are* 도치
 
-```text
-회피: There is many problems.
-바름: There are many problems.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | There is many problems. |
+| 바름 | There are many problems. |
 
 ### 4. *the number of* / *a number of*
 
-```text
-회피: The number of students are increasing.
-바름: The number of students is increasing.
-
-회피: A number of students is absent.
-바름: A number of students are absent.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The number of students are increasing. |
+| 바름 | The number of students is increasing. |
+| 회피 | A number of students is absent. |
+| 바름 | A number of students are absent. |
 
 ### 5. 집합명사
 
@@ -332,13 +316,12 @@ Mathematics is the foundation of physics.
 
 ### 6. *news, mathematics* 같은 -s 단수
 
-```text
-회피: The news are shocking.
-바름: The news is shocking.
-
-회피: Mathematics are difficult.
-바름: Mathematics is difficult.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The news are shocking. |
+| 바름 | The news is shocking. |
+| 회피 | Mathematics are difficult. |
+| 바름 | Mathematics is difficult. |
 
 ## 정리
 

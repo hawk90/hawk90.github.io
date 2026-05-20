@@ -102,10 +102,10 @@ A is the biggest in the class.
 
 ### 이중 비교 회피
 
-```text
-회피: more taller, most tallest
-바름: taller, tallest
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | more taller, most tallest |
+| 바름 | taller, tallest |
 
 ### 비교 불가 형용사
 
@@ -115,10 +115,10 @@ A is the biggest in the class.
 perfect, unique, complete, full, empty, dead, infinite, equal
 ```
 
-```text
-회피: more perfect, most unique
-바름: nearly perfect, almost unique
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | more perfect, most unique |
+| 바름 | nearly perfect, almost unique |
 
 미국 헌법 전문의 *more perfect Union*은 *예외적*인 수사적 사용입니다.
 
@@ -200,69 +200,59 @@ a beautiful old wooden box   (다른 부류 — 콤마 없음)
 
 ## 예문
 
-```text
-She is taller than her sister but shorter than her brother.
-그녀는 언니보다 키가 크지만 오빠보다 작습니다.
-
-The most expensive item on the menu is the lobster.
-메뉴에서 가장 비싼 항목은 랍스터입니다.
-
-He bought a beautiful old wooden chest at the antique store.
-그는 골동품 가게에서 아름답고 오래된 나무 궤를 샀습니다.
-
-The proposal seems reasonable, but further analysis is needed.
-제안은 합리적으로 보이지만 추가 분석이 필요합니다.
-
-She is the best candidate for the position.
-그녀가 그 자리에 가장 적합한 후보입니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| She is taller than her sister but shorter than her brother. | 그녀는 언니보다 키가 크지만 오빠보다 작습니다. |
+| The most expensive item on the menu is the lobster. | 메뉴에서 가장 비싼 항목은 랍스터입니다. |
+| He bought a beautiful old wooden chest at the antique store. | 그는 골동품 가게에서 아름답고 오래된 나무 궤를 샀습니다. |
+| The proposal seems reasonable, but further analysis is needed. | 제안은 합리적으로 보이지만 추가 분석이 필요합니다. |
+| She is the best candidate for the position. | 그녀가 그 자리에 가장 적합한 후보입니다. |
 
 ## 자주 보는 함정
 
 ### 1. 형용사 vs 부사 혼동
 
-```text
-회피: She sings beautiful.
-바름: She sings beautifully.   (동사 수식 — 부사)
-
-회피: He feels badly about it.
-바름: He feels bad about it.   (연결동사 + 형용사)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She sings beautiful. |
+| 바름 | She sings beautifully.   (동사 수식 — 부사) |
+| 회피 | He feels badly about it. |
+| 바름 | He feels bad about it.   (연결동사 + 형용사) |
 
 *feel, look, taste, sound, smell* 같은 연결동사 뒤는 *형용사*.
 
 ### 2. 이중 비교
 
-```text
-회피: She is more taller than me.
-바름: She is taller than I am.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She is more taller than me. |
+| 바름 | She is taller than I am. |
 
 ### 3. *less* vs *fewer*
 
 - **less** — 불가산 명사: *less water, less time, less money*
 - **fewer** — 가산 복수 명사: *fewer books, fewer people, fewer problems*
 
-```text
-회피: Less than 10 items.   (슈퍼마켓 표지에 자주)
-바름: Fewer than 10 items.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Less than 10 items.   (슈퍼마켓 표지에 자주) |
+| 바름 | Fewer than 10 items. |
 
 ### 4. 관사 누락
 
 학습자가 가장 자주 빠뜨리는 자리.
 
-```text
-회피: I am student at university.
-바름: I am a student at the university.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | I am student at university. |
+| 바름 | I am a student at the university. |
 
 ### 5. 형용사 순서 위반
 
-```text
-회피: a Korean old wooden table
-바름: an old Korean wooden table   (Age → Origin → Material)
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | a Korean old wooden table |
+| 바름 | an old Korean wooden table   (Age → Origin → Material) |
 
 ## 정리
 

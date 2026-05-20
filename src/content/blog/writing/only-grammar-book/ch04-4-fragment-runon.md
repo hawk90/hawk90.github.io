@@ -27,56 +27,49 @@ bookAuthor: "Susan Thurman"
 
 ### 유형 1: 종속절을 단독 문장으로
 
-```text
-회피: Because it was raining.
-       (종속절만 — 독립절 필요)
-바름: Because it was raining, we stayed home.
-바름: We stayed home because it was raining.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Because it was raining. (종속절만 — 독립절 필요) |
+| 바름 | Because it was raining, we stayed home. |
+| 바름 | We stayed home because it was raining. |
 
 종속접속사 (because, although, when, if, since, while …)로 시작하면 *반드시 독립절과 결합*.
 
 ### 유형 2: 구를 문장으로
 
-```text
-회피: Walking down the street.
-       (분사구만 — 동사 없음)
-바름: Walking down the street, I saw a rainbow.
-바름: She was walking down the street.
-
-회피: The book on the table.
-       (명사구만 — 동사 없음)
-바름: The book on the table is mine.
-
-회피: To finish the project.
-       (부정사구만)
-바름: To finish the project, we need more time.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Walking down the street. (분사구만 — 동사 없음) |
+| 바름 | Walking down the street, I saw a rainbow. |
+| 바름 | She was walking down the street. |
+| 회피 | The book on the table. (명사구만 — 동사 없음) |
+| 바름 | The book on the table is mine. |
+| 회피 | To finish the project. (부정사구만) |
+| 바름 | To finish the project, we need more time. |
 
 ### 유형 3: 주어 또는 동사 누락
 
-```text
-회피: Went to the store.   (주어 없음)
-바름: I went to the store.
-
-회피: She to the store.    (동사 없음)
-바름: She went to the store.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Went to the store.   (주어 없음) |
+| 바름 | I went to the store. |
+| 회피 | She to the store.    (동사 없음) |
+| 바름 | She went to the store. |
 
 ### 유형 4: 보조 정보의 분리
 
-```text
-회피: She passed the exam. With the highest score in the class.
-바름: She passed the exam with the highest score in the class.
-바름: She passed the exam — with the highest score in the class.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She passed the exam. With the highest score in the class. |
+| 바름 | She passed the exam with the highest score in the class. |
+| 바름 | She passed the exam — with the highest score in the class. |
 
 ### 유형 5: 관계절을 문장으로
 
-```text
-회피: The man who lives next door. Is a doctor.
-바름: The man who lives next door is a doctor.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | The man who lives next door. Is a doctor. |
+| 바름 | The man who lives next door is a doctor. |
 
 ### 의도적 단편 (예외)
 
@@ -191,15 +184,14 @@ bookAuthor: "Susan Thurman"
 
 가장 흔한 comma splice 원인.
 
-```text
-회피: She tried hard, however she failed.
-바름: She tried hard; however, she failed.
-바름: She tried hard. However, she failed.
-
-회피: We were tired, therefore we left early.
-바름: We were tired; therefore, we left early.
-바름: We were tired, so we left early.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She tried hard, however she failed. |
+| 바름 | She tried hard; however, she failed. |
+| 바름 | She tried hard. However, she failed. |
+| 회피 | We were tired, therefore we left early. |
+| 바름 | We were tired; therefore, we left early. |
+| 바름 | We were tired, so we left early. |
 
 *However, therefore, moreover, furthermore, nevertheless, consequently, thus, indeed, instead*은 *접속 부사*. 두 절을 *쉼표만으로* 잇지 못합니다.
 
@@ -234,10 +226,10 @@ bookAuthor: "Susan Thurman"
 
 한국어는 종속절이 *문장처럼 보일 수* 있어 영어로 옮길 때 단편이 됨.
 
-```text
-회피: 비가 왔기 때문에. → Because it was raining.
-바름: 비가 왔기 때문에 집에 있었다. → Because it was raining, we stayed home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | 비가 왔기 때문에. → Because it was raining. |
+| 바름 | 비가 왔기 때문에 집에 있었다. → Because it was raining, we stayed home. |
 
 ### 2. *그리고, 그러나* 직역의 comma splice
 
@@ -253,61 +245,52 @@ bookAuthor: "Susan Thurman"
 
 한국어는 *조사*로 연결이 자유로워 긴 문장도 자연스럽지만, 영어로 직역하면 fused.
 
-```text
-회피: She finished the project the deadline was tight she was tired.
-바름: She finished the project. The deadline was tight, and she was tired.
-바름: Although the deadline was tight and she was tired, she finished the project.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She finished the project the deadline was tight she was tired. |
+| 바름 | She finished the project. The deadline was tight, and she was tired. |
+| 바름 | Although the deadline was tight and she was tired, she finished the project. |
 
 ## 예문
 
-```text
-Because the deadline was approaching, the team worked late into the night.
-마감일이 다가오고 있었기 때문에, 팀은 밤 늦게까지 일했습니다.
-
-The report was thorough; however, the data needed verification.
-보고서는 철저했지만, 자료는 확인이 필요했습니다.
-
-She finished the presentation, and the audience applauded.
-그녀는 발표를 마쳤고, 청중은 박수를 쳤습니다.
-
-Although it was raining heavily, we decided to go for a walk.
-비가 많이 왔지만, 우리는 산책하러 가기로 했습니다.
-
-The conference will be held next week. Many speakers are expected to attend.
-회의는 다음 주에 열릴 것입니다. 많은 연사들이 참석할 것으로 예상됩니다.
-```
+| 영어 | 한국어 |
+|---|---|
+| Because the deadline was approaching, the team worked late into the night. | 마감일이 다가오고 있었기 때문에, 팀은 밤 늦게까지 일했습니다. |
+| The report was thorough; however, the data needed verification. | 보고서는 철저했지만, 자료는 확인이 필요했습니다. |
+| She finished the presentation, and the audience applauded. | 그녀는 발표를 마쳤고, 청중은 박수를 쳤습니다. |
+| Although it was raining heavily, we decided to go for a walk. | 비가 많이 왔지만, 우리는 산책하러 가기로 했습니다. |
+| The conference will be held next week. Many speakers are expected to attend. | 회의는 다음 주에 열릴 것입니다. 많은 연사들이 참석할 것으로 예상됩니다. |
 
 ## 자주 보는 함정
 
 ### 1. 종속절 단편
 
-```text
-회피: Because she was tired.
-바름: Because she was tired, she went home.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Because she was tired. |
+| 바름 | Because she was tired, she went home. |
 
 ### 2. 분사구 단편
 
-```text
-회피: Walking down the street.
-바름: Walking down the street, I saw her.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | Walking down the street. |
+| 바름 | Walking down the street, I saw her. |
 
 ### 3. Comma splice with 접속 부사
 
-```text
-회피: It was late, however we kept working.
-바름: It was late; however, we kept working.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | It was late, however we kept working. |
+| 바름 | It was late; however, we kept working. |
 
 ### 4. Fused sentence
 
-```text
-회피: She came he left.
-바름: She came, and he left.
-바름: She came. He left.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She came he left. |
+| 바름 | She came, and he left. |
+| 바름 | She came. He left. |
 
 ### 5. 짧고 가까운 두 절을 쉼표만으로
 
@@ -320,13 +303,10 @@ The conference will be held next week. Many speakers are expected to attend.
 
 ### 6. 너무 긴 중복문 (사실상 fused)
 
-```text
-회피: She studied hard for the exam and she stayed up late and she
-       drank coffee and she finished the assignment and she went to bed.
-
-바름: She studied hard for the exam, staying up late to drink coffee
-       and finish the assignment. Then she went to bed.
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | She studied hard for the exam and she stayed up late and she drank coffee and she finished the assignment and she went to bed. |
+| 바름 | She studied hard for the exam, staying up late to drink coffee and finish the assignment. Then she went to bed. |
 
 ## 정리
 

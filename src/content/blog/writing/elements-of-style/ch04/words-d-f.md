@@ -40,10 +40,10 @@ criterion → criteria (그리스어)
 
 `Different from`이 표준입니다. 비교의 *other than*, *unlike*와 같은 계통입니다.
 
-```
-선호: "This book is different from that one."
-회피: "This book is different than that one." (미국 회화에 흔하지만 비표준)
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | "This book is different from that one." |
+| 회피 | "This book is different than that one." (미국 회화에 흔하지만 비표준) |
 
 ### Disinterested / Uninterested
 
@@ -116,10 +116,10 @@ cf. Affect (동사, 영향을 끼치다):
 
 *Or*와 함께 쓰일 때만 "둘 중 하나"입니다. 셋 이상에는 부적합합니다.
 
-```
-선호: "Either A or B" (둘 중 하나)
-회피: "Either A, B, or C" → "any of A, B, or C"
-```
+| 분류 | 예문 |
+|---|---|
+| 바름 | "Either A or B" (둘 중 하나) |
+| 회피 | "Either A, B, or C" → "any of A, B, or C" |
 
 ### Enormity
 
@@ -179,13 +179,12 @@ cf. Affect (동사, 영향을 끼치다):
 
 감옥·학교·병원을 굳이 *facility*로 부르는 관료적 습관을 피합니다.
 
-```
-회피: "He has been appointed warden of the new facility."
-선호: "He has been appointed warden of the new prison."
-
-회피: "The medical facility opened last week."
-선호: "The hospital opened last week."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "He has been appointed warden of the new facility." |
+| 바름 | "He has been appointed warden of the new prison." |
+| 회피 | "The medical facility opened last week." |
+| 바름 | "The hospital opened last week." |
 
 *Facility*는 모호합니다. 구체 명사가 강합니다.
 
@@ -202,10 +201,10 @@ the match."
 "She won the match by being better trained."
 ```
 
-```
-회피: "Several factors contributed to the outcome."
-선호: "Three things led to the outcome: ..."
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "Several factors contributed to the outcome." |
+| 바름 | "Three things led to the outcome: ..." |
 
 ### Farther / Further
 
@@ -234,13 +233,12 @@ Less + 셀 수 없는 명사:
 "Less than ten percent agreed."
 ```
 
-```
-회피: "Less than ten students passed."
-선호: "Fewer than ten students passed."
-
-회피: "Ten items or less" ← 슈퍼마켓에 흔하지만 비표준
-선호: "Ten items or fewer"
-```
+| 분류 | 예문 |
+|---|---|
+| 회피 | "Less than ten students passed." |
+| 바름 | "Fewer than ten students passed." |
+| 회피 | "Ten items or less" ← 슈퍼마켓에 흔하지만 비표준 |
+| 바름 | "Ten items or fewer" |
 
 ### Finalize
 
