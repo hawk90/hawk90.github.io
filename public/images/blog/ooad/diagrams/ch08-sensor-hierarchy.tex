@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,3.4) {Sensor Class Hierarchy};
+
+% Interface
+\node[abs, minimum width=44mm, minimum height=11mm] (iface) at (0,2)
+  {\textit{$<<$interface$>>$}\\PositionSource};
+
+% Children
+\node[imp, minimum width=34mm, minimum height=10mm] (gps)   at (-5, 0) {GpsReceiver};
+\node[imp, minimum width=34mm, minimum height=10mm] (ins)   at ( 0, 0) {InertialNavigationSystem};
+\node[imp, minimum width=34mm, minimum height=10mm] (radio) at ( 5, 0) {RadioNavigation};
+
+% Grandchildren
+\node[imp, minimum width=44mm, minimum height=9mm] (multi) at (-5,-2.2) {MultiConstellationReceiver};
+\node[imp, minimum width=28mm, minimum height=9mm] (vor)   at ( 3.6,-2.2) {VorReceiver};
+\node[imp, minimum width=28mm, minimum height=9mm] (dme)   at ( 6.6,-2.2) {DmeReceiver};
+
+% Inheritance arrows (UML open triangle)
+\draw[inh] (gps.north)   -- (iface.south west);
+\draw[inh] (ins.north)   -- (iface.south);
+\draw[inh] (radio.north) -- (iface.south east);
+
+\draw[inh] (multi.north) -- (gps.south);
+\draw[inh] (vor.north) -- (radio.south west);
+\draw[inh] (dme.north) -- (radio.south east);
+
+% Caption
+\node[caption] at (0,-3.4) {센서 융합: 여러 소스를 결합해 최적 위치 추정};
+
+\end{tikzpicture}
+\end{document}

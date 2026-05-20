@@ -1,0 +1,56 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (4,3.4) {Data Flow Architecture};
+
+% --- Sources (left) ---
+\node[abs, minimum width=20mm, minimum height=8mm] (gps)  at (-3.5, 1.5) {GPS};
+\node[abs, minimum width=20mm, minimum height=8mm] (ins)  at (-3.5, 0.0) {INS};
+\node[abs, minimum width=20mm, minimum height=8mm] (baro) at (-3.5,-1.5) {BARO};
+
+% --- Top processing chain ---
+\node[imp, minimum width=22mm, minimum height=10mm] (fusion)  at (0, 0) {Sensor\\Fusion};
+\node[imp, minimum width=22mm, minimum height=10mm] (calc)    at (3, 0) {Position\\Calculator};
+\node[imp, minimum width=22mm, minimum height=10mm] (route)   at (6, 0) {Route\\Manager};
+\node[hi,  minimum width=22mm, minimum height=10mm] (display) at (9, 0) {Display};
+
+% --- Bottom verification chain ---
+\node[warn, minimum width=22mm, minimum height=10mm] (integ)  at (0,-2.5) {Integrity\\Monitor};
+\node[warn, minimum width=22mm, minimum height=10mm] (alert)  at (3,-2.5) {Alert\\Manager};
+\node[con,  minimum width=22mm, minimum height=10mm] (guide)  at (6,-2.5) {Guidance\\Computer};
+\node[hi,   minimum width=22mm, minimum height=10mm] (ui)     at (9,-2.5) {User\\Interface};
+
+% --- Source arrows to fusion ---
+\draw[arr] (gps.east)  -- (fusion.north west);
+\draw[arr] (ins.east)  -- (fusion.west);
+\draw[arr] (baro.east) -- (fusion.south west);
+
+% --- Top horizontal chain ---
+\draw[arr] (fusion) -- (calc);
+\draw[arr] (calc)   -- (route);
+\draw[arr] (route)  -- (display);
+
+% --- Verification chain ---
+\draw[arr] (integ)  -- (alert);
+\draw[arr] (alert)  -- (guide);
+\draw[arr] (guide)  -- (ui);
+
+% --- Vertical fan-outs ---
+\draw[arr] (fusion.south) -- (integ.north);
+\draw[arr] (calc.south)   -- (alert.north);
+\draw[arr] (route.south)  -- (guide.north);
+\draw[arr] (display.south) -- (ui.north);
+
+% --- Caption ---
+\node[caption, anchor=west] at (-3.5,-4) {발행/구독 패턴 — 느슨한 결합, 비동기 통신};
+
+\end{tikzpicture}
+\end{document}

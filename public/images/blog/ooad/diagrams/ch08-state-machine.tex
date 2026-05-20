@@ -1,0 +1,34 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,4) {Navigation System State Machine};
+
+% Start
+\node[circle, fill=inkc, inner sep=2.5pt] (start) at (0,3) {};
+
+% States (vertical layout)
+\node[abs,  minimum width=36mm, minimum height=10mm] (init)     at (0, 2.0)  {Initializing};
+\node[imp,  minimum width=36mm, minimum height=10mm] (normal)   at (0, 0.2)  {Normal};
+\node[hi,   minimum width=36mm, minimum height=10mm] (degraded) at (0,-1.8)  {Degraded};
+\node[con,  minimum width=36mm, minimum height=10mm] (dr)       at (0,-3.6)  {Dead Reckoning};
+\node[warn, minimum width=36mm, minimum height=10mm] (failed)   at (0,-5.4)  {Failed};
+
+% Vertical transitions
+\draw[arr] (start) -- (init);
+\draw[arr] (init) -- node[right, font=\footnotesize] {sensors ready} (normal);
+\draw[arr] (normal.south west) to[bend right=18] node[left, font=\footnotesize] {integrity fail} (degraded.north west);
+\draw[arr] (degraded.north east) to[bend right=18] node[right, font=\footnotesize] {integrity OK} (normal.south east);
+\draw[arr] (degraded) -- node[right, font=\footnotesize] {all sensors fail} (dr);
+\draw[arr] (dr.east) to[bend right=80] node[right, font=\footnotesize] {sensor restored} (degraded.east);
+\draw[arr] (dr) -- node[right, font=\footnotesize] {timeout} (failed);
+
+\end{tikzpicture}
+\end{document}

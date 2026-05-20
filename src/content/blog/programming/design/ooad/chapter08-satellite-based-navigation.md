@@ -104,23 +104,11 @@ public class Route {
 
 ### 센서 추상화
 
-```text
-센서 계층:
+`PositionSource` 인터페이스 아래 여러 구체 센서가 실체화된다.
 
-<<interface>>
-PositionSource
-    │
-    ├── GpsReceiver
-    │     └── MultiConstellationReceiver
-    ├── InertialNavigationSystem
-    └── RadioNavigation
-          ├── VorReceiver
-          └── DmeReceiver
+![Sensor Class Hierarchy](/images/blog/ooad/diagrams/ch08-sensor-hierarchy.svg)
 
-센서 융합:
-  여러 소스의 데이터를 결합하여
-  최적의 위치 추정값 계산
-```
+센서 융합은 여러 소스의 데이터를 결합하여 최적의 위치 추정값을 계산한다.
 
 ```java
 // 센서 인터페이스
@@ -197,67 +185,30 @@ public class SensorFusion implements PositionSource {
 
 ### 서브시스템 분해
 
-```text
-항법 시스템 서브시스템:
+항법 시스템은 6개의 서브시스템으로 나뉜다.
 
-┌─────────────────────────────────────────────────────────┐
-│                    Navigation System                    │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌───────────────┐  ┌───────────────┐  ┌─────────────┐ │
-│  │   Sensors     │  │   Position    │  │   Route     │ │
-│  │   Subsystem   │──│   Subsystem   │──│   Subsystem │ │
-│  └───────────────┘  └───────────────┘  └─────────────┘ │
-│          │                  │                  │        │
-│          │                  │                  │        │
-│  ┌───────┴───────┐  ┌───────┴───────┐  ┌───────┴─────┐ │
-│  │   Integrity   │  │   Display     │  │   Alert     │ │
-│  │   Monitor     │──│   Subsystem   │──│   Subsystem │ │
-│  └───────────────┘  └───────────────┘  └─────────────┘ │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+![Navigation System Subsystems](/images/blog/ooad/diagrams/ch08-subsystems.svg)
 
-Sensors: 센서 데이터 수집, 전처리
-Position: 위치 계산, 센서 융합
-Route: 항로 계획, 이탈 감지
-Integrity: 위치 무결성 검증
-Display: 시각화, 사용자 인터페이스
-Alert: 경고 생성, 우선순위 관리
-```
+| 서브시스템 | 책임 |
+|------------|------|
+| Sensors | 센서 데이터 수집, 전처리 |
+| Position | 위치 계산, 센서 융합 |
+| Route | 항로 계획, 이탈 감지 |
+| Integrity Monitor | 위치 무결성 검증 |
+| Display | 시각화, 사용자 인터페이스 |
+| Alert | 경고 생성, 우선순위 관리 |
 
 ### 실시간 구조
 
-```text
-실시간 태스크:
+실시간 태스크는 우선순위와 주기로 스케줄된다.
 
-높은 우선순위:
-  SensorTask (20ms 주기)
-    - 센서 데이터 읽기
-    - 전처리
-    - 이벤트 발행
-
-  PositionTask (100ms 주기)
-    - 위치 계산
-    - 무결성 검증
-    - 위치 발행
-
-  AlertTask (비주기, 이벤트 기반)
-    - 경고 조건 검사
-    - 경고 생성
-    - 우선순위 스케줄링
-
-중간 우선순위:
-  RouteTask (1s 주기)
-    - 항로 이탈 검사
-    - ETA 갱신
-    - 경유지 시퀀싱
-
-낮은 우선순위:
-  DisplayTask (33ms 주기, 30fps)
-    - 맵 렌더링
-    - 계기 갱신
-    - 사용자 입력 처리
-```
+| 우선순위 | 태스크 | 주기 | 책임 |
+|----------|--------|------|------|
+| 높음 | `SensorTask` | 20 ms | 센서 데이터 읽기, 전처리, 이벤트 발행 |
+| 높음 | `PositionTask` | 100 ms | 위치 계산, 무결성 검증, 위치 발행 |
+| 높음 | `AlertTask` | 비주기 (이벤트) | 경고 조건 검사, 경고 생성, 우선순위 스케줄링 |
+| 중간 | `RouteTask` | 1 s | 항로 이탈 검사, ETA 갱신, 경유지 시퀀싱 |
+| 낮음 | `DisplayTask` | 33 ms (30 fps) | 맵 렌더링, 계기 갱신, 사용자 입력 처리 |
 
 ```java
 // 실시간 태스크 구조
@@ -314,24 +265,11 @@ public class SensorTask extends PeriodicTask {
 
 ### 데이터 흐름
 
-```text
-데이터 흐름 아키텍처:
+GPS·INS·BARO 세 소스가 `SensorFusion`에 모이고, 위치 계산 → 라우팅 → 디스플레이로 이어진다. 각 단계의 결과는 아래 검증/경고 체인으로도 분기한다.
 
-GPS ──┐
-      │
-INS ──┼──▶ Sensor   ──▶ Position  ──▶ Route    ──▶ Display
-      │    Fusion       Calculator    Manager
-BARO ─┘        │            │            │           │
-               │            │            │           │
-               ▼            ▼            ▼           ▼
-          Integrity     Alert       Guidance      User
-          Monitor      Manager      Computer     Interface
+![Data Flow Architecture](/images/blog/ooad/diagrams/ch08-dataflow.svg)
 
-데이터 버스:
-  - 발행/구독 패턴
-  - 느슨한 결합
-  - 비동기 통신
-```
+데이터 버스의 특징: 발행/구독 패턴, 느슨한 결합, 비동기 통신.
 
 ```java
 // 발행/구독 이벤트 버스
@@ -466,89 +404,29 @@ public class RedundancyManager<T> {
 
 ### 위치 갱신 시퀀스
 
-```text
-:SensorTask   :SensorFusion   :PositionCalc   :IntegrityMon   :EventBus
-     │              │               │               │             │
-     │ readSensors()│               │               │             │
-     │─────────────▶│               │               │             │
-     │              │               │               │             │
-     │              │ calculate()   │               │             │
-     │              │──────────────▶│               │             │
-     │              │               │               │             │
-     │              │    position   │               │             │
-     │              │◀──────────────│               │             │
-     │              │               │               │             │
-     │              │ checkRAIM()   │               │             │
-     │              │───────────────────────────────▶│             │
-     │              │               │               │             │
-     │              │ integrityOK   │               │             │
-     │              │◀──────────────────────────────│             │
-     │              │               │               │             │
-     │              │               │               │ publish()   │
-     │              │───────────────────────────────────────────▶│
-     │              │               │               │             │
-```
+![Position Update Sequence](/images/blog/ooad/diagrams/ch08-sequence-position-update.svg)
+
+`SensorTask`가 20 ms 주기로 호출을 시작하고, `SensorFusion`이 오케스트레이터 역할을 한다. 무결성 검증(RAIM)을 통과해야만 `EventBus`로 위치를 발행한다.
 
 ### 경고 처리 시퀀스
 
-```text
-:TerrainDB   :AlertManager   :PriorityQueue   :Display   :Audio
-     │             │               │              │          │
-     │ proximity   │               │              │          │
-     │────────────▶│               │              │          │
-     │             │               │              │          │
-     │             │ createAlert() │              │          │
-     │             │──────────────▶│              │          │
-     │             │               │              │          │
-     │             │               │ enqueue      │          │
-     │             │               │────┐         │          │
-     │             │               │◀───┘         │          │
-     │             │               │              │          │
-     │             │               │ dequeue      │          │
-     │             │               │────┐         │          │
-     │             │               │◀───┘         │          │
-     │             │               │              │          │
-     │             │               │ showAlert()  │          │
-     │             │               │─────────────▶│          │
-     │             │               │              │          │
-     │             │               │ playWarning()│          │
-     │             │               │──────────────────────────▶│
-```
+![Alert Handling Sequence](/images/blog/ooad/diagrams/ch08-sequence-alert.svg)
+
+지형 데이터베이스가 근접 이벤트를 발생시키면 `AlertManager`가 우선순위 큐에 등록하고, 큐가 자체 enqueue·dequeue를 거친 뒤 `Display`와 `Audio`에 동시에 분기한다.
 
 ## 상태 다이어그램
 
 ### 항법 시스템 상태
 
-```text
-                    ●
-                    │
-                    ▼
-             ┌─────────────┐
-             │ Initializing│
-             └──────┬──────┘
-                    │ sensors ready
-                    ▼
-             ┌─────────────┐
-     ┌──────▶│   Normal    │◀──────┐
-     │       └──────┬──────┘       │
-     │              │              │
-integrity OK   integrity fail   integrity OK
-     │              │              │
-     │              ▼              │
-     │       ┌─────────────┐       │
-     └───────│   Degraded  │───────┘
-             └──────┬──────┘
-                    │ all sensors fail
-                    ▼
-             ┌─────────────┐
-             │  Dead Reck  │ (추측 항법)
-             └──────┬──────┘
-                    │ timeout
-                    ▼
-             ┌─────────────┐
-             │   Failed    │
-             └─────────────┘
-```
+![Navigation System State Machine](/images/blog/ooad/diagrams/ch08-state-machine.svg)
+
+| 상태 | 의미 |
+|------|------|
+| `Initializing` | 부팅·센서 초기화 |
+| `Normal` | 무결성 정상, 모든 센서 가용 |
+| `Degraded` | 무결성 검증 실패 또는 일부 센서 손실 |
+| `Dead Reckoning` | 모든 센서 손실, INS만으로 추측 항법 |
+| `Failed` | DR 타임아웃, 위치 미상 |
 
 ```java
 // 상태 머신 구현
