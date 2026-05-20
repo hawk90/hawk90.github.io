@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,6) {Vacation Tracking — Layered Architecture};
+
+% --- Presentation ---
+\node[hi, minimum width=44mm, minimum height=10mm] (web)  at (-3.5,4.5) {Web Controllers};
+\node[hi, minimum width=44mm, minimum height=10mm] (rest) at ( 3.5,4.5) {REST API Controllers};
+\node[panel, fit=(web)(rest), inner sep=8pt] (pres) {};
+\node[panelTitle] at (pres.north west) {Presentation Layer};
+
+% --- Application ---
+\node[con, minimum width=110mm, minimum height=12mm, align=center] (app)  at (0, 2.0)
+  {Application Services\\\small (LeaveRequestService, ApprovalService, ...)};
+\node[panel, fit=(app), inner sep=8pt] (apanel) {};
+\node[panelTitle] at (apanel.north west) {Application Layer};
+
+% --- Domain ---
+\node[imp, minimum width=110mm, minimum height=10mm, align=center] (dent) at (0,-0.4)
+  {Domain Model (Entities)\\\small (Employee, LeaveRequest, LeaveBalance, ...)};
+\node[imp, minimum width=110mm, minimum height=10mm, align=center] (dsvc) at (0,-2.0)
+  {Domain Services\\\small (BalanceCalculator, PolicyValidator, ...)};
+\node[panel, fit=(dent)(dsvc), inner sep=8pt] (dpanel) {};
+\node[panelTitle] at (dpanel.north west) {Domain Layer};
+
+% --- Infrastructure ---
+\node[abs, minimum width=32mm, minimum height=10mm] (repo)  at (-4.0,-4.5) {Repositories};
+\node[abs, minimum width=32mm, minimum height=10mm] (email) at ( 0.0,-4.5) {Email Service};
+\node[abs, minimum width=32mm, minimum height=10mm] (cal)   at ( 4.0,-4.5) {Calendar Integration};
+\node[panel, fit=(repo)(email)(cal), inner sep=8pt] (ipanel) {};
+\node[panelTitle] at (ipanel.north west) {Infrastructure Layer};
+
+% Vertical flow arrows
+\draw[arr] (pres.south)   -- (apanel.north);
+\draw[arr] (apanel.south) -- (dpanel.north);
+\draw[arr] (dpanel.south) -- (ipanel.north);
+
+\end{tikzpicture}
+\end{document}

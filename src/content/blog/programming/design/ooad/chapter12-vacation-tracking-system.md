@@ -266,44 +266,16 @@ public enum LeaveStatus {
 
 ### 아키텍처 구조
 
-```text
-계층 구조:
+4-계층 — Presentation, Application, Domain, Infrastructure. 위 계층이 아래 계층에만 의존한다.
 
-┌─────────────────────────────────────────────────────────┐
-│                  Presentation Layer                     │
-│  ┌───────────────────┐  ┌───────────────────────────┐  │
-│  │   Web Controllers │  │   REST API Controllers    │  │
-│  └─────────┬─────────┘  └─────────────┬─────────────┘  │
-└────────────┼──────────────────────────┼─────────────────┘
-             │                          │
-┌────────────┼──────────────────────────┼─────────────────┐
-│            ▼           Application    ▼                 │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │               Application Services                │  │
-│  │  (LeaveRequestService, ApprovalService, ...)     │  │
-│  └─────────────────────────┬─────────────────────────┘  │
-└────────────────────────────┼────────────────────────────┘
-                             │
-┌────────────────────────────┼────────────────────────────┐
-│                            ▼           Domain           │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │              Domain Model (Entities)              │  │
-│  │  (Employee, LeaveRequest, LeaveBalance, ...)      │  │
-│  └─────────────────────────┬─────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │              Domain Services                      │  │
-│  │  (BalanceCalculator, PolicyValidator, ...)       │  │
-│  └───────────────────────────────────────────────────┘  │
-└────────────────────────────┼────────────────────────────┘
-                             │
-┌────────────────────────────┼────────────────────────────┐
-│                            ▼      Infrastructure        │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │
-│  │ Repositories│  │   Email     │  │   Calendar      │  │
-│  │             │  │   Service   │  │   Integration   │  │
-│  └─────────────┘  └─────────────┘  └─────────────────┘  │
-└─────────────────────────────────────────────────────────┘
-```
+![Vacation Tracking — Layered Architecture](/images/blog/ooad/diagrams/ch12-layer-architecture.svg)
+
+| 계층 | 책임 | 대표 컴포넌트 |
+|------|------|---------------|
+| Presentation | HTTP 요청 처리, DTO 변환 | `WebControllers`, `RestApiControllers` |
+| Application | 트랜잭션·유스케이스 오케스트레이션 | `LeaveRequestService`, `ApprovalService` |
+| Domain | 비즈니스 규칙, 엔티티 | `Employee`, `LeaveRequest`, `LeaveBalance`, `BalanceCalculator`, `PolicyValidator` |
+| Infrastructure | 저장소·외부 시스템 연동 | `Repositories`, `EmailService`, `CalendarIntegration` |
 
 ### 애플리케이션 서비스
 
@@ -757,40 +729,9 @@ public record LeaveBalanceDto(
 
 ### 휴가 신청 흐름
 
-```text
-:Browser    :Controller    :Service    :Repository    :Notification
-    │            │             │             │              │
-    │ POST /leave-requests     │             │              │
-    │───────────▶│             │             │              │
-    │            │createRequest│             │              │
-    │            │────────────▶│             │              │
-    │            │             │ findEmployee│              │
-    │            │             │────────────▶│              │
-    │            │             │ findType    │              │
-    │            │             │────────────▶│              │
-    │            │             │ validate    │              │
-    │            │             │────┐        │              │
-    │            │             │◀───┘        │              │
-    │            │             │ findBalance │              │
-    │            │             │────────────▶│              │
-    │            │             │ save        │              │
-    │            │             │────────────▶│              │
-    │            │   DTO       │             │              │
-    │            │◀────────────│             │              │
-    │  201 Created             │             │              │
-    │◀───────────│             │             │              │
-    │            │             │             │              │
-    │ POST /submit             │             │              │
-    │───────────▶│             │             │              │
-    │            │submitRequest│             │              │
-    │            │────────────▶│             │              │
-    │            │             │ deductBalance              │
-    │            │             │────────────▶│              │
-    │            │             │ notifyPendingApproval     │
-    │            │             │─────────────────────────▶│
-    │  200 OK    │             │             │              │
-    │◀───────────│             │             │              │
-```
+`Browser`에서 두 번의 HTTP 호출 — 먼저 신청서를 *draft*로 생성하고, 다음으로 *submit*해 잔여일 차감과 승인 알림을 트리거한다.
+
+![Leave Request Sequence](/images/blog/ooad/diagrams/ch12-sequence-leave-request.svg)
 
 ## 정리
 
