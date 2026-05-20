@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,2.6) {Vendor-Locked Architecture (Today)};
+
+% Three vendor segments at top
+\node[con, minimum width=30mm, minimum height=14mm, align=center] (cat)  at (-5,1) {EtherCAT\\segment};
+\node[con, minimum width=30mm, minimum height=14mm, align=center] (pn)   at ( 0,1) {PROFINET\\segment};
+\node[con, minimum width=30mm, minimum height=14mm, align=center] (eip)  at ( 5,1) {EtherNet/IP\\segment};
+
+% Gateway middle row (small text on edges)
+\node[caption] at (-5,-0.5) {gateway};
+\node[caption] at ( 0,-0.5) {gateway};
+\node[caption] at ( 5,-0.5) {gateway};
+
+% SCADA/MES top-of-stack
+\node[hi, minimum width=70mm, minimum height=12mm] (scada) at (0,-2.4) {상위 SCADA · MES};
+
+% Arrows down to SCADA via gateways
+\draw[arr] (cat.south) -- (scada.north -| cat.south);
+\draw[arr] (pn.south)  -- (scada.north -| pn.south);
+\draw[arr] (eip.south) -- (scada.north -| eip.south);
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6,2.0) {PROFINET RT Frame (Ethernet II + VLAN + PN RT)};
+
+% Frame fields with proportional widths
+% Each cell shows the field name; widths approximate byte counts visually
+\node[cls, minimum width=14mm, minimum height=12mm, anchor=west] (da)   at (0.0,0)  {DA};
+\node[cls, minimum width=14mm, minimum height=12mm, anchor=west] (sa)   at (1.4,0)  {SA};
+\node[abs, minimum width=24mm, minimum height=12mm, anchor=west] (tpid) at (2.8,0)  {VLAN 0x8100};
+\node[abs, minimum width=18mm, minimum height=12mm, anchor=west] (tci)  at (5.2,0)  {TCI};
+\node[hi,  minimum width=30mm, minimum height=12mm, anchor=west] (et)   at (7.0,0)  {EtherType\\0x8892};
+\node[cls, minimum width=18mm, minimum height=12mm, anchor=west] (rest) at (10.0,0) {payload …};
+
+% Annotations under TCI and EtherType
+\draw[arr, line width=0.4pt] (6.1,0.0)  -- (6.1,-1.4);
+\node[caption, anchor=north] at (6.1,-1.4) {PCP = 6 (high)};
+
+\draw[arr, line width=0.4pt] (8.5,0.0) -- (8.5,-1.4);
+\node[caption, anchor=north] at (8.5,-1.4) {PROFINET RT};
+
+\end{tikzpicture}
+\end{document}

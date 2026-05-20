@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,2.6) {TSN Backbone (Future)};
+
+% Unified backbone
+\node[abs, minimum width=110mm, minimum height=18mm, align=center, inner sep=6pt] (bb) at (0,1.0)
+  {\textbf{TSN backbone (IEEE 802.1Qbv + 1AS)}\\[2pt]
+   \small OPC UA Pub-Sub semantic 위에 모든 데이터};
+
+% Three branches
+\node[imp, minimum width=28mm, minimum height=12mm, align=center] (motion) at (-4,-1.5) {모션\\\small (PubSub)};
+\node[imp, minimum width=28mm, minimum height=12mm, align=center] (safety) at ( 0,-1.5) {safety\\\small (PubSub)};
+\node[imp, minimum width=28mm, minimum height=12mm, align=center] (vision) at ( 4,-1.5) {vision\\\small (PubSub)};
+
+% Arrows down
+\draw[arr] (bb.south -| motion) -- (motion.north);
+\draw[arr] (bb.south -| safety) -- (safety.north);
+\draw[arr] (bb.south -| vision) -- (vision.north);
+
+\end{tikzpicture}
+\end{document}

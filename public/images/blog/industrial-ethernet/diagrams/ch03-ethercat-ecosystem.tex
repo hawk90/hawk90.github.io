@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,4.6) {EtherCAT Ecosystem};
+
+% ETG umbrella
+\node[abs, minimum width=110mm, minimum height=24mm, align=left, inner sep=8pt] (etg) at (0,2.7)
+  {\textbf{ETG (EtherCAT Technology Group) — 표준 관리}\\[2pt]
+   $\bullet$ IEC 61158 / 61784 표준\\
+   $\bullet$ 6000+ 회원사\\
+   $\bullet$ vendor ID 발급, conformance test};
+
+% Two implementation sides
+\node[hi, minimum width=52mm, minimum height=28mm, align=left, inner sep=6pt] (beck) at (-3.5,-0.5)
+  {\textbf{Beckhoff 솔루션}\\[2pt]
+   $\bullet$ ET1100 ASIC\\
+   $\bullet$ TwinCAT (master)\\
+   $\bullet$ 슬레이브 IO 모듈};
+
+\node[imp, minimum width=52mm, minimum height=28mm, align=left, inner sep=6pt] (other) at (3.5,-0.5)
+  {\textbf{타사 솔루션}\\[2pt]
+   $\bullet$ LAN9252 (Microchip), AX58100 (ASIX)\\
+   $\bullet$ SOEM, IgH (open source)\\
+   $\bullet$ acontis (commercial)};
+
+% Down arrows
+\draw[arr, line width=0.6pt] (etg.south) -- (beck.north);
+\draw[arr, line width=0.6pt] (etg.south) -- (other.north);
+
+\end{tikzpicture}
+\end{document}

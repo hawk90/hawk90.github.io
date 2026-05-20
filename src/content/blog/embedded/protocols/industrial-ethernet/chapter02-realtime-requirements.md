@@ -176,14 +176,7 @@ DC가 PTP와 비교해 갖는 강점은 *마스터의 OS jitter에 둔감*하다
 
 POWERLINK와 SERCOS III가 쓰는 방식입니다. 한 사이클을 *고정 슬롯*으로 나눕니다.
 
-```text
-POWERLINK 한 cycle (예: 1 ms)
-  ┌────────────┬─────────────────────────────┬──────────────┐
-  │ SoC (start)│  Isochronous (PReq+PRes×N)  │ Asynchronous │
-  └────────────┴─────────────────────────────┴──────────────┘
-   ← MN 송신   ←     hard real-time          ← TCP/IP 등 →
-   (50 μs)        (800 μs)                    (150 μs)
-```
+![POWERLINK Cycle (1 ms)](/images/blog/industrial-ethernet/diagrams/ch02-powerlink-cycle.svg)
 
 `SoC` (Start of Cycle)는 *모든 노드의 시계를 맞추는 동기 신호*를 겸합니다. Isochronous 단계에서는 마스터(MN)가 각 슬레이브(CN)에게 *PReq*를 보내고, 슬레이브가 *PRes*로 응답합니다. *고정 순서*입니다. 끝나면 Asynchronous 단계로 일반 IP 트래픽이 흐릅니다.
 

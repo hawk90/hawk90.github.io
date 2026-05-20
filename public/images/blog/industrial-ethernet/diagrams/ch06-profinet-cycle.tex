@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5,2.0) {PROFINET CC-C IRT Cycle (1 ms)};
+
+% Two-slot cycle bar
+% IRT: 200 μs → width 2.0
+% NRT/RT: 800 μs → width 8.0
+
+\definecolor{redphase}{RGB}{250,205,205}
+\definecolor{redphaseBord}{RGB}{200, 80, 80}
+\definecolor{greenphase}{RGB}{205,235,210}
+\definecolor{greenphaseBord}{RGB}{ 90,150, 95}
+
+\node[cls, minimum width=20mm, minimum height=14mm, anchor=west, align=center,
+      fill=redphase, draw=redphaseBord] (irt) at (0,0)
+  {IRT (red phase)\\\small hw-scheduled};
+\node[cls, minimum width=80mm, minimum height=14mm, anchor=west, align=center,
+      fill=greenphase, draw=greenphaseBord] (nrt) at (2.0,0)
+  {NRT / RT (green phase)\\\small best-effort + priority};
+
+% Labels under each slot
+\node[caption] at (1.0,-1.2) {200 $\mu$s reserved for IRT};
+\node[caption] at (6.0,-1.2) {800 $\mu$s for everything else};
+
+% IRT schedule excerpt — short text on the side
+\node[caption, anchor=north west, align=left] at (-0.3,-2.0)
+  {IRT 트래픽 예 (compile-time scheduled):\\
+   $\bullet$ t = 0   $\mu$s: Controller $\rightarrow$ Device 1, 32 B\\
+   $\bullet$ t = 50  $\mu$s: Controller $\rightarrow$ Device 2, 64 B\\
+   $\bullet$ t = 110 $\mu$s: Device 1 $\rightarrow$ Controller, 32 B};
+
+\end{tikzpicture}
+\end{document}
