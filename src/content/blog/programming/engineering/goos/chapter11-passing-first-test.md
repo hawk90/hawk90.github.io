@@ -717,23 +717,9 @@ class SniperPortfolio:
 
 Main 클래스의 책임을 분리하여 테스트 가능하게 만든다.
 
-Before — `Main` 한 곳에 모든 책임이 모여 있어 단위 테스트가 어렵다.
+![Responsibility Separation (Before/After)](/images/blog/goos/diagrams/ch11-responsibility-separation.svg)
 
-| 책임 (Main 단독) |
-|------------------|
-| XMPP 연결 |
-| UI 생성 |
-| Sniper 생성 |
-| 이벤트 처리 |
-| 메시지 전송 |
-
-After — 세 클래스로 책임을 분리하면 각 책임을 독립적으로 mock/대체할 수 있다.
-
-| 클래스 | 책임 |
-|--------|------|
-| `Main` | 시작점, 조립 (composition root) |
-| `AuctionHouse` | XMPP 연결, `Auction` 생성 |
-| `SniperLauncher` | `Sniper` 생성, 시작/종료 |
+After 단계에서 세 클래스로 책임을 분리하면 각 책임을 독립적으로 mock/대체할 수 있다. `Main`은 *composition root*가 되어 그래프 조립만 담당한다.
 
 ### AuctionHouse 추출
 
@@ -958,11 +944,7 @@ class AuctionSniper(AuctionEventListener):
 
 3-계층 구조 — UI / Domain / Infrastructure.
 
-| 계층 | 컴포넌트 | 의존 방향 |
-|------|----------|----------|
-| UI | `MainWindow`, `SnipersTableModel` | Domain으로 ↓ |
-| Domain | `SniperLauncher`, `SniperPortfolio`, `AuctionSniper × N` | Infrastructure로 ↓ |
-| Infrastructure | `XMPPAuctionHouse`, `XMPPAuction × N`, `AuctionMessageTranslator` | (외부 XMPP 서버) |
+![Final Architecture — 3-Layer](/images/blog/goos/diagrams/ch11-final-architecture.svg)
 
 계층 간 결합점.
 

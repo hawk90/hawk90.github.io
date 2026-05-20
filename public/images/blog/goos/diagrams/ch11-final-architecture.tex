@@ -1,0 +1,52 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,5.6) {Final Architecture — 3-Layer};
+
+% --- UI Layer ---
+\node[hi, minimum width=44mm, minimum height=10mm] (mw)   at (-3.5,4) {MainWindow};
+\node[hi, minimum width=44mm, minimum height=10mm] (tbl)  at ( 3.5,4) {SnipersTableModel};
+
+\node[panel, fit=(mw)(tbl), inner sep=8pt] (uipanel) {};
+\node[panelTitle] at (uipanel.north west) {UI Layer};
+
+% --- Domain Layer ---
+\node[imp, minimum width=44mm, minimum height=10mm] (launch) at (-3.5,1.5) {SniperLauncher};
+\node[imp, minimum width=44mm, minimum height=10mm] (port)   at ( 3.5,1.5) {SniperPortfolio};
+\node[imp, minimum width=24mm, minimum height=7mm]  (s1) at ( 0.5,-0.2) {AuctionSniper 1};
+\node[imp, minimum width=24mm, minimum height=7mm]  (s2) at ( 3.5,-0.2) {AuctionSniper 2};
+\node[imp, minimum width=24mm, minimum height=7mm]  (s3) at ( 6.5,-0.2) {AuctionSniper 3};
+
+\node[panel, fit=(launch)(port)(s1)(s2)(s3), inner sep=8pt] (dpanel) {};
+\node[panelTitle] at (dpanel.north west) {Domain Layer};
+
+% --- Infrastructure Layer ---
+\node[abs, minimum width=44mm, minimum height=10mm] (house) at (-3.5,-2.7) {XMPPAuctionHouse};
+\node[abs, minimum width=24mm, minimum height=7mm]  (a1) at ( 0.5,-3.7) {XMPPAuction 1};
+\node[abs, minimum width=24mm, minimum height=7mm]  (a2) at ( 3.5,-3.7) {XMPPAuction 2};
+\node[abs, minimum width=24mm, minimum height=7mm]  (a3) at ( 6.5,-3.7) {XMPPAuction 3};
+\node[abs, minimum width=44mm, minimum height=8mm]  (trans) at (-3.5,-4.5) {AuctionMessageTranslator};
+
+\node[panel, fit=(house)(a1)(a2)(a3)(trans), inner sep=8pt] (ipanel) {};
+\node[panelTitle] at (ipanel.north west) {Infrastructure Layer};
+
+% --- Cross-layer edges ---
+\draw[arr] (mw.south) -- node[right, font=\footnotesize] {UserRequestListener} (launch.north);
+\draw[arr] (s1.north) to[bend right=12] node[left, font=\footnotesize] {SniperListener} (tbl.south);
+\draw[arr] (launch.east) -- (port.west);
+\draw[arr] (port.south) -- (s2.north);
+
+\draw[arr] (launch.south) -- (house.north);
+\draw[arr] (house.east) -- (a1.west);
+\draw[arr] (a2.south) -- (trans.north -| a2);
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Title
+\node[font=\sffamily\bfseries\large] at (0,3.6) {Walking Skeleton — all layers traversed};
+
+% Layers (top to bottom)
+\node[hi,    minimum width=80mm, minimum height=12mm] (ui)     at (0, 2)  {UI Layer\\[2pt]\small (상태 LOST 표시)};
+\node[imp,   minimum width=80mm, minimum height=12mm] (domain) at (0, 0)  {Domain Layer\\[2pt]\small (AuctionSniper: 패배 판정)};
+\node[abs,   minimum width=80mm, minimum height=12mm] (infra)  at (0,-2)  {Infrastructure Layer\\[2pt]\small (XMPP 메시지 수신)};
+\node[con,   minimum width=80mm, minimum height=12mm] (ext)    at (0,-4)  {External\\[2pt]\small (경매 서버 CLOSE 이벤트)};
+
+% Vertical flow arrows
+\draw[arr] (ui.south) -- (domain.north);
+\draw[arr] (domain.south) -- (infra.north);
+\draw[arr] (infra.south) -- (ext.north);
+
+% Right-side annotations
+\node[caption, anchor=west] at (4.5, 2)  {화면 갱신};
+\node[caption, anchor=west] at (4.5, 0)  {도메인 로직};
+\node[caption, anchor=west] at (4.5,-2)  {프로토콜 어댑터};
+\node[caption, anchor=west] at (4.5,-4)  {외부 시스템};
+
+\end{tikzpicture}
+\end{document}
