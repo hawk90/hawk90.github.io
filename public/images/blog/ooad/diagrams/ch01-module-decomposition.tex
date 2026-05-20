@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,3) {E-commerce Module Decomposition};
+
+% Top row — left to right
+\node[hi,  minimum width=32mm, minimum height=11mm] (ui)      at (-5, 1) {UI\\Module};
+\node[con, minimum width=32mm, minimum height=11mm] (order)   at ( 0, 1) {Order\\Module};
+\node[imp, minimum width=32mm, minimum height=11mm] (payment) at ( 5, 1) {Payment\\Module};
+
+% Bottom row
+\node[abs, minimum width=32mm, minimum height=11mm] (inv)     at ( 0,-1.6) {Inventory\\Module};
+
+% Edges (uses)
+\draw[uses] (ui)    -- (order);
+\draw[uses] (order) -- (payment);
+\draw[uses] (order) -- (inv);
+
+% Caption
+\node[caption] at (0,-3) {각 모듈은 자기 영역의 클래스를 갖고, 다른 모듈과는 인터페이스로만 소통};
+
+\end{tikzpicture}
+\end{document}

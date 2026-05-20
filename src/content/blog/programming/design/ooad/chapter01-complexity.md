@@ -167,20 +167,7 @@ class Car {
 - **개별 테스트**: 모듈 단위로 테스트 가능
 - **이해 용이**: 한 번에 한 모듈만 이해하면 됨
 
-```text
-전자상거래 시스템의 모듈 분해 예시:
-
-┌─────────────┐   ┌─────────────┐   ┌─────────────┐
-│    UI       │   │   Order     │   │   Payment   │
-│   Module    │──▷│   Module    │──▷│   Module    │
-└─────────────┘   └─────────────┘   └─────────────┘
-                         │
-                         ▽
-                  ┌─────────────┐
-                  │  Inventory  │
-                  │   Module    │
-                  └─────────────┘
-```
+![E-commerce Module Decomposition](/images/blog/ooad/diagrams/ch01-module-decomposition.svg)
 
 각 모듈은 자기 영역의 클래스들을 갖고, 다른 모듈과는 인터페이스로만 소통합니다.
 

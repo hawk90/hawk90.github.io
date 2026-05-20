@@ -78,37 +78,23 @@ bookAuthor: "Grady Booch"
 | 팀 협업에 적합 |
 | 책임 중심 사고 |
 
-```text
-CRC 카드 예시:
+CRC 카드는 세 칸 — 클래스 이름 / 책임 / 협력자. 예시 두 장.
 
-┌─────────────────────────────────────┐
-│ Class: Order                        │
-├─────────────────────────────────────┤
-│ Responsibilities:                   │
-│ - 주문 항목 관리                     │
-│ - 총액 계산                          │
-│ - 주문 상태 추적                     │
-│ - 결제 처리 요청                     │
-├─────────────────────────────────────┤
-│ Collaborators:                      │
-│ - OrderItem                         │
-│ - Customer                          │
-│ - PaymentService                    │
-│ - ShippingService                   │
-└─────────────────────────────────────┘
+**Class: `Order`**
 
-┌─────────────────────────────────────┐
-│ Class: OrderItem                    │
-├─────────────────────────────────────┤
-│ Responsibilities:                   │
-│ - 상품과 수량 저장                   │
-│ - 소계 계산                          │
-├─────────────────────────────────────┤
-│ Collaborators:                      │
-│ - Product                           │
-│ - Order                             │
-└─────────────────────────────────────┘
-```
+| Responsibilities | Collaborators |
+|------------------|---------------|
+| 주문 항목 관리 | `OrderItem` |
+| 총액 계산 | `Customer` |
+| 주문 상태 추적 | `PaymentService` |
+| 결제 처리 요청 | `ShippingService` |
+
+**Class: `OrderItem`**
+
+| Responsibilities | Collaborators |
+|------------------|---------------|
+| 상품과 수량 저장 | `Product` |
+| 소계 계산 | `Order` |
 
 ### 유스케이스 분석
 
