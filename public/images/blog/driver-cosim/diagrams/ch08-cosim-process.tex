@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,6.0) {Cosim Process — End-to-End};
+
+% pytest runner at top
+\node[hi, minimum width=58mm, minimum height=12mm, align=center, inner sep=3pt] (py)
+  at (-4.5,4.5)
+  {\textbf{pytest runner}\\\small parametrize: smoke / stress / edge};
+
+% Driver and RTL side-by-side
+\node[con, minimum width=58mm, minimum height=24mm, align=left, inner sep=6pt] (drv)
+  at (-4.5,2.0)
+  {\textbf{Linux driver (.so)}\\\small $\bullet$ probe / init\\\small $\bullet$ ioctl handlers\\\small $\bullet$ ISR\\\small $\bullet$ DMA ring mgmt};
+\node[abs, minimum width=58mm, minimum height=24mm, align=left, inner sep=6pt] (rtl)
+  at ( 4.5,2.0)
+  {\textbf{Varistos1 (RTL)}\\\small Verilator C++ class\\\small + AXI Master BFM\\\small + AXI Slave BFM (RAM)};
+
+% Reference model
+\node[imp, minimum width=58mm, minimum height=14mm, align=left, inner sep=4pt] (ref)
+  at (-4.5,-1.0)
+  {\textbf{reference\_model.c}\\\small matmul, conv2d};
+
+% IRQ thread
+\node[warn, minimum width=120mm, minimum height=12mm, align=center] (irq) at (0,-3.0)
+  {IRQ injection thread (poll RTL irq pin)};
+
+% Artifact note
+\node[caption, anchor=west] at (-6.0,-4.4)
+  {\texttt{wave.fst} (on failure) $\longrightarrow$ CI artifact};
+
+% Arrows
+\draw[arr] (py.south) -- (drv.north);
+\draw[arr] (drv.east) -- node[above, font=\footnotesize] {DPI} (rtl.west);
+\draw[arr] (drv.south) -- node[right, font=\footnotesize] {\texttt{matmul\_ref()}} (ref.north);
+\draw[arr] (rtl.south) -- node[right, font=\footnotesize] {irq toggling} (irq.north -| rtl.south);
+\draw[arr] (irq.north -| drv.south) -- (drv.south);
+
+\node[panel, fit=(py)(drv)(rtl)(ref)(irq), inner sep=12pt] (proc) {};
+\node[panelTitle] at (proc.north west) {Cosim Process (Linux host)};
+
+\end{tikzpicture}
+\end{document}

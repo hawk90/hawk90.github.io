@@ -130,25 +130,7 @@ TLM은 두 transport 방식을 제공합니다.
 
 **Virtual Platform**(VP)이란 *CPU + 메모리 + 디바이스*가 모두 SystemC/TLM으로 모델링된 환경입니다. ISS(Instruction Set Simulator) 또는 fast-model CPU 위에서 *진짜 Linux kernel*이 boot됩니다.
 
-```text
-┌──────────────────────────────────────────┐
-│         Virtual Platform (SystemC)        │
-│                                          │
-│   ┌───────┐    ┌──────────────────────┐  │
-│   │ CPU   │───▶│   TLM bus(AXI)        │  │
-│   │ (QEMU │    └──┬────────┬───────┬──┘  │
-│   │  ISS) │       │        │       │      │
-│   └───────┘       ▼        ▼       ▼      │
-│              ┌──────┐ ┌──────┐ ┌─────────┐│
-│              │ UART │ │  RAM │ │ MY-NPU  ││
-│              │ TLM  │ │ TLM  │ │ TLM/RTL ││
-│              └──────┘ └──────┘ └─────────┘│
-└──────────────────────────────────────────┘
-                    ▲
-                    │
-              Linux boots here
-              driver loads as .ko
-```
+![SystemC Virtual Platform](/images/blog/driver-cosim/diagrams/ch05-virtual-platform.svg)
 
 CPU 모델은 보통 *QEMU의 TCG*를 SystemC TLM bridge로 감싸 씁니다. ARM의 *Fast Models*가 이 패턴의 표준 도구이며, AMD/Intel의 internal VP도 비슷한 구조입니다.
 

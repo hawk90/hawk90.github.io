@@ -43,21 +43,7 @@ NPU 한 세대를 다시 가정합시다. matrix multiply unit이 들어 있고,
 
 전체 그림.
 
-```text
-                  ┌──────────────────────┐
-                  │  reference_model.c   │
-                  │  (algorithm one)     │
-                  └──────────┬───────────┘
-                             │
-            ┌────────────────┼─────────────────┐
-            ▼                ▼                 ▼
-   ┌─────────────────┐  ┌────────────┐  ┌─────────────┐
-   │ UVM scoreboard │  │ Linux       │  │ Compiler    │
-   │ (DPI-C 호출)    │  │ driver      │  │ verifier    │
-   │  expected →    │  │ (software   │  │ (post-build │
-   │   actual 비교  │  │  fallback)  │  │  check)     │
-   └─────────────────┘  └────────────┘  └─────────────┘
-```
+![C Reference Model — Shared Across 3 Domains](/images/blog/driver-cosim/diagrams/ch07-c-ref-fanout.svg)
 
 세 영역 모두 *동일 C 함수*를 호출. 알고리즘 변경은 한 곳만 고치면 됩니다.
 

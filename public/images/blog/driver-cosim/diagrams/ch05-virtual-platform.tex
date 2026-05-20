@@ -1,0 +1,45 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,4.4) {SystemC Virtual Platform};
+
+% CPU on left
+\node[hi, minimum width=28mm, minimum height=14mm, align=center] (cpu) at (-4.0,2.4)
+  {CPU\\\small (QEMU ISS)};
+
+% TLM bus
+\node[abs, minimum width=70mm, minimum height=12mm, align=center] (bus) at (1.5,2.4)
+  {TLM bus (AXI)};
+
+% Devices on bus
+\node[imp, minimum width=24mm, minimum height=14mm, align=center] (uart) at (-2.0,0.4)
+  {UART\\\small TLM};
+\node[imp, minimum width=24mm, minimum height=14mm, align=center] (ram)  at ( 1.5,0.4)
+  {RAM\\\small TLM};
+\node[con, minimum width=32mm, minimum height=14mm, align=center] (npu)  at ( 5.5,0.4)
+  {MY-NPU\\\small TLM / RTL};
+
+% CPU → bus arrow
+\draw[arr] (cpu.east) -- (bus.west);
+
+% Bus → devices
+\draw[arr] (bus.south -| uart) -- (uart.north);
+\draw[arr] (bus.south -| ram)  -- (ram.north);
+\draw[arr] (bus.south -| npu)  -- (npu.north);
+
+\node[panel, fit=(cpu)(bus)(uart)(ram)(npu), inner sep=12pt] (vp) {};
+\node[panelTitle] at (vp.north west) {Virtual Platform (SystemC)};
+
+% Linux boot annotation
+\node[caption, anchor=west, align=left] at (-5.0,-2.7)
+  {Linux이 여기서 boot · driver를 \texttt{.ko}로 적재};
+
+\end{tikzpicture}
+\end{document}

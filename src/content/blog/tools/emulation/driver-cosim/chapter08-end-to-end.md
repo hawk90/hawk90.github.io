@@ -29,37 +29,7 @@ draft: false
 
 ## 아키텍처 한 장
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                  Cosim Process (Linux host)                     │
-│                                                                 │
-│   ┌────────────────────┐                                        │
-│   │  pytest runner     │ ── parametrize: smoke / stress / edge  │
-│   └─────────┬──────────┘                                        │
-│             │                                                   │
-│             ▼                                                   │
-│   ┌────────────────────┐    DPI    ┌──────────────────────┐    │
-│   │ Linux driver (.so) │ ────────▶ │  Varistos1 (RTL)     │    │
-│   │  - probe/init      │           │  Verilator C++ class │    │
-│   │  - ioctl handlers  │           │                      │    │
-│   │  - ISR             │           │  + AXI Master BFM    │    │
-│   │  - DMA ring mgmt   │           │  + AXI Slave BFM(RAM)│    │
-│   └─────────┬──────────┘           └──────────────────────┘    │
-│             │                                  ▲                │
-│             │ matmul_ref()                     │ irq toggling   │
-│             ▼                                  │                │
-│   ┌────────────────────┐                       │                │
-│   │ reference_model.c  │                       │                │
-│   │ (matmul, conv2d)   │                       │                │
-│   └────────────────────┘                       │                │
-│                                                │                │
-│   ┌────────────────────────────────────────────┴────────────┐  │
-│   │     IRQ injection thread (poll RTL irq pin)              │  │
-│   └──────────────────────────────────────────────────────────┘  │
-│                                                                 │
-│   wave.fst (on failure) ───────────────▶ CI artifact            │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Cosim Process — End-to-End](/images/blog/driver-cosim/diagrams/ch08-cosim-process.svg)
 
 요지: *하나의 프로세스 안*에 driver·RTL·BFM·reference가 모두 들어 있고, pytest가 시나리오를 흘립니다.
 
