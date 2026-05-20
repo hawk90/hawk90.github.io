@@ -17,37 +17,16 @@ draft: false
 
 ## 개요: 8개 챕터의 여정
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    WORKED EXAMPLE JOURNEY                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Ch 11: Passing the First Test                                  │
-│         └─▶ 경매 참가 → 종료 → LOST 표시                        │
-│                                                                 │
-│  Ch 12: Getting Ready to Bid                                    │
-│         └─▶ 가격 메시지 수신 및 파싱                            │
-│                                                                 │
-│  Ch 13: The Sniper Makes a Bid                                  │
-│         └─▶ 입찰 로직 구현, BIDDING 상태                        │
-│                                                                 │
-│  Ch 14: The Sniper Wins an Auction                              │
-│         └─▶ 낙찰 판정, WON 상태                                 │
-│                                                                 │
-│  Ch 15: Towards a Real User Interface                           │
-│         └─▶ 테이블 UI, 다중 아이템 표시                         │
-│                                                                 │
-│  Ch 16: Sniping for Multiple Items                              │
-│         └─▶ 여러 경매 동시 참가                                 │
-│                                                                 │
-│  Ch 17: Teasing Apart Main                                      │
-│         └─▶ 책임 분리, 의존성 주입                              │
-│                                                                 │
-│  Ch 18: Filling in the Details                                  │
-│         └─▶ 최대가 제한, 에러 처리, 완성                        │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+| Ch | 제목 | 추가되는 기능 |
+|----|------|---------------|
+| 11 | Passing the First Test | 경매 참가 → 종료 → LOST 표시 |
+| 12 | Getting Ready to Bid | 가격 메시지 수신 및 파싱 |
+| 13 | The Sniper Makes a Bid | 입찰 로직 구현, BIDDING 상태 |
+| 14 | The Sniper Wins an Auction | 낙찰 판정, WON 상태 |
+| 15 | Towards a Real User Interface | 테이블 UI, 다중 아이템 표시 |
+| 16 | Sniping for Multiple Items | 여러 경매 동시 참가 |
+| 17 | Teasing Apart Main | 책임 분리, 의존성 주입 |
+| 18 | Filling in the Details | 최대가 제한, 에러 처리, 완성 |
 
 ---
 
@@ -71,33 +50,12 @@ TEST_F(AuctionSniperEndToEndTest,
 
 ### 구현 단계
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  CH 11: IMPLEMENTATION STEPS                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Step 1: XMPP 연결                                              │
-│  ─────────────────                                              │
-│  • 경매 서버에 연결                                             │
-│  • 채팅방(MUC) 입장                                             │
-│                                                                 │
-│  Step 2: JOIN 메시지 전송                                       │
-│  ─────────────────────────                                      │
-│  • "SOLVersion: 1.1; Command: JOIN;"                            │
-│  • UI에 "JOINING" 표시                                          │
-│                                                                 │
-│  Step 3: CLOSE 메시지 수신                                      │
-│  ─────────────────────────                                      │
-│  • 메시지 리스너 등록                                           │
-│  • CLOSE 이벤트 감지                                            │
-│                                                                 │
-│  Step 4: LOST 상태 전이                                         │
-│  ─────────────────────────                                      │
-│  • UI에 "LOST" 표시                                             │
-│  • 테스트 통과 ✓                                                │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+| Step | 작업 | 세부 |
+|------|------|------|
+| 1 | XMPP 연결 | 경매 서버에 연결, 채팅방(MUC) 입장 |
+| 2 | JOIN 메시지 전송 | `SOLVersion: 1.1; Command: JOIN;` 전송, UI에 `JOINING` 표시 |
+| 3 | CLOSE 메시지 수신 | 메시지 리스너 등록, CLOSE 이벤트 감지 |
+| 4 | LOST 상태 전이 | UI에 `LOST` 표시, 테스트 통과 |
 
 ### AuctionMessageTranslator 구현
 
@@ -274,38 +232,18 @@ class AuctionMessageTranslator:
 
 다른 입찰자가 입찰하면 Sniper도 입찰한다:
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                   BIDDING STATE MACHINE                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│      ┌─────────┐                                                │
-│      │ JOINING │                                                │
-│      └────┬────┘                                                │
-│           │ PRICE (from other)                                  │
-│           ▼                                                     │
-│      ┌─────────┐         PRICE (from other)                     │
-│      │ BIDDING │◀────────────────────────────┐                  │
-│      └────┬────┘                             │                  │
-│           │                                  │                  │
-│           │ PRICE (from sniper)              │                  │
-│           ▼                                  │                  │
-│      ┌─────────┐                             │                  │
-│      │ WINNING │─────────────────────────────┘                  │
-│      └────┬────┘                                                │
-│           │                                                     │
-│           │ CLOSE                                               │
-│           ▼                                                     │
-│      ┌─────────┐                                                │
-│      │   WON   │                                                │
-│      └─────────┘                                                │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
 ### 입찰 상태 머신
 
 ![Bidding State Machine](/images/blog/goos/diagrams/ch11-bidding-state-machine.svg)
+
+상태 전이를 표로 풀면 다음과 같다.
+
+| 출발 상태 | 이벤트 | 도착 상태 |
+|-----------|--------|-----------|
+| `JOINING` | PRICE (from other) | `BIDDING` |
+| `BIDDING` | PRICE (from sniper) | `WINNING` |
+| `WINNING` | PRICE (from other) | `BIDDING` |
+| `WINNING` | CLOSE | `WON` |
 
 ### AuctionSniper 핵심 로직
 
@@ -550,25 +488,15 @@ def closed(self) -> "SniperSnapshot":
 
 ### 목표: 테이블 형태 UI
 
-여러 경매 상태를 테이블로 표시:
+여러 경매 상태를 테이블로 표시한다. UI 상단의 표는 `SnipersTableModel`이 행 단위로 렌더링한다.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    AUCTION SNIPER UI                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌───────────────┬────────────┬───────────┬───────────────────┐│
-│  │    Item ID    │ Last Price │ Last Bid  │      Status       ││
-│  ├───────────────┼────────────┼───────────┼───────────────────┤│
-│  │  item-54321   │    1000    │   1098    │     BIDDING       ││
-│  │  item-65432   │     500    │    550    │     WINNING       ││
-│  │  item-76543   │     200    │      0    │       LOST        ││
-│  └───────────────┴────────────┴───────────┴───────────────────┘│
-│                                                                 │
-│  [Add Item] [____________] [Start]                              │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+| Item ID | Last Price | Last Bid | Status |
+|---------|------------|----------|--------|
+| `item-54321` | 1000 | 1098 | `BIDDING` |
+| `item-65432` | 500 | 550 | `WINNING` |
+| `item-76543` | 200 | 0 | `LOST` |
+
+표 하단에 `[Add Item]` 입력 필드와 `[Start]` 버튼이 위치해 새 경매를 추가할 수 있다.
 
 ### SnipersTableModel 구현
 
@@ -787,32 +715,25 @@ class SniperPortfolio:
 
 ### 목표: 책임 분리
 
-Main 클래스의 책임을 분리하여 테스트 가능하게 만든다:
+Main 클래스의 책임을 분리하여 테스트 가능하게 만든다.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    RESPONSIBILITY SEPARATION                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Before:                                                        │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │                        Main                              │   │
-│  │  • XMPP 연결                                             │   │
-│  │  • UI 생성                                               │   │
-│  │  • Sniper 생성                                           │   │
-│  │  • 이벤트 처리                                           │   │
-│  │  • 메시지 전송                                           │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  After:                                                         │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐    │
-│  │      Main      │  │ AuctionHouse   │  │  SniperLauncher │    │
-│  │  • 시작점      │  │  • XMPP 연결   │  │  • Sniper 생성  │    │
-│  │  • 조립       │  │  • Auction 생성 │  │  • 시작/종료    │    │
-│  └────────────────┘  └────────────────┘  └────────────────┘    │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+Before — `Main` 한 곳에 모든 책임이 모여 있어 단위 테스트가 어렵다.
+
+| 책임 (Main 단독) |
+|------------------|
+| XMPP 연결 |
+| UI 생성 |
+| Sniper 생성 |
+| 이벤트 처리 |
+| 메시지 전송 |
+
+After — 세 클래스로 책임을 분리하면 각 책임을 독립적으로 mock/대체할 수 있다.
+
+| 클래스 | 책임 |
+|--------|------|
+| `Main` | 시작점, 조립 (composition root) |
+| `AuctionHouse` | XMPP 연결, `Auction` 생성 |
+| `SniperLauncher` | `Sniper` 생성, 시작/종료 |
 
 ### AuctionHouse 추출
 
@@ -1035,155 +956,81 @@ class AuctionSniper(AuctionEventListener):
 
 ## 최종 아키텍처
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    FINAL ARCHITECTURE                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │                      UI Layer                            │   │
-│  │                                                          │   │
-│  │  MainWindow ◀───────── SnipersTableModel                 │   │
-│  │      │                        ▲                          │   │
-│  │      │ UserRequestListener    │ SniperListener           │   │
-│  │      ▼                        │                          │   │
-│  └──────┼────────────────────────┼──────────────────────────┘   │
-│         │                        │                              │
-│  ┌──────▼────────────────────────┼──────────────────────────┐   │
-│  │                  Domain Layer │                          │   │
-│  │                               │                          │   │
-│  │  SniperLauncher ─────────▶ SniperPortfolio               │   │
-│  │       │                       │                          │   │
-│  │       │                       ├── AuctionSniper 1        │   │
-│  │       │                       ├── AuctionSniper 2        │   │
-│  │       │                       └── AuctionSniper 3        │   │
-│  │       │                                                  │   │
-│  └───────┼──────────────────────────────────────────────────┘   │
-│          │                                                      │
-│  ┌───────▼──────────────────────────────────────────────────┐   │
-│  │                Infrastructure Layer                      │   │
-│  │                                                          │   │
-│  │  XMPPAuctionHouse                                        │   │
-│  │       │                                                  │   │
-│  │       ├── XMPPAuction 1                                  │   │
-│  │       │      └── AuctionMessageTranslator                │   │
-│  │       ├── XMPPAuction 2                                  │   │
-│  │       └── XMPPAuction 3                                  │   │
-│  │                                                          │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+3-계층 구조 — UI / Domain / Infrastructure.
+
+| 계층 | 컴포넌트 | 의존 방향 |
+|------|----------|----------|
+| UI | `MainWindow`, `SnipersTableModel` | Domain으로 ↓ |
+| Domain | `SniperLauncher`, `SniperPortfolio`, `AuctionSniper × N` | Infrastructure로 ↓ |
+| Infrastructure | `XMPPAuctionHouse`, `XMPPAuction × N`, `AuctionMessageTranslator` | (외부 XMPP 서버) |
+
+계층 간 결합점.
+
+| 출발 | 인터페이스 | 도착 |
+|------|------------|------|
+| `MainWindow` | `UserRequestListener` | `SniperLauncher` |
+| `AuctionSniper` | `SniperListener` | `SnipersTableModel` |
+| `SniperLauncher` | (직접 참조) | `SniperPortfolio` |
+| `XMPPAuction` | (위임) | `AuctionMessageTranslator` |
+
+핵심: UI는 도메인에 대해서만 알고, 도메인은 XMPP를 모른다. `XMPPAuctionHouse`가 도메인 인터페이스(`AuctionHouse`)를 구현해 의존성을 역전한다.
 
 ---
 
 ## 테스트 피라미드
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      TEST PYRAMID                               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│                         /\                                      │
-│                        /  \                                     │
-│                       / E2E\     End-to-End Tests              │
-│                      /──────\    (FakeAuctionServer +           │
-│                     /        \    ApplicationRunner)            │
-│                    /──────────\                                 │
-│                   / Integration \   Integration Tests           │
-│                  /──────────────\   (XMPPAuction,               │
-│                 /                \   AuctionMessageTranslator)  │
-│                /──────────────────\                             │
-│               /     Unit Tests     \  Unit Tests                │
-│              /──────────────────────\ (AuctionSniper,           │
-│             /                        \ SniperSnapshot,          │
-│            /                          \ SnipersTableModel)      │
-│           /____________________________\                        │
-│                                                                 │
-│  비율: E2E (5%) < Integration (15%) < Unit (80%)               │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+| 계층 | 비율 | 대상 컴포넌트 | 도구 |
+|------|------|----------------|------|
+| End-to-End | ~5% | 시스템 전체 흐름 | `FakeAuctionServer`, `ApplicationRunner` |
+| Integration | ~15% | 어댑터·외부 시스템 | `XMPPAuction`, `AuctionMessageTranslator` |
+| Unit | ~80% | 도메인 로직 | `AuctionSniper`, `SniperSnapshot`, `SnipersTableModel` |
+
+피라미드 모양 — 위로 갈수록 적게, 느리게, 비싸게. 아래로 갈수록 많이, 빠르게, 싸게.
 
 ---
 
 ## 핵심 교훈
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      KEY LESSONS LEARNED                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. 점진적 개발                                                 │
-│     ─────────────                                               │
-│     • Walking Skeleton부터 시작                                 │
-│     • 기능을 작은 단위로 추가                                   │
-│     • 항상 동작하는 코드 유지                                   │
-│                                                                 │
-│  2. Outside-In TDD                                              │
-│     ─────────────────                                           │
-│     • 인수 테스트로 요구사항 정의                               │
-│     • 단위 테스트로 설계 발견                                   │
-│     • Mock으로 의존성 분리                                      │
-│                                                                 │
-│  3. 리팩토링의 중요성                                           │
-│     ─────────────────────                                       │
-│     • 책임 분리                                                 │
-│     • 의존성 주입                                               │
-│     • 테스트 가능한 설계                                        │
-│                                                                 │
-│  4. 테스트 더블 활용                                            │
-│     ─────────────────                                           │
-│     • Fake: 실제 동작하는 대체품 (FakeAuctionServer)            │
-│     • Mock: 기대 설정 검증 (MockAuction)                        │
-│     • Stub: 고정 값 반환                                        │
-│                                                                 │
-│  5. 상태 관리                                                   │
-│     ──────────                                                  │
-│     • 불변 스냅샷 (SniperSnapshot)                              │
-│     • 상태 전이 명시화                                          │
-│     • 이벤트 기반 알림                                          │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+| # | 교훈 | 실천 항목 |
+|---|------|-----------|
+| 1 | 점진적 개발 | Walking Skeleton부터 시작, 기능을 작은 단위로 추가, 항상 동작하는 코드 유지 |
+| 2 | Outside-In TDD | 인수 테스트로 요구사항 정의, 단위 테스트로 설계 발견, Mock으로 의존성 분리 |
+| 3 | 리팩토링의 중요성 | 책임 분리, 의존성 주입, 테스트 가능한 설계 |
+| 4 | 테스트 더블 활용 | Fake (`FakeAuctionServer`), Mock (`MockAuction`), Stub (고정 값) |
+| 5 | 상태 관리 | 불변 스냅샷 (`SniperSnapshot`), 상태 전이 명시화, 이벤트 기반 알림 |
 
 ---
 
 ## 요약
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      CHAPTERS 11-18 SUMMARY                     │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Worked Example 완성                                            │
-│  ─────────────────                                              │
-│  • Ch 11: 첫 테스트 통과 (JOIN → CLOSE → LOST)                  │
-│  • Ch 12: 가격 메시지 수신 및 파싱                              │
-│  • Ch 13: 입찰 로직 (BIDDING 상태)                              │
-│  • Ch 14: 낙찰 처리 (WON 상태)                                  │
-│  • Ch 15: 테이블 UI (SnipersTableModel)                         │
-│  • Ch 16: 다중 경매 (SniperPortfolio)                           │
-│  • Ch 17: 책임 분리 (AuctionHouse, SniperLauncher)              │
-│  • Ch 18: 최대가 제한 (LOSING 상태)                             │
-│                                                                 │
-│  핵심 컴포넌트                                                  │
-│  ────────────────                                               │
-│  • AuctionSniper: 핵심 비즈니스 로직                            │
-│  • SniperSnapshot: 불변 상태 표현                               │
-│  • XMPPAuction: 외부 시스템 래퍼                                │
-│  • AuctionMessageTranslator: 프로토콜 변환                      │
-│  • SniperPortfolio: Sniper 컬렉션 관리                          │
-│                                                                 │
-│  TDD 패턴                                                       │
-│  ──────────                                                     │
-│  • 인수 테스트 주도 개발                                        │
-│  • Mock 객체로 의존성 분리                                      │
-│  • 점진적 기능 추가                                             │
-│  • 리팩토링으로 설계 개선                                       │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+Worked Example 완성 — 챕터별 핵심.
+
+| Ch | 도달 지점 |
+|----|-----------|
+| 11 | 첫 테스트 통과 (JOIN → CLOSE → LOST) |
+| 12 | 가격 메시지 수신 및 파싱 |
+| 13 | 입찰 로직 (`BIDDING` 상태) |
+| 14 | 낙찰 처리 (`WON` 상태) |
+| 15 | 테이블 UI (`SnipersTableModel`) |
+| 16 | 다중 경매 (`SniperPortfolio`) |
+| 17 | 책임 분리 (`AuctionHouse`, `SniperLauncher`) |
+| 18 | 최대가 제한 (`LOSING` 상태) |
+
+핵심 컴포넌트.
+
+| 컴포넌트 | 역할 |
+|----------|------|
+| `AuctionSniper` | 핵심 비즈니스 로직 |
+| `SniperSnapshot` | 불변 상태 표현 |
+| `XMPPAuction` | 외부 시스템 래퍼 |
+| `AuctionMessageTranslator` | 프로토콜 변환 |
+| `SniperPortfolio` | Sniper 컬렉션 관리 |
+
+TDD 패턴:
+- 인수 테스트 주도 개발
+- Mock 객체로 의존성 분리
+- 점진적 기능 추가
+- 리팩토링으로 설계 개선
 
 ---
 
