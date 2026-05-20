@@ -20,9 +20,7 @@ draft: true
 
 ## 한눈에 보는 구조
 
-![SPI advanced — daisy and QSPI](/images/blog/embedded-serial/diagrams/ch03-spi-advanced.svg)
-
-왼쪽이 **daisy chain** (CS 하나 공유), 오른쪽이 **QSPI** (1 마스터 + 1 슬레이브에 4 데이터 라인).
+이 글이 다루는 두 축은 **daisy chain**(CS 하나 공유)과 **QSPI**(1 마스터 + 1 슬레이브에 4 데이터 라인)입니다. 각각의 회로는 아래 절에서 다이어그램과 함께 다룹니다.
 
 ## Multi-slave 두 토폴로지
 

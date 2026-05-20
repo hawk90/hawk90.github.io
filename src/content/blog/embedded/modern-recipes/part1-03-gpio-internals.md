@@ -25,6 +25,8 @@ draft: false
 
 GPIO 출력은 보통 두 개의 트랜지스터로 구성됩니다.
 
+![Push-Pull과 Open-Drain 출력 구조](/images/blog/modern-recipes/diagrams/part1-03-gpio-structure.svg)
+
 | 구조 요소 | Push-Pull | Open-Drain |
 | --- | --- | --- |
 | VDD 측 | P-MOS (1 출력) | 외부 풀업 저항 (10 kΩ 등) |

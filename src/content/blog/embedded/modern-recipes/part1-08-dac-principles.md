@@ -25,13 +25,7 @@ draft: false
 
 가장 직관적인 DAC 구조입니다. R과 2R 저항 망으로 binary-weighted 전류를 합칩니다.
 
-```text
-   D7 ── 2R ──┬──── R ──┬──── R ──┬── ... ──┬── V_out
-              │         │         │         │
-              R         R         R         R
-              │         │         │         │
-             GND       GND       GND       GND
-```
+![R-2R Ladder DAC 구조](/images/blog/modern-recipes/diagrams/part1-08-r2r-ladder.svg)
 
 각 비트가 1이면 2R 저항이 V_REF로 연결되고, 0이면 GND로 연결됩니다. 합성 전류가 R-2R 망을 통과해 가중 합 전압이 됩니다.
 

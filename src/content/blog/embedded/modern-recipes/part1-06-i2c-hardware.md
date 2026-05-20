@@ -25,6 +25,8 @@ draft: false
 
 I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 연결되고, 외부 풀업 저항으로 idle 시 1을 유지합니다.
 
+![I2C 버스 — SDA·SCL 두 선과 풀업 저항](/images/blog/modern-recipes/diagrams/part1-06-i2c-circuit.svg)
+
 | 신호 | 연결 | 역할 |
 | --- | --- | --- |
 | VDD → Rp → SDA | 풀업 (2.2 ~ 10 kΩ) | idle 시 1 유지 |
