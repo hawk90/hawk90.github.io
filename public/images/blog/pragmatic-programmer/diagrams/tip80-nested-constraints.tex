@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  L1/.style={draw=warnbord, fill=warnfill!50, line width=0.8pt, rounded corners=3pt},
+  L2/.style={draw=hibord, fill=hifill, line width=0.7pt, rounded corners=3pt},
+  L3/.style={draw=okbord, fill=okfill, line width=0.6pt, rounded corners=3pt},
+  L4/.style={draw=absbord, fill=absfill, line width=0.5pt, rounded corners=3pt},
+  lbl/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=north}
+]
+
+% Outermost
+\draw[L1] (0, 0) rectangle (10, 7);
+\node[lbl] at (5, 6.8) {예산: 1000만원};
+
+\draw[L2] (0.8, 0.8) rectangle (9.2, 5.5);
+\node[lbl] at (5, 5.3) {기한: 3개월};
+
+\draw[L3] (1.6, 1.6) rectangle (8.4, 4.0);
+\node[lbl] at (5, 3.8) {팀원: 2명};
+
+\draw[L4] (2.4, 2.4) rectangle (7.6, 2.95);
+\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (5, 2.65) {기술: Python};
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at (5, -0.3) {어떤 상자를 넓힐 수 있나?};
+
+\end{tikzpicture}
+\end{document}

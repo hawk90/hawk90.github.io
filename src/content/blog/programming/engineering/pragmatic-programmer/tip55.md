@@ -34,13 +34,7 @@ def process_order(order):
 
 어떤 작업이 어떤 작업을 기다려야 하는지 분석한다.
 
-```text
-validate ─────────┐
-                  ├──→ charge_payment ──→ send_confirmation
-calculate_total ──┤
-                  │
-check_inventory ──┘
-```
+![Parallel checks before sequential payment](/images/blog/pragmatic-programmer/diagrams/tip55-pipeline-stages.svg)
 
 - `validate`, `calculate_total`, `check_inventory`는 독립적이다. 병렬 처리 가능.
 - `charge_payment`는 세 작업 모두 끝나야 시작한다.
@@ -70,16 +64,7 @@ async def process_order(order):
 
 워크플로를 시각화하면 병렬 처리 기회가 드러난다.
 
-```text
-┌─────────┐  ┌──────────────┐  ┌─────────────┐
-│ 주문 →  │──│  검증        │──│             │
-└─────────┘  ├──────────────┤  │             │
-             │  가격 계산   │──│  결제 →     │──→ 확인
-             ├──────────────┤  │             │
-             │  재고 확인   │──│             │
-             └──────────────┘  └─────────────┘
-                 (병렬)           (합류)
-```
+![Order activity diagram: parallel checks → join → payment](/images/blog/pragmatic-programmer/diagrams/tip55-order-flow.svg)
 
 ## 파이프라인
 

@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  stp/.style={cls, align=center, font=\footnotesize, minimum width=26mm, minimum height=10mm},
+  par/.style={stp, draw=okbord, fill=okfill},
+  seq/.style={stp, draw=hibord, fill=hifill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+% Title
+\node[font=\sffamily\bfseries\small, anchor=south] at (5, 4.6) {병렬 + 순차 파이프라인};
+
+% Parallel inputs
+\node[par] (v)  at (0, 3.5) {validate};
+\node[par] (t)  at (0, 2.0) {calculate\_total};
+\node[par] (i)  at (0, 0.5) {check\_inventory};
+
+% Join point (invisible)
+\coordinate (j) at (4, 2.0);
+
+\draw[arr] (v.east) -- (j);
+\draw[arr] (t.east) -- (j);
+\draw[arr] (i.east) -- (j);
+
+% Sequential stages
+\node[seq] (c) at (6.5, 2.0) {charge\_payment};
+\node[seq] (s) at (10, 2.0) {send\_confirmation};
+
+\draw[arr] (j) -- (c.west);
+\draw[arr] (c.east) -- (s.west);
+
+\end{tikzpicture}
+\end{document}

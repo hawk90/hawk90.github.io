@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  stp/.style={cls, align=center, font=\footnotesize, minimum width=26mm, minimum height=10mm},
+  start/.style={stp, draw=hibord, fill=hifill},
+  par/.style={stp, draw=okbord, fill=okfill},
+  pay/.style={stp, draw=conbord, fill=confill},
+  done/.style={font=\sffamily\bfseries\footnotesize, anchor=west},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt},
+  lbl/.style={font=\sffamily\scriptsize, text=mutec, anchor=north}
+]
+
+% Order
+\node[start] (ord) at (0, 1.5) {주문};
+
+% Three parallel checks
+\node[par] (val) at (4, 3.0) {검증};
+\node[par] (price) at (4, 1.5) {가격 계산};
+\node[par] (inv) at (4, 0.0) {재고 확인};
+\node[lbl] at (4, -0.7) {(병렬)};
+
+\draw[arr] (ord.east) -- (val.west);
+\draw[arr] (ord.east) -- (price.west);
+\draw[arr] (ord.east) -- (inv.west);
+
+% Join + pay
+\node[pay] (pay) at (8, 1.5) {결제};
+\node[lbl] at (8, -0.7) {(합류)};
+\draw[arr] (val.east) -- (pay.west);
+\draw[arr] (price.east) -- (pay.west);
+\draw[arr] (inv.east) -- (pay.west);
+
+% Confirmation
+\draw[arr] (pay.east) -- ++(1.2, 0) node[done] {→ 확인};
+
+\end{tikzpicture}
+\end{document}

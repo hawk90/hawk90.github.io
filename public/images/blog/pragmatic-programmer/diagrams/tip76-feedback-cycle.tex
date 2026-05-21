@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  stp/.style={cls, align=center, font=\footnotesize, minimum width=32mm, minimum height=11mm},
+  s1/.style={stp, draw=hibord, fill=hifill},
+  s2/.style={stp, draw=okbord, fill=okfill},
+  s3/.style={stp, draw=conbord, fill=confill},
+  s4/.style={stp, draw=absbord, fill=absfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[s1] (a) at (0, 4) {만들기};
+\node[s2] (b) at (0, 2.5) {보여주기};
+\node[s3] (c) at (0, 1.0) {피드백};
+\node[s4] (d) at (0, -0.5) {조정};
+
+\draw[arr] (a.south) -- (b.north);
+\draw[arr] (b.south) -- (c.north);
+\draw[arr] (c.south) -- (d.north);
+% Loop back
+\draw[arr, rounded corners=8pt] (d.east) -- ++(3.2, 0) -- ++(0, 4.5) -- (a.east);
+
+\end{tikzpicture}
+\end{document}

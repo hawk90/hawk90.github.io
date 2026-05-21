@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  team/.style={cls, align=center, font=\footnotesize, minimum width=24mm, minimum height=14mm, draw=hibord, fill=hifill},
+  big/.style={cls, align=center, font=\footnotesize, minimum width=120mm, minimum height=18mm, draw=okbord, fill=okfill},
+  title/.style={font=\sffamily\bfseries\footnotesize, anchor=south, text=inkc}
+]
+
+\node[title] at (0, 4.6) {직무 중심 조직};
+\node[team] at (-4.5, 3.5) {프론트\\팀};
+\node[team] at (-1.5, 3.5) {백엔드\\팀};
+\node[team] at (1.5, 3.5) {DBA\\팀};
+\node[team] at (4.5, 3.5) {QA\\팀};
+
+\node[title] at (0, 0.4) {기능 중심 조직};
+\node[big] at (0, -0.8) {결제 기능 팀\\[2pt]\scriptsize (프론트 + 백엔드 + DBA + QA)};
+
+\end{tikzpicture}
+\end{document}

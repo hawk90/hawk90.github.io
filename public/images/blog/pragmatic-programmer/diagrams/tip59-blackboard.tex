@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  board/.style={cls, align=center, font=\sffamily\bfseries\small, minimum width=120mm, minimum height=22mm, draw=hibord, fill=hifill},
+  fact/.style={cls, align=center, font=\footnotesize, minimum width=24mm, minimum height=10mm, draw=okbord, fill=okfill!50},
+  agent/.style={cls, align=center, font=\footnotesize, minimum width=22mm, minimum height=10mm, draw=conbord, fill=confill},
+  arr/.style={{Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[board] (bb) at (0, 3) {블랙보드};
+\node[fact] (fa) at (-4, 3) {사실 A};
+\node[fact] (fb) at (0, 3) {사실 B};
+\node[fact] (fc) at (4, 3) {사실 C};
+
+\node[agent] (a1) at (-4, 0) {에이전트 1};
+\node[agent] (a2) at (0, 0) {에이전트 2};
+\node[agent] (a3) at (4, 0) {에이전트 3};
+
+\draw[arr] (a1.north) -- (fa.south);
+\draw[arr] (a2.north) -- (fb.south);
+\draw[arr] (a3.north) -- (fc.south);
+
+\end{tikzpicture}
+\end{document}

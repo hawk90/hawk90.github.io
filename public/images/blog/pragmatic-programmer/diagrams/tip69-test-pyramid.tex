@@ -1,0 +1,42 @@
+% tip69-test-pyramid.tex — Test Pyramid diagram
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{kotex}
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+% Pyramid layers (bottom to top)
+\coordinate (base-left) at (-3, 0);
+\coordinate (base-right) at (3, 0);
+\coordinate (mid-left) at (-2, 1.5);
+\coordinate (mid-right) at (2, 1.5);
+\coordinate (top-left) at (-1, 3);
+\coordinate (top-right) at (1, 3);
+\coordinate (apex) at (0, 4.5);
+
+% Unit tests (bottom layer) - green
+\fill[impfill] (base-left) -- (base-right) -- (mid-right) -- (mid-left) -- cycle;
+\draw[draw=impbord, line width=0.5pt] (base-left) -- (base-right) -- (mid-right) -- (mid-left) -- cycle;
+
+% Integration tests (middle layer) - blue
+\fill[absfill] (mid-left) -- (mid-right) -- (top-right) -- (top-left) -- cycle;
+\draw[draw=absbord, line width=0.5pt] (mid-left) -- (mid-right) -- (top-right) -- (top-left) -- cycle;
+
+% E2E tests (top layer) - orange/yellow
+\fill[hifill] (top-left) -- (top-right) -- (apex) -- cycle;
+\draw[draw=hibord, line width=0.5pt] (top-left) -- (top-right) -- (apex) -- cycle;
+
+% Labels inside pyramid
+\node[font=\sffamily\small\bfseries, text=impbord] at (0, 0.75) {단위 테스트};
+\node[font=\sffamily\small\bfseries, text=absbord] at (0, 2.25) {통합 테스트};
+\node[font=\sffamily\small\bfseries, text=hibord] at (0, 3.5) {E2E};
+
+% Annotations on right side
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.3, 0.75) {빠름, 많음};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.3, 2.25) {중간};
+\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3.3, 3.5) {느림, 적음};
+
+\end{tikzpicture}
+\end{document}
