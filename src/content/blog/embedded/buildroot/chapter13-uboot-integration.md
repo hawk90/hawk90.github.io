@@ -324,7 +324,10 @@ U-Boot 통합에서 가장 자주 만나는 문제 다섯 가지입니다.
 - 런타임 접근은 `fw_env.config` + `fw_printenv`/`fw_setenv`. *U-Boot 설정과 글자 단위로 일치*해야 합니다.
 - SPL은 DDR/clock 초기화와 main U-Boot 로드를 책임집니다. `BR2_TARGET_UBOOT_SPL=y`와 보드별 SPL 이름이 짝지어야 합니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 14: 빌드 캐싱 — ccache, BR2_CCACHE, per-package directories**. 30 ~ 50분짜리 toolchain·U-Boot·kernel 재빌드를 *분 단위*로 줄이는 캐싱 전략을 다룹니다.
+
 
 ## 관련 항목
 

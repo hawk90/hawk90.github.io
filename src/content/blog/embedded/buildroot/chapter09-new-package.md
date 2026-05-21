@@ -466,7 +466,10 @@ HTOP_ACME_AUTORECONF = YES
 - 디버깅은 `-rebuild`, `-reconfigure`, `-dirclean`을 적절히 골라 씁니다.
 - Python 패키지는 `_SETUP_TYPE`을 정확히 적어야 합니다(`setuptools`, `pep517` 등).
 
+## 다음 장 예고
+
 다음 편은 **Ch 10: 실전 — BeagleBone Black 시스템 처음부터 끝까지**.
+
 
 ## 관련 항목
 

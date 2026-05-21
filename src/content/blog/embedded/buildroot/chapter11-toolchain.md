@@ -306,7 +306,10 @@ $ readelf -V output/target/bin/busybox | grep GLIBC
 - libc 기본은 glibc, 소형 시스템은 musl. uClibc-ng는 legacy 전용.
 - 빌드 후 `readelf -V`로 *required GLIBC version*을 검증하는 게 가장 빠른 sanity check입니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 12: Linux 커널 customize**. Toolchain 위에 *커널과 device tree*를 어떻게 정렬하는지 다룹니다.
+
 
 ## 관련 항목
 

@@ -372,7 +372,10 @@ $ ./support/kconfig/merge_config.sh \
 - fragment 파일과 `merge_config.sh`로 production / debug 변형을 조합합니다.
 - `.config`는 산물이고, `defconfig`가 공식 정의입니다. 이 분리를 흐리지 마세요.
 
+## 다음 장 예고
+
 다음 편은 **Ch 4: 첫 빌드 — QEMU에서 동작하는 시스템**. `git clone`에서 부팅 prompt까지 전체 흐름을 따라갑니다.
+
 
 ## 관련 항목
 

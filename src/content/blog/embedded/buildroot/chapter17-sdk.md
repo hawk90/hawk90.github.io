@@ -396,7 +396,10 @@ v1.4.2 SDK로 application을 빌드해 v1.3.0 보드에 올리면 *glibc·라이
 - Yocto SDK는 메타 정보까지 묶고 eSDK는 recipe 추가가 가능합니다. Buildroot SDK는 *static*이라 의존성 변경 시 시스템 팀의 재발급이 필요합니다.
 - 흔한 사고는 relocate 누락, host architecture mismatch, sysroot 수동 수정, SDK·image 버전 어긋남입니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 18: Security·CVE 추적**. SDK·image를 만든 뒤 *유지보수 기간 내내* 따라붙는 보안 패치와 CVE 모니터링을 다룹니다.
+
 
 ## 관련 항목
 

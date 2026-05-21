@@ -406,7 +406,10 @@ Matrix 경로는 *최대 40 MHz*가 안전한 상한입니다. *80 MHz*는 *IO M
 - MCPWM은 *모터 제어 전용*으로 *데드타임·fault detection·동기 트리거*를 제공해 BLDC와 스테퍼에 적합합니다.
 - 서보 모터는 *MCPWM 50 Hz + 1~2 ms duty*로 0~180도 제어가 가능합니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 5: 시리얼 통신 4종 — UART·SPI·I2C·I2S**입니다. *DMA 활용*과 *polling vs 인터럽트 vs DMA* 처리량·지연 비교를 다루고, SSD1306 OLED와 SD card 실습이 들어갑니다.
+
 
 ## 관련 항목
 

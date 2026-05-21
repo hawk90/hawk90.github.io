@@ -356,7 +356,10 @@ void spl_dram_init(void)
 - training 통과 후 *memtester + stress-ng + 온도 sweep + resume cycle*까지 통과해야 양산 진입.
 - 여러 PCB revision은 *런타임 board ID 식별 + DDR config 선택*으로 처리합니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 27: 신뢰 체인(Chain of Trust)**. ROM → SPL → ATF → U-Boot → kernel 각 단계에서 *어떤 서명·검증*이 일어나는지, fused key가 어떻게 흐르는지 봅니다.
+
 
 ## 관련 항목
 

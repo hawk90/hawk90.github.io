@@ -345,7 +345,10 @@ NVS 파티션이 작으면 *binary blob 몇 개*만 넣어도 차버립니다. *
 - OTA는 *A/B 파티션 + otadata*로 동작하고, *valid mark 호출*이 없으면 자동 롤백되어 brick을 막습니다.
 - IRAM은 *희소 자원*이므로 `IRAM_ATTR`은 *진짜 cache-miss-critical*에만 붙이고 일반 코드는 flash cache에 둡니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 4: GPIO·LEDC·MCPWM — 디지털 출력의 세 모드**입니다. 22개 GPIO가 *GPIO Matrix를 통해 어떻게 페리퍼럴과 연결되는지*, LEDC와 MCPWM이 *무엇이 다른지* 풀어봅니다.
+
 
 ## 관련 항목
 

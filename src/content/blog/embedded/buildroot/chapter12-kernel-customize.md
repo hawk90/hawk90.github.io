@@ -336,7 +336,10 @@ Ch 11에서 다룬 ABI 문제의 *커널 쪽* 사례입니다. External toolchai
 - Headers ≤ 커널 버전 규칙은 toolchain·커널 사이에서도 유효합니다. external toolchain의 headers 버전이 커널보다 낮아야 syscall 사고가 없습니다.
 - 양산 트리는 `linux-update-defconfig` + fragment 분리 패턴으로 유지하는 게 *변경 추적*에 가장 좋습니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 13: U-Boot 통합**. 같은 device tree·toolchain 위에 *부트로더*를 어떻게 정렬해 single source of truth를 유지하는지 다룹니다.
+
 
 ## 관련 항목
 

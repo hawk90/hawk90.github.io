@@ -289,7 +289,10 @@ output/images/rootfs.<format>
 - `dl/`은 다운로드 캐시이며, 팀 단위에서는 공유 mount로 운영하는 것이 효율적입니다.
 - 본체 디렉터리에 직접 수정·패치를 쌓지 말고, 변경은 패치 파일 또는 `BR2_EXTERNAL`로 분리합니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 3: Kconfig 설정 — menuconfig와 defconfig**. `make menuconfig`의 8개 메뉴를 한 번에 둘러봅니다.
+
 
 ## 관련 항목
 

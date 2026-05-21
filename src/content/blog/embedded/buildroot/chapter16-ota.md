@@ -371,7 +371,10 @@ rauc-install: signature verification failed: certificate not trusted
 - partition layout의 시작점은 *boot + rootfs-A + rootfs-B + appdata + data + recovery*의 6개. eMMC 4 GB 기준 *800 MB × 2*가 흔한 비율입니다.
 - 양산은 *CA chain + active rollback (health check) + watchdog*의 3단 방어가 default. RTC 배터리·NTP 동기까지 chain의 일부로 봐야 합니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 17: SDK 생성·배포 — `make sdk`와 application 워크플로**. OTA로 *시스템 이미지*를 갱신하는 흐름을 마쳤다면, 그 위에서 *application 개발자*가 어떻게 빌드 환경을 받아 쓰는지 다룹니다.
+
 
 ## 관련 항목
 

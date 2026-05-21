@@ -377,7 +377,10 @@ $ make myapp-install
 - 변경은 *source 직접 수정 금지*, `0001-*.patch`로 영구화합니다.
 - 빌드 디버깅은 `make <pkg>-extract` / `patch` / `configure` / `build` / `install`을 단계별로 끊어 갑니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 6: 외부 트리 — BR2_EXTERNAL**. 회사·팀의 패키지·보드를 Buildroot 본체와 분리하는 메커니즘을 다룹니다.
+
 
 ## 관련 항목
 

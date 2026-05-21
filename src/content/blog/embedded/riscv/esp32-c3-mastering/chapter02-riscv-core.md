@@ -317,7 +317,10 @@ ESP-IDF는 *기본적으로 -fno-exceptions*입니다. `menuconfig`에서 활성
 - 부트 시퀀스는 *ROM → 2nd-stage bootloader → application* 3단계이며 PMP는 *2단계에서 활성*됩니다.
 - ESP-IDF 사용자는 *대부분 ISA를 몰라도 무방*하지만 *인라인 어셈블리·secure boot·panic 해석*에서 RISC-V 지식이 필요합니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 3: 메모리 맵·플래시·SPIFFS/LittleFS**입니다. *400 KB SRAM과 4 MB flash*가 *어떻게 영역으로 나뉘는지*, 파티션 테이블과 OTA 동작을 다룹니다.
+
 
 ## 관련 항목
 

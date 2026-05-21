@@ -372,7 +372,10 @@ GitLab/Actions의 *artifact 크기 제한*에 주의합니다. GitHub Actions는
 - 산출물은 git tag/SHA로 식별. 큰 산출물은 S3로, CI artifact는 메타데이터만.
 - 흔한 함정은 SHA 키·root ccache·artifact 한도·output 캐시 6가지입니다.
 
+## 다음 장 예고
+
 다음 편은 **Ch 20: Yocto로의 migration**. Buildroot로 양산한 시스템을 Yocto로 옮길 때 어떤 결정과 매핑이 필요한지를 다룹니다.
+
 
 ## 관련 항목
 
