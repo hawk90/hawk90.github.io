@@ -208,14 +208,7 @@ int main() {
 
 ### 추상화 레벨
 
-```
-High   ─┬─ Transactional Memory
-Level   │  Concurrent Collections (std::concurrent_*)
-        │  Locks and Conditions (std::mutex, std::condition_variable)
-        │  Atomic Operations (std::atomic, stdatomic.h)
-Low    ─┴─ Memory Model (std::memory_order)
-Level
-```
+![Concurrency primitives by abstraction level](/images/blog/parallel-principles/diagrams/ch01-concurrency-layers.svg)
 
 **위로 갈수록**: 사용하기 쉬움, 성능 손실 가능
 **아래로 갈수록**: 성능 좋음, 버그 위험

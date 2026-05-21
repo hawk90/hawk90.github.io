@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=14mm and 32mm,
+  stx/.style={cls, font=\sffamily\footnotesize, minimum width=36mm, minimum height=10mm,
+              draw=hibord, fill=hifill, rounded corners=2pt},
+  meta/.style={cls, font=\sffamily\footnotesize, minimum width=30mm, minimum height=10mm,
+               draw=absbord, fill=absfill, rounded corners=2pt},
+  ext/.style={-{Triangle[length=3.5mm,width=3.5mm]}, draw=edgec, line width=0.55pt},
+  lbl/.style={font=\sffamily\scriptsize, midway, above, fill=white, inner sep=1pt}
+]
+
+\node[stx] (s1) {«stereotype» Entity};
+\node[stx, below=of s1] (s2) {«stereotype» SessionBean};
+\node[stx, below=of s2] (s3) {«stereotype» EJB};
+
+\node[meta, right=of s1] (m1) {Class};
+\node[meta, right=of s2] (m2) {Class};
+\node[meta, right=of s3] (m3) {Component};
+
+\draw[ext] (s1) -- node[lbl] {«extension»} (m1);
+\draw[ext] (s2) -- node[lbl] {«extension»} (m2);
+\draw[ext] (s3) -- node[lbl] {«extension»} (m3);
+
+\end{tikzpicture}
+\end{document}

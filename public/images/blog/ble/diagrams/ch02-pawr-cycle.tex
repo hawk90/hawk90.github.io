@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  adv/.style={cls, align=center, font=\scriptsize, minimum width=22mm, minimum height=10mm, draw=hibord, fill=hifill},
+  slot/.style={cls, align=center, font=\scriptsize, minimum width=34mm, minimum height=8mm, draw=okbord, fill=okfill},
+  cycle/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=east}
+]
+
+\node[font=\sffamily\bfseries\small, anchor=south] at (3.5, 5.2) {PAwR 한 사이클};
+
+\node[cycle] at (-0.3, 4.5) {T0};
+\node[adv] (a0) at (1.5, 4.5) {광고};
+\node[slot] (s1) at (6, 4.5) {슬롯 1 응답 (디바이스 A)};
+\node[slot] (s2) at (6, 3.3) {슬롯 2 응답 (디바이스 B)};
+\node[slot] (s3) at (6, 2.1) {슬롯 3 응답 (디바이스 C)};
+\node[font=\sffamily\scriptsize, text=mutec] at (6, 1.1) {…};
+
+\draw[draw=edgec, line width=0.5pt] (a0.east) -- (s1.west);
+\draw[draw=edgec, line width=0.5pt] (a0.east) -- (s2.west);
+\draw[draw=edgec, line width=0.5pt] (a0.east) -- (s3.west);
+
+\node[cycle] at (-0.3, 0) {T1};
+\node[adv] (a1) at (1.5, 0) {광고};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (3.0, 0) {(다음 사이클)};
+
+\end{tikzpicture}
+\end{document}

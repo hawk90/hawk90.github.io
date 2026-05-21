@@ -51,12 +51,7 @@ printk(KERN_CONT "done\n");
 
 ## printk 출력 경로
 
-```
-printk(...) → __log_buf (ring buffer) → ┬─ console (TTY/serial)
-                                          └─ syslogd / journald
-                                          └─ /proc/kmsg
-                                          └─ /dev/kmsg
-```
+![printk fans out from __log_buf to console, syslogd, /proc/kmsg, /dev/kmsg](/images/blog/debugging/kernel/diagrams/ch02-printk-fanout.svg)
 
 여러 destination이 동시에. *console*은 console_loglevel 이하만 표시 (기본 7 또는 4).
 

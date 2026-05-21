@@ -45,9 +45,7 @@ API/구현 분리를 표현하는 핵심 도구.
 
 ## 패키지 의존
 
-```
-[Sales] ──┈┈▶ [Common]
-```
+![Sales package depends on Common](/images/blog/uml/diagrams/item12-sales-common-dep.svg)
 
 점선 화살표(`<<use>>`, `<<import>>`)로 의존을 표현. 의존은 다음을 만들지 말아야 합니다.
 

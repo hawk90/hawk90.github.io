@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  core/.style={cls, align=center, font=\footnotesize, minimum width=44mm, minimum height=14mm, draw=hibord, fill=hifill},
+  api/.style={cls, align=center, font=\ttfamily\scriptsize, minimum width=44mm, minimum height=10mm, draw=okbord, fill=okfill},
+  mem/.style={cls, align=center, font=\footnotesize, minimum width=68mm, minimum height=14mm, draw=conbord, fill=confill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[font=\sffamily\bfseries\small, anchor=south] at (4, 6.4) {RP2040 AMP — dual M0+ shared stream buffer};
+
+\node[core] (c0) at (0, 5) {Core 0 (M0+, 송신)};
+\node[core] (c1) at (8, 5) {Core 1 (M0+, 수신)};
+
+\node[api] (s) at (0, 3.0) {xStreamBufferSend};
+\node[api] (r) at (8, 3.0) {xStreamBufferReceive};
+
+\draw[arr] (c0.south) -- (s.north);
+\draw[arr] (c1.south) -- (r.north);
+
+\node[mem] (sram) at (4, 1.0) {SRAM (shared) — stream buffer\\[1pt]\scriptsize 공유 SRAM bank};
+\draw[arr] (s.south) -- (sram.north -| s.south);
+\draw[arr] (sram.north -| r.south) -- (r.south);
+
+\end{tikzpicture}
+\end{document}

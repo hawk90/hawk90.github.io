@@ -263,80 +263,91 @@ PR이 *defect 발견 시* 작성.
 
 ### CR vs PR
 
-```
-CR (Change Request) : Planned change for *new functionality* or *enhancement*
-PR (Problem Report) : *Defect* discovered, requires fix
-```
+| 종류 | 의미 |
+|------|------|
+| **CR** (Change Request) | Planned change for *new functionality* or *enhancement* |
+| **PR** (Problem Report) | *Defect* discovered, requires fix |
 
 큰 CR은 *수십 PR*로 분해될 수 있음.
 
 ### CR/PR Document Example
 
+**Problem Report PR-2024-1089**
+
+| 필드 | 값 |
+|------|-----|
+| ID | PR-2024-1089 |
+| Title | Pitch PID anti-windup off-by-one in negative direction |
+| Severity | Major |
+| Reporter | Mike Lee (Test Engineer) |
+| Reported Date | 2024-08-12 |
+
+**Affected items:**
+
+| 종류 | ID |
+|------|-----|
+| SCI | KF21-FMS-CODE-pitch_controller.c-2.0.2 |
+| LLR | LLR-PFC-103 |
+| Test | TC-PFC-103-005 (Pitch with negative integral wind-up) |
+
+**Description:** Negative integral term이 누적될 때 `-10.0`의 clamp가 제대로 적용되지 않음. 관측: `i_term`이 0.1초 안에 `-10.5`까지 도달. 기대: `i_term`이 `-10.0`에서 cap.
+
+**Steps to Reproduce:**
+
+1. `state.i_term = -9.5`, `state.prev_error = 0`으로 초기화
+2. `pitch_pid_compute(-20.0, +10.0, ...)` 반복 호출
+3. 5회 반복 후 `state.i_term` 관찰 — 결과 `-10.45` (기대 `-10.0`)
+
+**Root Cause:** Line 78 — `if (state->i_term < -I_TERM_LIMIT) state->i_term = -I_TERM_LIMIT;` 인데 *순서*가 새 contribution을 더하기 *전에* clamp.
+
+**Fix:** 모든 accumulation *이후* clamp:
+
+```c
+state->i_term += K_I * error * DT;
+state->i_term = clamp(state->i_term, -I_TERM_LIMIT, +I_TERM_LIMIT);
 ```
-=== Problem Report PR-2024-1089 ===
 
-ID:                PR-2024-1089
-Title:             Pitch PID anti-windup off-by-one in negative direction
-Severity:          Major
-Reporter:          Mike Lee (Test Engineer)
-Reported Date:     2024-08-12
+**Affected Components:**
 
-Affected:
-  SCI:             KF21-FMS-CODE-pitch_controller.c-2.0.2
-  LLR:             LLR-PFC-103
-  Test:            TC-PFC-103-005 (Pitch with negative integral wind-up)
+- `pitch_controller.c` — fix code
+- `TC-PFC-103-005` — update test (잘못된 조건 확인 중이었음)
+- `TC-PFC-103-012` — add new test for boundary
 
-Description:
-  When negative integral term accumulates, the clamp at -10.0 is NOT
-  applied correctly. Observed: i_term reached -10.5 in 0.1 second.
-  Expected: i_term capped at -10.0.
+**Impact:**
 
-Steps to Reproduce:
-  1. Initialize: state.i_term = -9.5, state.prev_error = 0
-  2. Call pitch_pid_compute(-20.0, +10.0, ...) repeatedly
-  3. Observe state.i_term after 5 iterations
-  Result: i_term = -10.45 (expected -10.0)
+| 영역 | 영향 |
+|------|------|
+| 비행 안전 | Pitch overshoot in extreme maneuvers (HIL detected) |
+| Schedule | 1 week delay |
+| DAL impact | A/B 둘 다 영향, 같은 fix |
 
-Root Cause:
-  Line 78: if (state->i_term < -I_TERM_LIMIT) state->i_term = -I_TERM_LIMIT;
-  But ordering: clamp BEFORE adding new contribution
+Discovered During: HIL test session 2024-08-12, aerobatic scenario.
 
-Fix:
-  Add clamp AFTER all accumulation:
-    state->i_term += K_I * error * DT;
-    state->i_term = clamp(state->i_term, -I_TERM_LIMIT, +I_TERM_LIMIT);
+**Status History:**
 
-Affected Components:
-  - pitch_controller.c (fix code)
-  - TC-PFC-103-005 (update test, was checking wrong condition)
-  - TC-PFC-103-012 (add new test for boundary)
+| 상태 | 날짜 | 담당 |
+|------|------|------|
+| OPEN | 2024-08-12 | Mike Lee |
+| ANALYZING | 2024-08-13 | John Smith |
+| FIXED | 2024-08-15 | John Smith (commit `4f2a8c1`) |
+| VERIFIED | 2024-08-19 | Alex Park (independent verifier) |
+| CLOSED | 2024-08-22 | Sarah Kim (SQA) |
 
-Impact:
-  - 비행 안전: Pitch overshoot in extreme maneuvers (HIL detected)
-  - Schedule: 1 week delay
-  - DAL impact: A/B both affected, same fix
+**Resolution Verified:**
 
-Discovered During: HIL test session 2024-08-12, aerobatic scenario
+- Original failing test TC-PFC-103-005 — PASS
+- New boundary test TC-PFC-103-012 — PASS
+- HIL re-test scenario 2024-08-12 — PASS
+- Coverage maintained 100%
 
-Status History:
-  OPEN       2024-08-12   Mike Lee
-  ANALYZING  2024-08-13   John Smith
-  FIXED      2024-08-15   John Smith (commit 4f2a8c1)
-  VERIFIED   2024-08-19   Alex Park (independent verifier)
-  CLOSED     2024-08-22   Sarah Kim (SQA)
+**Approvals:**
 
-Resolution Verified:
-  - Original failing test TC-PFC-103-005: PASS
-  - New boundary test TC-PFC-103-012: PASS
-  - HIL re-test scenario 2024-08-12: PASS
-  - Coverage maintained 100%
-
-Approvals:
-  Module Owner:    John Smith
-  Test Lead:       Mike Lee
-  SQA:             Sarah Kim
-  CCB Closure:     CCB Meeting 2024-08-26 (minute 2024-086)
-```
+| Role | Name |
+|------|------|
+| Module Owner | John Smith |
+| Test Lead | Mike Lee |
+| SQA | Sarah Kim |
+| CCB Closure | CCB Meeting 2024-08-26 (minute 2024-086) |
 
 이런 *level of detail*이 *open PR 수 적게 유지*. *심사관이 좋아하는 형식*.
 
@@ -344,34 +355,23 @@ Approvals:
 
 ### IBM Rational ClearCase
 
-```
-20년+ 항공 산업 표준
-강점:
-  - UCM (Unified Change Management) — branch+CR 통합
-  - Triggers (custom workflow)
-  - 큰 binary 처리
+20년+ 항공 산업 표준.
 
-약점:
-  - Slow, complex, 비쌈
-  - Modern dev workflow와 충돌
-  - 점점 시장에서 밀려남
-```
+| 측면 | 내용 |
+|------|------|
+| 강점 | UCM (Unified Change Management) — branch+CR 통합 / Triggers (custom workflow) / 큰 binary 처리 |
+| 약점 | Slow, complex, 비쌈 / Modern dev workflow와 충돌 / 점점 시장에서 밀려남 |
 
 대형 항공 OEM과 legacy 프로젝트가 *ClearCase* 광범위 사용한 사례 공개 (Boeing, Airbus 등).
 
 ### Git (with workflow)
 
-```
-신세대 항공 + 자동차 표준
-강점:
-  - Fast, distributed
-  - 풍부한 toolchain
-  - Open source
+신세대 항공 + 자동차 표준.
 
-약점:
-  - Binary 파일 부적합 (LFS 필요)
-  - 인증 trail 직접 구축
-```
+| 측면 | 내용 |
+|------|------|
+| 강점 | Fast, distributed / 풍부한 toolchain / Open source |
+| 약점 | Binary 파일 부적합 (LFS 필요) / 인증 trail 직접 구축 |
 
 신규 항공·우주 프로젝트와 신생 회사가 *Git* 채택하는 추세.
 
@@ -406,18 +406,14 @@ Approvals:
 
 ### JIRA / DOORS Next Gen for PR/CR Management
 
-```
-DOORS NG (IBM)         : 항공 표준, requirements + change
-JIRA                    : 자동차 + 항공 신생
-Polarion (Siemens)      : 통합 (requirements + change)
-HP/Micro Focus ALM      : 일부 큰 OEM
+| 도구 | 포지셔닝 |
+|------|----------|
+| DOORS NG (IBM) | 항공 표준, requirements + change |
+| JIRA | 자동차 + 항공 신생 |
+| Polarion (Siemens) | 통합 (requirements + change) |
+| HP/Micro Focus ALM | 일부 큰 OEM |
 
-각 도구가:
-  - PR/CR 등록
-  - Workflow 자동화
-  - CCB 미팅 자료 생성
-  - Status accounting report
-```
+각 도구가 *PR/CR 등록*, *workflow 자동화*, *CCB 미팅 자료 생성*, *status accounting report* 기능을 제공한다.
 
 ## Audits — Configuration Audits
 
@@ -483,13 +479,13 @@ PCA가 *PSAC §6의 lifecycle data 목록과 일치* 확인.
 
 ## A-9 — SQA (5 obj)
 
-```
-A-9-1  Plans·Standards 적용·확인         ✓+I 모든 DAL
-A-9-2  SW lifecycle process 적용·확인    ✓+I 모든 DAL
-A-9-3  Transition criteria 충족          ✓+I DAL A/B/C
-A-9-4  SAS 작성                          ✓+I 모든 DAL
-A-9-5  SQA 활동 기록                     ✓+I 모든 DAL
-```
+| Obj | 내용 | Independence | DAL |
+|-----|------|--------------|-----|
+| A-9-1 | Plans·Standards 적용·확인 | ✓+I | 모든 DAL |
+| A-9-2 | SW lifecycle process 적용·확인 | ✓+I | 모든 DAL |
+| A-9-3 | Transition criteria 충족 | ✓+I | A/B/C |
+| A-9-4 | SAS 작성 | ✓+I | 모든 DAL |
+| A-9-5 | SQA 활동 기록 | ✓+I | 모든 DAL |
 
 **모든 obj에 Independence 의무**. SQA는 *조직 차원 독립* 필수.
 
@@ -515,15 +511,13 @@ A-9-5  SQA 활동 기록                     ✓+I 모든 DAL
 
 ### SQA Team Size
 
-```
-Project size       Engineering    SQA
-─────────────────────────────────
-Small (10 ppl)        7-8         1-2
-Medium (50 ppl)      40-45        4-5
-Large (200 ppl)     160-170      20-25
+| Project size | Engineering | SQA |
+|--------------|-------------|-----|
+| Small (10 ppl) | 7–8 | 1–2 |
+| Medium (50 ppl) | 40–45 | 4–5 |
+| Large (200 ppl) | 160–170 | 20–25 |
 
-비율: 약 10-15% of total engineering
-```
+비율은 약 *10-15% of total engineering*.
 
 큰 조직은 *SQA가 별도 부서*. 작은 조직은 *전담 SQA 1-2명* + *consultants*.
 
@@ -563,50 +557,42 @@ Large (200 ppl)     160-170      20-25
 
 ### SQA Finding Example
 
-```
-=== SQA Finding SQAF-2024-067 ===
+**SQA Finding SQAF-2024-067**
 
-Date:           2024-09-15
-Subject:        Code review compliance audit
-Auditor:        Sarah Kim (SQA)
-Audit Type:     Process Audit
+| 필드 | 값 |
+|------|-----|
+| Date | 2024-09-15 |
+| Subject | Code review compliance audit |
+| Auditor | Sarah Kim (SQA) |
+| Audit Type | Process Audit |
+| Sample | 5 code review records from past 30 days — FRR-2024-130, 131, 132, 133, 134 |
 
-Sample:         5 code review records from past 30 days
-                FRR-2024-130, 131, 132, 133, 134
+**Major Finding M-1** — FRR-2024-131 (`pitch_controller.c` review).
 
-Findings:
+SDP §6.4가 요구하는 attendees는 Author + Independent Reviewer + Test Engineer + SQA. 실제 attendees는 Author + Reviewer 둘 뿐. *Test Engineer*, *SQA* 누락.
 
-  Major Finding M-1:
-    FRR-2024-131 (pitch_controller.c review)
-    Required attendees per SDP §6.4: Author, Independent Reviewer,
-    Test Engineer, SQA
-    Actual attendees: Author + Reviewer only
-    Missing: Test Engineer, SQA
+Impact — Review not compliant with DO-178C A-5-2 with Independence.
 
-    Impact: Review not compliant with DO-178C A-5-2 with Independence
+Required Action:
 
-    Required Action:
-      1. Re-conduct review with all required attendees
-      2. Update SDP §6.4 to clarify required attendees
-      3. Train review chairs on attendee requirements
+1. 모든 required attendees와 함께 review 재진행
+2. SDP §6.4에 required attendees 명확화
+3. Review chair에게 attendee 요구사항 교육
 
-    Due Date: 2024-09-29
+Due Date — 2024-09-29.
 
-  Minor Finding m-1:
-    Review records FRR-130, 132, 133 missing "Total preparation time"
-    field as required by Review Procedure RP-001 §4.
+**Minor Finding m-1** — Review records FRR-130, 132, 133이 Review Procedure RP-001 §4가 요구하는 "Total preparation time" 필드 누락.
 
-    Required Action:
-      Update Review Procedure form to make field mandatory.
+Required Action — Review Procedure form에서 해당 필드를 *mandatory*로 변경.
 
-    Due Date: 2024-10-15
+Due Date — 2024-10-15.
 
-Status:         OPEN
-SQA Manager:    T. Park (notified)
-Tracked:        DOORS module SQA-Findings
-
-Closure Plan:   Re-audit after fixes (2024-10-30)
-```
+| 필드 | 값 |
+|------|-----|
+| Status | OPEN |
+| SQA Manager | T. Park (notified) |
+| Tracked | DOORS module SQA-Findings |
+| Closure Plan | Re-audit after fixes (2024-10-30) |
 
 이런 *공식 finding*이 *SOI 3 audit*에서 *과거 record 검토 시 사용*.
 

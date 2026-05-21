@@ -50,12 +50,7 @@ auto result = std::move(f)
 
 ## 핵심 타입 세 가지
 
-```text
-Promise<T>      ──setValue/setException──▶  Core<T>  ──.thenValue──▶  Future<T>
-                                              ▲
-                                              │
-                              SemiFuture<T> ──┘ (.via(executor) 필요)
-```
+![Promise / Core / Future / SemiFuture relationship](/images/blog/folly/diagrams/part2-01-promise-core-future.svg)
 
 | 타입 | 역할 |
 |------|------|

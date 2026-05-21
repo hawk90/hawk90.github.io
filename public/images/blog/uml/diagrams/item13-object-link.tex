@@ -1,0 +1,24 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=30mm,
+  obj/.style={cls, minimum width=30mm, minimum height=10mm,
+              font=\sffamily\footnotesize, label distance=0pt}
+]
+
+% Instance names are underlined per UML convention
+\node[obj] (o1) {\underline{o1 : Order}};
+\node[obj, right=of o1] (c1) {\underline{c1 : Customer}};
+
+\draw[draw=edgec, line width=0.55pt]
+  (o1) -- node[font=\sffamily\scriptsize, midway, above, fill=white, inner sep=2pt] {owner} (c1);
+
+\node[font=\sffamily\scriptsize, anchor=south] at ($(o1)!.5!(c1) + (0, 0.9)$) {링크 — 객체 사이의 연관 인스턴스};
+
+\end{tikzpicture}
+\end{document}

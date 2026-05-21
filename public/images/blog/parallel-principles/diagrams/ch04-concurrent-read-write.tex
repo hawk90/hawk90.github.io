@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  th/.style={cls, align=center, font=\footnotesize, minimum width=44mm, minimum height=10mm},
+  ta/.style={th, draw=hibord, fill=hifill},
+  tb/.style={th, draw=okbord, fill=okfill},
+  qm/.style={cls, align=center, font=\sffamily\bfseries\large, minimum width=14mm, minimum height=14mm, draw=warnbord, fill=warnfill, circle},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[ta] (a) at (0, 2) {스레드 A: write(1)};
+\node[tb] (b) at (0, 0) {스레드 B: read()};
+
+\node[qm] (q) at (5, 1) {?};
+
+\draw[arr] (a.east) -- (q.north west);
+\draw[arr] (b.east) -- (q.south west);
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (6.5, 1) {무엇이 반환되나?};
+
+\end{tikzpicture}
+\end{document}

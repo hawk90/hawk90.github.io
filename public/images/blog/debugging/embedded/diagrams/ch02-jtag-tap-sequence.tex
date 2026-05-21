@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, x=0.9cm, y=1cm,
+  bit/.style={cls, align=center, font=\ttfamily\footnotesize\bfseries, minimum width=8mm, minimum height=10mm, draw=edgec, fill=hifill},
+  ph/.style={font=\sffamily\scriptsize, anchor=north, align=center, text=mutec},
+  brace/.style={decorate, decoration={brace, mirror, amplitude=4pt}, draw=mutec}
+]
+
+\node[font=\sffamily\bfseries\small, anchor=south] at (7, 2.6) {JTAG TAP state-transition (TMS sequence)};
+
+% TMS bits
+\foreach \i/\v in {0/1, 1/1, 2/1, 3/1, 4/1, 5/0, 6/1, 7/1, 8/0, 9/0, 10/0, 11/0, 12/1, 13/1, 14/0} {
+  \node[bit] (b\i) at (\i, 1.5) {\v};
+}
+
+% Phase brace: bits 0-4 = Reset 보장
+\draw[brace] (b0.south west) -- (b4.south east)
+  node[ph, midway, yshift=-3pt] {Reset 보장};
+
+% Annotations for selected bits (5..13) — rotated to fit
+\node[ph, rotate=-45, anchor=north east] at (b5.south)  {Run-Test/Idle};
+\node[ph, rotate=-45, anchor=north east] at (b6.south)  {Select-IR-Scan};
+\node[ph, rotate=-45, anchor=north east] at (b7.south)  {Capture-IR};
+\node[ph, rotate=-45, anchor=north east] at (b9.south)  {Shift-IR (4 비트)};
+\node[ph, rotate=-45, anchor=north east] at (b13.south) {Update-IR};
+
+% TDI row
+\node[font=\sffamily\bfseries\footnotesize, anchor=east] at (-0.5, 0.4) {TDI:};
+\foreach \i in {6,7,8,9} {
+  \node[bit, fill=okfill] at (\i, 0.4) {0};
+}
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (10, 0.4) {IR에 0x00을 4비트 시프트};
+
+\node[font=\sffamily\bfseries\footnotesize, anchor=east] at (-0.5, 1.5) {TMS:};
+
+\end{tikzpicture}
+\end{document}

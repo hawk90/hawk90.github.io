@@ -17,38 +17,7 @@ tags: [embedded, bootloader, smp, psci, arm64, kernel, hotplug]
 
 ARMv8-A 부트 체인은 *primary CPU 한 명만*으로 진행된다. BL1·BL2는 *single CPU 가정*으로 짜여 있다. 나머지 CPU 코어들은 reset 직후 *holding pen* 또는 *WFI*로 묶여 있다.
 
-```text
-                  Primary CPU 진행                                  Secondary CPU 진행
-                  ───────────────                                   ──────────────────
-[Reset]              모두 hold/WFI
-   ▼
-[BL1 (EL3)]          primary만 진입, 나머지는 hold pen
-   ▼
-[BL2 (EL3)]          DDR init, FIP 풀기
-   ▼
-[BL31 (EL3)]         runtime svc init, PSCI 등록
-                                                                   여전히 hold/WFI
-   ▼
-[BL33 (EL2)]         U-Boot, 커널 적재
-   ▼
-[Linux primary]      MMU 설정, scheduler init
-   ▼
-[smp_init_cpus]      DT의 cpu@N 노드 enumerate
-   ▼
-[cpu_up(1)]          PSCI CPU_ON SMC ──────────────────────────┐
-                                                               ▼
-                                                          [BL31 warm boot path]
-                                                               ▼
-                                                          [secondary_entry (커널)]
-                                                               ▼
-                                                          [secondary_startup (asm)]
-                                                               ▼
-                                                          [__secondary_switched]
-                                                               ▼
-                                                          [secondary_start_kernel (C)]
-                                                               ▼
-[cpu_up(2)] ...                                            CPU1 ONLINE
-```
+![SMP bring-up: primary boots alone, then PSCI CPU_ON wakes secondaries](/images/blog/bootloader/diagrams/ch33-smp-bringup-flow.svg)
 
 primary가 *부트의 거의 끝까지* 혼자 가고, 마지막에 secondary들을 한 명씩 깨운다. 이 모델의 장점은 *부트 초반의 race를 원천 차단*하는 것이다. DDR initialization, secure carveout setup, MMU page table build 같이 *원자적 단일 흐름이 필요한 작업*을 race 걱정 없이 진행할 수 있다.
 

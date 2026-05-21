@@ -81,10 +81,7 @@ A가 B를 extend 하면, **조건 만족 시에만** B가 실행됨.
 
 actor도 use case도 일반화 가능.
 
-```
-Premium Customer ── ▷ Customer    (actor generalization)
-[Express Place Order] ─▷ [Place Order]   (UC generalization)
-```
+![Actor and use-case generalization arrows](/images/blog/uml/diagrams/item17-usecase-generalization.svg)
 
 ## 시스템 경계 — 어디까지가 우리?
 

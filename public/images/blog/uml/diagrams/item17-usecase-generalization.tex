@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  actor/.style={font=\sffamily\footnotesize, align=center,
+                draw=edgec, fill=hifill, line width=0.5pt,
+                minimum width=30mm, minimum height=8mm, rounded corners=2pt},
+  uc/.style={ellipse, draw=edgec, fill=okfill, line width=0.5pt,
+             font=\sffamily\footnotesize, align=center,
+             minimum width=34mm, minimum height=10mm},
+  gen/.style={-{Triangle[length=3mm,width=3mm,open]}, draw=edgec, line width=0.55pt}
+]
+
+% Row 1: Actor generalization
+\node[actor] (a1) {Premium Customer};
+\node[actor, right=24mm of a1] (a2) {Customer};
+\draw[gen] (a1) -- (a2);
+\node[font=\sffamily\scriptsize, above=2mm of a1] {actor generalization};
+
+% Row 2: Use case generalization
+\node[uc, below=18mm of a1] (uc1) {Express Place Order};
+\node[uc, right=18mm of uc1] (uc2) {Place Order};
+\draw[gen] (uc1) -- (uc2);
+\node[font=\sffamily\scriptsize, above=2mm of uc1] {use-case generalization};
+
+\end{tikzpicture}
+\end{document}

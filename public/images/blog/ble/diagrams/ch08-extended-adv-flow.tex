@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  pkt/.style={cls, align=center, font=\footnotesize, minimum width=44mm, minimum height=12mm},
+  prim/.style={pkt, draw=hibord, fill=hifill},
+  aux/.style={pkt, draw=okbord, fill=okfill},
+  chain/.style={pkt, draw=conbord, fill=confill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt},
+  chlbl/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=east}
+]
+
+\node[font=\sffamily\bfseries\small, anchor=south] at (5, 5.6) {Extended Advertising 흐름};
+
+% Primary channel
+\node[chlbl] at (-0.3, 4) {Primary channel (37/38/39):};
+\node[prim] (p) at (3, 4) {ADV\_EXT\_IND};
+\node[font=\sffamily\scriptsize, anchor=west] at (5.5, 4) {"data is on AUX ch X at T"};
+
+% Secondary channel
+\node[chlbl] at (-0.3, 2) {Secondary channel:};
+\node[aux] (a) at (3, 2) {AUX\_ADV\_IND\\[1pt]\scriptsize \(\sim\)254 B 데이터};
+\node[chain] (c) at (8, 2) {AUX\_CHAIN\_IND\\[1pt]\scriptsize 다음 fragment};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (11, 2) {…};
+
+\draw[arr] (p.south) to[bend right=20] (a.north);
+\draw[arr] (a.east) -- (c.west);
+\draw[arr] (c.east) -- ++(0.5, 0);
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (-0.3, 0.4)
+  {최대 1650 B 누적 (chain으로 fragment 연속)};
+
+\end{tikzpicture}
+\end{document}

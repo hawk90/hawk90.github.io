@@ -439,11 +439,7 @@ CAS의 Consensus Number = ∞
 
 5장 마지막에서 책은 **Wait-Free Hierarchy Theorem**을 정리한다.
 
-```text
-Consensus number c인 객체로는,
-  c개 이하의 스레드 환경에서만 임의의 wait-free 동시 객체를 구현 가능.
-  c+1 이상의 스레드에 대해서는 *어떤 객체* 구현이 원천 불가능.
-```
+Consensus number `c`인 객체로는 *c개 이하의 스레드 환경*에서만 임의의 wait-free 동시 객체를 구현 가능하다. *c+1 이상의 스레드*에 대해서는 *어떤 객체* 구현이 *원천 불가능*하다.
 
 이게 6장의 **Universal Construction**으로 가는 다리다. CAS는 consensus number ∞이므로, **모든** N에 대해 모든 객체를 wait-free로 구현할 수 있다 — 즉 universal.
 
@@ -589,14 +585,20 @@ void cas_example(void) {
 
 x86의 `LOCK CMPXCHG`는 한 명령으로 wait-free N-consensus를 푼다. 코드 한 줄에 들어가는 정보가 이 만큼이다.
 
-```text
+```nasm
 LOCK CMPXCHG [mem], reg
-  의미:  if (mem == EAX) { mem = reg;       ZF = 1; }
-         else            { EAX = mem;       ZF = 0; }
-  보장:  - 메모리 접근 전체가 atomic (bus lock 또는 cache line lock)
-         - 다른 코어의 CMPXCHG와 결과적으로 직렬화됨
-         - linearizable
 ```
+
+**의미:**
+
+- `if (mem == EAX) { mem = reg; ZF = 1; }`
+- `else            { EAX = mem; ZF = 0; }`
+
+**보장:**
+
+- 메모리 접근 전체가 atomic (bus lock 또는 cache line lock)
+- 다른 코어의 `CMPXCHG`와 결과적으로 직렬화됨
+- linearizable
 
 이 한 명령이 곧 5장에서 본 CAS-based consensus의 핵심 단계다. `decision`이 초기값일 때 첫 번째 CMPXCHG만 성공하고, 그 뒤는 모두 실패하며 EAX에 결정값이 들어와 즉시 반환된다. consensus number ∞의 실증.
 
@@ -624,11 +626,10 @@ ARMv8.1부터는 `CAS` 명령이 추가됐다. 단일 명령으로 CAS를 수행
 
 위 사례는 한 머신 안의 이야기다. 시야를 넓혀 분산 시스템으로 가면, 합의의 의미가 달라지고 그 비용도 달라진다.
 
-```text
-한 머신:  CAS = O(1) cycle = 수십 나노초
-분산:    consensus = O(network round trip) = 수 밀리초
-         그리고 노드 장애를 허용해야 함
-```
+| 환경 | 비용 |
+|------|------|
+| 한 머신 | CAS = O(1) cycle = 수십 나노초 |
+| 분산 | consensus = O(network round trip) = 수 밀리초, 그리고 노드 장애를 허용해야 함 |
 
 Apache Zookeeper는 **ZAB**(Zookeeper Atomic Broadcast) 프로토콜로 합의를 구현한다. 모든 쓰기가 leader를 거치고, leader가 quorum에게 propose / ack 하여 단일 순서를 만든다. consensus number는 무한대이지만, 비용이 다르다.
 
@@ -661,10 +662,7 @@ while (!prev->next.compare_exchange_weak(expected, my_node, ...)) {
 
 다음 장의 예고 — **임의의 객체를 wait-free로 구현할 수 있다**, CAS만 있으면.
 
-```
-Universal Construction:
-순차 명세 + CAS → wait-free 구현
-```
+**Universal Construction:** *순차 명세 + CAS → wait-free 구현*.
 
 이게 6장에서 본격적으로 다룬다. CAS가 "universal"이라는 의미가 명확해진다.
 

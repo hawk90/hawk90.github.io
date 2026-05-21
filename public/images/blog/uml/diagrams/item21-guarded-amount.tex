@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=60mm,
+  state/.style={cls, rounded corners=4mm, minimum width=36mm, minimum height=12mm,
+                font=\sffamily\footnotesize\bfseries, fill=hifill, draw=hibord},
+  trans/.style={-{Stealth[length=2.6mm]}, draw=edgec, line width=0.55pt}
+]
+
+\node[state] (a) {Active};
+\node[state, right=of a] (h) {HoldForReview};
+
+\draw[trans] (a) -- node[font=\sffamily\scriptsize, midway, above, fill=white, inner sep=2pt, align=center]
+  {transfer(amt)\\{[amt > limit]}} (h);
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at ($(a)!.5!(h) + (0, -1.0)$)
+  {guard 조건 만족 시에만 전이};
+
+\end{tikzpicture}
+\end{document}

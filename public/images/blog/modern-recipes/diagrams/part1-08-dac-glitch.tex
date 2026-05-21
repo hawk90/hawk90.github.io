@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1.2cm, y=1cm,
+  sig/.style={draw=hibord, line width=1pt},
+  ref/.style={draw=mutec, dashed, line width=0.3pt},
+  ann/.style={font=\sffamily\scriptsize, anchor=west}
+]
+
+\node[font=\sffamily\bfseries\small, anchor=south] at (3.5, 4.2) {DAC code 0x7FFF → 0x8000 (모든 비트 toggle)};
+
+% Reference lines for low/settled levels
+\draw[ref] (0, 2.5) -- (7, 2.5);
+
+% Waveform: low → glitch spike → settled
+\draw[sig]
+  (0, 1.5) -- (2.5, 1.5)                                 % low (before)
+  -- (2.5, 3.6) -- (2.7, 3.6) -- (2.7, 1.2) -- (2.9, 1.2)  % glitch spike
+  .. controls (3.4, 1.9) and (3.6, 3.0) ..               % oscillating
+  (4.0, 2.5)                                              % settled
+  -- (7, 2.5);                                            % settled tail
+
+% Annotations
+\node[ann, text=warnbord] at (2.75, 3.95) {↑ glitch};
+\node[ann, text=okbord] at (5, 2.85) {settled};
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (-0.2, 0.3)
+  {V\_out shows brief glitch when all bits flip, then settles after a few µs};
+
+\end{tikzpicture}
+\end{document}

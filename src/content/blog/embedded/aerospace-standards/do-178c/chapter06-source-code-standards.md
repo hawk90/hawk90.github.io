@@ -95,107 +95,87 @@ SCS는 *Plan 단계*에서 작성 (3장 참고). *Source Code Development*가 *S
 
 ## SCS 작성 예 — 항공 프로젝트
 
-```
-=== SCS — Flight Management Software (가상 template) ===
-Project: FMS v2.0
-DAL: B
-Language: C
+가상 *Flight Management Software (FMS) v2.0, DAL B, C 언어* 프로젝트의 SCS template 예시. 50~100 페이지 문서를 *섹션별 요약*으로 정리한다.
 
-1. Introduction
-   This document defines the source code standards for the
-   Flight Management Software (FMS), DAL B.
-   Applies to all production code in src/ directory.
-   Test code in tests/ may deviate per agreed exceptions.
+### 1. Introduction
 
-2. Base Coding Standard
-   MISRA C:2012 Amendment 4 (2023)
+이 문서는 *Flight Management Software (FMS) DAL B*의 source code standards를 정의한다. `src/` 디렉터리의 모든 production code에 적용된다. `tests/`의 test code는 합의된 예외에 따라 deviation 가능.
 
-   Severity assignments:
-   - Mandatory: 100% compliance, no deviation
-   - Required:  100% compliance OR deviation per §10
-   - Advisory:  per project rules below
+### 2. Base Coding Standard
 
-3. Project-Specific Rules
+MISRA C:2012 Amendment 4 (2023). Severity assignment:
 
-   3.1 Advisory → Required Promotions
-   The following MISRA Advisory rules are promoted to Required:
-   - Rule 5.9   (internal linkage identifier uniqueness)
-   - Rule 8.7   (use static when possible)
-   - Rule 11.5  (explicit cast for void *)
-   - Rule 15.4  (single break/return per loop)
-   - Rule 15.5  (single function exit point — with cleanup exception)
-   - Rule 18.4  (use [] not pointer arithmetic)
+| 분류 | 적용 |
+|------|------|
+| Mandatory | 100% compliance, no deviation |
+| Required | 100% compliance OR deviation per §10 |
+| Advisory | per project rules below |
 
-   3.2 Additional Rules
+### 3. Project-Specific Rules
 
-   PR-001: All functions ≤ 60 LSLOC (excluding comments).
-   PR-002: McCabe Cyclomatic Complexity ≤ 10.
-   PR-003: Nesting depth ≤ 4.
-   PR-004: Function parameters ≤ 6.
-   PR-005: ISR functions ≤ 30 LSLOC.
-   PR-006: All non-void function returns checked or (void) cast.
-   PR-007: No dynamic memory allocation post-init (MISRA 21.3 strict).
-   PR-008: No recursion (MISRA 17.2 strict, no deviation).
-   PR-009: All header files have include guards (MISRA Dir 4.10).
-   PR-010: All public functions have Doxygen documentation.
-   PR-011: All input parameters validated (NULL check, range check).
-   PR-012: All non-trivial assumptions have ASSERT.
+**3.1 Advisory → Required Promotions** — 다음 MISRA Advisory rule을 Required로 격상한다.
 
-4. Naming Conventions
+- Rule 5.9 (internal linkage identifier uniqueness)
+- Rule 8.7 (use static when possible)
+- Rule 11.5 (explicit cast for `void *`)
+- Rule 15.4 (single break/return per loop)
+- Rule 15.5 (single function exit point — with cleanup exception)
+- Rule 18.4 (use `[]` not pointer arithmetic)
 
-   4.1 File Names
-   - lowercase, underscore
-   - Example: flight_ctrl.c, can_driver.h, sensor_filter.c
+**3.2 Additional Rules:**
 
-   4.2 Types
-   - PascalCase
-   - Suffix _t for typedef
-   - Example: FlightState, CanMessage_t, sensor_data_t
+| ID | 규칙 |
+|----|------|
+| PR-001 | All functions ≤ 60 LSLOC (excluding comments) |
+| PR-002 | McCabe Cyclomatic Complexity ≤ 10 |
+| PR-003 | Nesting depth ≤ 4 |
+| PR-004 | Function parameters ≤ 6 |
+| PR-005 | ISR functions ≤ 30 LSLOC |
+| PR-006 | All non-void function returns checked or `(void)` cast |
+| PR-007 | No dynamic memory allocation post-init (MISRA 21.3 strict) |
+| PR-008 | No recursion (MISRA 17.2 strict, no deviation) |
+| PR-009 | All header files have include guards (MISRA Dir 4.10) |
+| PR-010 | All public functions have Doxygen documentation |
+| PR-011 | All input parameters validated (NULL check, range check) |
+| PR-012 | All non-trivial assumptions have ASSERT |
 
-   4.3 Functions
-   - snake_case
-   - Module prefix
-   - Example: flight_ctrl_init(), can_driver_send()
+### 4. Naming Conventions
 
-   4.4 Variables
-   - snake_case
-   - Examples: current_altitude, error_count, p_buffer
+| 대상 | 규칙 | 예 |
+|------|------|-----|
+| File Names | lowercase, underscore | `flight_ctrl.c`, `can_driver.h`, `sensor_filter.c` |
+| Types | PascalCase, suffix `_t` for typedef | `FlightState`, `CanMessage_t`, `sensor_data_t` |
+| Functions | snake_case, module prefix | `flight_ctrl_init()`, `can_driver_send()` |
+| Variables | snake_case | `current_altitude`, `error_count`, `p_buffer` |
+| Constants/Macros | SCREAMING_SNAKE_CASE | `MAX_ALTITUDE`, `FLIGHT_TIMEOUT_MS`, `DEG_TO_RAD(x)` |
+| Module Prefix | `<module>_<action>` for public functions | `fms_compute_eta()`, `nav_get_position()` |
 
-   4.5 Constants and Macros
-   - SCREAMING_SNAKE_CASE
-   - Examples: MAX_ALTITUDE, FLIGHT_TIMEOUT_MS, DEG_TO_RAD(x)
+Public functions은 header에 선언. Private functions은 `static`, `.c`에만.
 
-   4.6 Module Prefix
-   - All public functions: <module>_<action>
-   - Examples: fms_compute_eta(), nav_get_position()
+### 5. File Organization
 
-   4.7 Private vs Public
-   - Public functions: declared in header
-   - Private functions: static, in .c only
+**5.1 Header (.h) Structure:**
 
-5. File Organization
+```c
+/**
+ * @file <filename>.h
+ * @brief One-line module description
+ * @author <author>
+ * @date <date>
+ *
+ * Module overview (3-10 lines).
+ * Allocation: HLR-XXX, HLR-YYY
+ */
 
-   5.1 Header (.h) Structure
-   ```
-   /**
-    * @file <filename>.h
-    * @brief One-line module description
-    * @author <author>
-    * @date <date>
-    *
-    * Module overview (3-10 lines).
-    * Allocation: HLR-XXX, HLR-YYY
-    */
+#ifndef PROJECT_MODULE_FILENAME_H
+#define PROJECT_MODULE_FILENAME_H
 
-   #ifndef PROJECT_MODULE_FILENAME_H
-   #define PROJECT_MODULE_FILENAME_H
+/* System includes */
+#include <stdint.h>
+#include <stddef.h>
 
-   /* System includes */
-   #include <stdint.h>
-   #include <stddef.h>
-
-   /* Project includes */
-   #include "common_types.h"
+/* Project includes */
+#include "common_types.h"
 
    /* Forward declarations */
    struct OtherType;
@@ -213,148 +193,155 @@ Language: C
     * @return 0 on success, negative errno on failure.
     * @requirement HLR-XXX
     */
-   int module_init(const module_config_t *config);
+int module_init(const module_config_t *config);
 
-   #endif  /* PROJECT_MODULE_FILENAME_H */
-   ```
+#endif  /* PROJECT_MODULE_FILENAME_H */
+```
 
-   5.2 Implementation (.c) Structure
-   ```
-   /**
-    * @file <filename>.c
-    * @brief Implementation of <module>
-    */
+**5.2 Implementation (.c) Structure:**
 
-   /* Self-include first */
-   #include "<filename>.h"
+```c
+/**
+ * @file <filename>.c
+ * @brief Implementation of <module>
+ */
 
-   /* System includes */
-   #include <stdint.h>
-   #include <string.h>
+/* Self-include first */
+#include "<filename>.h"
 
-   /* Project includes */
-   #include "logger.h"
-   #include "rtos_wrapper.h"
+/* System includes */
+#include <stdint.h>
+#include <string.h>
 
-   /* Private types */
-   typedef struct { ... } internal_state_t;
+/* Project includes */
+#include "logger.h"
+#include "rtos_wrapper.h"
 
-   /* Private constants */
-   #define BUFFER_DEPTH 32U
+/* Private types */
+typedef struct { ... } internal_state_t;
 
-   /* Private (static) variables */
-   static internal_state_t s_state = { 0 };
+/* Private constants */
+#define BUFFER_DEPTH 32U
 
-   /* Private function declarations */
-   static int validate_input(const data_t *data);
+/* Private (static) variables */
+static internal_state_t s_state = { 0 };
 
-   /* Public function implementations (in .h declaration order) */
-   int module_init(const module_config_t *config) {
-       /* ... */
-   }
+/* Private function declarations */
+static int validate_input(const data_t *data);
 
-   /* Private function implementations */
-   static int validate_input(const data_t *data) {
-       /* ... */
-   }
-**6. Documentation Standards**
+/* Public function implementations (in .h declaration order) */
+int module_init(const module_config_t *config) {
+    /* ... */
+}
 
-6.1 Function Comments (Doxygen)
+/* Private function implementations */
+static int validate_input(const data_t *data) {
+    /* ... */
+}
+```
 
-**Every public function MUST have:**
-   /**
-    * @brief One-line summary (period at end).
-    *
-    * Detailed description (optional, 1-5 lines).
-    *
-    * @param[in]  param_name Description.
-    * @param[out] param_name Description.
-    * @return Description of return value.
-    * @pre   Preconditions (NULL checks, ranges).
-    * @post  Postconditions (state changes).
-    * @retval 0 Success.
-    * @retval -EINVAL Invalid parameter.
-    * @note Special considerations.
-    * @requirement HLR-XXX (LLR-YYY)
-    */
-6.2 Module Comments
-Every .c and .h file MUST start with file-level Doxygen.
+### 6. Documentation Standards
 
-6.3 Inline Comments
+**6.1 Function Comments (Doxygen).** Every public function MUST have:
+
+```c
+/**
+ * @brief One-line summary (period at end).
+ *
+ * Detailed description (optional, 1-5 lines).
+ *
+ * @param[in]  param_name Description.
+ * @param[out] param_name Description.
+ * @return Description of return value.
+ * @pre   Preconditions (NULL checks, ranges).
+ * @post  Postconditions (state changes).
+ * @retval 0 Success.
+ * @retval -EINVAL Invalid parameter.
+ * @note Special considerations.
+ * @requirement HLR-XXX (LLR-YYY)
+ */
+```
+
+**6.2 Module Comments.** Every `.c` and `.h` file MUST start with file-level Doxygen.
+
+**6.3 Inline Comments:**
+
 - Comment WHY, not WHAT.
 - Magic numbers must have constant or comment.
 - Complex algorithms reference source paper.
 
-**7. Defensive Programming**
+### 7. Defensive Programming
 
-7.1 Input Validation
-
-**Every public function:**
+**7.1 Input Validation.** Every public function:
 
 - NULL check all pointer parameters
 - Range check all integer parameters
 - Validate enum values
-   int module_compute(const data_t *input, uint32_t count, result_t *output) {
-       if (input == NULL || output == NULL) return -EINVAL;
-       if (count == 0 || count > MAX_COUNT) return -ERANGE;
 
-       /* ... */
-   }
-7.2 Assertions
-Every function: minimum 2 assertions (per JPL Power of 10).
-- Pre-conditions: ASSERT(param != NULL);
-- Post-conditions: ASSERT(result < MAX);
-- Invariants: ASSERT(state.count >= 0);
-   #define ASSERT(cond) do { \
-       if (!(cond)) { \
-           emergency_log("ASSERT: " #cond " at " __FILE__ ":%d", __LINE__); \
-           emergency_halt(); \
-       } \
-   } while (0)
-7.3 Error Handling
+```c
+int module_compute(const data_t *input, uint32_t count, result_t *output) {
+    if (input == NULL || output == NULL) return -EINVAL;
+    if (count == 0 || count > MAX_COUNT) return -ERANGE;
+
+    /* ... */
+}
+```
+
+**7.2 Assertions.** Every function — minimum 2 assertions (per JPL Power of 10). Pre-conditions `ASSERT(param != NULL)`, post-conditions `ASSERT(result < MAX)`, invariants `ASSERT(state.count >= 0)`.
+
+```c
+#define ASSERT(cond) do { \
+    if (!(cond)) { \
+        emergency_log("ASSERT: " #cond " at " __FILE__ ":%d", __LINE__); \
+        emergency_halt(); \
+    } \
+} while (0)
+```
+
+**7.3 Error Handling:**
+
 - All errors returned as negative errno
 - Caller MUST check (PR-006)
 - No silent failures
 
-7.4 Resource Management
+**7.4 Resource Management:**
+
 - All allocated resources freed
-- goto cleanup pattern (with deviation for Rule 15.4)
+- `goto cleanup` pattern (with deviation for Rule 15.4)
 - Match acquire/release in same function
 
-**8. Language-Specific Rules**
+### 8. Language-Specific Rules
 
-8.1 C-Specific
-- Use stdint.h types (int32_t, uint16_t)
-- Use stdbool.h for boolean
-- Use static inline instead of macros for functions
+**8.1 C-Specific:**
+
+- Use `stdint.h` types (`int32_t`, `uint16_t`)
+- Use `stdbool.h` for boolean
+- Use `static inline` instead of macros for functions
 - No GCC extensions (or wrapped in macros)
 
-8.2 Preprocessor
-- Macros: SCREAMING_SNAKE
-- Function macros: do { } while (0) pattern
-- Conditional: #if PROJECT_FOO not #ifdef
-- #pragma: wrapped in compatibility macros
+**8.2 Preprocessor:**
 
-**9. Code Review Checklist**
+- Macros — SCREAMING_SNAKE
+- Function macros — `do { } while (0)` pattern
+- Conditional — `#if PROJECT_FOO` not `#ifdef`
+- `#pragma` — wrapped in compatibility macros
 
-- See Appendix A.
+### 9. Code Review Checklist
 
-**10. Compliance and Deviation Process**
+See Appendix A.
 
-10.1 Detection
-Static analysis: Helix QAC 2024.2 (configured per QAC-CFG-FMS-2024)
-Continuous: every commit, every nightly build, every release
+### 10. Compliance and Deviation Process
 
-10.2 Deviation
+**10.1 Detection** — Static analysis Helix QAC 2024.2 (configured per QAC-CFG-FMS-2024). Continuous — every commit, every nightly build, every release.
 
-**For Required rule violations:**
+**10.2 Deviation.** For Required rule violations:
 
 - Author files Deviation Record (DR)
 - Module Owner approval
 - Safety Manager approval (for DAL B+)
 - DR tracked in DOORS module SCS-DR
 
-**11. References**
+### 11. References
 
 - MISRA C:2012 Amendment 4 (2023)
 - JPL Power of 10 (Holzmann 2006) — inspiration
@@ -367,36 +354,32 @@ Continuous: every commit, every nightly build, every release
 
 대부분 항공 프로젝트가 *MISRA C:2012 Amendment 4*. 추가 결정:
 
-```
-What to enforce:
-□ All Mandatory (10개)         → 100%, no deviation
-□ All Required (~110개)        → 100% OR deviation
-□ Advisory (~30개)             → 선택적 (PR로 일부 격상)
-
-What to skip:
-□ Rule 11.4 (포인터-정수 변환)  → MMIO에 deviation
-□ Rule 15.5 (단일 종료점)       → cleanup goto 패턴 허용
-□ Rule 17.7 (반환값 검사)       → (void) cast로 명시 무시 허용
-□ Rule 21.6 (stdio)             → debug 로그 wrapper 허용
-```
+| 카테고리 | 항목 | 결정 |
+|----------|------|------|
+| What to enforce | All Mandatory (10개) | 100%, no deviation |
+| What to enforce | All Required (~110개) | 100% OR deviation |
+| What to enforce | Advisory (~30개) | 선택적 (PR로 일부 격상) |
+| What to skip | Rule 11.4 (포인터-정수 변환) | MMIO에 deviation |
+| What to skip | Rule 15.5 (단일 종료점) | cleanup `goto` 패턴 허용 |
+| What to skip | Rule 17.7 (반환값 검사) | `(void)` cast로 명시 무시 허용 |
+| What to skip | Rule 21.6 (stdio) | debug 로그 wrapper 허용 |
 
 각 결정이 *SCS에 명시*. 심사관에게 *명확한 정책*.
 
 ## SCS와 외부 라이브러리
 
-**프로젝트 구조:**
+프로젝트 구조:
 
-- src/                   ← SCS 100% 준수 (deviation 보고)
-- third_party/           ← SCS 면제 (별도 Permit)
-- FreeRTOS/
-- LWIP/
-- libcrc/
-- wrappers/              ← SCS 준수 (third_party와 src 사이 layer)
+| 경로 | 정책 |
+|------|------|
+| `src/` | SCS 100% 준수 (deviation 보고) |
+| `third_party/` (FreeRTOS, LWIP, libcrc) | SCS 면제 (별도 Permit) |
+| `wrappers/` | SCS 준수 (third_party와 src 사이 layer) |
 
-**심사관 view:**
+심사관 view:
 
-- src와 wrappers: SCS 준수 입증
-- third_party: 별도 SOUP (Software of Unknown Pedigree) 절차
+- `src`와 `wrappers` — SCS 준수 입증
+- `third_party` — 별도 SOUP (Software of Unknown Pedigree) 절차
 - SOUP는 ED-12C §5.4.1 또는 DO-178C §11.6 (PDS) 적용
 
 ## LLR ↔ Code Traceability — A-5-3
@@ -527,89 +510,56 @@ int process_label(uint32_t arinc_word) {
 
 ### Pre-Review Checklist
 
-```
-Author checks before submitting:
-□ Static analysis: 0 warnings
-□ Compiler: 0 warnings (-Wall -Wextra -Werror)
-□ Unit tests: 100% pass
-□ Coverage: ≥ 90% (per module)
-□ Doxygen: complete for all public functions
-□ LLR annotations: present
-□ MISRA: no Mandatory violations, Required justified
-□ Code formatted (clang-format)
-□ Commit message: convention + traceability
-```
+Author가 submit 전 확인하는 항목:
+
+- Static analysis — 0 warnings
+- Compiler — 0 warnings (`-Wall -Wextra -Werror`)
+- Unit tests — 100% pass
+- Coverage — ≥ 90% (per module)
+- Doxygen — complete for all public functions
+- LLR annotations — present
+- MISRA — no Mandatory violations, Required justified
+- Code formatted (clang-format)
+- Commit message — convention + traceability
 
 ### Review Items
 
-```
-Reviewer checks:
+Reviewer가 영역별로 확인하는 항목:
 
-Functional:
-□ Does implementation match LLR?
-□ All LLR cases handled?
-□ Error paths complete?
-
-Style:
-□ Naming convention?
-□ Function length ≤ 60?
-□ Complexity ≤ 10?
-□ Nesting ≤ 4?
-
-Safety:
-□ NULL checks at public function entry?
-□ Range validation for inputs?
-□ Assertions for invariants?
-□ Resource cleanup (open/close, alloc/free)?
-
-Defensive:
-□ Error codes returned correctly?
-□ Edge cases handled?
-□ Concurrent access protected?
-
-Performance:
-□ WCET within budget?
-□ Memory usage within budget?
-
-Maintainability:
-□ Doxygen complete and accurate?
-□ Inline comments WHY not WHAT?
-□ Code readable to junior engineer?
-```
+| 영역 | 체크 |
+|------|------|
+| Functional | 구현이 LLR과 일치? 모든 LLR 케이스 처리? 에러 경로 완성? |
+| Style | 명명 규칙? 함수 길이 ≤ 60? 복잡도 ≤ 10? Nesting ≤ 4? |
+| Safety | Public 함수 진입 시 NULL 검사? 입력 범위 검증? 불변식 ASSERT? 자원 cleanup? |
+| Defensive | 에러 코드 반환 정확? Edge case 처리? 동시 접근 보호? |
+| Performance | WCET budget 내? 메모리 budget 내? |
+| Maintainability | Doxygen 완전·정확? Inline 주석 WHY? Junior가 읽을 만한가? |
 
 수십 항목. *체크리스트 기반 review*가 *consistent quality*.
 
 ### Review Tools
 
-```
-Gerrit                   — 큰 항공 프로젝트 (Boeing 등)
-GitLab Merge Request     — 신생 회사
-Atlassian Crucible       — 일부 OEM
-GitHub PR Review         — 일반 사용
-ReviewBoard              — 자체 호스팅
+| 도구 | 사용처 |
+|------|--------|
+| Gerrit | 큰 항공 프로젝트 (Boeing 등) |
+| GitLab Merge Request | 신생 회사 |
+| Atlassian Crucible | 일부 OEM |
+| GitHub PR Review | 일반 사용 |
+| ReviewBoard | 자체 호스팅 |
 
-Plug-ins:
-- DOORS link
-- Static analysis result inline
-- Coverage diff
-```
+Plug-in으로 *DOORS link*, *static analysis result inline*, *coverage diff*를 통합.
 
 ### Review Statistics
 
-```
 좋은 review의 기준:
 
-Review rate:        100-200 LoC per hour
-Defect detection:   5-10 issues per 100 LoC (DAL A/B)
-Defect categories:
-  - Logic errors:        30%
-  - Coding standard:     25%
-  - Documentation:       20%
-  - Style:               15%
-  - Performance:         10%
+| 지표 | 값 |
+|------|-----|
+| Review rate | 100–200 LoC per hour |
+| Defect detection | 5–10 issues per 100 LoC (DAL A/B) |
+| Re-review after fix | 80% close in 1 round, 15% in 2, 5% in 3+ |
 
-Re-review after fix: 80% close in 1 round, 15% in 2, 5% in 3+
-```
+Defect categories — Logic errors 30% · Coding standard 25% · Documentation 20% · Style 15% · Performance 10%.
 
 review가 *너무 빠르면* (300+ LoC/hour) *놓침이 많음*. *너무 느리면* (50 LoC/hour) *생산성 저하*.
 

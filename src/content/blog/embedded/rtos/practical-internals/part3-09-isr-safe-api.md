@@ -166,15 +166,7 @@ FreeRTOS API는 낮은 priority ISR에서만 호출할 수 있습니다.
 #define configKERNEL_INTERRUPT_PRIORITY          255   // = 0xFF (lowest)
 ```
 
-```text
-                  Priority
-0 (highest) ─┬─── Hard real-time IRQ (FreeRTOS API 금지)
-             │
-0xBF (191) ──┤──── configMAX_SYSCALL_INTERRUPT_PRIORITY
-             │     ↑ 이 line 위 (priority value < 191) IRQ는 FreeRTOS API 금지
-             │     ↓ 이 line 아래 (priority value ≥ 191) IRQ는 *FromISR 호출 OK*
-0xFF (255) ──┴─── Kernel·Tick·SysCall (lowest)
-```
+![Cortex-M priority bands separated by configMAX_SYSCALL_INTERRUPT_PRIORITY](/images/blog/practical-internals/diagrams/part3-09-priority-bands.svg)
 
 > ⚠️ Cortex-M에서 priority는 수치가 클수록 실제 우선순위가 낮아집니다. 헷갈리기 쉬운 부분입니다.
 

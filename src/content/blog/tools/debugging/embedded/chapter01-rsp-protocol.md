@@ -104,13 +104,13 @@ $? → $T05thread:p1.1;
 
 `T<sig>` 시그널 정지. `S<sig>`는 단순 시그널(deprecated). `W<exitcode>` 정상 종료. `X<sig>` 비정상 종료.
 
-```
-S05         ← SIGTRAP (잘 안 씀, 호환용)
-T05thread:1;watch:7fff8000;reason:hwbreak
-W00         ← exit 0
-X0b         ← SIGSEGV로 죽음
-N           ← 더 이상 정지된 스레드 없음
-```
+| 응답 | 의미 |
+|------|------|
+| `S05` | SIGTRAP (잘 안 씀, 호환용) |
+| `T05thread:1;watch:7fff8000;reason:hwbreak` | watchpoint hardware BP 정지 |
+| `W00` | exit 0 |
+| `X0b` | SIGSEGV로 죽음 |
+| `N` | 더 이상 정지된 스레드 없음 |
 
 `T` 응답의 *키:값* 셀렉터.
 
@@ -147,10 +147,10 @@ $G<hex> → $OK                                   ← 전체 쓰기
 
 ### 3. 한 레지스터 — `p` / `P`
 
-```
-$p10 → $aabbccdd...                ← 레지스터 #16 읽기
-$P10=00000000... → $OK             ← 레지스터 #16 쓰기
-```
+| 요청 → 응답 | 동작 |
+|-------------|------|
+| `$p10 → $aabbccdd...` | 레지스터 #16 읽기 |
+| `$P10=00000000... → $OK` | 레지스터 #16 쓰기 |
 
 `g`와 달리 한 레지스터만 *효율적으로*. ARM처럼 레지스터가 많은 아키텍처에서 `p`가 자주 쓰입니다.
 
@@ -158,10 +158,10 @@ $P10=00000000... → $OK             ← 레지스터 #16 쓰기
 
 ### 4. 메모리 — `m` / `M`
 
-```
-$m400000,10 → $4889e5...           ← 0x400000부터 16바이트 hex 인코딩
-$M400000,4:48c7c001 → $OK          ← 4바이트 쓰기
-```
+| 요청 → 응답 | 동작 |
+|-------------|------|
+| `$m400000,10 → $4889e5...` | `0x400000`부터 16바이트 hex 인코딩 |
+| `$M400000,4:48c7c001 → $OK` | 4바이트 쓰기 |
 
 길이 제한은 `PacketSize`(qSupported 응답). 보통 16KB. 큰 메모리 영역을 받으려면 *여러 패킷*으로 나뉘어 자동 분할됩니다.
 
@@ -220,14 +220,14 @@ Z0의 *kind* 인자(`1`)는 *명령어 길이*. ARM Thumb는 `2`, ARM은 `4`. x8
 
 ### 7. 스레드 — `H` / `T` / `qfThreadInfo`
 
-```
-$Hg0 → $OK                    ← 다음 g 명령을 위한 thread context = 0 (현재)
-$Hc-1 → $OK                   ← continue 시 모든 스레드
-$T1 → $OK                     ← thread 1이 살아 있나? (alive check)
-$qfThreadInfo → $mp1.1,p1.2,p1.3       ← 첫 번째 스레드 목록 페이지
-$qsThreadInfo → $l                     ← 다음 페이지 없음 (lowercase L)
-$qThreadExtraInfo,p1.1 → $Worker_thread_1   ← 이름
-```
+| 요청 → 응답 | 동작 |
+|-------------|------|
+| `$Hg0 → $OK` | 다음 `g` 명령을 위한 thread context = 0 (현재) |
+| `$Hc-1 → $OK` | continue 시 모든 스레드 |
+| `$T1 → $OK` | thread 1이 살아 있나? (alive check) |
+| `$qfThreadInfo → $mp1.1,p1.2,p1.3` | 첫 번째 스레드 목록 페이지 |
+| `$qsThreadInfo → $l` | 다음 페이지 없음 (lowercase L) |
+| `$qThreadExtraInfo,p1.1 → $Worker_thread_1` | 이름 |
 
 GDB의 `info threads`가 이 셋(`qfThreadInfo` + `qsThreadInfo` + `qThreadExtraInfo`)으로 구성됩니다. 페이지네이션이 있는 이유는 PacketSize 한계 때문 — 천 개 스레드는 한 패킷에 안 들어갑니다.
 
@@ -309,9 +309,13 @@ GDB가 `load` 시 *주소가 flash인지 RAM인지*를 이걸 보고 결정. fla
 
 ### 10. monitor — 패스스루
 
+`qRcmd` 패킷 한 줄로 monitor 명령을 보낸다.
+
 ```
-$qRcmd,72657365742068616c74 → $OK     ← "reset halt"를 hex 인코딩해 monitor로
+$qRcmd,72657365742068616c74 → $OK
 ```
+
+`72657365742068616c74`는 `"reset halt"`의 hex 인코딩.
 
 `qRcmd`(remote command)가 GDB의 `monitor <cmd>`. 인자가 hex 인코딩된 ASCII. 스텁의 TCL 인터프리터(OpenOCD) 또는 자체 명령 핸들러(J-Link)로 전달됩니다.
 

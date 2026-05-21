@@ -67,13 +67,7 @@ B석 줄    ━━ []  ← 비었음
 
 가장 단순한 동시 PQ. 우선순위 값이 *작은 정수 범위*에 속한다고 가정.
 
-```text
-priority 0 ┐
-priority 1 │── 각 우선순위마다 lock-free queue (bin)
-priority 2 │
-...        │
-priority M ┘
-```
+![Bin priority queue: lock-free queue per priority value](/images/blog/parallel-principles/diagrams/ch15-bin-priorityqueue.svg)
 
 각 bin이 독립 큐. `insert(item, p)`는 `bin[p].enqueue(item)`. `extractMin()`은 *비어 있지 않은 가장 낮은 인덱스의 bin*에서 dequeue.
 

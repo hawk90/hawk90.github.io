@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  obj/.style={cls, minimum width=30mm, minimum height=10mm,
+              font=\sffamily\footnotesize},
+  c/.style={obj, fill=hifill, draw=hibord},
+  o/.style={obj, fill=okfill, draw=okbord},
+  i/.style={obj, fill=absfill, draw=absbord},
+  p/.style={obj, fill=warnfill, draw=warnbord},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
+  msg/.style={font=\sffamily\scriptsize, fill=white, inner sep=2pt}
+]
+
+\node[c] (cust)  at (0, 4)   {[:Customer]};
+\node[o] (ord)   at (5.5, 4) {[:Order]};
+\node[i] (inv)   at (10, 6)  {[:Inventory]};
+\node[p] (pay)   at (10, 2)  {[:Payment]};
+
+\draw[arr] (cust.east) -- node[msg, midway, above] {1: checkout()} (ord.west);
+\draw[arr] (ord.north east) -- node[msg, midway, above, sloped] {1.1: reserve()} (inv.south west);
+\draw[arr] (ord.south east) -- node[msg, midway, below, sloped] {1.2: charge()} (pay.north west);
+
+\end{tikzpicture}
+\end{document}

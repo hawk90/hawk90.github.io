@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=44mm,
+  act/.style={cls, rounded corners=2pt, minimum width=28mm, minimum height=14mm,
+              font=\sffamily\footnotesize\bfseries, fill=okfill, draw=okbord},
+  pin/.style={rectangle, draw=edgec, fill=white, line width=0.5pt,
+              minimum width=3mm, minimum height=3mm},
+  flow/.style={-{Stealth[length=2.6mm]}, draw=edgec, line width=0.55pt}
+]
+
+\node[act] (a1) {Action1};
+\node[act, right=of a1] (a2) {Action2};
+
+% Output pin on a1 (right edge)
+\node[pin] (p1) at (a1.east) {};
+% Input pin on a2 (left edge)
+\node[pin] (p2) at (a2.west) {};
+
+\draw[flow] (p1) -- node[font=\sffamily\scriptsize, midway, above, fill=white, inner sep=2pt] {pin} (p2);
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at ($(a1)!.5!(a2) + (0, -1.2)$)
+  {pin = action 사이의 데이터 흐름점};
+
+\end{tikzpicture}
+\end{document}

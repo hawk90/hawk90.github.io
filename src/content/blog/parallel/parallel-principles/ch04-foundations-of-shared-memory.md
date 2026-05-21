@@ -37,11 +37,7 @@ draft: false
 
 **핵심 질문**: 하드웨어 차원에서 "읽기"와 "쓰기"는 어떻게 동작하는가?
 
-```
-스레드 A: write(1) ──┐
-                     │   ?
-스레드 B: read() ────┘ → 무엇이 반환되나?
-```
+![Two threads concurrently writing and reading: what does read return?](/images/blog/parallel-principles/diagrams/ch04-concurrent-read-write.svg)
 
 답은 단순하지 않다. 동시 접근 시 **무엇을 보장하느냐**에 따라 여러 종류의 메모리가 존재한다.
 

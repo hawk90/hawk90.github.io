@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  bin/.style={cls, align=center, font=\footnotesize, minimum width=58mm, minimum height=9mm, draw=hibord, fill=hifill},
+  brace/.style={decorate, decoration={brace, mirror, amplitude=5pt}, draw=mutec}
+]
+
+\node[bin] at (0, 4)   {priority 0 — lock-free queue};
+\node[bin] at (0, 2.8) {priority 1 — lock-free queue};
+\node[bin] at (0, 1.6) {priority 2 — lock-free queue};
+\node[font=\sffamily\scriptsize, text=mutec] at (0, 0.6) {…};
+\node[bin] at (0, -0.4) {priority M — lock-free queue};
+
+\draw[brace] (3.2, -0.4) -- (3.2, 4)
+  node[font=\sffamily\footnotesize, midway, right=6pt, text=mutec, align=left]
+  {각 우선순위마다\\[1pt]lock-free queue (bin)};
+
+\end{tikzpicture}
+\end{document}

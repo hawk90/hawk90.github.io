@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  pkg/.style={cls, font=\sffamily\bfseries\footnotesize, minimum width=42mm, minimum height=10mm,
+              draw=hibord, fill=hifill, rounded corners=2pt},
+  child/.style={cls, font=\sffamily\footnotesize, minimum width=58mm, minimum height=8mm,
+                draw=edgec, fill=okfill!50, rounded corners=2pt},
+  link/.style={draw=edgec, line width=0.4pt}
+]
+
+\node[pkg] (p) at (0, 3) {Profile «JEE»};
+
+\node[child] (c1) at (3.5, 1.5) {Class (from UML metamodel)};
+\node[child] (c2) at (3.5, 0.5) {Component (from UML metamodel)};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (1.4, -0.5) {…};
+
+\draw[link] (p.south) |- (c1.west);
+\draw[link] (p.south) |- (c2.west);
+
+\end{tikzpicture}
+\end{document}

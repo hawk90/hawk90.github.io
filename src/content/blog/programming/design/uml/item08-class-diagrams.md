@@ -46,10 +46,7 @@ draft: false
 
 관계를 그리기 시작합니다. 다중도·역할 이름도 붙입니다.
 
-```
-Library  ◆ — 1..*  Book
-Member   ─ borrows 0..3 ─ Book
-```
+![Library aggregates Books; Member borrows Books](/images/blog/uml/diagrams/item08-library-aggregation.svg)
 
 ### 3단계: 논리 스키마 (Logical Schema)
 

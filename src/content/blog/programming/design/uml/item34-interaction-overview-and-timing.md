@@ -108,12 +108,7 @@ draft: false
 
 ### 예 — TCP 3-way handshake
 
-```text
-시간:    ──────────────────────────────────▶
-Client : CLOSED ─[SYN]──► SYN_SENT ─[ACK]──► ESTABLISHED
-                  │                ▲
-Server : LISTEN ──┴─[SYN-ACK]──────┘ ───► ESTABLISHED
-```
+![TCP 3-way handshake as a timing diagram](/images/blog/uml/diagrams/item34-tcp-timing.svg)
 
 각 라이프라인의 *상태가 언제 바뀌는가*를 한 눈에. 시퀀스 다이어그램은 *메시지 순서*는 잘 보여주지만 *상태 머신과의 결합*은 약합니다 — 타이밍 다이어그램이 그 결합을 그리는 자리.
 

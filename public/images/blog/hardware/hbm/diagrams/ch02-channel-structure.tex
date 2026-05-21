@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,trees}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  stack/.style={cls, align=center, font=\footnotesize, minimum width=42mm, minimum height=12mm, draw=hibord, fill=hifill},
+  chan/.style={cls, align=center, font=\scriptsize, minimum width=36mm, minimum height=9mm, draw=absbord, fill=absfill},
+  pc/.style={cls, align=center, font=\scriptsize, minimum width=24mm, minimum height=8mm, draw=okbord, fill=okfill},
+  link/.style={draw=edgec, line width=0.5pt}
+]
+
+\node[font=\sffamily\bfseries\small, anchor=south] at (4.5, 7.4) {HBM3 channel 구조};
+
+\node[stack] (stk) at (0, 6) {stack\\\scriptsize (1024-bit)};
+
+% 4 channels visible + dots + last
+\node[chan] (c0) at (6, 6.5) {Channel 0 (128-bit)};
+\node[chan] (c1) at (6, 4.8) {Channel 1 (128-bit)};
+\node[chan] (c2) at (6, 3.5) {Channel 2 (128-bit)};
+\node[font=\sffamily\scriptsize, text=mutec] at (6, 2.3) {…};
+\node[chan] (c15) at (6, 1.0) {Channel 15 (128-bit)};
+
+\draw[link] (stk.east) -- (c0.west);
+\draw[link] (stk.east) -- (c1.west);
+\draw[link] (stk.east) -- (c2.west);
+\draw[link] (stk.east) -- (c15.west);
+
+% PC split for Channel 0
+\node[pc] (pc0) at (12, 7.1) {PC0 (64-bit)};
+\node[pc] (pc1) at (12, 5.9) {PC1 (64-bit)};
+\draw[link] (c0.east) -- (pc0.west);
+\draw[link] (c0.east) -- (pc1.west);
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west, align=left] at (14.5, 6.5)
+  {독립 명령 발행 가능\\[2pt]PC = Pseudo Channel\\[2pt]한 channel은 2개의 PC로 분할 동작};
+
+\end{tikzpicture}
+\end{document}

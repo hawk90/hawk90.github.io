@@ -102,18 +102,7 @@ AdvData의 *type 코드*는 *Bluetooth Assigned Numbers*에 정의되어 있습�
 
 BLE 4까지는 *Legacy Advertising*만 있어 *최대 31 byte payload*였습니다. BLE 5는 *Extended Advertising*을 추가해 *AUX_ADV_IND*에 *최대 255 byte*를 실을 수 있게 했고, *chained PDU*로 *최대 1650 byte*까지 늘립니다.
 
-```text
-[Extended Advertising 흐름]
-
-Primary channel (37/38/39):
-  ADV_EXT_IND ─┐
-              "data is on AUX channel X at time T"
-
-Secondary channel (0~36 중 하나):
-                └──► AUX_ADV_IND (~ 254 B 데이터)
-                            └──► AUX_CHAIN_IND (다음 fragment)
-                                       └──► ... (최대 1650 B 누적)
-```
+![BLE Extended Advertising: primary channel pointer → AUX_ADV_IND → AUX_CHAIN_IND](/images/blog/ble/diagrams/ch08-extended-adv-flow.svg)
 
 ```c
 // nRF Connect SDK - Extended Advertising

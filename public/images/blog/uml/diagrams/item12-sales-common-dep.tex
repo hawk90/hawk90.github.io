@@ -1,0 +1,26 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=30mm,
+  pkg/.style={draw=edgec, line width=0.5pt, minimum width=28mm, minimum height=10mm,
+              font=\sffamily\footnotesize, append after command={
+                \pgfextra{\node[draw=edgec, line width=0.5pt, fill=hifill,
+                                minimum width=12mm, minimum height=4mm,
+                                anchor=south west, font=\sffamily\scriptsize]
+                          at (\tikzlastnode.north west) {};}
+              }}
+]
+
+\node[pkg, fill=hifill] (sales) {Sales};
+\node[pkg, fill=okfill, right=of sales] (common) {Common};
+
+\draw[-{Stealth[length=2.4mm]}, dashed, draw=edgec, line width=0.5pt]
+  (sales) -- node[font=\sffamily\scriptsize, midway, above, fill=white, inner sep=2pt] {$<<$import$>>$} (common);
+
+\end{tikzpicture}
+\end{document}

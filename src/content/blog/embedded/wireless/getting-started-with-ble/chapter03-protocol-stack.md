@@ -278,17 +278,7 @@ ATT는 *원시 read/write 연산*만 제공합니다. *모든 GATT 트래픽이 
 
 ### Read Request/Response 예
 
-```text
-Client → Server (Read handle 0x002A의 값)
-0A 2A 00
-│  └──┴── handle 0x002A
-└──────── Read Request
-
-Server → Client (값 = 65)
-0B 41
-│  └── value (1 byte: 0x41 = 65)
-└───── Read Response
-```
+![ATT Read Request/Response byte layout](/images/blog/ble/diagrams/ch03-att-read-bytes.svg)
 
 ATT는 *반드시 request/response 쌍*입니다(notify/indicate 제외). 한 번에 *하나의 트랜잭션*만 진행됩니다.
 

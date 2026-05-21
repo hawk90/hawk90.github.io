@@ -34,16 +34,7 @@ draft: false
 
 V_OH / V_OL은 출력 측이 보장하는 값이고, V_IH / V_IL은 입력 측이 0/1로 해석하는 경계입니다. 둘 사이의 차이가 **noise margin**입니다.
 
-```text
-3.3 V CMOS 기준
-   V_OH = 3.0 V ─┐
-                 │ Noise margin (high) = 1.0 V
-   V_IH = 2.0 V ─┘
-   ─── 불확정 영역 (입력 회로 동작 보장 안 됨) ───
-   V_IL = 0.8 V ─┐
-                 │ Noise margin (low) = 0.7 V
-   V_OL = 0.1 V ─┘
-```
+![3.3V CMOS voltage levels with noise margins](/images/blog/modern-recipes/diagrams/part1-01-cmos-levels.svg)
 
 ### 2) Rise time / Fall time
 
@@ -68,14 +59,7 @@ GPIOC->OSPEEDR |=  (0b11 << (5 * 2));   // 0b11 = very high speed
 
 전송선이 길거나 종단이 부족하면 신호가 오버슈트·언더슈트합니다. 이 진폭이 noise margin 안에 머물면 동작은 정상이지만, 넘으면 입력 회로가 잘못 토글합니다.
 
-```text
-   3.3V ─────┐
-             │ ← overshoot (4 V까지 튀면 입력 보호 다이오드 동작)
-             ╲╱╲╱  ← ringing
-             ╲╱
-   0V ─ ─ ─ ─ ─ ─ ─ ─
-                 ╲╱  ← undershoot (-0.5V로 떨어지면 ESD 다이오드 활성)
-```
+![Ringing waveform with overshoot and undershoot](/images/blog/modern-recipes/diagrams/part1-01-ringing-waveform.svg)
 
 ## 코드 / 실제 사용 예
 

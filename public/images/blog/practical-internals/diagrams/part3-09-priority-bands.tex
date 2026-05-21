@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  band/.style={cls, align=center, font=\sffamily\footnotesize, minimum width=88mm, minimum height=12mm, draw=edgec, line width=0.4pt},
+  hard/.style={band, fill=warnfill!50},
+  divider/.style={band, fill=hifill, minimum height=10mm},
+  kernel/.style={band, fill=okfill!60}
+]
+
+% Top: highest priority (lowest value)
+\node[hard] (h) at (0, 4) {0 (highest) — Hard real-time IRQ\\[1pt]\scriptsize FreeRTOS API 금지};
+
+\node[divider] (mid) at (0, 2.5) {0xBF (191) — configMAX\_SYSCALL\_INTERRUPT\_PRIORITY\\[1pt]\scriptsize 위쪽: API 금지 — 아래쪽: FromISR 호출 OK};
+
+\node[kernel] (k) at (0, 1.0) {0xFF (255) — Kernel · Tick · SysCall (lowest)};
+
+% Direction labels
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (5.0, 4) {Priority value 작음 (높은 우선순위)};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (5.0, 1.0) {Priority value 큼 (낮은 우선순위)};
+
+\end{tikzpicture}
+\end{document}

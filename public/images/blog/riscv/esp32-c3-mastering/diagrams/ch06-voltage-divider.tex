@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{circuitikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\ctikzset{bipoles/length=8mm}
+\begin{document}
+\begin{circuitikz}[scale=1.0, transform shape, font=\scriptsize]
+
+\node[font=\footnotesize\bfseries, anchor=south] at (1.5, 4.2) {Battery 전압 측정 분배기};
+
+\draw (0, 4) node[anchor=south, font=\scriptsize] {Battery +}
+      -- (0, 3.5)
+      to[R=100\,k$\Omega$, l_=R1] (0, 2.0)
+      coordinate (tap)
+      -- ++(1, 0)
+      node[anchor=west, font=\scriptsize] {ADC pin (GPIO0)};
+
+\draw (tap)
+      to[R=100\,k$\Omega$, l_=R2] (0, 0.5)
+      -- (0, 0) node[ground]{};
+
+\end{circuitikz}
+\end{document}

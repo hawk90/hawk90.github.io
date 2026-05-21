@@ -134,14 +134,9 @@ draft: false
 
 ### Battery Level (0x2A19)
 
-```text
-값: 1 byte, uint8, 0~100 (퍼센트)
+값 — `1 byte, uint8, 0~100` (퍼센트). 예 — `0x55 → 85%`.
 
-예: 0x55 → 85%
-
-GATT 서버는 단순히 1 byte만 반환하면 됨.
-폰의 기본 앱이 이걸 그대로 % 로 표시.
-```
+GATT 서버는 단순히 1 byte만 반환하면 된다. 폰의 기본 앱이 이걸 그대로 % 로 표시.
 
 ```c
 uint8_t battery_level = 87;
@@ -288,15 +283,12 @@ TX Char:        6E400003-B5A3-F393-E0A9-E50E24DCCA9E  (Server → Client, Notify
 
 NUS는 *de facto 표준*입니다. *시리얼 통신을 BLE로 흉내내는* 가장 단순한 패턴입니다.
 
-```text
-NUS Service: 6E400001-B5A3-F393-E0A9-E50E24DCCA9E
-├── RX Characteristic (Write, Write Without Response)
-│   UUID 6E400002-...
-│   클라이언트가 "보낼 데이터"를 write
-└── TX Characteristic (Notify)
-    UUID 6E400003-...
-    서버가 "보낼 데이터"를 notify
-```
+**NUS Service** — `6E400001-B5A3-F393-E0A9-E50E24DCCA9E`.
+
+| Characteristic | UUID | 동작 |
+|----------------|------|------|
+| RX (Write, Write Without Response) | `6E400002-...` | 클라이언트가 "보낼 데이터"를 write |
+| TX (Notify) | `6E400003-...` | 서버가 "보낼 데이터"를 notify |
 
 ```c
 #define NUS_SVC_UUID        BLE_UUID128_DECLARE(\
@@ -356,17 +348,17 @@ NUS는 *Nordic의 nRF Connect 앱*이 *기본 UI를 제공*합니다. 폰에서 
 
 예를 들어 *Heart Rate*는 두 문서가 있습니다.
 
-```text
-Heart Rate Service Specification 1.0
-  - Battery Service의 Characteristic 목록
-  - 각 Characteristic의 포맷과 권한
+**Heart Rate Service Specification 1.0:**
 
-Heart Rate Profile Specification 1.0
-  - 어떤 디바이스가 어떤 role을 가지는지
-  - Sensor (server) vs Collector (client)
-  - 필수 service / optional service
-  - 행동: 측정 시작, 정지, 에너지 리셋 등
-```
+- Battery Service의 Characteristic 목록
+- 각 Characteristic의 포맷과 권한
+
+**Heart Rate Profile Specification 1.0:**
+
+- 어떤 디바이스가 어떤 role을 가지는지
+- Sensor (server) vs Collector (client)
+- 필수 service / optional service
+- 행동 — 측정 시작, 정지, 에너지 리셋 등
 
 ### Service Specification의 표 구조
 
@@ -387,20 +379,13 @@ Heart Rate Profile Specification 1.0
 
 ### Profile Specification의 행동 사양
 
-```text
-6.1 Service Discovery
-  Collector는 GATT discovery로 Heart Rate Service의 Characteristic을 찾는다.
-  Body Sensor Location이 없으면 다음 step으로 넘어간다.
+**6.1 Service Discovery.** Collector는 GATT discovery로 Heart Rate Service의 Characteristic을 찾는다. Body Sensor Location이 없으면 다음 step으로 넘어간다.
 
-6.2 Configure Notification
-  Collector는 Heart Rate Measurement의 CCCD에 Notification ON을 쓴다.
+**6.2 Configure Notification.** Collector는 Heart Rate Measurement의 CCCD에 Notification ON을 쓴다.
 
-6.3 Reception
-  Sensor가 측정 시마다 Notification을 보낸다.
+**6.3 Reception.** Sensor가 측정 시마다 Notification을 보낸다.
 
-6.4 Error Handling
-  Collector는 ATT 에러 응답 시 ...
-```
+**6.4 Error Handling.** Collector는 ATT 에러 응답 시 ...
 
 직접 spec을 따르는 게 *재발명을 막고, 향후 호환성을 보장*합니다.
 

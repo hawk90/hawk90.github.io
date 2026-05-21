@@ -103,21 +103,7 @@ HBM4부터는 *hybrid bonding*으로 *솔더 없이* *구리끼리 직접 접합
 
 1024-bit bus는 *내부적으로 16개 channel*로 나뉩니다.
 
-```text
-HBM3 channel 구조
-
-stack (1024-bit)
-├── Channel 0  (128-bit)
-│   ├── PC0 (64-bit) ─┐
-│   └── PC1 (64-bit) ─┴── 독립 명령 발행 가능
-├── Channel 1  (128-bit)
-├── Channel 2  (128-bit)
-├── ...
-└── Channel 15 (128-bit)
-
-PC = Pseudo Channel
-한 channel은 2개의 PC로 분할 동작
-```
+![HBM3 stack → 16 channels → 2 pseudo channels each](/images/blog/hardware/hbm/diagrams/ch02-channel-structure.svg)
 
 | 단위 | 폭 | 개수 | 용도 |
 |------|-----|------|------|

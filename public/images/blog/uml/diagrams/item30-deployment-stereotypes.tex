@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=28mm,
+  node3d/.style={cls, minimum width=30mm, minimum height=14mm,
+                 font=\sffamily\footnotesize\bfseries, fill=hifill, draw=hibord},
+  link/.style={draw=edgec, line width=0.7pt}
+]
+
+\node[node3d] (web)  {WebServer};
+\node[node3d, right=of web] (app)  {AppServer};
+\node[node3d, right=of app] (pay)  {PaymentSvc};
+
+\draw[link] (web) -- node[font=\sffamily\scriptsize, midway, above, align=center, fill=white, inner sep=2pt]
+  {HTTP/2\\$<<$TCP$>>$} (app);
+\draw[link] (app) -- node[font=\sffamily\scriptsize, midway, above, align=center, fill=white, inner sep=2pt]
+  {gRPC\\$<<$encrypted$>>$} (pay);
+
+\end{tikzpicture}
+\end{document}

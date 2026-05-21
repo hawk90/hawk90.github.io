@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  outer/.style={cls, minimum width=84mm, minimum height=30mm,
+                font=\sffamily\bfseries\footnotesize, fill=hifill!30, draw=hibord, anchor=south west},
+  inner/.style={cls, minimum width=24mm, minimum height=10mm,
+                font=\sffamily\footnotesize, fill=okfill, draw=okbord},
+  port/.style={rectangle, draw=edgec, fill=white, line width=0.5pt, minimum width=3mm, minimum height=3mm},
+  iflbl/.style={font=\sffamily\scriptsize, anchor=west},
+  link/.style={draw=edgec, line width=0.6pt}
+]
+
+\node[outer] (car) at (0, 0) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west] at ($(car.north west) + (0.2, -0.15)$) {Car};
+
+\node[inner] (eng) at (4, 1.5) {engine};
+
+% External port (fuelIn) on left side of Car
+\node[port] (pext) at (car.west |- eng) {};
+\node[font=\sffamily\scriptsize, anchor=east] at ($(pext) + (-0.1, 0)$) {fuelIn};
+
+% Internal port on engine
+\node[port] (pint) at (eng.west) {};
+
+% Delegation line from external port to internal
+\draw[link] (pext.east) -- (pint.west);
+
+% Interface ball
+\node[circle, draw=edgec, fill=white, line width=0.5pt, minimum size=3mm] (ifball) at ($(pint)!.5!(pext)$) {};
+\node[iflbl] at ($(ifball) + (0.3, 0.3)$) {IFuel};
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at (4, -0.6)
+  {외부 포트(fuelIn) ──위임── 내부 포트(engine)};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  state/.style={cls, align=center, font=\footnotesize, minimum width=24mm, minimum height=10mm},
+  cli/.style={state, draw=hibord, fill=hifill},
+  srv/.style={state, draw=okbord, fill=okfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt},
+  msg/.style={font=\sffamily\footnotesize, text=conbord, midway, fill=white, inner sep=2pt},
+  rowlbl/.style={font=\sffamily\bfseries\small, anchor=east, text=inkc}
+]
+
+% Time axis
+\draw[->, draw=mutec, line width=0.4pt] (-1, 4) -- (13.5, 4) node[font=\sffamily\scriptsize, right]{time};
+
+% Client row
+\node[rowlbl] at (-0.5, 2.5) {Client:};
+\node[cli] (c1) at (1.5, 2.5) {CLOSED};
+\node[cli] (c2) at (6, 2.5) {SYN\_SENT};
+\node[cli] (c3) at (11, 2.5) {ESTABLISHED};
+
+\draw[arr] (c1.east) -- node[msg] {SYN} (c2.west);
+\draw[arr] (c2.east) -- node[msg] {ACK} (c3.west);
+
+% Server row
+\node[rowlbl] at (-0.5, 0.5) {Server:};
+\node[srv] (s1) at (1.5, 0.5) {LISTEN};
+\node[srv] (s2) at (11, 0.5) {ESTABLISHED};
+
+\draw[arr] (s1.east) -- node[msg, pos=0.55] {SYN-ACK} (s2.west);
+
+% Cross arrows
+\draw[arr, dashed, draw=mutec] (c1.south) -- (s1.north);
+\draw[arr, dashed, draw=mutec] (s2.north) -- (c3.south);
+
+\end{tikzpicture}
+\end{document}

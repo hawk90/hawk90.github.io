@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  node1/.style={cls, align=center, font=\footnotesize, minimum width=42mm, minimum height=10mm},
+  src/.style={node1, draw=hibord, fill=hifill},
+  ring/.style={node1, draw=warnbord, fill=warnfill},
+  sink/.style={node1, draw=okbord, fill=okfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[src]  (p)    at (0, 2)  {\ttfamily printk(...)};
+\node[ring] (rb)   at (5.5, 2) {\ttfamily \_\_log\_buf\\\scriptsize ring buffer};
+
+\draw[arr] (p.east) -- (rb.west);
+
+\node[sink] (c)  at (11, 4)   {console (TTY/serial)};
+\node[sink] (sl) at (11, 2.5) {syslogd / journald};
+\node[sink] (pk) at (11, 1)   {\ttfamily /proc/kmsg};
+\node[sink] (dk) at (11, -0.5) {\ttfamily /dev/kmsg};
+
+\draw[arr] (rb.east) -- (c.west);
+\draw[arr] (rb.east) -- (sl.west);
+\draw[arr] (rb.east) -- (pk.west);
+\draw[arr] (rb.east) -- (dk.west);
+
+\end{tikzpicture}
+\end{document}

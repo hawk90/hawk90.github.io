@@ -187,18 +187,7 @@ g_sb = xStreamBufferCreateWithCallback(
 
 Stream/message buffer가 *진짜로 빛나는 곳*은 *비대칭 멀티프로세싱(AMP)*입니다. RP2040은 *코어 0/1이 서로 다른 펌웨어*를 돌릴 수 있고, ESP32-S3는 *PRO/APP CPU*가 *공유 RAM*을 통해 통신합니다. 두 코어 모두 *내부 락 없이* 안전하게 쓸 수 있는 IPC가 필요합니다.
 
-```text
-[RP2040 AMP 구조]
-
-Core 0 (M0+, 송신)            Core 1 (M0+, 수신)
-   │                              │
-   ▼                              ▼
-xStreamBufferSend         xStreamBufferReceive
-   │                              │
-   └────► SRAM (shared) ◄─────────┘
-           [stream buffer]
-           위치: 공유 SRAM bank
-```
+![RP2040 dual M0+ stream buffer in shared SRAM](/images/blog/freertos-mastering/diagrams/ch10-rp2040-amp-stream.svg)
 
 ```c
 /* shared memory section에 stream buffer 배치 */

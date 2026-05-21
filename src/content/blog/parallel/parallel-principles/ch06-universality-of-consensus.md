@@ -666,11 +666,7 @@ Slot 2:  같은 의장 → propose → quorum ack → 결정 v_2
 
 이 슬롯 시퀀스가 곧 6장의 operation log다. 각 노드는 결정된 슬롯들을 처음부터 차례로 적용하여 자기 로컬 state machine을 갱신한다 — 회의록 재생.
 
-```text
-client request → leader → consensus → log → state machine 적용
-       ↑                                          ↓
-       └─────────── response ─────────────────────┘
-```
+![Replicated state machine cycle: client → leader → consensus → log → state](/images/blog/parallel-principles/diagrams/ch06-consensus-cycle.svg)
 
 이 패턴을 **replicated state machine**이라 부른다. Universal construction의 분산 구현이다.
 

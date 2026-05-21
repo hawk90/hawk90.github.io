@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  node1/.style={cls, align=center, font=\ttfamily\footnotesize, minimum width=30mm, minimum height=12mm},
+  p/.style={node1, draw=hibord, fill=hifill},
+  c/.style={node1, draw=okbord, fill=okfill},
+  f/.style={node1, draw=conbord, fill=confill},
+  sf/.style={node1, draw=warnbord, fill=warnfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[p] (prom) at (0, 2)   {Promise<T>};
+\node[c] (core) at (5.5, 2) {Core<T>};
+\node[f] (fut)  at (11, 2)  {Future<T>};
+\node[sf] (sf)  at (5.5, 0) {SemiFuture<T>};
+
+\draw[arr] (prom.east) -- node[font=\sffamily\scriptsize, midway, above] {setValue / setException} (core.west);
+\draw[arr] (core.east) -- node[font=\sffamily\scriptsize, midway, above] {.thenValue} (fut.west);
+\draw[arr] (sf.north) -- node[font=\sffamily\scriptsize, midway, right] {.via(executor) 필요} (core.south);
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,shapes.geometric}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  start/.style={circle, fill=inkc, minimum size=4mm, inner sep=0},
+  endp/.style={circle, draw=inkc, line width=0.8pt, minimum size=5mm, inner sep=0,
+               append after command={
+                 \pgfextra{\fill[inkc] (\tikzlastnode.center) circle (1.2mm);}
+               }},
+  ref/.style={cls, minimum width=44mm, minimum height=10mm,
+              font=\sffamily\footnotesize\bfseries, fill=hifill, draw=hibord},
+  decision/.style={diamond, draw=edgec, fill=warnfill, line width=0.5pt,
+                   inner sep=2pt, font=\sffamily\scriptsize, align=center, aspect=2},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
+  lbl/.style={font=\sffamily\scriptsize, fill=white, inner sep=2pt}
+]
+
+\node[start] (s) at (0, 6) {};
+\node[ref] (v) at (0, 4.5) {ref: ValidateOrder};
+\node[decision] (d) at (0, 2.7) {in stock?};
+\node[ref] (c) at (0, 1) {ref: ChargePayment};
+\node[ref] (sh) at (0, -0.5) {ref: ScheduleShipment};
+\node[ref] (n) at (5.5, 2.7) {ref: NotifyOutOfStock};
+\node[endp] (e1) at (0, -2) {};
+\node[endp] (e2) at (5.5, 1) {};
+
+\draw[arr] (s) -- (v.north);
+\draw[arr] (v.south) -- (d.north);
+\draw[arr] (d.south) -- node[lbl, right] {Yes} (c.north);
+\draw[arr] (c.south) -- (sh.north);
+\draw[arr] (sh.south) -- (e1.north);
+\draw[arr] (d.east) -- node[lbl, above] {No} (n.west);
+\draw[arr] (n.south) -- (e2.north);
+
+\end{tikzpicture}
+\end{document}

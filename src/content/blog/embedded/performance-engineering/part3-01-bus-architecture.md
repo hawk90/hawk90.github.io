@@ -91,14 +91,12 @@ ARSIZE — 각 transfer bytes (000=1, 011=8, 100=16, ..., 111=128)
 
 ## Outstanding Transaction
 
-```text
-Master가 *응답 받기 전*에 다음 AR 발사 가능.
+Master가 *응답 받기 전*에 다음 AR을 발사할 수 있다.
 
-Time:  1    2    3    4    5    6
-       AR0  AR1  AR2  AR3  AR4  AR5
-                      R0        R1
-                                R2 ...
-```
+| Time | 1 | 2 | 3 | 4 | 5 | 6 |
+|------|---|---|---|---|---|---|
+| AR | AR0 | AR1 | AR2 | AR3 | AR4 | AR5 |
+| R | | | | R0 | | R1 (R2…) |
 
 이렇게 하면 throughput이 향상됩니다. DRAM latency를 parallelism으로 가리는 효과가 있습니다.
 
@@ -178,12 +176,10 @@ STM32H7이 고성능 Cortex-M7으로 평가받는 이유 중 하나가 바로 AX
 
 ## DMA·CPU Contention
 
-```text
-CPU AXI master + DMA AXI master → 같은 slave (DDR) 접근
-  → arbiter가 우선순위 결정
-  → DMA 우선 시 CPU stall
-  → CPU 우선 시 DMA latency 증가
-```
+CPU AXI master와 DMA AXI master가 같은 slave (DDR)에 접근하면 *arbiter가 우선순위*를 결정한다.
+
+- DMA 우선 시 — CPU stall
+- CPU 우선 시 — DMA latency 증가
 
 `ARQOS`와 `AWQOS`는 4-bit priority를 제공합니다. CCI-400은 bandwidth regulation도 가능합니다.
 
@@ -202,19 +198,13 @@ Bus fault가 발생하면 ARM Cortex-A에서는 `Synchronous External Abort`, Co
 
 > ⚠️ Burst boundary 넘김
 
-```text
-AXI burst는 *4KB boundary* 넘으면 안 됨.
-INCR16 (16 transfer × 8 byte = 128 byte) → 4 KB 안에 있어야.
-```
+AXI burst는 *4KB boundary*를 넘으면 안 된다. `INCR16` (16 transfer × 8 byte = 128 byte)은 4 KB 안에 있어야 한다.
 
 DMA controller는 자동으로 split을 처리하지만, 수동으로 AXI master를 다룰 때는 직접 split해야 합니다.
 
 > ⚠️ ID 충돌
 
-```text
-같은 ID로 2 outstanding → slave가 응답을 *순서대로* 줘야 함.
-서로 다른 slave면 — *재정렬 못 함* → deadlock 가능.
-```
+같은 ID로 2 outstanding이면 slave가 응답을 *순서대로* 줘야 한다. 서로 다른 slave면 *재정렬 못 함* → deadlock 가능.
 
 slave 경로마다 unique ID를 두는 것이 안전합니다.
 

@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  node1/.style={cls, align=center, font=\footnotesize, minimum width=22mm, minimum height=10mm},
+  cli/.style={node1, draw=hibord, fill=hifill},
+  ldr/.style={node1, draw=okbord, fill=okfill},
+  con/.style={node1, draw=conbord, fill=confill},
+  log/.style={node1, draw=warnbord, fill=warnfill},
+  sm/.style={node1, draw=absbord, fill=absfill},
+  arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.6pt}
+]
+
+\node[cli] (c)  at (0, 0)  {client};
+\node[ldr] (l)  at (3.5, 0)  {leader};
+\node[con] (cn) at (7, 0)  {consensus};
+\node[log] (lg) at (10.5, 0) {log};
+\node[sm]  (s)  at (14, 0) {state machine};
+
+\foreach \a/\b in {c/l, l/cn, cn/lg, lg/s} {
+  \draw[arr] (\a.east) -- (\b.west);
+}
+
+\draw[arr, rounded corners=6pt] (s.south) -- ++(0, -1.2) -- node[font=\sffamily\scriptsize, midway, above, text=mutec] {response} ($(c.south) + (0, -1.2)$) -- (c.south);
+
+\end{tikzpicture}
+\end{document}

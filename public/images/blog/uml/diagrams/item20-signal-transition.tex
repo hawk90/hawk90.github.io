@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=46mm,
+  state/.style={cls, rounded corners=4mm, minimum width=28mm, minimum height=12mm,
+                font=\sffamily\footnotesize\bfseries, fill=hifill, draw=hibord},
+  trans/.style={-{Stealth[length=2.6mm]}, draw=edgec, line width=0.55pt}
+]
+
+\node[state] (s1) {State1};
+\node[state, right=of s1] (s2) {State2};
+
+\draw[trans] (s1) -- node[font=\sffamily\scriptsize, midway, above, fill=white, inner sep=2pt, align=center]
+                {signalA / sendSignal(B)} (s2);
+
+\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at ($(s1)!.5!(s2) + (0, -1.2)$)
+  {신호 수신을 트리거로 새 신호 발생};
+
+\end{tikzpicture}
+\end{document}

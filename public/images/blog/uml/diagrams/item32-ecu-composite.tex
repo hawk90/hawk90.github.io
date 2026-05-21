@@ -1,0 +1,41 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  outer/.style={cls, minimum width=120mm, minimum height=50mm,
+                fill=hifill!30, draw=hibord, anchor=south west},
+  part/.style={cls, minimum width=38mm, minimum height=10mm,
+               font=\sffamily\footnotesize, fill=okfill, draw=okbord},
+  bus/.style={cls, minimum width=22mm, minimum height=10mm,
+              font=\sffamily\footnotesize, fill=absfill, draw=absbord},
+  iflbl/.style={font=\sffamily\scriptsize, midway, fill=white, inner sep=1pt},
+  provball/.style={circle, draw=edgec, fill=white, line width=0.55pt, minimum size=3mm},
+  link/.style={draw=edgec, line width=0.55pt}
+]
+
+\node[outer] (ecu) at (0, 0) {};
+\node[font=\sffamily\bfseries\footnotesize, anchor=north west] at ($(ecu.north west) + (0.2, -0.15)$) {ECU};
+
+% Parts
+\node[part] (cpu) at (3, 3.5) {part cpu : Cortex-M7};
+\node[part] (can) at (3, 2.3) {part can : CANController};
+\node[part] (adc) at (3, 1.1) {part adc : ADC};
+
+% Bus
+\node[bus] (bus) at (10, 2.3) {bus : AXI};
+
+% Each part requires IBus (socket) and bus provides (ball)
+\foreach \p in {cpu, can, adc} {
+  \draw[link] (\p.east) -- node[iflbl] {IBus} (bus.west |- \p.east);
+}
+
+% Provided ball at bus
+\node[provball] at (bus.west) {};
+
+\end{tikzpicture}
+\end{document}

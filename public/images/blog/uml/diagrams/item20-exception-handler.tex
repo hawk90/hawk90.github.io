@@ -1,0 +1,24 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, node distance=44mm,
+  act/.style={cls, rounded corners=2pt, minimum width=28mm, minimum height=12mm,
+              font=\sffamily\footnotesize\bfseries, fill=okfill, draw=okbord},
+  hnd/.style={cls, rounded corners=2pt, minimum width=28mm, minimum height=12mm,
+              font=\sffamily\footnotesize\bfseries, fill=warnfill, draw=warnbord},
+  exc/.style={-{Stealth[length=2.6mm]}, draw=warnbord, line width=0.55pt, dashed}
+]
+
+\node[act] (a) {Action};
+\node[hnd, right=of a] (h) {Handler};
+
+\draw[exc] (a) -- node[font=\sffamily\scriptsize, midway, above, fill=white, inner sep=2pt]
+  {$<<$Exception$>>$} (h);
+
+\end{tikzpicture}
+\end{document}

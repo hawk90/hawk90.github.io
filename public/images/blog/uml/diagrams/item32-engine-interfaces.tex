@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,arrows}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  comp/.style={cls, minimum width=32mm, minimum height=14mm,
+               font=\sffamily\bfseries\footnotesize, fill=hifill, draw=hibord},
+  reqsocket/.style={draw=edgec, line width=0.6pt},
+  provball/.style={circle, draw=edgec, fill=white, line width=0.55pt, minimum size=3mm}
+]
+
+\node[comp] (eng) at (0, 0) {engine : Engine};
+
+% Required: IFuel — open half-circle (socket) on top
+\draw[reqsocket] (eng.east) -- ++(1.0, 0.4) coordinate (rA);
+\draw[reqsocket] (rA) arc (90:270:1.5mm);
+\node[font=\sffamily\scriptsize, anchor=west] at ($(rA) + (0.4, 0)$) {IFuel};
+\node[font=\sffamily\scriptsize, anchor=west, text=mutec] at (4.5, 0.4) {(engine은 IFuel을 \textit{요구})};
+
+% Provided: IThrottle — lollipop (ball) on bottom
+\draw[reqsocket] (eng.east) -- ++(1.0, -0.4) coordinate (pA);
+\node[provball] at ($(pA) + (0.2, 0)$) {};
+\node[font=\sffamily\scriptsize, anchor=west] at ($(pA) + (0.6, 0)$) {IThrottle};
+\node[font=\sffamily\scriptsize, anchor=west, text=mutec] at (4.5, -0.4) {(engine은 IThrottle을 \textit{제공})};
+
+\end{tikzpicture}
+\end{document}

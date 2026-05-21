@@ -123,16 +123,7 @@ if (err == ESP_ERR_NOT_SUPPORTED) {
 
 리튬 배터리(3.0~4.2 V)는 *ADC 한계인 3.3 V를 넘으므로* *외부 분압*이 필요합니다.
 
-```text
-Battery + ─┐
-           ├─ R1 = 100 kΩ
-           │
-           ├──── ADC pin (GPIO0)
-           │
-           ├─ R2 = 100 kΩ
-           │
-           ⏚ GND
-```
+![Voltage divider for battery measurement](/images/blog/riscv/esp32-c3-mastering/diagrams/ch06-voltage-divider.svg)
 
 분압 비 1:1이라서 *측정값 × 2 = 실제 전압*입니다. 저항을 *100 kΩ 이상*으로 크게 잡는 이유는 *상시 누설 전류 최소화*입니다 (100 kΩ × 2 = 200 kΩ → 4.2V 시 21 µA).
 
