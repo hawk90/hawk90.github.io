@@ -97,11 +97,11 @@ def find_user(identifier):  # ID, 이메일, 둘 다 가능
 
 현대 IDE는 안전한 리네이밍을 지원한다.
 
-```text
-VS Code: F2 또는 우클릭 → Rename Symbol
-IntelliJ/PyCharm: Shift+F6
-Vim (with LSP): :lua vim.lsp.buf.rename()
-```
+| IDE | 단축키 |
+|-----|--------|
+| VS Code | F2 또는 우클릭 → Rename Symbol |
+| IntelliJ/PyCharm | Shift+F6 |
+| Vim (with LSP) | `:lua vim.lsp.buf.rename()` |
 
 전체 프로젝트에서 참조를 모두 바꿔준다.
 
