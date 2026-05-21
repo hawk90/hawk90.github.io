@@ -315,5 +315,5 @@ Edge는 보통 batch=1. NPU 효율이 batch=1에서 떨어집니다. Multi-frame
 - [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
 - [12-05: TFLite Micro](/blog/embedded/modern-recipes/part12-05-tflite-micro)
 - [12-06: ONNX Runtime](/blog/embedded/modern-recipes/part12-06-onnx-runtime)
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part6-01-edge-inference)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part6-03-quantization)
+- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)

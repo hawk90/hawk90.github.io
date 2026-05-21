@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  src/.style={cls, align=center, font=\scriptsize, minimum width=22mm, minimum height=10mm, draw=hibord, fill=hifill},
+  pll/.style={cls, align=center, font=\scriptsize, minimum width=32mm, minimum height=10mm, draw=absbord, fill=absfill},
+  div/.style={cls, align=center, font=\scriptsize, minimum width=20mm, minimum height=8mm, draw=neutbord, fill=neutfill},
+  consumer/.style={cls, align=center, font=\scriptsize, minimum width=28mm, minimum height=8mm, draw=okbord, fill=okfill},
+  arr/.style={-{Stealth[length=2.2mm]}, draw=edgec, line width=0.5pt}
+]
+
+\node[src] (xtal) at (0, 2) {24MHz XTAL};
+
+% PLLs
+\node[pll] (sys) at (4.5, 4) {SYS\_PLL1\\\tiny 800MHz fixed};
+\node[pll] (arm) at (4.5, 2) {ARM\_PLL\\\tiny 1800MHz max};
+\node[pll] (dram) at (4.5, 0) {DRAM\_PLL\\\tiny DDR rate};
+
+\draw[arr] (xtal.east) -- (sys.west);
+\draw[arr] (xtal.east) -- (arm.west);
+\draw[arr] (xtal.east) -- (dram.west);
+
+% SYS_PLL1 dividers
+\node[div] (d2) at (9.5, 5.0) {/2 = 400MHz};
+\node[div] (d4) at (9.5, 4.0) {/4 = 200MHz};
+\node[div] (d8) at (9.5, 3.0) {/8 = 100MHz};
+
+\draw[arr] (sys.east) -- (d2.west);
+\draw[arr] (sys.east) -- (d4.west);
+\draw[arr] (sys.east) -- (d8.west);
+
+% Consumers
+\node[consumer] (uart) at (14, 3.0) {UART\_CLK\_ROOT};
+\node[consumer] (cpu) at (14, 2.0) {A53 cores};
+\node[consumer] (ddr) at (14, 0.0) {DRAM controller};
+
+\draw[arr] (d8.east) -- (uart.west);
+\draw[arr] (arm.east) -- (cpu.west);
+\draw[arr] (dram.east) -- (ddr.west);
+
+\end{tikzpicture}
+\end{document}

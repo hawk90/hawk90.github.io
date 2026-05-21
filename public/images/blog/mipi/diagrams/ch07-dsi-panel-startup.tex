@@ -10,12 +10,12 @@
 
 \node[font=\footnotesize\bfseries, anchor=west] at (0, 5) {DSI Panel Startup Sequence — IO·Power·Reset·DCS Commands};
 
-\node[anchor=west] at (0, 2) {\begin{tikztimingtable}
-  IOVCC (1.8V) & 0.5L 7H \\
-  VCI (2.8V)   & 1L 6.5H \\
-  RESET (n)    & 1.5L 0.5L 0.2H 5H \\
-  DSI (LP)     & 2.2Z 4.5Z \\
-  DCS Cmds     & 2.7Z D{Sleep Out} 0.5Z D{Pixel Fmt} 0.5Z D{Display On} 1Z \\
+\node[anchor=west] at (0, 2) {\begin{tikztimingtable}[xscale=1.4]
+  IOVCC (1.8V) & 0.5L 9H \\
+  VCI (2.8V)   & 1L 8.5H \\
+  RESET (n)    & 1.5L 0.5L 0.2H 7H \\
+  DSI (LP)     & 2.2Z 6.5Z \\
+  DCS Cmds     & 2.7Z D{Sleep Out} 1.5Z D{Pixel Fmt} 1.5Z D{Display On} 1Z \\
 \end{tikztimingtable}};
 
 \node[anchor=west, font=\tiny, align=left] at (0, -3) {

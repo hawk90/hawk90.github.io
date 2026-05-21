@@ -249,7 +249,7 @@ TEST(RetryPolicyTest, GivesUpAfterDeadline) {
 
 ## 관련 항목
 
-- [Part 7-01: Time / Duration overview](/blog/programming/code-review/abseil/part7-01-time-duration-overview)
+- [Part 7-01: Time / Duration overview](/blog/programming/code-review/abseil/part7-01-time-duration-overview-overview)
 - [Part 6-03: Notification](/blog/programming/code-review/abseil/part6-03-notification) — 동기화 타임아웃과 시계 mock
 - [Part 8-03: Mocking random](/blog/programming/code-review/abseil/part8-03-mocking-random) — 같은 정신의 random mock
 - [원문 — Test time](https://abseil.io/docs/cpp/guides/time#testing)

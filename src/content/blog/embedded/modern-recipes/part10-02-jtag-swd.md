@@ -294,5 +294,5 @@ reset halt
 
 ## 관련 항목
 
-- [1-05: Bootloader](/blog/embedded/modern-recipes/part1-05-bootloader)
+- [1-05: Bootloader](/blog/embedded/modern-recipes/part3-12-bootloader-chain)
 - [Performance Engineering 2-10: PMU](/blog/embedded/performance-engineering/part2-10-pmu)

@@ -222,4 +222,4 @@ compute().thenValue([](int x) { return parse(x); }).get();
 
 - [Folly Part 2-03 — SemiFuture vs Future](/blog/programming/code-review/folly/part2-03-semi-future-vs-future)
 - [Folly Part 3-01 — InlineExecutor](/blog/programming/code-review/folly/part3-01-inline-executor)
-- [Effective Modern C++ Item 38](/blog/programming/cpp/effective-modern-cpp/item38-thread-handles) — std::future 한계
+- [Effective Modern C++ Item 38](/blog/programming/cpp/effective-modern-cpp/item38-be-aware-of-varying-thread-handle-destructor-behavior) — std::future 한계

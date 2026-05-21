@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  src/.style={cls, align=center, font=\scriptsize, minimum width=22mm, minimum height=10mm, draw=hibord, fill=hifill},
+  dst/.style={cls, align=center, font=\scriptsize, minimum width=28mm, minimum height=10mm, draw=okbord, fill=okfill},
+  arr/.style={-{Stealth[length=2.2mm]}, draw=edgec, line width=0.5pt}
+]
+
+\node[src] (clk) at (0, 1) {Clock Out};
+\node[dst] (a) at (6, 2) {Chip A\\\tiny 1.5 ns 지연};
+\node[dst] (b) at (6, 0) {Chip B\\\tiny 0.75 ns 지연};
+
+\draw[arr] (clk.east) -- node[font=\scriptsize, above, sloped] {10 cm} (a.west);
+\draw[arr] (clk.east) -- node[font=\scriptsize, below, sloped] {5 cm} (b.west);
+
+\node[font=\scriptsize, text=warnbord, anchor=west] at (8, 1) {skew = 0.75 ns};
+
+\end{tikzpicture}
+\end{document}

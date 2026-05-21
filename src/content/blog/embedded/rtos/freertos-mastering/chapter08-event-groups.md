@@ -289,7 +289,7 @@ void main_task(void *p)
 
 ## 관련 항목
 
-- [Ch 7: Software Timers](/blog/embedded/rtos/freertos-mastering/chapter07-software-timers) — daemon task 우선순위와의 상호작용
+- [Ch 7: Software Timers](/blog/embedded/rtos/freertos-mastering/chapter05-software-timers) — daemon task 우선순위와의 상호작용
 - [Ch 9: Task Notifications](/blog/embedded/rtos/freertos-mastering/chapter09-task-notifications) — 경량 대안
 - [Ch 10: Stream and Message Buffers](/blog/embedded/rtos/freertos-mastering/chapter10-stream-message-buffers) — 단일 reader/writer용
 - [ESP32-C3 Mastering Ch 10: FreeRTOS](/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos) — ESP-IDF 변형

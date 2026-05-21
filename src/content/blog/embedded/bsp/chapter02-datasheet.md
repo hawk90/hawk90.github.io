@@ -65,17 +65,7 @@ NXP i.MX 8M Plus의 메모리 맵 일부입니다.
 
 i.MX 8M Plus의 단순화된 흐름입니다.
 
-```text
-24MHz XTAL  ─┐
-             ├─→ SYS_PLL1 (800MHz fixed)
-             │       ├─→ /2 = 400MHz
-             │       ├─→ /4 = 200MHz
-             │       └─→ /8 = 100MHz  ─→ UART_CLK_ROOT
-             │
-             ├─→ ARM_PLL (1800MHz max) ─→ A53 cores
-             │
-             └─→ DRAM_PLL (DDR rate)  ─→ DRAM controller
-```
+![i.MX 8M Plus clock tree](/images/blog/bsp/diagrams/ch02-clock-tree.svg)
 
 읽을 때 다음을 정합니다.
 

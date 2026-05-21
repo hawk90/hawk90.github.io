@@ -274,4 +274,4 @@ pcie_ep->BAR0_CFG = SIZE_128KB;   // 128 KB 요청
 ## 관련 항목
 
 - [1-02: DDR 초기화](/blog/embedded/modern-recipes/part1-02-ddr-init)
-- [1-04: Device Tree](/blog/embedded/modern-recipes/part1-04-device-tree)
+- [1-04: Device Tree](/blog/embedded/modern-recipes/part7-03-device-tree-basics)

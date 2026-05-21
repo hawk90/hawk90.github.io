@@ -345,4 +345,4 @@ ring_push(r, b);   /* race — SPSC 보장 깨짐 */
 ## 관련 항목
 
 - [2-01: ISR-Safe API](/blog/embedded/modern-recipes/part2-01-isr-safe)
-- [2-03: Priority Inversion](/blog/embedded/modern-recipes/part2-03-priority-inversion)
+- [2-03: Priority Inversion](/blog/embedded/modern-recipes/part6-10-priority-inversion)

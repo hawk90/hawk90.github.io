@@ -271,7 +271,7 @@ mpmc_queue<huge_struct, 1024> q;    /* slot마다 huge_struct 복사 */
 
 ## 관련 항목
 
-- [2-02: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part2-02-lock-free-ring)
+- [2-02: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
 - [6-06: Queue 활용](/blog/embedded/modern-recipes/part6-06-queue-usage)
 - [9-05: CAS 패턴](/blog/embedded/modern-recipes/part9-05-cas-patterns)
 - [9-08: ABA 문제 회피](/blog/embedded/modern-recipes/part9-08-aba-problem)

@@ -271,6 +271,6 @@ Batch 크기와 분배를 조절해 *순간 power spike*를 줄입니다.
 
 ## 관련 항목
 
-- [6-03: Quantization](/blog/embedded/modern-recipes/part6-03-quantization)
-- [6-05: Jetson](/blog/embedded/modern-recipes/part6-05-jetson)
+- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
+- [6-05: Jetson](/blog/embedded/modern-recipes/part12-08-jetson)
 - [PE 3-10: Thermal Throttling](/blog/embedded/performance-engineering/part3-10-thermal)

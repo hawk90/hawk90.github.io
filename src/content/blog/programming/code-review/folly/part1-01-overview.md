@@ -167,5 +167,5 @@ class Worker {
 ## 관련 항목
 
 - [Abseil 시리즈 Part 1-01](/blog/programming/code-review/abseil/part1-01-overview) — 같은 카테고리의 Google 라이브러리
-- [Effective Modern C++ Item 18](/blog/programming/cpp/effective-modern-cpp/item18-unique-ptr) — 표준 std::future의 한계
+- [Effective Modern C++ Item 18](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership) — 표준 std::future의 한계
 - [Folly GitHub](https://github.com/facebook/folly)

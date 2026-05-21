@@ -38,15 +38,7 @@ CAN은 wired-AND입니다. 모든 노드가 recessive를 보낼 때만 line이 r
 
 ### 3) Bus topology와 120Ω 종단
 
-```text
-CAN bus는 linear topology
-
-Node ─┬───── Node ───── Node ───── Node ──┬─
-      │                                    │
-     120Ω                                 120Ω
-      │                                    │
-     GND                                  GND
-```
+![CAN linear bus with 120Ω terminators at both ends](/images/blog/modern-recipes/diagrams/part1-10-can-bus-topology.svg)
 
 양 끝에 120Ω을 답니다. 중간 노드는 종단을 하면 안 됩니다. drop 길이(분기)는 가능한 짧게(< 30 cm) 유지합니다.
 

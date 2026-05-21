@@ -426,4 +426,4 @@ std::cout << b.is_lock_free();
 
 - [항목 38: future destructor](/blog/programming/cpp/effective-modern-cpp/item38-be-aware-of-varying-thread-handle-destructor-behavior)
 - [항목 39: void future](/blog/programming/cpp/effective-modern-cpp/item39-consider-void-futures-for-one-shot-event-communication)
-- [항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params)
+- [항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params)

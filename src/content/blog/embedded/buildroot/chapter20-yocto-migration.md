@@ -341,7 +341,7 @@ Ch 14에서 다룬 Buildroot의 `ccache + per-package directories`로 일부 격
 
 - [Ch 1: Buildroot가 푸는 문제 — Yocto와의 비교](/blog/embedded/buildroot/chapter01-problem) — 이 시리즈의 출발점이자 두 시스템의 철학적 트레이드오프
 - [Ch 11: Toolchain 선택 — internal vs external](/blog/embedded/buildroot/chapter11-toolchain) — 두 시스템에서 toolchain 처리 방식의 차이
-- [Ch 14: Caching — ccache·per-package directories·dl 공유](/blog/embedded/buildroot/chapter14-caching) — Buildroot의 caching과 Yocto sstate의 구조적 차이
+- [Ch 14: Caching — ccache·per-package directories·dl 공유](/blog/embedded/buildroot/chapter14-build-caching) — Buildroot의 caching과 Yocto sstate의 구조적 차이
 - [BSP Development Ch 16: Buildroot/Yocto와 BSP — rootfs 통합](/blog/embedded/bsp/chapter16-rootfs) — BSP 관점에서 빌드 시스템 선택
 - [원문 — Yocto Mega-Manual](https://docs.yoctoproject.org/singleindex.html)
 - [원문 — OpenEmbedded Reference Manual](https://docs.openembedded.org/docs/ref-manual/index.html)

@@ -1,0 +1,73 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (7,7) {Bank Interleaving — Bad vs Good};
+
+% ===== BAD scenario =====
+\node[font=\sffamily\bfseries, anchor=west, text=warnbord] at (0,6.2) {Bad — 같은 bank만 hit (BW 6\%)};
+
+% bank rows
+\foreach \b/\y in {0/5.5, 1/4.9, 2/4.3, 3/3.7} {
+  \node[caption, anchor=east] at (-0.2, \y) {bank \b};
+  \draw[mutec, line width=0.3pt] (0, \y) -- (8, \y);
+}
+\node[caption, anchor=west] at (0,3.1) {\ldots};
+% bank 0 keeps getting hit — long blocks
+\node[warn, minimum width=20mm, minimum height=5mm, anchor=west] at (0.0, 5.5) {R0};
+\node[warn, minimum width=20mm, minimum height=5mm, anchor=west] at (2.5, 5.5) {R1};
+\node[warn, minimum width=20mm, minimum height=5mm, anchor=west] at (5.0, 5.5) {R2};
+% gaps showing wait
+\node[caption, font=\tiny] at (2.2,5.95) {wait PRE};
+\node[caption, font=\tiny] at (4.7,5.95) {wait PRE};
+
+% time axis
+\draw[arr, line width=0.4pt] (0, 2.8) -- (8.2, 2.8);
+\node[caption, anchor=west] at (8.3, 2.8) {time};
+
+% ===== GOOD scenario =====
+\node[font=\sffamily\bfseries, anchor=west, text=okbord] at (0,1.9) {Good — 라운드 로빈 (BW 90\%+)};
+
+\foreach \b/\y in {0/1.2, 1/0.6, 2/0.0, 3/-0.6} {
+  \node[caption, anchor=east] at (-0.2, \y) {bank \b};
+  \draw[mutec, line width=0.3pt] (0, \y) -- (8, \y);
+}
+\node[caption, anchor=west] at (0,-1.2) {bank 15};
+
+% staggered blocks — each bank takes one slot, pipelined
+\foreach \i/\b in {0/0, 1/1, 2/2, 3/3} {
+  \pgfmathsetmacro\xx{0.5*\i}
+  \pgfmathsetmacro\yy{1.2 - 0.6*\b}
+  \node[ok, minimum width=4mm, minimum height=5mm, anchor=west] at (\xx,\yy) {};
+}
+% second pass
+\foreach \i/\b in {4/0, 5/1, 6/2, 7/3} {
+  \pgfmathsetmacro\xx{0.5*\i}
+  \pgfmathsetmacro\yy{1.2 - 0.6*(\i - 4)}
+  \node[ok, minimum width=4mm, minimum height=5mm, anchor=west] at (\xx,\yy) {};
+}
+% third pass
+\foreach \i/\b in {8/0, 9/1, 10/2, 11/3} {
+  \pgfmathsetmacro\xx{0.5*\i}
+  \pgfmathsetmacro\yy{1.2 - 0.6*(\i - 8)}
+  \node[ok, minimum width=4mm, minimum height=5mm, anchor=west] at (\xx,\yy) {};
+}
+% fourth pass
+\foreach \i/\b in {12/0, 13/1, 14/2, 15/3} {
+  \pgfmathsetmacro\xx{0.5*\i}
+  \pgfmathsetmacro\yy{1.2 - 0.6*(\i - 12)}
+  \node[ok, minimum width=4mm, minimum height=5mm, anchor=west] at (\xx,\yy) {};
+}
+
+% time axis
+\draw[arr, line width=0.4pt] (0, -1.6) -- (8.2, -1.6);
+\node[caption, anchor=west] at (8.3, -1.6) {time};
+
+\end{tikzpicture}
+\end{document}

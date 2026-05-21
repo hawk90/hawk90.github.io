@@ -239,6 +239,6 @@ Black Pill PC13처럼 *active-low*인 LED는 `ODR = 0`이 ON입니다. 보드 sc
 ## 관련 항목
 
 - [1-03: GPIO 내부 구조](/blog/embedded/modern-recipes/part1-03-gpio-internals)
-- [3-04: Startup 코드 작성](/blog/embedded/modern-recipes/part3-04-startup-code)
+- [3-04: Startup 코드 작성](/blog/embedded/modern-recipes/part3-06-startup-code)
 - [4-02: 레지스터 직접 접근](/blog/embedded/modern-recipes/part4-02-mmio-access)
 - [4-03: GPIO 드라이버 작성](/blog/embedded/modern-recipes/part4-03-gpio-driver)

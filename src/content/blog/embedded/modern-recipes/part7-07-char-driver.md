@@ -290,5 +290,5 @@ register_chrdev(123, ...);   /* fixed major — 이미 사용 중일 수 있음 
 
 - [7-06: Kernel Module 기초](/blog/embedded/modern-recipes/part7-06-kernel-module)
 - [7-08: Platform 드라이버](/blog/embedded/modern-recipes/part7-08-platform-driver)
-- [4-02: mmap](/blog/embedded/modern-recipes/part4-02-mmap)
-- [4-05: sysfs](/blog/embedded/modern-recipes/part4-05-sysfs)
+- [4-02: mmap](/blog/embedded/modern-recipes/part7-09-mmap)
+- [4-05: sysfs](/blog/embedded/modern-recipes/part7-12-sysfs)

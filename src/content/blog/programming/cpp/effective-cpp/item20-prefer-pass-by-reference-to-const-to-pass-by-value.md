@@ -20,7 +20,7 @@ draft: true
 - **작은 내장 타입** (`int`, `double`, 포인터) — 참조보다 값이 빠르다.
 - **STL 반복자와 함수 객체** — 가벼움이 전제다.
 
-C++11 이동 의미론으로 by-value 패턴 일부가 다시 평가됐다 ([EMC 항목 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params)). 이 항목은 그 결정 기준을 정리한다.
+C++11 이동 의미론으로 by-value 패턴 일부가 다시 평가됐다 ([EMC 항목 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params)). 이 항목은 그 결정 기준을 정리한다.
 
 ## 개요
 
@@ -271,4 +271,4 @@ reference를 반환할 땐 라이프타임 확인 (항목 21).
 
 - [항목 21: 객체 반환 시 참조 X](/blog/programming/cpp/effective-cpp/item21-dont-try-to-return-a-reference-when-you-must-return-an-object) — 참조의 라이프타임
 - [항목 25: non-throwing swap](/blog/programming/cpp/effective-cpp/item25-consider-support-for-a-non-throwing-swap) — 큰 객체 효율 교환
-- [Effective Modern C++ 항목 41: by-value vs move](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-parameters-that-are-cheap-to-move-and-always-copied) — 모던 트레이드오프
+- [Effective Modern C++ 항목 41: by-value vs move](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-parameters-that-are-cheap-to-move-and-always-copied) — 모던 트레이드오프

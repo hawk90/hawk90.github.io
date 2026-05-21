@@ -261,7 +261,7 @@ DMA buffer는 반드시 cache line 단위로 정렬해야 invalidate가 옆 line
 
 ## 관련 항목
 
-- [2-02: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part2-02-lock-free-ring)
-- [3-02: DMA Allocator](/blog/embedded/modern-recipes/part3-02-dma-allocator)
+- [2-02: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
+- [3-02: DMA Allocator](/blog/embedded/modern-recipes/part8-04-dma-allocator)
 - [PE 4-02: False Sharing](/blog/embedded/performance-engineering/part4-02-false-sharing)
 - [PE 2-07: Cache Line](/blog/embedded/performance-engineering/part2-07-cache-line)

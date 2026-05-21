@@ -1,0 +1,62 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.5,3.4) {Batched RD / WR Scheduling};
+
+% Color definitions
+\definecolor{rdfill}{RGB}{220,232,247}
+\definecolor{rdbord}{RGB}{72,118,182}
+\definecolor{wrfill}{RGB}{253,224,200}
+\definecolor{wrbord}{RGB}{210,135,68}
+\definecolor{taFill}{RGB}{251,229,229}
+\definecolor{taBord}{RGB}{180, 55, 55}
+
+% ===== Naive: R W alternating =====
+\node[font=\sffamily\bfseries, anchor=west, text=warnbord] at (0,2.5) {Naive — 매 명령마다 turnaround};
+\draw[mutec, line width=0.3pt] (0,1.8) -- (13.5,1.8);
+\foreach \i/\type in {0/R, 1/W, 2/R, 3/W, 4/R, 5/W, 6/R, 7/W} {
+  \pgfmathsetmacro\xx{\i*1.5}
+  \ifnum\pdfstrcmp{\type}{R}=0
+    \node[cls, fill=rdfill, draw=rdbord, minimum width=8mm, minimum height=6mm, anchor=west] at (\xx, 1.8) {\type};
+  \else
+    \node[cls, fill=wrfill, draw=wrbord, minimum width=8mm, minimum height=6mm, anchor=west] at (\xx, 1.8) {\type};
+  \fi
+  % turnaround penalty between each (except last)
+  \ifnum\i<7
+    \node[cls, fill=taFill, draw=taBord, minimum width=5mm, minimum height=4mm, anchor=west, font=\tiny] at (\xx + 0.8, 1.8) {ta};
+  \fi
+}
+
+% ===== Batched: RRRR then WWWW =====
+\node[font=\sffamily\bfseries, anchor=west, text=okbord] at (0,0.5) {Batched — turnaround 최소화};
+\draw[mutec, line width=0.3pt] (0,-0.2) -- (13.5,-0.2);
+\foreach \i in {0,1,2,3} {
+  \pgfmathsetmacro\xx{\i*0.9}
+  \node[cls, fill=rdfill, draw=rdbord, minimum width=8mm, minimum height=6mm, anchor=west] at (\xx, -0.2) {R};
+}
+% one turnaround
+\node[cls, fill=taFill, draw=taBord, minimum width=8mm, minimum height=5mm, anchor=west, font=\footnotesize] at (3.7, -0.2) {ta};
+\foreach \i in {0,1,2,3} {
+  \pgfmathsetmacro\xx{4.7 + \i*0.9}
+  \node[cls, fill=wrfill, draw=wrbord, minimum width=8mm, minimum height=6mm, anchor=west] at (\xx, -0.2) {W};
+}
+% second turnaround
+\node[cls, fill=taFill, draw=taBord, minimum width=8mm, minimum height=5mm, anchor=west, font=\footnotesize] at (8.4, -0.2) {ta};
+\foreach \i in {0,1,2,3} {
+  \pgfmathsetmacro\xx{9.4 + \i*0.9}
+  \node[cls, fill=rdfill, draw=rdbord, minimum width=8mm, minimum height=6mm, anchor=west] at (\xx, -0.2) {R};
+}
+
+% Legend
+\node[caption, anchor=west] at (0, -1.5)
+  {\textbf{R}: Read, \textbf{W}: Write, \textbf{ta}: turnaround (data bus 방향 전환)};
+
+\end{tikzpicture}
+\end{document}

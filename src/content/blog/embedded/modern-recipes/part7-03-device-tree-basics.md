@@ -346,5 +346,5 @@ Bootloader가 *옛 DTB*를 가리키면 변경이 무효가 됩니다. `/boot/ex
 
 ## 관련 항목
 
-- [1-03: PCIe BAR](/blog/embedded/modern-recipes/part1-03-pcie-bar)
-- [1-05: Bootloader](/blog/embedded/modern-recipes/part1-05-bootloader)
+- [1-03: PCIe BAR](/blog/embedded/modern-recipes/part11-03-pcie-bar)
+- [1-05: Bootloader](/blog/embedded/modern-recipes/part3-12-bootloader-chain)

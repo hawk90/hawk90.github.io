@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  worldlbl/.style={font=\sffamily\bfseries\small, text=inkc, anchor=south},
+  el/.style={cls, align=center, font=\footnotesize, minimum width=42mm, minimum height=10mm},
+  s/.style={el, draw=warnbord, fill=warnfill!40},
+  ns/.style={el, draw=okbord, fill=okfill!40},
+  mon/.style={el, draw=hibord, fill=hifill, minimum width=90mm},
+  link/.style={draw=edgec, line width=0.6pt}
+]
+
+% EL3 secure monitor spans both worlds
+\node[mon] (mon) at (4.5, 4) {EL3 \(\cdot\) secure monitor};
+
+% World labels above each column
+\node[worldlbl] at (1.5, 5.4) {Secure World};
+\node[worldlbl] at (7.5, 5.4) {Non-Secure World};
+
+% Secure column
+\node[s] (el1s) at (1.5, 2.5) {EL1 secure\\\scriptsize OP-TEE};
+\node[s] (el0s) at (1.5, 1.0) {EL0 secure\\\scriptsize Trusted App};
+
+% Non-secure column
+\node[ns] (el2)  at (7.5, 2.5) {EL2\\\scriptsize hypervisor (KVM 등)};
+\node[ns] (el1n) at (7.5, 1.0) {EL1\\\scriptsize Linux kernel};
+\node[ns] (el0n) at (7.5, -0.5) {EL0\\\scriptsize user space};
+
+% Lines from EL3 monitor down to each world's top
+\draw[link] (mon.south -| 1.5, 0) -- (el1s.north);
+\draw[link] (mon.south -| 7.5, 0) -- (el2.north);
+
+\end{tikzpicture}
+\end{document}

@@ -346,6 +346,6 @@ Ch 11에서 다룬 ABI 문제의 *커널 쪽* 사례입니다. External toolchai
 - [Ch 4: 첫 빌드 — QEMU에서 동작하는 시스템](/blog/embedded/buildroot/chapter04-first-build) — `linux-menuconfig`가 처음 등장한 흐름
 - [Ch 7: 보드 customize — br2-external과 board 디렉터리](/blog/embedded/buildroot/chapter07-board-customize) — DTS·linux.config 파일의 거주 위치
 - [Ch 11: Toolchain 선택 — internal vs external](/blog/embedded/buildroot/chapter11-toolchain) — kernel headers ABI 일치
-- [Ch 13: U-Boot 통합 — 같은 device tree 위에서](/blog/embedded/buildroot/chapter13-uboot) — 부트로더와 커널의 DTS 정렬
+- [Ch 13: U-Boot 통합 — 같은 device tree 위에서](/blog/embedded/buildroot/chapter13-uboot-integration) — 부트로더와 커널의 DTS 정렬
 - [BSP Development Ch 11: 커널 포팅](/blog/embedded/bsp/chapter11-kernel-port) — BSP 관점에서 vendor fork → mainline 정렬
 - [원문 — Buildroot Manual §13: Customizing the generated target filesystem](https://buildroot.org/downloads/manual/manual.html)

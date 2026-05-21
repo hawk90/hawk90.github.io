@@ -23,20 +23,7 @@ draft: false
 
 ### 1) 표준 메모리 맵 (Cortex-M3/M4)
 
-```text
-0xE0100000 ─┐
-0xE0000000  │ Private Peripheral Bus (PPB) — SCB, NVIC, DWT, ITM
-0xDFFFFFFF  │
-0xA0000000  │ External device (1 GB) — strongly-ordered
-0x9FFFFFFF  │
-0x60000000  │ External RAM (1 GB) — normal, non-shareable
-0x5FFFFFFF  │
-0x40000000  │ Peripheral (0.5 GB) — device
-0x3FFFFFFF  │
-0x20000000  │ SRAM (0.5 GB) — normal, shareable (bitband 0x22xxxxxx)
-0x1FFFFFFF  │
-0x00000000 ─┘ Code (0.5 GB) — normal, executable (bitband 0x22xxxxxx 가능)
-```
+![Cortex-M standard memory map](/images/blog/modern-recipes/diagrams/part2-05-arm-memory-map.svg)
 
 각 영역은 default access attribute가 다릅니다. MPU로 override 가능.
 

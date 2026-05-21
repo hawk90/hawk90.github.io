@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  sig/.style={draw=hibord, line width=1pt},
+  lbl/.style={font=\sffamily\scriptsize, anchor=east},
+  ann/.style={font=\sffamily\scriptsize, anchor=west}
+]
+
+% CS signal trace (active low)
+\node[lbl] at (-0.2, 2.0) {CS};
+\draw[sig] (0, 2.5) -- (1, 2.5) -- (1, 1.5) -- (7, 1.5) -- (7, 2.5) -- (8.5, 2.5);
+
+% Captured frame annotations between CS Low/High
+\node[ann, font=\ttfamily\scriptsize] at (1.5, 0.9) {MOSI: 0x05};
+\node[ann, font=\ttfamily\scriptsize] at (4.5, 0.9) {MISO: 0xFF};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (7.4, 0.9) {(read status command)};
+
+\node[ann, font=\ttfamily\scriptsize] at (1.5, -0.2) {MOSI: 0x00};
+\node[ann, font=\ttfamily\scriptsize] at (4.5, -0.2) {MISO: 0x02};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (7.4, -0.2) {(status byte = WIP)};
+
+% Setup label
+\node[font=\sffamily\footnotesize, anchor=west] at (-0.2, 3.5)
+  {신호 4개: MOSI, MISO, SCLK, CS \quad 설정: 8 bits/transfer, MSB first, CPOL, CPHA};
+
+\end{tikzpicture}
+\end{document}

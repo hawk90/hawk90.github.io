@@ -209,4 +209,4 @@ folly::Optional<std::unique_ptr<T>> opt;
 
 - [Part 6-01 to / tryTo](/blog/programming/code-review/folly/part6-01-to-try-to) — Optional 반환 패턴
 - [Effective Modern C++ Item 5](/blog/programming/cpp/effective-modern-cpp/item05-prefer-auto) — auto와 Optional 추론
-- [Effective Modern C++ Item 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value) — value vs reference 반환
+- [Effective Modern C++ Item 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params) — value vs reference 반환

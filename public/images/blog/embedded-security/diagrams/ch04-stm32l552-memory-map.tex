@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  title/.style={font=\sffamily\bfseries\small, text=inkc, anchor=south},
+  region/.style={cls, align=center, font=\footnotesize, text width=58mm, minimum height=12mm},
+  ns/.style={region, draw=okbord, fill=okfill!40},
+  s/.style={region, draw=warnbord, fill=warnfill!40},
+  addr/.style={font=\ttfamily\scriptsize, text=mutec, anchor=east}
+]
+
+\node[title] at (3.5, 5.6) {Memory Map — STM32L552};
+
+% Four memory regions stacked
+\node[ns] (nsflash) at (3.5, 4.5) {Non-secure flash\\[1pt]\scriptsize application};
+\node[s]  (sflash)  at (3.5, 3.0) {Secure flash\\[1pt]\scriptsize TF-M, secure boot};
+\node[ns] (nssram)  at (3.5, 1.5) {Non-secure SRAM};
+\node[s]  (ssram)   at (3.5, 0.0) {Secure SRAM};
+
+% Address labels (right side)
+\node[addr, anchor=west] at ([xshift=4pt]nsflash.north east) {0x00000000};
+\node[addr, anchor=west] at ([xshift=4pt]nsflash.south east) {0x07FFFFFF};
+\node[addr, anchor=west] at ([xshift=4pt]sflash.north east)  {0x0C000000};
+\node[addr, anchor=west] at ([xshift=4pt]sflash.south east)  {0x0FFFFFFF};
+\node[addr, anchor=west] at ([xshift=4pt]nssram.north east)  {0x20000000};
+\node[addr, anchor=west] at ([xshift=4pt]nssram.south east)  {0x2002FFFF};
+\node[addr, anchor=west] at ([xshift=4pt]ssram.north east)   {0x30000000};
+\node[addr, anchor=west] at ([xshift=4pt]ssram.south east)   {0x3000FFFF};
+
+\end{tikzpicture}
+\end{document}

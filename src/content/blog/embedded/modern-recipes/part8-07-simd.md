@@ -290,7 +290,7 @@ SIMD를 진지하게 쓸 때는 SoA 변환이 거의 필수입니다.
 
 ## 관련 항목
 
-- [3-04: NUMA](/blog/embedded/modern-recipes/part3-04-numa)
-- [3-06: ARM NEON 심화](/blog/embedded/modern-recipes/part3-06-neon)
+- [3-04: NUMA](/blog/embedded/modern-recipes/part8-06-numa)
+- [3-06: ARM NEON 심화](/blog/embedded/modern-recipes/part8-08-neon)
 - [PE 2-09: SIMD NEON](/blog/embedded/performance-engineering/part2-09-simd-neon)
-- [3-01: Cache Alignment](/blog/embedded/modern-recipes/part3-01-cache-alignment)
+- [3-01: Cache Alignment](/blog/embedded/modern-recipes/part8-03-cache-alignment)

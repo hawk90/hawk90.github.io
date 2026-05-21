@@ -419,6 +419,6 @@ cyclictest가 안 측정하는 *application-specific* 원인이 있습니다.
 - [Ch 5: EtherCAT Master 구현](/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master)
 - [Ch 12: 비교 분석 — 프로토콜 선택 가이드](/blog/embedded/protocols/industrial-ethernet/chapter12-comparison)
 - [Practical RTOS Internals Part 5-07: PREEMPT_RT Linux](/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux)
-- [Modern Embedded Recipes Part 4-06: IRQ affinity tuning](/blog/embedded/modern-recipes/part4-06-irq-affinity)
+- [Modern Embedded Recipes Part 4-06: IRQ affinity tuning](/blog/embedded/modern-recipes/part7-13-irq-affinity)
 - [원문 — IgH EtherLab Master](https://gitlab.com/etherlab.org/ethercat)
 - [원문 — Linux PREEMPT_RT wiki](https://wiki.linuxfoundation.org/realtime/)

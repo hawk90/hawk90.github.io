@@ -326,7 +326,7 @@ Q5. 공작기계·프레스인가?
 - [Ch 10: POWERLINK — Slot 기반 폴링](/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink)
 - [Ch 11: 리눅스 실시간 — PREEMPT_RT·EtherCAT](/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime)
 - [Practical RTOS Internals Part 5.7: PREEMPT_RT Linux](/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux)
-- [Modern Embedded Recipes Part 4.6: IRQ affinity](/blog/embedded/modern-recipes/part4-06-irq-affinity)
+- [Modern Embedded Recipes Part 4.6: IRQ affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity)
 - [Buildroot Ch 1: 문제 정의](/blog/embedded/buildroot/chapter01-problem)
 - [DO-178C Ch 1: 항공 SW 인증 개요](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
 - [원문 — ETG (EtherCAT Technology Group)](https://www.ethercat.org/)

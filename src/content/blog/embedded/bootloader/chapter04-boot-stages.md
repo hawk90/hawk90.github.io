@@ -114,16 +114,7 @@ EL0 — user space (가장 낮음)
 
 추가로 *secure / non-secure* 구분이 EL0/EL1/EL2에 *직교*로 존재합니다.
 
-```text
-[Secure World]        [Non-Secure World]
-EL3 (secure monitor)
-  │
-  └──────────────────────────┐
-                             │
-EL1 secure: OP-TEE           EL2: hypervisor (KVM 등)
-EL0 secure: Trusted App      EL1: Linux kernel
-                             EL0: user space
-```
+![TrustZone EL3 splits secure and non-secure worlds](/images/blog/bootloader/diagrams/ch04-trustzone-el-split.svg)
 
 부트 진행에 따라 권한 수준이 *내려가는* 흐름입니다.
 

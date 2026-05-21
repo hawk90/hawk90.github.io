@@ -261,6 +261,6 @@ Task M priority 5    /* ← same priority → preempt 없음, FIFO */
 
 ## 관련 항목
 
-- [2-02: Lock-Free Ring](/blog/embedded/modern-recipes/part2-02-lock-free-ring)
-- [2-04: Memory Barrier](/blog/embedded/modern-recipes/part2-04-memory-barrier)
+- [2-02: Lock-Free Ring](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
+- [2-04: Memory Barrier](/blog/embedded/modern-recipes/part2-10-memory-barrier)
 - [RTOS 3-04: Priority Inversion](/blog/embedded/rtos/practical-internals/part3-04-priority-inversion)

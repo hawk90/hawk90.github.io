@@ -372,5 +372,5 @@ SAU(CPU view) + MPC(memory controller view) + PPC(peripheral)를 모두 설정�
 ## 관련 항목
 
 - [6-07: 온디바이스 LLM](/blog/embedded/modern-recipes/part6-07-llama-cpp-edge)
-- [6-09: Matter·Thread](/blog/embedded/modern-recipes/part6-09-matter-thread)
+- [6-09: Matter·Thread](/blog/embedded/modern-recipes/part12-12-matter-thread)
 - [RTOS 4-11: TrustZone·TF-M](/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm)

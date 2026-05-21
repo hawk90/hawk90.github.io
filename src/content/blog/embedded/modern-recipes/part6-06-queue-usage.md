@@ -255,5 +255,5 @@ Backpressure 정책 없이 무한 대기하면 cascading failure가 발생합니
 - [PRTOS 1-09: Queues](/blog/embedded/rtos/practical-internals/part1-09-queues)
 - [PRTOS 3-07: Queue Implementation](/blog/embedded/rtos/practical-internals/part3-07-queue-impl)
 - [PRTOS 3-11: Stream/Message Buffer](/blog/embedded/rtos/practical-internals/part3-11-stream-message-buffer)
-- [2-02: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part2-02-lock-free-ring)
+- [2-02: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
 - [6-07: Event Group](/blog/embedded/modern-recipes/part6-07-event-group)

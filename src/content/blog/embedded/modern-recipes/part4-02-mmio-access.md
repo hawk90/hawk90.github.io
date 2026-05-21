@@ -245,4 +245,4 @@ datasheet의 reserved 비트는 read-modify-write가 안전합니다. blind writ
 - [4-01: 첫 bare-metal 프로그램](/blog/embedded/modern-recipes/part4-01-first-baremetal)
 - [4-03: GPIO 드라이버 작성](/blog/embedded/modern-recipes/part4-03-gpio-driver)
 - [2-05: ARM 메모리 맵](/blog/embedded/modern-recipes/part2-05-arm-memory-map)
-- [2-10: Memory Barrier 실전](/blog/embedded/modern-recipes/part2-10-memory-barriers)
+- [2-10: Memory Barrier 실전](/blog/embedded/modern-recipes/part2-10-memory-barrier)

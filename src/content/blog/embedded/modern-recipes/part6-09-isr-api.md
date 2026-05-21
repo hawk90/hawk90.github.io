@@ -255,5 +255,5 @@ task: read timestamp           /* ← race */
 
 ## 관련 항목
 
-- [1-06: JTAG·SWD](/blog/embedded/modern-recipes/part1-06-jtag)
-- [2-02: Lock-Free Ring](/blog/embedded/modern-recipes/part2-02-lock-free-ring)
+- [1-06: JTAG·SWD](/blog/embedded/modern-recipes/part10-02-jtag-swd)
+- [2-02: Lock-Free Ring](/blog/embedded/modern-recipes/part9-01-lock-free-ring)

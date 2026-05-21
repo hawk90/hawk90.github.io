@@ -246,4 +246,4 @@ int main() {
 
 - [Part 12-01 Singleton vs Meyers](/blog/programming/code-review/folly/part12-01-singleton-vs-meyers) — 왜 vault인가
 - [Part 7-04 F14FastMap](/blog/programming/code-review/folly/part7-04-f14-fast-map) — vault 내부 자료구조
-- [Effective Modern C++ Item 21](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-shared) — shared_ptr 생성
+- [Effective Modern C++ Item 21](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new) — shared_ptr 생성

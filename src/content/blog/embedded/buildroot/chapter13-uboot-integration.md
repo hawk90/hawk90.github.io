@@ -334,7 +334,7 @@ U-Boot 통합에서 가장 자주 만나는 문제 다섯 가지입니다.
 - [Ch 7: 보드 customize — board 디렉터리·post-image](/blog/embedded/buildroot/chapter07-board-customize) — boot.cmd, fw_env.config 배치
 - [Ch 11: Toolchain 선택 — internal vs external](/blog/embedded/buildroot/chapter11-toolchain) — U-Boot와 kernel이 공유할 toolchain
 - [Ch 12: Linux 커널 customize — defconfig fragment와 DTS](/blog/embedded/buildroot/chapter12-kernel-customize) — fragment 패턴은 U-Boot와 동일
-- [Ch 16: OTA 업데이트 — SWUpdate·RAUC·Mender 통합](/blog/embedded/buildroot/chapter16-ota-updates) — A/B 슬롯 env 변수 관리
+- [Ch 16: OTA 업데이트 — SWUpdate·RAUC·Mender 통합](/blog/embedded/buildroot/chapter16-ota) — A/B 슬롯 env 변수 관리
 - [Bootloader 시리즈 Ch 18: U-Boot env in flash](/blog/embedded/bootloader/chapter18-uboot-env) — env 저장소와 redundant 동작 원리
 - [원문 — Buildroot Manual §17: Customizing the bootloader](https://buildroot.org/downloads/manual/manual.html#customize-bootloader)
 - [원문 — U-Boot Documentation](https://docs.u-boot.org/en/latest/)

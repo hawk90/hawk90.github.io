@@ -616,7 +616,7 @@ ARM은 CAS를 *단일 명령*으로 제공하지 않는다 (ARMv8.1 이전엔). 
 
 `LDXR`이 cache line에 *exclusive monitor*를 건다. 그 사이에 다른 코어가 같은 line에 접근하면 monitor가 풀린다. `STXR`은 monitor가 살아 있을 때만 store하고 0을, 풀렸으면 1을 반환한다.
 
-이 LL/SC 짝은 CAS와 정확히 같은 consensus 능력 — ∞ — 을 갖는다. 그러나 single-instruction이 아니므로 *spurious failure*가 발생할 수 있다. 컨텍스트 스위치, 인터럽트, 같은 line의 무관한 접근이 monitor를 깨뜨린다. 그래서 ARM의 LL/SC를 C++의 `compare_exchange_weak`에 매핑한다 — weak 버전은 spurious failure를 허용하므로 LL/SC와 자연스럽게 맞물린다.
+이 LL/SC 짝은 CAS와 정확히 같은 consensus 능력 ∞를 갖는다. 그러나 single-instruction이 아니므로 *spurious failure*가 발생할 수 있다. 컨텍스트 스위치, 인터럽트, 같은 line의 무관한 접근이 monitor를 깨뜨린다. 그래서 ARM의 LL/SC를 C++의 `compare_exchange_weak`에 매핑한다. weak 버전은 spurious failure를 허용하므로 LL/SC와 자연스럽게 맞물린다.
 
 ARMv8.1부터는 `CAS` 명령이 추가됐다. 단일 명령으로 CAS를 수행한다. 하드웨어가 점점 더 강한 원시를 직접 제공하는 방향으로 진화한다.
 

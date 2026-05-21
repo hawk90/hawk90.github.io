@@ -332,5 +332,5 @@ Total HP throughput ≤ DDR bandwidth × 0.7 (efficiency). 4× HP의 합이 DDR 
 
 - [11-01: FPGA 기초](/blog/embedded/modern-recipes/part11-01-fpga-basics)
 - [11-04: AXI 인터페이스](/blog/embedded/modern-recipes/part11-04-axi)
-- [11-06: Mailbox Protocol](/blog/embedded/modern-recipes/part11-06-mailbox-protocol)
+- [11-06: Mailbox Protocol](/blog/embedded/modern-recipes/part11-06-mailbox)
 - [11-08: DMA Completion](/blog/embedded/modern-recipes/part11-08-dma-completion)

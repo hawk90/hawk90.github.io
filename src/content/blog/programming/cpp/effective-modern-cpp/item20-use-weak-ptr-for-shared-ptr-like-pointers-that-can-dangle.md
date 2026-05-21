@@ -234,6 +234,6 @@ std::shared_ptr<Widget> sp(wp);   // 생성자 — expired면 std::bad_weak_ptr 
 
 ## 관련 항목
 
-- [항목 18: unique_ptr](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership) — 독점 소유와의 비교
+- [항목 18: unique_ptr](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership-for-exclusive-ownership) — 독점 소유와의 비교
 - [항목 19: shared_ptr](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership) — control block, enable_shared_from_this
 - [항목 21: `make_*` 함수](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new) — make_shared의 weak 함정

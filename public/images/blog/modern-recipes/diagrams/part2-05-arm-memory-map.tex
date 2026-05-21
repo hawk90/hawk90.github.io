@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  region/.style={cls, align=center, font=\footnotesize, text width=78mm, minimum height=12mm},
+  ppb/.style={region, draw=warnbord, fill=warnfill!40},
+  dev/.style={region, draw=conbord, fill=confill!40},
+  ram/.style={region, draw=okbord, fill=okfill!40},
+  per/.style={region, draw=hibord, fill=hifill},
+  sram/.style={region, draw=absbord, fill=absfill},
+  code/.style={region, draw=impbord, fill=impfill},
+  addr/.style={font=\ttfamily\scriptsize, text=mutec, anchor=east}
+]
+
+% Memory regions (top to bottom = high to low addresses)
+\node[ppb] (r6) at (0, 6.5) {Private Peripheral Bus (PPB)\\[1pt]\scriptsize SCB, NVIC, DWT, ITM};
+\node[dev] (r5) at (0, 5.0) {External device (1 GB)\\[1pt]\scriptsize strongly-ordered};
+\node[ram] (r4) at (0, 3.5) {External RAM (1 GB)\\[1pt]\scriptsize normal, non-shareable};
+\node[per] (r3) at (0, 2.0) {Peripheral (0.5 GB)\\[1pt]\scriptsize device};
+\node[sram] (r2) at (0, 0.5) {SRAM (0.5 GB)\\[1pt]\scriptsize normal, shareable (bitband 0x22xxxxxx)};
+\node[code] (r1) at (0, -1.0) {Code (0.5 GB)\\[1pt]\scriptsize normal, executable (bitband 0x22xxxxxx 가능)};
+
+% Address labels (right side)
+\node[addr, anchor=west] at ([xshift=4pt]r6.north east) {0xE0100000};
+\node[addr, anchor=west] at ([xshift=4pt]r6.south east) {0xE0000000};
+\node[addr, anchor=west] at ([xshift=4pt]r5.north east) {0xDFFFFFFF};
+\node[addr, anchor=west] at ([xshift=4pt]r5.south east) {0xA0000000};
+\node[addr, anchor=west] at ([xshift=4pt]r4.north east) {0x9FFFFFFF};
+\node[addr, anchor=west] at ([xshift=4pt]r4.south east) {0x60000000};
+\node[addr, anchor=west] at ([xshift=4pt]r3.north east) {0x5FFFFFFF};
+\node[addr, anchor=west] at ([xshift=4pt]r3.south east) {0x40000000};
+\node[addr, anchor=west] at ([xshift=4pt]r2.north east) {0x3FFFFFFF};
+\node[addr, anchor=west] at ([xshift=4pt]r2.south east) {0x20000000};
+\node[addr, anchor=west] at ([xshift=4pt]r1.north east) {0x1FFFFFFF};
+\node[addr, anchor=west] at ([xshift=4pt]r1.south east) {0x00000000};
+
+\end{tikzpicture}
+\end{document}

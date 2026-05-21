@@ -242,6 +242,6 @@ void *p = mmap(..., MAP_HUGETLB, -1, 0);   /* ENOMEM */
 
 ## 관련 항목
 
-- [3-03: Zero-Copy](/blog/embedded/modern-recipes/part3-03-zero-copy)
-- [4-01: Kernel Module](/blog/embedded/modern-recipes/part4-01-kernel-module)
-- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio)
+- [3-03: Zero-Copy](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [4-01: Kernel Module](/blog/embedded/modern-recipes/part7-06-kernel-module)
+- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part7-11-uio-vfio)

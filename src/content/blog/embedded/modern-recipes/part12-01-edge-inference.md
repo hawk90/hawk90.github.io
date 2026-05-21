@@ -256,7 +256,7 @@ deploy 직전 INT8 변환 → accuracy 5% drop → 다시 train
 
 ## 관련 항목
 
-- [6-02: TensorRT](/blog/embedded/modern-recipes/part6-02-tensorrt)
-- [6-05: Jetson](/blog/embedded/modern-recipes/part6-05-jetson)
+- [6-02: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
+- [6-05: Jetson](/blog/embedded/modern-recipes/part12-08-jetson)
 - [6-07: 온디바이스 LLM](/blog/embedded/modern-recipes/part6-07-llama-cpp-edge)
-- [3-05: SIMD](/blog/embedded/modern-recipes/part3-05-simd)
+- [3-05: SIMD](/blog/embedded/modern-recipes/part8-07-simd)

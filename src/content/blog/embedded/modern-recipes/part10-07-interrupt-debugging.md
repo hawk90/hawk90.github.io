@@ -305,4 +305,4 @@ Bouncy 버튼은 한 번 눌러도 수십 번 edge가 떨어집니다. RC deboun
 
 - [10-04: 하드폴트 분석](/blog/embedded/modern-recipes/part10-04-hardfault-analysis)
 - [10-09: 타이밍/race 진단](/blog/embedded/modern-recipes/part10-09-timing-race-diag)
-- [RTOS 3-04: ISR 디자인](/blog/embedded/rtos/practical-internals/part2-08-isr-context-switch)
+- [RTOS 3-04: ISR 디자인](/blog/embedded/rtos/practical-internals/part2-04-context-switch)

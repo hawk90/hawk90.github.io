@@ -644,5 +644,5 @@ class SniperSnapshot:
 - [Ch 6: Object-Oriented Style](/blog/programming/engineering/goos/chapter06-object-oriented-style) — 이전 장
 - [Ch 8: Building on Third-Party Code](/blog/programming/engineering/goos/chapter08-building-on-third-party) — 다음 장
 - [Ch 19: Listening to the Tests](/blog/programming/engineering/goos/chapter19-listening-to-tests) — 테스트 신호로 설계를 진화
-- [TDD by Example Ch 1](/blog/programming/engineering/tdd-by-example/chapter01-multi-currency-money) — Detroit school에서 설계가 도출되는 방식과 비교
+- [TDD by Example Ch 1](/blog/programming/engineering/tdd-by-example/ch01) — Detroit school에서 설계가 도출되는 방식과 비교
 - [Khorikov Ch 5: Mock과 테스트 취약성](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility) — 인터페이스를 Mock으로 발견할 때의 리스크

@@ -10,10 +10,10 @@
 
 \node[font=\footnotesize\bfseries, anchor=west] at (0, 4) {UART Hardware Flow Control — RTS/CTS handshake};
 
-\node[anchor=west] at (0, 2) {\begin{tikztimingtable}
+\node[anchor=west] at (0, 2) {\begin{tikztimingtable}[xscale=1.5, yscale=1.4]
   A.RTS  & H 0.5L 3L 0.5H H \\
   B.CTS  & H 0.5L 3L 0.5H H \\
-  A.TX   & H 1.5H D{Hello} D{World} 1H \\
+  A.TX   & H 1.5H 1.2D{Hello} 1.2D{World} 1H \\
   A.CTS  & H L 4L L H \\
   B.RTS  & H L 4L L H \\
 \end{tikztimingtable}};

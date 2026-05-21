@@ -348,4 +348,4 @@ isr(...) {
 
 - [Ch 4: Control·Signal](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter04-control-and-signal)
 - [Ch 6: CCSDS Space Packet](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter06-ccsds-space-packet)
-- [Modern Recipes 5-01: Mailbox](/blog/embedded/modern-recipes/part5-01-mailbox)
+- [Modern Recipes 5-01: Mailbox](/blog/embedded/modern-recipes/part11-06-mailbox)

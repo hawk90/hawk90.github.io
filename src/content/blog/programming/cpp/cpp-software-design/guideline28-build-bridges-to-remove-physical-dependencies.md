@@ -657,5 +657,5 @@ Bridge / Pimpl을 적용할 때 점검할 항목이다.
 - [가이드라인 9: 추상화 소유권](/blog/programming/cpp/cpp-software-design/guideline09-pay-attention-to-the-ownership-of-abstractions) — Bridge의 추상화
 - [가이드라인 29: Bridge 성능](/blog/programming/cpp/cpp-software-design/guideline29-be-aware-of-bridge-performance-gains-and-losses) — 트레이드오프
 - [가이드라인 30: Prototype](/blog/programming/cpp/cpp-software-design/guideline30-apply-prototype-for-abstract-copy-operations) — clone 패턴
-- [Effective Modern C++ 항목 22: Pimpl](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file) — Pimpl의 함정
+- [Effective Modern C++ 항목 22: Pimpl](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file-define-special-members-in-impl-file) — Pimpl의 함정
 - [Effective C++ 항목 31: 컴파일 의존성](/blog/programming/cpp/effective-cpp/item31-minimize-compilation-dependencies-between-files) — 헤더 의존성

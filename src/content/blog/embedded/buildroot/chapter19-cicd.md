@@ -379,8 +379,8 @@ GitLab/Actions의 *artifact 크기 제한*에 주의합니다. GitHub Actions는
 
 ## 관련 항목
 
-- [Ch 14: 빌드 시간 최적화 — ccache·BR2_PER_PACKAGE_DIRECTORIES·dl 공유](/blog/embedded/buildroot/chapter14-build-time) — caching의 메커니즘 전제
+- [Ch 14: 빌드 시간 최적화 — ccache·BR2_PER_PACKAGE_DIRECTORIES·dl 공유](/blog/embedded/buildroot/chapter14-build-caching) — caching의 메커니즘 전제
 - [Ch 16: OTA 업데이트 — RAUC·SWUpdate·dual-bank](/blog/embedded/buildroot/chapter16-ota) — OTA bundle을 CI에서 자동 발행
 - [Ch 17: SDK 생성·배포 — make sdk와 application 워크플로](/blog/embedded/buildroot/chapter17-sdk) — SDK를 CI artifact로 자동 배포
-- [Ch 18: 보안 — CVE 추적·legal-info·SBOM](/blog/embedded/buildroot/chapter18-security) — CVE 스캔을 CI pipeline에 통합
+- [Ch 18: 보안 — CVE 추적·legal-info·SBOM](/blog/embedded/buildroot/chapter18-security-cve) — CVE 스캔을 CI pipeline에 통합
 - [원문 — Buildroot Manual §8.13: CI/CD considerations](https://buildroot.org/downloads/manual/manual.html)

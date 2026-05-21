@@ -37,7 +37,7 @@ draft: false
 | 즉시 vs 결산 후 반영 | Eager (TL2), Lazy (DSTM, NOrec) |
 | 락 없는 일반 코드 합성 | Haskell `atomically`, Clojure `dosync` (Ch3 7CM 합성 보장과 연결) |
 
-핵심 통찰은 두 가지다. 첫째, 락은 *합성이 안 된다* — 두 함수를 합쳐 쓰면 deadlock 위험. 트랜잭션은 *합성된다* — atomic block 안에 다른 atomic block을 넣을 수 있다. 둘째, *낙관적 동시성*(optimistic concurrency) — 일단 동시에 시작하고, 충돌이 *드물다*는 가정 아래 성능을 챙긴다. 충돌이 잦으면 retry overhead로 망한다.
+핵심 통찰은 두 가지다. 첫째, 락은 *합성이 안 된다*. 두 함수를 합쳐 쓰면 deadlock 위험이 생긴다. 트랜잭션은 *합성된다*. atomic block 안에 다른 atomic block을 넣을 수 있다. 둘째, *낙관적 동시성*(optimistic concurrency)은 일단 동시에 시작하고 충돌이 *드물다*는 가정 아래 성능을 챙긴다. 충돌이 잦으면 retry overhead로 망한다.
 
 이 장은 그 약속의 *세부 알고리즘*과 *현실의 한계*를 풀어 간다.
 

@@ -966,6 +966,6 @@ modern scheduler (Go, Tokio, Cilk)는 *work stealing*. 자기 큐가 비면 옆 
 ## 관련 항목
 
 - [Ch 14: Skiplists](/blog/parallel/parallel-principles/ch14-skiplists-and-balanced-search)
-- [Ch 16: Futures and Scheduling](/blog/parallel/parallel-principles/ch16-futures-scheduling-and-work-distribution)
+- [Ch 16: Futures and Scheduling](/blog/parallel/parallel-principles/ch16-futures-scheduling-work-distribution)
 - [C++ Concurrency in Action Ch 9: 스레드 풀](/blog/parallel/cpp-concurrency-in-action/chapter09-advanced-thread-management)
 - [C++ Concurrency in Action Ch 4: future](/blog/parallel/cpp-concurrency-in-action/chapter04-synchronizing-concurrent-operations)

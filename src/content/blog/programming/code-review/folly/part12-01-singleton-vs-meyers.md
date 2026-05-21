@@ -264,4 +264,4 @@ TEST(B) { folly::Singleton<Counter>::try_get()->inc(); EXPECT_EQ(1, ...); } // f
 
 - [Part 12-02 SingletonVault](/blog/programming/code-review/folly/part12-02-singleton-vault) — 등록·소멸 메커니즘 상세
 - [Part 12-03 try_get_fast](/blog/programming/code-review/folly/part12-03-try-get-fast) — 핫패스 접근 최적화
-- [Effective Modern C++ Item 18](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr) — shared_ptr lifetime
+- [Effective Modern C++ Item 18](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership) — shared_ptr lifetime

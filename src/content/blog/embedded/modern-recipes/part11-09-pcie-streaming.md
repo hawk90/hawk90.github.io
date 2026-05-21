@@ -15,7 +15,7 @@ tags: [recipes, pcie, bar, msi-x, dpdk, spdk]
 
 NVMe SSD에서 1 M IOPS를 뽑거나, 10/25/100 GbE NIC을 line rate로 받거나, FPGA accelerator로 카메라 frame을 zero-copy로 흘릴 때 PCIe streaming이 등장합니다. 이때는 단순히 `pci_iomap`으로 BAR을 잡는 것만으로는 충분치 않고, BAR의 prefetchable 여부, MSI-X vector 수, kernel bypass 가능성까지 같이 설계해야 합니다.
 
-PCIe enumeration 자체와 BAR sizing은 [1-03 PCIe BAR](/blog/embedded/modern-recipes/part1-03-pcie-bar)에서 다뤘으므로, 이 글은 *streaming traffic에 특화된 결정*에 집중합니다.
+PCIe enumeration 자체와 BAR sizing은 [1-03 PCIe BAR](/blog/embedded/modern-recipes/part11-03-pcie-bar)에서 다뤘으므로, 이 글은 *streaming traffic에 특화된 결정*에 집중합니다.
 
 ## 핵심 개념
 
@@ -154,7 +154,7 @@ while (1) {
 }
 ```
 
-VFIO로 BAR을 user space에 mapping하면 doorbell write와 completion polling이 system call 없이 발생합니다. DPDK·SPDK가 이 모델로 µs 단위 latency를 달성합니다. ([4-04 UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio) 참고)
+VFIO로 BAR을 user space에 mapping하면 doorbell write와 completion polling이 system call 없이 발생합니다. DPDK·SPDK가 이 모델로 µs 단위 latency를 달성합니다. ([4-04 UIO·VFIO](/blog/embedded/modern-recipes/part7-11-uio-vfio) 참고)
 
 ### SPDK NVMe enumeration
 
@@ -255,7 +255,7 @@ DPDK·SPDK가 device를 grab하지 못하면 보통 IOMMU group의 다른 device
 
 ## 관련 항목
 
-- [1-03: PCIe BAR](/blog/embedded/modern-recipes/part1-03-pcie-bar)
-- [5-02: CQ·SQ](/blog/embedded/modern-recipes/part5-02-cq-sq)
-- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio)
+- [1-03: PCIe BAR](/blog/embedded/modern-recipes/part11-03-pcie-bar)
+- [5-02: CQ·SQ](/blog/embedded/modern-recipes/part11-07-cq-sq)
+- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part7-11-uio-vfio)
 - [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)

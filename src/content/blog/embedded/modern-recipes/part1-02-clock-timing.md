@@ -68,11 +68,7 @@ PLL은 jitter를 완전히 없애 주지 않습니다. 입력의 phase noise를 
 
 같은 클럭이 여러 곳에 분배될 때, 도착 시각이 다르면 그 차이가 skew입니다. PCB 트레이스 길이, FPGA 내부 라우팅, clock buffer 지연 등이 원인입니다.
 
-```text
-Clock Out ─┬── (10 cm) ──→ Chip A (1.5 ns 지연)
-           └── (5 cm)  ──→ Chip B (0.75 ns 지연)
-                          ↑ skew = 0.75 ns
-```
+![Clock skew from PCB trace length mismatch](/images/blog/modern-recipes/diagrams/part1-02-clock-skew.svg)
 
 PCB 트레이스는 보통 6 ns / m 정도 지연을 줍니다.
 

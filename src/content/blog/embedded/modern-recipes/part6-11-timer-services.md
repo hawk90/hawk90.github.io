@@ -302,5 +302,5 @@ cancel_timer(t);   /* O(N) — list search */
 
 ## 관련 항목
 
-- [2-05: Wait-Free](/blog/embedded/modern-recipes/part2-05-wait-free)
+- [2-05: Wait-Free](/blog/embedded/modern-recipes/part9-02-wait-free)
 - [RTOS 4-09: Software Timer](/blog/embedded/rtos/practical-internals/part4-09-software-timer)

@@ -41,6 +41,74 @@
 | Patterns for Time-Triggered Embedded Systems | Michael Pont | 💡 | 안전 필수 (자동차/항공) |
 | Small Memory Software | Noble & Weir | 💡 | 메모리 제약 환경 |
 
+### 2.0 레이어 아키텍처 — *전체 스택 이해*
+
+현재 §2 책 목록은 **패턴·실무·메모리·실시간**에 강하지만, **레이어 아키텍처 전체** (HW → Device Driver → BSP → HAL → RTOS → OSAL → Middleware → Application) 를 체계적으로 다루는 책이 빠져 있다. 이 sub-section에서 보강.
+
+```text
+┌─────────────────────────────┐
+│      Application Layer      │
+├─────────────────────────────┤
+│   Middleware / Services     │
+├─────────────────────────────┤
+│     OSAL (OS Abstraction)   │
+├─────────────────────────────┤
+│     RTOS / Bare-metal       │
+├─────────────────────────────┤
+│     HAL (HW Abstraction)    │
+├─────────────────────────────┤
+│     BSP (Board Support)     │
+├─────────────────────────────┤
+│      Device Drivers         │
+├─────────────────────────────┤
+│      Hardware (MCU)         │
+└─────────────────────────────┘
+```
+
+**레이어 아키텍처 책**
+
+| 책 | 저자 | 상태 | 레벨 | 초점 |
+|---|------|------|------|------|
+| Embedded Systems Architecture | Tammy Noergaard | 💡 | 개론 | 레이어 전체 — HW부터 SW까지 |
+| Reusable Firmware Development | Jacob Beningo | 💡 | 중급 | 포터블 펌웨어·HAL 설계 패턴 |
+| Making Embedded Systems | Elecia White | 📋 | 입문~중급 | 실무 중심, 하드웨어 이해 (위 표 중복) |
+| Design Patterns for Embedded Systems in C | Bruce Douglass | 📋 | 중급 | GoF 패턴의 임베디드 적용 (위 표 중복) |
+
+**추천 조합 (목적별)**
+
+| 목적 | 책 |
+|------|-----|
+| 레이어 전체 이해 | Embedded Systems Architecture (Noergaard) |
+| HAL/드라이버 설계 | Reusable Firmware Development (Beningo) |
+| 임베디드 패턴 | Design Patterns for Embedded Systems in C (Douglass) |
+| 실무 시작 | Making Embedded Systems (Elecia White) |
+
+**경로 (레이어 아키텍처 중심):**
+
+```
+Making Embedded Systems (실무 감각)
+  → Embedded Systems Architecture (레이어 전체 지도)
+  → Reusable Firmware Development (HAL·드라이버 패턴 깊이)
+  → Design Patterns for Embedded Systems in C (재사용 패턴 카탈로그)
+```
+
+**카테고리·sub-series 매핑**
+
+| 책 | 위치 | 카테고리 | 시리즈 이름 | 챕터 수 |
+|------|------|----------|------------|---------|
+| Embedded Systems Architecture (Noergaard) | `src/content/blog/embedded/architecture/noergaard/` | `embedded/architecture` (신규) | "Embedded Systems Architecture" | 12 |
+| Reusable Firmware Development (Beningo) | `src/content/blog/embedded/architecture/beningo-hal/` | `embedded/architecture` | "Reusable Firmware Development" | 10 |
+| Design Patterns for Embedded (Douglass) | `src/content/blog/embedded/patterns/douglass/` | `embedded/patterns` (신규) | "Design Patterns for Embedded Systems" | 12 |
+| Making Embedded Systems (Elecia White) | `src/content/blog/embedded/practice/elecia-white/` | `embedded/practice` (신규) | "Making Embedded Systems" | 14 |
+
+**§2 내 기존 sub-section과의 관계**
+
+- §2.0 (이 절) — **레이어 아키텍처·HAL·재사용성** 중심. 위에서 아래 모든 layer 책.
+- §2.x SpaceX-스타일 — **RTOS internals·ISR·DMA·FPGA-PS** 중심. 특정 layer 깊이.
+- §3 (별도) — 분산 시스템. 임베디드와 직접 관련 없음.
+
+---
+
 ### 2.x SpaceX-스타일 실전 — *무료 책 우선*
 
 영역별 갭 (ISR latency / Cache coherency / DMA / FPGA-CPU 인터페이스 / RTOS 깊이) 를 *무료 책*으로 시작.

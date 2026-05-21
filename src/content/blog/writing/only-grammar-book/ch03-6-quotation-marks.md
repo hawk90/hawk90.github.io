@@ -1,6 +1,6 @@
 ---
 title: "Chapter 3.6: Quotation Marks"
-date: 2026-05-14T03:60:00
+date: 2026-05-14T04:00:00
 description: "따옴표와 괄호류 — 직접 인용, 작품 제목, 미국식과 영국식 차이, 괄호의 사용."
 series: "The Only Grammar Book You'll Ever Need"
 seriesOrder: 21
@@ -365,7 +365,7 @@ The sign read, "No exit [sic] this way."
 - 한 글 안의 *일관성*이 우선
 - 괄호 `( )` — 부가 정보, 약어 도입, 인용 출처
 - 대괄호 `[ ]` — 인용 안의 편집·*sic*
-- em dash — 가장 강한 강조, 괄호 — 부수적, 쉼표 — 자연스러운 부가
+- em dash는 가장 강한 강조, 괄호는 부수적, 쉼표는 자연스러운 부가
 
 ## Part 3 마무리
 

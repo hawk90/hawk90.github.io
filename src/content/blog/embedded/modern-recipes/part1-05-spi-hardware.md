@@ -51,17 +51,7 @@ draft: false
 
 여러 slave가 같은 SPI 버스에 붙을 때 두 가지 방식이 있습니다.
 
-```text
-방식 1: 각 slave에 CS line (가장 일반적)
-Master ─┬─ SCK/MOSI/MISO ─┬─ Slave A
-        ├─ CS_A ──────────┘
-        ├─ CS_B ──────────── Slave B
-        └─ CS_C ──────────── Slave C
-
-방식 2: Daisy-chain (드물게 사용)
-Master ─→ Slave A.MOSI / A.MISO ─→ Slave B.MOSI / B.MISO ─→ ...
-        ─→ 단일 CS, 단일 SCK
-```
+![SPI multi-slave: CS-per-slave vs daisy-chain](/images/blog/modern-recipes/diagrams/part1-05-spi-topologies.svg)
 
 Daisy-chain은 CS 핀을 아낄 수 있지만, 모든 슬레이브가 동시에 응답해야 하고 read latency가 길어집니다.
 

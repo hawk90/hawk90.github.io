@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,4.4) {HBM3 ECC Layers};
+
+% Layer 3 — system level (top, host bus)
+\node[hi, minimum width=100mm, minimum height=12mm, align=center] (l3) at (0,3.2)
+  {\textbf{Layer 3 — system-level ECC} (NVIDIA, AMD)\\
+   \small 컨트롤러가 64 + 8 bit ECC 추가, 복구 가능};
+
+% Layer 2 — link level
+\node[abs, minimum width=100mm, minimum height=12mm, align=center] (l2) at (0,1.4)
+  {\textbf{Layer 2 — link-level ECC} (옵션)\\
+   \small 컨트롤러 $\leftrightarrow$ base die 사이 CRC, retry 가능};
+
+% Layer 1 — on-die
+\node[imp, minimum width=100mm, minimum height=12mm, align=center] (l1) at (0,-0.4)
+  {\textbf{Layer 1 — on-die ECC} (HBM3 표준)\\
+   \small DRAM die 내부 SECDED, 컨트롤러는 알 필요 없음 (transparent)};
+
+% DRAM die at bottom
+\node[neut, minimum width=100mm, minimum height=10mm, align=center] (dram) at (0,-2.0)
+  {\textbf{DRAM Die}};
+
+% Vertical flow arrows
+\draw[arr] (l3.south) -- (l2.north);
+\draw[arr] (l2.south) -- (l1.north);
+\draw[arr] (l1.south) -- (dram.north);
+
+% Side annotation
+\node[caption, anchor=west, align=left] at (5.5, -3.4)
+  {Data path 폭:\\
+   \small 1024-bit data + 128-bit ECC\\
+   \small = \textbf{1152-bit host bus} (12.5\% redundancy)};
+
+\end{tikzpicture}
+\end{document}

@@ -832,7 +832,7 @@ Ch 9 — Python 스크립팅. 반복 작업을 명령으로, 복잡한 구조를
 - [Ch 7: core dump 분석](/blog/tools/debugging/gdb-lldb/chapter07-core-dump)
 - [Ch 9: Python 스크립팅](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting)
 - [Ch 12: DWARF](/blog/tools/debugging/gdb-lldb/chapter12-dwarf) — 콜스택 풀기의 정체
-- [Modern Embedded Recipes — JTAG 안 붙을 때](/blog/embedded/modern-recipes/part1-06-jtag) — 트러블슈팅 시각
+- [Modern Embedded Recipes — JTAG 안 붙을 때](/blog/embedded/modern-recipes/part10-02-jtag-swd) — 트러블슈팅 시각
 - [GDB RSP 명세](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Remote-Protocol.html)
 - [ARMv7-M Architecture Reference Manual](https://developer.arm.com/documentation/ddi0403/latest/) — CoreSight 전체
 - [OpenOCD 공식](https://openocd.org/)

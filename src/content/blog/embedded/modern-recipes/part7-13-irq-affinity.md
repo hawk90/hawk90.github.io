@@ -220,6 +220,6 @@ Modern Embedded Recipes **Part 4**는 여기까지입니다.
 
 ## 관련 항목
 
-- [4-05: sysfs](/blog/embedded/modern-recipes/part4-05-sysfs)
+- [4-05: sysfs](/blog/embedded/modern-recipes/part7-12-sysfs)
 - [PE 3-05: Interrupt Latency](/blog/embedded/performance-engineering/part3-05-interrupt-latency)
 - [RTOS 5-07: PREEMPT_RT Linux](/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux)

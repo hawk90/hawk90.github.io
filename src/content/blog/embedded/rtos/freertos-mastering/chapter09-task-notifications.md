@@ -291,7 +291,7 @@ void motor_task(void *p)
 
 ## 관련 항목
 
-- [Ch 6: Queue Management](/blog/embedded/rtos/freertos-mastering/chapter06-queue-management) — 객체 기반 IPC의 표준
+- [Ch 6: Queue Management](/blog/embedded/rtos/freertos-mastering/chapter04-queue-management) — 객체 기반 IPC의 표준
 - [Ch 8: Event Groups](/blog/embedded/rtos/freertos-mastering/chapter08-event-groups) — broadcast 대안
 - [Ch 10: Stream and Message Buffers](/blog/embedded/rtos/freertos-mastering/chapter10-stream-message-buffers)
 - [ESP32-C3 Mastering Ch 10: FreeRTOS](/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos)

@@ -256,7 +256,7 @@ Kernel auto balancing은 background로 동작하지만 RT spec을 보장하지 �
 
 ## 관련 항목
 
-- [3-03: Zero-Copy Pipeline](/blog/embedded/modern-recipes/part3-03-zero-copy)
-- [3-05: SIMD](/blog/embedded/modern-recipes/part3-05-simd)
+- [3-03: Zero-Copy Pipeline](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [3-05: SIMD](/blog/embedded/modern-recipes/part8-07-simd)
 - [PE 4-02: False Sharing](/blog/embedded/performance-engineering/part4-02-false-sharing)
-- [RTOS 4-07: SMP Scheduling](/blog/embedded/rtos/practical-internals/part4-07-smp-scheduling)
+- [RTOS 4-07: SMP Scheduling](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)

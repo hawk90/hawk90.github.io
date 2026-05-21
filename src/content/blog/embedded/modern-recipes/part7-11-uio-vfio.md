@@ -262,6 +262,6 @@ void *r = mmap(NULL, 4096, ..., fd, PHYS);
 
 ## 관련 항목
 
-- [4-01: Kernel Module](/blog/embedded/modern-recipes/part4-01-kernel-module)
-- [4-02: mmap](/blog/embedded/modern-recipes/part4-02-mmap)
+- [4-01: Kernel Module](/blog/embedded/modern-recipes/part7-06-kernel-module)
+- [4-02: mmap](/blog/embedded/modern-recipes/part7-09-mmap)
 - [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)

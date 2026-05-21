@@ -279,6 +279,6 @@ fir(in, out, host_coeff);          /* 매 frame coeff DMA */
 
 ## 관련 항목
 
-- [5-04: PCIe Streaming](/blog/embedded/modern-recipes/part5-04-pcie-streaming)
-- [5-06: AXI](/blog/embedded/modern-recipes/part5-06-axi)
-- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio)
+- [5-04: PCIe Streaming](/blog/embedded/modern-recipes/part11-09-pcie-streaming)
+- [5-06: AXI](/blog/embedded/modern-recipes/part11-04-axi)
+- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part7-11-uio-vfio)

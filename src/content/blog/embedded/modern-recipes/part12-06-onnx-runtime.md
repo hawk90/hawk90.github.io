@@ -342,5 +342,5 @@ Custom build에서 op를 빠뜨림. `required_ops.config` 재생성.
 - [12-02: NPU 아키텍처](/blog/embedded/modern-recipes/part12-02-npu-architecture)
 - [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
 - [12-05: TFLite Micro](/blog/embedded/modern-recipes/part12-05-tflite-micro)
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part6-01-edge-inference)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part6-03-quantization)
+- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)

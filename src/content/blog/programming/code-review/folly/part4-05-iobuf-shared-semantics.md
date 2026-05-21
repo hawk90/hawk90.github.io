@@ -238,4 +238,4 @@ Part 5부터 String/Format을 본다. 이 시리즈의 Part 1-4가 Folly의 *asy
 
 - [Folly Part 4-01 — IOBuf](/blog/programming/code-review/folly/part4-01-iobuf)
 - [Folly Part 4-04 — Zero-copy 패턴](/blog/programming/code-review/folly/part4-04-zero-copy-patterns)
-- [Effective Modern C++ Item 19](/blog/programming/cpp/effective-modern-cpp/item19-shared-ptr) — shared_ptr 비교
+- [Effective Modern C++ Item 19](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership) — shared_ptr 비교

@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  m/.style={cls, align=center, font=\scriptsize, minimum width=20mm, minimum height=10mm, draw=hibord, fill=hifill},
+  s/.style={cls, align=center, font=\scriptsize, minimum width=20mm, minimum height=10mm, draw=okbord, fill=okfill},
+  bus/.style={draw=edgec, line width=0.7pt},
+  cs/.style={draw=conbord, line width=0.5pt}
+]
+
+% --- Section 1: CS line per slave (top) ---
+\node[font=\sffamily\bfseries\small, anchor=west] at (-0.5, 6.0) {방식 1 — 각 slave에 CS line};
+
+\node[m] (m1) at (0, 4) {Master};
+\node[s] (a1) at (6, 5) {Slave A};
+\node[s] (b1) at (6, 4) {Slave B};
+\node[s] (c1) at (6, 3) {Slave C};
+
+\draw[bus] (m1.east) -- node[font=\tiny, above] {SCK/MOSI/MISO} ($(m1.east) + (1.5, 0)$) coordinate (j1);
+\draw[bus] (j1) -- (a1.west);
+\draw[bus] (j1) -- (b1.west);
+\draw[bus] (j1) -- (c1.west);
+\draw[cs] ([yshift=-3pt]m1.east) -- ++(2.5, 0) |- node[font=\tiny, pos=0.25, above] {CS\_A} (a1.south);
+\draw[cs] ([yshift=-5pt]m1.east) -- ++(2.8, 0) -- node[font=\tiny, above] {CS\_B} (b1.south west);
+\draw[cs] ([yshift=-7pt]m1.east) -- ++(3.0, 0) |- node[font=\tiny, pos=0.25, above] {CS\_C} (c1.north);
+
+% --- Section 2: Daisy-chain (bottom) ---
+\node[font=\sffamily\bfseries\small, anchor=west] at (-0.5, 1.2) {방식 2 — Daisy-chain (드물게 사용)};
+
+\node[m] (m2) at (0, -0.5) {Master};
+\node[s] (a2) at (4, -0.5) {Slave A};
+\node[s] (b2) at (8, -0.5) {Slave B};
+\node[font=\scriptsize, anchor=west] at (10.2, -0.5) {…};
+
+\draw[bus, -{Stealth[length=2mm]}] (m2.east) -- node[font=\tiny, above] {MOSI/MISO} (a2.west);
+\draw[bus, -{Stealth[length=2mm]}] (a2.east) -- node[font=\tiny, above] {chain} (b2.west);
+
+\node[font=\tiny, text=mutec, anchor=west] at (-0.5, -1.6) {단일 CS, 단일 SCK};
+
+\end{tikzpicture}
+\end{document}

@@ -405,7 +405,7 @@ v1.4.2 SDK로 application을 빌드해 v1.3.0 보드에 올리면 *glibc·라이
 
 - [Ch 11: Toolchain 선택 — internal vs external](/blog/embedded/buildroot/chapter11-toolchain) — SDK는 이 toolchain의 *재배포 패키지*
 - [Ch 14: Build cache·ccache·BR2_PER_PACKAGE_DIRECTORIES](/blog/embedded/buildroot/chapter14-cache) — SDK는 *frozen toolchain*이므로 캐시 정책의 한 사례
-- [Ch 18: Security·CVE 추적](/blog/embedded/buildroot/chapter18-security)
+- [Ch 18: Security·CVE 추적](/blog/embedded/buildroot/chapter18-security-cve)
 - [Ch 19: CI/CD — 자동 빌드와 SDK 배포 파이프라인](/blog/embedded/buildroot/chapter19-cicd) — SDK 자동 발급·체크섬·artifact repo
 - [BSP Development Ch 7: 크로스 컴파일 toolchain](/blog/embedded/bsp/chapter07-toolchain) — BSP 관점의 toolchain·SDK
 - [원문 — Buildroot Manual §8.13: make sdk](https://buildroot.org/downloads/manual/manual.html)

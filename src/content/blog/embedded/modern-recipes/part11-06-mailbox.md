@@ -259,7 +259,7 @@ Shared memory를 cacheable 영역에 두면 host의 `dma_wmb()` 또는 `__clean_
 
 ## 관련 항목
 
-- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part4-04-uio-vfio)
-- [5-02: CQ·SQ](/blog/embedded/modern-recipes/part5-02-cq-sq)
-- [1-03: PCIe BAR](/blog/embedded/modern-recipes/part1-03-pcie-bar)
+- [4-04: UIO·VFIO](/blog/embedded/modern-recipes/part7-11-uio-vfio)
+- [5-02: CQ·SQ](/blog/embedded/modern-recipes/part11-07-cq-sq)
+- [1-03: PCIe BAR](/blog/embedded/modern-recipes/part11-03-pcie-bar)
 - [RTOS 4-12: AMP·OpenAMP](/blog/embedded/rtos/practical-internals/part4-12-amp-openamp)

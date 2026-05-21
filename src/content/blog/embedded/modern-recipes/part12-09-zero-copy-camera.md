@@ -343,7 +343,7 @@ VIC·GPU shader로 옮기면 CPU가 거의 idle해집니다.
 
 ## 관련 항목
 
-- [6-05: Jetson](/blog/embedded/modern-recipes/part6-05-jetson)
+- [6-05: Jetson](/blog/embedded/modern-recipes/part12-08-jetson)
 - [6-07: 온디바이스 LLM](/blog/embedded/modern-recipes/part6-07-llama-cpp-edge)
-- [3-03: Zero-Copy](/blog/embedded/modern-recipes/part3-03-zero-copy)
-- [1-04: Device Tree](/blog/embedded/modern-recipes/part1-04-device-tree)
+- [3-03: Zero-Copy](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [1-04: Device Tree](/blog/embedded/modern-recipes/part7-03-device-tree-basics)

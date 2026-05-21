@@ -160,6 +160,6 @@ Linux PREEMPT_RT는 *호스트 OS의 jitter*만 줄여 줍니다. 망 자체의 
 - [Ch 2: 실시간 요구사항 — Determinism·Cycle Time](/blog/embedded/protocols/industrial-ethernet/chapter02-realtime-requirements)
 - [Ch 3: EtherCAT 아키텍처 — Processing on the Fly](/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture)
 - [Practical RTOS Internals Part 1.4: Preemption](/blog/embedded/rtos/practical-internals/part1-04-preemption) — 호스트 측 RT의 전제 조건
-- [Modern Embedded Recipes Part 4.6: IRQ affinity](/blog/embedded/modern-recipes/part4-06-irq-affinity) — NIC 인터럽트를 RT core에 고정하기
+- [Modern Embedded Recipes Part 4.6: IRQ affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity) — NIC 인터럽트를 RT core에 고정하기
 - [원문 — EtherCAT Technology Group](https://www.ethercat.org/)
 - [원문 — PROFINET International](https://www.profibus.com/)

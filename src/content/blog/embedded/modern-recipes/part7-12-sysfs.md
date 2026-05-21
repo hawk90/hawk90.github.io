@@ -245,6 +245,6 @@ static void sample_remove(struct platform_device *pdev) {
 
 ## 관련 항목
 
-- [1-04: Device Tree](/blog/embedded/modern-recipes/part1-04-device-tree)
-- [4-01: Kernel Module](/blog/embedded/modern-recipes/part4-01-kernel-module)
-- [4-06: IRQ Affinity](/blog/embedded/modern-recipes/part4-06-irq-affinity)
+- [1-04: Device Tree](/blog/embedded/modern-recipes/part7-03-device-tree-basics)
+- [4-01: Kernel Module](/blog/embedded/modern-recipes/part7-06-kernel-module)
+- [4-06: IRQ Affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity)

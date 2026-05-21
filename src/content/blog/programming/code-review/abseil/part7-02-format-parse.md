@@ -201,7 +201,7 @@ absl::StatusOr<RequestStamp> ParseStamp(absl::string_view header) {
 
 ## 관련 항목
 
-- [Part 7-01: Time / Duration overview](/blog/programming/code-review/abseil/part7-01-time-duration-overview)
+- [Part 7-01: Time / Duration overview](/blog/programming/code-review/abseil/part7-01-time-duration-overview-overview)
 - [Part 7-04: TimeZone](/blog/programming/code-review/abseil/part7-04-time-zone)
 - [Part 11-01: LOG, VLOG, CHECK](/blog/programming/code-review/abseil/part11-01-log-vlog-check) — 자동 timestamp 포맷
 - [원문 — Format/Parse](https://abseil.io/docs/cpp/guides/time#formatting-and-parsing)

@@ -260,4 +260,4 @@ ew.with_exception([](const std::exception& e) { ... });
 
 - [Part 6-01 to / tryTo](/blog/programming/code-review/folly/part6-01-to-try-to) — exception_wrapper로 error 반환
 - [Part 2-03 SemiFuture vs Future](/blog/programming/code-review/folly/part2-03-semi-future-vs-future) — Try의 error 통로
-- [Effective Modern C++ Item 14](/blog/programming/cpp/effective-modern-cpp/item14-declare-noexcept) — noexcept 설계
+- [Effective Modern C++ Item 14](/blog/programming/cpp/effective-modern-cpp/item14-declare-functions-noexcept-if-they-wont-emit-exceptions) — noexcept 설계

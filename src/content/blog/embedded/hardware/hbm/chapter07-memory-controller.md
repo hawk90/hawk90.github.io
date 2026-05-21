@@ -99,31 +99,32 @@ tFAW  (4개 row activation 윈도)      : 30 ns
 
 같은 row를 *계속 열어 둘지(Open)* *바로 닫을지(Closed)*가 핵심 정책 선택입니다.
 
-```text
-Open Page Policy
+**Open Page Policy** — 같은 row를 *열어 두고* 여러 column을 연속 read. row hit이면 `tCL`만 필요. row miss 시 `PRE → ACT`로 새 row 진입.
 
-ACT row=R                                          ← row open
+```text
+ACT row=R
 RD col=0
 RD col=1
-RD col=2     ← row hit (tCL만 필요)
+RD col=2
 RD col=3
-... (다음 요청 기다림)
 RD col=7
-PRE          ← 더 이상 같은 row 없으면 닫음
-ACT row=R'   ← 새 row
+PRE
+ACT row=R'
+```
 
-장점: row hit 비율이 높으면 latency 짧음
-단점: row miss 시 tRP + tRCD = 30 ns 추가
+- **장점**: row hit 비율이 높으면 latency 짧음
+- **단점**: row miss 시 `tRP + tRCD = 30 ns` 추가
 
-Closed Page Policy
+**Closed Page Policy** — 한 번 읽고 바로 auto-precharge로 닫음. row buffer locality가 없을 때 단순.
 
-ACT row=R + RD col=0 + auto PRE     ← 한 번 읽고 닫음
+```text
+ACT row=R + RD col=0 + auto PRE
 ACT row=R + RD col=1 + auto PRE
 ACT row=R + RD col=2 + auto PRE
-
-장점: row buffer locality 없을 때 simple
-단점: row hit 가능성 버림
 ```
+
+- **장점**: row buffer locality 없을 때 simple
+- **단점**: row hit 가능성 버림
 
 대부분 컨트롤러는 *Adaptive Page Policy*를 씁니다. *최근 access history*를 보고 *open할지 close할지* 결정합니다.
 
@@ -142,25 +143,10 @@ NVIDIA H100, AMD MI300X 모두 adaptive 사용
 
 컨트롤러가 *bank parallelism*을 짜내는 방식이 *효율의 80%*를 결정합니다.
 
-```text
-Bank interleaving
+![Bank Interleaving — Bad vs Good](/images/blog/hbm/diagrams/ch07-bank-interleaving.svg)
 
-bad: 같은 bank만 hit
-  T0: bank 0 row R0 RD
-  T1: bank 0 row R1 RD  ← bank 0 PRE 기다려야
-  T2: bank 0 row R2 RD  ← 또 기다려야
-  → bank 0만 일하고 나머지 511 bank idle
-  → BW utilization 6%
-
-good: 라운드 로빈
-  T0: bank 0
-  T1: bank 1
-  T2: bank 2
-  ...
-  T15: bank 15  ← bank 0의 PRE 이미 끝남
-  → 모든 bank가 pipeline으로 일함
-  → BW utilization 90%+
-```
+- **Bad** — 같은 bank만 hit. 매번 PRE를 기다려야 하고 나머지 511 bank가 idle → BW utilization **6 %**.
+- **Good** — 라운드 로빈. 모든 bank가 pipeline으로 동작 → BW utilization **90 %+**.
 
 이를 가능하게 하려면 *address-to-bank mapping*이 *균등*해야 합니다.
 
@@ -182,16 +168,17 @@ address = 0x0020_0000 → bank 2
 
 해결책은 *XOR hash mapping*입니다.
 
-```text
-XOR mapping
+**XOR mapping**
 
+```text
 bank_index = addr[bits low] XOR addr[bits mid] XOR addr[bits high]
+```
 
 이 방식의 효과:
+
 - 연속 access가 자동으로 bank 분산
 - adversarial pattern을 만들기 어려움
 - stride access (matrix column scan)도 분산
-```
 
 ```c
 // 의사 코드: HBM3 컨트롤러 address mapping
@@ -232,19 +219,13 @@ total stall: 16384 × 350 ns = 5.7 ms / 64 ms = 8.9%
 
 *per-bank refresh(REFpb)*는 *한 bank만 refresh*합니다. *다른 bank는 계속 일합니다*.
 
-```text
-REFpb 전략
+![REFab vs REFpb](/images/blog/hbm/diagrams/ch07-refpb.svg)
 
-per cycle:
-  bank 0 refresh while bank 1..15 active
-  bank 1 refresh while bank 0, 2..15 active
-  ...
-  
-bandwidth loss: 8.9% / 16 banks ≈ 0.6%
+REFpb는 한 번에 *한 bank만* refresh합니다. 나머지 bank는 그동안에도 active 상태 유지.
 
-조건: 컨트롤러가 bank별 refresh schedule을 추적
-HBM3에서 표준 지원
-```
+- **bandwidth loss**: 8.9 % / 16 banks ≈ **0.6 %**
+- **조건**: 컨트롤러가 bank별 refresh schedule을 추적해야 함
+- HBM3에서 표준 지원
 
 NVIDIA·AMD 컨트롤러는 *REFpb를 기본*으로 합니다. *AI training cluster*에서 *0.6 vs 9 %*의 *효율 차이*가 *수십억 원 단위*입니다.
 
@@ -252,58 +233,26 @@ NVIDIA·AMD 컨트롤러는 *REFpb를 기본*으로 합니다. *AI training clus
 
 같은 *bus 위*에서 *Read 후 Write*나 *Write 후 Read*는 *turnaround penalty*가 있습니다.
 
-```text
-turnaround 비용
+**Turnaround 비용**
 
-RD → WR same bank:
-  tRTW = 8 clock (data bus 방향 전환)
+| 방향 | 비용 |
+|------|------|
+| RD → WR (same bank) | `tRTW = 8 clock` (data bus 방향 전환) |
+| WR → RD (same bank) | `tWTR = tWR + tCL = 18 + 14 = 32 ns` |
 
-WR → RD same bank:
-  tWTR = tWR + tCL = 18 + 14 = 32 ns
-
-queue에서 RD/WR가 섞이면 turnaround 빈번
-→ batch grouping이 효율적
-```
+queue에서 RD/WR가 섞이면 turnaround가 빈번해집니다. **batch grouping**이 효율적입니다.
 
 좋은 컨트롤러는 *RD batch + WR batch* 형태로 *grouping*해 *turnaround를 최소화*합니다.
 
-```text
-batched scheduling
+![Batched RD/WR Scheduling](/images/blog/hbm/diagrams/ch07-batched-rw.svg)
 
-queue: R W R W R W R W
-naive: R W R W R W R W  ← 매 명령마다 turnaround
-batched:
-  R R R R    ← 8 read
-  -- turnaround --
-  W W W W    ← 8 write
-  -- turnaround --
-  R R R R
-```
+queue가 `R W R W R W R W`로 도착해도 컨트롤러가 `R R R R / W W W W / R R R R`로 묶어 turnaround를 *N번 → 2번*으로 줄입니다.
 
 ## ECC 처리
 
 HBM3 on-die ECC는 *base die*가 처리하지만, *컨트롤러도 추가 ECC*를 둘 수 있습니다.
 
-```text
-ECC layer
-
-Layer 1: on-die ECC (HBM3 표준)
-  DRAM die 내부에서 SECDED
-  컨트롤러는 알 필요 없음 (transparent)
-
-Layer 2: link-level ECC (옵션)
-  컨트롤러 ↔ base die 사이 CRC
-  retry 가능
-
-Layer 3: system-level ECC (NVIDIA, AMD)
-  컨트롤러가 추가 데이터 64+8 bit 보내고 검증
-  복구 가능
-
-data path에서 ECC 차지:
-  HBM3 1024-bit data + 128-bit ECC (optional)
-  → 12.5% redundancy
-  → host bus는 1152-bit
-```
+![HBM3 ECC Layers](/images/blog/hbm/diagrams/ch07-ecc-layers.svg)
 
 NVIDIA H100은 *system-level ECC*를 *on*으로 출하합니다. 데이터센터 신뢰성을 위해서입니다.
 

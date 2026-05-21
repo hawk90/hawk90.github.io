@@ -161,7 +161,7 @@ public:
 
 C++98 스타일이다. 추가 복사 비용은 있지만 단순하다.
 
-## 해결책 3 — Pass by Value ([항목 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params))
+## 해결책 3 — Pass by Value ([항목 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params))
 
 ```cpp
 class Person {
@@ -245,4 +245,4 @@ Base에 보편 참조 ctor를 두면 **derived의 자연스러운 copy도 깨진
 - [항목 17: 특수 멤버 자동 생성](/blog/programming/cpp/effective-modern-cpp/item17-understand-special-member-function-generation) — 보편 참조 ctor와 자동 생성의 상호작용
 - [항목 24: 보편 참조 식별](/blog/programming/cpp/effective-modern-cpp/item24-distinguish-universal-references-from-rvalue-references)
 - [항목 27: 오버로딩 대안](/blog/programming/cpp/effective-modern-cpp/item27-familiarize-yourself-with-alternatives-to-overloading-on-universal-references)
-- [항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params)
+- [항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params)

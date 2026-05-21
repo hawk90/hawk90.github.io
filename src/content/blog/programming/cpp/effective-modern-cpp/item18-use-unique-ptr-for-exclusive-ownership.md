@@ -165,7 +165,7 @@ arr[0] = 1;                                 // operator[]
 
 `unique_ptr`는 표준 곳곳에 쓰인다.
 
-- **Pimpl**의 표준 ([항목 22](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file)).
+- **Pimpl**의 표준 ([항목 22](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file-define-special-members-in-impl-file)).
 - 팩토리 함수 표준 반환 타입.
 - `std::function`이 큰 함수 객체를 보유할 때.
 
@@ -240,4 +240,4 @@ struct Node {
 - [항목 17: 특수 멤버 자동 생성](/blog/programming/cpp/effective-modern-cpp/item17-understand-special-member-function-generation) — unique_ptr이 RAII로 자원 관리를 위임
 - [항목 19: shared_ptr](/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership) — 공유 소유
 - [항목 21: `make_unique`/`make_shared`](/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new)
-- [항목 22: Pimpl](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file)
+- [항목 22: Pimpl](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file-define-special-members-in-impl-file)

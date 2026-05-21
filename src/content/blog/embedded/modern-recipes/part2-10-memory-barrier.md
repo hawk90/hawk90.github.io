@@ -308,5 +308,5 @@ __DMB_ISH();   /* ← Cortex-M에는 share domain 개념 없음 */
 
 ## 관련 항목
 
-- [2-03: Priority Inversion](/blog/embedded/modern-recipes/part2-03-priority-inversion)
-- [2-05: Wait-Free](/blog/embedded/modern-recipes/part2-05-wait-free)
+- [2-03: Priority Inversion](/blog/embedded/modern-recipes/part6-10-priority-inversion)
+- [2-05: Wait-Free](/blog/embedded/modern-recipes/part9-02-wait-free)

@@ -378,9 +378,9 @@ rauc-install: signature verification failed: certificate not trusted
 
 ## 관련 항목
 
-- [Ch 13: U-Boot 통합 — env·bootcmd·MMC layout](/blog/embedded/buildroot/chapter13-uboot-integration) — `fw_env.config`·bootcount의 출처
-- [Ch 15: post-build·post-image 스크립트 심화](/blog/embedded/buildroot/chapter15-post-build-deep) — RAUC bundle 생성 hook의 정석
-- [Ch 18: 보안·CVE 관리 — secure boot, SBOM, CVE tracking](/blog/embedded/buildroot/chapter18-security-cve) — OTA 서명 키와 secure boot의 chain of trust
+- [Ch 13: U-Boot 통합 — env·bootcmd·MMC layout](/blog/embedded/buildroot/chapter13-uboot-integration-integration) — `fw_env.config`·bootcount의 출처
+- [Ch 15: post-build·post-image 스크립트 심화](/blog/embedded/buildroot/chapter15-post-build-deep-deep) — RAUC bundle 생성 hook의 정석
+- [Ch 18: 보안·CVE 관리 — secure boot, SBOM, CVE tracking](/blog/embedded/buildroot/chapter18-security-cve-cve) — OTA 서명 키와 secure boot의 chain of trust
 - [U-Boot Ch 17: A/B 업데이트 — bootcount와 altbootcmd](/blog/embedded/bootloader/chapter17-ab-update) — bootloader 측 시각
 - [U-Boot Ch 20: RAUC·swupdate 통합 — bootloader 측 책임](/blog/embedded/bootloader/chapter20-rauc-swupdate) — Buildroot 통합의 반대편 절반
 - [BSP Development Ch 14: 업데이트 시스템 설계](/blog/embedded/bsp/chapter14-update-system) — BSP 관점의 OTA 아키텍처

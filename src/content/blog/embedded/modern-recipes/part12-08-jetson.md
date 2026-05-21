@@ -300,7 +300,7 @@ Devkit과 production carrier board는 thermal design이 다릅니다. 양쪽 모
 
 ## 관련 항목
 
-- [6-04: Thermal](/blog/embedded/modern-recipes/part6-04-thermal)
-- [6-06: Zero-Copy Camera](/blog/embedded/modern-recipes/part6-06-zero-copy-camera)
-- [6-02: TensorRT](/blog/embedded/modern-recipes/part6-02-tensorrt)
-- [3-03: Zero-Copy](/blog/embedded/modern-recipes/part3-03-zero-copy)
+- [6-04: Thermal](/blog/embedded/modern-recipes/part12-07-thermal)
+- [6-06: Zero-Copy Camera](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [6-02: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
+- [3-03: Zero-Copy](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)

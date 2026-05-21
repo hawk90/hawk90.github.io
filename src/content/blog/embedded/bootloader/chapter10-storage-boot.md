@@ -326,7 +326,7 @@ dummy cycle 설정은 디바이스 트리에서 옵션으로 줍니다.
 };
 ```
 
-XIP(eXecute In Place)는 SPI NOR를 *메모리 매핑된 영역*으로 보고 CPU가 직접 fetch하는 모드입니다. QSPI 컨트롤러가 `0xEB` 명령을 자동 발행해 read 결과를 AHB 버스에 매핑합니다. 일부 SoC는 부트 ROM 자체가 XIP 모드로 들어가 SPL을 *복사하지 않고 그대로 실행*합니다. 단점은 dummy cycle과 latency 때문에 instruction fetch가 [26장](/blog/embedded/bootloader/chapter26-ddr-controller)의 DDR보다 *10~50배* 느린 것입니다.
+XIP(eXecute In Place)는 SPI NOR를 *메모리 매핑된 영역*으로 보고 CPU가 직접 fetch하는 모드입니다. QSPI 컨트롤러가 `0xEB` 명령을 자동 발행해 read 결과를 AHB 버스에 매핑합니다. 일부 SoC는 부트 ROM 자체가 XIP 모드로 들어가 SPL을 *복사하지 않고 그대로 실행*합니다. 단점은 dummy cycle과 latency 때문에 instruction fetch가 [26장](/blog/embedded/bootloader/chapter26-ddr-training)의 DDR보다 *10~50배* 느린 것입니다.
 
 ## 부트 미디어 성능 비교
 
@@ -454,7 +454,7 @@ Verify GPT: success!
 - [Ch 11: 네트워크 부트](/blog/embedded/bootloader/chapter11-network-boot) — 디스크가 없는 부트
 - [Ch 12: USB 부트와 download mode](/blog/embedded/bootloader/chapter12-usb-boot) — recovery jumper의 종착지
 - [Ch 13: 환경 변수와 bootcmd](/blog/embedded/bootloader/chapter13-env-bootcmd) — `bootcmd`의 구조
-- [Ch 26: DDR 컨트롤러](/blog/embedded/bootloader/chapter26-ddr-controller) — XIP와 DDR fetch의 속도 차
+- [Ch 26: DDR 컨트롤러](/blog/embedded/bootloader/chapter26-ddr-training) — XIP와 DDR fetch의 속도 차
 - [Ch 28: Flash 레이아웃](/blog/embedded/bootloader/chapter28-flash-layout) — redundant SPL과 partition 설계
 - [Buildroot Ch 8: 파일 시스템](/blog/embedded/buildroot/chapter08-filesystems) — rootfs 이미지 포맷
 - [Security Ch 6: OTA Update](/blog/embedded/embedded-security/chapter06-ota-update) — 부트 파티션과 OTA

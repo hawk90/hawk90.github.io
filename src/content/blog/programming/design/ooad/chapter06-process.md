@@ -466,5 +466,5 @@ Chapter 7에서는 **실무**를 다룬다. 팀 관리, 릴리스 계획, 재사
 
 - [Ch 5: Notation](/blog/programming/design/ooad/chapter05-notation) — 표기법
 - [Ch 7: Pragmatics](/blog/programming/design/ooad/chapter07-pragmatics) — 실무
-- [OOSC Ch 28: The Software Construction Process](/blog/programming/design/oosc/chapter28-software-construction-process) — 구축 프로세스
+- [OOSC Ch 28: The Software Construction Process](/blog/programming/design/oosc/chapter28-the-software-construction-process) — 구축 프로세스
 

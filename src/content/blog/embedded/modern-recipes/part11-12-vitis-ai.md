@@ -313,6 +313,6 @@ Profile으로 측정. Preprocess는 GStreamer 또는 별도 fabric block으로 �
 - [11-10: HLS](/blog/embedded/modern-recipes/part11-10-hls)
 - [11-11: HLS 최적화](/blog/embedded/modern-recipes/part11-11-hls-optimization)
 - [11-13: OpenCL on FPGA](/blog/embedded/modern-recipes/part11-13-opencl-fpga)
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part6-01-edge-inference)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part6-03-quantization)
+- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
 - [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)

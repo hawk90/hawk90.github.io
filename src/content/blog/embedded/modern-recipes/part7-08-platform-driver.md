@@ -293,4 +293,4 @@ static int my_open(...) { d->ref++; }
 - [7-04: Device Tree Overlay](/blog/embedded/modern-recipes/part7-04-device-tree-overlay)
 - [7-06: Kernel Module 기초](/blog/embedded/modern-recipes/part7-06-kernel-module)
 - [7-07: 캐릭터 드라이버](/blog/embedded/modern-recipes/part7-07-char-driver)
-- [4-05: sysfs](/blog/embedded/modern-recipes/part4-05-sysfs)
+- [4-05: sysfs](/blog/embedded/modern-recipes/part7-12-sysfs)

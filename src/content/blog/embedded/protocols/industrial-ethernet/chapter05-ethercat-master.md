@@ -434,6 +434,6 @@ ARMW를 한 번만 보내고 끝낸 경우입니다. 슬레이브 clock의 *drif
 - [Ch 4: EtherCAT 프레임 — Datagram·WKC](/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame)
 - [Ch 6: PROFINET 개요 — RT·IRT 클래스](/blog/embedded/protocols/industrial-ethernet/chapter06-profinet)
 - [Practical RTOS Internals Part 1.4: Preemption](/blog/embedded/rtos/practical-internals/part1-04-preemption) — 마스터 cycle thread 설계
-- [Modern Embedded Recipes Part 4.6: IRQ affinity](/blog/embedded/modern-recipes/part4-06-irq-affinity)
+- [Modern Embedded Recipes Part 4.6: IRQ affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity)
 - [원문 — SOEM GitHub](https://github.com/OpenEtherCATsociety/SOEM)
 - [원문 — EtherLab IgH Master](https://etherlab.org/en/ethercat/)

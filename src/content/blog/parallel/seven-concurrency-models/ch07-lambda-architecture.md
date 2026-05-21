@@ -330,7 +330,7 @@ StormSubmitter.submitTopology("wordcount", conf, builder.createTopology());
 
 ## At-least-once vs Exactly-once
 
-**직관** — 처리 보증의 세 등급은 *택배 배송*에 비유하면 분명해집니다. *At-most-once*는 *“보내긴 보냈는데 도착 보장 안 함”* — 잃어버리면 그만. *At-least-once*는 *“도착할 때까지 다시 보냄”* — 같은 물건이 두 번 도착할 수 있으니 받는 쪽이 *중복을 견뎌야* 합니다. *Exactly-once*는 *“정확히 한 번만 도착”*인데, 분산 시스템에서 *진짜* 한 번을 보장하기는 어렵습니다. 실제로는 *부수효과의 효과가 한 번만 보이게* 트랜잭션 ID로 중복을 걸러 내는 *operational exactly-once*에 가깝습니다.
+**직관**: 처리 보증의 세 등급은 *택배 배송*에 비유하면 분명해집니다. *At-most-once*는 *“보내긴 보냈는데 도착 보장 안 함”*입니다. 잃어버리면 그만이라는 뜻입니다. *At-least-once*는 *“도착할 때까지 다시 보냄”*입니다. 같은 물건이 두 번 도착할 수 있으니 받는 쪽이 *중복을 견뎌야* 합니다. *Exactly-once*는 *“정확히 한 번만 도착”*인데, 분산 시스템에서 *진짜* 한 번을 보장하기는 어렵습니다. 실제로는 *부수효과의 효과가 한 번만 보이게* 트랜잭션 ID로 중복을 걸러 내는 *operational exactly-once*에 가깝습니다.
 
 Storm은 두 가지 처리 보증을 제공합니다.
 

@@ -312,8 +312,8 @@ config->setDefaultDeviceType(DeviceType::kDLA);
 
 ## 관련 항목
 
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part6-01-edge-inference)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part6-03-quantization)
-- [6-05: Jetson](/blog/embedded/modern-recipes/part6-05-jetson)
-- [5-04: PCIe Streaming](/blog/embedded/modern-recipes/part5-04-pcie-streaming)
+- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
+- [6-05: Jetson](/blog/embedded/modern-recipes/part12-08-jetson)
+- [5-04: PCIe Streaming](/blog/embedded/modern-recipes/part11-09-pcie-streaming)
 - [PE 5-08: Nsight Systems](/blog/embedded/performance-engineering/part5-08-nsight)

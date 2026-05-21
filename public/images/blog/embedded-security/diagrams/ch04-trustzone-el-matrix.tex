@@ -1,0 +1,43 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  colhdr/.style={font=\sffamily\bfseries\small, text=inkc, anchor=south},
+  rowhdr/.style={font=\sffamily\bfseries\footnotesize, text=inkc, anchor=east},
+  cell/.style={cls, align=center, font=\footnotesize, minimum width=42mm, minimum height=11mm},
+  ns/.style={cell, draw=okbord, fill=okfill!40},
+  s/.style={cell, draw=warnbord, fill=warnfill!40},
+  mon/.style={cell, draw=hibord, fill=hifill, minimum width=90mm}
+]
+
+% Column headers
+\node[colhdr] at (2.0, 5.4) {Non-secure};
+\node[colhdr] at (7.0, 5.4) {Secure};
+
+% EL3 monitor spans both columns
+\node[mon] at (4.5, 4.5) {EL3 (Monitor)\\[1pt]\scriptsize Secure Monitor — ARM Trusted FW BL31};
+
+% Row labels (left)
+\node[rowhdr] at (-0.2, 3.0) {EL2 (Hypervisor)};
+\node[rowhdr] at (-0.2, 1.5) {EL1 (OS Kernel)};
+\node[rowhdr] at (-0.2, 0.0) {EL0 (User)};
+
+% EL2 row
+\node[ns] at (2.0, 3.0) {KVM, Xen};
+\node[s]  at (7.0, 3.0) {(Secure EL2, optional)};
+
+% EL1 row
+\node[ns] at (2.0, 1.5) {Linux};
+\node[s]  at (7.0, 1.5) {OP-TEE OS};
+
+% EL0 row
+\node[ns] at (2.0, 0.0) {apps, libs};
+\node[s]  at (7.0, 0.0) {Trusted Applications};
+
+\end{tikzpicture}
+\end{document}

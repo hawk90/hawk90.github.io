@@ -278,5 +278,5 @@ eFuse에 public key hash가 박히면 revert가 불가합니다
 
 ## 관련 항목
 
-- [1-04: Device Tree](/blog/embedded/modern-recipes/part1-04-device-tree)
-- [1-06: JTAG·SWD](/blog/embedded/modern-recipes/part1-06-jtag)
+- [1-04: Device Tree](/blog/embedded/modern-recipes/part7-03-device-tree-basics)
+- [1-06: JTAG·SWD](/blog/embedded/modern-recipes/part10-02-jtag-swd)

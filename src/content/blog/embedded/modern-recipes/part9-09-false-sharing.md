@@ -265,7 +265,7 @@ char pad[64 - sizeof(std::atomic<long>)];   /* sizeof 바뀌면 깨짐 */
 
 ## 관련 항목
 
-- [8-03: Cache Line Alignment](/blog/embedded/modern-recipes/part8-03-cache-line-alignment)
+- [8-03: Cache Line Alignment](/blog/embedded/modern-recipes/part8-03-cache-alignment)
 - [9-06: Atomic 비용](/blog/embedded/modern-recipes/part9-06-atomic-cost)
 - [9-10: MPMC 큐](/blog/embedded/modern-recipes/part9-10-mpmc-queue)
 - [PE 4-02: False Sharing](/blog/embedded/performance-engineering/part4-02-false-sharing)

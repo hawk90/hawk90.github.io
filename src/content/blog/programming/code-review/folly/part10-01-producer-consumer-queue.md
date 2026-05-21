@@ -247,4 +247,4 @@ std::thread p2([&]{ q.write(2); }); // UB
 
 - [Part 9-01 Synchronized](/blog/programming/code-review/folly/part9-01-synchronized) — 데이터에 락을 묶는 일반 패턴
 - [Part 3-05 EventBase](/blog/programming/code-review/folly/part3-05-event-base) — EventBase 간 메시지 전달에 SPSC 자주 사용
-- [Effective Modern C++ Item 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value) — move semantics와 noexcept
+- [Effective Modern C++ Item 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params) — move semantics와 noexcept

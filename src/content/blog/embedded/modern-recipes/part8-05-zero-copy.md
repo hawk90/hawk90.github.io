@@ -268,7 +268,7 @@ CQE를 받기 전에는 buffer를 건드리지 않습니다. Zero-copy일수록 
 
 ## 관련 항목
 
-- [3-02: DMA Allocator](/blog/embedded/modern-recipes/part3-02-dma-allocator)
-- [3-04: NUMA Memory Topology](/blog/embedded/modern-recipes/part3-04-numa)
+- [3-02: DMA Allocator](/blog/embedded/modern-recipes/part8-04-dma-allocator)
+- [3-04: NUMA Memory Topology](/blog/embedded/modern-recipes/part8-06-numa)
 - [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)
-- [RTOS 3-11: Stream Buffer](/blog/embedded/rtos/practical-internals/part3-11-stream-buffer)
+- [RTOS 3-11: Stream Buffer](/blog/embedded/rtos/practical-internals/part3-11-stream-message-buffer)

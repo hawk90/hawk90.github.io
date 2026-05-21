@@ -365,6 +365,6 @@ void spl_dram_init(void)
 
 - [Ch 9: DRAM 초기화](/blog/embedded/bootloader/chapter09-dram-init) — 이 글의 기초가 되는 큰 그림
 - [Ch 8: 보드 초기화](/blog/embedded/bootloader/chapter08-board-init) — `board_init_f`에서 DDR을 부르는 위치
-- [Ch 24: SPL 분리 빌드](/blog/embedded/bootloader/chapter24-spl) — DDR firmware blob이 들어가는 SPL 빌드 흐름
+- [Ch 24: SPL 분리 빌드](/blog/embedded/bootloader/chapter24-spl-deep) — DDR firmware blob이 들어가는 SPL 빌드 흐름
 - [Ch 22: 부트 디버깅](/blog/embedded/bootloader/chapter22-debugging) — training 실패 시 JTAG·UART 활용법
 - [JEDEC LPDDR4 Standard (JESD209-4)](https://www.jedec.org/standards-documents/docs/jesd209-4b)

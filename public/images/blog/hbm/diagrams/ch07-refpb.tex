@@ -1,0 +1,66 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6,5.4) {REFab vs REFpb — per-bank Refresh};
+
+% ===== REFab — all bank refresh stalls the entire bus =====
+\node[font=\sffamily\bfseries, anchor=west, text=warnbord] at (0,4.4) {REFab (all-bank refresh) — 8.9\% loss};
+
+\foreach \b/\y in {0/3.8, 1/3.4, 2/3.0, 3/2.6} {
+  \node[caption, anchor=east] at (-0.2, \y) {bank \b};
+  \draw[mutec, line width=0.3pt] (0, \y) -- (12, \y);
+}
+
+% three REFab pulses: all banks refresh together
+\foreach \xx in {1.5, 5.5, 9.5} {
+  \foreach \y in {3.8, 3.4, 3.0, 2.6} {
+    \node[warn, minimum width=15mm, minimum height=4mm, anchor=west] at (\xx, \y) {};
+  }
+  \node[caption, anchor=south, font=\tiny, text=warnbord] at (\xx + 0.75, 4.0) {REFab};
+}
+% active operation (between refresh)
+\foreach \xx/\w in {0.0/1.5, 3.0/2.5, 7.0/2.5, 11.0/1.0} {
+  \foreach \y in {3.8, 3.4, 3.0, 2.6} {
+    \node[ok, minimum width=\w cm, minimum height=4mm, anchor=west] at (\xx, \y) {};
+  }
+}
+
+% time axis
+\draw[arr, line width=0.4pt] (0, 2.2) -- (12.2, 2.2);
+
+% ===== REFpb — only one bank refreshes at a time, others continue =====
+\node[font=\sffamily\bfseries, anchor=west, text=okbord] at (0,1.4) {REFpb (per-bank refresh) — 0.6\% loss};
+
+\foreach \b/\y in {0/0.8, 1/0.4, 2/0.0, 3/-0.4} {
+  \node[caption, anchor=east] at (-0.2, \y) {bank \b};
+  \draw[mutec, line width=0.3pt] (0, \y) -- (12, \y);
+}
+
+% bank 0 refreshes at t=1.5, bank 1 at 4, bank 2 at 6.5, bank 3 at 9
+\node[warn, minimum width=8mm, minimum height=4mm, anchor=west] at (1.5, 0.8) {};
+\node[warn, minimum width=8mm, minimum height=4mm, anchor=west] at (4.0, 0.4) {};
+\node[warn, minimum width=8mm, minimum height=4mm, anchor=west] at (6.5, 0.0) {};
+\node[warn, minimum width=8mm, minimum height=4mm, anchor=west] at (9.0, -0.4) {};
+
+% other banks remain active during others' refresh — show ok blocks
+\foreach \y in {0.8, 0.4, 0.0, -0.4} {
+  \node[ok, minimum width=15mm, minimum height=4mm, anchor=west] at (0.0, \y) {};
+}
+\foreach \xx in {2.5, 5.0, 7.5, 10.0} {
+  \foreach \y in {0.8, 0.4, 0.0, -0.4} {
+    \node[ok, minimum width=15mm, minimum height=4mm, anchor=west] at (\xx, \y) {};
+  }
+}
+
+\draw[arr, line width=0.4pt] (0, -0.8) -- (12.2, -0.8);
+\node[caption, anchor=west] at (12.3, -0.8) {time};
+
+\end{tikzpicture}
+\end{document}

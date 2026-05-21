@@ -1,0 +1,33 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  node1/.style={cls, align=center, font=\scriptsize, minimum width=16mm, minimum height=10mm, draw=hibord, fill=hifill},
+  term/.style={cls, align=center, font=\scriptsize, minimum width=14mm, minimum height=8mm, draw=warnbord, fill=warnfill},
+  bus/.style={draw=focusc, line width=1pt},
+  gnd/.style={draw=edgec, line width=0.4pt}
+]
+
+% Bus line and nodes
+\foreach \x/\name in {1.5/Node, 4/Node, 6.5/Node, 9/Node} {
+  \node[node1] at (\x, 2) {\name};
+  \draw[gnd] (\x, 1.5) -- (\x, 0.7);
+}
+\draw[bus] (0, 0.7) -- (10.5, 0.7);
+
+% Terminators
+\node[term] (t1) at (0, -0.4) {120Ω};
+\node[term] (t2) at (10.5, -0.4) {120Ω};
+\draw[gnd] (t1.south) -- ++(0, -0.5) node[font=\tiny, below] {GND};
+\draw[gnd] (t2.south) -- ++(0, -0.5) node[font=\tiny, below] {GND};
+
+% Caption
+\node[font=\sffamily\footnotesize, text=mutec, anchor=south] at (5.25, 3.0) {CAN bus는 linear topology};
+
+\end{tikzpicture}
+\end{document}

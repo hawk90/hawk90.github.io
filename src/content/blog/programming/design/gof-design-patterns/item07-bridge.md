@@ -387,5 +387,5 @@ class Circle {
 - **[Adapter (item 6)](/blog/programming/design/gof-design-patterns/item06-adapter)** — Adapter는 *사후 호환*, Bridge는 *사전 분리*
 - **[Strategy (item 21)](/blog/programming/design/gof-design-patterns/item21-strategy)** — 구조 거의 동일. Bridge는 *클래스 계층 분리*, Strategy는 *알고리즘 교체*에 집중
 - **[Abstract Factory (item 1)](/blog/programming/design/gof-design-patterns/item01-abstract-factory)** — Bridge의 ConcreteImplementor 군을 Abstract Factory로 생성
-- **[Pimpl Idiom (EMC++ Item 22)](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl)** — Bridge의 단순한 1:1 형태
+- **[Pimpl Idiom (EMC++ Item 22)](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file)** — Bridge의 단순한 1:1 형태
 - **[item 24 — 전체 관계도](/blog/programming/design/gof-design-patterns/item24-pattern-relationships-overview)** — Bridge는 *고립 영역* (Adapter, Proxy와 함께)

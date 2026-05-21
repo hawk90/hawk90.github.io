@@ -1024,6 +1024,6 @@ TDD 패턴:
 
 - [Ch 10: Walking Skeleton](/blog/programming/engineering/goos/chapter10-walking-skeleton) — 이전 장
 - [Ch 19: Listening to the Tests](/blog/programming/engineering/goos/chapter19-listening-to-tests) — 다음 장
-- [TDD by Example Ch 1](/blog/programming/engineering/tdd-by-example/chapter01-multi-currency-money) — Kent Beck의 점진적 기능 추가 방식과 비교
+- [TDD by Example Ch 1](/blog/programming/engineering/tdd-by-example/ch01) — Kent Beck의 점진적 기능 추가 방식과 비교
 - [TDD Patterns](/blog/programming/engineering/tdd-patterns/chapter05-tdd-patterns) — Worked Example에서 사용된 패턴 카탈로그
 - [Refactoring Catalog](/blog/programming/design/refactoring-catalog/section-introduction) — REFACTOR 단계의 도구

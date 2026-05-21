@@ -130,4 +130,4 @@ raw 포인터를 직접 다루는 자리는 — 최소화.
 
 - [Ch 12: Fundamental Types](/blog/programming/engineering/code-complete/ch12-Fundamental-Data-Types)
 - [Ch 14: Straight-Line Code](/blog/programming/engineering/code-complete/ch14-Organizing-Straight-Line-Code)
-- [Effective Modern C++ Ch 18: unique_ptr](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership)
+- [Effective Modern C++ Ch 18: unique_ptr](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership-for-exclusive-ownership)

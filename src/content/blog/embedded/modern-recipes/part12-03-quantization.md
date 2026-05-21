@@ -293,6 +293,6 @@ Preprocess에서 INT8로 변환해 NPU buffer에 직접 넣습니다.
 
 ## 관련 항목
 
-- [6-02: TensorRT](/blog/embedded/modern-recipes/part6-02-tensorrt)
-- [6-04: Thermal](/blog/embedded/modern-recipes/part6-04-thermal)
+- [6-02: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
+- [6-04: Thermal](/blog/embedded/modern-recipes/part12-07-thermal)
 - [6-07: 온디바이스 LLM](/blog/embedded/modern-recipes/part6-07-llama-cpp-edge)

@@ -519,4 +519,4 @@ def _transition_to(self, new_state: SniperState) -> None:
 - [Ch 6: Object-Oriented Style](/blog/programming/engineering/goos/chapter06-object-oriented-style) — 다음 장
 - [Ch 19: Listening to the Tests](/blog/programming/engineering/goos/chapter19-listening-to-tests) — 이중 루프가 막힐 때 신호 해석
 - [Refactoring Catalog](/blog/programming/design/refactoring-catalog/section-introduction) — REFACTOR 단계에서 사용하는 리팩토링 카탈로그
-- [TDD by Example Ch 32](/blog/programming/engineering/tdd-by-example/chapter32-test-driven-development-patterns) — Detroit school의 사이클 운영
+- [TDD by Example Ch 32](/blog/programming/engineering/tdd-by-example/ch32) — Detroit school의 사이클 운영

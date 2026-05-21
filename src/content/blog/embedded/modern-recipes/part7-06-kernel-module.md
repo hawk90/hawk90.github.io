@@ -231,6 +231,6 @@ make: *** /lib/modules/5.15.0/build: No such file or directory
 
 ## 관련 항목
 
-- [1-04: Device Tree](/blog/embedded/modern-recipes/part1-04-device-tree)
-- [4-02: mmap](/blog/embedded/modern-recipes/part4-02-mmap)
-- [4-05: sysfs](/blog/embedded/modern-recipes/part4-05-sysfs)
+- [1-04: Device Tree](/blog/embedded/modern-recipes/part7-03-device-tree-basics)
+- [4-02: mmap](/blog/embedded/modern-recipes/part7-09-mmap)
+- [4-05: sysfs](/blog/embedded/modern-recipes/part7-12-sysfs)

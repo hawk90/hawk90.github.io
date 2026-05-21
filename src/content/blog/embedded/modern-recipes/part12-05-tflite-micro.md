@@ -360,5 +360,5 @@ Quantized model은 *INT8 input*. `q = round(x / scale - zero_point)`로 변환.
 - [12-02: NPU 아키텍처](/blog/embedded/modern-recipes/part12-02-npu-architecture)
 - [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
 - [12-06: ONNX Runtime](/blog/embedded/modern-recipes/part12-06-onnx-runtime)
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part6-01-edge-inference)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part6-03-quantization)
+- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)

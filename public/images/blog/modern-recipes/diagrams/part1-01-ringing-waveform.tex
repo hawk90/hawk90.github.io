@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog, x=1cm, y=1cm,
+  sig/.style={draw=hibord, line width=1pt, smooth},
+  ann/.style={font=\sffamily\scriptsize, anchor=west},
+  ref/.style={draw=mutec, dashed, line width=0.3pt}
+]
+
+% Reference lines for 0V and 3.3V
+\draw[ref] (0, 0) -- (10, 0) node[font=\scriptsize, right]{0V};
+\draw[ref] (0, 3.3) -- (10, 3.3) node[font=\scriptsize, right]{3.3V};
+
+% Idealized switching with overshoot and ringing (rising edge)
+\draw[sig]
+  (0, 0) -- (1.5, 0)                              % low hold
+  -- (1.7, 4.0)                                    % overshoot peak
+  .. controls (2.0, 2.8) and (2.3, 3.8) ..        % ringing 1
+  (2.6, 3.0)
+  .. controls (2.9, 3.5) and (3.2, 3.2) ..        % ringing 2
+  (3.5, 3.3)
+  -- (6, 3.3)                                      % high hold
+  -- (6.2, -0.6)                                   % undershoot
+  .. controls (6.5, 0.4) and (6.8, -0.2) ..       % ringing
+  (7.1, 0.1)
+  -- (10, 0);                                      % low hold
+
+% Annotations
+\node[ann, text=warnbord] at (2.3, 4.2) {overshoot};
+\node[ann, text=mutec] at (3.0, 3.7) {ringing};
+\node[ann, text=warnbord] at (6.6, -0.85) {undershoot};
+
+\node[font=\sffamily\footnotesize, text=mutec, anchor=south] at (5, 5.0)
+  {4 V까지 튀면 입력 보호 다이오드 동작, $-$0.5 V로 떨어지면 ESD 다이오드 활성};
+
+\end{tikzpicture}
+\end{document}

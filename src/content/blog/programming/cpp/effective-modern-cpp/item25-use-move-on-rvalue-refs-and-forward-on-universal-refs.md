@@ -218,4 +218,4 @@ void f(const Widget&& w) {       // ⚠️ const rvalue 참조 — 거의 의미
 - [항목 14: noexcept](/blog/programming/cpp/effective-modern-cpp/item14-declare-functions-noexcept-if-they-wont-emit-exceptions)
 - [항목 23: move/forward 정체](/blog/programming/cpp/effective-modern-cpp/item23-understand-std-move-and-std-forward)
 - [항목 24: 두 종류 구분](/blog/programming/cpp/effective-modern-cpp/item24-distinguish-universal-references-from-rvalue-references)
-- [항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params)
+- [항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params)

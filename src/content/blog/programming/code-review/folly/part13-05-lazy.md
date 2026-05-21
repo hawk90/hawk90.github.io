@@ -273,4 +273,4 @@ Lazy 내부는 `mutable` 멤버를 갖지만, 멤버 자체가 mutable이 아니
 
 - [Part 12-02 SingletonVault](/blog/programming/code-review/folly/part12-02-singleton-vault) — eager vs lazy init 트레이드오프
 - [Part 13-04 folly::Function](/blog/programming/code-review/folly/part13-04-folly-function) — Lazy creator도 결국 callable
-- [Effective Modern C++ Item 39](/blog/programming/cpp/effective-modern-cpp/item39-future-for-one-shot) — once_flag 대안
+- [Effective Modern C++ Item 39](/blog/programming/cpp/effective-modern-cpp/item39-consider-void-futures-for-one-shot-event-communication) — once_flag 대안

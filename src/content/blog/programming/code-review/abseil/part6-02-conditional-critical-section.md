@@ -141,7 +141,7 @@ if (mu.AwaitWithTimeout(cond, absl::Seconds(5))) {
 }
 ```
 
-`absl::Duration`, `absl::Time` 사용. 표준 `std::chrono`보다 표현력이 강하다 ([Part 7](/blog/programming/code-review/abseil/part7-01-time-duration)에서 다룬다).
+`absl::Duration`, `absl::Time` 사용. 표준 `std::chrono`보다 표현력이 강하다 ([Part 7](/blog/programming/code-review/abseil/part7-01-time-duration-overview)에서 다룬다).
 
 ## 내부 동작
 
