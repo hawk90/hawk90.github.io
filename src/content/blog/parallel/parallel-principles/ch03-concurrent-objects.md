@@ -802,14 +802,12 @@ Java 예:
 
 ## 자기 점검
 
-```
-□ Linearizability 정의를 그림으로 그릴 수 있는가?
-□ Linearization point 찾는 법?
-□ Lock-free / Wait-free / Obstruction-free 구분?
-□ Composability(합성성)의 의미와 왜 중요한가?
-□ Sequential Consistency의 비합성성 예?
-□ C++20 memory_order와의 관계?
-```
+- [ ] Linearizability 정의를 그림으로 그릴 수 있는가?
+- [ ] Linearization point 찾는 법?
+- [ ] Lock-free / Wait-free / Obstruction-free 구분?
+- [ ] Composability(합성성)의 의미와 왜 중요한가?
+- [ ] Sequential Consistency의 비합성성 예?
+- [ ] C++20 memory_order와의 관계?
 
 ## 실제 시스템 사례
 

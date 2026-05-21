@@ -212,13 +212,11 @@ Form 5: Table N illustrates the relationship between ... ← Indicative
 
 자기 분야의 학술 논문 두세 편을 펴서 Data Commentary가 있는 자리를 찾아 다음을 점검합니다.
 
-```text
-□ Location statement가 indicative? informative?
-□ 어떤 동사가 쓰였는가? (shows / presents / illustrates / contains ...)
-□ 능동과 수동 비율이 어떻게 되는가?
-□ "as" clause가 사용되었는가?
-□ 한 commentary 안에 형태 변화가 있는가?
-```
+- [ ] Location statement가 indicative? informative?
+- [ ] 어떤 동사가 쓰였는가? (shows / presents / illustrates / contains ...)
+- [ ] 능동과 수동 비율이 어떻게 되는가?
+- [ ] "as" clause가 사용되었는가?
+- [ ] 한 commentary 안에 형태 변화가 있는가?
 
 이런 관찰이 자기 글의 Data Commentary 어휘를 늘리는 가장 빠른 방법입니다.
 
@@ -243,12 +241,10 @@ Form 5: Table N illustrates the relationship between ... ← Indicative
 
 ## 자기 글 점검
 
-```text
-□ 모든 표 / 그림이 본문 언급?
-□ Location → Highlighting → Discussion 흐름?
-□ 본문이 해석인가, 수치 반복?
-□ 동사 / 전치사가 다양?
-```
+- [ ] 모든 표 / 그림이 본문 언급?
+- [ ] Location → Highlighting → Discussion 흐름?
+- [ ] 본문이 해석인가, 수치 반복?
+- [ ] 동사 / 전치사가 다양?
 
 ## 다음 글 예고
 

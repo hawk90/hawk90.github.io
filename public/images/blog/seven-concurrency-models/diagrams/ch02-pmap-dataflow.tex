@@ -39,11 +39,11 @@
     \draw[arr] (fut\i) -- (out\i);
   }
 
-  % Thread brace on futures
+  % Thread brace beyond the output column on the right (clear of arrows/labels)
   \draw[decorate, decoration={brace, amplitude=4pt, mirror}, draw=mutec, line width=0.4pt]
-    ($(fut0.north east) + (1.4, 0)$) -- ($(fut4.south east) + (1.4, 0)$);
+    ($(out0.north east) + (0.5, 0)$) -- ($(out4.south east) + (0.5, 0)$);
   \node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=west]
-    at ($(fut2.east) + (2.0, 0)$) {각 항목\\별도 스레드};
+    at ($(out2.east) + (1.0, 0)$) {각 항목\\[2pt]별도 스레드};
 
   % Timing notes
   \node[note, text width=110mm, align=center]

@@ -1217,15 +1217,13 @@ std::vector<size_t> find_all_positions(
 
 ## 자기 점검
 
-```
-□ seq vs par vs par_unseq vs unseq 차이?
-□ reduce가 결합법칙 필요한 이유?
-□ transform_reduce의 map-reduce 패턴?
-□ 부동소수점 reduce의 *재현 불가능* 문제?
-□ 병렬 알고리즘 안 *예외 처리* 방식?
-□ par_unseq에서 락 사용 금지 이유?
-□ 병렬화 임계값 결정 기준?
-```
+- [ ] seq vs par vs par_unseq vs unseq 차이?
+- [ ] reduce가 결합법칙 필요한 이유?
+- [ ] transform_reduce의 map-reduce 패턴?
+- [ ] 부동소수점 reduce의 *재현 불가능* 문제?
+- [ ] 병렬 알고리즘 안 *예외 처리* 방식?
+- [ ] par_unseq에서 락 사용 금지 이유?
+- [ ] 병렬화 임계값 결정 기준?
 
 ## 다음 장 예고
 

@@ -934,13 +934,11 @@ C++20 새 기능:
 
 ## 자기 점검
 
-```
-□ while vs if (wait)의 차이?
-□ Spurious wakeup 정의?
-□ Mesa vs Hoare semantics?
-□ Semaphore vs Monitor 사용 자리?
-□ Reader-Writer의 starvation 위험?
-```
+- [ ] while vs if (wait)의 차이?
+- [ ] Spurious wakeup 정의?
+- [ ] Mesa vs Hoare semantics?
+- [ ] Semaphore vs Monitor 사용 자리?
+- [ ] Reader-Writer의 starvation 위험?
 
 ## 다음 장 예고
 

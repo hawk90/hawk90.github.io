@@ -907,12 +907,10 @@ C11:
 
 ## 자기 점검
 
-```
-□ TAS / TTAS 캐시 동작 차이?
-□ Exponential backoff의 이유?
-□ CLH vs MCS 큐 락 차이?
-□ NUMA에서의 락 성능?
-```
+- [ ] TAS / TTAS 캐시 동작 차이?
+- [ ] Exponential backoff의 이유?
+- [ ] CLH vs MCS 큐 락 차이?
+- [ ] NUMA에서의 락 성능?
 
 ## 다음 장 예고
 

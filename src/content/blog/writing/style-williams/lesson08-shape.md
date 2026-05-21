@@ -227,13 +227,11 @@ she finally spoke."
 
 ## 자기 글 점검
 
-```text
-□ 문장 길이가 다양한가?
-□ Cumulative sentence (주절 + 펼침)을 활용했는가?
-□ Periodic sentence가 극적 자리에 있는가?
-□ Parallel과 비-parallel을 절충했는가?
-□ 한 단락에 같은 패턴의 문장이 3개 이상 있지는 않은가?
-```
+- [ ] 문장 길이가 다양한가?
+- [ ] Cumulative sentence (주절 + 펼침)을 활용했는가?
+- [ ] Periodic sentence가 극적 자리에 있는가?
+- [ ] Parallel과 비-parallel을 절충했는가?
+- [ ] 한 단락에 같은 패턴의 문장이 3개 이상 있지는 않은가?
 
 ## 정리
 

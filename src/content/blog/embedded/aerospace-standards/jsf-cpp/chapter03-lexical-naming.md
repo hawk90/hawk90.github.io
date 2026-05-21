@@ -471,20 +471,18 @@ CI에서 자동 검증. 위반 시 *PR 실패*.
 
 ## Code Review Checklist — Naming
 
-```
-□ Class: PascalCase (+ C prefix 옵션, I for interface)
-□ Method: PascalCase
-□ Local variable: camelCase 또는 snake_case
-□ Member: m_ prefix (+ type info: m_p for pointer)
-□ Static: s_ prefix
-□ Global: g_ prefix (회피 권장)
-□ Constant: SCREAMING_SNAKE
-□ Macro: SCREAMING_SNAKE
-□ Enum: PascalCase + E prefix (C++03)
-□ Template parameter: T prefix
-□ File name: snake_case.h / .cpp
-□ 한 codebase 안 일관성
-```
+- [ ] Class: PascalCase (+ C prefix 옵션, I for interface)
+- [ ] Method: PascalCase
+- [ ] Local variable: camelCase 또는 snake_case
+- [ ] Member: m_ prefix (+ type info: m_p for pointer)
+- [ ] Static: s_ prefix
+- [ ] Global: g_ prefix (회피 권장)
+- [ ] Constant: SCREAMING_SNAKE
+- [ ] Macro: SCREAMING_SNAKE
+- [ ] Enum: PascalCase + E prefix (C++03)
+- [ ] Template parameter: T prefix
+- [ ] File name: snake_case.h / .cpp
+- [ ] 한 codebase 안 일관성
 
 ## 정리
 

@@ -429,33 +429,29 @@ Conclusion — 능동 선호:
 
 ## 한국 학생을 위한 핵심 결정
 
-```text
-□ I / we 사용 결정 — 분야 모범 논문 확인
-□ Contraction 빼기 — won't → will not
-□ "Not many / not much" → few / little
-□ Etc. 제거 / 풀어 쓰기
-□ "You" 회피 → 수동 또는 일반화
-□ 직접 의문 제한적 사용
-□ 부사 → mid-position
-□ Split infinitive — 의미가 살아나면 OK
-□ 군더더기 단어 제거
-□ 능동 / 수동 둘 다 자연스럽게
-```
+- [ ] I / we 사용 결정 — 분야 모범 논문 확인
+- [ ] Contraction 빼기 — won't → will not
+- [ ] "Not many / not much" → few / little
+- [ ] Etc. 제거 / 풀어 쓰기
+- [ ] "You" 회피 → 수동 또는 일반화
+- [ ] 직접 의문 제한적 사용
+- [ ] 부사 → mid-position
+- [ ] Split infinitive — 의미가 살아나면 OK
+- [ ] 군더더기 단어 제거
+- [ ] 능동 / 수동 둘 다 자연스럽게
 
 ## 자기 글 점검
 
-```text
-□ 자기 분야의 I / we 관습을 따랐는가?
-□ Contractions가 없는가?
-□ "Not ... any / much / many"를 no / little / few로?
-□ Etc. 자제 / 풀어 쓰기?
-□ "You" 직접 호명 없는가?
-□ 직접 의문이 남용되지 않는가?
-□ 부사가 적절한 위치에 있는가?
-□ Split infinitive가 의미를 살리는가?
-□ 한 문장에 불필요한 단어가 없는가?
-□ 능동 / 수동이 적절한 자리에 있는가?
-```
+- [ ] 자기 분야의 I / we 관습을 따랐는가?
+- [ ] Contractions가 없는가?
+- [ ] "Not ... any / much / many"를 no / little / few로?
+- [ ] Etc. 자제 / 풀어 쓰기?
+- [ ] "You" 직접 호명 없는가?
+- [ ] 직접 의문이 남용되지 않는가?
+- [ ] 부사가 적절한 위치에 있는가?
+- [ ] Split infinitive가 의미를 살리는가?
+- [ ] 한 문장에 불필요한 단어가 없는가?
+- [ ] 능동 / 수동이 적절한 자리에 있는가?
 
 ## 다음 글 예고
 

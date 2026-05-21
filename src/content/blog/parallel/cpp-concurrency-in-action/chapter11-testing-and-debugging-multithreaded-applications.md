@@ -1695,15 +1695,13 @@ CI 통합:
 
 ## 자기 점검
 
-```
-□ Data race와 Race condition 차이?
-□ Heisenbug의 정의와 대응 방법?
-□ Check-then-act 패턴이 위험한 이유?
-□ TSan의 작동 원리 (happens-before 추적)?
-□ Clang Thread Safety Analysis의 capability 시스템?
-□ Livelock과 Deadlock 차이?
-□ Stress test와 unit test의 다른 점?
-```
+- [ ] Data race와 Race condition 차이?
+- [ ] Heisenbug의 정의와 대응 방법?
+- [ ] Check-then-act 패턴이 위험한 이유?
+- [ ] TSan의 작동 원리 (happens-before 추적)?
+- [ ] Clang Thread Safety Analysis의 capability 시스템?
+- [ ] Livelock과 Deadlock 차이?
+- [ ] Stress test와 unit test의 다른 점?
 
 ## 시리즈 마무리
 

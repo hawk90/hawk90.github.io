@@ -41,12 +41,10 @@ draft: false
 
 예시:
 
-```
 - id : Long
 - name : String
 - tier : Tier = Bronze
 - email : String {unique}
-```
 
 `{property}`는 제약·꾸밈입니다: `{readOnly}`, `{ordered}`, `{unique}` 등.
 

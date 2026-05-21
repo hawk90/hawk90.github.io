@@ -52,7 +52,6 @@ Will not   — 금지
 
 표준 원문이 정의한 *대분류* (페이지 목차 기준):
 
-```
 - Introduction / References / Definitions
 - Environment
 - Language Compliance
@@ -67,7 +66,6 @@ Will not   — 금지
 - Library Use / Multi-threading
 - Floating-Point / Integer Types
 - Optimization
-```
 
 각 영역에 *수~수십 개 rule*. 정확한 rule 번호·wording은 *원문 PDF*.
 

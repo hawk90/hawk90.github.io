@@ -727,14 +727,12 @@ Java:
 
 ## 자기 점검
 
-```
-□ Consensus Number 정의?
-□ FLP impossibility (read/write 한계)?
-□ TAS / FAA / CAS의 consensus number?
-□ CAS가 universal하다는 의미?
-□ ABA 문제 미리 예측?
-□ compare_exchange_strong vs weak 차이?
-```
+- [ ] Consensus Number 정의?
+- [ ] FLP impossibility (read/write 한계)?
+- [ ] TAS / FAA / CAS의 consensus number?
+- [ ] CAS가 universal하다는 의미?
+- [ ] ABA 문제 미리 예측?
+- [ ] compare_exchange_strong vs weak 차이?
 
 ## 다음 장 예고
 

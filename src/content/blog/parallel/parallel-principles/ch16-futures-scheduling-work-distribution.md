@@ -1011,14 +1011,12 @@ Work stealing:
 
 ## 자기 점검
 
-```
-□ Future의 합성성과 합성 불가능 차이?
-□ Fork-Join 패턴의 THRESHOLD 의미?
-□ Work Stealing에서 *bottom*과 *top*의 비대칭?
-□ Random victim 선택의 이유?
-□ Continuation Stealing과 Child Stealing 차이?
-□ Critical Path (T_∞)가 병목인 이유?
-```
+- [ ] Future의 합성성과 합성 불가능 차이?
+- [ ] Fork-Join 패턴의 THRESHOLD 의미?
+- [ ] Work Stealing에서 *bottom*과 *top*의 비대칭?
+- [ ] Random victim 선택의 이유?
+- [ ] Continuation Stealing과 Child Stealing 차이?
+- [ ] Critical Path (T_∞)가 병목인 이유?
 
 ## 다음 장 예고
 

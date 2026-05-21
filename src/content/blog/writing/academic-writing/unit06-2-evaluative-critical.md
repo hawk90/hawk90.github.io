@@ -313,12 +313,10 @@ Nowhere in the analysis is X mentioned.
 
 ## 자기 글 점검
 
-```text
-□ 평가어 강도가 근거에 맞는가?
-□ Booster 자제?
-□ Hedge 적절?
-□ Interesting 대체 시도?
-```
+- [ ] 평가어 강도가 근거에 맞는가?
+- [ ] Booster 자제?
+- [ ] Hedge 적절?
+- [ ] Interesting 대체 시도?
 
 ## 다음 글 예고
 

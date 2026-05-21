@@ -1127,22 +1127,20 @@ public:
 
 ## 자기 점검
 
-```
-□ Spurious wakeup의 정의와 대응?
-□ predicate가 부수효과를 가지면 안 되는 이유?
-□ notify_one과 notify_all 사용 자리?
-□ wait_for의 반환값 의미? future_status::deferred의 함정?
-□ promise.set_value를 두 번 호출하면?
-□ broken_promise는 언제 발생?
-□ async의 launch policy 영향? 기본 정책이 deferred로 떨어질 위험?
-□ async가 반환한 future의 *소멸자 블로킹*?
-□ packaged_task가 GUI marshalling에 어울리는 이유?
-□ shared_future를 여러 스레드가 안전하게 쓰는 모델?
-□ 타임아웃에 steady_clock을 써야 하는 이유?
-□ 함수형 Quicksort에서 race가 발생하지 않는 이유?
-□ 메시지 패싱과 락 기반 동기화의 트레이드오프?
-□ latch와 barrier 차이?
-```
+- [ ] Spurious wakeup의 정의와 대응?
+- [ ] predicate가 부수효과를 가지면 안 되는 이유?
+- [ ] notify_one과 notify_all 사용 자리?
+- [ ] wait_for의 반환값 의미? future_status::deferred의 함정?
+- [ ] promise.set_value를 두 번 호출하면?
+- [ ] broken_promise는 언제 발생?
+- [ ] async의 launch policy 영향? 기본 정책이 deferred로 떨어질 위험?
+- [ ] async가 반환한 future의 *소멸자 블로킹*?
+- [ ] packaged_task가 GUI marshalling에 어울리는 이유?
+- [ ] shared_future를 여러 스레드가 안전하게 쓰는 모델?
+- [ ] 타임아웃에 steady_clock을 써야 하는 이유?
+- [ ] 함수형 Quicksort에서 race가 발생하지 않는 이유?
+- [ ] 메시지 패싱과 락 기반 동기화의 트레이드오프?
+- [ ] latch와 barrier 차이?
 
 ## 다음 장 예고
 

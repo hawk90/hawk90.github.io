@@ -7,22 +7,26 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  layer/.style={cls, align=center, font=\footnotesize, minimum width=120mm, minimum height=11mm, draw=edgec},
+  % Layer band: empty container, label sits OUTSIDE on the left
+  layer/.style={cls, align=center, font=\footnotesize, minimum width=120mm, minimum height=12mm, draw=edgec, inner sep=2pt},
   phy/.style={layer, fill=hifill},
   proto/.style={layer, fill=confill},
   app/.style={layer, fill=impfill},
-  subbox/.style={cls, align=center, font=\tiny, minimum width=22mm, minimum height=9mm, draw=edgec, fill=white, line width=0.4pt}
+  subbox/.style={cls, align=center, font=\tiny, minimum width=22mm, minimum height=9mm, draw=edgec, fill=white, line width=0.4pt},
+  layerlbl/.style={font=\footnotesize\bfseries, anchor=east, text=inkc}
 ]
 
-% Layer 3 — Applications
-\node[app] (apps) at (0, 0) {Applications};
+% Layer 3 — Applications (band only; label placed to the left)
+\node[app] (apps) at (0, 0) {};
+\node[layerlbl] at (apps.west) {Applications\quad};
 \node[subbox, anchor=west] at ([xshift=-58mm, yshift=0mm]apps.center) {Smartphone};
 \node[subbox] at ([xshift=-26mm, yshift=0mm]apps.center) {Automotive};
 \node[subbox] at ([xshift=6mm, yshift=0mm]apps.center) {Robot};
 \node[subbox] at ([xshift=34mm, yshift=0mm]apps.center) {AR/VR};
 
 % Layer 2 — Protocol
-\node[proto] (proto) at (0, -1.5) {Protocols};
+\node[proto] (proto) at (0, -1.7) {};
+\node[layerlbl] at (proto.west) {Protocols\quad};
 \node[subbox, anchor=west] at ([xshift=-58mm, yshift=0mm]proto.center) {CSI-2};
 \node[subbox] at ([xshift=-32mm, yshift=0mm]proto.center) {DSI / DSI-2};
 \node[subbox] at ([xshift=-4mm, yshift=0mm]proto.center) {I3C};
@@ -30,16 +34,17 @@
 \node[subbox] at ([xshift=46mm, yshift=0mm]proto.center) {Debug};
 
 % Layer 1 — PHY
-\node[phy] (phy) at (0, -3) {Physical Layer (PHY)};
+\node[phy] (phy) at (0, -3.4) {};
+\node[layerlbl] at (phy.west) {Physical (PHY)\quad};
 \node[subbox, anchor=west] at ([xshift=-58mm, yshift=0mm]phy.center) {D-PHY};
 \node[subbox] at ([xshift=-32mm, yshift=0mm]phy.center) {C-PHY};
 \node[subbox] at ([xshift=-6mm, yshift=0mm]phy.center) {M-PHY};
 \node[subbox] at ([xshift=22mm, yshift=0mm]phy.center) {A-PHY};
 
 % Right side labels
-\node[font=\tiny, anchor=west] at (apps.east) {OEM·시스템};
-\node[font=\tiny, anchor=west] at (proto.east) {MIPI standard};
-\node[font=\tiny, anchor=west] at (phy.east) {Silicon};
+\node[font=\tiny, anchor=west] at ([xshift=2mm]apps.east) {OEM·시스템};
+\node[font=\tiny, anchor=west] at ([xshift=2mm]proto.east) {MIPI standard};
+\node[font=\tiny, anchor=west] at ([xshift=2mm]phy.east) {Silicon};
 
 \end{tikzpicture}
 \end{document}

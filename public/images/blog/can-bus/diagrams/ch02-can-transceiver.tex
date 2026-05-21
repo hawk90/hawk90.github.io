@@ -28,8 +28,10 @@
 \draw (3, 4.5) -- (1, 4.5) node[anchor=east, font=\tiny] {MCU CAN\_TX};
 \draw (3, 4.0) -- (1, 4.0) node[anchor=east, font=\tiny] {MCU CAN\_RX};
 
-% Standby (optional)
-\draw (7, 3.0) -- (8.5, 3.0) node[anchor=west, font=\tiny] {STB (GND = active)};
+% Standby (optional) — route below the resistor mid-tap so the STB label
+% doesn't crash into the "60Ω" resistor label
+\draw (7, 3.0) -- (7.8, 3.0) -- (7.8, 1.0)
+       node[anchor=north, font=\tiny] {STB (GND = active)};
 
 % Power
 \draw (3, 2.0) -- (2, 2.0) -- (2, 6) node[anchor=south] {\scriptsize 5V VCC};

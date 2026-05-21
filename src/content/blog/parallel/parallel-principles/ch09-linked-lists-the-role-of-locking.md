@@ -1362,13 +1362,11 @@ C++20 선택 기준:
 
 ## 자기 점검
 
-```
-□ Hand-over-hand locking이 데드락 회피하는 메커니즘?
-□ Optimistic의 validation 단계?
-□ Lazy의 logical / physical 삭제 분리?
-□ Lock-free linked list의 어려움 (CAS만으로 부족)?
-□ Hazard pointer가 필요한 이유?
-```
+- [ ] Hand-over-hand locking이 데드락 회피하는 메커니즘?
+- [ ] Optimistic의 validation 단계?
+- [ ] Lazy의 logical / physical 삭제 분리?
+- [ ] Lock-free linked list의 어려움 (CAS만으로 부족)?
+- [ ] Hazard pointer가 필요한 이유?
 
 ## 다음 장 예고
 

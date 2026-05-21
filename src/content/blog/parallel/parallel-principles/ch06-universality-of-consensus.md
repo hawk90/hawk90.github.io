@@ -801,14 +801,12 @@ void atomic_ref_example() {
 
 ## 자기 점검
 
-```
-□ Universal construction 알고리즘 흐름?
-□ Helping이 필요한 이유?
-□ Lock-free / Wait-free / Obstruction-free 구분 (3번째)?
-□ Universality의 *이론적 의미*?
-□ 실용적 lock-free 자료구조 패턴?
-□ C++20의 atomic_shared_ptr, atomic_ref?
-```
+- [ ] Universal construction 알고리즘 흐름?
+- [ ] Helping이 필요한 이유?
+- [ ] Lock-free / Wait-free / Obstruction-free 구분 (3번째)?
+- [ ] Universality의 *이론적 의미*?
+- [ ] 실용적 lock-free 자료구조 패턴?
+- [ ] C++20의 atomic_shared_ptr, atomic_ref?
 
 ## 다음 장 예고
 

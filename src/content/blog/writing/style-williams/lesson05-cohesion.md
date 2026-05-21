@@ -232,13 +232,11 @@ We propose Z as solution. This approach ...
 
 ## 자기 글 점검
 
-```text
-□ 단락의 주어들이 비슷한 그룹인가? (coherent)
-□ 문장 끝과 다음 문장 시작이 연결되는가? (cohesive)
-□ Topic sentence가 단락 시작에 있는가?
-□ Transition (However, Moreover)을 과용하지 않았는가?
-□ 화제 전환에 새 단락을 썼는가?
-```
+- [ ] 단락의 주어들이 비슷한 그룹인가? (coherent)
+- [ ] 문장 끝과 다음 문장 시작이 연결되는가? (cohesive)
+- [ ] Topic sentence가 단락 시작에 있는가?
+- [ ] Transition (However, Moreover)을 과용하지 않았는가?
+- [ ] 화제 전환에 새 단락을 썼는가?
 
 ## 정리
 

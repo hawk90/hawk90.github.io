@@ -275,12 +275,10 @@ A. ❶ There are a number of explanations for why musicians have
 
 ## 자기 글 점검
 
-```text
-□ 헤지 강도가 데이터에 맞는가?
-□ 한 문장 한 헤지?
-□ Booster (clearly, obviously) 자제?
-□ "prove" 남용 없는가?
-```
+- [ ] 헤지 강도가 데이터에 맞는가?
+- [ ] 한 문장 한 헤지?
+- [ ] Booster (clearly, obviously) 자제?
+- [ ] "prove" 남용 없는가?
 
 ## 다음 글 예고
 

@@ -267,13 +267,11 @@ Unfortunately, the system has been abandoned.   ← 화자의 태도, 문장 전
 
 ## 자기 글 점검
 
-```text
-□ 네 단계 (S, P, S, E)가 명확?
-□ Problem이 측정 가능?
-□ Solution이 Problem과 직접 연결?
-□ Evaluation에 한계 인정?
-□ 단계 전환에 신호?
-```
+- [ ] 네 단계 (S, P, S, E)가 명확?
+- [ ] Problem이 측정 가능?
+- [ ] Solution이 Problem과 직접 연결?
+- [ ] Evaluation에 한계 인정?
+- [ ] 단계 전환에 신호?
 
 ## 다음 글 예고
 

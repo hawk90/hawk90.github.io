@@ -585,18 +585,16 @@ DAL A 의무. *Object code가 source와 일치*하는지 *직접 검증*.
 
 빌드 결과의 *완전성 검증*:
 
-```
-□ EOC가 *모든 source*를 포함
-□ EOC가 *모든 LLR를 구현*
-□ Memory layout이 *SAD와 일치*
-□ Stack budget 충족
-□ Code section read-only
-□ Data section read-write (per task with MPU)
-□ Linker script가 *correct memory map*
-□ Unused functions/sections 제거됨
-□ Optimization 결과가 *expected behavior 유지*
-□ Reproducible build 확인
-```
+- [ ] EOC가 *모든 source*를 포함
+- [ ] EOC가 *모든 LLR를 구현*
+- [ ] Memory layout이 *SAD와 일치*
+- [ ] Stack budget 충족
+- [ ] Code section read-only
+- [ ] Data section read-write (per task with MPU)
+- [ ] Linker script가 *correct memory map*
+- [ ] Unused functions/sections 제거됨
+- [ ] Optimization 결과가 *expected behavior 유지*
+- [ ] Reproducible build 확인
 
 이 *체크리스트가 build verification*. CI에서 자동 + 인간 review.
 

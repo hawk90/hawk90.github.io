@@ -352,12 +352,10 @@ this effect is stronger in slow caffeine metabolizers.
 
 ## 자기 글 점검
 
-```text
-□ Integral / non-integral 둘 다?
-□ 보고 동사 다양?
-□ 선행 연구 시제 일관?
-□ Purpose 동사 강함?
-```
+- [ ] Integral / non-integral 둘 다?
+- [ ] 보고 동사 다양?
+- [ ] 선행 연구 시제 일관?
+- [ ] Purpose 동사 강함?
 
 ## 다음 글 예고
 

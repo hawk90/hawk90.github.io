@@ -950,14 +950,12 @@ modern scheduler (Go, Tokio, Cilk)는 *work stealing*. 자기 큐가 비면 옆 
 
 ## 자기 점검
 
-```
-□ PQ가 동시성에 본질적으로 어려운 이유?
-□ Heap 기반 동시 PQ의 어려움?
-□ Skiplist 기반 PQ가 hot spot을 어떻게 완화?
-□ Relaxed PQ의 K 의미?
-□ Linden-Jonsson과 SprayList 차이?
-□ Multi-queue + work stealing의 트레이드오프?
-```
+- [ ] PQ가 동시성에 본질적으로 어려운 이유?
+- [ ] Heap 기반 동시 PQ의 어려움?
+- [ ] Skiplist 기반 PQ가 hot spot을 어떻게 완화?
+- [ ] Relaxed PQ의 K 의미?
+- [ ] Linden-Jonsson과 SprayList 차이?
+- [ ] Multi-queue + work stealing의 트레이드오프?
 
 ## 다음 장 예고
 

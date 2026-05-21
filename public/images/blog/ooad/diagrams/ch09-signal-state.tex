@@ -33,7 +33,12 @@
 \draw[arr] (off) -- node[above, font=\footnotesize] {greenOn} (green);
 \draw[arr] (green) -- node[right, font=\footnotesize] {timeout / demand} (yellow);
 \draw[arr] (yellow) -- node[right, font=\footnotesize] {timeout} (red);
-\draw[arr] (red.west) to[bend right=40] node[left, font=\footnotesize] {greenOn (next phase)} (green.west);
+% Loop on the RIGHT side of the column — clear of YELLOW which sits in
+% the middle, and clear of FLASH/OFF on the left.
+\draw[arr, rounded corners=4pt]
+  (red.east) -- ++(2, 0) -- ++(0, 5)
+  node[font=\footnotesize, midway, anchor=west] {greenOn\\(next phase)}
+  -- (green.east);
 
 % Flash transition (from any operating state)
 \draw[arr, dashed] (off.south) -- node[left, font=\footnotesize] {flashYellow} (flash.north);

@@ -975,14 +975,12 @@ C++ vs C 비교:
 
 ## 자기 점검
 
-```
-□ Mutual exclusion / deadlock-free / starvation-free 구분?
-□ Bounded waiting 정의?
-□ Peterson lock이 Modern CPU에서 깨지는 이유?
-□ Bakery lock의 ticket 생성 메커니즘?
-□ Read-modify-write 필요성?
-□ C++20 std::atomic_flag의 용도?
-```
+- [ ] Mutual exclusion / deadlock-free / starvation-free 구분?
+- [ ] Bounded waiting 정의?
+- [ ] Peterson lock이 Modern CPU에서 깨지는 이유?
+- [ ] Bakery lock의 ticket 생성 메커니즘?
+- [ ] Read-modify-write 필요성?
+- [ ] C++20 std::atomic_flag의 용도?
 
 ## 실제 시스템 사례
 

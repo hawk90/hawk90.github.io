@@ -262,14 +262,12 @@ transfer was not rate-limiting under our conditions.
 
 ## 자기 점검
 
-```
-□ 기본 시제가 Past Simple인가?
-□ 그림 참조가 Present Simple인가?
-□ 비교에 대상이 명시되었는가?
-□ significantly가 통계적 의미로 사용되었는가?
-□ 부정 결과가 명확히 보고되었는가?
-□ 발견의 강도가 데이터에 맞는가?
-```
+- [ ] 기본 시제가 Past Simple인가?
+- [ ] 그림 참조가 Present Simple인가?
+- [ ] 비교에 대상이 명시되었는가?
+- [ ] significantly가 통계적 의미로 사용되었는가?
+- [ ] 부정 결과가 명확히 보고되었는가?
+- [ ] 발견의 강도가 데이터에 맞는가?
 
 ## 정리
 

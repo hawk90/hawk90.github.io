@@ -203,11 +203,9 @@ Polarion의 강점:
 
 ### Atlassian Jira + Plugin
 
-```
 - Aha! Roadmaps
 - ReqIF integration plugins
 - 항공 인증에는 *아직 부족*하나 점진 채택
-```
 
 DOORS가 *항공 산업 큰 시장 점유*. Boeing, Airbus 등 대형 OEM이 *DOORS + 자체 시스템*을 결합하는 사례 공개. 각 한국 기업의 *내부 tool stack*은 *비공개*.
 
@@ -329,12 +327,10 @@ Fix:
 
 **Verification Method**가 *HLR attribute*에 명시:
 
-```
 - Test: HIL or unit test
 - Analysis: static analysis, formal proof, simulation
 - Review: peer review, expert review
 - Demonstration: 종합 동작 시연
-```
 
 ### A-3-5 — HLR ↔ Standards
 
@@ -422,23 +418,21 @@ A-3 objectives는 *주로 review로 충족*. *Peer Review*가 *공식 procedure*
 
 ### Review Checklist (HLR 일부)
 
-```
-□ Each HLR has unique ID per SRS naming convention.
-□ Each HLR is atomic (one requirement per statement).
-□ Each HLR uses "shall" for normative.
-□ Each HLR is verifiable (testable/analyzable/reviewable).
-□ Each HLR has rationale.
-□ Each HLR has at least one SR parent OR is marked Derived.
-□ Each HLR has allocation (module).
-□ Each HLR has DAL.
-□ Each HLR has at least one Verification Method.
-□ HLR set is internally consistent (no contradictions).
-□ HLR set is complete (covers all SR allocated to SW).
-□ Performance HLRs are quantified.
-□ Safety HLRs reference SSA.
-□ Memory/timing HLRs have specific values.
-□ Interface HLRs have signal/message references.
-```
+- [ ] Each HLR has unique ID per SRS naming convention.
+- [ ] Each HLR is atomic (one requirement per statement).
+- [ ] Each HLR uses "shall" for normative.
+- [ ] Each HLR is verifiable (testable/analyzable/reviewable).
+- [ ] Each HLR has rationale.
+- [ ] Each HLR has at least one SR parent OR is marked Derived.
+- [ ] Each HLR has allocation (module).
+- [ ] Each HLR has DAL.
+- [ ] Each HLR has at least one Verification Method.
+- [ ] HLR set is internally consistent (no contradictions).
+- [ ] HLR set is complete (covers all SR allocated to SW).
+- [ ] Performance HLRs are quantified.
+- [ ] Safety HLRs reference SSA.
+- [ ] Memory/timing HLRs have specific values.
+- [ ] Interface HLRs have signal/message references.
 
 수십 개 항목. 수백 HLR 검토 시 *상당한 작업량*.
 

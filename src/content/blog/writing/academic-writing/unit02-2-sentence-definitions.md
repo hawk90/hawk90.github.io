@@ -336,16 +336,14 @@ coal bed methane.
 
 ## 자기 글 점검 — Sentence Definition
 
-```text
-□ 용어 + is + class word + detail 구조인가?
-□ Class word가 적절한 상위 분류인가?
-□ 관계절(that/which)이 제한적인가?
-□ When / where 정의 회피?
-□ 순환 정의가 아닌가?
-□ 정의가 분야 권위에서 왔는가? (인용 명시)
-□ 수동태가 정의 동사에 자연스러운가?
-□ 한국어 직역 정의가 어색하지 않은가?
-```
+- [ ] 용어 + is + class word + detail 구조인가?
+- [ ] Class word가 적절한 상위 분류인가?
+- [ ] 관계절(that/which)이 제한적인가?
+- [ ] When / where 정의 회피?
+- [ ] 순환 정의가 아닌가?
+- [ ] 정의가 분야 권위에서 왔는가? (인용 명시)
+- [ ] 수동태가 정의 동사에 자연스러운가?
+- [ ] 한국어 직역 정의가 어색하지 않은가?
 
 ## 정리
 

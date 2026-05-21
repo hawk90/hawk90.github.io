@@ -382,13 +382,11 @@ DAL 적용 (일반 예):
 
 ### 4. Tool 진화
 
-```
 - AI-assisted code review (GitHub Copilot 항공 변형)
 - LLM 기반 requirements analysis
 - Formal methods 대중화 (학습 곡선 감소)
 - Cloud-based verification farm
 - Continuous certification (월별 incremental)
-```
 
 ### 5. 한국 항공 산업 — 공개 사실
 

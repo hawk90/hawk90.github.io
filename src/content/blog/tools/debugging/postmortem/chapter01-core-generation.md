@@ -70,10 +70,8 @@ unlimited
 
 `/etc/security/limits.conf` 또는 `/etc/security/limits.d/*.conf`.
 
-```
 *       soft    core    unlimited
 *       hard    core    unlimited
-```
 
 `soft`는 *사용자가 ulimit으로 변경 가능*한 한도, `hard`는 *최대*. 보통 둘 다 unlimited.
 

@@ -256,13 +256,11 @@ we recovered."
 
 ## 자기 글 점검
 
-```text
-□ Balance가 극적 자리에 있는가?
-□ Antithesis가 남용되지 않았는가?
-□ Triplets이 정확히 3개인가?
-□ 리듬이 자연스러운가, 부자연스러운가?
-□ Memorable phrase가 기억에 남는가?
-```
+- [ ] Balance가 극적 자리에 있는가?
+- [ ] Antithesis가 남용되지 않았는가?
+- [ ] Triplets이 정확히 3개인가?
+- [ ] 리듬이 자연스러운가, 부자연스러운가?
+- [ ] Memorable phrase가 기억에 남는가?
 
 ## 정리
 

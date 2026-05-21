@@ -1454,15 +1454,13 @@ void work_stealing_for(size_t total, Func f) {
 
 ## 자기 점검
 
-```
-□ Amdahl과 Gustafson 차이?
-□ False sharing 메커니즘과 회피 방법?
-□ AoS vs SoA 선택 기준?
-□ Lock striping의 작동?
-□ Critical section을 *최소화*하는 방법?
-□ 작업 단위 결정 (입자도) 기준?
-□ Parallel reduce가 commutative + associative 필요한 이유?
-```
+- [ ] Amdahl과 Gustafson 차이?
+- [ ] False sharing 메커니즘과 회피 방법?
+- [ ] AoS vs SoA 선택 기준?
+- [ ] Lock striping의 작동?
+- [ ] Critical section을 *최소화*하는 방법?
+- [ ] 작업 단위 결정 (입자도) 기준?
+- [ ] Parallel reduce가 commutative + associative 필요한 이유?
 
 ## 다음 장 예고
 

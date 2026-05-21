@@ -349,12 +349,10 @@ role of consumption timing has received less systematic attention.
 
 ## 자기 글 점검
 
-```text
-□ Move 1, 2, 3 명확?
-□ Move 2 부드러운 부정?
-□ Move 3 구체적 목적?
-□ 인용 분야 전통?
-```
+- [ ] Move 1, 2, 3 명확?
+- [ ] Move 2 부드러운 부정?
+- [ ] Move 3 구체적 목적?
+- [ ] 인용 분야 전통?
 
 ## 다음 글 예고
 

@@ -1505,15 +1505,13 @@ Go runtime scheduler는 *M:N 매핑*의 정수다. goroutine(G)을 OS thread(M) 
 
 ## 자기 점검
 
-```text
-□ Global queue vs Thread-local queue 차이?
-□ Work stealing의 *bottom*과 *top* 비대칭 이유?
-□ Chase-Lev deque의 핵심 트릭?
-□ stop_token이 *cooperative*인 의미?
-□ thread pool 내 future.get() deadlock 시나리오?
-□ CPU bound와 I/O bound 풀 크기 차이?
-□ NUMA awareness가 필요한 시점?
-```
+- [ ] Global queue vs Thread-local queue 차이?
+- [ ] Work stealing의 *bottom*과 *top* 비대칭 이유?
+- [ ] Chase-Lev deque의 핵심 트릭?
+- [ ] stop_token이 *cooperative*인 의미?
+- [ ] thread pool 내 future.get() deadlock 시나리오?
+- [ ] CPU bound와 I/O bound 풀 크기 차이?
+- [ ] NUMA awareness가 필요한 시점?
 
 ## 다음 장 예고
 

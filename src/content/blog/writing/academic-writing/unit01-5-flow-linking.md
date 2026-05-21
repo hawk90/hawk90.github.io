@@ -291,17 +291,15 @@ A second factor that influences sleep quality is ...
 
 ## 자기 글 점검
 
-```text
-□ Old-to-New 패턴이 대부분의 문장에 적용되는가?
-□ 옛 정보가 주어 자리(왼쪽)에?
-□ 새 정보가 서술부 끝(오른쪽)에?
-□ 대명사 (it, this, these)가 명확한 대상을 가리키는가?
-□ Linking word가 과다하지 않은가? (한 단락 2-3개)
-□ "But / And"가 남용되지 않는가?
-□ Topic sentence가 앞 단락과 연결되는가?
-□ 같은 linking word를 연속 사용하지 않았는가?
-□ 한국 글에 영어 connector 직역이 없는가?
-```
+- [ ] Old-to-New 패턴이 대부분의 문장에 적용되는가?
+- [ ] 옛 정보가 주어 자리(왼쪽)에?
+- [ ] 새 정보가 서술부 끝(오른쪽)에?
+- [ ] 대명사 (it, this, these)가 명확한 대상을 가리키는가?
+- [ ] Linking word가 과다하지 않은가? (한 단락 2-3개)
+- [ ] "But / And"가 남용되지 않는가?
+- [ ] Topic sentence가 앞 단락과 연결되는가?
+- [ ] 같은 linking word를 연속 사용하지 않았는가?
+- [ ] 한국 글에 영어 connector 직역이 없는가?
 
 ## 정리
 

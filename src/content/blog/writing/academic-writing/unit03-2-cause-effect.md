@@ -283,11 +283,9 @@ In light of recent findings, the hypothesis must be revised.
 
 ## 자기 글 점검
 
-```text
-□ 인과 강도가 데이터에 맞는가?
-□ 상관과 인과 구별?
-□ -ing 절로 압축 가능?
-```
+- [ ] 인과 강도가 데이터에 맞는가?
+- [ ] 상관과 인과 구별?
+- [ ] -ing 절로 압축 가능?
 
 ## 다음 글 예고
 

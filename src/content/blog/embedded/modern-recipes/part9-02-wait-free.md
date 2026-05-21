@@ -14,11 +14,9 @@ draft: false
 
 ## Progress Property 복습
 
-```text
 - Obstruction-free: 단독 실행 시 진행
 - Lock-free:        시스템 *전체*에서 한 thread는 진행
 - Wait-free:        *각 thread*가 N step 이내 완료
-```
 
 Wait-free는 가장 강한 보장입니다. 그래서 *deadline 보장*에 유리합니다.
 

@@ -91,10 +91,12 @@
   node[rellbl, pos=0.55]{creating\\composites} (cmp.north west);
 \draw[hubarr] (dec.east) to[bend left=8]
   node[rellbl, pos=0.5]{adding\\responsibilities} (cmp.west);
+% Two arrows from Visitor → Composite — strong vertical separation between
+% the two labels so they don't share a row.
 \draw[hubarr] (vis.north west) to[bend left=8]
-  node[rellbl, pos=0.5]{defining\\traversals} (cmp.east);
+  node[rellbl, pos=0.25, yshift=10pt]{defining\\traversals} (cmp.east);
 \draw[hubarr] (vis.west) to[bend right=8]
-  node[rellbl, pos=0.5]{adding\\operations} (cmp.south east);
+  node[rellbl, pos=0.75, yshift=-10pt]{adding\\operations} (cmp.south east);
 \draw[hubarr] (intp.north) to[bend left=10]
   node[rellbl, pos=0.55]{defining\\grammar} (cmp.south);
 \draw[hubarr] (cmd.west) to[bend right=10]
@@ -142,9 +144,11 @@
 \node[font=\sffamily\bfseries\Large, anchor=south]
   at (1.5, -14.2) {Design Pattern Relationships};
 
+% Legend — moved to bottom-left (well below the diagram bottom at y≈-12.4)
+% so it doesn't crash into the Builder node at (-9, 9)
 \node[draw=groupbord, rounded corners=4pt, inner sep=6pt, font=\sffamily\footnotesize,
       anchor=north west, align=left, fill=black!2]
-  at (-12.2, 11.6) {%
+  at (-12.2, -13.6) {%
     \textbf{Category}\\[2pt]
     \textcolor{conbord}{\rule{3mm}{3mm}} \ Creational (5)\\
     \textcolor{absbord}{\rule{3mm}{3mm}} \ Structural (7)\\

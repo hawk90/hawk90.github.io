@@ -313,12 +313,10 @@ draws explicitly on the cognitive framework introduced in Chapter 1.
 
 ## 자기 글 점검
 
-```text
-□ Summary가 Evaluation에 필요한 분량?
-□ 장점 + 한계 균형?
-□ 평가에 근거?
-□ 톤이 건설적?
-```
+- [ ] Summary가 Evaluation에 필요한 분량?
+- [ ] 장점 + 한계 균형?
+- [ ] 평가에 근거?
+- [ ] 톤이 건설적?
 
 ## 다음 글 예고
 

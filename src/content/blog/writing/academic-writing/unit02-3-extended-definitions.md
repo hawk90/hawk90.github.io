@@ -292,15 +292,13 @@ This paper follows [author's] definition of ....
 
 ## 자기 글 점검 — Extended Definition
 
-```text
-□ 한 문장 정의 + 2-4 측면 확장?
-□ 측면이 글의 주제에 관련되는가?
-□ 인용이 분야 권위에서 왔는가?
-□ Contrastive definition이 필요한가? 필요하면 the former / latter 활용
-□ 분야 안 정의 불일치가 있다면 인정했는가?
-□ 자기 채택 정의의 이유를 명시했는가?
-□ 헤지가 적절한 강도인가?
-```
+- [ ] 한 문장 정의 + 2-4 측면 확장?
+- [ ] 측면이 글의 주제에 관련되는가?
+- [ ] 인용이 분야 권위에서 왔는가?
+- [ ] Contrastive definition이 필요한가? 필요하면 the former / latter 활용
+- [ ] 분야 안 정의 불일치가 있다면 인정했는가?
+- [ ] 자기 채택 정의의 이유를 명시했는가?
+- [ ] 헤지가 적절한 강도인가?
 
 ## 정리
 

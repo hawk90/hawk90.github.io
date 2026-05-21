@@ -1088,14 +1088,12 @@ memtable이 일정 크기에 도달하면 *immutable*으로 전환되어 backgro
 
 ## 자기 점검
 
-```
-□ 균형 이진 트리가 동시성에 부적합한 이유?
-□ Skiplist의 *랜덤 높이* 메커니즘?
-□ Lock-Free Skiplist의 각 레벨 처리?
-□ Lazy Skiplist의 동작?
-□ Skiplist의 단점 (메모리, 캐시)?
-□ B-tree vs LSM tree vs Skiplist 사용 자리?
-```
+- [ ] 균형 이진 트리가 동시성에 부적합한 이유?
+- [ ] Skiplist의 *랜덤 높이* 메커니즘?
+- [ ] Lock-Free Skiplist의 각 레벨 처리?
+- [ ] Lazy Skiplist의 동작?
+- [ ] Skiplist의 단점 (메모리, 캐시)?
+- [ ] B-tree vs LSM tree vs Skiplist 사용 자리?
 
 ## 다음 장 예고
 

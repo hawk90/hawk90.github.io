@@ -20,12 +20,13 @@
 \node[state, draw=warnbord, fill=warnfill!60, line width=1.5pt] (busoff) at (18, 0)
   {Bus Off\\[2pt]\scriptsize TEC ≥ 256\\[1pt]\scriptsize 송신 불가};
 
-% Transitions
-\draw[transition] (active.east) -- node[trlabel, above] {counter ↑} (passive.west);
-\draw[transition] (passive.east) -- node[trlabel, above] {TEC ≥ 256} (busoff.west);
+% Transitions — forward arrows label BELOW so they don't collide with the
+% return arrow's "counter ↓" label which sits above the curve.
+\draw[transition] (active.east) -- node[trlabel, below] {counter ↑} (passive.west);
+\draw[transition] (passive.east) -- node[trlabel, below] {TEC ≥ 256} (busoff.west);
 
 \draw[transition, bend left=30] (passive.north west) to
-  node[trlabel, above] {counter ↓} (active.north east);
+  node[trlabel, above, pos=0.5, yshift=2pt] {counter ↓} (active.north east);
 \draw[transition, bend right=40] (busoff.south west) to
   node[trlabel, below, align=center] {128 × 11 consecutive\\[1pt]recessive bits} (active.south east);
 

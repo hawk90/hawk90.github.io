@@ -227,23 +227,19 @@ Astrée가 *Airbus A380/A350 FBW 검증의 마지막 단계*. *수만 줄 코드
 
 각 변수가 *어디서 정의*되고 *어디서 사용*되는지 추적.
 
-```
-□ 모든 변수가 사용 전 초기화? (CERT EXP33)
-□ 변수가 항상 사용? (dead variable 아님)
-□ 변수가 적절한 lifetime?
-□ Shared variable이 동기화?
-```
+- [ ] 모든 변수가 사용 전 초기화? (CERT EXP33)
+- [ ] 변수가 항상 사용? (dead variable 아님)
+- [ ] 변수가 적절한 lifetime?
+- [ ] Shared variable이 동기화?
 
 ### Control Flow Analysis
 
 함수의 *모든 가능한 실행 경로* 분석.
 
-```
-□ 모든 경로가 *예상한 종료*에 도달?
-□ Unreachable 경로 (dead code)?
-□ 무한 루프 가능성?
-□ 재귀 깊이 한계?
-```
+- [ ] 모든 경로가 *예상한 종료*에 도달?
+- [ ] Unreachable 경로 (dead code)?
+- [ ] 무한 루프 가능성?
+- [ ] 재귀 깊이 한계?
 
 ### A-7-9 — Data Coupling / Control Coupling Analysis
 

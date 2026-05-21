@@ -711,14 +711,12 @@ long lock_free_counter_get(const LockFreeCounter* c) {
 
 ## 자기 점검
 
-```
-□ Combining Tree와 Sharded Counter 차이?
-□ Counting Network의 깊이와 폭?
-□ Sharded counter가 단일 atomic보다 빠른 시나리오?
-□ Cache line padding의 역할?
-□ Lamport timestamp의 한계?
-□ Snowflake ID의 구조?
-```
+- [ ] Combining Tree와 Sharded Counter 차이?
+- [ ] Counting Network의 깊이와 폭?
+- [ ] Sharded counter가 단일 atomic보다 빠른 시나리오?
+- [ ] Cache line padding의 역할?
+- [ ] Lamport timestamp의 한계?
+- [ ] Snowflake ID의 구조?
 
 ## 다음 장 예고
 

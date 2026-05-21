@@ -931,14 +931,12 @@ __syncthreads();   // OK — block 전체 도달
 
 ## 자기 점검
 
-```
-□ Simple counter의 재사용 문제?
-□ Sense-reversing의 sense bit 의미?
-□ Combining tree barrier의 O(log N)?
-□ Dissemination이 가장 빠른 이유?
-□ Static tree barrier가 false sharing 없는 이유?
-□ std::latch와 std::barrier 사용 자리?
-```
+- [ ] Simple counter의 재사용 문제?
+- [ ] Sense-reversing의 sense bit 의미?
+- [ ] Combining tree barrier의 O(log N)?
+- [ ] Dissemination이 가장 빠른 이유?
+- [ ] Static tree barrier가 false sharing 없는 이유?
+- [ ] std::latch와 std::barrier 사용 자리?
 
 ## 다음 장 예고
 

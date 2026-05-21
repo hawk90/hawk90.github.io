@@ -1123,14 +1123,12 @@ C++20 고성능 큐:
 
 ## 자기 점검
 
-```
-□ ABA의 정의와 발생 조건?
-□ Michael-Scott에서 *helping*의 역할?
-□ version counter의 한계 (DCAS)?
-□ Hazard Pointer의 작동 원리?
-□ Epoch reclamation의 단점?
-□ GC 언어에서 ABA가 *자동* 해결되는 이유?
-```
+- [ ] ABA의 정의와 발생 조건?
+- [ ] Michael-Scott에서 *helping*의 역할?
+- [ ] version counter의 한계 (DCAS)?
+- [ ] Hazard Pointer의 작동 원리?
+- [ ] Epoch reclamation의 단점?
+- [ ] GC 언어에서 ABA가 *자동* 해결되는 이유?
 
 ## 다음 장 예고
 

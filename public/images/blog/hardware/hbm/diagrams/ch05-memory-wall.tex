@@ -13,14 +13,17 @@
   mem/.style={draw=absbord, line width=1.2pt, -{Stealth[length=2.4mm]}, mark=*}
 ]
 
-\draw[axisLine] (0,0) -- (12,0) node[ticklabel, below=4pt, midway, yshift=-12pt] {GPU 세대};
+\draw[axisLine] (0,0) -- (12,0);
 \draw[axisLine] (0,0) -- (0,7) node[ticklabel, left=4pt, midway, xshift=-22pt, rotate=90] {growth factor (vs 2017)};
+
+% X-axis title placed BELOW the tick labels so it never collides with year text
+\node[ticklabel, anchor=north] at (6, -1.05) {GPU 세대};
 
 \foreach \y/\lab in {0.5/1, 1.2/5, 2.1/10, 3.0/25, 4.2/50, 5.0/100, 5.7/150, 6.3/200} {
   \draw[draw=mutec, line width=0.3pt] (-0.1, \y) -- (0.1, \y);
   \node[ticklabel, anchor=east] at (-0.15, \y) {\lab};
 }
-\foreach \x/\lab in {1.5/{V100\\2017}, 3.5/{A100\\2020}, 5.5/{H100\\2022}, 7.5/{H200\\2024}, 9.5/{B200\\2024}, 11.5/{Rubin\\2026}} {
+\foreach \x/\lab in {1.5/{V100\\[1pt]2017}, 3.5/{A100\\[1pt]2020}, 5.5/{H100\\[1pt]2022}, 7.5/{H200\\[1pt]2024}, 9.5/{B200\\[1pt]2024}, 11.5/{Rubin\\[1pt]2026}} {
   \draw[draw=mutec, line width=0.3pt] (\x, -0.1) -- (\x, 0.1);
   \node[ticklabel, anchor=north, align=center] at (\x, -0.15) {\lab};
 }
@@ -43,7 +46,7 @@
 \node[font=\sffamily\footnotesize\bfseries, text=absbord, anchor=west] at (10.0, 1.6) {memory BW};
 
 \node[font=\sffamily\bfseries\small, text=inkc] at (6, 7.6) {Memory wall — compute가 memory보다 빠르게 성장};
-\node[font=\sffamily\footnotesize\itshape, text=mutec] at (6, -1.5) {2017--2026: compute $\sim$25$\times$, memory BW $\sim$9$\times$};
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (6, -1.9) {2017--2026: compute $\sim$25$\times$, memory BW $\sim$9$\times$};
 
 \end{tikzpicture}
 \end{document}

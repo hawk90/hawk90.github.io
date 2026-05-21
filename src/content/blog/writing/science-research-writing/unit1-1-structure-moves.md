@@ -254,12 +254,10 @@ The present paper presents [contribution]. On the basis of
 
 ## 자기 글 점검
 
-```
-□ 4-Move가 명확한가?
-□ Move 3에 부드러운 부정이 있는가?
-□ Move 4에 구체적 동사가 쓰였는가?
-□ Target article과 비교했는가?
-```
+- [ ] 4-Move가 명확한가?
+- [ ] Move 3에 부드러운 부정이 있는가?
+- [ ] Move 4에 구체적 동사가 쓰였는가?
+- [ ] Target article과 비교했는가?
 
 ## 다음 글 예고
 

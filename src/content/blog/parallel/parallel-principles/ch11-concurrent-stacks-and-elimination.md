@@ -763,14 +763,12 @@ Elimination Backoff Stack은 이론적으로 우아하다. 실용성은?
 
 ## 자기 점검
 
-```
-□ Treiber Stack에서 ABA는 어떻게 발생?
-□ Cache line contention의 메커니즘?
-□ Elimination이 linearizable인 이유?
-□ Exchanger의 세 상태 (EMPTY/WAITING/BUSY)?
-□ 경합과 elimination의 *반직관적* 관계?
-□ Elimination을 적용할 수 있는 자료구조 조건?
-```
+- [ ] Treiber Stack에서 ABA는 어떻게 발생?
+- [ ] Cache line contention의 메커니즘?
+- [ ] Elimination이 linearizable인 이유?
+- [ ] Exchanger의 세 상태 (EMPTY/WAITING/BUSY)?
+- [ ] 경합과 elimination의 *반직관적* 관계?
+- [ ] Elimination을 적용할 수 있는 자료구조 조건?
 
 ## 다음 장 예고
 

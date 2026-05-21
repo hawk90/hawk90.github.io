@@ -791,14 +791,12 @@ C11:
 
 ## 자기 점검
 
-```
-□ Moore's Law 종말의 의미를 한 줄로 설명?
-□ Shared memory vs message passing 차이 명시?
-□ Amdahl 법칙 직접 계산 가능?
-□ C++20 std::jthread vs std::thread 차이?
-□ C11 atomic_flag의 용도?
-□ Lock-free vs Wait-free 구분?
-```
+- [ ] Moore's Law 종말의 의미를 한 줄로 설명?
+- [ ] Shared memory vs message passing 차이 명시?
+- [ ] Amdahl 법칙 직접 계산 가능?
+- [ ] C++20 std::jthread vs std::thread 차이?
+- [ ] C11 atomic_flag의 용도?
+- [ ] Lock-free vs Wait-free 구분?
 
 ## 실제 시스템 사례
 

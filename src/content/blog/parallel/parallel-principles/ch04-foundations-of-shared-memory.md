@@ -705,14 +705,12 @@ C11 atomic:
 
 ## 자기 점검
 
-```
-□ Safe / Regular / Atomic 차이 명시?
-□ SRSW / MRSW / MRMW 표기 이해?
-□ 약한 register에서 강한 register 만드는 방법?
-□ Atomic snapshot의 의미와 wait-free 가능성?
-□ Modern CPU 메모리 모델 (TSO, ARM) 차이?
-□ C++20/C11 memory_order와의 대응?
-```
+- [ ] Safe / Regular / Atomic 차이 명시?
+- [ ] SRSW / MRSW / MRMW 표기 이해?
+- [ ] 약한 register에서 강한 register 만드는 방법?
+- [ ] Atomic snapshot의 의미와 wait-free 가능성?
+- [ ] Modern CPU 메모리 모델 (TSO, ARM) 차이?
+- [ ] C++20/C11 memory_order와의 대응?
 
 ## 다음 장 예고
 

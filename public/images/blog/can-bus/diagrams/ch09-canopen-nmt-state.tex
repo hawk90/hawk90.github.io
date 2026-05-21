@@ -29,11 +29,11 @@
 \draw[trans, bend right=20] (stop.north) to node[trlabel, left] {0x81 Reset} (init.south);
 \draw[trans, bend left=30] (op.south west) to node[trlabel, below] {0x82 Reset Comm} (init.east);
 
-% State descriptions
-\node[font=\tiny, anchor=north, align=left] at (0, -1) {부팅, OD 로드};
-\node[font=\tiny, anchor=north, align=left] at (8, 3) {SDO·NMT·EMCY OK\\PDO 비활성};
-\node[font=\tiny, anchor=north, align=left] at (8, -1) {모든 통신 활성};
-\node[font=\tiny, anchor=north, align=left] at (0, -1) {NMT·Heartbeat만};
+% State descriptions — placed directly below each state so they don't collide
+\node[font=\tiny, anchor=north, align=center] at (init.south) {부팅, OD 로드};
+\node[font=\tiny, anchor=north, align=center] at (preop.south) {SDO·NMT·EMCY OK\\[1pt]PDO 비활성};
+\node[font=\tiny, anchor=north, align=center] at (op.south) {모든 통신 활성};
+\node[font=\tiny, anchor=north, align=center] at (stop.south) {NMT·Heartbeat만};
 
 \end{tikzpicture}
 \end{document}
