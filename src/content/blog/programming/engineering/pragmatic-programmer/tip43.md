@@ -1,64 +1,64 @@
 ---
 title: "Tip 43: Avoid Fortune-Telling"
 date: 2026-05-11T19:00:00
-description: "점치지 마라 — 미래의 요구를 — 지금 설계하지 마라. YAGNI."
+description: "점치지 마라. 미래의 요구를 지금 설계에 넣지 마라. YAGNI."
 series: "The Pragmatic Programmer"
 seriesOrder: 43
 tags: [pragmatic-programmer, design, yagni]
-draft: true
+draft: false
 ---
 
 ## 이 팁의 메시지
 
-> **Avoid Fortune-Telling** — "혹시 모르니까 ..." → 거의 항상 — 잘못된 설계.
+> **Tip 43: Avoid Fortune-Telling.** Only look ahead as far as you can see.
 
-## 핵심 내용
+볼 수 있는 만큼만 앞을 보라.
 
-- 미래는 — 못 본다.
-- "혹시 모르니까" 만든 추상 = — 거의 항상 잘못된 추상.
-- YAGNI(You Aren't Gonna Need It).
-- 지금 필요한 만큼만 — 만든다.
+## "혹시 모르니까"의 함정
 
-## 점치기의 함정
+"혹시 나중에 다른 결제 수단이 필요할지도 모르니까 플러그인 아키텍처를 만들자."
 
-```python
-# 점치기 — "다양한 결제 수단 — 미래에 ..."
-class PaymentProcessor:
-    def __init__(self):
-        self.providers = {}
-    def register_provider(self, name, provider):
-        self.providers[name] = provider
-    def process(self, name, amount):
-        return self.providers[name].process(amount)
+지금 결제 수단은 하나다. 두 번째 결제 수단이 언제 올지, 어떤 형태일지 모른다. 그런데 미리 만든 추상화는 그 미지의 요구에 맞을까? 거의 항상 맞지 않는다.
 
-# 그러나 — 지금 — 결제 수단 한 개만.
-```
-
-추상화의 — **세 번째 사용**까지 — 실제 패턴을 모른다. 그 전에 만든 추상 = 잘못.
+세 번째 사용 사례를 보기 전에는 진짜 패턴을 모른다. 그 전에 만든 추상화는 잘못된 추상화일 가능성이 높다.
 
 ## YAGNI
 
-> You Aren't Gonna Need It.
+YAGNI는 "You Aren't Gonna Need It"의 약자다. 지금 필요하지 않으면 지금 만들지 않는다.
 
-지금 필요한 만큼만. 미래의 요구가 나오면 — 그때 — 추상화.
+미래의 요구가 실제로 나오면 그때 추상화를 추출한다. 실제 사용 사례가 있으니 올바른 추상화를 할 수 있다.
 
-## "혹시 모르니까"가 정당화되는 자리
+## 점치기 vs 준비
 
-- 잘 알려진 패턴(예: 데이터베이스 추상).
-- 외부 의존(추상은 — 가역성 보호).
-- 명확한 가까운 요구.
+| 점치기 | 준비 |
+|--------|------|
+| "혹시 여러 데이터베이스가 필요할지도" → 지금 추상화 | 외부 의존(DB)을 인터페이스로 감싸기 → 나중에 교체 가능 |
+| "혹시 플러그인이 필요할지도" → 지금 플러그인 시스템 | 단일 구현체로 시작 → 필요 시 추출 |
 
-이 외 — 점치기.
+차이점은 지금 보이는 요구인가, 상상의 요구인가이다.
+
+## 예외
+
+다음 경우에는 미리 추상화해도 좋다.
+
+- **잘 알려진 패턴**: 데이터베이스 추상(Repository 패턴)은 이미 검증됐다.
+- **외부 의존의 격리**: 변경될 수 있는 외부 시스템은 인터페이스로 감싼다.
+- **명확한 가까운 요구**: 다음 스프린트에 들어올 요구가 확실하다면 미리 준비할 수 있다.
+
+그 외에는 점치기다.
 
 ## 정리
 
-- 미래는 — 못 본다.
-- "혹시 모르니까" X.
-- YAGNI.
-- 발견된 패턴만 — 추상화.
+- 미래는 예측할 수 없다.
+- "혹시 모르니까"는 거의 항상 잘못된 추상화를 낳는다.
+- 세 번째 사용 사례를 본 후에 추상화한다.
+- YAGNI: 지금 필요한 것만 만든다.
+
+## 다음 장 예고
+
+[Tip 44: Decoupled Code Is Easier to Change](/blog/programming/engineering/pragmatic-programmer/tip44)에서는 결합도를 낮추면 변경이 쉬워지는 이유를 다룬다.
 
 ## 관련 항목
 
-- [Tip 42: Take Small Steps](/blog/programming/engineering/pragmatic-programmer/tip42)
-- [Tip 44: Decoupled Code](/blog/programming/engineering/pragmatic-programmer/tip44)
-- [Clean Code Ch 14: Successive Refinement](/blog/programming/engineering/clean-code/chapter14-successive-refinement)
+- [Tip 42: Take Small Steps—Always](/blog/programming/engineering/pragmatic-programmer/tip42)
+- [Tip 44: Decoupled Code Is Easier to Change](/blog/programming/engineering/pragmatic-programmer/tip44)
