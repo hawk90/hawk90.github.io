@@ -394,31 +394,36 @@ btmon이 출력하는 한 줄 예입니다.
 
 GATT *Read Request*가 사용자 앱에서 무선까지 흘러가는 과정입니다.
 
-```text
-1. Application
-   "Battery Level characteristic을 읽어와"
+**1. Application**
 
-2. GATT layer
-   handle 0x002A이 Battery Level이라고 캐시에서 확인
-   → ATT Read Request (handle=0x002A)
+- "Battery Level characteristic을 읽어와"
 
-3. ATT layer
-   ATT PDU = [0A 2A 00]  (OpCode 0x0A + handle little-endian)
+**2. GATT layer**
 
-4. L2CAP layer
-   Frame = [03 00 04 00][0A 2A 00]
-   length=3, CID=0x0004 (ATT)
+- handle 0x002A이 Battery Level이라고 캐시에서 확인
+- → ATT Read Request (handle=0x002A)
 
-5. HCI layer (dual-chip이면 UART로 송신)
-   ACL Header = [01 00 07 00][03 00 04 00][0A 2A 00]
-   handle=0x0001, total length=7
+**3. ATT layer**
 
-6. Link Layer
-   LL Data PDU 만들기, 다음 connection event 슬롯에 큐잉
+- ATT PDU = [0A 2A 00]  (OpCode 0x0A + handle little-endian)
 
-7. PHY
-   다음 CE 시작 시각에 채널 호핑 후 GFSK 변조하여 전송
-```
+**4. L2CAP layer**
+
+- Frame = [03 00 04 00][0A 2A 00]
+- length=3, CID=0x0004 (ATT)
+
+**5. HCI layer (dual-chip이면 UART로 송신)**
+
+- ACL Header = [01 00 07 00][03 00 04 00][0A 2A 00]
+- handle=0x0001, total length=7
+
+**6. Link Layer**
+
+- LL Data PDU 만들기, 다음 connection event 슬롯에 큐잉
+
+**7. PHY**
+
+- 다음 CE 시작 시각에 채널 호핑 후 GFSK 변조하여 전송
 
 응답은 *반대 방향*으로 흘러옵니다. 같은 connection event 안에서 *Master가 ATT Read Request 송신 → Slave가 ATT Read Response 응답*까지 끝낼 수 있습니다.
 

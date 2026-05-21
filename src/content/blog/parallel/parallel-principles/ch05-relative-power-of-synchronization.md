@@ -678,26 +678,28 @@ Universal Construction:
 
 ## 한국 개발자의 함정
 
-```
-1. *atomic은 모두 같은 능력*이라는 오해
-   - read/write atomic (con. number 1)
-   - TAS/FAA (con. number 2)
-   - CAS (con. number ∞)
-   - 셋이 *다른 위계*
+**1. *atomic은 모두 같은 능력*이라는 오해**
 
-2. *FAA로 충분*하다는 착각
-   - 큐 enqueue는 OK
-   - 일반 자료구조는 CAS 필요
+- read/write atomic (con. number 1)
+- TAS/FAA (con. number 2)
+- CAS (con. number ∞)
+- 셋이 *다른 위계*
 
-3. *CAS 한 번이면 끝*
-   - CAS 루프 (compare_exchange_weak in loop)
-   - ABA 문제 (다음 챕터)
+**2. *FAA로 충분*하다는 착각**
 
-4. *compare_exchange_strong vs weak* 혼동
-   - strong: 항상 실제 비교 수행
-   - weak: spurious failure 가능 (루프에서 사용)
-   - 성능 차이 — weak가 일부 아키텍처에서 더 빠름
-```
+- 큐 enqueue는 OK
+- 일반 자료구조는 CAS 필요
+
+**3. *CAS 한 번이면 끝***
+
+- CAS 루프 (compare_exchange_weak in loop)
+- ABA 문제 (다음 챕터)
+
+**4. *compare_exchange_strong vs weak* 혼동**
+
+- strong: 항상 실제 비교 수행
+- weak: spurious failure 가능 (루프에서 사용)
+- 성능 차이 — weak가 일부 아키텍처에서 더 빠름
 
 ## 실무 적용
 

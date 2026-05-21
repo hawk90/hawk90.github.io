@@ -106,66 +106,41 @@ draft: false
 
 ### 객체를 만들고 싶다
 
-```text
-객체 생성을 어떻게 하지?
-├─ 유일성 보장이 필요한가?
-│   └─ Yes → Singleton (단, 신중)
-├─ 같은 군의 객체들을 함께 만들고 싶은가?
-│   └─ Yes → Abstract Factory
-├─ 단계별로 복잡하게 조립하는가?
-│   └─ Yes → Builder
-├─ 기존 객체를 복제하면 되는가?
-│   └─ Yes → Prototype
-└─ 그 외 → Factory Method (또는 직접 new)
-```
+"객체 생성을 어떻게 하지?"라는 질문에 답을 찾는 결정 트리:
+
+- 유일성 보장이 필요한가? → **Singleton** (단, 신중)
+- 같은 군의 객체들을 함께 만들고 싶은가? → **Abstract Factory**
+- 단계별로 복잡하게 조립하는가? → **Builder**
+- 기존 객체를 복제하면 되는가? → **Prototype**
+- 그 외 → **Factory Method** (또는 직접 `new`)
 
 ### 객체를 합치고 싶다
 
-```text
-객체를 어떻게 합치지?
-├─ 인터페이스가 안 맞아서 호환만 필요?
-│   └─ Yes → Adapter
-├─ 추상과 구현을 따로 늘리고 싶은가?
-│   └─ Yes → Bridge
-├─ 트리 구조가 필요한가?
-│   └─ Yes → Composite
-├─ 기능을 런타임에 추가하고 싶은가?
-│   └─ Yes → Decorator
-├─ 복잡한 시스템에 단순 진입점만?
-│   └─ Yes → Facade
-├─ 같은 작은 객체가 수만 개?
-│   └─ Yes → Flyweight
-└─ 다른 객체에 접근을 통제하고 싶은가?
-    └─ Yes → Proxy
-```
+"객체를 어떻게 합치지?"라는 질문의 결정 트리:
+
+- 인터페이스가 안 맞아서 호환만 필요? → **Adapter**
+- 추상과 구현을 따로 늘리고 싶은가? → **Bridge**
+- 트리 구조가 필요한가? → **Composite**
+- 기능을 런타임에 추가하고 싶은가? → **Decorator**
+- 복잡한 시스템에 단순 진입점만? → **Facade**
+- 같은 작은 객체가 수만 개? → **Flyweight**
+- 다른 객체에 접근을 통제하고 싶은가? → **Proxy**
 
 ### 객체들이 협력하게 하고 싶다
 
-```text
-어떻게 협력시키지?
-├─ 알고리즘을 바꿔 끼우고 싶은가?
-│   └─ Yes → Strategy
-├─ 상태에 따라 동작이 달라지는가?
-│   └─ Yes → State
-├─ 알고리즘 골격은 같고 일부만 다른가?
-│   └─ Yes → Template Method
-├─ 요청을 객체로 만들어야 하는가? (undo, 큐, 매크로)
-│   └─ Yes → Command
-├─ 처리자가 여럿이고 누가 처리할지 모르는가?
-│   └─ Yes → Chain of Responsibility
-├─ 객체들이 서로 너무 많이 알고 있는가?
-│   └─ Yes → Mediator
-├─ 상태 변화를 여러 곳에 알려야 하는가?
-│   └─ Yes → Observer
-├─ 상태 snapshot이 필요한가? (undo, save)
-│   └─ Yes → Memento
-├─ 컬렉션을 순회해야 하는가?
-│   └─ Yes → Iterator
-├─ 객체 구조에 새 연산을 자주 추가하는가?
-│   └─ Yes → Visitor
-└─ 작은 언어를 평가해야 하는가?
-    └─ Yes → Interpreter
-```
+"어떻게 협력시키지?"라는 질문의 결정 트리:
+
+- 알고리즘을 바꿔 끼우고 싶은가? → **Strategy**
+- 상태에 따라 동작이 달라지는가? → **State**
+- 알고리즘 골격은 같고 일부만 다른가? → **Template Method**
+- 요청을 객체로 만들어야 하는가? (undo · 큐 · 매크로) → **Command**
+- 처리자가 여럿이고 누가 처리할지 모르는가? → **Chain of Responsibility**
+- 객체들이 서로 너무 많이 알고 있는가? → **Mediator**
+- 상태 변화를 여러 곳에 알려야 하는가? → **Observer**
+- 상태 snapshot이 필요한가? (undo · save) → **Memento**
+- 컬렉션을 순회해야 하는가? → **Iterator**
+- 객체 구조에 새 연산을 자주 추가하는가? → **Visitor**
+- 작은 언어를 평가해야 하는가? → **Interpreter**
 
 ## 흔한 혼동 — 같은 그림, 다른 의도
 
@@ -173,133 +148,112 @@ GoF에서 가장 어려운 부분은 *비슷한 패턴들의 차이*입니다. U
 
 ### Strategy vs State
 
-```text
-같은 그림: Context → IStrategy (또는 IState) ← 여러 구현체
+같은 그림 — `Context → IStrategy (또는 IState) ← 여러 구현체`. 다른 의도:
 
-다른 의도:
-- Strategy: 외부에서 "이 알고리즘으로 바꿔" (정렬·할인·압축)
-- State:    내부에서 "다음은 이 상태야"   (신호등·주문 상태·연결 상태)
+- **Strategy** — 외부에서 "이 알고리즘으로 바꿔" (정렬·할인·압축)
+- **State** — 내부에서 "다음은 이 상태야" (신호등·주문 상태·연결 상태)
 
-판별: 전이 규칙이 객체 안에 있으면 State, 밖에서 주입하면 Strategy.
-```
+**판별**: 전이 규칙이 객체 안에 있으면 State, 밖에서 주입하면 Strategy.
 
 ### Adapter vs Decorator vs Proxy
 
-```text
-모두 객체를 감쌉니다(wrap). 차이는 *왜* 감싸는가.
+모두 객체를 감쌉니다(wrap). 차이는 *왜* 감싸는가:
 
-- Adapter:   기존 인터페이스를 *다른 모양*으로 변환 (USB-C → USB-A)
-- Decorator: 기존 인터페이스 *그대로 + 기능 추가* (커피 + 시럽)
-- Proxy:     기존 인터페이스 *그대로 + 접근 제어* (비서, 캐시, lazy load)
+- **Adapter** — 기존 인터페이스를 *다른 모양*으로 변환 (USB-C → USB-A)
+- **Decorator** — 기존 인터페이스 *그대로 + 기능 추가* (커피 + 시럽)
+- **Proxy** — 기존 인터페이스 *그대로 + 접근 제어* (비서·캐시·lazy load)
 
-판별:
-- 인터페이스가 바뀌면 Adapter.
-- 인터페이스가 같고 새 기능이 추가되면 Decorator.
-- 인터페이스가 같고 호출을 통제하면 Proxy.
-```
+**판별**:
+
+- 인터페이스가 바뀌면 → Adapter
+- 인터페이스가 같고 새 기능이 추가되면 → Decorator
+- 인터페이스가 같고 호출을 통제하면 → Proxy
 
 ### Decorator vs Composite
 
-```text
-구조가 비슷합니다. 둘 다 Component를 *상속·포함*합니다.
+구조가 비슷합니다 — 둘 다 `Component`를 *상속·포함*합니다.
 
-- Decorator: 한 객체를 감싸 *책임 적층* (선형 wrapping)
-- Composite: 여러 자식을 묶어 *부분-전체 트리* (재귀 구조)
+- **Decorator** — 한 객체를 감싸 *책임 적층* (선형 wrapping)
+- **Composite** — 여러 자식을 묶어 *부분-전체 트리* (재귀 구조)
 
-판별:
+**판별**:
+
 - "이게 또 다른 것을 감싸나?" → Decorator
 - "이게 여러 개를 포함하나?" → Composite
-```
 
 ### Factory Method vs Abstract Factory vs Builder
 
-```text
 모두 생성을 위임합니다.
 
-- Factory Method:  서브클래스가 *한 종류*의 객체 결정
-- Abstract Factory: 한 팩토리가 *여러 종류*의 객체 일관성 유지
-- Builder:         *복잡한 단일 객체*를 단계적으로 조립
+- **Factory Method** — 서브클래스가 *한 종류*의 객체 결정
+- **Abstract Factory** — 한 팩토리가 *여러 종류*의 객체 일관성 유지
+- **Builder** — *복잡한 단일 객체*를 단계적으로 조립
 
-판별:
+**판별**:
+
 - 단일 객체 단계 조립 → Builder
 - 여러 종류의 객체 군 → Abstract Factory
 - 한 종류의 객체 + 서브클래스 결정 → Factory Method
-```
 
 ### Mediator vs Observer vs Facade
 
-```text
 모두 객체 간 결합을 줄입니다.
 
-- Facade:    클라이언트 → 서브시스템 (단방향 단순화)
-- Mediator:  여러 객체끼리 중재자 거쳐 협력 (다대다 → 별 모양)
-- Observer:  주체 → 관찰자들에게 알림 (느슨한 pub/sub)
+- **Facade** — 클라이언트 → 서브시스템 (단방향 단순화)
+- **Mediator** — 여러 객체끼리 중재자 거쳐 협력 (다대다 → 별 모양)
+- **Observer** — 주체 → 관찰자들에게 알림 (느슨한 pub/sub)
 
-판별:
+**판별**:
+
 - 외부 클라이언트를 위한 진입점 → Facade
 - 내부 객체들 사이의 양방향 조율 → Mediator
 - 상태 변경의 단방향 통지 → Observer
-```
 
 ### Command vs Strategy
 
-```text
 둘 다 동작을 객체화합니다.
 
-- Strategy: *알고리즘*을 캡슐화 (정렬·압축의 *방법*)
-- Command:  *요청*을 캡슐화 (수행할 *작업 자체*)
+- **Strategy** — *알고리즘*을 캡슐화 (정렬·압축의 *방법*)
+- **Command** — *요청*을 캡슐화 (수행할 *작업 자체*)
 
-판별:
+**판별**:
+
 - "어떻게 할까"를 객체로 → Strategy
 - "무엇을 할까"를 객체로 → Command (undo·queue·매크로 필요)
-```
 
 ### Bridge vs Adapter
 
-```text
 둘 다 두 개를 분리합니다.
 
-- Bridge:  *시작 시점*에 추상-구현을 분리해 *둘 다 따로 진화*
-- Adapter: *사후*에 호환되지 않는 두 인터페이스를 *임시 결합*
+- **Bridge** — *시작 시점*에 추상-구현을 분리해 *둘 다 따로 진화*
+- **Adapter** — *사후*에 호환되지 않는 두 인터페이스를 *임시 결합*
 
-판별:
+**판별**:
+
 - 처음부터 설계 의도 → Bridge
 - 기존 코드 통합 → Adapter
-```
 
 ### Template Method vs Strategy
 
-```text
 둘 다 가변 단계를 표현합니다.
 
-- Template Method: *상속* + 부모가 골격, 자식이 빈칸
-- Strategy:        *합성* + 외부 객체가 알고리즘
+- **Template Method** — *상속* + 부모가 골격, 자식이 빈칸
+- **Strategy** — *합성* + 외부 객체가 알고리즘
 
-판별:
+**판별**:
+
 - 컴파일 시점 고정 → Template Method
 - 런타임 교체 가능 → Strategy
-```
 
 ## 학습 순서 — 처음 GoF를 만난다면
 
 23개를 순서대로 읽지 마세요. **친숙도와 의존도** 기준으로:
 
-```text
-1단계 — 매일 마주치는 패턴 (이미 쓰고 있을 가능성)
-  Singleton, Factory Method, Iterator, Observer, Strategy, Template Method
-
-2단계 — 한 번에 직관적
-  Adapter, Decorator, Composite, Facade, Command
-
-3단계 — 조금 깊은 이해 필요
-  State, Chain of Responsibility, Proxy, Memento
-
-4단계 — 본격적 생성·구조
-  Abstract Factory, Builder, Prototype, Bridge, Flyweight
-
-5단계 — 고급 행위
-  Mediator, Visitor, Interpreter
-```
+- **1단계** — 매일 마주치는 패턴 (이미 쓰고 있을 가능성): Singleton, Factory Method, Iterator, Observer, Strategy, Template Method
+- **2단계** — 한 번에 직관적: Adapter, Decorator, Composite, Facade, Command
+- **3단계** — 조금 깊은 이해 필요: State, Chain of Responsibility, Proxy, Memento
+- **4단계** — 본격적 생성·구조: Abstract Factory, Builder, Prototype, Bridge, Flyweight
+- **5단계** — 고급 행위: Mediator, Visitor, Interpreter
 
 ## Modern 언어에서는 사라지는 패턴들
 

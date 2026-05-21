@@ -733,26 +733,28 @@ Elimination Backoff Stack은 이론적으로 우아하다. 실용성은?
 
 ## 한국 개발자의 함정
 
-```
-1. *Treiber Stack = 빠른 lock-free*라는 오해
-   - 단일 코어 / 저경합에선 빠름
-   - 고경합에선 cache line contention으로 락보다 느림
-   - 측정 없이 lock-free 선택 금지
+**1. *Treiber Stack = 빠른 lock-free*라는 오해**
 
-2. *Elimination = 무조건 더 빠름*
-   - push/pop 비율이 비슷할 때만 효과
-   - 비대칭 워크로드(예: push만)에선 무의미
-   - 오히려 오버헤드만 추가
+- 단일 코어 / 저경합에선 빠름
+- 고경합에선 cache line contention으로 락보다 느림
+- 측정 없이 lock-free 선택 금지
 
-3. *직접 구현*하려는 시도
-   - Exchanger의 state machine이 미묘
-   - Linearization point 증명이 어려움
-   - 라이브러리(java.util.concurrent.Exchanger) 사용
+**2. *Elimination = 무조건 더 빠름***
 
-4. *Linearizability를 직관에 맡김*
-   - elimination이 linearizable인 이유는 *증명* 필요
-   - 비슷한 최적화에서 자주 깨짐
-```
+- push/pop 비율이 비슷할 때만 효과
+- 비대칭 워크로드(예: push만)에선 무의미
+- 오히려 오버헤드만 추가
+
+**3. *직접 구현*하려는 시도**
+
+- Exchanger의 state machine이 미묘
+- Linearization point 증명이 어려움
+- 라이브러리(java.util.concurrent.Exchanger) 사용
+
+**4. *Linearizability를 직관에 맡김***
+
+- elimination이 linearizable인 이유는 *증명* 필요
+- 비슷한 최적화에서 자주 깨짐
 
 ## 실무 적용
 

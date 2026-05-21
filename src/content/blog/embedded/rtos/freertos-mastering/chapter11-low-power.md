@@ -42,16 +42,28 @@ Idle 태스크가 *남은 idle 시간이 충분*하면 (`configEXPECTED_IDLE_TIM
 
 `xExpectedIdleTime`은 *tick 단위의 예상 sleep 기간*입니다. 사용자 구현은 다음 순서로 진행합니다.
 
-```text
-1. tick 인터럽트 정지 (SysTick disable)
-2. wake-up 타이머 설정 (LPTIM/RTC → xExpectedIdleTime tick 후 인터럽트)
-3. interrupt 마스킹 — eTaskConfirmSleepModeStatus()로 sleep OK인지 확인
-4. WFI / 또는 deep sleep 진입 (HAL_PWR_EnterSTOPMode 등)
-5. ─── wake ───
-6. 실제로 잔 시간 측정 (wake-up 타이머 카운터 읽기)
-7. vTaskStepTick(actual_ticks)로 RTOS tick 보정
-8. tick 인터럽트 재개
-```
+**1. tick 인터럽트 정지 (SysTick disable)**
+
+
+**2. wake-up 타이머 설정 (LPTIM/RTC → xExpectedIdleTime tick 후 인터럽트)**
+
+
+**3. interrupt 마스킹 — eTaskConfirmSleepModeStatus()로 sleep OK인지 확인**
+
+
+**4. WFI / 또는 deep sleep 진입 (HAL_PWR_EnterSTOPMode 등)**
+
+
+**5. ─── wake ───**
+
+
+**6. 실제로 잔 시간 측정 (wake-up 타이머 카운터 읽기)**
+
+
+**7. vTaskStepTick(actual_ticks)로 RTOS tick 보정**
+
+
+**8. tick 인터럽트 재개**
 
 ## 기본 구현 — Cortex-M default
 

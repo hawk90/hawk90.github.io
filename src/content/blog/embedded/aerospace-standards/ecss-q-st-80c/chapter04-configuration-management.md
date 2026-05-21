@@ -18,19 +18,23 @@ ECSS의 *Software Configuration Management (SCM)*. DO-178C의 SCM과 *거의 동
 
 ## SCM의 4 활동 (ECSS-Q-ST-80C §5.5.2)
 
-```
-1. Configuration Identification (식별)
-2. Configuration Control (변경 통제)
-3. Configuration Status Accounting (현황 추적)
-4. Configuration Audits (감사)
-```
+**1. Configuration Identification (식별)**
+
+
+**2. Configuration Control (변경 통제)**
+
+
+**3. Configuration Status Accounting (현황 추적)**
+
+
+**4. Configuration Audits (감사)**
 
 추가로:
 
-```
-5. Release Management
-6. Archive (장기 보관 — ESA 특유 강조)
-```
+**5. Release Management**
+
+
+**6. Archive (장기 보관 — ESA 특유 강조)**
 
 DO-178C와 *기본 동일*. 차이는 *long-term archive* + *space-specific concerns*.
 
@@ -40,25 +44,51 @@ DO-178C와 *기본 동일*. 차이는 *long-term archive* + *space-specific conc
 
 DO-178C와 같이 *모든 산출물*이 SCI.
 
-```
-ECSS-specific SCI categories:
+**ECSS-specific SCI categories:**
 
-1. Source Code (.c, .h, .ada, .py)
-2. Object Code, Executable
-3. Plans (SDP, SVP, SCMP, SPA Plan)
-4. Standards (SCS, SRS, SDS)
-5. Requirements (DOORS items)
-6. Design Documentation
-7. Test cases + procedures + results
-8. Verification reports
-9. Quality records
-10. Tool configuration
-11. Build scripts
-12. Heritage SW (재사용 산출물)
-13. COTS / OSS components
-14. Documentation (manuals, user guides)
-15. Training material
-```
+**1. Source Code (.c, .h, .ada, .py)**
+
+
+**2. Object Code, Executable**
+
+
+**3. Plans (SDP, SVP, SCMP, SPA Plan)**
+
+
+**4. Standards (SCS, SRS, SDS)**
+
+
+**5. Requirements (DOORS items)**
+
+
+**6. Design Documentation**
+
+
+**7. Test cases + procedures + results**
+
+
+**8. Verification reports**
+
+
+**9. Quality records**
+
+
+**10. Tool configuration**
+
+
+**11. Build scripts**
+
+
+**12. Heritage SW (재사용 산출물)**
+
+
+**13. COTS / OSS components**
+
+
+**14. Documentation (manuals, user guides)**
+
+
+**15. Training material**
 
 ### Naming Convention — ECSS-style
 
@@ -164,38 +194,42 @@ Special participants (in-orbit 변경 시):
 
 ### Change Request (CR) Workflow — ECSS
 
-```
-1. CR Submission
-   - Originator: Anyone with valid reason
-   - CR Form (ECSS Annex E template)
-   - Impact analysis 요청
+**1. CR Submission**
 
-2. Impact Analysis (Engineering)
-   - Technical impact
-   - Schedule impact
-   - Cost impact
-   - Mission impact (operational change 시)
-   - Affected SCIs identified
+- Originator: Anyone with valid reason
+- CR Form (ECSS Annex E template)
+- Impact analysis 요청
 
-3. CCB Review
-   - Discussion
-   - Decision: Approve / Approve conditional / Reject / Defer / Withdraw
+**2. Impact Analysis (Engineering)**
 
-4. Implementation
-   - If approved: 개발팀 implement
-   - CR linked to SCI changes
+- Technical impact
+- Schedule impact
+- Cost impact
+- Mission impact (operational change 시)
+- Affected SCIs identified
 
-5. Verification (SPA)
-   - Change implemented per spec
-   - Tests updated/added
-   - Coverage maintained
-   - No regressions
+**3. CCB Review**
 
-6. CCB Closure
-   - Verification evidence
-   - CCB approves closure
-   - Baseline 업데이트
-```
+- Discussion
+- Decision: Approve / Approve conditional / Reject / Defer / Withdraw
+
+**4. Implementation**
+
+- If approved: 개발팀 implement
+- CR linked to SCI changes
+
+**5. Verification (SPA)**
+
+- Change implemented per spec
+- Tests updated/added
+- Coverage maintained
+- No regressions
+
+**6. CCB Closure**
+
+- Verification evidence
+- CCB approves closure
+- Baseline 업데이트
 
 ### CR Document — 일반 template
 
@@ -239,27 +273,45 @@ Approvals: CCB Chair, Config Manager, SPA Manager
 
 가장 *위험한 변경*. 발사된 SW를 *원격 update*.
 
-```
-In-orbit Change Procedure:
+**In-orbit Change Procedure:**
 
-1. CR submission (operational team)
-2. Ground simulation (HIL with current OBSW)
-3. Engineering analysis
-4. CCB review (operational members + customer)
-5. Customer / ESA approval (mission director)
-6. Risk mitigation plan
-   - Rollback procedure (이전 baseline 보존)
-   - Recovery from failed upload
-   - Safe mode trigger 정의
-7. Upload preparation
-   - Patch package (delta or full)
-   - Cryptographic signing
-   - Multiple ground station 준비
-8. Upload window (visibility window)
-9. Upload + verification
-10. Post-upload monitoring (30+ days)
-11. CCB closure
-```
+**1. CR submission (operational team)**
+
+
+**2. Ground simulation (HIL with current OBSW)**
+
+
+**3. Engineering analysis**
+
+
+**4. CCB review (operational members + customer)**
+
+
+**5. Customer / ESA approval (mission director)**
+
+
+**6. Risk mitigation plan**
+
+- Rollback procedure (이전 baseline 보존)
+- Recovery from failed upload
+- Safe mode trigger 정의
+
+**7. Upload preparation**
+
+- Patch package (delta or full)
+- Cryptographic signing
+- Multiple ground station 준비
+
+**8. Upload window (visibility window)**
+
+
+**9. Upload + verification**
+
+
+**10. Post-upload monitoring (30+ days)**
+
+
+**11. CCB closure**
 
 ### In-orbit Change — 일반 관찰
 
@@ -341,27 +393,43 @@ Approvals: Configuration Manager, SPA Manager, Project Manager
 
 > *기능적 일치*를 확인. SW가 *요구사항대로* 동작?
 
-```
-FCA 절차:
-1. Sample requirements 선택 (random 10%)
-2. 각 requirement에 대한 test result 확인
-3. Tests pass 확인
-4. Implementation 일치 확인 (code review)
-5. Audit report
-```
+**FCA 절차:**
+
+
+**1. Sample requirements 선택 (random 10%)**
+
+
+**2. 각 requirement에 대한 test result 확인**
+
+
+**3. Tests pass 확인**
+
+
+**4. Implementation 일치 확인 (code review)**
+
+
+**5. Audit report**
 
 ### Physical Configuration Audit (PCA)
 
 > *문서와 실제의 일치*. 모든 SCI가 *정의된 대로* 존재?
 
-```
-PCA 절차:
-1. Configuration Index와 repository 비교
-2. 각 SCI의 hash 검증
-3. Toolchain 버전 일치 확인
-4. Heritage / COTS 출처 확인
-5. Audit report
-```
+**PCA 절차:**
+
+
+**1. Configuration Index와 repository 비교**
+
+
+**2. 각 SCI의 hash 검증**
+
+
+**3. Toolchain 버전 일치 확인**
+
+
+**4. Heritage / COTS 출처 확인**
+
+
+**5. Audit report**
 
 ### Audit 시점
 
@@ -498,27 +566,31 @@ Archive:         LTO tape + cloud backup
 
 ## Common Findings — SCM
 
-```
-가장 흔한 finding:
+**가장 흔한 finding:**
 
-1. "CR-XXX implemented but verification step missing"
-   → workflow 누락
+**1. "CR-XXX implemented but verification step missing"**
 
-2. "Baseline manifest와 actual repository 불일치"
-   → SCI integrity 위반
+- → workflow 누락
 
-3. "Heritage component K3A-AOCS-v2.5의 modification log 누락"
-   → heritage tracking 부족
+**2. "Baseline manifest와 actual repository 불일치"**
 
-4. "CCB minute 일부 누락 (2024 Q2)"
-   → record-keeping 부실
+- → SCI integrity 위반
 
-5. "In-orbit change procedure documented but never tested"
-   → procedure validation 누락
+**3. "Heritage component K3A-AOCS-v2.5의 modification log 누락"**
 
-6. "Open CR 50+ for 30+ days"
-   → CR aging 문제
-```
+- → heritage tracking 부족
+
+**4. "CCB minute 일부 누락 (2024 Q2)"**
+
+- → record-keeping 부실
+
+**5. "In-orbit change procedure documented but never tested"**
+
+- → procedure validation 누락
+
+**6. "Open CR 50+ for 30+ days"**
+
+- → CR aging 문제
 
 ## ESA Mission 종료 — Archive
 

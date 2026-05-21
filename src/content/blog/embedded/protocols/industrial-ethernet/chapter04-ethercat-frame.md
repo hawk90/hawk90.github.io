@@ -227,15 +227,25 @@ ASCII로 보면 사람이 즉시 알아보기 어렵지만, Wireshark의 EtherCA
 
 `FoE`는 *TFTP를 EtherCAT 위로 옮긴 것*과 같습니다. *Bootstrap* 상태에서만 동작합니다. 슬레이브 firmware 업데이트의 표준 절차입니다.
 
-```text
-1. 마스터 → Pre-Op로 슬레이브 전이
-2. 마스터 → Bootstrap으로 슬레이브 전이
-3. FoE Write Request (filename, password)
-4. FoE Data 패킷 반복 (1024 byte chunk)
-5. FoE Data 마지막 (eof flag)
-6. 슬레이브 → 자체 reset
-7. Init으로 복귀
-```
+**1. 마스터 → Pre-Op로 슬레이브 전이**
+
+
+**2. 마스터 → Bootstrap으로 슬레이브 전이**
+
+
+**3. FoE Write Request (filename, password)**
+
+
+**4. FoE Data 패킷 반복 (1024 byte chunk)**
+
+
+**5. FoE Data 마지막 (eof flag)**
+
+
+**6. 슬레이브 → 자체 reset**
+
+
+**7. Init으로 복귀**
 
 SOEM의 `ec_FOEwrite()` 함수가 이 시퀀스를 캡슐화합니다.
 

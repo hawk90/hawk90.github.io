@@ -14,15 +14,25 @@ draft: false
 
 **Coverage-guided fuzzing**:
 
-```
-1. 시드 입력 → 프로그램 실행
-2. 코드 커버리지 측정 (어느 분기를 실행했나)
-3. 새 분기를 실행한 입력만 corpus에 보관
-4. 입력에 *변이*(byte flip, splice, ...) 적용
-5. 다시 실행 → coverage 측정
-6. 반복 — 새 분기를 *계속 찾는다*
-7. crash 발견 시 *입력 저장* + 보고
-```
+**1. 시드 입력 → 프로그램 실행**
+
+
+**2. 코드 커버리지 측정 (어느 분기를 실행했나)**
+
+
+**3. 새 분기를 실행한 입력만 corpus에 보관**
+
+
+**4. 입력에 *변이*(byte flip, splice, ...) 적용**
+
+
+**5. 다시 실행 → coverage 측정**
+
+
+**6. 반복 — 새 분기를 *계속 찾는다***
+
+
+**7. crash 발견 시 *입력 저장* + 보고**
 
 핵심은 *coverage를 안내자로 삼아* 무작위 입력의 비효율을 깬다는 점.
 
@@ -487,14 +497,22 @@ patch까지 평균        : 14일
 
 Fuzzing은 *마지막 방어선*. 그 전에:
 
-```
-1. CERT 규칙 준수          (코딩 시점)
-2. Static analysis         (커밋 시점)
-3. Unit/integration test   (PR 시점)
-4. Fuzzing                 (지속적, 24/7)
-5. Production canary       (배포 시점)
-6. Monitoring / alerting   (운영 시점)
-```
+**1. CERT 규칙 준수          (코딩 시점)**
+
+
+**2. Static analysis         (커밋 시점)**
+
+
+**3. Unit/integration test   (PR 시점)**
+
+
+**4. Fuzzing                 (지속적, 24/7)**
+
+
+**5. Production canary       (배포 시점)**
+
+
+**6. Monitoring / alerting   (운영 시점)**
 
 Fuzzing은 *정적 도구 + 리뷰 + 테스트*가 놓친 버그를 잡는다. 모든 layer가 같이 필요.
 

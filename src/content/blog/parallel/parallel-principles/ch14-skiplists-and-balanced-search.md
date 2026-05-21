@@ -1040,27 +1040,29 @@ memtable이 일정 크기에 도달하면 *immutable*으로 전환되어 backgro
 
 ## 한국 개발자의 함정
 
-```
-1. *Red-Black Tree로 동시 정렬 컨테이너*
-   - 회전이 다중 포인터 갱신 → 매우 어려움
-   - 학계에서도 lock-free RBT는 드묾
-   - Skiplist가 사실상 표준
+**1. *Red-Black Tree로 동시 정렬 컨테이너***
 
-2. *std::map을 동시에 써도 됨*
-   - std::map은 thread-unsafe
-   - 별도 뮤텍스로 래핑해도 coarse locking
-   - tbb::concurrent_map 또는 skiplist 사용
+- 회전이 다중 포인터 갱신 → 매우 어려움
+- 학계에서도 lock-free RBT는 드묾
+- Skiplist가 사실상 표준
 
-3. *Skiplist = 항상 빠름*
-   - 캐시 친화성은 균형 트리만 못함
-   - 메모리 오버헤드 큼 (포인터 평균 2개 per node)
-   - 순차 / single-thread는 std::map이 더 빠를 수 있음
+**2. *std::map을 동시에 써도 됨***
 
-4. *Lock-Free Skiplist 직접 구현*
-   - 9장 lock-free list의 누적 어려움
-   - logical/physical 삭제 + marked bit 매 레벨
-   - 라이브러리 사용 강력 권장
-```
+- std::map은 thread-unsafe
+- 별도 뮤텍스로 래핑해도 coarse locking
+- tbb::concurrent_map 또는 skiplist 사용
+
+**3. *Skiplist = 항상 빠름***
+
+- 캐시 친화성은 균형 트리만 못함
+- 메모리 오버헤드 큼 (포인터 평균 2개 per node)
+- 순차 / single-thread는 std::map이 더 빠를 수 있음
+
+**4. *Lock-Free Skiplist 직접 구현***
+
+- 9장 lock-free list의 누적 어려움
+- logical/physical 삭제 + marked bit 매 레벨
+- 라이브러리 사용 강력 권장
 
 ## 실무 적용
 

@@ -891,25 +891,27 @@ API는 다르지만 *세 가지 핵심 의무*는 같다. 잠들기 전 락을 a
 
 ## 한국 개발자의 함정
 
-```
-1. *if (cond) wait()* — 가장 흔한 버그
-   - Spurious wakeup으로 깨어남
-   - 다시 잠들지 않고 진행 → race
-   - 해결: *while (cond) wait()* 또는 predicate 버전
+**1. *if (cond) wait()* — 가장 흔한 버그**
 
-2. *notify_one() = 깨운 스레드가 즉시 실행*
-   - 실제: signal 후 락 해제까지 기다림
-   - Mesa semantics (C++, POSIX)
+- Spurious wakeup으로 깨어남
+- 다시 잠들지 않고 진행 → race
+- 해결: *while (cond) wait()* 또는 predicate 버전
 
-3. *notify_one vs notify_all*
-   - notify_one: 하나만 깨움 (효율, 위험)
-   - notify_all: 모두 깨움 (안전, 비효율)
-   - 안전이 의심되면 notify_all
+**2. *notify_one() = 깨운 스레드가 즉시 실행***
 
-4. *shared_mutex로 무조건 성능 향상*
-   - Reader가 많을 때만 이득
-   - 짧은 critical section은 mutex가 빠름
-```
+- 실제: signal 후 락 해제까지 기다림
+- Mesa semantics (C++, POSIX)
+
+**3. *notify_one vs notify_all***
+
+- notify_one: 하나만 깨움 (효율, 위험)
+- notify_all: 모두 깨움 (안전, 비효율)
+- 안전이 의심되면 notify_all
+
+**4. *shared_mutex로 무조건 성능 향상***
+
+- Reader가 많을 때만 이득
+- 짧은 critical section은 mutex가 빠름
 
 ## 실무 적용
 

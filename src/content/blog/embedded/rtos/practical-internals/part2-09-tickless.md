@@ -27,17 +27,31 @@ Sleep (~1 µA): 1 µA × 997 µs ≈ 1 nC/ms
 
 ## 동작 원리
 
-```text
-1. 모든 task가 Blocked
-2. Idle task entry
-3. configUSE_TICKLESS_IDLE 시 portSUPPRESS_TICKS_AND_SLEEP() 호출
-4. 다음 task wake까지의 tick 수 계산
-5. SysTick reload value = (wake - now) × cycles/tick
-6. WFI (Wait For Interrupt) → CPU sleep
-7. Interrupt 발생 → wake
-8. 실제 경과 tick 보충 (vTaskStepTick)
-9. Idle 다시
-```
+**1. 모든 task가 Blocked**
+
+
+**2. Idle task entry**
+
+
+**3. configUSE_TICKLESS_IDLE 시 portSUPPRESS_TICKS_AND_SLEEP() 호출**
+
+
+**4. 다음 task wake까지의 tick 수 계산**
+
+
+**5. SysTick reload value = (wake - now) × cycles/tick**
+
+
+**6. WFI (Wait For Interrupt) → CPU sleep**
+
+
+**7. Interrupt 발생 → wake**
+
+
+**8. 실제 경과 tick 보충 (vTaskStepTick)**
+
+
+**9. Idle 다시**
 
 ## FreeRTOS Tickless 구현
 

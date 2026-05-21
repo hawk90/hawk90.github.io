@@ -445,18 +445,34 @@ Disposition : Fix / Defer / Document / No action
 
 심사 핵심 문서. *모든 활동의 요약*:
 
-```
-1. SW Identification
-2. System Overview
-3. SW Overview
-4. Certification Considerations
-5. SW Lifecycle Process
-6. SW Lifecycle Data (모든 산출물 목록)
-7. Verification Process Outputs
-8. SW Configuration Management
-9. SW Quality Assurance
-10. Compliance Summary (Annex A의 모든 71 obj 충족 표)
-```
+**1. SW Identification**
+
+
+**2. System Overview**
+
+
+**3. SW Overview**
+
+
+**4. Certification Considerations**
+
+
+**5. SW Lifecycle Process**
+
+
+**6. SW Lifecycle Data (모든 산출물 목록)**
+
+
+**7. Verification Process Outputs**
+
+
+**8. SW Configuration Management**
+
+
+**9. SW Quality Assurance**
+
+
+**10. Compliance Summary (Annex A의 모든 71 obj 충족 표)**
 
 심사관에게 *최종 제출*. 보통 *200~1000 페이지*. *수개월에 걸쳐 작성*.
 

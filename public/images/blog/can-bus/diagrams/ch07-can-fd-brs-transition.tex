@@ -20,10 +20,10 @@
 
 % Phase boundaries
 \draw[marker] (3, -1) -- (3, 3);
-\node[caption, color=warnbord] at (3, 3) {BRS bit\\(rate 전환)};
+\node[caption, color=warnbord] at (3, 3) {BRS bit\\[1pt](rate 전환)};
 
 \draw[marker] (6, -1) -- (6, 3);
-\node[caption, color=warnbord] at (6, 3) {CRC delim\\(원속도 복귀)};
+\node[caption, color=warnbord] at (6, 3) {CRC delim\\[1pt](원속도 복귀)};
 
 % Slow phase 1 (Arbitration) — 4 bits illustrated, longer cycle
 \foreach \i in {0, 1, 2} {
@@ -42,9 +42,9 @@
 \draw[sigslow] (6, 1) -- (6, 2) -- (6.5, 2) -- (6.5, 1) -- (7, 1) -- (7, 2) -- (7.5, 2) -- (7.5, 1) -- (8, 1);
 
 % Phase labels
-\node[font=\scriptsize, anchor=south, align=center] at (1.5, 2.4) {Nominal\\1 Mbps};
-\node[font=\scriptsize, anchor=south, align=center, color=warnbord] at (4.5, 2.4) {Fast\\5 Mbps};
-\node[font=\scriptsize, anchor=south, align=center] at (7, 2.4) {Nominal\\1 Mbps};
+\node[font=\scriptsize, anchor=south, align=center] at (1.5, 2.4) {Nominal\\[1pt]1 Mbps};
+\node[font=\scriptsize, anchor=south, align=center, color=warnbord] at (4.5, 2.4) {Fast\\[1pt]5 Mbps};
+\node[font=\scriptsize, anchor=south, align=center] at (7, 2.4) {Nominal\\[1pt]1 Mbps};
 
 % bit time labels
 \draw[draw=edgec, line width=0.3pt, |-|] (0, 0.5) -- (1, 0.5);

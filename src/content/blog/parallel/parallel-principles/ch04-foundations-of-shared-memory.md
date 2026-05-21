@@ -658,25 +658,27 @@ Java의 `ConcurrentHashMap` (JDK 8+)도 이 패턴을 쓴다. resize 중에 look
 
 ## 한국 개발자의 함정
 
-```
-1. *volatile은 atomic*이라는 오해
-   - C: volatile은 *컴파일러 최적화 회피*만
-   - C++: std::atomic이 atomic
-   - C11: _Atomic이 atomic
+**1. *volatile은 atomic*이라는 오해**
 
-2. *read / write는 자동으로 안전*하다는 착각
-   - 8 byte 이상 변수는 안전 보장 없음
-   - x86은 word-aligned 8B까지 atomic
-   - ARM은 더 제한적
+- C: volatile은 *컴파일러 최적화 회피*만
+- C++: std::atomic이 atomic
+- C11: _Atomic이 atomic
 
-3. *Memory barrier 없이도 작동*하는 듯한 코드
-   - Tested OK, but undefined behavior
-   - 다른 CPU / 컴파일러에서 깨질 수 있음
+**2. *read / write는 자동으로 안전*하다는 착각**
 
-4. *memory_order_relaxed면 성능 최적*이라는 착각
-   - 정확성 먼저, 성능은 그 다음
-   - 대부분의 경우 seq_cst로 시작하고 필요시 최적화
-```
+- 8 byte 이상 변수는 안전 보장 없음
+- x86은 word-aligned 8B까지 atomic
+- ARM은 더 제한적
+
+**3. *Memory barrier 없이도 작동*하는 듯한 코드**
+
+- Tested OK, but undefined behavior
+- 다른 CPU / 컴파일러에서 깨질 수 있음
+
+**4. *memory_order_relaxed면 성능 최적*이라는 착각**
+
+- 정확성 먼저, 성능은 그 다음
+- 대부분의 경우 seq_cst로 시작하고 필요시 최적화
 
 ## 실무 적용
 

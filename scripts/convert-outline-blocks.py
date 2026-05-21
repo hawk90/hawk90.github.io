@@ -32,8 +32,9 @@ import sys
 from pathlib import Path
 
 BULLET_RE = re.compile(r"^\s*[-*][\s]+(.+)$")
+# Numbered heading: `1. Foo` or `1) Foo` at line start (no leading whitespace)
+NUMBERED_RE = re.compile(r"^([0-9]+[.)])\s+(.+?)\s*$")
 # Label line: optional whitespace + word(s) + colon, nothing else after.
-# Allow English + Korean + symbols, but no markdown bullets or code chars.
 LABEL_RE = re.compile(r"^\s*([^-*\[`{|<>=][^:`\n]*?):\s*$")
 
 
@@ -42,23 +43,25 @@ def classify(line: str) -> str:
         return "blank"
     if BULLET_RE.match(line):
         return "bullet"
+    if NUMBERED_RE.match(line):
+        return "numbered"
     if LABEL_RE.match(line):
         return "label"
-    # leading whitespace + plain text = continuation of previous bullet
+    # leading whitespace + plain text = continuation of previous bullet/label
     if line.startswith("  ") and not line.lstrip().startswith(("- ", "* ", "□ ")):
         return "cont"
     return "other"
 
 
 def is_pure_outline(body: list[str]) -> bool:
-    """Block qualifies if it has at least one label or bullet, and no
+    """Block qualifies if it has at least one label/bullet/numbered, and no
     other content."""
     saw_struct = False
     for line in body:
         c = classify(line)
         if c == "other":
             return False
-        if c in ("label", "bullet"):
+        if c in ("label", "bullet", "numbered"):
             saw_struct = True
     return saw_struct
 
@@ -77,18 +80,22 @@ def render(body: list[str]) -> list[str]:
             out.append(f"**{label}:**")
             out.append("")
             after_label = True
+        elif c == "numbered":
+            m = NUMBERED_RE.match(line)
+            num, title = m.group(1), m.group(2)
+            if prev_cls != "blank":
+                out.append("")
+            out.append(f"**{num} {title}**")
+            out.append("")
+            after_label = True
         elif c == "bullet":
             m = BULLET_RE.match(line)
             out.append(f"- {m.group(1).strip()}")
             after_label = False
         elif c == "cont":
-            # Indented line. If we just emitted a label and no real bullets
-            # yet, treat each indented line as its own bullet (the block
-            # author used indentation as a visual bullet substitute).
             if after_label:
                 out.append(f"- {line.strip()}")
             elif out and out[-1].startswith("- "):
-                # otherwise fold into previous bullet
                 out[-1] = out[-1] + " " + line.strip()
             else:
                 out.append(line.strip())
@@ -97,7 +104,6 @@ def render(body: list[str]) -> list[str]:
                 out.append("")
             after_label = False
         prev_cls = c
-    # trim trailing blank
     while out and not out[-1]:
         out.pop()
     return out

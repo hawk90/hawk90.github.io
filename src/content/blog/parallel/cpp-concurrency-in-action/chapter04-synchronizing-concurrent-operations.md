@@ -1072,32 +1072,35 @@ public:
 
 ## 한국 개발자의 함정
 
-```
-1. *cv.wait(lock) — predicate 없이*
-   - Spurious wakeup으로 깨어남
-   - 조건 확인 없이 진행 → race
-   - 반드시 wait(lock, predicate)
+**1. *cv.wait(lock) — predicate 없이***
 
-2. *cv.notify_one()을 락 안에서 호출*
-   - 동작은 함, 그러나 비효율
-   - 깨어난 스레드가 즉시 락 못 잡음
-   - notify는 락 *해제 후*가 보통 좋음
+- Spurious wakeup으로 깨어남
+- 조건 확인 없이 진행 → race
+- 반드시 wait(lock, predicate)
 
-3. *fut.get()을 두 번 호출*
-   - 두 번째는 UB
-   - shared_future로 옮기거나 한 번만
-   - 결과 보관은 별도 변수에
+**2. *cv.notify_one()을 락 안에서 호출***
 
-4. *std::async = 새 스레드*라는 오해
-   - 기본 launch policy는 구현 정의
-   - launch::async 명시 안 하면 deferred 가능
-   - 명시적으로 launch::async 사용
+- 동작은 함, 그러나 비효율
+- 깨어난 스레드가 즉시 락 못 잡음
+- notify는 락 *해제 후*가 보통 좋음
 
-5. *std::async future 소멸자 = non-blocking*
-   - async가 반환한 future는 소멸자에서 *블로킹*
-   - fire-and-forget으로 쓸 수 없음
-   - 진짜 fire-and-forget은 jthread 또는 detached thread
-```
+**3. *fut.get()을 두 번 호출***
+
+- 두 번째는 UB
+- shared_future로 옮기거나 한 번만
+- 결과 보관은 별도 변수에
+
+**4. *std::async = 새 스레드*라는 오해**
+
+- 기본 launch policy는 구현 정의
+- launch::async 명시 안 하면 deferred 가능
+- 명시적으로 launch::async 사용
+
+**5. *std::async future 소멸자 = non-blocking***
+
+- async가 반환한 future는 소멸자에서 *블로킹*
+- fire-and-forget으로 쓸 수 없음
+- 진짜 fire-and-forget은 jthread 또는 detached thread
 
 ## 실무 적용
 

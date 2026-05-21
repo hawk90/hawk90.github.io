@@ -863,19 +863,20 @@ class TASLock {
 
 ## 한국 개발자의 함정
 
-```
-1. *Spinlock = 무조건 빠름*이라는 오해
-   - 짧은 락에만 빠름
-   - 긴 락은 CPU 낭비
+**1. *Spinlock = 무조건 빠름*이라는 오해**
 
-2. *while(!flag) {}* 단순 스핀
-   - 캐시 트래픽 폭발
-   - TTAS / backoff 필요
+- 짧은 락에만 빠름
+- 긴 락은 CPU 낭비
 
-3. *Linux mutex = pthread_mutex_t*
-   - 실은 futex (사용자 공간 atomic + kernel 대기)
-   - 경합 없으면 spin도 안 함
-```
+**2. *while(!flag) {}* 단순 스핀**
+
+- 캐시 트래픽 폭발
+- TTAS / backoff 필요
+
+**3. *Linux mutex = pthread_mutex_t***
+
+- 실은 futex (사용자 공간 atomic + kernel 대기)
+- 경합 없으면 spin도 안 함
 
 ## 실무 적용
 

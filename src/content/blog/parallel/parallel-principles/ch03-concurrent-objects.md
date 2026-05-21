@@ -755,26 +755,28 @@ void thread_a_relaxed() {
 
 ## 한국 개발자의 함정
 
-```
-1. *Linearizability ≈ Atomicity*라는 오해
-   - Atomic은 *하드웨어 명령의 원자성*
-   - Linearizable은 *추상 객체의 정확성*
-   - 둘은 다른 차원
+**1. *Linearizability ≈ Atomicity*라는 오해**
 
-2. *Sequential consistency만 알면 충분*
-   - C++ Memory Model이 SC가 아님
-   - Modern CPU도 SC가 아님
-   - Acquire-release / sequentially-consistent 등 약한 모델
+- Atomic은 *하드웨어 명령의 원자성*
+- Linearizable은 *추상 객체의 정확성*
+- 둘은 다른 차원
 
-3. *Lock-free = Wait-free*라는 혼동
-   - Lock-free: 일부가 진행 (전체는 안 끝날 수 있음)
-   - Wait-free: 모두 유한 시간 완료
-   - 실무 대부분이 lock-free만 (wait-free는 너무 비쌈)
+**2. *Sequential consistency만 알면 충분***
 
-4. *Composability(합성성)*의 중요성 간과
-   - Linearizable이 SC보다 강한 이유
-   - 분산 시스템 / 모듈러 설계에 결정적
-```
+- C++ Memory Model이 SC가 아님
+- Modern CPU도 SC가 아님
+- Acquire-release / sequentially-consistent 등 약한 모델
+
+**3. *Lock-free = Wait-free*라는 혼동**
+
+- Lock-free: 일부가 진행 (전체는 안 끝날 수 있음)
+- Wait-free: 모두 유한 시간 완료
+- 실무 대부분이 lock-free만 (wait-free는 너무 비쌈)
+
+**4. *Composability(합성성)*의 중요성 간과**
+
+- Linearizable이 SC보다 강한 이유
+- 분산 시스템 / 모듈러 설계에 결정적
 
 ## 실무 적용
 

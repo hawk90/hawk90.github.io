@@ -885,27 +885,29 @@ __syncthreads();   // OK — block 전체 도달
 
 ## 한국 개발자의 함정
 
-```
-1. *Counter 한 개로 barrier 충분*
-   - 재사용 시 race condition (counter가 0 되기 전 새 phase)
-   - Sense-reversing 필수
-   - 또는 single-use barrier (std::latch)
+**1. *Counter 한 개로 barrier 충분***
 
-2. *std::latch와 std::barrier 혼동*
-   - std::latch: 일회용, 카운트가 0이 되면 모두 통과
-   - std::barrier: 재사용 가능, sense-reversing 사용
-   - 용도 다름
+- 재사용 시 race condition (counter가 0 되기 전 새 phase)
+- Sense-reversing 필수
+- 또는 single-use barrier (std::latch)
 
-3. *Barrier가 항상 필요*
-   - 작업이 독립적이면 work stealing이 더 빠름
-   - Barrier는 *phase 동기화*가 명확할 때만
-   - 너무 자주 쓰면 idle 시간 증가
+**2. *std::latch와 std::barrier 혼동***
 
-4. *GPU에서 __syncthreads()는 그냥 호출*
-   - 같은 thread block 안에서만 동작
-   - Block 간 동기화는 kernel 종료가 유일
-   - 잘못 쓰면 deadlock
-```
+- std::latch: 일회용, 카운트가 0이 되면 모두 통과
+- std::barrier: 재사용 가능, sense-reversing 사용
+- 용도 다름
+
+**3. *Barrier가 항상 필요***
+
+- 작업이 독립적이면 work stealing이 더 빠름
+- Barrier는 *phase 동기화*가 명확할 때만
+- 너무 자주 쓰면 idle 시간 증가
+
+**4. *GPU에서 __syncthreads()는 그냥 호출***
+
+- 같은 thread block 안에서만 동작
+- Block 간 동기화는 kernel 종료가 유일
+- 잘못 쓰면 deadlock
 
 ## 실무 적용
 

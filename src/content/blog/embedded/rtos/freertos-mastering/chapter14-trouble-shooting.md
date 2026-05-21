@@ -304,17 +304,31 @@ arm-none-eabi-addr2line -e firmware.elf 0x08004532
 
 ## 디버깅 워크플로
 
-```text
-1. configASSERT 켜기
-2. configCHECK_FOR_STACK_OVERFLOW = 2
-3. configUSE_MALLOC_FAILED_HOOK = 1
-4. configGENERATE_RUN_TIME_STATS로 부하 확인
-5. NVIC priority 전수 검토 (configMAX_SYSCALL 위반 검색)
-6. Hard Fault handler에서 PC/LR 덤프
-7. addr2line으로 PC → source 변환
-8. 여전히 미해결 → Tracealyzer/SystemView
-9. 그래도 → 로직 애널라이저 + GPIO 토글
-```
+**1. configASSERT 켜기**
+
+
+**2. configCHECK_FOR_STACK_OVERFLOW = 2**
+
+
+**3. configUSE_MALLOC_FAILED_HOOK = 1**
+
+
+**4. configGENERATE_RUN_TIME_STATS로 부하 확인**
+
+
+**5. NVIC priority 전수 검토 (configMAX_SYSCALL 위반 검색)**
+
+
+**6. Hard Fault handler에서 PC/LR 덤프**
+
+
+**7. addr2line으로 PC → source 변환**
+
+
+**8. 여전히 미해결 → Tracealyzer/SystemView**
+
+
+**9. 그래도 → 로직 애널라이저 + GPIO 토글**
 
 위 9단계로 *대부분의 FreeRTOS 버그*가 잡힙니다. 4번까지가 *코드 한 줄씩 추가*로 끝나는 일이라서, *프로젝트 초기에 모두 활성화*하는 것이 정석입니다.
 

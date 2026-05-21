@@ -16,13 +16,19 @@ draft: false
 
 코드 한 줄 — `order.place()` — 뒤에서 일어나는 일을 누가 어떻게 협력하는지 보고 싶다면.
 
-```
-1. UI가 OrderService에 submit
-2. OrderService가 Stripe에 charge
-3. Stripe가 txId 반환
-4. OrderService가 DB에 저장
-5. UI에 confirmed 반환
-```
+**1. UI가 OrderService에 submit**
+
+
+**2. OrderService가 Stripe에 charge**
+
+
+**3. Stripe가 txId 반환**
+
+
+**4. OrderService가 DB에 저장**
+
+
+**5. UI에 confirmed 반환**
 
 이걸 글로 적으면 5줄, 시퀀스 다이어그램으론 한 그림. 게다가 글로는 안 보이는 **병렬·반복·예외**가 시퀀스에선 잘 보입니다.
 

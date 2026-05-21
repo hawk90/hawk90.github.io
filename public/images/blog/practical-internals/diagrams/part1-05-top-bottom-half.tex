@@ -18,16 +18,17 @@
 \node[font=\footnotesize\bfseries, anchor=south] at (5, 4.5) {Top-Half (ISR) + Bottom-Half (Task) 패턴};
 
 % Hardware
-\node[hw] (uart) at (0, 2) {UART HW\\IRQ trigger};
+\node[hw] (uart) at (0, 2) {UART HW\\[2pt]IRQ trigger};
 
-% ISR (Top-Half)
-\node[isr] (isrN) at (4, 2) {Top-Half ISR\\$\sim$수 µs};
+% ISR (Top-Half) — explicit row gap
+\node[isr] (isrN) at (4, 2) {Top-Half ISR\\[2pt]$\sim$수 µs};
 
 % Queue
-\node[queue] (q) at (8.5, 2) {Queue\\(1 byte)};
+\node[queue] (q) at (8.5, 2) {Queue\\[2pt](1 byte)};
 
 % Task (Bottom-Half)
-\node[task] (taskN) at (4, -1) {Bottom-Half Task\\$\sim$ms 단위};
+\node[task] (taskN) at (4, -1) {Bottom-Half Task\\[2pt]$\sim$ms 단위};
+
 
 % Arrows
 \draw[arr] (uart) -- (isrN) node[lbl, midway, above] {IRQ};

@@ -44,24 +44,52 @@ A-8-6  SCI (Software Configuration Index) 작성
 
 ### SCI 분류
 
-```
-1. Source Code Files (.c, .h, .py, .ada)
-2. Object Code (.o, .a, .lib)
-3. Executable (.elf, .bin, .hex)
-4. Plans (PSAC, SDP, SVP, SCMP, SQAP)
-5. Standards (SRS, SDS, SCS)
-6. Requirements (HLR, LLR)
-7. Design (SDD, SAD)
-8. Test cases / procedures (SVCP)
-9. Test results (SVR)
-10. Coverage reports
-11. Review records
-12. Problem reports
-13. Audit reports
-14. Toolchain (compiler, linker version)
-15. Build scripts
-16. Configuration files
-```
+**1. Source Code Files (.c, .h, .py, .ada)**
+
+
+**2. Object Code (.o, .a, .lib)**
+
+
+**3. Executable (.elf, .bin, .hex)**
+
+
+**4. Plans (PSAC, SDP, SVP, SCMP, SQAP)**
+
+
+**5. Standards (SRS, SDS, SCS)**
+
+
+**6. Requirements (HLR, LLR)**
+
+
+**7. Design (SDD, SAD)**
+
+
+**8. Test cases / procedures (SVCP)**
+
+
+**9. Test results (SVR)**
+
+
+**10. Coverage reports**
+
+
+**11. Review records**
+
+
+**12. Problem reports**
+
+
+**13. Audit reports**
+
+
+**14. Toolchain (compiler, linker version)**
+
+
+**15. Build scripts**
+
+
+**16. Configuration files**
 
 각 SCI는 *unique identifier* + *version*.
 
@@ -156,74 +184,82 @@ Frequency: Weekly (active development), Monthly (maintenance)
 
 ### Change Request (CR) Workflow
 
-```
-1. CR Submission
-   - Originator: Anyone
-   - Description, justification, impact analysis
-   - Attached: design proposal, code diff, test plan
+**1. CR Submission**
 
-2. Impact Analysis
-   - Affected SCIs identified
-   - LLR/HLR impact
-   - Test impact
-   - Schedule impact
-   - Cost estimate
+- Originator: Anyone
+- Description, justification, impact analysis
+- Attached: design proposal, code diff, test plan
 
-3. CCB Review
-   - Discussion at CCB meeting
-   - Decision: Approve / Approve with conditions / Reject / Defer
+**2. Impact Analysis**
 
-4. Implementation
-   - If approved: Engineering implements
-   - CR linked to commit(s)
+- Affected SCIs identified
+- LLR/HLR impact
+- Test impact
+- Schedule impact
+- Cost estimate
 
-5. Verification
-   - Code review of CR implementation
-   - Test execution
-   - Coverage verification
+**3. CCB Review**
 
-6. CCB Closure
-   - Verification evidence presented
-   - CCB confirms completion
-   - CR closed, baseline updated
-```
+- Discussion at CCB meeting
+- Decision: Approve / Approve with conditions / Reject / Defer
+
+**4. Implementation**
+
+- If approved: Engineering implements
+- CR linked to commit(s)
+
+**5. Verification**
+
+- Code review of CR implementation
+- Test execution
+- Coverage verification
+
+**6. CCB Closure**
+
+- Verification evidence presented
+- CCB confirms completion
+- CR closed, baseline updated
 
 ### Problem Report (PR) Workflow
 
 PR이 *defect 발견 시* 작성.
 
-```
-PR Lifecycle:
+**PR Lifecycle:**
 
-1. OPEN
-   - Found by: Tester / Reviewer / Field
-   - Description, repro steps
-   - Severity: Critical / Major / Minor
+**1. OPEN**
 
-2. ANALYZING
-   - Engineering investigates
-   - Root cause identification
-   - Fix proposal
+- Found by: Tester / Reviewer / Field
+- Description, repro steps
+- Severity: Critical / Major / Minor
 
-3. FIXED
-   - Code commit
-   - PR linked to commit
-   - Tests added/updated
+**2. ANALYZING**
 
-4. VERIFIED
-   - Independent verification (different person)
-   - Fix confirmed
-   - No regressions
+- Engineering investigates
+- Root cause identification
+- Fix proposal
 
-5. CLOSED
-   - SQA confirms
-   - Baseline updated
+**3. FIXED**
 
-Optional states:
-  DEFERRED  : Acknowledged but fix postponed (with justification)
-  REJECTED  : Not a defect (with explanation)
-  DUPLICATE : Already tracked elsewhere
-```
+- Code commit
+- PR linked to commit
+- Tests added/updated
+
+**4. VERIFIED**
+
+- Independent verification (different person)
+- Fix confirmed
+- No regressions
+
+**5. CLOSED**
+
+- SQA confirms
+- Baseline updated
+
+**Optional states:**
+
+- DEFERRED  : Acknowledged but fix postponed (with justification)
+- REJECTED  : Not a defect (with explanation)
+- DUPLICATE : Already tracked elsewhere
 
 ### CR vs PR
 
@@ -341,27 +377,30 @@ Approvals:
 
 ### 인증 trail with Git
 
-```
-1. Signed commits
-   git config user.signingkey ...
-   git commit -S -m "Fix PR-2024-1089: anti-windup boundary"
+**1. Signed commits**
 
-2. Linear history (no force-push)
-   git config receive.denyNonFastForwards true
+- git config user.signingkey ...
+- git commit -S -m "Fix PR-2024-1089: anti-windup boundary"
 
-3. Protected branches
-   - main branch: only via reviewed PR
-   - Tagged releases: signed tags
+**2. Linear history (no force-push)**
 
-4. Audit log
-   - GitLab/GitHub의 audit feature
-   - Every action logged
+- git config receive.denyNonFastForwards true
 
-5. PR/MR template
-   - Linking to CR/PR
-   - Reviewer requirement
-   - Test results attached
-```
+**3. Protected branches**
+
+- main branch: only via reviewed PR
+- Tagged releases: signed tags
+
+**4. Audit log**
+
+- GitLab/GitHub의 audit feature
+- Every action logged
+
+**5. PR/MR template**
+
+- Linking to CR/PR
+- Reviewer requirement
+- Test results attached
 
 이런 구성으로 *Git 기반 항공 인증* 가능. 점점 *표준화*.
 
@@ -388,14 +427,22 @@ HP/Micro Focus ALM      : 일부 큰 OEM
 
 *기능적 일치 확인*. 코드가 *requirements를 정확히 구현*하는지.
 
-```
-FCA 절차:
-1. Test results 검토
-2. Requirements coverage 확인 (DOORS)
-3. Sampling 기반 PR review
-4. SQA findings 검토
-5. Audit report 작성
-```
+**FCA 절차:**
+
+
+**1. Test results 검토**
+
+
+**2. Requirements coverage 확인 (DOORS)**
+
+
+**3. Sampling 기반 PR review**
+
+
+**4. SQA findings 검토**
+
+
+**5. Audit report 작성**
 
 ### Physical Configuration Audit (PCA)
 
@@ -403,14 +450,22 @@ FCA 절차:
 
 *문서와 실제 산출물의 일치 확인*.
 
-```
-PCA 절차:
-1. SCI manifest와 repository 비교
-2. Each SCI hash 검증
-3. Toolchain version 일치 확인
-4. Build environment 일치 확인
-5. Audit report 작성
-```
+**PCA 절차:**
+
+
+**1. SCI manifest와 repository 비교**
+
+
+**2. Each SCI hash 검증**
+
+
+**3. Toolchain version 일치 확인**
+
+
+**4. Build environment 일치 확인**
+
+
+**5. Audit report 작성**
 
 PCA가 *PSAC §6의 lifecycle data 목록과 일치* 확인.
 
@@ -474,32 +529,35 @@ Large (200 ppl)     160-170      20-25
 
 ## SQA Activities
 
-```
-1. Plan/Standard Compliance Audit
-   - 매월: 한 모듈 random 선택, plan/standard 준수 확인
-   - 발견된 비준수 → SQA Finding 발행
-   - 4 weeks 내 해결 의무
+**1. Plan/Standard Compliance Audit**
 
-2. Process Audit
-   - 매 분기: 한 process (e.g., code review) 무작위 sample
-   - 절차 충실 이행 검증
-   - 통계 분석 (review duration, finding rate)
+- 매월: 한 모듈 random 선택, plan/standard 준수 확인
+- 발견된 비준수 → SQA Finding 발행
+- 4 weeks 내 해결 의무
 
-3. Product Audit
-   - 매 분기: 한 산출물 random sample
-   - Quality 직접 검증
-   - 외부 vs SQA 의견 비교
+**2. Process Audit**
 
-4. Lifecycle Audit
-   - 각 transition 시점
-   - Transition criteria 충족 확인
-   - Audit Report → CCB
+- 매 분기: 한 process (e.g., code review) 무작위 sample
+- 절차 충실 이행 검증
+- 통계 분석 (review duration, finding rate)
 
-5. Non-conformance Tracking
-   - Open findings 추적
-   - 보고 (월간, 분기간)
-   - Escalation if no resolution
-```
+**3. Product Audit**
+
+- 매 분기: 한 산출물 random sample
+- Quality 직접 검증
+- 외부 vs SQA 의견 비교
+
+**4. Lifecycle Audit**
+
+- 각 transition 시점
+- Transition criteria 충족 확인
+- Audit Report → CCB
+
+**5. Non-conformance Tracking**
+
+- Open findings 추적
+- 보고 (월간, 분기간)
+- Escalation if no resolution
 
 각 활동이 *공식 기록*. *SAS에 통합*.
 
@@ -558,68 +616,80 @@ Closure Plan:   Re-audit after fixes (2024-10-30)
 
 ### SAS 구조 (DO-178C §11.20)
 
-```
-1. System Overview
-   - Aircraft, system, SW의 위치
+**1. System Overview**
 
-2. Software Overview
-   - Identification
-   - Architecture
-   - Functions
-   - Size (LoC, modules, requirements)
+- Aircraft, system, SW의 위치
 
-3. Certification Considerations
-   - Certification basis (FAR, AC)
-   - DAL determination
-   - SW functions and effect on aircraft
+**2. Software Overview**
 
-4. Software Characteristics
-   - Programming language
-   - Tools used
-   - Compiler version
+- Identification
+- Architecture
+- Functions
+- Size (LoC, modules, requirements)
 
-5. Software Life Cycle
-   - Lifecycle model used
-   - Phases and transitions
+**3. Certification Considerations**
 
-6. Software Life Cycle Data
-   - Index of all submitted data
-   - Pages, version
+- Certification basis (FAR, AC)
+- DAL determination
+- SW functions and effect on aircraft
 
-7. Compliance with DO-178C
-   - Objective-by-objective compliance statement
-   - 71 obj × output × evidence reference
+**4. Software Characteristics**
 
-8. Verification Process Outputs
-   - Test summary
-   - Coverage summary
-   - Anomaly summary
+- Programming language
+- Tools used
+- Compiler version
 
-9. Software Configuration Management
-   - SCI list
-   - Baseline status
-   - Change history
+**5. Software Life Cycle**
 
-10. Software Quality Assurance
-    - SQA records summary
-    - Open findings
-    - Independence justification
+- Lifecycle model used
+- Phases and transitions
 
-11. Tool Qualification
-    - Qualified tools used
-    - TQL summary
+**6. Software Life Cycle Data**
 
-12. Open Problem Reports
-    - List of deferred PRs (with justification)
+- Index of all submitted data
+- Pages, version
 
-13. Alternative Methods
-    - If formal methods used
-    - If model-based development
+**7. Compliance with DO-178C**
 
-14. Conclusion
-    - Statement of compliance
-    - Recommendation for certification approval
-```
+- Objective-by-objective compliance statement
+- 71 obj × output × evidence reference
+
+**8. Verification Process Outputs**
+
+- Test summary
+- Coverage summary
+- Anomaly summary
+
+**9. Software Configuration Management**
+
+- SCI list
+- Baseline status
+- Change history
+
+**10. Software Quality Assurance**
+
+- SQA records summary
+- Open findings
+- Independence justification
+
+**11. Tool Qualification**
+
+- Qualified tools used
+- TQL summary
+
+**12. Open Problem Reports**
+
+- List of deferred PRs (with justification)
+
+**13. Alternative Methods**
+
+- If formal methods used
+- If model-based development
+
+**14. Conclusion**
+
+- Statement of compliance
+- Recommendation for certification approval
 
 ### SAS — 71 Objectives Compliance Table
 
@@ -793,27 +863,31 @@ SECI가 *모든 binary tool 버전*을 *정확히 기록*. *재현 빌드 보장
 
 ## Common Findings — CM & SQA
 
-```
-가장 흔한 finding:
+**가장 흔한 finding:**
 
-1. "CCB minute 2024-XX에 PR-YYY 논의 기록 없음"
-   → Change control 추적 누락
+**1. "CCB minute 2024-XX에 PR-YYY 논의 기록 없음"**
 
-2. "Baseline v2.0.0 manifest와 repository 실제 hash 불일치"
-   → SCI integrity 위반
+- → Change control 추적 누락
 
-3. "PR-2024-1089 fixed 후 verification record 누락"
-   → Workflow 누락
+**2. "Baseline v2.0.0 manifest와 repository 실제 hash 불일치"**
 
-4. "SQA Finding SQAF-2024-067 4 weeks 넘게 open"
-   → Resolution 지연
+- → SCI integrity 위반
 
-5. "SECI에 CMake 버전 미기록"
-   → Tool tracking 누락
+**3. "PR-2024-1089 fixed 후 verification record 누락"**
 
-6. "open PR 50개 중 30개 Major — DAL A 인증 부적합"
-   → 너무 많은 open issue
-```
+- → Workflow 누락
+
+**4. "SQA Finding SQAF-2024-067 4 weeks 넘게 open"**
+
+- → Resolution 지연
+
+**5. "SECI에 CMake 버전 미기록"**
+
+- → Tool tracking 누락
+
+**6. "open PR 50개 중 30개 Major — DAL A 인증 부적합"**
+
+- → 너무 많은 open issue
 
 ## 도구 통합 — 항공 산업
 

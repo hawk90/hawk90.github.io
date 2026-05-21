@@ -501,13 +501,19 @@ static int debug_dump_state(void) {  // 어디서 호출?
 
 A-5-5: *모든 source code가 EOC에 통합*.
 
-```
-도구 검증:
-1. ELF symbol table에 *모든 source 함수* 포함
-2. .text 섹션에 *모든 source 코드 컴파일 결과* 포함
-3. Linker가 *추가하지 않은 코드 없음* (예외: vendor library)
-4. Compiler가 *최적화로 제거하지 않은 함수 없음*
-```
+**도구 검증:**
+
+
+**1. ELF symbol table에 *모든 source 함수* 포함**
+
+
+**2. .text 섹션에 *모든 source 코드 컴파일 결과* 포함**
+
+
+**3. Linker가 *추가하지 않은 코드 없음* (예외: vendor library)**
+
+
+**4. Compiler가 *최적화로 제거하지 않은 함수 없음***
 
 ```bash
 # 함수 별 source ↔ binary 매핑
@@ -618,21 +624,34 @@ Target: ARM Cortex-A53 (FCC)
 
 A-6-5: *Test가 target hardware에서 실행*.
 
-```
-검증 흐름:
-1. Source code 작성
-2. Host (Linux x86_64)에서 unit test
-3. Cross-compile to ARM
-4. Target board에 program
-5. Target에서 unit test 재실행
-6. HIL에서 integration test
-7. Aircraft에서 final test (Flight test)
+**검증 흐름:**
 
-Host vs Target 차이 발견 시:
-  - Bug investigation
-  - Source 수정
-  - 위 단계 모두 다시
-```
+
+**1. Source code 작성**
+
+
+**2. Host (Linux x86_64)에서 unit test**
+
+
+**3. Cross-compile to ARM**
+
+
+**4. Target board에 program**
+
+
+**5. Target에서 unit test 재실행**
+
+
+**6. HIL에서 integration test**
+
+
+**7. Aircraft에서 final test (Flight test)**
+
+**Host vs Target 차이 발견 시:**
+
+- Bug investigation
+- Source 수정
+- 위 단계 모두 다시
 
 *Host에서 통과한 test가 target에서 실패*는 *흔하다*. *항공의 큰 비용 요소*.
 
@@ -727,25 +746,29 @@ soi_report:
 
 ## Common Findings — Build/Integration
 
-```
-1. "Build이 reproducible 아님 (timestamp 포함)"
-   → __DATE__/__TIME__ 매크로 제거
+**1. "Build이 reproducible 아님 (timestamp 포함)"**
 
-2. "Stack budget 초과 (T1 사용 5KB > 4KB 할당)"
-   → Stack 증가 또는 코드 줄임
+- → __DATE__/__TIME__ 매크로 제거
 
-3. "Memory map에 alloc 안 한 region 0x80FF0000~0x81000000 누락"
-   → linker script update
+**2. "Stack budget 초과 (T1 사용 5KB > 4KB 할당)"**
 
-4. "Function debug_dump_state 어디서도 호출 안 됨 (unused)"
-   → 제거 또는 SCS-DR-XXX 정당화
+- → Stack 증가 또는 코드 줄임
 
-5. "Compiler 12.2 → 12.3 업그레이드 시 EOC bit-different"
-   → SECI 업데이트 + 재인증 일부
+**3. "Memory map에 alloc 안 한 region 0x80FF0000~0x81000000 누락"**
 
-6. "Optimization -O2 → -O3 변경, branch behavior 변화 detected"
-   → -O2로 유지 또는 -O3 정당화 (verification 추가)
-```
+- → linker script update
+
+**4. "Function debug_dump_state 어디서도 호출 안 됨 (unused)"**
+
+- → 제거 또는 SCS-DR-XXX 정당화
+
+**5. "Compiler 12.2 → 12.3 업그레이드 시 EOC bit-different"**
+
+- → SECI 업데이트 + 재인증 일부
+
+**6. "Optimization -O2 → -O3 변경, branch behavior 변화 detected"**
+
+- → -O2로 유지 또는 -O3 정당화 (verification 추가)
 
 ## 정리
 

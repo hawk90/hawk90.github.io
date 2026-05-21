@@ -36,9 +36,9 @@
   \node[font=\tiny, text=mutec, anchor=north] at (\x, 0.3) {\t\,ms};
 }
 
-% Skip span annotation (separated from rows)
-\draw[<->, draw=warnbord, line width=0.5pt] (0.3, -0.7) -- (4.9, -0.7);
-\node[font=\sffamily\scriptsize, text=warnbord, anchor=south] at (2.6, -0.7)
+% Skip span annotation — pushed below the tick labels (which extend to ~y=-0.3)
+\draw[<->, draw=warnbord, line width=0.5pt] (0.3, -1.3) -- (4.9, -1.3);
+\node[font=\sffamily\scriptsize, text=warnbord, anchor=north] at (2.6, -1.35)
   {peripheral skip (latency = 4)};
 
 % Interval span annotation

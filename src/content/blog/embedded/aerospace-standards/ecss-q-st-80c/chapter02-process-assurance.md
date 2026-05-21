@@ -31,12 +31,16 @@ ESA가 *정량적 metric*과 *지속 개선*을 더 강조.
 
 ## SPA의 4단계 활동
 
-```
-1. Process Assurance Planning (SPA Plan 작성)
-2. Process Audit Execution
-3. Process Metric Collection + Analysis
-4. Process Improvement
-```
+**1. Process Assurance Planning (SPA Plan 작성)**
+
+
+**2. Process Audit Execution**
+
+
+**3. Process Metric Collection + Analysis**
+
+
+**4. Process Improvement**
 
 ## 1. SPA Plan — Software Process Assurance Plan
 
@@ -44,58 +48,66 @@ DO-178C의 SQAP에 해당. ECSS에서는 별도 문서.
 
 ### SPA Plan 구조
 
-```
-1. Introduction
-   - Project context
-   - Scope
-   - Applicable documents
+**1. Introduction**
 
-2. Process Assurance Organization
-   - SPA team 구조
-   - 독립성 보장
-   - Roles + responsibilities
+- Project context
+- Scope
+- Applicable documents
 
-3. Process Assurance Activities
-   - Planning
-   - Audits
-   - Reviews
-   - Reporting
+**2. Process Assurance Organization**
 
-4. Process Assurance Resources
-   - Tool
-   - Skills
-   - Effort
+- SPA team 구조
+- 독립성 보장
+- Roles + responsibilities
 
-5. Process Tailoring (ECSS 특유)
-   - 적용 ECSS 표준 목록
-   - Tailoring 결정 (어느 obj 면제)
-   - 정당화
+**3. Process Assurance Activities**
 
-6. Process Metrics
-   - 측정 항목
-   - 수집 절차
-   - 분석 + 보고
+- Planning
+- Audits
+- Reviews
+- Reporting
 
-7. Audit Plan
-   - Schedule
-   - Scope
-   - Method
+**4. Process Assurance Resources**
 
-8. Non-Conformance Process
-   - NCR (Non-Conformance Report) workflow
-   - Escalation
-   - Corrective Action tracking
+- Tool
+- Skills
+- Effort
 
-9. Independence Justification
-   - 조직 차원
-   - 재정 차원
-   - 기술 차원
+**5. Process Tailoring (ECSS 특유)**
 
-10. Records
-    - Audit records
-    - Finding records
-    - Metric records
-```
+- 적용 ECSS 표준 목록
+- Tailoring 결정 (어느 obj 면제)
+- 정당화
+
+**6. Process Metrics**
+
+- 측정 항목
+- 수집 절차
+- 분석 + 보고
+
+**7. Audit Plan**
+
+- Schedule
+- Scope
+- Method
+
+**8. Non-Conformance Process**
+
+- NCR (Non-Conformance Report) workflow
+- Escalation
+- Corrective Action tracking
+
+**9. Independence Justification**
+
+- 조직 차원
+- 재정 차원
+- 기술 차원
+
+**10. Records**
+
+- Audit records
+- Finding records
+- Metric records
 
 ### SPA Plan 작성 — 일반 template
 
@@ -170,31 +182,34 @@ D. Independence Audit
 
 ### Compliance Audit 절차
 
-```
-1. Planning (audit 1주 전)
-   - Audit scope 결정 (어느 process, 어느 시기)
-   - Sample 선택 (random 5-10 module)
-   - Checklist 준비
+**1. Planning (audit 1주 전)**
 
-2. Notification (audit 3일 전)
-   - 개발팀 통보
-   - 자료 요청
+- Audit scope 결정 (어느 process, 어느 시기)
+- Sample 선택 (random 5-10 module)
+- Checklist 준비
 
-3. Execution (audit 1-2일)
-   - Sample module의 산출물 review
-   - 개발팀 interview
-   - 절차 준수 확인
-   - Finding 기록
+**2. Notification (audit 3일 전)**
 
-4. Reporting (audit 후 1주)
-   - Audit report 작성
-   - Findings 분류 (Major/Minor/Observation)
-   - 개발팀 response 요청
+- 개발팀 통보
+- 자료 요청
 
-5. Follow-up (audit 후 4주)
-   - Corrective action 검증
-   - NCR closure 또는 escalation
-```
+**3. Execution (audit 1-2일)**
+
+- Sample module의 산출물 review
+- 개발팀 interview
+- 절차 준수 확인
+- Finding 기록
+
+**4. Reporting (audit 후 1주)**
+
+- Audit report 작성
+- Findings 분류 (Major/Minor/Observation)
+- 개발팀 response 요청
+
+**5. Follow-up (audit 후 4주)**
+
+- Corrective action 검증
+- NCR closure 또는 escalation
 
 ### Audit Checklist — Code Review Process 예
 
@@ -262,45 +277,51 @@ ECSS의 *고유 강조점*. *측정해서 개선*.
 
 ### 핵심 Metrics
 
-```
-1. Process Compliance Rate
-   = (정상 수행된 절차 수 / 총 절차 수) × 100%
-   Target: > 95%
+**1. Process Compliance Rate**
 
-2. Defect Detection Rate (per phase)
-   Requirements phase: 30-40%
-   Design phase: 20-30%
-   Code phase: 20-30%
-   Verification phase: 5-10%
-   Post-release: < 5%
+- = (정상 수행된 절차 수 / 총 절차 수) × 100%
+- Target: > 95%
 
-   분포가 *예상과 다르면* 문제
+**2. Defect Detection Rate (per phase)**
 
-3. Review Effectiveness
-   = (Major + Minor issues found) / (Review hours)
-   Target: 5-10 issues per hour
+- Requirements phase: 30-40%
+- Design phase: 20-30%
+- Code phase: 20-30%
+- Verification phase: 5-10%
+- Post-release: < 5%
 
-4. Test Coverage Trend
-   매주 측정
-   Target: 매 milestone에 specific target
+분포가 *예상과 다르면* 문제
 
-5. Code Churn Rate
-   = LoC changed / total LoC
-   너무 높으면: 불안정 design
-   너무 낮으면: insufficient feedback
+**3. Review Effectiveness**
 
-6. Open NCR Count
-   매주 측정
-   Trend 중요 (증가 = 문제)
+- = (Major + Minor issues found) / (Review hours)
+- Target: 5-10 issues per hour
 
-7. NCR Resolution Time
-   Average days to close
-   Target: < 30 days
+**4. Test Coverage Trend**
 
-8. Process Cycle Time
-   Phase 진입 → 종료 일수
-   Schedule slippage 검출
-```
+- 매주 측정
+- Target: 매 milestone에 specific target
+
+**5. Code Churn Rate**
+
+- = LoC changed / total LoC
+- 너무 높으면: 불안정 design
+- 너무 낮으면: insufficient feedback
+
+**6. Open NCR Count**
+
+- 매주 측정
+- Trend 중요 (증가 = 문제)
+
+**7. NCR Resolution Time**
+
+- Average days to close
+- Target: < 30 days
+
+**8. Process Cycle Time**
+
+- Phase 진입 → 종료 일수
+- Schedule slippage 검출
 
 ### Metrics 보고서 — 일반 template
 
@@ -340,15 +361,25 @@ ESA는 *one-size-fits-all 거부*. 각 mission에 맞춰 *tailoring*.
 
 ### Tailoring 절차
 
-```
-1. Default: 모든 ECSS obj 적용
-2. Project Manager: tailoring 제안
-3. Justification: 왜 면제·완화 필요한가
-4. Risk Analysis: tailoring으로 인한 위험
-5. ESA / Customer 승인
-6. Tailoring 문서화 (SPA Plan에)
-7. 후속 audit에서 tailoring 준수 확인
-```
+**1. Default: 모든 ECSS obj 적용**
+
+
+**2. Project Manager: tailoring 제안**
+
+
+**3. Justification: 왜 면제·완화 필요한가**
+
+
+**4. Risk Analysis: tailoring으로 인한 위험**
+
+
+**5. ESA / Customer 승인**
+
+
+**6. Tailoring 문서화 (SPA Plan에)**
+
+
+**7. 후속 audit에서 tailoring 준수 확인**
 
 ### Tailoring 예 — 작은 mission (가상)
 

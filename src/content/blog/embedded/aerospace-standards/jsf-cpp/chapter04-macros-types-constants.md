@@ -82,22 +82,25 @@ int max(int a, int b) { ... }   // 충돌
 
 ### 매크로 회피의 일반 이유
 
-```
-1. Type 안전성 없음
-   - 컴파일러가 type check 못함
+**1. Type 안전성 없음**
 
-2. Debugger에서 안 보임
-   - 매크로 expansion 후 코드만 표시
+- 컴파일러가 type check 못함
 
-3. Side effect 위험
-   - MAX(i++, j) — i 두 번 평가
+**2. Debugger에서 안 보임**
 
-4. Namespace 무시
-   - 모든 매크로가 글로벌
+- 매크로 expansion 후 코드만 표시
 
-5. Scope 무시
-   - 정의 후 모든 file에 영향
-```
+**3. Side effect 위험**
+
+- MAX(i++, j) — i 두 번 평가
+
+**4. Namespace 무시**
+
+- 모든 매크로가 글로벌
+
+**5. Scope 무시**
+
+- 정의 후 모든 file에 영향
 
 C++의 *inline + const*가 *매크로의 대안 대부분*.
 
@@ -450,18 +453,30 @@ clang-tidy --checks='cppcoreguidelines-*,readability-*' src.cpp
 
 ## 일반적인 finding (macros / types / constants)
 
-```
-실전에서 자주 발견되는 위반:
+**실전에서 자주 발견되는 위반:**
 
-1. 함수형 매크로 사용
-2. signed/unsigned 혼용 비교
-3. Implicit narrowing (int → short, int → char)
-4. Magic number (256, 1000, ...)
-5. #define으로 상수 (const variable 권장)
-6. C-style cast
-7. Floating-point == 비교
-8. if (count) — boolean 명시 누락
-```
+**1. 함수형 매크로 사용**
+
+
+**2. signed/unsigned 혼용 비교**
+
+
+**3. Implicit narrowing (int → short, int → char)**
+
+
+**4. Magic number (256, 1000, ...)**
+
+
+**5. #define으로 상수 (const variable 권장)**
+
+
+**6. C-style cast**
+
+
+**7. Floating-point == 비교**
+
+
+**8. if (count) — boolean 명시 누락**
 
 ## 정리
 

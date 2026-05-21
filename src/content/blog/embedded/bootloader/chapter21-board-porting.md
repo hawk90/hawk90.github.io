@@ -42,21 +42,29 @@ grep -l "imx8mm_evk" configs/ \
 
 새 보드 `boardx`를 추가한다고 하면, 손대는 곳은 보통 이렇습니다.
 
-```text
-1. configs/boardx_defconfig
-2. board/myvendor/boardx/
-     ├── Kconfig
-     ├── Makefile
-     ├── boardx.c        (보드 초기화, DRAM 크기 검출)
-     ├── spl.c           (SPL 단계 DDR 초기화)
-     ├── lpddr4_timing.c (DDR 타이밍, NXP 도구로 생성)
-     └── MAINTAINERS
-3. arch/arm/dts/boardx.dts
-   arch/arm/dts/boardx-u-boot.dtsi
-4. include/configs/boardx.h
-5. board/myvendor/Kconfig (subsystem 등록)
-6. arch/arm/mach-imx/imx8m/Kconfig (보드 선택 옵션 추가)
-```
+**1. configs/boardx_defconfig**
+
+
+**2. board/myvendor/boardx/**
+
+- ├── Kconfig
+- ├── Makefile
+- ├── boardx.c        (보드 초기화, DRAM 크기 검출)
+- ├── spl.c           (SPL 단계 DDR 초기화)
+- ├── lpddr4_timing.c (DDR 타이밍, NXP 도구로 생성)
+- └── MAINTAINERS
+
+**3. arch/arm/dts/boardx.dts**
+
+- arch/arm/dts/boardx-u-boot.dtsi
+
+**4. include/configs/boardx.h**
+
+
+**5. board/myvendor/Kconfig (subsystem 등록)**
+
+
+**6. arch/arm/mach-imx/imx8m/Kconfig (보드 선택 옵션 추가)**
 
 `-u-boot.dtsi`는 *U-Boot 단계 전용 DT 추가분*입니다. 본 DT는 Linux와 공유하고, U-Boot 만의 필요(예: SPL 단계 사용 device, bootph-pre-ram 같은 노드 속성)는 `.dtsi`로 끼워 넣습니다.
 

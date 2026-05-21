@@ -345,20 +345,31 @@ Target: > 95% (일반적)
 
 위성·우주선의 *in-orbit NCR*은 일반적으로 다음 패턴:
 
-```
-1. Detection — operations team이 anomaly 식별
-2. Initial triage — severity + safe-mode 여부
-3. Investigation (수주~수개월) — telemetry 분석, vendor 자문, simulation 재현
-4. Workaround — 즉각 적용 가능한 operational 변경
-5. Permanent fix — ground SW + HIL test + customer approval + in-orbit upload
-6. Verification — 수주~수개월 monitoring
-7. Lessons learned — 다음 mission에 반영
+**1. Detection — operations team이 anomaly 식별**
 
-특성:
-  - 비용 큼 (수 person-month 이상)
-  - 시간 큼 (수개월)
-  - Mission impact (degraded operation 가능)
-```
+
+**2. Initial triage — severity + safe-mode 여부**
+
+
+**3. Investigation (수주~수개월) — telemetry 분석, vendor 자문, simulation 재현**
+
+
+**4. Workaround — 즉각 적용 가능한 operational 변경**
+
+
+**5. Permanent fix — ground SW + HIL test + customer approval + in-orbit upload**
+
+
+**6. Verification — 수주~수개월 monitoring**
+
+
+**7. Lessons learned — 다음 mission에 반영**
+
+**특성:**
+
+- 비용 큼 (수 person-month 이상)
+- 시간 큼 (수개월)
+- Mission impact (degraded operation 가능)
 
 이런 *비싼 in-orbit NCR* 때문에 *pre-launch에 최대 발견*이 목표.
 
@@ -509,25 +520,29 @@ Automation이 *NCR 관리 부담 감소*. 수동 작업 → tool.
 
 ## Common NCR Pitfalls
 
-```
-1. RCA가 "fix and move on" — Process improvement 누락
-   교훈: 모든 Major NCR이 *Preventive Action* 가져야
+**1. RCA가 "fix and move on" — Process improvement 누락**
 
-2. NCR이 누적 (aging)
-   교훈: SLA + escalation procedure
+- 교훈: 모든 Major NCR이 *Preventive Action* 가져야
 
-3. Same root cause 반복
-   교훈: Pattern 분석 + process 개선
+**2. NCR이 누적 (aging)**
 
-4. NCR이 단순 bug tracker로 격하
-   교훈: Process violation, doc error 등 포함
+- 교훈: SLA + escalation procedure
 
-5. Customer에 늦은 통보
-   교훈: Critical/Major는 즉시 통보 의무
+**3. Same root cause 반복**
 
-6. RCA가 "human error"로 종결
-   교훈: 항상 *system fix* 가능 (training, checklist, tool)
-```
+- 교훈: Pattern 분석 + process 개선
+
+**4. NCR이 단순 bug tracker로 격하**
+
+- 교훈: Process violation, doc error 등 포함
+
+**5. Customer에 늦은 통보**
+
+- 교훈: Critical/Major는 즉시 통보 의무
+
+**6. RCA가 "human error"로 종결**
+
+- 교훈: 항상 *system fix* 가능 (training, checklist, tool)
 
 ## NCR 운영 — 일반 dashboard 구조
 

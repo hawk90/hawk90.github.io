@@ -98,19 +98,19 @@ Service의 끝은 어디?
 
 Characteristic은 *한 데이터 항목*입니다. *두 개의 Attribute*로 표현됩니다.
 
-```text
-1. Characteristic Declaration (Attribute)
-   Handle    = 0x0020
-   Type      = 0x2803 (Characteristic Declaration)
-   Value     = Properties(1B) || ValueHandle(2B) || UUID(2 or 16B)
-   Permission = Read only
+**1. Characteristic Declaration (Attribute)**
 
-2. Characteristic Value (Attribute)
-   Handle    = 0x0021 (= 위의 ValueHandle)
-   Type      = Characteristic의 UUID (예: 0x2A19 Battery Level)
-   Value     = 실제 데이터 (예: 1 byte의 0~100)
-   Permission = Properties에 따라
-```
+- Handle    = 0x0020
+- Type      = 0x2803 (Characteristic Declaration)
+- Value     = Properties(1B) || ValueHandle(2B) || UUID(2 or 16B)
+- Permission = Read only
+
+**2. Characteristic Value (Attribute)**
+
+- Handle    = 0x0021 (= 위의 ValueHandle)
+- Type      = Characteristic의 UUID (예: 0x2A19 Battery Level)
+- Value     = 실제 데이터 (예: 1 byte의 0~100)
+- Permission = Properties에 따라
 
 *두 개의 Attribute가 한 Characteristic을 만든다*는 게 처음 볼 때 헷갈리는 부분입니다. 첫 번째는 *메타데이터*, 두 번째는 *실제 값*입니다.
 
@@ -231,16 +231,21 @@ Format Byte 종류 (자주 쓰는 것).
 
 이 트리를 *클라이언트는 어떻게 발견*하는가?
 
-```text
-1. ATT Read By Group Type Request, Type=0x2800
-   → 모든 Primary Service의 [handle, endHandle, UUID] 목록
-2. ATT Read By Type Request, Type=0x2803 (within service range)
-   → 각 service 안의 Characteristic 선언 목록
-3. ATT Find Information Request (within characteristic range)
-   → 각 characteristic의 Descriptor 목록 (CCCD 등)
-4. ATT Write Request, handle=CCCD, value=0x0001
-   → notify 활성화
-```
+**1. ATT Read By Group Type Request, Type=0x2800**
+
+- → 모든 Primary Service의 [handle, endHandle, UUID] 목록
+
+**2. ATT Read By Type Request, Type=0x2803 (within service range)**
+
+- → 각 service 안의 Characteristic 선언 목록
+
+**3. ATT Find Information Request (within characteristic range)**
+
+- → 각 characteristic의 Descriptor 목록 (CCCD 등)
+
+**4. ATT Write Request, handle=CCCD, value=0x0001**
+
+- → notify 활성화
 
 이 4단계를 *Service Discovery*라고 부릅니다. *연결 직후 1회만* 수행하고, 이후로는 캐시를 씁니다 (5.1의 GATT Caching).
 

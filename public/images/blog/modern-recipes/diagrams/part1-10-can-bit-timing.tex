@@ -20,9 +20,10 @@
 \node[con, minimum width=24mm, minimum height=14mm, anchor=west] (ph2)   at (6.4,0)
   {Phase2\\\small (1 – 8 TQ)};
 
-% Sample point arrow between Phase1 / Phase2
+% Sample point arrow between Phase1 / Phase2 — caption with explicit row gap
 \draw[focus, line width=0.6pt] (6.4,-1.0) -- (6.4,-0.4);
-\node[caption, anchor=north, align=center] at (6.4,-1.0) {sample point\\\small (보통 75 – 87.5\%)};
+\node[caption, anchor=north, align=center] at (6.4,-1.1)
+  {sample point\\[2pt]\small (보통 75 – 87.5\%)};
 
 \end{tikzpicture}
 \end{document}

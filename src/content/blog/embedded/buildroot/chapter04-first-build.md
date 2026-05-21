@@ -104,22 +104,34 @@ $ make -j$(nproc) 2>&1 | tee build.log
 
 빌드는 대략 다음 순서로 진행됩니다. 각 단계가 화면에 흐를 때 *어디쯤인지* 감이 잡히도록 정리해 두면 좋습니다.
 
-```text
-1.  Initial directory setup
-2.  Download — dl/<pkg>/<tarball>.tar.*
-3.  Toolchain
-       host-binutils, host-gcc(stage 1), kernel-headers,
-       glibc(stage 1), host-gcc(stage 2), glibc(stage 2)
-4.  Target packages
-       skeleton, busybox, … (의존성 순)
-5.  Kernel
-       linux-extract, linux-configure, linux-build, linux-install
-6.  Bootloader
-       (qemu_aarch64_virt_defconfig는 U-Boot 없이 -kernel 부팅)
-7.  Filesystem images
-       fakeroot rootfs build, mkfs.ext4, …
-8.  Post-image (해당 시)
-```
+**1. Initial directory setup**
+
+
+**2. Download — dl/<pkg>/<tarball>.tar.***
+
+
+**3. Toolchain**
+
+- host-binutils, host-gcc(stage 1), kernel-headers,
+- glibc(stage 1), host-gcc(stage 2), glibc(stage 2)
+
+**4. Target packages**
+
+- skeleton, busybox, … (의존성 순)
+
+**5. Kernel**
+
+- linux-extract, linux-configure, linux-build, linux-install
+
+**6. Bootloader**
+
+- (qemu_aarch64_virt_defconfig는 U-Boot 없이 -kernel 부팅)
+
+**7. Filesystem images**
+
+- fakeroot rootfs build, mkfs.ext4, …
+
+**8. Post-image (해당 시)**
 
 처음에는 3단계(toolchain)이 가장 오래 걸립니다. 한 번 빌드한 toolchain은 `output/host/`에 캐시되므로, *같은 defconfig*로 재빌드하면 toolchain 단계는 거의 즉시 통과합니다.
 

@@ -106,42 +106,48 @@ Class 3: Light qualification
 
 ## Qualification Process (Annex Q §3)
 
-```
-1. Tool Identification
-   - Tool 이름, version, vendor
-   - Project에서의 사용
+**1. Tool Identification**
 
-2. Class Determination
-   - 위 3 class 중 어디?
-   - 정당화
+- Tool 이름, version, vendor
+- Project에서의 사용
 
-3. Tool Operational Requirements
-   - 도구가 해야 하는 일
-   - 기능, 성능
+**2. Class Determination**
 
-4. Tool Acceptance Procedure
-   - 어떻게 정상 동작 검증?
-   - Test method
-   - Acceptance criteria
+- 위 3 class 중 어디?
+- 정당화
 
-5. Tool Validation
-   - Acceptance procedure 실행
-   - Results 분석
-   - Anomaly handling
+**3. Tool Operational Requirements**
 
-6. Tool Operational Limits
-   - 알려진 한계
-   - Workaround
+- 도구가 해야 하는 일
+- 기능, 성능
 
-7. Tool Configuration Management
-   - Version control
-   - Update procedure
-   - Change impact
+**4. Tool Acceptance Procedure**
 
-8. Tool Qualification Records
-   - 모든 활동 기록
-   - Sign-off
-```
+- 어떻게 정상 동작 검증?
+- Test method
+- Acceptance criteria
+
+**5. Tool Validation**
+
+- Acceptance procedure 실행
+- Results 분석
+- Anomaly handling
+
+**6. Tool Operational Limits**
+
+- 알려진 한계
+- Workaround
+
+**7. Tool Configuration Management**
+
+- Version control
+- Update procedure
+- Change impact
+
+**8. Tool Qualification Records**
+
+- 모든 활동 기록
+- Sign-off
 
 DO-330만큼 *체계적이지 않음*. *간단함이 장점*.
 
@@ -433,30 +439,33 @@ OSS도 ECSS 사용 가능. *Class 2-3에서 흔함*.
 
 ### OSS Qualification Approach
 
-```
-1. License Check
-   - GPL: 사용 제한적 (final product에 OSS code 포함 의무)
-   - LGPL: 가능 (link로만 사용)
-   - BSD/MIT/Apache: 가장 자유
-   - Public Domain: 자유
-   
-2. Heritage Check
-   - 다른 missions에서 사용?
-   - Community 활성?
+**1. License Check**
 
-3. Vendor Support
-   - 상용 support 가능?
-   - 자체 maintenance 가능?
+- GPL: 사용 제한적 (final product에 OSS code 포함 의무)
+- LGPL: 가능 (link로만 사용)
+- BSD/MIT/Apache: 가장 자유
+- Public Domain: 자유
 
-4. Qualification Plan
-   - 자체 작성 (vendor 없으므로)
-   - 더 큰 effort
+**2. Heritage Check**
 
-5. Long-term Sustainability
-   - Project 발사 후 10-30년 사용
-   - OSS 프로젝트가 유지?
-   - Fork 가능성?
-```
+- 다른 missions에서 사용?
+- Community 활성?
+
+**3. Vendor Support**
+
+- 상용 support 가능?
+- 자체 maintenance 가능?
+
+**4. Qualification Plan**
+
+- 자체 작성 (vendor 없으므로)
+- 더 큰 effort
+
+**5. Long-term Sustainability**
+
+- Project 발사 후 10-30년 사용
+- OSS 프로젝트가 유지?
+- Fork 가능성?
 
 ### OSS Example — RTEMS RTOS
 

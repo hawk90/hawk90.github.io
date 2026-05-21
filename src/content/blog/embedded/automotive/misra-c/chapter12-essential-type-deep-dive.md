@@ -14,11 +14,13 @@ draft: false
 
 C 표준은 모든 산술 변환을 *3단계*로 정의한다.
 
-```
-1. Integer Promotion      — 작은 정수를 int로
-2. Usual Arithmetic Conv  — 양쪽 피연산자를 같은 타입으로
-3. Conversion (Assignment) — 결과를 대상 타입으로
-```
+**1. Integer Promotion      — 작은 정수를 int로**
+
+
+**2. Usual Arithmetic Conv  — 양쪽 피연산자를 같은 타입으로**
+
+
+**3. Conversion (Assignment) — 결과를 대상 타입으로**
 
 각 단계마다 *침묵 변환*이 일어난다. MISRA Essential Type Model은 이 *모든 침묵 변환*에 *명시 의도*를 요구.
 
@@ -95,17 +97,31 @@ Multiply16_safe:
 
 이항 산술 연산에서 양쪽 피연산자가 *다른 타입*이면:
 
-```
-1. 둘 중 long double 있으면 → 양쪽 long double
-2. 둘 중 double 있으면      → 양쪽 double
-3. 둘 중 float 있으면       → 양쪽 float
-4. 정수 promotion 적용
-5. 같은 타입이면 → 변환 없음
-6. 둘 다 signed 또는 둘 다 unsigned면 → rank 큰 쪽으로
-7. unsigned의 rank ≥ signed의 rank면 → unsigned로
-8. signed가 unsigned 값 모두를 표현할 수 있으면 → signed로
-9. 그 외 → signed의 unsigned 버전으로
-```
+**1. 둘 중 long double 있으면 → 양쪽 long double**
+
+
+**2. 둘 중 double 있으면      → 양쪽 double**
+
+
+**3. 둘 중 float 있으면       → 양쪽 float**
+
+
+**4. 정수 promotion 적용**
+
+
+**5. 같은 타입이면 → 변환 없음**
+
+
+**6. 둘 다 signed 또는 둘 다 unsigned면 → rank 큰 쪽으로**
+
+
+**7. unsigned의 rank ≥ signed의 rank면 → unsigned로**
+
+
+**8. signed가 unsigned 값 모두를 표현할 수 있으면 → signed로**
+
+
+**9. 그 외 → signed의 unsigned 버전으로**
 
 규칙 9가 *함정의 원천*이다.
 
@@ -161,15 +177,25 @@ if (a < 0) {
 
 C99 §6.3.1.1이 정의하는 *integer conversion rank*:
 
-```
-1. _Bool                    (rank 0, 가장 낮음)
-2. signed char, unsigned char, char
-3. short, unsigned short
-4. int, unsigned int
-5. long, unsigned long
-6. long long, unsigned long long
-7. extended integer types (구현 정의)
-```
+**1. _Bool                    (rank 0, 가장 낮음)**
+
+
+**2. signed char, unsigned char, char**
+
+
+**3. short, unsigned short**
+
+
+**4. int, unsigned int**
+
+
+**5. long, unsigned long**
+
+
+**6. long long, unsigned long long**
+
+
+**7. extended integer types (구현 정의)**
 
 같은 size의 signed와 unsigned는 *같은 rank*. 위 규칙 6~9가 이 동률을 깬다.
 

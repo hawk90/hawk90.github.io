@@ -220,20 +220,40 @@ Bluetooth Core Specification 5.4 (총 ~5,800 페이지)
 
 원서 *Getting Started with Bluetooth Low Energy*는 2014년에 *Bluetooth 4.1 시점*으로 출간되었습니다. 12장 구성입니다.
 
-```text
-1. Introduction
-2. Protocol Basics
-3. The BLE Controller (PHY, Link Layer)
-4. The Host (L2CAP, ATT, GATT, SMP, GAP)
-5. Hardware Platforms (당시 기준 nRF51, CC254x)
-6. Tools and Toolchains
-7. Debugging (sniffer, log)
-8. Application Design
-9. Beacons (iBeacon, AltBeacon)
-10. Android Programming
-11. iOS Programming
-12. Internet Gateways (BLE → IP)
-```
+**1. Introduction**
+
+
+**2. Protocol Basics**
+
+
+**3. The BLE Controller (PHY, Link Layer)**
+
+
+**4. The Host (L2CAP, ATT, GATT, SMP, GAP)**
+
+
+**5. Hardware Platforms (당시 기준 nRF51, CC254x)**
+
+
+**6. Tools and Toolchains**
+
+
+**7. Debugging (sniffer, log)**
+
+
+**8. Application Design**
+
+
+**9. Beacons (iBeacon, AltBeacon)**
+
+
+**10. Android Programming**
+
+
+**11. iOS Programming**
+
+
+**12. Internet Gateways (BLE → IP)**
 
 이 시리즈는 *책의 구조를 따르되, 5.x까지의 변화*를 반영합니다.
 

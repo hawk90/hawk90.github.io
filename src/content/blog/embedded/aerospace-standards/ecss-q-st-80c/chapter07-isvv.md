@@ -14,24 +14,25 @@ ECSS의 *가장 특징적인 활동* — **ISVV (Independent Software Verificati
 
 ECSS-Q-ST-80C의 *Independent Software Verification and Validation*은 *개발 조직과 기술적·관리적·재정적으로 독립된 조직*이 수행하는 V&V 활동.
 
-```
-3차원 독립:
+**3차원 독립:**
 
-1. Technical Independence
-   - 별도 도구
-   - 별도 방법론
-   - 독립적 분석
+**1. Technical Independence**
 
-2. Managerial Independence
-   - 별도 reporting chain
-   - 별도 조직
-   - 결정 권한 분리
+- 별도 도구
+- 별도 방법론
+- 독립적 분석
 
-3. Financial Independence
-   - 별도 funding
-   - 별도 budget
-   - 가능하면 별도 회사
-```
+**2. Managerial Independence**
+
+- 별도 reporting chain
+- 별도 조직
+- 결정 권한 분리
+
+**3. Financial Independence**
+
+- 별도 funding
+- 별도 budget
+- 가능하면 별도 회사
 
 DO-178C의 *Independence*는 *조직 내 다른 팀*도 가능. ECSS의 *ISVV*는 *별도 회사 권장*. 정확한 wording은 *ECSS-Q-ST-80C 원문*.
 
@@ -67,15 +68,25 @@ ECSS는 *둘 다 권장*. ISVV는 *internal V&V를 대체하지 않음*. *추가
 
 ECSS-Q-ST-80C의 ISVV 영역 (Annex K 참조):
 
-```
-1. ISVV Planning
-2. Requirements V&V
-3. Design V&V
-4. Code V&V
-5. Test V&V
-6. Process Audit
-7. Anomaly Analysis
-```
+**1. ISVV Planning**
+
+
+**2. Requirements V&V**
+
+
+**3. Design V&V**
+
+
+**4. Code V&V**
+
+
+**5. Test V&V**
+
+
+**6. Process Audit**
+
+
+**7. Anomaly Analysis**
 
 각 영역의 *구체 절차·산출물*은 원문 *Annex K*.
 
@@ -300,15 +311,21 @@ ISVV의 process audit이 *SPA (Ch 2) 자체 audit과 다름* — external perspe
 
 ISVV가 *개발 조직의 NCR pattern을 cluster + 분석*:
 
-```
-일반 분석 흐름:
+**일반 분석 흐름:**
 
-1. NCR sample을 root cause로 cluster
-2. Top cluster 식별 (예: floating point, concurrency, doc drift)
-3. 유사 mission과 비교
-4. Trend 평가 (이번 mission이 다른 mission 대비 어떤가)
-5. Cluster 별 systemic recommendation
-```
+**1. NCR sample을 root cause로 cluster**
+
+
+**2. Top cluster 식별 (예: floating point, concurrency, doc drift)**
+
+
+**3. 유사 mission과 비교**
+
+
+**4. Trend 평가 (이번 mission이 다른 mission 대비 어떤가)**
+
+
+**5. Cluster 별 systemic recommendation**
 
 ISVV가 *수많은 mission 경험*을 가져와 *single mission perspective*보다 광범위한 인사이트.
 

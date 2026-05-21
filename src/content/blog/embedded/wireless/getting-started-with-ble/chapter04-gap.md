@@ -298,18 +298,34 @@ iOS는 *연결 파라미터에 엄격한 정책*이 있습니다. Apple Bluetoot
 
 ### 절차 요약
 
-```text
-1. Peripheral: Advertising 시작
-2. Central: Scanning (active 또는 passive)
-3. Central: 원하는 광고 발견 → CONNECT_IND 송신
-4. 양쪽: 연결 채널 맵 결정, AccessAddress 생성
-5. 양쪽: Connection 상태로 전환
-6. 매 Connection Interval마다 CE 열림
-7. (선택) Connection Update로 파라미터 변경
-8. (선택) Pairing/Bonding (7장)
-9. GATT 트래픽 (5장)
-10. Disconnect (둘 중 누구든 가능)
-```
+**1. Peripheral: Advertising 시작**
+
+
+**2. Central: Scanning (active 또는 passive)**
+
+
+**3. Central: 원하는 광고 발견 → CONNECT_IND 송신**
+
+
+**4. 양쪽: 연결 채널 맵 결정, AccessAddress 생성**
+
+
+**5. 양쪽: Connection 상태로 전환**
+
+
+**6. 매 Connection Interval마다 CE 열림**
+
+
+**7. (선택) Connection Update로 파라미터 변경**
+
+
+**8. (선택) Pairing/Bonding (7장)**
+
+
+**9. GATT 트래픽 (5장)**
+
+
+**10. Disconnect (둘 중 누구든 가능)**
 
 ## GAP의 Discoverability와 Connectability
 

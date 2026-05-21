@@ -125,15 +125,25 @@ Ch 10  : 한국 적용 + 시리즈 마무리
 
 ### Key Takeaways
 
-```
-1. ECSS는 *유럽 우주 SW 표준* — 무료, 광범위.
-2. ECSS-Q-ST-80C (QA) + ECSS-E-ST-40C (Engineering)이 핵심 페어.
-3. *Tailoring 가능* — mission 규모에 맞게.
-4. *Heritage reuse* — ESA SAVOIR catalog.
-5. *ISVV* (외부 V&V)가 차별점.
-6. DO-178C / ISO 26262와 *상호 보완*.
-7. 정확한 정책·문서·rule wording은 *ecss.nl* 원문.
-```
+**1. ECSS는 *유럽 우주 SW 표준* — 무료, 광범위.**
+
+
+**2. ECSS-Q-ST-80C (QA) + ECSS-E-ST-40C (Engineering)이 핵심 페어.**
+
+
+**3. *Tailoring 가능* — mission 규모에 맞게.**
+
+
+**4. *Heritage reuse* — ESA SAVOIR catalog.**
+
+
+**5. *ISVV* (외부 V&V)가 차별점.**
+
+
+**6. DO-178C / ISO 26262와 *상호 보완*.**
+
+
+**7. 정확한 정책·문서·rule wording은 *ecss.nl* 원문.**
 
 ### 다음 시리즈 추천
 

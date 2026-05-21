@@ -1162,32 +1162,35 @@ std::vector<size_t> find_all_positions(
 
 ## 한국 개발자의 함정
 
-```
-1. *execution::par만 붙이면 빠름*
-   - 작은 데이터엔 오히려 느림 (오버헤드)
-   - 임계값 (≈10K 요소) 이상에서만 이득
-   - 측정 필수
+**1. *execution::par만 붙이면 빠름***
 
-2. *reduce = accumulate 더 빠른 버전*
-   - reduce는 *순서 무관* (결합법칙 필요)
-   - 뺄셈 / 부동소수점 정밀도에서 다른 결과
-   - 의미가 다름
+- 작은 데이터엔 오히려 느림 (오버헤드)
+- 임계값 (≈10K 요소) 이상에서만 이득
+- 측정 필수
 
-3. *par_unseq에서 락 사용*
-   - 정책이 락 사용 금지
-   - 데드락 또는 UB
-   - thread-safe atomic만 OK
+**2. *reduce = accumulate 더 빠른 버전***
 
-4. *예외 던지면 catch*
-   - 병렬 알고리즘 안에서 예외 → terminate
-   - 직접 catch + exception_ptr로 보관
-   - 표준이 그렇게 정의
+- reduce는 *순서 무관* (결합법칙 필요)
+- 뺄셈 / 부동소수점 정밀도에서 다른 결과
+- 의미가 다름
 
-5. *GCC에서 그냥 컴파일*
-   - libstdc++는 TBB 필요
-   - -ltbb 없으면 링크 실패
-   - 또는 oneTBB 설치
-```
+**3. *par_unseq에서 락 사용***
+
+- 정책이 락 사용 금지
+- 데드락 또는 UB
+- thread-safe atomic만 OK
+
+**4. *예외 던지면 catch***
+
+- 병렬 알고리즘 안에서 예외 → terminate
+- 직접 catch + exception_ptr로 보관
+- 표준이 그렇게 정의
+
+**5. *GCC에서 그냥 컴파일***
+
+- libstdc++는 TBB 필요
+- -ltbb 없으면 링크 실패
+- 또는 oneTBB 설치
 
 ## 실무 적용
 

@@ -55,14 +55,22 @@ GP 레지스터가 32개입니다. ARM의 16개보다 많아서 context save 크
 
 ## Interrupt 진입 — Cortex-M보다 적은 자동화
 
-```text
-External IRQ 발생:
-1. mepc ← 현재 PC
-2. mcause ← interrupt number
-3. mstatus.MIE → mstatus.MPIE (save)
-4. mstatus.MIE = 0 (disable)
-5. PC ← mtvec
-```
+**External IRQ 발생:**
+
+
+**1. mepc ← 현재 PC**
+
+
+**2. mcause ← interrupt number**
+
+
+**3. mstatus.MIE → mstatus.MPIE (save)**
+
+
+**4. mstatus.MIE = 0 (disable)**
+
+
+**5. PC ← mtvec**
 
 레지스터 자동 push가 전혀 없습니다. handler가 모든 레지스터를 SW로 저장해야 합니다.
 

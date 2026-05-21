@@ -257,23 +257,33 @@ key-dev {
 
 `bootm 0x40000000`을 치는 순간 U-Boot 내부에서 다음 순서가 돌아갑니다. 코드는 `boot/image-fit.c`·`boot/image-fit-sig.c`에 있습니다.
 
-```text
-1. fit_check_format()         — magic·구조 검증
-2. fit_conf_get_node()        — 부팅할 conf@N 선택
-3. fit_image_verify_required_sigs()
-   ├ control DTB의 required key 목록 수집
-   ├ conf@N/signature@N 노드와 매치
-   └ 매치 실패 시 abort
-4. fit_image_check_sig()
-   ├ signed image 목록 (kernel·fdt·ramdisk)
-   ├ region 데이터 모아 RSA verify
-   └ Verifying Hash Integrity ... sha256,rsa2048:dev+ OK
-5. fit_image_load(kernel)
-   ├ image data 메모리에 복사
-   └ hash@1 재계산 → Verifying Hash Integrity ... sha256+ OK
-6. fit_image_load(fdt) / fit_image_load(ramdisk)  — 동일 절차
-7. boot_jump_linux()          — entry point로 점프
-```
+**1. fit_check_format()         — magic·구조 검증**
+
+
+**2. fit_conf_get_node()        — 부팅할 conf@N 선택**
+
+
+**3. fit_image_verify_required_sigs()**
+
+- ├ control DTB의 required key 목록 수집
+- ├ conf@N/signature@N 노드와 매치
+- └ 매치 실패 시 abort
+
+**4. fit_image_check_sig()**
+
+- ├ signed image 목록 (kernel·fdt·ramdisk)
+- ├ region 데이터 모아 RSA verify
+- └ Verifying Hash Integrity ... sha256,rsa2048:dev+ OK
+
+**5. fit_image_load(kernel)**
+
+- ├ image data 메모리에 복사
+- └ hash@1 재계산 → Verifying Hash Integrity ... sha256+ OK
+
+**6. fit_image_load(fdt) / fit_image_load(ramdisk)  — 동일 절차**
+
+
+**7. boot_jump_linux()          — entry point로 점프**
 
 3·4단계가 *configuration 서명* 검증, 5·6단계가 *각 image hash* 검증입니다. 콘솔 로그에서 같은 "Verifying Hash Integrity"가 두 번 보이는 이유가 이것입니다.
 

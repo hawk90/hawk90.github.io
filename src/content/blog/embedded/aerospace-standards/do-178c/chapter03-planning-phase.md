@@ -40,48 +40,54 @@ STANDARDS (3)
 
 ### PSAC 구조 (DO-178C §11.1)
 
-```
-1. Introduction
-   - Purpose
-   - Scope
-   - Definitions, Acronyms
+**1. Introduction**
 
-2. System Overview
-   - Aircraft / system context
-   - SW의 역할
-   - Operating environment
+- Purpose
+- Scope
+- Definitions, Acronyms
 
-3. Software Overview
-   - Identification
-   - Architecture summary
-   - Features
+**2. System Overview**
 
-4. Certification Considerations
-   - 적용 인증 기준 (FAR Part 25, EASA CS-25 등)
-   - DAL 결정 근거 (System safety assessment 참조)
-   - Means of Compliance (MoC) — 어떻게 충족할 것인가
+- Aircraft / system context
+- SW의 역할
+- Operating environment
 
-5. Software Life Cycle
-   - 채택한 lifecycle (V-model, iterative 등)
-   - 각 phase의 *transition criteria*
+**3. Software Overview**
 
-6. Software Life Cycle Data
-   - 모든 산출물 목록
-   - 각 산출물의 *control category* (CC1/CC2)
+- Identification
+- Architecture summary
+- Features
 
-7. Schedule
-   - SOI milestones
-   - Critical path
+**4. Certification Considerations**
 
-8. Additional Considerations
-   - Previously Developed Software (PDS)
-   - Tool Qualification (DO-330)
-   - Alternative methods
-   - Deactivated code
-   - User-modifiable software
+- 적용 인증 기준 (FAR Part 25, EASA CS-25 등)
+- DAL 결정 근거 (System safety assessment 참조)
+- Means of Compliance (MoC) — 어떻게 충족할 것인가
 
-9. References
-```
+**5. Software Life Cycle**
+
+- 채택한 lifecycle (V-model, iterative 등)
+- 각 phase의 *transition criteria*
+
+**6. Software Life Cycle Data**
+
+- 모든 산출물 목록
+- 각 산출물의 *control category* (CC1/CC2)
+
+**7. Schedule**
+
+- SOI milestones
+- Critical path
+
+**8. Additional Considerations**
+
+- Previously Developed Software (PDS)
+- Tool Qualification (DO-330)
+- Alternative methods
+- Deactivated code
+- User-modifiable software
+
+**9. References**
 
 ### PSAC 작성 예 — Section 4 Certification Considerations
 
@@ -158,33 +164,50 @@ DAL A system (FBW급)  : 6~12 개월 + 검토 2-3개월
 
 ### SDP 구조 (DO-178C §11.2)
 
-```
-1. Introduction
-2. Standards
-   - SRS, SDS, SCS 참조
-3. Software Development Environment
-   - 개발 환경 (OS, IDE, 컴파일러 버전)
-   - 빌드 시스템
-   - VCS (보통 ClearCase 또는 Git)
-4. Software Requirements Process
-   - HLR 작성 procedure
-   - 도구 사용 (DOORS 등)
-5. Software Design Process
-   - LLR + Architecture
-   - 도구 (SCADE, Simulink, ASCET)
-6. Software Coding Process
-   - 컴파일러 설정
-   - 코드 review procedure
-7. Software Integration Process
-   - Build automation
-   - Integration test 준비
-8. Transition Criteria
-   - 각 phase 진입·종료 기준
-9. Traceability
-   - System Req → HLR → LLR → Code → Tests
-10. Software Development Standards
-    - 참조 standards
-```
+**1. Introduction**
+
+
+**2. Standards**
+
+- SRS, SDS, SCS 참조
+
+**3. Software Development Environment**
+
+- 개발 환경 (OS, IDE, 컴파일러 버전)
+- 빌드 시스템
+- VCS (보통 ClearCase 또는 Git)
+
+**4. Software Requirements Process**
+
+- HLR 작성 procedure
+- 도구 사용 (DOORS 등)
+
+**5. Software Design Process**
+
+- LLR + Architecture
+- 도구 (SCADE, Simulink, ASCET)
+
+**6. Software Coding Process**
+
+- 컴파일러 설정
+- 코드 review procedure
+
+**7. Software Integration Process**
+
+- Build automation
+- Integration test 준비
+
+**8. Transition Criteria**
+
+- 각 phase 진입·종료 기준
+
+**9. Traceability**
+
+- System Req → HLR → LLR → Code → Tests
+
+**10. Software Development Standards**
+
+- 참조 standards
 
 ### SDP의 핵심 — Transition Criteria
 
@@ -229,34 +252,54 @@ DAL A system (FBW급)  : 6~12 개월 + 검토 2-3개월
 
 ### SVP 구조 (DO-178C §11.3)
 
-```
-1. Introduction
-2. Verification Process Overview
-3. Independence Considerations
-   - 어느 obj에 Independence 필요
-   - 어떻게 보장 (조직, 인력)
-4. Verification of Requirements
-   - HLR review checklist
-   - HLR test approach
-5. Verification of Design
-   - LLR review checklist
-   - Architecture analysis
-6. Verification of Code
-   - Code review checklist
-   - Static analysis configuration
-7. Testing
-   - Test strategy (unit, integration, system, HIL)
-   - Test environment description
-   - Test coverage criteria
-8. Coverage Analysis
-   - Statement, Decision, MC/DC
-9. Reviews and Analyses
-   - 누가, 언제, 무엇을, 어떻게
-10. Re-verification
-    - Change 후 어디까지 다시 검증
-11. Verification of Verification
-12. Tool Considerations
-```
+**1. Introduction**
+
+
+**2. Verification Process Overview**
+
+
+**3. Independence Considerations**
+
+- 어느 obj에 Independence 필요
+- 어떻게 보장 (조직, 인력)
+
+**4. Verification of Requirements**
+
+- HLR review checklist
+- HLR test approach
+
+**5. Verification of Design**
+
+- LLR review checklist
+- Architecture analysis
+
+**6. Verification of Code**
+
+- Code review checklist
+- Static analysis configuration
+
+**7. Testing**
+
+- Test strategy (unit, integration, system, HIL)
+- Test environment description
+- Test coverage criteria
+
+**8. Coverage Analysis**
+
+- Statement, Decision, MC/DC
+
+**9. Reviews and Analyses**
+
+- 누가, 언제, 무엇을, 어떻게
+
+**10. Re-verification**
+
+- Change 후 어디까지 다시 검증
+
+**11. Verification of Verification**
+
+
+**12. Tool Considerations**
 
 ### SVP의 핵심 — Coverage Strategy
 
@@ -299,30 +342,46 @@ DAL A system (FBW급)  : 6~12 개월 + 검토 2-3개월
 
 ### SCMP 구조 (DO-178C §11.4)
 
-```
-1. Introduction
-2. SCM Organization
-   - CCB (Change Control Board) 구성
-   - 역할 정의
-3. Identification of SCIs
-   - Software Configuration Items 목록
-   - Naming scheme
-4. Baseline Identification
-   - Baseline 분류 (Functional, Allocated, Product, Operational)
-5. Change Control
-   - CR (Change Request) workflow
-   - PR (Problem Report) workflow
-6. Configuration Status Accounting
-   - 보고서 종류와 주기
-7. Audits
-   - Functional Configuration Audit (FCA)
-   - Physical Configuration Audit (PCA)
-8. SCM Environment
-   - Tool (ClearCase, Git, SVN)
-   - Repository structure
-9. Archive
-10. Release Management
-```
+**1. Introduction**
+
+
+**2. SCM Organization**
+
+- CCB (Change Control Board) 구성
+- 역할 정의
+
+**3. Identification of SCIs**
+
+- Software Configuration Items 목록
+- Naming scheme
+
+**4. Baseline Identification**
+
+- Baseline 분류 (Functional, Allocated, Product, Operational)
+
+**5. Change Control**
+
+- CR (Change Request) workflow
+- PR (Problem Report) workflow
+
+**6. Configuration Status Accounting**
+
+- 보고서 종류와 주기
+
+**7. Audits**
+
+- Functional Configuration Audit (FCA)
+- Physical Configuration Audit (PCA)
+
+**8. SCM Environment**
+
+- Tool (ClearCase, Git, SVN)
+- Repository structure
+
+**9. Archive**
+
+
+**10. Release Management**
 
 ### SCM의 핵심 — Baseline 흐름
 
@@ -352,26 +411,40 @@ Operational Baseline   (post-certification)
 
 ### SQAP 구조 (DO-178C §11.5)
 
-```
-1. Introduction
-2. SQA Organization
-   - SQA Manager
-   - 개발 조직과의 *독립성*
-   - 보고 라인 (조직도 포함)
-3. SQA Activities
-   - Process audits
-   - Product audits
-   - Lifecycle audit
-   - Non-conformance handling
-4. SQA Records
-5. Independence Justification
-   - DO-178C가 요구하는 *Independence 충족 입증*
-6. Reviews
-   - SQA가 수행하는 review 종류
-7. SQA Schedule
-8. SQA Tools and Methods
-9. SAS (Software Accomplishment Summary) 작성
-```
+**1. Introduction**
+
+
+**2. SQA Organization**
+
+- SQA Manager
+- 개발 조직과의 *독립성*
+- 보고 라인 (조직도 포함)
+
+**3. SQA Activities**
+
+- Process audits
+- Product audits
+- Lifecycle audit
+- Non-conformance handling
+
+**4. SQA Records**
+
+
+**5. Independence Justification**
+
+- DO-178C가 요구하는 *Independence 충족 입증*
+
+**6. Reviews**
+
+- SQA가 수행하는 review 종류
+
+**7. SQA Schedule**
+
+
+**8. SQA Tools and Methods**
+
+
+**9. SAS (Software Accomplishment Summary) 작성**
 
 ### SQA의 핵심 — Independence
 
@@ -616,20 +689,29 @@ Day 4
 
 ### Typical Findings — SOI 1
 
-```
-가장 흔한 Finding (Major):
-1. "PSAC §6.2 — Software Lifecycle Data 목록에 SAS Plan 누락"
-2. "SVP §5.3 — Independence claim에 조직 차트 미첨부"
-3. "SCMP §4 — Baseline 정의가 모호. 'after major milestones'는 부족"
-4. "SCS §3 — Naming convention 예시 부족"
-5. "PSAC §4.4 — DAL B의 obj A-5-6 verification approach 불충분"
+**가장 흔한 Finding (Major):**
 
-Minor Findings:
+
+**1. "PSAC §6.2 — Software Lifecycle Data 목록에 SAS Plan 누락"**
+
+
+**2. "SVP §5.3 — Independence claim에 조직 차트 미첨부"**
+
+
+**3. "SCMP §4 — Baseline 정의가 모호. 'after major milestones'는 부족"**
+
+
+**4. "SCS §3 — Naming convention 예시 부족"**
+
+
+**5. "PSAC §4.4 — DAL B의 obj A-5-6 verification approach 불충분"**
+
+**Minor Findings:**
+
 - Document version inconsistency between PSAC and SDP
 - Reference list incomplete
 - Acronym definitions missing
 - Cross-reference errors
-```
 
 각 Major finding 해소 후 *FAA 재검토*. 2-3 round 일반적.
 

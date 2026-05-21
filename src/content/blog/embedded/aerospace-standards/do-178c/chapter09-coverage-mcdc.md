@@ -663,33 +663,37 @@ Approved:
 
 ## 도구 — 종합
 
-```
-정상 MC/DC 도구 (DO-178C TQL-2 qualified):
+**정상 MC/DC 도구 (DO-178C TQL-2 qualified):**
 
-1. LDRA Testbed
-   - 항공 산업 광범위 사용
-   - Coverage + static analysis + test 통합
-   - 다수 대형 OEM 프로그램 적용 (vendor 공개)
+**1. LDRA Testbed**
 
-2. VectorCAST
-   - 자동화 강함
-   - 항공·자동차 양쪽
-   - LDRA보다 약간 가벼움
+- 항공 산업 광범위 사용
+- Coverage + static analysis + test 통합
+- 다수 대형 OEM 프로그램 적용 (vendor 공개)
 
-3. RTRT (IBM Rational Test RealTime)
-   - 일부 OEM legacy
+**2. VectorCAST**
 
-4. Cantata (QA Systems)
-   - 항공 적합, LDRA 자매사
+- 자동화 강함
+- 항공·자동차 양쪽
+- LDRA보다 약간 가벼움
 
-5. Parasoft C/C++ Test
-   - 일반 commercial
+**3. RTRT (IBM Rational Test RealTime)**
 
-도구 미qualified (validation 필요):
-  gcov + lcov          : 오픈소스, host-side
-  llvm-cov + GCC       : 컴파일러 통합 coverage
-  bullseye              : 상용
-```
+- 일부 OEM legacy
+
+**4. Cantata (QA Systems)**
+
+- 항공 적합, LDRA 자매사
+
+**5. Parasoft C/C++ Test**
+
+- 일반 commercial
+
+**도구 미qualified (validation 필요):**
+
+- gcov + lcov          : 오픈소스, host-side
+- llvm-cov + GCC       : 컴파일러 통합 coverage
+- bullseye              : 상용
 
 ASIL D 인증은 *qualified tool 필수*. *LDRA 또는 VectorCAST*.
 

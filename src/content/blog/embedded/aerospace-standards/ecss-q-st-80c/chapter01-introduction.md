@@ -90,29 +90,49 @@ DO-178C의 DAL A~D와 *유사한 의미*. 정확한 정의·assignment 절차는
 
 ### Criticality 결정 (개략)
 
-```
-1. 시스템 hazard analysis (ECSS-Q-ST-40C Safety)
-2. SW의 contribution 분석
-3. Severity 분류
-4. SW Criticality 부여 (A~D)
-5. PA Plan에 명시
-```
+**1. 시스템 hazard analysis (ECSS-Q-ST-40C Safety)**
+
+
+**2. SW의 contribution 분석**
+
+
+**3. Severity 분류**
+
+
+**4. SW Criticality 부여 (A~D)**
+
+
+**5. PA Plan에 명시**
 
 ## 핵심 활동 — 9 가지
 
 ECSS-Q-ST-80C가 정의하는 *핵심 활동* (정확한 wording은 원문):
 
-```
-1. SW Product Assurance Management
-2. SW Process Assurance
-3. SW Product Properties Assurance
-4. SW Reusable Components Assurance
-5. SW Configuration Management
-6. SW Non-Conformance Control
-7. SW Procurement Assurance
-8. SW Project Assurance
-9. SW Verification and Validation (ISVV 포함)
-```
+**1. SW Product Assurance Management**
+
+
+**2. SW Process Assurance**
+
+
+**3. SW Product Properties Assurance**
+
+
+**4. SW Reusable Components Assurance**
+
+
+**5. SW Configuration Management**
+
+
+**6. SW Non-Conformance Control**
+
+
+**7. SW Procurement Assurance**
+
+
+**8. SW Project Assurance**
+
+
+**9. SW Verification and Validation (ISVV 포함)**
 
 DO-178C의 *5 process 그룹*과 *대응*하지만 *유럽 특유의 강조점*:
 - **Reusable Components Assurance** — 유럽은 *legacy SW 재사용* 강조
@@ -155,19 +175,37 @@ ECSS-E-ST-40C
 
 ## ECSS-E-ST-40C — V-model 단계 (개략)
 
-```
-1. SW Related System Requirements
-2. SW Requirements Analysis (SRR)
-3. SW Architectural Design (PDR)
-4. SW Detailed Design (CDR)
-5. SW Coding
-6. SW Unit Testing
-7. SW Integration Testing
-8. SW Validation against SR
-9. SW Delivery and Acceptance
-10. SW Operations and Maintenance
-11. SW Disposal
-```
+**1. SW Related System Requirements**
+
+
+**2. SW Requirements Analysis (SRR)**
+
+
+**3. SW Architectural Design (PDR)**
+
+
+**4. SW Detailed Design (CDR)**
+
+
+**5. SW Coding**
+
+
+**6. SW Unit Testing**
+
+
+**7. SW Integration Testing**
+
+
+**8. SW Validation against SR**
+
+
+**9. SW Delivery and Acceptance**
+
+
+**10. SW Operations and Maintenance**
+
+
+**11. SW Disposal**
 
 Waterfall + V-model의 결합. *각 단계에 review*. Agile 적용은 *부분적*. 자세히는 Ch 8.
 

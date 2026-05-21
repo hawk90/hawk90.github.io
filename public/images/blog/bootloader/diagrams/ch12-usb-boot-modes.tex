@@ -14,14 +14,14 @@
 \node[font=\sffamily\bfseries] at (3, 4.5) {USB 부트 모드};
 
 % Three modes
-\node[mode, draw=absbord, fill=absfill] (serial) at (0, 2.5) {Serial Download\\(SDP)};
-\node[mode, draw=impbord, fill=impfill] (fastboot) at (3, 2.5) {fastboot\\Protocol};
-\node[mode, draw=clibord, fill=clifill] (ums) at (6, 2.5) {USB Mass\\Storage};
+\node[mode, draw=absbord, fill=absfill] (serial) at (0, 2.5) {Serial Download\\[1pt](SDP)};
+\node[mode, draw=impbord, fill=impfill] (fastboot) at (3, 2.5) {fastboot\\[1pt]Protocol};
+\node[mode, draw=clibord, fill=clifill] (ums) at (6, 2.5) {USB Mass\\[1pt]Storage};
 
-% Descriptions
-\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (0, 0.8) {BootROM 단계\\이미지 주입\\NXP uuu, sdp};
-\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (3, 0.8) {U-Boot 단계\\파티션 flash\\Android 호환};
-\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (6, 0.8) {eMMC를 PC에\\USB 디스크로\\dd, gparted};
+% Descriptions — explicit row gap so 3-line text doesn't crowd itself
+\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (0, 0.8) {BootROM 단계\\[2pt]이미지 주입\\[2pt]NXP uuu, sdp};
+\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (3, 0.8) {U-Boot 단계\\[2pt]파티션 flash\\[2pt]Android 호환};
+\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (6, 0.8) {eMMC를 PC에\\[2pt]USB 디스크로\\[2pt]dd, gparted};
 
 % Flow arrows
 \draw[arr] (serial) -- node[above, font=\sffamily\tiny] {SPL 적재} (fastboot);

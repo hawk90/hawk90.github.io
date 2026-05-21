@@ -237,26 +237,28 @@ Full name : RTCA DO-326A — Airworthiness Security Process Specification
 
 DO-326A는 *risk assessment process* 정의.
 
-```
-1. Threat Identification
-   - Asset 식별 (SW, HW, data)
-   - Threat 식별 (공격자 capability, intent)
-   - Attack vector (Wi-Fi, USB, RF, supply chain)
+**1. Threat Identification**
 
-2. Vulnerability Assessment
-   - 알려진 weakness (CVE 매핑)
-   - Defense 평가
+- Asset 식별 (SW, HW, data)
+- Threat 식별 (공격자 capability, intent)
+- Attack vector (Wi-Fi, USB, RF, supply chain)
 
-3. Risk Analysis
-   - Probability × Impact
-   - Acceptable risk threshold
+**2. Vulnerability Assessment**
 
-4. Mitigation
-   - Architecture isolation (DMZ)
-   - Cryptographic protection
-   - Input validation
-   - Monitoring
-```
+- 알려진 weakness (CVE 매핑)
+- Defense 평가
+
+**3. Risk Analysis**
+
+- Probability × Impact
+- Acceptable risk threshold
+
+**4. Mitigation**
+
+- Architecture isolation (DMZ)
+- Cryptographic protection
+- Input validation
+- Monitoring
 
 ### Security Objectives
 
@@ -425,53 +427,75 @@ Phase 5: 전문가 (5+ years)
 
 이 시리즈를 마쳤다면 다음 시리즈 추천:
 
-```
-1. JSF C++ (12 챕터)
-   - F-35 코딩 표준 → DO-178C와 함께 사용
+**1. JSF C++ (12 챕터)**
 
-2. NASA JPL Power of 10 (1 챕터)
-   - 단순함의 미학
+- F-35 코딩 표준 → DO-178C와 함께 사용
 
-3. ECSS-Q-ST-80C (10 챕터)
-   - 유럽 우주 SW (KARI 적용)
+**2. NASA JPL Power of 10 (1 챕터)**
 
-4. AUTOSAR C++14
-   - 자동차 C++ — DO-178C와 유사 정신
+- 단순함의 미학
 
-5. MISRA C
-   - 항공·자동차 공통 코딩 표준
+**3. ECSS-Q-ST-80C (10 챕터)**
 
-6. CERT C
-   - 보안 코딩 (DO-326A와 연결)
+- 유럽 우주 SW (KARI 적용)
 
-7. 실전 책 추천:
-   - "Developing Safety-Critical Software" by Leanna Rierson
-   - "DO-178B: Software Considerations" by Various
-   - "Safety-Critical Computer Systems" by Storey
-```
+**4. AUTOSAR C++14**
+
+- 자동차 C++ — DO-178C와 유사 정신
+
+**5. MISRA C**
+
+- 항공·자동차 공통 코딩 표준
+
+**6. CERT C**
+
+- 보안 코딩 (DO-326A와 연결)
+
+**7. 실전 책 추천:**
+
+- "Developing Safety-Critical Software" by Leanna Rierson
+- "DO-178B: Software Considerations" by Various
+- "Safety-Critical Computer Systems" by Storey
 
 ## 자료 — 참고문헌
 
-```
-1. RTCA DO-178C — Software Considerations in Airborne Systems
-   https://www.rtca.org/training/
+**1. RTCA DO-178C — Software Considerations in Airborne Systems**
 
-2. FAA AC 20-115D — Airborne Software Acceptance Guidelines
-   https://www.faa.gov/regulations_policies/advisory_circulars/
+- https://www.rtca.org/training/
 
-3. EASA CM-SWCEH-002 — Software Aspects of Certification
-   https://www.easa.europa.eu/
+**2. FAA AC 20-115D — Airborne Software Acceptance Guidelines**
 
-4. RTCA DO-330 — Software Tool Qualification
-5. RTCA DO-331 — Model-Based Development
-6. RTCA DO-332 — Object-Oriented Technology
-7. RTCA DO-333 — Formal Methods
-8. RTCA DO-326A — Airworthiness Security
-9. ARP 4754A — Civil Aircraft Systems Development
-10. ARP 4761 — Safety Assessment Process
-11. SAE AS9100 — Quality Management for Aerospace
-12. RTCA DO-254 — Hardware (DO-178C의 HW 자매)
-```
+- https://www.faa.gov/regulations_policies/advisory_circulars/
+
+**3. EASA CM-SWCEH-002 — Software Aspects of Certification**
+
+- https://www.easa.europa.eu/
+
+**4. RTCA DO-330 — Software Tool Qualification**
+
+
+**5. RTCA DO-331 — Model-Based Development**
+
+
+**6. RTCA DO-332 — Object-Oriented Technology**
+
+
+**7. RTCA DO-333 — Formal Methods**
+
+
+**8. RTCA DO-326A — Airworthiness Security**
+
+
+**9. ARP 4754A — Civil Aircraft Systems Development**
+
+
+**10. ARP 4761 — Safety Assessment Process**
+
+
+**11. SAE AS9100 — Quality Management for Aerospace**
+
+
+**12. RTCA DO-254 — Hardware (DO-178C의 HW 자매)**
 
 ## 정리
 

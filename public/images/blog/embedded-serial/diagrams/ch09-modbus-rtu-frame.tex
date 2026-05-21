@@ -18,16 +18,16 @@
 \node[font=\footnotesize\bfseries, anchor=south] at (5, 4) {Modbus RTU Frame Structure};
 
 % Idle (silence)
-\node[idle, minimum width=20mm] at (-0.5, 1.5) {≥ 3.5 char\\\tiny silence};
+\node[idle, minimum width=20mm] at (-0.5, 1.5) {≥ 3.5 char\\[1pt]\tiny silence};
 
-% Frame fields
-\node[addr, minimum width=12mm] at (1.8, 1.5) {Slave\\Addr (1B)};
-\node[func, minimum width=12mm] at (3.0, 1.5) {Function\\Code (1B)};
+% Frame fields — explicit row gap so 2-line field names don't crowd
+\node[addr, minimum width=12mm] at (1.8, 1.5) {Slave\\[1pt]Addr (1B)};
+\node[func, minimum width=12mm] at (3.0, 1.5) {Function\\[1pt]Code (1B)};
 \node[data, minimum width=44mm] at (5.8, 1.5) {Data (0-252 B)};
-\node[crc, minimum width=12mm] at (9.4, 1.5) {CRC-16\\(2B)};
+\node[crc, minimum width=12mm] at (9.4, 1.5) {CRC-16\\[1pt](2B)};
 
 % End idle
-\node[idle, minimum width=20mm] at (10.7, 1.5) {≥ 3.5 char\\\tiny silence};
+\node[idle, minimum width=20mm] at (10.7, 1.5) {≥ 3.5 char\\[1pt]\tiny silence};
 
 % Example annotation
 \node[font=\tiny, anchor=west, align=left] at (-1, -0.5) {

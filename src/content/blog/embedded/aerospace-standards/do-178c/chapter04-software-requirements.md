@@ -62,35 +62,40 @@ SR 한 줄이 *3+ HLR로 decompose*. 각 HLR은 *측정·검증 가능*.
 
 각 HLR은 *7개 속성*을 모두 가져야:
 
-```
-1. Functional and performance requirements
-   - "무엇을" 한다
-   - 성능 (응답시간, 처리량, 정확도)
+**1. Functional and performance requirements**
 
-2. Safety / reliability requirements
-   - Safety 영향 명시
-   - Failure modes 고려
+- "무엇을" 한다
+- 성능 (응답시간, 처리량, 정확도)
 
-3. Time / memory budgets
-   - WCET 할당
-   - RAM/ROM 예산
+**2. Safety / reliability requirements**
 
-4. Hardware / software interfaces
-   - 입출력 신호
-   - Bus message
-   - Memory-mapped register
+- Safety 영향 명시
+- Failure modes 고려
 
-5. Failure detection / fault tolerance
-   - 감지할 failure 종류
-   - 대응 동작
+**3. Time / memory budgets**
 
-6. Partitioning requirements
-   - 다른 SW와의 격리
-   - 시간·공간·통신 partitioning
+- WCET 할당
+- RAM/ROM 예산
 
-7. Input/output mapping
-   - 입력 → 출력 명세
-```
+**4. Hardware / software interfaces**
+
+- 입출력 신호
+- Bus message
+- Memory-mapped register
+
+**5. Failure detection / fault tolerance**
+
+- 감지할 failure 종류
+- 대응 동작
+
+**6. Partitioning requirements**
+
+- 다른 SW와의 격리
+- 시간·공간·통신 partitioning
+
+**7. Input/output mapping**
+
+- 입력 → 출력 명세
 
 ### HLR 형식 — 좋은 예
 
@@ -384,43 +389,49 @@ A-3 objectives는 *주로 review로 충족*. *Peer Review*가 *공식 procedure*
 
 ### Review Process
 
-```
-1. Author finalizes HLR draft in DOORS
-   → Status: Draft
+**1. Author finalizes HLR draft in DOORS**
 
-2. Author submits for review
-   → Status: Under Review
-   → DOORS notification to reviewers
+- → Status: Draft
 
-3. Reviewers (3-5 people):
-   - Author's lead
-   - Independent verifier (Independence 요구 시)
-   - Domain expert
-   - Test engineer (verifiability)
-   - Optionally: Customer / Stakeholder
+**2. Author submits for review**
 
-4. Reviewers add comments in DOORS
-   - Issue type: Critical / Major / Minor / Question
-   - Comment text
-   - Suggested resolution
+- → Status: Under Review
+- → DOORS notification to reviewers
 
-5. Author addresses each comment
-   - Accept → modify HLR
-   - Reject → justify rejection
-   - Defer → create PR for later
+**3. Reviewers (3-5 people):**
 
-6. Reviewers verify resolutions
-   - Mark resolved/not-resolved
-   - Re-review if needed
+- Author's lead
+- Independent verifier (Independence 요구 시)
+- Domain expert
+- Test engineer (verifiability)
+- Optionally: Customer / Stakeholder
 
-7. Review chair declares review complete
-   → Status: Approved
-   → HLR baseline locked
+**4. Reviewers add comments in DOORS**
 
-8. Review record archived
-   - Attendees, duration, comments, resolutions
-   - SQA audit trail
-```
+- Issue type: Critical / Major / Minor / Question
+- Comment text
+- Suggested resolution
+
+**5. Author addresses each comment**
+
+- Accept → modify HLR
+- Reject → justify rejection
+- Defer → create PR for later
+
+**6. Reviewers verify resolutions**
+
+- Mark resolved/not-resolved
+- Re-review if needed
+
+**7. Review chair declares review complete**
+
+- → Status: Approved
+- → HLR baseline locked
+
+**8. Review record archived**
+
+- Attendees, duration, comments, resolutions
+- SQA audit trail
 
 ### Review Checklist (HLR 일부)
 
@@ -444,27 +455,31 @@ A-3 objectives는 *주로 review로 충족*. *Peer Review*가 *공식 procedure*
 
 ## Common Findings — HLR
 
-```
-가장 흔한 Finding (Major):
+**가장 흔한 Finding (Major):**
 
-1. "HLR-XXX는 'appropriate', 'optimized' 등 측정 불가 단어 사용"
-   → Verifiable 위반
+**1. "HLR-XXX는 'appropriate', 'optimized' 등 측정 불가 단어 사용"**
 
-2. "HLR-XXX와 HLR-YYY가 모순 (timing budget 불일치)"
-   → Consistency 위반
+- → Verifiable 위반
 
-3. "HLR-XXX는 derived지만 system team에 통보된 기록 없음"
-   → DO-178C §5.1.2 위반
+**2. "HLR-XXX와 HLR-YYY가 모순 (timing budget 불일치)"**
 
-4. "SR-ZZZ가 HLR에 할당되지 않음"
-   → Coverage 위반
+- → Consistency 위반
 
-5. "HLR-XXX의 rationale 누락"
-   → SRS 위반
+**3. "HLR-XXX는 derived지만 system team에 통보된 기록 없음"**
 
-6. "HLR-XXX 검증 방법 'Inspection'이 너무 모호함"
-   → A-3-4 위반
-```
+- → DO-178C §5.1.2 위반
+
+**4. "SR-ZZZ가 HLR에 할당되지 않음"**
+
+- → Coverage 위반
+
+**5. "HLR-XXX의 rationale 누락"**
+
+- → SRS 위반
+
+**6. "HLR-XXX 검증 방법 'Inspection'이 너무 모호함"**
+
+- → A-3-4 위반
 
 Major finding 1개 발생 시 *해결 + 재리뷰*. 평균 *HLR 100개당 5~10 major*. *DAL A 프로젝트*는 *HLR 200~500개*. 총 *수십 major finding* 가능.
 

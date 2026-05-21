@@ -54,17 +54,31 @@ LLR → Code = *기계적 translation*. LLR을 *재해석*하지 않는다.
 
 DO-178C는 LLR이 가질 *attributes*를 정의 (§11.10):
 
-```
-1. 알고리즘 명세
-2. 데이터 흐름·제어 흐름
-3. 모듈 인터페이스
-4. 메모리 매핑
-5. 시간 budget (WCET)
-6. 통신 protocol
-7. 에러 처리
-8. 부분 partitioning
-9. HW/SW 인터페이스 세부
-```
+**1. 알고리즘 명세**
+
+
+**2. 데이터 흐름·제어 흐름**
+
+
+**3. 모듈 인터페이스**
+
+
+**4. 메모리 매핑**
+
+
+**5. 시간 budget (WCET)**
+
+
+**6. 통신 protocol**
+
+
+**7. 에러 처리**
+
+
+**8. 부분 partitioning**
+
+
+**9. HW/SW 인터페이스 세부**
 
 각 LLR에 적용 가능한 attributes를 *모두 명시*.
 
@@ -135,40 +149,44 @@ LLR과 *동시에* SW Architecture 작성. *모듈 구조, 데이터 흐름, 제
 
 ### Architecture 구성 요소
 
-```
-1. Module Decomposition
-   - 모듈 목록
-   - 모듈 간 dependency (acyclic)
-   - 각 모듈의 책임 정의
+**1. Module Decomposition**
 
-2. Data Flow
-   - 모듈 간 데이터 이동
-   - Shared data 식별
-   - Data ownership
+- 모듈 목록
+- 모듈 간 dependency (acyclic)
+- 각 모듈의 책임 정의
 
-3. Control Flow
-   - Task/Thread 구조
-   - Scheduler
-   - Inter-task communication
+**2. Data Flow**
 
-4. Memory Architecture
-   - Code segment (text)
-   - Data segment (RAM)
-   - Stack per task
-   - Heap (보통 면제)
-   - Memory protection
+- 모듈 간 데이터 이동
+- Shared data 식별
+- Data ownership
 
-5. Timing Architecture
-   - Periodic tasks + frequency
-   - Aperiodic tasks (interrupt-driven)
-   - Critical sections
-   - WCET budget per module
+**3. Control Flow**
 
-6. Partitioning (IMA의 경우)
-   - ARINC 653 partition 정의
-   - Time slot 할당
-   - Memory region 할당
-```
+- Task/Thread 구조
+- Scheduler
+- Inter-task communication
+
+**4. Memory Architecture**
+
+- Code segment (text)
+- Data segment (RAM)
+- Stack per task
+- Heap (보통 면제)
+- Memory protection
+
+**5. Timing Architecture**
+
+- Periodic tasks + frequency
+- Aperiodic tasks (interrupt-driven)
+- Critical sections
+- WCET budget per module
+
+**6. Partitioning (IMA의 경우)**
+
+- ARINC 653 partition 정의
+- Time slot 할당
+- Memory region 할당
 
 ### Architecture Notation — SysML
 
@@ -479,27 +497,31 @@ MB-5: Model standards conformance
 
 ## LLR Common Findings
 
-```
-가장 흔한 finding (Major):
+**가장 흔한 finding (Major):**
 
-1. "LLR-XXX는 HLR-YYY 구현 부족 — 일부 case 누락"
-   → A-4-1 위반 (HLR-LLR consistency)
+**1. "LLR-XXX는 HLR-YYY 구현 부족 — 일부 case 누락"**
 
-2. "LLR-XXX의 알고리즘 정확성 검증 없음"
-   → A-4-7 위반
+- → A-4-1 위반 (HLR-LLR consistency)
 
-3. "Architecture에 task T2 WCET 정의 없음"
-   → A-4-11 위반 (verifiable)
+**2. "LLR-XXX의 알고리즘 정확성 검증 없음"**
 
-4. "Module M5의 dependency가 circular (M5 → M3 → M5)"
-   → A-4-9 위반 (consistency)
+- → A-4-7 위반
 
-5. "Partition A 메모리 protection 입증 부족"
-   → A-4-13 위반
+**3. "Architecture에 task T2 WCET 정의 없음"**
 
-6. "LLR-XXX는 'reasonable' 표현 — 측정 불가"
-   → A-4-4 위반
-```
+- → A-4-11 위반 (verifiable)
+
+**4. "Module M5의 dependency가 circular (M5 → M3 → M5)"**
+
+- → A-4-9 위반 (consistency)
+
+**5. "Partition A 메모리 protection 입증 부족"**
+
+- → A-4-13 위반
+
+**6. "LLR-XXX는 'reasonable' 표현 — 측정 불가"**
+
+- → A-4-4 위반
 
 ## SCADE 적용 예 — Pitch Control
 
@@ -571,17 +593,22 @@ LLR + Architecture가 작성되면 *Design Review*:
 
 A-4-8 ~ A-4-12.
 
-```
-Architecture verification 방법:
-1. Manual review (전 architecture 문서)
-2. Tool analysis:
-   - Static analysis: dependency cycle, fan-out
-   - Memory analysis: stack usage (StackAnalyzer)
-   - Timing analysis: WCET (aiT, Bound-T)
-3. Simulation:
-   - Architecture-level simulation (SystemC)
-   - Schedulability simulation (TimeWiz)
-```
+**Architecture verification 방법:**
+
+
+**1. Manual review (전 architecture 문서)**
+
+
+**2. Tool analysis:**
+
+- Static analysis: dependency cycle, fan-out
+- Memory analysis: stack usage (StackAnalyzer)
+- Timing analysis: WCET (aiT, Bound-T)
+
+**3. Simulation:**
+
+- Architecture-level simulation (SystemC)
+- Schedulability simulation (TimeWiz)
 
 ### WCET Tool
 

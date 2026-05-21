@@ -440,15 +440,21 @@ JSF는 *unique style*. 현대 표준들과 *상당히 다름*.
 
 ## 일반적인 finding (naming)
 
-```
-실전에서 자주 발견되는 위반:
+**실전에서 자주 발견되는 위반:**
 
-1. m_buffer가 사실은 pointer → m_pBuffer로
-2. p_data parameter의 p_ prefix 누락
-3. long 100l (소문자 l)
-4. Macro 이름이 일관 안 됨
-5. inner scope name이 outer 가림 (shadowing)
-```
+**1. m_buffer가 사실은 pointer → m_pBuffer로**
+
+
+**2. p_data parameter의 p_ prefix 누락**
+
+
+**3. long 100l (소문자 l)**
+
+
+**4. Macro 이름이 일관 안 됨**
+
+
+**5. inner scope name이 outer 가림 (shadowing)**
 
 ## Tool 자동화 — clang-tidy 설정 예
 

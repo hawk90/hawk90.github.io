@@ -965,27 +965,29 @@ Work stealing의 좋은 점 — **불균형한 작업에 강함**.
 
 ## 한국 개발자의 함정
 
-```
-1. *Future.get() = 비동기*라는 오해
-   - get은 *블록*. 단지 결과 추출 기다림
-   - 진짜 비동기는 콜백 / coroutine / then
-   - C++20 coroutine + co_await가 진짜 비동기
+**1. *Future.get() = 비동기*라는 오해**
 
-2. *Thread Pool에 작업 무한 제출 = 빠름*
-   - 큐가 무한히 자라면 OOM
-   - 큐 크기 제한 + 거절 정책 필요
-   - 작업 크기 조절도 중요
+- get은 *블록*. 단지 결과 추출 기다림
+- 진짜 비동기는 콜백 / coroutine / then
+- C++20 coroutine + co_await가 진짜 비동기
 
-3. *Work Stealing은 만능*
-   - 작업 단위가 너무 작으면 overhead 큼
-   - 너무 크면 부하 균형 안 됨
-   - THRESHOLD 튜닝 중요
+**2. *Thread Pool에 작업 무한 제출 = 빠름***
 
-4. *std::async = 항상 새 스레드*
-   - std::launch::deferred면 호출 시점까지 지연
-   - std::launch::async만 새 스레드 보장
-   - 기본값은 구현체 정의
-```
+- 큐가 무한히 자라면 OOM
+- 큐 크기 제한 + 거절 정책 필요
+- 작업 크기 조절도 중요
+
+**3. *Work Stealing은 만능***
+
+- 작업 단위가 너무 작으면 overhead 큼
+- 너무 크면 부하 균형 안 됨
+- THRESHOLD 튜닝 중요
+
+**4. *std::async = 항상 새 스레드***
+
+- std::launch::deferred면 호출 시점까지 지연
+- std::launch::async만 새 스레드 보장
+- 기본값은 구현체 정의
 
 ## 실무 적용
 

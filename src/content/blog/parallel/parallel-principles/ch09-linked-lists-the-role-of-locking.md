@@ -39,13 +39,19 @@ draft: false
 
 각 단계는 직전 단계의 한계를 극복한다. 이 흐름이 모든 동시성 자료구조 디자인의 일반적 패턴이다.
 
-```
-1. Coarse-Grained — 거대 락
-2. Fine-Grained — 노드별 락
-3. Optimistic — 낙관적 잠금
-4. Lazy — 게으른 삭제
-5. Lock-Free — 락 없음
-```
+**1. Coarse-Grained — 거대 락**
+
+
+**2. Fine-Grained — 노드별 락**
+
+
+**3. Optimistic — 낙관적 잠금**
+
+
+**4. Lazy — 게으른 삭제**
+
+
+**5. Lock-Free — 락 없음**
 
 ## 9.2 Coarse-Grained — 거대 락
 
@@ -990,11 +996,13 @@ bool lazy_contains(LazyList* list, int key) {
 
 핵심 invariant:
 
-```text
-1. marked == false인 노드는 *현재 리스트에 속함*
-2. marked == true인 노드는 *논리적으로 삭제됨* (곧 unlink)
-3. unmarked 노드들의 next 체인은 *valid 리스트*를 구성
-```
+**1. marked == false인 노드는 *현재 리스트에 속함***
+
+
+**2. marked == true인 노드는 *논리적으로 삭제됨* (곧 unlink)**
+
+
+**3. unmarked 노드들의 next 체인은 *valid 리스트*를 구성**
 
 validate는 *세 가지*를 본다 — pred unmarked, curr unmarked, pred->next == curr. 셋이 모두 OK이면 *지금 이 순간* pred와 curr이 둘 다 리스트의 멤버임이 확정.
 
@@ -1193,12 +1201,16 @@ logical delete의 mark CAS가 핵심. 그 시점 이후 *어떤 traversal이든*
 
 핵심 관찰:
 
-```text
-1. Coarse는 *코어 늘수록 더 느려진다* — 락 경합 + 캐시 트래픽
-2. Fine은 좋지만 락 비용으로 stall
-3. Optimistic / Lazy / Lock-Free는 contains가 락 없음 → 90% 워크로드에서 큰 이득
-4. Lazy와 Lock-Free 차이는 작음 — Lazy가 *구현 단순성*에서 우세
-```
+**1. Coarse는 *코어 늘수록 더 느려진다* — 락 경합 + 캐시 트래픽**
+
+
+**2. Fine은 좋지만 락 비용으로 stall**
+
+
+**3. Optimistic / Lazy / Lock-Free는 contains가 락 없음 → 90% 워크로드에서 큰 이득**
+
+
+**4. Lazy와 Lock-Free 차이는 작음 — Lazy가 *구현 단순성*에서 우세**
 
 워크로드별 권고:
 
@@ -1323,23 +1335,25 @@ MongoDB의 스토리지 엔진 WiredTiger는 B-tree 페이지 캐시를 *lock-fr
 
 ## 한국 개발자의 함정
 
-```
-1. *Coarse-grained lock으로 충분*하다는 오해
-   - 단일 스레드 성능, 멀티 코어에서 *확장성 0*
-   - Throughput 측정 필요
+**1. *Coarse-grained lock으로 충분*하다는 오해**
 
-2. *Fine-grained가 항상 빠름*
-   - Hand-over-hand는 *충돌 적을 때*
-   - 작은 리스트는 coarse가 더 빠를 수 있음
+- 단일 스레드 성능, 멀티 코어에서 *확장성 0*
+- Throughput 측정 필요
 
-3. *Lock-free가 항상 좋음*
-   - 구현 복잡 + ABA 위험
-   - GC 없는 언어는 메모리 회수 어려움 (hazard pointer)
+**2. *Fine-grained가 항상 빠름***
 
-4. *Optimistic = 무조건 좋음*
-   - 검증 단계의 비용
-   - Conflict 빈도 따라 다름
-```
+- Hand-over-hand는 *충돌 적을 때*
+- 작은 리스트는 coarse가 더 빠를 수 있음
+
+**3. *Lock-free가 항상 좋음***
+
+- 구현 복잡 + ABA 위험
+- GC 없는 언어는 메모리 회수 어려움 (hazard pointer)
+
+**4. *Optimistic = 무조건 좋음***
+
+- 검증 단계의 비용
+- Conflict 빈도 따라 다름
 
 ## 실무 적용
 

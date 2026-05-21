@@ -523,18 +523,30 @@ clang-tidy --checks='modernize-*,cppcoreguidelines-*,readability-*' src/
 
 ## 일반적인 finding (declarations / casts)
 
-```
-실전에서 자주 발견되는 위반:
+**실전에서 자주 발견되는 위반:**
 
-1. 변수가 함수 시작에 선언되고 한참 후에 사용
-2. int *p1, p2; — p2가 int인가 의도?
-3. (int)f 사용 — static_cast 권장
-4. Constructor body에서 m_x = 0
-5. Initializer list 순서가 멤버 선언 순서와 다름
-6. Single-arg ctor에 explicit 누락
-7. dynamic_cast 사용 (RTTI 필요)
-8. const_cast로 const 제거
-```
+**1. 변수가 함수 시작에 선언되고 한참 후에 사용**
+
+
+**2. int *p1, p2; — p2가 int인가 의도?**
+
+
+**3. (int)f 사용 — static_cast 권장**
+
+
+**4. Constructor body에서 m_x = 0**
+
+
+**5. Initializer list 순서가 멤버 선언 순서와 다름**
+
+
+**6. Single-arg ctor에 explicit 누락**
+
+
+**7. dynamic_cast 사용 (RTTI 필요)**
+
+
+**8. const_cast로 const 제거**
 
 ## 정리
 

@@ -599,33 +599,39 @@ Template이 *runtime cost 없음*. 단 *binary size ↑* (각 type instantiation
 
 ## 일반적인 finding (inheritance / RTTI)
 
-```
-실전에서 자주 발견되는 위반:
+**실전에서 자주 발견되는 위반:**
 
-1. Multiple inheritance from 두 concrete class
-   → interface (pure abstract) 외 회피
+**1. Multiple inheritance from 두 concrete class**
 
-2. Polymorphic class에 virtual destructor 없음
-   → 의무
+- → interface (pure abstract) 외 회피
 
-3. dynamic_cast 사용
-   → 금지 (-fno-rtti 권장)
+**2. Polymorphic class에 virtual destructor 없음**
 
-4. typeid 사용
-   → 금지
+- → 의무
 
-5. 깊은 hierarchy
-   → 얕게
+**3. dynamic_cast 사용**
 
-6. Diamond inheritance
-   → design 변경으로 회피
+- → 금지 (-fno-rtti 권장)
 
-7. override keyword 누락 (C++11 이후)
-   → 명시 권장
+**4. typeid 사용**
 
-8. LSP 위반 (Rectangle/Square 류)
-   → 의미적 substitutability 검토
-```
+- → 금지
+
+**5. 깊은 hierarchy**
+
+- → 얕게
+
+**6. Diamond inheritance**
+
+- → design 변경으로 회피
+
+**7. override keyword 누락 (C++11 이후)**
+
+- → 명시 권장
+
+**8. LSP 위반 (Rectangle/Square 류)**
+
+- → 의미적 substitutability 검토
 
 ## 정리
 

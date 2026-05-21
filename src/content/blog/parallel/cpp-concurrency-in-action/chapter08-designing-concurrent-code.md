@@ -1381,32 +1381,35 @@ void work_stealing_for(size_t total, Func f) {
 
 ## 한국 개발자의 함정
 
-```
-1. *N코어 = N배 빠름*
-   - Amdahl로 깨짐 (직렬 부분 한계)
-   - 동기화 + cache + memory bandwidth 병목
-   - 보통 80%도 이상적
+**1. *N코어 = N배 빠름***
 
-2. *False sharing 무시*
-   - 다른 변수인데 같은 cache line이면 ping-pong
-   - 측정 안 하면 발견 어려움
-   - alignas(64) 또는 hardware_destructive_interference_size
+- Amdahl로 깨짐 (직렬 부분 한계)
+- 동기화 + cache + memory bandwidth 병목
+- 보통 80%도 이상적
 
-3. *작업 단위가 작을수록 좋음*
-   - 스레드 생성/동기화 오버헤드 큼
-   - 보통 청크 = N_threads × 4~8
-   - 너무 크면 load imbalance
+**2. *False sharing 무시***
 
-4. *모든 코드가 thread-safe 필요*
-   - 단일 스레드 코드는 그대로 두기
-   - 공유 데이터만 보호
-   - 과도한 락은 성능 저하
+- 다른 변수인데 같은 cache line이면 ping-pong
+- 측정 안 하면 발견 어려움
+- alignas(64) 또는 hardware_destructive_interference_size
 
-5. *AoS / SoA 자동 결정*
-   - SIMD / cache 패턴이 다름
-   - 워크로드 분석 필요
-   - 게임/HPC는 SoA가 보통 빠름
-```
+**3. *작업 단위가 작을수록 좋음***
+
+- 스레드 생성/동기화 오버헤드 큼
+- 보통 청크 = N_threads × 4~8
+- 너무 크면 load imbalance
+
+**4. *모든 코드가 thread-safe 필요***
+
+- 단일 스레드 코드는 그대로 두기
+- 공유 데이터만 보호
+- 과도한 락은 성능 저하
+
+**5. *AoS / SoA 자동 결정***
+
+- SIMD / cache 패턴이 다름
+- 워크로드 분석 필요
+- 게임/HPC는 SoA가 보통 빠름
 
 ## 현실 시스템에서의 동시성 설계
 

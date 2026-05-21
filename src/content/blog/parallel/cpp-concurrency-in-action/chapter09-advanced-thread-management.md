@@ -1432,32 +1432,35 @@ void good_usage(thread_pool& compute_pool, thread_pool& io_pool) {
 
 ## 한국 개발자의 함정
 
-```text
-1. *thread pool 안에서 future.get() 호출*
-   - 같은 풀의 다른 작업 결과 기다림 → deadlock
-   - 풀 크기보다 많은 dependency chain이면 멈춤
-   - continuation / 별도 풀 / async-await 사용
+**1. *thread pool 안에서 future.get() 호출***
 
-2. *모든 작업을 같은 풀에*
-   - CPU 바운드 + I/O 바운드 섞이면 성능 저하
-   - 풀을 *역할별*로 분리 (compute / io / background)
-   - I/O 풀은 더 크게
+- 같은 풀의 다른 작업 결과 기다림 → deadlock
+- 풀 크기보다 많은 dependency chain이면 멈춤
+- continuation / 별도 풀 / async-await 사용
 
-3. *Work stealing이 만능*
-   - 매우 짧은 작업엔 오버헤드 큼
-   - locality가 중요한 작업엔 그대로가 더 빠름
-   - 보통 fork-join 패턴에 잘 맞음
+**2. *모든 작업을 같은 풀에***
 
-4. *Thread affinity = 항상 성능 향상*
-   - OS 스케줄러를 막아 오히려 손해 가능
-   - NUMA 시스템에서만 보통 이득
-   - 측정 + 실험 필요
+- CPU 바운드 + I/O 바운드 섞이면 성능 저하
+- 풀을 *역할별*로 분리 (compute / io / background)
+- I/O 풀은 더 크게
 
-5. *stop_token을 무시*
-   - 협력적 취소 → 작업 코드가 *체크*해야 함
-   - 긴 계산 루프엔 주기적으로 stop_requested() 호출
-   - condition_variable_any로 wait 중단도 가능
-```
+**3. *Work stealing이 만능***
+
+- 매우 짧은 작업엔 오버헤드 큼
+- locality가 중요한 작업엔 그대로가 더 빠름
+- 보통 fork-join 패턴에 잘 맞음
+
+**4. *Thread affinity = 항상 성능 향상***
+
+- OS 스케줄러를 막아 오히려 손해 가능
+- NUMA 시스템에서만 보통 이득
+- 측정 + 실험 필요
+
+**5. *stop_token을 무시***
+
+- 협력적 취소 → 작업 코드가 *체크*해야 함
+- 긴 계산 루프엔 주기적으로 stop_requested() 호출
+- condition_variable_any로 wait 중단도 가능
 
 ## 현실 시스템에서의 thread 관리
 

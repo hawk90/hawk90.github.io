@@ -342,21 +342,23 @@ if (rc != SUCCESS) {
 
 Exception 금지의 일반적 근거:
 
-```
-1. 처리 시간 비결정적
-   - throw 시 stack unwinding, destructor 호출
-   - WCET 분석 어려움
+**1. 처리 시간 비결정적**
 
-2. Static analysis 곤란
-   - 어디서 throw, 어디서 catch?
-   - Control flow가 implicit
+- throw 시 stack unwinding, destructor 호출
+- WCET 분석 어려움
 
-3. 100% coverage 어려움
-   - 모든 throw path 검증 곤란
+**2. Static analysis 곤란**
 
-4. Binary 부담
-   - Exception 활성화 시 추가 metadata
-```
+- 어디서 throw, 어디서 catch?
+- Control flow가 implicit
+
+**3. 100% coverage 어려움**
+
+- 모든 throw path 검증 곤란
+
+**4. Binary 부담**
+
+- Exception 활성화 시 추가 metadata
 
 대부분 *`-fno-exceptions`로 컴파일*하여 시도 시 *컴파일 에러*.
 
@@ -612,18 +614,30 @@ ErrorCode ProcessData(const Data &p_input, Result &p_output) {
 
 ## 일반적인 finding (functions)
 
-```
-실전에서 자주 발견되는 위반:
+**실전에서 자주 발견되는 위반:**
 
-1. 함수 parameter 수 과다
-2. fopen / strcpy return 값 무시
-3. Recursive function (직접 또는 간접)
-4. varargs (...) 사용
-5. try/catch 사용
-6. setjmp + longjmp
-7. 50+ line inline function
-8. default 없는 switch
-```
+**1. 함수 parameter 수 과다**
+
+
+**2. fopen / strcpy return 값 무시**
+
+
+**3. Recursive function (직접 또는 간접)**
+
+
+**4. varargs (...) 사용**
+
+
+**5. try/catch 사용**
+
+
+**6. setjmp + longjmp**
+
+
+**7. 50+ line inline function**
+
+
+**8. default 없는 switch**
 
 ## 정리
 

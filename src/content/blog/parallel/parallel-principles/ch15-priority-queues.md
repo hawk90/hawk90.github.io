@@ -904,27 +904,29 @@ modern scheduler (Go, Tokio, Cilk)는 *work stealing*. 자기 큐가 비면 옆 
 
 ## 한국 개발자의 함정
 
-```
-1. *Priority Queue로 작업 스케줄링 = 자연스러움*
-   - 단일 PQ는 hot spot
-   - 수십~수백 스레드면 처리량 급락
-   - Multi-queue + work stealing이 표준
+**1. *Priority Queue로 작업 스케줄링 = 자연스러움***
 
-2. *std::priority_queue + std::mutex로 충분*
-   - 단일 락 (coarse-grained)
-   - 고경합에선 매우 느림
-   - 작은 워크로드만 OK
+- 단일 PQ는 hot spot
+- 수십~수백 스레드면 처리량 급락
+- Multi-queue + work stealing이 표준
 
-3. *Relaxed PQ는 잘못된 답*
-   - 응용이 K-relaxed 허용하면 정답
-   - 작업 스케줄러, 그래프 탐색에선 거의 항상 OK
-   - 항상 strict가 필요한 건 아님
+**2. *std::priority_queue + std::mutex로 충분***
 
-4. *Heap이 빠르니까 동시도 빠를 것*
-   - Heap의 sift-up/sift-down이 동시에선 매우 어려움
-   - root 경합 폭발
-   - Skiplist 기반 또는 multi-queue 권장
-```
+- 단일 락 (coarse-grained)
+- 고경합에선 매우 느림
+- 작은 워크로드만 OK
+
+**3. *Relaxed PQ는 잘못된 답***
+
+- 응용이 K-relaxed 허용하면 정답
+- 작업 스케줄러, 그래프 탐색에선 거의 항상 OK
+- 항상 strict가 필요한 건 아님
+
+**4. *Heap이 빠르니까 동시도 빠를 것***
+
+- Heap의 sift-up/sift-down이 동시에선 매우 어려움
+- root 경합 폭발
+- Skiplist 기반 또는 multi-queue 권장
 
 ## 실무 적용
 

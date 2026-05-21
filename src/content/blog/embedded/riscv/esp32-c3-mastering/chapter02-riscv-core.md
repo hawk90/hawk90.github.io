@@ -264,23 +264,24 @@ C로 작성하는 ISR은 *Level 1~3*까지만 가능합니다. Level 4 이상은
 
 C3의 부트는 *3단계*입니다.
 
-```text
-1. ROM Bootloader (0x40000000)
-   - 칩에 내장된 immutable 코드
-   - SPI flash에서 2nd-stage bootloader 로드
-   - secure boot 검증 (활성화 시)
+**1. ROM Bootloader (0x40000000)**
 
-2. 2nd-stage Bootloader (flash 0x0000)
-   - ESP-IDF가 빌드한 코드
-   - 파티션 테이블 읽기
-   - factory 또는 ota_N 파티션 선택
-   - application 로드 + 검증
-   - PMP 초기 설정
+- 칩에 내장된 immutable 코드
+- SPI flash에서 2nd-stage bootloader 로드
+- secure boot 검증 (활성화 시)
 
-3. Application
-   - app_main() 호출
-   - FreeRTOS 시작
-```
+**2. 2nd-stage Bootloader (flash 0x0000)**
+
+- ESP-IDF가 빌드한 코드
+- 파티션 테이블 읽기
+- factory 또는 ota_N 파티션 선택
+- application 로드 + 검증
+- PMP 초기 설정
+
+**3. Application**
+
+- app_main() 호출
+- FreeRTOS 시작
 
 PMP는 *2단계*에서 설정되어 *application 시작 시점에는 이미 활성*입니다. application 코드가 부트로더 영역에 *쓰기 시도*하면 즉시 trap이 발생합니다.
 

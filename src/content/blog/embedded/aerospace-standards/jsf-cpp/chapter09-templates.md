@@ -587,24 +587,27 @@ constexpr int Factorial() {
 
 ## 일반적인 정적 분석 finding (templates)
 
-```
-실전 finding:
+**실전 finding:**
 
-1. Template 정의가 .cpp에 있음
-   → header에 두기
+**1. Template 정의가 .cpp에 있음**
 
-2. Template metaprogramming 사용
-   → necessary 아닌 경우 회피
+- → header에 두기
 
-3. Specialization 다수
-   → 가능하면 단일 template로
+**2. Template metaprogramming 사용**
 
-4. Implicit instantiation 폭주 → binary 큼
-   → explicit instantiation 권장
+- → necessary 아닌 경우 회피
 
-5. Dependent name (this-> 누락)
-   → 컴파일 에러
-```
+**3. Specialization 다수**
+
+- → 가능하면 단일 template로
+
+**4. Implicit instantiation 폭주 → binary 큼**
+
+- → explicit instantiation 권장
+
+**5. Dependent name (this-> 누락)**
+
+- → 컴파일 에러
 
 ## 정리
 

@@ -521,33 +521,39 @@ JSF가 *C++03 기반*이라 *modern C++ 기능은 원본 범위 외*. 후속 표
 
 ## 일반적인 정적 분석 finding (memory + library)
 
-```
-실전에서 자주 발견되는 위반:
+**실전에서 자주 발견되는 위반:**
 
-1. operational phase에서 operator new 호출
-   → init phase only
+**1. operational phase에서 operator new 호출**
 
-2. std::vector / std::map 사용
-   → fixed-size 자체 컨테이너 권장
+- → init phase only
 
-3. real-time path에서 std::string
-   → bounded buffer 권장
+**2. std::vector / std::map 사용**
 
-4. strcpy 사용
-   → strncpy + size 권장
+- → fixed-size 자체 컨테이너 권장
 
-5. iostream cout 사용
-   → printf 또는 자체 logger
+**3. real-time path에서 std::string**
 
-6. 외부 library (Boost 등) 추가
-   → qualification 부담 검토
+- → bounded buffer 권장
 
-7. pthread_create 직접 호출
-   → OS abstraction layer 권장
+**4. strcpy 사용**
 
-8. error path에서 delete 누락
-   → RAII wrapper 권장
-```
+- → strncpy + size 권장
+
+**5. iostream cout 사용**
+
+- → printf 또는 자체 logger
+
+**6. 외부 library (Boost 등) 추가**
+
+- → qualification 부담 검토
+
+**7. pthread_create 직접 호출**
+
+- → OS abstraction layer 권장
+
+**8. error path에서 delete 누락**
+
+- → RAII wrapper 권장
 
 ## 정리
 
