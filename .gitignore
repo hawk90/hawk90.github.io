@@ -42,3 +42,4 @@ _jekyll_backup/
 *.pdf
 *.epub
 *.djvu
+scripts/__pycache__/
