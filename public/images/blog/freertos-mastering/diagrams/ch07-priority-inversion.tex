@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6,4.6) {Priority Inversion — mutex 없는 경우};
+
+% Time axis labels
+\node[caption, anchor=east] at (-0.2, 3.2)  {High (3)};
+\node[caption, anchor=east] at (-0.2, 1.6)  {Mid (2)};
+\node[caption, anchor=east] at (-0.2, 0.0)  {Low (1)};
+
+% Baseline lines
+\draw[mutec, line width=0.3pt] (0,3.2) -- (12,3.2);
+\draw[mutec, line width=0.3pt] (0,1.6) -- (12,1.6);
+\draw[mutec, line width=0.3pt] (0,0.0) -- (12,0.0);
+
+% Low — running from t0 to t1, then blocked
+\draw[focus, line width=2pt] (0.5, 0.0) -- (3.0, 0.0);
+% Mid — preempts Low from t2
+\draw[focus, line width=2pt] (3.0, 1.6) -- (9.0, 1.6);
+% Low resumes after Mid finishes
+\draw[focus, line width=2pt] (9.0, 0.0) -- (10.5, 0.0);
+% High blocked from t1 to release at t10.5
+\draw[focusc, line width=1.5pt, dashed] (1.5, 3.2) -- (10.5, 3.2);
+% High runs after release
+\draw[focus, line width=2pt] (10.5, 3.2) -- (12.0, 3.2);
+
+% Event markers (ticks + labels)
+\foreach \x/\lbl in {
+   0.5/{t0\\Low take},
+   1.5/{t1\\High want\\(block)},
+   3.0/{t2\\Mid wake\\preempts Low},
+   9.0/{t3..tn\\Mid busy},
+   10.5/{tn+1\\Low resume\\release}} {
+  \draw[mutec, line width=0.3pt] (\x, -0.3) -- (\x, 3.5);
+  \node[caption, anchor=north, align=center, font=\sffamily\tiny] at (\x, -0.4) {\lbl};
+}
+
+% Caption
+\node[caption, anchor=west, align=left] at (0, -1.6)
+  {\textbf{문제}: Mid(2)가 Low(1)를 선점하는 사이 High(3)는 무한 대기. UNBOUNDED INVERSION.\\\textbf{사례}: Mars Pathfinder (1997) reset.};
+
+\end{tikzpicture}
+\end{document}

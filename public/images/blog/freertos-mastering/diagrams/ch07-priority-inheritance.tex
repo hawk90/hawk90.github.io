@@ -1,0 +1,57 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6,4.6) {Priority Inheritance — FreeRTOS mutex 동작};
+
+% Time axis labels
+\node[caption, anchor=east] at (-0.2, 3.2)  {High (3)};
+\node[caption, anchor=east] at (-0.2, 1.6)  {Mid (2)};
+\node[caption, anchor=east] at (-0.2, 0.0)  {Low (1)};
+
+% Baseline lines
+\draw[mutec, line width=0.3pt] (0,3.2) -- (12,3.2);
+\draw[mutec, line width=0.3pt] (0,1.6) -- (12,1.6);
+\draw[mutec, line width=0.3pt] (0,0.0) -- (12,0.0);
+
+% Low takes mutex
+\draw[focus, line width=2pt] (0.5, 0.0) -- (1.5, 0.0);
+% Low inherits priority 3 (drawn at top level)
+\draw[focus, line width=2pt, dotted] (1.5, 0.0) -- (1.5, 3.2);
+\draw[focus, line width=2pt] (1.5, 3.2) -- (8.5, 3.2);
+\draw[focus, line width=2pt, dotted] (8.5, 3.2) -- (8.5, 0.0);
+% Low at priority 1 (brief, after give)
+\draw[focus, line width=2pt] (8.5, 0.0) -- (9.0, 0.0);
+% High runs after acquire
+\draw[focus, line width=2pt] (8.5, 3.2) -- (11.0, 3.2);
+% High wait (blocked)
+\draw[focusc, line width=1.5pt, dashed] (2.5, 3.2) -- (8.5, 3.2);
+% Mid stays blocked (cannot preempt Low-with-inherited-priority-3)
+\draw[mutec, line width=1pt, dashed] (4.0, 1.6) -- (11.0, 1.6);
+\draw[focus, line width=2pt] (11.0, 1.6) -- (12.0, 1.6);
+
+% Annotation: Low inherits priority 3
+\node[font=\sffamily\tiny, text=focusc, anchor=west] at (1.7, 2.6) {Low의 priority 3으로 상승};
+
+% Event markers
+\foreach \x/\lbl in {
+   0.5/{t0\\Low take},
+   2.5/{t1\\High want\\(block)},
+   4.0/{t3\\Mid wake\\(can't preempt)},
+   8.5/{t4\\Low give\\$\rightarrow$ High take}} {
+  \draw[mutec, line width=0.3pt] (\x, -0.3) -- (\x, 3.5);
+  \node[caption, anchor=north, align=center, font=\sffamily\tiny] at (\x, -0.4) {\lbl};
+}
+
+% Caption
+\node[caption, anchor=west, align=left] at (0, -1.6)
+  {\textbf{해결}: Low가 mutex 보유 동안 priority 3으로 상승 → Mid는 끼어들지 못함.\\give 후 priority 1로 복귀. High는 \textbf{bounded} 대기만.};
+
+\end{tikzpicture}
+\end{document}

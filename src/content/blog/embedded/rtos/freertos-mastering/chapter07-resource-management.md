@@ -21,25 +21,25 @@ draft: false
 
 ## 보호 수단의 5단계
 
-```text
-가장 강한 차단                                           가장 약한 차단
-─────────────                                            ────────────
-critical section ─► scheduler suspend ─► mutex ─► counting sem ─► gatekeeper
-  IRQ off            IRQ on, 스케줄러 off    IRQ on        IRQ on        IRQ on
-  ISR도 막힘          ISR 동작               ISR 동작       ISR 동작       ISR 동작
-                                              ↑
-                                       대부분의 정답
-```
+왼쪽일수록 차단이 강합니다 — *대부분의 정답*은 **mutex**.
+
+| 수단 | IRQ | 스케줄러 | ISR 동작 |
+|------|-----|----------|---------|
+| critical section | off | (해당 없음) | 차단됨 |
+| scheduler suspend | on | off | 동작 |
+| mutex | on | on | 동작 |
+| counting semaphore | on | on | 동작 |
+| gatekeeper task | on | on | 동작 |
 
 선택 원칙은 단순합니다.
 
-```text
-변수 1~2 word 단위 짧은 update?  → critical section
-공유 자료구조 짧은 read-modify-write?  → critical section 또는 mutex
-긴 작업 (수십~수백 μs)?  → mutex
-복수 인스턴스 (예: pool of 4 buffers)?  → counting semaphore
-복잡한 자원 (예: UART, file system)?  → gatekeeper task
-```
+| 상황 | 권장 수단 |
+|------|----------|
+| 변수 1 – 2 word 단위 짧은 update | critical section |
+| 공유 자료구조 짧은 read-modify-write | critical section 또는 mutex |
+| 긴 작업 (수십 – 수백 μs) | mutex |
+| 복수 인스턴스 (pool of 4 buffers 등) | counting semaphore |
+| 복잡한 자원 (UART, file system 등) | gatekeeper task |
 
 ## Critical Section — IRQ까지 막는 가장 강한 잠금
 
@@ -64,17 +64,17 @@ void prvIncrement(void)
 }
 ```
 
-```text
-critical section의 cost
-   * 매우 짧음 (수십 ns)
-   * 임계 구역 길이만큼 RTOS·인터럽트 latency 증가
-   * configMAX_SYSCALL_INTERRUPT_PRIORITY 이상 IRQ는 영향 없음
+**Critical section의 cost**
 
-규칙
-   * 가능한 한 짧게 (printf, 큰 루프 금지)
-   * 안에서 RTOS API 호출 금지 (block 발생 시 deadlock)
-   * 중첩 가능 (counter로 관리되므로)
-```
+- 매우 짧음 (수십 ns)
+- 임계 구역 길이만큼 RTOS·인터럽트 latency 증가
+- `configMAX_SYSCALL_INTERRUPT_PRIORITY` 이상 IRQ는 영향 없음
+
+**규칙**
+
+- 가능한 한 짧게 (`printf`, 큰 루프 금지)
+- 안에서 RTOS API 호출 금지 (block 발생 시 deadlock)
+- 중첩 가능 (counter로 관리)
 
 ISR 안에서 같은 변수를 만지면 *`taskENTER_CRITICAL_FROM_ISR`*을 씁니다.
 
@@ -122,68 +122,28 @@ void prvUseSpi(void)
 }
 ```
 
-```text
-mutex 특징
-   * take 한 태스크만 give 가능
-   * priority inheritance 자동
-   * recursive 불가 (같은 태스크가 두 번 take 시 deadlock)
-   * 더 무거운 cost (priority 추적 때문)
-```
+**Mutex 특징**
+
+- take 한 태스크만 give 가능
+- priority inheritance 자동
+- recursive 불가 (같은 태스크가 두 번 take 시 deadlock)
+- 더 무거운 cost (priority 추적 때문)
 
 ## Priority Inversion — 문제와 해결
 
-```text
-시나리오: priority inversion (mutex 없는 경우의 위험)
+**시나리오 — priority inversion (mutex 없는 경우의 위험)**
 
-priority 3 (High):   ──────W────────────────────────T─────
-                            ↓                       ↑
-                       want resource          finally got it
+High(3), Mid(2), Low(1) 세 태스크가 한 자원을 두고 경합. Low가 자원 보유, High가 그 자원을 기다리는 사이 Mid가 깨어나 Low를 선점합니다. 결과는 *unbounded inversion* — Mid가 끝날 때까지 High도 무한 대기.
 
-priority 2 (Mid):    ─────────────M─M─M─M─M─M─M─M─M─M──── (CPU 잡음)
-                                  ↓
-                                  CPU 사용 중
+![Priority Inversion — mutex 없는 경우](/images/blog/freertos-mastering/diagrams/ch07-priority-inversion.svg)
 
-priority 1 (Low):    ──L→take──────────────────────────────give───
-                           ↓                                ↑
-                       has resource                    finally release
+**유명 사건**: Mars Pathfinder (1997) reset의 원인.
 
-타임라인:
-   t0  Low가 자원 take
-   t1  High가 같은 자원 want → block (Low가 잡고 있으므로)
-   t2  Mid가 깨어남, CPU 우선순위가 Low보다 높으므로 Low를 선점
-   t3..tn  Mid가 long busy work → Low 못 돔 → 자원 release 안 됨
-   tn+1  Mid 끝나야 Low가 다시 돔 → release → High가 깨어남
+**시나리오 — priority inheritance (FreeRTOS mutex의 동작)**
 
-문제: 우선순위 3의 High가 우선순위 2의 Mid 때문에 막힘 ← INVERSION
-유명 사건: 화성탐사선 Pathfinder (1997) reset의 원인
-```
+Low가 mutex를 보유하는 동안 *임시로 priority 3으로 상승*합니다. Mid는 우선순위가 낮아 끼어들 수 없습니다. Low가 give하는 즉시 priority 1로 복귀하고 High가 mutex를 획득합니다.
 
-```text
-시나리오: priority inheritance (FreeRTOS mutex의 동작)
-
-priority 3 (High):   ──────W─────────────T─────
-                            ↓             ↑
-                       want resource    got it
-
-priority 2 (Mid):    ────────────────────────M─M─M─── (CPU 못 잡음)
-
-priority 1 (Low):    ──L→take──────────give───────────
-   inherit:                        ↑ 3   ↓ 1
-                                   │     │
-   Low의 우선순위가 임시로 3으로 올라감 → Mid는 못 끼어듦
-   give 후 다시 1로 돌아옴
-
-타임라인:
-   t0  Low가 자원 take (priority 1)
-   t1  High가 같은 자원 take → block
-   t2  Low의 priority가 임시로 3으로 inherit
-   t3  Mid가 깨어나도 priority 3보다 낮아서 못 선점
-   t4  Low가 release → priority 1로 복귀 → High가 take
-   t5  High 작업
-   t6  High give 후 Mid 또는 Low로 전환
-
-해결: Mid가 High를 막지 못함
-```
+![Priority Inheritance — FreeRTOS mutex 동작](/images/blog/freertos-mastering/diagrams/ch07-priority-inheritance.svg)
 
 priority inheritance는 *완전한 해결책*은 아닙니다. *복수 자원의 chained inversion*이나 *deadlock*은 여전히 가능합니다. *그래도 단일 자원의 unbounded inversion은 차단*하므로 *현실에서 충분히 강력*합니다.
 
@@ -227,12 +187,11 @@ void prvInner(void) {
 }
 ```
 
-```text
-recursive mutex의 cost
-   * 일반 mutex보다 무거움 (take count 추적)
-   * 신중히 — 일반적으로 recursive는 설계의 신호 약화
-   * 정말 필요한 경우에만 (재귀 호출 / 같은 lock으로 보호되는 함수 끼리)
-```
+**Recursive mutex의 cost**
+
+- 일반 mutex보다 무거움 (take count 추적)
+- 신중히 — 일반적으로 recursive는 설계의 신호 약화
+- 정말 필요한 경우에만 (재귀 호출 / 같은 lock으로 보호되는 함수 끼리)
 
 가능하면 *코드 구조 개편*으로 *재진입을 없애는 방향*이 권장됩니다.
 
@@ -305,16 +264,18 @@ void log_line(const char *s) {
 
 gatekeeper의 장점은 *경쟁 자체가 없어진다*는 것입니다. *UART는 한 태스크만 만지므로* mutex가 필요 없습니다. 사용자는 *비동기 큐 send*로 만족하고 *블로킹·실패 처리는 timeout으로* 표현합니다.
 
-```text
-gatekeeper 패턴 요약
-   장점
-     * 임계 구역 자체가 없음 (자원 = 한 태스크의 사유물)
-     * 호출 측은 모두 비동기 (큐 send) — fire-and-forget 또는 timeout
-     * UART·LCD·NV memory처럼 직렬 자원에 자연스러움
-   단점
-     * 큐 + 태스크 1개 RAM cost
-     * 응답이 비동기 (반환값 필요하면 별도 채널)
-```
+**Gatekeeper 패턴 요약**
+
+장점:
+
+- 임계 구역 자체가 없음 (자원 = 한 태스크의 사유물)
+- 호출 측은 모두 비동기 (큐 send) — fire-and-forget 또는 timeout
+- UART·LCD·NV memory처럼 직렬 자원에 자연스러움
+
+단점:
+
+- 큐 + 태스크 1개 RAM cost
+- 응답이 비동기 (반환값 필요하면 별도 채널)
 
 ## 자주 하는 실수와 troubleshooting
 
