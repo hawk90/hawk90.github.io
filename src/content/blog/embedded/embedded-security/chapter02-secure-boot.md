@@ -78,18 +78,18 @@ Cortex-M의 MCU는 더 단순합니다. 보통 두세 단계입니다.
 
 이미지 전체에 직접 서명하지 않습니다. *이미지의 hash*에 서명합니다. 검증 절차는 다음과 같습니다.
 
-```text
-1. 펌웨어 빌드 시:
-   ─ image_hash = SHA-256(firmware_image)
-   ─ signature  = sign(private_key, image_hash)
-   ─ firmware_image + signature + public_key_cert 를 묶어 배포
+**1. 펌웨어 빌드 시:**
 
-2. 부팅 시:
-   ─ ROM 또는 이전 단계가 firmware_image를 flash에서 읽어 hash 다시 계산
-   ─ public_key_cert가 OTP의 hash와 일치하는지 검증
-   ─ signature를 public_key로 verify
-   ─ verify(public_key, image_hash, signature) == true 이면 jump
-```
+- ─ image_hash = SHA-256(firmware_image)
+- ─ signature  = sign(private_key, image_hash)
+- ─ firmware_image + signature + public_key_cert 를 묶어 배포
+
+**2. 부팅 시:**
+
+- ─ ROM 또는 이전 단계가 firmware_image를 flash에서 읽어 hash 다시 계산
+- ─ public_key_cert가 OTP의 hash와 일치하는지 검증
+- ─ signature를 public_key로 verify
+- ─ verify(public_key, image_hash, signature) == true 이면 jump
 
 두 알고리즘이 자주 쓰입니다.
 
@@ -248,18 +248,19 @@ espefuse.py burn_efuse SECURE_BOOT_EN 1
 
 기본 아이디어는 *단조 증가 카운터*입니다. 각 펌웨어 빌드에 *security counter*를 박고, 디바이스도 OTP의 별도 fuse 비트로 같은 카운터를 유지합니다.
 
-```text
-펌웨어 이미지의 metadata:
-  ─ version  = 1.4.2   (사람이 보는 번호)
-  ─ sec_ver  = 5       (anti-rollback 카운터)
+**펌웨어 이미지의 metadata:**
 
-디바이스의 OTP fuse:
-  ─ rollback_fuse = 1111100... (현재 5비트 굽힘 → sec_ver 5 통과)
+- ─ version  = 1.4.2   (사람이 보는 번호)
+- ─ sec_ver  = 5       (anti-rollback 카운터)
 
-검증:
-  if (image.sec_ver < device.fuse_count) → reject
-  if (image.sec_ver > device.fuse_count) → 부팅 후 fuse 추가 굽기
-```
+**디바이스의 OTP fuse:**
+
+- ─ rollback_fuse = 1111100... (현재 5비트 굽힘 → sec_ver 5 통과)
+
+**검증:**
+
+- if (image.sec_ver < device.fuse_count) → reject
+- if (image.sec_ver > device.fuse_count) → 부팅 후 fuse 추가 굽기
 
 NXP HAB, MCUboot, ESP32 Secure Boot 모두 이 패턴을 지원합니다. 주의할 점은 fuse의 *총 비트 수가 유한*하다는 것입니다. 256비트짜리 fuse라면 256번까지만 sec_ver 증가가 가능합니다. 따라서 sec_ver은 *보안 수정에만* 증가시키고, 일반 기능 업데이트에는 그대로 둡니다.
 
@@ -269,11 +270,10 @@ NXP HAB, MCUboot, ESP32 Secure Boot 모두 이 패턴을 지원합니다. 주의
 
 핵심은 TPM의 PCR(Platform Configuration Register)입니다. 각 부트 단계가 *다음 단계의 hash*를 PCR에 *extend*합니다.
 
-```text
-PCR_extend(idx, data):
-    new_value = SHA-256(old_PCR_value || SHA-256(data))
-    PCR[idx] = new_value
-```
+**PCR_extend(idx, data):**
+
+- new_value = SHA-256(old_PCR_value || SHA-256(data))
+- PCR[idx] = new_value
 
 PCR은 *증가만* 가능하고 *되돌릴 수 없습니다*. 시스템이 부팅된 후 PCR 값들이 어떤 시퀀스인지를 *원격 서버에 attestation*으로 보고하면, 서버가 "이 PCR 조합은 우리가 아는 정상 부트와 일치한다"를 확인합니다.
 

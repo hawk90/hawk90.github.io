@@ -138,11 +138,10 @@ x86-64 System V의 일반 augmentation은 `"zR"` 또는 `"zPLR"`.
 
 CIE 안에도 *CFI 명령*이 있어 *모든 FDE의 시작 상태*를 정의.
 
-```
-CIE:
-  DW_CFA_def_cfa: r7 +8       ← 초기 CFA = rsp + 8
-  DW_CFA_offset: r16 -8       ← rip는 CFA - 8에 (call 명령이 push한 것)
-```
+**CIE:**
+
+- DW_CFA_def_cfa: r7 +8       ← 초기 CFA = rsp + 8
+- DW_CFA_offset: r16 -8       ← rip는 CFA - 8에 (call 명령이 push한 것)
 
 함수 *진입 직후*의 상태. 모든 함수가 *call에 의해 호출됨* → rsp+8이 호출자 SP, rsp+0이 return address.
 
@@ -277,17 +276,18 @@ $ llvm-dwarfdump --debug-frame my_prog
 
 ![.eh_frame_hdr 이진 탐색으로 FDE 찾기](/images/blog/tools/diagrams/eh-frame-hdr-search.svg)
 
-```
-.eh_frame_hdr 구조:
-  version  (1바이트, 보통 1)
-  eh_frame_ptr_enc  (1바이트, 인코딩 종류)
-  fde_count_enc     (1바이트)
-  table_enc         (1바이트)
-  eh_frame_ptr      (.eh_frame 시작 주소)
-  fde_count         (FDE 개수)
-  table[]:
-    (initial_pc, fde_ptr)        ← PC로 정렬된 (PC, FDE) 쌍
-```
+**.eh_frame_hdr 구조:**
+
+- version  (1바이트, 보통 1)
+- eh_frame_ptr_enc  (1바이트, 인코딩 종류)
+- fde_count_enc     (1바이트)
+- table_enc         (1바이트)
+- eh_frame_ptr      (.eh_frame 시작 주소)
+- fde_count         (FDE 개수)
+
+**table[]:**
+
+- (initial_pc, fde_ptr)        ← PC로 정렬된 (PC, FDE) 쌍
 
 PC가 주어지면 `table`에서 *이진 탐색*. O(log n)로 FDE 찾기. libgcc·libunwind의 `_Unwind_Find_FDE`가 이 인덱스 사용.
 

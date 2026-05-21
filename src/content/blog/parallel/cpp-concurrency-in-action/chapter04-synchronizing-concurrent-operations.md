@@ -1101,8 +1101,8 @@ public:
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - condition_variable     → pthread_cond_t
 - future / promise        → CompletableFuture (Java), Promise (JS), Future (Rust)
 - packaged_task           → 작업 큐 / 스레드 풀의 task 단위
@@ -1111,7 +1111,8 @@ public:
 - barrier (C++20)         → CyclicBarrier (Java), pthread_barrier_t
 - counting_semaphore      → Semaphore (Java), sem_t
 
-언제 무엇:
+**언제 무엇:**
+
 - 결과 받기            → future / promise
 - 이벤트 통보         → condition_variable
 - 작업 분배           → packaged_task + thread pool
@@ -1119,11 +1120,11 @@ public:
 - 반복 phase 동기화   → barrier
 - 자원 풀 제한        → counting_semaphore
 
-흔한 패턴:
+**흔한 패턴:**
+
 - Producer-Consumer  → queue + mutex + condition_variable
 - Fan-out/Fan-in     → async + future + when_all (boost / Folly)
 - Pipeline           → 여러 단계의 thread + queue
-```
 
 ## 자기 점검
 

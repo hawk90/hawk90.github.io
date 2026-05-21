@@ -108,24 +108,26 @@ CI에 *최소* clang-tidy + cppcheck + semgrep을 묶고, *블로커 룰*을 정
 
 같은 코드를 *컴파일러가 더 안전하게 빌드*하도록 옵션을 강제합니다.
 
-```text
-공통:
-  -Wall -Wextra -Wformat=2 -Wconversion -Werror
-  -fstack-protector-strong
-  -fno-strict-aliasing
-  -fno-common
-  -D_FORTIFY_SOURCE=2
+**공통:**
 
-위치 독립:
-  -fPIC / -fPIE -pie
+- -Wall -Wextra -Wformat=2 -Wconversion -Werror
+- -fstack-protector-strong
+- -fno-strict-aliasing
+- -fno-common
+- -D_FORTIFY_SOURCE=2
 
-스택·heap:
-  -ftrapv (signed overflow trap)
-  -fcf-protection=full (Intel CET / ARM BTI)
+**위치 독립:**
 
-링커:
-  -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack
-```
+- -fPIC / -fPIE -pie
+
+**스택·heap:**
+
+- -ftrapv (signed overflow trap)
+- -fcf-protection=full (Intel CET / ARM BTI)
+
+**링커:**
+
+- -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack
 
 `-Werror`로 *경고를 빌드 실패로* 만드는 것이 가장 큰 효과를 가집니다. 안 그러면 1년 뒤 *경고 1000개* 상황이 옵니다.
 

@@ -284,21 +284,22 @@ Target: RPN < 25 (Critical A)
 
 ### Tool
 
-```
-Static Application Security Testing (SAST):
-  - Helix QAC + CERT C/C++
-  - Fortify
-  - Checkmarx
-  - SonarQube Security
+**Static Application Security Testing (SAST):**
 
-Dynamic Application Security Testing (DAST):
-  - Penetration test
-  - Fuzzing
+- Helix QAC + CERT C/C++
+- Fortify
+- Checkmarx
+- SonarQube Security
 
-Software Composition Analysis (SCA):
-  - 외부 라이브러리 CVE 검사
-  - Snyk, Black Duck, OWASP Dependency Check
-```
+**Dynamic Application Security Testing (DAST):**
+
+- Penetration test
+- Fuzzing
+
+**Software Composition Analysis (SCA):**
+
+- 외부 라이브러리 CVE 검사
+- Snyk, Black Duck, OWASP Dependency Check
 
 ## 5. Software Reuse
 
@@ -499,17 +500,17 @@ Top N Hotspots (변경 빈번 + 복잡도 높음):
 
 ## ECSS vs DO-178C 비교 — Product Properties
 
-```
-DO-178C:
-  Code quality는 *SCS (Software Code Standards)* 안에서
-  주로 *qualitative* (e.g., "code shall be maintainable")
-  Metric 의무 없음 (프로젝트가 자체 설정)
+**DO-178C:**
 
-ECSS:
-  Product Properties Assurance 별도 활동
-  *Quantitative metric* 의무
-  Industry-wide benchmarking
-```
+- Code quality는 *SCS (Software Code Standards)* 안에서
+- 주로 *qualitative* (e.g., "code shall be maintainable")
+- Metric 의무 없음 (프로젝트가 자체 설정)
+
+**ECSS:**
+
+- Product Properties Assurance 별도 활동
+- *Quantitative metric* 의무
+- Industry-wide benchmarking
 
 ECSS가 *more measurable*. 비교·개선 가능.
 

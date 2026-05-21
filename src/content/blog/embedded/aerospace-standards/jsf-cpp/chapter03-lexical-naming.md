@@ -240,32 +240,29 @@ const float DEG_TO_RAD = 0.01745F;
 
 Hungarian이 *원래 의도*:
 
-```
-Microsoft (1980s, Charles Simonyi):
-  - Apps Hungarian: semantic prefix
-    예: cb (count of bytes), rw (row), ix (index)
-  
-  - Systems Hungarian: type prefix (변질)
-    예: iCount, szName, fActive
-```
+**Microsoft (1980s, Charles Simonyi):**
+
+- Apps Hungarian: semantic prefix 예: cb (count of bytes), rw (row), ix (index)
+
+- Systems Hungarian: type prefix (변질) 예: iCount, szName, fActive
 
 JSF는 *Systems Hungarian의 영향* — type/scope prefix.
 
 ### Modern 관점의 비판
 
-```
-일반적 비판:
-  1. Redundant — type system이 이미 표시
-  2. Verbose
-  3. 변경 시 cascade — 타입 변경 → prefix 변경
-  4. 현대 IDE가 hover/색상으로 이미 보여줌
-  5. 가독성 저하
+**일반적 비판:**
 
-옹호:
-  1. Scope 즉시 명확
-  2. 큰 codebase 일관성
-  3. Legacy 유지
-```
+- 1. Redundant — type system이 이미 표시
+- 2. Verbose
+- 3. 변경 시 cascade — 타입 변경 → prefix 변경
+- 4. 현대 IDE가 hover/색상으로 이미 보여줌
+- 5. 가독성 저하
+
+**옹호:**
+
+- 1. Scope 즉시 명확
+- 2. 큰 codebase 일관성
+- 3. Legacy 유지
 
 ### 표준 진화
 
@@ -418,23 +415,26 @@ private:
 
 ## 다른 코딩 표준의 명명 — 비교
 
-```
-JSF C++:
-  CFlightController, m_pBuffer, l_count
+**JSF C++:**
 
-Google C++ Style:
-  FlightController, buffer_, count
+- CFlightController, m_pBuffer, l_count
 
-LLVM Style:
-  FlightController, Buffer, Count (everything PascalCase)
+**Google C++ Style:**
 
-Boost Style:
-  flight_controller, buffer, count (snake_case)
+- FlightController, buffer_, count
 
-CppCoreGuidelines:
-  무엇이든 일관성. Hungarian 회피.
-  member에 trailing underscore OK.
-```
+**LLVM Style:**
+
+- FlightController, Buffer, Count (everything PascalCase)
+
+**Boost Style:**
+
+- flight_controller, buffer, count (snake_case)
+
+**CppCoreGuidelines:**
+
+- 무엇이든 일관성. Hungarian 회피.
+- member에 trailing underscore OK.
 
 JSF는 *unique style*. 현대 표준들과 *상당히 다름*.
 

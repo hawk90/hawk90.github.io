@@ -114,20 +114,20 @@ DT의 *논리적 정의*는 두 종류로 나뉩니다.
 
 DT 노드는 *주소가 있는 것*과 *없는 것*으로 나뉩니다.
 
-```text
-주소 있음:
-   uart0: serial@44e09000 {
-       reg = <0x44e09000 0x1000>;
-       compatible = "ti,am3352-uart";
-       ...
-   };
+**주소 있음:**
 
-주소 없음:
-   regulators {
-       compatible = "simple-bus";
-       ...
-   };
-```
+- uart0: serial@44e09000 {
+- reg = <0x44e09000 0x1000>;
+- compatible = "ti,am3352-uart";
+- ...
+- };
+
+**주소 없음:**
+
+- regulators {
+- compatible = "simple-bus";
+- ...
+- };
 
 주소 있는 노드는 `<name>@<unit-address>` 형식입니다. unit-address가 *부모 노드의 reg 첫 셀*과 일치해야 합니다. dtc가 이 일치를 *경고*합니다.
 

@@ -66,14 +66,13 @@ JEDEC 표준이 정의하는 주요 timing입니다.
 
 대부분 *ns 단위*로 데이터시트에 적혀 있습니다. 이걸 *클록 주기*로 환산한 값이 DDR controller에 들어갑니다.
 
-```text
-DDR4-2400, CL = 17 의미:
-   data rate 2400 MT/s
-   클록 = 1200 MHz (DDR은 양 edge에서 transfer)
-   클록 주기 = 1/1200MHz = 0.833 ns
-   CL = 17 cycles ≈ 14.17 ns
-   tRCD ≈ 14.17 ns → 17 cycles
-```
+**DDR4-2400, CL = 17 의미:**
+
+- data rate 2400 MT/s
+- 클록 = 1200 MHz (DDR은 양 edge에서 transfer)
+- 클록 주기 = 1/1200MHz = 0.833 ns
+- CL = 17 cycles ≈ 14.17 ns
+- tRCD ≈ 14.17 ns → 17 cycles
 
 이 환산을 *손으로 하면* 거의 항상 한 cycle씩 어긋납니다. *vendor tool*이 해야 합니다.
 

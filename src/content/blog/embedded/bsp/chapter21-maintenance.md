@@ -156,12 +156,11 @@ $ git format-patch -1 HEAD --subject-prefix="PATCH v2" \
 
 `--in-reply-to`로 v1 thread에 매답니다. cover letter에는 v1과의 차이를 명시.
 
-```text
-Changes since v1:
+**Changes since v1:**
+
 - Drop redundant clock-names entry (Krzysztof)
 - Move PHY mode to ethernet0 subnode (Rob)
 - Fix DT binding compatible (David Heidelberg)
-```
 
 응답이 빠르면 patch가 다음 merge window에 들어갈 가능성이 높습니다. 느리면 maintainer가 잊거나 다른 patch가 같은 영역을 건드려 conflict가 생깁니다.
 

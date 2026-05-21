@@ -105,12 +105,11 @@ ASAN_OPTIONS=detect_leaks=1 ./myapp
 
 ### 단순한 누수
 
-```
-Direct leak of 1024 byte(s) in 1 object(s) allocated from:
-    #0 0x...  in malloc
-    #1 0x...  in load_config /src/config.c:42
-    #2 0x...  in initialize_app /src/main.c:15
-```
+**Direct leak of 1024 byte(s) in 1 object(s) allocated from:**
+
+- #0 0x...  in malloc
+- #1 0x...  in load_config /src/config.c:42
+- #2 0x...  in initialize_app /src/main.c:15
 
 읽는 법:
 1. `1024 byte(s) in 1 object(s)` — 한 번의 1024바이트 할당이 누수
@@ -121,25 +120,24 @@ Direct leak of 1024 byte(s) in 1 object(s) allocated from:
 
 ### Direct + Indirect
 
-```
-Direct leak of 16 byte(s) in 1 object(s) allocated from:
-    #0 0x...  in malloc
-    #1 0x...  in create_list /src/list.c:10
+**Direct leak of 16 byte(s) in 1 object(s) allocated from:**
 
-Indirect leak of 80 byte(s) in 5 object(s) allocated from:
-    #0 0x...  in malloc
-    #1 0x...  in list_append /src/list.c:25
-```
+- #0 0x...  in malloc
+- #1 0x...  in create_list /src/list.c:10
+
+**Indirect leak of 80 byte(s) in 5 object(s) allocated from:**
+
+- #0 0x...  in malloc
+- #1 0x...  in list_append /src/list.c:25
 
 리스트 헤드(16바이트)가 누수되고, 그 헤드가 가리키던 *5개의 노드*(80바이트)가 같이 잃어버려졌습니다. Indirect는 *Direct를 고치면 자동 해결*되는 경우가 대부분이라, *Direct leak에 집중*하면 됩니다.
 
 ### 동일 위치의 반복 누수
 
-```
-Direct leak of 12000 byte(s) in 300 object(s) allocated from:
-    #0 0x...  in malloc
-    #1 0x...  in process_request /src/server.c:88
-```
+**Direct leak of 12000 byte(s) in 300 object(s) allocated from:**
+
+- #0 0x...  in malloc
+- #1 0x...  in process_request /src/server.c:88
 
 같은 자리에서 300번 할당이 누수됐다는 뜻입니다. 서버가 `process_request`를 300번 호출하면서 매번 해제를 빠뜨렸습니다. *Hot path의 누수*는 영향이 크므로 우선순위가 높습니다.
 

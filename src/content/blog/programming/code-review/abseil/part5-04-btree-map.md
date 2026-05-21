@@ -100,11 +100,10 @@ class btree_node {
 
 lookup은 노드 안에서 binary search(또는 linear search — small N에서 더 빠름)로 위치를 찾고, 필요하면 child 노드로 내려간다. 트리 높이는 `log_N`이지만 N이 크므로 실제 깊이는 매우 얕다.
 
-```text
-10M 원소:
+**10M 원소:**
+
 - std::map: ~23 level (log_2)
 - btree_map: ~4 level (log_64)
-```
 
 ## 코드 리뷰 포인트
 

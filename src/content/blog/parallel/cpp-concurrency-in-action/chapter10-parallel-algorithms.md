@@ -1191,8 +1191,8 @@ std::vector<size_t> find_all_positions(
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - std::execution::seq      → 순차 (기본)
 - std::execution::par      → 병렬
 - std::execution::par_unseq → 병렬 + SIMD
@@ -1201,19 +1201,20 @@ std::vector<size_t> find_all_positions(
 - std::inclusive_scan      → prefix sum (segment tree 등)
 - std::exclusive_scan      → parallel compaction에 사용
 
-언어/도구:
+**언어/도구:**
+
 - C++17/20: std::execution
 - C++ 라이브러리: oneTBB (Intel oneAPI), OpenMP, Highway
 - Rust: rayon (par_iter, par_iter_mut)
 - Java: parallel streams (Stream.parallel())
 - Python: numpy, multiprocessing.Pool
 
-빌드:
+**빌드:**
+
 - GCC: -ltbb (Linux), brew install tbb (Mac)
 - Clang: -ltbb 또는 PSTL 백엔드
 - MSVC: 내장
 - CMake: find_package(TBB REQUIRED)
-```
 
 ## 자기 점검
 

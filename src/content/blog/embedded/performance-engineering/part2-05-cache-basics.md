@@ -64,11 +64,10 @@ arr[16];  // ← 다른 line, miss
 
 ## Direct Mapped Cache
 
-```text
-Address bits:
-   [Tag] [Index] [Offset]
-    20    8       6        (64 KB cache, 64 byte line)
-```
+**Address bits:**
+
+- [Tag] [Index] [Offset]
+- 20    8       6        (64 KB cache, 64 byte line)
 
 각 메모리 주소는 유일한 cache line에만 들어갑니다.
 

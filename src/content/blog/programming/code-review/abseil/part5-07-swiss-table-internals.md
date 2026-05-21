@@ -21,11 +21,10 @@ Swiss Table은 **57비트 해시(H1)로 슬롯 그룹 인덱스**를, **7비트 
 
 Swiss Table은 **control byte**라는 메타데이터 배열을 따로 둔다. 각 슬롯 1바이트.
 
-```text
-control byte 의미:
-  bit 7 = 1 → 빈 슬롯 (empty / deleted / sentinel 구분은 하위 비트)
-  bit 7 = 0 → full 슬롯, 하위 7비트 = H2 (해시 일부)
-```
+**control byte 의미:**
+
+- bit 7 = 1 → 빈 슬롯 (empty / deleted / sentinel 구분은 하위 비트)
+- bit 7 = 0 → full 슬롯, 하위 7비트 = H2 (해시 일부)
 
 specific values:
 - `0b1xxxxxxx`: empty=`0b10000000`, deleted=`0b11111110`, sentinel=`0b11111111`

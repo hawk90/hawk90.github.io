@@ -239,17 +239,17 @@ Cantata              : 가벼운 검증
 
 도구가 *실수*해 *잘못된 결과*를 내면 *항공기에 직접 영향*. 따라서 *모든 도구의 자격* 요구.
 
-```
-Tool Use Class:
-  TQL-1 (DAL A에 used): 도구 검출 부재가 직접 catastrophic
-  TQL-2-3 (DAL B/C):  중간
-  TQL-4-5 (DAL D):    낮음
+**Tool Use Class:**
 
-도구 종류:
-  Verification Tool (정적 분석, 테스트):  Qualification 필요
-  Development Tool (컴파일러, 코드 생성기): 더 엄격
-  Configuration Tool (build):              간단한 qualification
-```
+- TQL-1 (DAL A에 used): 도구 검출 부재가 직접 catastrophic
+- TQL-2-3 (DAL B/C):  중간
+- TQL-4-5 (DAL D):    낮음
+
+**도구 종류:**
+
+- Verification Tool (정적 분석, 테스트):  Qualification 필요
+- Development Tool (컴파일러, 코드 생성기): 더 엄격
+- Configuration Tool (build):              간단한 qualification
 
 GCC도 *FAA-qualified GCC*가 별도로 제공 (수만 달러). 일반 GCC를 *그대로 못 쓴다*.
 

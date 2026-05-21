@@ -116,27 +116,31 @@ Review: SRR (System Requirements Review)
 
 ### Example — SR Allocation (가상)
 
-```
-System Requirement SR-12:
-  "Satellite shall maintain pointing accuracy of X° (3-sigma)
-   during nominal imaging mode."
+**System Requirement SR-12:**
 
-SR-12 Allocation:
-  HW responsible:
-    - Star tracker accuracy (vendor spec)
-    - Reaction wheel torque resolution
-    - Body rigidity (mechanical)
-  
-  SW responsible:
-    - Attitude estimation algorithm
-    - Control law (PID + feedforward)
-    - Mode management (transition logic)
-  
-  Combined budget:
-    HW: a° (3-sigma)
-    SW: b° (3-sigma)
-    Total: sqrt(a² + b²) ≤ X° (margin)
-```
+- "Satellite shall maintain pointing accuracy of X° (3-sigma)
+- during nominal imaging mode."
+
+**SR-12 Allocation:**
+
+
+**HW responsible:**
+
+- Star tracker accuracy (vendor spec)
+- Reaction wheel torque resolution
+- Body rigidity (mechanical)
+
+**SW responsible:**
+
+- Attitude estimation algorithm
+- Control law (PID + feedforward)
+- Mode management (transition logic)
+
+**Combined budget:**
+
+- HW: a° (3-sigma)
+- SW: b° (3-sigma)
+- Total: sqrt(a² + b²) ≤ X° (margin)
 
 이런 *명시적 allocation*이 *후속 design의 기준*.
 
@@ -204,18 +208,18 @@ PDR Agenda (3-5 days):
 
 ### PDR Outcomes
 
-```
-Possible outcomes:
-  - Approved → Allocated Baseline 설정
-  - Approved with conditions → 조건 충족 후 baseline
-  - Not approved → Phase 3 재실행
+**Possible outcomes:**
 
-PDR fail (rare):
-  - Architecture가 SRD 미충족
-  - Resource budget 초과
-  - Major risk 미해결
-  - 비용/일정 영향 큼
-```
+- Approved → Allocated Baseline 설정
+- Approved with conditions → 조건 충족 후 baseline
+- Not approved → Phase 3 재실행
+
+**PDR fail (rare):**
+
+- Architecture가 SRD 미충족
+- Resource budget 초과
+- Major risk 미해결
+- 비용/일정 영향 큼
 
 ## Phase 4: SW Detailed Design
 
@@ -252,15 +256,14 @@ CDR is "design freeze". 이후 변경 → CCB + 큰 영향
 
 ### CDR Effort — 일반 규모
 
-```
-대형 mission CDR의 일반 규모:
-  Preparation: 수개월
-  Review duration: 수일 ~ 1주
-  Participants: 수십명 (개발 team + customer + ISVV + subcontractor reps)
-  Documents reviewed: 수십~수백
-  Findings: Major + Minor 다수
-  Resolution time: 수개월
-```
+**대형 mission CDR의 일반 규모:**
+
+- Preparation: 수개월
+- Review duration: 수일 ~ 1주
+- Participants: 수십명 (개발 team + customer + ISVV + subcontractor reps)
+- Documents reviewed: 수십~수백
+- Findings: Major + Minor 다수
+- Resolution time: 수개월
 
 CDR이 *가장 큰 review*. *전체 design의 freeze*. 정확한 규모는 *mission*마다 다르다.
 
@@ -295,42 +298,44 @@ DO-178C Ch 6의 Source Code와 *내용 동일*. MISRA C 적용.
 
 ## Phase 6: SW Unit Testing
 
-```
-입력:
-  - Source code
-  - LLR
-  - Test environment
+**입력:**
 
-활동:
-  - Test case per LLR
-  - Unit test 실행
-  - Coverage 측정 (Statement/Decision/MC/DC)
-  - Anomaly handling
+- Source code
+- LLR
+- Test environment
 
-출력:
-  - Unit test results
-  - Coverage report
-  - PR (Problem Report)
+**활동:**
 
-목표:
-  Criticality A: MC/DC 100%
-  Criticality B: Decision 100%
-  Criticality C: Statement 100%
-```
+- Test case per LLR
+- Unit test 실행
+- Coverage 측정 (Statement/Decision/MC/DC)
+- Anomaly handling
+
+**출력:**
+
+- Unit test results
+- Coverage report
+- PR (Problem Report)
+
+**목표:**
+
+- Criticality A: MC/DC 100%
+- Criticality B: Decision 100%
+- Criticality C: Statement 100%
 
 ## Phase 7: SW Integration Testing
 
-```
-활동:
-  - 모듈 간 인터페이스 test
-  - Data flow 검증
-  - Control flow 검증
-  - HIL test 시작
+**활동:**
 
-출력:
-  - Integration test results
-  - HIL test results
-```
+- 모듈 간 인터페이스 test
+- Data flow 검증
+- Control flow 검증
+- HIL test 시작
+
+**출력:**
+
+- Integration test results
+- HIL test results
 
 ## Phase 8: SW Validation against SR
 
@@ -375,36 +380,37 @@ AR가 마지막 review. Pass = mission ready.
 
 ## Phase 10: SW Operations and Maintenance
 
-```
-활동 (mission 운영 중, 수년~수십년):
-  - Monitor
-  - Anomaly handling
-  - In-orbit changes
-  - Periodic updates
+**활동 (mission 운영 중, 수년~수십년):**
 
-조직:
-  - Operations team (운영)
-  - Engineering support
-  - Vendor support (필요 시)
+- Monitor
+- Anomaly handling
+- In-orbit changes
+- Periodic updates
 
-ECSS 적용:
-  - 모든 change에 ECSS process
-  - In-orbit upload procedure (Ch 4)
-  - Annual review
-```
+**조직:**
+
+- Operations team (운영)
+- Engineering support
+- Vendor support (필요 시)
+
+**ECSS 적용:**
+
+- 모든 change에 ECSS process
+- In-orbit upload procedure (Ch 4)
+- Annual review
 
 ## Phase 11: SW Disposal
 
-```
-Mission 종료:
-  - Final SW status capture
-  - Archive 30 years (ESA mission)
-  - Lessons learned documentation
-  - Re-use catalog 등록
+**Mission 종료:**
 
-조직:
-  - 마지막 1-2명 engineer + archive team
-```
+- Final SW status capture
+- Archive 30 years (ESA mission)
+- Lessons learned documentation
+- Re-use catalog 등록
+
+**조직:**
+
+- 마지막 1-2명 engineer + archive team
 
 장기 운영 후 mission이 *disposal phase*에 진입하는 사례는 ESA / NASA / 각 국 우주청에 다수.
 
@@ -412,22 +418,22 @@ Mission 종료:
 
 ECSS-E-ST-40C가 *coding standard 의무화*. 단 specific 표준 명시 X — 프로젝트 자체 정의.
 
-```
-Required content of Coding Standard:
-  - 적용 언어
-  - 명명 규칙
-  - 형식 (indentation, brackets)
-  - 주석 정책
-  - Error handling
-  - Concurrency rules
-  - Module/file organization
+**Required content of Coding Standard:**
 
-External standard 채택:
-  - C: MISRA C:2012
-  - C++: MISRA C++ / AUTOSAR / JSF C++
-  - Ada: SPARK Ada subset
-  - Python: PEP 8 + custom
-```
+- 적용 언어
+- 명명 규칙
+- 형식 (indentation, brackets)
+- 주석 정책
+- Error handling
+- Concurrency rules
+- Module/file organization
+
+**External standard 채택:**
+
+- C: MISRA C:2012
+- C++: MISRA C++ / AUTOSAR / JSF C++
+- Ada: SPARK Ada subset
+- Python: PEP 8 + custom
 
 대부분 ESA missions = *MISRA C* 또는 *Ada with SPARK*. *Ariane 5 launcher = Ada* (legacy + 새 missions은 C++ 검토 중).
 
@@ -480,15 +486,14 @@ Phase 11: Archive Index, Lessons Learned
 
 V-model의 *각 phase*만 있는 게 아니라 *continuous 활동*도.
 
-```
-Continuous activities (전 lifecycle):
-  - Configuration Management (Ch 4)
-  - Quality Assurance (Q-ST-80C)
-  - Risk Management (M-ST-80C)
-  - Documentation
-  - Training
-  - Audit (internal + external)
-```
+**Continuous activities (전 lifecycle):**
+
+- Configuration Management (Ch 4)
+- Quality Assurance (Q-ST-80C)
+- Risk Management (M-ST-80C)
+- Documentation
+- Training
+- Audit (internal + external)
 
 ECSS Standards 전체가 *완전한 ecosystem*.
 
@@ -522,45 +527,47 @@ ESA mission *15-30년* lifecycle. SW도 *그 동안 evolve*.
 
 ECSS-E-ST-40C도 *tailoring 가능*. ECSS-Q-ST-80C와 같이.
 
-```
-일반 tailoring 결정:
+**일반 tailoring 결정:**
 
-Small mission (CubeSat):
-  - Phase 8 reduced
-  - Document set simplified
-  - Customer review 단순화
+**Small mission (CubeSat):**
 
-Heritage mission (대부분 reused):
-  - Phase 2-4 expedited
-  - Heritage acceptance가 design 대체
+- Phase 8 reduced
+- Document set simplified
+- Customer review 단순화
 
-Constellation (다수 위성):
-  - 첫 위성에 full
-  - 후속 위성에 abbreviated
-```
+**Heritage mission (대부분 reused):**
+
+- Phase 2-4 expedited
+- Heritage acceptance가 design 대체
+
+**Constellation (다수 위성):**
+
+- 첫 위성에 full
+- 후속 위성에 abbreviated
 
 Constellation 형태의 mission은 *첫 unit에 full process, 후속 unit에 abbreviated*가 일반 패턴.
 
 ## V-Model 비판 + 진화
 
-```
-V-Model 비판:
-  - 변화에 느림
-  - Customer feedback 늦음
-  - Late discovery of issues
-  - 비용 증가
+**V-Model 비판:**
 
-진화 방향:
-  - Iterative V-model (각 phase에서 mini-iteration)
-  - Spiral model
-  - Incremental development
-  - Agile-V hybrid
+- 변화에 느림
+- Customer feedback 늦음
+- Late discovery of issues
+- 비용 증가
 
-ECSS의 점진적 변화:
-  - ECSS-E-ST-40C Rev.1 (검토 중) — iterative 요소 추가
-  - Small mission tailoring 강화
-  - Agile-friendly process 일부 허용
-```
+**진화 방향:**
+
+- Iterative V-model (각 phase에서 mini-iteration)
+- Spiral model
+- Incremental development
+- Agile-V hybrid
+
+**ECSS의 점진적 변화:**
+
+- ECSS-E-ST-40C Rev.1 (검토 중) — iterative 요소 추가
+- Small mission tailoring 강화
+- Agile-friendly process 일부 허용
 
 ## ECSS-E-ST-40C vs DO-178C
 
@@ -596,19 +603,19 @@ End        Phase 11: Disposal
 
 ## 신생 우주 회사 — V-Model 적용 어려움
 
-```
-신생 우주 회사의 일반 도전:
-  - Schedule pressure
-  - 적은 budget
-  - 작은 team
-  - V-Model documentation 부담
-  - 5 milestone review 부담
+**신생 우주 회사의 일반 도전:**
 
-일반 해결:
-  - Tailored ECSS (heavy reduction)
-  - 자체 표준 (ECSS 일부 차용)
-  - DO-178C-like (objective-based)
-```
+- Schedule pressure
+- 적은 budget
+- 작은 team
+- V-Model documentation 부담
+- 5 milestone review 부담
+
+**일반 해결:**
+
+- Tailored ECSS (heavy reduction)
+- 자체 표준 (ECSS 일부 차용)
+- DO-178C-like (objective-based)
 
 신생 우주는 *ECSS 변형* 또는 *자체 표준*이 흔하다.
 
@@ -616,62 +623,68 @@ End        Phase 11: Disposal
 
 전통 ECSS의 *paper-heavy*에 대응. Modern 도구.
 
-```
-DAC 도구:
-  - Sphinx (Python docs)
-  - mkdocs
-  - GitLab Wiki
-  - Confluence + Git plugin
-  - LaTeX + git
+**DAC 도구:**
 
-Trend:
-  - 모든 문서 git 관리
-  - Markdown 또는 reST
-  - Auto-build (PDF, HTML)
-  - Version controlled
-  - Diff 가능
-  - Review (PR-based)
+- Sphinx (Python docs)
+- mkdocs
+- GitLab Wiki
+- Confluence + Git plugin
+- LaTeX + git
 
-ECSS 채택 진행:
-  많은 우주·항공 조직이 DAC 도구 부분 도입 중
-  Boeing 등 대형 산업도 광범위 채택
-```
+**Trend:**
+
+- 모든 문서 git 관리
+- Markdown 또는 reST
+- Auto-build (PDF, HTML)
+- Version controlled
+- Diff 가능
+- Review (PR-based)
+
+**ECSS 채택 진행:**
+
+- 많은 우주·항공 조직이 DAC 도구 부분 도입 중
+- Boeing 등 대형 산업도 광범위 채택
 
 DAC가 *paperwork 부담 감소*. ECSS process compliance 유지하면서.
 
 ## 도구 — Phase별
 
-```
-Phase 1-2 (Requirements):
-  DOORS, Polarion, Jama Connect
+**Phase 1-2 (Requirements):**
 
-Phase 3-4 (Design):
-  Enterprise Architect (UML/SysML)
-  MagicDraw / Cameo Systems Modeler
-  Simulink / SCADE (model-based)
+- DOORS, Polarion, Jama Connect
 
-Phase 5 (Coding):
-  Git + GitLab/Bitbucket/GitHub
-  IDE: VS Code, CLion, Vim
+**Phase 3-4 (Design):**
 
-Phase 5 (Static Analysis):
-  Polyspace, QAC, LDRA
+- Enterprise Architect (UML/SysML)
+- MagicDraw / Cameo Systems Modeler
+- Simulink / SCADE (model-based)
 
-Phase 6-7 (Testing):
-  Google Test (Unit)
-  Cantata, VectorCAST
-  Custom HIL
+**Phase 5 (Coding):**
 
-Phase 8 (Validation):
-  dSPACE SCALEXIO (HIL)
-  Custom validation framework
+- Git + GitLab/Bitbucket/GitHub
+- IDE: VS Code, CLion, Vim
 
-Cross-phase:
-  Jira (NCR, CR)
-  Confluence (docs)
-  Jenkins / GitLab CI (build)
-  SonarQube (quality)
-```
+**Phase 5 (Static Analysis):**
+
+- Polyspace, QAC, LDRA
+
+**Phase 6-7 (Testing):**
+
+- Google Test (Unit)
+- Cantata, VectorCAST
+- Custom HIL
+
+**Phase 8 (Validation):**
+
+- dSPACE SCALEXIO (HIL)
+- Custom validation framework
+
+**Cross-phase:**
+
+- Jira (NCR, CR)
+- Confluence (docs)
+- Jenkins / GitLab CI (build)
+- SonarQube (quality)
 
 ## 정리
 

@@ -63,14 +63,14 @@ current limit는 *VREF voltage*로 설정 (DRV8825: I = VREF / (5 × R_sense)).
 
 stepper는 *기계적 inertia* 때문에 stop에서 max speed로 *바로 못 갑니다*. 천천히 가속해야 step 안 잃습니다.
 
-```text
-Linear ramp:
-  speed(t) = a × t  (a = 가속도, step/s²)
-  delay(n) = 1 / speed(n)
+**Linear ramp:**
 
-S-curve (jerk-limited):
-  더 부드럽지만 계산 복잡
-```
+- speed(t) = a × t  (a = 가속도, step/s²)
+- delay(n) = 1 / speed(n)
+
+**S-curve (jerk-limited):**
+
+- 더 부드럽지만 계산 복잡
 
 3D printer (Marlin firmware)는 *trapezoidal velocity profile* (가속 → 등속 → 감속)을 표준으로 씁니다.
 

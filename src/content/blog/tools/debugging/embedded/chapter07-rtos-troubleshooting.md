@@ -169,31 +169,30 @@ process_data
 
 ### CFSR 비트 해독
 
-```
-CFSR (0xE000ED28):
-  [25] DIVBYZERO    — 0으로 나눔
-  [24] UNALIGNED    — 정렬 안 된 접근
-  [19] NOCP         — Coprocessor 없음 (FPU 활성화 안 했나?)
-  [18] INVPC        — invalid PC load
-  [17] INVSTATE     — invalid state (Thumb 비트?)
-  [16] UNDEFINSTR   — undefined instruction
-  
-  [12:8] BFSR (BusFault):
-    [15] BFARVALID  — BFAR 유효
-    [12] STKERR     — exception 진입 시 stack push 실패
-    [11] UNSTKERR   — return 시 stack pop 실패
-    [10] IMPRECISERR — 비동기 bus fault
-    [9]  PRECISERR  — 정확한 bus fault (BFAR 의미 있음)
-    [8]  IBUSERR    — instruction fetch 실패
-  
-  [7:0] MMFSR (MemFault):
-    [7] MMARVALID   — MMAR 유효
-    [5] MLSPERR     — lazy FP stacking 실패
-    [4] MSTKERR     — exception 시 stack push 실패
-    [3] MUNSTKERR   — pop 실패
-    [1] DACCVIOL    — data access violation (MPU)
-    [0] IACCVIOL    — instruction access violation
-```
+**CFSR (0xE000ED28):**
+
+- [25] DIVBYZERO    — 0으로 나눔
+- [24] UNALIGNED    — 정렬 안 된 접근
+- [19] NOCP         — Coprocessor 없음 (FPU 활성화 안 했나?)
+- [18] INVPC        — invalid PC load
+- [17] INVSTATE     — invalid state (Thumb 비트?)
+- [16] UNDEFINSTR   — undefined instruction
+
+[12:8] BFSR (BusFault):
+[15] BFARVALID  — BFAR 유효
+[12] STKERR     — exception 진입 시 stack push 실패
+[11] UNSTKERR   — return 시 stack pop 실패
+[10] IMPRECISERR — 비동기 bus fault
+[9]  PRECISERR  — 정확한 bus fault (BFAR 의미 있음)
+[8]  IBUSERR    — instruction fetch 실패
+
+[7:0] MMFSR (MemFault):
+[7] MMARVALID   — MMAR 유효
+[5] MLSPERR     — lazy FP stacking 실패
+[4] MSTKERR     — exception 시 stack push 실패
+[3] MUNSTKERR   — pop 실패
+[1] DACCVIOL    — data access violation (MPU)
+[0] IACCVIOL    — instruction access violation
 
 ```c
 void decode_cfsr(uint32_t cfsr) {

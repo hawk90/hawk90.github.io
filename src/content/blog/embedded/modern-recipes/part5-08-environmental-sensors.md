@@ -238,17 +238,17 @@ float temp_smooth(float new) {
 
 값이 합리적인 범위(20-25°C, 40-60%RH, 1000-1020 hPa)에서 *정상 변동*해야 합니다.
 
-```text
-정상 측정:
-  T = 23.4 °C
-  P = 1013.2 hPa
-  RH = 47.3 %
+**정상 측정:**
 
-이상 측정:
-  T = -40.0 °C (sensor 미연결 또는 spi 오류)
-  T = +85.0 °C (calibration 잘못)
-  P = 0 (i2c address 잘못)
-```
+- T = 23.4 °C
+- P = 1013.2 hPa
+- RH = 47.3 %
+
+**이상 측정:**
+
+- T = -40.0 °C (sensor 미연결 또는 spi 오류)
+- T = +85.0 °C (calibration 잘못)
+- P = 0 (i2c address 잘못)
 
 검증: *손으로 sensor를 잡으면* 온도가 1-2°C 올라야 함. *입김*을 불면 RH가 80%+로 튐. 안 변하면 sensor가 동작 안 함.
 

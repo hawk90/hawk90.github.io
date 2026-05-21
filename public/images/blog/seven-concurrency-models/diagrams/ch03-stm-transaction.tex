@@ -34,7 +34,8 @@
 
   % Tx B commits FIRST — modifies ref2
   \draw[msgsync] (b |- 0,-4.4) -- node[msglabel]{commit: alter @b} (r2 |- 0,-4.4);
-  \node[seqnote, anchor=west, text width=30mm] at ($(r2 |- 0,-4.4) + (1.5,0)$)
+  % "Tx B 성공" placed BELOW the arrow so it doesn't sit on the msglabel
+  \node[seqnote, anchor=west, text width=24mm] at ($(r2 |- 0,-4.4) + (-2.5,-0.4)$)
        {Tx B 성공};
 
   % Tx A tries to alter ref2 (but value already changed)

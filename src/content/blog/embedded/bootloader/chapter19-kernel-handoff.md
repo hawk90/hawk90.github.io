@@ -18,29 +18,30 @@ draft: false
 
 가장 자주 만나는 ABI입니다. Linux `Documentation/arm64/booting.rst`에 명시되어 있습니다.
 
-```text
-점프 시점 요구사항:
+**점프 시점 요구사항:**
 
-레지스터:
-  x0 = DTB(또는 ACPI tables) 물리 주소
-  x1 = 0  (reserved)
-  x2 = 0  (reserved)
-  x3 = 0  (reserved)
-  PC = Image.start + 0x80
+**레지스터:**
 
-CPU 상태:
-  EL = EL1 (또는 EL2 — Linux가 자체 처리)
-  Endian = little endian
-  Interrupts = masked (DAIF.I = DAIF.F = 1)
-  MMU = OFF
-  D-cache = OFF (단, kernel 이미지·DTB·initramfs 영역은 *flushed*)
-  I-cache = invalidated 후 OFF 또는 ON
+- x0 = DTB(또는 ACPI tables) 물리 주소
+- x1 = 0  (reserved)
+- x2 = 0  (reserved)
+- x3 = 0  (reserved)
+- PC = Image.start + 0x80
 
-DTB:
-  8-byte aligned
-  kernel image와 동일한 512MB 영역 안 또는 그 이하
-  크기 < 2MB
-```
+**CPU 상태:**
+
+- EL = EL1 (또는 EL2 — Linux가 자체 처리)
+- Endian = little endian
+- Interrupts = masked (DAIF.I = DAIF.F = 1)
+- MMU = OFF
+- D-cache = OFF (단, kernel 이미지·DTB·initramfs 영역은 *flushed*)
+- I-cache = invalidated 후 OFF 또는 ON
+
+**DTB:**
+
+- 8-byte aligned
+- kernel image와 동일한 512MB 영역 안 또는 그 이하
+- 크기 < 2MB
 
 `booti`가 이 모두를 처리합니다. 직접 점프할 일은 없지만, *왜 멈추는지* 알려면 ABI를 알아야 합니다.
 
@@ -70,23 +71,24 @@ static void boot_jump_linux(struct bootm_headers *images, int flag)
 
 ARMv7 시대의 ABI는 형태가 약간 다릅니다.
 
-```text
-레지스터:
-  r0 = 0  (boot 모드 flag, 보통 0)
-  r1 = machine type  (machid, DT만 쓰면 ~0)
-  r2 = ATAGS 또는 DTB 물리 주소
+**레지스터:**
 
-CPU 상태:
-  SVC mode
-  Interrupts = disabled (CPSR.I = CPSR.F = 1)
-  MMU = OFF
-  D-cache = OFF
-  I-cache = ON 또는 OFF (둘 다 허용)
+- r0 = 0  (boot 모드 flag, 보통 0)
+- r1 = machine type  (machid, DT만 쓰면 ~0)
+- r2 = ATAGS 또는 DTB 물리 주소
 
-ATAGS / DTB:
-  ATAGS: 옛 인터페이스, 메모리 맵·cmdline 등을 구조체 리스트로
-  DTB:   현재 표준, r2가 가리키는 주소에 둠
-```
+**CPU 상태:**
+
+- SVC mode
+- Interrupts = disabled (CPSR.I = CPSR.F = 1)
+- MMU = OFF
+- D-cache = OFF
+- I-cache = ON 또는 OFF (둘 다 허용)
+
+**ATAGS / DTB:**
+
+- ATAGS: 옛 인터페이스, 메모리 맵·cmdline 등을 구조체 리스트로
+- DTB:   현재 표준, r2가 가리키는 주소에 둠
 
 ATAGS는 이제는 거의 안 보이지만, BSP가 오래된 보드면 마주칠 수 있습니다. 둘 중 어느 것인지는 *처음 4바이트*로 구분합니다. DTB는 `0xd00dfeed` magic으로 시작합니다.
 
@@ -183,19 +185,20 @@ cmdline은 DTB의 `chosen/bootargs`에 박힙니다. U-Boot env의 `bootargs`가
 
 RISC-V도 비슷한 구조입니다. `Documentation/riscv/boot.rst`를 따릅니다.
 
-```text
-레지스터:
-  a0 = boot hartid (어느 hart가 첫 부팅을 맡았는지)
-  a1 = DTB 물리 주소
+**레지스터:**
 
-CPU 상태:
-  S-mode (Linux는 S-mode에서 동작; M-mode는 OpenSBI 등 firmware가 차지)
-  MMU = OFF
-  Interrupts = disabled
+- a0 = boot hartid (어느 hart가 첫 부팅을 맡았는지)
+- a1 = DTB 물리 주소
 
-DTB:
-  8-byte aligned
-```
+**CPU 상태:**
+
+- S-mode (Linux는 S-mode에서 동작; M-mode는 OpenSBI 등 firmware가 차지)
+- MMU = OFF
+- Interrupts = disabled
+
+**DTB:**
+
+- 8-byte aligned
 
 흥미로운 점은 RISC-V는 *firmware가 항상 있다*는 가정입니다. OpenSBI가 M-mode를 들고 있고, U-Boot은 S-mode에서 동작하다 Linux로 인계합니다. ARM에서는 ATF가 비슷한 역할을 합니다.
 
@@ -203,24 +206,25 @@ DTB:
 
 x86은 historical reasons로 더 복잡합니다. *Real Mode* zImage 헤더, *32-bit boot protocol*, *64-bit boot protocol*이 있습니다.
 
-```text
-real-mode boot protocol:
-  zImage 헤더의 boot_params 구조체를 ES:SI에 둠
+**real-mode boot protocol:**
 
-32-bit boot protocol (CONFIG_KERNEL_NORELOC=n 이전):
-  EBX = 0
-  EBP = 0
-  EDI = 0
-  ESI = boot_params 물리 주소
-  EFLAGS.IF = 0
+- zImage 헤더의 boot_params 구조체를 ES:SI에 둠
 
-64-bit boot protocol:
-  RSI = boot_params
-  CR0.PE = 1 (protected)
-  CR4.PAE = 1 (Physical Address Extension)
-  EFER.LMA = 1 (long mode active)
-  paging = on (identity mapped first 4GB)
-```
+**32-bit boot protocol (CONFIG_KERNEL_NORELOC=n 이전):**
+
+- EBX = 0
+- EBP = 0
+- EDI = 0
+- ESI = boot_params 물리 주소
+- EFLAGS.IF = 0
+
+**64-bit boot protocol:**
+
+- RSI = boot_params
+- CR0.PE = 1 (protected)
+- CR4.PAE = 1 (Physical Address Extension)
+- EFER.LMA = 1 (long mode active)
+- paging = on (identity mapped first 4GB)
 
 임베디드에서 x86은 드물지만, intel atom 보드를 만지면 다시 볼 일이 있습니다.
 

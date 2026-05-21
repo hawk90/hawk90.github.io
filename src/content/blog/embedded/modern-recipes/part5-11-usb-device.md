@@ -40,24 +40,26 @@ PHY              (D+/D- driver, OTG)
 
 USB device는 *Descriptor*로 자신을 PC에 설명. PC OS가 이를 보고 driver를 매칭합니다.
 
-```text
-Device Descriptor:
-  Vendor ID (VID)  — 회사 식별
-  Product ID (PID) — 제품 식별
-  USB version, class, max packet size, ...
+**Device Descriptor:**
 
-Configuration Descriptor:
-  Interface count, attributes (power, ...)
+- Vendor ID (VID)  — 회사 식별
+- Product ID (PID) — 제품 식별
+- USB version, class, max packet size, ...
 
-Interface Descriptor:
-  Class (CDC=0x02, HID=0x03, MSC=0x08, ...)
-  Subclass, protocol
+**Configuration Descriptor:**
 
-Endpoint Descriptor:
-  Address (IN/OUT, number)
-  Type (control, bulk, interrupt, isochronous)
-  Max packet size, interval
-```
+- Interface count, attributes (power, ...)
+
+**Interface Descriptor:**
+
+- Class (CDC=0x02, HID=0x03, MSC=0x08, ...)
+- Subclass, protocol
+
+**Endpoint Descriptor:**
+
+- Address (IN/OUT, number)
+- Type (control, bulk, interrupt, isochronous)
+- Max packet size, interval
 
 ### Endpoint 종류
 

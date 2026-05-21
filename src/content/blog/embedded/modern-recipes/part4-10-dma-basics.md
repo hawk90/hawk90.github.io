@@ -197,11 +197,10 @@ $1 = 178           ← 256 → 178로 줄어들고 있음 (78 bytes 전송됨)
 
 ADC sampling은 oscilloscope로 ADC 트리거 핀(TIM2 ETR 등)을 보고, sample rate 일치 확인:
 
-```text
-TIM2 → ADC EXT trigger:
-  PA0 trigger: 1 µs period (1 MHz)
-  adc_buf 채우는 속도: 256 sample / 256 µs = 1 sample/µs ✓
-```
+**TIM2 → ADC EXT trigger:**
+
+- PA0 trigger: 1 µs period (1 MHz)
+- adc_buf 채우는 속도: 256 sample / 256 µs = 1 sample/µs ✓
 
 DMA가 안 도는 가장 흔한 원인은 *peripheral의 DMA enable bit 누락*과 *clock enable 누락*입니다.
 

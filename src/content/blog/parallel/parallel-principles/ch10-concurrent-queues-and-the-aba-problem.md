@@ -484,11 +484,10 @@ if (first == last) return std::nullopt;  // 버그!
 
 helping 메커니즘을 우체국 카운터로 구체화해 본다. 손님 A가 우편물을 카운터에 *놓는* 단계 1을 끝낸 뒤, *영수증 발급* 단계 2로 가다가 잠시 멈췄다. 다음 손님 B가 와서 본다:
 
-```text
-B가 보는 상태:
-    카운터 영수증판: A의 우편물 위치 표시 안 됨 (tail 이전 위치)
-    우편물 보관함: A의 우편물이 이미 들어있음 (last->next != null)
-```
+**B가 보는 상태:**
+
+- 카운터 영수증판: A의 우편물 위치 표시 안 됨 (tail 이전 위치)
+- 우편물 보관함: A의 우편물이 이미 들어있음 (last->next != null)
 
 B는 두 가지 사실을 안다: (1) 영수증판이 우편물 보관함을 따라가지 못함, (2) 앞에 끼어든 사람이 단계 2를 못 끝냈음. B는 자기 일을 시작하기 전에 *A를 대신해* 영수증판을 정정한다 (`tail.CAS(A, B의 직전 우편물)`). 그 다음 자기 우편물의 단계 1을 시도한다.
 
@@ -1101,25 +1100,26 @@ void reader() {
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - Two-Lock Queue      → std::mutex 두 개 + std::queue
 - Michael-Scott       → folly::MPMCQueue, moodycamel::ConcurrentQueue
 - ABA + version       → folly::PackedSyncPtr
 - Hazard Pointer      → folly::HazptrHolder
 - Epoch               → crossbeam-epoch (Rust)
 
-C++20 고성능 큐:
+**C++20 고성능 큐:**
+
 - SPSC (단일 생산자-단일 소비자): boost::lockfree::spsc_queue
 - MPMC (다중 생산자-다중 소비자): moodycamel::ConcurrentQueue
 - Work stealing: folly::UnboundedQueue
 
-라이브러리 선택:
+**라이브러리 선택:**
+
 - 일반용: std::mutex + std::queue (충분히 빠름)
 - 고성능: moodycamel::ConcurrentQueue
 - Facebook 스타일: folly::MPMCQueue
 - Gaming/실시간: lock-free ring buffer
-```
 
 ## 자기 점검
 

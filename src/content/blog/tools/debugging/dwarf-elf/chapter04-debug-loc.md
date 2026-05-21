@@ -241,13 +241,12 @@ DW_AT_location = DW_OP_call_frame_cfa DW_OP_consts -16 DW_OP_plus
 
 PC 위치별로 *다른 위치*를 가지는 변수.
 
-```
-.debug_loc (DWARF 4):
-  [0x401120, 0x40112f): DW_OP_reg0      ← r0에
-  [0x40112f, 0x401140): DW_OP_fbreg -16  ← 스택으로 spill
-  [0x401140, 0x401160): (empty)          ← 사라짐
-  [0x401160, 0x401180): DW_OP_reg5      ← r5로 다시
-```
+**.debug_loc (DWARF 4):**
+
+- [0x401120, 0x40112f): DW_OP_reg0      ← r0에
+- [0x40112f, 0x401140): DW_OP_fbreg -16  ← 스택으로 spill
+- [0x401140, 0x401160): (empty)          ← 사라짐
+- [0x401160, 0x401180): DW_OP_reg5      ← r5로 다시
 
 `DW_AT_location`이 *list*면 `.debug_loc`로의 offset (DW_FORM_sec_offset). GDB가 PC를 보고 적절한 entry 선택.
 
@@ -257,16 +256,17 @@ PC 위치별로 *다른 위치*를 가지는 변수.
 
 DWARF 4의 `.debug_loc`은 *모든 location list*를 한 섹션에 둠. DWARF 5는 *CU별 인덱스*로 분리 + 더 압축된 형식.
 
-```
-.debug_loclists:
-  CU offset → list 시작
-  각 entry:
-    DW_LLE_offset_pair: low_pc, high_pc (CU base 기준)
-    DW_LLE_base_address: 새 base 설정
-    DW_LLE_start_end: 절대 주소
-    DW_LLE_default_location: PC와 무관, default
-    DW_LLE_end_of_list: 끝
-```
+**.debug_loclists:**
+
+- CU offset → list 시작
+
+**각 entry:**
+
+- DW_LLE_offset_pair: low_pc, high_pc (CU base 기준)
+- DW_LLE_base_address: 새 base 설정
+- DW_LLE_start_end: 절대 주소
+- DW_LLE_default_location: PC와 무관, default
+- DW_LLE_end_of_list: 끝
 
 base address 트릭이 핵심 — *대부분의 PC는 가까이*에 있으므로 *상대 offset*만 저장. 같은 long range를 표현하는 데 *바이트가 절반*.
 

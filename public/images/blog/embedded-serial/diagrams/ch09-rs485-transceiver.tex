@@ -37,11 +37,15 @@
   % Termination at end
   \draw (6,2.5) to[R=120$\Omega$] (6,1.0);
 
-  % Bias resistors (idle state definition)
-  \draw (5.5,2.5) -- (5.5,4) node[anchor=south] {\scriptsize VCC};
-  \draw (5.5,2.5) to[R=680$\Omega$] (5.5,3.5);
-  \draw (5.5,1.0) -- (5.5,-0.5) node[ground] {};
-  \draw (5.5,1.0) to[R=680$\Omega$] (5.5,0);
+  % Bias resistors (idle state definition) — pushed right (5.5→6.5) so the
+  % "680Ω" labels don't collide with the IC pin "VCC" label at (4, 3.0).
+  % Tap the A/B bus lines (at x=4..6) horizontally first to reach the new column.
+  \draw (5.0,2.5) -- (6.5,2.5);
+  \draw (5.0,1.0) -- (6.5,1.0);
+  \draw (6.5,2.5) -- (6.5,4) node[anchor=south] {\scriptsize VCC};
+  \draw (6.5,2.5) to[R=680$\Omega$] (6.5,3.5);
+  \draw (6.5,1.0) -- (6.5,-0.5) node[ground] {};
+  \draw (6.5,1.0) to[R=680$\Omega$] (6.5,0);
 
   % Labels
   \node[font=\scriptsize, anchor=south] at (7, 2.5) {A line};

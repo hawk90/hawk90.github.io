@@ -88,16 +88,16 @@ DMA용 buffer를 SRAM이 아닌 strongly-ordered region에 두면 throughput이 
 
 SRAM과 peripheral 영역의 첫 1 MB는 bitband alias를 갖습니다. 32-bit access로 한 비트만 read/modify/write 합니다.
 
-```text
-SRAM bitband:
-   원본:   0x20000000 ~ 0x200FFFFF (1 MB)
-   alias:  0x22000000 ~ 0x23FFFFFF (32 MB)
-   alias address = 0x22000000 + (byte_offset × 32) + (bit_num × 4)
+**SRAM bitband:**
 
-Peripheral bitband:
-   원본:   0x40000000 ~ 0x400FFFFF
-   alias:  0x42000000 ~ 0x43FFFFFF
-```
+- 원본:   0x20000000 ~ 0x200FFFFF (1 MB)
+- alias:  0x22000000 ~ 0x23FFFFFF (32 MB)
+- alias address = 0x22000000 + (byte_offset × 32) + (bit_num × 4)
+
+**Peripheral bitband:**
+
+- 원본:   0x40000000 ~ 0x400FFFFF
+- alias:  0x42000000 ~ 0x43FFFFFF
 
 ```c
 // 0x20000000 byte 0 의 bit 3을 1로

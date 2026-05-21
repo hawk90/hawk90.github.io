@@ -472,17 +472,17 @@ $$
 
 ### 강한 확장성 vs 약한 확장성
 
-```text
-Strong scaling (Amdahl):
-  - 문제 크기 고정
-  - 코어 추가 시 각 코어의 일이 줄어듦
-  - 통신/동기화 오버헤드가 지배적
+**Strong scaling (Amdahl):**
 
-Weak scaling (Gustafson):
-  - 코어당 일이 일정
-  - 코어 추가 시 전체 문제 크기 증가
-  - 통신이 잘 설계되면 선형
-```
+- 문제 크기 고정
+- 코어 추가 시 각 코어의 일이 줄어듦
+- 통신/동기화 오버헤드가 지배적
+
+**Weak scaling (Gustafson):**
+
+- 코어당 일이 일정
+- 코어 추가 시 전체 문제 크기 증가
+- 통신이 잘 설계되면 선형
 
 벤치마크할 때 둘을 구분하지 않으면 잘못된 결론을 내린다. HPC 벤치마크는 두 가지 모두 보고하는 게 표준이다.
 
@@ -555,21 +555,21 @@ int main() {
 
 ### Hard real-time의 함정
 
-```text
-일반 OS의 함정:
+**일반 OS의 함정:**
+
 - 페이지 폴트 → 디스크 IO → 수십 ms 지연
 - 가비지 컬렉션 stop-the-world
 - 우선순위 역전 (Mars Pathfinder, 1997)
 - 캐시 미스로 인한 지연 변동성
 - mutex의 priority inheritance 없으면 무한 대기 가능
 
-해결책:
+**해결책:**
+
 - 메모리 핀(mlockall)
 - 미리 할당된 객체 풀
 - 우선순위 상속 mutex (PTHREAD_PRIO_INHERIT)
 - wait-free 자료구조
 - RTOS (FreeRTOS, Zephyr, VxWorks, QNX)
-```
 
 이 책의 후반부 자료구조 — lock-free queue, wait-free counter — 가 왜 중요한지 여기서 동기가 나온다. 실시간 시스템은 평균이 아닌 최악을 다뤄야 한다.
 
@@ -581,37 +581,46 @@ int main() {
 
 ### 의사 코드
 
-```text
-shared:
-    buffer[N]           ─ 원형 버퍼
-    head, tail          ─ 인덱스
-    not_full, not_empty ─ 조건 변수
-    mtx                 ─ 뮤텍스
+**shared:**
 
-producer():
-    loop:
-        item = produce()
-        acquire(mtx)
-        while (count == N):
-            wait(not_full, mtx)
-        buffer[tail] = item
-        tail = (tail + 1) mod N
-        count = count + 1
-        signal(not_empty)
-        release(mtx)
+- buffer[N]           ─ 원형 버퍼
+- head, tail          ─ 인덱스
+- not_full, not_empty ─ 조건 변수
+- mtx                 ─ 뮤텍스
 
-consumer():
-    loop:
-        acquire(mtx)
-        while (count == 0):
-            wait(not_empty, mtx)
-        item = buffer[head]
-        head = (head + 1) mod N
-        count = count - 1
-        signal(not_full)
-        release(mtx)
-        consume(item)
-```
+**producer():**
+
+
+**loop:**
+
+- item = produce()
+- acquire(mtx)
+
+**while (count == N):**
+
+- wait(not_full, mtx)
+- buffer[tail] = item
+- tail = (tail + 1) mod N
+- count = count + 1
+- signal(not_empty)
+- release(mtx)
+
+**consumer():**
+
+
+**loop:**
+
+- acquire(mtx)
+
+**while (count == 0):**
+
+- wait(not_empty, mtx)
+- item = buffer[head]
+- head = (head + 1) mod N
+- count = count - 1
+- signal(not_full)
+- release(mtx)
+- consume(item)
 
 ### C++20 구현
 
@@ -771,23 +780,24 @@ int bb_take(BoundedBuffer* bb) {
 
 ## 실무 적용 — 어디서 만나나
 
-```
-C++20/23:
+**C++20/23:**
+
 - std::jthread         → 자동 join + stop_token
 - std::latch/barrier   → 동기화 지점
 - std::counting_semaphore → 리소스 제한
 - std::atomic<T>::wait → 스핀락 대신 대기
 
-C11:
+**C11:**
+
 - <stdatomic.h>       → atomic_*
 - <threads.h>         → thrd_*, mtx_*, cnd_*
 
-비교:
+**비교:**
+
 - C++ std::mutex       ↔ C mtx_t
 - C++ std::thread      ↔ C thrd_t
 - C++ std::atomic<T>   ↔ C _Atomic T
 - C++ condition_variable ↔ C cnd_t
-```
 
 ## 자기 점검
 

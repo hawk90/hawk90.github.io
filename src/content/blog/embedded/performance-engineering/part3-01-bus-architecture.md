@@ -36,38 +36,41 @@ ARM Cortex-M은 AHB-Lite와 APB를 함께 씁니다. Cortex-A는 AXI에 CCI/CCN/
 
 ## 채널별 시그널
 
-```text
-AR (Read Address):
-  ARID, ARADDR, ARLEN, ARSIZE, ARBURST, ARLOCK, ARCACHE, ARPROT, ARVALID, ARREADY
+**AR (Read Address):**
 
-R (Read Data):
-  RID, RDATA, RRESP, RLAST, RVALID, RREADY
+- ARID, ARADDR, ARLEN, ARSIZE, ARBURST, ARLOCK, ARCACHE, ARPROT, ARVALID, ARREADY
 
-AW (Write Address):
-  AWID, AWADDR, AWLEN, AWSIZE, AWBURST, AWLOCK, AWCACHE, AWPROT, AWVALID, AWREADY
+**R (Read Data):**
 
-W (Write Data):
-  WDATA, WSTRB, WLAST, WVALID, WREADY
+- RID, RDATA, RRESP, RLAST, RVALID, RREADY
 
-B (Write Response):
-  BID, BRESP, BVALID, BREADY
-```
+**AW (Write Address):**
+
+- AWID, AWADDR, AWLEN, AWSIZE, AWBURST, AWLOCK, AWCACHE, AWPROT, AWVALID, AWREADY
+
+**W (Write Data):**
+
+- WDATA, WSTRB, WLAST, WVALID, WREADY
+
+**B (Write Response):**
+
+- BID, BRESP, BVALID, BREADY
 
 **VALID/READY handshake**는 양쪽이 모두 high여야 transfer가 발생합니다.
 
 ## ID — Out-of-Order 지원
 
-```text
-Master가 transaction에 ID 부여:
-  AR0: ID=0, addr=0x1000
-  AR1: ID=1, addr=0x2000  (다른 ID)
-  AR2: ID=0, addr=0x3000  (같은 ID — 순서 보장)
+**Master가 transaction에 ID 부여:**
 
-Slave 응답:
-  R: ID=1, data=0xCAFE   (AR1 응답 먼저 가능)
-  R: ID=0, data=...      (AR0)
-  R: ID=0, data=...      (AR2 — 같은 ID 내 순서)
-```
+- AR0: ID=0, addr=0x1000
+- AR1: ID=1, addr=0x2000  (다른 ID)
+- AR2: ID=0, addr=0x3000  (같은 ID — 순서 보장)
+
+**Slave 응답:**
+
+- R: ID=1, data=0xCAFE   (AR1 응답 먼저 가능)
+- R: ID=0, data=...      (AR0)
+- R: ID=0, data=...      (AR2 — 같은 ID 내 순서)
 
 같은 ID끼리는 FIFO 순서를 지키고, 다른 ID 사이에서는 OoO가 가능합니다.
 
@@ -117,11 +120,10 @@ AHB는 간단해서 작은 MCU에 적합합니다. AXI는 복잡하지만 throug
 
 ## APB — Peripheral 전용
 
-```text
-2-cycle (setup + access):
-  Cycle 1: PSEL=1, PENABLE=0, PADDR set
-  Cycle 2: PENABLE=1, PRDATA returned (read) / PWDATA captured (write)
-```
+**2-cycle (setup + access):**
+
+- Cycle 1: PSEL=1, PENABLE=0, PADDR set
+- Cycle 2: PENABLE=1, PRDATA returned (read) / PWDATA captured (write)
 
 매우 단순한 구조라서 UART·timer·GPIO처럼 낮은 대역폭 peripheral에 어울립니다.
 

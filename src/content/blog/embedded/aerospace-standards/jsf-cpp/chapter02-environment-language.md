@@ -273,19 +273,18 @@ ALWAYS_INLINE int compute(/* ... */) { /* ... */ }
 
 JSF 원본은 *C++03 기준*. 다음 기능은 *원본 범위 외*:
 
-```
-C++11 이후 기능 (JSF 원본 사용 불가):
-  - auto
-  - lambda
-  - nullptr
-  - enum class
-  - Range-based for
-  - Move semantics
-  - Variadic templates
-  - constexpr
-  - std::unique_ptr / std::shared_ptr
-  - Threading library
-```
+**C++11 이후 기능 (JSF 원본 사용 불가):**
+
+- auto
+- lambda
+- nullptr
+- enum class
+- Range-based for
+- Move semantics
+- Variadic templates
+- constexpr
+- std::unique_ptr / std::shared_ptr
+- Threading library
 
 새 프로젝트나 후속 표준 (AUTOSAR C++14, MISRA C++:2023)이 *modern 기능을 단계적 도입*.
 

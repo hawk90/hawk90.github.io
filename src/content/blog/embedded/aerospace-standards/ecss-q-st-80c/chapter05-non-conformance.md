@@ -48,30 +48,31 @@ ECSS는 *모두 NCR* 통합. *broader umbrella*.
 
 ## NCR Classification
 
-```
-By Severity:
-  Critical    : 미션 실패 또는 인명 손실 가능
-  Major       : 미션 기능 손실
-  Minor       : 사용자 불편, 기능 영향 미미
-  Observation : 결함은 아니지만 개선 가능
+**By Severity:**
 
-By Type:
-  Functional   : 기능 결함
-  Performance  : 성능 미달
-  Safety       : 안전 영향
-  Security     : 보안 영향
-  Documentation: 문서 부정확
-  Process      : 절차 미준수
-  Tool         : 도구 결함
+- Critical    : 미션 실패 또는 인명 손실 가능
+- Major       : 미션 기능 손실
+- Minor       : 사용자 불편, 기능 영향 미미
+- Observation : 결함은 아니지만 개선 가능
 
-By Origin:
-  Internal review
-  Customer review
-  Test failure
-  Field operation
-  Audit finding
-  External party (ESA, supplier)
-```
+**By Type:**
+
+- Functional   : 기능 결함
+- Performance  : 성능 미달
+- Safety       : 안전 영향
+- Security     : 보안 영향
+- Documentation: 문서 부정확
+- Process      : 절차 미준수
+- Tool         : 도구 결함
+
+**By Origin:**
+
+- Internal review
+- Customer review
+- Test failure
+- Field operation
+- Audit finding
+- External party (ESA, supplier)
 
 ## NCR Lifecycle
 
@@ -363,86 +364,89 @@ Target: > 95% (일반적)
 
 ## Tool — NCR Management
 
-```
-ESA 표준 도구:
-  IBM Rational Quality Manager (RQM)
-  IBM DOORS Next Gen (RTC integration)
-  Jira (점차 표준)
-  Polarion (Siemens)
-  Custom (Airbus 자체 시스템)
+**ESA 표준 도구:**
 
-일반 stack 예:
-  Jira (NCR tracking)
-  Requirements tool (linked to req)
-  Wiki (RCA documentation)
-  Dashboard tool
+- IBM Rational Quality Manager (RQM)
+- IBM DOORS Next Gen (RTC integration)
+- Jira (점차 표준)
+- Polarion (Siemens)
+- Custom (Airbus 자체 시스템)
 
-Open source:
-  Bugzilla (legacy)
-  Redmine
-  GitLab Issues
-```
+**일반 stack 예:**
+
+- Jira (NCR tracking)
+- Requirements tool (linked to req)
+- Wiki (RCA documentation)
+- Dashboard tool
+
+**Open source:**
+
+- Bugzilla (legacy)
+- Redmine
+- GitLab Issues
 
 ## Customer/Supplier Coordination
 
 ECSS는 *다국가 협력*이 흔함. NCR을 *공유* 시 표준 필요.
 
-```
-Cross-organization NCR sharing:
-  - 공통 format (ECSS Annex G)
-  - Shared classification
-  - Anonymization (proprietary info 제거)
-  - Lessons learned database
+**Cross-organization NCR sharing:**
 
-일반 collaboration 패턴:
-  - 공통 NCR database (혹은 export 가능 format)
-  - 정기 cross-review meeting
-  - Lessons learned 공유
-  - Anonymized statistics 외부 공유
-```
+- 공통 format (ECSS Annex G)
+- Shared classification
+- Anonymization (proprietary info 제거)
+- Lessons learned database
+
+**일반 collaboration 패턴:**
+
+- 공통 NCR database (혹은 export 가능 format)
+- 정기 cross-review meeting
+- Lessons learned 공유
+- Anonymized statistics 외부 공유
 
 ## NCR ↔ FRACAS
 
 방산·항공에서 *FRACAS (Failure Reporting, Analysis, and Corrective Action System)*이 NCR과 유사.
 
-```
-FRACAS:
-  - DoD MIL-STD-2155 + 자체
-  - Failure 중심 (NCR보다 narrow)
-  - 통계적 분석 강조
-  - Reliability prediction
+**FRACAS:**
 
-ECSS NCR:
-  - 모든 non-conformance 포함
-  - Process violation도
-  - Less reliability-focused
-  - More process improvement-focused
+- DoD MIL-STD-2155 + 자체
+- Failure 중심 (NCR보다 narrow)
+- 통계적 분석 강조
+- Reliability prediction
 
-Tool overlap:
-  많은 회사가 FRACAS + NCR을 *통합 system*에서 운영
-```
+**ECSS NCR:**
+
+- 모든 non-conformance 포함
+- Process violation도
+- Less reliability-focused
+- More process improvement-focused
+
+**Tool overlap:**
+
+- 많은 회사가 FRACAS + NCR을 *통합 system*에서 운영
 
 ## NCR과 Risk Management
 
 NCR이 *risk indicator*. ECSS-M-ST-80C (Risk Management)와 연결.
 
-```
-NCR Trend → Risk Impact:
+**NCR Trend → Risk Impact:**
 
-증가 trend:
-  → Risk: Project schedule slip
-  → Risk: Quality degradation
-  → Action: Resource increase
+**증가 trend:**
 
-Critical NCR 발생:
-  → Risk: Mission failure
-  → Action: Risk register update
-  → Action: Customer notification
+- → Risk: Project schedule slip
+- → Risk: Quality degradation
+- → Action: Resource increase
 
-Recurring root cause:
-  → Risk: Process inadequacy
-  → Action: Process improvement project
-```
+**Critical NCR 발생:**
+
+- → Risk: Mission failure
+- → Action: Risk register update
+- → Action: Customer notification
+
+**Recurring root cause:**
+
+- → Risk: Process inadequacy
+- → Action: Process improvement project
 
 NCR과 Risk가 *서로 영향*. 통합 관리 필요.
 

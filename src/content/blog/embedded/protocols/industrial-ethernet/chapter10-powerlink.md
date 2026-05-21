@@ -193,17 +193,17 @@ generates:
 
 GUI에서 *각 CN의 PDO mapping*을 드래그&드롭으로 짭니다. CANopen에서 그대로 가져온 *Index/SubIndex* 표현입니다.
 
-```text
-MN node F0:
-  cycle: 1000 µs
-  async slot: 200 µs
+**MN node F0:**
 
-CN node 01 (motor drive):
-  TPDO 0x1800 -> mapping object 0x6041:00 (statusword)
-                                0x6064:00 (position actual)
-  RPDO 0x1400 -> mapping object 0x6040:00 (controlword)
-                                0x607A:00 (target position)
-```
+- cycle: 1000 µs
+- async slot: 200 µs
+
+**CN node 01 (motor drive):**
+
+- TPDO 0x1800 -> mapping object 0x6041:00 (statusword)
+- 0x6064:00 (position actual)
+- RPDO 0x1400 -> mapping object 0x6040:00 (controlword)
+- 0x607A:00 (target position)
 
 이 매핑이 *PReq/PRes payload의 byte layout*을 정합니다.
 

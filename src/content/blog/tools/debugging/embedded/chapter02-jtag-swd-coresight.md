@@ -121,10 +121,9 @@ ARM이 핀 수를 줄이기 위해 만든 *2핀* 대체. JTAG 5핀 → SWD 2핀(
 
 같은 핀(SWCLK/SWDIO)이 *JTAG mode/SWD mode*로 양립합니다 — STM32 같은 칩은 처음에 JTAG 모드로 시작했다가 *어떤 패턴*을 받으면 SWD로 전환.
 
-```text
-JTAG → SWD 전환 시퀀스 (16-bit on SWDIO):
-   0x79E7
-```
+**JTAG → SWD 전환 시퀀스 (16-bit on SWDIO):**
+
+- 0x79E7
 
 SWD → JTAG도 비슷한 매직 시퀀스 존재.
 
@@ -141,13 +140,12 @@ JTAG의 상태 머신과 달리 *패킷 기반*.
 
 ### DP — Debug Port 레지스터
 
-```text
-A2 A3:
-  00  IDCODE (read) / ABORT (write)
-  01  CTRL/STAT  (control + status)
-  10  SELECT     (어느 AP의 어느 뱅크?)
-  11  RDBUFF (read) / 미사용 (write)
-```
+**A2 A3:**
+
+- 00  IDCODE (read) / ABORT (write)
+- 01  CTRL/STAT  (control + status)
+- 10  SELECT     (어느 AP의 어느 뱅크?)
+- 11  RDBUFF (read) / 미사용 (write)
 
 `SELECT`로 *어느 AP*에 접근할지 + 그 AP의 *어느 256바이트 뱅크*인지 지정. AP 안의 4바이트 레지스터 16개 = 64바이트 단위로 잡지만 ARM의 표준 AP는 4개 뱅크 = 256바이트.
 
@@ -212,21 +210,20 @@ JTAG/SWD가 *물리 인터페이스*라면 그 위에서 실제로 일하는 게
 
 `break main`이 어떻게 일어나나? 답은 DHCSR(Debug Halting Control and Status Register, 주소 `0xE000EDF0`).
 
-```text
-DHCSR:
-  [31:16] DBGKEY (= 0xA05F to write)
-  [25]    S_RESET_ST  (reset since last read)
-  [24]    S_RETIRE_ST (instruction retired)
-  [19]    S_LOCKUP
-  [18]    S_SLEEP
-  [17]    S_HALT     ← 1이면 정지
-  [16]    S_REGRDY
-  [5:2]   reserved
-  [3]     C_MASKINTS  (mask interrupts in halt)
-  [2]     C_STEP
-  [1]     C_HALT     ← 1로 쓰면 정지
-  [0]     C_DEBUGEN  ← 1이면 디버그 가능
-```
+**DHCSR:**
+
+- [31:16] DBGKEY (= 0xA05F to write)
+- [25]    S_RESET_ST  (reset since last read)
+- [24]    S_RETIRE_ST (instruction retired)
+- [19]    S_LOCKUP
+- [18]    S_SLEEP
+- [17]    S_HALT     ← 1이면 정지
+- [16]    S_REGRDY
+- [5:2]   reserved
+- [3]     C_MASKINTS  (mask interrupts in halt)
+- [2]     C_STEP
+- [1]     C_HALT     ← 1로 쓰면 정지
+- [0]     C_DEBUGEN  ← 1이면 디버그 가능
 
 `break main`의 흐름.
 
@@ -267,12 +264,11 @@ DCRDR (0xE000EDF8): 데이터 워드
 
 Flash Patch and Breakpoint Unit. 6개의 *주소 비교기*(comparator) + 2개의 *literal*. 비교기에 주소를 넣고 활성화하면 CPU fetch가 그 주소에 도달했을 때 halt.
 
-```text
-FP_COMP0 (0xE0002008):
-  [31:30] REPLACE — 00=BP, 01/10/11=instruction patch
-  [28:2]  COMP — 비교 주소 (4바이트 정렬, 비트 0 무시)
-  [0]     ENABLE
-```
+**FP_COMP0 (0xE0002008):**
+
+- [31:30] REPLACE — 00=BP, 01/10/11=instruction patch
+- [28:2]  COMP — 비교 주소 (4바이트 정렬, 비트 0 무시)
+- [0]     ENABLE
 
 GDB의 `break main` → 디버거가 FPB에 `&main`을 기록 + ENABLE.
 

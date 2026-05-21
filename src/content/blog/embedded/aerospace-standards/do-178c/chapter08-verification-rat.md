@@ -604,56 +604,57 @@ A-7-7: *Test cases include robustness testing*.
 
 ### Fault Injection HIL
 
-```
-HIL이 *제어된 fault 주입* 가능:
+**HIL이 *제어된 fault 주입* 가능:**
 
-  - GPS antenna 단절 시뮬레이션
-  - IMU 1축 데이터 오염
-  - CAN bus packet drop 10%
-  - 전원 noise injection
-  - 온도 환경 변화 (HIL chamber)
-  - EMI/RFI 노출 (별도 chamber)
-```
+- GPS antenna 단절 시뮬레이션
+- IMU 1축 데이터 오염
+- CAN bus packet drop 10%
+- 전원 noise injection
+- 온도 환경 변화 (HIL chamber)
+- EMI/RFI 노출 (별도 chamber)
 
 각 fault에 *SW가 detect + isolate + recover* 검증.
 
 ## Verification Tools
 
-```
-Unit/Integration Testing:
-  Google Test (gtest)        : 오픈소스, host-side. 가벼움
-  Cantata (QA Systems)       : 항공 산업 표준 (LDRA 회사 산하)
-  VectorCAST (Vector)        : 항공·자동차 표준
-  LDRA Testbed/TBrun         : 항공 광범위
-  IBM Rational Test RT       : 일부 OEM
-  Parasoft C/C++ Test        : 일부
+**Unit/Integration Testing:**
 
-HIL Systems:
-  dSPACE SCALEXIO            : 자동차·항공 양쪽
-  ETAS LABCAR                : 자동차 강함, 항공 일부
-  NI VeriStand               : 다목적
-  RT-Lab (Opal-RT)           : 전력·항공
+- Google Test (gtest)        : 오픈소스, host-side. 가벼움
+- Cantata (QA Systems)       : 항공 산업 표준 (LDRA 회사 산하)
+- VectorCAST (Vector)        : 항공·자동차 표준
+- LDRA Testbed/TBrun         : 항공 광범위
+- IBM Rational Test RT       : 일부 OEM
+- Parasoft C/C++ Test        : 일부
 
-Coverage Analysis:
-  VectorCAST/Cover           : 자동 instrumentation
-  LDRA Testbed               : MC/DC 강함
-  Cantata                    : 항공 적합
-  Bullseye Coverage          : 일반 commercial
-  gcov + lcov                : 오픈소스, host-side만
+**HIL Systems:**
 
-Static Analysis:
-  Helix QAC                  : 항공 표준
-  Polyspace Bug Finder/Code Prover : Abstract interpretation
-  LDRA Testbed               : 통합 (test + coverage + analysis)
-  Astrée (AbsInt)            : Airbus/Boeing 표준 abstract interp
-  Frama-C                    : 오픈소스, formal methods
+- dSPACE SCALEXIO            : 자동차·항공 양쪽
+- ETAS LABCAR                : 자동차 강함, 항공 일부
+- NI VeriStand               : 다목적
+- RT-Lab (Opal-RT)           : 전력·항공
 
-WCET Analysis:
-  aiT (AbsInt)               : 정적 WCET, 항공 표준
-  RapiTime (Rapita)          : 통계적 WCET
-  Bound-T                    : 상용
-  SymTA/S (Symtavision)      : 자동차+항공
-```
+**Coverage Analysis:**
+
+- VectorCAST/Cover           : 자동 instrumentation
+- LDRA Testbed               : MC/DC 강함
+- Cantata                    : 항공 적합
+- Bullseye Coverage          : 일반 commercial
+- gcov + lcov                : 오픈소스, host-side만
+
+**Static Analysis:**
+
+- Helix QAC                  : 항공 표준
+- Polyspace Bug Finder/Code Prover : Abstract interpretation
+- LDRA Testbed               : 통합 (test + coverage + analysis)
+- Astrée (AbsInt)            : Airbus/Boeing 표준 abstract interp
+- Frama-C                    : 오픈소스, formal methods
+
+**WCET Analysis:**
+
+- aiT (AbsInt)               : 정적 WCET, 항공 표준
+- RapiTime (Rapita)          : 통계적 WCET
+- Bound-T                    : 상용
+- SymTA/S (Symtavision)      : 자동차+항공
 
 ## Verification 결과 — SVR
 
@@ -719,24 +720,19 @@ Approved:
 
 Planning(SOI 1), Development(SOI 2), 그리고 *Verification 종료 시 SOI 3*.
 
-```
-SOI 3 Agenda:
-  Day 1: Test approach review
-         - SVCP (Verification Cases & Procedures)
-         - Test environment
-  Day 2: Test execution review
-         - Sample test execution (witness)
-         - Test results
-         - Anomalies
-  Day 3: Coverage analysis review
-         - Coverage reports
-         - MC/DC results
-         - Untestable code justifications
-  Day 4: Review of reviews
-         - Sampling of code/design reviews
-         - SQA audit records
-  Day 5: Findings + closeout
-```
+**SOI 3 Agenda:**
+
+- Day 1: Test approach review
+- SVCP (Verification Cases & Procedures)
+- Test environment Day 2: Test execution review
+- Sample test execution (witness)
+- Test results
+- Anomalies Day 3: Coverage analysis review
+- Coverage reports
+- MC/DC results
+- Untestable code justifications Day 4: Review of reviews
+- Sampling of code/design reviews
+- SQA audit records Day 5: Findings + closeout
 
 심사관이 *random test 직접 실행*. *재현 가능*해야 함.
 

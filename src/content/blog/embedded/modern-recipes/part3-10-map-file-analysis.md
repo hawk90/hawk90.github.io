@@ -68,17 +68,16 @@ linker script의 MEMORY가 그대로 출력됩니다. chip별 영역 확인용.
 
 ### 4) Symbol 위치 list
 
-```text
-Symbol Table:
-                0x080001ac                main
-                0x080001dc                setup
-                0x080001fc                gpio_init
-                0x20000000                _sdata
-                0x20000010                _edata
-                0x20000010                _sbss
-                0x20000130                _ebss
-                0x20020000                _estack
-```
+**Symbol Table:**
+
+- 0x080001ac                main
+- 0x080001dc                setup
+- 0x080001fc                gpio_init
+- 0x20000000                _sdata
+- 0x20000010                _edata
+- 0x20000010                _sbss
+- 0x20000130                _ebss
+- 0x20020000                _estack
 
 `grep`로 특정 symbol 위치 추적이 빠릅니다.
 

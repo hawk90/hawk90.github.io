@@ -1428,8 +1428,8 @@ void work_stealing_for(size_t total, Func f) {
 
 또한 라이브러리 선택 자체가 성능 프로필을 바꾼다. TBB는 작업 단위가 작아도 효율이 좋은 work stealing 스케줄러를 쓰고, OpenMP는 정적 스케줄링이 기본이라 균질한 작업에서 강하다. 같은 알고리즘도 라이브러리에 따라 코어 수에 따른 스케일링 곡선이 다르다. 8장의 개념을 이해하고 있으면 어느 라이브러리가 자기 문제에 맞는지를 가늠할 수 있다.
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - Parallel for_each      → std::for_each(par, ...) (C++17 병렬 알고리즘)
 - Parallel reduce        → std::reduce(par, ...) (C++17)
 - Work-stealing          → Intel oneTBB (구 TBB), rayon (Rust), ForkJoinPool (Java)
@@ -1437,20 +1437,21 @@ void work_stealing_for(size_t total, Func f) {
 - SIMD                   → std::simd (C++26 표준화 진행), std::experimental::simd, Highway, xsimd
 - False sharing 회피     → alignas(64), padding
 
-언어/프레임워크:
+**언어/프레임워크:**
+
 - C++: std::execution::par, oneTBB, OpenMP, MPI
 - Rust: rayon, crossbeam
 - Java: parallel streams, ForkJoinPool
 - Go: goroutine + channel
 - Python: multiprocessing (GIL 우회)
 
-설계 패턴:
+**설계 패턴:**
+
 - Embarrassingly parallel → parallel for_each
 - Reduce/Aggregate       → parallel reduce
 - Pipeline               → producer-consumer chain
 - Scatter-gather         → 데이터 분배 + 결과 수집
 - Map-Reduce             → Hadoop / Spark 패턴
-```
 
 ## 자기 점검
 

@@ -278,29 +278,31 @@ In-orbit Change Procedure:
 
 ### Status Accounting Reports
 
-```
-Daily Reports (자동):
-  - Open CR count
-  - CR status distribution
-  - Recent baselines
-  - Build status
+**Daily Reports (자동):**
 
-Weekly Reports:
-  - CR throughput (opened, closed, in progress)
-  - Module change frequency
-  - Test execution status
+- Open CR count
+- CR status distribution
+- Recent baselines
+- Build status
 
-Monthly Reports:
-  - Baseline summary
-  - Module-level change analysis
-  - Resource utilization
-  - Trend analysis
+**Weekly Reports:**
 
-Milestone Reports:
-  - Complete configuration index
-  - Configuration audit report
-  - Customer delivery
-```
+- CR throughput (opened, closed, in progress)
+- Module change frequency
+- Test execution status
+
+**Monthly Reports:**
+
+- Baseline summary
+- Module-level change analysis
+- Resource utilization
+- Trend analysis
+
+**Milestone Reports:**
+
+- Complete configuration index
+- Configuration audit report
+- Customer delivery
 
 ### Configuration Index — 일반 template
 
@@ -400,21 +402,21 @@ Custom systems
 
 ### Git for Space — KARI 사례
 
-```
-KARI Git Infrastructure (2024):
-  - GitLab Enterprise
-  - 자체 host (security)
-  - Per-mission repository
-  - LFS for binary (image, test data)
-  - CI/CD: GitLab Runner
+**KARI Git Infrastructure (2024):**
 
-Workflow:
-  - Protected main branch
-  - PR/MR review required
-  - Signed commits (GPG)
-  - Linear history (no force push)
-  - Tag for each baseline
-```
+- GitLab Enterprise
+- 자체 host (security)
+- Per-mission repository
+- LFS for binary (image, test data)
+- CI/CD: GitLab Runner
+
+**Workflow:**
+
+- Protected main branch
+- PR/MR review required
+- Signed commits (GPG)
+- Linear history (no force push)
+- Tag for each baseline
 
 GitLab의 *audit log* + *signed commits*이 *ECSS 인증 trail*.
 
@@ -471,26 +473,28 @@ Archive:         LTO tape + cloud backup
 
 ### Process — 일반 cadence
 
-```
-주간:
-  - Build daily
-  - CR review
-  - SPA spot check
+**주간:**
 
-월간:
-  - CCB meeting
-  - Status accounting report
-  - Customer status meeting
+- Build daily
+- CR review
+- SPA spot check
 
-분기:
-  - Compliance audit
-  - Customer milestone review
+**월간:**
 
-연간:
-  - Configuration audit (외부)
-  - SCM Plan review
-  - Tool update review
-```
+- CCB meeting
+- Status accounting report
+- Customer status meeting
+
+**분기:**
+
+- Compliance audit
+- Customer milestone review
+
+**연간:**
+
+- Configuration audit (외부)
+- SCM Plan review
+- Tool update review
 
 ## Common Findings — SCM
 
@@ -520,28 +524,30 @@ Archive:         LTO tape + cloud backup
 
 수십 년 후 *재해석*을 위해 *전체 configuration archive*.
 
-```
-Archive Requirements (ECSS-Q-ST-80C §5.5.6):
+**Archive Requirements (ECSS-Q-ST-80C §5.5.6):**
 
-기간:
-  - End of mission + 10 years 최소
-  - 일부 critical mission: 30 years
-  - James Webb: 30+ years (운영 끝나도 archive)
+**기간:**
 
-Format:
-  - Open formats (PDF/A, XML, plain text)
-  - No vendor-locked binary (Word .doc 금지)
-  - Toolchain virtualization (재현 가능)
+- End of mission + 10 years 최소
+- 일부 critical mission: 30 years
+- James Webb: 30+ years (운영 끝나도 archive)
 
-Storage:
-  - 여러 매체 (tape, optical, cloud)
-  - Geographic redundancy
-  - 정기 integrity check
+**Format:**
 
-Cataloging:
-  - Master catalog
-  - Index 검색 가능
-```
+- Open formats (PDF/A, XML, plain text)
+- No vendor-locked binary (Word .doc 금지)
+- Toolchain virtualization (재현 가능)
+
+**Storage:**
+
+- 여러 매체 (tape, optical, cloud)
+- Geographic redundancy
+- 정기 integrity check
+
+**Cataloging:**
+
+- Master catalog
+- Index 검색 가능
 
 장기 운영 mission의 archive가 *후속 mission의 heritage*로 재사용 가능.
 

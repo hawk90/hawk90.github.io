@@ -30,21 +30,12 @@ draft: false
 
 ## BootROM
 
-```text
 - Chip mask ROM, 변경 불가
 - TPL (Tertiary), 또는 SBL (Secondary Boot Loader) 라고도
-- Strap pin·fuse로 *부트 소스* 결정
-  · SD card?
-  · eMMC?
-  · NOR flash?
-  · UART (recovery)?
-- 매체에서 *고정 offset*에서 binary 읽음
-  · NXP i.MX: 0x400 offset, IVT header
-  · STM32MP1: 0 offset, partition 'fsbl1'
-  · Allwinner: 8 KB offset
+- Strap pin·fuse로 *부트 소스* 결정 · SD card? · eMMC? · NOR flash? · UART (recovery)?
+- 매체에서 *고정 offset*에서 binary 읽음 · NXP i.MX: 0x400 offset, IVT header · STM32MP1: 0 offset, partition 'fsbl1' · Allwinner: 8 KB offset
 - Header 검증 → signature check (secure boot 시)
 - SRAM에 로드 후 jump
-```
 
 ## SPL (Secondary Program Loader)
 
@@ -167,13 +158,12 @@ Cortex-A ARMv8 표준 부팅 chain입니다. 자동차 ECU·모바일 SoC의 표
 
 ## A/B Boot — 안전 업데이트
 
-```text
-Partition layout:
-  /boot_a (kernel A + DTB A)
-  /boot_b (kernel B + DTB B)
-  /root_a, /root_b
-  /misc — current slot + boot count
-```
+**Partition layout:**
+
+- /boot_a (kernel A + DTB A)
+- /boot_b (kernel B + DTB B)
+- /root_a, /root_b
+- /misc — current slot + boot count
 
 ```bash
 # U-Boot

@@ -231,18 +231,18 @@ bool coarse_contains(CoarseList* list, int key) {
 
 CoarseList의 정확성은 trivially linearizable이다.
 
-```text
-임의 작업 op:
-  1. lock 잡기      ← 다른 작업과의 ordering point
-  2. linearization point = lock 잡은 직후
-  3. 작업 수행 (단일 스레드처럼)
-  4. lock 풀기
+**임의 작업 op:**
 
-이유:
-  - 한 시점에 한 스레드만 진행
-  - 모든 작업이 *어느 순서로든* 순차 실행과 동치
-  - 따라서 sequential consistency + linearizability 자동
-```
+- 1. lock 잡기      ← 다른 작업과의 ordering point
+- 2. linearization point = lock 잡은 직후
+- 3. 작업 수행 (단일 스레드처럼)
+- 4. lock 풀기
+
+**이유:**
+
+- 한 시점에 한 스레드만 진행
+- 모든 작업이 *어느 순서로든* 순차 실행과 동치
+- 따라서 sequential consistency + linearizability 자동
 
 throughput 측정:
 
@@ -1000,12 +1000,11 @@ validate는 *세 가지*를 본다 — pred unmarked, curr unmarked, pred->next 
 
 contains는 marked bit만 보고 결정. atomic read 하나로 끝. 그래서 진정한 wait-free.
 
-```text
-contains의 linearization point:
-  - 키 발견 + unmarked → '발견' linearization은 marked 읽기 시점
-  - 키 발견 + marked   → '미발견' linearization도 같은 시점
-  - 키 미발견 (curr->key > key) → 그 시점이 linearization
-```
+**contains의 linearization point:**
+
+- 키 발견 + unmarked → '발견' linearization은 marked 읽기 시점
+- 키 발견 + marked   → '미발견' linearization도 같은 시점
+- 키 미발견 (curr->key > key) → 그 시점이 linearization
 
 이렇게 *모든 contains*는 한 번의 traversal로 끝난다. add/remove의 동시 진행과 무관.
 
@@ -1138,11 +1137,10 @@ public:
 
 **핵심 트릭**: `next` 포인터에 marked 비트를 함께 저장. CAS 한 번으로 둘을 atomic하게.
 
-```
-포인터 (low bit가 marked):
-  raw:    0x12345678 → 노드 + unmarked
-  marked: 0x12345679 → 노드 + marked
-```
+**포인터 (low bit가 marked):**
+
+- raw:    0x12345678 → 노드 + unmarked
+- marked: 0x12345679 → 노드 + marked
 
 **장점**: 진정한 lock-free. 한 스레드의 stall이 다른 스레드를 막지 않음.
 **단점**: 매우 복잡. ABA 문제, 메모리 회수 어려움.
@@ -1151,12 +1149,11 @@ public:
 
 Tim Harris의 원래 논문은 *Java*에서 비슷한 트릭을 `AtomicMarkableReference<T>`로 구현했다.
 
-```text
-AtomicMarkableReference<Node>:
-  내부적으로 (Node ref, boolean marked) 쌍을 *atomic하게* 보관
-  - compareAndSet(expRef, newRef, expMark, newMark) — 둘 다 같이 CAS
-  - getReference() / isMarked() — 따로 읽기 가능
-```
+**AtomicMarkableReference<Node>:**
+
+- 내부적으로 (Node ref, boolean marked) 쌍을 *atomic하게* 보관
+- compareAndSet(expRef, newRef, expMark, newMark) — 둘 다 같이 CAS
+- getReference() / isMarked() — 따로 읽기 가능
 
 C++에서는 두 가지 구현:
 
@@ -1249,18 +1246,18 @@ Lock-free는 GC 또는 hazard pointer 필요.
 
 리눅스 커널이 *읽기 압도적인* 자료구조 — VFS dentry, routing table, namespace — 에 광범위하게 쓰는 기법. 핵심 아이디어는 *읽기는 락 없이*, *쓰기는 복사본을 만들어 atomic 교체*다. 9.5절의 lazy + 9.6절의 lock-free 아이디어를 *읽기 쪽으로 극단화*한 것.
 
-```text
-RCU 핵심 의미론:
-  rcu_read_lock()        — 가벼운 마킹 (preempt off)
-  ptr = rcu_dereference(p) — 안전한 포인터 읽기 (memory barrier 포함)
-  rcu_read_unlock()      — 마킹 해제
+**RCU 핵심 의미론:**
 
-  쓰기:
-  new = kmalloc + copy
-  rcu_assign_pointer(p, new)  — atomic 포인터 swap
-  synchronize_rcu()           — 모든 reader가 끝날 때까지 기다림
-  kfree(old)                  — 안전하게 해제
-```
+- rcu_read_lock()        — 가벼운 마킹 (preempt off)
+- ptr = rcu_dereference(p) — 안전한 포인터 읽기 (memory barrier 포함)
+- rcu_read_unlock()      — 마킹 해제
+
+**쓰기:**
+
+- new = kmalloc + copy
+- rcu_assign_pointer(p, new)  — atomic 포인터 swap
+- synchronize_rcu()           — 모든 reader가 끝날 때까지 기다림
+- kfree(old)                  — 안전하게 해제
 
 읽기 비용이 *거의 0*에 가깝다. 쓰기는 비싸지만, *읽기:쓰기 = 1000:1*인 자료구조에서 압도적인 throughput을 낸다. 책의 lazy 리스트가 "logical delete → physical delete 분리"였다면, RCU는 그 분리를 *grace period*로 일반화한 것이다.
 
@@ -1286,18 +1283,22 @@ JDK 소스에서 `markedNext`라는 표시 비트를 보면 책의 marked pointe
 
 MongoDB의 스토리지 엔진 WiredTiger는 B-tree 페이지 캐시를 *lock-free*로 관리한다. 읽기 스레드가 페이지에 접근할 때마다 *hazard pointer*를 등록한다. 페이지를 *제거*하려는 스레드는 모든 hazard pointer를 스캔해 *지금 누가 보고 있는지* 확인한다. 보고 있으면 제거를 *미룬다*.
 
-```text
-WiredTiger hazard pointer (개념):
-  reader:
-    hazard[my_slot] = page_ptr   — 등록
-    ... 페이지 사용 ...
-    hazard[my_slot] = NULL       — 해제
+**WiredTiger hazard pointer (개념):**
 
-  evictor:
-    for each reader:
-      if (reader.hazard == page_ptr) skip
-    if (no hazard) free page
-```
+
+**reader:**
+
+- hazard[my_slot] = page_ptr   — 등록
+- ... 페이지 사용 ...
+- hazard[my_slot] = NULL       — 해제
+
+**evictor:**
+
+
+**for each reader:**
+
+- if (reader.hazard == page_ptr) skip
+- if (no hazard) free page
 
 이 패턴은 lock-free 자료구조의 *memory reclamation*을 푸는 표준 방법이다. RCU의 grace period가 *시간 기반*이라면, hazard pointer는 *명시적 등록 기반*이다.
 
@@ -1342,23 +1343,24 @@ WiredTiger hazard pointer (개념):
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - Coarse              → std::mutex + std::list (단순한 경우)
 - Fine (hand-over-hand) → 학술적, 잘 안 씀
 - Optimistic           → Java ConcurrentHashMap (size 같은 작업)
 - Lazy                 → Java ConcurrentSkipListMap
 - Lock-Free            → folly::ConcurrentSkipList (C++)
 
-C++20 선택 기준:
+**C++20 선택 기준:**
+
 - 짧은 critical section + 낮은 충돌 → optimistic / lazy
 - 긴 critical section → coarse 또는 fine + condition var
 - 높은 충돌 → coarse 또는 lock-free with backoff
 
-라이브러리 권장:
+**라이브러리 권장:**
+
 - C++: folly::ConcurrentHashMap, tbb::concurrent_hash_map
 - C: 직접 구현보다 검증된 라이브러리 사용
-```
 
 ## 자기 점검
 

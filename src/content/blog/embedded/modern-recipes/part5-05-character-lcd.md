@@ -62,16 +62,16 @@ GND ────────────► DB0-3
 
 ### Timing
 
-```text
-E low → high → low cycle:
-  E high ≥ 230 ns
-  E low ≥ 500 ns
-  data valid 80 ns before E falling
+**E low → high → low cycle:**
 
-Command execution:
-  Clear / Return Home: 1.52 ms
-  Other commands:      37 µs
-```
+- E high ≥ 230 ns
+- E low ≥ 500 ns
+- data valid 80 ns before E falling
+
+**Command execution:**
+
+- Clear / Return Home: 1.52 ms
+- Other commands:      37 µs
 
 대부분의 command 후 *37 µs 대기*가 필요합니다. *clear*만 1.52 ms.
 
@@ -90,17 +90,16 @@ Cursor → row R, col C:
 
 8 custom character (code 0x00~0x07)을 정의 가능. 각 character는 8 byte (5×8 pixel).
 
-```text
-'♥' character (code 0x01):
-  Row 0: 0b00000  (top)
-  Row 1: 0b01010
-  Row 2: 0b11111
-  Row 3: 0b11111
-  Row 4: 0b11111
-  Row 5: 0b01110
-  Row 6: 0b00100
-  Row 7: 0b00000  (bottom)
-```
+**'♥' character (code 0x01):**
+
+- Row 0: 0b00000  (top)
+- Row 1: 0b01010
+- Row 2: 0b11111
+- Row 3: 0b11111
+- Row 4: 0b11111
+- Row 5: 0b01110
+- Row 6: 0b00100
+- Row 7: 0b00000  (bottom)
 
 CGRAM address 0x00~0x3F. character N의 byte M = address (N*8 + M).
 
@@ -209,14 +208,13 @@ void demo(void) {
 
 요즘은 *I2C backpack PCB*를 LCD에 붙여 *2 wire*만 사용합니다.
 
-```text
-PCF8574 mapping (common):
-  P0 = RS
-  P1 = RW (GND)
-  P2 = E
-  P3 = backlight
-  P4-7 = D4-D7
-```
+**PCF8574 mapping (common):**
+
+- P0 = RS
+- P1 = RW (GND)
+- P2 = E
+- P3 = backlight
+- P4-7 = D4-D7
 
 ```c
 // I2C address 0x27 (typical)

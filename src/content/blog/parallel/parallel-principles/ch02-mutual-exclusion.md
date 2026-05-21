@@ -501,14 +501,13 @@ while (∃k ≠ me: level[k] ≥ L) AND (victim[L] == me)
 
 Filter Lock은 데드락-프리지만 **bounded waiting을 보장하지 않는다**. 다른 스레드들이 끊임없이 자신을 victim으로 만들면 영원히 갇힐 수 있다.
 
-```text
-시나리오:
+**시나리오:**
+
 - A가 레벨 L에 진입, victim[L] = A
 - B가 레벨 L에 진입, victim[L] = B (A 풀려남)
 - A가 다시 레벨 L 진입, victim[L] = A (B 풀려남)
 - ... 끝없이 반복 ...
 - 그 사이 C, D, ... 가 임계 영역을 들락날락
-```
 
 이게 Bakery로 가는 동기다. Bakery는 **FCFS**를 보장한다.
 
@@ -832,12 +831,11 @@ N명의 등산객이 한 좁은 출구를 통과한다. 출구가 한 명씩만 
 
 이 결과는 **소프트웨어만으로 효율적인 락이 불가능함**을 형식적으로 보여준다.
 
-```text
-n = 100 threads:
+**n = 100 threads:**
+
 - 단순 load/store만 → 최소 100개의 레지스터 필요
 - O(n) 공간 → 스레드 수에 비례하여 메모리 사용
 - O(n) 시간 → 각 락 시도마다 모든 레지스터 검사
-```
 
 이건 점근적 하한이지만 실용적 함의가 크다. 100개 스레드가 락 하나 잡으려고 100개 메모리 위치를 매번 읽어야 한다. 캐시 미스 폭증, 확장성 0.
 
@@ -955,23 +953,24 @@ public:
 
 ## 실무 적용
 
-```
-이론 → 실무 매핑:
+**이론 → 실무 매핑:**
+
 - Peterson  → 학술적 예제
 - Bakery    → 분산 락 (Lamport) 시초
 - Filter    → 토너먼트 락의 직관
 
-실제로 자주 만나는 락:
+**실제로 자주 만나는 락:**
+
 - std::mutex (C++) / mtx_t (C)
 - std::atomic_flag + TAS (스핀락)
 - pthread_mutex_t (POSIX)
 - futex (Linux)
 
-C++ vs C 비교:
+**C++ vs C 비교:**
+
 - std::atomic<bool>        ↔ atomic_bool
 - compare_exchange_strong  ↔ atomic_compare_exchange_strong
 - memory_order_seq_cst     ↔ memory_order_seq_cst (동일)
-```
 
 ## 자기 점검
 
@@ -1050,14 +1049,14 @@ try {
 
 Modern Linux의 mutex는 spinlock이 아니다. **futex (Fast Userspace Mutex)**: 경쟁이 없으면 userspace에서 atomic 한 번으로 끝, 경쟁이 있으면 kernel로 들어가 *블로킹 + 깨우기*. 글리브씨의 `pthread_mutex_t`, NPTL, `std::mutex` 모두 내부적으로 futex.
 
-```text
-fast path (uncontended):
-  CAS(state, 0, LOCKED) — 한 번에 성공, kernel 안 들어감
+**fast path (uncontended):**
 
-slow path (contended):
-  futex_wait(addr, expected_value) — kernel이 깨워줄 때까지 sleep
-  unlock 시 futex_wake(addr, n) — 대기 중인 n명 깨움
-```
+- CAS(state, 0, LOCKED) — 한 번에 성공, kernel 안 들어감
+
+**slow path (contended):**
+
+- futex_wait(addr, expected_value) — kernel이 깨워줄 때까지 sleep
+- unlock 시 futex_wake(addr, n) — 대기 중인 n명 깨움
 
 이 책의 spin lock과 정반대 전략: *대기 중에는 spin이 아니라 OS sleep*. Energy 친화적이고 다른 스레드가 CPU를 쓸 수 있게 양보한다.
 

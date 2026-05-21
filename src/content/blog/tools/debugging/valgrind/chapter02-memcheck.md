@@ -246,13 +246,12 @@ gcc -O2 main.c -o myapp        # 최적화 → 줄 번호가 부정확
 
 ### "still reachable: X bytes in Y blocks"
 
-```
-LEAK SUMMARY:
-   definitely lost: 0 bytes in 0 blocks
-   indirectly lost: 0 bytes in 0 blocks
-     possibly lost: 0 bytes in 0 blocks
-   still reachable: 280 bytes in 5 blocks
-```
+**LEAK SUMMARY:**
+
+- definitely lost: 0 bytes in 0 blocks
+- indirectly lost: 0 bytes in 0 blocks
+- possibly lost: 0 bytes in 0 blocks
+- still reachable: 280 bytes in 5 blocks
 
 `still reachable`은 *살아 있는 포인터가 가리키는* 할당입니다. 종료 시점에 해제 안 됐지만, *누군가 들고 있어* 잃어버린 건 아닙니다.
 

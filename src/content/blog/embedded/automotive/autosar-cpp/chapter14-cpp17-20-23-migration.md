@@ -297,37 +297,39 @@ std::flat_map<int, std::string> m;
 
 ## 마이그레이션 우선순위
 
-```
-Priority 1 (즉시 도입 권장):
-  - [[nodiscard]], [[fallthrough]], [[maybe_unused]]
-  - std::optional
-  - std::string_view
-  - std::byte
-  - std::scoped_lock
-  - if constexpr (tag dispatch 대체)
-  - Mandatory copy elision
+**Priority 1 (즉시 도입 권장):**
 
-Priority 2 (검증 후 도입):
-  - Concepts (가독성 큰 향상)
-  - std::span (gsl::span 표준)
-  - Three-way comparison
-  - consteval / constinit
-  - Designated initializers
-  - std::format / std::print (printf 대체)
-  - std::expected (에러 처리)
-  - std::flat_map (heap 절약)
+- [[nodiscard]], [[fallthrough]], [[maybe_unused]]
+- std::optional
+- std::string_view
+- std::byte
+- std::scoped_lock
+- if constexpr (tag dispatch 대체)
+- Mandatory copy elision
 
-Priority 3 (사례별 검토):
-  - Ranges (lazy 패턴 이해 필요)
-  - std::source_location (디버그 용도)
-  - Atomic wait/notify
+**Priority 2 (검증 후 도입):**
 
-Priority 4 (회피 또는 한정):
-  - Modules (도구 미성숙)
-  - Coroutines (heap 사용)
-  - Parallel algorithms (RTOS 미지원)
-  - Calendar / timezone
-```
+- Concepts (가독성 큰 향상)
+- std::span (gsl::span 표준)
+- Three-way comparison
+- consteval / constinit
+- Designated initializers
+- std::format / std::print (printf 대체)
+- std::expected (에러 처리)
+- std::flat_map (heap 절약)
+
+**Priority 3 (사례별 검토):**
+
+- Ranges (lazy 패턴 이해 필요)
+- std::source_location (디버그 용도)
+- Atomic wait/notify
+
+**Priority 4 (회피 또는 한정):**
+
+- Modules (도구 미성숙)
+- Coroutines (heap 사용)
+- Parallel algorithms (RTOS 미지원)
+- Calendar / timezone
 
 ## 컴파일러 지원 매트릭스 (2024)
 
@@ -449,31 +451,33 @@ MISRA C++:2023은 *AUTOSAR C++14 + MISRA C++:2008의 통합*. 차이점:
 
 ### 마이그레이션 단계
 
-```
-Phase 1 (~6개월):
-  - Toolchain 업그레이드 (GCC/Clang)
-  - Compiler 호환 확인
-  - C++17 enable
-  - 자동 마이그레이션 도구 (clang-tidy modernize-*)
+**Phase 1 (~6개월):**
 
-Phase 2 (~6개월):
-  - Priority 1 기능 도입
-    - [[nodiscard]] 전역 적용
-    - std::optional 도입
-    - std::string_view 도입
-    - std::byte 도입
-  - MISRA C++:2023 매핑 표 작성
+- Toolchain 업그레이드 (GCC/Clang)
+- Compiler 호환 확인
+- C++17 enable
+- 자동 마이그레이션 도구 (clang-tidy modernize-*)
 
-Phase 3 (~12개월):
-  - Priority 2 기능 (concepts, span 등)
-  - 새 코드부터 MISRA C++:2023 적용
-  - 기존 코드 점진 마이그레이션
+**Phase 2 (~6개월):**
 
-Phase 4 (~6개월):
-  - 모든 코드 MISRA C++:2023
-  - AUTOSAR C++14 보고 종료
-  - 새 ISO 26262 심사 통과
-```
+- Priority 1 기능 도입
+- [[nodiscard]] 전역 적용
+- std::optional 도입
+- std::string_view 도입
+- std::byte 도입
+- MISRA C++:2023 매핑 표 작성
+
+**Phase 3 (~12개월):**
+
+- Priority 2 기능 (concepts, span 등)
+- 새 코드부터 MISRA C++:2023 적용
+- 기존 코드 점진 마이그레이션
+
+**Phase 4 (~6개월):**
+
+- 모든 코드 MISRA C++:2023
+- AUTOSAR C++14 보고 종료
+- 새 ISO 26262 심사 통과
 
 총 *24-30개월* 계획.
 

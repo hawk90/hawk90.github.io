@@ -142,16 +142,16 @@ public:
 
 ### Virtual의 일반적 비용
 
-```
-Non-virtual call:
-  - Direct address (compile-time)
-  - Inlineable
+**Non-virtual call:**
 
-Virtual call:
-  - vtable lookup (1 indirection)
-  - Inline 불가
-  - 추가 cache pressure (vtable이 별도 cache line)
-```
+- Direct address (compile-time)
+- Inlineable
+
+**Virtual call:**
+
+- vtable lookup (1 indirection)
+- Inline 불가
+- 추가 cache pressure (vtable이 별도 cache line)
 
 비용의 정확한 정도는 *CPU, 컴파일러, branch prediction, 호출 패턴*에 따라 달라진다. *Hot path에서는 측정 + 신중*.
 

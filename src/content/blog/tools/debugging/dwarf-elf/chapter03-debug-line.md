@@ -80,17 +80,17 @@ struct LineHeader {
 
 ## File / Directory Table (DWARF 4)
 
-```
-directories[]:
-  0: "src"
-  1: "include"
-  2: "third_party"
+**directories[]:**
 
-files[]:
-  1: { name: "main.cpp", dir: 0, mtime: 0, size: 0 }
-  2: { name: "utils.h",  dir: 1, mtime: 0, size: 0 }
-  3: { name: "math.cpp", dir: 0, mtime: 0, size: 0 }
-```
+- 0: "src"
+- 1: "include"
+- 2: "third_party"
+
+**files[]:**
+
+- 1: { name: "main.cpp", dir: 0, mtime: 0, size: 0 }
+- 2: { name: "utils.h",  dir: 1, mtime: 0, size: 0 }
+- 3: { name: "math.cpp", dir: 0, mtime: 0, size: 0 }
 
 `file` 레지스터가 1부터 시작 (DWARF 4까지). `0`은 무효.
 
@@ -98,15 +98,15 @@ files[]:
 
 DWARF 5는 *0번 인덱스도 유효* (CU 자체의 파일을 0번에 둠), 그리고 *entry format*이 유연. `DW_LNCT_path`, `DW_LNCT_directory_index`, `DW_LNCT_timestamp`, `DW_LNCT_size`, `DW_LNCT_MD5` 같은 *content type*을 정의해 임의 조합 가능.
 
-```
-directory_entry_format:
-  DW_LNCT_path  DW_FORM_line_strp
+**directory_entry_format:**
 
-file_name_entry_format:
-  DW_LNCT_path             DW_FORM_line_strp
-  DW_LNCT_directory_index  DW_FORM_data1
-  DW_LNCT_MD5              DW_FORM_data16
-```
+- DW_LNCT_path  DW_FORM_line_strp
+
+**file_name_entry_format:**
+
+- DW_LNCT_path             DW_FORM_line_strp
+- DW_LNCT_directory_index  DW_FORM_data1
+- DW_LNCT_MD5              DW_FORM_data16
 
 MD5 hash가 있어 *디버거가 소스 파일의 변경을 검출* 가능. `list` 시 *현재 소스 파일이 빌드 시점과 다르다*를 경고할 수 있게.
 
@@ -331,16 +331,16 @@ void f() {
 
 DWARF 4까지는 line program 안의 파일/디렉터리 이름이 *인라인 NUL-terminated*. DWARF 5는 `.debug_line_str` 풀로 분리해 *중복 제거*.
 
-```
-.debug_line_str:
-  0x00: "main.cpp\0"
-  0x09: "src\0"
-  0x0d: "include\0"
+**.debug_line_str:**
 
-line program:
-  directory[0] = strp(0x09)   ← "src"
-  file[1] = { path: strp(0x00), dir: 0 }   ← "src/main.cpp"
-```
+- 0x00: "main.cpp\0"
+- 0x09: "src\0"
+- 0x0d: "include\0"
+
+**line program:**
+
+- directory[0] = strp(0x09)   ← "src"
+- file[1] = { path: strp(0x00), dir: 0 }   ← "src/main.cpp"
 
 큰 프로젝트에서 같은 디렉터리·파일 이름이 *수백 CU*에 반복되므로 효과 큼.
 
@@ -406,13 +406,14 @@ $ python3 -c "from elftools.elf.elffile import ELFFile; ..."
 
 crash log에 PC만 있고 심볼·줄 정보가 없을 때.
 
-```text
-crash log:
-  Backtrace:
-    #0 0x0000000000401234
-    #1 0x000000000040122a
-    #2 0x0000000000401180
-```
+**crash log:**
+
+
+**Backtrace:**
+
+- #0 0x0000000000401234
+- #1 0x000000000040122a
+- #2 0x0000000000401180
 
 ```bash
 $ for addr in 0x401234 0x40122a 0x401180; do

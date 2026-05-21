@@ -281,17 +281,16 @@ $qXfer:features:read:target.xml:0,ffb → $l<target><architecture>i386:x86-64</a
 
 `offset,length`로 청크 전송. 응답이 `l`로 시작하면 *마지막 청크*, `m`이면 *더 있음*. 큰 XML(예: 메모리 맵 + 모든 레지스터 정의)은 자동 분할.
 
-```
-qXfer 종류:
-  features:read        - 아키텍처 정의 (target.xml)
-  libraries-svr4:read  - 로드된 라이브러리 목록
-  memory-map:read      - flash/RAM 영역 정의 (임베디드 핵심!)
-  auxv:read            - auxv 벡터
-  siginfo:read/write   - 시그널 정보
-  exec-file:read       - 실행 파일 경로
-  threads:read         - XML로 스레드 정보
-  uib:read             - Unwind Info Block (Windows)
-```
+**qXfer 종류:**
+
+- features:read        - 아키텍처 정의 (target.xml)
+- libraries-svr4:read  - 로드된 라이브러리 목록
+- memory-map:read      - flash/RAM 영역 정의 (임베디드 핵심!)
+- auxv:read            - auxv 벡터
+- siginfo:read/write   - 시그널 정보
+- exec-file:read       - 실행 파일 경로
+- threads:read         - XML로 스레드 정보
+- uib:read             - Unwind Info Block (Windows)
 
 #### memory-map — 임베디드의 결정적 정보
 

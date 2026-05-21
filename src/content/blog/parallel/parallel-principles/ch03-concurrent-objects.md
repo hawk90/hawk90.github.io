@@ -408,30 +408,32 @@ $$
 
 ### 비용 vs 강도 트레이드오프
 
-```text
-진행 조건 강도:
-  wait-free      ─ 강함, 비쌈
-       ↓
-  lock-free      ─ 중간
-       ↓
-  obstruction-free ─ 약함, 저렴
-       ↓
-  blocking (mutex) ─ 가장 약함, 가장 저렴 (보통)
+**진행 조건 강도:**
 
-구현 복잡도:
-  wait-free       ★★★★★ (분산 헬퍼, announce 배열 등)
-  lock-free       ★★★★  (CAS 루프, ABA, 메모리 관리)
-  obstruction-free★★★   (백오프, 재시도 전략)
-  blocking        ★     (mutex 한 줄)
+- wait-free      ─ 강함, 비쌈
+- ↓
+- lock-free      ─ 중간
+- ↓
+- obstruction-free ─ 약함, 저렴
+- ↓
+- blocking (mutex) ─ 가장 약함, 가장 저렴 (보통)
 
-처리량 (경쟁 적을 때):
-  blocking < obstruction-free < lock-free < wait-free
+**구현 복잡도:**
 
-처리량 (경쟁 많을 때):
-  obstruction-free 망함 (라이브락)
-  wait-free 안정적
-  lock-free 변동
-```
+- wait-free       ★★★★★ (분산 헬퍼, announce 배열 등)
+- lock-free       ★★★★  (CAS 루프, ABA, 메모리 관리)
+- obstruction-free★★★   (백오프, 재시도 전략)
+- blocking        ★     (mutex 한 줄)
+
+**처리량 (경쟁 적을 때):**
+
+- blocking < obstruction-free < lock-free < wait-free
+
+**처리량 (경쟁 많을 때):**
+
+- obstruction-free 망함 (라이브락)
+- wait-free 안정적
+- lock-free 변동
 
 대부분의 실무 자료구조는 **lock-free**를 목표로 한다. wait-free는 이론적 매력은 크지만 구현 오버헤드가 커서 경쟁이 매우 높은 환경에서만 유리하다.
 
@@ -776,29 +778,31 @@ void thread_a_relaxed() {
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - Linearizability  → Strong consistency (DB, etcd, ZooKeeper)
 - Sequential Consistency → Java synchronized의 메모리 모델
 - Wait-free         → 실시간 시스템 (오디오, 게임)
 - Lock-free         → 동시성 자료구조 (java.util.concurrent)
 - Obstruction-free  → STM (Software Transactional Memory)
 
-C++20/23 예:
+**C++20/23 예:**
+
 - std::atomic<T>::load()/store()    — Linearizable (seq_cst)
 - std::atomic<T>::compare_exchange_*() — CAS 기반
 - std::atomic<T>::fetch_add()       — FAA
 
-C11 예:
+**C11 예:**
+
 - atomic_load()/atomic_store()      — 원자적 읽기/쓰기
 - atomic_compare_exchange_*()       — CAS
 - atomic_fetch_add()                — FAA
 
-Java 예:
+**Java 예:**
+
 - ConcurrentHashMap: linearizable
 - AtomicLong: linearizable (CAS 기반)
 - volatile read/write: SC 보장
-```
 
 ## 자기 점검
 
@@ -865,14 +869,13 @@ map.computeIfAbsent("key", k -> expensiveComputation());
 
 분산 KV store인 **etcd** (Kubernetes의 컨트롤 플레인 백엔드)와 **ZooKeeper**는 linearizability를 분산 시스템에 확장한다. 수십 개 노드 클러스터에서도 *한 줄로 정리* 가능한 결과만 클라이언트에게 보여준다.
 
-```text
-구현 메커니즘:
+**구현 메커니즘:**
+
 - Raft (etcd) / Zab (ZooKeeper) — 분산 합의 프로토콜
 - 모든 쓰기가 leader를 거쳐 majority commit
 - 읽기도 (옵션에 따라) leader 또는 majority quorum
 - "linearizable read" 옵션이 있으면 정확히 linearizable
 - "serializable read" 옵션이 있으면 stale 가능 (성능 ↑)
-```
 
 이게 Kubernetes API 서버의 일관성 모델이다. `kubectl apply`가 끝나면 그 변경은 *모든 후속 read*에서 보인다. linearizability가 가지는 합성성 덕분에 *여러 객체를 다루는 컨트롤러*가 안전하게 동시 실행된다.
 

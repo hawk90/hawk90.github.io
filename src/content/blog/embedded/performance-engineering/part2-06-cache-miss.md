@@ -93,15 +93,14 @@ int C[2048];
 
 ## 측정 — PMU 이벤트
 
-```text
-Cortex-A53 perf events:
-  0x03 L1D_CACHE_REFILL    L1 D 미스 (refill 횟수)
-  0x04 L1D_CACHE           L1 D 액세스
-  0x01 L1I_CACHE_REFILL    L1 I 미스
-  0x14 L1I_CACHE           L1 I 액세스
-  0x17 L2D_CACHE_REFILL    L2 D 미스
-  0x16 L2D_CACHE           L2 D 액세스
-```
+**Cortex-A53 perf events:**
+
+- 0x03 L1D_CACHE_REFILL    L1 D 미스 (refill 횟수)
+- 0x04 L1D_CACHE           L1 D 액세스
+- 0x01 L1I_CACHE_REFILL    L1 I 미스
+- 0x14 L1I_CACHE           L1 I 액세스
+- 0x17 L2D_CACHE_REFILL    L2 D 미스
+- 0x16 L2D_CACHE           L2 D 액세스
 
 $$\text{L1 miss rate} = \frac{\text{L1D\_CACHE\_REFILL}}{\text{L1D\_CACHE}}, \quad \text{L2 miss rate} = \frac{\text{L2D\_CACHE\_REFILL}}{\text{L2D\_CACHE}}$$
 
@@ -204,14 +203,14 @@ for (i = 0; i < N; i++) {
 
 ## Inclusive vs Exclusive Cache 영향
 
-```text
-Intel (inclusive):
-  L2 miss → L1·L2 둘 다 update → L1 conflict 가능
+**Intel (inclusive):**
 
-ARM (exclusive):
-  L2 miss → L1만 update, L2엔 안 들어감
-  L1 evict → L2 victim cache로 입력
-```
+- L2 miss → L1·L2 둘 다 update → L1 conflict 가능
+
+**ARM (exclusive):**
+
+- L2 miss → L1만 update, L2엔 안 들어감
+- L1 evict → L2 victim cache로 입력
 
 ARM은 작은 L2도 효율적이라 데이터를 잘 retention합니다.
 

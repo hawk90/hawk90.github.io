@@ -72,13 +72,13 @@ IRQ가 들어오면 hardware가 다음을 자동 수행합니다.
 
 IRQ handler가 끝나는데 다음 pending IRQ가 있으면, stack을 pop하지 않고 바로 다음 handler로 점프합니다.
 
-```text
-일반 종료:
-   handler1 끝 → unstack (8 word) → handler2 entry stack (8 word)
+**일반 종료:**
 
-Tail-chained:
-   handler1 끝 → handler2 entry (stack 그대로) → 6 cycle만 소요
-```
+- handler1 끝 → unstack (8 word) → handler2 entry stack (8 word)
+
+**Tail-chained:**
+
+- handler1 끝 → handler2 entry (stack 그대로) → 6 cycle만 소요
 
 5 ~ 6 cycle을 절약합니다.
 

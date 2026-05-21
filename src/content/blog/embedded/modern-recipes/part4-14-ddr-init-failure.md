@@ -171,13 +171,12 @@ void full_dram_test(uint32_t *base, size_t mb) {
 
 ## 보드 디자인 — Length Matching
 
-```text
-DDR signal lines:
-  CLK 차분 pair — 길이 정확
-  ADDR/CMD — CLK ± 50 mil (수밀)
-  DQ byte lane — group 안 ± 20 mil
-  DQS - DQ — 25 mil 이내
-```
+**DDR signal lines:**
+
+- CLK 차분 pair — 길이 정확
+- ADDR/CMD — CLK ± 50 mil (수밀)
+- DQ byte lane — group 안 ± 20 mil
+- DQS - DQ — 25 mil 이내
 
 Length mismatch는 skew를 만들어 high-speed 동작을 실패하게 합니다.
 

@@ -133,13 +133,12 @@ perf stat -e r19,r1d ./prog
 
 VTune의 time-series chart는 다음과 같이 표시됩니다.
 
-```text
-Time-series chart:
-  CPU: ────░░░░░░░░░░░──── (10%)
-  GPU: ──────░░░░░░██████  (60%)
-  DMA: ░░░░░░░░░░░░░░░░██  (5%)
-  Total: ░░░░░░░░██████░░  (saturation)
-```
+**Time-series chart:**
+
+- CPU: ────░░░░░░░░░░░──── (10%)
+- GPU: ──────░░░░░░██████  (60%)
+- DMA: ░░░░░░░░░░░░░░░░██  (5%)
+- Total: ░░░░░░░░██████░░  (saturation)
 
 색칠된 부분이 active 상태입니다. 총합이 100%에 가까워지면 saturation입니다.
 

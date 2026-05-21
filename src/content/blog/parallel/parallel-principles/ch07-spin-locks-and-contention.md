@@ -156,13 +156,12 @@ void tas_unlock(TASLock* lock) {
 
 이 캐시 핑퐁의 정체를 알기 위해 MESI 프로토콜을 본다. 책 7.4절은 이 흐름을 캐시 코히런스 관점에서 정리한다.
 
-```text
-MESI 상태:
-  M (Modified)  — 이 코어만 가짐, 메모리와 다름 (dirty)
-  E (Exclusive) — 이 코어만 가짐, 메모리와 같음
-  S (Shared)    — 여러 코어가 동일한 값 공유
-  I (Invalid)   — 무효
-```
+**MESI 상태:**
+
+- M (Modified)  — 이 코어만 가짐, 메모리와 다름 (dirty)
+- E (Exclusive) — 이 코어만 가짐, 메모리와 같음
+- S (Shared)    — 여러 코어가 동일한 값 공유
+- I (Invalid)   — 무효
 
 TAS의 한 라운드를 시나리오로 풀면:
 
@@ -179,13 +178,12 @@ TAS의 한 라운드를 시나리오로 풀면:
 
 TTAS는 다르다. read-only 단계에서는 라인이 S 상태로 *모든* 코어에 복제되어 있다. invalidate가 없다. 락이 풀려야 release write가 그 라인을 invalidate시키고, 그제서야 모든 코어가 한 번씩 다시 읽는다.
 
-```text
-TTAS 라이프사이클:
-  락 보유 중 — 라인 S (모든 코어 캐시) → invalidate 트래픽 0
-  unlock     — 라인 M (해제 코어) → 다른 코어들 I
-  경쟁 라운드 — 모두 한 번 RFO → 한 코어만 성공
-  다시 정착   — 라인 S 또는 M
-```
+**TTAS 라이프사이클:**
+
+- 락 보유 중 — 라인 S (모든 코어 캐시) → invalidate 트래픽 0
+- unlock     — 라인 M (해제 코어) → 다른 코어들 I
+- 경쟁 라운드 — 모두 한 번 RFO → 한 코어만 성공
+- 다시 정착   — 라인 S 또는 M
 
 책의 그림 7.4 (TAS vs TTAS 측정) — TAS는 코어 4~8에서 throughput이 무너지고, TTAS는 그래도 평탄하게 유지된다. 그러나 TTAS도 *경쟁이 풀린 순간의 동시 RFO 폭주*는 막지 못한다. 이를 *thundering herd*라 부른다. 다음 절의 backoff가 이 문제를 다룬다.
 
@@ -748,12 +746,11 @@ public:
 
 Queue lock에 timeout을 추가하면 어렵다 — 큐의 한 노드가 *포기*하면 후임자가 영원히 기다린다. 책의 해법:
 
-```text
-abortable queue lock 아이디어:
-  1. 포기 결정 시 자기 노드를 'aborted' 상태로 표시
-  2. unlock 시 aborted 노드를 건너뛰며 다음 정상 후임자에 hand-off
-  3. 큐 구조 안 변경 — 표시만으로 진행
-```
+**abortable queue lock 아이디어:**
+
+- 1. 포기 결정 시 자기 노드를 'aborted' 상태로 표시
+- 2. unlock 시 aborted 노드를 건너뛰며 다음 정상 후임자에 hand-off
+- 3. 큐 구조 안 변경 — 표시만으로 진행
 
 CLH-abortable / MCS-abortable 모두 이 패턴을 따른다. Java의 `ReentrantLock.tryLock(timeout)`이 내부적으로 비슷한 abortable variant를 쓴다.
 
@@ -790,13 +787,12 @@ Linux 커널 / glibc의 락은 더 복잡하다.
 
 리눅스 커널의 기본 spinlock은 2014년부터 *qspinlock*이다. 이름이 시사하듯 MCS의 변종이다. 4바이트 안에 *대기자 수 + tail 포인터*를 인코딩해 메모리를 아끼고, NUMA 친화적인 local spin을 유지한다.
 
-```text
-qspinlock 32비트 레이아웃:
-  [ tail (16b) | pending (1b) | locked (1b) | reserved ]
-  - locked = 1: 누가 락 잡음
-  - pending = 1: 첫 대기자 (큐를 만들기 전 fast path)
-  - tail: 큐 꼬리 CPU 번호 (MCS 노드 식별)
-```
+**qspinlock 32비트 레이아웃:**
+
+- [ tail (16b) | pending (1b) | locked (1b) | reserved ]
+- locked = 1: 누가 락 잡음
+- pending = 1: 첫 대기자 (큐를 만들기 전 fast path)
+- tail: 큐 꼬리 CPU 번호 (MCS 노드 식별)
 
 빠른 경로 — 경합 없을 때 — 는 cmpxchg 한 번. 경합이 보이면 *pending* 자리에 표시, 둘 이상이면 그제서야 진짜 MCS 큐를 만든다. 이 *점진적 전환*이 책의 TTAS-Backoff에서 queue lock으로 가는 흐름과 정확히 일치한다.
 
@@ -804,12 +800,11 @@ qspinlock 32비트 레이아웃:
 
 POSIX의 pthread spinlock은 가장 단순하다. 아키텍처별로 TAS 또는 TTAS. backoff도 큐도 없다. 짧은 critical section에 *직접* 쓰라는 인터페이스.
 
-```text
-glibc/nptl/pthread_spin_lock.c (x86):
-  while (atomic_exchange (lock, 1))
-    while (*lock)
-      __asm__ ("pause");
-```
+**glibc/nptl/pthread_spin_lock.c (x86):**
+
+- while (atomic_exchange (lock, 1))
+- while (*lock)
+- __asm__ ("pause");
 
 `pause` 명령어가 핵심이다. busy spin에서 CPU 파이프라인 stall을 피하고, hyperthreading 짝꿍에게 자원을 양보한다. *문틈으로 살피는 동안 숨 쉬기*에 해당한다.
 
@@ -884,26 +879,28 @@ class TASLock {
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - TAS / TTAS         → spinlock_t (Linux kernel)
 - CLH / MCS          → 고경합 영역의 spinlock
 - Backoff            → futex 대기 전 spin
 
-리눅스 커널:
+**리눅스 커널:**
+
 - spin_lock()        → TTAS + backoff 변형
 - arch_spin_lock     → 아키텍처별 최적화
 
-C++20:
+**C++20:**
+
 - std::atomic_flag::test_and_set  → 직접 spinlock
 - std::atomic<T>::exchange        → TAS 락 구현
 - std::atomic<T>::compare_exchange_* → CAS 기반 락
 
-C11:
+**C11:**
+
 - atomic_flag_test_and_set → 직접 spinlock
 - atomic_exchange          → TAS 락 구현
 - atomic_compare_exchange_* → CAS 기반 락
-```
 
 ## 자기 점검
 

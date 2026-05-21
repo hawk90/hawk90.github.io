@@ -167,20 +167,20 @@ int buffer_take(BoundedBuffer* buf) {
 
 책의 monitor는 *명시적 lock + 명시적 condition*이다. Java의 `synchronized` 블록은 같은 개념이지만 *암묵적*이다.
 
-```text
-Hoare/Herlihy-Shavit monitor:
-  lock.lock()
-  while (!ready) condition.await()
-  // ...
-  lock.unlock()
+**Hoare/Herlihy-Shavit monitor:**
 
-Java synchronized 모델:
-  synchronized(obj) {
-    while (!ready) obj.wait();
-    // ...
-  }
-  obj.notifyAll();
-```
+- lock.lock()
+- while (!ready) condition.await()
+- // ...
+- lock.unlock()
+
+**Java synchronized 모델:**
+
+- synchronized(obj) {
+- while (!ready) obj.wait();
+- // ...
+- }
+- obj.notifyAll();
 
 Java의 `Object`는 *모든 객체*가 monitor를 내장한다. lock과 condition이 객체 자체에 묶여 있고, condition은 *하나뿐*이다. 그래서 다른 조건을 기다리는 스레드들을 분리할 수 없다 — 결국 `notifyAll()`로 모두 깨워야 한다.
 
@@ -799,19 +799,19 @@ monitor 패턴은 거의 모든 동기화 라이브러리의 골격이다.
 
 POSIX는 monitor를 *두 객체로 분리*해 제공한다. `pthread_mutex_t`와 `pthread_cond_t`. 짝을 맞춰 쓰는 책임은 사용자에게 있다.
 
-```text
-pthread_mutex_t / pthread_cond_t 핵심 API:
-  pthread_mutex_lock(&m);
-  while (!ready) pthread_cond_wait(&c, &m);   // 락을 atomically 풀고 잠
-  // ... 일 ...
-  pthread_mutex_unlock(&m);
+**pthread_mutex_t / pthread_cond_t 핵심 API:**
 
-  // 깨우는 쪽:
-  pthread_mutex_lock(&m);
-  ready = true;
-  pthread_cond_signal(&c);                     // 락 안에서 signal 권장
-  pthread_mutex_unlock(&m);
-```
+- pthread_mutex_lock(&m);
+- while (!ready) pthread_cond_wait(&c, &m);   // 락을 atomically 풀고 잠
+- // ... 일 ...
+- pthread_mutex_unlock(&m);
+
+**// 깨우는 쪽:**
+
+- pthread_mutex_lock(&m);
+- ready = true;
+- pthread_cond_signal(&c);                     // 락 안에서 signal 권장
+- pthread_mutex_unlock(&m);
 
 `pthread_cond_wait`이 *락 해제와 잠들기*를 한 동작으로 묶는다. 이게 monitor를 *언어 구조 없이* 구현하는 유일한 방법이다. 별도 API였다면 lost wakeup은 막을 수 없다.
 
@@ -864,12 +864,11 @@ cv.wait(lock, [this] { return ready; });   // 내부에서 while 처리
 
 Go는 monitor를 *직접 제공하지 않지만*, channel이 사실상 같은 역할을 한다. 송신은 buffer 가득 차면 잠들고, 수신은 빈 buffer면 잠든다. select 문이 condition variable의 역할.
 
-```text
-Go channel 의미론 (개념):
-  ch <- x       → buffer 가득 차면 goroutine 잠 (put + cond_wait)
-  x := <-ch     → buffer 비면 goroutine 잠 (take + cond_wait)
-  내부 구현      → runtime의 hchan + mutex + sema
-```
+**Go channel 의미론 (개념):**
+
+- ch <- x       → buffer 가득 차면 goroutine 잠 (put + cond_wait)
+- x := <-ch     → buffer 비면 goroutine 잠 (take + cond_wait)
+- 내부 구현      → runtime의 hchan + mutex + sema
 
 | 시스템 | mutex + cond 표현 | 특이점 |
 |---|---|---|
@@ -914,23 +913,24 @@ API는 다르지만 *세 가지 핵심 의무*는 같다. 잠들기 전 락을 a
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - Monitor pattern    → std::mutex + std::condition_variable
 - Condition variable → pthread_cond_t (C), std::condition_variable (C++)
 - Semaphore          → std::counting_semaphore (C++20), sem_t (POSIX)
 - RWLock             → std::shared_mutex (C++17), pthread_rwlock_t
 
-C++20 새 기능:
+**C++20 새 기능:**
+
 - std::counting_semaphore, std::binary_semaphore
 - std::latch (일회성 카운트다운)
 - std::barrier (재사용 가능한 동기점)
 
-흔한 패턴:
+**흔한 패턴:**
+
 - Producer-Consumer (bounded buffer)
 - Reader-Writer (DB index)
 - Barrier (parallel computation)
-```
 
 ## 자기 점검
 

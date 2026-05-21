@@ -159,15 +159,15 @@ Logical address space (예: 64 slave × 평균 8 byte input + 8 byte output)
 
 각 슬레이브의 FMMU 0번이 *input 영역*의 자기 슬롯을, FMMU 1번이 *output 영역*의 자기 슬롯을 *DPRAM 주소*로 매핑합니다.
 
-```text
-Slave 1 FMMU 설정:
-  FMMU 0: logical 0x00000000~0x00000003 → DPRAM 0x1000 (input, read)
-  FMMU 1: logical 0x00000200~0x00000203 → DPRAM 0x1010 (output, write)
+**Slave 1 FMMU 설정:**
 
-Slave 2 FMMU 설정:
-  FMMU 0: logical 0x00000004~0x0000000B → DPRAM 0x1000 (input, read)
-  FMMU 1: logical 0x00000204~0x0000020B → DPRAM 0x1010 (output, write)
-```
+- FMMU 0: logical 0x00000000~0x00000003 → DPRAM 0x1000 (input, read)
+- FMMU 1: logical 0x00000200~0x00000203 → DPRAM 0x1010 (output, write)
+
+**Slave 2 FMMU 설정:**
+
+- FMMU 0: logical 0x00000004~0x0000000B → DPRAM 0x1000 (input, read)
+- FMMU 1: logical 0x00000204~0x0000020B → DPRAM 0x1010 (output, write)
 
 마스터가 *LRW 0x00000000, len=1024*를 한 번 발행하면, 모든 슬레이브가 *자기 슬롯만* R/W합니다. 마스터 입장에서는 *연속된 1024 byte 메모리*를 다루는 것처럼 보입니다.
 

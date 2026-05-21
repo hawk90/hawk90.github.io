@@ -34,15 +34,14 @@ LSE는 *VBAT으로 backup 가능*. LSI는 main power 꺼지면 정지.
 
 STM32 RTC는 *BCD (Binary-Coded Decimal)*. 25 = 0x25 (not 0x19).
 
-```text
-TR (Time Register):
-  [22:20] HT  (hour tens)
-  [19:16] HU  (hour units)
-  [14:12] MNT
-  [11:8]  MNU
-  [6:4]   ST
-  [3:0]   SU
-```
+**TR (Time Register):**
+
+- [22:20] HT  (hour tens)
+- [19:16] HU  (hour units)
+- [14:12] MNT
+- [11:8]  MNU
+- [6:4]   ST
+- [3:0]   SU
 
 ### Sub-second resolution
 

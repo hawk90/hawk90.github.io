@@ -106,11 +106,10 @@ Herlihy와 Shavit는 메모리의 정확성을 세 단계로 정의한다.
 
 직관적으로 우리가 보통 "메모리"라고 부르는 것에 가장 가깝다. Atomic은 regular의 모든 보장에 더해 **단조성**을 강제한다.
 
-```text
-세 보장의 관계:
-  safe   ⊂ regular ⊂ atomic
-  (포함 방향 — atomic은 더 좁은 행위 집합)
-```
+**세 보장의 관계:**
+
+- safe   ⊂ regular ⊂ atomic
+- (포함 방향 — atomic은 더 좁은 행위 집합)
 
 따라서 atomic register는 safe이고 regular이지만, 그 역은 거짓이다.
 
@@ -199,19 +198,20 @@ bool regular_bit_read(RegularBit* r) {
 
 이 변환을 책에서는 **Construction 4.1**로 부른다. 정확성 논증의 골자는 다음과 같다.
 
-```text
-case A — 읽기와 쓰기가 겹치지 않음:
-        safe 정의에 의해 마지막 값을 반환. OK.
+**case A — 읽기와 쓰기가 겹치지 않음:**
 
-case B — 읽기와 쓰기가 겹침, 그러나 새 값 == 옛 값:
-        write가 실제로 bit를 건드리지 않음 (skip).
-        safe register의 "concurrent" 모드 자체가 발동 안 함.
-        → 마지막 값 = 새 값 = 옛 값, 셋 다 동일. OK.
+- safe 정의에 의해 마지막 값을 반환. OK.
 
-case C — 읽기와 쓰기가 겹침, 새 값 ≠ 옛 값:
-        safe register는 0 또는 1을 반환.
-        둘 중 무엇이 반환되어도 "옛 값 또는 새 값" 정의에 부합. OK.
-```
+**case B — 읽기와 쓰기가 겹침, 그러나 새 값 == 옛 값:**
+
+- write가 실제로 bit를 건드리지 않음 (skip).
+- safe register의 "concurrent" 모드 자체가 발동 안 함.
+- → 마지막 값 = 새 값 = 옛 값, 셋 다 동일. OK.
+
+**case C — 읽기와 쓰기가 겹침, 새 값 ≠ 옛 값:**
+
+- safe register는 0 또는 1을 반환.
+- 둘 중 무엇이 반환되어도 "옛 값 또는 새 값" 정의에 부합. OK.
 
 이렇게 safe 한 레지스터로 regular을 만든다 — 추가 비용은 writer 측의 비교 한 번뿐.
 
@@ -231,24 +231,28 @@ case C — 읽기와 쓰기가 겹침, 새 값 ≠ 옛 값:
 
 writer는 새 값 v를 쓰기 위해 다음을 수행한다.
 
-```text
-write(v):
-  # 인덱스 v-1까지 1을 채우거나, v 이상의 1을 0으로 지운다
-  if v > current:
-      for i in (current..v-1): bits[i].write(1)
-  else:
-      for i in (v..current-1): bits[i].write(0)
-  current = v
-```
+**write(v):**
+
+- # 인덱스 v-1까지 1을 채우거나, v 이상의 1을 0으로 지운다
+
+**if v > current:**
+
+- for i in (current..v-1): bits[i].write(1)
+
+**else:**
+
+- for i in (v..current-1): bits[i].write(0)
+- current = v
 
 reader는 가장 왼쪽의 0의 인덱스를 찾는다 — 그것이 곧 값.
 
-```text
-read():
-  for i in 0..M-1:
-      if bits[i].read() == 0: return i
-  return M
-```
+**read():**
+
+
+**for i in 0..M-1:**
+
+- if bits[i].read() == 0: return i
+- return M
 
 겹치는 동안 reader가 보는 단조성이 핵심이다. writer가 비트를 한 방향으로만 갱신하므로, reader가 본 0/1 패턴이 비록 부분적으로 옛값 + 부분적으로 새값이어도, 그것이 **합법적인 중간 인코딩** 중 하나에 해당한다. 따라서 반환값은 옛 값 ≤ v_returned ≤ 새 값 사이의 어떤 값 — regular의 정의를 만족한다.
 
@@ -454,28 +458,27 @@ public:
 
 알고리즘이 wait-free임을 보이려면 **유한 횟수 안에 종료**됨을 증명해야 한다.
 
-```text
-정의:
-  clean double-collect = 두 번의 collect가 동일한 (value, timestamp) 결과를 냄.
-  moved 스레드 = 한 스레드의 timestamp가 두 collect 사이에 바뀌었음.
+**정의:**
 
-관찰:
-  실패는 항상 어떤 스레드 j가 moved 되었기 때문이다.
-  j가 처음 moved되었을 때는 단순히 다시 시도한다.
-  j가 두 번째 moved될 때는 j 자신이 그 사이에 update를 완료했으므로
-  j의 슬롯 안에 *j의 최근 snapshot*이 들어 있다.
-```
+- clean double-collect = 두 번의 collect가 동일한 (value, timestamp) 결과를 냄.
+- moved 스레드 = 한 스레드의 timestamp가 두 collect 사이에 바뀌었음.
+
+**관찰:**
+
+- 실패는 항상 어떤 스레드 j가 moved 되었기 때문이다.
+- j가 처음 moved되었을 때는 단순히 다시 시도한다.
+- j가 두 번째 moved될 때는 j 자신이 그 사이에 update를 완료했으므로
+- j의 슬롯 안에 *j의 최근 snapshot*이 들어 있다.
 
 이 j의 snapshot은 (j의 두 update 사이에 완료된 시점 ≥ 우리 snapshot의 시작 시점)이므로, 우리 snapshot 호출의 *linearization point*로 받아쓸 수 있다.
 
-```text
-경계 분석:
-  N개의 스레드. 각 스레드는 우리 collect 동안 최대 2번까지만 moved될 수 있음
-  (두 번째 moved에서 즉시 그의 snapshot을 차용).
-  따라서 collect 시도는 최대 2N + 1 번.
-  매 collect는 O(N) — 모든 슬롯을 한 번씩.
-  총 비용: O(N²) — wait-free.
-```
+**경계 분석:**
+
+- N개의 스레드. 각 스레드는 우리 collect 동안 최대 2번까지만 moved될 수 있음
+- (두 번째 moved에서 즉시 그의 snapshot을 차용).
+- 따라서 collect 시도는 최대 2N + 1 번.
+- 매 collect는 O(N) — 모든 슬롯을 한 번씩.
+- 총 비용: O(N²) — wait-free.
 
 이게 책의 **Lemma 4.14** 흐름이다 — "어떤 collect 끝에서든 N개의 스레드 모두에 대해 moved 카운트가 2 미만이면 직접 일관된 결과, 아니면 차용된 snapshot이 존재한다."
 
@@ -608,13 +611,12 @@ A는 분명 x를 먼저 썼는데, B는 y를 먼저 본다. ARM 입장에선 합
 
 C++의 `memory_order_acquire` load는 ARMv8에서 `LDAR`로, `memory_order_release` store는 `STLR`로 컴파일된다. `memory_order_seq_cst`는 추가 `DMB ISH`가 붙거나, `LDAR`/`STLR`만으로도 일부 경우 처리된다.
 
-```text
-같은 코드, 다른 아키텍처:
-  C++:   x.store(1, memory_order_seq_cst);
-  x86:   MOV [x], 1  +  MFENCE
-  ARMv8: STLR W0, [x]
-  RISC-V: FENCE rw, w  +  SW x0, x  +  FENCE w, rw
-```
+**같은 코드, 다른 아키텍처:**
+
+- C++:   x.store(1, memory_order_seq_cst);
+- x86:   MOV [x], 1  +  MFENCE
+- ARMv8: STLR W0, [x]
+- RISC-V: FENCE rw, w  +  SW x0, x  +  FENCE w, rw
 
 ### Lock-free hashing — 책장 여러 칸의 군중 사진
 
@@ -678,30 +680,32 @@ Java의 `ConcurrentHashMap` (JDK 8+)도 이 패턴을 쓴다. resize 중에 look
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - Safe register   → byte 단위 plain write
 - Regular register → C++ memory_order_relaxed
 - Atomic register  → C++ memory_order_seq_cst
 - Atomic snapshot  → 동시성 자료구조 디버깅 도구
 
-Modern CPU 메모리 모델:
+**Modern CPU 메모리 모델:**
+
 - x86/x64: TSO (Total Store Order) — 비교적 강함
 - ARM / RISC-V: Relaxed — 약함, 명시적 barrier 필요
 - POWER: 매우 약함
 
-C++20/23 atomic:
+**C++20/23 atomic:**
+
 - std::atomic<T>::load(order)
 - std::atomic<T>::store(value, order)
 - std::atomic<T>::exchange(value, order)
 - std::atomic<T>::compare_exchange_strong/weak()
 
-C11 atomic:
+**C11 atomic:**
+
 - atomic_load_explicit(&var, order)
 - atomic_store_explicit(&var, value, order)
 - atomic_exchange_explicit(&var, value, order)
 - atomic_compare_exchange_strong/weak_explicit()
-```
 
 ## 자기 점검
 

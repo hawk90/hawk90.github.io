@@ -314,10 +314,9 @@ void worker_loop(void)
 
 부팅이 너무 오래 걸리면 reset하는 메커니즘입니다. SPL이 watchdog을 켜고 timeout을 짧게(예: 120초) 둡니다. U-Boot proper, kernel 부팅을 거쳐 systemd가 watchdog을 인계받기 전까지 멈추지 않게 됩니다.
 
-```text
-U-Boot:
-    WDT:   Started watchdog@30280000 with servicing (60s timeout)
-```
+**U-Boot:**
+
+- WDT:   Started watchdog@30280000 with servicing (60s timeout)
 
 U-Boot가 watchdog을 서비싱하면서 부팅을 진행합니다. 부팅 단계 어디서든 hang하면 watchdog이 reset해 재부팅 루프를 만듭니다. 이 루프 자체는 정상 동작입니다 — fail-safe 설계가 의도한 동작입니다.
 

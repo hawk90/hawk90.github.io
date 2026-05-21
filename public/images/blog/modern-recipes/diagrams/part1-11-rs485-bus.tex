@@ -17,10 +17,11 @@
 % Bus line (horizontal)
 \draw[focus, line width=1.0pt] (-3,0) -- (10,0);
 \draw[focus, line width=1.0pt] (-3,-0.6) -- (10,-0.6);
-\node[caption, anchor=west] at (-3.5,-0.3) {twisted};
-\node[caption, anchor=west] at (-3.5,-0.7) {pair};
-\node[caption, anchor=east] at (-3,0.3) {A};
-\node[caption, anchor=east] at (-3,-0.6) {B};
+% "twisted pair" annotation placed BELOW the bus (clear of A/B line labels)
+\node[caption, anchor=east, align=center] at (-3.6,-0.3) {twisted\\[1pt]pair};
+% A / B labels at the right end so they don't collide with "twisted pair"
+\node[caption, anchor=west] at (10.2, 0) {A};
+\node[caption, anchor=west] at (10.2, -0.6) {B};
 
 % Connection from top node to bus
 \draw[edgec, line width=0.5pt] (n1.south) -- (0,0);

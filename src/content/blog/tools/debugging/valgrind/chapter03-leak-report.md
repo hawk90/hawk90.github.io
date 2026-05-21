@@ -12,14 +12,13 @@ draft: false
 
 `--leak-check=full --show-leak-kinds=all`로 실행하면 보고서 끝에 *LEAK SUMMARY*가 나옵니다.
 
-```
-LEAK SUMMARY:
-   definitely lost: 40 bytes in 1 blocks
-   indirectly lost: 80 bytes in 5 blocks
-     possibly lost: 16 bytes in 1 blocks
-   still reachable: 256 bytes in 3 blocks
-        suppressed: 0 bytes in 0 blocks
-```
+**LEAK SUMMARY:**
+
+- definitely lost: 40 bytes in 1 blocks
+- indirectly lost: 80 bytes in 5 blocks
+- possibly lost: 16 bytes in 1 blocks
+- still reachable: 256 bytes in 3 blocks
+- suppressed: 0 bytes in 0 blocks
 
 네 종류의 의미를 정확히 잡지 못하면 *어디서부터 고쳐야 할지* 결정이 어렵습니다. 이 장은 그 네 가지를 *정확히* 다룹니다.
 

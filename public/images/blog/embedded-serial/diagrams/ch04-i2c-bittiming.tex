@@ -41,9 +41,10 @@
   -- (6.7, 0)
   -- (7, 0);
 
-% Annotations
-\draw[marker] (0.3, -1.5) -- (0.3, 2.5);
-\node[caption] at (0.3, 2.5) {\textbf{S} (Start)};
+% Annotations — Start/Stop captions raised to a higher row so they don't
+% collide with the bit 1/bit 2/ACK captions next to them at y=2.5
+\draw[marker] (0.3, -1.5) -- (0.3, 3.3);
+\node[caption] at (0.3, 3.3) {\textbf{S} (Start)};
 
 \draw[marker] (1, -1.5) -- (1, 2.5);
 \node[caption] at (1, 2.5) {bit 1 = 0};
@@ -54,8 +55,8 @@
 \draw[marker] (4.5, -1.5) -- (4.5, 2.5);
 \node[caption] at (4.5, 2.5) {\textbf{ACK} (9th)};
 
-\draw[marker] (6.3, -1.5) -- (6.3, 2.5);
-\node[caption] at (6.3, 2.5) {\textbf{P} (Stop)};
+\draw[marker] (6.3, -1.5) -- (6.3, 3.3);
+\node[caption] at (6.3, 3.3) {\textbf{P} (Stop)};
 
 % Annotation lines below
 \node[font=\tiny, anchor=north] at (3, -1.7) {(SCL Low일 때 SDA 변화 = 데이터)};

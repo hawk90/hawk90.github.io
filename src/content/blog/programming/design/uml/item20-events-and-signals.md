@@ -20,19 +20,17 @@ draft: false
 
 ### 1. Call Event — 메서드 호출
 
-```
-ATM 상태머신에서:
-  Idle → cardInserted() → CardInserted
-```
+**ATM 상태머신에서:**
+
+- Idle → cardInserted() → CardInserted
 
 가장 흔한 트리거. 객체에 어떤 연산이 호출되면 발생.
 
 ### 2. Signal Event — 비동기 시그널 수신
 
-```
-Order 상태머신:
-  Placed → 「PaymentApproved」 → Paid
-```
+**Order 상태머신:**
+
+- Placed → 「PaymentApproved」 → Paid
 
 `<<signal>>` 분류자의 인스턴스가 도착했을 때.
 

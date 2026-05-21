@@ -65,13 +65,13 @@ CiA (CAN in Automation) 권장: sample point 87.5%. 너무 일찍이면 *propaga
 
 CAN bus는 *모든 node가 모든 message를 받습니다*. filter로 *원하는 ID만* CPU로 올림 — power와 ISR 시간 절약.
 
-```text
-Mask mode:
-  ID & MASK == FILTER & MASK
-  
-List mode:
-  ID == any of FILTER[]
-```
+**Mask mode:**
+
+- ID & MASK == FILTER & MASK
+
+**List mode:**
+
+- ID == any of FILTER[]
 
 STM32 bxCAN은 14개 filter bank, 각 *2개 ID list 또는 2개 mask*.
 
@@ -249,18 +249,18 @@ real bus와 분리되어 자기 송신을 자기가 수신. 코드 검증에 유
 
 CAN 분석기 (PEAK PCAN-USB, Vector, Kvaser)로 message를 모니터링하면 가장 명확. 없으면 두 STM32 보드를 *transceiver (TJA1051, SN65HVD230) + 120Ω termination*으로 연결.
 
-```text
-정상:
-  Node A: send id=0x100, data=[01 02 03 04]
-  Node B: recv id=0x100, data=[01 02 03 04]  ✓
+**정상:**
 
-문제 사례:
-  Send 후 TEC가 +8씩 증가 → 다른 node가 ACK 안 함
-  → cable, termination, baud 확인
-  
-  TEC = 255 → Error Passive
-  TEC = 256+ → Bus Off (전송 중단)
-```
+- Node A: send id=0x100, data=[01 02 03 04]
+- Node B: recv id=0x100, data=[01 02 03 04]  ✓
+
+**문제 사례:**
+
+- Send 후 TEC가 +8씩 증가 → 다른 node가 ACK 안 함
+- → cable, termination, baud 확인
+
+TEC = 255 → Error Passive
+TEC = 256+ → Bus Off (전송 중단)
 
 scope로 CAN_H/CAN_L 차이 (recessive ~0V, dominant ~2V)를 확인.
 

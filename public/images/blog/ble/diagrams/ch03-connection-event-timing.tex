@@ -20,13 +20,14 @@
 \node[font=\footnotesize\bfseries, anchor=south] at (5.5, 4.8)
   {BLE Connection Event — M$\to$S, S$\to$M alternating within each CE};
 
-% CE 1 background
+% CE 1 background — labels moved ABOVE the rectangle so they don't ride
+% on top of the M→S packet labels at y=1.9+
 \fill[ce] (0.2, -0.2) rectangle (3.8, 2.8);
-\node[font=\scriptsize\bfseries, anchor=north] at (2.0, 2.8) {CE 1};
+\node[font=\scriptsize\bfseries, anchor=south] at (2.0, 2.9) {CE 1};
 
 % CE 2 background
 \fill[ce] (5.0, -0.2) rectangle (8.6, 2.8);
-\node[font=\scriptsize\bfseries, anchor=north] at (6.8, 2.8) {CE 2};
+\node[font=\scriptsize\bfseries, anchor=south] at (6.8, 2.9) {CE 2};
 
 % Master row
 \node[lbl] at (0.0, 1.7) {Master};

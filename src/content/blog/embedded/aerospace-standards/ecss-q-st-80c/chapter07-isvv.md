@@ -48,18 +48,18 @@ Criticality D   자체 가능
 
 ## Internal V&V vs ISVV
 
-```
-Internal V&V (개발 조직):
-  - 같은 도구·환경·mindset
-  - Confirmation bias 위험
-  - 빠르고 저렴
+**Internal V&V (개발 조직):**
 
-ISVV (외부 조직):
-  - 다른 도구·방법
-  - Fresh perspective
-  - Confirmation bias 차단
-  - 비싸고 느림
-```
+- 같은 도구·환경·mindset
+- Confirmation bias 위험
+- 빠르고 저렴
+
+**ISVV (외부 조직):**
+
+- 다른 도구·방법
+- Fresh perspective
+- Confirmation bias 차단
+- 비싸고 느림
 
 ECSS는 *둘 다 권장*. ISVV는 *internal V&V를 대체하지 않음*. *추가 layer*.
 
@@ -83,8 +83,7 @@ ECSS-Q-ST-80C의 ISVV 영역 (Annex K 참조):
 
 Mission scope, contract, deliverable 정의:
 
-```
-ISVV Plan의 일반 내용:
+**ISVV Plan의 일반 내용:**
 
 - ISVV Provider 선정
 - Scope (어느 module / 어느 phase)
@@ -92,7 +91,6 @@ ISVV Plan의 일반 내용:
 - Schedule
 - Deliverable (V&V reports, anomaly reports, final report)
 - Approval chain (PM, QM, Director, 일부 customer)
-```
 
 ## 2. Requirements V&V
 

@@ -83,31 +83,35 @@ TQL-5: 가장 가벼움
 
 ## 도구별 Qualification — 일반 적용
 
-```
-Compiler (GCC/Diab/IAR for aerospace):
-  TQL-1 (DAL A) or TQL-2 (DAL B)
-  Vendor Qualification Kit 일반
+**Compiler (GCC/Diab/IAR for aerospace):**
 
-Static Analyzer (Helix QAC, Polyspace):
-  TQL-4 (DAL A) or TQL-5 (DAL B/C/D)
-  Vendor Qualification Kit
+- TQL-1 (DAL A) or TQL-2 (DAL B)
+- Vendor Qualification Kit 일반
 
-Coverage Tool (VectorCAST, LDRA):
-  TQL-4 (DAL A) or TQL-5 (DAL B/C)
-  Vendor Qualification Kit
+**Static Analyzer (Helix QAC, Polyspace):**
 
-Model-Based Code Generator (Simulink Embedded Coder):
-  TQL-1 (DAL A) or TQL-2 (DAL B)
-  Vendor Qualification Kit
+- TQL-4 (DAL A) or TQL-5 (DAL B/C/D)
+- Vendor Qualification Kit
 
-Linker (GNU ld):
-  TQL-1 (DAL A) — 자체 qualification 어려움
-  대안: Linker output 검증 (memory map review)
+**Coverage Tool (VectorCAST, LDRA):**
 
-Debugger (GDB):
-  TQL-5 — 가벼움
-  사용 한계 문서화로 충분
-```
+- TQL-4 (DAL A) or TQL-5 (DAL B/C)
+- Vendor Qualification Kit
+
+**Model-Based Code Generator (Simulink Embedded Coder):**
+
+- TQL-1 (DAL A) or TQL-2 (DAL B)
+- Vendor Qualification Kit
+
+**Linker (GNU ld):**
+
+- TQL-1 (DAL A) — 자체 qualification 어려움
+- 대안: Linker output 검증 (memory map review)
+
+**Debugger (GDB):**
+
+- TQL-5 — 가벼움
+- 사용 한계 문서화로 충분
 
 각 도구의 *정확한 qualification 비용*은 *vendor / 프로젝트 / 시점*마다 다르다. 공개된 정확한 가격은 *대부분 vendor 페이지에 없으므로 vendor 직접 문의*.
 
@@ -441,14 +445,13 @@ Approvals:
 
 Vendor 도구 외 *프로젝트 자체 도구*도 qualification 필요.
 
-```
-대표 자체 도구:
-  - Build automation script
-  - Custom code generator (Simulink 후처리)
-  - Test result aggregator
-  - Coverage report generator
-  - Custom static analyzer
-```
+**대표 자체 도구:**
+
+- Build automation script
+- Custom code generator (Simulink 후처리)
+- Test result aggregator
+- Coverage report generator
+- Custom static analyzer
 
 자체 도구는 *vendor kit 없음* → *전체 qualification 자체 수행*.
 

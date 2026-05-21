@@ -33,35 +33,39 @@ bookAuthor: "Bertrand Meyer"
 
 ### 전통적 접근의 문제
 
-```text
-단순한 접근 (spaghetti):
-  case current_screen of
-      SCREEN_LOGIN:
-          if button_ok then
-              validate_login
-              if valid then
-                  current_screen := SCREEN_MENU
-              else
-                  show_error
-              end
-          elsif button_cancel then
-              current_screen := SCREEN_EXIT
-          end
-      SCREEN_MENU:
-          if button_withdraw then
-              current_screen := SCREEN_WITHDRAW
-          elsif button_deposit then
-              current_screen := SCREEN_DEPOSIT
-          ...
-      ...
-  end
+**단순한 접근 (spaghetti):**
 
-문제:
-  - 거대한 조건문
-  - 상태와 전이가 얽힘
-  - 확장 어려움
-  - 테스트 어려움
-```
+- case current_screen of
+
+**SCREEN_LOGIN:**
+
+- if button_ok then
+- validate_login
+- if valid then
+- current_screen := SCREEN_MENU
+- else
+- show_error
+- end
+- elsif button_cancel then
+- current_screen := SCREEN_EXIT
+- end
+
+**SCREEN_MENU:**
+
+- if button_withdraw then
+- current_screen := SCREEN_WITHDRAW
+- elsif button_deposit then
+- current_screen := SCREEN_DEPOSIT
+- ...
+- ...
+- end
+
+**문제:**
+
+- 거대한 조건문
+- 상태와 전이가 얽힘
+- 확장 어려움
+- 테스트 어려움
 
 ## 상태 기계 모델
 

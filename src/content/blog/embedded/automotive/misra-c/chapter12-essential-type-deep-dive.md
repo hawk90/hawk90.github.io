@@ -28,12 +28,13 @@ C 표준은 모든 산술 변환을 *3단계*로 정의한다.
 
 `int`보다 *rank가 낮은* 정수 타입(`_Bool`, `char`, `short`)이 *표현식에 등장하면* 다음 변환이 일어난다.
 
-```
-if int can represent all values of original type:
-    promote to int
-else:
-    promote to unsigned int
-```
+**if int can represent all values of original type:**
+
+- promote to int
+
+**else:**
+
+- promote to unsigned int
 
 거의 모든 환경에서 `char`, `short`는 `int`로 변환된다.
 

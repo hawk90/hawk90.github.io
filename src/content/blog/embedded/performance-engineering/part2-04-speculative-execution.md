@@ -106,15 +106,15 @@ ldr r2, [r3]    ; load — r1 == r3?
 
 OoO에서 load를 store 앞으로 보낼 수 있을까요? 주소가 같지 않으면 OK입니다. 주소가 같으면 forwarding하거나 stall합니다.
 
-```text
-Store Queue:
-  [addr=0x1000, data=42, ✓]
-  [addr=0x1004, data=99, ✓]
+**Store Queue:**
 
-Load:
-  addr=0x1000 → Store Queue match → forward 42 (memory 안 가도 됨)
-  addr=0x2000 → no match → memory access
-```
+- [addr=0x1000, data=42, ✓]
+- [addr=0x1004, data=99, ✓]
+
+**Load:**
+
+- addr=0x1000 → Store Queue match → forward 42 (memory 안 가도 됨)
+- addr=0x2000 → no match → memory access
 
 Cortex-A72는 *Memory Order Buffer* (MOB)로 store/load 순서를 관리합니다.
 

@@ -909,25 +909,26 @@ __syncthreads();   // OK — block 전체 도달
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - Sense-Reversing       → std::barrier (C++20)
 - One-shot              → std::latch (C++20)
 - POSIX                 → pthread_barrier_t
 - GPU                   → __syncthreads() (CUDA, 사실상 표준), barrier() (OpenCL — 쇠퇴, SYCL/Vulkan Compute가 후속)
 
-언어별:
+**언어별:**
+
 - C++20: std::barrier, std::latch
 - C: pthread_barrier_t (POSIX), 직접 구현
 - Rust: std::sync::Barrier, crossbeam
 - Go: sync.WaitGroup (latch 유사)
 - Python: threading.Barrier
 
-응용:
+**응용:**
+
 - BSP (Bulk Synchronous Parallel) → MPI Barrier
 - Iterative algorithms → 매 iter 끝 barrier
 - 멀티 패스 알고리즘 → 각 패스 끝
-```
 
 ## 자기 점검
 

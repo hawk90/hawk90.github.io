@@ -10,12 +10,17 @@
 
 \node[font=\footnotesize\bfseries, anchor=west] at (0, 5) {Modem Dial-Up Sequence — DTR/DSR/DCD 협상};
 
-\node[anchor=west] at (0, 2) {\begin{tikztimingtable}
-  DTE.DTR  & L 1H 6H 1H L \\
-  Modem.DSR & 2L 6H 1L \\
+% Widen vertical spacing between rows so the row name labels never overlap
+\timingcounter
+\node[anchor=west] at (0, 2) {\begin{tikztimingtable}[
+  timing/rowdist=1.6,
+  timing/name/.append style={font=\scriptsize, align=right, anchor=east, inner sep=4pt}
+]
+  DTE.DTR    & L 1H 6H 1H L \\
+  Modem.DSR  & 2L 6H 1L \\
   Modem.RI   & 4L H 0.5L H 0.5L H 1L L \\
-  Modem.DCD & 5L 2H L \\
-  TXD/RXD  & 3.5Z D{ATD01012345678} 0.5Z 2D{data} 0.5Z \\
+  Modem.DCD  & 5L 2H L \\
+  TXD/RXD    & 3.5Z D{ATD01012345678} 0.5Z 2D{data} 0.5Z \\
 \end{tikztimingtable}};
 
 \node[anchor=west, font=\tiny, align=left] at (0, -3) {

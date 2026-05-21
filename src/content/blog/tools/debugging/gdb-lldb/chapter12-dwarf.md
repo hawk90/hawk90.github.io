@@ -134,15 +134,16 @@ $ llvm-dwarfdump --debug-info my_prog | head -50
 
 `.debug_info`에서 각 DIE는 *약어 코드* + *속성 값 나열*입니다. 약어 코드가 어떤 속성이 어떤 순서·형식으로 따라오는지 `.debug_abbrev`에서 정의.
 
-```text
-.debug_abbrev:
- Abbrev 1:
-   DW_TAG_compile_unit (children: yes)
-   DW_AT_name       DW_FORM_strx1
-   DW_AT_low_pc     DW_FORM_addr
-   DW_AT_high_pc    DW_FORM_data4
-   ...
-```
+**.debug_abbrev:**
+
+
+**Abbrev 1:**
+
+- DW_TAG_compile_unit (children: yes)
+- DW_AT_name       DW_FORM_strx1
+- DW_AT_low_pc     DW_FORM_addr
+- DW_AT_high_pc    DW_FORM_data4
+- ...
 
 같은 TAG/속성 조합의 DIE 수천 개가 한 약어를 공유합니다. 결과적으로 *압축비가 매우 높음*.
 
@@ -361,14 +362,13 @@ $ clang++ -g -gsplit-dwarf foo.o -o prog  # prog.dwo도 자동 검색
 
 ELF 안에 남는 건 *skeleton CU* — DIE 트리는 `.dwo`에 두고, ELF는 그 위치만 가리킴.
 
-```text
-ELF .debug_info:
-  DW_TAG_skeleton_unit
-  ├─ DW_AT_dwo_name = "foo.dwo"
-  ├─ DW_AT_addr_base = ...
-  ├─ DW_AT_str_offsets_base = ...
-  └─ (no children — 본체는 dwo에)
-```
+**ELF .debug_info:**
+
+- DW_TAG_skeleton_unit
+- ├─ DW_AT_dwo_name = "foo.dwo"
+- ├─ DW_AT_addr_base = ...
+- ├─ DW_AT_str_offsets_base = ...
+- └─ (no children — 본체는 dwo에)
 
 배포 시 `.dwo` 파일들을 `dwp` 도구로 단일 `dwp` 패키지로 묶을 수도 있음.
 

@@ -893,15 +893,15 @@ result = f.get();
 
 Work stealing의 좋은 점 — **불균형한 작업에 강함**.
 
-```
-순진한 분할:
+**순진한 분할:**
+
 - 작업을 P개로 나눠 각 스레드에 분배
 - 한 스레드의 작업이 일찍 끝나면 idle
 
-Work stealing:
+**Work stealing:**
+
 - 짧은 작업 끝낸 스레드가 다른 큐에서 훔침
 - 모든 스레드가 끝까지 일함
-```
 
 불균형이 클수록 work stealing 이득이 큼. 균형이 잘 잡힌 작업이면 정적 분배도 OK.
 
@@ -989,25 +989,26 @@ Work stealing:
 
 ## 실무 적용
 
-```
-이론 → 실무:
+**이론 → 실무:**
+
 - Future                  → std::future, std::async (C++)
 - Promise                 → std::promise (C++)
 - Work Stealing           → Intel oneTBB, libdispatch
 - Fork-Join               → std::async + recursive
 - Parallel STL            → std::execution::par
 
-언어별:
+**언어별:**
+
 - C++: std::async, std::future, oneTBB, parallel STL
 - C: 직접 구현 (thrd_t + 큐), OpenMP
 - Rust: rayon (CPU 바운드), tokio (I/O 바운드)
 - Go: goroutine + work-stealing scheduler
 
-설계:
+**설계:**
+
 - CPU 바운드 → oneTBB / parallel STL / OpenMP
 - I/O 바운드 → async runtime / coroutine
 - 혼합 → oneTBB + async
-```
 
 ## 자기 점검
 

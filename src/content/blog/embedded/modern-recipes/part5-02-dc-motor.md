@@ -194,12 +194,11 @@ void motor_protect_task(void) {
 
 current sensing이 있으면 ADC로 transient를 봅니다.
 
-```text
-Startup inrush:
-  Steady state running: ~300 mA
-  At startup:           ~2500 mA spike (0.1 sec)
-  → soft-start로 ~800 mA로 제한 권장
-```
+**Startup inrush:**
+
+- Steady state running: ~300 mA
+- At startup:           ~2500 mA spike (0.1 sec)
+- → soft-start로 ~800 mA로 제한 권장
 
 ## 자주 보는 함정
 

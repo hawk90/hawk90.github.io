@@ -125,13 +125,12 @@ Hard real-time은 *max ≤ deadline*을 요구합니다. Soft는 *p99·p999 ≤ 
 
 ## Long Tail
 
-```text
-Histogram:
-       ▓▓▓▓▓▓▓▓
-     ▓ ▓▓▓▓▓▓▓▓▓
-   ▓ ▓ ▓▓▓▓▓▓▓▓▓ ▓        ▓                     ▓ ← long tail
-   1   10           100              1000 ms
-```
+**Histogram:**
+
+- ▓▓▓▓▓▓▓▓
+- ▓ ▓▓▓▓▓▓▓▓▓
+- ▓ ▓ ▓▓▓▓▓▓▓▓▓ ▓        ▓                     ▓ ← long tail
+- 1   10           100              1000 ms
 
 평균 10 ms, p99 100 ms, max 1 s인 분포입니다. 사용자 체감을 결정하는 것은 *long tail*입니다.
 

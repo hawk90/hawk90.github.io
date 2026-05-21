@@ -374,21 +374,21 @@ typedef struct {
 
 ### st_info 비트
 
-```text
-Type (low 4 bits):
-  0 = NOTYPE
-  1 = OBJECT       (변수)
-  2 = FUNC
-  3 = SECTION
-  4 = FILE
-  5 = COMMON
-  6 = TLS
+**Type (low 4 bits):**
 
-Binding (high 4 bits):
-  0 = LOCAL
-  1 = GLOBAL
-  2 = WEAK         (override 가능)
-```
+- 0 = NOTYPE
+- 1 = OBJECT       (변수)
+- 2 = FUNC
+- 3 = SECTION
+- 4 = FILE
+- 5 = COMMON
+- 6 = TLS
+
+**Binding (high 4 bits):**
+
+- 0 = LOCAL
+- 1 = GLOBAL
+- 2 = WEAK         (override 가능)
 
 WEAK 심볼이 묘함 — 동명 GLOBAL이 있으면 그게 우선. malloc fork 같은 libc 함수가 WEAK. 그래서 `__libc_malloc`이 strong, `malloc`이 weak — 사용자가 자신만의 `malloc`을 정의하면 WEAK가 override 됨 (LD_PRELOAD).
 

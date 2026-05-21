@@ -49,16 +49,16 @@ sector size가 *불균등*합니다. EEPROM emulation은 보통 sector 1, 2 (16K
 
 ### Programming time
 
-```text
-Erase:
-  16 KB sector:   ~400 ms
-  64 KB sector:   ~1.1 s
-  128 KB sector:  ~2.5 s
+**Erase:**
 
-Write:
-  word (4 bytes): ~16 µs (V_dd 2.7~3.6 V)
-  doubleword:     ~30 µs
-```
+- 16 KB sector:   ~400 ms
+- 64 KB sector:   ~1.1 s
+- 128 KB sector:  ~2.5 s
+
+**Write:**
+
+- word (4 bytes): ~16 µs (V_dd 2.7~3.6 V)
+- doubleword:     ~30 µs
 
 erase는 *수십 ms*, 다른 모든 IRQ가 막힙니다 (CPU stall). 운영 중 erase는 신중히 결정.
 

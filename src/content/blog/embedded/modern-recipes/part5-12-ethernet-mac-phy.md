@@ -50,13 +50,12 @@ TXD[1:0] ──→ 2-bit TX data
 
 PHY의 *register set*에 접근하는 2-wire interface (MDC=clock, MDIO=data).
 
-```text
-주요 PHY register (IEEE 802.3 표준):
-  Reg 0  BMCR    — basic mode control (auto-neg, speed, duplex)
-  Reg 1  BMSR    — basic mode status (link up?, capability)
-  Reg 2-3 PHYID  — chip identification
-  Reg 4-5 ANAR/ANLPAR — auto-neg advertisement / partner
-```
+**주요 PHY register (IEEE 802.3 표준):**
+
+- Reg 0  BMCR    — basic mode control (auto-neg, speed, duplex)
+- Reg 1  BMSR    — basic mode status (link up?, capability)
+- Reg 2-3 PHYID  — chip identification
+- Reg 4-5 ANAR/ANLPAR — auto-neg advertisement / partner
 
 이 register들을 *MDIO로 read/write*해 link speed·duplex 협상.
 

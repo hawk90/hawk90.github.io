@@ -88,11 +88,10 @@ NIC->IRQ_COALESCE = COALESCE_TIME(50us) | COALESCE_COUNT(16);
 
 장점은 IRQ rate가 줄어드는 것이고, 단점은 평균 latency가 늘어나는 것입니다.
 
-```text
-Trade-off:
-  short coalesce: low latency, high CPU
-  long coalesce: high throughput, high latency
-```
+**Trade-off:**
+
+- short coalesce: low latency, high CPU
+- long coalesce: high throughput, high latency
 
 이더넷에서는 *50µs / 16 packet*이 일반적인 default입니다.
 

@@ -177,17 +177,17 @@ waitpid(pid, NULL, 0);
 
 POSIX의 async-signal-safe 함수 목록은 *매우 작다*.
 
-```
-허용 (일부):
-  _exit, abort, accept, alarm, bind, ..., write
-  sig_atomic_t 변수 접근
+**허용 (일부):**
 
-금지:
-  malloc, free          ← heap 손상 가능
-  printf, fprintf       ← stdio lock
-  signal, raise         ← 자기 자신 호출
-  거의 모든 라이브러리 함수
-```
+- _exit, abort, accept, alarm, bind, ..., write
+- sig_atomic_t 변수 접근
+
+**금지:**
+
+- malloc, free          ← heap 손상 가능
+- printf, fprintf       ← stdio lock
+- signal, raise         ← 자기 자신 호출
+- 거의 모든 라이브러리 함수
 
 ```c
 // 위반

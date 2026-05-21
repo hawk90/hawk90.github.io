@@ -210,23 +210,24 @@ if (a && (b || c)) { ... }
 
 각 조건의 *독립 영향* 입증할 쌍 찾기.
 
-```
-a의 독립 영향:
-  b와 c 동일, a만 다름, result 바뀜
-  - T1 (TTT, T) vs T5 (FTT, F): ✓
-  - T2 (TTF, T) vs T6 (FTF, F): ✓
-  - T3 (TFT, T) vs T7 (FFT, F): ✓
+**a의 독립 영향:**
 
-b의 독립 영향:
-  a와 c 동일, b만 다름, result 바뀜
-  - T1 (TTT, T) vs T3 (TFT, T): result 동일! 영향 없음
-  - T2 (TTF, T) vs T4 (TFF, F): ✓
+- b와 c 동일, a만 다름, result 바뀜
+- T1 (TTT, T) vs T5 (FTT, F): ✓
+- T2 (TTF, T) vs T6 (FTF, F): ✓
+- T3 (TFT, T) vs T7 (FFT, F): ✓
 
-c의 독립 영향:
-  a와 b 동일, c만 다름, result 바뀜
-  - T1 (TTT, T) vs T2 (TTF, T): result 동일! 영향 없음
-  - T3 (TFT, T) vs T4 (TFF, F): ✓
-```
+**b의 독립 영향:**
+
+- a와 c 동일, b만 다름, result 바뀜
+- T1 (TTT, T) vs T3 (TFT, T): result 동일! 영향 없음
+- T2 (TTF, T) vs T4 (TFF, F): ✓
+
+**c의 독립 영향:**
+
+- a와 b 동일, c만 다름, result 바뀜
+- T1 (TTT, T) vs T2 (TTF, T): result 동일! 영향 없음
+- T3 (TFT, T) vs T4 (TFF, F): ✓
 
 ### Minimal Test Set
 
@@ -476,53 +477,56 @@ Approved:
 
 ### Untestable Code 비율
 
-```
-DAL A 시스템 권장:
-  Untestable code < 1% of total LoC
+**DAL A 시스템 권장:**
 
-DAL A 평균:
-  ~0.2% - 0.5% (잘 작성된 코드)
+- Untestable code < 1% of total LoC
 
-Untestable이 5%+ 이면:
-  코드 재설계 필요 (defensive 과다)
-```
+**DAL A 평균:**
+
+- ~0.2% - 0.5% (잘 작성된 코드)
+
+**Untestable이 5%+ 이면:**
+
+- 코드 재설계 필요 (defensive 과다)
 
 ## Data Coupling & Control Coupling Coverage (A-7-9)
 
 DAL A/B 의무. 모든 *coupling*이 *최소 1 test*에서 실행.
 
-```
-Data Coupling Coverage:
-  - 각 모듈 간 parameter passing이 test에 실행
-  - 각 global variable read/write가 test에 실행
+**Data Coupling Coverage:**
 
-Control Coupling Coverage:
-  - 각 모듈 간 function call이 test에 실행
-  - 각 function pointer 호출이 test에 실행
-```
+- 각 모듈 간 parameter passing이 test에 실행
+- 각 global variable read/write가 test에 실행
+
+**Control Coupling Coverage:**
+
+- 각 모듈 간 function call이 test에 실행
+- 각 function pointer 호출이 test에 실행
 
 도구가 *coupling map 생성* + *test와 매칭*.
 
 ## Coverage at Different Levels
 
-```
-Unit Test Level:
-  - 각 함수의 *statement, decision, MC/DC*
-  - 가장 세밀
+**Unit Test Level:**
 
-Integration Test Level:
-  - 모듈 간 *data coupling, control coupling*
-  - Less granular
+- 각 함수의 *statement, decision, MC/DC*
+- 가장 세밀
 
-System Test Level (HIL):
-  - HLR coverage (각 HLR이 적어도 1 test로 검증)
-  - Functional coverage
+**Integration Test Level:**
 
-요약:
-  Unit:        Structural coverage (MC/DC) 충족
-  Integration: Coupling coverage 충족
-  System/HIL:  Functional (HLR) coverage 충족
-```
+- 모듈 간 *data coupling, control coupling*
+- Less granular
+
+**System Test Level (HIL):**
+
+- HLR coverage (각 HLR이 적어도 1 test로 검증)
+- Functional coverage
+
+**요약:**
+
+- Unit:        Structural coverage (MC/DC) 충족
+- Integration: Coupling coverage 충족
+- System/HIL:  Functional (HLR) coverage 충족
 
 각 level의 coverage가 *서로 보완*. *모두 합쳐* DO-178C 71 obj 충족.
 

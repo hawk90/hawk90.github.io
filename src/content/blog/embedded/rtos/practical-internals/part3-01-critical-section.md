@@ -121,12 +121,11 @@ portSPINLOCK_EXIT(&xCoreSpinlock);
 
 ## Hold Time이 결정하는 것
 
-```text
-Critical section 50 µs:
-  → 모든 ISR이 *최대 50 µs* 지연
-  → Interrupt latency *50 µs 추가*
-  → Hard real-time deadline 1 ms이면 위험
-```
+**Critical section 50 µs:**
+
+- → 모든 ISR이 *최대 50 µs* 지연
+- → Interrupt latency *50 µs 추가*
+- → Hard real-time deadline 1 ms이면 위험
 
 Hold time 가이드라인은 다음과 같습니다.
 

@@ -228,26 +228,31 @@ CNC 내부에서 어떻게 스케줄을 *계산하는가*가 다음 질문입니
 
 변수와 제약을 간단히 풀면 다음과 같습니다.
 
-```text
-Variables:
-  t_{s,h}  ∈ ℝ⁺   : stream s가 hop h를 떠나는 시각 (in cycle)
-  q_{s,h}  ∈ {0..7} : 그 hop의 queue 배정
+**Variables:**
 
-Constraints:
-  (1) Topology: t_{s, h+1} ≥ t_{s, h} + tx_time + prop_delay
-  (2) Deadline: t_{s, last} + tx_time ≤ deadline_s
-  (3) Non-overlap (same port, same queue):
-      ∀ s1, s2 sharing port p, queue q:
-        t_{s1,p} + tx_time + IPG ≤ t_{s2,p}    OR
-        t_{s2,p} + tx_time + IPG ≤ t_{s1,p}
-  (4) Frame ordering: FIFO within queue
-  (5) Cyclic wrap: t_{s,h} mod hyperperiod
+- t_{s,h}  ∈ ℝ⁺   : stream s가 hop h를 떠나는 시각 (in cycle)
+- q_{s,h}  ∈ {0..7} : 그 hop의 queue 배정
 
-Objective:
-  minimize  Σ end-to-end latency
-       OR
-  minimize  GCL entries (스위치 hw 제약)
-```
+**Constraints:**
+
+- (1) Topology: t_{s, h+1} ≥ t_{s, h} + tx_time + prop_delay
+- (2) Deadline: t_{s, last} + tx_time ≤ deadline_s
+
+**(3) Non-overlap (same port, same queue):**
+
+
+**∀ s1, s2 sharing port p, queue q:**
+
+- t_{s1,p} + tx_time + IPG ≤ t_{s2,p}    OR
+- t_{s2,p} + tx_time + IPG ≤ t_{s1,p}
+- (4) Frame ordering: FIFO within queue
+- (5) Cyclic wrap: t_{s,h} mod hyperperiod
+
+**Objective:**
+
+- minimize  Σ end-to-end latency
+- OR
+- minimize  GCL entries (스위치 hw 제약)
 
 (3)이 *비선형*(OR)이라 *integer variable*로 분리합니다. 수십 stream + 수 hop이면 CPLEX·Gurobi가 *수십 초*에 푸는 규모이고, 수백 stream이면 *수 시간*입니다. 실시간 재계산은 어렵습니다.
 

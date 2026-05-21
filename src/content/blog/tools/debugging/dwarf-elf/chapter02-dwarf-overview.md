@@ -195,48 +195,51 @@ DIE 하나하나를 단순 표현하면 *수백 메가*. 같은 형태의 DIE가
 
 ![Abbreviation 인코딩 — 같은 약어를 수만 번 공유](/images/blog/tools/diagrams/dwarf-abbrev-encoding.svg)
 
-```text
-.debug_abbrev:
-  Abbrev 1:
-    DW_TAG_compile_unit (children: yes)
-    DW_AT_producer        DW_FORM_strx1
-    DW_AT_language        DW_FORM_data1
-    DW_AT_name            DW_FORM_strx1
-    DW_AT_comp_dir        DW_FORM_strx1
-    DW_AT_low_pc          DW_FORM_addrx
-    DW_AT_high_pc         DW_FORM_data4
-    DW_AT_stmt_list       DW_FORM_sec_offset
+**.debug_abbrev:**
 
-  Abbrev 2:
-    DW_TAG_base_type (children: no)
-    DW_AT_name        DW_FORM_strx1
-    DW_AT_encoding    DW_FORM_data1
-    DW_AT_byte_size   DW_FORM_data1
 
-  Abbrev 3:
-    DW_TAG_class_type (children: yes)
-    DW_AT_calling_convention DW_FORM_data1
-    DW_AT_name              DW_FORM_strx1
-    DW_AT_byte_size         DW_FORM_data1
+**Abbrev 1:**
 
-  Abbrev 4:
-    DW_TAG_member (children: no)
-    DW_AT_name                  DW_FORM_strx1
-    DW_AT_type                  DW_FORM_ref4
-    DW_AT_data_member_location  DW_FORM_data1
-```
+- DW_TAG_compile_unit (children: yes)
+- DW_AT_producer        DW_FORM_strx1
+- DW_AT_language        DW_FORM_data1
+- DW_AT_name            DW_FORM_strx1
+- DW_AT_comp_dir        DW_FORM_strx1
+- DW_AT_low_pc          DW_FORM_addrx
+- DW_AT_high_pc         DW_FORM_data4
+- DW_AT_stmt_list       DW_FORM_sec_offset
+
+**Abbrev 2:**
+
+- DW_TAG_base_type (children: no)
+- DW_AT_name        DW_FORM_strx1
+- DW_AT_encoding    DW_FORM_data1
+- DW_AT_byte_size   DW_FORM_data1
+
+**Abbrev 3:**
+
+- DW_TAG_class_type (children: yes)
+- DW_AT_calling_convention DW_FORM_data1
+- DW_AT_name              DW_FORM_strx1
+- DW_AT_byte_size         DW_FORM_data1
+
+**Abbrev 4:**
+
+- DW_TAG_member (children: no)
+- DW_AT_name                  DW_FORM_strx1
+- DW_AT_type                  DW_FORM_ref4
+- DW_AT_data_member_location  DW_FORM_data1
 
 `.debug_info` 안의 각 DIE는 *약어 번호* + *속성 값들의 raw 인코딩*만 가짐.
 
-```text
-.debug_info:
-  0x0c: [Abbrev 1] producer=0x123 language=0x04 name=0x45 comp_dir=0x10 ...
-  0x2a: [Abbrev 2] name=0x67 encoding=0x05 byte_size=0x04
-  0x31: [Abbrev 3] calling_conv=0x01 name=0x89 byte_size=0x10
-  0x37: [Abbrev 4] name=0xAB type=0x2a data_member_location=0x00
-  0x40: [Abbrev 4] name=0xCD type=0x2a data_member_location=0x04
-  0x49: [Abbrev 0]   ← null = 자식 끝
-```
+**.debug_info:**
+
+- 0x0c: [Abbrev 1] producer=0x123 language=0x04 name=0x45 comp_dir=0x10 ...
+- 0x2a: [Abbrev 2] name=0x67 encoding=0x05 byte_size=0x04
+- 0x31: [Abbrev 3] calling_conv=0x01 name=0x89 byte_size=0x10
+- 0x37: [Abbrev 4] name=0xAB type=0x2a data_member_location=0x00
+- 0x40: [Abbrev 4] name=0xCD type=0x2a data_member_location=0x04
+- 0x49: [Abbrev 0]   ← null = 자식 끝
 
 같은 약어를 *수천 번 재사용* → 압축비 매우 큼.
 
@@ -488,16 +491,15 @@ uint64_t decode_uleb128(const uint8_t **p) {
 
 DIE의 `DW_FORM_strp` 값은 `.debug_str` 안의 NUL-terminated 문자열로의 offset.
 
-```
-.debug_str:
-  0x0000: "main.cpp\0"
-  0x0009: "int\0"
-  0x000d: "MyClass\0"
-  0x0015: "x\0"
-  0x0017: "y\0"
-  0x0019: "obj\0"
-  ...
-```
+**.debug_str:**
+
+- 0x0000: "main.cpp\0"
+- 0x0009: "int\0"
+- 0x000d: "MyClass\0"
+- 0x0015: "x\0"
+- 0x0017: "y\0"
+- 0x0019: "obj\0"
+- ...
 
 같은 문자열이 *여러 DIE*에서 공유 → 중복 제거. 큰 프로젝트에서 클래스명·함수명이 수백 번 반복되므로 효과 큼.
 

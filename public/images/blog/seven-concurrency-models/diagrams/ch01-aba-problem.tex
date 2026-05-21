@@ -22,16 +22,17 @@
        at ($(t1) + (-0.3, -1.7)$) {head = A 기억\\[2pt](중단)};
 
   % T2 pop A
+  % seqnote shifted to the right so it doesn't sit on the msglabel.
   \draw[msgsync] (t2 |- 0,-2.6) -- node[msglabel]{pop A} (h |- 0,-2.6);
-  \node[seqnote, anchor=west] at ($(h) + (0.4, -2.6)$) {head $\to$ B};
+  \node[seqnote, anchor=west] at ($(h) + (3.8, -2.6)$) {head $\to$ B};
 
   % T2 pop B
   \draw[msgsync] (t2 |- 0,-3.6) -- node[msglabel]{pop B} (h |- 0,-3.6);
-  \node[seqnote, anchor=west] at ($(h) + (0.4, -3.6)$) {head $\to$ C};
+  \node[seqnote, anchor=west] at ($(h) + (3.8, -3.6)$) {head $\to$ C};
 
   % T2 push A back
   \draw[msgsync] (t2 |- 0,-4.6) -- node[msglabel]{push A (재사용)} (h |- 0,-4.6);
-  \node[seqnote, anchor=west] at ($(h) + (0.4, -4.6)$) {head $\to$ A (다시!)};
+  \node[seqnote, anchor=west] at ($(h) + (3.8, -4.6)$) {head $\to$ A (다시!)};
 
   % T1 resumes, CAS succeeds
   \draw[msgsync] (t1 |- 0,-6.0) -- node[msglabel]{CAS(head, A, A.next)} (h |- 0,-6.0);

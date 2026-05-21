@@ -31,12 +31,13 @@
 \node[abs, minimum width=24mm] (io-svc) at (3.5, 1.6) {Service};
 \node[hi, minimum width=24mm] (io-dom) at (3.5, 0) {Domain};
 
-% Inside-Out arrows and labels
+% Inside-Out arrows and labels — anchor=west on the right side of the boxes
+% so labels grow rightward and never invade the Service/UI/Domain text.
 \draw[arr] (io-svc) -- (io-ui);
 \draw[arr] (io-dom) -- (io-svc);
-\node[font=\sffamily\tiny, anchor=east, text=mutec] at (5.2, 3.2) {마지막에 통합};
-\node[font=\sffamily\tiny, anchor=east, text=mutec] at (5.2, 1.6) {실제 객체로 테스트};
-\node[font=\sffamily\tiny, anchor=east, text=hibord] at (5.2, 0) {테스트 시작};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (4.8, 3.2) {마지막에 통합};
+\node[font=\sffamily\tiny, anchor=west, text=mutec] at (4.8, 1.6) {실제 객체로 테스트};
+\node[font=\sffamily\tiny, anchor=west, text=hibord] at (4.8, 0) {테스트 시작};
 
 % Divider line
 \draw[draw=gridc, line width=0.5pt, dashed] (0, 5) -- (0, -0.8);

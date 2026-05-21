@@ -29,14 +29,13 @@ Annex Q가 *Tool Qualification 전체*. 약 20 페이지.
 
 > **Tool**: Computer program or function used in support of the software life cycle.
 
-```
-도구 범주:
-  - Development tools: compilers, code generators
-  - Verification tools: static analyzers, test frameworks
-  - Configuration tools: build, version control
-  - Documentation tools: doc generators
-  - Project management: scheduling, tracking
-```
+**도구 범주:**
+
+- Development tools: compilers, code generators
+- Verification tools: static analyzers, test frameworks
+- Configuration tools: build, version control
+- Documentation tools: doc generators
+- Project management: scheduling, tracking
 
 각 도구의 *qualification 정도*가 다름.
 
@@ -224,60 +223,55 @@ ESA missions은 *qualified compiler 의무*. *일반 GCC 부적합*.
 
 ### Class 2 — Verification Tools
 
-```
-Static Analyzers:
-  - Polyspace Bug Finder + Code Prover (MathWorks)
-    Class 2, ESA approved
-  
-  - Astrée (AbsInt)
-    Class 2, runtime error 부재 증명
-    Airbus FBW, Boeing 787 사용
-  
-  - LDRA Testbed
-    Class 2, MISRA + coverage
-    DO-178C + ECSS 양쪽
-  
-  - Helix QAC (Perforce)
-    Class 2, MISRA 강함
+**Static Analyzers:**
 
-Test Frameworks:
-  - VectorCAST (Vector)
-    Class 2, MC/DC strong
-  
-  - Cantata (LDRA / QA Systems)
-    Class 2, 항공 적합
-  
-  - RTRT (IBM Rational, legacy)
+- Polyspace Bug Finder + Code Prover (MathWorks) Class 2, ESA approved
 
-Coverage Tools:
-  - VectorCAST/Cover
-  - LDRA Testbed
-  - Custom (gcov + lcov for open source, Class 3)
-```
+- Astrée (AbsInt) Class 2, runtime error 부재 증명 Airbus FBW, Boeing 787 사용
+
+- LDRA Testbed Class 2, MISRA + coverage DO-178C + ECSS 양쪽
+
+- Helix QAC (Perforce) Class 2, MISRA 강함
+
+**Test Frameworks:**
+
+- VectorCAST (Vector) Class 2, MC/DC strong
+
+- Cantata (LDRA / QA Systems) Class 2, 항공 적합
+
+- RTRT (IBM Rational, legacy)
+
+**Coverage Tools:**
+
+- VectorCAST/Cover
+- LDRA Testbed
+- Custom (gcov + lcov for open source, Class 3)
 
 ### Class 3 — Development Support
 
-```
-IDEs:
-  - VS Code (open source, Class 3)
-  - CLion (JetBrains, Class 3)
-  - Eclipse CDT (open source)
+**IDEs:**
 
-Version Control:
-  - Git (Class 3, qualification 단순)
-  - ClearCase (Class 3)
-  - Subversion (Class 3)
+- VS Code (open source, Class 3)
+- CLion (JetBrains, Class 3)
+- Eclipse CDT (open source)
 
-Project Management:
-  - Jira (Class 3)
-  - Confluence (Class 3)
-  - DOORS (Class 2-3, depending on use)
+**Version Control:**
 
-Build Systems:
-  - CMake (Class 3, output verified)
-  - Make
-  - Ninja
-```
+- Git (Class 3, qualification 단순)
+- ClearCase (Class 3)
+- Subversion (Class 3)
+
+**Project Management:**
+
+- Jira (Class 3)
+- Confluence (Class 3)
+- DOORS (Class 2-3, depending on use)
+
+**Build Systems:**
+
+- CMake (Class 3, output verified)
+- Make
+- Ninja
 
 Class 3 도구는 *gentle qualification*. 보통 *vendor 정보 + 사용 기록*으로 충분.
 
@@ -348,48 +342,53 @@ Conclusion: Polyspace qualified as Class 2 for project use.
 
 ESA가 *internal tool catalog* 운영. *mission 간 reuse*.
 
-```
-ESA Tool Catalog (partial):
+**ESA Tool Catalog (partial):**
 
-Compilers (Class 1):
-  - GNAT Pro Ada (Adacore)
-  - Green Hills C/C++ (Green Hills Software)
-  - Wind River Diab (Wind River)
-  - LLVM/Clang (research, qualification 진행 중)
+**Compilers (Class 1):**
 
-Code Generators (Class 1):
-  - SCADE Suite (Ansys)
-  - Simulink Embedded Coder (MathWorks)
-  - dSPACE TargetLink
+- GNAT Pro Ada (Adacore)
+- Green Hills C/C++ (Green Hills Software)
+- Wind River Diab (Wind River)
+- LLVM/Clang (research, qualification 진행 중)
 
-Static Analyzers (Class 2):
-  - Astrée (AbsInt)
-  - Polyspace (MathWorks)
-  - Frama-C (CEA, OSS)
-  - LDRA Testbed
+**Code Generators (Class 1):**
 
-Test Frameworks (Class 2):
-  - VectorCAST
-  - LDRA TBrun
-  - Cantata
-  - RTRT
+- SCADE Suite (Ansys)
+- Simulink Embedded Coder (MathWorks)
+- dSPACE TargetLink
 
-Modeling (Class 2-3):
-  - Enterprise Architect (Sparx Systems)
-  - Cameo Systems Modeler (Dassault)
-  - Capella (OSS, Eclipse)
-  - SCADE Architect
+**Static Analyzers (Class 2):**
 
-Requirements (Class 3):
-  - IBM DOORS / DOORS NG
-  - Siemens Polarion
-  - Jama Connect
+- Astrée (AbsInt)
+- Polyspace (MathWorks)
+- Frama-C (CEA, OSS)
+- LDRA Testbed
 
-Configuration Management (Class 3):
-  - IBM ClearCase
-  - Git
-  - Subversion
-```
+**Test Frameworks (Class 2):**
+
+- VectorCAST
+- LDRA TBrun
+- Cantata
+- RTRT
+
+**Modeling (Class 2-3):**
+
+- Enterprise Architect (Sparx Systems)
+- Cameo Systems Modeler (Dassault)
+- Capella (OSS, Eclipse)
+- SCADE Architect
+
+**Requirements (Class 3):**
+
+- IBM DOORS / DOORS NG
+- Siemens Polarion
+- Jama Connect
+
+**Configuration Management (Class 3):**
+
+- IBM ClearCase
+- Git
+- Subversion
 
 ESA mission이 *이 catalog 기반*. 새 tool 도입은 *qualification 추가*.
 
@@ -483,47 +482,49 @@ RTEMS for Spaceflight:
 
 ### Frama-C — OSS Formal Methods
 
-```
-Frama-C (CEA, OSS):
-  - GPL license (research only) + LGPL plugins
-  - ECSS 적용 가능
-  - 단 GPL 부분은 *코드에 들어가지 않음* (verification tool)
-  
-ECSS use:
-  - Class 2 verification tool
-  - Formal methods + abstract interpretation
-  - Astrée의 OSS 대안
+**Frama-C (CEA, OSS):**
 
-일반 evaluation:
-  Heritage: ESA가 일부 mission 사용
-  Cost: Free
-  Effort: 자체 qualification 수개월 ~ 1년
-```
+- GPL license (research only) + LGPL plugins
+- ECSS 적용 가능
+- 단 GPL 부분은 *코드에 들어가지 않음* (verification tool)
+
+**ECSS use:**
+
+- Class 2 verification tool
+- Formal methods + abstract interpretation
+- Astrée의 OSS 대안
+
+**일반 evaluation:**
+
+- Heritage: ESA가 일부 mission 사용
+- Cost: Free
+- Effort: 자체 qualification 수개월 ~ 1년
 
 ## Custom (Self-Developed) Tools
 
 프로젝트 자체 도구도 qualification 필요.
 
-```
-Custom tool examples in ECSS:
-  - Build script
-  - Test result aggregator
-  - Coverage report generator
-  - DOORS export script
-  - Telemetry analyzer
+**Custom tool examples in ECSS:**
 
-Each custom tool:
-  1. Tool operational requirements
-  2. Implementation
-  3. Self-testing
-  4. Documentation
-  5. Qualification record (lighter than commercial)
+- Build script
+- Test result aggregator
+- Coverage report generator
+- DOORS export script
+- Telemetry analyzer
 
-Class:
-  - Most custom tools: Class 3
-  - Some: Class 2 (custom static analyzer 등)
-  - Rare: Class 1 (custom code generator)
-```
+**Each custom tool:**
+
+- 1. Tool operational requirements
+- 2. Implementation
+- 3. Self-testing
+- 4. Documentation
+- 5. Qualification record (lighter than commercial)
+
+**Class:**
+
+- Most custom tools: Class 3
+- Some: Class 2 (custom static analyzer 등)
+- Rare: Class 1 (custom code generator)
 
 ### Custom Tool 비용
 
@@ -555,51 +556,58 @@ ECSS qualification은 *일반적인 우주 mission 표준*. *미국 export 또�
 
 ## 일반 Tool Stack — Class별 예
 
-```
-Compilers (Class 1):
-  - GCC / Clang (project-qualified)
-  - GNAT Pro Ada
-  - Wind River Diab
-  - Green Hills C/C++
+**Compilers (Class 1):**
 
-Code Generation (Class 1):
-  - Simulink + Embedded Coder
-  - SCADE Suite
-  - dSPACE TargetLink
+- GCC / Clang (project-qualified)
+- GNAT Pro Ada
+- Wind River Diab
+- Green Hills C/C++
 
-Static Analysis (Class 2):
-  - Polyspace Bug Finder + Code Prover
-  - Helix QAC
-  - Astrée (AbsInt)
-  - Frama-C (OSS)
-  - clang-tidy (CI)
+**Code Generation (Class 1):**
 
-Test Framework (Class 2):
-  - VectorCAST
-  - LDRA Testbed
-  - Google Test (host-side)
-  - Custom HIL framework
+- Simulink + Embedded Coder
+- SCADE Suite
+- dSPACE TargetLink
 
-Requirements (Class 3):
-  - DOORS / Polarion / Jama
+**Static Analysis (Class 2):**
 
-Modeling (Class 3):
-  - MagicDraw / Cameo
-  - Simulink
+- Polyspace Bug Finder + Code Prover
+- Helix QAC
+- Astrée (AbsInt)
+- Frama-C (OSS)
+- clang-tidy (CI)
 
-Version Control (Class 3):
-  - Git (GitLab / GitHub)
-  - ClearCase (legacy)
+**Test Framework (Class 2):**
 
-CI/CD (Class 3):
-  - Jenkins
-  - GitLab CI
+- VectorCAST
+- LDRA Testbed
+- Google Test (host-side)
+- Custom HIL framework
 
-Document (Class 3):
-  - Confluence
-  - LaTeX
-  - Sphinx (DAC)
-```
+**Requirements (Class 3):**
+
+- DOORS / Polarion / Jama
+
+**Modeling (Class 3):**
+
+- MagicDraw / Cameo
+- Simulink
+
+**Version Control (Class 3):**
+
+- Git (GitLab / GitHub)
+- ClearCase (legacy)
+
+**CI/CD (Class 3):**
+
+- Jenkins
+- GitLab CI
+
+**Document (Class 3):**
+
+- Confluence
+- LaTeX
+- Sphinx (DAC)
 
 각 조직의 실제 tool 선택은 *budget / heritage / customer 요구*에 따라 다르다.
 

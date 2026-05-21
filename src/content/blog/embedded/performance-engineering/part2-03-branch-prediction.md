@@ -94,10 +94,9 @@ PC (12-bit hash) → Index → 2-bit counter
 
 분기 주소뿐 아니라 대상 주소도 캐시합니다.
 
-```text
-PC → BTB entry:
-       { target_addr, predict_bits }
-```
+**PC → BTB entry:**
+
+- { target_addr, predict_bits }
 
 분기 명령 fetch 시점에 BTB hit이면 바로 target fetch가 이루어집니다. 1 cycle도 잃지 않습니다.
 

@@ -43,15 +43,15 @@ iounmap(mmio);
 
 ## Write-Combining
 
-```text
-일반 MMIO write:
-  매 store → 즉시 transaction
-  → 32 × 4-byte write = 32 transaction
+**일반 MMIO write:**
 
-Write-combining:
-  store buffer가 *근접 주소 합침*
-  → 32 × 4-byte → 4 × 32-byte burst transaction
-```
+- 매 store → 즉시 transaction
+- → 32 × 4-byte write = 32 transaction
+
+**Write-combining:**
+
+- store buffer가 *근접 주소 합침*
+- → 32 × 4-byte → 4 × 32-byte burst transaction
 
 PCIe BAR에서 GPU framebuffer 같은 *큰 sequential write*를 할 때 *bandwidth가 8배*로 늘어납니다.
 

@@ -148,12 +148,11 @@ cpu1: cpu@1 {
 
 `cpu-release-addr`이 가리키는 메모리는 SPL/U-Boot가 secondary CPU에게 *busy-wait loop*를 미리 심어 놓은 곳입니다. Loop는 대략 다음과 같습니다.
 
-```text
-secondary_holding_pen:
-    ldr  x0, [release_addr]   ; release 주소 폴링
-    cbz  x0, secondary_holding_pen   ; 0이면 계속 spin
-    br   x0                   ; 0 아니면 그 주소로 점프
-```
+**secondary_holding_pen:**
+
+- ldr  x0, [release_addr]   ; release 주소 폴링
+- cbz  x0, secondary_holding_pen   ; 0이면 계속 spin
+- br   x0                   ; 0 아니면 그 주소로 점프
 
 Linux가 `cpu-release-addr`에 `secondary_entry`의 물리 주소를 쓰고 SEV를 보냅니다. Secondary CPU는 그 주소로 점프해 커널 코드 실행을 시작합니다.
 

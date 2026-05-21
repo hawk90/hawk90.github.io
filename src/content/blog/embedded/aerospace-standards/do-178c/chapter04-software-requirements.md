@@ -31,28 +31,30 @@ Source Code
 
 ## HLR vs SR 차이 — 구체적 예
 
-```
-System Requirement (SR-FCS-014):
-   "The flight control system shall detect aircraft stall condition
-    based on angle-of-attack (AoA), airspeed, and load factor, and
-    issue audio/visual warnings to the pilot within 100 ms of
-    confirmed stall conditions."
+**System Requirement (SR-FCS-014):**
 
-→ SW Requirement (HLR-FCS-014a):
-   "The Stall Warning Software shall compute the AoA threshold based
-    on current weight, altitude, and configuration (flap position),
-    using lookup table SW-FCS-LUT-014, every 50 ms."
+- "The flight control system shall detect aircraft stall condition
+- based on angle-of-attack (AoA), airspeed, and load factor, and
+- issue audio/visual warnings to the pilot within 100 ms of
+- confirmed stall conditions."
 
-→ SW Requirement (HLR-FCS-014b):
-   "The Stall Warning Software shall declare a 'pre-stall' condition
-    when AoA exceeds 80% of computed threshold for 3 consecutive 50ms
-    samples."
+**→ SW Requirement (HLR-FCS-014a):**
 
-→ SW Requirement (HLR-FCS-014c):
-   "The Stall Warning Software shall send AURAL_STALL_WARN message
-    to Audio Manager via CAN bus message 0x142 within 50 ms of
-    declaring pre-stall condition."
-```
+- "The Stall Warning Software shall compute the AoA threshold based
+- on current weight, altitude, and configuration (flap position),
+- using lookup table SW-FCS-LUT-014, every 50 ms."
+
+**→ SW Requirement (HLR-FCS-014b):**
+
+- "The Stall Warning Software shall declare a 'pre-stall' condition
+- when AoA exceeds 80% of computed threshold for 3 consecutive 50ms
+- samples."
+
+**→ SW Requirement (HLR-FCS-014c):**
+
+- "The Stall Warning Software shall send AURAL_STALL_WARN message
+- to Audio Manager via CAN bus message 0x142 within 50 ms of
+- declaring pre-stall condition."
 
 SR 한 줄이 *3+ HLR로 decompose*. 각 HLR은 *측정·검증 가능*.
 
@@ -172,34 +174,34 @@ HLR은 *문서로 관리하지 않음*. *Requirements management tool* 사용.
 
 ### IBM Engineering Requirements Management DOORS
 
-```
-DOORS의 강점:
+**DOORS의 강점:**
+
 - 항공·우주 산업 표준 (50% 이상 시장)
 - Strong traceability
 - Baseline 관리
 - Configuration item attribute
 - DXL scripting
 
-약점:
+**약점:**
+
 - UI 90년대 풍
 - 라이선스 비쌈 ($5-10k/seat)
 - Cloud 적응 늦음
 - 학습 곡선 가파름
-```
 
 ### Siemens Polarion
 
-```
-Polarion의 강점:
+**Polarion의 강점:**
+
 - Modern web UI
 - Git 통합
 - Open API
 - DOORS 마이그레이션 지원
 
-약점:
+**약점:**
+
 - 항공 시장 DOORS만큼 검증되지 않음
 - 일부 항공 OEM은 거부
-```
 
 ### Atlassian Jira + Plugin
 
@@ -256,15 +258,20 @@ LLR Coverage by Tests:     100%
 
 **Tool**: DOORS의 *Coverage Wizard*.
 
-```
-Coverage check (DOORS DXL):
-   for each SR in module "System Requirements":
-       linked_hlrs = SR.outgoing_links("derives")
-       if linked_hlrs.empty():
-           print "WARNING: SR " + SR.ID + " has no HLR allocation"
-       else:
-           print "OK: SR " + SR.ID + " → " + len(linked_hlrs) + " HLRs"
-```
+**Coverage check (DOORS DXL):**
+
+
+**for each SR in module "System Requirements":**
+
+- linked_hlrs = SR.outgoing_links("derives")
+
+**if linked_hlrs.empty():**
+
+- print "WARNING: SR " + SR.ID + " has no HLR allocation"
+
+**else:**
+
+- print "OK: SR " + SR.ID + " → " + len(linked_hlrs) + " HLRs"
 
 이 스크립트가 *모든 SR의 HLR 할당* 검증. 누락 발견 시 *PR (Problem Report) 발행*.
 
@@ -295,12 +302,11 @@ Resolution: Update HLR-FCS-014b to 2 samples (100ms)
 
 HLR이 *실제 hardware*에서 구현 가능한가.
 
-```
-Examples:
+**Examples:**
+
 - HLR이 *128MB RAM* 요구. Target은 *64MB만 가짐* → 불가능.
 - HLR이 *μs 단위 응답* 요구. Target CPU가 *그 빠르기 안 됨* → 불가능.
 - HLR이 *부동소수점 연산* 요구. Target에 *FPU 없음* → 가능하지만 느림.
-```
 
 *Target compatibility analysis*가 *Design 시작 전*에 필요.
 

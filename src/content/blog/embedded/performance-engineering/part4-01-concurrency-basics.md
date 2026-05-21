@@ -96,13 +96,12 @@ __DMB();   // 이전 access 모두 완료 보장
 
 ## x86 Memory Model — Strong
 
-```text
-x86 (TSO — Total Store Order):
-  Load → Load: in order
-  Store → Store: in order
-  Load → Store: in order
-  Store → Load: *재정렬 가능* (store buffer)
-```
+**x86 (TSO — Total Store Order):**
+
+- Load → Load: in order
+- Store → Store: in order
+- Load → Store: in order
+- Store → Load: *재정렬 가능* (store buffer)
 
 x86은 약한 재정렬만 허용해서 거의 sequential에 가깝지만, ARM과 POWER는 훨씬 자유롭게 재정렬됩니다.
 

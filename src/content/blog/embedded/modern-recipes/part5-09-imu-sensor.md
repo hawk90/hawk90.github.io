@@ -22,22 +22,23 @@ drone flight controller, self-balancing robot, smartphone orientation, VR headse
 
 ### IMU의 세 sensor
 
-```text
-Accelerometer (가속도계):
-  3축 가속도 (g 단위)
-  중력 + linear motion 측정
-  사용: tilt 각도, motion detection
+**Accelerometer (가속도계):**
 
-Gyroscope (자이로):
-  3축 angular velocity (°/s)
-  rotation rate 직접 측정
-  사용: turn rate, drift 보정
+- 3축 가속도 (g 단위)
+- 중력 + linear motion 측정
+- 사용: tilt 각도, motion detection
 
-Magnetometer (지자기):
-  3축 magnetic field (µT)
-  지구 자기장 방향
-  사용: yaw absolute reference (compass)
-```
+**Gyroscope (자이로):**
+
+- 3축 angular velocity (°/s)
+- rotation rate 직접 측정
+- 사용: turn rate, drift 보정
+
+**Magnetometer (지자기):**
+
+- 3축 magnetic field (µT)
+- 지구 자기장 방향
+- 사용: yaw absolute reference (compass)
 
 6축 = accel + gyro. 9축 = + mag.
 
@@ -57,48 +58,50 @@ I2C address 0x68 (ADO=GND) 또는 0x69 (ADO=VDD).
 
 ### Scale 환산
 
-```text
-Accel:
-  ±2 g  → 16384 LSB/g
-  ±4 g  → 8192
-  ±8 g  → 4096
-  ±16 g → 2048
+**Accel:**
 
-Gyro:
-  ±250 °/s  → 131 LSB/(°/s)
-  ±500     → 65.5
-  ±1000    → 32.8
-  ±2000    → 16.4
-```
+- ±2 g  → 16384 LSB/g
+- ±4 g  → 8192
+- ±8 g  → 4096
+- ±16 g → 2048
+
+**Gyro:**
+
+- ±250 °/s  → 131 LSB/(°/s)
+- ±500     → 65.5
+- ±1000    → 32.8
+- ±2000    → 16.4
 
 raw_int16 / scale = physical value.
 
 ### Sampling 전략
 
-```text
-Polling (low-rate ≤ 100 Hz):
-  매 SysTick으로 read
+**Polling (low-rate ≤ 100 Hz):**
 
-Interrupt-driven (≤ 1 kHz):
-  Data Ready (DRDY) 핀에 IMU가 1 kHz로 pulse → ISR → read
+- 매 SysTick으로 read
 
-FIFO + DMA (high-rate, batch):
-  IMU 내부 FIFO에 누적 → 가득 차면 DMA로 한꺼번에 read
-```
+**Interrupt-driven (≤ 1 kHz):**
+
+- Data Ready (DRDY) 핀에 IMU가 1 kHz로 pulse → ISR → read
+
+**FIFO + DMA (high-rate, batch):**
+
+- IMU 내부 FIFO에 누적 → 가득 차면 DMA로 한꺼번에 read
 
 ### Calibration
 
-```text
-Accel:
-  6-position calibration (각 축 ±g) → bias, scale 보정
+**Accel:**
 
-Gyro:
-  정지 상태 평균 → bias offset (drift 보정)
+- 6-position calibration (각 축 ±g) → bias, scale 보정
 
-Magnetometer:
-  hard iron (offset) + soft iron (matrix)
-  → 8자 또는 구 모양으로 회전시키며 calib
-```
+**Gyro:**
+
+- 정지 상태 평균 → bias offset (drift 보정)
+
+**Magnetometer:**
+
+- hard iron (offset) + soft iron (matrix)
+- → 8자 또는 구 모양으로 회전시키며 calib
 
 calibration 없으면 *zero에 떠 있을 때도 0이 아님* — fusion이 drift합니다.
 
@@ -270,14 +273,14 @@ while (1) {
 
 ## 측정 / 동작 확인
 
-```text
-보드 평평한 책상 위:
-  ax = 0.00 g, ay = 0.00 g, az = 1.00 g
-  gx = 0, gy = 0, gz = 0 (calibration 후)
+**보드 평평한 책상 위:**
 
-보드를 좌측으로 90°:
-  ax = 0, ay = 1.00 g, az = 0
-```
+- ax = 0.00 g, ay = 0.00 g, az = 1.00 g
+- gx = 0, gy = 0, gz = 0 (calibration 후)
+
+**보드를 좌측으로 90°:**
+
+- ax = 0, ay = 1.00 g, az = 0
 
 값이 변하면 sensor 동작. drift가 *몇 °/min* 정도면 정상, 더 크면 calibration 부족.
 

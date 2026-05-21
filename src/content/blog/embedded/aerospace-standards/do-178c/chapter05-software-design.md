@@ -18,33 +18,35 @@ HLR이 *"무엇을"* 정의했다면, LLR(Low-Level Requirements)은 *"어떻게
 
 ## HLR vs LLR — 추상화 단계
 
-```
-SR (System):
-   "Flight management system shall compute optimal trajectory for fuel economy."
+**SR (System):**
 
-HLR (Software):
-   "FMS Trajectory Optimizer shall compute waypoint sequence minimizing fuel
-    burn subject to wind, altitude, and ATC constraints."
+- "Flight management system shall compute optimal trajectory for fuel economy."
 
-LLR (Design):
-   "trajectory_optimizer.c:: optimize_waypoints() shall:
-    1. Accept input: current_position, destination, ATC_constraints
-    2. Call get_wind_at_altitudes(altitude_range) → wind_array[100]
-    3. Iterate altitudes from FL280 to FL420 in 1000ft steps
-    4. For each altitude, compute fuel_burn using Equation 5.3.2
-       (BADA aircraft performance model, ICAO Doc 9587)
-    5. Select altitude with minimum fuel_burn satisfying ATC
-    6. Return waypoint sequence in optimized_route_t struct
-    7. Maximum execution time: 500ms"
+**HLR (Software):**
 
-Code (Implementation):
-   int optimize_waypoints(const position_t *current,
-                          const position_t *dest,
-                          const atc_constraints_t *atc,
-                          optimized_route_t *route) {
-       /* 정확히 LLR 그대로 */
-   }
-```
+- "FMS Trajectory Optimizer shall compute waypoint sequence minimizing fuel
+- burn subject to wind, altitude, and ATC constraints."
+
+**LLR (Design):**
+
+- "trajectory_optimizer.c:: optimize_waypoints() shall:
+- 1. Accept input: current_position, destination, ATC_constraints
+- 2. Call get_wind_at_altitudes(altitude_range) → wind_array[100]
+- 3. Iterate altitudes from FL280 to FL420 in 1000ft steps
+- 4. For each altitude, compute fuel_burn using Equation 5.3.2
+- (BADA aircraft performance model, ICAO Doc 9587)
+- 5. Select altitude with minimum fuel_burn satisfying ATC
+- 6. Return waypoint sequence in optimized_route_t struct
+- 7. Maximum execution time: 500ms"
+
+**Code (Implementation):**
+
+- int optimize_waypoints(const position_t *current,
+- const position_t *dest,
+- const atc_constraints_t *atc,
+- optimized_route_t *route) {
+- /* 정확히 LLR 그대로 */
+- }
 
 LLR → Code = *기계적 translation*. LLR을 *재해석*하지 않는다.
 
@@ -310,25 +312,25 @@ Total RAM: 96 KB
 
 ### Timing Budget — Rate Monotonic Analysis
 
-```
-Tasks (sorted by frequency, highest first):
-  T4 (Comms ISR):  event,     1 ms each, ~50 events/s = 50 ms/s
-  T1 (Main):       50 Hz,    15 ms, total 750 ms/s
-  T2 (Fault):      10 Hz,    30 ms, total 300 ms/s (50 of 100ms slot)
+**Tasks (sorted by frequency, highest first):**
 
-Schedulability check (RMA, single CPU):
-  U = sum of (WCET / Period)
-  U = 0.05 + 15/20 + 30/100 = 0.05 + 0.75 + 0.30 = 1.10
+- T4 (Comms ISR):  event,     1 ms each, ~50 events/s = 50 ms/s
+- T1 (Main):       50 Hz,    15 ms, total 750 ms/s
+- T2 (Fault):      10 Hz,    30 ms, total 300 ms/s (50 of 100ms slot)
 
-  Liu & Layland bound for 3 tasks: n(2^(1/n) - 1) ≈ 0.78
-  U = 1.10 > 0.78  ← OVERLOADED
+**Schedulability check (RMA, single CPU):**
 
-  Fix: 다음 중 하나
-  - T1 WCET 줄이기 (목표 12ms, 25% 감소)
-  - T2 period 늘리기 (200ms로)
-  - CPU 빠른 것 사용
-  - Multi-core 분산
-```
+- U = sum of (WCET / Period)
+- U = 0.05 + 15/20 + 30/100 = 0.05 + 0.75 + 0.30 = 1.10
+
+Liu & Layland bound for 3 tasks: n(2^(1/n) - 1) ≈ 0.78
+U = 1.10 > 0.78  ← OVERLOADED
+
+Fix: 다음 중 하나
+- T1 WCET 줄이기 (목표 12ms, 25% 감소)
+- T2 period 늘리기 (200ms로)
+- CPU 빠른 것 사용
+- Multi-core 분산
 
 이 *분석을 LLR/Architecture에 포함*. *과부하 발견 시 디자인 재검토*.
 
@@ -540,27 +542,28 @@ void pitch_pid_compute(
 
 LLR + Architecture가 작성되면 *Design Review*:
 
-```
-참석자:
-  - Author (LLR/Architecture)
-  - Systems Engineer (HLR 일관성 확인)
-  - Integration Engineer (다른 모듈과의 인터페이스 확인)
-  - Test Engineer (verifiability 확인)
-  - Independent Reviewer (DAL A는 의무)
-  - SQA Observer
+**참석자:**
 
-Agenda:
-  - Architecture overview (1 hour)
-  - Module-by-module LLR walkthrough (2-4 hours)
-  - Cross-module interaction (1 hour)
-  - Memory/timing analysis (1 hour)
-  - Findings discussion (1 hour)
+- Author (LLR/Architecture)
+- Systems Engineer (HLR 일관성 확인)
+- Integration Engineer (다른 모듈과의 인터페이스 확인)
+- Test Engineer (verifiability 확인)
+- Independent Reviewer (DAL A는 의무)
+- SQA Observer
 
-Output:
-  - Review record
-  - Action items
-  - PR list (open issues)
-```
+**Agenda:**
+
+- Architecture overview (1 hour)
+- Module-by-module LLR walkthrough (2-4 hours)
+- Cross-module interaction (1 hour)
+- Memory/timing analysis (1 hour)
+- Findings discussion (1 hour)
+
+**Output:**
+
+- Review record
+- Action items
+- PR list (open issues)
 
 큰 시스템은 *수일~수주의 review*. Boeing 787 FBW design review는 *수개월에 걸친 weekly meeting*.
 

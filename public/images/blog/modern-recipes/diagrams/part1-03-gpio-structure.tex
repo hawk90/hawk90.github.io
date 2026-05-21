@@ -11,9 +11,9 @@
 \draw[thick] (-1, 3) -- (1, 3) node[midway, above, text=inkc] {VDD};
 \draw[thick] (0, 3) -- (0, 2.5);
 
-% P-MOS
+% P-MOS — label moved to the LEFT so it doesn't collide with the OUT line
 \draw[thick] (0, 2.5) -- (0, 2);
-\node[text=inkc, right=2mm] at (0, 2.25) {P-MOS (1 출력)};
+\node[text=inkc, left=2mm, font=\scriptsize] at (-0.3, 2.25) {P-MOS (1 출력)};
 \draw[thick] (-0.3, 2) -- (0.3, 2);
 \draw[thick] (0, 2) -- (0, 1.5);
 
@@ -22,9 +22,9 @@
 \draw[thick] (0, 1.5) -- (1, 1.5);
 \node[text=inkc, right] at (1, 1.5) {OUT};
 
-% N-MOS
+% N-MOS — label moved LEFT (same reason)
 \draw[thick] (0, 1.5) -- (0, 1);
-\node[text=inkc, right=2mm] at (0, 1.25) {N-MOS (0 출력)};
+\node[text=inkc, left=2mm, font=\scriptsize] at (-0.3, 1.25) {N-MOS (0 출력)};
 \draw[thick] (-0.3, 1) -- (0.3, 1);
 \draw[thick] (0, 1) -- (0, 0.5);
 
@@ -38,9 +38,9 @@
 \draw[thick] (4, 3) -- (6, 3) node[midway, above, text=inkc] {VDD (외부 풀업)};
 \draw[thick] (5, 3) -- (5, 2.5);
 
-% Resistor
+% Resistor — label moved LEFT to free the area near OUT
 \draw[thick] (4.8, 2.5) -- (4.8, 2) -- (5.2, 2) -- (5.2, 1.5);
-\node[text=inkc, right=2mm] at (5, 2) {R (10k 등)};
+\node[text=inkc, left=2mm, font=\scriptsize] at (4.7, 2) {R (10k 등)};
 \draw[thick] (5, 1.5) -- (5, 1.5);
 
 % Output node
@@ -48,9 +48,9 @@
 \draw[thick] (5, 1.5) -- (6, 1.5);
 \node[text=inkc, right] at (6, 1.5) {OUT};
 
-% N-MOS only
+% N-MOS only — label moved LEFT
 \draw[thick] (5, 1.5) -- (5, 1);
-\node[text=inkc, right=2mm] at (5, 1.25) {N-MOS (0 출력만)};
+\node[text=inkc, left=2mm, font=\scriptsize] at (4.7, 1.25) {N-MOS (0 출력만)};
 \draw[thick] (4.7, 1) -- (5.3, 1);
 \draw[thick] (5, 1) -- (5, 0.5);
 

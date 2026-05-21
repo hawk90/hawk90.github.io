@@ -16,15 +16,14 @@ draft: false
 
 핵심: *언제, 무엇이, 누가, 왜 변경*되었는지 *완벽 추적*.
 
-```
-SCM activities (DO-178C §7.2):
-  1. Configuration Identification (SCI 식별)
-  2. Change Control (변경 통제)
-  3. Status Accounting (현황 추적)
-  4. Audits (감사)
-  5. Release Management
-  6. Archive (저장)
-```
+**SCM activities (DO-178C §7.2):**
+
+- 1. Configuration Identification (SCI 식별)
+- 2. Change Control (변경 통제)
+- 3. Status Accounting (현황 추적)
+- 4. Audits (감사)
+- 5. Release Management
+- 6. Archive (저장)
 
 ## A-8 — SCM Objectives (6 obj)
 
@@ -68,16 +67,16 @@ A-8-6  SCI (Software Configuration Index) 작성
 
 ### SCI Identification Scheme
 
-```
-Naming convention:
-  <PROJECT>-<MODULE>-<TYPE>-<NUMBER>-<VERSION>
+**Naming convention:**
 
-Examples:
-  KF21-FMS-CODE-pitch_controller.c-2.0.3
-  KF21-FMS-DOC-PSAC-1.4.0
-  KF21-FMS-TEST-TC-PFC-103-2.1.0
-  KF21-FMS-EOC-fms.elf-2.0.0
-```
+- <PROJECT>-<MODULE>-<TYPE>-<NUMBER>-<VERSION>
+
+**Examples:**
+
+- KF21-FMS-CODE-pitch_controller.c-2.0.3
+- KF21-FMS-DOC-PSAC-1.4.0
+- KF21-FMS-TEST-TC-PFC-103-2.1.0
+- KF21-FMS-EOC-fms.elf-2.0.0
 
 ## Baseline 관리
 
@@ -417,15 +416,15 @@ PCA가 *PSAC §6의 lifecycle data 목록과 일치* 확인.
 
 ### Audit 빈도
 
-```
-대규모 프로젝트:
-  내부 audit:   매 분기
-  외부 audit:   SOI 1/2/3 review 시 (FAA)
+**대규모 프로젝트:**
 
-소규모 프로젝트:
-  내부 audit:   매 6개월
-  외부 audit:   SOI 시
-```
+- 내부 audit:   매 분기
+- 외부 audit:   SOI 1/2/3 review 시 (FAA)
+
+**소규모 프로젝트:**
+
+- 내부 audit:   매 6개월
+- 외부 audit:   SOI 시
 
 ## A-9 — SQA (5 obj)
 
@@ -443,19 +442,19 @@ A-9-5  SQA 활동 기록                     ✓+I 모든 DAL
 
 ### Independence 보장
 
-```
-✗ Bad:
-   SQA가 PM에게 보고
-   SQA가 development 팀의 일부
-   SQA 평가 = SW 일정 준수
-   SQA budget = SW 프로젝트 budget
+**✗ Bad:**
 
-✓ Good:
-   SQA가 Quality VP에게 보고
-   SQA가 별도 조직
-   SQA 평가 = Quality metric (defect rate, audit findings)
-   SQA budget = corporate quality budget
-```
+- SQA가 PM에게 보고
+- SQA가 development 팀의 일부
+- SQA 평가 = SW 일정 준수
+- SQA budget = SW 프로젝트 budget
+
+**✓ Good:**
+
+- SQA가 Quality VP에게 보고
+- SQA가 별도 조직
+- SQA 평가 = Quality metric (defect rate, audit findings)
+- SQA budget = corporate quality budget
 
 심사관이 *SQA Independence 직접 확인*. 조직도 + 인터뷰 + 기록 review.
 
@@ -712,24 +711,27 @@ SAS 페이지:
 
 SAS가 제출되면 *SOI 4*. 인증 직전 마지막 review.
 
-```
-SOI 4 Agenda:
-  Day 1:
-    - SAS overview
-    - Compliance matrix review
-    - Open PR review
-    - Any outstanding findings from SOI 3
+**SOI 4 Agenda:**
 
-  Day 2:
-    - SQA records sampling
-    - Independence verification
-    - Final witnesses on test execution
 
-  Day 3:
-    - Closeout discussion
-    - Conditions for approval
-    - Schedule for Type Certificate
-```
+**Day 1:**
+
+- SAS overview
+- Compliance matrix review
+- Open PR review
+- Any outstanding findings from SOI 3
+
+**Day 2:**
+
+- SQA records sampling
+- Independence verification
+- Final witnesses on test execution
+
+**Day 3:**
+
+- Closeout discussion
+- Conditions for approval
+- Schedule for Type Certificate
 
 SOI 4 통과 = *FAA Type Certificate*. SW는 *AML (Approved Model List)*에 등재. *항공기 운항 가능*.
 

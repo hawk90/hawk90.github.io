@@ -36,12 +36,11 @@ Process마다 별도의 page table을 갖습니다. 같은 가상 주소도 proc
 
 기본 page 크기는 4 KB입니다(ARM은 16 KB, 64 KB도 옵션). 가상 주소를 page 단위로 잘라 page table을 통해 물리 주소로 변환합니다.
 
-```text
-ARMv8 4 KB page, 48-bit VA:
-   bit  47 ~ 39  38 ~ 30  29 ~ 21  20 ~ 12  11 ~ 0
-        L0       L1       L2       L3       offset
-        9 bit    9 bit    9 bit    9 bit    12 bit
-```
+**ARMv8 4 KB page, 48-bit VA:**
+
+- bit  47 ~ 39  38 ~ 30  29 ~ 21  20 ~ 12  11 ~ 0
+- L0       L1       L2       L3       offset
+- 9 bit    9 bit    9 bit    9 bit    12 bit
 
 4-level이므로 한 번 변환에 메모리 access 4번이 일어납니다. 그래서 **TLB**(Translation Lookaside Buffer)로 캐싱합니다.
 
@@ -49,12 +48,11 @@ ARMv8 4 KB page, 48-bit VA:
 
 가장 최근 변환 결과를 캐시합니다.
 
-```text
-Cortex-A53:
-   ITLB: 10 entry, fully-associative
-   DTLB: 10 entry
-   L2 TLB: 512 entry
-```
+**Cortex-A53:**
+
+- ITLB: 10 entry, fully-associative
+- DTLB: 10 entry
+- L2 TLB: 512 entry
 
 TLB hit이면 1 cycle, miss이면 page table walk(2 ~ 4 cycle, cached) 또는 main memory access(수십 cycle).
 

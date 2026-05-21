@@ -1479,8 +1479,8 @@ Tokio는 *async/await 위*에 work stealing을 얹은 사례다. async task는 O
 
 Go runtime scheduler는 *M:N 매핑*의 정수다. goroutine(G)을 OS thread(M) 위에서 logical processor(P)를 통해 스케줄링한다. P가 work stealing 큐의 단위가 되고, 코어 수와 비슷하게 설정된다. goroutine이 syscall로 블록되면 그 M은 다른 goroutine을 처리하지 못하지만, runtime이 새 M을 생성해 P를 넘겨받게 한다. 이 자동화가 Go의 동시성이 *쉽게 느껴지는* 이유다.
 
-```text
-이론 → 실무:
+**이론 → 실무:**
+
 - thread_pool             → Boost.Asio thread_pool, taskflow, BS::thread_pool
 - work-stealing           → Intel oneTBB (구 TBB), rayon (Rust), ForkJoinPool (Java)
 - priority pool           → 사용자 정의 또는 Asio
@@ -1488,20 +1488,21 @@ Go runtime scheduler는 *M:N 매핑*의 정수다. goroutine(G)을 OS thread(M) 
 - thread affinity         → pthread_setaffinity_np, SetThreadAffinityMask
 - NUMA 인지               → libnuma, jemalloc, mimalloc
 
-라이브러리:
+**라이브러리:**
+
 - C++: Boost.Asio, taskflow, oneTBB, Folly executors
 - Rust: rayon (CPU 바운드), tokio (I/O — async-std는 사실상 유지 보수 중단)
 - Java: ExecutorService, ForkJoinPool, CompletableFuture
 - Go: goroutine + work-stealing runtime
 - C#: TPL, Task.Run, async/await
 
-설계 결정:
+**설계 결정:**
+
 - 짧은 CPU 작업          → fixed-size pool (hardware_concurrency)
 - I/O 바운드             → 큰 pool (수십~수백)
 - 우선순위 필요          → priority_queue 기반 pool
 - 부하 변동             → adaptive pool
 - NUMA / 대규모         → NUMA-aware + thread affinity
-```
 
 ## 자기 점검
 

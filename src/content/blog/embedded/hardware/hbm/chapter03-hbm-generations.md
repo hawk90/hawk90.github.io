@@ -70,15 +70,15 @@ HBM2 (2018)
 
 핵심 변화는 *Pseudo Channel*입니다. 한 channel을 *반쪽씩 독립 명령*으로 운영해 *bank-level parallelism*을 *위층*으로 한 단계 더 올렸습니다.
 
-```text
-PC 도입 전 (HBM):
-  Channel 0 (128-bit) ─── 한 번에 한 명령
-  
-PC 도입 후 (HBM2):
-  Channel 0
-  ├── PC0 (64-bit) ─── 독립 명령 A
-  └── PC1 (64-bit) ─── 독립 명령 B  ← 동시 수행
-```
+**PC 도입 전 (HBM):**
+
+- Channel 0 (128-bit) ─── 한 번에 한 명령
+
+**PC 도입 후 (HBM2):**
+
+- Channel 0
+- ├── PC0 (64-bit) ─── 독립 명령 A
+- └── PC1 (64-bit) ─── 독립 명령 B  ← 동시 수행
 
 bank conflict 회피·effective bandwidth 향상에 큰 영향을 줬습니다.
 

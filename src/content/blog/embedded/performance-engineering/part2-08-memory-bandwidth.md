@@ -32,13 +32,12 @@ for (i = 0; i < N; i++) c[i] = a[i] + 3.0 * b[i];   // Triad
 
 총 데이터는 `24 × N = 192 MB`입니다. Working set이 L3보다 크기 때문에 사실상 DRAM 대역폭을 측정합니다.
 
-```text
-실측 예 — Raspberry Pi 4 (LPDDR4-3200, 32-bit bus):
-  Copy:   4.2 GB/s
-  Scale:  3.8 GB/s
-  Add:    3.5 GB/s
-  Triad:  3.4 GB/s
-```
+**실측 예 — Raspberry Pi 4 (LPDDR4-3200, 32-bit bus):**
+
+- Copy:   4.2 GB/s
+- Scale:  3.8 GB/s
+- Add:    3.5 GB/s
+- Triad:  3.4 GB/s
 
 이론치는 `3200 × 4 byte / 8 = 1600 MB/s × 2 = 12.8 GB/s`인데, 실측은 그중 25-30%만 활용합니다.
 
