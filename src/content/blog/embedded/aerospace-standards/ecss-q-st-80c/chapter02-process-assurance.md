@@ -111,47 +111,20 @@ DO-178C의 SQAP에 해당. ECSS에서는 별도 문서.
 
 ### SPA Plan 작성 — 일반 template
 
-```
-=== SPA Plan (일반 template) ===
+**SPA Plan — 일반 template**
 
-1. Introduction
-   Project context, scope, SW components + criticality
+| 절 | 내용 |
+|----|------|
+| 1. Introduction | Project context, scope, SW components + criticality |
+| 2. Process Assurance Organization | SPA Manager + team (개발 조직과 분리). Reports to Quality Director (independent chain) |
+| 3. Process Assurance Activities | 3.1 Planning (version control, annual review) / 3.2 Audits (Process / Product / Lifecycle) / 3.3 Reviews (SPA observer 참석) |
+| 4. Process Tailoring | Applied Standards (Q-ST-80C, E-ST-40C, Q-ST-30C, Q-ST-40C 등). Criticality별 tailoring 결정 + rationale |
+| 5. Process Metrics (매월) | Compliance rate, Defect detection rate, Review effectiveness, Test coverage trend, Code churn rate, Open NCR count + resolution time |
+| 6. Audit Plan | 분기별 schedule |
+| 7. Non-Conformance Process | NCR 등록 → SPA review → 통보. 응답 timeline + escalation 규칙 |
+| 8. Independence | 조직 차원 (분리된 reporting), 재정 차원 (별도 budget), 기술 차원 (외부 ISVV) |
 
-2. Process Assurance Organization
-   SPA Manager + team (개발 조직과 분리)
-   Reports to Quality Director (independent chain)
-
-3. Process Assurance Activities
-   3.1 Planning (version control, annual review)
-   3.2 Audits (Process / Product / Lifecycle)
-   3.3 Reviews (SPA observer 참석)
-
-4. Process Tailoring
-   Applied Standards 목록 (Q-ST-80C, E-ST-40C, Q-ST-30C, Q-ST-40C 등)
-   각 Criticality별 tailoring 결정 + rationale
-
-5. Process Metrics (매월 수집)
-   - Compliance rate
-   - Defect detection rate
-   - Review effectiveness
-   - Test coverage trend
-   - Code churn rate
-   - Open NCR count, resolution time
-
-6. Audit Plan (분기별 schedule)
-
-7. Non-Conformance Process
-   - NCR 등록 → SPA review → 통보
-   - 응답 timeline + escalation 규칙
-
-8. Independence
-   - 조직 차원 (분리된 reporting)
-   - 재정 차원 (별도 budget)
-   - 기술 차원 (외부 ISVV)
-
-Approved chain:
-   SPA Manager → Quality Director → Project Manager
-```
+**Approval chain**: SPA Manager → Quality Director → Project Manager.
 
 ## 2. Process Audit — 정기 절차
 
@@ -159,26 +132,12 @@ ESA의 process audit은 *checklist-based + sample-based*.
 
 ### Audit 종류
 
-```
-A. Compliance Audit
-   - 정해진 절차 (SDP, SVP 등)가 *실제 수행*되는가
-   - Sample-based (random 5-10 modules)
-   - 매 분기
-
-B. Document Audit
-   - 산출물의 *완성도, 정확성, 일관성*
-   - Document baseline review
-   - 매 milestone
-
-C. Process Effectiveness Audit
-   - 절차가 *예상한 결과*를 만드는가
-   - Outcome analysis
-   - 매 6개월
-
-D. Independence Audit
-   - SPA 조직의 *독립성 유지* 확인
-   - 외부 auditor (1년에 1회)
-```
+| 종류 | 점검 | 주기 |
+|------|------|------|
+| A. Compliance Audit | 정해진 절차(SDP, SVP 등)가 *실제 수행*되는가. Sample-based (random 5 – 10 modules) | 분기 |
+| B. Document Audit | 산출물의 *완성도·정확성·일관성*. Document baseline review | Milestone |
+| C. Process Effectiveness Audit | 절차가 *예상한 결과*를 만드는가. Outcome analysis | 6개월 |
+| D. Independence Audit | SPA 조직의 *독립성 유지* 확인. 외부 auditor | 1년 |
 
 ### Compliance Audit 절차
 
@@ -213,63 +172,32 @@ D. Independence Audit
 
 ### Audit Checklist — Code Review Process 예
 
-```
-=== Audit Checklist: Code Review Process ===
+**Audit Checklist — Code Review Process**
 
-Audit Date: 2024-10-15
-Auditor:    김OO (SPA)
-Sample:     5 code reviews from Q3 2024
-            (FRR-2024-301, 305, 308, 312, 318)
+- **Audit Date**: 2024-10-15
+- **Auditor**: 김OO (SPA)
+- **Sample**: 5 code reviews from Q3 2024 (FRR-2024-301, 305, 308, 312, 318)
 
-Checklist Items:
+**Checklist**
 
-A. Review Procedure Compliance
-   ☐ Review가 SDP §6.4 절차 따랐는가
-   ☐ 모든 required attendees 참석
-   ☐ Reviewer가 충분한 preparation 시간
-   ☐ Review meeting duration 적절 (2시간 미만)
-   ☐ 모든 issue 기록
-   ☐ Closure 후 follow-up
+| 영역 | 항목 |
+|------|------|
+| A. Review Procedure Compliance | Review가 SDP §6.4 절차 따랐는가 / 모든 required attendees 참석 / Reviewer가 충분한 preparation 시간 / Review meeting duration 적절 (2시간 미만) / 모든 issue 기록 / Closure 후 follow-up |
+| B. Reviewer Independence | Reviewer가 author와 다른 사람 / Criticality A/B는 Independent Reviewer 포함 |
+| C. Quality of Review | Issue가 substantive (style 외 포함) / Issue rate 적절 (5 – 10 per 100 LoC) / Resolution 검증 |
+| D. Records | Review record 완전 / DOORS link 정확 / Signature 있음 |
 
-B. Reviewer Independence
-   ☐ Reviewer가 author와 다른 사람
-   ☐ Criticality A/B: Independent Reviewer 포함
+**Findings**
 
-C. Quality of Review
-   ☐ Issue가 substantive (style 외 포함)
-   ☐ Issue rate 적절 (5-10 per 100 LoC)
-   ☐ Resolution 검증
+| Severity | ID | 내용 | Action | Due |
+|----------|----|----|---|---|
+| Major | M-1 | FRR-2024-308: Required SPA observer 누락 | Re-conduct with SPA observer | 2024-10-30 |
+| Minor | m-1 | FRR-2024-301, 305: "preparation time" 기록 없음 | Update form template | 2024-11-15 |
+| Observation | o-1 | Issue rate가 평균보다 낮음 (FRR-2024-312, 318) → 효과적이지 못한 review? | Review effectiveness 추가 분석 | 2024-12-15 |
 
-D. Records
-   ☐ Review record 완전
-   ☐ DOORS link 정확
-   ☐ Signature 있음
+**Conclusion**: Process largely compliant. 1 Major finding requires immediate action. Quality concern raised (Observation).
 
-Findings:
-  Major Finding M-1:
-    FRR-2024-308: Required SPA observer 누락
-    Action: Re-conduct with SPA observer
-    Due: 2024-10-30
-
-  Minor Finding m-1:
-    FRR-2024-301, 305: "preparation time" 기록 없음
-    Action: Update form template
-    Due: 2024-11-15
-
-  Observation o-1:
-    Issue rate가 평균보다 낮음 (FRR-2024-312, 318)
-    → 추가 분석 필요 (효과적이지 못한 review?)
-    Action: Review effectiveness 추가 분석
-    Due: 2024-12-15
-
-Conclusion: Process largely compliant.
-            1 Major finding requires immediate action.
-            Quality concern raised (Observation).
-
-Approval:
-   SPA Auditor:        김OO   2024-10-15
-   SPA Manager:        박OO   2024-10-18
-```
+**Approval**: SPA Auditor 김OO (2024-10-15) → SPA Manager 박OO (2024-10-18).
 
 ## 3. Process Metrics — 정량 측정
 
@@ -325,33 +253,20 @@ ECSS의 *고유 강조점*. *측정해서 개선*.
 
 ### Metrics 보고서 — 일반 template
 
-```
-=== Monthly Process Metrics (일반 template) ===
+**Monthly Process Metrics — 일반 template**
 
-1. Process Compliance Rate (target ≥ 95%)
-   - 이번 달 수치 + 추세
+| # | Metric | 측정 / Target |
+|---|--------|---------------|
+| 1 | Process Compliance Rate | target ≥ 95 %, 이번 달 수치 + 추세 |
+| 2 | Defect Detection by Phase | Requirements / Design / Coding / Verification / Post-release 분포. 예상 외 분포면 문제 가능 |
+| 3 | Review Effectiveness | issues per review hour, target 5 – 10 |
+| 4 | Test Coverage | Statement / Decision / MC/DC |
+| 5 | Code Churn | % of total LoC. 너무 높으면 design 불안정, 너무 낮으면 feedback 부족 |
+| 6 | Open NCR count + trend | — |
+| 7 | NCR Resolution Time | average days, target < 30 |
+| 8 | Schedule | milestone status |
 
-2. Defect Detection by Phase
-   - Requirements / Design / Coding / Verification / Post-release 분포
-   - 분포가 예상 외면 문제 가능
-
-3. Review Effectiveness (issues per review hour)
-   - Target 5-10
-
-4. Test Coverage (Statement / Decision / MC/DC)
-
-5. Code Churn (% of total LoC)
-   - 너무 높으면 design 불안정
-   - 너무 낮으면 feedback 부족
-
-6. Open NCR count + trend
-
-7. NCR Resolution Time (average days, target < 30)
-
-8. Schedule (milestone status)
-
-Conclusions + Action Items
-```
+마지막에 **Conclusions + Action Items**.
 
 이런 *monthly report*가 *management visibility*에 활용. *문제 조기 발견* 목적.
 
@@ -383,49 +298,31 @@ ESA는 *one-size-fits-all 거부*. 각 mission에 맞춰 *tailoring*.
 
 ### Tailoring 예 — 작은 mission (가상)
 
-```
-=== Tailoring Decision (가상 작은 mission) ===
+**Tailoring Decision — 가상 작은 mission**
 
-Context: 교육·기술 검증 cube-sat 수준
-Resources: 적음 (학생 팀 + advisor)
+- **Context**: 교육·기술 검증 cube-sat 수준
+- **Resources**: 적음 (학생 팀 + advisor)
+- **Applied Standards**: ECSS-Q-ST-80C, ECSS-E-ST-40C (full or tailored). Dependability / Safety: 적용 / 미적용 결정.
 
-Applied Standards:
-  - ECSS-Q-ST-80C, ECSS-E-ST-40C (full or tailored)
-  - Dependability / Safety: 적용 / 미적용 결정
+**Tailoring 예시**
 
-Tailoring Decisions (예시):
+| ID | 결정 | Justification | Risk Mitigation |
+|----|------|---------------|------------------|
+| T-1 | Independent ISVV not required | Educational, not commercial mission. Self-review by advisors deemed sufficient | Increased advisor review involvement |
+| T-2 | Process metrics simplified (8 → 3) | — | — |
+| T-3 | Document set reduced (SDP/SVP/SCMP/SQAP → 1 PMP) | — | — |
+| T-4 | Formal review milestones 줄임 (5 → 3) | — | — |
 
-T-1: Independent ISVV not required
-     Justification:
-       - Educational, not commercial mission
-       - Self-review by advisors deemed sufficient
-     Risk Mitigation:
-       - Increased advisor review involvement
-
-T-2: Process metrics simplified (8 → 3)
-
-T-3: Document set reduced (SDP/SVP/SCMP/SQAP → 1 PMP)
-
-T-4: Formal review milestones 줄임 (5 → 3)
-
-Approved chain:
-   Project Manager → Customer → External liaison
-```
+**Approval chain**: Project Manager → Customer → External liaison.
 
 이런 tailoring이 *작은 프로젝트의 ECSS 적용 가능성* 보장. *과부담 회피*. 정확한 tailoring rule은 *ECSS tailoring 가이드 (ECSS-S-ST-00C-Rev.1 등)* 참조.
 
 ### Tailoring vs DO-178C
 
-```
-DO-178C: Tailoring 거의 불가
-  - 71 obj가 거의 모든 case에 적용
-  - DAL이 면제 결정 (DAL E만 면제)
-
-ECSS:   Tailoring 광범위 가능
-  - 각 obj 별도 justification으로 면제 가능
-  - Mission size, criticality, schedule 고려
-  - 더 유연
-```
+| 표준 | Tailoring 가능 여부 |
+|------|---------------------|
+| DO-178C | 거의 불가. 71 obj가 거의 모든 case에 적용. DAL이 면제 결정 (DAL E만 면제) |
+| ECSS | 광범위 가능. 각 obj 별도 justification으로 면제 가능. Mission size, criticality, schedule 고려. 더 유연 |
 
 ESA의 유연성이 *작은 회사·신생 우주에 접근성*.
 
@@ -433,26 +330,20 @@ ESA의 유연성이 *작은 회사·신생 우주에 접근성*.
 
 모든 audit이 *기록*. SPA의 *audit trail*.
 
-```
-=== Annual Audit Summary (일반 template) ===
+**Annual Audit Summary — 일반 template**
 
-Total Audits:           [숫자]
-  Compliance:            [분기별 등]
-  Document:              [milestone마다]
-  Process Effectiveness: [semi-annual 등]
-  Independence:          [annual external]
+| 항목 | 값 |
+|------|-----|
+| Total Audits | [숫자] |
+| └ Compliance | 분기별 등 |
+| └ Document | milestone마다 |
+| └ Process Effectiveness | semi-annual 등 |
+| └ Independence | annual external |
+| Total Findings | severity별 count |
+| Resolution Status | end of year |
+| Trend (vs 이전 연도) | Compliance rate, Major finding 수, NCR resolution time |
 
-Total Findings (severity별 count)
-
-Resolution Status (end of year)
-
-Trend (vs 이전 연도)
-  - Compliance rate
-  - Major finding 수
-  - NCR resolution time
-
-Conclusions + open item 추적
-```
+마지막에 **Conclusions + open item 추적**.
 
 이런 *연간 보고*가 *project review*에 제출.
 
@@ -460,49 +351,25 @@ Conclusions + open item 추적
 
 DO-178C와 같이 *Independence 의무*. 하지만 ECSS는 *외부 ISVV*를 더 강조.
 
-```
-Independence 수준 (ECSS-Q-ST-80C §5.9.4):
+**Independence 수준 (ECSS-Q-ST-80C §5.9.4)**
 
-Level 1: Same person, different time
-  - 약한 independence
-  - Criticality D 적용
-
-Level 2: Different person, same team
-  - Peer review
-  - Criticality C 적용
-
-Level 3: Different team, same organization
-  - 조직 차원 분리
-  - Criticality B 적용
-
-Level 4: Different organization
-  - External ISVV
-  - Criticality A 의무
-```
+| Level | 형태 | 강도 | 적용 Criticality |
+|-------|------|------|------------------|
+| 1 | Same person, different time | 약한 independence | D |
+| 2 | Different person, same team | Peer review | C |
+| 3 | Different team, same organization | 조직 차원 분리 | B |
+| 4 | Different organization | External ISVV | A 의무 |
 
 Criticality A는 일반적으로 *외부 회사 ISVV*. 유럽에 *Critical Software, CGI/SCISYS, Solenix* 등의 회사가 있다. 자세히는 Ch 7.
 
 ## 시작하는 회사를 위한 SPA 도입 — 일반 가이드
 
-```
-Phase 1 (인식)
-  - ECSS 표준 학습 (무료 다운로드)
-  - 자사 mission에 맞는 tailoring 검토
-
-Phase 2 (인프라)
-  - SPA Manager (또는 trained 역할)
-  - Tool 설정 (requirements / NCR tracker / configuration)
-  - Metric 수집 시스템
-
-Phase 3 (적용)
-  - 첫 작은 프로젝트에 ECSS
-  - 점진적 expansion
-  - 외부 review 참여
-
-Phase 4 (성숙)
-  - ISVV 협력 관계
-  - 자체 capability 개발
-```
+| Phase | 단계 | 활동 |
+|-------|------|------|
+| 1 | 인식 | ECSS 표준 학습 (무료 다운로드), 자사 mission에 맞는 tailoring 검토 |
+| 2 | 인프라 | SPA Manager (또는 trained 역할), Tool 설정 (requirements / NCR tracker / configuration), Metric 수집 시스템 |
+| 3 | 적용 | 첫 작은 프로젝트에 ECSS, 점진적 expansion, 외부 review 참여 |
+| 4 | 성숙 | ISVV 협력 관계, 자체 capability 개발 |
 
 각 phase의 *기간·비용*은 *조직 / mission*마다 다르다.
 
