@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\input{../../_design-sequence.tex}
+\begin{tikzpicture}[blog, seq]
+
+\node[font=\sffamily\bfseries\large] at (4.0,1.2) {Optimistic Traversal — Lost Update};
+
+% Actors
+\node[actor]    (a) at (0, 0)   {Thread A};
+\node[actor]    (l) at (4, 0)   {List \texttt{n1→n2→n3}};
+\node[actorAlt] (b) at (8, 0)   {Thread B};
+
+% Lifelines
+\draw[lifeline] (a) -- ++(0,-7.5);
+\draw[lifeline] (l) -- ++(0,-7.5);
+\draw[lifeline] (b) -- ++(0,-7.5);
+
+% --- Time-ordered messages ---
+% A starts traverse (no lock)
+\draw[msgsync] (a |- 0,-1.5) -- node[msglabel]{traverse (no lock)} (l |- 0,-1.5);
+
+% B removes n2 concurrently
+\draw[msgsync] (b |- 0,-2.4) -- node[msglabel]{remove(n2): pred(n1)→next = n3} (l |- 0,-2.4);
+
+% A arrives, locks n1 and n3
+\draw[msgsync] (a |- 0,-3.4) -- node[msglabel]{lock(n1), lock(n3)} (l |- 0,-3.4);
+
+% A observes n1->next = n3 — appears consistent!
+\draw[msgret] (l |- 0,-4.4) -- node[msglabel]{n1→next == n3 (looks OK)} (a |- 0,-4.4);
+
+% Note about staleness
+\node[seqnote, anchor=west, align=left] at (0.4,-5.6)
+  {A는 \emph{오래된 pred–curr 짝}을 보고 있다.\\[1pt]
+   validation 없이 진행 = lost update.};
+
+% Bottom warning
+\node[font=\sffamily\bfseries\small, text=warnbord, anchor=center]
+  at (4.0,-7.0) {Validation: pred reachable + pred→next == curr};
+
+\end{tikzpicture}
+\end{document}

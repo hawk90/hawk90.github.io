@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,node distance=14mm]
+
+\node[font=\sffamily\bfseries\large] at (5.5,4.0) {Elimination — Load-Adaptive Feedback};
+
+\node[imp, minimum width=36mm, minimum height=11mm] (load) at (0, 2.4)
+  {경합 (contention) $\uparrow$};
+
+\node[neut, minimum width=36mm, minimum height=11mm] (cas) at (5.5, 2.4)
+  {Treiber stack\\[1pt]CAS 실패 $\uparrow$};
+
+\node[abs, minimum width=36mm, minimum height=11mm] (elim) at (5.5, 0.4)
+  {Elimination array\\[1pt]짝 만남 확률 $\uparrow$};
+
+\node[hi, minimum width=36mm, minimum height=11mm] (out) at (11.0, 1.4)
+  {전체 처리량 유지};
+
+% load splits into two causal lanes
+\draw[arr, line width=0.8pt] (load.east) -- (cas.west);
+\draw[arr, line width=0.8pt] (load.east) -| ([yshift=-1mm]elim.north -| elim.west) -- (elim.west);
+
+% Both feed into outcome
+\draw[arr, line width=0.8pt] (cas.east) -- ++(0.8,0) |- (out.west);
+\draw[arr, line width=0.8pt] (elim.east) -- ++(0.8,0) |- (out.west);
+
+% Note
+\node[caption, align=center, anchor=center] at (5.5,-1.4)
+  {경합이 심할수록 elimination이 더 잘 작동한다 — \emph{load-adaptive}};
+
+\end{tikzpicture}
+\end{document}

@@ -165,14 +165,7 @@ void tas_unlock(TASLock* lock) {
 
 TAS의 한 라운드를 시나리오로 풀면:
 
-```text
-코어 A: lock 잡기 → exchange(true) → state는 M (A 캐시에만)
-코어 B: lock 시도 → exchange(true)
-       → A의 캐시 라인을 invalidate (B가 RFO: Read For Ownership)
-       → A의 라인은 I, B의 라인은 M
-       → B는 true를 보고 실패, 다시 exchange
-코어 C: 동시에 exchange 시도 → B의 라인 invalidate ...
-```
+![TAS 캐시 핑퐁 — 코어 A/B/C가 같은 cache line의 ownership을 RFO로 빼앗으며 M↔I 상태가 진동한다](/images/blog/parallel-principles/diagrams/ch07-tas-cache-pingpong.svg)
 
 이렇게 *N개 코어*가 동시에 시도하면, 매 시도마다 RFO 트래픽이 발생한다. 락이 안 풀려 있어도 그렇다. 책의 분석은 TAS의 throughput이 코어 수에 *역비례*하는 영역이 있음을 보인다.
 
@@ -252,11 +245,10 @@ void ttas_unlock(TTASLock* lock) {
 
 먼저 **read**만 한다 — 캐시에서 읽으므로 다른 코어에 영향 없음. 락이 풀린 것 같으면 그때 exchange 시도.
 
-```
-TAS:  매 시도마다 write → cache invalidation
-TTAS: read만 반복 → cache hit
-      풀려야 exchange → write 한 번만
-```
+| 락 | 매 시도 | 캐시 효과 |
+|----|---------|----------|
+| TAS | write | cache invalidation |
+| TTAS | read 반복, 풀려야 exchange | cache hit, write 한 번만 |
 
 성능이 크게 개선된다. 다만 락이 풀린 직후엔 여전히 모두가 동시에 exchange를 시도해 경합 발생.
 

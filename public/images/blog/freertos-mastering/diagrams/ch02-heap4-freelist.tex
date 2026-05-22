@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.0,3.0) {heap\_4 — Free Block Linked List};
+\node[caption] at (6.0,2.4) {주소 오름차순};
+
+% head
+\node[neut, minimum width=14mm, minimum height=10mm] (head) at (0,1.0) {head};
+
+% blocks
+\node[abs, minimum width=22mm, minimum height=14mm, align=center] (b1) at (2.4,1.0)
+  {12 B free\\\small \texttt{BlockLink\_t}};
+\node[abs, minimum width=22mm, minimum height=14mm, align=center] (b2) at (5.6,1.0)
+  {40 B free\\\small \texttt{BlockLink\_t}};
+\node[abs, minimum width=22mm, minimum height=14mm, align=center] (b3) at (8.8,1.0)
+  {128 B free\\\small \texttt{BlockLink\_t}};
+
+% end
+\node[neut, minimum width=14mm, minimum height=10mm] (end) at (11.6,1.0) {end};
+
+% Arrows along the list
+\draw[arr, line width=0.8pt] (head.east) -- (b1.west);
+\draw[arr, line width=0.8pt] (b1.east)   -- (b2.west);
+\draw[arr, line width=0.8pt] (b2.east)   -- (b3.west);
+\draw[arr, line width=0.8pt] (b3.east)   -- (end.west);
+
+% Note about BlockLink_t fields
+\node[caption, align=center] at (6.0,-0.6)
+  {각 노드 — \texttt{\{pxNextFreeBlock, xBlockSize\}}};
+
+\end{tikzpicture}
+\end{document}

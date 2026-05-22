@@ -1,0 +1,59 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.5,4.6) {TAS — Cache Line Ping-Pong (MESI)};
+
+% Time axis (horizontal)
+\draw[arr, line width=0.6pt] (0,3.2) -- (13.2,3.2);
+\node[caption, anchor=west] at (13.2,3.2) {time};
+
+% Core lanes (rows)
+\node[caption, anchor=east] at (-0.2, 2.0) {Core A};
+\node[caption, anchor=east] at (-0.2, 0.4) {Core B};
+\node[caption, anchor=east] at (-0.2,-1.2) {Core C};
+
+% --- t1: A grabs line (M)
+\node[imp, minimum width=18mm, minimum height=9mm] (a1) at (1.2, 2.0)
+  {\small exchange\\[1pt]\small \textbf{M}};
+
+% --- t2: B RFO, A invalidated, B becomes M
+\node[neut, minimum width=18mm, minimum height=9mm] (a2) at (4.5, 2.0)
+  {\small \textbf{I}\\[1pt]\small (RFO from B)};
+\node[imp, minimum width=18mm, minimum height=9mm] (b2) at (4.5, 0.4)
+  {\small exchange\\[1pt]\small \textbf{M} (sees true)};
+
+% Arrow A→B at t2 showing RFO causes A invalidation
+\draw[arr, line width=0.6pt] (b2.north) -- (a2.south)
+  node[midway, right, caption] {\scriptsize RFO};
+
+% --- t3: C RFO, B invalidated, C becomes M
+\node[neut, minimum width=18mm, minimum height=9mm] (b3) at (8.0, 0.4)
+  {\small \textbf{I}\\[1pt]\small (RFO from C)};
+\node[imp, minimum width=18mm, minimum height=9mm] (c3) at (8.0,-1.2)
+  {\small exchange\\[1pt]\small \textbf{M} (sees true)};
+\draw[arr, line width=0.6pt] (c3.north) -- (b3.south)
+  node[midway, right, caption] {\scriptsize RFO};
+
+% --- t4: A retries → RFO again, C invalidated
+\node[imp, minimum width=18mm, minimum height=9mm] (a4) at (11.5, 2.0)
+  {\small retry\\[1pt]\small \textbf{M}};
+\node[neut, minimum width=18mm, minimum height=9mm] (c4) at (11.5,-1.2)
+  {\small \textbf{I}};
+\draw[arr, line width=0.6pt] (a4.south) -- (c4.north)
+  node[midway, right, caption] {\scriptsize RFO};
+
+% Legend
+\node[caption, anchor=west, align=left] at (0,-2.6)
+  {\textbf{M} = Modified (이 코어만 가짐, 락 시도 중)\\
+   \textbf{I} = Invalid (다른 코어가 RFO로 빼앗음)\\
+   매 시도가 cache line ping-pong을 일으킨다 — TAS가 코어 수에 역비례하는 이유};
+
+\end{tikzpicture}
+\end{document}

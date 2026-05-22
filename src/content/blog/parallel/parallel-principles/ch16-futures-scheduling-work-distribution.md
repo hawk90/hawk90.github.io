@@ -510,9 +510,7 @@ public:
 
 ## 16.5 단순 분산 — Centralized Queue
 
-```
-모든 스레드가 같은 글로벌 큐에서 가져감.
-```
+모든 스레드가 *같은 글로벌 큐*에서 작업을 가져간다.
 
 **장점**: 부하 자동 균형.
 **단점**: 글로벌 큐가 hot spot.
@@ -861,12 +859,10 @@ std::optional<T> pop_yielding() {
 
 **Balancing Pool** (책 16.5.3) — work stealing의 *상위* 추상화로, 큐가 비기 전에도 큐 사이 작업을 *밀어* 옮기는 풀. 임의의 두 큐의 길이 차가 일정 임계 이상이면 긴 쪽이 짧은 쪽으로 작업을 옮긴다.
 
-```
-work stealing          balancing pool
-─────────────          ───────────────
-idle 후 훔침            "거의 idle"이 되기 전에 미리 옮김
-reactive               proactive
-```
+| 전략 | 동작 | 시점 |
+|------|------|------|
+| work stealing | idle 후 훔침 | reactive |
+| balancing pool | "거의 idle"이 되기 전에 미리 옮김 | proactive |
 
 장점은 도둑이 일을 찾는 *latency*를 줄임. 단점은 적극적 이동이 *오히려* cache locality를 망칠 수 있음.
 

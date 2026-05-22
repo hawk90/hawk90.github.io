@@ -481,12 +481,7 @@ bool fine_contains(FineList* list, int key) {
 
 여러 스레드가 락을 잡는데 어떻게 deadlock이 안 생기는가?
 
-```text
-규칙: 락은 *리스트 순서대로만* 잡는다 (head → tail 방향).
-  - 모든 스레드가 같은 방향
-  - 두 스레드가 서로의 락을 기다릴 수 없음
-  - 따라서 deadlock 불가능
-```
+규칙은 *락을 리스트 순서대로만* 잡는다 (head → tail 방향). 모든 스레드가 *같은 방향*이므로 두 스레드가 *서로의 락을 기다릴 수 없고* deadlock이 불가능하다.
 
 linearization point — `add`의 경우 `pred->next = new_node`가 실행된 시점. `remove`는 `pred->next = curr->next`. `contains`는 *마지막으로 본 노드*의 lock을 잡은 시점.
 
@@ -746,14 +741,7 @@ bool opt_contains(OptimisticList* list, int key) {
 
 락 없이 traverse하면 *traverse 중에* 노드가 사라지거나 (free됨) 다른 자리에 옮겨질 수 있다.
 
-```text
-스레드 A traverse: head → n1 → n2 → n3 (curr)
-스레드 B 동시 remove(n2): pred(n1)->next = n3
-스레드 A 도착: lock(n1), lock(n3) — 잡음
-  → 그러나 n1->next != n3? 아니, n1->next = n3 (B가 그렇게 만듦)
-  → A는 *오래된 pred-curr 짝*을 보고 있다
-  → validation 없이 진행하면 lost update
-```
+![Optimistic traversal에서 발생하는 lost update — A가 락 없이 traverse하는 동안 B가 n2를 제거하면 A는 오래된 pred-curr 짝을 보게 된다](/images/blog/parallel-principles/diagrams/ch09-lost-update-sequence.svg)
 
 `validate(pred, curr)`는 두 가지 확인:
 

@@ -212,7 +212,7 @@ static void set_pmp_region0_readonly(void) {
 
 ### 구조
 
-ESP32-C3 인터럽트 구조 — *31개의 외부 인터럽트 소스* → *Interrupt Matrix*(CPU INT 매핑) → *CPU INT 0~30* (vectored 또는 single) → *RV32 trap vector*.
+![ESP32-C3 interrupt flow — 31개 외부 source가 Interrupt Matrix를 거쳐 CPU INT 0~30으로 매핑되고 RV32 trap vector로 진입](/images/blog/riscv/esp32-c3-mastering/diagrams/ch02-interrupt-matrix.svg)
 
 특이한 점은 *어떤 페리퍼럴 인터럽트가 어떤 CPU INT 번호가 될지*를 *런타임에 설정*한다는 것입니다. ESP-IDF의 `esp_intr_alloc()`이 이를 자동 처리합니다.
 

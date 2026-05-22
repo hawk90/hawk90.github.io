@@ -65,10 +65,7 @@ draft: false
 
 삽입/삭제 시 **rebalancing**이 트리의 큰 부분을 만진다. 회전(rotation)은 여러 노드의 포인터를 동시에 갱신해야 한다.
 
-```
-80 추가 후 rebalance:
-회전 ── 여러 부모 자식 관계 동시 갱신
-```
+80 추가 후 rebalance는 *회전(rotation)*을 일으키며, *여러 부모-자식 관계*가 동시에 갱신된다.
 
 - 락을 잡기 어렵다 (어디까지 잡을지 모름)
 - Lock-free 구현이 매우 복잡 (다중 포인터 atomic 갱신)
@@ -1066,25 +1063,30 @@ memtable이 일정 크기에 도달하면 *immutable*으로 전환되어 backgro
 
 ## 실무 적용
 
-```
-이론 → 실무:
-- Lock-Free Skiplist     → java.util.concurrent.ConcurrentSkipListMap
-- Skiplist + striped     → folly::ConcurrentSkipList
-- B-link tree            → DB 인덱스 (PostgreSQL, MySQL InnoDB)
-- LSM Tree               → LevelDB, RocksDB, Cassandra, ScyllaDB
+**이론 → 실무 매핑:**
 
-언어별:
-- C++: folly::ConcurrentSkipList, tbb::concurrent_map
-- C: 직접 구현 (위 코드 참고) 또는 라이브러리
-- Java: ConcurrentSkipListMap / ConcurrentSkipListSet
-- Redis: 정렬 집합(ZSET)이 skiplist 기반
-- Rust: crossbeam-skiplist
+| 알고리즘 | 실제 구현 |
+|---------|----------|
+| Lock-Free Skiplist | `java.util.concurrent.ConcurrentSkipListMap` |
+| Skiplist + striped | `folly::ConcurrentSkipList` |
+| B-link tree | DB 인덱스 (PostgreSQL, MySQL InnoDB) |
+| LSM Tree | LevelDB, RocksDB, Cassandra, ScyllaDB |
 
-언제 정렬된 동시 컨테이너?
+**언어별:**
+
+| 언어 | 구현 |
+|------|------|
+| C++ | `folly::ConcurrentSkipList`, `tbb::concurrent_map` |
+| C | 직접 구현 (위 코드 참고) 또는 라이브러리 |
+| Java | `ConcurrentSkipListMap` / `ConcurrentSkipListSet` |
+| Redis | 정렬 집합 (ZSET)이 skiplist 기반 |
+| Rust | `crossbeam-skiplist` |
+
+**언제 정렬된 동시 컨테이너?**
+
 - 범위 쿼리 (range scan) 필요
 - 순서가 의미 있음 (timestamp 등)
-- 그 외엔 ConcurrentHashMap이 더 빠름
-```
+- 그 외엔 `ConcurrentHashMap`이 더 빠름
 
 ## 자기 점검
 

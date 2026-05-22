@@ -123,13 +123,7 @@ void *pvPortMalloc(size_t xWantedSize)
 
 free된 블록을 *주소상 인접한 free 블록과 자동 병합*합니다. fragmentation을 *현실적으로 완화*하고, *대부분의 신규 프로젝트의 디폴트*입니다.
 
-**heap_4 자료구조** — *free block linked list* (주소 오름차순).
-
-```text
-head ──► [12 byte free] ──► [40 byte free] ──► [128 byte free] ──► end
-```
-
-각 노드가 `BlockLink_t { pxNextFreeBlock, xBlockSize }`.
+![heap_4 free block linked list — 주소 오름차순으로 free 블록을 잇고 각 노드는 BlockLink_t](/images/blog/freertos-mastering/diagrams/ch02-heap4-freelist.svg)
 
 | 단계 | 동작 |
 |------|------|
