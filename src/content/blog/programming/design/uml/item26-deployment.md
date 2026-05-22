@@ -83,10 +83,7 @@ order-svc.jar
 - 양방향 / 단방향
 - QoS (latency, bandwidth, encrypted)
 
-```
-WebServer ──HTTP/2──── AppServer ──gRPC──── PaymentSvc
-                      ⊕ encrypted
-```
+![Deployment: WebServer → AppServer (HTTP/2) → PaymentSvc (gRPC, encrypted)](/images/blog/uml/diagrams/item26-deployment-protocols.svg)
 
 ## 배포 시나리오
 

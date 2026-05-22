@@ -50,10 +50,7 @@ VM/컨테이너 토폴로지를 자연스럽게 표현.
 
 선 + 라벨:
 
-```
-WebServer ──HTTP/2──── AppServer ──gRPC──── PaymentSvc
-            <<TCP>>                <<encrypted>>
-```
+![Deployment with protocol stereotypes on each link](/images/blog/uml/diagrams/item30-deployment-stereotypes.svg)
 
 선에 스테레오타입과 protocol·QoS·port 같은 정보를 표시.
 

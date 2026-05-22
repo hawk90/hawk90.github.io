@@ -30,12 +30,12 @@ package/myapp/
 
 추가로 자주 있는 파일은 다음과 같습니다.
 
-```text
-myapp.hash           ─ tarball SHA-256, license 파일 hash
-0001-*.patch         ─ source에 적용할 패치
-S99myapp             ─ /etc/init.d에 설치할 init script
-myapp.service        ─ systemd unit
-```
+| 파일 | 역할 |
+|------|------|
+| `myapp.hash` | tarball SHA-256, license 파일 hash |
+| `0001-*.patch` | source에 적용할 패치 |
+| `S99myapp` | `/etc/init.d`에 설치할 init script |
+| `myapp.service` | systemd unit |
 
 이 디렉터리가 메인 트리(`package/`) 어디서 *처음 등장*하려면, 같은 디렉터리 안의 부모 `Config.in`에 한 줄을 추가해야 합니다.
 
@@ -304,13 +304,14 @@ sha256  56ef78ab90...  LICENSE
 
 `make myapp-source`를 처음 돌릴 때 hash가 *생성되지 않으면* CI가 거부합니다. 새 버전을 올릴 때 다음 명령으로 hash를 다시 계산합니다.
 
-```text
-$ make myapp-dirclean
-$ rm dl/myapp/*
-$ make myapp-source
-$ sha256sum dl/myapp/myapp-1.3.0.tar.gz
-$ # 결과를 myapp.hash에 갱신
+```bash
+make myapp-dirclean
+rm dl/myapp/*
+make myapp-source
+sha256sum dl/myapp/myapp-1.3.0.tar.gz
 ```
+
+`sha256sum` 결과를 `myapp.hash`에 갱신합니다.
 
 license 파일도 hash로 검증합니다. 이는 *업스트림이 라이센스를 조용히 바꾸는 것*을 catch하기 위한 안전장치입니다.
 
@@ -333,24 +334,27 @@ package/myapp/
 
 패키지를 작성하다 보면 *빌드가 깨졌는데 어디인지 모를 때*가 옵니다. 다음 흐름이 표준입니다.
 
-```text
-$ make V=1 myapp 2>&1 | tee build.log    # verbose
-$ less build.log                          # 실제 명령 확인
-$ cd output/build/myapp-1.2.3/            # 압축 풀린 source로 진입
-$ make CC=$(realpath ../../host/bin/aarch64-...-gcc) ...
-$ # 손으로 명령을 재현해 문제 위치 좁히기
+```bash
+make V=1 myapp 2>&1 | tee build.log
+less build.log
+cd output/build/myapp-1.2.3/
+make CC=$(realpath ../../host/bin/aarch64-...-gcc) ...
 ```
+
+`V=1`로 verbose 빌드 후 `build.log`에서 실제 명령을 찾고, 압축 풀린 source 디렉터리로 들어가 손으로 명령을 재현해 문제 위치를 좁힙니다.
 
 특히 효과적인 명령은 다음입니다.
 
-```text
-$ make myapp-dirclean                     # source 디렉터리 삭제
-$ make myapp-extract                      # 새로 압축 풀기
-$ make myapp-patch                        # 패치 적용까지
-$ make myapp-configure
-$ make myapp-build
-$ make myapp-install
+```bash
+make myapp-dirclean
+make myapp-extract
+make myapp-patch
+make myapp-configure
+make myapp-build
+make myapp-install
 ```
+
+순서대로 *source 디렉터리 삭제*, *새로 압축 풀기*, *패치 적용까지*, *configure*, *build*, *install*입니다.
 
 단계별로 끊어 들어가면 *어느 단계*에서 실패하는지 명확합니다. 각 단계의 산물은 `output/build/myapp-<ver>/.stamp_<단계>`로 표시되므로, 해당 stamp 파일을 지우면 그 단계부터 재실행합니다.
 

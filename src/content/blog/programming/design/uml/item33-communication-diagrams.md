@@ -37,25 +37,11 @@ draft: false
 
 ### 시퀀스 표기
 
-```text
-:Customer    :Order    :Inventory   :Payment
-   │            │            │           │
-   │─checkout()─▶│           │           │
-   │            │──reserve()─▶│          │
-   │            │◀─ok ──────│           │
-   │            │──charge()──────────────▶│
-   │            │◀─ok ───────────────────│
-```
+![Same flow drawn as a sequence diagram](/images/blog/uml/diagrams/item33-comm-sequence-table.svg)
 
 ### 커뮤니케이션 표기
 
-```text
-[:Customer] ──1: checkout()──▶ [:Order]
-                                  │
-                                  ├──1.1: reserve()──▶ [:Inventory]
-                                  │
-                                  └──1.2: charge()────▶ [:Payment]
-```
+![Communication diagram: same calls indexed 1, 1.1, 1.2](/images/blog/uml/diagrams/item33-comm-numbered.svg)
 
 같은 정보다. **연속 번호**가 시퀀스 다이어그램의 *시간 축* 역할.
 

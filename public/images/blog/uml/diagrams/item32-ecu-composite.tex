@@ -7,35 +7,37 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog, x=1cm, y=1cm,
-  outer/.style={cls, minimum width=120mm, minimum height=50mm,
-                fill=hifill!30, draw=hibord, anchor=south west},
-  part/.style={cls, minimum width=38mm, minimum height=10mm,
+  outer/.style={cls, minimum width=130mm, minimum height=52mm,
+                fill=hifill!20, draw=hibord, anchor=south west},
+  part/.style={cls, minimum width=42mm, minimum height=11mm,
                font=\sffamily\footnotesize, fill=okfill, draw=okbord},
-  bus/.style={cls, minimum width=22mm, minimum height=10mm,
+  bus/.style={cls, minimum width=22mm, minimum height=34mm,
               font=\sffamily\footnotesize, fill=absfill, draw=absbord},
-  iflbl/.style={font=\sffamily\scriptsize, midway, fill=white, inner sep=1pt},
-  provball/.style={circle, draw=edgec, fill=white, line width=0.55pt, minimum size=3mm},
+  iflbl/.style={font=\sffamily\scriptsize, fill=white, inner sep=1pt},
+  provball/.style={circle, draw=edgec, fill=white, line width=0.55pt, minimum size=3.2mm},
   link/.style={draw=edgec, line width=0.55pt}
 ]
 
 \node[outer] (ecu) at (0, 0) {};
 \node[font=\sffamily\bfseries\footnotesize, anchor=north west] at ($(ecu.north west) + (0.2, -0.15)$) {ECU};
 
-% Parts
-\node[part] (cpu) at (3, 3.5) {part cpu : Cortex-M7};
+% Parts on the left
+\node[part] (cpu) at (3, 3.7) {part cpu : Cortex-M7};
 \node[part] (can) at (3, 2.3) {part can : CANController};
-\node[part] (adc) at (3, 1.1) {part adc : ADC};
+\node[part] (adc) at (3, 0.9) {part adc : ADC};
 
-% Bus
-\node[bus] (bus) at (10, 2.3) {bus : AXI};
+% Bus on the right (tall, serves all parts)
+\node[bus] (bus) at (10.5, 2.3) {bus : AXI};
 
-% Each part requires IBus (socket) and bus provides (ball)
-\foreach \p in {cpu, can, adc} {
-  \draw[link] (\p.east) -- node[iflbl] {IBus} (bus.west |- \p.east);
-}
+% Provided ball on bus (left edge)
+\node[provball] (pb) at (bus.west) {};
 
-% Provided ball at bus
-\node[provball] at (bus.west) {};
+% Vertical trunk that all parts join, then one link to the bus ball
+\coordinate (trunk) at (7, 2.3);
+\draw[link] (cpu.east) -| (trunk);
+\draw[link] (adc.east) -| (trunk);
+\draw[link] (can.east) -- (trunk);
+\draw[link] (trunk) -- node[iflbl, midway, above] {IBus} (pb);
 
 \end{tikzpicture}
 \end{document}

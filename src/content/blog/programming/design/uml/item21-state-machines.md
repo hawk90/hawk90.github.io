@@ -66,10 +66,7 @@ event(args) [guard] / action
 
 ## Guard
 
-```
-            transfer(amt) [amt > limit]
-[Active] ───────────────────────────→ [HoldForReview]
-```
+![Guarded transition fires only when condition holds](/images/blog/uml/diagrams/item21-guarded-amount.svg)
 
 같은 이벤트라도 조건에 따라 다른 상태로. **상호 배타적** guard를 써야 합니다.
 

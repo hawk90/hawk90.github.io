@@ -47,22 +47,13 @@ draft: false
 
 확장하려는 UML 메타클래스를 프로파일에 끌어옵니다.
 
-```text
-Profile «JEE»
-  ├ Class (from UML metamodel)
-  ├ Component (from UML metamodel)
-  └ ...
-```
+![JEE Profile pulls in Class / Component metaclasses](/images/blog/uml/diagrams/item31-profile-jee.svg)
 
 ### 2) 스테레오타입 정의
 
 각 스테레오타입은 *어떤 메타클래스를 확장하는지* 명시.
 
-```text
-«stereotype» Entity ─«extension»─▶ Class
-«stereotype» SessionBean ─«extension»─▶ Class
-«stereotype» EJB ─«extension»─▶ Component
-```
+![Stereotypes extend metaclasses via «extension»](/images/blog/uml/diagrams/item31-stereotype-extensions.svg)
 
 ### 3) 태그값·제약 추가
 

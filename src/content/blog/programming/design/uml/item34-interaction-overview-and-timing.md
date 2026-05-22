@@ -42,25 +42,7 @@ draft: false
 
 ### 예 — 주문 처리
 
-```text
-[Start]
-   │
-   ▼
- [ref: ValidateOrder]
-   │
-   ▼
- ⟨in stock?⟩─── No ──▶ [ref: NotifyOutOfStock] ──▶ [End]
-   │
-  Yes
-   ▼
- [ref: ChargePayment]
-   │
-   ▼
- [ref: ScheduleShipment]
-   │
-   ▼
- [End]
-```
+![Order processing as an interaction overview with ref frames and a decision](/images/blog/uml/diagrams/item34-order-overview.svg)
 
 각 `ref: XXX` 박스는 *다른 시퀀스 다이어그램*을 가리킵니다. 큰 흐름 + 디테일이 자연스럽게 분리.
 

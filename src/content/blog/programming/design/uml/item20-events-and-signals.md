@@ -74,9 +74,7 @@ when(balance > 1000) → VIP로 승급
 
 상태 머신에서:
 
-```
-[State1] ── signalA / sendSignal(B) ─→ [State2]
-```
+![State transition with signal trigger and send-signal action](/images/blog/uml/diagrams/item20-signal-transition.svg)
 
 `/` 뒤에 **액션** — 트랜지션이 일어날 때 보낼 시그널, 호출할 메서드 등.
 
@@ -90,9 +88,7 @@ when(balance > 1000) → VIP로 승급
 
 UML은 예외도 시그널의 한 종류로 봅니다.
 
-```
-[Action]  ──「Exception」─→  [Handler]
-```
+![Exception flow from Action to Handler](/images/blog/uml/diagrams/item20-exception-handler.svg)
 
 예외 핸들링 흐름을 활동 다이어그램에 자연스럽게 끼워 넣을 수 있습니다.
 

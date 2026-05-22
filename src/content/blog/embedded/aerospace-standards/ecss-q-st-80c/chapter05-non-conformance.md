@@ -23,26 +23,13 @@ DO-178C의 *Problem Report (PR)*에 해당하지만 *broader scope*. *코드 외
 
 ## NCR vs PR vs CR — 비교
 
-```
-NCR (Non-Conformance Report)
-  - 정의된 spec/standard에서 *벗어남*
-  - 발견 후 *수정 의무*
-  - ECSS, ISO 9001
+| 종류 | 의미 | 표준 |
+|------|------|------|
+| **NCR** (Non-Conformance Report) | 정의된 spec/standard에서 *벗어남*, 발견 후 *수정 의무* | ECSS, ISO 9001 |
+| **PR** (Problem Report) | 코드/시스템의 *결함* | DO-178C 용어, NCR의 subset |
+| **CR** (Change Request) | 의도된 *변경 요청*, 결함 아님 (improvement) | 모든 표준 공통 |
 
-PR (Problem Report)
-  - 코드/시스템의 *결함*
-  - DO-178C 용어
-  - NCR의 subset
-
-CR (Change Request)
-  - 의도된 *변경 요청*
-  - 결함 아님 (improvement)
-  - 모든 표준 공통
-
-관계:
-  PR → CR (defect 발견 → 수정 요청)
-  Process violation → NCR (PR 아니지만 NCR)
-```
+관계 — `PR → CR` (defect 발견 → 수정 요청), `Process violation → NCR` (PR 아니지만 NCR).
 
 ECSS는 *모두 NCR* 통합. *broader umbrella*.
 
@@ -76,57 +63,60 @@ ECSS는 *모두 NCR* 통합. *broader umbrella*.
 
 ## NCR Lifecycle
 
-```
-STATE          Action                    Owner
-─────────────────────────────────────────────
-OPEN           Initial registration      Originator
-NEW            Triaged + assigned         NCR Manager
-INVESTIGATING  Root cause analysis        Engineer
-ANALYZED       Cause identified           Engineer + SPA
-FIXING         Implementation             Engineer
-FIXED          Code committed             Engineer
-VERIFIED       Independent verification   QA / SPA
-CLOSED         Confirmed resolved         SPA Manager
+| State | Action | Owner |
+|-------|--------|-------|
+| OPEN | Initial registration | Originator |
+| NEW | Triaged + assigned | NCR Manager |
+| INVESTIGATING | Root cause analysis | Engineer |
+| ANALYZED | Cause identified | Engineer + SPA |
+| FIXING | Implementation | Engineer |
+| FIXED | Code committed | Engineer |
+| VERIFIED | Independent verification | QA / SPA |
+| CLOSED | Confirmed resolved | SPA Manager |
 
-Side states:
-  REJECTED     : Not a defect (with justification)
-  DUPLICATE    : Already tracked
-  DEFERRED     : Acknowledged, fix postponed
-  WONT-FIX     : 결정적으로 fix 안 함 (드물게)
-```
+**Side states:**
+
+| State | 의미 |
+|-------|------|
+| REJECTED | Not a defect (with justification) |
+| DUPLICATE | Already tracked |
+| DEFERRED | Acknowledged, fix postponed |
+| WONT-FIX | 결정적으로 fix 안 함 (드물게) |
 
 ## NCR Form — ECSS Annex G template
 
 ECSS-Q-ST-80C가 *공식 template* 제공.
 
-```
-=== NCR (일반 template) ===
+**NCR (일반 template):**
 
-Identification
-  NCR ID:            [고유 ID]
-  Date Reported:     [YYYY-MM-DD]
-  Reported by:       [reporter]
-  Project / Subsystem
+**Identification:**
 
-Classification
-  Severity:          Critical / Major / Minor / Observation
-  Type:              Functional / Performance / Safety / Security / Doc / Process / Tool
-  Origin:            Internal review / Test failure / Audit / Customer review / External
+| 필드 | 값 |
+|------|-----|
+| NCR ID | [고유 ID] |
+| Date Reported | YYYY-MM-DD |
+| Reported by | [reporter] |
+| Project / Subsystem | — |
 
-Description
-  - 발견 사항 정확히
-  - Expected vs Actual
-  - 재현 조건 (parameters, reproducibility)
+**Classification:**
 
-Affected SCIs
-  - 영향 source / doc / test
+| 필드 | 옵션 |
+|------|------|
+| Severity | Critical / Major / Minor / Observation |
+| Type | Functional / Performance / Safety / Security / Doc / Process / Tool |
+| Origin | Internal review / Test failure / Audit / Customer review / External |
 
-Initial Assessment
-  - Impact (technical, mission)
-  - Workaround if available
+**Description:**
 
-Status / Assigned / Priority / Target Resolution
-```
+- 발견 사항 정확히
+- Expected vs Actual
+- 재현 조건 (parameters, reproducibility)
+
+**Affected SCIs** — 영향 source / doc / test.
+
+**Initial Assessment** — Impact (technical, mission), workaround (있다면).
+
+**기타** — Status / Assigned / Priority / Target Resolution.
 
 ## Root Cause Analysis (RCA) — ECSS 의무
 
@@ -273,32 +263,26 @@ Conclusions:
 
 ECSS는 *defect density*를 *quality metric*으로.
 
-```
-Defect Density Definition:
-  = (Total defects found) / (Total LoC) × 1000
-  = defects per KLoC
+**정의** — `Defect Density = (Total defects found) / (Total LoC) × 1000 = defects per KLoC`.
 
-When measured:
-  Cumulative: 프로젝트 시작부터 누적
-  Phase-specific: 각 phase의 defect
+**측정 시점:**
 
-Industry benchmarks:
-  Aerospace average: 0.5 - 2.0 per KLoC
-  Critical SW (DAL A/Crit A): 0.1 - 0.5 per KLoC
-  Commercial software: 5 - 15 per KLoC
+- *Cumulative* — 프로젝트 시작부터 누적
+- *Phase-specific* — 각 phase의 defect
+
+**Industry benchmarks:**
+
+| 영역 | Defect density (per KLoC) |
+|------|---------------------------|
+| Aerospace average | 0.5 – 2.0 |
+| Critical SW (DAL A/Crit A) | 0.1 – 0.5 |
+| Commercial software | 5 – 15 |
 
 Project target은 *criticality / mission*에 따라 결정.
-```
 
 ### Calculating Defect Removal Efficiency (DRE)
 
-```
-DRE = (Defects found in development) /
-      (Defects found in development + Field defects)
-    × 100%
-
-Target: > 95% (일반적)
-```
+`DRE = (Defects found in development) / (Defects found in development + Field defects) × 100%`. Target — *> 95%* (일반적).
 
 높은 DRE가 *ECSS verification의 효과* 지표 중 하나.
 
@@ -306,40 +290,19 @@ Target: > 95% (일반적)
 
 발사 후 발견된 NCR은 *완전 다른 process*.
 
-```
-=== In-orbit NCR Procedure ===
+**In-orbit NCR Procedure:**
 
-1. Detection
-   - Operations team이 anomaly 발견
-   - Ground station data 분석
-   - Pattern emergence
+**1. Detection** — Operations team이 anomaly 발견, ground station data 분석, pattern emergence.
 
-2. Initial Triage
-   - Severity assessment
-   - Spacecraft 즉각 위협? → Safe Mode 진입 권한
-   - 즉각 위협 X → Investigation 시작
+**2. Initial Triage** — severity assessment. Spacecraft 즉각 위협이면 *Safe Mode 진입 권한*. 즉각 위협이 아니면 Investigation 시작.
 
-3. Investigation (ground)
-   - Engineering team 소집
-   - 가능한 모든 telemetry 분석
-   - Simulation 재현
-   - Vendor 연락 (필요 시)
+**3. Investigation (ground)** — Engineering team 소집, 가능한 모든 telemetry 분석, simulation 재현, vendor 연락 (필요 시).
 
-4. Workaround
-   - 즉각 적용 가능한 운영 변경
-   - 예: Sensor 사용 방식 변경
+**4. Workaround** — 즉각 적용 가능한 운영 변경. 예 — sensor 사용 방식 변경.
 
-5. Permanent Fix
-   - Ground SW 개발
-   - HIL 시뮬레이션 검증
-   - Customer + ESA approval
-   - In-orbit upload (Ch 4 절차)
+**5. Permanent Fix** — Ground SW 개발 → HIL 시뮬레이션 검증 → Customer + ESA approval → in-orbit upload (Ch 4 절차).
 
-6. Closure
-   - Fix 확인 (수주~수개월 monitoring)
-   - Lessons learned 문서화
-   - 다음 mission에 반영
-```
+**6. Closure** — Fix 확인 (수주~수개월 monitoring), lessons learned 문서화, 다음 mission에 반영.
 
 ### In-Orbit NCR — 일반 패턴
 

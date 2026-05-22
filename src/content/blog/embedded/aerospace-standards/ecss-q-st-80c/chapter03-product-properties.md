@@ -44,107 +44,46 @@ ECSS-Q-ST-80C §5.3.2.2가 정의:
 
 ### Metrics
 
-```
-Metric 1: Cyclomatic Complexity
-  - 함수의 의사결정 path 수
-  - Target: < 10 per function
-  - Tool: pmccabe, Lizard, SonarQube
-
-Metric 2: Coupling
-  - 모듈 간 의존성
-  - Afferent Coupling (Ca): 이 모듈 의존하는 다른 모듈 수
-  - Efferent Coupling (Ce): 이 모듈이 의존하는 다른 모듈 수
-  - Instability (I) = Ce / (Ca + Ce)
-    - I = 0: stable
-    - I = 1: unstable
-  - Target: I < 0.5 for core modules
-
-Metric 3: Cohesion (LCOM — Lack of Cohesion of Methods)
-  - 클래스의 method 간 데이터 공유 정도
-  - Low cohesion = bad (분할 권장)
-  - Target: LCOM < 0.5
-
-Metric 4: Lines of Code per function
-  - Target: < 60 (LSLOC, excluding comments)
-  - Long function = harder to maintain
-
-Metric 5: Comment Density
-  - = 주석 라인 수 / 총 라인 수
-  - Target: 15-25% (적절 수준)
-  - 너무 적으면: documentation 부족
-  - 너무 많으면: 잘못된 종류의 주석 가능성
-
-Metric 6: Nesting Depth
-  - Target: < 4
-  - 깊은 nesting = 복잡
-
-Metric 7: Function Parameter Count
-  - Target: < 7
-  - 많으면: 구조체로 묶기
-
-Metric 8: Halstead Volume / Difficulty / Effort
-  - 코드 *복잡도*를 *수학적*으로 측정
-  - V = N × log2(n)  (N = operator+operand count, n = unique)
-  - D = (n1/2) × (N2/n2)
-  - E = D × V
-  - Target: 함수마다 Effort < 100,000
-
-Metric 9: Maintainability Index (MI)
-  - Halstead + Cyclomatic + LoC 결합
-  - MI = 171 - 5.2 × ln(Halstead Volume)
-       - 0.23 × Cyclomatic
-       - 16.2 × ln(LoC)
-  - Target: > 65 (good), > 85 (excellent)
-```
+| # | Metric | 설명 | Target |
+|---|--------|------|--------|
+| 1 | Cyclomatic Complexity | 함수의 의사결정 path 수 (도구 — pmccabe, Lizard, SonarQube) | < 10 per function |
+| 2 | Coupling | Ca(afferent), Ce(efferent), Instability `I = Ce / (Ca + Ce)` | I < 0.5 for core modules |
+| 3 | Cohesion (LCOM) | 클래스의 method 간 데이터 공유 정도 (Low cohesion = bad, 분할 권장) | LCOM < 0.5 |
+| 4 | Lines of Code per function | Long function = harder to maintain | < 60 LSLOC (주석 제외) |
+| 5 | Comment Density | 주석 라인 수 / 총 라인 수. 너무 적으면 doc 부족, 너무 많으면 잘못된 주석 가능 | 15–25% |
+| 6 | Nesting Depth | 깊은 nesting = 복잡 | < 4 |
+| 7 | Function Parameter Count | 많으면 구조체로 묶기 | < 7 |
+| 8 | Halstead Volume / Difficulty / Effort | `V = N × log2(n)`, `D = (n1/2) × (N2/n2)`, `E = D × V` | 함수마다 Effort < 100,000 |
+| 9 | Maintainability Index (MI) | Halstead + Cyclomatic + LoC 결합. `MI = 171 − 5.2 × ln(V) − 0.23 × Cyclomatic − 16.2 × ln(LoC)` | > 65 (good), > 85 (excellent) |
 
 ### 측정 도구
 
-```
-Lizard (오픈소스)
-  - Cyclomatic, NLOC, parameter count
-  - 빠름, 가벼움
-  - Python tool
-
-Understand (Scientific Toolworks)
-  - 종합 metric (Halstead, MI, Coupling)
-  - 시각화
-  - 항공·자동차 광범위 사용
-
-SonarQube
-  - Web-based dashboard
-  - 모든 metric 통합
-  - Trend tracking
-  - Open source + Commercial
-
-Helix QAC (8장 참조)
-  - MISRA + metrics
-
-CodeScene
-  - Hotspot analysis (git history 기반)
-  - Knowledge map
-```
+| 도구 | 특징 |
+|------|------|
+| Lizard (오픈소스) | Cyclomatic, NLOC, parameter count — 빠름, 가벼움, Python tool |
+| Understand (Scientific Toolworks) | 종합 metric (Halstead, MI, Coupling) — 시각화, 항공·자동차 광범위 사용 |
+| SonarQube | Web-based dashboard — 모든 metric 통합, trend tracking, OSS + Commercial |
+| Helix QAC (8장 참조) | MISRA + metrics |
+| CodeScene | Hotspot analysis (git history 기반), knowledge map |
 
 ### Maintainability Report — 일반 template
 
-```
-=== Maintainability Report (일반 template) ===
+**Maintainability Report (일반 template):**
 
-Module info: file name, LoC, function count
+**Module info** — file name, LoC, function count.
 
-Metrics 보고:
-  - Cyclomatic Complexity per function (min/max/avg, target)
-  - Coupling (Ca / Ce / Instability)
-  - LoC per function (min/max/avg, target)
-  - Comment Density (target 15-25%)
-  - Nesting Depth (target < 4)
-  - Parameter Count (target < 7)
-  - Halstead (Volume / Difficulty / Effort)
-  - Maintainability Index distribution
+**Metrics 보고:**
 
-Findings (severity별):
-  Major / Minor / Observation
-  각 finding에 Owner + Due + Action
-```
+- Cyclomatic Complexity per function (min/max/avg, target)
+- Coupling (Ca / Ce / Instability)
+- LoC per function (min/max/avg, target)
+- Comment Density (target 15–25%)
+- Nesting Depth (target < 4)
+- Parameter Count (target < 7)
+- Halstead (Volume / Difficulty / Effort)
+- Maintainability Index distribution
+
+**Findings** (severity별 — Major / Minor / Observation) — 각 finding에 Owner + Due + Action.
 
 각 metric의 *target value*는 *프로젝트 / 조직 / criticality 기반*으로 결정.
 
@@ -189,19 +128,13 @@ Findings (severity별):
 
 ### Reliability 예측 — Software Reliability Growth Models
 
-```
-1. Goel-Okumoto Model
-   λ(t) = α × β × exp(-β × t)
-   α = total defects, β = decay rate
-
-2. Musa Basic Execution Time
-   λ(t) = λ0 × exp(-(λ0/v0) × t)
-
-3. Jelinski-Moranda
-   λ(t) = φ × (N - i)
+| 모델 | 식 | 비고 |
+|------|-----|------|
+| Goel-Okumoto | $\lambda(t) = \alpha \beta \exp(-\beta t)$ | $\alpha$ = total defects, $\beta$ = decay rate |
+| Musa Basic Execution Time | $\lambda(t) = \lambda_0 \exp(-\lambda_0/v_0 \cdot t)$ | — |
+| Jelinski-Moranda | $\lambda(t) = \phi (N - i)$ | — |
 
 이 모델로 *future defect 예측* + *mission 신뢰성 추정*.
-```
 
 ```python
 # Goel-Okumoto 예
@@ -401,23 +334,23 @@ Heritage SW 사용 시:
 
 ### Portability 적용
 
-```
-=== Portability Audit — OBC Software ===
+**Portability Audit — OBC Software**
 
-Target migration: ARM Cortex-M7 → RISC-V (예정 2026)
+Target migration — *ARM Cortex-M7 → RISC-V* (예정 2026).
 
-Findings:
-  - 92% code portable (stdint.h, stdbool.h 사용)
-  - 5% portability barrier (assembler intrinsics in HAL)
-  - 3% portability barrier (compiler-specific attributes)
+**Findings:**
 
-Action:
-  - HAL layer 강화
-  - Compiler attributes를 PORTABLE_ATTR 매크로로 wrapping
-  - Endianness 가정 코드 검토
+- 92% code portable (`stdint.h`, `stdbool.h` 사용)
+- 5% portability barrier (assembler intrinsics in HAL)
+- 3% portability barrier (compiler-specific attributes)
 
-Estimated migration effort: 3 person-months (vs from scratch: 24 months)
-```
+**Action:**
+
+- HAL layer 강화
+- Compiler attributes를 `PORTABLE_ATTR` 매크로로 wrapping
+- Endianness 가정 코드 검토
+
+Estimated migration effort — *3 person-months* (vs from scratch — 24 months).
 
 ## 7. Software Suitability
 
