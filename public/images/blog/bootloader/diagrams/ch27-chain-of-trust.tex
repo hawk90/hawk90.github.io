@@ -1,0 +1,49 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,8.6) {Chain of Trust};
+
+\node[imp, minimum width=100mm, minimum height=11mm, align=center] (root) at (0,7.4)
+  {\textbf{eFuse PK hash} — Root of Trust (변경 불가)};
+
+\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s1) at (0,5.6)
+  {BootROM → BL1 / SPL 검증};
+
+\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s2) at (0,3.8)
+  {BL1 → BL2 검증};
+
+\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s3) at (0,2.0)
+  {BL2 → BL31 / BL32 / BL33 검증};
+
+\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s4) at (0,0.2)
+  {U-Boot (BL33) → kernel / DT / initramfs (FIT) 검증};
+
+\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s5) at (0,-1.6)
+  {kernel → kernel module (\texttt{.ko}) 서명 검증};
+
+\node[hi, minimum width=100mm, minimum height=11mm, align=center] (s6) at (0,-3.4)
+  {user space (dm-verity로 rootfs 무결성)};
+
+% Arrows with verification keys on edges
+\draw[arr, line width=0.8pt] (root.south) -- (s1.north)
+  node[midway, right, caption] {\scriptsize SHA-256 비교};
+\draw[arr, line width=0.8pt] (s1.south) -- (s2.north)
+  node[midway, right, caption] {\scriptsize RSA};
+\draw[arr, line width=0.8pt] (s2.south) -- (s3.north)
+  node[midway, right, caption] {\scriptsize trusted key};
+\draw[arr, line width=0.8pt] (s3.south) -- (s4.north)
+  node[midway, right, caption] {\scriptsize control DT key};
+\draw[arr, line width=0.8pt] (s4.south) -- (s5.north)
+  node[midway, right, caption] {\scriptsize builtin\_trusted\_keys};
+\draw[arr, line width=0.8pt] (s5.south) -- (s6.north)
+  node[midway, right, caption] {\scriptsize dm-verity root hash};
+
+\end{tikzpicture}
+\end{document}

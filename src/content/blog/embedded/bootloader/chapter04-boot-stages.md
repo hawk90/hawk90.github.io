@@ -56,28 +56,7 @@ ARM Trusted Firmware의 *공식 단계 이름*은 다음과 같습니다.
 
 U-Boot은 *자체 다단 모델*인 SPL/TPL을 가집니다. TF-A를 안 쓰는 ARMv7-A에서는 *이 모델 단독*으로 동작합니다.
 
-```text
-[BootROM]
-   │
-   ▼
-[TPL]   - Tertiary Program Loader (선택)
-        - 매우 작은 SRAM(예: 12KB)에서 동작
-        - SPL을 적재
-   │
-   ▼
-[SPL]   - Secondary Program Loader
-        - DDR이 없는 SRAM에서 동작
-        - DDR init, U-Boot Proper 적재
-   │
-   ▼
-[U-Boot Proper]
-        - DDR에서 동작
-        - 명령 인터프리터
-        - 커널 적재
-   │
-   ▼
-[Linux Kernel]
-```
+![U-Boot SPL/TPL 모델 — BootROM → TPL(작은 SRAM, 옵션) → SPL(DDR init + U-Boot Proper 적재) → U-Boot Proper(DDR) → Linux Kernel](/images/blog/bootloader/diagrams/ch04-uboot-spl-tpl.svg)
 
 TPL이 *왜 필요한가*. 일부 SoC는 *내부 SRAM이 매우 작고*(예: ROC-RK3399 보드의 일부 RK3399 SRAM은 *32KB 이하*), SPL이 거기 안 들어갑니다. *더 작은 TPL*이 *조금 큰 SPL*을 메모리에 풀어 놓고 점프합니다. 마치 SPL이 U-Boot Proper를 풀어 놓는 것과 *같은 구조*입니다.
 
@@ -87,17 +66,10 @@ TPL이 *왜 필요한가*. 일부 SoC는 *내부 SRAM이 매우 작고*(예: ROC
 
 ARMv8-A 보드에서 *SPL과 BL2 중 하나*가 *DDR initialization 책임*을 집니다. 둘 다 *같은 자리*입니다. 보드마다 둘 중 하나를 선택합니다.
 
-```text
-[모델 A — SPL 사용]
-BootROM → SPL → BL31 → U-Boot Proper → Linux
-         ↑
-         DDR init, BL31 적재
-
-[모델 B — BL2 사용]
-BootROM → BL1 → BL2 → BL31 → U-Boot Proper → Linux
-              ↑
-              DDR init, BL31 적재
-```
+| 모델 | 흐름 | DDR init 담당 |
+|------|------|---------------|
+| **A — SPL 사용** | BootROM → **SPL** → BL31 → U-Boot Proper → Linux | SPL (BL31 적재) |
+| **B — BL2 사용** | BootROM → BL1 → **BL2** → BL31 → U-Boot Proper → Linux | BL2 (BL31 적재) |
 
 i.MX 8M, Rockchip RK3399는 *모델 A*입니다. 일부 ARM server SKU는 *모델 B*입니다. NXP가 SPL을 선호하는 이유는 *U-Boot의 driver model을 그대로 재사용*할 수 있어서입니다.
 

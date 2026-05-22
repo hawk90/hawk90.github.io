@@ -18,27 +18,7 @@ draft: false
 
 ARM64 CPU가 reset signal을 받으면 *reset vector*로 점프합니다. ARMv8의 경우 EL3(secure monitor)에서 시작하고, reset vector 주소는 SoC 설계에 따라 고정되어 있습니다.
 
-```text
-[전원 인가]
-   │
-   ▼
-[POR — Power-On Reset]
-   - PMIC가 voltage rail을 차례로 올림
-   - PLL이 lock되기까지 ms 단위 대기
-   - CPU reset deassert
-   │
-   ▼
-[Reset Vector @ 고정 주소]
-   - i.MX 8M: 0x00910000 (BootROM)
-   - Rockchip RK3399: 0xFFFF0000 (BootROM)
-   - Raspberry Pi: GPU가 먼저, ARM은 나중
-   │
-   ▼
-[BootROM 실행 — SoC ROM 안의 코드]
-   - mask ROM, 변경 불가
-   - boot mode pin을 읽음 (SD/eMMC/USB/SPI)
-   - 부트 미디어에서 다음 단계 적재
-```
+![Reset 직후 흐름 — 전원 → POR(PMIC rail + PLL lock + CPU deassert) → Reset Vector(SoC 고정 주소) → BootROM(boot mode strap에 따라 다음 단계 적재)](/images/blog/bootloader/diagrams/ch01-reset-flow.svg)
 
 BootROM은 *SoC 출고 시 mask ROM에 굳어진 코드*입니다. 우리가 수정할 수 없습니다. BootROM은 *boot mode strap pin*을 읽어 어디서 다음 단계를 가져올지 정한 뒤, SoC 내부 SRAM에 *수십 KB짜리 작은 이미지*를 적재해 점프합니다.
 
@@ -84,47 +64,7 @@ ARM64 Linux 커널 진입 요구사항은 다음과 같습니다.
 
 전원 인가부터 user space의 init까지를 한눈에 보면 다음과 같습니다.
 
-```text
-[POR]
-   │
-   ▼
-[BootROM]
-   - mask ROM, SoC 고정
-   - boot mode 결정
-   - 다음 단계를 SRAM에 적재
-   │
-   ▼
-[SPL / BL1+BL2]
-   - SRAM 안, 50~100 KB
-   - DDR init, clock, pinmux
-   - U-Boot Proper를 DDR에 적재
-   │
-   ▼
-[BL31 (TF-A)]  ←  ARMv8-A secure 보드만
-   - EL3 secure monitor
-   - PSCI(Power State Coord Interface) 제공
-   - SMC 핸들러 등록
-   - BL33으로 점프
-   │
-   ▼
-[U-Boot Proper / BL33]
-   - DDR 위에서 동작
-   - 시리얼 console + 명령 인터프리터
-   - 환경 변수 처리
-   - 커널 이미지 적재 (mmc, tftp, fit)
-   - DTB fixup (MAC, memory size)
-   - booti / bootm으로 커널 진입
-   │
-   ▼
-[Linux Kernel]
-   - 메모리 매핑, 페이지 테이블
-   - 드라이버 probe
-   - rootfs 마운트
-   - init/systemd 실행
-   │
-   ▼
-[User space]
-```
+![전체 부트 체인 — POR → BootROM → SPL/BL1+BL2 → BL31(TF-A) → U-Boot Proper/BL33 → Linux Kernel → user space, 각 단계가 다음 단계를 메모리에 적재하고 점프](/images/blog/bootloader/diagrams/ch01-full-boot-chain.svg)
 
 각 단계가 *다음 단계를 메모리에 적재*하고 *점프*하는 *수직 인계* 구조입니다. 한 단계가 죽으면 *다음 단계는 시작도 못 합니다*.
 

@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,9.0) {ARMv8-A Full Boot Chain};
+
+\node[neut, minimum width=90mm, minimum height=10mm, align=center] (s1) at (0,7.6)
+  {POR (Power-On Reset)};
+
+\node[abs, minimum width=90mm, minimum height=12mm, align=center] (s2) at (0,5.8)
+  {\textbf{BootROM}\\\small mask ROM, SoC 고정 · boot mode 결정 · 다음 단계를 SRAM에 적재};
+
+\node[abs, minimum width=90mm, minimum height=14mm, align=center] (s3) at (0,3.6)
+  {\textbf{SPL / BL1 + BL2}\\\small SRAM 안 50$\sim$100 KB · DDR init · clock · pinmux · U-Boot Proper를 DDR에 적재};
+
+\node[imp, minimum width=90mm, minimum height=14mm, align=center] (s4) at (0,1.4)
+  {\textbf{BL31 (TF-A)} — ARMv8-A secure 보드만\\\small EL3 secure monitor · PSCI · SMC 핸들러 · BL33으로 점프};
+
+\node[abs, minimum width=90mm, minimum height=16mm, align=center] (s5) at (0,-1.0)
+  {\textbf{U-Boot Proper / BL33}\\\small DDR 위 실행 · 시리얼 console · 환경 변수 · 커널 적재 (mmc/tftp/fit) · DTB fixup · booti/bootm};
+
+\node[hi, minimum width=90mm, minimum height=14mm, align=center] (s6) at (0,-3.2)
+  {\textbf{Linux Kernel}\\\small 메모리 매핑 · 페이지 테이블 · 드라이버 probe · rootfs 마운트 · init/systemd};
+
+\node[neut, minimum width=90mm, minimum height=10mm, align=center] (s7) at (0,-5.0)
+  {User space};
+
+\draw[arr, line width=0.8pt] (s1.south) -- (s2.north);
+\draw[arr, line width=0.8pt] (s2.south) -- (s3.north);
+\draw[arr, line width=0.8pt] (s3.south) -- (s4.north);
+\draw[arr, line width=0.8pt] (s4.south) -- (s5.north);
+\draw[arr, line width=0.8pt] (s5.south) -- (s6.north);
+\draw[arr, line width=0.8pt] (s6.south) -- (s7.north);
+
+\end{tikzpicture}
+\end{document}

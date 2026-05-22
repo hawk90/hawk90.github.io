@@ -28,27 +28,7 @@ eFuse에 박는 이 hash를 NXP는 *SRK hash*(Super Root Key), Rockchip은 *PK h
 
 전체 체인을 *수직 인계* 구조로 펼치면 다음과 같습니다.
 
-```text
-[eFuse PK hash]   ← Root of Trust (변경 불가)
-       │ BootROM이 다음 이미지의 public key SHA-256을 비교
-       ▼
-[BootROM → BL1/SPL 검증]
-       │ BL1이 묶인 RSA public key로 BL2 서명 검증
-       ▼
-[BL1 → BL2 검증]
-       │ BL2가 trusted key로 BL31·BL32·BL33 서명 검증
-       ▼
-[BL2 → BL31 / BL32 / BL33 검증]
-       │ BL33(U-Boot)이 control DT에 박힌 키로 FIT 검증
-       ▼
-[U-Boot → kernel/DT/initramfs (FIT) 검증]
-       │ 커널이 .builtin_trusted_keys로 모듈 .ko 서명 검증
-       ▼
-[kernel → kernel module 검증]
-       │ user space는 dm-verity로 rootfs 무결성 유지
-       ▼
-[user space]
-```
+![Chain of Trust — eFuse PK hash(RoT) → BootROM이 SPL 검증 → BL1→BL2→BL31/32/33 단계별 RSA 서명 검증 → U-Boot이 FIT 검증 → 커널이 모듈 서명 검증 → user space는 dm-verity로 rootfs 무결성](/images/blog/bootloader/diagrams/ch27-chain-of-trust.svg)
 
 각 단계가 *다음 단계의 서명*을 *자기 키*로 검증합니다. 한 단계라도 *키가 없거나*, *서명이 깨졌거나*, *anti-rollback 카운터가 옛 버전*이면 부팅이 즉시 끊깁니다.
 

@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (0,5.6) {Reset 직후 부트 흐름};
+
+\node[neut, minimum width=80mm, minimum height=10mm, align=center] (p1) at (0,4.4)
+  {전원 인가};
+
+\node[abs, minimum width=80mm, minimum height=16mm, align=center] (p2) at (0,2.6)
+  {\textbf{POR — Power-On Reset}\\\small PMIC voltage rail 차례 상승 · PLL lock 대기 (ms) · CPU reset deassert};
+
+\node[abs, minimum width=80mm, minimum height=16mm, align=center] (p3) at (0,0.4)
+  {\textbf{Reset Vector @ 고정 주소}\\\small i.MX 8M \texttt{0x00910000} · Rockchip RK3399 \texttt{0xFFFF0000} · RPi (GPU 먼저)};
+
+\node[imp, minimum width=80mm, minimum height=16mm, align=center] (p4) at (0,-2.0)
+  {\textbf{BootROM 실행} (mask ROM, 변경 불가)\\\small boot mode pin 읽기 (SD/eMMC/USB/SPI) → 다음 단계를 SRAM에 적재};
+
+\draw[arr, line width=0.8pt] (p1.south) -- (p2.north);
+\draw[arr, line width=0.8pt] (p2.south) -- (p3.north);
+\draw[arr, line width=0.8pt] (p3.south) -- (p4.north);
+
+\end{tikzpicture}
+\end{document}

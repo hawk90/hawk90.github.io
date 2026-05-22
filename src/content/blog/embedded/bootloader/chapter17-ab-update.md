@@ -132,7 +132,7 @@ defconfig에는 다음을 켭니다.
 ```text
 CONFIG_BOOTCOUNT_LIMIT=y
 CONFIG_BOOTCOUNT_ENV=y
-# 또는 더 안전한 백엔드
+# Or a safer backend
 # CONFIG_BOOTCOUNT_I2C=y
 # CONFIG_SYS_I2C_RTC_ADDR=0x68
 ```
@@ -208,8 +208,9 @@ struct slot_metadata {
 | I2C EEPROM | `CONFIG_BOOTCOUNT_I2C` | 별도 EEPROM 칩 | 부트 체인 독립 | 추가 부품·BOM |
 | PMIC register | `CONFIG_BOOTCOUNT_PMIC` | PMIC 비휘발 레지스터 | 칩 통합 | PMIC vendor 종속 |
 
+권장 양산 defconfig 예:
+
 ```text
-# defconfig — 권장 양산 설정 예
 CONFIG_BOOTCOUNT_LIMIT=y
 CONFIG_BOOTCOUNT_I2C=y
 CONFIG_SYS_BOOTCOUNT_ADDR=0x68
