@@ -119,27 +119,27 @@ $ gcc -Og -g3 -fno-omit-frame-pointer ...
 
 다음을 `~/.gdbinit`에 넣어 두면 매번 입력하지 않아도 됩니다.
 
-```
-# History
+```gdb
+# 히스토리
 set history save on
 set history filename ~/.gdb_history
 set history size 10000
 
-# Output formatting
+# 출력
 set print pretty on
 set print object on
 set print array on
 set print array-indexes on
 set print elements 200
 
-# Auto-stop behavior
+# 자동 정지 동작
 set pagination off
 set confirm off
 
-# Allow library auto-load (pretty-printers etc.)
+# 라이브러리 자동 로드 허용 (pretty-printer 등)
 set auto-load safe-path /
 
-# Color
+# 색
 set style sources on
 
 # follow-fork

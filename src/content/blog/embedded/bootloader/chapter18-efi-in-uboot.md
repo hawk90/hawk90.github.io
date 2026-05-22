@@ -93,7 +93,7 @@ CONFIG_EFI_SECURE_BOOT=y
 
 다음은 ESP(EFI System Partition)에서 Linux EFI stub을 직접 부팅하는 전체 흐름입니다.
 
-```text
+```bash
 # ESP를 FAT으로 마운트하고 파일 확인
 => ls mmc 0:1
     12345678   EFI/BOOT/BOOTAA64.EFI

@@ -207,7 +207,7 @@ Seq  Method       State   Uclass    Part  Name                              File
 
 Raspberry Pi는 *완전히 다른 부트 흐름*을 씁니다. ARM 코어가 아니라 *VideoCore GPU가 먼저 부팅*하고, GPU의 firmware가 *SD 카드의 FAT32 파티션*에서 `config.txt`를 읽습니다.
 
-```text
+```ini
 # /boot/config.txt
 # CPU / 메모리
 arm_64bit=1

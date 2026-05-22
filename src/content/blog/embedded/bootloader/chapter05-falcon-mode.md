@@ -16,36 +16,14 @@ draft: false
 
 ## 일반 흐름과 Falcon 흐름
 
-### 일반 흐름
+| 단계 | 일반 흐름 | Falcon 흐름 |
+|------|-----------|-------------|
+| BootROM | 0 ms | 0 ms |
+| SPL | 100 ms (DDR init 80 ms) | **150 ms (DDR init + 커널 적재)** |
+| U-Boot Proper | 400~1000 ms — driver probe, env, autoboot delay, bootcmd | *생략* |
+| Linux Kernel | 부트 시작 | 부트 시작 |
 
-```text
-[BootROM]     0 ms
-   │
-   ▼
-[SPL]         100 ms (DDR init 80 ms 포함)
-   │
-   ▼
-[U-Boot Proper]   400~1000 ms
-   - driver probe (MMC, NET, USB)
-   - 환경 변수 읽기
-   - autoboot delay
-   - bootcmd 실행
-   │
-   ▼
-[Linux Kernel]   부트 시작
-```
-
-### Falcon 흐름
-
-```text
-[BootROM]     0 ms
-   │
-   ▼
-[SPL]         150 ms (DDR init + 커널 적재)
-   │
-   ▼
-[Linux Kernel]   부트 시작
-```
+차이는 *수백 ms* — U-Boot Proper 단계가 완전히 사라진다.
 
 U-Boot Proper 단계가 *완전히 사라집니다*. 차이는 *수백 ms* 입니다.
 
@@ -158,17 +136,17 @@ int spl_start_uboot(void)
 
 Falcon이 동작하려면 *DTB + bootargs*가 *부트 미디어에 미리 굳어져* 있어야 합니다. 일반 U-Boot Proper에서 `spl export` 명령으로 *args를 추출*합니다.
 
-```text
-[일반 U-Boot Proper 부트]
+```bash
+# 일반 U-Boot Proper 부트
 => setenv bootargs "console=ttymxc1,115200 root=/dev/mmcblk0p2 rw rootwait"
 => load mmc 0:1 ${loadaddr} Image
 => load mmc 0:1 ${fdt_addr} imx8mp-evk.dtb
 
 # 이 시점에 kernel과 dtb가 메모리에 있음
 
-=> spl export atags ${fdt_addr}      ← ARMv7 (ATAGS)
-또는
-=> spl export fdt ${fdt_addr}         ← ARMv8 (FDT)
+=> spl export atags ${fdt_addr}      # ARMv7 (ATAGS)
+# 또는
+=> spl export fdt ${fdt_addr}        # ARMv8 (FDT)
 ```
 
 `spl export`는 *현재의 bootargs를 DTB의 chosen 노드에 fixup*한 *완성된 DTB*를 만들고, 그 DTB의 *주소를 출력*합니다.

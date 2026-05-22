@@ -404,19 +404,19 @@ LLDB:
 
 ### `.gdbinit`
 
-```
+```gdb
 # ~/.gdbinit
 
-# Disable output pagination (auto-scroll long output)
+# 출력 페이지네이션 끄기 (긴 출력 자동 스크롤)
 set pagination off
 
-# Follow child process (multi-process)
+# 자식 프로세스 따라가기 (멀티프로세스용)
 set follow-fork-mode child
 
-# Assembly syntax
+# 어셈블리 신택스
 set disassembly-flavor intel
 
-# Auto command
+# 자동 명령
 define hookpost-run
     info threads
 end

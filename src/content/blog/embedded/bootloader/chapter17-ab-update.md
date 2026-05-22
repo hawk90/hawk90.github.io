@@ -129,10 +129,10 @@ ulong bootcount_load(void)
 
 defconfig에는 다음을 켭니다.
 
-```text
+```ini
 CONFIG_BOOTCOUNT_LIMIT=y
 CONFIG_BOOTCOUNT_ENV=y
-# Or a safer backend
+# 또는 더 안전한 백엔드
 # CONFIG_BOOTCOUNT_I2C=y
 # CONFIG_SYS_I2C_RTC_ADDR=0x68
 ```

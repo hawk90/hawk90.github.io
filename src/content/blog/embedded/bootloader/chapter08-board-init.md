@@ -222,7 +222,7 @@ DRAM 2GB:
 
 relocation 함수는 *arch별 assembly*입니다.
 
-```text
+```asm
 /* arch/arm/lib/relocate.S */
 
 ENTRY(relocate_code)

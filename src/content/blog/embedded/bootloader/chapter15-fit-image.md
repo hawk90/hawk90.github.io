@@ -248,7 +248,7 @@ U-Boot 측에서 `CONFIG_FIT_SIGNATURE=y`를 켜면 `bootm`이 *서명 없는 FI
 
 `configurations` 노드의 강력함은 *한 `.itb`로 여러 보드*를 지원하는 데 있습니다. 양산 라인에서 보드 revision이 늘어날 때마다 별도 이미지를 빌드하지 않아도 됩니다.
 
-```text
+```bash
 # U-Boot 측에서 보드 자동 감지
 => setenv board_rev "revA"
 => bootm ${loadaddr}#conf-${board_rev}
