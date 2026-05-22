@@ -14,12 +14,19 @@ draft: false
 
 ```text
 build/
-├── myapp                  # 실행 파일
-├── libmylib.so           # 공유 라이브러리
-├── CMakeFiles/           # CMake 내부
-├── cmake_install.cmake   # 설치 스크립트 (CMake가 생성)
+├── myapp
+├── libmylib.so
+├── CMakeFiles/
+├── cmake_install.cmake
 └── ... 수십 개의 파일
 ```
+
+| 파일 | 역할 |
+|------|------|
+| `myapp` | 실행 파일 |
+| `libmylib.so` | 공유 라이브러리 |
+| `CMakeFiles/` | CMake 내부 |
+| `cmake_install.cmake` | 설치 스크립트 (CMake가 생성) |
 
 이대로는 *배포할 수가 없습니다*. 사용자에게 "이 디렉터리를 통째로 복사하세요"라고 할 수 없기 때문입니다. 실행 파일은 `/usr/local/bin`에, 라이브러리는 `/usr/local/lib`에, 헤더는 `/usr/local/include`에 가야 합니다. 그것도 *플랫폼별 관행에 맞춰* 다른 자리에 가야 합니다.
 
@@ -221,22 +228,34 @@ target_link_libraries(app PRIVATE MyLib::mylib)
 
 ### 설치 후의 디렉터리 구조
 
+설치 후의 디렉터리 구조 — `${PREFIX}/` (예: `/usr/local`):
+
 ```text
-${PREFIX}/                                       ← 예: /usr/local
+${PREFIX}/
 ├── bin/
 │   └── myapp
 ├── lib/
-│   ├── libmylib.so                              ← 라이브러리 본체
+│   ├── libmylib.so
 │   └── cmake/
 │       └── MyLib/
-│           ├── MyLibConfig.cmake                ← find_package(MyLib) 진입점
-│           ├── MyLibConfigVersion.cmake         ← 버전 검사 로직
-│           └── MyLibTargets.cmake               ← imported 타겟 정의
-│           └── MyLibTargets-release.cmake       ← 구성별 타겟 정보
+│           ├── MyLibConfig.cmake
+│           ├── MyLibConfigVersion.cmake
+│           ├── MyLibTargets.cmake
+│           └── MyLibTargets-release.cmake
 └── include/
     └── mylib/
-        └── api.h                                ← 공개 헤더
+        └── api.h
 ```
+
+| 경로 | 역할 |
+|------|------|
+| `bin/myapp` | 실행 파일 |
+| `lib/libmylib.so` | 라이브러리 본체 |
+| `lib/cmake/MyLib/MyLibConfig.cmake` | `find_package(MyLib)` 진입점 |
+| `lib/cmake/MyLib/MyLibConfigVersion.cmake` | 버전 검사 로직 |
+| `lib/cmake/MyLib/MyLibTargets.cmake` | imported 타겟 정의 |
+| `lib/cmake/MyLib/MyLibTargets-release.cmake` | 구성별 타겟 정보 |
+| `include/mylib/api.h` | 공개 헤더 |
 
 세 파일이 만들어내는 그림:
 

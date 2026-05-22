@@ -22,28 +22,26 @@ draft: false
 
 ## 용어집 예
 
-```markdown
-# 프로젝트 용어집
+**고객 (Customer)**
 
-## 고객 (Customer)
-- 정의: 우리 서비스에 가입한 개인 또는 기업
-- 코드: `Customer` 클래스
-- DB: `customers` 테이블
-- 참고: "사용자(User)"와 구분. 사용자는 로그인하는 사람,
-        고객은 결제하는 주체.
+- 정의 — 우리 서비스에 가입한 개인 또는 기업
+- 코드 — `Customer` 클래스
+- DB — `customers` 테이블
+- 참고 — *사용자(User)*와 구분. 사용자는 *로그인하는 사람*, 고객은 *결제하는 주체*
 
-## 주문 (Order)
-- 정의: 고객이 상품을 구매하기 위해 생성한 요청
-- 코드: `Order` 클래스
-- DB: `orders` 테이블
-- 상태: 생성됨, 결제됨, 배송중, 완료, 취소
-- 참고: "장바구니(Cart)"와 구분. 결제 전은 장바구니.
+**주문 (Order)**
 
-## SKU
-- 정의: Stock Keeping Unit. 개별 상품을 식별하는 코드
-- 예: "SHOE-RED-42" (빨간 신발 42사이즈)
-- 코드: `Product.sku`
-```
+- 정의 — 고객이 상품을 구매하기 위해 생성한 요청
+- 코드 — `Order` 클래스
+- DB — `orders` 테이블
+- 상태 — 생성됨, 결제됨, 배송중, 완료, 취소
+- 참고 — *장바구니(Cart)*와 구분. 결제 전은 장바구니
+
+**SKU**
+
+- 정의 — Stock Keeping Unit, 개별 상품을 식별하는 코드
+- 예 — `SHOE-RED-42` (빨간 신발 42사이즈)
+- 코드 — `Product.sku`
 
 ## 용어집의 이점
 
@@ -114,21 +112,14 @@ class OrderEntity:
 
 ## 동음이의어 주의
 
-같은 단어가 다른 의미일 수 있다.
+같은 단어가 다른 의미일 수 있다. 예 — *계정 (Account)*.
 
-```markdown
-## 계정 (Account)
+| 종류 | 의미 | 테이블 |
+|------|------|--------|
+| User Account | 로그인 정보 | `users` |
+| Financial Account | 수입/지출 분류 | `chart_of_accounts` |
 
-### 1. 사용자 계정 (User Account)
-- 로그인 정보
-- `users` 테이블
-
-### 2. 회계 계정 (Financial Account)
-- 수입/지출 분류
-- `chart_of_accounts` 테이블
-
-⚠️ 맥락에 따라 다른 것을 의미함
-```
+> ⚠️ 맥락에 따라 다른 것을 의미한다.
 
 ## 약어 정리
 

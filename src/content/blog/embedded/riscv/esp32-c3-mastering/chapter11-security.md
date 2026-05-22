@@ -60,18 +60,12 @@ espefuse.py --port /dev/ttyUSB0 burn_efuse SECURE_BOOT_EN 1
 
 Secure Boot V2는 *3단계 체인*을 ECDSA-256으로 검증합니다.
 
-```text
-ROM bootloader (마스크롬, 변경 불가)
-   │ Boot ROM이 BOOTLOADER 영역의 서명을 검증
-   ▼
-Secondary bootloader (사용자 빌드, 서명 됨)
-   │ 자체적으로 partition table 서명 검증
-   ▼
-Partition table (서명 됨)
-   │
-   ▼
-Application (서명 됨)
-```
+| 단계 | 검증 |
+|------|------|
+| ROM bootloader (마스크롬, 변경 불가) | Boot ROM이 BOOTLOADER 영역의 서명을 검증 |
+| Secondary bootloader (사용자 빌드, 서명 됨) | 자체적으로 partition table 서명 검증 |
+| Partition table (서명 됨) | (다음 단계가 검증) |
+| Application (서명 됨) | bootloader가 검증 |
 
 각 단계의 서명은 *공통 ECDSA-256 공개키*로 검증됩니다. 공개키의 SHA-256 digest가 *eFuse의 SECURE_BOOT_V2_KEY_DIGEST에 burn*되어 있습니다. 최대 *3개의 digest*를 보관할 수 있어, *키 회전*이 가능합니다.
 
@@ -231,31 +225,13 @@ Digital Signature(DS) peripheral은 *RSA 서명을 하드웨어 가속*합니다
 
 가장 흔한 *영구 brick 시나리오*는 *Development에서 충분히 확인하지 않고 바로 Release*로 봉인하는 것입니다. 권장 워크플로입니다.
 
-```text
-[STEP 1] Development 모드로 1차 검증
-  - sdkconfig: SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
-  - Secure Boot은 켜고 키 burn은 안 함
-  - 펌웨어가 잘 부팅·OTA되는지 확인
-
-[STEP 2] 키 생성과 백업
-  - secure_boot_signing_key.pem 생성
-  - HSM 또는 안전한 키 저장소에 백업
-  - 키 분실 = 향후 OTA 불가 = 모든 디바이스가 영구 동결
-
-[STEP 3] Development 모드에서 Secure Boot 활성
-  - SECURE_BOOT_EN burn
-  - 서명된 binary로 재플래시
-  - bootup·OTA 모두 검증
-
-[STEP 4] Release 모드로 전환 (한 디바이스에만 먼저)
-  - sdkconfig: SECURE_FLASH_ENCRYPTION_MODE_RELEASE
-  - 한 디바이스에서 24~48시간 검증
-  - OTA, BLE provisioning, 정상 운영 시나리오 전부
-
-[STEP 5] 양산 라인 적용
-  - JTAG·UART 차단됨
-  - 디버그 불가, 모든 갱신은 OTA만
-```
+| 단계 | 활동 |
+|------|------|
+| **1. Development 모드 1차 검증** | sdkconfig `SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT` · Secure Boot은 켜고 키 burn은 안 함 · 펌웨어가 잘 부팅·OTA되는지 확인 |
+| **2. 키 생성과 백업** | `secure_boot_signing_key.pem` 생성 · HSM 또는 안전한 키 저장소에 백업 · 키 분실 = 향후 OTA 불가 = 모든 디바이스 영구 동결 |
+| **3. Development 모드에서 Secure Boot 활성** | `SECURE_BOOT_EN` burn · 서명된 binary로 재플래시 · bootup·OTA 모두 검증 |
+| **4. Release 모드로 전환** (한 디바이스에만 먼저) | sdkconfig `SECURE_FLASH_ENCRYPTION_MODE_RELEASE` · 한 디바이스에서 24~48시간 검증 · OTA, BLE provisioning, 정상 운영 시나리오 전부 |
+| **5. 양산 라인 적용** | JTAG·UART 차단됨 · 디버그 불가, 모든 갱신은 OTA만 |
 
 ### 영구 brick 시나리오
 

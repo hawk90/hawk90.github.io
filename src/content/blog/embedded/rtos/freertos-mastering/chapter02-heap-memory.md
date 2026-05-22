@@ -89,14 +89,13 @@ void vPortFree(void *pv)
 
 `vPortFree`를 지원하지만 *인접한 free 블록을 병합하지 않습니다*. 같은 크기 객체를 *반복 생성·삭제*하는 패턴에는 잘 맞지만, *크기가 들쭉날쭉*하면 fragmentation으로 죽습니다.
 
-```text
-heap_2 사용 시나리오
-1. block(32) alloc → free
-2. block(32) alloc → free          OK, 같은 자리 재사용
-3. block(64) alloc → free
+heap_2 사용 시나리오:
+
+1. `block(32)` alloc → free
+2. `block(32)` alloc → free — OK, 같은 자리 재사용
+3. `block(64)` alloc → free
 4. 32+32+64 인접 free 영역 있음
-5. block(96) alloc → 실패!         병합을 안 하므로
-```
+5. `block(96)` alloc → *실패* — 병합을 안 하므로
 
 *신규 프로젝트에는 권장되지 않습니다*. 책에서도 *deprecated 분위기*입니다. 후술할 heap_4가 *상위호환*이라 heap_2를 쓸 이유가 거의 없습니다.
 
@@ -124,24 +123,18 @@ void *pvPortMalloc(size_t xWantedSize)
 
 free된 블록을 *주소상 인접한 free 블록과 자동 병합*합니다. fragmentation을 *현실적으로 완화*하고, *대부분의 신규 프로젝트의 디폴트*입니다.
 
+**heap_4 자료구조** — *free block linked list* (주소 오름차순).
+
 ```text
-heap_4 자료구조 — free block linked list
-Free block list (주소 오름차순)
-
-  head ──► [12 byte free] ──► [40 byte free] ──► [128 byte free] ──► end
-              ↓                    ↓                    ↓
-            BlockLink_t          BlockLink_t          BlockLink_t
-            {pxNextFreeBlock,    {pxNextFreeBlock,    {pxNextFreeBlock,
-             xBlockSize=12}       xBlockSize=40}       xBlockSize=128}
-
-할당
-  best-fit이 아니라 first-fit (충분히 큰 첫 블록을 씀)
-  남는 부분은 다시 free list에 삽입
-
-해제
-  주변 블록의 주소를 확인 → 인접하면 즉시 병합
-  병합 후 free list 갱신
+head ──► [12 byte free] ──► [40 byte free] ──► [128 byte free] ──► end
 ```
+
+각 노드가 `BlockLink_t { pxNextFreeBlock, xBlockSize }`.
+
+| 단계 | 동작 |
+|------|------|
+| 할당 | best-fit이 아니라 *first-fit* (충분히 큰 첫 블록을 씀). 남는 부분은 다시 free list에 삽입 |
+| 해제 | 주변 블록의 주소를 확인 → 인접하면 *즉시 병합*. 병합 후 free list 갱신 |
 
 `pvPortMalloc`의 흐름은 다음과 같습니다.
 

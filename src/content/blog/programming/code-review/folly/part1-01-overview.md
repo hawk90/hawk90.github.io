@@ -19,15 +19,13 @@ C++ 표준 라이브러리는 신중하다. 표준화 위원회의 합의를 거
 
 Meta는 다른 제약을 가진다. 수십억 사용자의 요청을 처리해야 하고, 마이크로초가 데이터센터 수십 대 분량의 비용 차이로 이어진다. fbcode monorepo는 단일 빌드 시스템과 단일 toolchain을 강제하므로 ABI 호환성을 외부와 맞출 필요도 없다. 이 환경에서 Folly가 자라났다.
 
-```text
-표준 라이브러리          Folly
-─────────────────       ─────────────────
-보수적 ABI 안정          빌드마다 변경 가능
-범용 구현               워크로드 specific 최적화
-예외 회피 옵션          예외 적극 활용
-독립적 의존성            jemalloc/glog/Boost 의존
-표준 위원회 합의         Meta 내부 합의 + OSS 공개
-```
+| 측면 | 표준 라이브러리 | Folly |
+|------|-----------------|-------|
+| ABI | 보수적 안정 | 빌드마다 변경 가능 |
+| 구현 | 범용 | 워크로드 specific 최적화 |
+| 예외 | 회피 옵션 | 적극 활용 |
+| 의존성 | 독립적 | jemalloc/glog/Boost 의존 |
+| 거버넌스 | 표준 위원회 합의 | Meta 내부 합의 + OSS 공개 |
 
 Folly는 그 결과물이다. fbstring은 24바이트 SSO와 `__builtin_expect` 기반 분기 힌트로 std::string보다 빠르고, F14 hashmap은 SIMD 16-way probing으로 std::unordered_map을 두 배 이상 앞선다. fbvector는 jemalloc의 `realloc()`을 직접 호출해 메모리를 in-place로 확장한다.
 
@@ -35,23 +33,22 @@ Folly는 그 결과물이다. fbstring은 24바이트 SSO와 `__builtin_expect` 
 
 Folly의 헤더는 카테고리별로 정리된다.
 
-```text
-folly/
-├── FBString.h, FBVector.h         # std 컨테이너 대체
-├── container/F14*.h               # SIMD hashmap (Swiss table류)
-├── small_vector.h, sorted_vector.h
-├── futures/                       # Future/Promise — std::future 대체
-├── executors/                     # CPU/IO ThreadPool, EventBase
-├── io/IOBuf.h, IOBufQueue.h       # zero-copy network buffer
-├── synchronization/               # Baton, Latch, DistributedMutex
-├── concurrency/                   # ConcurrentHashMap, MPMCQueue
-├── fibers/                        # M:N stackful coroutine
-├── dynamic.h, json.h              # 동적 타입 + JSON
-├── Format.h, Conv.h               # 빠른 포맷팅/변환
-├── Optional.h, Expected.h, Try.h  # error handling
-├── Singleton.h                    # 안전한 leak-free singleton
-└── ScopeGuard.h                   # RAII utility
-```
+| 헤더 | 역할 |
+|------|------|
+| `FBString.h`, `FBVector.h` | std 컨테이너 대체 |
+| `container/F14*.h` | SIMD hashmap (Swiss table류) |
+| `small_vector.h`, `sorted_vector.h` | small/sorted vector |
+| `futures/` | Future/Promise — `std::future` 대체 |
+| `executors/` | CPU/IO ThreadPool, EventBase |
+| `io/IOBuf.h`, `IOBufQueue.h` | zero-copy network buffer |
+| `synchronization/` | Baton, Latch, DistributedMutex |
+| `concurrency/` | ConcurrentHashMap, MPMCQueue |
+| `fibers/` | M:N stackful coroutine |
+| `dynamic.h`, `json.h` | 동적 타입 + JSON |
+| `Format.h`, `Conv.h` | 빠른 포맷팅/변환 |
+| `Optional.h`, `Expected.h`, `Try.h` | error handling |
+| `Singleton.h` | 안전한 leak-free singleton |
+| `ScopeGuard.h` | RAII utility |
 
 각 컴포넌트는 *그 자체로 시리즈 한 편이 될 만한* 깊이를 가진다.
 

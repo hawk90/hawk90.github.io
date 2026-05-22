@@ -28,14 +28,14 @@ C3 코어가 지원하는 명령어 집합은 *RV32IMC* 한 줄로 끝납니다.
 
 C3에 *없는 것*도 분명히 해 둡니다.
 
-```text
-없음 — A (atomic)         → LR/SC, AMO 없음
-없음 — F/D (float)        → 하드웨어 FPU 없음, soft-float
-없음 — Zicsr 외 CSR 확장   → 표준 Zicsr는 있음
-없음 — U-mode (user mode)  → M-mode only
-없음 — S-mode (supervisor) → MMU 없음, OS-class 칩이 아님
-없음 — V (vector)          → SIMD 없음
-```
+| 없는 것 | 설명 |
+|---------|------|
+| A (atomic) | LR/SC, AMO 없음 |
+| F/D (float) | 하드웨어 FPU 없음, soft-float |
+| Zicsr 외 CSR 확장 | 표준 Zicsr는 있음 |
+| U-mode (user mode) | M-mode only |
+| S-mode (supervisor) | MMU 없음, OS-class 칩이 아님 |
+| V (vector) | SIMD 없음 |
 
 *atomic 없음*은 주의할 점입니다. FreeRTOS의 atomic primitive는 *인터럽트 mask*로 흉내냅니다. *진짜 LR/SC*가 없으니 멀티코어 SMP는 처음부터 *불가능*합니다(어차피 single-core이지만).
 
@@ -212,16 +212,7 @@ static void set_pmp_region0_readonly(void) {
 
 ### 구조
 
-```text
-ESP32-C3 인터럽트 구조
-  31개의 외부 인터럽트 소스
-       ↓
-  Interrupt Matrix (CPU INT 매핑)
-       ↓
-  CPU INT 0~30 (vectored 또는 single)
-       ↓
-  RV32 trap vector
-```
+ESP32-C3 인터럽트 구조 — *31개의 외부 인터럽트 소스* → *Interrupt Matrix*(CPU INT 매핑) → *CPU INT 0~30* (vectored 또는 single) → *RV32 trap vector*.
 
 특이한 점은 *어떤 페리퍼럴 인터럽트가 어떤 CPU INT 번호가 될지*를 *런타임에 설정*한다는 것입니다. ESP-IDF의 `esp_intr_alloc()`이 이를 자동 처리합니다.
 
