@@ -3,7 +3,7 @@ title: "5-01: Linux perf 기초 — stat·record·report"
 date: 2026-05-08T20:00:00
 description: "Linux perf 표준 도구의 세 가지 핵심 명령. 설치, 권한, 그리고 첫 측정부터 핫스팟 분석까지."
 series: "Embedded Performance Engineering"
-seriesOrder: 39
+seriesOrder: 40
 tags: [perf, profiling, sampling, linux]
 ---
 

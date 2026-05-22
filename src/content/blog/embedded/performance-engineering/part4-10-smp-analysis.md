@@ -3,7 +3,7 @@ title: "4-10: SMP 분석 — Per-Core·Affinity·Load Balance·Scalability"
 date: 2026-05-08T19:00:00
 description: "Per-core utilization과 CPU affinity, NUMA, migration cost, Amdahl 한계."
 series: "Embedded Performance Engineering"
-seriesOrder: 38
+seriesOrder: 39
 tags: [smp, affinity, load-balancing, migration, scalability]
 ---
 

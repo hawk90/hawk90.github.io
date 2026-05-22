@@ -23,12 +23,13 @@ draft: false
 
 ### 1) 가상 주소 → 물리 주소
 
-```text
-User process가 보는 주소     실제 RAM 주소
-   0x00400000 (.text)  →  page table  →  0x80100000
-   0x00601000 (.data)  →               →  0x802A0000
-   0x00800000 (heap)   →               →  ... (page에 따라)
-```
+| User process 가상 주소 | 실제 RAM 주소 |
+|----------------------|--------------|
+| `0x00400000` (.text) | `0x80100000` |
+| `0x00601000` (.data) | `0x802A0000` |
+| `0x00800000` (heap) | (page에 따라) |
+
+(가상 → 실제는 page table을 거친다.)
 
 Process마다 별도의 page table을 갖습니다. 같은 가상 주소도 process별로 다른 물리 주소를 가리킵니다.
 
@@ -77,26 +78,18 @@ TLB hit이면 1 cycle, miss이면 page table walk(2 ~ 4 cycle, cached) 또는 ma
 
 Linux는 process마다 `mm_struct`를 갖고, 그 안에 page table root를 둡니다. fork() 시 page table을 copy하고 COW(copy-on-write)로 lazy 복제합니다.
 
-```text
-fork()
-   parent mm_struct       child mm_struct
-        │                       │
-        ▼                       ▼
-   page table root         (parent와 같은 PT를 share, read-only 표시)
-        │                       │
-   write 발생 시 → page fault → kernel이 새 page를 할당, copy
-```
+`fork()` 시 parent와 child의 `mm_struct`가 *같은 page table을 share*하고 *read-only*로 표시된다. *write 발생 시 → page fault → kernel이 새 page를 할당하고 copy*한다. 이게 COW다.
 
 ### 6) Page fault 처리
 
-```text
-가상 주소 접근 → MMU lookup → PTE 없음 → page fault → kernel handler
-   │
-   ├─ valid mapping이지만 page가 swap 됨 → swap-in
-   ├─ COW page에 write → 새 page 할당
-   ├─ Demand paging (lazy alloc) → 새 page 할당
-   └─ 진짜 invalid → SIGSEGV
-```
+흐름 — *가상 주소 접근 → MMU lookup → PTE 없음 → page fault → kernel handler*. handler는 상황에 따라 분기한다.
+
+| 상황 | 처리 |
+|------|------|
+| Valid mapping이지만 page가 swap 됨 | swap-in |
+| COW page에 write | 새 page 할당 |
+| Demand paging (lazy alloc) | 새 page 할당 |
+| 진짜 invalid | SIGSEGV |
 
 ## 코드 / 실제 사용 예
 

@@ -1,0 +1,46 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5.5,3.4) {802.1CB FRER — Frame Replication \& Elimination};
+
+% Talker (left)
+\node[imp, minimum width=22mm, minimum height=12mm] (talker) at (0,1.0) {Talker};
+
+% Two intermediate path bars (just labels)
+\node[abs, minimum width=40mm, minimum height=8mm] (pathA) at (5.0, 2.0)
+  {Path A (switch X $\to$ Y)};
+\node[abs, minimum width=40mm, minimum height=8mm] (pathB) at (5.0, 0.0)
+  {Path B (switch P $\to$ Q)};
+
+% Listener (right)
+\node[imp, minimum width=22mm, minimum height=12mm] (listener) at (10.0,1.0) {Listener\\\small + SRF};
+
+% Replication arrows
+\draw[arr, line width=1pt] (talker.east) .. controls (2.5, 2.0) .. (pathA.west)
+  node[midway, above, caption] {frame seq=42};
+\draw[arr, line width=1pt] (talker.east) .. controls (2.5, 0.0) .. (pathB.west)
+  node[midway, below, caption] {frame seq=42};
+
+% Convergence arrows
+\draw[arr, line width=1pt] (pathA.east) .. controls (7.5, 2.0) .. (listener.west);
+\draw[arr, line width=1pt] (pathB.east) .. controls (7.5, 0.0) .. (listener.west);
+
+% Annotations near listener
+\node[caption, align=left, anchor=west] at (10.7,1.8)
+  {먼저 도착: accept};
+\node[caption, align=left, anchor=west] at (10.7,0.2)
+  {중복: drop};
+
+% R-TAG note
+\node[caption, anchor=center] at (5.0,-1.4)
+  {각 프레임에 R-TAG (EtherType 0xF1C1, 16-bit sequence)};
+
+\end{tikzpicture}
+\end{document}

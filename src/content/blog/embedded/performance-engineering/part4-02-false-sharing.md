@@ -3,7 +3,7 @@ title: "4-02: False Sharing — Cache Line Ping-Pong·Padding·Measurement"
 date: 2026-05-08T11:00:00
 description: "False sharing 원인. Cache coherence ping-pong. Padding으로 line 분리. 측정 방법."
 series: "Embedded Performance Engineering"
-seriesOrder: 30
+seriesOrder: 31
 tags: [false-sharing, cacheline, padding, coherence]
 draft: false
 ---

@@ -3,7 +3,7 @@ title: "4-03: Lock Contention — Wait·Hold·Convoy·측정"
 date: 2026-05-08T12:00:00
 description: "Wait time과 hold time, contention ratio를 측정하고 lock convoy를 회피하는 법."
 series: "Embedded Performance Engineering"
-seriesOrder: 31
+seriesOrder: 32
 tags: [lock, contention, wait-time, hold-time, convoy]
 ---
 

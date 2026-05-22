@@ -3,7 +3,7 @@ title: "5-04: eBPF·bpftrace — 동적 트레이싱"
 date: 2026-05-08T42:00:00
 description: "eBPF VM과 verifier, bpftrace one-liner, BCC tools, kprobe·uprobe·USDT 비교."
 series: "Embedded Performance Engineering"
-seriesOrder: 42
+seriesOrder: 43
 tags: [ebpf, bpftrace, bcc, dynamic-tracing]
 ---
 

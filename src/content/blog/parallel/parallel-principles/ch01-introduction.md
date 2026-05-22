@@ -167,11 +167,7 @@ int producer(void* arg) {
 
 ### 도전 3: 지연과 실패 (Latency and Failure)
 
-```
-스레드 A가 락을 잡고 멈추면?
-- 다른 스레드들은 영원히 대기?
-- 데드락, 라이브락
-```
+스레드 A가 락을 잡고 멈추면, *다른 스레드들이 영원히 대기*할 수 있다. 데드락, 라이브락.
 
 해결: 락-프리 알고리즘, 타임아웃
 
@@ -825,15 +821,12 @@ int bb_take(BoundedBuffer* bb) {
 
 ARM이 도입한 *비대칭 멀티코어*. 빠르지만 전력 먹는 *big* 코어 몇 개, 느리지만 효율적인 *LITTLE* 코어 몇 개를 한 칩에 둔다. Snapdragon, Apple A/M 시리즈, Samsung Exynos 모두 이 구조.
 
-```text
-Apple A17 Pro:
-  2× Performance core (high freq, big OOO window)
-  4× Efficiency core  (low freq, small OOO window)
+**Apple A17 Pro:**
 
-스케줄러가 워크로드를 코어 클래스에 매핑.
-공유 메모리 모델은 동일.
-캐시 일관성 프로토콜은 클래스 가리지 않고 모든 코어에 적용.
-```
+- 2× Performance core (high freq, big OOO window)
+- 4× Efficiency core (low freq, small OOO window)
+
+스케줄러가 워크로드를 *코어 클래스에 매핑*한다. 공유 메모리 모델은 동일하고, 캐시 일관성 프로토콜은 *클래스를 가리지 않고* 모든 코어에 적용된다.
 
 이게 동기화 비용을 더 복잡하게 만든다. big-core가 LITTLE-core를 기다리는 경우 latency가 비대칭이다. 9-10장의 락 알고리즘들이 이런 환경에서 *공정성*을 보장하려고 큐 기반(MCS, CLH)으로 진화한 배경.
 
@@ -841,16 +834,13 @@ Apple A17 Pro:
 
 단일 서버 192코어는 시작에 불과하다. Google, Meta, Amazon은 *수십만 대*를 묶어 한 워크로드를 돌린다.
 
-```text
-이 책 (공유 메모리, 단일 노드)
-       ↓
-한 노드 안에서 lock-free / wait-free
-       ↓
-분산 (메시지 전달):
-  - gRPC, Raft (etcd, Consul)
-  - Spark, Flink (대용량 배치)
-  - Kafka (이벤트 스트림)
-```
+계층 — 이 책(공유 메모리, 단일 노드) → 한 노드 안에서 lock-free / wait-free → 분산(메시지 전달).
+
+| 분산 영역 | 도구 |
+|-----------|------|
+| 분산 합의 | gRPC, Raft (etcd, Consul) |
+| 대용량 배치 | Spark, Flink |
+| 이벤트 스트림 | Kafka |
 
 분산 시스템에서도 이 책의 개념이 변형되어 등장한다. **Linearizability** → 분산 합의 (Raft, Paxos). **Wait-free** → 한 노드가 죽어도 다른 노드는 진행. **Amdahl** → MapReduce의 reduce 단계가 직렬 부분.
 

@@ -3,7 +3,7 @@ title: "4-07: Lock-Free — CAS·ABA·Hazard Pointer·Epoch Reclamation"
 date: 2026-05-08T16:00:00
 description: "CAS 기반 lock-free와 ABA 문제, hazard pointer와 epoch reclamation 비교."
 series: "Embedded Performance Engineering"
-seriesOrder: 35
+seriesOrder: 36
 tags: [lock-free, cas, aba, hazard-pointer, epoch]
 ---
 

@@ -3,7 +3,7 @@ title: "5-02: perf 고급 — Raw Event·Tracepoint·perf script"
 date: 2026-05-08T40:00:00
 description: "perf의 raw event, tracepoint, perf script Python을 사용한 커스텀 분석."
 series: "Embedded Performance Engineering"
-seriesOrder: 40
+seriesOrder: 41
 tags: [perf, raw-event, scripting, tracepoint]
 ---
 

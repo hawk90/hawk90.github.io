@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.5,2.6) {802.1Qbu — Frame Preemption};
+
+% --- Row 1: 정상 (no preemption) ---
+\node[caption, anchor=east, align=right] at (-0.2,1.4) {정상};
+\node[abs, minimum width=110mm, minimum height=10mm, anchor=west] (pmacFull) at (0,1.4)
+  {pMAC frame (1500 B)};
+
+% --- Row 2: 선점 (preemption) ---
+\node[caption, anchor=east, align=right] at (-0.2,-0.2) {선점};
+\node[abs, minimum width=12mm, minimum height=10mm, anchor=west] (frag1) at (0,-0.2)
+  {\small frag1\\[1pt]\small 64 B};
+\node[hi,  minimum width=20mm, minimum height=10mm, anchor=west] (eMAC)  at (1.2,-0.2)
+  {\small eMAC\\[1pt]\small 100 B};
+\node[abs, minimum width=78mm, minimum height=10mm, anchor=west] (frag2) at (3.2,-0.2)
+  {pMAC frag2 (1436 B)};
+
+% Vertical drop indicating critical inserts
+\draw[arr, line width=0.7pt, dashed] (eMAC.north) -- ++(0,0.7)
+  node[caption, anchor=south] {critical 프레임 끼어듦};
+
+% Time axis
+\draw[arr, line width=0.6pt] (0,-1.4) -- (11.2,-1.4);
+\node[caption, anchor=west] at (11.2,-1.4) {time};
+
+% Legend
+\node[abs, minimum width=4mm, minimum height=4mm] (leg1) at (1.4,-2.2) {};
+\node[caption, anchor=west] at (1.7,-2.2) {pMAC (preemptable)};
+\node[hi,  minimum width=4mm, minimum height=4mm] (leg2) at (6.0,-2.2) {};
+\node[caption, anchor=west] at (6.3,-2.2) {eMAC (express, critical)};
+
+\end{tikzpicture}
+\end{document}

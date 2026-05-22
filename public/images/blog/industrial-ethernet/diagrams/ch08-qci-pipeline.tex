@@ -1,0 +1,45 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,node distance=8mm]
+
+\node[font=\sffamily\bfseries\large] at (0,4.4) {802.1Qci — Per-Stream Filtering \& Policing};
+
+\node[neut, minimum width=42mm, minimum height=11mm] (inc)    at (0, 3.2)
+  {incoming frame};
+
+\node[abs, minimum width=42mm, minimum height=11mm] (sid)     at (0, 1.6)
+  {\textbf{Stream ID}\\[1pt]\small hash $\to$ stream\_handle = 17};
+
+\node[abs, minimum width=42mm, minimum height=11mm] (filter)  at (0, 0.0)
+  {\textbf{Filter}\\[1pt]\small Stream 17 allowed at port 3? Yes};
+
+\node[abs, minimum width=42mm, minimum height=11mm] (gate)    at (0, -1.6)
+  {\textbf{Gate}\\[1pt]\small expected at t = 100\,$\mu$s $\pm$ 5\,$\mu$s? Yes};
+
+\node[abs, minimum width=42mm, minimum height=11mm] (meter)   at (0, -3.2)
+  {\textbf{Meter}\\[1pt]\small max rate 100\,Mbps? Within budget};
+
+\node[hi,  minimum width=42mm, minimum height=11mm] (out)     at (0, -4.8)
+  {forward to output queue};
+
+% Arrows
+\draw[arr] (inc.south)    -- (sid.north);
+\draw[arr] (sid.south)    -- (filter.north);
+\draw[arr] (filter.south) -- (gate.north);
+\draw[arr] (gate.south)   -- (meter.north);
+\draw[arr] (meter.south)  -- (out.north);
+
+% Side note
+\node[caption, anchor=west, align=left] at (3.0, -1.6)
+  {각 단계가 fail이면\\
+   $\to$ frame drop\\
+   $\to$ violation 카운터 증가};
+
+\end{tikzpicture}
+\end{document}

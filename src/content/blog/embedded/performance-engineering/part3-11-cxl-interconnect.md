@@ -3,7 +3,7 @@ title: "3-11: CXL·Interconnect — AI 시대 메모리 대역폭"
 date: 2026-05-08T10:00:00
 description: "CXL 2.0/3.1과 Neoverse V2가 만든 cache-coherent interconnect. CXL.io·CXL.cache·CXL.mem 세 프로토콜, Type 1/2/3 디바이스, latency·대역폭의 현실."
 series: "Embedded Performance Engineering"
-seriesOrder: 53
+seriesOrder: 29
 tags: [cxl, interconnect, memory-bandwidth, ai, neoverse, accelerator]
 ---
 

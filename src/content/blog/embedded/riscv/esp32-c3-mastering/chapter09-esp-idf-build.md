@@ -40,16 +40,27 @@ idf.py -p /dev/ttyUSB0 flash monitor
 
 ```text
 my_app/
-├── CMakeLists.txt            # 프로젝트 최상위 CMake
+├── CMakeLists.txt
 ├── main/
-│   ├── CMakeLists.txt        # main 컴포넌트의 CMake
-│   ├── my_app.c              # 사용자 코드
-│   └── idf_component.yml     # 외부 의존성 선언 (옵션)
-├── components/               # 자체 컴포넌트 (옵션, 비어 있어도 됨)
-├── sdkconfig                 # 빌드 설정 (gitignore 권장)
-├── sdkconfig.defaults        # 팀 공유 기본값 (git 커밋)
-└── partitions.csv            # 사용자 파티션 테이블 (옵션)
+│   ├── CMakeLists.txt
+│   ├── my_app.c
+│   └── idf_component.yml
+├── components/
+├── sdkconfig
+├── sdkconfig.defaults
+└── partitions.csv
 ```
+
+| 경로 | 역할 |
+|------|------|
+| `CMakeLists.txt` | 프로젝트 최상위 CMake |
+| `main/CMakeLists.txt` | main 컴포넌트의 CMake |
+| `main/my_app.c` | 사용자 코드 |
+| `main/idf_component.yml` | 외부 의존성 선언 (옵션) |
+| `components/` | 자체 컴포넌트 (옵션) |
+| `sdkconfig` | 빌드 설정 (gitignore 권장) |
+| `sdkconfig.defaults` | 팀 공유 기본값 (git 커밋) |
+| `partitions.csv` | 사용자 파티션 테이블 (옵션) |
 
 `sdkconfig`는 *menuconfig가 생성*하는 결과물입니다. 팀이 공유할 때는 *`sdkconfig.defaults`*에 *변경한 값만* 적고, `sdkconfig`는 `.gitignore`에 두는 패턴이 표준입니다.
 
@@ -110,7 +121,7 @@ menu "My Sensor"
         range 1 1000
         default 100
         help
-            샘플링 주파수. 너무 높이면 CPU 점유 증가.
+            Sample rate Hz. Higher rate increases CPU load.
 
     config MY_SENSOR_LOG_LEVEL
         int "Log level"
@@ -157,8 +168,9 @@ ncurses TUI가 뜹니다. 주요 메뉴입니다.
 
 저장하면 *프로젝트 루트의 `sdkconfig`*에 반영됩니다. 팀 공유는 *변경된 값만*을 `sdkconfig.defaults`에 옮기는 것이 깔끔합니다.
 
-```text
-# sdkconfig.defaults — 팀 공유 기본값
+팀 공유 기본값은 `sdkconfig.defaults`에 적습니다.
+
+```ini
 CONFIG_IDF_TARGET="esp32c3"
 CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
 CONFIG_FREERTOS_HZ=1000

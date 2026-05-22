@@ -3,7 +3,7 @@ title: "6-01: 사례 — ISR Latency 100µs Deadline Miss 추적"
 date: 2026-05-08T30:00:00
 description: "산업용 센서 보드에서 산발적으로 발생한 ISR latency spike. 가설 두 개를 거쳐 SD 카드 드라이버를 범인으로 확정한 과정."
 series: "Embedded Performance Engineering"
-seriesOrder: 47
+seriesOrder: 50
 tags: [case-study, isr, latency, ftrace, irq]
 ---
 

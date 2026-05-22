@@ -3,7 +3,7 @@ title: "5-09: Tracy·Hotspot·uftrace·Coz — 저오버헤드 모던 프로파�
 date: 2026-05-08T28:00:00
 description: "Tracy nanosecond instrumentation, Hotspot GUI, uftrace function trace, Coz causal profiler."
 series: "Embedded Performance Engineering"
-seriesOrder: 51
+seriesOrder: 48
 tags: [profiling, tracy, hotspot, uftrace, coz, low-overhead]
 ---
 

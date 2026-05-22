@@ -18,17 +18,17 @@ ESP32 원조와 가장 큰 차이는 *DAC와 터치 센서의 부재*입니다. 
 
 ## C3 ADC — 사양 한눈에
 
-```text
-ADC1
-  Type:        12-bit SAR (Successive Approximation Register)
-  Channels:    6 (ADC1_CH0~CH4, ADC1_CH4 = GPIO4)
-  Pins:        GPIO0, GPIO1, GPIO2, GPIO3, GPIO4
-  Sample rate: 최대 ~2 MSPS (continuous mode)
-  Vref:        ~1.1 V (internal)
+**ADC1:**
 
-ADC2
-  존재하지만 WiFi와 충돌, 일반 사용 비권장
-```
+| 속성 | 값 |
+|------|-----|
+| Type | 12-bit SAR (Successive Approximation Register) |
+| Channels | 6 (ADC1_CH0~CH4, ADC1_CH4 = GPIO4) |
+| Pins | GPIO0, GPIO1, GPIO2, GPIO3, GPIO4 |
+| Sample rate | 최대 ~2 MSPS (continuous mode) |
+| Vref | ~1.1 V (internal) |
+
+**ADC2** — 존재하지만 WiFi와 충돌해 *일반 사용 비권장*.
 
 > **메모**: 일부 데이터시트는 "ADC1 6 channels"라고 적지만, 실제로 *GPIO에 연결된 채널*은 *5개(GPIO0~4)*입니다. CH4는 *별도 IO*가 아닌 *내부 reference channel*인 경우가 보드별로 다릅니다.
 
@@ -97,14 +97,11 @@ int read_voltage_mv(void) {
 
 Espressif는 출하 전 *모든 칩에 대해 ADC 캘리브레이션*을 수행해 *eFuse*에 결과를 굽습니다. eFuse는 *한 번 굽고 되돌릴 수 없는* OTP 메모리입니다.
 
-```text
-eFuse 영역 (간략)
-  BLK1: MAC address
-  BLK2: ADC calibration (factory)
-        - Vref 보정
-        - 채널별 offset
-  BLK3: 사용자 영역 (secure boot key 등)
-```
+| 영역 | 내용 |
+|------|------|
+| BLK1 | MAC address |
+| BLK2 | ADC calibration (factory) — Vref 보정, 채널별 offset |
+| BLK3 | 사용자 영역 (secure boot key 등) |
 
 `adc_cali_create_scheme_curve_fitting`은 *Curve Fitting scheme*을 씁니다. 이는 *다항식 보정*으로, *Two Point 보정*보다 *정확하지만 더 많은 eFuse 비트*를 씁니다. C3는 *Curve Fitting을 기본*으로 가집니다.
 
@@ -266,10 +263,10 @@ ESP32(원조)는 *10채널 정전식 터치*가 있고 *deep-sleep wake-up sourc
 
 CAP1188(8 channel), TTP223(1 channel) 같은 *I2C 터치 컨트롤러*를 외부에 답니다.
 
-```text
-TTP223 → GPIO 인터럽트
-CAP1188 → I2C로 폴링 또는 인터럽트
-```
+| IC | 인터페이스 |
+|----|-----------|
+| TTP223 | GPIO 인터럽트 |
+| CAP1188 | I2C로 폴링 또는 인터럽트 |
 
 ### 2. RC oscillator 흉내
 

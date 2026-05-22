@@ -3,7 +3,7 @@ title: "4-01: Concurrency 기초 — Concurrency vs Parallelism·Race·Memory Mo
 date: 2026-05-08T10:00:00
 description: "Concurrency vs Parallelism (Rob Pike). Race condition. Memory model 도입."
 series: "Embedded Performance Engineering"
-seriesOrder: 29
+seriesOrder: 30
 tags: [concurrency, parallel, race, memory-model]
 draft: false
 ---
