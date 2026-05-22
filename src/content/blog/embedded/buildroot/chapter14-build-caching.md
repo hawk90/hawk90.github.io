@@ -88,13 +88,12 @@ BR2_PRIMARY_SITE_ONLY=n
 
 `dl/`은 *완전히 read-only로 공유 가능*합니다. 같은 hash면 같은 파일이라는 보장이 있기 때문입니다.
 
-```text
-# NFS mount
-$ mount -t nfs build-cache.corp:/srv/buildroot-dl /mnt/buildroot-dl
-$ export BR2_DL_DIR=/mnt/buildroot-dl
+```bash
+mount -t nfs build-cache.corp:/srv/buildroot-dl /mnt/buildroot-dl
+export BR2_DL_DIR=/mnt/buildroot-dl
 
 # 또는 환경 변수로 명시
-$ make BR2_DL_DIR=/mnt/buildroot-dl
+make BR2_DL_DIR=/mnt/buildroot-dl
 ```
 
 CI에서는 다음 패턴이 표준입니다.
@@ -142,8 +141,9 @@ cache hit rate                      85.07 %
 
 ccache는 *컴파일러 실행 파일의 경로·hash*를 cache key의 일부로 씁니다. Buildroot는 toolchain을 *output 디렉터리 안*에 빌드하기 때문에 *output 디렉터리가 바뀌면* 같은 코드도 cache miss입니다.
 
+다른 output 디렉터리는 *다른 cache key*가 된다.
+
 ```text
-# 다른 output 디렉터리 → 다른 cache key
 output-imx8/host/aarch64-buildroot-linux-gnu/bin/aarch64-buildroot-linux-gnu-gcc
 output-rpi4/host/aarch64-buildroot-linux-gnu/bin/aarch64-buildroot-linux-gnu-gcc
 ```
@@ -181,13 +181,19 @@ BR2_PER_PACKAGE_DIRECTORIES=y
 
 ```text
 output/per-package/openssl/
-├── host/         ─ openssl가 빌드될 때 보이는 host tree
-└── target/       ─ openssl가 빌드될 때 보이는 target tree
+├── host/
+└── target/
 
 output/per-package/libcurl/
-├── host/         ─ libcurl가 보이는 host tree (openssl까지만 포함)
+├── host/
 └── target/
 ```
+
+| 경로 | 내용 |
+|------|------|
+| `openssl/host/`, `openssl/target/` | openssl가 빌드될 때 보이는 host/target tree |
+| `libcurl/host/` | libcurl가 보이는 host tree (openssl까지만 포함) |
+| `libcurl/target/` | libcurl가 보이는 target tree |
 
 패키지 B를 빌드할 때 *B의 의존성*만 *복사*해 와 sysroot로 씁니다. 의존성에 없는 패키지의 헤더·`.so`는 *보이지도 않습니다*. 결과적으로 패키지 빌드가 *defconfig가 명시한 의존성에만* 영향을 받는다는 보장이 생깁니다.
 

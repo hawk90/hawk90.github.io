@@ -140,17 +140,13 @@ GDDR의 *진짜 비용*은 *PCB와 신호 무결성*에 있습니다.
 
 * length matching*은 *모든 신호 쌍*이 *같은 시간*에 도착하도록 trace 길이를 *맞추는 것*입니다. PAM4 21 Gbps에서 1 UI = 47.6 ps인데, 47.6 ps는 *PCB 위에서 약 7 mm*입니다. *±0.5 mm 오차*는 *±7%* 정도의 *eye width 침투*가 됩니다.
 
-```text
-GDDR PCB 비용 비교
-
-GDDR5  : 6층 PCB, 표준 length matching ±2 mm     → cheap
-GDDR6  : 8층, ±1 mm                              → moderate
-GDDR6X : 10~12층, ±0.5 mm, FEC, 추가 ground plane → expensive
-GDDR7  : 12층, ±0.4 mm, retimer 옵션              → expensive
-
-HBM3   : interposer (silicon), microbump 55 μm    → 별개 비용 구조
-         PCB는 단순, 비용은 interposer가 흡수
-```
+| 세대 | PCB 사양 | 비용 |
+|------|----------|------|
+| GDDR5 | 6층 PCB, 표준 length matching ±2 mm | cheap |
+| GDDR6 | 8층, ±1 mm | moderate |
+| GDDR6X | 10~12층, ±0.5 mm, FEC, 추가 ground plane | expensive |
+| GDDR7 | 12층, ±0.4 mm, retimer 옵션 | expensive |
+| HBM3 | interposer (silicon), microbump 55 μm | 별개 비용 구조 — PCB는 단순, 비용은 interposer가 흡수 |
 
 GDDR이 *chip 가격은 싸지만 PCB·VRM·decoupling 비용*은 *상당히 큽니다*. *256-bit, 384-bit, 512-bit*로 갈수록 *카드 PCB가 결정적*인 비용 요소입니다.
 
@@ -182,18 +178,14 @@ GDDR6은 *2 channel × 16-bit*로 *내부적으로 분할*됩니다. HBM3의 *16
 
 GDDR도 *ECC와 RAS*가 강화됐습니다.
 
-```text
-GDDR ECC 진화
+| 세대 | ECC |
+|------|-----|
+| GDDR5 | 없음 (cost 우선) |
+| GDDR6 | on-die ECC 옵션 (벤더별) |
+| GDDR6X | on-die ECC + DBI 강화 |
+| GDDR7 | SECDED on-die ECC 표준 |
 
-GDDR5  : ECC 없음 (cost 우선)
-GDDR6  : on-die ECC 옵션 (벤더별)
-GDDR6X : on-die ECC + DBI 강화
-GDDR7  : SECDED on-die ECC 표준
-
-데이터센터용 GDDR6X (NVIDIA L40, L4):
-- 추가로 sideband ECC 16:1 (8-bit data + 1-bit ECC × 16 lane)
-- soft error rate 보장
-```
+데이터센터용 GDDR6X (NVIDIA L40, L4)는 *sideband ECC 16:1* (8-bit data + 1-bit ECC × 16 lane)을 추가해 *soft error rate*를 보장한다.
 
 데이터센터 추론 카드(L40, L4 등)는 *ECC GDDR6X*를 씁니다. *24/7 동작*에서 *soft error*가 누적되면 *추론 정확도*가 떨어지기 때문입니다. 게이밍 카드는 ECC가 *off*가 일반적이고, *fps 우선*입니다.
 
@@ -201,18 +193,15 @@ GDDR7  : SECDED on-die ECC 표준
 
 GDDR과 HBM의 *전력 효율* 차이는 *시스템 설계의 분기점*입니다.
 
-```text
-1 TB/s를 만드는 데 필요한 전력
+| 메모리 | 구성 | 전력 |
+|--------|------|------|
+| GDDR6 | 16 Gbps × 384-bit | 약 110 W (12 chip × 9 W) |
+| GDDR6X | 21 Gbps × 384-bit | 약 130 W (12 chip × 11 W) |
+| GDDR7 | 32 Gbps × 256-bit | 약 95 W (8 chip × 12 W) |
+| HBM3 | 6.4 × 1024 × 1.5 | 약 35 W (2 stack × 18 W) |
+| HBM3E | 9.6 × 1024 × 1.2 | 약 25 W (2 stack × 12 W) |
 
-GDDR6  (16 Gbps × 384-bit) : 약 110 W (12 chip × 9 W)
-GDDR6X (21 Gbps × 384-bit) : 약 130 W (12 chip × 11 W)
-GDDR7  (32 Gbps × 256-bit) : 약 95 W  (8 chip × 12 W)
-HBM3   (6.4 × 1024 × 1.5)  : 약 35 W  (2 stack × 18 W)
-HBM3E  (9.6 × 1024 × 1.2)  : 약 25 W  (2 stack × 12 W)
-
-→ HBM이 3~4배 효율적
-   다만 capacity per W도 봐야 함
-```
+HBM이 *3~4배 효율적*. 다만 *capacity per W*도 함께 봐야 한다.
 
 GDDR이 *효율은 낮지만 capacity는 풍부*합니다. 32 GB GDDR6X 카드를 *$2K*에 살 수 있는 반면 192 GB HBM3 가속기는 *$25K* 시작입니다. *용도와 예산*이 *분기*시킵니다.
 

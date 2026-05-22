@@ -12,15 +12,13 @@ AUTOSAR(AUTomotive Open System ARchitecture)는 2003년 BMW, Bosch, Continental,
 
 ## Classic vs Adaptive AUTOSAR
 
-```
-Classic AUTOSAR (2003~)         Adaptive AUTOSAR (2017~)
-──────────────────────         ────────────────────────
-RTOS 위 정적 스케줄              POSIX 위 동적 배치
-ECU 단위 컴파일                  서비스 단위, 동적 디스커버리
-C 언어                          C++14
-deterministic, ms 단위           micros, GB 메모리
-Powertrain, Body Control         ADAS, V2X, IVI, 자율주행
-```
+| 측면 | Classic AUTOSAR (2003~) | Adaptive AUTOSAR (2017~) |
+|------|-------------------------|--------------------------|
+| 스케줄링 | RTOS 위 정적 스케줄 | POSIX 위 동적 배치 |
+| 빌드 단위 | ECU 단위 컴파일 | 서비스 단위, 동적 디스커버리 |
+| 언어 | C | C++14 |
+| 시간 | deterministic, ms 단위 | micros, GB 메모리 |
+| 적용 영역 | Powertrain, Body Control | ADAS, V2X, IVI, 자율주행 |
 
 자율주행·V2X·OTA 업데이트 같은 *대규모·동적* 시스템이 Classic의 *정적 모델*로는 감당이 안 되면서 Adaptive가 등장. C++14 채택은 *그 결과*다.
 
@@ -40,13 +38,11 @@ C++17/20/23으로 가는 *마이그레이션 경로*는 *AUTOSAR가 정의*. 202
 
 ## MISRA C++:2008 — AUTOSAR가 대체한 이유
 
-```
-MISRA C++:2008    →    AUTOSAR C++14 (2017)    →    MISRA C++:2023
-─────────────         ──────────────────────         ────────────────
-228 rules             340+ rules                     C++17/20 통합
-C++03 기반            C++14 기반                     최신 표준 반영
-C++11 표준 없음        modern C++ 적극 활용             AUTOSAR + MISRA 통합
-```
+| 표준 | 규칙 수 | 기반 | 특징 |
+|------|---------|------|------|
+| MISRA C++:2008 | 228 rules | C++03 기반 | C++11 표준 없음 |
+| AUTOSAR C++14 (2017) | 340+ rules | C++14 기반 | modern C++ 적극 활용 |
+| MISRA C++:2023 | C++17/20 통합 | 최신 표준 반영 | AUTOSAR + MISRA 통합 |
 
 MISRA C++:2008은 *C++11 이전*의 표준이라 *modern C++* 기능(`auto`, lambda, move semantics, smart pointer)을 *전혀 다루지 못한다*. AUTOSAR가 *modern C++ 시대의 안전 표준*으로 등장한 이유다.
 
@@ -95,18 +91,16 @@ MISRA C의 *Mandatory*는 AUTOSAR에서 *Required + Decidable + Error*에 해당
 
 AUTOSAR C++14는 *ISO 26262 Part 6*의 *코딩 가이드라인 요건*을 직접 충족한다.
 
-```
-ISO 26262 Part 6, Clause 5.4
-  "A set of recommended coding guidelines shall be applied..."
+**ISO 26262 Part 6, Clause 5.4** — *"A set of recommended coding guidelines shall be applied..."* — AUTOSAR C++14가 이를 충족한다.
 
-AUTOSAR C++14가 이를 충족.
+**ASIL 등급별 적용:**
 
-ASIL 등급별 적용
-  ASIL A      Advisory 일부 면제 가능
-  ASIL B      Required 모두 + Advisory 일부
-  ASIL C      Required 모두 + Advisory 권장
-  ASIL D      Required 모두 + Advisory 강력 권장
-```
+| ASIL | 적용 |
+|------|------|
+| A | Advisory 일부 면제 가능 |
+| B | Required 모두 + Advisory 일부 |
+| C | Required 모두 + Advisory 권장 |
+| D | Required 모두 + Advisory 강력 권장 |
 
 자율주행 SoC 펌웨어는 *ASIL D + AUTOSAR C++14* 조합이 일반적이다.
 

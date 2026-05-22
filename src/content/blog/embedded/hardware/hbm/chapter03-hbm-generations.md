@@ -31,19 +31,19 @@ draft: false
 
 AMD Fury X(Fiji)와 함께 *첫 양산*된 세대입니다. SK 하이닉스가 제조했습니다.
 
-```text
-HBM (1세대)
-├── per-pin       : 1.0 Gbps
-├── bus           : 1024-bit
-├── stack BW      : 128 GB/s
-├── max stack     : 4-Hi
-├── max capacity  : 4 GB / stack
-├── channel       : 8 × 128-bit
-└── VDD           : 1.2 V
+**HBM (1세대):**
 
-대표 카드:
-- AMD Radeon R9 Fury X (4 stack × 1 GB = 4 GB, 512 GB/s)
-```
+| 항목 | 값 |
+|------|-----|
+| per-pin | 1.0 Gbps |
+| bus | 1024-bit |
+| stack BW | 128 GB/s |
+| max stack | 4-Hi |
+| max capacity | 4 GB / stack |
+| channel | 8 × 128-bit |
+| VDD | 1.2 V |
+
+**대표 카드** — AMD Radeon R9 Fury X (4 stack × 1 GB = 4 GB, 512 GB/s).
 
 당시 *상황을 보면 놀라운 수치*였습니다. 같은 시기 GDDR5는 *7 Gbps × 256-bit = 224 GB/s*였습니다. HBM 4 stack이 *2배 이상*의 대역폭을 *훨씬 적은 전력*으로 냈습니다.
 
@@ -53,20 +53,18 @@ HBM (1세대)
 
 NVIDIA P100·V100, Google TPU v2와 함께 *데이터센터의 표준*이 됐습니다.
 
-```text
-HBM2 (2018)
-├── per-pin       : 2.4 Gbps (clock 1.2 GHz)
-├── stack BW      : 307 GB/s
-├── max stack     : 8-Hi
-├── max capacity  : 8 GB / stack
-├── pseudo channel: 16 × 64-bit (PC 도입)
-└── ECC           : SECDED 옵션
+**HBM2 (2018):**
 
-대표 카드:
-- NVIDIA V100 (4 stack × 4 GB = 16 GB, 900 GB/s)
-- NVIDIA V100 32GB (4 stack × 8 GB)
-- Google TPU v2/v3
-```
+| 항목 | 값 |
+|------|-----|
+| per-pin | 2.4 Gbps (clock 1.2 GHz) |
+| stack BW | 307 GB/s |
+| max stack | 8-Hi |
+| max capacity | 8 GB / stack |
+| pseudo channel | 16 × 64-bit (PC 도입) |
+| ECC | SECDED 옵션 |
+
+**대표 카드** — NVIDIA V100 (4 stack × 4 GB = 16 GB, 900 GB/s), V100 32GB (4 stack × 8 GB), Google TPU v2/v3.
 
 핵심 변화는 *Pseudo Channel*입니다. 한 channel을 *반쪽씩 독립 명령*으로 운영해 *bank-level parallelism*을 *위층*으로 한 단계 더 올렸습니다.
 
@@ -86,19 +84,17 @@ bank conflict 회피·effective bandwidth 향상에 큰 영향을 줬습니다.
 
 HBM2의 *클럭만 끌어올린* 마이너 버전입니다.
 
-```text
-HBM2E (2020)
-├── per-pin       : 3.6 Gbps (Samsung Flashbolt 3.2 Gbps)
-├── stack BW      : 461 GB/s
-├── max stack     : 8-Hi
-├── max capacity  : 16 GB / stack (16 Gb DRAM)
-└── 신호 변화 거의 없음, DRAM 밀도만 2배
+**HBM2E (2020):**
 
-대표 카드:
-- NVIDIA A100 40GB (5 stack × 8 GB, 1.6 TB/s)
-- NVIDIA A100 80GB (5 stack × 16 GB, 2.0 TB/s)
-- AMD MI100 (4 stack × 8 GB, 1.2 TB/s)
-```
+| 항목 | 값 |
+|------|-----|
+| per-pin | 3.6 Gbps (Samsung Flashbolt 3.2 Gbps) |
+| stack BW | 461 GB/s |
+| max stack | 8-Hi |
+| max capacity | 16 GB / stack (16 Gb DRAM) |
+| 변화 | 신호 변화 거의 없음, DRAM 밀도만 2배 |
+
+**대표 카드** — NVIDIA A100 40GB (5 stack × 8 GB, 1.6 TB/s), A100 80GB (5 stack × 16 GB, 2.0 TB/s), AMD MI100 (4 stack × 8 GB, 1.2 TB/s).
 
 A100이 *HBM2E*의 대표 시스템입니다. *5 stack 구성*으로 *80 GB / 2.0 TB/s*를 만들어 *2020~2022년 AI training의 표준*이 됐습니다.
 
@@ -108,23 +104,22 @@ per-pin이 *2.4 → 3.6 Gbps*로 *50% 증가*했지만 *전체 구조*는 *HBM2*
 
 JEDEC가 *큰 폭의 사양 변경*을 한 세대입니다.
 
-```text
-HBM3 (2022)
-├── per-pin       : 6.4 Gbps (clock 3.2 GHz)
-├── stack BW      : 819 GB/s
-├── max stack     : 12-Hi (이전 8-Hi)
-├── max capacity  : 24 GB / stack (16 Gb DRAM × 12)
-├── channel       : 16 × 64-bit (8 × 128-bit에서 변경)
-├── pseudo channel: 32 × 32-bit
-├── VDD           : 1.1 V (이전 1.2 V)
-├── ECC           : on-die ECC 표준
-├── RAS           : refresh management 강화
-└── 새 명령       : RFM, ASR
+**HBM3 (2022):**
 
-대표 카드:
-- NVIDIA H100 (5 stack × 16 GB = 80 GB, 3.35 TB/s)
-- AMD MI300X (8 stack × 24 GB = 192 GB, 5.3 TB/s)
-```
+| 항목 | 값 |
+|------|-----|
+| per-pin | 6.4 Gbps (clock 3.2 GHz) |
+| stack BW | 819 GB/s |
+| max stack | 12-Hi (이전 8-Hi) |
+| max capacity | 24 GB / stack (16 Gb DRAM × 12) |
+| channel | 16 × 64-bit (8 × 128-bit에서 변경) |
+| pseudo channel | 32 × 32-bit |
+| VDD | 1.1 V (이전 1.2 V) |
+| ECC | on-die ECC 표준 |
+| RAS | refresh management 강화 |
+| 새 명령 | RFM, ASR |
+
+**대표 카드** — NVIDIA H100 (5 stack × 16 GB = 80 GB, 3.35 TB/s), AMD MI300X (8 stack × 24 GB = 192 GB, 5.3 TB/s).
 
 변화가 *많습니다*. 하나씩 봅니다.
 
@@ -140,27 +135,17 @@ HBM3 (2022)
 
 NVIDIA Blackwell B100/B200/B300의 *주력 메모리*입니다.
 
-```text
-HBM3E (2024)
+**HBM3E (2024) — per-pin 차이 (벤더마다):**
 
-per-pin 차이 (벤더마다):
-├── SK Hynix    : 9.2 Gbps (NVIDIA H200 1st-source)
-├── Micron      : 9.8 Gbps (B200용)
-└── Samsung     : 9.6 Gbps (qualification 진행)
+| 벤더 | per-pin | stack BW (× 1024-bit) | 비고 |
+|------|---------|----------------------|------|
+| SK Hynix | 9.2 Gbps | 1.18 TB/s | NVIDIA H200 1st-source |
+| Samsung | 9.6 Gbps | 1.23 TB/s | qualification 진행 |
+| Micron | 9.8 Gbps | 1.25 TB/s | B200용 |
 
-stack BW:
-├── 9.2 Gbps × 1024-bit = 1.18 TB/s
-├── 9.6 Gbps × 1024-bit = 1.23 TB/s
-└── 9.8 Gbps × 1024-bit = 1.25 TB/s
+max capacity — *36 GB / stack* (24 Gb DRAM × 12 = 36 GB).
 
-max capacity: 36 GB / stack (24 Gb DRAM × 12 = 36 GB)
-
-대표 카드:
-- NVIDIA H200 (6 stack × 24 GB = 144 GB, 4.8 TB/s)
-- NVIDIA B100 (8 stack × 24 GB = 192 GB)
-- NVIDIA B200 (8 stack × 24 GB = 192 GB, 8 TB/s)
-- AMD MI325X (8 stack × 32 GB = 256 GB)
-```
+**대표 카드** — NVIDIA H200 (6 stack × 24 GB = 144 GB, 4.8 TB/s), B100 (8 stack × 24 GB = 192 GB), B200 (8 stack × 24 GB = 192 GB, 8 TB/s), AMD MI325X (8 stack × 32 GB = 256 GB).
 
 핵심은 *DRAM die 자체*가 *24 Gb*로 *2배 커진* 것입니다. *12-Hi stacking*과 결합해 *36 GB stack*이 가능해졌습니다. *cell density* 향상이 *공정 미세화*로 들어가서 *DRAM die 자체가 같은 크기*를 유지합니다.
 
@@ -170,38 +155,29 @@ max capacity: 36 GB / stack (24 Gb DRAM × 12 = 36 GB)
 
 HBM4는 *흐름을 바꿉니다*. *pin rate를 더 끌어올리지 않고*, *bus width를 2배(2048-bit)*로 늘립니다.
 
-```text
-HBM4 예상 (JESD238B 초안 기준)
+**HBM4 예상 (JESD238B 초안 기준):**
 
-├── per-pin       : 6.4~8.0 Gbps (HBM3와 비슷)
-├── bus           : 2048-bit (1024-bit에서 2배)
-├── stack BW      : 1.6~2.0 TB/s
-├── max stack     : 16-Hi (옵션)
-├── max capacity  : 48~64 GB / stack
-├── VDD           : 1.0 V
-├── bonding       : hybrid bonding (옵션, no microbump)
-└── base die      : custom logic 옵션 (HBM4P)
+| 항목 | 값 |
+|------|-----|
+| per-pin | 6.4~8.0 Gbps (HBM3와 비슷) |
+| bus | 2048-bit (1024-bit에서 2배) |
+| stack BW | 1.6~2.0 TB/s |
+| max stack | 16-Hi (옵션) |
+| max capacity | 48~64 GB / stack |
+| VDD | 1.0 V |
+| bonding | hybrid bonding (옵션, no microbump) |
+| base die | custom logic 옵션 (HBM4P) |
 
-채택 예정 칩:
-- NVIDIA Rubin (R100, 2026)
-- AMD MI400 (2026)
-- 차세대 TPU
-```
+**채택 예정 칩** — NVIDIA Rubin (R100, 2026), AMD MI400 (2026), 차세대 TPU.
 
 왜 *광폭으로 갔는가*? *9.8 Gbps에서 더 올리려면 PAM4 같은 signaling*이 필요한데, *HBM의 strict timing budget*에서 *PAM4는 BER 부담*이 큽니다. *bus width를 늘리는 게 안전*하다는 결론입니다.
 
-```text
-HBM3E → HBM4 transition
+**HBM3E → HBM4 transition:**
 
-방식 1: per-pin 14~16 Gbps + PAM (포기)
-  - PAM4 SerDes로 power · area 폭증
-  - DRAM die의 IO 회로가 GDDR6X 수준으로 복잡
-  - 발열·yield 모두 악화
-
-방식 2: bus 2048-bit + per-pin 그대로 (채택)
-  - microbump pitch를 55 → 30 μm로 줄임
-  - hybrid bonding으로 9 μm까지 가능 (HBM4P)
-  - 면적·전력 부담 분산
+| 방식 | 결정 | 이유 |
+|------|------|------|
+| 1. per-pin 14~16 Gbps + PAM | 포기 | PAM4 SerDes로 power·area 폭증, DRAM die의 IO 회로가 GDDR6X 수준으로 복잡, 발열·yield 모두 악화 |
+| 2. bus 2048-bit + per-pin 그대로 | 채택 | microbump pitch 55 → 30 μm 축소, hybrid bonding으로 9 μm까지 가능(HBM4P), 면적·전력 부담 분산 |
 ```
 
 hybrid bonding은 *솔더 없이 구리끼리 접합*하는 기술입니다. *microbump pitch*가 *9 μm*로 줄어 *같은 면적에 2048 신호*가 들어갑니다. Samsung·SK Hynix·TSMC가 모두 *2025년 양산*을 목표로 합니다.
@@ -210,20 +186,13 @@ hybrid bonding은 *솔더 없이 구리끼리 접합*하는 기술입니다. *mi
 
 세대마다 *Reliability·Availability·Serviceability* 기능이 강화됐습니다.
 
-```text
-RAS 기능 누적
-
-HBM2  : 기본 메모리, 옵션 SECDED ECC
-HBM2E : on-die ECC 옵션 추가
-HBM3  : on-die ECC 표준, RFM(Row Hammer 방어), 
-        PPR(Post-Package Repair), 
-        boundary scan,
-        temperature compensated refresh
-HBM3E : 위 기능 + DBI(Data Bus Inversion) 강화, 
-        per-channel error reporting
-HBM4  : 위 기능 + on-die ECC 더 강력 (SECDED → DECTED?), 
-        Cyclic Redundancy Check 표준화
-```
+| 세대 | RAS 기능 |
+|------|---------|
+| HBM2 | 기본 메모리, 옵션 SECDED ECC |
+| HBM2E | on-die ECC 옵션 추가 |
+| HBM3 | on-die ECC 표준, RFM(Row Hammer 방어), PPR(Post-Package Repair), boundary scan, temperature compensated refresh |
+| HBM3E | 위 기능 + DBI(Data Bus Inversion) 강화, per-channel error reporting |
+| HBM4 | 위 기능 + on-die ECC 더 강력 (SECDED → DECTED?), Cyclic Redundancy Check 표준화 |
 
 AI training cluster에서 *수만 개의 stack*이 *24시간 가동*되면 *soft error*가 *시간당 수회* 발생합니다. *PPR과 ECC* 없이는 *training이 며칠 만에 실패*합니다. 그래서 HBM3부터 *RAS가 사실상 필수 옵션*이 됐습니다.
 

@@ -188,12 +188,14 @@ Kernel  --->
 
 커널 빌드만 다시 돌리고 싶을 때는 다음 명령을 자주 씁니다.
 
-```text
-$ make linux-menuconfig          # 커널 .config 열기
-$ make linux-savedefconfig       # defconfig 추출
-$ make linux-rebuild             # 변경 후 다시 빌드
-$ make linux-rebuild linux-reinstall   # rebuild + rootfs 반영
+```bash
+make linux-menuconfig
+make linux-savedefconfig
+make linux-rebuild
+make linux-rebuild linux-reinstall
 ```
+
+순서대로 *커널 `.config` 열기*, *defconfig 추출*, *변경 후 다시 빌드*, *rebuild + rootfs 반영*.
 
 ## 6) Target packages — *2,000개의 패키지 메뉴*
 
@@ -256,9 +258,9 @@ Filesystem images  --->
       ext2/3/4 variant (ext4)
       [*] Add extra inodes
       (16) extra inodes
-  [ ] squashfs root filesystem
-  [ ] tar the root filesystem
-  [ ] ubi image containing an ubifs root filesystem
+  [ ] squashfs
+  [ ] tar
+  [ ] ubi
 ```
 
 대표 옵션과 용도는 다음과 같습니다.
@@ -326,18 +328,20 @@ $ make savedefconfig
 
 이 명령은 *기본값과 다른 옵션만* 모아 `defconfig` 파일을 만듭니다. 보통 50 ~ 200줄 안쪽으로 짧습니다. 다음과 같이 사용하는 흐름이 표준입니다.
 
-```text
-$ make menuconfig          # GUI에서 설정 조정
-$ make savedefconfig       # 변경 사항을 defconfig로 추출
-$ mv defconfig configs/myboard_defconfig
-$ git add configs/myboard_defconfig
+```bash
+make menuconfig
+make savedefconfig
+mv defconfig configs/myboard_defconfig
+git add configs/myboard_defconfig
 ```
+
+순서대로 *GUI에서 설정 조정*, *변경 사항을 defconfig로 추출*, *configs로 이동*, *git에 추가*.
 
 이렇게 만든 defconfig는 *다른 사람이* 다음과 같이 재현할 수 있습니다.
 
-```text
-$ make myboard_defconfig
-$ make
+```bash
+make myboard_defconfig
+make
 ```
 
 defconfig가 git에 남는 *공식적인 보드 정의*이며, `.config`는 그 *전개판*입니다. 둘의 관계가 명확하게 분리되어 있어야 시간이 흐른 뒤에도 빌드를 재현할 수 있습니다.
