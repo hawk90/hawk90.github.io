@@ -112,37 +112,14 @@ ESA는 *long mission name*을 사용해 *수십 년 후*도 식별 가능.
 
 ECSS는 *6 baseline*. DO-178C의 4보다 많음.
 
-```
-Type A — Functional Baseline (FBL)
-  After:  SRR (System Requirements Review)
-  Frozen: System requirements
-  Changes: 시스템 수준 영향 분석
-
-Type B — Allocated Baseline (ABL)
-  After:  PDR (Preliminary Design Review)
-  Frozen: HLR + High-level Architecture
-  Changes: Subsystem level CCB
-
-Type C — Design Baseline (DBL)
-  After:  CDR (Critical Design Review)
-  Frozen: LLR + Detailed Design
-  Changes: 코드와 함께
-
-Type D — Product Baseline (PBL)
-  After:  QR (Qualification Review)
-  Frozen: 양산 SW
-  Changes: Service Bulletin
-
-Type E — Operational Baseline (OBL)
-  After:  AR (Acceptance Review) + Launch
-  Frozen: 발사된 SW
-  Changes: In-orbit update만 (매우 신중)
-
-Type F — Maintenance Baseline (MBL)
-  매년 또는 분기
-  Operational 중 누적 변경
-  Frozen: 정기 release
-```
+| Type | 이름 | After | Frozen | Changes |
+|------|------|-------|--------|---------|
+| A | Functional Baseline (FBL) | SRR | System requirements | 시스템 수준 영향 분석 |
+| B | Allocated Baseline (ABL) | PDR | HLR + High-level Architecture | Subsystem level CCB |
+| C | Design Baseline (DBL) | CDR | LLR + Detailed Design | 코드와 함께 |
+| D | Product Baseline (PBL) | QR | 양산 SW | Service Bulletin |
+| E | Operational Baseline (OBL) | AR + Launch | 발사된 SW | In-orbit update만 (매우 신중) |
+| F | Maintenance Baseline (MBL) | 매년 또는 분기 | 정기 release | Operational 중 누적 변경 |
 
 DO-178C(4 baseline)는 *항공기 1회 인증* 모델. ECSS(6 baseline)는 *지속 운영* 모델.
 
@@ -447,26 +424,12 @@ ESA mission은 *수십 회 audit*. 모든 audit이 *기록*.
 
 ## Tool — SCM 도구
 
-```
-IBM Rational ClearCase
-  - 항공 + 우주 표준 (20년+)
-  - 강한 trigger + branch 관리
-  - 비싸고 느림
-
-Git + GitLab/GitHub
-  - 새로운 표준
-  - Fast, distributed
-  - 항공 + 우주 점진 채택
-  - LFS for binary
-
-Subversion (SVN)
-  - Legacy 일부 ESA
-  - 점차 Git으로
-
-Custom systems
-  - 매우 큰 ESA mission이 자체 시스템
-  - Airbus, Thales 등
-```
+| 도구 | 특성 |
+|------|------|
+| **IBM Rational ClearCase** | 항공 + 우주 표준(20년+), 강한 trigger + branch 관리, 비싸고 느림 |
+| **Git + GitLab/GitHub** | 새로운 표준, fast/distributed, 항공·우주 점진 채택, LFS for binary |
+| **Subversion (SVN)** | Legacy 일부 ESA, 점차 Git으로 |
+| **Custom systems** | 매우 큰 ESA mission이 자체 시스템 (Airbus, Thales 등) |
 
 ### Git for Space — KARI 사례
 
@@ -512,16 +475,14 @@ Component: [name]
 
 ## ECSS vs DO-178C — SCM 비교
 
-```
-                    DO-178C            ECSS-Q-ST-80C
-─────────────────────────────────────────────────
-Baseline 수         4                  6 (operational + maintenance)
-Long-term archive   언급               의무 강조
-In-orbit change     N/A                정식 procedure
-Heritage SW         PDS / SOUP         별도 활동 (강조)
-COTS                PDS / SOUP         별도 활동 (강조)
-Customer 참여       FAA late           Customer early + 지속
-```
+| 항목 | DO-178C | ECSS-Q-ST-80C |
+|------|---------|---------------|
+| Baseline 수 | 4 | 6 (operational + maintenance) |
+| Long-term archive | 언급 | 의무 강조 |
+| In-orbit change | N/A | 정식 procedure |
+| Heritage SW | PDS / SOUP | 별도 활동 (강조) |
+| COTS | PDS / SOUP | 별도 활동 (강조) |
+| Customer 참여 | FAA late | Customer early + 지속 |
 
 ESA가 *고객 (운영자) 참여*를 더 강조. 위성·발사체는 *대형 고객 (정부)*가 *전 lifecycle 참여*.
 

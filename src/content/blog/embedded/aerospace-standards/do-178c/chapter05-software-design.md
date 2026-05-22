@@ -204,103 +204,58 @@ C 시스템도 *적절히 UML 차용* 가능 — 모듈을 class 비유.
 
 ## Architecture 문서 — 실제 예
 
-```
-=== Software Architecture Document (SAD) ===
+**Software Architecture Document (SAD) — Engine FADEC v3.0, DAL A.**
 
-Project: Engine FADEC v3.0
-DAL: A
+**1. Overview**
 
-1. Overview
-   - System: Full Authority Digital Engine Control
-   - Engine: PW1100G turbofan
-   - 책임: 연료 분사, 펌프 제어, monitoring, fault detection
+- System — Full Authority Digital Engine Control
+- Engine — PW1100G turbofan
+- 책임 — 연료 분사, 펌프 제어, monitoring, fault detection
 
-2. Module Decomposition
-   The FADEC SW is decomposed into the following modules:
+**2. Module Decomposition** — FADEC SW를 다음 모듈로 분해.
 
-   M1: I/O Manager        — Hardware I/O abstraction
-   M2: Sensor Processing  — Filter, validate, calibrate
-   M3: Engine State       — Engine state machine
-   M4: Control Law        — Fuel/air ratio computation
-   M5: Fault Detector     — FDIR (Fault Detection, Isolation, Recovery)
-   M6: Communications     — ARINC 429 + CAN buses
-   M7: Built-in Test (BIT)— self-diagnostic
-   M8: Logger             — non-volatile event log
+| 모듈 | 역할 |
+|------|------|
+| M1 I/O Manager | Hardware I/O abstraction |
+| M2 Sensor Processing | Filter, validate, calibrate |
+| M3 Engine State | Engine state machine |
+| M4 Control Law | Fuel/air ratio computation |
+| M5 Fault Detector | FDIR (Fault Detection, Isolation, Recovery) |
+| M6 Communications | ARINC 429 + CAN buses |
+| M7 Built-in Test (BIT) | self-diagnostic |
+| M8 Logger | non-volatile event log |
 
-3. Dependency Graph
+**3. Dependency Graph** — M1(I/O, HW와 직접) → M2(Sensor) → M3(Engine State) ← M5(Fault Detector) → M4(Control Law) → M5. Cross-cutting — M6/M7/M8. 순환 의존 없음. M1 has no upstream.
 
-   M1 (I/O Manager)        ← 최하위 (HW와 직접)
-       ↑
-   M2 (Sensor Processing)
-       ↑
-   M3 (Engine State) ←─── M5 (Fault Detector)
-       ↑                       ↑
-   M4 (Control Law) ──────────┘
-       ↑
-   M6 (Comms)  M7 (BIT)  M8 (Logger)    ← cross-cutting
+**4. Data Flow** — Sensors → M1 → M2 → M3 → M4 → M1 (actuators). M2/M3에서 M5(analysis) → M3(state transitions).
 
-   No circular dependencies. M1 has no upstream.
+**5. Control Flow (Task Architecture)**
 
-4. Data Flow
-   Sensors → M1 → M2 → M3 → M4 → M1 (actuators)
-                  ↓    ↓
-                 M5 (analysis)
-                  ↓
-                 M3 (state transitions)
+| Task | 주기 | WCET 한도 | 동작 |
+|------|------|-----------|------|
+| T1 Main Control Loop | 50 Hz, 20 ms | — | M1.input → M2 → M3 → M4 → M1.output |
+| T2 Fault Monitor | 10 Hz, 100 ms | — | M5 (cross-check + watchdog reset) |
+| T3 BIT Background | 1 Hz, 1 s | — | M7 (memory check, ROM CRC) |
+| T4 Communications | event-driven | — | M6 (ARINC 429 RX/TX, CAN RX/TX) |
+| T5 Logger | low priority, opportunistic | — | M8 (write to NVM when CPU idle) |
 
-5. Control Flow (Task Architecture)
+**6. Memory Architecture**
 
-   T1: Main Control Loop        (50 Hz, 20ms)
-       M1.input → M2 → M3 → M4 → M1.output
+| 영역 | 크기 |
+|------|------|
+| ROM | 384 KB |
+| RAM | 96 KB |
+| NVM | 128 KB (event log) |
+| Stack T1/T2/T3/T4/T5 | 4/2/2/2/1 KB |
+| Heap | 0 (no dynamic allocation post-init) |
 
-   T2: Fault Monitor             (10 Hz, 100ms)
-       M5 (cross-check + watchdog reset)
+Memory Protection — Code segment read-only, data segment read-write per task (MPU), stack overflow MPU guard pages.
 
-   T3: BIT Background            (1 Hz, 1s)
-       M7 (memory check, ROM CRC)
+**7. Timing Architecture** — task별 WCET — T1 15 ms (75% of 20 ms budget), T2 30 ms (within 100 ms budget), T3 50 ms (within 1 s budget), T4 1 ms per message, T5 background. CPU utilization (worst-case) — *78%*. Schedulability proven via Rate Monotonic Analysis (RMA). See Timing Analysis Report TAR-FADEC-2024-003.
 
-   T4: Communications            (event-driven)
-       M6 (ARINC 429 RX/TX, CAN RX/TX)
+**8. Partitioning** — No partitioning (single criticality at DAL A). For multi-DAL systems, ARINC 653 IMA would be used.
 
-   T5: Logger                    (low priority, opportunistic)
-       M8 (write to NVM when CPU idle)
-
-6. Memory Architecture
-   ROM:     384 KB
-   RAM:      96 KB
-   NVM:     128 KB (event log)
-   Stack per task:
-     T1: 4 KB
-     T2: 2 KB
-     T3: 2 KB
-     T4: 2 KB
-     T5: 1 KB
-   Heap: 0 (no dynamic allocation post-init)
-
-   Memory Protection:
-   - Code segment: read-only
-   - Data segment: read-write per task (MPU)
-   - Stack overflow: MPU guard pages
-
-7. Timing Architecture
-   Worst-Case Execution Time per task:
-     T1: 15 ms (75% of 20ms budget)
-     T2: 30 ms (within 100ms budget)
-     T3: 50 ms (within 1s budget)
-     T4: 1 ms per message (event-driven)
-     T5: ~ (background)
-
-   CPU utilization (worst-case): 78%
-   Schedulability proven via Rate Monotonic Analysis (RMA).
-   See Timing Analysis Report TAR-FADEC-2024-003.
-
-8. Partitioning
-   No partitioning (single criticality at DAL A).
-   For multi-DAL systems, ARINC 653 IMA would be used.
-
-9. HW/SW Interface
-   See ICD-FADEC-HW-2024-001 for hardware interface details.
-```
+**9. HW/SW Interface** — See ICD-FADEC-HW-2024-001 for hardware interface details.
 
 이런 *3~10 페이지 SAD*가 *시스템 디자인의 모든 결정*을 *한 곳*에. 후속 코드는 *SAD 안에서만 동작*.
 
@@ -308,23 +263,22 @@ DAL: A
 
 ### Memory Budget
 
-```
-Total RAM: 96 KB
-─────────────────
-  M1 (I/O Manager):           4 KB
-  M2 (Sensor Processing):     8 KB
-  M3 (Engine State):          2 KB
-  M4 (Control Law):          12 KB
-  M5 (Fault Detector):        6 KB
-  M6 (Comms):                 8 KB (TX/RX buffers)
-  M7 (BIT):                   2 KB
-  M8 (Logger):                4 KB
-  Stack (all tasks):         11 KB
-  RTOS overhead:              4 KB
-  Margin:                    35 KB (37%)
-─────────────────
-  Total used:                61 KB (63%)
-```
+Total RAM 96 KB. 모듈별 budget:
+
+| 항목 | RAM |
+|------|-----|
+| M1 (I/O Manager) | 4 KB |
+| M2 (Sensor Processing) | 8 KB |
+| M3 (Engine State) | 2 KB |
+| M4 (Control Law) | 12 KB |
+| M5 (Fault Detector) | 6 KB |
+| M6 (Comms, TX/RX buffers) | 8 KB |
+| M7 (BIT) | 2 KB |
+| M8 (Logger) | 4 KB |
+| Stack (all tasks) | 11 KB |
+| RTOS overhead | 4 KB |
+| Margin | 35 KB (37%) |
+| **Total used** | **61 KB (63%)** |
 
 각 모듈에 *RAM budget 명시*. 모듈 개발 중 *초과 시 경고*. 후속 *re-balance*.
 
