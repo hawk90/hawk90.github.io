@@ -220,12 +220,7 @@ void sense_barrier_wait(SenseBarrier* b) {
 
 **핵심 아이디어** — sense 비트가 매 phase마다 뒤집힘. 스레드가 다음 phase로 가면 자기 local_sense도 뒤집어서 비교.
 
-```
-Phase 1: sense=false, 모두 wait until sense=false → 즉시 통과
-        마지막이 sense를 true로 → 모두 풀려남
-Phase 2: 다음 await에서 local_sense를 true로 → wait until sense=true
-        ...
-```
+![Sense-reversing barrier — phase마다 sense 비트가 뒤집히고 마지막 스레드가 sense를 토글하면 모든 spinner가 풀려난다](/images/blog/parallel-principles/diagrams/ch17-sense-barrier.svg)
 
 재사용 안전. 그러나 여전히 sense 변수에 모두가 spin — cache bouncing.
 

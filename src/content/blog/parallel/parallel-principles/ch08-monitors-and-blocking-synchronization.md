@@ -416,11 +416,10 @@ public:
 
 반대로 `BoundedBuffer`처럼 *두 다른 조건*(not_full, not_empty)이 있으면 condition을 둘로 분리해야 한다. 단일 condition으로 가능하지만 `notify_all`만 가능하고 비효율.
 
-```text
-조건의 수 = condition variable의 수
-한 condition으로 N개 다른 조건을 다루려면 → notify_all + while로 재검사
-별도 condition으로 분리하면 → notify_one으로 정확히 한 명만 깨움 (효율)
-```
+조건의 수 = condition variable의 수.
+
+- 한 condition으로 N개 다른 조건을 다루려면 → `notify_all` + `while`로 재검사
+- 별도 condition으로 분리하면 → `notify_one`으로 정확히 한 명만 깨움 (효율)
 
 ```cpp
 // 연결 풀 예제 (C++20)

@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.0,3.4) {SkipQueue — concurrent marking};
+
+% Linked list of nodes
+\node[neut, minimum width=14mm, minimum height=10mm] (head) at (0,1.4) {head};
+\node[imp, minimum width=14mm, minimum height=10mm, align=center]
+  (n1) at (2.0,1.4) {\textbf{1}\\\small marked};
+\node[imp, minimum width=14mm, minimum height=10mm, align=center]
+  (n2) at (4.0,1.4) {\textbf{2}\\\small marked};
+\node[abs, minimum width=14mm, minimum height=10mm] (n3) at (6.0,1.4) {3};
+\node[abs, minimum width=14mm, minimum height=10mm] (n4) at (8.0,1.4) {4};
+\node[abs, minimum width=14mm, minimum height=10mm] (n5) at (10.0,1.4) {5};
+
+\draw[arr] (head.east) -- (n1.west);
+\draw[arr] (n1.east) -- (n2.west);
+\draw[arr] (n2.east) -- (n3.west);
+\draw[arr] (n3.east) -- (n4.west);
+\draw[arr] (n4.east) -- (n5.west);
+
+% Workers
+\node[hi, minimum width=14mm, minimum height=10mm] (a) at (2.0,-0.8) {직원 A};
+\node[hi, minimum width=14mm, minimum height=10mm] (b) at (4.0,-0.8) {직원 B};
+\node[imp, minimum width=14mm, minimum height=10mm] (c) at (6.0,-0.8) {직원 C};
+
+\draw[arr] (a.north) -- (n1.south);
+\draw[arr] (b.north) -- (n2.south);
+\draw[arr, dashed] (c.north) -- (n3.south)
+  node[midway, right, caption] {\scriptsize CAS};
+
+% Note
+\node[caption, align=center, anchor=center] at (6.0,-2.2)
+  {CAS 실패는 자연 back-off — 다음 학생으로 넘어가게 만든다};
+
+\end{tikzpicture}
+\end{document}

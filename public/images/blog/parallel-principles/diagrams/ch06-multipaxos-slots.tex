@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.5,3.6) {Multi-Paxos — Slot Sequence};
+
+% Slot row
+\foreach \i/\v in {0/v_0, 1/v_1, 2/v_2, 3/v_3} {
+  \node[abs, minimum width=22mm, minimum height=12mm, anchor=west, align=center]
+    (s\i) at ({\i*2.6},1.4)
+    {\textbf{Slot \i}\\\small decision $= \v$};
+}
+
+% Same leader bracket
+\node[caption, anchor=center] at (4.5, 2.6) {same leader (no re-election)};
+
+% Per-slot detail
+\foreach \i in {0,1,2,3} {
+  \node[caption, anchor=center, align=center] at ({\i*2.6+1.1},-0.0)
+    {propose\\$\downarrow$\\quorum ack};
+}
+
+% Operation log (bottom)
+\node[hi, minimum width=104mm, minimum height=12mm, anchor=west, align=center]
+  (log) at (0,-2.2) {Operation log: \texttt{[$v_0$, $v_1$, $v_2$, $v_3$, ...]}};
+
+\foreach \i in {0,1,2,3} {
+  \draw[arr, line width=0.7pt] ({\i*2.6+1.1},-0.6) -- ++(0,-1.0);
+}
+
+% Side note
+\node[caption, anchor=center, align=center] at (6.5,-3.4)
+  {모든 노드가 같은 슬롯 시퀀스에 합의 → state machine을 재생};
+
+\end{tikzpicture}
+\end{document}

@@ -1018,18 +1018,7 @@ void unlock(ticket_lock* l) {
 
 Ticket lock은 모든 CPU가 *같은* `now_serving` 변수를 spin한다. 락이 풀릴 때마다 모든 코어의 캐시 라인이 무효화되어 *cache-line bouncing*이 폭증. **MCS lock** (Mellor-Crummey & Scott, 1991)은 각 스레드가 *자기 로컬* 노드를 spin하게 만들어 이를 해결.
 
-```text
-스레드 A의 lock:
-1. 자기 노드(MCSNode A)를 글로벌 tail에 swap으로 enqueue
-2. 이전 tail이 nullptr이면 즉시 락 획득
-3. 이전 tail의 next에 자기를 연결, 그 다음 자기 노드의 locked 필드를 spin
-
-unlock:
-1. 자기 노드의 next가 nullptr이면 — 후속자 없음, tail에 CAS로 비우기
-2. 그렇지 않으면 후속자의 locked = false로 깨움
-
-각 스레드는 자기 cache line만 spin → bouncing 없음.
-```
+![MCS lock — 각 스레드가 자기 MCSNode를 글로벌 tail에 enqueue하고 자기 노드의 locked 필드만 spin해 cache bouncing을 없앤다](/images/blog/parallel-principles/diagrams/ch02-mcs-lock.svg)
 
 Linux qspinlock(`include/asm-generic/qspinlock.h`)은 *MCS lock + ticket lock hybrid*. 경쟁이 적을 때는 ticket처럼 빠르고, 경쟁이 많을 때는 MCS처럼 확장한다.
 

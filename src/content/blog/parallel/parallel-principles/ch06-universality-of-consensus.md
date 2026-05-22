@@ -656,13 +656,7 @@ universal construction의 *형태* — 합의된 연산 로그 + 재생 — 는 
 
 Leslie Lamport의 Paxos는 단일 결정 하나를 합의한다. Multi-Paxos는 결정을 *연속해서* 합의한다 — 첫 결정의 합의가 끝나면 leader를 재선출하지 않고 그대로 다음 결정으로 넘어간다.
 
-```text
-Slot 0:  의장 후보 → propose → quorum ack → 결정 v_0
-Slot 1:  같은 의장 → propose → quorum ack → 결정 v_1
-Slot 2:  같은 의장 → propose → quorum ack → 결정 v_2
-...
-모든 노드가 같은 슬롯 시퀀스에 합의 → operation log
-```
+![Multi-Paxos slot 시퀀스 — leader가 매 슬롯에 propose하고 quorum이 ack하면 operation log가 누적된다](/images/blog/parallel-principles/diagrams/ch06-multipaxos-slots.svg)
 
 이 슬롯 시퀀스가 곧 6장의 operation log다. 각 노드는 결정된 슬롯들을 처음부터 차례로 적용하여 자기 로컬 state machine을 갱신한다 — 회의록 재생.
 

@@ -338,11 +338,7 @@ struct HeapNode {
 
 직원 여러 명이 동시에 *맨 앞부터 한 명씩 처리*한다. 첫 직원이 1번 학생을 *마킹*하면 두 번째 직원은 자연스럽게 2번 학생으로 넘어간다. 세 번째는 3번. CAS 실패가 자연 back-off 역할.
 
-```text
-head ━ 1(mark)━ 2(mark)━ 3 ━ 4 ━ 5 ━ ...
-        ↑          ↑         ↑
-      직원 A     직원 B    직원 C가 노리는 자리
-```
+![SkipQueue marking — 직원 A/B가 head 근처 노드를 marking하고 직원 C는 다음 미마킹 노드를 노린다](/images/blog/parallel-principles/diagrams/ch15-skipqueue-marking.svg)
 
 이게 SkipQueue의 영리한 점 — *엄밀한 strict PQ semantics를 유지하면서* 어느 정도 분산을 얻는다.
 

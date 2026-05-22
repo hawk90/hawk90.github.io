@@ -1,0 +1,44 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.5,3.8) {MCS Lock — per-thread spin node};
+
+% Global tail pointer
+\node[imp, minimum width=22mm, minimum height=10mm] (tail) at (12.5, 2.2)
+  {global \texttt{tail}};
+
+% Queue of MCSNodes (linked list)
+\foreach \i/\lab/\state in {
+  0/A/{locked=\textbf{F} (owner)},
+  1/B/{locked=\textbf{T} (spin)},
+  2/C/{locked=\textbf{T} (spin)}%
+} {
+  \node[abs, minimum width=28mm, minimum height=14mm, anchor=west, align=center]
+    (n\i) at ({\i*3.3},0.4)
+    {MCSNode \lab\\\small \state};
+}
+
+% Arrows showing next pointers
+\draw[arr, line width=0.8pt] (n0.east) -- (n1.west);
+\draw[arr, line width=0.8pt] (n1.east) -- (n2.west);
+
+% Tail pointer to last node
+\draw[arr, line width=0.8pt, dashed] (tail.south) |- (n2.east);
+
+% Each thread spins on own cache line note
+\node[caption, anchor=center, align=center] at (4.5,-1.6)
+  {각 스레드는 \emph{자기 노드의 locked 필드만} spin\\[1pt]→ cache-line bouncing 없음};
+
+% Unlock note
+\node[caption, anchor=center, align=center] at (4.5,-3.0)
+  {unlock — 자기 next의 \texttt{locked = false}로 후속자 깨움};
+
+\end{tikzpicture}
+\end{document}
