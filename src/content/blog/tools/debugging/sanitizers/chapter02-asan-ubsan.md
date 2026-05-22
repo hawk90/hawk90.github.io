@@ -193,19 +193,14 @@ UBSAN_OPTIONS=suppressions=ubsan.supp ./myapp
 
 각 sanitizer가 자기 suppression 파일을 따로 가집니다. 패턴은 함수명 / 모듈명 / 정규식을 지원합니다.
 
-```
-# 함수명으로
-leak:my_known_leak_function
+**suppression 패턴 예:**
 
-# 라이브러리로
-leak:libfoo.so
-
-# 정규식 (interceptor)
-interceptor_via_fun:^OpenSSL_*
-
-# UBSan 전용
-signed-integer-overflow:somefile.cpp
-```
+| 패턴 | 의미 |
+|------|------|
+| `leak:my_known_leak_function` | 함수명 |
+| `leak:libfoo.so` | 라이브러리 |
+| `interceptor_via_fun:^OpenSSL_*` | 정규식 (interceptor) |
+| `signed-integer-overflow:somefile.cpp` | UBSan 전용 |
 
 Suppression은 *최후의 수단*입니다. 우리 코드의 버그를 가리면 안 됩니다. 외부 라이브러리·CRT의 *알려진 false positive*에만 씁니다.
 

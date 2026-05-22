@@ -103,25 +103,14 @@ fun:main
 
 ### 와일드카드와 매칭
 
-```
-# 정확히 일치
-fun:malloc
-
-# 와일드카드
-fun:OpenSSL_*
-
-# 정규식 모양 (limited)
-fun:my_*_function
-
-# 라이브러리 이름
-obj:/usr/lib/libcrypto*.so*
-
-# 모든 프레임 매칭
-...
-
-# 스킵 — 임의의 한 프레임
-fun:*
-```
+| 패턴 | 의미 |
+|------|------|
+| `fun:malloc` | 정확히 일치 |
+| `fun:OpenSSL_*` | 와일드카드 |
+| `fun:my_*_function` | 정규식 모양 (limited) |
+| `obj:/usr/lib/libcrypto*.so*` | 라이브러리 이름 |
+| `...` | 모든 프레임 매칭 (0개 이상) |
+| `fun:*` | 임의의 *한* 프레임만 |
 
 `...`은 *0개 이상의 프레임을 임의로 매칭*. `fun:*`은 *정확히 한 프레임 매칭*. 둘은 의미가 다릅니다.
 

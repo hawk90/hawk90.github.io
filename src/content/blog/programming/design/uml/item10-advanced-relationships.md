@@ -33,10 +33,10 @@ UML은 이런 케이스를 위한 추가 표기를 제공합니다.
 | ◆ (꽉 찬 마름모) | composition | 전체가 죽으면 부분도 죽음 |
 | ◇ (빈 마름모) | aggregation | 전체가 죽어도 부분은 살아남음 |
 
-```
-House ◆—— Room        # 집 허물면 방도 없어짐
-Department ◇—— Employee   # 부서 없어져도 직원은 남음
-```
+| 관계 | UML 표기 | 의미 |
+|------|----------|------|
+| Composition | `House ◆—— Room` | 집을 허물면 방도 없어짐 |
+| Aggregation | `Department ◇—— Employee` | 부서가 없어져도 직원은 남음 |
 
 > 💡 실무에선 **composition만 쓰고 aggregation은 거의 안 씁니다**. 도메인 의미가 모호한 경우가 많고, Fowler도 "aggregation은 무시해도 된다"고 합니다.
 

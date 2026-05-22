@@ -37,16 +37,17 @@ void h() { /* crash */ }
 
 각 PC 위치에서.
 
-```
-CFA (Canonical Frame Address) = 호출자 측 SP의 값
+**CFA** (Canonical Frame Address) = 호출자 측 SP의 값.
 
-호출자 측 각 레지스터의 위치 (register rule):
-  Same     - 값이 같다 (변경 안 됨)
-  Offset N - CFA + N 주소에 저장됨
-  Register R - 다른 레지스터에 있음
-  Expression - DWARF expression
-  Undefined - 알 수 없음 (보존 안 됨)
-```
+호출자 측 각 레지스터의 위치(**register rule**):
+
+| Rule | 의미 |
+|------|------|
+| `Same` | 값이 같다 (변경 안 됨) |
+| `Offset N` | CFA + N 주소에 저장됨 |
+| `Register R` | 다른 레지스터에 있음 |
+| `Expression` | DWARF expression |
+| `Undefined` | 알 수 없음 (보존 안 됨) |
 
 `bt`의 *한 단계 위로 올라가기*.
 

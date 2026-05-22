@@ -29,27 +29,13 @@ draft: false
 
 ## Tail-Chaining - 핵심 트릭
 
-```text
-ISR A 종료 → ISR B 대기 중
-
-회피 (옛 ARM7):
-  ISR A 종료 → pop 8 reg → main 명령 1개 → 또 push 8 reg → ISR B 진입
-  = 12 + 12 + idle = ~30 cycle
-
-Cortex-M Tail-Chaining:
-  ISR A 종료 → pop 안 함 → 곧바로 ISR B 진입
-  = 6 cycle
-```
+![Tail-chaining 비교 — 옛 ARM7은 pop/push를 반복하지만 Cortex-M은 pop을 생략하고 곧바로 ISR B에 진입한다](/images/blog/perf-eng/diagrams/part3-05-tail-chaining.svg)
 
 연속 IRQ 상황에서 *50% 효율*을 얻습니다.
 
 ## Late Arrival
 
-```text
-ISR A 진입 중 — 더 높은 priority B 도착
-  → A의 push 진행 중이므로 *그대로 활용* → B로 vector fetch만 변경
-  → A는 *영원 대기 (B 끝난 후 진행)*
-```
+![Late arrival — A의 push 진행 중에 더 높은 priority B가 도착하면 push를 그대로 활용하고 vector fetch만 B로 변경한다](/images/blog/perf-eng/diagrams/part3-05-late-arrival.svg)
 
 Higher priority IRQ가 *최소 손실로 선점*합니다. Cortex-M3 이상의 표준 동작입니다.
 

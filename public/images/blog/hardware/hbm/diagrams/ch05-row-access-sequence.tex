@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (7.0,3.6) {DRAM Row Access Sequence};
+
+% Timeline boxes
+\node[imp,  minimum width=22mm, minimum height=10mm, anchor=west] (act1)  at (0,1.6)  {ACT row=R};
+\node[abs,  minimum width=14mm, minimum height=10mm, anchor=west] (rd0)   at (2.4,1.6){RD $C_0$};
+\node[abs,  minimum width=14mm, minimum height=10mm, anchor=west] (rd1)   at (4.0,1.6){RD $C_1$};
+\node[abs,  minimum width=14mm, minimum height=10mm, anchor=west] (rd2)   at (5.6,1.6){RD $C_2$};
+\node[neut, minimum width=14mm, minimum height=10mm, anchor=west] (pre)   at (7.2,1.6){PRE};
+\node[imp,  minimum width=22mm, minimum height=10mm, anchor=west] (act2)  at (8.8,1.6){ACT row=R'};
+\node[abs,  minimum width=14mm, minimum height=10mm, anchor=west] (rd3)   at (11.4,1.6){RD $C'$};
+
+% Annotation timings
+\node[caption, anchor=center] at (1.1, 0.6) {\scriptsize tRCD $\approx$ 15 ns};
+\node[caption, anchor=center] at (4.8, 0.6) {\scriptsize tCL $\approx$ 14 ns, burst};
+\node[caption, anchor=center] at (7.9, 0.6) {\scriptsize tRP $\approx$ 14 ns};
+\node[caption, anchor=center] at (9.9, 0.6) {\scriptsize tRCD};
+
+% Outcome summary
+\node[caption, align=left, anchor=west] at (0,-0.6)
+  {\textbf{row hit:} 14 ns latency, 이후 burst};
+\node[caption, align=left, anchor=west] at (0,-1.4)
+  {\textbf{row miss:} 14 + 14 + 14 = 42 ns overhead (PRE + ACT + RD)};
+
+% Time axis
+\draw[arr, line width=0.6pt] (0,2.6) -- (13.2,2.6);
+\node[caption, anchor=west] at (13.2,2.6) {time};
+
+\end{tikzpicture}
+\end{document}

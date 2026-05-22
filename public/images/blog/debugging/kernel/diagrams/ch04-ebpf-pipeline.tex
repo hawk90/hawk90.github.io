@@ -1,0 +1,42 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,node distance=8mm]
+
+\node[font=\sffamily\bfseries\large] at (0,5.6) {eBPF Execution Pipeline};
+
+\node[neut, minimum width=68mm, minimum height=10mm, align=center] (user) at (0,4.4)
+  {사용자 코드\\\small (bpftrace 한 줄 또는 C 코드)};
+
+\node[abs, minimum width=68mm, minimum height=10mm, align=center] (comp) at (0,2.8)
+  {컴파일러\\\small → BPF 바이트코드};
+
+\node[imp, minimum width=68mm, minimum height=11mm, align=center] (verify) at (0,1.0)
+  {\textbf{커널 verifier}\\\small 무한 루프 없음, 메모리 접근 안전, ...};
+
+\node[abs, minimum width=68mm, minimum height=10mm, align=center] (jit) at (0,-0.8)
+  {JIT compiler\\\small → 네이티브 x86 / ARM 코드};
+
+\node[hi, minimum width=68mm, minimum height=11mm, align=center] (hook) at (0,-2.6)
+  {\textbf{Hook 실행}\\\small kprobe / tracepoint / perf event / XDP / ...};
+
+\node[neut, minimum width=68mm, minimum height=10mm, align=center] (result) at (0,-4.4)
+  {결과 채널\\\small perf buffer / BPF map / ringbuf};
+
+\draw[arr, line width=0.8pt] (user.south)   -- (comp.north);
+\draw[arr, line width=0.8pt] (comp.south)   -- (verify.north);
+\draw[arr, line width=0.8pt] (verify.south) -- (jit.north);
+\draw[arr, line width=0.8pt] (jit.south)    -- (hook.north);
+\draw[arr, line width=0.8pt] (hook.south)   -- (result.north);
+
+% Side note
+\node[caption, anchor=west, align=left] at (4.0, 1.0)
+  {검증 통과 =\\\emph{커널 crash 불가}};
+
+\end{tikzpicture}
+\end{document}

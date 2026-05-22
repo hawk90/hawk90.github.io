@@ -98,13 +98,10 @@ H mtx_A 대기 → L1·L2 둘 다 boost
 
 ## 해결 2: Priority Ceiling Protocol (PCP)
 
-```text
-각 mutex에 *ceiling priority* 미리 지정
-  ceiling = mutex를 *사용할 가능성 있는* 모든 task 중 *최고 priority*
+각 mutex에 *ceiling priority*를 미리 지정한다. *ceiling = mutex를 사용할 가능성 있는 모든 task 중 최고 priority*.
 
-Take 시 — task priority가 ceiling 수준으로 *즉시 boost*
-Give 시 — 원래 priority 복원
-```
+- Take 시 — task priority가 ceiling 수준으로 *즉시 boost*
+- Give 시 — 원래 priority 복원
 
 VxWorks와 INTEGRITY, 일부 µC/OS는 PCP를 지원합니다. 덕분에 WCET 분석이 *훨씬 쉬워집니다*.
 
@@ -152,10 +149,7 @@ struct mutex_stats {
 
 ## ISR과 Priority Inversion
 
-```text
-ISR run on H mutex held → ISR no priority concept
-  → 단순 block 아니라 *ISR is blocked task* — 일반적으로 ISR이 mutex 안 잡음
-```
+ISR이 H가 잡고 있는 mutex를 만나면 ISR에는 priority 개념이 없으므로 *단순 block이 아니라 ISR-blocked-task* 상황이 된다. 일반적으로 *ISR은 mutex를 잡지 않는다*.
 
 ISR과 task 사이에는 *semaphore*(signaling)를 씁니다. Mutex는 *task 간에만* 사용합니다.
 

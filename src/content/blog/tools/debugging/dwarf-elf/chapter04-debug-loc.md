@@ -37,16 +37,14 @@ DWARF expression은 *스택 머신*의 명령어 시퀀스.
 
 ![DWARF expression 스택 머신 — 각 opcode 후의 스택 상태](/images/blog/tools/diagrams/dwarf-expr-vm.svg)
 
-```text
-DW_OP_reg5            ← 값이 r5 레지스터에 있음
-DW_OP_fbreg -16       ← frame base + (-16) 주소에 있음
-DW_OP_addr 0x600000   ← 절대 주소
-DW_OP_breg6 -8        ← r6 + (-8) 주소에 있음
-DW_OP_constu 42 DW_OP_stack_value
-                      ← 값이 42 (메모리 어디에도 없음)
-DW_OP_reg3 DW_OP_piece 4 DW_OP_reg5 DW_OP_piece 4
-                      ← low 4바이트는 r3, high 4바이트는 r5
-```
+| Expression | 의미 |
+|------------|------|
+| `DW_OP_reg5` | 값이 `r5` 레지스터에 있음 |
+| `DW_OP_fbreg -16` | frame base + (−16) 주소에 있음 |
+| `DW_OP_addr 0x600000` | 절대 주소 |
+| `DW_OP_breg6 -8` | `r6 + (−8)` 주소에 있음 |
+| `DW_OP_constu 42 DW_OP_stack_value` | 값이 42 (메모리 어디에도 없음) |
+| `DW_OP_reg3 DW_OP_piece 4 DW_OP_reg5 DW_OP_piece 4` | low 4바이트는 `r3`, high 4바이트는 `r5` |
 
 각 줄이 한 변수의 위치 표현. 단순한 경우는 1-2 opcode, 복잡한 경우 10+.
 

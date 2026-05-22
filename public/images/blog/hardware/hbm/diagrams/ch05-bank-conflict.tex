@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.5,3.4) {Bank Conflict — Serialized Same-Bank Requests};
+
+% Bank 3 row (serialized)
+\node[caption, anchor=east] at (-0.2,1.4) {Bank 3};
+\node[imp,  minimum width=18mm, minimum height=10mm, anchor=west] (t0) at (0,1.4)  {T0 row $R_0$};
+\node[neut, minimum width=18mm, minimum height=10mm, anchor=west] (s1) at (2.2,1.4) {stall PRE};
+\node[imp,  minimum width=18mm, minimum height=10mm, anchor=west] (t1) at (4.4,1.4) {T1 row $R_1$};
+\node[neut, minimum width=18mm, minimum height=10mm, anchor=west] (s3) at (6.6,1.4) {stall PRE};
+\node[imp,  minimum width=18mm, minimum height=10mm, anchor=west] (t3) at (8.8,1.4) {T3 row $R_2$};
+
+% Bank 7 row (parallel, immediate)
+\node[caption, anchor=east] at (-0.2,-0.2) {Bank 7};
+\node[hi, minimum width=18mm, minimum height=10mm, anchor=west] (t2) at (0,-0.2) {T2 row $R_2$};
+\node[caption, anchor=west] at (2.4,-0.2) {(곧바로 처리 — 충돌 없음)};
+
+% Time axis
+\draw[arr, line width=0.6pt] (0,-1.4) -- (11.4,-1.4);
+\node[caption, anchor=west] at (11.4,-1.4) {time};
+
+% Summary
+\node[caption, anchor=center, align=center] at (5.7,-2.4)
+  {bank 3 직렬화로 utilization 저하 — XOR hash로 banks 분산 시 conflict $<$ 5\%};
+
+\end{tikzpicture}
+\end{document}

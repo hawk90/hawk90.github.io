@@ -18,7 +18,7 @@ build/
 ├── libmylib.so
 ├── CMakeFiles/
 ├── cmake_install.cmake
-└── ... 수십 개의 파일
+└── ...
 ```
 
 | 파일 | 역할 |

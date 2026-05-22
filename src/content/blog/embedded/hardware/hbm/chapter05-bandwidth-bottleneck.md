@@ -98,21 +98,7 @@ refresh 명령 (tREFI = 3.9 μs):
 
 DRAM access는 *row를 먼저 activate*해야 *column read/write*가 가능합니다.
 
-```text
-DRAM access sequence
-
-1. ACT row=R       (tRCD = ~15 ns 대기)
-2. RD col=C₀       (tCL = ~14 ns)
-3. RD col=C₁
-4. RD col=C₂       ← 같은 row 내에서 연속 access
-5. ...
-6. PRE             (row close, tRP = ~14 ns)
-7. ACT row=R'      ← 새 row open
-8. RD col=C'
-
-row hit 시: 14 ns latency, 그 후 burst
-row miss 시: 14+14+14 = 42 ns overhead
-```
+![DRAM access sequence — row open(ACT) → 같은 row 안의 RD 연속 → row close(PRE) → 새 row open. row hit는 burst 효율적, row miss는 ACT+PRE+ACT의 42 ns overhead](/images/blog/hardware/hbm/diagrams/ch05-row-access-sequence.svg)
 
 *같은 row 내 access(row hit)*는 *효율적*이지만, *random access*는 *row miss 비율*이 높아 *bandwidth 깎입니다*. 잘 설계된 컨트롤러는 *row buffer locality*가 *70~90%* 정도입니다.
 
@@ -120,24 +106,7 @@ row miss 시: 14+14+14 = 42 ns overhead
 
 여러 *outstanding request*가 *같은 bank*를 노리면 *직렬화*됩니다.
 
-```text
-Bank conflict 시나리오
-
-queue:
-  T0: read bank 3 row R₀
-  T1: read bank 3 row R₁  ← 같은 bank, 다른 row
-  T2: read bank 7 row R₂
-  T3: read bank 3 row R₂  ← 같은 bank
-  ...
-
-bank 3에서:
-  T0 ACT → tRCD → RD
-  T1: T0의 PRE 끝날 때까지 stall (~14 ns)
-  T3: T1의 PRE 끝날 때까지 stall
-
-bank 7은 T2를 곧바로 처리하지만,
-bank 3는 직렬 처리되어 utilization 저하.
-```
+![Bank conflict — bank 3에 다른 row 요청이 쌓여 직렬화되는 동안 bank 7은 곧바로 처리하므로 utilization이 저하된다](/images/blog/hardware/hbm/diagrams/ch05-bank-conflict.svg)
 
 HBM3는 *16 channel × 2 PC × 16 bank = 512 bank*가 *독립*합니다. 컨트롤러가 *address mapping*을 *XOR hash*로 잘 설계하면 *bank conflict*가 *5% 이하*로 떨어집니다.
 

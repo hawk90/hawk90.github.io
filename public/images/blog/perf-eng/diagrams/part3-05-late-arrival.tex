@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (6.5,3.4) {Late Arrival — Higher-Priority B Preempts A};
+
+% Timeline
+\node[neut, minimum width=18mm, minimum height=10mm, anchor=west] (m) at (0,1.4) {main code};
+\node[abs,  minimum width=22mm, minimum height=10mm, anchor=west] (push) at (2.2,1.4) {push (for A)};
+
+% B arrives midway
+\node[imp,  minimum width=22mm, minimum height=10mm, anchor=west] (b) at (4.8,1.4) {ISR B (higher)};
+\node[abs,  minimum width=22mm, minimum height=10mm, anchor=west] (a) at (7.6,1.4) {ISR A (resumes)};
+
+% Arrows
+\draw[arr, line width=0.8pt] (push.east) -- (b.west);
+\draw[arr, line width=0.8pt] (b.east) -- (a.west);
+
+% B arrival marker
+\draw[arr, line width=1pt, dashed, warnbord] (4.2,3.0) -- (4.2,1.95)
+  node[caption, midway, right] {\scriptsize B 도착};
+
+% Annotation
+\node[caption, anchor=center, align=center] at (6.5,-0.4)
+  {A의 push가 \emph{재사용}되고 vector fetch만 B로 변경 → 최소 손실};
+
+% Time axis
+\draw[arr, line width=0.6pt] (0,-1.4) -- (10.0,-1.4);
+\node[caption, anchor=west] at (10.0,-1.4) {time};
+
+\end{tikzpicture}
+\end{document}

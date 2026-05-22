@@ -18,17 +18,15 @@ GDB의 `print val`이 *val의 타입*에 매칭된 Python 클래스를 호출하
 
 ![Pretty-printer dispatch 흐름](/images/blog/tools/diagrams/pretty-printer-dispatch.svg)
 
-```text
-(gdb) print v
+`(gdb) print v` 처리 흐름:
 
-1. v의 타입을 파악 → gdb.Type
+1. `v`의 타입을 파악 → `gdb.Type`
 2. 등록된 pretty-printer들 순회
 3. 첫 매칭되는 printer로 인스턴스 생성
-4. instance.to_string() 호출 → 결과 문자열
-5. instance.children() 호출 (있으면) → 자식 노드 yield
-6. instance.display_hint() (있으면) → "array"/"map"/"string"
+4. `instance.to_string()` 호출 → 결과 문자열
+5. `instance.children()` 호출 (있으면) → 자식 노드 yield
+6. `instance.display_hint()` (있으면) → `"array"`/`"map"`/`"string"`
 7. 위 정보를 종합해 출력
-```
 
 매칭이 없으면 *원시 출력* (struct 멤버 그대로). `print /r val`로 *강제 원시*.
 
