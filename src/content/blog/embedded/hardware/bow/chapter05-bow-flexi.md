@@ -18,14 +18,13 @@ draft: false
 
 칩렛이 좋다는 건 다들 알지만, 대부분의 회사가 *advanced packaging에 들어가지 못합니다*. 이유는 단순합니다.
 
-```text
-advanced packaging의 진입 장벽
-├── CoWoS 라인 capacity 부족 (NVIDIA·AMD가 선점)
-├── 대당 200달러 이상의 packaging 비용
-├── 새 EDA flow 학습 비용
-├── 신뢰성 검증 데이터 부족
-└── 양산 ramp-up 위험
-```
+advanced packaging의 진입 장벽:
+
+- CoWoS 라인 capacity 부족 (NVIDIA·AMD가 선점)
+- 대당 200달러 이상의 packaging 비용
+- 새 EDA flow 학습 비용
+- 신뢰성 검증 데이터 부족
+- 양산 ramp-up 위험
 
 엣지 SoC 회사 입장에서 *대당 5달러짜리 BGA 패키지*를 쓰던 자리에 *200달러짜리 silicon interposer*를 넣을 수는 없습니다. 그러나 *칩렛의 이점*은 갖고 싶습니다. *I/O와 compute 분리*, *die 크기 축소로 수율 향상*, *다양한 메모리 옵션*.
 
@@ -109,14 +108,15 @@ Flexi의 *명확한 타깃*은 다음과 같습니다.
 
 엣지 디바이스의 AI 가속기는 *10~50 TOPS* 수준이고 *200 GB/s 메모리 대역폭*이면 충분합니다. Flexi의 *organic substrate + DDR/LPDDR 칩렛* 구성이 *완벽한 fit*입니다.
 
-```text
-엣지 AI SoC 구성 예
-- Compute die: 7nm AI 가속기 (10 TOPS, 50 mm²)
-- IO die: 22nm I/O 칩렛 (USB, MIPI, SerDes)
-- Memory die: LPDDR5 controller + PHY
-- 모두 organic substrate에 BoW Flexi로 연결
-- 총 BoM: 일반 SoC 대비 +5달러
-```
+엣지 AI SoC 구성 예:
+
+| 칩렛 | 사양 |
+|------|------|
+| Compute die | 7nm AI 가속기 (10 TOPS, 50 mm²) |
+| IO die | 22nm I/O 칩렛 (USB, MIPI, SerDes) |
+| Memory die | LPDDR5 controller + PHY |
+| 연결 | 모두 organic substrate에 BoW Flexi |
+| BoM | 일반 SoC 대비 +5달러 |
 
 monolithic SoC로 만들면 *7nm 면적이 커져* 수율이 떨어집니다. 칩렛으로 나누면 *공정·면적을 최적화*하면서 *원가가 줄어듭니다*.
 

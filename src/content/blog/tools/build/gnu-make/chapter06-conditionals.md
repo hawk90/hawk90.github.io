@@ -346,14 +346,21 @@ header.h:           ← 빈 규칙
 ```text
 project/
 ├── Makefile
-├── config.mk          # 변수 설정
-├── rules.mk           # 공통 규칙
+├── config.mk
+├── rules.mk
 └── src/
     ├── module1/
-    │   └── module.mk  # 모듈별 변수·소스 목록
+    │   └── module.mk
     └── module2/
         └── module.mk
 ```
+
+| 파일 | 역할 |
+|------|------|
+| `Makefile` | 진입점 |
+| `config.mk` | 변수 설정 |
+| `rules.mk` | 공통 규칙 |
+| `src/*/module.mk` | 모듈별 변수·소스 목록 |
 
 ```makefile
 # Makefile

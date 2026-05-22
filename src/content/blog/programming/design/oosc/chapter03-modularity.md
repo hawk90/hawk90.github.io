@@ -70,21 +70,22 @@ Meyer는 **좋은 모듈 구조**를 판단하는 5가지 기준을 제시한다
 
 이해 기준은 **유지보수성**의 핵심이다. 버그를 고치려면 코드를 이해해야 한다. 하나의 모듈을 이해하기 위해 다른 10개 모듈을 읽어야 한다면 생산성이 급락한다.
 
-```text
-이해 어려움:
+**이해 어려움** — `ValidationHelper`의 내부 구현·`DatabaseManager`의 상태를 알아야 한다.
+
+```java
 // OrderProcessor.java
 public void process(Order order) {
-    // ValidationHelper의 내부 구현 알아야 이해 가능
     if (ValidationHelper.check(order, FLAGS_A | FLAGS_B)) {
-        // DatabaseManager의 상태에 따라 동작이 달라짐
         DatabaseManager.getInstance().save(order);
     }
 }
+```
 
-이해 쉬움:
+**이해 쉬움** — 주입된 인터페이스만 알면 충분.
+
+```java
 // OrderProcessor.java
 public void process(Order order) {
-    // 인터페이스만 알면 충분
     if (validator.isValid(order)) {
         repository.save(order);
     }

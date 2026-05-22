@@ -17,19 +17,11 @@ draft: false
 
 10Gbps 네트워크에서 매초 1GB의 byte가 흐른다. user-space에서 1번 복사하면 *추가 1GB/s memcpy*다. CPU 한 코어를 통째로 잡아먹는다.
 
-```text
-전통적 흐름 — 여러 copy
-[NIC] → kernel rx buffer → user buf1 → user buf2 → socket buf → kernel tx → [NIC]
-                              ↑↑↑              ↑↑↑
-                          memcpy 비용     memcpy 비용
-```
+![전통적 흐름 — kernel↔user 사이에 user buf1/buf2/socket buf 거치며 여러 번 memcpy](/images/blog/folly/diagrams/part4-04-traditional-copy.svg)
 
 zero-copy 목표는 *user-space에서 0번 copy*다.
 
-```text
-zero-copy 흐름
-[NIC] → kernel rx → IOBuf (pointer만 wrap) → IOBuf chain (pointer 연결) → writev → kernel tx → [NIC]
-```
+![zero-copy 흐름 — IOBuf가 pointer만 wrap해 chain으로 연결되고 writev/sendmsg에 직접 전달](/images/blog/folly/diagrams/part4-04-zero-copy.svg)
 
 IOBuf의 ref-count와 chain 구조가 이를 자연스럽게 표현한다.
 

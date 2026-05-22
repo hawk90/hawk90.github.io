@@ -43,16 +43,10 @@ Abseil은 Google C++ Style Guide의 "no exceptions" 정책을 따른다. `absl::
 
 ### 2. 의존성
 
-```text
-Abseil 의존성:                Folly 의존성:
-- 자체 완결 (CMake 기준)        - Boost (Context, ProgramOptions, ...)
-- C++17 표준만                 - glog
-- 옵션: Bazel                  - gflags
-                              - jemalloc (강력 권장)
-                              - OpenSSL, double-conversion, fmt
-                              - libevent (executors)
-                              - libdwarf (symbolizer)
-```
+| 라이브러리 | 의존성 |
+|------------|--------|
+| **Abseil** | 자체 완결 (CMake 기준), C++17 표준만, 옵션 Bazel |
+| **Folly** | Boost (Context, ProgramOptions, ...), glog, gflags, jemalloc (강력 권장), OpenSSL, double-conversion, fmt, libevent (executors), libdwarf (symbolizer) |
 
 Folly를 도입하면 *생태계 전체*가 들어온다. 패키지 매니저로 vcpkg/Conan을 쓰지 않으면 빌드 자체가 어렵다. Abseil은 `add_subdirectory`만으로 충분한 경우가 많다.
 

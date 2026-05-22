@@ -227,32 +227,43 @@ target_link_libraries(myapp ${FOO_LIB})
 
 ```text
 project/
-├── CMakeLists.txt           # 최상위 설정
-├── CMakePresets.json        # 빌드 프리셋
-├── cmake/                   # CMake 모듈
+├── CMakeLists.txt
+├── CMakePresets.json
+├── cmake/
 │   ├── MyProjectConfig.cmake.in
 │   └── modules/
 │       └── FindFoo.cmake
-├── include/                 # 공개 헤더
+├── include/
 │   └── myproject/
 │       ├── api.hpp
 │       └── types.hpp
-├── src/                     # 소스 코드
+├── src/
 │   ├── CMakeLists.txt
 │   ├── main.cpp
 │   └── lib/
 │       ├── CMakeLists.txt
 │       └── mylib.cpp
-├── tests/                   # 테스트
+├── tests/
 │   ├── CMakeLists.txt
 │   └── test_mylib.cpp
-├── apps/                    # 추가 실행 파일
+├── apps/
 │   └── cli/
 │       ├── CMakeLists.txt
 │       └── main.cpp
-└── third_party/             # 외부 의존성
+└── third_party/
     └── ...
 ```
+
+| 경로 | 역할 |
+|------|------|
+| `CMakeLists.txt` | 최상위 설정 |
+| `CMakePresets.json` | 빌드 프리셋 |
+| `cmake/` | CMake 모듈 |
+| `include/myproject/` | 공개 헤더 |
+| `src/` | 소스 코드 |
+| `tests/` | 테스트 |
+| `apps/` | 추가 실행 파일 |
+| `third_party/` | 외부 의존성 |
 
 ### 최상위 CMakeLists.txt 템플릿
 

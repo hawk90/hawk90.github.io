@@ -156,12 +156,11 @@ NIST SP 800-213은 *연방 정부가 IoT를 도입할 때* 보는 기준이고, 
 
 제품은 위험도에 따라 분류됩니다.
 
-```text
-Class I (default)         자기적합선언
-Class II (important)      OS, password manager, VPN, network mgmt
-Class III (critical)      hardware security module, smart meter gateway
-                          → 제3자 인증 의무
-```
+| Class | 대상 | 인증 |
+|-------|------|------|
+| **I** (default) | 일반 IoT | 자기적합선언 |
+| **II** (important) | OS, password manager, VPN, network mgmt | 자기적합선언 |
+| **III** (critical) | hardware security module, smart meter gateway | *제3자 인증 의무* |
 
 대부분의 IoT는 *Class I*입니다. CE 마킹이 가능합니다. 다만 *secure boot 검증*, *서명된 업데이트*, *SBOM 제출*은 기본입니다. SBOM은 [Ch 10: SDLC](/blog/embedded/embedded-security/chapter10-sdlc)에서 다룹니다.
 

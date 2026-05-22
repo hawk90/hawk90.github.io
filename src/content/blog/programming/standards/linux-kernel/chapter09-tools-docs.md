@@ -353,13 +353,21 @@ See Also
 
 ```text
 Documentation/
-├── admin-guide/         # 시스템 관리자용
-├── driver-api/          # 드라이버 API
-├── core-api/            # 코어 커널 API
-├── process/             # 개발 프로세스
-│   └── coding-style.rst # 코딩 스타일
-└── translations/        # 번역
+├── admin-guide/
+├── driver-api/
+├── core-api/
+├── process/
+│   └── coding-style.rst
+└── translations/
 ```
+
+| 경로 | 대상 |
+|------|------|
+| `admin-guide/` | 시스템 관리자 |
+| `driver-api/` | 드라이버 API |
+| `core-api/` | 코어 커널 API |
+| `process/coding-style.rst` | 개발 프로세스 / 코딩 스타일 |
+| `translations/` | 번역 |
 
 ## 정리
 

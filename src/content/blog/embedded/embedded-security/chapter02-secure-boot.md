@@ -160,11 +160,11 @@ NXP의 High Assurance Boot(HAB) version 4는 i.MX6, i.MX7, i.MX8 시리즈의 se
 
 키 구조는 PKI(공개키 기반 구조)입니다.
 
-```text
-SRK (Super Root Key)  — root, 4개의 키 가능. hash가 OTP에 굽힘.
-  ├─ CSF Key — Command Sequence File에 서명
-  └─ IMG Key — 부트 이미지에 서명
-```
+| 키 | 역할 |
+|----|------|
+| **SRK** (Super Root Key) | root, 4개의 키 가능 — hash가 OTP에 burn |
+| └ CSF Key | Command Sequence File에 서명 |
+| └ IMG Key | 부트 이미지에 서명 |
 
 OTP에는 SRK 4개의 *전체 hash* (SHA-256, 32 bytes)가 굽힙니다. SRK 중 하나가 노출되면 *SRK_REVOKE* fuse를 굽혀 그 slot을 비활성화합니다.
 
@@ -303,13 +303,13 @@ tpm2_create -C parent.ctx -L policy.bin -i secret.bin ...
 
 ARM Trusted Firmware(ATF, 또는 TF-A)는 ARMv8 Cortex-A를 위한 *오픈 소스 참조 secure boot 구현*입니다. 4단계 부트로더로 구성됩니다.
 
-```text
-BL1 — Boot ROM 직후 동작, 보통 ROM 또는 SRAM
-BL2 — 후속 단계 로더, eMMC/SD에서 BL31/BL32/BL33 로드
-BL31 — Secure Monitor (EL3 상주). SMC 처리, PSCI 구현.
-BL32 — Secure-EL1 payload (보통 OP-TEE)
-BL33 — Non-secure entry point (U-Boot, EDK2)
-```
+| 단계 | 역할 |
+|------|------|
+| **BL1** | Boot ROM 직후 동작, 보통 ROM 또는 SRAM |
+| **BL2** | 후속 단계 로더, eMMC/SD에서 BL31/BL32/BL33 로드 |
+| **BL31** | Secure Monitor (EL3 상주). SMC 처리, PSCI 구현 |
+| **BL32** | Secure-EL1 payload (보통 OP-TEE) |
+| **BL33** | Non-secure entry point (U-Boot, EDK2) |
 
 빌드 명령은 다음과 같습니다.
 

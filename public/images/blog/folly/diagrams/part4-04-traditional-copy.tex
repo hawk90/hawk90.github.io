@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (7.0,2.6) {Traditional Network I/O — multiple copies};
+
+\node[neut, minimum width=18mm, minimum height=10mm, anchor=west] (nic1) at (0,0.8)   {NIC RX};
+\node[abs,  minimum width=22mm, minimum height=10mm, anchor=west] (krx)  at (2.2,0.8) {kernel rx};
+\node[imp,  minimum width=20mm, minimum height=10mm, anchor=west] (u1)   at (4.8,0.8) {user buf1};
+\node[imp,  minimum width=20mm, minimum height=10mm, anchor=west] (u2)   at (7.2,0.8) {user buf2};
+\node[abs,  minimum width=22mm, minimum height=10mm, anchor=west] (sock) at (9.6,0.8) {socket buf};
+\node[abs,  minimum width=22mm, minimum height=10mm, anchor=west] (ktx)  at (12.2,0.8){kernel tx};
+\node[neut, minimum width=18mm, minimum height=10mm, anchor=west] (nic2) at (14.8,0.8){NIC TX};
+
+\draw[arr] (nic1.east) -- (krx.west);
+\draw[arr, line width=1pt, warnbord] (krx.east)  -- (u1.west)   node[midway, above, caption] {\scriptsize memcpy};
+\draw[arr] (u1.east)   -- (u2.west);
+\draw[arr, line width=1pt, warnbord] (u2.east)   -- (sock.west) node[midway, above, caption] {\scriptsize memcpy};
+\draw[arr] (sock.east) -- (ktx.west);
+\draw[arr] (ktx.east)  -- (nic2.west);
+
+\node[caption, anchor=center, align=center] at (7.0,-0.6)
+  {매 memcpy = 1 GB/s 부담 → CPU 한 코어 통째};
+
+\end{tikzpicture}
+\end{document}

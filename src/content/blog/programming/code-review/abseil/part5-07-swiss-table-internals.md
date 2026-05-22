@@ -38,12 +38,12 @@ specific values:
 
 64비트 해시를 두 부분으로 나눈다.
 
-```text
-hash = [H1 (57 bits) | H2 (7 bits)]
+64-bit hash = `[H1 (57 bits) | H2 (7 bits)]`.
 
-H1 % capacity → 시작 슬롯 그룹 인덱스
-H2 → control byte와 비교될 7비트 fingerprint
-```
+| 부분 | 용도 |
+|------|------|
+| H1 | `H1 % capacity` → 시작 슬롯 그룹 인덱스 |
+| H2 | control byte와 비교될 7-bit fingerprint |
 
 H2가 같다고 key가 같다는 보장은 없다 (7비트만 비교). 하지만 *다르면 확실히 다르다* — 즉, 빠른 필터다.
 

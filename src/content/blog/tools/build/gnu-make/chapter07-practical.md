@@ -33,8 +33,10 @@ myproject/
 ├── src/
 │   ├── main.c
 │   └── mylib.c
-└── build/        ← 자동 생성, .gitignore 대상
+└── build/
 ```
+
+`build/`는 *자동 생성*, `.gitignore` 대상.
 
 `src/`와 `include/`를 분리해 *공개 헤더*와 *구현*을 명확히 갈라 두는 게 표준입니다.
 

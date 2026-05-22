@@ -56,19 +56,17 @@ DRAM die가 *12장 쌓여 있는데*, 신호는 *맨 위 die*도 *맨 아래 bas
 
 TSV는 *실리콘 본체를 관통하는 구리 비아*입니다. 제조 단계는 다음과 같습니다.
 
-```text
-TSV 제조 (via-middle 방식)
+**TSV 제조 단계** (via-middle 방식):
 
 1. CMOS 공정 일부 진행 (active layer 형성)
 2. Deep Si etch (수직 구멍 뚫기, ~50 μm)
-3. SiO2 절연막 증착
+3. SiO₂ 절연막 증착
 4. Ta/TaN barrier + Cu seed 증착
 5. Cu electroplating (구멍 채우기)
 6. CMP로 표면 평탄화
 7. 남은 CMOS 공정 진행 (BEOL)
 8. wafer thinning (50 μm로 갈아내기)
 9. 뒷면에 microbump 형성
-```
 
 HBM3에서 TSV 개수는 *stack당 약 1000~1500개*입니다. HBM4는 *2048-bit interface*가 되면서 *2000~3000개*로 늘어납니다.
 

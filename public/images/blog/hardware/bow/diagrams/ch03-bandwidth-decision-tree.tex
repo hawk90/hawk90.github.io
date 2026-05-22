@@ -1,0 +1,50 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,node distance=10mm]
+
+\node[font=\sffamily\bfseries\large] at (0,5.6) {D2D Bandwidth → PHY 선택};
+
+\node[imp, minimum width=50mm, minimum height=11mm, align=center] (q) at (0, 4.4)
+  {시스템의 필요 D2D 대역폭};
+
+% Three bandwidth branches
+\node[abs, minimum width=42mm, minimum height=11mm, align=center] (lo) at (-6.0, 2.4)
+  {$<$ 500 GB/s};
+\node[abs, minimum width=42mm, minimum height=11mm, align=center] (mid) at (0, 2.4)
+  {500 GB/s $\sim$ 2 TB/s};
+\node[abs, minimum width=42mm, minimum height=11mm, align=center] (hi) at (6.0, 2.4)
+  {$>$ 2 TB/s};
+
+\draw[arr] (q.south) -- (lo.north);
+\draw[arr] (q.south) -- (mid.north);
+\draw[arr] (q.south) -- (hi.north);
+
+% Low branch decisions
+\node[hi, minimum width=42mm, minimum height=11mm, align=center] (lo1) at (-7.5, 0.4)
+  {organic 라인 OK\\\textbf{BoW Flexi}};
+\node[hi, minimum width=42mm, minimum height=11mm, align=center] (lo2) at (-3.5, 0.4)
+  {organic 불가\\\textbf{BoW Standard}};
+\draw[arr] (lo.south) -- (lo1.north);
+\draw[arr] (lo.south) -- (lo2.north);
+
+% Mid branch decisions
+\node[hi, minimum width=42mm, minimum height=11mm, align=center] (mid1) at (-1.5,-1.6)
+  {외부 칩렛 + 인증\\\textbf{UCIe Standard}};
+\node[hi, minimum width=42mm, minimum height=11mm, align=center] (mid2) at (3.0,-1.6)
+  {사내 설계 / 비용 우선\\\textbf{BoW Standard}};
+\draw[arr] (mid.south) |- (mid1.north);
+\draw[arr] (mid.south) |- (mid2.north);
+
+% High branch
+\node[hi, minimum width=42mm, minimum height=11mm, align=center] (hi1) at (6.0, 0.4)
+  {\textbf{UCIe Advanced}\\\small (BoW는 면적 부족)};
+\draw[arr] (hi.south) -- (hi1.north);
+
+\end{tikzpicture}
+\end{document}

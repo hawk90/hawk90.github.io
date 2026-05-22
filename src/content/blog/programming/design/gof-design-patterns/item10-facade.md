@@ -201,11 +201,11 @@ void compiler_compile(Compiler* c, const char* source, const char* out) {
 
 ### 3. **여러 facade로 분할** (좋음)
 
-```
-SimpleCompiler        — 90% 사용자용
-AdvancedCompiler      — 고급 사용자용
-JITCompiler           — runtime 컴파일용
-```
+| Facade | 대상 |
+|--------|------|
+| `SimpleCompiler` | 90% 사용자 |
+| `AdvancedCompiler` | 고급 사용자 |
+| `JITCompiler` | runtime 컴파일 |
 
 → 한 facade를 비대하게 하지 말고 *역할별*로 분리.
 

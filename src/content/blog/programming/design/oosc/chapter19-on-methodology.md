@@ -198,9 +198,9 @@ feature -- 상태 변경
 end
 ```
 
-```text
-Short Form 자동 생성:
+자동 생성된 *Short Form*:
 
+```eiffel
 class interface ACCOUNT
 feature
     balance: INTEGER
@@ -208,10 +208,9 @@ feature
         require positive: amount > 0
         ensure increased: balance = old balance + amount
 end
-
-→ 구현은 숨기고 계약만 노출
-→ 항상 코드와 일치
 ```
+
+*구현은 숨기고 계약만 노출* + *항상 코드와 일치*.
 
 ## 품질 보증
 

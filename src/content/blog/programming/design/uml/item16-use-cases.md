@@ -35,25 +35,25 @@ draft: false
 
 유스케이스는 한 줄짜리 타원이 아니라 **시나리오 집합**입니다.
 
-```
-Use Case: Place Order
+**Use Case: Place Order**
 
-Primary Actor: Customer
-Goal: 결제 완료된 주문을 등록
+- Primary Actor — Customer
+- Goal — 결제 완료된 주문을 등록
 
-Main Success Scenario:
-  1. Customer가 장바구니를 본다.
-  2. Customer가 주문을 시작한다.
-  3. System이 결제 정보를 요청한다.
-  4. Customer가 결제 정보를 입력한다.
-  5. System이 결제를 처리한다.
-  6. System이 주문을 확정하고 영수증을 보낸다.
+**Main Success Scenario:**
 
-Extensions (대안):
-  3a. 결제 정보가 이미 저장돼 있으면 단계 3 생략
-  5a. 결제 실패 시 단계 4부터 다시
-  5b. 재고 부족 시 backorder로 전환
-```
+1. Customer가 장바구니를 본다
+2. Customer가 주문을 시작한다
+3. System이 결제 정보를 요청한다
+4. Customer가 결제 정보를 입력한다
+5. System이 결제를 처리한다
+6. System이 주문을 확정하고 영수증을 보낸다
+
+**Extensions (대안):**
+
+- 3a — 결제 정보가 이미 저장돼 있으면 단계 3 생략
+- 5a — 결제 실패 시 단계 4부터 다시
+- 5b — 재고 부족 시 backorder로 전환
 
 타원은 이 시나리오 텍스트의 **시각적 이름표**일 뿐.
 
