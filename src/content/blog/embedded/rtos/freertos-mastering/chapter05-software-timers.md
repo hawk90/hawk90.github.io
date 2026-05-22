@@ -106,19 +106,10 @@ int main(void) {
 
 ## One-Shot vs Auto-Reload
 
-```text
-auto-reload (uxAutoReload=pdTRUE)
-   T0  T1  T2  T3 ...
-    ↓   ↓   ↓   ↓
-    cb  cb  cb  cb       콜백이 주기적으로 반복
-    period 마다
-
-one-shot (uxAutoReload=pdFALSE)
-   T0
-    ↓
-    cb                   한 번만 호출 후 dormant 상태
-                         xTimerStart로 다시 시작 가능
-```
+| 모드 | 동작 |
+|------|------|
+| **auto-reload** (`uxAutoReload=pdTRUE`) | `T0, T1, T2, T3 ...` 매 period마다 콜백 호출 — *콜백이 주기적으로 반복* |
+| **one-shot** (`uxAutoReload=pdFALSE`) | `T0`에서 한 번 호출 후 dormant 상태 — `xTimerStart`로 다시 시작 가능 |
 
 | 용도 | 종류 |
 |------|------|
@@ -214,15 +205,12 @@ static void prvBlinkWithCtx(TimerHandle_t xTimer) {
 
 타이머 데몬 안에서 콜백이 *직렬로* 실행됩니다. 따라서 *한 콜백이 길어지면 모든 타이머가 밀립니다*.
 
-```text
-규칙
-1. 콜백은 짧게 (μs~ms 단위)
-2. 콜백에서 블로킹 API 호출 금지
-   → xQueueSend(..., portMAX_DELAY) 같은 호출 금지
-   → vTaskDelay 호출 금지
+**규칙:**
+
+1. 콜백은 *짧게* (μs~ms 단위)
+2. 콜백에서 *블로킹 API 호출 금지* — `xQueueSend(..., portMAX_DELAY)` 금지, `vTaskDelay` 금지
 3. 콜백에서 무거운 작업은 task notify·queue로 다른 태스크에 위임
 4. 콜백 안에서 다른 타이머 API 호출은 OK (큐로 넣을 뿐)
-```
 
 블로킹 작업을 해야 하면 *콜백은 신호만 보내고 실제 일은 worker 태스크에서* 합니다.
 
@@ -246,15 +234,10 @@ void prvWorkerTask(void *pv) {
 
 `configTIMER_TASK_PRIORITY`가 데몬의 우선순위입니다.
 
-```text
-높게 (configMAX_PRIORITIES-1)
-  + 정확한 시간 응답 (다른 일이 데몬을 지연시키지 않음)
-  - 콜백이 길면 다른 모든 일이 멈춤
-
-낮게 (1 또는 2)
-  + 데몬이 다른 응답성에 영향 줄 일이 적음
-  - 다른 태스크가 비잡으면 콜백이 지연됨
-```
+| 우선순위 | 장점 | 단점 |
+|----------|------|------|
+| 높게 (`configMAX_PRIORITIES-1`) | 정확한 시간 응답 (다른 일이 데몬을 지연시키지 않음) | 콜백이 길면 다른 모든 일이 멈춤 |
+| 낮게 (1 또는 2) | 데몬이 다른 응답성에 영향 줄 일이 적음 | 다른 태스크가 바쁘면 콜백이 지연됨 |
 
 대부분은 *높은 우선순위 + 콜백 짧게*가 정답입니다. 콜백을 진짜 짧게 유지하면 *데몬이 항상 빨리 끝나 응답성에 영향이 미미*합니다.
 

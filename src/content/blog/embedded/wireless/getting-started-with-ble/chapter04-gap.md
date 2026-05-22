@@ -36,13 +36,12 @@ GAP은 디바이스를 *4가지 역할*로 분류합니다.
 
 연결 없이 *광고만* 합니다. 가장 *단순하고 저전력*인 역할입니다. 비콘이 대표입니다.
 
-```text
-디바이스 흐름
+디바이스 흐름:
+
 - 부팅
 - advertising 시작 (광고 데이터 = UUID + Major + Minor)
 - 광고 주기마다 채널 37/38/39에 송신
 - sleep
-```
 
 매 광고 사이클을 *수 ms*에 끝내고 나머지는 sleep합니다. 코인셀 1년 운용의 표준 형태입니다.
 
@@ -101,15 +100,12 @@ Public Address는 *IEEE에 등록*된 48-bit MAC을 그대로 씁니다.
 
 *Privacy 1.2*의 핵심입니다. *15분마다 자동으로 주소가 바뀝니다*. 추적 방지가 목적입니다.
 
-```text
-RPA = prand(24 bit) || hash(24 bit)
-       │              │
-       │              └─ AES-128(IRK, padding||prand)의 하위 24 bit
-       └─ 상위 2 bit = 0b01, 나머지 22 bit는 랜덤
+`RPA = prand(24 bit) || hash(24 bit)`.
 
-IRK (Identity Resolving Key) = 16 byte 비밀 키
-                              본드된 디바이스끼리만 공유
-```
+- `prand` — 상위 2 bit = `0b01`, 나머지 22 bit는 랜덤
+- `hash` — `AES-128(IRK, padding||prand)`의 하위 24 bit
+
+**IRK** (Identity Resolving Key) — 16 byte 비밀 키, *본드된 디바이스끼리만 공유*.
 
 *Bonded 디바이스만 IRK를 가지고 있어서, 그 디바이스만 주소를 해석*할 수 있습니다. 도청자는 *주소가 바뀌니 추적이 불가능*합니다.
 
@@ -261,21 +257,12 @@ schedule_after(30000_ms, []{
 
 ### 절전과 응답성의 trade-off
 
-```text
-케이스 1: 빠른 응답 우선
-  interval = 30 ms
-  latency = 0
-  → CE가 33 Hz로 일어남
-  → 평균 전류 ~ 5 mA
-  → 절대 지연 ~ 30 ms
+| 케이스 | Interval | Latency | CE 주파수 | 평균 전류 | 지연 |
+|--------|----------|---------|-----------|-----------|------|
+| 빠른 응답 우선 | 30 ms | 0 | 33 Hz | ~5 mA | ~30 ms |
+| 절전 우선 | 1 s | 4 | 1 Hz | ~50 µA | 0~5 s |
 
-케이스 2: 절전 우선
-  interval = 1 s
-  latency = 4
-  → Slave는 5초마다 응답해도 OK
-  → 평균 전류 ~ 50 µA
-  → 절대 지연 0~5 s
-```
+절전 케이스에서 Slave는 *5초마다 응답해도 OK*.
 
 ### Connection Update Procedure
 

@@ -181,9 +181,9 @@ add_subdirectory(tests)
 
 ### Python 프로젝트 구조 예시
 
-```
+```text
 auction-sniper/
-├── pyproject.toml           # 프로젝트 설정
+├── pyproject.toml
 ├── src/
 │   └── auction_sniper/
 │       ├── __init__.py
@@ -192,7 +192,7 @@ auction-sniper/
 │       └── ui/
 │           └── main_window.py
 ├── tests/
-│   ├── conftest.py          # pytest fixtures
+│   ├── conftest.py
 │   ├── unit/
 │   │   └── test_auction_sniper.py
 │   └── acceptance/
@@ -202,9 +202,15 @@ auction-sniper/
 │           └── application_runner.py
 ├── .github/
 │   └── workflows/
-│       └── ci.yml           # CI 파이프라인
+│       └── ci.yml
 └── README.md
 ```
+
+| 경로 | 역할 |
+|------|------|
+| `pyproject.toml` | 프로젝트 설정 |
+| `tests/conftest.py` | pytest fixtures |
+| `.github/workflows/ci.yml` | CI 파이프라인 |
 
 ```toml
 # pyproject.toml
@@ -461,27 +467,15 @@ GOOS 권장: **인프라 우선**.
 
 ### 현실적인 접근
 
-```
-실제로는 병행:
+실제로는 병행 진행:
 
-1일차:
-├── 빌드 시스템 설정
-├── 테스트 프레임워크 구성
-└── 첫 인수 테스트 스켈레톤
+| 일차 | 활동 |
+|------|------|
+| 1일차 | 빌드 시스템 설정 · 테스트 프레임워크 구성 · 첫 인수 테스트 스켈레톤 |
+| 2일차 | CI 파이프라인 · 가짜 서버 스텁 · 애플리케이션 스켈레톤 |
+| 3일차 | 첫 인수 테스트 통과 · 실제 통신 구현 시작 · 단위 테스트 작성 시작 |
 
-2일차:
-├── CI 파이프라인
-├── 가짜 서버 스텁
-└── 애플리케이션 스켈레톤
-
-3일차:
-├── 첫 인수 테스트 통과!
-├── 실제 통신 구현 시작
-└── 단위 테스트 작성 시작
-
-→ Walking Skeleton 완성
-→ 이후부터 기능 개발 시작
-```
+→ Walking Skeleton 완성 → 이후부터 기능 개발 시작.
 
 ## 4.6 첫 테스트를 통과시키기
 
@@ -545,21 +539,13 @@ class AuctionSniper:
 
 ### 무엇을 포함해야 하는가?
 
-```
-포함:
-✓ 전체 아키텍처 관통
-✓ 빌드/테스트/배포 자동화
-✓ 기본 에러 핸들링
-✓ 로깅 인프라
-✓ 설정 관리
-
-제외:
-✗ 모든 비즈니스 로직
-✗ 예외 케이스 처리
-✗ 성능 최적화
-✗ 보안 (초기에는)
-✗ 완전한 UI
-```
+| 포함 | 제외 |
+|------|------|
+| 전체 아키텍처 관통 | 모든 비즈니스 로직 |
+| 빌드/테스트/배포 자동화 | 예외 케이스 처리 |
+| 기본 에러 핸들링 | 성능 최적화 |
+| 로깅 인프라 | 보안 (초기에는) |
+| 설정 관리 | 완전한 UI |
 
 ### 완료 기준
 

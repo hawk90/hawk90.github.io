@@ -410,11 +410,12 @@ Breakpoint 1 (my_plugin_function) pending.
 
 ### 시나리오 1: 메모리가 망가지는 순간
 
-```
-(gdb) print my_struct.value
-$1 = 42        # 정상
+`my_struct.value`가 처음엔 42였는데 *어딘가에서 망가짐*. 어디?
 
-# 어딘가에서 망가짐 — 어디?
+```text
+(gdb) print my_struct.value
+$1 = 42
+
 (gdb) watch my_struct.value
 (gdb) continue
 Hardware watchpoint 2: my_struct.value
@@ -427,7 +428,9 @@ buggy_function () at bug.c:88
 
 ### 시나리오 2: 깊은 루프의 특정 자리
 
-```
+12345번 레코드를 만나면 자동으로 dump한다.
+
+```text
 (gdb) b process_record if record_id == 12345
 (gdb) commands
 > bt 5
@@ -435,19 +438,18 @@ buggy_function () at bug.c:88
 > continue
 > end
 (gdb) run
-
-# 12345번 레코드 만나면 자동 dump
 ```
 
 ### 시나리오 3: 예외 추적
 
-```
+어디서 `out_of_range`를 던졌는지 backtrace로 추적.
+
+```text
 (gdb) catch throw std::out_of_range
 (gdb) run
 
 Catchpoint 1 (exception thrown), ...
 (gdb) bt
-# 어디서 out_of_range를 던졌는지
 ```
 
 ---

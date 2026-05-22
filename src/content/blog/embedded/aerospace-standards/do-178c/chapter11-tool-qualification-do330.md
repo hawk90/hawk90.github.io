@@ -348,7 +348,6 @@ Perforce가 제공:
 5. FAA submission
 
 Vendor kit 사용이 full self-qualification 대비 *효과 큼* (정확한 절감은 도구·프로젝트마다 다름).
-```
 
 Vendor kit *없는 도구*는 *자체 qualification* — *극히 비쌈*. 그래서 *qualified tool* 선택이 *프로젝트 시작 결정*.
 
@@ -359,25 +358,27 @@ Tool이 *TOR을 정확히 구현*하는지 *직접 test*. *수백~수천 test ca
 ### MISRA Tool Validation — 일반 흐름
 
 ```bash
-# TVS 실행 (일반)
 tvs-runner --suite misra2012-validation \
            --tool {vendor-tool-version} \
            --output validation_results.json
-
-# 결과 (일반 구조)
-=== Tool Validation Results ===
-Total Tests:        [수]
-PASS:               [수]
-FAIL:               [수, 모두 TOR LIMIT으로 문서화 필요]
-NOT APPLICABLE:     [수]
-
-Failures (예시):
-  - False negative cases — manual review로 mitigation
-  - Edge case discrepancy — TOR LIMIT으로 문서화
-  - Minor metric off-by-one — documented limit
-
-Overall: ACCEPTABLE if all failures 문서화 + mitigation
 ```
+
+**결과 (일반 구조):**
+
+| 항목 | 값 |
+|------|-----|
+| Total Tests | [수] |
+| PASS | [수] |
+| FAIL | [수, 모두 TOR LIMIT으로 문서화 필요] |
+| NOT APPLICABLE | [수] |
+
+**Failures (예시):**
+
+- False negative cases — manual review로 mitigation
+- Edge case discrepancy — TOR LIMIT으로 문서화
+- Minor metric off-by-one — documented limit
+
+Overall — *ACCEPTABLE if all failures 문서화 + mitigation*.
 
 이 *결과가 TAS의 핵심 증거*. FAA가 *모든 failure를 review*.
 
@@ -385,57 +386,43 @@ Overall: ACCEPTABLE if all failures 문서화 + mitigation
 
 각 qualified tool에 대해 *TAS*. *DO-178C의 SAS와 유사*.
 
-```
-=== TAS-FMS-Helix-QAC-2024 ===
+**TAS-FMS-Helix-QAC-2024**
 
-1. Tool: Helix QAC 2024.2
+| 항목 | 값 |
+|------|-----|
+| Tool | Helix QAC 2024.2 |
+| TQL | TQL-4 (DAL B, TC-2) |
 
-2. TQL: TQL-4 (DAL B, TC-2)
+**DO-330 Obj Compliance:**
 
-3. DO-330 Obj Compliance
+| Obj | 상태 | Evidence |
+|-----|------|----------|
+| T-1 Tool Operational Requirements | ✓ COMPLIANT | TOR-FMS-QAC-2024-001 (Approval 2024-04-10) |
+| T-2 Tool Operational Environment | ✓ COMPLIANT | QAC-FMS-ENV-2024-001 |
+| T-3 Tool Operational Procedures | ✓ COMPLIANT | QAC-FMS-OPS-PROC-2024-001 |
+| T-4 Tool Operational Verification | ✓ COMPLIANT | Method: Validation Suite execution. Result: 1238/1247 PASS. Failures all documented in TOR limits. Evidence: QAC-FMS-VAL-RES-2024-001 |
+| T-5 ~ T-9 (TQL-1/2/3 specific) | NOT APPLICABLE for TQL-4 | — |
+| T-7 Tool Quality Assurance | ✓ COMPLIANT | SQA-QAC-2024-001 |
+| T-8 Tool Accomplishment Summary | ✓ | THIS DOCUMENT |
 
-   T-1 Tool Operational Requirements    ✓ COMPLIANT
-       Evidence: TOR-FMS-QAC-2024-001
-       Approval: 2024-04-10
+**Tool Configuration:**
 
-   T-2 Tool Operational Environment      ✓ COMPLIANT
-       Evidence: QAC-FMS-ENV-2024-001
+- Production install version — 2024.2 build 20240412
+- Installation hash — SHA-256 `abc...`
+- Project config — `qac/fms.prj` (version 2.0.0, SHA-256 `def...`)
 
-   T-3 Tool Operational Procedures       ✓ COMPLIANT
-       Evidence: QAC-FMS-OPS-PROC-2024-001
+**Open Issues** — None.
 
-   T-4 Tool Operational Verification     ✓ COMPLIANT
-       Method: Validation Suite execution
-       Result: 1238/1247 PASS
-       Failures: All documented in TOR limits
-       Evidence: QAC-FMS-VAL-RES-2024-001
+**Conclusion** — Helix QAC 2024.2 is qualified at TQL-4 for use in FMS v2.0.0. All DO-330 TQL-4 obj satisfied. Tool may be used to satisfy DO-178C obj A-5-2.
 
-   T-5 Through T-9 (TQL-1/2/3 specific) — NOT APPLICABLE for TQL-4
+**Approvals:**
 
-   T-7 Tool Quality Assurance            ✓ COMPLIANT
-       Evidence: SQA-QAC-2024-001
-
-   T-8 Tool Accomplishment Summary       ✓ THIS DOCUMENT
-
-4. Tool Configuration
-   Production install version: 2024.2 build 20240412
-   Installation hash: SHA-256 abc...
-   Project config: qac/fms.prj (version 2.0.0, SHA-256 def...)
-
-5. Open Issues
-   None.
-
-6. Conclusion
-   Helix QAC 2024.2 is qualified at TQL-4 for use in FMS v2.0.0.
-   All DO-330 TQL-4 obj satisfied.
-   Tool may be used to satisfy DO-178C obj A-5-2.
-
-Approvals:
-   Tool Qualification Lead:    John Park    2024-05-30
-   Independent Verifier:       Sarah Kim    2024-05-30
-   SQA:                         Tom Lee      2024-06-01
-   Certification Liaison:      Jim Wilson    2024-06-05
-```
+| Role | Name | Date |
+|------|------|------|
+| Tool Qualification Lead | John Park | 2024-05-30 |
+| Independent Verifier | Sarah Kim | 2024-05-30 |
+| SQA | Tom Lee | 2024-06-01 |
+| Certification Liaison | Jim Wilson | 2024-06-05 |
 
 ## 자체 도구 (Custom Tool) Qualification
 
@@ -453,12 +440,12 @@ Vendor 도구 외 *프로젝트 자체 도구*도 qualification 필요.
 
 ### 자체 도구 Qualification — 일반 effort
 
-```
-TQL-5 자체 도구:    가벼움 (operational env + 한계 문서)
-TQL-4 자체 도구:    중간 (TOR + validation suite + TAS)
-TQL-2 자체 도구:    무거움 (DO-178C와 유사한 process)
-TQL-1 자체 도구:    가장 무거움 (DAL A와 동등)
-```
+| TQL | Effort |
+|-----|--------|
+| TQL-5 자체 도구 | 가벼움 (operational env + 한계 문서) |
+| TQL-4 자체 도구 | 중간 (TOR + validation suite + TAS) |
+| TQL-2 자체 도구 | 무거움 (DO-178C와 유사한 process) |
+| TQL-1 자체 도구 | 가장 무거움 (DAL A와 동등) |
 
 정확한 effort는 *도구 크기·복잡도*에 따라 다르다. 자체 도구가 *비용 폭주 원인*인 경우가 많아 *가능하면 vendor 도구 사용*.
 

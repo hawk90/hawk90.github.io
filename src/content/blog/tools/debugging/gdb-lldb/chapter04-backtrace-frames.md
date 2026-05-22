@@ -331,7 +331,9 @@ Program terminated with signal SIGSEGV, Segmentation fault.
 
 ### 시나리오 1: 충돌 자리 찾기
 
-```
+SIGSEGV 발생 직후 backtrace로 *null 포인터를 받은 frame*을 찾고, `up`으로 *누가 보냈는지* 거슬러 올라간다.
+
+```text
 $ gdb ./myapp
 (gdb) run
 Program received signal SIGSEGV.
@@ -345,34 +347,35 @@ Program received signal SIGSEGV.
 (gdb) info args
 n = 0x0
 
-# null 포인터를 받았네 — frame 1으로 가서 누가 보냈는지
 (gdb) up
 #1  walk_tree () at tree.c:88
 (gdb) list
-# walk_tree의 어디서 process_node(NULL)을 호출했는지
 ```
+
+`list`로 `walk_tree`의 어디에서 `process_node(NULL)`을 호출했는지 본다.
 
 ### 시나리오 2: 깊은 재귀 분석
 
-```
+100단계 깊은 재귀에서 *한 단계마다 인자가 어떻게 변하는지* 본다. 각 단계마다 잘 줄어드는지 확인.
+
+```text
 (gdb) bt
 #0~99: 100단계 깊은 재귀
 #100: main
 
-# 한 단계마다 인자가 어떻게 변하는지 보고 싶다
 (gdb) frame 0
 (gdb) info args         # n = 0
 (gdb) frame 10
 (gdb) info args         # n = 10
 (gdb) frame 50
 (gdb) info args         # n = 50
-
-# 각 단계마다 잘 줄어드는지 확인
 ```
 
 ### 시나리오 3: 데드락 진단
 
-```
+두 스레드가 서로 다른 mutex를 기다린다 → *데드락*.
+
+```text
 (gdb) thread apply all bt
 Thread 4: 멈춰 있음
 #0  __lll_lock_wait ()
@@ -383,8 +386,6 @@ Thread 3: 멈춰 있음
 #0  __lll_lock_wait ()
 #1  pthread_mutex_lock (mutex=0x... <m2>)
 #2  worker (m2, m1) ...
-
-# 두 스레드가 서로 다른 mutex를 기다림 → 데드락
 ```
 
 ---

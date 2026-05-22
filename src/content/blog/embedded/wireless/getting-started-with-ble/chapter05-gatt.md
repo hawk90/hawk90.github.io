@@ -62,28 +62,27 @@ uuidgen
 
 16-bit를 쓰면 *광고 페이로드와 ATT 트래픽이 짧아집니다*. SIG에 등록된 service면 항상 16-bit를 씁니다. 자체 service만 128-bit를 씁니다.
 
-```text
-ATT 한 PDU의 크기 차이
-Read By Group Type Response (Service Discovery)
-  16-bit UUID Service:   handle(2) + endHandle(2) + UUID(2) = 6 byte per entry
-  128-bit UUID Service:  handle(2) + endHandle(2) + UUID(16) = 20 byte per entry
-```
+ATT 한 PDU의 크기 차이 — Read By Group Type Response (Service Discovery):
+
+| UUID 종류 | entry 크기 |
+|-----------|-----------|
+| 16-bit UUID Service | `handle(2) + endHandle(2) + UUID(2) = 6 byte` |
+| 128-bit UUID Service | `handle(2) + endHandle(2) + UUID(16) = 20 byte` |
 
 ## Service — Attribute의 묶음
 
 Service는 *논리적으로 관련된 Characteristic의 묶음*입니다. *Service Declaration*이라는 Attribute로 시작합니다.
 
-```text
-Service Declaration Attribute
-  Handle    = 0x0010 (예)
-  Type      = 0x2800 (Primary Service)
-           또는 0x2801 (Secondary Service)
-  Value     = Service의 UUID (16 또는 128 bit)
-  Permission = Read only
+**Service Declaration Attribute:**
 
-Service의 끝은 어디?
-→ 다음 Service Declaration이 나오기 직전까지가 한 Service
-```
+| 필드 | 값 |
+|------|-----|
+| Handle | `0x0010` (예) |
+| Type | `0x2800` (Primary Service) 또는 `0x2801` (Secondary Service) |
+| Value | Service의 UUID (16 또는 128 bit) |
+| Permission | Read only |
+
+Service의 끝은 *다음 Service Declaration이 나오기 직전까지*가 한 Service.
 
 | Type UUID | 의미 |
 |-----------|------|
@@ -315,18 +314,11 @@ NimBLE이 *CCCD를 자동으로 추가*합니다. `BLE_GATT_CHR_F_NOTIFY` 플래
 
 ATT MTU는 *한 PDU의 최대 크기*입니다. *기본값 23 byte*이고, *Exchange MTU Request*로 늘릴 수 있습니다.
 
-```text
-ATT MTU 23 (default)
-  payload 실용: 23 - 3 (ATT 헤더) = 20 byte
-  notification 한 번에 20 byte 데이터
-
-ATT MTU 247 (NimBLE 기본 max)
-  payload 실용: 247 - 3 = 244 byte
-  notification 한 번에 244 byte → 12배 throughput
-
-ATT MTU 517 (스펙 최대)
-  payload 실용: 517 - 3 = 514 byte
-```
+| MTU | Payload 실용 | 비고 |
+|-----|--------------|------|
+| 23 (default) | `23 − 3(ATT 헤더) = 20` byte | notification 한 번에 20 byte |
+| 247 (NimBLE 기본 max) | `247 − 3 = 244` byte | notification 한 번에 244 byte → 12배 throughput |
+| 517 (스펙 최대) | `517 − 3 = 514` byte | — |
 
 ### MTU 협상
 
