@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Contact"
+  description="Hawk's Blog 운영자에게 연락하는 방법."
+>
+  <section class="py-16">
+    <div class="container">
+      <div class="container-narrow mx-auto px-0">
+        <div class="section-eyebrow mb-2">Contact</div>
+        <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-3">연락하기</h1>
+        <p class="text-[var(--color-text-secondary)] mb-12 leading-relaxed">
+          글에 대한 피드백, 오타·오류 제보, 협업 제안, 또는 그냥 인사도 환영합니다.
+          답장은 며칠 걸릴 수 있습니다.
+        </p>
+
+        <div class="space-y-8">
+          <section class="card card-panel">
+            <h2 class="sidebar-section-title mb-3">이메일</h2>
+            <p class="text-[var(--color-text-primary)] leading-relaxed mb-2">
+              <a href="mailto:hawking90a@gmail.com" class="underline hover:text-[var(--color-accent)] font-medium">
+                hawking90a@gmail.com
+              </a>
+            </p>
+            <p class="text-sm text-[var(--color-text-secondary)]">
+              일반 문의, 협업 제안, 사이트 관련 모든 연락은 이메일이 가장 빠릅니다.
+            </p>
+          </section>
+
+          <section class="card card-panel">
+            <h2 class="sidebar-section-title mb-3">GitHub</h2>
+            <p class="text-[var(--color-text-primary)] leading-relaxed mb-2">
+              <a href="https://github.com/hawk90" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-accent)] font-medium">
+                github.com/hawk90
+              </a>
+            </p>
+            <p class="text-sm text-[var(--color-text-secondary)]">
+              본 사이트의 소스 코드와 글 원문은 GitHub에 공개되어 있습니다.
+              오타나 사실 오류는 저장소에 Issue 또는 Pull Request로도 받습니다.
+            </p>
+          </section>
+
+          <section class="card card-panel">
+            <h2 class="sidebar-section-title mb-3">댓글</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              개별 글에 대한 토론은 글 하단의 댓글창(Giscus, GitHub Discussions 기반)을
+              이용해 주세요. GitHub 계정으로 로그인이 필요합니다.
+            </p>
+          </section>
+
+          <section class="card card-panel">
+            <h2 class="sidebar-section-title mb-3">응답 시간 및 범위</h2>
+            <ul class="space-y-2 text-[var(--color-text-secondary)] leading-relaxed">
+              <li>· 보통 영업일 기준 2–5일 안에 회신합니다.</li>
+              <li>· 광고·홍보 메일은 회신드리지 않습니다.</li>
+              <li>· 코드/디버깅 도움 요청은 가능한 범위에서만 답합니다.</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

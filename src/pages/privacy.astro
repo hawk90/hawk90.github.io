@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lastUpdated = '2026-05-28';
+---
+
+<BaseLayout
+  title="개인정보 처리방침"
+  description="Hawk's Blog의 개인정보 수집·이용·제공·쿠키 사용 정책을 설명합니다."
+>
+  <section class="py-16">
+    <div class="container">
+      <div class="container-narrow mx-auto px-0">
+        <div class="section-eyebrow mb-2">Privacy</div>
+        <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-3">개인정보 처리방침</h1>
+        <p class="text-xs text-[var(--color-text-muted)] mb-12">
+          최종 업데이트: {lastUpdated}
+        </p>
+
+        <div class="prose prose-invert max-w-none space-y-10">
+          <section>
+            <h2 class="text-2xl font-bold mb-3">1. 개요</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              Hawk's Blog(<a href="https://hawk90.github.io" class="underline hover:text-[var(--color-accent)]">hawk90.github.io</a>, 이하 "본 사이트")는
+              방문자의 개인정보를 소중히 다룹니다. 본 방침은 본 사이트가 어떤 정보를 수집하고,
+              어떻게 사용하며, 제3자에게 어떻게 공유되는지를 설명합니다.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-bold mb-3">2. 운영자 정보</h2>
+            <ul class="space-y-1 text-[var(--color-text-secondary)] leading-relaxed">
+              <li>운영자: Hawk</li>
+              <li>연락처: <a href="mailto:hawking90a@gmail.com" class="underline hover:text-[var(--color-accent)]">hawking90a@gmail.com</a></li>
+              <li>호스팅: GitHub Pages (GitHub, Inc.)</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-bold mb-3">3. 본 사이트가 직접 수집하는 정보</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed mb-3">
+              본 사이트 자체는 회원가입·로그인을 제공하지 않으며, 방문자의 이름·이메일·전화번호 등
+              개인 식별 정보를 직접 수집하지 않습니다. 방문자가 자발적으로
+              이메일을 통해 문의를 보내는 경우, 회신 목적에 한해 해당 이메일 주소를 사용합니다.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-bold mb-3">4. 쿠키 및 제3자 서비스</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed mb-4">
+              본 사이트는 다음 제3자 서비스를 사용하며, 이들 서비스가 자체 쿠키 또는
+              유사한 기술을 사용해 방문자 정보를 수집할 수 있습니다.
+            </p>
+
+            <h3 class="text-lg font-semibold mt-6 mb-2">4.1 Google AdSense</h3>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed mb-3">
+              본 사이트는 Google AdSense를 통해 광고를 게재할 수 있습니다.
+              제3자 공급업체로서의 Google은 쿠키를 사용해 방문자가 본 사이트 및 다른 사이트를
+              방문한 이력을 기반으로 광고를 게재합니다. 방문자는
+              <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-accent)]">광고 설정</a>
+              에서 맞춤 광고를 비활성화할 수 있으며,
+              <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-accent)]">aboutads.info</a>
+              에서 제3자 공급업체의 맞춤 광고도 함께 비활성화할 수 있습니다.
+            </p>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              Google의 광고 및 콘텐츠 네트워크 개인정보 처리방침은
+              <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-accent)]">여기</a>
+              에서 확인할 수 있습니다.
+            </p>
+
+            <h3 class="text-lg font-semibold mt-6 mb-2">4.2 Giscus (댓글 시스템)</h3>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              본 사이트는 댓글 기능에 Giscus(GitHub Discussions 기반)를 사용합니다.
+              댓글을 작성하려면 GitHub 계정으로 로그인해야 하며, 작성된 댓글과 GitHub 사용자명은
+              본 사이트의 GitHub 저장소 Discussions에 공개적으로 저장됩니다. 자세한 내용은
+              <a href="https://giscus.app" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-accent)]">Giscus</a>
+              및
+              <a href="https://docs.github.com/site-policy/privacy-policies/github-privacy-statement" target="_blank" rel="noopener noreferrer" class="underline hover:text-[var(--color-accent)]">GitHub 개인정보처리방침</a>
+              을 참고하세요.
+            </p>
+
+            <h3 class="text-lg font-semibold mt-6 mb-2">4.3 GitHub Pages</h3>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              본 사이트는 GitHub Pages에서 호스팅됩니다. GitHub는 보안 및 안정성 목적으로
+              방문자의 IP 주소 등 일부 로그 정보를 수집할 수 있습니다.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-bold mb-3">5. EU 및 영국 방문자 (GDPR)</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              EU 및 영국 거주 방문자는 Google의 GDPR 동의 메시지를 통해 맞춤 광고에 대한
+              동의 여부를 선택할 수 있습니다. 동의하지 않더라도 비맞춤 광고가 표시될 수 있습니다.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-bold mb-3">6. 캘리포니아 거주자 (CCPA)</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              본 사이트는 방문자의 개인정보를 판매하지 않습니다. CCPA에 따른 권리 행사를
+              원하시면 운영자 이메일로 연락 주세요.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-bold mb-3">7. 쿠키 비활성화 방법</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              대부분의 웹 브라우저는 설정에서 쿠키를 차단하거나 삭제할 수 있습니다.
+              쿠키를 차단하면 본 사이트와 제3자 서비스의 일부 기능이 제한될 수 있습니다.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-bold mb-3">8. 정책 변경</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              본 방침은 법령 또는 서비스의 변경에 따라 수정될 수 있으며,
+              변경 시 본 페이지에 게시합니다. 페이지 상단의 "최종 업데이트" 날짜를 참고하세요.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-2xl font-bold mb-3">9. 문의</h2>
+            <p class="text-[var(--color-text-secondary)] leading-relaxed">
+              본 방침에 대한 문의는 <a href="mailto:hawking90a@gmail.com" class="underline hover:text-[var(--color-accent)]">hawking90a@gmail.com</a>
+              으로 보내주세요.
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

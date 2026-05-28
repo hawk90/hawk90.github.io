@@ -70,6 +70,8 @@ export const FOOTER_LINKS = [
   { href: '/now', label: 'Now' },
   { href: '/uses', label: 'Uses' },
   { href: '/stats', label: 'Stats' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/privacy', label: 'Privacy' },
   { href: '/rss.xml', label: 'RSS' },
 ];
 
