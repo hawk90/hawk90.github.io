@@ -8,6 +8,8 @@ tags: [cpp, abseil, numeric, int128, integer]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 왜 128비트가 필요한가

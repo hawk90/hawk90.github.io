@@ -5,7 +5,7 @@ description: "현대 보안의 *기본 인프라*가 된 fuzzing. coverage-guide
 tags: [cert-c, fuzzing, libfuzzer, afl, oss-fuzz, security, coverage]
 series: "CERT C"
 seriesOrder: 13
-draft: false
+draft: true
 ---
 
 11장에서 본 CVE들이 *왜 fuzzing으로 잡혔는가*. 이 장은 *fuzzing이 현대 보안의 1차 검출 인프라*가 된 이유와 *실전 구축*을 본다.

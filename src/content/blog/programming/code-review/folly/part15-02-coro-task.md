@@ -8,6 +8,8 @@ tags: [cpp, folly, coro, task, async]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `Task<T>`는 lazy하게 시작되고 executor에 schedule된 후에야 실행되는 single-shot 코루틴이다. 매 `co_await`마다 결과 또는 예외가 전파되고, 소비되지 않으면 영원히 실행되지 않는다.

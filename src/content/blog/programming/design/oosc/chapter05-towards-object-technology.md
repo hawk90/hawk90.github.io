@@ -5,7 +5,7 @@ description: "전통적 접근법의 한계 — 함수 분해, 최상위 설계,
 series: "Object-Oriented Software Construction"
 seriesOrder: 5
 tags: [oop, meyer, functional-decomposition, top-down]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

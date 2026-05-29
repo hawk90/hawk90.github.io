@@ -8,7 +8,7 @@ tags: [writing, grammar, pronoun, case, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > Use the proper case of pronoun.

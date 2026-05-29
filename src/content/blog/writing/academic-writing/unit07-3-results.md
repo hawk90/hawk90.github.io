@@ -8,6 +8,8 @@ tags: [writing, academic, results, statistics]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 Results 섹션은 발견을 보고하는 자리입니다. 해석은 Discussion에서 합니다. Results는 무엇을 봤는지에 집중합니다. 이 글은 Results의 표현 패턴, 통계 보고 형식, Data Commentary와의 관계를 다룹니다.

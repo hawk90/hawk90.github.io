@@ -8,7 +8,7 @@ tags: [cpp, abseil, container, inlined-vector, sbo]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

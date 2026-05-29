@@ -5,7 +5,7 @@ description: "케이스 스터디 — 암호 분석 AI 시스템."
 series: "Object-Oriented Analysis and Design with Applications"
 seriesOrder: 10
 tags: [oop, booch, case-study, ai, cryptanalysis]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Analysis and Design with Applications"
 bookAuthor: "Grady Booch"

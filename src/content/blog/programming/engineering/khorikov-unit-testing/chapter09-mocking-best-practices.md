@@ -5,6 +5,8 @@ description: "시스템 경계에서만 Mock한다. 자체 Wrapper, Mock 수 제
 tags: [Testing, Mock, Best Practices]
 series: "Khorikov Unit Testing"
 seriesOrder: 9
+draft: true
+
 ---
 
 Mock은 강력하지만 오용하기 쉽다. 올바른 Mock 사용법은 테스트의 가치를 높이고, 잘못된 사용은 취약한 테스트를 만든다.

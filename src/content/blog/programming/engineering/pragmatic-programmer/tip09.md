@@ -5,7 +5,7 @@ description: "지식 포트폴리오에 정기 투자하라 — 금융처럼 다
 series: "The Pragmatic Programmer"
 seriesOrder: 9
 tags: [pragmatic-programmer, learning]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

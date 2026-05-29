@@ -5,7 +5,7 @@ description: "사용자와 함께 일해서 사용자처럼 생각하라. 사용
 series: "The Pragmatic Programmer"
 seriesOrder: 77
 tags: [pragmatic-programmer, ux, requirements]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

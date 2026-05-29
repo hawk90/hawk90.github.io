@@ -8,6 +8,8 @@ tags: [writing, academic, hedging, discussion, modals]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
+draft: true
+
 ---
 
 Discussion의 문법은 *Hedging*(헤지)에 집중됩니다. 자기 결론의 강도를 데이터가 옹호할 만큼만 표현하는 것이 학술 영어의 어조입니다.

@@ -8,6 +8,8 @@ tags: [writing, academic, organization, general-specific]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 Unit 2의 첫 글은 GS(General-Specific) 텍스트의 시작 방법입니다. Swales와 Feak는 세 가지 흔한 도입 방식을 정리합니다. General Statement, Statistic, Definition입니다. 이 글은 앞의 둘을 다루고, 정의는 다음 글에서 본격적으로 다룹니다.

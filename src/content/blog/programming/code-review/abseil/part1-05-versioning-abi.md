@@ -8,6 +8,8 @@ tags: [cpp, abseil, versioning, abi, compatibility, inline-namespace]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: Abseil의 ABI 정책은 "같은 빌드 단위 안에서만 호환을 보장"한다. 이 제약은 inline namespace로 강제되고, 다른 옵션으로 빌드된 두 Abseil 코드를 같은 실행 파일에 링크하면 컴파일 또는 링크 단계에서 실패하도록 설계되어 있다.

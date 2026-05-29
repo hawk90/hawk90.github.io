@@ -8,6 +8,8 @@ tags: [writing, composition, design, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
+draft: true
+
 ---
 
 > Choose a suitable design and hold to it.

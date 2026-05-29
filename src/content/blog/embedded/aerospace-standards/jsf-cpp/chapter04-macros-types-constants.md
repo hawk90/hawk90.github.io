@@ -5,7 +5,7 @@ description: "JSF C++ — Preprocessor 제한, type 정의, integer/enum, 상수
 tags: [jsf-cpp, macros, preprocessor, types, constants, enums, typedef]
 series: "JSF C++"
 seriesOrder: 4
-draft: false
+draft: true
 ---
 
 JSF C++의 *macros / types / constants* 정책. *preprocessor minimal*, *integer type strict*, *constants well-defined*. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.

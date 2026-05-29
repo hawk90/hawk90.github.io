@@ -8,6 +8,8 @@ tags: [writing, academic, flow, linking, cohesion]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 문장 단위가 모여 단락을 이룰 때, 그 사이의 연결을 만드는 것이 flow입니다. Swales와 Feak는 흐름의 두 큰 도구를 정리합니다. Old-to-New 정보 패턴과 linking words / phrases입니다. 둘은 보완 관계입니다. 정보 패턴이 흐름의 내용을 만들고, linking이 명시적 연결을 만듭니다.

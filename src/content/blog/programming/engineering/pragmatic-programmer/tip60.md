@@ -5,7 +5,7 @@ description: "도마뱀 뇌의 말을 들어라. 뭔가 잘못됐다는 본능�
 series: "The Pragmatic Programmer"
 seriesOrder: 60
 tags: [pragmatic-programmer, mindset, intuition]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

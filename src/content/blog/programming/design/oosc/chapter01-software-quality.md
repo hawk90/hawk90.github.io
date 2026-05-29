@@ -5,7 +5,7 @@ description: "소프트웨어 품질의 외적·내적 요소 — 정확성, 견
 series: "Object-Oriented Software Construction"
 seriesOrder: 1
 tags: [oop, meyer, quality, correctness, robustness]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

@@ -5,7 +5,7 @@ description: "클래스 설계 원칙 — 응집도, 일관성, 최소 인터페
 series: "Object-Oriented Software Construction"
 seriesOrder: 23
 tags: [oop, meyer, class-design, cohesion, interface-design]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

@@ -5,7 +5,7 @@ description: "PRQA·Polyspace·LDRA·Cppcheck·clang-tidy 비교, Compliance Mat
 tags: [misra, c, tools, polyspace, ldra, certification, iso-26262, compliance]
 series: "MISRA C"
 seriesOrder: 10
-draft: false
+draft: true
 ---
 
 규칙을 이해하는 것과 *프로젝트에 적용*하는 것은 다른 문제다. 마지막 장은 도구 선택, Compliance Matrix 작성, 인증 심사 대응까지 실전 행정을 본다.

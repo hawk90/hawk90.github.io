@@ -5,7 +5,7 @@ description: "객체 모델 — OOP의 4대 요소: 추상화, 캡슐화, 모듈
 series: "Object-Oriented Analysis and Design with Applications"
 seriesOrder: 2
 tags: [oop, booch, object-model, abstraction, encapsulation, modularity, hierarchy]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Analysis and Design with Applications"
 bookAuthor: "Grady Booch"

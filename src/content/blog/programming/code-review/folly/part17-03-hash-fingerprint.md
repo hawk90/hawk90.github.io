@@ -8,6 +8,8 @@ tags: [cpp, folly, hash, fingerprint, sharding]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `Fingerprint64/128`은 polynomial Rabin-Karp 기반 fixed-size hash다. `std::hash`가 in-process container용이라면 fingerprint는 *서로 다른 프로세스/머신에서 같은 입력에 같은 결과*를 보장해 sharding과 dedup의 키가 된다.

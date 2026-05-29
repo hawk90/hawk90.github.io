@@ -8,7 +8,7 @@ tags: [cpp, folly, executor, manual, testing]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `ManualExecutor`는 task를 *queue에 쌓아두고* `run()` 호출 시에만 실행한다. 비동기 Future 체인의 진행을 *step-by-step*으로 검증하는 테스트 도구다.

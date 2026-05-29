@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, unity]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 좋은 글은 통일성이 있습니다. 한 글이 *하나의 어조, 하나의 관점, 하나의 시제*로 유지됩니다. Zinsser는 네 가지 통일성을 강조합니다.

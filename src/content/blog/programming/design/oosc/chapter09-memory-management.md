@@ -5,7 +5,7 @@ description: "메모리 관리 — 가비지 컬렉션, 참조 카운팅, 수동
 series: "Object-Oriented Software Construction"
 seriesOrder: 9
 tags: [oop, meyer, memory, garbage-collection, references]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

@@ -5,7 +5,7 @@ description: "프로그래밍은 코드에 관한 것이지만, 프로그램은 
 series: "The Pragmatic Programmer"
 seriesOrder: 49
 tags: [pragmatic-programmer, design]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

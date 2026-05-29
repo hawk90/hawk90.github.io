@@ -5,7 +5,7 @@ description: "MC/DC truth table 작성, 도구 검출, untestable code 처리, s
 tags: [do-178c, coverage, mc-dc, statement, decision, truth-table, structural]
 series: "DO-178C"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 DO-178C DAL A에서 *가장 비용 큰 항목*이 *MC/DC 100%*. *Modified Condition/Decision Coverage*는 *각 조건이 독립적으로 결과에 영향*을 미치는지 *수학적으로 입증*. 이 장은 *MC/DC truth table 작성, 도구 검출, untestable code 처리*까지.

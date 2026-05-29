@@ -5,7 +5,7 @@ description: "객체와 협력 — Tell Don't Ask. 역할 / 책임 중심 설계
 tags: [TDD, OO, Tell Don't Ask]
 series: "Growing Object-Oriented Software"
 seriesOrder: 2
-draft: false
+draft: true
 ---
 
 TDD와 객체지향은 자연스럽게 결합된다. 객체의 협력 관계를 테스트가 발견하고, 그 테스트가 다시 좋은 객체 설계를 이끈다. GOOS의 핵심 주장은 단순하다. **객체는 메시지를 주고받는 단위**이며, 테스트는 그 메시지가 옳게 흐르는지 검증하는 자리다. 이 관점에서 Mock은 우회 도구가 아니라 협력자를 명시하는 설계 언어다.

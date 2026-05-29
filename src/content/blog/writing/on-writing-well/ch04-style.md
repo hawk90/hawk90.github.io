@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, style, voice]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 > 스타일은 작가의 인격입니다.

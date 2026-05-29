@@ -5,7 +5,7 @@ description: "특수 멤버 함수 일관(A12), Rule of Five/Zero, virtual destr
 tags: [autosar, cpp, class, raii, virtual, rule-of-five, inheritance]
 series: "AUTOSAR C++14"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 C++의 클래스는 *RAII*(Resource Acquisition Is Initialization)를 통해 *자원 관리의 자동화*를 가능하게 한다. 동시에 *복사·이동·상속*이 얽히면 *미묘한 함정*이 생긴다. 이 장은 그 둘을 본다.

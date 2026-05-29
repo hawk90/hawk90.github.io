@@ -5,7 +5,7 @@ description: "8-space tabs의 철학, K&R brace 스타일, switch 문 정렬. �
 tags: [Linux, Kernel, Indentation, Braces, Tabs]
 series: "Linux Kernel Coding Style"
 seriesOrder: 1
-draft: false
+draft: true
 ---
 
 > "Tabs are 8 characters, and thus indentations are also 8 characters."

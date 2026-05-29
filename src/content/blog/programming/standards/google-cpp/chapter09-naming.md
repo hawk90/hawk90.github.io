@@ -5,7 +5,7 @@ description: "File / Type / Variable / Constant / Function / Namespace / Enum / 
 tags: [Google, C++, Style-Guide, Naming]
 series: "Google C++ Style"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 명명 규칙은 가이드 중에서 가장 가시적이다. 한 줄 코드를 봐도 변수인지 함수인지 상수인지가 형태로 드러나는 것이 목적이다. Google은 일관된 식별자 형태로 *읽는 사람의 인지 부담*을 줄인다.

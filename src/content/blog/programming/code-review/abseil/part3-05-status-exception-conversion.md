@@ -8,6 +8,8 @@ tags: [cpp, abseil, status, exception, error-code, grpc, interop]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: Status 기반 코드와 exception 기반 외부 라이브러리, gRPC status, `std::error_code` 사이 변환은 라이브러리 *경계*에서만 일어나야 한다. 변환이 코드 곳곳에서 일어나면 디버깅도 성능도 잃는다.

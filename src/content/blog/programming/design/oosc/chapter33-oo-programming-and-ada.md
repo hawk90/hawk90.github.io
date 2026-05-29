@@ -5,7 +5,7 @@ description: "Ada에서의 OO 프로그래밍 — 패키지, 태그 타입."
 series: "Object-Oriented Software Construction"
 seriesOrder: 33
 tags: [oop, meyer, ada, tagged-types, packages]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

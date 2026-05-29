@@ -5,7 +5,7 @@ description: "What보다 Why. 코드로 설명하고, 주석은 이유를 설명
 tags: [Linux, Kernel, Comments, Documentation]
 series: "Linux Kernel Coding Style"
 seriesOrder: 4
-draft: false
+draft: true
 ---
 
 > "Comments are good, but there is also a danger of over-commenting."

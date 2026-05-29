@@ -5,7 +5,7 @@ description: "memory order — relaxed / acquire / release / seq_cst. std::atomi
 tags: [C++, Concurrency, Memory Model, Atomic, Memory Order]
 series: "C++ Concurrency in Action"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 뮤텍스 없이 스레드 안전한 코드를 작성하려면 메모리 모델을 이해해야 한다. 이 장에서는 C++ 메모리 모델의 기초 개념, `std::atomic` 타입들, 그리고 memory order를 통한 동기화 강제 방법을 다룬다. 책 5장의 구조를 따라간다. 메모리 모델 기본기, atomic 타입과 연산, 동기화와 순서 강제 순이다.

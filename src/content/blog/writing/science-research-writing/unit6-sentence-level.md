@@ -8,6 +8,8 @@ tags: [writing, academic, sentence-style, science]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
+draft: true
+
 ---
 
 논문의 section 구조(Intro / Method / Result / Discussion / Abstract / Title)를 다 잡은 다음에는 문장 단위에서 다듬는 마지막 단계가 남습니다. Glasman-Deal Unit 6은 이 단계를 다룹니다. section-level 작업이 끝났을 때 원어민 검토 이전에 본인이 할 수 있는 정리입니다.

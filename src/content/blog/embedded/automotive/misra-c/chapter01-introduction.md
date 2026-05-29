@@ -5,7 +5,7 @@ description: "MISRA 단체의 배경, 자동차 산업의 요구, 1998/2004/2012
 tags: [misra, c, safety, iso-26262, automotive, standards]
 series: "MISRA C"
 seriesOrder: 1
-draft: false
+draft: true
 ---
 
 MISRA(Motor Industry Software Reliability Association)는 1990년대 초 영국 자동차 산업이 만든 컨소시엄이다. 자동차에 ECU가 늘면서 *C로 작성된 펌웨어가 차량 안전을 좌우*하기 시작했고, 누구든 따라 쓸 수 있는 "안전한 C 부분집합"이 필요해졌다. 그 결과물이 1998년의 **MISRA C:1998**이다.

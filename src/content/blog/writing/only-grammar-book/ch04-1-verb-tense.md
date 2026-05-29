@@ -8,6 +8,8 @@ tags: [writing, grammar, mistakes, tense, verb]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 시제는 *행위의 시간과 상*을 표시합니다. 영어 화자에게도 까다로운 영역이며, 한국어 화자는 *현재완료*와 *시제 일치*에서 특히 자주 실수합니다.

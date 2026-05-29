@@ -8,6 +8,8 @@ tags: [cpp, abseil, conformance, policy, base, platform]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: Abseil은 어떤 컴파일러·플랫폼·C++ 표준을 지원하는지 명문화된 정책을 가진다. `ABSL_DEPRECATED_IF_UNAVAILABLE` 같은 매크로는 미지원 환경에서 graceful degradation을 가능하게 한다.

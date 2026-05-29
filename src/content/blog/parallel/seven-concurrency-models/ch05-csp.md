@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, csp, go, channels, core-async]
 type: book-review
 bookTitle: "Seven Concurrency Models in Seven Weeks"
 bookAuthor: "Paul Butcher"
-draft: false
+draft: true
 ---
 
 이번 장은 Paul Butcher의 책에서 다섯 번째로 다루는 모델인 **Communicating Sequential Processes**입니다. 4장 Actor와 같은 메시지 기반 모델이지만, 결정적인 차이가 하나 있습니다. Actor에서는 메시지가 *수신자*에게 직접 전달됩니다. CSP에서는 메시지가 *채널*로 보내지고, 누가 그것을 받든 sender는 알 필요가 없습니다. 이 작은 결합도의 차이가 시스템 설계 전반을 바꿉니다.

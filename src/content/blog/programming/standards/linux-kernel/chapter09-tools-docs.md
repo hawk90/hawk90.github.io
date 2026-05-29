@@ -5,7 +5,7 @@ description: "checkpatch.pl로 스타일 검사, sparse로 정적 분석, kernel
 tags: [Linux, Kernel, checkpatch, sparse, kernel-doc, Documentation]
 series: "Linux Kernel Coding Style"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 > "Use the tools. That's what they're for."

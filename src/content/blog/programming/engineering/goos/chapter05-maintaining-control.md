@@ -5,7 +5,7 @@ description: "외부 → 내부 (outside-in). 인수 → 단위 테스트로 좁
 tags: [TDD, Outside-In]
 series: "Growing Object-Oriented Software"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 Walking Skeleton이 완성되면 본격적인 개발이 시작된다. 이때부터의 과제는 TDD 사이클을 유지하면서 기능을 점진적으로 쌓아 가는 일이다. GOOS는 이를 위해 **이중 루프**를 제시한다. 바깥 루프는 인수 테스트로 사용자 시나리오를 정의하고, 안쪽 루프는 단위 테스트로 객체 협력을 다듬는다.

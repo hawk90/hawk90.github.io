@@ -8,7 +8,7 @@ tags: [writing, grammar, punctuation]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
-draft: false
+draft: true
 ---
 
 구두점은 *문장의 호흡과 의미*를 결정합니다. 같은 단어 묶음도 구두점에 따라 다른 뜻이 됩니다. 이 챕터는 각 구두점의 표준 용법을 정리합니다.

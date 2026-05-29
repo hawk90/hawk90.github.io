@@ -8,7 +8,7 @@ tags: [cpp, folly, semifuture, executor, async]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `SemiFuture<T>`는 *executor에 바인딩되지 않은* Future다. 라이브러리 API의 반환 타입으로 SemiFuture를 강제하면 *caller가 executor 결정권*을 갖는다.

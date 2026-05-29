@@ -5,7 +5,7 @@ description: "JSF C++ → MISRA C++:2008 → AUTOSAR C++14 → MISRA C++:2023 �
 tags: [jsf-cpp, autosar, misra-cpp, comparison, evolution]
 series: "JSF C++"
 seriesOrder: 11
-draft: false
+draft: true
 ---
 
 JSF C++(2005)와 후속 *MISRA C++:2008*, *AUTOSAR C++14*(2017), *MISRA C++:2023* 간의 비교. *공식 발행 사실과 표준 문서 명시 정책*만 정리.

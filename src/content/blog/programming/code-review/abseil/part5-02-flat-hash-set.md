@@ -8,7 +8,7 @@ tags: [cpp, abseil, container, hash-set, swiss-table]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

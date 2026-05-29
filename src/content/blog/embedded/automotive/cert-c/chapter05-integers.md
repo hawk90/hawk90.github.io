@@ -5,7 +5,7 @@ description: "unsigned wraparound(INT30), signed overflow UB(INT31), shift UB(IN
 tags: [cert-c, integer, overflow, signed, unsigned, shift, cwe-190]
 series: "CERT C"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 정수 함정은 *NVD CVE의 큰 부분*이다. 버퍼 크기 계산이 overflow하면 *작은 버퍼에 큰 데이터*가 흘러들어가 buffer overflow로 연결된다. INT 카테고리는 이를 다룬다.

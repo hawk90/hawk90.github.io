@@ -5,7 +5,7 @@ description: "통합 빌드 절차, linker script, memory map 분석, EOC tracea
 tags: [do-178c, integration, build, eoc, linker, memory-map, deactivated-code]
 series: "DO-178C"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 코드가 *모듈별로 컴파일*되면 *Linker*가 *합쳐 Executable Object Code (EOC)*를 만든다. DO-178C는 *EOC*를 *별도의 verification 대상*으로 본다. 이 장은 *통합·빌드·EOC 검증*까지.

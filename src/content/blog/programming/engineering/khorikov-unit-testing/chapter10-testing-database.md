@@ -5,6 +5,8 @@ description: "DB 통합 테스트의 원칙. 실제 DB, 격리 전략, 테스트
 tags: [Testing, Database]
 series: "Khorikov Unit Testing"
 seriesOrder: 10
+draft: true
+
 ---
 
 데이터베이스는 대부분의 애플리케이션에서 핵심 컴포넌트다. DB와의 연동을 올바르게 테스트하는 방법을 정리한다.

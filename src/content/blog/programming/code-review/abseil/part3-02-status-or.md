@@ -8,6 +8,8 @@ tags: [cpp, abseil, statusor, error-handling, monadic]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: `absl::StatusOr<T>`는 "값 T 또는 에러 Status"를 한 type에 묶는다. 함수가 의미 있는 결과를 반환할 때 에러도 함께 표현할 수 있다. C++23의 `std::expected`의 선구적 패턴.

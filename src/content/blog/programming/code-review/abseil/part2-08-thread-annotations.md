@@ -8,6 +8,8 @@ tags: [cpp, abseil, thread-safety, clang, annotations, mutex]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: `ABSL_GUARDED_BY`, `ABSL_LOCKS_EXCLUDED` 같은 매크로는 clang의 thread safety analysis(TSA)를 활성화해 mutex 보호가 누락된 변수 접근을 컴파일 시점에 잡는다. runtime race detector가 따라잡지 못하는 종류의 버그를 미리 차단한다.

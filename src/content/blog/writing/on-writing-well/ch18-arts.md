@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, criticism, arts]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 비평 글은 *예술 작품에 대한 평가*입니다. 영화, 책, 음악, 미술, 연극 — 모두 비평의 대상입니다. 비평가는 *문화의 안내인*이자 *질의 판관*입니다.

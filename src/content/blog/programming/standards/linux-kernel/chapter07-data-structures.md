@@ -5,7 +5,7 @@ description: "커널 자료구조 — list_head, hlist, rbtree, kref. container_
 tags: [Linux, Kernel, Data-Structures, list_head, rbtree, kref]
 series: "Linux Kernel Coding Style"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 > "The kernel has its own data structure implementations."

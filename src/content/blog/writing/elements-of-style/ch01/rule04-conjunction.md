@@ -8,7 +8,7 @@ tags: [writing, grammar, comma, conjunction, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > Place a comma before a conjunction introducing an independent clause.

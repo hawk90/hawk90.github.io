@@ -8,6 +8,8 @@ tags: [writing, grammar, word-usage, confused]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 영어에는 *발음·철자가 비슷한* 단어들이 많습니다. 잘못 쓰면 문법적으로는 정상이지만 *의미가 어긋납니다*.

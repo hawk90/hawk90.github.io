@@ -5,7 +5,7 @@ description: "케이스 스터디 — 교통 관리 제어 시스템."
 series: "Object-Oriented Analysis and Design with Applications"
 seriesOrder: 9
 tags: [oop, booch, case-study, control-system, traffic]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Analysis and Design with Applications"
 bookAuthor: "Grady Booch"

@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, science, technology]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 과학과 기술 글은 어렵습니다. *추상*과 *전문 용어*가 가득합니다. 일반 독자에게 *quantum entanglement*, *gradient descent*, *CRISPR*를 설명하는 일은 쉽지 않습니다.

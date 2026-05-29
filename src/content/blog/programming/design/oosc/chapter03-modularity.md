@@ -5,7 +5,7 @@ description: "모듈성의 5가지 기준과 5가지 원칙 — 분해, 조합, 
 series: "Object-Oriented Software Construction"
 seriesOrder: 3
 tags: [oop, meyer, modularity, decomposition, composition]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

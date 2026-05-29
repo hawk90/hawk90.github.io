@@ -5,7 +5,7 @@ description: "객체지향 환경 — 통합 개발 환경, 라이브러리, 도
 series: "Object-Oriented Software Construction"
 seriesOrder: 36
 tags: [oop, meyer, environment, ide, tools, libraries]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

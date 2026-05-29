@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, interview, people]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 > 사람에 관한 글은 nonfiction의 핵심입니다.

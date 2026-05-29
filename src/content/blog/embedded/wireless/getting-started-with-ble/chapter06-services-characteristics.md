@@ -8,7 +8,7 @@ tags: [ble, services, sig, custom, profiles]
 type: book-review
 bookTitle: "Getting Started with Bluetooth Low Energy"
 bookAuthor: "Kevin Townsend et al."
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

@@ -5,7 +5,7 @@ description: "실무 — 팀 관리, 릴리스 계획, 재사용, 품질 보증.
 series: "Object-Oriented Analysis and Design with Applications"
 seriesOrder: 7
 tags: [oop, booch, pragmatics, team, quality, reuse]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Analysis and Design with Applications"
 bookAuthor: "Grady Booch"

@@ -8,7 +8,7 @@ tags: [cpp, folly, api, stability, versioning]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: Folly는 API/ABI 안정성을 약속하지 않는다. 이는 무책임이 아니라 fbcode monorepo의 운영 모델을 OSS에 그대로 노출한 결과다. 외부 사용자는 *commit 단위 freeze*로 이를 보완한다.

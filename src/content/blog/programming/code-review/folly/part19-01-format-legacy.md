@@ -8,6 +8,8 @@ tags: [cpp, folly, format, legacy, migration]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `folly::format`은 fmt와 `std::format`이 표준에 들어오기 전의 type-safe formatter다. 새 코드는 fmt/std::format을 쓰되 fbcode에 깊이 박힌 legacy `folly::format`을 어떻게 마이그레이션하는지 안다.

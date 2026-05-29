@@ -8,6 +8,8 @@ tags: [writing, academic, title, science]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
+draft: true
+
 ---
 
 논문의 제목은 가장 짧고 가장 중요한 부분입니다. 모든 잠재 독자가 처음 보는 것이고, 인용·검색·소개에서 반복 등장합니다.

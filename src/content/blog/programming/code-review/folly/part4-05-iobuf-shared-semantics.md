@@ -8,7 +8,7 @@ tags: [cpp, folly, iobuf, shared, semantics]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: IOBuf의 *buffer*와 *node*는 별개다. `clone`은 buffer를 공유하고 node를 새로 만든다. `unshare`는 buffer를 분리한다. 이 구분이 zero-copy의 안전성을 결정한다.

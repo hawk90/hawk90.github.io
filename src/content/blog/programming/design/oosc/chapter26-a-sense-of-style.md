@@ -5,7 +5,7 @@ description: "스타일 감각 — 명명 규칙, 레이아웃, 주석, 헤더."
 series: "Object-Oriented Software Construction"
 seriesOrder: 26
 tags: [oop, meyer, style, naming, conventions, readability]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

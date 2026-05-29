@@ -5,7 +5,7 @@ description: "문서를 안으로 짜 넣어라 — 마지막에 덧붙이지 �
 series: "The Pragmatic Programmer"
 seriesOrder: 13
 tags: [pragmatic-programmer, documentation]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

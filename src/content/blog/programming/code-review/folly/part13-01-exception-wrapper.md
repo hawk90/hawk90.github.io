@@ -8,6 +8,8 @@ tags: [cpp, folly, exception, wrapper, utility]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 ## 한 줄 요약

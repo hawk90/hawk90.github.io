@@ -8,7 +8,7 @@ tags: [parallel, concurrency, book-review, amp, consensus, cas, C++, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
-draft: false
+draft: true
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 5 요약

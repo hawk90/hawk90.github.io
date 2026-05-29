@@ -5,7 +5,7 @@ description: "유용한 기법들 — 참조 vs 값, 복제, 동등성 비교."
 series: "Object-Oriented Software Construction"
 seriesOrder: 25
 tags: [oop, meyer, techniques, cloning, equality]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

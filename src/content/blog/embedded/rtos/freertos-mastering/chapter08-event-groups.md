@@ -5,7 +5,7 @@ description: "xEventGroupSetBits·WaitForBits — 24비트 이벤트 플래그�
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 8
 tags: [freertos, event-group, synchronization, rendezvous]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

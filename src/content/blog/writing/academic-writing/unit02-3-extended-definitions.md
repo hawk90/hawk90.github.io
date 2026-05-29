@@ -8,6 +8,8 @@ tags: [writing, academic, definitions, extended]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 한 문장 정의로 끝낼 수 있는 용어는 많지 않습니다. 강의 과제나 학위 논문에서는 확장된 정의가 필요합니다. 그래야 그 개념을 충분히 이해했다는 신호가 전달됩니다. Swales와 Feak는 Extended Definition의 표준 흐름과, 경쟁하는 정의가 있을 때의 자리 잡기를 정리합니다.

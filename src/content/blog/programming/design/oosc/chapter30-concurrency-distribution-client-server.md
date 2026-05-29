@@ -5,7 +5,7 @@ description: "동시성과 분산 — OO에서의 동시성, SCOOP 모델."
 series: "Object-Oriented Software Construction"
 seriesOrder: 30
 tags: [oop, meyer, concurrency, distribution, scoop, client-server]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

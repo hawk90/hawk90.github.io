@@ -5,7 +5,7 @@ description: "코드를 고치기 전에 실패하는 테스트를 먼저 작성
 series: "The Pragmatic Programmer"
 seriesOrder: 31
 tags: [pragmatic-programmer, testing, debugging]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

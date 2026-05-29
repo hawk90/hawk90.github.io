@@ -8,7 +8,7 @@ tags: [writing, style, figures-of-speech, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > Use figures of speech sparingly.

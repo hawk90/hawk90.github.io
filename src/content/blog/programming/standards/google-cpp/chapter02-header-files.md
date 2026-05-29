@@ -5,7 +5,7 @@ description: "Self-contained / #define guard / IWYU / Forward declaration / Inli
 tags: [Google, C++, Style-Guide, Header, Include]
 series: "Google C++ Style"
 seriesOrder: 2
-draft: false
+draft: true
 ---
 
 헤더 파일은 코드베이스의 접합점이다. 잘못 만들면 컴파일 시간이 폭증하고, 순환 의존이 생기며, 구현 디테일이 인터페이스로 새어 나간다. 이 장의 규칙들은 헤더가 "혼자서도 제 역할을 하도록" 만드는 것을 목표로 한다.

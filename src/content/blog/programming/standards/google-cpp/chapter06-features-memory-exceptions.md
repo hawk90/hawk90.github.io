@@ -5,7 +5,7 @@ description: "Ownership / Smart Pointers / Rvalue / Friends / Exceptions / noexc
 tags: [Google, C++, Style-Guide, Smart-Pointer, Exception, RTTI, Casting]
 series: "Google C++ Style"
 seriesOrder: 6
-draft: false
+draft: true
 ---
 
 이 장은 Google 가이드에서 가장 강한 의견이 모인 자리다. 예외 금지, RTTI 제한, C 스타일 캐스트 금지처럼 다른 표준과 가장 크게 갈리는 결정들이 여기에 있다.

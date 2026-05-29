@@ -8,6 +8,8 @@ tags: [writing, grammar, punctuation, apostrophe]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 아포스트로피(`'`)는 *소유격*과 *축약*을 표시합니다. 단순한 부호지만 *영어 글쓰기에서 가장 자주 실수하는* 자리.

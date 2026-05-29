@@ -5,7 +5,7 @@ description: "kmalloc/kfree, GFP 플래그, 에러 코드 규칙. NULL vs ERR_PT
 tags: [Linux, Kernel, Memory, kmalloc, Error-Handling, ERR_PTR]
 series: "Linux Kernel Coding Style"
 seriesOrder: 6
-draft: false
+draft: true
 ---
 
 > "Kernel memory allocation is different from userspace."

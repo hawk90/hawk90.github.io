@@ -5,7 +5,7 @@ description: "알고리즘의 차수를 추정하라. Big-O 표기로 성능을 
 series: "The Pragmatic Programmer"
 seriesOrder: 62
 tags: [pragmatic-programmer, algorithms, performance]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

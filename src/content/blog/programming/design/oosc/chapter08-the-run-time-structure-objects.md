@@ -5,7 +5,7 @@ description: "객체 — 런타임의 주역, 생성, 참조, 동등성."
 series: "Object-Oriented Software Construction"
 seriesOrder: 8
 tags: [oop, meyer, objects, references, identity]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

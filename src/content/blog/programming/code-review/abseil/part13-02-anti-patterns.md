@@ -8,6 +8,8 @@ tags: [cpp, abseil, anti-pattern, code-review, mistakes]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## anti-pattern을 모아 보는 이유

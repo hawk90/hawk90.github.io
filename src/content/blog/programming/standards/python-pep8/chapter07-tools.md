@@ -5,7 +5,7 @@ description: "Black, flake8, mypy, isort, ruff. 자동 포맷팅, 린팅, 타입
 tags: [Python, PEP8, Black, flake8, mypy, ruff, Tools]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 > "Let tools do the work."

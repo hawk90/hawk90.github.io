@@ -8,7 +8,7 @@ tags: [writing, style, abbreviations, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > Do not take shortcuts at the cost of clarity.

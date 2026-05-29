@@ -5,7 +5,7 @@ description: "조건문 본질(R14), goto 정책(R15), switch 엄격성(R16) —
 tags: [misra, c, control-flow, switch, goto, fallthrough]
 series: "MISRA C"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 제어흐름의 위반은 *경로 추론을 망친다*. 정적 분석기, 인간 리뷰어, 그리고 미래의 디버거 모두 영향을 받는다. MISRA는 *명시적이고 예측 가능한* 제어흐름을 요구한다.

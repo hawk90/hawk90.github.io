@@ -5,7 +5,7 @@ description: "POSIX 특정 함정(POS), 동시성 race(CON), atomic·mutex, TSan
 tags: [cert-c, posix, concurrency, race, mutex, atomic, tsan]
 series: "CERT C"
 seriesOrder: 10
-draft: false
+draft: true
 ---
 
 이 마지막 장은 *POSIX 특정* 함정과 *동시성*을 다룬다. RTOS·Linux 기반 임베디드, IPC·threading 코드에 직접 적용된다.

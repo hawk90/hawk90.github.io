@@ -5,7 +5,7 @@ description: "외부 설정으로 앱을 파라미터화하라. 코드를 바꾸
 series: "The Pragmatic Programmer"
 seriesOrder: 54
 tags: [pragmatic-programmer, config, deployment]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

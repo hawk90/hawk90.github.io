@@ -8,6 +8,8 @@ tags: [cpp, folly, microlock, lock, memory]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `MicroLock`은 1-byte 안에 lock 상태와 wait queue head를 표현한다. `std::mutex`가 40+ byte를 쓰는 자리에서 *수억 개 객체*에 각각 lock을 박을 수 있게 한다.

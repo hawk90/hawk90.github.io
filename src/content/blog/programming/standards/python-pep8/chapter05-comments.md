@@ -5,7 +5,7 @@ description: "블록 주석, 인라인 주석, docstring 규칙. PEP 257, Google
 tags: [Python, PEP8, Comments, Docstrings, Documentation]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 > "Comments that contradict the code are worse than no comments."

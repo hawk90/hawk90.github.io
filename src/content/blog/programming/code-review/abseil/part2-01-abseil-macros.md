@@ -8,6 +8,8 @@ tags: [cpp, abseil, macros, portability, base, attributes]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: `ABSL_HAVE_*`는 컴파일러·플랫폼 기능의 존재를 감지하고, `ABSL_ATTRIBUTE_*`는 표준화되지 않은 attribute의 컴파일러별 차이를 흡수한다. Abseil의 모든 코드가 이 두 매크로 위에 서 있다.

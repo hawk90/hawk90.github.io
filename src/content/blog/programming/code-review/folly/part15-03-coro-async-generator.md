@@ -8,6 +8,8 @@ tags: [cpp, folly, coro, generator, stream]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `AsyncGenerator<T>`는 `co_yield`로 값을 한 번에 하나씩 비동기로 내보내고 소비자는 `for co_await`로 받는다. backpressure가 자연스럽고 cancellation도 협력적으로 동작한다.

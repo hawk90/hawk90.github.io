@@ -8,6 +8,8 @@ tags: [cpp, abseil, branch-prediction, performance, base]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: `ABSL_PREDICT_TRUE` / `ABSL_PREDICT_FALSE`는 컴파일러에게 분기 확률을 알려주는 힌트다. 현대 CPU의 분기 예측기는 보통 이를 무시해도 충분히 잘 동작하지만, 코드 레이아웃(hot path 응집)에 미치는 영향은 측정 가능한 만큼 남아 있다.

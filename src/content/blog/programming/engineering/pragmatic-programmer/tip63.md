@@ -5,7 +5,7 @@ description: "추정을 테스트하라. 이론적 복잡도와 실제 성능을
 series: "The Pragmatic Programmer"
 seriesOrder: 63
 tags: [pragmatic-programmer, algorithms, testing]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

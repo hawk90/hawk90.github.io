@@ -8,6 +8,8 @@ tags: [cpp, abseil, type-traits, sfinae, meta-programming]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: `absl::negation`, `absl::conjunction`, `absl::disjunction`, `absl::void_t`는 C++17이 표준화한 type_traits 유틸리티의 C++14 polyfill이다. short-circuit evaluation과 SFINAE 친화성이 핵심이다.

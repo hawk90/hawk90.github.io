@@ -8,6 +8,8 @@ tags: [cpp, abseil, log, structured, entry]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## LogEntry — Sink가 보는 인터페이스

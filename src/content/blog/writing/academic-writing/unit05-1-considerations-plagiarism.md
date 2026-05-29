@@ -8,6 +8,8 @@ tags: [writing, academic, summary, plagiarism]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 학술 글쓰기에서 요약(summary)은 거의 모든 글에 들어갑니다. 문헌 리뷰의 각 문단이 요약이고, 토론 섹션의 기존 연구 정리도 요약입니다. Unit 5의 첫 글은 요약을 쓰기 전에 결정해야 할 것들과, 학술 정직성의 문제인 표절을 다룹니다.

@@ -5,7 +5,7 @@ description: "테스트를 테스트하기 위해 사보타주를 사용하라. 
 series: "The Pragmatic Programmer"
 seriesOrder: 91
 tags: [pragmatic-programmer, testing, mutation-testing]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

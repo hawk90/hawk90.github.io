@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, business]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 > 비즈니스 글이 흐릿한 이유는 *가식적 관습* 때문입니다.

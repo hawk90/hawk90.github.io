@@ -5,7 +5,7 @@ description: "스테레오타입·태그값·제약을 모아 도메인 전용 U
 tags: [UML, Profile, Stereotype, Extension, Domain]
 series: "UML 2.5.1"
 seriesOrder: 31
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

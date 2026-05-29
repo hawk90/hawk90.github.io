@@ -8,7 +8,7 @@ tags: [cpp, folly, executor, inline, async]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `InlineExecutor`는 `add(fn)`을 *그 자리에서 호출*한다. 가장 단순한 Executor지만 동시에 가장 잘못 쓰이는 Executor다.

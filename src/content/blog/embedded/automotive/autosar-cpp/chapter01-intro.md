@@ -5,7 +5,7 @@ description: "AUTOSAR 컨소시엄, Classic/Adaptive, C++14 채택 배경, MISRA
 tags: [autosar, cpp, c++14, iso-26262, adaptive, classic, automotive]
 series: "AUTOSAR C++14"
 seriesOrder: 1
-draft: false
+draft: true
 ---
 
 AUTOSAR(AUTomotive Open System ARchitecture)는 2003년 BMW, Bosch, Continental, Daimler, Ford 등 자동차 OEM과 Tier-1이 함께 만든 *자동차 소프트웨어 아키텍처 표준* 컨소시엄이다. 이 컨소시엄이 *Adaptive AUTOSAR* 플랫폼을 발표하면서 *C++14를 공식 채택*했고, 그에 따른 코딩 표준이 **AUTOSAR C++14 Coding Guidelines**(2017)이다.

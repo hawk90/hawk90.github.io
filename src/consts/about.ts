@@ -7,51 +7,68 @@ export const ABOUT_DATA = {
   // Profile
   name: 'Hawk',
   photo: '/images/pic.jpg',
-  title: 'System & Firmware Developer',
-  tagline: 'System & Firmware Developer with a passion for working close to the hardware.',
+  title: 'System & Firmware Engineer',
+  tagline:
+    'System & firmware engineer working close to the hardware for 10+ years — ' +
+    'embedded firmware, kernel-adjacent drivers, and parallel/HPC systems. ' +
+    'This blog is where I keep what I learn so I can find it again.',
 
   // Skill badges shown on the hero section.
   // Each gets a complementary accent color + small icon.
   skills: [
-    { label: 'Embedded Systems', icon: '🔌', color: 'cyan' },
-    { label: 'ARM / RISC-V',     icon: '🧠', color: 'amber' },
-    { label: 'Jetson Orin',      icon: '⚡', color: 'green' },
-    { label: 'Kernel Porting',   icon: '🐧', color: 'violet' },
+    { label: 'Embedded Firmware', icon: '🔌', color: 'cyan' },
+    { label: 'ARM / RISC-V',      icon: '🧠', color: 'amber' },
+    { label: 'NVMe / Drivers',    icon: '⚡', color: 'green' },
+    { label: 'CUDA / MPI',        icon: '🐧', color: 'violet' },
   ],
 
   // Content sections
   sections: [
     {
-      icon: '🔧',
-      title: 'Area of Expertise',
+      icon: '👋',
+      title: 'Background',
       content:
-        "I'm a System & Firmware Developer with a passion for working close to the hardware. " +
-        'My experience spans embedded systems, low-level debugging, board bring-up, ' +
-        'bootloader development, and kernel porting across various platforms.',
+        "I started in systems software in 2013 during an integrated PhD program at Korea University, " +
+        'researching parallel/distributed systems and deep-learning optimization. ' +
+        'Since then I\'ve worked on SoC bring-up and IP driver verification at MetisX ' +
+        '(ARM M0+ / A53, Zebu/HAPS, NVMe), VPN runtimes and kernel firewall modules at Future Systems, ' +
+        'and tsunami-detection / hydrodynamics simulation at Marine Information Technology. ' +
+        'Full project history is on the /resume page.',
     },
     {
-      icon: '🚀',
-      title: "What I'm Working On",
+      icon: '🔧',
+      title: 'What I Work With',
       content:
-        'These days, I primarily work on firmware development for platforms like ARM-based systems, ' +
-        'RISC-V architectures, and Jetson Orin. My focus lies in performance optimization ' +
-        'and ensuring system reliability.',
+        'Day-to-day I sit close to the hardware: ARM and RISC-V bring-up, ' +
+        'low-level drivers (I2C/SPI/UART, NVMe, custom IPs), bootloaders, and SDK refactoring. ' +
+        'I also keep one foot in parallel computing — CUDA, MPI, and deep-learning inference ' +
+        'systems from earlier R&D work. C/C++ are my daily drivers; Python for tooling and ML.',
     },
     {
       icon: '✍️',
-      title: 'Purpose of This Blog',
+      title: 'Why This Blog Exists',
       content:
-        'This blog is a space where I document what I learn through hands-on development. ' +
-        'I aim to share insights into system and firmware development, practical debugging tips, ' +
-        'and the joy of digging into registers and low-level code.',
+        'Most posts here are notes I wrote for *myself*: a chapter of a book I needed to ' +
+        'internalize, a debugging session I want to remember, a pattern I kept re-deriving. ' +
+        'Publishing them forces me to fix the loose ends I\'d otherwise leave hanging. ' +
+        'If a post helps you too, that\'s a bonus.',
+    },
+    {
+      icon: '📚',
+      title: "What You'll Find",
+      content:
+        'Book-driven series (Effective Modern C++, GoF Design Patterns, Designing Data-Intensive ' +
+        'Applications, Linear Algebra, and more), embedded standards walkthroughs (MISRA, Google C++ ' +
+        'Style), tooling notes (Vim, perf, debuggers), and deep-dives into topics I\'ve hit at work. ' +
+        'Korean is the primary language; some series carry English code and comments.',
     },
     {
       icon: '🤝',
-      title: 'To Visitors',
+      title: 'Get in Touch',
       content:
-        "If you're interested in system software, currently learning, or working in the same field, " +
-        "you're more than welcome here. Feel free to leave comments or feedback—I'd love to connect " +
-        'and learn together.',
+        'GitHub and email are linked in the footer. I happily read corrections, ' +
+        'disagreements, and "you should also read X" notes. For longer conversations ' +
+        'about firmware, drivers, or parallel systems, the /resume page has fuller context.',
     },
   ],
 

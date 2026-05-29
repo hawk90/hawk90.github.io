@@ -8,6 +8,8 @@ tags: [writing, grammar, mistakes, fragment, run-on]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 문장은 *완전*해야 하고 *적절히 끝나야* 합니다. *단편*은 *덜 끝난* 문장, *런온*은 *너무 길게 이어진* 문장입니다.

@@ -5,7 +5,7 @@ description: "단순하게 유지하고 공격 표면을 최소화하라. 복잡
 series: "The Pragmatic Programmer"
 seriesOrder: 71
 tags: [pragmatic-programmer, security, design]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

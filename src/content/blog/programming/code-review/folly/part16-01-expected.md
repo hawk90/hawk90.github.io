@@ -8,6 +8,8 @@ tags: [cpp, folly, expected, error-handling]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `Expected<T, E>`는 함수의 *정상 결과 또는 오류 코드*를 하나의 값으로 표현한다. C++23 `std::expected`의 선구자이자 `absl::StatusOr<T>`의 사촌으로 monadic 조합이 가능한 모델이다.

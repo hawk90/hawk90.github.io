@@ -8,6 +8,8 @@ tags: [writing, academic, introduction, IMRD, moves]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
+draft: true
+
 ---
 
 연구 논문 Introduction은 모래시계의 가장 넓은 입구입니다. 일반에서 시작해 구체로 좁아집니다. 이 글은 Introduction의 표준 구조와, Glasman-Deal이 제안하는 *4-Move 모델*을 다룹니다.

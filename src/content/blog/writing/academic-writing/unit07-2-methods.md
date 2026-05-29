@@ -8,6 +8,8 @@ tags: [writing, academic, methods, research-paper]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 Methods 섹션은 IMRD의 가장 기술적인 부분입니다. 어떻게 했는지를 재현 가능하게 기술하는 것이 목적입니다. 이 글은 Methods의 표준 구조, 시제·voice 관습, 자주 쓰는 표현을 정리합니다.

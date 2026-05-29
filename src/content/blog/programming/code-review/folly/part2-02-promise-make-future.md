@@ -8,7 +8,7 @@ tags: [cpp, folly, future, promise, async]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `Promise<T>`는 *나중에* 값/예외를 채우는 생산자 측 핸들이고, `makeFuture` 계열은 *이미 결정된* 값을 Future 인터페이스에 올리는 단축 길이다.

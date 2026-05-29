@@ -8,6 +8,8 @@ tags: [cpp, folly, observer, config, atomic]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `folly::observer`는 *드물게 업데이트되고 자주 읽히는* 값을 atomic하게 refresh하는 framework다. config, feature flag, load balancer weight 같은 hot read 자리에서 lock 없이 새 값을 빌어온다.

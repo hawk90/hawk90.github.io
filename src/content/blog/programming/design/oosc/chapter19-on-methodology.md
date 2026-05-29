@@ -5,7 +5,7 @@ description: "방법론에 대하여 — 소프트웨어 방법론의 역할과 
 series: "Object-Oriented Software Construction"
 seriesOrder: 19
 tags: [oop, meyer, methodology, software-process]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

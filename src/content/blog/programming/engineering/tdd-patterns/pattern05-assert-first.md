@@ -8,6 +8,8 @@ tags: [tdd, beck, assert-first]
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
+draft: true
+
 ---
 
 ## 한 줄 요약

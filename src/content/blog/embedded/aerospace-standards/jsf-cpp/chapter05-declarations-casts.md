@@ -5,7 +5,7 @@ description: "JSF C++ — 선언 정책, 명시 초기화, C-style cast 금지, 
 tags: [jsf-cpp, declarations, initialization, casts, expressions, sizeof, static-cast]
 series: "JSF C++"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 JSF C++의 *선언·초기화·캐스트·표현식* 정책. *명시 초기화 의무*, *C-style cast 금지*, *side effect 회피*. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.

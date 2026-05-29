@@ -8,7 +8,7 @@ tags: [cpp, folly, executor, eventbase, libevent]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `EventBase`는 libevent의 `event_base`를 wrap한 *single-threaded event loop*다. fd 이벤트, timer, cross-thread message를 한 thread 안에서 처리하고, `folly::Executor`를 구현해 Future와 직접 통합된다.

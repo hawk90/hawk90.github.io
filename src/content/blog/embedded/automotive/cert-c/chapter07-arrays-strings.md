@@ -5,7 +5,7 @@ description: "Buffer overflow 차단 — 배열 경계(ARR30), 충분한 버퍼(
 tags: [cert-c, array, string, buffer-overflow, null-termination, cwe-119]
 series: "CERT C"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 배열과 문자열은 *CVE 통계 1위*다. CWE-119(buffer overflow), CWE-787(out-of-bounds write), CWE-125(out-of-bounds read) — 메모리 안전 문제의 *대부분*이 여기서 나온다.

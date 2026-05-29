@@ -8,6 +8,8 @@ tags: [cpp, abseil, cord, strings, zero-copy]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 한 줄 요약

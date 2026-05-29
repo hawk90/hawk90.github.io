@@ -8,7 +8,7 @@ tags: [writing, grammar, mistakes, errors]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
-draft: false
+draft: true
 ---
 
 이 챕터는 *영어 글쓰기에서 자주 일어나는 오류*들을 정리합니다. 문법 규칙은 알지만 *적용*에서 헷갈리는 자리들입니다. 각 함정에 대한 *규칙 + 예 + 함정의 이유*가 도움이 됩니다.

@@ -5,7 +5,7 @@ description: "예외 클래스 throw(A15-1-1), destructor에서 leak 금지(A15-
 tags: [autosar, cpp, exception, noexcept, raii, exception-safety]
 series: "AUTOSAR C++14"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 C++ 예외는 *RAII와 결합하면* 깨끗한 자원 관리를, *분석·성능 관점에서는* 큰 부담을 준다. 임베디드 안전 시스템에서 *예외를 쓸 것인가*는 *프로젝트 차원의 결정*이다.

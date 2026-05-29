@@ -8,6 +8,8 @@ tags: [cpp, folly, hash, spookyhash]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `SpookyHashV2`는 Bob Jenkins의 빠른 non-cryptographic hash다. F14의 기본 hasher 후보로 분포·속도 모두 좋고, 결정적이라 sharding에도 쓸 수 있다.

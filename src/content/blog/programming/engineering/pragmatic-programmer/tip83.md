@@ -5,7 +5,7 @@ description: "작고 안정적인 팀을 유지하라. 팀원이 자주 바뀌�
 series: "The Pragmatic Programmer"
 seriesOrder: 83
 tags: [pragmatic-programmer, team, organization]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

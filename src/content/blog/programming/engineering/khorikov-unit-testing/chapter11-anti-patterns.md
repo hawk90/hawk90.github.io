@@ -5,6 +5,8 @@ description: "Private 메서드 테스트, 시간 누수, 코드 오염, 구체 
 tags: [TDD, Anti-Patterns]
 series: "Khorikov Unit Testing"
 seriesOrder: 11
+draft: true
+
 ---
 
 안티패턴을 알면 좋은 테스트를 작성하기 쉬워진다. 마지막 장에서는 흔한 실수와 해결책을 살펴보고, 시리즈 전체를 마무리한다.

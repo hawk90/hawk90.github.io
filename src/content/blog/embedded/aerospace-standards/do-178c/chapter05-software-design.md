@@ -5,7 +5,7 @@ description: "HLR → LLR decomposition, Architecture 설계, SCADE/Simulink mod
 tags: [do-178c, design, llr, architecture, scade, simulink, do-331, model-based]
 series: "DO-178C"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 HLR이 *"무엇을"* 정의했다면, LLR(Low-Level Requirements)은 *"어떻게"* 한다. *Software Design Process*는 *A-2-3 + A-2-4 + A-4의 14 obj* — 전체 71 obj의 약 20%. 이 장은 *LLR 작성, Architecture 설계, Model-Based Development (DO-331)*까지 본다.

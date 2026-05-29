@@ -8,7 +8,7 @@ tags: [writing, grammar, comma, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > In a series of three or more terms with a single conjunction, use a comma after each term except the last.

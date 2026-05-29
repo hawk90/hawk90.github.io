@@ -5,7 +5,7 @@ description: "ECSS-Q-ST-80C의 짝꿍 표준. V-model 11 단계, 5 milestone rev
 tags: [ecss, ecss-e-st-40c, engineering, v-model, srr, pdr, cdr, qr, ar]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 8
-draft: false
+draft: true
 ---
 
 ECSS-Q-ST-80C가 *quality 측면*이라면 **ECSS-E-ST-40C**는 *engineering 측면*. *어떻게 SW를 만드는가*. 두 표준이 *반드시 함께 사용*. 이 장은 *V-model 11 단계, 5 milestone review, 코딩 표준, KARI 적용*까지.

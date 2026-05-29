@@ -8,6 +8,8 @@ tags: [writing, grammar, phrase, syntax]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 구(phrase)는 *주어와 동사가 없는* 단어 묶음입니다. 절보다 작고 단어보다 크며, 문장의 *기능적 부품*으로 동작합니다.

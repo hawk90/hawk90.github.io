@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, simplicity]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 Zinsser의 가장 유명한 문장이 이 챕터에 있습니다.

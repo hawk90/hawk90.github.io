@@ -8,7 +8,7 @@ tags: [cpp, folly, executor, threadpool, cpu]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `CPUThreadPoolExecutor`는 fixed-size thread pool로 *CPU-bound 작업*을 실행한다. priority/queue/factory가 모두 교체 가능한 라이브러리급 구현이다.

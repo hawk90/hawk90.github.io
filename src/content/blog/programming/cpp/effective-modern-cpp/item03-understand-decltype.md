@@ -5,6 +5,8 @@ description: "decltype은 추론하지 않고 보고한다. decltype(auto), 이�
 tags: [C++, decltype, Type Deduction]
 series: "Effective Modern C++"
 seriesOrder: 3
+draft: true
+
 ---
 
 ## 왜 이 항목이 중요한가?

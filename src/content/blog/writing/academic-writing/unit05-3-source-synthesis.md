@@ -8,6 +8,8 @@ tags: [writing, academic, citation, synthesis]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 여러 출처에서 정보를 가져와 자기 글의 흐름에 통합하는 것이 학술 글쓰기의 핵심 기술입니다. 이 글은 출처 도입의 두 방식과, 여러 출처를 묶는 Synthesis를 다룹니다.

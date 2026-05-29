@@ -5,7 +5,7 @@ description: "비난이 아니라 문제를 고쳐라 — 누구의 잘못인지
 series: "The Pragmatic Programmer"
 seriesOrder: 29
 tags: [pragmatic-programmer, debugging]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

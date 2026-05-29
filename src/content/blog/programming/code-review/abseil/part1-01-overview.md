@@ -8,6 +8,8 @@ tags: [cpp, abseil, google, library, overview]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: Abseil은 Google이 사내 수억 줄의 C++ 코드를 떠받치기 위해 만든 라이브러리이고, std의 빈자리를 메우거나 std보다 빠른 구현을 제공하는 두 축으로 굴러간다.

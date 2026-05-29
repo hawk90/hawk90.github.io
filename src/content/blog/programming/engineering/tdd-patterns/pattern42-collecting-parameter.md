@@ -8,6 +8,8 @@ tags: [tdd, beck, collecting-parameter, builder]
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
+draft: true
+
 ---
 
 ## 한 줄 요약

@@ -8,7 +8,7 @@ tags: [writing, grammar, colon, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > Use a colon after an independent clause to introduce a list of particulars, an appositive, an amplification, or an illustrative quotation.

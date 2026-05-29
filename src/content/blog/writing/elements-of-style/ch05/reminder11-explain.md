@@ -8,7 +8,7 @@ tags: [writing, style, dialogue, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > Do not explain too much.

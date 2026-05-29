@@ -5,7 +5,7 @@ description: "JSF C++ — goto/setjmp 금지, varargs 금지, 재귀 금지, 함
 tags: [jsf-cpp, statements, functions, goto, varargs, recursion, return-value]
 series: "JSF C++"
 seriesOrder: 6
-draft: false
+draft: true
 ---
 
 JSF C++의 *제어흐름 + 함수 정책*. *goto/setjmp/longjmp 금지*, *varargs 금지*, *재귀 금지*. 항공 SW의 *deterministic 보장* 핵심. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.

@@ -5,7 +5,7 @@ description: "Helix QAC 2024 실전 설정 — .prj 구조, RCMA 룰 셋, suppre
 tags: [misra, c, helix-qac, prqa, ci, static-analysis, gitlab, suppression]
 series: "MISRA C"
 seriesOrder: 13
-draft: false
+draft: true
 ---
 
 10장이 도구 목록을 봤다면, 이 장은 *가장 많이 쓰이는 도구인 Helix QAC*의 *실전 설정 깊이*를 본다. 빈 프로젝트에서 *완전한 CI 통합*까지 단계별로.

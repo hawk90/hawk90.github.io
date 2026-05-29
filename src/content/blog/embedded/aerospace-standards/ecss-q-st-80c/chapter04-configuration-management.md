@@ -5,7 +5,7 @@ description: "ECSS-Q-ST-80C §5.5 — SCM Plan, identification, baseline, change
 tags: [ecss, scm, configuration-management, baseline, ccb, change-control, audit]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 4
-draft: false
+draft: true
 ---
 
 ECSS의 *Software Configuration Management (SCM)*. DO-178C의 SCM과 *거의 동일*하지만 *ESA의 미션 lifecycle*(10-30년)에 적응. 위성이 *발사 후 10년+ 운영*되며 *지상에서 SW update*가 흔하다. 이 장은 *SCM 4 활동, baseline 4종류, Change Control Board, KARI 적용*까지.

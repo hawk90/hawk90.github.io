@@ -8,6 +8,8 @@ tags: [writing, academic, abstract, summary]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
+draft: true
+
 ---
 
 Abstract는 논문 전체를 200-300 단어로 압축한 것입니다. 가장 읽히는 부분이지만 가장 마지막에 작성됩니다. 논문의 모든 섹션이 완성된 뒤에야 진짜 abstract를 쓸 수 있습니다.

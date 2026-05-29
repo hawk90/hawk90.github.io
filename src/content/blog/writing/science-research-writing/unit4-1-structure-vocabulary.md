@@ -8,6 +8,8 @@ tags: [writing, academic, discussion, conclusion, limitations]
 type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
+draft: true
+
 ---
 
 Discussion은 모래시계가 다시 넓어지는 부분입니다. 좁은 Results에서 시작해 기존 연구와의 관계, 함의, 한계로 넓혀 갑니다. Introduction의 거꾸로 진행과 같습니다.

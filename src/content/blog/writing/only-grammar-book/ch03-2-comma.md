@@ -8,6 +8,8 @@ tags: [writing, grammar, punctuation, comma]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 쉼표는 *가장 자주 쓰이고 가장 자주 잘못 쓰이는* 구두점입니다. 사용 규칙이 *수십 개*에 달하지만, 핵심은 *문장 안의 호흡과 의미 단위*를 표시하는 것입니다.

@@ -5,7 +5,7 @@ description: "추상과 구현을 분리 — N×M 클래스 폭발을 N+M으로.
 tags: [Design Pattern, GoF, C++, C, Structural]
 series: "GoF Design Patterns"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

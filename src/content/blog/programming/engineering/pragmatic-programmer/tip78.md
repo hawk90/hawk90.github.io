@@ -5,7 +5,7 @@ description: "정책은 메타데이터다. 비즈니스 규칙을 코드가 아
 series: "The Pragmatic Programmer"
 seriesOrder: 78
 tags: [pragmatic-programmer, design, configuration]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

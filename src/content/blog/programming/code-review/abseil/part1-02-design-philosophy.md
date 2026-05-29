@@ -8,6 +8,8 @@ tags: [cpp, abseil, design, philosophy, std]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: Abseil의 설계는 "std와 충돌하지 않으면서 production 요구를 채운다"는 한 줄로 요약되지만, 그 한 줄을 지키기 위해 inline namespace, ABI 정책, Live at Head 같은 인프라가 따라온다.

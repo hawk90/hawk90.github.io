@@ -5,7 +5,7 @@ description: "stdlib·string·signal·setjmp 금지(R21), 파일·자원 lifetim
 tags: [misra, c, stdlib, malloc, signal, setjmp, resource]
 series: "MISRA C"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 표준 C 라이브러리의 *상당수*는 임베디드 안전 시스템에 부적합하다. 동적 메모리, 시그널, 비결정적 시간 — MISRA R21/R22는 이를 차단한다.

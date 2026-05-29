@@ -5,7 +5,7 @@ description: "책의 Worked Example 소개 — 경매 sniper 시스템. Part 3 �
 tags: [TDD, Case Study, Auction Sniper]
 series: "Growing Object-Oriented Software"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 > "The best way to learn is by doing."

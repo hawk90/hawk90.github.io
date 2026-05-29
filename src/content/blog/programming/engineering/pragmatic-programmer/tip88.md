@@ -5,7 +5,7 @@ description: "버전 관리를 빌드, 테스트, 릴리스의 중심에 두라.
 series: "The Pragmatic Programmer"
 seriesOrder: 88
 tags: [pragmatic-programmer, version-control, ci-cd]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

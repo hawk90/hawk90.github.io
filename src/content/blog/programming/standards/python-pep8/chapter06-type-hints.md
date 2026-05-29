@@ -5,7 +5,7 @@ description: "PEP 484 타입 힌트. 변수, 함수, 클래스 어노테이션. 
 tags: [Python, PEP8, Type-Hints, PEP484, mypy, Typing]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 6
-draft: false
+draft: true
 ---
 
 > "Type hints are completely optional."

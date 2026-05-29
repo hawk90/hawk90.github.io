@@ -8,6 +8,8 @@ tags: [writing, academic, definitions, sentence]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 학술 글쓰기에서 정의는 핵심 도구입니다. 자기 분야의 전문 용어, 자기가 채택한 의미, 다른 사람과 다른 자기 입장을 정의로 표현합니다. Swales와 Feak는 formal sentence definition의 표준 구조와, 정의에 자주 쓰이는 동사 패턴을 정리합니다.

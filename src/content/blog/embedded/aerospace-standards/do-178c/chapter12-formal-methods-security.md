@@ -5,7 +5,7 @@ description: "수학적 증명으로 verification 충족 — SPARK Ada, Frama-C,
 tags: [do-178c, do-333, do-326a, formal-methods, spark-ada, frama-c, security]
 series: "DO-178C"
 seriesOrder: 12
-draft: false
+draft: true
 ---
 
 마지막 장 — DO-178C의 *두 큰 supplement*: **DO-333 (Formal Methods)** 와 **DO-326A (Airworthiness Security)**. *수학적 증명*과 *사이버 보안*이 *현대 항공 SW의 두 새로운 축*. 시리즈를 마무리하며 *전체 그림*과 *향후 5-10년 전망*까지.

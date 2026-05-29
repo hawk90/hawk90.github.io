@@ -5,7 +5,7 @@ description: "워크플로를 분석해 동시성을 개선하라. 의존성을 
 series: "The Pragmatic Programmer"
 seriesOrder: 55
 tags: [pragmatic-programmer, concurrency]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

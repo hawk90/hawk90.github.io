@@ -5,7 +5,7 @@ description: "std::thread(A21), atomic memory_order(A23), race 회피, lock-free
 tags: [autosar, cpp, concurrency, atomic, memory-model, thread]
 series: "AUTOSAR C++14"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 C++11이 도입한 *thread, atomic, memory model*은 *언어 차원의 동시성 추상*을 가능하게 했다. 하지만 *분석 곤란*과 *성능 함정*이 큰 영역. AUTOSAR는 *통제된 사용*을 요구한다.

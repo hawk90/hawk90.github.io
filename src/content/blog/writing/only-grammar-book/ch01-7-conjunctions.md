@@ -8,6 +8,8 @@ tags: [writing, grammar, conjunction]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 접속사는 *단어, 구, 절*을 연결합니다. 어떤 접속사를 쓰느냐에 따라 *문장 구조*와 *논리 관계*가 결정됩니다.

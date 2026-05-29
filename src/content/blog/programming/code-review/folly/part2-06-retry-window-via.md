@@ -8,7 +8,7 @@ tags: [cpp, folly, future, retry, control]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `retry`는 실패 시 재시도, `window`는 동시성 제한, `via`는 executor 전환이다. 이 세 조합자가 Future 코드의 *제어 흐름*을 표현한다.

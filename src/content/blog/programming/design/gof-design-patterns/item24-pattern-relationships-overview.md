@@ -5,7 +5,7 @@ description: "GoF 23 패턴의 관계 다이어그램과 각 패턴의 한눈 at
 tags: [Design Pattern, GoF, Overview, Atlas]
 series: "GoF Design Patterns"
 seriesOrder: 24
-draft: false
+draft: true
 ---
 
 ## 왜 마지막 글에 관계도가 필요한가

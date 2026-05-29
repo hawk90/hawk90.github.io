@@ -8,6 +8,8 @@ tags: [cpp, folly, range, span, string-view]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `Range<Iter>`는 두 iterator를 묶은 view 타입이다. `StringPiece`(=`Range<const char*>`)의 일반화이며, `std::span`/`std::string_view`보다 먼저 도입돼 둘의 역할을 통합 표현한다.

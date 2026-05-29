@@ -5,7 +5,7 @@ description: "FreeRTOS-MPU·privileged·unprivileged — 태스크 격리와 보
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 12
 tags: [freertos, mpu, security, isolation]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

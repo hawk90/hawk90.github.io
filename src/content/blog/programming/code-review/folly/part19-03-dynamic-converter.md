@@ -8,6 +8,8 @@ tags: [cpp, folly, dynamic, converter, json]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `DynamicConverter`는 `folly::dynamic`과 사용자 struct 사이를 변환하는 traits 기반 framework다. JSON → struct, struct → JSON을 boilerplate 없이 처리하기 위해 만들어졌다.

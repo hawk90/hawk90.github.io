@@ -8,6 +8,8 @@ tags: [writing, grammar, punctuation, end-mark]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > *마침표, 물음표, 느낌표*는 문장의 끝을 알리는 *end marks*입니다. 어느 종지부를 쓰느냐가 *문장의 종류와 어조*를 결정합니다.

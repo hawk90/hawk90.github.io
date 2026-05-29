@@ -8,6 +8,8 @@ tags: [tdd, beck, crash-test-dummy, error-handling]
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
+draft: true
+
 ---
 
 ## 한 줄 요약

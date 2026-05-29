@@ -5,7 +5,7 @@ description: "configNUMBER_OF_CORES·core affinity — FreeRTOS의 멀티코어 
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 13
 tags: [freertos, smp, multicore, affinity]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

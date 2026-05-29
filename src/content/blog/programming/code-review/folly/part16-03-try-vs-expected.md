@@ -8,6 +8,8 @@ tags: [cpp, folly, try, expected, design]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `Try<T>`는 *비동기 결과 슬롯*에 어떤 예외든 받는다. `Expected<T, E>`는 *도메인 오류*를 type-safe enum/struct로 표현한다. 둘은 겹쳐 보이지만 사용 자리가 다르다.

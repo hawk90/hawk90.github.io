@@ -5,7 +5,7 @@ description: "Lockheed Martin이 F-35 Joint Strike Fighter용으로 발행한 C+
 tags: [jsf-cpp, lockheed-martin, f-35, joint-strike-fighter, cpp, aerospace, dod]
 series: "JSF C++"
 seriesOrder: 1
-draft: false
+draft: true
 ---
 
 **JSF C++ Coding Standards** (Joint Strike Fighter Air Vehicle C++ Coding Standards)는 *Lockheed Martin*이 2005년 발행한 *F-35 (Joint Strike Fighter) 프로그램용 C++ 코딩 표준*. *항공 critical SW의 C++ 코딩 가이드*로 *후속 자동차·일반 안전 critical 표준*에 영향을 주었다.

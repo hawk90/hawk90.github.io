@@ -8,7 +8,7 @@ tags: [cpp, folly, build, fbcode, monorepo, cmake]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: Folly는 Meta 내부에서는 Buck/fbcode 안에서만 빌드되도록 자라났고, OSS CMake 빌드는 *그 그림자*다. 외부 사용자가 마주치는 빌드 문제 대부분은 이 비대칭에서 나온다.

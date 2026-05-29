@@ -5,7 +5,7 @@ description: "snake_case 명명, 전역은 서술적으로, 지역은 짧게. ty
 tags: [Linux, Kernel, Naming, typedef]
 series: "Linux Kernel Coding Style"
 seriesOrder: 2
-draft: false
+draft: true
 ---
 
 > "C is a Spartan language, and your naming conventions should follow suit."

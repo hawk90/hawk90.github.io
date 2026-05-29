@@ -5,7 +5,7 @@ description: "객체 영속성과 데이터베이스 — OODBMS, O/R 매핑."
 series: "Object-Oriented Software Construction"
 seriesOrder: 31
 tags: [oop, meyer, persistence, database, oodbms, orm]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

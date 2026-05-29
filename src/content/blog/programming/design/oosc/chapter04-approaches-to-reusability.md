@@ -5,7 +5,7 @@ description: "재사용성의 목표와 장애물 — 왜 소프트웨어 재사
 series: "Object-Oriented Software Construction"
 seriesOrder: 4
 tags: [oop, meyer, reusability, components]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

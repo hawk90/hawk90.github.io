@@ -8,6 +8,8 @@ tags: [cpp, abseil, random, seed, entropy]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 기본은 OS entropy

@@ -5,7 +5,7 @@ description: "Slice·lane·data rate — BoW의 기본 빌딩 블록과 forwarde
 series: "BoW 개요"
 seriesOrder: 2
 tags: [bow, slice, architecture]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

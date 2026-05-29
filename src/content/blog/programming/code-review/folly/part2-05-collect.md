@@ -8,7 +8,7 @@ tags: [cpp, folly, future, collect, parallel]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `collect`는 *모두 성공*을, `collectAll`은 *모두 완료*(예외 포함)를, `collectAny`는 *하나만 완료*를 기다린다. 셋의 의미가 fan-in 패턴의 의도를 코드에 적는다.

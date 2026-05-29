@@ -5,7 +5,7 @@ description: "우연에 의존해 프로그래밍하지 마라. 왜 동작하는
 series: "The Pragmatic Programmer"
 seriesOrder: 61
 tags: [pragmatic-programmer, mindset, debugging]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

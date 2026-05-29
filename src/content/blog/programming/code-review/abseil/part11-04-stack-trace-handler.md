@@ -8,6 +8,8 @@ tags: [cpp, abseil, log, stack-trace, signal]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 왜 crash 시 stack trace인가

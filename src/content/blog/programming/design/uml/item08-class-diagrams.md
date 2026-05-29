@@ -5,7 +5,7 @@ description: "도메인의 명사들을 잡아 시스템 골격으로 — 가장
 tags: [UML, Class Diagram, Static Modeling, Domain]
 series: "UML 2.5.1"
 seriesOrder: 8
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

@@ -8,6 +8,8 @@ tags: [writing, grammar, agreement, syntax]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 주어가 *단수*이면 동사도 *단수*, 주어가 *복수*이면 동사도 *복수*. 단순한 원칙이지만 *까다로운 자리*가 많습니다.

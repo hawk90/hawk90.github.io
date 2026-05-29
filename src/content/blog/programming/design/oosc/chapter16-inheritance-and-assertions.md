@@ -5,7 +5,7 @@ description: "상속과 단언 — 리스코프 치환 원칙, 계약의 상속.
 series: "Object-Oriented Software Construction"
 seriesOrder: 16
 tags: [oop, meyer, inheritance, assertions, lsp, contracts]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

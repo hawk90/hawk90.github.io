@@ -5,7 +5,7 @@ description: "ECSS-Q-ST-80C — Supplier qualification, COTS evaluation, OSS ado
 tags: [ecss, procurement, cots, oss, heritage, supplier]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 6
-draft: false
+draft: true
 ---
 
 ECSS의 *고유 강조점* — *Procurement Assurance*. ESA mission이 *다국가 협력*과 *광범위 reuse*에 기반하므로 *외부 SW 인수*가 핵심. DO-178C의 *PDS (Previously Developed Software)*보다 *광범위*. *정확한 절차·문서는 ECSS-Q-ST-80C 원문 참조*.

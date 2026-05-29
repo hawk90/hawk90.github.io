@@ -5,7 +5,7 @@ description: "프로토타입은 학습을 위한 것 — 결과물이 아니라
 series: "The Pragmatic Programmer"
 seriesOrder: 21
 tags: [pragmatic-programmer, development]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

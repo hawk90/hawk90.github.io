@@ -8,6 +8,8 @@ tags: [cpp, abseil, code-review, google-style, best-practices]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## Google 코드 리뷰의 핵심 원칙

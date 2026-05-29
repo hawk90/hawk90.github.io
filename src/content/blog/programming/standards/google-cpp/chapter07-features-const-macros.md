@@ -5,7 +5,7 @@ description: "Preincrement / const / constexpr / Integer / 64-bit / Preprocessor
 tags: [Google, C++, Style-Guide, const, constexpr, Macro, nullptr]
 series: "Google C++ Style"
 seriesOrder: 7
-draft: false
+draft: true
 ---
 
 이 장은 상수, 수치 타입, preprocessor 같은 *작지만 자주 마주치는* 결정들을 모았다. 하나하나는 사소해 보여도 코드베이스 전체에 일관되게 적용되면 가독성이 크게 달라진다.

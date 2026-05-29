@@ -5,7 +5,7 @@ description: "알고리즘을 객체로 캡슐화 — 런타임에 교체 가능
 tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 21
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

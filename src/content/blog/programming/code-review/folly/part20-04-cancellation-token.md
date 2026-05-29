@@ -8,6 +8,8 @@ tags: [cpp, folly, cancellation, coro, future]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `CancellationToken`은 코루틴·Future 트리에 *협력적 취소*를 전파한다. C++26 senders/receivers의 stop_token과 등가 모델로 Meta가 일찍 도입했다.

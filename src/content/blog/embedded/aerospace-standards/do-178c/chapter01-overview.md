@@ -5,7 +5,7 @@ description: "RTCA DO-178C / EUROCAE ED-12C — 항공 SW 인증의 모표준. �
 tags: [do-178c, ed-12c, rtca, eurocae, airworthiness, faa, easa, certification]
 series: "DO-178C"
 seriesOrder: 1
-draft: false
+draft: true
 ---
 
 **DO-178C** (RTCA DO-178C, 유럽 동일 EUROCAE ED-12C)는 *항공 SW 인증의 모표준*이다. 모든 *민간 항공기*에 탑재되는 SW는 *FAA, EASA, 국내 KAA*가 *DO-178C 준수*를 요구한다. 2011년 발행된 *C 버전*이 현행. 그 전 B 버전(1992)이 *20년간 표준*이었다.

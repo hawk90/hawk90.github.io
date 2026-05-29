@@ -5,7 +5,7 @@ description: "메서드 호출을 줄줄이 잇지 마라. 데메테르 법칙: 
 series: "The Pragmatic Programmer"
 seriesOrder: 46
 tags: [pragmatic-programmer, oop]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

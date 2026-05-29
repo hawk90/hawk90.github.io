@@ -8,6 +8,8 @@ tags: [writing, grammar, adjective]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 형용사는 *명사를 수식*합니다. 영어 형용사는 한국어와 달리 *형태 변화가 적지만*, 위치·순서·비교급에서 규칙이 까다롭습니다.

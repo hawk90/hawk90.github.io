@@ -8,6 +8,8 @@ tags: [writing, grammar, mistakes, modifier]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 수식어는 *수식하는 단어 옆에* 놓아야 합니다. 멀어지면 의미가 *모호*해지거나 *잘못된 단어*를 수식하게 됩니다.

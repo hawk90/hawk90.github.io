@@ -8,7 +8,7 @@ tags: [writing, grammar, comma-splice, semicolon, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > Do not join independent clauses with a comma.

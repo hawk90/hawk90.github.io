@@ -8,6 +8,8 @@ tags: [cpp, abseil, time, testing, mocking]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## absl::Now()를 직접 부르면 안 된다

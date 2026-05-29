@@ -8,6 +8,8 @@ tags: [cpp, folly, try, future, error-handling]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `Try<T>`는 정상값, 예외, 빈 상태 셋 중 하나를 담는다. `Expected`가 도메인 오류 표현이라면 `Try`는 *예외 객체를 값으로 들고 다닐 때* 쓴다. Futures 내부의 결과 슬롯.

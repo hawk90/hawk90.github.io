@@ -8,7 +8,7 @@ tags: [writing, grammar, sentence, syntax]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
-draft: false
+draft: true
 ---
 
 문법의 다음 단위는 *문장*입니다. 단어가 모여 *완전한 생각*을 표현합니다. 이 챕터는 문장의 구성 요소, 네 가지 문장 종류, 그리고 자주 마주치는 *단편 문장*과 *연결 오류*를 다룹니다.

@@ -5,7 +5,7 @@ description: "함수 정의 정책(A8), 반환 타입 추론(A7-1-5), default ar
 tags: [autosar, cpp, function, lambda, noexcept, default-argument]
 series: "AUTOSAR C++14"
 seriesOrder: 4
-draft: false
+draft: true
 ---
 
 함수는 C++ 코드의 *최소 검증 단위*다. AUTOSAR는 함수 시그니처와 정의에서 *예측 가능성과 안전성*을 요구한다.

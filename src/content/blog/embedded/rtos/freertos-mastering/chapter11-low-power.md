@@ -5,7 +5,7 @@ description: "tickless idle·sleep modes — RTOS에서 전력 소비 줄이기.
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 11
 tags: [freertos, low-power, tickless, sleep]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

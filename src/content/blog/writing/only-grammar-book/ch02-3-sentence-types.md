@@ -8,6 +8,8 @@ tags: [writing, grammar, sentence, syntax]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 문장은 *독립절과 종속절의 결합*에 따라 *네 가지 종류*로 분류됩니다. 어떤 구조를 쓰느냐가 글의 *리듬과 명료성*을 결정합니다.

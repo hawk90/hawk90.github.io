@@ -8,6 +8,8 @@ tags: [writing, composition, emphasis, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
+draft: true
+
 ---
 
 > Place the emphatic words of a sentence at the end.

@@ -5,7 +5,7 @@ description: "snake_case 함수/변수, PascalCase 클래스, UPPER_CASE 상수.
 tags: [Python, PEP8, Naming, Conventions, snake_case]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 2
-draft: false
+draft: true
 ---
 
 > "Naming conventions make code more readable."

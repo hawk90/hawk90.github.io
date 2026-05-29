@@ -5,7 +5,7 @@ description: "전역 객체와 상수 — once 함수, 공유 객체, 상수 정
 series: "Object-Oriented Software Construction"
 seriesOrder: 18
 tags: [oop, meyer, global, constants, once-functions, shared-objects]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

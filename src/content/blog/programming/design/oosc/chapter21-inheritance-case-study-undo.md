@@ -5,7 +5,7 @@ description: "상속 케이스 스터디: Undo — Command 패턴의 OO 구현."
 series: "Object-Oriented Software Construction"
 seriesOrder: 21
 tags: [oop, meyer, undo, command-pattern, case-study]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

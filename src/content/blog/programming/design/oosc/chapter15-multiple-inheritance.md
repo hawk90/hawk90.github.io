@@ -5,7 +5,7 @@ description: "다중 상속 — 필요성, 다이아몬드 문제, 이름 충돌
 series: "Object-Oriented Software Construction"
 seriesOrder: 15
 tags: [oop, meyer, multiple-inheritance, diamond-problem, renaming]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

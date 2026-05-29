@@ -5,7 +5,7 @@ description: "다형성은 인터페이스로 표현하라. 추상 클래스보�
 series: "The Pragmatic Programmer"
 seriesOrder: 52
 tags: [pragmatic-programmer, oop]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

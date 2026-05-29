@@ -5,7 +5,7 @@ description: "단정으로 불가능을 막아라. '절대 일어날 리 없다'
 series: "The Pragmatic Programmer"
 seriesOrder: 39
 tags: [pragmatic-programmer, defensive-programming]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

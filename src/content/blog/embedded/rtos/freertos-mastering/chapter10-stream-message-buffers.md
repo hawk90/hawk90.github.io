@@ -5,7 +5,7 @@ description: "xStreamBufferSend·xMessageBufferSend — 단일 reader/writer용 
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 10
 tags: [freertos, stream-buffer, message-buffer, lock-free]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

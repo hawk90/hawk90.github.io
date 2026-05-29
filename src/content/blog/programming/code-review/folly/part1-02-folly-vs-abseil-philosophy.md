@@ -8,7 +8,7 @@ tags: [cpp, folly, abseil, philosophy, comparison]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: Abseil은 std의 *보완*을 목표로 하고 Folly는 std의 *능가*를 목표로 한다. 같은 utility 라이브러리지만 거의 모든 설계 결정이 반대로 간다.

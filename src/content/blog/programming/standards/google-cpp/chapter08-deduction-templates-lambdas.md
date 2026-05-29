@@ -5,7 +5,7 @@ description: "auto / CTAD / Lambdas / Template Metaprogramming / Concepts / Boos
 tags: [Google, C++, Style-Guide, auto, Lambda, Template, Concepts]
 series: "Google C++ Style"
 seriesOrder: 8
-draft: false
+draft: true
 ---
 
 이 장은 모던 C++의 강력하지만 양날의 검 같은 기능들을 다룬다. `auto`, lambda, 템플릿, concept이 모두 그렇다. 잘 쓰면 코드가 짧고 명확해지지만, 잘못 쓰면 타입이 보이지 않고 컴파일 에러가 거대해진다.

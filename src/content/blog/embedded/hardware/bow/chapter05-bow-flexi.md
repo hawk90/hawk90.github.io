@@ -5,7 +5,7 @@ description: "Organic substrate에서도 동작하는 BoW의 최저비용 프로
 series: "BoW 개요"
 seriesOrder: 5
 tags: [bow, flexi, organic, low-cost]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

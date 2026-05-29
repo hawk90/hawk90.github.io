@@ -8,6 +8,8 @@ tags: [cpp, abseil, random, bitgen, prng]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## std::의 random은 왜 불편한가

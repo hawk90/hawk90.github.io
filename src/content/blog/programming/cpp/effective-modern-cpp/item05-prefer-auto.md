@@ -5,6 +5,8 @@ description: "auto는 단순히 타이핑을 줄여주는 키워드가 아니다
 tags: [C++, auto, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 5
+draft: true
+
 ---
 
 ## 왜 이 항목이 중요한가?

@@ -5,7 +5,7 @@ description: "자신의 작업에 서명하라. 장인은 자신의 작품에 �
 series: "The Pragmatic Programmer"
 seriesOrder: 96
 tags: [pragmatic-programmer, craftsmanship, pride]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

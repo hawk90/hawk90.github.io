@@ -8,7 +8,7 @@ tags: [writing, grammar, strunk, white, intro]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 ## 이 챕터의 구성 — 원전 8 + 보강 3

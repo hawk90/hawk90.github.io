@@ -5,7 +5,7 @@ description: "JSF C++ — 함수 크기 한계, cyclomatic complexity, ISO C++03
 tags: [jsf-cpp, environment, language, iso-14882, complexity, function-size]
 series: "JSF C++"
 seriesOrder: 2
-draft: false
+draft: true
 ---
 
 JSF C++의 *환경 + 언어 준수* 영역. *함수 크기 한계*, *cyclomatic complexity 한계*, *ISO C++03 준수*가 핵심. 일부는 다른 항공·우주 표준에도 *공통 정신*. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.

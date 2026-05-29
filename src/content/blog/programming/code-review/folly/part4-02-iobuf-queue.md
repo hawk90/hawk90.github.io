@@ -8,7 +8,7 @@ tags: [cpp, folly, iobuf, queue, buffer]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `IOBufQueue`는 IOBuf chain의 *생산자/소비자 API*다. append/prepend/split-at-cursor를 효율적으로 제공해 streaming codec의 backbone이 된다.

@@ -8,6 +8,8 @@ tags: [writing, grammar, noun]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 명사는 *사람, 사물, 장소, 개념*의 이름입니다. 문장의 *주어*와 *목적어* 자리에 놓이며, 영어 문법의 출발점이 됩니다.

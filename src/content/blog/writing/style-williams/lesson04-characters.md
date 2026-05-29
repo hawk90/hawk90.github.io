@@ -8,6 +8,8 @@ tags: [writing, style, subject, character, williams]
 type: book-review
 bookTitle: "Style: Lessons in Clarity and Grace"
 bookAuthor: "Joseph M. Williams, Joseph Bizup"
+draft: true
+
 ---
 
 > **Style: Lessons in Clarity and Grace** Lesson 4 요약

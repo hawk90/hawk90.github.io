@@ -8,6 +8,8 @@ tags: [cpp, abseil, log, sink, customization]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## LogSink의 자리

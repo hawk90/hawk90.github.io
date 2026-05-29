@@ -5,7 +5,7 @@ description: "상속 입문 — 확장, 재정의, 다형성, 동적 바인딩."
 series: "Object-Oriented Software Construction"
 seriesOrder: 14
 tags: [oop, meyer, inheritance, polymorphism, dynamic-binding]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

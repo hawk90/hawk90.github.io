@@ -8,6 +8,8 @@ tags: [cpp, abseil, numeric, bits, popcount]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## C++20 `<bit>`의 polyfill

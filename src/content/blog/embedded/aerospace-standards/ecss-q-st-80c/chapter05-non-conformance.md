@@ -5,7 +5,7 @@ description: "ECSS-Q-ST-80C §5.6 — NCR 등록·분류·추적·종결. Root c
 tags: [ecss, non-conformance, ncr, rca, fishbone, fta, corrective-action]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 ECSS의 *Non-Conformance Control*은 *결함 발견 → 분석 → 수정 → 재발 방지*의 closed-loop. 단순 *bug tracking* 이상이다. *Root cause analysis*가 의무이고, *Corrective Action*이 *similar bug 재발 차단*까지. *정확한 절차·deliverable은 ECSS-Q-ST-80C 원문 참조*.

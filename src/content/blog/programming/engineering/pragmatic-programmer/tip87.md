@@ -5,7 +5,7 @@ description: "사용자가 필요할 때 전달하라. 완벽보다 시의적절
 series: "The Pragmatic Programmer"
 seriesOrder: 87
 tags: [pragmatic-programmer, delivery, agile]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

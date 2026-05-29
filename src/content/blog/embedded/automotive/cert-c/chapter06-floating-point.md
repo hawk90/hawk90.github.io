@@ -5,7 +5,7 @@ description: "Loop counter 금지(FLP30), 도메인 에러(FLP32), 변환 검증
 tags: [cert-c, floating-point, ieee-754, nan, denormal, rounding]
 series: "CERT C"
 seriesOrder: 6
-draft: false
+draft: true
 ---
 
 부동소수점은 *수학적 실수*가 아니라 *IEEE 754 비트 표현*이다. C 표준은 IEEE 754를 *권장*하지만 강제하지 않는다. 임베디드에서는 *float 하드웨어가 없거나*, *비표준 구현*인 경우도 있다.

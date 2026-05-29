@@ -5,7 +5,7 @@ description: "Google Test, pytest, Mock 라이브러리. C++과 Python 테스트
 tags: [TDD, Tools, GoogleTest, pytest]
 series: "Growing Object-Oriented Software"
 seriesOrder: 3
-draft: false
+draft: true
 ---
 
 TDD를 실천하려면 적절한 도구가 필요하다. 원서는 Java + JUnit + JMock 조합을 쓰지만, 같은 원칙은 C++과 Python에서도 그대로 통한다. 이 장에서는 두 언어의 테스트 프레임워크와 Mock 라이브러리를 살펴본다. 도구가 달라져도 변하지 않는 것은 두 가지다. **테스트가 첫 사용자**이고, **Mock이 협력 관계를 드러낸다**는 사실이다.

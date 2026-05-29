@@ -5,7 +5,7 @@ description: "3가지 verification 방법의 분류·적용·증거. HIL/SIL 환
 tags: [do-178c, verification, review, analysis, test, hil, sil, robustness]
 series: "DO-178C"
 seriesOrder: 8
-draft: false
+draft: true
 ---
 
 DO-178C는 *verification*을 *Review, Analysis, Test (RAT)*  3 종류로 정의한다. 각각 *어떤 obj에 효과적*인지 정해져 있다. 이 장은 *RAT의 본질, test level, HIL/SIL 환경, robustness testing*까지.

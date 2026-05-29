@@ -5,7 +5,7 @@ description: "35편의 UML 2.5.1 시리즈 정리. System은 Models를 포함하
 tags: [UML, Modeling, Summary, System]
 series: "UML 2.5.1"
 seriesOrder: 35
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

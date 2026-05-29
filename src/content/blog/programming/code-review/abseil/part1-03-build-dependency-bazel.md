@@ -8,6 +8,8 @@ tags: [cpp, abseil, build, bazel, cmake, vcpkg, conan]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: Abseil은 Bazel-first 라이브러리지만 CMake도 동급으로 지원한다. 패키지 매니저(vcpkg/Conan)는 LTS 스냅숏만 다루고, source build가 ABI 안전성의 기본 전제다.

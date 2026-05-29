@@ -5,7 +5,7 @@ description: "xTaskNotify·NotifyValue — 큐/세마포보다 가볍고 빠른 
 series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 9
 tags: [freertos, notification, lightweight-ipc]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

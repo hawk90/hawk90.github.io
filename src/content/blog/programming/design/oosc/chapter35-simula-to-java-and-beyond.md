@@ -5,7 +5,7 @@ description: "주요 OO 언어들 — Simula, Smalltalk, C++, Java, Eiffel 비�
 series: "Object-Oriented Software Construction"
 seriesOrder: 35
 tags: [oop, meyer, simula, smalltalk, cpp, java, eiffel, languages]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

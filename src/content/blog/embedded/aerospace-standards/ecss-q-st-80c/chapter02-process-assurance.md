@@ -5,7 +5,7 @@ description: "ECSS-Q-ST-80C — SPA Plan 작성, process metrics, periodic audit
 tags: [ecss, spa, process-assurance, audit, review, tailoring]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 2
-draft: false
+draft: true
 ---
 
 ECSS-Q-ST-80C의 *9개 핵심 활동* 중 가장 큰 비중을 차지하는 *SW Process Assurance (SPA)*. *개발 절차가 정해진 대로 수행되는지*를 *독립적으로 검증*한다. DO-178C의 SQA에 해당하지만 *ESA 특유의 process tailoring* 개념이 더해진다. *정확한 절차·deliverable은 ECSS-Q-ST-80C 원문 참조*.

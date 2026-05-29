@@ -8,6 +8,8 @@ tags: [writing, grammar, preposition]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 전치사는 *명사·대명사 앞*에서 *관계*를 표시합니다. 한국어 조사와 대응되지만 *일대일 번역*이 거의 불가능한 영역입니다.

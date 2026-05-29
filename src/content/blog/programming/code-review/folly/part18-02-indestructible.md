@@ -8,6 +8,8 @@ tags: [cpp, folly, indestructible, singleton, lifetime]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `Indestructible<T>`는 *생성은 하되 영원히 destroy하지 않는* wrapper다. Meyers singleton이 static deinitialization order fiasco를 일으키는 자리에서 destructor를 건너뛰어 안전을 산다.

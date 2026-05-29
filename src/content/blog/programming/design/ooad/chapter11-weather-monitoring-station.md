@@ -5,7 +5,7 @@ description: "케이스 스터디 — 기상 모니터링 스테이션 데이터
 series: "Object-Oriented Analysis and Design with Applications"
 seriesOrder: 11
 tags: [oop, booch, case-study, data-acquisition, weather]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Analysis and Design with Applications"
 bookAuthor: "Grady Booch"

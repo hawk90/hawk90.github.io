@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, tips]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 Part 1의 마지막 장입니다. 작은 가르침들의 모음 — 각각 한 챕터를 만들 만큼은 아니지만 중요한 것들을 다룹니다.

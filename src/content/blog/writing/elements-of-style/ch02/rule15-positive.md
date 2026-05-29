@@ -8,6 +8,8 @@ tags: [writing, composition, positive-form, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
+draft: true
+
 ---
 
 > Put statements in positive form.

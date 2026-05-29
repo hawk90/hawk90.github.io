@@ -5,7 +5,7 @@ description: "Test as documentation. AAA / Given-When-Then. Helper / Builder 패
 tags: [TDD, Readability, Builder]
 series: "Growing Object-Oriented Software"
 seriesOrder: 20
-draft: false
+draft: true
 ---
 
 > "Tests are executable documentation."

@@ -5,7 +5,7 @@ description: "System Requirements → HLR 파생, DOORS 활용, 7 attribute, der
 tags: [do-178c, requirements, hlr, doors, polarion, traceability, derived]
 series: "DO-178C"
 seriesOrder: 4
-draft: false
+draft: true
 ---
 
 DO-178C의 *Software Requirements Process*가 *Group A-2의 5 obj + Group A-3의 7 obj = 12 obj*를 차지한다. 전체 71 obj의 약 17%. HLR(High-Level Requirements)이 *모든 후속 개발의 starting point*. 이 장은 *HLR을 어떻게 쓰고 관리하고 검증하는가*를 본다.

@@ -5,7 +5,7 @@ description: "안 된다는 말 대신 무엇을 할 수 있는지 말한다. �
 series: "The Pragmatic Programmer"
 seriesOrder: 4
 tags: [pragmatic-programmer, communication, responsibility]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

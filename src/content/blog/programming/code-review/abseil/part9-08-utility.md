@@ -8,6 +8,8 @@ tags: [cpp, abseil, utility, apply, in-place]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## utility 헤더가 모은 작은 도구들

@@ -5,7 +5,7 @@ description: "TQL-1~5 결정, Tool Operational Requirements (TOR), Tool Qualific
 tags: [do-178c, do-330, tool-qualification, tql, tor, tqp, vendor]
 series: "DO-178C"
 seriesOrder: 11
-draft: false
+draft: true
 ---
 
 DO-178C가 *코드의 품질*을 보장한다면, **DO-330**은 *그 코드를 만든 도구의 품질*을 보장한다. 컴파일러가 *잘못된 코드*를 생성하면? 정적 분석기가 *위반을 놓치면*? 그 영향이 *직접 항공기에 도달*. 이 장은 *DO-330 전체*를 본다.

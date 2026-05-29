@@ -5,7 +5,7 @@ description: "테스트를 고려해 설계하라. 테스트 가능한 코드가
 series: "The Pragmatic Programmer"
 seriesOrder: 68
 tags: [pragmatic-programmer, testing, design]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

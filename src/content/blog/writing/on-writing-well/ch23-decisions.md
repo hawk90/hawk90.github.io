@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, decisions]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 글쓰기는 *끝없는 결정*입니다.

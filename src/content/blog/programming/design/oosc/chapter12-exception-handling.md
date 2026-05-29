@@ -5,7 +5,7 @@ description: "예외 처리 — 계약 위반 시 대응, 재시도와 조직적
 series: "Object-Oriented Software Construction"
 seriesOrder: 12
 tags: [oop, meyer, exceptions, error-handling, retry]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

@@ -8,7 +8,7 @@ tags: [cpp, folly, iobuf, cursor, stream]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `folly::io::Cursor`는 IOBuf chain 위를 *단일 byte stream처럼* 순회한다. chain 경계를 자동으로 넘기고 endian-safe primitive read/write를 제공한다.

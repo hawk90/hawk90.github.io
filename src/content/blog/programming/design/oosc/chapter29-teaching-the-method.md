@@ -5,7 +5,7 @@ description: "방법론 교육 — 객체지향을 어떻게 가르칠 것인가
 series: "Object-Oriented Software Construction"
 seriesOrder: 29
 tags: [oop, meyer, teaching, education, curriculum]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"

@@ -5,7 +5,7 @@ description: "C++17/20/23의 모든 주요 기능을 *임베디드 안전 critic
 tags: [autosar, cpp, cpp17, cpp20, cpp23, migration, modules, concepts, coroutines]
 series: "AUTOSAR C++14"
 seriesOrder: 14
-draft: false
+draft: true
 ---
 
 AUTOSAR C++14는 *C++14*에 고정됐다. 하지만 *후계 표준 MISRA C++:2023*은 C++17, 일부 C++20 채택. 이 장은 *C++17/20/23의 모든 주요 기능*을 *임베디드 안전 critical 관점*에서 평가하고 *마이그레이션 우선순위*를 본다.

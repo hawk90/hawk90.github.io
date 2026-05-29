@@ -8,6 +8,8 @@ tags: [cpp, abseil, memory, smart-pointer, allocator, base]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: `absl::memory`는 `std::make_unique`, `allocator_traits` 같은 표준 도구의 polyfill과 보완을 제공한다. 현대 C++(14+)에서는 대부분 std로 옮겨갔지만, allocator-aware 구현에 필요한 일부 helper는 여전히 가치가 있다.

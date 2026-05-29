@@ -8,7 +8,7 @@ tags: [writing, grammar, style, clarity]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
-draft: false
+draft: true
 ---
 
 문법이 *맞는 문장*과 *좋은 문장*은 다릅니다. 이 마지막 챕터는 문법을 넘어선 *문체와 명확성*의 원리를 정리합니다. Thurman의 책이 *실용 레퍼런스*로서 문법을 넘어 *작가의 결정*에 닿는 자리입니다.

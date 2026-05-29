@@ -8,7 +8,7 @@ tags: [freertos, rtos, embedded, portability]
 type: book-review
 bookTitle: "Mastering the FreeRTOS Real Time Kernel"
 bookAuthor: "Richard Barry"
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

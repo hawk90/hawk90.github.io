@@ -5,7 +5,7 @@ description: "const 정확성(DCL00), 식별자 가독성(DCL02), 자동 변수 
 tags: [cert-c, declaration, initialization, const, lifetime, prototype]
 series: "CERT C"
 seriesOrder: 3
-draft: false
+draft: true
 ---
 
 DCL 카테고리는 *선언과 초기화*의 안전성을 다룬다. MISRA R8/R9와 겹치지만 *보안 관점*에 초점이 있다. 즉 *잘못된 선언이 만들 수 있는 취약점*에 무게를 둔다.

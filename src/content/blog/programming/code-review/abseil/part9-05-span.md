@@ -8,6 +8,8 @@ tags: [cpp, abseil, types, span, range]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## span이 푸는 문제

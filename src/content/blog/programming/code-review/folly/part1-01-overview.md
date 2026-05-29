@@ -8,7 +8,7 @@ tags: [cpp, folly, meta, facebook, library, overview]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: Folly는 Meta의 fbcode monorepo에서 자라난 performance-first C++ 라이브러리다. std가 채우지 못한 자리를 *마이크로초 단위*로 최적화된 구현으로 메운다.

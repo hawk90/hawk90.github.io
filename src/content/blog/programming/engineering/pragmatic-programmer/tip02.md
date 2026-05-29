@@ -5,7 +5,7 @@ description: "자동 조종을 끄고 매 결정을 실시간으로 비판한다
 series: "The Pragmatic Programmer"
 seriesOrder: 2
 tags: [pragmatic-programmer, software-craftsmanship]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

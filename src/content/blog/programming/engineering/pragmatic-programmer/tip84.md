@@ -5,7 +5,7 @@ description: "일정에 넣어야 실행된다. 중요하지만 급하지 않은
 series: "The Pragmatic Programmer"
 seriesOrder: 84
 tags: [pragmatic-programmer, planning, habits]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

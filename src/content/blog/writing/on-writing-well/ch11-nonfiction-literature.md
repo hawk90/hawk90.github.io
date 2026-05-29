@@ -8,7 +8,7 @@ tags: [writing, nonfiction, zinsser, literature]
 type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
-draft: false
+draft: true
 ---
 
 Part 2의 시작은 도발적인 주장에서 출발합니다.

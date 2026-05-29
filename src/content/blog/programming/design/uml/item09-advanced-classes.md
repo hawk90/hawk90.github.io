@@ -5,7 +5,7 @@ description: "클래스가 전부가 아니다 — UML 분류자(classifier) 패
 tags: [UML, Class Diagram, Classifier, Active Class]
 series: "UML 2.5.1"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

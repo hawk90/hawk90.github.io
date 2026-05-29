@@ -8,7 +8,7 @@ tags: [cpp, folly, fibers, coroutine, async]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `folly::fibers`는 boost.context 기반 stackful coroutine으로 *동기적으로 보이는* 코드를 비동기 실행한다. C++20 coroutine보다 코드 변환이 가볍지만 stack 메모리를 쓴다.

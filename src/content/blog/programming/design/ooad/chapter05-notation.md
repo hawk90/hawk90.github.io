@@ -5,7 +5,7 @@ description: "표기법 — UML 클래스, 시퀀스, 상태 다이어그램."
 series: "Object-Oriented Analysis and Design with Applications"
 seriesOrder: 5
 tags: [oop, booch, uml, notation, diagrams]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Analysis and Design with Applications"
 bookAuthor: "Grady Booch"

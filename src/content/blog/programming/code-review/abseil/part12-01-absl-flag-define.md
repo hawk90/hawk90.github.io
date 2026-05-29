@@ -8,6 +8,8 @@ tags: [cpp, abseil, flags, command-line, definition]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 매크로 한 줄로 flag 정의

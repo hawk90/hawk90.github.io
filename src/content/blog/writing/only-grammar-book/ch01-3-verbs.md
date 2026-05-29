@@ -8,6 +8,8 @@ tags: [writing, grammar, verb, tense]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 동사는 *행위, 상태, 발생*을 표현합니다. 영어 동사의 핵심은 *시제(tense)·상(aspect)·법(mood)·태(voice)*의 결합으로 만들어지는 체계적 형태 변화입니다.

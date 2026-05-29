@@ -5,7 +5,7 @@ description: "MSA·모놀리스·라이브러리 아키텍처를 한 장에. 인
 tags: [UML, Component Diagram, Architecture, Microservices]
 series: "UML 2.5.1"
 seriesOrder: 29
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

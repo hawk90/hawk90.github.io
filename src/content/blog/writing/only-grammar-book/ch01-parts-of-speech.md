@@ -8,7 +8,7 @@ tags: [writing, grammar, reference, thurman]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
-draft: false
+draft: true
 ---
 
 Susan Thurman의 *The Only Grammar Book You'll Ever Need*는 영어 문법의 *실용 레퍼런스*입니다. 두꺼운 학술 문법서가 아니라, 글을 쓰면서 자주 마주치는 결정의 *근거*를 짧게 답해 주는 책입니다. 첫 챕터는 모든 문법의 출발점인 *품사(parts of speech)*를 정리합니다.

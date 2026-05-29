@@ -8,6 +8,8 @@ tags: [cpp, abseil, status, macros, error-handling]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: `RETURN_IF_ERROR`와 `ASSIGN_OR_RETURN`은 Status/StatusOr의 장황한 에러 전파를 한 줄로 줄인다. Google 사내에서는 사실상 표준 패턴이고, 매크로 expansion에 몇 가지 미묘한 트릭이 들어 있다.

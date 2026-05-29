@@ -5,7 +5,7 @@ description: "품질을 요구사항의 일부로 만들어라 — 사용자와 
 series: "The Pragmatic Programmer"
 seriesOrder: 8
 tags: [pragmatic-programmer, quality]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

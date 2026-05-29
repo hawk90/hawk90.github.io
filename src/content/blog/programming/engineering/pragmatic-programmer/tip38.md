@@ -5,7 +5,7 @@ description: "일찍 죽어라. 잘못된 상태로 계속 가지 마라. 즉시
 series: "The Pragmatic Programmer"
 seriesOrder: 38
 tags: [pragmatic-programmer, defensive-programming]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

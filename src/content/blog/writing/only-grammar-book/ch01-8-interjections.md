@@ -8,6 +8,8 @@ tags: [writing, grammar, interjection]
 type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
+draft: true
+
 ---
 
 > 감탄사는 *감정의 즉각적 표출*입니다. 문법적으로 *문장의 다른 요소와 연결되지 않는* 독립적 단어이며, 학술 글에서는 거의 등장하지 않습니다.

@@ -5,7 +5,7 @@ description: "static_cast 명시(A5-2-2), C-style cast 금지(A5-2-3), narrowing
 tags: [autosar, cpp, cast, narrowing, sizeof, division]
 series: "AUTOSAR C++14"
 seriesOrder: 3
-draft: false
+draft: true
 ---
 
 C++의 표현식은 C에 *연산자 오버로딩, 참조, lambda*가 추가되어 *복잡도가 비약*한다. 이 장은 변환·캐스트·산술의 안전성을 본다.

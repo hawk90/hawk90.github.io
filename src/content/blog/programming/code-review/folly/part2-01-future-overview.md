@@ -8,7 +8,7 @@ tags: [cpp, folly, future, async, overview]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `std::future`는 값을 가져가는 통로에 그친다. `folly::Future`는 continuation, executor binding, 예외 전파를 모두 다루는 조립 가능한 async primitive다.

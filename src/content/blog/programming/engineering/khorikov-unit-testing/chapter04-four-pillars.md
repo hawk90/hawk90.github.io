@@ -5,6 +5,8 @@ description: "회귀 보호, 리팩토링 내성, 빠른 피드백, 유지보수
 tags: [TDD, Four Pillars]
 series: "Khorikov Unit Testing"
 seriesOrder: 4
+draft: true
+
 ---
 
 좋은 단위 테스트를 판단하는 객관적 기준이 있을까? Khorikov는 4가지 기둥(pillar)을 제시한다. 셋은 서로를 침범하는 트레이드오프 관계이고, 나머지 하나는 예외다.

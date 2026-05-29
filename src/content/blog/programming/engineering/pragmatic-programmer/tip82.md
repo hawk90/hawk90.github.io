@@ -5,7 +5,7 @@ description: "애자일은 명사가 아니다. 애자일은 하는 방식이다
 series: "The Pragmatic Programmer"
 seriesOrder: 82
 tags: [pragmatic-programmer, agile, process]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

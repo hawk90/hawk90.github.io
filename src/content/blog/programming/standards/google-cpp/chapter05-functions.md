@@ -5,7 +5,7 @@ description: "Inputs and Outputs / Short Functions / Overloading / Default Argum
 tags: [Google, C++, Style-Guide, Function]
 series: "Google C++ Style"
 seriesOrder: 5
-draft: false
+draft: true
 ---
 
 함수는 코드의 가장 작은 추상화 단위다. 잘 만든 함수는 이름만으로도 무엇을 하는지 알리고, 호출자가 인자와 반환값만 보고도 안전하게 쓸 수 있게 한다. 이 장의 규칙들은 그런 함수를 만드는 다섯 가지 원칙이다.

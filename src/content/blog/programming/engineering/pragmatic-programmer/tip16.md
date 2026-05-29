@@ -5,7 +5,7 @@ description: "재사용을 쉽게 하라 — 재사용이 어려우면 사람들
 series: "The Pragmatic Programmer"
 seriesOrder: 16
 tags: [pragmatic-programmer, design]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

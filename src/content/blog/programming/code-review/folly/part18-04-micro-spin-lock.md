@@ -8,6 +8,8 @@ tags: [cpp, folly, spinlock, microspinlock]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `MicroSpinLock`은 1-byte spin lock이다. 절대 sleep 하지 않고 CPU를 점유하며 대기한다. critical section이 *수십 nanosecond* 수준일 때 가장 빠르다.

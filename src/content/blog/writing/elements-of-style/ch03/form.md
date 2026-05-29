@@ -8,6 +8,8 @@ tags: [writing, form, citation, style, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
+draft: true
+
 ---
 
 이 챕터는 짧습니다. 규칙은 11개 항목이지만 하나하나가 작은 결정입니다. 글의 형식 관습을 정리합니다.

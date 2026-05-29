@@ -8,7 +8,7 @@ tags: [writing, grammar, dash, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
-draft: false
+draft: true
 ---
 
 > A dash is a mark of separation stronger than a comma, less formal than a colon, and more relaxed than parentheses.

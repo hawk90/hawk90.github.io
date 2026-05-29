@@ -8,6 +8,8 @@ tags: [cpp, abseil, random, distribution, statistics]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 분포 API의 형태

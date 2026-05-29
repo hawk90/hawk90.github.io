@@ -8,6 +8,8 @@ tags: [cpp, abseil, types, optional, std-compatible]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 짧은 역사

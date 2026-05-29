@@ -5,7 +5,7 @@ description: "깨진 창문과 살지 마라 — 작은 부패가 큰 부패를 
 series: "The Pragmatic Programmer"
 seriesOrder: 5
 tags: [pragmatic-programmer, code-quality]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

@@ -5,7 +5,7 @@ description: "Memory-coherent extension — D2D 위에 CXL·OMI를 얹어 메모
 series: "BoW 개요"
 seriesOrder: 4
 tags: [bow, memory, coherence]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

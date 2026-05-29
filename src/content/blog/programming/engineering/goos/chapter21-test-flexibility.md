@@ -5,7 +5,7 @@ description: "유연한 테스트 — over-specified mocks 회피. Custom matche
 tags: [TDD, Flexibility, Matchers]
 series: "Growing Object-Oriented Software"
 seriesOrder: 21
-draft: false
+draft: true
 ---
 
 ## 테스트 유연성의 중요성

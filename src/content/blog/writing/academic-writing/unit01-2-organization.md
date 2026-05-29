@@ -8,6 +8,8 @@ tags: [writing, academic, organization, structure]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 조직(organization)은 정보가 어떤 순서로 흐르는가의 문제입니다. 학술 영어 산문에서는 두 큰 패턴이 반복됩니다. General-Specific(G-S)과 Specific-General(S-G)입니다. 이 글은 두 패턴의 개념과 변형을 정리합니다.

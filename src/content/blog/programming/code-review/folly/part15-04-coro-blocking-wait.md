@@ -8,6 +8,8 @@ tags: [cpp, folly, coro, blockingwait, collect]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `blockingWait`는 코루틴 세계와 동기 세계의 *유일한 합법적 경계*다. `collectAll`/`collectAllRange`는 여러 Task를 fan-out + join 한다. 둘을 잘못 섞으면 deadlock이 정해진 일.

@@ -5,6 +5,8 @@ description: "프록시 타입은 auto와 만나면 함정이 된다. vector<boo
 tags: [C++, auto, Proxy Types]
 series: "Effective Modern C++"
 seriesOrder: 6
+draft: true
+
 ---
 
 ## 왜 이 항목이 중요한가?

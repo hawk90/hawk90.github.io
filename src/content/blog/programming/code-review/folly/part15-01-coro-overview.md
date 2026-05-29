@@ -8,6 +8,8 @@ tags: [cpp, folly, coro, coroutines, async]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: C++20 코루틴은 언어 키워드만 표준이다. Task, awaiter, executor 통합, cancellation 같은 *실행 모델*은 라이브러리가 채워야 한다. `folly::coro`는 production code에서 그 빈자리를 가장 빨리 메운 구현이다.

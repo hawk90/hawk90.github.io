@@ -8,6 +8,8 @@ tags: [cpp, abseil, random, mock, testing]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## random 테스트의 두 가지 함정

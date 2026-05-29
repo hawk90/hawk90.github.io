@@ -5,7 +5,7 @@ description: "Goals of the Style Guide, C++ Version 정책, Google-Specific Magi
 tags: [Google, C++, Style-Guide, Background, Version, cpplint]
 series: "Google C++ Style"
 seriesOrder: 1
-draft: false
+draft: true
 ---
 
 가이드 전체를 이해하려면 먼저 메타가 필요하다. 이 글은 *Background*, *C++ Version*, *Google-Specific Magic* 세 절을 묶었다.

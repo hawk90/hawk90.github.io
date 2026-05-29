@@ -8,6 +8,8 @@ tags: [cpp, folly, compression, zstd, lz4, snappy]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `folly::io::Codec`은 IOBuf를 입력/출력으로 받는 통합 compression 인터페이스다. zstd/lz4/snappy/zlib을 algorithm enum 한 번 바꿔 교체할 수 있다.

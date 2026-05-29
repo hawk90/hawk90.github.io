@@ -5,7 +5,7 @@ description: "테스트가 어렵다 = 디자인이 어렵다. 신호 / 해석 /
 tags: [TDD, Test Smells]
 series: "Growing Object-Oriented Software"
 seriesOrder: 19
-draft: false
+draft: true
 ---
 
 > "The tests are telling us something about our design."

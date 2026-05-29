@@ -5,7 +5,7 @@ description: "계약으로 설계하라. 사전 조건·사후 조건·불변식
 series: "The Pragmatic Programmer"
 seriesOrder: 37
 tags: [pragmatic-programmer, design]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

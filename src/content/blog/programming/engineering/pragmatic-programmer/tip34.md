@@ -5,7 +5,7 @@ description: "가정하지 마라. 증명하라. 실제 데이터·실제 입력
 series: "The Pragmatic Programmer"
 seriesOrder: 34
 tags: [pragmatic-programmer, debugging]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

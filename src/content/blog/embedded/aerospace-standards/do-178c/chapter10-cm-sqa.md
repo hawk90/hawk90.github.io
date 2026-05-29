@@ -5,7 +5,7 @@ description: "SCM baseline·CCB·PR workflow. SQA audit·SAS 작성. 도구 (Cle
 tags: [do-178c, scm, configuration-management, sqa, baseline, ccb, sas, clearcase]
 series: "DO-178C"
 seriesOrder: 10
-draft: false
+draft: true
 ---
 
 코드와 verification이 *완벽*해도 *형상 관리와 품질 보증*이 부실하면 인증 실패. *SCM (Software Configuration Management)*과 *SQA (Software Quality Assurance)*가 *모든 산출물의 baseline + change control + audit*을 보장한다. 이 장은 *SCM·SQA의 항공 적용 + SAS 작성*까지.

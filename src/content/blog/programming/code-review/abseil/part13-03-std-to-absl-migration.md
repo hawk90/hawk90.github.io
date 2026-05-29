@@ -8,6 +8,8 @@ tags: [cpp, abseil, migration, std, refactoring]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 한 번에 다 바꾸지 않는다

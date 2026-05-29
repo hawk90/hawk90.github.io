@@ -5,7 +5,7 @@ description: "JSF C++ 일반 template 정책 — 단순 generic, metaprogramming
 tags: [jsf-cpp, templates, generic, code-bloat, metaprogramming, cpp03]
 series: "JSF C++"
 seriesOrder: 9
-draft: false
+draft: true
 ---
 
 JSF C++의 *template 정책* 일반 — *단순 generic 허용*, *metaprogramming 회피*, *code bloat 신중*. C++03 시기의 *template 한계*도 함께. *정확한 AV Rule 번호와 wording은 원문 PDF 참조*.

@@ -5,7 +5,7 @@ description: "지식을 평문으로 유지하라 — 바이너리 형식은 미
 series: "The Pragmatic Programmer"
 seriesOrder: 25
 tags: [pragmatic-programmer, tools]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

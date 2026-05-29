@@ -8,6 +8,8 @@ tags: [writing, academic, comparison, highlighting]
 type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
+draft: true
+
 ---
 
 이 글은 Data Commentary의 두 가지 중심 작업을 다룹니다. 데이터 비교 표현과 Highlighting Statement 작성입니다. 둘 다 판단력이 핵심입니다.

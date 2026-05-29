@@ -8,6 +8,8 @@ tags: [cpp, abseil, crc32c, hardware, checksum]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## 한 줄 요약

@@ -5,7 +5,7 @@ description: "지역적으로 행동하라. 변수의 수명을 짧게 유지하
 series: "The Pragmatic Programmer"
 seriesOrder: 41
 tags: [pragmatic-programmer, design]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

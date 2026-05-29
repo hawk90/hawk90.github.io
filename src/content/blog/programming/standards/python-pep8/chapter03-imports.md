@@ -5,7 +5,7 @@ description: "Import 순서와 그룹핑. 절대 경로 선호, 와일드카드 
 tags: [Python, PEP8, Imports, Modules, isort]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 3
-draft: false
+draft: true
 ---
 
 > "Imports should usually be on separate lines."

@@ -5,7 +5,7 @@ description: "Gerard Holzmann이 정리한 *단 10개 규칙*으로 NASA JPL이 
 tags: [jpl, nasa, c, power-of-ten, holzmann, curiosity, perseverance, safety]
 series: "NASA JPL Power of 10"
 seriesOrder: 1
-draft: false
+draft: true
 ---
 
 2006년 NASA JPL(Jet Propulsion Laboratory)의 Gerard Holzmann이 *단 10개 규칙*으로 *안전 critical 코드*를 정리했다. 화성 로버(Spirit, Opportunity, Curiosity, Perseverance), Cassini-Huygens, Voyager 2의 *update* — JPL의 모든 mission-critical 펌웨어에 적용된다.

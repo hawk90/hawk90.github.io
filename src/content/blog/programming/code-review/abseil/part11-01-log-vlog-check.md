@@ -8,6 +8,8 @@ tags: [cpp, abseil, log, check, vlog]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## absl::log의 위치

@@ -5,6 +5,8 @@ description: "IDE 호버부터 컴파일 에러 트릭, Boost.TypeIndex, godbolt
 tags: [C++, Type Deduction, Debugging]
 series: "Effective Modern C++"
 seriesOrder: 4
+draft: true
+
 ---
 
 ## 왜 이 항목이 중요한가?

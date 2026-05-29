@@ -8,6 +8,8 @@ tags: [writing, composition, concrete-language, strunk, white]
 type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
+draft: true
+
 ---
 
 > Use definite, specific, concrete language.

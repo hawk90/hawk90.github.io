@@ -5,7 +5,7 @@ description: "이름을 잘 짓고, 필요하면 바꿔라. 이름은 의도를 
 series: "The Pragmatic Programmer"
 seriesOrder: 73
 tags: [pragmatic-programmer, naming, code-quality]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

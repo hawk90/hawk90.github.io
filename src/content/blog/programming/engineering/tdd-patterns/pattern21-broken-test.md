@@ -8,6 +8,8 @@ tags: [tdd, beck, broken-test, context-switching]
 type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
+draft: true
+
 ---
 
 ## 한 줄 요약

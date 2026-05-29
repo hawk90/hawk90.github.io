@@ -5,7 +5,7 @@ description: "Bunch of Wires — OCP ODSA가 만든 royalty-free D2D 표준, org
 series: "BoW 개요"
 seriesOrder: 1
 tags: [bow, ocp, chiplet, d2d]
-draft: false
+draft: true
 ---
 
 ## 한 줄 요약

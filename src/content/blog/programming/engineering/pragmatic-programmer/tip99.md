@@ -5,7 +5,7 @@ description: "당신의 인생이다. 기술, 프로젝트, 일하는 방식을 
 series: "The Pragmatic Programmer"
 seriesOrder: 99
 tags: [pragmatic-programmer, career, autonomy]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

@@ -8,6 +8,8 @@ tags: [cpp, abseil, status, payload, debugging, grpc]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 > **한 줄 요약**: `absl::Status`의 payload는 메시지 외에 구조화된 데이터를 첨부하는 메커니즘이다. URL-based key로 namespace를 분리해 라이브러리 간 충돌을 막고, gRPC error_details와의 연동을 위해 설계되었다.

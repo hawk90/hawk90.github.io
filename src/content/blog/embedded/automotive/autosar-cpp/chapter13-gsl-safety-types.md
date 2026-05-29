@@ -5,7 +5,7 @@ description: "Microsoft GSL / C++ Core Guidelines의 type wrapper들 — *컴파
 tags: [autosar, cpp, gsl, core-guidelines, span, not-null, owner, narrow-cast]
 series: "AUTOSAR C++14"
 seriesOrder: 13
-draft: false
+draft: true
 ---
 
 C++의 *타입 시스템*은 *값의 의미와 제약*을 표현할 수 있다. 단순 포인터·정수보다 *의미를 가진 wrapper*를 쓰면 *컴파일러와 분석기*가 더 많이 잡아준다. **GSL(Guidelines Support Library)** 과 **C++ Core Guidelines**가 정의하는 패턴들을 본다.

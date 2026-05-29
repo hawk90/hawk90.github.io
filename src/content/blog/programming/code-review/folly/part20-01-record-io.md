@@ -8,6 +8,8 @@ tags: [cpp, folly, recordio, log, file-format]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `RecordIO`는 가변 길이 record를 append-only로 쓰고 mid-file부터도 안전하게 읽을 수 있는 파일 포맷이다. 각 record에 magic, length, checksum이 붙어 truncation/corruption을 견딘다.

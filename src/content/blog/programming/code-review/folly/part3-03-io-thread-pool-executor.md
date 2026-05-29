@@ -8,7 +8,7 @@ tags: [cpp, folly, executor, io, libevent]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 ---
 
 > **한 줄 요약**: `IOThreadPoolExecutor`는 worker thread마다 `EventBase`를 두어 *file descriptor 이벤트와 timer*를 처리한다. 동일 pool 안의 다른 thread에 dispatch도 지원한다.

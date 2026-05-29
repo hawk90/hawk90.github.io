@@ -5,7 +5,7 @@ description: "코드와 함께 일정도 반복하라 — 한 번에 못 박힌 
 series: "The Pragmatic Programmer"
 seriesOrder: 24
 tags: [pragmatic-programmer, estimation]
-draft: false
+draft: true
 ---
 
 ## 이 팁의 메시지

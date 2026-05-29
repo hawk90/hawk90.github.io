@@ -8,6 +8,8 @@ tags: [cpp, folly, demangle, debug, typeid]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
+draft: true
+
 ---
 
 > **한 줄 요약**: `typeid(T).name()`이 토해내는 mangled name (`_ZN3foo3BarE`)을 사람 읽기 쉬운 `foo::Bar`로 바꾼다. crash stacktrace, log, debug 출력의 *읽기 가능성*을 결정한다.

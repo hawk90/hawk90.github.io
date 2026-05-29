@@ -8,6 +8,8 @@ tags: [cpp, abseil, types, any, type-erasure]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
+draft: true
+
 ---
 
 ## std::any의 polyfill

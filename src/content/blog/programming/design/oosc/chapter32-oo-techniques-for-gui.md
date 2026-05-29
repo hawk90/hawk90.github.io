@@ -5,7 +5,7 @@ description: "GUI를 위한 OO 기법 — 이벤트 루프, MVC의 대안."
 series: "Object-Oriented Software Construction"
 seriesOrder: 32
 tags: [oop, meyer, gui, graphics, event-loop, interactive]
-draft: false
+draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"
