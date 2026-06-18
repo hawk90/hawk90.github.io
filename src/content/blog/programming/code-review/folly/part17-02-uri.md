@@ -1,6 +1,6 @@
 ---
-title: "Part 17-02: folly::Uri — URL 파서"
-date: 2026-05-27T15:00:00
+title: "folly::Uri — URL 파서"
+date: 2026-06-08T09:01:00
 description: "Uri의 RFC 3986 파싱, query string 추출, scheme/host/path 분해 — 표준에 없는 빈자리."
 series: "Folly Code Review"
 seriesOrder: 73

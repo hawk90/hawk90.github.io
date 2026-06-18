@@ -1,6 +1,6 @@
 ---
-title: "2-06: ARM Cortex-A Context Switch — Mode 전환, SVC, Banked Registers"
-date: 2026-05-07T16:00:00
+title: "ARM Cortex-A Context Switch — Mode 전환·SVC·Banked Registers"
+date: 2026-05-05T09:16:00
 description: "Cortex-A의 7 모드와 모드별 banked register. 모드 간 SP·LR 별도 — Cortex-M보다 복잡."
 series: "Practical RTOS Internals"
 seriesOrder: 16

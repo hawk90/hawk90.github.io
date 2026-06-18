@@ -1,6 +1,6 @@
 ---
-title: "9-08: ABA 문제 회피"
-date: 2026-05-16T12:00:00
+title: "ABA 문제 회피 — Tagged Pointer·Hazard·Generation Counter"
+date: 2026-04-18T09:07:00
 description: "ABA 시나리오, tagged pointer (64-bit + tag), version counter, hazard pointer 활용, 실제 사례를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 108

@@ -1,6 +1,6 @@
 ---
-title: "Ch 20: Yocto로의 migration — 언제·어떻게 옮길까"
-date: 2026-05-19T20:00:00
+title: "Buildroot → Yocto 마이그레이션 — 언제·어떻게 옮길까"
+date: 2026-05-19T09:20:00
 description: "Buildroot가 한계에 도달하는 신호와 Yocto/OE로 점진 이전하는 패턴, meta-buildroot 같은 hybrid 옵션."
 series: "Buildroot Practical"
 seriesOrder: 20

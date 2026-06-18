@@ -1,6 +1,6 @@
 ---
-title: "4-12: 워치독 (IWDG/WWDG)"
-date: 2026-05-13T22:00:00
+title: "IWDG·WWDG 워치독 구현 — Independent vs Window 비교"
+date: 2026-04-13T09:46:00
 description: "Independent vs Window·refresh 전략·debug 모드 freeze."
 series: "Modern Embedded Recipes"
 seriesOrder: 46

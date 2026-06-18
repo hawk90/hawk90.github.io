@@ -1,6 +1,6 @@
 ---
-title: "3-06: 스타트업 코드 분석"
-date: 2026-05-13T04:00:00
+title: "임베디드 스타트업 코드 분석 — Reset_Handler·Vector Table·SystemInit"
+date: 2026-04-12T09:28:00
 description: "Reset_Handler·vector table·__libc_init_array·main 진입."
 series: "Modern Embedded Recipes"
 seriesOrder: 28

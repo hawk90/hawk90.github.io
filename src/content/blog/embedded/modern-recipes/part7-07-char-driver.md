@@ -1,6 +1,6 @@
 ---
-title: "7-07: 캐릭터 드라이버 작성"
-date: 2026-05-15T09:00:00
+title: "캐릭터 드라이버 작성 — file_operations·cdev·register_chrdev"
+date: 2026-04-16T09:06:00
 description: "file_operations, cdev, minor 번호, copy_to/from_user, blocking I/O, misc device 단축 경로까지 character driver의 표준 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 81

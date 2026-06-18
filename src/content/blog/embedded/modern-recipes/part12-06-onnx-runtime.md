@@ -1,6 +1,6 @@
 ---
-title: "12-06: ONNX Runtime — Execution Provider와 Cross-Platform 배포"
-date: 2026-05-17T22:00:00
+title: "ONNX Runtime 분석 — Execution Provider와 Cross-Platform 배포"
+date: 2026-04-21T09:05:00
 description: "ONNX format·ONNX Runtime의 Execution Provider (CUDA·TensorRT·DML·CoreML)·embedded build·cross-platform inference."
 series: "Modern Embedded Recipes"
 seriesOrder: 142

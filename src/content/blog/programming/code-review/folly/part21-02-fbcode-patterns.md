@@ -1,6 +1,6 @@
 ---
-title: "Part 21-02: fbcode 패턴 모음 — folly 사용의 실전"
-date: 2026-05-28T12:00:00
+title: "fbcode 패턴 모음 — folly 사용의 실전"
+date: 2026-06-08T09:16:00
 description: "Meta fbcode 코드 리뷰에서 반복적으로 등장하는 folly 사용 패턴 — overview + 시리즈 마무리."
 series: "Folly Code Review"
 seriesOrder: 88

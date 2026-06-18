@@ -1,6 +1,6 @@
 ---
-title: "4-09: I2C 드라이버"
-date: 2026-05-13T19:00:00
+title: "I2C 드라이버 구현 — Master·7-bit/10-bit·Clock Stretching 처리"
+date: 2026-04-13T09:43:00
 description: "Master·repeated start·NACK 처리·timeout."
 series: "Modern Embedded Recipes"
 seriesOrder: 43

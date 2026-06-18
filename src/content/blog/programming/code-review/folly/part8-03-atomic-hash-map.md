@@ -1,6 +1,6 @@
 ---
-title: "Part 8-03: AtomicHashMap (lock-free read)"
-date: 2026-05-24T14:00:00
+title: "folly::AtomicHashMap — lock-free read 분석"
+date: 2026-06-06T09:01:00
 description: "AtomicHashMap — lock-free read, append-only insert, 큰 read-heavy 워크로드용 hash map."
 series: "Folly Code Review"
 seriesOrder: 37

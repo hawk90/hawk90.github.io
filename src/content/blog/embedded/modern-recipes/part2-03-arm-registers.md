@@ -1,6 +1,6 @@
 ---
-title: "2-03: ARM 레지스터 구조"
-date: 2026-05-12T15:00:00
+title: "ARM 레지스터 구조 분석 — R0~R15·CPSR·SPSR·Banked Registers"
+date: 2026-04-11T09:15:00
 description: "R0-R15·xPSR·CONTROL·PRIMASK·BASEPRI — register set 전체 지도."
 series: "Modern Embedded Recipes"
 seriesOrder: 15

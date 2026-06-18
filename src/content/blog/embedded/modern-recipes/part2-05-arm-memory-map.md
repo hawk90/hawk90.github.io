@@ -1,6 +1,6 @@
 ---
-title: "2-05: ARM 메모리 맵"
-date: 2026-05-12T17:00:00
+title: "ARM 메모리 맵 분석 — Normal·Device·Strongly-Ordered Region"
+date: 2026-04-11T09:17:00
 description: "Code·SRAM·Peripheral·System 영역 — bitband·MPU 활용."
 series: "Modern Embedded Recipes"
 seriesOrder: 17

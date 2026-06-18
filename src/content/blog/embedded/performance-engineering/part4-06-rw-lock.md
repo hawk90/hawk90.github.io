@@ -1,6 +1,6 @@
 ---
-title: "4-06: Reader-Writer Lock — Reader/Writer Priority·RCU·Seqlock"
-date: 2026-05-08T15:00:00
+title: "Reader-Writer Lock 성능 — Reader/Writer Priority·RCU·Seqlock"
+date: 2026-04-26T09:05:00
 description: "RW-lock의 종류와 reader/writer priority, RCU 비교, seqlock의 read-mostly 대안."
 series: "Embedded Performance Engineering"
 seriesOrder: 35

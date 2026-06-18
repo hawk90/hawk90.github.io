@@ -1,6 +1,6 @@
 ---
-title: "11-05: PS-PL 통신 (Zynq) — GP·HP·ACP 인터페이스 선택"
-date: 2026-05-17T07:00:00
+title: "Zynq PS-PL 통신 — GP·HP·ACP 인터페이스 선택"
+date: 2026-04-20T09:04:00
 description: "Zynq의 GP·HP·ACP·M_AXI·S_AXI 인터페이스를 latency·throughput·cache coherence 관점에서 비교합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 127

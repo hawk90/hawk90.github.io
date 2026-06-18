@@ -1,6 +1,6 @@
 ---
-title: "Part 9-06: absl::any"
-date: 2026-05-25T07:00:00
+title: "absl::any 분석"
+date: 2026-06-12T09:05:00
 description: "absl::any — 임의 타입을 담는 type-erased 컨테이너. variant와 언제 어떻게 다른가."
 series: "Abseil Code Review"
 seriesOrder: 53

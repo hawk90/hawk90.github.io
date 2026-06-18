@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: CMake와 CI 통합"
-date: 2026-05-17T05:00:00
+title: "Sanitizer를 CMake와 CI에 통합 — Multi-config 빌드 전략"
+date: 2026-05-29T09:05:00
 description: "Sanitizer 빌드를 프로젝트에 자연스럽게 통합 — CMake 옵션, GitHub Actions, GitLab CI 실전 예시."
 tags: [Sanitizer, CMake, CI, GitHub Actions, GitLab, Debugging]
 series: "Sanitizers"

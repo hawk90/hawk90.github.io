@@ -1,6 +1,6 @@
 ---
-title: "5-08: 환경 센서 (온도·습도·기압)"
-date: 2026-05-14T08:00:00
+title: "환경 센서 활용 — BME280 온습압·SHT3x·BMP180 비교"
+date: 2026-04-14T09:56:00
 description: "BME280·SHT3x — I2C·SPI 센서 driver 패턴."
 series: "Modern Embedded Recipes"
 seriesOrder: 56

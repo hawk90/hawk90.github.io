@@ -1,6 +1,6 @@
 ---
-title: "Part 8-01: SmallVector (inline storage)"
-date: 2026-05-24T12:00:00
+title: "folly::SmallVector — inline storage 분석"
+date: 2026-06-05T09:17:00
 description: "SmallVector — N개까지 inline 저장, overflow는 heap, std::vector 호환 인터페이스."
 series: "Folly Code Review"
 seriesOrder: 35

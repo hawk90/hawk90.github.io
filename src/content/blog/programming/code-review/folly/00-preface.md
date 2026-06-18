@@ -1,6 +1,6 @@
 ---
-title: "Folly Code Review: 서문"
-date: 2026-05-23
+title: "Folly Code Review — Meta의 production-grade C++ 라이브러리 코드 분석"
+date: 2026-06-04T09:00:00
 description: "Meta(Facebook)가 production에서 검증한 Folly C++ 라이브러리를 code review의 시선으로 읽는다. performance-first 철학과 fbcode 환경의 산물을 14 Parts 63편으로 살펴본다."
 series: "Folly Code Review"
 seriesOrder: 0

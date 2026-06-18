@@ -1,6 +1,6 @@
 ---
-title: "10-11: 로깅 시스템 설계 — 레벨·버퍼·SWO·Deferred"
-date: 2026-05-17T01:00:00
+title: "임베디드 로깅 시스템 설계 — 레벨·버퍼·SWO·Deferred"
+date: 2026-04-19T09:10:00
 description: "임베디드 환경에서 overhead를 최소화한 로깅. 레벨 분리·circular buffer·SWO/RTT·deferred 처리 패턴."
 series: "Modern Embedded Recipes"
 seriesOrder: 121

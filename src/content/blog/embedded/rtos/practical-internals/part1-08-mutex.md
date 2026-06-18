@@ -1,6 +1,6 @@
 ---
-title: "1-08: Mutex 개념 — Ownership, Recursive, Priority Inheritance"
-date: 2026-05-07T08:00:00
+title: "Mutex 개념 분해 — Ownership·Recursive·Priority Inheritance"
+date: 2026-05-04T09:08:00
 description: "공유 자원 보호의 정답입니다. Owner tracking 덕에 PI가 가능하고, recursive로 재진입도 허용합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 8

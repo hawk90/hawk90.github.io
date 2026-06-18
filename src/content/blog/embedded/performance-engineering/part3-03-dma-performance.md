@@ -1,6 +1,6 @@
 ---
-title: "3-03: DMA 성능 - Burst·Scatter-Gather·Chain·Cache 일관성"
-date: 2026-05-08T02:00:00
+title: "DMA 성능 최적화 — Burst·Scatter-Gather·Chain·Cache 일관성"
+date: 2026-04-25T09:02:00
 description: "Burst size 최적화. Scatter-gather, chain. Cache clean/invalidate, double buffer."
 series: "Embedded Performance Engineering"
 seriesOrder: 21

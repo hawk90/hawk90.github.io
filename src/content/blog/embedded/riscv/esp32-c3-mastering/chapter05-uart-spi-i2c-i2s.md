@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: 시리얼 통신 4종 — UART·SPI·I2C·I2S"
-date: 2026-05-01T05:00:00
+title: "ESP32-C3 시리얼 통신 4종 — UART·SPI·I2C·I2S 분석"
+date: 2026-05-20T09:05:00
 description: "주변 디바이스와의 4대 통신. DMA 활용, 인터럽트 vs polling."
 series: "ESP32-C3 Mastering"
 seriesOrder: 5

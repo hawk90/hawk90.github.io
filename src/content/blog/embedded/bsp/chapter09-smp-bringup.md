@@ -1,6 +1,6 @@
 ---
-title: "Ch 9: Multi-core SMP bring-up"
-date: 2026-05-09T09:00:00
+title: "Multi-core SMP Bring-up — PSCI·Secondary CPU 깨우기"
+date: 2026-05-18T09:09:00
 description: "보드의 다른 코어를 깨우는 절차를 정리합니다. PSCI, spin-table, ARM CPU hotplug의 흐름을 살펴봅니다."
 series: "BSP Development"
 seriesOrder: 9

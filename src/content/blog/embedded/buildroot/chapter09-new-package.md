@@ -1,6 +1,6 @@
 ---
-title: "Ch 9: 새 패키지 작성 — autotools, cmake, python"
-date: 2026-05-19T09:00:00
+title: "Buildroot 새 패키지 작성 — autotools·cmake·python 통합"
+date: 2026-05-19T09:09:00
 description: "Buildroot에 새 패키지를 추가하는 실전 — autotools·cmake·python 세 케이스."
 series: "Buildroot Practical"
 seriesOrder: 9

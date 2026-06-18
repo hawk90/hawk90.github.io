@@ -1,6 +1,6 @@
 ---
-title: "Part 11-02: JSON conversion (toJson / parseJson)"
-date: 2026-05-25T04:00:00
+title: "folly JSON conversion — toJson·parseJson"
+date: 2026-06-06T09:14:00
 description: "Part 11-02: toJson / parseJson — folly::dynamic ↔ JSON 문자열. parse 옵션, 성능, schema-less 처리."
 series: "Folly Code Review"
 seriesOrder: 50

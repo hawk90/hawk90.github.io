@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: 디버거란 / 설치 / GDB vs LLDB"
-date: 2026-05-17T01:00:00
+title: "GDB vs LLDB 분석 — 두 디버거의 설치·차이·선택 기준"
+date: 2026-05-24T09:01:00
 description: "네이티브 디버거의 메커니즘, gdb·lldb 차이, 설치, 첫 세션."
 tags: [gdb, lldb, Setup]
 series: "GDB and LLDB"
@@ -14,7 +14,7 @@ draft: false
 - [GDB 확장 & IDE](/blog/tools/debugging/gdb-extension/chapter01-python-api-basics) — Python API, pretty-printer, DAP
 - [DWARF & ELF 내부](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview) — 디버그 정보의 정체
 - [Embedded](/blog/tools/debugging/embedded/chapter01-rsp-protocol) — RSP, JTAG/SWD, OpenOCD, J-Link
-- [Concurrency](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex) — 멀티스레드, rr, TSan
+- Concurrency — 멀티스레드, rr, TSan
 - [Postmortem](/blog/tools/debugging/postmortem/chapter01-core-generation) — core dump, debuginfod
 - [Python 디버깅](/blog/tools/debugging/python/chapter01-pdb-basics) — pdb, debugpy, py-spy
 - [Sanitizers](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan) · [Valgrind](/blog/tools/debugging/valgrind/chapter02-memcheck) — 자동 검출

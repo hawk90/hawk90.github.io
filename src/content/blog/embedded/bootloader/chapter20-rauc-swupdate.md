@@ -1,6 +1,6 @@
 ---
-title: "Ch 20: RAUC / SWUpdate — 펌웨어 업데이트 프레임워크"
-date: 2026-05-09T20:00:00
+title: "임베디드 펌웨어 업데이트 — RAUC vs SWUpdate 비교"
+date: 2026-05-09T09:20:00
 description: "U-Boot와 통합되는 펌웨어 업데이트 프레임워크 — RAUC와 SWUpdate의 비교와 적용."
 series: "Bootloader Internals"
 seriesOrder: 20

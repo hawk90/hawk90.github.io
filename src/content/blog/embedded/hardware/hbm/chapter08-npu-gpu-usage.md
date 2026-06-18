@@ -1,6 +1,6 @@
 ---
-title: "Ch 8: NPU·GPU에서의 활용"
-date: 2026-05-16T08:00:00
+title: "NPU·GPU에서의 HBM 활용 — Weight·Activation·KV Cache 배치 분석"
+date: 2026-05-16T09:08:00
 description: "Weight·activation·KV cache — HBM 자리잡기와 시리즈 마무리."
 series: "HBM·GDDR 심화"
 seriesOrder: 8
@@ -333,15 +333,15 @@ capacity가 늘면 *batch를 키울 수 있고* throughput이 늘긴 합니다. 
 
 ## 추천 후속 시리즈
 
-- [UCIe Ch 1: 개요](/blog/embedded/hardware/ucie/chapter01-overview) — 칩렛 표준의 핵심
-- [BoW Ch 1: 개요](/blog/embedded/hardware/bow/chapter01-overview) — open die-to-die 표준
-- [CXL Ch 1: 개요](/blog/embedded/hardware/cxl/chapter01-overview) — HBM 너머의 메모리
-- [UALink Ch 1: 개요](/blog/embedded/hardware/ualink/chapter01-overview) — GPU 간 메모리 fabric
+- UCIe Ch 1: 개요 — 칩렛 표준의 핵심
+- BoW Ch 1: 개요 — open die-to-die 표준
+- CXL Ch 1: 개요 — HBM 너머의 메모리
+- UALink Ch 1: 개요 — GPU 간 메모리 fabric
 
 ## 관련 항목
 
 - [Ch 1: 고대역 메모리 개요](/blog/embedded/hardware/hbm/chapter01-overview)
 - [Ch 5: 대역폭 계산과 병목 분석](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)
 - [Ch 7: 메모리 컨트롤러 인터페이스](/blog/embedded/hardware/hbm/chapter07-memory-controller)
-- [CXL Ch 8: ML 가속기](/blog/embedded/hardware/cxl/chapter08-ml-accelerator) — HBM과 CXL의 조합
-- [UCIe Ch 12: case studies](/blog/embedded/hardware/ucie/chapter12-case-studies) — 칩렛 + HBM 실제 사례
+- CXL Ch 8: ML 가속기 — HBM과 CXL의 조합
+- UCIe Ch 12: case studies — 칩렛 + HBM 실제 사례

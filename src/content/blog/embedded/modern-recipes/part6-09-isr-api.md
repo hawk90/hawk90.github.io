@@ -1,6 +1,6 @@
 ---
-title: "6-09: ISR-Safe API 설계 — Reentrant·Atomic·Defer 패턴"
-date: 2026-05-14T23:00:00
+title: "ISR-Safe API 설계 — Reentrant·Atomic·Defer 패턴"
+date: 2026-04-15T09:08:00
 description: "ISR 안전 함수 작성. Reentrant, atomic 변수, deferred work, FromISR variant."
 series: "Modern Embedded Recipes"
 seriesOrder: 71

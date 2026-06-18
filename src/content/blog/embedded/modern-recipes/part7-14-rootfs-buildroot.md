@@ -1,6 +1,6 @@
 ---
-title: "7-14: 루트 파일시스템 (Buildroot 기초)"
-date: 2026-05-15T16:00:00
+title: "루트 파일시스템 구축 — Buildroot 기초·Package·Toolchain"
+date: 2026-04-16T09:13:00
 description: "Buildroot 설정, package 추가, post-build script, toolchain 선택, Yocto와의 trade-off를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 88

@@ -1,6 +1,6 @@
 ---
-title: "3-03: Mutex 내부 구현 — Owner 추적, Recursion Count, ISR 금지"
-date: 2026-05-07T24:00:00
+title: "Mutex 내부 구현 추적 — Owner·Recursion Count·ISR 금지"
+date: 2026-05-06T09:24:00
 description: "Mutex = Semaphore + pxMutexHolder + uxBasePriority. Recursive variant는 lock-count."
 series: "Practical RTOS Internals"
 seriesOrder: 24

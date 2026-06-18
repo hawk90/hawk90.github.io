@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: Suppression과 실무 운용"
-date: 2026-05-17T05:00:00
+title: "Valgrind Suppression과 실무 운용 — 노이즈 제거와 CI 통합"
+date: 2026-05-28T09:05:00
 description: "Valgrind suppression 문법, 외부 라이브러리 우회, Sanitizer와의 분담, CI 통합 실전."
 tags: [Valgrind, Suppression, CI, Debugging, C, C++]
 series: "Valgrind"
@@ -508,4 +508,4 @@ Valgrind 시리즈 다섯 챕터를 마칩니다.
 
 - [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-intro) — 짝을 이루는 도구
 - [GDB / LLDB](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 인터랙티브 디버깅
-- [perf / flamegraph](/blog/tools/perf-flamegraph/chapter01-perf-overview) — 성능 분석
+- perf / flamegraph — 성능 분석

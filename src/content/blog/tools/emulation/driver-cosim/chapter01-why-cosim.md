@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: Why Pre-Silicon Driver Verification"
-date: 2026-05-17T01:00:00
+title: "Pre-Silicon Driver Verification — RTL Co-simulation이 푸는 문제"
+date: 2026-05-22T09:01:00
 description: "Silicon 없이 driver 검증 — co-simulation의 의미."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 1
@@ -147,6 +147,6 @@ Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 도
 ## 관련 항목
 
 - [Ch 2: SystemVerilog DPI-C 기초](/blog/tools/emulation/driver-cosim/chapter02-dpi-c-basics)
-- [QEMU Fake Device Driver](/blog/tools/emulation/qemu-fake-device/chapter01-overview) — functional 모델로 driver 개발
-- [FPGA Driver via QEMU+VFIO](/blog/tools/emulation/qemu-fpga-driver/chapter01-fpga-driver-challenge) — QEMU와 실 FPGA를 4-step으로 잇기
+- QEMU Fake Device Driver — functional 모델로 driver 개발
+- FPGA Driver via QEMU+VFIO — QEMU와 실 FPGA를 4-step으로 잇기
 - [CXL 4.0 Spec Full Review](/blog/embedded/hardware/cxl-spec/chapter01-overview) — chiplet 인터커넥트의 검증 시나리오

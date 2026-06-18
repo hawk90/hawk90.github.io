@@ -1,6 +1,6 @@
 ---
-title: "Ch 26: DDR Training · PHY 초기화 깊이"
-date: 2026-05-19T26:00:00
+title: "DDR Training과 PHY Calibration — 보드별 파라미터 튜닝"
+date: 2026-05-19T09:26:00
 description: "DDR4/LPDDR4 controller·PHY가 어떻게 캘리브레이션되는지, 보드별 timing parameter, training 실패 디버깅."
 series: "Bootloader Internals"
 seriesOrder: 26

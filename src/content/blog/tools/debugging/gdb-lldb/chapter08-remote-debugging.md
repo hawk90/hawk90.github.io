@@ -1,6 +1,6 @@
 ---
-title: "Ch 8: 원격 디버깅 — gdbserver / OpenOCD / J-Link"
-date: 2026-05-17T08:00:00
+title: "GDB 원격 디버깅 — gdbserver·OpenOCD·J-Link 통합"
+date: 2026-05-24T09:08:00
 description: "다른 머신·MCU를 GDB로. RSP, gdbserver, OpenOCD, J-Link, JTAG/SWD, ARM CoreSight."
 tags: [gdb, Remote Debug, gdbserver, OpenOCD, JTAG, ARM]
 series: "GDB and LLDB"

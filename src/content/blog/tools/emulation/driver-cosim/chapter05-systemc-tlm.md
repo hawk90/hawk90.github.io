@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: SystemC TLM — Transaction-Level Modeling"
-date: 2026-05-17T05:00:00
+title: "SystemC TLM 분석 — Transaction-Level Modeling으로 빠른 검증"
+date: 2026-05-22T09:05:00
 description: "Cycle-accurate 너머 — high-speed virtual platform."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 5
@@ -218,5 +218,5 @@ NPU/accelerator vendor 사이에서 *Fast Models + 사내 RTL* 조합이 *de fac
 
 - [Ch 4: CocoTB](/blog/tools/emulation/driver-cosim/chapter04-cocotb)
 - [Ch 6: Bus Functional Model](/blog/tools/emulation/driver-cosim/chapter06-bfm)
-- [QEMU Internals — TCG Deep](/blog/tools/emulation/qemu-internals/chapter13-tcg-deep) — fast functional CPU model
-- [QEMU Embedded — ARM virt](/blog/tools/emulation/qemu-embedded/chapter02-arm-virt) — virtual platform 비교
+- QEMU Internals — TCG Deep — fast functional CPU model
+- QEMU Embedded — ARM virt — virtual platform 비교

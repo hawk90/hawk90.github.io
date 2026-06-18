@@ -1,6 +1,6 @@
 ---
-title: "1-01: 디지털 신호 기초"
-date: 2026-05-12T01:00:00
+title: "디지털 신호 기초 — Voltage Level·Edge·Setup/Hold 분석"
+date: 2026-04-10T09:01:00
 description: "Voltage level·rise/fall time·noise margin·신호 무결성의 기본기."
 series: "Modern Embedded Recipes"
 seriesOrder: 1

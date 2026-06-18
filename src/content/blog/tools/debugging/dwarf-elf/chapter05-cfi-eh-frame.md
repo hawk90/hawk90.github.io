@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: CFI — .debug_frame / .eh_frame"
-date: 2026-05-17T05:00:00
+title: "DWARF Call Frame Information — .debug_frame과 .eh_frame 분해"
+date: 2026-05-23T09:05:00
 description: "콜스택 풀기의 정체. CIE/FDE, CFA, register rule, .eh_frame_hdr 이진 탐색."
 tags: [dwarf, cfi, unwinding, eh_frame, exception]
 series: "DWARF and ELF Internals"

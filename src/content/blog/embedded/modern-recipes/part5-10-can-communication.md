@@ -1,6 +1,6 @@
 ---
-title: "5-10: CAN 통신"
-date: 2026-05-14T10:00:00
+title: "CAN 통신 구현 — bxCAN·Filter·Mailbox·CAN-FD"
+date: 2026-04-14T09:58:00
 description: "Frame format·filter·bit timing·error frame."
 series: "Modern Embedded Recipes"
 seriesOrder: 58

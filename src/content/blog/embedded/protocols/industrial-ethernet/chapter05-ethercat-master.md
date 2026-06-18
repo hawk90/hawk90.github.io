@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: EtherCAT Master/Slave — SOEM·IgH"
-date: 2026-05-16T05:00:00
+title: "EtherCAT Master 구현 비교 — SOEM·IgH·TwinCAT 분석"
+date: 2026-05-13T09:05:00
 description: "SOEM·IgH·TwinCAT — 오픈소스와 상용 master 구현."
 series: "Industrial Ethernet 심화"
 seriesOrder: 5

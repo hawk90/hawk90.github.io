@@ -1,6 +1,6 @@
 ---
-title: "2-02: Pipeline Stall — Data·Structural·Control Hazard + Forwarding"
-date: 2026-05-08T09:00:00
+title: "Pipeline Stall 분석 — Data·Structural·Control Hazard·Forwarding"
+date: 2026-04-24T09:01:00
 description: "Stall은 pipeline bubble을 만듭니다. RAW·WAR·WAW hazard, forwarding, PMU STALL counter를 살펴봅니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 10

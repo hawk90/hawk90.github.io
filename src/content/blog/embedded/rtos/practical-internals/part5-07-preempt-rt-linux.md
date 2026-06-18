@@ -1,6 +1,6 @@
 ---
-title: "5-07: PREEMPT_RT Linux — Mainline 6.12·Xenomai 4·EVL"
-date: 2026-05-07T08:00:00
+title: "PREEMPT_RT Linux — Mainline 6.12·Xenomai 4·EVL"
+date: 2026-05-08T09:52:00
 description: "2024년 9월 Linux 6.12 mainline에 합류한 PREEMPT_RT의 핵심 변경을 정리하고, Xenomai 4·EVL과 함께 RTOS와의 선택 기준을 비교합니다. threaded IRQ·sleeping spinlock·cyclictest까지 한 지도에 모읍니다."
 series: "Practical RTOS Internals"
 seriesOrder: 52

@@ -1,6 +1,6 @@
 ---
-title: "Ch 10: 보안 개발 라이프사이클 / 시리즈 마무리"
-date: 2026-05-08T11:00:00
+title: "임베디드 보안 개발 라이프사이클 — Secure SDLC 적용"
+date: 2026-05-21T09:10:00
 description: "Microsoft SDL, threat modeling, SBOM, supply chain, 사고 대응. 시리즈 마무리."
 tags: [SDLC, SDL, SBOM, Threat Modeling, Supply Chain]
 series: "Embedded Security"
@@ -112,7 +112,7 @@ C/C++ 임베디드에서 *반드시* 따라야 할 자리입니다.
 | Polyspace | abstract interpretation, 자동차 표준 |
 | semgrep | 패턴 기반, 빠르고 자동화 좋음 |
 
-CI에 *최소* clang-tidy + cppcheck + semgrep을 묶고, *블로커 룰*을 정의합니다. [Embedded Automotive — CERT C](/blog/embedded/automotive/cert-c/chapter01-intro-vs-misra)와 [MISRA C](/blog/embedded/automotive/misra-c/chapter01-introduction)가 임베디드 C에 가장 직접적입니다.
+CI에 *최소* clang-tidy + cppcheck + semgrep을 묶고, *블로커 룰*을 정의합니다. Embedded Automotive — CERT C와 MISRA C가 임베디드 C에 가장 직접적입니다.
 
 ### Compiler hardening
 
@@ -357,10 +357,10 @@ osv-scanner --sbom=firmware.cdx.json
 
 | 시리즈 | 연결점 |
 |--------|--------|
-| [Embedded Automotive — MISRA C](/blog/embedded/automotive/misra-c/chapter01-introduction) | secure coding의 자동차 표준 |
-| [Embedded Automotive — CERT C](/blog/embedded/automotive/cert-c/chapter01-intro-vs-misra) | 보안 코딩 규칙 |
+| Embedded Automotive — MISRA C | secure coding의 자동차 표준 |
+| Embedded Automotive — CERT C | 보안 코딩 규칙 |
 | [Embedded Automotive — AUTOSAR Adaptive](/blog/embedded/automotive/autosar-adaptive/00-overview) | 자동차 SOA + 보안 |
-| [Aerospace Standards — DO-178C](/blog/embedded/aerospace-standards/do-178c/chapter01-overview) | 항공 기능 안전, DO-326A로 연결 |
+| Aerospace Standards — DO-178C | 항공 기능 안전, DO-326A로 연결 |
 | [Aerospace Standards — JSF C++](/blog/embedded/aerospace-standards/jsf-cpp/00-overview) | safety-critical C++ |
 | [Practical RTOS Internals — Part 4-11: TrustZone & TF-M](/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm) | RTOS와 secure world |
 | [Buildroot Practical](/blog/embedded/buildroot/chapter01-buildroot-philosophy) | Linux 임베디드 빌드와 SBOM |
@@ -411,9 +411,9 @@ ETSI/CRA 위반입니다. *명시 공지*가 의무.
 - [Ch 1: Threat Model](/blog/embedded/embedded-security/chapter01-threat-model)
 - [Ch 8: IoT 표준](/blog/embedded/embedded-security/chapter08-iot-standards)
 - [Ch 9: 펌웨어 분석 / 리버싱](/blog/embedded/embedded-security/chapter09-firmware-analysis)
-- [Embedded Automotive — MISRA C 시리즈](/blog/embedded/automotive/misra-c/chapter01-introduction)
-- [Embedded Automotive — CERT C 시리즈](/blog/embedded/automotive/cert-c/chapter01-intro-vs-misra)
-- [Aerospace Standards — DO-178C 시리즈](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
+- Embedded Automotive — MISRA C 시리즈
+- Embedded Automotive — CERT C 시리즈
+- Aerospace Standards — DO-178C 시리즈
 - [Practical RTOS Internals — TrustZone & TF-M](/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm)
 - [원문 — Microsoft Security Development Lifecycle](https://www.microsoft.com/en-us/securityengineering/sdl)
 - [원문 — OWASP SAMM](https://owaspsamm.org/)

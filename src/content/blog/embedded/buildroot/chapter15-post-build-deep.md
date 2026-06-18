@@ -1,6 +1,6 @@
 ---
-title: "Ch 15: post-build·post-image 심화"
-date: 2026-05-19T15:00:00
+title: "Buildroot post-build·post-image 심화 — rootfs 최종 수정 흐름"
+date: 2026-05-19T09:15:00
 description: "post-build·post-image·post-fakeroot 세 hook의 정확한 차이, 환경 변수, BR2_ROOTFS_OVERLAY 한계, system_table.txt로 권한·devnode 다루기, genimage로 SD 이미지 만들기."
 series: "Buildroot Practical"
 seriesOrder: 15

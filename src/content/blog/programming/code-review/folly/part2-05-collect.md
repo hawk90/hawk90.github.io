@@ -1,6 +1,6 @@
 ---
-title: "Part 2-05: collect / collectAll / collectAny — fan-in 패턴"
-date: 2026-05-23T10:00:00
+title: "folly::collect·collectAll·collectAny — fan-in 패턴 분석"
+date: 2026-06-04T09:10:00
 description: "여러 SemiFuture를 모으는 세 가지 의미 — 모두 성공, 모두 완료, 하나만 완료."
 series: "Folly Code Review"
 seriesOrder: 10

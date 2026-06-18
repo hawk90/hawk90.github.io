@@ -1,6 +1,6 @@
 ---
-title: "Part 7-05: F14 internals (SIMD probing)"
-date: 2026-05-24T11:00:00
+title: "folly F14 internals — SIMD probing 메커니즘"
+date: 2026-06-05T09:16:00
 description: "F14 chunk 구조와 SIMD probing — SSE2/AVX/NEON dispatch, H1/H2 hash split, 14-slot 선택 이유."
 series: "Folly Code Review"
 seriesOrder: 34

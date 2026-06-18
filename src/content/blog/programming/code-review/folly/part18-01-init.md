@@ -1,6 +1,6 @@
 ---
-title: "Part 18-01: folly::Init — main() 부트스트랩"
-date: 2026-05-27T18:00:00
+title: "folly::Init — main() 부트스트랩"
+date: 2026-06-08T09:04:00
 description: "folly::Init의 역할 — gflags 파싱, signal handler, glog 설정, exit handler 통합."
 series: "Folly Code Review"
 seriesOrder: 76

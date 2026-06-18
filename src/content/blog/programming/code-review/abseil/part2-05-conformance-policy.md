@@ -1,6 +1,6 @@
 ---
-title: "Part 2-05: Conformance / policy"
-date: 2026-05-23T10:00:00
+title: "Abseil Conformance·Policy 분석"
+date: 2026-06-09T09:10:00
 description: "Part 2-05: Abseil의 platform conformance 정책 — 지원 컴파일러, 표준 버전, deprecated_if_unavailable."
 series: "Abseil Code Review"
 seriesOrder: 10

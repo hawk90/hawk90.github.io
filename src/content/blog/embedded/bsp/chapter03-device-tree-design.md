@@ -1,6 +1,6 @@
 ---
-title: "Ch 3: Device Tree 설계"
-date: 2026-05-09T03:00:00
+title: "새 보드 Device Tree 설계 — node·property·phandle 작성 흐름"
+date: 2026-05-18T09:03:00
 description: "보드 토폴로지를 DT로 표현 — SoC dtsi 상속, 보드 dts 작성, overlay 활용."
 series: "BSP Development"
 seriesOrder: 3

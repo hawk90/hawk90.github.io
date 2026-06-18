@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: 멀티스레드 / 멀티프로세스 디버깅"
-date: 2026-05-17T06:00:00
+title: "멀티스레드·멀티프로세스 디버깅 — Non-Stop·Scheduler-Locking·Fork"
+date: 2026-05-24T09:06:00
 description: "thread / process apply. scheduler-locking. follow-fork. rr 시간 역행 디버깅."
 tags: [gdb, Multithread, Multiprocess]
 series: "GDB and LLDB"
@@ -9,7 +9,7 @@ draft: false
 ---
 
 :::tip[Deep dive]
-이 챕터는 빠른 참조입니다. 깊은 내부 메커니즘은 [Concurrency Debugging 시리즈](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex)를 참고하세요 — Linux 스레드 내부, futex 메커니즘, rr 워크플로, TSan/Helgrind 통합까지.
+이 챕터는 빠른 참조입니다. 깊은 내부 메커니즘은 Concurrency Debugging 시리즈를 참고하세요 — Linux 스레드 내부, futex 메커니즘, rr 워크플로, TSan/Helgrind 통합까지.
 :::
 
 

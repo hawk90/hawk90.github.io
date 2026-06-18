@@ -1,6 +1,6 @@
 ---
-title: "Part 1-03: 런타임 요구사항"
-date: 2026-05-07T03:00:00
+title: "임베디드 C++ 런타임 요구사항 — libstdc++·newlib·crt0 분석"
+date: 2026-04-28T09:03:00
 description: "C++ 코드가 돌기 위한 최소 런타임 — libstdc++, libsupc++, newlib, libgcc. 무엇이 진짜 필요한가."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 3

@@ -1,6 +1,6 @@
 ---
-title: "Ch 8: Modern CMake 베스트 프랙티스"
-date: 2026-05-17T08:00:00
+title: "Modern CMake 베스트 프랙티스 — target_* 중심 설계"
+date: 2026-06-02T09:08:00
 description: "타겟 중심 접근법, 피해야 할 안티패턴, 대규모 프로젝트 구성 전략."
 tags: [cmake, build, cpp, best-practices]
 series: "CMake"

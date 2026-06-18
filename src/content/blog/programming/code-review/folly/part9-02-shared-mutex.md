@@ -1,6 +1,6 @@
 ---
-title: "Part 9-02: SharedMutex"
-date: 2026-05-24T18:00:00
+title: "folly::SharedMutex 분석"
+date: 2026-06-06T09:05:00
 description: "folly::SharedMutex — std::shared_mutex보다 작고 빠른 reader-writer lock, fairness 정책 선택."
 series: "Folly Code Review"
 seriesOrder: 41

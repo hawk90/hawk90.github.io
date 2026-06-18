@@ -1,6 +1,6 @@
 ---
-title: "Part 3-01: InlineExecutor — 호출자 thread에서 즉시 실행"
-date: 2026-05-23T13:00:00
+title: "folly::InlineExecutor — 호출자 thread에서 즉시 실행"
+date: 2026-06-04T09:13:00
 description: "InlineExecutor는 add()의 caller thread에서 callback을 그 자리에서 실행한다. 테스트와 단축 경로에 적합하지만 production hot path에는 위험하다."
 series: "Folly Code Review"
 seriesOrder: 13

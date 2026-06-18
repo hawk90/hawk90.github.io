@@ -1,6 +1,6 @@
 ---
-title: "4-04: Spinlock — Spin-Wait vs Context Switch·Ticket·MCS Lock"
-date: 2026-05-08T13:00:00
+title: "Spinlock 성능 분석 — Spin-Wait vs Context Switch·Ticket·MCS"
+date: 2026-04-26T09:03:00
 description: "Spinlock 비용 분석과 ticket lock, MCS lock의 scalability 차이."
 series: "Embedded Performance Engineering"
 seriesOrder: 33

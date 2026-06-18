@@ -1,6 +1,6 @@
 ---
-title: "Ch 3: Kconfig 설정 — menuconfig와 defconfig"
-date: 2026-05-19T03:00:00
+title: "Buildroot Kconfig 설정 — menuconfig와 defconfig 작성"
+date: 2026-05-19T09:03:00
 description: "Buildroot의 Kconfig 시스템 — make menuconfig 사용법, defconfig 패턴, 옵션 의존성."
 series: "Buildroot Practical"
 seriesOrder: 3

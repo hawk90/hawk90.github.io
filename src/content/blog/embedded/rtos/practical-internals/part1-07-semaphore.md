@@ -1,6 +1,6 @@
 ---
-title: "1-07: Semaphore 개념 — Counting, Binary, P/V 연산"
-date: 2026-05-07T07:00:00
+title: "Semaphore 개념 분해 — Counting·Binary·P/V 연산"
+date: 2026-05-04T09:07:00
 description: "Dijkstra의 P/V(1965)에서 출발한 Counting(N 자원)과 Binary(신호) 세마포어를 다룹니다. ISR에서 task로 신호를 전달하는 표준 도구입니다."
 series: "Practical RTOS Internals"
 seriesOrder: 7

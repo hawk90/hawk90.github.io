@@ -1,6 +1,6 @@
 ---
-title: "Ch 2: JTAG / SWD / CoreSight"
-date: 2026-05-17T02:00:00
+title: "JTAG·SWD·CoreSight 분석 — ARM 디버그 인터페이스 비교"
+date: 2026-05-26T09:02:00
 description: "TAP 상태 머신, SWD 패킷, ARM CoreSight (DAP/FPB/DWT/ITM/ETM) 회로 구조."
 tags: [jtag, swd, coresight, arm, embedded]
 series: "Embedded Debugging"

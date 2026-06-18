@@ -1,6 +1,6 @@
 ---
-title: "Ch 27: 신뢰 체인 — 다단계 서명의 전체 흐름"
-date: 2026-05-19T27:00:00
+title: "임베디드 Chain of Trust — 다단계 서명 검증의 전체 흐름"
+date: 2026-05-19T09:27:00
 description: "BootROM PK hash → BL2 signed by ROTPK → BL31/BL33 signed by trusted key → kernel signed by FIT key의 chain을 끝까지."
 series: "Bootloader Internals"
 seriesOrder: 27

@@ -1,6 +1,6 @@
 ---
-title: "Part 7-04: F14FastMap (auto-select)"
-date: 2026-05-24T10:00:00
+title: "folly::F14FastMap — auto-select 동작"
+date: 2026-06-05T09:15:00
 description: "F14FastMap — key/value 크기로 ValueMap과 VectorMap 중 자동 선택, 사용자 trade-off 제거."
 series: "Folly Code Review"
 seriesOrder: 33

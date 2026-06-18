@@ -1,6 +1,6 @@
 ---
-title: "Part 9-03: Baton (one-shot wait)"
-date: 2026-05-24T19:00:00
+title: "folly::Baton — one-shot wait 동기화"
+date: 2026-06-06T09:06:00
 description: "folly::Baton — 한 번 post, 한 번 wait의 경량 signal primitive. condition variable보다 가볍다."
 series: "Folly Code Review"
 seriesOrder: 42

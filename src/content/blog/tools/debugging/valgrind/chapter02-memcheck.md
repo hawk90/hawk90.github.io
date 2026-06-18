@@ -1,6 +1,6 @@
 ---
-title: "Ch 2: Memcheck 실전 사용"
-date: 2026-05-17T02:00:00
+title: "Valgrind Memcheck 실전 — 메모리 오류 탐지 워크플로"
+date: 2026-05-28T09:02:00
 description: "Memcheck의 모든 핵심 옵션 — leak-check, track-origins, error-limit, 그리고 비용 vs 정확도 트레이드오프."
 tags: [Valgrind, Memcheck, Debugging, C, C++]
 series: "Valgrind"

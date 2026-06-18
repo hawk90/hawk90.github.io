@@ -1,6 +1,6 @@
 ---
-title: "Part 12-01: Singleton vs Meyers / static (왜 Folly의 Singleton인가)"
-date: 2026-05-25T07:00:00
+title: "folly::Singleton vs Meyers/static — 왜 Folly의 Singleton인가"
+date: 2026-06-06T09:17:00
 description: "Part 12-01: Meyers singleton과 static 변수의 한계 — destruction order, fork safety, dependency 관리."
 series: "Folly Code Review"
 seriesOrder: 53

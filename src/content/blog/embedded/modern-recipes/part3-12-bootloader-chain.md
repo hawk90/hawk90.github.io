@@ -1,6 +1,6 @@
 ---
-title: "3-12: Bootloader 체인 — BootROM·SPL·U-Boot·Kernel·Secure Boot"
-date: 2026-05-13T10:00:00
+title: "임베디드 Bootloader 체인 — BootROM·SPL·U-Boot·Kernel·Secure Boot"
+date: 2026-04-12T09:34:00
 description: "Cortex-A 부팅 단계. BootROM → SPL → U-Boot → Linux. Secure boot, FIT image, A/B."
 series: "Modern Embedded Recipes"
 seriesOrder: 34

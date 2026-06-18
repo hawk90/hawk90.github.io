@@ -1,6 +1,6 @@
 ---
-title: "Part 16-01: GetStackTrace와 Symbolize — crash 시 readable stack"
-date: 2026-05-26T08:00:00
+title: "absl::GetStackTrace와 Symbolize — crash 시 readable stack"
+date: 2026-06-13T09:12:00
 description: "absl::GetStackTrace로 PC 배열을 받고 absl::Symbolize로 함수 이름·파일·라인으로 변환. signal handler 안에서도 동작하는 async-safe API."
 series: "Abseil Code Review"
 seriesOrder: 76

@@ -1,6 +1,6 @@
 ---
-title: "Ch 8: 보드 초기화 — board_init_f와 board_init_r"
-date: 2026-05-09T08:00:00
+title: "U-Boot 보드 초기화 시퀀스 — board_init_f와 board_init_r 분리 이유"
+date: 2026-05-09T09:08:00
 description: "U-Boot 보드 초기화 흐름 — pre-relocation (board_init_f)과 post-relocation (board_init_r)."
 series: "Bootloader Internals"
 seriesOrder: 8

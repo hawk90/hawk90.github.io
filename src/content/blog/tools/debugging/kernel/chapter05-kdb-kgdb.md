@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: kdb / kgdb — 인터랙티브 커널 디버깅"
-date: 2026-05-17T05:00:00
+title: "kdb·kgdb 인터랙티브 커널 디버깅 — Source-level Step·Breakpoint"
+date: 2026-05-25T09:05:00
 description: "별 머신 또는 시리얼로 커널을 step-debug. kgdb 셋업, gdb 연결, 실전 흐름."
 tags: [kernel, kgdb, kdb, serial, vm-debug]
 series: "Kernel Debugging"

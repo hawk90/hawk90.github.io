@@ -1,6 +1,6 @@
 ---
-title: "10-05: UART 안 찍힐 때 — Bare-metal 체크리스트"
-date: 2026-05-16T19:00:00
+title: "UART 안 찍힐 때 — Bare-metal 체크리스트"
+date: 2026-04-19T09:04:00
 description: "UART 디버깅. 클럭·핀·baud·로직 레벨·종단·인쇄 단계별 체크."
 series: "Modern Embedded Recipes"
 seriesOrder: 115

@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: 대역폭 계산과 병목 분석"
-date: 2026-05-16T05:00:00
+title: "메모리 대역폭 병목 분석 — Theoretical vs Achievable·Roofline·Memory Wall"
+date: 2026-05-16T09:05:00
 description: "Theoretical vs achievable — 메모리 대역폭의 실제와 roofline·memory wall."
 series: "HBM·GDDR 심화"
 seriesOrder: 5
@@ -312,4 +312,4 @@ MFU만 보면 *compute 사용률*은 알지만 *memory 사용률은 모릅니다
 - [Ch 3: HBM 세대 비교](/blog/embedded/hardware/hbm/chapter03-hbm-generations)
 - [Ch 6: 열 설계와 전력 관리](/blog/embedded/hardware/hbm/chapter06-thermal-power)
 - [Ch 8: NPU·GPU 활용](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)
-- [CXL Ch 8: ML 가속기](/blog/embedded/hardware/cxl/chapter08-ml-accelerator) — memory wall 보완 경로
+- CXL Ch 8: ML 가속기 — memory wall 보완 경로

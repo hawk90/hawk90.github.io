@@ -1,6 +1,6 @@
 ---
-title: "4-09: Cache Coherency — MESI·MOESI·Snoop·Directory"
-date: 2026-05-08T18:00:00
+title: "Cache Coherency 프로토콜 — MESI·MOESI·Snoop·Directory"
+date: 2026-04-26T09:08:00
 description: "MESI와 MOESI 프로토콜, snoop과 directory 방식, coherency overhead 측정."
 series: "Embedded Performance Engineering"
 seriesOrder: 38

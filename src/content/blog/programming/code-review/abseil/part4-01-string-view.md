@@ -1,6 +1,6 @@
 ---
-title: "Part 4-01: absl::string_view — non-owning 문자열 참조"
-date: 2026-05-23T19:00:00
+title: "absl::string_view — non-owning 문자열 참조"
+date: 2026-06-10T09:03:00
 description: "Part 4-01: absl::string_view — 복사 없는 문자열 전달, lifetime 책임, std::string_view와의 관계."
 series: "Abseil Code Review"
 seriesOrder: 19

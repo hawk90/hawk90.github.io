@@ -1,6 +1,6 @@
 ---
-title: "Ch 18: EFI in U-Boot — bootefi와 EFI loader"
-date: 2026-05-09T18:00:00
+title: "U-Boot의 EFI 호환 분석 — bootefi 명령과 EFI loader 동작 원리"
+date: 2026-05-09T09:18:00
 description: "U-Boot이 UEFI Boot Services를 노출하는 방식 — bootefi, EBBR, Linux EFI stub과의 연결."
 series: "Bootloader Internals"
 seriesOrder: 18

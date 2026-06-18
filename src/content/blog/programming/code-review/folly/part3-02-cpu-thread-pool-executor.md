@@ -1,6 +1,6 @@
 ---
-title: "Part 3-02: CPUThreadPoolExecutor — CPU-bound 작업의 표준 thread pool"
-date: 2026-05-23T14:00:00
+title: "folly::CPUThreadPoolExecutor — CPU-bound 작업의 표준 thread pool"
+date: 2026-06-04T09:14:00
 description: "CPUThreadPoolExecutor는 CPU 집약 작업을 위한 thread pool. priority queue, blocking queue, thread factory를 조합한다."
 series: "Folly Code Review"
 seriesOrder: 14

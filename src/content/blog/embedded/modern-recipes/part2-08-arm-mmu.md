@@ -1,6 +1,6 @@
 ---
-title: "2-08: MMU 기초"
-date: 2026-05-12T20:00:00
+title: "ARM MMU 기초 분석 — Translation Table·TLB·ASID"
+date: 2026-04-11T09:20:00
 description: "Page table·TLB·virtual address·Linux의 4-level paging."
 series: "Modern Embedded Recipes"
 seriesOrder: 20

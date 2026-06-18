@@ -1,6 +1,6 @@
 ---
-title: "Part 11-02: LogSink"
-date: 2026-05-25T14:00:00
+title: "Abseil LogSink 분석"
+date: 2026-06-12T09:12:00
 description: "absl::LogSink — 출력 destination 커스터마이징. 파일·syslog·원격 collector·테스트 캡처."
 series: "Abseil Code Review"
 seriesOrder: 60

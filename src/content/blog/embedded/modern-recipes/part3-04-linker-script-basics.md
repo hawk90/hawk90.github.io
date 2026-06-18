@@ -1,6 +1,6 @@
 ---
-title: "3-04: 링커 스크립트 기초"
-date: 2026-05-13T02:00:00
+title: "링커 스크립트 기초 — SECTIONS·MEMORY·entry point"
+date: 2026-04-12T09:26:00
 description: "MEMORY·SECTIONS·alignment·기본 layout."
 series: "Modern Embedded Recipes"
 seriesOrder: 26

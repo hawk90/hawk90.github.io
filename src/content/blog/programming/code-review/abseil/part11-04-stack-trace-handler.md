@@ -1,6 +1,6 @@
 ---
-title: "Part 11-04: Stack trace / failure_signal_handler"
-date: 2026-05-25T16:00:00
+title: "Abseil Stack trace·failure_signal_handler"
+date: 2026-06-12T09:14:00
 description: "absl::Symbolize, GetStackTrace, InstallFailureSignalHandler — crash 시점에 stack을 찍어 남기는 진단 인프라."
 series: "Abseil Code Review"
 seriesOrder: 62

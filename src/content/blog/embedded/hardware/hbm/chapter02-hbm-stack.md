@@ -1,6 +1,6 @@
 ---
-title: "Ch 2: HBM 스택 구조와 TSV"
-date: 2026-05-16T02:00:00
+title: "HBM 3D 스택 구조 분해 — TSV·Microbump·Base Die의 역할"
+date: 2026-05-16T09:02:00
 description: "Base die + DRAM die stack — 3D 메모리의 구성요소와 TSV·microbump의 역할."
 series: "HBM·GDDR 심화"
 seriesOrder: 2
@@ -204,6 +204,6 @@ TSV는 *die 내부*에서 *10 μm pitch*, microbump는 *die 간*에서 *55 μm p
 - [Ch 1: 고대역 메모리 개요](/blog/embedded/hardware/hbm/chapter01-overview)
 - [Ch 3: HBM 세대 비교](/blog/embedded/hardware/hbm/chapter03-hbm-generations)
 - [Ch 6: 열 설계와 전력 관리](/blog/embedded/hardware/hbm/chapter06-thermal-power)
-- [UCIe Ch 6: 2.5D 패키징](/blog/embedded/hardware/ucie/chapter06-2-5d-packaging) — interposer 공유
-- [UCIe Ch 7: 3D 패키징](/blog/embedded/hardware/ucie/chapter07-3d-packaging) — hybrid bonding 심화
-- [BoW Ch 6: 패키징](/blog/embedded/hardware/bow/chapter06-packaging) — bump pitch와 yield
+- UCIe Ch 6: 2.5D 패키징 — interposer 공유
+- UCIe Ch 7: 3D 패키징 — hybrid bonding 심화
+- BoW Ch 6: 패키징 — bump pitch와 yield

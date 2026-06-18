@@ -1,6 +1,6 @@
 ---
-title: "4-13: C++ in RTOS — RAII·std::thread·ETL·Coroutine"
-date: 2026-05-07T01:00:00
+title: "C++ in RTOS — RAII·std::thread·ETL·Coroutine"
+date: 2026-05-07T09:45:00
 description: "RTOS C API를 C++ 객체로 감싸는 패턴을 정리합니다. RAII MutexGuard와 ScopedIRQDisable, std::thread/std::mutex의 한계와 직접 xTaskCreate가 결정성을 갖는 이유, ETL로 STL을 대체하는 법, C++20 coroutine을 RTOS 위에 얹는 방식까지 다룹니다."
 series: "Practical RTOS Internals"
 seriesOrder: 45

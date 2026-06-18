@@ -1,6 +1,6 @@
 ---
-title: "Part 3-03: IOThreadPoolExecutor — libevent 기반 I/O pool"
-date: 2026-05-23T15:00:00
+title: "folly::IOThreadPoolExecutor — libevent 기반 I/O pool"
+date: 2026-06-04T09:15:00
 description: "IOThreadPoolExecutor는 각 worker thread에 EventBase를 두어 libevent 기반 I/O와 timer를 처리한다."
 series: "Folly Code Review"
 seriesOrder: 15

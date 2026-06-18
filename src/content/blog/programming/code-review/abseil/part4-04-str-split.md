@@ -1,6 +1,6 @@
 ---
-title: "Part 4-04: StrSplit — Delimiter, Predicate, 컨테이너 변환"
-date: 2026-05-23T22:00:00
+title: "absl::StrSplit — Delimiter·Predicate·컨테이너 변환"
+date: 2026-06-10T09:06:00
 description: "Part 4-04: absl::StrSplit — Delimiter 추상화, ByChar/ByString/ByAnyChar/ByLength, predicate 필터링, 임의 컨테이너 자동 변환."
 series: "Abseil Code Review"
 seriesOrder: 22

@@ -1,6 +1,6 @@
 ---
-title: "3-05: 링커 스크립트 고급"
-date: 2026-05-13T03:00:00
+title: "링커 스크립트 고급 — Overlay·BSS·init_array·LMA/VMA"
+date: 2026-04-12T09:27:00
 description: "LMA vs VMA·KEEP·AT>·overlay·custom section."
 series: "Modern Embedded Recipes"
 seriesOrder: 27

@@ -1,6 +1,6 @@
 ---
-title: "Ch 10: 실전 — BeagleBone Black 시스템 처음부터 끝까지"
-date: 2026-05-19T10:00:00
+title: "Buildroot 실전 — BeagleBone Black 시스템 처음부터 끝까지"
+date: 2026-05-19T09:10:00
 description: "Buildroot로 BeagleBone Black용 완전한 시스템을 구축 — defconfig부터 SD 카드 부팅까지."
 series: "Buildroot Practical"
 seriesOrder: 10

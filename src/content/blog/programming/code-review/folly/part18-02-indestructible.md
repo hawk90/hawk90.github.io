@@ -1,6 +1,6 @@
 ---
-title: "Part 18-02: folly::Indestructible — global lifetime 패턴"
-date: 2026-05-27T19:00:00
+title: "folly::Indestructible — global lifetime 패턴"
+date: 2026-06-08T09:05:00
 description: "Indestructible<T>의 동기 — Meyers singleton의 static deinitialization 함정과 그 회피."
 series: "Folly Code Review"
 seriesOrder: 77

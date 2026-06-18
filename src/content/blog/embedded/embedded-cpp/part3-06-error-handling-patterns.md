@@ -1,6 +1,6 @@
 ---
-title: "Part 3-06: 에러 처리 패턴"
-date: 2026-05-07T06:00:00
+title: "임베디드 에러 처리 패턴 — Result·errno·optional 비교"
+date: 2026-04-30T09:24:00
 description: "Result types, error chains, exception-free RAII — 실용적 에러 시스템 구축 패턴."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 24
@@ -458,7 +458,7 @@ int f() { throw std::runtime_error("err"); }
 - [Part 3-05: No-Exception 설계](/blog/embedded/embedded-cpp/part3-05-no-exception-design)
 - [Part 3-07: std::expected](/blog/embedded/embedded-cpp/part3-07-expected)
 - [Part 4-06: State Machine](/blog/embedded/embedded-cpp/part4-06-state-machine)
-- [Refactoring Pattern 40: Introduce Assertion](/blog/programming/design/refactoring-catalog/pattern40-introduce-assertion) — 검증
+- Refactoring Pattern 40: Introduce Assertion — 검증
 
 ## 다음 글
 

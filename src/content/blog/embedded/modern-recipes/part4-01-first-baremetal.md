@@ -1,6 +1,6 @@
 ---
-title: "4-01: 첫 bare-metal 프로그램"
-date: 2026-05-13T11:00:00
+title: "첫 bare-metal 프로그램 작성 — Linker·Startup·main의 최소 구성"
+date: 2026-04-13T09:35:00
 description: "LED toggle — 최소한의 startup·main·loop."
 series: "Modern Embedded Recipes"
 seriesOrder: 35

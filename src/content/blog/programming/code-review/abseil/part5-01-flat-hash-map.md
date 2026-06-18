@@ -1,6 +1,6 @@
 ---
-title: "Part 5-01: flat_hash_map — Swiss Table 기반 hash map"
-date: 2026-05-24T04:00:00
+title: "absl::flat_hash_map — Swiss Table 기반 hash map"
+date: 2026-06-10T09:11:00
 description: "Part 5-01: absl::flat_hash_map — Swiss Table 채택 배경, std::unordered_map 대비 cache locality와 성능, pointer/iterator 안정성 트레이드오프."
 series: "Abseil Code Review"
 seriesOrder: 27

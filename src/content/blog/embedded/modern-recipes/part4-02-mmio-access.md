@@ -1,6 +1,6 @@
 ---
-title: "4-02: 레지스터 직접 접근"
-date: 2026-05-13T12:00:00
+title: "MMIO 레지스터 직접 접근 — volatile·Memory Map·Aliasing 분석"
+date: 2026-04-13T09:36:00
 description: "volatile·MMIO·packed struct — peripheral register 다루기."
 series: "Modern Embedded Recipes"
 seriesOrder: 36

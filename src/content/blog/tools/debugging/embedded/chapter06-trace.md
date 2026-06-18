@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: Trace — RTT / ITM / SWO / ETM / Semihosting"
-date: 2026-05-17T06:00:00
+title: "임베디드 Trace 비교 — RTT·ITM·SWO·ETM·Semihosting 선택"
+date: 2026-05-26T09:06:00
 description: "printf 없이 펌웨어 로그·trace 빼내기. 다섯 가지 방법 비교 + 코드 예제."
 tags: [rtt, itm, swo, etm, semihosting, trace, embedded]
 series: "Embedded Debugging"

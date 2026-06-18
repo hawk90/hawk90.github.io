@@ -1,6 +1,6 @@
 ---
-title: "Part 3-08: No-RTTI 설계"
-date: 2026-05-07T08:00:00
+title: "No-RTTI C++ 설계 — dynamic_cast 제거와 정적 타입 분기"
+date: 2026-04-30T09:26:00
 description: "-fno-rtti 환경에서 type info 없이 다형성 — enum tag, std::variant, CRTP."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 26
@@ -394,7 +394,7 @@ using Event = std::variant<SmallEvent, HugeEvent>;
 - [Part 1-02: 컴파일러 플래그](/blog/embedded/embedded-cpp/part1-02-compiler-flags) — `-fno-rtti`
 - [Part 2-08: Static Polymorphism](/blog/embedded/embedded-cpp/part2-08-static-polymorphism) — CRTP
 - [Part 4-06: State Machine](/blog/embedded/embedded-cpp/part4-06-state-machine) — std::variant 활용
-- [GoF 23: Visitor](/blog/programming/design/gof-design-patterns/item23-visitor) — std::visit
+- GoF 23: Visitor — std::visit
 
 ## 다음 글
 

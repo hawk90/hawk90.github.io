@@ -1,6 +1,6 @@
 ---
-title: "3-09: 컴파일러 최적화"
-date: 2026-05-13T07:00:00
+title: "임베디드 컴파일러 최적화 분석 — -O0~-O3·-Os·-LTO 비교"
+date: 2026-04-12T09:31:00
 description: "-O0/-O1/-O2/-O3/-Os/-Og — 옵션별 차이와 디버깅 가능성."
 series: "Modern Embedded Recipes"
 seriesOrder: 31

@@ -1,6 +1,6 @@
 ---
-title: "Part 5-02: flat_hash_set — set 버전 Swiss Table"
-date: 2026-05-24T05:00:00
+title: "absl::flat_hash_set — set 버전 Swiss Table"
+date: 2026-06-10T09:12:00
 description: "Part 5-02: absl::flat_hash_set — flat_hash_map의 set 대응, value-as-key 구조, dedup/membership 워크로드 패턴."
 series: "Abseil Code Review"
 seriesOrder: 28

@@ -1,6 +1,6 @@
 ---
-title: "Part 2-08: thread_annotations — clang TSA"
-date: 2026-05-23T13:00:00
+title: "Abseil thread_annotations — clang TSA 통합"
+date: 2026-06-09T09:13:00
 description: "Part 2-08: ABSL_GUARDED_BY, ABSL_LOCKS_EXCLUDED — clang의 thread safety analysis로 mutex 사용을 컴파일 시점에 검증."
 series: "Abseil Code Review"
 seriesOrder: 13

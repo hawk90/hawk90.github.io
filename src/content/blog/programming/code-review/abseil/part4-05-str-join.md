@@ -1,6 +1,6 @@
 ---
-title: "Part 4-05: StrJoin — 컨테이너 결합과 Formatter"
-date: 2026-05-23T23:00:00
+title: "absl::StrJoin — 컨테이너 결합과 Formatter"
+date: 2026-06-10T09:07:00
 description: "Part 4-05: absl::StrJoin — 임의 컨테이너를 구분자로 합치기, Formatter 커스터마이즈, PairFormatter / DereferenceFormatter."
 series: "Abseil Code Review"
 seriesOrder: 23

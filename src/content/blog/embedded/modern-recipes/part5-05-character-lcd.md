@@ -1,6 +1,6 @@
 ---
-title: "5-05: Character LCD (HD44780)"
-date: 2026-05-14T05:00:00
+title: "Character LCD 제어 — HD44780·4-bit Mode·Custom Char"
+date: 2026-04-14T09:53:00
 description: "4/8-bit 모드·command·custom character·timing 준수."
 series: "Modern Embedded Recipes"
 seriesOrder: 53

@@ -1,6 +1,6 @@
 ---
-title: "Practical RTOS Internals: 서문"
-date: 2026-05-07
+title: "Practical RTOS Internals — 실시간 커널 내부 분석 시리즈 소개"
+date: 2026-05-04T09:00:00
 description: "RTOS를 사용하는 것이 아니라 이해하고 구현하는 법. Scheduler, context switch, memory allocator의 내부 동작을 소스 코드 수준에서 분석합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 0

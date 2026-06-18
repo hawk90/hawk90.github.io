@@ -1,6 +1,6 @@
 ---
-title: "Part 13-04: folly::Function (vs std::function)"
-date: 2026-05-25T13:00:00
+title: "folly::Function vs std::function"
+date: 2026-06-07T09:05:00
 description: "Part 13-04: folly::Function — move-only callable. unique_ptr capture, const-correctness, exec policy를 갖춘 std::function 대체."
 series: "Folly Code Review"
 seriesOrder: 59

@@ -1,6 +1,6 @@
 ---
-title: "Ch 2: ELF Core 파일 포맷"
-date: 2026-05-17T02:00:00
+title: "ELF Core 파일 포맷 분해 — NT_PRSTATUS·NT_PRPSINFO·NT_FILE"
+date: 2026-06-01T09:02:00
 description: "core dump의 내부 구조. PT_NOTE/PT_LOAD, NT_PRSTATUS, NT_FILE, NT_AUXV."
 tags: [core-dump, elf, nt-prstatus, postmortem]
 series: "Postmortem Debugging"

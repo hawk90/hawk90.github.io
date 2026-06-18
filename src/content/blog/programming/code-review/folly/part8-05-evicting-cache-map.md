@@ -1,6 +1,6 @@
 ---
-title: "Part 8-05: EvictingCacheMap (LRU)"
-date: 2026-05-24T16:00:00
+title: "folly::EvictingCacheMap — LRU 구현 분석"
+date: 2026-06-06T09:03:00
 description: "EvictingCacheMap — 고정 size 한도와 LRU eviction policy를 결합한 single-thread cache."
 series: "Folly Code Review"
 seriesOrder: 39

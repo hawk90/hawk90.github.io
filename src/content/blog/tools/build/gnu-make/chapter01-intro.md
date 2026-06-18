@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: Make 소개 / 설치 / 첫 Makefile"
-date: 2026-05-17T01:00:00
+title: "GNU Make 소개와 첫 Makefile — 설치부터 첫 빌드까지"
+date: 2026-06-03T09:01:00
 description: "GNU Make의 역할, 설치 방법, 첫 Makefile 작성과 실행."
 tags: [make, build, Makefile]
 series: "GNU Make"

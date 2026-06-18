@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: GDB Python API 입문 — Value / Type / Frame"
-date: 2026-05-17T01:00:00
+title: "GDB Python API 입문 — Value·Type·Frame 객체 활용"
+date: 2026-05-27T09:01:00
 description: "GDB Python 인터프리터, 핵심 객체(Value/Type/Frame/Symbol), 디버기 데이터 조작."
 tags: [gdb, python, api]
 series: "GDB Extension and IDE"

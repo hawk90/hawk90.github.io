@@ -1,6 +1,6 @@
 ---
-title: "Ch 10: TUI / 프런트엔드"
-date: 2026-05-17T10:00:00
+title: "GDB·LLDB TUI와 프런트엔드 — gdb-dashboard·gef·pwndbg·VS Code"
+date: 2026-05-24T09:10:00
 description: "TUI 모드, cgdb, gdb-dashboard, gef/pwndbg, VSCode, nvim-dap, DAP 프로토콜."
 tags: [gdb, TUI, Frontend, DAP]
 series: "GDB and LLDB"

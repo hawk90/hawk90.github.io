@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: Buildroot가 푸는 문제 — Yocto와의 비교"
-date: 2026-05-19T01:00:00
+title: "Buildroot가 푸는 문제 — Yocto와의 핵심 차이 분석"
+date: 2026-05-19T09:01:00
 description: "Buildroot의 위치 — 임베디드 리눅스 rootfs 빌드 시스템, Yocto와의 트레이드오프."
 series: "Buildroot Practical"
 seriesOrder: 1

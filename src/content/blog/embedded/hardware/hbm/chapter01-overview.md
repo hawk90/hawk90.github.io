@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: 고대역 메모리 개요 — HBM vs GDDR"
-date: 2026-05-16T01:00:00
+title: "HBM과 GDDR 분기점 분석 — Bandwidth·Capacity·Cost 트레이드오프"
+date: 2026-05-16T09:01:00
 description: "HBM과 GDDR의 분기점 — bandwidth·capacity·cost의 트레이드오프와 시장 분할."
 series: "HBM·GDDR 심화"
 seriesOrder: 1
@@ -148,9 +148,9 @@ SK 하이닉스가 *2023년 HBM3 양산*에 *가장 먼저* 들어가 NVIDIA의 
 | Ch 7 | 메모리 컨트롤러 | bank·scheduling |
 | Ch 8 | NPU·GPU 활용 | weight·KV cache |
 
-이번 시리즈의 *자매 시리즈* 둘이 있습니다. [BoW 시리즈](/blog/embedded/hardware/bow/chapter01-overview)와 [UCIe 시리즈](/blog/embedded/hardware/ucie/chapter01-overview)는 *die-to-die* 표준입니다. HBM이 *DRAM stack*을 *interposer 위*에 놓는다면, BoW/UCIe는 *로직 칩렛*을 *같은 interposer 위*에 놓습니다. 함께 보면 *현세대 패키징의 전체 그림*이 나옵니다.
+이번 시리즈의 *자매 시리즈* 둘이 있습니다. BoW 시리즈와 UCIe 시리즈는 *die-to-die* 표준입니다. HBM이 *DRAM stack*을 *interposer 위*에 놓는다면, BoW/UCIe는 *로직 칩렛*을 *같은 interposer 위*에 놓습니다. 함께 보면 *현세대 패키징의 전체 그림*이 나옵니다.
 
-[CXL 시리즈](/blog/embedded/hardware/cxl/chapter01-overview)는 *HBM의 한계 너머*입니다. *stack 4개로 192 GB*를 만들어도 *LLM weight 1 TB*는 못 담습니다. CXL은 *PCIe 너머로 메모리를 풀링*해 *TB급 메모리*를 만드는 길입니다.
+CXL 시리즈는 *HBM의 한계 너머*입니다. *stack 4개로 192 GB*를 만들어도 *LLM weight 1 TB*는 못 담습니다. CXL은 *PCIe 너머로 메모리를 풀링*해 *TB급 메모리*를 만드는 길입니다.
 
 ## 자주 하는 실수
 
@@ -190,6 +190,6 @@ HBM은 *DDR5의 진화형*이 아니라 *완전히 다른 패키징 카테고리
 - [Ch 2: HBM 스택 구조와 TSV](/blog/embedded/hardware/hbm/chapter02-hbm-stack)
 - [Ch 3: HBM2/HBM2E/HBM3/HBM3E 스펙 비교](/blog/embedded/hardware/hbm/chapter03-hbm-generations)
 - [Ch 4: GDDR6·GDDR6X·GDDR7](/blog/embedded/hardware/hbm/chapter04-gddr)
-- [BoW Ch 1: 개요](/blog/embedded/hardware/bow/chapter01-overview) — die-to-die 표준의 한쪽
-- [UCIe Ch 1: 개요](/blog/embedded/hardware/ucie/chapter01-overview) — die-to-die 표준의 다른 쪽
-- [CXL Ch 1: 개요](/blog/embedded/hardware/cxl/chapter01-overview) — HBM 너머의 메모리 풀링
+- BoW Ch 1: 개요 — die-to-die 표준의 한쪽
+- UCIe Ch 1: 개요 — die-to-die 표준의 다른 쪽
+- CXL Ch 1: 개요 — HBM 너머의 메모리 풀링

@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: CMake 소개 / 설치 / 첫 프로젝트"
-date: 2026-05-17T01:00:00
+title: "CMake 소개와 첫 프로젝트 — 설치부터 빌드까지"
+date: 2026-06-02T09:01:00
 description: "왜 메타 빌드 시스템이 필요한가, CMake가 그 자리에서 무엇을 하는가, 그리고 5줄 짜리 첫 프로젝트."
 tags: [cmake, build, cpp]
 series: "CMake"

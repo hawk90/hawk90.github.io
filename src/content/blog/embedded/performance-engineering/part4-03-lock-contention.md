@@ -1,6 +1,6 @@
 ---
-title: "4-03: Lock Contention — Wait·Hold·Convoy·측정"
-date: 2026-05-08T12:00:00
+title: "Lock Contention 분석 — Wait·Hold·Convoy·측정 기법"
+date: 2026-04-26T09:02:00
 description: "Wait time과 hold time, contention ratio를 측정하고 lock convoy를 회피하는 법."
 series: "Embedded Performance Engineering"
 seriesOrder: 32

@@ -1,6 +1,6 @@
 ---
-title: "Ch 3: ftrace + tracepoints"
-date: 2026-05-17T03:00:00
+title: "ftrace와 tracepoints 활용 — 커널 함수 호출 트레이싱"
+date: 2026-05-25T09:03:00
 description: "함수 단위 trace, 이벤트 trace, 정적 tracepoint, function graph."
 tags: [kernel, ftrace, tracepoint, tracing]
 series: "Kernel Debugging"
@@ -417,7 +417,7 @@ Ch 4 — eBPF / bpftrace로 커널 디버깅. ftrace의 모든 것을 *훨씬 �
 
 - [Ch 2: printk / dmesg](/blog/tools/debugging/kernel/chapter02-printk-dmesg)
 - [Ch 4: eBPF for kernel debugging](/blog/tools/debugging/kernel/chapter04-ebpf-kernel)
-- [strace-tracing Ch 9: ftrace](/blog/tools/strace-tracing/chapter09-ftrace)
+- strace-tracing Ch 9: ftrace
 - [Brendan Gregg — perf 페이지 (ftrace 자료 많음)](https://www.brendangregg.com/perf.html)
 - [`Documentation/trace/ftrace.rst`](https://www.kernel.org/doc/html/latest/trace/ftrace.html)
 - [trace-cmd GitHub](https://github.com/rostedt/trace-cmd)

@@ -1,6 +1,6 @@
 ---
-title: "Part 1-02: Folly vs Abseil 철학 차이 (performance-first vs std-compatible)"
-date: 2026-05-23T02:00:00
+title: "Folly vs Abseil 철학 비교 — performance-first vs std-compatible"
+date: 2026-06-04T09:02:00
 description: "두 라이브러리의 설계 결정을 항목별로 비교 — 예외, 의존성, async 모델, ABI 정책."
 series: "Folly Code Review"
 seriesOrder: 2

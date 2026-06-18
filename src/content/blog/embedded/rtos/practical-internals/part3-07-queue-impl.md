@@ -1,6 +1,6 @@
 ---
-title: "3-07: Queue 내부 구현 — Ring Buffer, 2 Wait Lists, Atomic Send/Receive"
-date: 2026-05-07T04:00:00
+title: "Queue 내부 구현 추적 — Ring Buffer·2 Wait Lists·Atomic Send/Receive"
+date: 2026-05-06T09:28:00
 description: "FreeRTOS Queue 코드 — pcWriteTo·pcReadFrom·uxMessagesWaiting + xTasksWaitingToSend/Receive."
 series: "Practical RTOS Internals"
 seriesOrder: 28

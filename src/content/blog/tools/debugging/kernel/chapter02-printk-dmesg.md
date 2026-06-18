@@ -1,6 +1,6 @@
 ---
-title: "Ch 2: printk / dmesg / dynamic_debug"
-date: 2026-05-17T02:00:00
+title: "printk·dmesg·dynamic_debug 분석 — 커널 로그 추적"
+date: 2026-05-25T09:02:00
 description: "커널 로깅의 모든 것. log level, ring buffer, ratelimit, 런타임 토글."
 tags: [kernel, printk, dmesg, dynamic-debug]
 series: "Kernel Debugging"
@@ -344,6 +344,6 @@ Ch 3 — ftrace + tracepoints. printk 없이 *모든 함수 호출*을 보는 �
 
 - [Ch 1: 커널 디버깅 개론](/blog/tools/debugging/kernel/chapter01-user-kernel-boundary)
 - [Ch 3: ftrace + tracepoints](/blog/tools/debugging/kernel/chapter03-ftrace-tracepoints)
-- [strace-tracing Ch 9: ftrace](/blog/tools/strace-tracing/chapter09-ftrace)
+- strace-tracing Ch 9: ftrace
 - [Linux Kernel — printk docs](https://www.kernel.org/doc/html/latest/core-api/printk-basics.html)
 - [`Documentation/admin-guide/dynamic-debug-howto.rst`](https://www.kernel.org/doc/html/latest/admin-guide/dynamic-debug-howto.html)

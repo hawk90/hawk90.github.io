@@ -1,6 +1,6 @@
 ---
-title: "2-09: TrustZone-M 기초"
-date: 2026-05-12T21:00:00
+title: "ARM TrustZone-M 기초 — Secure/Non-Secure·NSC·MPC"
+date: 2026-04-11T09:21:00
 description: "Cortex-M33의 Secure/Non-Secure 분리·SAU/IDAU·NSC."
 series: "Modern Embedded Recipes"
 seriesOrder: 21

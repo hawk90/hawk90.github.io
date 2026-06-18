@@ -1,6 +1,6 @@
 ---
-title: "Part 13-03: folly::Optional (vs std::optional)"
-date: 2026-05-25T12:00:00
+title: "folly::Optional vs std::optional"
+date: 2026-06-07T09:04:00
 description: "Part 13-03: folly::Optional — std::optional와의 차이, 역사적 배경, monadic op과 std 호환."
 series: "Folly Code Review"
 seriesOrder: 58

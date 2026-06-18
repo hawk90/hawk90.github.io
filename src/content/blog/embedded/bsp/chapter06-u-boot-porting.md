@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: U-Boot 보드 포팅"
-date: 2026-05-09T06:00:00
+title: "U-Boot 새 보드 포팅 — defconfig·board.c·DTS 작성 흐름"
+date: 2026-05-18T09:06:00
 description: "BSP 관점에서의 U-Boot 추가 — defconfig·board.c·DT 통합 흐름."
 series: "BSP Development"
 seriesOrder: 6

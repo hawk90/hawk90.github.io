@@ -1,6 +1,6 @@
 ---
-title: "Modern Embedded Recipes: 서문"
-date: 2026-05-07T01:00:00
+title: "Modern Embedded Recipes — 모던 임베디드 실전 레시피 시리즈 소개"
+date: 2026-04-10T09:00:00
 description: "HW interface 기초부터 ARM·빌드·드라이버·peripheral·RTOS·Linux·메모리·동시성·디버깅·FPGA·Edge AI까지 임베디드 12 Part 종합 cookbook 148편."
 series: "Modern Embedded Recipes"
 seriesOrder: 0

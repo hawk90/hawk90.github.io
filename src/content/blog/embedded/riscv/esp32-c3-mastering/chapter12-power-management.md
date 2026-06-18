@@ -1,6 +1,6 @@
 ---
-title: "Ch 12: 전력 관리 — Modem/Light/Deep Sleep와 Wake 소스"
-date: 2026-05-01T12:00:00
+title: "ESP32-C3 전력 관리 — Modem·Light·Deep Sleep와 Wake 소스"
+date: 2026-05-20T09:12:00
 description: "5단계 power mode, RTC 도메인 활용, ULP 코프로세서 미지원 — C3는 RTC GPIO만."
 series: "ESP32-C3 Mastering"
 seriesOrder: 12

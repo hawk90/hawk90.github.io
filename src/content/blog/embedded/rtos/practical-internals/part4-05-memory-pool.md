@@ -1,6 +1,6 @@
 ---
-title: "4-05: Memory Pool — Fixed-Size Block Allocator의 단순함과 강력함"
-date: 2026-05-07T17:00:00
+title: "Memory Pool — Fixed-Size Block Allocator의 단순함과 강력함"
+date: 2026-05-07T09:37:00
 description: "같은 크기 객체를 다수 alloc/free하는 패턴을 위한 fixed-size pool입니다. free list 구조, O(1) 보장, per-class pool, lock-free 변형까지 실전 패턴을 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 37

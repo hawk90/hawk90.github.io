@@ -1,6 +1,6 @@
 ---
-title: "5-06: SPI OLED (SSD1306)"
-date: 2026-05-14T06:00:00
+title: "SPI OLED 제어 — SSD1306·Frame Buffer·Page 단위 갱신"
+date: 2026-04-14T09:54:00
 description: "128×64 OLED·framebuffer·page mode·partial update."
 series: "Modern Embedded Recipes"
 seriesOrder: 54

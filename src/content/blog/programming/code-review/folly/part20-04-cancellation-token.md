@@ -1,6 +1,6 @@
 ---
-title: "Part 20-04: folly::CancellationToken — 코루틴/Future 취소 전파"
-date: 2026-05-28T10:00:00
+title: "folly::CancellationToken — 코루틴·Future 취소 전파"
+date: 2026-06-08T09:14:00
 description: "CancellationSource/Token의 전파 모델 — coroutine·Future·callback 트리에서 협력적 취소."
 series: "Folly Code Review"
 seriesOrder: 86

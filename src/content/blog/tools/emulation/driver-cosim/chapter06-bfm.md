@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: Bus Functional Model (BFM) in C"
-date: 2026-05-17T06:00:00
+title: "C로 구현하는 Bus Functional Model — Driver 검증용 BFM 설계"
+date: 2026-05-22T09:06:00
 description: "Driver와 RTL 사이의 protocol-aware adapter."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 6
@@ -265,5 +265,5 @@ C BFM과 Python BFM은 *같은 protocol* 같은 *transaction abstraction*을 다
 
 - [Ch 5: SystemC TLM](/blog/tools/emulation/driver-cosim/chapter05-systemc-tlm)
 - [Ch 7: UVM C Reference Model](/blog/tools/emulation/driver-cosim/chapter07-uvm-c-model)
-- [QEMU Fake Device — Register Bank](/blog/tools/emulation/qemu-fake-device/chapter13-register-bank) — register 모델링 패턴
-- [FPGA Driver — AXI/PCIe Bridge](/blog/tools/emulation/qemu-fpga-driver/chapter04-axi-pcie-bridge)
+- QEMU Fake Device — Register Bank — register 모델링 패턴
+- FPGA Driver — AXI/PCIe Bridge

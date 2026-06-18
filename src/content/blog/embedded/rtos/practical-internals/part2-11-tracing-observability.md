@@ -1,6 +1,6 @@
 ---
-title: "2-11: RTOS Tracing과 Observability — Tracealyzer·SystemView·ITM/ETM"
-date: 2026-05-07T21:00:00
+title: "RTOS Tracing과 Observability — Tracealyzer·SystemView·ITM/ETM"
+date: 2026-05-05T09:21:00
 description: "Percepio Tracealyzer와 Segger SystemView, Cortex-M의 ITM/ETM 하드웨어 트레이스. Task switch·ISR·queue·mutex 이벤트를 시간축에 펼쳐 인과를 추적합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 21

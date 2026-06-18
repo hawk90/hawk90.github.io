@@ -1,6 +1,6 @@
 ---
-title: "Ch 8: TSN — Time-Sensitive Networking"
-date: 2026-05-16T08:00:00
+title: "TSN 표준 분석 — IEEE 802.1 Time-Sensitive Networking 개요"
+date: 2026-05-13T09:08:00
 description: "IEEE 802.1 toolkit — 표준 Ethernet에 결정성을 더하는 9개 표준을 한 자리에."
 series: "Industrial Ethernet 심화"
 seriesOrder: 8

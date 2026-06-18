@@ -1,6 +1,6 @@
 ---
-title: "5-05: RTOS 선택 가이드 — Footprint·License·Certification·Ecosystem"
-date: 2026-05-07T06:00:00
+title: "RTOS 선택 가이드 — Footprint·License·Certification·Ecosystem"
+date: 2026-05-08T09:50:00
 description: "FreeRTOS·Zephyr·ThreadX·RT-Thread·NuttX·VxWorks·QNX·INTEGRITY·SafeRTOS·µC/OS·PX5를 한 표에 모아 비교합니다. IoT·자동차·항공·산업·의료·웨어러블·드론별 추천과 결정 기준을 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 50

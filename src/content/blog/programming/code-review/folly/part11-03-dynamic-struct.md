@@ -1,6 +1,6 @@
 ---
-title: "Part 11-03: Dynamic ↔ struct (manual marshaling)"
-date: 2026-05-25T05:00:00
+title: "folly dynamic ↔ struct — manual marshaling"
+date: 2026-06-06T09:15:00
 description: "Part 11-03: dynamic을 strongly-typed struct로. type safety boundary를 어디에 그을지, marshaling 패턴 비교."
 series: "Folly Code Review"
 seriesOrder: 51

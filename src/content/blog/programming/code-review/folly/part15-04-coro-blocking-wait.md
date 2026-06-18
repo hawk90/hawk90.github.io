@@ -1,6 +1,6 @@
 ---
-title: "Part 15-04: blockingWait / collectAll — 동기 경계와 fan-in"
-date: 2026-05-27T09:00:00
+title: "folly coro blockingWait·collectAll — 동기 경계와 fan-in"
+date: 2026-06-07T09:13:00
 description: "blockingWait, collectAll, collectAllRange — sync 경계 연결과 병렬 합성, deadlock 회피 규칙."
 series: "Folly Code Review"
 seriesOrder: 67

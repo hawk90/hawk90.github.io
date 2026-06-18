@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: Breakpoint와 Watchpoint"
-date: 2026-05-17T05:00:00
+title: "Breakpoint와 Watchpoint 분석 — Conditional·Hardware·Catchpoint"
+date: 2026-05-24T09:05:00
 description: "조건부 break, watchpoint(변수 변경 추적), catchpoint, hardware vs software."
 tags: [gdb, lldb, Breakpoint, Watchpoint]
 series: "GDB and LLDB"

@@ -1,6 +1,6 @@
 ---
-title: "7-04: Device Tree Overlay"
-date: 2026-05-15T06:00:00
+title: "Device Tree Overlay 적용 — Runtime fragment·dtoverlay"
+date: 2026-04-16T09:03:00
 description: "DT overlay의 fragment, target, symbol, dtoverlay 명령, Raspberry Pi 적용 예까지 동적 device 활성화를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 78

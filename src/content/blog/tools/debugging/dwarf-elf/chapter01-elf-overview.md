@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: ELF 포맷 개관"
-date: 2026-05-17T01:00:00
+title: "ELF 포맷 분해 — Section·Segment·Symbol Table 구조 추적"
+date: 2026-05-23T09:01:00
 description: "ELF 헤더, Program Header / Section Header, dynamic linking, build-id."
 tags: [elf, binary, linker]
 series: "DWARF and ELF Internals"

@@ -1,6 +1,6 @@
 ---
-title: "Part 2-08: Static Polymorphism (CRTP)"
-date: 2026-05-07T08:00:00
+title: "CRTP 패턴 분석 — vtable 없는 정적 다형성"
+date: 2026-04-29T09:16:00
 description: "Curiously Recurring Template Pattern — virtual 함수 없이 컴파일 타임 다형성. vtable 0, 간접 호출 0."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 16
@@ -488,7 +488,7 @@ bl      UartLogger::log_impl   ; 직접 호출 — 인라인 가능
 - [Part 2-09: Type Traits](/blog/embedded/embedded-cpp/part2-09-type-traits) — SFINAE 결합
 - [Part 2-10: Concepts (C++20)](/blog/embedded/embedded-cpp/part2-10-concepts) — CRTP 명확화
 - [Part 5-03: Peripheral 추상화](/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction) — CRTP peripheral
-- [GoF 21: Strategy](/blog/programming/design/gof-design-patterns/item21-strategy) — virtual vs CRTP
+- GoF 21: Strategy — virtual vs CRTP
 
 ## 다음 글
 

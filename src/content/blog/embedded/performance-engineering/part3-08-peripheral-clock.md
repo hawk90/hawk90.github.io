@@ -1,6 +1,6 @@
 ---
-title: "3-08: Peripheral Clock — PLL·Divider·Gating·DVFS"
-date: 2026-05-08T07:00:00
+title: "Peripheral Clock 분석 — PLL·Divider·Gating·DVFS"
+date: 2026-04-25T09:07:00
 description: "PLL/divider/gating으로 peripheral clock. STM32 RCC, Linux CCF. Power vs Performance."
 series: "Embedded Performance Engineering"
 seriesOrder: 26

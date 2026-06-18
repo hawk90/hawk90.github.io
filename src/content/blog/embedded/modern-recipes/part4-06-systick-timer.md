@@ -1,6 +1,6 @@
 ---
-title: "4-06: SysTick 타이머"
-date: 2026-05-13T16:00:00
+title: "SysTick 타이머 활용 — 24-bit Counter·1ms Tick·delay 구현"
+date: 2026-04-13T09:40:00
 description: "1ms tick·delay·jiffies — RTOS 없이 시간 처리."
 series: "Modern Embedded Recipes"
 seriesOrder: 40

@@ -1,6 +1,6 @@
 ---
-title: "Part 5-07: Swiss Table internals — control byte, SIMD probing"
-date: 2026-05-24T10:00:00
+title: "Abseil Swiss Table internals — control byte·SIMD probing"
+date: 2026-06-11T09:01:00
 description: "Part 5-07: Swiss Table 내부 — H1/H2 해시 분할, control byte 그룹, SSE2/SSE3/NEON SIMD probing, tombstone 처리."
 series: "Abseil Code Review"
 seriesOrder: 33

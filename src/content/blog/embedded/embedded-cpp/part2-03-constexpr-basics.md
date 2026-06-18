@@ -1,6 +1,6 @@
 ---
-title: "Part 2-03: constexpr 기초"
-date: 2026-05-07T03:00:00
+title: "constexpr 기초와 임베디드 적용 — 컴파일 타임 계산 활용"
+date: 2026-04-29T09:11:00
 description: "컴파일 타임 계산 — 런타임 코드와 데이터를 컴파일러가 미리 만들어줍니다. -Os보다 강력한 zero-cost."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 11

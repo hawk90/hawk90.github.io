@@ -1,6 +1,6 @@
 ---
-title: "4-01: Concurrency 기초 — Concurrency vs Parallelism·Race·Memory Model"
-date: 2026-05-08T10:00:00
+title: "Concurrency 기초 — Concurrency vs Parallelism·Race·Memory Model"
+date: 2026-04-26T09:00:00
 description: "Concurrency vs Parallelism (Rob Pike). Race condition. Memory model 도입."
 series: "Embedded Performance Engineering"
 seriesOrder: 30

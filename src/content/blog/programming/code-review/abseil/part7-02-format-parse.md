@@ -1,6 +1,6 @@
 ---
-title: "Part 7-02: Format / Parse"
-date: 2026-05-24T17:00:00
+title: "absl::Time Format·Parse"
+date: 2026-06-11T09:08:00
 description: "FormatTime, ParseTime — Abseil이 strftime/RFC3339를 한 함수로 흡수하는 방법."
 series: "Abseil Code Review"
 seriesOrder: 40

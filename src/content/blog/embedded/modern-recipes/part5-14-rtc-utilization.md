@@ -1,6 +1,6 @@
 ---
-title: "5-14: RTC 활용"
-date: 2026-05-14T14:00:00
+title: "RTC 활용 — Calendar·Alarm·Wake-up Timer·Backup Domain"
+date: 2026-04-14T09:62:00
 description: "Battery backup·alarm·calendar·tamper."
 series: "Modern Embedded Recipes"
 seriesOrder: 62

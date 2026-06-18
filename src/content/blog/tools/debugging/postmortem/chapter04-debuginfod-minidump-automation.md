@@ -1,6 +1,6 @@
 ---
-title: "Ch 4: debuginfod / Minidump / 자동화"
-date: 2026-05-17T04:00:00
+title: "포스트모템 자동화 — debuginfod·Minidump 파이프라인"
+date: 2026-06-01T09:04:00
 description: "build-id로 자동 debuginfo 매칭, Breakpad/crashpad minidump, CI 자동 사후 분석."
 tags: [debuginfod, minidump, breakpad, sentry, automation, postmortem]
 series: "Postmortem Debugging"
@@ -472,6 +472,6 @@ with open('core', 'rb') as f:
 - [crashpad](https://chromium.googlesource.com/crashpad/crashpad/)
 - [Sentry](https://sentry.io/)
 - [DWARF and ELF Internals — Ch 6: debuginfod](/blog/tools/debugging/dwarf-elf/chapter06-split-dwarf-tools)
-- [Concurrency Debugging](/blog/tools/debugging/concurrency/chapter01-linux-threads-futex)
+- Concurrency Debugging
 - [Embedded Debugging](/blog/tools/debugging/embedded/chapter01-rsp-protocol)
 - [GDB Extension and IDE](/blog/tools/debugging/gdb-extension/chapter01-python-api-basics)

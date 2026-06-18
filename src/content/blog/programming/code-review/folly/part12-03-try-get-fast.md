@@ -1,6 +1,6 @@
 ---
-title: "Part 12-03: try_get / try_get_fast (TLS-cached 접근)"
-date: 2026-05-25T09:00:00
+title: "folly::Singleton try_get·try_get_fast — TLS-cached 접근"
+date: 2026-06-07T09:01:00
 description: "Part 12-03: try_get vs try_get_fast — TLS 캐시로 hot-path singleton 접근을 nanosecond 수준으로."
 series: "Folly Code Review"
 seriesOrder: 55

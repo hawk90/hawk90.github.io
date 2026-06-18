@@ -1,6 +1,6 @@
 ---
-title: "8-11: 전력 최적화"
-date: 2026-05-16T03:00:00
+title: "임베디드 전력 최적화 — Sleep Mode·Clock Gating·DVFS"
+date: 2026-04-17T09:10:00
 description: "Active와 sleep, peripheral clock gating, DVFS, tickless idle, µA-level 측정까지 임베디드 전력 절감 기법을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 99

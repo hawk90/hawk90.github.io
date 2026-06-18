@@ -1,6 +1,6 @@
 ---
-title: "4-08: SMP Spinlock — LDREX/STREX, Ticket Lock, MCS, WFE/SEV"
-date: 2026-05-07T20:00:00
+title: "SMP Spinlock 구현 — LDREX/STREX·Ticket Lock·MCS·WFE/SEV"
+date: 2026-05-07T09:40:00
 description: "ARM LDREX/STREX exclusive monitor와 ARMv8.1 LSE를 출발점으로 SMP spinlock 구현을 따라갑니다. test-and-test-and-set, ticket lock, MCS lock의 fairness와 cache bouncing trade-off, WFE/SEV로 만드는 저전력 spin을 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 40

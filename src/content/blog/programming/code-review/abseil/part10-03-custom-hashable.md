@@ -1,6 +1,6 @@
 ---
-title: "Part 10-03: Custom hashable"
-date: 2026-05-25T12:00:00
+title: "Abseil Custom hashable 구현"
+date: 2026-06-12T09:10:00
 description: "실전 사용자 타입을 hashable로 만들기 — value class, enum, pair, raw 바이트 등 흔한 패턴 정리."
 series: "Abseil Code Review"
 seriesOrder: 58

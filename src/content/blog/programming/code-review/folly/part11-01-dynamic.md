@@ -1,6 +1,6 @@
 ---
-title: "Part 11-01: folly::dynamic (JSON-like dynamic type)"
-date: 2026-05-25T03:00:00
+title: "folly::dynamic — JSON-like dynamic type 분석"
+date: 2026-06-06T09:13:00
 description: "Part 11-01: folly::dynamic — JSON-like 동적 타입. std::any와 무엇이 다른지, 왜 Meta는 별도 타입을 만들었는지."
 series: "Folly Code Review"
 seriesOrder: 49

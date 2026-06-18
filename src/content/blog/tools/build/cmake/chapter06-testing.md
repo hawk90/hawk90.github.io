@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: 테스트와 CTest"
-date: 2026-05-17T06:00:00
+title: "CMake 테스트와 CTest — add_test·테스트 fixture·리포트"
+date: 2026-06-02T09:06:00
 description: "CMake 테스트 프레임워크 CTest와 Google Test, Catch2 연동 방법."
 tags: [cmake, build, cpp, testing, ctest]
 series: "CMake"

@@ -1,6 +1,6 @@
 ---
-title: "Ch 32: PSCI / SMCCC ABI"
-date: 2026-05-22T32:00:00
+title: "PSCI와 SMCCC ABI — ARM 표준 SMC 호출 규약 분석"
+date: 2026-05-22T09:32:00
 description: "SMCCC 호출 규약과 PSCI v1.1 ABI — function ID 구조, fast vs yielding, CPU_ON·CPU_SUSPEND, Linux PSCI driver."
 series: "Bootloader Internals"
 seriesOrder: 32

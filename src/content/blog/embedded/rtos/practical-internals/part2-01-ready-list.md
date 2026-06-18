@@ -1,6 +1,6 @@
 ---
-title: "2-01: Ready List 자료구조 — Linked List, Bitmap, O(1) Scheduler"
-date: 2026-05-07T11:00:00
+title: "Ready List 자료구조 분석 — Linked List·Bitmap·O(1) Scheduler"
+date: 2026-05-05T09:11:00
 description: "Ready 상태 task를 보관하는 자료구조 선택이 곧 스케줄러 latency를 결정합니다. FreeRTOS의 array-of-lists, bitmap + CLZ 최적화, uC/OS의 8×8 LUT까지 한 번에 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 11

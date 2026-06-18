@@ -1,6 +1,6 @@
 ---
-title: "Ch 8: End-to-End — Driver + RTL Co-sim"
-date: 2026-05-17T08:00:00
+title: "End-to-End Driver + RTL Co-simulation — 실전 통합 흐름"
+date: 2026-05-22T09:08:00
 description: "Verilator + DPI-C + Linux driver — 통합 cosim flow."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 8
@@ -285,6 +285,6 @@ NPU·chiplet·SoC가 가는 길에서 *pre-silicon driver 검증*은 더 이상 
 
 - [Ch 7: UVM C Reference Model](/blog/tools/emulation/driver-cosim/chapter07-uvm-c-model)
 - [Ch 1: Why Pre-Silicon Driver Verification](/blog/tools/emulation/driver-cosim/chapter01-why-cosim) — 시리즈 다시 보기
-- [QEMU Fake Device — Test Automation](/blog/tools/emulation/qemu-fake-device/chapter10-test-automation)
-- [FPGA Driver via QEMU+VFIO — VFIO Basics](/blog/tools/emulation/qemu-fpga-driver/chapter09-vfio-basics) — post-cosim 단계
+- QEMU Fake Device — Test Automation
+- FPGA Driver via QEMU+VFIO — VFIO Basics — post-cosim 단계
 - [Embedded Performance Engineering — Methodology](/blog/embedded/performance-engineering/part1-01-methodology)

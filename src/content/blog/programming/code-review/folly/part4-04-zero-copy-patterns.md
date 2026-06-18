@@ -1,6 +1,6 @@
 ---
-title: "Part 4-04: Zero-copy 패턴 — IOBuf로 ScatterGather I/O 표현"
-date: 2026-05-23T21:00:00
+title: "folly Zero-copy 패턴 — IOBuf로 ScatterGather I/O 표현"
+date: 2026-06-05T09:03:00
 description: "IOBuf chain을 직접 writev/readv에 넘기고, splice/sendfile과 결합해 zero-copy 송수신 파이프라인을 구성한다."
 series: "Folly Code Review"
 seriesOrder: 21

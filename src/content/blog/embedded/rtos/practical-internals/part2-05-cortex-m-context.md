@@ -1,6 +1,6 @@
 ---
-title: "2-05: ARM Cortex-M Context Switch — PendSV, MSP/PSP, 어셈블리"
-date: 2026-05-07T15:00:00
+title: "ARM Cortex-M Context Switch — PendSV·MSP/PSP 어셈블리 추적"
+date: 2026-05-05T09:15:00
 description: "Cortex-M context switch는 PendSV 예외와 dual-stack 모델로 압축됩니다. FreeRTOS port의 PendSV 핸들러 어셈블리를 한 줄씩 따라가며 EXC_RETURN, BASEPRI, lazy FPU까지 풀어봅니다."
 series: "Practical RTOS Internals"
 seriesOrder: 15

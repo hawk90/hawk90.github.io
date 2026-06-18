@@ -1,6 +1,6 @@
 ---
-title: "4-04: 클럭 설정"
-date: 2026-05-13T14:00:00
+title: "임베디드 클럭 설정 분석 — HSE·PLL·SYSCLK·AHB/APB 분주"
+date: 2026-04-13T09:38:00
 description: "HSE/HSI·PLL·peripheral clock enable — 코어/주변기기 클럭 트리."
 series: "Modern Embedded Recipes"
 seriesOrder: 38

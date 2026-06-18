@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: RSP — GDB Remote Serial Protocol"
-date: 2026-05-17T01:00:00
+title: "GDB Remote Serial Protocol 분석 — 디버거-타겟 통신 메커니즘"
+date: 2026-05-26T09:01:00
 description: "GDB가 원격 스텁과 주고받는 ASCII 패킷의 모든 것. 패킷 형식, qSupported 협상, vCont, 멀티 패킷, RLE."
 tags: [gdb, rsp, embedded, protocol]
 series: "Embedded Debugging"

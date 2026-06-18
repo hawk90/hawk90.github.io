@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: Valgrind 개요 — Memcheck / Helgrind / DRD"
-date: 2026-05-17T01:00:00
+title: "Valgrind 도구 개요 — Memcheck·Helgrind·DRD 비교"
+date: 2026-05-28T09:01:00
 description: "Sanitizer 시대에도 Valgrind가 살아남은 이유, 세 핵심 도구의 역할, 도입 자리."
 tags: [Valgrind, Memcheck, Helgrind, DRD, Debugging, C, C++]
 series: "Valgrind"

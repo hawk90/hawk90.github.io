@@ -1,6 +1,6 @@
 ---
-title: "Part 16-03: Try vs Expected — 선택 기준"
-date: 2026-05-27T13:00:00
+title: "folly::Try vs Expected 선택 기준"
+date: 2026-06-07T09:17:00
 description: "언제 Try, 언제 Expected — 비동기 결과 슬롯과 도메인 오류 표현의 명확한 분리."
 series: "Folly Code Review"
 seriesOrder: 71

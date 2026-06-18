@@ -1,6 +1,6 @@
 ---
-title: "4-05: Mutex 성능 — Futex·Adaptive·Priority Inheritance"
-date: 2026-05-08T14:00:00
+title: "Mutex 성능 분석 — Futex·Adaptive·Priority Inheritance"
+date: 2026-04-26T09:04:00
 description: "Mutex blocking 비용과 Linux futex 2-stage, adaptive mutex, priority inheritance overhead."
 series: "Embedded Performance Engineering"
 seriesOrder: 34

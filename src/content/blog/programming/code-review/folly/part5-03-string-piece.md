@@ -1,6 +1,6 @@
 ---
-title: "Part 5-03: StringPiece (string_view 호환)"
-date: 2026-05-24T02:00:00
+title: "folly::StringPiece — string_view 호환 분석"
+date: 2026-06-05T09:07:00
 description: "StringPiece의 역사적 배경, std::string_view와의 호환 layer, Range<const char*>로서의 일반화."
 series: "Folly Code Review"
 seriesOrder: 25

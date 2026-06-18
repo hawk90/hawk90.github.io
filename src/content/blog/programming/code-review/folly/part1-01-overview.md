@@ -1,6 +1,6 @@
 ---
-title: "Part 1-01: Folly 개요 — Meta가 production에서 검증한 utility"
-date: 2026-05-23T01:00:00
+title: "Folly 개요 — Meta가 production에서 검증한 utility 모음 분석"
+date: 2026-06-04T09:01:00
 description: "Folly의 출발점, 구성, std/Abseil과의 차별점 — Meta production에서 단련된 high-performance C++ 라이브러리."
 series: "Folly Code Review"
 seriesOrder: 1

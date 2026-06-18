@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: 함수"
-date: 2026-05-17T05:00:00
+title: "Make 함수 분석 — wildcard·patsubst·foreach·shell"
+date: 2026-06-03T09:05:00
 description: "내장 함수로 텍스트·파일·조건을 다루기 — wildcard / patsubst / filter / shell / foreach / call / eval."
 tags: [make, build, Makefile, functions]
 series: "GNU Make"

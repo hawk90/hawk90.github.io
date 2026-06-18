@@ -1,6 +1,6 @@
 ---
-title: "3-10: Thermal Throttling — Junction Temp·Trip Point·Cooling"
-date: 2026-05-08T09:00:00
+title: "Thermal Throttling 분석 — Junction Temp·Trip Point·냉각"
+date: 2026-04-25T09:09:00
 description: "Junction temperature, thermal sensor, trip point, throttling 동작, 자동차·우주 환경."
 series: "Embedded Performance Engineering"
 seriesOrder: 28

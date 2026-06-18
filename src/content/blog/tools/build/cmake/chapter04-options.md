@@ -1,6 +1,6 @@
 ---
-title: "Ch 4: 옵션과 캐시 변수"
-date: 2026-05-17T04:00:00
+title: "CMake 옵션과 캐시 변수 — option·set·cache type 분석"
+date: 2026-06-02T09:04:00
 description: "사용자 설정 가능한 빌드 옵션과 CMake 캐시 시스템."
 tags: [cmake, build, cpp, options, cache]
 series: "CMake"

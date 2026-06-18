@@ -1,6 +1,6 @@
 ---
-title: "Part 2-06: Templates 기초"
-date: 2026-05-07T06:00:00
+title: "임베디드 Templates 기초 — 타입 안전과 코드 재사용 분석"
+date: 2026-04-29T09:14:00
 description: "함수 템플릿과 클래스 템플릿 — 컴파일 타임 다형성으로 type-safe + zero-cost generic 코드."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 14

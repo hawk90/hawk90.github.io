@@ -1,6 +1,6 @@
 ---
-title: "Part 2-01: folly::Future 개요 — std::future의 한계를 넘는 composable async"
-date: 2026-05-23T06:00:00
+title: "folly::Future 분석 — std::future의 한계를 넘는 composable async"
+date: 2026-06-04T09:06:00
 description: "folly::Future가 std::future의 어떤 한계를 해결하는가 — continuation, executor binding, exception 전파."
 series: "Folly Code Review"
 seriesOrder: 6

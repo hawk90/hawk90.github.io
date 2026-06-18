@@ -1,6 +1,6 @@
 ---
-title: "Part 2-07: raw_logging — heap-free 로깅"
-date: 2026-05-23T12:00:00
+title: "Abseil raw_logging — heap-free 로깅"
+date: 2026-06-09T09:12:00
 description: "Part 2-07: raw_logging — heap, exception, mutex 없이 동작하는 로깅. signal handler, ASan early init, OOM 경로."
 series: "Abseil Code Review"
 seriesOrder: 12

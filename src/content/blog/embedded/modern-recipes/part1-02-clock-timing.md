@@ -1,6 +1,6 @@
 ---
-title: "1-02: 클럭과 타이밍"
-date: 2026-05-12T02:00:00
+title: "임베디드 클럭과 타이밍 — Skew·Jitter·PLL·MMCM 분석"
+date: 2026-04-10T09:02:00
 description: "PLL·jitter·skew·setup/hold time — 디지털 시스템의 모든 동작의 근간."
 series: "Modern Embedded Recipes"
 seriesOrder: 2

@@ -1,6 +1,6 @@
 ---
-title: "4-11: TrustZone·TF-M — Secure/Non-Secure·NSC Veneer·PSA"
-date: 2026-05-07T23:00:00
+title: "TrustZone과 TF-M — Secure/Non-Secure·NSC Veneer·PSA"
+date: 2026-05-07T09:43:00
 description: "Cortex-M33/M55/M85의 TrustZone-M과 TF-M secure firmware를 정리합니다. SAU/IDAU로 메모리를 secure/non-secure로 가르고, NSC veneer + SG 명령으로 안전하게 cross-world call을 수행하는 구조, PSA Crypto/Storage/Attestation API, secure boot chain까지 다룹니다."
 series: "Practical RTOS Internals"
 seriesOrder: 43

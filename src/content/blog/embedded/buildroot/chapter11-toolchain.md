@@ -1,6 +1,6 @@
 ---
-title: "Ch 11: Toolchain 선택 — internal vs external"
-date: 2026-05-19T11:00:00
+title: "Buildroot Toolchain 선택 — Internal vs External 비교"
+date: 2026-05-19T09:11:00
 description: "Buildroot toolchain 결정 — internal toolchain의 단순함과 external toolchain(Bootlin·Linaro·vendor SDK)의 속도·호환성 트레이드오프."
 series: "Buildroot Practical"
 seriesOrder: 11

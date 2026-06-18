@@ -1,6 +1,6 @@
 ---
-title: "Part 5-05: FixedArray — 런타임 크기를 가진 stack 배열"
-date: 2026-05-24T08:00:00
+title: "absl::FixedArray — 런타임 크기 stack 배열"
+date: 2026-06-10T09:15:00
 description: "Part 5-05: absl::FixedArray — 런타임 결정 크기지만 작으면 stack, 크면 heap. VLA의 안전한 대체."
 series: "Abseil Code Review"
 seriesOrder: 31

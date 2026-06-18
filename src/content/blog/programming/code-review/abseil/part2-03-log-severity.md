@@ -1,6 +1,6 @@
 ---
-title: "Part 2-03: absl::LogSeverity"
-date: 2026-05-23T08:00:00
+title: "absl::LogSeverity — 로그 레벨 타입"
+date: 2026-06-09T09:08:00
 description: "Part 2-03: absl::LogSeverity — INFO/WARNING/ERROR/FATAL 4단계, NormalizeLogSeverity, 외부 시스템 연동."
 series: "Abseil Code Review"
 seriesOrder: 8

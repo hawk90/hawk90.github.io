@@ -1,6 +1,6 @@
 ---
-title: "Part 3-10: 소유권 모델"
-date: 2026-05-07T10:00:00
+title: "임베디드 C++ 소유권 모델 — single·shared·borrow 패턴"
+date: 2026-04-30T09:28:00
 description: "Owner, observer, borrower — 객체 lifetime의 명확한 책임 할당."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 28
@@ -406,7 +406,7 @@ use-after-free: 0
 
 - [Part 3-09: 스마트 포인터 선택](/blog/embedded/embedded-cpp/part3-09-smart-pointer-choice)
 - [Part 2-01: RAII 기초](/blog/embedded/embedded-cpp/part2-01-raii-basics)
-- [Refactoring Pattern 33: Change Reference to Value](/blog/programming/design/refactoring-catalog/pattern33-change-reference-to-value)
+- Refactoring Pattern 33: Change Reference to Value
 - [C++ Core Guidelines — Resource Management](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource)
 
 ## 다음 글 (Part 4 시작)

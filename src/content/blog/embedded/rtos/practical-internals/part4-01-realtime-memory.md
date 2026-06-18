@@ -1,6 +1,6 @@
 ---
-title: "4-01: 실시간 메모리 요구사항 — Determinism·Fragmentation·WCET"
-date: 2026-05-07T13:00:00
+title: "실시간 메모리 요구사항 — Determinism·Fragmentation·WCET"
+date: 2026-05-07T09:33:00
 description: "동적 할당의 한계와 fragmentation, WCET-bounded allocator, safety-critical 기준을 살펴봅니다."
 series: "Practical RTOS Internals"
 seriesOrder: 33

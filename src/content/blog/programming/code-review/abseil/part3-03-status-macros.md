@@ -1,6 +1,6 @@
 ---
-title: "Part 3-03: status_macros — ASSIGN_OR_RETURN / RETURN_IF_ERROR"
-date: 2026-05-23T16:00:00
+title: "absl status_macros — ASSIGN_OR_RETURN·RETURN_IF_ERROR"
+date: 2026-06-10T09:00:00
 description: "Part 3-03: RETURN_IF_ERROR와 ASSIGN_OR_RETURN — 에러 전파를 한 줄로. 매크로 expansion 분석과 안전한 사용법."
 series: "Abseil Code Review"
 seriesOrder: 16

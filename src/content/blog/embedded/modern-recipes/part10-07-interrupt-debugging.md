@@ -1,6 +1,6 @@
 ---
-title: "10-07: 인터럽트 누락/중복 진단"
-date: 2026-05-16T21:00:00
+title: "인터럽트 누락·중복 진단 — Priority·Pending·Re-entry 추적"
+date: 2026-04-19T09:06:00
 description: "NVIC pending·priority·level vs edge·shared IRQ — 인터럽트 동작 이상의 흔한 원인을 잡습니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 117

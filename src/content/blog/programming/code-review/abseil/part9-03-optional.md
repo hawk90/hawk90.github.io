@@ -1,6 +1,6 @@
 ---
-title: "Part 9-03: absl::optional (vs std)"
-date: 2026-05-25T04:00:00
+title: "absl::optional vs std::optional"
+date: 2026-06-12T09:02:00
 description: "absl::optional — std::optional이 도착하기 전 시기의 polyfill. 지금은 std::optional의 alias로 동작."
 series: "Abseil Code Review"
 seriesOrder: 50

@@ -1,6 +1,6 @@
 ---
-title: "5-04: 서보 모터"
-date: 2026-05-14T04:00:00
+title: "서보 모터 제어 — PWM 1ms~2ms·Closed Loop·PID"
+date: 2026-04-14T09:52:00
 description: "PWM-based 제어 (50Hz, 1~2ms duty)·각도 매핑."
 series: "Modern Embedded Recipes"
 seriesOrder: 52

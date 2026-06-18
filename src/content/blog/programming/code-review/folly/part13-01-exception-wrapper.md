@@ -1,6 +1,6 @@
 ---
-title: "Part 13-01: ExceptionWrapper (type-erased exception holder)"
-date: 2026-05-25T10:00:00
+title: "folly::ExceptionWrapper — type-erased exception holder"
+date: 2026-06-07T09:02:00
 description: "Part 13-01: ExceptionWrapper — exception을 throw 없이 옮기는 holder. async 콜백·thread 경계에서 핵심."
 series: "Folly Code Review"
 seriesOrder: 56

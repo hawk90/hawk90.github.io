@@ -1,6 +1,6 @@
 ---
-title: "Part 5-01: FBString — SSO + COW"
-date: 2026-05-23T23:00:00
+title: "folly::FBString 분석 — SSO + COW 구현"
+date: 2026-06-05T09:05:00
 description: "FBString의 23-byte SSO와 Copy-on-Write, jemalloc 친화 레이아웃 — std::string 대체로서의 설계 결정."
 series: "Folly Code Review"
 seriesOrder: 23

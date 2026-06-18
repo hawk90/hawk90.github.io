@@ -1,6 +1,6 @@
 ---
-title: "1-03: GPIO 내부 구조"
-date: 2026-05-12T03:00:00
+title: "GPIO 내부 구조 분해 — Push-Pull·Open-Drain·Schmitt Trigger"
+date: 2026-04-10T09:03:00
 description: "Push-pull·open-drain·pull-up/down·drive strength·slew rate."
 series: "Modern Embedded Recipes"
 seriesOrder: 3

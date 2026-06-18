@@ -1,6 +1,6 @@
 ---
-title: "Part 2-01: RAII 기초"
-date: 2026-05-07T01:00:00
+title: "임베디드 RAII 기초 — 리소스 안전성과 결정적 소멸 보장"
+date: 2026-04-29T09:09:00
 description: "Resource Acquisition Is Initialization — 자원 생명주기를 객체 생명주기에 묶는 C++의 핵심 idiom."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 9
@@ -483,7 +483,7 @@ shared:
 - [Part 2-02: RAII 실전 패턴](/blog/embedded/embedded-cpp/part2-02-raii-patterns) — `std::scoped_lock`, Handle 패턴, ScopedXxx
 - [Part 3-05: No-Exception 설계](/blog/embedded/embedded-cpp/part3-05-no-exception-design) — 예외 없는 환경의 RAII
 - [Part 3-09: 스마트 포인터 선택](/blog/embedded/embedded-cpp/part3-09-smart-pointer-choice) — `unique_ptr`의 RAII
-- [GoF 14: Command](/blog/programming/design/gof-design-patterns/item14-command) — Command + RAII undo
+- GoF 14: Command — Command + RAII undo
 
 ## 다음 글
 

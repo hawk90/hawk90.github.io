@@ -1,6 +1,6 @@
 ---
-title: "Part 7-02: F14NodeMap (stable pointer)"
-date: 2026-05-24T08:00:00
+title: "folly::F14NodeMap — stable pointer가 필요할 때"
+date: 2026-06-05T09:13:00
 description: "F14NodeMap — value를 별도 heap node에 두어 pointer/reference 안정성을 보장하는 F14 변형."
 series: "Folly Code Review"
 seriesOrder: 31

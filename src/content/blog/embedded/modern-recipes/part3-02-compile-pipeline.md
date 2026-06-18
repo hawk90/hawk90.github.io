@@ -1,6 +1,6 @@
 ---
-title: "3-02: 컴파일 4단계"
-date: 2026-05-13T00:00:00
+title: "C 컴파일 4단계 — Preprocess·Compile·Assemble·Link 추적"
+date: 2026-04-12T09:24:00
 description: "Preprocess·compile·assemble·link — `-E -S -c` 분해."
 series: "Modern Embedded Recipes"
 seriesOrder: 24

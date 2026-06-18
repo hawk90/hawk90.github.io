@@ -1,6 +1,6 @@
 ---
-title: "10-09: 타이밍/Race 진단 — Heisenbug 잡기"
-date: 2026-05-16T23:00:00
+title: "타이밍·Race 진단 — Heisenbug 잡는 법"
+date: 2026-04-19T09:08:00
 description: "printf로 race가 사라지는 이유와 SWO/RTT·DWT 사이클 카운터·GPIO pulse로 non-intrusive하게 race를 가시화하는 방법."
 series: "Modern Embedded Recipes"
 seriesOrder: 119

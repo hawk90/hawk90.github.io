@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: 패키지 시스템 — .mk와 Config.in"
-date: 2026-05-19T05:00:00
+title: "Buildroot 패키지 시스템 분석 — .mk와 Config.in 동작 추적"
+date: 2026-05-19T09:05:00
 description: "Buildroot 패키지 작성 규약 — Config.in 옵션 노출과 .mk 빌드 레시피."
 series: "Buildroot Practical"
 seriesOrder: 5

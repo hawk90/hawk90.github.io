@@ -1,6 +1,6 @@
 ---
-title: "9-06: Atomic operation 비용"
-date: 2026-05-16T10:00:00
+title: "Atomic Operation 비용 분석 — Fence·Cache Line·Contention"
+date: 2026-04-18T09:05:00
 description: "memory_order별 ARM 명령어 차이, LSE vs LL/SC, hot spinning 회피까지 atomic 연산의 실측 비용을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 106

@@ -1,6 +1,6 @@
 ---
-title: "7-02: U-Boot 활용"
-date: 2026-05-15T04:00:00
+title: "U-Boot 활용 — bootcmd·env·tftp·boot.scr 분석"
+date: 2026-04-16T09:01:00
 description: "U-Boot environment, script, bootcmd, TFTP/Fastboot, UEFI 모드까지 현장에서 쓰는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 76

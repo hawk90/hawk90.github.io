@@ -1,6 +1,6 @@
 ---
-title: "1-08: DAC 동작 원리"
-date: 2026-05-12T08:00:00
+title: "DAC 동작 원리 — R-2R Ladder·Sigma-Delta·Settling Time"
+date: 2026-04-10T09:08:00
 description: "R-2R·delta-sigma DAC·glitch energy·monotonicity."
 series: "Modern Embedded Recipes"
 seriesOrder: 8

@@ -1,6 +1,6 @@
 ---
-title: "Ch 5: ELF / MAP — 베어메탈 메모리"
-date: 2026-05-17T05:00:00
+title: "ELF와 MAP 파일 분석 — 베어메탈 메모리 레이아웃 추적"
+date: 2026-05-26T09:05:00
 description: "ELF의 LMA/VMA, 링커 스크립트, MAP 파일로 메모리 진단, startup 코드의 정체."
 tags: [elf, map, linker, embedded, baremetal]
 series: "Embedded Debugging"

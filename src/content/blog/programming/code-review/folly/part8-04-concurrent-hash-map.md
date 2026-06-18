@@ -1,6 +1,6 @@
 ---
-title: "Part 8-04: ConcurrentHashMap (sharded)"
-date: 2026-05-24T15:00:00
+title: "folly::ConcurrentHashMap — sharded 동시 해시 맵"
+date: 2026-06-06T09:02:00
 description: "ConcurrentHashMap — sharded buckets + Hazard Pointer로 erase 포함 full thread-safe hash map."
 series: "Folly Code Review"
 seriesOrder: 38

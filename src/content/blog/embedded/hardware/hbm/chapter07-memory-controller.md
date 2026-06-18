@@ -1,6 +1,6 @@
 ---
-title: "Ch 7: 메모리 컨트롤러 인터페이스"
-date: 2026-05-16T07:00:00
+title: "HBM 메모리 컨트롤러 분석 — Bank·Row·Column·Address Mapping·Scheduling"
+date: 2026-05-16T09:07:00
 description: "Bank·row·column·command — 컨트롤러가 보는 HBM과 scheduling·address mapping."
 series: "HBM·GDDR 심화"
 seriesOrder: 7
@@ -363,5 +363,5 @@ system-level ECC를 *on*하면 *bus utilization*에서 *12.5%*가 redundancy로 
 - [Ch 5: 대역폭 계산과 병목 분석](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)
 - [Ch 6: 열 설계와 전력 관리](/blog/embedded/hardware/hbm/chapter06-thermal-power)
 - [Ch 8: NPU·GPU 활용](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)
-- [CXL Ch 4: CXL.mem](/blog/embedded/hardware/cxl/chapter04-cxl-mem) — 외부 메모리 컨트롤러
-- [BoW Ch 4: BoW Memory](/blog/embedded/hardware/bow/chapter04-bow-memory) — 메모리 트랜잭션의 일반론
+- CXL Ch 4: CXL.mem — 외부 메모리 컨트롤러
+- BoW Ch 4: BoW Memory — 메모리 트랜잭션의 일반론

@@ -1,6 +1,6 @@
 ---
-title: "Ch 15: 부트 시간 최적화"
-date: 2026-05-09T15:00:00
+title: "BSP 부트 시간 최적화 — Bootchart·initcall_debug·Parallel Init"
+date: 2026-05-18T09:15:00
 description: "boot에서 application까지 시간을 줄이는 기법 — measurement, Falcon, deferred init, kernel slim."
 series: "BSP Development"
 seriesOrder: 15

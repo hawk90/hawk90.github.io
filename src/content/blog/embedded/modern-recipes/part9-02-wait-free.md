@@ -1,6 +1,6 @@
 ---
-title: "9-02: Wait-Free Signaling — Atomic Flag·Sequence·Latest-Value"
-date: 2026-05-16T06:00:00
+title: "Wait-Free Signaling — Atomic Flag·Sequence·Latest-Value"
+date: 2026-04-18T09:01:00
 description: "Wait-free 보장 patterns. Atomic flag, sequence number, latest-value (double buffer)."
 series: "Modern Embedded Recipes"
 seriesOrder: 102

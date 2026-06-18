@@ -1,6 +1,6 @@
 ---
-title: "8-09: 스택 분석 (high-water·overflow)"
-date: 2026-05-16T01:00:00
+title: "임베디드 스택 분석 — high-water·overflow 탐지"
+date: 2026-04-17T09:08:00
 description: "Stack 패턴 채우기로 high-water mark, overflow hook, canary, MPU guard region, RTOS task stack 분석을 한 자리에 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 97

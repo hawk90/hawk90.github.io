@@ -1,6 +1,6 @@
 ---
-title: "Part 5-04: Join / split utilities"
-date: 2026-05-24T03:00:00
+title: "folly Join·Split utilities — 문자열 분해와 결합"
+date: 2026-06-05T09:08:00
 description: "folly::join과 folly::split의 구현, StringPiece 기반 zero-copy split, absl::StrSplit 비교."
 series: "Folly Code Review"
 seriesOrder: 26

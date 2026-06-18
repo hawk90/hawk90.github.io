@@ -1,6 +1,6 @@
 ---
-title: "Part 5-04: HAL 설계 패턴"
-date: 2026-05-07T04:00:00
+title: "임베디드 HAL 설계 패턴 — Static·Dynamic·Hybrid 비교"
+date: 2026-05-02T09:40:00
 description: "범용 HAL 구조 — 벤더 종속성 격리, 다중 보드/MCU 지원, 시리즈 마무리."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 40
@@ -426,7 +426,7 @@ HAL implementation만 다릅니다. application 코드는 변경되지 않습니
 - **[Embedded Performance Engineering](/blog/embedded/performance-engineering)** — 측정과 최적화 (50 chapters)
 - **[Practical RTOS Internals](/blog/embedded/rtos/practical-internals)** — FreeRTOS/Zephyr/RT-Thread 소스 분석 (45 chapters)
 - **[Modern Embedded Recipes](/blog/embedded/modern-recipes)** — 일상 recipe 모음 (145 recipes)
-- **[Refactoring Catalog](/blog/programming/design/refactoring-catalog/pattern01-extract-function)** — Fowler 61 패턴
+- **Refactoring Catalog** — Fowler 61 패턴
 - **[GoF Design Patterns](/blog/programming/design/gof-design-patterns)** — 23 패턴
 
 ## 자주 보는 함정과 안티패턴
@@ -475,7 +475,7 @@ HAL이 얼마나 비싼지를 모릅니다. 측정 도구를 활용합니다([Pa
 - [Part 5-03: Peripheral 추상화](/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction)
 - [Part 2-08: Static Polymorphism](/blog/embedded/embedded-cpp/part2-08-static-polymorphism)
 - [Part 4-08: Singleton 대안](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives)
-- [TDD Pattern 49: Extract Interface](/blog/programming/engineering/tdd-patterns/pattern49-extract-interface)
+- TDD Pattern 49: Extract Interface
 
 ## 시리즈 마무리
 

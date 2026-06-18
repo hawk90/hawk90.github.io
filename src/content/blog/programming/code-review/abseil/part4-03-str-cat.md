@@ -1,6 +1,6 @@
 ---
-title: "Part 4-03: StrCat — 가변 인자 문자열 연결과 AlphaNum"
-date: 2026-05-23T21:00:00
+title: "absl::StrCat — 가변 인자 문자열 연결과 AlphaNum"
+date: 2026-06-10T09:05:00
 description: "Part 4-03: absl::StrCat — variadic 문자열 연결, AlphaNum 어댑터, operator+ / ostringstream과의 성능 차이."
 series: "Abseil Code Review"
 seriesOrder: 21

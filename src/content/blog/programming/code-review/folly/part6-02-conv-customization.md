@@ -1,6 +1,6 @@
 ---
-title: "Part 6-02: Customization (사용자 타입)"
-date: 2026-05-24T05:00:00
+title: "folly Conv Customization — 사용자 타입 지원"
+date: 2026-06-05T09:10:00
 description: "folly::to에 사용자 타입을 hook하기 — parseTo, toAppend ADL 확장."
 series: "Folly Code Review"
 seriesOrder: 28

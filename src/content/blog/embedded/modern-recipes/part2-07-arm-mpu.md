@@ -1,6 +1,6 @@
 ---
-title: "2-07: MPU 활용"
-date: 2026-05-12T19:00:00
+title: "ARM MPU 활용 — Region·Attribute·Privilege Separation"
+date: 2026-04-11T09:19:00
 description: "Region setup·attributes·fault analysis — 메모리 보호의 실전."
 series: "Modern Embedded Recipes"
 seriesOrder: 19

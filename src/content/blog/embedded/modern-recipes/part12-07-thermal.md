@@ -1,6 +1,6 @@
 ---
-title: "12-07: Thermal Management — Throttling·DVFS·Fan Curve·Sustained 성능"
-date: 2026-05-17T23:00:00
+title: "Edge Thermal Management — Throttling·DVFS·Fan Curve·Sustained"
+date: 2026-04-21T09:06:00
 description: "Edge AI 보드의 sustained 성능을 결정하는 thermal 한계. throttle trip, DVFS, fan curve, nvpmodel, passive cooling 설계를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 143

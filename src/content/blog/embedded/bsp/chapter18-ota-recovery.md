@@ -1,6 +1,6 @@
 ---
-title: "Ch 18: OTA와 field recovery"
-date: 2026-05-09T18:00:00
+title: "BSP OTA와 Field Recovery — A/B 슬롯·롤백·BootCount"
+date: 2026-05-18T09:18:00
 description: "현장 배포된 보드의 펌웨어 업데이트와 복구 — RAUC/SWUpdate 통합, recovery 파티션, USB recovery."
 series: "BSP Development"
 seriesOrder: 18

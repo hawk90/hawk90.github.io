@@ -1,6 +1,6 @@
 ---
-title: "Ch 10: 스토리지 부트 — MMC, SCSI, NAND, SPI Flash"
-date: 2026-05-09T10:00:00
+title: "임베디드 스토리지 부팅 분석 — MMC·SCSI·NAND·SPI Flash 비교"
+date: 2026-05-09T09:10:00
 description: "부트 미디어별 동작 차이 — eMMC, SD, SATA, NAND, SPI NOR/NAND의 부트 모드."
 series: "Bootloader Internals"
 seriesOrder: 10

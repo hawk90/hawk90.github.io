@@ -1,6 +1,6 @@
 ---
-title: "Ch 4: GPIO·LEDC·MCPWM — 디지털 출력의 세 모드"
-date: 2026-05-01T04:00:00
+title: "ESP32-C3 디지털 출력 — GPIO·LEDC·MCPWM 세 모드 비교"
+date: 2026-05-20T09:04:00
 description: "22개 GPIO, GPIO Matrix로 페리퍼럴 자유 매핑. LEDC PWM, MCPWM (모터 제어)."
 series: "ESP32-C3 Mastering"
 seriesOrder: 4

@@ -1,6 +1,6 @@
 ---
-title: "Part 7-03: F14VectorMap (cache-friendly iteration)"
-date: 2026-05-24T09:00:00
+title: "folly::F14VectorMap — cache-friendly iteration"
+date: 2026-06-05T09:14:00
 description: "F14VectorMap — value를 contiguous vector에 두고 chunk에는 index만, 순회 cache-friendly."
 series: "Folly Code Review"
 seriesOrder: 32

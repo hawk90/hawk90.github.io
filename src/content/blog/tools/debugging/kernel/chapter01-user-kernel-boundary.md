@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: 커널 디버깅 개론 — User/Kernel 경계"
-date: 2026-05-17T01:00:00
+title: "리눅스 커널 디버깅 개론 — User/Kernel 경계와 도구 선택"
+date: 2026-05-25T09:01:00
 description: "user-space와 kernel-space 디버깅의 차이. /proc, kallsyms, kernel debug info."
 tags: [kernel, linux, debugging, proc]
 series: "Kernel Debugging"
@@ -264,7 +264,7 @@ Ch 2 — printk + dmesg + dynamic_debug. 커널 로깅의 모든 것: log level,
 
 - [Ch 2: printk / dmesg / dynamic_debug](/blog/tools/debugging/kernel/chapter02-printk-dmesg)
 - [DWARF and ELF Internals](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview)
-- [strace / tracing 시리즈](/blog/tools/strace-tracing/chapter01-tracing-overview) — ftrace/eBPF 사전 학습
+- strace / tracing 시리즈 — ftrace/eBPF 사전 학습
 - [Linux Kernel Documentation — Debugging](https://www.kernel.org/doc/html/latest/dev-tools/index.html)
 - `man 5 proc` — /proc 전체
 - [`Documentation/admin-guide/sysrq.rst`](https://www.kernel.org/doc/html/latest/admin-guide/sysrq.html) — Magic SysRq

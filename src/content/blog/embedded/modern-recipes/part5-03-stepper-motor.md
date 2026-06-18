@@ -1,6 +1,6 @@
 ---
-title: "5-03: 스테퍼 모터"
-date: 2026-05-14T03:00:00
+title: "스테퍼 모터 제어 — Full Step·Half Step·Microstepping"
+date: 2026-04-14T09:51:00
 description: "Full-step·half-step·micro-step·가속/감속 프로파일."
 series: "Modern Embedded Recipes"
 seriesOrder: 51

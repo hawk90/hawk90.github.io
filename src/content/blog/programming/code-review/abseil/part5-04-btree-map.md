@@ -1,6 +1,6 @@
 ---
-title: "Part 5-04: btree_map — sorted, cache-friendly B-tree"
-date: 2026-05-24T07:00:00
+title: "absl::btree_map — sorted·cache-friendly B-tree"
+date: 2026-06-10T09:14:00
 description: "Part 5-04: absl::btree_map — std::map(red-black tree)의 B-tree 대체, cache locality와 메모리 효율, sorted 컨테이너의 새 기준."
 series: "Abseil Code Review"
 seriesOrder: 30

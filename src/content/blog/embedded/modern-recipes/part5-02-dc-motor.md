@@ -1,6 +1,6 @@
 ---
-title: "5-02: DC 모터 제어"
-date: 2026-05-14T02:00:00
+title: "DC 모터 제어 — H-Bridge·PWM Duty·Encoder Feedback"
+date: 2026-04-14T09:50:00
 description: "H-bridge·PWM·방향·역기전력 보호."
 series: "Modern Embedded Recipes"
 seriesOrder: 50

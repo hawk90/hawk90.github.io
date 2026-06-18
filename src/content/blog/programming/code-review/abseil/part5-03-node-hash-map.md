@@ -1,6 +1,6 @@
 ---
-title: "Part 5-03: node_hash_map — stable pointer가 필요할 때"
-date: 2026-05-24T06:00:00
+title: "absl::node_hash_map — stable pointer가 필요할 때"
+date: 2026-06-10T09:13:00
 description: "Part 5-03: absl::node_hash_map — flat_hash_map의 노드 기반 변형, value pointer 안정성 보장, std::unordered_map 마이그레이션 경로."
 series: "Abseil Code Review"
 seriesOrder: 29

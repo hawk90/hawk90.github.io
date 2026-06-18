@@ -1,6 +1,6 @@
 ---
-title: "Ch 3: MCU 크립토 — HW accelerator (AES / SHA / ECC)"
-date: 2026-05-08T04:00:00
+title: "MCU Crypto HW Accelerator 분석 — AES·SHA·ECC 가속기"
+date: 2026-05-21T09:03:00
 description: "MCU 내장 crypto 엔진. 소프트웨어 vs 하드웨어. constant-time."
 tags: [Crypto, AES, ECC, MCU]
 series: "Embedded Security"

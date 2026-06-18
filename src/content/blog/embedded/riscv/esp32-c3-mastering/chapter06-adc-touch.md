@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: ADC·터치 센서 — 아날로그 입력"
-date: 2026-05-01T06:00:00
+title: "ESP32-C3 ADC와 터치 센서 — 아날로그 입력 처리"
+date: 2026-05-20T09:06:00
 description: "12-bit SAR ADC × 2 unit, 정전식 터치 9 채널. 캘리브레이션과 노이즈."
 series: "ESP32-C3 Mastering"
 seriesOrder: 6

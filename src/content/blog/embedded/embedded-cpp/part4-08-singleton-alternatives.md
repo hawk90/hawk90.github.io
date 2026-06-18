@@ -1,6 +1,6 @@
 ---
-title: "Part 4-08: Singleton 대안"
-date: 2026-05-07T08:00:00
+title: "Singleton 대안 패턴 — Service Locator·Static Init·Phantom"
+date: 2026-05-01T09:36:00
 description: "임베디드의 DI 패턴 — Construct-On-First-Use, static dependency injection, service locator."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 36
@@ -402,8 +402,8 @@ DI가 약간 작고 더 빠릅니다. 의존성이 명확해지는 가치도 함
 
 - [Part 1-06: 스타트업 코드](/blog/embedded/embedded-cpp/part1-06-startup-code) — Static Init Order Fiasco
 - [Part 3-10: 소유권 모델](/blog/embedded/embedded-cpp/part3-10-ownership-model) — DI와 ownership
-- [GoF 5: Singleton (avoid)](/blog/programming/design/gof-design-patterns/item05-singleton)
-- [TDD Pattern 43: Singleton (avoid)](/blog/programming/engineering/tdd-patterns/pattern43-singleton)
+- GoF 5: Singleton (avoid)
+- TDD Pattern 43: Singleton (avoid)
 
 ## 다음 글 (Part 5 시작)
 

@@ -1,6 +1,6 @@
 ---
-title: "Part 19-01: folly::format — legacy formatter"
-date: 2026-05-27T22:00:00
+title: "folly::format — legacy formatter 분석"
+date: 2026-06-08T09:08:00
 description: "folly::format의 historical 위치, fmt와의 관계, std::format으로의 마이그레이션 경로."
 series: "Folly Code Review"
 seriesOrder: 80

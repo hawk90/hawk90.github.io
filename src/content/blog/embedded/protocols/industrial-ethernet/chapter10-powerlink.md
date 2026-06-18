@@ -1,6 +1,6 @@
 ---
-title: "Ch 10: POWERLINK·OpenSAFETY"
-date: 2026-05-16T10:00:00
+title: "POWERLINK과 OpenSAFETY 분석 — 산업 안전 통신 프로토콜"
+date: 2026-05-13T09:10:00
 description: "B&R발 오픈소스 표준 산업 이더넷·통합 safety layer — slot polling으로 1ms 결정성을 만드는 법."
 series: "Industrial Ethernet 심화"
 seriesOrder: 10

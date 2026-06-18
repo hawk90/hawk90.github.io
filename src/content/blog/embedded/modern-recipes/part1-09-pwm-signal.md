@@ -1,6 +1,6 @@
 ---
-title: "1-09: PWM 신호 생성"
-date: 2026-05-12T09:00:00
+title: "PWM 신호 생성 분석 — Duty·Frequency·Dead Time·Center-Aligned"
+date: 2026-04-10T09:09:00
 description: "Duty·frequency·dead-time·center-aligned·complementary 출력."
 series: "Modern Embedded Recipes"
 seriesOrder: 9

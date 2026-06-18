@@ -1,6 +1,6 @@
 ---
-title: "Ch 12: 비교 분석 — 프로토콜 선택 가이드"
-date: 2026-05-16T12:00:00
+title: "산업용 이더넷 프로토콜 비교 — EtherCAT·PROFINET·POWERLINK·TSN 선택"
+date: 2026-05-13T09:12:00
 description: "EtherCAT·PROFINET·EtherNet/IP·POWERLINK·SERCOS III·TSN — 시나리오별 선택 가이드와 한국 산업 현장 적용 사례."
 series: "Industrial Ethernet 심화"
 seriesOrder: 12
@@ -327,7 +327,7 @@ Safety:           FSoE
 - [Practical RTOS Internals Part 5.7: PREEMPT_RT Linux](/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux)
 - [Modern Embedded Recipes Part 4.6: IRQ affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity)
 - [Buildroot Ch 1: 문제 정의](/blog/embedded/buildroot/chapter01-problem)
-- [DO-178C Ch 1: 항공 SW 인증 개요](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
+- DO-178C Ch 1: 항공 SW 인증 개요
 - [원문 — ETG (EtherCAT Technology Group)](https://www.ethercat.org/)
 - [원문 — PI (PROFINET International)](https://www.profibus.com/)
 - [원문 — ODVA (EtherNet/IP)](https://www.odva.org/)

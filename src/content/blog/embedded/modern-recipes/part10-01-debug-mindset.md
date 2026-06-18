@@ -1,6 +1,6 @@
 ---
-title: "10-01: 디버깅 마인드셋"
-date: 2026-05-16T15:00:00
+title: "임베디드 디버깅 마인드셋 — 가설·격리·재현·이분탐색"
+date: 2026-04-19T09:00:00
 description: "가설-검증 사이클·binary search·changelog·rubber duck — 임베디드 디버깅의 사고 도구."
 series: "Modern Embedded Recipes"
 seriesOrder: 111

@@ -1,6 +1,6 @@
 ---
-title: "Ch 2: 기본 명령 — break / step / next / print"
-date: 2026-05-17T02:00:00
+title: "GDB·LLDB 기본 명령 — break·step·next·print 동작 비교"
+date: 2026-05-24T09:02:00
 description: "디버거에서 매일 쓰는 핵심 명령 10가지 — 정확한 의미와 자주 쓰는 변형."
 tags: [gdb, lldb, Debugging, BasicCommands]
 series: "GDB and LLDB"

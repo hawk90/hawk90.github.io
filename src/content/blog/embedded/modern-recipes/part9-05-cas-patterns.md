@@ -1,6 +1,6 @@
 ---
-title: "9-05: Compare-And-Swap 패턴"
-date: 2026-05-16T09:00:00
+title: "Compare-And-Swap 패턴 — Stack·Counter·Linked List 적용"
+date: 2026-04-18T09:04:00
 description: "CAS loop, strong과 weak CAS, ABA 회피, exponential backoff, spurious failure까지 CAS 사용의 표준 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 105

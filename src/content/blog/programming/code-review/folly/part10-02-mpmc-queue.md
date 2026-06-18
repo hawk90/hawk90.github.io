@@ -1,6 +1,6 @@
 ---
-title: "Part 10-02: MPMCQueue (multi-producer multi-consumer)"
-date: 2026-05-24T23:00:00
+title: "folly::MPMCQueue — multi-producer multi-consumer"
+date: 2026-06-06T09:10:00
 description: "Part 10-02: MPMCQueue — ticket 기반 lock-free 큐. CAS 없이 여러 producer/consumer를 안전하게 처리한다."
 series: "Folly Code Review"
 seriesOrder: 46

@@ -1,6 +1,6 @@
 ---
-title: "Part 2-02: RAII 실전 패턴"
-date: 2026-05-07T02:00:00
+title: "임베디드 RAII 실전 패턴 — Lock·Pin·DMA·Power 관리"
+date: 2026-04-29T09:10:00
 description: "scoped_lock, unique_ptr with custom deleter, ScopedXxx, Finally — 임베디드에 자주 등장하는 RAII 표준 패턴."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 10

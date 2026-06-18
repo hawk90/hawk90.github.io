@@ -1,6 +1,6 @@
 ---
-title: "Part 4-02: folly::IOBufQueue — chain의 push/pull 추상화"
-date: 2026-05-23T19:00:00
+title: "folly::IOBufQueue — chain의 push/pull 추상화"
+date: 2026-06-05T09:01:00
 description: "IOBufQueue는 IOBuf chain의 append/prepend/split을 효율적으로 관리한다. streaming codec과 framing layer의 표준 도구다."
 series: "Folly Code Review"
 seriesOrder: 19

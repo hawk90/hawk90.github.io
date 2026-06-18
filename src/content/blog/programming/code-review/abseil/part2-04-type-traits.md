@@ -1,6 +1,6 @@
 ---
-title: "Part 2-04: type_traits (negation, conjunction, void_t)"
-date: 2026-05-23T09:00:00
+title: "Abseil type_traits — negation·conjunction·void_t"
+date: 2026-06-09T09:09:00
 description: "Part 2-04: absl::negation, absl::conjunction, absl::void_t — C++17 type_traits의 C++14 polyfill과 SFINAE 활용."
 series: "Abseil Code Review"
 seriesOrder: 9

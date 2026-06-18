@@ -1,6 +1,6 @@
 ---
-title: "Part 2-07: folly::fibers — M:N stackful coroutine"
-date: 2026-05-23T12:00:00
+title: "folly::fibers 분석 — M:N stackful coroutine"
+date: 2026-06-04T09:12:00
 description: "Folly fibers는 boost.context 기반 stackful coroutine. 동기 코드처럼 쓰고 비동기로 동작하는 M:N 모델."
 series: "Folly Code Review"
 seriesOrder: 12

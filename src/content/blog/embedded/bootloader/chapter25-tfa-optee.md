@@ -1,6 +1,6 @@
 ---
-title: "Ch 25: ARM TF-A 통합 — BL1·BL2·BL31·BL32·BL33"
-date: 2026-05-19T25:00:00
+title: "ARM Trusted Firmware-A 통합 — BL1·BL2·BL31·BL32·BL33 흐름"
+date: 2026-05-19T09:25:00
 description: "ARMv8 secure boot의 표준 단계화 — Trusted Firmware-A의 BL1·BL2·BL31과 OP-TEE(BL32)·U-Boot(BL33) 위치."
 series: "Bootloader Internals"
 seriesOrder: 25

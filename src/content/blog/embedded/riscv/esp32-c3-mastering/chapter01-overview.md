@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: ESP32-C3 — 왜 RISC-V로 갈아탔나"
-date: 2026-05-01T01:00:00
+title: "ESP32-C3 분석 — Espressif가 Xtensa에서 RISC-V로 갈아탄 이유"
+date: 2026-05-20T09:01:00
 description: "Espressif가 Tensilica Xtensa에서 RISC-V로 전환한 첫 SoC. WiFi 4 + BLE 5.0, 32-bit RV32IMC."
 series: "ESP32-C3 Mastering"
 seriesOrder: 1

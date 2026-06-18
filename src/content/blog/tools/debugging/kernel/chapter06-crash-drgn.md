@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: crash + drgn — vmcore 분석"
-date: 2026-05-17T06:00:00
+title: "crash와 drgn 분석 — vmcore에서 커널 상태 복원하기"
+date: 2026-05-25T09:06:00
 description: "kdump로 만든 vmcore를 사후 분석. crash 명령, drgn Python API, 실전 흐름."
 tags: [kernel, crash, drgn, vmcore, kdump]
 series: "Kernel Debugging"

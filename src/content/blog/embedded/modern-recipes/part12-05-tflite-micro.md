@@ -1,6 +1,6 @@
 ---
-title: "12-05: TFLite Micro — Op Resolver·Tensor Arena·Cortex-M"
-date: 2026-05-17T21:00:00
+title: "TFLite Micro 분석 — Op Resolver·Tensor Arena·Cortex-M"
+date: 2026-04-21T09:04:00
 description: "MCU용 TensorFlow Lite Micro의 구조, op resolver·tensor arena·CMSIS-NN integration·Ethos-U delegate."
 series: "Modern Embedded Recipes"
 seriesOrder: 141

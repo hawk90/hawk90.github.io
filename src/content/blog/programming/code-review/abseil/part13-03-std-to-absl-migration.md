@@ -1,6 +1,6 @@
 ---
-title: "Part 13-03: std → absl 마이그레이션 전략"
-date: 2026-05-25T22:00:00
+title: "std → absl 마이그레이션 전략"
+date: 2026-06-13T09:04:00
 description: "기존 std 기반 코드베이스에 Abseil을 도입하는 단계적 전략 — ABI 격리, 점진적 치환, 마이그레이션 도구."
 series: "Abseil Code Review"
 seriesOrder: 68

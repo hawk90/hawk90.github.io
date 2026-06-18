@@ -1,6 +1,6 @@
 ---
-title: "12-10: 온디바이스 LLM — llama.cpp·GGUF·MLX·KV Cache·NPU Backend"
-date: 2026-05-18T02:00:00
+title: "온디바이스 LLM 추론 — llama.cpp·GGUF·MLX·KV Cache·NPU Backend"
+date: 2026-04-21T09:09:00
 description: "4-bit 양자화된 LLM이 모바일·edge에서 동작하는 시대. llama.cpp/GGUF, Apple MLX, KV cache 메모리, 백엔드 선택을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 146

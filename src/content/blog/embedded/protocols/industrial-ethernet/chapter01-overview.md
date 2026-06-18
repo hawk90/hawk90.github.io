@@ -1,6 +1,6 @@
 ---
-title: "Ch 1: 산업용 이더넷 개요"
-date: 2026-05-16T01:00:00
+title: "산업용 이더넷 분석 — 일반 이더넷과 결정성 요구의 차이"
+date: 2026-05-13T09:01:00
 description: "왜 표준 Ethernet으로 부족한가 — 실시간성·결정성."
 series: "Industrial Ethernet 심화"
 seriesOrder: 1

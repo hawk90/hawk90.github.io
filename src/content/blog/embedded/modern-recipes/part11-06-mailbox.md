@@ -1,6 +1,6 @@
 ---
-title: "11-06: Mailbox Protocol — Host와 Accelerator를 잇는 Doorbell 채널"
-date: 2026-05-17T08:00:00
+title: "Mailbox Protocol 분석 — Host와 Accelerator를 잇는 Doorbell"
+date: 2026-04-20T09:05:00
 description: "Host CPU와 FPGA·NPU·보조 CPU를 잇는 mailbox 프로토콜을 register layout, doorbell IRQ, sequence·CRC, OpenAMP 비교 관점에서 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 128

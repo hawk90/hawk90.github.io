@@ -1,6 +1,6 @@
 ---
-title: "2-06: ARM 캐시 (L1/L2)"
-date: 2026-05-12T18:00:00
+title: "ARM L1·L2 캐시 분석 — Set Associative·Inclusive·Maintenance"
+date: 2026-04-11T09:18:00
 description: "I-Cache/D-Cache·write-through vs write-back·invalidate/clean."
 series: "Modern Embedded Recipes"
 seriesOrder: 18

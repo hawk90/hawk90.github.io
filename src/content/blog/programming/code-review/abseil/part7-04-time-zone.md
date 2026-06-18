@@ -1,6 +1,6 @@
 ---
-title: "Part 7-04: time_zone"
-date: 2026-05-24T19:00:00
+title: "absl::time_zone 분석"
+date: 2026-06-11T09:10:00
 description: "absl::TimeZone — IANA TZ database 위에 얹은 안전한 변환 layer. UTC가 아닌 시각을 다루는 모든 코드가 거쳐야 할 관문."
 series: "Abseil Code Review"
 seriesOrder: 42

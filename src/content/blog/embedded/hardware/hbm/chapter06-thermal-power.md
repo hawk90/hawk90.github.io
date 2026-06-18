@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: 열 설계와 전력 관리"
-date: 2026-05-16T06:00:00
+title: "HBM 열 설계와 전력 관리 — Stack 열 부하·Refresh Cost·냉각 솔루션"
+date: 2026-05-16T09:06:00
 description: "HBM stack의 열 부하·power state·refresh의 cost와 냉각 솔루션."
 series: "HBM·GDDR 심화"
 seriesOrder: 6
@@ -305,4 +305,4 @@ GDDR은 *카드 PCB*에 *분산*되어 *카드 fan*으로 *전체 면적 냉각*
 - [Ch 2: HBM 스택 구조와 TSV](/blog/embedded/hardware/hbm/chapter02-hbm-stack)
 - [Ch 5: 대역폭 계산과 병목 분석](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)
 - [Ch 7: 메모리 컨트롤러 인터페이스](/blog/embedded/hardware/hbm/chapter07-memory-controller)
-- [UCIe Ch 8: runtime recalibration](/blog/embedded/hardware/ucie/chapter08-runtime-recalibration) — 온도 변화 대응
+- UCIe Ch 8: runtime recalibration — 온도 변화 대응

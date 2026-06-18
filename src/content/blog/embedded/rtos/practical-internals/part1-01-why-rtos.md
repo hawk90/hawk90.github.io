@@ -1,6 +1,6 @@
 ---
-title: "1-01: RTOS가 필요한 이유"
-date: 2026-05-07T01:00:00
+title: "RTOS가 필요한 이유 — 일반 OS와의 결정적 차이"
+date: 2026-05-04T09:01:00
 description: "Super-loop는 모든 작업이 직렬화되어 deadline을 보장하지 못합니다. RTOS는 preemption과 우선순위로 실시간성을 확보합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 1

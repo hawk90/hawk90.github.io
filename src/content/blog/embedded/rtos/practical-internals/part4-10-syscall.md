@@ -1,6 +1,6 @@
 ---
-title: "4-10: System Call — SVC, ECALL, User/Kernel 분리, FreeRTOS-MPU"
-date: 2026-05-07T22:00:00
+title: "RTOS System Call — SVC·ECALL·User/Kernel 분리·FreeRTOS-MPU"
+date: 2026-05-07T09:42:00
 description: "MPU/MMU로 user task와 kernel을 분리하는 RTOS의 syscall 구조를 정리합니다. Cortex-M의 SVC trap, RISC-V의 ECALL, FreeRTOS-MPU와 Zephyr USERSPACE의 차이, capability 검사, syscall overhead 측정까지 다룹니다."
 series: "Practical RTOS Internals"
 seriesOrder: 42

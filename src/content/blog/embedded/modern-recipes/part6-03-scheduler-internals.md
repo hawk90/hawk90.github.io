@@ -1,6 +1,6 @@
 ---
-title: "6-03: Scheduler 동작 이해"
-date: 2026-05-14T17:00:00
+title: "RTOS Scheduler 동작 분석 — Tick·Context Switch·Yield"
+date: 2026-04-15T09:02:00
 description: "Preemptive와 cooperative, time-slice, context switch 비용, tickless idle까지 scheduler가 실제로 어떻게 도는지 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 65

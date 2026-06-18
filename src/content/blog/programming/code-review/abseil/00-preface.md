@@ -1,6 +1,6 @@
 ---
-title: "Abseil Code Review: 서문"
-date: 2026-05-23
+title: "Abseil Code Review — Google production-grade C++ 라이브러리 분석"
+date: 2026-06-09T09:00:00
 description: "Google이 만든 Abseil C++ 라이브러리를 code review의 시선으로 읽는다. std를 보완하는 industrial-grade 도구의 설계 의도와 사용 패턴을 13 Parts 68편으로 살펴본다."
 series: "Abseil Code Review"
 seriesOrder: 0

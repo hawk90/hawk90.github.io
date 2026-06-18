@@ -1,6 +1,6 @@
 ---
-title: "Part 4-01: folly::IOBuf — zero-copy buffer chain의 기본 단위"
-date: 2026-05-23T18:00:00
+title: "folly::IOBuf 분석 — zero-copy buffer chain의 기본 단위"
+date: 2026-06-05T09:00:00
 description: "IOBuf는 ref-counted byte buffer chain. network 코드의 zero-copy 패턴을 표현하는 Folly의 핵심 자료구조다."
 series: "Folly Code Review"
 seriesOrder: 18

@@ -1,6 +1,6 @@
 ---
-title: "6-01: RTOS 도입 결정"
-date: 2026-05-14T15:00:00
+title: "RTOS 도입 결정 분석 — Super Loop vs RTOS 트레이드오프"
+date: 2026-04-15T09:00:00
 description: "Super-loop와 RTOS의 분기점, RAM/Flash 비용, 디버깅 복잡도, 결정 기준을 한 자리에 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 63

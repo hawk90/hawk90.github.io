@@ -1,6 +1,6 @@
 ---
-title: "1-09: 큐와 메시지 패싱 — Producer-Consumer, Ring Buffer, By-Value vs By-Reference"
-date: 2026-05-07T09:00:00
+title: "큐와 메시지 패싱 — Producer-Consumer·Ring Buffer·전달 의미"
+date: 2026-05-04T09:09:00
 description: "Task 간 데이터 전달의 표준입니다. FreeRTOS는 by-value copy이며, 대용량은 pointer queue로 처리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 9

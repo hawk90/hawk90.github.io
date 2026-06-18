@@ -1,6 +1,6 @@
 ---
-title: "Part 9-02: bits (popcount, countl_zero)"
-date: 2026-05-25T03:00:00
+title: "absl::bits — popcount·countl_zero"
+date: 2026-06-12T09:01:00
 description: "absl::popcount, countl_zero, countr_zero — C++20 <bit>의 polyfill. SwissTable·해시·정수 압축의 핵심 primitive."
 series: "Abseil Code Review"
 seriesOrder: 49

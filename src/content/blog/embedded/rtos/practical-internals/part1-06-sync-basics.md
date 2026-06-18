@@ -1,6 +1,6 @@
 ---
-title: "1-06: 동기화 기초 — Critical Section, Mutual Exclusion, Race Condition"
-date: 2026-05-07T06:00:00
+title: "동기화 기초 분석 — Critical Section·Mutual Exclusion·Race Condition"
+date: 2026-05-04T09:06:00
 description: "공유 자원 보호의 3가지 도구로 interrupt disable, spinlock, mutex가 있습니다. 언제 어느 것을 쓰는지 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 6

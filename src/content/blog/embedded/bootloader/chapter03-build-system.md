@@ -1,6 +1,6 @@
 ---
-title: "Ch 3: 빌드 시스템 — Kconfig, Makefile, defconfig"
-date: 2026-05-09T03:00:00
+title: "U-Boot 빌드 시스템 분석 — Kconfig·Makefile·defconfig 동작 추적"
+date: 2026-05-09T09:03:00
 description: "U-Boot의 빌드 시스템 — Kconfig 옵션, Makefile 구조, defconfig 패턴, out-of-tree 빌드."
 series: "Bootloader Internals"
 seriesOrder: 3

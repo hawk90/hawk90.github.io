@@ -1,6 +1,6 @@
 ---
-title: "10-06: 부팅 안 될 때 — 단계별 Isolation"
-date: 2026-05-16T20:00:00
+title: "임베디드 부팅 실패 진단 — 단계별 Isolation"
+date: 2026-04-19T09:05:00
 description: "전원·reset·clock·vector table·main 진입까지 단계별로 isolation하는 부팅 디버깅 절차를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 116

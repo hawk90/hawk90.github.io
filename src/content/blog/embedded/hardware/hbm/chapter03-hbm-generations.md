@@ -1,6 +1,6 @@
 ---
-title: "Ch 3: HBM2/HBM2E/HBM3/HBM3E 스펙 비교"
-date: 2026-05-16T03:00:00
+title: "HBM2·HBM2E·HBM3·HBM3E 세대 비교 — JEDEC 표준 진화 흐름"
+date: 2026-05-16T09:03:00
 description: "세대별 bandwidth·capacity·signaling — JEDEC 표준의 진화 흐름."
 series: "HBM·GDDR 심화"
 seriesOrder: 3
@@ -253,4 +253,4 @@ HBM4는 *bus width 자체가 2배*입니다. *interposer 라우팅*과 *base die
 - [Ch 2: HBM 스택 구조와 TSV](/blog/embedded/hardware/hbm/chapter02-hbm-stack)
 - [Ch 4: GDDR6·GDDR6X·GDDR7](/blog/embedded/hardware/hbm/chapter04-gddr)
 - [Ch 5: 대역폭 계산과 병목 분석](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)
-- [UCIe Ch 5: 버전 비교](/blog/embedded/hardware/ucie/chapter05-version-comparison) — 표준 세대 진화 패턴
+- UCIe Ch 5: 버전 비교 — 표준 세대 진화 패턴

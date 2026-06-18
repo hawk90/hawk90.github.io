@@ -1,6 +1,6 @@
 ---
-title: "3-08: 메모리 레이아웃"
-date: 2026-05-13T06:00:00
+title: "임베디드 메모리 레이아웃 — .text·.rodata·.data·.bss·.heap·.stack"
+date: 2026-04-12T09:30:00
 description: "Stack/heap/static — 누가 어디 사는가."
 series: "Modern Embedded Recipes"
 seriesOrder: 30

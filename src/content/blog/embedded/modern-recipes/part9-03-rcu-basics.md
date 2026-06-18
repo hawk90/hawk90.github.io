@@ -1,6 +1,6 @@
 ---
-title: "9-03: RCU (Read-Copy-Update) 기초"
-date: 2026-05-16T07:00:00
+title: "RCU (Read-Copy-Update) 기초 — Quiescent State·Grace Period"
+date: 2026-04-18T09:02:00
 description: "RCU 원리, rcu_read_lock, grace period, synchronize_rcu, 임베디드 적용(URCU)을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 103

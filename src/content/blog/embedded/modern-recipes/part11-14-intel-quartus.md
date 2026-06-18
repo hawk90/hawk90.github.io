@@ -1,6 +1,6 @@
 ---
-title: "11-14: Intel Quartus 사용법 — Platform Designer·Nios II·HLS"
-date: 2026-05-17T16:00:00
+title: "Intel Quartus 사용법 — Platform Designer·Nios II·HLS"
+date: 2026-04-20T09:13:00
 description: "Intel Quartus Prime·Platform Designer(Qsys)·Nios II soft processor·Intel HLS·partial reconfig 사용법."
 series: "Modern Embedded Recipes"
 seriesOrder: 136

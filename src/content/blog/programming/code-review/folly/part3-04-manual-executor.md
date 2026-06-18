@@ -1,6 +1,6 @@
 ---
-title: "Part 3-04: ManualExecutor — 결정적 테스트를 위한 수동 진행"
-date: 2026-05-23T16:00:00
+title: "folly::ManualExecutor — 결정적 테스트를 위한 수동 진행"
+date: 2026-06-04T09:16:00
 description: "ManualExecutor는 schedule된 task를 자동 실행하지 않고 run()/drive() 호출 시점에만 진행한다. 비동기 코드의 단위 테스트에 결정성을 부여한다."
 series: "Folly Code Review"
 seriesOrder: 16

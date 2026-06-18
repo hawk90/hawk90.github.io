@@ -1,6 +1,6 @@
 ---
-title: "Part 3-03: Pool Allocator 구현"
-date: 2026-05-07T03:00:00
+title: "Pool Allocator 구현 — Fixed-Size Block과 O(1) 보장"
+date: 2026-04-30T09:21:00
 description: "고정 크기 블록 + free list — 임베디드의 표준 allocator 구현."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 21

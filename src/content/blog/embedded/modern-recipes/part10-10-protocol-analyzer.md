@@ -1,6 +1,6 @@
 ---
-title: "10-10: 통신 프로토콜 분석 — Logic Analyzer와 Protocol Decoder"
-date: 2026-05-17T00:00:00
+title: "통신 프로토콜 분석 — Logic Analyzer와 Protocol Decoder"
+date: 2026-04-19T09:09:00
 description: "Saleae·DSLogic·oscilloscope·protocol decoder로 UART/SPI/I2C/CAN 신호를 캡처·디코딩하는 실전 패턴."
 series: "Modern Embedded Recipes"
 seriesOrder: 120

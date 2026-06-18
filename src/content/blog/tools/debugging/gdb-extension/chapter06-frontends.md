@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: 프런트엔드 — TUI, cgdb, dashboard, gef, IDE"
-date: 2026-05-17T06:00:00
+title: "GDB 프런트엔드 비교 — TUI·cgdb·dashboard·gef·IDE"
+date: 2026-05-27T09:06:00
 description: "터미널부터 IDE까지. 내장 TUI, cgdb, gdb-dashboard, gef/pwndbg, VSCode, nvim-dap, Cortex-Debug 비교."
 tags: [gdb, tui, cgdb, gef, vscode, neovim, frontend]
 series: "GDB Extension and IDE"

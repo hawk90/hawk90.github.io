@@ -1,6 +1,6 @@
 ---
-title: "Ch 7: 보드 customize — overlay, post-build, post-image"
-date: 2026-05-19T07:00:00
+title: "Buildroot 보드 Customize — overlay·post-build·post-image 흐름"
+date: 2026-05-19T09:07:00
 description: "보드별 파일 추가, 빌드 후 처리, 이미지 생성 후 처리 — 세 가지 hook."
 series: "Buildroot Practical"
 seriesOrder: 7

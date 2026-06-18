@@ -1,6 +1,6 @@
 ---
-title: "Part 15-02: folly::coro::Task — lazy single-shot 코루틴"
-date: 2026-05-27T07:00:00
+title: "folly::coro::Task — lazy single-shot 코루틴"
+date: 2026-06-07T09:11:00
 description: "Task<T>의 lazy start, executor 바인딩, scheduleOn, 값/예외 전파 — production async의 기본 단위."
 series: "Folly Code Review"
 seriesOrder: 65

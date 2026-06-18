@@ -1,6 +1,6 @@
 ---
-title: "Part 18-04: folly::MicroSpinLock — 가장 좁은 spin lock"
-date: 2026-05-27T21:00:00
+title: "folly::MicroSpinLock — 가장 좁은 spin lock"
+date: 2026-06-08T09:07:00
 description: "MicroSpinLock의 1-byte 표현, sleep 없는 순수 spin — 짧은 critical section 전용."
 series: "Folly Code Review"
 seriesOrder: 79

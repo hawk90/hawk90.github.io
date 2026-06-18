@@ -1,6 +1,6 @@
 ---
-title: "Part 15-03: Cord vs std::string — 선택 기준과 메모리 프로파일"
-date: 2026-05-26T07:00:00
+title: "absl::Cord vs std::string — 선택 기준과 메모리 프로파일"
+date: 2026-06-13T09:11:00
 description: "absl::Cord와 std::string 중 무엇을 쓸지 판단하는 기준 — 크기·mutation 패턴·공유 빈도·메모리 프로파일 비교."
 series: "Abseil Code Review"
 seriesOrder: 75

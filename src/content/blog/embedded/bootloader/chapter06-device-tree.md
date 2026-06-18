@@ -1,6 +1,6 @@
 ---
-title: "Ch 6: Device Tree와 부트로더 — DTB 로딩과 fixup"
-date: 2026-05-09T06:00:00
+title: "Device Tree DTB 부트로더 처리 — 로딩 시점과 fixup 메커니즘 추적"
+date: 2026-05-09T09:06:00
 description: "U-Boot가 DTB를 다루는 방식 — control DTB와 OS DTB, fdt 명령, 런타임 fixup."
 series: "Bootloader Internals"
 seriesOrder: 6

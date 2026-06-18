@@ -1,6 +1,6 @@
 ---
-title: "Part 16-01: folly::Expected — 결과 또는 오류"
-date: 2026-05-27T11:00:00
+title: "folly::Expected — 결과 또는 오류"
+date: 2026-06-07T09:15:00
 description: "Expected<T, E>의 monadic API, std::expected와의 차이, absl::StatusOr와의 비교 — 예외 없는 에러 표현."
 series: "Folly Code Review"
 seriesOrder: 69

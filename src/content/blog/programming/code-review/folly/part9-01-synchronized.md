@@ -1,6 +1,6 @@
 ---
-title: "Part 9-01: Synchronized (lock wrapper)"
-date: 2026-05-24T17:00:00
+title: "folly::Synchronized — lock wrapper 패턴"
+date: 2026-06-06T09:04:00
 description: "folly::Synchronized<T> — 데이터와 lock을 한 객체에 묶어 잠금 누락을 컴파일 타임에 막는다."
 series: "Folly Code Review"
 seriesOrder: 40

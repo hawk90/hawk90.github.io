@@ -1,6 +1,6 @@
 ---
-title: "Part 4-03: Lock-free 기초"
-date: 2026-05-07T03:00:00
+title: "임베디드 Lock-free 기초 — atomic·memory ordering·CAS"
+date: 2026-05-01T09:31:00
 description: "Atomic, CAS, memory order — mutex 없이 동시성. 임베디드의 ISR-safe 패턴."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 31

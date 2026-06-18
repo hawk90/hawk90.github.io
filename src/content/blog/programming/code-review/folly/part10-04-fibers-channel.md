@@ -1,6 +1,6 @@
 ---
-title: "Part 10-04: fibers::Channel (Go-like channel)"
-date: 2026-05-25T02:00:00
+title: "folly::fibers::Channel — Go-like channel"
+date: 2026-06-06T09:12:00
 description: "Part 10-04: fibers::Channel — fiber 간 producer/consumer 채널. Go의 channel과 비슷한 sync 점."
 series: "Folly Code Review"
 seriesOrder: 48

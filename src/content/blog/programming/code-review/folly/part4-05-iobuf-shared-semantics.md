@@ -1,6 +1,6 @@
 ---
-title: "Part 4-05: IOBuf shared semantics — clone / unshare / takeOwnership"
-date: 2026-05-23T22:00:00
+title: "folly::IOBuf shared semantics — clone·unshare·takeOwnership"
+date: 2026-06-05T09:04:00
 description: "IOBuf의 ref-count는 buffer share를 표현한다. clone/unshare/takeOwnership의 의미를 정확히 이해해야 zero-copy가 안전하다."
 series: "Folly Code Review"
 seriesOrder: 22

@@ -1,6 +1,6 @@
 ---
-title: "11-11: HLS 최적화 — Pipeline·Unroll·Partition·Dataflow"
-date: 2026-05-17T13:00:00
+title: "HLS 최적화 기법 — Pipeline·Unroll·Partition·Dataflow"
+date: 2026-04-20T09:10:00
 description: "Vitis/Vivado HLS의 pragma로 II=1 pipeline·array partition·dataflow를 적용해 throughput을 극대화하는 패턴."
 series: "Modern Embedded Recipes"
 seriesOrder: 133

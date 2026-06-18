@@ -1,6 +1,6 @@
 ---
-title: "5-10: 연속 프로파일링 — Parca·Pixie·Pyroscope·Tetragon"
-date: 2026-05-08T29:00:00
+title: "연속 프로파일링 — Parca·Pixie·Pyroscope·Tetragon"
+date: 2026-04-27T09:09:00
 description: "eBPF 기반 continuous profiling. Parca, Pixie, Pyroscope, Cilium Tetragon으로 24/7 분석."
 series: "Embedded Performance Engineering"
 seriesOrder: 49

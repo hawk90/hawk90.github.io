@@ -1,6 +1,6 @@
 ---
-title: "Ch 4: glibc 자체 도구 — mtrace / mcheck / MALLOC_CHECK_"
-date: 2026-05-17T04:00:00
+title: "glibc 메모리 도구 — mtrace·mcheck·MALLOC_CHECK_"
+date: 2026-05-31T09:04:00
 description: "별 라이브러리 없이 glibc 만으로 메모리 디버깅. mtrace, mcheck, MALLOC_CHECK_."
 tags: [memory, glibc, mtrace, mcheck, malloc-check]
 series: "Memory Diagnostics"

@@ -1,6 +1,6 @@
 ---
-title: "Ch 7: WiFi 4 스택 — Station·SoftAP·Mesh"
-date: 2026-05-01T07:00:00
+title: "ESP32-C3 WiFi 4 스택 — Station·SoftAP·Mesh 구성"
+date: 2026-05-20T09:07:00
 description: "802.11 b/g/n. ESP-IDF WiFi API, 4가지 모드. WPA2/WPA3 보안."
 series: "ESP32-C3 Mastering"
 seriesOrder: 7

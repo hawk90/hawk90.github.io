@@ -1,6 +1,6 @@
 ---
-title: "Ch 23: BootROM · eFuse · OTP — SoC의 0단계"
-date: 2026-05-19T23:00:00
+title: "SoC BootROM·eFuse·OTP — 부팅의 0단계 분석"
+date: 2026-05-19T09:23:00
 description: "전원 인가 직후 mask ROM이 무엇을 하는지, eFuse/OTP에 굳어 들어가는 키와 anti-rollback counter, secure boot의 시작점."
 series: "Bootloader Internals"
 seriesOrder: 23

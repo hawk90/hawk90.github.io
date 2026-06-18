@@ -1,6 +1,6 @@
 ---
-title: "Part 11-04: Visitor pattern (dynamic의 type별 분기)"
-date: 2026-05-25T06:00:00
+title: "folly dynamic Visitor pattern — type별 분기"
+date: 2026-06-06T09:16:00
 description: "Part 11-04: dynamic을 type별로 처리하는 visitor 패턴. std::visit-like helper로 switch boilerplate를 줄인다."
 series: "Folly Code Review"
 seriesOrder: 52

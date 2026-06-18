@@ -1,6 +1,6 @@
 ---
-title: "7-05: 커널 빌드"
-date: 2026-05-15T07:00:00
+title: "임베디드 커널 빌드 — defconfig·menuconfig·Image·zImage"
+date: 2026-04-16T09:04:00
 description: "Kernel source, defconfig, menuconfig, cross-compile, module 빌드, deb/rpm 패키징까지 KBuild 전 과정을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 79

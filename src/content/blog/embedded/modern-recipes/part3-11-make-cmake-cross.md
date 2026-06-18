@@ -1,6 +1,6 @@
 ---
-title: "3-11: Make와 CMake (cross-compile)"
-date: 2026-05-13T09:00:00
+title: "Make·CMake 크로스 컴파일 — Toolchain File·Sysroot 통합"
+date: 2026-04-12T09:33:00
 description: "Embedded 빌드 시스템 — toolchain file·target_link_options."
 series: "Modern Embedded Recipes"
 seriesOrder: 33

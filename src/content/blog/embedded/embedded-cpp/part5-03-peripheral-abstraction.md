@@ -1,6 +1,6 @@
 ---
-title: "Part 5-03: Peripheral 추상화"
-date: 2026-05-07T03:00:00
+title: "Peripheral 추상화 — UART·SPI·I2C 공통 인터페이스 설계"
+date: 2026-05-02T09:39:00
 description: "UART, SPI, I2C — peripheral을 type-safe class로. Blocking, interrupt, DMA 패턴."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 39

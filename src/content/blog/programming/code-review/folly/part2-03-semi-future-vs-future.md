@@ -1,6 +1,6 @@
 ---
-title: "Part 2-03: SemiFuture vs Future — executor binding의 명시화"
-date: 2026-05-23T08:00:00
+title: "folly::SemiFuture vs Future — executor binding의 명시화"
+date: 2026-06-04T09:08:00
 description: "SemiFuture는 executor에 바인딩되지 않은 상태, Future는 바인딩 완료 상태. 이 구분이 라이브러리 API의 안전성을 만든다."
 series: "Folly Code Review"
 seriesOrder: 8

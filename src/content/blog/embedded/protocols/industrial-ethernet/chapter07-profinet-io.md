@@ -1,6 +1,6 @@
 ---
-title: "Ch 7: PROFINET IO — Controller·Device·Supervisor"
-date: 2026-05-16T07:00:00
+title: "PROFINET IO 모델 — Controller·Device·Supervisor 역할 추적"
+date: 2026-05-13T09:07:00
 description: "PROFINET IO 통신 모델 — AR·CR·DCP·alarm·MRP redundancy까지 한 번에."
 series: "Industrial Ethernet 심화"
 seriesOrder: 7

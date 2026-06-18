@@ -1,6 +1,6 @@
 ---
-title: "5-03: RT-Thread — Object 모델·Components·Smart·Studio"
-date: 2026-05-07T04:00:00
+title: "RT-Thread 분석 — Object 모델·Components·Smart·Studio"
+date: 2026-05-08T09:48:00
 description: "RT-Thread의 object-oriented C 설계와 component 생태계를 따라갑니다. FreeRTOS급 경량 kernel 위에 DFS·LwIP·POSIX·FinSH가 어떻게 얹히는지, Smart variant가 무엇을 더 가져오는지 정리합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 48

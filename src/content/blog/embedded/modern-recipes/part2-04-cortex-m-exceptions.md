@@ -1,6 +1,6 @@
 ---
-title: "2-04: Cortex-M 예외 처리"
-date: 2026-05-12T16:00:00
+title: "Cortex-M 예외 처리 — Vector Table·NVIC·Tail-Chaining 추적"
+date: 2026-04-11T09:16:00
 description: "NVIC·vector table·tail-chaining·late-arrival의 hardware 기반."
 series: "Modern Embedded Recipes"
 seriesOrder: 16

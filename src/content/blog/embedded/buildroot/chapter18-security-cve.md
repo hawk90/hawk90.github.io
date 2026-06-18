@@ -1,6 +1,6 @@
 ---
-title: "Ch 18: Security·CVE 추적 — pkg-stats와 reproducible builds"
-date: 2026-05-19T18:00:00
+title: "Buildroot Security·CVE 추적 — pkg-stats와 Reproducible Builds"
+date: 2026-05-19T09:18:00
 description: "Buildroot의 CVE 추적·legal info 산출·SBOM·reproducible build로 보안과 컴플라이언스를 관리하는 패턴."
 series: "Buildroot Practical"
 seriesOrder: 18

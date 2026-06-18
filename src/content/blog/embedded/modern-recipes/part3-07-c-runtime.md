@@ -1,6 +1,6 @@
 ---
-title: "3-07: C 런타임 (crt0)"
-date: 2026-05-13T05:00:00
+title: "C 런타임 crt0 분석 — Stack·BSS Zero·Data Copy·atexit"
+date: 2026-04-12T09:29:00
 description: "crt0·.data 복사·.bss 클리어·ctors·atexit."
 series: "Modern Embedded Recipes"
 seriesOrder: 29

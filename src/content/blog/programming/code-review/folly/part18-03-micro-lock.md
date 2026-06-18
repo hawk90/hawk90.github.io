@@ -1,6 +1,6 @@
 ---
-title: "Part 18-03: folly::MicroLock — 1-byte 락"
-date: 2026-05-27T20:00:00
+title: "folly::MicroLock — 1-byte 락"
+date: 2026-06-08T09:06:00
 description: "MicroLock의 1-byte 표현 — futex 기반 lock으로 std::mutex(40+ byte)의 메모리 비용 회피."
 series: "Folly Code Review"
 seriesOrder: 78

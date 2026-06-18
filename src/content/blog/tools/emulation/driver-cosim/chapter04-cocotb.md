@@ -1,6 +1,6 @@
 ---
-title: "Ch 4: CocoTB — Python Testbench"
-date: 2026-05-17T04:00:00
+title: "CocoTB 분석 — Python으로 작성하는 RTL Testbench"
+date: 2026-05-22T09:04:00
 description: "Python coroutine으로 RTL testbench — productivity gain."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 4
@@ -256,4 +256,4 @@ async def coverage_test(dut):
 
 - [Ch 3: Verilator](/blog/tools/emulation/driver-cosim/chapter03-verilator)
 - [Ch 5: SystemC TLM](/blog/tools/emulation/driver-cosim/chapter05-systemc-tlm)
-- [QEMU Fake Device Driver — Test Automation](/blog/tools/emulation/qemu-fake-device/chapter10-test-automation) — pytest 통합 패턴
+- QEMU Fake Device Driver — Test Automation — pytest 통합 패턴

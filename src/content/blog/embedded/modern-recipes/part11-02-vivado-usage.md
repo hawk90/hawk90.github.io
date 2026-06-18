@@ -1,6 +1,6 @@
 ---
-title: "11-02: Vivado 사용법 — Project·Constraint·Synth·Impl·Bitstream"
-date: 2026-05-17T04:00:00
+title: "Vivado 사용법 — Project·Constraint·Synth·Impl·Bitstream"
+date: 2026-04-20T09:01:00
 description: "Vivado project 흐름·XDC constraint·synthesis/implementation·timing report·bitstream programming의 실전 패턴."
 series: "Modern Embedded Recipes"
 seriesOrder: 124

@@ -1,6 +1,6 @@
 ---
-title: "4-08: SPI 드라이버"
-date: 2026-05-13T18:00:00
+title: "SPI 드라이버 구현 — Master·Slave·CRC·DMA"
+date: 2026-04-13T09:42:00
 description: "Master/slave·CPOL/CPHA·DMA·multi-slave CS."
 series: "Modern Embedded Recipes"
 seriesOrder: 42

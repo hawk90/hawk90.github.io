@@ -1,6 +1,6 @@
 ---
-title: "Part 9-01: int128 / uint128"
-date: 2026-05-25T02:00:00
+title: "absl::int128·uint128 분석"
+date: 2026-06-12T09:00:00
 description: "absl::int128, uint128 — 64비트로 부족한 곳을 메우는 128비트 정수. 컴파일러 builtin과 emulation 양쪽을 가린 ABI."
 series: "Abseil Code Review"
 seriesOrder: 48

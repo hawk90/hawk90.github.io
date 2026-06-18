@@ -1,6 +1,6 @@
 ---
-title: "Part 2-06: retry / window / via — 제어 흐름 조합자"
-date: 2026-05-23T11:00:00
+title: "folly::Future retry·window·via — 제어 흐름 조합자"
+date: 2026-06-04T09:11:00
 description: "Future 조립의 제어 흐름 — 재시도, 동시성 윈도, executor 전환."
 series: "Folly Code Review"
 seriesOrder: 11

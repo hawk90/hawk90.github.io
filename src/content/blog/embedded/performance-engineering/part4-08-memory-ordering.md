@@ -1,6 +1,6 @@
 ---
-title: "4-08: Memory Ordering — Acquire·Release·Seq-Cst·ARM Relaxed Model"
-date: 2026-05-08T17:00:00
+title: "Memory Ordering 분석 — Acquire·Release·Seq-Cst·ARM Relaxed Model"
+date: 2026-04-26T09:07:00
 description: "C11/C++11 memory_order와 acquire-release pair, seq-cst 비용, ARM ldar/stlr."
 series: "Embedded Performance Engineering"
 seriesOrder: 37

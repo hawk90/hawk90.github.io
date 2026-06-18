@@ -1,6 +1,6 @@
 ---
-title: "6-02: 사례 — Matrix Multiply가 예상의 10배 느린 이유"
-date: 2026-05-08T31:00:00
+title: "실전 사례 — Matrix Multiply가 예상의 10배 느린 이유"
+date: 2026-04-28T09:01:00
 description: "1024×1024 matrix multiply가 이론값의 10배 느렸다. SIMD부터 의심했지만 진짜 범인은 캐시 미스 90%였다."
 series: "Embedded Performance Engineering"
 seriesOrder: 51

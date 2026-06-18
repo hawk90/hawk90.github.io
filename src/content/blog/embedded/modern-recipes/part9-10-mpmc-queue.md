@@ -1,6 +1,6 @@
 ---
-title: "9-10: Multi-producer Multi-consumer 큐"
-date: 2026-05-16T14:00:00
+title: "MPMC Queue 구현 — Multi-producer Multi-consumer Lock-Free"
+date: 2026-04-18T09:09:00
 description: "MPMC와 SPSC 차이, Vyukov 큐, Disruptor의 ring과 sequence, bounded와 unbounded 비교를 실측과 함께 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 110

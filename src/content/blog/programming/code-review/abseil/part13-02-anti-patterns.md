@@ -1,6 +1,6 @@
 ---
-title: "Part 13-02: 자주 보는 anti-pattern"
-date: 2026-05-25T21:00:00
+title: "Abseil 자주 보는 anti-pattern"
+date: 2026-06-13T09:03:00
 description: "code review에서 반복적으로 지적하는 Abseil 오용 사례 — string_view dangling, mutex annotation 누락, StatusOr 무시, 잘못된 hash 등."
 series: "Abseil Code Review"
 seriesOrder: 67

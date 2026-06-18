@@ -1,6 +1,6 @@
 ---
-title: "Ch 2: RISC-V 코어 — RV32IMC + PMP + 인터럽트 컨트롤러"
-date: 2026-05-01T02:00:00
+title: "ESP32-C3 RISC-V 코어 분석 — RV32IMC·PMP·인터럽트 컨트롤러"
+date: 2026-05-20T09:02:00
 description: "ESP32-C3 코어의 ISA·특권 모델·인터럽트. 32-bit IMC, M-mode only, PMP 16 entries."
 series: "ESP32-C3 Mastering"
 seriesOrder: 2

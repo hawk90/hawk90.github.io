@@ -1,6 +1,6 @@
 ---
-title: "5-06: Apache NuttX — POSIX·PX4·NASA Ingenuity"
-date: 2026-05-07T07:00:00
+title: "Apache NuttX 분석 — POSIX·PX4·NASA Ingenuity"
+date: 2026-05-08T09:51:00
 description: "NuttX의 POSIX-compliant 구조를 따라가며 PX4 autopilot과 NASA Ingenuity 화성 헬리콥터 채택 배경을 정리합니다. Flat/Protected/Kernel 빌드, VFS, 네트워크, NSH, micro-ROS 통합까지 한 지도로 모읍니다."
 series: "Practical RTOS Internals"
 seriesOrder: 51

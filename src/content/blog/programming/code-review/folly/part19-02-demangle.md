@@ -1,6 +1,6 @@
 ---
-title: "Part 19-02: folly::demangle — typeid 디망글링"
-date: 2026-05-27T23:00:00
+title: "folly::demangle — typeid 디망글링"
+date: 2026-06-08T09:09:00
 description: "folly::demangle의 역할 — C++ mangled name을 읽기 쉬운 형식으로, crash log와 typeid 출력에 필수."
 series: "Folly Code Review"
 seriesOrder: 81

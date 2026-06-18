@@ -1,6 +1,6 @@
 ---
-title: "5-05: Flamegraph 분석 — On-CPU·Off-CPU·Differential"
-date: 2026-05-08T43:00:00
+title: "Flamegraph 분석 — On-CPU·Off-CPU·Differential"
+date: 2026-04-27T09:04:00
 description: "Brendan Gregg flamegraph로 on-CPU·off-CPU·차분 분석. perf·BCC stack 수집."
 series: "Embedded Performance Engineering"
 seriesOrder: 44

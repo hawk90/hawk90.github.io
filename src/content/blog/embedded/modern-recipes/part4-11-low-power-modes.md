@@ -1,6 +1,6 @@
 ---
-title: "4-11: 저전력 모드"
-date: 2026-05-13T21:00:00
+title: "저전력 모드 분석 — Sleep·Stop·Standby·Wake-up Source"
+date: 2026-04-13T09:45:00
 description: "Sleep/Stop/Standby·wake-up source·전류 측정."
 series: "Modern Embedded Recipes"
 seriesOrder: 45

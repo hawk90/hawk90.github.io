@@ -1,6 +1,6 @@
 ---
-title: "Ch 7: UVM C Reference Model"
-date: 2026-05-17T07:00:00
+title: "UVM C Reference Model 통합 — DUT와 황금 모델 비교 검증"
+date: 2026-05-22T09:07:00
 description: "UVM testbench의 reference model을 C로 — driver와 공유."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 7
@@ -225,5 +225,5 @@ src/
 
 - [Ch 6: Bus Functional Model](/blog/tools/emulation/driver-cosim/chapter06-bfm)
 - [Ch 8: End-to-End — Driver + RTL Co-sim](/blog/tools/emulation/driver-cosim/chapter08-end-to-end)
-- [GoF Design Patterns — Strategy](/blog/programming/design/gof-design-patterns/item21-strategy) — algorithm interchangeability
-- [Khorikov Unit Testing — Anti-Patterns](/blog/programming/engineering/khorikov-unit-testing/chapter11-anti-patterns) — duplicated reference 안티패턴
+- GoF Design Patterns — Strategy — algorithm interchangeability
+- Khorikov Unit Testing — Anti-Patterns — duplicated reference 안티패턴

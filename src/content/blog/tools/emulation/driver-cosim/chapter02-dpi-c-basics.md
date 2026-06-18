@@ -1,6 +1,6 @@
 ---
-title: "Ch 2: SystemVerilog DPI-C 기초"
-date: 2026-05-17T02:00:00
+title: "SystemVerilog DPI-C 기초 — C와 RTL을 잇는 표준 인터페이스"
+date: 2026-05-22T09:02:00
 description: "Import·export·data type — SV와 C 사이의 다리."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 2
@@ -261,4 +261,4 @@ DPI-C를 처음 쓰면 자주 막히는 지점들.
 
 - [Ch 1: Why Pre-Silicon Driver Verification](/blog/tools/emulation/driver-cosim/chapter01-why-cosim)
 - [Ch 3: Verilator — Open Source SV Simulator](/blog/tools/emulation/driver-cosim/chapter03-verilator)
-- [QEMU Internals — QOM Deep Dive](/blog/tools/emulation/qemu-internals/chapter02-qom-deep-dive) — functional model과의 비교
+- QEMU Internals — QOM Deep Dive — functional model과의 비교

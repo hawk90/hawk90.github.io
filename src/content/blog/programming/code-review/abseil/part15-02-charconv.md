@@ -1,6 +1,6 @@
 ---
-title: "Part 15-02: absl::from_chars / SimpleAtoi — 숫자 변환의 빠른 길"
-date: 2026-05-26T06:00:00
+title: "absl::from_chars·SimpleAtoi — 빠른 숫자 변환"
+date: 2026-06-13T09:10:00
 description: "absl::SimpleAtoi / SimpleAtof / from_chars — locale-free, exception-free, sscanf 대비 10~50배. std::charconv와의 관계."
 series: "Abseil Code Review"
 seriesOrder: 74

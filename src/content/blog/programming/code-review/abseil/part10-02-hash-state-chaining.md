@@ -1,6 +1,6 @@
 ---
-title: "Part 10-02: HashState chaining"
-date: 2026-05-25T11:00:00
+title: "Abseil HashState chaining"
+date: 2026-06-12T09:09:00
 description: "H::combine의 진짜 동작 — HashState로 필드를 chain해 한 번에 좋은 분포를 얻는 방법."
 series: "Abseil Code Review"
 seriesOrder: 57

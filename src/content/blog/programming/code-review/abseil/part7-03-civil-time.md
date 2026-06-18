@@ -1,6 +1,6 @@
 ---
-title: "Part 7-03: CivilTime"
-date: 2026-05-24T18:00:00
+title: "absl::CivilTime 분석"
+date: 2026-06-11T09:09:00
 description: "absl::CivilDay와 가족들 — 시간대 없는 달력 산술. 윤년·월말을 직접 처리할 필요가 없게 한다."
 series: "Abseil Code Review"
 seriesOrder: 41

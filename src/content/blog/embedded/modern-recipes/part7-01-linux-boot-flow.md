@@ -1,6 +1,6 @@
 ---
-title: "7-01: 임베디드 Linux 부팅 흐름"
-date: 2026-05-15T03:00:00
+title: "임베디드 Linux 부팅 흐름 분석 — BootROM·U-Boot·Kernel·init"
+date: 2026-04-16T09:00:00
 description: "BootROM, SPL, U-Boot, Kernel, Init까지 각 단계의 책임과 ATF/OP-TEE, initramfs, init 시스템 선택을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 75

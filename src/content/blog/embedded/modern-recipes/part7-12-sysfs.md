@@ -1,6 +1,6 @@
 ---
-title: "7-12: sysfs·configfs — kobject 기반 User 인터페이스"
-date: 2026-05-15T14:00:00
+title: "sysfs·configfs 활용 — kobject 기반 User 인터페이스"
+date: 2026-04-16T09:11:00
 description: "sysfs attribute, attribute group, configfs로 user space에서 driver를 제어하는 표준 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 86

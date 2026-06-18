@@ -1,6 +1,6 @@
 ---
-title: "Ch 13: Power Management — suspend/resume, runtime PM, regulators"
-date: 2026-05-09T13:00:00
+title: "BSP Power Management — Suspend/Resume·Runtime PM·Regulator"
+date: 2026-05-18T09:13:00
 description: "BSP의 전력 관리 — suspend-to-RAM, runtime PM, regulator framework, CPU idle/freq를 정리합니다."
 series: "BSP Development"
 seriesOrder: 13

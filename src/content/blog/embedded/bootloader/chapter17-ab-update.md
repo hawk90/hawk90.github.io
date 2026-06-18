@@ -1,6 +1,6 @@
 ---
-title: "Ch 17: A/B 업데이트와 boot 이중화"
-date: 2026-05-09T17:00:00
+title: "임베디드 A/B 부팅 이중화 — OTA 안전성을 위한 부트 슬롯 설계"
+date: 2026-05-09T09:17:00
 description: "A/B 슬롯 부트 — 양산 시스템의 안전한 펌웨어 업데이트와 자동 fallback."
 series: "Bootloader Internals"
 seriesOrder: 17

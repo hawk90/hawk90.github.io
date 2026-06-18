@@ -1,6 +1,6 @@
 ---
-title: "Ch 14: bootflow / bootmeth — 모던 U-Boot 추상화"
-date: 2026-05-09T14:00:00
+title: "Modern U-Boot bootflow / bootmeth — 새 추상화 레이어 분석"
+date: 2026-05-09T09:14:00
 description: "U-Boot의 새로운 부트 모델 — bootflow / bootmeth로 distro_bootcmd 스크립트를 대체."
 series: "Bootloader Internals"
 seriesOrder: 14

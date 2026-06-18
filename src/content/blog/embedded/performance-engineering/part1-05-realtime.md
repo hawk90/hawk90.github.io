@@ -1,6 +1,6 @@
 ---
-title: "1-05: 실시간 성능 분석 — WCET, Jitter, Deadline Miss"
-date: 2026-05-08T05:00:00
+title: "실시간 성능 분석 — WCET·Jitter·Deadline Miss 측정"
+date: 2026-04-23T09:05:00
 description: "Real-time 시스템의 측정 — 평균 아닌 worst-case. WCET 4 방법과 jitter·tardiness 분석."
 series: "Embedded Performance Engineering"
 seriesOrder: 5

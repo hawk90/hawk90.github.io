@@ -1,6 +1,6 @@
 ---
-title: "Part 21-01: folly::observer — hot config의 atomic refresh"
-date: 2026-05-28T11:00:00
+title: "folly::observer — hot config의 atomic refresh"
+date: 2026-06-08T09:15:00
 description: "folly::observer — read mostly 값의 atomic refresh, hot config·feature flag·LB weight 같은 패턴의 표준."
 series: "Folly Code Review"
 seriesOrder: 87

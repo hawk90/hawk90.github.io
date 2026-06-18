@@ -1,6 +1,6 @@
 ---
-title: "Ch 17: SDK 생성·배포 — make sdk와 application 워크플로"
-date: 2026-05-19T17:00:00
+title: "Buildroot SDK 생성·배포 — make sdk와 application 워크플로"
+date: 2026-05-19T09:17:00
 description: "Buildroot가 만든 toolchain을 application 개발자에게 SDK로 배포하는 패턴과 relocatable toolchain 한계."
 series: "Buildroot Practical"
 seriesOrder: 17

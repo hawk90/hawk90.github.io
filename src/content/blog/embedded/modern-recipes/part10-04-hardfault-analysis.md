@@ -1,6 +1,6 @@
 ---
-title: "10-04: 하드폴트 분석 — Stacked Frame과 CFSR 읽기"
-date: 2026-05-16T18:00:00
+title: "Cortex-M 하드폴트 분석 — Stacked Frame·CFSR 읽기"
+date: 2026-04-19T09:03:00
 description: "Cortex-M HardFault 핸들러에서 stacked PC·LR·CFSR을 추출해 정확한 fault 위치를 찾는 절차를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 114

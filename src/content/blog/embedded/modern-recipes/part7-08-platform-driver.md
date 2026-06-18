@@ -1,6 +1,6 @@
 ---
-title: "7-08: Platform 드라이버"
-date: 2026-05-15T10:00:00
+title: "Platform 드라이버 작성 — probe·remove·of_match·DT 바인딩"
+date: 2026-04-16T09:07:00
 description: "platform_driver_register, of_match_table, probe/remove, devm_* 자원 관리, IRQ와 MMIO 획득까지 platform driver의 표준 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 82

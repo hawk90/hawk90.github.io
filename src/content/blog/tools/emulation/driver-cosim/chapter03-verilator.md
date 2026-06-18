@@ -1,6 +1,6 @@
 ---
-title: "Ch 3: Verilator — Open Source SV Simulator"
-date: 2026-05-17T03:00:00
+title: "Verilator 분석 — Open Source SystemVerilog Simulator"
+date: 2026-05-22T09:03:00
 description: "RTL → C++ — driver code와 link되는 가장 빠른 simulator."
 series: "Driver-RTL Co-simulation"
 seriesOrder: 3
@@ -286,5 +286,5 @@ jobs:
 
 - [Ch 2: SystemVerilog DPI-C 기초](/blog/tools/emulation/driver-cosim/chapter02-dpi-c-basics)
 - [Ch 4: CocoTB — Python Testbench](/blog/tools/emulation/driver-cosim/chapter04-cocotb)
-- [QEMU Internals — TCG Deep](/blog/tools/emulation/qemu-internals/chapter13-tcg-deep) — software-only 시뮬레이션과의 비교
-- [FPGA Driver via QEMU+VFIO — QEMU Fake FPGA](/blog/tools/emulation/qemu-fpga-driver/chapter03-qemu-fake-fpga)
+- QEMU Internals — TCG Deep — software-only 시뮬레이션과의 비교
+- FPGA Driver via QEMU+VFIO — QEMU Fake FPGA

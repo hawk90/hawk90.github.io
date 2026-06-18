@@ -1,6 +1,6 @@
 ---
-title: "4-10: DMA 기초"
-date: 2026-05-13T20:00:00
+title: "임베디드 DMA 기초 — Memory-to-Memory·Peripheral·Circular Mode"
+date: 2026-04-13T09:44:00
 description: "Channel·trigger·half/full complete·circular·memory-to-memory."
 series: "Modern Embedded Recipes"
 seriesOrder: 44

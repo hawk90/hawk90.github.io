@@ -1,6 +1,6 @@
 ---
-title: "10-03: GDB 원격 디버깅"
-date: 2026-05-16T17:00:00
+title: "GDB 원격 디버깅 — OpenOCD·J-Link·target remote 구성"
+date: 2026-04-19T09:02:00
 description: "OpenOCD·pyOCD로 target에 붙고, .gdbinit으로 반복 작업을 자동화하는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 113

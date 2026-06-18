@@ -1,6 +1,6 @@
 ---
-title: "6-04: 사례 — 카메라 1080p 60fps가 30fps로 떨어지는 이유"
-date: 2026-05-08T33:00:00
+title: "실전 사례 — 카메라 1080p 60fps가 30fps로 떨어지는 이유"
+date: 2026-04-28T09:03:00
 description: "Cortex-A 보드의 카메라 캡처가 frame drop. CPU는 한가했고 진짜 범인은 DMA burst size와 AXI bus 효율이었다."
 series: "Embedded Performance Engineering"
 seriesOrder: 53

@@ -1,6 +1,6 @@
 ---
-title: "Part 14-03: std vs folly 선택 기준"
-date: 2026-05-25T17:00:00
+title: "folly vs std 선택 기준 분석"
+date: 2026-06-07T09:09:00
 description: "Part 14-03: std/abseil/folly 선택 의사결정 가이드 — production scale, throughput, latency profile에 따른 분기."
 series: "Folly Code Review"
 seriesOrder: 63

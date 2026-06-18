@@ -1,6 +1,6 @@
 ---
-title: "Ch 17: 이미지 패키징 — flash layout, partition, GPT"
-date: 2026-05-09T17:00:00
+title: "BSP 이미지 패키징 — Flash Layout·Partition·GPT 설계"
+date: 2026-05-18T09:17:00
 description: "최종 이미지 조립 — 파티션 테이블, flash layout, SD/eMMC/UFS 굽기 워크플로."
 series: "BSP Development"
 seriesOrder: 17

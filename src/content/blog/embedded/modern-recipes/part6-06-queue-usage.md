@@ -1,6 +1,6 @@
 ---
-title: "6-06: Queue 활용"
-date: 2026-05-14T20:00:00
+title: "RTOS Queue 활용 — By-Value·By-Reference·Timeout 패턴"
+date: 2026-04-15T09:05:00
 description: "RTOS queue로 producer-consumer를 구성하고, by-value vs by-pointer, backpressure, zero-copy queue까지 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 68

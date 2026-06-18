@@ -1,6 +1,6 @@
 ---
-title: "2-05: Cache 기초 — L1·L2·L3·Set Associative·Replacement Policy"
-date: 2026-05-08T12:00:00
+title: "CPU Cache 기초 — L1·L2·L3·Set Associative·Replacement Policy"
+date: 2026-04-24T09:04:00
 description: "Cache hierarchy. Direct mapped vs N-way set associative. LRU·PLRU·Random."
 series: "Embedded Performance Engineering"
 seriesOrder: 13

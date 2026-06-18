@@ -1,6 +1,6 @@
 ---
-title: "Part 12-01: ABSL_FLAG 정의"
-date: 2026-05-25T17:00:00
+title: "ABSL_FLAG 정의 분석"
+date: 2026-06-12T09:15:00
 description: "ABSL_FLAG — gflags의 후속이자 Abseil 표준 command-line flag. type-safe definition과 GetFlag/SetFlag 접근."
 series: "Abseil Code Review"
 seriesOrder: 63
