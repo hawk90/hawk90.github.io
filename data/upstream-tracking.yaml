@@ -1,0 +1,54 @@
+# Upstream source tracking — code-review·spec-analysis 시리즈
+#
+# 외부 GitHub repo·spec 소스를 인용하는 시리즈의 *baseline commit*을 명시.
+# scripts/audit-upstream-freshness.sh가 이 파일을 읽어 *upstream HEAD와의 diff*를
+# 분석하고 *영향 챕터를 ranking* 합니다.
+#
+# 신규 시리즈를 추가하면 아래 schema에 맞춰 entry 추가:
+#   - id: 시리즈 식별자 (slug)
+#   - title: 시리즈 제목 (사람이 읽음)
+#   - series_dir: src/content/blog 아래의 시리즈 디렉터리 (전체 path)
+#   - upstream:
+#       repo_url: GitHub URL
+#       local_path: ~/Workspaces/code-review-sources 아래 로컬 clone path
+#       branch: tracking branch (main / master)
+#       baseline_commit: 시리즈 작성 시점의 commit hash
+#       baseline_date: 시리즈 작성 일자 (참고용)
+#   - file_patterns: 챕터-파일 매핑을 위한 grep 패턴 (정규식)
+#
+# 새 baseline 갱신 — 시리즈 챕터를 *upstream HEAD 기준으로 다시 정리*했을 때만 update.
+# 그 외에는 *audit이 stale을 detect*하는 게 정상.
+
+trackings:
+  - id: folly
+    title: "Folly Code Review"
+    series_dir: src/content/blog/programming/code-review/folly
+    upstream:
+      repo_url: https://github.com/facebook/folly
+      local_path: ~/Workspaces/code-review-sources/folly
+      branch: main
+      baseline_commit: 7fd01eb44d6992d94462de64c57e6b700513161a
+      baseline_date: 2026-06-04
+    file_patterns:
+      # 챕터 본문에서 인용된 파일 path 추출 패턴
+      - 'folly/[A-Za-z0-9_/.-]+\.(h|cpp|hpp)'
+      - 'folly::[A-Za-z0-9_]+'
+
+  - id: abseil
+    title: "Abseil Code Review"
+    series_dir: src/content/blog/programming/code-review/abseil
+    upstream:
+      repo_url: https://github.com/abseil/abseil-cpp
+      local_path: ~/Workspaces/code-review-sources/abseil-cpp
+      branch: master
+      baseline_commit: a2b280228f28c10408e26b2a88bbc1fdb50ce681
+      baseline_date: 2026-06-09
+    file_patterns:
+      - 'absl/[A-Za-z0-9_/.-]+\.(h|cc|hpp)'
+      - 'absl::[A-Za-z0-9_]+'
+
+# 미래 추가 후보 (Linux kernel subsystem 인용 시리즈):
+# - cxl_internals: drivers/cxl/ — torvalds/linux baseline TBD
+# - pcie_deep_dive: drivers/pci/ — torvalds/linux baseline TBD
+# - kernel_debugging: 여러 subsystem 인용 — baseline 다중
+# 이들은 baseline 확정 시 entry 추가.

@@ -107,9 +107,23 @@ fi
 # 6. Universal fact-density (informational, 항상 warn — review 우선순위 식별)
 if [ -x "$ROOT/scripts/audit-fact-density.sh" ]; then
   run_check \
-    "6/6 Fact-density 분석 (universal, 모든 챕터)" \
+    "6/7 Fact-density 분석 (universal, 모든 챕터)" \
     "$ROOT/scripts/audit-fact-density.sh --top 20 $ARGS_STR" \
     "warn"
+fi
+
+# 7. Upstream freshness — code-review·spec-analysis 시리즈가 upstream에 얼마나 뒤처졌나
+#    --no-fetch: local clone 기준만 (빠름, fetch는 별도 npm run audit:upstream)
+if [ -x "$ROOT/scripts/audit-upstream-freshness.py" ] && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
+  echo ""
+  echo "═══ 7/7 Upstream freshness (code-review·spec) ═══"
+  if python3 "$ROOT/scripts/audit-upstream-freshness.py" --no-fetch --top 5 > /tmp/audit-freshness.txt 2>&1; then
+    # staleness 요약만 표시 (Top chapter는 상세 명령으로)
+    grep -E "^## |Since baseline:|Chapters:" /tmp/audit-freshness.txt || true
+    echo "ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)"
+  else
+    echo "− SKIPPED (upstream tracking 미설정 또는 clone 없음)"
+  fi
 fi
 
 echo ""
@@ -127,6 +141,6 @@ elif [ "$HALLUCINATION_FOUND" -eq 1 ]; then
     exit 0
   fi
 else
-  echo "✓ All 4 gates pass. Publish OK."
+  echo "✓ All blocking gates pass. Publish OK."
   exit 0
 fi

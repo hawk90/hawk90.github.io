@@ -36,7 +36,10 @@
     "og:prune": "node scripts/build-og.mjs --prune",
     "diagrams": "bash scripts/build-diagrams.sh",
     "diagrams:force": "bash scripts/build-diagrams.sh --force",
-    "diagrams:watch": "bash scripts/watch-diagrams.sh"
+    "diagrams:watch": "bash scripts/watch-diagrams.sh",
+    "audit:gate": "bash scripts/audit-publish-gate.sh",
+    "audit:upstream": "python3 scripts/audit-upstream-freshness.py --top 20",
+    "audit:upstream:json": "python3 scripts/audit-upstream-freshness.py --top 50 --json reports/upstream-freshness.json"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.1",
