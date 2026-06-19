@@ -1,0 +1,54 @@
+# lefthook.yml — Git hooks for hawk90.github.io
+#
+# 설치: `lefthook install` (한 번만)
+# 우회: `git commit --no-verify` (긴급 시)
+
+pre-commit:
+  parallel: false
+  commands:
+    # 변경된 .md 파일에 대해서만 publish gate 실행
+    publish-gate:
+      glob:
+        - "src/content/blog/**/*.md"
+      run: |
+        echo "▶ Running publish gate on staged .md files..."
+        ./scripts/audit-publish-gate.sh {staged_files}
+      fail_text: |
+        ✗ Publish gate failed.
+        규칙을 위반한 파일이 있습니다 (CLAUDE.md §6·§10 참조).
+        긴급 시 `git commit --no-verify`로 우회 가능 (CLAUDE.md 위반 책임 본인).
+
+    # 새로 추가된 챕터에 draft·series·title 기본 frontmatter 누락 검사
+    frontmatter-required:
+      glob:
+        - "src/content/blog/**/*.md"
+      run: |
+        for f in {staged_files}; do
+          if [ ! -f "$f" ]; then continue; fi
+          missing=""
+          for key in title date description; do
+            if ! grep -q "^$key:" "$f"; then
+              missing="$missing $key"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "✗ $f: 필수 frontmatter 누락:$missing"
+            exit 1
+          fi
+        done
+
+pre-push:
+  parallel: false
+  commands:
+    # push 직전에는 전체 sweep (변경 안 한 글에 새 위반이 있는지)
+    full-sweep:
+      run: |
+        echo "▶ Running full publish gate sweep before push..."
+        ./scripts/audit-publish-gate.sh
+      fail_text: |
+        ✗ Full sweep failed.
+        Repository 어딘가에 규칙 위반이 있습니다. 수정 후 push 재시도.
+        긴급 시 `git push --no-verify`로 우회 가능.
+
+# 옵션: 빌드 후 자동 검증 (수동 npm run build 시에는 별도 trigger 안 됨)
+# 필요 시 prebuild hook 추가 가능

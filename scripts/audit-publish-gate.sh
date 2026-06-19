@@ -92,9 +92,25 @@ fi
 
 # 4. Hallucination 후보 — strict 모드에서만 block
 run_check \
-  "4/4 Hallucination 후보 (CLAUDE.md §10)" \
+  "4/5 Hallucination 후보 (CLAUDE.md §10)" \
   "$ROOT/scripts/audit-suspect-claims.sh $ARGS_STR" \
   "warn"
+
+# 5. Known-fact whitelist 검증 — strict 모드에서만 block
+if [ -x "$ROOT/scripts/verify-known-facts.sh" ]; then
+  run_check \
+    "5/6 Known-fact whitelist (data/known-facts.yaml)" \
+    "$ROOT/scripts/verify-known-facts.sh $ARGS_STR" \
+    "warn"
+fi
+
+# 6. Universal fact-density (informational, 항상 warn — review 우선순위 식별)
+if [ -x "$ROOT/scripts/audit-fact-density.sh" ]; then
+  run_check \
+    "6/6 Fact-density 분석 (universal, 모든 챕터)" \
+    "$ROOT/scripts/audit-fact-density.sh --top 20 $ARGS_STR" \
+    "warn"
+fi
 
 echo ""
 echo "═══════════════════════════════════════"

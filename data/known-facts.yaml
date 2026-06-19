@@ -1,0 +1,145 @@
+# known-facts.yaml — 검증된 fact 화이트리스트
+#
+# 글에 등장하는 spec/product/standard 이름이 *여기 등재*되어 있어야 합니다.
+# 등재되지 않은 것은 *수동 review 필요* 신호.
+#
+# 등재 규칙:
+#   - 공개 자료(공식 spec PDF·datasheet·release note)에서 직접 확인된 것만
+#   - 신규 항목 추가 시 출처 comment 필수
+#
+# 사용: scripts/verify-known-facts.sh가 이 파일을 읽어 검증
+
+# ─── JEDEC 표준 ────────────────────────────────────────────────
+jedec_standards:
+  - JESD235      # HBM (2013, 1.0 Gbps × 1024-bit)
+  - JESD235A     # HBM2 (2016)
+  - JESD235B     # HBM2 update
+  - JESD235C     # HBM2E (2020)
+  - JESD238      # HBM3 (2022)
+  - JESD238A     # HBM3 update (2024)
+  - JESD209      # LPDDR base
+  - JESD209-2    # LPDDR2
+  - JESD209-3    # LPDDR3
+  - JESD209-4    # LPDDR4 (JESD209-4 / 4B 등)
+  - JESD209-4B
+  - JESD209-5    # LPDDR5
+  - JESD79       # DDR base
+  - JESD79-4     # DDR4
+  - JESD79-5     # DDR5
+  # Note: HBM3E는 별도 표준 번호 없이 JESD238 update로 다룸
+  # HBM4는 2024~2025 표준화 진행, 번호 미부여
+
+# ─── PCI-SIG / CXL Consortium 표준 ────────────────────────────
+pcie_standards:
+  - PCI-SIG ECN  # generic
+  - CXL 1.0
+  - CXL 1.1
+  - CXL 2.0
+  - CXL 3.0
+  - CXL 3.1
+  - CXL 3.2
+
+# ─── DMTF / SPDM ───────────────────────────────────────────────
+dmtf_standards:
+  - DSP0274      # SPDM (Security Protocol Data Model)
+  - DSP0276      # SPDM Secured Messages
+  - DSP0277      # SPDM over MCTP Binding
+
+# ─── IEEE 802.1 TSN ────────────────────────────────────────────
+ieee_802_1_tsn:
+  - IEEE 802.1AS        # gPTP
+  - IEEE 802.1AS-2020   # gPTP Rev
+  - IEEE 802.1Qbv       # Time-Aware Shaper
+  - IEEE 802.1Qbu       # Frame Preemption
+  - IEEE 802.1Qci       # Per-Stream Filtering
+  - IEEE 802.1Qcc       # Stream Reservation
+  - IEEE 802.1CB        # FRER
+  - IEEE 802.1CB-2018
+
+# ─── Industrial Ethernet 프로토콜 ─────────────────────────────
+industrial_ethernet:
+  - EtherCAT             # ETG
+  - PROFINET             # PI
+  - EtherNet/IP          # ODVA
+  - POWERLINK            # EPSG
+  - SERCOS III           # IGS
+  - Modbus TCP
+
+# ─── 검증된 NVIDIA GPU SKU (공식 발표 + 양산) ────────────────
+nvidia_gpu_verified:
+  - H100 80GB SXM5       # 5x HBM3 16GB = 80 GB, 3.35 TB/s
+  - H100 96GB SXM5       # H100 SXM5 96GB variant
+  - H100 NVL             # H100 NVL 94GB
+  - H200 SXM5            # 6x HBM3E 24GB raw / 141 GB effective
+  - H200 NVL             # H200 NVL variant
+  - B100                 # Blackwell first
+  - B200                 # Blackwell SXM6, 192 GB HBM3E
+  - GB200                # Grace Blackwell
+  - L4
+  - L40
+  - L40S
+  - RTX 4090
+  - RTX 5090
+
+# ─── 미발표·로드맵 NVIDIA GPU (qualifier 의무) ────────────────
+nvidia_gpu_roadmap:
+  - B300                 # 차세대, 미양산 (단정 금지)
+  - Vera Rubin           # 차차세대
+
+# ─── 검증된 AMD GPU SKU ──────────────────────────────────────
+amd_gpu_verified:
+  - MI300X              # 192 GB HBM3
+  - MI325X              # 256 GB HBM3E (288 GB는 잘못)
+  - MI300A              # APU variant
+  - MI355X              # post-MI325 (announced)
+
+# ─── 미발표 AMD GPU (qualifier 의무) ──────────────────────────
+amd_gpu_roadmap:
+  - MI400               # 차세대, 미발표
+
+# ─── 검증된 Intel AI 가속기 ──────────────────────────────────
+intel_ai_verified:
+  - Gaudi 2
+  - Gaudi 3
+  - Granite Rapids
+  - Sierra Forest
+  - Emerald Rapids
+  - Sapphire Rapids
+
+# ─── 검증된 한국 NPU 회사·제품 ───────────────────────────────
+korean_npu_verified:
+  - Sapeon X220
+  - Sapeon X330         # 일부 자료에 등장, qualifier 권장
+  - Rebellions Atom
+  - Rebellions Atom+    # 공식 발표
+
+# ─── 검증된 Google TPU ───────────────────────────────────────
+google_tpu_verified:
+  - TPU v4
+  - TPU v5p
+  - TPU v5e
+  - Trillium            # TPU v6 codename
+
+# ─── 검증된 CXL 메모리 제품 ──────────────────────────────────
+cxl_memory_verified:
+  - Samsung CMM-D       # 양산
+  - SK Hynix Niagara    # 양산
+  - Astera Labs Leo
+  - Micron CXL Memory Expander
+
+# ─── 미확인·가상 제품 (qualifier 의무 또는 제거) ──────────────
+unverified_products:
+  - Samsung CMM-H       # HBM-CXL 융합, 미공개 확인
+  - SK Hynix MARO       # 가짜 가능
+
+# ─── 검증된 NVIDIA Jetson SKU ────────────────────────────────
+nvidia_jetson_verified:
+  - Jetson Nano
+  - Jetson Xavier NX
+  - Jetson AGX Xavier
+  - Jetson Orin Nano
+  - Jetson Orin NX
+  - Jetson AGX Orin
+
+nvidia_jetson_roadmap:
+  - Jetson Thor         # 2025+ 예정, 발표만 (구체 spec 단정 금지)

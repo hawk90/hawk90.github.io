@@ -319,13 +319,19 @@ class OrderProcessor {
 | TikZ 텍스트 근접 (heuristic) | `./scripts/detect-tikz-overlap.sh` | warning 0건 |
 | 코드 블록 내 한국어 산문 | `./scripts/detect-prose-in-code.sh` | 위반 없음 |
 | Hallucination 후보 | `./scripts/audit-suspect-claims.sh` | 출력된 candidate를 사람이 review |
-| **통합 gate** | `./scripts/audit-publish-gate.sh` | 위 4가지를 한 번에. `--strict`로 hallucination도 차단 |
+| Known-fact 화이트리스트 | `./scripts/verify-known-facts.sh` | `data/known-facts.yaml` 등재된 것만 통과 |
+| **통합 gate** | `./scripts/audit-publish-gate.sh` | 위 6가지를 한 번에. `--strict`로 hallucination·whitelist도 차단 |
+| **Git hook (자동)** | `lefthook install` 한 번 실행 → 매 commit/push 자동 trigger | 위반 시 commit/push 거부 |
 
-*Publish 전 통합 gate 통과 필수*. 빌드가 OK여도 *위반이 있으면 publish 금지*.
+*Publish 전 통합 gate 통과 필수*. 빌드가 OK여도 *위반이 있으면 publish 금지*. lefthook이 설치되면 *commit 시 자동*으로 staged .md 파일에 gate가 적용됩니다 (`git commit --no-verify`로 우회 가능, 단 책임 본인).
 
-`audit-suspect-claims.sh`는 CLAUDE.md §10 "Hallucination 방지" 7 카테고리를 *자동 grep*해 *후보 위치*를 출력합니다. *후보 = hallucination 아님*. 각 위치를 *사람이 review*해 진위 확인 후 qualify·수정.
+`audit-suspect-claims.sh`는 CLAUDE.md §10 "Hallucination 방지" 7 카테고리를 *자동 grep*. *후보 = hallucination 아님*. 각 위치를 *사람이 review*해 진위 확인 후 qualify·수정.
 
 7 카테고리: `future-sku`, `spec-num`, `kernel-api`, `company-impl`, `codename`, `yaml-schema`, `spec-year`. 특정 카테고리만 검사하려면 `--category <name>`.
+
+`verify-known-facts.sh`는 *whitelist 기반*: 글에 등장하는 spec 번호·제품 SKU·표준 이름이 `data/known-facts.yaml`에 *등재된 것만 통과*. 새 fact 발견 시 *공식 출처를 comment로* 등재.
+
+`audit-fact-density.sh`는 *universal*: *모든 챕터*에서 *구체적 주장*(단위 있는 수치·버전·연도·표준·SKU·회사+제품) 빈도를 측정해 *fact-heavy 챕터*를 자동 ranking. *카테고리 무관·targeting 없음*. *Threshold 초과 챕터는 publish 전 수동 review 우선순위*. 7 카테고리 grep과 달리 *어떤 주제의 글이든 적용 가능*합니다.
 
 ### 표
 
