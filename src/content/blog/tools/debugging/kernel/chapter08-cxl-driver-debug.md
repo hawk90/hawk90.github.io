@@ -83,15 +83,14 @@ $ bpftrace -e '
 
 ## drgn으로 커널 상태 검사
 
-drgn은 *살아 있는 커널의 데이터 구조를 Python으로 검사*하는 도구입니다. CXL의 *port·decoder·region* 객체를 직접 볼 수 있습니다.
+drgn은 *살아 있는 커널의 데이터 구조를 Python으로 검사*하는 도구입니다. CXL의 *port·decoder·region* 객체를 직접 볼 수 있습니다 (helper 함수가 *drgn 표준 패키지에 아직 없으면* *자체 walker*로 작성):
 
 ```python
-# drgn 세션
+# drgn 세션 — helper 자체 작성 또는 직접 struct walk
 >>> from drgn import Object
->>> from drgn.helpers.linux.cxl import for_each_cxl_port
 >>>
->>> # 모든 CXL port 나열
->>> for port in for_each_cxl_port(prog):
+>>> # 모든 CXL port 나열 (개념적 — 실제는 kernel struct walk)
+>>> for port in walk_cxl_ports(prog):
 ...     print(f"port {port.name}, decoder_count={port.nr_dport}")
 port port0, decoder_count=2
 port port1, decoder_count=4
@@ -106,7 +105,7 @@ size=137438953472 interleave=2
 ...     print(f"  decoder {d.id}: base={hex(d.hpa_range.start)} size={d.hpa_range.end - d.hpa_range.start}")
 ```
 
-drgn은 *kdump core*나 *살아 있는 커널* 둘 다에서 동작합니다.
+drgn은 *kdump core*나 *살아 있는 커널* 둘 다에서 동작합니다. CXL 전용 helper module은 *drgn mainline 추가 진행 중*. *현 시점에서는 struct walker를 직접 구현*하는 게 일반적입니다.
 
 ## 자주 만나는 함정
 

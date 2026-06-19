@@ -19,24 +19,17 @@ tags: [embedded, bootloader, u-boot, pcie, enumeration, cxl, root-complex]
 
 PCIe enumeration은 *Root Complex가 깨어 있는 상태*에서 시작됩니다. SoC마다 *PCIe controller IP*가 다르지만 *공통 시퀀스*가 있습니다.
 
-```text
-[U-Boot PCIe RC init 시퀀스]
+U-Boot PCIe RC init 시퀀스:
 
-1. PCIe controller power-on
-   └─ PMU에서 power domain 활성화
-2. Reference clock 공급 (100 MHz)
-3. PHY 초기화
-   └─ PIPE interface, equalization, lane bring-up
-4. Link training (LTSSM)
-   ├─ Detect → Polling → Configuration
-   ├─ L0 도달 시 link active
-   └─ 실패 시 PERST# assert 후 재시도
-5. Speed negotiation
-   └─ Gen1 → Gen2 → Gen3 → Gen4 → Gen5
-6. Width negotiation (x1·x4·x8·x16)
-7. Root Complex Config Space 초기화
-   └─ Bus 0, Device 0, Function 0이 RC
-```
+| 단계 | 작업 |
+|------|------|
+| 1. PCIe controller power-on | PMU에서 power domain 활성화 |
+| 2. Reference clock 공급 | 100 MHz |
+| 3. PHY 초기화 | PIPE interface, equalization, lane bring-up |
+| 4. Link training (LTSSM) | Detect → Polling → Configuration. L0 도달 시 link active. 실패 시 PERST# assert 후 재시도 |
+| 5. Speed negotiation | Gen1 → Gen2 → Gen3 → Gen4 → Gen5 |
+| 6. Width negotiation | x1·x4·x8·x16 |
+| 7. Root Complex Config Space 초기화 | Bus 0, Device 0, Function 0이 RC |
 
 *LTSSM(Link Training and Status State Machine)*이 *L0 상태*에 도달해야 *config space access가 가능*합니다. 이 단계에서 *cable 문제·전원 부족·PHY 설정 오류*가 자주 잡힙니다.
 

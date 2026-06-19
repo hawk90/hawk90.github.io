@@ -53,18 +53,13 @@ CXL의 핵심은 *PCIe 물리 계층 재사용*입니다. CXL 1.1/2.0은 PCIe 5.
 
 같은 링크에서 *세 프로토콜이 시분할*로 흐릅니다. CXL.mem의 *M2S Req·S2M NDR/DRS* 메시지는 *cache line 단위(64 B)*로 DRAM에 read/write를 일으킵니다.
 
-```text
-호스트 CPU                        CXL Switch                 CXL Memory Device
-   │                                  │                            │
-   │ 1. M2S Req (Read, addr=0x...)    │                            │
-   │ ────────────────────────────────▶│                            │
-   │                                  │ ──────────────────────────▶│
-   │                                  │                            │ Read DRAM
-   │                                  │                            │ (cache line)
-   │                                  │ ◀──────────────────────────│
-   │ 2. S2M DRS (Data, 64 B)          │                            │
-   │ ◀────────────────────────────────│                            │
-```
+단계별 흐름:
+
+| 단계 | 동작 |
+|------|------|
+| 1 | 호스트 CPU → CXL Switch → CXL Memory Device: *M2S Req* (Read, addr=0x...) |
+| 2 | Memory Device가 DRAM read (cache line) |
+| 3 | CXL Memory Device → CXL Switch → 호스트 CPU: *S2M DRS* (Data, 64 B) |
 
 *핵심*: CPU의 *load instruction*이 *MMU 변환 → 메모리 컨트롤러 → CXL link → CXL.mem device*를 거쳐 *64 B 라인 한 줄*을 가져옵니다. *드라이버 호출 없음*. *DMA 셋업 없음*. NVMe SSD와는 완전히 다른 의미입니다.
 
@@ -164,34 +159,16 @@ CXL 메모리는 두 가지 모드로 *호스트에 노출*됩니다.
 
 같은 가속기 보드에 *HBM과 CXL.mem이 함께* 있는 그림이 *2025~2026년 표준*입니다.
 
-```text
-NVIDIA Blackwell 가정 시스템
+가정 시스템 구성 — Blackwell-class GPU + CXL pool:
 
-┌─────────────────────────────────────────┐
-│  Blackwell GPU                          │
-│  ┌──────┬──────┬──────┬──────┐          │
-│  │ HBM3E│ HBM3E│ HBM3E│ HBM3E│ (192 GB) │
-│  └──────┴──────┴──────┴──────┘          │
-│         ↕ 8 TB/s                        │
-│  ┌─────────────┐    PCIe 5.0 x16        │
-│  │ GPU compute │ ─────────────────┐     │
-│  └─────────────┘                  │     │
-└───────────────────────────────────┼─────┘
-                                    │
-                          ┌─────────▼──────────┐
-                          │ CXL Switch         │
-                          └─┬──────────┬───────┘
-                            │          │
-                       ┌────▼────┐ ┌───▼────┐
-                       │CXL Type3│ │CXL Type3│
-                       │ 2 TB    │ │ 2 TB    │  ← KV cache pool
-                       └─────────┘ └─────────┘
-
-총 메모리:
-  - HBM:    192 GB at 8 TB/s
-  - CXL:  4096 GB at 100 GB/s
-  - 합:   4288 GB
-```
+| 컴포넌트 | 구성 |
+|---------|------|
+| GPU 측 HBM | 4 stack × 48 GB HBM3E = 192 GB @ 8 TB/s |
+| GPU compute → CXL link | PCIe 5.0 x16 |
+| CXL Switch | 1대, 2개 downstream |
+| CXL Type 3 | 2 TB × 2장 = 4 TB (KV cache pool) |
+| **총 메모리** | HBM 192 GB + CXL 4096 GB = **4288 GB** |
+| 대역폭 | HBM 8 TB/s vs CXL 100 GB/s |
 
 *HBM은 weight*가 들어가고, *CXL은 KV cache pool*이 들어갑니다. *Ch 8의 LLaMA 70B (780 GB)*는 *HBM 한 장으로는 못 풀던 문제*가 *CXL 추가로 해결*됩니다. 데이터센터는 *동일 GPU·다른 CXL 양*으로 *워크로드별 SKU*를 만들 수 있습니다.
 
@@ -217,18 +194,14 @@ NVIDIA Blackwell 가정 시스템
 
 [Ch 1](/blog/embedded/hardware/hbm/chapter01-overview)에서 봤듯 *HBM은 한국 두 회사가 90% 점유*합니다. CXL.mem 시장은 *2024~2025년 막 시작된* 영역이라 *점유율 데이터가 아직 빈약*하지만 *공급 측 우위가 그대로 이어질 가능성*이 큽니다.
 
-```text
-CXL.mem 디바이스 양산 시작 (2024~2025)
+| 회사 | 제품 | 시장 상태 |
+|------|------|----------|
+| Samsung | CMM-D (CXL Memory Module - DDR), 최대 512 GB | 양산 |
+| SK Hynix | Niagara, 96~256 GB | 양산 |
+| Micron | CXL Expander (DDR5 기반) | 양산 |
+| Astera Labs | Leo platform (fabless, 한국 DRAM 사용) | 양산 |
 
-Samsung   ━━━━━━━━━━━━━━━━━━━━  CMM-D 512 GB (양산), CMM-H (HBM-CXL 융합) 개발
-SK Hynix  ━━━━━━━━━━━━━━━━━     Niagara 256 GB (양산), Pooling Memory Solution
-Micron    ━━━━━━━━━━            CXL Expander (DDR5 기반)
-Astera    ━━━━━━━━━              Leo platform (fabless, 한국 DRAM 사용)
-```
-
-*Samsung CMM-H*는 *HBM과 CXL을 한 모듈에 융합*하는 실험적 제품으로, *on-package HBM의 대역폭*과 *CXL.mem의 용량 확장*을 *한 디바이스에서* 합치는 시도입니다. *2025년 시제품, 2026년 양산 목표*입니다.
-
-CXL.mem은 *PCIe·CXL 인터페이스 IP*와 *DRAM 모듈*을 *모두 가진 회사*가 우위입니다. *DRAM 시장의 한국 우위*가 *CXL.mem 시장으로 자연 확장*되는 구조입니다.
+CXL.mem은 *PCIe·CXL 인터페이스 IP*와 *DRAM 모듈*을 *모두 가진 회사*가 우위입니다. *DRAM 시장의 한국 우위*가 *CXL.mem 시장으로 자연 확장*되는 구조입니다. 차세대로는 *HBM과 CXL을 통합한 패키지* 형태가 *각사 로드맵*에서 거론됩니다.
 
 ## 정리
 

@@ -22,16 +22,15 @@ draft: false
 
 ## drgn으로 vmcore 분석
 
-drgn은 *kdump core*에서 *살아 있는 커널처럼* CXL 구조를 검사할 수 있습니다.
+drgn은 *kdump core*에서 *살아 있는 커널처럼* CXL 구조를 검사할 수 있습니다. CXL 전용 helper module은 *drgn에 표준 포함 진행 중*이므로 *없으면 struct walker를 자체 작성*합니다.
 
 ```python
 # drgn 세션
 $ drgn --core /var/crash/vmcore --vmlinux /usr/lib/debug/.../vmlinux
 
->>> # 모든 CXL port 나열
->>> from drgn.helpers.linux.cxl import for_each_cxl_port
->>> ports = list(for_each_cxl_port(prog))
->>> print(f"{len(ports)} CXL ports")
+>>> # 모든 CXL port 나열 (개념적 — 자체 walker 또는 향후 추가될 helper)
+>>> ports = walk_cxl_ports(prog)  # 직접 작성 or future helper
+>>> print(f"{len(list(ports))} CXL ports")
 3 CXL ports
 
 >>> # Crash 시점의 region 상태

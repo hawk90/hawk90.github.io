@@ -15,21 +15,15 @@ tags: [recipes, pcie, cxl, flex-bus, cache-coherency, interconnect]
 
 [Ch 125 (PCIe BAR)](/blog/embedded/modern-recipes/part11-03-pcie-bar)에서 *PCIe로 device를 enumerate*하고 *MMIO로 register를 read/write*하는 흐름을 봤습니다. CXL은 *같은 PCIe 인프라*를 그대로 쓰면서 *추가 능력*을 얹은 표준입니다.
 
-```text
-                 ┌─────────────────────────┐
-PCIe 5.0/6.0 PHY │ 32 GT/s / 64 GT/s       │ ← 동일 물리 계층
-                 └────────────┬────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              │       Flex Bus (multiplexer)  │
-              └───────────────┬───────────────┘
-                              │
-        ┌──────────┬──────────┴──────────┬──────────┐
-        │ CXL.io   │ CXL.cache           │ CXL.mem  │
-        │ (=PCIe)  │ (device→host cache) │ (host→dev│
-        │          │                     │  memory) │
-        └──────────┴─────────────────────┴──────────┘
-```
+레이어 구조:
+
+| 레이어 | 역할 |
+|--------|------|
+| PCIe 5.0/6.0 PHY (32 GT/s / 64 GT/s) | 동일 물리 계층 |
+| Flex Bus (multiplexer) | 세 프로토콜을 시분할 |
+| CXL.io | =PCIe (config·DMA) |
+| CXL.cache | device → host cache |
+| CXL.mem | host → device memory |
 
 *같은 케이블·같은 connector·같은 enumeration*입니다. *디바이스 측이 CXL을 지원*하면 *config space에 CXL DVSEC*이 추가되어 *host가 인식*합니다.
 
