@@ -323,6 +323,23 @@ static pci_ers_result_t cxl_error_detected(
 
 *Hot-remove 진행 중 region access*는 *SIGBUS·OOPS 위험*. *graceful unmount* 패턴이 권장. *cleanup이 동시 진행 중인 race*에 주의.
 
+## 최근 mainline 변경 (cxl-for-next, 2026-06 기준)
+
+본 글의 코드 인용은 *작성 시점(2026-05) mainline*입니다. 이후 *cxl-for-next branch*에 들어간 주요 변경:
+
+| 영역 | 주요 변경 |
+|------|----------|
+| **Type 2 region attach** | `devm_cxl_probe_mem()`·`cxl_memdev_attach_region()` 도입 — Type 2(accelerator + memory) device가 *region에 직접 attach*하는 새 모델. for-7.2/cxl-type2-attach-region merge가 가장 큼 |
+| **memdev type 분류** | `cxl_class_memdev_type` 도입 — memdev를 *클래스 별로 분류*. parent reference도 *memdev lifetime 동안 pin* |
+| **region 안전성** | deletion race·creation 중 delete block·auto-discovery targets 채우기·OOB·variable shadowing·partition index validation 다수 fix |
+| **interleave helper** | encode/decode helper가 *caller와 정렬*되도록 signature 조정 |
+| **PCI access** | DVSEC config access의 *PCIBIOS error → errno 변환* |
+| **RAS** | `CXL_HEADERLOG_SIZE`가 *RAS Capability size와 일치*하도록 fix |
+
+이 변경 사항은 *Linux 6.10+ 또는 6.11에 머지* 예정 (cxl-for-next branch). *Type 2 attach 모델*은 *향후 GPU·NPU + CXL.mem* 조합의 주요 경로.
+
+> 본 시리즈는 *upstream tracking* 인프라(`data/upstream-tracking.yaml` + `audit-upstream-freshness.py`)로 *cxl.h 변경*을 자동 추적합니다. 새 변경이 누적되면 다음 라운드에서 본문 보강.
+
 ## 정리
 
 - `drivers/cxl/`는 *cxl_core를 base로 cxl_acpi·cxl_pci·cxl_mem 등이 의존*합니다.
@@ -332,6 +349,7 @@ static pci_ers_result_t cxl_error_detected(
 - *Mailbox API*로 모든 디바이스 명령. *timeout·lock·payload 관리*가 driver의 핵심.
 - *NUMA hot-add*가 *region commit과 함께 자동*.
 - *RAS 이벤트는 pci_error_handlers*. Fatal 시 *offline*.
+- *cxl-for-next 2026-06*에 *Type 2 device의 region attach 새 모델*(`devm_cxl_probe_mem`·`cxl_memdev_attach_region`) 도입. *6.10+ 머지 예정*.
 
 ## 다음 편
 
