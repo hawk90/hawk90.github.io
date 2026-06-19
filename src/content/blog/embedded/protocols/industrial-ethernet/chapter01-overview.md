@@ -108,7 +108,7 @@ IEEE 1588 PTP로 모든 노드의 시계를 sub-μs로 맞춥니다. 그러면 *
 
 여기에 **TSN (IEEE 802.1)**이 *상위 표준*으로 자리잡고 있습니다. 5대 표준이 각자의 TSN profile을 정의하면서 *수렴*하는 흐름입니다.
 
-지역적 색채도 짙습니다. 독일·유럽은 EtherCAT/PROFINET이 압도적이고, 미국은 EtherNet/IP가 강세입니다. 한국은 양쪽이 섞여 있습니다. 현대중공업·두산은 EtherCAT 기반 로봇 라인을, LS ELECTRIC은 EtherNet/IP와 PROFINET을 모두 지원하는 PLC를, 대우조선은 PROFINET 기반의 공정 제어를 운영합니다. 한 공장에 두세 가지 표준이 *gateway로 연결되어* 공존하는 게 일상입니다.
+지역적 색채도 짙습니다. 독일·유럽은 EtherCAT/PROFINET이 압도적이고, 미국은 EtherNet/IP가 강세입니다. 한국은 양쪽이 섞여 있습니다. *국내 로봇·자동화 업계*는 *EtherCAT·EtherNet/IP·PROFINET*이 *공존*하며, 한 공장에 *두세 가지 표준이 gateway로 연결되어 공존*하는 게 일상입니다. (구체 회사·라인별 채택 현황은 *공개 자료 한정*적이므로 *spec 카탈로그*에서 직접 확인하는 게 안전합니다.)
 
 ## 시리즈 로드맵
 

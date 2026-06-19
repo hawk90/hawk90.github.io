@@ -19,11 +19,13 @@ draft: false
 | 세대 | JEDEC 표준 | 양산 시기 | per-pin | Stack BW | Stack capacity | I/O | VDD |
 |------|-----------|-----------|---------|----------|----------------|-----|-----|
 | HBM | JESD235 | 2015 | 1.0 Gbps | 128 GB/s | 1·4 GB | 1024-bit | 1.2 V |
-| HBM2 | JESD235A | 2018 | 2.4 Gbps | 307 GB/s | 4·8 GB | 1024-bit | 1.2 V |
-| HBM2E | JESD235B | 2020 | 3.6 Gbps | 461 GB/s | 8·16 GB | 1024-bit | 1.2 V |
+| HBM2 | JESD235A | 2016 | 2.0~2.4 Gbps | 256~307 GB/s | 4·8 GB | 1024-bit | 1.2 V |
+| HBM2E | JESD235C | 2018~2020 | 3.2~3.6 Gbps | 410~461 GB/s | 8·16 GB | 1024-bit | 1.2 V |
 | HBM3 | JESD238 | 2022 | 6.4 Gbps | 819 GB/s | 16·24 GB | 1024-bit | 1.1 V |
-| HBM3E | JESD238A | 2024 | 9.2~9.8 Gbps | 1.18~1.25 TB/s | 24·36 GB | 1024-bit | 1.1 V |
-| HBM4 | JESD238B (예정) | 2025~2026 | 6.4~8.0 Gbps | 1.6~2.0 TB/s | 36·48·64 GB | 2048-bit | 1.0 V |
+| HBM3E | JESD238 update | 2024 | 9.2~9.8 Gbps | 1.18~1.25 TB/s | 24·36 GB | 1024-bit | 1.1 V |
+| HBM4 | JEDEC 표준화 진행 | 2025~2026 예상 | 6.4~8.0 Gbps | 1.6~2.0 TB/s+ | 36~64 GB | 2048-bit | 1.0 V |
+
+(JEDEC 문서 번호·revision은 시기에 따라 갱신됩니다. HBM3E는 별도 표준 번호 없이 HBM3 spec 안의 *변형*으로 다뤄지는 것이 통상이며, HBM4는 *2024~2025년에 표준 작업이 진행*되어 *공식 번호가 부여*됩니다.)
 
 각 세대의 *변곡점*을 짚어 가겠습니다.
 

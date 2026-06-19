@@ -42,13 +42,13 @@ KV cache (sequence에 비례):
 
 *KV cache가 weight보다 4배 큽니다*. 이게 *LLM serving의 메모리 폭증*입니다.
 
-| 가속기 | HBM capacity | 한 장으로 가능한 것 |
-|--------|--------------|---------------------|
-| NVIDIA H100 80GB | 80 GB | LLaMA 70B FP16 weight도 단독 안 됨 |
-| NVIDIA H200 | 144 GB | weight + 짧은 KV |
+| 가속기 | HBM capacity (공개 자료 기준) | 한 장으로 가능한 것 |
+|--------|------------------------------|---------------------|
+| NVIDIA H100 80 GB | 80 GB | LLaMA 70B FP16 weight도 단독 안 됨 |
+| NVIDIA H200 | 141 GB | weight + 짧은 KV |
 | NVIDIA B200 | 192 GB | weight + 중간 KV |
 | AMD MI300X | 192 GB | weight + 중간 KV |
-| AMD MI325X | 288 GB | LLaMA 70B + 큰 KV |
+| AMD MI325X | 256 GB | LLaMA 70B + 큰 KV |
 
 H100 *80 GB*로 LLaMA 70B를 *serving하려면* *모델 4분할 + KV cache 별도 호스트*가 필요합니다. H200·B200으로 가야 *한 장에 weight*가 들어갑니다.
 
@@ -207,7 +207,7 @@ batch 64:   weight read 1회 × 42 ms = 0.65 ms / token (이론)
 
 batch sweet spot:
   H100 80 GB: batch 16~32
-  H200 144 GB: batch 32~64
+  H200 141 GB: batch 32~64
   B200 192 GB: batch 64~128
 ```
 
@@ -218,7 +218,7 @@ batch sweet spot:
 | 카드 | HBM 구성 | capacity | spec BW | TDP |
 |------|----------|----------|---------|-----|
 | NVIDIA H100 80GB SXM5 | 5 × HBM3 × 16 GB | 80 GB | 3.35 TB/s | 700 W |
-| NVIDIA H200 SXM5 | 6 × HBM3E × 24 GB | 144 GB | 4.8 TB/s | 700 W (liquid) |
+| NVIDIA H200 SXM5 | 6 × HBM3E × 24 GB | 141 GB | 4.8 TB/s | 700 W (liquid) |
 | NVIDIA B100 / B200 SXM6 | 8 × HBM3E × 24 GB | 192 GB | 8 TB/s | 1000 W (liquid 필수) |
 | NVIDIA B300 (예정) | 8 × HBM3E × 36 GB | 288 GB | 9 TB/s | — |
 | AMD MI300X | 8 × HBM3 × 24 GB (chiplet) | 192 GB | 5.3 TB/s | 750 W |
@@ -301,7 +301,7 @@ HBM·GDDR 8개 장을 *지났습니다*. 시리즈를 한 줄씩 정리합니다
 
 ### "HBM capacity로 모든 LLM이 수용된다"
 
-70B 모델 *weight 140 GB*는 H200(144 GB)에 *겨우 들어갑니다*. *KV cache 80 GB*까지 합치면 *어느 H200도 못 담습니다*. *최소 2장 분할*이 필수입니다. *카드 capacity*만 보고 *수용 가능*을 판단하면 *오답*입니다.
+70B 모델 *weight 140 GB*는 H200(141 GB)에 *겨우 들어갑니다*. *KV cache 80 GB*까지 합치면 *어느 H200도 못 담습니다*. *최소 2장 분할*이 필수입니다. *카드 capacity*만 보고 *수용 가능*을 판단하면 *오답*입니다.
 
 ### KV cache를 *작다고 가정*
 
@@ -326,7 +326,7 @@ capacity가 늘면 *batch를 키울 수 있고* throughput이 늘긴 합니다. 
 - *channel-aware allocation*과 *tile-based access*가 *HBM 효율*을 결정합니다.
 - *MFU와 MBU*를 같이 봐야 *진짜 병목*이 보입니다. decode는 *MBU 80%, MFU 5%*가 흔합니다.
 - *batch가 클수록 MFU 상승*하지만 *latency도 증가*합니다.
-- 현세대 카드는 H100(80GB) → H200(144GB) → B200(192GB) → B300(288GB) → MI325X(256GB) 순으로 *capacity가 빠르게 증가*합니다.
+- 현세대 카드는 H100(80GB) → H200(141GB) → B200(192GB) → MI325X(256GB) → 차세대 (288GB+ 예정) 순으로 *capacity가 빠르게 증가*합니다.
 - *CXL은 Tier 2 메모리*, *UALink는 GPU 간 HBM 공유*, *NVMe는 Tier 3 cold tier*입니다.
 - 한국 NPU(Rebellions Atom, Sapeon X330)는 *HBM 채택*과 *GDDR 채택*이 *섞여 있습니다*.
 - 시리즈는 끝났지만 *UCIe·BoW·CXL·UALink* 시리즈와 *함께 읽으면* *현세대 패키징·메모리 시스템*의 전체 그림이 보입니다.

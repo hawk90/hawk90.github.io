@@ -34,7 +34,7 @@ EtherCAT의 *경제성*을 떠받치는 핵심은 *마스터의 단순함*입니
 - **IgH**: production 수준의 결정성. CNC, 로봇 컨트롤러 등에 적합.
 - **TwinCAT**: PLC 프로그래머가 익숙한 환경. *Beckhoff IO 모듈*과 매칭이 자연스러움.
 
-한국 시장은 셋 다 쓰입니다. 현대중공업 로봇팔은 IgH 기반, 두산의 협동로봇 일부는 SOEM 포팅판, 중소 자동화업체 데모기는 TwinCAT인 경우가 많습니다.
+한국 시장도 셋 다 쓰입니다. 대형 로봇 라인은 *production-grade IgH*, 임베디드 도입은 *SOEM 포팅*, PLC 환경은 *TwinCAT*이 *전형적인 분포*입니다. (특정 회사·라인별 채택 사례는 *비공개 정보가 많음*. 구체 사례 검증은 공식 발표·기술 자료 기반 권장.)
 
 ## SOEM — Simple Open EtherCAT Master
 

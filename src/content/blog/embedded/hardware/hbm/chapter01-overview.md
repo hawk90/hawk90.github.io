@@ -109,7 +109,7 @@ HBM이 약 *3배 효율적*.
 
 | 진영 | 대표 제품 | 특징 |
 |------|-----------|------|
-| **HBM** | NVIDIA H100/H200/B100/B200/B300<br>AMD MI300X/MI325X/MI350<br>Google TPU v5p/v6<br>Intel Gaudi 3<br>Korea: Sapeon X330, Rebellions Atom (NPU) | training·대형 추론<br>대당 $20K~$40K<br>per-rack 100~200 kW |
+| **HBM** | NVIDIA H100/H200/B100/B200, Blackwell 차세대<br>AMD MI300X/MI325X, MI350 계열<br>Google TPU v5p/Trillium<br>Intel Gaudi 3<br>Korea: Sapeon·Rebellions NPU 계열 | training·대형 추론<br>대당 $20K~$40K<br>per-rack 100~200 kW |
 | **GDDR** | NVIDIA RTX 30/40/50 시리즈<br>AMD RX 7000/8000 시리즈<br>PlayStation 5, Xbox Series X<br>데이터센터 추론 카드 (L4·L40·H100 PCIe NVL)<br>네트워킹 SoC (Marvell, Broadcom) | 그래픽·게임·소형 추론<br>대당 $500~$8K<br>per-card 250~450 W |
 
 같은 NVIDIA 안에서도 H100은 HBM, RTX 4090은 GDDR입니다. *분기점은 명확*합니다. *capacity가 100 GB를 넘어야 하고, 대역폭이 1.5 TB/s 이상 필요*하면 HBM 외에는 선택지가 없습니다.
