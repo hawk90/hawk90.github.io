@@ -108,10 +108,10 @@ TODO: 내용 작성
 
 ## 다음 장 예고
 
-[Chapter 15: Performance](/blog/embedded/hardware/pcie/chapter15-performance)에서 PCIe 성능 측정과 최적화를 다룬다. 레이턴시, 대역폭 분석 방법을 살펴본다.
+[Chapter 15: Performance](/blog/embedded/hardware/pcie/chapter17-performance)에서 PCIe 성능 측정과 최적화를 다룬다. 레이턴시, 대역폭 분석 방법을 살펴본다.
 
 ## 관련 항목
 
 - [Chapter 7: Error Handling](/blog/embedded/hardware/pcie/chapter07-error-handling)
-- [Chapter 13: Tools](/blog/embedded/hardware/pcie/chapter13-tools)
-- [Chapter 15: Performance](/blog/embedded/hardware/pcie/chapter15-performance)
+- [Chapter 13: Tools](/blog/embedded/hardware/pcie/chapter15-tools)
+- [Chapter 15: Performance](/blog/embedded/hardware/pcie/chapter17-performance)

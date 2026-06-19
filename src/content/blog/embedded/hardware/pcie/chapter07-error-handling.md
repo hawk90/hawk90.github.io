@@ -98,4 +98,4 @@ TODO: 내용 작성
 
 - [Chapter 6: Power Management](/blog/embedded/hardware/pcie/chapter06-power-management)
 - [Chapter 8: DLLP](/blog/embedded/hardware/pcie/chapter08-dllp)
-- [Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter14-troubleshooting)
+- [Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter16-troubleshooting)

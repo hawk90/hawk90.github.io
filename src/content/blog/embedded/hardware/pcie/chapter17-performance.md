@@ -111,10 +111,10 @@ TODO: 내용 작성
 
 ## 다음 장 예고
 
-[Chapter 16: Register Maps](/blog/embedded/hardware/pcie/chapter16-register-maps)에서 Configuration Space의 상세 비트필드를 정리한다. 레퍼런스로 활용할 수 있다.
+[Chapter 16: Register Maps](/blog/embedded/hardware/pcie/chapter18-register-maps)에서 Configuration Space의 상세 비트필드를 정리한다. 레퍼런스로 활용할 수 있다.
 
 ## 관련 항목
 
 - [Chapter 2: TLP](/blog/embedded/hardware/pcie/chapter02-tlp)
 - [Chapter 6: Power Management](/blog/embedded/hardware/pcie/chapter06-power-management)
-- [Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter14-troubleshooting)
+- [Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter16-troubleshooting)

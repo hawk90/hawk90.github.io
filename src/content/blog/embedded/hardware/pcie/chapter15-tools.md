@@ -104,9 +104,9 @@ TODO: 내용 작성
 
 ## 다음 장 예고
 
-[Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter14-troubleshooting)에서 실제 디버깅 시나리오를 다룬다. 링크 다운, 에러 분석, 성능 문제 해결을 살펴본다.
+[Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter16-troubleshooting)에서 실제 디버깅 시나리오를 다룬다. 링크 다운, 에러 분석, 성능 문제 해결을 살펴본다.
 
 ## 관련 항목
 
 - [Chapter 3: Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space)
-- [Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter14-troubleshooting)
+- [Chapter 14: Troubleshooting](/blog/embedded/hardware/pcie/chapter16-troubleshooting)

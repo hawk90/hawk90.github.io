@@ -96,10 +96,10 @@ TODO: 내용 작성
 
 ## 다음 장 예고
 
-[Chapter 12: Linux Advanced](/blog/embedded/hardware/pcie/chapter12-linux-advanced)에서 SR-IOV, VFIO, P2P DMA 등 고급 주제를 다룬다.
+[Chapter 12: Linux Advanced](/blog/embedded/hardware/pcie/chapter12-virtualization-1)에서 SR-IOV, VFIO, P2P DMA 등 고급 주제를 다룬다.
 
 ## 관련 항목
 
 - [Chapter 4: BAR & MMIO](/blog/embedded/hardware/pcie/chapter04-bar-mmio)
 - [Chapter 10: Linux Basics](/blog/embedded/hardware/pcie/chapter10-linux-basics)
-- [Chapter 12: Linux Advanced](/blog/embedded/hardware/pcie/chapter12-linux-advanced)
+- [Chapter 12: Linux Advanced](/blog/embedded/hardware/pcie/chapter12-virtualization-1)

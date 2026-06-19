@@ -40,15 +40,33 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
-    # push 직전에는 전체 sweep (변경 안 한 글에 새 위반이 있는지)
-    full-sweep:
+    # push 직전에는 *push할 commit에서 변경된 파일만* 검사.
+    # 이미 main에 있던 기존 violation은 별 작업으로 fix.
+    # (전체 sweep을 원하면 수동으로 `npm run audit:gate` 실행)
+    push-changed-files:
       run: |
-        echo "▶ Running full publish gate sweep before push..."
-        ./scripts/audit-publish-gate.sh
+        echo "▶ Running publish gate on commits being pushed..."
+        # 1) push할 commit 범위: origin/main..HEAD 또는 첫 push면 모든 commit
+        if git rev-parse --verify --quiet @{u} > /dev/null; then
+          range="@{u}..HEAD"
+        else
+          range="HEAD"
+        fi
+        files=$(git diff --name-only --diff-filter=ACMR $range -- "src/content/blog/**/*.md" 2>/dev/null || true)
+        if [ -z "$files" ]; then
+          echo "  No blog .md changes — skip"
+          exit 0
+        fi
+        # 변경된 .md 파일들의 디렉터리 unique → audit 대상
+        dirs=$(echo "$files" | xargs -n1 dirname 2>/dev/null | sort -u)
+        echo "  Auditing dirs:"
+        echo "$dirs" | sed 's|^|    |'
+        ./scripts/audit-publish-gate.sh $dirs
       fail_text: |
-        ✗ Full sweep failed.
-        Repository 어딘가에 규칙 위반이 있습니다. 수정 후 push 재시도.
-        긴급 시 `git push --no-verify`로 우회 가능.
+        ✗ Publish gate failed on commits being pushed.
+        Push할 commit의 *변경 파일에* 규칙 위반이 있습니다. 수정 후 push 재시도.
+        긴급 시 `git push --no-verify`로 우회 가능 (책임 본인).
+        전체 sweep은 `npm run audit:gate`로 별도 실행.
 
 # 옵션: 빌드 후 자동 검증 (수동 npm run build 시에는 별도 trigger 안 됨)
 # 필요 시 prebuild hook 추가 가능

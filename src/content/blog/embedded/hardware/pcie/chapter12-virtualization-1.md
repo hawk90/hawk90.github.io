@@ -96,10 +96,10 @@ TODO: 내용 작성
 
 ## 다음 장 예고
 
-[Chapter 13: Tools](/blog/embedded/hardware/pcie/chapter13-tools)에서 lspci, setpci 등 PCIe 디버깅 도구의 실전 사용법을 다룬다.
+[Chapter 13: Tools](/blog/embedded/hardware/pcie/chapter15-tools)에서 lspci, setpci 등 PCIe 디버깅 도구의 실전 사용법을 다룬다.
 
 ## 관련 항목
 
 - [Chapter 10: Linux Basics](/blog/embedded/hardware/pcie/chapter10-linux-basics)
 - [Chapter 11: Linux DMA](/blog/embedded/hardware/pcie/chapter11-linux-dma)
-- [Chapter 13: Tools](/blog/embedded/hardware/pcie/chapter13-tools)
+- [Chapter 13: Tools](/blog/embedded/hardware/pcie/chapter15-tools)

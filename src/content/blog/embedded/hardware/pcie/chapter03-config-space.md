@@ -102,4 +102,4 @@ TODO: 내용 작성
 
 - [Chapter 2: TLP](/blog/embedded/hardware/pcie/chapter02-tlp)
 - [Chapter 4: BAR & MMIO](/blog/embedded/hardware/pcie/chapter04-bar-mmio)
-- [Chapter 16: Register Maps](/blog/embedded/hardware/pcie/chapter16-register-maps)
+- [Chapter 16: Register Maps](/blog/embedded/hardware/pcie/chapter18-register-maps)

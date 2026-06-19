@@ -127,11 +127,12 @@ if [ -x "$ROOT/scripts/audit-upstream-freshness.py" ] && [ -f "$ROOT/data/upstre
 fi
 
 # 8. Internal link rot — /blog/... 링크가 실제 파일을 가리키는지
-#    인자 전달 — 단일 파일/디렉터리 publish 시 그 대상만 검사 (전체 검사는 별 작업)
-if [ -x "$ROOT/scripts/audit-internal-links.sh" ]; then
+#    Python 버전이 image markdown ![]()과 page link []()를 구별해 정확.
+#    인자 전달 — 단일 파일/디렉터리만 검사 가능.
+if [ -x "$ROOT/scripts/audit-internal-links.py" ]; then
   run_check \
-    "8/10 Internal link rot (/blog/... 깨진 링크)" \
-    "$ROOT/scripts/audit-internal-links.sh $ARGS_STR" \
+    "8/10 Internal link rot (/blog/... page link)" \
+    "python3 $ROOT/scripts/audit-internal-links.py $ARGS_STR" \
     "block"
 fi
 
