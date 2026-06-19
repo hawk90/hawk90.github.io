@@ -318,8 +318,14 @@ class OrderProcessor {
 | TikZ 텍스트 겹침 (strict) | `python3 scripts/detect-text-overlap.py --series <name>` | `olap` 열 = 0 |
 | TikZ 텍스트 근접 (heuristic) | `./scripts/detect-tikz-overlap.sh` | warning 0건 |
 | 코드 블록 내 한국어 산문 | `./scripts/detect-prose-in-code.sh` | 위반 없음 |
+| Hallucination 후보 | `./scripts/audit-suspect-claims.sh` | 출력된 candidate를 사람이 review |
+| **통합 gate** | `./scripts/audit-publish-gate.sh` | 위 4가지를 한 번에. `--strict`로 hallucination도 차단 |
 
-*Publish 전 4가지 모두 통과*. 빌드가 OK여도 *위반이 있으면 publish 금지*.
+*Publish 전 통합 gate 통과 필수*. 빌드가 OK여도 *위반이 있으면 publish 금지*.
+
+`audit-suspect-claims.sh`는 CLAUDE.md §10 "Hallucination 방지" 7 카테고리를 *자동 grep*해 *후보 위치*를 출력합니다. *후보 = hallucination 아님*. 각 위치를 *사람이 review*해 진위 확인 후 qualify·수정.
+
+7 카테고리: `future-sku`, `spec-num`, `kernel-api`, `company-impl`, `codename`, `yaml-schema`, `spec-year`. 특정 카테고리만 검사하려면 `--category <name>`.
 
 ### 표
 

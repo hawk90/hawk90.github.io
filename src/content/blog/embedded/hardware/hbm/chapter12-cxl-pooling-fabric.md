@@ -117,7 +117,7 @@ FM은 *별도 네트워크* 또는 *전용 BMC link*로 동작합니다. *데이
 | Meta | Memory Tiering | 컨테이너 host overcommit + CXL.mem cold tier |
 | Microsoft Azure | Project Pond | 다중 VM 메모리 풀링 |
 | AMD | MI300 Cluster | EPYC + Instinct + CXL pool |
-| 삼성·SK Hynix | CMM-D / Niagara fleet | 자사 데이터센터 양산 적용 |
+| Samsung·SK Hynix | CMM-D / Niagara | 양산 (자사 데이터센터 도입 검토·공개 보고 자료 있음) |
 | 기타 hyperscale | (공개 자료 제한) | TPU·GPU 클러스터의 CXL 확장 검토·시범 적용 보고 |
 
 대부분 *CXL 2.0 pooling*이 *2024~2025 양산 적용*, *3.0 fabric*은 *2026+ 본격 도입*입니다.

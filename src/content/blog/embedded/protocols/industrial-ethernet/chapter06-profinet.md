@@ -183,20 +183,19 @@ TIA Portal에서 *GSDML 파일을 import*하면 해당 device가 *project 라이
 
 선택의 갈림길은 *기존 인프라*입니다. Siemens PLC + TIA Portal 환경이라면 PROFINET. *모션 컨트롤러를 처음부터 짜는* 흐름이면 EtherCAT이 *master 비용 절감*에서 유리합니다.
 
-## Siemens 생태계 — 한국 적용 예
+## Siemens 생태계 — 공정 자동화 구성 패턴
 
-LS ELECTRIC의 PLC(XGT 시리즈)는 PROFINET과 EtherNet/IP를 *모두 지원*합니다. 대우조선의 선박 자동화 시스템은 *PROFINET 기반 ET 200SP*로 분산 IO를 구성하고, *S7-1500*이 IO-Controller 역할입니다. *공정 데이터*는 PROFINET RT(10 ms cycle)면 충분합니다. *모션*이 들어가는 부분은 PROFINET CC-C IRT나 *EtherCAT 별도 segment*로 분리하는 게 일반적입니다.
+국내외 *PLC 벤더*가 PROFINET·EtherNet/IP *복수 프로토콜 지원* 제품을 출시하고 있어, *한 공장에 PROFINET·EtherCAT이 공존*하는 게 일반적입니다. *공정 데이터*는 PROFINET RT(약 10 ms cycle)로 충분하고, *모션*은 *PROFINET CC-C IRT* 또는 *EtherCAT 별도 segment*로 분리하는 *이중 protocol topology*가 표준 구성입니다.
 
-```text
-대우조선 선박 자동화 구성 (간단 예)
-  공정 영역:        S7-1500 + PROFINET RT
-                      └ ET 200SP × 12 (분산 IO)
-  모션 영역 (개별):  EtherCAT segment (Beckhoff)
-                      └ AX5000 servo × 4
-  두 망 연결:        Gateway 모듈 (PROFINET ↔ EtherCAT)
-```
+전형적 구성 예 (Siemens stack 기준):
 
-같은 공장 안에 PROFINET과 EtherCAT이 *gateway로 묶여* 공존하는 게 일반적입니다. 둘 중 하나가 *지배적*이지 않습니다.
+| 영역 | 구성 |
+|------|------|
+| 공정 영역 | *S7-1500* IO-Controller + *PROFINET RT* + *ET 200SP* 분산 IO 다수 |
+| 모션 영역 | *EtherCAT segment* + *Beckhoff AX5000 servo* 등 |
+| 두 망 연결 | *Gateway 모듈* (PROFINET ↔ EtherCAT) |
+
+같은 공장 안에 PROFINET과 EtherCAT이 *gateway로 묶여* 공존하는 게 일반적입니다. 둘 중 하나가 *지배적*이지 않습니다. (구체 회사·사이트별 채택은 *공개 자료 한정*적이라 spec 카탈로그 확인 권장.)
 
 ## 자주 하는 실수
 
