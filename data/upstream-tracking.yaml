@@ -47,8 +47,39 @@ trackings:
       - 'absl/[A-Za-z0-9_/.-]+\.(h|cc|hpp)'
       - 'absl::[A-Za-z0-9_]+'
 
-# 미래 추가 후보 (Linux kernel subsystem 인용 시리즈):
-# - cxl_internals: drivers/cxl/ — torvalds/linux baseline TBD
-# - pcie_deep_dive: drivers/pci/ — torvalds/linux baseline TBD
-# - kernel_debugging: 여러 subsystem 인용 — baseline 다중
-# 이들은 baseline 확정 시 entry 추가.
+  - id: cxl_internals
+    title: "CXL 4.0 Internals (Linux drivers/cxl)"
+    series_dir: src/content/blog/embedded/hardware/cxl
+    upstream:
+      repo_url: https://github.com/torvalds/linux
+      local_path: ~/Workspaces/code-review-sources/linux
+      branch: master
+      baseline_commit: e196115ec330a18de415bdb9f5071aa9f08e53ce
+      baseline_date: 2026-05-16
+      # Linux kernel은 거대. sparse checkout + 이 path만 diff 추적
+      subsystem_paths:
+        - drivers/cxl/
+    file_patterns:
+      - 'drivers/cxl/[A-Za-z0-9_/.-]+\.(h|c)'
+      - 'cxl_[a-z_]+'
+
+  - id: pcie_deep_dive
+    title: "PCIe Deep Dive (Linux drivers/pci)"
+    series_dir: src/content/blog/embedded/hardware/pcie
+    upstream:
+      repo_url: https://github.com/torvalds/linux
+      local_path: ~/Workspaces/code-review-sources/linux
+      branch: master
+      baseline_commit: 23bc2dd17b2000912b7ee3a92090ec67e4e572d7
+      baseline_date: 2026-05-19
+      subsystem_paths:
+        - drivers/pci/
+    file_patterns:
+      - 'drivers/pci/[A-Za-z0-9_/.-]+\.(h|c)'
+      - 'pci_[a-z_]+'
+
+# 미래 추가 후보:
+# - kernel_debugging: kernel/, fs/ftrace, drivers/perf — baseline 다중 path
+# - dwarf_elf_internals: binutils-gdb·llvm-project (별도 repo)
+# - gdb_lldb: binutils-gdb·llvm-project (별도 repo)
+# 이들은 시리즈를 *upstream HEAD 기준*으로 다시 정리할 때 등록.

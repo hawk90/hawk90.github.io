@@ -107,7 +107,7 @@ fi
 # 6. Universal fact-density (informational, 항상 warn — review 우선순위 식별)
 if [ -x "$ROOT/scripts/audit-fact-density.sh" ]; then
   run_check \
-    "6/7 Fact-density 분석 (universal, 모든 챕터)" \
+    "6/10 Fact-density 분석 (universal, 모든 챕터)" \
     "$ROOT/scripts/audit-fact-density.sh --top 20 $ARGS_STR" \
     "warn"
 fi
@@ -116,7 +116,7 @@ fi
 #    --no-fetch: local clone 기준만 (빠름, fetch는 별도 npm run audit:upstream)
 if [ -x "$ROOT/scripts/audit-upstream-freshness.py" ] && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
   echo ""
-  echo "═══ 7/7 Upstream freshness (code-review·spec) ═══"
+  echo "═══ 7/10 Upstream freshness (code-review·spec) ═══"
   if python3 "$ROOT/scripts/audit-upstream-freshness.py" --no-fetch --top 5 > /tmp/audit-freshness.txt 2>&1; then
     # staleness 요약만 표시 (Top chapter는 상세 명령으로)
     grep -E "^## |Since baseline:|Chapters:" /tmp/audit-freshness.txt || true
@@ -124,6 +124,37 @@ if [ -x "$ROOT/scripts/audit-upstream-freshness.py" ] && [ -f "$ROOT/data/upstre
   else
     echo "− SKIPPED (upstream tracking 미설정 또는 clone 없음)"
   fi
+fi
+
+# 8. Internal link rot — /blog/... 링크가 실제 파일을 가리키는지
+#    인자 전달 — 단일 파일/디렉터리 publish 시 그 대상만 검사 (전체 검사는 별 작업)
+if [ -x "$ROOT/scripts/audit-internal-links.sh" ]; then
+  run_check \
+    "8/10 Internal link rot (/blog/... 깨진 링크)" \
+    "$ROOT/scripts/audit-internal-links.sh $ARGS_STR" \
+    "block"
+fi
+
+# 9. Series integrity — seriesOrder gap·draft 혼합·date 역행·중복 검출
+if [ -x "$ROOT/scripts/audit-series-integrity.py" ]; then
+  echo ""
+  echo "═══ 9/10 Series integrity (frontmatter 일관성) ═══"
+  if python3 "$ROOT/scripts/audit-series-integrity.py" --quiet > /tmp/audit-integrity.txt 2>&1; then
+    head -3 /tmp/audit-integrity.txt
+    echo "ℹ  상세는 'npm run audit:series' 실행"
+  else
+    head -3 /tmp/audit-integrity.txt
+    echo "ℹ  Blocking 위반 발견 — 'npm run audit:series'로 확인"
+    FAILED=$((FAILED + 1))
+  fi
+fi
+
+# 10. Image coverage — §11 접근성 — 추상 개념 vs 이미지 0개 챕터 ranking
+if [ -x "$ROOT/scripts/audit-image-coverage.py" ]; then
+  echo ""
+  echo "═══ 10/10 Image coverage (§11 접근성, informational) ═══"
+  python3 "$ROOT/scripts/audit-image-coverage.py" --top 5 2>&1 | head -5
+  echo "ℹ  상세는 'npm run audit:images' 실행"
 fi
 
 echo ""

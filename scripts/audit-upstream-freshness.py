@@ -84,12 +84,22 @@ def fetch_upstream(local_path, branch):
     run(["git", "fetch", "--quiet", "origin", branch], cwd=local_path)
 
 
-def get_diff_files(local_path, baseline, branch):
-    """git log baseline..origin/branch --name-only --stat → file_changes dict."""
-    code, out = run(
-        ["git", "log", f"{baseline}..origin/{branch}", "--name-only", "--format="],
-        cwd=local_path
-    )
+def _path_in_subsystems(path, subsystem_paths):
+    """path가 subsystem_paths prefix 중 하나로 시작하는지."""
+    if not subsystem_paths:
+        return True  # 필터 없으면 전부 통과
+    return any(path.startswith(s) for s in subsystem_paths)
+
+
+def get_diff_files(local_path, baseline, branch, subsystem_paths=None):
+    """git log baseline..origin/branch -- <paths>로 path 필터링.
+
+    subsystem_paths가 있으면 git 자체에 -- pathspec 전달해 빠르게.
+    """
+    cmd = ["git", "log", f"{baseline}..origin/{branch}", "--name-only", "--format="]
+    if subsystem_paths:
+        cmd += ["--"] + list(subsystem_paths)
+    code, out = run(cmd, cwd=local_path)
     files = defaultdict(int)
     for line in out.splitlines():
         line = line.strip()
@@ -98,20 +108,20 @@ def get_diff_files(local_path, baseline, branch):
     return files
 
 
-def get_commit_count(local_path, baseline, branch):
-    code, out = run(
-        ["git", "rev-list", "--count", f"{baseline}..origin/{branch}"],
-        cwd=local_path
-    )
+def get_commit_count(local_path, baseline, branch, subsystem_paths=None):
+    cmd = ["git", "rev-list", "--count", f"{baseline}..origin/{branch}"]
+    if subsystem_paths:
+        cmd += ["--"] + list(subsystem_paths)
+    code, out = run(cmd, cwd=local_path)
     return int(out.strip())
 
 
-def get_diff_stat(local_path, baseline, branch):
-    """Total insertions + deletions."""
-    code, out = run(
-        ["git", "log", f"{baseline}..origin/{branch}", "--shortstat", "--format="],
-        cwd=local_path
-    )
+def get_diff_stat(local_path, baseline, branch, subsystem_paths=None):
+    """Total insertions + deletions (선택 path filter)."""
+    cmd = ["git", "log", f"{baseline}..origin/{branch}", "--shortstat", "--format="]
+    if subsystem_paths:
+        cmd += ["--"] + list(subsystem_paths)
+    code, out = run(cmd, cwd=local_path)
     insertions = deletions = 0
     for line in out.splitlines():
         m = re.search(r"(\d+) insertion", line)
@@ -124,13 +134,20 @@ def get_diff_stat(local_path, baseline, branch):
 
 
 def find_chapter_file_refs(series_dir, file_patterns):
-    """Chapter당 인용된 upstream 파일 set 추출."""
+    """Chapter당 인용된 upstream 파일 set 추출 + 시리즈 전체 chapter 수.
+
+    return: (chapter_refs dict, total_chapters int)
+    chapter_refs: 패턴 매치된 챕터만 (영향 평가 input)
+    total_chapters: STORYBOARD 제외 시리즈 디렉토리 안 모든 .md 수
+    """
     series = expand_path(REPO_ROOT / series_dir)
     chapter_refs = defaultdict(set)
     compiled = [re.compile(p) for p in file_patterns]
+    total = 0
     for chapter_md in series.glob("*.md"):
         if chapter_md.name == "STORYBOARD.md":
             continue
+        total += 1
         try:
             text = chapter_md.read_text(encoding="utf-8")
         except Exception:
@@ -138,7 +155,7 @@ def find_chapter_file_refs(series_dir, file_patterns):
         for cp in compiled:
             for m in cp.finditer(text):
                 chapter_refs[chapter_md.name].add(m.group(0))
-    return chapter_refs
+    return chapter_refs, total
 
 
 # Code source 파일만 분석 대상 (build·doc·script 제외)
@@ -253,24 +270,26 @@ def audit_series(entry, no_fetch=False, top=10, fetch_releases=False):
     branch = upstream["branch"]
     baseline = upstream["baseline_commit"]
     baseline_date = upstream.get("baseline_date", "")
+    subsystem_paths = upstream.get("subsystem_paths") or None
     file_patterns = entry.get("file_patterns", [])
 
     print(f"\n=== {title} ===", file=sys.stderr)
     print(f"  baseline: {baseline[:12]} ({baseline_date})", file=sys.stderr)
+    if subsystem_paths:
+        print(f"  subsystems: {', '.join(subsystem_paths)}", file=sys.stderr)
 
     # 1. Clone / fetch
     local = ensure_clone(repo_url, local_path, branch)
     if not no_fetch:
         fetch_upstream(local, branch)
 
-    # 2. Diff 분석
-    commit_count = get_commit_count(local, baseline, branch)
-    insertions, deletions = get_diff_stat(local, baseline, branch)
-    changed_files = get_diff_files(local, baseline, branch)
+    # 2. Diff 분석 (subsystem_paths가 있으면 git pathspec으로 필터)
+    commit_count = get_commit_count(local, baseline, branch, subsystem_paths)
+    insertions, deletions = get_diff_stat(local, baseline, branch, subsystem_paths)
+    changed_files = get_diff_files(local, baseline, branch, subsystem_paths)
 
     # 3. Chapter ↔ file 매핑
-    chapter_refs = find_chapter_file_refs(series_dir, file_patterns)
-    chapter_count = len(chapter_refs)
+    chapter_refs, chapter_count = find_chapter_file_refs(series_dir, file_patterns)
 
     # 4. 영향 챕터 ranking
     ranked = rank_affected_chapters(chapter_refs, changed_files)
