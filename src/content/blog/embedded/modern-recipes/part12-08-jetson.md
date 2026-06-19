@@ -29,7 +29,7 @@ Jetson을 고르는 이유는 세 가지입니다. 첫째, NVIDIA CUDA·cuDNN·T
 | Orin Nano | 6× A78AE | 1024 Ampere | - | 40 | 7-15 W |
 | Orin NX | 8× A78AE | 1024 Ampere | 2 DLA | 100 | 10-25 W |
 | AGX Orin | 12× A78AE | 2048 Ampere | 2 DLA | 275 | 15-60 W |
-| Thor (2025) | 14× Neoverse V3 | Blackwell + safety | - | 1000+ | 40-130 W |
+| Thor (2025+ 예정) | Neoverse-class CPU | Blackwell-class GPU + safety | - | 2000+ FP8 TOPS (announced) | 40-130 W |
 
 자율주행·로봇 production은 *AGX Orin·Thor*가 표준입니다. 개발·prototype·entry edge는 Orin Nano·Orin NX가 가성비가 좋습니다.
 
