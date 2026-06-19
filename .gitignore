@@ -43,3 +43,6 @@ _jekyll_backup/
 *.epub
 *.djvu
 scripts/__pycache__/
+
+# Spec cache — 저작권 있는 spec 텍스트 추출 (CXL/PCIe/JEDEC 등). 로컬 참조용만.
+data/*-spec-cache/
