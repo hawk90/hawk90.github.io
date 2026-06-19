@@ -264,6 +264,8 @@ class OrderProcessor {
 > **ASCII art → TikZ 우선**: ASCII 박스 다이어그램(`┌──┐`)을 마주치면 *기본 변환 대상은 TikZ*. 표는 시각 정보가 없을 때만 fallback. 모호하면 TikZ로 간다.
 > **Mermaid 사용 안 함**: sequence/state는 `_design-sequence.tex` / `_design-state.tex`로. graph·flowchart는 `_design.tex`로. 모든 다이어그램이 *pre-built SVG*로 통일.
 
+> **Publish 전 강제 검증**: `./scripts/detect-ascii-diagrams.sh` — 박스 다이어그램·bar chart 자동 탐지. *위반 발견 시 빌드 OK여도 publish 금지*. 디렉토리 트리(`├──`·`└──`)만 허용 예외.
+
 ### 다이어그램 파일 배치
 
 - **TikZ**: `public/images/blog/<series>/diagrams/<name>.tex` + 빌드된 `.svg`
@@ -308,11 +310,16 @@ class OrderProcessor {
 - 같은 행의 두 박스: *중심 간 거리 ≥ 박스 폭 + 0.5cm*.
 - 트리 다이어그램에서 좌우 분기가 있으면 *level 1 sibling distance ≥ 양쪽 자식 폭 합 + 여유*.
 
-**검증**
+**검증 — Publish 전 필수**
 
-- 작성·수정 후: `python3 scripts/detect-text-overlap.py --series <name>` 로 충돌 확인.
-- 출력의 `olap` 열이 0이면 strict overlap 없음. `touch` 열은 0.5pt 미만 근접(시각 거슬릴 수 있음).
-- 휴리스틱 빠른 점검: `scripts/detect-tikz-overlap.sh`.
+| 검사 | 명령 | 통과 기준 |
+|------|------|----------|
+| ASCII 박스 다이어그램 | `./scripts/detect-ascii-diagrams.sh` | 출력 "No ASCII box diagram violations found." |
+| TikZ 텍스트 겹침 (strict) | `python3 scripts/detect-text-overlap.py --series <name>` | `olap` 열 = 0 |
+| TikZ 텍스트 근접 (heuristic) | `./scripts/detect-tikz-overlap.sh` | warning 0건 |
+| 코드 블록 내 한국어 산문 | `./scripts/detect-prose-in-code.sh` | 위반 없음 |
+
+*Publish 전 4가지 모두 통과*. 빌드가 OK여도 *위반이 있으면 publish 금지*.
 
 ### 표
 
@@ -463,6 +470,29 @@ media/av1              — AV1
 ### Frontmatter 중복 키
 
 - 빌드 실패의 흔한 원인 — `draft: false`와 `draft: true`가 한 frontmatter에 모두 있는 경우. YAML이 거부합니다. 한 키는 한 번만.
+
+### Hallucination 방지 — *publish 전 자율 audit 필수*
+
+다음 카테고리는 *기억에 의존하면 hallucinate*하기 가장 쉽습니다. 챕터 publish 전 *반드시* 자율 점검합니다.
+
+- [ ] **Future-product SKU·spec** — *발표 전·미양산* 제품의 capacity·TOPS·세부 spec을 *단정*하지 않았는가? "*예정·발표·로드맵*" qualifier 사용.
+  - 잘못된 예: "AMD MI325X 288 GB HBM3E" (실은 256 GB)
+  - 잘못된 예: "NVIDIA B300 (288GB)" (미발표·단정)
+- [ ] **JEDEC·DSP·IEEE·RFC 표준 번호와 revision** — *기억으로 적지 말고* 공식 spec 인용·"진행 중"·"update" qualifier 사용.
+  - 잘못된 예: "HBM2E JESD235B" (실은 C), "HBM4 JESD238B" (번호 미부여)
+  - 올바른 예: "JEDEC 표준화 진행", "JESD238 update"
+- [ ] **Kernel API·flag·struct 이름** — *기억으로 만들지 말 것*. 정확한 이름이 안 떠오르면 *generic 설명*으로 우회 또는 *self-walker* qualifier.
+  - 잘못된 예: `MHP_NID_IS_MGID` (존재 안 함)
+  - 잘못된 예: `from drgn.helpers.linux.cxl import for_each_cxl_port` (모듈 없음 가능)
+  - 올바른 예: "자체 walker 작성", "(개념적 — 실제는 struct walk)"
+- [ ] **회사 ↔ 내부 구현 매핑** — *비공개 정보가 많음*. "현대중공업은 IgH 기반" 같은 구체 단정 금지.
+  - 올바른 예: "국내 로봇·자동화 업계", "(구체 회사·라인별 채택은 공개 자료 한정)"
+- [ ] **Project codename 매핑** — "Google Carbon (Carbon은 프로그래밍 언어)", "Alibaba Pangu (Pangu는 스토리지)" 같은 *이름 충돌* 흔함.
+  - 올바른 예: "AMD MI300 Cluster", "Meta Memory Tiering" 같은 *검증된 매핑*만 사용
+- [ ] **YAML·config schema 단정** — *특정 라이브러리의 schema*를 외워 적으면 위험. "*개념적 예시 — 실 schema는 docs 참조*" qualifier.
+- [ ] **인용한 spec·표준의 *publish 연도*** — "JESD235A는 2018년" 같은 *연도 단정*은 *반드시 공식 자료 인용 또는 확인*.
+
+핵심 원칙: *내가 100% 확신 못 하는 fact는 단정하지 않는다*. *qualifier 사용*이 *신뢰성 손실보다 작은 비용*.
 
 ---
 

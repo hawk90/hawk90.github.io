@@ -118,18 +118,21 @@ HBM이 약 *3배 효율적*.
 
 HBM 시장은 *한국 두 회사가 사실상 양분*하고 있습니다.
 
-```text
-HBM 시장 점유율 (2025)
+HBM 시장 점유율 (2025년경 공개 자료 기준 추정):
 
-SK 하이닉스   ━━━━━━━━━━━━━━━━━━━━━━ 53%   (HBM3·HBM3E 1위)
-Samsung       ━━━━━━━━━━━━━━━━━ 38%
-Micron        ━━━━ 9%               (HBM3E 후발, 점유율 추격 중)
+| 회사 | 점유율 | 비고 |
+|------|--------|------|
+| SK 하이닉스 | ~53% | HBM3·HBM3E 1위 |
+| Samsung | ~38% | |
+| Micron | ~9% | HBM3E 후발, 점유율 추격 중 |
 
 NVIDIA Blackwell HBM3E 공급:
-├── SK Hynix  : 주 공급 (9.2 Gbps qualified 1st)
-├── Micron    : 추가 공급 (9.8 Gbps 양산)
-└── Samsung   : qualification 진행
-```
+
+| 회사 | 역할 | 비고 |
+|------|------|------|
+| SK Hynix | 주 공급 | 9.2 Gbps grade qualified 우선 |
+| Micron | 추가 공급 | 9.8 Gbps 양산 |
+| Samsung | qualification 진행 | |
 
 SK 하이닉스가 *2023년 HBM3 양산*에 *가장 먼저* 들어가 NVIDIA의 *first source*가 됐고, *HBM3E*에서도 *9.2 Gbps grade*로 *양산 선두*를 지키고 있습니다. Samsung은 *HBM3E 12-Hi 24 Gb DRAM*으로 *36 GB stack*을 먼저 발표했지만 NVIDIA *qualification*이 늦어졌습니다. Micron은 *9.8 Gbps*로 *per-pin rate*는 가장 높지만 *총 volume*은 아직 3위입니다.
 
