@@ -26,8 +26,10 @@ jedec_standards:
   - JESD79       # DDR base
   - JESD79-4     # DDR4
   - JESD79-5     # DDR5
+  - JESD270      # HBM4 base number
+  - JESD270-4    # HBM4 — JEDEC 2025-04 확정. https://www.jedec.org/news/pressreleases/jedec%C2%AE-and-industry-leaders-collaborate-release-jesd270-4-hbm4-standard-advancing
   # Note: HBM3E는 별도 표준 번호 없이 JESD238 update로 다룸
-  # HBM4는 2024~2025 표준화 진행, 번호 미부여
+  # HBM4는 2025-04 JESD270-4로 확정 (JESD235 계열 아님)
 
 # ─── PCI-SIG / CXL Consortium 표준 ────────────────────────────
 pcie_standards:
