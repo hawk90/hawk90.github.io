@@ -408,7 +408,7 @@ ARMv7-M의 exclusive monitor가 atomic을 보장합니다. DMA 같은 다른 mas
 - [Part 4-03: Lock-free 기초](/blog/embedded/embedded-cpp/part4-03-lock-free-basics)
 - [Part 3-03: Pool Allocator](/blog/embedded/embedded-cpp/part3-03-pool-allocator) — lock-free pool
 - [Part 4-01: Intrusive Containers](/blog/embedded/embedded-cpp/part4-01-intrusive-containers)
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals)
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)
 
 ## 다음 글
 

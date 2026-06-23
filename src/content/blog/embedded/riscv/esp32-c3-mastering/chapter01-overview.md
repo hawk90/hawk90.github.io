@@ -252,8 +252,8 @@ ESP-IDF 사용자라면 *몰라도 됩니다*. C 레벨에서 코어 ISA는 *완
 
 - [Ch 2: RISC-V 코어 — RV32IMC + PMP + 인터럽트 컨트롤러](/blog/embedded/riscv/esp32-c3-mastering/chapter02-riscv-core)
 - [Ch 3: 메모리 맵·플래시·SPIFFS/LittleFS](/blog/embedded/riscv/esp32-c3-mastering/chapter03-memory-flash)
-- [Ch 11: 보안·Secure Boot](/blog/embedded/riscv/esp32-c3-mastering/chapter11-secure-boot) — eFuse·flash encryption
-- [Modern Embedded Recipes Part 5.2: WiFi provisioning](/blog/embedded/modern-recipes/part5-02-wifi-provisioning)
-- [Practical RTOS Internals Part 1.1: 듀얼 코어 vs 싱글 코어](/blog/embedded/rtos/practical-internals/part1-01-single-vs-dual)
+- [Ch 11: 보안·Secure Boot](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security) — eFuse·flash encryption
+- Modern Embedded Recipes Part 5.2: WiFi provisioning
+- Practical RTOS Internals Part 1.1: 듀얼 코어 vs 싱글 코어
 - [원문 — ESP32-C3 Datasheet (Espressif)](https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf)
 - [원문 — ESP-IDF Programming Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/)

@@ -341,4 +341,4 @@ uarch           : qemu
 - [Ch 10: 성능 측정과 트레이싱](/blog/tools/emulation/qemu-riscv/chapter10-tracing)
 - [QEMU Embedded — U-Boot](/blog/tools/emulation/qemu-embedded/chapter04-uboot)
 - [Bootloader Internals — Driver Model](/blog/embedded/bootloader/chapter07-driver-model)
-- [Buildroot Practical](/blog/embedded/buildroot/chapter01-overview)
+- [Buildroot Practical](/blog/embedded/buildroot/chapter01-problem)

@@ -190,5 +190,5 @@ absl::Time deadline = absl::FromTimeT(legacy);
 
 - [Part 6-01: absl::Mutex vs std::mutex](/blog/programming/code-review/abseil/part6-01-mutex) — `Duration` 기반 timeout API
 - [Part 7-03: CivilTime](/blog/programming/code-review/abseil/part7-03-civil-time)
-- [Effective Modern C++ — 항목 7: chrono 활용](/blog/programming/cpp/effective-modern-cpp)
+- [Effective Modern C++ — 항목 7: chrono 활용](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
 - [원문 — Abseil Time](https://abseil.io/docs/cpp/guides/time)

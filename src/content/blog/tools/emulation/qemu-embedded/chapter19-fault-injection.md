@@ -286,4 +286,4 @@ fault injection × mutated code. driver의 *robustness*를 *수학적*으로 검
 - [Ch 18: 보드 bringup](/blog/tools/emulation/qemu-embedded/chapter18-board-bringup)
 - [Ch 20: CI matrix](/blog/tools/emulation/qemu-embedded/chapter20-ci-matrix)
 - [QEMU Fake Device — AER Emulation](/blog/tools/emulation/qemu-fake-device/chapter21-aer-emulation)
-- [Developing Safety-Critical Software](/blog/embedded/avionics/developing-safety-critical/chapter01-overview)
+- [Developing Safety-Critical Software](/blog/embedded/avionics/developing-safety-critical/chapter01-assurance-overview)

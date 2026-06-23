@@ -511,5 +511,5 @@ Chapter 31에서는 **객체 영속성과 데이터베이스**를 다룬다. OOD
 ## 관련 항목
 
 - [Ch 11: Design by Contract](/blog/programming/design/oosc/chapter11-design-by-contract) — 계약
-- [Ch 12: When the Contract is Broken](/blog/programming/design/oosc/chapter12-when-the-contract-is-broken) — 예외
+- [Ch 12: When the Contract is Broken](/blog/programming/design/oosc/chapter12-exception-handling) — 예외
 - [Ch 28: The Software Construction Process](/blog/programming/design/oosc/chapter28-the-software-construction-process) — 프로세스

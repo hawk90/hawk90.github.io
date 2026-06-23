@@ -520,5 +520,5 @@ Expression Problem을 기억하자.
 - [가이드라인 2: 변화를 위한 디자인](/blog/programming/cpp/cpp-software-design/guideline02-design-for-change) — 확장의 토대
 - [가이드라인 4: 테스트 가능성](/blog/programming/cpp/cpp-software-design/guideline04-design-for-testability) — OCP의 자매
 - [가이드라인 15: 타입/연산 추가를 위한 디자인](/blog/programming/cpp/cpp-software-design/guideline15-design-for-the-addition-of-types-or-operations) — 본격적인 Visitor 도입
-- [GoF Strategy](/blog/programming/design/gof-design-patterns/item19-strategy) — 알고리즘 교체
+- [GoF Strategy](/blog/programming/design/gof-design-patterns/item19-observer) — 알고리즘 교체
 - [Effective C++ 항목 35: 가상 함수의 대안](/blog/programming/cpp/effective-cpp/item35-consider-alternatives-to-virtual-functions) — 다형성 도구들

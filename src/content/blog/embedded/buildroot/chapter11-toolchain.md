@@ -316,5 +316,5 @@ $ readelf -V output/target/bin/busybox | grep GLIBC
 - [Ch 4: 첫 빌드 — QEMU에서 동작하는 시스템](/blog/embedded/buildroot/chapter04-first-build) — toolchain 단계의 실제 흐름
 - [Ch 12: Linux 커널 customize — defconfig fragment와 DTS](/blog/embedded/buildroot/chapter12-kernel-customize)
 - [Ch 17: SDK 생성·배포 — make sdk와 application 워크플로](/blog/embedded/buildroot/chapter17-sdk) — toolchain을 application 개발자에게 배포
-- [BSP Development Ch 7: 크로스 컴파일 toolchain](/blog/embedded/bsp/chapter07-toolchain) — BSP 관점에서의 toolchain
+- [BSP Development Ch 7: 크로스 컴파일 toolchain](/blog/embedded/bsp/chapter07-tfa-trustzone) — BSP 관점에서의 toolchain
 - [원문 — Buildroot Manual §3: getting started](https://buildroot.org/downloads/manual/manual.html)

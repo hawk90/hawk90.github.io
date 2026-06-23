@@ -231,4 +231,4 @@ CPOL/CPHA mismatch면 decode가 *완전히 다른 byte*로 나옵니다. Capture
 
 - [10-05: UART 안 찍힐 때](/blog/embedded/modern-recipes/part10-05-uart-not-printing)
 - [10-09: 타이밍/race 진단](/blog/embedded/modern-recipes/part10-09-timing-race-diag)
-- [Embedded Serial Ch 1: UART](/blog/embedded/protocols/embedded-serial/chapter01-uart-basics)
+- [Embedded Serial Ch 1: UART](/blog/embedded/protocols/embedded-serial/chapter01-overview)

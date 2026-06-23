@@ -681,5 +681,5 @@ Observer를 적용할 때 다음을 점검한다.
 
 - [가이드라인 11: 명시적 공유 최소화](/blog/programming/cpp/beautiful-cpp/item11-minimize-explicit-data-sharing) — 라이프타임
 - [가이드라인 21: Command](/blog/programming/cpp/cpp-software-design/guideline21-use-command-to-isolate-what-things-are-done) — 함수 객체
-- [GoF Observer](/blog/programming/design/gof-design-patterns/item18-observer) — 원본
+- [GoF Observer](/blog/programming/design/gof-design-patterns/item18-memento) — 원본
 - [Beautiful C++ 항목 30: RAII](/blog/programming/cpp/beautiful-cpp/item30-use-raii-to-prevent-leaks) — Subscription RAII

@@ -33,7 +33,7 @@ auto withGPS = std::make_unique<GPSDecorator>(std::move(withSunroof));
 withGPS->price();    // 모든 옵션이 누적된다
 ```
 
-GoF 23개 패턴 중 하나다. 자세한 GoF 측면은 [Decorator](/blog/programming/design/gof-design-patterns/item11-decorator)에서 다룬다.
+GoF 23개 패턴 중 하나다. 자세한 GoF 측면은 [Decorator](/blog/programming/design/gof-design-patterns/item11-flyweight)에서 다룬다.
 
 ## 기본 구조 — 런타임 (상속 기반)
 
@@ -358,7 +358,7 @@ auto pipeline = Reduce{0, std::plus{},
 
 ## 관련 항목
 
-- [GoF Decorator](/blog/programming/design/gof-design-patterns/item11-decorator) — GoF 측면
+- [GoF Decorator](/blog/programming/design/gof-design-patterns/item11-flyweight) — GoF 측면
 - [가이드라인 19: Strategy](/blog/programming/cpp/cpp-software-design/guideline19-use-strategy-to-isolate-how-things-are-done) — 다른 의도
 - [가이드라인 20: Composition over Inheritance](/blog/programming/cpp/cpp-software-design/guideline20-favor-composition-over-inheritance) — 같은 정신
 - [가이드라인 32: Type Erasure](/blog/programming/cpp/cpp-software-design/guideline32-consider-replacing-inheritance-hierarchies-with-type-erasure) — 결합 패턴

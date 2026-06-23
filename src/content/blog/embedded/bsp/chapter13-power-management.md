@@ -428,5 +428,5 @@ $ cat /sys/devices/system/cpu/cpu0/cpuidle/state2/time
 - [Ch 9: Multi-core SMP bring-up](/blog/embedded/bsp/chapter09-smp-bringup) — cpuidle의 기반
 - [Ch 12: 드라이버 추가](/blog/embedded/bsp/chapter12-driver-add) — regulator binding
 - [Ch 14: Thermal과 watchdog](/blog/embedded/bsp/chapter14-thermal-watchdog)
-- [Embedded Performance Engineering](/blog/embedded/performance-engineering/) — DVFS와 성능 트레이드오프
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — 양산 절전 측정
+- [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface) — DVFS와 성능 트레이드오프
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — 양산 절전 측정

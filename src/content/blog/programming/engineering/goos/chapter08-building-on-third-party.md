@@ -656,5 +656,5 @@ class XmppAuction:
 
 - [Ch 7: Achieving Object-Oriented Design](/blog/programming/engineering/goos/chapter07-achieving-design) — 이전 장
 - [Ch 9: Commitment — The Sniper Project](/blog/programming/engineering/goos/chapter09-commitment) — 다음 장
-- [Refactoring Catalog — Encapsulate Subgraph](/blog/programming/design/refactoring-catalog/section-introduction) — ACL과 wrapper의 리팩토링 관점
+- Refactoring Catalog — Encapsulate Subgraph — ACL과 wrapper의 리팩토링 관점
 - [Khorikov Ch 5: Mock과 테스트 취약성](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility) — "Don't mock what you don't own"이 fragility를 어떻게 줄이는가

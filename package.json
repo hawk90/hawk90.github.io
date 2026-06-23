@@ -40,7 +40,8 @@
     "audit:gate": "bash scripts/audit-publish-gate.sh",
     "audit:upstream": "python3 scripts/audit-upstream-freshness.py --top 20",
     "audit:upstream:json": "python3 scripts/audit-upstream-freshness.py --top 50 --json reports/upstream-freshness.json",
-    "audit:links": "bash scripts/audit-internal-links.sh",
+    "audit:links": "python3 scripts/audit-internal-links.py",
+    "audit:links:fix": "python3 scripts/resolve-internal-links.py --apply",
     "audit:series": "python3 scripts/audit-series-integrity.py",
     "audit:images": "python3 scripts/audit-image-coverage.py --top 30"
   },

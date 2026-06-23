@@ -578,7 +578,7 @@ Butcher의 책은 *기술 스택의 카탈로그*가 아니라 *사고 모델의
 ## 관련 항목
 
 - [Ch 6: Data Parallelism](/blog/parallel/seven-concurrency-models/ch06-data-parallelism) — 한 머신의 데이터 병렬
-- [Ch 5: CSP](/blog/parallel/seven-concurrency-models/ch05-communicating-sequential-processes) — Storm 토폴로지와의 유사성
+- [Ch 5: CSP](/blog/parallel/seven-concurrency-models/ch05-csp) — Storm 토폴로지와의 유사성
 - [Ch 4: Actors](/blog/parallel/seven-concurrency-models/ch04-actors) — 분산·메시지의 다른 모델
 - [Ch 3: The Clojure Way](/blog/parallel/seven-concurrency-models/ch03-the-clojure-way) — Cascalog의 모태 언어
 - [Ch 2: Functional Programming](/blog/parallel/seven-concurrency-models/ch02-functional-programming) — MapReduce의 사고 토대

@@ -273,8 +273,8 @@ make INSTALL_MOD_PATH=/tmp/rootfs modules_install
 
 ## 관련 항목
 
-- [Ch 7: Device Tree 작성](/blog/embedded/bsp/chapter07-device-tree)
+- [Ch 7: Device Tree 작성](/blog/embedded/bsp/chapter07-tfa-trustzone)
 - [Ch 9: Multi-core SMP bring-up](/blog/embedded/bsp/chapter09-smp-bringup)
 - [Ch 10: 첫 부팅 — 0%부터 login prompt까지](/blog/embedded/bsp/chapter10-first-boot)
-- [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/) — 커널과 rootfs 통합
-- [Embedded Performance Engineering](/blog/embedded/performance-engineering/) — `CONFIG_PREEMPT`·`HZ` 선택의 성능 영향
+- [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/chapter01-problem) — 커널과 rootfs 통합
+- [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface) — `CONFIG_PREEMPT`·`HZ` 선택의 성능 영향

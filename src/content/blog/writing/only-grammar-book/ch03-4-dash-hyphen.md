@@ -340,4 +340,4 @@ He realized—too late—that he had made a mistake.
 - [Chapter 3: Punctuation](/blog/writing/only-grammar-book/ch03-punctuation)
 - [Chapter 3.3: Semicolon and Colon](/blog/writing/only-grammar-book/ch03-3-semicolon-colon)
 - [Chapter 3.5: Apostrophe](/blog/writing/only-grammar-book/ch03-5-apostrophe)
-- [Elements of Style — Rule 8: 대시의 용법](/blog/writing/elements-of-style/ch01-rule08-dash)
+- Elements of Style — Rule 8: 대시의 용법

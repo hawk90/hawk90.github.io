@@ -272,4 +272,4 @@ T2: 쓰기 (counter = 6)  ← 하나 잃음
 - [Ch 2: Concurrent or Not Concurrent?](/blog/parallel/art-of-concurrency/chapter02-concurrent-or-not) — 분해 전략
 - [Ch 3: Proving Correctness and Measuring Performance](/blog/parallel/art-of-concurrency/chapter03-correctness-performance) — Amdahl 상세
 - [AMP Ch 1: Introduction](/blog/parallel/parallel-principles/ch01-introduction) — 이론적 기초
-- [C++ Concurrency Ch 1: Hello, world of concurrency](/blog/parallel/cpp-concurrency-in-action/chapter01-hello-concurrency) — C++ 관점
+- [C++ Concurrency Ch 1: Hello, world of concurrency](/blog/parallel/cpp-concurrency-in-action/chapter01-hello-concurrent-world) — C++ 관점

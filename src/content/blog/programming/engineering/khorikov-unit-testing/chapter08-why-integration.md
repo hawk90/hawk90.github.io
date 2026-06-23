@@ -328,5 +328,5 @@ public void Order_with_zero_quantity_is_invalid()
 - [Ch 7: Refactoring Toward Valuable Unit Tests](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring)
 - [Ch 9: Mocking Best Practices](/blog/programming/engineering/khorikov-unit-testing/chapter09-mocking-best-practices)
 - [Ch 10: Testing the Database](/blog/programming/engineering/khorikov-unit-testing/chapter10-testing-database)
-- [GOOS](/blog/programming/engineering/goos/) — Outside-In과 End-to-End 사이의 균형
-- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/) — 통합 테스트가 필요한 레거시 진입점
+- [GOOS](/blog/programming/engineering/goos/chapter01-what-is-tdd) — Outside-In과 End-to-End 사이의 균형
+- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/ch01) — 통합 테스트가 필요한 레거시 진입점

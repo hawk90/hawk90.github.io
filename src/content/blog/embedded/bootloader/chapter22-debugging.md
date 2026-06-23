@@ -310,10 +310,10 @@ reserved-memory {
 
 | 시리즈 | 이어지는 지점 |
 |--------|----------------|
-| [BSP Development](/blog/embedded/bsp/) | 부트로더 위로 *커널·드라이버·rootfs* 전체 BSP 구성 |
-| [Buildroot Practical](/blog/embedded/buildroot/) | 부트로더·커널·rootfs 빌드 시스템과 OTA 패키징 |
-| [Embedded Security](/blog/embedded/embedded-security/) | Secure Boot·HSM·TPM·anti-rollback의 *위 시점* |
-| [Practical RTOS Internals](/blog/embedded/practical-rtos-internals/) | 부트로더 없는·또는 minimal한 시스템의 시작 |
+| [BSP Development](/blog/embedded/bsp/chapter01-what-is-bsp) | 부트로더 위로 *커널·드라이버·rootfs* 전체 BSP 구성 |
+| [Buildroot Practical](/blog/embedded/buildroot/chapter01-problem) | 부트로더·커널·rootfs 빌드 시스템과 OTA 패키징 |
+| [Embedded Security](/blog/embedded/embedded-security/chapter01-threat-model) | Secure Boot·HSM·TPM·anti-rollback의 *위 시점* |
+| Practical RTOS Internals | 부트로더 없는·또는 minimal한 시스템의 시작 |
 
 BSP 시리즈는 이 시리즈와 *짝*으로 읽으면 좋습니다. 같은 보드를 BSP 관점에서 다시 보면 *부트로더의 산출물이 BSP에 어떻게 흡수되는지*가 더 선명해집니다.
 
@@ -342,7 +342,7 @@ BSP 시리즈는 이 시리즈와 *짝*으로 읽으면 좋습니다. 같은 보
 
 - [Ch 21: 새 보드 포팅 — defconfig부터 첫 부팅까지](/blog/embedded/bootloader/chapter21-board-porting)
 - [Ch 19: 커널로 인계 — Linux boot ABI](/blog/embedded/bootloader/chapter19-kernel-handoff)
-- [BSP Development 시리즈](/blog/embedded/bsp/)
-- [Buildroot Practical 시리즈](/blog/embedded/buildroot/)
-- [Embedded Security 시리즈](/blog/embedded/embedded-security/)
+- [BSP Development 시리즈](/blog/embedded/bsp/chapter01-what-is-bsp)
+- [Buildroot Practical 시리즈](/blog/embedded/buildroot/chapter01-problem)
+- [Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model)
 - [원문 — U-Boot doc/usage/debug.rst](https://u-boot.readthedocs.io/en/latest/usage/index.html)

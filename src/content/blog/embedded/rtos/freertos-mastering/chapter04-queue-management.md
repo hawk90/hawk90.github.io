@@ -305,7 +305,7 @@ xTaskNotifyWait(/*clearOnEntry=*/0,
 - [Ch 5: Software Timer Management](/blog/embedded/rtos/freertos-mastering/chapter05-software-timers)
 - [Ch 6: Interrupt Management](/blog/embedded/rtos/freertos-mastering/chapter06-interrupt-management) — `xQueueSendFromISR`
 - [Ch 7: Resource Management](/blog/embedded/rtos/freertos-mastering/chapter07-resource-management) — 세마포·뮤텍스도 큐
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/) — 큐 내부 구현
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) — 큐 내부 구현
 - [ESP32-C3 Mastering Ch 10: FreeRTOS](/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos)
 - [원문 — FreeRTOS Queue Management](https://www.freertos.org/Embedded-RTOS-Queues.html)
 - [원문 — Task Notifications](https://www.freertos.org/RTOS-task-notifications.html)

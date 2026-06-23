@@ -464,6 +464,6 @@ Ubuntu/Debian: `sudo apt install libncurses-dev`. macOS: `brew install ncurses`.
 - [Ch 4: 부트 단계](/blog/embedded/bootloader/chapter04-boot-stages)
 - [Ch 7: Driver Model](/blog/embedded/bootloader/chapter07-driver-model)
 - [BSP Ch 6: U-Boot 보드 포팅](/blog/embedded/bsp/chapter06-u-boot-porting)
-- [Buildroot Ch 4: 패키지와 옵션](/blog/embedded/buildroot/chapter04-packages-config)
+- [Buildroot Ch 4: 패키지와 옵션](/blog/embedded/buildroot/chapter04-first-build)
 - [원문 — U-Boot README](https://source.denx.de/u-boot/u-boot/-/blob/master/README)
 - [원문 — Kbuild documentation](https://www.kernel.org/doc/Documentation/kbuild/)

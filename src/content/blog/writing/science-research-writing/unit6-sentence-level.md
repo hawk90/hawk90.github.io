@@ -76,7 +76,7 @@ draft: true
 ## 관련 항목
 
 - [Unit 5.2: Title의 작성과 시리즈 마무리](/blog/writing/science-research-writing/unit5-2-title-closing)
-- [Academic Writing for Graduate Students 시리즈](/blog/writing/academic-writing) — 더 넓은 학술 글쓰기 가이드
+- [Academic Writing for Graduate Students 시리즈](/blog/writing/academic-writing/unit01-1-audience-purpose) — 더 넓은 학술 글쓰기 가이드
 - [Elements of Style Ch 1 서문](/blog/writing/elements-of-style/ch01/00-intro) — 문장 단위 규칙
 
 ## 참고

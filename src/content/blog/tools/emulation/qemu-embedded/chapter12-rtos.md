@@ -245,5 +245,5 @@ GitHub Actions에서 RTOS 빌드 + QEMU 부팅 자동화.
 
 - [Ch 11: 베어메탈 펌웨어](/blog/tools/emulation/qemu-embedded/chapter11-baremetal)
 - [Ch 13: 벤더 머신](/blog/tools/emulation/qemu-embedded/chapter13-vendor-machines)
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/part1-01-real-time-systems)
-- [Mastering the FreeRTOS Real Time Kernel](/blog/embedded/rtos/freertos-mastering/chapter01-overview)
+- Practical RTOS Internals
+- [Mastering the FreeRTOS Real Time Kernel](/blog/embedded/rtos/freertos-mastering/chapter01-distribution)

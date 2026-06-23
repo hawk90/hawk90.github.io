@@ -256,4 +256,4 @@ QEMU를 별도 터미널에서 `-s -S`로 띄우고 F5. breakpoint·step·variab
 - [Ch 9: 네트워킹](/blog/tools/emulation/qemu-embedded/chapter09-networking)
 - [Ch 11: 베어메탈 펌웨어](/blog/tools/emulation/qemu-embedded/chapter11-baremetal)
 - [QEMU RISC-V — GDB 디버깅](/blog/tools/emulation/qemu-riscv/chapter03-gdb-debugging)
-- [GDB and LLDB](/blog/tools/debugging/gdb-lldb/chapter01-overview)
+- [GDB and LLDB](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install)

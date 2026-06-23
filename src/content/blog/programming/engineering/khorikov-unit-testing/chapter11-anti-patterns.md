@@ -485,9 +485,9 @@ public void Large_order_gets_10_percent_discount()
 - [Ch 1: The Goal of Unit Testing](/blog/programming/engineering/khorikov-unit-testing/chapter01-goal-of-unit-testing)
 - [Ch 5: Mocks and Test Fragility](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility)
 - [Ch 9: Mocking Best Practices](/blog/programming/engineering/khorikov-unit-testing/chapter09-mocking-best-practices)
-- [TDD by Example](/blog/programming/engineering/tdd-by-example/) — TDD의 기본 리듬
-- [TDD Patterns](/blog/programming/engineering/tdd-patterns/) — 안티패턴 회피를 돕는 보조 패턴
-- [GOOS](/blog/programming/engineering/goos/) — Outside-In 흐름과 Mock 경계 짓기
-- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/) — Seam과 Sprout으로 안티패턴 정리
-- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/) — Extract Class, Replace Conditional 등의 어휘
+- [TDD by Example](/blog/programming/engineering/tdd-by-example/ch01) — TDD의 기본 리듬
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/pattern01-test) — 안티패턴 회피를 돕는 보조 패턴
+- [GOOS](/blog/programming/engineering/goos/chapter01-what-is-tdd) — Outside-In 흐름과 Mock 경계 짓기
+- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/ch01) — Seam과 Sprout으로 안티패턴 정리
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/pattern01-extract-function) — Extract Class, Replace Conditional 등의 어휘
 - [TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-08-tdd-as-xp) — TDD가 작동하기 위한 사회적 조건

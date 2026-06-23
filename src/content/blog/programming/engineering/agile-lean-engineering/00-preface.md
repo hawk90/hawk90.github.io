@@ -339,15 +339,15 @@ Agile을 처음 만난다면 토대부터.
 
 | 주제 | 이 시리즈 | 자매 시리즈 |
 |------|-----------|------------|
-| TDD 기초·실천 | Part 2-08 (XP 관점) | [TDD by Example](/blog/programming/engineering/tdd-by-example) |
+| TDD 기초·실천 | Part 2-08 (XP 관점) | [TDD by Example](/blog/programming/engineering/tdd-by-example/ch01) |
 | Refactoring 기법 | Part 2-09 (XP 관점) | Refactoring Catalog |
-| Clean Code·SOLID | Part 2-10 (Simple Design) | [Clean Code](/blog/programming/engineering/clean-code) |
-| Legacy Code 대응 | Part 5 (Lean 관점) | [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code) |
-| 팀·사람 관리 | Part 10 (Topologies) | [Peopleware](/blog/programming/engineering/peopleware), [Mythical Man-Month](/blog/programming/engineering/mythical-man-month) |
-| 테스트 설계 철학 | Part 7-04 (Pyramid) | [Khorikov Unit Testing](/blog/programming/engineering/khorikov-unit-testing) |
-| OO 통합 테스트 | Part 2-08 (TDD 적용) | [Growing OO Software Guided by Tests](/blog/programming/engineering/goos) |
-| 실무 프로그래머 자세 | Part 1 (Manifesto) | [Pragmatic Programmer](/blog/programming/engineering/pragmatic-programmer) |
-| 거대 코드베이스 운영 | Part 8 (DevOps) | [Code Complete](/blog/programming/engineering/code-complete) |
+| Clean Code·SOLID | Part 2-10 (Simple Design) | [Clean Code](/blog/programming/engineering/clean-code/chapter01-clean-code) |
+| Legacy Code 대응 | Part 5 (Lean 관점) | [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/ch01) |
+| 팀·사람 관리 | Part 10 (Topologies) | [Peopleware](/blog/programming/engineering/peopleware/ch01), [Mythical Man-Month](/blog/programming/engineering/mythical-man-month/ch01) |
+| 테스트 설계 철학 | Part 7-04 (Pyramid) | [Khorikov Unit Testing](/blog/programming/engineering/khorikov-unit-testing/chapter01-goal-of-unit-testing) |
+| OO 통합 테스트 | Part 2-08 (TDD 적용) | [Growing OO Software Guided by Tests](/blog/programming/engineering/goos/chapter01-what-is-tdd) |
+| 실무 프로그래머 자세 | Part 1 (Manifesto) | [Pragmatic Programmer](/blog/programming/engineering/pragmatic-programmer/tip01) |
+| 거대 코드베이스 운영 | Part 8 (DevOps) | [Code Complete](/blog/programming/engineering/code-complete/ch01-Welcome-to-Software-Construction) |
 
 ## 사전 지식
 

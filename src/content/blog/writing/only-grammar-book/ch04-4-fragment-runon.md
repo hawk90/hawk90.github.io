@@ -336,5 +336,5 @@ Chapter 4 시리즈를 마칩니다. 시제 오류, 대명사 참조, 수식어 
 - [Chapter 2.3: Sentence Types](/blog/writing/only-grammar-book/ch02-3-sentence-types)
 - [Chapter 3.2: Comma](/blog/writing/only-grammar-book/ch03-2-comma)
 - [Chapter 5: Word Usage](/blog/writing/only-grammar-book/ch05-word-usage)
-- [Elements of Style — Rule 5: Comma Splice](/blog/writing/elements-of-style/ch01-rule05-comma-splice)
-- [Elements of Style — Rule 6: Sentence Fragment](/blog/writing/elements-of-style/ch01-rule06-sentence-fragment)
+- Elements of Style — Rule 5: Comma Splice
+- Elements of Style — Rule 6: Sentence Fragment

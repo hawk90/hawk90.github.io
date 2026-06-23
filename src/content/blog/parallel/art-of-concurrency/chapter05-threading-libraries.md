@@ -448,4 +448,4 @@ auto task_b = std::async([&] {
 - [Ch 4: Eight Simple Rules](/blog/parallel/art-of-concurrency/chapter04-eight-rules) — 설계 규칙
 - [Ch 6: Parallel Sum and Prefix Scan](/blog/parallel/art-of-concurrency/chapter06-parallel-sum-prefix) — 패턴 적용
 - [C++ Concurrency Ch 2: Managing Threads](/blog/parallel/cpp-concurrency-in-action/chapter02-managing-threads) — C++ 상세
-- [AMP Ch 7: Spin Locks and Contention](/blog/parallel/parallel-principles/ch07-spin-locks) — 동기화 이론
+- [AMP Ch 7: Spin Locks and Contention](/blog/parallel/parallel-principles/ch07-spin-locks-and-contention) — 동기화 이론

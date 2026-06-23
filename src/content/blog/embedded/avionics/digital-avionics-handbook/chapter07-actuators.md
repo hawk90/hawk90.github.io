@@ -528,4 +528,4 @@ Aerodynamic load → actuator backdrive로 무지령 상태에서 position devia
 - [Ch 6: Sensors](/blog/embedded/avionics/digital-avionics-handbook/chapter06-sensors)
 - [Ch 8: FMS](/blog/embedded/avionics/digital-avionics-handbook/chapter08-fms)
 - [Ch 9: Fault Tolerance](/blog/embedded/avionics/digital-avionics-handbook/chapter09-fault-tolerance)
-- [Launch Vehicle Flight SW Ch 4: Control Signal](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter04-control-signal)
+- [Launch Vehicle Flight SW Ch 4: Control Signal](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter04-control-and-signal)

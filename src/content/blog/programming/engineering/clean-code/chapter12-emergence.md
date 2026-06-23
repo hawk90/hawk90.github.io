@@ -167,4 +167,4 @@ public <T> T findFieldById(int id, Function<User, T> extractor) {
 
 - [Ch 1: 클린 코드](/blog/programming/engineering/clean-code/chapter01-clean-code) — 거장들의 정의
 - [Ch 13: 동시성](/blog/programming/engineering/clean-code/chapter13-concurrency) — 다음 챕터
-- [Refactoring](/blog/programming/engineering/refactoring/) — 중복 제거 + 의도 표현 = 리팩토링
+- Refactoring — 중복 제거 + 의도 표현 = 리팩토링

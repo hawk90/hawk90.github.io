@@ -258,9 +258,9 @@ CXL coherent FPGA의 산업 채택.
 
 ## 관련 시리즈
 
-- [CXL 4.0 Spec Full Review](/blog/embedded/hardware/cxl-spec/chapter01-overview) — CXL spec 상세
-- [CXL 심화](/blog/embedded/hardware/cxl/chapter01-overview)
-- [PCIe Deep Dive](/blog/embedded/hardware/pcie/chapter01-overview)
+- CXL 4.0 Spec Full Review — CXL spec 상세
+- [CXL 심화](/blog/embedded/hardware/cxl/chapter01-cxl-position)
+- [PCIe Deep Dive](/blog/embedded/hardware/pcie/chapter01-fundamentals)
 - [QEMU Internals — Confidential](/blog/tools/emulation/qemu-internals/chapter21-confidential)
 - [Driver-RTL Co-simulation](/blog/tools/emulation/driver-cosim/chapter01-why-cosim) — pre-silicon 검증
 

@@ -656,5 +656,5 @@ class TestAuctionSniper:
 
 - [Ch 5: Maintaining the Test-Driven Cycle](/blog/programming/engineering/goos/chapter05-maintaining-control) — 이전 장
 - [Ch 7: Achieving Object-Oriented Design](/blog/programming/engineering/goos/chapter07-achieving-design) — 다음 장
-- [Refactoring Catalog — Extract Function](/blog/programming/design/refactoring-catalog/ch06-01-extract-function) — 작은 객체로 가는 가장 흔한 길
+- Refactoring Catalog — Extract Function — 작은 객체로 가는 가장 흔한 길
 - [Khorikov Ch 6: 단위 테스트의 세 가지 스타일](/blog/programming/engineering/khorikov-unit-testing/chapter06-styles) — communication-based vs state-based, GOOS는 전자에 강하게 기울어 있다

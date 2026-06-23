@@ -290,4 +290,4 @@ my_atomic_op();   /* lock-free? wait-free? — 측정 안 함 */
 ## 관련 항목
 
 - [2-04: Memory Barrier](/blog/embedded/modern-recipes/part2-10-memory-barrier)
-- [2-06: Timer Wheel](/blog/embedded/modern-recipes/part2-06-timer-wheel)
+- 2-06: Timer Wheel

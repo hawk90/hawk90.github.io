@@ -14,7 +14,7 @@ draft: false
 
 부트로더와 커널을 다 만들어도 application이 동작할 *환경*이 없으면 BSP가 완성되지 않습니다. busybox, libc, OpenSSL, application 의존 라이브러리, init 시스템, 설정 파일 같은 것들이 rootfs에 들어갑니다. 이걸 손으로 모으는 시대는 끝났습니다. Buildroot나 Yocto가 표준입니다.
 
-이번 글은 *BSP의 시각*에서 두 시스템과 통합하는 방법을 다룹니다. Buildroot 자체 사용법은 [Buildroot 시리즈](/blog/embedded/buildroot/)에서 다루고, 여기서는 *BSP가 어떻게 빌드 시스템에 자리잡는가*에 집중합니다.
+이번 글은 *BSP의 시각*에서 두 시스템과 통합하는 방법을 다룹니다. Buildroot 자체 사용법은 [Buildroot 시리즈](/blog/embedded/buildroot/chapter01-problem)에서 다루고, 여기서는 *BSP가 어떻게 빌드 시스템에 자리잡는가*에 집중합니다.
 
 ## Buildroot vs Yocto — 어떤 걸 고를까
 
@@ -392,5 +392,5 @@ bmaptool create -o "${BINARIES_DIR}/sdcard.bmap" "${BINARIES_DIR}/sdcard.img"
 
 - [Ch 15: 부트 시간 최적화](/blog/embedded/bsp/chapter15-boot-time-optimization) — 부팅 단계의 측정
 - [Ch 17: 이미지 패키징](/blog/embedded/bsp/chapter17-image-packaging) — 다음 단계
-- [Buildroot Practical 시리즈](/blog/embedded/buildroot/) — Buildroot 자체의 깊이 있는 다룸
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — recipe 묶음
+- [Buildroot Practical 시리즈](/blog/embedded/buildroot/chapter01-problem) — Buildroot 자체의 깊이 있는 다룸
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — recipe 묶음

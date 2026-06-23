@@ -393,4 +393,4 @@ P6이 새 코디네이터
 - [Ch 5: Naming](/blog/parallel/distributed-systems-tanenbaum/chapter05-naming) — 네이밍
 - [Ch 7: Consistency and Replication](/blog/parallel/distributed-systems-tanenbaum/chapter07-consistency-replication) — 일관성
 - [AMP Ch 2: Mutual Exclusion](/blog/parallel/parallel-principles/ch02-mutual-exclusion) — 상호 배제 이론
-- [Seven Models Ch 6: CSP](/blog/parallel/seven-concurrency-models/ch06-csp) — 통신 순차 프로세스
+- [Seven Models Ch 6: CSP](/blog/parallel/seven-concurrency-models/ch06-data-parallelism) — 통신 순차 프로세스

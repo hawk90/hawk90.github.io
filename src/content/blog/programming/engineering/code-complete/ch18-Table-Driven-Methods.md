@@ -148,4 +148,4 @@ OOP에선 — **Strategy 패턴**과 같다.
 
 - [Ch 17: Unusual Control](/blog/programming/engineering/code-complete/ch17-Unusual-Control-Structures)
 - [Ch 19: General Control Issues](/blog/programming/engineering/code-complete/ch19-General-Control-Issues)
-- [Refactoring: Replace Conditional with Polymorphism](/blog/programming/engineering/refactoring/)
+- Refactoring: Replace Conditional with Polymorphism

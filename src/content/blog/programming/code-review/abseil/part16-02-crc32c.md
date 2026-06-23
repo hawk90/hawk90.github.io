@@ -268,4 +268,4 @@ write(fd, &v, 4);
 - [Part 16-01 — Stacktrace / Symbolize](/blog/programming/code-review/abseil/part16-01-stacktrace-symbolize)
 - [Part 15-01 — Cord](/blog/programming/code-review/abseil/part15-01-cord) — Cord 체크섬 통합
 - [Part 10-01 — AbslHashValue](/blog/programming/code-review/abseil/part10-01-abseil-hash-value)
-- [Folly Part 9-02 — Hash](/blog/programming/code-review/folly/part9-02-hash)
+- Folly Part 9-02 — Hash

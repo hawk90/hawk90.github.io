@@ -278,4 +278,4 @@ SCOPE_EXIT { cleanup(); };
 
 - [Part 13-01 ExceptionWrapper](/blog/programming/code-review/folly/part13-01-exception-wrapper) — SCOPE_FAIL과 함께 쓰기
 - [Effective Modern C++ Item 14](/blog/programming/cpp/effective-modern-cpp/item14-declare-functions-noexcept-if-they-wont-emit-exceptions) — 소멸자 noexcept
-- [GoF Decorator](/blog/programming/design/gof/part2-decorator) — wrap 패턴 일반론
+- GoF Decorator — wrap 패턴 일반론

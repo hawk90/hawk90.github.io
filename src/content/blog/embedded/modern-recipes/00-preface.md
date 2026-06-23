@@ -328,9 +328,9 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 
 | 주제 | 이 시리즈 (cookbook) | 깊이 있는 시리즈 (internals) |
 |------|---------------------|----------------------------|
-| RTOS scheduler·sync internals | Part 6 (8편 응용) | [Practical RTOS Internals](/blog/embedded/rtos/practical-internals) |
-| 성능 측정·프로파일링 방법론 | Part 8 (12편 적용) | [Embedded Performance Engineering](/blog/embedded/performance-engineering) |
-| C++ on MCU (template·RAII·constexpr) | 일부 코드 예시 | [Embedded C++ for Real Systems](/blog/embedded/embedded-cpp) |
+| RTOS scheduler·sync internals | Part 6 (8편 응용) | [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) |
+| 성능 측정·프로파일링 방법론 | Part 8 (12편 적용) | [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface) |
+| C++ on MCU (template·RAII·constexpr) | 일부 코드 예시 | [Embedded C++ for Real Systems](/blog/embedded/embedded-cpp/00-preface) |
 | 보안 인증·표준 | Part 12 (TF-M·Matter) | (Practical RTOS Part 4-11 + Modern Recipes 12-11) |
 
 **조합 예**:

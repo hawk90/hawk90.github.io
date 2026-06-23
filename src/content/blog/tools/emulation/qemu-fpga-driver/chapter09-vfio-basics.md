@@ -241,5 +241,5 @@ Linux 6.6+에서 **IOMMUFD**가 등장. `/dev/iommu`를 통해 *container 개념
 
 - [Ch 8: Partial Reconfiguration](/blog/tools/emulation/qemu-fpga-driver/chapter08-partial-reconfig)
 - [Ch 10: VFIO-PCI 패스스루](/blog/tools/emulation/qemu-fpga-driver/chapter10-vfio-pci-passthrough)
-- [PCIe Deep Dive — SR-IOV/VFIO](/blog/embedded/hardware/pcie/chapter01-overview)
+- [PCIe Deep Dive — SR-IOV/VFIO](/blog/embedded/hardware/pcie/chapter01-fundamentals)
 - [QEMU Internals — KVM Accel](/blog/tools/emulation/qemu-internals/chapter14-kvm-accel)

@@ -345,7 +345,7 @@ ESP_LOGI("stack", "min free stack: %u bytes", high_water * sizeof(StackType_t));
 - [Ch 9: ESP-IDF — 빌드 시스템과 컴포넌트 구조](/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build)
 - [Ch 11: 보안 — Secure Boot, Flash Encryption](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security)
 - [Ch 12: 전력 관리 — Modem/Light/Deep Sleep](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management) — tickless idle 이어집니다
-- [Practical RTOS Internals — Part 2 FreeRTOS](/blog/embedded/rtos/practical-internals/) — vanilla FreeRTOS 내부
-- [Modern Embedded Recipes — 동기화 패턴](/blog/embedded/modern-recipes/)
+- [Practical RTOS Internals — Part 2 FreeRTOS](/blog/embedded/rtos/practical-internals/00-preface) — vanilla FreeRTOS 내부
+- [Modern Embedded Recipes — 동기화 패턴](/blog/embedded/modern-recipes/00-preface)
 - [원문 — ESP-IDF FreeRTOS Reference](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/system/freertos.html)
 - [원문 — ESP-IDF Power Management](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/system/power_management.html)

@@ -230,5 +230,5 @@ const Function vs non-const Function vs Function<void() const>의 구분을 의�
 ## 관련 항목
 
 - [Part 2-04 thenValue / thenError](/blog/programming/code-review/folly/part2-04-then-value-error) — once-only 콜백 사용
-- [Effective Modern C++ Item 33](/blog/programming/cpp/effective-modern-cpp/item33-init-capture-for-move) — init capture와 move-only lambda
+- [Effective Modern C++ Item 33](/blog/programming/cpp/effective-modern-cpp/item33-use-decltype-on-auto-parameters-when-forwarding) — init capture와 move-only lambda
 - [Effective Modern C++ Item 34](/blog/programming/cpp/effective-modern-cpp/item34-prefer-lambdas-to-std-bind) — std::function 한계

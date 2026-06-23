@@ -359,11 +359,11 @@ osv-scanner --sbom=firmware.cdx.json
 |--------|--------|
 | Embedded Automotive — MISRA C | secure coding의 자동차 표준 |
 | Embedded Automotive — CERT C | 보안 코딩 규칙 |
-| [Embedded Automotive — AUTOSAR Adaptive](/blog/embedded/automotive/autosar-adaptive/00-overview) | 자동차 SOA + 보안 |
+| Embedded Automotive — AUTOSAR Adaptive | 자동차 SOA + 보안 |
 | Aerospace Standards — DO-178C | 항공 기능 안전, DO-326A로 연결 |
-| [Aerospace Standards — JSF C++](/blog/embedded/aerospace-standards/jsf-cpp/00-overview) | safety-critical C++ |
+| Aerospace Standards — JSF C++ | safety-critical C++ |
 | [Practical RTOS Internals — Part 4-11: TrustZone & TF-M](/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm) | RTOS와 secure world |
-| [Buildroot Practical](/blog/embedded/buildroot/chapter01-buildroot-philosophy) | Linux 임베디드 빌드와 SBOM |
+| [Buildroot Practical](/blog/embedded/buildroot/chapter01-problem) | Linux 임베디드 빌드와 SBOM |
 
 자동차·항공은 *기능 안전*(safety)과 *보안*(security)이 만나는 자리입니다. 이 시리즈의 보안 위에 *안전*을 더하면 산업급 임베디드 시스템 엔지니어링이 완성됩니다.
 

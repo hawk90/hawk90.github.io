@@ -377,5 +377,5 @@ public void Complex_test_with_many_mocks()
 - [Ch 4: The Four Pillars of a Good Unit Test](/blog/programming/engineering/khorikov-unit-testing/chapter04-four-pillars)
 - [Ch 6: Styles of Unit Testing](/blog/programming/engineering/khorikov-unit-testing/chapter06-styles)
 - [Ch 9: Mocking Best Practices](/blog/programming/engineering/khorikov-unit-testing/chapter09-mocking-best-practices)
-- [GOOS](/blog/programming/engineering/goos/) — London 학파의 Mock 활용
-- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/) — Seam과 Sprout 패턴으로 Mock 경계 짓기
+- [GOOS](/blog/programming/engineering/goos/chapter01-what-is-tdd) — London 학파의 Mock 활용
+- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/ch01) — Seam과 Sprout 패턴으로 Mock 경계 짓기

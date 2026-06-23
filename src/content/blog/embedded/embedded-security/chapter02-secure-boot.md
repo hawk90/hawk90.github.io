@@ -357,4 +357,4 @@ make CROSS_COMPILE=aarch64-linux-gnu- \
 - [Ch 5: TEE — OP-TEE / ARM CCA](/blog/embedded/embedded-security/chapter05-tee)
 - [Ch 6: OTA 업데이트](/blog/embedded/embedded-security/chapter06-ota-update)
 - [Practical RTOS Internals — Part 4-11: TrustZone & TF-M](/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm)
-- [DO-178C — 항공 SW 보증](/blog/embedded/aerospace-standards/do-178c)
+- [DO-178C — 항공 SW 보증](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)

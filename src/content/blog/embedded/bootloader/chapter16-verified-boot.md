@@ -461,7 +461,7 @@ mkimage -f myboard.its \
 - [Ch 15: FIT 이미지 — 한 묶음으로 부팅하기](/blog/embedded/bootloader/chapter15-fit-image) — 이번 장이 서명한 컨테이너 구조
 - [Ch 17: A/B 업데이트와 boot 이중화](/blog/embedded/bootloader/chapter17-ab-update)
 - [Ch 23: eFuse와 Root-of-Trust](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp) — 신뢰의 출발점이 되는 OTP 키 해시
-- [Ch 25: TF-A로 BL 단계별 서명](/blog/embedded/bootloader/chapter25-tfa-signing) — BL1·BL2·BL31까지의 서명 흐름
+- [Ch 25: TF-A로 BL 단계별 서명](/blog/embedded/bootloader/chapter25-tfa-optee) — BL1·BL2·BL31까지의 서명 흐름
 - [Ch 27: 전체 chain of trust 정리](/blog/embedded/bootloader/chapter27-chain-of-trust) — eFuse→BL→kernel까지의 큰 그림
 - [Embedded Security Ch 2: Secure Boot](/blog/embedded/embedded-security/chapter02-secure-boot) — ROM·SPL 측 시점에서 본 같은 체인
 - [원문 — U-Boot doc/uImage.FIT/signature.txt](https://u-boot.readthedocs.io/en/latest/usage/fit/signature.html)

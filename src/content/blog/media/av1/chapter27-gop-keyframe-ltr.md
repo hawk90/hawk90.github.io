@@ -816,7 +816,7 @@ Ch 28에서는 **Temporal Filtering과 Adaptive QP**를 다룬다. ALTREF 생성
 
 ## 관련 항목
 
-- [Ch 5: Frame Header](/blog/media/av1/chapter05-frame-header) — refresh_frame_flags, 참조 관리
-- [Ch 11: Inter 예측](/blog/media/av1/chapter11-inter-prediction) — 참조 프레임 선택
+- [Ch 5: Frame Header](/blog/media/av1/chapter05-prediction-overview) — refresh_frame_flags, 참조 관리
+- [Ch 11: Inter 예측](/blog/media/av1/chapter11-reference-frames) — 참조 프레임 선택
 - [Ch 24: Error Resilience](/blog/media/av1/chapter24-error-resilience) — 에러 복구 메커니즘
 - [Ch 26: Rate Control](/blog/media/av1/chapter26-rate-control) — 비트 분배

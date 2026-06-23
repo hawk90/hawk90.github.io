@@ -170,4 +170,4 @@ DAC는 V_REF 핀을 별도 갖습니다. 누설 전류로 V_REF가 흔들리면 
 
 - [1-07: ADC 동작 원리](/blog/embedded/modern-recipes/part1-07-adc-principles)
 - [1-09: PWM 신호 생성](/blog/embedded/modern-recipes/part1-09-pwm-signal)
-- 더 깊이 — [Embedded Performance Engineering: 신호 처리](/blog/embedded/performance-engineering/)
+- 더 깊이 — [Embedded Performance Engineering: 신호 처리](/blog/embedded/performance-engineering/00-preface)

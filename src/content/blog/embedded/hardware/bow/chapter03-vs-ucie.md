@@ -215,7 +215,7 @@ UCIe Advanced의 10 Tbps/mm²만 보고 *BoW를 탈락*시키는 경우. *bump p
 - [Ch 4: BoW Memory](/blog/embedded/hardware/bow/chapter04-bow-memory)
 - [Ch 5: BoW Flexi](/blog/embedded/hardware/bow/chapter05-bow-flexi)
 - [UCIe Ch 1: 개요](/blog/embedded/hardware/ucie/chapter01-overview)
-- [UCIe Ch 2: PHY와 module](/blog/embedded/hardware/ucie/chapter02-phy-module)
+- [UCIe Ch 2: PHY와 module](/blog/embedded/hardware/ucie/chapter02-architecture)
 - [HBM Ch 1: 메모리 스택](/blog/embedded/hardware/hbm/chapter01-overview)
 - [원문 — UCIe Specification](https://www.uciexpress.org/specification)
 - [원문 — OCP ODSA BoW Spec](https://www.opencompute.org/projects/ocp-server/odsa)

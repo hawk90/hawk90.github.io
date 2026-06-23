@@ -277,6 +277,6 @@ static_assert(std::is_nothrow_move_constructible_v<Widget>);
 
 - [항목 11: `= delete`](/blog/programming/cpp/effective-modern-cpp/item11-prefer-deleted-functions-to-private-undefined) — 명시적 차단
 - [항목 16: const 멤버 함수는 thread-safe하게](/blog/programming/cpp/effective-modern-cpp/item16-make-const-member-functions-thread-safe) — mutex가 copy를 막는 패턴
-- [항목 22: Pimpl + special members](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file-define-special-members-in-impl-file)
+- [항목 22: Pimpl + special members](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file)
 - [항목 23: move/forward](/blog/programming/cpp/effective-modern-cpp/item23-understand-std-move-and-std-forward)
 - [항목 26: 보편 참조 오버로딩](/blog/programming/cpp/effective-modern-cpp/item26-avoid-overloading-on-universal-references) — 템플릿 ctor 함정

@@ -380,5 +380,5 @@ regulator(CE, FCC, KC)와 customer에게 제출하는 release package는 다음�
 
 - [Ch 18: OTA와 field recovery](/blog/embedded/bsp/chapter18-ota-recovery) — 서명된 bundle의 활용
 - [Ch 21: 유지보수](/blog/embedded/bsp/chapter21-maintenance) — 양산 후의 삶
-- [Embedded Security — Secure boot](/blog/embedded/embedded-security/) — 서명 chain 깊이
-- [Buildroot Practical — SBOM](/blog/embedded/buildroot/) — 라이선스 추적
+- [Embedded Security — Secure boot](/blog/embedded/embedded-security/chapter01-threat-model) — 서명 chain 깊이
+- [Buildroot Practical — SBOM](/blog/embedded/buildroot/chapter01-problem) — 라이선스 추적

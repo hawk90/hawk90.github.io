@@ -61,7 +61,7 @@ Fowler의 카탈로그가 표준. 주요 항목:
 - **Extract Class** — 책임을 분리.
 - **Replace Inheritance with Delegation** — 상속을 구성으로.
 
-자세한 카탈로그는 — [Refactoring 시리즈](/blog/programming/engineering/refactoring/) 참고.
+자세한 카탈로그는 — Refactoring 시리즈 참고.
 
 ## 안전한 리팩토링
 
@@ -124,5 +124,5 @@ Fowler의 카탈로그가 표준. 주요 항목:
 
 - [Ch 23: Debugging](/blog/programming/engineering/code-complete/ch23-Debugging)
 - [Ch 25: Code-Tuning Strategies](/blog/programming/engineering/code-complete/ch25-Code-Tuning-Strategies)
-- [Refactoring 시리즈](/blog/programming/engineering/refactoring/)
+- Refactoring 시리즈
 - [Clean Code Ch 14: Successive Refinement](/blog/programming/engineering/clean-code/chapter14-successive-refinement)

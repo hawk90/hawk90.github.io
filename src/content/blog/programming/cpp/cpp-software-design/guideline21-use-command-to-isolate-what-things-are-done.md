@@ -689,4 +689,4 @@ variant + visit으로 닫힌 집합과 값 의미론을 함께 갖춘다. 직렬
 - [가이드라인 19: Strategy](/blog/programming/cpp/cpp-software-design/guideline19-use-strategy-to-isolate-how-things-are-done) — "어떻게" 격리
 - [가이드라인 22: 값 의미론](/blog/programming/cpp/cpp-software-design/guideline22-prefer-value-semantics-over-reference-semantics) — Command의 가치
 - [가이드라인 23: 값 기반 Command](/blog/programming/cpp/cpp-software-design/guideline23-prefer-a-value-based-implementation-of-strategy-and-command) — variant 구현
-- [GoF Command](/blog/programming/design/gof-design-patterns/item17-command) — 원본
+- [GoF Command](/blog/programming/design/gof-design-patterns/item17-mediator) — 원본

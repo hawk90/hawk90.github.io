@@ -331,7 +331,7 @@ atomic이 가장 빠르면서도 안전합니다. critical section은 모든 ISR
 
 - [Part 4-04: Lock-free Container](/blog/embedded/embedded-cpp/part4-04-lock-free-container)
 - [Part 3-03: Pool Allocator](/blog/embedded/embedded-cpp/part3-03-pool-allocator) — atomic free list
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals)
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)
 - [CppCon: Lock-free programming](https://www.youtube.com/results?search_query=cppcon+lock+free)
 
 ## 다음 글

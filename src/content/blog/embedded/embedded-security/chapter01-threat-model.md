@@ -207,5 +207,5 @@ Cortex-M0+ @ 48 MHz, 32 KB RAM, 256 KB Flash:
 - [Ch 3: MCU 크립토 — HW accelerator](/blog/embedded/embedded-security/chapter03-mcu-crypto)
 - [Ch 4: TrustZone — Cortex-A / Cortex-M](/blog/embedded/embedded-security/chapter04-trustzone)
 - [Ch 7: 사이드채널 공격](/blog/embedded/embedded-security/chapter07-side-channel)
-- [CERT C — 보안 코딩 규칙](/blog/embedded/automotive/cert-c)
+- [CERT C — 보안 코딩 규칙](/blog/embedded/automotive/cert-c/chapter01-intro-vs-misra)
 - [Practical RTOS Internals — Part 4-11: TrustZone & TF-M](/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm)

@@ -198,4 +198,4 @@ echo 'hist:keys=common_pid:vals=hitcount:sort=hitcount' \
 - [6-02: Cache Thrashing 사례](/blog/embedded/performance-engineering/part6-02-case-cache-thrashing)
 - [3-05: Interrupt Latency](/blog/embedded/performance-engineering/part3-05-interrupt-latency)
 - [5-01: perf 기초](/blog/embedded/performance-engineering/part5-01-perf-basics)
-- [Practical RTOS Internals 2-08: Interrupt Latency](/blog/embedded/rtos/practical-internals/part2-08-interrupt-latency)
+- Practical RTOS Internals 2-08: Interrupt Latency

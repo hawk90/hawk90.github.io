@@ -238,4 +238,4 @@ servo가 외력으로 회전당하면 *back-EMF*가 signal line으로 결합. si
 - [5-01: PWM 출력](/blog/embedded/modern-recipes/part5-01-pwm-output)
 - [5-02: DC 모터 제어](/blog/embedded/modern-recipes/part5-02-dc-motor)
 - [5-03: 스테퍼 모터](/blog/embedded/modern-recipes/part5-03-stepper-motor)
-- [9-05: PID 제어 기본](/blog/embedded/modern-recipes/part9-05-pid-control)
+- 9-05: PID 제어 기본

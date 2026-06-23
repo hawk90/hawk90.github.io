@@ -256,4 +256,4 @@ Camus (서술, 현재 완료):
 
 - [Rule 20: 관련 있는 단어를 함께 두라](/blog/writing/elements-of-style/ch02/rule20-word-order)
 - [Rule 22: Place the emphatic words at the end](/blog/writing/elements-of-style/ch02/rule22-emphasis)
-- [Academic Writing — Unit 7: Tense](/blog/writing/academic-writing/unit7-1-tense)
+- Academic Writing — Unit 7: Tense

@@ -192,6 +192,6 @@ bool LongerThanMonth(BillingCycle a, BillingCycle b) {
 
 ## 관련 항목
 
-- [Part 7-01: Time / Duration overview](/blog/programming/code-review/abseil/part7-01-time-duration-overview-overview)
+- [Part 7-01: Time / Duration overview](/blog/programming/code-review/abseil/part7-01-time-duration-overview)
 - [Part 7-02: Format / Parse](/blog/programming/code-review/abseil/part7-02-format-parse)
 - [원문 — CivilTime](https://abseil.io/docs/cpp/guides/time#civil-times)

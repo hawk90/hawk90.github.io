@@ -293,7 +293,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 - [Ch 2: Heap Memory Management](/blog/embedded/rtos/freertos-mastering/chapter02-heap-memory)
 - [Ch 4: Queue Management](/blog/embedded/rtos/freertos-mastering/chapter04-queue-management)
 - [Ch 7: Resource Management](/blog/embedded/rtos/freertos-mastering/chapter07-resource-management) — 우선순위 역전
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/) — 스케줄러 내부
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) — 스케줄러 내부
 - [ESP32-C3 Mastering Ch 10: FreeRTOS](/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos)
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/)
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface)
 - [원문 — FreeRTOS Task Management](https://www.freertos.org/taskandcr.html)

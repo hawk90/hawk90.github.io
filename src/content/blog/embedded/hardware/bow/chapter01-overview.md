@@ -160,5 +160,5 @@ OCP의 출신지는 서버이지만, BoW 사용처는 *네트워킹·엣지·임
 - [Ch 5: BoW Flexi — 저비용 구현](/blog/embedded/hardware/bow/chapter05-bow-flexi)
 - [UCIe Ch 1: 개요](/blog/embedded/hardware/ucie/chapter01-overview)
 - [HBM Ch 1: 메모리 스택](/blog/embedded/hardware/hbm/chapter01-overview)
-- [CXL Ch 1: 코히어런트 인터커넥트](/blog/embedded/hardware/cxl/chapter01-overview)
+- [CXL Ch 1: 코히어런트 인터커넥트](/blog/embedded/hardware/cxl/chapter01-cxl-position)
 - [원문 — OCP ODSA BoW Specification](https://www.opencompute.org/projects/ocp-server/odsa)

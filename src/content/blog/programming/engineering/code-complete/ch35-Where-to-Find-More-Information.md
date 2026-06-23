@@ -112,5 +112,5 @@ draft: true
 - [Ch 34: Themes in Craftsmanship](/blog/programming/engineering/code-complete/ch34-Themes-in-Software-Craftsmanship)
 - [Pragmatic Programmer](/blog/programming/engineering/pragmatic-programmer/tip01/)
 - [Clean Code](/blog/programming/engineering/clean-code/chapter01-clean-code/)
-- [Refactoring](/blog/programming/engineering/refactoring/)
+- Refactoring
 - [Clean Architecture](/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture/)

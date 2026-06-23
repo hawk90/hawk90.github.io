@@ -491,5 +491,5 @@ P2: ────●───●───●──
 
 - [Ch 7: Consistency and Replication](/blog/parallel/distributed-systems-tanenbaum/chapter07-consistency-replication) — 일관성
 - [Ch 9: Security](/blog/parallel/distributed-systems-tanenbaum/chapter09-security) — 보안
-- [AMP Ch 5: The Relative Power of Primitive Synchronization Operations](/blog/parallel/parallel-principles/ch05-relative-power) — 합의 수
+- [AMP Ch 5: The Relative Power of Primitive Synchronization Operations](/blog/parallel/parallel-principles/ch05-relative-power-of-synchronization) — 합의 수
 - [DDIA Ch 9: Consistency and Consensus](/blog/parallel/designing-data-intensive-applications/chapter09-consistency-and-consensus) — 합의 상세

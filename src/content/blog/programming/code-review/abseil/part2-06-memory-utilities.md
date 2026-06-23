@@ -276,6 +276,6 @@ Part 2-07에서 `raw_logging`을 본다. 일반 로깅 시스템이 초기화되
 - [Part 2-01: ABSL_HAVE_* / ABSL_ATTRIBUTE_*](/blog/programming/code-review/abseil/part2-01-abseil-macros)
 - [Part 2-07: raw_logging](/blog/programming/code-review/abseil/part2-07-raw-logging)
 - [Part 9-03: absl::optional](/blog/programming/code-review/abseil/part9-03-optional)
-- [Effective Modern C++: Item 21 — make_unique/make_shared](/blog/programming/cpp/effective-modern-cpp)
+- [Effective Modern C++: Item 21 — make_unique/make_shared](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
 - [원문 — absl/memory/memory.h](https://github.com/abseil/abseil-cpp/blob/master/absl/memory/memory.h)
 - [원문 — absl/cleanup/cleanup.h](https://github.com/abseil/abseil-cpp/blob/master/absl/cleanup/cleanup.h)

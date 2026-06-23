@@ -666,4 +666,4 @@ C++ 커뮤니티가 지난 30년간 발견한 패턴(Type Erasure, CRTP, NVI, Ex
 - [가이드라인 11: 패턴의 목적](/blog/programming/cpp/cpp-software-design/guideline11-understand-the-purpose-of-design-patterns) — 패턴 정의
 - [가이드라인 12: 패턴에 대한 오해](/blog/programming/cpp/cpp-software-design/guideline12-beware-of-design-pattern-misconceptions) — 식별의 함정
 - [가이드라인 14: 패턴 이름으로 의도 전달](/blog/programming/cpp/cpp-software-design/guideline14-use-a-design-patterns-name-to-communicate-intent) — 이름과 소통
-- [Effective Modern C++ 항목 18: unique_ptr](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership-for-exclusive-ownership) — Ownership 패턴
+- [Effective Modern C++ 항목 18: unique_ptr](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership) — Ownership 패턴

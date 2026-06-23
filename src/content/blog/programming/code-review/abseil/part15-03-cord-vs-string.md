@@ -273,4 +273,4 @@ Part 16에서 디버깅·CRC·프로파일링 도구를 본다. [Part 16-01 — 
 - [Part 15-01 — Cord](/blog/programming/code-review/abseil/part15-01-cord)
 - [Part 15-02 — charconv](/blog/programming/code-review/abseil/part15-02-charconv)
 - [Part 4-01 — string_view](/blog/programming/code-review/abseil/part4-01-string-view)
-- [Folly Part 5-02 — IOBuf](/blog/programming/code-review/folly/part5-02-iobuf)
+- Folly Part 5-02 — IOBuf

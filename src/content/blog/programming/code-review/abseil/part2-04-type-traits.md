@@ -286,5 +286,5 @@ Part 2-05에서 Abseil의 conformance / policy 매크로를 본다. `ABSL_DEPREC
 - [Part 2-05: Conformance / policy](/blog/programming/code-review/abseil/part2-05-conformance-policy)
 - [Part 9-03: absl::optional](/blog/programming/code-review/abseil/part9-03-optional)
 - [Part 9-04: absl::variant](/blog/programming/code-review/abseil/part9-04-variant)
-- [Effective Modern C++: alias declarations](/blog/programming/cpp/effective-modern-cpp)
+- [Effective Modern C++: alias declarations](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
 - [원문 — absl/meta/type_traits.h](https://github.com/abseil/abseil-cpp/blob/master/absl/meta/type_traits.h)

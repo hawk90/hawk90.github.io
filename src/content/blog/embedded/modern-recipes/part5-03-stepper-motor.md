@@ -249,4 +249,4 @@ NEMA 17은 일반적으로 *200-400 Hz 부근*에 resonance — 이 속도에서
 - [5-01: PWM 출력](/blog/embedded/modern-recipes/part5-01-pwm-output)
 - [5-02: DC 모터 제어](/blog/embedded/modern-recipes/part5-02-dc-motor)
 - [5-04: 서보 모터](/blog/embedded/modern-recipes/part5-04-servo-motor)
-- [9-05: PID 제어 기본](/blog/embedded/modern-recipes/part9-05-pid-control)
+- 9-05: PID 제어 기본

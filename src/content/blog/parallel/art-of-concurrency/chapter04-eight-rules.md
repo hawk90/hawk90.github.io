@@ -440,4 +440,4 @@ WARNING: ThreadSanitizer: data race
 - [Ch 3: Proving Correctness and Measuring Performance](/blog/parallel/art-of-concurrency/chapter03-correctness-performance) — 정확성과 성능
 - [Ch 5: Threading Libraries](/blog/parallel/art-of-concurrency/chapter05-threading-libraries) — 라이브러리
 - [AMP Ch 2: Mutual Exclusion](/blog/parallel/parallel-principles/ch02-mutual-exclusion) — 상호 배제 이론
-- [C++ Concurrency Ch 4: Synchronizing Operations](/blog/parallel/cpp-concurrency-in-action/chapter04-synchronizing-operations) — 동기화 상세
+- [C++ Concurrency Ch 4: Synchronizing Operations](/blog/parallel/cpp-concurrency-in-action/chapter04-synchronizing-concurrent-operations) — 동기화 상세

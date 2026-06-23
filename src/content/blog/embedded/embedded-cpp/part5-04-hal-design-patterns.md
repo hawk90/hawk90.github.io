@@ -423,11 +423,11 @@ HAL implementation만 다릅니다. application 코드는 변경되지 않습니
 
 이 시리즈가 Modern C++ in Embedded를 다뤘다면 다음으로는 이런 시리즈를 추천합니다.
 
-- **[Embedded Performance Engineering](/blog/embedded/performance-engineering)** — 측정과 최적화 (50 chapters)
-- **[Practical RTOS Internals](/blog/embedded/rtos/practical-internals)** — FreeRTOS/Zephyr/RT-Thread 소스 분석 (45 chapters)
-- **[Modern Embedded Recipes](/blog/embedded/modern-recipes)** — 일상 recipe 모음 (145 recipes)
+- **[Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface)** — 측정과 최적화 (50 chapters)
+- **[Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)** — FreeRTOS/Zephyr/RT-Thread 소스 분석 (45 chapters)
+- **[Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface)** — 일상 recipe 모음 (145 recipes)
 - **Refactoring Catalog** — Fowler 61 패턴
-- **[GoF Design Patterns](/blog/programming/design/gof-design-patterns)** — 23 패턴
+- **[GoF Design Patterns](/blog/programming/design/gof-design-patterns/item00-mental-models)** — 23 패턴
 
 ## 자주 보는 함정과 안티패턴
 

@@ -200,4 +200,4 @@ reset 후 cache는 disabled입니다. Cortex-M4와 비슷한 성능이 나오면
 - [2-05: ARM 메모리 맵](/blog/embedded/modern-recipes/part2-05-arm-memory-map)
 - [2-07: MPU 활용](/blog/embedded/modern-recipes/part2-07-arm-mpu)
 - [2-10: Memory Barrier 실전](/blog/embedded/modern-recipes/part2-10-memory-barrier)
-- 더 깊이 — [Embedded Performance Engineering: Cache 분석](/blog/embedded/performance-engineering/)
+- 더 깊이 — [Embedded Performance Engineering: Cache 분석](/blog/embedded/performance-engineering/00-preface)

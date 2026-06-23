@@ -213,5 +213,5 @@ void Read(absl::Span<const int> s) {
 
 - [Part 4-01: string_view](/blog/programming/code-review/abseil/part4-01-string-view) — 같은 정신의 문자열 view
 - [Part 4-02: string_view pitfalls](/blog/programming/code-review/abseil/part4-02-string-view-pitfalls) — dangling 위험
-- [Effective Modern C++ — 항목 21: make_unique](/blog/programming/cpp/effective-modern-cpp)
+- [Effective Modern C++ — 항목 21: make_unique](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
 - [원문 — absl::Span](https://abseil.io/docs/cpp/guides/types#span)

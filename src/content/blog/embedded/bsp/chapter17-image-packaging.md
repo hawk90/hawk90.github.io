@@ -367,5 +367,5 @@ $ sudo uuu flash.uuu
 
 - [Ch 16: Buildroot/Yocto와 rootfs](/blog/embedded/bsp/chapter16-rootfs) — 빌드 산출물의 출처
 - [Ch 18: OTA와 field recovery](/blog/embedded/bsp/chapter18-ota-recovery) — A/B 슬롯의 활용
-- [Bootloader 시리즈 — 환경 변수](/blog/embedded/bootloader/) — U-Boot env partition
-- [Buildroot Practical — 이미지 조립](/blog/embedded/buildroot/) — Buildroot 측 깊이
+- [Bootloader 시리즈 — 환경 변수](/blog/embedded/bootloader/chapter01-boot-problem) — U-Boot env partition
+- [Buildroot Practical — 이미지 조립](/blog/embedded/buildroot/chapter01-problem) — Buildroot 측 깊이

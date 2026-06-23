@@ -395,5 +395,5 @@ recovery는 다음을 할 수 있어야 합니다.
 
 - [Ch 17: 이미지 패키징](/blog/embedded/bsp/chapter17-image-packaging) — A/B 파티션 layout
 - [Ch 20: 양산 환경](/blog/embedded/bsp/chapter20-production) — 키 관리와 CI
-- [Bootloader 시리즈 — bootcount](/blog/embedded/bootloader/) — U-Boot 측 깊이
-- [Embedded Security 시리즈](/blog/embedded/embedded-security/) — 서명, HSM, secure boot
+- [Bootloader 시리즈 — bootcount](/blog/embedded/bootloader/chapter01-boot-problem) — U-Boot 측 깊이
+- [Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model) — 서명, HSM, secure boot

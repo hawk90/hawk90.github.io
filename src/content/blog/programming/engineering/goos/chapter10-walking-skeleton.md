@@ -992,4 +992,4 @@ Walking Skeleton 구축:
 - [Ch 11-18: Passing the First Test → Final Features](/blog/programming/engineering/goos/chapter11-passing-first-test) — 다음 장
 - [Ch 4: Kick-Starting](/blog/programming/engineering/goos/chapter04-kick-starting) — Walking Skeleton의 개념 정리
 - [Khorikov Ch 2: 단위 테스트란 무엇인가](/blog/programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test) — E2E vs 단위 테스트의 현대적 경계
-- [Agile/Lean Engineering — TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-16-tdd-as-xp) — 통합 우선 사고의 XP 뿌리
+- Agile/Lean Engineering — TDD as XP — 통합 우선 사고의 XP 뿌리

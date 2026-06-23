@@ -254,6 +254,6 @@ public void Test()
 
 - [Ch 2: What Is a Unit Test?](/blog/programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test)
 - [Ch 4: The Four Pillars of a Good Unit Test](/blog/programming/engineering/khorikov-unit-testing/chapter04-four-pillars)
-- [TDD by Example](/blog/programming/engineering/tdd-by-example/) — Kent Beck의 TDD 입문서
-- [GOOS](/blog/programming/engineering/goos/) — London 학파의 대표 텍스트
-- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/) — 테스트 없는 코드를 안전하게 변경하는 법
+- [TDD by Example](/blog/programming/engineering/tdd-by-example/ch01) — Kent Beck의 TDD 입문서
+- [GOOS](/blog/programming/engineering/goos/chapter01-what-is-tdd) — London 학파의 대표 텍스트
+- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/ch01) — 테스트 없는 코드를 안전하게 변경하는 법

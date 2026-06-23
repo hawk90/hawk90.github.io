@@ -196,4 +196,4 @@ SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
 - [2-05: ARM 메모리 맵](/blog/embedded/modern-recipes/part2-05-arm-memory-map)
 - [2-06: ARM 캐시 (L1/L2)](/blog/embedded/modern-recipes/part2-06-arm-cache)
 - [2-08: MMU 기초](/blog/embedded/modern-recipes/part2-08-arm-mmu)
-- 더 깊이 — [Practical RTOS Internals: Task isolation](/blog/embedded/rtos/practical-internals/)
+- 더 깊이 — [Practical RTOS Internals: Task isolation](/blog/embedded/rtos/practical-internals/00-preface)

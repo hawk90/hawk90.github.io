@@ -440,5 +440,5 @@ std::cout << "Welcome, " << user_name << "!\n";
 
 ## 관련 항목
 
-- [Ch 5: Functions](/blog/embedded/automotive/google-cpp/chapter05-functions)
-- [Ch 7: const / Numbers / Macros](/blog/embedded/automotive/google-cpp/chapter07-features-const-macros)
+- Ch 5: Functions
+- [Ch 7: const / Numbers / Macros](/blog/programming/standards/google-cpp/chapter07-features-const-macros)

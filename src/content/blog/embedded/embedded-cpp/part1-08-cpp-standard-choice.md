@@ -293,9 +293,9 @@ DO-178C, ISO 26262, IEC 62304 환경에서는 각 표준에 대한 도구 인증
 
 자세한 비교는 다음을 참고합니다.
 
-- [AUTOSAR C++14 Guidelines](/blog/embedded/automotive/autosar-cpp)
-- [JSF C++ Coding Standards](/blog/embedded/aerospace-standards/jsf-cpp)
-- [MISRA C](/blog/embedded/automotive/misra-c) — C 표준이지만 비교 참고용으로 유용합니다
+- [AUTOSAR C++14 Guidelines](/blog/embedded/automotive/autosar-cpp/chapter01-intro)
+- [JSF C++ Coding Standards](/blog/embedded/aerospace-standards/jsf-cpp/chapter01-introduction)
+- [MISRA C](/blog/embedded/automotive/misra-c/chapter01-introduction) — C 표준이지만 비교 참고용으로 유용합니다
 
 ## 자주 보는 함정과 안티패턴
 
@@ -347,7 +347,7 @@ DO-178C, ISO 26262, IEC 62304 환경에서는 각 표준에 대한 도구 인증
 - [Part 1-02: 컴파일러 플래그](/blog/embedded/embedded-cpp/part1-02-compiler-flags) — `-std=c++17` 등 표준 명시
 - [Part 2-10: Concepts (C++20)](/blog/embedded/embedded-cpp/part2-10-concepts) — C++20 핵심 기능
 - [Part 3-07: std::expected (C++23)](/blog/embedded/embedded-cpp/part3-07-expected) — Result type
-- [AUTOSAR C++14 Guidelines](/blog/embedded/automotive/autosar-cpp) — 인증 환경의 표준 subset
+- [AUTOSAR C++14 Guidelines](/blog/embedded/automotive/autosar-cpp/chapter01-intro) — 인증 환경의 표준 subset
 
 ## 다음 글 (Part 2 시작)
 

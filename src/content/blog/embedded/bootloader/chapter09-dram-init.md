@@ -427,7 +427,7 @@ void spl_dram_init(void) {
 
 - [Ch 8: 보드 초기화](/blog/embedded/bootloader/chapter08-board-init) — `board_init_f`의 중심 작업
 - [Ch 10: 스토리지 부트](/blog/embedded/bootloader/chapter10-storage-boot) — DRAM 다음 단계
-- [Ch 24: SPL 내부 구조](/blog/embedded/bootloader/chapter24-spl-deep-internals) — SPL이 DDR init을 호출하는 자리
+- [Ch 24: SPL 내부 구조](/blog/embedded/bootloader/chapter24-spl-deep) — SPL이 DDR init을 호출하는 자리
 - [Ch 26: DDR PHY training 심화](/blog/embedded/bootloader/chapter26-ddr-training) — write/read leveling·VRef training의 내부 동작
 - [Ch 28: Flash 레이아웃](/blog/embedded/bootloader/chapter28-flash-layout) — DDR 파라미터 blob·firmware의 저장 위치
 - [BSP Ch 5: DDR 파라미터](/blog/embedded/bsp/chapter05-ddr-params) — 보드 bring-up 관점에서의 DDR

@@ -267,7 +267,7 @@ UALink 컨소시엄: AMD, Broadcom, Cisco, Google, HPE, Intel, Meta, Microsoft.
 
 **GPU 간 HBM 공유 효과** — weight 한 GPU에 두고 나머지 GPU가 직접 access. weight replication을 줄여 *더 큰 모델 서빙* 가능.
 
-[UALink 시리즈](/blog/embedded/hardware/ualink/)에서 자세히 다룹니다.
+[UALink 시리즈](/blog/embedded/hardware/ualink/chapter01-overview)에서 자세히 다룹니다.
 
 ## 시리즈 마무리
 

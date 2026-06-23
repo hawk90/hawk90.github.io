@@ -247,4 +247,4 @@ static int fpga_submit_h2c(struct my_fpga *f, ...) {
 - [Ch 5: FPGA 인터럽트 모델](/blog/tools/emulation/qemu-fpga-driver/chapter05-irq-model)
 - [Ch 7: 비트스트림 로딩](/blog/tools/emulation/qemu-fpga-driver/chapter07-bitstream-loading)
 - [QEMU Fake Device — SG-DMA](/blog/tools/emulation/qemu-fake-device/chapter14-scatter-gather-dma)
-- [NVMe Deep Dive](/blog/embedded/hardware/nvme/chapter01-overview)
+- [NVMe Deep Dive](/blog/embedded/hardware/nvme/chapter01-architecture)

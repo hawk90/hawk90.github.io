@@ -606,4 +606,4 @@ class FakeAuctionServer:
 - [Ch 19: Listening to the Tests](/blog/programming/engineering/goos/chapter19-listening-to-tests) — 이전 장
 - [Ch 21: Test Flexibility](/blog/programming/engineering/goos/chapter21-test-flexibility) — 다음 장
 - [Khorikov Ch 7: 단위 테스트 리팩토링](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring) — Builder/Object Mother로 테스트 가독성 끌어올리기
-- [TDD Patterns](/blog/programming/engineering/tdd-patterns/chapter05-tdd-patterns) — Kent Beck의 가독성 패턴 카탈로그
+- TDD Patterns — Kent Beck의 가독성 패턴 카탈로그

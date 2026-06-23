@@ -607,4 +607,4 @@ C++의 네 가지 구현은 다음과 같다.
 - [가이드라인 20: composition over inheritance](/blog/programming/cpp/cpp-software-design/guideline20-favor-composition-over-inheritance) — Strategy의 큰 원칙
 - [가이드라인 22: 값 의미론](/blog/programming/cpp/cpp-software-design/guideline22-prefer-value-semantics-over-reference-semantics) — Strategy의 가치
 - [가이드라인 23: 값 기반 Strategy](/blog/programming/cpp/cpp-software-design/guideline23-prefer-a-value-based-implementation-of-strategy-and-command) — std::variant 구현
-- [GoF Strategy](/blog/programming/design/gof-design-patterns/item19-strategy) — 원본
+- [GoF Strategy](/blog/programming/design/gof-design-patterns/item19-observer) — 원본

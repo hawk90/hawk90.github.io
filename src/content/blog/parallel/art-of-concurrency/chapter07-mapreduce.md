@@ -483,4 +483,4 @@ result = mr.run(data, map_fn, reduce_fn)
 - [Ch 6: Parallel Sum and Prefix Scan](/blog/parallel/art-of-concurrency/chapter06-parallel-sum-prefix) — 리덕션 기초
 - [Ch 8: Sorting](/blog/parallel/art-of-concurrency/chapter08-sorting) — MapReduce로 정렬
 - [DDIA Ch 10: Batch Processing](/blog/parallel/designing-data-intensive-applications/chapter10-batch-processing) — 분산 MapReduce
-- [Tanenbaum Ch 4: Naming](/blog/parallel/distributed-systems-tanenbaum/chapter04-naming) — 분산 키 공간
+- [Tanenbaum Ch 4: Naming](/blog/parallel/distributed-systems-tanenbaum/chapter04-communication) — 분산 키 공간

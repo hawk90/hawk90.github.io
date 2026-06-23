@@ -284,5 +284,5 @@ graphical.target @3.401s
 - [Ch 9: Multi-core SMP bring-up](/blog/embedded/bsp/chapter09-smp-bringup)
 - [Ch 11: 부트로그 디버깅](/blog/embedded/bsp/chapter11-bootlog-debugging)
 - [Ch 12: 드라이버 추가](/blog/embedded/bsp/chapter12-driver-add)
-- [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/) — initramfs와 rootfs 만들기
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — 양산 부팅 최적화
+- [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/chapter01-problem) — initramfs와 rootfs 만들기
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — 양산 부팅 최적화

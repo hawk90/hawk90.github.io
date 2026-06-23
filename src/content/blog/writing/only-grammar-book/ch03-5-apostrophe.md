@@ -358,4 +358,4 @@ In two weeks' time, the project will be complete.
 - [Chapter 3.6: Quotation Marks](/blog/writing/only-grammar-book/ch03-6-quotation-marks)
 - [Chapter 1.1: Nouns](/blog/writing/only-grammar-book/ch01-1-nouns)
 - [Chapter 1.2: Pronouns](/blog/writing/only-grammar-book/ch01-2-pronouns)
-- [Elements of Style — Rule 1: 단수 명사의 소유격](/blog/writing/elements-of-style/ch01-rule01-possessive)
+- Elements of Style — Rule 1: 단수 명사의 소유격

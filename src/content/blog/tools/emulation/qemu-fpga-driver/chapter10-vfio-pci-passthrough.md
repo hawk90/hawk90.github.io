@@ -228,4 +228,4 @@ production cloud FPGA는 위 패턴 중 하나를 택해 *uptime SLA*를 유지�
 - [Ch 9: VFIO 기초](/blog/tools/emulation/qemu-fpga-driver/chapter09-vfio-basics)
 - [Ch 11: SR-IOV·mdev](/blog/tools/emulation/qemu-fpga-driver/chapter11-sriov-mdev)
 - [QEMU Internals — KVM Accel](/blog/tools/emulation/qemu-internals/chapter14-kvm-accel)
-- [PCIe Deep Dive — SR-IOV/VFIO](/blog/embedded/hardware/pcie/chapter01-overview)
+- [PCIe Deep Dive — SR-IOV/VFIO](/blog/embedded/hardware/pcie/chapter01-fundamentals)

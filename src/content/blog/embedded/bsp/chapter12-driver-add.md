@@ -473,9 +473,9 @@ $ cat /sys/kernel/debug/devices_deferred
 
 ## 관련 항목
 
-- [Ch 7: Device Tree 작성](/blog/embedded/bsp/chapter07-device-tree)
+- [Ch 7: Device Tree 작성](/blog/embedded/bsp/chapter07-tfa-trustzone)
 - [Ch 8: Linux 커널 설정](/blog/embedded/bsp/chapter08-kernel-config)
 - [Ch 13: Power Management](/blog/embedded/bsp/chapter13-power-management)
 - [Ch 14: Thermal과 watchdog](/blog/embedded/bsp/chapter14-thermal-watchdog)
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — driver 패턴
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/) — interrupt 처리 비교
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — driver 패턴
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) — interrupt 처리 비교

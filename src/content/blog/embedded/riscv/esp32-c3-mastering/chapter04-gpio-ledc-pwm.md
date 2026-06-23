@@ -416,7 +416,7 @@ Matrix 경로는 *최대 40 MHz*가 안전한 상한입니다. *80 MHz*는 *IO M
 - [Ch 3: 메모리 맵·플래시·SPIFFS/LittleFS](/blog/embedded/riscv/esp32-c3-mastering/chapter03-memory-flash)
 - [Ch 5: 시리얼 통신 4종 — UART·SPI·I2C·I2S](/blog/embedded/riscv/esp32-c3-mastering/chapter05-uart-spi-i2c-i2s)
 - [Ch 6: ADC·터치 센서](/blog/embedded/riscv/esp32-c3-mastering/chapter06-adc-touch)
-- [Modern Embedded Recipes Part 4.4: PWM 정확도](/blog/embedded/modern-recipes/part4-04-pwm-accuracy)
-- [Practical RTOS Internals Part 2.4: GPIO ISR latency](/blog/embedded/rtos/practical-internals/part2-04-gpio-isr-latency)
+- Modern Embedded Recipes Part 4.4: PWM 정확도
+- Practical RTOS Internals Part 2.4: GPIO ISR latency
 - [원문 — ESP-IDF GPIO API](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/peripherals/gpio.html)
 - [원문 — ESP-IDF MCPWM API](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/peripherals/mcpwm.html)

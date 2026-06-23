@@ -371,7 +371,7 @@ Singleton이 정당화될 수 있는 경우는 다음과 같다.
 
 ## 관련 항목
 
-- [GoF Singleton](/blog/programming/design/gof-design-patterns/item04-singleton) — GoF 측면
+- [GoF Singleton](/blog/programming/design/gof-design-patterns/item04-prototype) — GoF 측면
 - [가이드라인 38: Singleton 디자인](/blog/programming/cpp/cpp-software-design/guideline38-design-singletons-for-change-and-testability) — 정 써야 할 때
 - [가이드라인 9: Ownership of Abstractions](/blog/programming/cpp/cpp-software-design/guideline09-pay-attention-to-the-ownership-of-abstractions) — DIP
 - [가이드라인 4: Design for Testability](/blog/programming/cpp/cpp-software-design/guideline04-design-for-testability) — Mock 주입

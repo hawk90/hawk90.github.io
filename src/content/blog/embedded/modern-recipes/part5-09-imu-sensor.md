@@ -325,4 +325,4 @@ motor·고전류 wire의 magnetic field가 *지자기보다 훨씬 큼*. mag sen
 - [4-09: I2C 드라이버](/blog/embedded/modern-recipes/part4-09-i2c-driver)
 - [5-08: 환경 센서](/blog/embedded/modern-recipes/part5-08-environmental-sensors)
 - [5-10: CAN 통신](/blog/embedded/modern-recipes/part5-10-can-communication)
-- [9-05: PID 제어 기본](/blog/embedded/modern-recipes/part9-05-pid-control)
+- 9-05: PID 제어 기본

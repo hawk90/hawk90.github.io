@@ -177,7 +177,7 @@ EU·일본·한국에서 *2022년 7월 이후 신차 type approval*에 필수. *
 
 R155는 *차량 자체*의 보안뿐 아니라 *OEM의 조직과 프로세스*를 평가합니다. ISO/SAE 21434가 R155 준수의 사실상 *기술적 표준*입니다. R156은 [Ch 6의 OTA](/blog/embedded/embedded-security/chapter06-ota-update) 요건을 강제합니다.
 
-자동차 분야는 [Embedded Automotive 시리즈](/blog/embedded/automotive/misra-c)와 깊게 연결됩니다.
+자동차 분야는 [Embedded Automotive 시리즈](/blog/embedded/automotive/misra-c/chapter01-introduction)와 깊게 연결됩니다.
 
 ## 항공·우주 — 별도 트랙
 
@@ -299,7 +299,7 @@ SBOM은 *매 release마다* 갱신되어야 합니다. 자동 생성(CycloneDX-C
 - [Ch 6: OTA Update](/blog/embedded/embedded-security/chapter06-ota-update)
 - [Ch 10: 보안 SDLC + SBOM](/blog/embedded/embedded-security/chapter10-sdlc)
 - Embedded Automotive — MISRA C 시리즈
-- [Embedded Automotive — AUTOSAR Adaptive 시리즈](/blog/embedded/automotive/autosar-adaptive/00-overview)
+- Embedded Automotive — AUTOSAR Adaptive 시리즈
 - Aerospace Standards — DO-178C 시리즈
 - [원문 — ETSI EN 303 645 V2.1.1](https://www.etsi.org/deliver/etsi_en/303600_303699/303645/02.01.01_60/en_303645v020101p.pdf)
 - [원문 — IEC 62443 (ISA)](https://www.isa.org/standards-and-publications/isa-standards/isa-iec-62443-series-of-standards)

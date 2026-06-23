@@ -228,4 +228,4 @@ qemu-system-riscv64 -machine virt -m 2G \
 - [Ch 1: QEMU RISC-V 개요](/blog/tools/emulation/qemu-riscv/chapter01-overview)
 - [Ch 3: QEMU + GDB 디버깅](/blog/tools/emulation/qemu-riscv/chapter03-gdb-debugging)
 - [QEMU Embedded — Device Tree](/blog/tools/emulation/qemu-embedded/chapter07-device-tree)
-- [RISC-V 베어메탈 부트](/blog/systems/riscv/baremetal-boot/chapter01-overview) — 부트 흐름과 메모리 맵
+- [RISC-V 베어메탈 부트](/blog/systems/riscv/baremetal-boot/chapter01-boot-overview) — 부트 흐름과 메모리 맵

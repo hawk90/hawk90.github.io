@@ -203,5 +203,5 @@ mksquashfs rootfs/ rootfs.sqfs -comp xz
 
 - [Ch 5: 리눅스 커널 부팅](/blog/tools/emulation/qemu-embedded/chapter05-linux-kernel)
 - [Ch 7: 디바이스 트리](/blog/tools/emulation/qemu-embedded/chapter07-device-tree)
-- [Buildroot Practical](/blog/embedded/buildroot/chapter01-overview)
+- [Buildroot Practical](/blog/embedded/buildroot/chapter01-problem)
 - [Modern Embedded Recipes — Rootfs Buildroot](/blog/embedded/modern-recipes/part7-14-rootfs-buildroot)

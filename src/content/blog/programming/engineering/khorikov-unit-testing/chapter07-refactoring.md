@@ -454,6 +454,6 @@ public class UserController
 
 - [Ch 6: Styles of Unit Testing](/blog/programming/engineering/khorikov-unit-testing/chapter06-styles)
 - [Ch 8: Why Integration Testing?](/blog/programming/engineering/khorikov-unit-testing/chapter08-why-integration)
-- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/) — Humble Object와 Sprout 패턴
-- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/) — Extract Class, Move Function 등의 어휘
+- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/ch01) — Humble Object와 Sprout 패턴
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/pattern01-extract-function) — Extract Class, Move Function 등의 어휘
 - [TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-08-tdd-as-xp) — TDD가 만드는 설계 압력

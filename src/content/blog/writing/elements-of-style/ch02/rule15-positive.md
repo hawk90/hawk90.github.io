@@ -258,4 +258,4 @@ be the case that ..."
 
 - [Rule 14: 능동태를 쓸 것](/blog/writing/elements-of-style/ch02/rule14-active-voice)
 - [Rule 16: Use definite, specific, concrete language](/blog/writing/elements-of-style/ch02/rule16-specific)
-- [On Writing Well — Chapter 12: Clutter](/blog/writing/on-writing-well/ch12-clutter)
+- [On Writing Well — Chapter 12: Clutter](/blog/writing/on-writing-well/ch12-people)

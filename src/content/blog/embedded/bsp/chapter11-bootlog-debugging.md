@@ -351,5 +351,5 @@ console=ttymxc0,115200 console=tty0
 - [Ch 10: 첫 부팅 — 0%부터 login prompt까지](/blog/embedded/bsp/chapter10-first-boot)
 - [Ch 12: 드라이버 추가](/blog/embedded/bsp/chapter12-driver-add)
 - [Ch 13: Power Management](/blog/embedded/bsp/chapter13-power-management)
-- [Embedded Performance Engineering](/blog/embedded/performance-engineering/) — ftrace 활용
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — 양산 디버깅
+- [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface) — ftrace 활용
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — 양산 디버깅

@@ -317,8 +317,8 @@ ESP-IDF는 *기본적으로 -fno-exceptions*입니다. `menuconfig`에서 활성
 
 - [Ch 1: ESP32-C3 — 왜 RISC-V로 갈아탔나](/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview)
 - [Ch 3: 메모리 맵·플래시·SPIFFS/LittleFS](/blog/embedded/riscv/esp32-c3-mastering/chapter03-memory-flash)
-- [Ch 11: 보안·Secure Boot](/blog/embedded/riscv/esp32-c3-mastering/chapter11-secure-boot) — PMP Lock 비트 활용
-- [Practical RTOS Internals Part 2.3: 인터럽트 모델](/blog/embedded/rtos/practical-internals/part2-03-interrupt-model)
-- [Modern Embedded Recipes Part 3.5: 인라인 어셈블리](/blog/embedded/modern-recipes/part3-05-inline-assembly)
+- [Ch 11: 보안·Secure Boot](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security) — PMP Lock 비트 활용
+- Practical RTOS Internals Part 2.3: 인터럽트 모델
+- Modern Embedded Recipes Part 3.5: 인라인 어셈블리
 - [원문 — RISC-V Privileged Spec](https://riscv.org/technical/specifications/)
 - [원문 — ESP32-C3 Technical Reference Manual](https://www.espressif.com/sites/default/files/documentation/esp32-c3_technical_reference_manual_en.pdf)

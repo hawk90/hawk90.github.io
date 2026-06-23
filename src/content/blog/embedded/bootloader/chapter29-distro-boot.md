@@ -323,7 +323,7 @@ label linux-old
     append console=ttyS0,115200 root=/dev/mmcblk0p2 rw rootwait
 ```
 
-5초 안에 키를 누르면 메뉴가 나오고, 그렇지 않으면 `default`가 자동 부트합니다. 무인 시스템에서는 *A/B 슬롯 + 부트 카운터*([Ch 26: A/B 슬롯](/blog/embedded/bootloader/chapter26-ab-update))로 자동화합니다.
+5초 안에 키를 누르면 메뉴가 나오고, 그렇지 않으면 `default`가 자동 부트합니다. 무인 시스템에서는 *A/B 슬롯 + 부트 카운터*([Ch 26: A/B 슬롯](/blog/embedded/bootloader/chapter26-ddr-training))로 자동화합니다.
 
 ### bootflow priority로
 
@@ -370,7 +370,7 @@ Seq  Method       State   Uclass    Part  Name                       Filename
 - [Ch 14: bootflow / bootmeth](/blog/embedded/bootloader/chapter14-bootflow-bootmeth) — 2세대 표준
 - [Ch 18: EFI in U-Boot](/blog/embedded/bootloader/chapter18-efi-in-uboot) — EFI bootmgr 자세히
 - [Ch 19: 커널 인계](/blog/embedded/bootloader/chapter19-kernel-handoff) — booti/bootm의 동작
-- [Ch 26: A/B 슬롯](/blog/embedded/bootloader/chapter26-ab-update) — 다중 부트의 자동화
+- [Ch 26: A/B 슬롯](/blog/embedded/bootloader/chapter26-ddr-training) — 다중 부트의 자동화
 - [Buildroot Ch 8: 파일 시스템 이미지](/blog/embedded/buildroot/chapter08-filesystems) — extlinux.conf가 들어가는 자리
 - [원문 — U-Boot Standard Boot 문서](https://docs.u-boot.org/en/latest/develop/bootstd/index.html)
 - [원문 — Syslinux extlinux.conf 사양](https://wiki.syslinux.org/wiki/index.php?title=Config)

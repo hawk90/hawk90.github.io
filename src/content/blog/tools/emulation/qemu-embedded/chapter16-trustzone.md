@@ -218,4 +218,4 @@ ARMv8-M(Cortex-M23/M33/M55)도 TrustZone을 *다른 모델*로 구현 — *Secur
 - [Ch 15: OpenAMP·RPMsg](/blog/tools/emulation/qemu-embedded/chapter15-openamp-rpmsg)
 - [Ch 17: ARM Hypervisor](/blog/tools/emulation/qemu-embedded/chapter17-hypervisor)
 - [QEMU OpenTitan](/blog/tools/emulation/qemu-riscv/chapter06-opentitan) — RISC-V root of trust
-- [Embedded Security](/blog/embedded/embedded-security/chapter01-overview)
+- [Embedded Security](/blog/embedded/embedded-security/chapter01-threat-model)

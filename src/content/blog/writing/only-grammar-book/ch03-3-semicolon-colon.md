@@ -319,4 +319,4 @@ He realized the truth: she had been right all along.
 - [Chapter 3: Punctuation](/blog/writing/only-grammar-book/ch03-punctuation)
 - [Chapter 3.2: Comma](/blog/writing/only-grammar-book/ch03-2-comma)
 - [Chapter 3.4: Dash and Hyphen](/blog/writing/only-grammar-book/ch03-4-dash-hyphen)
-- [Elements of Style — Rule 7: 콜론의 용법](/blog/writing/elements-of-style/ch01-rule07-colon)
+- Elements of Style — Rule 7: 콜론의 용법

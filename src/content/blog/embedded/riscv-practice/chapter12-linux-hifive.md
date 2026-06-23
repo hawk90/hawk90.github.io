@@ -130,9 +130,9 @@ all:
 
 ## 관련 시리즈
 
-- [RISC-V ISA 해부](/blog/systems/riscv/isa-anatomy/) — ISA 기초
-- [RISC-V 베어메탈 부트](/blog/systems/riscv/baremetal-boot/) — 부트 과정
-- [RISC-V QEMU 심화](/blog/tools/emulation/qemu-riscv/) — 에뮬레이션
+- [RISC-V ISA 해부](/blog/systems/riscv/isa-anatomy/chapter01-what-is-riscv) — ISA 기초
+- [RISC-V 베어메탈 부트](/blog/systems/riscv/baremetal-boot/chapter01-boot-overview) — 부트 과정
+- [RISC-V QEMU 심화](/blog/tools/emulation/qemu-riscv/chapter01-overview) — 에뮬레이션
 
 ---
 

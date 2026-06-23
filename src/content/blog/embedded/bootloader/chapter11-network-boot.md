@@ -400,7 +400,7 @@ factory 이미지 fetch 흐름은 다음과 같습니다.
 5. 서버가 보드별 unique 이미지 생성 후 응답
 6. U-Boot가 eMMC 또는 NOR flash에 굽기 → 재부팅
 
-이 모델은 *동일한 마스터 이미지*를 보드별로 personalize하는 [Ch 30](/blog/embedded/bootloader/chapter30-bootloader-ci-test)의 factory test 흐름과 자연스럽게 결합합니다.
+이 모델은 *동일한 마스터 이미지*를 보드별로 personalize하는 [Ch 30](/blog/embedded/bootloader/chapter30-bootloader-ci)의 factory test 흐름과 자연스럽게 결합합니다.
 
 ## 자주 하는 실수
 
@@ -434,7 +434,7 @@ factory 이미지 fetch 흐름은 다음과 같습니다.
 - [Ch 12: USB 부트](/blog/embedded/bootloader/chapter12-usb-boot) — USB로 다운로드, fastboot
 - [Ch 13: 환경 변수와 bootcmd](/blog/embedded/bootloader/chapter13-env-bootcmd) — distroboot 흐름
 - [Ch 29: Distro Boot](/blog/embedded/bootloader/chapter29-distro-boot) — `boot_targets`에 PXE·DHCP 결합
-- [Ch 30: CI·factory test](/blog/embedded/bootloader/chapter30-bootloader-ci-test) — factory provisioning 자동화 연계
+- [Ch 30: CI·factory test](/blog/embedded/bootloader/chapter30-bootloader-ci) — factory provisioning 자동화 연계
 - [Buildroot Ch 8: 파일 시스템](/blog/embedded/buildroot/chapter08-filesystems) — NFS root의 target/ 트리
 - [PXE Specification 2.1 (Intel)](https://www.intel.com/content/dam/www/public/us/en/documents/specification-updates/pxe-2-1-specification.pdf)
 - [RFC 2348 — TFTP Blocksize Option](https://www.rfc-editor.org/rfc/rfc2348)

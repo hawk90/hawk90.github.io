@@ -314,4 +314,4 @@ Chapter 2의 11개 규칙은 문체와 구성의 기초입니다.
 
 - [Rule 21: 동사 시제는 일관되게](/blog/writing/elements-of-style/ch02/rule21-tense)
 - [Chapter 3: A Few Matters of Form](/blog/writing/elements-of-style/ch03/form)
-- [Reminder 22: 문장의 끝을 강하게](/blog/writing/elements-of-style/ch05/reminder06-orderly)
+- [Reminder 22: 문장의 끝을 강하게](/blog/writing/elements-of-style/ch05/reminder06-overwrite)

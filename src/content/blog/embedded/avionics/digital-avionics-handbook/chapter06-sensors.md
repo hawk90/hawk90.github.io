@@ -539,4 +539,4 @@ Lab test pass → flight vibration에서 sensor noise·bias가 변할 수 있다
 - [Ch 5: Buses](/blog/embedded/avionics/digital-avionics-handbook/chapter05-buses)
 - [Ch 7: Actuators](/blog/embedded/avionics/digital-avionics-handbook/chapter07-actuators)
 - [Ch 8: FMS](/blog/embedded/avionics/digital-avionics-handbook/chapter08-fms)
-- [Launch Vehicle Flight SW Ch 4: Control Signal](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter04-control-signal)
+- [Launch Vehicle Flight SW Ch 4: Control Signal](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter04-control-and-signal)

@@ -700,5 +700,5 @@ Chapter 11에서는 **기상 모니터링 스테이션**을 다룬다. 데이터
 
 - [Ch 9: Traffic Management](/blog/programming/design/ooad/chapter09-traffic-management) — 교통 관리
 - [Ch 11: Weather Monitoring Station](/blog/programming/design/ooad/chapter11-weather-monitoring-station) — 기상 모니터링
-- [OOSC Ch 26: Pattern Matching](/blog/programming/design/oosc/chapter26-pattern-matching-practical-style) — 패턴 매칭
+- [OOSC Ch 26: Pattern Matching](/blog/programming/design/oosc/chapter26-a-sense-of-style) — 패턴 매칭
 

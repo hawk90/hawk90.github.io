@@ -655,5 +655,5 @@ mutable cache는 복사 의미가 미묘해진다. 보통은 복사된 객체가
 - [가이드라인 17: std::variant Visitor](/blog/programming/cpp/cpp-software-design/guideline17-consider-stdvariant-for-implementing-visitor) — 값 다형성
 - [가이드라인 20: composition over inheritance](/blog/programming/cpp/cpp-software-design/guideline20-favor-composition-over-inheritance) — 값 의미론과 친화적
 - [가이드라인 23: 값 기반 Strategy/Command](/blog/programming/cpp/cpp-software-design/guideline23-prefer-a-value-based-implementation-of-strategy-and-command) — 본격 적용
-- [Effective Modern C++ 항목 41: by-value sink](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-parameters-that-are-cheap-to-move-and-always-copied) — by-value + move
+- [Effective Modern C++ 항목 41: by-value sink](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params) — by-value + move
 - [Beautiful C++ 항목 26: 불변 데이터](/blog/programming/cpp/beautiful-cpp/item26-prefer-immutable-data) — 값에 친화적

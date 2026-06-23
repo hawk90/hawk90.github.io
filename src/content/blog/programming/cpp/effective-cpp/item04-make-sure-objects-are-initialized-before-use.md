@@ -159,7 +159,7 @@ public:
 };
 ```
 
-`unique_ptr`은 복사 불가, 이동만 가능하다. 초기화 리스트에서 `std::move`로 이동하는 게 표준 패턴이다 ([EMC 항목 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params) 참고).
+`unique_ptr`은 복사 불가, 이동만 가능하다. 초기화 리스트에서 `std::move`로 이동하는 게 표준 패턴이다 ([EMC 항목 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params) 참고).
 
 ## 멤버 초기화 순서 — 선언 순서
 
@@ -355,4 +355,4 @@ class Vector {
 - [항목 13: 자원 관리에는 객체](/blog/programming/cpp/effective-cpp/item13-use-objects-to-manage-resources) — RAII는 초기화의 한 적용
 - [항목 26: 변수 정의를 가능한 늦춰라](/blog/programming/cpp/effective-cpp/item26-postpone-variable-definitions-as-long-as-possible) — 의미 있는 값을 가질 때 정의
 - [EMC 항목 17: 특수 멤버 자동 생성](/blog/programming/cpp/effective-modern-cpp/item17-understand-special-member-function-generation) — 자동 생성 규칙
-- [EMC 항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params) — by-value + move 패턴
+- [EMC 항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params) — by-value + move 패턴

@@ -438,5 +438,5 @@ DO-178C는 *50년 항공 안전 진화의 결정*. 한국 방산·우주 — 이
 
 - [Ch 14: 인증 산출물](/blog/embedded/avionics/developing-safety-critical/chapter14-certification-artifacts)
 - [Ch 1: Assurance 개요](/blog/embedded/avionics/developing-safety-critical/chapter01-assurance-overview)
-- [Launch Vehicle Flight SW Ch 10: KSLV-II](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter10-kslv-ii)
+- [Launch Vehicle Flight SW Ch 10: KSLV-II](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter10-kslv-case-study)
 - [원문 — Leanna Rierson, *Developing Safety-Critical Software: A Practical Guide for Aviation Software and DO-178C Compliance*](https://www.routledge.com/Developing-Safety-Critical-Software-A-Practical-Guide-for-Aviation-Software/Rierson/p/book/9781439813683)

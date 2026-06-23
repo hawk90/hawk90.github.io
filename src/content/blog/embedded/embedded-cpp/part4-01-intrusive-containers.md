@@ -415,7 +415,7 @@ intrusive list<Task>:
 - [Part 3-01: 동적 할당 없이](/blog/embedded/embedded-cpp/part3-01-no-dynamic-alloc)
 - [Part 3-03: Pool Allocator](/blog/embedded/embedded-cpp/part3-03-pool-allocator) — pool + intrusive
 - [Part 4-02: ETL 라이브러리](/blog/embedded/embedded-cpp/part4-02-etl-library)
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals) — RTOS scheduler
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) — RTOS scheduler
 
 ## 다음 글
 

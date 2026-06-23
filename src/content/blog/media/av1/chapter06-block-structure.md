@@ -442,5 +442,5 @@ Ch 7에서는 엔트로피 디코딩을 다룬다. 비트를 심볼로 변환하
 ## 관련 항목
 
 - [Ch 4: 블록 파티셔닝](/blog/media/av1/chapter04-partitioning)
-- [Ch 5: Frame Header](/blog/media/av1/chapter05-frame-header)
+- [Ch 5: Frame Header](/blog/media/av1/chapter05-prediction-overview)
 - [Ch 7: 엔트로피 디코딩](/blog/media/av1/chapter07-entropy-coding)

@@ -212,7 +212,7 @@ fi
 | **secure verify time** | BL2가 BL31 검증한 시간 | +20 ms / PR |
 | **memory test pass rate** | `mtest` 명령 결과 | 100% 미만 즉시 fail |
 
-[Ch 25: 부트 시간 측정](/blog/embedded/bootloader/chapter25-boot-time)에서 본 timestamp 기반 측정을 *CI metric pipeline에 통합*하면 회귀 추세가 자동으로 잡힙니다.
+[Ch 25: 부트 시간 측정](/blog/embedded/bootloader/chapter25-tfa-optee)에서 본 timestamp 기반 측정을 *CI metric pipeline에 통합*하면 회귀 추세가 자동으로 잡힙니다.
 
 ## bisect 자동화
 
@@ -334,9 +334,9 @@ LAVA를 직접 통합하려면 *빌드 → S3 업로드 → LAVA submit-job → 
 
 | 추천 시리즈 | 다루는 범위 | 부트로더와의 연결 |
 |---|---|---|
-| [Linux Kernel Internals](/blog/systems/linux-kernel) | head.S → start_kernel → init | 커널 진입 ABI 이후의 흐름 |
-| [BSP Engineering](/blog/embedded/bsp) | U-Boot 포팅·driver·DTS·image | 새 보드 전체 stack 통합 |
-| [Buildroot Practical](/blog/embedded/buildroot) | rootfs 빌드·OTA·SDK | image pipeline 자동화 |
+| Linux Kernel Internals | head.S → start_kernel → init | 커널 진입 ABI 이후의 흐름 |
+| [BSP Engineering](/blog/embedded/bsp/chapter01-what-is-bsp) | U-Boot 포팅·driver·DTS·image | 새 보드 전체 stack 통합 |
+| [Buildroot Practical](/blog/embedded/buildroot/chapter01-problem) | rootfs 빌드·OTA·SDK | image pipeline 자동화 |
 
 각 시리즈가 부트로더와 *한 면씩 맞붙어* 있어 자연스러운 확장이 됩니다.
 
@@ -356,7 +356,7 @@ LAVA를 직접 통합하려면 *빌드 → S3 업로드 → LAVA submit-job → 
 
 - [Ch 21: 새 보드 포팅 — defconfig부터 첫 부팅까지](/blog/embedded/bootloader/chapter21-board-porting) — matrix에 새 보드를 추가하는 출발점
 - [Ch 22: 디버깅 워크플로 — JTAG·printk·boot log](/blog/embedded/bootloader/chapter22-debugging) — boot test에서 로그 anchor를 잡는 근거
-- [Ch 25: 부트 시간 측정](/blog/embedded/bootloader/chapter25-boot-time) — regression metric의 timestamp source
+- [Ch 25: 부트 시간 측정](/blog/embedded/bootloader/chapter25-tfa-optee) — regression metric의 timestamp source
 - [Ch 27: 신뢰 체인 — secure boot key 관리](/blog/embedded/bootloader/chapter27-chain-of-trust) — secure boot CI의 key 정책 전제
 - [Buildroot Ch 19: CI/CD — container build와 cache 공유](/blog/embedded/buildroot/chapter19-cicd) — rootfs CI와의 비교
 - [원문 — LAVA 공식 문서](https://docs.lavasoftware.org/lava/) — board farm 자동화

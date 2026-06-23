@@ -168,4 +168,4 @@ ESD 다이오드가 0.7V drop으로 견디는 동안은 동작합니다. 며칠 
 - [1-02: 클럭과 타이밍](/blog/embedded/modern-recipes/part1-02-clock-timing)
 - [1-04: UART 하드웨어 동작](/blog/embedded/modern-recipes/part1-04-uart-hardware)
 - [1-06: I2C 하드웨어](/blog/embedded/modern-recipes/part1-06-i2c-hardware)
-- 더 깊이 — [Embedded Performance Engineering: GPIO 토글 측정](/blog/embedded/performance-engineering/)
+- 더 깊이 — [Embedded Performance Engineering: GPIO 토글 측정](/blog/embedded/performance-engineering/00-preface)

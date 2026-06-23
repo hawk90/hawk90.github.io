@@ -536,5 +536,5 @@ Ch 5에서는 Frame Header를 다룬다. 프레임 타입, 양자화 설정, 루
 ## 관련 항목
 
 - [Ch 3: Sequence Header와 공간 구조](/blog/media/av1/chapter02-bitstream/05-sequence-header)
-- [Ch 5: Frame Header](/blog/media/av1/chapter05-frame-header)
+- [Ch 5: Frame Header](/blog/media/av1/chapter05-prediction-overview)
 - [Ch 6: 블록 구조와 CB/TB](/blog/media/av1/chapter06-block-structure)

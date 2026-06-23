@@ -67,7 +67,7 @@ std::string s = "world";
 Person p2(s);                      // lvalue → copy + move
 ```
 
-자세한 분석은 [항목 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params)에서 다룬다.
+자세한 분석은 [항목 41](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params)에서 다룬다.
 
 장점은 이렇다.
 
@@ -235,4 +235,4 @@ explicit Person(T&& n);
 - [항목 26: 오버로딩 함정](/blog/programming/cpp/effective-modern-cpp/item26-avoid-overloading-on-universal-references)
 - [항목 28: 참조 축약](/blog/programming/cpp/effective-modern-cpp/item28-understand-reference-collapsing)
 - [항목 30: forwarding 실패](/blog/programming/cpp/effective-modern-cpp/item30-familiarize-yourself-with-perfect-forwarding-failure-cases)
-- [항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params-for-copyable-cheap-to-move-always-copied-params)
+- [항목 41: pass by value](/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params)

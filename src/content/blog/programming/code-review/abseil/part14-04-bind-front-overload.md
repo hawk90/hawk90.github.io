@@ -291,5 +291,5 @@ Part 15에서는 분산 시스템용 대용량 문자열 `absl::Cord`와 charcon
 - [Part 15-01 — Cord](/blog/programming/code-review/abseil/part15-01-cord)
 - [Part 14-03 — function_ref / any_invocable](/blog/programming/code-review/abseil/part14-03-function-ref-any-invocable)
 - [Part 9-04 — absl::variant](/blog/programming/code-review/abseil/part9-04-variant)
-- [EMC++ Item 34 — std::bind 회피](/blog/programming/cpp/effective-modern-cpp/item34)
-- [Folly Part 4-04 — Partial](/blog/programming/code-review/folly/part4-04-partial)
+- [EMC++ Item 34 — std::bind 회피](/blog/programming/cpp/effective-modern-cpp/item34-prefer-lambdas-to-std-bind)
+- Folly Part 4-04 — Partial

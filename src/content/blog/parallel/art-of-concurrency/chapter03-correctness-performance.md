@@ -366,4 +366,4 @@ Thread 3: ███████░░░░░ 70ms + 50ms 대기
 - [Ch 2: Concurrent or Not Concurrent?](/blog/parallel/art-of-concurrency/chapter02-concurrent-or-not) — 분해 전략
 - [Ch 4: Eight Simple Rules](/blog/parallel/art-of-concurrency/chapter04-eight-rules) — 설계 규칙
 - [AMP Ch 1: Introduction](/blog/parallel/parallel-principles/ch01-introduction) — 이론적 기초
-- [C++ Concurrency Ch 3: Sharing Data](/blog/parallel/cpp-concurrency-in-action/chapter03-sharing-data) — 동기화 상세
+- [C++ Concurrency Ch 3: Sharing Data](/blog/parallel/cpp-concurrency-in-action/chapter03-sharing-data-between-threads) — 동기화 상세

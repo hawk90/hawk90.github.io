@@ -522,5 +522,5 @@ Avionics — *aviation electronics*의 50년 진화. 다음 50년 — *open·ada
 - [Ch 13: DO-160](/blog/embedded/avionics/digital-avionics-handbook/chapter13-do-160)
 - [Ch 1: Avionics 시스템 개요](/blog/embedded/avionics/digital-avionics-handbook/chapter01-avionics-overview)
 - [Developing Safety-Critical SW Ch 15: 방사청·KARI](/blog/embedded/avionics/developing-safety-critical/chapter15-korea-defense)
-- [Launch Vehicle Flight SW Ch 10: KSLV-II](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter10-kslv-ii)
+- [Launch Vehicle Flight SW Ch 10: KSLV-II](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter10-kslv-case-study)
 - [원문 — Cary Spitzer (ed.), *Digital Avionics Handbook*, 3rd ed., CRC Press](https://www.routledge.com/Digital-Avionics-Handbook/Spitzer-Ferrell-Ferrell/p/book/9781439868980)

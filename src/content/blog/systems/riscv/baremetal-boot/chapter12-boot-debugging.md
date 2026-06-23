@@ -137,9 +137,9 @@ void trap_handler(void) {
 
 ## 관련 시리즈
 
-- [RISC-V ISA 해부](/blog/systems/riscv/isa-anatomy/) — ISA 기초
-- [RISC-V QEMU 심화](/blog/tools/emulation/qemu-riscv/) — 에뮬레이션 실습
-- [RISC-V 임베디드 실습](/blog/embedded/riscv-practice/) — 실제 보드
+- [RISC-V ISA 해부](/blog/systems/riscv/isa-anatomy/chapter01-what-is-riscv) — ISA 기초
+- [RISC-V QEMU 심화](/blog/tools/emulation/qemu-riscv/chapter01-overview) — 에뮬레이션 실습
+- [RISC-V 임베디드 실습](/blog/embedded/riscv-practice/chapter01-toolchain) — 실제 보드
 
 ---
 

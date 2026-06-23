@@ -281,6 +281,6 @@ xTaskCreatePinnedToCore(consumer, "rx", 4096, sb, 5, NULL, 1);
 - [Ch 6: Queue Management](/blog/embedded/rtos/freertos-mastering/chapter04-queue-management) — 다중 송수신용
 - [Ch 9: Task Notifications](/blog/embedded/rtos/freertos-mastering/chapter09-task-notifications) — 알림 전용 경량 IPC
 - [Ch 13: SMP Support](/blog/embedded/rtos/freertos-mastering/chapter13-smp-support) — SMP와의 차이
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — DMA + 버퍼 패턴
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — DMA + 버퍼 패턴
 - [원문 — FreeRTOS Stream Buffers](https://www.freertos.org/RTOS-stream-buffer-API.html)
 - [원문 — FreeRTOS Message Buffers](https://www.freertos.org/RTOS-message-buffer-API.html)

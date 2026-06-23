@@ -149,4 +149,4 @@ Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 도
 - [Ch 2: SystemVerilog DPI-C 기초](/blog/tools/emulation/driver-cosim/chapter02-dpi-c-basics)
 - QEMU Fake Device Driver — functional 모델로 driver 개발
 - FPGA Driver via QEMU+VFIO — QEMU와 실 FPGA를 4-step으로 잇기
-- [CXL 4.0 Spec Full Review](/blog/embedded/hardware/cxl-spec/chapter01-overview) — chiplet 인터커넥트의 검증 시나리오
+- CXL 4.0 Spec Full Review — chiplet 인터커넥트의 검증 시나리오

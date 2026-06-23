@@ -429,11 +429,11 @@ A/B 도입 시 자주 만나는 함정입니다.
 
 ## 관련 항목
 
-- [Ch 13: U-Boot 환경변수 — env partition과 fw_setenv](/blog/embedded/bootloader/chapter13-environment) — `BOOT_SLOT`·`bootcount`가 사는 곳
+- [Ch 13: U-Boot 환경변수 — env partition과 fw_setenv](/blog/embedded/bootloader/chapter13-env-bootcmd) — `BOOT_SLOT`·`bootcount`가 사는 곳
 - [Ch 16: Verified Boot — RSA 서명과 public key 임베딩](/blog/embedded/bootloader/chapter16-verified-boot)
 - [Ch 18: EFI in U-Boot — bootefi와 EFI loader](/blog/embedded/bootloader/chapter18-efi-in-uboot)
 - [Ch 20: RAUC / SWUpdate — 펌웨어 업데이트 프레임워크](/blog/embedded/bootloader/chapter20-rauc-swupdate) — A/B를 *위 레이어*에서 다루는 도구
-- [Ch 27: Signed A/B — secure boot과 슬롯별 anti-rollback](/blog/embedded/bootloader/chapter27-signed-ab) — 슬롯별 서명·counter 관리
+- [Ch 27: Signed A/B — secure boot과 슬롯별 anti-rollback](/blog/embedded/bootloader/chapter27-chain-of-trust) — 슬롯별 서명·counter 관리
 - [Ch 28: Flash layout과 파티션 사이즈 산정](/blog/embedded/bootloader/chapter28-flash-layout) — boot/rootfs/shared 영역 크기 결정
 - [Buildroot Ch 16: OTA 통합](/blog/embedded/buildroot/chapter16-ota) — Buildroot 측 RAUC·SWUpdate 패키징
 - [원문 — U-Boot doc/README.bootcount](https://u-boot.readthedocs.io/en/latest/usage/environment.html#bootcount)

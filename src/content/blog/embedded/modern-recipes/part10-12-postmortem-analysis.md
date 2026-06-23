@@ -334,4 +334,4 @@ Release 빌드의 `.elf`를 잃으면 `0x08001234`가 *영원히* 의미 없는 
 - [10-04: 하드폴트 분석](/blog/embedded/modern-recipes/part10-04-hardfault-analysis)
 - [10-08: 메모리 오염 진단](/blog/embedded/modern-recipes/part10-08-memory-corruption)
 - [10-11: 로깅 시스템 설계](/blog/embedded/modern-recipes/part10-11-logging-system)
-- [RTOS 5-04: 시스템 진단](/blog/embedded/rtos/practical-internals/part5-04-system-trace)
+- RTOS 5-04: 시스템 진단

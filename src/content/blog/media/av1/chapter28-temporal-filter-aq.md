@@ -677,6 +677,6 @@ Ch 29에서는 **테스트 벡터**로 디코더를 검증한다. AOMedia 공식
 ## 관련 항목
 
 - [Ch 9: 변환과 양자화](/blog/media/av1/chapter09-transform-quantization) — QP, 양자화
-- [Ch 18: Segmentation](/blog/media/av1/chapter18-segmentation) — ROI 구현
+- [Ch 18: Segmentation](/blog/media/av1/chapter18-loop-restoration) — ROI 구현
 - [Ch 26: Rate Control](/blog/media/av1/chapter26-rate-control) — QP/λ 결정
 - [Ch 27: GOP, Key Frame, LTR](/blog/media/av1/chapter27-gop-keyframe-ltr) — ALTREF 활용

@@ -360,5 +360,5 @@ KARI도 현대화를 진행 중입니다. Open source 채택 검토, Modern tool
 ## 관련 항목
 
 - [Ch 9: F-Prime](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter09-fprime)
-- [Developing Safety-Critical SW Ch 1](/blog/embedded/avionics/developing-safety-critical/chapter01-overview)
-- [Digital Avionics Handbook Ch 1](/blog/embedded/avionics/digital-avionics-handbook/chapter01-overview)
+- [Developing Safety-Critical SW Ch 1](/blog/embedded/avionics/developing-safety-critical/chapter01-assurance-overview)
+- [Digital Avionics Handbook Ch 1](/blog/embedded/avionics/digital-avionics-handbook/chapter01-avionics-overview)

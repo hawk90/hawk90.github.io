@@ -277,7 +277,7 @@ Digital Signature(DS) peripheral은 *RSA 서명을 하드웨어 가속*합니다
 - [Ch 9: ESP-IDF — 빌드 시스템과 컴포넌트 구조](/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build) — 서명되는 binary들의 출처
 - [Ch 10: FreeRTOS on ESP32-C3](/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos)
 - [Ch 12: 전력 관리 — Modem/Light/Deep Sleep](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management)
-- [Embedded Security 시리즈](/blog/embedded/embedded-security/) — Secure Boot 일반 원리
+- [Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model) — Secure Boot 일반 원리
 - [원문 — ESP-IDF Secure Boot V2](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/security/secure-boot-v2.html)
 - [원문 — ESP-IDF Flash Encryption](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/security/flash-encryption.html)
 - [원문 — espefuse.py reference](https://docs.espressif.com/projects/esptool/en/latest/esp32c3/espefuse/index.html)

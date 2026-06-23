@@ -269,4 +269,4 @@ main이 반환하면 stack의 LR(garbage)로 점프해 hardfault. 반드시 `whi
 - [3-04: 링커 스크립트 기초](/blog/embedded/modern-recipes/part3-04-linker-script-basics)
 - [3-05: 링커 스크립트 고급](/blog/embedded/modern-recipes/part3-05-linker-script-advanced)
 - [3-07: C 런타임 (crt0)](/blog/embedded/modern-recipes/part3-07-c-runtime)
-- 더 깊이 — [Embedded C++ for Real Systems: 초기화 순서](/blog/embedded/embedded-cpp/)
+- 더 깊이 — [Embedded C++ for Real Systems: 초기화 순서](/blog/embedded/embedded-cpp/00-preface)

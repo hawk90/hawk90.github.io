@@ -24,7 +24,7 @@ std::unique_ptr<Animal> copy = ???;        // 어떻게 복제할까?
 
 GoF 23개 패턴 중 하나이며, C++에서는 다형 복사의 표준적인 해법이다. 슬라이싱을 깔끔하게 피할 수 있다.
 
-GoF 관점의 자세한 설명은 [GoF Prototype](/blog/programming/design/gof-design-patterns/item05-prototype)을 참고하라.
+GoF 관점의 자세한 설명은 [GoF Prototype](/blog/programming/design/gof-design-patterns/item05-singleton)을 참고하라.
 
 ## 핵심 문제 — 슬라이싱
 
@@ -351,7 +351,7 @@ auto c = a.clone();    // ✅ OK
 
 ## 관련 항목
 
-- [GoF Prototype](/blog/programming/design/gof-design-patterns/item05-prototype) — GoF 관점
+- [GoF Prototype](/blog/programming/design/gof-design-patterns/item05-singleton) — GoF 관점
 - [가이드라인 17: std::variant](/blog/programming/cpp/cpp-software-design/guideline17-consider-stdvariant-for-implementing-visitor) — 닫힌 집합 대안
 - [가이드라인 26: CRTP](/blog/programming/cpp/cpp-software-design/guideline26-use-crtp-to-introduce-static-type-categories) — Cloneable mixin
 - [가이드라인 32: Type Erasure](/blog/programming/cpp/cpp-software-design/guideline32-consider-replacing-inheritance-hierarchies-with-type-erasure) — 또 다른 대안

@@ -243,4 +243,4 @@ priority 없으면 link 순서. 명확한 순서가 필요하면 `__attribute__(
 - [3-04: 링커 스크립트 기초](/blog/embedded/modern-recipes/part3-04-linker-script-basics)
 - [3-06: 스타트업 코드 분석](/blog/embedded/modern-recipes/part3-06-startup-code)
 - [3-08: 메모리 레이아웃](/blog/embedded/modern-recipes/part3-08-memory-layout)
-- 더 깊이 — [Embedded C++ for Real Systems: static 초기화](/blog/embedded/embedded-cpp/)
+- 더 깊이 — [Embedded C++ for Real Systems: static 초기화](/blog/embedded/embedded-cpp/00-preface)

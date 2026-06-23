@@ -773,4 +773,4 @@ Auction Sniper 프로젝트:
 - [Ch 8: Building on Third-Party Code](/blog/programming/engineering/goos/chapter08-building-on-third-party) — 이전 장
 - [Ch 10: Walking Skeleton](/blog/programming/engineering/goos/chapter10-walking-skeleton) — 다음 장
 - [Ch 4: Kick-Starting](/blog/programming/engineering/goos/chapter04-kick-starting) — 본 장이 적용할 시작 전략
-- [Agile/Lean Engineering — TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-16-tdd-as-xp) — 점진적 빌드의 XP/Lean 배경
+- Agile/Lean Engineering — TDD as XP — 점진적 빌드의 XP/Lean 배경

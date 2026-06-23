@@ -241,4 +241,4 @@ else if (t == "int64") ...
 
 - [Part 11-01 folly::dynamic](/blog/programming/code-review/folly/part11-01-dynamic) — 타입 모델
 - [Part 11-03 Dynamic ↔ struct](/blog/programming/code-review/folly/part11-03-dynamic-struct) — boundary에서 변환
-- [GoF Visitor](/blog/programming/design/gof/part4-visitor) — 클래식 visitor 패턴
+- GoF Visitor — 클래식 visitor 패턴

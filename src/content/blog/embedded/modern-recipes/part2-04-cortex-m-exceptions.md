@@ -212,4 +212,4 @@ void EXTI0_IRQHandler(void) {
 - [2-03: ARM 레지스터 구조](/blog/embedded/modern-recipes/part2-03-arm-registers)
 - [2-05: ARM 메모리 맵](/blog/embedded/modern-recipes/part2-05-arm-memory-map)
 - [2-07: MPU 활용](/blog/embedded/modern-recipes/part2-07-arm-mpu)
-- 더 깊이 — [Practical RTOS Internals: PendSV 구현](/blog/embedded/rtos/practical-internals/)
+- 더 깊이 — [Practical RTOS Internals: PendSV 구현](/blog/embedded/rtos/practical-internals/00-preface)

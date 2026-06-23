@@ -145,4 +145,4 @@ E.B. White의 주석:
 
 - [Rule 3: 삽입 표현은 쉼표로 감싸기](/blog/writing/elements-of-style/ch01/rule03-parenthetic)
 - [Rule 5: Do not join independent clauses with a comma](/blog/writing/elements-of-style/ch01/rule05-comma-splice)
-- [Rule 6: 마침표로 끊기](/blog/writing/elements-of-style/ch01/rule06-period)
+- [Rule 6: 마침표로 끊기](/blog/writing/elements-of-style/ch01/rule06-sentence-fragment)

@@ -192,5 +192,5 @@ Engineer 채용·교육은 *전혀 다른 트랙*.
 ## 관련 항목
 
 - [Ch 2: FCC Architecture](/blog/embedded/avionics/launch-vehicle-flight-sw/chapter02-fcc-architecture)
-- [Digital Avionics Handbook Ch 1](/blog/embedded/avionics/digital-avionics-handbook/chapter01-overview)
-- [Developing Safety-Critical SW Ch 1](/blog/embedded/avionics/developing-safety-critical/chapter01-overview)
+- [Digital Avionics Handbook Ch 1](/blog/embedded/avionics/digital-avionics-handbook/chapter01-avionics-overview)
+- [Developing Safety-Critical SW Ch 1](/blog/embedded/avionics/developing-safety-critical/chapter01-assurance-overview)

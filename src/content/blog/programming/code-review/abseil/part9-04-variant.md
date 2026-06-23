@@ -212,5 +212,5 @@ std::string Print(const Token& t) {
 
 - [Part 9-03: absl::optional](/blog/programming/code-review/abseil/part9-03-optional)
 - [Part 3-02: StatusOr](/blog/programming/code-review/abseil/part3-02-status-or)
-- [Effective Modern C++ — 항목 14: noexcept](/blog/programming/cpp/effective-modern-cpp)
+- [Effective Modern C++ — 항목 14: noexcept](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
 - [원문 — absl::variant](https://abseil.io/docs/cpp/guides/types#variant)

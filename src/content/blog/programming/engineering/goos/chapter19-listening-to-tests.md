@@ -796,4 +796,4 @@ class OrderProcessor:
 - [Ch 20: Test Readability](/blog/programming/engineering/goos/chapter20-test-readability) — 다음 장
 - [Khorikov Ch 5: Mock과 테스트 취약성](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility) — Mock 남용을 신호로 다루는 현대적 관점
 - [Khorikov Ch 7: 단위 테스트 리팩토링](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring) — 테스트 신호를 코드 개선으로 옮기는 절차
-- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/section-introduction) — 신호를 받아 적용할 리팩토링
+- Refactoring Catalog — 신호를 받아 적용할 리팩토링

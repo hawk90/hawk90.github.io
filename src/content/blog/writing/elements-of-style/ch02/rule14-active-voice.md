@@ -265,5 +265,5 @@ Strunk:
 
 - [Rule 13: 단락을 작문의 단위로](/blog/writing/elements-of-style/ch02/rule13-paragraph)
 - [Rule 15: Put statements in positive form](/blog/writing/elements-of-style/ch02/rule15-positive)
-- [On Writing Well — Chapter 8: Verbs](/blog/writing/on-writing-well/ch08-verbs)
-- [Reminder 11: Do not use the passive voice excessively](/blog/writing/elements-of-style/ch05/reminder11-passive)
+- [On Writing Well — Chapter 8: Verbs](/blog/writing/on-writing-well/ch08-unity)
+- [Reminder 11: Do not use the passive voice excessively](/blog/writing/elements-of-style/ch05/reminder11-explain)

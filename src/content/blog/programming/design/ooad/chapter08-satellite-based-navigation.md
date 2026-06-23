@@ -502,5 +502,5 @@ Chapter 9에서는 **교통 관리 시스템**을 다룬다. 제어 시스템의
 
 - [Ch 7: Pragmatics](/blog/programming/design/ooad/chapter07-pragmatics) — 실무
 - [Ch 9: Traffic Management](/blog/programming/design/ooad/chapter09-traffic-management) — 교통 관리
-- [OOSC Ch 32: Object-Oriented Analysis](/blog/programming/design/oosc/chapter32-object-oriented-database-systems) — 객체 데이터베이스
+- [OOSC Ch 32: Object-Oriented Analysis](/blog/programming/design/oosc/chapter32-oo-techniques-for-gui) — 객체 데이터베이스
 

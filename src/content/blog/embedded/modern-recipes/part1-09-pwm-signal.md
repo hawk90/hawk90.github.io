@@ -156,4 +156,4 @@ CCR 업데이트가 cycle 중간에 반영되면 한 cycle만 잘못된 duty가 
 
 - [1-08: DAC 동작 원리](/blog/embedded/modern-recipes/part1-08-dac-principles)
 - [1-10: CAN 버스 전기적 특성](/blog/embedded/modern-recipes/part1-10-can-electrical)
-- 더 깊이 — [Practical RTOS Internals: Timer subsystem](/blog/embedded/rtos/practical-internals/)
+- 더 깊이 — [Practical RTOS Internals: Timer subsystem](/blog/embedded/rtos/practical-internals/00-preface)

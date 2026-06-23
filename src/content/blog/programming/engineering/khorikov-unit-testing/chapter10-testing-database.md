@@ -473,5 +473,5 @@ jobs:
 - [Ch 8: Why Integration Testing?](/blog/programming/engineering/khorikov-unit-testing/chapter08-why-integration)
 - [Ch 9: Mocking Best Practices](/blog/programming/engineering/khorikov-unit-testing/chapter09-mocking-best-practices)
 - [Ch 11: Unit Testing Anti-Patterns](/blog/programming/engineering/khorikov-unit-testing/chapter11-anti-patterns)
-- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/) — DB가 박혀 있는 레거시의 진입점 설계
-- [TDD Patterns](/blog/programming/engineering/tdd-patterns/) — 테스트 데이터 빌더와 격리 패턴
+- [Working Effectively with Legacy Code](/blog/programming/engineering/legacy-code/ch01) — DB가 박혀 있는 레거시의 진입점 설계
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/pattern01-test) — 테스트 데이터 빌더와 격리 패턴

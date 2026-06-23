@@ -260,5 +260,5 @@ for (;;) {
 - [Part 14-04 — bind_front / Overload](/blog/programming/code-review/abseil/part14-04-bind-front-overload)
 - [Part 14-01 — Cleanup](/blog/programming/code-review/abseil/part14-01-cleanup)
 - [Part 9-04 — absl::variant](/blog/programming/code-review/abseil/part9-04-variant)
-- [Folly Part 4-03 — folly::Function](/blog/programming/code-review/folly/part4-03-folly-function) — Meta의 move-only callable
-- [EMC++ Item 34 — std::bind 회피](/blog/programming/cpp/effective-modern-cpp/item34)
+- Folly Part 4-03 — folly::Function — Meta의 move-only callable
+- [EMC++ Item 34 — std::bind 회피](/blog/programming/cpp/effective-modern-cpp/item34-prefer-lambdas-to-std-bind)

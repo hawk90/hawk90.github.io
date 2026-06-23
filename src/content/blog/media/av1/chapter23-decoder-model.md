@@ -697,6 +697,6 @@ Ch 24에서는 **Error Resilience**를 다룬다. 네트워크 에러 상황에�
 
 - [Ch 22: Metadata OBU](/blog/media/av1/chapter22-metadata)
 - [Ch 21: Superres와 Scalability](/blog/media/av1/chapter21-superres-scalability)
-- [Ch 3: Sequence Header와 프레임 구조](/blog/media/av1/chapter03-sequence-frame)
+- [Ch 3: Sequence Header와 프레임 구조](/blog/media/av1/chapter03-tiles-superblocks)
 - [AV1 Spec Annex A](https://aomediacodec.github.io/av1-spec/#profiles-and-levels) — Profiles and Levels
 - [AV1 Spec Annex E](https://aomediacodec.github.io/av1-spec/#decoder-model) — Decoder Model

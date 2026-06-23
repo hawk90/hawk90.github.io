@@ -333,6 +333,6 @@ Part 3-02에서 `absl::StatusOr<T>`를 본다. "값이거나 에러"를 한 type
 - [Part 3-04: Status payload](/blog/programming/code-review/abseil/part3-04-status-payload)
 - [Part 3-05: Status ↔ exception](/blog/programming/code-review/abseil/part3-05-status-exception-conversion)
 - [Part 2-07: raw_logging](/blog/programming/code-review/abseil/part2-07-raw-logging) — Status 출력 경로
-- [Effective Modern C++: Item 4 — return types](/blog/programming/cpp/effective-modern-cpp)
+- [Effective Modern C++: Item 4 — return types](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
 - [원문 — absl::Status](https://abseil.io/docs/cpp/guides/status)
 - [gRPC error codes](https://grpc.io/docs/guides/status-codes/)

@@ -239,7 +239,7 @@ std::thread([&] {
 }).detach();
 ```
 
-(`absl::Cleanup`은 [Part 14](/blog/programming/code-review/abseil) 또는 별도 글 참조.)
+(`absl::Cleanup`은 [Part 14](/blog/programming/code-review/abseil/00-preface) 또는 별도 글 참조.)
 
 **count 0으로 초기화**
 

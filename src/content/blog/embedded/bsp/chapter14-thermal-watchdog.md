@@ -381,13 +381,13 @@ $ dmesg | grep -i wdog
 
 ## 다음 편 예고
 
-이 글은 BSP Development 시리즈의 마지막 챕터입니다. 다음 시리즈로 [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/) 또는 [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/)를 추천합니다. BSP가 완성되면 이미지 빌드와 양산 펌웨어 관리가 다음 관심사입니다.
+이 글은 BSP Development 시리즈의 마지막 챕터입니다. 다음 시리즈로 [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/chapter01-problem) 또는 [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)를 추천합니다. BSP가 완성되면 이미지 빌드와 양산 펌웨어 관리가 다음 관심사입니다.
 
 ## 관련 항목
 
 - [Ch 12: 드라이버 추가](/blog/embedded/bsp/chapter12-driver-add) — sensor driver 통합
 - [Ch 13: Power Management](/blog/embedded/bsp/chapter13-power-management) — DVFS와 thermal 연동
-- [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/) — systemd 설정
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — 양산 안전 설계
-- [Embedded Performance Engineering](/blog/embedded/performance-engineering/) — thermal과 성능의 트레이드오프
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/) — watchdog 패턴 비교
+- [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/chapter01-problem) — systemd 설정
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — 양산 안전 설계
+- [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface) — thermal과 성능의 트레이드오프
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) — watchdog 패턴 비교

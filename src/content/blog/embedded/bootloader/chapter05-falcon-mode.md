@@ -268,7 +268,7 @@ Loading args from MMC 0:1
 
 *1.3초 단축*입니다. Linux 부팅이 *상수 시간*이므로 *user space까지의 총 시간*에서 차이가 그대로 유지됩니다.
 
-여기서 *추가로 단축*하려면 *Linux 자체*를 다듬어야 합니다. CONFIG_DEBUG_KERNEL=n, deferred initcall, async probe. 이는 [Embedded Performance Engineering](/blog/embedded/) 시리즈에서 다룹니다.
+여기서 *추가로 단축*하려면 *Linux 자체*를 다듬어야 합니다. CONFIG_DEBUG_KERNEL=n, deferred initcall, async probe. 이는 Embedded Performance Engineering 시리즈에서 다룹니다.
 
 ## Falcon의 한계
 

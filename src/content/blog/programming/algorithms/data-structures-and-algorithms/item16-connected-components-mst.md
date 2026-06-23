@@ -34,7 +34,7 @@ int countComponents(const Graph& g) {
 
 → DFS 한 바퀴 = 한 성분. 시간 O(V + E).
 
-방향 그래프에선 **SCC** (Strongly Connected Component) — [item 21](/blog/programming/algorithms/data-structures-and-algorithms/item21-topological-sort-scc)에서 자세히.
+방향 그래프에선 **SCC** (Strongly Connected Component) — [item 21](/blog/programming/algorithms/data-structures-and-algorithms/item21-non-comparison-external-sort)에서 자세히.
 
 ---
 

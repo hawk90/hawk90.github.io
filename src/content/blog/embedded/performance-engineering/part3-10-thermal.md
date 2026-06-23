@@ -236,4 +236,4 @@ Hard RT는 fixed frequency를 보장하고, 발열도 예산 안에서 관리해
 ## 관련 항목
 
 - [3-09: Power vs Performance](/blog/embedded/performance-engineering/part3-09-power-vs-performance)
-- [4-01: Compiler Optimization](/blog/embedded/performance-engineering/part4-01-compiler-optimization)
+- 4-01: Compiler Optimization

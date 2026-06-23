@@ -213,7 +213,7 @@ void buildHeap(std::vector<T>& arr) {
 2. 루트(최댓값)를 마지막 자리와 swap, 힙 크기 -1, siftDown
 3. n-1번 반복
 
-→ **O(n log n)**. In-place. 자세히는 [item 16](/blog/programming/algorithms/data-structures-and-algorithms/item16-heap-sort).
+→ **O(n log n)**. In-place. 자세히는 [item 16](/blog/programming/algorithms/data-structures-and-algorithms/item16-connected-components-mst).
 
 ## 시간 복잡도
 

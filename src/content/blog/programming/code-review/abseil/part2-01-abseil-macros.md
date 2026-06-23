@@ -311,6 +311,6 @@ Part 2-02에서 `ABSL_PREDICT_TRUE` / `ABSL_PREDICT_FALSE`를 본다. branch hin
 - [Part 2-02: ABSL_PREDICT_TRUE/FALSE](/blog/programming/code-review/abseil/part2-02-predict-branch-hint)
 - [Part 2-05: Conformance / policy](/blog/programming/code-review/abseil/part2-05-conformance-policy)
 - [Part 2-08: thread_annotations](/blog/programming/code-review/abseil/part2-08-thread-annotations)
-- [Effective Modern C++: Item 11 — deleted functions](/blog/programming/cpp/effective-modern-cpp)
+- [Effective Modern C++: Item 11 — deleted functions](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
 - [원문 — absl/base/attributes.h](https://github.com/abseil/abseil-cpp/blob/master/absl/base/attributes.h)
 - [원문 — absl/base/config.h](https://github.com/abseil/abseil-cpp/blob/master/absl/base/config.h)

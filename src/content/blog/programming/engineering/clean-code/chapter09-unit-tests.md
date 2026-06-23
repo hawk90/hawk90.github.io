@@ -249,4 +249,4 @@ assertEquals(50, account.getBalance());
 
 - [Ch 3: 함수](/blog/programming/engineering/clean-code/chapter03-functions) — 함수가 작으면 테스트도 작다
 - [Ch 10: 클래스](/blog/programming/engineering/clean-code/chapter10-classes) — SRP와 테스트 가능성
-- [Refactoring Ch 4: 테스트 구축](/blog/programming/engineering/refactoring/chapter04-testing) — 안전망으로서의 테스트
+- Refactoring Ch 4: 테스트 구축 — 안전망으로서의 테스트

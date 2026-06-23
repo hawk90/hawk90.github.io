@@ -584,6 +584,6 @@ public void CreateDelivery_returns_valid_delivery()
 
 - [Ch 2: What Is a Unit Test?](/blog/programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test)
 - [Ch 4: The Four Pillars of a Good Unit Test](/blog/programming/engineering/khorikov-unit-testing/chapter04-four-pillars)
-- [TDD by Example](/blog/programming/engineering/tdd-by-example/) — Kent Beck의 TDD 입문서
-- [TDD Patterns](/blog/programming/engineering/tdd-patterns/) — 테스트 데이터, 픽스처, 단언 패턴
-- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/) — Extract Function 등 리팩토링 어휘
+- [TDD by Example](/blog/programming/engineering/tdd-by-example/ch01) — Kent Beck의 TDD 입문서
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/pattern01-test) — 테스트 데이터, 픽스처, 단언 패턴
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/pattern01-extract-function) — Extract Function 등 리팩토링 어휘

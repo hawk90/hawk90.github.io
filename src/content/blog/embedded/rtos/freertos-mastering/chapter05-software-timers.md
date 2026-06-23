@@ -318,7 +318,7 @@ void EXTI3_IRQHandler(void) {
 - [Ch 3: Task Management](/blog/embedded/rtos/freertos-mastering/chapter03-task-management)
 - [Ch 4: Queue Management](/blog/embedded/rtos/freertos-mastering/chapter04-queue-management)
 - [Ch 6: Interrupt Management](/blog/embedded/rtos/freertos-mastering/chapter06-interrupt-management)
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/) — 타이머 데몬 구현
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) — 타이머 데몬 구현
 - [ESP32-C3 Mastering Ch 10: FreeRTOS](/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos)
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — 디바운스·watchdog 패턴
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — 디바운스·watchdog 패턴
 - [원문 — FreeRTOS Software Timers](https://www.freertos.org/RTOS-software-timer.html)

@@ -110,7 +110,7 @@ void bl2_main(void)
 
 TF-A 없이 U-Boot만으로도 ARMv8-A를 부팅할 수 있지만, *PSCI가 없으니 SMP를 못 쓰고*, *power management도 한계*가 있습니다. 양산용은 *대부분 TF-A 사용*입니다.
 
-> 더 깊이 — [ARM 아키 관점에서의 같은 주제](/blog/systems/arm/baremetal-boot/chapter06-tfa-bl1-bl2)
+> 더 깊이 — ARM 아키 관점에서의 같은 주제
 
 ## EDK II — UEFI 표준 준수
 

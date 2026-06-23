@@ -264,6 +264,6 @@ IDLE              40123          41384             76%       77%
 - [Ch 10: Stream and Message Buffers](/blog/embedded/rtos/freertos-mastering/chapter10-stream-message-buffers) — 코어 간 통신 (AMP)
 - [Ch 14: Trouble Shooting](/blog/embedded/rtos/freertos-mastering/chapter14-trouble-shooting) — SMP race 디버그
 - [ESP32-C3 Mastering Ch 10: FreeRTOS](/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos) — 단일 코어 ESP32-C3 비교
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/) — SMP 스케줄러 내부
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) — SMP 스케줄러 내부
 - [원문 — FreeRTOS SMP](https://www.freertos.org/symmetric-multiprocessing-introduction.html)
 - [원문 — RP2040 SDK Multicore](https://www.raspberrypi.com/documentation/pico-sdk/high_level.html#group_multicore)

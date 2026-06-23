@@ -253,7 +253,7 @@ Ch 3 — jemalloc / tcmalloc profiling. 표준 malloc 대체 + 내장 profiler.
 
 - [Ch 1: 메모리 회계](/blog/tools/debugging/memory/chapter01-memory-accounting)
 - [Ch 3: jemalloc / tcmalloc profiling](/blog/tools/debugging/memory/chapter03-jemalloc-tcmalloc)
-- [Valgrind Ch 5: Massif](/blog/tools/debugging/valgrind/chapter05-massif-callgrind)
+- [Valgrind Ch 5: Massif](/blog/tools/debugging/valgrind/chapter05-suppressions)
 - [Sanitizers Ch 3: LSan](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks)
 - [heaptrack GitHub](https://github.com/KDE/heaptrack)
 - [KDE blog — heaptrack intro](https://milian.cc/heaptrack/)

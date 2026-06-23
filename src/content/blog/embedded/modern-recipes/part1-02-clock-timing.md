@@ -144,4 +144,4 @@ brr = 16000000 / 9600;                  // 1666.67 → 1666
 - [1-01: 디지털 신호 기초](/blog/embedded/modern-recipes/part1-01-digital-signal-basics)
 - [1-03: GPIO 내부 구조](/blog/embedded/modern-recipes/part1-03-gpio-internals)
 - [1-04: UART 하드웨어 동작](/blog/embedded/modern-recipes/part1-04-uart-hardware)
-- 더 깊이 — [Practical RTOS Internals 2-01: SysTick](/blog/embedded/rtos/practical-internals/)
+- 더 깊이 — [Practical RTOS Internals 2-01: SysTick](/blog/embedded/rtos/practical-internals/00-preface)

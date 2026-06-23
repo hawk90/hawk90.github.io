@@ -132,4 +132,4 @@ qemu-system-x86_64 -enable-kvm -m 4G \
 - [Ch 2: FPGA 아키텍처 Review](/blog/tools/emulation/qemu-fpga-driver/chapter02-fpga-architecture)
 - [QEMU Fake Device Driver](/blog/tools/emulation/qemu-fake-device/chapter01-overview) — fake device 만들기 기초
 - [Driver-RTL Co-simulation](/blog/tools/emulation/driver-cosim/chapter01-why-cosim) — pre-silicon 검증 인접 영역
-- [PCIe Deep Dive](/blog/embedded/hardware/pcie/chapter01-overview) — PCIe 기초
+- [PCIe Deep Dive](/blog/embedded/hardware/pcie/chapter01-fundamentals) — PCIe 기초

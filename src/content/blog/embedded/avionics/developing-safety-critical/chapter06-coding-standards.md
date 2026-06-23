@@ -448,5 +448,5 @@ C++03 subset → C++17 코드와 혼재 → Compile fail → Subset rule 모순.
 
 - [Ch 5: Design](/blog/embedded/avionics/developing-safety-critical/chapter05-design)
 - [Ch 7: Verification](/blog/embedded/avionics/developing-safety-critical/chapter07-verification)
-- [Embedded Automotive — MISRA C](/blog/embedded/automotive/misra-c)
-- [Embedded Automotive — CERT C](/blog/embedded/automotive/cert-c)
+- [Embedded Automotive — MISRA C](/blog/embedded/automotive/misra-c/chapter01-introduction)
+- [Embedded Automotive — CERT C](/blog/embedded/automotive/cert-c/chapter01-intro-vs-misra)

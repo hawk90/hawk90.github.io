@@ -651,4 +651,4 @@ McConnell 원문 5:
 - [Ch 10: General Issues in Using Variables](/blog/programming/engineering/code-complete/ch10-General-Issues-in-Using-Variables)
 - [Ch 12: Fundamental Data Types](/blog/programming/engineering/code-complete/ch12-Fundamental-Data-Types)
 - [Clean Code Ch 2: 의미 있는 이름](/blog/programming/engineering/clean-code/chapter02-meaningful-names)
-- [Google C++ Style: Naming](/blog/programming/cpp/google-cpp-style/ch09-naming)
+- Google C++ Style: Naming

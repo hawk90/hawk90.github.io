@@ -193,7 +193,7 @@ ABI 안정성이 만들어 내는 가치는 다음과 같다.
 - 클라이언트는 새 버전과 링크만 다시 하면 되고, 재컴파일은 필요 없다
 - 라이브러리는 사용자에게 부담을 주지 않고 진화할 수 있다
 
-자세한 내용은 [Effective Modern C++ 항목 22](/blog/programming/cpp/effective-modern-cpp/item22-when-using-the-pimpl-idiom-define-special-member-functions-in-the-implementation-file)에서 다룬다.
+자세한 내용은 [Effective Modern C++ 항목 22](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file)에서 다룬다.
 
 ## 측정 — 실제 벤치마크
 
@@ -395,6 +395,6 @@ Pimpl을 쓸까?
 ## 관련 항목
 
 - [가이드라인 28: Bridge 패턴](/blog/programming/cpp/cpp-software-design/guideline28-build-bridges-to-remove-physical-dependencies) — 동기와 구조
-- [EMC++ 항목 22: Pimpl 특수 멤버 함수](/blog/programming/cpp/effective-modern-cpp/item22-when-using-the-pimpl-idiom-define-special-member-functions-in-the-implementation-file) — 구현 세부
+- [EMC++ 항목 22: Pimpl 특수 멤버 함수](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file) — 구현 세부
 - [Beautiful C++ 항목 23: 템플릿 추상화](/blog/programming/cpp/beautiful-cpp/item23-use-templates-for-abstraction) — 컴파일 타임 대안
 - [가이드라인 22: 값 의미론](/blog/programming/cpp/cpp-software-design/guideline22-prefer-value-semantics-over-reference-semantics) — 일반 객체의 이점

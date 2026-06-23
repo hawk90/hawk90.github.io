@@ -597,5 +597,5 @@ C++20 concept이 duck typing으로 adapter의 일부 역할을 대신한다.
 - [가이드라인 19: Strategy](/blog/programming/cpp/cpp-software-design/guideline19-use-strategy-to-isolate-how-things-are-done) — Adapter도 strategy로 주입할 수 있다
 - [가이드라인 28: Bridge](/blog/programming/cpp/cpp-software-design/guideline28-build-bridges-to-remove-physical-dependencies) — 새 디자인에서의 추상화
 - [가이드라인 35: Decorator](/blog/programming/cpp/cpp-software-design/guideline35-use-decorators-to-add-customization-hierarchically) — 같은 인터페이스 + 기능 추가
-- [GoF Adapter](/blog/programming/design/gof-design-patterns/item07-adapter) — 원본
+- [GoF Adapter](/blog/programming/design/gof-design-patterns/item07-bridge) — 원본
 - [Beautiful C++ 항목 7: 지저분한 struct 캡슐화](/blog/programming/cpp/beautiful-cpp/item07-encapsulate-messy-structs) — C API wrap

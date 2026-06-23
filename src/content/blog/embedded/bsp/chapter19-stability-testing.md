@@ -357,5 +357,5 @@ soak-72h:
 
 - [Ch 18: OTA와 field recovery](/blog/embedded/bsp/chapter18-ota-recovery) — 안정성 실패 시 복구
 - [Ch 20: 양산 환경](/blog/embedded/bsp/chapter20-production) — CI 자동화의 다음 단계
-- [Ch 14: 디버깅 도구](/blog/embedded/bsp/chapter14-debugging-tools) — kdump와 crash 분석
-- [Modern Embedded Recipes — Stress recipes](/blog/embedded/modern-recipes/) — recipe 묶음
+- [Ch 14: 디버깅 도구](/blog/embedded/bsp/chapter14-thermal-watchdog) — kdump와 crash 분석
+- [Modern Embedded Recipes — Stress recipes](/blog/embedded/modern-recipes/00-preface) — recipe 묶음

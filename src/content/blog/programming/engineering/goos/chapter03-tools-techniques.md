@@ -478,5 +478,5 @@ def test_saves_order(database):
 
 - [Ch 2: TDD with Objects](/blog/programming/engineering/goos/chapter02-test-driven-with-objects) — 이전 장
 - [Ch 4: Kick-Starting the TDD Cycle](/blog/programming/engineering/goos/chapter04-kick-starting) — 다음 장
-- [TDD Patterns](/blog/programming/engineering/tdd-patterns/chapter05-tdd-patterns) — Kent Beck의 TDD 패턴 카탈로그, Builder/Fixture 등이 도구 위에서 어떻게 결합되는가
+- TDD Patterns — Kent Beck의 TDD 패턴 카탈로그, Builder/Fixture 등이 도구 위에서 어떻게 결합되는가
 - [Khorikov Ch 7: 단위 테스트 리팩토링](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring) — Builder와 fixture가 테스트 가독성에 미치는 영향

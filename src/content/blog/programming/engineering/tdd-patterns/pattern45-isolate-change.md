@@ -233,4 +233,4 @@ method/class 추출은 JIT inline — 런타임 무관. 분해된 코드는 cach
 - [Pattern 47: Extract Method](/blog/programming/engineering/tdd-patterns/pattern47-extract-method) — 메서드 추출
 - [Pattern 44: Reconcile Differences](/blog/programming/engineering/tdd-patterns/pattern44-reconcile-differences) — 차이 통합
 - [Pattern 49: Extract Interface](/blog/programming/engineering/tdd-patterns/pattern49-extract-interface) — 인터페이스 추출
-- [Working Effectively with Legacy Code](/blog/programming/engineering/wewlc) — Feathers의 sprout/wrap
+- Working Effectively with Legacy Code — Feathers의 sprout/wrap

@@ -222,4 +222,4 @@ It's raining.              (it is)
 - [Chapter 1: Parts of Speech](/blog/writing/only-grammar-book/ch01-parts-of-speech)
 - [Chapter 1.2: Pronouns](/blog/writing/only-grammar-book/ch01-2-pronouns)
 - [Chapter 2.4: Subject-Verb Agreement](/blog/writing/only-grammar-book/ch02-4-subject-verb-agreement)
-- [Elements of Style — Rule 1: 단수 명사의 소유격](/blog/writing/elements-of-style/ch01-rule01-possessive)
+- Elements of Style — Rule 1: 단수 명사의 소유격

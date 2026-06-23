@@ -666,5 +666,5 @@ Chapter 10에서는 **암호 분석 시스템**을 다룬다. AI와 객체지향
 
 - [Ch 8: Satellite-Based Navigation](/blog/programming/design/ooad/chapter08-satellite-based-navigation) — 항법 시스템
 - [Ch 10: Cryptanalysis](/blog/programming/design/ooad/chapter10-cryptanalysis) — 암호 분석
-- [OOSC Ch 31: Object-Oriented Programming and Concurrency](/blog/programming/design/oosc/chapter31-oo-programming-and-concurrency) — 동시성
+- [OOSC Ch 31: Object-Oriented Programming and Concurrency](/blog/programming/design/oosc/chapter31-object-persistence-and-databases) — 동시성
 

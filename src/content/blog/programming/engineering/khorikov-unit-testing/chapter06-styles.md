@@ -396,5 +396,5 @@ public void Valid_email_change_succeeds()
 
 - [Ch 5: Mocks and Test Fragility](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility)
 - [Ch 7: Refactoring Toward Valuable Unit Tests](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring)
-- [TDD Patterns](/blog/programming/engineering/tdd-patterns/) — Self-Shunt, Imposter 등 스타일 보조 패턴
-- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/) — Extract Function, Split Phase 같은 어휘
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/pattern01-test) — Self-Shunt, Imposter 등 스타일 보조 패턴
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/pattern01-extract-function) — Extract Function, Split Phase 같은 어휘

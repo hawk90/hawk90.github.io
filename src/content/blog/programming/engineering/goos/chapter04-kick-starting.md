@@ -588,4 +588,4 @@ class AuctionSniper:
 - [Ch 5: Maintaining the Test-Driven Cycle](/blog/programming/engineering/goos/chapter05-maintaining-control) — 다음 장
 - [Ch 10: Walking Skeleton](/blog/programming/engineering/goos/chapter10-walking-skeleton) — 본 장의 개념을 Auction Sniper 예제로 구체화
 - [TDD by Example Ch 32: Patterns](/blog/programming/engineering/tdd-by-example/ch32) — Detroit school에서의 사이클 시작 방식과 대조
-- [Agile/Lean Engineering — TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-16-tdd-as-xp) — Walking Skeleton의 XP/Lean 맥락
+- Agile/Lean Engineering — TDD as XP — Walking Skeleton의 XP/Lean 맥락

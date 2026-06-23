@@ -240,4 +240,4 @@ Outline 없이 시작하면 중간에 길을 잃습니다. 짧은 글에서도 3
 - [Rule 11: 현수 분사](/blog/writing/elements-of-style/ch01/rule11-dangling)
 - [Rule 13: Make the paragraph the unit of composition](/blog/writing/elements-of-style/ch02/rule13-paragraph)
 - [On Writing Well — Chapter 4: Style](/blog/writing/on-writing-well/ch04-style)
-- [Academic Writing — Unit 1: Process and Product](/blog/writing/academic-writing/unit1-1-process-product)
+- Academic Writing — Unit 1: Process and Product

@@ -319,4 +319,4 @@ Khorikov는 테스트의 가치를 다음과 같이 비유한다.
 - [Ch 5: Mocks and Test Fragility](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility)
 - [Ch 7: Refactoring Toward Valuable Unit Tests](/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring)
 - [TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-08-tdd-as-xp) — TDD가 작동하는 사회적 조건
-- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/) — 리팩토링 어휘
+- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/pattern01-extract-function) — 리팩토링 어휘

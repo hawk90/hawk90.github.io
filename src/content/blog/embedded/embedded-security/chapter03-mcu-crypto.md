@@ -361,5 +361,5 @@ tinycrypt는 *최소한의 알고리즘만* 제공하므로, 정말 작은 BLE p
 - [Ch 4: TrustZone — Cortex-A / Cortex-M](/blog/embedded/embedded-security/chapter04-trustzone)
 - [Ch 5: TEE — OP-TEE / ARM CCA](/blog/embedded/embedded-security/chapter05-tee)
 - [Ch 7: 사이드채널 공격](/blog/embedded/embedded-security/chapter07-side-channel)
-- [CERT C — 보안 코딩 규칙](/blog/embedded/automotive/cert-c)
-- [MISRA C — 안전 임베디드 규칙](/blog/embedded/automotive/misra-c)
+- [CERT C — 보안 코딩 규칙](/blog/embedded/automotive/cert-c/chapter01-intro-vs-misra)
+- [MISRA C — 안전 임베디드 규칙](/blog/embedded/automotive/misra-c/chapter01-introduction)

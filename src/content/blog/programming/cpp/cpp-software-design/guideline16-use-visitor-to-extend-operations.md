@@ -557,4 +557,4 @@ GoF Visitor를 도입할 때 다음을 점검한다.
 - [가이드라인 15: 타입/연산 추가 디자인](/blog/programming/cpp/cpp-software-design/guideline15-design-for-the-addition-of-types-or-operations) — Expression Problem
 - [가이드라인 17: std::variant Visitor](/blog/programming/cpp/cpp-software-design/guideline17-consider-stdvariant-for-implementing-visitor) — 모던 대안
 - [가이드라인 18: Acyclic Visitor의 성능](/blog/programming/cpp/cpp-software-design/guideline18-beware-the-performance-of-acyclic-visitor) — 변형의 함정
-- [GoF Visitor](/blog/programming/design/gof-design-patterns/item22-visitor) — 1994년의 정의
+- [GoF Visitor](/blog/programming/design/gof-design-patterns/item22-template-method) — 1994년의 정의

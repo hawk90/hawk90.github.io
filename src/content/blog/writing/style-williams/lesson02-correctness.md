@@ -209,4 +209,4 @@ Williams의 권장은 네 가지로 정리된다.
 
 - [Lesson 1: Understanding](/blog/writing/style-williams/lesson01-understanding)
 - [Elements of Style Ch 4: Misused Words](/blog/writing/elements-of-style/ch04/words-a-c)
-- [Only Grammar Book Ch 4: Common Mistakes](/blog/writing/only-grammar-book/ch01-parts-of-speech/ch04-common-mistakes)
+- [Only Grammar Book Ch 4: Common Mistakes](/blog/writing/only-grammar-book/ch04-common-mistakes)

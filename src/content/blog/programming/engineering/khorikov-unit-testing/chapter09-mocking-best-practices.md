@@ -373,5 +373,5 @@ public async Task CompleteOrder_integration_test()
 - [Ch 5: Mocks and Test Fragility](/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility)
 - [Ch 8: Why Integration Testing?](/blog/programming/engineering/khorikov-unit-testing/chapter08-why-integration)
 - [Ch 10: Testing the Database](/blog/programming/engineering/khorikov-unit-testing/chapter10-testing-database)
-- [GOOS](/blog/programming/engineering/goos/) — Wrapper와 Adapter 사용법
-- [TDD Patterns](/blog/programming/engineering/tdd-patterns/) — Self-Shunt, Imposter 패턴
+- [GOOS](/blog/programming/engineering/goos/chapter01-what-is-tdd) — Wrapper와 Adapter 사용법
+- [TDD Patterns](/blog/programming/engineering/tdd-patterns/pattern01-test) — Self-Shunt, Imposter 패턴

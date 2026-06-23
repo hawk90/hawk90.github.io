@@ -271,5 +271,5 @@ QEMU opentitan이 가장 빛나는 시나리오.
 
 - [Ch 5: sifive_u 머신](/blog/tools/emulation/qemu-riscv/chapter05-sifive-u)
 - [Ch 7: spike vs QEMU](/blog/tools/emulation/qemu-riscv/chapter07-spike-vs-qemu)
-- [Embedded Security](/blog/embedded/embedded-security/chapter01-overview) — 보안 펌웨어 일반
-- [JSF C++](/blog/embedded/aerospace-standards/jsf-cpp/chapter01-overview) — 보안 코드 표준과의 비교
+- [Embedded Security](/blog/embedded/embedded-security/chapter01-threat-model) — 보안 펌웨어 일반
+- [JSF C++](/blog/embedded/aerospace-standards/jsf-cpp/chapter01-introduction) — 보안 코드 표준과의 비교

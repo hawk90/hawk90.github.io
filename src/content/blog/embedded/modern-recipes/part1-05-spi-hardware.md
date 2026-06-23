@@ -159,4 +159,4 @@ slave 데이터시트에 명시된 최대 SCK를 넘어서면 sporadic하게 rea
 - [1-04: UART 하드웨어 동작](/blog/embedded/modern-recipes/part1-04-uart-hardware)
 - [1-06: I2C 하드웨어](/blog/embedded/modern-recipes/part1-06-i2c-hardware)
 - [1-12: LVDS / 차동 신호 일반](/blog/embedded/modern-recipes/part1-12-lvds-differential)
-- 더 깊이 — [Embedded Performance Engineering: DMA throughput](/blog/embedded/performance-engineering/)
+- 더 깊이 — [Embedded Performance Engineering: DMA throughput](/blog/embedded/performance-engineering/00-preface)

@@ -325,4 +325,4 @@ long one instead."
 - [Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02/rule16-specific)
 - [Rule 18: Avoid a succession of loose sentences](/blog/writing/elements-of-style/ch02/rule18-loose)
 - [On Writing Well — Chapter 3: Clutter](/blog/writing/on-writing-well/ch03-clutter)
-- [Reminder 13: Be clear](/blog/writing/elements-of-style/ch05/reminder13-clear)
+- [Reminder 13: Be clear](/blog/writing/elements-of-style/ch05/reminder13-speaker)

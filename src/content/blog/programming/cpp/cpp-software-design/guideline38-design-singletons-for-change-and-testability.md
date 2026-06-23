@@ -390,4 +390,4 @@ Singleton을 써야 할 때
 - [가이드라인 37: Singleton은 구현 패턴](/blog/programming/cpp/cpp-software-design/guideline37-treat-singleton-as-an-implementation-pattern-not-a-design-pattern) — 본질
 - [가이드라인 19: Strategy](/blog/programming/cpp/cpp-software-design/guideline19-use-strategy-to-isolate-how-things-are-done) — 변경 격리
 - [가이드라인 4: Design for Testability](/blog/programming/cpp/cpp-software-design/guideline04-design-for-testability) — Mock 주입
-- [GoF Singleton](/blog/programming/design/gof-design-patterns/item04-singleton) — GoF 측면
+- [GoF Singleton](/blog/programming/design/gof-design-patterns/item04-prototype) — GoF 측면

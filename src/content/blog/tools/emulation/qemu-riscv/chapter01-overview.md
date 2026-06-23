@@ -189,4 +189,4 @@ ARM 세계에서 *옵션*이었던 QEMU가 RISC-V 세계에서는 *기본*입니
 - [Ch 2: virt 머신 해부](/blog/tools/emulation/qemu-riscv/chapter02-virt-machine)
 - [QEMU Internals — Architecture](/blog/tools/emulation/qemu-internals/chapter01-architecture) — QEMU 내부 구조
 - [QEMU Embedded — RISC-V virt](/blog/tools/emulation/qemu-embedded/chapter03-riscv-virt) — 임베디드 관점
-- [RISC-V ISA 해부](/blog/systems/riscv/isa-anatomy/chapter01-overview) — ISA 기초
+- [RISC-V ISA 해부](/blog/systems/riscv/isa-anatomy/chapter01-what-is-riscv) — ISA 기초

@@ -259,5 +259,5 @@ Part 14~16에서는 본 시리즈에서 다루지 않은 모듈을 추가로 본
 - [Part 1-01: Abseil 개요](/blog/programming/code-review/abseil/part1-01-overview)
 - [Part 13-01: Google 스타일의 Abseil 사용 패턴](/blog/programming/code-review/abseil/part13-01-google-style-patterns)
 - [Part 13-02: 자주 보는 anti-pattern](/blog/programming/code-review/abseil/part13-02-anti-patterns)
-- [Folly Code Review 시리즈](/blog/programming/code-review/folly) — Meta의 같은 종류 라이브러리
+- [Folly Code Review 시리즈](/blog/programming/code-review/folly/00-preface) — Meta의 같은 종류 라이브러리
 - [원문 — Abseil compatibility](https://abseil.io/about/compatibility)

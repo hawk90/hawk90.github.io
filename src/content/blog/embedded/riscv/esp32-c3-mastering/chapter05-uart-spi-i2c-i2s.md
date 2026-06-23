@@ -408,8 +408,8 @@ GPIO Matrix 경로는 *최대 40 MHz*입니다. *기본 핀 번호*(IO MUX 직�
 
 - [Ch 4: GPIO·LEDC·MCPWM](/blog/embedded/riscv/esp32-c3-mastering/chapter04-gpio-ledc-pwm)
 - [Ch 6: ADC·터치 센서 — 아날로그 입력](/blog/embedded/riscv/esp32-c3-mastering/chapter06-adc-touch)
-- [Modern Embedded Recipes Part 4.7: DMA descriptor 설계](/blog/embedded/modern-recipes/part4-07-dma-descriptors)
-- [Practical RTOS Internals Part 2.5: ISR + queue 패턴](/blog/embedded/rtos/practical-internals/part2-05-isr-queue)
+- Modern Embedded Recipes Part 4.7: DMA descriptor 설계
+- Practical RTOS Internals Part 2.5: ISR + queue 패턴
 - [원문 — ESP-IDF SPI Master API](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/peripherals/spi_master.html)
 - [원문 — ESP-IDF I2C API](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/peripherals/i2c.html)
 - [원문 — ESP-IDF I2S API](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/peripherals/i2s.html)

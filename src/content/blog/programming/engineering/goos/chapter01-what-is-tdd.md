@@ -231,4 +231,4 @@ TEST_F(AuctionSniperEndToEndTest, JoinsAuctionUntilAuctionCloses) {
 - [Ch 2: TDD with Objects](/blog/programming/engineering/goos/chapter02-test-driven-with-objects) — 다음 장
 - [TDD by Example Ch 1](/blog/programming/engineering/tdd-by-example/ch01) — Kent Beck의 Detroit school 관점, classicist TDD의 원전
 - [Khorikov Ch 2: 단위 테스트란 무엇인가](/blog/programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test) — London vs Detroit 비교, mockist TDD의 현대적 비판
-- [Agile/Lean Engineering — TDD as XP](/blog/programming/engineering/agile-lean-engineering/part2-16-tdd-as-xp) — TDD의 XP 맥락
+- Agile/Lean Engineering — TDD as XP — TDD의 XP 맥락

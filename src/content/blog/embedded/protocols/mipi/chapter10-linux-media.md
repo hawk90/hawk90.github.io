@@ -258,4 +258,4 @@ DSI 패널의 *고정 timing*에 맞지 않는 mode 강제 → *화면 안 나�
 
 - [Ch 9: A-PHY](/blog/embedded/protocols/mipi/chapter09-a-phy)
 - [Ch 11: 카메라 드라이버](/blog/embedded/protocols/mipi/chapter11-camera-driver)
-- [Linux Drivers (LDD3)](/blog/systems/linux-drivers/ldd3-modern/chapter01-intro)
+- [Linux Drivers (LDD3)](/blog/systems/linux-drivers/ldd3-modern/chapter01-introduction)

@@ -327,7 +327,7 @@ void vApplicationMallocFailedHook(void)
 - [Ch 1: The FreeRTOS Distribution](/blog/embedded/rtos/freertos-mastering/chapter01-distribution)
 - [Ch 3: Task Management](/blog/embedded/rtos/freertos-mastering/chapter03-task-management)
 - [Ch 7: Resource Management](/blog/embedded/rtos/freertos-mastering/chapter07-resource-management) — heap과 critical section의 관계
-- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/) — heap 구현 비교
-- [Modern Embedded Recipes](/blog/embedded/modern-recipes/) — 정적 할당 패턴
+- [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) — heap 구현 비교
+- [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) — 정적 할당 패턴
 - [원문 — FreeRTOS Memory Management](https://www.freertos.org/a00111.html)
 - [원문 — heap_4 source](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/portable/MemMang/heap_4.c)

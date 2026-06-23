@@ -275,4 +275,4 @@ Cormac McCarthy의 단락:
 
 - [Rule 12: 적절한 디자인](/blog/writing/elements-of-style/ch02/rule12-design)
 - [Rule 14: Use the active voice](/blog/writing/elements-of-style/ch02/rule14-active-voice)
-- [On Writing Well — Chapter 9: Bits and Pieces](/blog/writing/on-writing-well/ch09-bits-and-pieces)
+- [On Writing Well — Chapter 9: Bits and Pieces](/blog/writing/on-writing-well/ch09-lead-ending)

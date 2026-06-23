@@ -23,7 +23,7 @@ production C++를 읽고 쓰는 사람에게 Abseil은 두 번 마주친다. 한
 - Bazel 또는 CMake로 Abseil을 도입한 팀의 새 멤버
 - "absl::StatusOr는 std::optional과 뭐가 달라?"가 궁금한 사람
 
-C++ 초심자는 먼저 [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp) 시리즈를 권합니다.
+C++ 초심자는 먼저 [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) 시리즈를 권합니다.
 
 ## 시리즈 구성
 
@@ -184,10 +184,10 @@ Abseil이 왜 존재하는지, 어떻게 빌드하는지부터.
 
 ## 자매 시리즈
 
-- [Effective C++](/blog/programming/cpp/effective-cpp) — 언어 feature 위주
-- [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp) — C++11/14 언어 feature
-- [Beautiful C++](/blog/programming/cpp/beautiful-cpp) — modern 스타일 가이드
-- [Folly Code Review](/blog/programming/code-review/folly) — Meta의 industrial library
+- [Effective C++](/blog/programming/cpp/effective-cpp/item01-view-cpp-as-a-federation-of-languages) — 언어 feature 위주
+- [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) — C++11/14 언어 feature
+- [Beautiful C++](/blog/programming/cpp/beautiful-cpp/item01-use-iso-standard-cpp) — modern 스타일 가이드
+- [Folly Code Review](/blog/programming/code-review/folly/00-preface) — Meta의 industrial library
 
 이 시리즈와의 차이: 위 셋은 *언어 feature*를 다루고, 이 시리즈는 *industrial library를 reading lens로* 다룬다. Abseil은 Google이 사내 production에서 발전시킨 것이고, Folly는 Meta가 같은 일을 한 결과다. 두 라이브러리를 나란히 보면 "production C++의 합의된 패턴"이 무엇인지 보인다.
 
@@ -205,4 +205,4 @@ Abseil이 왜 존재하는지, 어떻게 빌드하는지부터.
 
 - [원문 — Abseil website](https://abseil.io/)
 - [Abseil source — github.com/abseil/abseil-cpp](https://github.com/abseil/abseil-cpp)
-- [Folly Code Review 시리즈](/blog/programming/code-review/folly)
+- [Folly Code Review 시리즈](/blog/programming/code-review/folly/00-preface)

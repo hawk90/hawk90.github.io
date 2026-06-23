@@ -344,5 +344,5 @@ Part 3-03에서 `ASSIGN_OR_RETURN`, `RETURN_IF_ERROR` 매크로를 본다. chain
 - [Part 3-04: Status payload](/blog/programming/code-review/abseil/part3-04-status-payload)
 - [Part 3-05: Status ↔ exception](/blog/programming/code-review/abseil/part3-05-status-exception-conversion)
 - [Part 9-03: absl::optional](/blog/programming/code-review/abseil/part9-03-optional)
-- [Effective Modern C++: pass by value](/blog/programming/cpp/effective-modern-cpp)
+- [Effective Modern C++: pass by value](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
 - [원문 — absl/status/statusor.h](https://github.com/abseil/abseil-cpp/blob/master/absl/status/statusor.h)

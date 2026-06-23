@@ -1036,8 +1036,8 @@ GOOS 스타일 TDD의 핵심:
 - [Ch 1: What Is TDD?](/blog/programming/engineering/goos/chapter01-what-is-tdd) — 시리즈 시작점
 - [TDD by Example](/blog/programming/engineering/tdd-by-example/ch01) — Detroit school을 정면으로 다루는 자매 시리즈
 - [Khorikov: 단위 테스트의 원칙과 관행](/blog/programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test) — GOOS 스타일에 대한 현대적 비판과 보완
-- [TDD Patterns](/blog/programming/engineering/tdd-patterns/chapter05-tdd-patterns) — TDD를 실천하기 위한 패턴 카탈로그
-- [Refactoring Catalog](/blog/programming/design/refactoring-catalog/section-introduction) — REFACTOR 단계를 위한 카탈로그
+- TDD Patterns — TDD를 실천하기 위한 패턴 카탈로그
+- Refactoring Catalog — REFACTOR 단계를 위한 카탈로그
 - [원서 — Growing Object-Oriented Software, Guided by Tests](https://www.growing-object-oriented-software.com/)
 
 *시리즈 완결*

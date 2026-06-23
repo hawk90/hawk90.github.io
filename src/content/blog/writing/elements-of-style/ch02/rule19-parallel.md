@@ -311,4 +311,4 @@ shall fight in the hills; we shall never surrender."
 
 - [Rule 18: Loose Sentence 연쇄](/blog/writing/elements-of-style/ch02/rule18-loose)
 - [Rule 20: Keep related words together](/blog/writing/elements-of-style/ch02/rule20-word-order)
-- [Academic Writing — Unit 5: Sentence Structure](/blog/writing/academic-writing/unit5-1-sentence-structure)
+- Academic Writing — Unit 5: Sentence Structure

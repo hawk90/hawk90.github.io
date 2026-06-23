@@ -190,4 +190,4 @@ S 함수 진입 시 S stack을 쓰지만, 호출 인자는 register로 들어옵
 - [2-03: ARM 레지스터 구조](/blog/embedded/modern-recipes/part2-03-arm-registers)
 - [2-04: Cortex-M 예외 처리](/blog/embedded/modern-recipes/part2-04-cortex-m-exceptions)
 - [2-10: Memory Barrier 실전](/blog/embedded/modern-recipes/part2-10-memory-barrier)
-- 더 깊이 — [Practical RTOS Internals: Secure RTOS](/blog/embedded/rtos/practical-internals/)
+- 더 깊이 — [Practical RTOS Internals: Secure RTOS](/blog/embedded/rtos/practical-internals/00-preface)

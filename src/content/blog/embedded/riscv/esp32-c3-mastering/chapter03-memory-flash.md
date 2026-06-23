@@ -354,9 +354,9 @@ NVS 파티션이 작으면 *binary blob 몇 개*만 넣어도 차버립니다. *
 
 - [Ch 2: RISC-V 코어 — RV32IMC + PMP + 인터럽트 컨트롤러](/blog/embedded/riscv/esp32-c3-mastering/chapter02-riscv-core)
 - [Ch 4: GPIO·LEDC·MCPWM — 디지털 출력의 세 모드](/blog/embedded/riscv/esp32-c3-mastering/chapter04-gpio-ledc-pwm)
-- [Ch 9: RTC·저전력](/blog/embedded/riscv/esp32-c3-mastering/chapter09-rtc-sleep) — RTC SRAM 활용 패턴
-- [Ch 11: 보안·Secure Boot](/blog/embedded/riscv/esp32-c3-mastering/chapter11-secure-boot) — flash encryption
-- [Modern Embedded Recipes Part 6.3: OTA 전략](/blog/embedded/modern-recipes/part6-03-ota-strategy)
-- [Practical RTOS Internals Part 3.2: Heap fragmentation](/blog/embedded/rtos/practical-internals/part3-02-heap)
+- [Ch 9: RTC·저전력](/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build) — RTC SRAM 활용 패턴
+- [Ch 11: 보안·Secure Boot](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security) — flash encryption
+- Modern Embedded Recipes Part 6.3: OTA 전략
+- Practical RTOS Internals Part 3.2: Heap fragmentation
 - [원문 — ESP-IDF Partition Tables](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-guides/partition-tables.html)
 - [원문 — LittleFS Design](https://github.com/littlefs-project/littlefs/blob/master/DESIGN.md)

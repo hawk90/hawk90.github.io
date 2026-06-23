@@ -22,7 +22,7 @@ eFuse에 *키 자체*를 넣지는 않습니다. 키는 보통 2048비트 RSA pu
 
 이 *hash 비교* 한 줄이 체인의 *닻*입니다. 공격자가 자신의 키로 이미지에 서명하더라도, 그 키의 hash가 eFuse 값과 다르므로 BootROM이 거부합니다. eFuse는 한 번 굽혀 있어 *바꿀 수 없으니* 닻은 빠지지 않습니다.
 
-eFuse에 박는 이 hash를 NXP는 *SRK hash*(Super Root Key), Rockchip은 *PK hash*, TI는 *ROTPK hash*(Root Of Trust Public Key)라 부릅니다. 이름은 다르지만 *역할은 같습니다*. [Ch 23](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp-efuse-otp)에서 eFuse의 물리적 구조를 다뤘다면, 이 장은 그 위에 *키*가 어떻게 얹히는지 봅니다.
+eFuse에 박는 이 hash를 NXP는 *SRK hash*(Super Root Key), Rockchip은 *PK hash*, TI는 *ROTPK hash*(Root Of Trust Public Key)라 부릅니다. 이름은 다르지만 *역할은 같습니다*. [Ch 23](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp)에서 eFuse의 물리적 구조를 다뤘다면, 이 장은 그 위에 *키*가 어떻게 얹히는지 봅니다.
 
 ## 단계별 검증 흐름
 
@@ -307,7 +307,7 @@ CTX = HAB_CTX_COMMAND (0xc0)
 
 - [Ch 15: FIT 이미지 — 한 묶음으로 부팅하기](/blog/embedded/bootloader/chapter15-fit-image)
 - [Ch 16: Verified Boot — RSA 서명과 public key 임베딩](/blog/embedded/bootloader/chapter16-verified-boot)
-- [Ch 23: BootROM · eFuse · OTP — SoC의 0단계](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp-efuse-otp)
+- [Ch 23: BootROM · eFuse · OTP — SoC의 0단계](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp)
 - [Ch 25: ARM TF-A 통합 — BL1·BL2·BL31·BL32·BL33](/blog/embedded/bootloader/chapter25-tfa-optee)
 - [Ch 28: Flash layout 설계 — partition과 offset](/blog/embedded/bootloader/chapter28-flash-layout)
 - [Buildroot Ch 18: CVE 추적과 SBOM](/blog/embedded/buildroot/chapter18-security-cve) — 키와 함께 추적할 취약점 관리

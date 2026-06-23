@@ -382,7 +382,7 @@ The results appear to indicate that ...
 
 ## 관련 항목
 
-- [Unit 2.2: Methodology의 문법](/blog/writing/science-research-writing/unit1-1-structure-moves/unit2-2-grammar)
-- [Unit 3.2: Results의 문법](/blog/writing/science-research-writing/unit1-1-structure-moves/unit3-2-grammar)
+- [Unit 2.2: Methodology의 문법](/blog/writing/science-research-writing/unit2-2-grammar)
+- [Unit 3.2: Results의 문법](/blog/writing/science-research-writing/unit3-2-grammar)
 - [AWG Unit 7.3: Results Section](/blog/writing/academic-writing/unit07-3-results)
 - [Elements of Style — Rule 16: 구체적이고 구상적인 언어](/blog/writing/elements-of-style/ch02/rule16-specific)

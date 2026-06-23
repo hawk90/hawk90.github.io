@@ -255,4 +255,4 @@ Google 내부 보통 32~64. 깊이 비용은 무시할 수준.
 - [Part 16-03 — PeriodicSampler](/blog/programming/code-review/abseil/part16-03-periodic-sampler)
 - [Part 2-07 — RAW_LOG](/blog/programming/code-review/abseil/part2-07-raw-logging)
 - [Part 11-04 — stack trace handler](/blog/programming/code-review/abseil/part11-04-stack-trace-handler)
-- [Folly Part 9-01 — symbolizer](/blog/programming/code-review/folly/part9-01-symbolizer)
+- Folly Part 9-01 — symbolizer

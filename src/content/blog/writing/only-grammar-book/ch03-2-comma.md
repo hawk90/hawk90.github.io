@@ -400,5 +400,5 @@ The report, which was submitted on May 14, 2026, has been approved.
 - [Chapter 3.1: End Marks](/blog/writing/only-grammar-book/ch03-1-end-marks)
 - [Chapter 3.3: Semicolon and Colon](/blog/writing/only-grammar-book/ch03-3-semicolon-colon)
 - [Chapter 4.4: Fragments and Run-ons](/blog/writing/only-grammar-book/ch04-4-fragment-runon)
-- [Elements of Style — Rule 2: 직렬 쉼표](/blog/writing/elements-of-style/ch01-rule02-serial-comma)
-- [Elements of Style — Rule 5: Comma Splice](/blog/writing/elements-of-style/ch01-rule05-comma-splice)
+- Elements of Style — Rule 2: 직렬 쉼표
+- Elements of Style — Rule 5: Comma Splice

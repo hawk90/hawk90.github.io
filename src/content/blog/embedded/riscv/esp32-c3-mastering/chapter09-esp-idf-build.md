@@ -346,6 +346,6 @@ esptool.py --port /dev/ttyUSB0 flash_id
 - [Ch 8: BLE 5.0 — GAP·GATT·Coded PHY](/blog/embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt)
 - [Ch 10: FreeRTOS on ESP32-C3](/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos)
 - [Ch 11: 보안 — Secure Boot, Flash Encryption](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security) — 빌드 결과물 서명
-- [Modern Embedded Recipes Part 2: 빌드 시스템](/blog/embedded/modern-recipes/) — CMake 일반론
+- [Modern Embedded Recipes Part 2: 빌드 시스템](/blog/embedded/modern-recipes/00-preface) — CMake 일반론
 - [원문 — ESP-IDF Build System](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-guides/build-system.html)
 - [원문 — ESP Component Registry](https://components.espressif.com/)

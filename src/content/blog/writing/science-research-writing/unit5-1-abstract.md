@@ -275,7 +275,7 @@ non-technical 언어
 
 ## 관련 항목
 
-- [Unit 4.2: Discussion의 문법](/blog/writing/science-research-writing/unit1-1-structure-moves/unit4-2-grammar)
-- [Unit 5.2: Title과 시리즈 마무리](/blog/writing/science-research-writing/unit1-1-structure-moves/unit5-2-title-closing)
+- [Unit 4.2: Discussion의 문법](/blog/writing/science-research-writing/unit4-2-grammar)
+- [Unit 5.2: Title과 시리즈 마무리](/blog/writing/science-research-writing/unit5-2-title-closing)
 - [AWG Unit 7.1: 출판 유형과 IMRD](/blog/writing/academic-writing/unit07-1-publication-types)
 - [Elements of Style — Rule 17: Omit needless words](/blog/writing/elements-of-style/ch02/rule17-omit)

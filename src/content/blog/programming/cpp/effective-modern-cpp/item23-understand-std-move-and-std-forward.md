@@ -252,7 +252,7 @@ void wrapper(T&& arg) {
 
 ## 관련 항목
 
-- [항목 22: Pimpl](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file-define-special-members-in-impl-file) — move 자동 생성 차단의 영향
+- [항목 22: Pimpl](/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file) — move 자동 생성 차단의 영향
 - [항목 24: 보편 참조 vs rvalue 참조](/blog/programming/cpp/effective-modern-cpp/item24-distinguish-universal-references-from-rvalue-references)
 - [항목 25: move/forward 사용처](/blog/programming/cpp/effective-modern-cpp/item25-use-move-on-rvalue-refs-and-forward-on-universal-refs)
 - [항목 28: 참조 축약](/blog/programming/cpp/effective-modern-cpp/item28-understand-reference-collapsing) — forward 동작 원리

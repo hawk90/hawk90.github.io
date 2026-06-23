@@ -257,5 +257,5 @@ Industrial과 자동차 grade는 105°C까지 지원합니다. 그 외 환경에
 
 ## 관련 항목
 
-- [1-01: UART 디버깅](/blog/embedded/modern-recipes/part1-01-uart-debugging)
+- 1-01: UART 디버깅
 - [1-03: PCIe BAR](/blog/embedded/modern-recipes/part11-03-pcie-bar)

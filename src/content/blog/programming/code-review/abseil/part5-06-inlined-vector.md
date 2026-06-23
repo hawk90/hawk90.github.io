@@ -206,4 +206,4 @@ inline 복귀 의도라면 `shrink_to_fit`. 그러나 매번 `shrink_to_fit`이 
 
 - [Part 5-05 — FixedArray](/blog/programming/code-review/abseil/part5-05-fixed-array)
 - [Part 5-07 — Swiss Table internals](/blog/programming/code-review/abseil/part5-07-swiss-table-internals)
-- [Folly Part 8-x — small_vector](/blog/programming/code-review/folly) — Meta의 유사 컨테이너
+- [Folly Part 8-x — small_vector](/blog/programming/code-review/folly/00-preface) — Meta의 유사 컨테이너

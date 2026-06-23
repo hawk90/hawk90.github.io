@@ -328,7 +328,7 @@ Ch 2 — heaptrack. Valgrind보다 가벼운 heap profiler. 운영 환경에도 
 
 - [Ch 2: heaptrack](/blog/tools/debugging/memory/chapter02-heaptrack)
 - [Sanitizers Ch 3: LSan](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks)
-- [Valgrind Ch 5: Massif](/blog/tools/debugging/valgrind/chapter05-massif-callgrind)
+- [Valgrind Ch 5: Massif](/blog/tools/debugging/valgrind/chapter05-suppressions)
 - [Kernel Ch 6: crash / drgn](/blog/tools/debugging/kernel/chapter06-crash-drgn) — kernel 측 메모리
 - `man 5 proc` — /proc 전체
 - [Brendan Gregg — Linux memory tools](https://www.brendangregg.com/Slides/SCaLE15x_Linux_perf_tools.pdf)
