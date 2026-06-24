@@ -12,7 +12,7 @@ draft: false
 
 > **"POWERLINK는 *MN이 모든 송신 권한을 줄로 세워* 결정성을 만들고, *OpenSAFETY*는 그 위에 *black channel*로 SIL 3까지 한 번에 올라갑니다."** — 표준 Ethernet 하드웨어 + 오픈소스 stack으로 EtherCAT급 사이클을 내는 *유일한* 옵션입니다.
 
-POWERLINK는 *B&R Automation*이 2001년에 만들고 *EPSG(Ethernet POWERLINK Standardization Group)*가 표준화한 산업 이더넷입니다. EtherCAT보다 5년 먼저 나왔고, *오픈소스 stack(openPOWERLINK)*과 *오픈 표준*이라는 점에서 다른 모든 경쟁자와 다릅니다.
+POWERLINK는 *B&R Automation*이 2001년에 만들고 *EPSG(Ethernet POWERLINK Standardization Group)*가 표준화한 산업 이더넷입니다. EtherCAT(2003)보다 2년 먼저 나왔고, *오픈소스 stack(openPOWERLINK)*과 *오픈 표준*이라는 점에서 다른 모든 경쟁자와 다릅니다.
 
 이 장은 POWERLINK의 *slot polling 메커니즘*과 그 위에 올라가는 *OpenSAFETY*(EN 50325-5 / IEC 61784-3)를 다룹니다. 둘이 합쳐지면 *별도의 safety bus 없이* 동일 이더넷 케이블로 SIL 3 safety가 가능합니다.
 
