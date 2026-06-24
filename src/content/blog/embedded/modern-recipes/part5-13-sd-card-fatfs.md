@@ -1,6 +1,6 @@
 ---
 title: "SD Card + FatFs 구현 — SPI/SDIO 모드·CSD/CID·Wear"
-date: 2026-04-14T09:61:00
+date: 2026-04-14T10:01:00
 description: "SPI 모드 vs SDIO·FatFs port·long filename."
 series: "Modern Embedded Recipes"
 seriesOrder: 61

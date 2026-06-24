@@ -1,6 +1,6 @@
 ---
 title: "Part 2-20: XP Team Roles"
-date: 2026-05-20T28:00:00
+date: 2026-05-21T04:00:00
 description: "XP의 팀 역할 — Coach·Tracker·Tester·Manager·Customer 등.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 28

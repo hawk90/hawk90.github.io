@@ -1,6 +1,6 @@
 ---
 title: "Chapter 1.8: Interjections"
-date: 2026-05-14T01:80:00
+date: 2026-05-14T02:20:00
 description: "감탄사의 사용 — 감정 표현, 구두점, 글의 종류별 적합성."
 series: "The Only Grammar Book You'll Ever Need"
 seriesOrder: 9

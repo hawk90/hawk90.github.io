@@ -1,6 +1,6 @@
 ---
 title: "Part 3-12: Daily Scrum — 15분 standup"
-date: 2026-05-20T44:00:00
+date: 2026-05-21T20:00:00
 description: "3 질문 방식 vs walking the board — 어느 쪽이 더 효과적인가.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 44

@@ -1,6 +1,6 @@
 ---
 title: "Part 5-07: Respect People"
-date: 2026-05-20T74:00:00
+date: 2026-05-23T02:00:00
 description: "engaged worker — Lean의 핵심은 사람이다.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 74

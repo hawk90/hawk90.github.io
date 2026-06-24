@@ -1,6 +1,6 @@
 ---
 title: "Part 3-15: Backlog Refinement (grooming)"
-date: 2026-05-20T47:00:00
+date: 2026-05-21T23:00:00
 description: "10% 시간 원칙 — backlog refinement의 자리와 진행법.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 47

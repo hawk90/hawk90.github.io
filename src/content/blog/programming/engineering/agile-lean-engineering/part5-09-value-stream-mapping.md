@@ -1,6 +1,6 @@
 ---
 title: "Part 5-09: Value Stream Mapping — 그리는 법"
-date: 2026-05-20T76:00:00
+date: 2026-05-23T04:00:00
 description: "현재 상태 VSM·미래 상태 VSM — 그리는 단계와 해석.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 76

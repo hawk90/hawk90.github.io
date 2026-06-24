@@ -1,6 +1,6 @@
 ---
 title: "Part 3-07: Product Backlog — DEEP·ordering·refinement"
-date: 2026-05-20T39:00:00
+date: 2026-05-21T15:00:00
 description: "DEEP(Detailed appropriately·Estimated·Emergent·Prioritized) backlog 관리.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 39

@@ -1,6 +1,6 @@
 ---
 title: "Part 3-19: Nexus / Scrum@Scale 개요"
-date: 2026-05-20T51:00:00
+date: 2026-05-22T03:00:00
 description: "멀티팀 scaling — Schwaber Nexus와 Sutherland Scrum@Scale 비교.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 51

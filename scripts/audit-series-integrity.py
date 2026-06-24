@@ -121,6 +121,15 @@ def audit_series(name, chapters):
             issues["blocking"].append(f"title 누락: {c['path']}")
         if not c["has_date"]:
             issues["blocking"].append(f"date 누락: {c['path']}")
+        else:
+            # 시각 형식 검증 — hour 0-23, minute/second 0-59 (T24:00:00 같은 잘못된 값 차단)
+            tm = re.search(r"T(\d{2}):(\d{2}):(\d{2})", str(c["date"]))
+            if tm:
+                hh, mm, ss = (int(x) for x in tm.groups())
+                if hh > 23 or mm > 59 or ss > 59:
+                    issues["blocking"].append(
+                        f"잘못된 시각: {c['date']} ({c['path']})"
+                    )
         if c["order"] == 0:
             issues["warning"].append(f"seriesOrder=0 또는 누락: {c['path']}")
 

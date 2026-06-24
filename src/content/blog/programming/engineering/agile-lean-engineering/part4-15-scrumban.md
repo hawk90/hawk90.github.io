@@ -1,6 +1,6 @@
 ---
 title: "Part 4-15: Scrumban — 두 방법 결합"
-date: 2026-05-20T67:00:00
+date: 2026-05-22T19:00:00
 description: "Scrum 구조 + Kanban flow — Ladas Scrumban의 통합.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 67

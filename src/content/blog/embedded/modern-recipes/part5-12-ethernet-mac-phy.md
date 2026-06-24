@@ -1,6 +1,6 @@
 ---
 title: "Ethernet MAC+PHY 통합 — RMII·lwIP·DMA Descriptor"
-date: 2026-04-14T09:60:00
+date: 2026-04-14T10:00:00
 description: "RMII·MDIO·lwIP raw API·DHCP·HTTP server."
 series: "Modern Embedded Recipes"
 seriesOrder: 60

@@ -1,6 +1,6 @@
 ---
 title: "Part 4-08: Implement Feedback Loops"
-date: 2026-05-20T60:00:00
+date: 2026-05-22T12:00:00
 description: "daily standup·replenishment meeting·retrospective의 cadence.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 60

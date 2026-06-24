@@ -1,6 +1,6 @@
 ---
 title: "Chapter 1.7: Conjunctions"
-date: 2026-05-14T01:70:00
+date: 2026-05-14T02:10:00
 description: "접속사의 종류 — 등위접속사(FANBOYS), 종속접속사, 상관접속사. 평행 구조와 쉼표 사용."
 series: "The Only Grammar Book You'll Ever Need"
 seriesOrder: 8

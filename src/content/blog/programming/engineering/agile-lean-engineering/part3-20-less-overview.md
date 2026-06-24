@@ -1,6 +1,6 @@
 ---
 title: "Part 3-20: LeSS — Large-Scale Scrum"
-date: 2026-05-20T52:00:00
+date: 2026-05-22T04:00:00
 description: "feature team 강조와 단일 backlog — Larman·Vodde의 LeSS.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 52

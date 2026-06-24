@@ -1,6 +1,6 @@
 ---
 title: "Part 3-14: Sprint Retrospective — Agile Kaizen"
-date: 2026-05-20T46:00:00
+date: 2026-05-21T22:00:00
 description: "4Ls·start-stop-continue·sailboat·5 whys — retrospective 패턴 카탈로그.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 46

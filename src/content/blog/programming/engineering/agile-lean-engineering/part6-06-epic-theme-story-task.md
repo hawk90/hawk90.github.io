@@ -1,6 +1,6 @@
 ---
 title: "Part 6-06: Epic / Theme / Story / Task"
-date: 2026-05-20T85:00:00
+date: 2026-05-23T13:00:00
 description: "granularity 계층 — 어디서 어느 단위로 자를 것인가.'
 series: 'Agile & Lean Software Engineering"
 seriesOrder: 85
