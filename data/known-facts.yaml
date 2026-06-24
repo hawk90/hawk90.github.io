@@ -151,6 +151,7 @@ nvidia_jetson_verified:
   - Jetson Orin Nano
   - Jetson Orin NX
   - Jetson AGX Orin
+  - Jetson AGX Thor     # 2025-08 GA, $3499. Blackwell + 14× Neoverse-V3AE, 128 GB LPDDR5X, 2070 FP4 TFLOPS, 130 W. https://nvidianews.nvidia.com/news/nvidia-blackwell-powered-jetson-thor-now-available-accelerating-the-age-of-general-robotics
+  - Jetson T5000       # Thor 모듈
 
-nvidia_jetson_roadmap:
-  - Jetson Thor         # 2025+ 예정, 발표만 (구체 spec 단정 금지)
+nvidia_jetson_roadmap: []
