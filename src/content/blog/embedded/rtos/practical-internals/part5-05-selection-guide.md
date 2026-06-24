@@ -25,14 +25,14 @@ tags: [selection, comparison, freertos, zephyr, vxworks, qnx, integrity]
 |---|---|---|---|---|---|
 | FreeRTOS | MIT | 4-10 KB | v11+ | SafeRTOS (상업 fork) | 매우 큼 |
 | Zephyr | Apache 2.0 | 8-50 KB | ✓ | DO-178C 진행 | 매우 큼·LF |
-| Eclipse ThreadX (Azure RTOS) | proprietary (무료) | 2-15 KB | optional | IEC 61508·ISO 26262 | Microsoft·Eclipse |
+| Eclipse ThreadX (구 Azure RTOS) | MIT (2024 오픈소스) | 2-15 KB | optional | IEC 61508·ISO 26262 | Eclipse Foundation |
 | RT-Thread | Apache 2.0 | 4-50 KB | ✓ | 일부 | 중국 dominant |
 | NuttX | Apache 2.0 | 8-100 KB | ✓ | DO-178C optional | PX4·NASA |
 | VxWorks | commercial | 50-500 KB | ✓ | DO-178C·ISO 26262 | Wind River |
 | QNX | commercial | 100 KB+ | ✓ | ASIL D·DO-178C | BlackBerry |
 | INTEGRITY | commercial | 50 KB+ | ✓ | DO-178C Level A·EAL 6+ | Green Hills |
 | SafeRTOS | commercial | 6 KB+ | × | IEC 61508·ISO 26262 | WHIS |
-| µC/OS (Micrium) | proprietary | 5-15 KB | optional | IEC 62304 | Silicon Labs |
+| µC/OS (Micrium) | Apache 2.0 (2020 오픈소스) | 5-15 KB | optional | IEC 62304 | Weston Embedded |
 | PX5 | commercial | 1-5 KB | × | DO-178C 진행 | 2024년 신규 |
 
 > 참고 — Arm Mbed OS는 2026년 7월 EOL이 공식 예고되어 *신규 프로젝트에는 권장되지 않습니다*. 기존 프로젝트는 Zephyr나 FreeRTOS로의 이전 경로를 미리 계획해 두는 편이 안전합니다.
@@ -94,18 +94,17 @@ tags: [selection, comparison, freertos, zephyr, vxworks, qnx, integrity]
 
 - FreeRTOS (MIT)
 - Zephyr·NuttX·RT-Thread (Apache 2.0)
+- Eclipse ThreadX (MIT) — 구 Azure RTOS, Microsoft가 2024년 Eclipse로 기증
+- µC/OS (Apache 2.0) — 2020년 오픈소스화, Weston Embedded 관리
 - eCos (modified GPL)
 - Linux PREEMPT_RT (GPL)
 
-Free for commercial (proprietary)
-
-- Eclipse ThreadX — 과거 Azure RTOS, Microsoft가 Eclipse로 기증
-
-Commercial
+Commercial (라이선스 또는 인증 패키지 유료)
 
 - VxWorks·QNX·INTEGRITY — 수만~수십만 달러
-- SafeRTOS·µC/OS-III — 수만 달러
-- PX5 — 2024년 등장한 신규 옵션
+- SafeRTOS — 수만 달러
+- µC/OS-III 안전 인증 패키지(Weston Embedded) — 별도 유료
+- PX5 — 신규 상업 옵션
 
 GPL은 임베디드 제품 distribution 시 *소스 공개 의무*가 따라옵니다. 자동차·proprietary 시스템에서는 Apache 2.0 또는 MIT가 일반적인 선택입니다.
 
