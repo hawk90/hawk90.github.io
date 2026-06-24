@@ -61,7 +61,7 @@ TODO: RV64IMAFDC = RV64GC
 
 ## 프로파일
 
-TODO: RVA20, RVA22, RVI20
+확장이 모듈형이다 보니 구현마다 조합이 달라 같은 RISC-V라도 바이너리 호환이 깨질 수 있다. 이를 막으려고 RISC-V International은 **프로파일**이라는 표준 확장 묶음을 정의한다. 임베디드용 RVI20, application용 RVA20·RVA22, 그리고 벡터·하이퍼바이저를 필수화한 최신 **RVA23**(2024년 비준)이 있다. 자세한 내용은 [Ch 18: 확장 로드맵](/blog/systems/riscv/isa-anatomy/chapter18-extension-roadmap)에서 다룬다.
 
 ---
 
