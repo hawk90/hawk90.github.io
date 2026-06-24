@@ -41,6 +41,12 @@ pcie_standards:
   - CXL 3.1
   - CXL 3.2
 
+# ─── 가속기 인터커넥트 ─────────────────────────────────────────
+accelerator_interconnect:
+  - NVLink               # NVIDIA proprietary (4세대 GH200 / 5세대 B200)
+  - UALink               # open consortium
+  - UALink 200G 1.0      # 2025-04-08 비준. 200 Gbps/lane, ≤1024 accel. https://www.phoronix.com/news/UALink-200G-1.0-Released
+
 # ─── DMTF / SPDM ───────────────────────────────────────────────
 dmtf_standards:
   - DSP0274      # SPDM (Security Protocol Data Model)
@@ -77,6 +83,8 @@ nvidia_gpu_verified:
   - B100                 # Blackwell first
   - B200                 # Blackwell SXM6, 192 GB HBM3E
   - GB200                # Grace Blackwell
+  - B300                 # Blackwell Ultra — 양산 2026-01. 288 GB HBM3E(12-Hi), 8 TB/s, 1400 W. https://www.tomshardware.com/pc-components/gpus/nvidia-announces-blackwell-ultra-b300-1-5x-faster-than-b200-with-288gb-hbm3e-and-15-pflops-dense-fp4
+  - GB300                # Grace Blackwell Ultra (NVL72)
   - L4
   - L40
   - L40S
@@ -85,8 +93,8 @@ nvidia_gpu_verified:
 
 # ─── 미발표·로드맵 NVIDIA GPU (qualifier 의무) ────────────────
 nvidia_gpu_roadmap:
-  - B300                 # 차세대, 미양산 (단정 금지)
-  - Vera Rubin           # 차차세대
+  - Vera Rubin           # 양산 진입 2026-06(발표), 볼륨 램프 H2 2026 — qualifier 권장
+  - Rubin Ultra          # 차차세대
 
 # ─── 검증된 AMD GPU SKU ──────────────────────────────────────
 amd_gpu_verified:
@@ -111,9 +119,10 @@ intel_ai_verified:
 # ─── 검증된 한국 NPU 회사·제품 ───────────────────────────────
 korean_npu_verified:
   - Sapeon X220
-  - Sapeon X330         # 일부 자료에 등장, qualifier 권장
-  - Rebellions Atom
+  - Sapeon X330         # FP8 367 TFLOPS @ 120 W, GDDR. Sapeon-Rebellions 합병
+  - Rebellions Atom     # 16 GB GDDR6, 256 GB/s
   - Rebellions Atom+    # 공식 발표
+  - Rebellions REBEL-Quad  # Hot Chips 2025 — 144 GB HBM3E, UCIe 4-chiplet, 1 PFLOPS FP16. https://rebellions.ai/newsroom/rebellions-rebel-quad-ucie-and-144gb-hbm3e-accelerator-at-hot-chips-2025/
 
 # ─── 검증된 Google TPU ───────────────────────────────────────
 google_tpu_verified:

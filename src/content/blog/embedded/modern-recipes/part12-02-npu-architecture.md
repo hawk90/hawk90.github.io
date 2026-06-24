@@ -81,8 +81,8 @@ HVX_Vector vc = Q6_Vw_vadd_VwVw(va, vb);   /* 32 × 32-bit add 한 cycle */
 ## Apple Neural Engine
 
 ```text
-ANE (A17, M2, M3):
-  ~17 TOPS (M2), ~18 TOPS (A17)
+ANE (A17 Pro, M2):
+  ~15.8 TOPS (M2), 35 TOPS INT8 (A17 Pro)
   16 cores (compute units)
   Core ML로만 access
 ```
