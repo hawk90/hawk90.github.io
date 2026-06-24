@@ -93,8 +93,8 @@ nvidia_gpu_verified:
 
 # ─── 미발표·로드맵 NVIDIA GPU (qualifier 의무) ────────────────
 nvidia_gpu_roadmap:
-  - Vera Rubin           # 양산 진입 2026-06(발표), 볼륨 램프 H2 2026 — qualifier 권장
-  - Rubin Ultra          # 차차세대
+  - Vera Rubin           # review:2026-Q4 양산 진입 2026-06(발표), 볼륨 램프 H2 2026 — qualifier 권장
+  - Rubin Ultra          # review:2027-Q2 차차세대
 
 # ─── 검증된 AMD GPU SKU ──────────────────────────────────────
 amd_gpu_verified:
@@ -105,7 +105,7 @@ amd_gpu_verified:
 
 # ─── 미발표 AMD GPU (qualifier 의무) ──────────────────────────
 amd_gpu_roadmap:
-  - MI400               # 차세대, 미발표
+  - MI400               # review:2026-Q4 차세대, AMD 2026 출시 예고
 
 # ─── 검증된 Intel AI 가속기 ──────────────────────────────────
 intel_ai_verified:

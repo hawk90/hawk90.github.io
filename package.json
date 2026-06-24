@@ -43,7 +43,8 @@
     "audit:links": "python3 scripts/audit-internal-links.py",
     "audit:links:fix": "python3 scripts/resolve-internal-links.py --apply",
     "audit:series": "python3 scripts/audit-series-integrity.py",
-    "audit:images": "python3 scripts/audit-image-coverage.py --top 30"
+    "audit:images": "python3 scripts/audit-image-coverage.py --top 30",
+    "audit:roadmap": "python3 scripts/audit-roadmap-staleness.py"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.1",
