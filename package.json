@@ -26,7 +26,7 @@
   "scripts": {
     "dev": "astro dev",
     "prebuild": "node scripts/build-og.mjs --prune",
-    "build": "astro build",
+    "build": "NODE_OPTIONS=${NODE_OPTIONS:---max-old-space-size=8192} astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
