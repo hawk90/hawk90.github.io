@@ -18,8 +18,8 @@ draft: false
 
 | 세대 | 양산 | per-pin | Signaling | Chip BW | 전형적 용도 |
 |------|------|---------|-----------|---------|-------------|
-| GDDR5 | 2008 | 7 Gbps | NRZ | 28 GB/s | 1080 Ti |
-| GDDR5X | 2016 | 11.5 Gbps | NRZ | 46 GB/s | 1080 |
+| GDDR5 | 2008 | 7 Gbps | NRZ | 28 GB/s | GTX 980 |
+| GDDR5X | 2016 | 10~11.5 Gbps | NRZ | 46 GB/s | GTX 1080 / 1080 Ti |
 | GDDR6 | 2018 | 14~16 Gbps | NRZ | 64 GB/s | RTX 20/30 |
 | GDDR6X | 2020 | 19~24 Gbps | PAM4 | 96 GB/s | RTX 30/40 |
 | GDDR7 | 2024 | 32~36 Gbps | PAM3 | 128~144 GB/s | RTX 50 |
