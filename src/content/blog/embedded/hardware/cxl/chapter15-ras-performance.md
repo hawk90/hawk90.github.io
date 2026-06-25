@@ -95,6 +95,29 @@ CXL Performance Considerations는 *spec Ch 13 (작년 추가)*에서 다루는 *
 
 대부분 AI workload는 *memory-bound* — *Roofline의 inclined region*에 위치. *CXL.mem의 effective bandwidth*가 *bottleneck*.
 
+## CHMU — Hot-Page Monitoring Unit (CXL 3.2)
+
+Roofline에서 *CXL.mem이 bottleneck*이라는 결론이 나오면, 다음 질문은 *무엇을 로컬 DRAM으로 끌어올릴까*입니다. *자주 쓰는(hot) 페이지는 로컬 DRAM에, 드물게 쓰는(cold) 페이지는 CXL에* 두는 *티어링*이 핵심인데, 문제는 *어떤 페이지가 hot인지를 어떻게 아느냐*입니다. 기존에는 *호스트가 page table의 access bit을 주기적으로 스캔*하는 소프트웨어 휴리스틱에 의존했고, 이는 *부정확하고 CPU를 먹었습니다*.
+
+CXL 3.2가 추가한 **CHMU**(Hotness/Hot-page Monitoring Unit)는 이 측정을 *디바이스 하드웨어로 내립니다*. 메모리 디바이스 안에 카운터를 박아, *실제 디바이스에 도달한 접근*(호스트 캐시에서 처리된 hit은 제외)을 *software-configurable 단위(unit, 보통 page 이상)*로 셉니다.
+
+동작은 단순합니다.
+
+- 각 unit의 접근 수가 *epoch 임계값*을 넘으면 순환 **Hotlist**에 큐잉됩니다.
+- 소프트웨어는 이 Hotlist를 *폴링*하거나 *인터럽트*로 받아, 해당 unit을 로컬 DRAM으로 *승격(promote)*합니다.
+- 외부 프로파일러 없이 *디바이스가 직접 telemetry를 OS에 올립니다*.
+
+| 항목 | 기존 SW 스캔 | CHMU |
+|------|-------------|------|
+| 측정 위치 | 호스트 CPU | 디바이스 HW |
+| 근거 | page table access bit 추정 | 실 접근 카운트 |
+| 오버헤드 | 주기적 CPU 스캔 | 거의 없음 |
+| 단위 | page 고정 | software-configurable |
+
+Linux는 CHMU를 *perf 드라이버로 노출*하는 작업이 진행 중이고, QEMU에도 *CHMU 에뮬레이션 패치*가 올라와 있습니다. [Ch 12](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 본 QEMU 환경이면 *실 하드웨어 없이* hotlist 동작을 실험할 수 있습니다.
+
+이 하드웨어 측정은 [HBM Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)에서 본 *hot/warm/cold KV cache 티어링*을 *추측이 아니라 측정*으로 돌리는 토대가 됩니다.
+
 ## Compliance Testing
 
 CXL Spec Ch 14 *Compliance Testing*은 *디바이스가 표준에 부합*하는지 검증합니다.
