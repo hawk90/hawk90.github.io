@@ -45,6 +45,7 @@
     "audit:series": "python3 scripts/audit-series-integrity.py",
     "audit:images": "python3 scripts/audit-image-coverage.py --top 30",
     "audit:roadmap": "python3 scripts/audit-roadmap-staleness.py",
+    "audit:tone": "python3 scripts/audit-tone-consistency.py",
     "check:duplicate": "python3 scripts/check-duplicate-topic.py"
   },
   "dependencies": {
