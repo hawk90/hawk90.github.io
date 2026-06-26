@@ -9,29 +9,29 @@ tags: [embedded, bootloader, smp, psci, arm64, kernel, hotplug]
 
 ## 한 줄 요약
 
-> **"SMP 부트는 *primary CPU가 secondary CPU 각각에 진입점을 알려 주고 한 줄씩 일으켜 세우는* 순서다."** — BL1·BL2는 single CPU로 진행되고, BL31이 primary 한 명만 BL33으로 보낸다. 나머지 CPU들은 *Linux가 primary 위에서 동작한 뒤에야* PSCI SMC로 깨워진다. 옛 spin-table 방식과 현재 표준 PSCI 방식이 *어떻게 다른지*가 핵심이다.
+> **"SMP 부트는 *primary CPU가 secondary CPU 각각에 진입점을 알려 주고 한 줄씩 일으켜 세우는* 순서입니다."** — BL1·BL2는 single CPU로 진행되고, BL31이 primary 한 명만 BL33으로 보냅니다. 나머지 CPU들은 *Linux가 primary 위에서 동작한 뒤에야* PSCI SMC로 깨워집니다. 옛 spin-table 방식과 현재 표준 PSCI 방식이 *어떻게 다른지*가 핵심입니다.
 
-[Ch 32](/blog/embedded/bootloader/chapter32-psci-smccc)에서 PSCI CPU_ON의 ABI를 봤다. 이 장은 그 *반대편*을 본다. CPU_ON이 trigger된 뒤 secondary CPU가 *어떤 어셈블리를 통과해* Linux의 `secondary_start_kernel`에 도착하는지, 그 사이에 *어떤 자료구조가 초기화*되는지를 따라간다. 비교 대상으로 옛 spin-table 방식도 함께 본다.
+[Ch 32](/blog/embedded/bootloader/chapter32-psci-smccc)에서 PSCI CPU_ON의 ABI를 봤습니다. 이 장은 그 *반대편*을 봅니다. CPU_ON이 trigger된 뒤 secondary CPU가 *어떤 어셈블리를 통과해* Linux의 `secondary_start_kernel`에 도착하는지, 그 사이에 *어떤 자료구조가 초기화*되는지를 따라갑니다. 비교 대상으로 옛 spin-table 방식도 함께 봅니다.
 
 ## 부트 시퀀스 안에서 SMP가 일어나는 자리
 
-ARMv8-A 부트 체인은 *primary CPU 한 명만*으로 진행된다. BL1·BL2는 *single CPU 가정*으로 짜여 있다. 나머지 CPU 코어들은 reset 직후 *holding pen* 또는 *WFI*로 묶여 있다.
+ARMv8-A 부트 체인은 *primary CPU 한 명만*으로 진행됩니다. BL1·BL2는 *single CPU 가정*으로 짜여 있습니다. 나머지 CPU 코어들은 reset 직후 *holding pen* 또는 *WFI*로 묶여 있습니다.
 
 ![SMP bring-up: primary boots alone, then PSCI CPU_ON wakes secondaries](/images/blog/bootloader/diagrams/ch33-smp-bringup-flow.svg)
 
-primary가 *부트의 거의 끝까지* 혼자 가고, 마지막에 secondary들을 한 명씩 깨운다. 이 모델의 장점은 *부트 초반의 race를 원천 차단*하는 것이다. DDR initialization, secure carveout setup, MMU page table build 같이 *원자적 단일 흐름이 필요한 작업*을 race 걱정 없이 진행할 수 있다.
+primary가 *부트의 거의 끝까지* 혼자 가고, 마지막에 secondary들을 한 명씩 깨웁니다. 이 모델의 장점은 *부트 초반의 race를 원천 차단*하는 것입니다. DDR initialization, secure carveout setup, MMU page table build 같이 *원자적 단일 흐름이 필요한 작업*을 race 걱정 없이 진행할 수 있습니다.
 
-전체 SMP bring-up 흐름을 한눈에 보면 다음과 같다.
+전체 SMP bring-up 흐름을 한눈에 보면 다음과 같습니다.
 
 ![SMP bring-up flow — power on → primary → secondary online](/images/blog/bootloader/diagrams/chapter33-smp-bringup-flow.svg)
 
 ## 두 가지 방식 — spin-table vs PSCI
 
-secondary CPU를 깨우는 방식은 mainline 커널 기준 두 가지다.
+secondary CPU를 깨우는 방식은 mainline 커널 기준 두 가지입니다.
 
 ### spin-table (legacy)
 
-ARMv8 spec 초기에 정의된 방식이다. secondary CPU가 *지정된 메모리 주소*를 polling하며 WFE로 대기한다. primary가 *그 주소에 entry point를 write하고 SEV*하면, secondary가 깨어나 그 주소로 점프한다.
+ARMv8 spec 초기에 정의된 방식입니다. secondary CPU가 *지정된 메모리 주소*를 polling하며 WFE로 대기합니다. primary가 *그 주소에 entry point를 write하고 SEV*하면, secondary가 깨어나 그 주소로 점프합니다.
 
 ```text
 [Boot]
@@ -49,11 +49,11 @@ Linux primary:
   sev                              ← secondary wakes up
 ```
 
-`release_addr`는 *각 CPU마다 다른 주소*고 DT에 `cpu-release-addr = <0x0 0x70000000>` 형태로 적힌다. BL31이 부팅 후 secondary CPU들을 그 주소에서 WFI/WFE 상태로 둬야 한다.
+`release_addr`는 *각 CPU마다 다른 주소*고 DT에 `cpu-release-addr = <0x0 0x70000000>` 형태로 적힙니다. BL31이 부팅 후 secondary CPU들을 그 주소에서 WFI/WFE 상태로 둬야 합니다.
 
 ### PSCI CPU_ON (현재 표준)
 
-primary가 SMC를 통해 BL31에 *직접 깨우기를 요청*한다. BL31이 SoC reset controller를 두드려 secondary CPU의 reset을 풀고, *warm boot path*에서 caller가 지정한 entry로 점프시킨다. spin-table과 달리 *busy-loop polling이 필요 없고* 진정한 power-down에서 깨울 수 있다.
+primary가 SMC를 통해 BL31에 *직접 깨우기를 요청*합니다. BL31이 SoC reset controller를 두드려 secondary CPU의 reset을 풀고, *warm boot path*에서 caller가 지정한 entry로 점프시킵니다. spin-table과 달리 *busy-loop polling이 필요 없고* 진정한 power-down에서 깨울 수 있습니다.
 
 | 항목 | spin-table | PSCI |
 |---|---|---|
@@ -64,11 +64,11 @@ primary가 SMC를 통해 BL31에 *직접 깨우기를 요청*한다. BL31이 SoC
 | 표준 | ARMv8 옛 spec | PSCI v1.0+ |
 | Linux DT 표기 | `enable-method = "spin-table"` | `enable-method = "psci"` |
 
-mainline 커널 기준 *PSCI가 사실상 강제*다. spin-table은 PSCI가 없는 환경(예: hypervisor 없이 EL2에서 직접 부팅하는 일부 minimal boot)이나 *legacy 보드*에만 남아 있다. 새로 만드는 모든 ARMv8 보드는 PSCI를 쓴다.
+mainline 커널 기준 *PSCI가 사실상 강제*다. spin-table은 PSCI가 없는 환경(예: hypervisor 없이 EL2에서 직접 부팅하는 일부 minimal boot)이나 *legacy 보드*에만 남아 있습니다. 새로 만드는 모든 ARMv8 보드는 PSCI를 씁니다.
 
 ## DT 표기 — enable-method가 분기점
 
-커널의 secondary CPU 깨우기 분기는 DT의 `enable-method` 속성으로 결정된다.
+커널의 secondary CPU 깨우기 분기는 DT의 `enable-method` 속성으로 결정됩니다.
 
 ```dts
 /* PSCI 방식 */
@@ -113,15 +113,15 @@ cpus {
 };
 ```
 
-같은 `cpus` 노드에 enable-method가 *섞여 있어도* 된다. 일부 CPU는 PSCI, 일부는 spin-table로 깨우는 hybrid 보드가 드물게 존재한다.
+같은 `cpus` 노드에 enable-method가 *섞여 있어도* 됩니다. 일부 CPU는 PSCI, 일부는 spin-table로 깨우는 hybrid 보드가 드물게 존재합니다.
 
-두 방식의 차이를 그림으로 비교하면 다음과 같다.
+두 방식의 차이를 그림으로 비교하면 다음과 같습니다.
 
 ![spin-table vs PSCI CPU_ON 비교](/images/blog/bootloader/diagrams/chapter33-spin-vs-psci.svg)
 
 ## Linux primary의 SMP 진입 흐름
 
-커널이 secondary CPU를 깨우는 코드 경로를 따라간다. `start_kernel`이 마지막에 `rest_init` → `kernel_init` → `kernel_init_freeable` → `smp_init`을 호출한다.
+커널이 secondary CPU를 깨우는 코드 경로를 따라갑니다. `start_kernel`이 마지막에 `rest_init` → `kernel_init` → `kernel_init_freeable` → `smp_init`을 호출합니다.
 
 ```c
 /* kernel/smp.c */
@@ -139,7 +139,7 @@ void __init smp_init(void)
 }
 ```
 
-`cpu_up`이 `_cpu_up` → `bringup_cpu` → `__cpu_up`(arch-specific)으로 내려간다.
+`cpu_up`이 `_cpu_up` → `bringup_cpu` → `__cpu_up`(arch-specific)으로 내려갑니다.
 
 ```c
 /* arch/arm64/kernel/smp.c */
@@ -169,7 +169,7 @@ int __cpu_up(unsigned int cpu, struct task_struct *idle)
 }
 ```
 
-`cpu_ops[cpu]`는 enable-method에 따라 다른 ops 구조체다.
+`cpu_ops[cpu]`는 enable-method에 따라 다른 ops 구조체입니다.
 
 ```c
 /* arch/arm64/kernel/cpu_ops.c */
@@ -180,7 +180,7 @@ static const struct cpu_operations *const supported_cpu_ops[] = {
 };
 ```
 
-PSCI 방식이면 `cpu_psci_ops.cpu_boot = cpu_psci_cpu_boot`가 호출되어 SMC를 발사한다.
+PSCI 방식이면 `cpu_psci_ops.cpu_boot = cpu_psci_cpu_boot`가 호출되어 SMC를 발사합니다.
 
 ```c
 /* drivers/firmware/psci/psci.c */
@@ -195,11 +195,11 @@ static int cpu_psci_cpu_boot(unsigned int cpu)
 }
 ```
 
-`secondary_entry`가 *secondary CPU가 첫 진입할 어셈블리 라벨*이다. PSCI CPU_ON에 *physical address*로 넘긴다는 점이 중요하다.
+`secondary_entry`가 *secondary CPU가 첫 진입할 어셈블리 라벨*입니다. PSCI CPU_ON에 *physical address*로 넘긴다는 점이 중요합니다.
 
 ## secondary_entry 어셈블리 — MMU off에서 시작
 
-`secondary_entry`부터 `__secondary_switched`까지의 어셈블리가 SMP bring-up의 *진짜 핵심*이다. 이 코드는 *MMU off, cache off* 상태에서 시작해 *MMU on, cache on*까지 가져간다.
+`secondary_entry`부터 `__secondary_switched`까지의 어셈블리가 SMP bring-up의 *진짜 핵심*입니다. 이 코드는 *MMU off, cache off* 상태에서 시작해 *MMU on, cache on*까지 가져갑니다.
 
 ```asm
 /* arch/arm64/kernel/head.S */
@@ -225,7 +225,7 @@ SYM_CODE_START_LOCAL(secondary_startup)
 SYM_CODE_END(secondary_startup)
 ```
 
-각 단계가 다음을 한다.
+각 단계가 다음을 합니다.
 
 | 단계 | 내용 |
 |---|---|
@@ -236,11 +236,11 @@ SYM_CODE_END(secondary_startup)
 | `__enable_mmu` | TTBR0·TTBR1 set, SCTLR_EL1.M·C·I bit set |
 | `__secondary_switched` | MMU on 상태로 C 코드 진입 |
 
-MMU를 켜는 순간 *primary가 만들어 둔 swapper_pg_dir*가 secondary에도 보이게 된다. 이 page table은 *모든 CPU가 공유*하므로 별도 build가 필요 없다. `__cpu_setup`이 TCR_EL1의 TG0/TG1(page size), IPS(physical addr size)를 primary와 *일치*시켜 page table을 그대로 쓸 수 있게 만든다.
+MMU를 켜는 순간 *primary가 만들어 둔 swapper_pg_dir*가 secondary에도 보이게 됩니다. 이 page table은 *모든 CPU가 공유*하므로 별도 build가 필요 없습니다. `__cpu_setup`이 TCR_EL1의 TG0/TG1(page size), IPS(physical addr size)를 primary와 *일치*시켜 page table을 그대로 쓸 수 있게 만듭니다.
 
 ## __secondary_switched — C 코드로 점프
 
-MMU가 켜진 직후의 첫 C 함수가 `secondary_start_kernel`이다.
+MMU가 켜진 직후의 첫 C 함수가 `secondary_start_kernel`입니다.
 
 ```asm
 /* arch/arm64/kernel/head.S */
@@ -264,7 +264,7 @@ SYM_FUNC_START_LOCAL(__secondary_switched)
 SYM_FUNC_END(__secondary_switched)
 ```
 
-`sp_el0`에 task_struct를 넣어 두는 것이 ARM64 커널의 `current` 매크로를 동작하게 만드는 핵심이다. 그래서 `current = (struct task_struct *) read_sysreg(sp_el0)`이 *어떤 CPU에서든 자기 자신의 task*를 가리킨다.
+`sp_el0`에 task_struct를 넣어 두는 것이 ARM64 커널의 `current` 매크로를 동작하게 만드는 핵심입니다. 그래서 `current = (struct task_struct *) read_sysreg(sp_el0)`이 *어떤 CPU에서든 자기 자신의 task*를 가리킵니다.
 
 ```c
 /* arch/arm64/kernel/smp.c */
@@ -303,11 +303,11 @@ asmlinkage notrace void secondary_start_kernel(void)
 }
 ```
 
-`set_cpu_online(cpu, true)`이 *그 CPU가 동작 가능*함을 scheduler에 알리는 신호다. 이 줄이 실행되는 순간 scheduler가 그 CPU에 task를 배정하기 시작한다. `complete(&cpu_running)`이 primary의 `wait_for_completion_timeout`을 깨운다. 그 다음 `cpu_startup_entry`가 idle loop로 들어가고 첫 *timer interrupt*가 도착하면 scheduler가 work를 배정한다.
+`set_cpu_online(cpu, true)`이 *그 CPU가 동작 가능*함을 scheduler에 알리는 신호입니다. 이 줄이 실행되는 순간 scheduler가 그 CPU에 task를 배정하기 시작합니다. `complete(&cpu_running)`이 primary의 `wait_for_completion_timeout`을 깨웁니다. 그 다음 `cpu_startup_entry`가 idle loop로 들어가고 첫 *timer interrupt*가 도착하면 scheduler가 work를 배정합니다.
 
 ## percpu 자료구조 초기화
 
-`set_my_cpu_offset(per_cpu_offset(cpu))`이 secondary의 *percpu base register*를 set up한다. ARM64는 TPIDR_EL1를 percpu offset register로 쓴다.
+`set_my_cpu_offset(per_cpu_offset(cpu))`이 secondary의 *percpu base register*를 set up합니다. ARM64는 TPIDR_EL1를 percpu offset register로 씁니다.
 
 ```c
 /* arch/arm64/include/asm/percpu.h */
@@ -324,9 +324,9 @@ static inline unsigned long __my_cpu_offset(void)
 }
 ```
 
-이 offset이 설정되기 *전에* percpu variable 접근을 시도하면 *primary CPU의 변수에 접근*하게 되어 race가 난다. `set_my_cpu_offset` 호출 *직후부터* 비로소 percpu access가 안전하다.
+이 offset이 설정되기 *전에* percpu variable 접근을 시도하면 *primary CPU의 변수에 접근*하게 되어 race가 납니다. `set_my_cpu_offset` 호출 *직후부터* 비로소 percpu access가 안전합니다.
 
-GIC CPU interface 초기화는 `cpu_postboot` ops에서 한다. PSCI ops의 경우 다음이 호출된다.
+GIC CPU interface 초기화는 `cpu_postboot` ops에서 합니다. PSCI ops의 경우 다음이 호출됩니다.
 
 ```c
 /* drivers/irqchip/irq-gic-v3.c */
@@ -348,11 +348,11 @@ static void gic_cpu_init(void)
 }
 ```
 
-GIC CPU interface(GICC/GICR)는 *CPU별로 자기 자신만 접근 가능*하다. 그래서 *secondary CPU 위에서 직접* 초기화해야 한다. primary가 대신 못 한다. 이게 secondary CPU bring-up이 단순히 reset release만으로 끝나지 않는 이유 중 하나다.
+GIC CPU interface(GICC/GICR)는 *CPU별로 자기 자신만 접근 가능*합니다. 그래서 *secondary CPU 위에서 직접* 초기화해야 합니다. primary가 대신 못 합니다. 이게 secondary CPU bring-up이 단순히 reset release만으로 끝나지 않는 이유 중 하나입니다.
 
 ## HOTPLUG_CPU — CPU_OFF 흐름
 
-`echo 0 > /sys/devices/system/cpu/cpu1/online`으로 CPU를 끄면 reverse 흐름이 진행된다.
+`echo 0 > /sys/devices/system/cpu/cpu1/online`으로 CPU를 끄면 reverse 흐름이 진행됩니다.
 
 ```text
 echo 0 > .../cpu1/online
@@ -388,13 +388,13 @@ cpu_die (CPU1)
       SoC reset assert → CPU1 전원 차단
 ```
 
-CPU_OFF SMC는 *return하지 않는다*. 호출한 CPU 자신이 power down되기 때문이다. CPU1이 사라진 뒤 primary는 `wait_for_completion(&cpu_died)`에서 깨어나 hotplug list에서 CPU1을 제거한다.
+CPU_OFF SMC는 *return하지 않는다*. 호출한 CPU 자신이 power down되기 때문입니다. CPU1이 사라진 뒤 primary는 `wait_for_completion(&cpu_died)`에서 깨어나 hotplug list에서 CPU1을 제거합니다.
 
-다시 켤 때는 *처음 SMP bring-up과 같은 경로*가 반복된다. PSCI CPU_ON → BL31 warm boot → secondary_entry → secondary_start_kernel. CPU별 percpu storage는 *영구 할당*돼 있어 재초기화만 하면 된다.
+다시 켤 때는 *처음 SMP bring-up과 같은 경로*가 반복됩니다. PSCI CPU_ON → BL31 warm boot → secondary_entry → secondary_start_kernel. CPU별 percpu storage는 *영구 할당*돼 있어 재초기화만 하면 됩니다.
 
 ## 측정 — 4-core boot up time
 
-i.MX 8M Plus(4-core Cortex-A53 1.5 GHz, kernel 6.6) 측정값이다.
+i.MX 8M Plus(4-core Cortex-A53 1.5 GHz, kernel 6.6) 측정값입니다.
 
 ```text
 [BL31 reset release → primary BL33 진입]    : ~5 ms
@@ -409,7 +409,7 @@ i.MX 8M Plus(4-core Cortex-A53 1.5 GHz, kernel 6.6) 측정값이다.
 [총 SMP bring-up time]                      : ~1 ms (4-core)
 ```
 
-전체 부트의 *1 ms*만이 SMP bring-up에 쓰인다. 나머지는 BL31 부팅과 kernel single-CPU init이 잡아먹는다. SMP bring-up이 빠른 이유는 *PSCI fast call*과 *모든 CPU가 같은 page table을 공유*하기 때문이다.
+전체 부트의 *1 ms*만이 SMP bring-up에 쓰입니다. 나머지는 BL31 부팅과 kernel single-CPU init이 잡아먹습니다. SMP bring-up이 빠른 이유는 *PSCI fast call*과 *모든 CPU가 같은 page table을 공유*하기 때문입니다.
 
 ```text
 [ 부트 로그에서 본 SMP 단계 ]
@@ -427,51 +427,51 @@ i.MX 8M Plus(4-core Cortex-A53 1.5 GHz, kernel 6.6) 측정값이다.
 [    0.088462] SMP: Total of 4 processors activated.
 ```
 
-`Booted secondary processor` 사이의 timestamp 차이가 *한 CPU bring-up 시간*이다. 약 100 µs 단위로 올라온다.
+`Booted secondary processor` 사이의 timestamp 차이가 *한 CPU bring-up 시간*입니다. 약 100 µs 단위로 올라옵니다.
 
 ## 자주 보는 함정
 
 ### Secondary CPU stack 미할당
 
-`secondary_data.stack`이 NULL이면 `__secondary_switched`의 `cbz x1, __secondary_too_slow` 검사에 걸려 secondary가 *조용히 hang*한다. mainline 커널은 idle thread를 미리 fork해 stack을 할당해 두지만, 새 enable-method ops를 custom으로 추가하다 `secondary_data` 설정을 빠뜨리면 발생한다. 부팅 중 `CPU%d: failed to come online`이 뜨면 stack 또는 task struct를 의심한다.
+`secondary_data.stack`이 NULL이면 `__secondary_switched`의 `cbz x1, __secondary_too_slow` 검사에 걸려 secondary가 *조용히 hang*합니다. mainline 커널은 idle thread를 미리 fork해 stack을 할당해 두지만, 새 enable-method ops를 custom으로 추가하다 `secondary_data` 설정을 빠뜨리면 발생합니다. 부팅 중 `CPU%d: failed to come online`이 뜨면 stack 또는 task struct를 의심합니다.
 
 ### GIC CPU interface 초기화 누락
 
-`cpu_postboot`에서 `gic_cpu_init`을 부르지 않으면 SGI/PPI가 안 들어와 *secondary가 timer interrupt를 못 받는다*. local IRQ는 enable되지만 *아무 interrupt도 도착하지 않으므로* scheduler가 task를 배정해도 idle에 머문다. mainline에서는 `cpu_psci_ops`가 자동 처리하지만, hypervisor 환경의 paravirt SMP에서 빠뜨리는 경우가 있다.
+`cpu_postboot`에서 `gic_cpu_init`을 부르지 않으면 SGI/PPI가 안 들어와 *secondary가 timer interrupt를 못 받는다*. local IRQ는 enable되지만 *아무 interrupt도 도착하지 않으므로* scheduler가 task를 배정해도 idle에 머뭅니다. mainline에서는 `cpu_psci_ops`가 자동 처리하지만, hypervisor 환경의 paravirt SMP에서 빠뜨리는 경우가 있습니다.
 
 ### CPU_ON race — 같은 CPU 두 번 호출
 
-primary가 `cpu_up(1)`을 호출한 직후 *다른 thread가 다시 `cpu_up(1)`을 호출*하면 PSCI가 `ALREADY_ON` 또는 `ON_PENDING`을 return한다. 커널의 `cpu_up`은 `cpu_hotplug_lock`으로 보호되지만, custom ops를 짤 때 race를 신경 쓰지 않으면 *secondary가 두 번 진입*해 stack corruption이 난다.
+primary가 `cpu_up(1)`을 호출한 직후 *다른 thread가 다시 `cpu_up(1)`을 호출*하면 PSCI가 `ALREADY_ON` 또는 `ON_PENDING`을 return합니다. 커널의 `cpu_up`은 `cpu_hotplug_lock`으로 보호되지만, custom ops를 짤 때 race를 신경 쓰지 않으면 *secondary가 두 번 진입*해 stack corruption이 납니다.
 
 ### MMU enable 전에 percpu access
 
-`set_my_cpu_offset` 이전에 percpu variable에 쓰는 코드가 들어가면 *primary CPU의 percpu 영역*을 두드리게 된다. 이는 *race로 primary를 망가뜨릴 수* 있다. 특히 `pr_info` 같은 매크로가 내부에서 percpu printk buffer를 쓰므로 *MMU enable 전에 print 호출 자체가 위험*하다. mainline은 `early_printk`에 special path를 두지만 custom build에서 잊기 쉽다.
+`set_my_cpu_offset` 이전에 percpu variable에 쓰는 코드가 들어가면 *primary CPU의 percpu 영역*을 두드리게 됩니다. 이는 *race로 primary를 망가뜨릴 수* 있습니다. 특히 `pr_info` 같은 매크로가 내부에서 percpu printk buffer를 쓰므로 *MMU enable 전에 print 호출 자체가 위험*합니다. mainline은 `early_printk`에 special path를 두지만 custom build에서 잊기 쉽습니다.
 
 ### spin-table release_addr 정렬 누락
 
-spin-table 방식에서 `cpu-release-addr`가 8-byte aligned가 아니면 `ldr x0, [release_addr]`이 alignment fault를 낸다. DT 작성 시 *항상 8-byte aligned* 주소를 쓰고, BL31이 그 주소에 8-byte zero를 미리 깔아 둬야 한다.
+spin-table 방식에서 `cpu-release-addr`가 8-byte aligned가 아니면 `ldr x0, [release_addr]`이 alignment fault를 냅니다. DT 작성 시 *항상 8-byte aligned* 주소를 쓰고, BL31이 그 주소에 8-byte zero를 미리 깔아 둬야 합니다.
 
 ### enable-method 누락 또는 잘못
 
-`enable-method` 속성이 없으면 커널이 *PSCI도 spin-table도 아니라고 판단해* 그 CPU를 *online으로 만들지 않는다*. `dmesg`에 `CPU%d: failed in unknown state` 형태의 메시지가 뜨면 DT의 enable-method를 확인한다. 거꾸로 `enable-method = "psci"`인데 PSCI 노드 자체가 DT에 없으면 PSCI ops가 등록 안 돼 같은 결과가 난다.
+`enable-method` 속성이 없으면 커널이 *PSCI도 spin-table도 아니라고 판단해* 그 CPU를 *online으로 만들지 않는다*. `dmesg`에 `CPU%d: failed in unknown state` 형태의 메시지가 뜨면 DT의 enable-method를 확인합니다. 거꾸로 `enable-method = "psci"`인데 PSCI 노드 자체가 DT에 없으면 PSCI ops가 등록 안 돼 같은 결과가 납니다.
 
 ## 정리
 
-- SMP 부트는 *primary CPU가 secondary 각각에 진입점을 알려 일으켜 세우는* 순서다. BL1·BL2·BL31·BL33·Linux primary가 모두 single CPU로 진행된다.
-- secondary 깨우는 방식은 두 가지다. *spin-table*은 메모리 polling + SEV, *PSCI*는 SMC + SoC reset controller다. 현재 표준은 PSCI다.
-- DT의 `cpus/cpu@N/enable-method` 속성이 분기점이고, PSCI 방식이면 `psci` 노드와 `method = "smc"`가 함께 있어야 한다.
-- 커널의 `__cpu_up`이 `secondary_data`에 idle task와 stack을 채우고, enable-method에 맞는 `cpu_boot` ops를 호출해 PSCI CPU_ON SMC를 발사한다.
-- secondary는 `secondary_entry → secondary_startup → __secondary_switched → secondary_start_kernel`을 통과한다. MMU off에서 시작해 primary가 만든 swapper_pg_dir로 MMU를 켠다.
-- `set_my_cpu_offset`이 TPIDR_EL1을 채워야 percpu access가 안전해진다. GIC CPU interface 초기화는 secondary 위에서 직접 해야 한다.
-- HOTPLUG_CPU는 `cpu_die`가 `PSCI CPU_OFF` SMC로 자신을 끄는 흐름이고, 다시 켤 때는 처음 bring-up과 같은 경로가 반복된다.
-- 4-core Cortex-A53 기준 전체 SMP bring-up이 약 1 ms 안에 끝난다. 한 CPU당 reset release 후 online까지 ~300 µs다.
-- 흔한 함정은 secondary stack 미할당, GIC 초기화 누락, CPU_ON race, MMU 전 percpu access, spin-table 정렬 문제, enable-method 누락 여섯 가지다.
+- SMP 부트는 *primary CPU가 secondary 각각에 진입점을 알려 일으켜 세우는* 순서입니다. BL1·BL2·BL31·BL33·Linux primary가 모두 single CPU로 진행됩니다.
+- secondary 깨우는 방식은 두 가지입니다. *spin-table*은 메모리 polling + SEV, *PSCI*는 SMC + SoC reset controller다. 현재 표준은 PSCI다.
+- DT의 `cpus/cpu@N/enable-method` 속성이 분기점이고, PSCI 방식이면 `psci` 노드와 `method = "smc"`가 함께 있어야 합니다.
+- 커널의 `__cpu_up`이 `secondary_data`에 idle task와 stack을 채우고, enable-method에 맞는 `cpu_boot` ops를 호출해 PSCI CPU_ON SMC를 발사합니다.
+- secondary는 `secondary_entry → secondary_startup → __secondary_switched → secondary_start_kernel`을 통과합니다. MMU off에서 시작해 primary가 만든 swapper_pg_dir로 MMU를 켭니다.
+- `set_my_cpu_offset`이 TPIDR_EL1을 채워야 percpu access가 안전해집니다. GIC CPU interface 초기화는 secondary 위에서 직접 해야 합니다.
+- HOTPLUG_CPU는 `cpu_die`가 `PSCI CPU_OFF` SMC로 자신을 끄는 흐름이고, 다시 켤 때는 처음 bring-up과 같은 경로가 반복됩니다.
+- 4-core Cortex-A53 기준 전체 SMP bring-up이 약 1 ms 안에 끝납니다. 한 CPU당 reset release 후 online까지 ~300 µs다.
+- 흔한 함정은 secondary stack 미할당, GIC 초기화 누락, CPU_ON race, MMU 전 percpu access, spin-table 정렬 문제, enable-method 누락 여섯 가지입니다.
 
 ## 시리즈 마무리
 
-이 장이 Bootloader Internals 시리즈의 *마지막 깊이*다. 시리즈는 [Ch 1: 부트로더가 푸는 문제](/blog/embedded/bootloader/chapter01-boot-problem)에서 시작해 BootROM부터 init까지의 전 과정을 따라왔다. 30장이 양산 CI까지의 보편적 흐름을 다뤘다면, 마지막 세 장(31·32·33)은 *ARM bare-metal boot이 깊어질 때 반드시 마주치는* EL3 runtime과 SMP bring-up을 채웠다.
+이 장이 Bootloader Internals 시리즈의 *마지막 깊이*다. 시리즈는 [Ch 1: 부트로더가 푸는 문제](/blog/embedded/bootloader/chapter01-boot-problem)에서 시작해 BootROM부터 init까지의 전 과정을 따라왔습니다. 30장이 양산 CI까지의 보편적 흐름을 다뤘다면, 마지막 세 장(31·32·33)은 *ARM bare-metal boot이 깊어질 때 반드시 마주치는* EL3 runtime과 SMP bring-up을 채웠습니다.
 
-다음 단계로 추천할 주제는 두 가지다. 첫째는 [Embedded Security](/blog/embedded/embedded-security/chapter01-threat-model) 시리즈로 secure boot·TrustZone·TEE의 보안 모델을 더 깊이 파는 길이다. 둘째는 [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) 시리즈로 ARM Cortex-A SMP·AMP·context switch 같은 *부트 이후의 runtime* 동작을 따라가는 길이다.
+다음 단계로 추천할 주제는 두 가지입니다. 첫째는 [Embedded Security](/blog/embedded/embedded-security/chapter01-threat-model) 시리즈로 secure boot·TrustZone·TEE의 보안 모델을 더 깊이 파는 길입니다. 둘째는 [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) 시리즈로 ARM Cortex-A SMP·AMP·context switch 같은 *부트 이후의 runtime* 동작을 따라가는 길입니다.
 
 ## 관련 항목
 
