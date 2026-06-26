@@ -23,11 +23,11 @@ production C++를 읽고 쓰는 사람에게 Abseil은 두 번 마주친다. 한
 - Bazel 또는 CMake로 Abseil을 도입한 팀의 새 멤버
 - "absl::StatusOr는 std::optional과 뭐가 달라?"가 궁금한 사람
 
-C++ 초심자는 먼저 [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) 시리즈를 권합니다.
+C++ 초심자는 먼저 [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) 시리즈를 권한다.
 
 ## 시리즈 구성
 
-총 **13 Parts × 68편**으로 구성됩니다.
+총 **13 Parts × 68편**으로 구성된다.
 
 | Part | 제목 | 핵심 | 편수 |
 |---|---|---|---|
@@ -193,7 +193,7 @@ Abseil이 왜 존재하는지, 어떻게 빌드하는지부터.
 
 ## 학습 로드맵
 
-처음부터 1편씩 순서대로 읽지 않아도 됩니다. 권장 순서:
+처음부터 1편씩 순서대로 읽지 않아도 된다. 권장 순서:
 
 1. **핵심 (먼저)** — Part 3 (Status), Part 4 (Strings), Part 5 (Container). production C++에서 가장 자주 보는 세 영역.
 2. **synchronization 다루는 사람** — Part 6, Part 7 추가.

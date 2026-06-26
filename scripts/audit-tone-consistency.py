@@ -62,7 +62,11 @@ def prose_of(raw):
     return "\n".join(out)
 
 
+QUOTED = re.compile(r'"[^"]*"|“[^”]*”|\'[^\']*\'|‘[^’]*’')  # 인용 예문 (문법책 등)
+
+
 def count_tones(text):
+    text = QUOTED.sub("", text)  # 따옴표 안 예문은 톤 집계에서 제외
     a = len(NIDA.findall(text)) - len(ANIDA.findall(text))
     # B = 전체 '…X다.' 에서 니다(A) 제외, 아니다 가산, 청유형 시다 제외
     b = (len(DA.findall(text)) - len(NIDA.findall(text))

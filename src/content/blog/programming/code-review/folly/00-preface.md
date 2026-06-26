@@ -25,11 +25,11 @@ Folly는 Abseil과 비교되는 일이 많다. 둘 다 std::을 보완하지만 
 - 메모리/네트워크 성능에 민감한 시스템을 만드는 사람 (IOBuf)
 - "folly::dynamic은 std::any와 뭐가 달라?"가 궁금한 사람
 
-C++ 초심자는 먼저 [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) 시리즈를 권합니다.
+C++ 초심자는 먼저 [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) 시리즈를 권한다.
 
 ## 시리즈 구성
 
-총 **14 Parts × 63편**으로 구성됩니다.
+총 **14 Parts × 63편**으로 구성된다.
 
 | Part | 제목 | 핵심 | 편수 |
 |---|---|---|---|
@@ -196,7 +196,7 @@ Folly가 왜 존재하는지, Abseil과의 차이부터.
 
 ## 학습 로드맵
 
-처음부터 1편씩 순서대로 읽지 않아도 됩니다. 권장 순서:
+처음부터 1편씩 순서대로 읽지 않아도 된다. 권장 순서:
 
 1. **핵심 (먼저)** — Part 2 (Future), Part 3 (Executor), Part 9 (Synchronization). 비동기/병행이 Folly의 가장 강력한 영역.
 2. **고성능 자료구조** — Part 7 (F14), Part 4 (IOBuf), Part 10 (Concurrency Primitives).

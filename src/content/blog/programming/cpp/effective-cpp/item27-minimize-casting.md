@@ -38,7 +38,7 @@ C 시절의 캐스트 문법:
 T(expr)           // 함수 호출 스타일 (같은 의미)
 ```
 
-이 두 형태는 **컴파일러가 가능한 모든 캐스트를 시도** — `static_cast`, `const_cast`, `reinterpret_cast`까지 — 의도가 무엇인지 코드에 드러나지 않습니다.
+이 두 형태는 **컴파일러가 가능한 모든 캐스트를 시도** — `static_cast`, `const_cast`, `reinterpret_cast`까지 — 의도가 무엇인지 코드에 드러나지 않는다.
 
 ```cpp
 int*       p = ...;
@@ -47,7 +47,7 @@ char*      bp = (char*)p;             // reinterpret_cast인가?
 double     d = (double)42;            // static_cast?
 ```
 
-코드만 봐선 의도를 알 수 없고, grep으로 "위험한 캐스트"를 찾기도 어렵습니다.
+코드만 봐선 의도를 알 수 없고, grep으로 "위험한 캐스트"를 찾기도 어렵다.
 
 ## C++ 4가지 캐스트
 
@@ -95,7 +95,7 @@ try {
 }
 ```
 
-RTTI를 사용하므로 클래스에 적어도 하나의 virtual 함수가 있어야 합니다.
+RTTI를 사용하므로 클래스에 적어도 하나의 virtual 함수가 있어야 한다.
 
 ### const_cast 예
 
