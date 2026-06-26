@@ -5,7 +5,7 @@ description: "코어 동작 너머의 PCIe spec 기능들 — Lane Margining(신
 series: "PCIe Deep Dive"
 seriesOrder: 19
 tags: [pcie, lane-margining, tph, acs, l0p, advanced]
-draft: true
+draft: false
 ---
 
 [Ch 9](/blog/embedded/hardware/pcie/chapter09-physical-layer)에서 물리 계층을, [Ch 11](/blog/embedded/hardware/pcie/chapter11-linux-dma)에서 DMA·IOMMU를 봤습니다. 이 장은 그 사이사이에 끼어 있지만 *자주 그냥 지나치는* spec 기능들을 모읍니다. 신호 무결성을 소프트웨어로 재는 *Lane Margining*, in-flight 요청을 늘리는 *10-bit Tag*, 캐시에 직접 꽂는 *TPH*, 가상화 격리의 토대인 *ACS*, 그리고 대역폭에 비례해 전력을 줄이는 *L0p*입니다.
