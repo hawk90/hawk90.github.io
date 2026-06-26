@@ -13,7 +13,7 @@ bookAuthor: "Grady Booch"
 
 ## 한 줄 요약
 
-> 위성 기반 항법 시스템은 **실시간성**, **분산 처리**, **안전성**을 요구하는 복잡한 시스템이다. 객체지향 분해가 이 복잡성을 관리한다.
+> 위성 기반 항법 시스템은 **실시간성**, **분산 처리**, **안전성**을 요구하는 복잡한 시스템입니다. 객체지향 분해가 이 복잡성을 관리합니다.
 
 ## 문제 도메인
 
@@ -104,11 +104,11 @@ public class Route {
 
 ### 센서 추상화
 
-`PositionSource` 인터페이스 아래 여러 구체 센서가 실체화된다.
+`PositionSource` 인터페이스 아래 여러 구체 센서가 실체화됩니다.
 
 ![Sensor Class Hierarchy](/images/blog/ooad/diagrams/ch08-sensor-hierarchy.svg)
 
-센서 융합은 여러 소스의 데이터를 결합하여 최적의 위치 추정값을 계산한다.
+센서 융합은 여러 소스의 데이터를 결합하여 최적의 위치 추정값을 계산합니다.
 
 ```java
 // 센서 인터페이스
@@ -185,7 +185,7 @@ public class SensorFusion implements PositionSource {
 
 ### 서브시스템 분해
 
-항법 시스템은 6개의 서브시스템으로 나뉜다.
+항법 시스템은 6개의 서브시스템으로 나뉩니다.
 
 ![Navigation System Subsystems](/images/blog/ooad/diagrams/ch08-subsystems.svg)
 
@@ -200,7 +200,7 @@ public class SensorFusion implements PositionSource {
 
 ### 실시간 구조
 
-실시간 태스크는 우선순위와 주기로 스케줄된다.
+실시간 태스크는 우선순위와 주기로 스케줄됩니다.
 
 | 우선순위 | 태스크 | 주기 | 책임 |
 |----------|--------|------|------|
@@ -265,7 +265,7 @@ public class SensorTask extends PeriodicTask {
 
 ### 데이터 흐름
 
-GPS·INS·BARO 세 소스가 `SensorFusion`에 모이고, 위치 계산 → 라우팅 → 디스플레이로 이어진다. 각 단계의 결과는 아래 검증/경고 체인으로도 분기한다.
+GPS·INS·BARO 세 소스가 `SensorFusion`에 모이고, 위치 계산 → 라우팅 → 디스플레이로 이어집니다. 각 단계의 결과는 아래 검증/경고 체인으로도 분기합니다.
 
 ![Data Flow Architecture](/images/blog/ooad/diagrams/ch08-dataflow.svg)
 
@@ -406,13 +406,13 @@ public class RedundancyManager<T> {
 
 ![Position Update Sequence](/images/blog/ooad/diagrams/ch08-sequence-position-update.svg)
 
-`SensorTask`가 20 ms 주기로 호출을 시작하고, `SensorFusion`이 오케스트레이터 역할을 한다. 무결성 검증(RAIM)을 통과해야만 `EventBus`로 위치를 발행한다.
+`SensorTask`가 20 ms 주기로 호출을 시작하고, `SensorFusion`이 오케스트레이터 역할을 합니다. 무결성 검증(RAIM)을 통과해야만 `EventBus`로 위치를 발행합니다.
 
 ### 경고 처리 시퀀스
 
 ![Alert Handling Sequence](/images/blog/ooad/diagrams/ch08-sequence-alert.svg)
 
-지형 데이터베이스가 근접 이벤트를 발생시키면 `AlertManager`가 우선순위 큐에 등록하고, 큐가 자체 enqueue·dequeue를 거친 뒤 `Display`와 `Audio`에 동시에 분기한다.
+지형 데이터베이스가 근접 이벤트를 발생시키면 `AlertManager`가 우선순위 큐에 등록하고, 큐가 자체 enqueue·dequeue를 거친 뒤 `Display`와 `Audio`에 동시에 분기합니다.
 
 ## 상태 다이어그램
 
@@ -496,7 +496,7 @@ public class NavigationStateMachine {
 
 ## 다음 장 예고
 
-Chapter 9에서는 **교통 관리 시스템**을 다룬다. 제어 시스템의 객체지향 설계 — 센서, 액추에이터, 제어 알고리즘.
+Chapter 9에서는 **교통 관리 시스템**을 다룹니다. 제어 시스템의 객체지향 설계 — 센서, 액추에이터, 제어 알고리즘.
 
 ## 관련 항목
 
