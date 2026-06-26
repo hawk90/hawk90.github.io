@@ -331,7 +331,7 @@ Program terminated with signal SIGSEGV, Segmentation fault.
 
 ### 시나리오 1: 충돌 자리 찾기
 
-SIGSEGV 발생 직후 backtrace로 *null 포인터를 받은 frame*을 찾고, `up`으로 *누가 보냈는지* 거슬러 올라간다.
+SIGSEGV 발생 직후 backtrace로 *null 포인터를 받은 frame*을 찾고, `up`으로 *누가 보냈는지* 거슬러 올라갑니다.
 
 ```text
 $ gdb ./myapp
@@ -352,11 +352,11 @@ n = 0x0
 (gdb) list
 ```
 
-`list`로 `walk_tree`의 어디에서 `process_node(NULL)`을 호출했는지 본다.
+`list`로 `walk_tree`의 어디에서 `process_node(NULL)`을 호출했는지 봅니다.
 
 ### 시나리오 2: 깊은 재귀 분석
 
-100단계 깊은 재귀에서 *한 단계마다 인자가 어떻게 변하는지* 본다. 각 단계마다 잘 줄어드는지 확인.
+100단계 깊은 재귀에서 *한 단계마다 인자가 어떻게 변하는지* 봅니다. 각 단계마다 잘 줄어드는지 확인.
 
 ```text
 (gdb) bt

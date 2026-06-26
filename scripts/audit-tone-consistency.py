@@ -34,8 +34,9 @@ CONTENT = REPO_ROOT / "src" / "content" / "blog"
 
 FENCE = re.compile(r"^\s*```")
 DA = re.compile(r"([가-힣])다[.!?…]")        # 종결 '…X다.'  (X = 직전 음절)
-NIDA = re.compile(r"니다[.!?…]")             # '…니다.'
+NIDA = re.compile(r"니다[.!?…]")             # '…니다.'  (Tone A: 합니다·입니다)
 ANIDA = re.compile(r"아니다[.!?…]")          # 예외: '아니다'는 Tone B
+SIDA = re.compile(r"시다[.!?…]")             # 청유형 '…ㅂ시다.' (봅시다·합시다) = Tone A, B로 세지 않음
 
 
 def field(fm, key):
@@ -63,7 +64,9 @@ def prose_of(raw):
 
 def count_tones(text):
     a = len(NIDA.findall(text)) - len(ANIDA.findall(text))
-    b = len(DA.findall(text)) - len(NIDA.findall(text)) + len(ANIDA.findall(text))
+    # B = 전체 '…X다.' 에서 니다(A) 제외, 아니다 가산, 청유형 시다 제외
+    b = (len(DA.findall(text)) - len(NIDA.findall(text))
+         + len(ANIDA.findall(text)) - len(SIDA.findall(text)))
     return max(a, 0), max(b, 0)
 
 
