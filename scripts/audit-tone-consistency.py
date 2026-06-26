@@ -56,7 +56,10 @@ def prose_of(raw):
         if in_fence:
             continue
         s = line.lstrip()
-        if s.startswith("|") or s.startswith("#"):
+        # 표·헤딩·블록인용 제외. 블록인용(>)은 예문·인용·콜아웃 용도라 본문 톤이
+        # 아니다(문법책의 예문 ~다가 대표적). 라인 제외는 카운트를 줄일 뿐이라
+        # 없던 MIXED를 만들지 않는다.
+        if s.startswith("|") or s.startswith("#") or s.startswith(">"):
             continue
         out.append(line)
     return "\n".join(out)
