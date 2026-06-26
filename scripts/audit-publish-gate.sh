@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # audit-publish-gate.sh — pre-publish 통합 검증 gate
 #
-# CLAUDE.md §6·§10에 정의된 publish 전 4가지 검증을 한 번에 실행:
-#   1. ASCII 박스 다이어그램 (자동 차단)
-#   2. TikZ 텍스트 겹침 (자동 차단)
-#   3. 코드 블록 내 한국어 산문 (자동 차단)
-#   4. Hallucination 후보 (수동 review 알림)
+# CLAUDE.md §1·§6·§10에 정의된 publish 전 검증을 한 번에 실행:
+#   1.  ASCII 박스 다이어그램 (자동 차단)
+#   2.  TikZ 텍스트 겹침 (자동 차단)
+#   3.  코드 블록 내 한국어 산문 (자동 차단)
+#   3b. Tone 일관성 §1 — ~합니다/~다 혼용 (자동 차단)
+#   4.  Hallucination 후보 (수동 review 알림)
 #
 # Usage:
 #   ./scripts/audit-publish-gate.sh                  # 전체 published
@@ -88,6 +89,14 @@ else
   echo ""
   echo "═══ 3/4 코드 블록 내 한국어 산문 ═══"
   echo "− SKIPPED (detect-prose-in-code.sh 미존재)"
+fi
+
+# 3b. Tone 일관성 (~합니다 vs ~다 혼용·시리즈 이탈) — MIXED 차단
+if [ -x "$ROOT/scripts/audit-tone-consistency.py" ]; then
+  run_check \
+    "3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단)" \
+    "python3 $ROOT/scripts/audit-tone-consistency.py $ARGS_STR" \
+    "block"
 fi
 
 # 4. Hallucination 후보 — strict 모드에서만 block

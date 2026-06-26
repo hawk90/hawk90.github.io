@@ -108,7 +108,10 @@ def main():
         mixed = minority >= 3 and minority / total >= args.ratio
         series = field(re.match(r"^---\s*\n(.*?)\n---", raw, re.DOTALL).group(1)
                        if raw.startswith("---") else "", "series")
-        rel = md.relative_to(REPO_ROOT)
+        try:
+            rel = md.relative_to(REPO_ROOT)
+        except ValueError:
+            rel = md  # repo 밖 경로(테스트 등)도 안전하게 처리
         rec = (rel, series, a, b, dom, mixed)
         chapters.append(rec)
         if series:
