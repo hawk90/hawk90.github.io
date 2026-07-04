@@ -17,6 +17,19 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# LaTeX build byproducts (diagram builds leave these behind)
+*.aux
+*.log
+texput.log
+
+# internal planning / storyboard docs (kept locally, not published)
+/ARM_STORYBOARD.md
+/QEMU_STORYBOARD.md
+/RISCV_STORYBOARD.md
+/INTERACTIVE_VISUALIZATIONS.md
+/READING_ROADMAP.md
+/docs/
+
 
 # environment variables
 .env
