@@ -99,6 +99,15 @@ if [ -x "$ROOT/scripts/audit-tone-consistency.py" ]; then
     "block"
 fi
 
+# 3c. 번역체·AI 상투구 후보 (CLAUDE.md §2) — 휴리스틱이라 warn (후보 = 위반 아님).
+#     확정·리라이트는 korean-prose-critic 에이전트로.
+if [ -x "$ROOT/scripts/audit-translationese.py" ]; then
+  run_check \
+    "3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2)" \
+    "python3 $ROOT/scripts/audit-translationese.py $ARGS_STR" \
+    "warn"
+fi
+
 # 4. Hallucination 후보 — strict 모드에서만 block
 run_check \
   "4/5 Hallucination 후보 (CLAUDE.md §10)" \
