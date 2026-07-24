@@ -8,7 +8,7 @@ tags: [cpp, abseil, log, stack-trace, signal]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 

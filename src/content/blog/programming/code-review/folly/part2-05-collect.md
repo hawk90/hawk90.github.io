@@ -8,7 +8,7 @@ tags: [cpp, folly, future, collect, parallel]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 ---
 
 > **한 줄 요약**: `collect`는 *모두 성공*을, `collectAll`은 *모두 완료*(예외 포함)를, `collectAny`는 *하나만 완료*를 기다린다. 셋의 의미가 fan-in 패턴의 의도를 코드에 적는다.
@@ -132,29 +132,29 @@ folly::collectAny(std::move(futures))
     auto [idx, result] = std::move(pair);
     LOG(INFO) << "first replica: " << idx;
     if (result.hasException()) {
-      // 가장 빠른 응답이 실패 — 다음 단계는 collectAnySuccessful 고려
+      // 가장 빠른 응답이 실패 — 다음 단계는 collectAnyWithoutException 고려
     }
     return *std::move(result);
   });
 ```
 
-가장 빠른 *완료*이지 가장 빠른 *성공*이 아니다. 가장 빠른 실패도 잡힌다. 성공만 원한다면 `collectAnySuccessful`을 쓴다.
+가장 빠른 *완료*이지 가장 빠른 *성공*이 아니다. 가장 빠른 실패도 잡힌다. 성공만 원한다면 `collectAnyWithoutException`을 쓴다.
 
-## collectAnySuccessful — 모두 실패해야 실패
+## collectAnyWithoutException — 모두 실패해야 실패
 
 ```cpp
-folly::collectAnySuccessful(std::move(futures))
+folly::collectAnyWithoutException(std::move(futures))
   .via(&pool)
   .thenValue([](auto pair) {
     auto [idx, value] = std::move(pair);   // 성공값
     return value;
   })
-  .thenError(folly::tag_t<CollectAllFailedException>{}, [](auto&) {
-    return Default{};   // 모두 실패
+  .thenError([](folly::exception_wrapper&&) {
+    return Default{};   // 모두 실패 — 마지막 예외
   });
 ```
 
-내부적으로 `CollectAllFailedException`이 모아진 모든 예외를 전달한다.
+예외 없이 완료된 *첫* Future를 돌려준다. 하나도 성공하지 못하면 *마지막* 예외가 결과로 전달된다 (`collectAny`처럼 모든 예외를 모으지는 않는다).
 
 ## variadic vs range
 

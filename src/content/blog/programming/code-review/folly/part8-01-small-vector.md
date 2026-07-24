@@ -1,14 +1,14 @@
 ---
-title: "folly::SmallVector — inline storage 분석"
+title: "folly::small_vector — inline storage 분석"
 date: 2026-06-05T09:17:00
-description: "SmallVector — N개까지 inline 저장, overflow는 heap, std::vector 호환 인터페이스."
+description: "small_vector — N개까지 inline 저장, overflow는 heap, std::vector 호환 인터페이스."
 series: "Folly Code Review"
 seriesOrder: 35
 tags: [cpp, folly, container, smallvector, sbo]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 
@@ -135,7 +135,7 @@ inline → heap 전환은 한 번만 일어난다. 이후는 일반 `std::vector
 T가 `folly::IsRelocatable`이면 element move를 `memcpy`로 대체.
 
 ```cpp
-if constexpr (folly::is_trivially_relocatable_v<T>) {
+if constexpr (folly::IsRelocatable<T>::value) {
   std::memcpy(new_data, old_data, size_ * sizeof(T));
   // destructor 호출 안 함 (relocate 의미)
 } else {

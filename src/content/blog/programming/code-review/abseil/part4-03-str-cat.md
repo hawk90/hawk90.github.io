@@ -8,7 +8,7 @@ tags: [cpp, abseil, strings, strcat, performance]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약

@@ -8,7 +8,7 @@ tags: [cpp, abseil, utility, apply, in-place]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 
@@ -130,13 +130,13 @@ custom allocator, in-place storage 구현에서만 등장. 일반 코드는 거�
 
 ```cpp
 // to_address — fancy pointer를 raw로
-T* p = absl::to_address(it);   // iterator → raw pointer (가능한 경우)
+T* p = std::to_address(it);   // iterator → raw pointer (가능한 경우)
 
 // move_if_noexcept — strong exception safety 보장
-T moved = absl::move_if_noexcept(x);
+T moved = std::move_if_noexcept(x);
 ```
 
-대부분 std에 들어왔고, Abseil polyfill은 C++11/14 코드의 호환 layer다.
+과거 Abseil이 제공하던 이 계열 polyfill은 C++17 이후 std로 흡수되면서 제거·`ABSL_DEPRECATE_AND_INLINE`로 std에 위임됐다. 지금은 `std::` 버전을 그대로 쓴다.
 
 ## 작은 예시 — Variadic logging helper
 

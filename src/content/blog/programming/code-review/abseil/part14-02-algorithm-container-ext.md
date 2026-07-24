@@ -8,7 +8,7 @@ tags: [cpp, abseil, algorithm, container, ranges]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 
@@ -81,7 +81,7 @@ absl::c_set_union(a, b, std::back_inserter(out));
 // 순서·정렬 확인
 bool sorted = absl::c_is_sorted(v);
 absl::c_reverse(v);
-absl::c_unique(v);   // 정렬된 container에서 인접 중복 제거
+absl::c_unique_copy(v, std::back_inserter(out));   // 인접 중복 제거 (in-place c_unique는 abseil이 의도적으로 생략)
 ```
 
 ## 내부 구현

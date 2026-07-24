@@ -8,7 +8,7 @@ tags: [cpp, abseil, status, exception, error-code, grpc, interop]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 

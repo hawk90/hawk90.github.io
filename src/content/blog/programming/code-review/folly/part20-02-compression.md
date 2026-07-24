@@ -8,7 +8,7 @@ tags: [cpp, folly, compression, zstd, lz4, snappy]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 

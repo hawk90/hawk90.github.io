@@ -8,7 +8,7 @@ tags: [cpp, abseil, sampling, profiling, performance]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 

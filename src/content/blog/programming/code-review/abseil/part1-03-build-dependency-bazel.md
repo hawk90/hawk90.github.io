@@ -8,7 +8,7 @@ tags: [cpp, abseil, build, bazel, cmake, vcpkg, conan]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 

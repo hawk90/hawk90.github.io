@@ -8,7 +8,7 @@ tags: [cpp, folly, try, expected, design]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 

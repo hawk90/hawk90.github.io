@@ -8,7 +8,7 @@ tags: [cpp, abseil, memory, smart-pointer, allocator, base]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 
@@ -92,9 +92,9 @@ std::unique_ptr<Foo> CreateFoo() {
 
 `WrapUnique`의 이점은 ownership transfer를 코드에서 명확히 드러내는 것. `new` 다음에 바로 `WrapUnique`를 호출하는 패턴은 "이 pointer가 unique_ptr에 들어간다"는 의도를 명시한다.
 
-## absl::PointerTraits 등
+## absl::pointer_traits 등
 
-C++17의 `std::pointer_traits`를 보완하는 도구는 거의 없다. 대부분 std를 그대로 쓴다.
+과거 `absl::pointer_traits`가 있었으나 지금은 `ABSL_DEPRECATE_AND_INLINE`로 `std::pointer_traits`에 위임된다. 보완 도구는 거의 없고 대부분 std를 그대로 쓴다.
 
 ## allocator_traits 보완
 

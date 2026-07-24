@@ -8,7 +8,7 @@ tags: [cpp, folly, anti-pattern, performance, mistakes]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 

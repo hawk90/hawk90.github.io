@@ -8,7 +8,7 @@ tags: [cpp, abseil, sync, condition, mutex]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 ---
 
 ## 한 줄 요약
@@ -122,10 +122,10 @@ DoWork();
 mu.Unlock();
 ```
 
-`MutexLockWhen`이라는 RAII도 있다.
+`MutexLock`은 `Condition`을 받는 생성자로 *조건이 참이 될 때까지 대기 후 잠그는* RAII도 제공한다.
 
 ```cpp
-absl::MutexLockWhen l(&mu, absl::Condition(&ready));
+absl::MutexLock l(&mu, absl::Condition(&ready));
 DoWork();
 // 자동 unlock
 ```

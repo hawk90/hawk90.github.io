@@ -8,7 +8,7 @@ tags: [cpp, abseil, statusor, error-handling, monadic]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 

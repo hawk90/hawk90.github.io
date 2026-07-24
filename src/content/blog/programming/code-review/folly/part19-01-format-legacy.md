@@ -8,7 +8,7 @@ tags: [cpp, folly, format, legacy, migration]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 
@@ -42,8 +42,8 @@ std::cout << folly::format("hello {}, {}\n", name, age);
 // 2. format → fbstring (str())
 auto s = folly::format("x={}, y={}", x, y).str();
 
-// 3. format-into a writer
-folly::format(folly::stringPrinter(buffer), "value = {}", v);
+// 3. format → append to string buffer
+folly::format(&buffer, "value = {}", v);   // buffer(std::string)에 append
 
 // 4. positional
 auto a = folly::format("{0}-{1}-{0}", "x", "y").str();   // "x-y-x"

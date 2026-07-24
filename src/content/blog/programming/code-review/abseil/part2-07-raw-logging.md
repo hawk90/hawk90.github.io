@@ -8,7 +8,7 @@ tags: [cpp, abseil, raw-logging, signal-handler, no-dependency, base]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 

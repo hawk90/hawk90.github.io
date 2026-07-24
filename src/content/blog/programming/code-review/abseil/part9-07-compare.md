@@ -8,7 +8,7 @@ tags: [cpp, abseil, utility, compare, three-way]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 
@@ -152,16 +152,22 @@ struct Version {
     std::string prerelease;   // 빈 문자열이 stable
 
     absl::weak_ordering CompareTo(const Version& o) const {
-        if (auto r = absl::compare_three_way{}(major, o.major); r != 0) return r;
-        if (auto r = absl::compare_three_way{}(minor, o.minor); r != 0) return r;
-        if (auto r = absl::compare_three_way{}(patch, o.patch); r != 0) return r;
+        // abseil은 public 3-way compare functor를 제공하지 않는다. 직접 만든다.
+        auto cmp = [](const auto& a, const auto& b) -> absl::weak_ordering {
+            if (a < b) return absl::weak_ordering::less;
+            if (b < a) return absl::weak_ordering::greater;
+            return absl::weak_ordering::equivalent;
+        };
+        if (auto r = cmp(major, o.major); r != 0) return r;
+        if (auto r = cmp(minor, o.minor); r != 0) return r;
+        if (auto r = cmp(patch, o.patch); r != 0) return r;
 
         // prerelease 있음 < prerelease 없음 (semver 규칙)
         if (prerelease.empty() != o.prerelease.empty()) {
             return prerelease.empty() ? absl::weak_ordering::greater
                                        : absl::weak_ordering::less;
         }
-        return absl::compare_three_way{}(prerelease, o.prerelease);
+        return cmp(prerelease, o.prerelease);
     }
 
     bool operator<(const Version& o) const  { return CompareTo(o) < 0; }

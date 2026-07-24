@@ -8,7 +8,7 @@ tags: [cpp, folly, f14, fast-map, auto]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 
@@ -66,7 +66,7 @@ namespace detail {
   template <typename K, typename V>
   using FastSelect = std::conditional_t<
       (sizeof(std::pair<K, V>) <= kF14VectorMapThreshold) &&
-       folly::is_trivially_relocatable_v<std::pair<K, V>>,
+       folly::IsRelocatable<std::pair<K, V>>::value,
       F14ValueMap<K, V>,
       F14VectorMap<K, V>>;
 }

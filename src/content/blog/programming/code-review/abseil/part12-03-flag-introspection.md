@@ -8,7 +8,7 @@ tags: [cpp, abseil, flags, validation, introspection]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: true
+draft: false
 
 ---
 
@@ -164,11 +164,14 @@ debug endpoint(`/_/flags`)로 노출하면 운영 중 현재 설정 확인 가�
 ## SetFlag — 런타임 변경
 
 ```cpp
-absl::SetFlag(&FLAGS_port, 9090);
-absl::SetFlagByName("port", "9090");   // 문자열 인터페이스
+absl::SetFlag(&FLAGS_port, 9090);   // 타입 안전
+
+// 이름(문자열)으로 설정하려면 reflection API를 거친다
+std::string err;
+absl::FindCommandLineFlag("port")->ParseFrom("9090", &err);
 ```
 
-`SetFlag` / `SetFlagByName` 모두 thread-safe. 다만 *이미 캡처된 값*은 안 바뀐다.
+두 경로 모두 thread-safe. 다만 *이미 캡처된 값*은 안 바뀐다.
 
 ```cpp
 const bool verbose = absl::GetFlag(FLAGS_verbose);   // 캡처

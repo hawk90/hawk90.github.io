@@ -8,7 +8,7 @@ tags: [cpp, folly, uri, url, parser]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 

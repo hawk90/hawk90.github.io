@@ -8,7 +8,7 @@ tags: [cpp, folly, container, lru, cache]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 

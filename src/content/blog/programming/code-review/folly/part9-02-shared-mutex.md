@@ -8,7 +8,7 @@ tags: [cpp, folly, sync, shared-mutex, rwlock]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: true
+draft: false
 
 ---
 
@@ -27,8 +27,8 @@ draft: true
 server에서 ConcurrentHashMap의 shard마다 mutex가 박혀 있다 보면 *mutex 자체의 메모리*도 무시 못 한다. folly는 sizeof = 4 byte의 SharedMutex를 만들었다. 또한 reader/writer priority를 *template parameter*로 선택.
 
 ```cpp
-folly::SharedMutex_ReadPriority   m1;   // reader 우선
-folly::SharedMutex_WritePriority  m2;   // writer 우선 (default)
+folly::SharedMutexReadPriority   m1;   // reader 우선
+folly::SharedMutexWritePriority  m2;   // writer 우선 (default)
 folly::SharedMutex                m3;   // alias of WritePriority
 ```
 
