@@ -65,7 +65,14 @@ trackings:
         - drivers/cxl/
     file_patterns:
       - 'drivers/cxl/[A-Za-z0-9_/.-]+\.(h|c)'
-      - 'cxl_[a-z_]+'
+      # \b(단어경계) — devm_cxl_* 같은 접두 함수의 중간 매치 방지
+      - '\bcxl_[a-z_]+'
+    cited_symbol_whitelist:
+      # tools/testing/cxl/의 mock 모듈 — drivers/cxl/ 밖이라 인덱싱 안 됨(실존)
+      - 'cxl_mock'
+      - 'cxl_mock_mem'
+      # ARB/MUX ALMP는 링크레이어 — Linux 드라이버 심볼 아님, vendor 예시로 hedged
+      - 'cxl_almp_send'
 
   - id: pcie_deep_dive
     title: "PCIe Deep Dive (Linux drivers/pci)"
@@ -80,7 +87,8 @@ trackings:
         - drivers/pci/
     file_patterns:
       - 'drivers/pci/[A-Za-z0-9_/.-]+\.(h|c)'
-      - 'pci_[a-z_]+'
+      # \b — my_pci_table 같은 사용자 예시 변수의 중간 매치 방지
+      - '\bpci_[a-z_]+'
 
 # 미래 추가 후보:
 # - kernel_debugging: kernel/, fs/ftrace, drivers/perf — baseline 다중 path
