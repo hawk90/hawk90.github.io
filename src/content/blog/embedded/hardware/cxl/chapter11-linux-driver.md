@@ -80,14 +80,14 @@ $ modprobe cxl_acpi
 
 | 단계 | 함수 | 동작 |
 |------|------|------|
-| 1 | `cxl_pci_probe()` | 진입점, DVSEC 확인 |
-| 2 | `cxl_dev_state_create()` | base struct 할당 |
-| 3 | `cxl_setup_regs()` | MMIO BAR 매핑 |
+| 1 | `cxl_pci_probe()` | 진입점, `pci_find_dvsec_capability()`로 DVSEC 확인 |
+| 2 | `cxl_memdev_state_create()` | base struct 할당 |
+| 3 | `cxl_pci_setup_regs()` | MMIO BAR 매핑 |
 | 4 | `cxl_pci_setup_mailbox()` | mailbox 초기화 |
-| 5 | `cxl_dvsec_init()` | DVSEC capability 읽기 |
+| 5 | `cxl_dev_state_identify()` | IDENTIFY 명령으로 디바이스 capability 읽기 |
 | 6 | `cxl_alloc_irq_vectors()` | MSI/MSI-X 할당 |
-| 7 | `cxl_pci_setup_aer()` | AER handler 등록 |
-| 8 | `cxl_memdev_register()` | memdev 객체 생성, sysfs 등록 |
+| 7 | `cxl_event_config()` | 이벤트·인터럽트 설정 (AER는 정적 `cxl_error_handlers`) |
+| 8 | `devm_cxl_add_classdev()` | memdev class device 생성, sysfs 등록 |
 
 각 단계 실패 시 *별도 errno*. ftrace function_graph로 단계 가시화 가능 ([Kernel Debugging Ch 8 CXL 디버깅](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)).
 
@@ -100,7 +100,7 @@ int cxl_decoder_commit(struct cxl_decoder *cxld)
 {
     void __iomem *hdm = cxld->hdm_reg_base;
 
-    down_write(&cxl_decoder_rwsem);
+    down_write(&cxl_rwsem.region);
 
     if (cxld->flags & CXL_DECODER_F_ENABLE) {
         rc = -EBUSY;
@@ -132,12 +132,12 @@ int cxl_decoder_commit(struct cxl_decoder *cxld)
         cxld->flags |= CXL_DECODER_F_ENABLE;
 
 out:
-    up_write(&cxl_decoder_rwsem);
+    up_write(&cxl_rwsem.region);
     return rc;
 }
 ```
 
-*`cxl_decoder_rwsem`*이 *전역 read-write semaphore*. 모든 decoder commit이 *순차 진행*.
+*`cxl_rwsem.region`*이 *전역 read-write semaphore*(`struct cxl_rwsem cxl_rwsem`의 멤버). 모든 decoder commit이 *순차 진행*.
 
 ## Region 생성 — sysfs path
 
@@ -234,7 +234,7 @@ static int cxl_region_attach(struct cxl_region *cxlr,
     // 모든 target 결정 후
     if (all_targets_set(cxlr)) {
         // NUMA node 할당
-        int target_nid = cxl_region_pick_node(cxlr);
+        int target_nid = phys_to_target_node(cxlr->res.start);
 
         // Memory hot-add
         rc = add_memory_driver_managed(target_nid,
@@ -263,9 +263,8 @@ CXL 디바이스의 *RAS 이벤트*는 *pci_error_handlers*를 통해 *호스트
 ```c
 static const struct pci_error_handlers cxl_error_handlers = {
     .error_detected = cxl_error_detected,
-    .mmio_enabled   = cxl_mmio_enabled,
     .slot_reset     = cxl_slot_reset,
-    .resume         = cxl_resume,
+    .resume         = cxl_error_resume,
 };
 
 static pci_ers_result_t cxl_error_detected(
@@ -275,8 +274,7 @@ static pci_ers_result_t cxl_error_detected(
     struct cxl_dev_state *cxlds = pci_get_drvdata(pdev);
 
     if (state == pci_channel_io_perm_failure) {
-        // Fatal — device offline
-        cxl_memdev_offline(cxlds);
+        // Fatal — 복구 불가, 디바이스 분리
         return PCI_ERS_RESULT_DISCONNECT;
     }
     cxl_mem_get_event_records(cxlds);
@@ -284,7 +282,7 @@ static pci_ers_result_t cxl_error_detected(
 }
 ```
 
-*Fatal 이벤트*는 *디바이스를 offline*시키고 *NUMA 노드를 자동 제거*.
+*Fatal 이벤트*(`pci_channel_io_perm_failure`)는 `PCI_ERS_RESULT_DISCONNECT`를 반환해 *디바이스를 분리*한다. 이후 hot-remove 경로에서 NUMA 노드가 정리된다.
 
 ## Lock 사용
 
@@ -292,9 +290,9 @@ static pci_ers_result_t cxl_error_detected(
 
 | Lock | 보호 대상 |
 |------|----------|
-| cxl_port_mutex | port list 변경 |
-| cxl_decoder_rwsem | decoder commit·release |
-| cxl_region_mutex | region 생성·삭제 |
+| port->regions_lock | port별 region list 변경 |
+| cxl_rwsem.region | HPA·interleave 변경 (decoder commit) |
+| cxl_rwsem.dpa | DPA 공간 변경 |
 | mbox_mutex | mailbox concurrent access 방지 |
 | event_log_lock | event ring buffer |
 | cxlds->lock | dev state 일반 |

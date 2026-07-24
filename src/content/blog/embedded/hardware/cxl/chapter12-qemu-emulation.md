@@ -178,21 +178,20 @@ CEDT 내용이 *실 BIOS와 동일한 형식*입니다. *드라이버가 같은 
 QEMU 환경에서 *kernel module 개발 사이클*:
 
 ```bash
-# host에서 cross-compile
-host$ make ARCH=x86_64 CROSS_COMPILE=x86_64-linux-gnu- \
-    M=drivers/cxl/
+# host에서 cxl_test mock 프레임워크 빌드 (drivers/cxl/가 아니라 tools/testing/cxl/)
+host$ make -C ~/linux M=tools/testing/cxl
 
-# 결과 .ko를 guest로 복사
-host$ scp drivers/cxl/cxl_mock.ko guest:/tmp/
+# 결과 .ko를 guest로 복사 (cxl_test·cxl_mock·cxl_mock_mem)
+host$ scp tools/testing/cxl/cxl_mock.ko guest:/tmp/
 
 # guest에서 load·테스트
 guest$ insmod /tmp/cxl_mock.ko
 guest$ dmesg | tail
 guest$ ls /sys/bus/cxl/devices/
 
-# 수정·반복
-host$ vim drivers/cxl/cxl_mock.c
-host$ make ...
+# 수정·반복 (mock 소스는 test/mock.c)
+host$ vim tools/testing/cxl/test/mock.c
+host$ make -C ~/linux M=tools/testing/cxl
 ```
 
 *컴파일·load·테스트* 사이클이 *수십 초*. *실 하드웨어에 reboot·flash*하는 시간보다 *훨씬 빠름*.
