@@ -334,9 +334,9 @@ static pci_ers_result_t cxl_error_detected(
 | **region 안전성** | deletion race·creation 중 delete block·auto-discovery targets 채우기·OOB·variable shadowing·partition index validation 다수 fix |
 | **interleave helper** | encode/decode helper가 *caller와 정렬*되도록 signature 조정 |
 | **PCI access** | DVSEC config access의 *PCIBIOS error → errno 변환* |
-| **RAS** | `CXL_HEADERLOG_SIZE`가 *RAS Capability size와 일치*하도록 fix |
+| **RAS** | `CXL_HEADERLOG_SIZE`를 `SZ_512`에서 `SZ_64`로 축소해 *RAS Capability size와 일치*하도록 fix. 다만 rasdaemon이 기존 512 B 레이아웃에 의존하므로, trace 이벤트 배열은 `CXL_HEADERLOG_TRACE_SIZE`(SZ_512)로 별도 유지해 ABI를 보존 |
 
-이 변경 사항은 *Linux 6.10+ 또는 6.11에 머지* 예정 (cxl-for-next branch). *Type 2 attach 모델*은 *향후 GPU·NPU + CXL.mem* 조합의 주요 경로.
+이 변경 사항은 *cxl-for-next branch*(`for-7.2/*`)에 쌓여 *Linux 7.2 머지* 대상입니다. 현재 mainline은 v7.1이며 아직 릴리스에는 포함되지 않았습니다. *Type 2 attach 모델*은 *향후 GPU·NPU + CXL.mem* 조합의 주요 경로.
 
 > 본 시리즈는 *upstream tracking* 인프라(`data/upstream-tracking.yaml` + `audit-upstream-freshness.py`)로 *cxl.h 변경*을 자동 추적합니다. 새 변경이 누적되면 다음 라운드에서 본문 보강.
 

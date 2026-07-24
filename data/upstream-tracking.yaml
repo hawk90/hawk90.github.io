@@ -54,8 +54,8 @@ trackings:
       repo_url: https://github.com/torvalds/linux
       local_path: ~/Workspaces/code-review-sources/linux
       branch: master
-      baseline_commit: e196115ec330a18de415bdb9f5071aa9f08e53ce
-      baseline_date: 2026-05-16
+      baseline_commit: 48a5a7ab8d6ab7090564339e039c421f315de912
+      baseline_date: 2026-07-24
       # Linux kernel은 거대. sparse checkout + 이 path만 diff 추적
       subsystem_paths:
         - drivers/cxl/
@@ -70,8 +70,8 @@ trackings:
       repo_url: https://github.com/torvalds/linux
       local_path: ~/Workspaces/code-review-sources/linux
       branch: master
-      baseline_commit: 23bc2dd17b2000912b7ee3a92090ec67e4e572d7
-      baseline_date: 2026-05-19
+      baseline_commit: 48a5a7ab8d6ab7090564339e039c421f315de912
+      baseline_date: 2026-07-24
       subsystem_paths:
         - drivers/pci/
     file_patterns:
