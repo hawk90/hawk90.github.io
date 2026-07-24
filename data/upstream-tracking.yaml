@@ -46,6 +46,10 @@ trackings:
     file_patterns:
       - 'absl/[A-Za-z0-9_/.-]+\.(h|cc|hpp)'
       - 'absl::[A-Za-z0-9_]+'
+    # audit-cited-symbols.py 예외 — upstream에 없어도 정상인 인용
+    cited_symbol_whitelist:
+      # LTS 버전 inline namespace 예시 (mangled-name 설명용, 특정 릴리스 태그)
+      - 'absl::lts_20240722'
 
   - id: cxl_internals
     title: "CXL 4.0 Internals (Linux drivers/cxl)"

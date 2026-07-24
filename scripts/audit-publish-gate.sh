@@ -144,6 +144,26 @@ if [ -x "$ROOT/scripts/audit-upstream-freshness.py" ] && [ -f "$ROOT/data/upstre
   fi
 fi
 
+# 7b. Cited-symbol existence — 글이 인용한 라이브러리 심볼이 upstream에 실제 존재?
+#     rename·삭제·hallucination(존재하지 않는 API 이름) 탐지. 후보=수동 review.
+if [ -x "$ROOT/scripts/audit-cited-symbols.py" ] && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
+  echo ""
+  echo "═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══"
+  if python3 "$ROOT/scripts/audit-cited-symbols.py" > /tmp/audit-symbols.txt 2>&1; then
+    grep -E "^## |MISSING: 0|✓ 모든" /tmp/audit-symbols.txt || true
+    echo "✓ PASS — 모든 인용 심볼 존재"
+  else
+    # exit 2 = MISSING 후보 있음 (informational, 사람이 확인)
+    grep -E "^## |MISSING:|    - \`" /tmp/audit-symbols.txt || true
+    echo "ℹ  MISSING 후보 = hallucination 아님. 각 심볼을 upstream에 확인 후 수정·qualify."
+    echo "ℹ  상세: python3 scripts/audit-cited-symbols.py [--series <id>]"
+    if [ "$STRICT" -eq 1 ]; then
+      echo "✗ --strict: 인용 심볼 부재 차단"
+      FAILED=$((FAILED + 1))
+    fi
+  fi
+fi
+
 # 8. Internal link rot — /blog/... 링크가 실제 파일을 가리키는지
 #    Python 버전이 image markdown ![]()과 page link []()를 구별해 정확.
 #    인자 전달 — 단일 파일/디렉터리만 검사 가능.
