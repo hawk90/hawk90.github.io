@@ -586,3 +586,37 @@ Book-review 시리즈는 *책 챕터 1:1*로 매핑이 원칙입니다. 다음�
   - Modern Embedded Recipes
   - Embedded Performance Engineering
   - Practical RTOS Internals
+
+---
+
+## 14. 자동화 워크플로우 지도
+
+콘텐츠 수명주기의 각 단계에 *올바른 도구 하나*가 있습니다. 스크립트를 개별로 외우지 말고 *단계 → 도구*로 찾습니다. 아래 표가 정본입니다.
+
+| 단계 | 무엇을 검증/생성 | 도구 (`scripts/` 또는 `npm run`) |
+|------|-----------------|--------------------------------|
+| ① 집필 — 톤·산문 | Tone A/B 혼용, 번역체·AI 상투구 | `audit:tone` · `audit-translationese.py` · `korean-prose-critic`(agent) |
+| ② 시각화 | ASCII 다이어그램, TikZ 겹침, 코드 블록 산문 | `npm run diagrams` · `detect-ascii-diagrams.sh` · `detect-text-overlap.py` · `detect-prose-in-code.sh` |
+| ③ 사실 검증 | hallucination 후보, known-fact, 인용 심볼 존재, upstream drift | `audit-suspect-claims.sh` · `verify-known-facts.sh` · `audit-cited-symbols.py` · `audit:upstream` |
+| ④ 발행 게이트 | ①③의 blocking 부분을 한 번에 | `npm run audit:gate` (= `audit-publish-gate.sh`) |
+| ⑤ 구조 무결성 | seriesOrder gap·draft 혼합·링크 rot·중복 | `audit:series` · `audit:links` · `check:duplicate` |
+| ⑥ 유지보수 (발행 후) | upstream 코드·spec 변화, 인용 심볼 rename, 로드맵 만료 | `audit:upstream` · `audit-cited-symbols.py` · `audit:roadmap` |
+
+### Dispatch — 언제 자동으로 도는가
+
+- **commit 시**: lefthook `pre-commit`이 staged `.md`에 `audit-publish-gate.sh` + frontmatter 검사.
+- **push 시**: lefthook `pre-push`가 push되는 commit의 변경 파일에 gate.
+- **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (fetch 포함 drift).
+- **게이트가 느릴 때**: `git commit/push --no-verify`로 우회하되 *책임 본인* — 우회했으면 `npm run audit:gate`를 별도로 돌린다.
+
+### Slash 커맨드 (`.claude/commands/`)
+
+의도 기반 진입점. 스크립트 이름을 몰라도 단계로 부른다.
+
+- `/pre-publish [dir]` — 발행 전 통합 gate (④).
+- `/audit-freshness` — upstream drift + 인용 심볼 존재 (③⑥).
+- `/new-chapter` — frontmatter 스캐폴딩 (§4 준수).
+
+### Upstream tracking 등록
+
+외부 repo·spec을 인용하는 시리즈는 `data/upstream-tracking.yaml`에 등록해야 ③⑥ 자동화가 적용됩니다. 스키마·baseline 갱신 규칙은 그 파일 주석 참조. 인용 심볼 중 upstream에 *의도적으로 없는 것*(버전 네임스페이스 등)은 `cited_symbol_whitelist`로 예외 처리.
