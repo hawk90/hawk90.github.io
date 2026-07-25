@@ -86,21 +86,19 @@ folly::coro::Task<size_t> ReadAsync(folly::IoUringBackend& backend,
 
 ## 내부 — io_uring 동작
 
-```text
-io_uring 모델:
-  SQE (Submission Queue Entry) ring — user 영역 fill, kernel poll
-  CQE (Completion Queue Entry) ring — kernel fill, user poll
+io_uring은 링 두 쌍으로 동작한다. SQE(Submission Queue Entry) ring은 user 영역이 채우고 kernel이 poll하며, CQE(Completion Queue Entry) ring은 kernel이 채우고 user가 poll한다.
 
-submit:
-  1. SQE에 op 정보 채움
-  2. io_uring_enter syscall (또는 SQPOLL mode면 kernel이 자동 poll)
-  3. kernel이 SQE를 처리, 완료 시 CQE에 결과
-  
-poll:
-  1. CQE ring을 user가 poll
-  2. 각 CQE의 user_data로 Op* 복원
-  3. callback 호출
-```
+submit 경로는 다음과 같다.
+
+1. SQE에 op 정보를 채운다.
+2. `io_uring_enter` syscall을 호출한다 (SQPOLL mode면 kernel이 자동으로 poll).
+3. kernel이 SQE를 처리하고, 완료되면 CQE에 결과를 기록한다.
+
+poll 경로는 다음과 같다.
+
+1. user가 CQE ring을 poll한다.
+2. 각 CQE의 `user_data`로 `Op*`를 복원한다.
+3. callback을 호출한다.
 
 ring 한 쌍이 *batch* 제출과 *batch* 수확을 가능하게 한다. syscall 한 번에 수십 op 처리. context switch 비용이 결정적으로 줄어든다.
 

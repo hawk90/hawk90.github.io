@@ -78,12 +78,12 @@ Program header는 "어디에 올려라", section header는 "어디서 만들어�
 `.o` 파일은 외부 symbol 참조를 미해결로 두고, .rel.* 섹션에 "여기에 외부 symbol 주소를 넣어라"라는 entry를 둡니다. linker가 이를 해소합니다.
 
 ```text
-main.o의 .rel.text:
-   offset 0x14: R_ARM_CALL → printf
-   offset 0x20: R_ARM_ABS32 → my_global_var
-
-→ linker가 printf, my_global_var의 주소를 박아 넣음
+.rel.text (main.o):
+   offset 0x14: R_ARM_CALL   printf
+   offset 0x20: R_ARM_ABS32  my_global_var
 ```
+
+linker는 이 entry를 읽어 `printf`와 `my_global_var`의 실제 주소를 해당 offset에 박아 넣습니다.
 
 ## 코드 / 실제 사용 예
 

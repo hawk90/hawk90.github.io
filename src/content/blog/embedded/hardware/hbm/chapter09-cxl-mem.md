@@ -131,19 +131,23 @@ CXL.mem은 *load/store가 native로 가능*하지만 *OS가 인식하고 배치�
 
 **Linux CXL 서브시스템** (kernel 6.0+)
 
+CXL 디바이스는 `sysfs`에 트리 형태로 노출됩니다.
+
 ```text
-sysfs:
-  /sys/bus/cxl/devices/
+/sys/bus/cxl/devices/
     ├── root0/           # CXL Root
     ├── port0/           # Upstream port
-    ├── decoder0.0/      # HDM decoder (physical address → device)
+    ├── decoder0.0/      # HDM decoder (physical address -> device)
     ├── mem0/            # Memory device
-    └── region0/         # 묶인 메모리 영역 (e.g., interleave)
+    └── region0/         # region: interleave 등으로 묶인 메모리 영역
+```
 
-명령:
-  cxl list -RT          # 전체 토폴로지
-  cxl create-region -d decoder0.0 ...   # region 생성
-  daxctl list           # DAX 디바이스 (RAM 대신 mmap)
+주요 명령은 다음과 같습니다.
+
+```bash
+cxl list -RT                          # 전체 토폴로지
+cxl create-region -d decoder0.0 ...   # region 생성
+daxctl list                           # DAX 디바이스 (RAM 대신 mmap)
 ```
 
 CXL 메모리는 두 가지 모드로 *호스트에 노출*됩니다.

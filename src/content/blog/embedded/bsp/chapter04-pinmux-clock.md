@@ -264,20 +264,14 @@ void clock_init(void)
 
 SoC dtsi의 clock 노드는 *고정*입니다. 우리가 *보드에서* 바꾸는 것은 다음입니다.
 
-```text
-[보드별 변경점]
-
 1. 외부 oscillator 주파수 (XTAL)
    - 회로도 확인
-   - U-Boot board.c의 osc_24m_clk 정의
-
+   - U-Boot `board.c`의 `osc_24m_clk` 정의
 2. peripheral의 clock-rates / assigned-rates
    - 어떤 peripheral은 보드별로 다른 주파수가 필요
    - 예: 카메라 sensor의 MCLK = 24MHz vs 48MHz
-
 3. assigned-clock-parents
    - 보드의 디스플레이가 다르면 VIDEO_PLL을 다른 rate로
-```
 
 DT 예시입니다.
 

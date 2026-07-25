@@ -31,13 +31,13 @@ void *ptr = malloc(1024);
 
 ### External Fragmentation
 
+<!-- TODO: TikZ — free block 분산과 연속 8KB 요청 실패를 나타내는 fragmentation 다이어그램 -->
+
 ```text
-Free 영역:  ████░░██░░███░░██  (총 free 6KB)
-요청:      [████████] (8 KB 연속)
-→ 6 KB free 있어도 *연속 8 KB 없음* → 할당 실패
+████░░██░░███░░██
 ```
 
-총 free 메모리가 충분해도 연속 영역이 부족해 할당이 실패하는 상황입니다.
+free 블록이 위처럼 흩어져 있으면 총 free는 6 KB지만 연속 영역이 없습니다. 이때 8 KB 연속 블록을 요청하면 총 free가 충분해도 연속 영역이 부족해 할당이 실패합니다.
 
 ### Internal Fragmentation
 

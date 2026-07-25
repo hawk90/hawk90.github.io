@@ -31,12 +31,13 @@ cycle time은 *제어 알고리즘이 한 번 도는 데 걸리는 시간*입니
 
 cycle time을 *물리 시정수의 1/10 이하*로 잡는 것이 일반 원칙입니다. 시정수 1 ms인 서보를 250 μs cycle로 도는 이유가 여기 있습니다. 더 빠르게 돌면 *제어 성능은 그대로*인데 *망 부하만 늘어납니다*. 너무 느리게 돌면 *위상 지연*으로 발진이 일어납니다.
 
-```text
-서보 위치 제어 루프 예
-  Nyquist:        시정수 1 ms → 최소 샘플 500 μs
-  실용 안전 마진:  시정수의 1/4 = 250 μs cycle
-  표준 EtherCAT:   125 μs로도 가능 (DC 활용)
-```
+시정수 1 ms인 서보 위치 제어 루프를 예로 들면 다음과 같습니다.
+
+| 기준 | 근거 | cycle time |
+|------|------|-----------|
+| Nyquist | 시정수 1 ms → 최소 샘플 | 500 μs |
+| 실용 안전 마진 | 시정수의 1/4 | 250 μs |
+| 표준 EtherCAT | DC 활용 | 125 μs로도 가능 |
 
 ## Jitter — 평균이 아니라 분산
 
@@ -159,14 +160,13 @@ ptp4l[19.890]: master offset     -12 s2 freq    -12290 path delay     1234
 
 EtherCAT은 PTP를 그대로 쓰지 않습니다. *Distributed Clock(DC)*이라는 자체 방식을 씁니다. 원리는 비슷하지만 *마스터가 아니라 첫 슬레이브가 reference clock*이라는 점이 다릅니다.
 
-```text
-EtherCAT DC 동기 절차
-  1. 마스터가 BRD(0x900) 명령으로 모든 슬레이브에 *현재 시각*을 broadcast 읽기
-  2. 첫 번째 DC-capable 슬레이브의 시각을 reference로 채택
-  3. 각 슬레이브의 offset = reference - local
-  4. 마스터가 ARMW(Auto-increment + Read-Multiple-Write)로 offset을 분배
-  5. 슬레이브 ASIC이 그 offset만큼 자신의 clock을 자동 조정
-```
+EtherCAT DC 동기 절차는 다음과 같습니다.
+
+1. 마스터가 BRD(0x900) 명령으로 모든 슬레이브에 *현재 시각*을 broadcast 읽기 합니다.
+2. 첫 번째 DC-capable 슬레이브의 시각을 reference로 채택합니다.
+3. 각 슬레이브의 offset을 `reference - local`로 구합니다.
+4. 마스터가 ARMW(Auto-increment + Read-Multiple-Write)로 offset을 분배합니다.
+5. 슬레이브 ASIC이 그 offset만큼 자신의 clock을 자동 조정합니다.
 
 결과는 sub-μs 수준입니다. 64축 모터가 모두 *동일한 절대 시각*에 다음 위치로 움직입니다. 1번 모터가 12.5 μs 먼저 움직이고 64번이 늦게 움직이는 일이 없습니다.
 

@@ -225,11 +225,10 @@ Error: decoder already committed by firmware
 
 ### SPDM 인증 실패가 silent
 
-```text
-[BIOS SPDM 인증 실패 시]
-- CEDT에서 해당 디바이스 항목 제거
-- BIOS log에만 기록, 호스트 OS에 전달 안 됨
-```
+BIOS SPDM 인증이 실패하면 다음과 같이 처리됩니다.
+
+- CEDT에서 해당 디바이스 항목이 제거됩니다.
+- 실패는 BIOS log에만 기록되고, 호스트 OS에는 전달되지 않습니다.
 
 *인증 실패한 디바이스가 그냥 안 보임*. *Confidential Computing 환경*에서는 *BIOS log 확인* 필수.
 

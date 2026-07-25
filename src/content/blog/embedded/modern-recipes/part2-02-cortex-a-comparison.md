@@ -50,15 +50,15 @@ A53, A55가 little core로 자주 쓰이는 이유는 전력 효율과 가격입
 
 같은 SoC에 빠른 코어(big)와 느린 코어(LITTLE)를 함께 둡니다. Linux scheduler가 작업의 부담에 따라 둘 사이에서 마이그레이션 합니다.
 
+예를 들어 RK3588은 다음과 같이 구성됩니다.
+
 ```text
-RK3588 예시
+RK3588
   4 × Cortex-A76 (big, 2.4 GHz)
   4 × Cortex-A55 (LITTLE, 1.8 GHz)
-
-가벼운 작업 → A55
-무거운 작업 → A76
-대기 시 LITTLE만 active → 전력 절감
 ```
+
+가벼운 작업은 A55로, 무거운 작업은 A76로 보냅니다. 대기 상태에서는 LITTLE만 active로 두어 전력을 절감합니다.
 
 DynamIQ 기술로 같은 cluster에 big과 LITTLE을 섞을 수도 있습니다.
 

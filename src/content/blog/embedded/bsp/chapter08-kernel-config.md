@@ -232,14 +232,14 @@ BSP 초기에 마주하는 큰 결정입니다.
 
 빌드가 끝나면 다음이 생깁니다.
 
-```text
-arch/arm64/boot/Image           # 압축 안 한 raw 커널
-arch/arm64/boot/Image.gz        # gzip 압축
-arch/arm64/boot/dts/.../<>.dtb  # 빌드된 DTB
-*.ko                            # 외부 트리에 흩어진 모듈
-System.map                      # 심볼 ↔ 주소
-vmlinux                         # ELF (gdb·perf용)
-```
+| 산출물 | 설명 |
+|--------|------|
+| `arch/arm64/boot/Image` | 압축 안 한 raw 커널 |
+| `arch/arm64/boot/Image.gz` | gzip 압축 |
+| `arch/arm64/boot/dts/.../<>.dtb` | 빌드된 DTB |
+| `*.ko` | 외부 트리에 흩어진 모듈 |
+| `System.map` | 심볼 ↔ 주소 매핑 |
+| `vmlinux` | ELF (gdb·perf용) |
 
 `vmlinux`는 SD 카드에 안 올립니다. 디버깅에 쓸 ELF입니다. 실제 부팅에는 `Image` 또는 `Image.gz`와 `*.dtb`만 필요합니다.
 

@@ -212,18 +212,21 @@ temp1:        +32.1°C  (low  = -55.0°C, high = +127.0°C)
 
 Watchdog은 *주기적으로 키워주지 않으면* 시스템을 reset하는 timer입니다. software hang 시 마지막 안전망입니다.
 
+동작 흐름은 이렇습니다. watchdog timer를 enable한 뒤 timeout(예: 60초)을 설정하면 timer가 tick을 시작합니다. application은 매 N초마다 `WDIOC_KEEPALIVE` ioctl을 보내 watchdog 카운터를 초기화합니다. 만약 application이 hang되어 KEEPALIVE가 오지 않으면, timeout이 만료되고 시스템이 reset됩니다.
+
+<!-- TODO: TikZ (_design.tex) — watchdog timer / application KEEPALIVE flow diagram -->
+
 ```text
 [watchdog timer]
-   ├─ enable
-   ├─ timeout 설정 (예: 60 s)
-   └─ tick
+   |- enable
+   |- timeout
+   `- tick
 
 [application]
-   └─ 매 N초마다 WDIOC_KEEPALIVE ioctl
-        ↓
-   watchdog 카운터 초기화
-
-만약 application이 hang → KEEPALIVE 안 옴 → timeout → reset
+   `- WDIOC_KEEPALIVE ioctl (every N s)
+        |
+        v
+   watchdog counter reset
 ```
 
 ### /dev/watchdog 사용

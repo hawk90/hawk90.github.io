@@ -272,25 +272,15 @@ DRAM:  128 MiB
 
 새 프로젝트에서 어느 부트로더를 쓸지 결정하는 기준입니다.
 
-```text
-이 보드가 ARM 임베디드인가?
-  └ Yes → U-Boot 시작
-       └ ARMv8-A인가?
-            └ Yes → TF-A도 추가
-                 └ secure OS가 필요한가?
-                      └ Yes → OP-TEE(BL32) 추가
-            └ No → SPL + U-Boot Proper만
+<!-- TODO: TikZ flowchart (_design.tex) -->
 
-이 보드가 ARM server인가?
-  └ Yes → EDK II(UEFI) 사용
-       └ TF-A(BL31)도 필수
-
-이 보드가 x86인가?
-  └ coreboot 또는 EDK II
-
-이 보드가 RISC-V인가?
-  └ OpenSBI + U-Boot
-```
+- **ARM 임베디드** — U-Boot으로 시작합니다.
+  - ARMv8-A라면 TF-A를 추가합니다.
+    - secure OS가 필요하면 OP-TEE(BL32)까지 추가합니다.
+  - ARMv8-A가 아니면 SPL + U-Boot Proper만으로 충분합니다.
+- **ARM server** — EDK II(UEFI)를 사용하며, TF-A(BL31)가 필수입니다.
+- **x86** — coreboot 또는 EDK II를 씁니다.
+- **RISC-V** — OpenSBI + U-Boot 조합입니다.
 
 산업용 임베디드는 *U-Boot + TF-A*가 거의 *기본값*입니다. SoC vendor의 BSP가 이미 그렇게 구성되어 있으므로, 그 위에서 *수정*해 가는 것이 빠릅니다.
 

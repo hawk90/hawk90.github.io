@@ -149,9 +149,7 @@ Binary tree 형태로 *log N* bit으로 근사합니다.
 
 ### Write-Through
 
-```text
-Write → cache + memory 둘 다 즉시 업데이트
-```
+write가 발생하면 cache와 memory를 둘 다 즉시 업데이트합니다.
 
 장점은 coherence가 단순하다는 점입니다. 단점은 write traffic이 크다는 점입니다.
 

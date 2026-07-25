@@ -60,13 +60,10 @@ IRQ가 들어오면 hardware가 다음을 자동 수행합니다.
 
 이 전체가 12 cycle(M3/M4 기준), no-cache 시 16 ~ 25 cycle 정도 걸립니다.
 
-```text
-   IRQ pending → CPU 현재 명령 완료
-                 ↓
-        12 cycle (HW stacking + vector fetch)
-                 ↓
-        IRQ handler 첫 명령 실행
-```
+흐름을 정리하면 이렇습니다. IRQ가 pending되면 CPU가 현재 명령을 마친 뒤, 12 cycle 동안 hardware stacking과 vector fetch를 수행하고, 그 다음 IRQ handler의 첫 명령을 실행합니다.
+
+<!-- TODO: TikZ flow diagram — IRQ pending → CPU 현재 명령 완료 → 12 cycle (HW stacking + vector fetch) → IRQ handler 첫 명령 실행 -->
+
 
 ### 3) Tail-chaining
 

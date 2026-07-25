@@ -227,13 +227,10 @@ Dmitry Vyukov가 제안한 MPMC 알고리즘으로, Folly와 LMAX, DPDK가 채�
 
 ## ABA — SPSC엔 없음
 
-```text
-SPSC — producer/consumer 각 1개
-  → head는 producer만, tail은 consumer만 변경
-  → 같은 변수 두 thread가 write 안 함 → ABA 없음
-```
+Lock-free stack과 queue에서 흔히 등장하는 ABA 문제는 *SPSC에서는 발생하지 않습니다*. producer와 consumer가 각각 하나뿐이기 때문입니다.
 
-Lock-free stack과 queue에서 흔히 등장하는 ABA 문제는 *SPSC에서는 발생하지 않습니다*.
+- `head`는 producer만, `tail`은 consumer만 변경합니다.
+- 같은 변수를 두 thread가 동시에 write하지 않으므로 ABA가 생길 여지가 없습니다.
 
 ## Static Allocation
 

@@ -20,11 +20,12 @@ draft: false
 
 `std::vector`는 항상 heap을 사용한다. 평균 size가 0-3개인 vector조차 `new[]`를 한다.
 
-```text
-파이프라인 단계 N개를 매 요청마다 vector에 넣었다 비우는 코드
-  per request:  malloc + free  (수십~수백 ns)
-  per second 100K req:  10ms 가량의 allocator overhead
-```
+파이프라인 단계 N개를 매 요청마다 vector에 넣었다 비우는 코드를 생각해 보자. 요청마다 `malloc`과 `free`가 한 번씩 붙고, 처리량이 높아질수록 allocator overhead가 눈에 띄게 쌓인다.
+
+| 단위 | 비용 |
+|------|------|
+| per request | `malloc` + `free` (수십~수백 ns) |
+| per second (100K req) | 10ms 가량의 allocator overhead |
 
 이런 use case에서 stack에 fixed buffer를 두면 할당이 사라진다. LLVM의 `SmallVector`, boost의 `static_vector`/`small_vector`, abseil의 `InlinedVector`가 모두 같은 답.
 

@@ -228,7 +228,7 @@ openssl cms -sign -in "${STAGE}/sw-description" \
 
 A/B 부팅의 *결정자*는 OTA 도구가 아니라 **U-Boot**입니다. RAUC·swupdate는 *어느 슬롯이 다음 부팅 대상인지*를 U-Boot 환경 변수로 알립니다.
 
-```text
+```bash
 # 정상 부팅 시도 - bootcount 1 증가
 bootcmd=run main_boot
 main_boot=if test ${BOOT_ORDER} = "A B"; then \

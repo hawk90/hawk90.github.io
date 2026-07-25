@@ -180,12 +180,12 @@ active/suspended 시간 비율로 절전 효과를 측정합니다.
 
 CPU가 idle 상태에 진입하면 다양한 깊이의 C-state를 선택할 수 있습니다.
 
-```text
-C0  active
-C1  WFI (wait for interrupt) — 빠른 진입/탈출, 클럭 gating
-C2  power gating — 더 깊지만 wakeup latency 증가
-C3+ 도메인 전체 OFF — 가장 큰 절전, 가장 긴 wakeup
-```
+| C-state | 동작 | 특징 |
+|---------|------|------|
+| C0 | active | 실행 중 |
+| C1 | WFI (wait for interrupt) | 빠른 진입/탈출, 클럭 gating |
+| C2 | power gating | 더 깊지만 wakeup latency 증가 |
+| C3+ | 도메인 전체 OFF | 가장 큰 절전, 가장 긴 wakeup |
 
 ARM Cortex-A 시리즈에서는 PSCI의 `CPU_SUSPEND` SMC가 깊은 C-state 진입을 처리합니다.
 

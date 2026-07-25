@@ -109,16 +109,12 @@ LTS는 6개월~1년에 한 번 main을 잘라 태그를 붙인 snapshot이다.
 
 ## LTS 간 마이그레이션
 
-LTS에서 다음 LTS로 올라갈 때 무엇이 일어나는가.
+LTS에서 다음 LTS로 올라갈 때 무엇이 일어나는가. 예를 들어 `20240116.0`에서 `20240722.0` 사이의 주요 변경은 다음과 같다.
 
-```text
-20240116.0 → 20240722.0 사이의 주요 변경 (예시)
-
-- absl::Hash의 internal state layout 변경 — ABI 영향
-- absl::flat_hash_map의 default size 변경 — 성능 영향
-- absl::LogSink 인터페이스에 새 메서드 추가 — virtual override 영향
+- `absl::Hash`의 internal state layout 변경 — ABI 영향
+- `absl::flat_hash_map`의 default size 변경 — 성능 영향
+- `absl::LogSink` 인터페이스에 새 메서드 추가 — virtual override 영향
 - 일부 deprecation 제거 (이전 LTS에서 deprecate된 것)
-```
 
 마이그레이션 비용은 다음에 비례한다.
 

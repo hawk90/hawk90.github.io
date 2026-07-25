@@ -127,16 +127,16 @@ O(1) add + O(1) tick에 가끔 cascade가 들어갑니다. Linux kernel 5.0까�
 
 ## Linux New Hashed Wheel (HRtimer 아닌 timer_list)
 
-```text
-9 level, 각 64 slot:
-  level 0: 1ms × 64
-  level 1: 64ms × 64
-  level 2: 4s × 64
-  ...
+9 level, 각 64 slot 구조입니다.
 
-Cascade 없음 — 각 level 직접 expiry 처리
-Tick O(1) + occasional level 0 process
-```
+| Level | 단위 | 슬롯 |
+|-------|------|------|
+| 0 | 1 ms | 64 |
+| 1 | 64 ms | 64 |
+| 2 | 4 s | 64 |
+| ... | ... | ... |
+
+cascade가 없어 각 level이 직접 expiry를 처리합니다. Tick은 O(1)에 가끔 level 0 process가 들어가는 정도입니다.
 
 Linux 4.8+에서는 cascade를 제거했습니다. 그래서 더 단순하고 예측 가능합니다.
 

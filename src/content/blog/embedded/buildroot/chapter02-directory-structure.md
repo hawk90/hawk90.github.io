@@ -28,25 +28,24 @@ boot/           system/         toolchain/      utils/
 
 이 중 *바이트 크기로* 가장 무거운 것은 `package/`입니다. 2,000개가 넘는 패키지 정의가 들어 있습니다. 트리 구조부터 한눈에 보면 다음과 같습니다.
 
-```text
-buildroot/
-├── Config.in               ─ 최상위 Kconfig 진입점
-├── Makefile                ─ make 명령의 진짜 본체
-├── package/                ─ 2,000+ 패키지 (Config.in + .mk 쌍)
-├── board/                  ─ 보드별 파일 (defconfig 보조 자료)
-├── configs/                ─ defconfig 카탈로그
-├── fs/                     ─ rootfs 이미지 생성기
-├── output/                 ─ 빌드 산물 (gitignore)
-├── dl/                     ─ download cache (gitignore 권장)
-├── linux/                  ─ Linux 커널 빌드 인프라
-├── boot/                   ─ U-Boot, GRUB, syslinux 등
-├── toolchain/              ─ toolchain 빌드/임포트
-├── arch/                   ─ architecture별 cflags
-├── system/                 ─ skeleton rootfs, init scripts
-├── support/                ─ host-side 보조 스크립트
-├── docs/                   ─ 매뉴얼 sources
-└── utils/                  ─ check-package 같은 maintainer 도구
-```
+| 디렉터리 | 역할 |
+|---|---|
+| `Config.in` | 최상위 Kconfig 진입점 |
+| `Makefile` | make 명령의 진짜 본체 |
+| `package/` | 2,000+ 패키지 (`Config.in` + `.mk` 쌍) |
+| `board/` | 보드별 파일 (defconfig 보조 자료) |
+| `configs/` | defconfig 카탈로그 |
+| `fs/` | rootfs 이미지 생성기 |
+| `output/` | 빌드 산물 (gitignore) |
+| `dl/` | download cache (gitignore 권장) |
+| `linux/` | Linux 커널 빌드 인프라 |
+| `boot/` | U-Boot, GRUB, syslinux 등 |
+| `toolchain/` | toolchain 빌드/임포트 |
+| `arch/` | architecture별 cflags |
+| `system/` | skeleton rootfs, init scripts |
+| `support/` | host-side 보조 스크립트 |
+| `docs/` | 매뉴얼 sources |
+| `utils/` | check-package 같은 maintainer 도구 |
 
 ## package/ — 2,000개 패키지의 본거지
 
@@ -166,20 +165,18 @@ fs/ext2/
 
 `output/`은 빌드 산물이 들어가는 곳입니다. *반드시* `.gitignore`에 추가합니다. 내부 구조는 다음과 같습니다.
 
-```text
-output/
-├── build/            ─ 패키지별 빌드 디렉터리 (busybox-1.36.0/, linux-6.6.30/, …)
-├── host/             ─ host용 toolchain (cross-gcc, cross-binutils)
-│   ├── bin/          ─   aarch64-buildroot-linux-gnu-gcc 등
-│   ├── lib/
-│   └── share/
-├── staging/          ─ host/<TUPLE>/sysroot의 symlink (legacy)
-├── target/           ─ rootfs를 *조립 중*인 트리
-├── images/           ─ 최종 산물 (Image, rootfs.ext4, sdcard.img, …)
-├── .config           ─ menuconfig의 결과
-├── Makefile          ─ in-tree 빌드용 trampoline
-└── per-package/      ─ per-package 모드 사용 시 패키지별 sysroot
-```
+| 경로 | 역할 |
+|---|---|
+| `build/` | 패키지별 빌드 디렉터리 (`busybox-1.36.0/`, `linux-6.6.30/`, …) |
+| `host/` | host용 toolchain (cross-gcc, cross-binutils) |
+| `host/bin/` | `aarch64-buildroot-linux-gnu-gcc` 등 |
+| `host/lib/`, `host/share/` | toolchain 지원 라이브러리·데이터 |
+| `staging/` | `host/<TUPLE>/sysroot`의 symlink (legacy) |
+| `target/` | rootfs를 *조립 중*인 트리 |
+| `images/` | 최종 산물 (Image, rootfs.ext4, sdcard.img, …) |
+| `.config` | menuconfig의 결과 |
+| `Makefile` | in-tree 빌드용 trampoline |
+| `per-package/` | per-package 모드 사용 시 패키지별 sysroot |
 
 가장 자주 보는 두 곳은 다음입니다.
 

@@ -14,20 +14,9 @@ draft: false
 
 ## 3가지 hook의 정확한 차이
 
-Ch 7에서 post-build·post-image의 존재는 짚었습니다. 이번 장은 셋의 경계에 집중합니다. 실제로 트러블 슈팅의 9할이 "어느 hook에서 무엇을 해야 하는가"를 잘못 결정한 데서 옵니다. 각 hook이 실행되는 시점을 그리면 다음 흐름입니다.
+Ch 7에서 post-build·post-image의 존재는 짚었습니다. 이번 장은 셋의 경계에 집중합니다. 실제로 트러블 슈팅의 9할이 "어느 hook에서 무엇을 해야 하는가"를 잘못 결정한 데서 옵니다. 각 hook이 실행되는 시점은 다음 흐름을 따릅니다.
 
-```text
-패키지 빌드·설치 끝
-   │
-   ├─► post-build  (TARGET_DIR 수정 가능, fakeroot 밖, root 권한 없음)
-   │
-   ├─► fakeroot 진입
-   │     ├─ device table 적용 (system_table.txt)
-   │     ├─ post-fakeroot  (TARGET_DIR 안에서 chown·mknod 가능)
-   │     └─ rootfs tar/squashfs/ext4 생성 → BINARIES_DIR
-   │
-   └─► post-image  (BINARIES_DIR 조립, fakeroot 밖, TARGET_DIR 건드리지 말 것)
-```
+패키지 빌드·설치가 끝나면 먼저 **post-build**가 fakeroot 밖에서, root 권한 없이 TARGET_DIR을 수정할 수 있는 상태로 실행됩니다. 그다음 fakeroot에 진입해 `system_table.txt` 기반 device table을 적용하고, 그 안에서 **post-fakeroot**가 TARGET_DIR에 `chown`·`mknod`를 박은 뒤, rootfs를 tar/squashfs/ext4로 만들어 BINARIES_DIR에 내보냅니다. 마지막으로 fakeroot 밖에서 **post-image**가 BINARIES_DIR을 조립합니다. 이 단계에서는 TARGET_DIR을 건드리면 안 됩니다.
 
 세 hook의 *권한·디렉터리·시점*을 한 표로 정리하면 다음과 같습니다.
 

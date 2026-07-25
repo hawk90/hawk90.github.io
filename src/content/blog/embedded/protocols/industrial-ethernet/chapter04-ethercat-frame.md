@@ -74,12 +74,7 @@ EtherCAT 명령 코드는 *주소 모드*와 *동작*의 조합입니다.
 
 가장 *많이 보내는* 명령은 단연 **LRW (0x0C)**입니다. 모든 process data를 *한 명령*으로 read + write합니다.
 
-```text
-주기 process data 전송 (대표 패턴)
-  LRW logical 0x10000~0x101FF, 512 byte
-    → 슬레이브들이 input을 읽어 들이고 동시에 output을 가져간다
-    → 한 datagram, 한 frame, 12.5 μs cycle
-```
+주기 process data 전송의 대표 패턴은 `LRW logical 0x10000~0x101FF`에 512 byte를 실어 보내는 것입니다. 이 한 명령으로 슬레이브들이 input을 읽어 들이는 동시에 output을 가져갑니다. datagram 하나, frame 하나, 12.5 μs cycle에 모두 끝납니다.
 
 ## Working Counter (WKC) — 응답 채널
 
@@ -92,13 +87,10 @@ WKC는 *datagram 끝의 2 byte 카운터*입니다. 마스터가 *0*으로 전�
 | Read+Write 성공 | +1 (read) + +2 (write) = +3 |
 | 처리 실패 | 0 (증가하지 않음) |
 
-마스터가 *기대 WKC*를 계산해 두고, 응답 frame의 WKC와 비교합니다.
+마스터가 *기대 WKC*를 계산해 두고, 응답 frame의 WKC와 비교합니다. 예를 들어 16개 슬레이브가 모두 4 byte를 R/W하는 LRW라면 기대 WKC는 16 × 3 = 48입니다.
 
-```text
-LRW 16 slave 모두 4 byte R/W → 기대 WKC = 16 × 3 = 48
-응답 WKC가 45면 → 3개 slave가 정상 처리 못함
-응답 WKC가 0이면 → 어떤 slave에도 안 닿음 (cable break, etc)
-```
+- 응답 WKC가 45면 3개 슬레이브가 정상 처리하지 못한 것입니다.
+- 응답 WKC가 0이면 어떤 슬레이브에도 닿지 못한 것입니다 (cable break 등).
 
 WKC는 *어느 슬레이브*가 실패했는지 알려 주지 *않습니다*. 단순히 *몇 개가 정상이었나*만 말합니다. 어느 슬레이브가 문제인지 찾으려면 *개별 FPRD*로 polling해야 합니다.
 

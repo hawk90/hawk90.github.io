@@ -16,25 +16,26 @@ U-Boot은 거의 모든 ARM SoC에서 *사실상 표준* 부트로더입니다. 
 
 ## U-Boot의 두 단계
 
-요즘 SoC의 U-Boot은 *항상 두 단계*입니다.
+요즘 SoC의 U-Boot은 *항상 두 단계*입니다. BootROM이 SPL을 불러오고, SPL이 U-Boot proper를 불러오는 흐름입니다.
 
+<!-- TODO: TikZ -->
 ```text
-[BootROM (SoC 내부)]
-   │
-   ▼
-[SPL — Secondary Program Loader]
-   - SoC 내부 SRAM에서 동작 (DDR 없음)
-   - 크기 제한 (보통 128KB 이내)
-   - DDR 초기화, clock·pinmux 설정
-   - 다음 단계를 DDR로 적재
-   │
-   ▼
-[U-Boot proper (또는 BL31 → BL33 U-Boot)]
-   - DDR에서 동작
-   - 시리얼 console + 명령 인터프리터
-   - 부트 환경 (uEnv.txt, fw_env)
-   - 커널 적재 + 부팅
+[BootROM (SoC 내부)]  →  [SPL]  →  [U-Boot proper]
 ```
+
+**SPL (Secondary Program Loader)** 단계는 다음 일을 합니다.
+
+- SoC 내부 SRAM에서 동작합니다 (DDR 없음).
+- 크기 제한이 있습니다 (보통 128KB 이내).
+- DDR을 초기화하고 clock·pinmux를 설정합니다.
+- 다음 단계를 DDR로 적재합니다.
+
+**U-Boot proper** 단계(또는 BL31 → BL33 U-Boot)는 다음을 담당합니다.
+
+- DDR에서 동작합니다.
+- 시리얼 console과 명령 인터프리터를 제공합니다.
+- 부트 환경을 다룹니다 (uEnv.txt, fw_env).
+- 커널을 적재하고 부팅합니다.
 
 SPL과 U-Boot proper는 *같은 소스 트리에서 다른 .config*로 빌드됩니다. 동일한 driver를 *다르게 컴파일*해 양쪽에 link합니다.
 

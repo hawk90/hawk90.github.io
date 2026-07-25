@@ -261,12 +261,15 @@ Bond 정보는 NVS의 `ble_hs_store` 영역에 저장됩니다. 펌웨어 업데
 
 C3는 라디오가 *하나*입니다. WiFi 패킷과 BLE 패킷이 *시분할*됩니다.
 
+<!-- TODO: TikZ timeline diagram -->
+
 ```text
 시간 ──────────────────────────────────────►
 WiFi:  ███   ██     ████    ██   ███
 BLE:      ██    ███     ██     ██    ██
-       양쪽 모두 약 50%씩 시간 점유
 ```
+
+WiFi와 BLE가 라디오 하나를 번갈아 점유하며, 대략 양쪽이 절반씩 시간을 나눠 씁니다.
 
 ```c
 // menuconfig: Component config → Bluetooth → Bluetooth controller

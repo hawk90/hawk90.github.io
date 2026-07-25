@@ -289,13 +289,19 @@ BR2_PACKAGE_HOST_GENIMAGE=y
 
 가장 흔한 원인은 *path*입니다. overlay 루트의 직접 자식이 `etc`인지, `rootfs-overlay`인지 확인합니다. `BR2_ROOTFS_OVERLAY`가 가리키는 디렉터리 *바로 아래*가 rootfs의 `/`로 매핑됩니다.
 
+overlay 루트 바로 아래에 `etc`·`opt`가 있으면 각각 rootfs의 `/etc`·`/opt`로 매핑됩니다.
+
 ```text
 $ ls -la $(BR2_EXTERNAL_ACME_PATH)/board/acme/edge/rootfs-overlay
-drwxr-xr-x  etc/   ← 이게 맞음
+drwxr-xr-x  etc/
 drwxr-xr-x  opt/
+```
 
-# 아니라
-drwxr-xr-x  rootfs/   ← 이러면 /rootfs/etc/... 로 들어감
+반대로 한 단계 더 감싼 `rootfs/` 디렉터리가 루트에 있으면, 그 전체가 `/rootfs/etc/...`로 들어가 의도한 경로에서 벗어납니다.
+
+```text
+$ ls -la $(BR2_EXTERNAL_ACME_PATH)/board/acme/edge/rootfs-overlay
+drwxr-xr-x  rootfs/
 ```
 
 ### post-build 스크립트가 실행되지 않는다

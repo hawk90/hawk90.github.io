@@ -143,32 +143,22 @@ Folly 전면 도입 검토 가치. Meta급 워크로드면 throughput 차이가 
 
 ## throughput vs latency profile
 
-```text
-[1] throughput-bound (배치, ML 학습, ETL)
-   - F14, fbstring, jemalloc 통합으로 alloc 비용 절감 효과 큼
-   - Folly가 유리
+워크로드의 프로파일에 따라 선택이 갈린다.
 
-[2] latency-bound (RPC handler, 실시간)
-   - try_get_fast, lock-free queue, IOBuf zero-copy
-   - Folly의 production 디테일이 빛남
-
-[3] startup-bound (CLI tool, short-lived)
-   - Folly의 무거운 init 비용이 부담
-   - std + abseil이 유리
-```
+- **throughput-bound** (배치, ML 학습, ETL) — F14, fbstring, jemalloc 통합으로 alloc 비용 절감 효과가 크다. Folly가 유리하다.
+- **latency-bound** (RPC handler, 실시간) — try_get_fast, lock-free queue, IOBuf zero-copy 같은 Folly의 production 디테일이 빛난다.
+- **startup-bound** (CLI tool, short-lived) — Folly의 무거운 init 비용이 부담이다. std + abseil이 유리하다.
 
 ## 측정 워크플로
 
-새 모듈을 시작할 때.
+새 모듈을 시작할 때 다음 사이클을 따른다.
 
-```text
-1. std로 구현, 정확성 우선
-2. 핫패스 식별 (perf, profile)
-3. 핫패스에만 abseil/folly 후보 적용
-4. 벤치마크로 std vs candidate 측정 (p50, p99, peak memory)
-5. 측정 결과로 선택 확정
-6. PR 설명에 이유 명시
-```
+1. std로 구현하고 정확성을 우선한다.
+2. 핫패스를 식별한다 (perf, profile).
+3. 핫패스에만 abseil/folly 후보를 적용한다.
+4. 벤치마크로 std vs candidate를 측정한다 (p50, p99, peak memory).
+5. 측정 결과로 선택을 확정한다.
+6. PR 설명에 이유를 명시한다.
 
 이 사이클을 거치지 않은 mass-replace는 anti-pattern.
 

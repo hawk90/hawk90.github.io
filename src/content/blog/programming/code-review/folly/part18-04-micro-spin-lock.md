@@ -107,16 +107,11 @@ PAUSE는 1-15 cycle. CPU에 *짧은 backoff*를 알린다. memory ordering buffe
 
 ## 언제 spin이 옳은가
 
-```text
-critical section ≈ context switch cost (수 μs)
-  → mutex가 더 나음
-
-critical section << context switch cost (수십 ns)
-  → spin이 압도적
-
-대기자 많고 critical section 김
-  → spin이 CPU를 낭비. mutex
-```
+| 상황 | 권장 |
+|------|------|
+| critical section ≈ context switch cost (수 μs) | mutex가 더 나음 |
+| critical section << context switch cost (수십 ns) | spin이 압도적 |
+| 대기자 많고 critical section 김 | spin이 CPU를 낭비. mutex |
 
 **짧고 자주, contention 적음** → spin이 이긴다.
 

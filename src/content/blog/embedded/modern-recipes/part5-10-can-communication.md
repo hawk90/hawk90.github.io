@@ -79,17 +79,14 @@ STM32 bxCAN은 14개 filter bank, 각 *2개 ID list 또는 2개 mask*.
 
 CAN은 *적극적 error detection* — bit error, stuff error, CRC error, form error, ACK error. error 발생 시 *error frame* 송신 → 다른 node에게 알림.
 
-```text
-TEC (Transmit Error Counter):
-  error 시 +8, 정상 송신 시 -1
-  TEC ≥ 128 → Error Passive
-  TEC ≥ 256 → Bus Off (송신 중단)
+TEC(Transmit Error Counter)는 송신 error가 나면 +8, 정상 송신하면 -1 합니다. REC(Receive Error Counter)는 수신 측에서 비슷하게 동작합니다. 카운터 값에 따라 node 상태가 다음처럼 바뀝니다.
 
-REC (Receive Error Counter):
-  비슷, 수신 측
+| 조건 | 상태 |
+|------|------|
+| TEC ≥ 128 | Error Passive |
+| TEC ≥ 256 | Bus Off (송신 중단) |
 
-Bus-off → 128 × 11 recessive bit 후 자동 복구 (또는 수동)
-```
+Bus-off에 빠지면 128 × 11 recessive bit를 관찰한 뒤 자동 복구합니다 (또는 수동 복구).
 
 bus-off는 *심각한 상태*. cable 단선, termination 누락, 다른 node baud 불일치.
 

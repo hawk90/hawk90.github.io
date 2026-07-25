@@ -265,27 +265,17 @@ Created:         Mon May 19 09:00:00 2026
 
 ## RISC-V의 다단 부트
 
-RISC-V는 *OpenSBI*가 ARMv8-A의 TF-A 자리를 차지합니다.
+RISC-V는 *OpenSBI*가 ARMv8-A의 TF-A 자리를 차지합니다. 부트 흐름은 BootROM에서 시작해 U-Boot SPL, OpenSBI, U-Boot Proper를 거쳐 Linux 커널로 이어집니다. 각 단계가 실행되는 특권 모드와 역할은 다음과 같습니다.
 
-```text
-[BootROM]
-   │
-   ▼
-[U-Boot SPL]   - M-mode
-               - DDR init, OpenSBI 적재
-   │
-   ▼
-[OpenSBI]      - M-mode firmware
-               - SBI 핸들러, MTIME interrupt
-               - U-Boot Proper로 점프 (S-mode)
-   │
-   ▼
-[U-Boot Proper] - S-mode
-                 - 부트 정책
-   │
-   ▼
-[Linux Kernel]  - S-mode
-```
+<!-- TODO: TikZ (RISC-V 다단 부트 flow) -->
+
+| 단계 | 모드 | 역할 |
+|------|------|------|
+| BootROM | M-mode | 최초 진입 |
+| U-Boot SPL | M-mode | DDR init, OpenSBI 적재 |
+| OpenSBI | M-mode firmware | SBI 핸들러, MTIME interrupt, U-Boot Proper로 점프 (S-mode) |
+| U-Boot Proper | S-mode | 부트 정책 |
+| Linux Kernel | S-mode | 커널 실행 |
 
 ARMv8-A의 EL이 M-mode/S-mode/U-mode로 *간략화*된 형태입니다. SBI call이 SMC call에 대응됩니다.
 

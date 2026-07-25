@@ -61,31 +61,39 @@ draft: false
 
 요즘 출고되는 SoC 거의 모두가 ARMv8입니다. 부트 체인은 다음 흐름을 따릅니다.
 
+<!-- TODO: TikZ (_design.tex) — 부트 체인 세로 흐름도로 교체 -->
+
 ```text
 [Power-on / Reset]
    │
    ▼
-BootROM      — Mask ROM. SoC 안에 *영구히* 박힌 코드.
-   │           부트 미디어(eMMC, SD, NAND, USB)를
-   │           정해진 우선순위로 시도.
+BootROM
+   │
    ▼
-SPL / BL2    — Secondary Program Loader (U-Boot SPL)
-   │           또는 TF-A BL2.
-   │           DDR 초기화, clk, pinmux, console.
-   │           다음 단계를 DDR로 적재.
+SPL / BL2
+   │
    ▼
-BL31         — TF-A의 secure monitor.
-   │           ARMv8 EL3에서 영구히 거주.
-   │           PSCI(전원 관리), SMC handler.
+BL31
+   │
    ▼
-BL33         — U-Boot proper (또는 다른 normal-world 부트로더).
-   │           부트 환경, 사용자 입력, 커널 적재.
+BL33
+   │
    ▼
-Linux Kernel — 커널 시작. DT 파싱, 드라이버 probe.
-   │           init 실행.
+Linux Kernel
+   │
    ▼
 [userspace]
 ```
+
+각 단계의 책임은 다음과 같습니다.
+
+| 단계 | 책임 |
+|------|------|
+| BootROM | Mask ROM. SoC 안에 *영구히* 박힌 코드. 부트 미디어(eMMC, SD, NAND, USB)를 정해진 우선순위로 시도. |
+| SPL / BL2 | Secondary Program Loader (U-Boot SPL) 또는 TF-A BL2. DDR 초기화, clk, pinmux, console. 다음 단계를 DDR로 적재. |
+| BL31 | TF-A의 secure monitor. ARMv8 EL3에서 영구히 거주. PSCI(전원 관리), SMC handler. |
+| BL33 | U-Boot proper (또는 다른 normal-world 부트로더). 부트 환경, 사용자 입력, 커널 적재. |
+| Linux Kernel | 커널 시작. DT 파싱, 드라이버 probe. init 실행. |
 
 ARMv7(Cortex-A8, Cortex-A9, Cortex-A15) 보드는 BL31이 없습니다. SPL → U-Boot → Kernel의 *3단 구조*입니다. RISC-V는 OpenSBI가 BL31의 자리에 들어갑니다.
 

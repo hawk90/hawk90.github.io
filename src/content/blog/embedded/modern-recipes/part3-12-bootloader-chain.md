@@ -259,11 +259,7 @@ DT의 `chosen { stdout-path = ... }`와 *일치*해야 합니다.
 
 > ⚠️ Secure boot key 분실
 
-```text
-eFuse에 public key hash가 박히면 revert가 불가합니다
-```
-
-개발 시에는 *test key*를 쓰고, 양산 직전에 *production key*로 burn합니다. 잘못하면 chip이 *brick*됩니다.
+eFuse에 public key hash가 박히면 revert가 불가합니다. 개발 시에는 *test key*를 쓰고, 양산 직전에 *production key*로 burn합니다. 잘못하면 chip이 *brick*됩니다.
 
 ## 정리
 

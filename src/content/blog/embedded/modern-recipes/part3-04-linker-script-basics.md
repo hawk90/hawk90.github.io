@@ -85,10 +85,12 @@ MEMORY
 ```text
 .section_name [start_addr] :
 {
-    pattern   ← 어떤 입력 섹션을 포함할지
+    pattern
     pattern
 } > MEMORY_REGION
 ```
+
+중괄호 안의 `pattern`은 어떤 입력 섹션을 이 output section에 포함할지 지정합니다.
 
 기본 패턴:
 

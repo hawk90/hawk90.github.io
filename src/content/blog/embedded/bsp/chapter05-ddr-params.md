@@ -84,13 +84,10 @@ DDR memory에는 *Serial Presence Detect (SPD)*라는 작은 EEPROM이 *옵션�
 
 임베디드는 다릅니다. *DRAM 칩이 보드에 직접 납땜*되어 있고 (BGA), *SPD가 없는* 경우가 대부분입니다. BSP가 *DDR 칩의 datasheet를 읽고* timing을 *손으로* 설정합니다.
 
-```text
-[SPD 있음 — 데스크톱]
-   BIOS → I2C로 SPD 읽기 → DDR controller에 자동 적용
-
-[SPD 없음 — 임베디드]
-   BSP 엔지니어 → DDR datasheet → Vendor DDR Tool → SPL/BL2 코드
-```
+| 상황 | timing 결정 흐름 |
+|------|------------------|
+| SPD 있음 (데스크톱) | BIOS가 I2C로 SPD를 읽어 DDR controller에 자동 적용 |
+| SPD 없음 (임베디드) | BSP 엔지니어가 DDR datasheet를 읽고 vendor DDR tool로 SPL/BL2 코드를 생성 |
 
 vendor의 *DDR config tool*이 *datasheet 값을 입력*받아 *SoC의 controller 레지스터 값*을 생성합니다.
 
@@ -107,26 +104,28 @@ vendor의 *DDR config tool*이 *datasheet 값을 입력*받아 *SoC의 controlle
 | Qualcomm | LPDDR Tool — Snapdragon family |
 | Allwinner | dram_para_gen + uboot driver |
 
-NXP DDR Tool의 흐름은 다음과 같습니다.
+NXP DDR Tool의 흐름은 세 단계입니다.
 
-```text
-[입력]
-   DRAM 칩 모델 선택 (Micron MT40A1G16TB-062E 등)
-      → JEDEC SPD 라이브러리에서 timing 자동 로드
-   DDR rate 선택 (예: 2400 MT/s)
-   Bus width, 칩 개수, rank 설정
-   보드 layout 정보 (CK to DQS skew 등)
+**입력**
 
-[중간 단계]
-   DDR controller register set 생성
-   PHY training script 생성
-   stress test pattern 정의
+- DRAM 칩 모델 선택 (Micron MT40A1G16TB-062E 등) → JEDEC SPD 라이브러리에서 timing 자동 로드
+- DDR rate 선택 (예: 2400 MT/s)
+- Bus width, 칩 개수, rank 설정
+- 보드 layout 정보 (CK to DQS skew 등)
 
-[출력]
-   ddr_init.c — C 함수, SPL에 link
-   ddr_data.c — 레지스터 값 array
-   timing.h   — 매크로 정의
-```
+**중간 단계**
+
+- DDR controller register set 생성
+- PHY training script 생성
+- stress test pattern 정의
+
+**출력**
+
+| 파일 | 내용 |
+|------|------|
+| `ddr_init.c` | C 함수, SPL에 link |
+| `ddr_data.c` | 레지스터 값 array |
+| `timing.h` | 매크로 정의 |
 
 이 출력을 그대로 U-Boot 또는 TF-A에 *include*합니다.
 

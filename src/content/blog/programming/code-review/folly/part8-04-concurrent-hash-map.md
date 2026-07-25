@@ -93,18 +93,11 @@ key의 hash 상위 bit으로 shard 선택. shard 내부는 own SharedMutex.
 
 erase 시점에 reader가 해당 entry를 보고 있을 수 있다. 즉시 delete 하면 reader가 dangling. 해결책은 *지연 해제*.
 
-```text
-1. reader: 노드 pointer 읽기 전 hazard pointer에 등록
-   - hazard_set(thread_local_slot, node_ptr);
-2. reader: node 사용
-3. reader: 사용 끝, hazard pointer 비움
-   - hazard_set(thread_local_slot, nullptr);
-
-4. writer: erase 시 노드를 retired list에 추가, 즉시 delete 안 함
-5. writer (또는 별도 reclaim thread): 주기적으로
-   - 모든 thread의 hazard pointer를 stable copy로 가져옴
-   - retired 중 어느 hazard pointer에도 없는 것만 delete
-```
+1. reader: 노드 pointer를 읽기 전 hazard pointer에 등록한다 — `hazard_set(thread_local_slot, node_ptr)`.
+2. reader: node를 사용한다.
+3. reader: 사용이 끝나면 hazard pointer를 비운다 — `hazard_set(thread_local_slot, nullptr)`.
+4. writer: erase 시 노드를 retired list에 추가하고, 즉시 delete하지 않는다.
+5. writer(또는 별도 reclaim thread): 주기적으로 모든 thread의 hazard pointer를 stable copy로 가져온 뒤, retired 중 어느 hazard pointer에도 없는 것만 delete한다.
 
 folly는 `folly::hazptr_*` 모듈로 이 기능을 제공. ConcurrentHashMap이 내부적으로 사용.
 

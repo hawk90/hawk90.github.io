@@ -16,26 +16,9 @@ ARM Cortex-A 코어가 여러 개인 SoC를 켜면 BootROM은 *CPU0 하나만* �
 
 ## CPU bring-up의 큰 그림
 
-```text
-[Boot CPU (CPU0)]                  [Secondary CPU (CPU1..N)]
-  ROM → SPL → ATF → U-Boot          WFE 상태로 정지
-  ↓                                  
-  Kernel start_kernel()              
-  ↓                                  
-  smp_init() 호출                    
-  ↓                                  
-  enable-method 확인 ──────────────→ PSCI_CPU_ON SMC 호출
-                                     또는
-                                     spin-table 주소 갱신 + sev
-                                     ↓
-                                     ATF/펌웨어가 CPU 깨움
-                                     ↓
-                                     EL3 → EL2 → EL1 점프
-                                     ↓
-                                     secondary_entry (커널)
-                                     ↓
-                                     C 코드 ready, CPU online
-```
+Boot CPU(CPU0)는 `ROM → SPL → ATF → U-Boot`를 거쳐 커널의 `start_kernel()`에 진입한 뒤 `smp_init()`에서 각 CPU의 enable-method를 확인합니다. 그 사이 secondary CPU(CPU1..N)는 WFE 상태로 정지해 있습니다. Boot CPU가 `PSCI_CPU_ON` SMC를 호출하거나(또는 spin-table 주소를 갱신하고 SEV를 보내면), ATF/펌웨어가 그 코어를 깨웁니다. 깨어난 코어는 `EL3 → EL2 → EL1` 순으로 예외 레벨을 낮추며 점프해 커널의 `secondary_entry`에 도달하고, 여기서 C 코드가 준비되면 CPU가 online 상태가 됩니다.
+
+<!-- TODO: TikZ — boot CPU와 secondary CPU의 병렬 bring-up 흐름도 -->
 
 이 절차의 핵심은 *enable-method*를 무엇으로 선택했는지입니다.
 
@@ -90,30 +73,13 @@ mainline에서는 PSCI를 기본 선택지로 보고 있고, 32-bit ARM 보드�
 
 ## PSCI 흐름 — CPU_ON
 
-ARMv8 PSCI 1.0+ 기준입니다.
+ARMv8 PSCI 1.0+ 기준으로, CPU_ON 요청은 세 단계를 거칩니다.
 
-```text
-[Linux side: kernel/arch/arm64/kernel/psci.c]
+- **Linux side** (`arch/arm64/kernel/psci.c`) — `cpu_psci_cpu_boot()`가 `invoke_psci_fn(PSCI_0_2_FN_CPU_ON, mpidr, entry_point, 0)`을 호출하고, 이는 다시 `smc #0`(또는 configurable하게 `hvc`)을 발행합니다.
+- **Firmware side** (ATF BL31, `services/std_svc/psci/`) — `psci_cpu_on_start()`가 secondary CPU의 power domain을 켜고 reset을 풀며, `entry_point`를 보안 RAM에 stash한 뒤 secondary CPU의 ROM이 BL31의 warm boot vector로 점프하게 합니다.
+- **Secondary CPU side** — BL31 warm boot vector가 EL3에서 컨텍스트를 설정하고 `EL3 → EL1`으로 ERET한 뒤, `entry_point`(Linux의 `secondary_entry`)로 점프합니다.
 
-cpu_psci_cpu_boot(unsigned int cpu)
-    └─ invoke_psci_fn(PSCI_0_2_FN_CPU_ON, mpidr, entry_point, 0)
-        └─ smc #0   (또는 hvc, configurable)
-
-[Firmware side: ATF BL31 (services/std_svc/psci/)]
-
-psci_cpu_on_start()
-    ├─ secondary CPU의 power domain ON
-    ├─ release reset
-    ├─ entry_point를 보안 RAM에 stash
-    └─ secondary CPU의 ROM이 BL31의 warm boot vector로 점프
-
-[Secondary CPU side]
-
-BL31 warm boot vector
-    ├─ EL3에서 컨텍스트 설정
-    ├─ EL3 → EL1으로 ERET
-    └─ entry_point (Linux의 secondary_entry) 점프
-```
+<!-- TODO: TikZ — Linux / Firmware / Secondary CPU 3-side PSCI CPU_ON call flow -->
 
 여기서 `entry_point`는 Linux 커널이 미리 정한 secondary entry입니다. arm64에서는 `arch/arm64/kernel/head.S`의 `secondary_entry` 심볼입니다.
 

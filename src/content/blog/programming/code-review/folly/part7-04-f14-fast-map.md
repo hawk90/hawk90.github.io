@@ -99,18 +99,18 @@ relocatable이면 rehash 시 byte-wise memmove로 옮길 수 있어 ValueMap이 
 
 ## 사용 결정 — 언제 FastMap
 
-```text
-F14FastMap을 쓰는 경우:
-  - 정책 정하기 귀찮음. 그냥 빠른 것.
-  - workload가 lookup-heavy도, iteration-heavy도 명확하지 않음.
-  - team 코드 베이스에서 일관성을 원함.
+`F14FastMap`을 쓰는 경우:
+
+- 정책을 정하기 번거롭고 그냥 빠른 것이면 된다.
+- workload가 lookup-heavy도, iteration-heavy도 명확하지 않다.
+- team 코드 베이스에서 일관성을 원한다.
 
 명시적 선택을 쓰는 경우:
-  - lookup만 한다 → F14ValueMap
-  - 순회/snapshot이 잦다 → F14VectorMap
-  - pointer 안정성 필요 → F14NodeMap
-  - 큰 value이고 erase 잦다 → F14NodeMap (VectorMap의 swap-pop 회피)
-```
+
+- lookup만 한다면 `F14ValueMap`.
+- 순회/snapshot이 잦다면 `F14VectorMap`.
+- pointer 안정성이 필요하면 `F14NodeMap`.
+- 큰 value이고 erase가 잦다면 `F14NodeMap` (VectorMap의 swap-pop 회피).
 
 대부분 새 코드는 `F14FastMap`이 default.
 

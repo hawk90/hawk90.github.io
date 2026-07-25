@@ -39,13 +39,8 @@ Abseil의 공식 약속은 한 줄이다.
 
 대신 사용자는 다음 두 가지 시나리오를 피해야 한다.
 
-```text
-시나리오 A: 사전 빌드된 absl.so + 사용자가 빌드한 absl-사용 코드
-  → 두 쪽의 컴파일 옵션이 다를 수 있음. 위험.
-
-시나리오 B: 두 third-party가 각자 prebuild Abseil을 들고 옴
-  → 같은 심볼이 두 번 정의될 수 있음. ODR violation.
-```
+- **시나리오 A** — 사전 빌드된 `absl.so`에 사용자가 빌드한 Abseil 사용 코드를 링크. 두 쪽의 컴파일 옵션이 다를 수 있어 위험하다.
+- **시나리오 B** — 두 third-party가 각자 prebuild Abseil을 들고 온다. 같은 심볼이 두 번 정의되어 ODR violation이 날 수 있다.
 
 ## inline namespace로 강제
 
@@ -135,13 +130,11 @@ g++ -std=c++17 main.cc -labsl_strings -labsl_status
 
 이때 `/usr/lib`의 libabsl_*.so가 어떤 옵션으로 빌드되었는지 사용자는 모른다. 사용자의 `-std=c++17`와 시스템 라이브러리의 빌드 옵션이 일치하지 않으면 미묘한 ABI 불일치가 발생한다. inline namespace로 잡히면 link error로 끝나지만, 어떤 경우는 runtime에 문제가 드러난다.
 
-```text
-권장 빌드 모델
-────────────────
-1. 사용자 프로젝트가 Abseil 소스를 가져와 자체 빌드
-2. Bazel, CMake FetchContent, vcpkg manifest mode 모두 OK
-3. apt/yum/brew의 시스템 패키지는 비권장 (단 toy/learning에는 OK)
-```
+권장하는 빌드 모델은 다음과 같다.
+
+1. 사용자 프로젝트가 Abseil 소스를 가져와 자체 빌드한다.
+2. Bazel, CMake FetchContent, vcpkg manifest mode 모두 무방하다.
+3. apt/yum/brew의 시스템 패키지는 비권장이다. 다만 toy나 learning 용도에는 무방하다.
 
 ## 두 라이브러리가 Abseil을 각자 갖고 오는 경우
 

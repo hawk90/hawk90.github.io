@@ -174,10 +174,7 @@ BaseType_t xEventGroupSetBitsFromISR(EventGroupHandle_t eg,
 
 ISR에서 *task를 깨우는 작업*은 **timer service task에 defer**됩니다. daemon task가 실제 set 처리를 맡습니다. 이렇게 해야 ISR이 짧게 유지됩니다.
 
-```text
-ISR → xTimerPendFunctionCallFromISR(set_bits_fn, eg, bits)
-        → Daemon task가 깨어나 실제 SetBits 호출
-```
+처리 흐름은 두 단계로 나뉩니다. 먼저 ISR이 `xTimerPendFunctionCallFromISR(set_bits_fn, eg, bits)`로 실제 작업을 예약합니다. 그러면 daemon task가 깨어나 실제 `SetBits` 호출을 수행합니다.
 
 ## 사용 예 — Wi-Fi 연결 상태 머신
 

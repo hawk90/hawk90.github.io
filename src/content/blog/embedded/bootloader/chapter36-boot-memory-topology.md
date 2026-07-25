@@ -235,8 +235,9 @@ $ cat /sys/devices/virtual/memory_tiering/memory_tier*/nodelist
 
 ### SRAT에 CXL.mem 누락
 
-```text
-[증상]
+증상은 다음과 같습니다. CXL 노드가 아예 보이지 않습니다.
+
+```bash
 guest$ numactl --hardware
 available: 2 nodes (0-1)   # CXL 노드 안 보임
 

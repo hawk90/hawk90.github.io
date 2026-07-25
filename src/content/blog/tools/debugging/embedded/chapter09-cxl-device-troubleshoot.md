@@ -172,16 +172,14 @@ $ dmesg | tail
 
 실 상황의 *poison page 처리 흐름*:
 
-```text
 1. 디바이스가 internal media error 감지
 2. Poison list에 추가, event log에 기록
-3. Interrupt → host kernel 알림
+3. Interrupt로 host kernel에 알림
 4. Kernel이 affected page를 offline
 5. 해당 page에 매핑되어 있던 process에 SIGBUS
 6. Process가 정상 종료 또는 fault handler에서 복구
-7. 운영팀이 cxl monitor 알림으로 인지
-8. Poison rate 추적해 디바이스 교체 결정
-```
+7. 운영팀이 `cxl monitor` 알림으로 인지
+8. Poison rate를 추적해 디바이스 교체 결정
 
 이 흐름이 *데이터센터 운영 표준 절차*.
 

@@ -193,30 +193,23 @@ compute *25배* growth 동안 memory BW *9배* growth. *knee point가 오른쪽�
 
 ## LLM inference의 MBU
 
-LLM 추론에서 *Memory Bandwidth Utilization(MBU)*가 *core metric*이 됐습니다.
+LLM 추론에서 *Memory Bandwidth Utilization(MBU)*가 *core metric*이 됐습니다. 추론은 두 단계로 나뉩니다.
+
+1. **Prefill (prompt encoding)** — 모든 weight를 한 번씩 읽습니다. batch가 클수록 reuse가 늘어 compute bound에 가깝습니다.
+2. **Decode (token by token)** — 매 토큰마다 weight를 다시 읽고, sequence 길이에 비례해 KV cache를 추가로 읽습니다. 강한 memory bound입니다.
+
+두 지표로 각 단계의 효율을 봅니다. MBU는 실제 사용 BW를 peak BW로 나눈 값이고, MFU는 실제 FLOPS를 peak FLOPS로 나눈 값입니다.
 
 ```text
-LLM inference 단계
-
-1. Prefill (prompt encoding)
-   - 모든 weight 한 번씩 읽음
-   - batch 클수록 reuse 증가
-   - compute bound 경향
-   
-2. Decode (token by token)
-   - 매 토큰마다 weight 다시 읽음
-   - KV cache 추가 읽기 (sequence 길이에 비례)
-   - 강한 memory bound
-
 MBU = actual BW used / peak BW
 MFU = actual FLOPS / peak FLOPS
 
 LLaMA 70B inference on H100 (batch=1):
   Decode latency: 30 ms/token
-  weight = 140 GB / 3.35 TB/s = 42 ms (이론)
-  실제 30 ms ← KV cache는 cache hit 효과
-  MBU ≈ 80%
-  MFU ≈ 5%
+  weight = 140 GB / 3.35 TB/s = 42 ms (theory)
+  actual  30 ms  <- KV cache hit effect
+  MBU ~= 80%
+  MFU ~= 5%
 ```
 
 LLaMA 70B decode는 *MBU 80%, MFU 5%*입니다. *compute는 거의 쉬고 memory만 돌아갑니다*. *batch를 키워야* MFU가 올라가지만 *latency도 같이* 늘어납니다.

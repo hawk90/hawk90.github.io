@@ -210,11 +210,19 @@ Buildroot는 이 sysroot를 *그대로* 사용하지 *않습니다*. 대신 stag
 
 ```text
 output/staging/
-├── usr/
-│   ├── include/      ─ toolchain 헤더 + 패키지 헤더
-│   ├── lib/          ─ toolchain lib + 패키지 lib
-│   └── lib/pkgconfig/  ─ pkg-config 정보
+└── usr/
+    ├── include/
+    ├── lib/
+    └── lib/pkgconfig/
 ```
+
+각 디렉터리에는 toolchain이 제공한 것과 패키지가 설치한 것이 함께 쌓입니다.
+
+| 경로 | 내용 |
+|---|---|
+| `usr/include/` | toolchain 헤더 + 패키지 헤더 |
+| `usr/lib/` | toolchain lib + 패키지 lib |
+| `usr/lib/pkgconfig/` | pkg-config 정보 |
 
 문제는 *toolchain sysroot 안의 라이브러리*와 *패키지가 설치한 라이브러리*가 *충돌*하는 경우입니다. 가장 흔한 사례:
 

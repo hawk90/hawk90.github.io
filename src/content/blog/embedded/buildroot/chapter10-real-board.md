@@ -118,7 +118,7 @@ BR2_ROOTFS_POST_IMAGE_SCRIPT="board/beaglebone/post-image.sh"
 
 `acme_bbb_defconfig`를 우리 요구에 맞춥니다.
 
-```text
+```makefile
 # Read-only squashfs + data partition pattern (Ch 8)
 BR2_TARGET_ROOTFS_SQUASHFS=y
 BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y

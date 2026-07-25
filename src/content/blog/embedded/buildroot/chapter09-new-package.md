@@ -125,13 +125,17 @@ cf2b...       COPYING
 source "$BR2_EXTERNAL_ACME_PATH/package/htop-acme/Config.in"
 ```
 
-`make menuconfig`에서 활성화한 뒤:
+`make menuconfig`에서 활성화한 뒤 다음 타겟을 차례로 실행합니다.
 
-```text
-$ make htop-acme-source     # tarball 다운로드 + hash 검증
-$ make htop-acme            # configure + build + install
-$ make htop-acme-show-info  # 메타데이터 출력
+```bash
+make htop-acme-source
+make htop-acme
+make htop-acme-show-info
 ```
+
+- `htop-acme-source` — tarball 다운로드 + hash 검증
+- `htop-acme` — configure + build + install
+- `htop-acme-show-info` — 메타데이터 출력
 
 빌드가 성공하면 `output/target/usr/bin/htop`이 생깁니다.
 
@@ -366,22 +370,33 @@ patching file CRT.c
 | `<name>-show-info` | 메타데이터 JSON 출력 |
 | `<name>-show-depends` | 직접 의존성만 출력 |
 
-전형적 디버깅 흐름입니다.
+전형적 디버깅 흐름은 다음과 같습니다.
+
+첫 시도에서 링크 에러가 납니다.
 
 ```text
-$ make htop-acme              # 첫 시도, 실패
+$ make htop-acme
 ... error: undefined reference to `cap_get_proc'
+```
 
-# .mk 수정: HTOP_ACME_DEPENDENCIES += libcap 추가
-$ make htop-acme-rebuild      # 의존성 해결 후 다시
+`.mk`에 `HTOP_ACME_DEPENDENCIES += libcap`을 추가하고 의존성을 해결한 뒤 다시 빌드합니다. 그래도 실패합니다.
+
+```text
+$ make htop-acme-rebuild
 ... still fails
+```
 
-# configure 옵션 확인
-$ ls output/build/htop-acme-3.3.0/config.log
-$ less output/build/htop-acme-3.3.0/config.log
+configure 옵션을 확인하려고 `config.log`를 봅니다.
 
-# .mk 다시 수정
-$ make htop-acme-reconfigure  # configure만 다시
+```bash
+ls output/build/htop-acme-3.3.0/config.log
+less output/build/htop-acme-3.3.0/config.log
+```
+
+`.mk`를 다시 수정한 뒤 configure만 다시 돌립니다.
+
+```bash
+make htop-acme-reconfigure
 ```
 
 `-rebuild`는 *extract부터* 다시 합니다. patch가 늘었거나 시리즈 변경이 있을 때 씁니다. `-reconfigure`는 *configure부터* 다시. 옵션만 바꿀 때 충분합니다.

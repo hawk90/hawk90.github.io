@@ -18,15 +18,14 @@ ESP32-C3에서 메모리 관련 실수는 *거의 모든 신규 프로젝트가 
 
 ## 메모리 영역 — 한눈에
 
-```text
-주소 공간                    영역              크기      특징
-0x3FC8_0000~0x3FCE_0000     SRAM (DRAM)       384 KB   데이터 (read/write)
-0x4037_0000~0x4038_0000     SRAM (IRAM)       (overlay) 코드 + ISR
-0x5000_0000~0x5000_2000     RTC SRAM           8 KB     deep-sleep 유지
-0x4200_0000~0x4280_0000     External flash    4 MB     MMU mapped (XIP)
-0x3C00_0000~0x3C80_0000     External flash    4 MB     MMU mapped (data)
-0x4000_0000~0x4006_0000     ROM (boot)         384 KB   immutable
-```
+| 주소 공간 | 영역 | 크기 | 특징 |
+|-----------|------|------|------|
+| `0x3FC8_0000`~`0x3FCE_0000` | SRAM (DRAM) | 384 KB | 데이터 (read/write) |
+| `0x4037_0000`~`0x4038_0000` | SRAM (IRAM) | (overlay) | 코드 + ISR |
+| `0x5000_0000`~`0x5000_2000` | RTC SRAM | 8 KB | deep-sleep 유지 |
+| `0x4200_0000`~`0x4280_0000` | External flash | 4 MB | MMU mapped (XIP) |
+| `0x3C00_0000`~`0x3C80_0000` | External flash | 4 MB | MMU mapped (data) |
+| `0x4000_0000`~`0x4006_0000` | ROM (boot) | 384 KB | immutable |
 
 SRAM은 *물리적으로 한 덩어리*지만 *bus mapping*에 따라 IRAM과 DRAM 두 가지 *view*로 보입니다. 같은 워드를 IRAM 주소로 *읽으면 명령어*가 되고 DRAM 주소로 *읽으면 데이터*가 됩니다.
 

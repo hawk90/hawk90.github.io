@@ -203,21 +203,22 @@ Buildroot가 *직접 만들어 주는* 이 스크립트는 학습용으로도 �
 
 ```text
 output/
-├── host/         ─ 호스트가 실행하는 도구·toolchain. PATH에 추가됨
-├── build/        ─ 패키지별 source + 빌드 산출물. 디버깅의 중심
-├── staging/      ─ symlink → host/<tuple>/sysroot. 패키지가 *링크할* 헤더·.so
-├── target/       ─ 최종 rootfs의 *staging area*. 여기를 archive하면 rootfs
-├── images/       ─ 최종 산출물 (Image, rootfs.ext4, U-Boot binary 등)
-└── build-time.log ─ 패키지별 빌드 시간
+├── host/
+├── build/
+├── staging/
+├── target/
+├── images/
+└── build-time.log
 ```
 
-| 디렉터리 | 누구의 시선 | 들어가 보는 이유 |
-|---|---|---|
-| `host/` | 빌드 호스트 | 망가진 binary, 잘못된 wrapper 추적 |
-| `build/` | 빌드 시점 | source 직접 확인, `make V=1` 재현 |
-| `staging/` | *cross-compile 시점*의 target | 헤더·`.so` 누락 확인 |
-| `target/` | runtime 시점의 target | rootfs 내용 미리 보기, init script 확인 |
-| `images/` | 배포 산출물 | flash, archive |
+| 디렉터리 | 역할 | 누구의 시선 | 들어가 보는 이유 |
+|---|---|---|---|
+| `host/` | 호스트가 실행하는 도구·toolchain (PATH에 추가됨) | 빌드 호스트 | 망가진 binary, 잘못된 wrapper 추적 |
+| `build/` | 패키지별 source + 빌드 산출물 (디버깅의 중심) | 빌드 시점 | source 직접 확인, `make V=1` 재현 |
+| `staging/` | `host/<tuple>/sysroot`의 symlink. 패키지가 *링크할* 헤더·`.so` | *cross-compile 시점*의 target | 헤더·`.so` 누락 확인 |
+| `target/` | 최종 rootfs의 *staging area*. 여기를 archive하면 rootfs | runtime 시점의 target | rootfs 내용 미리 보기, init script 확인 |
+| `images/` | 최종 산출물 (Image, rootfs.ext4, U-Boot binary 등) | 배포 산출물 | flash, archive |
+| `build-time.log` | 패키지별 빌드 시간 | — | 병목 단계 파악 |
 
 `staging/`과 `target/`의 차이가 *처음에는 헷갈립니다*. 한 줄로 요약하면 *staging은 link 시점, target은 run 시점*입니다. `libfoo`라는 패키지가 다른 패키지를 위해 `libfoo.h`와 `libfoo.so`를 제공한다면, 헤더와 `.so`의 *symlinks*는 staging에 들어가야 다음 패키지가 *링크*할 수 있습니다. 동시에 `.so`는 target에도 복사돼야 *런타임*에 dlopen이 가능합니다. 이 구분이 `BR2_INSTALL_STAGING=YES`의 의미입니다.
 
@@ -333,12 +334,12 @@ $ make
 
 핵심은 단계의 *재실행 입자도*입니다. 패키지 한 개만 재빌드하고 싶다면 다음 명령들이 표준입니다.
 
-```text
-$ make busybox-rebuild         # busybox만 다시 빌드
-$ make busybox-reconfigure     # configure부터
-$ make busybox-dirclean        # source까지 지우고 다음 빌드 때 처음부터
-$ make linux-rebuild           # 커널만 다시 빌드
-$ make linux-rebuild linux-reinstall    # rebuild + rootfs 반영
+```bash
+make busybox-rebuild         # busybox만 다시 빌드
+make busybox-reconfigure     # configure부터
+make busybox-dirclean        # source까지 지우고 다음 빌드 때 처음부터
+make linux-rebuild           # 커널만 다시 빌드
+make linux-rebuild linux-reinstall    # rebuild + rootfs 반영
 ```
 
 `make all`(= `make`)는 *바뀐 부분만* 자동으로 추적하지만, Buildroot는 Yocto만큼 정밀하지 않습니다. 패키지 옵션을 바꿨을 때는 *명시적인 rebuild*가 안전합니다.

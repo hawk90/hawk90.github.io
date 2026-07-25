@@ -18,21 +18,18 @@ CXL 링크 문제는 *원인이 여러 층*에 흩어집니다. PCIe PHY·LTSSM�
 
 LTSSM(Link Training and Status State Machine)이 *L0에 도달*하지 못하면 *config space access 자체가 불가능*합니다. 멈춘 상태가 어디인지를 먼저 알아야 합니다.
 
-```text
-[LTSSM 상태 진행]
+LTSSM은 `Detect → Polling → Configuration → L0` 순으로 진행하며, L0 이후에는 일시 오류 시 `Recovery`로 빠졌다가 재training하거나 `L0s`/`L1`/`L2` 전력 절감 상태로 내려갑니다. 각 상태가 하는 일은 다음과 같습니다.
 
-Detect        ← 슬롯에 디바이스 있는지 확인
-  ↓
-Polling       ← TS1/TS2 ordered set 교환
-  ↓
-Configuration ← Lane 번호 정렬, link width 협상
-  ↓
-L0            ← 정상 동작
-  ↓
-Recovery      ← 일시 오류, 재training
-  ↓
-L0s/L1/L2     ← 전력 절감 상태
-```
+<!-- TODO: TikZ state machine (_design-state.tex) -->
+
+| 상태 | 하는 일 |
+|------|---------|
+| Detect | 슬롯에 디바이스가 있는지 확인 |
+| Polling | TS1/TS2 ordered set 교환 |
+| Configuration | Lane 번호 정렬, link width 협상 |
+| L0 | 정상 동작 |
+| Recovery | 일시 오류, 재training |
+| L0s / L1 / L2 | 전력 절감 상태 |
 
 | 멈춘 상태 | 의심 원인 |
 |----------|----------|

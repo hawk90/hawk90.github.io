@@ -76,14 +76,16 @@ assembly 결과의 핵심은 두 가지다.
 ```text
 Sum:
     test  %esi, %esi
-    je    .L_cold_path        ← 거의 안 가는 곳으로 jump
-    xor   %eax, %eax           ← hot path는 fall-through
+    je    .L_cold_path        # rarely-taken jump
+    xor   %eax, %eax          # hot path falls through
     ... (loop)
     retq
 .L_cold_path:
-    xor   %eax, %eax           ← cold section. 보통 함수 끝에 배치
+    xor   %eax, %eax          # cold section, placed at function end
     retq
 ```
+
+`je`는 거의 안 가는 `.L_cold_path`로 분기하고, hot path는 fall-through로 이어진다. cold section은 보통 함수 끝에 배치된다.
 
 비교: PREDICT 힌트가 없을 때는 cold path가 fall-through일 수도 있다. 컴파일러의 PGO(profile-guided optimization)가 있으면 굳이 힌트가 없어도 같은 결정을 내릴 수 있다.
 

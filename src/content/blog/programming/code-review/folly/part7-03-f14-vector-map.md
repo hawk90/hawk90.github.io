@@ -69,14 +69,17 @@ VectorMap만의 특징: **insertion order를 유지**한다. python `dict`(3.7+)
 
 ### 두 자료구조 결합
 
+Swiss table 스타일의 chunk가 실제 값 대신 vector index를 슬롯에 담고, 값 자체는 연속된 vector에 저장된다. 순회는 이 vector를 그대로 훑기 때문에 insertion order가 유지된다.
+
+<!-- TODO: TikZ -->
+
 ```text
 Chunks (Swiss table):
   [ controls | slot[0] = vec_index | ... | slot[13] = vec_index ]
-                       ↓
+                       |
+                       v
 Vector:
   [ pair<K,V>[0] | pair<K,V>[1] | pair<K,V>[2] | ... ]
-                       ↑
-              순회는 여기를 그대로
 ```
 
 ```cpp

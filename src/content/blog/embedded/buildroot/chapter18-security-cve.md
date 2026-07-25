@@ -246,15 +246,12 @@ BR2_PACKAGE_DROPBEAR_DISABLE_REVERSEDNS=y
 BR2_PACKAGE_DROPBEAR=y                  # SSH 접속은 key로만
 ```
 
-불필요한 서비스도 *기본에서 꺼야* 합니다. busybox의 inetd 안에 `telnet`·`ftp`가 활성화돼 있으면 production rootfs에서 활성화된 채로 나갑니다.
+불필요한 서비스도 *기본에서 꺼야* 합니다. busybox의 inetd 안에 `telnet`·`ftp`가 활성화돼 있으면 production rootfs에서 활성화된 채로 나갑니다. `BR2_PACKAGE_BUSYBOX_SHOW_OTHERS`는 그대로 두되, busybox config fragment에서 다음처럼 명시적으로 비활성화합니다.
 
 ```text
-# 끄기
-# BR2_PACKAGE_BUSYBOX_SHOW_OTHERS는 그대로 두되
-# busybox config fragment에서 명시적 비활성:
-# CONFIG_TELNETD=n
-# CONFIG_FTPD=n
-# CONFIG_TFTP=n
+CONFIG_TELNETD=n
+CONFIG_FTPD=n
+CONFIG_TFTP=n
 ```
 
 production 출하 직전에 `nmap`으로 *오픈된 포트 목록*을 한 번 찍어 *예상한 것만* 열려 있는지 검증하는 게 안전 그물입니다.

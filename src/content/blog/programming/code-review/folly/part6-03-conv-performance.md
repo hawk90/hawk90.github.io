@@ -20,12 +20,7 @@ draft: false
 
 server에서 integer ↔ string은 매 요청 수십 번 발생한다. RPC ID, log line, query string, JSON 숫자, metric counter. 하나당 100 ns만 차이 나도 throughput 5-10% 차이로 환산된다.
 
-```text
-1억 req/s 클러스터에서 변환 한 번에 200 ns vs 30 ns
-→ 약 170 ns × 100M = 17 초의 CPU 시간 차이
-```
-
-이 규모에서 `stringstream`은 사실상 *사용 금지*다.
+1억 req/s 클러스터에서 변환 한 번이 200 ns냐 30 ns냐만 달라져도, 약 170 ns × 100M = 17초의 CPU 시간 차이가 난다. 이 규모에서 `stringstream`은 사실상 *사용 금지*다.
 
 ## benchmark — int → string
 
@@ -144,32 +139,26 @@ Tgt to(StringPiece sp) {
 
 ### sprintf
 
-```text
-- locale lookup (LC_NUMERIC)
+- locale lookup (`LC_NUMERIC`)
 - format string parsing (런타임)
-- variadic argument 처리 (va_list)
-- 모든 conversion specifier 지원 (% 처리)
-```
+- variadic argument 처리 (`va_list`)
+- 모든 conversion specifier 지원 (`%` 처리)
 
-대부분 unused지만 비용은 항상 지불.
+대부분 unused지만 비용은 항상 지불한다.
 
 ### stringstream
 
-```text
 - ios 상태 관리 (precision, fill, width, locale)
 - streambuf 가상 호출
 - sentry 생성/소멸
 - error flag 갱신
-```
 
-OOP overhead 누적. 한 conversion이 virtual dispatch 5-6번.
+OOP overhead가 누적된다. 한 conversion에 virtual dispatch가 5-6번 일어난다.
 
 ### std::to_string
 
-```text
-- snprintf wrapper (libstdc++/libc++)
-- 그래서 sprintf와 같은 비용
-```
+- `snprintf` wrapper (libstdc++/libc++)
+- 그래서 `sprintf`와 같은 비용
 
 ## 메모리 효율
 

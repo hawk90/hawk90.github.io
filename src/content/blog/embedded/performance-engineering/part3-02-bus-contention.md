@@ -33,11 +33,9 @@ Cycle 5: A
 ```text
 Master:  A (P0) B (P1) C (P2) D (P3)
                                 ↑ highest
-
-A·B·C·D 동시 요청 → D 먼저
 ```
 
-장점은 critical master를 보장한다는 점입니다. 단점은 low priority master가 starvation에 빠질 수 있다는 점입니다.
+A·B·C·D가 동시에 요청하면 우선순위가 가장 높은 D가 먼저 처리됩니다. 장점은 critical master를 보장한다는 점입니다. 단점은 low priority master가 starvation에 빠질 수 있다는 점입니다.
 
 ### Weighted Round-Robin
 

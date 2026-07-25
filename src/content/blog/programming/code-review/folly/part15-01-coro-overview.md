@@ -18,18 +18,16 @@ draft: false
 
 C++20이 도입한 것은 `co_await`, `co_yield`, `co_return` 세 키워드와 `coroutine_handle<>`, `promise_type` 컨셉 정도다. 정작 "코루틴으로 무엇을 표현할 것인가"는 표준에 없다.
 
-```text
-표준이 준 것              표준이 안 준 것
-─────────────────         ──────────────────
-co_await/yield/return     Task<T>
-coroutine_handle<P>       Generator<T>
-promise_type 컨셉         AsyncGenerator<T>
-suspend_always/never      executor 바인딩
-                          collectAll / when_all
-                          cancellation 전파
-                          coroutine-aware Mutex/Baton
-                          blocking wait
-```
+| 표준이 준 것 | 표준이 안 준 것 |
+|--------------|----------------|
+| `co_await`/`co_yield`/`co_return` | `Task<T>` |
+| `coroutine_handle<P>` | `Generator<T>` |
+| `promise_type` 컨셉 | `AsyncGenerator<T>` |
+| `suspend_always`/`suspend_never` | executor 바인딩 |
+| | `collectAll` / `when_all` |
+| | cancellation 전파 |
+| | coroutine-aware `Mutex`/`Baton` |
+| | blocking wait |
 
 결과적으로 같은 키워드로 cppcoro, folly::coro, stdexec, libunifex, asio::awaitable 등 *겹치지 않는* 라이브러리가 동시에 존재한다. Meta는 Folly Futures를 운영하다가 코루틴 도입 시점부터 자체 어댑터를 키웠다. 이게 `folly::coro`다.
 

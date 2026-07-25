@@ -202,12 +202,15 @@ compact는 *valid entry만 새 sector에 copy* 후 원본 sector erase하는 방
 
 STM32F4 일부 (F427/429/437/439), F7, H7는 *bank A + bank B*로 나뉜 Flash를 가집니다. 한 bank에서 실행하면서 *다른 bank에 새 firmware를 쓸* 수 있습니다.
 
-```text
-Bank 1: 현재 실행 중인 firmware
-Bank 2: 새 firmware OTA download 영역
-       ↓ 완료 후 reset
-Bank 2에서 boot, Bank 1을 다음 download 영역으로
-```
+| Bank | 역할 |
+|------|------|
+| Bank 1 | 현재 실행 중인 firmware |
+| Bank 2 | 새 firmware OTA download 영역 |
+
+download가 끝나면 reset하고 Bank 2에서 boot합니다. 이제 Bank 1이 다음 download 영역이 됩니다.
+
+<!-- TODO: TikZ — bank swap flow diagram -->
+
 
 bootloader는 *boot magic*과 *firmware CRC*를 확인하고 valid한 bank로 jump합니다. roll-back 메커니즘으로 *새 firmware가 한 번도 안 booted면* 자동 이전 bank 복귀.
 

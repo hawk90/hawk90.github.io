@@ -56,23 +56,14 @@ SoC의 SRAM이 *너무 작아 SPL이 들어가지 못하는* 경우가 있습니
 
 이때 *부트 단계를 한 번 더 쪼개* TPL(Tertiary Program Loader)을 둡니다. TPL은 *극단적으로 작은 코드*로 동작합니다.
 
-```text
-[BootROM]
-   │
-   ▼ (TPL을 SRAM에 적재)
-[TPL — 8 ~ 32 KB]
-   - 클럭, PLL 초기화
-   - DDR 초기화만 수행
-   - SRAM에 적재된 SPL로 점프
-   │
-   ▼
-[SPL — DDR 위에서 동작]
-   - 페리페럴 초기화
-   - MMC에서 U-Boot Proper 적재
-   │
-   ▼
-[U-Boot Proper]
-```
+TPL을 두면 부트 체인이 한 단계 늘어납니다. BootROM이 먼저 TPL을 SRAM에 적재하고, TPL이 DDR을 초기화한 뒤 SPL로 넘기고, SPL이 다시 U-Boot Proper를 적재하는 흐름입니다.
+
+<!-- TODO: TikZ -->
+
+- **BootROM** — TPL을 SRAM에 적재한다.
+- **TPL (8 ~ 32 KB)** — 클럭·PLL을 초기화하고, DDR 초기화만 수행한 뒤 SRAM에 적재된 SPL로 점프한다.
+- **SPL (DDR 위에서 동작)** — 페리페럴을 초기화하고, MMC에서 U-Boot Proper를 적재한다.
+- **U-Boot Proper** — DDR 위에서 최종 부팅을 이어받는다.
 
 Rockchip RK3399의 부트 흐름이 정확히 이 구조입니다. `idbloader.img` 안에 *TPL*과 *SPL*이 함께 묶여 있고, BootROM이 두 단계를 차례로 적재합니다.
 

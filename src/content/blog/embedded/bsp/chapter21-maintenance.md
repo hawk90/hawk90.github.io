@@ -39,10 +39,9 @@ Linus가 release 하는 mainline은 *대략 9~10주마다* 새 버전이 나옵�
 
 ## Out-of-tree 패치 cost
 
-BSP가 들고 있는 *vendor 패치 묶음*이 유지보수 비용의 핵심입니다.
+BSP가 들고 있는 *vendor 패치 묶음*이 유지보수 비용의 핵심입니다. 아래는 가상의 BSP 패치 카운트입니다.
 
 ```text
-# 가상의 BSP 패치 카운트
 patches/
 ├── linux/
 │   ├── arm64-dts/        (45 patches, 1200 lines)

@@ -62,10 +62,11 @@ WAR·WAW 의존성이 제거되어 진짜 RAW만 남습니다.
 ```text
 ROB entry (in fetch order):
   [add ✓ r0=12] [sub ✓ r3=10] [ldr ⏳ r1=?] [add ⏳] [mul ⏳]
-                                 ↑ load miss — 대기
-                                 
-이미 실행 완료된 sub, add는 *ROB에 대기*. ldr 완료 후 *순서대로 commit*.
+                                 ↑ load miss (대기)
 ```
+<!-- TODO: TikZ -->
+
+이미 실행 완료된 `sub`, `add`도 ROB에서 대기합니다. `ldr`이 완료된 뒤에야 fetch 순서대로 commit합니다.
 
 ROB 크기는 곧 OoO window입니다. Cortex-A72는 128 entry이고 Apple M1은 630+ entry로 괴물 수준입니다.
 

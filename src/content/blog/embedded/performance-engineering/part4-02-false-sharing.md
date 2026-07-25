@@ -30,11 +30,9 @@ CPU 1: writes counter_b
   → CPU 1 fetch from L2 (or CPU 0 cache)
   → CPU 1 cache state = Modified
   → CPU 0 = Invalid
-  
-* 매 access마다 *line bounces between caches* (ping-pong)
 ```
 
-실제로 공유되는 데이터는 하나도 없는데, 단지 같은 line에 들어 있다는 이유로 coherence가 계속 동작합니다.
+매 access마다 line이 두 cache 사이를 왕복합니다(ping-pong). 실제로 공유되는 데이터는 하나도 없는데, 단지 같은 line에 들어 있다는 이유로 coherence가 계속 동작합니다.
 
 그림으로 보면 두 코어가 *같은 line*을 두고 핑퐁하는 모습이 분명해집니다.
 

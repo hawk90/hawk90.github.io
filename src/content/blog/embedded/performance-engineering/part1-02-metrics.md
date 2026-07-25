@@ -112,14 +112,14 @@ Latency 대신 deadline 만족 여부가 metric이 됩니다. 즉, *deadline 안
 
 ## Percentile 표기
 
-```text
-p50 (median)  — 절반은 더 빠름
-p90           — 10% 케이스만 더 느림
-p99           — 1% 케이스만 더 느림
-p999          — 0.1% (1000 중 1)
-p9999         — 0.01%
-max           — worst-case
-```
+| 표기 | 의미 |
+| --- | --- |
+| p50 (median) | 절반은 더 빠름 |
+| p90 | 10% 케이스만 더 느림 |
+| p99 | 1% 케이스만 더 느림 |
+| p999 | 0.1% (1000 중 1) |
+| p9999 | 0.01% |
+| max | worst-case |
 
 Hard real-time은 *max ≤ deadline*을 요구합니다. Soft는 *p99·p999 ≤ deadline*이면 됩니다.
 

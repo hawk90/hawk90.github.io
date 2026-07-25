@@ -22,27 +22,20 @@ TF-A 없이는 PSCI를 통한 CPU on/off가 불가능하므로 SMP 부팅도 안
 
 ## BL 단계 모델
 
-TF-A는 부팅을 *BL0부터 BL33*까지 단계로 나눕니다.
+TF-A는 부팅을 *BL0부터 BL33*까지 단계로 나눕니다. 각 단계의 역할과 다음 단계로의 전이는 다음과 같습니다.
 
-```text
-BL0 — BootROM (SoC 내부, fix)
-   │  boot mode pin 읽기, BL1 적재
-   ▼
-BL1 — Trusted Boot ROM (선택적, ROM 안에 fuse-burn 가능)
-   │  BL2 인증·적재
-   ▼
-BL2 — Trusted Boot Firmware (DDR 초기화·서명 검증)
-   │  SoC vendor마다 SPL 대체 또는 보완
-   ▼
-BL31 — EL3 Runtime Firmware (Secure Monitor)
-   │  PSCI, SMC handler, 상주 코드
-   ├── BL32 — Secure World OS (OP-TEE 등, 선택)
-   ▼
-BL33 — Non-secure firmware (U-Boot)
-   │  Linux 부팅 준비
-   ▼
-Linux Kernel (EL2 또는 EL1)
-```
+<!-- TODO: TikZ — BL0→BL1→BL2→BL31(→BL32)→BL33→Linux 세로 flow 다이어그램 -->
+
+| 단계 | 역할 | 다음 단계로 넘기는 일 |
+|------|------|----------------------|
+| BL0 | BootROM (SoC 내부, fix) | boot mode pin 읽기, BL1 적재 |
+| BL1 | Trusted Boot ROM (선택적, ROM 안에 fuse-burn 가능) | BL2 인증·적재 |
+| BL2 | Trusted Boot Firmware (DDR 초기화·서명 검증) | SoC vendor마다 SPL 대체 또는 보완 |
+| BL31 | EL3 Runtime Firmware (Secure Monitor) | PSCI·SMC handler로 상주, BL32(Secure World OS, OP-TEE 등, 선택) 기동 |
+| BL33 | Non-secure firmware (U-Boot) | Linux 부팅 준비 |
+| Linux Kernel | EL2 또는 EL1에서 실행 | — |
+
+BL0에서 시작해 BL33(U-Boot)까지 순차로 내려가며, BL31이 BL32를 곁가지로 기동한 뒤 BL33으로 이어집니다.
 
 BL31은 *상주 코드*입니다. Linux로 진입한 뒤에도 SMC instruction이 호출되면 BL31이 깨어나 처리하고 EL1으로 돌아갑니다. SMC instruction은 사실상 secure world로의 *trap*입니다.
 
@@ -67,13 +60,13 @@ trusted-firmware-a/
 ├── bl1/
 ├── bl2/
 ├── bl2u/
-├── bl31/                ← EL3 runtime
-├── bl32/                ← BL32 reference (TSP)
+├── bl31/
+├── bl32/
 ├── plat/
 │   ├── nxp/
 │   │   └── imx/
 │   │       └── imx8m/
-│   │           ├── imx8mp/         ← i.MX 8M Plus port
+│   │           ├── imx8mp/
 │   │           ├── imx8mq/
 │   │           └── ...
 │   ├── rockchip/
@@ -84,13 +77,25 @@ trusted-firmware-a/
 │   │   └── ...
 │   ├── st/
 │   │   └── stm32mp1/
-│   └── arm/             ← Juno, FVP reference
-├── drivers/             ← UART, crypto, GIC, console
-├── lib/                 ← libc, fdt, optee_utils
+│   └── arm/
+├── drivers/
+├── lib/
 ├── include/
 └── services/
-    └── std_svc/         ← PSCI 등 표준 서비스
+    └── std_svc/
 ```
+
+주요 디렉터리의 역할은 다음과 같습니다.
+
+| 디렉터리 | 역할 |
+|----------|------|
+| `bl31/` | EL3 runtime |
+| `bl32/` | BL32 reference (TSP) |
+| `plat/nxp/imx/imx8m/imx8mp/` | i.MX 8M Plus port |
+| `plat/arm/` | Juno, FVP reference |
+| `drivers/` | UART, crypto, GIC, console |
+| `lib/` | libc, fdt, optee_utils |
+| `services/std_svc/` | PSCI 등 표준 서비스 |
 
 새 BSP에 TF-A를 통합할 때 직접 만드는 디렉터리는 `plat/<vendor>/<soc>/<board>/` 하나입니다. SoC는 이미 vendor가 port를 maintain하고 있으므로 우리는 *보드별 plat_io_storage.c·platform_def.h·plat_psci.c* 정도만 만듭니다.
 

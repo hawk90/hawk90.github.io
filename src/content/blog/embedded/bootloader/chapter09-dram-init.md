@@ -314,15 +314,12 @@ Training이 실패하면 SPL은 거기서 멈춥니다. 디버그 UART에 "DDR t
 
 DRAM chip의 datasheet는 *standard JEDEC 파라미터*를 제공합니다. 보드 설계자는 여기에 *PCB-specific* 정보를 더해 최종 timing을 결정합니다.
 
-```text
-chip datasheet → JEDEC speed grade (DDR4-2400, DDR4-3200, …)
-                  ↓
-보드 설계 (PCB length, decoupling) → 보드별 마진
-                  ↓
-SoC vendor의 DDR tool → 레지스터 값 산출
-                  ↓
-SPL의 헤더/DTS에 포함
-```
+timing이 확정되는 경로는 다음과 같습니다.
+
+1. chip datasheet가 JEDEC speed grade(DDR4-2400, DDR4-3200 등)를 제공합니다.
+2. 보드 설계(PCB length, decoupling)에서 보드별 마진이 더해집니다.
+3. SoC vendor의 DDR tool이 레지스터 값을 산출합니다.
+4. 산출된 값이 SPL의 헤더나 DTS에 포함됩니다.
 
 새 보드 bring-up은 거의 항상 *DDR 파라미터 가져오기*부터 시작합니다. [BSP 5장](/blog/embedded/bsp/chapter05-ddr-params)에서 이 부분을 더 깊이 다룹니다. 일반적인 절차는 다음과 같습니다.
 
@@ -369,10 +366,10 @@ $ stress-ng --vm 2 --vm-bytes 512M --vm-method all --verify -t 60s
 
 DRAM이 *self-refresh*에서 깨어날 때, 일부 training 결과는 그대로 쓸 수 있습니다. 그러나 칩 온도가 크게 바뀌면 read gate 위치가 흔들립니다. 그래서 *resume 시 partial retraining*이 표준입니다.
 
-```text
-suspend  → 컨트롤러 self-refresh 모드 진입, training 결과는 PHY 레지스터에 보존
-resume   → PHY 깨우기 → DQS gate retraining → ZQ short calibration → 정상 동작
-```
+| 단계 | 동작 |
+|------|------|
+| suspend | 컨트롤러가 self-refresh 모드로 진입하고, training 결과는 PHY 레지스터에 보존됩니다. |
+| resume | PHY를 깨운 뒤 DQS gate retraining, ZQ short calibration을 거쳐 정상 동작으로 복귀합니다. |
 
 이 흐름은 U-Boot보다는 *ATF(BL31)*가 담당하는 경우가 많습니다. PSCI `CPU_SUSPEND`가 들어오면 ATF가 DDR을 self-refresh로 보내고, resume에서 retraining을 돌립니다. U-Boot는 *cold boot 한 번*만 보고, suspend/resume은 ATF + 커널의 책임이 됩니다.
 

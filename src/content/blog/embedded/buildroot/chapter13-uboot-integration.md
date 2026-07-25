@@ -263,21 +263,9 @@ $ fw_setenv -- bootargs "console=ttyS0,115200 root=/dev/mmcblk0p3 rw"
 
 대부분의 modern SoC는 *두 단계 부팅*을 합니다. SoC ROM이 작은 SPL을 SRAM에 로드해 실행하고, SPL이 DRAM을 초기화한 뒤 main U-Boot를 DRAM에 로드합니다.
 
-```text
-[SoC ROM]
-    ↓ load 32 ~ 128 KB
-[SPL — SRAM]
-    - DDR PHY init
-    - clock tree setup
-    - basic console
-    ↓ load 500 KB ~ 1 MB
-[main U-Boot — DRAM]
-    - 전체 device 트리
-    - filesystem, network, USB
-    - bootcmd 실행
-    ↓
-[Linux kernel]
-```
+부팅 흐름은 SoC ROM → SPL(SRAM) → main U-Boot(DRAM) → Linux kernel 순서로 이어집니다. SoC ROM이 32~128 KB의 SPL을 SRAM으로 로드하고, SPL은 DDR PHY 초기화·clock tree 설정·기본 console을 마친 뒤 500 KB~1 MB의 main U-Boot를 DRAM으로 로드합니다. main U-Boot는 전체 device 트리와 filesystem·network·USB를 올린 다음 `bootcmd`를 실행해 Linux kernel로 넘어갑니다.
+
+<!-- TODO: TikZ — boot stage flow diagram (SoC ROM → SPL → main U-Boot → Linux) -->
 
 각 단계의 책임은 다음과 같습니다.
 

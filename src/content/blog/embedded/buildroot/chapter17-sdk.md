@@ -38,25 +38,43 @@ $ make sdk
 
 ```text
 aarch64-buildroot-linux-gnu_sdk-buildroot/
-├── bin/                                ─ host cross binaries
+├── bin/
 │   ├── aarch64-buildroot-linux-gnu-gcc
 │   ├── aarch64-buildroot-linux-gnu-g++
 │   ├── aarch64-buildroot-linux-gnu-ld
 │   └── ...
 ├── aarch64-buildroot-linux-gnu/
-│   ├── bin/                            ─ target-prefixed binaries
-│   ├── include/                        ─ toolchain 헤더
-│   ├── lib/                            ─ libc, libstdc++ (host-side)
-│   └── sysroot/                        ─ target sysroot
-│       ├── usr/include/                ─ target 헤더 (커널 + 패키지)
-│       ├── usr/lib/                    ─ target .so + .a
-│       └── usr/lib/pkgconfig/          ─ pkg-config metadata
-├── libexec/gcc/...                     ─ GCC 내부 binary
-├── share/                              ─ man, docs
-├── environment-setup                   ─ shell 환경 설정 스크립트
-├── relocate-sdk.sh                     ─ 새 위치로 옮긴 후 경로 갱신
-└── version                             ─ Buildroot revision
+│   ├── bin/
+│   ├── include/
+│   ├── lib/
+│   └── sysroot/
+│       ├── usr/include/
+│       ├── usr/lib/
+│       └── usr/lib/pkgconfig/
+├── libexec/gcc/...
+├── share/
+├── environment-setup
+├── relocate-sdk.sh
+└── version
 ```
+
+각 항목의 역할은 다음과 같습니다.
+
+| 경로 | 역할 |
+|---|---|
+| `bin/` | host cross binaries (워크스테이션에서 도는 cross compiler·linker) |
+| `aarch64-buildroot-linux-gnu/bin/` | target-prefixed binaries |
+| `aarch64-buildroot-linux-gnu/include/` | toolchain 헤더 |
+| `aarch64-buildroot-linux-gnu/lib/` | libc, libstdc++ (host-side) |
+| `aarch64-buildroot-linux-gnu/sysroot/` | target sysroot |
+| `sysroot/usr/include/` | target 헤더 (커널 + 패키지) |
+| `sysroot/usr/lib/` | target `.so` + `.a` |
+| `sysroot/usr/lib/pkgconfig/` | pkg-config metadata |
+| `libexec/gcc/...` | GCC 내부 binary |
+| `share/` | man, docs |
+| `environment-setup` | shell 환경 설정 스크립트 |
+| `relocate-sdk.sh` | 새 위치로 옮긴 후 경로 갱신 |
+| `version` | Buildroot revision |
 
 핵심은 두 부분입니다. *host* 쪽의 `bin/aarch64-...-gcc`는 application 개발자의 워크스테이션(보통 x86_64 Linux)에서 도는 cross compiler입니다. *target sysroot*는 그 cross compiler가 컴파일·링크 시 참조할 헤더와 라이브러리입니다.
 

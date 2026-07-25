@@ -323,18 +323,18 @@ TEST(ConcurrentHashMapTest, ConcurrentAccess) {
 
 ### 성능
 
-```text
 필수:
+
 1. 벤치마크 결과 (전/후, 입력 크기별)
 2. 메모리 할당 패턴
 3. 핫패스 영향
 4. 캐시 미스 예상치
 
 권장:
+
 5. SIMD 가능성
 6. branch prediction 친화성
 7. false sharing 가능성
-```
 
 ### PR 본문 템플릿
 

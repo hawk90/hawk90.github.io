@@ -26,46 +26,16 @@ BootROM이 *어떻게 동작할지*는 출하 시점에 정해집니다. 하지�
 
 전원 인가부터 BootROM이 SPL로 점프하기까지의 순서를 i.MX 8M 계열 기준으로 풀어 보면 다음과 같습니다.
 
-```text
-[POR 신호 LOW → HIGH]
-   │
-   ▼
-[PMIC voltage rail 안정 — 수십 ms]
-   - VDD_CORE, VDD_SOC, VDD_DRAM 순서대로 상승
-   - 각 rail이 target voltage 도달 신호 대기
-   │
-   ▼
-[reference clock PLL lock]
-   - 24 MHz xtal 기반 PLL 안정화 (수 ms)
-   │
-   ▼
-[CPU reset deassert]
-   - cortex-a53 #0 만 unhalt, 나머지는 WFE
-   - PC = 0x00910000 (i.MX 8M ROM base)
-   │
-   ▼
-[BootROM 실행 시작 — mask ROM 안의 코드]
-   - SP를 OCRAM(0x00900000)에 설정
-   - eFuse OCOTP bank를 읽어 정책 결정
-   - boot mode strap (BOOT_MODE[3:0]) 샘플링
-   │
-   ▼
-[boot device 결정]
-   - SD/eMMC/QSPI/USB OTG 중 하나
-   - boot container header (4 KB)를 OCRAM에 적재
-   - 헤더에서 SPL 오프셋·크기·서명 위치 파싱
-   │
-   ▼
-[secure boot check — HAB enabled bit가 켜진 경우]
-   - eFuse SRK_HASH와 container 안 SRK table 해시 비교
-   - container 안 CSF(Command Sequence File) 서명 검증
-   - 실패 시 USB 복구 모드로 전환 (Serial Downloader)
-   │
-   ▼
-[SPL 적재 + 점프]
-   - SPL을 OCRAM(0x00910000~) 또는 TCM에 적재
-   - PC = SPL entry point, 인계 완료
-```
+<!-- TODO: TikZ (POR → SPL 점프 flow diagram) -->
+
+1. **POR 신호 LOW → HIGH.** 전원 인가로 Power-On Reset이 풀립니다.
+2. **PMIC voltage rail 안정 (수십 ms).** VDD_CORE, VDD_SOC, VDD_DRAM이 순서대로 상승하고, 각 rail이 target voltage에 도달했다는 신호를 대기합니다.
+3. **reference clock PLL lock.** 24 MHz xtal 기반 PLL이 안정화되기까지 수 ms가 걸립니다.
+4. **CPU reset deassert.** cortex-a53 #0만 unhalt되고 나머지 코어는 WFE로 대기합니다. PC는 i.MX 8M ROM base인 `0x00910000`으로 설정됩니다.
+5. **BootROM 실행 시작 (mask ROM 안의 코드).** SP를 OCRAM(`0x00900000`)에 설정하고, eFuse OCOTP bank를 읽어 정책을 결정한 뒤, boot mode strap(`BOOT_MODE[3:0]`)을 샘플링합니다.
+6. **boot device 결정.** SD/eMMC/QSPI/USB OTG 중 하나를 고르고, boot container header(4 KB)를 OCRAM에 적재해 헤더에서 SPL 오프셋·크기·서명 위치를 파싱합니다.
+7. **secure boot check (HAB enabled bit가 켜진 경우).** eFuse SRK_HASH와 container 안 SRK table 해시를 비교하고, container 안 CSF(Command Sequence File) 서명을 검증합니다. 실패하면 USB 복구 모드(Serial Downloader)로 전환합니다.
+8. **SPL 적재 + 점프.** SPL을 OCRAM(`0x00910000~`) 또는 TCM에 적재하고, PC를 SPL entry point로 옮겨 인계를 마칩니다.
 
 이 시점에서 우리가 짠 코드(SPL)가 처음 한 줄을 실행합니다. 그 전까지 모든 일은 *우리가 못 건드리는 영역*입니다.
 
@@ -283,15 +253,14 @@ eFuse는 실수가 가장 치명적인 영역입니다. 양산 라인에서 자�
 
 가장 흔한 사고는 *SEC_CONFIG를 먼저 굳히는* 것입니다. 양산 fuse 시퀀스에서 *순서*가 결정적입니다. 다음 순서를 dry-run으로 검증해 두는 게 안전합니다.
 
-```text
-[양산 fuse 순서 — 권장]
- 1. unique ID·MAC·serial 굳기 (필요 시)
- 2. SRK_HASH 8 word 굳기 + verify
- 3. BOOT_CFG·BT_FUSE_SEL 굳기 + verify (boot device lock)
- 4. JTAG_SMODE = secure (개발 회복 여지 유지)
- 5. SEC_CONFIG = 11 (Closed 전환) — 마지막
- 6. ※ 모든 단계마다 fuse sense로 verify
-```
+권장하는 양산 fuse 순서는 다음과 같습니다.
+
+1. unique ID·MAC·serial 굳기 (필요 시)
+2. SRK_HASH 8 word 굳기 + verify
+3. BOOT_CFG·BT_FUSE_SEL 굳기 + verify (boot device lock)
+4. JTAG_SMODE = secure (개발 회복 여지 유지)
+5. SEC_CONFIG = 11 (Closed 전환) — 마지막
+6. 모든 단계마다 `fuse sense`로 verify
 
 또 한 가지 흔한 실수는 *fuse prog의 비트 위치 착오*입니다. NXP의 OCOTP는 word 단위, Rockchip OTP는 byte 단위로 주소 체계가 다릅니다. SoC 데이터시트의 fuse map과 fuse 명령의 인자 의미를 *교차 검증*하지 않은 채 *대량 굳히기*에 들어가면 lot 전체가 폐기됩니다.
 

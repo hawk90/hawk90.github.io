@@ -31,9 +31,9 @@ LV와 항공은 외부 환경이 영하에서 직사광선까지 넓게 변하�
 On-die diode based:
   V_BE diff (PTAT — Proportional To Absolute Temp)
   → ADC conversion → ° C
-  
-정확도 ±2~5°C, 해상도 1°C
 ```
+
+정확도는 ±2~5°C, 해상도는 1°C 수준입니다.
 
 ```c
 /* STM32 internal TS */

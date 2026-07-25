@@ -219,27 +219,10 @@ RM이 *SoC의 능력*을 보여준다면, 회로도는 *우리 보드가 그 능
 
 수천 페이지를 *순서대로 읽는 것*은 비효율적입니다. 다음 방식이 훨씬 빠릅니다.
 
-```text
-[검색 워크플로우]
-
-1. PDF reader에서 keyword 검색
-   "UART1 base address" → 메모리 맵 표
-   "PLL1" → clock 트리 그림
-   "BOOT_MODE" → boot mode 표
-
-2. 그림(figure) 중심으로 본다
-   Clock tree, memory map, boot sequence 그림이
-   해당 챕터의 *요약*에 해당.
-
-3. 표(table)를 우선 본다
-   Pin mux 표, 레지스터 표, boot 모드 표.
-   본문은 표를 *해설*하는 형태가 많다.
-
-4. 비슷한 SoC의 BSP source를 *반대로* 본다
-   `arch/arm64/boot/dts/freescale/imx8mp-evk.dts`에서
-   `interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>`를 찾고,
-   RM의 GIC interrupt 표에서 *왜 26인지* 역추적.
-```
+1. **PDF reader에서 keyword 검색.** "UART1 base address"로 메모리 맵 표를, "PLL1"으로 clock 트리 그림을, "BOOT_MODE"로 boot mode 표를 곧장 찾습니다.
+2. **그림(figure) 중심으로 본다.** Clock tree, memory map, boot sequence 그림이 해당 챕터의 *요약*에 해당합니다.
+3. **표(table)를 우선 본다.** Pin mux 표, 레지스터 표, boot 모드 표가 핵심이고, 본문은 표를 *해설*하는 형태가 많습니다.
+4. **비슷한 SoC의 BSP source를 *반대로* 본다.** `arch/arm64/boot/dts/freescale/imx8mp-evk.dts`에서 `interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>`를 찾고, RM의 GIC interrupt 표에서 *왜 26인지* 역추적합니다.
 
 특히 *세 번째*가 강력합니다. 비슷한 보드의 *동작하는 BSP*가 RM의 *가장 정확한 해석서*입니다.
 

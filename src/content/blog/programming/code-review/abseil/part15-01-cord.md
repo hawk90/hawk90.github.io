@@ -226,13 +226,13 @@ absl::Status Handle(const Request& req, Response* res) {
 
 **1. 크기 기준으로 Cord 적용**
 
-```text
-< 4KB        → std::string 또는 string_view
-4KB ~ 64KB   → 케이스 바이 케이스
-> 64KB       → Cord 강력 검토
-mutable 잦음 → std::string
-shared 잦음  → Cord
-```
+| 조건 | 선택 |
+|------|------|
+| < 4KB | `std::string` 또는 `string_view` |
+| 4KB ~ 64KB | 케이스 바이 케이스 |
+| > 64KB | `Cord` 강력 검토 |
+| mutable 잦음 | `std::string` |
+| shared 잦음 | `Cord` |
 
 작은 문자열에 `Cord`를 쓰면 tree overhead만 산다.
 

@@ -38,31 +38,19 @@ vendor가 자체 secure monitor를 만들지 않고 *TF-A에 platform 코드만 
 
 TF-A는 부트를 다섯 단계로 나눕니다. 각 단계의 머리글자 BL은 *Boot Loader*의 약자입니다.
 
-```text
-[POR]
-   ▼
-[BL1]   ROM 안, immutable
-   - root of trust
-   - BL2 image 검증·적재
-   ▼
-[BL2]   SRAM 안, trusted boot firmware
-   - DDR init
-   - FIP를 풀어 BL31·BL32·BL33을 위치에 배치
-   ▼
-[BL31]  DDR secure, EL3 secure monitor
-   - PSCI handler, SMC dispatcher
-   - 평생 살아 있음 (런타임 firmware)
-   ▼
-[BL32]  DDR secure, S-EL1 (옵션)
-   - OP-TEE 등 secure OS
-   - TA(Trusted Application) 실행
-   ▼
-[BL33]  DDR normal, EL2 또는 EL1
-   - U-Boot / UEFI(EDK II) / LinuxBoot
-   - 커널 적재
-```
+POR에서 시작해 BL1 → BL2 → BL31 → BL32 → BL33 순서로 제어가 넘어갑니다. 각 단계가 어디서 실행되고 무엇을 하는지는 다음과 같습니다.
 
-각 BL의 책임을 한 표로 묶으면 다음과 같습니다.
+<!-- TODO: TikZ 세로 flow 다이어그램 (_design.tex) -->
+
+| 단계 | 위치 | 성격 | 주요 책임 |
+|---|---|---|---|
+| **BL1** | ROM 안 | immutable | root of trust, BL2 image 검증·적재 |
+| **BL2** | SRAM 안 | trusted boot firmware | DDR init, FIP를 풀어 BL31·BL32·BL33을 위치에 배치 |
+| **BL31** | DDR secure | EL3 secure monitor | PSCI handler, SMC dispatcher, 런타임 내내 살아 있음 |
+| **BL32** | DDR secure | S-EL1 (옵션) | OP-TEE 등 secure OS, TA(Trusted Application) 실행 |
+| **BL33** | DDR normal | EL2 또는 EL1 | U-Boot / UEFI(EDK II) / LinuxBoot, 커널 적재 |
+
+각 BL의 책임을 실행 위치·Exception Level 관점으로 다시 묶으면 다음과 같습니다.
 
 | 단계 | 위치 | EL | 변경 가능 | 역할 |
 |---|---|---|---|---|

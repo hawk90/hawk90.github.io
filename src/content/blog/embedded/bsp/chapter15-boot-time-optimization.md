@@ -153,15 +153,14 @@ CONFIG_SPL_FALCON_BOOT_MMC=y
 
 Falcon mode는 U-Boot의 *유연성*과 *부팅 속도*를 맞바꿉니다. 양산 펌웨어에 권장됩니다.
 
-DRAM 초기화 조기 종료, console 끄기, 불필요한 드라이버 제외도 누적되면 큽니다.
+DRAM 초기화 조기 종료, console 끄기, 불필요한 드라이버 제외도 누적되면 큽니다. defconfig에서 제거할 후보는 다음과 같습니다.
 
-```text
-# defconfig에서 제거할 후보
-CONFIG_CMD_NET=n          # 네트워크 부팅 안 함
+```ini
+CONFIG_CMD_NET=n           # 네트워크 부팅 안 함
 CONFIG_USB_STORAGE=n       # USB 부팅 안 함
 CONFIG_CMD_USB=n
 CONFIG_CONSOLE_MUX=n
-CONFIG_HUSH_PARSER=n      # 양산이면 셸 자체를 빼도 됨
+CONFIG_HUSH_PARSER=n       # 양산이면 셸 자체를 빼도 됨
 ```
 
 이더넷 PHY autoneg은 1~3초가 걸리므로 부팅 경로에 *절대* 두지 말아야 합니다.

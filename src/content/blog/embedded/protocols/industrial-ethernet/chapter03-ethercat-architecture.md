@@ -108,17 +108,15 @@ Sync Manager는 두 가지 모드가 있습니다.
 | **Buffered (3-buffer)** | 주기 process data | 3개 버퍼를 *원자적*으로 swap. 항상 *최신*만 읽힘 |
 | **Mailbox (handshake)** | 비주기 큰 메시지 | 한 측 쓰기 완료 → 다른 측 읽기. handshake |
 
-3-buffer 모드의 동작이 정교합니다.
+3-buffer 모드의 동작이 정교합니다. 세 버퍼는 각각 다음 역할을 맡습니다.
 
-```text
-3-buffer SM (process data)
-  버퍼 A: EtherCAT이 *지금 쓰는 중*
-  버퍼 B: 호스트가 *지금 읽는 중*
-  버퍼 C: *다음에 swap될 후보*
+| 버퍼 | 역할 |
+|------|------|
+| 버퍼 A | EtherCAT이 *지금 쓰는 중* |
+| 버퍼 B | 호스트가 *지금 읽는 중* |
+| 버퍼 C | *다음에 swap될 후보* |
 
-  EtherCAT 쓰기 완료 → C가 "최신"으로 표시, A가 다음 쓰기로
-  호스트 읽기 완료    → C가 호스트의 다음 읽기로
-```
+EtherCAT 쓰기가 완료되면 버퍼 C가 "최신"으로 표시되고 버퍼 A가 다음 쓰기 대상이 됩니다. 호스트 읽기가 완료되면 버퍼 C가 호스트의 다음 읽기 대상이 됩니다.
 
 결과는 *race-free에 latest-only* 의미론입니다. 호스트가 느리게 읽어도 *최신 데이터*만 봅니다. 오래된 데이터를 보는 일이 없습니다.
 
@@ -126,21 +124,12 @@ mailbox SM은 *CoE·SoE·FoE·EoE·AoE* 같은 *대용량 비주기* 메시지�
 
 ## Distributed Clock — Sub-μs 동기
 
-DC의 원리는 Ch 2에서 다뤘습니다. 여기서는 *EtherCAT 안에서의 동작 흐름*을 봅니다.
+DC의 원리는 Ch 2에서 다뤘습니다. 여기서는 *EtherCAT 안에서의 동작 흐름*을 봅니다. 마스터는 다음 절차로 DC를 동기합니다.
 
-```text
-DC 동기 절차 (마스터가 수행)
-  1. BWR (0x05, Broadcast Write):
-     모든 슬레이브의 DC port time을 latch
-     → 각 슬레이브는 *각 port에서의 프레임 도착 시각*을 기록
-  2. BRD (0x07, Broadcast Read):
-     첫 DC 슬레이브의 시각을 reference로 채택
-  3. ARMW (Auto Read Multiple Write, 0x0D):
-     reference 시각을 모든 슬레이브에 분배.
-     각 슬레이브 ESC가 자기 propagation delay를 자동으로 빼고
-     offset을 계산해서 자체 clock에 적용
-  4. 마스터가 주기적으로 ARMW를 재전송 → drift 보정
-```
+1. **`BWR` (0x05, Broadcast Write)** — 모든 슬레이브의 DC port time을 latch합니다. 각 슬레이브는 *각 port에서의 프레임 도착 시각*을 기록합니다.
+2. **`BRD` (0x07, Broadcast Read)** — 첫 DC 슬레이브의 시각을 reference로 채택합니다.
+3. **`ARMW` (Auto Read Multiple Write, 0x0D)** — reference 시각을 모든 슬레이브에 분배합니다. 각 슬레이브 ESC가 자기 propagation delay를 자동으로 빼고 offset을 계산해서 자체 clock에 적용합니다.
+4. 마스터가 주기적으로 `ARMW`를 재전송해 drift를 보정합니다.
 
 DC의 절묘함은 *propagation delay 자동 계산*입니다. ESC는 *port 0 도착 시각*과 *port 1 도착 시각*을 *둘 다* 기록합니다. 그 차이가 *그 슬레이브에서의 처리 시간 + 케이블 왕복 시간*입니다. 마스터는 이 정보로 *각 슬레이브까지의 정확한 propagation delay*를 계산해 ARMW에 실어 줍니다.
 
