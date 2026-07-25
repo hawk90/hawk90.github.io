@@ -74,7 +74,10 @@ for line in sys.stdin:
     h = len(re.findall(r"[가-힣]", line))
     # exclude lines with code-style operators or assignment
     has_op = bool(re.search(r"[=:;{}()\[\]<>|]", line))
-    if h >= 6 and not has_op:
+    # exclude directory-tree lines (CLAUDE.md §6 allows ├──/└── trees;
+    # Korean after them is a # comment on a real path, not relocatable prose)
+    is_tree = bool(re.search(r"[├└│─┌┐┘┬┴┼╰╯╭╮]", line))
+    if h >= 6 and not has_op and not is_tree:
         sys.stdout.write(line)
         break
 ' 2>/dev/null)
