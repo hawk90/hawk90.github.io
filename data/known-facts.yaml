@@ -40,6 +40,7 @@ pcie_standards:
   - CXL 3.0
   - CXL 3.1
   - CXL 3.2
+  - CXL 4.0        # 2025-11-18 릴리스. 128 GT/s(PCIe 7.0), bundled ports, 256B FLIT. https://computeexpresslink.org/blog/introducing-the-cxl-4-0-specification-webinar-qa-recap-4386/
 
 # ─── 가속기 인터커넥트 ─────────────────────────────────────────
 accelerator_interconnect:
@@ -49,6 +50,7 @@ accelerator_interconnect:
 
 # ─── DMTF / SPDM ───────────────────────────────────────────────
 dmtf_standards:
+  - DSP0236      # MCTP Base Specification
   - DSP0274      # SPDM (Security Protocol Data Model)
   - DSP0276      # SPDM Secured Messages
   - DSP0277      # SPDM over MCTP Binding
@@ -58,6 +60,7 @@ ieee_802_1_tsn:
   - IEEE 802.1AS        # gPTP
   - IEEE 802.1AS-2020   # gPTP Rev
   - IEEE 802.1Qbv       # Time-Aware Shaper
+  - IEEE 802.1Qbv-2015  # TAS 원 표준 revision
   - IEEE 802.1Qbu       # Frame Preemption
   - IEEE 802.1Qci       # Per-Stream Filtering
   - IEEE 802.1Qcc       # Stream Reservation
@@ -74,7 +77,11 @@ industrial_ethernet:
   - Modbus TCP
 
 # ─── 검증된 NVIDIA GPU SKU (공식 발표 + 양산) ────────────────
+# 통칭(bare) 토큰과 풀 SKU를 함께 등재. audit은 bare 토큰(H100·H200·GH200)을 뽑음.
 nvidia_gpu_verified:
+  - H100                 # bare 통칭 — H100 SXM5 / 80GB 등을 본문에서 이렇게 부름
+  - H200                 # bare 통칭 — H200 SXM5 141GB
+  - GH200                # Grace Hopper: GH100 + 141GB HBM3E(6×24GB), 900GB/s C2C. https://www.tomshardware.com/news/nvidia-reveals-gh200-grace-hopper-gpu-with-141gb-of-hbm3e
   - H100 80GB SXM5       # 5x HBM3 16GB = 80 GB, 3.35 TB/s
   - H100 96GB SXM5       # H100 SXM5 96GB variant
   - H100 NVL             # H100 NVL 94GB
@@ -98,9 +105,12 @@ nvidia_gpu_roadmap:
 
 # ─── 검증된 AMD GPU SKU ──────────────────────────────────────
 amd_gpu_verified:
+  - MI100               # CDNA1, 2020-11-16, 32GB HBM2, 1.23 TB/s, 300W. https://technical.city/en/video/Radeon-Instinct-MI100
+  - MI300               # MI300 family(MI300A/MI300X) 통칭
   - MI300X              # 192 GB HBM3
   - MI325X              # 256 GB HBM3E (288 GB는 잘못)
   - MI300A              # APU variant
+  - MI350               # MI350 시리즈(MI350X/MI355X) 통칭, CDNA4, 2025-06-12, ~288GB HBM3E, 8 TB/s. https://www.tomshardware.com/pc-components/gpus/amd-announces-mi350x-and-mi355x-ai-gpus-claims-up-to-4x-generational-gain-up-to-35x-faster-inference-performance
   - MI355X              # post-MI325 (announced)
 
 # ─── 미발표 AMD GPU (qualifier 의무) ──────────────────────────
@@ -145,6 +155,10 @@ unverified_products:
 
 # ─── 검증된 NVIDIA Jetson SKU ────────────────────────────────
 nvidia_jetson_verified:
+  - Jetson Orin          # Orin 제품군 bare 통칭
+  - Jetson Xavier        # Xavier 제품군 bare 통칭
+  - Jetson AGX           # AGX 폼팩터 bare 통칭
+  - Jetson Orin AGX      # 본문 표기(= AGX Orin)
   - Jetson Nano
   - Jetson Xavier NX
   - Jetson AGX Xavier
