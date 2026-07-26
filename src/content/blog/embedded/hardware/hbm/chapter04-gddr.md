@@ -112,7 +112,7 @@ PAM3 : 1.5 bit/UI (이론)
 PAM4 : 2.0 bit/UI
 ```
 
-GDDR7은 *32 Gbps*에서 *PAM3*로 동작하고 *PAM3의 effective bit rate*는 *clock × 1.5*로 들어갑니다. NVIDIA RTX 50 시리즈가 *GDDR7 32 Gbps*로 출시 예정입니다.
+GDDR7은 *최대 32 Gbps*에서 *PAM3*로 동작하고 *PAM3의 effective bit rate*는 *clock × 1.5*로 들어갑니다. NVIDIA RTX 50 시리즈가 *GDDR7*을 처음 채택해 *2025년 1월 출시*됐습니다(RTX 5090은 32 GB GDDR7, 28 Gbps · 1.79 TB/s).
 
 ```text
 GDDR7 (2024~2025)

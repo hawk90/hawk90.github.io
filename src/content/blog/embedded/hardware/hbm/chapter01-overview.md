@@ -132,9 +132,9 @@ NVIDIA Blackwell HBM3E 공급:
 |------|------|------|
 | SK Hynix | 주 공급 | 9.2 Gbps grade qualified 우선 |
 | Micron | 추가 공급 | 9.8 Gbps 양산 |
-| Samsung | qualification 진행 | |
+| Samsung | 3rd 공급 (2025-09 qualified) | 12-Hi 양산 |
 
-SK 하이닉스가 *2023년 HBM3 양산*에 *가장 먼저* 들어가 NVIDIA의 *first source*가 됐고, *HBM3E*에서도 *9.2 Gbps grade*로 *양산 선두*를 지키고 있습니다. Samsung은 *HBM3E 12-Hi 24 Gb DRAM*으로 *36 GB stack*을 먼저 발표했지만 NVIDIA *qualification*이 늦어졌습니다. Micron은 *9.8 Gbps*로 *per-pin rate*는 가장 높지만 *총 volume*은 아직 3위입니다.
+SK 하이닉스가 *2023년 HBM3 양산*에 *가장 먼저* 들어가 NVIDIA의 *first source*가 됐고, *HBM3E*에서도 *9.2 Gbps grade*로 *양산 선두*를 지키고 있습니다. Samsung은 *HBM3E 12-Hi 24 Gb DRAM*으로 *36 GB stack*을 먼저 발표했지만 NVIDIA *qualification*이 늦어져, *2025년 9월*에야 통과해 *3rd source*로 합류했습니다. Micron은 *9.8 Gbps*로 *per-pin rate*는 가장 높지만 *총 volume*은 아직 3위입니다.
 
 ## 시리즈 로드맵
 

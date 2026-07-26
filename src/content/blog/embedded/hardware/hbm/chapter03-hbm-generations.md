@@ -142,7 +142,7 @@ NVIDIA Blackwell B100/B200/B300의 *주력 메모리*입니다.
 | 벤더 | per-pin | stack BW (× 1024-bit) | 비고 |
 |------|---------|----------------------|------|
 | SK Hynix | 9.2 Gbps | 1.18 TB/s | NVIDIA H200 1st-source |
-| Samsung | 9.6 Gbps | 1.23 TB/s | qualification 진행 |
+| Samsung | 9.6 Gbps | 1.23 TB/s | 12-Hi NVIDIA qualified (2025-09) |
 | Micron | 9.8 Gbps | 1.25 TB/s | B200용 |
 
 max capacity — *36 GB / stack* (24 Gb DRAM × 12 = 36 GB).
