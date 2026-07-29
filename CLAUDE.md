@@ -51,13 +51,14 @@
 | ③ 사실 검증 | hallucination 후보, known-fact, 인용 심볼 존재, upstream drift | `audit-suspect-claims.sh` · `verify-known-facts.sh` · `audit-cited-symbols.py` · `audit:upstream` |
 | ④ 발행 게이트 | ①③의 blocking 부분을 한 번에 | `npm run audit:gate` (= `audit-publish-gate.sh`) |
 | ⑤ 구조 무결성 | seriesOrder gap·draft 혼합·링크 rot·중복 | `audit:series` · `audit:links` · `check:duplicate` |
-| ⑥ 유지보수 (발행 후) | upstream 코드·spec 변화, 인용 심볼 rename, 로드맵 만료 | `audit:upstream` · `audit-cited-symbols.py` · `audit:roadmap` |
+| ⑥ 유지보수 (발행 후) | upstream 코드·spec 변화, 인용 심볼 rename, 로드맵 만료, 산문 미래 시제·날짜 앵커 stale | `audit:upstream` · `audit-cited-symbols.py` · `audit:roadmap` · `audit:staleness` |
 
 ### Dispatch — 언제 자동으로 도는가
 
 - **commit 시**: lefthook `pre-commit`이 staged `.md`에 `audit-publish-gate.sh` + frontmatter 검사.
 - **push 시**: lefthook `pre-push`가 push되는 commit의 변경 파일에 gate.
-- **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (fetch 포함 drift).
+- **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (fetch 포함 drift), `npm run audit:staleness` (산문 미래 시제·날짜 앵커).
+- **staleness 두 도구 구분**: `audit:roadmap`은 `known-facts.yaml`에 *등재된 SKU*의 `review:` 날짜만, `audit:staleness`는 *본문 산문 자체*의 미래 시제(`예정`·`미발표`)·날짜 앵커(`YYYY년 현재`)를 훑는다. 등재 안 된 주장은 후자만 잡는다.
 - **게이트가 느릴 때**: `git commit/push --no-verify`로 우회하되 *책임 본인* — 우회했으면 `npm run audit:gate`를 별도로 돌린다.
 
 ### Slash 커맨드 (`.claude/commands/`)
@@ -65,7 +66,7 @@
 의도 기반 진입점. 스크립트 이름을 몰라도 단계로 부른다.
 
 - `/pre-publish [dir]` — 발행 전 통합 gate (④).
-- `/audit-freshness` — upstream drift + 인용 심볼 존재 (③⑥).
+- `/audit-freshness` — upstream drift + 인용 심볼 존재 + 산문 staleness (③⑥).
 - `/new-chapter` — frontmatter 스캐폴딩 (§4 준수).
 
 ### Upstream tracking 등록
