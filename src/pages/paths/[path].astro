@@ -1,0 +1,147 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/common/Breadcrumb.astro';
+import { toSlug } from '../../lib/utils';
+import { getSeriesMetadata } from '../../consts/series';
+import { LEARNING_PATHS, type LearningPath, type PathNode } from '../../consts/learning-paths';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog');
+
+  // series id → { total, published } 카운트
+  const counts = new Map<string, { total: number; pub: number }>();
+  for (const p of allPosts) {
+    const s = p.data.series;
+    if (!s) continue;
+    const c = counts.get(s) ?? { total: 0, pub: 0 };
+    c.total += 1;
+    if (!p.data.draft) c.pub += 1;
+    counts.set(s, c);
+  }
+
+  return LEARNING_PATHS.map((path) => ({
+    params: { path: path.id },
+    props: { path, counts: Object.fromEntries(counts) },
+  }));
+}
+
+type NodeStatus =
+  | { kind: 'published'; href: string; count: number; total: number }
+  | { kind: 'draft'; total: number }
+  | { kind: 'planned' };
+
+interface Props {
+  path: LearningPath;
+  counts: Record<string, { total: number; pub: number }>;
+}
+
+const { path, counts } = Astro.props;
+
+function classify(node: PathNode): NodeStatus {
+  if (!node.series) return { kind: 'planned' };
+  const c = counts[node.series];
+  if (!c || c.total === 0) {
+    // series id가 어떤 글의 frontmatter와도 안 맞음 — 오타 방지용 경고
+    console.warn(`[paths/${path.id}] unknown series id (no posts): "${node.series}"`);
+    return { kind: 'planned' };
+  }
+  if (c.pub > 0) {
+    return { kind: 'published', href: `/series/${toSlug(node.series)}`, count: c.pub, total: c.total };
+  }
+  return { kind: 'draft', total: c.total };
+}
+
+function nodeTitle(node: PathNode): string {
+  return node.label ?? node.series ?? '';
+}
+
+const partsWithStatus = path.parts.map((part) => ({
+  ...part,
+  nodes: part.nodes.map((node) => ({
+    node,
+    title: nodeTitle(node),
+    lens: node.series ? getSeriesMetadata(node.series)?.lens : undefined,
+    status: classify(node),
+  })),
+}));
+---
+
+<BaseLayout title={`${path.name} — 학습경로`} description={path.description}>
+  <section class="py-16">
+    <div class="container max-w-4xl">
+      <Breadcrumb items={[{ label: 'Paths', href: '/paths' }, { label: path.name }]} />
+
+      <div class="mb-8">
+        <div class="text-sm text-[var(--color-accent)] font-medium mb-2">
+          학습경로 · {path.parts.length} 단계
+        </div>
+        <h1 class="text-4xl font-bold mb-4">{path.name}</h1>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">{path.description}</p>
+        {path.intro && (
+          <p class="text-sm text-[var(--color-text-secondary)] mt-3 leading-relaxed">{path.intro}</p>
+        )}
+      </div>
+
+      <div class="space-y-10">
+        {partsWithStatus.map((part) => (
+          <div>
+            <h2 class="text-xl font-semibold mb-1.5">{part.title}</h2>
+            {part.intro && (
+              <p class="text-sm text-[var(--color-text-secondary)] mb-4 leading-relaxed">{part.intro}</p>
+            )}
+            <div class="space-y-2.5">
+              {part.nodes.map(({ node, title, lens, status }) => {
+                const inner = (
+                  <div class="flex items-start gap-3">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-semibold leading-snug">{title}</span>
+                        {status.kind === 'published' && (
+                          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-600 dark:text-green-400">
+                            {status.count}/{status.total} 발행
+                          </span>
+                        )}
+                        {status.kind === 'draft' && (
+                          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
+                            준비 중 · {status.total}편
+                          </span>
+                        )}
+                        {status.kind === 'planned' && (
+                          <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                            예정
+                          </span>
+                        )}
+                      </div>
+                      {lens && (
+                        <p class="text-sm text-[var(--color-text-secondary)] mt-1 leading-relaxed">{lens}</p>
+                      )}
+                      {node.note && (
+                        <p class="text-xs text-[var(--color-text-muted)] mt-0.5">{node.note}</p>
+                      )}
+                      {status.kind === 'planned' && node.home && (
+                        <p class="text-xs text-[var(--color-text-muted)] mt-0.5">→ {node.home}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+
+                const cls =
+                  'block p-4 rounded-xl border transition-all duration-200 ' +
+                  (status.kind === 'published'
+                    ? 'bg-[var(--color-bg-secondary)] border-[var(--color-border)] hover:border-[var(--color-accent)] hover:shadow-md'
+                    : 'bg-[var(--color-bg-secondary)]/50 border-dashed border-[var(--color-border)]');
+
+                return status.kind === 'published' ? (
+                  <a href={status.href} class={cls}>{inner}</a>
+                ) : (
+                  <div class={cls}>{inner}</div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

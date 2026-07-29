@@ -1,0 +1,65 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/common/Breadcrumb.astro';
+import { LEARNING_PATHS } from '../../consts/learning-paths';
+
+const allPosts = await getCollection('blog');
+const pubSeries = new Set(allPosts.filter((p) => !p.data.draft && p.data.series).map((p) => p.data.series));
+const allSeries = new Set(allPosts.filter((p) => p.data.series).map((p) => p.data.series));
+
+// 경로별 커버리지: 발행 / 준비 중 / 예정 노드 수
+const paths = LEARNING_PATHS.map((path) => {
+  let published = 0;
+  let draft = 0;
+  let planned = 0;
+  for (const part of path.parts) {
+    for (const node of part.nodes) {
+      if (!node.series || !allSeries.has(node.series)) planned += 1;
+      else if (pubSeries.has(node.series)) published += 1;
+      else draft += 1;
+    }
+  }
+  return { ...path, stats: { published, draft, planned } };
+});
+---
+
+<BaseLayout title="학습경로 — 주제로 읽는 인덱스" description="책·출처별 시리즈를 하나의 주제 흐름으로 꿰는 큐레이션 학습경로.">
+  <section class="py-16">
+    <div class="container max-w-4xl">
+      <Breadcrumb items={[{ label: 'Paths' }]} />
+
+      <div class="mb-10">
+        <h1 class="text-4xl font-bold mb-4">학습경로</h1>
+        <p class="text-[var(--color-text-secondary)] leading-relaxed">
+          글은 책·출처별 시리즈로 정리돼 있다. 학습경로는 그 위에 얹는 주제 축 인덱스다 —
+          흩어진 시리즈를 하나의 이야기 순서로 꿰어, 무엇을 어떤 순서로 읽으면 되는지 보여 준다.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        {paths.map((path) => (
+          <a
+            href={`/paths/${path.id}`}
+            class="block p-6 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:shadow-md transition-all duration-200 group"
+          >
+            <h2 class="text-xl font-bold group-hover:text-[var(--color-accent)] transition-colors">{path.name}</h2>
+            <p class="text-sm text-[var(--color-text-secondary)] mt-2 leading-relaxed">{path.description}</p>
+            <div class="flex items-center gap-2 mt-3 text-[10px] font-medium">
+              <span class="px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-600 dark:text-green-400">
+                발행 {path.stats.published}
+              </span>
+              <span class="px-1.5 py-0.5 rounded-full bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
+                준비 중 {path.stats.draft}
+              </span>
+              <span class="px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                예정 {path.stats.planned}
+              </span>
+              <span class="text-[var(--color-text-muted)] ml-auto">{path.parts.length} 단계</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
