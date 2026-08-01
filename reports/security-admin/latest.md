@@ -1,6 +1,6 @@
 # Security & admin remediation gate
 
-Generated: 2026-08-01T09:11:08.686Z
+Generated deterministically from the current source tree.
 
 > `open` P0 findings fail `npm run gate:security-admin`. `manual-review` requires an explicit deployment/design decision before enabling the affected capability.
 

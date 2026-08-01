@@ -73,13 +73,11 @@ const findings = rules.map((rule) => ({
 const openP0 = findings.filter((finding) => finding.priority === 'P0' && finding.status === 'open');
 const reportDir = 'reports/security-admin';
 await mkdir(reportDir, { recursive: true });
-const generatedAt = new Date().toISOString();
-
-await writeFile(join(reportDir, 'latest.json'), `${JSON.stringify({ generatedAt, scope: files, findings }, null, 2)}\n`);
+await writeFile(join(reportDir, 'latest.json'), `${JSON.stringify({ scope: files, findings }, null, 2)}\n`);
 await writeFile(join(reportDir, 'latest.md'), [
   '# Security & admin remediation gate',
   '',
-  `Generated: ${generatedAt}`,
+  'Generated deterministically from the current source tree.',
   '',
   '> `open` P0 findings fail `npm run gate:security-admin`. `manual-review` requires an explicit deployment/design decision before enabling the affected capability.',
   '',
