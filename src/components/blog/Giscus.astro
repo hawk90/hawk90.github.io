@@ -2,25 +2,29 @@
 import { COMMENTS_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
 
-const config = {
-  enabled: String(COMMENTS_CONFIG.enabled),
-  repo: COMMENTS_CONFIG.repo,
-  repoId: COMMENTS_CONFIG.repoId,
-  category: COMMENTS_CONFIG.category,
-  categoryId: COMMENTS_CONFIG.categoryId,
+const giscusConfig = COMMENTS_CONFIG.enabled && COMMENTS_CONFIG.provider === 'giscus'
+  ? COMMENTS_CONFIG
+  : null;
+
+const config = giscusConfig && {
+  enabled: 'true',
+  repo: giscusConfig.repo,
+  repoId: giscusConfig.repoId,
+  category: giscusConfig.category,
+  categoryId: giscusConfig.categoryId,
   mapping: 'pathname',
   strict: '0',
   reactionsEnabled: '1',
   emitMetadata: '0',
   inputPosition: 'top',
-  lang: COMMENTS_CONFIG.lang,
+  lang: giscusConfig.lang,
 };
 
 const setupMessage = t('giscus_setup_required');
 const setupLink = t('giscus_setup_link');
 ---
 
-{COMMENTS_CONFIG.enabled && (
+{config && (
   <div
     class="giscus-wrapper"
     data-giscus-enabled={config.enabled}

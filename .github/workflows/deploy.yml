@@ -34,13 +34,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "22"
-
-      - name: Cache node_modules
-        id: node-cache
-        uses: actions/cache@v5
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+          cache: npm
 
       - name: Cache Astro content layer
         uses: actions/cache@v5
@@ -67,7 +61,6 @@ jobs:
         uses: actions/configure-pages@v6
 
       - name: Install dependencies
-        if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline --no-audit
 
       - name: Build with Astro

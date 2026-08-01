@@ -149,7 +149,7 @@ export function toggleTheme(): boolean {
 const REACTIVITY_FLAG = '__themeReactivityInstalled';
 export function installThemeReactivity(): void {
   if (typeof window === 'undefined') return;
-  const w = window as Window & Record<string, unknown>;
+  const w = window as unknown as Window & Record<string, unknown>;
   if (w[REACTIVITY_FLAG]) return;
   w[REACTIVITY_FLAG] = true;
 

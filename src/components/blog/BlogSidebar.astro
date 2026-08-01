@@ -5,7 +5,6 @@ import { CATEGORIES, getTopLevelCategories, getSubCategories } from '../../const
 import { BLOG_CONFIG } from '../../consts/config';
 import { getTagsWithCount, type BlogPost } from '../../lib/posts';
 import { toSlug, getTagUrl } from '../../lib/utils';
-import { onPageLoad } from '../../lib/lifecycle';
 
 interface Props {
   posts: BlogPost[];
@@ -90,7 +89,7 @@ function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
   return {
     id: category.id,
     name: category.name,
-    icon: category.icon,
+    icon: category.icon ?? '',
     count: (postsByCategoryPrefix.get(category.id) ?? []).length,
     isActive: isActiveCategory(category.id),
     initiallyOpen: isActiveCategory(category.id) || hasActiveDescendant,
@@ -185,6 +184,8 @@ const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
 </style>
 
 <script>
+  import { onPageLoad } from '../../lib/lifecycle';
+
   onPageLoad(() => {
     const applyAll = (open: boolean) => {
       document.querySelectorAll<HTMLDetailsElement>('.cat-tree').forEach((details) => {

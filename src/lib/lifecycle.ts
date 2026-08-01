@@ -15,12 +15,23 @@
  *     return () => btn.removeEventListener('click', onClick);
  *   });
  */
-export function onPageLoad(init: () => (() => void) | void): void {
+type Cleanup = () => void;
+type InitResult = Cleanup | void | Promise<Cleanup | void>;
+
+export function onPageLoad(init: () => InitResult): void {
   if (typeof document === 'undefined') return;
-  let cleanup: (() => void) | void = undefined;
-  const run = () => {
+  let cleanup: Cleanup | void = undefined;
+  let runId = 0;
+  const run = async () => {
+    const currentRun = ++runId;
     if (typeof cleanup === 'function') cleanup();
-    cleanup = init();
+    cleanup = undefined;
+    const nextCleanup = await init();
+    if (currentRun === runId) {
+      cleanup = nextCleanup;
+    } else if (typeof nextCleanup === 'function') {
+      nextCleanup();
+    }
   };
   run();
   document.addEventListener('astro:page-load', run);

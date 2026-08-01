@@ -86,7 +86,7 @@ export type CommentsConfig =
       /** Your Disqus shortname (the part before .disqus.com) */
       shortname: string;
     };
-export const defineComments = <T extends CommentsConfig>(c: T) => c;
+export const defineComments = (c: CommentsConfig): CommentsConfig => c;
 
 // ─── Analytics ──────────────────────────────────────────────
 export type AnalyticsConfig =
@@ -94,7 +94,7 @@ export type AnalyticsConfig =
   | { enabled: true; provider: 'google'; id: string }
   | { enabled: true; provider: 'umami'; id: string; src?: string }
   | { enabled: true; provider: 'plausible'; id: string };
-export const defineAnalytics = <T extends AnalyticsConfig>(c: T) => c;
+export const defineAnalytics = (c: AnalyticsConfig): AnalyticsConfig => c;
 
 
 // ─── Newsletter ─────────────────────────────────────────────
@@ -112,7 +112,7 @@ export type NewsletterConfig =
       description?: string;
       buttonText?: string;
     };
-export const defineNewsletter = <T extends NewsletterConfig>(c: T) => c;
+export const defineNewsletter = (c: NewsletterConfig): NewsletterConfig => c;
 
 // ─── Author (multi-author support) ──────────────────────────
 export interface AuthorConfig {
@@ -125,7 +125,7 @@ export interface AuthorConfig {
   social?: { twitter?: string; github?: string; linkedin?: string; email?: string };
 }
 export const defineAuthor = <T extends AuthorConfig>(c: T) => c;
-export const defineAuthors = <T extends ReadonlyArray<AuthorConfig>>(c: T) => c;
+export const defineAuthors = (c: ReadonlyArray<AuthorConfig>): ReadonlyArray<AuthorConfig> => c;
 
 // ─── Blog ───────────────────────────────────────────────────
 export interface BlogConfig {
