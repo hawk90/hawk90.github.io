@@ -1,0 +1,186 @@
+{
+  "generatedAt": "2026-08-01T07:51:41.449Z",
+  "policy": "Review-only; title similarity is not duplicate evidence.",
+  "candidates": [
+    {
+      "category": "observability",
+      "left": {
+        "id": "AP-O-96",
+        "title": "O-96. Metrics Without Editorial Judgment",
+        "category": "observability",
+        "file": "observability-02.md#ap-o-96",
+        "originalIds": [
+          "O-96"
+        ],
+        "sourceMessageIds": [
+          "95281689-fcc5-4aaa-a656-841196372a9d"
+        ]
+      },
+      "right": {
+        "id": "AP-O-97",
+        "title": "O-97. Editorial Judgment Without Metrics",
+        "category": "observability",
+        "file": "observability-02.md#ap-o-97",
+        "originalIds": [
+          "O-97"
+        ],
+        "sourceMessageIds": [
+          "95281689-fcc5-4aaa-a656-841196372a9d"
+        ]
+      },
+      "exactTitle": false,
+      "tokenScore": 1,
+      "trigramScore": 0.8620689655172413
+    },
+    {
+      "category": "localization",
+      "left": {
+        "id": "AP-L-07",
+        "title": "L-07. Over-Translation",
+        "category": "localization",
+        "file": "localization-01.md#ap-l-07",
+        "originalIds": [
+          "L-07"
+        ],
+        "sourceMessageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "right": {
+        "id": "AP-L-08",
+        "title": "L-08. Under-Translation",
+        "category": "localization",
+        "file": "localization-01.md#ap-l-08",
+        "originalIds": [
+          "L-08"
+        ],
+        "sourceMessageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "exactTitle": false,
+      "tokenScore": 0.5,
+      "trigramScore": 0.8148148148148148
+    },
+    {
+      "category": "observability",
+      "left": {
+        "id": "AP-O-92",
+        "title": "O-92. Duplicate Pageview After Client Navigation",
+        "category": "observability",
+        "file": "observability-02.md#ap-o-92",
+        "originalIds": [
+          "O-92"
+        ],
+        "sourceMessageIds": [
+          "95281689-fcc5-4aaa-a656-841196372a9d"
+        ]
+      },
+      "right": {
+        "id": "AP-O-93",
+        "title": "O-93. Missing Pageview After Client Navigation",
+        "category": "observability",
+        "file": "observability-02.md#ap-o-93",
+        "originalIds": [
+          "O-93"
+        ],
+        "sourceMessageIds": [
+          "95281689-fcc5-4aaa-a656-841196372a9d"
+        ]
+      },
+      "exactTitle": false,
+      "tokenScore": 0.8,
+      "trigramScore": 0.7714285714285715
+    },
+    {
+      "category": "information_architecture",
+      "left": {
+        "id": "AP-K-17",
+        "title": "K-17. Relation Inferred from Folder",
+        "category": "information_architecture",
+        "file": "information_architecture-02.md#ap-k-17",
+        "originalIds": [
+          "K-17"
+        ],
+        "sourceMessageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "right": {
+        "id": "AP-K-18",
+        "title": "K-18. Relation Inferred from Title",
+        "category": "information_architecture",
+        "file": "information_architecture-02.md#ap-k-18",
+        "originalIds": [
+          "K-18"
+        ],
+        "sourceMessageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "exactTitle": false,
+      "tokenScore": 0.75,
+      "trigramScore": 0.7659574468085106
+    },
+    {
+      "category": "quality",
+      "left": {
+        "id": "AP-T-14",
+        "title": "T-14. Locale-Dependent Test",
+        "category": "quality",
+        "file": "quality-01.md#ap-t-14",
+        "originalIds": [
+          "T-14"
+        ],
+        "sourceMessageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "right": {
+        "id": "AP-T-15",
+        "title": "T-15. Time-Dependent Test",
+        "category": "quality",
+        "file": "quality-01.md#ap-t-15",
+        "originalIds": [
+          "T-15"
+        ],
+        "sourceMessageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "exactTitle": false,
+      "tokenScore": 0.6666666666666666,
+      "trigramScore": 0.75
+    },
+    {
+      "category": "localization",
+      "left": {
+        "id": "AP-L-07",
+        "title": "L-07. Over-Translation",
+        "category": "localization",
+        "file": "localization-01.md#ap-l-07",
+        "originalIds": [
+          "L-07"
+        ],
+        "sourceMessageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "right": {
+        "id": "AP-L-28",
+        "title": "L-28. Translation Lag",
+        "category": "localization",
+        "file": "localization-01.md#ap-l-28",
+        "originalIds": [
+          "L-28"
+        ],
+        "sourceMessageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "exactTitle": false,
+      "tokenScore": 0.5,
+      "trigramScore": 0.72
+    }
+  ]
+}

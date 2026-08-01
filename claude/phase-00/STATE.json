@@ -1,0 +1,9 @@
+{
+  "phase": "PHASE-00",
+  "batch": 1,
+  "status": "in_progress",
+  "activeTasks": ["PH-00-01", "PH-00-02", "PH-00-03", "PH-00-04"],
+  "completedTasks": [],
+  "deferredTasks": [],
+  "unlocks": ["PHASE-01"]
+}

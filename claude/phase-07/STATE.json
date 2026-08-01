@@ -1,0 +1,26 @@
+{
+  "phase": 7,
+  "status": "queued",
+  "activeTasks": [
+    "PH-ADS-01",
+    "PH-ADS-02",
+    "PH-ADS-03",
+    "PH-ADS-04"
+  ],
+  "allTasks": [
+    "PH-ADS-01",
+    "PH-ADS-02",
+    "PH-ADS-03",
+    "PH-ADS-04",
+    "PH-ADS-05",
+    "PH-ADS-06",
+    "PH-ADS-07",
+    "PH-ADS-08",
+    "PH-ADS-09",
+    "PH-ADS-10",
+    "PH-ADS-11",
+    "PH-ADS-12"
+  ],
+  "completedTasks": [],
+  "deferredTasks": []
+}

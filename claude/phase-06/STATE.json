@@ -1,0 +1,26 @@
+{
+  "phase": 6,
+  "status": "queued",
+  "activeTasks": [
+    "PH-VIS-01",
+    "PH-VIS-02",
+    "PH-VIS-03",
+    "PH-VIS-04"
+  ],
+  "allTasks": [
+    "PH-VIS-01",
+    "PH-VIS-02",
+    "PH-VIS-03",
+    "PH-VIS-04",
+    "PH-VIS-05",
+    "PH-VIS-06",
+    "PH-VIS-07",
+    "PH-VIS-08",
+    "PH-VIS-09",
+    "PH-VIS-10",
+    "PH-VIS-11",
+    "PH-VIS-12"
+  ],
+  "completedTasks": [],
+  "deferredTasks": []
+}

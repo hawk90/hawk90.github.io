@@ -1,0 +1,421 @@
+{
+  "algorithm": "Exact SHA-256 of role + NUL + original Markdown",
+  "originalBlocks": 125,
+  "retainedBlocks": 79,
+  "duplicates": [
+    {
+      "removedOriginalIndex": 17,
+      "removedId": "388cd0fc-950d-4312-89c9-4f0ff5077bee",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 20,
+      "removedId": "552b67cb-754a-4831-aad6-9a48f0686fc0",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 23,
+      "removedId": "d560cd28-3239-4a00-895a-d24598ca827e",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 26,
+      "removedId": "597575f0-07ce-4aaa-97a7-d0a1b7f13d8f",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 29,
+      "removedId": "b24de5f5-3002-4d17-9ea8-ce7f1e535b81",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 31,
+      "removedId": "87749f97-7c60-4515-8be6-07318de66f85",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 33,
+      "removedId": "70b29bf4-21b6-4322-8ba3-420b9352ecce",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 35,
+      "removedId": "0c183840-5bbb-464b-ba09-d0b2b7439b37",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 37,
+      "removedId": "70cd0352-e356-47ac-a6b2-2c200766ce83",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 39,
+      "removedId": "66cf5302-4821-408d-bc1a-64d2f3331ad9",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 42,
+      "removedId": "2fd2ce14-3426-4cc5-8043-843ad88edc20",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 44,
+      "removedId": "a58828ff-9ff8-4eb4-9edc-74a5ca13f6a5",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 46,
+      "removedId": "d4919447-a561-4004-8a4d-645c2b27b60a",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 49,
+      "removedId": "a401836c-a8f1-49c0-8492-a64fbcc2eba8",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 51,
+      "removedId": "ae2a3663-f33b-4928-9db2-b653439c991a",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 53,
+      "removedId": "725a01dc-e56f-44c1-874f-9c4f77dd050e",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 55,
+      "removedId": "b8626d61-93c6-4192-b866-7f7ec2fca2b8",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 57,
+      "removedId": "e8860986-840f-4152-a7e5-cdc34d05a7de",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 59,
+      "removedId": "7f3f4be7-55ef-437e-9630-10fa60563033",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 61,
+      "removedId": "2f0b9d3b-9b22-4327-aa00-103bf1ac20b0",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 63,
+      "removedId": "af5075a0-9fd8-4085-bb62-a567de032dc6",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 65,
+      "removedId": "7a8632d7-d858-470f-b275-2c6b6b94bb97",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 67,
+      "removedId": "2638c7b3-7845-4e4a-91f6-b27380e30dc2",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 69,
+      "removedId": "7f4089ea-204b-41d8-bfc4-2f06a3831eb6",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 71,
+      "removedId": "4d5024f5-77d5-419e-97c0-f08b109a9c57",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 73,
+      "removedId": "8dac8f1f-3b02-4c9c-ae3b-8bbecba14110",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 76,
+      "removedId": "57f4842e-e8dd-4179-a6cb-7901c023ba80",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 78,
+      "removedId": "d90efcea-a0f9-4b40-8718-90be4763c43f",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 80,
+      "removedId": "f27468e9-507f-4cea-b0f1-d5210c52c2d7",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 82,
+      "removedId": "cb23b9ac-a7ff-4c15-a6ab-141340a8f0f8",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 84,
+      "removedId": "b9bfe8ef-2853-426a-8e7c-4f4d26a473f9",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 86,
+      "removedId": "eb10f168-dad0-426a-bc8c-2863f496b02f",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 89,
+      "removedId": "1a991387-6883-49e9-9b9f-26d2928b84f5",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 91,
+      "removedId": "a475569a-2466-4530-9138-8dcd877406f6",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 95,
+      "removedId": "f7f5ee17-cdea-47ab-a1d8-5d854261c917",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 97,
+      "removedId": "21d8ff43-a182-46f6-bde6-e36676841a4a",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 99,
+      "removedId": "c52c7907-9f0c-4132-884d-f5430e3c6f1e",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 101,
+      "removedId": "968d43e0-6b83-4221-b539-8588de16a3f2",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 103,
+      "removedId": "c5d8ba0b-ea22-4ec4-9ef8-b43bad7d8bfa",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 105,
+      "removedId": "5f9e6af9-1d5b-4d49-b022-6d029efbc797",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 107,
+      "removedId": "c0a284de-6d01-46ac-8fda-1e9066edbe7c",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 109,
+      "removedId": "5c08bb34-efdf-49af-808b-fafcafe8016a",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 113,
+      "removedId": "e2db3503-b86b-43a3-8e49-4828d295c99b",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 115,
+      "removedId": "ab83166b-a6b6-46bc-8707-6378eb8b10b8",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 117,
+      "removedId": "c78e7ed9-47ff-4f57-b1c0-26aa70f98358",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    },
+    {
+      "removedOriginalIndex": 119,
+      "removedId": "13ce2657-4648-4e90-966d-acb41802c11f",
+      "keptOriginalIndex": 15,
+      "keptId": "e3d6b68e-46d8-4f60-bebc-80a81d65b5ac",
+      "role": "user",
+      "sha256": "ecdff11ea25e840ba9ae6053ff334c9c80421d2dd79922ec323d6f1aa05d9364",
+      "keptDeduplicatedIndex": 15
+    }
+  ]
+}

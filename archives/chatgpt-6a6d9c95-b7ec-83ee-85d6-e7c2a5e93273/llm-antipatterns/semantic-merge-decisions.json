@@ -1,0 +1,42 @@
+{
+  "reviewedAt": "2026-08-01T00:00:00.000Z",
+  "policy": "Merge only when problem, scope, and remedy are materially identical. Keep related but distinct failure modes as separate atomic items.",
+  "decisions": [
+    {
+      "left": "AP-O-96",
+      "right": "AP-O-97",
+      "decision": "related",
+      "reason": "They are opposite decision failures: over-reliance on metrics versus ignoring metrics."
+    },
+    {
+      "left": "AP-L-07",
+      "right": "AP-L-08",
+      "decision": "related",
+      "reason": "They are opposite localization failures with different remediation rules."
+    },
+    {
+      "left": "AP-O-92",
+      "right": "AP-O-93",
+      "decision": "related",
+      "reason": "Both concern SPA pageview instrumentation, but one overcounts and the other undercounts."
+    },
+    {
+      "left": "AP-K-17",
+      "right": "AP-K-18",
+      "decision": "related",
+      "reason": "Both infer semantic relations from weak proxies, but folder structure and title text are separate signals."
+    },
+    {
+      "left": "AP-T-14",
+      "right": "AP-T-15",
+      "decision": "related",
+      "reason": "Both are nondeterministic test inputs, but locale and clock require distinct controls."
+    },
+    {
+      "left": "AP-L-07",
+      "right": "AP-L-28",
+      "decision": "related",
+      "reason": "Both affect translated content quality, but terminology choice and translation freshness are different problems."
+    }
+  ]
+}

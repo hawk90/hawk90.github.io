@@ -1,0 +1,290 @@
+---
+title: "Search and SEO (15 anti-patterns)"
+category: search_seo
+item_count: 15
+---
+# Search and SEO
+> LLM instructions: Treat each `AP-*` block as an atomic claim. Use `Original IDs` and `Related IDs` for traceability; do not infer that nearby blocks are duplicates.
+## AP-S-61 — Ads on Non-Content Pages
+- Category: Search and SEO
+- Original IDs: S-61
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 콘텐츠가 없는 화면에도 광고
+
+예:
+
+- 404
+- 검색 결과 없음
+- 관리자 화면
+- 로그인 화면
+- 빈 태그 페이지
+- 로딩 화면
+
+AdSense 정책은 게시자 콘텐츠가 없거나 가치가 낮은 화면, 탐색·알림 목적 화면 등에 광고를 게재하지 못하도록 한다. citeturn453314search20
+
+### 개선
+
+페이지 유형별 광고 활성화 정책을 둔다.
+
+---
+## AP-S-62 — Ads Before Primary Content
+- Category: Search and SEO
+- Original IDs: S-62
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 본문보다 광고가 먼저 보임
+
+### 문제
+
+사용자가 원하는 정보를 찾기 어렵다.
+
+Google의 광고 배치 모범 사례는 광고를 사용자가 관심 있어 하는 콘텐츠 근처에 두되, 사용자가 찾는 콘텐츠를 쉽게 발견할 수 있게 하라고 권장한다. citeturn453314search45
+
+### 개선
+
+첫 화면에서 문서 제목·목적·핵심 내용이 광고보다 우선하게 한다.
+
+---
+## AP-S-63 — Ads Between Explanation and Evidence
+- Category: Search and SEO
+- Original IDs: S-63
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 설명과 코드·표 사이에 광고
+
+```text
+이 결과가 발생한 이유는
+[광고]
+다음 로그에서 볼 수 있다.
+```
+
+### 문제
+
+기술 문서의 논리적 흐름이 끊긴다.
+
+### 개선
+
+광고는 다음처럼 내용 경계가 명확한 위치에 둔다.
+
+- 주요 장이 끝난 뒤
+- 본문 종료 후
+- 관련 글 이전
+- 큰 섹션 사이
+
+---
+## AP-S-64 — Ads Inside Code Walkthrough
+- Category: Search and SEO
+- Original IDs: S-64
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 코드 설명 중간에 광고 삽입
+
+### 문제
+
+코드와 설명의 대응 관계가 깨진다.
+
+### 개선
+
+코드 블록, 캡션, 설명을 하나의 보호된 콘텐츠 단위로 취급한다.
+
+---
+## AP-S-65 — Ads Inside Step-by-Step Procedure
+- Category: Search and SEO
+- Original IDs: S-65
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 단계 중간에 광고
+
+```text
+1단계
+2단계
+광고
+3단계
+```
+
+### 문제
+
+작업 순서를 놓치기 쉽다.
+
+### 개선
+
+전체 절차가 끝난 뒤 배치한다.
+
+---
+## AP-S-66 — Auto Ads Without Exclusion Zones
+- Category: Search and SEO
+- Original IDs: S-66
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 자동 광고가 모든 본문 위치에 삽입될 수 있음
+
+Auto Ads는 사이트를 분석해 광고 위치를 자동 선택하며, 광고 형식과 개수 등을 설정에서 조정할 수 있다. citeturn453314search24turn453314search30
+
+### 개선
+
+기술 글에서는 다음 영역을 광고 제외 대상으로 고려한다.
+
+- 코드와 해설
+- 표와 해석
+- 다이어그램과 캡션
+- 단계별 튜토리얼
+- 경고·안전 안내
+- 결론 직전
+
+---
+## AP-S-67 — Maximum Ad Density
+- Category: Search and SEO
+- Original IDs: S-67
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 가능한 모든 위치에 광고
+
+### 문제
+
+수익 최적화가 콘텐츠 소비를 방해한다.
+
+### 개선
+
+페이지 길이만으로 광고 수를 결정하지 말고 문서 구조와 실제 읽기 경험을 기준으로 한다.
+
+---
+## AP-S-68 — Ad-Shaped Navigation
+- Category: Search and SEO
+- Original IDs: S-68
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 메뉴·다운로드 버튼과 광고가 비슷함
+
+### 문제
+
+사용자가 광고를 콘텐츠 탐색 요소로 오인할 수 있다.
+
+### 개선
+
+광고와 사이트 UI의 시각적 역할을 명확히 구분한다.
+
+---
+## AP-S-69 — Accidental Click Layout
+- Category: Search and SEO
+- Original IDs: S-69
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 광고가 버튼·코드 복사·페이지 이동 요소에 붙어 있음
+
+### 문제
+
+의도하지 않은 클릭을 유도할 수 있다.
+
+Google 광고 배치 정책은 광고의 부정확한 클릭 유도나 사용자 행동을 방해하는 배치를 제한한다. citeturn453314search5
+
+### 개선
+
+광고 주변에 충분한 공간을 두고 상호작용 요소와 분리한다.
+
+---
+## AP-S-70 — Ad-Induced CLS
+- Category: Search and SEO
+- Original IDs: S-70
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 광고가 늦게 삽입되며 본문을 밀어냄
+
+### 개선
+
+- 광고 슬롯 크기 예약
+- layout shift 측정
+- 모바일별 크기 검증
+- 코드·표 위치 변화 방지
+
+---
+## AP-S-71 — Sticky Ad Competition
+- Category: Search and SEO
+- Original IDs: S-71
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 헤더·TOC·광고가 모두 고정
+
+### 문제
+
+본문 화면이 좁아지고 특히 모바일에서 읽기가 어렵다.
+
+### 개선
+
+고정 요소의 총 화면 점유율을 제한한다.
+
+---
+## AP-S-72 — Auto-Refreshing Ads
+- Category: Search and SEO
+- Original IDs: S-72
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 사용자 요청 없이 광고를 주기적으로 새로고침
+
+AdSense 광고 배치 정책은 사용자가 요청하지 않은 자동 새로고침이나 자동 이동 방식의 광고 게재를 허용하지 않는다. citeturn453314search5
+
+---
+## AP-S-73 — Ads on Draft or Preview
+- Category: Search and SEO
+- Original IDs: S-73
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 개발·미리보기 페이지에 실제 광고 코드
+
+### 개선
+
+Production canonical 페이지에만 광고가 활성화되도록 환경을 분리한다.
+
+---
+## AP-S-74 — Ads on Superseded Content
+- Category: Search and SEO
+- Original IDs: S-74
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 폐기된 문서에도 같은 광고 밀도
+
+### 문제
+
+사용자가 잘못된 정보를 읽는 동안 광고만 노출될 수 있다.
+
+### 개선
+
+대체 문서로 강하게 안내하고, 내용 가치가 거의 없다면 광고를 비활성화한다.
+
+---
+## AP-S-75 — Monetization Before Page Quality
+- Category: Search and SEO
+- Original IDs: S-75
+- Source messages: f5f2581f-3744-41b0-a106-96d642f2a0c9
+- Merge status: canonical source
+### Source material
+### 승인과 광고 삽입을 먼저 처리
+
+### 개선 순서
+
+```text
+콘텐츠 구조
+신뢰 페이지
+색인 정리
+모바일 경험
+내부 링크
+성능
+광고 신청
+광고 배치
+```
+
+---

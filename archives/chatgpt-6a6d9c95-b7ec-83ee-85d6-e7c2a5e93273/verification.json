@@ -1,0 +1,26 @@
+{
+  "extraction": {
+    "source": "ChatGPT React Router stream",
+    "totalBlocks": 125,
+    "uniqueMessageIds": 125,
+    "emptyMarkdownBlocks": 0,
+    "roles": {
+      "user": 58,
+      "assistant": 67
+    }
+  },
+  "deduplication": {
+    "retainedBlocks": 79,
+    "removedExactDuplicates": 46,
+    "fingerprint": "SHA-256(role + NUL + original Markdown)"
+  },
+  "topicSplit": {
+    "topLevelTopics": 1845,
+    "missingSourceMessages": 0
+  },
+  "classification": {
+    "antiPatterns": 1372,
+    "phases": 254,
+    "unclassifiedNumberedHeadings": 0
+  }
+}

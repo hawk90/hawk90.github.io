@@ -1,0 +1,6 @@
+{
+  "status": "pending phase-guardian review",
+  "candidateIds": ["SUP-SEC-001", "SUP-SEC-002", "SUP-SEC-003", "SUP-SEC-004", "SUP-T-001", "SUP-SEC-005", "SUP-T-002"],
+  "reviewOutcomes": ["promote", "merge", "reject"],
+  "source": "Repository code review after canonical corpus generation"
+}

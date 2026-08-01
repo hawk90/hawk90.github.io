@@ -1,0 +1,232 @@
+{
+  "generatedAt": "2026-08-01T08:25:38.169Z",
+  "scope": [
+    "src/components/admin/AdminGuard.astro",
+    "src/components/blog/AnimatedSvg.astro",
+    "src/components/blog/AuthorBio.astro",
+    "src/components/blog/Backlinks.astro",
+    "src/components/blog/BlogSidebar.astro",
+    "src/components/blog/Callout.astro",
+    "src/components/blog/CategoryTreeNode.astro",
+    "src/components/blog/Comments.astro",
+    "src/components/blog/Compare.astro",
+    "src/components/blog/CompareItem.astro",
+    "src/components/blog/Definition.astro",
+    "src/components/blog/Diagram.astro",
+    "src/components/blog/Disqus.astro",
+    "src/components/blog/Giscus.astro",
+    "src/components/blog/Newsletter.astro",
+    "src/components/blog/Pagination.astro",
+    "src/components/blog/PostCard.astro",
+    "src/components/blog/PostListPanel.astro",
+    "src/components/blog/ReadingProgress.astro",
+    "src/components/blog/RelatedPosts.astro",
+    "src/components/blog/SeriesNav.astro",
+    "src/components/blog/SeriesSidebar.astro",
+    "src/components/blog/ShareButtons.astro",
+    "src/components/blog/StickyTitle.astro",
+    "src/components/blog/Summary.astro",
+    "src/components/blog/TableOfContents.astro",
+    "src/components/blog/TagBadge.astro",
+    "src/components/blog/Utterances.astro",
+    "src/components/common/Breadcrumb.astro",
+    "src/components/common/Footer.astro",
+    "src/components/common/Header.astro",
+    "src/components/common/LanguageSwitcher.astro",
+    "src/components/common/Logo.astro",
+    "src/components/common/SearchModal.astro",
+    "src/components/common/ThemeToggle.astro",
+    "src/components/settings/CodePreview.astro",
+    "src/components/settings/ThemeCustomizer.astro",
+    "src/components/settings/ThemeSelector.astro",
+    "src/components/ui/BackToTop.astro",
+    "src/components/ui/ScrollProgress.astro",
+    "src/consts/about.ts",
+    "src/consts/authors.ts",
+    "src/consts/categories.ts",
+    "src/consts/config.ts",
+    "src/consts/learning-paths.ts",
+    "src/consts/now.ts",
+    "src/consts/resume.ts",
+    "src/consts/series.ts",
+    "src/consts/ui-strings.ts",
+    "src/consts/uses.ts",
+    "src/content.config.ts",
+    "src/i18n/define.ts",
+    "src/i18n/index.ts",
+    "src/i18n/locales/en.ts",
+    "src/i18n/locales/ja.ts",
+    "src/i18n/locales/ko.ts",
+    "src/i18n/locales/zh.ts",
+    "src/layouts/BaseLayout.astro",
+    "src/lib/admin/auth.ts",
+    "src/lib/admin/github-api.ts",
+    "src/lib/admin/notifications.ts",
+    "src/lib/admin/post-document.ts",
+    "src/lib/define.ts",
+    "src/lib/keyboard.ts",
+    "src/lib/lifecycle.ts",
+    "src/lib/og-themes.data.mjs",
+    "src/lib/og-themes.ts",
+    "src/lib/posts.ts",
+    "src/lib/rehype-image-lazy.mjs",
+    "src/lib/remark-callouts.mjs",
+    "src/lib/search.ts",
+    "src/lib/theme.ts",
+    "src/lib/utils.ts",
+    "src/pages/404.astro",
+    "src/pages/about.astro",
+    "src/pages/admin/edit.astro",
+    "src/pages/admin/index.astro",
+    "src/pages/admin/login.astro",
+    "src/pages/admin/new.astro",
+    "src/pages/admin/settings.astro",
+    "src/pages/api/auth/callback.ts",
+    "src/pages/api/auth/github.ts",
+    "src/pages/archive.astro",
+    "src/pages/authors/[author]/[...page].astro",
+    "src/pages/blog/[...category]/index.astro",
+    "src/pages/blog/[...page].astro",
+    "src/pages/blog/[...slug].astro",
+    "src/pages/components.astro",
+    "src/pages/contact.astro",
+    "src/pages/index.astro",
+    "src/pages/now.astro",
+    "src/pages/paths/[path].astro",
+    "src/pages/paths/index.astro",
+    "src/pages/privacy.astro",
+    "src/pages/random.astro",
+    "src/pages/recently-updated.astro",
+    "src/pages/resume.astro",
+    "src/pages/rss.xml.ts",
+    "src/pages/search.json.ts",
+    "src/pages/series/[series].astro",
+    "src/pages/settings.astro",
+    "src/pages/stats.astro",
+    "src/pages/tags/[tag]/[...page].astro",
+    "src/pages/uses.astro",
+    ".github/workflows/deploy.yml"
+  ],
+  "findings": [
+    {
+      "id": "AP-SEC-52",
+      "phase": "PHASE-04",
+      "priority": "P0",
+      "summary": "PAT stored in browser localStorage",
+      "evidence": [
+        {
+          "file": "src/lib/admin/auth.ts",
+          "line": 164,
+          "excerpt": "localStorage.setItem(STORAGE_KEYS.accessToken, accessToken"
+        }
+      ],
+      "status": "open"
+    },
+    {
+      "id": "AP-SEC-51",
+      "phase": "PHASE-04",
+      "priority": "P0",
+      "summary": "OAuth secret/server route boundary requires deployment review",
+      "evidence": [
+        {
+          "file": "src/pages/api/auth/callback.ts",
+          "line": 40,
+          "excerpt": "import.meta.env.GITHUB_CLIENT_SECRET"
+        }
+      ],
+      "status": "open"
+    },
+    {
+      "id": "AP-SEC-29",
+      "phase": "PHASE-04",
+      "priority": "P0",
+      "summary": "Raw HTML insertion requires sanitizer review",
+      "evidence": [
+        {
+          "file": "src/components/blog/Disqus.astro",
+          "line": 61,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/components/blog/Utterances.astro",
+          "line": 32,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/components/blog/Utterances.astro",
+          "line": 61,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/components/common/SearchModal.astro",
+          "line": 262,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/components/common/SearchModal.astro",
+          "line": 268,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/components/common/SearchModal.astro",
+          "line": 281,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/components/common/SearchModal.astro",
+          "line": 328,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/components/common/SearchModal.astro",
+          "line": 333,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/components/common/SearchModal.astro",
+          "line": 344,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/lib/admin/post-document.ts",
+          "line": 65,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/pages/admin/edit.astro",
+          "line": 533,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/pages/admin/edit.astro",
+          "line": 543,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/pages/admin/index.astro",
+          "line": 179,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/pages/admin/new.astro",
+          "line": 445,
+          "excerpt": ".innerHTML ="
+        },
+        {
+          "file": "src/pages/admin/new.astro",
+          "line": 455,
+          "excerpt": ".innerHTML ="
+        }
+      ],
+      "status": "open"
+    },
+    {
+      "id": "AP-T-98",
+      "phase": "PHASE-04",
+      "priority": "P1",
+      "summary": "Admin artifact exclusion needs an explicit build assertion",
+      "evidence": [],
+      "status": "manual-review"
+    }
+  ]
+}

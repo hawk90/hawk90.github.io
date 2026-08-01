@@ -1,0 +1,36 @@
+{
+  "phase": 3,
+  "status": "queued",
+  "activeTasks": [
+    "PH-EWF-01",
+    "PH-EWF-02",
+    "PH-EWF-03",
+    "PH-EWF-04"
+  ],
+  "allTasks": [
+    "PH-EWF-01",
+    "PH-EWF-02",
+    "PH-EWF-03",
+    "PH-EWF-04",
+    "PH-EWF-05",
+    "PH-EWF-06",
+    "PH-EWF-07",
+    "PH-EWF-08",
+    "PH-EWF-09",
+    "PH-EWF-10",
+    "PH-MIG-01",
+    "PH-MIG-02",
+    "PH-MIG-03",
+    "PH-MIG-04",
+    "PH-MIG-05",
+    "PH-MIG-06",
+    "PH-MIG-07",
+    "PH-MIG-08",
+    "PH-MIG-09",
+    "PH-MIG-10",
+    "PH-MIG-11",
+    "PH-MIG-12"
+  ],
+  "completedTasks": [],
+  "deferredTasks": []
+}

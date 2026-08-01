@@ -72,3 +72,9 @@
 ### Upstream tracking 등록
 
 외부 repo·spec을 인용하는 시리즈는 `data/upstream-tracking.yaml`에 등록해야 ③⑥ 자동화가 적용됩니다. 스키마·baseline 갱신 규칙은 그 파일 주석 참조. 인용 심볼 중 upstream에 *의도적으로 없는 것*(버전 네임스페이스 등)은 `cited_symbol_whitelist`로 예외 처리.
+
+---
+
+## 15. Claude Code 실행 패킷
+
+코드 리팩터링 작업은 [claude/WORKFLOW.md](claude/WORKFLOW.md)를 따릅니다. 현재 활성 패킷은 [claude/phase-01/TASK.md](claude/phase-01/TASK.md)입니다.

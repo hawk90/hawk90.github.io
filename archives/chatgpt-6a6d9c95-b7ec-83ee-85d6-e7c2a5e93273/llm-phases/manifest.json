@@ -1,0 +1,1783 @@
+{
+  "generatedAt": "2026-08-01T07:58:27.064Z",
+  "phases": [
+    {
+      "id": "PH-ARC-01",
+      "title": "ARC-01. Domain 기본 모델 생성",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-01",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-02",
+      "title": "ARC-02. Astro Entry Normalizer 생성",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-02",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-03",
+      "title": "ARC-03. Content Manifest 생성",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-03",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-04",
+      "title": "ARC-04. Publication Policy 중앙화",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-04",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-05",
+      "title": "ARC-05. Topic Registry 이동",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-05",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-06",
+      "title": "ARC-06. Home Featured Curation 이동",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-06",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-07",
+      "title": "ARC-07. Topic Hub Query 작성",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-07",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-08",
+      "title": "ARC-08. Search Generator를 Manifest 기반으로 변경",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-08",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-09",
+      "title": "ARC-09. Sitemap과 RSS를 Publication Policy에 연결",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-09",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-ARC-10",
+      "title": "ARC-10. 기존 중복 loader 삭제",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-arc-10",
+      "sourceMessageId": "07c1744e-8164-4d0d-b280-38b916880df0"
+    },
+    {
+      "id": "PH-B-01",
+      "title": "B-01. Topic Hub의 역할 정의",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-01",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-02",
+      "title": "B-02. 공통 Hub 페이지 구조",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-02",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-03",
+      "title": "B-03. `PCIe & CXL` Hub 생성",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-03",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-04",
+      "title": "B-04. `PCIe & CXL` 하위 구조",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-04",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-05",
+      "title": "B-05. `PCIe & CXL` Start Here",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-05",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-06",
+      "title": "B-06. `PCIe & CXL` 대표 글 선정 기준",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-06",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-07",
+      "title": "B-07. `PCIe & CXL` 문서 역할 분류",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-07",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-08",
+      "title": "B-08. `PCIe & CXL` 기존 글 배치 작업",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-08",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-09",
+      "title": "B-09. `PCIe & CXL` 중복 후보 분석",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-09",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-10",
+      "title": "B-10. `PCIe & CXL` Hub 완료 조건",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-10",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-11",
+      "title": "B-11. `Firmware & Bootloader` Hub 생성",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-11",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-12",
+      "title": "B-12. `Firmware & Bootloader` 하위 구조",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-12",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-13",
+      "title": "B-13. `Firmware & Bootloader` Start Here",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-13",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-14",
+      "title": "B-14. `Firmware & Bootloader` Featured 역할",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-14",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-15",
+      "title": "B-15. Firmware와 PCIe Hub의 경계",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-15",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-16",
+      "title": "B-16. Topic registry 생성",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-16",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-17",
+      "title": "B-17. Hub 큐레이션과 자동 목록 분리",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-17",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-18",
+      "title": "B-18. Hub용 데이터 모델",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-18",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-19",
+      "title": "B-19. 대표 문서 20개 선정",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-19",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-20",
+      "title": "B-20. 대표 문서 보완 우선순위",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-20",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-21",
+      "title": "B-21. 대표 문서 최소 metadata",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-21",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-22",
+      "title": "B-22. 대표 문서 상단 UI",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-22",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-23",
+      "title": "B-23. 대표 문서 하단 UI",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-23",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-24",
+      "title": "B-24. Hub와 태그 페이지 관계",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-24",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-25",
+      "title": "B-25. Hub 페이지 컴포넌트 구조",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-25",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-26",
+      "title": "B-26. Hub의 접근성과 모바일",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-26",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-27",
+      "title": "B-27. Hub 성능 기준",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-27",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-B-28",
+      "title": "B-28. Epic B 완료 기준",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-b-28",
+      "sourceMessageId": "e5772c7f-1398-4495-b5fa-a8ef0b26706d"
+    },
+    {
+      "id": "PH-CPM-01",
+      "title": "CPM-01. Content Domain 타입",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-cpm-01",
+      "sourceMessageId": "e720b385-bb03-4aeb-a750-4ebcfb296b96"
+    },
+    {
+      "id": "PH-CPM-02",
+      "title": "CPM-02. Raw Entry Normalizer",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-cpm-02",
+      "sourceMessageId": "e720b385-bb03-4aeb-a750-4ebcfb296b96"
+    },
+    {
+      "id": "PH-CPM-03",
+      "title": "CPM-03. Content Manifest",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-cpm-03",
+      "sourceMessageId": "e720b385-bb03-4aeb-a750-4ebcfb296b96"
+    },
+    {
+      "id": "PH-CPM-04",
+      "title": "CPM-04. 필수 Validation",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-cpm-04",
+      "sourceMessageId": "e720b385-bb03-4aeb-a750-4ebcfb296b96"
+    },
+    {
+      "id": "PH-CPM-05",
+      "title": "CPM-05. Publication Policy",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-cpm-05",
+      "sourceMessageId": "e720b385-bb03-4aeb-a750-4ebcfb296b96"
+    },
+    {
+      "id": "PH-CPM-06",
+      "title": "CPM-06. Featured Validation",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-cpm-06",
+      "sourceMessageId": "e720b385-bb03-4aeb-a750-4ebcfb296b96"
+    },
+    {
+      "id": "PH-CPM-07",
+      "title": "CPM-07. Search·Sitemap Adapter",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-cpm-07",
+      "sourceMessageId": "e720b385-bb03-4aeb-a750-4ebcfb296b96"
+    },
+    {
+      "id": "PH-CPM-08",
+      "title": "CPM-08. 테스트",
+      "phase": "Phase 1 — Domain and information foundation",
+      "file": "foundation.md#ph-cpm-08",
+      "sourceMessageId": "e720b385-bb03-4aeb-a750-4ebcfb296b96"
+    },
+    {
+      "id": "PH-ART-01",
+      "title": "ART-01. Article Page View Model",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-01",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-02",
+      "title": "ART-02. Article Header 개편",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-02",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-03",
+      "title": "ART-03. Status Notice",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-03",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-04",
+      "title": "ART-04. TL;DR 지원",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-04",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-05",
+      "title": "ART-05. Prerequisite Notice",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-05",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-06",
+      "title": "ART-06. TOC 정리",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-06",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-07",
+      "title": "ART-07. Code Block Role",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-07",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-08",
+      "title": "ART-08. Scope·Environment·Evidence",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-08",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-09",
+      "title": "ART-09. Article Relations",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-09",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-10",
+      "title": "ART-10. Error Report·Edit Link",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-10",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-11",
+      "title": "ART-11. Mobile Article Audit",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-11",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-ART-12",
+      "title": "ART-12. Type별 Quality Warning",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-art-12",
+      "sourceMessageId": "a435c87a-4731-4428-a437-4c9e900f09fb"
+    },
+    {
+      "id": "PH-REL-01",
+      "title": "REL-01. 관계 Domain 모델",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-01",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-02",
+      "title": "REL-02. 관계 정규화",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-02",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-03",
+      "title": "REL-03. Relation Validation",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-03",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-04",
+      "title": "REL-04. 역방향 Graph 생성",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-04",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-05",
+      "title": "REL-05. Article Relation View Model",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-05",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-06",
+      "title": "REL-06. ArticleRelations UI",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-06",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-07",
+      "title": "REL-07. 대표 문서 20개 매핑",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-07",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-08",
+      "title": "REL-08. 고아 문서 리포트",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-08",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-09",
+      "title": "REL-09. 태그 기반 추천을 fallback으로 이동",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-09",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-REL-10",
+      "title": "REL-10. 내부 Redirect Link 감사",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-rel-10",
+      "sourceMessageId": "75819060-514f-47f1-babb-81b119578a21"
+    },
+    {
+      "id": "PH-SEA-01",
+      "title": "SEA-01. SearchDocument 모델 생성",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-01",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-02",
+      "title": "SEA-02. Manifest 기반 검색 문서 생성",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-02",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-03",
+      "title": "SEA-03. Terminology Alias Registry 생성",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-03",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-04",
+      "title": "SEA-04. Query 정규화 구현",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-04",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-05",
+      "title": "SEA-05. 검색 Adapter 구현",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-05",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-06",
+      "title": "SEA-06. Golden Query 테스트",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-06",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-07",
+      "title": "SEA-07. Search Dialog 지연 로딩",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-07",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-08",
+      "title": "SEA-08. 검색 결과 View Model",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-08",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-09",
+      "title": "SEA-09. 안전한 Highlight",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-09",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-SEA-10",
+      "title": "SEA-10. 결과 없음·오류 Fallback",
+      "phase": "Phase 2 — Content, relationship, and search discovery",
+      "file": "discovery.md#ph-sea-10",
+      "sourceMessageId": "5a03db38-f758-4eb8-aaeb-f3577bfcf335"
+    },
+    {
+      "id": "PH-EWF-01",
+      "title": "EWF-01. Content Generator",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-01",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-02",
+      "title": "EWF-02. 신규 문서 Strict Validation",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-02",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-03",
+      "title": "EWF-03. Representative Validation",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-03",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-04",
+      "title": "EWF-04. Content Review CLI",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-04",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-05",
+      "title": "EWF-05. Changed Document Review",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-05",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-06",
+      "title": "EWF-06. Publish Dry Run",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-06",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-07",
+      "title": "EWF-07. Freshness Policy",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-07",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-08",
+      "title": "EWF-08. Review Queue Report",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-08",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-09",
+      "title": "EWF-09. Redaction Scan",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-09",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-EWF-10",
+      "title": "EWF-10. Pull Request Checklist",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-ewf-10",
+      "sourceMessageId": "ae943574-4153-46d9-b51a-a46fcb5d7349"
+    },
+    {
+      "id": "PH-MIG-01",
+      "title": "MIG-01. 전체 Content Inventory",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-01",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-02",
+      "title": "MIG-02. Migration Tier와 Action 모델",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-02",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-03",
+      "title": "MIG-03. Topic·Type 제안 리포트",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-03",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-04",
+      "title": "MIG-04. 대표 문서 20개 수동 분류",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-04",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-05",
+      "title": "MIG-05. Batch Manifest 형식",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-05",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-06",
+      "title": "MIG-06. Dry-run Migration Script",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-06",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-07",
+      "title": "MIG-07. Metadata-only Migration",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-07",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-08",
+      "title": "MIG-08. Historical·Superseded 처리",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-08",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-09",
+      "title": "MIG-09. 중복 콘텐츠 후보 리포트",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-09",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-10",
+      "title": "MIG-10. Internal Link·Redirect 정리",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-10",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-11",
+      "title": "MIG-11. Legacy Adapter",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-11",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-MIG-12",
+      "title": "MIG-12. Migration Progress Report",
+      "phase": "Phase 3 — Content workflow and migration",
+      "file": "content.md#ph-mig-12",
+      "sourceMessageId": "5ccc3b41-b74e-470d-99cb-3ea9379878eb"
+    },
+    {
+      "id": "PH-E-01",
+      "title": "E-01. 빌드 단계별 기준선 측정",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-01",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-02",
+      "title": "E-02. 빌드 명령 역할 분리",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-02",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-03",
+      "title": "E-03. 공통 Content Manifest 생성",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-03",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-04",
+      "title": "E-04. Publication Policy 중앙화",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-04",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-05",
+      "title": "E-05. Markdown 다중 파싱 제거",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-05",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-06",
+      "title": "E-06. AST 생명주기 제한",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-06",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-07",
+      "title": "E-07. Shiki 처리량 측정",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-07",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-08",
+      "title": "E-08. 코드 블록 역할 분리",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-08",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-09",
+      "title": "E-09. Shiki 언어 Allowlist",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-09",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-10",
+      "title": "E-10. 코드 하이라이팅 캐시",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-10",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-11",
+      "title": "E-11. 대형 코드 블록 감사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-11",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-12",
+      "title": "E-12. 변경 파일 인식",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-12",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-13",
+      "title": "E-13. 문서별 파생 레코드 생성",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-13",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-14",
+      "title": "E-14. OG 이미지 증분 생성",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-14",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-15",
+      "title": "E-15. 다이어그램 파이프라인 격리",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-15",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-16",
+      "title": "E-16. 이미지 처리 정책",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-16",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-17",
+      "title": "E-17. CI Job 분리",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-17",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-18",
+      "title": "E-18. Dependency 설치 캐시",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-18",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-19",
+      "title": "E-19. 동일 작업의 Job 간 중복 제거",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-19",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-20",
+      "title": "E-20. 메모리 증설을 완료 조건으로 삼지 않기",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-20",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-21",
+      "title": "E-21. 빌드 예산 설정",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-21",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-22",
+      "title": "E-22. 빌드 회귀 리포트",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-22",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-23",
+      "title": "E-23. 대표 복잡도 페이지 Canary 선정",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-23",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-24",
+      "title": "E-24. 배포 결과 Smoke Test",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-24",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-25",
+      "title": "E-25. 실패 등급 분리",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-25",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-26",
+      "title": "E-26. 외부 링크 검사를 정기 작업으로 이동",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-26",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-27",
+      "title": "E-27. 로컬 Fast Path",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-27",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-28",
+      "title": "E-28. 빌드 환경 고정",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-28",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-29",
+      "title": "E-29. 생성물 Source of Truth 명확화",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-29",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-E-30",
+      "title": "E-30. 성능 최적화 종료 조건",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-e-30",
+      "sourceMessageId": "2441cf15-fe36-456b-8e79-1810b160624e"
+    },
+    {
+      "id": "PH-H-01",
+      "title": "H-01. 테스트 계층 확정",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-01",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-02",
+      "title": "H-02. 빠른 Content Validation 명령",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-02",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-03",
+      "title": "H-03. Content Fixture 세트 생성",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-03",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-04",
+      "title": "H-04. Internal Link 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-04",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-05",
+      "title": "H-05. Relation Integrity 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-05",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-06",
+      "title": "H-06. Topic Hub Validation",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-06",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-07",
+      "title": "H-07. Featured Content Validation",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-07",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-08",
+      "title": "H-08. Publication Set 일치 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-08",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-09",
+      "title": "H-09. Production Build 통합 테스트",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-09",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-10",
+      "title": "H-10. 최종 `dist` 구조 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-10",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-11",
+      "title": "H-11. Dist HTTP Smoke Test",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-11",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-12",
+      "title": "H-12. SEO Metadata 회귀 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-12",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-13",
+      "title": "H-13. 구조화 데이터 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-13",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-14",
+      "title": "H-14. 검색 Golden Query 테스트",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-14",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-15",
+      "title": "H-15. 검색 UI 브라우저 테스트",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-15",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-16",
+      "title": "H-16. 접근성 자동 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-16",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-17",
+      "title": "H-17. 수동 키보드 Smoke Checklist",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-17",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-18",
+      "title": "H-18. 모바일 Viewport Smoke Test",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-18",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-19",
+      "title": "H-19. Visual Canary 세트",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-19",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-20",
+      "title": "H-20. 코드 블록 회귀 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-20",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-21",
+      "title": "H-21. 표와 다이어그램 회귀 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-21",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-22",
+      "title": "H-22. 보안 회귀 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-22",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-23",
+      "title": "H-23. GitHub Actions Lint",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-23",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-24",
+      "title": "H-24. 성능 회귀 기준",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-24",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-25",
+      "title": "H-25. 외부 Integration 실패 테스트",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-25",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-26",
+      "title": "H-26. 광고 제외 페이지 회귀 검사",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-26",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-27",
+      "title": "H-27. 출시 전 수동 대표 문서 리뷰",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-27",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-28",
+      "title": "H-28. 단계적 출시 전략",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-28",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-29",
+      "title": "H-29. Release Branch와 Commit 경계",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-29",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-30",
+      "title": "H-30. 데이터 Migration Dry Run",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-30",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-31",
+      "title": "H-31. Rollback 계획",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-31",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-32",
+      "title": "H-32. Production Verification",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-32",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-33",
+      "title": "H-33. 출시 후 관찰 기간",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-33",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-34",
+      "title": "H-34. 실패 Severity 정책",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-34",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-35",
+      "title": "H-35. CI 파이프라인 최종안",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-35",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-H-36",
+      "title": "H-36. 테스트 유지비 제한",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-h-36",
+      "sourceMessageId": "e82e1aae-6fa7-4358-8799-41b3f8bc3114"
+    },
+    {
+      "id": "PH-TST-01",
+      "title": "TST-01. 테스트 계층 분리",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-01",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-02",
+      "title": "TST-02. 실제 기술 문자열 Fixture",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-02",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-03",
+      "title": "TST-03. Domain Policy Matrix",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-03",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-04",
+      "title": "TST-04. Invalid Content Fixture",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-04",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-05",
+      "title": "TST-05. Markdown Pipeline Fixture",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-05",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-06",
+      "title": "TST-06. Generated HTML Contract",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-06",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-07",
+      "title": "TST-07. Golden Search Queries",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-07",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-08",
+      "title": "TST-08. Dist Artifact Test",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-08",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-09",
+      "title": "TST-09. Browser Core Flow",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-09",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-10",
+      "title": "TST-10. JavaScript Disabled Smoke",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-10",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-11",
+      "title": "TST-11. Visual Canary 축소",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-11",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-TST-12",
+      "title": "TST-12. Warning Baseline",
+      "phase": "Phase 4 — Performance and quality controls",
+      "file": "quality.md#ph-tst-12",
+      "sourceMessageId": "ca0fc6ce-6a4a-46c1-9628-0a463c0bba09"
+    },
+    {
+      "id": "PH-F-01",
+      "title": "F-01. 현재 공개 URL 유형 전수 조사",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-01",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-02",
+      "title": "F-02. Indexability Matrix 확정",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-02",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-03",
+      "title": "F-03. Sitemap을 공개 가치 목록으로 정리",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-03",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-04",
+      "title": "F-04. Canonical URL 전수 검증",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-04",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-05",
+      "title": "F-05. 얕은 태그 페이지 정리",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-05",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-06",
+      "title": "F-06. 얕은 Series 페이지 강화",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-06",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-07",
+      "title": "F-07. 빈 페이지와 Placeholder 제거",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-07",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-08",
+      "title": "F-08. 콘텐츠 중복·Cannibalization 1차 정리",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-08",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-09",
+      "title": "F-09. 대표 문서 10개 완성",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-09",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-10",
+      "title": "F-10. 일반적인 AI 문장 제거",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-10",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-11",
+      "title": "F-11. 홈과 Topic Hub 완성",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-11",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-12",
+      "title": "F-12. About 페이지 개편",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-12",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-13",
+      "title": "F-13. Editorial Policy 페이지 작성",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-13",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-14",
+      "title": "F-14. Contact와 오류 제보 경로 정비",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-14",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-15",
+      "title": "F-15. Privacy Policy 작성·현행화",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-15",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-16",
+      "title": "F-16. Terms·Disclaimer의 과잉 생성 방지",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-16",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-17",
+      "title": "F-17. 구조화 데이터 최소 구현",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-17",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-18",
+      "title": "F-18. 제목과 Description 감사",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-18",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-19",
+      "title": "F-19. 검색 색인 품질 검사",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-19",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-20",
+      "title": "F-20. 404와 삭제 URL 정비",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-20",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-21",
+      "title": "F-21. 모바일 콘텐츠 경험 감사",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-21",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-22",
+      "title": "F-22. 광고 없는 상태에서 사이트 감사",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-22",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-23",
+      "title": "F-23. 광고 가능 페이지 정책 작성",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-23",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-24",
+      "title": "F-24. 광고 제외 영역 설계",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-24",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-25",
+      "title": "F-25. 광고 슬롯 CLS 방지",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-25",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-26",
+      "title": "F-26. AdSense 재신청 전 최종 체크리스트",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-26",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-27",
+      "title": "F-27. 재신청 판단 기준",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-27",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-28",
+      "title": "F-28. 재신청 후 변경 동결 범위",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-28",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-29",
+      "title": "F-29. Search Console 변경 로그",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-29",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-F-30",
+      "title": "F-30. Epic F 완료 조건",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-f-30",
+      "sourceMessageId": "9c9ac6e5-49da-4ba2-8a90-ceb5f5e65e27"
+    },
+    {
+      "id": "PH-OPS-01",
+      "title": "OPS-01. Build Once, Deploy Same Artifact",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-01",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-02",
+      "title": "OPS-02. Workflow 권한 최소화",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-02",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-03",
+      "title": "OPS-03. Concurrency 적용",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-03",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-04",
+      "title": "OPS-04. Dist Validation",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-04",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-05",
+      "title": "OPS-05. Production Metadata",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-05",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-06",
+      "title": "OPS-06. Base Path·URL 검사",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-06",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-07",
+      "title": "OPS-07. Production Artifact Browser Smoke",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-07",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-08",
+      "title": "OPS-08. Post-deploy Smoke",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-08",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-09",
+      "title": "OPS-09. Hashed Generated Assets",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-09",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-10",
+      "title": "OPS-10. Redirect Validation",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-10",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-11",
+      "title": "OPS-11. External Integration 격리",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-11",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-OPS-12",
+      "title": "OPS-12. Rollback Runbook",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-ops-12",
+      "sourceMessageId": "5fc6d1c4-d9c0-463f-b440-991a1a4e7ac2"
+    },
+    {
+      "id": "PH-PRN-01",
+      "title": "PRN-01. 기능 Inventory",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-01",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-02",
+      "title": "PRN-02. Dependency Inventory",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-02",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-03",
+      "title": "PRN-03. Admin Surface 제거 또는 격리",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-03",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-04",
+      "title": "PRN-04. Client Island Audit",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-04",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-05",
+      "title": "PRN-05. External Script Lazy Loading",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-05",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-06",
+      "title": "PRN-06. Markdown Pipeline Audit",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-06",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-07",
+      "title": "PRN-07. Feature Flag Cleanup",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-07",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-08",
+      "title": "PRN-08. Build Command 통합",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-08",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-09",
+      "title": "PRN-09. Dead Code·CSS 후보 Report",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-09",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-PRN-10",
+      "title": "PRN-10. 전후 Metrics 비교",
+      "phase": "Phase 5 — URL migration and operations",
+      "file": "delivery.md#ph-prn-10",
+      "sourceMessageId": "98e290f4-ee57-4ace-aade-592c15bb7457"
+    },
+    {
+      "id": "PH-VIS-01",
+      "title": "VIS-01. CSS Responsibility Audit",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-01",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-02",
+      "title": "VIS-02. Core Design Tokens 정리",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-02",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-03",
+      "title": "VIS-03. Container System",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-03",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-04",
+      "title": "VIS-04. Prose Vertical Rhythm",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-04",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-05",
+      "title": "VIS-05. Technical Overflow Audit",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-05",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-06",
+      "title": "VIS-06. Heading·Anchor Offset",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-06",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-07",
+      "title": "VIS-07. Card Role 분리",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-07",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-08",
+      "title": "VIS-08. Badge·Status Density 감소",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-08",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-09",
+      "title": "VIS-09. Dark Mode Surface Audit",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-09",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-10",
+      "title": "VIS-10. Responsive Navigation Audit",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-10",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-11",
+      "title": "VIS-11. Accessibility Interaction Audit",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-11",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-VIS-12",
+      "title": "VIS-12. Visual Canary 구성",
+      "phase": "Phase 6 — Visual system",
+      "file": "experience.md#ph-vis-12",
+      "sourceMessageId": "fb52b7f1-b7e3-4f75-a9a7-e93f44dde0b8"
+    },
+    {
+      "id": "PH-ADS-01",
+      "title": "ADS-01. Indexable URL Inventory",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-01",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-02",
+      "title": "ADS-02. Thin Surface Audit",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-02",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-03",
+      "title": "ADS-03. Non-content Page Policy",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-03",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-04",
+      "title": "ADS-04. Representative Content Set",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-04",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-05",
+      "title": "ADS-05. Home Content Rebalance",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-05",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-06",
+      "title": "ADS-06. Core Topic Hub 3~5개",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-06",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-07",
+      "title": "ADS-07. Short-note Consolidation",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-07",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-08",
+      "title": "ADS-08. Historical·Superseded Cleanup",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-08",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-09",
+      "title": "ADS-09. About·Privacy 정비",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-09",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-10",
+      "title": "ADS-10. Sitemap·Canonical Audit",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-10",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-11",
+      "title": "ADS-11. Ad Eligibility Map",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-11",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    },
+    {
+      "id": "PH-ADS-12",
+      "title": "ADS-12. Manual Review Checklist",
+      "phase": "Phase 7 — Indexability and ads review",
+      "file": "monetization.md#ph-ads-12",
+      "sourceMessageId": "6a73f755-d3be-4d04-93b2-8dd0f87b5f2b"
+    }
+  ]
+}
