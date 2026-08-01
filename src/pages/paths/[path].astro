@@ -1,22 +1,22 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/common/Breadcrumb.astro';
 import { toSlug } from '../../lib/utils';
 import { getSeriesMetadata } from '../../consts/series';
 import { LEARNING_PATHS, type LearningPath, type PathNode } from '../../consts/learning-paths';
+import { getBlogContentManifest, getPublicationDecision } from '../../lib/content';
 
 export async function getStaticPaths() {
-  const allPosts = await getCollection('blog');
+  const manifest = await getBlogContentManifest();
 
   // series id → { total, published } 카운트
   const counts = new Map<string, { total: number; pub: number }>();
-  for (const p of allPosts) {
-    const s = p.data.series;
+  for (const document of manifest.documents) {
+    const s = document.series;
     if (!s) continue;
     const c = counts.get(s) ?? { total: 0, pub: 0 };
     c.total += 1;
-    if (!p.data.draft) c.pub += 1;
+    if (getPublicationDecision(document).render) c.pub += 1;
     counts.set(s, c);
   }
 

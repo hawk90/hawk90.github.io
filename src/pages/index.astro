@@ -3,10 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/blog/PostCard.astro';
 import { BRAND_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
-import { getHomepageLatestWriting, getPublishedPosts } from '../lib/posts';
+import { getBlogContentManifest, getHomepageCuration } from '../lib/content';
 
-const allPosts = await getPublishedPosts();
-const { featuredLatestPosts } = getHomepageLatestWriting(allPosts);
+const manifest = await getBlogContentManifest();
+const { latest } = getHomepageCuration(manifest);
+const featuredLatestPosts = latest.map((document) => document.source);
 ---
 
 <BaseLayout title={`${BRAND_CONFIG.heroTitle} - ${BRAND_CONFIG.tagline}`}>

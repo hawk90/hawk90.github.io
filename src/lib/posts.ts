@@ -1,5 +1,6 @@
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { type CollectionEntry } from 'astro:content';
 import { SITE_CONFIG } from '../consts/config';
+import { getBlogContentManifest, getPublicationDecision } from './content';
 import { formatDate } from './utils';
 
 export type BlogPost = CollectionEntry<'blog'>;
@@ -14,18 +15,18 @@ export interface PostMeta {
   thumbnail: string;
 }
 
-export interface HomepageLatestWriting {
-  featuredLatestPosts: BlogPost[];
-  heroPost: BlogPost | undefined;
-  secondaryLatestPosts: BlogPost[];
-}
-
 /**
  * 발행된 포스트를 날짜 내림차순으로 가져오기
  */
 export async function getPublishedPosts(): Promise<BlogPost[]> {
   if (!publishedPostsPromise) {
-    publishedPostsPromise = getCollection('blog', ({ data }) => !data.draft).then(sortByDate);
+    publishedPostsPromise = getBlogContentManifest().then((manifest) =>
+      sortByDate(
+        manifest.documents
+          .filter((document) => getPublicationDecision(document).render)
+          .map((document) => document.source),
+      ),
+    );
   }
   return publishedPostsPromise;
 }
@@ -45,19 +46,6 @@ export function getRecentlyUpdatedPosts(posts: BlogPost[], limit: number): BlogP
     .filter(isUpdatedPost)
     .sort((a, b) => (b.data.updated?.valueOf() || 0) - (a.data.updated?.valueOf() || 0))
     .slice(0, limit);
-}
-
-/**
- * 홈 최신 글 섹션용 데이터
- */
-export function getHomepageLatestWriting(posts: BlogPost[]): HomepageLatestWriting {
-  const featuredLatestPosts = getLatestPosts(posts, 6);
-  const heroPost = featuredLatestPosts[0];
-  return {
-    featuredLatestPosts,
-    heroPost,
-    secondaryLatestPosts: featuredLatestPosts.slice(heroPost ? 1 : 0, 5),
-  };
 }
 
 /**

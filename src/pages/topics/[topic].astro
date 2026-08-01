@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TopicHub from '../../components/topics/TopicHub.astro';
+import {
+  getBlogContentManifest,
+  getTopicHubQuery,
+  getTopicHubDefinition,
+  TOPIC_HUBS,
+} from '../../lib/content';
+
+export async function getStaticPaths() {
+  return TOPIC_HUBS.filter((hub) => hub.isPublished).map((hub) => ({
+    params: { topic: hub.id },
+    props: { hubId: hub.id },
+  }));
+}
+
+interface Props {
+  hubId: string;
+}
+
+const { hubId } = Astro.props;
+const hub = getTopicHubDefinition(hubId);
+if (!hub) throw new Error(`Unknown Topic Hub: ${hubId}`);
+
+const manifest = await getBlogContentManifest();
+const query = getTopicHubQuery(manifest, hub.id, hub.categoryIds, hub.startHereIds);
+const relatedHubs = hub.relatedTopicIds
+  .map((id) => getTopicHubDefinition(id))
+  .filter((related): related is NonNullable<typeof related> => Boolean(related));
+---
+
+<BaseLayout title={hub.label} description={hub.summary}>
+  <TopicHub hub={hub} query={query} relatedHubs={relatedHubs} />
+</BaseLayout>

@@ -10,6 +10,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeImageLazy from './src/lib/rehype-image-lazy.mjs';
+import { serializeSitemapItem } from './src/lib/content/sitemap.ts';
 
 // ─── OAuth Support (Optional) ───────────────────────────────
 // To enable GitHub OAuth login (instead of PAT only):
@@ -35,12 +36,12 @@ export default defineConfig({
     // loads ~200 langs which pushes heap. Only load what's actually used.
     expressiveCode({
       shiki: {
-        langs: [
+        langs: /** @type {any} */ ([
           'cpp', 'c', 'text', 'bash', 'python', 'javascript', 'typescript',
           'java', 'eiffel', 'cmake', 'makefile', 'asm', 'csharp', 'vim',
           'yaml', 'json', 'rust', 'go', 'sql', 'html', 'css', 'verilog',
           'dts', 'tcl', 'cuda', 'glsl',
-        ],
+        ]),
       },
       themes: ['github-dark', 'github-light'],
     }),
@@ -49,6 +50,7 @@ export default defineConfig({
     sitemap({
       // Exclude admin pages from sitemap (they're not public).
       filter: (page) => !page.includes('/admin'),
+      serialize: serializeSitemapItem,
     }),
   ],
 

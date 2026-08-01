@@ -1,5 +1,5 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagBadge from '../../components/blog/TagBadge.astro';
 import TableOfContents from '../../components/blog/TableOfContents.astro';
@@ -19,7 +19,7 @@ import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/co
 import { t } from '../../consts/ui-strings';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getPublishedPosts();
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },

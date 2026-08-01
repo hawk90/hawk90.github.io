@@ -1,12 +1,16 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/common/Breadcrumb.astro';
 import { LEARNING_PATHS } from '../../consts/learning-paths';
+import { getBlogContentManifest, getPublicationDecision } from '../../lib/content';
 
-const allPosts = await getCollection('blog');
-const pubSeries = new Set(allPosts.filter((p) => !p.data.draft && p.data.series).map((p) => p.data.series));
-const allSeries = new Set(allPosts.filter((p) => p.data.series).map((p) => p.data.series));
+const manifest = await getBlogContentManifest();
+const pubSeries = new Set(
+  manifest.documents
+    .filter((document) => getPublicationDecision(document).render && document.series)
+    .map((document) => document.series),
+);
+const allSeries = new Set(manifest.documents.filter((document) => document.series).map((document) => document.series));
 
 // 경로별 커버리지: 발행 / 준비 중 / 예정 노드 수
 const paths = LEARNING_PATHS.map((path) => {
