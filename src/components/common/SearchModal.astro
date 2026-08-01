@@ -163,7 +163,7 @@ const filterSeriesLabel = t('search_filter_series');
 </style>
 
 <script>
-  import { searchPosts, highlightMatch, type SearchItem } from '../../lib/search';
+  import { searchPosts, type SearchItem } from '../../lib/search';
   import { isInputElement } from '../../lib/keyboard';
   import { onPageLoad } from '../../lib/lifecycle';
 
@@ -180,10 +180,10 @@ const filterSeriesLabel = t('search_filter_series');
     const modal = document.getElementById('search-modal');
     const d = modal?.dataset || {};
     return {
-      EMPTY_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${d.i18nEmpty || 'Type to search'}</div>`,
-      NO_RESULTS_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${d.i18nNoResults || 'No results'}</div>`,
-      LOADING_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]"><svg class="animate-spin inline-block w-5 h-5 mr-2 align-middle" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>${d.i18nLoading || 'Loading...'}</div>`,
-      ERROR_MESSAGE: `<div class="p-8 text-center text-[var(--color-text-muted)]">${d.i18nError || 'Error loading search'}</div>`,
+      emptyMessage: d.i18nEmpty || 'Type to search',
+      noResultsMessage: d.i18nNoResults || 'No results',
+      loadingMessage: d.i18nLoading || 'Loading...',
+      errorMessage: d.i18nError || 'Error loading search',
       resultsCount: d.i18nResultsCount || ' results',
       filterTag: d.i18nFilterTag || 'Tag:',
       filterSeries: d.i18nFilterSeries || 'Series:',
@@ -240,6 +240,19 @@ const filterSeriesLabel = t('search_filter_series');
 
     let openerElement: HTMLElement | null = null;
 
+    function showMessage(message: string, loading = false) {
+      const messageEl = document.createElement('div');
+      messageEl.className = 'p-8 text-center text-[var(--color-text-muted)]';
+      if (loading) {
+        const spinner = document.createElement('span');
+        spinner.className = 'animate-spin inline-block w-5 h-5 mr-2 align-middle rounded-full border-2 border-current border-r-transparent';
+        spinner.setAttribute('aria-hidden', 'true');
+        messageEl.append(spinner);
+      }
+      messageEl.append(message);
+      results.replaceChildren(messageEl);
+    }
+
     function setFilter(filter: { type: 'tag' | 'series'; value: string } | null) {
       currentFilter = filter;
       if (filter && filterContainer && filterLabel && filterName) {
@@ -259,13 +272,13 @@ const filterSeriesLabel = t('search_filter_series');
       input.focus();
       input.setAttribute('aria-expanded', 'true');
       selectedIndex = -1;
-      results.innerHTML = i18n.LOADING_MESSAGE;
+      showMessage(i18n.loadingMessage, true);
 
       loadSearchIndex().then((success) => {
         if (success) {
           renderResults(input.value || '');
         } else {
-          results.innerHTML = i18n.ERROR_MESSAGE;
+          showMessage(i18n.errorMessage);
         }
       });
     }
@@ -278,7 +291,7 @@ const filterSeriesLabel = t('search_filter_series');
       input.removeAttribute('aria-activedescendant');
       setFilter(null);
       selectedIndex = -1;
-      results.innerHTML = i18n.EMPTY_MESSAGE;
+      showMessage(i18n.emptyMessage);
 
       if (openerElement) {
         openerElement.focus();
@@ -325,12 +338,13 @@ const filterSeriesLabel = t('search_filter_series');
           ? { filterTag: currentFilter.value }
           : { filterSeries: currentFilter.value };
         const matches = searchPosts(searchIndex, options);
-        results.innerHTML = matches.length === 0 ? i18n.NO_RESULTS_MESSAGE : renderMatchList(matches, '');
+        if (matches.length === 0) showMessage(i18n.noResultsMessage);
+        else renderMatchList(matches, '');
         return;
       }
 
       if (!q) {
-        results.innerHTML = i18n.EMPTY_MESSAGE;
+        showMessage(i18n.emptyMessage);
         return;
       }
 
@@ -341,42 +355,75 @@ const filterSeriesLabel = t('search_filter_series');
       }
 
       const matches = searchPosts(searchIndex, options);
-      results.innerHTML = matches.length === 0 ? i18n.NO_RESULTS_MESSAGE : renderMatchList(matches, q);
+      if (matches.length === 0) showMessage(i18n.noResultsMessage);
+      else renderMatchList(matches, q);
     }
 
-    function renderMatchList(matches: SearchItem[], query: string): string {
-      const countHtml = `<div class="px-4 py-2 text-[11px] text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]/40">${matches.length}${i18n.resultsCount}</div>`;
+    function renderMatchList(matches: SearchItem[], query: string) {
+      const count = document.createElement('div');
+      count.className = 'px-4 py-2 text-[11px] text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]/40';
+      count.textContent = `${matches.length}${i18n.resultsCount}`;
       // When already filtering by series, the series context on each row is redundant.
       const showContext = currentFilter?.type !== 'series';
-      const itemsHtml = matches
-        .map((item, index) => {
-          const ctx = showContext && item.series
-            ? `<div class="search-context">${escapeAttr(item.series)}</div>`
-            : '';
-          const desc = item.description
-            ? `<div class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mt-0.5">${highlightMatch(item.description, query)}</div>`
-            : '';
-          const tags = item.tags.slice(0, 3).map((tag) =>
-            `<span class="text-[11px] px-2 py-0.5 bg-[var(--color-accent-muted)] text-[var(--color-accent)] rounded-full">${highlightMatch(tag, '')}</span>`,
-          ).join('');
-          return `
-          <a href="/blog/${encodeURI(item.slug)}" id="search-opt-${index}" role="option" aria-selected="false" class="block px-4 py-3 border-b border-[var(--color-border)] last:border-0 outline-none">
-            ${ctx}
-            <div class="font-medium">${highlightMatch(item.title, query)}</div>
-            ${desc}
-            ${tags ? `<div class="flex gap-1.5 mt-2 flex-wrap">${tags}</div>` : ''}
-          </a>`;
-        })
-        .join('');
-      return countHtml + itemsHtml;
+      const items = matches.map((item, index) => createResultItem(item, index, query, showContext));
+      results.replaceChildren(count, ...items);
     }
 
-    function escapeAttr(s: string): string {
-      return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+    function createResultItem(item: SearchItem, index: number, query: string, showContext: boolean): HTMLAnchorElement {
+      const link = document.createElement('a');
+      link.href = `/blog/${encodeURI(item.slug)}`;
+      link.id = `search-opt-${index}`;
+      link.setAttribute('role', 'option');
+      link.setAttribute('aria-selected', 'false');
+      link.className = 'block px-4 py-3 border-b border-[var(--color-border)] last:border-0 outline-none';
+      if (showContext && item.series) {
+        const context = document.createElement('div');
+        context.className = 'search-context';
+        context.textContent = item.series;
+        link.append(context);
+      }
+      const title = document.createElement('div');
+      title.className = 'font-medium';
+      appendHighlightedText(title, item.title, query);
+      link.append(title);
+      if (item.description) {
+        const description = document.createElement('div');
+        description.className = 'text-sm text-[var(--color-text-secondary)] line-clamp-2 mt-0.5';
+        appendHighlightedText(description, item.description, query);
+        link.append(description);
+      }
+      if (item.tags.length > 0) {
+        const tags = document.createElement('div');
+        tags.className = 'flex gap-1.5 mt-2 flex-wrap';
+        for (const tag of item.tags.slice(0, 3)) {
+          const tagEl = document.createElement('span');
+          tagEl.className = 'text-[11px] px-2 py-0.5 bg-[var(--color-accent-muted)] text-[var(--color-accent)] rounded-full';
+          tagEl.textContent = tag;
+          tags.append(tagEl);
+        }
+        link.append(tags);
+      }
+      return link;
+    }
+
+    function appendHighlightedText(container: HTMLElement, text: string, query: string) {
+      const normalizedQuery = query.trim();
+      if (!normalizedQuery) {
+        container.textContent = text;
+        return;
+      }
+      const matcher = new RegExp(`(${normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      const lowerQuery = normalizedQuery.toLowerCase();
+      for (const part of text.split(matcher)) {
+        if (part.toLowerCase() === lowerQuery) {
+          const mark = document.createElement('mark');
+          mark.className = 'bg-[var(--color-accent-muted)] text-[var(--color-accent)] px-0.5 rounded';
+          mark.textContent = part;
+          container.append(mark);
+        } else {
+          container.append(part);
+        }
+      }
     }
 
     // Event handlers

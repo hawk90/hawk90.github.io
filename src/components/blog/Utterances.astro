@@ -29,7 +29,7 @@ const theme = cfg.theme ?? 'preferred-color-scheme';
     if (!mount) return;
 
     // Wipe any previous embed (after page swap)
-    mount.innerHTML = '';
+    mount.replaceChildren();
     let io: IntersectionObserver | null = null;
 
     const load = () => {
@@ -58,7 +58,7 @@ const theme = cfg.theme ?? 'preferred-color-scheme';
 
     return () => {
       io?.disconnect();
-      mount.innerHTML = '';
+      mount.replaceChildren();
     };
   });
 </script>

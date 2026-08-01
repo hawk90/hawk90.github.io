@@ -56,15 +56,18 @@ export function isAllowedContentFilePath(path: string, contentRoot: string): boo
   return isValidContentPathSegment(relativePath);
 }
 
-export function sanitizePreviewHtml(html: string): string {
+export function sanitizePreviewFragment(html: string): DocumentFragment {
   if (typeof document === 'undefined') {
-    return html;
+    throw new Error('Markdown previews can only be rendered in a browser.');
   }
 
-  const template = document.createElement('template');
-  template.innerHTML = html;
+  const parsed = new DOMParser().parseFromString(html, 'text/html');
 
-  const blockedTags = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK', 'META']);
+  const blockedTags = new Set([
+    'SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK', 'META',
+    'FORM', 'INPUT', 'BUTTON', 'TEXTAREA', 'SELECT', 'OPTION', 'SVG', 'MATH',
+  ]);
+  const urlAttributes = new Set(['href', 'src', 'xlink:href', 'action', 'formaction', 'poster']);
 
   const sanitizeNode = (node: Element) => {
     if (blockedTags.has(node.tagName)) {
@@ -81,7 +84,12 @@ export function sanitizePreviewHtml(html: string): string {
         continue;
       }
 
-      if ((name === 'href' || name === 'src' || name === 'xlink:href') && value.startsWith('javascript:')) {
+      if (name === 'style' || name === 'srcdoc' || name === 'srcset') {
+        node.removeAttribute(attr.name);
+        continue;
+      }
+
+      if (urlAttributes.has(name) && !isSafePreviewUrl(value)) {
         node.removeAttribute(attr.name);
       }
     }
@@ -91,9 +99,24 @@ export function sanitizePreviewHtml(html: string): string {
     }
   };
 
-  for (const child of Array.from(template.content.children)) {
+  for (const child of Array.from(parsed.body.children)) {
     sanitizeNode(child);
   }
 
-  return template.innerHTML;
+  const fragment = document.createDocumentFragment();
+  fragment.append(...Array.from(parsed.body.childNodes));
+  return fragment;
+}
+
+function isSafePreviewUrl(value: string): boolean {
+  if (value.startsWith('#') || value.startsWith('/') || value.startsWith('./') || value.startsWith('../')) {
+    return true;
+  }
+
+  try {
+    const protocol = new URL(value, document.baseURI).protocol;
+    return protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:';
+  } catch {
+    return false;
+  }
 }

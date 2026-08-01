@@ -151,8 +151,9 @@ export const ADMIN_CONFIG = defineAdmin({
   // Authentication mode:
   // - 'pat': Personal Access Token only (works everywhere)
   // - 'oauth': GitHub OAuth only (requires Vercel/Netlify)
-  // - 'both': Show both options (default)
-  authMode: 'both',
+  // OAuth needs a server adapter and an explicit deployment review.
+  // GitHub Pages remains PAT-only.
+  authMode: 'pat',
   clientId: 'Ov23lim7LA7j5Np59mgw',
   allowedUsers: ['hawk90'],
   contentRepo: 'hawk90/hawk90.github.io',

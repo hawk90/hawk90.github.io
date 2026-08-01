@@ -58,7 +58,7 @@ const cfg = COMMENTS_CONFIG;
 
     return () => {
       io?.disconnect();
-      mount.innerHTML = '';
+      mount.replaceChildren();
     };
   });
 </script>

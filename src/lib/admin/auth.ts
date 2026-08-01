@@ -5,12 +5,12 @@
  *
  * 1. PAT (Personal Access Token) - Works on all deployments including GitHub Pages
  *    - User generates token at github.com/settings/tokens
- *    - Token is stored in localStorage
+ *    - Token is kept in memory for the current tab only
  *
  * 2. OAuth - Requires server-side routes (Vercel/Netlify with hybrid mode)
  *    - User clicks "Login with GitHub"
  *    - Server exchanges code for token
- *    - Token is passed via URL hash and stored in localStorage
+ *    - Token is passed via URL hash and kept in memory for the current tab only
  */
 
 // ─── Types ──────────────────────────────────────────────────
@@ -53,13 +53,10 @@ export interface AuthState {
   user: GitHubUser | null;
 }
 
-// ─── Storage Keys ───────────────────────────────────────────
-
-const STORAGE_KEYS = {
-  accessToken: 'admin_access_token',
-  user: 'admin_user',
-  lastCommentCheck: 'admin_last_comment_check',
-} as const;
+// Static hosting cannot issue an HttpOnly session cookie. Do not persist a
+// repository credential in browser storage; a refresh intentionally requires
+// a new login.
+let currentAuth: AuthState = { isAuthenticated: false, accessToken: null, user: null };
 
 // ─── Device Flow ────────────────────────────────────────────
 
@@ -157,46 +154,24 @@ export async function fetchUser(accessToken: string): Promise<GitHubUser> {
 // ─── Token Management ───────────────────────────────────────
 
 /**
- * Save authentication state to localStorage.
+ * Keep authentication state only for the current browser tab.
  */
 export function saveAuth(accessToken: string, user: GitHubUser): void {
-  try {
-    localStorage.setItem(STORAGE_KEYS.accessToken, accessToken);
-    localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
-  } catch {
-    console.error('Failed to save auth state');
-  }
+  currentAuth = { isAuthenticated: true, accessToken, user };
 }
 
 /**
- * Clear authentication state from localStorage.
+ * Clear the in-memory authentication state.
  */
 export function clearAuth(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEYS.accessToken);
-    localStorage.removeItem(STORAGE_KEYS.user);
-  } catch {
-    console.error('Failed to clear auth state');
-  }
+  currentAuth = { isAuthenticated: false, accessToken: null, user: null };
 }
 
 /**
  * Get current authentication state.
  */
 export function getAuthState(): AuthState {
-  try {
-    const accessToken = localStorage.getItem(STORAGE_KEYS.accessToken);
-    const userJson = localStorage.getItem(STORAGE_KEYS.user);
-
-    if (!accessToken || !userJson) {
-      return { isAuthenticated: false, accessToken: null, user: null };
-    }
-
-    const user = JSON.parse(userJson) as GitHubUser;
-    return { isAuthenticated: true, accessToken, user };
-  } catch {
-    return { isAuthenticated: false, accessToken: null, user: null };
-  }
+  return currentAuth;
 }
 
 /**

@@ -2,7 +2,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
 
-const authMode = ADMIN_CONFIG.enabled ? (ADMIN_CONFIG.authMode ?? 'both') : 'both';
+type AuthMode = 'pat' | 'oauth' | 'both';
+function resolveAuthMode(): AuthMode {
+  return ADMIN_CONFIG.enabled ? (ADMIN_CONFIG.authMode ?? 'both') : 'both';
+}
+const authMode = resolveAuthMode();
 const showPat = authMode === 'pat' || authMode === 'both';
 const showOAuth = authMode === 'oauth' || authMode === 'both';
 ---
