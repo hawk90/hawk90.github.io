@@ -1553,13 +1553,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-52. Dynamic Content in Screenshot”?",
-      "scope": null,
+      "reviewQuestion": "Reassess dynamic surfaces with seeded data or explicit clock/network controls before browser snapshot coverage.",
+      "scope": "Repository dynamic-content visual-test policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "src/pages/random.astro",
+            "src/lib/admin/notifications.ts"
+          ],
+          "verification": "npm run verify:search && npm run verify:release",
+          "result": "Static publishing and search checks use deterministic source data; runtime random, time, and notification surfaces are not treated as unseeded screenshot baselines."
+        }
+      ],
+      "residualRisk": "Unseeded dynamic behavior can still produce flaky manual captures; introduce deterministic fixtures, clocks, and network stubs before automating those flows."
     },
     {
       "id": "AP-T-53",

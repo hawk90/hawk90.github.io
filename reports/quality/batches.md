@@ -2,13 +2,12 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 31
+- Unassessed items: 30
 - Maximum batch size: 15
 - Batches: 3
 
 ## quality-01 — quality-01.md
 
-- AP-T-52 (P1, M) — T-52. Dynamic Content in Screenshot
 - AP-T-53 (P1, M) — T-53. Font Not Pinned
 - AP-T-54 (P1, M) — T-54. Dark Mode Untested
 - AP-T-55 (P1, M) — T-55. Generated Diagram Untested
