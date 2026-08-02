@@ -31,7 +31,7 @@ export default defineConfig({
       shiki: {
         langs: /** @type {any} */ ([
           'cpp', 'c', 'text', 'bash', 'python', 'javascript', 'typescript',
-          'java', 'eiffel', 'cmake', 'makefile', 'asm', 'csharp', 'vim',
+          'java', 'cmake', 'makefile', 'asm', 'csharp', 'vim',
           'yaml', 'json', 'rust', 'go', 'sql', 'html', 'css', 'verilog',
           'tcl', 'glsl',
         ]),
@@ -42,6 +42,23 @@ export default defineConfig({
           bitbake: 'makefile',
           cuda: 'cpp',
           ld: 'text',
+          // Shiki does not ship grammars for these legacy/domain-specific
+          // fence labels; preserve their source while making the text
+          // fallback explicit and warning-free.
+          eiffel: 'text',
+          fortran: 'text',
+          gdb: 'text',
+          systemverilog: 'text',
+          promela: 'text',
+          thrift: 'text',
+          nasm: 'text',
+          scl: 'text',
+          tla: 'text',
+          kconfig: 'text',
+          conf: 'text',
+          cocci: 'text',
+          meson: 'text',
+          simula: 'text',
         },
       },
       themes: ['github-dark', 'github-light'],
