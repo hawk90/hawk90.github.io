@@ -9,25 +9,6 @@
       "source": "quality-01.md",
       "items": [
         {
-          "id": "AP-T-49",
-          "title": "T-49. Visual Test on One Browser",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "quality-01.md#ap-t-49",
-            "messageIds": [
-              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-49. Visual Test on One Browser”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
           "id": "AP-T-50",
           "title": "T-50. Desktop-Only Screenshot",
           "priority": "P1",
