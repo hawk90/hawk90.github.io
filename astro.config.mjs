@@ -81,7 +81,11 @@ export default defineConfig({
           properties: { class: 'heading-anchor', ariaLabel: 'Link to section', tabIndex: -1 },
           content: { type: 'text', value: '#' },
         }],
-        rehypeKatex,
+        // Technical notes intentionally use Korean labels and arrows inside
+        // `\\text{}`. Keep rendering strict enough for parse errors while
+        // suppressing KaTeX's noisy Unicode strict-mode warnings; the
+        // `audit:math-unicode` report remains the review surface.
+        [rehypeKatex, { strict: false }],
         rehypeImageLazy,
       ],
     }),
