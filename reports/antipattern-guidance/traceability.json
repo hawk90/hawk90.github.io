@@ -1,0 +1,51 @@
+{
+  "source": "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/original-guidance.md",
+  "policy": "Traceability is additive; canonical anti-pattern bodies and source content are not rewritten.",
+  "links": [
+    {
+      "canonicalId": "AP-P-02",
+      "originalGuidanceSection": 144,
+      "sourceLine": 6550,
+      "sourcePath": "conversation.full.md:6550",
+      "disposition": "linked-candidate",
+      "confidence": "high",
+      "note": "Heap Expansion as Optimization matches Build Stability by Increasing Heap."
+    },
+    {
+      "canonicalId": "AP-D-10-2",
+      "originalGuidanceSection": 187,
+      "sourceLine": 57049,
+      "sourcePath": "conversation.full.md:57049",
+      "disposition": "linked-candidate",
+      "confidence": "high",
+      "note": "검색 실패 Fallback matches the existing methodology item."
+    },
+    {
+      "canonicalId": "AP-P-04",
+      "originalGuidanceSection": 211,
+      "sourceLine": 6975,
+      "sourcePath": "conversation.full.md:6975",
+      "disposition": "related-only",
+      "confidence": "medium",
+      "note": "Related release-blocker policy, but not equivalent to missing remediation workflow."
+    },
+    {
+      "canonicalId": "AP-D-63",
+      "originalGuidanceSection": 211,
+      "sourceLine": 6975,
+      "sourcePath": "conversation.full.md:6975",
+      "disposition": "related-only",
+      "confidence": "medium",
+      "note": "Related automatic-fix policy, but not equivalent to missing remediation workflow."
+    },
+    {
+      "canonicalId": "AP-D-85",
+      "originalGuidanceSection": 211,
+      "sourceLine": 6975,
+      "sourcePath": "conversation.full.md:6975",
+      "disposition": "related-only",
+      "confidence": "medium",
+      "note": "Owner is one required remediation field, not the whole anti-pattern."
+    }
+  ]
+}

@@ -55,6 +55,7 @@ const lines = [
   '- P1 review decisions: [p1-review.md](p1-review.md)',
   '- P2 review decisions: [p2-review.md](p2-review.md)',
   '- Consolidated decisions: [decision-index.md](decision-index.md)',
+  '- Canonical traceability: [traceability.json](traceability.json)',
   '',
   '> This is a routing report, not a semantic equivalence claim. Unlinked guidance must be reviewed before assigning or merging anti-pattern IDs.', '',
   '## Linked guidance', '',

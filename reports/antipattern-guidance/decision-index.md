@@ -17,3 +17,4 @@
 - `guidance-only`: anti-pattern이 아닌 실행·검사·검색 지침이므로 AP 카탈로그에 넣지 않는다.
 
 세부 결정은 [p0-review.md](p0-review.md), [p1-review.md](p1-review.md), [p2-review.md](p2-review.md)에 있다.
+고신뢰·관련 항목의 additive 연결은 [traceability.json](traceability.json)에 있다.
