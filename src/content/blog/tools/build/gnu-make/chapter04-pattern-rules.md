@@ -89,7 +89,7 @@ build/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 ```
 
-`build/main.o`를 만들 차례가 되면 Make는 `src/main.c`를 찾아 컴파일합니다. `$(@D)`는 [Ch 3](/blog/tools/build/gnu-make/chapter03-variables#디렉터리·파일-이름-분리)에서 본 *자동 변수의 디렉터리 부분*입니다.
+`build/main.o`를 만들 차례가 되면 Make는 `src/main.c`를 찾아 컴파일합니다. `$(@D)`는 [Ch 3](/blog/tools/build/gnu-make/chapter03-variables#디렉터리파일-이름-분리--d-f)에서 본 *자동 변수의 디렉터리 부분*입니다.
 
 ### 패턴 안의 `%`는 *하나*만
 
@@ -104,7 +104,7 @@ Make 매뉴얼은 *한 패턴에 `%`는 한 번*이라고 못 박습니다. 두 
 
 ## 자동 변수 — stem(`$*`) 포함
 
-[Ch 3](/blog/tools/build/gnu-make/chapter03-variables#자동-변수-규칙마다-자동으로-채워지는-손잡이)에서 본 자동 변수에 패턴 규칙에서 특히 유용한 한 가지가 더해집니다 — `$*` (stem).
+[Ch 3](/blog/tools/build/gnu-make/chapter03-variables#자동-변수--규칙마다-자동으로-채워지는-손잡이)에서 본 자동 변수에 패턴 규칙에서 특히 유용한 한 가지가 더해집니다 — `$*` (stem).
 
 | 변수 | 의미 | `build/main.o: src/main.c` 예 |
 |------|------|--------------------------------|

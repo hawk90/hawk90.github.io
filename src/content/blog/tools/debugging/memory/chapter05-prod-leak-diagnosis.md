@@ -112,7 +112,7 @@ $ jeprof --text --base=jeprof.12345.0.heap \
 
 ### 옵션 B — eBPF 메모리 추적
 
-[BCC tools](/blog/tools/debugging/kernel/chapter04-ebpf-kernel#bcc-—-python으로-더-복잡한-프로그램)의 `memleak`.
+[BCC tools](/blog/tools/debugging/kernel/chapter04-ebpf-kernel#bcc--python으로-더-복잡한-프로그램)의 `memleak`.
 
 ```bash
 $ sudo /usr/share/bcc/tools/memleak -p $PID --combined-only
