@@ -49,6 +49,7 @@ const lines = [
   `- Anti-pattern candidates requiring manual AP mapping: ${candidates.length}`,
   `- Guidance-only sections (do not force an AP ID): ${guidanceOnly.length}`,
   `- Candidate priority: P0 ${candidates.filter(({ priority }) => priority === 'P0').length}, P1 ${candidates.filter(({ priority }) => priority === 'P1').length}, P2 ${candidates.filter(({ priority }) => priority === 'P2').length}`,
+  '- P0 review decision: [p0-review.md](p0-review.md)',
   '',
   '> This is a routing report, not a semantic equivalence claim. Unlinked guidance must be reviewed before assigning or merging anti-pattern IDs.', '',
   '## Linked guidance', '',

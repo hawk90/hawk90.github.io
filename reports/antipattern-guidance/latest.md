@@ -6,6 +6,7 @@
 - Anti-pattern candidates requiring manual AP mapping: 54
 - Guidance-only sections (do not force an AP ID): 228
 - Candidate priority: P0 1, P1 14, P2 39
+- P0 review decision: [p0-review.md](p0-review.md)
 
 > This is a routing report, not a semantic equivalence claim. Unlinked guidance must be reviewed before assigning or merging anti-pattern IDs.
 
