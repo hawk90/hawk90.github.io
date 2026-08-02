@@ -1,6 +1,6 @@
 # Security & admin remediation gate
 
-Generated deterministically from the current source tree.
+Generated deterministically from the current source tree and `dist`.
 
 > `open` P0 findings fail `npm run gate:security-admin`. `manual-review` requires an explicit deployment/design decision before enabling the affected capability.
 
