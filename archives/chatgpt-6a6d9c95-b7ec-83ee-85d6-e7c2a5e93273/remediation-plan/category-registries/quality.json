@@ -817,13 +817,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-27. Every External Link on Every Commit”?",
-      "scope": null,
+      "reviewQuestion": "Reassess external-link sampling on scheduled runs or before releases when freshness evidence is required.",
+      "scope": "Repository publish-gate network policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/audit-internal-links.py",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-publish-gate.sh"
+          ],
+          "verification": "npm run verify:release && npm run audit:links",
+          "result": "The release gate checks the local internal link graph and build artifact; external freshness is an explicit opt-in audit rather than a network-dependent per-commit blocker."
+        }
+      ],
+      "residualRisk": "External URLs can expire between scheduled audits; run the upstream freshness audit before releases that depend on third-party references."
     },
     {
       "id": "AP-T-28",
