@@ -365,13 +365,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-12. Unit Test Internal Implementation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess if future tests assert private helper names, call order, or implementation-specific DOM structure instead of observable contracts.",
+      "scope": "Repository-wide black-box quality contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-search.mjs",
+            "scripts/verify-content-relations.mjs",
+            "scripts/audit-internal-links.py",
+            "scripts/audit-quality-contracts.mjs"
+          ],
+          "verification": "npm run verify:search && npm run test:relations && npm run audit:links && npm run audit:quality-contracts",
+          "result": "The quality checks assert observable search, relation, link, and contract outcomes; they do not mock or assert private helper call order or internal implementation details."
+        }
+      ],
+      "residualRisk": "Implementation regressions that preserve current outputs may evade black-box checks; add focused contract assertions when a user-visible behavior is introduced."
     },
     {
       "id": "AP-T-13",
