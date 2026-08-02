@@ -21,7 +21,7 @@ for (const item of manifest.canonicalItems) {
 }
 
 const blocks = guidance.split(/(?=^#### \d+\. )/m).filter((block) => /^#### \d+\. /m.test(block));
-const idPattern = /\b(?:AP-)?(?:A|I|P|S|U|M|SEC|O|L|T|R|D|G|K)-\d{1,3}\b/g;
+const idPattern = /\b(?:AP-)?(?:A|C|I|P|S|U|M|SEC|O|L|T|R|D|G|K)-\d{1,3}\b/g;
 const rows = blocks.map((block) => {
   const title = block.match(/^#### \d+\. (.+)$/m)?.[1] || 'untitled';
   const source = block.match(/^<!-- source: (.+?) -->$/m)?.[1] || 'unknown';
