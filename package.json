@@ -36,6 +36,7 @@
     "test:relations": "node scripts/verify-content-relations.mjs",
     "sync:book-notes": "node scripts/sync-book-notes.mjs",
     "archive:chatgpt": "node scripts/archive-chatgpt-share.mjs",
+    "restore:antipattern-guidance": "node scripts/restore-antipattern-guidance.mjs",
     "build:llm-antipatterns": "node scripts/build-llm-antipatterns.mjs",
     "build:llm-phases": "node scripts/build-llm-phases.mjs",
     "scaffold:claude-phases": "node scripts/scaffold-claude-phases.mjs",
