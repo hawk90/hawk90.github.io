@@ -3,9 +3,9 @@
 - Source: [archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/original-guidance.md](archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/original-guidance.md)
 - Guidance sections: 437
 - Sections with canonical AP links: 155
-- Anti-pattern candidates requiring manual AP mapping: 61
-- Guidance-only sections (do not force an AP ID): 221
-- Candidate priority: P0 5, P1 15, P2 41
+- Anti-pattern candidates requiring manual AP mapping: 54
+- Guidance-only sections (do not force an AP ID): 228
+- Candidate priority: P0 1, P1 14, P2 39
 
 > This is a routing report, not a semantic equivalence claim. Unlinked guidance must be reviewed before assigning or merging anti-pattern IDs.
 
@@ -173,11 +173,7 @@
 
 | Priority | Guidance | Source |
 | --- | --- | --- |
-| P0 | 추천 보안 기준선 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:19058; message: 48 (assistant); path: 추천 보안 기준선 |
-| P0 | H-22. 보안 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40865; message: 79 (assistant); path: H-22. 보안 회귀 검사 |
-| P0 | 63. 보안 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:57368; message: 102 (assistant); path: 63. 보안 검사 |
 | P0 | Audit Without Remediation Workflow | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:6975; message: 28 (assistant); path: 14. 열네 번째 핵심 안티패턴 > Audit Without Remediation Workflow |
-| P0 | Production artifact 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40880; message: 79 (assistant); path: H-22. 보안 회귀 검사 > Production artifact 검사 |
 | P1 | 추천 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:6550; message: 28 (assistant); path: 6. 여섯 번째 핵심 안티패턴 > Build Stability by Increasing Heap > 추천 |
 | P1 | Sprint 2 — 2주차: 대표 문서 선정과 검증 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:41995; message: 81 (assistant); path: 2주 계획: 기반과 대표 콘텐츠 > Sprint 2 — 2주차: 대표 문서 선정과 검증 |
 | P1 | 92. Article 품질 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:62113; message: 106 (assistant); path: 92. Article 품질 검사 |
@@ -185,7 +181,6 @@
 | P1 | 권장 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:7101; message: 28 (assistant); path: 16. 열여섯 번째 핵심 안티패턴 > Migration Avoidance > 권장 |
 | P1 | 1. 모든 검증을 E2E 테스트로 해결 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:73944; message: 118 (assistant); path: Task 3-26. 테스트 아키텍처·회귀 방지·품질 게이트 안티패턴 > 1. 모든 검증을 E2E 테스트로 해결 |
 | P1 | 정기 품질 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:4166; message: 22 (assistant); path: 4. 세 번째 핵심 안티패턴 > Build-Time Feature Accumulation > 정기 품질 검사 |
-| P1 | 13.6 품질 감사 자동화 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:4718; message: 22 (assistant); path: 13. 현재 기술 스택에서 잘한 부분 > 13.6 품질 감사 자동화 |
 | P1 | 작성일·수정일·검증일이 혼동됨 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:5677; message: 25 (assistant); path: 14. 열세 번째 핵심 안티패턴 > Date Ambiguity > 작성일·수정일·검증일이 혼동됨 |
 | P1 | F-19. 검색 색인 품질 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:37539; message: 75 (assistant); path: F-19. 검색 색인 품질 검사 |
 | P1 | 48. 검색 실패 Fallback | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:57049; message: 102 (assistant); path: 48. 검색 실패 Fallback |
@@ -203,9 +198,7 @@
 | P2 | 실행 환경 없음 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:9913; message: 34 (assistant); path: Task 2-2. Content Architecture Anti-patterns > C-34. Environment Omission > 실행 환경 없음 |
 | P2 | 권장 구조 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:67391; message: 112 (assistant); path: Task 3-23. 의존성·기능 가지치기와 정적 사이트 복잡도 축소 > 1. 핵심 안티패턴: 정적 블로그를 애플리케이션처럼 운영 > 권장 구조 |
 | P2 | 권장 상태 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:3536; message: 19 (assistant); path: 15. 수정 이력이 콘텐츠에 반영되지 않는 문제 > Timeless Technical Article > 권장 상태 |
-| P2 | H-12. SEO Metadata 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40357; message: 79 (assistant); path: H-12. SEO Metadata 회귀 검사 |
 | P2 | 권장 표 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:43448; message: 83 (assistant); path: Ticket S1-08. 대표 문서 감사표 작성 > 권장 표 |
-| P2 | 41. 검색 결과의 상태 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:56908; message: 102 (assistant); path: 41. 검색 결과의 상태 회귀 검사 |
 | P2 | 권장 분류 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:76398; message: 121 (assistant); path: 3. 모든 과거 메모를 검색 페이지로 유지 > 권장 분류 |
 | P2 | 권장 검색 문서 모델 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:4376; message: 22 (assistant); path: 7. 여섯 번째 핵심 안티패턴 > Client-Side Full-Text Index > 권장 검색 문서 모델 |
 | P2 | 권장 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:4622; message: 22 (assistant); path: 11. 열 번째 핵심 안티패턴 > Configuration Surface Expansion > 권장 |
@@ -305,6 +298,8 @@
 | 권장 순서 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:76746; message: 121 (assistant); path: 11. 홈에서 최근 글만 보여줌 > 권장 순서 |
 | 95. 권장 실행 순서 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:79059; message: 121 (assistant); path: 95. 권장 실행 순서 |
 | 권장 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:4679; message: 22 (assistant); path: 12. 사용하지 않는 의존성 잔존 가능성 > Dependency Archaeology > 권장 |
+| 13.6 품질 감사 자동화 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:4718; message: 22 (assistant); path: 13. 현재 기술 스택에서 잘한 부분 > 13.6 품질 감사 자동화 |
+| 추천 보안 기준선 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:19058; message: 48 (assistant); path: 추천 보안 기준선 |
 | 추천 최소 관측 체계 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:20675; message: 50 (assistant); path: 추천 최소 관측 체계 |
 | 추천 최소 편집 흐름 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:22491; message: 52 (assistant); path: 추천 최소 편집 흐름 |
 | 추천 최소 테스트 피라미드 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:27318; message: 58 (assistant); path: 추천 최소 테스트 피라미드 |
@@ -318,12 +313,14 @@
 | H-04. Internal Link 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:39936; message: 79 (assistant); path: H-04. Internal Link 검사 |
 | Anchor 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:39951; message: 79 (assistant); path: H-04. Internal Link 검사 > Anchor 검사 |
 | H-05. Relation Integrity 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40000; message: 79 (assistant); path: H-05. Relation Integrity 검사 |
+| H-12. SEO Metadata 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40357; message: 79 (assistant); path: H-12. SEO Metadata 회귀 검사 |
 | H-13. 구조화 데이터 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40407; message: 79 (assistant); path: H-13. 구조화 데이터 검사 |
 | H-16. 접근성 자동 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40572; message: 79 (assistant); path: H-16. 접근성 자동 검사 |
 | 자동 검사로 충분하지 않은 항목 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40597; message: 79 (assistant); path: H-16. 접근성 자동 검사 > 자동 검사로 충분하지 않은 항목 |
 | 권장 viewport | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40653; message: 79 (assistant); path: H-18. 모바일 Viewport Smoke Test > 권장 viewport |
 | H-20. 코드 블록 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40763; message: 79 (assistant); path: H-20. 코드 블록 회귀 검사 |
 | H-21. 표와 다이어그램 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40819; message: 79 (assistant); path: H-21. 표와 다이어그램 회귀 검사 |
+| H-22. 보안 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40865; message: 79 (assistant); path: H-22. 보안 회귀 검사 |
 | H-26. 광고 제외 페이지 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:41038; message: 79 (assistant); path: H-26. 광고 제외 페이지 회귀 검사 |
 | 권장 필드 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:43241; message: 83 (assistant); path: Ticket S1-05. 최소 Front Matter Schema 추가 > 권장 필드 |
 | Ticket S1-06. Featured 불변조건 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:43308; message: 83 (assistant); path: Ticket S1-06. Featured 불변조건 검사 |
@@ -336,6 +333,8 @@
 | 30. 자기 참조 검증 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:51478; message: 98 (assistant); path: 30. 자기 참조 검증 |
 | 31. Superseded 상태 검증 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:51515; message: 98 (assistant); path: 31. Superseded 상태 검증 |
 | 40. Top 3 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:56885; message: 102 (assistant); path: 40. Top 3 검사 |
+| 41. 검색 결과의 상태 회귀 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:56908; message: 102 (assistant); path: 41. 검색 결과의 상태 회귀 검사 |
+| 63. 보안 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:57368; message: 102 (assistant); path: 63. 보안 검사 |
 | 36. 상태 기반 추천 필터 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:58718; message: 104 (assistant); path: 36. 상태 기반 추천 필터 |
 | 73. 추천 상태 검증 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:59603; message: 104 (assistant); path: 73. 추천 상태 검증 |
 | 96. 인쇄 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:62209; message: 106 (assistant); path: 96. 인쇄 검사 |
@@ -400,6 +399,7 @@
 | H-08. Publication Set 일치 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40137; message: 79 (assistant); path: H-08. Publication Set 일치 검사 |
 | 파일 크기 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40266; message: 79 (assistant); path: H-10. 최종 `dist` 구조 검사 > 파일 크기 검사 |
 | 검사 항목 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40323; message: 79 (assistant); path: H-11. Dist HTTP Smoke Test > 검사 항목 |
+| Production artifact 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:40880; message: 79 (assistant); path: H-22. 보안 회귀 검사 > Production artifact 검사 |
 | 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:41363; message: 79 (assistant); path: H-32. Production Verification > 검사 |
 | 예시 검사 | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:43325; message: 83 (assistant); path: Ticket S1-06. Featured 불변조건 검사 > 예시 검사 |
 | 권장 Warning | archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md:44673; message: 85 (assistant); path: 14. Hub Validation 규칙 > 권장 Warning |

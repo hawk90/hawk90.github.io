@@ -29,7 +29,8 @@ const rows = blocks.map((block) => {
   // "검증") inherit their anti-pattern identity from an AP-labelled parent.
   const ids = [...new Set(`${title}\n${source}\n${block}`.match(idPattern)?.map((id) => id.replace(/^AP-/, '')) || [])];
   const canonical = [...new Set(ids.flatMap((id) => (byOriginal.get(id) || []).map((item) => item.id)))];
-  const candidate = /anti-pattern|안티패턴|검토|감사|품질|보안|검색|콘텐츠|metadata|migration|CI\/CD/i.test(`${title} ${source}`);
+  const guidanceControl = /보안 기준선|보안 회귀 검사|보안 검사|Production artifact 검사|회귀 검사|품질 감사 자동화/i.test(title);
+  const candidate = !guidanceControl && /anti-pattern|안티패턴|검토|감사|품질|보안|검색|콘텐츠|metadata|migration|CI\/CD/i.test(`${title} ${source}`);
   const text = `${title} ${source}`;
   const priority = /보안|security|CI\/CD|secret|workflow|OAuth/i.test(text) ? 'P0'
     : /품질|테스트|검증|build|migration|fallback|CSS/i.test(text) ? 'P1'
