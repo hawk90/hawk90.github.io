@@ -31,8 +31,8 @@ import { SITE_CONFIG, ADMIN_CONFIG, FOOTER_LINKS, SOCIAL_CONFIG } from '../../co
                 <dd>{String(ADMIN_CONFIG.enabled)}</dd>
               </div>
               <div class="flex justify-between gap-4">
-                <dt class="text-[var(--color-text-muted)]">Client ID</dt>
-                <dd class="font-mono">{ADMIN_CONFIG.enabled ? (ADMIN_CONFIG.clientId || 'Not set') : 'Disabled'}</dd>
+                <dt class="text-[var(--color-text-muted)]">Authentication</dt>
+                <dd class="font-mono">{ADMIN_CONFIG.enabled ? 'Personal Access Token' : 'Disabled'}</dd>
               </div>
               <div class="flex justify-between gap-4">
                 <dt class="text-[var(--color-text-muted)]">Allowed Users</dt>

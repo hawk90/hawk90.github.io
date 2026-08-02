@@ -20,6 +20,9 @@ const blogCollection = defineCollection({
     author: z.string().default(SITE_CONFIG.author),
 
     // Classification
+    /** Canonical topic IDs from src/lib/content/topics.ts. Prefer this over path inference. */
+    // Canonical topic IDs are required; URLs and folders are not taxonomy.
+    topics: z.array(z.string()).min(1),
     tags: z.array(z.string()).default([]),
     type: z.enum(['tech', 'book-review', 'presentation']).default('tech'),
 
@@ -58,6 +61,12 @@ const blogCollection = defineCollection({
 
     /** When the post was last updated — shown in article header if set */
     updated: z.coerce.date().optional(),
+
+    // Editorial lifecycle is deliberately separate from publication. These
+    // fields support review queues without making unreviewed content vanish.
+    lastVerified: z.coerce.date().optional(),
+    reviewStatus: z.enum(['current', 'needs-review', 'archived']).default('needs-review'),
+    evidenceStatus: z.enum(['primary', 'documented', 'experience', 'mixed']).optional(),
 
     // Legacy (for Jekyll migration)
     categories: z.array(z.string()).optional(),

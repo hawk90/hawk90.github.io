@@ -15,7 +15,6 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
 ---
 
 {!showAll ? (
-  <!-- Compact navigation (single line) -->
   <div class="card">
     <div class="flex items-center justify-between gap-4">
       {prevPost ? (
@@ -47,7 +46,6 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
   </div>
 ) : (
   <div class="space-y-6">
-    <!-- Big prev / next CTAs -->
     <nav
       class="grid sm:grid-cols-2 gap-3"
       aria-label="Previous and next post"
@@ -93,7 +91,6 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
       )}
     </nav>
 
-    <!-- Full series list -->
     <div class="p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
       <h3 class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
         {posts[0]?.data.series} · {currentIndex + 1} of {posts.length}

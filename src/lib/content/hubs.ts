@@ -1,4 +1,6 @@
-import type { TopicDefinition } from './types';
+import { getPublicationDecision } from './publication';
+import { TOPIC_REGISTRY } from './topics';
+import type { ContentManifest, TopicDefinition } from './types';
 
 export interface TopicHubConcept {
   title: string;
@@ -67,4 +69,44 @@ const hubsById = new Map(TOPIC_HUBS.map((hub) => [hub.id, hub]));
 
 export function getTopicHubDefinition(id: string): TopicHubDefinition | undefined {
   return hubsById.get(id);
+}
+
+/** Reject silent omissions and broken links before a curated hub is published. */
+export function assertTopicHubIntegrity(manifest: ContentManifest): void {
+  const issues: string[] = [];
+  const ids = new Set<string>();
+
+  for (const hub of TOPIC_HUBS) {
+    if (ids.has(hub.id)) issues.push(`Duplicate Topic Hub ID: ${hub.id}`);
+    ids.add(hub.id);
+    if (hub.href !== `/topics/${hub.id}/`) issues.push(`${hub.id}: href must be /topics/${hub.id}/`);
+    // Draft hubs are planning records. Their taxonomy and start-here choices
+    // become build contracts only once they are published.
+    if (!hub.isPublished) continue;
+    if (!hub.summary.trim() || !hub.audience.trim()) issues.push(`${hub.id}: summary and audience are required`);
+
+    for (const categoryId of hub.categoryIds) {
+      if (!TOPIC_REGISTRY.byId.has(categoryId)) issues.push(`${hub.id}: unknown category ${categoryId}`);
+    }
+    for (const relatedId of hub.relatedTopicIds) {
+      if (relatedId === hub.id) issues.push(`${hub.id}: cannot relate to itself`);
+      else if (!hubsById.has(relatedId)) issues.push(`${hub.id}: unknown related hub ${relatedId}`);
+    }
+
+    if (hub.startHereIds.length === 0) issues.push(`${hub.id}: published hubs need at least one Start Here document`);
+    for (const documentId of hub.startHereIds) {
+      const document = manifest.byId.get(documentId);
+      if (!document) {
+        issues.push(`${hub.id}: missing Start Here document ${documentId}`);
+        continue;
+      }
+      if (!getPublicationDecision(document).render) issues.push(`${hub.id}: Start Here document is not published: ${documentId}`);
+      const belongsToHub = document.categories.some((category) => hub.categoryIds.some(
+        (hubCategory) => category === hubCategory || category.startsWith(`${hubCategory}/`),
+      ));
+      if (!belongsToHub) issues.push(`${hub.id}: Start Here document is outside hub categories: ${documentId}`);
+    }
+  }
+
+  if (issues.length) throw new Error(`Topic Hub integrity failed:\n- ${issues.join('\n- ')}`);
 }

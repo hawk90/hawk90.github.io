@@ -1,43 +1,10 @@
 /**
- * GitHub Authentication for Admin Panel
+ * Authentication state for the static admin panel.
  *
- * Supports two authentication methods:
- *
- * 1. PAT (Personal Access Token) - Works on all deployments including GitHub Pages
- *    - User generates token at github.com/settings/tokens
- *    - Token is kept in memory for the current tab only
- *
- * 2. OAuth - Requires server-side routes (Vercel/Netlify with hybrid mode)
- *    - User clicks "Login with GitHub"
- *    - Server exchanges code for token
- *    - Token is passed via URL hash and kept in memory for the current tab only
+ * The site uses a Personal Access Token entered by the administrator. It is
+ * retained in memory only for the current tab; OAuth belongs in a separate
+ * server application and is intentionally not implemented here.
  */
-
-// ─── Types ──────────────────────────────────────────────────
-
-export interface DeviceCodeResponse {
-  device_code: string;
-  user_code: string;
-  verification_uri: string;
-  expires_in: number;
-  interval: number;
-}
-
-export interface TokenResponse {
-  access_token: string;
-  token_type: string;
-  scope: string;
-}
-
-export interface TokenErrorResponse {
-  error: 'authorization_pending' | 'slow_down' | 'expired_token' | 'access_denied';
-  error_description: string;
-}
-
-export type PollResult =
-  | { status: 'success'; token: TokenResponse }
-  | { status: 'pending' }
-  | { status: 'slow_down' };
 
 export interface GitHubUser {
   login: string;
@@ -53,89 +20,9 @@ export interface AuthState {
   user: GitHubUser | null;
 }
 
-// Static hosting cannot issue an HttpOnly session cookie. Do not persist a
-// repository credential in browser storage; a refresh intentionally requires
-// a new login.
 let currentAuth: AuthState = { isAuthenticated: false, accessToken: null, user: null };
 
-// ─── Device Flow ────────────────────────────────────────────
-
-/**
- * Start the Device Authorization flow.
- * Returns device code info for displaying to user.
- */
-export async function startDeviceAuth(clientId: string): Promise<DeviceCodeResponse> {
-  const response = await fetch('https://github.com/login/device/code', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      client_id: clientId,
-      scope: 'repo read:user',
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to start device auth: ${response.status}`);
-  }
-
-  return response.json();
-}
-
-/**
- * Poll for access token after user enters device code.
- * Returns token on success, null if still pending.
- * Throws on error (expired, denied).
- */
-export async function pollForToken(
-  clientId: string,
-  deviceCode: string
-): Promise<PollResult> {
-  const response = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      client_id: clientId,
-      device_code: deviceCode,
-      grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Token request failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  // Check for error responses
-  if ('error' in data) {
-    const errorData = data as TokenErrorResponse;
-
-    switch (errorData.error) {
-      case 'authorization_pending':
-        return { status: 'pending' };
-      case 'slow_down':
-        return { status: 'slow_down' };
-      case 'expired_token':
-        throw new Error('Device code expired. Please start over.');
-      case 'access_denied':
-        throw new Error('Authorization was denied.');
-      default:
-        throw new Error(`Auth error: ${errorData.error_description}`);
-    }
-  }
-
-  return { status: 'success', token: data as TokenResponse };
-}
-
-/**
- * Fetch the authenticated user's profile.
- */
+/** Fetch the authenticated user's GitHub profile for token validation. */
 export async function fetchUser(accessToken: string): Promise<GitHubUser> {
   const response = await fetch('https://api.github.com/user', {
     headers: {
@@ -143,190 +30,44 @@ export async function fetchUser(accessToken: string): Promise<GitHubUser> {
       Accept: 'application/vnd.github+json',
     },
   });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch user: ${response.status}`);
-  }
-
+  if (!response.ok) throw new Error(`Failed to fetch user: ${response.status}`);
   return response.json();
 }
 
-// ─── Token Management ───────────────────────────────────────
-
-/**
- * Keep authentication state only for the current browser tab.
- */
+/** Keep credentials only in the current browser tab. */
 export function saveAuth(accessToken: string, user: GitHubUser): void {
   currentAuth = { isAuthenticated: true, accessToken, user };
 }
 
-/**
- * Clear the in-memory authentication state.
- */
 export function clearAuth(): void {
   currentAuth = { isAuthenticated: false, accessToken: null, user: null };
 }
 
-/**
- * Get current authentication state.
- */
 export function getAuthState(): AuthState {
   return currentAuth;
 }
 
-/**
- * Check if the current user is in the allowed users list.
- */
 export function isAllowedUser(user: GitHubUser, allowedUsers: string[]): boolean {
-  return allowedUsers.map((u) => u.toLowerCase()).includes(user.login.toLowerCase());
+  return allowedUsers.map((candidate) => candidate.toLowerCase()).includes(user.login.toLowerCase());
 }
 
-/**
- * Parse OAuth callback hash and save auth state.
- * Returns true if successful, false if no hash or invalid.
- *
- * Hash format: #token={accessToken}&user={encodedUserJson}
- */
-export function handleOAuthCallback(): { success: boolean; error?: string } {
-  try {
-    if (typeof window === 'undefined') {
-      return { success: false };
-    }
-
-    const hash = window.location.hash;
-    if (!hash || hash.length < 2) {
-      return { success: false };
-    }
-
-    // Parse hash parameters
-    const params = new URLSearchParams(hash.slice(1));
-    const token = params.get('token');
-    const userJson = params.get('user');
-
-    if (!token || !userJson) {
-      return { success: false };
-    }
-
-    // Parse user object
-    const user = JSON.parse(decodeURIComponent(userJson)) as GitHubUser;
-
-    // Save auth state
-    saveAuth(token, user);
-
-    // Clear the hash from URL (security)
-    window.history.replaceState(null, '', window.location.pathname + window.location.search);
-
-    return { success: true };
-  } catch (error) {
-    console.error('Failed to parse OAuth callback:', error);
-    return { success: false, error: 'Invalid callback data' };
-  }
-}
-
-/**
- * Verify token is still valid by making an API call.
- */
 export async function verifyToken(accessToken: string): Promise<boolean> {
   try {
-    const response = await fetch('https://api.github.com/user', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: 'application/vnd.github+json',
-      },
-    });
-    return response.ok;
+    await fetchUser(accessToken);
+    return true;
   } catch {
     return false;
   }
 }
 
-/**
- * Full authentication check - verifies token and returns state.
- */
 export async function checkAuth(): Promise<AuthState> {
   const state = getAuthState();
-
-  if (!state.isAuthenticated || !state.accessToken) {
-    return { isAuthenticated: false, accessToken: null, user: null };
-  }
-
-  // Verify token is still valid
-  const isValid = await verifyToken(state.accessToken);
-
-  if (!isValid) {
-    clearAuth();
-    return { isAuthenticated: false, accessToken: null, user: null };
-  }
-
-  return state;
+  if (!state.isAuthenticated || !state.accessToken) return { isAuthenticated: false, accessToken: null, user: null };
+  if (await verifyToken(state.accessToken)) return state;
+  clearAuth();
+  return { isAuthenticated: false, accessToken: null, user: null };
 }
 
-/**
- * Logout - clear auth state.
- */
 export function logout(): void {
   clearAuth();
-}
-
-// ─── Polling Helper ─────────────────────────────────────────
-
-export interface PollOptions {
-  clientId: string;
-  deviceCode: string;
-  interval: number;
-  expiresIn: number;
-  onSuccess: (token: string, user: GitHubUser) => void;
-  onError: (error: Error) => void;
-  onExpired: () => void;
-}
-
-/**
- * Start polling for token with automatic cleanup.
- * Returns a cleanup function.
- */
-export function startPolling(options: PollOptions): () => void {
-  const { clientId, deviceCode, interval, expiresIn, onSuccess, onError, onExpired } = options;
-
-  let currentInterval = interval * 1000; // Convert to ms
-  const expiresAt = Date.now() + expiresIn * 1000;
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
-  let stopped = false;
-
-  const poll = async () => {
-    if (stopped || Date.now() >= expiresAt) {
-      if (!stopped) {
-        onExpired();
-      }
-      return;
-    }
-
-    try {
-      const result = await pollForToken(clientId, deviceCode);
-
-      if (result.status === 'success') {
-        // Got token - fetch user and complete
-        const user = await fetchUser(result.token.access_token);
-        onSuccess(result.token.access_token, user);
-      } else if (result.status === 'slow_down') {
-        currentInterval += 5000;
-        timeoutId = setTimeout(poll, currentInterval);
-      } else {
-        // Still pending - poll again
-        timeoutId = setTimeout(poll, currentInterval);
-      }
-    } catch (error) {
-      onError(error instanceof Error ? error : new Error(String(error)));
-    }
-  };
-
-  // Start polling
-  timeoutId = setTimeout(poll, currentInterval);
-
-  // Return cleanup function
-  return () => {
-    stopped = true;
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  };
 }

@@ -6,8 +6,9 @@ import { t } from '../consts/ui-strings';
 import { getBlogContentManifest, getHomepageCuration } from '../lib/content';
 
 const manifest = await getBlogContentManifest();
-const { latest } = getHomepageCuration(manifest);
-const featuredLatestPosts = latest.map((document) => document.source);
+const { latest, guides, topicHubs } = getHomepageCuration(manifest);
+const latestPosts = latest.slice(0, 3).map((document) => document.source);
+const guidePosts = guides.map((document) => document.source);
 ---
 
 <BaseLayout title={`${BRAND_CONFIG.heroTitle} - ${BRAND_CONFIG.tagline}`}>
@@ -25,7 +26,7 @@ const featuredLatestPosts = latest.map((document) => document.source);
             {BRAND_CONFIG.heroDescription}
           </p>
           <div class="flex flex-wrap gap-3 text-sm">
-            <a href="/blog" class="btn btn-primary rounded-xl px-5 py-3">Read the blog</a>
+            <a href={topicHubs[0]?.href ?? '/blog'} class="btn btn-primary rounded-xl px-5 py-3">Explore learning paths</a>
             <a href="/about" class="btn btn-ghost rounded-xl border border-[var(--color-border)] px-5 py-3">About the author</a>
           </div>
         </div>
@@ -67,7 +68,37 @@ const featuredLatestPosts = latest.map((document) => document.source);
     }
   </style>
 
-  <!-- Recent Posts -->
+  {topicHubs.length > 0 && (
+    <section class="py-16">
+      <div class="container">
+        <div class="section-eyebrow mb-2">Knowledge Map</div>
+        <h2 class="text-2xl font-bold mb-8">Core Topics</h2>
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {topicHubs.map((hub) => (
+            <a href={hub.href} class="block rounded-xl border border-[var(--color-border)] p-6 hover:border-[var(--color-accent)] transition-colors">
+              <h3 class="text-lg font-semibold mb-3 text-[var(--color-accent)]">{hub.label}</h3>
+              <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-4">{hub.summary}</p>
+              <span class="text-sm font-medium">{hub.audience} →</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {guidePosts.length > 0 && (
+    <section class="surface-section py-16">
+      <div class="container">
+        <div class="section-eyebrow mb-2">Start Here</div>
+        <h2 class="text-2xl font-bold mb-8">Featured Guides</h2>
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {guidePosts.map((post) => <PostCard post={post} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Recent posts are discovery support, not the site's primary architecture. -->
   <section class="surface-section py-16">
     <div class="container">
       <div class="flex items-center justify-between mb-8">
@@ -80,7 +111,7 @@ const featuredLatestPosts = latest.map((document) => document.source);
         </a>
       </div>
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {featuredLatestPosts.map((post) => (
+        {latestPosts.map((post) => (
           <PostCard post={post} />
         ))}
       </div>

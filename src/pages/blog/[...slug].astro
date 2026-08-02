@@ -14,7 +14,8 @@ import ReadingProgress from '../../components/blog/ReadingProgress.astro';
 import AuthorBio from '../../components/blog/AuthorBio.astro';
 import Newsletter from '../../components/blog/Newsletter.astro';
 import { formatDate, getTagUrl } from '../../lib/utils';
-import { getPostMeta, getPublishedPosts, getRelatedPosts } from '../../lib/posts';
+import { getPostMeta, getPublishedPosts, getRelatedPosts, type RelatedPost } from '../../lib/posts';
+import { getBlogContentManifest, getContentRelations } from '../../lib/content';
 import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
 
@@ -45,10 +46,22 @@ if (post.data.series) {
 // Reading time
 const { readingTime } = getPostMeta(post);
 
+const RELATION_KIND_LABELS = {
+  prerequisite: '먼저 읽을 선행 글',
+  'deep-dive': '더 깊이 살펴볼 글',
+  implementation: '구현 관점으로 확장하는 글',
+  related: '편집자가 연결한 관련 글',
+} as const;
+
 // Related posts
-let relatedPosts: CollectionEntry<'blog'>[] = [];
+let relatedPosts: RelatedPost[] = [];
 if (RELATED_POSTS_CONFIG.enabled) {
-  relatedPosts = getRelatedPosts(post, allPosts, RELATED_POSTS_CONFIG.maxPosts);
+  const manifest = await getBlogContentManifest();
+  const curatedPosts = getContentRelations(manifest, post.id).map(({ document, kind, rationale }) => ({
+    post: document.source,
+    reason: rationale ?? RELATION_KIND_LABELS[kind],
+  }));
+  relatedPosts = getRelatedPosts(post, allPosts, RELATED_POSTS_CONFIG.maxPosts, curatedPosts);
 }
 
 const formattedDate = formatDate(post.data.date);

@@ -15,6 +15,13 @@ export interface PostMeta {
   thumbnail: string;
 }
 
+export interface RelatedPost {
+  post: BlogPost;
+  /** The reader-visible reason is intentional, never an opaque relevance score. */
+  reason: string;
+  source: 'curated' | 'inferred';
+}
+
 /**
  * 발행된 포스트를 날짜 내림차순으로 가져오기
  */
@@ -112,15 +119,22 @@ export function getAllTags(posts: BlogPost[]): string[] {
  * Threshold 이상 게시물이 있는 태그만 페이지를 만든다.
  */
 export function getTagsForPageGeneration(posts: BlogPost[], minPosts = 2): string[] {
-  const counts = new Map<string, number>();
+  const tags = new Map<string, { label: string; count: number }>();
   for (const p of posts) {
     for (const t of p.data.tags) {
-      counts.set(t, (counts.get(t) ?? 0) + 1);
+      const key = t.toLocaleLowerCase();
+      const current = tags.get(key);
+      tags.set(key, {
+        // Keep the first spelling for display, but match the URL's
+        // case-insensitive semantics when counting and generating routes.
+        label: current?.label ?? t,
+        count: (current?.count ?? 0) + 1,
+      });
     }
   }
-  return [...counts.entries()]
-    .filter(([, c]) => c >= minPosts)
-    .map(([t]) => t)
+  return [...tags.values()]
+    .filter(({ count }) => count >= minPosts)
+    .map(({ label }) => label)
     .sort((a, b) => a.localeCompare(b));
 }
 
@@ -179,14 +193,20 @@ export function getReadingTime(content: string): number {
 }
 
 /**
- * 관련 글 찾기 (태그 유사도 기반, 같은 시리즈 우선)
+ * 관련 글 찾기. 명시적으로 큐레이션된 관계가 먼저 오고, 남은 칸만
+ * 시리즈·태그 유사도 기반 추천으로 채운다.
  */
 export function getRelatedPosts(
   currentPost: BlogPost,
   allPosts: BlogPost[],
   maxPosts: number = 3,
-): BlogPost[] {
-  const candidates = allPosts.filter((p) => p.id !== currentPost.id);
+  curatedPosts: readonly { post: BlogPost; reason: string }[] = [],
+): RelatedPost[] {
+  const selected = curatedPosts.slice(0, maxPosts).map(({ post, reason }) => ({ post, reason, source: 'curated' as const }));
+  if (selected.length >= maxPosts) return selected;
+
+  const selectedIds = new Set([currentPost.id, ...selected.map(({ post }) => post.id)]);
+  const candidates = allPosts.filter((p) => !selectedIds.has(p.id));
 
   const scored = candidates.map((post) => {
     let score = 0;
@@ -212,11 +232,19 @@ export function getRelatedPosts(
     return { post, score };
   });
 
-  return scored
+  const fallback = scored
     .filter((s) => s.score > 0)
     .sort((a, b) => b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf())
-    .slice(0, maxPosts)
-    .map((s) => s.post);
+    .slice(0, maxPosts - selected.length)
+    .map(({ post }) => ({
+      post,
+      reason: currentPost.data.series && post.data.series === currentPost.data.series
+        ? '같은 시리즈에서 이어 읽기'
+        : '공통 태그 기반 추천',
+      source: 'inferred' as const,
+    }));
+
+  return [...selected, ...fallback];
 }
 
 /**

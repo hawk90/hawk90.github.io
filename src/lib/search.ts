@@ -1,4 +1,5 @@
 import { escapeHtml } from './utils';
+import { expandSearchTerms, normalizeSearchText } from './search-aliases';
 
 export interface SearchItem {
   title: string;
@@ -25,39 +26,38 @@ const SCORE_WEIGHTS = {
   seriesContains: 5,  // 시리즈 포함
 };
 
+function containsTerm(text: string, term: string): boolean {
+  if (!/^[a-z0-9]+$/.test(term)) return text.includes(term);
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`).test(text);
+}
+
 function calculateScore(item: SearchItem, query: string): number {
-  const q = query.toLowerCase();
-  const title = item.title.toLowerCase();
-  const desc = item.description.toLowerCase();
+  const terms = expandSearchTerms(query);
+  const title = normalizeSearchText(item.title);
+  const desc = normalizeSearchText(item.description);
   let score = 0;
 
-  // 제목 매칭
-  if (title === q) {
-    score += SCORE_WEIGHTS.titleExact;
-  } else if (title.startsWith(q)) {
-    score += SCORE_WEIGHTS.titleStart;
-  } else if (title.includes(q)) {
-    score += SCORE_WEIGHTS.titleContains;
-  }
+  for (const term of terms) {
+    let termScore = 0;
+    if (title === term) termScore += SCORE_WEIGHTS.titleExact;
+    else if (title.startsWith(term)) termScore += SCORE_WEIGHTS.titleStart;
+    else if (containsTerm(title, term)) termScore += SCORE_WEIGHTS.titleContains;
 
-  // 설명 매칭
-  if (desc.includes(q)) {
-    score += SCORE_WEIGHTS.descContains;
-  }
+    if (containsTerm(desc, term)) termScore += SCORE_WEIGHTS.descContains;
 
-  // 태그 매칭
-  for (const tag of item.tags) {
-    const t = tag.toLowerCase();
-    if (t === q) {
-      score += SCORE_WEIGHTS.tagExact;
-    } else if (t.includes(q)) {
-      score += SCORE_WEIGHTS.tagContains;
+    for (const tag of item.tags) {
+      const normalizedTag = normalizeSearchText(tag);
+      if (normalizedTag === term) termScore += SCORE_WEIGHTS.tagExact;
+      else if (containsTerm(normalizedTag, term)) termScore += SCORE_WEIGHTS.tagContains;
     }
-  }
 
-  // 시리즈 매칭
-  if (item.series?.toLowerCase().includes(q)) {
-    score += SCORE_WEIGHTS.seriesContains;
+    if (item.series && containsTerm(normalizeSearchText(item.series), term)) {
+      termScore += SCORE_WEIGHTS.seriesContains;
+    }
+    // A synonym should find the document, but must not inflate relevance by
+    // adding every spelling variant to the same result.
+    score = Math.max(score, termScore);
   }
 
   return score;
@@ -72,16 +72,16 @@ export interface SearchOptions {
 export function searchPosts(items: SearchItem[], options: SearchOptions | string): SearchItem[] {
   // 하위 호환: string이면 query로 처리
   const opts: SearchOptions = typeof options === 'string' ? { query: options } : options;
-  const q = (opts.query || '').toLowerCase().trim();
-  const filterTag = opts.filterTag?.toLowerCase();
-  const filterSeries = opts.filterSeries?.toLowerCase();
+  const q = normalizeSearchText(opts.query || '');
+  const filterTag = opts.filterTag && normalizeSearchText(opts.filterTag);
+  const filterSeries = opts.filterSeries && normalizeSearchText(opts.filterSeries);
 
   // 필터만 있고 검색어 없는 경우
   if ((filterTag || filterSeries) && !q) {
     return items
       .filter((item) => {
-        if (filterTag && !item.tags.some((t) => t.toLowerCase() === filterTag)) return false;
-        if (filterSeries && item.series?.toLowerCase() !== filterSeries) return false;
+        if (filterTag && !item.tags.some((tag) => normalizeSearchText(tag) === filterTag)) return false;
+        if (filterSeries && (!item.series || normalizeSearchText(item.series) !== filterSeries)) return false;
         return true;
       })
       .sort((a, b) => b.date - a.date);
@@ -94,8 +94,8 @@ export function searchPosts(items: SearchItem[], options: SearchOptions | string
   // 필터가 있으면 먼저 필터링
   if (filterTag || filterSeries) {
     candidates = items.filter((item) => {
-      if (filterTag && !item.tags.some((t) => t.toLowerCase() === filterTag)) return false;
-      if (filterSeries && item.series?.toLowerCase() !== filterSeries) return false;
+      if (filterTag && !item.tags.some((tag) => normalizeSearchText(tag) === filterTag)) return false;
+      if (filterSeries && (!item.series || normalizeSearchText(item.series) !== filterSeries)) return false;
       return true;
     });
   }

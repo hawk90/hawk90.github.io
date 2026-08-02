@@ -5,6 +5,9 @@ export type ContentType = 'article' | 'book-review' | 'presentation';
 
 /** Publication state is intentionally separate from discoverability policy. */
 export type ContentStatus = 'draft' | 'published';
+export type ClassificationSource = 'explicit';
+export type ReviewStatus = 'current' | 'needs-review' | 'archived';
+export type EvidenceStatus = 'primary' | 'documented' | 'experience' | 'mixed';
 
 /**
  * A future-facing topic definition. Phase 1 only defines the contract; the
@@ -44,7 +47,12 @@ export interface ContentDocument {
   description?: string;
   publishedAt: Date;
   updatedAt?: Date;
-  topics: readonly string[];
+  lastVerifiedAt?: Date;
+  reviewStatus: ReviewStatus;
+  evidenceStatus?: EvidenceStatus;
+  /** Canonical IDs used for topic navigation; independent of file location. */
+  topicIds: readonly string[];
+  classificationSource: ClassificationSource;
   categories: readonly string[];
   tags: readonly string[];
   series?: string;
