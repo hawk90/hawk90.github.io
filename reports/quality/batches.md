@@ -2,13 +2,12 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 45
+- Unassessed items: 44
 - Maximum batch size: 15
 - Batches: 4
 
 ## quality-01 — quality-01.md
 
-- AP-T-15 (P1, M) — T-15. Time-Dependent Test
 - AP-T-27 (P1, M) — T-27. Every External Link on Every Commit
 - AP-T-28 (P1, M) — T-28. External Failure Blocks Publishing
 - AP-T-29 (P1, M) — T-29. Redirect Considered Healthy Forever
@@ -23,10 +22,10 @@
 - AP-T-51 (P1, M) — T-51. Screenshot Without Interaction
 - AP-T-52 (P1, M) — T-52. Dynamic Content in Screenshot
 - AP-T-53 (P1, M) — T-53. Font Not Pinned
+- AP-T-54 (P1, M) — T-54. Dark Mode Untested
 
 ## quality-02 — quality-01.md
 
-- AP-T-54 (P1, M) — T-54. Dark Mode Untested
 - AP-T-55 (P1, M) — T-55. Generated Diagram Untested
 - AP-T-56 (P1, M) — T-56. Automated Accessibility Equals Accessible
 - AP-T-57 (P1, M) — T-57. Accessibility Test on Homepage Only

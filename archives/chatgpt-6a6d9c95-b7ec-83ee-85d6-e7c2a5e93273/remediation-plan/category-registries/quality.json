@@ -456,13 +456,25 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-15. Time-Dependent Test”?",
-      "scope": null,
+      "reviewQuestion": "Reassess if a test begins comparing against the wall clock or an unseeded current date instead of explicit input timestamps.",
+      "scope": "Repository-wide temporal determinism policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-search.mjs",
+            "scripts/verify-content-relations.mjs",
+            "scripts/audit-series-integrity.py",
+            "src/lib/posts.ts",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "Search, relation, series, and release checks compare explicit document dates and deterministic outcomes; current time is used only for report metadata or runtime admin behavior, not as a test oracle."
+        }
+      ],
+      "residualRisk": "Admin runtime features intentionally depend on current time; those paths require injected clocks or bounded tolerance if promoted into automated tests."
     },
     {
       "id": "AP-T-16",
