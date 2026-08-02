@@ -1,0 +1,253 @@
+{
+  "policy": "A category is not complete because infrastructure exists. It is complete only when every scoped AP is dispositioned (remediated, accepted with rationale, or superseded), its acceptance criteria pass, and recorded evidence is current. A dependent category may be audited early but may not be declared complete or activate remediation work until every dependency is complete. Published content is preservation-first: queue disposition never authorizes deletion, consolidation, drafting, archiving, renaming, moving, or bulk rewriting without explicit user approval and per-document evidence. Frontmatter changes are script-only: preview by default, explicit --apply, affected-file reporting, idempotency, and post-change verification are mandatory.",
+  "statusScale": [
+    "not_started",
+    "baseline_established",
+    "remediation_in_progress",
+    "completed"
+  ],
+  "categories": [
+    {
+      "id": "methodology",
+      "label": "AP-D 방법론",
+      "expectedApCount": 125,
+      "dependsOn": [],
+      "status": "completed",
+      "closure": [
+        "Every AP-D item is dispositioned with AP ID, scope, decision, and residual risk.",
+        "The remediation workflow rejects work without task-level evidence."
+      ],
+      "verification": [
+        "npm run audit:methodology",
+        "npm run audit:remediation-graph",
+        "npm run gate:tooling"
+      ]
+    },
+    {
+      "id": "repository",
+      "label": "AP-R 저장소·운영",
+      "expectedApCount": 100,
+      "dependsOn": [
+        "methodology"
+      ],
+      "status": "remediation_in_progress",
+      "closure": [
+        "Every AP-R item is dispositioned.",
+        "CI, dependency, artifact, and rollback evidence are recorded."
+      ],
+      "verification": [
+        "npm run gate:repository",
+        "npm run gate:ci-security",
+        "npm run verify:release"
+      ]
+    },
+    {
+      "id": "quality",
+      "label": "AP-T 품질·테스트",
+      "expectedApCount": 100,
+      "dependsOn": [
+        "methodology",
+        "repository"
+      ],
+      "status": "remediation_in_progress",
+      "closure": [
+        "Every AP-T item is dispositioned.",
+        "Required regression and release checks pass."
+      ],
+      "verification": [
+        "npm run gate:tooling",
+        "npm run check",
+        "npm run verify:release"
+      ]
+    },
+    {
+      "id": "security",
+      "label": "AP-SEC 보안",
+      "expectedApCount": 100,
+      "dependsOn": [
+        "methodology",
+        "repository",
+        "quality"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-SEC item is dispositioned.",
+        "Static-admin, secrets, supply-chain, and production-artifact checks pass."
+      ],
+      "verification": [
+        "npm run gate:security-admin -- --artifact dist",
+        "npm run gate:secrets",
+        "npm run gate:ci-security"
+      ]
+    },
+    {
+      "id": "metadata",
+      "label": "AP-M 메타데이터",
+      "expectedApCount": 90,
+      "dependsOn": [
+        "methodology",
+        "quality"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-M item is dispositioned.",
+        "Metadata lifecycle decisions are evidence-backed; no bulk verification claims."
+      ],
+      "verification": [
+        "npm run audit:knowledge-model",
+        "npm run audit:content-readiness"
+      ]
+    },
+    {
+      "id": "information_architecture",
+      "label": "AP-I 정보구조",
+      "expectedApCount": 160,
+      "dependsOn": [
+        "metadata",
+        "quality"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-I item is dispositioned.",
+        "Taxonomy and relation decisions are reviewed rather than inferred from paths."
+      ],
+      "verification": [
+        "npm run audit:knowledge-model"
+      ]
+    },
+    {
+      "id": "localization",
+      "label": "AP-L 로컬라이제이션",
+      "expectedApCount": 100,
+      "dependsOn": [
+        "metadata",
+        "information_architecture"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-L item is dispositioned.",
+        "Locale coverage and terminology decisions are verified."
+      ],
+      "verification": [
+        "npm run check",
+        "npm run test:search"
+      ]
+    },
+    {
+      "id": "search_seo",
+      "label": "AP-S 검색·SEO",
+      "expectedApCount": 75,
+      "dependsOn": [
+        "metadata",
+        "information_architecture",
+        "localization"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-S item is dispositioned.",
+        "Search, canonical, sitemap, and indexability contracts pass."
+      ],
+      "verification": [
+        "npm run test:search",
+        "npm run build",
+        "npm run audit:product-experience"
+      ]
+    },
+    {
+      "id": "ux",
+      "label": "AP-U UX",
+      "expectedApCount": 103,
+      "dependsOn": [
+        "information_architecture",
+        "localization",
+        "search_seo"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-U item is dispositioned.",
+        "Shared and article-level interaction contracts pass."
+      ],
+      "verification": [
+        "npm run audit:product-experience",
+        "npm run check"
+      ]
+    },
+    {
+      "id": "performance",
+      "label": "AP-P 성능",
+      "expectedApCount": 80,
+      "dependsOn": [
+        "repository",
+        "quality",
+        "ux"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-P item is dispositioned.",
+        "Performance budgets and representative production measurements are recorded."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run verify:release"
+      ]
+    },
+    {
+      "id": "observability",
+      "label": "AP-O 관측성",
+      "expectedApCount": 100,
+      "dependsOn": [
+        "security",
+        "repository",
+        "performance"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-O item is dispositioned.",
+        "Collection policy, privacy boundary, and operational response evidence are recorded."
+      ],
+      "verification": [
+        "npm run audit:product-experience",
+        "npm run gate:security-admin"
+      ]
+    },
+    {
+      "id": "content",
+      "label": "AP-A 콘텐츠",
+      "expectedApCount": 239,
+      "dependsOn": [
+        "metadata",
+        "information_architecture",
+        "localization",
+        "search_seo",
+        "ux",
+        "performance",
+        "observability",
+        "quality",
+        "security"
+      ],
+      "status": "baseline_established",
+      "closure": [
+        "Every AP-A item is dispositioned.",
+        "Content decisions have source/evidence or explicit editorial rationale.",
+        "Readiness queues are reduced according to an approved batch plan, not bulk-marked."
+      ],
+      "verification": [
+        "npm run audit:content-readiness",
+        "npm run audit:knowledge-model",
+        "npm run verify:release"
+      ]
+    }
+  ],
+  "activationExceptions": [
+    {
+      "id": "repository-external-recovery-deferral-for-quality",
+      "dependency": "repository",
+      "allowedDependent": "quality",
+      "authority": "User approved deferral because backup and DNS recovery cannot be performed now.",
+      "scope": "Allows AP-T quality remediation to activate while the accepted external AP-R recovery risk remains unresolved.",
+      "closureImpact": "none",
+      "closureBoundary": "AP-R and AP-T cannot be declared complete from this exception.",
+      "reassessmentTrigger": "Before a material deployment-platform change, ownership change, or the next planned recovery exercise."
+    }
+  ]
+}

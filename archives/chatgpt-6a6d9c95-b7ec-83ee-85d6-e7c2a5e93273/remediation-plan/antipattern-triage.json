@@ -6220,83 +6220,6 @@
       "effort": "L",
       "rationale": "Initial heuristic; confirm against concrete finding and affected scope.",
       "dependsOnPhase": "PHASE-04",
-      "auditEvidence": [
-        {
-          "file": "src/components/blog/Disqus.astro",
-          "line": 61,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/blog/Utterances.astro",
-          "line": 32,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/blog/Utterances.astro",
-          "line": 61,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 262,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 268,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 281,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 328,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 333,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 344,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/lib/admin/post-document.ts",
-          "line": 65,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/edit.astro",
-          "line": 533,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/edit.astro",
-          "line": 543,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/index.astro",
-          "line": 179,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/new.astro",
-          "line": 445,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/new.astro",
-          "line": 455,
-          "excerpt": ".innerHTML ="
-        }
-      ],
       "auditedAt": "2026-08-01T08:25:38.167Z"
     },
     {
@@ -6475,14 +6398,7 @@
       "effort": "L",
       "rationale": "Initial heuristic; confirm against concrete finding and affected scope.",
       "dependsOnPhase": "PHASE-04",
-      "auditEvidence": [
-        {
-          "file": "src/pages/api/auth/callback.ts",
-          "line": 40,
-          "excerpt": "import.meta.env.GITHUB_CLIENT_SECRET"
-        }
-      ],
-      "auditedAt": "2026-08-01T08:25:38.167Z"
+      "auditedAt": "2026-08-01T09:27:52.333Z"
     },
     {
       "id": "AP-SEC-52",
@@ -6492,13 +6408,6 @@
       "effort": "L",
       "rationale": "Initial heuristic; confirm against concrete finding and affected scope.",
       "dependsOnPhase": "PHASE-04",
-      "auditEvidence": [
-        {
-          "file": "src/lib/admin/auth.ts",
-          "line": 164,
-          "excerpt": "localStorage.setItem(STORAGE_KEYS.accessToken, accessToken"
-        }
-      ],
       "auditedAt": "2026-08-01T08:25:38.167Z"
     },
     {

@@ -1,5 +1,4 @@
 {
-  "generatedAt": "2026-08-01T08:25:38.169Z",
   "scope": [
     "src/components/admin/AdminGuard.astro",
     "src/components/blog/AnimatedSvg.astro",
@@ -39,6 +38,7 @@
     "src/components/settings/CodePreview.astro",
     "src/components/settings/ThemeCustomizer.astro",
     "src/components/settings/ThemeSelector.astro",
+    "src/components/topics/TopicHub.astro",
     "src/components/ui/BackToTop.astro",
     "src/components/ui/ScrollProgress.astro",
     "src/consts/about.ts",
@@ -63,6 +63,16 @@
     "src/lib/admin/github-api.ts",
     "src/lib/admin/notifications.ts",
     "src/lib/admin/post-document.ts",
+    "src/lib/content/curation.ts",
+    "src/lib/content/hubs.ts",
+    "src/lib/content/index.ts",
+    "src/lib/content/manifest.ts",
+    "src/lib/content/normalize.ts",
+    "src/lib/content/publication.ts",
+    "src/lib/content/relations.ts",
+    "src/lib/content/sitemap.ts",
+    "src/lib/content/topics.ts",
+    "src/lib/content/types.ts",
     "src/lib/define.ts",
     "src/lib/keyboard.ts",
     "src/lib/lifecycle.ts",
@@ -71,6 +81,7 @@
     "src/lib/posts.ts",
     "src/lib/rehype-image-lazy.mjs",
     "src/lib/remark-callouts.mjs",
+    "src/lib/search-aliases.ts",
     "src/lib/search.ts",
     "src/lib/theme.ts",
     "src/lib/utils.ts",
@@ -81,8 +92,6 @@
     "src/pages/admin/login.astro",
     "src/pages/admin/new.astro",
     "src/pages/admin/settings.astro",
-    "src/pages/api/auth/callback.ts",
-    "src/pages/api/auth/github.ts",
     "src/pages/archive.astro",
     "src/pages/authors/[author]/[...page].astro",
     "src/pages/blog/[...category]/index.astro",
@@ -104,7 +113,10 @@
     "src/pages/settings.astro",
     "src/pages/stats.astro",
     "src/pages/tags/[tag]/[...page].astro",
+    "src/pages/topics/[topic].astro",
     "src/pages/uses.astro",
+    ".github/dependabot.yml",
+    ".github/workflows/ci.yml",
     ".github/workflows/deploy.yml"
   ],
   "findings": [
@@ -113,112 +125,24 @@
       "phase": "PHASE-04",
       "priority": "P0",
       "summary": "PAT stored in browser localStorage",
-      "evidence": [
-        {
-          "file": "src/lib/admin/auth.ts",
-          "line": 164,
-          "excerpt": "localStorage.setItem(STORAGE_KEYS.accessToken, accessToken"
-        }
-      ],
-      "status": "open"
+      "evidence": [],
+      "status": "passed"
     },
     {
       "id": "AP-SEC-51",
       "phase": "PHASE-04",
       "priority": "P0",
-      "summary": "OAuth secret/server route boundary requires deployment review",
-      "evidence": [
-        {
-          "file": "src/pages/api/auth/callback.ts",
-          "line": 40,
-          "excerpt": "import.meta.env.GITHUB_CLIENT_SECRET"
-        }
-      ],
-      "status": "open"
+      "summary": "Static deployment must not retain OAuth secrets or callback routes",
+      "evidence": [],
+      "status": "passed"
     },
     {
       "id": "AP-SEC-29",
       "phase": "PHASE-04",
       "priority": "P0",
       "summary": "Raw HTML insertion requires sanitizer review",
-      "evidence": [
-        {
-          "file": "src/components/blog/Disqus.astro",
-          "line": 61,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/blog/Utterances.astro",
-          "line": 32,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/blog/Utterances.astro",
-          "line": 61,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 262,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 268,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 281,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 328,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 333,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/components/common/SearchModal.astro",
-          "line": 344,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/lib/admin/post-document.ts",
-          "line": 65,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/edit.astro",
-          "line": 533,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/edit.astro",
-          "line": 543,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/index.astro",
-          "line": 179,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/new.astro",
-          "line": 445,
-          "excerpt": ".innerHTML ="
-        },
-        {
-          "file": "src/pages/admin/new.astro",
-          "line": 455,
-          "excerpt": ".innerHTML ="
-        }
-      ],
-      "status": "open"
+      "evidence": [],
+      "status": "passed"
     },
     {
       "id": "AP-T-98",
@@ -226,7 +150,63 @@
       "priority": "P1",
       "summary": "Admin artifact exclusion needs an explicit build assertion",
       "evidence": [],
-      "status": "manual-review"
+      "status": "passed"
+    },
+    {
+      "id": "AP-T-99",
+      "phase": "PHASE-04",
+      "priority": "P1",
+      "summary": "Workflow permissions must be explicitly least-privilege by job",
+      "evidence": [],
+      "status": "passed"
+    },
+    {
+      "id": "AP-T-96",
+      "phase": "PHASE-04",
+      "priority": "P1",
+      "summary": "Production artifact must be scanned for secrets",
+      "evidence": [],
+      "status": "passed"
+    },
+    {
+      "id": "AP-I-34",
+      "phase": "PHASE-03",
+      "priority": "P1",
+      "summary": "Internal links must be validated before deployment",
+      "evidence": [],
+      "status": "passed"
+    },
+    {
+      "id": "AP-I-37",
+      "phase": "PHASE-02",
+      "priority": "P1",
+      "summary": "Acronym search must use an explicit terminology alias registry",
+      "evidence": [],
+      "status": "passed"
+    },
+    {
+      "id": "AP-I-38",
+      "phase": "PHASE-02",
+      "priority": "P1",
+      "summary": "Korean-English and punctuation variants must share query normalization",
+      "evidence": [],
+      "status": "passed"
+    },
+    {
+      "id": "AP-I-02",
+      "phase": "PHASE-01",
+      "priority": "P1",
+      "summary": "Topic hierarchy must have one validated canonical registry",
+      "evidence": [],
+      "status": "passed"
+    },
+    {
+      "id": "AP-I-03",
+      "phase": "PHASE-01",
+      "priority": "P1",
+      "summary": "Content topics must not be permanently inferred from storage folders",
+      "evidence": [],
+      "status": "passed"
     }
   ]
 }

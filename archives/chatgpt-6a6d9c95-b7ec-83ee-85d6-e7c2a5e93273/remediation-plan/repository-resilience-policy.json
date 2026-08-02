@@ -1,0 +1,5 @@
+{
+  "localControls": ["git-object-integrity", "recovery-remote", "pinned-ci-actions", "reproducible-install", "build-once-artifact", "static-artifact-security", "source-archive-preservation", "preservation-first-content"],
+  "externalEvidenceRequired": ["independent-backup-and-restore-test", "domain-dns-recovery", "account-recovery", "emergency-static-host"],
+  "policy": "External recovery claims are never inferred from repository files."
+}

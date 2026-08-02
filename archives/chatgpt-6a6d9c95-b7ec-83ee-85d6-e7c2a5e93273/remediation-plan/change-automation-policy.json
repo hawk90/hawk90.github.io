@@ -1,0 +1,19 @@
+{
+  "policy": "Remediation changes are bounded, evidence-led, and reversible. Automation follows policy, previews by default, and never substitutes a batch mutation for review.",
+  "requiredControls": [
+    "smallest-safe-change",
+    "baseline-and-acceptance-criteria",
+    "negative-acceptance-criteria",
+    "migration-separated-from-redesign",
+    "representative-pilot-including-hard-cases",
+    "policy-before-tooling",
+    "preview-before-apply",
+    "explicit-apply",
+    "idempotency",
+    "partial-failure-reporting",
+    "affected-file-diff-report",
+    "review-sampling",
+    "rollback-boundary"
+  ],
+  "contentPolicy": "Published content and URLs are preservation-first. Frontmatter changes are script-only and require preview, explicit --apply, affected-file reporting, idempotency, and post-change verification."
+}

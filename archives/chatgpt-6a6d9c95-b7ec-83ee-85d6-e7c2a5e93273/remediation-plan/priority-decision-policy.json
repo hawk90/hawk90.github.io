@@ -1,0 +1,21 @@
+{
+  "policy": "Priority is a reviewable routing decision, never an automatic composite score or a moral label. Every active remediation proposal records the factors below as qualitative evidence and may select 'do nothing / defer' with a reason.",
+  "requiredFactors": [
+    "userImpact",
+    "frequency",
+    "blastRadius",
+    "confidence",
+    "reversibility",
+    "dependencyOrder",
+    "maintenanceCost",
+    "effort"
+  ],
+  "forbiddenShortcuts": [
+    "severity-only prioritization",
+    "easy-win-only prioritization",
+    "automatic composite-score decisions",
+    "priority without a baseline or reassessment"
+  ],
+  "allowedOutcomes": ["activate", "defer", "accept", "do-nothing", "reassess"],
+  "acceptanceRequirements": ["rationale", "residualRisk", "reassessmentTrigger"]
+}

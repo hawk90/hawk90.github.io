@@ -1,0 +1,22 @@
+{
+  "policy": "Completion is evidence after release-relevant validation, not merge status. Backlogs are stateful, bounded, and revisitable; governance serves remediation rather than becoming the product.",
+  "requiredControls": [
+    "happy-and-negative-path-validation",
+    "before-after-and-long-tail-samples",
+    "user-experience-alongside-metrics",
+    "cleanup-and-documentation-after-success",
+    "reassessment-trigger",
+    "stateful-evidence-backed-backlog",
+    "bounded-issue-scope",
+    "explicit-owner-or-reviewer",
+    "experiment-expiration",
+    "closure-with-history-and-reopen-path",
+    "governance-proportional-to-remediation"
+  ],
+  "cultureControls": [
+    "evidence-over-shame-and-sunk-cost",
+    "reversible-progress-over-perfectionism",
+    "preservation-with-evidence-not-fear",
+    "action-and-reflection-loop"
+  ]
+}

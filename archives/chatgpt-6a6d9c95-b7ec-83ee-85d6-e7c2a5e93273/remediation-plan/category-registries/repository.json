@@ -1,0 +1,2463 @@
+{
+  "category": "repository",
+  "dispositionScale": [
+    "unassessed",
+    "remediated",
+    "accepted",
+    "superseded",
+    "routed"
+  ],
+  "items": [
+    {
+      "id": "AP-R-01",
+      "title": "R-01. Git Is the Backup",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-01",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-02",
+      "title": "R-02. Single Remote Dependency",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-02",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-03",
+      "title": "R-03. Local Clone as Backup",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-03",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-04",
+      "title": "R-04. Backup Without Restore Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-04",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the disposable local restore rehearsal control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/exercise-local-recovery.mjs",
+            "reports/repository/local-recovery-exercise.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "A Git bundle was restored into a fresh disposable clone and validated through source inventory and static build; independent backup coverage remains separately required."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-05",
+      "title": "R-05. Backup Without Inventory",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-05",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the source recovery inventory control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/build-source-inventory.mjs",
+            "reports/repository/source-inventory.json"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "A deterministic inventory records every Markdown source path, byte count, and SHA-256 before an external backup/restore exercise."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-06",
+      "title": "R-06. Repository Backup Without Secrets Recovery Plan",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-06",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has account-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for account-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-07",
+      "title": "R-07. Backup Includes Live Secrets",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-07",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-08",
+      "title": "R-08. Generated Site as the Only Backup",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-08",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-09",
+      "title": "R-09. Source Only, No Rendered Snapshot",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-09",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-10",
+      "title": "R-10. Same Failure Domain Backup",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "repository-01.md#ap-r-10",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-100",
+      "title": "R-100. Resilience Work Prevents Publishing",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-100",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the bounded resilience workflow control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The runbook prioritizes a readable site and explicitly prevents resilience work from becoming an unbounded publishing blocker."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-11",
+      "title": "R-11. Deployment Is Rebuilt Manually",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-11",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the CI artifact deployment control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/deploy.yml",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The deploy workflow builds and uploads the Pages artifact rather than relying on a hand-assembled deployment."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-12",
+      "title": "R-12. No Known-Good Artifact",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-12",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-13",
+      "title": "R-13. Rollback Means Revert Everything",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-13",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-14",
+      "title": "R-14. Rollback Untested",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-14",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-15",
+      "title": "R-15. Deploy From Mutable Environment",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-15",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the locked dependency installation control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "CI and deployment use npm ci, so the lockfile—not a mutable installed environment—defines dependency installation."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-16",
+      "title": "R-16. No Post-Restore Validation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-16",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the post-restore validation control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/exercise-local-recovery.mjs",
+            "reports/repository/local-recovery-exercise.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The recovery rehearsal verifies Git object connectivity and the restored Markdown source inventory after restoration; the optional --full mode adds dependency and Astro diagnostics."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-17",
+      "title": "R-17. Domain Recovery Ignored",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "repository-01.md#ap-r-17",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has domain-dns-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-18",
+      "title": "R-18. Automatic Renewal Assumption",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-18",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has domain-dns-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-19",
+      "title": "R-19. DNS Records Undocumented",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-19",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has domain-dns-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-20",
+      "title": "R-20. No Emergency Static Host",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-20",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has domain-dns-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-21",
+      "title": "R-21. Comments as Permanent Knowledge",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-21",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-21. Comments as Permanent Knowledge”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-22",
+      "title": "R-22. Analytics as Historical Archive",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-22",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the analytics is not an archive dependency control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/consts/config.ts",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Analytics is explicitly disabled, so site history and recovery do not depend on an analytics provider."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-23",
+      "title": "R-23. External Image Hotlinking",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-23",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the self-hosted content image references control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/content/blog",
+            "scripts/audit-content-asset-portability.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The content corpus contains no Markdown or HTML remote image hotlinks; external reference links remain preserved as citations."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-24",
+      "title": "R-24. External Script as Required Functionality",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-24",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the optional comment integration fallback control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/components/blog/Giscus.astro",
+            "src/pages/blog/[...slug].astro"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "A missing Giscus configuration shows a setup fallback and returns before loading an external script; article rendering remains available."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-25",
+      "title": "R-25. External Font Dependency",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-25",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the self-hosted runtime font path control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/styles/global.css"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The runtime code font is self-hosted with local fallbacks; no remote font stylesheet is configured in the global stylesheet."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-26",
+      "title": "R-26. Newsletter Provider Lock-In",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-26",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the newsletter-independent site control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/consts/config.ts"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Newsletter delivery is explicitly disabled and is not required for site rendering or recovery."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-27",
+      "title": "R-27. Search Service Lock-In",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-27",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the static local search index control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/components/common/SearchModal.astro",
+            "src/pages/search.json.ts",
+            "scripts/verify-search.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Search consumes the site-generated /search.json index rather than a hosted search service."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-28",
+      "title": "R-28. Social Platform as Discovery Backbone",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-28",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the first-party discovery feeds control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/consts/config.ts",
+            "astro.config.mjs",
+            "src/pages/rss.xml.ts"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The site publishes its own sitemap and RSS route, so discovery is not solely delegated to a social platform."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-29",
+      "title": "R-29. AdSense Script Failure Breaks Layout",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-29",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the ad-script-free layout control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The layout has no AdSense runtime script or ad-slot integration that could make layout rendering depend on an ad provider."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-30",
+      "title": "R-30. OAuth Provider as Admin Availability",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-30",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the static PAT-only boundary control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "scripts/security-admin-gate.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The static-site boundary rejects OAuth callback routes; any OAuth workflow requires a separately deployed server boundary."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-31",
+      "title": "R-31. Framework-Specific Content",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-31",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-31. Framework-Specific Content”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-32",
+      "title": "R-32. MDX Component Lock-In",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-32",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the Markdown-only source corpus control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The content collection contains Markdown source files and has no MDX component dependency."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-33",
+      "title": "R-33. Custom Directive Without Fallback",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-33",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-33. Custom Directive Without Fallback”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-34",
+      "title": "R-34. HTML Embedded for Layout",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-34",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-34. HTML Embedded for Layout”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-35",
+      "title": "R-35. CSS Class in Content",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-35",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-35. CSS Class in Content”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-36",
+      "title": "R-36. File Path as Public Identity",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-36",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the stable content ID URLs control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/lib/content/normalize.ts",
+            "scripts/audit-content-portability.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Public blog URLs are derived from stable entry IDs, not directory taxonomy paths."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-37",
+      "title": "R-37. Front Matter Parser Lock-In",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-37",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the independently parseable YAML frontmatter control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-frontmatter-portability.mjs",
+            "reports/content-portability/frontmatter.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Every Markdown document was parsed through js-yaml independently of the Astro content loader; the audit changes no frontmatter."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-38",
+      "title": "R-38. Date Stored in Ambiguous Format",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-38",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the validated date schema control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "scripts/audit-content-portability.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Content dates are parsed through the collection schema instead of relying on ambiguous raw filename metadata."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-39",
+      "title": "R-39. Implicit Metadata Derived From Filename",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-39",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the explicit content metadata control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/lib/content/normalize.ts",
+            "scripts/audit-content-portability.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Canonical topics must be explicit in frontmatter; missing metadata is rejected instead of inferred from a filename."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-40",
+      "title": "R-40. Binary Source Format",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-40",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the text-based content source control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The source corpus is text Markdown, not a binary-only authoring format."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-41",
+      "title": "R-41. Only Generated Diagram Kept",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-41",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-41. Only Generated Diagram Kept”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-42",
+      "title": "R-42. Only Source Diagram Kept",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-42",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-42. Only Source Diagram Kept”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-43",
+      "title": "R-43. Unversioned Diagram Toolchain",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-43",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-43. Unversioned Diagram Toolchain”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-44",
+      "title": "R-44. External Asset by Mutable URL",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-44",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-44. External Asset by Mutable URL”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-45",
+      "title": "R-45. Screenshot Without Source Context",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-45",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-45. Screenshot Without Source Context”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-46",
+      "title": "R-46. Lossy Re-encoding Loop",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-46",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-46. Lossy Re-encoding Loop”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-47",
+      "title": "R-47. No Original Image Preservation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-47",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-47. No Original Image Preservation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-48",
+      "title": "R-48. Font-Dependent SVG",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-48",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-48. Font-Dependent SVG”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-49",
+      "title": "R-49. Diagram Text as Paths Only",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-49",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-49. Diagram Text as Paths Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-50",
+      "title": "R-50. Media Without Checksums",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-50",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-50. Media Without Checksums”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-51",
+      "title": "R-51. URL Changes With Every Taxonomy Refactor",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-51",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the taxonomy-independent URL policy control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/lib/content/normalize.ts",
+            "scripts/audit-content-portability.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Taxonomy changes do not form the public blog URL because the URL is based on the entry ID."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-52",
+      "title": "R-52. Date-Based URL Lock-In",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-52",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the date-independent URL policy control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/lib/content/normalize.ts",
+            "scripts/audit-content-portability.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Public blog URLs are stable entry IDs, not publication dates."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-53",
+      "title": "R-53. Title-Derived Slug Mutation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-53",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the title-independent URL policy control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/lib/content/normalize.ts",
+            "scripts/audit-content-portability.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Public blog URLs are stable entry IDs, not mutable titles or generated title slugs."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-54",
+      "title": "R-54. No Redirect Registry",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-54",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-54. No Redirect Registry”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-55",
+      "title": "R-55. Redirect Chain Accumulation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-55",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-55. Redirect Chain Accumulation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-56",
+      "title": "R-56. Redirect Provider Lock-In",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-56",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-56. Redirect Provider Lock-In”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-57",
+      "title": "R-57. Canonical Depends on Runtime Host",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-57",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the configured canonical host control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Canonical URLs use Astro.site from a checked-in static-site configuration, not an untrusted runtime Host header."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-58",
+      "title": "R-58. Anchor Instability",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-58",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-58. Anchor Instability”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-59",
+      "title": "R-59. Duplicate Anchor Renumbering",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-01.md#ap-r-59",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-59. Duplicate Anchor Renumbering”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-60",
+      "title": "R-60. Deleted URL Forgotten",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-60",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-60. Deleted URL Forgotten”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-61",
+      "title": "R-61. Current State Overwrites History",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-61",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the versioned source history control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-repository-health.mjs",
+            "reports/repository-health/latest.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Repository object connectivity and a recovery remote are verified; the current source is retained as Git history rather than a single overwritten snapshot."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-62",
+      "title": "R-62. Historical Article Looks Current",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-62",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-62. Historical Article Looks Current”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-63",
+      "title": "R-63. Link to Latest Documentation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-63",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-63. Link to Latest Documentation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-64",
+      "title": "R-64. Source Link to Main Branch",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-64",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-64. Source Link to Main Branch”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-65",
+      "title": "R-65. Spec Reference Without Revision",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-65",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-65. Spec Reference Without Revision”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-66",
+      "title": "R-66. Benchmark Without Preservation Data",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-66",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-66. Benchmark Without Preservation Data”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-67",
+      "title": "R-67. Environment Captured as Free Text Only",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-67",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-67. Environment Captured as Free Text Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-68",
+      "title": "R-68. Tool Version Lost",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-68",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-68. Tool Version Lost”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-69",
+      "title": "R-69. Reproduction Requires Defunct Hardware",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-69",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-69. Reproduction Requires Defunct Hardware”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-70",
+      "title": "R-70. External Evidence Disappears",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-70",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-70. External Evidence Disappears”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-71",
+      "title": "R-71. No Export Path",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-71",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the open portable content export control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/export-portable-content.mjs",
+            "reports/content-export/content.jsonl",
+            "reports/content-export/manifest.json"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The full source corpus has an additive, independently readable JSONL export path."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-72",
+      "title": "R-72. Export Loses Relationships",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-72",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the relationship-preserving export control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/export-portable-content.mjs",
+            "reports/content-export/content.jsonl"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Every portable export record retains frontmatter relationships and the stable public URL alongside the full body."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-73",
+      "title": "R-73. Export Depends on Building the Whole Site",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-73",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the source-readable export path control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The complete text source corpus is directly readable from the repository without building the whole site."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-74",
+      "title": "R-74. Content IDs Not Stable",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-74",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the stable content IDs control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/lib/content/normalize.ts",
+            "scripts/audit-content-portability.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The runtime URL contract uses the content entry ID and is audited as a portability control."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-75",
+      "title": "R-75. Search Data Is Non-Portable",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-75",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the portable generated search data control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/pages/search.json.ts"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Search data is emitted as a site-owned JSON document from the content manifest."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-76",
+      "title": "R-76. Theme Contains Business Logic",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-76",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-76. Theme Contains Business Logic”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-77",
+      "title": "R-77. Build Scripts Assume Repository Name",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-77",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-77. Build Scripts Assume Repository Name”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-78",
+      "title": "R-78. GitHub Pages Assumptions Everywhere",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-78",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-78. GitHub Pages Assumptions Everywhere”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-79",
+      "title": "R-79. No Alternative Render Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-79",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-79. No Alternative Render Test”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-80",
+      "title": "R-80. Migration Rewrite Temptation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "repository-02.md#ap-r-80",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the additive migration boundary control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The recovery and export contracts are additive and explicitly prohibit migration rewrites from being inferred as preservation work."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-81",
+      "title": "R-81. Live Site Is the Archive",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-81",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the source and export archive control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/content/blog",
+            "reports/content-export/content.jsonl"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The live site is not the sole archive: Git source and a full portable export are both retained."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-82",
+      "title": "R-82. Archive Without Discovery",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-82",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-82. Archive Without Discovery”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-83",
+      "title": "R-83. Archive Every Build",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-83",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-83. Archive Every Build”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-84",
+      "title": "R-84. Archive Without Checksums",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-84",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the checksummed source export control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/export-portable-content.mjs",
+            "scripts/audit-portable-content-export.mjs",
+            "reports/content-export/manifest.json"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Every exported source document has a SHA-256 record verified against the preserved Markdown source."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-85",
+      "title": "R-85. Archive Uses Proprietary Container Only",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-85",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the open archive container control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "reports/content-export/content.jsonl",
+            "reports/content-export/README.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The export uses plain UTF-8 JSON Lines rather than a proprietary container."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-86",
+      "title": "R-86. No Offline Readability",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-86",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the offline-readable source control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The preserved Markdown corpus can be read offline without a proprietary archive reader."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-87",
+      "title": "R-87. Archive Excludes Redirect History",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-87",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-87. Archive Excludes Redirect History”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-88",
+      "title": "R-88. Archive Excludes Comments and Corrections",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-88",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-88. Archive Excludes Comments and Corrections”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-R-89",
+      "title": "R-89. No Human-Readable Manifest",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-89",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the human-readable archive manifest control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The export includes a human-readable README and a machine-readable manifest of every stable source record."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-90",
+      "title": "R-90. Preservation System Becomes the Product",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-90",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the bounded preservation scope control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The runbook bounds preservation work around restoring a readable site before optional integrations, preventing the preservation system from becoming the product."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-91",
+      "title": "R-91. No Failure Classification",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-91",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the failure classification runbook control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The recovery runbook requires an incident trigger and failure classification."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-92",
+      "title": "R-92. No Recovery Priority",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-92",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the documented recovery priority control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The runbook defines recovery order before optional integration recovery."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-93",
+      "title": "R-93. Comments Delay Site Recovery",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-93",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the comments outside recovery critical path control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Comments are explicitly restored only after the readable static site is healthy."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-94",
+      "title": "R-94. Analytics Required for Deployment",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-94",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the analytics-independent deployment control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "src/consts/config.ts",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "Analytics is explicitly disabled and the deployment workflow has no analytics prerequisite."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-95",
+      "title": "R-95. Recovery Changes Canonical URLs",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-95",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has domain-dns-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-96",
+      "title": "R-96. Emergency Host Indexed",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-96",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has domain-dns-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-97",
+      "title": "R-97. Incident Fix Without Root Cause",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-97",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the incident root-cause record control still hold after changes to its listed source files?",
+      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
+          "result": "The runbook requires an incident record including residual risk and reassessment, not only an immediate fix."
+        }
+      ],
+      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+    },
+    {
+      "id": "AP-R-98",
+      "title": "R-98. No Account Recovery Preparation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-98",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has account-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for account-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    },
+    {
+      "id": "AP-R-99",
+      "title": "R-99. Single Maintainer Knowledge",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "repository-02.md#ap-r-99",
+        "messageIds": [
+          "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
+        ]
+      },
+      "disposition": "accepted",
+      "nextAction": "external-review",
+      "reviewQuestion": "Has account-recovery been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
+      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:repository-external-evidence",
+          "result": "Accepted risk deferral for account-recovery; actual exercise remains pending."
+        }
+      ],
+      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+    }
+  ]
+}

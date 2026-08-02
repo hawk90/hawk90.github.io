@@ -1,0 +1,2382 @@
+{
+  "category": "quality",
+  "dispositionScale": [
+    "unassessed",
+    "remediated",
+    "accepted",
+    "superseded",
+    "routed"
+  ],
+  "items": [
+    {
+      "id": "AP-T-01",
+      "title": "T-01. Build Success Equals Correctness",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-01",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the multi-layer release contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The multi-layer release contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-02",
+      "title": "T-02. Type Safety as Content Safety",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-02",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the validated content schema control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The validated content schema control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-03",
+      "title": "T-03. Test Only the Framework",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-03",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the content-aware regression checks control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The content-aware regression checks control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-04",
+      "title": "T-04. Content Is Not Code",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-04",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the content included in release checks control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The content included in release checks control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-05",
+      "title": "T-05. Test Every Detail",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-05",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-05. Test Every Detail”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-06",
+      "title": "T-06. Utility-Only Unit Tests",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-06",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-06. Utility-Only Unit Tests”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-07",
+      "title": "T-07. Mock Everything",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-07",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-07. Mock Everything”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-08",
+      "title": "T-08. No Parser Fixture",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-08",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the independent parser corpus audit control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The independent parser corpus audit control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-09",
+      "title": "T-09. Happy-Path Fixture Only",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-09",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the negative-path validation control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The negative-path validation control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-10",
+      "title": "T-10. Fixture Does Not Resemble Real Content",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-10",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-10. Fixture Does Not Resemble Real Content”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-100",
+      "title": "T-100. Testing System Becomes the Product",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-100",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-100. Testing System Becomes the Product”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-11",
+      "title": "T-11. Fixture Copy of Production Article",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-11",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-11. Fixture Copy of Production Article”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-12",
+      "title": "T-12. Unit Test Internal Implementation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-12",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-12. Unit Test Internal Implementation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-13",
+      "title": "T-13. Generated HTML String Equality",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-13",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-13. Generated HTML String Equality”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-14",
+      "title": "T-14. Locale-Dependent Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-14",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-14. Locale-Dependent Test”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-15",
+      "title": "T-15. Time-Dependent Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-15",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-15. Time-Dependent Test”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-16",
+      "title": "T-16. No End-to-End Content Pipeline Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-16",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the end-to-end publish pipeline control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The end-to-end publish pipeline control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-17",
+      "title": "T-17. Production Build Never Tested in CI",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-17",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the production build in deployment CI control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The production build in deployment CI control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-18",
+      "title": "T-18. Full Build Only Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-18",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the layered checks before build control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The layered checks before build control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-19",
+      "title": "T-19. No Generated Output Inspection",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-19",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the generated artifact inspection control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The generated artifact inspection control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-20",
+      "title": "T-20. One Representative Page",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-20",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the corpus-wide internal-link audit control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The corpus-wide internal-link audit control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-21",
+      "title": "T-21. No Large-Article Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-21",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the large-corpus parser coverage control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The large-corpus parser coverage control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-22",
+      "title": "T-22. No Empty-State Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-22",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the search empty-state contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The search empty-state contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-23",
+      "title": "T-23. No Error-State Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-23",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the search error-state contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The search error-state contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-24",
+      "title": "T-24. Preview and Production Divergence",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-24",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the preview/production output contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The preview/production output contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-25",
+      "title": "T-25. Test Against Source, Not Dist",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-25",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the dist artifact validation control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The dist artifact validation control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-26",
+      "title": "T-26. HTTP Status Only Link Check",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-26",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the filesystem-aware internal link check control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The filesystem-aware internal link check control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-27",
+      "title": "T-27. Every External Link on Every Commit",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-27",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-27. Every External Link on Every Commit”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-28",
+      "title": "T-28. External Failure Blocks Publishing",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-28",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-28. External Failure Blocks Publishing”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-29",
+      "title": "T-29. Redirect Considered Healthy Forever",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-29",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-29. Redirect Considered Healthy Forever”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-30",
+      "title": "T-30. Anchor Links Not Checked",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-30",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-30. Anchor Links Not Checked”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-31",
+      "title": "T-31. Generated Heading Slug Assumption",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-31",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-31. Generated Heading Slug Assumption”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-32",
+      "title": "T-32. Link Checker Parses Code Blocks",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-32",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the code-fence link exclusion control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The code-fence link exclusion control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-33",
+      "title": "T-33. Link Checker Ignores Reference Links",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-33",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the reference-style link resolution control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The reference-style link resolution control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-34",
+      "title": "T-34. Link Fixer Chooses Nearest Title",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-34",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the deterministic link repair control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The deterministic link repair control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-35",
+      "title": "T-35. Redirect Hides Internal Link Debt",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-35",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-35. Redirect Hides Internal Link Debt”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-36",
+      "title": "T-36. Search Works Means Search Is Good",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-36",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the search quality regression contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The search quality regression contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-37",
+      "title": "T-37. No Golden Query Set",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-37",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the golden query set control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The golden query set control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-38",
+      "title": "T-38. Only Exact Query Tests",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-38",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the alias-query coverage control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The alias-query coverage control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-39",
+      "title": "T-39. No Negative Search Cases",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-39",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the negative search case control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The negative search case control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-40",
+      "title": "T-40. Rank-One-Only Evaluation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-40",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the multi-result search ranking regression control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The multi-result search ranking regression control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-41",
+      "title": "T-41. Search Snapshot by Score",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-41",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the search ranking snapshot regression control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The search ranking snapshot regression control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-42",
+      "title": "T-42. Search Test Ignores Content Status",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-42",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the publication-aware search contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The publication-aware search contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-43",
+      "title": "T-43. Search Test Ignores Canonical Guide",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-43",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the canonical search URL contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The canonical search URL contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-44",
+      "title": "T-44. Search Test Dataset Too Small",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-44",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the representative search corpus control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The representative search corpus control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-45",
+      "title": "T-45. Search Quality Tested Only Manually",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-45",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the automated search quality regression control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The automated search quality regression control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-46",
+      "title": "T-46. Screenshot Every Page",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-46",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-46. Screenshot Every Page”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-47",
+      "title": "T-47. No Visual Regression Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-47",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-47. No Visual Regression Test”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-48",
+      "title": "T-48. Pixel-Perfect Failure",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-48",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-48. Pixel-Perfect Failure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-49",
+      "title": "T-49. Visual Test on One Browser",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-49",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-49. Visual Test on One Browser”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-50",
+      "title": "T-50. Desktop-Only Screenshot",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-50",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-50. Desktop-Only Screenshot”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-51",
+      "title": "T-51. Screenshot Without Interaction",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-51",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-51. Screenshot Without Interaction”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-52",
+      "title": "T-52. Dynamic Content in Screenshot",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-52",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-52. Dynamic Content in Screenshot”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-53",
+      "title": "T-53. Font Not Pinned",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-53",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-53. Font Not Pinned”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-54",
+      "title": "T-54. Dark Mode Untested",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-54",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-54. Dark Mode Untested”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-55",
+      "title": "T-55. Generated Diagram Untested",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-55",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-55. Generated Diagram Untested”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-56",
+      "title": "T-56. Automated Accessibility Equals Accessible",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-56",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-56. Automated Accessibility Equals Accessible”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-57",
+      "title": "T-57. Accessibility Test on Homepage Only",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-57",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-57. Accessibility Test on Homepage Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-58",
+      "title": "T-58. No Keyboard Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-58",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-58. No Keyboard Test”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-59",
+      "title": "T-59. Focus Visible Test Missing",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-01.md#ap-t-59",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-59. Focus Visible Test Missing”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-60",
+      "title": "T-60. Focus Order Follows DOM Accidentally",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-60",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-60. Focus Order Follows DOM Accidentally”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-61",
+      "title": "T-61. Modal Escape Not Tested",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-61",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the search Escape close contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The search Escape close contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-62",
+      "title": "T-62. Reduced Motion Untested",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-62",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the reduced-motion contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The reduced-motion contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-63",
+      "title": "T-63. High Contrast Untested",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-63",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-63. High Contrast Untested”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-64",
+      "title": "T-64. Screen Reader Label Snapshot",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-64",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-64. Screen Reader Label Snapshot”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-65",
+      "title": "T-65. Semantic HTML Replaced by ARIA Tests",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-65",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-65. Semantic HTML Replaced by ARIA Tests”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-66",
+      "title": "T-66. Grammar Linter as Technical Validator",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-66",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-66. Grammar Linter as Technical Validator”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-67",
+      "title": "T-67. Minimum Word Count Rule",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-67",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-67. Minimum Word Count Rule”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-68",
+      "title": "T-68. Required Section Checklist Everywhere",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-68",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-68. Required Section Checklist Everywhere”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-69",
+      "title": "T-69. Description Length as Quality",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-69",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-69. Description Length as Quality”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-70",
+      "title": "T-70. Duplicate Detector by Text Similarity Alone",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-70",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-70. Duplicate Detector by Text Similarity Alone”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-71",
+      "title": "T-71. AI Detector as Quality Gate",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-71",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-71. AI Detector as Quality Gate”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-72",
+      "title": "T-72. Citation Count as Trust Score",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-72",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-72. Citation Count as Trust Score”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-73",
+      "title": "T-73. Environment Section Presence Only",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-73",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-73. Environment Section Presence Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-74",
+      "title": "T-74. Updated Date Automatically Means Verified",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-74",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the separate verification metadata contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The separate verification metadata contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-75",
+      "title": "T-75. Broken Claim Detection by Keyword",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-75",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-75. Broken Claim Detection by Keyword”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-76",
+      "title": "T-76. Schema Valid, Relation Invalid",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "quality-02.md#ap-t-76",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the relation integrity validation control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The relation integrity validation control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-77",
+      "title": "T-77. Self-Referential Relation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-77",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the self-referential relation rejection control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The self-referential relation rejection control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-78",
+      "title": "T-78. Duplicate Relation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-78",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the duplicate relation rejection control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The duplicate relation rejection control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-79",
+      "title": "T-79. Invalid Inverse Relation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-79",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-79. Invalid Inverse Relation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-80",
+      "title": "T-80. Circular Supersession",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-80",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-80. Circular Supersession”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-81",
+      "title": "T-81. Series Order Collision",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-81",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the series order collision audit control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The series order collision audit control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-82",
+      "title": "T-82. Missing Series Member",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-82",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-82. Missing Series Member”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-83",
+      "title": "T-83. Topic Hub References Draft",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-83",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the published hub draft guard control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The published hub draft guard control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-84",
+      "title": "T-84. Superseded Article Remains Featured",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-84",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-84. Superseded Article Remains Featured”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-85",
+      "title": "T-85. Canonical Slug Collision",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-85",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the generated canonical slug uniqueness control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The generated canonical slug uniqueness control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-86",
+      "title": "T-86. Asset Exists Means Correct",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-86",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-86. Asset Exists Means Correct”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-87",
+      "title": "T-87. Image Reference Without Dimension Check",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-87",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-87. Image Reference Without Dimension Check”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-88",
+      "title": "T-88. SVG Syntax Only Validation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-88",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-88. SVG Syntax Only Validation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-89",
+      "title": "T-89. OG Text Overflow Untested",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-89",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-89. OG Text Overflow Untested”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-90",
+      "title": "T-90. Missing Font Fallback in Generator",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-90",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-90. Missing Font Fallback in Generator”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-91",
+      "title": "T-91. Search Manifest and Page Set Diverge",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-91",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the search manifest/page parity control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The search manifest/page parity control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-92",
+      "title": "T-92. RSS Contains Draft or Superseded Content",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-92",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the RSS publication boundary control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The RSS publication boundary control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-93",
+      "title": "T-93. Sitemap Contains Redirect Targets Twice",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-93",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the sitemap uniqueness boundary control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The sitemap uniqueness boundary control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-94",
+      "title": "T-94. OG Generation Failure Silently Falls Back",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-94",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the OG generation failure contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The OG generation failure contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-95",
+      "title": "T-95. Dependency Scan Only Security Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-95",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the layered dependency and quality contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The layered dependency and quality contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-96",
+      "title": "T-96. No Secret Scan in Content",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-96",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the content secret-scan contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The content secret-scan contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-97",
+      "title": "T-97. CSP Header Presence Only",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-97",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-97. CSP Header Presence Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-T-98",
+      "title": "T-98. Admin Route Hidden Test",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "quality-02.md#ap-t-98",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the admin artifact boundary contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The admin artifact boundary contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    },
+    {
+      "id": "AP-T-99",
+      "title": "T-99. Workflow Permission Not Tested",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "quality-02.md#ap-t-99",
+        "messageIds": [
+          "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+        ]
+      },
+      "disposition": "remediated",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Does the workflow security contract control remain in the release contract after future tooling changes?",
+      "scope": "Repository-wide quality control; no published content, URLs, or frontmatter are changed.",
+      "dependsOn": [],
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/verify-search.mjs",
+            "scripts/audit-frontmatter-portability.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The workflow security contract control is included in the current quality contract."
+        }
+      ],
+      "residualRisk": "This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review."
+    }
+  ]
+}
