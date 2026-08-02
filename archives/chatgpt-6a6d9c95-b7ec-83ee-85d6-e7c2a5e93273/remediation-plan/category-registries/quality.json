@@ -425,13 +425,25 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-14. Locale-Dependent Test”?",
-      "scope": null,
+      "reviewQuestion": "Reassess with AP-P-77 if a build or test result changes across Node ICU/default locale settings.",
+      "scope": "Quality-test determinism policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-search.mjs",
+            "scripts/build-llm-antipatterns.mjs",
+            "scripts/build-llm-phases.mjs",
+            "src/lib/posts.ts",
+            "reports/quality/contracts.md"
+          ],
+          "verification": "npm run verify:release && npm run audit:quality-contracts",
+          "result": "Search and release checks assert stable semantic outcomes; generated LLM artifacts use explicit English ordering, while user-facing Korean label sorting remains an intentional presentation concern rather than a test oracle."
+        }
+      ],
+      "residualRisk": "Some user-facing localeCompare calls intentionally follow locale semantics, and unqualified ordering in auxiliary paths could vary across ICU environments; add an explicit locale or key-based comparator when such a path becomes a release invariant."
     },
     {
       "id": "AP-T-15",
