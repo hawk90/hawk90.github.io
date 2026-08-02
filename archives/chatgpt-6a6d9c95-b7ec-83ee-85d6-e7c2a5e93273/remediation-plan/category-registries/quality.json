@@ -1403,13 +1403,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-47. No Visual Regression Test”?",
-      "scope": null,
+      "reviewQuestion": "Reassess representative browser regression coverage before major layout, theme, or responsive breakpoint changes.",
+      "scope": "Repository visual-regression policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-product-experience.mjs",
+            "scripts/build-diagram-review-index.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run audit:diagram-quality && npm run verify:release",
+          "result": "The repository uses route/asset contracts and targeted diagram review rather than a browser screenshot-diff suite; this is an explicit scope decision, not an assertion that visual regression is fully automated."
+        }
+      ],
+      "residualRisk": "CSS, responsive, dark-mode, and interaction regressions can escape static checks; introduce representative browser snapshots when the visual surface or release risk justifies the maintenance cost."
     },
     {
       "id": "AP-T-48",

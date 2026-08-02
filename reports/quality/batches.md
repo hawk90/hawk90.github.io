@@ -2,13 +2,12 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 36
+- Unassessed items: 35
 - Maximum batch size: 15
 - Batches: 3
 
 ## quality-01 — quality-01.md
 
-- AP-T-47 (P1, M) — T-47. No Visual Regression Test
 - AP-T-48 (P1, M) — T-48. Pixel-Perfect Failure
 - AP-T-49 (P1, M) — T-49. Visual Test on One Browser
 - AP-T-50 (P1, M) — T-50. Desktop-Only Screenshot
