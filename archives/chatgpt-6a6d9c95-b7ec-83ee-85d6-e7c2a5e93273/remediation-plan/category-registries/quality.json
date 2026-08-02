@@ -906,13 +906,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-30. Anchor Links Not Checked”?",
-      "scope": null,
+      "reviewQuestion": "Reassess anchor coverage when heading or slug generation changes.",
+      "scope": "Repository anchor-link validation; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-anchor-links.mjs",
+            "scripts/audit-internal-links.py",
+            "scripts/verify-release.mjs",
+            "reports/quality/anchors.md"
+          ],
+          "verification": "npm run audit:anchors && npm run verify:release",
+          "result": "Anchor targets and internal links are audited against generated heading IDs and the source corpus; the release contract includes the link checks."
+        }
+      ],
+      "residualRisk": "Dynamic client-side anchors or external fragments are outside the static source audit and require targeted browser review when introduced."
     },
     {
       "id": "AP-T-31",
