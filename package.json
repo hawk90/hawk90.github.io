@@ -120,7 +120,7 @@
   "dependencies": {
     "@astrojs/mdx": "^7.0.5",
     "@astrojs/rss": "^4.0.18",
-    "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/sitemap": "^3.7.3",
     "@expressive-code/plugin-line-numbers": "^0.42.0",
     "@milkdown/kit": "^7.21.0",
     "@resvg/resvg-js": "^2.6.2",
@@ -141,7 +141,7 @@
     "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "js-yaml": "^4.1.0",
     "typescript": "^5.9.3"
   }
