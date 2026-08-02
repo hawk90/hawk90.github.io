@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'content', 'blog', 'tools', 'debugging', 'embedded');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 1, 'chapter01-rsp-protocol.md',          'GDB Remote Serial Protocol 분석 — 디버거-타겟 통신 메커니즘',                 '2026-05-26T09:01:00'],

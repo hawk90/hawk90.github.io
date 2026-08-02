@@ -112,10 +112,22 @@ def main():
     for f in args.files:
         p = Path(f)
         p = p if p.is_absolute() else REPO_ROOT / p
-        lines = p.read_text(encoding="utf-8").split("\n")
+        original = p.read_text(encoding="utf-8")
+        lines = original.splitlines()
+        final_newline = "\n" if original.endswith("\n") else ""
         in_fence = False
+        in_frontmatter = False
         out, hits = [], []
         for i, line in enumerate(lines, 1):
+            if i == 1 and line == "---":
+                in_frontmatter = True
+                out.append(line)
+                continue
+            if in_frontmatter:
+                out.append(line)
+                if line == "---":
+                    in_frontmatter = False
+                continue
             if FENCE.match(line):
                 in_fence = not in_fence
                 out.append(line)
@@ -128,11 +140,15 @@ def main():
                 hits.append((i, line.strip(), new.strip()))
             out.append(new)
         total += len(hits)
-        print(f"=== {p.relative_to(REPO_ROOT)} — {len(hits)} 라인 변환 ===")
+        try:
+            label = p.relative_to(REPO_ROOT)
+        except ValueError:
+            label = p
+        print(f"=== {label} — {len(hits)} 라인 변환 ===")
         for ln, before, after in hits[:80]:
             print(f"  L{ln}: …{before[-50:]}\n      → …{after[-50:]}")
         if args.apply and hits:
-            p.write_text("\n".join(out), encoding="utf-8")
+            p.write_text("\n".join(out) + final_newline, encoding="utf-8")
     print(f"\n{'APPLIED' if args.apply else 'DRY RUN'} — 총 {total} 라인")
 
 

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'content', 'blog', 'tools', 'debugging', 'kernel');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 1, 'chapter01-user-kernel-boundary.md', '리눅스 커널 디버깅 개론 — User/Kernel 경계와 도구 선택',                  '2026-05-25T09:01:00'],

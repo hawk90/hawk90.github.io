@@ -1,0 +1,611 @@
+{
+  "total": 3387,
+  "verified": 0,
+  "current": 0,
+  "needsReview": 3387,
+  "archived": 0,
+  "evidence": 0,
+  "reviewQueue": [
+    {
+      "id": "embedded/modern-recipes/00-preface",
+      "title": "Modern Embedded Recipes — 모던 임베디드 실전 레시피 시리즈 소개",
+      "date": "2026-04-10T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "embedded/rtos/practical-internals/00-preface",
+      "title": "Practical RTOS Internals — 실시간 커널 내부 분석 시리즈 소개",
+      "date": "2026-05-04T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "embedded/performance-engineering/00-preface",
+      "title": "Embedded Performance Engineering — 임베디드 성능 엔지니어링 시리즈 소개",
+      "date": "2026-04-23T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "programming/code-review/folly/00-preface",
+      "title": "Folly Code Review — Meta의 production-grade C++ 라이브러리 코드 분석",
+      "date": "2026-06-04T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "embedded/embedded-cpp/00-preface",
+      "title": "Embedded C++ for Real Systems — 임베디드 모던 C++ 시리즈 소개",
+      "date": "2026-04-28T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "programming/code-review/abseil/00-preface",
+      "title": "Abseil Code Review — Google production-grade C++ 라이브러리 분석",
+      "date": "2026-06-09T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "embedded/modern-recipes/part1-01-digital-signal-basics",
+      "title": "디지털 신호 기초 — Voltage Level·Edge·Setup/Hold 분석",
+      "date": "2026-04-10T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-02-clock-timing",
+      "title": "임베디드 클럭과 타이밍 — Skew·Jitter·PLL·MMCM 분석",
+      "date": "2026-04-10T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-03-gpio-internals",
+      "title": "GPIO 내부 구조 분해 — Push-Pull·Open-Drain·Schmitt Trigger",
+      "date": "2026-04-10T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-04-uart-hardware",
+      "title": "UART 하드웨어 동작 분석 — Baud Rate·Framing·FIFO",
+      "date": "2026-04-10T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-05-spi-hardware",
+      "title": "SPI 하드웨어 분석 — Clock Mode·MOSI/MISO·Chip Select",
+      "date": "2026-04-10T09:05:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-06-i2c-hardware",
+      "title": "I2C 하드웨어 분석 — Open-Drain·Clock Stretching·Arbitration",
+      "date": "2026-04-10T09:06:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-07-adc-principles",
+      "title": "ADC 동작 원리 — SAR·Sigma-Delta·Pipelined 비교",
+      "date": "2026-04-10T09:07:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-08-dac-principles",
+      "title": "DAC 동작 원리 — R-2R Ladder·Sigma-Delta·Settling Time",
+      "date": "2026-04-10T09:08:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-09-pwm-signal",
+      "title": "PWM 신호 생성 분석 — Duty·Frequency·Dead Time·Center-Aligned",
+      "date": "2026-04-10T09:09:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-10-can-electrical",
+      "title": "CAN 버스 전기적 특성 — Differential·Termination·Dominant/Recessive",
+      "date": "2026-04-10T09:10:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-11-rs485-rs422",
+      "title": "RS-485·RS-422 차동 신호 분석 — Termination·Biasing·Topology",
+      "date": "2026-04-10T09:11:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-12-lvds-differential",
+      "title": "LVDS 차동 신호 분석 — Common-Mode·Impedance·Eye Pattern",
+      "date": "2026-04-10T09:12:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-01-dynamic-memory",
+      "title": "임베디드 동적 메모리 — malloc 위험·결정성·대안 분석",
+      "date": "2026-04-17T09:00:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-02-memory-alignment",
+      "title": "메모리 정렬과 패딩 분석 — Natural·Strict Alignment·Trap",
+      "date": "2026-04-17T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-03-cache-alignment",
+      "title": "Cache Line Alignment — alignas·Padding·SoA 적용",
+      "date": "2026-04-17T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-04-dma-allocator",
+      "title": "DMA-Friendly Allocator — dma_alloc_coherent·IOMMU·Pool",
+      "date": "2026-04-17T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-05-zero-copy",
+      "title": "Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice",
+      "date": "2026-04-17T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-06-numa",
+      "title": "NUMA Memory Topology — numactl·numa_alloc·HBM 적용",
+      "date": "2026-04-17T09:05:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-07-simd",
+      "title": "SIMD 활용 분석 — Intrinsics·Auto-Vectorization·OpenMP SIMD",
+      "date": "2026-04-17T09:06:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-08-neon",
+      "title": "ARM NEON 심화 — Matrix Multiply·FFT·Image Filter 적용",
+      "date": "2026-04-17T09:07:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-09-stack-analysis",
+      "title": "임베디드 스택 분석 — high-water·overflow 탐지",
+      "date": "2026-04-17T09:08:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-10-code-size-optimization",
+      "title": "임베디드 코드 크기 최적화 — -Os·LTO·Section Garbage Collection",
+      "date": "2026-04-17T09:09:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-11-power-optimization",
+      "title": "임베디드 전력 최적화 — Sleep Mode·Clock Gating·DVFS",
+      "date": "2026-04-17T09:10:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-12-wcet-analysis",
+      "title": "WCET 분석 기법 — Static·Measurement·Hybrid 방법론",
+      "date": "2026-04-17T09:11:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-01-pipeline",
+      "title": "CPU 파이프라인 분석 — 5-stage·Cortex-M·Cortex-A 비교",
+      "date": "2026-04-24T09:00:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-02-pipeline-stall",
+      "title": "Pipeline Stall 분석 — Data·Structural·Control Hazard·Forwarding",
+      "date": "2026-04-24T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-03-branch-prediction",
+      "title": "Branch Prediction 분석 — Static·2-bit·BTB·BHT·Mispredict 비용",
+      "date": "2026-04-24T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-04-speculative-execution",
+      "title": "Speculative Execution 분석 — OoO·Reorder Buffer·Register Renaming",
+      "date": "2026-04-24T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-05-cache-basics",
+      "title": "CPU Cache 기초 — L1·L2·L3·Set Associative·Replacement Policy",
+      "date": "2026-04-24T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-06-cache-miss",
+      "title": "Cache Miss 3C Model 분석 — Compulsory·Capacity·Conflict",
+      "date": "2026-04-24T09:05:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-07-cache-line",
+      "title": "Cache Line 최적화 — Alignment·Prefetch·False Sharing 처리",
+      "date": "2026-04-24T09:06:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-08-memory-bandwidth",
+      "title": "메모리 대역폭 분석 — STREAM·Roofline·Bus Saturation 측정",
+      "date": "2026-04-24T09:07:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-09-simd-neon",
+      "title": "SIMD·NEON 활용 — 128-bit Vector·Auto-Vectorization·SVE/SVE2",
+      "date": "2026-04-24T09:08:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/performance-engineering/part2-10-pmu",
+      "title": "PMU·HPM 하드웨어 카운터 분석 — 정밀 성능 진단",
+      "date": "2026-04-24T09:09:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part4-01-iobuf",
+      "title": "folly::IOBuf 분석 — zero-copy buffer chain의 기본 단위",
+      "date": "2026-06-05T09:00:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part4-02-iobuf-queue",
+      "title": "folly::IOBufQueue — chain의 push/pull 추상화",
+      "date": "2026-06-05T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part4-03-cursor",
+      "title": "folly::io::Cursor·RWCursor — chain 위의 stream",
+      "date": "2026-06-05T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part4-04-zero-copy-patterns",
+      "title": "folly Zero-copy 패턴 — IOBuf로 ScatterGather I/O 표현",
+      "date": "2026-06-05T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part4-05-iobuf-shared-semantics",
+      "title": "folly::IOBuf shared semantics — clone·unshare·takeOwnership",
+      "date": "2026-06-05T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part5-01-fbstring",
+      "title": "folly::FBString 분석 — SSO + COW 구현",
+      "date": "2026-06-05T09:05:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part5-02-fmt-format-integration",
+      "title": "folly의 fmt::format 통합 — 모던 포맷팅 채택",
+      "date": "2026-06-05T09:06:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part5-03-string-piece",
+      "title": "folly::StringPiece — string_view 호환 분석",
+      "date": "2026-06-05T09:07:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part5-04-join-split",
+      "title": "folly Join·Split utilities — 문자열 분해와 결합",
+      "date": "2026-06-05T09:08:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part6-01-to-try-to",
+      "title": "folly::to·tryTo — text↔num 변환 분석",
+      "date": "2026-06-05T09:09:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part6-02-conv-customization",
+      "title": "folly Conv Customization — 사용자 타입 지원",
+      "date": "2026-06-05T09:10:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part6-03-conv-performance",
+      "title": "folly Conv 성능 비교 — sprintf·stringstream 대비",
+      "date": "2026-06-05T09:11:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part7-01-f14-value-map",
+      "title": "folly::F14ValueMap vs std::unordered_map",
+      "date": "2026-06-05T09:12:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part7-02-f14-node-map",
+      "title": "folly::F14NodeMap — stable pointer가 필요할 때",
+      "date": "2026-06-05T09:13:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part7-03-f14-vector-map",
+      "title": "folly::F14VectorMap — cache-friendly iteration",
+      "date": "2026-06-05T09:14:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part7-04-f14-fast-map",
+      "title": "folly::F14FastMap — auto-select 동작",
+      "date": "2026-06-05T09:15:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part7-05-f14-internals",
+      "title": "folly F14 internals — SIMD probing 메커니즘",
+      "date": "2026-06-05T09:16:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/folly/part8-01-small-vector",
+      "title": "folly::small_vector — inline storage 분석",
+      "date": "2026-06-05T09:17:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part9-01-int128",
+      "title": "absl::int128·uint128 분석",
+      "date": "2026-06-12T09:00:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part9-02-bits",
+      "title": "absl::bits — popcount·countl_zero",
+      "date": "2026-06-12T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part9-03-optional",
+      "title": "absl::optional vs std::optional",
+      "date": "2026-06-12T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part9-04-variant",
+      "title": "absl::variant 분석",
+      "date": "2026-06-12T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part9-05-span",
+      "title": "absl::span 분석",
+      "date": "2026-06-12T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part9-06-any",
+      "title": "absl::any 분석",
+      "date": "2026-06-12T09:05:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part9-07-compare",
+      "title": "absl::compare — three-way 비교",
+      "date": "2026-06-12T09:06:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part9-08-utility",
+      "title": "Abseil utility — apply·in_place",
+      "date": "2026-06-12T09:07:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part10-01-abseil-hash-value",
+      "title": "Abseil AbslHashValue 분석",
+      "date": "2026-06-12T09:08:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part10-02-hash-state-chaining",
+      "title": "Abseil HashState chaining",
+      "date": "2026-06-12T09:09:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part10-03-custom-hashable",
+      "title": "Abseil Custom hashable 구현",
+      "date": "2026-06-12T09:10:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part11-01-log-vlog-check",
+      "title": "Abseil LOG·VLOG·CHECK 분석",
+      "date": "2026-06-12T09:11:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part11-02-log-sink",
+      "title": "Abseil LogSink 분석",
+      "date": "2026-06-12T09:12:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part11-03-log-entry-structured",
+      "title": "Abseil LogEntry·structured logging",
+      "date": "2026-06-12T09:13:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part11-04-stack-trace-handler",
+      "title": "Abseil Stack trace·failure_signal_handler",
+      "date": "2026-06-12T09:14:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "programming/code-review/abseil/part12-01-absl-flag-define",
+      "title": "ABSL_FLAG 정의 분석",
+      "date": "2026-06-12T09:15:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/bootloader/chapter34-pcie-enumeration",
+      "title": "U-Boot PCIe Enumeration — 부트로더가 디바이스를 찾는 흐름 분석",
+      "date": "2026-06-19T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/bootloader/chapter35-uefi-cxl-init",
+      "title": "EFI·UEFI에서 CXL 초기화 — CEDT 생성과 HDM Decoder 사전 설정",
+      "date": "2026-06-19T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/bootloader/chapter36-boot-memory-topology",
+      "title": "부트 시 메모리 토폴로지 결정 — DDR + CXL.mem 통합 인식",
+      "date": "2026-06-19T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/bootloader/chapter37-secureboot-cert-rollover",
+      "title": "UEFI Secure Boot 인증서 만료 — 2011→2023 CA 롤오버와 PQC 대비",
+      "date": "2026-06-19T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/embedded-cpp/part4-01-intrusive-containers",
+      "title": "Intrusive Containers 분석 — 동적 할당 없는 컨테이너 설계",
+      "date": "2026-05-01T09:29:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/embedded-cpp/part4-02-etl-library",
+      "title": "ETL 라이브러리 분석 — Embedded Template Library의 STL 대체",
+      "date": "2026-05-01T09:30:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/embedded-cpp/part4-03-lock-free-basics",
+      "title": "임베디드 Lock-free 기초 — atomic·memory ordering·CAS",
+      "date": "2026-05-01T09:31:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/embedded-cpp/part4-04-lock-free-container",
+      "title": "Lock-free Container 구현 — SPSC Queue·Ring Buffer",
+      "date": "2026-05-01T09:32:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/embedded-cpp/part4-05-type-safe-flags",
+      "title": "Type-safe Flags 패턴 — Enum Class·Strong Typedef·Tag",
+      "date": "2026-05-01T09:33:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/embedded-cpp/part4-06-state-machine",
+      "title": "임베디드 State Machine 패턴 — Variant·Visitor·Table-driven 비교",
+      "date": "2026-05-01T09:34:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/embedded-cpp/part4-07-compile-time-fsm",
+      "title": "Compile-time FSM 구현 — 템플릿으로 상태 전이 검증",
+      "date": "2026-05-01T09:35:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/embedded-cpp/part4-08-singleton-alternatives",
+      "title": "Singleton 대안 패턴 — Service Locator·Static Init·Phantom",
+      "date": "2026-05-01T09:36:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/rtos/practical-internals/part5-01-freertos-source",
+      "title": "FreeRTOS 소스 분석 — tasks.c·queue.c·port.c 추적",
+      "date": "2026-05-08T09:46:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/rtos/practical-internals/part5-02-zephyr-source",
+      "title": "Zephyr 커널 분석 — k_thread·k_sem·Driver Model",
+      "date": "2026-05-08T09:47:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/rtos/practical-internals/part5-03-rt-thread",
+      "title": "RT-Thread 분석 — Object 모델·Components·Smart·Studio",
+      "date": "2026-05-08T09:48:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/rtos/practical-internals/part5-04-porting",
+      "title": "RTOS 포팅 가이드 — 새 아키텍처에 옮기는 절차",
+      "date": "2026-05-08T09:49:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/rtos/practical-internals/part5-05-selection-guide",
+      "title": "RTOS 선택 가이드 — Footprint·License·Certification·Ecosystem",
+      "date": "2026-05-08T09:50:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/rtos/practical-internals/part5-06-nuttx",
+      "title": "Apache NuttX 분석 — POSIX·PX4·NASA Ingenuity",
+      "date": "2026-05-08T09:51:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/rtos/practical-internals/part5-07-preempt-rt-linux",
+      "title": "PREEMPT_RT Linux — Mainline 6.12·Xenomai 4·EVL",
+      "date": "2026-05-08T09:52:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "tools/emulation/driver-cosim/chapter01-why-cosim",
+      "title": "Pre-Silicon Driver Verification — RTL Co-simulation이 푸는 문제",
+      "date": "2026-05-22T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "tools/emulation/driver-cosim/chapter02-dpi-c-basics",
+      "title": "SystemVerilog DPI-C 기초 — C와 RTL을 잇는 표준 인터페이스",
+      "date": "2026-05-22T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "tools/emulation/driver-cosim/chapter03-verilator",
+      "title": "Verilator 분석 — Open Source SystemVerilog Simulator",
+      "date": "2026-05-22T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "tools/emulation/driver-cosim/chapter04-cocotb",
+      "title": "CocoTB 분석 — Python으로 작성하는 RTL Testbench",
+      "date": "2026-05-22T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "tools/emulation/driver-cosim/chapter05-systemc-tlm",
+      "title": "SystemC TLM 분석 — Transaction-Level Modeling으로 빠른 검증",
+      "date": "2026-05-22T09:05:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "tools/emulation/driver-cosim/chapter06-bfm",
+      "title": "C로 구현하는 Bus Functional Model — Driver 검증용 BFM 설계",
+      "date": "2026-05-22T09:06:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "tools/emulation/driver-cosim/chapter07-uvm-c-model",
+      "title": "UVM C Reference Model 통합 — DUT와 황금 모델 비교 검증",
+      "date": "2026-05-22T09:07:00.000Z",
+      "score": 10
+    }
+  ],
+  "generatedAt": "2026-08-01T14:02:55.613Z"
+}

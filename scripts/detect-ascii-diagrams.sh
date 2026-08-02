@@ -35,22 +35,21 @@ if [ ${#TARGETS[@]} -eq 0 ]; then
   TARGETS=("$ROOT/src/content/blog")
 fi
 
-# Box drawing characters to detect (excluding directory tree markers)
-# The pattern matches:
-#   ┌ ┐ ┘ ┬ ┤ ┴ ┼  (box drawing corners and joins)
-#   ━━ (heavy horizontal - bar chart)
-# Note: ├ └ │ are allowed only when used in directory tree style:
-#   line ending in `├── name/` or `└── name/` (with name)
-# Filtered out post-hoc to avoid false positives on dir trees.
-SUSPECT_PATTERN='(┌|┐|┘|┬|┤|┴|┼|━━)'
-
-# Allowed directory tree pattern — lines that match these are NOT violations
-DIR_TREE_PATTERN='([├└][─].+/|│[ ]*[├└])'
-
 VIOLATIONS=0
 VIOLATING_FILES=()
 
-while IFS= read -r f; do
+count_suspects() {
+  awk '
+    BEGIN { in_fence = 0; in_frontmatter = 0 }
+    NR == 1 && $0 == "---" { in_frontmatter = 1; next }
+    in_frontmatter { if ($0 == "---") in_frontmatter = 0; next }
+    /^[[:space:]]*```/ { in_fence = !in_fence; next }
+    !in_fence && /┌|┐|┘|┬|┤|┴|┼|━━/ { count++ }
+    END { print count + 0 }
+  ' "$1"
+}
+
+while IFS= read -r -d '' f; do
   # Skip drafts unless --include-drafts
   if [ "$INCLUDE_DRAFTS" -eq 0 ]; then
     if grep -q "^draft: true" "$f"; then
@@ -58,9 +57,9 @@ while IFS= read -r f; do
     fi
   fi
 
-  # Count suspect lines, excluding directory tree patterns
-  matches=$(grep -cE "$SUSPECT_PATTERN" "$f" 2>/dev/null) || matches=0
-  matches=${matches:-0}
+  # Code examples and frontmatter can legitimately describe these characters;
+  # only prose is subject to the diagram policy.
+  matches=$(count_suspects "$f")
 
   if [ "$matches" -gt 0 ] 2>/dev/null; then
     VIOLATIONS=$((VIOLATIONS + matches))
@@ -68,7 +67,7 @@ while IFS= read -r f; do
     relpath="${f#$ROOT/}"
     printf "  %-65s %s lines\n" "$relpath" "$matches"
   fi
-done < <(find "${TARGETS[@]}" -name "*.md" -type f)
+done < <(find "${TARGETS[@]}" -name "*.md" -type f -print0)
 
 echo ""
 if [ "$VIOLATIONS" -eq 0 ]; then

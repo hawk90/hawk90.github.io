@@ -31,7 +31,6 @@ Usage:
 """
 import argparse
 import re
-import shutil
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -70,21 +69,21 @@ def build_pdf(tex: Path, force: bool) -> Path | None:
 
     engine = "xelatex" if needs_xelatex(tex) else "pdflatex"
     try:
-        subprocess.run(
+        result = subprocess.run(
             [engine, "-interaction=nonstopmode", "-halt-on-error", tex.name],
             cwd=tex.parent,
             capture_output=True,
             timeout=60,
             check=False,
         )
-    except subprocess.TimeoutExpired:
+    except (OSError, subprocess.TimeoutExpired):
         return None
     # Clean aux/log immediately to avoid clutter
     for ext in (".aux", ".log"):
         aux = tex.with_suffix(ext)
         if aux.exists():
             aux.unlink()
-    return pdf if pdf.exists() else None
+    return pdf if result.returncode == 0 and pdf.exists() else None
 
 
 def extract_words(pdf: Path) -> list[tuple[float, float, float, float, str]]:
@@ -93,7 +92,7 @@ def extract_words(pdf: Path) -> list[tuple[float, float, float, float, str]]:
         out = subprocess.check_output(
             ["pdftotext", "-bbox", str(pdf), "-"], timeout=10
         ).decode("utf-8", errors="ignore")
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
         return []
     return [
         (float(a), float(b), float(c), float(d), text)
@@ -216,6 +215,8 @@ def main():
     p.add_argument("--max-near", type=int, default=999_999,
                    help="Strict mode: max allowed near_pairs per file (default unlimited; near is informational)")
     args = p.parse_args()
+    if args.jobs < 1:
+        p.error("--jobs must be at least 1")
 
     # Determine margin
     if args.margin is not None:

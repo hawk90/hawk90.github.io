@@ -1,5 +1,7 @@
 {
   "scope": [
+    ".github/dependabot.yml",
+    ".github/workflows/ci.yml",
     ".github/workflows/deploy.yml",
     "src/components/admin/AdminGuard.astro",
     "src/components/blog/AnimatedSvg.astro",
@@ -70,7 +72,7 @@
     "src/lib/content/manifest.ts",
     "src/lib/content/normalize.ts",
     "src/lib/content/publication.ts",
-    "src/lib/content/sitemap.ts",
+    "src/lib/content/relations.ts",
     "src/lib/content/topics.ts",
     "src/lib/content/types.ts",
     "src/lib/define.ts",
@@ -81,6 +83,7 @@
     "src/lib/posts.ts",
     "src/lib/rehype-image-lazy.mjs",
     "src/lib/remark-callouts.mjs",
+    "src/lib/search-aliases.ts",
     "src/lib/search.ts",
     "src/lib/theme.ts",
     "src/lib/utils.ts",
@@ -91,8 +94,6 @@
     "src/pages/admin/login.astro",
     "src/pages/admin/new.astro",
     "src/pages/admin/settings.astro",
-    "src/pages/api/auth/callback.ts",
-    "src/pages/api/auth/github.ts",
     "src/pages/archive.astro",
     "src/pages/authors/[author]/[...page].astro",
     "src/pages/blog/[...category]/index.astro",
@@ -137,25 +138,33 @@
     {
       "id": "SEC-ADMIN-03",
       "priority": "P0",
-      "title": "OAuth server secret boundary",
-      "remediation": "Keep GitHub client secrets in server-only routes and require a hybrid/server deployment before enabling OAuth.",
-      "evidence": [
-        {
-          "file": "src/pages/api/auth/callback.ts",
-          "line": 40,
-          "excerpt": "import.meta.env.GITHUB_CLIENT_SECRET"
-        }
-      ],
-      "manual": true,
-      "status": "manual-review"
+      "title": "OAuth server secret in a static site",
+      "remediation": "Do not keep OAuth callback code or GitHub client secrets in this static deployment.",
+      "evidence": [],
+      "status": "passed"
     },
     {
       "id": "SEC-ADMIN-04",
       "priority": "P1",
       "title": "Static deployment OAuth compatibility",
-      "remediation": "Assert that OAuth is disabled when Astro output is static, or deploy a server adapter before enabling it.",
+      "remediation": "Static output must stay PAT-only; move OAuth to a separately deployed server application.",
       "evidence": [],
-      "manual": true,
+      "status": "passed"
+    },
+    {
+      "id": "SEC-ADMIN-05",
+      "priority": "P1",
+      "title": "OAuth route source in a static site",
+      "remediation": "Remove API OAuth routes from static deployments; they can only emit broken, pre-rendered redirects.",
+      "evidence": [],
+      "status": "passed"
+    },
+    {
+      "id": "SEC-ADMIN-06",
+      "priority": "P1",
+      "title": "OAuth endpoint in production artifact",
+      "remediation": "Production artifact must not contain /api/auth routes when this project builds as a static site.",
+      "evidence": [],
       "status": "passed"
     }
   ]

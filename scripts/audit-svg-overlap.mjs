@@ -18,18 +18,20 @@ const GLYPH_W = 5;           // approx glyph width
 const GLYPH_H = 4;           // bbox half-height — runs whose y differs by >4pt are different lines
 
 async function main() {
-  const dir = process.argv[2];
+  const args = process.argv.slice(2);
+  const dir = args.find((arg) => !arg.startsWith('--'));
+  const recursive = args.includes('--recursive');
   if (!dir) {
-    console.error('usage: node audit-svg-overlap.mjs <dir>');
+    console.error('usage: node audit-svg-overlap.mjs <dir> [--recursive]');
     process.exit(1);
   }
-  const files = (await fs.readdir(dir)).filter((f) => f.endsWith('.svg')).sort();
+  const files = await svgFiles(dir, recursive);
   let any = false;
   for (const f of files) {
-    const overlaps = audit(await fs.readFile(path.join(dir, f), 'utf-8'));
+    const overlaps = audit(await fs.readFile(f, 'utf-8'));
     if (overlaps.length === 0) continue;
     any = true;
-    console.log(`\n${f}`);
+    console.log(`\n${path.relative(dir, f)}`);
     for (const o of overlaps.slice(0, 5)) {
       console.log(`  overlap @ y≈${o.y.toFixed(1)}: ` +
         `[${o.aX.toFixed(0)}..${o.aXEnd.toFixed(0)}] × [${o.bX.toFixed(0)}..${o.bXEnd.toFixed(0)}] ` +
@@ -40,9 +42,24 @@ async function main() {
   if (!any) console.log('No overlaps detected by heuristic.');
 }
 
+async function svgFiles(dir, recursive) {
+  const files = [];
+  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    const file = path.join(dir, entry.name);
+    if (entry.isDirectory() && recursive) files.push(...await svgFiles(file, true));
+    else if (entry.isFile() && entry.name.endsWith('.svg')) files.push(file);
+  }
+  return files.sort();
+}
+
 function audit(svg) {
-  const uses = [...svg.matchAll(/<use [^>]*xlink:href="#(glyph-[\d-]+)"[^>]*x="([-\d.]+)"[^>]*y="([-\d.]+)"/g)]
-    .map((m) => ({ id: m[1], x: +m[2], y: +m[3] }));
+  const uses = [...svg.matchAll(/<use\b([^>]*)>/g)].flatMap((match) => {
+    const attrs = match[1];
+    const id = attrs.match(/(?:xlink:)?href="#(glyph-[\d-]+)"/)?.[1];
+    const x = attrs.match(/\bx="([-\d.]+)"/)?.[1];
+    const y = attrs.match(/\by="([-\d.]+)"/)?.[1];
+    return id && x && y ? [{ id, x: +x, y: +y }] : [];
+  });
   uses.sort((a, b) => a.y - b.y || a.x - b.x);
 
   const runs = [];

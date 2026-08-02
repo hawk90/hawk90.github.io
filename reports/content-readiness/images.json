@@ -1,0 +1,2956 @@
+{
+  "series_stats": {
+    "Embedded C++ for Real Systems": {
+      "chapters": 41,
+      "images": 14
+    },
+    "Embedded Security": {
+      "chapters": 13,
+      "images": 5
+    },
+    "Bootloader Internals": {
+      "chapters": 37,
+      "images": 25
+    },
+    "Embedded Performance Engineering": {
+      "chapters": 57,
+      "images": 36
+    },
+    "BSP Development": {
+      "chapters": 21,
+      "images": 5
+    },
+    "Modern Embedded Recipes": {
+      "chapters": 152,
+      "images": 39
+    },
+    "Buildroot Practical": {
+      "chapters": 20,
+      "images": 8
+    },
+    "Industrial Ethernet 심화": {
+      "chapters": 12,
+      "images": 17
+    },
+    "ESP32-C3 Mastering": {
+      "chapters": 12,
+      "images": 6
+    },
+    "Practical RTOS Internals": {
+      "chapters": 53,
+      "images": 16
+    },
+    "CXL 4.0 Internals": {
+      "chapters": 15,
+      "images": 0
+    },
+    "HBM·GDDR 심화": {
+      "chapters": 12,
+      "images": 25
+    },
+    "PCIe Deep Dive": {
+      "chapters": 19,
+      "images": 0
+    },
+    "Folly Code Review": {
+      "chapters": 89,
+      "images": 51
+    },
+    "Abseil Code Review": {
+      "chapters": 79,
+      "images": 26
+    },
+    "CMake": {
+      "chapters": 9,
+      "images": 6
+    },
+    "GNU Make": {
+      "chapters": 7,
+      "images": 0
+    },
+    "Postmortem Debugging": {
+      "chapters": 6,
+      "images": 3
+    },
+    "Sanitizers": {
+      "chapters": 5,
+      "images": 0
+    },
+    "Memory Diagnostics": {
+      "chapters": 7,
+      "images": 0
+    },
+    "Python Debugging": {
+      "chapters": 5,
+      "images": 0
+    },
+    "DWARF and ELF Internals": {
+      "chapters": 6,
+      "images": 8
+    },
+    "GDB and LLDB": {
+      "chapters": 12,
+      "images": 3
+    },
+    "GDB Extension and IDE": {
+      "chapters": 6,
+      "images": 3
+    },
+    "Valgrind": {
+      "chapters": 5,
+      "images": 0
+    },
+    "Embedded Debugging": {
+      "chapters": 9,
+      "images": 12
+    },
+    "Kernel Debugging": {
+      "chapters": 9,
+      "images": 3
+    },
+    "Driver-RTL Co-simulation": {
+      "chapters": 8,
+      "images": 4
+    }
+  },
+  "candidates": [
+    {
+      "path": "src/content/blog/embedded/modern-recipes/00-preface.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 45,
+      "distinct_keyword_count": 19,
+      "top_keywords": [
+        [
+          "interrupt",
+          7
+        ],
+        [
+          "mutex",
+          4
+        ],
+        [
+          "rcu",
+          4
+        ],
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "epoll",
+          3
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter18-register-maps.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 15,
+      "distinct_keyword_count": 10,
+      "top_keywords": [
+        [
+          "interrupt",
+          5
+        ],
+        [
+          "FLIT",
+          2
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "IOMMU",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter15-ras-performance.md",
+      "series": "CXL 4.0 Internals",
+      "images": 0,
+      "keyword_count": 16,
+      "distinct_keyword_count": 8,
+      "top_keywords": [
+        [
+          "QoS",
+          4
+        ],
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "HBM",
+          2
+        ],
+        [
+          "stack",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter01-fundamentals.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 41,
+      "distinct_keyword_count": 7,
+      "top_keywords": [
+        [
+          "FLIT",
+          11
+        ],
+        [
+          "transaction",
+          7
+        ],
+        [
+          "lane",
+          7
+        ],
+        [
+          "PAM4",
+          7
+        ],
+        [
+          "stack",
+          5
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-06-sync-basics.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 28,
+      "distinct_keyword_count": 7,
+      "top_keywords": [
+        [
+          "mutex",
+          10
+        ],
+        [
+          "interrupt",
+          5
+        ],
+        [
+          "spinlock",
+          4
+        ],
+        [
+          "semaphore",
+          4
+        ],
+        [
+          "cache line",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part4-07-lock-free.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 14,
+      "distinct_keyword_count": 7,
+      "top_keywords": [
+        [
+          "epoch",
+          6
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "B-tree",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-02-zephyr-source.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 11,
+      "distinct_keyword_count": 7,
+      "top_keywords": [
+        [
+          "mutex",
+          2
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "MMU",
+          2
+        ],
+        [
+          "scheduler",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md",
+      "series": "Industrial Ethernet 심화",
+      "images": 0,
+      "keyword_count": 10,
+      "distinct_keyword_count": 7,
+      "top_keywords": [
+        [
+          "rcu",
+          2
+        ],
+        [
+          "preempt",
+          2
+        ],
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "spinlock",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter17-performance.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 21,
+      "distinct_keyword_count": 6,
+      "top_keywords": [
+        [
+          "NUMA",
+          11
+        ],
+        [
+          "DDIO",
+          4
+        ],
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "lane",
+          2
+        ],
+        [
+          "IOMMU",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-03-rt-thread.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 14,
+      "distinct_keyword_count": 6,
+      "top_keywords": [
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "MMU",
+          3
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ],
+        [
+          "scheduler",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-04-porting.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 14,
+      "distinct_keyword_count": 6,
+      "top_keywords": [
+        [
+          "stack",
+          7
+        ],
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "page table",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 14,
+      "distinct_keyword_count": 6,
+      "top_keywords": [
+        [
+          "preempt",
+          4
+        ],
+        [
+          "mutex",
+          3
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "rt-mutex",
+          2
+        ],
+        [
+          "rcu",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter13-switching-fabric.md",
+      "series": "CXL 4.0 Internals",
+      "images": 0,
+      "keyword_count": 13,
+      "distinct_keyword_count": 6,
+      "top_keywords": [
+        [
+          "QoS",
+          6
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "mesh",
+          2
+        ],
+        [
+          "mailbox",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess.md",
+      "series": "GDB and LLDB",
+      "images": 0,
+      "keyword_count": 32,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "mutex",
+          11
+        ],
+        [
+          "scheduler",
+          10
+        ],
+        [
+          "futex",
+          7
+        ],
+        [
+          "select",
+          3
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/valgrind/chapter04-helgrind-drd.md",
+      "series": "Valgrind",
+      "images": 0,
+      "keyword_count": 28,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "mutex",
+          8
+        ],
+        [
+          "spinlock",
+          8
+        ],
+        [
+          "vector clock",
+          7
+        ],
+        [
+          "stack",
+          3
+        ],
+        [
+          "Lamport",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter05-interrupts.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 25,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "interrupt",
+          15
+        ],
+        [
+          "IOMMU",
+          7
+        ],
+        [
+          "softirq",
+          1
+        ],
+        [
+          "tasklet",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part6-05-mutex-usage.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 22,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "mutex",
+          17
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter02-tlp.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 20,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "transaction",
+          11
+        ],
+        [
+          "IOMMU",
+          6
+        ],
+        [
+          "DDIO",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part3-01-critical-section.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 14,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "spinlock",
+          5
+        ],
+        [
+          "scheduler",
+          4
+        ],
+        [
+          "semaphore",
+          3
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part8-04-dma-allocator.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 13,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "IOMMU",
+          9
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "io_uring",
+          1
+        ],
+        [
+          "MMU",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 10,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "scheduler",
+          4
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "TCP",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md",
+      "series": "Memory Diagnostics",
+      "images": 0,
+      "keyword_count": 10,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "NUMA",
+          4
+        ],
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "interrupt",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md",
+      "series": "HBM·GDDR 심화",
+      "images": 0,
+      "keyword_count": 8,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "HBM",
+          4
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "TPU",
+          1
+        ],
+        [
+          "mesh",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-01-why-rtos.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 5,
+      "top_keywords": [
+        [
+          "mutex",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ],
+        [
+          "MMU",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 52,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "spinlock",
+          29
+        ],
+        [
+          "mutex",
+          20
+        ],
+        [
+          "cache line",
+          2
+        ],
+        [
+          "futex",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/programming/code-review/folly/part15-05-coro-baton-mutex.md",
+      "series": "Folly Code Review",
+      "images": 0,
+      "keyword_count": 38,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mutex",
+          28
+        ],
+        [
+          "semaphore",
+          6
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "scheduler",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter08-dllp.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 30,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "FLIT",
+          26
+        ],
+        [
+          "PAM4",
+          2
+        ],
+        [
+          "channel",
+          1
+        ],
+        [
+          "transaction",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part2-08-arm-mmu.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 27,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "TLB",
+          12
+        ],
+        [
+          "page table",
+          11
+        ],
+        [
+          "MMU",
+          2
+        ],
+        [
+          "stack",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter11-linux-dma.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 27,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "IOMMU",
+          19
+        ],
+        [
+          "interrupt",
+          4
+        ],
+        [
+          "page table",
+          3
+        ],
+        [
+          "DDIO",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part4-05-mutex.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 25,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mutex",
+          15
+        ],
+        [
+          "futex",
+          6
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter19-advanced-features.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 25,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "lane",
+          12
+        ],
+        [
+          "IOMMU",
+          7
+        ],
+        [
+          "FLIT",
+          5
+        ],
+        [
+          "transaction",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter09-physical-layer.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 24,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "lane",
+          14
+        ],
+        [
+          "PAM4",
+          6
+        ],
+        [
+          "FLIT",
+          2
+        ],
+        [
+          "differential pair",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter11-linux-driver.md",
+      "series": "CXL 4.0 Internals",
+      "images": 0,
+      "keyword_count": 22,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mailbox",
+          11
+        ],
+        [
+          "NUMA",
+          8
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part11-06-mailbox.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 20,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mailbox",
+          17
+        ],
+        [
+          "channel",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/kernel/chapter09-drivers-cxl-walkthrough.md",
+      "series": "Kernel Debugging",
+      "images": 0,
+      "keyword_count": 20,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mailbox",
+          9
+        ],
+        [
+          "NUMA",
+          7
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter12-virtualization-1.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 19,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "IOMMU",
+          15
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "TLB",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part12-03-quantization.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 18,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "channel",
+          8
+        ],
+        [
+          "tensor",
+          8
+        ],
+        [
+          "TPU",
+          1
+        ],
+        [
+          "epoch",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/programming/code-review/folly/part10-04-fibers-channel.md",
+      "series": "Folly Code Review",
+      "images": 0,
+      "keyword_count": 18,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "channel",
+          15
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "select",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part3-12-cxl-mem-latency.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 16,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "NUMA",
+          6
+        ],
+        [
+          "HBM",
+          5
+        ],
+        [
+          "cache line",
+          3
+        ],
+        [
+          "channel",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos.md",
+      "series": "ESP32-C3 Mastering",
+      "images": 0,
+      "keyword_count": 16,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mutex",
+          6
+        ],
+        [
+          "interrupt",
+          4
+        ],
+        [
+          "semaphore",
+          3
+        ],
+        [
+          "stack",
+          3
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/programming/code-review/folly/part9-04-rw-spin-lock.md",
+      "series": "Folly Code Review",
+      "images": 0,
+      "keyword_count": 16,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "spinlock",
+          7
+        ],
+        [
+          "mutex",
+          5
+        ],
+        [
+          "futex",
+          2
+        ],
+        [
+          "cache line",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part9-06-atomic-cost.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 15,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mutex",
+          6
+        ],
+        [
+          "cache line",
+          4
+        ],
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "sharding",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part2-01-raii-basics.md",
+      "series": "Embedded C++ for Real Systems",
+      "images": 0,
+      "keyword_count": 14,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mutex",
+          6
+        ],
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "stack",
+          3
+        ],
+        [
+          "channel",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part4-10-smp-analysis.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 13,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "NUMA",
+          8
+        ],
+        [
+          "TLB",
+          2
+        ],
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "page table",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part11-08-dma-completion.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 13,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "interrupt",
+          10
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ],
+        [
+          "tasklet",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-06-nuttx.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 13,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "MMU",
+          5
+        ],
+        [
+          "stack",
+          4
+        ],
+        [
+          "preempt",
+          2
+        ],
+        [
+          "TCP",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/00-preface.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 13,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "scheduler",
+          8
+        ],
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "mailbox",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-04-context-switch.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 13,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "stack",
+          9
+        ],
+        [
+          "scheduler",
+          2
+        ],
+        [
+          "TLB",
+          1
+        ],
+        [
+          "MMU",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part12-02-npu-architecture.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 12,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "TPU",
+          6
+        ],
+        [
+          "tensor",
+          3
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "kernel launch",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part5-11-cxl-profiling-tools.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 11,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "NUMA",
+          7
+        ],
+        [
+          "HBM",
+          2
+        ],
+        [
+          "mailbox",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/bootloader/chapter26-ddr-training.md",
+      "series": "Bootloader Internals",
+      "images": 0,
+      "keyword_count": 10,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "channel",
+          5
+        ],
+        [
+          "mailbox",
+          2
+        ],
+        [
+          "lane",
+          2
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 10,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "scheduler",
+          6
+        ],
+        [
+          "preempt",
+          2
+        ],
+        [
+          "MMU",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part9-04-hazard-pointer.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 9,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "rcu",
+          5
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part9-05-cas-patterns.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 8,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "cache line",
+          3
+        ],
+        [
+          "stack",
+          3
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "sharding",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part9-09-false-sharing.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 8,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "cache line",
+          4
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "sharding",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-09-software-timer.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 8,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ],
+        [
+          "TCP",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part11-09-pcie-streaming.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "IOMMU",
+          3
+        ],
+        [
+          "io_uring",
+          2
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md",
+      "series": "CXL 4.0 Internals",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "HBM",
+          3
+        ],
+        [
+          "lane",
+          2
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "QoS",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md",
+      "series": "CXL 4.0 Internals",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "HBM",
+          4
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "QoS",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part10-09-timing-race-diag.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 6,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mutex",
+          3
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter01-overview.md",
+      "series": "Industrial Ethernet 심화",
+      "images": 0,
+      "keyword_count": 6,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "TCP",
+          3
+        ],
+        [
+          "channel",
+          1
+        ],
+        [
+          "softirq",
+          1
+        ],
+        [
+          "VLAN",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part3-07-queue-impl.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 6,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "mutex",
+          2
+        ],
+        [
+          "mailbox",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/00-preface.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "TCP",
+          2
+        ],
+        [
+          "MMU",
+          1
+        ],
+        [
+          "preempt",
+          1
+        ],
+        [
+          "mesh",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part6-11-timer-services.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 4,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "channel",
+          1
+        ],
+        [
+          "skiplist",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "TCP",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md",
+      "series": "CXL 4.0 Internals",
+      "images": 0,
+      "keyword_count": 4,
+      "distinct_keyword_count": 4,
+      "top_keywords": [
+        [
+          "transaction",
+          1
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "mesh",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part8-09-stack-analysis.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 38,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "stack",
+          36
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "TCP",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part6-04-semaphore-usage.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 28,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "semaphore",
+          19
+        ],
+        [
+          "mutex",
+          6
+        ],
+        [
+          "channel",
+          3
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/bootloader/chapter36-boot-memory-topology.md",
+      "series": "Bootloader Internals",
+      "images": 0,
+      "keyword_count": 23,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "NUMA",
+          14
+        ],
+        [
+          "HBM",
+          8
+        ],
+        [
+          "channel",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part6-12-rtos-debugging.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 20,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "stack",
+          17
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part4-06-rw-lock.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 19,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "rcu",
+          11
+        ],
+        [
+          "mutex",
+          7
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part7-10-epoll.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 19,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "epoll",
+          12
+        ],
+        [
+          "select",
+          6
+        ],
+        [
+          "TCP",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part9-03-rcu-basics.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 19,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "rcu",
+          15
+        ],
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 19,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "spinlock",
+          14
+        ],
+        [
+          "cache line",
+          3
+        ],
+        [
+          "mutex",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-07-semaphore.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 19,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "semaphore",
+          11
+        ],
+        [
+          "mutex",
+          7
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part2-02-raii-patterns.md",
+      "series": "Embedded C++ for Real Systems",
+      "images": 0,
+      "keyword_count": 18,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mutex",
+          13
+        ],
+        [
+          "interrupt",
+          4
+        ],
+        [
+          "transaction",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part4-04-spinlock.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 18,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "spinlock",
+          11
+        ],
+        [
+          "mutex",
+          6
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink.md",
+      "series": "Industrial Ethernet 심화",
+      "images": 0,
+      "keyword_count": 18,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "stack",
+          9
+        ],
+        [
+          "channel",
+          7
+        ],
+        [
+          "TCP",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-04-static-allocation.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 17,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "stack",
+          15
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "semaphore",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part3-02-semaphore-impl.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 16,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "semaphore",
+          9
+        ],
+        [
+          "mutex",
+          6
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction.md",
+      "series": "Embedded C++ for Real Systems",
+      "images": 0,
+      "keyword_count": 15,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "interrupt",
+          8
+        ],
+        [
+          "channel",
+          4
+        ],
+        [
+          "select",
+          3
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 15,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mailbox",
+          8
+        ],
+        [
+          "NUMA",
+          6
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part7-11-uio-vfio.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 15,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "IOMMU",
+          13
+        ],
+        [
+          "io_uring",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter08-cxl-mem.md",
+      "series": "CXL 4.0 Internals",
+      "images": 0,
+      "keyword_count": 13,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "cache line",
+          9
+        ],
+        [
+          "NUMA",
+          3
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md",
+      "series": "Embedded Security",
+      "images": 0,
+      "keyword_count": 11,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "IOMMU",
+          5
+        ],
+        [
+          "channel",
+          4
+        ],
+        [
+          "HBM",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 11,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "rcu",
+          8
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "epoch",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter01-memory-accounting.md",
+      "series": "Memory Diagnostics",
+      "images": 0,
+      "keyword_count": 11,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "stack",
+          6
+        ],
+        [
+          "NUMA",
+          3
+        ],
+        [
+          "page table",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part12-12-matter-thread.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 10,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mesh",
+          7
+        ],
+        [
+          "TCP",
+          2
+        ],
+        [
+          "channel",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter16-troubleshooting.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 10,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "lane",
+          5
+        ],
+        [
+          "IOMMU",
+          4
+        ],
+        [
+          "NUMA",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-05-memory-pool.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 9,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "stack",
+          5
+        ],
+        [
+          "cache line",
+          3
+        ],
+        [
+          "mutex",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter07-tiered-memory-diagnostics.md",
+      "series": "Memory Diagnostics",
+      "images": 0,
+      "keyword_count": 9,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "NUMA",
+          7
+        ],
+        [
+          "TLB",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part4-03-lock-contention.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 8,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "semaphore",
+          3
+        ],
+        [
+          "mutex",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part6-03-scheduler-internals.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 8,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "scheduler",
+          3
+        ],
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "semaphore",
+          2
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-06-cortex-a-context.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 8,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "TLB",
+          4
+        ],
+        [
+          "MMU",
+          3
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames.md",
+      "series": "GDB and LLDB",
+      "images": 0,
+      "keyword_count": 8,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "stack",
+          5
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "select",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/bootloader/chapter35-uefi-cxl-init.md",
+      "series": "Bootloader Internals",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "NUMA",
+          5
+        ],
+        [
+          "QoS",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-01-freertos-source.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "semaphore",
+          3
+        ],
+        [
+          "stack",
+          3
+        ],
+        [
+          "mutex",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter09-flit-format.md",
+      "series": "CXL 4.0 Internals",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "PAM4",
+          5
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/programming/code-review/folly/part9-05-pico-spin-lock.md",
+      "series": "Folly Code Review",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mutex",
+          3
+        ],
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/programming/code-review/abseil/00-preface.md",
+      "series": "Abseil Code Review",
+      "images": 0,
+      "keyword_count": 7,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mutex",
+          4
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "B-tree",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part3-04-dma-vs-cpu.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 6,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "STM",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part6-02-task-design.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 6,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "scheduler",
+          3
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part3-03-dma-performance.md",
+      "series": "Embedded Performance Engineering",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "transaction",
+          2
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part11-05-ps-pl-communication.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part3-10-deadlock.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mutex",
+          3
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-10-syscall.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "MMU",
+          2
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter10-linux-basics.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "IOMMU",
+          2
+        ],
+        [
+          "workqueue",
+          2
+        ],
+        [
+          "NUMA",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter07-error-handling.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "transaction",
+          2
+        ],
+        [
+          "FLIT",
+          2
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/postmortem/chapter06-cxl-fabric-postmortem.md",
+      "series": "Postmortem Debugging",
+      "images": 0,
+      "keyword_count": 5,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "cache line",
+          3
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-security/chapter11-pcie-cxl-ide.md",
+      "series": "Embedded Security",
+      "images": 0,
+      "keyword_count": 4,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "HBM",
+          2
+        ],
+        [
+          "stack",
+          1
+        ],
+        [
+          "interposer",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-08-tick-timer.md",
+      "series": "Practical RTOS Internals",
+      "images": 0,
+      "keyword_count": 4,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "scheduler",
+          2
+        ],
+        [
+          "preempt",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter03-config-space.md",
+      "series": "PCIe Deep Dive",
+      "images": 0,
+      "keyword_count": 4,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "channel",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/programming/code-review/folly/part21-01-observer.md",
+      "series": "Folly Code Review",
+      "images": 0,
+      "keyword_count": 4,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "rcu",
+          2
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/programming/code-review/folly/00-preface.md",
+      "series": "Folly Code Review",
+      "images": 0,
+      "keyword_count": 4,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "channel",
+          2
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "select",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/programming/code-review/abseil/part16-03-periodic-sampler.md",
+      "series": "Abseil Code Review",
+      "images": 0,
+      "keyword_count": 4,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mutex",
+          2
+        ],
+        [
+          "cache line",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/bsp/chapter21-maintenance.md",
+      "series": "BSP Development",
+      "images": 0,
+      "keyword_count": 3,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "rcu",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part2-02-cortex-a-comparison.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 3,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "MMU",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/modern-recipes/part7-12-sysfs.md",
+      "series": "Modern Embedded Recipes",
+      "images": 0,
+      "keyword_count": 3,
+      "distinct_keyword_count": 3,
+      "top_keywords": [
+        [
+          "mutex",
+          1
+        ],
+        [
+          "epoll",
+          1
+        ],
+        [
+          "io_uring",
+          1
+        ]
+      ]
+    }
+  ]
+}

@@ -20,12 +20,14 @@ verified로 안 옮겨져 본문이 "예정"으로 남는 것(B300·Jetson Thor�
 Usage:
   audit-roadmap-staleness.py                # 오늘 기준 점검
   audit-roadmap-staleness.py --as-of 2027-01-01   # 가상 날짜로 점검(테스트)
+  audit-roadmap-staleness.py --strict --json reports/roadmap.json
 
-Exit: 0 = 신선, 1 = 기한 지난 항목 있음(확인 필요).
+Exit: 0 = 신선, 1 = 기한 지난 항목 있음(또는 --strict에서 날짜 누락).
 """
 
 import argparse
 import calendar
+import json
 import re
 import sys
 from datetime import date
@@ -55,6 +57,8 @@ def due_date(y, mid, dd):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--as-of", help="기준일 YYYY-MM-DD (기본=오늘)")
+    ap.add_argument("--strict", action="store_true", help="review 날짜 미설정도 실패 처리")
+    ap.add_argument("--json", help="결과 JSON 출력 경로")
     args = ap.parse_args()
     today = date.fromisoformat(args.as_of) if args.as_of else date.today()
 
@@ -80,7 +84,11 @@ def main():
         if not mr:
             undated.append((section, name))
             continue
-        d = due_date(*mr.groups())
+        try:
+            d = due_date(*mr.groups())
+        except ValueError:
+            undated.append((section, f"{name} (invalid review date: {mr.group(0)})"))
+            continue
         if today > d:
             stale.append((section, name, d))
         else:
@@ -98,7 +106,21 @@ def main():
         for sec, name in undated:
             print(f"  [{sec}] {name}")
 
-    return 1 if stale else 0
+    if args.json:
+        Path(args.json).write_text(json.dumps({
+            "asOf": today.isoformat(),
+            "fresh": ok,
+            "stale": [
+                {"section": section, "name": name, "reviewDue": due.isoformat()}
+                for section, name, due in stale
+            ],
+            "undated": [
+                {"section": section, "name": name}
+                for section, name in undated
+            ],
+        }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    return 1 if stale or (args.strict and undated) else 0
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIR = join(__dirname, '..', 'src', 'content', 'blog', 'embedded', 'hardware', 'cxl');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 // Existing files → new structure mapping.
 // [oldFile, newFile, newOrder, newTitle, newDate, newDescription, outlinePoints]

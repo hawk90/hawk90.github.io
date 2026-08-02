@@ -1,0 +1,113 @@
+═══ Fact-Density 분석 — threshold 30 ═══
+  density는 *fact 주장의 양*. 많을수록 review 우선순위 높음.
+
+  261 src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md
+  181 src/content/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage.md
+  136 src/content/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck.md
+  117 src/content/blog/embedded/hardware/hbm/chapter04-gddr.md
+  117 src/content/blog/embedded/hardware/hbm/chapter01-overview.md
+  114 src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md
+   87 src/content/blog/embedded/performance-engineering/part3-12-cxl-mem-latency.md
+   86 src/content/blog/embedded/bootloader/chapter10-storage-boot.md
+   84 src/content/blog/embedded/hardware/hbm/chapter07-memory-controller.md
+   81 src/content/blog/embedded/modern-recipes/part4-04-clock-setup.md
+   81 src/content/blog/embedded/hardware/hbm/chapter09-cxl-mem.md
+   81 src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md
+   73 src/content/blog/embedded/protocols/industrial-ethernet/chapter08-tsn.md
+   71 src/content/blog/embedded/performance-engineering/part6-04-case-dma-tuning.md
+   70 src/content/blog/embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache.md
+   63 src/content/blog/embedded/modern-recipes/part12-02-npu-architecture.md
+   62 src/content/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling.md
+   62 src/content/blog/embedded/protocols/industrial-ethernet/chapter02-realtime-requirements.md
+   59 src/content/blog/embedded/modern-recipes/part12-05-tflite-micro.md
+   58 src/content/blog/embedded/performance-engineering/part6-02-case-cache-thrashing.md
+   58 src/content/blog/embedded/performance-engineering/part2-08-memory-bandwidth.md
+   56 src/content/blog/embedded/bootloader/chapter28-flash-layout.md
+   54 src/content/blog/embedded/modern-recipes/part5-07-tft-display.md
+   53 src/content/blog/embedded/modern-recipes/part12-01-edge-inference.md
+   49 src/content/blog/embedded/modern-recipes/part12-03-quantization.md
+   48 src/content/blog/embedded/protocols/industrial-ethernet/chapter12-comparison.md
+   48 src/content/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink.md
+   48 src/content/blog/embedded/performance-engineering/part2-05-cache-basics.md
+   47 src/content/blog/embedded/performance-engineering/part3-04-dma-vs-cpu.md
+   47 src/content/blog/embedded/bootloader/chapter09-dram-init.md
+   46 src/content/blog/embedded/performance-engineering/part1-07-modeling.md
+   46 src/content/blog/embedded/modern-recipes/part2-06-arm-cache.md
+   46 src/content/blog/embedded/modern-recipes/part1-01-digital-signal-basics.md
+   45 src/content/blog/embedded/rtos/practical-internals/part4-12-amp-openamp.md
+   45 src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md
+   43 src/content/blog/embedded/rtos/practical-internals/part4-03-tlsf.md
+   43 src/content/blog/embedded/modern-recipes/part5-04-servo-motor.md
+   43 src/content/blog/embedded/embedded-security/chapter03-mcu-crypto.md
+   42 src/content/blog/embedded/rtos/practical-internals/part2-08-tick-timer.md
+   42 src/content/blog/embedded/modern-recipes/part12-10-on-device-llm.md
+   42 src/content/blog/embedded/bootloader/chapter26-ddr-training.md
+   41 src/content/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach.md
+   41 src/content/blog/embedded/modern-recipes/part12-08-jetson.md
+   41 src/content/blog/embedded/modern-recipes/part10-10-protocol-analyzer.md
+   41 src/content/blog/embedded/modern-recipes/part1-09-pwm-signal.md
+   41 src/content/blog/embedded/hardware/pcie/chapter17-performance.md
+   41 src/content/blog/embedded/bootloader/chapter32-psci-smccc.md
+   40 src/content/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight.md
+   40 src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md
+   40 src/content/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview.md
+   40 src/content/blog/embedded/performance-engineering/part3-11-cxl-interconnect.md
+   40 src/content/blog/embedded/performance-engineering/part2-03-branch-prediction.md
+   40 src/content/blog/embedded/performance-engineering/part1-02-metrics.md
+   40 src/content/blog/embedded/modern-recipes/part5-06-spi-oled.md
+   40 src/content/blog/embedded/bootloader/chapter23-bootrom-efuse-otp.md
+   39 src/content/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis.md
+   39 src/content/blog/embedded/bsp/chapter05-ddr-params.md
+   39 src/content/blog/embedded/bootloader/chapter24-spl-deep.md
+   37 src/content/blog/embedded/embedded-cpp/part1-04-code-size-analysis.md
+   37 src/content/blog/embedded/bsp/chapter17-image-packaging.md
+   36 src/content/blog/tools/debugging/embedded/chapter04-jlink.md
+   36 src/content/blog/embedded/performance-engineering/part4-04-spinlock.md
+   36 src/content/blog/embedded/performance-engineering/part4-03-lock-contention.md
+   36 src/content/blog/embedded/embedded-security/chapter11-pcie-cxl-ide.md
+   35 src/content/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp.md
+   35 src/content/blog/embedded/rtos/practical-internals/part1-03-scheduling-algorithms.md
+   35 src/content/blog/embedded/protocols/industrial-ethernet/chapter01-overview.md
+   35 src/content/blog/embedded/modern-recipes/part2-02-cortex-a-comparison.md
+   35 src/content/blog/embedded/embedded-cpp/part1-02-compiler-flags.md
+   35 src/content/blog/embedded/bsp/chapter15-boot-time-optimization.md
+   35 src/content/blog/embedded/bootloader/chapter31-tfa-bl31-runtime.md
+   34 src/content/blog/embedded/performance-engineering/part5-01-perf-basics.md
+   34 src/content/blog/embedded/performance-engineering/part3-09-power-vs-performance.md
+   34 src/content/blog/embedded/modern-recipes/part8-10-code-size-optimization.md
+   34 src/content/blog/embedded/modern-recipes/part1-04-uart-hardware.md
+   34 src/content/blog/embedded/embedded-security/chapter06-ota-update.md
+   33 src/content/blog/programming/code-review/folly/part7-03-f14-vector-map.md
+   33 src/content/blog/embedded/rtos/practical-internals/part2-10-scheduler-latency.md
+   33 src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md
+   33 src/content/blog/embedded/performance-engineering/part3-05-interrupt-latency.md
+   33 src/content/blog/embedded/modern-recipes/part8-06-numa.md
+   33 src/content/blog/embedded/modern-recipes/part5-01-pwm-output.md
+   33 src/content/blog/embedded/modern-recipes/part11-05-ps-pl-communication.md
+   33 src/content/blog/embedded/modern-recipes/part1-02-clock-timing.md
+   33 src/content/blog/embedded/bsp/chapter04-pinmux-clock.md
+   32 src/content/blog/embedded/rtos/practical-internals/part4-07-smp-rtos.md
+   32 src/content/blog/embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt.md
+   32 src/content/blog/embedded/riscv/esp32-c3-mastering/chapter05-uart-spi-i2c-i2s.md
+   32 src/content/blog/embedded/protocols/industrial-ethernet/chapter06-profinet.md
+   32 src/content/blog/embedded/performance-engineering/part6-01-case-isr-latency.md
+   32 src/content/blog/embedded/performance-engineering/part1-06-benchmark.md
+   32 src/content/blog/embedded/modern-recipes/part5-05-character-lcd.md
+   32 src/content/blog/embedded/modern-recipes/part4-13-flash-programming.md
+   31 src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md
+   31 src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md
+   31 src/content/blog/embedded/modern-recipes/part12-12-matter-thread.md
+   31 src/content/blog/embedded/modern-recipes/part1-03-gpio-internals.md
+   30 src/content/blog/programming/code-review/folly/part6-03-conv-performance.md
+   30 src/content/blog/embedded/riscv/esp32-c3-mastering/chapter07-wifi-stack.md
+   30 src/content/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame.md
+   30 src/content/blog/embedded/performance-engineering/part1-04-statistics.md
+   30 src/content/blog/embedded/hardware/pcie/chapter03-config-space.md
+
+총 102 챕터가 threshold 30 이상.
+
+권장 검증:
+  1. 상위 챕터부터 수동 review (./scripts/audit-suspect-claims.sh <path>)
+  2. fact를 *공식 출처*와 비교 (datasheet·spec PDF)
+  3. 확인 못 한 fact는 *qualifier* 추가 ('알려져 있음'·'발표·예정')
+  4. 검증 완료 후 frontmatter에 'last-verified: <date>' 추가 권장

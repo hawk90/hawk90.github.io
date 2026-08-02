@@ -1,0 +1,237 @@
+# Content readiness queue
+
+> Review queue only. Signals indicate where to inspect; they do not establish a factual correction, a required illustration, or a lifecycle status. Published content and URLs are preservation-first: this queue never authorizes deletion, consolidation, drafting, archiving, renaming, moving, or bulk rewriting.
+
+- P1 staleness candidates: 6
+- P2 fact-dense candidates: 102
+- P3 visual-aid candidates: 118
+- Series integrity issues: 0
+
+## Priority queue
+
+- **P1** `staleness:dated` — `src/content/blog/embedded/embedded-security/chapter05-tee.md`:357: 날짜 앵커 2026 — 기준 연도 경과 시 갱신
+- **P1** `staleness:future` — `src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md`:174: 미래 시제 + 제품/spec 토큰 — 현재 상태 확인
+- **P1** `staleness:future` — `src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md`:27: 미래 시제 — 이미 출시/확정됐는지 확인
+- **P1** `staleness:future` — `src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md`:174: 미래 시제 + 제품/spec 토큰 — 현재 상태 확인
+- **P1** `staleness:future` — `src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md`:262: 미래 시제 + 제품/spec 토큰 — 현재 상태 확인
+- **P1** `staleness:dated` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md`:50: 날짜 앵커 2026 — 기준 연도 경과 시 갱신
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md` [261]: 261 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage.md` [181]: 181 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck.md` [136]: 136 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter04-gddr.md` [117]: 117 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter01-overview.md` [117]: 117 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md` [114]: 114 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part3-12-cxl-mem-latency.md` [87]: 87 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bootloader/chapter10-storage-boot.md` [86]: 86 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter07-memory-controller.md` [84]: 84 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part4-04-clock-setup.md` [81]: 81 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter09-cxl-mem.md` [81]: 81 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md` [81]: 81 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter08-tsn.md` [73]: 73 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part6-04-case-dma-tuning.md` [71]: 71 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache.md` [70]: 70 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part12-02-npu-architecture.md` [63]: 63 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling.md` [62]: 62 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter02-realtime-requirements.md` [62]: 62 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part12-05-tflite-micro.md` [59]: 59 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part6-02-case-cache-thrashing.md` [58]: 58 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part2-08-memory-bandwidth.md` [58]: 58 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bootloader/chapter28-flash-layout.md` [56]: 56 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part5-07-tft-display.md` [54]: 54 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part12-01-edge-inference.md` [53]: 53 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part12-03-quantization.md` [49]: 49 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter12-comparison.md` [48]: 48 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink.md` [48]: 48 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part2-05-cache-basics.md` [48]: 48 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part3-04-dma-vs-cpu.md` [47]: 47 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bootloader/chapter09-dram-init.md` [47]: 47 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part1-07-modeling.md` [46]: 46 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part2-06-arm-cache.md` [46]: 46 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part1-01-digital-signal-basics.md` [46]: 46 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part4-12-amp-openamp.md` [45]: 45 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md` [45]: 45 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part4-03-tlsf.md` [43]: 43 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part5-04-servo-motor.md` [43]: 43 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/embedded-security/chapter03-mcu-crypto.md` [43]: 43 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part2-08-tick-timer.md` [42]: 42 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part12-10-on-device-llm.md` [42]: 42 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bootloader/chapter26-ddr-training.md` [42]: 42 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach.md` [41]: 41 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part12-08-jetson.md` [41]: 41 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part10-10-protocol-analyzer.md` [41]: 41 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part1-09-pwm-signal.md` [41]: 41 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/pcie/chapter17-performance.md` [41]: 41 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bootloader/chapter32-psci-smccc.md` [41]: 41 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight.md` [40]: 40 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md` [40]: 40 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview.md` [40]: 40 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part3-11-cxl-interconnect.md` [40]: 40 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part2-03-branch-prediction.md` [40]: 40 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part1-02-metrics.md` [40]: 40 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part5-06-spi-oled.md` [40]: 40 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bootloader/chapter23-bootrom-efuse-otp.md` [40]: 40 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis.md` [39]: 39 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bsp/chapter05-ddr-params.md` [39]: 39 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bootloader/chapter24-spl-deep.md` [39]: 39 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/embedded-cpp/part1-04-code-size-analysis.md` [37]: 37 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bsp/chapter17-image-packaging.md` [37]: 37 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/tools/debugging/embedded/chapter04-jlink.md` [36]: 36 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part4-04-spinlock.md` [36]: 36 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part4-03-lock-contention.md` [36]: 36 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/embedded-security/chapter11-pcie-cxl-ide.md` [36]: 36 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp.md` [35]: 35 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part1-03-scheduling-algorithms.md` [35]: 35 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter01-overview.md` [35]: 35 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part2-02-cortex-a-comparison.md` [35]: 35 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/embedded-cpp/part1-02-compiler-flags.md` [35]: 35 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bsp/chapter15-boot-time-optimization.md` [35]: 35 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bootloader/chapter31-tfa-bl31-runtime.md` [35]: 35 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part5-01-perf-basics.md` [34]: 34 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part3-09-power-vs-performance.md` [34]: 34 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part8-10-code-size-optimization.md` [34]: 34 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part1-04-uart-hardware.md` [34]: 34 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/embedded-security/chapter06-ota-update.md` [34]: 34 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/programming/code-review/folly/part7-03-f14-vector-map.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part2-10-scheduler-latency.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part3-05-interrupt-latency.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part8-06-numa.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part5-01-pwm-output.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part11-05-ps-pl-communication.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part1-02-clock-timing.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/bsp/chapter04-pinmux-clock.md` [33]: 33 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part4-07-smp-rtos.md` [32]: 32 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt.md` [32]: 32 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter05-uart-spi-i2c-i2s.md` [32]: 32 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter06-profinet.md` [32]: 32 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part6-01-case-isr-latency.md` [32]: 32 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part1-06-benchmark.md` [32]: 32 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part5-05-character-lcd.md` [32]: 32 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part4-13-flash-programming.md` [32]: 32 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md` [31]: 31 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md` [31]: 31 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part12-12-matter-thread.md` [31]: 31 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part1-03-gpio-internals.md` [31]: 31 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/programming/code-review/folly/part6-03-conv-performance.md` [30]: 30 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter07-wifi-stack.md` [30]: 30 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame.md` [30]: 30 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part1-04-statistics.md` [30]: 30 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/hardware/pcie/chapter03-config-space.md` [30]: 30 concrete-claim signals; verify against primary sources before marking current.
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/00-preface.md` [19]: 19 abstract concepts / 45 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter18-register-maps.md` [10]: 10 abstract concepts / 15 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter15-ras-performance.md` [8]: 8 abstract concepts / 16 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter01-fundamentals.md` [7]: 7 abstract concepts / 41 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part1-06-sync-basics.md` [7]: 7 abstract concepts / 28 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part4-07-lock-free.md` [7]: 7 abstract concepts / 14 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-02-zephyr-source.md` [7]: 7 abstract concepts / 11 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md` [7]: 7 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter17-performance.md` [6]: 6 abstract concepts / 21 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-03-rt-thread.md` [6]: 6 abstract concepts / 14 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-04-porting.md` [6]: 6 abstract concepts / 14 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md` [6]: 6 abstract concepts / 14 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter13-switching-fabric.md` [6]: 6 abstract concepts / 13 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess.md` [5]: 5 abstract concepts / 32 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/valgrind/chapter04-helgrind-drd.md` [5]: 5 abstract concepts / 28 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter05-interrupts.md` [5]: 5 abstract concepts / 25 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-05-mutex-usage.md` [5]: 5 abstract concepts / 22 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter02-tlp.md` [5]: 5 abstract concepts / 20 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part3-01-critical-section.md` [5]: 5 abstract concepts / 14 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part8-04-dma-allocator.md` [5]: 5 abstract concepts / 13 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md` [5]: 5 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md` [5]: 5 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md` [5]: 5 abstract concepts / 8 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part1-01-why-rtos.md` [5]: 5 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex.md` [4]: 4 abstract concepts / 52 hits with no image
+- **P3** `visual-aid` — `src/content/blog/programming/code-review/folly/part15-05-coro-baton-mutex.md` [4]: 4 abstract concepts / 38 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter08-dllp.md` [4]: 4 abstract concepts / 30 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part2-08-arm-mmu.md` [4]: 4 abstract concepts / 27 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter11-linux-dma.md` [4]: 4 abstract concepts / 27 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part4-05-mutex.md` [4]: 4 abstract concepts / 25 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter19-advanced-features.md` [4]: 4 abstract concepts / 25 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter09-physical-layer.md` [4]: 4 abstract concepts / 24 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter11-linux-driver.md` [4]: 4 abstract concepts / 22 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-06-mailbox.md` [4]: 4 abstract concepts / 20 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/kernel/chapter09-drivers-cxl-walkthrough.md` [4]: 4 abstract concepts / 20 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter12-virtualization-1.md` [4]: 4 abstract concepts / 19 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part12-03-quantization.md` [4]: 4 abstract concepts / 18 hits with no image
+- **P3** `visual-aid` — `src/content/blog/programming/code-review/folly/part10-04-fibers-channel.md` [4]: 4 abstract concepts / 18 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part3-12-cxl-mem-latency.md` [4]: 4 abstract concepts / 16 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos.md` [4]: 4 abstract concepts / 16 hits with no image
+- **P3** `visual-aid` — `src/content/blog/programming/code-review/folly/part9-04-rw-spin-lock.md` [4]: 4 abstract concepts / 16 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-06-atomic-cost.md` [4]: 4 abstract concepts / 15 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/embedded-cpp/part2-01-raii-basics.md` [4]: 4 abstract concepts / 14 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part4-10-smp-analysis.md` [4]: 4 abstract concepts / 13 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-08-dma-completion.md` [4]: 4 abstract concepts / 13 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-06-nuttx.md` [4]: 4 abstract concepts / 13 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/00-preface.md` [4]: 4 abstract concepts / 13 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part2-04-context-switch.md` [4]: 4 abstract concepts / 13 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part12-02-npu-architecture.md` [4]: 4 abstract concepts / 12 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part5-11-cxl-profiling-tools.md` [4]: 4 abstract concepts / 11 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/bootloader/chapter26-ddr-training.md` [4]: 4 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis.md` [4]: 4 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-04-hazard-pointer.md` [4]: 4 abstract concepts / 9 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-05-cas-patterns.md` [4]: 4 abstract concepts / 8 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-09-false-sharing.md` [4]: 4 abstract concepts / 8 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-09-software-timer.md` [4]: 4 abstract concepts / 8 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-09-pcie-streaming.md` [4]: 4 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md` [4]: 4 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md` [4]: 4 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part10-09-timing-race-diag.md` [4]: 4 abstract concepts / 6 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter01-overview.md` [4]: 4 abstract concepts / 6 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part3-07-queue-impl.md` [4]: 4 abstract concepts / 6 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/00-preface.md` [4]: 4 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md` [4]: 4 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-11-timer-services.md` [4]: 4 abstract concepts / 4 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md` [4]: 4 abstract concepts / 4 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part8-09-stack-analysis.md` [3]: 3 abstract concepts / 38 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-04-semaphore-usage.md` [3]: 3 abstract concepts / 28 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/bootloader/chapter36-boot-memory-topology.md` [3]: 3 abstract concepts / 23 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-12-rtos-debugging.md` [3]: 3 abstract concepts / 20 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part4-06-rw-lock.md` [3]: 3 abstract concepts / 19 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part7-10-epoll.md` [3]: 3 abstract concepts / 19 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-03-rcu-basics.md` [3]: 3 abstract concepts / 19 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp.md` [3]: 3 abstract concepts / 19 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part1-07-semaphore.md` [3]: 3 abstract concepts / 19 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/embedded-cpp/part2-02-raii-patterns.md` [3]: 3 abstract concepts / 18 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part4-04-spinlock.md` [3]: 3 abstract concepts / 18 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink.md` [3]: 3 abstract concepts / 18 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-04-static-allocation.md` [3]: 3 abstract concepts / 17 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part3-02-semaphore-impl.md` [3]: 3 abstract concepts / 16 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction.md` [3]: 3 abstract concepts / 15 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md` [3]: 3 abstract concepts / 15 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part7-11-uio-vfio.md` [3]: 3 abstract concepts / 15 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter08-cxl-mem.md` [3]: 3 abstract concepts / 13 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md` [3]: 3 abstract concepts / 11 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md` [3]: 3 abstract concepts / 11 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/memory/chapter01-memory-accounting.md` [3]: 3 abstract concepts / 11 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part12-12-matter-thread.md` [3]: 3 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter16-troubleshooting.md` [3]: 3 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-05-memory-pool.md` [3]: 3 abstract concepts / 9 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/memory/chapter07-tiered-memory-diagnostics.md` [3]: 3 abstract concepts / 9 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part4-03-lock-contention.md` [3]: 3 abstract concepts / 8 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-03-scheduler-internals.md` [3]: 3 abstract concepts / 8 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part2-06-cortex-a-context.md` [3]: 3 abstract concepts / 8 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames.md` [3]: 3 abstract concepts / 8 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/bootloader/chapter35-uefi-cxl-init.md` [3]: 3 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-01-freertos-source.md` [3]: 3 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter09-flit-format.md` [3]: 3 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/programming/code-review/folly/part9-05-pico-spin-lock.md` [3]: 3 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/programming/code-review/abseil/00-preface.md` [3]: 3 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part3-04-dma-vs-cpu.md` [3]: 3 abstract concepts / 6 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-02-task-design.md` [3]: 3 abstract concepts / 6 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part3-03-dma-performance.md` [3]: 3 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-05-ps-pl-communication.md` [3]: 3 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part3-10-deadlock.md` [3]: 3 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-10-syscall.md` [3]: 3 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter10-linux-basics.md` [3]: 3 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter07-error-handling.md` [3]: 3 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/postmortem/chapter06-cxl-fabric-postmortem.md` [3]: 3 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/embedded-security/chapter11-pcie-cxl-ide.md` [3]: 3 abstract concepts / 4 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part2-08-tick-timer.md` [3]: 3 abstract concepts / 4 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter03-config-space.md` [3]: 3 abstract concepts / 4 hits with no image
+- **P3** `visual-aid` — `src/content/blog/programming/code-review/folly/part21-01-observer.md` [3]: 3 abstract concepts / 4 hits with no image
+- **P3** `visual-aid` — `src/content/blog/programming/code-review/folly/00-preface.md` [3]: 3 abstract concepts / 4 hits with no image
+- **P3** `visual-aid` — `src/content/blog/programming/code-review/abseil/part16-03-periodic-sampler.md` [3]: 3 abstract concepts / 4 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/bsp/chapter21-maintenance.md` [3]: 3 abstract concepts / 3 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part2-02-cortex-a-comparison.md` [3]: 3 abstract concepts / 3 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part7-12-sysfs.md` [3]: 3 abstract concepts / 3 hits with no image

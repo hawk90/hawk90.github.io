@@ -1,6 +1,6 @@
 # Security & admin remediation gate
 
-Generated deterministically from the current source tree.
+Generated deterministically from the current source tree and `dist`.
 
 > `open` P0 findings fail `npm run gate:security-admin`. `manual-review` requires an explicit deployment/design decision before enabling the affected capability.
 
@@ -16,15 +16,26 @@ Generated deterministically from the current source tree.
 - Raw HTML insertion sinks
 - Required remediation: Replace string HTML rendering with DOM APIs, or sanitize a narrowly documented trusted input before insertion.
 
-## SEC-ADMIN-03 — manual-review
+## SEC-ADMIN-03 — passed
 
 - Priority: P0
-- OAuth server secret boundary
-- Required remediation: Keep GitHub client secrets in server-only routes and require a hybrid/server deployment before enabling OAuth.
-- Evidence: `src/pages/api/auth/callback.ts:40` — `import.meta.env.GITHUB_CLIENT_SECRET`
+- OAuth server secret in a static site
+- Required remediation: Do not keep OAuth callback code or GitHub client secrets in this static deployment.
 
 ## SEC-ADMIN-04 — passed
 
 - Priority: P1
 - Static deployment OAuth compatibility
-- Required remediation: Assert that OAuth is disabled when Astro output is static, or deploy a server adapter before enabling it.
+- Required remediation: Static output must stay PAT-only; move OAuth to a separately deployed server application.
+
+## SEC-ADMIN-05 — passed
+
+- Priority: P1
+- OAuth route source in a static site
+- Required remediation: Remove API OAuth routes from static deployments; they can only emit broken, pre-rendered redirects.
+
+## SEC-ADMIN-06 — passed
+
+- Priority: P1
+- OAuth endpoint in production artifact
+- Required remediation: Production artifact must not contain /api/auth routes when this project builds as a static site.

@@ -50,6 +50,8 @@ extract_category() {
 
 # Build whitelist once
 WHITELIST=$(mktemp)
+COUNTFILE=$(mktemp)
+trap 'rm -f "$WHITELIST" "$COUNTFILE"' EXIT
 for sub in jedec_standards pcie_standards dmtf_standards ieee_802_1_tsn \
            nvidia_gpu_verified nvidia_gpu_roadmap \
            amd_gpu_verified amd_gpu_roadmap \
@@ -60,7 +62,6 @@ for sub in jedec_standards pcie_standards dmtf_standards ieee_802_1_tsn \
 done
 
 UNKNOWN_COUNT=0
-COUNTFILE=$(mktemp)
 echo 0 > "$COUNTFILE"
 echo "═══ Known-fact verification ═══"
 
@@ -96,10 +97,6 @@ while IFS= read -r f; do
 done < <(find "${TARGETS[@]}" -name "*.md" -type f)
 
 UNKNOWN_COUNT=$(cat "$COUNTFILE")
-rm -f "$COUNTFILE"
-
-rm -f "$WHITELIST"
-
 echo ""
 if [ "$UNKNOWN_COUNT" -eq 0 ]; then
   echo "✓ 모든 fact가 whitelist에 등재됨."

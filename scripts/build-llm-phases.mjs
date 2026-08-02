@@ -12,6 +12,7 @@ const [classification, conversation] = await Promise.all([
   readFile(join(archive, 'conversation.json'), 'utf8').then(JSON.parse),
 ]);
 const messages = new Map(conversation.messages.filter(({ id }) => id).map((message) => [message.id, message]));
+const sourceCapturedAt = conversation.capturedAt ?? null;
 const groups = {
   foundation: { label: 'Phase 1 — Domain and information foundation', prefixes: ['ARC', 'CPM', 'B'] },
   discovery: { label: 'Phase 2 — Content, relationship, and search discovery', prefixes: ['REL', 'ART', 'SEA'] },
@@ -52,6 +53,6 @@ for (const [group, definition] of Object.entries(groups)) {
   ].join('\n');
   await writeFile(join(output, filename), `${markdown}\n`);
 }
-await writeFile(join(output, 'manifest.json'), `${JSON.stringify({ generatedAt: new Date().toISOString(), phases: manifest }, null, 2)}\n`);
+await writeFile(join(output, 'manifest.json'), `${JSON.stringify({ sourceCapturedAt, phases: manifest }, null, 2)}\n`);
 await writeFile(join(output, 'index.md'), ['# Execution phases', '', '> LLM instructions: retrieve the current phase only, preserve task IDs, and update task status with evidence.', '', '| Phase | Tasks | File |', '| --- | ---: | --- |', ...Object.entries(groups).map(([key, value]) => `| ${value.label} | ${phases.filter((item) => item.group === key).length} | [${key}.md](${key}.md) |`), ''].join('\n'));
 console.log(`Created ${phases.length} phase tasks in ${output}`);

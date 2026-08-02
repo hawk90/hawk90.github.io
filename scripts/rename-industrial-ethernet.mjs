@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DIR = join(REPO_ROOT, 'src', 'content', 'blog', 'embedded', 'protocols', 'industrial-ethernet');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 1, 'chapter01-overview.md',              '산업용 이더넷 분석 — 일반 이더넷과 결정성 요구의 차이',                       '2026-05-13T09:01:00'],

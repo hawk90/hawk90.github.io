@@ -36,6 +36,7 @@ Exit code:
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -46,6 +47,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TRACKING_FILE = REPO_ROOT / "data" / "upstream-tracking.yaml"
+CACHE_DIR = REPO_ROOT / ".cache" / "cited-symbols"
 
 # clone에서 인덱싱할 source 확장자
 _SOURCE_EXT = (".h", ".hpp", ".hh", ".cpp", ".cc", ".cxx", ".c", ".inl", ".ipp")
@@ -55,12 +57,17 @@ _IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 
 def load_yaml(path):
-    """yq CLI로 YAML → JSON (PyYAML 의존성 제거, freshness audit과 동일)."""
+    """프로젝트 의존성 js-yaml으로 YAML을 읽는다 (별도 yq 설치 불필요)."""
     try:
-        out = subprocess.check_output(["yq", "-o=json", str(path)], text=True)
+        out = subprocess.check_output([
+            "node", "--input-type=module", "--eval",
+            "import fs from 'node:fs'; import yaml from 'js-yaml'; "
+            "console.log(JSON.stringify(yaml.load(fs.readFileSync(process.argv[1], 'utf8'))));",
+            str(path),
+        ], text=True, cwd=REPO_ROOT)
         return json.loads(out)
     except FileNotFoundError:
-        print("ERROR: yq required (brew install yq)", file=sys.stderr)
+        print("ERROR: node is required", file=sys.stderr)
         sys.exit(1)
     except subprocess.CalledProcessError as e:
         print(f"ERROR parsing YAML {path}: {e}", file=sys.stderr)
@@ -90,12 +97,31 @@ def leaf_name(symbol):
     return symbol.rsplit("::", 1)[-1]
 
 
+def cache_key(local, subsystem_paths):
+    """Stable cache key for exactly one upstream revision and scan scope."""
+    try:
+        revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=local, text=True, stderr=subprocess.DEVNULL
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        revision = "unknown"
+    raw = json.dumps({"path": str(local.resolve()), "revision": revision,
+                      "subsystems": subsystem_paths or []}, sort_keys=True)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
 def build_token_index(local_path, subsystem_paths=None):
     """clone의 source 파일에서 모든 식별자 토큰 set을 구축.
 
     subsystem_paths가 있으면 그 하위만 순회 (거대 repo 대비).
     """
     local = expand_path(local_path)
+    cache_file = CACHE_DIR / f"{cache_key(local, subsystem_paths)}.json"
+    try:
+        cached = json.loads(cache_file.read_text(encoding="utf-8"))
+        return set(cached["tokens"]), cached["files_scanned"], True
+    except (OSError, KeyError, json.JSONDecodeError):
+        pass
     roots = []
     if subsystem_paths:
         for sp in subsystem_paths:
@@ -117,7 +143,10 @@ def build_token_index(local_path, subsystem_paths=None):
             except Exception:
                 continue
             tokens.update(_IDENT_RE.findall(text))
-    return tokens, files_scanned
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_file.write_text(json.dumps({"files_scanned": files_scanned,
+                                      "tokens": sorted(tokens)}, ensure_ascii=False), encoding="utf-8")
+    return tokens, files_scanned, False
 
 
 def extract_cited_symbols(series_dir, symbol_patterns):
@@ -160,7 +189,7 @@ def audit_series(entry):
               file=sys.stderr)
         return None
 
-    tokens, files_scanned = build_token_index(local, subsystem_paths)
+    tokens, files_scanned, cache_hit = build_token_index(local, subsystem_paths)
     cited = extract_cited_symbols(series_dir, symbol_patterns)
 
     missing = {}
@@ -174,6 +203,7 @@ def audit_series(entry):
         "id": entry["id"],
         "title": title,
         "files_scanned": files_scanned,
+        "cache_hit": cache_hit,
         "cited": len(cited),
         "missing": missing,
     }
@@ -186,7 +216,7 @@ def format_report(results):
         if r is None:
             continue
         lines.append(f"## {r['title']}")
-        lines.append(f"- clone source files: {r['files_scanned']}, "
+        lines.append(f"- clone source files: {r['files_scanned']} ({'cached index' if r['cache_hit'] else 'rebuilt index'}), "
                      f"cited symbols: {r['cited']}, "
                      f"MISSING: {len(r['missing'])}")
         if r["missing"]:

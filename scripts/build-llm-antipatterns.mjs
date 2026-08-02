@@ -19,6 +19,7 @@ const [classification, conversation] = await Promise.all([
   readFile(join(archive, 'classification.json'), 'utf8').then(JSON.parse),
   readFile(join(archive, 'conversation.json'), 'utf8').then(JSON.parse),
 ]);
+const sourceCapturedAt = conversation.capturedAt ?? null;
 const messagesById = new Map(conversation.messages.filter(({ id }) => id).map((message) => [message.id, message]));
 const categories = {
   content: { label: 'Content strategy and structure', prefixes: ['A', 'C', 'G'] },
@@ -144,7 +145,7 @@ const index = [
   '',
   '| Category | Canonical items | Files |',
   '| --- | ---: | --- |',
-  ...Object.entries(categories).map(([key, value]) => `| ${value.label} | ${value.items} | ${value.chunks.map((file) => `[${file}](${file})`).join(', ')} |`),
+  ...Object.entries(categories).map(([, value]) => `| ${value.label} | ${value.items} | ${value.chunks.map((file) => `[${file}](${file})`).join(', ')} |`),
   '',
   '## Merge policy',
   '',
@@ -153,7 +154,7 @@ const index = [
   '',
 ].join('\n');
 await writeFile(join(output, 'index.md'), index);
-await writeFile(join(output, 'manifest.json'), `${JSON.stringify({ generatedAt: new Date().toISOString(), canonicalItems: manifest }, null, 2)}\n`);
+await writeFile(join(output, 'manifest.json'), `${JSON.stringify({ sourceCapturedAt, canonicalItems: manifest }, null, 2)}\n`);
 await writeFile(join(output, 'merge-map.json'), `${JSON.stringify({ policy: 'Exact normalized source-body SHA-256 only', canonicalItems: mergeMap }, null, 2)}\n`);
 await writeFile(join(output, 'README.md'), `# LLM anti-pattern corpus\n\nStart with [index.md](index.md). Use [manifest.json](manifest.json) for ID-based retrieval and [merge-map.json](merge-map.json) to trace exact merges.\n`);
 console.log(`Created ${canonicalItems.length} canonical anti-patterns in ${output}`);

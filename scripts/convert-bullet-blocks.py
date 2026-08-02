@@ -59,15 +59,17 @@ def convert(text: str) -> tuple[str, int]:
 
 
 if __name__ == "__main__":
+    apply = "--apply" in sys.argv[1:]
     total = 0
-    for arg in sys.argv[1:]:
+    for arg in (arg for arg in sys.argv[1:] if arg != "--apply"):
         p = Path(arg)
         if not p.is_file():
             continue
         text = p.read_text()
         new_text, n = convert(text)
         if n > 0:
-            p.write_text(new_text)
-            print(f"{p}: {n} blocks converted")
+            if apply:
+                p.write_text(new_text)
+            print(f"{p}: {n} blocks {'converted' if apply else 'to convert'}")
             total += n
-    print(f"\nTotal: {total} blocks converted")
+    print(f"\n{'APPLIED' if apply else 'DRY RUN'}: {total} blocks")

@@ -39,12 +39,17 @@ TRACKING_FILE = REPO_ROOT / "data" / "upstream-tracking.yaml"
 
 
 def load_yaml(path):
-    """yq CLI로 YAML → JSON 변환 후 json 모듈로 파싱 (PyYAML 의존성 제거)."""
+    """프로젝트 의존성 js-yaml으로 YAML을 읽는다 (별도 yq 설치 불필요)."""
     try:
-        out = subprocess.check_output(["yq", "-o=json", str(path)], text=True)
+        out = subprocess.check_output([
+            "node", "--input-type=module", "--eval",
+            "import fs from 'node:fs'; import yaml from 'js-yaml'; "
+            "console.log(JSON.stringify(yaml.load(fs.readFileSync(process.argv[1], 'utf8'))));",
+            str(path),
+        ], text=True, cwd=REPO_ROOT)
         return json.loads(out)
     except FileNotFoundError:
-        print("ERROR: yq required (brew install yq)", file=sys.stderr)
+        print("ERROR: node is required", file=sys.stderr)
         sys.exit(1)
     except subprocess.CalledProcessError as e:
         print(f"ERROR parsing YAML {path}: {e}", file=sys.stderr)
@@ -68,8 +73,8 @@ def run(cmd, cwd=None, check=True, capture=True):
     return result.returncode, result.stdout
 
 
-def ensure_clone(repo_url, local_path, branch):
-    """Clone if missing, otherwise fetch."""
+def ensure_clone(repo_url, local_path):
+    """Clone only when the caller explicitly requested a refresh."""
     local = expand_path(local_path)
     if not local.exists():
         local.parent.mkdir(parents=True, exist_ok=True)
@@ -260,7 +265,7 @@ def get_releases(repo_url):
         return []
 
 
-def audit_series(entry, no_fetch=False, top=10, fetch_releases=False):
+def audit_series(entry, fetch=False, top=10, fetch_releases=False):
     """단일 시리즈 audit."""
     title = entry["title"]
     series_dir = entry["series_dir"]
@@ -278,9 +283,13 @@ def audit_series(entry, no_fetch=False, top=10, fetch_releases=False):
     if subsystem_paths:
         print(f"  subsystems: {', '.join(subsystem_paths)}", file=sys.stderr)
 
-    # 1. Clone / fetch
-    local = ensure_clone(repo_url, local_path, branch)
-    if not no_fetch:
+    # 1. Local clone is read-only by default. Network clone/fetch is opt-in.
+    local = expand_path(local_path)
+    if not local.exists() and not fetch:
+        return {"id": entry["id"], "title": title, "skipped": "local clone 없음 (--fetch로 생성)"}
+    if not local.exists():
+        local = ensure_clone(repo_url, local_path)
+    if fetch:
         fetch_upstream(local, branch)
 
     # 2. Diff 분석 (subsystem_paths가 있으면 git pathspec으로 필터)
@@ -325,6 +334,9 @@ def format_report(results):
     lines.append("# Upstream Freshness Audit\n")
     for r in results:
         lines.append(f"## {r['title']}\n")
+        if r.get("skipped"):
+            lines.append(f"- SKIPPED: {r['skipped']}\n")
+            continue
         bl = r["baseline"]
         sb = r["since_baseline"]
         lines.append(f"- Baseline: `{bl['commit'][:12]}` ({bl['date']})")
@@ -355,7 +367,8 @@ def format_report(results):
 def main():
     ap = argparse.ArgumentParser(description="Upstream freshness audit")
     ap.add_argument("--series", help="단일 시리즈 id로 제한", default=None)
-    ap.add_argument("--no-fetch", action="store_true", help="fetch 안 함 (offline)")
+    ap.add_argument("--fetch", action="store_true", help="없는 clone을 만들고 origin을 fetch (네트워크 사용)")
+    ap.add_argument("--no-fetch", action="store_true", help="호환용 별칭; 기본이 이미 offline")
     ap.add_argument("--top", type=int, default=10, help="ranking 상위 N 챕터")
     ap.add_argument("--json", help="JSON 출력 경로", default=None)
     ap.add_argument("--releases", action="store_true", help="gh CLI로 release 정보 추가")
@@ -372,7 +385,7 @@ def main():
         if args.series and entry["id"] != args.series:
             continue
         try:
-            r = audit_series(entry, no_fetch=args.no_fetch, top=args.top,
+            r = audit_series(entry, fetch=args.fetch and not args.no_fetch, top=args.top,
                              fetch_releases=args.releases)
             results.append(r)
         except Exception as e:

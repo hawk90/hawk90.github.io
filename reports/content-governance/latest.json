@@ -1,0 +1,711 @@
+{
+  "generatedAt": "2026-08-01T12:03:34.976Z",
+  "lifecycle": [
+    {
+      "id": "embedded/modern-recipes/00-preface",
+      "title": "Modern Embedded Recipes — 모던 임베디드 실전 레시피 시리즈 소개",
+      "date": "2026-04-10T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "embedded/rtos/practical-internals/00-preface",
+      "title": "Practical RTOS Internals — 실시간 커널 내부 분석 시리즈 소개",
+      "date": "2026-05-04T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "embedded/performance-engineering/00-preface",
+      "title": "Embedded Performance Engineering — 임베디드 성능 엔지니어링 시리즈 소개",
+      "date": "2026-04-23T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "programming/code-review/folly/00-preface",
+      "title": "Folly Code Review — Meta의 production-grade C++ 라이브러리 코드 분석",
+      "date": "2026-06-04T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "embedded/embedded-cpp/00-preface",
+      "title": "Embedded C++ for Real Systems — 임베디드 모던 C++ 시리즈 소개",
+      "date": "2026-04-28T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "programming/code-review/abseil/00-preface",
+      "title": "Abseil Code Review — Google production-grade C++ 라이브러리 분석",
+      "date": "2026-06-09T09:00:00.000Z",
+      "score": 110
+    },
+    {
+      "id": "embedded/modern-recipes/part1-01-digital-signal-basics",
+      "title": "디지털 신호 기초 — Voltage Level·Edge·Setup/Hold 분석",
+      "date": "2026-04-10T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-02-clock-timing",
+      "title": "임베디드 클럭과 타이밍 — Skew·Jitter·PLL·MMCM 분석",
+      "date": "2026-04-10T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-03-gpio-internals",
+      "title": "GPIO 내부 구조 분해 — Push-Pull·Open-Drain·Schmitt Trigger",
+      "date": "2026-04-10T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-04-uart-hardware",
+      "title": "UART 하드웨어 동작 분석 — Baud Rate·Framing·FIFO",
+      "date": "2026-04-10T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-05-spi-hardware",
+      "title": "SPI 하드웨어 분석 — Clock Mode·MOSI/MISO·Chip Select",
+      "date": "2026-04-10T09:05:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-06-i2c-hardware",
+      "title": "I2C 하드웨어 분석 — Open-Drain·Clock Stretching·Arbitration",
+      "date": "2026-04-10T09:06:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-07-adc-principles",
+      "title": "ADC 동작 원리 — SAR·Sigma-Delta·Pipelined 비교",
+      "date": "2026-04-10T09:07:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-08-dac-principles",
+      "title": "DAC 동작 원리 — R-2R Ladder·Sigma-Delta·Settling Time",
+      "date": "2026-04-10T09:08:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-09-pwm-signal",
+      "title": "PWM 신호 생성 분석 — Duty·Frequency·Dead Time·Center-Aligned",
+      "date": "2026-04-10T09:09:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-10-can-electrical",
+      "title": "CAN 버스 전기적 특성 — Differential·Termination·Dominant/Recessive",
+      "date": "2026-04-10T09:10:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-11-rs485-rs422",
+      "title": "RS-485·RS-422 차동 신호 분석 — Termination·Biasing·Topology",
+      "date": "2026-04-10T09:11:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part1-12-lvds-differential",
+      "title": "LVDS 차동 신호 분석 — Common-Mode·Impedance·Eye Pattern",
+      "date": "2026-04-10T09:12:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-01-dynamic-memory",
+      "title": "임베디드 동적 메모리 — malloc 위험·결정성·대안 분석",
+      "date": "2026-04-17T09:00:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-02-memory-alignment",
+      "title": "메모리 정렬과 패딩 분석 — Natural·Strict Alignment·Trap",
+      "date": "2026-04-17T09:01:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-03-cache-alignment",
+      "title": "Cache Line Alignment — alignas·Padding·SoA 적용",
+      "date": "2026-04-17T09:02:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-04-dma-allocator",
+      "title": "DMA-Friendly Allocator — dma_alloc_coherent·IOMMU·Pool",
+      "date": "2026-04-17T09:03:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-05-zero-copy",
+      "title": "Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice",
+      "date": "2026-04-17T09:04:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-06-numa",
+      "title": "NUMA Memory Topology — numactl·numa_alloc·HBM 적용",
+      "date": "2026-04-17T09:05:00.000Z",
+      "score": 10
+    },
+    {
+      "id": "embedded/modern-recipes/part8-07-simd",
+      "title": "SIMD 활용 분석 — Intrinsics·Auto-Vectorization·OpenMP SIMD",
+      "date": "2026-04-17T09:06:00.000Z",
+      "score": 10
+    }
+  ],
+  "taxonomy": [
+    {
+      "path": "programming/engineering/agile-lean-engineering",
+      "documents": 156,
+      "seriesCount": 1,
+      "dominantSeries": "Agile & Lean Software Engineering",
+      "dominantSeriesDocuments": 3,
+      "dominantSeriesShare": 0.019,
+      "ungroupedDocuments": 153,
+      "recommendation": "review-as-topic",
+      "rationale": "No single named series accounts for 80% of documents; review as a potential stable reader-facing topic before creating a category."
+    },
+    {
+      "path": "embedded/modern-recipes",
+      "documents": 152,
+      "seriesCount": 1,
+      "dominantSeries": "Modern Embedded Recipes",
+      "dominantSeriesDocuments": 152,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/engineering/pragmatic-programmer",
+      "documents": 100,
+      "seriesCount": 1,
+      "dominantSeries": "The Pragmatic Programmer",
+      "dominantSeriesDocuments": 100,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/code-review/folly",
+      "documents": 89,
+      "seriesCount": 1,
+      "dominantSeries": "Folly Code Review",
+      "dominantSeriesDocuments": 89,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/code-review/abseil",
+      "documents": 79,
+      "seriesCount": 1,
+      "dominantSeries": "Abseil Code Review",
+      "dominantSeriesDocuments": 79,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/design/refactoring-catalog",
+      "documents": 61,
+      "seriesCount": 1,
+      "dominantSeries": "Refactoring Catalog (Fowler 2nd ed)",
+      "dominantSeriesDocuments": 61,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "embedded/performance-engineering",
+      "documents": 57,
+      "seriesCount": 1,
+      "dominantSeries": "Embedded Performance Engineering",
+      "dominantSeriesDocuments": 57,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/cpp/effective-cpp",
+      "documents": 55,
+      "seriesCount": 1,
+      "dominantSeries": "Effective C++",
+      "dominantSeriesDocuments": 55,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "embedded/rtos/practical-internals",
+      "documents": 53,
+      "seriesCount": 1,
+      "dominantSeries": "Practical RTOS Internals",
+      "dominantSeriesDocuments": 53,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/engineering/tdd-patterns",
+      "documents": 53,
+      "seriesCount": 1,
+      "dominantSeries": "TDD by Example — Patterns Deep Dive",
+      "dominantSeriesDocuments": 53,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "writing/elements-of-style",
+      "documents": 51,
+      "seriesCount": 1,
+      "dominantSeries": "The Elements of Style",
+      "dominantSeriesDocuments": 51,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/cpp/effective-modern-cpp",
+      "documents": 42,
+      "seriesCount": 1,
+      "dominantSeries": "Effective Modern C++",
+      "dominantSeriesDocuments": 42,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "embedded/embedded-cpp",
+      "documents": 41,
+      "seriesCount": 1,
+      "dominantSeries": "Embedded C++ for Real Systems",
+      "dominantSeriesDocuments": 41,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "media/av1",
+      "documents": 40,
+      "seriesCount": 1,
+      "dominantSeries": "AV1",
+      "dominantSeriesDocuments": 40,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/algorithms/data-structures-and-algorithms",
+      "documents": 40,
+      "seriesCount": 1,
+      "dominantSeries": "Data Structures and Algorithms",
+      "dominantSeriesDocuments": 40,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/cpp/cpp-software-design",
+      "documents": 39,
+      "seriesCount": 1,
+      "dominantSeries": "C++ Software Design",
+      "dominantSeriesDocuments": 39,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "embedded/bootloader",
+      "documents": 37,
+      "seriesCount": 1,
+      "dominantSeries": "Bootloader Internals",
+      "dominantSeriesDocuments": 37,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "ml/foundations/murphy-ml2",
+      "documents": 36,
+      "seriesCount": 1,
+      "dominantSeries": "Probabilistic Machine Learning: Advanced Topics",
+      "dominantSeriesDocuments": 36,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/design/oosc",
+      "documents": 36,
+      "seriesCount": 1,
+      "dominantSeries": "Object-Oriented Software Construction",
+      "dominantSeriesDocuments": 36,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/design/uml",
+      "documents": 35,
+      "seriesCount": 1,
+      "dominantSeries": "UML 2.5.1",
+      "dominantSeriesDocuments": 35,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/engineering/code-complete",
+      "documents": 35,
+      "seriesCount": 1,
+      "dominantSeries": "Code Complete",
+      "dominantSeriesDocuments": 35,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/design/clean-architecture",
+      "documents": 34,
+      "seriesCount": 1,
+      "dominantSeries": "Clean Architecture",
+      "dominantSeriesDocuments": 34,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/cpp/professional-cpp",
+      "documents": 33,
+      "seriesCount": 1,
+      "dominantSeries": "전문가를 위한 C++",
+      "dominantSeriesDocuments": 33,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/engineering/tdd-by-example",
+      "documents": 32,
+      "seriesCount": 1,
+      "dominantSeries": "TDD by Example",
+      "dominantSeriesDocuments": 32,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/cpp/beautiful-cpp",
+      "documents": 30,
+      "seriesCount": 1,
+      "dominantSeries": "Beautiful C++",
+      "dominantSeriesDocuments": 30,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "writing/academic-writing",
+      "documents": 30,
+      "seriesCount": 1,
+      "dominantSeries": "Academic Writing for Graduate Students",
+      "dominantSeriesDocuments": 30,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "writing/only-grammar-book",
+      "documents": 30,
+      "seriesCount": 1,
+      "dominantSeries": "The Only Grammar Book You'll Ever Need",
+      "dominantSeriesDocuments": 30,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/design/gof-design-patterns",
+      "documents": 25,
+      "seriesCount": 1,
+      "dominantSeries": "GoF Design Patterns",
+      "dominantSeriesDocuments": 25,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/engineering/legacy-code",
+      "documents": 25,
+      "seriesCount": 1,
+      "dominantSeries": "Working Effectively with Legacy Code",
+      "dominantSeriesDocuments": 25,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "systems/code-petzold",
+      "documents": 25,
+      "seriesCount": 1,
+      "dominantSeries": "Code: The Hidden Language",
+      "dominantSeriesDocuments": 25,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/python/fluent-python",
+      "documents": 24,
+      "seriesCount": 1,
+      "dominantSeries": "Fluent Python",
+      "dominantSeriesDocuments": 24,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "writing/on-writing-well",
+      "documents": 24,
+      "seriesCount": 1,
+      "dominantSeries": "On Writing Well",
+      "dominantSeriesDocuments": 24,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "math/probability/gelman-bda3",
+      "documents": 23,
+      "seriesCount": 1,
+      "dominantSeries": "Bayesian Data Analysis (3rd ed)",
+      "dominantSeriesDocuments": 23,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "ml/foundations/murphy-ml1",
+      "documents": 23,
+      "seriesCount": 1,
+      "dominantSeries": "Probabilistic Machine Learning: An Introduction",
+      "dominantSeriesDocuments": 23,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/cpp/extreme-c",
+      "documents": 23,
+      "seriesCount": 1,
+      "dominantSeries": "전문가를 위한 C",
+      "dominantSeriesDocuments": 23,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "tools/emulation/qemu-fake-device",
+      "documents": 22,
+      "seriesCount": 1,
+      "dominantSeries": "QEMU Fake Device Driver",
+      "dominantSeriesDocuments": 22,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "tools/emulation/qemu-internals",
+      "documents": 22,
+      "seriesCount": 1,
+      "dominantSeries": "QEMU Internals",
+      "dominantSeriesDocuments": 22,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "embedded/bsp",
+      "documents": 21,
+      "seriesCount": 1,
+      "dominantSeries": "BSP Development",
+      "dominantSeriesDocuments": 21,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "math/probability/koller-friedman-pgm",
+      "documents": 21,
+      "seriesCount": 1,
+      "dominantSeries": "Probabilistic Graphical Models (Koller & Friedman)",
+      "dominantSeriesDocuments": 21,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "systems/apue",
+      "documents": 21,
+      "seriesCount": 1,
+      "dominantSeries": "APUE",
+      "dominantSeriesDocuments": 21,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "tools/practical-vim",
+      "documents": 21,
+      "seriesCount": 1,
+      "dominantSeries": "Practical Vim",
+      "dominantSeriesDocuments": 21,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "embedded/buildroot",
+      "documents": 20,
+      "seriesCount": 1,
+      "dominantSeries": "Buildroot Practical",
+      "dominantSeriesDocuments": 20,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "embedded/hardware/pcie",
+      "documents": 20,
+      "seriesCount": 1,
+      "dominantSeries": "PCIe Deep Dive",
+      "dominantSeriesDocuments": 19,
+      "dominantSeriesShare": 0.95,
+      "ungroupedDocuments": 1,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/engineering/art-of-unix",
+      "documents": 20,
+      "seriesCount": 1,
+      "dominantSeries": "The Art of UNIX Programming",
+      "dominantSeriesDocuments": 20,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/engineering/peopleware",
+      "documents": 20,
+      "seriesCount": 1,
+      "dominantSeries": "Peopleware",
+      "dominantSeriesDocuments": 20,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "tools/emulation/qemu-embedded",
+      "documents": 20,
+      "seriesCount": 1,
+      "dominantSeries": "QEMU Embedded Emulation",
+      "dominantSeriesDocuments": 20,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "writing/uri-geul-baro-sseugi",
+      "documents": 20,
+      "seriesCount": 1,
+      "dominantSeries": "우리글 바로쓰기",
+      "dominantSeriesDocuments": 20,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/cpp/a-tour-of-cpp",
+      "documents": 19,
+      "seriesCount": 1,
+      "dominantSeries": "A Tour of C++",
+      "dominantSeriesDocuments": 19,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "programming/engineering/mythical-man-month",
+      "documents": 19,
+      "seriesCount": 1,
+      "dominantSeries": "The Mythical Man-Month",
+      "dominantSeriesDocuments": 19,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "systems/linux-drivers/ldd3-modern",
+      "documents": 19,
+      "seriesCount": 1,
+      "dominantSeries": "Linux Device Drivers (LDD3)",
+      "dominantSeriesDocuments": 19,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    }
+  ],
+  "relations": {
+    "explicitCount": 2,
+    "action": "Propose relationships only after reading both documents; never infer prerequisites from filenames or dates."
+  }
+}

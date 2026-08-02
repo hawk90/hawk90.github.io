@@ -1,0 +1,1039 @@
+{
+  "category": "quality",
+  "state": "remediation_in_progress",
+  "blockedBy": [],
+  "batchSize": 15,
+  "batches": [
+    {
+      "id": "quality-01",
+      "source": "quality-01.md",
+      "items": [
+        {
+          "id": "AP-T-05",
+          "title": "T-05. Test Every Detail",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-05",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-05. Test Every Detail”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-06",
+          "title": "T-06. Utility-Only Unit Tests",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-06",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-06. Utility-Only Unit Tests”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-07",
+          "title": "T-07. Mock Everything",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-07",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-07. Mock Everything”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-10",
+          "title": "T-10. Fixture Does Not Resemble Real Content",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-10",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-10. Fixture Does Not Resemble Real Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-11",
+          "title": "T-11. Fixture Copy of Production Article",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-11",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-11. Fixture Copy of Production Article”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-12",
+          "title": "T-12. Unit Test Internal Implementation",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-12",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-12. Unit Test Internal Implementation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-13",
+          "title": "T-13. Generated HTML String Equality",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-13",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-13. Generated HTML String Equality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-14",
+          "title": "T-14. Locale-Dependent Test",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-14",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-14. Locale-Dependent Test”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-15",
+          "title": "T-15. Time-Dependent Test",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-15",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-15. Time-Dependent Test”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-27",
+          "title": "T-27. Every External Link on Every Commit",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-27",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-27. Every External Link on Every Commit”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-28",
+          "title": "T-28. External Failure Blocks Publishing",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-28",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-28. External Failure Blocks Publishing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-29",
+          "title": "T-29. Redirect Considered Healthy Forever",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-29",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-29. Redirect Considered Healthy Forever”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-30",
+          "title": "T-30. Anchor Links Not Checked",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-30",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-30. Anchor Links Not Checked”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-31",
+          "title": "T-31. Generated Heading Slug Assumption",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-31",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-31. Generated Heading Slug Assumption”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-35",
+          "title": "T-35. Redirect Hides Internal Link Debt",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-35",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-35. Redirect Hides Internal Link Debt”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "quality-02",
+      "source": "quality-01.md",
+      "items": [
+        {
+          "id": "AP-T-46",
+          "title": "T-46. Screenshot Every Page",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-46",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-46. Screenshot Every Page”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-47",
+          "title": "T-47. No Visual Regression Test",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-47",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-47. No Visual Regression Test”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-48",
+          "title": "T-48. Pixel-Perfect Failure",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-48",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-48. Pixel-Perfect Failure”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-49",
+          "title": "T-49. Visual Test on One Browser",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-49",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-49. Visual Test on One Browser”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-50",
+          "title": "T-50. Desktop-Only Screenshot",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-50",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-50. Desktop-Only Screenshot”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-51",
+          "title": "T-51. Screenshot Without Interaction",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-51",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-51. Screenshot Without Interaction”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-52",
+          "title": "T-52. Dynamic Content in Screenshot",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-52",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-52. Dynamic Content in Screenshot”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-53",
+          "title": "T-53. Font Not Pinned",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-53",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-53. Font Not Pinned”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-54",
+          "title": "T-54. Dark Mode Untested",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-54",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-54. Dark Mode Untested”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-55",
+          "title": "T-55. Generated Diagram Untested",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-55",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-55. Generated Diagram Untested”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-56",
+          "title": "T-56. Automated Accessibility Equals Accessible",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-56",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-56. Automated Accessibility Equals Accessible”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-57",
+          "title": "T-57. Accessibility Test on Homepage Only",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-57",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-57. Accessibility Test on Homepage Only”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-58",
+          "title": "T-58. No Keyboard Test",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-58",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-58. No Keyboard Test”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-59",
+          "title": "T-59. Focus Visible Test Missing",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-59",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-59. Focus Visible Test Missing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-100",
+          "title": "T-100. Testing System Becomes the Product",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-01.md#ap-t-100",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-100. Testing System Becomes the Product”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "quality-03",
+      "source": "quality-02.md",
+      "items": [
+        {
+          "id": "AP-T-60",
+          "title": "T-60. Focus Order Follows DOM Accidentally",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-60",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-60. Focus Order Follows DOM Accidentally”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-63",
+          "title": "T-63. High Contrast Untested",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-63",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-63. High Contrast Untested”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-64",
+          "title": "T-64. Screen Reader Label Snapshot",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-64",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-64. Screen Reader Label Snapshot”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-65",
+          "title": "T-65. Semantic HTML Replaced by ARIA Tests",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-65",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-65. Semantic HTML Replaced by ARIA Tests”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-66",
+          "title": "T-66. Grammar Linter as Technical Validator",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-66",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-66. Grammar Linter as Technical Validator”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-67",
+          "title": "T-67. Minimum Word Count Rule",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-67",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-67. Minimum Word Count Rule”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-68",
+          "title": "T-68. Required Section Checklist Everywhere",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-68",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-68. Required Section Checklist Everywhere”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-69",
+          "title": "T-69. Description Length as Quality",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-69",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-69. Description Length as Quality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-70",
+          "title": "T-70. Duplicate Detector by Text Similarity Alone",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-70",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-70. Duplicate Detector by Text Similarity Alone”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-71",
+          "title": "T-71. AI Detector as Quality Gate",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-71",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-71. AI Detector as Quality Gate”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-72",
+          "title": "T-72. Citation Count as Trust Score",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-72",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-72. Citation Count as Trust Score”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-73",
+          "title": "T-73. Environment Section Presence Only",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-73",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-73. Environment Section Presence Only”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-75",
+          "title": "T-75. Broken Claim Detection by Keyword",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-75",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-75. Broken Claim Detection by Keyword”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-79",
+          "title": "T-79. Invalid Inverse Relation",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-79",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-79. Invalid Inverse Relation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-80",
+          "title": "T-80. Circular Supersession",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-80",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-80. Circular Supersession”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "quality-04",
+      "source": "quality-02.md",
+      "items": [
+        {
+          "id": "AP-T-82",
+          "title": "T-82. Missing Series Member",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-82",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-82. Missing Series Member”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-84",
+          "title": "T-84. Superseded Article Remains Featured",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-84",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-84. Superseded Article Remains Featured”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-86",
+          "title": "T-86. Asset Exists Means Correct",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-86",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-86. Asset Exists Means Correct”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-87",
+          "title": "T-87. Image Reference Without Dimension Check",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-87",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-87. Image Reference Without Dimension Check”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-88",
+          "title": "T-88. SVG Syntax Only Validation",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-88",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-88. SVG Syntax Only Validation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-89",
+          "title": "T-89. OG Text Overflow Untested",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-89",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-89. OG Text Overflow Untested”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-90",
+          "title": "T-90. Missing Font Fallback in Generator",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-90",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-90. Missing Font Fallback in Generator”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-T-97",
+          "title": "T-97. CSP Header Presence Only",
+          "priority": "P1",
+          "effort": "M",
+          "source": {
+            "file": "quality-02.md#ap-t-97",
+            "messageIds": [
+              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-97. CSP Header Presence Only”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    }
+  ]
+}

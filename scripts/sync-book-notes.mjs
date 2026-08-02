@@ -9,12 +9,14 @@
 //   linear-algebra: chapter dir "NN-topic", section "N.M-slug.md", aux files
 //   set-theory:     chapter dir "chNN",     section "MM-slug.md", no aux files
 //
-// Re-runnable: overwrites synced files. Author in book-notes, run this to publish.
+// Re-runnable: overwrites synced files only with --apply.
+// Usage: node scripts/sync-book-notes.mjs [--apply]
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
+const APPLY = process.argv.includes('--apply');
 const BOOK_NOTES_ROOT = path.resolve(ROOT, '../book-notes');
 // Vector-only — blog uses SVG. PNG/raster intentionally skipped (duplicates of SVG).
 const IMG_EXT = /\.svg$/i;
@@ -53,7 +55,7 @@ const SERIES = [
 async function main() {
   let total = 0;
   for (const s of SERIES) total += await syncSeries(s);
-  console.log(`done. ${total} posts written.`);
+  console.log(`done. ${total} posts ${APPLY ? 'written' : 'to write (dry run)'}.`);
 }
 
 async function syncSeries(series) {
@@ -68,8 +70,10 @@ async function syncSeries(series) {
     return 0;
   }
 
-  await fs.mkdir(destPosts, { recursive: true });
-  await fs.mkdir(destImages, { recursive: true });
+  if (APPLY) {
+    await fs.mkdir(destPosts, { recursive: true });
+    await fs.mkdir(destImages, { recursive: true });
+  }
   console.log(`\n[${series.name}]`);
 
   const chapters = await listChapters(source, series.chapterRe);
@@ -99,7 +103,7 @@ async function syncChapter(series, { num, slug, dir }, destPosts, destImages) {
   const chNum = `ch${pad(num)}`;
   const chFolder = slug ? `${chNum}-${slug}` : chNum;
   await copyFigures(path.join(dir, 'figures'), path.join(destImages, chNum));
-  await fs.mkdir(path.join(destPosts, chFolder), { recursive: true });
+  if (APPLY) await fs.mkdir(path.join(destPosts, chFolder), { recursive: true });
 
   const files = await fs.readdir(dir);
   let written = 0;
@@ -123,8 +127,8 @@ async function syncChapter(series, { num, slug, dir }, destPosts, destImages) {
       seriesOrder: num * 100 + meta.order,
     });
     const outPath = path.join(destPosts, chFolder, meta.name);
-    await fs.writeFile(outPath, `${frontmatter}\n${body}`);
-    console.log(`  wrote: ${chFolder}/${meta.name}`);
+    if (APPLY) await fs.writeFile(outPath, `${frontmatter}\n${body}`);
+    console.log(`  ${APPLY ? 'wrote' : 'would write'}: ${chFolder}/${meta.name}`);
     written++;
   }
   return written;
@@ -138,10 +142,10 @@ async function copyFigures(srcDir, destDir) {
     if (e.code === 'ENOENT') return;
     throw e;
   }
-  await fs.mkdir(destDir, { recursive: true });
+  if (APPLY) await fs.mkdir(destDir, { recursive: true });
   for (const f of files) {
     if (!IMG_EXT.test(f)) continue;
-    await fs.copyFile(path.join(srcDir, f), path.join(destDir, f));
+    if (APPLY) await fs.copyFile(path.join(srcDir, f), path.join(destDir, f));
   }
 }
 

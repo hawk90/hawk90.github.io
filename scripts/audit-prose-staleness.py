@@ -30,6 +30,7 @@ Exit: 0 = 후보 없음, 1 = 후보 있음(수동 review).
 """
 
 import argparse
+import json
 import re
 import sys
 from datetime import date
@@ -67,6 +68,25 @@ def iter_published(targets):
             yield f, text
 
 
+def prose_lines(text):
+    """Return only narrative lines; frontmatter and fenced examples are not claims."""
+    lines = text.split("\n")
+    start = 0
+    if text.startswith("---"):
+        try:
+            start = lines.index("---", 1) + 1
+        except ValueError:
+            return []
+    out, in_fence = [], False
+    for line_no, line in enumerate(lines[start:], start=start + 1):
+        if re.match(r"^\s*```", line):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            out.append((line_no, line))
+    return out
+
+
 def scan_line(line, as_of):
     """한 줄 → (reason, note) 또는 None. reason: future | dated."""
     if STRONG.search(line):
@@ -86,6 +106,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("targets", nargs="*", help="파일·디렉토리 (기본=전체 published)")
     ap.add_argument("--as-of", help="기준일 YYYY-MM-DD (기본=오늘)")
+    ap.add_argument("--json", help="결과 JSON 출력 경로")
     args = ap.parse_args()
     as_of = date.fromisoformat(args.as_of) if args.as_of else date.today()
     targets = args.targets or [DEFAULT_TARGET]
@@ -93,13 +114,21 @@ def main():
     hits = []  # (relpath, lineno, reason, note, text)
     for f, text in iter_published(targets):
         rel = f.relative_to(REPO_ROOT)
-        for i, line in enumerate(text.split("\n"), 1):
+        for i, line in prose_lines(text):
             r = scan_line(line, as_of)
             if r:
                 hits.append((str(rel), i, r[0], r[1], line.strip()[:100]))
 
     print("=== Prose Staleness Audit ===")
     print(f"  기준일: {as_of.isoformat()}   후보: {len(hits)}")
+    if args.json:
+        Path(args.json).write_text(json.dumps({
+            "asOf": as_of.isoformat(),
+            "findings": [
+                {"file": rel, "line": line, "kind": kind, "note": note, "text": text}
+                for rel, line, kind, note, text in hits
+            ],
+        }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if not hits:
         print("\n✓ stale 후보 없음.")
         return 0

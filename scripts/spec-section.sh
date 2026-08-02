@@ -7,7 +7,7 @@
 #   ./scripts/spec-section.sh --list 1    # list all sub-sections of Ch 1
 #   ./scripts/spec-section.sh --grep "<term>"   # search for a term
 
-set -eo pipefail
+set -euo pipefail
 
 CACHE="$(cd "$(dirname "$0")/.." && pwd)/data/cxl-spec-cache/cxl-4.0-rev1.0.txt"
 
@@ -20,12 +20,14 @@ fi
 
 case "${1:-}" in
   --list)
-    chap="$2"
-    grep -nE "^[ ]+${chap}\.[0-9]+([\.0-9]+)? +[A-Z]" "$CACHE" | head -50
+    chap="${2:-}"
+    [[ "$chap" =~ ^[0-9]+$ ]] || { echo "--list requires a numeric chapter" >&2; exit 2; }
+    grep -nE "^[ ]+${chap}\.[0-9]+([\.0-9]+)? +[A-Z]" "$CACHE" | head -50 || true
     ;;
   --grep)
     shift
-    grep -nE -i "$@" "$CACHE" | head -30
+    [ $# -gt 0 ] || { echo "--grep requires a search term" >&2; exit 2; }
+    grep -niF -- "$*" "$CACHE" | head -30 || true
     ;;
   --help|-h|"")
     sed -n '2,12p' "$0"
@@ -33,8 +35,10 @@ case "${1:-}" in
     ;;
   *)
     sec="$1"
-    # Find first body occurrence (not ToC) by skipping early lines
-    line=$(grep -nE "^[ ]+${sec//./\\.} +[A-Z]" "$CACHE" | tail -1 | cut -d: -f1)
+    [[ "$sec" =~ ^[0-9]+(\.[0-9]+)*$ ]] || { echo "Section must be numeric (for example: 3.2.4)" >&2; exit 2; }
+    # Contents precedes the body. Take the first plausible body heading rather
+    # than the last matching line, which could be a cross-reference appendix.
+    line=$(awk -v sec="$sec" '$0 ~ "^[ ]+" sec " +[A-Z]" && NR > 200 { print NR; exit }' "$CACHE")
     if [ -z "$line" ]; then
       echo "✗ Section $sec not found"
       exit 1

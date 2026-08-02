@@ -1,0 +1,325 @@
+{
+  "generatedAt": "2026-08-01T13:01:13.158Z",
+  "batches": [
+    {
+      "id": "MD-01",
+      "title": "Definition and diagnosis discipline",
+      "activeItems": [],
+      "completionRule": "For every item: record a concrete repository finding, choose remediated/accepted/superseded, and attach files plus verification evidence. Do not infer completion from a similarly named script.",
+      "itemCount": 34
+    },
+    {
+      "id": "MD-02",
+      "title": "Prioritization and decision discipline",
+      "activeItems": [],
+      "completionRule": "For every item: record a concrete repository finding, choose remediated/accepted/superseded, and attach files plus verification evidence. Do not infer completion from a similarly named script.",
+      "itemCount": 16
+    },
+    {
+      "id": "MD-03",
+      "title": "Small safe change and automation discipline",
+      "activeItems": [],
+      "completionRule": "For every item: record a concrete repository finding, choose remediated/accepted/superseded, and attach files plus verification evidence. Do not infer completion from a similarly named script.",
+      "itemCount": 20
+    },
+    {
+      "id": "MD-04",
+      "title": "Validation, lifecycle, and governance discipline",
+      "activeItems": [],
+      "completionRule": "For every item: record a concrete repository finding, choose remediated/accepted/superseded, and attach files plus verification evidence. Do not infer completion from a similarly named script.",
+      "itemCount": 24
+    },
+    {
+      "id": "MD-05",
+      "title": "Completion traps and reassessment discipline",
+      "activeItems": [],
+      "completionRule": "For every item: record a concrete repository finding, choose remediated/accepted/superseded, and attach files plus verification evidence. Do not infer completion from a similarly named script.",
+      "itemCount": 6
+    },
+    {
+      "id": "MD-R-01",
+      "title": "Cross-category search and discovery proposals",
+      "executionLane": "search_seo",
+      "note": "These AP-D source items define search/discovery work. They must be dispositioned in AP-D, but their implementation is planned under AP-S after its dependencies open.",
+      "activeItems": [
+        {
+          "id": "AP-D-01-2",
+          "title": "D-01. 현재 검색 구조 측정",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-01-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-02-2",
+          "title": "D-02. 검색 문서 모델 재설계",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-02-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-03-2",
+          "title": "D-03. 검색 필드 가중치 정의",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-03-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-04-2",
+          "title": "D-04. 한글·영문·기호 alias registry",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-04-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-05-2",
+          "title": "D-05. 기술 식별자 검색 지원",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-05-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-06-2",
+          "title": "D-06. 오류 메시지 검색 지원",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-06-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-07-2",
+          "title": "D-07. 대표 검색어 Golden Set 생성",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-07-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-08-2",
+          "title": "D-08. 검색 결과 UI 재설계",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-08-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-09-2",
+          "title": "D-09. 검색 인덱스 지연 로딩",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-09-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-10-2",
+          "title": "D-10. 검색 실패 fallback",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-10-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-11-2",
+          "title": "D-11. 고아 문서 정의",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-11-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-12-2",
+          "title": "D-12. 고아 문서 감사 리포트",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-12-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-13-2",
+          "title": "D-13. 의미 링크와 UI 링크 분리",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-13-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-14-2",
+          "title": "D-14. 내부 링크 anchor 개선",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-14-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-15-2",
+          "title": "D-15. 대표 문서의 역할 기반 관계",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-15-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-16-2",
+          "title": "D-16. 관련 글 추천 재설계",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-16-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-17-2",
+          "title": "D-17. 구판과 신판 관계 처리",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-17-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-18-2",
+          "title": "D-18. Topic Cannibalization 리포트",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-18-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-19-2",
+          "title": "D-19. Topic Hub와 검색 역할 분리",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-19-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-20-2",
+          "title": "D-20. 최근 검색·인기 검색 기능 보류",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-20-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-21-2",
+          "title": "D-21. 검색 분석 최소화",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-21-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-22-2",
+          "title": "D-22. 내부 링크 검증",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-22-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-23-2",
+          "title": "D-23. 검색 manifest와 공개 페이지 집합 일치",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-23-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-24-2",
+          "title": "D-24. 검색 성능 예산",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-24-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        },
+        {
+          "id": "AP-D-25-2",
+          "title": "D-25. 검색·관계 테스트",
+          "priority": "P3",
+          "source": {
+            "file": "methodology-01.md#ap-d-25-2",
+            "messageIds": [
+              "94670747-2a28-4192-94fc-55bc12e998cc"
+            ]
+          }
+        }
+      ],
+      "completionRule": "For every item: record a concrete repository finding, choose remediated/accepted/superseded, and attach files plus verification evidence. Do not infer completion from a similarly named script.",
+      "itemCount": 25
+    }
+  ]
+}

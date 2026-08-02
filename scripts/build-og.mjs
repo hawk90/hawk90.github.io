@@ -33,6 +33,7 @@ const FONT_PATH = path.join(ROOT, 'public/fonts/Pretendard-Bold.otf');
 const CACHE_DIR = path.join(ROOT, '.cache');
 const MANIFEST_PATH = path.join(CACHE_DIR, 'og-manifest.json');
 const THEMES_FILE = path.join(ROOT, 'src/lib/og-themes.data.mjs');
+const SITE_CONFIG_FILE = path.join(ROOT, 'src/consts/config.ts');
 
 const args = new Set(process.argv.slice(2));
 const FORCE = args.has('--force');
@@ -42,9 +43,15 @@ const PRUNE = args.has('--prune');
 const HTML_ESCAPE = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"]/g, (m) => HTML_ESCAPE[m]);
 
-// ─── Site config (mirrored from src/consts/config.ts) ──────────
-const SITE_TITLE = "Hawk's Blog";
-const TAGLINE = 'Developer Blog';
+// ─── Site config ────────────────────────────────────────────────
+// The Astro config is TypeScript and cannot be imported directly by Node here.
+// Read only the two literal branding fields so OG cards cannot drift from it.
+async function loadBranding() {
+  const source = await fs.readFile(SITE_CONFIG_FILE, 'utf8');
+  const literal = (field, fallback) =>
+    source.match(new RegExp(`^\\s*${field}:\\s*(['\"])(.*?)\\1,?\\s*$`, 'm'))?.[2] ?? fallback;
+  return { title: literal('title', "Hawk's Blog"), tagline: literal('tagline', 'Developer Blog') };
+}
 
 // ─── helpers ───────────────────────────────────────────────────
 async function* walk(dir) {
@@ -82,14 +89,14 @@ function hashFor(data, themesVersion) {
   return crypto.createHash('sha1').update(payload).digest('hex').slice(0, 16);
 }
 
-function postMarkup(data) {
+function postMarkup(data, siteTitle) {
   const theme = themeForSeriesName(data.series);
   const safeTitle = escapeHtml(data.title ?? '(untitled)');
   const safeSeries = data.series ? escapeHtml(data.series) : '';
   const safeDescription = data.description ? escapeHtml(data.description) : '';
   const safeTags = (Array.isArray(data.tags) ? data.tags.slice(0, 3) : []).map(escapeHtml);
   const safeBadge = theme.badge ? escapeHtml(theme.badge) : '';
-  const safeSiteTitle = escapeHtml(SITE_TITLE);
+  const safeSiteTitle = escapeHtml(siteTitle);
 
   const badgeBlock = safeBadge
     ? `<div style="position: absolute; top: 60px; right: 60px; display: flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 24px; background: ${theme.accentSoft}; border: 2px solid ${theme.accent}; color: ${theme.accent}; font-size: 28px; font-weight: bold; letter-spacing: 1px;">${safeBadge}</div>`
@@ -125,11 +132,11 @@ function postMarkup(data) {
   `;
 }
 
-function defaultMarkup() {
+function defaultMarkup({ title, tagline }) {
   return `
     <div style="display: flex; flex-direction: column; width: 100%; height: 100%; background: linear-gradient(135deg, ${DEFAULT_THEME.bgFrom} 0%, ${DEFAULT_THEME.bgTo} 100%); padding: 60px; justify-content: center; align-items: center;">
-      <div style="color: ${DEFAULT_THEME.accent}; font-size: 80px; font-weight: bold; margin-bottom: 24px;">${escapeHtml(SITE_TITLE)}</div>
-      <div style="color: ${DEFAULT_THEME.subtext}; font-size: 32px; text-align: center;">${escapeHtml(TAGLINE)}</div>
+      <div style="color: ${DEFAULT_THEME.accent}; font-size: 80px; font-weight: bold; margin-bottom: 24px;">${escapeHtml(title)}</div>
+      <div style="color: ${DEFAULT_THEME.subtext}; font-size: 32px; text-align: center;">${escapeHtml(tagline)}</div>
     </div>
   `;
 }
@@ -160,9 +167,15 @@ async function loadManifest() {
 // ─── main ──────────────────────────────────────────────────────
 async function main() {
   const t0 = Date.now();
-  const fontData = await fs.readFile(FONT_PATH);
-  const themesContent = await fs.readFile(THEMES_FILE, 'utf8');
-  const themesVersion = crypto.createHash('sha1').update(themesContent).digest('hex').slice(0, 12);
+  const [fontData, themesContent, branding] = await Promise.all([
+    fs.readFile(FONT_PATH),
+    fs.readFile(THEMES_FILE, 'utf8'),
+    loadBranding(),
+  ]);
+  const themesVersion = crypto.createHash('sha1')
+    .update(`${themesContent}\0${JSON.stringify(branding)}`)
+    .digest('hex')
+    .slice(0, 12);
 
   await fs.mkdir(OUT_DIR, { recursive: true });
   await fs.mkdir(CACHE_DIR, { recursive: true });
@@ -199,7 +212,7 @@ async function main() {
     }
 
     await fs.mkdir(path.dirname(outPath), { recursive: true });
-    const png = await renderPng(postMarkup(data), fontData);
+    const png = await renderPng(postMarkup(data, branding.title), fontData);
     await fs.writeFile(outPath, png);
     next.posts[id] = { hash };
     rendered++;
@@ -208,7 +221,7 @@ async function main() {
 
   // Default OG: regenerate if missing or themes changed.
   if (FORCE || themesChanged || !(await fileExists(DEFAULT_OUT))) {
-    const png = await renderPng(defaultMarkup(), fontData);
+    const png = await renderPng(defaultMarkup(branding), fontData);
     await fs.writeFile(DEFAULT_OUT, png);
     console.log('  rendered og-default.png');
   }

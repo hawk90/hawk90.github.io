@@ -42,13 +42,15 @@ if [ ${#TARGETS[@]} -eq 0 ]; then
   TARGETS=("$ROOT/src/content/blog")
 fi
 
-# Build file list (filter drafts unless --include-drafts)
-FILES=$(find "${TARGETS[@]}" -name "*.md" -type f | while read -r f; do
-  if [ "$INCLUDE_DRAFTS" -eq 0 ] && grep -q "^draft: true" "$f"; then
-    continue
-  fi
-  echo "$f"
-done)
+# The audit is for prose claims, not frontmatter values or code examples.
+prose_only() {
+  awk '
+    NR == 1 && $0 == "---" { frontmatter = 1; next }
+    frontmatter { if ($0 == "---") frontmatter = 0; next }
+    /^[[:space:]]*```/ { fenced = !fenced; next }
+    !fenced { print }
+  ' "$1"
+}
 
 # Run a category scan
 run_category() {
@@ -68,14 +70,17 @@ run_category() {
     echo "  ($context)"
   fi
   local found=0
-  while IFS= read -r f; do
-    matches=$(grep -cE "$pattern" "$f" 2>/dev/null) || matches=0
+  while IFS= read -r -d '' f; do
+    if [ "$INCLUDE_DRAFTS" -eq 0 ] && grep -q "^draft: true" "$f"; then
+      continue
+    fi
+    matches=$(prose_only "$f" | grep -cE "$pattern") || matches=0
     if [ "${matches:-0}" -gt 0 ] 2>/dev/null; then
       relpath="${f#$ROOT/}"
       printf "  %-60s %s line(s)\n" "$relpath" "$matches"
       found=$((found + matches))
     fi
-  done <<< "$FILES"
+  done < <(find "${TARGETS[@]}" -name "*.md" -type f -print0)
   if [ "$found" -eq 0 ]; then
     echo "  ✓ clean"
   fi

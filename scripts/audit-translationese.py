@@ -23,6 +23,7 @@ suspect-claims처럼 사람이 각 위치를 review한다.
 
 Usage:
   audit-translationese.py [path...]         # 기본 = 전체 blog
+  audit-translationese.py --include-drafts  # draft도 포함
   audit-translationese.py --show hard|soft|all
   audit-translationese.py --min 8           # 판정 최소 문장 수
 
@@ -118,6 +119,7 @@ def main():
     ap.add_argument("paths", nargs="*")
     ap.add_argument("--min", type=int, default=8, help="판정 최소 문장 수")
     ap.add_argument("--show", choices=["hard", "soft", "all"], default="all")
+    ap.add_argument("--include-drafts", action="store_true", help="draft도 검사")
     args = ap.parse_args()
 
     files = collect(args.paths or [str(CONTENT)])
@@ -126,6 +128,8 @@ def main():
     total_hard = 0
     for md in files:
         raw = md.read_text(encoding="utf-8", errors="ignore")
+        if not args.include_drafts and re.search(r"^draft:\s*true\s*$", raw, re.MULTILINE):
+            continue
         n_sent, hard, soft, _ = analyze(raw, args.min)
         if n_sent < args.min:
             continue

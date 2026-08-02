@@ -1,0 +1,111 @@
+# Content lifecycle inventory
+
+- Documents: 3387
+- Last verified: 0
+- Review status — current: 0, needs review: 3387, archived: 0
+- Evidence status recorded: 0
+
+## Review queue (top 100)
+
+- [110] `embedded/modern-recipes/00-preface` — Modern Embedded Recipes — 모던 임베디드 실전 레시피 시리즈 소개
+- [110] `embedded/rtos/practical-internals/00-preface` — Practical RTOS Internals — 실시간 커널 내부 분석 시리즈 소개
+- [110] `embedded/performance-engineering/00-preface` — Embedded Performance Engineering — 임베디드 성능 엔지니어링 시리즈 소개
+- [110] `programming/code-review/folly/00-preface` — Folly Code Review — Meta의 production-grade C++ 라이브러리 코드 분석
+- [110] `embedded/embedded-cpp/00-preface` — Embedded C++ for Real Systems — 임베디드 모던 C++ 시리즈 소개
+- [110] `programming/code-review/abseil/00-preface` — Abseil Code Review — Google production-grade C++ 라이브러리 분석
+- [10] `embedded/modern-recipes/part1-01-digital-signal-basics` — 디지털 신호 기초 — Voltage Level·Edge·Setup/Hold 분석
+- [10] `embedded/modern-recipes/part1-02-clock-timing` — 임베디드 클럭과 타이밍 — Skew·Jitter·PLL·MMCM 분석
+- [10] `embedded/modern-recipes/part1-03-gpio-internals` — GPIO 내부 구조 분해 — Push-Pull·Open-Drain·Schmitt Trigger
+- [10] `embedded/modern-recipes/part1-04-uart-hardware` — UART 하드웨어 동작 분석 — Baud Rate·Framing·FIFO
+- [10] `embedded/modern-recipes/part1-05-spi-hardware` — SPI 하드웨어 분석 — Clock Mode·MOSI/MISO·Chip Select
+- [10] `embedded/modern-recipes/part1-06-i2c-hardware` — I2C 하드웨어 분석 — Open-Drain·Clock Stretching·Arbitration
+- [10] `embedded/modern-recipes/part1-07-adc-principles` — ADC 동작 원리 — SAR·Sigma-Delta·Pipelined 비교
+- [10] `embedded/modern-recipes/part1-08-dac-principles` — DAC 동작 원리 — R-2R Ladder·Sigma-Delta·Settling Time
+- [10] `embedded/modern-recipes/part1-09-pwm-signal` — PWM 신호 생성 분석 — Duty·Frequency·Dead Time·Center-Aligned
+- [10] `embedded/modern-recipes/part1-10-can-electrical` — CAN 버스 전기적 특성 — Differential·Termination·Dominant/Recessive
+- [10] `embedded/modern-recipes/part1-11-rs485-rs422` — RS-485·RS-422 차동 신호 분석 — Termination·Biasing·Topology
+- [10] `embedded/modern-recipes/part1-12-lvds-differential` — LVDS 차동 신호 분석 — Common-Mode·Impedance·Eye Pattern
+- [10] `embedded/modern-recipes/part8-01-dynamic-memory` — 임베디드 동적 메모리 — malloc 위험·결정성·대안 분석
+- [10] `embedded/modern-recipes/part8-02-memory-alignment` — 메모리 정렬과 패딩 분석 — Natural·Strict Alignment·Trap
+- [10] `embedded/modern-recipes/part8-03-cache-alignment` — Cache Line Alignment — alignas·Padding·SoA 적용
+- [10] `embedded/modern-recipes/part8-04-dma-allocator` — DMA-Friendly Allocator — dma_alloc_coherent·IOMMU·Pool
+- [10] `embedded/modern-recipes/part8-05-zero-copy` — Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice
+- [10] `embedded/modern-recipes/part8-06-numa` — NUMA Memory Topology — numactl·numa_alloc·HBM 적용
+- [10] `embedded/modern-recipes/part8-07-simd` — SIMD 활용 분석 — Intrinsics·Auto-Vectorization·OpenMP SIMD
+- [10] `embedded/modern-recipes/part8-08-neon` — ARM NEON 심화 — Matrix Multiply·FFT·Image Filter 적용
+- [10] `embedded/modern-recipes/part8-09-stack-analysis` — 임베디드 스택 분석 — high-water·overflow 탐지
+- [10] `embedded/modern-recipes/part8-10-code-size-optimization` — 임베디드 코드 크기 최적화 — -Os·LTO·Section Garbage Collection
+- [10] `embedded/modern-recipes/part8-11-power-optimization` — 임베디드 전력 최적화 — Sleep Mode·Clock Gating·DVFS
+- [10] `embedded/modern-recipes/part8-12-wcet-analysis` — WCET 분석 기법 — Static·Measurement·Hybrid 방법론
+- [10] `embedded/performance-engineering/part2-01-pipeline` — CPU 파이프라인 분석 — 5-stage·Cortex-M·Cortex-A 비교
+- [10] `embedded/performance-engineering/part2-02-pipeline-stall` — Pipeline Stall 분석 — Data·Structural·Control Hazard·Forwarding
+- [10] `embedded/performance-engineering/part2-03-branch-prediction` — Branch Prediction 분석 — Static·2-bit·BTB·BHT·Mispredict 비용
+- [10] `embedded/performance-engineering/part2-04-speculative-execution` — Speculative Execution 분석 — OoO·Reorder Buffer·Register Renaming
+- [10] `embedded/performance-engineering/part2-05-cache-basics` — CPU Cache 기초 — L1·L2·L3·Set Associative·Replacement Policy
+- [10] `embedded/performance-engineering/part2-06-cache-miss` — Cache Miss 3C Model 분석 — Compulsory·Capacity·Conflict
+- [10] `embedded/performance-engineering/part2-07-cache-line` — Cache Line 최적화 — Alignment·Prefetch·False Sharing 처리
+- [10] `embedded/performance-engineering/part2-08-memory-bandwidth` — 메모리 대역폭 분석 — STREAM·Roofline·Bus Saturation 측정
+- [10] `embedded/performance-engineering/part2-09-simd-neon` — SIMD·NEON 활용 — 128-bit Vector·Auto-Vectorization·SVE/SVE2
+- [10] `embedded/performance-engineering/part2-10-pmu` — PMU·HPM 하드웨어 카운터 분석 — 정밀 성능 진단
+- [10] `programming/code-review/folly/part4-01-iobuf` — folly::IOBuf 분석 — zero-copy buffer chain의 기본 단위
+- [10] `programming/code-review/folly/part4-02-iobuf-queue` — folly::IOBufQueue — chain의 push/pull 추상화
+- [10] `programming/code-review/folly/part4-03-cursor` — folly::io::Cursor·RWCursor — chain 위의 stream
+- [10] `programming/code-review/folly/part4-04-zero-copy-patterns` — folly Zero-copy 패턴 — IOBuf로 ScatterGather I/O 표현
+- [10] `programming/code-review/folly/part4-05-iobuf-shared-semantics` — folly::IOBuf shared semantics — clone·unshare·takeOwnership
+- [10] `programming/code-review/folly/part5-01-fbstring` — folly::FBString 분석 — SSO + COW 구현
+- [10] `programming/code-review/folly/part5-02-fmt-format-integration` — folly의 fmt::format 통합 — 모던 포맷팅 채택
+- [10] `programming/code-review/folly/part5-03-string-piece` — folly::StringPiece — string_view 호환 분석
+- [10] `programming/code-review/folly/part5-04-join-split` — folly Join·Split utilities — 문자열 분해와 결합
+- [10] `programming/code-review/folly/part6-01-to-try-to` — folly::to·tryTo — text↔num 변환 분석
+- [10] `programming/code-review/folly/part6-02-conv-customization` — folly Conv Customization — 사용자 타입 지원
+- [10] `programming/code-review/folly/part6-03-conv-performance` — folly Conv 성능 비교 — sprintf·stringstream 대비
+- [10] `programming/code-review/folly/part7-01-f14-value-map` — folly::F14ValueMap vs std::unordered_map
+- [10] `programming/code-review/folly/part7-02-f14-node-map` — folly::F14NodeMap — stable pointer가 필요할 때
+- [10] `programming/code-review/folly/part7-03-f14-vector-map` — folly::F14VectorMap — cache-friendly iteration
+- [10] `programming/code-review/folly/part7-04-f14-fast-map` — folly::F14FastMap — auto-select 동작
+- [10] `programming/code-review/folly/part7-05-f14-internals` — folly F14 internals — SIMD probing 메커니즘
+- [10] `programming/code-review/folly/part8-01-small-vector` — folly::small_vector — inline storage 분석
+- [10] `programming/code-review/abseil/part9-01-int128` — absl::int128·uint128 분석
+- [10] `programming/code-review/abseil/part9-02-bits` — absl::bits — popcount·countl_zero
+- [10] `programming/code-review/abseil/part9-03-optional` — absl::optional vs std::optional
+- [10] `programming/code-review/abseil/part9-04-variant` — absl::variant 분석
+- [10] `programming/code-review/abseil/part9-05-span` — absl::span 분석
+- [10] `programming/code-review/abseil/part9-06-any` — absl::any 분석
+- [10] `programming/code-review/abseil/part9-07-compare` — absl::compare — three-way 비교
+- [10] `programming/code-review/abseil/part9-08-utility` — Abseil utility — apply·in_place
+- [10] `programming/code-review/abseil/part10-01-abseil-hash-value` — Abseil AbslHashValue 분석
+- [10] `programming/code-review/abseil/part10-02-hash-state-chaining` — Abseil HashState chaining
+- [10] `programming/code-review/abseil/part10-03-custom-hashable` — Abseil Custom hashable 구현
+- [10] `programming/code-review/abseil/part11-01-log-vlog-check` — Abseil LOG·VLOG·CHECK 분석
+- [10] `programming/code-review/abseil/part11-02-log-sink` — Abseil LogSink 분석
+- [10] `programming/code-review/abseil/part11-03-log-entry-structured` — Abseil LogEntry·structured logging
+- [10] `programming/code-review/abseil/part11-04-stack-trace-handler` — Abseil Stack trace·failure_signal_handler
+- [10] `programming/code-review/abseil/part12-01-absl-flag-define` — ABSL_FLAG 정의 분석
+- [10] `embedded/bootloader/chapter34-pcie-enumeration` — U-Boot PCIe Enumeration — 부트로더가 디바이스를 찾는 흐름 분석
+- [10] `embedded/bootloader/chapter35-uefi-cxl-init` — EFI·UEFI에서 CXL 초기화 — CEDT 생성과 HDM Decoder 사전 설정
+- [10] `embedded/bootloader/chapter36-boot-memory-topology` — 부트 시 메모리 토폴로지 결정 — DDR + CXL.mem 통합 인식
+- [10] `embedded/bootloader/chapter37-secureboot-cert-rollover` — UEFI Secure Boot 인증서 만료 — 2011→2023 CA 롤오버와 PQC 대비
+- [10] `embedded/embedded-cpp/part4-01-intrusive-containers` — Intrusive Containers 분석 — 동적 할당 없는 컨테이너 설계
+- [10] `embedded/embedded-cpp/part4-02-etl-library` — ETL 라이브러리 분석 — Embedded Template Library의 STL 대체
+- [10] `embedded/embedded-cpp/part4-03-lock-free-basics` — 임베디드 Lock-free 기초 — atomic·memory ordering·CAS
+- [10] `embedded/embedded-cpp/part4-04-lock-free-container` — Lock-free Container 구현 — SPSC Queue·Ring Buffer
+- [10] `embedded/embedded-cpp/part4-05-type-safe-flags` — Type-safe Flags 패턴 — Enum Class·Strong Typedef·Tag
+- [10] `embedded/embedded-cpp/part4-06-state-machine` — 임베디드 State Machine 패턴 — Variant·Visitor·Table-driven 비교
+- [10] `embedded/embedded-cpp/part4-07-compile-time-fsm` — Compile-time FSM 구현 — 템플릿으로 상태 전이 검증
+- [10] `embedded/embedded-cpp/part4-08-singleton-alternatives` — Singleton 대안 패턴 — Service Locator·Static Init·Phantom
+- [10] `embedded/rtos/practical-internals/part5-01-freertos-source` — FreeRTOS 소스 분석 — tasks.c·queue.c·port.c 추적
+- [10] `embedded/rtos/practical-internals/part5-02-zephyr-source` — Zephyr 커널 분석 — k_thread·k_sem·Driver Model
+- [10] `embedded/rtos/practical-internals/part5-03-rt-thread` — RT-Thread 분석 — Object 모델·Components·Smart·Studio
+- [10] `embedded/rtos/practical-internals/part5-04-porting` — RTOS 포팅 가이드 — 새 아키텍처에 옮기는 절차
+- [10] `embedded/rtos/practical-internals/part5-05-selection-guide` — RTOS 선택 가이드 — Footprint·License·Certification·Ecosystem
+- [10] `embedded/rtos/practical-internals/part5-06-nuttx` — Apache NuttX 분석 — POSIX·PX4·NASA Ingenuity
+- [10] `embedded/rtos/practical-internals/part5-07-preempt-rt-linux` — PREEMPT_RT Linux — Mainline 6.12·Xenomai 4·EVL
+- [10] `tools/emulation/driver-cosim/chapter01-why-cosim` — Pre-Silicon Driver Verification — RTL Co-simulation이 푸는 문제
+- [10] `tools/emulation/driver-cosim/chapter02-dpi-c-basics` — SystemVerilog DPI-C 기초 — C와 RTL을 잇는 표준 인터페이스
+- [10] `tools/emulation/driver-cosim/chapter03-verilator` — Verilator 분석 — Open Source SystemVerilog Simulator
+- [10] `tools/emulation/driver-cosim/chapter04-cocotb` — CocoTB 분석 — Python으로 작성하는 RTL Testbench
+- [10] `tools/emulation/driver-cosim/chapter05-systemc-tlm` — SystemC TLM 분석 — Transaction-Level Modeling으로 빠른 검증
+- [10] `tools/emulation/driver-cosim/chapter06-bfm` — C로 구현하는 Bus Functional Model — Driver 검증용 BFM 설계
+- [10] `tools/emulation/driver-cosim/chapter07-uvm-c-model` — UVM C Reference Model 통합 — DUT와 황금 모델 비교 검증
+
+> New and existing content defaults to `needs-review` until an editorial review records its evidence and verification date.

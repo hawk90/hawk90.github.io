@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'content', 'blog', 'tools', 'debugging', 'gdb-lldb');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 1, 'chapter01-intro-and-install.md',        'GDB vs LLDB 분석 — 두 디버거의 설치·차이·선택 기준',                       '2026-05-24T09:01:00'],

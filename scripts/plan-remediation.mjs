@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const archive = 'archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273';
+const args = process.argv.slice(2);
+const archiveAt = args.indexOf('--archive');
+const archive = archiveAt === -1 ? 'archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273' : args[archiveAt + 1];
+if (!archive || archive.startsWith('--')) throw new Error('Usage: node scripts/plan-remediation.mjs [--archive <directory>]');
 const output = join(archive, 'remediation-plan');
 const [antipatterns, phases] = await Promise.all([
   readFile(join(archive, 'llm-antipatterns/manifest.json'), 'utf8').then(JSON.parse),
@@ -15,9 +18,21 @@ const defaults = {
   content: ['P2', 'M'], localization: ['P2', 'S'], ux: ['P2', 'S'], methodology: ['P3', 'S'],
 };
 const hardWords = /migration|schema|domain|graph|supply chain|workflow|architecture|보안|마이그레이션|스키마|관계|아키텍처/i;
+let existingItems = new Map();
+try {
+  await access(join(output, 'antipattern-triage.json'));
+  const existing = JSON.parse(await readFile(join(output, 'antipattern-triage.json'), 'utf8'));
+  existingItems = new Map((existing.items ?? []).map((item) => [item.id, item]));
+} catch { /* First generation: use calculated defaults. */ }
 const triage = antipatterns.canonicalItems.map((item) => {
   const [priority, baseEffort] = defaults[item.category] || ['P2', 'M'];
-  return { id: item.id, title: item.title, category: item.category, priority, effort: hardWords.test(item.title) ? 'L' : baseEffort, rationale: 'Initial heuristic; confirm against concrete finding and affected scope.' };
+  const previous = existingItems.get(item.id);
+  const generated = { id: item.id, title: item.title, category: item.category, priority, effort: hardWords.test(item.title) ? 'L' : baseEffort, rationale: 'Initial heuristic; confirm against concrete finding and affected scope.' };
+  // Regeneration refreshes source metadata but never discards audit/manual triage.
+  for (const key of ['priority', 'effort', 'rationale', 'dependsOn', 'dependsOnPhase', 'auditEvidence']) {
+    if (previous?.[key] !== undefined) generated[key] = previous[key];
+  }
+  return generated;
 });
 const phaseGroups = Object.groupBy(phases.phases, (task) => Number(task.phase.match(/^Phase (\d+)/)[1]));
 const phasePlan = [{

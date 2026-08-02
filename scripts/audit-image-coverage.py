@@ -39,7 +39,7 @@ ABSTRACT_KEYWORDS = [
     "page table", "TLB", "MMU", "IOMMU",
     "cache line", "DDIO", "NUMA",
     # OS / kernel
-    "scheduler", "rt-mutex", "rcu", "RCU", "preempt",
+    "scheduler", "rt-mutex", "rcu", "preempt",
     "interrupt", "softirq", "tasklet", "workqueue",
     # Networking / RDMA
     "RDMA", "DCB", "PFC", "QoS", "VLAN", "VXLAN",
@@ -65,11 +65,12 @@ IMAGE_PATTERNS = [
 
 
 def count_images(text):
-    """이미지 reference 수 (대략적 — 중복 카운트 가능, 우선순위용)."""
-    n = 0
-    for p in IMAGE_PATTERNS:
-        n += len(p.findall(text))
-    return n
+    """동일 이미지를 여러 문법이 다시 잡아도 한 번만 센다."""
+    refs = set()
+    refs.update(re.findall(r"!\[[^\]]*\]\(([^)]+)\)", text))
+    refs.update(re.findall(r"<img\s+[^>]*src=[\"']([^\"']+)", text, re.IGNORECASE))
+    refs.update(re.findall(r"/images/blog/[^)\s\"']+", text))
+    return len(refs)
 
 
 def count_abstract_keywords(text):
@@ -136,27 +137,29 @@ def main():
         imgs = count_images(text)
         kws = count_abstract_keywords(text)
         n_kw = sum(c for _, c in kws)
+        distinct_kw = len(kws)
 
         series_stats[series]["chapters"] += 1
         series_stats[series]["images"] += imgs
 
         # 보강 후보: 이미지 0개 + 추상 키워드 ≥ min
-        if imgs == 0 and n_kw >= args.min_keywords:
+        if imgs == 0 and distinct_kw >= args.min_keywords:
             candidates.append({
                 "path": str(md.relative_to(REPO_ROOT)),
                 "series": series,
                 "images": imgs,
                 "keyword_count": n_kw,
+                "distinct_keyword_count": distinct_kw,
                 "top_keywords": sorted(kws, key=lambda x: -x[1])[:5],
             })
 
     # Ranking — 키워드 많은 순
-    candidates.sort(key=lambda c: -c["keyword_count"])
+    candidates.sort(key=lambda c: (-c["distinct_keyword_count"], -c["keyword_count"]))
 
     # 텍스트 리포트
     print("=== Image Coverage Audit ===")
     print(f"  Total series: {len(series_stats)}")
-    print(f"  Candidates (image=0, keyword≥{args.min_keywords}): {len(candidates)}")
+    print(f"  Candidates (image=0, distinct keyword≥{args.min_keywords}): {len(candidates)}")
     print()
 
     print("=== 시리즈별 평균 이미지 ===")
@@ -170,10 +173,10 @@ def main():
     print(f"  ... ({len(rows) - 15} more)" if len(rows) > 15 else "")
     print()
 
-    print(f"=== Top {args.top} 보강 후보 (이미지=0, 키워드 많은 순) ===")
+    print(f"=== Top {args.top} 보강 후보 (이미지=0, 서로 다른 키워드 많은 순) ===")
     for c in candidates[:args.top]:
         kw_str = ", ".join(f"{k}×{n}" for k, n in c["top_keywords"])
-        print(f"  [{c['keyword_count']:3d} kw] {c['path']}")
+        print(f"  [{c['distinct_keyword_count']:2d} types / {c['keyword_count']:3d} hits] {c['path']}")
         print(f"         keywords: {kw_str}")
 
     if args.json:

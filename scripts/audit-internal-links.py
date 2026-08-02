@@ -8,8 +8,6 @@ Bash 버전(audit-internal-links.sh)이 image markdown ![]()와 page link []()�
 검사:
   - text link [text](/blog/...): src/content/blog/<path>.md 또는 index.md 존재
   - image link ![alt](/blog/...): public/images/blog/<path>.{svg,png,jpg,webp} 존재
-  - bare reference /blog/...: text link로 간주
-
 Anchor #는 path만 추출해 검사.
 
 인자:
@@ -21,6 +19,7 @@ Exit code:
 """
 
 import argparse
+import json
 import re
 import sys
 from collections import defaultdict
@@ -34,6 +33,11 @@ IMAGES_DIR = REPO_ROOT / "public" / "images" / "blog"
 IMAGE_LINK = re.compile(r"!\[[^\]]*\]\((/blog/[^)\s]+)\)")
 # Pattern: text link `[text](/blog/...)` — page link
 TEXT_LINK = re.compile(r"(?<!\!)\[[^\]]*\]\((/blog/[^)\s]+)\)")
+# Reference-style Markdown links are valid in long-form content and need the
+# same filesystem checks as inline links.
+REFERENCE_DEF = re.compile(r"^\s{0,3}\[([^\]]+)\]:\s*(/blog/[^\s]+)", re.MULTILINE)
+IMAGE_REFERENCE = re.compile(r"!\[[^\]]*\]\[([^\]]*)\]")
+TEXT_REFERENCE = re.compile(r"(?<!\!)\[[^\]]+\]\[([^\]]*)\]")
 
 # Image 가능한 확장자
 IMAGE_EXTS = (".svg", ".png", ".jpg", ".jpeg", ".webp", ".gif")
@@ -77,7 +81,21 @@ def audit_file(md_path):
         return []
     broken = []
     lines = text.split("\n")
+    definitions = {key.strip().lower(): url for key, url in REFERENCE_DEF.findall(text)}
+    in_fence = False
+    in_frontmatter = text.startswith("---")
     for lineno, line in enumerate(lines, 1):
+        if lineno == 1 and in_frontmatter:
+            continue
+        if in_frontmatter:
+            if line == "---":
+                in_frontmatter = False
+            continue
+        if re.match(r"^\s*```", line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
         # Image links — image 파일 존재 확인
         for m in IMAGE_LINK.finditer(line):
             url, _ = split_anchor(m.group(1))
@@ -88,6 +106,19 @@ def audit_file(md_path):
             url, _ = split_anchor(m.group(1))
             if not check_page(url):
                 broken.append((lineno, "page", m.group(1)))
+        for m in IMAGE_REFERENCE.finditer(line):
+            key = m.group(1).strip().lower()
+            url = definitions.get(key)
+            if url and not check_image(split_anchor(url)[0]):
+                broken.append((lineno, "image", url))
+        for m in TEXT_REFERENCE.finditer(line):
+            # Definition lines are declarations, not link uses.
+            if REFERENCE_DEF.match(line):
+                continue
+            key = m.group(1).strip().lower()
+            url = definitions.get(key)
+            if url and not check_page(split_anchor(url)[0]):
+                broken.append((lineno, "page", url))
     return broken
 
 
@@ -96,6 +127,7 @@ def main():
     ap.add_argument("paths", nargs="*", help="검사 대상 (디렉터리·파일). 기본=전체")
     ap.add_argument("--by-type", action="store_true",
                     help="image/page 별 카운트만 표시")
+    ap.add_argument("--json", help="결과 JSON 출력 경로")
     args = ap.parse_args()
 
     targets = args.paths or [str(CONTENT_DIR)]
@@ -109,7 +141,6 @@ def main():
         elif p.is_dir():
             md_files.extend(p.rglob("*.md"))
 
-    total = 0
     broken_total = 0
     by_type = defaultdict(int)
     by_file = defaultdict(list)
@@ -121,12 +152,22 @@ def main():
             broken_total += len(broken)
             for _, kind, _ in broken:
                 by_type[kind] += 1
-        # link 총수 — 다시 정확히 세지 않고 broken 비율 추정만
-        total += 1
-
     print("=== Internal Link Audit ===")
     print(f"  Files scanned: {len(md_files)}")
     print(f"  Broken: {broken_total} ({by_type['page']} page, {by_type['image']} image)")
+
+    if args.json:
+        payload = {
+            "filesScanned": len(md_files),
+            "broken": broken_total,
+            "byType": dict(sorted(by_type.items())),
+            "findings": [
+                {"file": str(md.relative_to(REPO_ROOT)), "line": line, "type": kind, "url": url}
+                for md, items in sorted(by_file.items())
+                for line, kind, url in items
+            ],
+        }
+        Path(args.json).write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if args.by_type or not by_file:
         sys.exit(1 if broken_total > 0 else 0)

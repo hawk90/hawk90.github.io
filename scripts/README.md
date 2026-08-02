@@ -8,6 +8,9 @@ All diagrams live as `.tex` next to their compiled `.svg` under `public/images/b
 npm run diagrams         # incremental — only rebuild changed .tex
 npm run diagrams:force   # full rebuild
 npm run diagrams:watch   # auto-rebuild on .tex save (requires fswatch)
+npm run audit:diagrams   # verify .tex/.svg structure and report accessibility gaps
+npm run review:diagrams  # build a human review sheet for visual candidates
+npm run audit:diagram-quality # rank palette/effect candidates for visual review
 
 # build a single file
 bash scripts/build-diagrams.sh public/images/blog/dsa/diagrams/item20-quicksort-partition.tex
@@ -34,16 +37,57 @@ The `src` is the path under `/images/blog/`, with or without `.svg`.
 
 ## Other scripts
 
+### Write safety
+
+Scripts that rewrite content now preview by default. Pass `--apply` only after
+reviewing their output. The ChatGPT archiver refuses to replace an existing
+archive unless `--overwrite` is explicit. `npm run gate:tooling` enforces these
+contracts for content-migration scripts.
+
 ### Security & admin workstream
 
 ```bash
 npm run audit:security-admin # updates reports/security-admin/latest.{md,json}
 npm run gate:security-admin  # fails while deterministic P0 findings remain
+npm run gate:security-admin -- --artifact dist # also asserts no static OAuth routes shipped
+npm run test:search          # terminology aliases and short-acronym regressions
+npm run test:topics          # topic ID, parent, and hierarchy-cycle regressions
+npm run test:classification  # explicit-topic migration and fallback regressions
+npm run test:relations       # curated learning-path relation validation
+npm run audit:classification # classification-source inventory before taxonomy migration
+npm run gate:classification  # fails if a document falls back to legacy/path taxonomy
+npm run audit:lifecycle      # review/evidence lifecycle inventory
+npm run build:governance-queue # bounded Claude review queue from all inventories
+npm run audit:knowledge-model # verifies terminology, taxonomy, relations, and refreshes governance reports
+npm run audit:content-readiness # refreshes global staleness, fact-density, image, and series review queue
+npm run migrate:topics       # preview path → explicit topic migration (add -- --apply to write)
 ```
 
 Run the report before a Claude Code security batch. The gate deliberately does
 not treat OAuth deployment decisions as pass/fail source checks; those remain
 explicit manual reviews in the report.
+
+`audit:content-readiness` is deliberately informational: its P1/P2/P3 signals
+rank review work but never assert a correction or bulk-change frontmatter. Its
+companion Claude command is `.claude/commands/content-readiness-run.md`.
+
+### Secret scan
+
+```bash
+npm run audit:secrets # updates reports/secrets/latest.{md,json}
+npm run gate:secrets  # fails on credential-shaped content or artifacts
+npm run gate:dependencies # fails on high-severity production dependency advisories
+```
+
+The scan covers Markdown, public text assets, and the final `dist` artifact.
+
+### Tooling contract audit
+
+```bash
+npm run audit:tooling # validates every script's static syntax and npm entrypoint
+npm run gate:tooling  # fails on a syntax or missing-entrypoint finding
+npm run verify:release # runs every publish-blocking check and creates a verified dist artifact
+```
 
 - `sync-book-notes.mjs` — scaffolding for the book-notes series.
 - `archive-chatgpt-share.mjs` — stores a share page as original HTML, per-message JSON, readable Markdown, and downloaded images.

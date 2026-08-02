@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  schedule:
+    # Re-check advisories and the production build even when the repository is idle.
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+# CI only reads the repository. Deployment authority remains isolated in deploy.yml.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Publish-readiness verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Verify release contract
+        run: npm run verify:release
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          ASTRO_TELEMETRY_DISABLED: "1"

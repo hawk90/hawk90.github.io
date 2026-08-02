@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DIR = join(REPO_ROOT, 'src', 'content', 'blog', 'embedded', 'modern-recipes');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 // [seriesOrder, file, newTitle, day, minute]
 const PLAN = [

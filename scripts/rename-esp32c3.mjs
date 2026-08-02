@@ -3,9 +3,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'content', 'blog', 'embedded', 'riscv', 'esp32-c3-mastering');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 1, 'chapter01-overview.md',            'ESP32-C3 분석 — Espressif가 Xtensa에서 RISC-V로 갈아탄 이유',                  '2026-05-20T09:01:00'],

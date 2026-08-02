@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DIR = join(REPO_ROOT, 'src', 'content', 'blog', 'embedded', 'buildroot');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 1, 'chapter01-problem.md',              'Buildroot가 푸는 문제 — Yocto와의 핵심 차이 분석',                           '2026-05-19T09:01:00'],
@@ -41,7 +41,7 @@ function applyEdit(filePath, newTitle, newDate) {
 }
 
 let count = 0;
-for (const [order, file, title, date] of PLAN) {
+for (const [, file, title, date] of PLAN) {
   applyEdit(join(DIR, file), title, date);
   count++;
 }

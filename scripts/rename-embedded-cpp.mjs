@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DIR = join(REPO_ROOT, 'src', 'content', 'blog', 'embedded', 'embedded-cpp');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 0, '00-preface.md',                       'Embedded C++ for Real Systems — 임베디드 모던 C++ 시리즈 소개',                   '2026-04-28T09:00:00'],

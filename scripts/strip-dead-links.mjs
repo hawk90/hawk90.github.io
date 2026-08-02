@@ -3,8 +3,8 @@
 // `[anchor text](/blog/path)` → `anchor text` when /blog/path is a drafted slug.
 //
 // Usage:
-//   node scripts/strip-dead-links.mjs --dry-run   # report only
-//   node scripts/strip-dead-links.mjs             # apply
+//   node scripts/strip-dead-links.mjs             # report only (default)
+//   node scripts/strip-dead-links.mjs --apply     # apply
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { glob } from 'node:fs/promises';
@@ -13,7 +13,7 @@ import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BLOG_ROOT = join(__dirname, '..', 'src', 'content', 'blog');
-const DRY_RUN = process.argv.includes('--dry-run');
+const DRY_RUN = !process.argv.includes('--apply');
 
 function isDraft(raw) {
   return /^draft:\s*true\s*$/m.test(raw);
@@ -60,7 +60,7 @@ async function main() {
     scannedFiles++;
 
     let changed = false;
-    const next = raw.replace(LINK_RE, (match, text, path, trailingSlash, frag) => {
+    const next = raw.replace(LINK_RE, (match, text, path) => {
       // Normalize candidate to a slug — strip trailing slash
       const candidate = path.replace(/\/$/, '');
       if (!draftedSlugs.has(candidate)) return match; // healthy link, keep

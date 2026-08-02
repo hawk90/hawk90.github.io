@@ -12,8 +12,8 @@ Idempotent: a series already on T01:00:00, T02:00:00, ... will get the
 same dates back.
 
 Usage:
-  scripts/normalize-post-dates.py              # apply changes
-  scripts/normalize-post-dates.py --dry-run    # preview only
+  scripts/normalize-post-dates.py              # preview only (default)
+  scripts/normalize-post-dates.py --apply      # apply changes
 """
 import argparse
 import re
@@ -54,7 +54,7 @@ def format_new(base_day: date, offset: int) -> str:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--apply", action="store_true", help="실제 변경 적용 (기본은 미리보기)")
     args = p.parse_args()
 
     posts = []
@@ -100,7 +100,7 @@ def main():
                 f"date: {new_date_str}",
                 1,
             )
-            if not args.dry_run:
+            if args.apply:
                 m["path"].write_text(new_text, encoding="utf-8")
             print(f"  {m['date_raw']:>25s} → {new_date_str}  {m['path'].relative_to(BLOG)}")
             changes += 1
@@ -112,7 +112,7 @@ def main():
     print(f"Series scanned: {len(groups)}")
     print(f"Series modified: {series_changed}")
     print(f"Posts updated: {changes}")
-    if args.dry_run:
+    if not args.apply:
         print("(dry run — no files written)")
 
 

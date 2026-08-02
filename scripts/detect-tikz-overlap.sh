@@ -3,7 +3,7 @@
 #
 # Scans public/images/blog/**/*.tex and assigns each file a numeric "overlap
 # risk score" based on patterns that commonly produce unreadable diagrams.
-# Outputs a ranked list to stdout (and to /tmp/tikz-overlap-report.txt).
+# Outputs a ranked list to stdout (and to a report file).
 #
 # Signals scored (strict by default — aligned with CLAUDE.md §6 TikZ rules):
 #   - `\\` without explicit `\\[Npt]` spacing (CLAUDE.md: use `\\[2pt]`)
@@ -26,12 +26,13 @@
 #   ./scripts/detect-tikz-overlap.sh --series uml     # filter by series
 #   ./scripts/detect-tikz-overlap.sh --loose          # disable strict signals
 #   ./scripts/detect-tikz-overlap.sh --fail-above 30  # exit non-zero if any file scores > N
+#   ./scripts/detect-tikz-overlap.sh --report reports/diagrams/overlap.txt
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIAG_ROOT="$ROOT/public/images/blog"
-REPORT="/tmp/tikz-overlap-report.txt"
+REPORT="$ROOT/reports/diagrams/tikz-overlap-report.txt"
 LIMIT=40
 SERIES_FILTER=""
 STRICT=1
@@ -40,12 +41,23 @@ FAIL_ABOVE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --all) LIMIT=0; shift ;;
-    --series) shift; SERIES_FILTER="${1:-}"; shift ;;
-    --limit) shift; LIMIT="${1:-40}"; shift ;;
+    --series)
+      [[ $# -ge 2 && -n "$2" ]] || { echo "--series requires a value" >&2; exit 2; }
+      SERIES_FILTER="$2"; shift 2 ;;
+    --limit)
+      [[ $# -ge 2 && "$2" =~ ^[0-9]+$ ]] || { echo "--limit requires a non-negative integer" >&2; exit 2; }
+      LIMIT="$2"; shift 2 ;;
+    --report)
+      [[ $# -ge 2 && -n "$2" ]] || { echo "--report requires a path" >&2; exit 2; }
+      REPORT="$2"; shift 2 ;;
     --loose) STRICT=0; shift ;;
     --strict) STRICT=1; shift ;;
-    --fail-above) shift; FAIL_ABOVE="${1:-}"; shift ;;
-    *) shift ;;
+    --fail-above)
+      [[ $# -ge 2 && "$2" =~ ^[0-9]+$ ]] || { echo "--fail-above requires a non-negative integer" >&2; exit 2; }
+      FAIL_ABOVE="$2"; shift 2 ;;
+    --help|-h)
+      sed -n '2,31p' "$0"; exit 0 ;;
+    *) echo "Unknown option: $1" >&2; exit 2 ;;
   esac
 done
 
@@ -55,7 +67,7 @@ if [[ -z "$PYTHON" ]]; then
 fi
 
 "$PYTHON" - "$DIAG_ROOT" "$SERIES_FILTER" "$LIMIT" "$REPORT" "$STRICT" "${FAIL_ABOVE:-}" <<'PY'
-import os, re, sys
+import re, sys
 from pathlib import Path
 
 diag_root = Path(sys.argv[1])
@@ -69,8 +81,8 @@ fail_above_val = int(fail_above) if fail_above else None
 # Strictness thresholds
 LONG_KOREAN_STRICT = 8     # strict — flag >8 hangul chars on a line
 LONG_KOREAN_LOOSE = 12     # loose
-CLOSE_COORD_STRICT = 0.3   # strict — pairs within 0.3 units
-CLOSE_COORD_LOOSE = 0.5    # loose
+CLOSE_COORD_STRICT = 0.5   # strict — flag more close coordinate pairs
+CLOSE_COORD_LOOSE = 0.3    # loose
 LONG_KOREAN = LONG_KOREAN_STRICT if strict else LONG_KOREAN_LOOSE
 CLOSE_COORD = CLOSE_COORD_STRICT if strict else CLOSE_COORD_LOOSE
 
@@ -81,7 +93,7 @@ text_width_re = re.compile(r'text\s+width\s*=')
 node_at_long_re = re.compile(r'\\node\s+at\s*\([^)]*\)\s*\{[^{}]*[가-힣]{8,}')
 rotate_re = re.compile(r'rotate\s*=\s*(-?\d+)')
 input_design_re = re.compile(r'\\input\{[^}]*_design[^}]*\.tex\}')
-tikz_blog_re = re.compile(r'\\begin\{tikzpicture\}\s*\[\s*blog\s*[,\]]')
+tikz_blog_re = re.compile(r'\\begin\{tikzpicture\}\s*\[[^\]]*\bblog\b')
 tikz_any_re = re.compile(r'\\begin\{tikzpicture\}')
 node_distance_re = re.compile(r'node\s+distance\s*=\s*([\d.]+)\s*(cm|mm|pt|em)?')
 projection_re = re.compile(r'\|-|-\|')
@@ -217,6 +229,7 @@ out_lines = [
 for i, (total, s, path) in enumerate(rows, 1):
     out_lines.append(f"{i:>4}  {total:>5}  {fmt(s)}  {path}")
 
+report_path.parent.mkdir(parents=True, exist_ok=True)
 report_path.write_text('\n'.join(out_lines) + '\n', encoding='utf-8')
 
 show = out_lines if limit == 0 else (out_lines[:4] + out_lines[4:limit + 4])

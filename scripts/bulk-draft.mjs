@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Mark book-derived and standards-walkthrough posts as draft for AdSense compliance.
 // Usage:
-//   node scripts/bulk-draft.mjs            # apply changes
-//   node scripts/bulk-draft.mjs --dry-run  # report only
+//   node scripts/bulk-draft.mjs            # report only (default)
+//   node scripts/bulk-draft.mjs --apply    # apply changes
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { glob } from 'node:fs/promises';
@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const BLOG_ROOT = join(REPO_ROOT, 'src', 'content', 'blog');
-const DRY_RUN = process.argv.includes('--dry-run');
+const DRY_RUN = !process.argv.includes('--apply');
 
 // Series that are book-derived or external-standard walkthroughs.
 // Anything matching here → draft. Plus all `type: book-review` posts.

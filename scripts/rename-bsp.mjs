@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DIR = join(REPO_ROOT, 'src', 'content', 'blog', 'embedded', 'bsp');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 1, 'chapter01-what-is-bsp.md',            'BSP의 본질 분해 — 새 보드 부팅을 위한 코드의 자리',                             '2026-05-18T09:01:00'],
@@ -49,7 +49,7 @@ function applyEdit(filePath, newTitle, newDate) {
 }
 
 let count = 0;
-for (const [order, file, title, date] of PLAN) {
+for (const [, file, title, date] of PLAN) {
   const path = join(DIR, file);
   applyEdit(path, title, date);
   count++;

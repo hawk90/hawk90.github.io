@@ -1,0 +1,11 @@
+{
+  "total": 125,
+  "counts": {
+    "unassessed": 0,
+    "remediated": 100,
+    "accepted": 0,
+    "superseded": 0,
+    "routed": 25
+  },
+  "findings": []
+}

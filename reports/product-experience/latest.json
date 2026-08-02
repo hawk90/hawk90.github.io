@@ -1,0 +1,56 @@
+{
+  "analytics": {
+    "enabled": false,
+    "provider": null
+  },
+  "pages": {
+    "total": 28,
+    "documents": 27,
+    "redirects": 1,
+    "layoutCoverage": 27,
+    "titleCoverage": 27
+  },
+  "checks": [
+    {
+      "name": "skip-navigation",
+      "passed": true
+    },
+    {
+      "name": "main-landmark",
+      "passed": true
+    },
+    {
+      "name": "global-search",
+      "passed": true
+    },
+    {
+      "name": "not-found-noindex",
+      "passed": true
+    },
+    {
+      "name": "not-found-recovery",
+      "passed": true
+    },
+    {
+      "name": "analytics-boundary",
+      "passed": true
+    },
+    {
+      "name": "analytics-provider",
+      "passed": true
+    },
+    {
+      "name": "page-layout",
+      "passed": true
+    },
+    {
+      "name": "page-title",
+      "passed": true
+    },
+    {
+      "name": "redirect-safety",
+      "passed": true
+    }
+  ],
+  "findings": []
+}

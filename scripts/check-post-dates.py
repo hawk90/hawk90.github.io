@@ -15,10 +15,10 @@ Usage:
   scripts/check-post-dates.py
 
   # git 최초 commit 시각으로 자동 수정 (dry-run)
-  scripts/check-post-dates.py --from-git --dry-run
+  scripts/check-post-dates.py --from-git
 
   # 실제 적용
-  scripts/check-post-dates.py --from-git
+  scripts/check-post-dates.py --from-git --apply
 
   # 잘못된 형식만 자동 정리 (T130 → T13)
   scripts/check-post-dates.py --fix-invalid
@@ -167,7 +167,7 @@ def main() -> int:
         action="store_true",
         help="T130:00:00 같은 비정상 시각만 자동 정리 (T13:00:00 등).",
     )
-    ap.add_argument("--dry-run", action="store_true", help="변경 없이 미리보기만.")
+    ap.add_argument("--apply", action="store_true", help="실제 변경 적용 (기본은 미리보기).")
     ap.add_argument("--quiet", action="store_true", help="OK 메시지 생략.")
     args = ap.parse_args()
 
@@ -229,10 +229,10 @@ def main() -> int:
                 ok_count += 1
             continue
 
-        action = "DRY     " if args.dry_run else "UPDATED "
+        action = "UPDATED " if args.apply else "DRY     "
         print(f"{action} {rel}  {raw} → {new_date}  ({why})")
 
-        if not args.dry_run:
+        if args.apply:
             updated = replace_date_in_text(text, new_date)
             if updated is not None:
                 f.write_text(updated, encoding="utf-8")
@@ -249,7 +249,7 @@ def main() -> int:
         print(f"Invalid date: {invalid_count}{' (fixed)' if args.fix_invalid or args.from_git else ''}")
     if synced_count:
         print(f"Synced to git: {synced_count}")
-    if args.dry_run:
+    if not args.apply:
         print("(dry run — no files written)")
 
     return 0 if (invalid_count == 0 or args.fix_invalid or args.from_git) else 2

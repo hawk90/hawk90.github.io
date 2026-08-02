@@ -33,7 +33,7 @@ for (const [category, items] of Object.entries(Object.groupBy(manifest.canonical
   }
 }
 candidates.sort((left, right) => Number(right.exactTitle) - Number(left.exactTitle) || right.trigramScore - left.trigramScore || right.tokenScore - left.tokenScore);
-await writeFile(join(corpus, 'semantic-merge-candidates.json'), `${JSON.stringify({ generatedAt: new Date().toISOString(), policy: 'Review-only; title similarity is not duplicate evidence.', candidates }, null, 2)}\n`);
+await writeFile(join(corpus, 'semantic-merge-candidates.json'), `${JSON.stringify({ sourceCapturedAt: manifest.sourceCapturedAt ?? null, policy: 'Review-only; title similarity is not duplicate evidence.', candidates }, null, 2)}\n`);
 const review = [
   '# Semantic merge review queue', '',
   '> Open both atomic blocks before deciding. Return `merge` only when problem, scope, and remedy are materially the same; otherwise use `related` or `keep`.', '',

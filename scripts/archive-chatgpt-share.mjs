@@ -5,7 +5,7 @@
  * The original HTML and per-message HTML are deliberately retained: Markdown is
  * a readable derivative, not the source of truth for unsupported rich blocks.
  */
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { basename, extname, join } from 'node:path';
 import * as cheerio from 'cheerio';
@@ -20,6 +20,7 @@ const option = (name) => {
 const source = args.find((arg) => !arg.startsWith('--') && arg !== option('--input') && arg !== option('--output'));
 const input = option('--input');
 const output = option('--output');
+const overwrite = args.includes('--overwrite');
 
 if ((!source && !input) || (source && input)) {
   console.error('Usage: node scripts/archive-chatgpt-share.mjs <share-url> [--output directory]');
@@ -33,6 +34,12 @@ const slug = sourceUrl
   : basename(input, extname(input));
 const archiveDir = output || join('archives', `chatgpt-${slug}`);
 const assetDir = join(archiveDir, 'assets');
+try {
+  await access(archiveDir);
+  if (!overwrite) throw new Error(`Archive already exists: ${archiveDir}. Use --overwrite only after preserving any manual edits.`);
+} catch (error) {
+  if (error?.code !== 'ENOENT') throw error;
+}
 await mkdir(assetDir, { recursive: true });
 
 const html = input

@@ -12,8 +12,13 @@ import path from 'node:path';
 const GLYPH_W = 5;
 
 function parseUses(svg) {
-  return [...svg.matchAll(/<use [^>]*xlink:href="#(glyph-[\d-]+)"[^>]*x="([-\d.]+)"[^>]*y="([-\d.]+)"/g)]
-    .map((m) => ({ id: m[1], x: +m[2], y: +m[3] }));
+  return [...svg.matchAll(/<use\b([^>]*)>/g)].flatMap((match) => {
+    const attrs = match[1];
+    const id = attrs.match(/(?:xlink:)?href="#(glyph-[\d-]+)"/)?.[1];
+    const x = attrs.match(/\bx="([-\d.]+)"/)?.[1];
+    const y = attrs.match(/\by="([-\d.]+)"/)?.[1];
+    return id && x && y ? [{ id, x: +x, y: +y }] : [];
+  });
 }
 
 function makeRuns(uses) {
@@ -123,25 +128,37 @@ function audit(svg) {
 }
 
 async function main() {
-  const dir = process.argv[2];
+  const args = process.argv.slice(2);
+  const dir = args.find((arg) => !arg.startsWith('--'));
+  const recursive = args.includes('--recursive');
   if (!dir) {
-    console.error('usage: node audit-svg-stronger.mjs <dir>');
+    console.error('usage: node audit-svg-stronger.mjs <dir> [--recursive]');
     process.exit(1);
   }
-  const files = (await fs.readdir(dir)).filter(f => f.endsWith('.svg')).sort();
+  const files = await svgFiles(dir, recursive);
   let any = false;
   for (const f of files) {
-    const svg = await fs.readFile(path.join(dir, f), 'utf-8');
+    const svg = await fs.readFile(f, 'utf-8');
     const hits = audit(svg);
     if (hits.length === 0) continue;
     any = true;
-    console.log(`\n${f}: ${hits.length} text-on-shape candidate(s)`);
+    console.log(`\n${path.relative(dir, f)}: ${hits.length} text-on-shape candidate(s)`);
     for (const h of hits.slice(0, 4)) {
       console.log(`  run ${h.run.id}×${h.run.glyphs} @ [${h.run.x.toFixed(0)}..${h.run.xEnd.toFixed(0)}, y=${h.run.y.toFixed(0)}] crosses box [${h.box.minX.toFixed(0)}..${h.box.maxX.toFixed(0)}, ${h.box.minY.toFixed(0)}..${h.box.maxY.toFixed(0)}]`);
     }
     if (hits.length > 4) console.log(`  …${hits.length - 4} more`);
   }
   if (!any) console.log('No text-on-shape overlaps found.');
+}
+
+async function svgFiles(dir, recursive) {
+  const files = [];
+  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    const file = path.join(dir, entry.name);
+    if (entry.isDirectory() && recursive) files.push(...await svgFiles(file, true));
+    else if (entry.isFile() && entry.name.endsWith('.svg')) files.push(file);
+  }
+  return files.sort();
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

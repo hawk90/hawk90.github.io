@@ -17,6 +17,7 @@ CLAUDE.md §1: 한 글 안에서 '~합니다'(Tone A)와 '~다'(Tone B)를 섞�
 
 Usage:
   audit-tone-consistency.py [path...]        # 기본 = 전체
+  audit-tone-consistency.py --include-drafts # draft도 포함
   audit-tone-consistency.py --min 8          # 판정 최소 문장 수
   audit-tone-consistency.py --show mixed|outlier|all
 
@@ -83,6 +84,7 @@ def main():
     ap.add_argument("--min", type=int, default=8, help="판정 최소 문장 수")
     ap.add_argument("--ratio", type=float, default=0.15, help="MIXED 소수톤 비율 임계")
     ap.add_argument("--show", choices=["mixed", "outlier", "all"], default="all")
+    ap.add_argument("--include-drafts", action="store_true", help="draft도 검사")
     args = ap.parse_args()
 
     targets = args.paths or [str(CONTENT)]
@@ -99,6 +101,8 @@ def main():
     by_series = defaultdict(list)
     for md in files:
         raw = md.read_text(encoding="utf-8", errors="ignore")
+        if not args.include_drafts and re.search(r"^draft:\s*true\s*$", raw, re.MULTILINE):
+            continue
         a, b = count_tones(prose_of(raw))
         total = a + b
         if total < args.min:

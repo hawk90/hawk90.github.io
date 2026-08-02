@@ -15,8 +15,8 @@ AMBIG(후보 여러 개)는 절대 자동 변경하지 않고 리포트만 한�
 Usage:
   resolve-internal-links.py                       # 전체 dry-run 리포트
   resolve-internal-links.py --area embedded/bsp   # 범위 한정
-  resolve-internal-links.py --apply               # pass1+2+3 적용
-  resolve-internal-links.py --apply --no-strip    # remap만, strip 보류
+  resolve-internal-links.py --apply               # 안전한 remap만 적용
+  resolve-internal-links.py --apply --allow-strip # 후보 없는 링크도 평문으로 변경
   resolve-internal-links.py --show AMBIG          # 수동 검토 대상만
 
 Exit: 0 = 적용/리포트 정상, 1 = (dry-run 시) 미해결 broken 존재.
@@ -129,11 +129,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true", help="복구 적용 (기본은 dry-run)")
     ap.add_argument("--area", default="", help="src/content/blog 하위 경로로 한정")
-    ap.add_argument("--no-strip", action="store_true", help="죽은 링크 strip 보류 (remap만)")
+    ap.add_argument("--allow-strip", action="store_true",
+                    help="후보 없는 죽은 링크를 평문으로 변경 (명시적 승인 필요)")
     ap.add_argument("--show", choices=["REMAP", "SERIES", "STRIP", "AMBIG", "NONE", "all"],
                     default="all")
     args = ap.parse_args()
-    allow_strip = not args.no_strip
+    allow_strip = args.allow_strip
 
     idx = build_index()
     slugs = idx[0]

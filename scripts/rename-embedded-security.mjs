@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'content', 'blog', 'embedded', 'embedded-security');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 1, 'chapter01-threat-model.md',     '임베디드 보안 위협 모델 — STRIDE·DFD·자산 식별 흐름',                           '2026-05-21T09:01:00'],

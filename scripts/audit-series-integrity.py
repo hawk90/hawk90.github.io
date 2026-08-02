@@ -3,12 +3,11 @@
 audit-series-integrity.py — 시리즈 안 frontmatter 일관성·완전성 검증.
 
 검사 항목:
-  1. seriesOrder 빈 번호 (gap) — 1,2,3,_,5 같은
-  2. 같은 series 이름 안에서 chapter 모두 같은 series 값
-  3. draft 상태 *혼합* — 시리즈가 대부분 published인데 일부만 draft
-  4. date 순서 — seriesOrder대로 정렬했을 때 date 역행
-  5. 중복 seriesOrder
-  6. 필수 필드 누락 (title, series, seriesOrder, date)
+  1. 중복 seriesOrder
+  2. 필수 필드 누락 (title, date)·잘못된 시각
+
+`seriesOrder` gap, draft 혼합, 발행일 역행은 실제 프로젝트에서 정상일 수 있는
+편집 정책이므로 기본 검증에서 제외한다. 필요할 때만 `--check-policy`로 본다.
 
 출력:
   텍스트 리포트. 시리즈 단위로 그룹화.
@@ -87,7 +86,7 @@ def collect_series():
     return series_map
 
 
-def audit_series(name, chapters):
+def audit_series(name, chapters, check_policy=False):
     """단일 시리즈의 일관성·완전성 audit."""
     issues = {"blocking": [], "warning": []}
 
@@ -105,8 +104,9 @@ def audit_series(name, chapters):
                 f"중복 seriesOrder={order}: {', '.join(p.rsplit('/', 1)[-1] for p in paths)}"
             )
 
-    # 2. seriesOrder 빈 번호 (gap)
-    if orders:
+    # 편집 정책 점검은 opt-in이다. 챕터 번호가 10 단위이거나 00-preface가
+    # 있는 시리즈에서는 gap/발행일 역행이 정상이라 기본 gate 신호가 아니다.
+    if check_policy and orders:
         unique_orders = sorted(set(orders))
         expected = set(range(min(unique_orders), max(unique_orders) + 1))
         missing = expected - set(unique_orders)
@@ -130,12 +130,12 @@ def audit_series(name, chapters):
                     issues["blocking"].append(
                         f"잘못된 시각: {c['date']} ({c['path']})"
                     )
-        if c["order"] == 0:
+        if check_policy and c["order"] == 0:
             issues["warning"].append(f"seriesOrder=0 또는 누락: {c['path']}")
 
     # 4. draft 상태 혼합 (소수파만)
     drafts = sum(1 for c in chapters if c["draft"])
-    if drafts > 0 and drafts < len(chapters):
+    if check_policy and drafts > 0 and drafts < len(chapters):
         # 어느 쪽이 소수인지 알리기
         if drafts <= len(chapters) // 2:
             issues["warning"].append(
@@ -148,15 +148,16 @@ def audit_series(name, chapters):
             )
 
     # 5. date 역행 — seriesOrder대로 정렬했을 때 date가 *내림*이면 의도된 것 아닐 가능성
-    prev_date = ""
-    for c in chapters_sorted:
-        if c["date"] and prev_date and c["date"] < prev_date:
-            issues["warning"].append(
-                f"date 역행: seriesOrder={c['order']} {c['date']} < 이전 {prev_date}"
-            )
-            break  # 한 번만
-        if c["date"]:
-            prev_date = c["date"]
+    if check_policy:
+        prev_date = ""
+        for c in chapters_sorted:
+            if c["date"] and prev_date and c["date"] < prev_date:
+                issues["warning"].append(
+                    f"date 역행: seriesOrder={c['order']} {c['date']} < 이전 {prev_date}"
+                )
+                break  # 한 번만
+            if c["date"]:
+                prev_date = c["date"]
 
     return issues
 
@@ -168,6 +169,8 @@ def main():
     ap.add_argument("--json", help="JSON 출력 경로")
     ap.add_argument("--quiet", action="store_true",
                     help="이슈 없는 시리즈는 출력 안 함")
+    ap.add_argument("--check-policy", action="store_true",
+                    help="gap·draft 혼합·발행일 순서 같은 편집 정책 후보도 표시")
     args = ap.parse_args()
 
     series_map = collect_series()
@@ -181,7 +184,7 @@ def main():
     for name, chapters in sorted(series_map.items()):
         total_series += 1
         total_chapters += len(chapters)
-        issues = audit_series(name, chapters)
+        issues = audit_series(name, chapters, args.check_policy)
         nb = len(issues["blocking"])
         nw = len(issues["warning"])
         if nb == 0 and nw == 0:

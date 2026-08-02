@@ -1,0 +1,3611 @@
+{
+  "generatedAt": "2026-08-01T12:57:21.760Z",
+  "summary": {
+    "stalenessCandidates": 6,
+    "factDensityCandidates": 102,
+    "imageCandidates": 118,
+    "seriesWithIntegrityIssues": 0
+  },
+  "queue": [
+    {
+      "priority": "P1",
+      "kind": "staleness:dated",
+      "path": "src/content/blog/embedded/embedded-security/chapter05-tee.md",
+      "line": 357,
+      "reason": "날짜 앵커 2026 — 기준 연도 경과 시 갱신",
+      "excerpt": "CCA는 2026년 현재 ARMv9.2-A 일부 SoC에 처음 양산되기 시작했고, 향후 5~10년에 걸쳐 모바일·서버 양 쪽에 확산할 것으로 예상됩니다."
+    },
+    {
+      "priority": "P1",
+      "kind": "staleness:future",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md",
+      "line": 174,
+      "reason": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
+      "excerpt": "12-Hi → 16-Hi는 *capacity 33%* 증가지만 *yield가 18% 떨어집니다*. 게다가 *발열·신호 무결성*도 악화됩니다. *HBM3E는 12-Hi가 sweet "
+    },
+    {
+      "priority": "P1",
+      "kind": "staleness:future",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md",
+      "line": 27,
+      "reason": "미래 시제 — 이미 출시/확정됐는지 확인",
+      "excerpt": "| HBM4 | JESD270-4 | 2026 (양산 램프) | 6.4~8.0 Gbps | 1.6~2.0 TB/s+ | 36~64 GB | 2048-bit | 1.0 V |"
+    },
+    {
+      "priority": "P1",
+      "kind": "staleness:future",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md",
+      "line": 174,
+      "reason": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
+      "excerpt": "**채택 예정 칩** — NVIDIA Rubin (R100, 2026), AMD MI400 (2026), 차세대 TPU."
+    },
+    {
+      "priority": "P1",
+      "kind": "staleness:future",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md",
+      "line": 262,
+      "reason": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
+      "excerpt": "| 삼성SDS / SK텔레콤 | B200 도입 예정, full liquid cooling 준비, 시설 retrofit 진행 | — |"
+    },
+    {
+      "priority": "P1",
+      "kind": "staleness:dated",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md",
+      "line": 50,
+      "reason": "날짜 앵커 2026 — 기준 연도 경과 시 갱신",
+      "excerpt": "2026년 현재의 상황:"
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md",
+      "score": 261,
+      "reason": "261 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage.md",
+      "score": 181,
+      "reason": "181 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck.md",
+      "score": 136,
+      "reason": "136 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter04-gddr.md",
+      "score": 117,
+      "reason": "117 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter01-overview.md",
+      "score": 117,
+      "reason": "117 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md",
+      "score": 114,
+      "reason": "114 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part3-12-cxl-mem-latency.md",
+      "score": 87,
+      "reason": "87 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bootloader/chapter10-storage-boot.md",
+      "score": 86,
+      "reason": "86 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter07-memory-controller.md",
+      "score": 84,
+      "reason": "84 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part4-04-clock-setup.md",
+      "score": 81,
+      "reason": "81 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter09-cxl-mem.md",
+      "score": 81,
+      "reason": "81 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md",
+      "score": 81,
+      "reason": "81 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter08-tsn.md",
+      "score": 73,
+      "reason": "73 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part6-04-case-dma-tuning.md",
+      "score": 71,
+      "reason": "71 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache.md",
+      "score": 70,
+      "reason": "70 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part12-02-npu-architecture.md",
+      "score": 63,
+      "reason": "63 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling.md",
+      "score": 62,
+      "reason": "62 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter02-realtime-requirements.md",
+      "score": 62,
+      "reason": "62 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part12-05-tflite-micro.md",
+      "score": 59,
+      "reason": "59 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part6-02-case-cache-thrashing.md",
+      "score": 58,
+      "reason": "58 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part2-08-memory-bandwidth.md",
+      "score": 58,
+      "reason": "58 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bootloader/chapter28-flash-layout.md",
+      "score": 56,
+      "reason": "56 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part5-07-tft-display.md",
+      "score": 54,
+      "reason": "54 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part12-01-edge-inference.md",
+      "score": 53,
+      "reason": "53 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part12-03-quantization.md",
+      "score": 49,
+      "reason": "49 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter12-comparison.md",
+      "score": 48,
+      "reason": "48 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink.md",
+      "score": 48,
+      "reason": "48 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part2-05-cache-basics.md",
+      "score": 48,
+      "reason": "48 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part3-04-dma-vs-cpu.md",
+      "score": 47,
+      "reason": "47 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bootloader/chapter09-dram-init.md",
+      "score": 47,
+      "reason": "47 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part1-07-modeling.md",
+      "score": 46,
+      "reason": "46 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part2-06-arm-cache.md",
+      "score": 46,
+      "reason": "46 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part1-01-digital-signal-basics.md",
+      "score": 46,
+      "reason": "46 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-12-amp-openamp.md",
+      "score": 45,
+      "reason": "45 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md",
+      "score": 45,
+      "reason": "45 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-03-tlsf.md",
+      "score": 43,
+      "reason": "43 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part5-04-servo-motor.md",
+      "score": 43,
+      "reason": "43 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/embedded-security/chapter03-mcu-crypto.md",
+      "score": 43,
+      "reason": "43 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-08-tick-timer.md",
+      "score": 42,
+      "reason": "42 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part12-10-on-device-llm.md",
+      "score": 42,
+      "reason": "42 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bootloader/chapter26-ddr-training.md",
+      "score": 42,
+      "reason": "42 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach.md",
+      "score": 41,
+      "reason": "41 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part12-08-jetson.md",
+      "score": 41,
+      "reason": "41 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part10-10-protocol-analyzer.md",
+      "score": 41,
+      "reason": "41 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part1-09-pwm-signal.md",
+      "score": 41,
+      "reason": "41 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter17-performance.md",
+      "score": 41,
+      "reason": "41 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bootloader/chapter32-psci-smccc.md",
+      "score": 41,
+      "reason": "41 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight.md",
+      "score": 40,
+      "reason": "40 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md",
+      "score": 40,
+      "reason": "40 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview.md",
+      "score": 40,
+      "reason": "40 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part3-11-cxl-interconnect.md",
+      "score": 40,
+      "reason": "40 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part2-03-branch-prediction.md",
+      "score": 40,
+      "reason": "40 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part1-02-metrics.md",
+      "score": 40,
+      "reason": "40 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part5-06-spi-oled.md",
+      "score": 40,
+      "reason": "40 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bootloader/chapter23-bootrom-efuse-otp.md",
+      "score": 40,
+      "reason": "40 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis.md",
+      "score": 39,
+      "reason": "39 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bsp/chapter05-ddr-params.md",
+      "score": 39,
+      "reason": "39 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bootloader/chapter24-spl-deep.md",
+      "score": 39,
+      "reason": "39 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/embedded-cpp/part1-04-code-size-analysis.md",
+      "score": 37,
+      "reason": "37 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bsp/chapter17-image-packaging.md",
+      "score": 37,
+      "reason": "37 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/tools/debugging/embedded/chapter04-jlink.md",
+      "score": 36,
+      "reason": "36 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part4-04-spinlock.md",
+      "score": 36,
+      "reason": "36 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part4-03-lock-contention.md",
+      "score": 36,
+      "reason": "36 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/embedded-security/chapter11-pcie-cxl-ide.md",
+      "score": 36,
+      "reason": "36 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp.md",
+      "score": 35,
+      "reason": "35 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-03-scheduling-algorithms.md",
+      "score": 35,
+      "reason": "35 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter01-overview.md",
+      "score": 35,
+      "reason": "35 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part2-02-cortex-a-comparison.md",
+      "score": 35,
+      "reason": "35 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/embedded-cpp/part1-02-compiler-flags.md",
+      "score": 35,
+      "reason": "35 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bsp/chapter15-boot-time-optimization.md",
+      "score": 35,
+      "reason": "35 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bootloader/chapter31-tfa-bl31-runtime.md",
+      "score": 35,
+      "reason": "35 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part5-01-perf-basics.md",
+      "score": 34,
+      "reason": "34 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part3-09-power-vs-performance.md",
+      "score": 34,
+      "reason": "34 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part8-10-code-size-optimization.md",
+      "score": 34,
+      "reason": "34 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part1-04-uart-hardware.md",
+      "score": 34,
+      "reason": "34 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/embedded-security/chapter06-ota-update.md",
+      "score": 34,
+      "reason": "34 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/programming/code-review/folly/part7-03-f14-vector-map.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-10-scheduler-latency.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part3-05-interrupt-latency.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part8-06-numa.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part5-01-pwm-output.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part11-05-ps-pl-communication.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part1-02-clock-timing.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/bsp/chapter04-pinmux-clock.md",
+      "score": 33,
+      "reason": "33 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-07-smp-rtos.md",
+      "score": 32,
+      "reason": "32 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt.md",
+      "score": 32,
+      "reason": "32 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter05-uart-spi-i2c-i2s.md",
+      "score": 32,
+      "reason": "32 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter06-profinet.md",
+      "score": 32,
+      "reason": "32 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part6-01-case-isr-latency.md",
+      "score": 32,
+      "reason": "32 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part1-06-benchmark.md",
+      "score": 32,
+      "reason": "32 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part5-05-character-lcd.md",
+      "score": 32,
+      "reason": "32 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part4-13-flash-programming.md",
+      "score": 32,
+      "reason": "32 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md",
+      "score": 31,
+      "reason": "31 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md",
+      "score": 31,
+      "reason": "31 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part12-12-matter-thread.md",
+      "score": 31,
+      "reason": "31 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/modern-recipes/part1-03-gpio-internals.md",
+      "score": 31,
+      "reason": "31 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/programming/code-review/folly/part6-03-conv-performance.md",
+      "score": 30,
+      "reason": "30 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter07-wifi-stack.md",
+      "score": 30,
+      "reason": "30 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame.md",
+      "score": 30,
+      "reason": "30 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/performance-engineering/part1-04-statistics.md",
+      "score": 30,
+      "reason": "30 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P2",
+      "kind": "fact-density",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter03-config-space.md",
+      "score": 30,
+      "reason": "30 concrete-claim signals; verify against primary sources before marking current."
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/00-preface.md",
+      "score": 19,
+      "reason": "19 abstract concepts / 45 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          7
+        ],
+        [
+          "mutex",
+          4
+        ],
+        [
+          "rcu",
+          4
+        ],
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "epoll",
+          3
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter18-register-maps.md",
+      "score": 10,
+      "reason": "10 abstract concepts / 15 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          5
+        ],
+        [
+          "FLIT",
+          2
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "IOMMU",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter15-ras-performance.md",
+      "score": 8,
+      "reason": "8 abstract concepts / 16 hits with no image",
+      "keywords": [
+        [
+          "QoS",
+          4
+        ],
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "HBM",
+          2
+        ],
+        [
+          "stack",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter01-fundamentals.md",
+      "score": 7,
+      "reason": "7 abstract concepts / 41 hits with no image",
+      "keywords": [
+        [
+          "FLIT",
+          11
+        ],
+        [
+          "transaction",
+          7
+        ],
+        [
+          "lane",
+          7
+        ],
+        [
+          "PAM4",
+          7
+        ],
+        [
+          "stack",
+          5
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-06-sync-basics.md",
+      "score": 7,
+      "reason": "7 abstract concepts / 28 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          10
+        ],
+        [
+          "interrupt",
+          5
+        ],
+        [
+          "spinlock",
+          4
+        ],
+        [
+          "semaphore",
+          4
+        ],
+        [
+          "cache line",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part4-07-lock-free.md",
+      "score": 7,
+      "reason": "7 abstract concepts / 14 hits with no image",
+      "keywords": [
+        [
+          "epoch",
+          6
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "B-tree",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-02-zephyr-source.md",
+      "score": 7,
+      "reason": "7 abstract concepts / 11 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          2
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "MMU",
+          2
+        ],
+        [
+          "scheduler",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md",
+      "score": 7,
+      "reason": "7 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "rcu",
+          2
+        ],
+        [
+          "preempt",
+          2
+        ],
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "spinlock",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter17-performance.md",
+      "score": 6,
+      "reason": "6 abstract concepts / 21 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          11
+        ],
+        [
+          "DDIO",
+          4
+        ],
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "lane",
+          2
+        ],
+        [
+          "IOMMU",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-03-rt-thread.md",
+      "score": 6,
+      "reason": "6 abstract concepts / 14 hits with no image",
+      "keywords": [
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "MMU",
+          3
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ],
+        [
+          "scheduler",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-04-porting.md",
+      "score": 6,
+      "reason": "6 abstract concepts / 14 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          7
+        ],
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "page table",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md",
+      "score": 6,
+      "reason": "6 abstract concepts / 14 hits with no image",
+      "keywords": [
+        [
+          "preempt",
+          4
+        ],
+        [
+          "mutex",
+          3
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "rt-mutex",
+          2
+        ],
+        [
+          "rcu",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter13-switching-fabric.md",
+      "score": 6,
+      "reason": "6 abstract concepts / 13 hits with no image",
+      "keywords": [
+        [
+          "QoS",
+          6
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "mesh",
+          2
+        ],
+        [
+          "mailbox",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 32 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          11
+        ],
+        [
+          "scheduler",
+          10
+        ],
+        [
+          "futex",
+          7
+        ],
+        [
+          "select",
+          3
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/valgrind/chapter04-helgrind-drd.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 28 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          8
+        ],
+        [
+          "spinlock",
+          8
+        ],
+        [
+          "vector clock",
+          7
+        ],
+        [
+          "stack",
+          3
+        ],
+        [
+          "Lamport",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter05-interrupts.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 25 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          15
+        ],
+        [
+          "IOMMU",
+          7
+        ],
+        [
+          "softirq",
+          1
+        ],
+        [
+          "tasklet",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part6-05-mutex-usage.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 22 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          17
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter02-tlp.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 20 hits with no image",
+      "keywords": [
+        [
+          "transaction",
+          11
+        ],
+        [
+          "IOMMU",
+          6
+        ],
+        [
+          "DDIO",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part3-01-critical-section.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 14 hits with no image",
+      "keywords": [
+        [
+          "spinlock",
+          5
+        ],
+        [
+          "scheduler",
+          4
+        ],
+        [
+          "semaphore",
+          3
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part8-04-dma-allocator.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 13 hits with no image",
+      "keywords": [
+        [
+          "IOMMU",
+          9
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "io_uring",
+          1
+        ],
+        [
+          "MMU",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "scheduler",
+          4
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "TCP",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          4
+        ],
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "interrupt",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 8 hits with no image",
+      "keywords": [
+        [
+          "HBM",
+          4
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "TPU",
+          1
+        ],
+        [
+          "mesh",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-01-why-rtos.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ],
+        [
+          "MMU",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 52 hits with no image",
+      "keywords": [
+        [
+          "spinlock",
+          29
+        ],
+        [
+          "mutex",
+          20
+        ],
+        [
+          "cache line",
+          2
+        ],
+        [
+          "futex",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/programming/code-review/folly/part15-05-coro-baton-mutex.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 38 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          28
+        ],
+        [
+          "semaphore",
+          6
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "scheduler",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter08-dllp.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 30 hits with no image",
+      "keywords": [
+        [
+          "FLIT",
+          26
+        ],
+        [
+          "PAM4",
+          2
+        ],
+        [
+          "channel",
+          1
+        ],
+        [
+          "transaction",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part2-08-arm-mmu.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 27 hits with no image",
+      "keywords": [
+        [
+          "TLB",
+          12
+        ],
+        [
+          "page table",
+          11
+        ],
+        [
+          "MMU",
+          2
+        ],
+        [
+          "stack",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter11-linux-dma.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 27 hits with no image",
+      "keywords": [
+        [
+          "IOMMU",
+          19
+        ],
+        [
+          "interrupt",
+          4
+        ],
+        [
+          "page table",
+          3
+        ],
+        [
+          "DDIO",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part4-05-mutex.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 25 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          15
+        ],
+        [
+          "futex",
+          6
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter19-advanced-features.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 25 hits with no image",
+      "keywords": [
+        [
+          "lane",
+          12
+        ],
+        [
+          "IOMMU",
+          7
+        ],
+        [
+          "FLIT",
+          5
+        ],
+        [
+          "transaction",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter09-physical-layer.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 24 hits with no image",
+      "keywords": [
+        [
+          "lane",
+          14
+        ],
+        [
+          "PAM4",
+          6
+        ],
+        [
+          "FLIT",
+          2
+        ],
+        [
+          "differential pair",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter11-linux-driver.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 22 hits with no image",
+      "keywords": [
+        [
+          "mailbox",
+          11
+        ],
+        [
+          "NUMA",
+          8
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part11-06-mailbox.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 20 hits with no image",
+      "keywords": [
+        [
+          "mailbox",
+          17
+        ],
+        [
+          "channel",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/kernel/chapter09-drivers-cxl-walkthrough.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 20 hits with no image",
+      "keywords": [
+        [
+          "mailbox",
+          9
+        ],
+        [
+          "NUMA",
+          7
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter12-virtualization-1.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 19 hits with no image",
+      "keywords": [
+        [
+          "IOMMU",
+          15
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "TLB",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part12-03-quantization.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 18 hits with no image",
+      "keywords": [
+        [
+          "channel",
+          8
+        ],
+        [
+          "tensor",
+          8
+        ],
+        [
+          "TPU",
+          1
+        ],
+        [
+          "epoch",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/programming/code-review/folly/part10-04-fibers-channel.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 18 hits with no image",
+      "keywords": [
+        [
+          "channel",
+          15
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "select",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part3-12-cxl-mem-latency.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 16 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          6
+        ],
+        [
+          "HBM",
+          5
+        ],
+        [
+          "cache line",
+          3
+        ],
+        [
+          "channel",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 16 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          6
+        ],
+        [
+          "interrupt",
+          4
+        ],
+        [
+          "semaphore",
+          3
+        ],
+        [
+          "stack",
+          3
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/programming/code-review/folly/part9-04-rw-spin-lock.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 16 hits with no image",
+      "keywords": [
+        [
+          "spinlock",
+          7
+        ],
+        [
+          "mutex",
+          5
+        ],
+        [
+          "futex",
+          2
+        ],
+        [
+          "cache line",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-06-atomic-cost.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 15 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          6
+        ],
+        [
+          "cache line",
+          4
+        ],
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "sharding",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/embedded-cpp/part2-01-raii-basics.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 14 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          6
+        ],
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "stack",
+          3
+        ],
+        [
+          "channel",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part4-10-smp-analysis.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 13 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          8
+        ],
+        [
+          "TLB",
+          2
+        ],
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "page table",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part11-08-dma-completion.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 13 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          10
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ],
+        [
+          "tasklet",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-06-nuttx.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 13 hits with no image",
+      "keywords": [
+        [
+          "MMU",
+          5
+        ],
+        [
+          "stack",
+          4
+        ],
+        [
+          "preempt",
+          2
+        ],
+        [
+          "TCP",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/00-preface.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 13 hits with no image",
+      "keywords": [
+        [
+          "scheduler",
+          8
+        ],
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "mailbox",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-04-context-switch.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 13 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          9
+        ],
+        [
+          "scheduler",
+          2
+        ],
+        [
+          "TLB",
+          1
+        ],
+        [
+          "MMU",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part12-02-npu-architecture.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 12 hits with no image",
+      "keywords": [
+        [
+          "TPU",
+          6
+        ],
+        [
+          "tensor",
+          3
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "kernel launch",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part5-11-cxl-profiling-tools.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 11 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          7
+        ],
+        [
+          "HBM",
+          2
+        ],
+        [
+          "mailbox",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/bootloader/chapter26-ddr-training.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "channel",
+          5
+        ],
+        [
+          "mailbox",
+          2
+        ],
+        [
+          "lane",
+          2
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "scheduler",
+          6
+        ],
+        [
+          "preempt",
+          2
+        ],
+        [
+          "MMU",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-04-hazard-pointer.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 9 hits with no image",
+      "keywords": [
+        [
+          "rcu",
+          5
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-05-cas-patterns.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 8 hits with no image",
+      "keywords": [
+        [
+          "cache line",
+          3
+        ],
+        [
+          "stack",
+          3
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "sharding",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-09-false-sharing.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 8 hits with no image",
+      "keywords": [
+        [
+          "cache line",
+          4
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "sharding",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-09-software-timer.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 8 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "spinlock",
+          2
+        ],
+        [
+          "semaphore",
+          2
+        ],
+        [
+          "TCP",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part11-09-pcie-streaming.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "IOMMU",
+          3
+        ],
+        [
+          "io_uring",
+          2
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "HBM",
+          3
+        ],
+        [
+          "lane",
+          2
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "QoS",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "HBM",
+          4
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "QoS",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part10-09-timing-race-diag.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 6 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          3
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter01-overview.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 6 hits with no image",
+      "keywords": [
+        [
+          "TCP",
+          3
+        ],
+        [
+          "channel",
+          1
+        ],
+        [
+          "softirq",
+          1
+        ],
+        [
+          "VLAN",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part3-07-queue-impl.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 6 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          2
+        ],
+        [
+          "mailbox",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/00-preface.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "TCP",
+          2
+        ],
+        [
+          "MMU",
+          1
+        ],
+        [
+          "preempt",
+          1
+        ],
+        [
+          "mesh",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part6-11-timer-services.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 4 hits with no image",
+      "keywords": [
+        [
+          "channel",
+          1
+        ],
+        [
+          "skiplist",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "TCP",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 4 hits with no image",
+      "keywords": [
+        [
+          "transaction",
+          1
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "mesh",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part8-09-stack-analysis.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 38 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          36
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "TCP",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part6-04-semaphore-usage.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 28 hits with no image",
+      "keywords": [
+        [
+          "semaphore",
+          19
+        ],
+        [
+          "mutex",
+          6
+        ],
+        [
+          "channel",
+          3
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/bootloader/chapter36-boot-memory-topology.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 23 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          14
+        ],
+        [
+          "HBM",
+          8
+        ],
+        [
+          "channel",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part6-12-rtos-debugging.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 20 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          17
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part4-06-rw-lock.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 19 hits with no image",
+      "keywords": [
+        [
+          "rcu",
+          11
+        ],
+        [
+          "mutex",
+          7
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part7-10-epoll.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 19 hits with no image",
+      "keywords": [
+        [
+          "epoll",
+          12
+        ],
+        [
+          "select",
+          6
+        ],
+        [
+          "TCP",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-03-rcu-basics.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 19 hits with no image",
+      "keywords": [
+        [
+          "rcu",
+          15
+        ],
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 19 hits with no image",
+      "keywords": [
+        [
+          "spinlock",
+          14
+        ],
+        [
+          "cache line",
+          3
+        ],
+        [
+          "mutex",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part1-07-semaphore.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 19 hits with no image",
+      "keywords": [
+        [
+          "semaphore",
+          11
+        ],
+        [
+          "mutex",
+          7
+        ],
+        [
+          "preempt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/embedded-cpp/part2-02-raii-patterns.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 18 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          13
+        ],
+        [
+          "interrupt",
+          4
+        ],
+        [
+          "transaction",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part4-04-spinlock.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 18 hits with no image",
+      "keywords": [
+        [
+          "spinlock",
+          11
+        ],
+        [
+          "mutex",
+          6
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 18 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          9
+        ],
+        [
+          "channel",
+          7
+        ],
+        [
+          "TCP",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-04-static-allocation.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 17 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          15
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "semaphore",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part3-02-semaphore-impl.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 16 hits with no image",
+      "keywords": [
+        [
+          "semaphore",
+          9
+        ],
+        [
+          "mutex",
+          6
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 15 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          8
+        ],
+        [
+          "channel",
+          4
+        ],
+        [
+          "select",
+          3
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 15 hits with no image",
+      "keywords": [
+        [
+          "mailbox",
+          8
+        ],
+        [
+          "NUMA",
+          6
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part7-11-uio-vfio.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 15 hits with no image",
+      "keywords": [
+        [
+          "IOMMU",
+          13
+        ],
+        [
+          "io_uring",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter08-cxl-mem.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 13 hits with no image",
+      "keywords": [
+        [
+          "cache line",
+          9
+        ],
+        [
+          "NUMA",
+          3
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 11 hits with no image",
+      "keywords": [
+        [
+          "IOMMU",
+          5
+        ],
+        [
+          "channel",
+          4
+        ],
+        [
+          "HBM",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 11 hits with no image",
+      "keywords": [
+        [
+          "rcu",
+          8
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "epoch",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/memory/chapter01-memory-accounting.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 11 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          6
+        ],
+        [
+          "NUMA",
+          3
+        ],
+        [
+          "page table",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part12-12-matter-thread.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "mesh",
+          7
+        ],
+        [
+          "TCP",
+          2
+        ],
+        [
+          "channel",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter16-troubleshooting.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "lane",
+          5
+        ],
+        [
+          "IOMMU",
+          4
+        ],
+        [
+          "NUMA",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-05-memory-pool.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 9 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          5
+        ],
+        [
+          "cache line",
+          3
+        ],
+        [
+          "mutex",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/memory/chapter07-tiered-memory-diagnostics.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 9 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          7
+        ],
+        [
+          "TLB",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part4-03-lock-contention.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 8 hits with no image",
+      "keywords": [
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "semaphore",
+          3
+        ],
+        [
+          "mutex",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part6-03-scheduler-internals.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 8 hits with no image",
+      "keywords": [
+        [
+          "scheduler",
+          3
+        ],
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "semaphore",
+          2
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-06-cortex-a-context.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 8 hits with no image",
+      "keywords": [
+        [
+          "TLB",
+          4
+        ],
+        [
+          "MMU",
+          3
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 8 hits with no image",
+      "keywords": [
+        [
+          "stack",
+          5
+        ],
+        [
+          "mutex",
+          2
+        ],
+        [
+          "select",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/bootloader/chapter35-uefi-cxl-init.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          5
+        ],
+        [
+          "QoS",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-01-freertos-source.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "semaphore",
+          3
+        ],
+        [
+          "stack",
+          3
+        ],
+        [
+          "mutex",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter09-flit-format.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "PAM4",
+          5
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/programming/code-review/folly/part9-05-pico-spin-lock.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          3
+        ],
+        [
+          "spinlock",
+          3
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/programming/code-review/abseil/00-preface.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          4
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "B-tree",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part3-04-dma-vs-cpu.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 6 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          3
+        ],
+        [
+          "channel",
+          2
+        ],
+        [
+          "STM",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part6-02-task-design.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 6 hits with no image",
+      "keywords": [
+        [
+          "scheduler",
+          3
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "semaphore",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/performance-engineering/part3-03-dma-performance.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "transaction",
+          2
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part11-05-ps-pl-communication.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part3-10-deadlock.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          3
+        ],
+        [
+          "semaphore",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part4-10-syscall.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "MMU",
+          2
+        ],
+        [
+          "stack",
+          2
+        ],
+        [
+          "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter10-linux-basics.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "IOMMU",
+          2
+        ],
+        [
+          "workqueue",
+          2
+        ],
+        [
+          "NUMA",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter07-error-handling.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "transaction",
+          2
+        ],
+        [
+          "FLIT",
+          2
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/postmortem/chapter06-cxl-fabric-postmortem.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "cache line",
+          3
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/embedded-security/chapter11-pcie-cxl-ide.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 4 hits with no image",
+      "keywords": [
+        [
+          "HBM",
+          2
+        ],
+        [
+          "stack",
+          1
+        ],
+        [
+          "interposer",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-08-tick-timer.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 4 hits with no image",
+      "keywords": [
+        [
+          "scheduler",
+          2
+        ],
+        [
+          "preempt",
+          1
+        ],
+        [
+          "interrupt",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/pcie/chapter03-config-space.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 4 hits with no image",
+      "keywords": [
+        [
+          "interrupt",
+          2
+        ],
+        [
+          "channel",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/programming/code-review/folly/part21-01-observer.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 4 hits with no image",
+      "keywords": [
+        [
+          "rcu",
+          2
+        ],
+        [
+          "mutex",
+          1
+        ],
+        [
+          "cache line",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/programming/code-review/folly/00-preface.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 4 hits with no image",
+      "keywords": [
+        [
+          "channel",
+          2
+        ],
+        [
+          "spinlock",
+          1
+        ],
+        [
+          "select",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/programming/code-review/abseil/part16-03-periodic-sampler.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 4 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          2
+        ],
+        [
+          "cache line",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/bsp/chapter21-maintenance.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 3 hits with no image",
+      "keywords": [
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "rcu",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part2-02-cortex-a-comparison.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 3 hits with no image",
+      "keywords": [
+        [
+          "MMU",
+          1
+        ],
+        [
+          "scheduler",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part7-12-sysfs.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 3 hits with no image",
+      "keywords": [
+        [
+          "mutex",
+          1
+        ],
+        [
+          "epoll",
+          1
+        ],
+        [
+          "io_uring",
+          1
+        ]
+      ]
+    }
+  ]
+}

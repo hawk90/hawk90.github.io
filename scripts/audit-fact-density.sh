@@ -21,7 +21,7 @@
 #   ./scripts/audit-fact-density.sh --top 10              # 상위 10개
 #   ./scripts/audit-fact-density.sh <path>                # 특정 디렉토리·파일
 
-set -eo pipefail
+set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 THRESHOLD=30
@@ -63,13 +63,14 @@ PAT_MEASUREMENT='(약 |대략 )?[0-9]+(\.[0-9]+)? *(%|배|이상|이하|만큼|�
 
 # Output file for sorting
 TMP=$(mktemp)
+trap 'rm -f "$TMP"' EXIT
 
 while IFS= read -r f; do
   if grep -q "^draft: true" "$f"; then continue; fi
 
   count_pattern() {
     local n
-    n=$(grep -cE "$1" "$f" 2>/dev/null) || n=0
+    n=$(grep -Eo "$1" "$f" 2>/dev/null | wc -l | tr -d ' ') || n=0
     echo "${n:-0}"
   }
   numeric=$(count_pattern "$PAT_NUMERIC")
@@ -90,7 +91,6 @@ done < <(find "${TARGETS[@]}" -name "*.md" -type f)
 
 if [ ! -s "$TMP" ]; then
   echo "✓ Fact-density threshold ($THRESHOLD) 초과 챕터 없음."
-  rm -f "$TMP"
   exit 0
 fi
 
@@ -106,8 +106,6 @@ else
 fi
 
 TOTAL_FILES=$(wc -l < "$TMP" | tr -d ' ')
-rm -f "$TMP"
-
 echo ""
 echo "총 $TOTAL_FILES 챕터가 threshold $THRESHOLD 이상."
 echo ""

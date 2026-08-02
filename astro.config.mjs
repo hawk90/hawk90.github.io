@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { unified } from '@astrojs/markdown-remark';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 import expressiveCode from 'astro-expressive-code';
@@ -10,17 +11,9 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeImageLazy from './src/lib/rehype-image-lazy.mjs';
-import { serializeSitemapItem } from './src/lib/content/sitemap.ts';
 
-// ─── OAuth Support (Optional) ───────────────────────────────
-// To enable GitHub OAuth login (instead of PAT only):
-// 1. Install adapter: npm install @astrojs/vercel (or @astrojs/netlify)
-// 2. Uncomment the adapter import and add to integrations
-// 3. Change output to 'hybrid'
-// 4. Set GITHUB_CLIENT_SECRET in your environment variables
-//
-// import vercel from '@astrojs/vercel';
-// ─────────────────────────────────────────────────────────────
+// This site is intentionally static and PAT-only. OAuth needs a separately
+// deployed server boundary; do not add OAuth callback routes to this project.
 
 // https://astro.build/config
 export default defineConfig({
@@ -40,43 +33,41 @@ export default defineConfig({
           'cpp', 'c', 'text', 'bash', 'python', 'javascript', 'typescript',
           'java', 'eiffel', 'cmake', 'makefile', 'asm', 'csharp', 'vim',
           'yaml', 'json', 'rust', 'go', 'sql', 'html', 'css', 'verilog',
-          'dts', 'tcl', 'cuda', 'glsl',
+          'tcl', 'glsl',
         ]),
+        // Shiki has no grammars for these fence labels. Map each to the
+        // closest supported grammar instead of silently rendering as text.
+        langAlias: {
+          dts: 'c',
+          bitbake: 'makefile',
+          cuda: 'cpp',
+          ld: 'text',
+        },
       },
       themes: ['github-dark', 'github-light'],
     }),
     // mdx() integration dropped — repo has 0 .mdx files; pure .md only.
     // Removing saves parser load + memory during build.
     sitemap({
-      // Exclude admin pages from sitemap (they're not public).
-      filter: (page) => !page.includes('/admin'),
-      serialize: serializeSitemapItem,
-    }),
+    // Exclude admin pages from sitemap (they're not public).
+    filter: (page) => !page.includes('/admin'),
+  }),
   ],
 
   markdown: {
-    remarkPlugins: [
-      remarkMath,
-      remarkDirective,
-      remarkCallouts,
-    ],
-    rehypePlugins: [
-      rehypeSlug,
-      [
-        rehypeAutolinkHeadings,
-        {
+    processor: unified({
+      remarkPlugins: [remarkMath, remarkDirective, remarkCallouts],
+      rehypePlugins: [
+        rehypeSlug,
+        [rehypeAutolinkHeadings, {
           behavior: 'prepend',
-          properties: {
-            class: 'heading-anchor',
-            ariaLabel: 'Link to section',
-            tabIndex: -1,
-          },
+          properties: { class: 'heading-anchor', ariaLabel: 'Link to section', tabIndex: -1 },
           content: { type: 'text', value: '#' },
-        },
+        }],
+        rehypeKatex,
+        rehypeImageLazy,
       ],
-      rehypeKatex,
-      rehypeImageLazy,
-    ],
+    }),
   },
 
   prefetch: {
@@ -88,12 +79,7 @@ export default defineConfig({
   },
 
   // ─── Output Mode ─────────────────────────────────────────────
-  // 'static': GitHub Pages compatible (PAT login only)
-  // 'hybrid': Vercel/Netlify compatible (OAuth + PAT login)
-  //
-  // For OAuth support, change to 'hybrid' and add adapter:
-  // adapter: vercel(), // or netlify()
-  // ─────────────────────────────────────────────────────────────
+  // GitHub Pages deployment: no server routes or OAuth callbacks.
   output: 'static',
   compressHTML: true,
 

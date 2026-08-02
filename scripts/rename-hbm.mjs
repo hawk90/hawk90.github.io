@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DIR = join(REPO_ROOT, 'src', 'content', 'blog', 'embedded', 'hardware', 'hbm');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [1, 'chapter01-overview.md',             'HBM과 GDDR 분기점 분석 — Bandwidth·Capacity·Cost 트레이드오프',          '2026-05-16T09:01:00'],

@@ -1,0 +1,23 @@
+=== Image Coverage Audit ===
+  Total series: 28
+  Candidates (image=0, distinct keyword≥3): 118
+
+=== 시리즈별 평균 이미지 ===
+   0.00 img/ch   15편     0개  CXL 4.0 Internals
+   0.00 img/ch   19편     0개  PCIe Deep Dive
+   0.00 img/ch    7편     0개  GNU Make
+   0.00 img/ch    5편     0개  Sanitizers
+   0.00 img/ch    7편     0개  Memory Diagnostics
+   0.00 img/ch    5편     0개  Python Debugging
+   0.00 img/ch    5편     0개  Valgrind
+   0.24 img/ch   21편     5개  BSP Development
+   0.25 img/ch   12편     3개  GDB and LLDB
+   0.26 img/ch  152편    39개  Modern Embedded Recipes
+   0.30 img/ch   53편    16개  Practical RTOS Internals
+   0.33 img/ch   79편    26개  Abseil Code Review
+   0.33 img/ch    9편     3개  Kernel Debugging
+   0.34 img/ch   41편    14개  Embedded C++ for Real Systems
+   0.38 img/ch   13편     5개  Embedded Security
+  ... (13 more)
+
+=== Top 0 보강 후보 (이미지=0, 서로 다른 키워드 많은 순) ===

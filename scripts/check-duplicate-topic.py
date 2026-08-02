@@ -19,6 +19,7 @@ Exit: 0 = 강한 중복 없음, 1 = 임계 이상 후보 있음(확인 권장).
 """
 
 import argparse
+import json
 import math
 import re
 import sys
@@ -35,12 +36,25 @@ def field(fm, key):
     return m.group(1).strip().strip('"') if m else ""
 
 
+def normalize(value):
+    return re.sub(r"\s+", " ", value).strip().casefold()
+
+
+def contains_term(text, term):
+    """Avoid matching short ASCII terms inside unrelated identifiers."""
+    if re.fullmatch(r"[a-z0-9][a-z0-9 _-]*", term):
+        return bool(re.search(rf"(?<![a-z0-9_]){re.escape(term)}(?![a-z0-9_])", text))
+    return term in text
+
+
 def scan(query_terms):
-    terms = [t.lower() for t in query_terms if t.strip()]
+    terms = list(dict.fromkeys(normalize(t) for t in query_terms if normalize(t)))
     # 1-pass: 각 챕터의 텍스트를 모아 두고, term별 문서빈도(df) 계산
     docs = []
     df = {t: 0 for t in terms}
     for md in CONTENT.rglob("*.md"):
+        if md.name in {"README.md", "STORYBOARD.md"}:
+            continue
         raw = md.read_text(encoding="utf-8", errors="ignore")
         m = FM.match(raw)
         if not m:
@@ -49,14 +63,14 @@ def scan(query_terms):
         d = {
             "path": md.relative_to(REPO_ROOT),
             "title_raw": field(fm, "title"),
-            "title": field(fm, "title").lower(),
-            "tags": field(fm, "tags").lower(),
-            "desc": field(fm, "description").lower(),
+            "title": normalize(field(fm, "title")),
+            "tags": normalize(field(fm, "tags")),
+            "desc": normalize(field(fm, "description")),
             "body": body,
         }
         docs.append(d)
         for t in terms:
-            if t in d["title"] or t in d["tags"] or t in d["desc"] or t in d["body"]:
+            if any(contains_term(d[field_name], t) for field_name in ("title", "tags", "desc", "body")):
                 df[t] += 1
 
     n = len(docs) or 1
@@ -69,13 +83,13 @@ def scan(query_terms):
         hits = []
         for t in terms:
             w = 0
-            if t in d["title"]:
+            if contains_term(d["title"], t):
                 w += 5
-            if t in d["tags"]:
+            if contains_term(d["tags"], t):
                 w += 4
-            if t in d["desc"]:
+            if contains_term(d["desc"], t):
                 w += 3
-            if t in d["body"]:
+            if contains_term(d["body"], t):
                 w += 1
             if w:
                 score += w * idf[t]
@@ -93,6 +107,7 @@ def main():
     ap.add_argument("--threshold", type=int, default=8,
                     help="이 점수 이상이면 '강한 중복 후보'로 경고 (기본 8)")
     ap.add_argument("--top", type=int, default=10)
+    ap.add_argument("--json", action="store_true", help="기계 판독용 JSON 출력")
     args = ap.parse_args()
 
     terms = list(args.terms)
@@ -104,21 +119,42 @@ def main():
     results, df, n = scan(terms)
     # 주제의 '정체성' = 가장 희귀한(=df 최소) 쿼리 단어. 그 단어를 다룬 챕터가
     # 없으면 새 주제로 본다. RISC-V 같은 흔한 단어가 겹치는 건 '관련'일 뿐.
-    lterms = [t.lower() for t in terms]
+    lterms = list(dict.fromkeys(normalize(t) for t in terms))
     min_df = min(df[t] for t in lterms)
     identity = {t for t in lterms if df[t] == min_df}  # 최소 df 단어(들)
-
-    print("=== Duplicate-Topic Check ===")
-    print(f"  쿼리: {', '.join(terms)}   매칭 챕터: {len(results)}")
-    print("  단어별 등장 챕터 수 (낮을수록 변별력↑):")
-    for t in terms:
-        mark = " ← 정체성 단어" if t.lower() in identity else ""
-        print(f"    {t}: {df[t.lower()]}{mark}")
 
     def is_strong(score, hits):
         return score >= args.threshold and any(h in identity for h in hits)
 
     strong = [r for r in results if is_strong(r[0], r[3])]
+
+    if args.json:
+        payload = {
+            "terms": lterms,
+            "documentCount": n,
+            "documentFrequency": df,
+            "identityTerms": sorted(identity),
+            "threshold": args.threshold,
+            "strongMatches": [
+                {"score": score, "path": str(rel), "title": title, "hits": hits}
+                for score, rel, title, hits in strong
+            ],
+            "matches": [
+                {"score": score, "path": str(rel), "title": title, "hits": hits}
+                for score, rel, title, hits in results[:args.top]
+            ],
+        }
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return 1 if strong else 0
+
+    print("=== Duplicate-Topic Check ===")
+    print(f"  쿼리: {', '.join(terms)}   매칭 챕터: {len(results)}")
+    print("  단어별 등장 챕터 수 (낮을수록 변별력↑):")
+    for t in terms:
+        normalized = normalize(t)
+        mark = " ← 정체성 단어" if normalized in identity else ""
+        print(f"    {t}: {df[normalized]}{mark}")
+
     if results:
         print()
         for score, rel, title, hits in results[: args.top]:

@@ -16,6 +16,8 @@ explicitly activated.
 ## Guardrails
 
 - Preserve the lossless source archive under `archives/`; it is reference data, not application code.
+- Published content is preservation-first. Do not delete, bulk-rewrite, merge, rename/move, draft, archive, or mark content superseded merely to clear an anti-pattern queue. Those actions require the user's explicit approval and per-document evidence. Default remediation improves metadata, navigation, validation, presentation, or review records while retaining the original content and URL.
+- Frontmatter changes are script-only. Do not hand-edit frontmatter across content files: use a repository script with preview-by-default, explicit `--apply`, an affected-file/diff report, idempotency, and the relevant post-change verifier. A one-document exception still requires explicit user approval.
 - Do not make broad refactors, dependency upgrades, visual redesigns, or content rewrites unless the active task requires them.
 - Keep a task `pending` when evidence is insufficient. Use `blocked` with a concrete reason rather than guessing.
 - Treat `npm run check` failures already present outside the changed files as baseline issues; record them, but do not silently fix unrelated errors.

@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..');
 const DIR = join(REPO_ROOT, 'src', 'content', 'blog', 'embedded', 'performance-engineering');
-const DRY = process.argv.includes('--dry-run');
+const DRY = !process.argv.includes('--apply');
 
 const PLAN = [
   [ 0, '00-preface.md',                         'Embedded Performance Engineering — 임베디드 성능 엔지니어링 시리즈 소개',                   '2026-04-23', 0],
@@ -98,7 +98,7 @@ function applyEdit(filePath, newTitle, newDate) {
 }
 
 let count = 0;
-for (const [order, file, title, day, minute] of PLAN) {
+for (const [, file, title, day, minute] of PLAN) {
   const path = join(DIR, file);
   const date = fmt(day, minute);
   applyEdit(path, title, date);
