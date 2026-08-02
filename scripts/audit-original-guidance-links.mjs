@@ -30,7 +30,7 @@ const rows = blocks.map((block) => {
   const ids = [...new Set(`${title}\n${source}\n${block}`.match(idPattern)?.map((id) => id.replace(/^AP-/, '')) || [])];
   const canonical = [...new Set(ids.flatMap((id) => (byOriginal.get(id) || []).map((item) => item.id)))];
   const hasAntiPatternParent = /핵심 안티패턴|anti-pattern/i.test(source);
-  const guidanceControl = /보안 기준선|보안 회귀 검사|보안 검사|Production artifact 검사|회귀 검사|품질 감사 자동화|^Sprint\b|^Task\b|^\d+\. (검사|발행 전|실행)/i.test(title)
+  const guidanceControl = /보안 기준선|보안 회귀 검사|보안 검사|Production artifact 검사|회귀 검사|품질 감사 자동화|^Sprint\b|^Task\b|^\d+\. (검사|발행 전|실행)|^F-\d+\. .*검사|^\d+\. Article 품질 검사|^\d+\. 문장 품질 자동 검사|^정기 품질 검사/i.test(title)
     || (!hasAntiPatternParent && /^(권장|추천|자동화할 것|자동화하지 않을 것|검사|실험·디버깅 글 권장|권장 계층|권장 구성|권장 표|권장 분류|권장 URL|권장 검색)/i.test(title));
   const candidate = !guidanceControl && /anti-pattern|안티패턴|검토|감사|품질|보안|검색|콘텐츠|metadata|migration|CI\/CD/i.test(`${title} ${source}`);
   const text = `${title} ${source}`;
