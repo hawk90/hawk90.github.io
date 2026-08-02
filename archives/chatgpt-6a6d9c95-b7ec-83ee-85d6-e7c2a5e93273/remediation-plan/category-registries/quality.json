@@ -195,13 +195,25 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-07. Mock Everything”?",
-      "scope": null,
+      "reviewQuestion": "Reassess if a new test suite replaces real corpus and artifact checks with mocked filesystem or parser inputs.",
+      "scope": "Repository-wide fixture and integration policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/audit-internal-links.py",
+            "scripts/audit-content-classification.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "Release verification reads the repository's real Markdown corpus, YAML frontmatter, link graph, generated dist artifact, and admin boundary; it does not rely exclusively on mocked filesystem or parser data."
+        }
+      ],
+      "residualRisk": "Small in-memory fixtures remain appropriate for focused search and negative-path cases; they must supplement, not replace, real-corpus and artifact checks."
     },
     {
       "id": "AP-T-08",
