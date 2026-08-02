@@ -91,6 +91,7 @@
     "audit:anchors": "node scripts/audit-anchor-links.mjs",
     "audit:search-page-parity": "node scripts/audit-search-page-parity.mjs",
     "audit:quality-contracts": "node scripts/audit-quality-contracts.mjs",
+    "audit:quality-overlap": "node scripts/audit-quality-overlap.mjs",
     "audit:distribution-feeds": "node scripts/audit-distribution-feeds.mjs",
     "audit:diagrams": "node scripts/audit-diagram-assets.mjs",
     "audit:diagram-accessibility": "node scripts/audit-svg-accessibility.mjs",

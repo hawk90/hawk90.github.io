@@ -2,13 +2,12 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 33
+- Unassessed items: 32
 - Maximum batch size: 15
 - Batches: 3
 
 ## quality-01 — quality-01.md
 
-- AP-T-50 (P1, M) — T-50. Desktop-Only Screenshot
 - AP-T-51 (P1, M) — T-51. Screenshot Without Interaction
 - AP-T-52 (P1, M) — T-52. Dynamic Content in Screenshot
 - AP-T-53 (P1, M) — T-53. Font Not Pinned

@@ -60,6 +60,49 @@ const report = {
   packageScripts: Object.keys(packageJson.scripts ?? {}).length,
   findings,
 };
+const normalizeCommand = (command) => command
+  .replace(/\s+--(?:apply|by-type|enforce|force|json\s+[^\s]+|prune|quiet|top\s+\d+)/g, '')
+  .replace(/\s+/g, ' ')
+  .trim();
+const commandGroups = new Map();
+for (const [name, command] of Object.entries(packageJson.scripts ?? {})) {
+  const key = normalizeCommand(command);
+  const names = commandGroups.get(key) ?? [];
+  names.push(name);
+  commandGroups.set(key, names);
+}
+const variants = [...commandGroups.entries()]
+  .filter(([, names]) => names.length > 1)
+  .map(([command, names]) => ({ command, names: names.sort() }))
+  .sort((left, right) => right.names.length - left.names.length || left.command.localeCompare(right.command));
+const isExpectedVariant = ({ names }) => {
+  const has = (...expected) => expected.every((name) => names.includes(name));
+  return has('audit:classification', 'gate:classification')
+    || has('audit:tooling', 'gate:tooling')
+    || has('audit:secrets', 'gate:secrets')
+    || has('audit:security-admin', 'gate:security-admin')
+    || has('audit:diagram-accessibility', 'fix:diagram-accessibility')
+    || has('audit:upstream', 'audit:upstream:json')
+    || has('diagrams', 'diagrams:force')
+    || has('prebuild', 'og', 'og:force', 'og:prune');
+};
+await mkdir('reports/tooling', { recursive: true });
+await writeFile('reports/tooling/overlap.md', [
+  '# Tooling command overlap',
+  '',
+  `- Package scripts: ${Object.keys(packageJson.scripts ?? {}).length}`,
+  `- Shared command profiles: ${variants.length}`,
+  `- Unclassified profiles: ${variants.filter((variant) => !isExpectedVariant(variant)).length}`,
+  '',
+  'Shared command profiles are not automatically duplicates. Audit/gate and preview/apply variants are intentional; unclassified profiles require review before adding another alias.',
+  '',
+  ...variants.flatMap((variant) => [
+    `## ${isExpectedVariant(variant) ? 'Expected variant' : 'Review required'} — ${variant.names.join(', ')}`,
+    '',
+    `- Normalized command: \`${variant.command}\``,
+    '',
+  ]),
+].join('\n'));
 const reportDir = 'reports/tooling';
 await mkdir(reportDir, { recursive: true });
 await writeFile(join(reportDir, 'latest.json'), `${JSON.stringify(report, null, 2)}\n`);

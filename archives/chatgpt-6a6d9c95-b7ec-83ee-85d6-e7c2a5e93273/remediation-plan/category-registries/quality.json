@@ -1493,13 +1493,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-50. Desktop-Only Screenshot”?",
-      "scope": null,
+      "reviewQuestion": "Reassess mobile and narrow-width representative coverage before responsive layout or navigation changes.",
+      "scope": "Repository responsive visual-test policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-product-experience.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "scripts/verify-release.mjs",
+            "src/styles"
+          ],
+          "verification": "npm run audit:product-experience && npm run audit:diagram-quality && npm run verify:release",
+          "result": "The repository does not treat a desktop screenshot as universal responsive evidence; route and asset contracts remain viewport-agnostic, with responsive review reserved for representative high-risk changes."
+        }
+      ],
+      "residualRisk": "Narrow viewport overflow, touch target, and mobile navigation regressions can escape static checks without browser viewport coverage."
     },
     {
       "id": "AP-T-51",
