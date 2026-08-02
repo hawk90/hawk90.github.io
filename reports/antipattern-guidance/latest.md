@@ -8,6 +8,7 @@
 - Candidate priority: P0 1, P1 7, P2 26
 - P0 review decision: [p0-review.md](p0-review.md)
 - P1 review decisions: [p1-review.md](p1-review.md)
+- P2 review decisions: [p2-review.md](p2-review.md)
 
 > This is a routing report, not a semantic equivalence claim. Unlinked guidance must be reviewed before assigning or merging anti-pattern IDs.
 
