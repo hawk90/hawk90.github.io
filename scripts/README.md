@@ -9,6 +9,8 @@ npm run diagrams         # incremental — only rebuild changed .tex
 npm run diagrams:force   # full rebuild
 npm run diagrams:watch   # auto-rebuild on .tex save (requires fswatch)
 npm run audit:diagrams   # verify .tex/.svg structure and report accessibility gaps
+npm run audit:diagram-accessibility # read-only title/desc metadata check
+npm run fix:diagram-accessibility   # add fallback metadata only with explicit apply
 npm run review:diagrams  # build a human review sheet for visual candidates
 npm run audit:diagram-quality # rank palette/effect candidates for visual review
 

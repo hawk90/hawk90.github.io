@@ -91,6 +91,8 @@
     "audit:quality-contracts": "node scripts/audit-quality-contracts.mjs",
     "audit:distribution-feeds": "node scripts/audit-distribution-feeds.mjs",
     "audit:diagrams": "node scripts/audit-diagram-assets.mjs",
+    "audit:diagram-accessibility": "node scripts/audit-svg-accessibility.mjs",
+    "fix:diagram-accessibility": "node scripts/audit-svg-accessibility.mjs --apply",
     "review:diagrams": "node scripts/build-diagram-review-index.mjs",
     "audit:diagram-quality": "node scripts/audit-diagram-quality.mjs",
     "audit:tooling": "node scripts/audit-tooling.mjs",
