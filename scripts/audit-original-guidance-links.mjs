@@ -29,27 +29,34 @@ const rows = blocks.map((block) => {
   // "검증") inherit their anti-pattern identity from an AP-labelled parent.
   const ids = [...new Set(`${title}\n${source}\n${block}`.match(idPattern)?.map((id) => id.replace(/^AP-/, '')) || [])];
   const canonical = [...new Set(ids.flatMap((id) => (byOriginal.get(id) || []).map((item) => item.id)))];
-  return { title, ids, canonical, source };
+  const candidate = /anti-pattern|안티패턴|검토|감사|품질|보안|검색|콘텐츠|metadata|migration|CI\/CD/i.test(`${title} ${source}`);
+  return { title, ids, canonical, source, disposition: canonical.length ? 'linked' : candidate ? 'anti-pattern-candidate' : 'guidance-only' };
 });
 const linked = rows.filter(({ canonical }) => canonical.length);
 const unlinked = rows.filter(({ canonical }) => !canonical.length);
+const candidates = unlinked.filter(({ disposition }) => disposition === 'anti-pattern-candidate');
+const guidanceOnly = unlinked.filter(({ disposition }) => disposition === 'guidance-only');
 const lines = [
   '# Original guidance traceability audit', '',
   `- Source: [${guidancePath}](${guidancePath})`,
   `- Guidance sections: ${rows.length}`,
   `- Sections with canonical AP links: ${linked.length}`,
-  `- Sections requiring manual AP mapping: ${unlinked.length}`,
+  `- Anti-pattern candidates requiring manual AP mapping: ${candidates.length}`,
+  `- Guidance-only sections (do not force an AP ID): ${guidanceOnly.length}`,
   '',
   '> This is a routing report, not a semantic equivalence claim. Unlinked guidance must be reviewed before assigning or merging anti-pattern IDs.', '',
   '## Linked guidance', '',
   '| Guidance | Original IDs | Canonical IDs | Source |',
   '| --- | --- | --- | --- |',
   ...linked.map(({ title, ids, canonical, source }) => `| ${title.replaceAll('|', '\\|')} | ${ids.join(', ') || '—'} | ${canonical.join(', ')} | ${source} |`),
-  '', '## Manual mapping queue', '',
+  '', '## Manual anti-pattern mapping queue', '',
   '| Guidance | Source |', '| --- | --- |',
-  ...unlinked.map(({ title, source }) => `| ${title.replaceAll('|', '\\|')} | ${source} |`),
+  ...candidates.map(({ title, source }) => `| ${title.replaceAll('|', '\\|')} | ${source} |`),
+  '', '## Guidance-only sections', '',
+  '| Guidance | Source |', '| --- | --- |',
+  ...guidanceOnly.map(({ title, source }) => `| ${title.replaceAll('|', '\\|')} | ${source} |`),
   '',
 ];
 await mkdir(dirname(output), { recursive: true });
 await writeFile(output, `${lines.join('\n')}\n`, 'utf8');
-console.log(`Audited ${rows.length} guidance sections: ${linked.length} linked, ${unlinked.length} manual mapping queue`);
+console.log(`Audited ${rows.length} guidance sections: ${linked.length} linked, ${candidates.length} candidates, ${guidanceOnly.length} guidance-only`);
