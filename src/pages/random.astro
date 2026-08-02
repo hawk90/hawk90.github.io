@@ -16,7 +16,7 @@ const buildPick = slugs[Math.floor(Math.random() * slugs.length)] ?? '';
     <meta name="robots" content="noindex" />
     <link rel="canonical" href={`/blog/${buildPick}`} />
     <meta http-equiv="refresh" content={`0; url=/blog/${buildPick}`} />
-    <script type="application/json" id="random-slugs" set:html={JSON.stringify(slugs)}></script>
+    <script is:inline type="application/json" id="random-slugs" set:html={JSON.stringify(slugs)}></script>
     <script is:inline>
       // Pick fresh per visit using the embedded slug list.
       (function () {

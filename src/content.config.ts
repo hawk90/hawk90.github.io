@@ -37,7 +37,7 @@ const blogCollection = defineCollection({
     rating: z.number().min(1).max(5).optional(),
 
     // Presentation specific
-    slidevUrl: z.string().url().optional(),
+    slidevUrl: z.url().optional(),
     pdfUrl: z.string().optional(),
 
     // Meta
@@ -52,7 +52,7 @@ const blogCollection = defineCollection({
       /** Override the OG image URL (defaults to the auto-generated /og/<slug>.png) */
       ogImage: z.string().optional(),
       /** Canonical URL — use if the post is also published elsewhere */
-      canonical: z.string().url().optional(),
+      canonical: z.url().optional(),
       /** Tell crawlers to skip indexing this post */
       noindex: z.boolean().optional(),
       /** Tell crawlers not to follow outbound links */

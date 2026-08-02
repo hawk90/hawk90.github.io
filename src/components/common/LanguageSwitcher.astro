@@ -26,8 +26,6 @@ const LANGS: LangOption[] = [
 ];
 
 const currentLang = SITE_CONFIG.lang;
-const currentLabel =
-  LANGS.find((l) => l.code === currentLang)?.label ?? '한국어';
 ---
 
 <div class="relative" data-lang-switcher>

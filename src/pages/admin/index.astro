@@ -143,7 +143,7 @@ import { SITE_CONFIG } from '../../consts/config';
 
 <script>
   import { onPageLoad } from '../../lib/lifecycle';
-  import { getAuthState, logout } from '../../lib/admin/auth';
+  import { logout } from '../../lib/admin/auth';
   import { fetchDrafts, parseRepo } from '../../lib/admin/github-api';
   import { ADMIN_CONFIG } from '../../consts/config';
   import type { AuthState } from '../../lib/admin/auth';
@@ -166,7 +166,6 @@ import { SITE_CONFIG } from '../../consts/config';
 
     const commentsLoading = document.getElementById('comments-loading');
     const commentsEmpty = document.getElementById('comments-empty');
-    const commentsList = document.getElementById('comments-list');
 
     function handleLogout() {
       logout();

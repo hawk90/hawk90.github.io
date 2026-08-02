@@ -43,6 +43,13 @@ export interface GitHubApiError {
   documentation_url?: string;
 }
 
+function encodeBase64Utf8(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
 // ─── API Client ─────────────────────────────────────────────
 
 const GITHUB_API = 'https://api.github.com';
@@ -143,7 +150,7 @@ export async function createFile(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       message,
-      content: btoa(unescape(encodeURIComponent(content))), // UTF-8 safe base64
+      content: encodeBase64Utf8(content),
       branch,
     }),
   });
@@ -169,7 +176,7 @@ export async function updateFile(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       message,
-      content: btoa(unescape(encodeURIComponent(content))), // UTF-8 safe base64
+      content: encodeBase64Utf8(content),
       sha,
       branch,
     }),

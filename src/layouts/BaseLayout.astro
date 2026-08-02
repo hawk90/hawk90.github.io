@@ -142,22 +142,22 @@ const jsonLd = type === 'article'
     <meta name="twitter:image" content={ogImageURL} />
 
     <!-- JSON-LD Structured Data (escape </ to prevent script breakout) -->
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
 
     <!-- Analytics -->
     {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' && ANALYTICS_CONFIG.id && (
       <>
-        <script async crossorigin="anonymous" src={`https://www.googletagmanager.com/gtag/js?id=${ANALYTICS_CONFIG.id}`}></script>
+        <script is:inline async crossorigin="anonymous" src={`https://www.googletagmanager.com/gtag/js?id=${ANALYTICS_CONFIG.id}`}></script>
         <script is:inline data-ga-id={ANALYTICS_CONFIG.id}>
           window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config",document.currentScript.getAttribute("data-ga-id"));
         </script>
       </>
     )}
     {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' && ANALYTICS_CONFIG.id && (
-      <script async defer crossorigin="anonymous" data-website-id={ANALYTICS_CONFIG.id} src={ANALYTICS_CONFIG.src || 'https://analytics.umami.is/script.js'}></script>
+      <script is:inline async defer crossorigin="anonymous" data-website-id={ANALYTICS_CONFIG.id} src={ANALYTICS_CONFIG.src || 'https://analytics.umami.is/script.js'}></script>
     )}
     {ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' && ANALYTICS_CONFIG.id && (
-      <script async defer crossorigin="anonymous" data-domain={ANALYTICS_CONFIG.id} src="https://plausible.io/js/script.js"></script>
+      <script is:inline async defer crossorigin="anonymous" data-domain={ANALYTICS_CONFIG.id} src="https://plausible.io/js/script.js"></script>
     )}
 
     {/* KaTeX CSS — only on pages with math content */}
