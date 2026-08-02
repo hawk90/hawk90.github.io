@@ -24,9 +24,11 @@ const blocks = guidance.split(/(?=^#### \d+\. )/m).filter((block) => /^#### \d+\
 const idPattern = /\b(?:AP-)?(?:A|I|P|S|U|M|SEC|O|L|T|R|D|G|K)-\d{1,3}\b/g;
 const rows = blocks.map((block) => {
   const title = block.match(/^#### \d+\. (.+)$/m)?.[1] || 'untitled';
-  const ids = [...new Set((block.match(idPattern) || []).map((id) => id.replace(/^AP-/, '')))];
-  const canonical = [...new Set(ids.flatMap((id) => (byOriginal.get(id) || []).map((item) => item.id)))];
   const source = block.match(/^<!-- source: (.+?) -->$/m)?.[1] || 'unknown';
+  // Include the source path because actionable child sections (e.g. "권장",
+  // "검증") inherit their anti-pattern identity from an AP-labelled parent.
+  const ids = [...new Set(`${title}\n${source}\n${block}`.match(idPattern)?.map((id) => id.replace(/^AP-/, '')) || [])];
+  const canonical = [...new Set(ids.flatMap((id) => (byOriginal.get(id) || []).map((item) => item.id)))];
   return { title, ids, canonical, source };
 });
 const linked = rows.filter(({ canonical }) => canonical.length);
