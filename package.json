@@ -136,7 +136,7 @@
     "rehype-slug": "^6.0.0",
     "remark-directive": "^4.0.0",
     "remark-math": "^6.0.0",
-    "satori": "^0.18.3",
+    "satori": "^0.29.0",
     "satori-html": "^0.3.2",
     "tailwindcss": "^4.1.18",
     "turndown": "^7.2.0",
