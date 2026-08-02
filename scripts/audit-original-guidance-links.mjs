@@ -30,7 +30,11 @@ const rows = blocks.map((block) => {
   const ids = [...new Set(`${title}\n${source}\n${block}`.match(idPattern)?.map((id) => id.replace(/^AP-/, '')) || [])];
   const canonical = [...new Set(ids.flatMap((id) => (byOriginal.get(id) || []).map((item) => item.id)))];
   const candidate = /anti-pattern|안티패턴|검토|감사|품질|보안|검색|콘텐츠|metadata|migration|CI\/CD/i.test(`${title} ${source}`);
-  return { title, ids, canonical, source, disposition: canonical.length ? 'linked' : candidate ? 'anti-pattern-candidate' : 'guidance-only' };
+  const text = `${title} ${source}`;
+  const priority = /보안|security|CI\/CD|secret|workflow|OAuth/i.test(text) ? 'P0'
+    : /품질|테스트|검증|build|migration|fallback|CSS/i.test(text) ? 'P1'
+      : 'P2';
+  return { title, ids, canonical, source, priority, disposition: canonical.length ? 'linked' : candidate ? 'anti-pattern-candidate' : 'guidance-only' };
 });
 const linked = rows.filter(({ canonical }) => canonical.length);
 const unlinked = rows.filter(({ canonical }) => !canonical.length);
@@ -43,6 +47,7 @@ const lines = [
   `- Sections with canonical AP links: ${linked.length}`,
   `- Anti-pattern candidates requiring manual AP mapping: ${candidates.length}`,
   `- Guidance-only sections (do not force an AP ID): ${guidanceOnly.length}`,
+  `- Candidate priority: P0 ${candidates.filter(({ priority }) => priority === 'P0').length}, P1 ${candidates.filter(({ priority }) => priority === 'P1').length}, P2 ${candidates.filter(({ priority }) => priority === 'P2').length}`,
   '',
   '> This is a routing report, not a semantic equivalence claim. Unlinked guidance must be reviewed before assigning or merging anti-pattern IDs.', '',
   '## Linked guidance', '',
@@ -50,8 +55,8 @@ const lines = [
   '| --- | --- | --- | --- |',
   ...linked.map(({ title, ids, canonical, source }) => `| ${title.replaceAll('|', '\\|')} | ${ids.join(', ') || '—'} | ${canonical.join(', ')} | ${source} |`),
   '', '## Manual anti-pattern mapping queue', '',
-  '| Guidance | Source |', '| --- | --- |',
-  ...candidates.map(({ title, source }) => `| ${title.replaceAll('|', '\\|')} | ${source} |`),
+  '| Priority | Guidance | Source |', '| --- | --- | --- |',
+  ...candidates.sort((left, right) => left.priority.localeCompare(right.priority)).map(({ title, source, priority }) => `| ${priority} | ${title.replaceAll('|', '\\|')} | ${source} |`),
   '', '## Guidance-only sections', '',
   '| Guidance | Source |', '| --- | --- |',
   ...guidanceOnly.map(({ title, source }) => `| ${title.replaceAll('|', '\\|')} | ${source} |`),
