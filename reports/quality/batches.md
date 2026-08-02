@@ -2,13 +2,12 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 41
+- Unassessed items: 40
 - Maximum batch size: 15
 - Batches: 4
 
 ## quality-01 — quality-01.md
 
-- AP-T-29 (P1, M) — T-29. Redirect Considered Healthy Forever
 - AP-T-30 (P1, M) — T-30. Anchor Links Not Checked
 - AP-T-31 (P1, M) — T-31. Generated Heading Slug Assumption
 - AP-T-35 (P1, M) — T-35. Redirect Hides Internal Link Debt
@@ -23,10 +22,10 @@
 - AP-T-54 (P1, M) — T-54. Dark Mode Untested
 - AP-T-55 (P1, M) — T-55. Generated Diagram Untested
 - AP-T-56 (P1, M) — T-56. Automated Accessibility Equals Accessible
+- AP-T-57 (P1, M) — T-57. Accessibility Test on Homepage Only
 
 ## quality-02 — quality-01.md
 
-- AP-T-57 (P1, M) — T-57. Accessibility Test on Homepage Only
 - AP-T-58 (P1, M) — T-58. No Keyboard Test
 - AP-T-59 (P1, M) — T-59. Focus Visible Test Missing
 

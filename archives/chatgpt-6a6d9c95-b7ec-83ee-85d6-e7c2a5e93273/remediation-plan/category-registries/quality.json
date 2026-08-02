@@ -877,13 +877,23 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-29. Redirect Considered Healthy Forever”?",
-      "scope": null,
+      "reviewQuestion": "Reassess redirect targets and fallback links when routes or canonical URLs change.",
+      "scope": "Repository redirect safety contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-product-experience.mjs",
+            "reports/product-experience/latest.md",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run verify:release",
+          "result": "Redirect routes are audited for noindex, canonicalization, and a manual fallback link; redirect presence alone is not treated as permanent health. Product experience audit passed 10/10."
+        }
+      ],
+      "residualRisk": "A redirect can still point to a semantically obsolete destination; periodic content-owner review remains necessary for long-lived redirects."
     },
     {
       "id": "AP-T-30",
