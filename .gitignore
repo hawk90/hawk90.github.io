@@ -59,3 +59,9 @@ scripts/__pycache__/
 
 # Spec cache — 저작권 있는 spec 텍스트 추출 (CXL/PCIe/JEDEC 등). 로컬 참조용만.
 data/*-spec-cache/
+
+# Generated review-only audit output (regenerated locally from scripts)
+node_modules/.package-lock.json
+reports/content-readiness/series.txt
+reports/content-readiness/staleness.txt
+reports/diagrams/tikz-overlap-report.txt
