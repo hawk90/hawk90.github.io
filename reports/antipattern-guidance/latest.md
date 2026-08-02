@@ -3,12 +3,13 @@
 - Source: [archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/original-guidance.md](archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/original-guidance.md)
 - Guidance sections: 437
 - Sections with canonical AP links: 167
-- Anti-pattern candidates requiring manual AP mapping: 34
+- Anti-pattern candidates pending canonical action (all reviewed): 34
 - Guidance-only sections (do not force an AP ID): 236
 - Candidate priority: P0 1, P1 7, P2 26
 - P0 review decision: [p0-review.md](p0-review.md)
 - P1 review decisions: [p1-review.md](p1-review.md)
 - P2 review decisions: [p2-review.md](p2-review.md)
+- Consolidated decisions: [decision-index.md](decision-index.md)
 
 > This is a routing report, not a semantic equivalence claim. Unlinked guidance must be reviewed before assigning or merging anti-pattern IDs.
 
