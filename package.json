@@ -122,7 +122,7 @@
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
     "@expressive-code/plugin-line-numbers": "^0.42.0",
-    "@milkdown/kit": "^7.21.0",
+    "@milkdown/kit": "^7.21.3",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^7.1.6",
