@@ -1053,13 +1053,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-35. Redirect Hides Internal Link Debt”?",
-      "scope": null,
+      "reviewQuestion": "Reassess canonical-link coverage when adding or changing redirects; redirect success must not replace target-content validation.",
+      "scope": "Repository link and redirect governance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-internal-links.py",
+            "scripts/audit-product-experience.mjs",
+            "scripts/audit-anchor-links.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:links && npm run audit:product-experience && npm run audit:anchors",
+          "result": "Internal links, anchors, and redirect safety are audited as separate contracts; a redirect's existence or HTTP success is not used as proof that the canonical target content is correct."
+        }
+      ],
+      "residualRisk": "Static checks do not judge whether a redirect target is editorially obsolete; canonical target review remains required when routes migrate."
     },
     {
       "id": "AP-T-36",

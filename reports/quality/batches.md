@@ -2,13 +2,12 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 38
+- Unassessed items: 37
 - Maximum batch size: 15
 - Batches: 3
 
 ## quality-01 — quality-01.md
 
-- AP-T-35 (P1, M) — T-35. Redirect Hides Internal Link Debt
 - AP-T-46 (P1, M) — T-46. Screenshot Every Page
 - AP-T-47 (P1, M) — T-47. No Visual Regression Test
 - AP-T-48 (P1, M) — T-48. Pixel-Perfect Failure
