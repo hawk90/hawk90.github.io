@@ -164,13 +164,25 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-06. Utility-Only Unit Tests”?",
-      "scope": null,
+      "reviewQuestion": "Reassess if future tests bypass the content-to-artifact path and cover utilities only.",
+      "scope": "Repository-wide integration quality contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/verify-release.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/verify-content-relations.mjs",
+            "scripts/audit-internal-links.py",
+            "scripts/audit-quality-contracts.mjs"
+          ],
+          "verification": "npm run verify:release && npm run audit:quality-contracts",
+          "result": "The release contract exercises content classification, relations, internal links, search, static build, admin boundaries, and generated artifacts together; quality contracts passed 20/20 and the release gate passed."
+        }
+      ],
+      "residualRisk": "The release gate is integration-oriented but does not replace targeted unit tests for every helper; new helpers still need focused regression cases when their contracts are introduced."
     },
     {
       "id": "AP-T-07",

@@ -2,13 +2,12 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 52
+- Unassessed items: 51
 - Maximum batch size: 15
 - Batches: 4
 
 ## quality-01 — quality-01.md
 
-- AP-T-06 (P1, M) — T-06. Utility-Only Unit Tests
 - AP-T-07 (P1, M) — T-07. Mock Everything
 - AP-T-10 (P1, M) — T-10. Fixture Does Not Resemble Real Content
 - AP-T-11 (P1, M) — T-11. Fixture Copy of Production Article
@@ -23,10 +22,10 @@
 - AP-T-31 (P1, M) — T-31. Generated Heading Slug Assumption
 - AP-T-35 (P1, M) — T-35. Redirect Hides Internal Link Debt
 - AP-T-46 (P1, M) — T-46. Screenshot Every Page
+- AP-T-47 (P1, M) — T-47. No Visual Regression Test
 
 ## quality-02 — quality-01.md
 
-- AP-T-47 (P1, M) — T-47. No Visual Regression Test
 - AP-T-48 (P1, M) — T-48. Pixel-Perfect Failure
 - AP-T-49 (P1, M) — T-49. Visual Test on One Browser
 - AP-T-50 (P1, M) — T-50. Desktop-Only Screenshot
