@@ -83,7 +83,6 @@ const provenance = [
   `source_markdown: ${JSON.stringify(input)}`,
   `source_html_sha256: ${hash(html)}`,
   `source_markdown_sha256: ${hash(markdown)}`,
-  `generated_at: ${new Date().toISOString()}`,
   `selected_sections: ${selected.length}`,
   'preservation: "원본 HTML과 전체 대화는 변경하지 않음"',
   '---',

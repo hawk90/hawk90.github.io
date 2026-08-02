@@ -4,7 +4,6 @@ source_html: "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/page.html"
 source_markdown: "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/conversation.full.md"
 source_html_sha256: b1fed8c81821c2b668b71d507599f60816a59f313f1589e3b070f9f6bebd123c
 source_markdown_sha256: 39ea2ac80c6f8fd01e17be5de4bacf806c83e4e71eed22e8530173d8621c5dae
-generated_at: 2026-08-02T07:30:21.983Z
 selected_sections: 437
 preservation: "원본 HTML과 전체 대화는 변경하지 않음"
 ---
