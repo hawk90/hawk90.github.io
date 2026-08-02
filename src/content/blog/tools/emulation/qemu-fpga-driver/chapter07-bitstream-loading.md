@@ -6,6 +6,7 @@ tags: [QEMU, bitstream, fpga-manager, firmware-load]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 7
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 FPGA는 *bitstream*을 받아야 user logic이 살아납니다. Linux의 **fpga_mgr** subsystem 덕분에 어느 vendor의 FPGA든 *같은 인터페이스*로 program할 수 있고, driver는 `fpga_manager_ops`만 구현하면 됩니다. 이 장에서는 fake-fpga에 bitstream load 명령을 추가하고 driver를 fpga_mgr에 등록합니다.

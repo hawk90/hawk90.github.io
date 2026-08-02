@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 1
 tags: [RISC-V, ISA, Architecture, Open-Source]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

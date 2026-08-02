@@ -6,6 +6,7 @@ tags: [Logic, Argument Structure]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 4
 draft: true
+topics: ["philosophy"]
 ---
 
 ## 작성 중

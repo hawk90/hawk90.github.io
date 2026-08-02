@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 4
 tags: [avionics, processor, rad750, leon, cortex]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

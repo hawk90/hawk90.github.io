@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 7
 tags: [amdahl, gustafson, roofline, operational-intensity]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [QEMU, ARM, virt, AArch64, GIC, PL011]
 series: "QEMU Embedded Emulation"
 seriesOrder: 2
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 ARM 임베디드 개발에서 가장 자주 쓰는 환경이 QEMU의 **virt 머신**입니다. 특정 SoC를 흉내내지 않고 *합의된 표준 peripheral 묶음*을 제공해, 학습·CI·prototype에 두루 적합합니다. 이 장은 ARM virt 머신의 구성·옵션·부팅 흐름을 한 번에 정리합니다.

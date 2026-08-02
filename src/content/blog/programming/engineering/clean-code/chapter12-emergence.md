@@ -6,6 +6,7 @@ tags: [CleanCode, Design, Simple Design, Kent Beck, Robert Martin]
 series: "Clean Code"
 seriesOrder: 12
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 50
 tags: [recipes, peripheral, motor]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

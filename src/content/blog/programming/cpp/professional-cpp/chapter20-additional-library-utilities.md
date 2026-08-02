@@ -6,6 +6,7 @@ tags: [C++, Utility, optional, variant]
 series: "전문가를 위한 C++"
 seriesOrder: 20
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

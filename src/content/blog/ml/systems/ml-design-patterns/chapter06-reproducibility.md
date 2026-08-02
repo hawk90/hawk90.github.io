@@ -6,6 +6,7 @@ series: "ML 디자인 패턴"
 seriesOrder: 6
 tags: [ml-pattern, reproducibility, splits]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Transform* — train·serving 변환 공유. *Repeatable Splitting* — hash-based stable split. *Bridged Schema* — old/new feature 호환. *Windowed Inference* — streaming context. *Workflow Pipelines* — Kubeflow·Vertex Pipelines. *Feature Store* (재방문). *Random seed*·*deterministic op*.

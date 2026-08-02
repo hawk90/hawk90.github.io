@@ -6,6 +6,7 @@ tags: [Vim, Learning]
 series: "Practical Vim"
 seriesOrder: 21
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용 (Tip 121)

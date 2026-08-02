@@ -6,6 +6,7 @@ tags: [QEMU, block-layer, bds, throttling, write-cache, write-back]
 series: "QEMU Internals"
 seriesOrder: 17
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Ch 5에서 본 block layer 위에서 *실제 I/O가 어떻게 흐르는지*를 따라갑니다. virtio-blk write 한 번이 *어떤 layer를 거쳐* host의 syscall이 되는지, 그 path의 throttle·cache·zero-copy까지.

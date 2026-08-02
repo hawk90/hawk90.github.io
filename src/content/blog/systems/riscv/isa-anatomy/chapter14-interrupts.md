@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 14
 tags: [RISC-V, Interrupt, PLIC, CLINT]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

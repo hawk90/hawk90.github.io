@@ -6,6 +6,7 @@ tags: [make, build, Makefile, pattern]
 series: "GNU Make"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 패턴 규칙이 필요한가

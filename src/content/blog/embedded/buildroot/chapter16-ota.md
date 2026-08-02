@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 16
 tags: [embedded, buildroot, ota, rauc, swupdate, mender, ab-update]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

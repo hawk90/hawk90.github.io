@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Probabilistic Machine Learning: Advanced Topics"
 bookAuthor: "Kevin P. Murphy"
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *ML1의 후속* — supervised 너머 SOTA·심화. *6개 Part* — Foundations·Inference·Prediction·Generation·Discovery·Action. *Diffusion·LLM·causal·RL까지* 망라. [무료 PDF](https://probml.github.io/pml-book/book2.html) 기준. NPU compiler·researcher 진로의 *deep dive*용.

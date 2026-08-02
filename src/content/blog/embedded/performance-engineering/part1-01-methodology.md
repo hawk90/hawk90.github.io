@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 1
 tags: [performance, methodology, use-method, red-method]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

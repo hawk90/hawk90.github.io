@@ -6,6 +6,7 @@ tags: [QEMU, QOM, DeviceModel, TypeInfo, realize]
 series: "QEMU Fake Device Driver"
 seriesOrder: 3
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 *모든 device*는 **QOM**(QEMU Object Model)의 객체입니다. C로 구현한 객체 지향 시스템으로, 상속·property·인터페이스를 갖추죠. driver를 개발하려면 그 device의 *틀*인 QOM을 먼저 이해해야 합니다.

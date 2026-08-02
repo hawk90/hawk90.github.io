@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 14
 tags: [DDR, DDR5, memory, DFE, RAS]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 DDR5는 DDR4 대비 대역폭, 전력 효율, 신뢰성에서 큰 도약을 이뤘다. 이 장에서는 DDR5의 주요 변화와 새로운 기능을 DDR4와 비교하며 살펴본다.

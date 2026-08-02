@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 7
 tags: [uart, baud, parity, framing, oversampling]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

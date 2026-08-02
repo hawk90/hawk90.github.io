@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Sort, QuickSort, MergeSort, HeapSort]
 series: "Data Structures and Algorithms"
 seriesOrder: 20
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

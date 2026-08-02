@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 30
 tags: [concurrency, parallel, race, memory-model]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

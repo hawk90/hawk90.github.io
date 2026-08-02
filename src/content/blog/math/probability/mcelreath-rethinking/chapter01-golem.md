@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Statistical Rethinking, 2nd Edition"
 bookAuthor: "Richard McElreath"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Golem 비유* — model은 instruction을 그대로 따른다. *Karl Popper와 Galileo*. *Why null hypothesis significance testing is broken*. *Bayesian data analysis의 cosmology*. *DAG·causal salad·multiverse*. *Workflow* — 본 책의 큰 그림. [공식 사이트](https://xcelab.net/rm/statistical-rethinking/) — R·brms·PyMC 코드.

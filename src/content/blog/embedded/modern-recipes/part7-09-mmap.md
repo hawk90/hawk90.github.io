@@ -5,6 +5,7 @@ description: "mmap의 네 가지 사용 모드와 madvise·MAP_HUGETLB·mlock을
 series: "Modern Embedded Recipes"
 seriesOrder: 83
 tags: [recipes, mmap, madvise, huge-page, mlock]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

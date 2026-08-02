@@ -6,6 +6,7 @@ tags: [CleanCode, Unit Test, TDD, Robert Martin]
 series: "Clean Code"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

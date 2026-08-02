@@ -5,6 +5,7 @@ description: "TF-A BL31의 EL3 runtime service 구조 — runtime_svc 등록 모
 series: "Bootloader Internals"
 seriesOrder: 31
 tags: [embedded, bootloader, tf-a, bl31, el3, psci, sdei, ras, smccc, arm]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

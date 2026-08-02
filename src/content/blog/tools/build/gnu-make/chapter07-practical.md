@@ -6,6 +6,7 @@ tags: [make, build, Makefile, practical]
 series: "GNU Make"
 seriesOrder: 7
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 이 장에서 다루는 것

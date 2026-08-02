@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 15
 tags: [mlir, debugging, trace, reproducer]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *`--debug`·`--debug-only=...`*. *Action tracing* — pass·pattern application. *Crash reproducer* — local·crash 시 자동 생성. *llvm-reduce*·*mlir-reduce*. *Verifier* 활용. *DebugLog API*. *Pretty-print*·diagnostic. *IR dump after pass* — `--mlir-print-ir-after`.

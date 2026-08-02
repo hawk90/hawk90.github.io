@@ -6,6 +6,7 @@ tags: [C++, Effective C++, Casting]
 series: "Effective C++"
 seriesOrder: 27
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

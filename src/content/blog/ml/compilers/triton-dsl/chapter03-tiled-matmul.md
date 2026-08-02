@@ -6,6 +6,7 @@ series: "Triton DSL"
 seriesOrder: 3
 tags: [triton, matmul, gemm, tile]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *BLOCK_M·BLOCK_N·BLOCK_K* tile. *K-loop accumulator*. *tl.dot* — tensor core 활용. *Pointer advance*·`group_M` swizzle for L2 reuse. *Boundary check* — `mask`. *Mixed-precision* (fp16 → fp32 acc). *Comparison vs cuBLAS GEMM*.

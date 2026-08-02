@@ -5,6 +5,7 @@ description: "Intel Quartus Prime·Platform Designer(Qsys)·Nios II soft process
 series: "Modern Embedded Recipes"
 seriesOrder: 136
 tags: [recipes, fpga, quartus, intel, altera]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

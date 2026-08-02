@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 6
 tags: [can-fd, flexible-data-rate, bosch, iso-11898-1]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

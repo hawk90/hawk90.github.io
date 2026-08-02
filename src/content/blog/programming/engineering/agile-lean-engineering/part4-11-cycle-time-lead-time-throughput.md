@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Kanban: Successful Evolutionary Change"
 bookAuthor: "David J. Anderson"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — flow metric 세 가지 — 정의·측정·해석.

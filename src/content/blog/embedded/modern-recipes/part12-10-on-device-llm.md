@@ -5,6 +5,7 @@ description: "4-bit 양자화된 LLM이 모바일·edge에서 동작하는 시�
 series: "Modern Embedded Recipes"
 seriesOrder: 146
 tags: [recipes, edge-ai, llm, llama-cpp, ggml, mlx, gguf]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

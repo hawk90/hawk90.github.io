@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 14
 tags: [predictive-model, supervised, regression, classification]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Conditional density estimation* — regression·classification 통합. *Parametric vs nonparametric*·*Bayesian vs frequentist*. *Predictive distribution* — point·variance·full distribution. *Calibration·proper scoring rule*. *Uncertainty quantification* — aleatoric·epistemic. *OOD detection*. Part III roadmap.

@@ -6,6 +6,7 @@ tags: [Git, Commit Message]
 series: "Git Conventions"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

@@ -6,6 +6,7 @@ tags: [DDD, Analysis Patterns, Fowler]
 series: "Domain-Driven Design"
 seriesOrder: 11
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## Analysis Patterns이란?

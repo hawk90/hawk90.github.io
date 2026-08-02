@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 15
 tags: [cache, line, alignment, prefetch, false-sharing]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 7
 tags: [koller-friedman, gaussian-bn, ggm, precision-matrix]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Multivariate Gaussian recap*. *Gaussian Bayesian Network* — linear Gaussian CPD·closure under marginalization. *Gaussian Markov Random Field·precision matrix* — zero pattern = conditional independence. *Hybrid network* — discrete + continuous. *Linear Gaussian SSM·Kalman recap*. *Sparse precision estimation* (graphical Lasso).

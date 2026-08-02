@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 62
 tags: [pragmatic-programmer, algorithms, performance]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

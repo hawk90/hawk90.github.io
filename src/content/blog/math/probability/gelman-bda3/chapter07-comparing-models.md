@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 7
 tags: [bda3, waic, loo, model-comparison]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Expected log predictive density (ELPD)*. *Information criteria* — AIC·DIC·WAIC. *Cross-validation* — LOO·PSIS-LOO·k-fold. *Marginal likelihood· Bayes factor* — sensitivity to prior. *Model averaging* — Bayesian Model Averaging (BMA)·stacking. *Reference predictive method*. *Model expansion>selection*.

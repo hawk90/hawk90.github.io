@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Heap, Mergeable Heap]
 series: "Data Structures and Algorithms"
 seriesOrder: 25
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

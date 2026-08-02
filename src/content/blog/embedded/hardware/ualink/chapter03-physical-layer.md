@@ -6,6 +6,7 @@ series: "UALink 심화"
 seriesOrder: 3
 tags: [ualink, phy, ethernet, pam4]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 * Outline — *IEEE 802.3* PHY 채택 — 200 Gbps PAM4 per lane. *FEC·equalization* 이미 spec에. *Retimer*·*linear pluggable*·*co-packaged optics* 옵션. *Pin·power efficiency*. UALink-specific link-layer protocol을 그 위에. *왜 이더넷 PHY인가* — 양산성·생태계.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Essential Scrum"
 bookAuthor: "Kenneth Rubin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 10% 시간 원칙 — backlog refinement의 자리와 진행법.

@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 10
 tags: [nvme, error, aer, recovery]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 스토리지 시스템에서 에러 처리는 데이터 무결성과 가용성의 핵심이다. 이 장에서는 NVMe의 에러 분류와 복구 전략, AER 메커니즘을 분석한다.

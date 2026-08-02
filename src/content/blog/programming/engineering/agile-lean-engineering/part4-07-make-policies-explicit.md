@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Kanban: Successful Evolutionary Change"
 bookAuthor: "David J. Anderson"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 카드 진입·종료 기준을 명시 — 암묵적 정책의 위험.

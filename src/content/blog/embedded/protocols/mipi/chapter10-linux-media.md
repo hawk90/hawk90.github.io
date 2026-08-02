@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 10
 tags: [linux, v4l2, drm, kms, media, libcamera]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

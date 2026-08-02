@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 5
 tags: [mipi, csi-2, raw, yuv, rgb, data-type, bit-packing, dpcm]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

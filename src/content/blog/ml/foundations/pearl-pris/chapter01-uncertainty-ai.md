@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Probabilistic Reasoning in Intelligent Systems"
 bookAuthor: "Judea Pearl"
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *1988년 AI 풍경* — rule-based expert system의 한계 (certainty factor·fuzzy logic). *Probability theory의 부활* — Pearl이 일으킨 paradigm shift. *Bayesian network의 등장 동기*. *Plausible reasoning의 systematic framework*. 시리즈 — Bayesian network 창시 책 10장 전부.

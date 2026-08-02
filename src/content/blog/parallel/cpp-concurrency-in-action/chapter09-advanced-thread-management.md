@@ -6,6 +6,7 @@ tags: [C++, C, Concurrency, Thread Pool, Work Stealing]
 series: "C++ Concurrency in Action"
 seriesOrder: 9
 draft: true
+topics: ["parallel"]
 ---
 
 스레드를 생성하고 삭제하는 것은 비용이 든다. 스레드 풀을 사용하면 이 비용을 줄일 수 있다. 이 장에서는 고급 스레드 관리 기법을 다룬다.

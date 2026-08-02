@@ -6,6 +6,7 @@ tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 104
 draft: true
+topics: ["math"]
 ---
 
 ## 지금까지의 공리들로 만들 수 있는 것

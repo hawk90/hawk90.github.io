@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 29
 tags: [cpp, embedded, intrusive, linked-list, container, no-alloc]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

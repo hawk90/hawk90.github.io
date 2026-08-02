@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 2
 tags: [recipes, clock, timing, pll]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

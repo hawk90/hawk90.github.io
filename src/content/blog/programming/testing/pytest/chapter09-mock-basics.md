@@ -6,6 +6,7 @@ series: "pytest 심화"
 seriesOrder: 9
 tags: [pytest, mock, magicmock, side-effect]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `Mock` vs `MagicMock`(magic method 자동 지원). `.return_value` / `.side_effect` (callable·iterable·exception). `assert_called_with`·`assert_called_once`·`call_args_list`. `spec=`/`autospec=`로 *실제 시그니처 따르기* — silent typo 방지.

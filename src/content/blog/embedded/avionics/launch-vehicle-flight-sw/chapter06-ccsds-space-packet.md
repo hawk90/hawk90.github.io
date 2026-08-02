@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 6
 tags: [avionics, ccsds, space-packet, telemetry, tm, tc]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

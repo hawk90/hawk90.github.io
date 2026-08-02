@@ -6,6 +6,7 @@ tags: [UML, Communication Diagram, Interaction, Message]
 series: "UML 2.5.1"
 seriesOrder: 33
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

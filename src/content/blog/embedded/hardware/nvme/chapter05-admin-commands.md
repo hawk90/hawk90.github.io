@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 5
 tags: [nvme, admin, identify, features]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 Admin Queue는 Controller 관리와 I/O Queue 생성에 사용된다. 이 장에서는 핵심 Admin Command인 Identify, Create I/O Queue, Get/Set Features를 분석한다.

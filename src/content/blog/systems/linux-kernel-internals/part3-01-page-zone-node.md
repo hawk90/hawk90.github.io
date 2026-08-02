@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Memory, NUMA, Page]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 11
 draft: true
+topics: ["systems", "systems/linux-kernel"]
 ---
 
 ## 작성 중

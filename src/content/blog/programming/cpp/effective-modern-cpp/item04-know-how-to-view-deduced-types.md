@@ -6,7 +6,7 @@ tags: [C++, Type Deduction, Debugging]
 series: "Effective Modern C++"
 seriesOrder: 4
 draft: true
-
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

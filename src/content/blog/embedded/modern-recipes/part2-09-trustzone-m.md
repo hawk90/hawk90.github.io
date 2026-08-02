@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 21
 tags: [recipes, arm, trustzone]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

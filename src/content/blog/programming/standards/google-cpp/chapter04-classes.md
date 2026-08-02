@@ -6,6 +6,7 @@ tags: [Google, C++, Style-Guide, Class, Inheritance]
 series: "Google C++ Style"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 클래스는 추상화의 기본 단위다. Google 가이드는 클래스 설계에서 *명시성*과 *단순함*을 일관되게 강조한다. 이 장은 생성자에서 선언 순서까지 클래스의 모든 면을 다룬다.

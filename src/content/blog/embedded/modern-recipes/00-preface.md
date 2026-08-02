@@ -7,6 +7,7 @@ seriesOrder: 0
 tags: [embedded, recipes, cookbook, arm, linux, rtos, fpga, edge-ai]
 type: tech
 featured: true
+topics: ["embedded"]
 ---
 
 ## 이 시리즈가 다루는 것

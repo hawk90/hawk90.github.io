@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Container, AnnexB]
 series: "AV1"
 seriesOrder: 2.08
 draft: true
+topics: ["media"]
 ---
 
 같은 *논리적 OBU* 들이 *물리적으로는 두 가지 다른 패킹* 으로 저장된다. 이 절은 그 두 포맷과 *컨테이너가 어떻게 끼는지* 를 정리한다.

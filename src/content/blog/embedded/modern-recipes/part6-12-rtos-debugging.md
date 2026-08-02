@@ -5,6 +5,7 @@ description: "Stack high-water mark, overflow hook, deadlock 탐지, heap 분석
 series: "Modern Embedded Recipes"
 seriesOrder: 74
 tags: [recipes, rtos, debugging]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

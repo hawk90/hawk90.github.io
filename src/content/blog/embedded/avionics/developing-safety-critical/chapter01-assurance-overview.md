@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 1
 tags: [avionics, do-178c, assurance, safety-critical]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

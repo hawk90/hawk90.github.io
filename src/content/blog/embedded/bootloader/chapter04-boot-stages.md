@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 4
 tags: [embedded, bootloader, u-boot, tf-a, spl]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

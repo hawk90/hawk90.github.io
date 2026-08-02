@@ -6,6 +6,7 @@ series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 4
 tags: [kruschke, beta-binomial, conjugate, coin-flip]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Coin flip example* — proportion 추정. *Beta prior + binomial likelihood = Beta posterior*. *Prior choice* — uniform·informative·Jeffreys. *Posterior summary*·*HDI*. *Predicting next data*. *Sequential update*. *Why analytic when possible*.

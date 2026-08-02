@@ -6,6 +6,7 @@ series: "Reasoning About Uncertainty"
 seriesOrder: 8
 tags: [halpern, default, conditional, counterfactual]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Default reasoning* — "birds typically fly". *Conditional logic* — `φ > ψ` (if φ, normally ψ). *KLM postulates*·*P-entailment*. *Counterfactual semantics* — Stalnaker·Lewis·Halpern-Pearl. *Halpern's actual cause* (Pearl ch10과 짝). *Modern AI explanation·causal storytelling*.

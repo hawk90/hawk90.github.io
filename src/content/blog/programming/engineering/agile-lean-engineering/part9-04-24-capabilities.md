@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Accelerate"
 bookAuthor: "Forsgren·Humble·Kim"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Accelerate appendix의 24가지 capability — 측정 가능한 driver.

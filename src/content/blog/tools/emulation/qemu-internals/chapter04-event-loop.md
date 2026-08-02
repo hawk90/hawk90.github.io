@@ -6,6 +6,7 @@ tags: [QEMU, EventLoop, Coroutine, AIO, BottomHalf]
 series: "QEMU Internals"
 seriesOrder: 4
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU 프로세스의 *심장*은 **main loop**입니다. fd I/O·timer·bottom half·coroutine — 모든 *비동기 작업*이 이 한 루프 안에서 처리됩니다. 새 device의 background work·migration·block I/O 모두 이 인프라 위에서 동작하므로 *반드시* 이해해야 합니다.

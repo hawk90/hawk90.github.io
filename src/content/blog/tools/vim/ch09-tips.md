@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 9
 tags: [vim, editor, tips, productivity, workflow]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 9: 실전 팁

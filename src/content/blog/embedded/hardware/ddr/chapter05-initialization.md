@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 5
 tags: [DDR, memory, initialization, MRS, calibration]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 DDR 메모리는 전원 투입 후 바로 사용할 수 없다. 정해진 초기화 시퀀스를 거쳐야 정상 동작한다. 이 장에서는 Power-up 시퀀스, Mode Register 설정, ZQ Calibration을 다룬다.

@@ -6,6 +6,7 @@ tags: [C++, const, Thread Safety, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 16
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

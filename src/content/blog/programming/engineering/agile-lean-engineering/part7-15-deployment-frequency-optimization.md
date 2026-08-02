@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Accelerate + DORA Report"
 bookAuthor: "Forsgren·Humble·Kim / DORA team"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — DORA elite 기준 daily 이상 — 어떻게 도달하나.

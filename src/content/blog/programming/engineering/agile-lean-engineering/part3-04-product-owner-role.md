@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Essential Scrum + Scrum Guide"
 bookAuthor: "Kenneth Rubin / Schwaber & Sutherland"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — value 책임자로서 PO — backlog 관리·stakeholder 조율.

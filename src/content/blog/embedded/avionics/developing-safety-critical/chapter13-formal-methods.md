@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 13
 tags: [avionics, do-178c, do-333, formal-methods]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 28
 tags: [pca, factor-analysis, nmf, lda]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Linear latent variable model* 통합 — PCA·PPCA·factor analysis·ICA·NMF. *Bayesian·hierarchical 확장*. *Latent Dirichlet Allocation (LDA)* — topic model. *Dynamic topic·correlated topic*. *Mixed membership model*·*tensor factorization*. *Inference 방법* — VB·collapsed Gibbs.

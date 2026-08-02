@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Software Development + Clean Agile"
 bookAuthor: "Alistair Cockburn / Robert C. Martin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — fixed-price 계약의 함정과 협력 기반 계약의 대안.

@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Container, MP4, WebM, AVIF, RTP]
 series: "AV1"
 seriesOrder: 25
 draft: true
+topics: ["media"]
 ---
 
 AV1 비트스트림은 OBU(Open Bitstream Unit)의 연속이다. 하지만 실제 파일이나 네트워크 전송에서는 **컨테이너 포맷**이 필요하다. 이 장에서는 AV1이 다양한 컨테이너와 전송 프로토콜에 어떻게 패키징되는지 살펴본다.

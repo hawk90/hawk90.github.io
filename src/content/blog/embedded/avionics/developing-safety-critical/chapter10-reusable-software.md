@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 10
 tags: [avionics, do-178c, reusable, cots, soi]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

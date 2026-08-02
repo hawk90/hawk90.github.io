@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 11
 tags: [embedded, bootloader, u-boot, tftp, pxe]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

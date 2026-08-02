@@ -6,6 +6,7 @@ series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 10
 tags: [hoff, metropolis-hastings, non-conjugate, proposal]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Why nonconjugate prior* — flexibility·robustness. *Metropolis-Hastings algorithm*. *Proposal choice* — symmetric (random walk)·independence·Langevin·HMC. *Acceptance rate tuning*. *Combining Gibbs and MH*. *Example* — non-conjugate logistic. *Convergence·mixing diagnostic*.

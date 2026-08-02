@@ -6,6 +6,7 @@ series: "ONNX 실전"
 seriesOrder: 3
 tags: [onnx-runtime, ort, inference-session]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 * Outline — *ORT* — Microsoft 공식 inference engine. *InferenceSession·run·io_binding*. *Execution Provider (EP)* — CPU·CUDA·TensorRT·CoreML·QNN·OpenVINO·DirectML. *SessionOptions* — graph_opt_level·intra/inter_op threads. *IO binding* — copy 회피. *Python·C++·C#·Java API* 비교.

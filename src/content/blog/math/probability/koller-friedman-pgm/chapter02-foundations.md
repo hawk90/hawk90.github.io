@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 2
 tags: [koller-friedman, probability-recap, graph-theory]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Probability theory recap* — joint·marginal·conditional·Bayes. *Graph theory* — directed·undirected·DAG·cycle·moralization. *Independence·conditional independence·semi-graphoid axioms*. *Algorithmic concepts* — search·dynamic programming·optimization preview.

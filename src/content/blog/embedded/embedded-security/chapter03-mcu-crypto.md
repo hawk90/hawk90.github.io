@@ -6,6 +6,7 @@ tags: [Crypto, AES, ECC, MCU]
 series: "Embedded Security"
 seriesOrder: 3
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

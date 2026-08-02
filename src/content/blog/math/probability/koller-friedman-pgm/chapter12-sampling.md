@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 12
 tags: [koller-friedman, sampling, mcmc, smc, importance]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Forward sampling·rejection·likelihood weighting*. *Gibbs sampling on PGM* — local update. *Metropolis-Hastings*. *Mixing diagnostic in PGM*. *Particle filter for DBN*. *Sequential Monte Carlo*. *Variance reduction* — Rao-Blackwellization. *Comparison with VI* — accuracy vs cost.

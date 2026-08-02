@@ -5,6 +5,7 @@ description: "Percepio Tracealyzer와 Segger SystemView, Cortex-M의 ITM/ETM 하
 series: "Practical RTOS Internals"
 seriesOrder: 21
 tags: [tracing, observability, tracealyzer, systemview, itm, etm]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

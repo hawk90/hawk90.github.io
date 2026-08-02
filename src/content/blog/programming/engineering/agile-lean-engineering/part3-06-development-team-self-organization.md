@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Scrum Guide"
 bookAuthor: "Schwaber & Sutherland"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — cross-functional·한자릿수 인원·self-organizing — Scrum 팀의 구조.

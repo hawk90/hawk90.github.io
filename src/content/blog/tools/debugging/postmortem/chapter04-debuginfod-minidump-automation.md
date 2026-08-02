@@ -6,6 +6,7 @@ tags: [debuginfod, minidump, breakpad, sentry, automation, postmortem]
 series: "Postmortem Debugging"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 대규모 운영 환경에선 core dump 분석을 *수동*으로 할 수 없습니다. 사고가 *하루에 수십*. 이 시리즈의 마지막 장은 *자동화* — build-id로 debuginfo 자동 다운로드, Breakpad/crashpad minidump 워크플로, Sentry 같은 SaaS, 그리고 CI에서 자동 사후 분석.

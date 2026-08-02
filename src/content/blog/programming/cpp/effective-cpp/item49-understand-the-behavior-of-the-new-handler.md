@@ -6,6 +6,7 @@ tags: [C++, Effective C++, new, Memory]
 series: "Effective C++"
 seriesOrder: 49
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

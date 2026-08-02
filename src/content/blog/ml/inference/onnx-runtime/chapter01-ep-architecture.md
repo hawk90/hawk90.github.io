@@ -6,6 +6,7 @@ series: "ONNX Runtime 심화"
 seriesOrder: 1
 tags: [onnxruntime, ep, execution-provider]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *Execution Provider (EP)* — backend 추상화. *Built-in EP* — CPU·CUDA·TensorRT·DirectML·CoreML·QNN·OpenVINO·SNPE·CANN·ROCm. *Capability* — supported op list. *Graph partitioning* — supported subgraph는 EP가 실행, 나머지는 CPU fallback. *Priority order*. *Plugin EP 개발* — NPU vendor 진입로.

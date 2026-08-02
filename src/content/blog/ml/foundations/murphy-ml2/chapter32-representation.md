@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 32
 tags: [representation-learning, self-supervised, contrastive, foundation]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Representation 목적* — downstream task에 유용한 inductive bias. *Pretext task* — autoencoder·denoising. *Contrastive* — SimCLR·MoCo·CLIP·SimSiam·BYOL·DINO. *Masked* — MAE·BERT·data2vec. *Multi-modal* — CLIP·LiT·BLIP·CoCa. *Foundation model embedding*·*linear probe·fine-tuning evaluation*. *Information theoretic 시각* — InfoNCE·IB.

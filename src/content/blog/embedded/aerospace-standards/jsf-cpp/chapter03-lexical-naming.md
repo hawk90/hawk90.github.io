@@ -6,6 +6,7 @@ tags: [jsf-cpp, lexical, comments, naming, hungarian, prefix, identifier]
 series: "JSF C++"
 seriesOrder: 3
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 JSF C++의 *어휘 + 명명 규칙*. *Hungarian-like prefix* (m_, s_, p_, l_)가 *legacy aerospace codebase*에서 자주 보이는 패턴. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.

@@ -6,6 +6,7 @@ series: "Mathematics and Plausible Reasoning, Vol I"
 seriesOrder: 6
 tags: [polya, plausibility, degree-of-belief]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Plausibility의 정량화 첫 시도*. *Conjecture A가 conjecture B를 함의*하면 B를 검증함으로써 A의 plausibility 증가. *Pattern of plausible inference* — 검증된 결과·예외 등이 conjecture에 미치는 영향. Vol II의 *patterns*로의 다리.

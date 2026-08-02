@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 15
 tags: [embedded, buildroot, post-build, post-image, genimage, fakeroot]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

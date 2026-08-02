@@ -6,6 +6,7 @@ tags: [C++, Scope, Code Style]
 series: "Beautiful C++"
 seriesOrder: 21
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

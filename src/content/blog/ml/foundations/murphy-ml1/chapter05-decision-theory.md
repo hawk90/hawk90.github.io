@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 5
 tags: [murphy, decision-theory, loss, erm, calibration]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Loss function·posterior expected loss·Bayes rule*. *Classification·regression·detection*에 대응. *Confusion matrix·precision/recall/F1·ROC/PRC·AUC*. *Calibration*·*proper scoring rule* (log·Brier). *Empirical Risk Minimization (ERM)*. *Generalization·bias-variance trade-off*. *Cross-validation*.

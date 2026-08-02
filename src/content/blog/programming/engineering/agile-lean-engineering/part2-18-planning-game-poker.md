@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — XP의 planning game. James Grenning의 Planning Poker(2002) 등장. Wideband Delphi와의 연결. Part 6과 cross-ref.

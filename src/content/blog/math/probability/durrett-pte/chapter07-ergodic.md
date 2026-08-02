@@ -6,6 +6,7 @@ series: "Probability: Theory and Examples"
 seriesOrder: 7
 tags: [durrett, ergodic, birkhoff, stationary-process]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Measure-preserving transformation*·*stationary process*. *Birkhoff's ergodic theorem* — time average = space average. *Ergodicity·mixing properties*. *Subadditive ergodic theorem (Kingman)*. *Recurrence (Poincaré)*. *Application* — empirical distribution·MCMC convergence theoretical foundation·percolation.

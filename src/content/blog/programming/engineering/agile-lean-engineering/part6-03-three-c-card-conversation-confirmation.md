@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Installed"
 bookAuthor: "Ron Jeffries"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Jeffries의 3C — story는 카드가 아니라 대화의 약속.

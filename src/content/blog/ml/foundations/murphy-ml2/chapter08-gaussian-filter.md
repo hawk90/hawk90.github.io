@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 8
 tags: [kalman, extended-kalman, ukf, smoothing]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Linear Gaussian SSM*. *Kalman filter (KF)* — predict·update step. *Rauch-Tung-Striebel smoother*. *Extended Kalman Filter (EKF)*·*linearization*. *Unscented Kalman Filter (UKF)*·sigma point. *Information form filter*. *Particle filter* 예고. *Application* — SLAM·tracking·sensor fusion·time series.

@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 11
 tags: [socketcan, can-utils, linux, candump, vcan, j1939]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

@@ -5,6 +5,7 @@ description: "Submission/Completion Queue 패턴을 NVMe·io_uring·Xilinx XDMA�
 series: "Modern Embedded Recipes"
 seriesOrder: 129
 tags: [recipes, cq, sq, nvme, xdma, io_uring]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

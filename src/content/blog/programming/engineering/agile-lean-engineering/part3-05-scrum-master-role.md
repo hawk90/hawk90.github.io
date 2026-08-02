@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Essential Scrum"
 bookAuthor: "Kenneth Rubin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Scrum Master는 facilitator인가 manager인가 — 역할의 모호함과 명확한 책임.

@@ -6,6 +6,7 @@ series: "Reasoning About Uncertainty"
 seriesOrder: 2
 tags: [halpern, dempster-shafer, possibility, ranking-function]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Probability* — standard Bayesian. *Sets of probability measures* — Bayesian robustness·imprecise probability. *Dempster-Shafer belief function*. *Possibility measure (Zadeh)*. *Ranking function (Spohn)* — qualitative belief. *각 framework의 axiomatic 정당화와 한계*.

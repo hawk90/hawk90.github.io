@@ -6,6 +6,7 @@ tags: [cmake, build, cpp, options, cache]
 series: "CMake"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 캐시 변수가 필요한가

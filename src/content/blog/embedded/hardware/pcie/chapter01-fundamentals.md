@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 1
 tags: [pcie, architecture, topology, root-complex, gen7]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

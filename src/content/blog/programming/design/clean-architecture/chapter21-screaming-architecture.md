@@ -6,6 +6,7 @@ tags: [Architecture, ScreamingArchitecture, DomainDriven]
 series: "Clean Architecture"
 seriesOrder: 21
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

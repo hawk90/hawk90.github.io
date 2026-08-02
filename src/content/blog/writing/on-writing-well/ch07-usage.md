@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 영어 용법은 변합니다. 100년 전 옳지 않던 것이 지금 표준이 되고, 그 반대도 일어납니다.

@@ -6,6 +6,7 @@ series: "TinyML·Edge AI"
 seriesOrder: 4
 tags: [tinyml, quantization, int8, int4]
 draft: true
+topics: ["ml", "ml/tinyml"]
 ---
 
 > Outline — *Why quantize on MCU* — int8 MAC만 효율적. *Full integer quantization* — input·output까지 int. *Symmetric vs asymmetric*·*per-channel*. *Calibration dataset* — 100-500 sample. *Accuracy 손실 budget*. *Mixed precision*. *INT4* (weight-only). *Pruning* + quantization 결합.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Continuous Delivery"
 bookAuthor: "Jez Humble & Dave Farley"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — rollback이 어려운 시대 — forward fix와 feature flag의 자리.

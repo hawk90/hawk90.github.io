@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Clean Agile: Back to Basics"
 bookAuthor: "Robert C. Martin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Uncle Bob이 Clean Agile에서 추려낸 XP 핵심 — 무엇이 빠지지 않아야 하는가.

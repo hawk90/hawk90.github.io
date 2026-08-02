@@ -6,6 +6,7 @@ tags: [UML, Interaction, Sequence, Communication]
 series: "UML 2.5.1"
 seriesOrder: 15
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [QEMU, snapshot, live-migration, vmstate, savevm]
 series: "QEMU Internals"
 seriesOrder: 22
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 시리즈 마지막 장입니다. Ch 10에서 본 *live migration*과 *snapshot*은 *비슷한 메커니즘*을 사용하지만 *용도와 흐름이 다릅니다*. 둘의 *공통점*과 *차이*를 한 자리에 정리하며 시리즈를 닫습니다.

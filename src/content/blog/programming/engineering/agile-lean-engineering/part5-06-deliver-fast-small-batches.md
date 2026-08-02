@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Lean SD + Principles of Product Development Flow"
 bookAuthor: "Poppendieck / Reinertsen"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — queueing theory와 batch size — 작게 자주 배달하는 것이 빠르다.

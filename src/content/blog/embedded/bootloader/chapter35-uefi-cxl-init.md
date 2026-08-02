@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 35
 tags: [embedded, bootloader, uefi, edk2, cxl, cedt, acpi, hdm-decoder]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

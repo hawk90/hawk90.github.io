@@ -6,6 +6,7 @@ tags: [jsf-cpp, classes, struct, encapsulation, friend, operator-overload, raii]
 series: "JSF C++"
 seriesOrder: 7
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 JSF C++의 *class 영역*. *public data는 struct만*, *friend 회피*, *operator overload 신중*. 항공 SW의 *encapsulation 강조*. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.

@@ -6,6 +6,7 @@ tags: [DDIA, Reliability, Scalability, Maintainability]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 1
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

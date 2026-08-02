@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 2
 tags: [pcie, tlp, transaction-layer, split-transaction, routing]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

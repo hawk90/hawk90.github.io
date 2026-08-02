@@ -6,6 +6,7 @@ series: "The Algebra of Probable Inference"
 seriesOrder: 3
 tags: [cox, boolean-algebra, proposition]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Proposition의 boolean algebra*. *Conjunction·disjunction·negation*. *Plausibility function의 algebra*. *Conditional plausibility*·*Bayes' theorem 유도*. *Independence·dependence 의 정량적 정의*. *Algebra가 closed under negation*하므로 0-1로 normalize 가능.

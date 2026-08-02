@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 17
 tags: [pragmatic-programmer, design, orthogonality]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

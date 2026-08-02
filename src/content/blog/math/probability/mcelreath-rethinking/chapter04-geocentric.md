@@ -6,6 +6,7 @@ series: "Statistical Rethinking"
 seriesOrder: 4
 tags: [mcelreath, linear-regression, geocentric, gaussian]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Linear regression as geocentric model*. *Why Normal distribution* — CLT·max entropy. *Language of model* — likelihood + prior. *Bayesian linear regression*. *Polynomial·spline*. *Prior predictive simulation* — model 합리성 check. *brms·rethinking package* 워크플로.

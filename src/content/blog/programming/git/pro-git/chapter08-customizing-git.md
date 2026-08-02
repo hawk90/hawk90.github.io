@@ -6,6 +6,7 @@ tags: [Git, Configuration, Hooks]
 series: "Pro Git"
 seriesOrder: 8
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

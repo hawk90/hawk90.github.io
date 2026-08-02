@@ -6,6 +6,7 @@ series: "Elements of Information Theory"
 seriesOrder: 9
 tags: [gaussian-channel, snr, water-filling, mimo]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *AWGN channel*. *Capacity formula* `½ log(1+P/N)`. *Bandwidth-limited channel*·*Shannon limit*. *Parallel Gaussian channels* — water-filling 해. *Gaussian colored noise*. *Feedback in Gaussian channel*. ML 응용 — diffusion model 잡음 channel 해석·rate-distortion.

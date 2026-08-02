@@ -5,6 +5,7 @@ description: "NEON 실전 사례를 matrix multiply, color conversion, box filte
 series: "Modern Embedded Recipes"
 seriesOrder: 96
 tags: [recipes, neon, matrix, fft, image, simd]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

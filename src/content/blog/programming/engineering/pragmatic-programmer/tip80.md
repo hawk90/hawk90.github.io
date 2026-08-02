@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 80
 tags: [pragmatic-programmer, problem-solving, creativity]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

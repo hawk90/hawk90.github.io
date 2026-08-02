@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 25
 tags: [recipes, toolchain, elf]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

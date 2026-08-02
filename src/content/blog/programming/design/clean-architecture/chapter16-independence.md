@@ -6,6 +6,7 @@ tags: [Architecture, Independence, Decoupling]
 series: "Clean Architecture"
 seriesOrder: 16
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

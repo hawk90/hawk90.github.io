@@ -6,6 +6,7 @@ tags: [gdb, lldb, Python, Scripting]
 series: "GDB and LLDB"
 seriesOrder: 9
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 :::tip[Deep dive]

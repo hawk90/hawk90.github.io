@@ -6,6 +6,7 @@ tags: [Git, Tools, Bisect, Stash]
 series: "Pro Git"
 seriesOrder: 7
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

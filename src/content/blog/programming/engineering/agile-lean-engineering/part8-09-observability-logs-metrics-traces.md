@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Observability Engineering"
 bookAuthor: "Charity Majors et al."
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 3 pillars of observability — Charity Majors의 정의.

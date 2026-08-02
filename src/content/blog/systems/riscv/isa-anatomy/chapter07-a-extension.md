@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 7
 tags: [RISC-V, A-Extension, Atomic, LR-SC, AMO]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ tags: [QEMU, Network, NIC, virtio-net, tap, vhost]
 series: "QEMU Internals"
 seriesOrder: 6
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU network layer는 *NIC frontend*와 *backend*가 *분리된* 구조입니다. guest가 보는 NIC(`virtio-net`·`e1000`·`rtl8139`)와 host의 backend(`tap`·`user`·`socket`·`vhost`)가 *자유롭게 조합*되어, *서로 다른 시나리오*를 같은 코드에서 처리합니다.

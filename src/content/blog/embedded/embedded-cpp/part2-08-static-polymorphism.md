@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 16
 tags: [cpp, embedded, crtp, polymorphism, virtual, zero-cost]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

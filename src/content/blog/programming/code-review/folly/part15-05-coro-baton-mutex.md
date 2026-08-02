@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: `std::mutex`는 thread를 block한다. 코루틴 안에서 그러면 executor의 thread 한 칸을 통째로 잠근다. `folly::coro::Mutex`/`Baton`은 *코루틴만* suspend해 같은 thread가 다른 일을 한다.

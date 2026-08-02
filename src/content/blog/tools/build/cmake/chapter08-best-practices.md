@@ -6,6 +6,7 @@ tags: [cmake, build, cpp, best-practices]
 series: "CMake"
 seriesOrder: 8
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 베스트 프랙티스가 필요한가

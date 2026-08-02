@@ -5,6 +5,7 @@ description: "Apple·Google·Amazon·Samsung이 공동으로 만든 Matter 1.3/1
 series: "Modern Embedded Recipes"
 seriesOrder: 148
 tags: [recipes, iot, matter, thread, openthread, csa]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

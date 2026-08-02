@@ -6,6 +6,7 @@ tags: [cmake, build, cpp, install, cpack]
 series: "CMake"
 seriesOrder: 7
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 설치 규칙이 필요한가

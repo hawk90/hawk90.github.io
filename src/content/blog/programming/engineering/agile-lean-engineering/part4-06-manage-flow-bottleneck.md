@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Kanban + The Goal"
 bookAuthor: "David J. Anderson / Eliyahu Goldratt"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Theory of Constraints와 Kanban — bottleneck 식별과 해소.

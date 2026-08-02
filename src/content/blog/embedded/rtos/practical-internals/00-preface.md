@@ -7,6 +7,7 @@ seriesOrder: 0
 tags: [rtos, freertos, zephyr, scheduler, context-switch, embedded, arm, risc-v]
 type: tech
 featured: true
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 이 시리즈를 쓰는 이유

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 1999년 "한 달 이내"가 급진적이었던 시절. 2004년 2판에서 "매주·매일"로 단축. Continuous Deployment(Part 7)와의 연결.

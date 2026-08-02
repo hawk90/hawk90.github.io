@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 5
 tags: [linux, driver, concurrency, mutex, spinlock, rcu]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — kernel semaphore (down/up) → mutex (모던 표준). spinlock — `spin_lock`·`spin_lock_irqsave`. completion. atomic — `atomic_t`·`atomic_long_t`. seqlock·RCU 개요. 6.x에서의 *preemption RT*와의 영향.

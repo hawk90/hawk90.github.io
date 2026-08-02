@@ -5,6 +5,7 @@ description: "Vitis HLS로 C++ 코드를 RTL로 합성할 때 II=1을 끌어내�
 series: "Modern Embedded Recipes"
 seriesOrder: 132
 tags: [recipes, hls, vitis, fpga, pipeline, dataflow]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

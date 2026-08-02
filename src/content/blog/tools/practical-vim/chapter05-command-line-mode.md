@@ -6,6 +6,7 @@ tags: [Vim, Ex Command]
 series: "Practical Vim"
 seriesOrder: 5
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

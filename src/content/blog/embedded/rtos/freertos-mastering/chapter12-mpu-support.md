@@ -6,6 +6,7 @@ series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 12
 tags: [freertos, mpu, security, isolation]
 draft: true
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

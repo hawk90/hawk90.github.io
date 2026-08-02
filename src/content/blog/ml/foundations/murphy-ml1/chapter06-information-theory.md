@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 6
 tags: [murphy, entropy, kl, cross-entropy, mutual-information]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Entropy·cross-entropy·KL divergence·MI*. *Why log-loss is principled* — code length·MLE·KL minimization. *Conditional entropy·data processing inequality·Fano*. *Continuous version* — differential entropy. *Practical ML* — softmax cross-entropy·label smoothing·distillation. *Information bottleneck* 시각.

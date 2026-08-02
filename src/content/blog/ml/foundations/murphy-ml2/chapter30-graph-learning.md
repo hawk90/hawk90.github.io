@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 30
 tags: [graph-learning, gnn, structure-learning]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Graph structure learning* — score-based·constraint-based·PC·GES. *GNN* — GCN·GAT·GraphSAGE·MPNN·Transformer GNN. *Heterogeneous graph·knowledge graph*. *Edge prediction·node classification·graph classification*. *Scalability* — sampling·partitioning. *Application* — molecule·social·recommendation·LLM agent.

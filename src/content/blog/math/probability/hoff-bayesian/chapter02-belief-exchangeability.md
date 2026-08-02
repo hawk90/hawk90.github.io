@@ -6,6 +6,7 @@ series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 2
 tags: [hoff, exchangeability, de-finetti, foundations]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Belief function·subjective probability·Cox 후속*. *Exchangeable sequence* — order-independence. *De Finetti's representation theorem* — exchangeable = i.i.d. given parameter. *왜 Bayesian framework이 logical*. *Conditional independence*·*Bayes' rule formal*.

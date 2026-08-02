@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "The Art of Concurrency"
 bookAuthor: "Clay Breshears"
+topics: ["parallel"]
 ---
 
 ## 동시성 디버깅의 어려움

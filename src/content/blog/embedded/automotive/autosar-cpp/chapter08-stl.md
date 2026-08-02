@@ -6,6 +6,7 @@ tags: [autosar, cpp, stl, smart-pointer, container, algorithm]
 series: "AUTOSAR C++14"
 seriesOrder: 8
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 C++ 표준 라이브러리는 *수많은 유용한 도구*를 주지만, *동적 메모리·예외·복잡한 알고리즘*이 얽혀 있다. AUTOSAR는 *허용·금지 영역*을 명확히 한다.

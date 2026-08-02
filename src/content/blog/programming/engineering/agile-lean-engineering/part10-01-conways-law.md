@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Conway 1968 + Team Topologies"
 bookAuthor: "Melvin Conway / Skelton & Pais"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 1968 Conway 논문 — "조직 구조가 곧 시스템 구조".

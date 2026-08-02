@@ -6,6 +6,7 @@ tags: [DDD, Design Patterns, GoF]
 series: "Domain-Driven Design"
 seriesOrder: 12
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 디자인 패턴과 도메인 모델

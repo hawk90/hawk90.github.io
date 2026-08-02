@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 8
 tags: [hbm, npu, gpu, llm-serving]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

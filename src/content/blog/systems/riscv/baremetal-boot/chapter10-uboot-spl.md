@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 10
 tags: [RISC-V, U-Boot, SPL, DRAM]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

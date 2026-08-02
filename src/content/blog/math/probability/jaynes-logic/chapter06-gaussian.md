@@ -6,6 +6,7 @@ series: "Probability Theory: The Logic of Science"
 seriesOrder: 6
 tags: [gaussian, normal, clt, herschel]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Gaussian의 도출* — Herschel-Maxwell·max-entropy·CLT 세 길. *Why Gaussian dominates* — 정보 부족 = Gaussian. *Properties* — closure under linear combination·marginal·conditional. *Multivariate Gaussian* — Σ·precision matrix. *Reproducing property*. *Central limit theorem*의 다양한 형태.

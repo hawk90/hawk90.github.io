@@ -6,6 +6,7 @@ series: "Convex Optimization (Boyd)"
 seriesOrder: 5
 tags: [duality, lagrangian, kkt, strong-duality]
 draft: true
+topics: ["math", "math/optimization"]
 ---
 
 > Outline — *Lagrangian* L(x,λ,ν). *Dual function*·*dual problem*. *Weak·strong duality*. *Slater's condition* — strong duality 충분조건. *KKT conditions* — primal·dual feasibility·complementary slackness·stationarity. *Sensitivity analysis* — λ·ν의 의미. *Saddle-point*·*minimax* 해석. ML에서 SVM·regularization의 출현.

@@ -5,6 +5,7 @@ description: "FreeRTOS 11 SMP와 Zephyr SMP를 단일 ready list와 per-CPU read
 series: "Practical RTOS Internals"
 seriesOrder: 39
 tags: [smp, multicore, affinity, ipi, load-balancing]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

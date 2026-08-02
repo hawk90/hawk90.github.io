@@ -6,6 +6,7 @@ tags: [C++, Software Design, Observer, Pub-Sub]
 series: "C++ Software Design"
 seriesOrder: 25
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 가이드라인이 중요한가?

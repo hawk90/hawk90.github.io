@@ -6,6 +6,7 @@ series: "ESP32-C3 Mastering"
 seriesOrder: 8
 tags: [ble, bluetooth, gap, gatt, esp32-c3]
 draft: false
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 한 줄 요약

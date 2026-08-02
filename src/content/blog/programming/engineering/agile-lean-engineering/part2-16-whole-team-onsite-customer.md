@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — XP의 on-site customer가 Scrum Product Owner로 진화한 경로. 현장 적용 한계. proxy customer 패턴.

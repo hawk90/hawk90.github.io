@@ -6,6 +6,7 @@ tags: [misra, c, essential-type, conversion, promotion, assembly, rank]
 series: "MISRA C"
 seriesOrder: 12
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 5장에서 Essential Type Model의 *개념*을 봤다. 이 장은 *모든 변환 조합의 실제 동작*을 본다. C 표준의 *integer promotion*과 *usual arithmetic conversion* 규칙이 어떻게 *컴파일러의 assembly 출력*을 결정하는지, MISRA가 왜 *명시적 캐스트*를 요구하는지 *증거와 함께* 본다.

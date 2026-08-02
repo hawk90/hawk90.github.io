@@ -5,6 +5,7 @@ description: "eBPF VM과 verifier, bpftrace one-liner, BCC tools, kprobe·uprobe
 series: "Embedded Performance Engineering"
 seriesOrder: 43
 tags: [ebpf, bpftrace, bcc, dynamic-tracing]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

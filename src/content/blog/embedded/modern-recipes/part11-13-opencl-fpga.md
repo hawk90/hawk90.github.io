@@ -5,6 +5,7 @@ description: "Intel/AMD FPGA에서 OpenCL kernel·channel·burst memory를 활�
 series: "Modern Embedded Recipes"
 seriesOrder: 135
 tags: [recipes, fpga, opencl, sycl]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

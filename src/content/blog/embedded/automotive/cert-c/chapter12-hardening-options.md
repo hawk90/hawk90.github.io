@@ -6,6 +6,7 @@ tags: [cert-c, hardening, security, canary, aslr, pie, relro, cfi, scs]
 series: "CERT C"
 seriesOrder: 12
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 CERT 규칙 *준수*가 *첫 단계*라면, 컴파일러 *hardening 옵션*은 *두 번째 방어선*이다. 코드 자체에 버그가 있어도 *exploit를 차단하는 런타임 보호*를 컴파일러가 자동 삽입한다. 이 장은 *현대 보안 빌드의 모든 옵션*을 종합한다.

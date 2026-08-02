@@ -6,6 +6,7 @@ tags: [Git, CI/CD, GitHub Actions]
 series: "Git Flow"
 seriesOrder: 8
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

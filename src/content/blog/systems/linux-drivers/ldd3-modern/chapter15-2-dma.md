@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 16
 tags: [linux, driver, dma, iommu, scatter-gather]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — *DMA 매핑* 두 종류 — *coherent* (`dma_alloc_coherent`) vs *streaming* (`dma_map_single`). *DMA mask* — addressable 범위. *scatter-gather* — `sg_table`·`dma_map_sg`. *IOMMU* — 가상 주소 매핑. 6.x의 `dma-buf` — cross-driver buffer sharing. *cache coherency*와 barrier.

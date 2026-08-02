@@ -6,6 +6,7 @@ tags: [DDD, Layered Architecture, Domain Layer]
 series: "Domain-Driven Design"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 왜 도메인을 격리하는가?

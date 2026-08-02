@@ -5,6 +5,7 @@ description: "Vitis/Vivado HLS의 pragma로 II=1 pipeline·array partition·data
 series: "Modern Embedded Recipes"
 seriesOrder: 133
 tags: [recipes, fpga, hls, vitis]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

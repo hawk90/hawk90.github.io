@@ -5,6 +5,7 @@ description: "AMBA AXI4·AXI4-Lite·AXI-Stream을 역할별로 구분해 사용�
 series: "Modern Embedded Recipes"
 seriesOrder: 126
 tags: [recipes, axi, axi-stream, amba, fpga]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

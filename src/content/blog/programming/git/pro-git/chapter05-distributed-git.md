@@ -6,6 +6,7 @@ tags: [Git, Distributed, Workflow]
 series: "Pro Git"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

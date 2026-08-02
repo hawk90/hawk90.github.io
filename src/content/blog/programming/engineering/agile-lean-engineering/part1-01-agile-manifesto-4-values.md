@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Manifesto + Clean Agile"
 bookAuthor: "Beck et al. / Robert C. Martin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Individuals/Working software/Collaboration/Responding — 2001 Snowbird 회동과 4 가치 뒤의 맥락.

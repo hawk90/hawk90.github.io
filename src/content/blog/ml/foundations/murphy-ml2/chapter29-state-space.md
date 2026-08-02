@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 29
 tags: [ssm, hmm, lds, mamba, s4]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Linear Dynamical System (LDS)* — Kalman과 짝. *Hidden Markov Model (HMM)* — Viterbi·forward-backward·Baum-Welch. *Switching state-space*·*nonlinear (particle filter)*. *Deep state-space* — S4·Mamba·Linear RNN·H3. *Modern SSM이 Transformer 대안으로 부상*. *Application* — speech·biology·time series.

@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 17
 tags: [bnn, mc-dropout, swag, deep-ensemble]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Why BNN* — uncertainty·OOD detection·safety. *Method* — Laplace·VI (Bayes by Backprop)·MC dropout·SWAG·ensembles·HMC for NN. *Last-layer Bayesian*. *Subnetwork inference*. *Posterior approximation의 trade-off*. *Calibration*·*expected calibration error*. *Deep ensembles* — 가성비 최고. *Functional priors·neural tangent prior*.

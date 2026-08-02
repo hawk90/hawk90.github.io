@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 18
 tags: [bda3, missing-data, imputation, mar]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Missing mechanism* — MCAR·MAR·MNAR. *Full Bayesian model with missing*. *Multiple imputation by chained equations (MICE)*. *Joint model imputation*. *Bayesian의 자연스러운 missing 처리* — latent variable. *Pattern-mixture·selection model* for MNAR. *Survey nonresponse application*.

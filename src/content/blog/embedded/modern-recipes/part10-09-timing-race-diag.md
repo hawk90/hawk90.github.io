@@ -5,6 +5,7 @@ description: "printf로 race가 사라지는 이유와 SWO/RTT·DWT 사이클 �
 series: "Modern Embedded Recipes"
 seriesOrder: 119
 tags: [recipes, debugging, race, timing]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

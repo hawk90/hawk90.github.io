@@ -6,6 +6,7 @@ tags: [C++, Effective C++, new, delete, Placement]
 series: "Effective C++"
 seriesOrder: 52
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

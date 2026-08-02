@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Continuous Delivery + Modern Software Engineering"
 bookAuthor: "Jez Humble & Dave Farley / Dave Farley"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 세 용어를 정확히 — 흔히 혼동되는 차이.

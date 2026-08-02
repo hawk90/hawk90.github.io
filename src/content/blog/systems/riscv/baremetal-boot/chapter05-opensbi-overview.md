@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 5
 tags: [RISC-V, OpenSBI, SBI, Firmware]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 23
 tags: [normalizing-flow, real-nvp, glow, neural-ode]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Change of variable* — det Jacobian. *Coupling layer* — RealNVP·Glow. *Autoregressive flow* — MAF·IAF. *Continuous flow* — Neural ODE·FFJORD. *Discrete flow*. *Application* — density estimation·VI variational family·anomaly detection. *Limitation* — invertibility 제약과 expressiveness trade-off.

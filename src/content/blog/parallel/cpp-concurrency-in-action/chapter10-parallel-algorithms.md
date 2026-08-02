@@ -6,6 +6,7 @@ tags: [C++, C, Concurrency, Parallel Algorithms, Execution Policy]
 series: "C++ Concurrency in Action"
 seriesOrder: 10
 draft: true
+topics: ["parallel"]
 ---
 
 C++17은 표준 알고리즘에 병렬 실행을 추가했다. 실행 정책 하나로 순차/병렬/벡터화를 선택할 수 있다.

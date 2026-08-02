@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 17
 tags: [embedded, bootloader, u-boot, ab-update, fallback]
 draft: false
+topics: ["embedded"]
 ---
 
 OTA 업데이트는 *전원 끊김*과 *잘못 빌드된 펌웨어* 둘 다에서 살아남아야 합니다. 전원 끊김은 쓰기 중인 슬롯을 망가뜨리고, 잘못된 펌웨어는 일단 다 쓰였더라도 부팅을 못 합니다. A/B 슬롯은 *부팅 가능한 사본 한 벌*을 항상 남겨 두는 방식으로 두 문제를 동시에 해결합니다.

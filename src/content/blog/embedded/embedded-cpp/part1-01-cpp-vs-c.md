@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 1
 tags: [cpp, c, embedded, overhead, zero-cost, comparison]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 37
 tags: [embedded, bootloader, secure-boot, uefi, post-quantum]
 draft: false
+topics: ["embedded"]
 ---
 
 [Ch 16](/blog/embedded/bootloader/chapter16-verified-boot)에서 U-Boot가 FIT 이미지를 자기 키로 검증하는 흐름을, [Ch 27](/blog/embedded/bootloader/chapter27-chain-of-trust)에서 eFuse PK hash부터 커널 모듈까지 이어지는 전체 chain of trust를 봤습니다. 그 체인은 *키를 신뢰*한다는 전제 위에 서 있습니다. 그런데 키는 영원하지 않습니다. 인증서에는 만료일이 있고, 2026년은 UEFI Secure Boot 생태계가 처음으로 그 만료를 정면으로 마주하는 해입니다.

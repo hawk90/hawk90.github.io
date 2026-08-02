@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 17
 tags: [murphy, kernel, svm, rkhs, gp]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Kernel function·Mercer's theorem·RKHS*. *Representer theorem*. *Kernel ridge regression*. *Support Vector Machine* — hinge loss·dual·KKT. *Gaussian process classification·regression*. *Kernel choice* — RBF·Matérn·polynomial. *Random features* (Rahimi-Recht) — kernel approximation. *Connection to deep learning* — NTK.

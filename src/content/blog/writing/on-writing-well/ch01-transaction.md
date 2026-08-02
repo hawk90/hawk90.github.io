@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 William Zinsser의 *On Writing Well*은 1976년 초판 이후 30년 넘게 *nonfiction 글쓰기*의 정전으로 자리 잡았습니다. 첫 챕터의 한 줄 요약은 이렇습니다.

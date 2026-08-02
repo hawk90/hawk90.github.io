@@ -5,6 +5,7 @@ description: "IRQ를 코어에 고정하는 방법과 isolcpus·irqbalance·thre
 series: "Modern Embedded Recipes"
 seriesOrder: 87
 tags: [recipes, irq-affinity, isolcpus, irqbalance, preempt-rt]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

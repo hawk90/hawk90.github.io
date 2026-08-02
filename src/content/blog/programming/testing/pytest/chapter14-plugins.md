@@ -6,6 +6,7 @@ series: "pytest 심화"
 seriesOrder: 14
 tags: [pytest, plugin, xdist, rerunfailures, timeout]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `pytest-xdist`(병렬 — `-n auto`), `pytest-rerunfailures`(flaky 자동 재시도), `pytest-timeout`(hang 방지), `pytest-randomly`(셔플), `pytest-django`/`pytest-flask`/`pytest-asyncio`/`pytest-benchmark`. *plugin discovery* — `entry_points`. *나만의 plugin 작성*의 hook 패턴.

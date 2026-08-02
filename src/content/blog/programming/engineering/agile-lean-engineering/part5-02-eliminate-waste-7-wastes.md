@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Lean Software Development"
 bookAuthor: "Mary & Tom Poppendieck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Partially done work·Extra features·Relearning·Handoffs·Task switching·Delays·Defects.

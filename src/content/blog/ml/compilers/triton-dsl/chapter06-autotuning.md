@@ -6,6 +6,7 @@ series: "Triton DSL"
 seriesOrder: 6
 tags: [triton, autotune, configs]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *@triton.autotune* decorator. *Config* — BLOCK·warp·num_stages 조합. *Key* — autotune signature (shape·dtype). *Pruning* — bad config 제거. *Heuristics* fallback. *Cache 영속화*. *Compilation overhead* trade-off. *Best practice* — config space 설계.

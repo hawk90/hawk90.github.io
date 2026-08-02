@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Overview]
 series: "Data Structures and Algorithms"
 seriesOrder: 40
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 시리즈 구성

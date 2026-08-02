@@ -5,6 +5,7 @@ description: "perf의 raw event, tracepoint, perf script Python을 사용한 커
 series: "Embedded Performance Engineering"
 seriesOrder: 41
 tags: [perf, raw-event, scripting, tracepoint]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

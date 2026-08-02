@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 21
 tags: [dma, burst, scatter-gather, cache, double-buffer]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

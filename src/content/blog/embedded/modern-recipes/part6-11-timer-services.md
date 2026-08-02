@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 73
 tags: [recipes, timer-wheel, hashed-wheel, hierarchical, scheduler]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

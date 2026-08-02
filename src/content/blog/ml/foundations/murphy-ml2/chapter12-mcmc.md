@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 12
 tags: [mcmc, metropolis, gibbs, hmc, nuts]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Detailed balance·ergodicity·stationary distribution*. *Metropolis-Hastings·proposal choice·acceptance*. *Gibbs sampling*·*collapsed Gibbs*. *Hamiltonian Monte Carlo (HMC)*·*NUTS*. *Stochastic Gradient MCMC* — SGLD·SGHMC. *Convergence diagnostic* — R̂·ESS·trace plot. *Modern tool* — Stan·NumPyro·PyMC.

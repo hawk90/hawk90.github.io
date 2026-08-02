@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Refactoring: Improving the Design of Existing Code, 2nd Edition"
 bookAuthor: "Martin Fowler"
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 4
 tags: [mlir, pass, rewriter, pipeline]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Pass* — `OperationPass<T>`. *PassManager*·pipeline 구성. *PatternRewriter* — local rewrite. *applyPatternsAndFoldGreedily*. *Cost model*과 benefit. *Pass dependency* 표시. *Statistics*·`-pass-statistics`. *pass instrumentation*.

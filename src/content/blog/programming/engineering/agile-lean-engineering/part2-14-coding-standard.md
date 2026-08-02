@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — collective ownership·pair programming의 전제 조건. 자동 포매터(prettier·gofmt) 시대의 의미. lint rule과 styleguide.

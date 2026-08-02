@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 5
 tags: [vim, editor, registers, macros, automation]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 5: 레지스터와 매크로

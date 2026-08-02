@@ -5,6 +5,7 @@ description: "eBPF 기반 continuous profiling. Parca, Pixie, Pyroscope, Cilium 
 series: "Embedded Performance Engineering"
 seriesOrder: 49
 tags: [profiling, ebpf, parca, pixie, pyroscope, tetragon, continuous-profiling]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

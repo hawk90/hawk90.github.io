@@ -6,6 +6,7 @@ tags: [dwarf, debug-info, elf]
 series: "DWARF and ELF Internals"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 GDB가 `print x`라고 했을 때 `x`의 *타입*, *위치*, *어떤 소스 파일에 정의됐는지*를 어떻게 알까요. 답은 ELF 파일 안에 박힌 **DWARF**라는 디버그 정보 형식입니다. 이 정보 없이는 GDB가 그저 어셈블리 디스어셈블러에 불과합니다.

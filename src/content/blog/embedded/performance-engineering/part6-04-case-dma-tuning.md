@@ -5,6 +5,7 @@ description: "Cortex-A 보드의 카메라 캡처가 frame drop. CPU는 한가�
 series: "Embedded Performance Engineering"
 seriesOrder: 53
 tags: [case-study, dma, burst, axi, throughput]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

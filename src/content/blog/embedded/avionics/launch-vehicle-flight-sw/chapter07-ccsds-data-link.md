@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 7
 tags: [avionics, ccsds, tm, tc, virtual-channel, cop-1]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

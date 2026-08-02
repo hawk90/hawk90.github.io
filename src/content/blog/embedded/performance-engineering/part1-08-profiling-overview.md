@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 8
 tags: [profiling, sampling, instrumentation, gprof, perf, pgo, lto]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

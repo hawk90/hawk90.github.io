@@ -6,6 +6,7 @@ series: "The Bayesian Choice"
 seriesOrder: 2
 tags: [robert, loss, risk, minimax, admissibility]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Axioms of rational behavior* (von Neumann-Morgenstern). *Loss function·risk function*. *Frequentist criteria* — minimax·admissibility·unbiasedness. *Bayes risk*·*Bayes estimator의 optimality*. *Equivalence of Bayes and admissibility*. *Robert의 결론* — *rational decision is Bayesian*.

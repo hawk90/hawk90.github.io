@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 40
 tags: [recipes, bare-metal, systick]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

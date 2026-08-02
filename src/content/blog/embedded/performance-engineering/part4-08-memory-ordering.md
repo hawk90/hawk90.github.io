@@ -5,6 +5,7 @@ description: "C11/C++11 memory_order와 acquire-release pair, seq-cst 비용, AR
 series: "Embedded Performance Engineering"
 seriesOrder: 37
 tags: [memory-ordering, acquire, release, seq-cst, ldar]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

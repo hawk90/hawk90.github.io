@@ -5,6 +5,7 @@ description: "platform_driver_register, of_match_table, probe/remove, devm_* 자
 series: "Modern Embedded Recipes"
 seriesOrder: 82
 tags: [recipes, linux, platform-driver]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

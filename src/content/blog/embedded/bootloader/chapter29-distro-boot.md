@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 29
 tags: [embedded, bootloader, u-boot, distro-boot, extlinux]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Designing Machine Learning Systems"
 seriesOrder: 5
 tags: [dmls, feature-engineering, scaling, encoding]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 * Outline — *Missing value handling* — drop·impute·indicator. *Scaling* — standard·min-max·robust·log. *Discretization·binning*. *Categorical encoding* — one-hot·ordinal·target·hash. *Feature crossing*·*positional encoding*. *Data leakage* 주요 원인. *Engineering checklist*.

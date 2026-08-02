@@ -6,6 +6,7 @@ tags: [C, Memory, Stack, Heap, malloc]
 series: "전문가를 위한 C"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

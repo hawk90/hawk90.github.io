@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 14
 tags: [linux, device-model, kobject, sysfs, udev]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — *kobject* — refcount + sysfs entry. *sysfs* — `/sys/...` 노출. *bus_type*·`device_driver`·`device` 3-tuple — driver model. *class* — userspace 뷰. *device tree* — `of_*` 함수로 DT 노드 매칭. *udev* — netlink uevent. 6.x의 `auxiliary_bus` — peripheral subdevice 모델.

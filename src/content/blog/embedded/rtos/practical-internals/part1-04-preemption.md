@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 4
 tags: [rtos, preemption, cooperative, yield, tick]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

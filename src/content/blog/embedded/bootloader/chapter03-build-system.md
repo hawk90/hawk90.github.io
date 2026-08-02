@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 3
 tags: [embedded, bootloader, u-boot, kconfig, build]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

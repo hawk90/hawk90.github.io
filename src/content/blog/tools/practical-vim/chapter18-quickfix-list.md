@@ -6,6 +6,7 @@ tags: [Vim, Quickfix, Build]
 series: "Practical Vim"
 seriesOrder: 17
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용 (Tips 104-108)

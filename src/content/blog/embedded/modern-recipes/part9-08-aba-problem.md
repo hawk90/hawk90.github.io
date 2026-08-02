@@ -5,6 +5,7 @@ description: "ABA 시나리오, tagged pointer (64-bit + tag), version counter, 
 series: "Modern Embedded Recipes"
 seriesOrder: 108
 tags: [recipes, concurrency, aba]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

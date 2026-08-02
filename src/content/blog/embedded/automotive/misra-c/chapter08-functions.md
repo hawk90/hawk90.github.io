@@ -6,6 +6,7 @@ tags: [misra, c, function, recursion, varargs, return-value]
 series: "MISRA C"
 seriesOrder: 8
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 함수는 안전 펌웨어의 *최소 검증 단위*다. 각 함수가 *예측 가능한 호출 계약*을 따라야 단위 테스트와 정적 분석이 의미를 가진다.

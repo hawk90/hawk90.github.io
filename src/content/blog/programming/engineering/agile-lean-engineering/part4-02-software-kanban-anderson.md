@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Kanban: Successful Evolutionary Change"
 bookAuthor: "David J. Anderson"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — David Anderson이 Microsoft XIT에서 적용한 소프트웨어 Kanban 사례.

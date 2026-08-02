@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: continuation은 *값을 다룰지*, *예외를 다룰지*, *둘 다 다룰지* 의도를 코드에 적는다. 세 API의 이름이 그 의도를 강제한다.

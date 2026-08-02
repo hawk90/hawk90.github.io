@@ -6,6 +6,7 @@ series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 2
 tags: [pearl, causal-discovery, ic-algorithm, faithfulness]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Causal discovery problem* — observational data로 DAG 추론. *Faithfulness assumption*. *IC algorithm·PC algorithm·FCI* — constraint-based discovery. *Markov equivalence class* — CPDAG. *Limitation* — confounder 가정·sample size. *Algorithmic causal inference* 출발점.

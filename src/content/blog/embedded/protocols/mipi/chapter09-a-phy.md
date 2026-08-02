@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 9
 tags: [mipi, a-phy, automotive, serdes, functional-safety, asa]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

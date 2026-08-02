@@ -6,6 +6,7 @@ tags: [Git, Branching, Merge, Rebase]
 series: "Pro Git"
 seriesOrder: 3
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

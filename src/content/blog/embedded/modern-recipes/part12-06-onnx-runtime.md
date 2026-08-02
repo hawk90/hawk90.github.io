@@ -5,6 +5,7 @@ description: "ONNX format·ONNX Runtime의 Execution Provider (CUDA·TensorRT·D
 series: "Modern Embedded Recipes"
 seriesOrder: 142
 tags: [recipes, edge-ai, onnx, onnxruntime]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

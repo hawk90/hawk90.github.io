@@ -6,6 +6,7 @@ series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 5
 tags: [hoff, normal-model, conjugate-prior, posterior]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Normal with known variance·known mean·both unknown*. *Conjugate prior* — Normal-Inverse-Gamma. *Posterior 공식 유도*. *Predictive distribution*. *Noninformative limit*. *Sequential update*. *Computation* — analytical formulas·Monte Carlo verification.

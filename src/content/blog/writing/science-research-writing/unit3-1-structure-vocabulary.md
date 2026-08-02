@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
 draft: true
-
+topics: ["writing"]
 ---
 
 Results는 모래시계의 좁은 끝입니다. 발견 자체에 집중하고 해석은 Discussion으로 미룹니다. 이 글은 Results의 구조와 어휘를 다룹니다.

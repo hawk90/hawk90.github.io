@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 Part 3의 시작은 *작가의 태도*입니다. 무엇을 어떻게 쓰는가의 문제가 아니라, *왜 쓰는가, 어떤 자세로 쓰는가*의 문제로 넘어갑니다.

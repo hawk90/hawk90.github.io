@@ -6,6 +6,7 @@ tags: [TEE, OP-TEE, GlobalPlatform]
 series: "Embedded Security"
 seriesOrder: 5
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 > 사람에 관한 글은 nonfiction의 핵심입니다.

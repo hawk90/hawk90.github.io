@@ -6,6 +6,7 @@ tags: [perf, Annotate, Assembly]
 series: "perf and FlameGraph"
 seriesOrder: 4
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

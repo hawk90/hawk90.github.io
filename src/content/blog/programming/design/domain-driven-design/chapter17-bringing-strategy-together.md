@@ -6,6 +6,7 @@ tags: [DDD, Strategy]
 series: "Domain-Driven Design"
 seriesOrder: 17
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## Strategic Design의 세 기둥

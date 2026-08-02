@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 115
 tags: [recipes, uart, debugging, bare-metal]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

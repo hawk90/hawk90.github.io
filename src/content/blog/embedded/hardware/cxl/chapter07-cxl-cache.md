@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 7
 tags: [cxl-cache, d2h, h2d, mesi, snoop]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

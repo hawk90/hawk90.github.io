@@ -5,6 +5,7 @@ description: "FP32→INT8/INT4 양자화의 수식, PTQ와 QAT 차이, per-chann
 series: "Modern Embedded Recipes"
 seriesOrder: 139
 tags: [recipes, quantization, int8, int4, qat, ptq, gptq]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

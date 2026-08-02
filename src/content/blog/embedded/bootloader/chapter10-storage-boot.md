@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 10
 tags: [embedded, bootloader, u-boot, storage, mmc, nand]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

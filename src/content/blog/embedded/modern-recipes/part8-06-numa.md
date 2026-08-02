@@ -5,6 +5,7 @@ description: "NUMA node topology, numactl 운영, libnuma API, HBM/CXL tier, 자
 series: "Modern Embedded Recipes"
 seriesOrder: 94
 tags: [recipes, numa, memory, hbm, cxl]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

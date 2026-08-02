@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 7
 tags: [hbm, memory-controller, bank, scheduling]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 9
 tags: [kruschke, rope, nhst-critique, hypothesis-testing]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *NHST의 문제* — Kruschke의 강한 비판. *Bayesian alternative* — credible interval + ROPE (Region of Practical Equivalence). *Decision rule via ROPE*. *Estimation rather than test*. *Effect size 강조*. *Power analysis via simulation*. Modern Bayesian movement 영향.

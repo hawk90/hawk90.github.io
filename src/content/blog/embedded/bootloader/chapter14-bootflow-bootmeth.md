@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 14
 tags: [embedded, bootloader, u-boot, bootflow, bootmeth]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

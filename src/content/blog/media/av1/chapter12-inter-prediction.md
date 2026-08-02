@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Inter, Motion Vector]
 series: "AV1"
 seriesOrder: 12
 draft: true
+topics: ["media"]
 ---
 
 Inter 예측은 AV1 압축의 핵심이다. 비디오의 **90% 이상의 블록**이 Inter 예측으로 처리된다. 이 장에서는 참조 프레임에서 현재 블록을 예측하는 **Motion Vector**, **서브픽셀 보간**, **MV 예측 시스템**을 살펴본다.

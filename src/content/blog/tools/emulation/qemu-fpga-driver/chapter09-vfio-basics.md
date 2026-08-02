@@ -6,6 +6,7 @@ tags: [QEMU, vfio, iommu-group, userspace-driver]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 9
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 워크플로의 *Step 2*가 시작됩니다. 지금까지는 fake FPGA로 driver를 짰는데, *실 FPGA가 도착*했을 때 그 driver를 *그대로* 옮기는 방법이 **VFIO**입니다.

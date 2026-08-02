@@ -6,6 +6,7 @@ tags: [cmake, build, cpp, library, target]
 series: "CMake"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 타겟 중심 접근법인가

@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, OBU, Parser]
 series: "AV1"
 seriesOrder: 2.03
 draft: true
+topics: ["media"]
 ---
 
 이제 OBU의 비트 레이아웃을 알았으니 디코더가 *연속된 바이트 스트림* 을 받아 어떻게 분배하는지 본다.

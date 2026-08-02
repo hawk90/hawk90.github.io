@@ -6,6 +6,7 @@ series: "UCIe 심화"
 seriesOrder: 4
 tags: [ucie, d2d-adapter, flit, crc]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Flit-based 전송* — 64B/256B unit. *CRC + retry* — link-level reliability. *Stack management*·flow control. *Negotiation* sideband. *Protocol mux* — 한 link 위에 multiple protocol. *Latency optimization* — pass-through mode for low-latency variants.

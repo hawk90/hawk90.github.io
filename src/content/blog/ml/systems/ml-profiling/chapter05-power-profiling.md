@@ -6,6 +6,7 @@ series: "ML 시스템 프로파일링"
 seriesOrder: 5
 tags: [power, energy, perf-watt]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Software-level* — `nvidia-smi`·`rocm-smi`·NVML. *Hardware-level* — external power monitor (Otii·Joulescope). *RAPL* (Intel CPU). *Per-kernel energy* 측정 어려움 — 평균값만. *Joules/inference* KPI. *Power capping*과 throttling.

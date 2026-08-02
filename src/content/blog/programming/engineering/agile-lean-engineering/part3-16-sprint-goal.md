@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Scrum Guide"
 bookAuthor: "Schwaber & Sutherland"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Sprint Goal이 일관성을 보장하는 방법 — 단순한 작업 목록이 아닌 목표.

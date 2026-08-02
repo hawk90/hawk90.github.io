@@ -6,6 +6,7 @@ tags: [DDD, Model-Driven Design, Hands-on Modelers]
 series: "Domain-Driven Design"
 seriesOrder: 3
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 모델과 구현의 괴리

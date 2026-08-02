@@ -6,6 +6,7 @@ series: "Designing Machine Learning Systems"
 seriesOrder: 9
 tags: [dmls, continual-learning, ab-test, shadow]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Stateless retraining* vs *stateful (continual)*. *Trigger* — schedule·performance drop·data drift. *Test in production* — shadow deployment·canary·A/B·interleaving·bandits. *Feature flag·rollback policy*. *Continuous training pipeline*. *Catastrophic forgetting* 회피.

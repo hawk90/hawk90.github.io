@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: Abseil의 HEAD는 Google이 사내에서 쓰는 모델이고, LTS는 외부 사용자를 위한 1년 두 번의 snapshot이다. 두 모델은 API 변경 정책과 마이그레이션 부담이 다르다.

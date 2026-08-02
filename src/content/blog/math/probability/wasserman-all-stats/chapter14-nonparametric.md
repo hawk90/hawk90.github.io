@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 14
 tags: [nonparametric, kernel-density, smoothing, bandwidth]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Density estimation* — histogram·kernel·KDE. *Bandwidth selection* — cross-validation·plug-in. *Regression* — kernel·local polynomial·spline. *Bias-variance trade-off*. *Curse of dimensionality*. *Sieve estimator·orthogonal series*. ML 응용 — k-NN·decision tree·GP의 nonparametric 시각.

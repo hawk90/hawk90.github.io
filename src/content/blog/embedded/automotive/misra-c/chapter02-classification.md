@@ -6,6 +6,7 @@ tags: [misra, c, classification, deviation, decidable, advisory]
 series: "MISRA C"
 seriesOrder: 2
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 MISRA C:2012는 159개 항목을 4개 축으로 분류한다. 분류를 모르면 위반 리포트를 어떻게 처리해야 할지 판단할 수 없다.

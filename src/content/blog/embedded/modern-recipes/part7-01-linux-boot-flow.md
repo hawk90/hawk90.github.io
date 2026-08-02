@@ -5,6 +5,7 @@ description: "BootROM, SPL, U-Boot, Kernel, Init까지 각 단계의 책임과 A
 series: "Modern Embedded Recipes"
 seriesOrder: 75
 tags: [recipes, linux, boot]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

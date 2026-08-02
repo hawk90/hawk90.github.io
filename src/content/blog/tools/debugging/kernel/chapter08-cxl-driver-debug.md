@@ -6,6 +6,7 @@ series: "Kernel Debugging"
 seriesOrder: 8
 tags: [cxl, kernel-debugging, ftrace, bpftrace, drgn, cxl-core]
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## drivers/cxl/ 모듈 의존성

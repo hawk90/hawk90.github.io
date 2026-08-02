@@ -5,6 +5,7 @@ description: "Saleae·DSLogic·oscilloscope·protocol decoder로 UART/SPI/I2C/CA
 series: "Modern Embedded Recipes"
 seriesOrder: 120
 tags: [recipes, debugging, logic-analyzer]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [QEMU, microvm, serverless, firecracker, fast-boot]
 series: "QEMU Internals"
 seriesOrder: 20
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 기존 QEMU 머신(`pc`·`q35`·`virt`)은 *legacy PCI host bridge·ACPI·BIOS*를 포함해 무거웠습니다. *serverless·함수 단위* 워크로드에서는 부팅 시간 *수초*도 부담입니다. **microvm**은 그 모든 *불필요한 부분*을 빼서 *<100ms 부팅*을 가능하게 한 *minimal machine*입니다.

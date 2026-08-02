@@ -6,6 +6,7 @@ tags: [TrustZone, ARM, Secure World]
 series: "Embedded Security"
 seriesOrder: 4
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

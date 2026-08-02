@@ -6,6 +6,7 @@ tags: [DDD, Breakthrough, Refactoring]
 series: "Domain-Driven Design"
 seriesOrder: 8
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 점진적 정제 vs 도약

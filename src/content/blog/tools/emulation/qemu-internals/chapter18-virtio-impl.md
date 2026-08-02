@@ -6,6 +6,7 @@ tags: [QEMU, virtio, virtqueue, virtio-blk, virtio-net]
 series: "QEMU Internals"
 seriesOrder: 18
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **VirtIO**는 *paravirtualized device*의 표준입니다. guest와 host 사이의 *공유 메모리 ring*과 *doorbell + IRQ*로 *kernel-bypass에 가까운* 성능. virtio-blk·virtio-net·virtio-9p·virtio-gpu 등 *수십 종*의 device가 같은 framework 위에 구축. 이 장은 QEMU 측 *host implementation*을 들여다봅니다.

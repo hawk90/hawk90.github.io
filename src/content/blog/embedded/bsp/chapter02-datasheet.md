@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 2
 tags: [embedded, bsp, datasheet, reference-manual]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

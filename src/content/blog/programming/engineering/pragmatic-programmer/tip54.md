@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 54
 tags: [pragmatic-programmer, config, deployment]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

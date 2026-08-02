@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 9
 tags: [canopen, sdo, pdo, nmt, object-dictionary, cia-301]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

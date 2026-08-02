@@ -6,6 +6,7 @@ tags: [perf, perf stat, Counters]
 series: "perf and FlameGraph"
 seriesOrder: 2
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

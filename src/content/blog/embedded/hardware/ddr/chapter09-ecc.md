@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 9
 tags: [DDR, memory, ECC, reliability, scrubbing]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 메모리 에러는 우주선(cosmic ray)이나 전기적 노이즈로 발생할 수 있다. ECC(Error Correcting Code)는 이러한 에러를 감지하고 정정하여 시스템 신뢰성을 높인다.

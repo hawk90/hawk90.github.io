@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 6
 tags: [cxl-io, pcie, dvsec, doe, uio]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

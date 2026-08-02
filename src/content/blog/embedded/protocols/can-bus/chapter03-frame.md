@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 3
 tags: [can, frame, standard-id, extended-id, bit-stuffing, crc]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

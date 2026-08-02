@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 8
 tags: [code-complete, defensive-programming, assertions, exceptions, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

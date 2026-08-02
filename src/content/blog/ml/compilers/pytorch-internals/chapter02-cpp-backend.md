@@ -6,6 +6,7 @@ series: "PyTorch Internals"
 seriesOrder: 2
 tags: [pytorch, aten, c10, tensor-impl]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *c10* — core library (Tensor·Storage·Allocator·Device). *ATen* — operator implementation. *TensorImpl* 내부 — shape·stride·storage·dispatch key set. *Storage·Allocator*. *Caching allocator* (GPU). *Memory format* — channels-last 등. *Reference count* + intrusive_ptr.

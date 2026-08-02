@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 37
 tags: [recipes, bare-metal, gpio]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

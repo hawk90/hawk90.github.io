@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 9
 tags: [quantization, qdq, ptq, qat]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 * Outline — *Quant IR representation* — fake-quant op·QDQ pair. *PTQ flow* — calibration data·observer·scale/zero-point 계산. *QAT* — gradient through fake-quant. *Quantize·Dequantize op folding*. *Mixed-precision* policy — sensitivity analysis. *Hardware target별 quantization spec* — INT8 symmetric·per-channel.

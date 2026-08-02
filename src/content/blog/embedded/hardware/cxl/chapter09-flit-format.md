@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 9
 tags: [cxl, flit, 68b-flit, 256b-flit, fec]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

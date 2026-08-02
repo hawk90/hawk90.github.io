@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Manifesto + Clean Agile"
 bookAuthor: "Beck et al. / Robert C. Martin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Agile Manifesto의 12 원칙 — 각 원칙의 함의와 흔한 오해.

@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 2
 tags: [embedded, buildroot, directory]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

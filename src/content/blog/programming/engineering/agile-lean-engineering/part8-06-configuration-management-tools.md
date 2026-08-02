@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The DevOps Handbook"
 bookAuthor: "Kim·Humble·Debois·Willis"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — push vs pull·agent vs agentless — 세 도구 비교.

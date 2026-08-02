@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Skip List, Probabilistic]
 series: "Data Structures and Algorithms"
 seriesOrder: 30
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

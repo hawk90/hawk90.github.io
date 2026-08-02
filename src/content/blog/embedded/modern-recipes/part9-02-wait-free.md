@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 102
 tags: [recipes, wait-free, signaling, sequence, double-buffer]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

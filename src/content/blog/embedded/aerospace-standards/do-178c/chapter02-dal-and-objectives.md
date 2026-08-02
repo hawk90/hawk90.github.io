@@ -6,6 +6,7 @@ tags: [do-178c, dal, objectives, independence, control-category, annex-a]
 series: "DO-178C"
 seriesOrder: 2
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 DO-178C의 *Annex A — Objectives*는 144페이지 표준의 핵심. 5개 *DAL 등급*과 *71개 objectives*가 *한 표*에 정리돼 있다. 인증 심사는 *이 표를 그대로 따라간다*. 이 장은 *모든 71 objective*를 *DAL별 적용*과 함께 본다.

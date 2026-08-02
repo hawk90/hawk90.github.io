@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 91
 tags: [pragmatic-programmer, testing, mutation-testing]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

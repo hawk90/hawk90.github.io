@@ -6,6 +6,7 @@ series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 10
 tags: [pearl, actual-cause, halpern-pearl, explanation]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Type vs token causation*. *Halpern-Pearl actual cause 정의* — contingency·minimal sufficient. *Examples* — voting paradox·preemption·overdetermination. *Refinements* (HP1·HP2·HP3 versions). *Explanation*과의 연결. *AI safety·legal AI에서의 중요성*.

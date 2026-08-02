@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "ChatOps (Jesse Newland)"
 bookAuthor: "Jesse Newland"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — GitHub Hubot에서 시작 — 채팅에서 운영 작업.

@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 6
 tags: [autotuning, autotvm, ansor, meta-schedule]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *AutoTVM* — template + cost model (XGBoost). *Ansor* — template-free, auto-derived search space. *Meta-schedule* — modern unified API. *Cost model* — random·grid·evolutionary·XGBoost. *Tuning time vs quality* trade-off. *Hardware on-device* measurement·*RPC tracker*. *Cross-shape reuse*.

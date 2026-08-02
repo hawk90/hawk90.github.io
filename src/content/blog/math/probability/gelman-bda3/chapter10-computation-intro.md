@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 10
 tags: [bda3, computation, simulation, integration]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Posterior 적분의 어려움* — high-dim·intractable normalizer. *Sampling = expectation 추정*. *Numerical integration·quadrature 한계*. *Importance sampling*·*rejection sampling*. *Distributional approximation* — normal·Laplace. *MCMC·VI·SMC roadmap*. Modern probabilistic programming.

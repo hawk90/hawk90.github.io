@@ -6,6 +6,7 @@ series: "Statistical Rethinking"
 seriesOrder: 14
 tags: [mcelreath, varying-slope, lkj, gp, iv]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Varying intercepts AND slopes* — correlation 모델링. *LKJ prior* for correlation matrix. *Multilevel multivariate Gaussian*. *Gaussian process briefly*. *Instrumental variable Bayesian implementation*. *Phylogenetic regression preview*. *Reduce computation* — non-centered parameterization.

@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 15
 tags: [classification, lda, svm, tree, vc-dimension]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Bayes classifier* — optimal in 0-1 loss. *LDA·QDA*. *Logistic regression* (앞서). *SVM·kernel SVM*. *Decision tree·boosting·bagging·random forest*. *VC dimension·PAC learning*. *Empirical risk minimization*. *Generalization bound*. *Cross-validation*·*calibration*. *통계 vs ML* 시각 비교.

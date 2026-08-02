@@ -5,6 +5,7 @@ description: "Per-core utilization과 CPU affinity, NUMA, migration cost, Amdahl
 series: "Embedded Performance Engineering"
 seriesOrder: 39
 tags: [smp, affinity, load-balancing, migration, scalability]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

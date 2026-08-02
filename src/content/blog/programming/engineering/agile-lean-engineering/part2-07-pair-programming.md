@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Laurie Williams 박사학위 논문(2000) 결과: 시간 +15%, defect -15%, 학습·만족도 향상. 반론과 한계. driver/navigator, ping-pong, mob 패턴.

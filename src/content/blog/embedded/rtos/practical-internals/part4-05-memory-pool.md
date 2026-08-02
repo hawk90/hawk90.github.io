@@ -5,6 +5,7 @@ description: "같은 크기 객체를 다수 alloc/free하는 패턴을 위한 f
 series: "Practical RTOS Internals"
 seriesOrder: 37
 tags: [pool, fixed-size, free-list, slab]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

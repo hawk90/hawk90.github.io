@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 22
 tags: [recipes, memory-barrier, dmb, dsb, isb, dma]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

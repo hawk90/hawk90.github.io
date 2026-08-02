@@ -6,6 +6,7 @@ series: "Pattern Recognition and Machine Learning"
 seriesOrder: 6
 tags: [bishop, kernel, dual, gaussian-process]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Dual representation*·*kernel trick*. *Constructing kernels* — composition rule·valid kernel test. *RBF·polynomial·string kernel·Fisher kernel*. *Gaussian Process for regression*·*for classification (Laplace approximation)*. *ARD·learning hyperparameter from marginal likelihood*.

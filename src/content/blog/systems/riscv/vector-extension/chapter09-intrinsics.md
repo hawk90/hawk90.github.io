@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 9
 tags: [RISC-V, Vector, Intrinsics, C]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 1
 tags: [gtest, googletest, testing, cpp]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — 네 framework의 *컴파일 시간, header-only 여부, fixture/parameterize/death-test/mock 지원 매트릭스*. gtest가 *왜 사실상 표준*인가 — gMock 결합, CMake/IDE 통합, Google 내부 코드베이스 검증. 적합한 곳·아닌 곳.

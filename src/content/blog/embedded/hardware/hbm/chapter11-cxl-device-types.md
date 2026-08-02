@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 11
 tags: [cxl, cxl-type, accelerator, memory-expander]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

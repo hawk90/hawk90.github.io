@@ -6,6 +6,7 @@ tags: [QEMU, opae, dfl, intel-fpga, afu]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 12
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Intel FPGA(Stratix·Agilex)의 management 스택은 **OPAE**(userspace)와 **DFL**(kernel framework) 둘로 나뉩니다. DFL의 결정적 특징은 *device 자체에 metadata가 들어 있어* driver가 sub-device를 *자동 discovery*한다는 점. PR(Partial Reconfig)·AFU·FME가 모두 표준화돼 있습니다.

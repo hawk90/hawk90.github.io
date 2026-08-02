@@ -6,6 +6,7 @@ series: "TinyML·Edge AI"
 seriesOrder: 10
 tags: [tinyml, vision, mobilenet, image-classification]
 draft: true
+topics: ["ml", "ml/tinyml"]
 ---
 
 * Outline — *Person detection·visual wake word* — Pete Warden classic example. *Model* — MobileNetV2 minimal·MicroNets. *Input size* 90-100 px grayscale로 메모리 축소. *Camera interface* — OV7670·HiMax HM01B0 (low-power). *Performance* — Cortex-M4 @ 100 MHz로 1-5 FPS. *Edge Impulse·OpenMV* 워크플로.

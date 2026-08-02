@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Continuous Delivery"
 bookAuthor: "Jez Humble & Dave Farley"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 두 환경을 번갈아 — 무중단 배포 패턴.

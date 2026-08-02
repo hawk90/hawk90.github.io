@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 10
 tags: [RISC-V, C-Extension, Compressed, Code-Density]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

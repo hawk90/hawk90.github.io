@@ -5,6 +5,7 @@ description: "PCIe로 streaming traffic을 다룰 때 알아야 할 BAR 종류, 
 series: "Modern Embedded Recipes"
 seriesOrder: 131
 tags: [recipes, pcie, bar, msi-x, dpdk, spdk]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

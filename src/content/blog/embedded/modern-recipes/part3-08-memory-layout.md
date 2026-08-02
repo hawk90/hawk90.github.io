@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 30
 tags: [recipes, toolchain, memory]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

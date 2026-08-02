@@ -6,6 +6,7 @@ tags: [core-dump, elf, nt-prstatus, postmortem]
 series: "Postmortem Debugging"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 생성된 core 파일은 그저 *ELF*입니다. `e_type = ET_CORE`. 일반 실행 파일·shared library와 *같은 포맷*. 이 장은 core 안에 *어떤 정보*가 어떻게 들어 있는지를 깊이 봅니다 — PT_NOTE 세그먼트의 모든 NT_* 노트, PT_LOAD의 메모리 매핑, 그리고 *부분 core*가 어떻게 표현되는지.

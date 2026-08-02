@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Accelerate"
 bookAuthor: "Forsgren·Humble·Kim"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Deployment Frequency·Lead Time·MTTR·Change Failure Rate.

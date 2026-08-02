@@ -6,6 +6,7 @@ series: "NPU 아키텍처"
 seriesOrder: 9
 tags: [npu, power, thermal, tops-per-watt]
 draft: true
+topics: ["ml", "ml/accelerators"]
 ---
 
 > Outline — *TOPS/W* — mobile NPU의 핵심 KPI. *Compute/idle 비율*. *Clock·voltage scaling (DVFS)*. *Thermal envelope* — mobile 2-5W·laptop 10-15W·data center 50-200W. *Sustained vs peak* TOPS. *Liquid cooling*·*direct die* (high-end). *Power gating* — 동작 안 하는 sub-unit 끄기.

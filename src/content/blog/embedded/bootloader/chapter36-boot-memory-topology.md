@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 36
 tags: [embedded, bootloader, memory-topology, srat, hmat, numa, cxl-mem, tiered-memory]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 23
 tags: [interrupt, latency, tail-chaining, lazy-stacking]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

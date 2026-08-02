@@ -5,6 +5,7 @@ description: "RCU 원리, rcu_read_lock, grace period, synchronize_rcu, 임베�
 series: "Modern Embedded Recipes"
 seriesOrder: 103
 tags: [recipes, concurrency, rcu]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

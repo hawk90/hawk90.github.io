@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, ByteAlignment, Padding]
 series: "AV1"
 seriesOrder: 2.09
 draft: true
+topics: ["media"]
 ---
 
 OBU의 *바이트 경계* 를 맞추는 작은 트릭. 사소해 보이지만 *비트 단위 파서가 동기화* 되는 데 필수다.

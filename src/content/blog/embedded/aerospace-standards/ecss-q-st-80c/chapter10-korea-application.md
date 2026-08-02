@@ -6,6 +6,7 @@ tags: [ecss, korea, kari, kompsat, nuri]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 10
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 ECSS 시리즈 마지막. 한국 우주 산업의 *공개된 사실*과 시리즈 정리. *기업·기관 내부 정보·확인되지 않은 수치는 제시하지 않는다*.

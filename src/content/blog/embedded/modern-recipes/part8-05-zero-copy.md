@@ -5,6 +5,7 @@ description: "Camera→GPU→Encoder→Network pipeline에서 memcpy를 모두 �
 series: "Modern Embedded Recipes"
 seriesOrder: 93
 tags: [recipes, zero-copy, dma-buf, sendfile, io_uring, splice]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

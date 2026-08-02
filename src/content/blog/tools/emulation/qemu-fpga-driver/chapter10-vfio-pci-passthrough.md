@@ -6,6 +6,7 @@ tags: [QEMU, vfio-pci, passthrough, fpga]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 10
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 실 FPGA가 도착했습니다. **VFIO-PCI**로 guest VM에 *직접 pass-through*하면, fake-fpga로 짠 driver를 *수정 없이* 그대로 VM에서 실 보드에 사용할 수 있습니다. 시리즈의 step 1(fake)에서 step 2(실 보드)로 넘어가는 결정적 단계입니다.

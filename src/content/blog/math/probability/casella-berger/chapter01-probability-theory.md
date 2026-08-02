@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Statistical Inference, 2nd Edition"
 bookAuthor: "George Casella, Roger L. Berger"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Set theory·σ-algebra*. *Axioms of probability*. *Counting·Bernoulli trials·random variables*. *Distribution function·density·CDF·PDF*. *Conditional probability·independence*. *Bayes' rule*. 수리통계 그래듀에이트 표준의 출발점.

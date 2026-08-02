@@ -6,6 +6,7 @@ series: "Statistical Rethinking"
 seriesOrder: 15
 tags: [mcelreath, missing-data, measurement-error, imputation]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Measurement error model* — Bayesian의 자연스러운 처리. *Missing data imputation*·*joint model*. *Hierarchical model에서 missing*. *Categorical missing*. *Phylogenetic dependence·spatial dependence*. *Errors-in-variables*. *Truncated·censored data*.

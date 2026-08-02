@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 17
 tags: [RISC-V, Debug, JTAG, Trigger, Breakpoint]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

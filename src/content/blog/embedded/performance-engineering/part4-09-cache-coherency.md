@@ -5,6 +5,7 @@ description: "MESI와 MOESI 프로토콜, snoop과 directory 방식, coherency o
 series: "Embedded Performance Engineering"
 seriesOrder: 38
 tags: [coherency, mesi, moesi, snoop, directory]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

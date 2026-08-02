@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — TDD는 XP의 13 primary 중 하나. red-green-refactor cycle이 simple design·CI·incremental design과 어떻게 맞물리나. 자매 시리즈 TDD by Example로 연결.

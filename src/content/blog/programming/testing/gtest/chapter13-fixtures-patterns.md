@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 13
 tags: [gtest, fixture, setup, teardown, environment]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — fixture 객체는 *각 테스트마다 새로* 생성. *비싼 resource* 공유 — `SetUpTestSuite`/`TearDownTestSuite`(suite 단위). `testing::Environment` 등록(`AddGlobalTestEnvironment`)으로 *프로세스 단위*. 함정 — suite-level state 변경의 *test 순서 의존* 위험.

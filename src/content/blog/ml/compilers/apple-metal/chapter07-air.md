@@ -6,6 +6,7 @@ series: "Apple Metal Stack"
 seriesOrder: 7
 tags: [metal, air, ir, codegen]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Compile pipeline* — MSL → AIR (LLVM IR variant) → device binary. *Offline compile* — `metal` tool. *Function constants* — specialization. *Dynamic library*·*function pointers*. *Pipeline cache* — load 시 GPU binary 캐싱. *Cross-platform binary* — iOS·macOS·visionOS 통합.

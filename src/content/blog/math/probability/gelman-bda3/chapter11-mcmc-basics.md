@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 11
 tags: [bda3, mcmc, gibbs, metropolis, hmc]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Markov chain의 정상분포 = posterior*. *Metropolis-Hastings*. *Gibbs sampler*. *HMC (Hamiltonian Monte Carlo)*. *Effective Sample Size (ESS)*. *R̂ convergence diagnostic*. *Burn-in·thinning·multiple chains*. *Practical Stan workflow*.

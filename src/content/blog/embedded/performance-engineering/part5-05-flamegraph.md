@@ -5,6 +5,7 @@ description: "Brendan Gregg flamegraph로 on-CPU·off-CPU·차분 분석. perf·
 series: "Embedded Performance Engineering"
 seriesOrder: 44
 tags: [flamegraph, perf, brendan-gregg, off-cpu]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

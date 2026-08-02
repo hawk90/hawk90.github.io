@@ -6,6 +6,7 @@ series: "TensorRT 심화"
 seriesOrder: 7
 tags: [tensorrt, timing-cache, build-time]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 * Outline — *ITimingCache* — kernel benchmark 결과 저장. *GPU·CUDA 버전 의존*. *Share across builds* — 같은 device에서 빌드 시간 5-10× 감소. *Cache size*·*serialization*. *MultiGPU build* — 각 GPU별 cache. *Versioning*과 cross-version 호환성.

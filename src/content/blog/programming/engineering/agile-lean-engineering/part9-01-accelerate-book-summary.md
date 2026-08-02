@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Accelerate"
 bookAuthor: "Forsgren·Humble·Kim"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Forsgren·Humble·Kim의 research — 6년 데이터의 결론.

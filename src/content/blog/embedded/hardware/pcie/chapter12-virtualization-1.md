@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 12
 tags: [pcie, sr-iov, vfio, dpdk, spdk, virtualization, acs]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

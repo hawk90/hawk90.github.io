@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
 draft: true
-
+topics: ["writing"]
 ---
 
 > 대명사는 *명사를 대신*하여 같은 단어의 반복을 피하게 합니다. 격(case) 변화가 있어 *주어 자리*와 *목적어 자리*에서 다른 형태를 씁니다.

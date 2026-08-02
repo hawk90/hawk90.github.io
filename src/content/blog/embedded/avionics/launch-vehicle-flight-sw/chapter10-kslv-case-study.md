@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 10
 tags: [avionics, kslv, korea, innospace, perigee, unastella]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

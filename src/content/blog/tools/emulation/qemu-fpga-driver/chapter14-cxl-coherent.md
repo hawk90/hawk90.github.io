@@ -6,6 +6,7 @@ tags: [QEMU, cxl-cache, cci-p, coherent-fpga, npu]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 14
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 시리즈의 마지막 장입니다. 지금까지 다룬 DMA descriptor ring·SR-IOV·passthrough가 *현재*라면, 이 장은 *미래*를 봅니다 — FPGA가 host CPU cache에 *직접* 참여하는 **CXL.cache** 시대. DMA가 *사라지고* load/store 한 줄이 cache-line 단위로 *snoop* 따라가는 패러다임.

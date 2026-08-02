@@ -6,6 +6,7 @@ series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 12
 tags: [monte-carlo, mcmc, importance-sampling, gibbs]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *왜 sampling* — 고차원 적분 계산 불가. *Importance sampling*·*rejection sampling*. *Markov Chain Monte Carlo (MCMC)* — Metropolis·Metropolis-Hastings·Gibbs. *Detailed balance·ergodicity*. *Mixing time·convergence diagnostic*. *Hamiltonian Monte Carlo (HMC)·NUTS·SGLD*. ML 응용 — Bayesian neural network·diffusion model sampling.

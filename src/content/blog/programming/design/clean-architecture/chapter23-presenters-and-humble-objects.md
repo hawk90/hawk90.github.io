@@ -6,6 +6,7 @@ tags: [Architecture, Presenter, HumbleObject, MVP]
 series: "Clean Architecture"
 seriesOrder: 23
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

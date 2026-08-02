@@ -6,6 +6,7 @@ series: "UCIe 심화"
 seriesOrder: 8
 tags: [ucie, ras, recalibration, reliability]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Drift 원인* — voltage·temperature·aging. *Recalibration* — periodic·event-triggered. *Lane repair* — failed lane bypass. *Spare lane* 활용. *Error reporting* — CRC·correctable·uncorrectable. *RAS API*. *Manageability* via sideband.

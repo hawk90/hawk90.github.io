@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Data-Structures, list_head, rbtree, kref]
 series: "Linux Kernel Coding Style"
 seriesOrder: 7
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "The kernel has its own data structure implementations."

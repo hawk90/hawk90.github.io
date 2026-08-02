@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Software Development + Clean Agile"
 bookAuthor: "Alistair Cockburn / Robert C. Martin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 다섯 가지 Agile 방법론의 공통점과 차이 — 어떻게 고를 것인가.

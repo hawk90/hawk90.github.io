@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Personal Kanban"
 bookAuthor: "Jim Benson & Tonianne DeMaria Barry"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 개인 work 관리 — Benson·Barry의 Personal Kanban.

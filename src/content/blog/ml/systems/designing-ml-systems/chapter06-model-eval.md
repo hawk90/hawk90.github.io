@@ -6,6 +6,7 @@ series: "Designing Machine Learning Systems"
 seriesOrder: 6
 tags: [dmls, model-development, evaluation, calibration]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Baseline* 종류 — random·zero rule·human·simple heuristic·existing solution. *Ensembles*. *Debugging* — overfit small sample first. *Distributed training* basics. *AutoML*. *Offline evaluation* — perturbation test·invariance·slice analysis·calibration. *Confidence·uncertainty estimation*.

@@ -6,6 +6,7 @@ series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 12
 tags: [kruschke, regression, robust-regression, interaction]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *One metric predictor*·*multiple predictors*. *Robust regression* — Student-t likelihood. *Outlier 대응 - Bayesian의 자연스러움*. *Hierarchical regression* — varying intercept·slope. *Interaction terms*. *Centering·standardization·posterior interpretation*. *Multicollinearity in Bayesian view*.

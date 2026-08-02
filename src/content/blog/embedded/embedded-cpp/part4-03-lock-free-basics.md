@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 31
 tags: [cpp, embedded, lock-free, atomic, cas, memory-order, isr]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

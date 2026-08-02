@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 지속 가능한 속도가 productivity에 미치는 영향 — 연구와 사례.

@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 3
 tags: [recipes, gpio, hw-basics]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

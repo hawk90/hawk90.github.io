@@ -8,6 +8,7 @@ tags: [cpp, folly, meta, facebook, library, code-review, overview]
 type: tech
 featured: true
 draft: false
+topics: ["programming", "programming/code-review"]
 ---
 
 ## 이 시리즈를 쓰는 이유

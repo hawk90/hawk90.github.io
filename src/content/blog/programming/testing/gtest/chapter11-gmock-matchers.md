@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 11
 tags: [gtest, gmock, matcher, custom-matcher]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — 30+ built-in matchers의 분류 — equality·comparison·string·container·field/property·pointer·composite. `Field(&Struct::member, Matcher)`로 struct 멤버 검증. `MATCHER`/`MATCHER_P` 매크로로 *도메인 matcher* 만들기. *describe message*가 실패 보고서에 박힌다.

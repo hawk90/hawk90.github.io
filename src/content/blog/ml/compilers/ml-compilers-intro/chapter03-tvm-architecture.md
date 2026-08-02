@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 3
 tags: [tvm, relay, tir, runtime]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *TVM 구조* — Relay (high-level) → TIR (loop-level) → target codegen. *Module·Function·Pass*. *Schedule primitive* — split·fuse·reorder·bind·tensorize. *Runtime* — `tvm.Module`·*module.load*·dispatch. *Custom code generator* — BYOC. *Microcontroller (microTVM)* 지원.

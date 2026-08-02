@@ -6,6 +6,7 @@ tags: [kernel, kgdb, kdb, serial, vm-debug]
 series: "Kernel Debugging"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ftrace·eBPF는 *관찰*만 합니다. *실시간으로 멈추고 변수를 검사*하려면 **kgdb**가 답입니다. 커널이 *자기 자신을 디버깅할 수 없으므로* 별 머신 (호스트) 또는 시리얼 콘솔이 필요합니다. 가상화 시대엔 QEMU + virtio serial이 표준.

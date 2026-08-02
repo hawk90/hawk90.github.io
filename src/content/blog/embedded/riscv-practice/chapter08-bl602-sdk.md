@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 8
 tags: [RISC-V, BL602, SDK, Build]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

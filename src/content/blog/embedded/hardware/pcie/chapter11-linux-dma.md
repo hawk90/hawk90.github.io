@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 11
 tags: [pcie, dma, iommu, ats, pasid, iommufd, svm]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

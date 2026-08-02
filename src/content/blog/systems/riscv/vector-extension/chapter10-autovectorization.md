@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 10
 tags: [RISC-V, Vector, Autovectorization, Optimization]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

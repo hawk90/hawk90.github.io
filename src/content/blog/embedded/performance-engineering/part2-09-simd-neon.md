@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 17
 tags: [simd, neon, sve, helium, intrinsics]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

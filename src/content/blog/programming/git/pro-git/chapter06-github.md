@@ -6,6 +6,7 @@ tags: [Git, GitHub, Pull Request]
 series: "Pro Git"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

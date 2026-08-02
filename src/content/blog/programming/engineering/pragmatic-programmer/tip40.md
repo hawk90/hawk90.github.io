@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 40
 tags: [pragmatic-programmer, resource-management]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

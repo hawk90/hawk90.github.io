@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 8
 tags: [embedded, buildroot, rootfs, ext4, squashfs, initramfs]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

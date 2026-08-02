@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Structure of Scientific Revolutions"
 bookAuthor: "Thomas S. Kuhn"
 draft: true
+topics: ["philosophy"]
 ---
 
 ## 한 줄 요약

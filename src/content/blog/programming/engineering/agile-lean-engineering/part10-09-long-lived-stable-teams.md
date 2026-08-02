@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Bezos memo + Team Topologies"
 bookAuthor: "Jeff Bezos / Skelton & Pais"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Bezos memo·long-lived team의 가치.

@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 5
 tags: [avionics, fpga, axi, dma, irq, register-map]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 151
 tags: [recipes, linux, cxl, kernel-driver, dax, sysfs]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

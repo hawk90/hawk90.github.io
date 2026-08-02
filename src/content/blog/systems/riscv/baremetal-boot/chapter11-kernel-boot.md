@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 11
 tags: [RISC-V, Linux, Kernel, Boot]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

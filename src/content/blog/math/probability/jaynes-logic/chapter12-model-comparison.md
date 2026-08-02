@@ -6,6 +6,7 @@ series: "Probability Theory: The Logic of Science"
 seriesOrder: 12
 tags: [model-comparison, evidence, occam, bayes-factor]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Marginal likelihood = evidence*. *Bayesian model comparison via Bayes factor*. *Automatic Occam's razor* — over-parameterize는 wide prior 손해. *Nested vs non-nested model*. *Continuous parameter case* — Laplace approximation·BIC. *Hierarchical Bayes* — hyperprior over model class. *Robustness*·*sensitivity to prior*. ML 응용 — Bayesian NN·model selection.

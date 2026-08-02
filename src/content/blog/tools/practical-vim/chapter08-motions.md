@@ -6,6 +6,7 @@ tags: [Vim, Motion, Navigation]
 series: "Practical Vim"
 seriesOrder: 8
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

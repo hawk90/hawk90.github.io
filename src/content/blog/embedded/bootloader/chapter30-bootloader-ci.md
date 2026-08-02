@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 30
 tags: [embedded, bootloader, ci-cd, qemu, build-matrix]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

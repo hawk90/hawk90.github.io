@@ -6,6 +6,7 @@ tags: [DDD, Supple Design]
 series: "Domain-Driven Design"
 seriesOrder: 10
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## Supple Design이란?

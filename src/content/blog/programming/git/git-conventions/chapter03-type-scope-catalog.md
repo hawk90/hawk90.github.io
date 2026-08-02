@@ -6,6 +6,7 @@ tags: [Git, Commit Type, Scope]
 series: "Git Conventions"
 seriesOrder: 3
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

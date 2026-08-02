@@ -6,6 +6,7 @@ series: "Convex Optimization (Boyd)"
 seriesOrder: 7
 tags: [mle, map, bayes, hypothesis-testing]
 draft: true
+topics: ["math", "math/optimization"]
 ---
 
 > Outline — *Parametric distribution estimation* — Gaussian·exponential family. *MLE는 convex* — log-likelihood concave for exponential family. *MAP* — prior가 log-concave면 convex. *Hypothesis testing* — Neyman-Pearson LP form. *Chebyshev·Chernoff bound* — probability tail에 대한 convex 최적화. *Experiment design* — A·D·E-optimal.

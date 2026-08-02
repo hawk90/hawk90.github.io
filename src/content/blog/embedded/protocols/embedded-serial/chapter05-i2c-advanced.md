@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 5
 tags: [i2c, repeated-start, 10bit, clock-stretching, multi-master, smbus, i3c]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [Vim, File, netrw]
 series: "Practical Vim"
 seriesOrder: 7
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

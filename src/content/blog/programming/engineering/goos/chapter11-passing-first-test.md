@@ -6,6 +6,7 @@ tags: [TDD, Case Study, Mock]
 series: "Growing Object-Oriented Software"
 seriesOrder: 11
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > "Make it work, make it right, make it fast."

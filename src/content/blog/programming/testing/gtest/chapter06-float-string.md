@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 6
 tags: [gtest, float, string, near-equal]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — 부동소수점 *4 ULP 허용* 비교(`EXPECT_FLOAT_EQ`)와 *절대 오차 허용*(`EXPECT_NEAR`)의 차이. `EXPECT_DOUBLE_EQ`. 문자열 — `StrEq`/`StrCaseEq`/`StrNe`/`HasSubstr`/`StartsWith`/`EndsWith`. `wchar_t`·`std::string_view` 처리.

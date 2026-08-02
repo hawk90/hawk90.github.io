@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Introduction to Probability, 2nd Edition"
 bookAuthor: "Dimitri P. Bertsekas, John N. Tsitsiklis"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Sample space·event·probability axioms*. *Conditional probability*. *Bayes' rule*·*total probability theorem*. *Independence·conditional independence*. *Counting methods*. *MIT 6.041/6.431 표준 교재*. [MIT OCW](https://ocw.mit.edu/courses/res-6-012-introduction-to-probability-spring-2018/).

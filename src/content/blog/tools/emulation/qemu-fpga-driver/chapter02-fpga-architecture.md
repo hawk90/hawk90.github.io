@@ -6,6 +6,7 @@ tags: [QEMU, fpga, shell, axi, pcie-bridge]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 2
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Driver 개발자가 FPGA 내부 회로 전체를 알 필요는 없습니다. 그러나 *driver가 보게 될 layer* — PCIe endpoint, shell, user logic, AXI 인터페이스 — 는 명확히 알아야 합니다. 이 장은 FPGA를 *driver 관점*으로 3-layer로 분해해 정리합니다.

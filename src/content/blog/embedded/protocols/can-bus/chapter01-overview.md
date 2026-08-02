@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 1
 tags: [can, can-bus, automotive, bosch, iso-11898]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

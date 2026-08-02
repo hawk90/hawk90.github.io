@@ -6,6 +6,7 @@ series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 13
 tags: [kruschke, logistic-regression, classification, calibration]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Logistic regression* — logit link·Bernoulli likelihood. *Hierarchical logistic*. *Robust logistic* — guess rate parameter. *Multiple predictors·interaction*. *Posterior predictive classification accuracy*·*calibration*. *ROC·confusion matrix in Bayesian framework*. *Comparison to frequentist*.

@@ -6,6 +6,7 @@ series: "TensorRT 심화"
 seriesOrder: 8
 tags: [tensorrt, cnn, transformer, llm, patterns]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *CNN* — conv·norm·activation fusion. *Transformer* — attention plugin·multi-head fusion·FP8. *LLM serving* — *TensorRT-LLM* 전용 stack. *KV cache management*·*continuous batching*. *Speculative decoding*. *Speech·diffusion model* 패턴. *Triton Inference Server*와 통합 배포.

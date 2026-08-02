@@ -6,6 +6,7 @@ tags: [C++, Coroutines, C++20, C++23]
 series: "전문가를 위한 C++"
 seriesOrder: 27
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Test-Driven Development: By Example"
 bookAuthor: "Kent Beck"
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 한 줄 요약

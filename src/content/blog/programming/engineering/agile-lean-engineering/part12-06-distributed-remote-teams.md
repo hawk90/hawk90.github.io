@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Sutherland writings + DORA remote"
 bookAuthor: "Jeff Sutherland / DORA"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Sutherland·Forsgren의 remote agile 연구.

@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Probability Theory: The Logic of Science"
 bookAuthor: "E. T. Jaynes"
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Deductive vs inductive*. *Plausibility as extension of logic* — Polya·Cox. *Common sense의 정량화*. *Robot* 비유 — bias 없는 추론기. *3가지 desiderata* — Cox가 도출한 일관성 조건. 책의 야심 — *확률 = 합리적 추론의 유일한 calculus*. 시리즈는 핵심 12장.

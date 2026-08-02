@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 24
 tags: [interrupt, storm, rate-limit, napi, coalescing]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

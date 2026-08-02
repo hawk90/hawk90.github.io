@@ -6,6 +6,7 @@ series: "Designing Machine Learning Systems"
 seriesOrder: 7
 tags: [dmls, deployment, batch-prediction, online-prediction]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Batch prediction* — scheduled job (Airflow·Spark). *Online prediction (real-time)* — REST·gRPC. *Streaming prediction* — Flink·Kafka Streams. *Edge prediction* — on-device. *Model compression* — pruning·quantization·distillation. *Compute platform* — cloud·hybrid·edge. *Cost·latency·privacy* 결정 매트릭스.

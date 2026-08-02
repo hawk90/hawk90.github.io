@@ -6,6 +6,7 @@ tags: [Git, Server, SSH]
 series: "Pro Git"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

@@ -6,6 +6,7 @@ tags: [Valgrind, Memcheck, Debugging, C, C++]
 series: "Valgrind"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## Memcheck가 잡는 것

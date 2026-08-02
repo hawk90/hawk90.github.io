@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 12
 tags: [embedded, bootloader, u-boot, usb, fastboot]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

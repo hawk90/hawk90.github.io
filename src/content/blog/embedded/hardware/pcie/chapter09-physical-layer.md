@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 9
 tags: [pcie, ltssm, physical-layer, equalization, serdes, pam4]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

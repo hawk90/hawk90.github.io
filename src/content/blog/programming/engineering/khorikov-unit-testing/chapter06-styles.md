@@ -6,7 +6,7 @@ tags: [TDD, Styles, Functional Core]
 series: "Khorikov Unit Testing"
 seriesOrder: 6
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 단위 테스트에는 세 가지 스타일이 있다. 각 스타일은 다른 방식으로 SUT를 검증하며, 4가지 기둥에서 서로 다른 강점을 보인다.

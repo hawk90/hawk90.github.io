@@ -6,6 +6,7 @@ series: "ONNX Runtime 심화"
 seriesOrder: 2
 tags: [onnxruntime, graph-optimization, fusion]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *GraphOptimizationLevel* — `DISABLE_ALL·BASIC·EXTENDED·ALL`. *Basic* — DCE·constant folding·shape inference. *Extended* — fusion (conv+bn+relu·attention·gelu·layernorm). *Layout* — NCHW ↔ NHWC. *Transformer-specific* — attention·embedding fusion. *Saving optimized model* via `optimized_model_filepath`.

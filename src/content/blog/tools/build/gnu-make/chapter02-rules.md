@@ -6,6 +6,7 @@ tags: [make, build, Makefile, rules]
 series: "GNU Make"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 규칙의 해부

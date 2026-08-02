@@ -6,6 +6,7 @@ series: "Statistical Inference"
 seriesOrder: 8
 tags: [casella-berger, neyman-pearson, lrt, ump, p-value]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Hypothesis testing setup* — null·alternative·rejection region. *Likelihood Ratio Test (LRT)*. *Bayesian test·posterior probability*. *Union-intersection·intersection-union*. *Size·level·power function*. *Most Powerful (MP)·Uniformly Most Powerful (UMP) test*·*Neyman-Pearson Lemma*. *Karlin-Rubin theorem*. *p-value의 의미·Bayesian p-value*.

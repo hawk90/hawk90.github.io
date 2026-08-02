@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 8
 tags: [embedded, bootloader, u-boot, board-init]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

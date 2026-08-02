@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 2
 tags: [cpp, embedded, compiler, gcc, clang, flags, optimization]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

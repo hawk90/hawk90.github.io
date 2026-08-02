@@ -6,6 +6,7 @@ series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 2
 tags: [pearl, bayes-rule, posterior, hypothesis]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 * Outline — *Bayes' rule의 AI 응용*. *Prior·likelihood·posterior*. *Evidence combining* — independent vs dependent. *Odds·log-odds·support 개념*. *Hypothesis ranking*. *Bayesian network 도입 전 단일 hypothesis case*. *Inference as belief update*.

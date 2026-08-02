@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "No Rules Rules + Powerful + Spotify videos"
 bookAuthor: "Reed Hastings / Patty McCord"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Hastings No Rules·Patty McCord·Spotify guild — 문화 사례 비교.

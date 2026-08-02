@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Partitioning, Block]
 series: "AV1"
 seriesOrder: 4
 draft: true
+topics: ["media"]
 ---
 
 ## 4.1 왜 블록으로 나누는가

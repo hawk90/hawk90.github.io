@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 3
 tags: [code-complete, requirements, architecture, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

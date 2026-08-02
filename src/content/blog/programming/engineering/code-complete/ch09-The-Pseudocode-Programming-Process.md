@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 9
 tags: [code-complete, pseudocode, PPP, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

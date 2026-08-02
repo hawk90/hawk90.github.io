@@ -6,6 +6,7 @@ tags: [QEMU, board-bringup, dtb, kernel-config, hal]
 series: "QEMU Embedded Emulation"
 seriesOrder: 18
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 새 SoC나 보드를 받아 Linux를 *부팅시키는 절차*가 **board bringup**입니다. power → clock → UART → DRAM → bootloader → kernel → rootfs → driver — 한 단계씩 올립니다. 보드 도착 *전*에 QEMU에서 같은 절차를 *시뮬레이션*해 두면, 펌웨어와 driver 코드가 모두 준비된 상태로 실 보드를 받아 *몇 시간 안에* 콘솔까지 올릴 수 있습니다.

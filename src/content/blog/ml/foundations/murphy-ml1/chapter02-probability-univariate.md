@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 2
 tags: [murphy, probability, univariate, gaussian]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Random variable·CDF·PDF·PMF*. *기본 분포* — Bernoulli·Binomial·Poisson·Gaussian·Student-t·Laplace·beta·gamma. *Empirical distribution*. *Bayes' rule + ML examples* — naive Bayes·spam filter. *Transformation of RV*·*Monte Carlo approximation*.

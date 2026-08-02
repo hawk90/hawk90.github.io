@@ -6,6 +6,7 @@ tags: [FlameGraph, Brendan Gregg, Visualization]
 series: "perf and FlameGraph"
 seriesOrder: 5
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

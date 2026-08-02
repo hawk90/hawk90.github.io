@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 24
 tags: [code-complete, refactoring, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 4
 tags: [RISC-V, ESP32-C3, Espressif, IoT]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

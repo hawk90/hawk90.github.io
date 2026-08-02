@@ -6,6 +6,7 @@ tags: [QEMU, Linux, Kernel, cross-compile, defconfig]
 series: "QEMU Embedded Emulation"
 seriesOrder: 5
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU 위에서 *내가 빌드한 Linux 커널*을 띄우는 것이 임베디드 개발의 *기본 능력*입니다. cross compile 환경, defconfig 선택, 부팅 옵션, 콘솔 메시지의 의미 — 한 번 익히면 거의 모든 임베디드 작업의 출발점이 됩니다.

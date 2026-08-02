@@ -6,6 +6,7 @@ tags: [C, Build, Make, CMake, Bazel]
 series: "전문가를 위한 C"
 seriesOrder: 23
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 24
 tags: [embedded, bootloader, spl, tpl, u-boot]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [Design Pattern, GoF, C++, C, Creational]
 series: "GoF Design Patterns"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 2
 tags: [RISC-V, QEMU, virt, Memory-Map, DTB]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 `virt` 머신은 RISC-V 시스템 개발의 *기본 환경*입니다. 특정 실 SoC를 따라가지 않고 RISC-V 생태계의 *표준 가상 플랫폼*으로 설계되어 있어서, 학습부터 펌웨어 개발·Linux 포팅까지 한 머신으로 끝낼 수 있죠. 이 장은 virt 머신을 한 번에 분해합니다 — 메모리 맵, 표준 디바이스, DTB 자동 생성, CPU 옵션까지.

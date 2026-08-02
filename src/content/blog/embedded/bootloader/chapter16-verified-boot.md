@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 16
 tags: [embedded, bootloader, u-boot, verified-boot, security]
 draft: false
+topics: ["embedded"]
 ---
 
 부트로더가 커널을 *그냥 점프*하면, 디스크를 잠시라도 만질 수 있는 공격자는 마음대로 커널을 바꿔 끼울 수 있습니다. Verified Boot은 *이 한 줄*을 잘라내는 작업입니다. ROM이 SPL을 검증하고, SPL이 U-Boot를 검증하고, U-Boot이 커널·DT·initramfs를 검증합니다. 한 단계라도 서명이 안 맞으면 부팅을 끊습니다.

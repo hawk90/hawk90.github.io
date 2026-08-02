@@ -6,6 +6,7 @@ series: "Elements of Information Theory"
 seriesOrder: 12
 tags: [maximum-entropy, exponential-family, jaynes]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Maximum entropy principle* (Jaynes). *Moment 제약* 하의 entropy 최대화 → exponential family. *Gaussian = max entropy* with fixed variance. *Gibbs distribution*. *Spectrum estimation*. *Anomalous max-entropy* (counterintuitive 예). ML: softmax cross-entropy의 의미·MaxEnt classifier.

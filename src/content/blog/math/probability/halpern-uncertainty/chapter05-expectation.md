@@ -6,6 +6,7 @@ series: "Reasoning About Uncertainty"
 seriesOrder: 5
 tags: [halpern, expectation, choquet, lower-prevision]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Standard expectation*. *Choquet integral* — non-additive measure에 대한 적분. *Lower·upper previsions* (Walley). *Sublinear expectation*. *Decision under imprecise probability* — Γ-maximin·E-admissibility. *Modern application* — robust Bayesian·distributional RL.

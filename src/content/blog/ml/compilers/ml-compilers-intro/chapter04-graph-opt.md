@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 4
 tags: [graph-optimization, fusion, constant-folding, dce]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Constant folding* — compile-time 평가. *Operator fusion* — vertical·horizontal. *Common Subexpression Elimination*. *Dead Code Elimination*. *Layout 변환* — NCHW ↔ NHWC. *Type/Layout propagation*. *Pattern-based rewrite* — TVM·MLIR. *Algebraic simplification*.

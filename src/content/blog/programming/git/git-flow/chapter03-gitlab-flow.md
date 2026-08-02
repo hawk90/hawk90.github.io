@@ -6,6 +6,7 @@ tags: [Git, GitLab Flow]
 series: "Git Flow"
 seriesOrder: 3
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

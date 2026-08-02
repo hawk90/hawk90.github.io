@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 2
 tags: [RISC-V, Machine-Mode, Initialization, Startup]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 33
 tags: [recipes, build, cmake]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

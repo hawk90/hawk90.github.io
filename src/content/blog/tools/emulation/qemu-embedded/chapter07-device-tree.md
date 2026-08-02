@@ -6,6 +6,7 @@ tags: [QEMU, DeviceTree, DTB, dtc, overlay]
 series: "QEMU Embedded Emulation"
 seriesOrder: 7
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 ARM·RISC-V Linux 시스템에서 *하드웨어 구성*을 커널에 알려 주는 표준 메커니즘이 **Device Tree**(DT)입니다. QEMU는 머신 구성에 맞춰 DT를 *자동 생성*해 부트로더에 전달하지만, 종종 *직접 수정*하거나 *증강*해야 할 때가 있죠. 이 장은 DT의 기본부터 QEMU에서의 활용까지 한 번에 정리합니다.

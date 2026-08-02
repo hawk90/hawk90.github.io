@@ -6,6 +6,7 @@ series: "XLA·OpenXLA 심화"
 seriesOrder: 2
 tags: [xla, stablehlo, frontend, portability]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *StableHLO* — HLO의 forward·backward 호환 spec. *MLIR dialect로 정의*. *Versioned op set* — semver-style. *Serialization* — portability. *Spec 문서* — operation별 semantics. *PJRT 입력*으로 표준화. *Compatibility window* — 5+ years.

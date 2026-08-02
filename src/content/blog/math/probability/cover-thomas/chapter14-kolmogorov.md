@@ -6,6 +6,7 @@ series: "Elements of Information Theory"
 seriesOrder: 14
 tags: [kolmogorov-complexity, algorithmic-information, solomonoff]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Definition* K(x) — universal Turing machine 기반 prefix code 길이. *Incomputable* — halting problem. *Relation to Shannon entropy* — `E[K(X)] ≈ H(X)`. *Universal probability·Solomonoff induction*. *Algorithmic randomness*. *Practical proxy* — compression ratio. ML 응용 — generalization·Occam·simplicity bias.

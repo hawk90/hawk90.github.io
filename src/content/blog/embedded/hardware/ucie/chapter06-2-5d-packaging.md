@@ -6,6 +6,7 @@ series: "UCIe 심화"
 seriesOrder: 6
 tags: [ucie, 2.5d, cowos, emib]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Silicon interposer (CoWoS)* — TSMC. *EMIB (Embedded Multi-die Interconnect Bridge)* — Intel. *Organic substrate* — 저비용. *RDL (Redistribution Layer)*. *Bump pitch*에 따른 bandwidth density. *열·전력·테스트* 도전 과제. 실 제품 — H100·MI300·Sapphire Rapids.

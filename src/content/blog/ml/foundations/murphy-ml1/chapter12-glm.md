@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 12
 tags: [murphy, glm, exponential-family, link-function]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Exponential family* — natural·canonical parameter·sufficient stat. *Link function·canonical link*. *GLM 예* — Gaussian (linear)·Bernoulli (logistic)·Poisson·gamma. *MLE 통일 풀이* — IRLS. *Bayesian GLM*. *GLM extension* — GAM (Generalized Additive Models)·GLMM (mixed-effects). *Practical regression toolkit*의 토대.

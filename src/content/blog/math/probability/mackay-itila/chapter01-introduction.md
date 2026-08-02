@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Information Theory, Inference, and Learning Algorithms"
 bookAuthor: "David J.C. MacKay"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *세 영역 통합* — 정보이론·Bayesian 추론·neural network. *Cover-Thomas와 차이* — ML·learning에 더 가깝게. *Two design problems* — data compression·error-correcting code. *기본 노테이션* — entropy·probability. [무료 PDF](https://www.inference.org.uk/itila/) 기준. 시리즈는 핵심 15장.

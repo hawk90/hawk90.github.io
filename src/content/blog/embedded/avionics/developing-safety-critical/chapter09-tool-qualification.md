@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 9
 tags: [avionics, do-178c, do-330, tool-qualification]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

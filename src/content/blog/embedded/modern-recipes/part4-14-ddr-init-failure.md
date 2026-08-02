@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 48
 tags: [recipes, ddr, sdram, memory, calibration]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

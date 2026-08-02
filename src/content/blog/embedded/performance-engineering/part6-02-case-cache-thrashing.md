@@ -5,6 +5,7 @@ description: "1024×1024 matrix multiply가 이론값의 10배 느렸다. SIMD�
 series: "Embedded Performance Engineering"
 seriesOrder: 51
 tags: [case-study, cache, thrashing, tiling, layout]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

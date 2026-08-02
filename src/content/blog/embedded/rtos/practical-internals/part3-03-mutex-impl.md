@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 24
 tags: [mutex, owner, recursion, lock-count, queue]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

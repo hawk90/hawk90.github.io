@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, SequenceHeader, ColorConfig]
 series: "AV1"
 seriesOrder: 2.05
 draft: true
+topics: ["media"]
 ---
 
 **Sequence Header OBU** 는 *전체 비디오 시퀀스에 한 번* 설정되는 전역 정보를 담는다. CVS(Coded Video Sequence) 가 시작되는 자리이자, 같은 CVS 안 모든 프레임이 *동일하게* 따르는 규칙이다.

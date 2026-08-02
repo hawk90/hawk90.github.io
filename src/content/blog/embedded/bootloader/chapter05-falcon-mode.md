@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 5
 tags: [embedded, bootloader, u-boot, falcon, boot-time]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

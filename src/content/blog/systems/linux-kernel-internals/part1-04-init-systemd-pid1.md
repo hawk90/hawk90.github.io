@@ -6,6 +6,7 @@ tags: [Linux, init, systemd]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 4
 draft: true
+topics: ["systems", "systems/linux-kernel"]
 ---
 
 ## 작성 중

@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 30
 tags: [isr-safe, fromisr, higher-priority, deferred]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

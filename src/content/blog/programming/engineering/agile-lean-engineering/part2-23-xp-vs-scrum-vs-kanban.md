@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Software Development"
 bookAuthor: "Alistair Cockburn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 세 방법론을 컨텍스트별로 비교 — 어떤 팀·상황에 무엇이 맞는가.

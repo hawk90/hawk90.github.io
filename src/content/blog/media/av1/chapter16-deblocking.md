@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Deblocking, Loop Filter]
 series: "AV1"
 seriesOrder: 16
 draft: true
+topics: ["media"]
 ---
 
 Ch 10에서 프레임을 복원하고 BMP로 저장했다. 자세히 보면 **블록 경계에 희미한 줄**이 보인다. 특히 QP가 높거나 단색 영역에서 눈에 띈다. 이것이 **블록 아티팩트(blocking artifact)**다.

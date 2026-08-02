@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 2
 tags: [cxl, cxl-type, mld, mh-mld, bundled-port]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

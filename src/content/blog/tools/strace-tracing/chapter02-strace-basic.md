@@ -6,6 +6,7 @@ tags: [strace, ptrace, syscall]
 series: "System Tracing"
 seriesOrder: 2
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

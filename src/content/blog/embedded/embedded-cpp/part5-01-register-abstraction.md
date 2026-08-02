@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 37
 tags: [cpp, embedded, register, mmio, volatile, type-safe, hardware]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

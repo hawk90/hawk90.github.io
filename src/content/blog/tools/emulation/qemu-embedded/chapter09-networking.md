@@ -6,6 +6,7 @@ tags: [QEMU, Networking, TAP, SLIRP, virtio-net, hostfwd]
 series: "QEMU Embedded Emulation"
 seriesOrder: 9
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 guest VM이 *어떻게 네트워크에 연결되는지*가 임베디드 개발에서 자주 필요합니다 — TFTP 부팅, NFS root, SSH 접속, package install. QEMU는 *여러 backend*를 통해 다양한 시나리오를 지원합니다. 이 장은 user-mode·TAP·socket의 차이와 활용을 정리합니다.

@@ -6,6 +6,7 @@ series: "High-Dimensional Probability"
 seriesOrder: 7
 tags: [vershynin, random-process, empirical-process, slepian]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Empirical process* — uniform LLN·DKW. *Gaussian process basics·comparison theorems*. *Slepian's inequality*·*Sudakov-Fernique inequality*. *Gordon's inequality*. *Sudakov's minoration*. *Application* — VC theory·M-estimator·convex regression·matrix estimation.

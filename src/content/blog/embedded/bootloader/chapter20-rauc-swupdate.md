@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 20
 tags: [embedded, bootloader, u-boot, rauc, swupdate, ota]
 draft: false
+topics: ["embedded"]
 ---
 
 A/B 슬롯·서명·다운로드·진행 보고·롤백 정책을 직접 짜기 시작하면, 비슷한 코드를 여러 프로젝트에서 다시 짜는 자신을 발견합니다. RAUC와 SWUpdate는 그 *반복되는 뼈대*를 미리 마련해 둔 오픈소스 프레임워크입니다. 둘 다 U-Boot의 A/B 슬롯과 정확히 맞물려 동작합니다.

@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 11
 tags: [linux, spidev, i2c-dev, ttys, termios, ioctl, userspace, kernel-driver]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

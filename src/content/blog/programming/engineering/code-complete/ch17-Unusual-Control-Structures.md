@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 17
 tags: [code-complete, control-flow, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

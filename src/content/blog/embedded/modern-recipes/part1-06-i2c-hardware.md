@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 6
 tags: [recipes, i2c, hw-basics]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

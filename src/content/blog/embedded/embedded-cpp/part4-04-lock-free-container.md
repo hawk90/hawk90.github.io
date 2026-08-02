@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 32
 tags: [cpp, embedded, lock-free, queue, stack, ring-buffer, spsc, mpmc]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

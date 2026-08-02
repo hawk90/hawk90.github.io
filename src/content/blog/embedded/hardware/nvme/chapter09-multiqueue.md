@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 9
 tags: [nvme, multiqueue, wrr, numa, affinity]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 NVMe의 강점 중 하나는 수만 개의 I/O Queue를 지원하는 것이다. 이 장에서는 멀티큐 전략, 중재 메커니즘, CPU Affinity를 분석한다.

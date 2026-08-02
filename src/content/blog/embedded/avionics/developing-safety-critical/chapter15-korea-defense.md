@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 15
 tags: [avionics, korea, kari, dapa, defense]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

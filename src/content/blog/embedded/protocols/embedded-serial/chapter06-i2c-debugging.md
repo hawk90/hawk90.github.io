@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 6
 tags: [i2c, debugging, stuck-bus, pullup, level-shift, logic-analyzer]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

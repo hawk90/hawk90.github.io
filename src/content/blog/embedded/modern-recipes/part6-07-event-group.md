@@ -5,6 +5,7 @@ description: "Event group bit, set/clear, AND/OR 조건 wait, broadcast로 다�
 series: "Modern Embedded Recipes"
 seriesOrder: 69
 tags: [recipes, rtos, event]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

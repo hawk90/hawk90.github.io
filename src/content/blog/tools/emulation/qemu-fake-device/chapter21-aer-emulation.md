@@ -6,6 +6,7 @@ tags: [QEMU, pcie-aer, error-injection, ras]
 series: "QEMU Fake Device Driver"
 seriesOrder: 21
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **AER**(Advanced Error Reporting)은 PCIe spec의 *표준 error reporting 메커니즘*입니다. correctable/uncorrectable/fatal error를 *device가 host에 알리는* path. cloud·datacenter의 *RAS*(Reliability·Availability·Serviceability)에 핵심이고, driver의 *error path*가 *실제 동작*하는지 검증하려면 AER injection이 필수.

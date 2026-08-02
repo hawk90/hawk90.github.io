@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Infrastructure as Code"
 bookAuthor: "Kief Morris"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — IaC의 의미와 도구 — declarative vs imperative.

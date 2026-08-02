@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 > 글쓰기는 두렵습니다. 두려움이 글을 망칩니다.

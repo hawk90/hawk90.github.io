@@ -6,6 +6,7 @@ tags: [QEMU, Buildroot, Yocto, Rootfs, initramfs, ext4]
 series: "QEMU Embedded Emulation"
 seriesOrder: 6
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 커널이 부팅하면 그 다음은 *user-space*입니다. user-space가 사는 곳이 **rootfs**. QEMU에서 rootfs를 attach해 init부터 shell까지 진입하는 흐름이 임베디드 개발의 *완전한 부팅*입니다.

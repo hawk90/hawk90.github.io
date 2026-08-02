@@ -5,6 +5,7 @@ description: "DT overlay의 fragment, target, symbol, dtoverlay 명령, Raspberr
 series: "Modern Embedded Recipes"
 seriesOrder: 78
 tags: [recipes, linux, devicetree, overlay]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

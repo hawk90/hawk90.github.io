@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 6
 tags: [bda3, model-checking, ppc, posterior-predictive]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Posterior predictive check (PPC)* — model이 data를 충분히 reproduce하는지. *Discrepancy measure* — test statistic·Bayesian p-value. *Graphical check* — histogram·QQ·scatter. *Cross-validation* — leave-one-out·k-fold·PSIS-LOO. *Importance resampling diagnostic*. *Model expansion path*.

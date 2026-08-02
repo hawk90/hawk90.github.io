@@ -5,6 +5,7 @@ description: "Active와 sleep, peripheral clock gating, DVFS, tickless idle, µA
 series: "Modern Embedded Recipes"
 seriesOrder: 99
 tags: [recipes, performance, power]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

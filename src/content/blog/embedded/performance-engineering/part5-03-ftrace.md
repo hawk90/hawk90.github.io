@@ -5,6 +5,7 @@ description: "ftrace의 function tracer, function_graph, irqsoff·preemptoff lat
 series: "Embedded Performance Engineering"
 seriesOrder: 42
 tags: [ftrace, function-tracer, latency-tracer, trace-cmd]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

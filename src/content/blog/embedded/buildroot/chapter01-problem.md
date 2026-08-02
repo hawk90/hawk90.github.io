@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 1
 tags: [embedded, buildroot, rootfs, yocto, embedded-linux]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

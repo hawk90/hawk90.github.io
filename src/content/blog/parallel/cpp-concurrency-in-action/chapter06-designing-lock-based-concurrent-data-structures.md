@@ -6,6 +6,7 @@ tags: [C++, C, Concurrency, Data Structures, Mutex]
 series: "C++ Concurrency in Action"
 seriesOrder: 6
 draft: true
+topics: ["parallel"]
 ---
 
 스레드 안전한 자료구조를 설계하는 방법을 다룬다. 단순히 뮤텍스를 감싸는 것 이상으로, 인터페이스 설계와 락 입자도가 중요하다. 6장은 lock-based 설계, 7장은 lock-free 설계로 자연스럽게 이어진다.

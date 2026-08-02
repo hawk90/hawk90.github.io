@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: 21 parts 88 chapters를 통과한 folly 시리즈의 마지막. fbcode 코드 리뷰에서 *반복적으로* 등장하는 folly 사용 패턴을 한 자리에 정리한다.

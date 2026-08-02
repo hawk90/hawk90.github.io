@@ -7,6 +7,7 @@ seriesOrder: 0
 tags: [performance, profiling, cache, optimization, perf, embedded, arm, risc-v]
 type: tech
 featured: true
+topics: ["embedded"]
 ---
 
 ## 이 시리즈를 쓰는 이유

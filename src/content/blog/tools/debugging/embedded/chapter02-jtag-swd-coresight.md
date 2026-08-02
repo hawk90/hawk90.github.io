@@ -6,6 +6,7 @@ tags: [jtag, swd, coresight, arm, embedded]
 series: "Embedded Debugging"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 RSP는 *위쪽 프로토콜*. 아래에서는 실제로 *전선 다섯 가닥*(JTAG) 또는 *두 가닥*(SWD)이 칩 안의 디버그 회로를 두드립니다. 이 장은 그 전기·논리 계층을 다룹니다 — TAP 상태 머신, SWD 패킷 형식, 그리고 *칩 안에 무엇이 들어 있나*의 표준인 ARM **CoreSight**.

@@ -5,6 +5,7 @@ description: "RTOS C API를 C++ 객체로 감싸는 패턴을 정리합니다. R
 series: "Practical RTOS Internals"
 seriesOrder: 45
 tags: [cpp, rtos, raii, std-thread, std-mutex, etl, coroutine]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

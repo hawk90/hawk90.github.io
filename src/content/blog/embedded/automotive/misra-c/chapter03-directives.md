@@ -6,6 +6,7 @@ tags: [misra, c, directives, implementation-defined, traceability, header-guard]
 series: "MISRA C"
 seriesOrder: 3
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 Directive는 정적 분석기가 자동 검증할 수 없는 *프로세스·환경·문서* 차원의 요구다. MISRA C:2012는 16개 Directive를 4개 그룹으로 묶었다.

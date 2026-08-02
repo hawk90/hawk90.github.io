@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 9
 tags: [embedded, bsp, smp, psci, multicore]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

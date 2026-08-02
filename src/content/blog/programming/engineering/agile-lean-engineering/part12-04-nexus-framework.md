@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Nexus Guide"
 bookAuthor: "Ken Schwaber"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Schwaber의 Nexus — Nexus Integration Team의 자리.

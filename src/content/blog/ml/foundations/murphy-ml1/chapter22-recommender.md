@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 22
 tags: [murphy, recommender, collaborative-filtering, mf]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Recsys task family* — rating·ranking·top-K. *Collaborative filtering (CF)* — user-user·item-item. *Matrix factorization* — SVD·ALS·SGD. *Implicit feedback* — BPR·WARP. *Cold start* 문제. *Neural CF·sequential recsys (SASRec·BERT4Rec)*. *Two-tower model·embedding service*. *Evaluation* — NDCG·recall·hit rate.

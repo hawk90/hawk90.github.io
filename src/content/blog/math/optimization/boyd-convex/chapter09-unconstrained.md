@@ -6,6 +6,7 @@ series: "Convex Optimization (Boyd)"
 seriesOrder: 9
 tags: [gradient-descent, newton, bfgs, line-search]
 draft: true
+topics: ["math", "math/optimization"]
 ---
 
 > Outline — *Strongly convex·smooth* — convergence 분석 도구. *Descent direction·step size* — line search (backtracking·Wolfe). *Gradient method*·convergence rate. *Steepest descent* — quadratic norm dependent. *Newton's method* — affine invariance·quadratic convergence·damping. *Quasi-Newton (BFGS·L-BFGS)*·*conjugate gradient*. SGD·Adam은 ML 컨텍스트에서.

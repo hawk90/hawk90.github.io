@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 2
 tags: [can, physical-layer, differential, termination, bit-timing, transceiver]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

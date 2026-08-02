@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 Memoir는 자기 인생에 관한 글입니다. 자서전(*autobiography*)과 비슷해 보이지만 다른 형식입니다.

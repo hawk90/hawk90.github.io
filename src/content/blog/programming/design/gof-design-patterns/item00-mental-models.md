@@ -6,6 +6,7 @@ tags: [Design Pattern, GoF, Mental Model, Overview]
 series: "GoF Design Patterns"
 seriesOrder: 0
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 왜 GoF가 어렵게 느껴지는가

@@ -6,6 +6,7 @@ tags: [Python, PEP8, Naming, Conventions, snake_case]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Naming conventions make code more readable."

@@ -5,6 +5,7 @@ description: "CAS loop, strong과 weak CAS, ABA 회피, exponential backoff, spu
 series: "Modern Embedded Recipes"
 seriesOrder: 105
 tags: [recipes, concurrency, atomic, cas]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

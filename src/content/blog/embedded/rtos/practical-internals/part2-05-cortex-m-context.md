@@ -5,6 +5,7 @@ description: "Cortex-M context switch는 PendSV 예외와 dual-stack 모델로 �
 series: "Practical RTOS Internals"
 seriesOrder: 15
 tags: [cortex-m, pendsv, msp, psp, svc, assembly]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

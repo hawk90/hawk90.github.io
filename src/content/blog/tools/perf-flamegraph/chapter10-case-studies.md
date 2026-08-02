@@ -6,6 +6,7 @@ tags: [perf, Case Study]
 series: "perf and FlameGraph"
 seriesOrder: 10
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: `folly::Init`은 main() 첫 줄에 두는 부트스트랩 객체다. gflags 파싱, glog 초기화, signal handler 설치, 기본 thread name까지 *손볼 곳을 한 줄로 줄인다*.

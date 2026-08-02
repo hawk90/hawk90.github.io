@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 8
 tags: [embedded, bsp, linux-kernel, defconfig]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 5
 tags: [pcie, interrupts, msi, msi-x, intx, interrupt-remapping]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

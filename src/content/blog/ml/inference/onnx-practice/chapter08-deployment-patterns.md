@@ -6,6 +6,7 @@ series: "ONNX 실전"
 seriesOrder: 8
 tags: [onnx, deployment, server, edge, mobile]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *Server* — Triton Inference Server·ORT C++ host. *Edge* — Jetson·NPU·OpenVINO. *Mobile* — ORT Mobile·Core ML·QNN ExecutionProvider. *WebAssembly* — onnxruntime-web. *Versioning·model registry*·*A/B testing*. *Latency·throughput·cost* 균형. *Failure mode* — fallback path.

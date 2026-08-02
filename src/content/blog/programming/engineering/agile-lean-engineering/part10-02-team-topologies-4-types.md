@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Team Topologies"
 bookAuthor: "Matthew Skelton & Manuel Pais"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Stream-aligned·Platform·Enabling·Complicated-subsystem.

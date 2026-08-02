@@ -6,6 +6,7 @@ series: "XLA·OpenXLA 심화"
 seriesOrder: 6
 tags: [xla, layout, tensor-order, transpose]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Layout* — minor-to-major order. *Layout assignment pass* — frontend hint·constraint·cost-driven 결정. *Forced layouts* — convolution이 채널 순서 요구. *Transpose insertion* 비용. *Cross-op consistency*. *AllReduce·Collective*과의 상호작용. *Memory bandwidth*가 결정 요인.

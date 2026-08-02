@@ -6,6 +6,7 @@ tags: [dwarf, debug-loc, expression-vm, optimization]
 series: "DWARF and ELF Internals"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 `print x`라고 했을 때 GDB는 `x`가 *지금 어디 있는지* 어떻게 알까요. 답은 `.debug_loc` (DWARF 4) 또는 `.debug_loclists` (DWARF 5) 안의 **DWARF expression** — 또 하나의 바이트코드 *스택 머신*.

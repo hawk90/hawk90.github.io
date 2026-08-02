@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 22
 tags: [cpp, embedded, pmr, polymorphic-allocator, cpp17, memory-resource]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

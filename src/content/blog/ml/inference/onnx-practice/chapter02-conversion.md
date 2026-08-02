@@ -6,6 +6,7 @@ series: "ONNX 실전"
 seriesOrder: 2
 tags: [onnx, conversion, torch-onnx, tf2onnx]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *PyTorch* — `torch.onnx.export` (legacy)·`torch.onnx.dynamo_export` (modern). *TensorFlow* — `tf2onnx`. *JAX* — `jax-to-tf` 경유. *Common pitfalls* — control flow·dynamic shape·custom op. *Symbolic shape inference*. *Constant folding* on export.

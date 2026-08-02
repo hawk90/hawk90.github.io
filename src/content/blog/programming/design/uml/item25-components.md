@@ -6,6 +6,7 @@ tags: [UML, Component, Architecture, Deployment]
 series: "UML 2.5.1"
 seriesOrder: 25
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

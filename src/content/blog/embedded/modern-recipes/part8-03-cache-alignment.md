@@ -5,6 +5,7 @@ description: "Cache line 정렬과 false sharing 회피, hot/cold 분리, SoA �
 series: "Modern Embedded Recipes"
 seriesOrder: 91
 tags: [recipes, cache, alignment, padding, soa]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [UML, Composite Structure, Part, Port, Connector]
 series: "UML 2.5.1"
 seriesOrder: 32
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

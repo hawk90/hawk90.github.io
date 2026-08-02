@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 10
 tags: [embedded, buildroot, beaglebone, practical]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

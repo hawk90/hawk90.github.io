@@ -6,6 +6,7 @@ tags: [QEMU, hypervisor, EL2, kvm-arm, xen, nested]
 series: "QEMU Embedded Emulation"
 seriesOrder: 17
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 자동차 ECU에서는 *한 SoC*가 infotainment(Linux), cluster(RTOS), ADAS(real-time OS)를 *분리된 partition*으로 동시에 돌립니다. 이를 가능하게 하는 토대가 ARMv8 *virtualization extension*(EL2)입니다. QEMU `virt,virtualization=on`으로 KVM·Xen·nested virtualization을 시뮬레이션할 수 있습니다.

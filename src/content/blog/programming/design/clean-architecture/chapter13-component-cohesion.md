@@ -6,6 +6,7 @@ tags: [Architecture, Components, Cohesion, REP, CCP, CRP]
 series: "Clean Architecture"
 seriesOrder: 13
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

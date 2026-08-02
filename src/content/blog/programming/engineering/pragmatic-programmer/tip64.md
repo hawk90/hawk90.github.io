@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 64
 tags: [pragmatic-programmer, refactoring, design]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

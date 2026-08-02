@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 18
 tags: [recipes, arm, cache]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

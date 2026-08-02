@@ -6,6 +6,7 @@ tags: [DDIA, Stream, Kafka, Flink, EventTime, ExactlyOnce]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 11
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

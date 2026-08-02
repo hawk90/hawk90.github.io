@@ -6,6 +6,7 @@ tags: [Design Pattern, GoF, C++, C, Structural]
 series: "GoF Design Patterns"
 seriesOrder: 12
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

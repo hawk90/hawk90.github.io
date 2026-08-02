@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
 draft: true
-
+topics: ["writing"]
 ---
 
 > Make the paragraph the unit of composition.

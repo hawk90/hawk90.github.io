@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 18
 tags: [embedded, bsp, ota, recovery, rauc, swupdate]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

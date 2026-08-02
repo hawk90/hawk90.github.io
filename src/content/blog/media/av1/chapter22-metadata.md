@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Metadata, HDR]
 series: "AV1"
 seriesOrder: 22
 draft: true
+topics: ["media"]
 ---
 
 이번 장에서는 AV1의 **Metadata OBU**를 살펴본다. Metadata OBU는 비디오 데이터 자체가 아닌 **부가 정보**를 전달한다. HDR 디스플레이 정보, Scalability 구조, 타임코드 등이 이를 통해 전송된다.

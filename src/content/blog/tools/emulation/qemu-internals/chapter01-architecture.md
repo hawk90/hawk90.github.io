@@ -6,6 +6,7 @@ tags: [QEMU, Architecture, TCG, KVM, accelerator]
 series: "QEMU Internals"
 seriesOrder: 1
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 *내부 구조*를 이해하면 단순 사용자에서 *기여자/개발자*로 한 단계 올라설 수 있습니다. 새 머신을 만들거나, 디바이스를 추가하거나, 성능을 튜닝하거나, 버그를 추적할 때 *어디를 봐야 하는지* 알게 되죠. 이 시리즈가 22장에 걸쳐 그 지도를 그립니다.

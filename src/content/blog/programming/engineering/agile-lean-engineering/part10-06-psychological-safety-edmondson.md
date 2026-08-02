@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Fearless Organization"
 bookAuthor: "Amy Edmondson"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 심리적 안전 — Amy Edmondson 25년 연구.

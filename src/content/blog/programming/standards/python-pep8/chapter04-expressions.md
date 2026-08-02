@@ -6,6 +6,7 @@ tags: [Python, PEP8, Expressions, Statements, Operators]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Whitespace in Expressions and Statements"

@@ -6,6 +6,7 @@ tags: [gdb, TUI, Frontend, DAP]
 series: "GDB and LLDB"
 seriesOrder: 10
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 :::tip[Deep dive]

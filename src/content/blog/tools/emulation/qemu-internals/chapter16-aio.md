@@ -6,6 +6,7 @@ tags: [QEMU, aio, io-uring, linux-aio, IOThread]
 series: "QEMU Internals"
 seriesOrder: 16
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 **AIO**(Asynchronous I/O) subsystem은 *fd handler·timer·coroutine·bottom half*를 한 곳에 묶는 *event loop infrastructure*입니다. main loop·iothread 각각이 *자기 AioContext*를 갖고, 그 안에서 *모든 비동기 동작*이 일어납니다.

@@ -6,6 +6,7 @@ tags: [autosar, cpp, template, sfinae, type-traits, concepts]
 series: "AUTOSAR C++14"
 seriesOrder: 6
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 템플릿은 C++의 *가장 강력한 도구*이자 *가장 분석 어려운 영역*이다. 인증 코드에서는 *통제된 사용*이 필요하다. AUTOSAR C++14는 *템플릿 메타프로그래밍의 안전 영역*을 정의한다.

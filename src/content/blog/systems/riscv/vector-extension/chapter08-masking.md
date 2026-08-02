@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 8
 tags: [RISC-V, Vector, Mask, Predication]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

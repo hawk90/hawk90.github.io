@@ -6,6 +6,7 @@ tags: [Python, PEP8, Imports, Modules, isort]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 3
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Imports should usually be on separate lines."

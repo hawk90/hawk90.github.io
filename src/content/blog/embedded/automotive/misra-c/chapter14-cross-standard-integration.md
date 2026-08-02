@@ -6,6 +6,7 @@ tags: [misra, cert-c, autosar, c, cpp, integration, cross-standard, governance]
 series: "MISRA C"
 seriesOrder: 14
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 자동차·항공 펌웨어 프로젝트는 *MISRA C + CERT C + AUTOSAR C++14* 셋 다 적용되는 경우가 많다. 각 표준이 *다른 강조점*을 가지므로 *conflict*가 생긴다. 이 장은 *통합 전략*을 본다.

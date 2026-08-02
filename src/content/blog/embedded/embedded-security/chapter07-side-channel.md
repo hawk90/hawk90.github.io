@@ -6,6 +6,7 @@ tags: [Side-channel, Power Analysis, Timing Attack, Fault Injection, ChipWhisper
 series: "Embedded Security"
 seriesOrder: 7
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Scrumban"
 bookAuthor: "Corey Ladas"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Scrum 구조 + Kanban flow — Ladas Scrumban의 통합.

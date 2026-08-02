@@ -6,6 +6,7 @@ series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 14
 tags: [neural-network, bayesian-nn, learning-as-inference]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Single neuron as classifier* — logistic regression. *Capacity of a neuron* — VC bound. *Learning as inference* — weight posterior. *Backpropagation* — chain rule on layered graph. *Bayesian NN* — Laplace·VI·ensemble. *Hopfield·Boltzmann* — modern energy-based model 뿌리. *Generalization* — MacKay의 Bayesian framework.

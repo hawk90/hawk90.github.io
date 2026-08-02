@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 19
 tags: [bus, ahb, axi, chi, amba]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [Valgrind, Memcheck, MemoryLeak, Debugging, C, C++]
 series: "Valgrind"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 네 가지 누수 분류

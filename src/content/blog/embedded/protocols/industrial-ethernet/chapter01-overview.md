@@ -6,6 +6,7 @@ series: "Industrial Ethernet 심화"
 seriesOrder: 1
 tags: [industrial-ethernet, ethercat, profinet, tsn]
 draft: false
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

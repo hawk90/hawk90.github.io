@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 8
 tags: [DDR, LPDDR, memory, training, command]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 LPDDR에서는 Command와 Address가 동일한 버스를 공유한다. CA Training은 이 CA 버스의 타이밍을 CLK에 정렬하는 과정이다.

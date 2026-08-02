@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 33
 tags: [cpp, embedded, enum-class, bit-flags, type-safe]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

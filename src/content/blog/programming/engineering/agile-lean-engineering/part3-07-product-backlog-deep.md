@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Essential Scrum"
 bookAuthor: "Kenneth Rubin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — DEEP(Detailed appropriately·Estimated·Emergent·Prioritized) backlog 관리.

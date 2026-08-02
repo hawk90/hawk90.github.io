@@ -6,7 +6,7 @@ tags: [Testing, Integration]
 series: "Khorikov Unit Testing"
 seriesOrder: 8
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 단위 테스트만으로는 충분하지 않다. 컴포넌트 간의 연동, 외부 시스템과의 통합은 통합 테스트로 검증해야 한다.

@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 9
 tags: [embedded, buildroot, package, autotools, cmake, python]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

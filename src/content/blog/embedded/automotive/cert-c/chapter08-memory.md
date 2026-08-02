@@ -6,6 +6,7 @@ tags: [cert-c, memory, malloc, double-free, use-after-free, asan, cwe-416]
 series: "CERT C"
 seriesOrder: 8
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 heap 메모리 관리 버그는 *exploit의 최대 단골*이다. *Heap Feng Shui*, *Use-After-Free*, *Double Free*, *Heap Spray* 모두 같은 카테고리의 변종이다. MEM 카테고리는 이 패밀리 전체를 다룬다.

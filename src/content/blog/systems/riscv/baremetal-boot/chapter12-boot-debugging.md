@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 12
 tags: [RISC-V, Debug, UART, JTAG, Boot]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

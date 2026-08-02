@@ -6,6 +6,7 @@ tags: [gdb, core-dump, postmortem, siginfo]
 series: "Postmortem Debugging"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 core 파일이 손에 들어왔습니다. *어디서 죽었나*, *왜 죽었나*, *어떤 변수가 잘못된 값을 가졌나*. 이 장은 GDB로 core를 분석하는 실전 흐름과 자주 만나는 패턴을 다룹니다.

@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 7
 tags: [RISC-V, BL602, Bouffalo, IoT]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

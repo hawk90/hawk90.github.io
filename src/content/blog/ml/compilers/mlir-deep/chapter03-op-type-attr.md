@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 3
 tags: [mlir, operation, type, attribute]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Operation* — operand·result·region·attribute·successor. *Region·Block·Argument*. *Type* — `tensor`·`memref`·`vector`·`index`·func type. *Attribute* — compile-time constant (integer·string·array·dictionary·typed). *Verifier*와 trait. *interface* — generic dispatch.

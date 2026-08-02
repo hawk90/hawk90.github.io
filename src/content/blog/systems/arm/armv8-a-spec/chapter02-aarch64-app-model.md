@@ -6,6 +6,7 @@ series: "ARMv8-A Architecture Reference Manual"
 seriesOrder: 2
 tags: [armv8-a, aarch64, registers, app-level]
 draft: true
+topics: ["systems", "systems/arm"]
 ---
 
 ## 한 줄 요약

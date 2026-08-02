@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 18
 tags: [koller-friedman, structure-learning, bic, bde, pc-algorithm]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Constraint-based structure learning* — PC·IC·FCI algorithm. *Score-based* — BIC·BDe·MDL score. *Score decomposition* — score equivalence. *Search* — greedy·hill-climbing·tabu·GES (Greedy Equivalence Search). *Markov equivalence class·CPDAG*. *Bayesian model averaging over structures*. ML 응용 — causal discovery.

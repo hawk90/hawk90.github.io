@@ -6,6 +6,7 @@ tags: [Valgrind, Memcheck, Helgrind, DRD, Debugging, C, C++]
 series: "Valgrind"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## Valgrind는 *어떤 도구인가*

@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 5
 tags: [scheduling, tiling, vectorization, halide]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Halide* 영감 — algorithm·schedule 분리. *TVM schedule primitive*. *Tile size*·*outer/inner loop*. *Reorder·split·fuse*. *Parallelize·vectorize*. *Tensorize* — hardware intrinsic mapping. *Bind* — thread·block·warp. *Cache_read·cache_write*. *Compute_at·compute_inline*.

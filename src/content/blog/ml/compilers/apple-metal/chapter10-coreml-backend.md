@@ -6,6 +6,7 @@ series: "Apple Metal Stack"
 seriesOrder: 10
 tags: [metal, coreml, ane, dispatch]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Core ML* — ANE·GPU·CPU 자동 선택. *MPSGraph 백엔드* — GPU 경로. *Compute unit hint* — `cpuOnly·cpuAndGPU·cpuAndNeuralEngine·all`. *Stateful ML programs*·*On-device personalization*. *Core ML Tools* — PyTorch·TF → mlpackage 변환. *Apple Intelligence* (LLM on-device) stack과 연결.

@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 8
 tags: [can-xl, payload, vcid, ethernet-tunneling, cia-611-1]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

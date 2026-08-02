@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 ## std::의 random은 왜 불편한가

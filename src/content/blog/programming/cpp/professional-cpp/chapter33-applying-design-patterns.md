@@ -6,6 +6,7 @@ tags: [C++, Design Patterns, Observer, Iterator]
 series: "전문가를 위한 C++"
 seriesOrder: 33
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

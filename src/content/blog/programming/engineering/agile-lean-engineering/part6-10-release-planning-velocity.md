@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Estimating and Planning"
 bookAuthor: "Mike Cohn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — velocity로 release date 예측 — burndown forecast.

@@ -6,6 +6,7 @@ series: "Designing Machine Learning Systems"
 seriesOrder: 2
 tags: [dmls, system-design, requirements]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Business goal* — 매출·전환·CSAT. *ML objective* — accuracy·recall·latency. *Constraints* — data privacy·budget·platform·latency SLO. *Reliability·scalability·maintainability·adaptability*. *Iterative loop* — quick win → improve. *Misalignment* — proxy metric vs business outcome.

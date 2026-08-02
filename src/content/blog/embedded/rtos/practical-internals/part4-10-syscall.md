@@ -5,6 +5,7 @@ description: "MPU/MMU로 user task와 kernel을 분리하는 RTOS의 syscall 구
 series: "Practical RTOS Internals"
 seriesOrder: 42
 tags: [syscall, svc, ecall, mpu, mmu, privilege, freertos-mpu]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

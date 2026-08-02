@@ -6,6 +6,7 @@ tags: [Architecture, OO, Polymorphism, DependencyInversion]
 series: "Clean Architecture"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

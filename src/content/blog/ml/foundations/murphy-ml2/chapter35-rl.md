@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 35
 tags: [reinforcement-learning, mdp, ppo, rlhf]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *MDP·Bellman equation*. *Tabular RL* — DP·MC·TD·Q-learning·SARSA. *Function approximation* — DQN·Double DQN·Rainbow. *Policy gradient* — REINFORCE·A2C·PPO·TRPO. *Actor-critic*. *Model-based RL*·*world model*. *Offline RL*. *RLHF* — preference modeling·PPO with reward model. *Multi-agent RL·imitation learning·inverse RL*.

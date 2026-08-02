@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 8
 tags: [koller-friedman, exponential-family, natural-parameter, log-partition]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Exponential family form*. *Natural·canonical parameter*. *Sufficient statistic·log partition function*. *Marginal·conditional in exponential family*. *MLE·maximum entropy connection*. *Conjugate prior structure*. *Mean parameter vs canonical parameter*. *PGM에서 exponential family의 자연성*.

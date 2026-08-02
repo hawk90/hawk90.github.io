@@ -5,6 +5,7 @@ description: "FreeRTOS Software Timer 내부를 따라가며 daemon task 구조,
 series: "Practical RTOS Internals"
 seriesOrder: 41
 tags: [software-timer, daemon, callback, timer-wheel]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

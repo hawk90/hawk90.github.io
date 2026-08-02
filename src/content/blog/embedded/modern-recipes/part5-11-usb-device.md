@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 59
 tags: [recipes, peripheral, usb]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

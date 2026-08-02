@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 14
 tags: [nvme, nvme-cli, diagnostic, admin]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 nvme-cli는 Linux에서 NVMe 디바이스를 관리하고 진단하는 표준 도구다. 이 장에서는 핵심 명령어를 완전 정복한다.

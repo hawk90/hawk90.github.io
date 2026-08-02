@@ -6,6 +6,7 @@ tags: [elf, binary, linker]
 series: "DWARF and ELF Internals"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 DWARF를 깊이 다루기 전에 그 컨테이너인 *ELF*부터 봅니다. Linux·BSD·일부 임베디드 환경의 표준 바이너리 포맷. 50년 가까이 거의 변함없이 살아남았고, 디버그 정보·심볼·실행 가능 코드·동적 링크 메타데이터를 *한 파일*에 모두 담는 결정적인 추상화입니다.

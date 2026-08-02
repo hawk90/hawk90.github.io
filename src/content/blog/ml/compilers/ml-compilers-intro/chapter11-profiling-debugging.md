@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 11
 tags: [profiling, debugging, accuracy, regression]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Per-op timing* — `tvm.runtime.profiler`. *Memory profiling* — peak usage·fragmentation. *Layer-wise accuracy*·*reference run*. *Bit-exact reproducibility*·deterministic flag. *MLIR `--mlir-print-ir-after-failure`*. *Compile time* 측정. *Bisect tooling* — pass·op-level 회귀.

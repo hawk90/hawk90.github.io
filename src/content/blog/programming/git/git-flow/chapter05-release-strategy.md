@@ -6,6 +6,7 @@ tags: [Git, Release, Tagging, Versioning]
 series: "Git Flow"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

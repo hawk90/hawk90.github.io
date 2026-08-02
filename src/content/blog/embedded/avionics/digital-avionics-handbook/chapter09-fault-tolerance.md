@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 9
 tags: [avionics, fault-tolerance, tmr, redundancy]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

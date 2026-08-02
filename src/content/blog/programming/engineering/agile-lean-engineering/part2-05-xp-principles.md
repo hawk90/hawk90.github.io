@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change (2nd ed)"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 2판에서 추가된 14 원칙. 가치(why)와 실천(how) 사이를 잇는 다리(what). 각 원칙의 의미와 적용.

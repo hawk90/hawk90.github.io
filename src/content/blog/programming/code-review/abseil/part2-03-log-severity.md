@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: `absl::LogSeverity`는 4단계 로그 심각도를 표현하는 enum이고, 로깅 시스템의 다른 모든 부분이 이 type 위에 서 있다. `NormalizeLogSeverity`는 외부 시스템의 정수 코드를 안전하게 변환한다.

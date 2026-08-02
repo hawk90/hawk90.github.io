@@ -5,6 +5,7 @@ description: "Preemptive와 cooperative, time-slice, context switch 비용, tick
 series: "Modern Embedded Recipes"
 seriesOrder: 65
 tags: [recipes, rtos, scheduler]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

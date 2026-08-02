@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
 draft: true
-
+topics: ["writing"]
 ---
 
 Results의 문법은 시제와 비교 표현에 집중됩니다. 자기 발견을 어느 강도로 표현하는가가 voice를 결정합니다.

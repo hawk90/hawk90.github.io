@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 21
 tags: [bda3, gaussian-process, spatial, kriging]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *GP regression·classification* (PRML·Murphy ML2와 보완). *Kriging in spatial statistics*. *Covariance function* — exponential·Matérn·periodic·composite. *Computational scaling* — sparse approximation·SVI for GP·inducing point. *Spatio-temporal model*. *Bayesian optimization preview*.

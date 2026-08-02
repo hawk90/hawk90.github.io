@@ -5,6 +5,7 @@ description: "file_operations, cdev, minor 번호, copy_to/from_user, blocking I
 series: "Modern Embedded Recipes"
 seriesOrder: 81
 tags: [recipes, linux, char-driver]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

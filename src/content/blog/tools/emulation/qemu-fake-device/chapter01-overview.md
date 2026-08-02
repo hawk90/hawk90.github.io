@@ -6,6 +6,7 @@ tags: [QEMU, Driver, Emulation, fake-device, fake-fpga]
 series: "QEMU Fake Device Driver"
 seriesOrder: 1
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Linux device driver 개발은 *실 hardware*가 있어야 시작할 수 있다는 통념이 있습니다. 그러나 QEMU에 *가상 device*를 만들면 *하드웨어 도착 전*에 driver의 대부분을 완성할 수 있죠. 이 시리즈 22장이 그 워크플로의 *전체 청사진*입니다.

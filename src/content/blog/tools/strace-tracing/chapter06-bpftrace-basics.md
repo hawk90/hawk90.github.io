@@ -6,6 +6,7 @@ tags: [bpftrace, eBPF, DSL]
 series: "System Tracing"
 seriesOrder: 6
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

@@ -5,6 +5,7 @@ description: "False sharing의 원리와 영향, perf c2c 감지, alignas(64) pa
 series: "Modern Embedded Recipes"
 seriesOrder: 109
 tags: [recipes, concurrency, cache, false-sharing]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

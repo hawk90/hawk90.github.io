@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 11
 tags: [nvme, linux, kernel, driver]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 Linux는 mainline 커널에 NVMe 드라이버를 포함하고 있다. 이 장에서는 nvme-core와 nvme-pci 모듈의 전체 구조를 분석한다.

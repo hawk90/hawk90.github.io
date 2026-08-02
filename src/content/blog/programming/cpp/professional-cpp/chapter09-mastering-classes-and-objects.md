@@ -6,6 +6,7 @@ tags: [C++, Class, Rule of Five]
 series: "전문가를 위한 C++"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

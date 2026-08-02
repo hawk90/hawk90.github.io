@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Retrospectives"
 bookAuthor: "Esther Derby & Diana Larsen"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 4Ls·start-stop-continue·sailboat·5 whys — retrospective 패턴 카탈로그.

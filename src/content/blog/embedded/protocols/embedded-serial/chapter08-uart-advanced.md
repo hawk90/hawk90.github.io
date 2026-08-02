@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 8
 tags: [uart, flow-control, dma, fifo, idle-line, rts-cts]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

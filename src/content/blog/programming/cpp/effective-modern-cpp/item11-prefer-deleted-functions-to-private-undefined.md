@@ -6,6 +6,7 @@ tags: [C++, deleted Functions, Special Member, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 11
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

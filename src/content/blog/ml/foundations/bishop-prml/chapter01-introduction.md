@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Pattern Recognition and Machine Learning"
 bookAuthor: "Christopher M. Bishop"
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Polynomial curve fitting* — overfitting·regularization·Bayesian 시각 도입. *Probability theory* recap — sum·product rule·Gaussian. *Model selection*·*curse of dimensionality*. *Decision theory* — Bayes·minimum misclassification·rejection. *Information theory* — entropy·KL·mutual info. PRML의 *probabilistic·Bayesian 톤*.

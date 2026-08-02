@@ -6,6 +6,7 @@ tags: [cert-c, security, sei, cwe, risk-assessment]
 series: "CERT C"
 seriesOrder: 1
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 CERT(Computer Emergency Response Team)는 1988년 Morris Worm 사건 이후 카네기멜런 SEI(Software Engineering Institute)가 미국방부 자금으로 설립한 보안 대응 조직이다. CERT C는 그 산물 중 하나 — *C 언어로 작성된 코드에서 보안 취약점을 만들지 않기 위한 표준*이다.

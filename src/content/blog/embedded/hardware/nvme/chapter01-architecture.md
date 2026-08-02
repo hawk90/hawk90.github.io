@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 1
 tags: [nvme, ahci, pcie, architecture]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 NVMe는 AHCI의 한계를 극복하기 위해 처음부터 새로 설계된 프로토콜이다. 이 장에서는 두 프로토콜의 근본적인 차이를 비교하고, NVMe 아키텍처의 전체 그림을 그린다.

@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 1
 tags: [RISC-V, Boot, Reset-Vector, Firmware]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

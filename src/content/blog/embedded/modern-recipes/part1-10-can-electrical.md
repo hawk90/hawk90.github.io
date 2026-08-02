@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 10
 tags: [recipes, can, hw-basics]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

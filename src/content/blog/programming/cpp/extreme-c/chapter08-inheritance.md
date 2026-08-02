@@ -6,6 +6,7 @@ tags: [C, OOP, Inheritance]
 series: "전문가를 위한 C"
 seriesOrder: 8
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

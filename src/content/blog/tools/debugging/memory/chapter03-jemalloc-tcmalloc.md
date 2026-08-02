@@ -6,6 +6,7 @@ tags: [memory, jemalloc, tcmalloc, malloc, pprof]
 series: "Memory Diagnostics"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 glibc의 ptmalloc은 *멀티스레드 환경*에서 lock 경합·heap fragmentation으로 *수십 % 메모리 낭비*가 흔합니다. **jemalloc** (Facebook/Mozilla)과 **tcmalloc** (Google)이 *더 효율적인 대체*이자 *내장 profiler*까지 제공.

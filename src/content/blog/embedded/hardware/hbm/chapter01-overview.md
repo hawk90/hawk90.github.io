@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 1
 tags: [hbm, gddr, memory, bandwidth]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

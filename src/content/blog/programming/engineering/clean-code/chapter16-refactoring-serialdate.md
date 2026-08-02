@@ -6,6 +6,7 @@ tags: [CleanCode, Refactoring, Code Review, Robert Martin]
 series: "Clean Code"
 seriesOrder: 16
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

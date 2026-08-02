@@ -6,6 +6,7 @@ series: "XLA·OpenXLA 심화"
 seriesOrder: 1
 tags: [xla, openxla, jax, tensorflow, pjrt]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *XLA* — 2017 TF에서 시작, JIT/AOT compiler. *2022 OpenXLA* — Google·DeepMind·NVIDIA·AMD·Intel·Apple·Meta 등 컨소시엄. *Backends* — CPU·GPU·TPU·custom. *Frontend* — TensorFlow·JAX·PyTorch (via PJRT). *MLIR과의 관계* — StableHLO·HLO를 MLIR로 마이그레이션 중.

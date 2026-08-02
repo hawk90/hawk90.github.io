@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 3
 tags: [nvme, namespace, multipath, subsystem]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 Namespace는 NVMe에서 논리적인 스토리지 단위다. 하나의 Controller가 여러 Namespace를 관리할 수 있으며, 반대로 하나의 Namespace를 여러 Controller가 공유할 수도 있다. 이 장에서는 Namespace의 구조와 Multi-path I/O를 다룬다.

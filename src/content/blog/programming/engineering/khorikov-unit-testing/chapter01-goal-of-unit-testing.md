@@ -6,7 +6,7 @@ tags: [TDD, Unit Testing, Goal]
 series: "Khorikov Unit Testing"
 seriesOrder: 1
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 단위 테스트를 왜 작성하는가? "버그를 잡기 위해"가 일반적인 답이다. Khorikov는 더 근본적인 목적을 제시한다. 단위 테스트의 진짜 가치는 **지속 가능한 프로젝트 성장**에 있다.

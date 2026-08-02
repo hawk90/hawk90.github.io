@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Scrum Guide"
 bookAuthor: "Schwaber & Sutherland"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Transparency·Inspection·Adaptation — Scrum의 토대.

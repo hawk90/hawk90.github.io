@@ -6,6 +6,7 @@ tags: [QEMU, virtio, packed-ring, indirect-descriptor, EVENT_IDX]
 series: "QEMU Fake Device Driver"
 seriesOrder: 16
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Ch 15의 basic VirtIO 위에 *성능 최적화 layer*들이 있습니다. **packed virtqueue**(1.1+)·**indirect descriptor**·**EVENT_IDX**가 throughput을 *수 배* 끌어올립니다. modern VirtIO device는 *모두* 이 features를 활용. 이 장이 그들의 *내부*.

@@ -6,6 +6,7 @@ series: "Elements of Information Theory"
 seriesOrder: 16
 tags: [portfolio, log-optimal, universal-portfolio]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Stock market model* — return vector·portfolio. *Log-optimal portfolio* — Kelly의 generalize. *Doubling rate* W*과 entropy의 관계. *Side information* 가치. *Universal portfolio* (Cover) — distribution 모르고도 asymptotically optimal. *Information-investment duality*. *Stationary market의 long-run* 분석.

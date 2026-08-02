@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 19
 tags: [embedded, bootloader, u-boot, linux-abi, kernel]
 draft: false
+topics: ["embedded"]
 ---
 
 부트로더는 커널을 *그냥 점프*하지 않습니다. 커널은 점프 시점의 *레지스터 값*과 *CPU 모드*에 강한 요구가 있습니다. 그 약속이 boot ABI입니다. 약속을 어기면 커널이 첫 명령어에서 panic하거나, 더 흔하게는 아무 출력도 없이 멈춥니다.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 글의 가장 중요한 두 부분은 *시작(lead)*과 *끝(ending)*입니다.

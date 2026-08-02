@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 84
 tags: [pragmatic-programmer, planning, habits]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

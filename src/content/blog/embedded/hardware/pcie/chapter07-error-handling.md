@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 7
 tags: [pcie, error-handling, aer, dpc, flr]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

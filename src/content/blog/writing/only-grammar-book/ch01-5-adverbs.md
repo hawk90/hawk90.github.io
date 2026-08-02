@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
 draft: true
-
+topics: ["writing"]
 ---
 
 > 부사는 *동사, 형용사, 다른 부사, 문장 전체*를 수식합니다. 위치가 의미를 바꾸기도 하므로 정확한 자리에 놓아야 합니다.

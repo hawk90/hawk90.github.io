@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 7
 tags: [linux, driver, time, jiffies, workqueue]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — `jiffies`·HZ·`get_jiffies_64`. `time64_t`·`ktime_t`. delay — `udelay`·`mdelay`·`msleep`·`usleep_range`. kernel timer (legacy)·hrtimer. *workqueue* (모던 표준)·tasklet (deprecated). softirq·threaded IRQ.

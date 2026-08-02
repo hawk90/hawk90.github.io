@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "우리글 바로쓰기"
 bookAuthor: "이오덕"
 draft: true
+topics: ["writing"]
 ---
 
 > **우리글 바로쓰기** 제5권 4장 요약

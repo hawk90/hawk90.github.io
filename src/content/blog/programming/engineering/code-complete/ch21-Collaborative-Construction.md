@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 21
 tags: [code-complete, collaboration, code-review, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

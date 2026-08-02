@@ -6,6 +6,7 @@ tags: [TDD, Readability, Builder]
 series: "Growing Object-Oriented Software"
 seriesOrder: 20
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > "Tests are executable documentation."

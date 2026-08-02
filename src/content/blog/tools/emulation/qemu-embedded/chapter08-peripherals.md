@@ -6,6 +6,7 @@ tags: [QEMU, UART, SPI, I2C, GPIO, chardev]
 series: "QEMU Embedded Emulation"
 seriesOrder: 8
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU virt 머신의 기본 peripheral 외에도 *추가로 attach*할 수 있는 device들이 많습니다. UART 다중·SPI flash·I2C 센서·GPIO 입출력 — driver 개발 시나리오에 맞춰 attach하면 *실 보드*에 가깝게 시뮬레이션할 수 있습니다.

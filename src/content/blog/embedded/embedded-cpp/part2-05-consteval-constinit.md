@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 13
 tags: [cpp, embedded, cpp20, consteval, constinit, compile-time]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

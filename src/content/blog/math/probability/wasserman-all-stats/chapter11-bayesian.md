@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 11
 tags: [bayesian, prior, posterior, credible-interval]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Prior·posterior·marginal·posterior predictive*. *Conjugate prior*. *Credible interval* vs frequentist confidence interval. *Bayesian point estimator* — MAP·posterior mean. *Bayesian model comparison*·Bayes factor. *Empirical Bayes·hierarchical model*. *Frequentist vs Bayesian* 비교. *MCMC·VI* 예고.

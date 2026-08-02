@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 6
 tags: [sync, critical-section, mutex, race-condition, atomic]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

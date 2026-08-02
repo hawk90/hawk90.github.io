@@ -5,6 +5,7 @@ description: "Lock-free 메모리 회수, ABA 회피, RCU와의 비교, C++ prop
 series: "Modern Embedded Recipes"
 seriesOrder: 104
 tags: [recipes, concurrency, hazard-pointer]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

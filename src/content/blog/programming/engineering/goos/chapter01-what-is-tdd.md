@@ -6,6 +6,7 @@ tags: [TDD, Red-Green-Refactor]
 series: "Growing Object-Oriented Software"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 TDD는 단순히 "테스트를 먼저 작성하는 것"이 아니다. 테스트가 설계를 이끄는 개발 방법론이다. GOOS의 저자 Steve Freeman과 Nat Pryce는 여기에 더해, 테스트가 객체 간 **협력 관계**를 설계하는 도구라고 본다. 이 시각이 이른바 **London school**(또는 mockist) TDD의 출발점이다.

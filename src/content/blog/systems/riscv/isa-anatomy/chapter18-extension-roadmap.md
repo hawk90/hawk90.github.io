@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 18
 tags: [RISC-V, Extensions, Vector, Hypervisor, Profiles]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

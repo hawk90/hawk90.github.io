@@ -6,6 +6,7 @@ tags: [Sanitizer, ASan, UBSan, Debugging, C, C++]
 series: "Sanitizers"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 황금 조합 다시 보기

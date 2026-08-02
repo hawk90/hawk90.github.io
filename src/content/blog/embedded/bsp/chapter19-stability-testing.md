@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 19
 tags: [embedded, bsp, stability, stress, soak, testing]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

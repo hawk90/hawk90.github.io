@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 16
 tags: [RISC-V, RVWMO, Memory-Model, Fence, Memory-Ordering]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

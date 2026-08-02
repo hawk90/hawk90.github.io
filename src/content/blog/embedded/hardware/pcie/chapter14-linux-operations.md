@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 14
 tags: [pcie, hot-plug, aer-recovery, dpc, ari, linux-operations]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

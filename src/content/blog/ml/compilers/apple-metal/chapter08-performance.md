@@ -6,6 +6,7 @@ series: "Apple Metal Stack"
 seriesOrder: 8
 tags: [metal, tile-shader, simdgroup, performance]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Tile shader* — render pass 중간에 compute. *Imageblock* — TBDR (Tile-Based Deferred Rendering) tile memory. *Simdgroup matrix* — 8×8 matrix op (M3+). *Raster Order Group* — pixel level sync. *Heaps·argument buffers*로 binding 최소화. *Xcode GPU Frame Capture·Counters*.

@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 21
 tags: [koller-friedman, influence-diagram, decision-theory, value-of-information]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Influence diagram* — chance·decision·utility node. *Maximum expected utility (MEU) policy*. *Variable elimination for ID·junction tree*. *Value of perfect·imperfect information*. *Sequential decision·POMDP의 토대*. *Multi-attribute utility·preferences elicitation*. K&F 책 마무리 — *PGM이 단순 inference 너머 decision-making framework*.

@@ -6,6 +6,7 @@ tags: [QEMU, FreeRTOS, Zephyr, NuttX, RTOS, Cortex-M]
 series: "QEMU Embedded Emulation"
 seriesOrder: 12
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 bare-metal과 Linux 사이에 *Real-Time Operating System*(RTOS)이 있습니다. FreeRTOS·Zephyr·NuttX·ThreadX 등 — *task scheduler + 동기화 primitive*만 제공하는 가벼운 커널. QEMU에서 RTOS를 띄우면 *MCU 펌웨어*를 보드 없이 개발할 수 있습니다.

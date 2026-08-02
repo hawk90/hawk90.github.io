@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 11
 tags: [avionics, do-178c, do-331, mbd, simulink, scade]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

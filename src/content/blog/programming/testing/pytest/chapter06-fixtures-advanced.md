@@ -6,6 +6,7 @@ series: "pytest 심화"
 seriesOrder: 6
 tags: [pytest, fixture, request, params, indirect]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `request` fixture로 메타 정보 (`request.param`, `request.node`). `@fixture(params=[...])`로 *fixture 자체를 parameterize*. `indirect=True`로 parametrize 값을 fixture에 *통과*. *factory pattern* — fixture가 함수를 반환해 test 안에서 호출. `tmp_path`·`monkeypatch` 등 built-in fixture.

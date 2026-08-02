@@ -6,6 +6,7 @@ series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 8
 tags: [freertos, event-group, synchronization, rendezvous]
 draft: true
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

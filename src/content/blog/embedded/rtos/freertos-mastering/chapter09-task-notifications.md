@@ -6,6 +6,7 @@ series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 9
 tags: [freertos, notification, lightweight-ipc]
 draft: true
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

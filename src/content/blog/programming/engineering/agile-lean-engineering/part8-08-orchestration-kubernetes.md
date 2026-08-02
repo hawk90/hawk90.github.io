@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Kubernetes Up & Running"
 bookAuthor: "Hightower·Burns·Beda"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Kubernetes의 핵심 추상 — Pod·Deployment·Service·Ingress.

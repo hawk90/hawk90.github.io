@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Kanban: Successful Evolutionary Change"
 bookAuthor: "David J. Anderson"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Kanban board의 칸 구분 원칙 — value stream 시각화.

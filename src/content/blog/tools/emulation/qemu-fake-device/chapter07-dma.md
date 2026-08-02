@@ -6,6 +6,7 @@ tags: [QEMU, DMA, Memory, pci_dma_read, IOMMU]
 series: "QEMU Fake Device Driver"
 seriesOrder: 7
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 DMA(Direct Memory Access)는 device가 *CPU 개입 없이* host RAM에 직접 접근하는 메커니즘입니다. *대용량 데이터*(disk·network·video) 전송의 표준. QEMU에서는 `pci_dma_read/write` API로 *간단히* 구현하지만, IOMMU 변환과 alignment 같은 *세부*에 주의가 필요.

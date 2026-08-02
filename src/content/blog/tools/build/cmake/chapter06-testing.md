@@ -6,6 +6,7 @@ tags: [cmake, build, cpp, testing, ctest]
 series: "CMake"
 seriesOrder: 6
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 테스트 자동화가 필요한가

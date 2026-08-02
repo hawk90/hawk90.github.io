@@ -6,6 +6,7 @@ series: "Mathematics and Plausible Reasoning, Vol I"
 seriesOrder: 7
 tags: [polya, mathematical-induction, proof]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Mathematical induction* — base + inductive step. *Strong induction*·*well-ordering*. *Plausible inductive 추측을 strict induction으로 prove*. *Examples* — sum formula·divisibility·inequality. *Errors in induction* — base case 누락·step 정당성. *Induction in mathematics는 induction in science와 *어떻게 다른가**.

@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 86
 tags: [pragmatic-programmer, pragmatism, decision-making]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

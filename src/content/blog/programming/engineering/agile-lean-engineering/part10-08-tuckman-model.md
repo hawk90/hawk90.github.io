@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Tuckman 1965"
 bookAuthor: "Bruce Tuckman"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Bruce Tuckman 1965의 단계 모델 — 팀 발달.

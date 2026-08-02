@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "User Stories Applied"
 bookAuthor: "Mike Cohn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Independent·Negotiable·Valuable·Estimable·Small·Testable — 건강한 story의 속성.

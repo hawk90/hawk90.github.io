@@ -6,6 +6,7 @@ series: "TinyML·Edge AI"
 seriesOrder: 2
 tags: [tflite-micro, interpreter, baremetal]
 draft: true
+topics: ["ml", "ml/tinyml"]
 ---
 
 > Outline — *TFLM* — TFLite의 MCU 변형. *No dynamic allocation*·*no OS*·*no stdlib*. *FlatBuffer model* — `.tflite` file. *OpResolver* — 사용되는 op만 link. *MicroErrorReporter*·*MicroInterpreter*. *Tensor arena* — 사용자가 buffer 제공. *Selective build* — 최종 binary 100 KB 이내.

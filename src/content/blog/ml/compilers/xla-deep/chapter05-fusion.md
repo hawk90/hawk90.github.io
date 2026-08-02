@@ -6,6 +6,7 @@ series: "XLA·OpenXLA 심화"
 seriesOrder: 5
 tags: [xla, fusion, kernel-launch, bandwidth]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Why fusion* — kernel launch overhead·memory roundtrip 제거. *Vertical (producer-consumer)* vs *horizontal (siblings)*. *Fusion kind* — loop·input·output·custom. *Cost model* — bytes saved·register pressure. *GPU code generation* — single kernel. *HLO `Fusion` op*과 backend별 codegen.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — spike의 정의(throw-away 코드로 학습). 견적이 안 잡힐 때·기술적 위험이 클 때 사용. Scrum spike(Part 3)와의 비교.

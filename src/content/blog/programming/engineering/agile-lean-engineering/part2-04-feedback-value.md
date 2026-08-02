@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 전통적 cost-of-change 곡선(시간에 따라 지수적 상승)에 대한 Beck의 반박. XP는 곡선을 평탄화한다. feedback이 짧을수록 변경 비용이 낮다.

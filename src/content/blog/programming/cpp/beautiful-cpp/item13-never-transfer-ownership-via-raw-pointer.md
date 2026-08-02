@@ -6,6 +6,7 @@ tags: [C++, Ownership, Smart Pointers]
 series: "Beautiful C++"
 seriesOrder: 13
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

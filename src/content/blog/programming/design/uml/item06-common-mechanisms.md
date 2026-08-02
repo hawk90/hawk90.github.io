@@ -6,6 +6,7 @@ tags: [UML, Stereotype, Tag Value, Constraint, Extensibility]
 series: "UML 2.5.1"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 65
 tags: [pragmatic-programmer, testing, tdd]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

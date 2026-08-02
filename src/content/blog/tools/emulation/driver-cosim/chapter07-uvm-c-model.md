@@ -6,6 +6,7 @@ series: "Driver-RTL Co-simulation"
 seriesOrder: 7
 tags: [uvm, reference-model, dpi-c, scoreboard, single-source]
 draft: false
+topics: ["tools", "tools/emulation"]
 ---
 
 검증 팀은 RTL이 *기대대로* 동작하는지 확인합니다. driver 팀은 RTL이 *driver가 가정한 대로* 동작하는지 확인합니다. 두 팀이 *같은 reference*를 두면 한 번의 수정이 양쪽을 모두 만족시킵니다. 이 single-source-of-truth 패턴이 **UVM C reference model**입니다.

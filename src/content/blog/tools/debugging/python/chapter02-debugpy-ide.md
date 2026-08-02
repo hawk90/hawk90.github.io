@@ -6,6 +6,7 @@ tags: [python, debugging, debugpy, vscode]
 series: "Python Debugging"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 `pdb`가 콘솔의 도구라면 [`debugpy`](https://github.com/microsoft/debugpy)는 IDE의 디버거입니다. Microsoft가 만들고 VSCode의 Python 익스텐션이 기본으로 깔아 두는 그 디버거. DAP(Debug Adapter Protocol)를 말하므로 VSCode·PyCharm·Neovim 모두 같은 어댑터를 씁니다.

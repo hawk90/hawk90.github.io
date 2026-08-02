@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Estimating and Planning"
 bookAuthor: "Mike Cohn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — granularity 계층 — 어디서 어느 단위로 자를 것인가.

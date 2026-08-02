@@ -6,6 +6,7 @@ series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 3
 tags: [bayesian-inference, case-study, decision]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Box of marbles*·*bent coin*·*forensic DNA* 예제. *Posterior 계산의 실전* — likelihood·prior choice. *Decision boundary*. *Counter-intuitive 결과* — base rate fallacy. *Bayesian vs likelihoodist vs frequentist* 비교. 직관 강화를 위한 핵심 장.

@@ -6,6 +6,7 @@ series: "pytest 심화"
 seriesOrder: 3
 tags: [pytest, unittest, migration]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — pytest는 `unittest.TestCase` 서브클래스를 *그대로* 인식. `setUp/tearDown`도 동작. *부분 마이그레이션* 전략 — 새 코드는 pytest 스타일, 기존은 그대로. assert 메서드(`assertEqual` 등)를 plain `assert`로 치환할 때의 함정.

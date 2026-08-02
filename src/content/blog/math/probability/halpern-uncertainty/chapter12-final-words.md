@@ -6,6 +6,7 @@ series: "Reasoning About Uncertainty"
 seriesOrder: 12
 tags: [halpern, framework-selection, open-problems]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Framework 선택 기준* — domain·data 가용성·계산 복잡도·decision-theoretic objective. *Open problems* — generalization·complexity·learning. *AI safety·explainable AI에서의 framework 다양성*. *Cox-Jaynes Bayesian universality 주장에 대한 Halpern의 미묘한 답*. *통합 시도의 한계*.

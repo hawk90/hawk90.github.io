@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 8
 tags: [bda3, sampling-design, missing-data, ignorability]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Likelihood and inclusion in design*. *Ignorable vs non-ignorable design*. *Stratified·cluster·survey sampling Bayesian framework*. *Missing data mechanism* — MCAR·MAR·MNAR. *Selection model·pattern mixture*. *Stopping rule's effect on Bayesian inference* — likelihood principle.

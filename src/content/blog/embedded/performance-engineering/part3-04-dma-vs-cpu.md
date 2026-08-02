@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 22
 tags: [dma, memcpy, cpu, break-even]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

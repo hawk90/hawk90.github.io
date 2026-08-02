@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 18
 tags: [pmu, hardware-counter, arm, riscv, perf]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

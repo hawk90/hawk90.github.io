@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 3
 tags: [avionics, amp, smp, openamp, rpmsg, ipc]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

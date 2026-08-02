@@ -6,6 +6,7 @@ series: "High-Dimensional Probability"
 seriesOrder: 5
 tags: [vershynin, talagrand, log-sobolev, entropy-method]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Concentration of measure on the sphere*. *Talagrand's inequality* for product spaces. *Logarithmic Sobolev inequality*. *Entropy method (Boucheron-Lugosi-Massart)*. *Bounded differences inequality (McDiarmid)*. *Concentration on Gaussian space (Borell-TIS)*. ML 응용 — generalization bound for non-i.i.d. data.

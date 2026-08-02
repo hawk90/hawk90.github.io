@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 2
 tags: [RISC-V, ESP32-C3, BL602, SiFive, Board]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

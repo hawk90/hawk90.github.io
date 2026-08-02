@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 17
 tags: [pcie, performance, bandwidth, latency, max-payload, tuning]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

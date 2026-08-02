@@ -6,6 +6,7 @@ tags: [Vim, Dot Command]
 series: "Practical Vim"
 seriesOrder: 1
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

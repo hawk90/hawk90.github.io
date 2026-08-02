@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 2
 tags: [avionics, do-178c, dal, objectives, supplements]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Site Reliability Engineering"
 bookAuthor: "Beyer et al."
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — SLO·SLI·error budget — 신뢰성을 정량적으로 관리.

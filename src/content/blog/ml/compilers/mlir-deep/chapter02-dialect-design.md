@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 2
 tags: [mlir, dialect, design]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Dialect* 정의 — operation·type·attribute의 namespace. *Built-in dialect* — builtin·func·arith·math. *Tensor·linalg·vector·affine* — ML 핵심. *언제 새 dialect를 만들 것인가* 결정 기준. *Dialect 간 conversion* 흐름. *progressive lowering* 원칙.

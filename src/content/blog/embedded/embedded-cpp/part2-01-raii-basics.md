@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 9
 tags: [cpp, embedded, raii, resource, destructor, exception-safety]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

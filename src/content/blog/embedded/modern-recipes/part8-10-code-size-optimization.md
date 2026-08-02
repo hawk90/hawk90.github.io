@@ -5,6 +5,7 @@ description: "-Os, LTO, function-sections, --gc-sections, strip, newlib-nano, pr
 series: "Modern Embedded Recipes"
 seriesOrder: 98
 tags: [recipes, performance, code-size]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

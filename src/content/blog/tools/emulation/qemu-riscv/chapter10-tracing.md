@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 10
 tags: [RISC-V, QEMU, Tracing, Performance, TCG, perf]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 시리즈의 마지막 장입니다. 지금까지 다룬 머신·디버깅·풀 스택 부팅 위에서 *지금 무슨 일이 일어나고 있는지*를 들여다보는 도구를 정리합니다. QEMU의 `-d` 로그, 내장 trace subsystem, TCG 프로파일링, 플러그인, host 측 perf 연동까지 — 시뮬레이션 환경에서 얻을 수 있는 관측 정보의 *층위*를 한 번에 본 다음 시리즈를 닫습니다.

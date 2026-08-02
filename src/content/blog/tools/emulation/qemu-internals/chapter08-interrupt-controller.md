@@ -6,6 +6,7 @@ tags: [QEMU, GIC, APIC, PLIC, Interrupt, MSI]
 series: "QEMU Internals"
 seriesOrder: 8
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 device가 *비동기 이벤트*(DMA 완료·packet 수신·timer expired)를 CPU에 알리는 메커니즘이 **interrupt**입니다. QEMU는 각 architecture의 표준 interrupt controller를 모두 모델링 — ARM **GIC**·x86 **APIC**·RISC-V **PLIC + CLINT**. 새 device를 만들 때 IRQ wiring 방식을 이해해야 합니다.

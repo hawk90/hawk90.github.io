@@ -6,6 +6,7 @@ series: "Mathematics and Plausible Reasoning, Vol II"
 seriesOrder: 6
 tags: [polya, research-method, inductive]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Research mathematician*이 실제 사용하는 *plausible reasoning toolkit*. *연구 절차* — guess·simplify·look for analogy·check special case·look for counterexample·generalize. *Why textbooks hide the heuristic*. *수학 교육에서 plausible reasoning이 빠진 결과*. ML researcher의 modern 적용.

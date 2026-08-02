@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 18
 tags: [gaussian-process, kernel, sparse-gp, deep-gp]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *GP for regression* — exact posterior closed form. *Kernel design* — stationary·non-stationary·composite. *GP classification* — Laplace·EP·VI. *Sparse GP* — inducing points·SVGP. *Deep GP·hierarchical GP*. *Connection to NN* — NNGP·NTK. *Application* — Bayesian optimization·active learning·surrogate model.

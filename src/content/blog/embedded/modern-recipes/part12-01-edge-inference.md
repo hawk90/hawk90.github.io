@@ -5,6 +5,7 @@ description: "Edge inference가 cloud 대비 언제 답인지, MCU부터 server-
 series: "Modern Embedded Recipes"
 seriesOrder: 137
 tags: [recipes, edge-ai, inference, pipeline, tflite, onnx]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

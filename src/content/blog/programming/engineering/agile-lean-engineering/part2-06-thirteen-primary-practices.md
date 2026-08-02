@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change (2nd ed)"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Sit Together·Whole Team·Informative Workspace·Energized Work·Pair Programming·Stories·Weekly Cycle·Quarterly Cycle·Slack·Ten-Minute Build·CI·TDD·Incremental Design. 함께 쓸 때의 시너지.

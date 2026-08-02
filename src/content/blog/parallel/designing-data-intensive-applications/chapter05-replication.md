@@ -6,6 +6,7 @@ tags: [DDIA, Replication, SingleLeader, MultiLeader, Leaderless]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 5
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

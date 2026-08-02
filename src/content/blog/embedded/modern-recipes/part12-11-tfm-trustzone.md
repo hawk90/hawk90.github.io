@@ -5,6 +5,7 @@ description: "Cortex-M33+ TrustZone-M 위에 TF-M으로 secure firmware를 구�
 series: "Modern Embedded Recipes"
 seriesOrder: 147
 tags: [recipes, security, tfm, trustzone, psa, cortex-m33, mcuboot]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

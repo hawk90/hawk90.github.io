@@ -6,6 +6,7 @@ tags: [DDD, Case Study, Cargo]
 series: "Domain-Driven Design"
 seriesOrder: 7
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 화물 운송 시스템

@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 11
 tags: [mlir, gpu, spir-v, async]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *async dialect* — token·group·execute. *gpu dialect* — `gpu.func`·`gpu.launch`·threadIdx·blockIdx. *spir-v dialect* — Vulkan/OpenCL compute backend. *nvvm·rocdl·amdgpu dialect* — vendor-specific. *Host code generation* — kernel binary embedding. *Multi-target* — 같은 IR로 CUDA·ROCm·Vulkan.

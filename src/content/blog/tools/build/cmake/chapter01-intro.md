@@ -6,6 +6,7 @@ tags: [cmake, build, cpp]
 series: "CMake"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 CMake가 필요한가

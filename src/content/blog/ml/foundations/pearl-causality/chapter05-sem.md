@@ -6,6 +6,7 @@ series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 5
 tags: [pearl, sem, path-analysis, econometrics]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 * Outline — *SEM* 역사 — Wright의 path analysis (1921). *Linear SEM*·*Wright path tracing rule*. *Econometrics와 causal inference*의 lineage. *Instrumental variable (IV) method*·*two-stage least squares (2SLS)*. *Granger causality 비판*. *Structural Causal Model (SCM)* — Pearl의 unified framework.

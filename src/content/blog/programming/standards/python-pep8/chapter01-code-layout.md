@@ -6,6 +6,7 @@ tags: [Python, PEP8, Indentation, Layout, Formatting]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Use 4 spaces per indentation level."

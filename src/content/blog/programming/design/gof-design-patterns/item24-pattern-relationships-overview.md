@@ -6,6 +6,7 @@ tags: [Design Pattern, GoF, Overview, Atlas]
 series: "GoF Design Patterns"
 seriesOrder: 24
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 왜 마지막 글에 관계도가 필요한가

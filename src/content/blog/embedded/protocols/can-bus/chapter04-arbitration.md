@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 4
 tags: [can, arbitration, csma-ca, priority, latency]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

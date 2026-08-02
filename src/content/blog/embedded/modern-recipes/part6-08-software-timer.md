@@ -5,6 +5,7 @@ description: "Software timer와 hardware timer의 분기점, one-shot/auto-reloa
 series: "Modern Embedded Recipes"
 seriesOrder: 70
 tags: [recipes, rtos, timer]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

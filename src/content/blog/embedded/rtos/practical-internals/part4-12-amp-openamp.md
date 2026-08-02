@@ -5,6 +5,7 @@ description: "Cortex-A와 Cortex-M이 한 칩 위에서 별도의 OS를 돌리�
 series: "Practical RTOS Internals"
 seriesOrder: 44
 tags: [amp, openamp, heterogeneous, rpmsg, remoteproc, imx, stm32mp]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

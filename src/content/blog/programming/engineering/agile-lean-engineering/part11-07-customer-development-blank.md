@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Four Steps to the Epiphany"
 bookAuthor: "Steve Blank"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Discovery·Validation·Creation·Building — 4 단계 customer development.

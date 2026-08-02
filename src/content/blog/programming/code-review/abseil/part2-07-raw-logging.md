@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: `ABSL_RAW_LOG`는 heap·exception·mutex 없이 동작하는 로깅이다. signal handler, OOM 경로, ASan early init 같은 "일반 로깅이 깨질 수 있는" 상황을 위해 만들어졌다.

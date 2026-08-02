@@ -6,6 +6,7 @@ tags: [Vim, Register, Yank, Paste]
 series: "Practical Vim"
 seriesOrder: 10
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

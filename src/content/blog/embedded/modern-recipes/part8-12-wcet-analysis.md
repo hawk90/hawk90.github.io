@@ -5,6 +5,7 @@ description: "WCET와 ACET의 차이, 측정 기반과 static analysis, cache �
 series: "Modern Embedded Recipes"
 seriesOrder: 100
 tags: [recipes, performance, wcet]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

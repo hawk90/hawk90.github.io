@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 44
 tags: [recipes, bare-metal, dma]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

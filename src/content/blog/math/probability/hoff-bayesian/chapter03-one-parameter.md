@@ -6,6 +6,7 @@ series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 3
 tags: [hoff, binomial, poisson, conjugate]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Binomial with beta prior*. *Poisson with gamma prior*. *Exponential with gamma prior*. *Conjugate prior*의 본질 — sufficient statistic·analytical form. *Posterior summary* — mean·variance·credible interval. *Predictive distribution*. *Information from prior + data balance*.

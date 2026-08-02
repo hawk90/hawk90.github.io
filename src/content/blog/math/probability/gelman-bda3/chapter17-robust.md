@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 17
 tags: [bda3, robust, student-t, outlier]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Outlier·data corruption 대응*. *Student-t likelihood*·*heavy-tailed distribution*. *Mixture model* — robust likelihood. *Sensitivity analysis*·*influence diagnostic*. *Robust prior choice*. *M-estimator와 Bayesian 시각*. *Application* — financial·sensor·survey data.

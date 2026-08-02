@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — XP의 CI는 1999년 정의. 모든 개발자가 매일 여러 번 trunk에 integrate. ten-minute build와의 연결. Part 7 CD와 cross-ref.

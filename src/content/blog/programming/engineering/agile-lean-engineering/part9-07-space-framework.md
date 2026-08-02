@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "SPACE (Microsoft Research 2021)"
 bookAuthor: "Forsgren·Storey·Maddila·Zimmermann·Houck·Butler"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Satisfaction·Performance·Activity·Communication·Efficiency.

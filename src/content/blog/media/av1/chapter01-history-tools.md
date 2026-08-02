@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, libaom, dav1d, SVT-AV1]
 series: "AV1"
 seriesOrder: 1
 draft: true
+topics: ["media"]
 ---
 
 왜 AV1인가, 그리고 무엇을 만들 것인가. 이 장에서는 비디오 코덱의 기본 개념부터 AV1이 탄생하게 된 배경, 그리고 실제로 사용할 도구들을 살펴본다.

@@ -6,6 +6,7 @@ tags: [cert-c, sanitizer, asan, msan, tsan, ubsan, hwasan, lsan, runtime]
 series: "CERT C"
 seriesOrder: 14
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 13장에서 *fuzzing*과 sanitizer를 결합하는 패턴을 봤다. 이 장은 *각 sanitizer*의 동작 원리, 검출 가능 버그, 결합 전략, *production 빌드에 켤 수 있는가*까지 본다.

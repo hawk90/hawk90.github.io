@@ -6,6 +6,7 @@ series: "ARMv8-A Architecture Reference Manual"
 seriesOrder: 1
 tags: [armv8-a, arm-arm, overview]
 draft: true
+topics: ["systems", "systems/arm"]
 ---
 
 ## 한 줄 요약

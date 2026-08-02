@@ -6,6 +6,7 @@ series: "PyTorch Internals"
 seriesOrder: 7
 tags: [pytorch, inductor, triton, codegen]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Inductor pipeline* — FX → IR → scheduler → codegen. *GPU backend* — Triton kernel 생성. *CPU backend* — C++ + OpenMP. *Fusion·scheduling*. *Buffer management*. *Cache directory*. *Configuration* — `torch._inductor.config`. *Cudagraphs* 통합.

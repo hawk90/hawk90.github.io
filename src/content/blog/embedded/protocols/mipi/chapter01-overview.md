@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 1
 tags: [mipi, alliance, csi, dsi, d-phy, c-phy, standards]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

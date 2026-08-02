@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Accelerate"
 bookAuthor: "Forsgren·Humble·Kim"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — low → high → elite로 가는 단계별 capability 개선 순서.

@@ -6,6 +6,7 @@ series: "XLA·OpenXLA 심화"
 seriesOrder: 11
 tags: [jax, xla, jit, pjit]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *JAX의 transform* — `jit`·`grad`·`vmap`·`pmap`·`pjit`. *Tracing* — abstract value로 trace, jaxpr 생성. *jaxpr → MLIR (StableHLO)* lowering. *Cache hashing* — argument shape·dtype. *Sharding* — `pjit` with mesh. *Custom call* — black-box op 삽입. *Performance pitfall* — recompilation·async dispatch.

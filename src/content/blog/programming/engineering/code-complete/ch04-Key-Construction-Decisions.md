@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 4
 tags: [code-complete, decisions, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

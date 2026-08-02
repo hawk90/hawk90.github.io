@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Canary Release (Sato, martinfowler.com)"
 bookAuthor: "Danilo Sato"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 점진 배포 — 일부에게 먼저 노출하고 metric 관찰.

@@ -6,6 +6,7 @@ tags: [QEMU, MSI, Interrupt, MSI-X, irqfd]
 series: "QEMU Fake Device Driver"
 seriesOrder: 6
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 device가 *완료 알림*을 driver에 보내는 메커니즘이 **interrupt**입니다. 현대 PCI device는 거의 모두 **MSI-X**(Message Signaled Interrupts) 사용. 이 장은 fake-pci에 MSI-X를 추가해 *비동기 알림*을 구현합니다.

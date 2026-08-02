@@ -6,6 +6,7 @@ series: "Statistical Rethinking"
 seriesOrder: 13
 tags: [mcelreath, multilevel, varying-intercept, partial-pooling]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Frogs and tadpoles example* — pond별 varying intercept. *Why multilevel models always (almost)*. *Partial pooling 시각화*·*shrinkage*. *Hyperprior choice* — half-Cauchy·half-Normal for σ. *Group-level predictor*. *Predicting new groups* — posterior predictive. *Multilevel + GLM combination*.

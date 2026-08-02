@@ -6,6 +6,7 @@ series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 7
 tags: [hoff, multivariate-normal, inverse-wishart]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Multivariate normal* — mean·covariance. *Conjugate prior* — Normal-Inverse-Wishart. *Full conditional distributions* for Gibbs. *Missing data imputation* — natural in Bayesian MVN. *Posterior for correlation·variance*. *Application* — biometric·multivariate measurement.

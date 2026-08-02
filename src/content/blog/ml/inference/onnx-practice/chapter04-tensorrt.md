@@ -6,6 +6,7 @@ series: "ONNX 실전"
 seriesOrder: 4
 tags: [tensorrt, onnx, nvidia, engine-builder]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *TensorRT* — NVIDIA inference engine. *Workflow* — ONNX parser → network → builder → engine (`.engine`/`.plan`). *Precision* — fp32·fp16·INT8·fp8·INT4. *Calibration* — INT8 entropy calibrator. *Dynamic shape* — optimization profiles. *Layer fusion*·*kernel autotuning*. *Plugin*으로 custom op.

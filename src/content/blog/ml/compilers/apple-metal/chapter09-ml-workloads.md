@@ -6,6 +6,7 @@ series: "Apple Metal Stack"
 seriesOrder: 9
 tags: [metal, convolution, attention, benchmark]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Conv2d MSL* 직접 작성·MPS 비교. *FlashAttention 패턴*을 MSL/MPSGraph로. *Mixed-precision* — fp16·bf16 (M2+). *Performance counter* — instructions·cache hit·occupancy. *Apple Silicon GPU 특징* — fast threadgroup memory·register file. *호환 라이브러리* — llama.cpp·MLX.

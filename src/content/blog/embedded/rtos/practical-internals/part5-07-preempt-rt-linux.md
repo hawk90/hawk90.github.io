@@ -5,6 +5,7 @@ description: "2024년 9월 Linux 6.12 mainline에 합류한 PREEMPT_RT의 핵심
 series: "Practical RTOS Internals"
 seriesOrder: 52
 tags: [preempt-rt, linux, xenomai, evl, real-time-linux]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

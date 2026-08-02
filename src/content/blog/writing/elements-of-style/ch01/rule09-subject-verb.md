@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
 draft: true
+topics: ["writing"]
 ---
 
 > The number of the subject determines the number of the verb.

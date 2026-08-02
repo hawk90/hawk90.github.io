@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "SRE + The DevOps Handbook"
 bookAuthor: "Beyer et al. / Kim et al."
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 사고 분석에서 비난을 제거 — 학습 문화의 토대.

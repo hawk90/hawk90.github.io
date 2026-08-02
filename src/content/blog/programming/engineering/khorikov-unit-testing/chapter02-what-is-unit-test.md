@@ -6,7 +6,7 @@ tags: [TDD, London, Classical, School]
 series: "Khorikov Unit Testing"
 seriesOrder: 2
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 "단위 테스트란 무엇인가?"라는 질문은 생각보다 논쟁적이다. 두 학파가 서로 다른 정의를 제시하고, 그 정의 차이가 테스트 코드의 모양을 결정한다.

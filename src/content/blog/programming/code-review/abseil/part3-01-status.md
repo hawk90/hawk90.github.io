@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: `absl::Status`는 Google의 사내 표준 에러 타입이다. exception 없이 에러를 값으로 전달하고, 17개의 canonical code로 종류를 분류하며, ok 경로에서는 포인터 한 개의 크기만 차지하도록 설계되었다.

@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 15
 tags: [murphy, rnn, lstm, transformer, attention]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *RNN·BPTT·vanishing gradient*. *LSTM·GRU*. *Encoder-decoder·seq2seq·attention*. *Transformer* — self-attention·positional encoding·multi-head. *Modern LLM 진화* — BERT·GPT·T5·LLaMA. *Tokenization* — BPE·SentencePiece. *Inference optimization* — KV cache·prefill·decode.

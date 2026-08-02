@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 13
 tags: [DDR, Linux, EDAC, ECC, RAS]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 EDAC (Error Detection And Correction)은 리눅스 커널의 메모리 에러 리포팅 서브시스템이다. ECC 메모리의 에러를 사용자 공간에 노출하고 RAS(Reliability, Availability, Serviceability)를 지원한다.

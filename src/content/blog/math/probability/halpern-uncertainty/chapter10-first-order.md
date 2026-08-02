@@ -6,6 +6,7 @@ series: "Reasoning About Uncertainty"
 seriesOrder: 10
 tags: [halpern, first-order, modal-logic, probabilistic]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *First-order quantifier + probability*. *Statistical vs subjective probability*의 통합. *Type-1 vs Type-2 probability* (Halpern's distinction). *Complexity·decidability* of first-order probabilistic logic. *Bayesian logic programming·Markov logic networks* — modern implementation.

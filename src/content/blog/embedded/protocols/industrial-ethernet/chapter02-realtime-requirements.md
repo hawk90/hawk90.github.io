@@ -6,6 +6,7 @@ series: "Industrial Ethernet 심화"
 seriesOrder: 2
 tags: [real-time, jitter, latency, cycle-time]
 draft: false
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

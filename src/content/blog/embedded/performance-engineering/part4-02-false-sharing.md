@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 31
 tags: [false-sharing, cacheline, padding, coherence]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

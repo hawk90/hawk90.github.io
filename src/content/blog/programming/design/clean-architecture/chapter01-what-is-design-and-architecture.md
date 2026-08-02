@@ -6,6 +6,7 @@ tags: [Architecture, Design, CleanArchitecture]
 series: "Clean Architecture"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

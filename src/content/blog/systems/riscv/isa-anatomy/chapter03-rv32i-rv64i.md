@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 3
 tags: [RISC-V, RV32I, RV64I, Instructions]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

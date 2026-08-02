@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 4
 tags: [mipi, csi-2, camera, packet, short-packet, long-packet]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [Python, PEP8, Black, flake8, mypy, ruff, Tools]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 7
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Let tools do the work."

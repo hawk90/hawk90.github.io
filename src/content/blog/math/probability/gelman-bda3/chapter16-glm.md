@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 16
 tags: [bda3, bayesian-glm, logistic, poisson]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *GLM 통합 framework* — link function + exponential family. *Logistic regression*. *Poisson regression·overdispersion·negative binomial*. *Ordered logit·multinomial*. *Hierarchical GLM*. *Latent variable formulation* — auxiliary Gibbs for logit/probit. *Computation strategies*.

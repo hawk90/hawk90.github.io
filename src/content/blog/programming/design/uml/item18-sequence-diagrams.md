@@ -6,6 +6,7 @@ tags: [UML, Sequence Diagram, Interaction, Behavior]
 series: "UML 2.5.1"
 seriesOrder: 18
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

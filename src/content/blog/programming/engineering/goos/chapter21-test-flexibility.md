@@ -6,6 +6,7 @@ tags: [TDD, Flexibility, Matchers]
 series: "Growing Object-Oriented Software"
 seriesOrder: 21
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 테스트 유연성의 중요성

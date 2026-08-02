@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "User Stories Applied"
 bookAuthor: "Mike Cohn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — User Story 템플릿의 기원과 적용.

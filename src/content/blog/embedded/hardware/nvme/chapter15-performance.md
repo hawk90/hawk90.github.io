@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 15
 tags: [nvme, performance, polling, numa, tuning]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 NVMe의 잠재력을 최대한 끌어내려면 시스템 레벨 최적화가 필요하다. 이 장에서는 Queue Depth, 폴링 모드, NUMA 최적화를 다룬다.

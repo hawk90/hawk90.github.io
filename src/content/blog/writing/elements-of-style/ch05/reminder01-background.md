@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
 draft: true
+topics: ["writing"]
 ---
 
 E.B. White가 Chapter V를 시작하면서 처음 두는 reminder는 *역설적*입니다. 스타일을 얻으려면 *스타일을 흉내 내지 말라*고 합니다.

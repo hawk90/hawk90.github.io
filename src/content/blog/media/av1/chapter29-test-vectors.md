@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Test, Conformance, Verification]
 series: "AV1"
 seriesOrder: 29
 draft: true
+topics: ["media"]
 ---
 
 AV1 디코더 구현이 완료되었다면, 이제 **검증** 단계가 필요하다. 디코더가 스펙을 올바르게 구현했는지 확인하는 가장 확실한 방법은 **공식 테스트 벡터**를 사용하는 것이다. AOMedia가 제공하는 테스트 벡터와 참조 디코더(dav1d)의 출력을 비교하여 구현의 정확성을 검증한다.

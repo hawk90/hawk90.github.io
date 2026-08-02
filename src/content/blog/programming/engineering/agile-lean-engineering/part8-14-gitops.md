@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Weaveworks GitOps Guide"
 bookAuthor: "Weaveworks"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Git이 single source of truth — declarative continuous deployment.

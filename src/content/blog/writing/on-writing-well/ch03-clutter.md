@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 2장이 단순함의 원칙이었다면, 3장은 *구체적 잡초의 식별*입니다.

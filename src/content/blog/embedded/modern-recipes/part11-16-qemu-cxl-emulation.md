@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 150
 tags: [recipes, cxl, qemu, emulation, virtualization, type-3]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

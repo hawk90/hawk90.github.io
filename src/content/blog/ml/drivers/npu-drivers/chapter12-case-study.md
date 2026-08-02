@@ -6,6 +6,7 @@ series: "NPU 드라이버 개발"
 seriesOrder: 12
 tags: [npu, etnaviv, panfrost, case-study]
 draft: true
+topics: ["ml", "ml/drivers"]
 ---
 
 > Outline — *Etnaviv* — Vivante GPU (NPU 포함 모델). 오픈소스 reverse-engineer driver. *Panfrost* — ARM Mali GPU (Mali-G NPU 일부). *VeriSilicon Vivante NPU* driver 사례. *Rockchip NPU* (RK3588). *Mediatek APU·Qualcomm AIE* 공개 정보. *Habana Gaudi* upstream driver. *교훈 정리* — open driver를 처음부터 설계하려면.

@@ -6,6 +6,7 @@ tags: [CleanCode, OOP, Data Structures, Robert Martin]
 series: "Clean Code"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

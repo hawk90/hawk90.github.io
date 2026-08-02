@@ -5,6 +5,7 @@ description: "NVIDIA TensorRT로 ONNX 모델을 engine으로 빌드하고 FP16·
 series: "Modern Embedded Recipes"
 seriesOrder: 140
 tags: [recipes, tensorrt, jetson, dla, cuda, onnx]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

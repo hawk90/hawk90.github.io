@@ -6,6 +6,7 @@ tags: [QEMU, Memory, AddressSpace, MemoryRegion, IOMMU]
 series: "QEMU Internals"
 seriesOrder: 3
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 *모든 device*는 메모리 공간 어딘가에 자리합니다 — DRAM·flash·MMIO peripheral. 이 메모리 공간을 *구조화된 tree*로 모델링한 것이 **MemoryRegion**과 **AddressSpace**입니다. 새 device를 만들거나 메모리 맵을 조정할 때 *반드시* 이 모델을 이해해야 합니다.

@@ -5,6 +5,7 @@ description: "ARM Development Studio Streamline, Lauterbach TRACE32, ETM·PTM ha
 series: "Embedded Performance Engineering"
 seriesOrder: 45
 tags: [arm-ds, lauterbach, trace32, etm, ptm, streamline]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

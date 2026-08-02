@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 21
 tags: [embedded, bootloader, u-boot, porting, board]
 draft: false
+topics: ["embedded"]
 ---
 
 새 보드를 받아 U-Boot부터 띄울 때, 백지에서 시작하면 며칠을 그냥 잡아먹습니다. 다행히 거의 항상 *비슷한 보드*가 이미 mainline U-Boot에 들어 있습니다. 그 보드를 복사해 차이만 고치는 게 정석입니다.

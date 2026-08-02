@@ -6,6 +6,7 @@ tags: [DDD, Refactoring, Continuous]
 series: "Domain-Driven Design"
 seriesOrder: 13
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 두 종류의 리팩토링

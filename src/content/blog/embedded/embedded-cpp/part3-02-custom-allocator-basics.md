@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 20
 tags: [cpp, embedded, allocator, custom-allocator, stl]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

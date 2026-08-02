@@ -6,6 +6,7 @@ series: "ONNX 실전"
 seriesOrder: 6
 tags: [onnx, simplifier, optimizer, pass]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *onnx-simplifier* — shape inference + constant folding. *onnxoptimizer* — graph rewrite. *Shape inference* propagation. *Quantization tool* — `onnxruntime.quantization` (PTQ·QAT). *Sparsity 표현*·*pruning*. *Custom pass 작성* — protobuf 직접 다루기.

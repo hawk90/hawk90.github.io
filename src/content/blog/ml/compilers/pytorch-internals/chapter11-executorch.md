@@ -6,6 +6,7 @@ series: "PyTorch Internals"
 seriesOrder: 11
 tags: [pytorch, executorch, inference, mobile]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *ExecuTorch* — TorchScript·LibTorch 후속. *Export → AOT compile → Runtime*. *.pte file* — portable executable. *Backend delegate* — XNNPACK·CoreML·Vulkan·Qualcomm. *Selective build* — 사용된 op만 link. *Embedded constraints* — heap·thread minimal. *Performance vs latency*.

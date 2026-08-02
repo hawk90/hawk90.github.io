@@ -5,6 +5,7 @@ description: "Stack 패턴 채우기로 high-water mark, overflow hook, canary, 
 series: "Modern Embedded Recipes"
 seriesOrder: 97
 tags: [recipes, memory, stack]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

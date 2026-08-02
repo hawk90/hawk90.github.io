@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 26
 tags: [embedded, bootloader, ddr, lpddr, dram-init, training]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

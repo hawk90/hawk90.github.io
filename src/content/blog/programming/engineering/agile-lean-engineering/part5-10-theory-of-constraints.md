@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Goal"
 bookAuthor: "Eliyahu Goldratt"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Goldratt의 5 단계 — Identify·Exploit·Subordinate·Elevate·Repeat.

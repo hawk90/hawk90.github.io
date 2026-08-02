@@ -6,6 +6,7 @@ series: "Triton DSL"
 seriesOrder: 5
 tags: [triton, compiler, mlir, ptx]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Frontend* — Python AST → Triton IR (MLIR dialect). *TritonGPU IR* — layout·encoding annotation. *Pass* — coalescing·memory hierarchy·pipelining·async copy. *LLVM IR → PTX·AMDGCN·SPIR-V*. *Cache key* — kernel source + constexpr + autotune. *Compilation cost*과 캐싱.

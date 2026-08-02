@@ -6,6 +6,7 @@ tags: [Profiling, hotspot, Tracy, VTune]
 series: "perf and FlameGraph"
 seriesOrder: 9
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

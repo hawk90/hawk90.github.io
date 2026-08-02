@@ -5,6 +5,7 @@ description: "Natural alignment, struct padding 규칙, packed의 unaligned acce
 series: "Modern Embedded Recipes"
 seriesOrder: 90
 tags: [recipes, memory, alignment]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 34
 tags: [cpp, embedded, state-machine, fsm, variant, etl, type-safe]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

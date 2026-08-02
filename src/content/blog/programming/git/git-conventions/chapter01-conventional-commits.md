@@ -6,6 +6,7 @@ tags: [Git, Conventional Commits]
 series: "Git Conventions"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

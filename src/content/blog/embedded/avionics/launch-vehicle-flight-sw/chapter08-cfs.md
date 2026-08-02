@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 8
 tags: [avionics, cfs, nasa, flight-software, framework]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

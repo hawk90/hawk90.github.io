@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 10
 tags: [byoc, backend, npu-integration, vendor]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *BYOC (Bring Your Own Codegen)* — TVM의 vendor 진입 API. *Partition* — graph를 supported/unsupported 영역 분리. *Codegen function*. *Runtime module* — 벤더 SDK 호출. *MLIR BYOC equivalent* — `func.call_extern`·`extension dialect`. *Vendor sample* — Ethos-N·Arm Compute Library·OpenVINO.

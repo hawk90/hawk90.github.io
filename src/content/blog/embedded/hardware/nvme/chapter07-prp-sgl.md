@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 7
 tags: [nvme, prp, sgl, dma]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 NVMe 명령은 호스트 메모리의 데이터 버퍼 위치를 Controller에 알려야 한다. 이 장에서는 두 가지 버퍼 지정 방식인 PRP(Physical Region Page)와 SGL(Scatter Gather List)를 분석한다.

@@ -6,6 +6,7 @@ series: "The Zynq Book"
 seriesOrder: 8
 tags: [zynq, linux, petalinux, device-tree, yocto]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *PetaLinux 프로젝트 구조* — `project-spec/`·`build/`. *DT 생성* — XSA → device tree overlay. *Kernel config*·user-app 추가. *rootfs* — BusyBox vs full Debian. *Yocto layer* — `meta-xilinx`·`meta-xilinx-tools`. *부팅* — `image.ub`·`boot.scr`. PetaLinux 없이 *순수 Yocto*로 가는 길도.

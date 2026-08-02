@@ -6,6 +6,7 @@ tags: [jlink, segger, embedded, rtt]
 series: "Embedded Debugging"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 J-Link는 *상용 표준*입니다. OpenOCD가 오픈·범용이라면 J-Link는 *속도·안정성·완성도*가 압도적. 특히 신호 무결성 안 좋은 보드, 큰 펌웨어, 시간 sensitive한 디버깅에서 OpenOCD가 자꾸 끊긴다면 J-Link로 전환하면 거의 모든 문제가 사라집니다.

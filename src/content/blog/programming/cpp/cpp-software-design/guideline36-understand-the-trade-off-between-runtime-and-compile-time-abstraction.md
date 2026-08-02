@@ -6,6 +6,7 @@ tags: [C++, Software Design, Polymorphism, Trade-off]
 series: "C++ Software Design"
 seriesOrder: 36
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 가이드라인이 중요한가?

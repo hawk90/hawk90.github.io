@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 75
 tags: [pragmatic-programmer, requirements, communication]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

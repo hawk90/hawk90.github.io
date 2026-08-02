@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 12
 tags: [cpu, speculative, ooo, reorder-buffer, renaming]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

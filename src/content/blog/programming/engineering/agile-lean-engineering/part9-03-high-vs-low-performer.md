@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Accelerate + DORA Report"
 bookAuthor: "Forsgren·Humble·Kim / DORA team"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 200×~2,500× 격차 — elite와 low 사이의 정량적 차이.

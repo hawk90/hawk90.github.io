@@ -6,6 +6,7 @@ tags: [CleanCode, Boundaries, Adapter, Robert Martin]
 series: "Clean Code"
 seriesOrder: 8
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

@@ -6,6 +6,7 @@ series: "Embedded Security"
 seriesOrder: 11
 tags: [cxl, pcie, ide, integrity, encryption, aes-gcm, link-security]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

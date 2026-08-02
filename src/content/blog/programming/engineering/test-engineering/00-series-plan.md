@@ -6,6 +6,7 @@ series: "Practical Test Engineering"
 seriesOrder: 0
 tags: [testing, planning]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 # Practical Test Engineering 시리즈 기획

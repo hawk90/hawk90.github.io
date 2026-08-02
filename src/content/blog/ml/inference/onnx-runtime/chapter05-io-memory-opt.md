@@ -6,6 +6,7 @@ series: "ONNX Runtime 심화"
 seriesOrder: 5
 tags: [onnxruntime, memory-arena, prepacking]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *MemoryArena* — alloc pool. *Memory pattern* — first-run profile로 알맞은 buffer. *Weight prepacking* — weight를 kernel-friendly layout으로 한 번에. *External initializer* — model 파일과 weight 분리 (>2 GB). *MemoryStrategy* config. *Cross-session sharing* — initializer 공유.

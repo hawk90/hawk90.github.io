@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 12
 tags: [RISC-V, CSR, mstatus, mtvec, mcause]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

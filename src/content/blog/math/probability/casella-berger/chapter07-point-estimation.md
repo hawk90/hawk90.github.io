@@ -6,6 +6,7 @@ series: "Statistical Inference"
 seriesOrder: 7
 tags: [casella-berger, mle, mom, umvue, cramer-rao]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Method of Moments (MoM)*. *Maximum Likelihood Estimation (MLE)*. *Bayes estimator*. *Evaluation of estimators* — bias·variance·MSE. *Best Unbiased estimator (UMVUE)·Rao-Blackwell·Lehmann-Scheffé*. *Cramér-Rao Lower Bound·Fisher information*. *Loss function·decision theory 시각*.

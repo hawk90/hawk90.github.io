@@ -6,6 +6,7 @@ series: "NPU 아키텍처"
 seriesOrder: 10
 tags: [npu, programming-model, graph, command-stream]
 draft: true
+topics: ["ml", "ml/accelerators"]
 ---
 
 > Outline — *Graph-level* — Core ML·ONNX Runtime·OpenVINO·QNN. *Command stream* — TPU XLA·Habana SynapseAI·Rebellions runtime. *Kernel-level* — 거의 없음 (NPU는 fixed-function 위주). *Cooperative* — host+device split (Mediatek APU). *언제 graph로·언제 cmd stream으로*. NPU compiler 진입로.

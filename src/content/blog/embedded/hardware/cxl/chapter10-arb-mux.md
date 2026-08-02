@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 10
 tags: [cxl, arb-mux, vlsm, almp, multiplexing]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

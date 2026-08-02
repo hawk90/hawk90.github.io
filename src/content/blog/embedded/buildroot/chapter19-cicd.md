@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 19
 tags: [embedded, buildroot, ci-cd, docker, gitlab]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

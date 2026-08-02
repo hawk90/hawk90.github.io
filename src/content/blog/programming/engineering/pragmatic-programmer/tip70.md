@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 70
 tags: [pragmatic-programmer, testing, property-based]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

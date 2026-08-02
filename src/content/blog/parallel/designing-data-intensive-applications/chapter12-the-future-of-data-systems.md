@@ -6,6 +6,7 @@ tags: [DDIA, Future, Dataflow, Ethics]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 12
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

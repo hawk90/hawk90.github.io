@@ -6,6 +6,7 @@ series: "Probability: Theory and Examples"
 seriesOrder: 2
 tags: [durrett, lln, kolmogorov, borel-cantelli]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Independence*. *Weak Law of Large Numbers* — convergence in probability. *Strong Law (Kolmogorov)* — almost sure convergence. *Borel-Cantelli lemmas* (1st·2nd). *Kolmogorov's 0-1 law*. *Kolmogorov three-series theorem*. *Renewal theory 짧은 introduction*. *Empirical process basics*.

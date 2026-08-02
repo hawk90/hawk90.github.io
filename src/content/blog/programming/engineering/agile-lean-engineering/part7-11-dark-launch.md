@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Facebook Engineering blog"
 bookAuthor: "Facebook Engineering"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 기능을 숨긴 채 production traffic으로 검증.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained (2nd ed)"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Industrial XP·Enterprise XP — XP를 대규모로 키우려는 시도들과 한계.

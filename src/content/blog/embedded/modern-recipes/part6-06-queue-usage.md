@@ -5,6 +5,7 @@ description: "RTOS queue로 producer-consumer를 구성하고, by-value vs by-po
 series: "Modern Embedded Recipes"
 seriesOrder: 68
 tags: [recipes, rtos, queue]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

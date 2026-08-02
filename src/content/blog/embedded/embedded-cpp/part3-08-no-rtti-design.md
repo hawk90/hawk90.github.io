@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 26
 tags: [cpp, embedded, no-rtti, variant, type-id, polymorphism]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

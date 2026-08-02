@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 82
 tags: [pragmatic-programmer, agile, process]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

@@ -6,6 +6,7 @@ tags: [Git, Breaking Change, Semver]
 series: "Git Conventions"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

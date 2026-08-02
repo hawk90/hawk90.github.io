@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 8
 tags: [mipi, dsi-2, dsc, vesa, vr, ar, foveated]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

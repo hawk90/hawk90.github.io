@@ -6,6 +6,7 @@ series: "ML 디자인 패턴"
 seriesOrder: 4
 tags: [ml-pattern, multi-label, cascade, ensemble]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Multi-label* — 한 sample 다중 label. *Cascade* — 계층적 분류로 cost 절감. *Ensembles* — voting·stacking·bagging·boosting. *Neutral class* — uncertainty 명시. *Rebalancing* — class imbalance. *Reframing* — 문제를 다른 표현으로 변환해 더 쉬워지는 경우.

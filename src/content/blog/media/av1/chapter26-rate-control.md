@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Encoder, Rate Control]
 series: "AV1"
 seriesOrder: 26
 draft: true
+topics: ["media"]
 ---
 
 지금까지 디코더 관점에서 AV1을 살펴봤다. 이제 **인코더**의 핵심 문제인 **Rate Control**(비트레이트 제어)을 다룬다. 디코더는 "주어진 것을 처리"하면 되지만, 인코더는 "무엇을 어떻게 보낼지" 매 블록마다 결정해야 한다.

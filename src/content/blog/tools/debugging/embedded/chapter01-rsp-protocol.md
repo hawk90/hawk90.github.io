@@ -6,6 +6,7 @@ tags: [gdb, rsp, embedded, protocol]
 series: "Embedded Debugging"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 임베디드 디버깅이 *왜 가능한가*의 답은 **RSP**(Remote Serial Protocol)에 있습니다. 호스트의 GDB와 타깃의 *스텁*(gdbserver든 OpenOCD든 J-Link 펌웨어든 모두) 사이를 흐르는 ASCII 텍스트 프로토콜. 한 번이라도 이 프로토콜을 들여다보면, *GDB 명령이 칩 안에서 어떻게 일어나는지*가 또렷해집니다.

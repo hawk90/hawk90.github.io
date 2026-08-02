@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 11
 tags: [RISC-V, Privilege, Machine-Mode, Supervisor-Mode]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

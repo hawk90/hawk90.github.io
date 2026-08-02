@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Mathematics and Plausible Reasoning, Vol I: Induction and Analogy in Mathematics"
 bookAuthor: "George Pólya"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Demonstrative vs plausible reasoning*. 수학이 *guess → test → prove*의 사이클임을 강조. *Inductive 단서* — 패턴·합·정리. *Examples* — Euler's identity·prime conjecture. 그저 *strict 증명*만 가르치면 안 된다는 Pólya의 교육관. ML 추론의 인지적 모델.

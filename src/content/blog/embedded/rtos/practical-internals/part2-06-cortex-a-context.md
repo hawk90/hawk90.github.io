@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 16
 tags: [cortex-a, svc, mode, banked-registers, mmu]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

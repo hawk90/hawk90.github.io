@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 19
 tags: [time-series, spatial, hierarchical, transfer]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Independent and identically distributed 가정의 한계*. *Time series* — ARIMA·VAR·state-space·RNN/Transformer. *Spatial statistics* — Gaussian random field·kriging. *Hierarchical/multilevel model*. *Transfer·domain adaptation*. *Distribution shift* — covariate·label·concept. *Continual learning*. ML 응용 — robust deployment.

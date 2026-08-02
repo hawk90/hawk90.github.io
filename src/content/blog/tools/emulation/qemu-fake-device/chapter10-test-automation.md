@@ -6,6 +6,7 @@ tags: [QEMU, CI, Testing, qtest, pytest, GitHub-Actions]
 series: "QEMU Fake Device Driver"
 seriesOrder: 10
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 driver 개발의 회귀를 *수동*으로 잡으면 시간 낭비. *매 commit마다* QEMU를 띄워 *unit + functional* 시험하는 자동화가 핵심입니다. 이 장은 qtest·pytest·GitHub Actions를 결합한 *production-grade CI*를 정리합니다.

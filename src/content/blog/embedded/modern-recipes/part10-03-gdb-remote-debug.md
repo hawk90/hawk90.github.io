@@ -5,6 +5,7 @@ description: "OpenOCD·pyOCD로 target에 붙고, .gdbinit으로 반복 작업�
 series: "Modern Embedded Recipes"
 seriesOrder: 113
 tags: [recipes, debugging, gdb, openocd]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

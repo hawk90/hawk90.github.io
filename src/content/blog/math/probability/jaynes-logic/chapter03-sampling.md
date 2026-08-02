@@ -6,6 +6,7 @@ series: "Probability Theory: The Logic of Science"
 seriesOrder: 3
 tags: [sampling, urn-model, hypergeometric, binomial]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Urn model* — sampling with/without replacement. *Hypergeometric*·*binomial*·*multinomial distribution*. *Sequence vs combination 시각*. *Probability vs frequency* — 같지 않을 수 있다. *Generalization to multi-color urn*. *Limit* — Poisson approximation. 책의 다른 예제와 paradox를 위한 기초.

@@ -6,6 +6,7 @@ series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 2
 tags: [agans, debugging, reproduction]
 draft: true
+topics: ["tools", "tools/debugging"]
 ---
 
 > Outline — *Do it again·start at the beginning·stimulate the failure·what you did but don't simulate*. *Intermittent bug 대응* — random seed·timing·environment 변수 통제. *What changed?* — 환경·HW·라이브러리 버전. *Reproduction steps* 문서화. *Failure가 일관되지 않으면 모든 진단이 noisy*.

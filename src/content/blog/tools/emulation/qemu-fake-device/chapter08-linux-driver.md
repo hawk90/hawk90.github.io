@@ -6,6 +6,7 @@ tags: [QEMU, Linux, Driver, kernel-module, ioctl, sysfs]
 series: "QEMU Fake Device Driver"
 seriesOrder: 8
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 지금까지 QEMU 측 device를 만들었으니, 이제 *Linux driver*를 작성합니다. PCI probe·BAR mapping·IRQ 등록·user-space 노출까지 *완전한 driver*를 만들어 *insmod 후 동작* 확인합니다.

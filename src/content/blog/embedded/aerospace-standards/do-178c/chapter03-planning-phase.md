@@ -6,6 +6,7 @@ tags: [do-178c, planning, psac, sdp, svp, scmp, sqap, srs, sds, scs, soi-1]
 series: "DO-178C"
 seriesOrder: 3
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 DO-178C 인증은 *Planning Phase에서 80%가 결정*된다. 이 단계의 *8개 산출물*(5 plan + 3 standard)이 *전체 프로젝트의 헌법*. FAA *SOI 1 review*에서 이 문서들이 *심사관 첫인상*을 결정한다. 부실한 계획은 *전체 인증을 5년 끌게* 할 수 있다.

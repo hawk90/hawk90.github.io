@@ -6,6 +6,7 @@ series: "Programming Pearls"
 seriesOrder: 5
 tags: [algorithms, programming-pearls, classics]
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 > **Programming Pearls** Column 5 요약

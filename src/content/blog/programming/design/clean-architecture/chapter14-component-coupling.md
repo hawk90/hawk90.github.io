@@ -6,6 +6,7 @@ tags: [Architecture, Components, Coupling, ADP, SDP, SAP]
 series: "Clean Architecture"
 seriesOrder: 14
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

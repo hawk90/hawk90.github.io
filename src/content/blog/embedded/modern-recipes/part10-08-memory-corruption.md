@@ -5,6 +5,7 @@ description: "Heap canary·MPU guard·data watchpoint·desktop ASan — 임베�
 series: "Modern Embedded Recipes"
 seriesOrder: 118
 tags: [recipes, debugging, memory]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

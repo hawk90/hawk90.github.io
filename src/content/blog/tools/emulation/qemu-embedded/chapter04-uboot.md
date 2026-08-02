@@ -6,6 +6,7 @@ tags: [QEMU, U-Boot, Bootloader, TFTP, virtio-blk]
 series: "QEMU Embedded Emulation"
 seriesOrder: 4
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **U-Boot**(Das U-Boot)은 임베디드 시스템의 사실상 표준 부트로더입니다. STM32 같은 마이크로컨트롤러부터 i.MX·Zynq·라즈베리 파이까지 *대부분*이 U-Boot을 거쳐 부팅합니다. QEMU 위에서 U-Boot를 띄우면 부트로더 스크립트·env 변수·boot 명령을 *실 보드 도착 전에* 검증할 수 있습니다.

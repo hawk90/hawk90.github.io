@@ -6,6 +6,7 @@ series: "Probability Theory: The Logic of Science"
 seriesOrder: 9
 tags: [maximum-entropy, prior, jaynes]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Principle of maximum entropy* — Jaynes 1957. *제약 (moment·support)* 하에서 entropy 최대화. *Lagrange multiplier* solution → exponential family. *Why max ent is uniquely justified* — Shore-Johnson axioms. *Discrete vs continuous max ent*. *Concentration theorem*. *Wallis derivation* — combinatorial 정당화.

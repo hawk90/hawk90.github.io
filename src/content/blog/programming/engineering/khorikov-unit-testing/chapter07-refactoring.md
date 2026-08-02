@@ -6,7 +6,7 @@ tags: [TDD, Refactoring, Code Categories]
 series: "Khorikov Unit Testing"
 seriesOrder: 7
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 모든 코드에 같은 테스트 전략을 적용할 수는 없다. 코드를 분류하고 각 유형에 맞는 전략을 세워야 한다.

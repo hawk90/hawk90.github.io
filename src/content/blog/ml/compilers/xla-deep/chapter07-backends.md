@@ -6,6 +6,7 @@ series: "XLA·OpenXLA 심화"
 seriesOrder: 7
 tags: [xla, backend, cpu, gpu, tpu]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *CPU backend* — LLVM codegen, vectorization. *GPU backend* — Triton·cuBLAS·cuDNN·CUTLASS·legacy IR emitter. *TPU backend* — XLA:TPU·MLIR-based. *Plugin backend* — vendor-specific via PJRT. *Profiler hook*·*tracing*. NPU vendor가 XLA backend로 진입하는 방법.

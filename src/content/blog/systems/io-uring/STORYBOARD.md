@@ -4,6 +4,7 @@ date: 2026-05-19T00:00:00
 description: "io_uring 시리즈 설계 문서 — 챕터별 깊이·다이어그램·코드·레퍼런스 계획"
 tags: [io_uring, linux, storyboard, internal]
 draft: true
+topics: ["systems"]
 ---
 
 # io_uring Deep Dive — Storyboard

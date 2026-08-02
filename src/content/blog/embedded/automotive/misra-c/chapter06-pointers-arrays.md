@@ -6,6 +6,7 @@ tags: [misra, c, pointer, array, void-pointer, vla, flexible-array]
 series: "MISRA C"
 seriesOrder: 6
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 포인터는 C의 *가장 강력하면서 가장 위험한* 도구다. MISRA는 R11(타입 변환)과 R18(산술)에 강한 제약을 둔다. 위반은 거의 항상 메모리 안전 사고와 직결된다.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Accelerate"
 bookAuthor: "Forsgren·Humble·Kim"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — software speed and stability가 조직 성과로 — 인과 관계.

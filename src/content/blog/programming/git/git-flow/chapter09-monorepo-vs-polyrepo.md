@@ -6,6 +6,7 @@ tags: [Git, Monorepo, Polyrepo, Build]
 series: "Git Flow"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

@@ -6,6 +6,7 @@ tags: [QEMU, MMIO, Register, BAR, MemoryRegionOps]
 series: "QEMU Fake Device Driver"
 seriesOrder: 5
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 PCI device의 *registers*가 *MMIO BAR*에 매핑됩니다. driver가 그 영역을 `writel`/`readl`로 접근하면 *device callback*이 호출되어 처리. 이 장은 *register set*을 정의하고 callback에서 *상태 관리*하는 흐름을 봅니다.

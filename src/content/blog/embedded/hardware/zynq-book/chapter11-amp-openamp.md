@@ -6,6 +6,7 @@ series: "The Zynq Book"
 seriesOrder: 11
 tags: [zynq, amp, openamp, rpmsg, remoteproc]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *AMP (Asymmetric Multi-Processing)* — Linux on APU + FreeRTOS on RPU. *OpenAMP* 표준 — remoteproc + RPMsg + VirtIO. *remoteproc* — life-cycle 관리. *RPMsg* — IPC 채널. *Shared memory*와 cache coherency. Zynq UltraScale+의 *Cortex-R5F* lockstep. *Boot 시나리오* — domain 분리.

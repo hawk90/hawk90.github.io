@@ -6,6 +6,7 @@ tags: [gdb, lldb, Memory, Inspection, STL]
 series: "GDB and LLDB"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## `print`의 한계

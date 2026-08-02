@@ -6,6 +6,7 @@ tags: [C++, Ranges, Views, C++20, C++23]
 series: "전문가를 위한 C++"
 seriesOrder: 23
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

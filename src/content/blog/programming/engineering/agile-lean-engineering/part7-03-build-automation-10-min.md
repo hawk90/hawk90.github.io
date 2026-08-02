@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Continuous Delivery"
 bookAuthor: "Jez Humble & Dave Farley"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 10-minute build의 가치 — feedback latency가 곧 비용.

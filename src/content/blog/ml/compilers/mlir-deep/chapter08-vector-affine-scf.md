@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 8
 tags: [mlir, vector, affine, scf, memref]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *vector* — SIMD 추상. *affine* — affine loop nest·affine map. *scf* — structured control flow (`for`·`if`·`while`). *memref* — pointer-like memory abstraction. 각 dialect 간 lowering 경로. *affine analysis*·*polyhedral transformation*. Linalg → vector/affine/scf 변환 예.

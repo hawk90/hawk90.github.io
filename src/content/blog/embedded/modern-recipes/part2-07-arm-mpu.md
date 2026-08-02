@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 19
 tags: [recipes, arm, mpu]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 12
 tags: [DDR, Linux, kernel, memory, NUMA]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 리눅스 커널은 복잡한 메모리 관리 서브시스템을 갖추고 있다. 이 장에서는 물리 메모리 관리의 핵심인 mm/ 서브시스템을 DDR 관점에서 살펴본다.

@@ -6,6 +6,7 @@ series: "The Zynq Book"
 seriesOrder: 2
 tags: [zynq, ps, apu, memory-controller]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *APU (Application Processing Unit)* — 코어·L1·L2·SCU·GIC. *OCM* (On-Chip Memory) — 256 KB SRAM. *DDR controller* — 외부 DRAM. *주변기기* — UART·SPI·I2C·QSPI·SD·USB·Ethernet (GEM). *Interconnect* — AXI matrix. *Clock/Reset 모듈*. UltraScale+에선 RPU·PMU·CSU 추가.

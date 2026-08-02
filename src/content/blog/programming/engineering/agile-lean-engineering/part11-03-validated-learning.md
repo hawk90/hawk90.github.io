@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Lean Startup"
 bookAuthor: "Eric Ries"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 단순히 데이터 수집이 아닌 가설 검증 — leap-of-faith assumption.

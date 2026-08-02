@@ -6,6 +6,7 @@ series: "UALink 심화"
 seriesOrder: 5
 tags: [ualink, topology, scale-up, pod]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Scale-up vs scale-out* 정의. *UALink scale-up* — 최대 1024 가속기. *Topologies* — fat tree·dragonfly·3D torus. *Switched fabric* vs *direct attach*. *Latency hop* 모델. *Memory semantics 유지 거리*. NVLink NVL72와 비교.

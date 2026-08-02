@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 6
 tags: [RISC-V, ESP32-C3, ESP-IDF, FreeRTOS]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

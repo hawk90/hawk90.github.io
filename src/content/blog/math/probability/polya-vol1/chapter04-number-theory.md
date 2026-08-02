@@ -6,6 +6,7 @@ series: "Mathematics and Plausible Reasoning, Vol I"
 seriesOrder: 4
 tags: [polya, number-theory, fermat, goldbach]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *수론의 conjecture 풍부함* — primes·partitions·sums. *Fermat's two-square theorem*·*four-square theorem* 발견 과정. *Goldbach conjecture* — 검증 + 미해결. *Numerical evidence와 plausibility*. *Examples of failed conjectures* — 작은 수에선 맞지만 큰 수에서 깨지는 경우.

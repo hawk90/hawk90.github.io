@@ -6,6 +6,7 @@ series: "NPU 드라이버 개발"
 seriesOrder: 7
 tags: [npu, interrupt, msi-x, threaded-irq]
 draft: true
+topics: ["ml", "ml/drivers"]
 ---
 
 > Outline — *Interrupt source* — completion·error·debug. *MSI-X allocation* — `pci_alloc_irq_vectors`. *Top half + threaded IRQ*. *Polled completion* — vs interrupt-driven. *Doorbell-like fast path*. *Userspace wakeup* — `wait_queue`·*eventfd*·*sync_file*. Cumulative IRQ rate 조절.

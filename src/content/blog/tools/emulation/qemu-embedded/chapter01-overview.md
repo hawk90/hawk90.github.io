@@ -6,6 +6,7 @@ tags: [QEMU, ARM, RISC-V, Embedded, virt]
 series: "QEMU Embedded Emulation"
 seriesOrder: 1
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 임베디드 개발은 *하드웨어가 있어야* 시작할 수 있는 분야로 흔히 인식됩니다. 그러나 실 보드 없이도 펌웨어·OS·driver의 *대부분*을 개발·테스트할 수 있는 환경이 존재합니다 — **QEMU**입니다. 이 시리즈는 그 환경을 깊이 활용하는 법을 다룹니다.

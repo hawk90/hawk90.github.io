@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Various scaling frameworks"
 bookAuthor: "Various"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — SAFe·LeSS·Nexus·DAD — 어느 패턴이 어느 컨텍스트에 맞나.

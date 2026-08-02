@@ -6,6 +6,7 @@ series: "Driver-RTL Co-simulation"
 seriesOrder: 4
 tags: [cocotb, python, testbench, vpi, pytest]
 draft: false
+topics: ["tools", "tools/emulation"]
 ---
 
 **CocoTB**(Coroutine-based Cosimulation TestBench)는 RTL testbench를 *Python*으로 짜는 프레임워크입니다. SystemVerilog 대신 Python coroutine으로 자극·확인 시퀀스를 표현하고, simulator hook(VPI/VHPI/FLI/DPI)을 통해 DUT(Design Under Test) 신호에 접근합니다. testbench 생산성을 *수배* 끌어올린다는 평이 산업 전반에 일반화되어 있습니다.

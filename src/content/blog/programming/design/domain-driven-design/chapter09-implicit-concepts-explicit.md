@@ -6,6 +6,7 @@ tags: [DDD, Explicit Concepts, Specification]
 series: "Domain-Driven Design"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 암묵적 개념이란?

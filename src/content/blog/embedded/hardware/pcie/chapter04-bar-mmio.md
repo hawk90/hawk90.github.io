@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 4
 tags: [pcie, bar, mmio, rebar, sr-iov]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

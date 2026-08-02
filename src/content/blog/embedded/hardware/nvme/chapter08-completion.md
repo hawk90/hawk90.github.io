@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 8
 tags: [nvme, completion, status-code, error]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 모든 NVMe 명령은 Completion Queue Entry로 결과를 반환한다. 이 장에서는 CQ Entry 구조와 Status Code 체계를 분석한다.

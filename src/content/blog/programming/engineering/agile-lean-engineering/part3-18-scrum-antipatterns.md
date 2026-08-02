@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Software in 30 Days"
 bookAuthor: "Ken Schwaber"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 절차만 따라하고 empiricism을 놓치는 패턴 — Schwaber의 비판.

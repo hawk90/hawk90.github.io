@@ -6,6 +6,7 @@ tags: [eBPF, BPF, CO-RE]
 series: "System Tracing"
 seriesOrder: 5
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

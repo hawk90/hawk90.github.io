@@ -6,6 +6,7 @@ tags: [make, build, Makefile]
 series: "GNU Make"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 Make가 필요한가

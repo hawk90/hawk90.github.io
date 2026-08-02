@@ -6,6 +6,7 @@ tags: [Vim, Visual Mode]
 series: "Practical Vim"
 seriesOrder: 4
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

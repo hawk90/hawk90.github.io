@@ -6,6 +6,7 @@ series: "XLA·OpenXLA 심화"
 seriesOrder: 12
 tags: [tensorflow, pytorch, xla, torch-xla]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *TensorFlow* — `tf.function(jit_compile=True)`·SavedModel-to-HLO. *PyTorch/XLA* — lazy tensor·trace + dispatch. *PyTorch + StableHLO* — Torch-MLIR via PJRT. *Common pitfall* — dynamic shape·python side effect. *PJRT integration* — TPU·GPU·NPU. Migrate path — `torch.compile` + OpenXLA backend.

@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 1
 tags: [avionics, aerospace, overview, spitzer]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

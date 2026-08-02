@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 14
 tags: [avionics, future, face, sdr, ai]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

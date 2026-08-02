@@ -6,6 +6,7 @@ tags: [QEMU, Build, Setup, configure, meson]
 series: "QEMU Fake Device Driver"
 seriesOrder: 2
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 이 시리즈는 *custom device*를 QEMU 소스에 추가해 빌드합니다. 따라서 *패키지로 설치된 QEMU*가 아닌 *소스 빌드*가 필요합니다. 이 장은 의존성·소스·configure·build를 한 번에 정리합니다.

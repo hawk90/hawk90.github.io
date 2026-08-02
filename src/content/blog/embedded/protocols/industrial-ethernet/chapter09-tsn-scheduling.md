@@ -6,6 +6,7 @@ series: "Industrial Ethernet 심화"
 seriesOrder: 9
 tags: [tsn, qbv, qbu, ptp, scheduling, gcl, ilp, cnc]
 draft: false
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

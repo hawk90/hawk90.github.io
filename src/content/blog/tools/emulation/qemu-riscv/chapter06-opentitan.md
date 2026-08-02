@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 6
 tags: [RISC-V, QEMU, OpenTitan, Security, Root-of-Trust, Ibex]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **OpenTitan**은 Google이 lowRISC와 함께 주도하는 *오픈소스 Root-of-Trust* 프로젝트입니다. 부트 무결성·키 보관·암호 가속을 한 칩에 담은 마이크로컨트롤러로, 기존의 *closed* TPM/secure-element를 *open-source*로 대체하려는 시도입니다. QEMU의 `opentitan` 머신은 그 칩을 모사합니다.

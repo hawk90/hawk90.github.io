@@ -6,6 +6,7 @@ tags: [Vim, ctags, Code Navigation]
 series: "Practical Vim"
 seriesOrder: 16
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용 (Tips 100-103)

@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Causality: Models, Reasoning, and Inference"
 bookAuthor: "Judea Pearl"
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Statistics가 답할 수 없는 질문* — intervention·counterfactual. *Causal model = DAG + structural equations*. *Three rungs of causality* — association·intervention·counterfactual. *Bayesian network와 causal network 구별*. *왜 causal inference가 modern ML의 가장 활발한 영역인가*. 시리즈 — Pearl 책 11장 전부.

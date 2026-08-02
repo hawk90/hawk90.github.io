@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 9
 tags: [avionics, fprime, jpl, flight-software, component]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

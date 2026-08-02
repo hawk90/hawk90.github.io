@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 14
 tags: [embedded, bsp, thermal, watchdog, safety]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

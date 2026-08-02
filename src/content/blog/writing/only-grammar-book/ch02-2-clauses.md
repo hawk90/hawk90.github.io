@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
 draft: true
-
+topics: ["writing"]
 ---
 
 > 절(clause)은 *주어와 동사를 가진* 단어 묶음입니다. 절은 *독립절*과 *종속절*로 나뉘며, 종속절은 다시 *명사절·형용사절·부사절*로 분류됩니다.

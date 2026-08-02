@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 27
 tags: [priority-ceiling, pcp, deadlock-free]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

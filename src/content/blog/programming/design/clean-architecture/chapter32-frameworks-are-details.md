@@ -6,6 +6,7 @@ tags: [Architecture, Frameworks, Detail]
 series: "Clean Architecture"
 seriesOrder: 32
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

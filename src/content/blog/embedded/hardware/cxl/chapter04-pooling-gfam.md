@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 4
 tags: [cxl, memory-pooling, gfam, fabric, fabric-manager]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

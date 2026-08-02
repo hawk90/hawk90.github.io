@@ -5,6 +5,7 @@ description: "Linux perf 표준 도구의 세 가지 핵심 명령. 설치, 권�
 series: "Embedded Performance Engineering"
 seriesOrder: 40
 tags: [perf, profiling, sampling, linux]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

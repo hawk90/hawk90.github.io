@@ -6,6 +6,7 @@ tags: [ecss, esa, european-space, software-quality, satellite]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 1
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 **ECSS** (European Cooperation for Space Standardization)는 *유럽우주국 (ESA), 유럽 우주 산업, 국가 우주청*이 공동 운영하는 *우주 시스템·SW 표준 체계*. *ECSS-Q-ST-80C*는 그중 *SW Product Assurance* 표준 — *위성·발사체·우주 탐사선 SW의 품질 보증 절차*를 정의한다.

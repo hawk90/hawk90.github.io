@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 18
 tags: [embedded, bootloader, u-boot, efi, uefi, ebbr]
 draft: false
+topics: ["embedded"]
 ---
 
 UEFI는 데스크탑·서버의 영역이라 생각하기 쉽지만, U-Boot은 *EFI loader*라는 부분 UEFI 구현을 들고 있습니다. 덕분에 임베디드 보드도 GRUB·systemd-boot·Linux EFI stub처럼 *EFI 애플리케이션*을 그대로 부팅할 수 있습니다. 배포판이 굳이 보드별 부트로더를 만들지 않아도 되는 셈입니다.

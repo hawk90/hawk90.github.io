@@ -6,6 +6,7 @@ series: "Pattern Recognition and Machine Learning"
 seriesOrder: 4
 tags: [bishop, lda, logistic-regression, laplace]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Discriminant function·Fisher's LDA·perceptron*. *Generative model* — Gaussian class-conditional·MLE. *Discriminative model* — logistic regression·IRLS·multiclass softmax. *Probit regression·canonical link function*. *Bayesian logistic regression* — Laplace approximation. *Predictive distribution* — approximate marginal.

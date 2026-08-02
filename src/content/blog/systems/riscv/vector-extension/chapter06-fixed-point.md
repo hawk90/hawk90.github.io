@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 6
 tags: [RISC-V, Vector, Fixed-Point, Saturating]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

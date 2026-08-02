@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 33
 tags: [memory, determinism, fragmentation, wcet]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

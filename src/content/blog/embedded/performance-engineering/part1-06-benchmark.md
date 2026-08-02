@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 6
 tags: [benchmark, reproducibility, warmup, coremark, isolation]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

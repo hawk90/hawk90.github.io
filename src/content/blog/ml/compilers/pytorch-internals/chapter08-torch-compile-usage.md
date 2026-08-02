@@ -6,6 +6,7 @@ series: "PyTorch Internals"
 seriesOrder: 8
 tags: [pytorch, torch-compile, mode, dynamic]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *torch.compile(model, mode=...)* — `default·reduce-overhead·max-autotune`. *Backend 선택* — `inductor` (default)·`openxla`·custom. *Dynamic shape* — `dynamic=True`. *graph break* 회피 — supported Python subset. *Recompilation cost*·`TORCH_LOGS=recompiles`. *Production pattern* — warmup·cache.

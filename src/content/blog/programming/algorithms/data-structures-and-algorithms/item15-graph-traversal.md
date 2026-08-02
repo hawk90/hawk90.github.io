@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Graph, DFS, BFS]
 series: "Data Structures and Algorithms"
 seriesOrder: 15
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

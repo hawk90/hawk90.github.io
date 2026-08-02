@@ -6,6 +6,7 @@ tags: [gdb, python, api]
 series: "GDB Extension and IDE"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 GDB는 거의 모든 동작을 사용자 명령으로 제어할 수 있는 *완전한 디버거 SDK*입니다. 그 SDK의 핵심이 *내장 Python 인터프리터*. `print` 한 줄 매크로부터 STL pretty-printer, JIT 디버깅 지원, 자동화된 메모리 분석까지 — 모두 이 API 위에서 일어납니다.

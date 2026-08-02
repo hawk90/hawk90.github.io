@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 2
 tags: [rtos, task, tcb, state-machine, lifecycle]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 4
 tags: [vim, editor, search, replace, regex]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 4: 검색과 치환

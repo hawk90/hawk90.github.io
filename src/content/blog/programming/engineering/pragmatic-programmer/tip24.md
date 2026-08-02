@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 24
 tags: [pragmatic-programmer, estimation]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

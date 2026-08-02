@@ -6,6 +6,7 @@ series: "The Bayesian Choice"
 seriesOrder: 3
 tags: [robert, prior, conjugate, jeffreys, reference]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Subjective prior elicitation*. *Conjugate prior* — exponential family. *Noninformative prior* — Jeffreys·Laplace·Haldane. *Reference prior* (Bernardo). *Improper prior와 정당화*. *Hierarchical prior*. *Empirical Bayes prior estimation*. *Prior robustness*.

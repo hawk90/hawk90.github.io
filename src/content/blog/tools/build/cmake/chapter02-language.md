@@ -6,6 +6,7 @@ tags: [cmake, build, cpp, syntax]
 series: "CMake"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 CMake 언어를 알아야 하는가

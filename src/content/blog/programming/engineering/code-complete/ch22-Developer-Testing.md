@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 22
 tags: [code-complete, testing, TDD, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

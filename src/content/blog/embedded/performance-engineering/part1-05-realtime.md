@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 5
 tags: [realtime, wcet, jitter, deadline, tardiness, cyclictest]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

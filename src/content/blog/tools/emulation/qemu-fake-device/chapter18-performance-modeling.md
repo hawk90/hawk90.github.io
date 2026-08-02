@@ -6,6 +6,7 @@ tags: [QEMU, performance, latency-injection, qos]
 series: "QEMU Fake Device Driver"
 seriesOrder: 18
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 *기본 device emulation*은 *즉시 완료* — vmexit 후 *수 µs* 안에 결과. 그러나 *실 hardware*는 *수 µs~수 ms* latency. driver의 *timeout·queue depth·QoS*가 *실 latency 하에서* 동작하는지 검증하려면 *명시적 latency injection*이 필요합니다.

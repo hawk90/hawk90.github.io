@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 7
 tags: [gtest, parameterized, test-p, instantiate]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `class FooTest : public testing::TestWithParam<T>`. `TEST_P` 안에서 `GetParam()`. `INSTANTIATE_TEST_SUITE_P`로 `Values`·`Range`·`Combine`·`ValuesIn(container)` 주입. *generator 이름이 test 이름에 박히는* 방식. custom name generator.

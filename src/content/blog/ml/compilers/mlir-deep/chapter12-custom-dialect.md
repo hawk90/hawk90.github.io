@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 12
 tags: [mlir, custom-dialect, ods, tutorial]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *MLIR Tutorial (Toy)* 따라가기. *Dialect 등록* — `DialectRegistry`. *Op 정의* — ODS (.td 파일). *Custom assembly*·parser/printer. *Verifier*·canonicalization·folder. *Interface 구현*. *Toy → Affine → LLVM* lowering 실습. NPU custom dialect의 시작점.

@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 14
 tags: [koller-friedman, hmm, dbn, kalman, smoothing]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Inference task in temporal model* — filtering·smoothing·prediction·Viterbi. *Forward-backward·Viterbi for HMM*. *Linear Gaussian state-space·Kalman filter·smoother*. *Switching state-space·particle filter for non-Gaussian non-linear*. *DBN inference*·*boyen-koller·assumed density filter (ADF)*. *Modern* — neural state-space.

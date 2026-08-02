@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 13
 tags: [scheduler, next-task, pxcurrenttcb, clz]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

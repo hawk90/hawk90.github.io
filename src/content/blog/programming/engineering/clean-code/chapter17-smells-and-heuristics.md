@@ -6,6 +6,7 @@ tags: [CleanCode, Code Smells, Heuristics, Robert Martin]
 series: "Clean Code"
 seriesOrder: 17
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

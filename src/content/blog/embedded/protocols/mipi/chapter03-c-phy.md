@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 3
 tags: [mipi, c-phy, trio, symbol-encoding, lane-reduction]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

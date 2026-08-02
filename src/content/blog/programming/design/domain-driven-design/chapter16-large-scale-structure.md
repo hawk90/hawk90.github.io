@@ -6,6 +6,7 @@ tags: [DDD, Large-Scale Structure]
 series: "Domain-Driven Design"
 seriesOrder: 16
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 대규모 시스템의 문제

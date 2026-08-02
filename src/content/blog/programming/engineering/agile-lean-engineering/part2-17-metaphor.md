@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — system metaphor가 무엇인지·왜 어렵게 받아들여졌는지. 2판에서 빠진 배경. 후일 DDD의 ubiquitous language로 진화한 흐름.

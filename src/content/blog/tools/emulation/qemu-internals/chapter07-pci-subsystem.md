@@ -6,6 +6,7 @@ tags: [QEMU, PCI, PCIe, BAR, Bus]
 series: "QEMU Internals"
 seriesOrder: 7
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 PCI는 x86·ARM·RISC-V 모두에서 *device discovery + 메모리 mapping*의 표준입니다. QEMU의 PCI 서브시스템은 *host bridge·root complex·bus·device·BAR·capability·MSI-X*를 모두 모델링해, mainline Linux PCI driver가 *그대로 동작*합니다.

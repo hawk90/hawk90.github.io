@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 4
 tags: [embedded, bsp, pinmux, clock]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

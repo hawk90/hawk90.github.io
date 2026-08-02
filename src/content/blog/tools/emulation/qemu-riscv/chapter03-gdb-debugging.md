@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 3
 tags: [RISC-V, QEMU, GDB, Debug, RSP]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 가장 강력한 기능 중 하나가 **내장 GDB stub**입니다. 실 보드의 JTAG 환경 없이도 GDB로 RISC-V 펌웨어·커널을 *명령어 단위* 디버깅할 수 있죠. JTAG 케이블·디버거 보드·OpenOCD 설정이 빠지므로 시작 비용이 0에 가깝습니다.

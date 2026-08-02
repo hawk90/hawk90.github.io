@@ -6,6 +6,7 @@ tags: [QEMU, sev, tdx, confidential-computing, cca]
 series: "QEMU Internals"
 seriesOrder: 21
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **Confidential Computing**은 *cloud의 새로운 보안 모델*입니다. 기존의 *hypervisor를 신뢰*하는 모델을 넘어, *hypervisor도 guest의 메모리·상태를 볼 수 없게* 합니다. AMD **SEV** 시리즈·Intel **TDX**·ARM **CCA**가 그 표준 — QEMU가 이 모든 platform을 지원합니다.

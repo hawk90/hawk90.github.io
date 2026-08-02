@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 10
 tags: [linux, device-tree, dts, spi, i2c, uart, pinctrl]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

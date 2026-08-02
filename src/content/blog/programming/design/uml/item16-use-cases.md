@@ -6,6 +6,7 @@ tags: [UML, Use Case, Requirements, Actor]
 series: "UML 2.5.1"
 seriesOrder: 16
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

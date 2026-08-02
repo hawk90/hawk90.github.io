@@ -6,6 +6,7 @@ series: "NPU 드라이버 개발"
 seriesOrder: 2
 tags: [npu, dma-buf, sharing, sync]
 draft: true
+topics: ["ml", "ml/drivers"]
 ---
 
 > Outline — *DMA-BUF* — Linux kernel cross-driver buffer sharing. *Exporter·importer*. *fd 기반* — userspace에서 다른 driver로 전달. *map·unmap·sync* operation. *Implicit fence* — old semantic. *Explicit fence* — sync_file·drm_syncobj. *V4L2·DRM·NPU* 간 zero-copy.

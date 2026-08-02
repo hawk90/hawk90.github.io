@@ -6,6 +6,7 @@ tags: [QEMU, partial-reconfig, fpga-region, dfx]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 8
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 FPGA 전체 재프로그래밍은 *수십 초*가 걸립니다. 일부 영역만 *초 단위*로 교체하는 게 **Partial Reconfiguration**(PR). ML model swap·HFT strategy 전환·NPU operator 교체에 필수입니다. Linux는 `fpga_region` subsystem으로 이 메커니즘을 추상화하고, driver는 region 정의 + reconfig 흐름만 구현하면 됩니다.

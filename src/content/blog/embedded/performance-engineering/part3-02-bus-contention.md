@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 20
 tags: [bus, contention, arbitration, qos, starvation]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

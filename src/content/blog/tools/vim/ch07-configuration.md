@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 7
 tags: [vim, editor, vimrc, configuration, settings]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 7: 설정 (vimrc)

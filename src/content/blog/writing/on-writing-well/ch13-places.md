@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 장소 글 — 여행 기사, 풍경 묘사, 도시 글은 *가장 cliché에 빠지기 쉬운 분야*입니다. 한 도시를 다루는 글이 *수백 명의 같은 글*처럼 보이기 쉽습니다.

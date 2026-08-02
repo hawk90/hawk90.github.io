@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 11
 tags: [cpp, embedded, constexpr, compile-time, optimization, zero-cost]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

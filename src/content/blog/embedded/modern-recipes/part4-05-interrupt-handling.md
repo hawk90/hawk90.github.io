@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 39
 tags: [recipes, bare-metal, interrupt]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

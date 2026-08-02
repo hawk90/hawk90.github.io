@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Estimating and Planning"
 bookAuthor: "Mike Cohn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 절대 시간이 아닌 상대 크기 — Fibonacci·T-shirt sizing.

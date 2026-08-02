@@ -6,6 +6,7 @@ tags: [jsf-cpp, inheritance, virtual, multiple-inheritance, rtti, dynamic-cast]
 series: "JSF C++"
 seriesOrder: 8
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 JSF C++의 *inheritance + virtual + RTTI* 정책. *RTTI 금지*, *virtual 신중*, *다중 상속 interface 외 회피*. 항공 SW의 *runtime cost 최소화 + analyzability* 정신. *정확한 AV Rule 번호·wording은 원문 PDF 참조*.

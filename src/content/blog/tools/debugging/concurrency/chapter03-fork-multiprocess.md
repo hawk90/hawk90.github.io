@@ -6,6 +6,7 @@ tags: [fork, vfork, multiprocess, namespace, container]
 series: "Concurrency Debugging"
 seriesOrder: 3
 draft: true
+topics: ["tools", "tools/debugging"]
 ---
 
 `fork()` 직후의 *자식 프로세스*에 버그가 있다면? GDB가 *어느 쪽*을 따라갈지 결정해야 합니다. 이 장은 fork/vfork/clone의 차이, follow-fork-mode 옵션, 자식·부모 동시 추적, exec로 바이너리가 바뀌는 경우, 그리고 컨테이너 안 프로세스 디버깅까지 다룹니다.

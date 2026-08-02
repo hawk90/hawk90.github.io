@@ -6,6 +6,7 @@ series: "UALink 심화"
 seriesOrder: 8
 tags: [ualink, ai-cluster, llm, sharding]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 * Outline — *Tensor parallelism* — UALink 내 모든 GPU에 split. *Pipeline parallelism* — UALink pod 간. *Expert parallelism* (MoE) — sparse routing. *Collective* — all-reduce·all-gather over UALink switch. *Pod 단위 fault domain*. RoCE/InfiniBand는 inter-pod로 분리.

@@ -6,6 +6,7 @@ tags: [kernel, crash, drgn, vmcore, kdump]
 series: "Kernel Debugging"
 seriesOrder: 6
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 커널 panic 후 시스템이 죽었습니다. 재현은 안 됩니다. *kdump*가 *재부팅 직전* RAM을 vmcore 파일로 저장해 줬다면 — **crash** 또는 **drgn**으로 부검합니다. 이건 user-space의 core dump 분석(`gdb exe core`)에 해당하는 *커널 버전*.

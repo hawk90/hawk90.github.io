@@ -5,6 +5,7 @@ description: "모든 RTOS 객체를 컴파일 타임에 fixed로 두는 패턴�
 series: "Practical RTOS Internals"
 seriesOrder: 36
 tags: [static, deterministic, misra, do-178c, linker]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

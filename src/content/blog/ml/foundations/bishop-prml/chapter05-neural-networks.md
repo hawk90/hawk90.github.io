@@ -6,6 +6,7 @@ series: "Pattern Recognition and Machine Learning"
 seriesOrder: 5
 tags: [bishop, neural-network, backprop, bayesian-nn]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Feed-forward network*·*activation function*. *Network training* — error backpropagation·Jacobian·Hessian. *Regularization* — weight decay·early stopping·invariance·dropout (이 책엔 없지만 modern). *Mixture density network*. *Bayesian neural network* — Laplace + evidence framework. PRML 시각 — Bayesian NN 강조. (Modern은 Bishop의 새 책 *Deep Learning*에서 보강)

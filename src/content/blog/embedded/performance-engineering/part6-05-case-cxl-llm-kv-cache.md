@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 56
 tags: [cxl, llm-inference, kv-cache, hbm, tiered-memory, case-study]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

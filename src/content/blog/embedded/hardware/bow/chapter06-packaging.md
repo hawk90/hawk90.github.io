@@ -6,6 +6,7 @@ series: "BoW 개요"
 seriesOrder: 6
 tags: [bow, packaging, substrate, dft]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

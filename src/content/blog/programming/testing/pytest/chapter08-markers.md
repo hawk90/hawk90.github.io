@@ -6,6 +6,7 @@ series: "pytest 심화"
 seriesOrder: 8
 tags: [pytest, marker, skip, xfail]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — built-in — `skip`(절대 안 돌림), `skipif`(조건), `xfail`(실패 예상), `parametrize`. Custom marker — `pyproject.toml`의 `markers` 항목에 등록. `pytest -m "slow and not network"`로 선택 실행. `@pytest.mark.tryfirst`/`trylast`로 hook 순서.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 책임 분산의 장점과 함정. weak ownership과 strong ownership의 비교. 대규모 팀에서의 적용 한계.

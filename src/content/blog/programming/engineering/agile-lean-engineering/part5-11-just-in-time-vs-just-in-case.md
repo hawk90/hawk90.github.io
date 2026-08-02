@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Toyota Production System"
 bookAuthor: "Taiichi Ohno"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — inventory cost — JIT의 의미와 소프트웨어 적용.

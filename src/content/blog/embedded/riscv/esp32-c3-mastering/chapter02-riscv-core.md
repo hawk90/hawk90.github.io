@@ -6,6 +6,7 @@ series: "ESP32-C3 Mastering"
 seriesOrder: 2
 tags: [riscv, isa, pmp, interrupt, esp32-c3]
 draft: false
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 한 줄 요약

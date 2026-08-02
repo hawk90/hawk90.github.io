@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 10
 tags: [code-complete, variables, initialization, scope, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

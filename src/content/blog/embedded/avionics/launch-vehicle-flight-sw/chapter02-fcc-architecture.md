@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 2
 tags: [avionics, fcc, arm, dsp, fpga, heterogeneous]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

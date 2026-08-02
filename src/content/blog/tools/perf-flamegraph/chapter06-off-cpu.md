@@ -6,6 +6,7 @@ tags: [perf, off-CPU, Blocking]
 series: "perf and FlameGraph"
 seriesOrder: 6
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

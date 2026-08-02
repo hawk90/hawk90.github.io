@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 12
 tags: [mobile, deployment, npu, on-device]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *End-to-end flow* — PyTorch → ONNX/StableHLO → 컴파일러 → device binary. *모바일 환경* 제약 — APK size·메모리·전력. *Vendor SDK 호출* — QNN·CoreML·OpenVINO. *Selective op kernel*·*dead code elimination*. *Performance debugging*. *Multi-device 분기*. *Real-world latency 측정*.

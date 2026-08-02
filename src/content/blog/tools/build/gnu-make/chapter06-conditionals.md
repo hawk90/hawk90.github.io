@@ -6,6 +6,7 @@ tags: [make, build, Makefile, conditional]
 series: "GNU Make"
 seriesOrder: 6
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 조건문이 필요한가

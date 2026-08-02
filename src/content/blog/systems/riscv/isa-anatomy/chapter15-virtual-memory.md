@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 15
 tags: [RISC-V, Virtual-Memory, Sv39, Page-Table, MMU]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

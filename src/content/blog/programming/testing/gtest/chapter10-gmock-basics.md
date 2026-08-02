@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 10
 tags: [gtest, gmock, mock, expect-call]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `MOCK_METHOD(ReturnT, Name, (Args...), (qualifiers))` 매크로. `EXPECT_CALL(mock, Method(matchers))`의 4가지 절 — `.Times`/`.WillOnce`/`.WillRepeatedly`/`.InSequence`. mock 객체 *수명*과 *expectation 검증 시점*(소멸 시). NiceMock vs StrictMock vs NaggyMock.

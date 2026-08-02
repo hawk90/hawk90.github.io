@@ -6,6 +6,7 @@ tags: [UML, Deployment, Architecture, Distributed Systems]
 series: "UML 2.5.1"
 seriesOrder: 26
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

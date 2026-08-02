@@ -6,6 +6,7 @@ tags: [Vim, Jump, Tag]
 series: "Practical Vim"
 seriesOrder: 9
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

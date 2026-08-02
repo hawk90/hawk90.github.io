@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 1
 tags: [protocols, spi, i2c, uart, rs485, embedded]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

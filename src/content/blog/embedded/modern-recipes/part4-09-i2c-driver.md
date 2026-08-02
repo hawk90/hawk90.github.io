@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 43
 tags: [recipes, bare-metal, i2c]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Kanban: Successful Evolutionary Change"
 bookAuthor: "David J. Anderson"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — STATIK(Systems Thinking Approach To Introducing Kanban) — 도입 방법론.

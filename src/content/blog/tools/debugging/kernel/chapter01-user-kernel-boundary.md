@@ -6,6 +6,7 @@ tags: [kernel, linux, debugging, proc]
 series: "Kernel Debugging"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 지금까지 다룬 GDB·Sanitizer·Valgrind는 모두 *user-space 프로세스*가 대상이었습니다. 커널은 다릅니다 — 멈춰서 들여다볼 *프로세스 컨텍스트*가 없고, *전체 시스템*이 한 컨텍스트로 도는 데다, *디버거 자체*가 그 위에서 돌고 있어 평소 도구가 안 통합니다.

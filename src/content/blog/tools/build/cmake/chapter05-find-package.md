@@ -6,6 +6,7 @@ tags: [cmake, build, cpp, dependencies]
 series: "CMake"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 `find_package`가 필요한가

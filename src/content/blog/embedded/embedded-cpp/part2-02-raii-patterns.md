@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 10
 tags: [cpp, embedded, raii, scoped-lock, unique-ptr, finally, lock-guard]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

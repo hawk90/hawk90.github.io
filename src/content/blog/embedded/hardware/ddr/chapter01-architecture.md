@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 1
 tags: [DDR, memory, architecture, bank, rank]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 DDR 메모리의 성능을 이해하려면 물리적 구조부터 알아야 한다. 이 장에서는 메모리 셀의 동작 원리부터 Bank, Row, Column, Rank의 계층 구조까지 다룬다.

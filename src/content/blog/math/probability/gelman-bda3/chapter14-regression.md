@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 14
 tags: [bda3, bayesian-regression, prior-choice]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Normal linear regression*. *Posterior distribution of coefficients·predictions*. *Prior choice* — weakly informative·conjugate·non-conjugate. *Computational implementation* — analytic·Gibbs·HMC. *Posterior predictive check for regression*. *Multiple-regression interpretation* warning.

@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 5
 tags: [avionics, do-178c, design, architecture, partitioning]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

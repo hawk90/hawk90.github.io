@@ -6,6 +6,7 @@ tags: [TDD, Diagnostics]
 series: "Growing Object-Oriented Software"
 seriesOrder: 22
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 테스트 진단의 중요성

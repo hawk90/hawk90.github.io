@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 3
 tags: [RISC-V, OpenOCD, Debug, Probe]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

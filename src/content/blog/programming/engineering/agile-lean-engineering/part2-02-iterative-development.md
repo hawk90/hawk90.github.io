@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Beck의 운전 metaphor. 한 번에 길게 가는 것이 아니라 끊임없이 미세조정. feedback loop를 짧게 만들수록 cost of change가 줄어든다.

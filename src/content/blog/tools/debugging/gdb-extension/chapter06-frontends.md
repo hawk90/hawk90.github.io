@@ -6,6 +6,7 @@ tags: [gdb, tui, cgdb, gef, vscode, neovim, frontend]
 series: "GDB Extension and IDE"
 seriesOrder: 6
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 GDB는 본질이 명령줄이지만 *실제 작업 환경*은 다양합니다. 가벼운 한 화면 분할부터 풀 IDE까지 — 이 장은 각 프런트엔드의 특징과 *언제 어느 것을 선택*할지를 다룹니다.

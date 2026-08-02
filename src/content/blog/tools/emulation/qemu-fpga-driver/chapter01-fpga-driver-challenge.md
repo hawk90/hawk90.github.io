@@ -6,6 +6,7 @@ tags: [QEMU, fpga, driver, vfio, workflow]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 1
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 FPGA driver 개발의 진짜 어려움은 *코드 자체*가 아니라 *환경*에 있습니다. 보드 한 대를 여러 명이 시간대를 나눠 쓰고, bitstream은 자주 바뀌며, 로그는 dmesg 한 줄에 그치고, 시스템이 lock-up되면 재현조차 어렵습니다. 이 시리즈는 그 환경 문제를 푸는 *4단계 워크플로*를 다룹니다 — QEMU에 가짜 FPGA를 만들어 driver를 작성하고, 실 FPGA가 도착하면 VFIO로 그대로 옮기는 흐름.

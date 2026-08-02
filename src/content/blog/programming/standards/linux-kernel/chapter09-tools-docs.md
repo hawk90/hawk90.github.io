@@ -6,6 +6,7 @@ tags: [Linux, Kernel, checkpatch, sparse, kernel-doc, Documentation]
 series: "Linux Kernel Coding Style"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Use the tools. That's what they're for."

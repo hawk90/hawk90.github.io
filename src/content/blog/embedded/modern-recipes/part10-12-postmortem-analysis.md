@@ -5,6 +5,7 @@ description: "Linux coredump·gdb 분석부터 MCU 환경의 mini-dump(Memfault)
 series: "Modern Embedded Recipes"
 seriesOrder: 122
 tags: [recipes, debugging, postmortem]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

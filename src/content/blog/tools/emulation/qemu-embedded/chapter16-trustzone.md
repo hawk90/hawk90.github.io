@@ -6,6 +6,7 @@ tags: [QEMU, trustzone, op-tee, secure-world, EL3, ATF]
 series: "QEMU Embedded Emulation"
 seriesOrder: 16
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 모바일과 IoT 디바이스의 *지문·얼굴 인식·DRM·결제·키 보관*은 모두 **TrustZone** 안에서 동작합니다. ARM이 single core 위에 *secure world*와 *non-secure world*를 하드웨어로 분리해, Linux를 신뢰하지 않는 상태에서도 비밀을 보호합니다. 이 장은 QEMU `virt,secure=on` + ARM Trusted Firmware + OP-TEE로 완전한 secure boot chain을 시뮬레이션하는 흐름을 다룹니다.

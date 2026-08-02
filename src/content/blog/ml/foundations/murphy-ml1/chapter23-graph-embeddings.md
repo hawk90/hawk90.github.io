@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 23
 tags: [murphy, gnn, node2vec, graph-embedding]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Graph data 예* — social·molecule·knowledge graph. *Random walk based* — DeepWalk·node2vec·LINE. *Graph Neural Network* — GCN·GAT·GraphSAGE·MPNN. *Heterogeneous graph*·relational GCN. *Graph pooling·readout*. *Scalability* — sampling·partitioning. *Application* — drug discovery·recommendation·knowledge graph completion.

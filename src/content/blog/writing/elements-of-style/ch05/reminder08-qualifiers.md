@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Elements of Style"
 bookAuthor: "William Strunk Jr., E.B. White"
 draft: true
+topics: ["writing"]
 ---
 
 > Avoid the use of qualifiers.

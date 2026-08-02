@@ -6,6 +6,7 @@ series: "ONNX Runtime 심화"
 seriesOrder: 6
 tags: [onnxruntime, quantization, qdq, ptq]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *onnxruntime.quantization* — `quantize_static`·`quantize_dynamic`. *QDQ format* — quantize/dequantize node 삽입. *QOperator format* — old style. *Calibration* — entropy·percentile·MinMax·distribution. *Per-channel*·*per-tensor*. *Mixed precision* — sensitivity analysis. *QAT* — onnxruntime-training로.

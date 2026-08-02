@@ -5,6 +5,7 @@ description: "Super-loop와 RTOS의 분기점, RAM/Flash 비용, 디버깅 복�
 series: "Modern Embedded Recipes"
 seriesOrder: 63
 tags: [recipes, rtos, design]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

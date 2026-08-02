@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 9
 tags: [mle, method-of-moments, fisher-information]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Method of moments*. *Maximum Likelihood Estimator (MLE)*. *MLE 성질* — consistency·asymptotic normality·efficiency. *Fisher information I(θ)*·*Cramér-Rao lower bound*. *Score function*·*regularity conditions*. *Likelihood ratio*. *Properties failure* — non-regular case (boundary·discrete jump).

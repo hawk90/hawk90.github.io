@@ -6,7 +6,7 @@ tags: [Testing, Mock, Best Practices]
 series: "Khorikov Unit Testing"
 seriesOrder: 9
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 Mock은 강력하지만 오용하기 쉽다. 올바른 Mock 사용법은 테스트의 가치를 높이고, 잘못된 사용은 취약한 테스트를 만든다.

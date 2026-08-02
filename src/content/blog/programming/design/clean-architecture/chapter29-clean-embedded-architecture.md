@@ -6,6 +6,7 @@ tags: [Architecture, Embedded, HAL]
 series: "Clean Architecture"
 seriesOrder: 29
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

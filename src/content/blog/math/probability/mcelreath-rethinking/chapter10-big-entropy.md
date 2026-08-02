@@ -6,6 +6,7 @@ series: "Statistical Rethinking"
 seriesOrder: 10
 tags: [mcelreath, max-entropy, exponential-family, glm]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Max entropy distributions* — constraint별 (count: Poisson, bounded: binomial, continuous unbounded: Gaussian, ordered: exponential). *Why these distribution families dominate*. *Generalized Linear Model framework* — link function이 자연스럽게 따라온다. *Common GLM zoo*. *Information theory의 ML와의 만남*.

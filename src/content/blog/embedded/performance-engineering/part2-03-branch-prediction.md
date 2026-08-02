@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 11
 tags: [cpu, branch, prediction, btb, bht]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

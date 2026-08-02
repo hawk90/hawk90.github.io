@@ -5,6 +5,7 @@ description: "임베디드 환경에서 overhead를 최소화한 로깅. 레벨 
 series: "Modern Embedded Recipes"
 seriesOrder: 121
 tags: [recipes, debugging, logging]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [Git, SVN, Migration]
 series: "Pro Git"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

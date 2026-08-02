@@ -5,6 +5,7 @@ description: "Host CPU와 FPGA·NPU·보조 CPU를 잇는 mailbox 프로토콜�
 series: "Modern Embedded Recipes"
 seriesOrder: 128
 tags: [recipes, mailbox, doorbell, fpga, openamp]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

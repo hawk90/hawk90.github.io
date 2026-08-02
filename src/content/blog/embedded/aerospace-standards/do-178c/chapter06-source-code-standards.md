@@ -6,6 +6,7 @@ tags: [do-178c, source-code, scs, misra, defensive, traceability, code-review]
 series: "DO-178C"
 seriesOrder: 6
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 DO-178C는 *특정 코딩 표준을 명시하지 않는다*. *프로젝트가 자체 SCS (Software Code Standards)*를 정의해 *심사관 승인*을 받는다. 대부분의 항공 프로젝트가 *MISRA C + 추가 규칙*을 채택. 이 장은 *SCS 작성, MISRA C 적용, LLR ↔ Code traceability, Code Review*까지.

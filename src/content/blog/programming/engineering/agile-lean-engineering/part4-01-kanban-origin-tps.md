@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Toyota Production System + Kanban"
 bookAuthor: "Taiichi Ohno / David J. Anderson"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Toyota 슈퍼마켓 영감의 시각화 카드 — Ohno TPS에서 출발.

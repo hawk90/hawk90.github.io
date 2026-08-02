@@ -6,6 +6,7 @@ tags: [Vim, Normal Mode]
 series: "Practical Vim"
 seriesOrder: 2
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 12
 tags: [can, debugging, canalyzer, pcan, kvaser, dbc, bus-load]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

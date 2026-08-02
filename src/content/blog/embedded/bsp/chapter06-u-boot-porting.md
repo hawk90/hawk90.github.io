@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 6
 tags: [embedded, bsp, u-boot, porting]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "BoW 개요"
 seriesOrder: 3
 tags: [bow, ucie, comparison]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

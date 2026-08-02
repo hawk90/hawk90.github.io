@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 2
 tags: [spi, mosi, miso, cpol, cpha, mode]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

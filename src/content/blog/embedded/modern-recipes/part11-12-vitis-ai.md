@@ -5,6 +5,7 @@ description: "Xilinx Vitis AI로 TensorFlow/PyTorch 모델을 DPU용 xmodel로 q
 series: "Modern Embedded Recipes"
 seriesOrder: 134
 tags: [recipes, fpga, vitis-ai, dpu, edge-ai]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

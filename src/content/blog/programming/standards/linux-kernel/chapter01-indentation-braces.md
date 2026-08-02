@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Indentation, Braces, Tabs]
 series: "Linux Kernel Coding Style"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Tabs are 8 characters, and thus indentations are also 8 characters."

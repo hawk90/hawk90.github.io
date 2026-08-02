@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 6
 tags: [cpp, embedded, startup, init-array, static-initialization, reset-handler]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

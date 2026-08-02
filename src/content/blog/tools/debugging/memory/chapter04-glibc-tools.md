@@ -6,6 +6,7 @@ tags: [memory, glibc, mtrace, mcheck, malloc-check]
 series: "Memory Diagnostics"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ASan·Valgrind·heaptrack을 못 쓰는 환경 (오래된 시스템, 빌드 도구 부재, 임베디드 등)에서 *glibc 자체*가 제공하는 도구들. 정밀도는 낮지만 *환경 변수 하나*로 켜고 끄는 단순함이 매력.

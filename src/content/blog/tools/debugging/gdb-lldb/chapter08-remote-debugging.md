@@ -6,6 +6,7 @@ tags: [gdb, Remote Debug, gdbserver, OpenOCD, JTAG, ARM]
 series: "GDB and LLDB"
 seriesOrder: 8
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 :::tip[Deep dive]

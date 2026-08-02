@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 16
 tags: [memory, bandwidth, stream, roofline]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

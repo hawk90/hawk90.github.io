@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Lean Software Development"
 bookAuthor: "Mary & Tom Poppendieck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — set-based design·learning loop — 지식이 곧 progress.

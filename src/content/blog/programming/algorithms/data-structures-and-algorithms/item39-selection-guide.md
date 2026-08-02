@@ -6,6 +6,7 @@ tags: [Data Structure, Decision Tree, Guide]
 series: "Data Structures and Algorithms"
 seriesOrder: 39
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

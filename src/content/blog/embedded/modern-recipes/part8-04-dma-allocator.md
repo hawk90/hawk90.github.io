@@ -5,6 +5,7 @@ description: "DMA buffer 할당 패턴을 coherent와 streaming, CMA, IOMMU, MPU
 series: "Modern Embedded Recipes"
 seriesOrder: 92
 tags: [recipes, dma, allocator, iommu, coherent]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

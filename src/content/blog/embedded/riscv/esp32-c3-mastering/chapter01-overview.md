@@ -6,6 +6,7 @@ series: "ESP32-C3 Mastering"
 seriesOrder: 1
 tags: [esp32-c3, riscv, mcu, wifi, ble]
 draft: false
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 한 줄 요약

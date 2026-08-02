@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "User Stories Applied + BDD in Action"
 bookAuthor: "Mike Cohn / John Smart"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — BDD의 given-when-then 형식 — acceptance criteria 작성법.

@@ -5,6 +5,7 @@ description: "Mutex blocking 비용과 Linux futex 2-stage, adaptive mutex, prio
 series: "Embedded Performance Engineering"
 seriesOrder: 34
 tags: [mutex, blocking, futex, adaptive, priority-inheritance]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

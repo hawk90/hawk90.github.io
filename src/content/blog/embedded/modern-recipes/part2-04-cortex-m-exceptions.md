@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 16
 tags: [recipes, arm, nvic, exceptions]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

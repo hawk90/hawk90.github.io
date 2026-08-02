@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 11
 tags: [embedded, buildroot, toolchain, cross-compile, glibc]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

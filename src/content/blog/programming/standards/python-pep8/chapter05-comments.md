@@ -6,6 +6,7 @@ tags: [Python, PEP8, Comments, Docstrings, Documentation]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Comments that contradict the code are worse than no comments."

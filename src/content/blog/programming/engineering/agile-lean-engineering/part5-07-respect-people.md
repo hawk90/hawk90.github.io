@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Lean Software Development"
 bookAuthor: "Mary & Tom Poppendieck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — engaged worker — Lean의 핵심은 사람이다.

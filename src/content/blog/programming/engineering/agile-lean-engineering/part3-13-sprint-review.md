@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Scrum Guide"
 bookAuthor: "Schwaber & Sutherland"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — stakeholder가 참여하는 review — demo만 하면 안 되는 이유.

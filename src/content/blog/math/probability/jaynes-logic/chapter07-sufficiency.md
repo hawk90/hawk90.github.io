@@ -6,6 +6,7 @@ series: "Probability Theory: The Logic of Science"
 seriesOrder: 7
 tags: [sufficient-statistic, exponential-family, ancillary]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Sufficient statistic* — likelihood factorization. *Fisher-Neyman factorization theorem*. *Exponential family*의 자연성. *Ancillary statistic* — parameter에 무관. *Conditioning on ancillary*·*Cox proportional hazards*. *Bayesian view* — sufficient stat이 posterior에 전부. ML 응용 — minimal sufficient embedding·representation learning.

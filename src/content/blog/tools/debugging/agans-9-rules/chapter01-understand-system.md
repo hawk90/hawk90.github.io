@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Debugging: The 9 Indispensable Rules"
 bookAuthor: "David J. Agans"
+topics: ["tools", "tools/debugging"]
 ---
 
 > Outline — *Read the manual·whole thing*. *Know the fundamentals* — language·OS·HW spec. *Know the road map·tool*. *Look up the details*. *Know your tools*. *Look it up*. 멘탈 모델 없이 디버깅은 *추측 게임*. 책 시작 — 9가지 보편 디버깅 원칙. [공식 사이트](http://debuggingrules.com/).

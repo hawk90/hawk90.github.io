@@ -6,6 +6,7 @@ tags: [QEMU, msi-x, fpga, user-irq]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 5
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 FPGA는 *수십에서 수천 개*의 IRQ source를 가질 수 있습니다. DMA 채널 완료·user logic 이벤트·error condition 등. **MSI-X**는 이를 vector 단위로 분리해 driver가 깔끔하게 처리하게 해 줍니다. 이 장은 fake-fpga에 MSI-X 모델·user IRQ multiplexing·polling fallback을 차례로 더합니다.

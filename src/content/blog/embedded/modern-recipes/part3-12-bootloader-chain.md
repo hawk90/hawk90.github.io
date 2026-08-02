@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 34
 tags: [recipes, bootloader, u-boot, secure-boot, spl]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

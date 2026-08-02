@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 3
 tags: [expectation, variance, covariance, mgf]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Expectation as integral*. *Linearity of expectation*. *Variance·standard deviation·moments*. *Covariance·correlation*. *Conditional expectation* — E[Y|X]. *Tower property*. *MGF (Moment Generating Function)*·*characteristic function*. ML 응용 — Monte Carlo estimator·variance reduction.

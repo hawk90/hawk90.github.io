@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 57
 tags: [pragmatic-programmer, concurrency, debugging]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 11
 tags: [DDR, memory, controller, scheduler, interleaving]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 DDR 컨트롤러는 CPU/버스의 메모리 요청을 받아 DRAM 명령으로 변환하고 스케줄링한다. 컨트롤러의 설계가 메모리 대역폭 활용률을 결정한다.

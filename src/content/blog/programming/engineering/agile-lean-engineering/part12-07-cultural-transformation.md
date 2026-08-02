@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Clean Agile + Phoenix Project"
 bookAuthor: "Robert C. Martin / Gene Kim"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Cargo Cult Agile·Dark Scrum — 가장 흔한 도입 실패.

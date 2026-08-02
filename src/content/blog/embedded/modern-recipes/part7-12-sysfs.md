@@ -5,6 +5,7 @@ description: "sysfs attribute, attribute group, configfs로 user space에서 dri
 series: "Modern Embedded Recipes"
 seriesOrder: 86
 tags: [recipes, sysfs, configfs, kobject, udev]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

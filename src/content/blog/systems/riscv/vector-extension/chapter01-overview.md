@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 1
 tags: [RISC-V, Vector, RVV, SIMD, VLA]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ series: "TinyML·Edge AI"
 seriesOrder: 6
 tags: [tinyml, power, energy, duty-cycle]
 draft: true
+topics: ["ml", "ml/tinyml"]
 ---
 
 > Outline — *Energy budget* — coin cell·primary battery. *Energy/inference* metric (μJ). *Duty cycle* — sleep dominant·short inference. *Wake-on-event* via low-power sensor. *MCU sleep mode* (M-class·deep sleep). *Inference 빈도·정확도·전력* trade-off. *Power profile tool* — Otii·Joulescope.

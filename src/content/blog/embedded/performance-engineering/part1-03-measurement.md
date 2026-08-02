@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 3
 tags: [measurement, dwt, pmu, clock-gettime, gpio]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

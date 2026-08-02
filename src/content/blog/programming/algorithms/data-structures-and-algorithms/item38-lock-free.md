@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Concurrency, Lock-free, Atomic]
 series: "Data Structures and Algorithms"
 seriesOrder: 38
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

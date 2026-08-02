@@ -6,6 +6,7 @@ series: "UCIe 심화"
 seriesOrder: 10
 tags: [ucie, pcie, io-chiplet]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *I/O die* (Intel·AMD) — PCIe·Ethernet·USB가 별도 chiplet. *PCIe TLP를 UCIe flit에 매핑*. *Latency 영향*. *Multi-host* 시나리오. AMD Genoa·Intel Granite Rapids 사례. UCIe → 외부 PCIe로 가는 hop 비용 분석.

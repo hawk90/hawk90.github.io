@@ -6,6 +6,7 @@ tags: [Architecture, CleanArchitecture, DependencyRule]
 series: "Clean Architecture"
 seriesOrder: 22
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

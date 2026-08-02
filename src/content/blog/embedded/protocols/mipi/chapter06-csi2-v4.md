@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 6
 tags: [mipi, csi-2-v3, csi-2-v4, smart-roi, usl, raw24, mipi-ccs]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

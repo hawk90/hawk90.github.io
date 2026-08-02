@@ -6,6 +6,7 @@ tags: [Sanitizer, TSan, ThreadSanitizer, Concurrency, DataRace, C, C++]
 series: "Sanitizers"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 데이터 레이스가 *왜 어려운가*

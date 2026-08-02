@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 38
 tags: [cpp, embedded, gpio, template, type-safe, hal]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

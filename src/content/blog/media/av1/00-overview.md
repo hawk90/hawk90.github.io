@@ -6,6 +6,7 @@ series: "AV1"
 seriesOrder: 0
 tags: [AV1, Codec, Video, AOMedia, Bitstream]
 draft: true
+topics: ["media"]
 ---
 
 AV1은 Alliance for Open Media가 개발한 로열티 프리 비디오 코덱이다. 이 시리즈는 AV1 스펙 전체를 다룬다.

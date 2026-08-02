@@ -6,6 +6,7 @@ tags: [QEMU, tcg, dynamic-translation, code-cache, mttcg]
 series: "QEMU Internals"
 seriesOrder: 13
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **TCG**(Tiny Code Generator)는 QEMU의 *상징적인* 기능입니다. *어떤 host*에서도 *어떤 guest*를 실행 가능하게 만드는 *동적 번역기*. KVM이 *같은 architecture*에서만 동작하는 반면 TCG는 *cross-architecture*를 가능하게 합니다.

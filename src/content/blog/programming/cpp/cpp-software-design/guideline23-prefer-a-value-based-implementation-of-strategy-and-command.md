@@ -6,6 +6,7 @@ tags: [C++, Software Design, Strategy, Command, Value Semantics]
 series: "C++ Software Design"
 seriesOrder: 23
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 가이드라인이 중요한가?

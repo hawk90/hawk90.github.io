@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 9
 tags: [rs232, rs485, modbus, differential, multidrop, termination]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

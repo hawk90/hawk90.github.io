@@ -6,6 +6,7 @@ tags: [QEMU, RISC-V, virt, RV64, OpenSBI, PLIC]
 series: "QEMU Embedded Emulation"
 seriesOrder: 3
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 ARM virt와 짝을 이루는 RISC-V 측 환경이 `qemu-system-riscv64 -M virt`입니다. 둘은 *놀라울 만큼 닮았지만* RISC-V만의 부팅 단계(OpenSBI)와 인터럽트 구조(PLIC + CLINT)에 차이가 있습니다. 이 장은 그 차이를 중심으로 RISC-V virt 머신을 정리합니다.

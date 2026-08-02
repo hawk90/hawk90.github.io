@@ -5,6 +5,7 @@ description: "FreeRTOS와 Zephyr의 port 계층을 따라가며 새 아키텍처
 series: "Practical RTOS Internals"
 seriesOrder: 49
 tags: [porting, architecture, port-c, context-switch, tick]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

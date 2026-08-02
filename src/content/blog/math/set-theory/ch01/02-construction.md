@@ -6,6 +6,7 @@ tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 102
 draft: true
+topics: ["math"]
 ---
 
 ## 어디서 막히나

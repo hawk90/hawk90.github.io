@@ -6,6 +6,7 @@ tags: [UML, Collaboration, Role, Pattern]
 series: "UML 2.5.1"
 seriesOrder: 27
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
 draft: true
-
+topics: ["writing"]
 ---
 
 > 좋은 글은 *필요한 단어만* 씁니다. 같은 의미를 *더 적은 단어*로 표현할 수 있다면 더 *명료*해집니다.

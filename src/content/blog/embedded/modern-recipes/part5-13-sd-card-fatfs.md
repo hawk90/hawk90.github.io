@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 61
 tags: [recipes, peripheral, sd, fatfs]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

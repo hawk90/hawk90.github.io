@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 13
 tags: [nvme, linux, admin, ioctl]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 Admin 명령은 Controller 관리와 설정에 사용된다. 이 장에서는 Linux 드라이버가 Admin 명령을 어떻게 처리하는지 분석한다.

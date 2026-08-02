@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 2
 tags: [nvme, controller, identify, capabilities]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 NVMe Controller는 호스트와 스토리지 미디어 사이의 인터페이스를 담당한다. 이 장에서는 Controller의 능력을 정의하는 레지스터와 Identify 구조체를 상세히 분석한다.

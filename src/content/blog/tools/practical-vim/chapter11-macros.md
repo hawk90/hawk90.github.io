@@ -6,6 +6,7 @@ tags: [Vim, Macro, Automation]
 series: "Practical Vim"
 seriesOrder: 11
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

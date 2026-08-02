@@ -6,6 +6,7 @@ series: "TinyML·Edge AI"
 seriesOrder: 11
 tags: [tinyml, anomaly-detection, autoencoder, predictive-maintenance]
 draft: true
+topics: ["ml", "ml/tinyml"]
 ---
 
 > Outline — *Anomaly detection* — predictive maintenance·산업 모니터링. *Autoencoder*-based — reconstruction error threshold. *Statistical* — Mahalanobis·PCA. *Isolation Forest* — tree-based. *One-class SVM·LOF*. *Drift handling*·on-device adaptation. *Sensor fusion* — vibration + temperature + current.

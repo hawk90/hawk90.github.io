@@ -5,6 +5,7 @@ description: "LUT·Flip-Flop·BRAM·DSP slice·clock region·IO bank — FPGA �
 series: "Modern Embedded Recipes"
 seriesOrder: 123
 tags: [recipes, fpga, basics]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

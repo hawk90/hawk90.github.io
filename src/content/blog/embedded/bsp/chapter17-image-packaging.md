@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 17
 tags: [embedded, bsp, image, partition, gpt]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

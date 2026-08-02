@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
 draft: true
-
+topics: ["writing"]
 ---
 
 > 따옴표는 *직접 인용, 짧은 작품 제목, 강조·반어*에 쓰입니다. 미국식과 영국식의 사용 규칙이 다르므로 *한 글 안의 일관성*이 중요합니다.

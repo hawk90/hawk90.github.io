@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Lean Startup"
 bookAuthor: "Eric Ries"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 10 가지 pivot 유형 — 언제 방향을 바꾸나.

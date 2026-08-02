@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 6
 tags: [nvme, read, write, flush, trim]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 I/O Commands는 실제 데이터 전송을 담당한다. 이 장에서는 Read, Write, Flush, Dataset Management 명령을 분석한다.

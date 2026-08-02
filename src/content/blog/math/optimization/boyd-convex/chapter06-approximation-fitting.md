@@ -6,6 +6,7 @@ series: "Convex Optimization (Boyd)"
 seriesOrder: 6
 tags: [least-squares, lasso, robust, sparse]
 draft: true
+topics: ["math", "math/optimization"]
 ---
 
 > Outline — *Norm approximation* — L2 (least squares)·L1 (robust)·L∞ (Chebyshev). *Penalty function* — Huber (robust)·deadzone-linear. *Regularization* — Tikhonov·Lasso (L1)·elastic net. *Robust approximation* — uncertain coefficient·stochastic·worst-case. *Function fitting*·*splines*·*polynomial*. *Signal reconstruction* — basis pursuit·total variation.

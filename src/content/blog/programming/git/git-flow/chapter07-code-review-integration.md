@@ -6,6 +6,7 @@ tags: [Git, Code Review, Pull Request]
 series: "Git Flow"
 seriesOrder: 7
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

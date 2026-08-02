@@ -6,6 +6,7 @@ tags: [Secure Boot, Root of Trust, Cryptography]
 series: "Embedded Security"
 seriesOrder: 2
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

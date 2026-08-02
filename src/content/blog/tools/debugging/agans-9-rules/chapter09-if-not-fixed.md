@@ -6,6 +6,7 @@ series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 9
 tags: [agans, debugging, regression, verification]
 draft: true
+topics: ["tools", "tools/debugging"]
 ---
 
 > Outline — *Bug가 사라졌다 ≠ 고쳐졌다*. *Verify the cause·verify the fix*. *Re-introduce the bug intentionally·confirm fix*. *Regression test 추가*. *Look for similar bugs elsewhere*. *Root cause vs symptom* 구별. *Fix the cause not the symptom*. 책 마무리 — *9가지 원칙은 분야 불문 적용*.

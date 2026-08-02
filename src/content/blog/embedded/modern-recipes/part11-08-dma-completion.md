@@ -5,6 +5,7 @@ description: "DMA가 끝났음을 알려주는 세 가지 방식을 비교합니
 series: "Modern Embedded Recipes"
 seriesOrder: 130
 tags: [recipes, dma, completion, interrupt, polling]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

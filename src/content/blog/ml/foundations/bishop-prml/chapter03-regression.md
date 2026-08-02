@@ -6,6 +6,7 @@ series: "Pattern Recognition and Machine Learning"
 seriesOrder: 3
 tags: [bishop, linear-regression, bayesian-regression, evidence]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Linear basis function model*·*MLE·MAP*. *Geometry of least squares*·*sequential learning*. *Regularized least squares* — L2·Lq. *Bias-variance decomposition*. *Bayesian linear regression* — predictive distribution·equivalent kernel. *Evidence approximation* — type-II MLE for hyperparameter. *Limitations of fixed basis*.

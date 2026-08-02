@@ -6,6 +6,7 @@ tags: [ecss, product-properties, metrics, maintainability, testability, sonarqub
 series: "ECSS-Q-ST-80C"
 seriesOrder: 3
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 ECSS-Q-ST-80C의 *제품 측면* 품질 보증. *코드 자체의 quality*를 *정량 측정*한다. DO-178C가 *process*에 집중한다면 ECSS는 *process + product 양쪽 동등*. 이 장은 *각 quality property의 측정·해석·개선*까지.

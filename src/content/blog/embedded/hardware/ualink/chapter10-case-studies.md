@@ -6,6 +6,7 @@ series: "UALink 심화"
 seriesOrder: 10
 tags: [ualink, case-study, amd, intel, gaudi]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *AMD MI350X* — Infinity Fabric Gen4 → UALink 호환. *Intel Gaudi 3·Falcon Shores* — UALink endpoint. *Cisco·Marvell·Broadcom* switch silicon 출시 일정. *공개된 ML benchmark* — all-reduce·all-gather latency. NVIDIA NVL72와 head-to-head 비교 (vendor-claim).

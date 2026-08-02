@@ -6,6 +6,7 @@ series: "Elements of Information Theory"
 seriesOrder: 7
 tags: [channel-capacity, shannon, coding-theorem]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Discrete memoryless channel*. *Channel capacity* `C = max I(X;Y)`. *대표 예* — BSC·BEC·typewriter. *Random coding*·*jointly typical decoding*으로 증명. *Converse*·*Fano's inequality*. *Capacity achieving distribution* 계산. *Feedback*은 capacity 변화 없음. Modern ML: 채널 = noisy supervision·label noise 모델.

@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 12
 tags: [avionics, verification, validation, hil, sil]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [DDD, Entity, Value Object, Service, Module]
 series: "Domain-Driven Design"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 도메인 모델의 구성요소

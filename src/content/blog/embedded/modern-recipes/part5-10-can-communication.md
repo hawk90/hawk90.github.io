@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 58
 tags: [recipes, peripheral, can]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 99
 tags: [pragmatic-programmer, career, autonomy]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

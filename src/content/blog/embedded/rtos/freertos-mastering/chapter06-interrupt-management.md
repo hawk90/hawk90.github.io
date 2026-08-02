@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Mastering the FreeRTOS Real Time Kernel"
 bookAuthor: "Richard Barry"
 draft: true
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

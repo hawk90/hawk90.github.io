@@ -6,6 +6,7 @@ series: "Memory Diagnostics"
 seriesOrder: 7
 tags: [tiered-memory, damon, damos, cxl, promotion, demotion]
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## DAMON 기본 동작 모델

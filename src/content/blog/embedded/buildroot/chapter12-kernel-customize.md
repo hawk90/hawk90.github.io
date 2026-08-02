@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 12
 tags: [embedded, buildroot, linux-kernel, defconfig, devicetree]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

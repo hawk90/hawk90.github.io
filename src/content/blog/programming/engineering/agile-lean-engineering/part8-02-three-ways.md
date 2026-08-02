@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The DevOps Handbook + Phoenix Project"
 bookAuthor: "Kim et al."
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Phoenix Project의 Three Ways — DevOps의 원리.

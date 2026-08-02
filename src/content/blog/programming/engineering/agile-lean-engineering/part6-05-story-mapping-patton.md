@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "User Story Mapping"
 bookAuthor: "Jeff Patton"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — backbone + walking skeleton — story map 그리는 단계.

@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Kconfig, Modules, module_init]
 series: "Linux Kernel Coding Style"
 seriesOrder: 8
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Kconfig is the kernel's configuration language."

@@ -8,7 +8,7 @@ tags: [agile, lean, xp, scrum, kanban, devops, cd, accelerate]
 type: tech
 featured: true
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 시리즈가 다루는 것

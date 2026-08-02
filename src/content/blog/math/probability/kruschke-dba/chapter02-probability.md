@@ -6,6 +6,7 @@ series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 2
 tags: [kruschke, probability, distribution, intuition]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Long-run frequency vs degree of belief* — Bayesian = degree of belief. *PMF·PDF·CDF* 직관. *Random variable·expectation*. *Common distribution* — Bernoulli·binomial·beta·normal·exponential. *Marginal·conditional·joint*. *Independence·conditional independence*. 그림 위주 설명.

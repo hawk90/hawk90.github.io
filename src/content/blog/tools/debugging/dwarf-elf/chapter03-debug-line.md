@@ -6,6 +6,7 @@ tags: [dwarf, debug-line, state-machine, addr2line]
 series: "DWARF and ELF Internals"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 `addr2line 0x401234`가 어떻게 `main.cpp:42`라고 답할까요. 답은 `.debug_line` 섹션입니다. PC 주소와 (파일, 줄, 컬럼)의 매핑을 *바이트코드 가상 머신*으로 압축한 형태.

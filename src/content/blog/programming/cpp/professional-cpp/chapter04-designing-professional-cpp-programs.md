@@ -6,6 +6,7 @@ tags: [C++, Design, Abstraction]
 series: "전문가를 위한 C++"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

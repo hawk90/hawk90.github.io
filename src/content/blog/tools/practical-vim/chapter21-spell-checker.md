@@ -6,6 +6,7 @@ tags: [Vim, Spell Check]
 series: "Practical Vim"
 seriesOrder: 20
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용 (Tips 118-120)

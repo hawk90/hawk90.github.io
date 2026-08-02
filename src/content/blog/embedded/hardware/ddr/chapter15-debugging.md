@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 15
 tags: [DDR, memory, debugging, troubleshooting, ECC]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 메모리 문제는 시스템 안정성에 직접적인 영향을 준다. 이 장에서는 실무에서 흔히 겪는 메모리 문제의 증상, 원인, 디버깅 방법을 다룬다.

@@ -6,6 +6,7 @@ tags: [TDD, Third-Party, Wrapper]
 series: "Growing Object-Oriented Software"
 seriesOrder: 8
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 실제 프로젝트에서 외부 라이브러리와 프레임워크, API를 피할 수 있는 경우는 거의 없다. 그래서 던져야 하는 질문은 "쓰느냐 마느냐"가 아니라 **어떻게 격리하느냐**다. GOOS의 답은 단호하다. *소유하지 않은 타입은 Mock하지 마라.* 대신 얇은 wrapper로 감싸고, 그 wrapper에 대해서만 Mock을 만든다.

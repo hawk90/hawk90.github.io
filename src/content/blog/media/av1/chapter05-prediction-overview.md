@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Frame Header, Quantization]
 series: "AV1"
 seriesOrder: 5
 draft: true
+topics: ["media"]
 ---
 
 ## 5.1 Frame Header의 역할

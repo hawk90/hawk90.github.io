@@ -6,6 +6,7 @@ series: "Industrial Ethernet 심화"
 seriesOrder: 10
 tags: [powerlink, opensafety, br-automation, sil3, black-channel]
 draft: false
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

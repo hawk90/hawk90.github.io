@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 13
 tags: [cache, l1, l2, l3, set-associative]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 8
 tags: [cpp, embedded, standard, cpp11, cpp17, cpp20, cpp23, compiler-support]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

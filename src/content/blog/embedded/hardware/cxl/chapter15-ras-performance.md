@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 15
 tags: [cxl, ras, compliance, performance, cvme]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

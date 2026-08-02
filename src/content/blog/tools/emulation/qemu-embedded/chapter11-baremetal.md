@@ -6,6 +6,7 @@ tags: [QEMU, Baremetal, Firmware, linker-script, reset-vector]
 series: "QEMU Embedded Emulation"
 seriesOrder: 11
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **Bare-metal**은 OS 없이 *하드웨어 직접 위에서* 실행되는 코드입니다. 부트 ROM, 초기 펌웨어, 보안 모니터, 작은 RTOS 등이 해당. QEMU는 baremetal 코드를 직접 `-kernel`로 실행할 수 있어 *MCU 펌웨어 개발*에 매우 자주 쓰입니다.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Lean Startup"
 bookAuthor: "Eric Ries"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Concierge·Wizard of Oz·Smoke test — MVP의 다양한 형태.

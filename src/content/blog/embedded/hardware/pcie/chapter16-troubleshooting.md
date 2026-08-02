@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 16
 tags: [pcie, troubleshooting, debugging, scenarios]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 2
 tags: [ir, relay, hlo, mlir, tensor]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Relay (TVM)* — functional·typed IR. *HLO (XLA)* — operation-rich, shape-statically-typed. *MLIR* — multi-level, dialect-extensible. *Common requirements* — tensor type·shape·layout·attr. *TIR (TVM)*·*TensorIR* — low-level loop IR. *Relax* (TVM 2) — dynamic shape 지원.

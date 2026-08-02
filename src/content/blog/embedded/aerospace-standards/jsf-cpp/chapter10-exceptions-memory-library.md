@@ -6,6 +6,7 @@ tags: [jsf-cpp, exceptions, memory, new-delete, stl, multi-threading, static-poo
 series: "JSF C++"
 seriesOrder: 10
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 JSF C++의 가장 *strict한 영역들*. *Exception 금지*, *dynamic memory 제한*, *STL 일부만 사용*, *multi-threading은 OS가 관리*. 항공 SW의 *deterministic 우선* 정신. *정확한 AV Rule 번호와 wording은 원문 PDF 참조*.

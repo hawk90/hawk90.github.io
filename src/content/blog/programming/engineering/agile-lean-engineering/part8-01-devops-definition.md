@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The DevOps Handbook"
 bookAuthor: "Kim·Humble·Debois·Willis"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — DevOps가 무엇인가 — 흔한 오해와 진짜 정의.

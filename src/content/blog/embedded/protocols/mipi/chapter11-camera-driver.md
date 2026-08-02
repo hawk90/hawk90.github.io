@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 11
 tags: [linux, v4l2-subdev, imx-sensor, camera-driver, dt-binding]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

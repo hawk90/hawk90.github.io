@@ -6,6 +6,7 @@ tags: [Tracing, Resources]
 series: "System Tracing"
 seriesOrder: 10
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

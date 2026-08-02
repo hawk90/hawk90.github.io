@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 5
 tags: [cxl-4, pcie-7, bundled-port, streamlined-port, ppr]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

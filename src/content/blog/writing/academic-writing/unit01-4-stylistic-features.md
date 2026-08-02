@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
 draft: true
-
+topics: ["writing"]
 ---
 
 학술 영어 문체는 어휘만의 문제가 아닙니다. 문장 수준의 작은 결정들이 모여 학술 톤을 만듭니다. Swales와 Feak는 열 가지 항목을 정리합니다.

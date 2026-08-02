@@ -6,6 +6,7 @@ tags: [Architecture, Components, Deployment]
 series: "Clean Architecture"
 seriesOrder: 12
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

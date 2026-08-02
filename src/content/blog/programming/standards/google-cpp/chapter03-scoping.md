@@ -6,6 +6,7 @@ tags: [Google, C++, Style-Guide, Scoping, Namespace]
 series: "Google C++ Style"
 seriesOrder: 3
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 스코프는 식별자의 수명과 가시 범위를 결정한다. 잘못된 스코프는 이름 충돌, 자원 누출, 정적 초기화 순서 문제로 이어진다. 이 장은 namespace부터 thread\_local까지 차례로 다룬다.

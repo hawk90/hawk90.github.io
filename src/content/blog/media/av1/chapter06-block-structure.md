@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Superblock, Coding Block, Transform Block]
 series: "AV1"
 seriesOrder: 6
 draft: true
+topics: ["media"]
 ---
 
 ## 6.1 블록 계층 구조

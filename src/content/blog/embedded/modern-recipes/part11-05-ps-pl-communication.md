@@ -5,6 +5,7 @@ description: "Zynq의 GP·HP·ACP·M_AXI·S_AXI 인터페이스를 latency·thro
 series: "Modern Embedded Recipes"
 seriesOrder: 127
 tags: [recipes, fpga, zynq, ps-pl, axi]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

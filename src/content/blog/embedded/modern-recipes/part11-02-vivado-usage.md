@@ -5,6 +5,7 @@ description: "Vivado project 흐름·XDC constraint·synthesis/implementation·t
 series: "Modern Embedded Recipes"
 seriesOrder: 124
 tags: [recipes, fpga, vivado, xilinx]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Probability Theory: The Logic of Science"
 seriesOrder: 5
 tags: [parameter-estimation, posterior, conjugate, beta]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Estimating a probability* — Bayes의 표·beta posterior. *Conjugate prior* — beta·gamma·Dirichlet. *Truncated parameter* — physical constraint. *Posterior mean·MAP·median*. *Loss function*에 따라 다른 point estimator. *Nuisance parameter marginalization*. *Likelihood principle*.

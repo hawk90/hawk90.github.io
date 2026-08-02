@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Lean Startup"
 bookAuthor: "Eric Ries"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Establish baseline·Tune the engine·Pivot or persevere — vanity metric 회피.

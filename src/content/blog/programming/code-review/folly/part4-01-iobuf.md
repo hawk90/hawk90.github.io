@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: `IOBuf`는 ref-counted byte buffer의 *연결 리스트*다. 네트워크 코드에서 *복사 없이 buffer를 분할/결합*해 protocol layer를 쌓는다.

@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 6
 tags: [avionics, do-178c, misra, cert, jsf-cpp, coding-standard]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

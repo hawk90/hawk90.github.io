@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 7
 tags: [can-fd, brs, esi, fdf, frame, iso, non-iso]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

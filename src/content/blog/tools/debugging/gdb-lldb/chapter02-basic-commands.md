@@ -6,6 +6,7 @@ tags: [gdb, lldb, Debugging, BasicCommands]
 series: "GDB and LLDB"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 매일 쓰는 명령 10가지

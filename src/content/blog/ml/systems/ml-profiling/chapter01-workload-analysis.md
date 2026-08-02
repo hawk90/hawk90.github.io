@@ -6,6 +6,7 @@ series: "ML 시스템 프로파일링"
 seriesOrder: 1
 tags: [ml-profiling, roofline, workload]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Roofline model* — operational intensity vs achievable BW/FLOPS. *Compute-bound* (GEMM)·*memory-bound* (elementwise)·*comm-bound* (collective). *Layer profile* — conv·attention·norm·activation. *Batch-size sensitivity*. *Inference vs training*. 시리즈 로드맵.

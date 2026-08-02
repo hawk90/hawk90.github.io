@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Array]
 series: "Data Structures and Algorithms"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [Architecture, SOLID, ISP]
 series: "Clean Architecture"
 seriesOrder: 10
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

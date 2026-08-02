@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Graph, SCC, Tarjan, Kosaraju]
 series: "Data Structures and Algorithms"
 seriesOrder: 33
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

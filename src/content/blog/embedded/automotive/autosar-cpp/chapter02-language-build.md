@@ -6,6 +6,7 @@ tags: [autosar, cpp, lexical, identifier, odr, header]
 series: "AUTOSAR C++14"
 seriesOrder: 2
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 C++는 *C의 모든 미지정·구현 정의 동작*에 더해 *훨씬 더 큰 표면적*을 가진다. 이 장은 빌드·식별자·헤더 같은 *기초 환경* 규칙을 본다.

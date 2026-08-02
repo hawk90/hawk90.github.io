@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 34
 tags: [code-complete, craftsmanship, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

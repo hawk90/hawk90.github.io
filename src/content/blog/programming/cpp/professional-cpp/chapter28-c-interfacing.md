@@ -6,6 +6,7 @@ tags: [C++, C, FFI, ABI]
 series: "전문가를 위한 C++"
 seriesOrder: 28
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

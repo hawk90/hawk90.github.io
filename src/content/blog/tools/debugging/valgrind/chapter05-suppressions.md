@@ -6,6 +6,7 @@ tags: [Valgrind, Suppression, CI, Debugging, C, C++]
 series: "Valgrind"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## *Suppression이 필요한 이유*

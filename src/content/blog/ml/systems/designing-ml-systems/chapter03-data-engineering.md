@@ -6,6 +6,7 @@ series: "Designing Machine Learning Systems"
 seriesOrder: 3
 tags: [dmls, data-engineering, etl, schema]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Data sources* — user input·system gen·internal DB·third-party·log. *Data formats* — row vs column·text vs binary·OLTP vs OLAP. *Data models* — relational·NoSQL·graph. *Data storage* — data lake·warehouse·lakehouse. *Processing* — batch (Spark) vs streaming (Flink). *Modes* — request-driven·event-driven.

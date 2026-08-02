@@ -6,6 +6,7 @@ series: "Probability: Theory and Examples"
 seriesOrder: 3
 tags: [durrett, clt, characteristic-function, levy]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Weak convergence·tightness·Prokhorov's theorem*. *Characteristic function* — Fourier transform. *Lévy continuity theorem*. *CLT for i.i.d.*·*Lindeberg's CLT*·*Lyapunov condition*. *Multivariate CLT*. *Berry-Esseen bound*. *Stable distributions·infinite divisibility*.

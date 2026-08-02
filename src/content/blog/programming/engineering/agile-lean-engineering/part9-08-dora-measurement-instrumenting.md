@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Google Four Keys Project + DORA Report"
 bookAuthor: "Google / DORA team"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Four Keys project로 DORA 4 metric을 어떻게 측정하나.

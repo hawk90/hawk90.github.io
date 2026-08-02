@@ -6,6 +6,7 @@ series: "Pattern Recognition and Machine Learning"
 seriesOrder: 12
 tags: [bishop, pca, ppca, factor-analysis, kernel-pca]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *PCA* — maximum variance·minimum error·high-dim. *Probabilistic PCA (PPCA)*. *Factor analysis* — anisotropic noise. *Kernel PCA*. *Independent Component Analysis (ICA)*. *Autoencoder·nonlinear latent variable*. PRML 12장은 VAE 토대를 자연스럽게 깐다.

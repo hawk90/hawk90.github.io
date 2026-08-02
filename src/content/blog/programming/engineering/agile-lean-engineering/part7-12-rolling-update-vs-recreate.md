@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Kubernetes Documentation"
 bookAuthor: "Kubernetes"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Kubernetes의 두 배포 전략 — trade-off.

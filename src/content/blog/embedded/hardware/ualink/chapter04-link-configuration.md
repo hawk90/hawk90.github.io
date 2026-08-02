@@ -6,6 +6,7 @@ series: "UALink 심화"
 seriesOrder: 4
 tags: [ualink, lane, bandwidth]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Lane width* — x1·x2·x4 옵션. *Per-lane bandwidth* — 200 Gbps. *Aggregate* — x4 = 800 Gbps per direction. *Asymmetric link* 지원 여부. *Power scaling*. *Negotiation* — host capability와 device cap 협상.

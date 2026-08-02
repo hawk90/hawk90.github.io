@@ -6,6 +6,7 @@ series: "Embedded Debugging"
 seriesOrder: 8
 tags: [cxl, link-training, ltssm, protocol-analyzer, debugging]
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 왜 어려운가

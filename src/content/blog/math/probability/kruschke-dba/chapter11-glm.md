@@ -6,6 +6,7 @@ series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 11
 tags: [kruschke, glm, link-function, exponential-family]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *GLM 도식* — predicted variable + linear combination + link + noise distribution. *예측 변수 type* — metric·nominal·ordinal·count·dichotomous. *Likelihood family choice*. *Link function* — identity·logit·log. *Bayesian GLM workflow in Stan/brms*. *Posterior interpretation* — credible interval on coefficients.

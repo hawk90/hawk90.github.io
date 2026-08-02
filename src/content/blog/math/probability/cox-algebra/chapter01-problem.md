@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "The Algebra of Probable Inference"
 bookAuthor: "Richard T. Cox"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Pólya의 patterns를 formalize하려는 시도*. *Plausibility (Pólya) → numerical quantity로 변환 가능한가*. *Desiderata* — consistency·universal applicability. *Real-valued function on propositions*. *Continuity·monotonicity 등 합리적 가정*. 시리즈 — Cox의 짧고 elegant한 5장.

@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 2
 tags: [bda3, conjugate, beta-binomial, normal]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Binomial model* with beta prior — conjugate. *Normal model* (known variance). *Poisson with gamma prior*. *Exponential·other one-parameter*. *Noninformative prior* — Jeffreys·uniform. *Posterior predictive distribution*. *Sequential update·sufficient statistic*. *Summarization* — mean·median·credible interval.

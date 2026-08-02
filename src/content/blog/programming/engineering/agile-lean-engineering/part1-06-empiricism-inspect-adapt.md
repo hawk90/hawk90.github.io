@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Scrum Guide"
 bookAuthor: "Schwaber & Sutherland"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 경험적 프로세스 제어 이론 — 왜 plan-driven이 아닌가.

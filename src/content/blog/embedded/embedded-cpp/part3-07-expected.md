@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 25
 tags: [cpp, embedded, expected, cpp23, result-type, monadic]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

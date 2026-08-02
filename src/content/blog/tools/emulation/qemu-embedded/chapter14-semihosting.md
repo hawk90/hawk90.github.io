@@ -6,6 +6,7 @@ tags: [QEMU, semihosting, baremetal, arm-semihosting, BKPT]
 series: "QEMU Embedded Emulation"
 seriesOrder: 14
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 UART도 없는 bare-metal MCU에서 printf 디버깅이 가능할까요? **Semihosting**이 그 답입니다 — guest가 특수 명령을 trigger하면 host(QEMU 또는 debugger)가 *자기 syscall*을 빌려 줍니다. UART 설정·driver 없이 *즉시* 콘솔 입출력이 가능하고, CI에서 firmware test의 exit code를 host로 받는 데에도 핵심.

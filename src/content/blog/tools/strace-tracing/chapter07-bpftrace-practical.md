@@ -6,6 +6,7 @@ tags: [bpftrace, Tracing, Production]
 series: "System Tracing"
 seriesOrder: 7
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

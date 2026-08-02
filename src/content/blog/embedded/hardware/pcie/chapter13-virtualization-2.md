@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 13
 tags: [pcie, viommu, scalable-iov, virtio, ide, tdisp, confidential-computing]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

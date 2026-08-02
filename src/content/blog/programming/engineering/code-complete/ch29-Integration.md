@@ -6,6 +6,7 @@ series: "Code Complete"
 seriesOrder: 29
 tags: [code-complete, integration, CI, McConnell]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

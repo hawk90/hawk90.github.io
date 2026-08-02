@@ -6,6 +6,7 @@ series: "Introduction to Probability"
 seriesOrder: 4
 tags: [bertsekas, mgf, conditional-expectation, covariance]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Derived distribution methods*. *Convolution*. *Transforms* — MGF·characteristic function·Laplace transform. *Sums of random number of independent RVs* (compound). *Covariance·correlation·conditional variance*. *Conditional expectation as RV*. *Tower property·smoothing*. *Best estimator (MMSE)*.

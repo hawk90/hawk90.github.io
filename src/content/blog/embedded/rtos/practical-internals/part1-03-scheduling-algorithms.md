@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 3
 tags: [rtos, scheduler, rr, priority, edf, rms]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

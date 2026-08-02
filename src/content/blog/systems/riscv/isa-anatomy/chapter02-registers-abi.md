@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 2
 tags: [RISC-V, Registers, ABI, Calling-Convention]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 4
 tags: [avionics, control-law, dsp, filter, pid, lqr, kalman]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

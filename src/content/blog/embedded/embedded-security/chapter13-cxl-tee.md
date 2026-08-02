@@ -6,6 +6,7 @@ series: "Embedded Security"
 seriesOrder: 13
 tags: [cxl, tdisp, confidential-computing, arm-cca, sev-tio, tvm]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

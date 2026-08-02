@@ -6,6 +6,7 @@ series: "Statistical Inference"
 seriesOrder: 5
 tags: [casella-berger, sampling-distribution, t-distribution, order-statistic]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Random sample·sample mean·variance*. *Sums of RVs·distributions of sums*. *Sampling from normal* — sample mean Gaussian·sample variance χ². *t·F distribution 도입*. *Order statistic* — i-th order statistic distribution. *Convergence concepts* — in probability·a.s.·in distribution. *Delta method*.

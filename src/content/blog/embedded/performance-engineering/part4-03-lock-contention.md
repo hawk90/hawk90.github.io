@@ -5,6 +5,7 @@ description: "Wait time과 hold time, contention ratio를 측정하고 lock conv
 series: "Embedded Performance Engineering"
 seriesOrder: 32
 tags: [lock, contention, wait-time, hold-time, convoy]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

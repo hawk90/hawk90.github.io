@@ -6,6 +6,7 @@ tags: [gdb, python, frame, unwinder, jit]
 series: "GDB Extension and IDE"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 비동기 코드의 깊은 코루틴 콜스택, V8 같은 JIT 안의 *DWARF 없는* 코드, *합성된 자식 프레임* — 표준 `bt`로는 정리되지 않는 콜스택이 많습니다. GDB는 두 가지 메커니즘으로 이를 풀어 줍니다.

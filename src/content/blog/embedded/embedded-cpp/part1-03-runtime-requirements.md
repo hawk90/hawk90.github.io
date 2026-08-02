@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 3
 tags: [cpp, embedded, runtime, libstdc++, newlib, libgcc, libsupc++]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

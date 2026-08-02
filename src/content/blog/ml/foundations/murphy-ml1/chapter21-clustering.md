@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 21
 tags: [murphy, clustering, kmeans, gmm, spectral]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Cluster definition·objective*. *K-means·K-medoids·K-means++*. *EM for Gaussian Mixture*. *Hierarchical clustering* — agglomerative·divisive·linkage. *Spectral clustering* — graph Laplacian. *DBSCAN·density-based*. *Mean-shift*. *Evaluation* — silhouette·NMI·ARI. *Number-of-cluster selection*.

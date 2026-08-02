@@ -5,6 +5,7 @@ description: "Spinlock 비용 분석과 ticket lock, MCS lock의 scalability 차
 series: "Embedded Performance Engineering"
 seriesOrder: 33
 tags: [spinlock, smp, ticket-lock, mcs]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

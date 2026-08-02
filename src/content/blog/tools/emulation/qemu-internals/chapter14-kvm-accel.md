@@ -6,6 +6,7 @@ tags: [QEMU, kvm, accelerator, kvm-run, irqfd]
 series: "QEMU Internals"
 seriesOrder: 14
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 KVM은 Linux kernel의 *hardware virtualization driver*입니다. CPU의 VT-x/AMD-V/ARM EL2/RISC-V H-extension을 사용해 *native에 가까운* VM 실행을 제공합니다. QEMU는 KVM의 `/dev/kvm` ioctl을 통해 그 기능을 *오케스트레이션*합니다. 이 둘의 *인터페이스*가 이 장의 주제.

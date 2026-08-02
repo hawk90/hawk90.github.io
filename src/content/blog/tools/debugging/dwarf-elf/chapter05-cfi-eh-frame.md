@@ -6,6 +6,7 @@ tags: [dwarf, cfi, unwinding, eh_frame, exception]
 series: "DWARF and ELF Internals"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 GDB의 `bt`가 어떻게 콜스택을 *거꾸로* 풀어 갈까요. 답은 `.eh_frame` (또는 `.debug_frame`) 섹션의 **CFI**(Call Frame Information). 각 PC 위치에서 *어디가 호출자 측 프레임인지*, *어떤 레지스터가 어떻게 보존됐는지*를 표로 기술한 데이터.

@@ -6,6 +6,7 @@ series: "Embedded Security"
 seriesOrder: 12
 tags: [spdm, cma, attestation, pcie-security, cxl-security, dice]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

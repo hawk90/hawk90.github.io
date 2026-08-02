@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 23
 tags: [embedded, bootloader, bootrom, efuse, otp, secure-boot]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

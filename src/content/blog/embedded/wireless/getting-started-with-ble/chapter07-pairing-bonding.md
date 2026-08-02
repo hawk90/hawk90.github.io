@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Getting Started with Bluetooth Low Energy"
 bookAuthor: "Kevin Townsend et al."
 draft: true
+topics: ["embedded", "embedded/wireless"]
 ---
 
 ## 한 줄 요약

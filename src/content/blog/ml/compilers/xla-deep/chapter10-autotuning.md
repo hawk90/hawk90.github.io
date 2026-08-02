@@ -6,6 +6,7 @@ series: "XLA·OpenXLA 심화"
 seriesOrder: 10
 tags: [xla, autotuning, kernel-selection, cache]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 * Outline — *Why autotune* — heuristic 비용 모델의 한계. *Algorithm autotuning* — conv·gemm variant 후보 실측. *Block-size·split-k* exploration. *Persistent cache* — 같은 shape에 재사용. *Triton autotuning vs XLA*. *AOT vs JIT* 모드 차이. *Trade-off* — 컴파일 시간.

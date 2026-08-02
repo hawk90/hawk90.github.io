@@ -6,6 +6,7 @@ tags: [OO, Style, Roles]
 series: "Growing Object-Oriented Software"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 TDD와 객체지향은 상호 보완적이다. 테스트하기 쉬운 코드는 대체로 좋은 설계를 따르고, 좋은 설계는 테스트를 쉽게 만든다. Steve와 Nat이 추구하는 OO 스타일은 한마디로 **작은 객체, 명확한 역할, 한 곳의 진실**이다. 작은 객체는 한 화면에 들어오고, 명확한 역할은 협력자를 통해 드러나며, 한 곳의 진실은 중복을 제거한다.

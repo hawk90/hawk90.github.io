@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Software Development"
 bookAuthor: "Alistair Cockburn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 두 개념을 정확히 구분 — 둘 다 쓰지만 의미가 다르다.

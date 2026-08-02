@@ -5,6 +5,7 @@ description: "Context switch는 결국 CPU의 모든 가시 상태를 task 스�
 series: "Practical RTOS Internals"
 seriesOrder: 14
 tags: [context-switch, register, stack-frame, caller-saved, callee-saved]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

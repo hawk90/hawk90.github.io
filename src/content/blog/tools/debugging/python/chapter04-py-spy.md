@@ -6,6 +6,7 @@ tags: [python, debugging, py-spy, profiling]
 series: "Python Debugging"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 `pdb`/`debugpy`는 *프로세스 안*에서 동작합니다. 운영 서비스에 디버그 코드를 넣을 수 없을 때, 또는 *이미 멈춘 듯한* 프로세스를 진단할 때 [py-spy](https://github.com/benfred/py-spy)가 답입니다. Rust로 작성된 외부 도구로, 대상 프로세스의 메모리를 *읽기 전용*으로 들여다보며 콜스택을 재구성합니다. 측정 오버헤드가 거의 0이고 코드 수정도 필요 없습니다.

@@ -6,6 +6,7 @@ tags: [QEMU, QOM, TypeSystem, Object, Property]
 series: "QEMU Internals"
 seriesOrder: 2
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 모든 device·machine·backend는 **QOM**(QEMU Object Model) 객체입니다. C로 구현한 객체 지향 시스템으로, 상속·다형성·인터페이스·런타임 reflection을 갖춥니다. 이 시스템을 *깊이 이해*하면 QEMU 소스 어디를 봐도 *구조가 보이게* 됩니다.

@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 15
 tags: [pcie, lspci, setpci, pcimem, debug-tools]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

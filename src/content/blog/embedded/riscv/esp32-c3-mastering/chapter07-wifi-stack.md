@@ -6,6 +6,7 @@ series: "ESP32-C3 Mastering"
 seriesOrder: 7
 tags: [wifi, "802.11", esp-idf, wpa2, wpa3, esp32-c3]
 draft: false
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 한 줄 요약

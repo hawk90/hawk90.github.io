@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 8
 tags: [bootstrap, resampling, confidence-interval]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Bootstrap idea* — empirical distribution에서 resample. *Bootstrap variance estimation*. *Bootstrap confidence interval* — normal·pivotal·percentile. *Why it works* — asymptotic theory. *Failure modes*·*bias correction*. *Bayesian bootstrap*. *ML 응용* — uncertainty quantification·model variance.

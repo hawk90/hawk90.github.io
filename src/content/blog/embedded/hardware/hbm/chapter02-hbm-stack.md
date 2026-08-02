@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 2
 tags: [hbm, tsv, 3d-stack, base-die]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

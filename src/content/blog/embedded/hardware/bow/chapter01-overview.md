@@ -6,6 +6,7 @@ series: "BoW 개요"
 seriesOrder: 1
 tags: [bow, ocp, chiplet, d2d]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

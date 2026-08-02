@@ -6,6 +6,7 @@ series: "ONNX 실전"
 seriesOrder: 7
 tags: [onnx, opset, compatibility, version]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *opset version* — annual major bump. *Backwards compatible*·*deprecation cycle*. *Domain* — `ai.onnx`·`ai.onnx.ml`·*custom domain*. *Runtime support matrix* — ORT·TensorRT·CoreML opset 호환성. *opset converter* — version up/downgrade. *opset 17·19·20*의 주요 추가.

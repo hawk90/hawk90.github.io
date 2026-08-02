@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 19
 tags: [koller-friedman, em, hidden-variable, structural-em]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Hidden variable·missing data*. *Expectation Maximization (EM) algorithm*. *EM convergence·local maxima·initialization*. *Variational EM·stochastic EM·incremental EM*. *Structural EM* — model selection with hidden. *Identifiability·label switching*. *Bayesian alternative* — sampling·VI. *EM for HMM·GMM·NB·LDA*.

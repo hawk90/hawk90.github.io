@@ -6,6 +6,7 @@ tags: [Vim, Autocompletion]
 series: "Practical Vim"
 seriesOrder: 19
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용 (Tips 112-117)

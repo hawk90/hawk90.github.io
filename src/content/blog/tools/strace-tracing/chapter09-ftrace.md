@@ -6,6 +6,7 @@ tags: [ftrace, tracecmd, Kernel]
 series: "System Tracing"
 seriesOrder: 9
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

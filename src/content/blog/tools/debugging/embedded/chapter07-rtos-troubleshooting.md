@@ -6,6 +6,7 @@ tags: [rtos, freertos, zephyr, hardfault, mpu, troubleshooting, embedded]
 series: "Embedded Debugging"
 seriesOrder: 7
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 이 시리즈의 마지막 장은 *실전에서 자주 만나는* 임베디드 디버깅 문제들을 모았습니다. RTOS-aware 디버깅으로 task별 콜스택 보기, Cortex-M의 Hardfault·UsageFault·MemFault 분석, MPU 위반 추적, 신호 무결성·전원 문제, flash 보호 lock 해제까지.

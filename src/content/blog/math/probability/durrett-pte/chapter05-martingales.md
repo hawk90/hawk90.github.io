@@ -6,6 +6,7 @@ series: "Probability: Theory and Examples"
 seriesOrder: 5
 tags: [durrett, martingale, stopping-time, doob]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Conditional expectation* — Radon-Nikodym 시각. *Martingale·submartingale·supermartingale*. *Stopping time*·*optional stopping theorem*. *Doob's inequalities*. *Martingale convergence theorem* — L^1·L^p·a.s.. *Upcrossing inequality*. *Backward martingale·UI*. ML 응용 — concentration·online learning regret.

@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 13
 tags: [avionics, do-160, environmental, qualification]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 6
 tags: [pearl, simpson-paradox, confounder, collapsibility]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Simpson's paradox* — 부분 vs 전체에서 효과 방향이 뒤집힌다. *Confounder 정의* — Pearl의 graph-based criterion. *Lord's paradox·Berkson's paradox·M-bias*. *Collapsibility* — when stratification preserves effect. *Modern relevance* — Yule-Simpson in fairness·subgroup analysis.

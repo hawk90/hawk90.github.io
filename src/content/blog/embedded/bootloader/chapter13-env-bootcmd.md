@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 13
 tags: [embedded, bootloader, u-boot, env, bootcmd]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

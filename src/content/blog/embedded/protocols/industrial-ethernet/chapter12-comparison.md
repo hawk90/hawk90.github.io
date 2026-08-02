@@ -6,6 +6,7 @@ series: "Industrial Ethernet 심화"
 seriesOrder: 12
 tags: [industrial-ethernet, comparison, selection-guide, tsn, industry-4-0]
 draft: false
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

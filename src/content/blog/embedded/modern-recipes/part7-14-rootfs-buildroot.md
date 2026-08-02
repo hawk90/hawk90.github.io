@@ -5,6 +5,7 @@ description: "Buildroot 설정, package 추가, post-build script, toolchain 선
 series: "Modern Embedded Recipes"
 seriesOrder: 88
 tags: [recipes, linux, buildroot, rootfs]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

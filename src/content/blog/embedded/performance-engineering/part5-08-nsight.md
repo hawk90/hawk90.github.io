@@ -5,6 +5,7 @@ description: "NVIDIA Nsight Systems로 CPU·GPU·메모리 통합 timeline 분�
 series: "Embedded Performance Engineering"
 seriesOrder: 47
 tags: [nsight, gpu, npu, jetson, cuda, nvtx]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

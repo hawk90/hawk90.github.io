@@ -5,6 +5,7 @@ description: "CAS 기반 lock-free와 ABA 문제, hazard pointer와 epoch reclam
 series: "Embedded Performance Engineering"
 seriesOrder: 36
 tags: [lock-free, cas, aba, hazard-pointer, epoch]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

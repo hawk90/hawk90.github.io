@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 28
 tags: [thermal, throttle, sensor, junction-temp]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

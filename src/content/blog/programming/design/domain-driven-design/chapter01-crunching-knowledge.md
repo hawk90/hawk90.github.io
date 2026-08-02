@@ -6,6 +6,7 @@ tags: [DDD, Knowledge, Modeling]
 series: "Domain-Driven Design"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 지식 탐구의 시작

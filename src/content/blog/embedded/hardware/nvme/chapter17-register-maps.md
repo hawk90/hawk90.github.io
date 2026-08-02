@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 17
 tags: [nvme, register, mmio, bar]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 NVMe Controller는 PCIe BAR0를 통해 Memory-Mapped Register를 노출한다. 이 장에서는 핵심 레지스터를 상세히 분석한다.

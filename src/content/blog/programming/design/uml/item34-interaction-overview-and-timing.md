@@ -6,6 +6,7 @@ tags: [UML, Interaction Overview, Timing Diagram, Interaction]
 series: "UML 2.5.1"
 seriesOrder: 34
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

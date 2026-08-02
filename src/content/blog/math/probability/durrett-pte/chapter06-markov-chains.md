@@ -6,6 +6,7 @@ series: "Probability: Theory and Examples"
 seriesOrder: 6
 tags: [durrett, markov-chain, stationary, mixing]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Discrete-time Markov chain on countable space*. *Transition matrix·Chapman-Kolmogorov*. *Classification of states* — recurrent·transient·periodic. *Stationary distribution·detailed balance*. *Ergodic theorem for Markov chain*. *Mixing time·spectral gap*. *Coupling arguments·total variation distance*.

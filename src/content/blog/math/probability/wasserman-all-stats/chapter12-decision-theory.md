@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 12
 tags: [decision-theory, risk, minimax, admissibility]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Loss function·risk function R(θ,δ)*. *Bayes risk·minimax risk*. *Admissible estimator*·*Stein's paradox*. *Posterior expected loss·Bayes rule*. *James-Stein shrinkage*. *Frequentist vs Bayesian decision*. ML 직결 — supervised learning은 decision rule learning.

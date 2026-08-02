@@ -6,6 +6,7 @@ series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 11
 tags: [memory-model, formal-verification, herd, alloy]
 draft: true
+topics: ["systems", "systems/architecture"]
 ---
 
 > Outline — *Specification 방식* — operational (state machine) vs axiomatic (relation). *Cat language*·*herd7 tool*. *ARM·RISC-V·C++의 공식 모델*. *Litmus test suite*로 검증. *Tooling* — RMEM·herd·alloy. *Verification* — 하드웨어와 컴파일러가 모델을 만족하는지. 마지막 장 — 앞으로 모델은 더 형식화될 방향.

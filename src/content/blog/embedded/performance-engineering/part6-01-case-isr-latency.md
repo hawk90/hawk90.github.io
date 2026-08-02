@@ -5,6 +5,7 @@ description: "산업용 센서 보드에서 산발적으로 발생한 ISR latenc
 series: "Embedded Performance Engineering"
 seriesOrder: 50
 tags: [case-study, isr, latency, ftrace, irq]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

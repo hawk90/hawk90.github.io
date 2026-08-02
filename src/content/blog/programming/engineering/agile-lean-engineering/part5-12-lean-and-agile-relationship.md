@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Lean SD + Principles of Product Development Flow"
 bookAuthor: "Poppendieck / Reinertsen"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 두 운동의 overlap과 차이 — 공통 뿌리와 강조점.

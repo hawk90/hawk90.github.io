@@ -6,6 +6,7 @@ tags: [core-dump, linux, ulimit, systemd]
 series: "Postmortem Debugging"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 프로덕션이 한 번 죽고 다시는 재현 안 되는 버그 — 답은 *시신*. core dump가 프로세스 사망 직전의 메모리·레지스터·콜스택 스냅샷. 라이브 디버깅이 진료라면 core 분석은 부검입니다.

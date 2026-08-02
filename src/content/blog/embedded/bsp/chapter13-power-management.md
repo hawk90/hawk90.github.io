@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 13
 tags: [embedded, bsp, power-management, pm, runtime-pm]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

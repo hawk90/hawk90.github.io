@@ -6,6 +6,7 @@ tags: [C++, Lambda, std::function, Function Object]
 series: "전문가를 위한 C++"
 seriesOrder: 24
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

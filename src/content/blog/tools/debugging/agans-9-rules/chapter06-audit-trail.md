@@ -6,6 +6,7 @@ series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 6
 tags: [agans, debugging, logging, journal]
 draft: true
+topics: ["tools", "tools/debugging"]
 ---
 
 * Outline — *Write down what you did·in what order·what happened*. *Details matter — exact error message·timestamp·environment*. *Tools* — bug tracker·debug log·notebook. *Reproducible recipe* 만들기. *Pattern recognition over multiple bugs*. *Team sharing*·*postmortem culture*.

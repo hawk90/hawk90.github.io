@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 41
 tags: [recipes, bare-metal, uart]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

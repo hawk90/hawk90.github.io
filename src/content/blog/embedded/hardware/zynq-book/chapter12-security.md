@@ -6,6 +6,7 @@ series: "The Zynq Book"
 seriesOrder: 12
 tags: [zynq, secure-boot, trustzone, security]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Secure boot chain* — eFUSE에 RSA public key hash. *Bitstream encryption* — AES-256. *TrustZone* on Cortex-A53 — secure/non-secure world. *PMU·CSU* on UltraScale+ — root of trust. *Tamper response* — eFUSE·BBRAM 키 zeroization. *방산·항우주에서의 의미* — JD에 자주 언급되는 항목.

@@ -6,6 +6,7 @@ tags: [Git, Basics]
 series: "Pro Git"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

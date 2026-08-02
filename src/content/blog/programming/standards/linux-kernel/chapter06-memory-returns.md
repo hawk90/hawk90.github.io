@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Memory, kmalloc, Error-Handling, ERR_PTR]
 series: "Linux Kernel Coding Style"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Kernel memory allocation is different from userspace."

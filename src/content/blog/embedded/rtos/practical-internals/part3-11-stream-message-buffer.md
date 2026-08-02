@@ -5,6 +5,7 @@ description: "FreeRTOS 10+ 추가된 Stream/Message Buffer. Lock-free SPSC ring 
 series: "Practical RTOS Internals"
 seriesOrder: 32
 tags: [stream-buffer, message-buffer, freertos, ipc, lock-free, spsc]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

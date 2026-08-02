@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Structured Parallel Programming: Patterns for Efficient Computation"
 bookAuthor: "Michael McCool, James Reinders, Arch D. Robison"
+topics: ["parallel"]
 ---
 
 ## 이 장에서 다루는 것

@@ -5,6 +5,7 @@ description: "가설-검증 사이클·binary search·changelog·rubber duck —
 series: "Modern Embedded Recipes"
 seriesOrder: 111
 tags: [recipes, debugging, methodology]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

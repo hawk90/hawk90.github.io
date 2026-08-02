@@ -6,6 +6,7 @@ tags: [DDIA, Encoding, Protobuf, Avro, SchemaEvolution]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 4
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

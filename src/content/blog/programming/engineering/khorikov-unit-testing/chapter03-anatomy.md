@@ -6,7 +6,7 @@ tags: [TDD, AAA, Naming]
 series: "Khorikov Unit Testing"
 seriesOrder: 3
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 좋은 단위 테스트는 일정한 구조를 따른다. 이 장에서는 테스트의 해부학적 구조와 명명 규칙, 그리고 중복을 줄이는 헬퍼 패턴을 살펴본다.

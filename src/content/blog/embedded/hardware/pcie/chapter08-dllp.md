@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 8
 tags: [pcie, dllp, ack-nak, flow-control, flit-mode]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "우리글 바로쓰기"
 bookAuthor: "이오덕"
 draft: true
+topics: ["writing"]
 ---
 
 > **우리글 바로쓰기** 제2권 2장 요약

@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: `folly::AsyncIO`는 Linux의 io_uring(우선) 또는 libaio(폴백)을 wrap한 async disk I/O 인터페이스다. thread-per-IO 모델 없이 수만 동시 I/O를 다룬다.

@@ -6,6 +6,7 @@ series: "Mathematics and Plausible Reasoning, Vol II"
 seriesOrder: 2
 tags: [polya, verification, refutation, analogy]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Successful prediction*은 plausibility 증가. *Failed prediction*은 보통 큰 감소. *Comparable·incomparable conjecture*. *Analogy strength* — 구조적 유사성 정도. *First link to probability theory* — Pólya가 보여주는 conditional probability 직관.

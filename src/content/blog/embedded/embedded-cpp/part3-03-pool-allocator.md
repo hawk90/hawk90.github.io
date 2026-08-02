@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 21
 tags: [cpp, embedded, pool-allocator, free-list, memory-management]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

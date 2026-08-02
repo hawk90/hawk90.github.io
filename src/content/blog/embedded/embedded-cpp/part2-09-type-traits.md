@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 17
 tags: [cpp, embedded, type-traits, sfinae, enable-if, compile-time]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

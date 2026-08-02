@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 43
 tags: [pragmatic-programmer, design, yagni]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Macros, Inline, Preprocessor]
 series: "Linux Kernel Coding Style"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Macros resembling functions may be named in lower case."

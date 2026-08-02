@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 9
 tags: [queue, message-passing, producer-consumer, ring-buffer]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

@@ -5,6 +5,7 @@ description: "NVIC pending·priority·level vs edge·shared IRQ — 인터럽트
 series: "Modern Embedded Recipes"
 seriesOrder: 117
 tags: [recipes, debugging, interrupt, nvic]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 13
 tags: [RISC-V, Exception, Trap, Handler]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 5
 tags: [recipes, spi, hw-basics]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

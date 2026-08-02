@@ -6,6 +6,7 @@ tags: [Git, Trunk-based, Continuous Integration]
 series: "Git Flow"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

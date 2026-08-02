@@ -6,6 +6,7 @@ series: "Yocto Deep Dive"
 seriesOrder: 1
 tags: [yocto, embedded-linux, bitbake, openembedded]
 draft: true
+topics: ["embedded", "embedded/yocto"]
 ---
 
 이 시리즈는 **Yocto Project 공식 문서**(Mega-Manual, BitBake User Manual, OE-Core Manual)와 **현행 LTS (scarthgap, 2024.4)** 기준으로 Yocto/OpenEmbedded를 정리합니다. 책 한 권으로 묶이지 않는 *살아있는 빌드 시스템*이라 release-cadence를 반영합니다. (책 — Streif *Embedded Linux Systems with the Yocto Project*(2016), Salvador & Angolini *Embedded Linux Development Using Yocto Project Cookbook*(2018) — 은 *참고*로 인용.)

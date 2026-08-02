@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Entropy, Arithmetic Coding, MSAC]
 series: "AV1"
 seriesOrder: 7
 draft: true
+topics: ["media"]
 ---
 
 ## 7.1 정보 이론 직관

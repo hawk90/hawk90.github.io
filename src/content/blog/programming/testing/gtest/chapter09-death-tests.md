@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 9
 tags: [gtest, death-test, abort, regex]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — *fork* 기반 death test와 *thread-safe* 모드. regex가 *플랫폼별*로 달라 함정. `EXPECT_DEBUG_DEATH`로 NDEBUG 처리. *왜 critical*인가 — `assert()` / `LOG(FATAL)` / contract 검증에 유일한 도구.

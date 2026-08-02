@@ -6,6 +6,7 @@ tags: [QEMU, Timer, Clock, RTC, icount]
 series: "QEMU Internals"
 seriesOrder: 9
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 *시간 관리*는 *real time*과 *virtual time*을 명확히 분리합니다. host wall clock과 guest의 시뮬레이션 시간이 *다른 속도*로 흐를 수 있고, 그 차이가 *deterministic 시뮬레이션*과 *real-time guest 호환*을 모두 가능하게 합니다.

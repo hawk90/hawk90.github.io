@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 16
 tags: [nvme, firmware, format, secure-erase]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 NVMe 디바이스의 펌웨어 업데이트와 포맷은 운영 중 필요한 관리 작업이다. 이 장에서는 안전한 절차와 주의사항을 다룬다.

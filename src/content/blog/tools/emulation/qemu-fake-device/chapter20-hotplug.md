@@ -6,6 +6,7 @@ tags: [QEMU, hotplug, pcie, hot-add]
 series: "QEMU Fake Device Driver"
 seriesOrder: 20
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 production cloud는 *VM 실행 중* device를 *add/remove*합니다. NVMe disk attach·NIC reassign·GPU scaling. driver가 *probe·remove를 자주* 거치는 환경에서 *atomic state·resource cleanup·in-flight handling*이 critical.

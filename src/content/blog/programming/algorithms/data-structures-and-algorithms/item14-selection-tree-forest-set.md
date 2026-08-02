@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Tournament, Union-Find]
 series: "Data Structures and Algorithms"
 seriesOrder: 14
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

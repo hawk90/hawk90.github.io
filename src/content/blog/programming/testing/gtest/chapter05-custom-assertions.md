@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 5
 tags: [gtest, custom-assertion, predicate, matcher]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `EXPECT_PRED1`~`EXPECT_PRED5`와 한계. `AssertionResult` 반환으로 *맞춤 실패 메시지*. predicate function vs predicate format function. `MATCHER_P`로 reusable matcher 정의.

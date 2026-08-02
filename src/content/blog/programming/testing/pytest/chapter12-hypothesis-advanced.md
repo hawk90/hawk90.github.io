@@ -6,6 +6,7 @@ series: "pytest 심화"
 seriesOrder: 12
 tags: [pytest, hypothesis, composite, shrinking, stateful]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `@composite`로 *도메인 객체* 전략 작성. *shrinking* — 실패 케이스를 *최소 형태*로 자동 축소. `RuleBasedStateMachine`으로 *상태 기계* 테스트 (큐·DB·캐시 같은 stateful object). `@settings(database=...)`로 실패 케이스 재현.

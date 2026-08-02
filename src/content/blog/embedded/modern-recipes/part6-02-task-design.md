@@ -5,6 +5,7 @@ description: "Periodic, event-driven, state machine 세 가지 task 패턴과 pr
 series: "Modern Embedded Recipes"
 seriesOrder: 64
 tags: [recipes, rtos, task]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

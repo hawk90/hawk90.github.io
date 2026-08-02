@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 4
 tags: [RISC-V, Load-Store, Memory]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

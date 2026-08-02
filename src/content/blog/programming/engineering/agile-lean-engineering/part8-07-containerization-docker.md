@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Using Docker"
 bookAuthor: "Adrian Mouat"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Docker 컨테이너의 의미 — chroot에서 OCI까지.

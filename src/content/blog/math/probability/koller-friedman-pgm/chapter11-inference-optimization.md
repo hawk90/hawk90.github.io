@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 11
 tags: [koller-friedman, vi, free-energy, loopy-bp, mean-field]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Inference as optimization* — log Z 최소화. *Bethe free energy·Kikuchi*. *Mean-field VI*. *Loopy Belief Propagation* — fixed point of Bethe·convergence·damping. *Generalized BP*. *Expectation Propagation (EP)·moment matching*. *TRBP·tree-reweighted BP*. *Convex relaxation*. ML 응용 — modern VI는 PGM에서 출발.

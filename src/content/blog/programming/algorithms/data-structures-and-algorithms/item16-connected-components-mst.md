@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Graph, MST, Kruskal, Prim]
 series: "Data Structures and Algorithms"
 seriesOrder: 16
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

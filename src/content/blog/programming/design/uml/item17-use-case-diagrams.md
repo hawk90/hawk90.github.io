@@ -6,6 +6,7 @@ tags: [UML, Use Case Diagram, Requirements, Scope]
 series: "UML 2.5.1"
 seriesOrder: 17
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

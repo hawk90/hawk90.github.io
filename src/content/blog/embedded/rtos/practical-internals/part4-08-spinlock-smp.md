@@ -5,6 +5,7 @@ description: "ARM LDREX/STREX exclusive monitor와 ARMv8.1 LSE를 출발점으�
 series: "Practical RTOS Internals"
 seriesOrder: 40
 tags: [spinlock, smp, ldrex, strex, mcs, ticket-lock]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

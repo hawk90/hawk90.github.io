@@ -5,6 +5,7 @@ description: "UIO·VFIO로 user space에서 hardware를 다루는 방법, IOMMU 
 series: "Modern Embedded Recipes"
 seriesOrder: 85
 tags: [recipes, uio, vfio, iommu, dpdk, spdk]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

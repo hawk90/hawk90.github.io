@@ -6,6 +6,7 @@ tags: [cert-c, expression, sequence-point, sizeof, null-deref]
 series: "CERT C"
 seriesOrder: 4
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 C의 표현식은 *평가 순서를 표준이 거의 지정하지 않는다*. 같은 변수를 여러 번 수정하거나 부작용이 있는 함수를 호출하면 결과가 *컴파일러·최적화 레벨에 따라 다르다*. EXP 카테고리는 이를 다룬다.

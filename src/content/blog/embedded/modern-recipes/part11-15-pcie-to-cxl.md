@@ -5,6 +5,7 @@ description: "PCIe 5.0/6.0 PHY 위에서 CXL이 어떻게 cache coherency를 얹
 series: "Modern Embedded Recipes"
 seriesOrder: 149
 tags: [recipes, pcie, cxl, flex-bus, cache-coherency, interconnect]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [Vim, Substitute, Substitution]
 series: "Practical Vim"
 seriesOrder: 14
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

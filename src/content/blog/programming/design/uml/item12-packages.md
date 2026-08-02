@@ -6,6 +6,7 @@ tags: [UML, Package, Modularity, Architecture]
 series: "UML 2.5.1"
 seriesOrder: 12
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

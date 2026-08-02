@@ -6,6 +6,7 @@ tags: [QEMU, vhost, vhost-user, dpdk, kernel-bypass]
 series: "QEMU Internals"
 seriesOrder: 19
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 VirtIO datapath의 *극한 성능*은 QEMU를 *완전히 우회*하는 **vhost**에서 나옵니다. *kernel*(vhost-net·vhost-scsi·vhost-blk)이나 *user-space process*(vhost-user)가 *virtqueue 처리*를 직접 담당. QEMU는 *control plane*만 다룹니다.

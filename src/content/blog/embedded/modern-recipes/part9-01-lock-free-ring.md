@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 101
 tags: [recipes, lock-free, ring-buffer, spsc, atomic]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

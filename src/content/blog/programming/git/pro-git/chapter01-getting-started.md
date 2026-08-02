@@ -6,6 +6,7 @@ tags: [Git, VCS, Installation]
 series: "Pro Git"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

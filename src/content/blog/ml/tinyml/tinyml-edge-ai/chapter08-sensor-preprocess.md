@@ -6,6 +6,7 @@ series: "TinyML·Edge AI"
 seriesOrder: 8
 tags: [tinyml, preprocessing, sensor, fft, mfcc]
 draft: true
+topics: ["ml", "ml/tinyml"]
 ---
 
 > Outline — *Window/segment* — sliding·overlap. *Feature engineering* — FFT·MFCC·spectrogram·statistics. *Normalize·standardize* — per-channel scale. *Quantization-aware preprocessing*. *Float vs fixed-point pipeline*. *DSP에서 처리할 것 vs ML kernel로 미룰 것*.

@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Distributed Systems: Principles and Paradigms"
 bookAuthor: "Maarten van Steen, Andrew S. Tanenbaum"
+topics: ["parallel"]
 ---
 
 ## 스레드

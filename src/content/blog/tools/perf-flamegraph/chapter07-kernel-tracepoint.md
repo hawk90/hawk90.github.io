@@ -6,6 +6,7 @@ tags: [perf, tracepoint, kprobe, uprobe]
 series: "perf and FlameGraph"
 seriesOrder: 7
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

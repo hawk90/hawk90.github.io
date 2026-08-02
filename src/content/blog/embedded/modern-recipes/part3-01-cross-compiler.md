@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 23
 tags: [recipes, toolchain, cross-compile]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [BCC, eBPF, Python]
 series: "System Tracing"
 seriesOrder: 8
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

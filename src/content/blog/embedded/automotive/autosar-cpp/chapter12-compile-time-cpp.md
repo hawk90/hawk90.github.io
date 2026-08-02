@@ -6,6 +6,7 @@ tags: [autosar, cpp, constexpr, type-traits, sfinae, concept, compile-time, temp
 series: "AUTOSAR C++14"
 seriesOrder: 12
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 C++의 *컴파일 타임 계산*은 *런타임 비용을 0으로 줄이고, 잘못된 코드를 빌드 시점에 차단*한다. 6장에서 SFINAE를 봤지만, 이 장은 *컴파일 타임 C++의 전체 그림*을 본다 — `constexpr`의 진화, `type_traits` 카탈로그, concept으로의 전환, 안전 critical 코드 적용 사례.

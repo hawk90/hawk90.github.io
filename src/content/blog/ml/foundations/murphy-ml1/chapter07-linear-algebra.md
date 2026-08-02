@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 7
 tags: [murphy, linear-algebra, eigen, svd]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Vector·matrix·tensor·tensor product·Kronecker*. *Matrix calculus* — gradient·Jacobian·Hessian. *Decomposition* — QR·LU·Cholesky·eigen·SVD. *Low-rank approximation*. *Special matrix* — symmetric·PSD·orthogonal·circulant. *Sparse matrix*. ML 응용 — linear model·dimensionality reduction.

@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 35
 tags: [cpp, embedded, fsm, constexpr, compile-time, template-meta]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

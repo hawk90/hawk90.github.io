@@ -6,6 +6,7 @@ tags: [C, WebAssembly, Embedded, Cross-compilation]
 series: "전문가를 위한 C"
 seriesOrder: 22
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

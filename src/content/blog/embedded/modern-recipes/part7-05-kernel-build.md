@@ -5,6 +5,7 @@ description: "Kernel source, defconfig, menuconfig, cross-compile, module 빌드
 series: "Modern Embedded Recipes"
 seriesOrder: 79
 tags: [recipes, linux, kernel-build]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

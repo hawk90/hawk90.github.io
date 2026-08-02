@@ -6,6 +6,7 @@ series: "Statistical Rethinking"
 seriesOrder: 8
 tags: [mcelreath, interaction, moderation, marginal-effect]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Interaction effect의 진짜 의미*. *Continuous interaction visualization*. *Triptych plot* — 세 패널로 interaction 보기. *Marginal·conditional effect* 구분. *Bayesian interaction의 명료성* — posterior distribution이 자연스러움. *Symmetry of interaction*.

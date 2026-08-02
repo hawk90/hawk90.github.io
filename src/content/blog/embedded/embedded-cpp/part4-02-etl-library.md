@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 30
 tags: [cpp, embedded, etl, library, stl-alternative, fsm]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

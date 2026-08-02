@@ -6,6 +6,7 @@ series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 11
 tags: [model-selection, occam, evidence, marginal-likelihood]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Bayesian model comparison* — `p(D|M_i)` 비교. *Marginal likelihood = evidence*. *Automatic Occam's razor* — over-parameterize는 wide prior 스프레드 손해. *BIC·AIC·DIC·WAIC* 비교. *Cross-validation*과 관계. *Hyperparameter*도 같은 framework. ML 응용 — Bayesian deep learning·neural architecture search.

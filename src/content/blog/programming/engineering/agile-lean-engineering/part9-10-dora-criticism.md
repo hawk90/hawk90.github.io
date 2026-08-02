@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Various critical takes"
 bookAuthor: "Various authors"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Goodhart's law·컨텍스트 차이 — DORA의 한계와 비판적 시각.

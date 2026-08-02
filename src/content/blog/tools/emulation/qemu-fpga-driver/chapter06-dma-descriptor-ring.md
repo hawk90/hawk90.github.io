@@ -6,6 +6,7 @@ tags: [QEMU, fpga, dma, descriptor-ring, zero-copy]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 6
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Ch 4의 *단순* DMA(주소·길이만 register에)는 학습용입니다. *production FPGA*는 **descriptor ring** 패턴을 씁니다 — driver가 *여러 descriptor*를 ring에 채워 두고 doorbell 한 번으로 batch 처리. NIC(mlx5, ena)·NVMe(SQ/CQ)·NPU 모두 이 패턴. 이 장은 fake-fpga에 ring을 더해 driver가 *alloc → prep → submit → wait → complete* 사이클을 돌게 합니다.

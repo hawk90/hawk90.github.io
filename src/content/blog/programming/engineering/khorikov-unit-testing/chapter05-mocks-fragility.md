@@ -6,7 +6,7 @@ tags: [TDD, Mock, Stub, Fake]
 series: "Khorikov Unit Testing"
 seriesOrder: 5
 draft: true
-
+topics: ["programming", "programming/engineering"]
 ---
 
 Mock은 양날의 검이다. 적절히 사용하면 테스트를 빠르고 격리되게 만들지만, 남용하면 취약한 테스트를 양산한다.

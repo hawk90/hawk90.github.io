@@ -5,6 +5,7 @@ description: "NuttX의 POSIX-compliant 구조를 따라가며 PX4 autopilot과 N
 series: "Practical RTOS Internals"
 seriesOrder: 51
 tags: [nuttx, posix, px4, ingenuity, microkernel]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

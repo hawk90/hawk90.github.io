@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 1
 tags: [RISC-V, QEMU, Emulation, virt, RV64]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 RISC-V 개발에서 실 하드웨어 없이도 펌웨어·부트로더·커널을 돌려 볼 수 있는 가장 일반적인 도구가 **QEMU**입니다. ARM에 비해 보드 수가 적은 RISC-V 환경에서는 QEMU가 *대안*이 아니라 *주된* 개발 환경인 경우가 많습니다. 이 시리즈는 그 환경을 *깊게* 쓰는 법을 다룹니다.

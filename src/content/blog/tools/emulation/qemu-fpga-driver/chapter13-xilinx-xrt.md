@@ -6,6 +6,7 @@ tags: [QEMU, xrt, alveo, versal, xilinx]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 13
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Xilinx(현 AMD) FPGA의 management 스택은 Intel OPAE/DFL과 별개의 **XRT**(Xilinx Runtime)입니다. xocl과 xclmgmt 두 kernel module 위에 libxrt userspace가 올라갑니다. Alveo·Versal·Zynq MPSoC가 *모두 같은 API*를 씁니다. Ch 12 OPAE/DFL과 비교하며 학습합니다.

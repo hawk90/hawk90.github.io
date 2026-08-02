@@ -6,6 +6,7 @@ series: "NPU 드라이버 개발"
 seriesOrder: 9
 tags: [npu, runtime-pm, power-management, dvfs]
 draft: true
+topics: ["ml", "ml/drivers"]
 ---
 
 > Outline — *Linux runtime PM* — `pm_runtime_get_sync`·`pm_runtime_put_autosuspend`. *Reference counting*. *DVFS*·*devfreq*·*OPP table*. *Clock gating*·*power gating*. *Wakeup latency budget*. *Idle policy* — autosuspend delay tuning. *thermal·power budget* 통합.

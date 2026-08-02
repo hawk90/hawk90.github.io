@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 3
 tags: [spi, qspi, octospi, xip, daisy-chain, flash]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

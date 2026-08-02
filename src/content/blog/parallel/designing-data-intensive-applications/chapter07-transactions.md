@@ -6,6 +6,7 @@ tags: [DDIA, Transaction, ACID, Isolation, Serializable]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 7
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

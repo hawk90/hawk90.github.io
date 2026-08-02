@@ -6,6 +6,7 @@ series: "NPU 아키텍처"
 seriesOrder: 3
 tags: [tpu, google, systolic, scaling]
 draft: true
+topics: ["ml", "ml/accelerators"]
 ---
 
 > Outline — *TPU v1* — 256×256 INT8 systolic (2015). *v2/v3* — float32·HBM. *v4/v5p* — Trillium·sparse·optical interconnect (OCS). *MXU·VPU·HBM*. *Scalar·Vector·Matrix unit*. *Pod 구성* — TPU v4 4096-chip. *XLA backend*가 컴파일·dispatch.

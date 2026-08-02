@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 7
 tags: [inference, exact, variational, mcmc]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Inference task* — posterior·marginal·MAP·prediction. *Exact* — junction tree·variable elimination. *Deterministic approximation* — Laplace·VI·EP. *Stochastic approximation* — MCMC·SMC. *Trade-off* — accuracy vs cost. *Tractability frontier*. *Modern hybrid* — variational MCMC·SVI·HMC.

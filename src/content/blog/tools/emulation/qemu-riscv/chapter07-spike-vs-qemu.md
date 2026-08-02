@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 7
 tags: [RISC-V, QEMU, spike, Simulator, ISA]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 RISC-V 생태계에는 두 가지 *공식적*인 simulator가 있습니다. **Spike**는 *ISA reference simulator*고, **QEMU**는 *system emulator*입니다. 둘 다 같은 ISA를 다루는데 왜 *둘 다* 필요한가, 언제 어느 쪽을 골라야 하는가가 이 장의 질문입니다.

@@ -6,6 +6,7 @@ series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 4
 tags: [pearl, action, direct-effect, mediation]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Atomic intervention vs conditional·stochastic*. *Plan evaluation*. *Direct effect (CDE)·indirect effect (NIE)·total effect (TE)*. *Mediation analysis* — Baron-Kenny vs counterfactual modern. *Decomposition formula*. *Causal mediation의 ML 응용* — fairness·explainability.

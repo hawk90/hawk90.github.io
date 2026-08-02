@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 8
 tags: [avionics, fms, mission, navigation]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

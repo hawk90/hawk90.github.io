@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 24장의 여정을 마무리하는 마지막 장입니다. Zinsser가 책의 끝에 두는 한 문장.

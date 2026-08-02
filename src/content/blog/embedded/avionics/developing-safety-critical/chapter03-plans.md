@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 3
 tags: [avionics, do-178c, psac, sdp, plans]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

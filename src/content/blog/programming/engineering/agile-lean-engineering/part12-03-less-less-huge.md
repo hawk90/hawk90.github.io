@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Large-Scale Scrum: More with LeSS"
 bookAuthor: "Larman & Vodde"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Larman·Vodde의 LeSS — single product backlog·feature team.

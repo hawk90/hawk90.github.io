@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 36
 tags: [cpp, embedded, singleton, dependency-injection, static-di, service-locator]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

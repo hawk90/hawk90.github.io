@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 52
 tags: [recipes, peripheral, servo]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

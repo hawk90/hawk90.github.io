@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Succeeding with Agile"
 bookAuthor: "Mike Cohn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — unit > component > integration > e2e — Cohn의 테스트 피라미드.

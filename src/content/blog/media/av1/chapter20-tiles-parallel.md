@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Tile, Parallel, Segmentation]
 series: "AV1"
 seriesOrder: 20
 draft: true
+topics: ["media"]
 ---
 
 지금까지 다룬 디코딩 과정은 모두 **단일 프레임 전체**를 순차적으로 처리했다. 4K나 8K 영상에서는 이 방식이 병목이 된다 — 프레임 하나가 워낙 커서 한 코어로는 실시간 처리가 불가능하다.

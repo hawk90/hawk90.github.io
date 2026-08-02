@@ -6,6 +6,7 @@ tags: [QEMU, Block, Storage, qcow2, BDS]
 series: "QEMU Internals"
 seriesOrder: 5
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 **block layer**는 guest의 disk I/O를 *host 파일/네트워크 storage*로 forward하는 stack입니다. qcow2의 snapshot·암호화, nbd의 원격 disk, live mirror·backup이 모두 이 layer 위에서 동작. 4-layer 구조와 coroutine 패턴을 이해하면 *고급 storage 기능*을 활용할 수 있습니다.

@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 29
 tags: [event-group, bit-flag, and-or, sync-barrier]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

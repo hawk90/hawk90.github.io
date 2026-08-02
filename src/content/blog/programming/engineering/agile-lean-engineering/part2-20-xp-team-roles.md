@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change (2nd ed)"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — XP의 역할 분담. Coach가 Scrum Master로 진화. Tracker(metrics), Tester(automation), Manager(boundary). 모던 팀에서의 분포.

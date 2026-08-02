@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Style: Lessons in Clarity and Grace"
 bookAuthor: "Joseph M. Williams, Joseph Bizup"
 draft: true
-
+topics: ["writing"]
 ---
 
 > **Style: Lessons in Clarity and Grace** Lesson 1 요약

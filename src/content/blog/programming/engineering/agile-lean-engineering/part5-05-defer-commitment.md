@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Lean Software Development"
 bookAuthor: "Mary & Tom Poppendieck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 되돌릴 수 있는 결정은 미루고, 되돌릴 수 없는 결정은 작게.

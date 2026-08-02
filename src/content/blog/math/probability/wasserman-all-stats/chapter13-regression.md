@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 13
 tags: [regression, ols, logistic, variable-selection]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Simple·multiple linear regression*. *Least squares estimator*·*normal equations*. *Properties of OLS* — BLUE under Gauss-Markov. *Inference about β*·*F-test·R²·residual analysis*. *Logistic regression* — link function·MLE·deviance. *Variable selection* — AIC·BIC·LASSO·stepwise. *Multicollinearity·VIF*.

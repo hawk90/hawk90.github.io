@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
-
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: `folly::Uri`는 RFC 3986 기반 URL 파서다. C++ 표준에는 URL 파서가 없어 fbcode·외부 모두 같은 빈자리를 채우는 도구가 필요했다.

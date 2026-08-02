@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
 draft: true
-
+topics: ["writing"]
 ---
 
 학술 영어의 어휘는 일상 영어와 패턴이 분명히 다릅니다. Swales와 Feak는 두 가지 어휘 이동 (vocabulary shift)을 강조합니다.

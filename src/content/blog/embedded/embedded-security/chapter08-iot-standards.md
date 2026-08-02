@@ -6,6 +6,7 @@ tags: [IoT, ETSI, IEC 62443, NIST, CRA, Standards]
 series: "Embedded Security"
 seriesOrder: 8
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

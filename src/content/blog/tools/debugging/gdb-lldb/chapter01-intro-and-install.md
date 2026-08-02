@@ -6,6 +6,7 @@ tags: [gdb, lldb, Setup]
 series: "GDB and LLDB"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 :::info[디버깅 시리즈 지도]

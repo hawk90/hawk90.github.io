@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 15
 tags: [bda3, multilevel, mixed-model, varying-effect]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Varying intercept·varying slope*. *Correlation between random effects*. *Partial pooling*. *Group-level predictors*. *Centering vs non-centering parameterization*. *Modeling correlations* — LKJ prior for correlation matrix. *Example* — radon·schools data.

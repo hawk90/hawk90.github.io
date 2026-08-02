@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 7
 tags: [embedded, buildroot, overlay, post-build, post-image]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

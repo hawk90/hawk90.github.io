@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 20
 tags: [scheduler, latency, measurement, dwt, gpio, ftrace, cyclictest]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

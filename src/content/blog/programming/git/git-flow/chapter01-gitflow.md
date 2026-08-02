@@ -6,6 +6,7 @@ tags: [Git, GitFlow, Driessen]
 series: "Git Flow"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

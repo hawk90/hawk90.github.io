@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 4
 tags: [RISC-V, QEMU, SiFive, E31, HiFive1, Bare-metal]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 `virt` 머신이 *Linux*급 시스템이라면, `sifive_e`는 *마이크로컨트롤러*급입니다. SiFive의 첫 양산 RISC-V 보드인 **HiFive1**과 호환되는 가상 머신으로, 메모리가 작고 OS 없는 베어메탈 펌웨어 개발에 적합합니다. Arduino-스타일 코드를 RISC-V로 옮길 때 가장 빠른 환경이기도 합니다.

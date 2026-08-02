@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "A First Course in Bayesian Statistical Methods"
 bookAuthor: "Peter D. Hoff"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Hoff 책의 자리* — 짧고 mathematical·Gibbs sampling 중심. *Three examples* — happiness·placenta previa·OPN gene expression. *Bayesian framework* 빠른 정의. 시리즈 — 11장 입문 코스. *짧고 단단한 수학적 처리* — McElreath와 다른 톤.

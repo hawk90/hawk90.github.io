@@ -6,6 +6,7 @@ tags: [Vim, Insert Mode]
 series: "Practical Vim"
 seriesOrder: 3
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

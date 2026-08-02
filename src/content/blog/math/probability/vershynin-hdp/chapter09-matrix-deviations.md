@@ -6,6 +6,7 @@ series: "High-Dimensional Probability"
 seriesOrder: 9
 tags: [vershynin, matrix-deviation, random-projection, restricted-isometry]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Matrix Bernstein·matrix Chernoff*. *Sum of independent random matrices*. *Random projection geometry* — JL preserved. *Restricted Isometry Property (RIP)* for sparse recovery. *Tropp's matrix concentration results*. ML 응용 — random feature·sketching·compressed sensing.

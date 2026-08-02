@@ -6,6 +6,7 @@ tags: [QEMU, register-bank, bar, mmio, indirect]
 series: "QEMU Fake Device Driver"
 seriesOrder: 13
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 production device는 *수십~수백 개의 register*. 한 BAR에 *모두 평면*으로 두면 *읽기·관리·디버깅* 모두 어렵습니다. 현실 가속기(NPU·NIC·NVMe)는 *register bank* 패턴으로 *영역별 분리*. 이 장은 그 패턴을 정리합니다.

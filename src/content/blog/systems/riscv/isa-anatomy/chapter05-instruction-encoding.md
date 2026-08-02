@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 5
 tags: [RISC-V, Encoding, Instruction-Format]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

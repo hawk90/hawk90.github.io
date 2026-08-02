@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 55
 tags: [cxl, cxl-cli, damon, perf-mem, numastat, profiling]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

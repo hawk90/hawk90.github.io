@@ -6,6 +6,7 @@ series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 6
 tags: [coherence-protocol, mesi, moesi, state-machine]
 draft: true
+topics: ["systems", "systems/architecture"]
 ---
 
 > Outline — *Cache line state*의 진화 — MSI (Modified·Shared·Invalid) → MESI (+Exclusive) → MOESI (+Owned) → MESIF (Intel). *Transition diagram* — request·response·snoop. *Stable vs transient state*. *Atomic transitions* — race 회피 위한 추가 state. *Why E matters* — silent upgrade.

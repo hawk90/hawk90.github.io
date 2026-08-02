@@ -6,6 +6,7 @@ tags: [DDIA, Distributed, Network, Clock, Failure]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 8
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

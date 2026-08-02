@@ -6,6 +6,7 @@ series: "Postmortem Debugging"
 seriesOrder: 6
 tags: [cxl, fabric, postmortem, multi-host, pooling, fabric-manager]
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 왜 fabric 분석은 어려운가

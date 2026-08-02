@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 11
 tags: [RISC-V, SiFive, Freedom-Metal, HAL]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

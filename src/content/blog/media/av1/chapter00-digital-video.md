@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, YCbCr, ChromaSubsampling]
 series: "AV1"
 seriesOrder: 0
 draft: true
+topics: ["media"]
 ---
 
 코덱을 이해하기 전에 먼저 "비디오"가 무엇인지부터 잡고 가야 한다. 픽셀, 프레임, 색 공간, 중복성, 정수 연산 — 이 다섯 가지가 앞으로 AV1을 읽어 나갈 토대다.

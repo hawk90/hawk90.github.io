@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 10
 tags: [linux, driver, interrupt, threaded-irq, tasklet]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — `request_irq`·`free_irq` — IRQ 등록. *top half* — 짧고 빠르게. *bottom half* — tasklet·softirq·workqueue 비교. 6.x의 `request_threaded_irq` — kernel thread 위에서 실행. *MSI/MSI-X*는 ch12에서. *IRQ sharing* — `IRQF_SHARED`. *spurious IRQ* 디버깅.

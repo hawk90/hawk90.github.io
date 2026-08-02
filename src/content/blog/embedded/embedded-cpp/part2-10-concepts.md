@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 18
 tags: [cpp, embedded, concepts, cpp20, templates, constraints]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

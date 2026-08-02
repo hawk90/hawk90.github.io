@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 12
 tags: [debugging, logic-analyzer, sigrok, saleae, oscilloscope, protocol-decoder]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

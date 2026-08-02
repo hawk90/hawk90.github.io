@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 10
 tags: [murphy, logistic-regression, softmax, irls]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Binary logistic regression* — sigmoid·log-odds. *MLE*·IRLS·Newton. *Multinomial logistic regression*·*softmax*. *Hierarchical Bayesian logistic*. *L1·L2 regularization*. *Bayesian logistic regression* — Laplace approximation·variational. *Posterior predictive*. *Calibration*·*Platt scaling*.

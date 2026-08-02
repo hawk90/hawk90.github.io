@@ -6,6 +6,7 @@ series: "Statistical Inference"
 seriesOrder: 2
 tags: [casella-berger, transformation, mgf, moment]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Distributions of functions of RVs*. *Probability integral transform*. *Expected value·variance·moment generating function*. *MGF의 uniqueness·existence*. *Moment의 응용* — distribution identification. *Differentiating under the integral sign*. *MGF and CLT proof preview*.

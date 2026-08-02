@@ -6,6 +6,7 @@ tags: [perf, perf script, Custom Analysis]
 series: "perf and FlameGraph"
 seriesOrder: 8
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

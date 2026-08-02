@@ -6,6 +6,7 @@ series: "Introduction to Probability"
 seriesOrder: 5
 tags: [bertsekas, lln, clt, chebyshev]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Markov inequality·Chebyshev inequality*. *Weak·Strong Law of Large Numbers*. *Convergence in probability·in distribution*. *Central Limit Theorem* (basic·multivariate). *de Moivre-Laplace*. *Normal approximation to binomial*. *Application*에 응용 예제 풍부.

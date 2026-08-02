@@ -5,6 +5,7 @@ description: "MPMC와 SPSC 차이, Vyukov 큐, Disruptor의 ring과 sequence, bo
 series: "Modern Embedded Recipes"
 seriesOrder: 110
 tags: [recipes, concurrency, queue, mpmc]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

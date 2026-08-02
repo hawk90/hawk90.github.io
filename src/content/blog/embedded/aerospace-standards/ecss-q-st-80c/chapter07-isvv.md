@@ -6,6 +6,7 @@ tags: [ecss, isvv, verification, validation, independence, esa]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 7
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 ECSS의 *가장 특징적인 활동* — **ISVV (Independent Software Verification & Validation)**. *Criticality A/B에서 외부 독립 V&V 의무*. *유럽 우주 산업의 ISVV ecosystem*은 ESA mission 30+ 년 기간을 거치며 형성. *구체 절차·deliverable은 ECSS-Q-ST-80C 원문 참조*.

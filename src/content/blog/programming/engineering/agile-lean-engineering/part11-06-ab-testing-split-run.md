@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Trustworthy Online Controlled Experiments"
 bookAuthor: "Kohavi·Tang·Xu"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 통계적 유의성·sample size·multivariate testing.

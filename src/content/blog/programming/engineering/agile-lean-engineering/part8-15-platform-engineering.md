@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Team Topologies + Humanitec Reports"
 bookAuthor: "Skelton & Pais / Humanitec"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Internal Developer Platform — Skelton·Humanitec의 platform.

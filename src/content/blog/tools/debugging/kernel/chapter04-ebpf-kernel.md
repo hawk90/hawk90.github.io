@@ -6,6 +6,7 @@ tags: [kernel, ebpf, bpftrace, kprobe, bcc]
 series: "Kernel Debugging"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 eBPF(extended Berkeley Packet Filter)는 *커널 안에서 안전하게 실행되는 바이트코드 VM*입니다. 원래 패킷 필터링용이었지만 지금은 *trace·observability·security*의 표준 인프라. bpftrace는 그 위의 *고급 언어*로, ftrace의 모든 기능에 *표현력*과 *집계 능력*을 더합니다.

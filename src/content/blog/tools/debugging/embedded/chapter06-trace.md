@@ -6,6 +6,7 @@ tags: [rtt, itm, swo, etm, semihosting, trace, embedded]
 series: "Embedded Debugging"
 seriesOrder: 6
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 UART 한 핀을 *놓치면* 펌웨어 디버깅이 거의 불가능해 보입니다. ISR 안에서 printf를 하면 시스템이 멈추고, 인터럽트가 100 Hz로 들어오는데 9600 baud UART로 로그를 빼면 *로그 자체가 타이밍을 바꿉니다*. 다행히 임베디드 디버깅에는 *non-blocking* trace 메커니즘이 다섯 가지나 있습니다.

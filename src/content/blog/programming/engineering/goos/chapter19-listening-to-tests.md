@@ -6,6 +6,7 @@ tags: [TDD, Test Smells]
 series: "Growing Object-Oriented Software"
 seriesOrder: 19
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > "The tests are telling us something about our design."

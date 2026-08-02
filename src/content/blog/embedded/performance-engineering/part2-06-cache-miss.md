@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 14
 tags: [cache, miss, compulsory, capacity, conflict, 3c]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

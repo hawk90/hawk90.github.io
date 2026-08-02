@@ -6,6 +6,7 @@ series: "TinyML·Edge AI"
 seriesOrder: 12
 tags: [microtvm, tvm, mcu, baremetal]
 draft: true
+topics: ["ml", "ml/tinyml"]
 ---
 
 > Outline — *microTVM* — TVM이 MCU·DSP·NPU 타깃으로 binary 생성. *AOT compile* — runtime overhead 제거. *RPC tracker* — on-device tuning. *Standalone runtime*. *Zephyr·Arduino* 통합. *USMP (Unified Static Memory Planner)*. *Custom backend* — Cortex-M·Ethos-U·custom NPU. TFLM과 비교 — 성능·정밀 vs 생태계.

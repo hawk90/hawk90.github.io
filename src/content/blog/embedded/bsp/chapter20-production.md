@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 20
 tags: [embedded, bsp, ci-cd, signing, production]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

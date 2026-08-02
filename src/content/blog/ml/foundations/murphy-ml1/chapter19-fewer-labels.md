@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 19
 tags: [murphy, semi-supervised, active-learning, self-supervised, transfer]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Transfer learning·domain adaptation·meta-learning*. *Semi-supervised* — pseudo-labeling·consistency regularization·MixMatch·FixMatch. *Active learning* — uncertainty·diversity·batch acquisition. *Weak supervision* — Snorkel·programmatic labeling. *Self-supervised learning* — contrastive·MAE·SimCLR·MoCo·DINO. *Few-shot·zero-shot* — prompting·CLIP.

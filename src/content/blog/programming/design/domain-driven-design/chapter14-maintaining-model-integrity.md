@@ -6,6 +6,7 @@ tags: [DDD, Bounded Context, Context Map]
 series: "Domain-Driven Design"
 seriesOrder: 14
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 단일 모델의 한계

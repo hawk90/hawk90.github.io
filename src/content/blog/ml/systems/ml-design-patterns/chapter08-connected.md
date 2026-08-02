@@ -6,6 +6,7 @@ series: "ML 디자인 패턴"
 seriesOrder: 8
 tags: [ml-pattern, pipeline, multi-stage, retrieval]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Two-Phase Predictions* — cheap filter + heavy refine. *Cascade* (앞서 다룸). *Embeddings* + downstream task. *Retrieval-Augmented Generation (RAG)* — vector DB + LLM. *Tool use*·*function calling*. *Multi-modal pipeline* — vision + language + audio.

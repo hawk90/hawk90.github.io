@@ -6,6 +6,7 @@ series: "The Bayesian Choice"
 seriesOrder: 8
 tags: [robert, admissibility, complete-class, stein]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Admissibility 정의*·*dominated estimator 회피*. *Complete class theorem* — *Bayes estimator만 admissible*. *Generalized Bayes admissibility*. *Stein's paradox* — 다차원에서 MLE inadmissible. *James-Stein shrinkage*. *Connection to Bayesian hierarchical shrinkage*.

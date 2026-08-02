@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 4
 tags: [RISC-V, Memory-Map, Device-Tree, FDT]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

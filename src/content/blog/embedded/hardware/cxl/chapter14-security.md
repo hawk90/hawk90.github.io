@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 14
 tags: [cxl-security, ide, spdm, tsp, tdisp]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

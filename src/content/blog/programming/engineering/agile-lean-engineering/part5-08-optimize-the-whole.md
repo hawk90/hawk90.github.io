@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Lean Software Development"
 bookAuthor: "Mary & Tom Poppendieck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 부분 최적화의 위험 — value stream 전체를 보아야 한다.

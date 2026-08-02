@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 12
 tags: [embedded, bsp, driver, peripheral]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

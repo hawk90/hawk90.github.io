@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Nexus Guide"
 bookAuthor: "Ken Schwaber"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 멀티팀 scaling — Schwaber Nexus와 Sutherland Scrum@Scale 비교.

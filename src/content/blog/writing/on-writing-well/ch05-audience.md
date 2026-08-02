@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 흔한 가르침은 *독자를 생각하며 써라*입니다. Zinsser는 이 가르침을 뒤집습니다.

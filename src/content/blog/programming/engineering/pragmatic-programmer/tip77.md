@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 77
 tags: [pragmatic-programmer, ux, requirements]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

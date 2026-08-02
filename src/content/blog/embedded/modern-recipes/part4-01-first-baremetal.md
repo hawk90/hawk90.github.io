@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 35
 tags: [recipes, bare-metal, led]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

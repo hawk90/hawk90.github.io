@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Clean Agile + Extreme Programming Explained"
 bookAuthor: "Robert C. Martin / Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — XP 도입 시 가장 흔한 실패 패턴 — practice만 따라하고 가치를 놓치는 경우.

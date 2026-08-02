@@ -6,6 +6,7 @@ tags: [make, build, Makefile, functions]
 series: "GNU Make"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 함수가 필요한가

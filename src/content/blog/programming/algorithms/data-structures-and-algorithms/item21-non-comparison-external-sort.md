@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Sort, Radix, External Sort]
 series: "Data Structures and Algorithms"
 seriesOrder: 21
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

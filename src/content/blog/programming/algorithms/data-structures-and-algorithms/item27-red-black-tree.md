@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, BST, Red-Black, Splay]
 series: "Data Structures and Algorithms"
 seriesOrder: 27
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

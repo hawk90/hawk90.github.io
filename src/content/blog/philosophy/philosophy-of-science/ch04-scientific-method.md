@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Understanding Philosophy of Science"
 bookAuthor: "James Ladyman"
 draft: true
+topics: ["philosophy"]
 ---
 
 ## 한 줄 요약

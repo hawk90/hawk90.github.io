@@ -5,6 +5,7 @@ description: "SMCCC 호출 규약과 PSCI v1.1 ABI — function ID 구조, fast 
 series: "Bootloader Internals"
 seriesOrder: 32
 tags: [embedded, bootloader, psci, smccc, arm, tf-a, kernel]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

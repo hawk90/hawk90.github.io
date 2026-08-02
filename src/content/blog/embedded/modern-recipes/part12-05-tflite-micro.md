@@ -5,6 +5,7 @@ description: "MCU용 TensorFlow Lite Micro의 구조, op resolver·tensor arena�
 series: "Modern Embedded Recipes"
 seriesOrder: 141
 tags: [recipes, edge-ai, tflite-micro, mcu, cortex-m]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

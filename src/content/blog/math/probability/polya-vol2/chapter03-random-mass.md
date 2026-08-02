@@ -6,6 +6,7 @@ series: "Mathematics and Plausible Reasoning, Vol II"
 seriesOrder: 3
 tags: [polya, frequency, random-mass]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Random mass phenomena* — 다수 시행의 통계적 규칙성. *Frequency probability의 직관적 정당화*. *Law of large numbers*·*central limit theorem* 직관. *물리학·통계역학과 plausible reasoning의 만남*. *Pólya urn scheme* — exchangeability의 씨앗.

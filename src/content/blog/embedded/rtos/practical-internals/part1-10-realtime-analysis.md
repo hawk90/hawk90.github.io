@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 10
 tags: [realtime, latency, jitter, wcet, rma, deadline]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

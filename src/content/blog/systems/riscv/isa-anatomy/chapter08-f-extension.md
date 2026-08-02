@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 8
 tags: [RISC-V, F-Extension, Floating-Point, IEEE-754]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

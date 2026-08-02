@@ -6,6 +6,7 @@ tags: [QEMU, virtio, virtqueue, virtio-pci]
 series: "QEMU Fake Device Driver"
 seriesOrder: 15
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 지금까지 만든 custom PCI device는 *register-driven*입니다. 매 MMIO access마다 vmexit가 발생해 *수 µs latency*. **VirtIO**는 *paravirt 표준*으로, *공유 memory ring + doorbell*로 *vmexit을 최소화*. 같은 driver 개발 패턴이지만 *수십 배 빠른* device.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 1판의 "40-hour week" → 2판의 "energized work". 장시간 노동 연구(Ford·Tom DeMarco). 생산성 곡선의 평탄·하락.

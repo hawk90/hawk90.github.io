@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 3
 tags: [RISC-V, Vector, vsetvli, SEW, LMUL]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ tags: [Linux, File System, ext4, Btrfs, XFS]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 18
 draft: true
+topics: ["systems", "systems/linux-kernel"]
 ---
 
 ## 작성 중

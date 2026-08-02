@@ -5,6 +5,7 @@ description: "Cortex-M HardFault 핸들러에서 stacked PC·LR·CFSR을 추출�
 series: "Modern Embedded Recipes"
 seriesOrder: 114
 tags: [recipes, debugging, hardfault, cortex-m]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

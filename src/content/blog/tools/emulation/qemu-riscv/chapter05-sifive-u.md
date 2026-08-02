@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 5
 tags: [RISC-V, QEMU, SiFive, U54, Linux, HiFive-Unleashed]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 `sifive_e`가 마이크로컨트롤러급이었다면 **`sifive_u`**는 *application processor*급 머신입니다. SiFive의 첫 Linux-capable 보드 HiFive Unleashed(2018)과 그 후속 HiFive Unmatched(2021)에 들어간 U-시리즈 코어를 모사합니다. RISC-V에서 Linux를 *진짜로* 띄워 보는 가장 표준적인 환경 중 하나입니다.

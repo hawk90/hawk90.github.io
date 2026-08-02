@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 5
 tags: [cpp, c, embedded, abi, name-mangling, extern-c, calling-convention]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

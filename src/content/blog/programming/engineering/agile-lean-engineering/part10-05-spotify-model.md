@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Spotify Engineering Culture videos + Sundén posts"
 bookAuthor: "Joakim Sundén"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Squad·Tribe·Chapter·Guild가 정착됐는가 — Joakim Sundén의 회고.

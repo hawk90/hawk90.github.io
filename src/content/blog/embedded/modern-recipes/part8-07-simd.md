@@ -5,6 +5,7 @@ description: "Auto-vectorize, intrinsics, OpenMP SIMD pragma 세 갈래를 데�
 series: "Modern Embedded Recipes"
 seriesOrder: 95
 tags: [recipes, simd, vectorization, intrinsics, openmp, ispc]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -5,6 +5,7 @@ description: "임베디드 가장 흔한 silent bug가 스택 오버플로우입
 series: "Practical RTOS Internals"
 seriesOrder: 38
 tags: [stack-overflow, canary, mpu, watermark]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

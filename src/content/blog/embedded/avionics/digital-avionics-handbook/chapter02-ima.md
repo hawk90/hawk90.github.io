@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 2
 tags: [avionics, ima, partitioned, architecture]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

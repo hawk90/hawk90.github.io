@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 8
 tags: [RISC-V, QEMU, Device, MMIO, QOM, SysBus]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 기본 머신(`virt`·`sifive_e`·`sifive_u`·`opentitan`)이 갖춰 둔 디바이스만으로 부족할 때가 있습니다. 내가 설계 중인 *커스텀 가속기*나 *비표준 peripheral*을 modeling하려면 QEMU에 새 디바이스를 추가해야 합니다.

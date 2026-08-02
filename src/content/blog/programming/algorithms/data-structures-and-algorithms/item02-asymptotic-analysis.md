@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Complexity]
 series: "Data Structures and Algorithms"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

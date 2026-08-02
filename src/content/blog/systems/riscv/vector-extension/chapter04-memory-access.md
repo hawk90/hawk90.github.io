@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 4
 tags: [RISC-V, Vector, Load, Store, Memory]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

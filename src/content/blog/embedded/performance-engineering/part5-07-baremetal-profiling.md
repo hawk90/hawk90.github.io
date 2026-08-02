@@ -5,6 +5,7 @@ description: "OS도 perf도 없는 환경에서 GPIO, DWT cycle counter, SysTick
 series: "Embedded Performance Engineering"
 seriesOrder: 46
 tags: [baremetal, dwt, gpio, cycle-counter, itm, systick]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

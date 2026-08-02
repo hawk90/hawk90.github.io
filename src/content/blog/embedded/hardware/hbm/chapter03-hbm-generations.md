@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 3
 tags: [hbm, hbm2, hbm3, hbm3e, hbm4]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

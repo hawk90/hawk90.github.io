@@ -6,6 +6,7 @@ series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 10
 tags: [freertos, stream-buffer, message-buffer, lock-free]
 draft: true
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

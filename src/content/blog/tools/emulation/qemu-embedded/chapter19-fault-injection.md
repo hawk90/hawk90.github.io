@@ -6,6 +6,7 @@ tags: [QEMU, fault-injection, watchdog, robustness, ASIL]
 series: "QEMU Embedded Emulation"
 seriesOrder: 19
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 자동차·항공·의료 같은 *safety-critical* 시스템은 fault가 발생해도 안전해야 합니다(ISO 26262 ASIL, DO-178C, IEC 62304). *Functional safety test*는 실 HW에 fault를 *인위적으로* 주입하는 게 표준이지만, 비용과 재현성이 부담입니다. QEMU에서 같은 fault를 *결정적*으로 주입할 수 있으면 수천 시나리오를 CI로 자동화할 수 있습니다.

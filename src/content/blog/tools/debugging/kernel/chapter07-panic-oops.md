@@ -6,6 +6,7 @@ tags: [kernel, panic, oops, dmesg, addr2line]
 series: "Kernel Debugging"
 seriesOrder: 7
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 마지막 장 — *최소 정보로 가장 많이 추론*하는 기술. 운영 환경에서 vmcore 없이 *dmesg 한 줄*만으로 panic·oops를 해석합니다. 이게 모든 커널 디버깅의 *끝점*이자 *시작점*.

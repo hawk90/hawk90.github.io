@@ -6,6 +6,7 @@ series: "ONNX Runtime 심화"
 seriesOrder: 3
 tags: [onnxruntime, custom-op, kernel-registration]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *Custom Op API* — C·C++·Python. *CustomOpDomain·CustomOpFactory*. *Kernel implementation* — Compute() 메소드. *Shape inference* function. *Multi-EP support* — 같은 custom op을 CPU·CUDA·DML로. *Loading via shared library*. *Lite custom op API* (modern).

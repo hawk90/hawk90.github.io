@@ -6,6 +6,7 @@ tags: [memory, linux, rss, pss, smaps]
 series: "Memory Diagnostics"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 "이 프로세스가 메모리를 얼마나 쓰나?" 답이 *RSS, VSS, PSS, USS* 중 어느 것이냐에 따라 *4가지*입니다. 잘못 답하면 OOM이 일어났을 때 *왜*인지 알 수 없고, 누수 디버깅도 헛수고. 이 시리즈는 *메모리 진단의 처음부터* — 정확한 회계, 누수 도구, glibc/jemalloc/tcmalloc profiling까지 다룹니다.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Unicorn Project"
 bookAuthor: "Gene Kim"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Maxine의 시점 — developer 관점에서 본 같은 회사.

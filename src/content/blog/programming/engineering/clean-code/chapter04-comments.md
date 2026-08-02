@@ -6,6 +6,7 @@ tags: [CleanCode, Comments, Robert Martin]
 series: "Clean Code"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 챕터의 메시지

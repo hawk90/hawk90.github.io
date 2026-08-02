@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Object-Oriented Software Construction"
 bookAuthor: "Bertrand Meyer"
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

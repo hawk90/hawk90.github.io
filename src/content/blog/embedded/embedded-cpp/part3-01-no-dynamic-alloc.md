@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 19
 tags: [cpp, embedded, no-heap, static-allocation, std-array, etl]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

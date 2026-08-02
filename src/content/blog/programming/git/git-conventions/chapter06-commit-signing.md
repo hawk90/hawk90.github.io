@@ -6,6 +6,7 @@ tags: [Git, Signing, GPG, SSH]
 series: "Git Conventions"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

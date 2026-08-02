@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
 draft: true
-
+topics: ["writing"]
 ---
 
 > 세미콜론과 콜론은 *마침표보다 약하고 쉼표보다 강한* 휴식을 만듭니다. 각각의 정확한 자리를 알아야 *격식 글*에서 효과적으로 쓸 수 있습니다.

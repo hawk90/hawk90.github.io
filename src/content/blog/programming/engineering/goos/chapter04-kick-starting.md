@@ -6,6 +6,7 @@ tags: [TDD, Walking Skeleton]
 series: "Growing Object-Oriented Software"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 첫 번째 테스트를 어디서 시작해야 하는가? TDD 사이클을 시작하는 핵심 전략이 **Walking Skeleton**이다. 가장 단순한 시나리오 하나를 골라 시스템의 모든 레이어를 관통하게 만든다. 이때 핵심은 기능이 아니라 **통합**이다. 빌드, 배포, E2E 테스트 인프라가 갖춰지면 그 위에서 안전하게 기능을 추가할 수 있다.

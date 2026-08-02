@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 3
 tags: [vim, editor, motions, text-objects]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 3: 모션과 텍스트 객체

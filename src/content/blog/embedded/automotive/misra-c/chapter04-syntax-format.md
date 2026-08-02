@@ -6,6 +6,7 @@ tags: [misra, c, identifiers, unused-code, comments, ambiguity]
 series: "MISRA C"
 seriesOrder: 4
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 이 장부터 MISRA Rule 본문에 들어간다. R1~R5는 "코드의 표면"에 해당하는 규칙들 — 어떤 C 환경을 가정하느냐, 죽은 코드가 있느냐, 식별자가 충돌하지 않느냐. 분석기가 *가장 잘 잡는* 영역이기도 하다.

@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 31
 tags: [pragmatic-programmer, testing, debugging]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

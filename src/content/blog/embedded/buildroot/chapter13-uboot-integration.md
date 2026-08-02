@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 13
 tags: [embedded, buildroot, u-boot, bootloader, fw-env]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

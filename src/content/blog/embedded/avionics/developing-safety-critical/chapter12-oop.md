@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 12
 tags: [avionics, do-178c, do-332, oop, cpp]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

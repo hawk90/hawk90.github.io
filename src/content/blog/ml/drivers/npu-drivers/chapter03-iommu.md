@@ -6,6 +6,7 @@ series: "NPU 드라이버 개발"
 seriesOrder: 3
 tags: [npu, iommu, dma, address-translation]
 draft: true
+topics: ["ml", "ml/drivers"]
 ---
 
 > Outline — *IOMMU* — DMA virtual address space. *Linux IOMMU API* — `iommu_domain_alloc`·`iommu_attach_device`·`iommu_map`. *Identity·DMA·unmanaged domain*. *SVA (Shared Virtual Addressing)* — CPU와 동일 VA. *ATS (Address Translation Services)* on PCIe. *NPU 보안* — isolation·DMA protection. ARM SMMU·Intel VT-d.

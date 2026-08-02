@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 9
 tags: [RISC-V, BL602, Zephyr, RTOS]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

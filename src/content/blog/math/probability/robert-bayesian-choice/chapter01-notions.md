@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "The Bayesian Choice"
 bookAuthor: "Christian P. Robert"
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Bayesian framework* 형식적 정의. *Sample space·parameter space·statistical model*. *Frequentist motivation·Bayesian motivation*. *Why Bayesian is decision-theoretic by nature*. *Likelihood principle·conditionality principle·sufficiency principle*. 시리즈 — Robert의 이론적 깊이 11장.

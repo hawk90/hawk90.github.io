@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 6
 tags: [linux, driver, ioctl, poll, blocking-io]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — `ioctl` — magic numbers·command coding macros (`_IO`·`_IOR`·`_IOW`·`_IOWR`). blocking I/O — wait queues (`wait_event_interruptible`·`wake_up_interruptible`). poll·select — `f_op->poll`. async notification — `fasync`. mmap (다음 ch15에서 깊이).

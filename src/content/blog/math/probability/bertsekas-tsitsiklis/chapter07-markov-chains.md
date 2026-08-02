@@ -6,6 +6,7 @@ series: "Introduction to Probability"
 seriesOrder: 7
 tags: [bertsekas, markov-chain, steady-state, absorption]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Discrete-time Markov chain (DTMC)*·*transition probability*. *Classification of states·steady-state*. *Absorption probabilities·expected absorption time*. *Continuous-time Markov chain (CTMC)*·*rate matrix*. *Birth-death process*. *Application* — queueing·population dynamics·reliability.

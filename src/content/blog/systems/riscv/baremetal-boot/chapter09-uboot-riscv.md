@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 9
 tags: [RISC-V, U-Boot, Bootloader, Porting]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

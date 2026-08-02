@@ -6,6 +6,7 @@ series: "NPU 드라이버 개발"
 seriesOrder: 11
 tags: [npu, umd, runtime, library-design]
 draft: true
+topics: ["ml", "ml/drivers"]
 ---
 
 > Outline — *KMD + UMD split* — kernel mode·user mode. *Stable ABI vs versioned* 결정. *Device discovery* — `/dev/accelN`·sysfs. *Context·queue·buffer 객체* — UMD가 추상. *Command stream builder*·*compiler integration* — MLIR backend가 cmd stream을 토하도록. *Multi-process* synchronization.

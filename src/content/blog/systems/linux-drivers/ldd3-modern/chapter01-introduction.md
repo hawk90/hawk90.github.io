@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 1
 tags: [linux, driver, kernel, ldd3]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — driver의 역할 (HW abstraction). 세 가지 분류 — char·block·network. *driver vs kernel module*. classes·security·license. LDD3가 2.6 기준이지만 *6.x에서도 그대로 유효한 개념*과 *바뀐 부분*을 같이 본다.

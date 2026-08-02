@@ -6,6 +6,7 @@ series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 3
 tags: [agans, debugging, evidence, instrumentation]
 draft: true
+topics: ["tools", "tools/debugging"]
 ---
 
 > Outline — *추측 → 검증* 사이클의 비효율. *Direct observation* — log·debugger·trace·oscilloscope·logic analyzer. *Instrumentation 추가*. *Failures의 details까지*. *"It can't happen" — 항상 일어남*. *Heisenberg debugging* — 측정이 동작을 바꾸는 경우 회피.

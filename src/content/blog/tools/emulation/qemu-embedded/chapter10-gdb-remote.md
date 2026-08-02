@@ -6,6 +6,7 @@ tags: [QEMU, GDB, Debugging, RSP, vmlinux]
 series: "QEMU Embedded Emulation"
 seriesOrder: 10
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 JTAG·ICE 같은 외부 디버거 없이도 QEMU의 *내장 GDB 서버*가 kernel·firmware·user app을 *명령어 단위*로 디버깅하게 해 줍니다. JTAG 환경 셋업 비용이 0에 가까워 학습·CI·일상 개발에서 표준 도구.

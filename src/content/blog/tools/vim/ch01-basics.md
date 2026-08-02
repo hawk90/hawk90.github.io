@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 1
 tags: [vim, editor, basics, modes]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 1: 기초

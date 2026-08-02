@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 4
 tags: [linux, driver, debugging, dmesg, ftrace]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — `printk`·`dynamic_debug`·`pr_debug`·`dev_dbg`. `/sys/kernel/debug` (debugfs). oops 메시지 읽기 — `decode_stacktrace.sh`. *모던 도구* — ftrace·tracepoint·kprobes·BPF (`bpftrace`). KASan·KMSan·UBSan in kernel.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Choose Your WoW"
 bookAuthor: "Scott Ambler"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Scott Ambler의 DAD/DA — choose your WoW.

@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, CDEF, Filter]
 series: "AV1"
 seriesOrder: 17
 draft: true
+topics: ["media"]
 ---
 
 Ch 16에서 디블로킹 필터를 살펴봤다. 블록 경계의 계단 현상은 잘 처리했지만, 블록 내부에 남은 아티팩트는 어떻게 할까? 특히 강한 에지 주변에 물결처럼 나타나는 **링잉(ringing) 아티팩트**는 디블로킹만으로는 해결되지 않는다.

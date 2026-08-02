@@ -6,6 +6,7 @@ tags: [C++, Concurrency, std::thread]
 series: "C++ Concurrency in Action"
 seriesOrder: 1
 draft: true
+topics: ["parallel"]
 ---
 
 동시성(concurrency)은 왜 필요한가? 단일 스레드로 충분하지 않은가? 이 장에서는 동시성의 본질을 짚고, C++에서 첫 번째 스레드를 띄워 본다.

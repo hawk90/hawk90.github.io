@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
 draft: true
-
+topics: ["writing"]
 ---
 
 Introduction을 쓸 때 자주 마주치는 문법 결정과 어휘 선택을 정리합니다. 시제 쌍, signalling language, passive/active의 사용이 모두 작가의 의도를 표시합니다.

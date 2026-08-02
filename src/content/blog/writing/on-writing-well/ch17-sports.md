@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 스포츠 글은 cliché의 또 다른 무덤입니다. 매일 수백 명의 기자가 같은 경기를 다루고, 그 글들이 *놀랍게 비슷*합니다.

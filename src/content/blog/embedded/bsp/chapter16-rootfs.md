@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 16
 tags: [embedded, bsp, buildroot, yocto, rootfs]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

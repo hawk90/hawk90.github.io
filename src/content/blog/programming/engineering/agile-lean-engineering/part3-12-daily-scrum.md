@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Essential Scrum"
 bookAuthor: "Kenneth Rubin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 3 질문 방식 vs walking the board — 어느 쪽이 더 효과적인가.

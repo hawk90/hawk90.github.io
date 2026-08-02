@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 8
 tags: [vim, editor, plugins, vim-plug, neovim]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 8: 플러그인

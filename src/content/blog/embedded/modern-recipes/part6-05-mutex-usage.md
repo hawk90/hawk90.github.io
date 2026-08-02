@@ -5,6 +5,7 @@ description: "Mutex와 binary semaphore의 차이, priority inheritance, recursi
 series: "Modern Embedded Recipes"
 seriesOrder: 67
 tags: [recipes, rtos, mutex]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

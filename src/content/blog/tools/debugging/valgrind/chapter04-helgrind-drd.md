@@ -6,6 +6,7 @@ tags: [Valgrind, Helgrind, DRD, Concurrency, DataRace, Debugging, C, C++]
 series: "Valgrind"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 두 도구가 *나뉜 이유*

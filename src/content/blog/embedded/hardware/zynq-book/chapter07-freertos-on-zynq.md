@@ -6,6 +6,7 @@ series: "The Zynq Book"
 seriesOrder: 7
 tags: [zynq, freertos, cortex-a9, smp]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *FreeRTOS Cortex-A9 port* — `portASM.S`·tick via Global Timer. *GIC와 협력* — `XScuGic` + FreeRTOS interrupt API. *SMP 옵션* — Cortex-A9 dual core. *RPU on UltraScale+* — Cortex-R5F lockstep. *Hardware abstraction* — Xilinx driver + FreeRTOS task의 통합 패턴.

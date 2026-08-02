@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 3
 tags: [pcie, configuration-space, ecam, capability, dvsec]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

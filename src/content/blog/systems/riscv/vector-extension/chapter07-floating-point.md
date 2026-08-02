@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 7
 tags: [RISC-V, Vector, Floating-Point, FP]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

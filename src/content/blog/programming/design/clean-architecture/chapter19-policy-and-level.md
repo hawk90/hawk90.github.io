@@ -6,6 +6,7 @@ tags: [Architecture, Policy, Level]
 series: "Clean Architecture"
 seriesOrder: 19
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

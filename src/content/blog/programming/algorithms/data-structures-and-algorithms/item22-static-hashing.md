@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Hashing, Hash Table]
 series: "Data Structures and Algorithms"
 seriesOrder: 22
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

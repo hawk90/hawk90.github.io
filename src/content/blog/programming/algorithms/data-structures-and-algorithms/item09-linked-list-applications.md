@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Linked List, Polynomial]
 series: "Data Structures and Algorithms"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

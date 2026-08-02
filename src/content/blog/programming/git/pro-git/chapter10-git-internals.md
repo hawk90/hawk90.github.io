@@ -6,6 +6,7 @@ tags: [Git, Internals, Plumbing]
 series: "Pro Git"
 seriesOrder: 10
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

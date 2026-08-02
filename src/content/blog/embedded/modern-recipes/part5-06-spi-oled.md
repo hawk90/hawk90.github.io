@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 54
 tags: [recipes, peripheral, oled]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

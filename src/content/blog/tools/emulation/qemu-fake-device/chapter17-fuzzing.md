@@ -6,6 +6,7 @@ tags: [QEMU, fuzzing, syzkaller, security, AFL]
 series: "QEMU Fake Device Driver"
 seriesOrder: 17
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **Fuzzing**은 *random·malformed input*으로 *bug·취약점*을 발견하는 기법입니다. driver의 *register write*·*DMA descriptor*가 *guest의 통제*에 있으므로, *적대적 guest*가 driver를 무력화할 위험. QEMU 환경에서 *체계적*으로 검증하는 흐름을 봅니다.

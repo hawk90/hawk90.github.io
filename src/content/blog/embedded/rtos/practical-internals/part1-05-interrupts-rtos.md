@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 5
 tags: [rtos, isr, deferred, fromisr, bottom-half]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

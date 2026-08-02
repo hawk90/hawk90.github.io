@@ -6,6 +6,7 @@ series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 13
 tags: [variational, vi, elbo, mean-field]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Variational Inference (VI)* — posterior를 tractable family로 근사. *ELBO (Evidence Lower Bound)*. *Mean-field assumption*. *Optimization via coordinate ascent*. *Reparameterization trick* — gradient through sampling. *Amortized VI* — VAE의 토대. *Normalizing flows*. *VI vs MCMC* 비교.

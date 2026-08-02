@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 40
 tags: [cpp, embedded, hal, abstraction, portability, board-support]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

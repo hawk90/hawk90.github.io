@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 6
 tags: [koller-friedman, plate-model, dbn, prm]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Plate notation*·*exchangeability*. *Dynamic Bayesian Network (DBN)*·*temporal model*. *Probabilistic Relational Model (PRM)*. *First-order PGM·Markov Logic Network*. *Hierarchical model representation*. *Template instantiation algorithm*. Modern application — relational reasoning·knowledge graph.

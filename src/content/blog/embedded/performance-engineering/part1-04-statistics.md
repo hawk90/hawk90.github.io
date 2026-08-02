@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 4
 tags: [statistics, percentile, histogram, hdr-histogram]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Essential Scrum"
 bookAuthor: "Kenneth Rubin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — minimum DoD vs ideal DoD — 어디서 시작해 어떻게 키울 것인가.

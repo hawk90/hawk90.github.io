@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Doing Bayesian Data Analysis, 2nd Edition"
 bookAuthor: "John K. Kruschke"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Credibility 재분배* — Bayesian의 직관적 정의. *Possibility space의 likelihood-weighted update*. *Posterior = prior × likelihood / evidence*. *Three goals* — estimation·prediction·model comparison. *책 구조* — exact·grid·MCMC·JAGS·Stan. 시리즈 — Kruschke 25장 중 핵심 15장.

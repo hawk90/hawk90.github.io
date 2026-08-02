@@ -6,6 +6,7 @@ tags: [TDD, Walking Skeleton]
 series: "Growing Object-Oriented Software"
 seriesOrder: 10
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > "Get the skeleton walking first."

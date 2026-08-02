@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 19
 tags: [bda3, nonlinear, pharmacokinetic, ode]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Nonlinear regression* — model specification. *Pharmacokinetic·dose-response model*. *ODE-based model*·*differential equation likelihood*. *Hierarchical nonlinear model*. *Parameter identifiability* — sloppy parameters. *Inference challenge* — multimodal posterior. *Stan ODE solver 통합*.

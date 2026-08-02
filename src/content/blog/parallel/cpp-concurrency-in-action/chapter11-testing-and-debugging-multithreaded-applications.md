@@ -6,6 +6,7 @@ tags: [C++, C, Concurrency, Testing, Debugging, ThreadSanitizer]
 series: "C++ Concurrency in Action"
 seriesOrder: 11
 draft: true
+topics: ["parallel"]
 ---
 
 동시성 버그는 재현이 어렵고 디버깅이 까다롭다. Williams는 11장에서 *어떤 버그가 어떤 형태로 나타나는지*, *어떻게 찾을 것인지*, *어떻게 재현 가능하게 테스트할 것인지*를 정리한다. 이 글은 그 흐름을 따라가며 ThreadSanitizer 같은 현대 도구와 structured concurrency 관점까지 확장한다.

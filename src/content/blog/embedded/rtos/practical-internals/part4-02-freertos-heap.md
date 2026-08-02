@@ -5,6 +5,7 @@ description: "FreeRTOS가 제공하는 다섯 가지 heap 구현을 source 수�
 series: "Practical RTOS Internals"
 seriesOrder: 34
 tags: [freertos, heap, allocator]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

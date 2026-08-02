@@ -6,6 +6,7 @@ tags: [misra, c, iso-26262, asil-d, audit, certification, deviation, helix-qac]
 series: "MISRA C"
 seriesOrder: 11
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 10장이 인증의 *행정 절차*를 개관했다면, 이 장은 *실전 시나리오*를 본다. 가상의 *Electric Parking Brake (EPB) ECU* 프로젝트가 ISO 26262 ASIL D 인증을 받는 과정을 처음부터 끝까지 따라간다. 모든 문서, 도구 설정, 심사관 질문, deviation 정당화를 *실제 형식*으로 살핀다.

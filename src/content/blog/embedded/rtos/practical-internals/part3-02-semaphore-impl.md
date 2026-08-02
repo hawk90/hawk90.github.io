@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 23
 tags: [semaphore, wait-list, counter, queue, isr-safe]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

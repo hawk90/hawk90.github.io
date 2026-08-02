@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 12
 tags: [scheduler, blocked-list, timeout, delta-list, tick-wraparound]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

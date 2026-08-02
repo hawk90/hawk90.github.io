@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 25
 tags: [mmio, register, cache-policy, volatile, barrier]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

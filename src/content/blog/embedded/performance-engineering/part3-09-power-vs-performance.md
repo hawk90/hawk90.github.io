@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 27
 tags: [power, dvfs, cpufreq, big-little, race-to-idle]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

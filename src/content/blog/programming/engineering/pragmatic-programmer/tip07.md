@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 7
 tags: [pragmatic-programmer, perspective]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

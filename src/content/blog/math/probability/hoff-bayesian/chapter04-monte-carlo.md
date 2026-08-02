@@ -6,6 +6,7 @@ series: "A First Course in Bayesian Statistical Methods"
 seriesOrder: 4
 tags: [hoff, monte-carlo, importance-sampling]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Monte Carlo principle* — sample mean = E approximate. *Direct sampling*·*inverse CDF*. *Importance sampling*·*proposal choice*. *Rejection sampling*. *Variance of MC estimator·CLT*. *Bayesian inference via Monte Carlo* — posterior summary·credible interval·predictive.

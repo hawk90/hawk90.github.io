@@ -6,6 +6,7 @@ series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 6
 tags: [kruschke, jags, stan, workflow]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *JAGS* model specification language. *Stan* model language·HMC backend. *rstanarm·brms* — high-level Bayesian wrappers. *Workflow* — data·model·fit·check·report. *Convergence diagnostic in R*. *Posterior visualization* — bayesplot. *PyMC alternative*.

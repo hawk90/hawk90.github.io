@@ -6,6 +6,7 @@ series: "ESP32-C3 Mastering"
 seriesOrder: 12
 tags: [power, sleep, low-power, rtc, esp32-c3]
 draft: false
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 한 줄 요약

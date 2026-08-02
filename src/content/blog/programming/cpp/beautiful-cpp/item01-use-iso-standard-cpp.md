@@ -6,6 +6,7 @@ tags: [C++, Portability, Standards]
 series: "Beautiful C++"
 seriesOrder: 1
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 

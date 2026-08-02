@@ -5,6 +5,7 @@ description: "RW-lock의 종류와 reader/writer priority, RCU 비교, seqlock�
 series: "Embedded Performance Engineering"
 seriesOrder: 35
 tags: [rwlock, reader, writer, rcu, seqlock]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

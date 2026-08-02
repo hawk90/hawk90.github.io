@@ -5,6 +5,7 @@ description: "CXL.mem 토폴로지별 실측 — Direct attach·Single switch·M
 series: "Embedded Performance Engineering"
 seriesOrder: 54
 tags: [cxl, cxl-mem, latency, bandwidth, numa, mlc, stream]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

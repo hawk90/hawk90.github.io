@@ -6,6 +6,7 @@ series: "Launch Vehicle Flight Software"
 seriesOrder: 1
 tags: [avionics, launch-vehicle, aircraft, comparison]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

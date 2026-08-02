@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 26
 tags: [clock, peripheral, dvfs, rcc, pll]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

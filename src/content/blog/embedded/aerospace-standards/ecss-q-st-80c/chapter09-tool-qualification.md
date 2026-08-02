@@ -6,6 +6,7 @@ tags: [ecss, tool-qualification, annex-q, compiler, static-analysis, polyspace]
 series: "ECSS-Q-ST-80C"
 seriesOrder: 9
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 DO-330의 ECSS 대응. *ECSS-Q-ST-80C Annex Q*가 *도구 자격*을 정의한다. DO-330만큼 *세분화되지 않지만* *3 class* 분류 + *qualification 절차*. 이 장은 *Tool Class 분류, qualification 절차, ESA approved tool, KARI tool stack*까지.

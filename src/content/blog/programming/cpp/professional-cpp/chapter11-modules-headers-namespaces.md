@@ -6,6 +6,7 @@ tags: [C++, Modules, Namespace, ADL]
 series: "전문가를 위한 C++"
 seriesOrder: 11
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

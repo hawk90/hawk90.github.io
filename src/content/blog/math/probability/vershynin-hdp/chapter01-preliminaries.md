@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "High-Dimensional Probability"
 bookAuthor: "Roman Vershynin"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Standard probabilistic tools recap*. *Markov·Chebyshev·Chernoff bound*. *Sub-Gaussian·sub-exponential RV* — defining properties·equivalent characterizations. *Ψ-norm (Orlicz norm)*. *Hoeffding·Bernstein inequalities preview*. [무료 PDF](https://www.math.uci.edu/~rvershyn/papers/HDP-book/HDP-book.html). ML 이론 modern foundation.

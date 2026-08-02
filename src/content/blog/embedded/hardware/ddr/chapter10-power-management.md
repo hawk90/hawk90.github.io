@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 10
 tags: [DDR, memory, power, self-refresh, low-power]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 메모리는 시스템 전력의 상당 부분을 차지한다. DDR은 다양한 저전력 모드를 제공하여 유휴 시 전력 소모를 줄인다. 이 장에서는 Self-Refresh, Power-Down, LPDDR의 저전력 기법을 다룬다.

@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 9
 tags: [embedded, bootloader, u-boot, ddr, dram]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

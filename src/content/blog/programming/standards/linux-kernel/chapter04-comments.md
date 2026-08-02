@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Comments, Documentation]
 series: "Linux Kernel Coding Style"
 seriesOrder: 4
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Comments are good, but there is also a danger of over-commenting."

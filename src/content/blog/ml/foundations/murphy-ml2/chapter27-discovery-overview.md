@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 27
 tags: [discovery, unsupervised, latent, representation]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Discovery task* — 데이터에서 *구조* 찾기. *Latent factor* — PCA·FA·ICA·NMF. *State-space*·*time evolution*. *Graph structure*·*causal structure*. *Representation*·*disentanglement*. *Interpretability*. Part V 로드맵 — 28-33장.

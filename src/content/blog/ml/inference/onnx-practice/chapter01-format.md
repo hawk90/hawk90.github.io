@@ -6,6 +6,7 @@ series: "ONNX 실전"
 seriesOrder: 1
 tags: [onnx, protobuf, graph]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *ONNX* — Open Neural Network Exchange. *Protobuf 기반* — model.onnx 파일 구조. *ModelProto·GraphProto·NodeProto*. *opset version*·*ir_version*. *Initializer (weight)*·*Input·Output value_info*. *Tensor·Sequence·Map type*. *Custom domain* — vendor 확장.

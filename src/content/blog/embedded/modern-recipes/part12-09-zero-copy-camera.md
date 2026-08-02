@@ -5,6 +5,7 @@ description: "카메라부터 NPU·display까지 한 frame이 한 physical page�
 series: "Modern Embedded Recipes"
 seriesOrder: 145
 tags: [recipes, camera, v4l2, dma-buf, zero-copy, isp, libcamera]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

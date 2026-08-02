@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "The Only Grammar Book You'll Ever Need"
 bookAuthor: "Susan Thurman"
 draft: true
-
+topics: ["writing"]
 ---
 
 > 대명사는 *선행사*(antecedent)를 가리킵니다. 어느 명사를 가리키는지 *분명하지 않으면* 문장이 모호해집니다.

@@ -5,6 +5,7 @@ description: "RT-Thread의 object-oriented C 설계와 component 생태계를 �
 series: "Practical RTOS Internals"
 seriesOrder: 48
 tags: [rt-thread, source-analysis, components, smart, finsh]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

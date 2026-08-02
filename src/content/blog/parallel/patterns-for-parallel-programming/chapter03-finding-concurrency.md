@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Patterns for Parallel Programming"
 bookAuthor: "Timothy G. Mattson, Beverly A. Sanders, Berna L. Massingill"
+topics: ["parallel"]
 ---
 
 ## 이 장에서 다루는 것

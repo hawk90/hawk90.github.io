@@ -6,6 +6,7 @@ tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 103
 draft: true
+topics: ["math"]
 ---
 
 ## 우리가 진짜로 하고 싶은 일

@@ -5,6 +5,7 @@ description: "select·poll의 한계와 epoll의 트리거 모드, ONESHOT·EXCL
 series: "Modern Embedded Recipes"
 seriesOrder: 84
 tags: [recipes, epoll, level-triggered, edge-triggered, multiplex]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

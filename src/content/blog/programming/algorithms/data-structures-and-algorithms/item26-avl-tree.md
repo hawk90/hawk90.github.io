@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, BST, AVL, Balanced Tree]
 series: "Data Structures and Algorithms"
 seriesOrder: 26
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

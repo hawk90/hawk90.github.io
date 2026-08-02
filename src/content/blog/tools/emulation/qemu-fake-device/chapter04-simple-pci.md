@@ -6,6 +6,7 @@ tags: [QEMU, PCI, DeviceModel, vendor-id, BAR]
 series: "QEMU Fake Device Driver"
 seriesOrder: 4
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 PCI는 *가장 흔한* device type입니다. driver 개발의 대부분이 PCI device를 대상이죠. 이 장은 *가장 단순한* PCI device를 만들고 guest에서 `lspci`로 인식시키는 *전체 흐름*을 봅니다. 이 device가 이후 모든 장의 *baseline*.

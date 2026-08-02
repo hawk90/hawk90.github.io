@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "trunkbaseddevelopment.com + Continuous Delivery"
 bookAuthor: "Paul Hammant / Humble & Farley"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 두 브랜칭 전략 비교 — CD에 적합한 것은 어느 쪽인가.

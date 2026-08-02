@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 11
 tags: [monte-carlo, importance-sampling, control-variates]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Direct sampling*·*inverse CDF*·*Box-Muller*. *Rejection sampling*·*adaptive rejection*. *Importance sampling (IS)* — proposal choice·ESS. *Self-normalized IS*. *Variance reduction* — control variates·Rao-Blackwellization·antithetic. *Quasi-Monte Carlo*. *Score function·pathwise gradient estimator*. ML 응용 — REINFORCE·REBAR.

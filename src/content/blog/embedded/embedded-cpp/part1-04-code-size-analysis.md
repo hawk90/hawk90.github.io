@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 4
 tags: [cpp, embedded, code-size, bloat, tools, nm, objdump, bloaty]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

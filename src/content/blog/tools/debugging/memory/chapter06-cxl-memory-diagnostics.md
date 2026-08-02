@@ -6,6 +6,7 @@ series: "Memory Diagnostics"
 seriesOrder: 6
 tags: [cxl, memory-diagnostics, ras, poison, numa, cxl-cli]
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## CXL.mem은 일반 메모리와 무엇이 다른가

@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 5
 tags: [hbm, bandwidth, roofline, bottleneck]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

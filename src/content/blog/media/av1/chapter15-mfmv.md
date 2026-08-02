@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, MFMV, Motion Vector]
 series: "AV1"
 seriesOrder: 15
 draft: true
+topics: ["media"]
 ---
 
 Ch 12에서 MV 후보 리스트를 만들 때, 주로 **공간적 이웃**(위, 왼쪽 블록)에서 MV를 가져왔다. 하지만 비디오는 시간적 연속성이 강하다. "1초 전 같은 위치의 블록이 어떻게 움직였는지"를 알면, 현재 블록의 MV를 더 잘 예측할 수 있다.

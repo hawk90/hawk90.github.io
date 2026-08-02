@@ -6,6 +6,7 @@ tags: [QEMU, sr-iov, mdev, multi-tenant]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 11
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 FPGA 한 대를 여러 VM이나 tenant가 *공유*하는 것은 datacenter ROI의 핵심입니다. **SR-IOV**는 하드웨어로, **mdev**는 소프트웨어로 device를 *가상 함수 다수*로 분할합니다. 이 장은 두 패턴과 FPGA 특화 응용(XRT VF, OPAE, DFL AFU)을 함께 봅니다.

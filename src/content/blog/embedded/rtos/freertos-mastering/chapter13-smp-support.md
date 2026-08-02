@@ -6,6 +6,7 @@ series: "Mastering the FreeRTOS Real Time Kernel"
 seriesOrder: 13
 tags: [freertos, smp, multicore, affinity]
 draft: true
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

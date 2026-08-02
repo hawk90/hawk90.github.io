@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 14
 tags: [avionics, do-178c, certification, artifacts]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

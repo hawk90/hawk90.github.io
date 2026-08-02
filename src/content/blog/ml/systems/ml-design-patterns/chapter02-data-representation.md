@@ -6,6 +6,7 @@ series: "ML 디자인 패턴"
 seriesOrder: 2
 tags: [ml-pattern, embedding, hashed-feature]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Hashed Feature* — cardinality 폭증 방지. *Embedding* — 학습 가능한 dense representation. *Feature Cross* — interaction 명시적 표현. *Multimodal Input* — text + image + categorical. *Reframing* — regression을 classification으로. 각 패턴의 *언제·왜·trade-off*.

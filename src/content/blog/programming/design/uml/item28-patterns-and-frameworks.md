@@ -6,6 +6,7 @@ tags: [UML, Design Pattern, Framework, Collaboration]
 series: "UML 2.5.1"
 seriesOrder: 28
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

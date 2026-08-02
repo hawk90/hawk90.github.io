@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 13
 tags: [mlir, tablegen, ods, drr]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *TableGen* — LLVM에서 가져온 declarative language. *ODS (Operation Definition Specification)* — op·dialect·type·attribute를 `.td`로. *DRR (Declarative Rewrite Rules)* — pattern을 `.td`로. *Generated C++ binding*. *Constraint*·*Trait*. *Build system 통합* — CMake·Bazel.

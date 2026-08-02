@@ -6,6 +6,7 @@ series: "Pattern Recognition and Machine Learning"
 seriesOrder: 10
 tags: [bishop, variational-inference, expectation-propagation]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Variational Inference (VI)* — factorized·mean field. *Example* — univariate Gaussian·model comparison·linear regression·mixture of Gaussian. *Local variational* — bound 위 lower bound. *Expectation Propagation (EP)*·moment matching. *Convex duality·variational message passing*. *Modern relevance* — VAE의 토대.

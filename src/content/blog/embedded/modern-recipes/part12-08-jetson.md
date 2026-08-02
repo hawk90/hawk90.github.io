@@ -5,6 +5,7 @@ description: "Jetson 라인업의 power·성능 trade-off, JetPack 구성, DLA·
 series: "Modern Embedded Recipes"
 seriesOrder: 144
 tags: [recipes, jetson, tensorrt, dla, vpi, deepstream, jetpack]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

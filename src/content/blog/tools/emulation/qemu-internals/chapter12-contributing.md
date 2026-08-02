@@ -6,6 +6,7 @@ tags: [QEMU, Contributing, OpenSource, mailing-list, patch]
 series: "QEMU Internals"
 seriesOrder: 12
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU는 *mainline upstream에 기여*가 가능한 open-source 프로젝트입니다. mailing list 기반 패치 흐름·코드 스타일·테스트가 *전형적인 GNU 스타일*이라 처음에는 어색할 수 있지만, 어휘만 익히면 *기여자*로 합류할 수 있습니다.

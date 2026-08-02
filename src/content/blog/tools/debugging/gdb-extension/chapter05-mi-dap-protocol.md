@@ -6,6 +6,7 @@ tags: [gdb, mi, dap, ide, protocol]
 series: "GDB Extension and IDE"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 VSCode·PyCharm·Neovim·Emacs가 모두 *같은 디버거*에 붙는 비결은 두 프로토콜에 있습니다. *MI* (GDB/MI — GDB Machine Interface)가 *GDB 측 표준*, *DAP* (Debug Adapter Protocol)가 *IDE 측 표준*. 두 프로토콜이 한 어댑터에서 매개되어 *어떤 IDE*에서든 *어떤 디버거*에 붙을 수 있습니다.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: IOBuf chain은 *그 자체로 iovec*다. `writev`/`readv`/`sendmsg`에 직접 넘겨 user-space copy를 0회로 만든다.

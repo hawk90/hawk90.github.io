@@ -6,6 +6,7 @@ series: "ML 시스템 프로파일링"
 seriesOrder: 8
 tags: [bottleneck, optimization, mfu, mbu]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Decision tree* — MFU<50%? → compute issue. MBU 한계? → memory bound. Comm 시간 > compute? → topology 문제. *Specific 최적화* — fusion·layout·sharding 변경·tensor parallelism. *KV cache* 최적화 — page attention·prefix sharing. *대용량 LLM serving* 사례.

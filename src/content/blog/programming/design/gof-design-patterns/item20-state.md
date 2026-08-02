@@ -6,6 +6,7 @@ tags: [Design Pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 20
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

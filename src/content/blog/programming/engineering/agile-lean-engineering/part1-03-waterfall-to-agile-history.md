@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Software Development + Clean Agile"
 bookAuthor: "Alistair Cockburn / Robert C. Martin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Royce 1970의 진짜 의도 — 그는 폭포를 권하지 않았다. iterative의 뿌리.

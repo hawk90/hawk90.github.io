@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Lean Startup"
 bookAuthor: "Eric Ries"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Eric Ries의 핵심 loop — 가설을 실험으로 검증.

@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 3
 tags: [pragmatic-programmer, software-craftsmanship]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

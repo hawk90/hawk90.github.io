@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Naming, typedef]
 series: "Linux Kernel Coding Style"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "C is a Spartan language, and your naming conventions should follow suit."

@@ -6,6 +6,7 @@ tags: [Linux, Kernel, Functions, goto, Error-Handling]
 series: "Linux Kernel Coding Style"
 seriesOrder: 3
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Functions should be short and sweet, and do just one thing."

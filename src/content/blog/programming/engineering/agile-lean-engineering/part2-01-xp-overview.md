@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — good practice를 극단까지. testing이 좋다면 항상 테스트하고, review가 좋다면 항상 review(pair)하자는 발상. XP의 정체성과 시작 배경.

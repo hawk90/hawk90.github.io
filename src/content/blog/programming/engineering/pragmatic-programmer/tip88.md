@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 88
 tags: [pragmatic-programmer, version-control, ci-cd]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

@@ -5,6 +5,7 @@ description: "전원·reset·clock·vector table·main 진입까지 단계별로
 series: "Modern Embedded Recipes"
 seriesOrder: 116
 tags: [recipes, debugging, boot]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

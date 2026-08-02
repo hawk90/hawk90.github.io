@@ -6,6 +6,7 @@ tags: [TDD, Case Study, Auction Sniper]
 series: "Growing Object-Oriented Software"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > "The best way to learn is by doing."

@@ -6,6 +6,7 @@ tags: [gdb, STL, Optimization, rr]
 series: "GDB and LLDB"
 seriesOrder: 11
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 마지막 장에서는 매일의 답답함을 줄여 주는 작은 팁을 모았습니다. STL이 줄줄이 보이지 않는 문제, `-O2` 코드의 "value optimized out", `.gdbinit` 합리적 기본값, 그리고 GDB의 가장 새로운 무기인 *시간 역행 디버깅*.

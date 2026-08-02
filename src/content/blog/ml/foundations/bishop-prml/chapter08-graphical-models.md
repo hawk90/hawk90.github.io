@@ -6,6 +6,7 @@ series: "Pattern Recognition and Machine Learning"
 seriesOrder: 8
 tags: [bishop, pgm, bayes-net, mrf, junction-tree]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Bayesian network*·*d-separation*·*explaining away*. *Markov random field*·*Hammersley-Clifford*. *Inference on chain·tree* — variable elimination·BP. *Sum-product·max-product algorithm*. *Junction tree*. *Loopy belief propagation*·*Bethe approximation*. *Factor graph*. PRML이 PGM 입문으로 자주 쓰이는 이유 — Bishop 명확함.

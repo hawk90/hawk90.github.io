@@ -6,6 +6,7 @@ tags: [C++, C, Concurrency, Design, Parallelism, False Sharing]
 series: "C++ Concurrency in Action"
 seriesOrder: 8
 draft: true
+topics: ["parallel"]
 ---
 
 동시성 코드는 단순히 스레드를 만드는 것 이상이다. 작업을 어떻게 분할하고, 성능을 어떻게 최적화하는지가 중요하다.

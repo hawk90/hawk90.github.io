@@ -6,6 +6,7 @@ series: "BoW 개요"
 seriesOrder: 5
 tags: [bow, flexi, organic, low-cost]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

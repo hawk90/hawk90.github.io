@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 59
 tags: [pragmatic-programmer, concurrency, patterns]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

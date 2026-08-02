@@ -6,6 +6,7 @@ tags: [C++, Type Safety, Strong Types]
 series: "Beautiful C++"
 seriesOrder: 25
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

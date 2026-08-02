@@ -6,6 +6,7 @@ tags: [QEMU, coroutine, async, block-io, fiber]
 series: "QEMU Internals"
 seriesOrder: 15
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 *비동기 I/O*가 *순차적 코드*처럼 보이는 비결이 **coroutine**입니다. C++20·Python·JavaScript의 *async/await*과 같은 개념을 *C 매크로*로 구현. block layer가 *전면 사용*하며, *callback hell* 없이도 복잡한 I/O sequence를 표현합니다.

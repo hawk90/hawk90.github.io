@@ -6,6 +6,7 @@ series: "NPU 아키텍처"
 seriesOrder: 7
 tags: [npu, memory-hierarchy, bandwidth, scratchpad]
 draft: true
+topics: ["ml", "ml/accelerators"]
 ---
 
 > Outline — *On-chip SRAM (scratchpad)* — MB 단위. *L1·L2 cache* (가속기는 cache 없는 경우 많음). *HBM·LPDDR·GDDR* off-chip. *Bandwidth wall* — compute는 빨리, BW는 느리게. *Operational intensity*. *Software-managed* (NPU) vs *cache* (GPU). *DMA descriptor*·*prefetch* 설계.

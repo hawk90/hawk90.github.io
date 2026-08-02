@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 15
 tags: [embedded, bsp, boot-time, optimization, sub-second]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: ["Set Theory", "Mathematics", "Enderton"]
 series: "Set Theory"
 seriesOrder: 105
 draft: true
+topics: ["math"]
 ---
 
 ## 결이 다른 약속

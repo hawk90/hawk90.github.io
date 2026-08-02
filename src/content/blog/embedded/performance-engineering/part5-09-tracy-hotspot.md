@@ -5,6 +5,7 @@ description: "Tracy nanosecond instrumentation, Hotspot GUI, uftrace function tr
 series: "Embedded Performance Engineering"
 seriesOrder: 48
 tags: [profiling, tracy, hotspot, uftrace, coz, low-overhead]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

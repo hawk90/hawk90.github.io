@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 1
 tags: [embedded, bsp, board-support-package]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

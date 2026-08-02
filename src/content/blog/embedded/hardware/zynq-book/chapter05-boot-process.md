@@ -6,6 +6,7 @@ series: "The Zynq Book"
 seriesOrder: 5
 tags: [zynq, boot, fsbl, u-boot, bootrom]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Stage 0* — BootROM (Xilinx 내장). *Stage 1* — FSBL (First Stage Bootloader). *Bitstream* — PL 프로그래밍. *Stage 2* — U-Boot (또는 ATF·U-Boot for UltraScale+). *Stage 3* — Linux kernel + DT. *Boot mode pins* — JTAG·QSPI·SD·NAND. *BOOT.BIN* 구조와 만드는 법.

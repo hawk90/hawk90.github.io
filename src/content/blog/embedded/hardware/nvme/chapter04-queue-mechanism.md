@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 4
 tags: [nvme, queue, doorbell, phase-bit]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 NVMe의 고성능은 효율적인 큐 메커니즘에서 비롯된다. 이 장에서는 Submission Queue, Completion Queue, Doorbell 레지스터, 그리고 Phase Bit의 동작을 상세히 분석한다.

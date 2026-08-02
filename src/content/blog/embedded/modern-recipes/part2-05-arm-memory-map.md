@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 17
 tags: [recipes, arm, memory-map]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

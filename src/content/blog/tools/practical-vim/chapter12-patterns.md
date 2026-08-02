@@ -6,6 +6,7 @@ tags: [Vim, Regex, Pattern]
 series: "Practical Vim"
 seriesOrder: 12
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

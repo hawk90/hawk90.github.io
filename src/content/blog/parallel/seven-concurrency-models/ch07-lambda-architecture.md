@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Seven Concurrency Models in Seven Weeks"
 bookAuthor: "Paul Butcher"
 draft: true
+topics: ["parallel"]
 ---
 
 > **Seven Concurrency Models in Seven Weeks** Chapter 7 요약

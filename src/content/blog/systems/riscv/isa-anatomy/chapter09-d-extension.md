@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 9
 tags: [RISC-V, D-Extension, Double-Precision, IEEE-754]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

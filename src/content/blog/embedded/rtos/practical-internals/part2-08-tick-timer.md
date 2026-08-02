@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 18
 tags: [tick, systick, hw-timer, time-slice]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

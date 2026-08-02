@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Frame, Decoding]
 series: "AV1"
 seriesOrder: 10
 draft: true
+topics: ["media"]
 ---
 
 지금까지 개별 블록을 예측하고 잔차를 복원하는 방법을 배웠다. 이 장에서는 **모든 블록을 순회**하여 프레임 전체를 조립하고, **YUV → RGB 변환**을 거쳐 최종 이미지를 출력한다. 이 장을 완료하면 첫 번째 Intra 프레임이 복원된다.

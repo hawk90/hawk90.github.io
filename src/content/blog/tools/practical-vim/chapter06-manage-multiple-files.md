@@ -6,6 +6,7 @@ tags: [Vim, Buffer, Window, Tab]
 series: "Practical Vim"
 seriesOrder: 6
 draft: true
+topics: ["tools"]
 ---
 
 ## 작성 중

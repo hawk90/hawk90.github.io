@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 1
 tags: [cxl, pcie, memory, interconnect]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "A Tour of C++"
 bookAuthor: "Bjarne Stroustrup"
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 이 장에서 다루는 것

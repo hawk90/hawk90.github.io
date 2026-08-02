@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 8
 tags: [avionics, do-178c, coverage, mc-dc]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

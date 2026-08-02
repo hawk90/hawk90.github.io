@@ -6,6 +6,7 @@ series: "Statistical Rethinking"
 seriesOrder: 11
 tags: [mcelreath, binomial, poisson, count-data]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Binomial regression* — logit·probit·complementary log-log. *Aggregated vs disaggregated*. *Poisson regression* — log link·offset·exposure. *Multinomial / categorical*. *Ordered categorical*·*cumulative link*. *Negative binomial* for overdispersion. *Censoring·zero-inflation* 미리보기.

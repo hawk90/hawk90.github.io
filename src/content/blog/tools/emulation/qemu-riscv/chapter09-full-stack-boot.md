@@ -6,6 +6,7 @@ series: "RISC-V QEMU 심화"
 seriesOrder: 9
 tags: [RISC-V, QEMU, OpenSBI, U-Boot, Linux, Buildroot, Boot]
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 RISC-V Linux 시스템의 표준 부팅 chain은 다음과 같습니다.

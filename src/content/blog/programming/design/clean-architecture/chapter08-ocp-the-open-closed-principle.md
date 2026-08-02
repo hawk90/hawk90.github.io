@@ -6,6 +6,7 @@ tags: [Architecture, SOLID, OCP]
 series: "Clean Architecture"
 seriesOrder: 8
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

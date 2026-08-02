@@ -5,6 +5,7 @@ description: "U-Boot environment, script, bootcmd, TFTP/Fastboot, UEFI 모드까
 series: "Modern Embedded Recipes"
 seriesOrder: 76
 tags: [recipes, linux, uboot]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

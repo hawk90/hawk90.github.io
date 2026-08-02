@@ -6,6 +6,7 @@ series: "NPU 드라이버 개발"
 seriesOrder: 6
 tags: [npu, command-queue, doorbell, scheduler]
 draft: true
+topics: ["ml", "ml/drivers"]
 ---
 
 > Outline — *Ring buffer* — head·tail·doorbell. *Submit ioctl* — command stream + dependency. *drm_sched*·*drm_gpu_scheduler* — kernel-side scheduler. *Multi-context*·*priority*·*preemption*. *Out-of-order submission*·*in-order completion*. *Userspace submission (UMD-direct)* — Mesa·UMR 패턴.

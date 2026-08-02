@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 13
 tags: [smc, particle-filter, sequential]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Sequential importance sampling (SIS)*·*degeneracy 문제*. *Particle filter* — resampling·ESS. *Sequential Monte Carlo sampler*·*annealed importance sampling*. *Particle MCMC*. *Application* — state estimation·rare event·intractable posterior. *Differentiable particle filter*·ML 통합.

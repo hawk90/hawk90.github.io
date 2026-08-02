@@ -6,6 +6,7 @@ series: "Kernel Debugging"
 seriesOrder: 9
 tags: [cxl, kernel-source, drivers, sysfs, cxl-core, code-walkthrough]
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 디렉터리 구조

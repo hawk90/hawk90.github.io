@@ -5,6 +5,7 @@ description: "Binary semaphore signaling, counting semaphore resource pool, ISR-
 series: "Modern Embedded Recipes"
 seriesOrder: 66
 tags: [recipes, rtos, semaphore]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

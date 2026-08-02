@@ -5,6 +5,7 @@ description: "memory_order별 ARM 명령어 차이, LSE vs LL/SC, hot spinning �
 series: "Modern Embedded Recipes"
 seriesOrder: 106
 tags: [recipes, concurrency, atomic]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

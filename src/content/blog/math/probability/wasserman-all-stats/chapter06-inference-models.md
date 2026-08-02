@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 6
 tags: [statistical-model, estimator, mse, bias-variance]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Statistical model* — parametric·nonparametric. *Point estimator·bias·variance·MSE*. *Consistency·asymptotic normality*. *Confidence set·confidence interval*. *Standard error·plug-in estimator*. *Connection to ML* — supervised learning은 conditional density estimation·function estimation.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"
 draft: true
+topics: ["parallel"]
 ---
 
 > **The Art of Multiprocessor Programming** Chapter 3 요약

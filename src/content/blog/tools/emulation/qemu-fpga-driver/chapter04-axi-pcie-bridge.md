@@ -6,6 +6,7 @@ tags: [QEMU, axi, pcie-bridge, dma-engine]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 4
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Ch 3의 fake-fpga에 *FPGA shell의 핵심*인 AXI ↔ PCIe bridge와 DMA engine을 더합니다. 목표는 driver가 Xilinx XDMA나 Intel DMA IP와 *같은 register layout*을 보게 만드는 것 — 그래야 driver 코드를 실 FPGA로 옮길 때 *수정 없이* 동작합니다.

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Team Topologies"
 bookAuthor: "Matthew Skelton & Manuel Pais"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Collaboration·X-as-a-Service·Facilitating — 세 가지 상호작용.

@@ -6,6 +6,7 @@ series: "Developing Safety-Critical Software"
 seriesOrder: 7
 tags: [avionics, do-178c, verification, review, test]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

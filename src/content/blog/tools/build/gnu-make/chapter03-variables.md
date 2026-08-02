@@ -6,6 +6,7 @@ tags: [make, build, Makefile, variables]
 series: "GNU Make"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 왜 변수가 필요한가

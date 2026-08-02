@@ -6,6 +6,7 @@ series: "Convex Optimization (Boyd)"
 seriesOrder: 10
 tags: [equality-constraint, kkt, newton, infeasible-start]
 draft: true
+topics: ["math", "math/optimization"]
 ---
 
 > Outline — *Equality constrained problem* — `min f(x) s.t. Ax = b`. *KKT system* — Newton step의 linear system. *Solving KKT systems* — block elimination·Schur complement·null-space approach. *Infeasible start Newton*. *Sparse KKT* 시스템 — ML·EDA 응용. *Convergence analysis*. Strongly convex 가정 하의 quadratic convergence.

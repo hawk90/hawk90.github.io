@@ -6,6 +6,7 @@ tags: [QEMU, fake-fpga, qom, pci-device]
 series: "FPGA Driver via QEMU+VFIO"
 seriesOrder: 3
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 이제 본격적으로 *가짜 FPGA*를 만듭니다. QEMU 안에 `fake-fpga`라는 PCI device를 QOM(QEMU Object Model)으로 정의하고, BAR 3개(CSR·DMA descriptor ring·user logic)를 노출해 driver가 *진짜 FPGA처럼* 다룰 수 있는 test bed를 구축합니다. 이 device가 이후 모든 장의 출발점이 됩니다.

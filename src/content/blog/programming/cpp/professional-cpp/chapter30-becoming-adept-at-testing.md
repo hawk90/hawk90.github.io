@@ -6,6 +6,7 @@ tags: [C++, Testing, gtest, Catch2]
 series: "전문가를 위한 C++"
 seriesOrder: 30
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

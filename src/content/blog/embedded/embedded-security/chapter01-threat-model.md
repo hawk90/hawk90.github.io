@@ -6,6 +6,7 @@ tags: [Embedded Security, Threat Model, STRIDE]
 series: "Embedded Security"
 seriesOrder: 1
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

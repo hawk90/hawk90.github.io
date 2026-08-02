@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 11
 tags: [embedded, bsp, debugging, bootlog]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

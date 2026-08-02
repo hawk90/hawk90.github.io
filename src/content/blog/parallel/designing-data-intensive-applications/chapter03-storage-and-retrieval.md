@@ -6,6 +6,7 @@ tags: [DDIA, Storage, LSM, BTree, OLTP, OLAP]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 3
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

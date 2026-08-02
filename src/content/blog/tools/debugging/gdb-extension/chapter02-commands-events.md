@@ -6,6 +6,7 @@ tags: [gdb, python, command, event, breakpoint]
 series: "GDB Extension and IDE"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 GDB 명령을 *내가 만든다*는 것이 Python API의 두 번째 즐거움입니다. 단순 매크로부터 자동 BP 액션, 정지마다 떨어지는 통계까지 — 모두 같은 패턴 (gdb.Command / gdb.Function / gdb.Breakpoint / 이벤트 hook)으로 가능합니다.

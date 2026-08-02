@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Introduction to Parallel Computing"
 bookAuthor: "Ananth Grama, George Karypis, Vipin Kumar, Anshul Gupta"
+topics: ["parallel"]
 ---
 
 ## 이 장에서 다루는 것

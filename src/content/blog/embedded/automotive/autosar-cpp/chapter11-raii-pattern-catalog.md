@@ -6,6 +6,7 @@ tags: [autosar, cpp, raii, scoped, lock-guard, transaction, smart-pointer, patte
 series: "AUTOSAR C++14"
 seriesOrder: 11
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 5장에서 RAII의 *기본 패턴*을 봤다. 이 장은 *실전에서 쓰는 RAII 패턴 카탈로그* 50개를 본다. 각 패턴은 *문제 → 해법 → 코드 → 함정* 구조로. *AUTOSAR C++14의 핵심 가치*가 어떻게 *구체적 코드*로 표현되는지 본다.

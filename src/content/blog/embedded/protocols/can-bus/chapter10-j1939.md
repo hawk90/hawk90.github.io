@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 10
 tags: [j1939, sae, heavy-duty, pgn, spn, transport-protocol]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 13
 tags: [murphy, mlp, backprop, dropout, batchnorm]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *MLP architecture* — feedforward·activation·output layer. *Backpropagation* — computation graph·chain rule. *Initialization* — Xavier·He. *Regularization* — L2·dropout·early stopping·batch norm·layer norm. *Optimization tricks* — gradient clipping·schedule. *Tabular DL vs gradient boosting* — 왜 tabular는 GBM이 강한가.

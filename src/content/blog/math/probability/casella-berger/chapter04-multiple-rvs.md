@@ -6,6 +6,7 @@ series: "Statistical Inference"
 seriesOrder: 4
 tags: [casella-berger, joint-distribution, covariance, multivariate]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Joint·marginal·conditional distribution*. *Independence·conditional independence*. *Bivariate transformations*·*Jacobian*. *Hierarchical model·mixture distribution*. *Covariance·correlation·multinomial distribution*. *Multivariate normal*. *Inequalities and identities for multiple RVs*.

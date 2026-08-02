@@ -6,6 +6,7 @@ tags: [gdb, lldb, Breakpoint, Watchpoint]
 series: "GDB and LLDB"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## Breakpoint — *멈출 자리*를 정밀하게

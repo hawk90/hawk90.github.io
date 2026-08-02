@@ -6,6 +6,7 @@ tags: [QEMU, GDB, Debugging, trace, ftrace]
 series: "QEMU Fake Device Driver"
 seriesOrder: 9
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 driver 개발의 절반은 *디버깅*입니다. QEMU 환경의 강점이 *명령어 단위 디버깅·재현 가능성·trace 풍부*. 이 장은 GDB·dmesg·ftrace·QEMU trace event를 *어떻게 활용*해 driver bug를 찾는지 정리합니다.

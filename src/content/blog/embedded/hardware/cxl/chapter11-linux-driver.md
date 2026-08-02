@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 11
 tags: [cxl, linux, drivers, sysfs, hdm-decoder]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Mathematics and Plausible Reasoning, Vol I"
 seriesOrder: 5
 tags: [polya, archimedes, galileo, history-of-math]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Historical examples* — Archimedes의 구의 부피·Galileo의 운동 법칙·Newton의 만유인력. *Analogy in physics-mathematics 교류*. *Heuristic strategy*가 정형 증명의 길잡이. *Failed analogy의 교훈*. *Mathematical taste*의 기원.

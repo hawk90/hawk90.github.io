@@ -6,6 +6,7 @@ series: "Statistical Inference"
 seriesOrder: 6
 tags: [casella-berger, sufficient-statistic, ancillary, complete]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Sufficiency principle*·*Fisher-Neyman factorization theorem*. *Minimal sufficient statistic·Lehmann-Scheffé*. *Ancillary statistic*. *Complete statistic·Bahadur's theorem*. *Basu's theorem*. *Likelihood principle·conditionality principle*. *Sufficiency vs invariance*. *Practical 데이터 reduction strategies*.

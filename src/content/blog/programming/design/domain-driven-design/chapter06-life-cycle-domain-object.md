@@ -6,6 +6,7 @@ tags: [DDD, Aggregate, Factory, Repository]
 series: "Domain-Driven Design"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 도메인 객체의 생명주기

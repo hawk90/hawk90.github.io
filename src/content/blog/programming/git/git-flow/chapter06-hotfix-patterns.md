@@ -6,6 +6,7 @@ tags: [Git, Hotfix, Production]
 series: "Git Flow"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

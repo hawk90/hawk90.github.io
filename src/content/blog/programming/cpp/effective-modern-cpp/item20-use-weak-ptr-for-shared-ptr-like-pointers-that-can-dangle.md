@@ -6,6 +6,7 @@ tags: [C++, Smart Pointer, weak_ptr, RAII, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 20
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

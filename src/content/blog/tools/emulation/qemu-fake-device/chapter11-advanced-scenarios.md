@@ -6,6 +6,7 @@ tags: [QEMU, Testing, ErrorInjection, race-condition, stress]
 series: "QEMU Fake Device Driver"
 seriesOrder: 11
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 production driver의 *신뢰성*은 *정상 path 동작*만으로 보장되지 않습니다 — *fault·race·stress* 같은 *비정상 시나리오*도 *예측 가능하게* 동작해야 합니다. 이 장은 QEMU 환경에서 *고급 시나리오*를 *결정적*으로 시뮬레이션하는 기법을 정리합니다.

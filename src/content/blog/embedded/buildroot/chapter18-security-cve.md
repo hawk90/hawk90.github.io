@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 18
 tags: [embedded, buildroot, security, cve, sbom, reproducible-builds]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "Postmortem Debugging"
 seriesOrder: 5
 tags: [cxl, postmortem, core-dump, drgn, mailbox-log, vmcore]
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## CXL 관련 postmortem이 왜 다른가

@@ -6,6 +6,7 @@ tags: [Git, GitHub Flow]
 series: "Git Flow"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

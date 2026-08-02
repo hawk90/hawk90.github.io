@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 6
 tags: [hbm, thermal, power, refresh]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

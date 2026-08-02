@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 19
 tags: [tickless, low-power, suppress-tick, wfi, sleep]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

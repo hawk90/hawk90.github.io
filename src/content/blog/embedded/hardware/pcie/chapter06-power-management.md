@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 6
 tags: [pcie, power-management, aspm, l1-substates, clkreq, pme]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

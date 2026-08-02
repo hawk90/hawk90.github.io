@@ -6,6 +6,7 @@ tags: [Architecture, Values, Eisenhower]
 series: "Clean Architecture"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

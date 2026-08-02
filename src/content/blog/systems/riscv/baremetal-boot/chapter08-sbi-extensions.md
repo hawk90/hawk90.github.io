@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 8
 tags: [RISC-V, SBI, Extensions, Timer, IPI]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

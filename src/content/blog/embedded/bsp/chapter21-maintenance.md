@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 21
 tags: [embedded, bsp, upstream, lts, maintenance]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

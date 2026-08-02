@@ -6,6 +6,7 @@ tags: [Google, C++, Style-Guide, Comments, Formatting]
 series: "Google C++ Style"
 seriesOrder: 10
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 마지막 장은 주석과 형식, 그리고 가이드 자체의 마무리 메시지로 구성된다. 형식 규칙은 자동화 도구(clang-format)로 거의 다 처리되지만, 주석과 *원칙*은 사람이 의식해야 한다.

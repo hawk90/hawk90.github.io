@@ -6,6 +6,7 @@ tags: [Sanitizer, LSan, MemoryLeak, Debugging, C, C++]
 series: "Sanitizers"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## LSan이 잡는 것

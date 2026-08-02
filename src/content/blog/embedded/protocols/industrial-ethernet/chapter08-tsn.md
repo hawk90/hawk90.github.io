@@ -6,6 +6,7 @@ series: "Industrial Ethernet 심화"
 seriesOrder: 8
 tags: [tsn, ieee-802-1, deterministic-ethernet, gptp, qbv, qbu, qci, cb, frer, qcc]
 draft: false
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

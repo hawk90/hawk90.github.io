@@ -6,6 +6,7 @@ tags: [QEMU, openamp, rpmsg, amp, remoteproc, zynq]
 series: "QEMU Embedded Emulation"
 seriesOrder: 15
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 현대 임베디드 SoC는 *heterogeneous*입니다. Zynq UltraScale+(APU Cortex-A53 + RPU Cortex-R5), i.MX8(A72 + M4), STM32MP1(A7 + M4) 같은 시스템에서 *두 종류의 코어*가 *서로 다른 OS*를 동시에 돌리고, *shared memory + mailbox*로 통신합니다. **OpenAMP + RPMsg**가 그 표준 framework이고, QEMU에서 시뮬레이션할 수 있습니다.

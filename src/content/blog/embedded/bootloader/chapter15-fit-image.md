@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 15
 tags: [embedded, bootloader, u-boot, fit, mkimage]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

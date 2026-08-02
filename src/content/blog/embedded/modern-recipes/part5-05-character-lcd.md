@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 53
 tags: [recipes, peripheral, lcd]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

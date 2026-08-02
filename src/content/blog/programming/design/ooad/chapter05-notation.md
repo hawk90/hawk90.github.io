@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Object-Oriented Analysis and Design with Applications"
 bookAuthor: "Grady Booch"
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

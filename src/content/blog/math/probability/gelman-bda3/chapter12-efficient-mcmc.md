@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 12
 tags: [bda3, mcmc-tuning, reparameterization, parallel]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Reparameterization* — non-centered parameterization·funnel 회피. *Adaptive HMC·NUTS·dual averaging*. *Tuning step size·mass matrix*. *Parallel chain·parallel tempering·replica exchange*. *Mode-jumping moves*. *Reversible jump MCMC (RJ-MCMC)* — model dimension change. *SGD-MCMC for big data*.

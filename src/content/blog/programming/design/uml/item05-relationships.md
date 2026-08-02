@@ -6,6 +6,7 @@ tags: [UML, Class Diagram, Relationships, OOP]
 series: "UML 2.5.1"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

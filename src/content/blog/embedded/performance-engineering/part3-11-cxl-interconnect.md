@@ -5,6 +5,7 @@ description: "CXL 2.0/3.1과 Neoverse V2가 만든 cache-coherent interconnect. 
 series: "Embedded Performance Engineering"
 seriesOrder: 29
 tags: [cxl, interconnect, memory-bandwidth, ai, neoverse, accelerator]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

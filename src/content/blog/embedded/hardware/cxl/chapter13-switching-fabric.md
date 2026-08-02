@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 13
 tags: [cxl, switch, fabric-manager, mctp, dcd]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

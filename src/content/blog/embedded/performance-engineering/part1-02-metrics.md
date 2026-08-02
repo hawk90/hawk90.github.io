@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 2
 tags: [performance, latency, throughput, utilization, jitter, deadline]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

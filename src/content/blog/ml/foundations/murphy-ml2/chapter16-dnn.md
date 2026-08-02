@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 16
 tags: [dnn, transformer, foundation-model, scaling-law]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Architecture* — MLP·CNN·RNN·Transformer·SSM. *Training tricks* — initialization·optimization·normalization·regularization. *Scaling law*·*Chinchilla 분석*. *Foundation model* — pretraining·fine-tuning·instruction tuning·RLHF. *Mixture of Experts (MoE)*. *Quantization·distillation*. *Efficient transformer* — sparse·linear·SSM. ML1 ch 13-15 심화.

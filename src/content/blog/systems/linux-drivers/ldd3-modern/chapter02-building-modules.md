@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 2
 tags: [linux, driver, module, kbuild]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — `module_init`·`module_exit`·`MODULE_LICENSE`. Kbuild 구조 — `obj-m`·`make -C $(KDIR) M=$(PWD) modules`. `insmod`·`rmmod`·`modprobe`·`lsmod`·`modinfo`. printk levels — `KERN_INFO`·`pr_info`·`dev_info`. 6.x에서의 *signed modules*와 *MODULE_IMPORT_NS*.

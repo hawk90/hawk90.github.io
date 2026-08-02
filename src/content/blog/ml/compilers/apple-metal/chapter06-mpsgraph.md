@@ -6,6 +6,7 @@ series: "Apple Metal Stack"
 seriesOrder: 6
 tags: [metal, mpsgraph, ml-graph]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *MPSGraph* — XLA·ONNX 등 ML graph 의 Apple 등가. *Op set* — linear algebra·conv·activation·optimizer. *Graph construction* — `Graph.matMul`·`Graph.add`. *Compilation* — kernel fusion·layout opt. *Execution* — `runWithFeeds`. *Backward / training* 지원. PyTorch MPS backend의 내부.

@@ -6,6 +6,7 @@ tags: [python, debugging, faulthandler, tracemalloc, objgraph]
 series: "Python Debugging"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 마지막 장은 *비정상 종료*와 *서서히 새는 메모리* 진단입니다. C 확장이 세그폴트로 죽었을 때 어디서 죽었는지, 프로세스 메모리가 자꾸 늘 때 어떤 객체가 GC되지 않고 있는지를 표준 라이브러리 + 작은 외부 도구로 잡습니다.

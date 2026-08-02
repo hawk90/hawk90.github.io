@@ -5,6 +5,7 @@ description: "ARM64 secondary CPU 깨우기 — spin-table 옛 방식과 PSCI CP
 series: "Bootloader Internals"
 seriesOrder: 33
 tags: [embedded, bootloader, smp, psci, arm64, kernel, hotplug]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

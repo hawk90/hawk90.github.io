@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Toyota Production System + Lean Software Development"
 bookAuthor: "Taiichi Ohno / Mary & Tom Poppendieck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Taiichi Ohno의 7 wastes — Lean의 출발점.

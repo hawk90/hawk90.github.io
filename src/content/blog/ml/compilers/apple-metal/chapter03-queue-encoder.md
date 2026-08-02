@@ -6,6 +6,7 @@ series: "Apple Metal Stack"
 seriesOrder: 3
 tags: [metal, command-queue, encoder, indirect]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *MTLDevice*·*MTLCommandQueue*·*MTLCommandBuffer*·*MTLComputeCommandEncoder*. *Resource binding* — `setBuffer`·`setTexture`. *Threadgroup dispatch* — `dispatchThreadgroups`. *Async completion* — completion handler·event. *Indirect command buffer* — GPU-driven dispatch. *Multi-queue·multi-stream* 패턴.

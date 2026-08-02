@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "On Writing Well"
 bookAuthor: "William Zinsser"
 draft: true
+topics: ["writing"]
 ---
 
 학교와 직장이 가르치는 것은 *최종 결과물(final product)이 중요*하다는 것입니다. 시험에서 답안지가 평가됩니다. 직장에서 발표 자료가 평가됩니다. 과정은 *보이지 않습니다*.

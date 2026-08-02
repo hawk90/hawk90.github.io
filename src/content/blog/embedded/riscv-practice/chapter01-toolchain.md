@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 1
 tags: [RISC-V, Toolchain, GCC, LLVM]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

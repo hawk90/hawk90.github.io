@@ -6,6 +6,7 @@ tags: [QEMU, dma, scatter-gather, descriptor-ring]
 series: "QEMU Fake Device Driver"
 seriesOrder: 14
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 Ch 7의 simple DMA는 *single contiguous buffer*를 가정했습니다. 현실 driver는 *scatter-gather*(SG)로 *page list*를 한 번에 처리. 이 장은 *descriptor ring + SG-DMA* 완전 구현을 다룹니다.

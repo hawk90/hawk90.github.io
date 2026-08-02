@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 25
 tags: [priority-inversion, mars-pathfinder, bounded, unbounded]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

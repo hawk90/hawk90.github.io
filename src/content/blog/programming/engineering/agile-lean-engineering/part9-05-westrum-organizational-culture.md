@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Westrum 2004 paper"
 bookAuthor: "Ron Westrum"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Pathological·Bureaucratic·Generative — 문화 분류.

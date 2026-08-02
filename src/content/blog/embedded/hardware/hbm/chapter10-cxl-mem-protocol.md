@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 10
 tags: [cxl, cxl-mem, hdm-decoder, cache-coherency]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

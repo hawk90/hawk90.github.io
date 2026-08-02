@@ -5,6 +5,7 @@ description: "Cortex-M33/M55/M85의 TrustZone-M과 TF-M secure firmware를 정�
 series: "Practical RTOS Internals"
 seriesOrder: 43
 tags: [trustzone, tf-m, security, cortex-m33, psa, secure-boot]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

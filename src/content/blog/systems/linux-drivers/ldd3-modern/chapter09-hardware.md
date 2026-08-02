@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 9
 tags: [linux, driver, mmio, ioremap, barrier]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — I/O ports — `request_region`·`inb`·`outb`. MMIO — `ioremap`·`readl`·`writel`·`iounmap`. *memory barriers* — `wmb`·`rmb`·`mb`·`smp_mb`. 6.x의 `devm_ioremap_resource`. *endianness* — `cpu_to_le32`·`le32_to_cpu`. PCIe BAR access는 ch12에서.

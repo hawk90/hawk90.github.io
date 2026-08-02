@@ -6,6 +6,7 @@ tags: [QEMU, ci, matrix-build, github-actions, gitlab-ci]
 series: "QEMU Embedded Emulation"
 seriesOrder: 20
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 시리즈의 마지막 장입니다. 임베디드 소프트웨어는 *수많은 board × kernel × toolchain 조합*에서 동작해야 합니다. 실 HW를 모두 갖추는 건 비용과 관리 부담이 크죠. QEMU와 GitHub Actions/GitLab CI의 *matrix 기능*을 결합하면 *매 commit*마다 수십 조합을 *자동 검증*할 수 있습니다. Linux kernel·U-Boot·Zephyr 같은 mainline 프로젝트가 정확히 이 방식.

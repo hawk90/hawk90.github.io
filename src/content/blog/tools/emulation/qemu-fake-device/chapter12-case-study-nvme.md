@@ -6,6 +6,7 @@ tags: [QEMU, NVMe, CaseStudy, hw-block, SQ-CQ]
 series: "QEMU Fake Device Driver"
 seriesOrder: 12
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 지금까지 우리가 만든 fake-pci는 *교육용*이었습니다. *production-grade* device의 *실 구조*를 보려면 QEMU에 내장된 **NVMe controller**(`hw/nvme/`)를 분석해야 합니다. NVMe spec의 *복잡한 SQ/CQ + admin command + namespace + namespace*가 *QEMU 안에 그대로* 구현되어 있죠.

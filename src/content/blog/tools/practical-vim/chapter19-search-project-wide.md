@@ -6,6 +6,7 @@ tags: [Vim, grep, vimgrep, ripgrep]
 series: "Practical Vim"
 seriesOrder: 18
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용 (Tips 109-111)

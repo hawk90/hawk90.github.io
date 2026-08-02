@@ -5,6 +5,7 @@ description: "Malloc의 fragmentation과 비결정성, pool/arena/slab 대안, F
 series: "Modern Embedded Recipes"
 seriesOrder: 89
 tags: [recipes, memory, allocator]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

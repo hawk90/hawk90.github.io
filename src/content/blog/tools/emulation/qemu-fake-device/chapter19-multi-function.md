@@ -6,6 +6,7 @@ tags: [QEMU, multi-function, pci, mfd]
 series: "QEMU Fake Device Driver"
 seriesOrder: 19
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 PCI device는 *function 8개*까지 가질 수 있습니다. 한 silicon에 *Ethernet + WiFi*, *NVMe + Management*, *XRT의 user + mgmt*처럼 *기능 분리*. 이 장은 multi-function device의 구현 패턴을 다룹니다.

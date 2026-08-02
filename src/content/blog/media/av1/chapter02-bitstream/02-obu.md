@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, OBU, Bitstream]
 series: "AV1"
 seriesOrder: 2.02
 draft: true
+topics: ["media"]
 ---
 
 OBU(Open Bitstream Unit)는 AV1 비트스트림의 **기본 단위** 다. 모든 데이터 — 시퀀스 설정, 프레임 헤더, 타일 데이터, 메타데이터 — 가 OBU에 담긴다. 이 절에서는 OBU의 *비트 레이아웃* 을 본다.

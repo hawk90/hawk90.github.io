@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 22
 tags: [embedded, bootloader, u-boot, debugging, jtag]
 draft: false
+topics: ["embedded"]
 ---
 
 부트로더가 죽으면 대개 *조용히* 죽습니다. OS도 없고, 시리얼도 아직 안 살아 있고, gdb도 못 붙는 상태에서 무엇이 잘못됐는지 알아야 합니다. 이번 장은 이 시리즈의 마지막으로, *처음 출력 한 글자*부터 *post-mortem 분석*까지 부트로더 디버깅의 도구 상자를 정리합니다.

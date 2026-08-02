@@ -6,6 +6,7 @@ tags: [gdb, Multithread, Multiprocess]
 series: "GDB and LLDB"
 seriesOrder: 6
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 :::tip[Deep dive]

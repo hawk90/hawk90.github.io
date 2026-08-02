@@ -6,6 +6,7 @@ tags: [DDD, Ubiquitous Language, Communication]
 series: "Domain-Driven Design"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 유비쿼터스 언어란?

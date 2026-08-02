@@ -5,6 +5,7 @@ description: "Zephyr 커널 서브트리를 따라가며 sched.c·thread.c·sem.
 series: "Practical RTOS Internals"
 seriesOrder: 47
 tags: [zephyr, source-analysis, k_thread, device-model, devicetree]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

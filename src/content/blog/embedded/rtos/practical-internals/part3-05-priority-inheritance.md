@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 26
 tags: [priority-inheritance, pi, inherit, disinherit]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

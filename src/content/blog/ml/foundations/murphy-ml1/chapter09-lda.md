@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 9
 tags: [murphy, lda, qda, gaussian, generative]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Generative vs discriminative*. *Gaussian discriminant analysis* — common Σ (LDA)·class-specific Σ (QDA). *Naive Bayes로의 환원*. *Diagonal LDA·regularized LDA*. *Class-imbalance·prior 보정*. *Reduced-rank LDA*. *Comparison vs logistic regression*. *Why discriminative often wins on accuracy*.

@@ -6,6 +6,7 @@ series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 15
 tags: [gaussian-process, kernel, infinite-width, ntk]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Gaussian process* — function over input의 distribution. *Mean·covariance (kernel) function*. *Posterior prediction* — closed form. *Kernel choice* — RBF·Matérn·periodic. *Hyperparameter learning* — marginal likelihood. *Sparse GP·inducing points* (scalability). *Connection to NN* — NTK·infinite-width limit. ML 응용 — Bayesian optimization·active learning.

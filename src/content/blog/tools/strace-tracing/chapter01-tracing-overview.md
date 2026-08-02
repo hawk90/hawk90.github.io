@@ -6,6 +6,7 @@ tags: [Tracing, ptrace, eBPF]
 series: "System Tracing"
 seriesOrder: 1
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

@@ -6,6 +6,7 @@ series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 5
 tags: [agans, debugging, isolate, control-experiment]
 draft: true
+topics: ["tools", "tools/debugging"]
 ---
 
 > Outline — *One change → one test → one observation*. *Compare with a working system·known-good baseline*. *What did you change?* — version control diff·environment 변화. *Multiple changes 합치면 root cause 못 찾음*. *Revert before next change*. *Scientific method과 일치*.

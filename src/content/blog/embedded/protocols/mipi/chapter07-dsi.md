@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 7
 tags: [mipi, dsi, display, command-mode, video-mode, dcs]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

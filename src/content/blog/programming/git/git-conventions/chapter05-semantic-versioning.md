@@ -6,6 +6,7 @@ tags: [Git, Semver, Versioning]
 series: "Git Conventions"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

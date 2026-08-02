@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 5
 tags: [avionics, mil-std-1553, arinc-429, afdx, bus]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

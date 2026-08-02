@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Five Dysfunctions of a Team"
 bookAuthor: "Patrick Lencioni"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Absence of Trust·Fear of Conflict·Lack of Commitment·Avoidance of Accountability·Inattention to Results.

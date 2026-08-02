@@ -6,6 +6,7 @@ series: "MLIR 심화"
 seriesOrder: 9
 tags: [mlir, llvm-dialect, lowering, codegen]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *LLVM dialect* — LLVM IR을 MLIR로 모델링. *Convert-to-LLVM* pipeline — `--convert-X-to-llvm`. *Translate*·`mlir-translate -mlir-to-llvmir`. *Aggregate type* 변환. *ABI lowering*. *LLVM optimization*과 협력. *Standalone tool* vs *JIT (ExecutionEngine)*.

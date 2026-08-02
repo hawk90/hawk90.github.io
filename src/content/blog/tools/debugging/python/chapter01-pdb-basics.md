@@ -6,6 +6,7 @@ tags: [python, debugging, pdb]
 series: "Python Debugging"
 seriesOrder: 1
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 파이썬 디버깅의 진입점은 표준 라이브러리에 들어 있는 `pdb`입니다. 별도 설치 없이, 어디서나 한 줄로 멈출 수 있다는 게 가장 큰 강점입니다. 이 시리즈는 `pdb`에서 출발해 `ipdb`, `breakpoint()`, post-mortem 분석, 그리고 `debugpy`(VSCode 연결)와 `py-spy`(샘플링)로 확장됩니다.

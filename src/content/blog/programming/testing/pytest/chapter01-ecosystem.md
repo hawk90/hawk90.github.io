@@ -6,6 +6,7 @@ series: "pytest 심화"
 seriesOrder: 1
 tags: [pytest, unittest, testing, python]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — Python 표준 `unittest`(JUnit-style)와 pytest(*assert rewriting* + fixture DI)의 철학 차이. nose의 쇠퇴. Hypothesis(property-based)와의 보완 관계. *왜 pytest가 사실상 표준*인가 — assert·plugin 생태계·discovery.

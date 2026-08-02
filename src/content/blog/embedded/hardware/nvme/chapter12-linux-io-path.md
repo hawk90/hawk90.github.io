@@ -6,6 +6,7 @@ series: "NVMe Deep Dive"
 seriesOrder: 12
 tags: [nvme, linux, blk-mq, io-path]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 이 장에서는 애플리케이션의 I/O 요청이 NVMe Controller에 도달하고 완료되기까지의 전체 경로를 추적한다.

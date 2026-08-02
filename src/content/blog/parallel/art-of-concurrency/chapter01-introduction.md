@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "The Art of Concurrency"
 bookAuthor: "Clay Breshears"
+topics: ["parallel"]
 ---
 
 ## 왜 동시성인가

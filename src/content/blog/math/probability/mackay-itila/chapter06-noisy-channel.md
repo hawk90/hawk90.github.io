@@ -6,6 +6,7 @@ series: "Information Theory, Inference, and Learning Algorithms"
 seriesOrder: 6
 tags: [channel-coding, shannon-2, capacity, ber]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Discrete memoryless channel*. *Mutual information의 최대 = capacity*. *Random coding argument*·*jointly typical decoding*. *Achievability + converse* — capacity는 양방향 한계. *Practical codes* — block·convolutional·LDPC·turbo. *BSC·BEC·AWGN capacity 계산*.

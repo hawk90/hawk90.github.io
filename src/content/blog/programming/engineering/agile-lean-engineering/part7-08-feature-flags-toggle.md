@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Feature Toggles (Hodgson, martinfowler.com)"
 bookAuthor: "Pete Hodgson"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — release·operational·permission·experiment toggle — Hodgson 분류.

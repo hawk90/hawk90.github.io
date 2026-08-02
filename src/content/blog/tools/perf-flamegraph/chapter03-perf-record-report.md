@@ -6,6 +6,7 @@ tags: [perf, Sampling, Profile]
 series: "perf and FlameGraph"
 seriesOrder: 3
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

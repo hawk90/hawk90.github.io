@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 3
 tags: [embedded, bsp, device-tree, dts]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

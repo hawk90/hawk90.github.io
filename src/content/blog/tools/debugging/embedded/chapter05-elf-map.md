@@ -6,6 +6,7 @@ tags: [elf, map, linker, embedded, baremetal]
 series: "Embedded Debugging"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 베어메탈 펌웨어는 *어디에 무엇이 놓일지를 명시적으로 결정*해야 합니다. flash인지 SRAM인지, .data를 어떻게 초기화할지, 스택은 어디 두고 인터럽트 벡터는 어디 둘지 — OS가 알아서 해 주던 일을 *링커 스크립트*가 합니다. 그 결과물이 ELF, 그 보조 자료가 MAP 파일.

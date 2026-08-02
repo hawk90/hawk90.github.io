@@ -6,6 +6,7 @@ series: "Debugging: The 9 Indispensable Rules"
 seriesOrder: 4
 tags: [agans, debugging, bisect, binary-search]
 draft: true
+topics: ["tools", "tools/debugging"]
 ---
 
 > Outline — *Narrow the search* — input·code·data 영역 binary search. *Get the range·divide·repeat*. *Start with the easy stuff·watch sign of failure*. *git bisect* practical tool. *Hardware bisection*·*code commenting out·feature flag toggling*. *Pinpointing the smallest reproducing case*.

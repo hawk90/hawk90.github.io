@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 6
 tags: [vim, editor, buffers, windows, tabs]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 6: 버퍼, 윈도우, 탭

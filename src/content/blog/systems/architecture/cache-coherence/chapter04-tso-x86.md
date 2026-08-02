@@ -6,6 +6,7 @@ series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 4
 tags: [tso, x86, memory-model, store-buffer]
 draft: true
+topics: ["systems", "systems/architecture"]
 ---
 
 > Outline — *TSO* — SC + store buffer. *Reorder 허용* — store→load. *x86 (and SPARC)* 채택. *Litmus test 변화* — Dekker's가 깨진다. *Fence* — `MFENCE` (x86) — store buffer flush. *Atomic operation* — `LOCK` prefix. *Total Store Order vs PSO·RMO*.

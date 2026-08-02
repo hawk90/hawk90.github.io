@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 56
 tags: [recipes, peripheral, sensor]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

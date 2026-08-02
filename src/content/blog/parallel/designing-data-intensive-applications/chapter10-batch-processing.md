@@ -6,6 +6,7 @@ tags: [DDIA, Batch, MapReduce, Hadoop, Spark]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 10
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

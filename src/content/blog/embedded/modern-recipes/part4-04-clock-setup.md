@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 38
 tags: [recipes, bare-metal, clock]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

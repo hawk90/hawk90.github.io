@@ -6,6 +6,7 @@ tags: [C, POSIX, pthread]
 series: "전문가를 위한 C"
 seriesOrder: 15
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 작성 중

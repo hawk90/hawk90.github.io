@@ -5,6 +5,7 @@ description: "Linux kernel module의 진입점, 모듈 파라미터, KBuild Make
 series: "Modern Embedded Recipes"
 seriesOrder: 80
 tags: [recipes, kernel-module, ko, kbuild, dkms]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

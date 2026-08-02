@@ -6,6 +6,7 @@ tags: [gdb, python, pretty-printer, stl]
 series: "GDB Extension and IDE"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 `std::vector<int>`가 `{1, 2, 3, 4}`로 깔끔하게 표시되는 이유는 **pretty-printer** 덕입니다. Python 클래스 하나가 *원시 메모리*를 *사람 읽을 표현*으로 변환. 이 장은 그 메커니즘을 깊이 다룹니다 — `to_string`/`children`/`display_hint` 인터페이스, MI 트리 출력, auto-load 메커니즘, 그리고 libstdc++ 표준 printer의 내부.

@@ -5,6 +5,7 @@ description: "8-core 서버에서 thread를 늘릴수록 throughput이 오히려
 series: "Embedded Performance Engineering"
 seriesOrder: 52
 tags: [case-study, lock, contention, scalability, perf-lock]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

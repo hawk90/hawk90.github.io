@@ -6,6 +6,7 @@ tags: [Git, Hooks, husky, lefthook]
 series: "Git Conventions"
 seriesOrder: 7
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Backtracking, N-Queens]
 series: "Data Structures and Algorithms"
 seriesOrder: 35
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

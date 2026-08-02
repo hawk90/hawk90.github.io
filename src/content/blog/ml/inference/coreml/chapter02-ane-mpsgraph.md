@@ -6,6 +6,7 @@ series: "Core ML 심화"
 seriesOrder: 2
 tags: [coreml, ane, mpsgraph, backend]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *ANE backend* — 비공개, Core ML 통해서만. *MPSGraph backend* — GPU 실행 경로. *Hybrid 실행* — ANE-supported subgraph + GPU fallback. *Compiler가 결정* — fp16·int8 변환·op fusion. *비교 분석* — compute_unit 옵션별 latency·power. *Reverse-engineering 노트* (Asahi·llama.cpp Metal).

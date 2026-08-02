@@ -6,6 +6,7 @@ series: "Probability Theory: The Logic of Science"
 seriesOrder: 10
 tags: [ignorance-prior, jeffreys, transformation-group]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Uniform prior의 문제* — reparametrization 시 변한다. *Transformation group*으로 정한 prior — invariant. *Location parameter* → uniform. *Scale parameter* → 1/σ (improper). *Jeffreys prior* — Fisher information 기반. *Reference prior* (Bernardo). *Improper prior의 정당성·위험*. ML에서 weakly informative prior와 연결.

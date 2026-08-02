@@ -6,6 +6,7 @@ tags: [C++, Software Design, SOLID, OCP, Open-Closed]
 series: "C++ Software Design"
 seriesOrder: 5
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 가이드라인이 중요한가?

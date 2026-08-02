@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Planning Poker (Grenning 2002)"
 bookAuthor: "James Grenning"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Wideband Delphi의 변형 — James Grenning이 만든 planning poker.

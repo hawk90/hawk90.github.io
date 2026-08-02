@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 11
 tags: [avionics, rtos, vxworks, rtems, integrity]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

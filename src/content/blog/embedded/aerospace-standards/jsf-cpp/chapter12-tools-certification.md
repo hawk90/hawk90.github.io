@@ -6,6 +6,7 @@ tags: [jsf-cpp, tools, ldra, helix-qac, certification]
 series: "JSF C++"
 seriesOrder: 12
 draft: true
+topics: ["embedded", "embedded/aerospace-standards"]
 ---
 
 JSF C++ 시리즈 마지막. *공개 자료 기반 도구 정리*, *원문 자료*, *시리즈 종합*.

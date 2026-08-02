@@ -6,6 +6,7 @@ tags: [Architecture, Boundaries, Pragmatic]
 series: "Clean Architecture"
 seriesOrder: 24
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

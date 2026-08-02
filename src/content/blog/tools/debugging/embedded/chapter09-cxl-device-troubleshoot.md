@@ -6,6 +6,7 @@ series: "Embedded Debugging"
 seriesOrder: 9
 tags: [cxl, ras, poison, media-error, debugging, mailbox]
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 왜 별도 진단이 필요한가

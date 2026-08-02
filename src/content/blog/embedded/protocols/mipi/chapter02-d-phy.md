@@ -6,6 +6,7 @@ series: "MIPI 심화"
 seriesOrder: 2
 tags: [mipi, d-phy, lp, hs, lanes, burst-mode]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

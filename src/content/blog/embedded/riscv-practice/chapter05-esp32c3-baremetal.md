@@ -6,6 +6,7 @@ series: "RISC-V 임베디드 실습"
 seriesOrder: 5
 tags: [RISC-V, ESP32-C3, Bare-Metal, GPIO]
 draft: true
+topics: ["embedded", "embedded/riscv"]
 ---
 
 ## 개요

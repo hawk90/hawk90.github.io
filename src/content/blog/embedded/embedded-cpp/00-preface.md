@@ -7,6 +7,7 @@ seriesOrder: 0
 tags: [cpp, embedded, raii, constexpr, no-exception, modern-cpp, arm, templates]
 type: tech
 featured: true
+topics: ["embedded"]
 ---
 
 ## 이 시리즈를 쓰는 이유

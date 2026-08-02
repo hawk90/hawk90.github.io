@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Trie, String]
 series: "Data Structures and Algorithms"
 seriesOrder: 29
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

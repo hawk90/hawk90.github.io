@@ -6,6 +6,7 @@ series: "Introduction to Probability"
 seriesOrder: 8
 tags: [bertsekas, bayesian-inference, map, mmse]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Bayesian framework* — prior·likelihood·posterior. *MAP·LMS (Least Mean Squares) estimator*. *Linear LMS (orthogonality principle)*. *Bayesian hypothesis testing*. *Conjugate prior 예제* — Bernoulli·Gaussian. *Application* — communication·sensor fusion·filtering. *Kalman filter preview*.

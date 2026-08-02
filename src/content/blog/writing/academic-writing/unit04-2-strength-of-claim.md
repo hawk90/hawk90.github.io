@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
 draft: true
-
+topics: ["writing"]
 ---
 
 학술 영어에서 주장의 강도는 글의 신뢰를 결정합니다. 너무 강하면 오만, 너무 약하면 무용지물입니다. Swales와 Feak는 Skelton(1988)의 명구를 인용합니다.

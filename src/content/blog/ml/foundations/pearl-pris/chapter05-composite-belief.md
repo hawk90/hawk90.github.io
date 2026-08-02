@@ -6,6 +6,7 @@ series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 5
 tags: [pearl, map-inference, mpe, diagnosis]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *MAP (Maximum A Posteriori) configuration*. *Most Probable Explanation (MPE)*. *Max-product propagation* — Viterbi 일반화. *Distributed computation* on tree. *Diagnostic reasoning* — 의학·기계 fault. *Sequential evidence assimilation*. *Belief revision의 dynamic 측면*.

@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 6
 tags: [DDR, memory, training, write-leveling, timing]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 DDR3부터 도입된 Write Leveling은 DQS 스트로브와 CLK의 타이밍을 정렬하는 트레이닝 과정이다. PCB 배선 길이 차이로 인한 스큐를 보정하여 안정적인 Write 동작을 보장한다.

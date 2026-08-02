@@ -6,6 +6,7 @@ tags: [SDLC, SDL, SBOM, Threat Modeling, Supply Chain]
 series: "Embedded Security"
 seriesOrder: 10
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

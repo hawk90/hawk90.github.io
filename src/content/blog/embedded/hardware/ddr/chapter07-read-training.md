@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 7
 tags: [DDR, memory, training, read, timing]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 Read Training은 DRAM에서 나오는 DQS와 DQ 신호를 정확히 캡처하기 위한 트레이닝이다. DQS Gate Training과 Per-Bit Deskew가 핵심이다.

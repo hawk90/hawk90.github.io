@@ -6,6 +6,7 @@ tags: [Data Structure, Algorithm, Union-Find, Disjoint Set]
 series: "Data Structures and Algorithms"
 seriesOrder: 31
 draft: true
+topics: ["programming", "programming/algorithms"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [UML, State Machine, Composite State, History]
 series: "UML 2.5.1"
 seriesOrder: 23
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 한 줄 요약

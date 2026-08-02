@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Agile Estimating and Planning"
 bookAuthor: "Mike Cohn"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — velocity 추적과 forecast — 두 chart의 차이와 활용.

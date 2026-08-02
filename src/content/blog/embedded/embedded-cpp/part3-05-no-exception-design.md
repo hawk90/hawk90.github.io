@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 23
 tags: [cpp, embedded, no-exceptions, error-handling, optional, expected]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

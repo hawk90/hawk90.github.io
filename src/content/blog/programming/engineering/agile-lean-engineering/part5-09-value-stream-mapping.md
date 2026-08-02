@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Implementing Lean Software Development"
 bookAuthor: "Mary & Tom Poppendieck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 현재 상태 VSM·미래 상태 VSM — 그리는 단계와 해석.

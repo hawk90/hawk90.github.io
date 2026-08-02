@@ -6,6 +6,7 @@ series: "The Bayesian Choice"
 seriesOrder: 5
 tags: [robert, bayes-factor, hpd, testing]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Bayesian hypothesis testing* — posterior odds·Bayes factor. *Composite hypothesis*. *Highest Posterior Density (HPD) region*·*credible region*. *Improper prior와 Lindley's paradox*. *Frequentist vs Bayesian testing의 충돌*. *Default Bayes factor* (Kass·Raftery·Berger). *Approximate posterior probability* of point null.

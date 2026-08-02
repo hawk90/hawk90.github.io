@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 29
 tags: [recipes, toolchain, runtime]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

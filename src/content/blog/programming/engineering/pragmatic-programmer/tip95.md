@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 95
 tags: [pragmatic-programmer, user-experience, value]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 4
 tags: [DDR, memory, timing, refresh, write]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 기본 타이밍 외에도 시스템 안정성과 성능에 영향을 주는 타이밍 파라미터가 많다. 이 장에서는 Refresh 관련 타이밍과 Read/Write 전환 타이밍을 다룬다.

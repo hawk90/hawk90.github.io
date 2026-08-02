@@ -6,6 +6,7 @@ tags: [python, debugging, asyncio]
 series: "Python Debugging"
 seriesOrder: 3
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 `asyncio` 코드를 평소 디버거(`pdb`/`debugpy`)로 멈춰 보면 콜스택이 *이상하게 짧습니다*. `await`를 만난 순간 코루틴 컨텍스트는 이벤트 루프로 돌아가고, 다음 깨어남에서 *새로운 콜스택*으로 시작합니다. 이 장은 비동기 코드만의 함정과 도구를 다룹니다.

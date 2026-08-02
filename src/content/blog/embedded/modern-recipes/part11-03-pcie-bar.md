@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 125
 tags: [recipes, pcie, bar, mmio, enumeration]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

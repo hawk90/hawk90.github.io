@@ -6,6 +6,7 @@ tags: [C++, std::atomic, volatile, Concurrency, Modern C++]
 series: "Effective Modern C++"
 seriesOrder: 40
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

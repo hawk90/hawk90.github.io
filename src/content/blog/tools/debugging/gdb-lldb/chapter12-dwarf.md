@@ -6,6 +6,7 @@ tags: [gdb, lldb, DWARF, ELF, DebugInfo]
 series: "GDB and LLDB"
 seriesOrder: 12
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 :::tip[Deep dive]

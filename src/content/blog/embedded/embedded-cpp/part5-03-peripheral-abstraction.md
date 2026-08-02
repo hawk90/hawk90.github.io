@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 39
 tags: [cpp, embedded, peripheral, uart, spi, i2c, dma]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

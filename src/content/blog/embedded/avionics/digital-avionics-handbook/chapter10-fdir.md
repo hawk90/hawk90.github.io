@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 10
 tags: [avionics, fdir, fault-management]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

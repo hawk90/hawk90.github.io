@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 7
 tags: [embedded, bsp, tf-a, trustzone, security]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

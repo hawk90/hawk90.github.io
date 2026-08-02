@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 10
 tags: [pcie, linux, driver-model, sysfs, enumeration]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

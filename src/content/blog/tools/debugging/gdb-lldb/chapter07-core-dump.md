@@ -6,6 +6,7 @@ tags: [gdb, Core Dump, Crash, ELF]
 series: "GDB and LLDB"
 seriesOrder: 7
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 :::tip[Deep dive]

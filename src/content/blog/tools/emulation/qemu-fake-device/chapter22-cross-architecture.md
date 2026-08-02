@@ -6,6 +6,7 @@ tags: [QEMU, cross-architecture, endianness, portable-device]
 series: "QEMU Fake Device Driver"
 seriesOrder: 22
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 시리즈 마지막 장입니다. 지금까지 device를 x86_64에서 개발했지만, 실 cloud는 *ARM Graviton·RISC-V*도. 같은 device가 *모든 architecture*에서 *일관되게* 동작하도록 *endian·alignment·timing*에 주의해야 합니다.

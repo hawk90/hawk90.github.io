@@ -6,6 +6,7 @@ series: "RISC-V 베어메탈 부트"
 seriesOrder: 7
 tags: [RISC-V, SBI, ECALL, Calling-Convention]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

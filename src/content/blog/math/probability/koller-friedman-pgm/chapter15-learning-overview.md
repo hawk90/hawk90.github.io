@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 15
 tags: [koller-friedman, learning-pgm, parameter-learning, structure-learning]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Learning task taxonomy*: structure (known·learn)·data (complete·partial)·objective (MLE·Bayesian·discriminative). *Goals* — density estimation·prediction·structure discovery·causal. *Generative vs discriminative learning*. *Loss for evaluation* — log-likelihood·hold-out·predictive. *Overfitting·regularization·sparsity in PGM*.

@@ -6,6 +6,7 @@ series: "Designing Machine Learning Systems"
 seriesOrder: 10
 tags: [dmls, mlops, infrastructure, platform]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Compute layer* — cloud (managed instance·GPU pool)·on-prem. *Storage* — feature store·data warehouse·data lake. *Resource management* — Kubernetes·SLURM·Ray. *ML platform* — Vertex AI·SageMaker·Databricks·custom. *Development environment* — notebook·IDE·CI/CD. *Build vs buy* 결정 기준.

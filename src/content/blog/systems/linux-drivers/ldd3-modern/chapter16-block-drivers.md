@@ -6,6 +6,7 @@ series: "Linux Device Drivers (LDD3)"
 seriesOrder: 17
 tags: [linux, driver, block, blk-mq, nvme]
 draft: true
+topics: ["systems", "systems/linux-drivers"]
 ---
 
 > Outline — LDD3 시절 *legacy request* → 6.x는 *blk-mq* (multi-queue). `blk_mq_ops` — `queue_rq`·`init_hctx`. *bio* — I/O 단위. *gendisk* — 디스크 표현. *I/O scheduler* — mq-deadline·BFQ·Kyber·none. NVMe는 별도 (`drivers/nvme/`). *zoned device* — sequential write.

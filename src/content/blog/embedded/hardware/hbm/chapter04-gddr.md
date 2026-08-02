@@ -6,6 +6,7 @@ series: "HBM·GDDR 심화"
 seriesOrder: 4
 tags: [gddr, gddr6, gddr7, pam3]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

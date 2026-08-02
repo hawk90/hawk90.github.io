@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 6
 tags: [embedded, buildroot, br2-external, layer]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

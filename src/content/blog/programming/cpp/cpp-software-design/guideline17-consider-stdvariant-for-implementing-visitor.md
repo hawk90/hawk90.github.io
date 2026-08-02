@@ -6,6 +6,7 @@ tags: [C++, Software Design, Visitor, std::variant, Modern C++]
 series: "C++ Software Design"
 seriesOrder: 17
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 가이드라인이 중요한가?

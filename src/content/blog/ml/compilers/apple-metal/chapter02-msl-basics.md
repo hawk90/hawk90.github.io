@@ -6,6 +6,7 @@ series: "Apple Metal Stack"
 seriesOrder: 2
 tags: [metal, msl, kernel, threadgroup]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *MSL* — C++14 superset. *Kernel function* — `kernel void`. *Thread space* — `thread_position_in_grid`·`threadgroup`·`simd_group`. *Buffer·Texture·Sampler*. *Address space* — `device`·`constant`·`threadgroup`·`thread`. *atomic_uint*·sync primitives. Hello-world — vector add.

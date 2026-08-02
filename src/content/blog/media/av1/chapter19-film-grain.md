@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Film Grain, Synthesis]
 series: "AV1"
 seriesOrder: 19
 draft: true
+topics: ["media"]
 ---
 
 Ch 16~18에서 디블로킹, CDEF, Loop Restoration으로 3단 필터 파이프라인을 완성했다. 이 필터들은 **복원 품질**을 높이는 데 집중한다. 그런데 필름 영상에는 독특한 질감이 있다 — **필름 그레인(film grain)**이다.

@@ -6,6 +6,7 @@ tags: [cmake, build, cpp, advanced, presets]
 series: "CMake"
 seriesOrder: 9
 draft: false
+topics: ["tools", "tools/build"]
 ---
 
 ## 이 장에서 다루는 것

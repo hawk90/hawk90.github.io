@@ -6,6 +6,7 @@ tags: [DDIA, Consistency, Linearizability, Consensus, Paxos, Raft, CAP]
 series: "Designing Data-Intensive Applications"
 seriesOrder: 9
 draft: true
+topics: ["parallel"]
 ---
 
 ## 이 챕터의 메시지

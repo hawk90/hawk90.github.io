@@ -6,6 +6,7 @@ tags: [Git, Changelog, Release]
 series: "Git Conventions"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/git"]
 ---
 
 ## 작성 중

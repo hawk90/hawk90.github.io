@@ -6,6 +6,7 @@ tags: [Python, PEP8, Type-Hints, PEP484, mypy, Typing]
 series: "Python Style Guide (PEP 8)"
 seriesOrder: 6
 draft: true
+topics: ["programming", "programming/standards"]
 ---
 
 > "Type hints are completely optional."

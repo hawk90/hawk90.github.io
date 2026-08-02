@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 14
 tags: [cpp, embedded, templates, generic, type-safe, instantiation]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

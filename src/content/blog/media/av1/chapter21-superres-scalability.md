@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Superres, Scalability, SVC]
 series: "AV1"
 seriesOrder: 21
 draft: true
+topics: ["media"]
 ---
 
 이번 장에서는 AV1의 **Superres**(초해상도)와 **Scalability**(확장성) 기능을 살펴본다. Superres는 인코딩 시 해상도를 낮추고 디코딩 시 업스케일링하여 압축 효율을 높이는 기법이다. Scalability는 하나의 비트스트림에서 여러 프레임레이트나 해상도를 추출할 수 있게 하는 계층적 코딩 기법이다.

@@ -6,6 +6,7 @@ tags: [perf, PMU, Profiling]
 series: "perf and FlameGraph"
 seriesOrder: 1
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

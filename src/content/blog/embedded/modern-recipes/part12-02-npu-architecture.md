@@ -5,6 +5,7 @@ description: "Arm Ethos·Qualcomm Hexagon·Apple Neural Engine 등 NPU 내부 �
 series: "Modern Embedded Recipes"
 seriesOrder: 138
 tags: [recipes, edge-ai, npu, ethos, hexagon]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 2
 tags: [random-variable, cdf, pdf, transformation]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Random variable의 measure-theoretic 정의*. *CDF F(x)*·*PDF/PMF*. *주요 분포* — Bernoulli·Binomial·Poisson·uniform·normal·exponential·gamma·beta. *Joint·marginal·conditional*. *Independence of RVs*. *Transformation of RVs* — change-of-variable formula. *Multivariate normal*.

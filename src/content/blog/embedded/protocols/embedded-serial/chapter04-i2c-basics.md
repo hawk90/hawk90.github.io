@@ -6,6 +6,7 @@ series: "Embedded Protocols 심화"
 seriesOrder: 4
 tags: [i2c, sda, scl, open-drain, addressing, ack]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

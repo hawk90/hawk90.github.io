@@ -6,7 +6,7 @@ tags: [C++, Template, Type Deduction]
 series: "Effective Modern C++"
 seriesOrder: 1
 draft: true
-
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

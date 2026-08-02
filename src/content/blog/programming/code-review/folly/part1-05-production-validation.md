@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
 draft: false
+topics: ["programming", "programming/code-review"]
 ---
 
 > **한 줄 요약**: Folly의 hot path 컴포넌트는 Meta의 매일 수십억 요청에 깎여 다듬어졌다. 그러나 *Meta가 안 쓰는 부분*은 같은 정도로 검증되지 않았음을 인지하고 사용한다.

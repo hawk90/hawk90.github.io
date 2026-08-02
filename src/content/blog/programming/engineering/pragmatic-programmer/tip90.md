@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 90
 tags: [pragmatic-programmer, testing, definition-of-done]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

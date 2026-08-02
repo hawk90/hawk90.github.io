@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Refactoring은 별도의 phase가 아니라 매일의 일. simple design rules와의 연결. Fowler Refactoring Catalog와의 cross-ref.

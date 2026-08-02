@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 3
 tags: [DDR, memory, timing, latency, performance]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 메모리 스펙에서 흔히 보는 "16-18-18-36" 같은 숫자가 바로 타이밍 파라미터다. 이 장에서는 가장 기본적인 네 가지 타이밍—tCL, tRCD, tRP, tRAS—의 의미와 성능 영향을 다룬다.

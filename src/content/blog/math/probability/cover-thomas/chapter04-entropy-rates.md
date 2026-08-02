@@ -6,6 +6,7 @@ series: "Elements of Information Theory"
 seriesOrder: 4
 tags: [entropy-rate, markov-chain, stationary]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Entropy rate* H(X) — 시퀀스당 정보량의 한계. *Stationary process*·*Markov chain*. *Markov chain의 entropy rate* — `H(X_2|X_1)`. *Functions of Markov chains*·*hidden Markov*. *Cesaro mean*·convergence 증명. ML 응용 — language model의 perplexity·sequence entropy.

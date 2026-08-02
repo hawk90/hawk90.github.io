@@ -6,6 +6,7 @@ series: "UCIe 심화"
 seriesOrder: 3
 tags: [ucie, physical-layer, signaling, ber]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Standard Package* — 16/24/32 GT/s, organic substrate. *Advanced Package* — 12·16·24·32·64 GT/s, silicon interposer. *Bump pitch* 차이 — 45 μm vs 25/10 μm. *Training* — link bring-up sequence. *BER*·*lane repair*·*data scrambling*. UCIe 3.0의 64 GT/s.

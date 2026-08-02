@@ -6,6 +6,7 @@ series: "TinyML·Edge AI"
 seriesOrder: 9
 tags: [tinyml, wake-word, kws, speech]
 draft: true
+topics: ["ml", "ml/tinyml"]
 ---
 
 > Outline — *Wake-word 시스템 구조* — VAD → KWS → big model. *Two-tier* — always-on tiny + cloud handoff. *Spectrogram pipeline* — log-mel·MFCC. *Tiny model* — CRNN·DSCNN·MatchboxNet. *False accept/reject* trade-off. *Continuous learning*·*on-device personalization*. Apple·Google·Amazon 사례.

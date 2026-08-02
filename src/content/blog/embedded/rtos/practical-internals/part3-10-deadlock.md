@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 31
 tags: [deadlock, detection, avoidance, lock-ordering]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

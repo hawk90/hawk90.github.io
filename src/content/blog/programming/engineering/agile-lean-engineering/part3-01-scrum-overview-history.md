@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "The Scrum Guide + Essential Scrum"
 bookAuthor: "Schwaber & Sutherland / Kenneth Rubin"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Takeuchi/Nonaka 럭비 1986 → Sutherland 1995 → Scrum Guide.

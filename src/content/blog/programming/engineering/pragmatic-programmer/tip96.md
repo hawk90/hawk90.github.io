@@ -6,6 +6,7 @@ series: "The Pragmatic Programmer"
 seriesOrder: 96
 tags: [pragmatic-programmer, craftsmanship, pride]
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 ## 이 팁의 메시지

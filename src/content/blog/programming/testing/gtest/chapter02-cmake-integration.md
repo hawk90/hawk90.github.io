@@ -6,6 +6,7 @@ series: "gtest 심화"
 seriesOrder: 2
 tags: [gtest, cmake, fetchcontent, build]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `FetchContent_Declare(googletest GIT_TAG v1.14.0)` 패턴. `enable_testing()` + `gtest_discover_tests(target)` 자동 등록. system-install vs source-build 비교. *version pinning*의 중요성. cross-compile 환경에서의 함정.

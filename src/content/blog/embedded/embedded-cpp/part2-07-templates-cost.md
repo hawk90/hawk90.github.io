@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 15
 tags: [cpp, embedded, templates, code-bloat, instantiation, optimization]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

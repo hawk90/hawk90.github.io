@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Bitstream, OBU]
 series: "AV1"
 seriesOrder: 2.0
 draft: true
+topics: ["media"]
 ---
 
 AV1 디코더가 가장 먼저 하는 일은 비트스트림을 파싱하는 것이다. 이 장에서는 AV1 비트스트림의 계층 구조를 위에서 아래로 훑는다. 아직 코드는 거의 쓰지 않고, *어떤 단위가 어떤 단위를 감싸는지*만 정확히 잡는다.

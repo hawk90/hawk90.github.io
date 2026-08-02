@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Continuous Delivery"
 bookAuthor: "Jez Humble & Dave Farley"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 네 가지 configuration의 layer — version control 대상.

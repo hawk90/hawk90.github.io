@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 31
 tags: [recipes, toolchain, optimization]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

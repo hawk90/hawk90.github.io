@@ -6,6 +6,7 @@ series: "Bayesian Data Analysis (3rd ed)"
 seriesOrder: 4
 tags: [bda3, asymptotics, bernstein-von-mises, large-sample]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Normal approximation to posterior* — large sample limit. *Bernstein-von Mises theorem*. *Frequency property of Bayesian estimator*. *MLE·MAP·posterior mean*의 점근적 동등성. *Reparameterization·data transformation*. *Counterexample* — non-regular case·boundary parameter.

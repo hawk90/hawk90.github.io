@@ -5,6 +5,7 @@ description: "U-Boot PCIe 열거 과정 — Root Complex 초기화·Config Space
 series: "Bootloader Internals"
 seriesOrder: 34
 tags: [embedded, bootloader, u-boot, pcie, enumeration, cxl, root-complex]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

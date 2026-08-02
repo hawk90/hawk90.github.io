@@ -6,6 +6,7 @@ series: "ML 디자인 패턴"
 seriesOrder: 7
 tags: [ml-pattern, responsible-ai, fairness, explainability]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 * Outline — *Heuristic Benchmark* — naive baseline 대비. *Explainable Predictions* — SHAP·LIME·attention vis. *Fairness Lens* — group·individual·predictive fairness. *Model Cards*·*Datasheets for Datasets*. *Bias detection* — counterfactual·what-if tool. *Continuous monitoring*. EU AI Act 등 규제 영향.

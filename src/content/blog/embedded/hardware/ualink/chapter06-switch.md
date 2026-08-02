@@ -6,6 +6,7 @@ series: "UALink 심화"
 seriesOrder: 6
 tags: [ualink, switch, routing]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 > Outline — *Switch radix* — port count. *Routing 모델* — adaptive·deterministic. *QoS class*·flow control·congestion control. *Multicast 지원* (collective op 효율). *Vendor* — Astera·Broadcom·Marvell. *Linux/firmware* 관리 인터페이스.

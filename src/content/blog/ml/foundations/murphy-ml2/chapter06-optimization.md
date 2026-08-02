@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 6
 tags: [optimization, sgd, natural-gradient, adam]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Stochastic optimization* — SGD·mini-batch theory·variance reduction (SVRG·SAG·SARAH). *Adaptive method* — AdaGrad·RMSProp·Adam·AdamW·Lion. *Natural gradient·K-FAC·Shampoo*. *Second-order in DL*. *Constrained optimization* — projection·proximal·ADMM. *Bayesian optimization* — GP surrogate·acquisition function. *Hyperparameter optimization*.

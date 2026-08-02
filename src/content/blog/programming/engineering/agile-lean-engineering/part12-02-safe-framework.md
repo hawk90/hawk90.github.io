@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "SAFe Reference Guide + critics"
 bookAuthor: "Dean Leffingwell / Various critics"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Big Picture·ART·PI Planning — SAFe의 구조와 통렬한 비판.

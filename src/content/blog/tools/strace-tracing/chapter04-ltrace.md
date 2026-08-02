@@ -6,6 +6,7 @@ tags: [ltrace, Library, Dynamic Linking]
 series: "System Tracing"
 seriesOrder: 4
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

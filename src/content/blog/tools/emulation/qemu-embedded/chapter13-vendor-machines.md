@@ -6,6 +6,7 @@ tags: [QEMU, stm32, imx, raspberry-pi, bcm, sifive, zynq]
 series: "QEMU Embedded Emulation"
 seriesOrder: 13
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 지금까지 다룬 generic `-M virt`는 *학습과 prototype*에 좋습니다. 그러나 실 SoC의 *vendor-specific peripheral*(STM32의 PWM·i.MX의 GPMI·Raspberry Pi의 VideoCore mailbox)을 다뤄야 하는 시점이 옵니다. QEMU는 다수의 *vendor machine*을 제공합니다 — 실 출하 보드를 흉내내는 머신들. 이 장은 그 카테고리와 활용을 정리합니다.

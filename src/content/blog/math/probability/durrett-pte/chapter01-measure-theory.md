@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Probability: Theory and Examples"
 bookAuthor: "Rick Durrett"
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Probability space (Ω, F, P)*. *σ-algebra·measurable space*. *Random variable* — measurable function. *Distribution induced·CDF·PDF*. *Expectation as Lebesgue integral*. *Convergence types* — a.s.·in probability·in distribution·Lp. *Inequalities* — Markov·Chebyshev·Cauchy-Schwarz·Jensen. *Product measure·Fubini*. [무료 PDF](https://services.math.duke.edu/~rtd/PTE/pte.html).

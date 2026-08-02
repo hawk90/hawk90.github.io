@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 27
 tags: [cpp, embedded, smart-pointer, unique-ptr, shared-ptr, ownership]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [QEMU, Machine, Board, MachineClass]
 series: "QEMU Internals"
 seriesOrder: 11
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 QEMU의 기본 머신(`virt`·`raspi`·`sifive_u`)으로 못 풀리는 *내 SoC*를 시뮬레이션하려면 **custom machine type**을 추가해야 합니다. CPU + 메모리 + 인터럽트 컨트롤러 + peripheral을 *조립*해 *완전한 가상 SoC*를 만드는 작업입니다.

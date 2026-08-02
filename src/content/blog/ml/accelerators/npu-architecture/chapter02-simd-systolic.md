@@ -6,6 +6,7 @@ series: "NPU 아키텍처"
 seriesOrder: 2
 tags: [npu, simd, systolic, dataflow]
 draft: true
+topics: ["ml", "ml/accelerators"]
 ---
 
 > Outline — *SIMD* — vector lane 병렬. *Systolic array* — 격자에서 데이터 흐름 (Kung·Leiserson 1980). *MAC unit* — multiply-accumulate. *Output-stationary·weight-stationary·input-stationary* dataflow. *Eyeriss*·*TPU* 영향. *Sparsity·structured sparsity* 처리.

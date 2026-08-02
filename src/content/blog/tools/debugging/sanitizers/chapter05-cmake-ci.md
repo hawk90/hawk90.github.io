@@ -6,6 +6,7 @@ tags: [Sanitizer, CMake, CI, GitHub Actions, GitLab, Debugging]
 series: "Sanitizers"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 이 장의 목표

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Continuous Delivery"
 bookAuthor: "Jez Humble & Dave Farley"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — commit → build → test → deploy — deployment pipeline의 단계.

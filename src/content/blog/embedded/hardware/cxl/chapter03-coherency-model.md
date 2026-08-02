@@ -6,6 +6,7 @@ series: "CXL 4.0 Internals"
 seriesOrder: 3
 tags: [cxl, coherency, hdm-db, hdm-d, bias, bisnp]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

@@ -5,6 +5,7 @@ description: "Edge AI 보드의 sustained 성능을 결정하는 thermal 한계.
 series: "Modern Embedded Recipes"
 seriesOrder: 143
 tags: [recipes, thermal, throttling, edge-ai, jetson, dvfs]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

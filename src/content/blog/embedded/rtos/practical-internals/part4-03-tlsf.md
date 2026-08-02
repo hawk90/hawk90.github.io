@@ -5,6 +5,7 @@ description: "Masmano 2004의 TLSF 알고리즘을 풀어봅니다. Bitmap과 CL
 series: "Practical RTOS Internals"
 seriesOrder: 35
 tags: [tlsf, allocator, deterministic, o1]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

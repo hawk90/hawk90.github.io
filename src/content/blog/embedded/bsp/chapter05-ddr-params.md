@@ -6,6 +6,7 @@ series: "BSP Development"
 seriesOrder: 5
 tags: [embedded, bsp, ddr, dram, timing]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

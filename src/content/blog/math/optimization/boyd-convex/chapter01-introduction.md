@@ -9,6 +9,7 @@ draft: true
 type: book-review
 bookTitle: "Convex Optimization"
 bookAuthor: "Stephen Boyd, Lieven Vandenberghe"
+topics: ["math", "math/optimization"]
 ---
 
 > Outline — *수학적 최적화 문제* — minimize f(x) s.t. inequality·equality 제약. *Convex 문제 정의* — convex 목적·affine 등식·convex 부등식. *Convex의 의미* — local 극소가 곧 global. *비-convex* 문제의 어려움. *Linear·quadratic·SDP·CP* 계층. 본 시리즈는 [Boyd 무료 PDF](https://web.stanford.edu/~boyd/cvxbook/) 기준.

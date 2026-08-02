@@ -6,6 +6,7 @@ tags: [Architecture, SOLID, LSP]
 series: "Clean Architecture"
 seriesOrder: 9
 draft: true
+topics: ["programming", "programming/design"]
 ---
 
 ## 이 챕터의 메시지

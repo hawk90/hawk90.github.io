@@ -6,6 +6,7 @@ series: "Modern Embedded Recipes"
 seriesOrder: 112
 tags: [recipes, jtag, swd, openocd, debug, brick]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

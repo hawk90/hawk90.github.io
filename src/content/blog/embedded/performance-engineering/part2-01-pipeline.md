@@ -6,6 +6,7 @@ series: "Embedded Performance Engineering"
 seriesOrder: 9
 tags: [cpu, pipeline, cortex-m, cortex-a]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -6,6 +6,7 @@ tags: [autosar, cpp, tools, certification, misra-cpp-2023, polyspace, helix-qac]
 series: "AUTOSAR C++14"
 seriesOrder: 10
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 마지막 장. 도구 선택, Compliance Matrix, ISO 26262 심사, *MISRA C++:2023 통합 후계*까지 마무리한다.

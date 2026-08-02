@@ -6,6 +6,7 @@ series: "CAN Bus 심화"
 seriesOrder: 5
 tags: [can, error, fault-confinement, bus-off, tec, rec]
 draft: true
+topics: ["embedded", "embedded/protocols"]
 ---
 
 ## 한 줄 요약

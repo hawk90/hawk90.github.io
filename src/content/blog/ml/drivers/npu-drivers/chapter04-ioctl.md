@@ -6,6 +6,7 @@ series: "NPU 드라이버 개발"
 seriesOrder: 4
 tags: [npu, ioctl, uapi, abi]
 draft: true
+topics: ["ml", "ml/drivers"]
 ---
 
 > Outline — *ioctl 설계 원칙* — versionable·forward-compatible·64-bit safe. *struct 크기* — `__u64`·reserved field. *Cmd encoding* — `_IO`·`_IOR`·`_IOW`·`_IOWR`. *DRM ioctl pattern* — DRM_IOCTL_*·DRM_AUTH·DRM_MASTER 권한. *Capability discovery*. *Deprecation policy* — UAPI는 stable contract.

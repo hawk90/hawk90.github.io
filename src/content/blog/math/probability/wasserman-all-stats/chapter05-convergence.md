@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 5
 tags: [convergence, lln, clt, delta-method]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *4가지 convergence* — almost sure·probability·L2·distribution. *Weak·Strong Law of Large Numbers*. *Central Limit Theorem*. *Delta method* — variance approximation. *Slutsky's theorem*. *Continuous mapping theorem*. ML/통계 asymptotic 분석의 정점.

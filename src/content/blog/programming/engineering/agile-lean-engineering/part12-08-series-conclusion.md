@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "All references"
 bookAuthor: "Cumulative"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 155편을 회고하고 — 컨텍스트별 추천 학습 경로.

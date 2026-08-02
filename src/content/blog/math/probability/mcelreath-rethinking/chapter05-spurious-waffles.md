@@ -6,6 +6,7 @@ series: "Statistical Rethinking"
 seriesOrder: 5
 tags: [mcelreath, multiple-regression, confounding, waffle-house]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Waffle House → divorce rate* — spurious 상관 예제. *Multiple regression의 진짜 의미* — *controlling for*. *Masked relationship*. *DAG로 시각화*·*causal interpretation*. *Categorical variable*·*interaction*. *Bayesian 실용 워크플로* — prior choice·posterior predictive.

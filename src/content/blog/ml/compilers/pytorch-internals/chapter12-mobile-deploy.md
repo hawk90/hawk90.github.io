@@ -6,6 +6,7 @@ series: "PyTorch Internals"
 seriesOrder: 12
 tags: [pytorch, mobile, ios, android, embedded]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *Android* — ExecuTorch Android·LiteRT 변환. *iOS* — Core ML 변환·ExecuTorch iOS. *Selective op build* — binary size 절감. *Memory profile*·*latency budget*. *Custom op*과 vendor delegate. *Real device benchmark* — Android profiler·Xcode Instruments. *Edge AI* 결합.

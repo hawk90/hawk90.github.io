@@ -6,6 +6,7 @@ tags: [TDD, Design]
 series: "Growing Object-Oriented Software"
 seriesOrder: 7
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 TDD는 단순히 테스트를 먼저 작성하는 작업이 아니다. 테스트가 설계의 첫 사용자가 되어 인터페이스를 발견하고, 역할을 정의하며, 좋은 객체지향 설계를 이끌어낸다. 이 장에서는 그 과정을 단계별로 따라가며, 테스트가 어떻게 **인터페이스 발견기**로 작동하는지 본다.

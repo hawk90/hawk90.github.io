@@ -6,6 +6,7 @@ series: "Probabilistic Graphical Models (Koller & Friedman)"
 seriesOrder: 16
 tags: [koller-friedman, parameter-learning, dirichlet, bayesian-estimation]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *MLE for tabular CPD*·*sufficient statistic*. *MLE for Gaussian linear CPD·conjugate Bayesian*. *Dirichlet prior·posterior·BDe score*. *Prior equivalence·noninformative prior choice*. *Hyperparameter sharing·hierarchical learning*. *Generative vs discriminative parameter learning*. *Exponential family unified MLE*.

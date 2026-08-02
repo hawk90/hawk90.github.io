@@ -6,6 +6,7 @@ tags: [cert-c, file-io, signal, environment, errno, toctou, race]
 series: "CERT C"
 seriesOrder: 9
 draft: true
+topics: ["embedded", "embedded/automotive"]
 ---
 
 이 장은 시스템과의 *경계*에서 일어나는 함정을 다룬다. 파일 I/O, 환경 변수, 시그널 — 셋 다 *비동기·동시성·외부 입력*이 끼어들어 *race condition과 권한 우회*의 단골 무대다.

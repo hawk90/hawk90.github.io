@@ -6,6 +6,7 @@ series: "Causality: Models, Reasoning, and Inference"
 seriesOrder: 3
 tags: [pearl, do-calculus, backdoor, frontdoor]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Intervention `do(x)`*. *Backdoor criterion*·*backdoor adjustment formula*. *Frontdoor criterion*·*frontdoor adjustment*. *do-calculus 3 rules* — graph 위 manipulation으로 causal effect 식별. *Identifiability problem*·*ID algorithm*. *Modern application* — Hidden Confounder·instrumental variable.

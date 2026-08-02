@@ -6,6 +6,7 @@ tags: [C++, API Design, Default Arguments]
 series: "Beautiful C++"
 seriesOrder: 2
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 

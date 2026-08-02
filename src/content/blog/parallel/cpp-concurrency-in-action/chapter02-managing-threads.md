@@ -6,6 +6,7 @@ tags: [C++, Concurrency, std::thread, thread_guard, scoped_thread]
 series: "C++ Concurrency in Action"
 seriesOrder: 2
 draft: true
+topics: ["parallel"]
 ---
 
 스레드는 생성되고, 작업을 수행하고, 종료된다. 이 장에서는 스레드의 생애 주기를 관리하는 방법을 다룬다. `join`과 `detach`의 선택, 예외 안전성을 위한 RAII 가드, 인자 전달의 함정, `std::thread`의 이동 의미론, 그리고 런타임 스레드 수 결정과 스레드 식별까지 살펴본다.

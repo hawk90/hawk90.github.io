@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 7
 tags: [avionics, actuator, tvc, rcs, servo]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

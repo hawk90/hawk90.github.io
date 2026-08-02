@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 24
 tags: [cpp, embedded, error-handling, result-type, error-chain, fatal-error]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

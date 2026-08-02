@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Science Research Writing for Non-Native Speakers of English"
 bookAuthor: "Hilary Glasman-Deal"
 draft: true
-
+topics: ["writing"]
 ---
 
 Methodology는 모래시계의 좁은 중심부입니다. 자기 연구의 재현 가능성을 만드는 자리입니다. 이 글은 Methodology의 표준 구조와 자주 쓰이는 어휘를 다룹니다.

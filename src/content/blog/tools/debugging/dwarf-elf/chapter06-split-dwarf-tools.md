@@ -6,6 +6,7 @@ tags: [dwarf, split-dwarf, dwz, debuginfod, pyelftools, tools]
 series: "DWARF and ELF Internals"
 seriesOrder: 6
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 DWARF는 *큽니다*. Chrome, LLVM, Linux 커널 등 큰 코드베이스는 디버그 정보가 본 코드의 5~10배. 빌드 시간·메모리·디스크가 모두 영향을 받습니다.

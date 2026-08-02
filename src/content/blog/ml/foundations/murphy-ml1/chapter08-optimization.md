@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 8
 tags: [murphy, optimization, sgd, adam, second-order]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *First-order* — gradient·SGD·momentum·Nesterov·AdaGrad·RMSProp·Adam·LARS·LAMB. *Second-order* — Newton·Quasi-Newton (L-BFGS)·conjugate gradient. *Stochastic Newton* — natural gradient·K-FAC. *Constrained optimization* — projection·penalty·Lagrangian. *Bayesian optimization*. ML 응용 — large-scale training pipeline.

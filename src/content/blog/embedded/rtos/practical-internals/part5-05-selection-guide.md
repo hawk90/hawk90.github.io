@@ -5,6 +5,7 @@ description: "FreeRTOS·Zephyr·ThreadX·RT-Thread·NuttX·VxWorks·QNX·INTEGRI
 series: "Practical RTOS Internals"
 seriesOrder: 50
 tags: [selection, comparison, freertos, zephyr, vxworks, qnx, integrity]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

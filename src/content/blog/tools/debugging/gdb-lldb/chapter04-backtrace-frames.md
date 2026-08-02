@@ -6,6 +6,7 @@ tags: [gdb, lldb, Backtrace, Stack]
 series: "GDB and LLDB"
 seriesOrder: 4
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 ## 호출 스택은 *디버깅의 지도*

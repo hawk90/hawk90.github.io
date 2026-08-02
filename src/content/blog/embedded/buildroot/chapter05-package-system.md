@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 5
 tags: [embedded, buildroot, package, mk, config-in]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

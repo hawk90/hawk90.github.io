@@ -6,6 +6,7 @@ series: "Probabilistic Reasoning in Intelligent Systems"
 seriesOrder: 3
 tags: [pearl, bayes-net, dag, markov-network]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *Bayesian network 정의* — DAG + conditional probability table (CPT). *Conditional independence semantics* — d-separation. *Markov network (MRF)*·*moralization*. *Joint distribution factorization*. *Knowledge engineer가 directly graph 만들 수 있는 장점*. *Causal vs associational reading의 ambiguity* (Causality 책에서 명확화).

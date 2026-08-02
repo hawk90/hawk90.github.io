@@ -6,6 +6,7 @@ tags: [C++, Software Design, Expression Problem, Visitor]
 series: "C++ Software Design"
 seriesOrder: 15
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 가이드라인이 중요한가?

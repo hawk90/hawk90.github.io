@@ -6,6 +6,7 @@ series: "RISC-V ISA 해부"
 seriesOrder: 6
 tags: [RISC-V, M-Extension, Multiply, Divide]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

@@ -6,6 +6,7 @@ tags: [QEMU, Migration, VMState, livemigrate]
 series: "QEMU Internals"
 seriesOrder: 10
 draft: true
+topics: ["tools", "tools/emulation"]
 ---
 
 **Live migration**은 *실행 중인* VM을 *다른 host*로 *짧은 다운타임*에 옮기는 기능입니다. cloud의 *hardware maintenance·load balancing·rebalancing*에 핵심이고, QEMU의 가장 정교한 subsystem 중 하나입니다.

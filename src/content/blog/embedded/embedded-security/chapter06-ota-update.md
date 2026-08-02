@@ -6,6 +6,7 @@ tags: [OTA, Firmware Update, Rollback, MCUboot, Mender]
 series: "Embedded Security"
 seriesOrder: 6
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

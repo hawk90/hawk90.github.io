@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 5
 tags: [RISC-V, Vector, Integer, Arithmetic]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

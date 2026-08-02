@@ -9,7 +9,7 @@ type: book-review
 bookTitle: "Academic Writing for Graduate Students"
 bookAuthor: "John M. Swales, Christine B. Feak"
 draft: true
-
+topics: ["writing"]
 ---
 
 Unit 3 마지막 글은 문제-해결 텍스트에서 해결을 도입하는 방법과, 학술 영어에서 자주 쓰이는 간접 의문문을 다룹니다.

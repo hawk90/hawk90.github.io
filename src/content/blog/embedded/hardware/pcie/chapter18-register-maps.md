@@ -6,6 +6,7 @@ series: "PCIe Deep Dive"
 seriesOrder: 18
 tags: [pcie, register-map, reference, configuration-space, bitfield]
 draft: false
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

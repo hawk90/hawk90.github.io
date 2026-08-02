@@ -6,6 +6,7 @@ series: "ML 컴파일러"
 seriesOrder: 8
 tags: [iree, mlir, runtime, deployment]
 draft: true
+topics: ["ml", "ml/compilers"]
 ---
 
 > Outline — *IREE (Intermediate Representation Execution Environment)*. *Compiler* — MLIR pipeline. *VM (Virtual Machine)* runtime. *HAL (Hardware Abstraction Layer)* — Vulkan·CUDA·Metal·CPU·SPIR-V. *.vmfb* portable executable. *Mobile/embedded* 타깃 design. *PyTorch·JAX frontend*과 통합.

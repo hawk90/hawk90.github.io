@@ -6,6 +6,7 @@ series: "Bootloader Internals"
 seriesOrder: 25
 tags: [embedded, bootloader, tf-a, atf, op-tee, secure-boot, armv8]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

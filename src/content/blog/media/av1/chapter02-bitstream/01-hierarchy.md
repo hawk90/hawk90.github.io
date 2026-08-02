@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Bitstream, Hierarchy]
 series: "AV1"
 seriesOrder: 2.01
 draft: true
+topics: ["media"]
 ---
 
 AV1 비트스트림은 *동심원* 처럼 7개 계층으로 쌓여 있다. 가장 바깥은 *전체 비디오 한 편*, 가장 안은 *한 변환 계수* 다. 각 계층은 자기 위 계층의 *유효 구간* 안에서만 의미가 있다.

@@ -5,6 +5,7 @@ description: "Lock hold time, 코어 수, preemption, real-time 요구사항에 
 series: "Modern Embedded Recipes"
 seriesOrder: 107
 tags: [recipes, concurrency, lock]
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

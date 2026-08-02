@@ -6,6 +6,7 @@ tags: [strace, Advanced]
 series: "System Tracing"
 seriesOrder: 3
 draft: true
+topics: ["tools"]
 ---
 
 ## 예정 내용

@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Patterns for Splitting User Stories"
 bookAuthor: "Richard Lawrence"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — Spike·Path·Interface·Data·Rules — Richard Lawrence의 SPIDR 카탈로그.

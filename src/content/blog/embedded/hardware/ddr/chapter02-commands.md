@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 2
 tags: [DDR, memory, commands, protocol]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 DDR 메모리 컨트롤러는 정해진 명령어 집합으로 DRAM과 통신한다. 이 장에서는 핵심 명령어인 ACTIVATE, READ, WRITE, PRECHARGE, REFRESH의 동작을 상세히 다룬다.

@@ -5,6 +5,7 @@ description: "FreeRTOS-Kernel 저장소의 핵심 파일 셋을 따라가며 xTa
 series: "Practical RTOS Internals"
 seriesOrder: 46
 tags: [freertos, source-analysis, tasks, queue, port]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

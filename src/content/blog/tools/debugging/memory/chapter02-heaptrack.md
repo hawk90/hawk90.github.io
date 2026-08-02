@@ -6,6 +6,7 @@ tags: [memory, heaptrack, profiler, kde]
 series: "Memory Diagnostics"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 Valgrind Memcheck/Massif는 정확하지만 *20-100배 느림* — 운영 환경에 부적합. **heaptrack**은 *2-3배 느림*에 *모든 heap allocation*을 콜스택과 함께 기록. KDE 프로젝트 출신이지만 *어떤 Linux 프로그램*에도 적용.

@@ -6,6 +6,7 @@ tags: [Logic, Natural Deduction, Inference Rules]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 6
 draft: true
+topics: ["philosophy"]
 ---
 
 ## 작성 중

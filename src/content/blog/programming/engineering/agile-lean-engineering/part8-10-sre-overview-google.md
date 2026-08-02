@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Site Reliability Engineering (Google)"
 bookAuthor: "Beyer et al."
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — SRE의 정의 — software engineering으로 operations.

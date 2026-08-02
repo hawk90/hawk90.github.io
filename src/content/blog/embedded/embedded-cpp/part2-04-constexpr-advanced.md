@@ -6,6 +6,7 @@ series: "Embedded C++ for Real Systems"
 seriesOrder: 12
 tags: [cpp, embedded, constexpr, compile-time, algorithm, std-array]
 type: tech
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

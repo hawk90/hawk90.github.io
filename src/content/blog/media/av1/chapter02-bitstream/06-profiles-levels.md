@@ -6,6 +6,7 @@ tags: [AV1, Video, Codec, Profile, Level, Tier]
 series: "AV1"
 seriesOrder: 2.06
 draft: true
+topics: ["media"]
 ---
 
 코덱 스트링 `av01.0.04M.10` 이 무슨 뜻인지 안 풀려서 답답했을 사람을 위해. 이 절은 Annex A의 *Profiles*, *Levels*, *Tiers* 를 한꺼번에 푼다.

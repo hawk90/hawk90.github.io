@@ -6,6 +6,7 @@ tags: [memory, leak, production, cgroup, oom]
 series: "Memory Diagnostics"
 seriesOrder: 5
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 이 시리즈의 마지막 장 — *재현 환경 없는* 운영의 누수 진단. ASan은 빌드 다시 필요, Valgrind는 너무 느림, heaptrack은 trace 너무 큼. 그래서 *프로덕션 친화 도구 셋*이 필요합니다.

@@ -6,6 +6,7 @@ tags: [C++, Effective C++, Inheritance, Name Hiding]
 series: "Effective C++"
 seriesOrder: 33
 draft: true
+topics: ["programming", "programming/cpp"]
 ---
 
 ## 왜 이 항목이 중요한가?

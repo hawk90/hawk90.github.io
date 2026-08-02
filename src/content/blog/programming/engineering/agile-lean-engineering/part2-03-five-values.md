@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Extreme Programming Explained: Embrace Change"
 bookAuthor: "Kent Beck"
 draft: true
+topics: ["programming", "programming/engineering"]
 ---
 
 > Outline — 5 가치(Communication·Simplicity·Feedback·Courage·Respect)가 14 원칙과 13 practice를 떠받치는 구조. 2판에서 Respect가 추가된 배경.

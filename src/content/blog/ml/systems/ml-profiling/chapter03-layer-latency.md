@@ -6,6 +6,7 @@ series: "ML 시스템 프로파일링"
 seriesOrder: 3
 tags: [latency, hotspot, layer-profile]
 draft: true
+topics: ["ml", "ml/systems"]
 ---
 
 > Outline — *Per-op timing* — host queue + device execute. *Cold start vs steady state* — JIT compile·cache miss. *Launch overhead* — small kernel 다수가 누적 비용. *Synchronization stall* — DMA·collective. *Cudagraph·graph capture*로 launch 축소. *Workload별 hotspot 패턴*.

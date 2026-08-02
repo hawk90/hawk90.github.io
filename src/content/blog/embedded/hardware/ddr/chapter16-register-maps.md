@@ -6,6 +6,7 @@ series: "DDR Memory Deep Dive"
 seriesOrder: 16
 tags: [DDR, memory, register, MRS, SPD]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 DDR 메모리의 동작 파라미터는 Mode Register에 설정되고, DIMM 정보는 SPD EEPROM에 저장된다. 이 장에서는 두 레지스터 체계의 구조와 내용을 상세히 다룬다.

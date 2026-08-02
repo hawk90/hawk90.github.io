@@ -6,6 +6,7 @@ series: "Vim 마스터하기"
 seriesOrder: 2
 tags: [vim, editor, editing, commands]
 draft: true
+topics: ["tools"]
 ---
 
 > **Vim 마스터하기** Chapter 2: 편집 명령어

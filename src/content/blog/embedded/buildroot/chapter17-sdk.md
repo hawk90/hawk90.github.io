@@ -6,6 +6,7 @@ series: "Buildroot Practical"
 seriesOrder: 17
 tags: [embedded, buildroot, sdk, toolchain, application]
 draft: false
+topics: ["embedded"]
 ---
 
 ## 한 줄 요약

@@ -5,6 +5,7 @@ description: "Ready 상태 task를 보관하는 자료구조 선택이 곧 스�
 series: "Practical RTOS Internals"
 seriesOrder: 11
 tags: [scheduler, ready-list, bitmap, linked-list, o1]
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

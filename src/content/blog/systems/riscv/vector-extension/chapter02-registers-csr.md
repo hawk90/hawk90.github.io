@@ -6,6 +6,7 @@ series: "RISC-V Vector Extension"
 seriesOrder: 2
 tags: [RISC-V, Vector, Registers, CSR]
 draft: true
+topics: ["systems", "systems/riscv"]
 ---
 
 ## 개요

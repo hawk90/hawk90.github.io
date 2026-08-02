@@ -6,6 +6,7 @@ series: "All of Statistics"
 seriesOrder: 4
 tags: [inequalities, hoeffding, chebyshev, jensen]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Markov's inequality*. *Chebyshev's inequality*. *Cauchy-Schwarz·Jensen's inequality*. *Hoeffding's inequality*. *Bernstein·McDiarmid*. *Concentration of measure* 일반. ML 응용 — generalization bound·sample complexity·confidence interval.

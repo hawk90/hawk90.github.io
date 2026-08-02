@@ -6,6 +6,7 @@ series: "Practical RTOS Internals"
 seriesOrder: 17
 tags: [riscv, ecall, mret, csr, mscratch, mepc]
 draft: false
+topics: ["embedded", "embedded/rtos"]
 ---
 
 ## 한 줄 요약

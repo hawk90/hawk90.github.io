@@ -6,6 +6,7 @@ series: "Reasoning About Uncertainty"
 seriesOrder: 6
 tags: [halpern, multi-agent, common-knowledge, epistemic-logic]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 * Outline — *Epistemic logic 기초* — K_i (i knows φ). *Common knowledge*·*muddy children puzzle*. *Distributed knowledge*. *Multi-agent probability*·*aggregation*. *Game-theoretic reasoning*. *Modern application* — multi-agent RL·decentralized inference·federated learning.

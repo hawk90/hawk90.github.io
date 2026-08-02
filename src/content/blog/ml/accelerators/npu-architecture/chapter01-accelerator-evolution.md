@@ -6,6 +6,7 @@ series: "NPU 아키텍처"
 seriesOrder: 1
 tags: [npu, gpu, accelerator, evolution]
 draft: true
+topics: ["ml", "ml/accelerators"]
 ---
 
 > Outline — *CPU* — general purpose, IPC 1-4. *GPU* — SIMT, 수천 thread parallel. *NPU* — DNN-specific tensor op·낮은 정밀도·정형 dataflow. *Roofline 변화* — 메모리 bound 회피. *NPU 핵심 설계 결정* — programmability vs efficiency. 시리즈 로드맵.

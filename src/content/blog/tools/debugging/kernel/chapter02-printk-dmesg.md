@@ -6,6 +6,7 @@ tags: [kernel, printk, dmesg, dynamic-debug]
 series: "Kernel Debugging"
 seriesOrder: 2
 draft: false
+topics: ["tools", "tools/debugging"]
 ---
 
 커널 디버깅의 *가장 빠른 도구*는 printk입니다. 너무 단순해 무시하기 쉽지만, *대부분의 커널 버그가 printk 한 줄로 잡힙니다*. 다만 잘 쓰려면 *log level*, *ring buffer*, *ratelimit*, *dynamic_debug*를 알아야 합니다.

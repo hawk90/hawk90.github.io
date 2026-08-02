@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: An Introduction"
 seriesOrder: 20
 tags: [murphy, pca, factor-analysis, tsne, umap, autoencoder]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *PCA* — variance maximization·SVD 시각. *Probabilistic PCA·factor analysis*. *Independent Component Analysis (ICA)*. *Linear vs nonlinear DR*. *Autoencoder·VAE*. *Manifold learning* — Isomap·LLE·Laplacian eigenmap. *t-SNE·UMAP* — visualization 표준. *Embedding evaluation·downstream test*.

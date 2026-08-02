@@ -6,6 +6,7 @@ series: "TensorRT 심화"
 seriesOrder: 2
 tags: [tensorrt, plugin, custom-op]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *IPluginV3* (modern) — IPluginV2 deprecated. *Lifecycle* — createPlugin·enqueue·destroy. *Custom CUDA kernel* 통합. *Plugin registry* — name·version·namespace. *ONNX parser plugin*. *Plugin attribute serialization*. *Use case* — non-standard ops (Triton fused kernel·exotic activation).

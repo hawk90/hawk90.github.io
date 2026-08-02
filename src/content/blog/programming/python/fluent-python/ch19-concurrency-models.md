@@ -9,6 +9,7 @@ type: book-review
 bookTitle: "Fluent Python (2nd Edition)"
 bookAuthor: "Luciano Ramalho"
 draft: true
+topics: ["programming", "programming/python"]
 ---
 
 ## 한 줄 요약

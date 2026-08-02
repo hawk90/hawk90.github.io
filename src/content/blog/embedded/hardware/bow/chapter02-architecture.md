@@ -6,6 +6,7 @@ series: "BoW 개요"
 seriesOrder: 2
 tags: [bow, slice, architecture]
 draft: true
+topics: ["embedded", "embedded/hardware"]
 ---
 
 ## 한 줄 요약

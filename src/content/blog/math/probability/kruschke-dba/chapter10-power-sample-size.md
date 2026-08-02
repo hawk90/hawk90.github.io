@@ -6,6 +6,7 @@ series: "Doing Bayesian Data Analysis (2nd ed, core)"
 seriesOrder: 10
 tags: [kruschke, power, sample-size, simulation]
 draft: true
+topics: ["math", "math/probability"]
 ---
 
 > Outline — *Goal articulation* — accuracy·rejection·acceptance·detection. *Bayesian power via simulation*. *Sample size for HDI width*. *Sequential sample addition·optional stopping under Bayesian* (no inflation). *Precision-based design*. *Reporting effective sample size*.

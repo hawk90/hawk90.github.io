@@ -6,6 +6,7 @@ series: "Digital Avionics Handbook"
 seriesOrder: 6
 tags: [avionics, sensor, imu, gps, star-tracker]
 draft: true
+topics: ["embedded", "embedded/avionics"]
 ---
 
 ## 한 줄 요약

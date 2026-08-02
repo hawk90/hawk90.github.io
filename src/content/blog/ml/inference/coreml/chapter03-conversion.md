@@ -6,6 +6,7 @@ series: "Core ML 심화"
 seriesOrder: 3
 tags: [coreml, coremltools, mil, conversion]
 draft: true
+topics: ["ml", "ml/inference"]
 ---
 
 > Outline — *coremltools* — Python lib. *Source* — PyTorch (TorchScript·ExportedProgram·ONNX)·TF·JAX. *MIL (Model Intermediate Language)* — internal IR. *ct.convert()*·`inputs`·`outputs`·`compute_units`. *Iterating MIL* — pass·custom ops. *Trouble shooting* — unsupported op·dynamic shape.

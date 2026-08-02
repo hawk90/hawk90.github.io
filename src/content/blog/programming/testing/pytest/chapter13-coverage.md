@@ -6,6 +6,7 @@ series: "pytest 심화"
 seriesOrder: 13
 tags: [pytest, coverage, pytest-cov, branch]
 draft: true
+topics: ["programming", "programming/testing"]
 ---
 
 > Outline — `pytest --cov=mypkg --cov-report=term-missing`. *branch coverage*는 `--cov-branch` 옵션. `.coveragerc` 또는 `pyproject.toml [tool.coverage.run]`로 *exclude·context·plugins*. `--cov-fail-under=80`으로 CI 게이트. *namespace packages* 함정.

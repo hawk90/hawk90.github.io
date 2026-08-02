@@ -6,6 +6,7 @@ series: "Probabilistic Machine Learning: Advanced Topics"
 seriesOrder: 24
 tags: [ebm, score-matching, langevin, restricted-boltzmann]
 draft: true
+topics: ["ml", "ml/foundations"]
 ---
 
 > Outline — *EBM* — `p(x) ∝ exp(-E(x))`. *Boltzmann·RBM·deep RBM*. *Training challenge* — log partition Z. *Contrastive divergence (CD)*·*persistent CD*. *Score matching·denoising score matching*. *Noise contrastive estimation (NCE)*. *Langevin dynamics sampling*. *Diffusion과의 다리*. *JEM (Joint Energy-based Model)*.
