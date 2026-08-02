@@ -284,13 +284,26 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-10. Fixture Does Not Resemble Real Content”?",
-      "scope": null,
+      "reviewQuestion": "Reassess if a new checker is validated only against synthetic content without representative corpus coverage.",
+      "scope": "Repository-wide representative-content verification; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content/blog",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-internal-links.py",
+            "reports/content-portability/frontmatter.md",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The release gate validates the representative production corpus (3,387 Markdown documents) for frontmatter, classification, links, relations, search, build output, and security boundaries rather than relying only on minimal synthetic fixtures."
+        }
+      ],
+      "residualRisk": "Targeted parser edge cases still benefit from small fixtures; fixture additions must preserve representative headings, math, directives, code fences, images, and frontmatter combinations."
     },
     {
       "id": "AP-T-100",
