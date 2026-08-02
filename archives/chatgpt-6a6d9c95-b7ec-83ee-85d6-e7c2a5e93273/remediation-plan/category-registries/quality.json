@@ -1644,13 +1644,25 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-55. Generated Diagram Untested”?",
-      "scope": null,
+      "reviewQuestion": "Reassess visual candidates after TikZ/SVG generator, design tokens, or diagram layout changes.",
+      "scope": "Repository generated-diagram quality contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "scripts/build-diagram-review-index.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:diagrams && npm run audit:diagram-accessibility && npm run audit:diagram-quality && npm run verify:release",
+          "result": "Generated SVG assets are checked for structural contracts and accessibility metadata, ranked for quality review, and included in the release gate; the current inventory reports 1,038 SVG assets with zero structural findings."
+        }
+      ],
+      "residualRisk": "Structural and accessibility checks cannot prove visual readability, semantic correctness, or arrow/box layout quality; human review remains required for ranked candidates."
     },
     {
       "id": "AP-T-56",
