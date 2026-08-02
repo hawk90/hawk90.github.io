@@ -70,7 +70,6 @@
     "src/lib/content/normalize.ts",
     "src/lib/content/publication.ts",
     "src/lib/content/relations.ts",
-    "src/lib/content/sitemap.ts",
     "src/lib/content/topics.ts",
     "src/lib/content/types.ts",
     "src/lib/define.ts",
