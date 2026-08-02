@@ -2,7 +2,7 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 44
+- Unassessed items: 43
 - Maximum batch size: 15
 - Batches: 4
 
@@ -31,7 +31,6 @@
 - AP-T-57 (P1, M) — T-57. Accessibility Test on Homepage Only
 - AP-T-58 (P1, M) — T-58. No Keyboard Test
 - AP-T-59 (P1, M) — T-59. Focus Visible Test Missing
-- AP-T-100 (P1, M) — T-100. Testing System Becomes the Product
 
 ## quality-03 — quality-02.md
 

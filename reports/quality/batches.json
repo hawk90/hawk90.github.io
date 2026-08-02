@@ -393,25 +393,6 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        },
-        {
-          "id": "AP-T-100",
-          "title": "T-100. Testing System Becomes the Product",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "quality-01.md#ap-t-100",
-            "messageIds": [
-              "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-100. Testing System Becomes the Product”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
         }
       ]
     },

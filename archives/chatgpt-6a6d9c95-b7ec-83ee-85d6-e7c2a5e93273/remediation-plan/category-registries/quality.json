@@ -316,13 +316,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-100. Testing System Becomes the Product”?",
-      "scope": null,
+      "reviewQuestion": "Reassess if quality tooling grows beyond the risk-weighted contracts needed to protect publishing and content integrity.",
+      "scope": "Repository quality-governance scope; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "reports/quality/contracts.md",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run audit:quality-contracts && npm run verify:release && npm run audit:tooling",
+          "result": "The repository maintains a bounded set of risk-based quality contracts (20/20 passing), a single release gate, and tooling inventory checks; the system does not attempt exhaustive prose or pixel assertions."
+        }
+      ],
+      "residualRisk": "A growing script inventory can still increase maintenance cost; new checks should include a failure-impact rationale and retire redundant contracts."
     },
     {
       "id": "AP-T-11",
