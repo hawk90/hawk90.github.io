@@ -1,0 +1,81 @@
+# Diagram visual-quality inventory
+
+- SVGs scanned: 1038
+- Heuristic candidates: 71
+- Reference: none (pass --reference=<svg> for feature deltas)
+
+## Candidate reasons
+
+- public/images/blog/abseil/diagrams/part16-02-crc32c-hardware.svg — palette-complexity; glyph scale n/a; colors 19
+- public/images/blog/av1/chapter0/fig-0-1-resolution.svg — effect-or-opacity; glyph scale n/a; colors 8
+- public/images/blog/av1/chapter0/fig-0-2-rgb-cube.svg — effect-or-opacity, palette-complexity; glyph scale n/a; colors 24
+- public/images/blog/av1/chapter0/fig-0-3-ycbcr-channels.svg — effect-or-opacity, palette-complexity; glyph scale n/a; colors 36
+- public/images/blog/av1/chapter0/fig-0-4-chroma-subsampling.svg — effect-or-opacity; glyph scale n/a; colors 9
+- public/images/blog/av1/chapter0/fig-0-5-frame-diff.svg — effect-or-opacity; glyph scale n/a; colors 15
+- public/images/blog/av1/chapter0/fig-0-6-bitrate-chart.svg — effect-or-opacity; glyph scale n/a; colors 10
+- public/images/blog/av1/diagrams/ch00-banding.svg — palette-complexity; glyph scale n/a; colors 65
+- public/images/blog/av1/diagrams/ch00-temporal-redundancy.svg — effect-or-opacity; glyph scale n/a; colors 7
+- public/images/blog/av1/diagrams/ch00-ycbcr-420-layout.svg — effect-or-opacity; glyph scale n/a; colors 6
+- public/images/blog/av1/diagrams/ch02-bitstream-hierarchy.svg — effect-or-opacity; glyph scale n/a; colors 8
+- public/images/blog/av1/diagrams/ch02-decoding-pipeline.svg — effect-or-opacity; glyph scale n/a; colors 6
+- public/images/blog/av1/diagrams/ch04-partition-types.svg — palette-complexity; glyph scale n/a; colors 31
+- public/images/blog/bootloader/diagrams/chapter33-smp-bringup-flow.svg — palette-complexity; glyph scale n/a; colors 19
+- public/images/blog/buildroot/diagrams/chapter05-package-lifecycle.svg — effect-or-opacity; glyph scale n/a; colors 14
+- public/images/blog/can-bus/diagrams/ch05-can-fault-confinement.svg — effect-or-opacity; glyph scale n/a; colors 10
+- public/images/blog/clean-architecture/diagrams/ch13-tension-triangle.svg — effect-or-opacity; glyph scale n/a; colors 2
+- public/images/blog/cpp-concepts/diagrams/heap-vs-stack-vs-arena.svg — palette-complexity; glyph scale n/a; colors 19
+- public/images/blog/csapp/diagrams/ch12-thread-model.svg — effect-or-opacity; glyph scale n/a; colors 6
+- public/images/blog/domain-driven-design/diagrams/ch01-knowledge-cycle.svg — effect-or-opacity; glyph scale n/a; colors 7
+- public/images/blog/domain-driven-design/diagrams/ch01-knowledge-hierarchy.svg — effect-or-opacity; glyph scale n/a; colors 9
+- public/images/blog/domain-driven-design/diagrams/ch01-model-evolution.svg — effect-or-opacity; glyph scale n/a; colors 6
+- public/images/blog/domain-driven-design/diagrams/ch02-translation-cost.svg — effect-or-opacity; glyph scale n/a; colors 10
+- public/images/blog/domain-driven-design/diagrams/ch02-ubiquitous-language.svg — effect-or-opacity; glyph scale n/a; colors 9
+- public/images/blog/domain-driven-design/diagrams/ch04-dependency-inversion.svg — effect-or-opacity; glyph scale n/a; colors 11
+- public/images/blog/domain-driven-design/diagrams/ch04-layered-architecture.svg — effect-or-opacity; glyph scale n/a; colors 9
+- public/images/blog/domain-driven-design/diagrams/ch06-aggregate-reference.svg — effect-or-opacity; glyph scale n/a; colors 9
+- public/images/blog/domain-driven-design/diagrams/ch06-aggregate-structure.svg — effect-or-opacity; glyph scale n/a; colors 13
+- public/images/blog/domain-driven-design/diagrams/ch06-lifecycle.svg — effect-or-opacity; glyph scale n/a; colors 10
+- public/images/blog/dsa/diagrams/item02-bigo-growth.svg — effect-or-opacity; glyph scale n/a; colors 9
+- public/images/blog/embedded-cpp/diagrams/part1-07-memory-map.svg — palette-complexity; glyph scale n/a; colors 20
+- public/images/blog/embedded-cpp/diagrams/part3-09-decision-tree.svg — effect-or-opacity; glyph scale n/a; colors 7
+- public/images/blog/embedded-cpp/diagrams/part4-06-hsm-hierarchy.svg — effect-or-opacity; glyph scale n/a; colors 3
+- public/images/blog/folly/diagrams/part15-02-coro-task-states.svg — effect-or-opacity; glyph scale n/a; colors 15
+- public/images/blog/folly/diagrams/part2-01-future-states.svg — effect-or-opacity; glyph scale n/a; colors 14
+- public/images/blog/freertos-mastering/diagrams/ch07-priority-inheritance.svg — effect-or-opacity; glyph scale n/a; colors 4
+- public/images/blog/freertos-mastering/diagrams/ch07-priority-inversion.svg — effect-or-opacity; glyph scale n/a; colors 4
+- public/images/blog/goos/diagrams/ch01-double-loop.svg — effect-or-opacity; glyph scale n/a; colors 9
+- public/images/blog/goos/diagrams/ch21-coupling-spectrum.svg — effect-or-opacity, palette-complexity; glyph scale n/a; colors 40
+- public/images/blog/hardware/bow/diagrams/ch01-bandwidth-density.svg — palette-complexity; glyph scale n/a; colors 20
+- public/images/blog/khorikov/diagrams/ch06-functional-core.svg — effect-or-opacity; glyph scale n/a; colors 7
+- public/images/blog/linear-algebra/ch01/fig-01-07-inclusion-exclusion.svg — effect-or-opacity; glyph scale n/a; colors 10
+- public/images/blog/modern-recipes/diagrams/part1-01-ringing-waveform.svg — effect-or-opacity; glyph scale n/a; colors 5
+- public/images/blog/modern-recipes/diagrams/part1-05-bootloader-chain.svg — palette-complexity; glyph scale n/a; colors 20
+- public/images/blog/modern-recipes/diagrams/part1-08-dac-glitch.svg — effect-or-opacity; glyph scale n/a; colors 6
+- public/images/blog/modern-recipes/diagrams/part2-03-priority-inversion.svg — palette-complexity; glyph scale n/a; colors 19
+- public/images/blog/modern-recipes/diagrams/part6-06-zero-copy-camera.svg — palette-complexity; glyph scale n/a; colors 19
+- public/images/blog/perf-eng/diagrams/part4-02-false-sharing.svg — palette-complexity; glyph scale n/a; colors 21
+- public/images/blog/perf-eng/diagrams/part5-06-etm-ptm.svg — palette-complexity; glyph scale n/a; colors 20
+- public/images/blog/practical-internals/diagrams/part1-08-priority-inversion.svg — effect-or-opacity; glyph scale n/a; colors 7
+- public/images/blog/pragmatic-programmer/diagrams/tip80-nested-constraints.svg — effect-or-opacity; glyph scale n/a; colors 10
+- public/images/blog/set-theory/ch01/ac-equivalents.svg — effect-or-opacity; glyph scale n/a; colors 2
+- public/images/blog/set-theory/ch01/epsilon-chain-forbidden.svg — effect-or-opacity; glyph scale n/a; colors 3
+- public/images/blog/set-theory/ch01/flow-overview.svg — effect-or-opacity; glyph scale n/a; colors 1
+- public/images/blog/set-theory/ch01/kuratowski-pair.svg — effect-or-opacity; glyph scale n/a; colors 2
+- public/images/blog/set-theory/ch01/omega-smallest-inductive.svg — effect-or-opacity; glyph scale n/a; colors 7
+- public/images/blog/set-theory/ch01/power-lattice.svg — effect-or-opacity; glyph scale n/a; colors 3
+- public/images/blog/set-theory/ch01/separation-replacement.svg — effect-or-opacity; glyph scale n/a; colors 3
+- public/images/blog/set-theory/ch01/union-flatten.svg — effect-or-opacity; glyph scale n/a; colors 2
+- public/images/blog/set-theory/ch01/von-neumann.svg — effect-or-opacity; glyph scale n/a; colors 1
+- public/images/blog/set-theory/ch01/zfc-comparison.svg — effect-or-opacity; glyph scale n/a; colors 8
+- public/images/blog/seven-concurrency-models/diagrams/ch02-pure-vs-impure.svg — palette-complexity; glyph scale n/a; colors 19
+- public/images/blog/seven-concurrency-models/diagrams/ch03-atom-cas-loop.svg — effect-or-opacity; glyph scale n/a; colors 15
+- public/images/blog/seven-concurrency-models/diagrams/ch07-lambda-architecture.svg — palette-complexity; glyph scale n/a; colors 19
+- public/images/blog/seven-concurrency-models/diagrams/ch07-lambda-vs-kappa.svg — palette-complexity; glyph scale n/a; colors 22
+- public/images/blog/tdd-patterns/diagrams/pattern01-test-cycle.svg — effect-or-opacity; glyph scale n/a; colors 8
+- public/images/blog/uml/diagrams/item09-scheduler-active.svg — effect-or-opacity; glyph scale n/a; colors 4
+- public/images/blog/uml/diagrams/item22-active-class.svg — effect-or-opacity; glyph scale n/a; colors 4
+- public/images/blog/uml/diagrams/item22-active-objects.svg — effect-or-opacity; glyph scale n/a; colors 5
+- public/images/blog/uml/diagrams/item32-composite-structure.svg — effect-or-opacity; glyph scale n/a; colors 8
+- public/images/blog/uml/diagrams/item34-order-overview.svg — effect-or-opacity; glyph scale n/a; colors 8
+
+> These are review candidates, not automatic correctness verdicts. Meaning, legibility at the rendered size, and pedagogical value still require human review.

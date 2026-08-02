@@ -1,0 +1,262 @@
+
+ble/diagrams/ch10-le-audio-cis-bis.svg
+  overlap @ y≈106.3: [107..116] × [113..120] (glyph-4-0×3 ↔ glyph-4-3×2)
+
+clean-architecture/diagrams/ch04-decomposition.svg
+  overlap @ y≈23.1: [127..145] × [132..140] (glyph-0-0×5 ↔ glyph-1-0×2)
+
+clean-architecture/diagrams/ch08-dependency-direction.svg
+  overlap @ y≈25.8: [73..96] × [68..95] (glyph-1-0×6 ↔ glyph-0-1×11)
+
+clean-architecture/diagrams/ch13-tension-triangle.svg
+  overlap @ y≈51.4: [145..150] × [146..151] (glyph-3-0×1 ↔ glyph-3-0×1)
+
+cpp-concepts/diagrams/executor-models.svg
+  overlap @ y≈223.4: [318..323] × [321..326] (glyph-4-2×1 ↔ glyph-4-3×1)
+  overlap @ y≈225.4: [321..326] × [324..329] (glyph-4-3×1 ↔ glyph-4-4×1)
+
+csapp/diagrams/ch06-address-partition.svg
+  overlap @ y≈166.0: [79..84] × [56..174] (glyph-5-0×1 ↔ glyph-3-0×15)
+  overlap @ y≈166.0: [129..134] × [56..174] (glyph-5-1×1 ↔ glyph-3-0×15)
+
+debugging/embedded/diagrams/ch02-jtag-tap-sequence.svg
+  overlap @ y≈42.7: [235..240] × [238..243] (glyph-3-12×1 ↔ glyph-3-18×1)
+  overlap @ y≈44.9: [161..166] × [164..169] (glyph-3-12×1 ↔ glyph-3-5×1)
+  overlap @ y≈45.3: [238..243] × [240..246] (glyph-3-18×1 ↔ glyph-3-19×2)
+  overlap @ y≈57.2: [200..205] × [198..203] (glyph-3-16×1 ↔ glyph-1-0×1)
+  overlap @ y≈64.1: [207..212] × [208..213] (glyph-3-17×1 ↔ glyph-3-5×1)
+  …3 more overlaps
+
+domain-driven-design/diagrams/chapter14-open-host-service.svg
+  overlap @ y≈20.8: [50..121] × [64..124] (glyph-0-0×14 ↔ glyph-0-20×12)
+
+dsa/diagrams/item17-floyd-warshall.svg
+  overlap @ y≈284.9: [36..48] × [13..91] (glyph-9-0×3 ↔ glyph-7-0×16)
+
+embedded-security/diagrams/ch01-trust-boundaries.svg
+  overlap @ y≈106.3: [65..70] × [65..70] (glyph-2-0×1 ↔ glyph-2-1×1)
+  overlap @ y≈109.0: [65..70] × [65..70] (glyph-2-1×1 ↔ glyph-2-2×1)
+  overlap @ y≈116.3: [65..70] × [65..70] (glyph-2-3×1 ↔ glyph-2-0×1)
+
+embedded-serial/diagrams/ch05-i3c-hdr-entry.svg
+  overlap @ y≈104.0: [329..338] × [336..344] (glyph-7-2×2 ↔ glyph-7-4×3)
+  overlap @ y≈144.2: [117..122] × [119..124] (glyph-5-0×1 ↔ glyph-5-0×1)
+  overlap @ y≈145.8: [119..124] × [121..126] (glyph-5-0×1 ↔ glyph-5-0×1)
+  overlap @ y≈153.2: [130..135] × [132..137] (glyph-5-3×1 ↔ glyph-5-4×1)
+  overlap @ y≈154.9: [132..137] × [135..140] (glyph-5-4×1 ↔ glyph-5-5×1)
+  …10 more overlaps
+
+embedded-serial/diagrams/ch08-uart-dma-idle.svg
+  overlap @ y≈161.7: [156..161] × [156..161] (glyph-4-2×1 ↔ glyph-4-3×1)
+
+goos/diagrams/ch23-tdd-maturity.svg
+  overlap @ y≈114.3: [19..24] × [19..24] (glyph-3-6×1 ↔ glyph-3-2×1)
+  overlap @ y≈116.6: [19..24] × [19..24] (glyph-3-2×1 ↔ glyph-3-5×1)
+  overlap @ y≈118.9: [19..24] × [19..24] (glyph-3-5×1 ↔ glyph-3-4×1)
+
+goos/diagrams/ch23-test-pyramid.svg
+  overlap @ y≈17.9: [288..293] × [288..293] (glyph-3-5×1 ↔ glyph-3-4×1)
+  overlap @ y≈26.1: [288..293] × [288..293] (glyph-3-10×1 ↔ glyph-3-16×1)
+  overlap @ y≈30.0: [288..293] × [288..293] (glyph-3-16×1 ↔ glyph-3-4×1)
+  overlap @ y≈48.8: [288..293] × [288..293] (glyph-3-5×1 ↔ glyph-3-4×1)
+  overlap @ y≈52.2: [288..293] × [288..293] (glyph-3-4×1 ↔ glyph-3-17×1)
+  …13 more overlaps
+
+hardware/bow/diagrams/ch01-bandwidth-density.svg
+  overlap @ y≈147.1: [20..25] × [20..25] (glyph-1-13×1 ↔ glyph-1-12×1)
+  overlap @ y≈162.4: [20..25] × [20..25] (glyph-1-11×1 ↔ glyph-1-10×1)
+  overlap @ y≈165.2: [20..25] × [20..25] (glyph-1-10×1 ↔ glyph-1-9×1)
+  overlap @ y≈181.2: [20..25] × [20..25] (glyph-1-6×1 ↔ glyph-1-5×1)
+
+hardware/hbm/diagrams/ch01-per-pin-rate.svg
+  overlap @ y≈174.8: [20..25] × [20..25] (glyph-1-9×1 ↔ glyph-1-8×1)
+  overlap @ y≈183.6: [20..25] × [20..25] (glyph-1-1×1 ↔ glyph-1-7×1)
+  overlap @ y≈186.8: [20..25] × [20..25] (glyph-1-7×1 ↔ glyph-1-6×1)
+  overlap @ y≈190.1: [20..25] × [20..25] (glyph-1-6×1 ↔ glyph-1-2×1)
+  overlap @ y≈198.6: [20..25] × [20..25] (glyph-1-5×1 ↔ glyph-1-4×1)
+  …2 more overlaps
+
+hardware/hbm/diagrams/ch03-stack-bw.svg
+  overlap @ y≈150.9: [20..25] × [20..25] (glyph-1-11×1 ↔ glyph-1-10×1)
+  overlap @ y≈166.2: [20..25] × [20..25] (glyph-1-8×1 ↔ glyph-1-7×1)
+  overlap @ y≈188.6: [20..25] × [20..25] (glyph-1-4×1 ↔ glyph-1-3×1)
+
+hardware/hbm/diagrams/ch05-memory-wall.svg
+  overlap @ y≈141.4: [20..25] × [20..25] (glyph-0-16×1 ↔ glyph-0-15×1)
+  overlap @ y≈144.8: [20..25] × [20..25] (glyph-0-15×1 ↔ glyph-0-14×1)
+  overlap @ y≈162.7: [20..25] × [20..25] (glyph-0-11×1 ↔ glyph-0-10×1)
+  overlap @ y≈166.0: [20..25] × [20..25] (glyph-0-10×1 ↔ glyph-0-9×1)
+  overlap @ y≈180.9: [20..25] × [20..25] (glyph-0-4×1 ↔ glyph-0-8×1)
+  …4 more overlaps
+
+hardware/hbm/diagrams/ch05-roofline.svg
+  overlap @ y≈162.7: [44..49] × [44..49] (glyph-1-10×1 ↔ glyph-1-9×1)
+  overlap @ y≈171.8: [44..49] × [44..49] (glyph-1-1×1 ↔ glyph-1-8×1)
+  overlap @ y≈179.7: [44..49] × [44..49] (glyph-1-7×1 ↔ glyph-1-6×1)
+  overlap @ y≈189.4: [44..49] × [44..49] (glyph-1-5×1 ↔ glyph-1-2×1)
+  overlap @ y≈196.3: [44..49] × [44..49] (glyph-1-4×1 ↔ glyph-1-3×1)
+  …2 more overlaps
+
+linear-algebra/ch01/fig-01-01-linear-dependence.svg
+  overlap @ y≈123.7: [277..282] × [253..289] (glyph-6-0×1 ↔ glyph-0-1×4)
+  overlap @ y≈126.8: [253..289] × [277..282] (glyph-0-1×4 ↔ glyph-6-1×1)
+
+linear-algebra/ch01/fig-01-02-direct-sum.svg
+  overlap @ y≈213.9: [20..25] × [15..241] (glyph-4-0×1 ↔ glyph-3-0×28)
+
+linear-algebra/ch01/fig-01-03-r2-subspaces.svg
+  overlap @ y≈224.4: [20..25] × [15..243] (glyph-2-1×1 ↔ glyph-5-0×31)
+  overlap @ y≈224.4: [218..223] × [15..243] (glyph-2-1×1 ↔ glyph-5-0×31)
+
+linear-algebra/ch01/fig-01-04-span-two-vectors.svg
+  overlap @ y≈250.2: [121..126] × [64..217] (glyph-6-0×1 ↔ glyph-3-0×27)
+
+linear-algebra/ch01/fig-01-10-vector-space-zoo.svg
+  overlap @ y≈28.9: [200..205] × [194..234] (glyph-5-0×1 ↔ glyph-4-0×5)
+
+linear-algebra/ch01/fig-01-11-multiple-bases.svg
+  overlap @ y≈20.4: [170..175] × [164..252] (glyph-2-1×1 ↔ glyph-8-0×10)
+  overlap @ y≈34.6: [256..261] × [141..277] (glyph-2-1×1 ↔ glyph-10-0×16)
+  overlap @ y≈163.0: [36..89] × [67..85] (glyph-3-0×7 ↔ glyph-2-0×2)
+  overlap @ y≈163.0: [205..259] × [211..216] (glyph-3-0×7 ↔ glyph-2-1×1)
+  overlap @ y≈163.0: [205..259] × [237..254] (glyph-3-0×7 ↔ glyph-2-0×2)
+
+linear-algebra/ch01/fig-01-15-r2-subspace-lattice.svg
+  overlap @ y≈103.7: [-0..374] × [16..89] (glyph-2-17×80 ↔ glyph-6-0×13)
+  overlap @ y≈103.7: [-0..374] × [130..202] (glyph-2-17×80 ↔ glyph-6-0×13)
+  overlap @ y≈104.2: [-0..374] × [136..141] (glyph-2-17×80 ↔ glyph-7-1×1)
+  overlap @ y≈104.2: [-0..374] × [249..254] (glyph-2-17×80 ↔ glyph-7-2×1)
+  overlap @ y≈105.7: [130..202] × [136..141] (glyph-6-0×13 ↔ glyph-7-1×1)
+
+mipi/diagrams/ch10-v4l2-media-graph.svg
+  overlap @ y≈66.6: [429..434] × [431..436] (glyph-3-0×1 ↔ glyph-3-1×1)
+  overlap @ y≈68.8: [431..436] × [433..438] (glyph-3-1×1 ↔ glyph-3-0×1)
+  overlap @ y≈71.0: [433..438] × [435..440] (glyph-3-0×1 ↔ glyph-3-2×1)
+  overlap @ y≈119.0: [440..445] × [438..443] (glyph-4-3×1 ↔ glyph-4-3×1)
+  overlap @ y≈125.4: [434..439] × [432..437] (glyph-4-2×1 ↔ glyph-4-1×1)
+  …1 more overlaps
+
+modern-recipes/diagrams/part1-02-clock-skew.svg
+  overlap @ y≈73.8: [113..123] × [121..126] (glyph-3-0×2 ↔ glyph-3-2×1)
+
+modern-recipes/diagrams/part1-08-r2r-ladder.svg
+  overlap @ y≈56.6: [81..90] × [83..88] (glyph-0-2×2 ↔ glyph-0-0×1)
+  overlap @ y≈56.6: [109..118] × [111..116] (glyph-0-2×2 ↔ glyph-0-0×1)
+  overlap @ y≈56.6: [165..175] × [167..172] (glyph-0-2×2 ↔ glyph-0-0×1)
+
+modern-recipes/diagrams/part1-11-rs485-bus.svg
+  overlap @ y≈141.5: [42..47] × [39..54] (glyph-2-10×1 ↔ glyph-2-6×4)
+
+oosc/diagrams/ch03-module-deps.svg
+  overlap @ y≈131.5: [61..66] × [46..84] (glyph-4-0×1 ↔ glyph-2-0×6)
+
+parallel-principles/diagrams/ch01-concurrency-layers.svg
+  overlap @ y≈111.8: [19..24] × [19..24] (glyph-2-2×1 ↔ glyph-2-1×1)
+
+parallel-principles/diagrams/ch03-sc-impossible.svg
+  overlap @ y≈114.2: [72..104] × [15..77] (glyph-1-5×7 ↔ glyph-0-12×14)
+
+parallel-principles/diagrams/ch03-sc-relaxed.svg
+  overlap @ y≈80.6: [15..81] × [14..52] (glyph-0-15×15 ↔ glyph-1-3×8)
+
+parallel-principles/diagrams/ch11-elimination.svg
+  overlap @ y≈57.1: [15..86] × [59..114] (glyph-0-0×17 ↔ glyph-1-15×12)
+
+perf-eng/diagrams/part1-02-saturation-curve.svg
+  overlap @ y≈28.7: [21..26] × [21..26] (glyph-1-6×1 ↔ glyph-1-5×1)
+  overlap @ y≈38.0: [21..26] × [21..26] (glyph-1-4×1 ↔ glyph-1-3×1)
+  overlap @ y≈47.0: [21..26] × [21..26] (glyph-1-2×1 ↔ glyph-1-1×1)
+  overlap @ y≈50.0: [21..26] × [13..25] (glyph-1-1×1 ↔ glyph-2-0×3)
+
+perf-eng/diagrams/part1-04-box-plot.svg
+  overlap @ y≈115.6: [19..24] × [19..24] (glyph-1-1×1 ↔ glyph-1-0×1)
+
+perf-eng/diagrams/part1-07-roofline.svg
+  overlap @ y≈124.7: [72..77] × [71..76] (glyph-3-5×1 ↔ glyph-3-4×1)
+  overlap @ y≈148.8: [20..25] × [20..25] (glyph-1-5×1 ↔ glyph-1-2×1)
+  overlap @ y≈155.7: [20..25] × [20..25] (glyph-1-4×1 ↔ glyph-1-3×1)
+  overlap @ y≈158.4: [20..25] × [20..25] (glyph-1-3×1 ↔ glyph-1-2×1)
+  overlap @ y≈161.8: [20..25] × [20..25] (glyph-1-2×1 ↔ glyph-1-1×1)
+
+perf-eng/diagrams/part2-08-roofline.svg
+  overlap @ y≈103.1: [19..24] × [19..24] (glyph-1-10×1 ↔ glyph-1-9×1)
+  overlap @ y≈113.2: [19..24] × [19..24] (glyph-1-1×1 ↔ glyph-1-8×1)
+  overlap @ y≈124.9: [117..122] × [115..120] (glyph-4-7×1 ↔ glyph-4-5×1)
+  overlap @ y≈129.4: [76..81] × [74..79] (glyph-3-4×1 ↔ glyph-3-3×1)
+  overlap @ y≈131.8: [74..79] × [71..76] (glyph-3-3×1 ↔ glyph-3-2×1)
+  …3 more overlaps
+
+perf-eng/diagrams/part4-09-mesi-states.svg
+  overlap @ y≈187.2: [357..362] × [354..359] (glyph-5-12×1 ↔ glyph-5-11×1)
+  overlap @ y≈194.5: [348..353] × [346..351] (glyph-5-8×1 ↔ glyph-5-7×1)
+  overlap @ y≈210.7: [328..333] × [326..331] (glyph-5-1×1 ↔ glyph-5-4×1)
+  overlap @ y≈221.7: [314..319] × [312..317] (glyph-5-1×1 ↔ glyph-5-0×1)
+  overlap @ y≈267.6: [162..170] × [168..173] (glyph-3-3×2 ↔ glyph-3-5×1)
+
+perf-eng/diagrams/part5-05-flamegraph-anatomy.svg
+  overlap @ y≈130.1: [20..25] × [20..25] (glyph-1-7×1 ↔ glyph-1-6×1)
+  overlap @ y≈150.0: [20..25] × [20..25] (glyph-1-2×1 ↔ glyph-1-2×1)
+  overlap @ y≈153.0: [20..25] × [20..25] (glyph-1-2×1 ↔ glyph-1-1×1)
+
+perf-eng/diagrams/part5-10-fleet-profiling.svg
+  overlap @ y≈119.2: [40..45] × [40..45] (glyph-1-8×1 ↔ glyph-1-8×1)
+  overlap @ y≈123.1: [40..45] × [40..45] (glyph-1-8×1 ↔ glyph-1-8×1)
+
+practical-internals/diagrams/part1-05-top-bottom-half.svg
+  overlap @ y≈130.7: [266..271] × [264..269] (glyph-4-12×1 ↔ glyph-4-11×1)
+  overlap @ y≈132.6: [264..269] × [262..266] (glyph-4-11×1 ↔ glyph-4-10×2)
+  overlap @ y≈134.8: [262..266] × [260..265] (glyph-4-10×2 ↔ glyph-4-9×1)
+  overlap @ y≈136.9: [260..265] × [258..263] (glyph-4-9×1 ↔ glyph-4-2×1)
+  overlap @ y≈138.6: [258..263] × [256..261] (glyph-4-2×1 ↔ glyph-4-8×2)
+  …4 more overlaps
+
+rtos/diagrams/part2-10-gpio-isr-trace.svg
+  overlap @ y≈98.1: [138..143] × [141..146] (glyph-3-0×1 ↔ glyph-4-1×1)
+
+set-theory/ch01/choice-function.svg
+  overlap @ y≈190.4: [69..74] × [69..74] (glyph-2-0×1 ↔ glyph-2-0×1)
+  overlap @ y≈194.4: [69..74] × [69..74] (glyph-2-0×1 ↔ glyph-2-0×1)
+
+set-theory/ch01/cumulative-hierarchy.svg
+  overlap @ y≈91.7: [238..243] × [238..243] (glyph-4-0×1 ↔ glyph-4-0×1)
+  overlap @ y≈95.7: [238..243] × [238..243] (glyph-4-0×1 ↔ glyph-4-0×1)
+  overlap @ y≈128.4: [14..19] × [14..19] (glyph-8-1×1 ↔ glyph-8-0×1)
+  overlap @ y≈131.7: [14..19] × [14..19] (glyph-8-0×1 ↔ glyph-7-2×1)
+
+seven-concurrency-models/diagrams/ch03-hamt-sharing.svg
+  overlap @ y≈194.6: [13..123] × [99..107] (glyph-10-0×14 ↔ glyph-12-0×2)
+
+seven-concurrency-models/diagrams/ch05-web-crawler.svg
+  overlap @ y≈130.8: [281..286] × [281..286] (glyph-2-0×1 ↔ glyph-2-0×1)
+  overlap @ y≈134.7: [281..286] × [281..286] (glyph-2-0×1 ↔ glyph-2-0×1)
+
+tools/diagrams/elf-lma-vma.svg
+  overlap @ y≈49.1: [150..155] × [148..153] (glyph-3-5×1 ↔ glyph-3-7×1)
+  overlap @ y≈51.6: [148..153] × [146..151] (glyph-3-7×1 ↔ glyph-3-6×1)
+  overlap @ y≈58.7: [141..146] × [139..144] (glyph-3-5×1 ↔ glyph-3-4×1)
+  overlap @ y≈67.1: [133..138] × [131..136] (glyph-3-2×1 ↔ glyph-3-1×1)
+  overlap @ y≈69.1: [131..136] × [129..134] (glyph-3-1×1 ↔ glyph-3-0×1)
+
+uml/diagrams/item33-comm-numbered.svg
+  overlap @ y≈50.3: [271..276] × [269..274] (glyph-2-4×1 ↔ glyph-2-5×1)
+  overlap @ y≈106.2: [253..260] × [256..261] (glyph-3-0×2 ↔ glyph-3-2×1)
+  overlap @ y≈112.7: [263..268] × [265..270] (glyph-3-4×1 ↔ glyph-3-5×1)
+  overlap @ y≈116.5: [268..273] × [271..278] (glyph-3-6×1 ↔ glyph-3-7×2)
+  overlap @ y≈119.1: [271..278] × [276..281] (glyph-3-7×2 ↔ glyph-3-9×1)
+  …1 more overlaps
+
+uml/diagrams/item33-communication.svg
+  overlap @ y≈43.3: [296..301] × [294..299] (glyph-4-6×1 ↔ glyph-4-5×1)
+  overlap @ y≈45.3: [294..299] × [292..297] (glyph-4-5×1 ↔ glyph-4-2×1)
+  overlap @ y≈47.8: [292..297] × [289..294] (glyph-4-2×1 ↔ glyph-4-4×1)
+  overlap @ y≈49.8: [289..294] × [287..292] (glyph-4-4×1 ↔ glyph-4-1×1)
+  overlap @ y≈51.9: [287..292] × [285..290] (glyph-4-1×1 ↔ glyph-4-2×1)
+  …12 more overlaps
+
+uml/diagrams/item34-timing.svg
+  overlap @ y≈93.1: [148..153] × [149..154] (glyph-5-0×1 ↔ glyph-5-1×1)
+  overlap @ y≈96.0: [149..154] × [149..154] (glyph-5-1×1 ↔ glyph-5-2×1)
+  overlap @ y≈101.2: [124..129] × [123..128] (glyph-4-6×1 ↔ glyph-4-5×1)
+  overlap @ y≈103.2: [92..97] × [93..98] (glyph-3-0×1 ↔ glyph-3-1×1)
+  overlap @ y≈103.8: [123..128] × [122..127] (glyph-4-5×1 ↔ glyph-4-4×1)
+  …5 more overlaps
