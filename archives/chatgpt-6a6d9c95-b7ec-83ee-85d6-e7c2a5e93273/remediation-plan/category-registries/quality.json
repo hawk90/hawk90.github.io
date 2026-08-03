@@ -1735,13 +1735,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-58. No Keyboard Test”?",
-      "scope": null,
+      "reviewQuestion": "Reassess tab order, focus trap, skip links, and keyboard activation after interactive component changes.",
+      "scope": "Repository keyboard accessibility assurance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-quality-contracts.mjs",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:quality-contracts && npm run audit:product-experience && npm run verify:release",
+          "result": "Escape-close and reduced-motion contracts are automated, while complete keyboard traversal and focus behavior are intentionally left to representative browser review."
+        }
+      ],
+      "residualRisk": "Focus order, traps, skip navigation, and non-pointer activation can regress without browser keyboard execution."
     },
     {
       "id": "AP-T-59",
@@ -1754,13 +1765,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-59. Focus Visible Test Missing”?",
-      "scope": null,
+      "reviewQuestion": "Reassess focus-visible styles across themes and interactive components after CSS or reset changes.",
+      "scope": "Repository focus-visibility assurance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/styles/global.css",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/audit-product-experience.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:quality-contracts && npm run audit:product-experience && npm run verify:release",
+          "result": "Global focus styling and selected interaction contracts are present, but the repository does not claim exhaustive browser assertions for every focusable component."
+        }
+      ],
+      "residualRisk": "A component-specific outline reset or theme contrast issue can hide focus without static detection; representative keyboard review remains required."
     },
     {
       "id": "AP-T-60",
@@ -1773,13 +1795,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-60. Focus Order Follows DOM Accidentally”?",
-      "scope": null,
+      "reviewQuestion": "Reassess focus order when visual reordering, dialogs, menus, or responsive layout changes are introduced.",
+      "scope": "Repository focus-order assurance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/components/common/SearchModal.astro",
+            "src/components/admin/AdminGuard.astro",
+            "scripts/audit-product-experience.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run verify:release",
+          "result": "Interactive components are covered by route/product contracts, but no automated assertion assumes DOM order is always an accessible focus order."
+        }
+      ],
+      "residualRisk": "CSS visual reordering and conditional rendering can produce an unintuitive tab sequence; manual keyboard walkthrough remains required for affected components."
     },
     {
       "id": "AP-T-61",
@@ -1850,13 +1883,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-63. High Contrast Untested”?",
-      "scope": null,
+      "reviewQuestion": "Reassess forced-colors/high-contrast behavior when color tokens, borders, SVGs, or focus indicators change.",
+      "scope": "Repository forced-colors accessibility assurance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/styles/global.css",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:diagram-accessibility && npm run audit:quality-contracts && npm run verify:release",
+          "result": "SVG metadata and selected style contracts are audited, but forced-colors/high-contrast rendering is not claimed as automatically covered."
+        }
+      ],
+      "residualRisk": "System high-contrast modes can override colors and borders in ways static CSS checks miss; manual forced-colors review remains required for UI changes."
     },
     {
       "id": "AP-T-64",
@@ -1869,13 +1913,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-64. Screen Reader Label Snapshot”?",
-      "scope": null,
+      "reviewQuestion": "Reassess accessible names and announcements with a screen reader when labels, live regions, or navigation change.",
+      "scope": "Repository screen-reader assurance boundary; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["src/components/common/SearchModal.astro", "src/components/admin/AdminGuard.astro", "scripts/audit-product-experience.mjs", "scripts/verify-release.mjs"],
+        "verification": "npm run audit:product-experience && npm run verify:release",
+        "result": "Accessible labels and route contracts are checked where encoded in source; full screen-reader output is not reduced to brittle snapshot strings."
+      }],
+      "residualRisk": "Screen-reader interpretation, verbosity, and announcement timing require manual assistive-technology review."
     },
     {
       "id": "AP-T-65",
@@ -1888,13 +1936,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-65. Semantic HTML Replaced by ARIA Tests”?",
-      "scope": null,
+      "reviewQuestion": "Reassess semantic element and ARIA usage when templates or interactive widgets change.",
+      "scope": "Repository semantic-markup assurance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["src/pages", "src/components", "scripts/audit-product-experience.mjs", "scripts/verify-release.mjs"],
+        "verification": "npm run audit:product-experience && npm run verify:release",
+        "result": "The quality policy does not treat ARIA label checks as a substitute for semantic HTML review; generated routes and component source remain the review surface."
+      }],
+      "residualRisk": "Static source review can miss context-specific semantic misuse; manual accessibility review remains required for new widgets."
     },
     {
       "id": "AP-T-66",
@@ -1907,13 +1959,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-66. Grammar Linter as Technical Validator”?",
-      "scope": null,
+      "reviewQuestion": "Reassess prose lint signals only as editorial hints; never promote them to technical correctness gates.",
+      "scope": "Repository editorial-vs-technical validation boundary; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["scripts/audit-tone-consistency.py", "scripts/audit-prose-staleness.py", "scripts/verify-release.mjs"],
+        "verification": "npm run audit:tone && npm run audit:staleness && npm run verify:release",
+        "result": "Editorial prose audits are advisory and are not part of the publish-blocking technical contract; build, schema, links, and artifacts have separate validators."
+      }],
+      "residualRisk": "Advisory prose signals can be ignored or misread; editorial review is still needed for clarity and technical meaning."
     },
     {
       "id": "AP-T-67",
@@ -1926,13 +1982,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-67. Minimum Word Count Rule”?",
-      "scope": null,
+      "reviewQuestion": "Reassess only if a topic-specific length constraint is justified by reader outcome or format requirements.",
+      "scope": "Repository editorial quality policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["scripts/audit-content-readiness.mjs", "scripts/audit-prose-staleness.py", "scripts/verify-release.mjs"],
+        "verification": "npm run audit:content-readiness && npm run verify:release",
+        "result": "Content readiness produces bounded review signals and does not impose a universal word-count gate on published or draft articles."
+      }],
+      "residualRisk": "Very short content can still be incomplete; editorial review must judge task coverage and reader utility rather than length alone."
     },
     {
       "id": "AP-T-68",
@@ -1945,13 +2005,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-68. Required Section Checklist Everywhere”?",
-      "scope": null,
+      "reviewQuestion": "Reassess section requirements per content type or series, not as a universal template constraint.",
+      "scope": "Repository content-structure policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["src/content.config.ts", "scripts/audit-content-readiness.mjs", "scripts/verify-release.mjs"],
+        "verification": "npm run audit:content-readiness && npm run verify:release",
+        "result": "Schema and readiness checks validate required metadata and integrity contracts without forcing one section checklist onto every article type."
+      }],
+      "residualRisk": "A document can omit a useful section while satisfying schema; topic-specific editorial review remains necessary."
     },
     {
       "id": "AP-T-69",
@@ -1964,13 +2028,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-69. Description Length as Quality”?",
-      "scope": null,
+      "reviewQuestion": "Reassess descriptions for clarity and search intent, not a universal character threshold.",
+      "scope": "Repository metadata editorial policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["src/content.config.ts", "scripts/verify-search.mjs", "scripts/verify-release.mjs"],
+        "verification": "npm run test:search && npm run verify:release",
+        "result": "Description fields participate in schema and search behavior, but length alone is not treated as a quality verdict."
+      }],
+      "residualRisk": "Descriptions can be technically valid yet unclear or misleading; editorial and search-result review remain required."
     },
     {
       "id": "AP-T-70",
@@ -1983,13 +2051,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-70. Duplicate Detector by Text Similarity Alone”?",
-      "scope": null,
+      "reviewQuestion": "Reassess duplicate candidates with source identity, topic, series, and human semantic review; similarity is only a signal.",
+      "scope": "Repository duplicate-review policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["scripts/prepare-semantic-merge-review.mjs", "scripts/audit-antipatterns.mjs", "scripts/verify-release.mjs"],
+        "verification": "npm run review:semantic-merges && npm run audit:antipatterns && npm run verify:release",
+        "result": "Similarity tooling creates a conservative review queue and does not delete or merge content automatically."
+      }],
+      "residualRisk": "Semantic duplicates can be missed or false-positive candidates can consume review time; decisions require traceable human disposition."
     },
     {
       "id": "AP-T-71",
@@ -2002,13 +2074,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-71. AI Detector as Quality Gate”?",
-      "scope": null,
+      "reviewQuestion": "Keep AI-origin signals advisory; never reject content solely from detector output.",
+      "scope": "Repository authorship and quality policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["scripts/verify-release.mjs", "scripts/audit-content-readiness.mjs", "scripts/README.md"],
+        "verification": "npm run audit:content-readiness && npm run verify:release",
+        "result": "No AI-detector result is part of the publish-blocking contract; quality checks focus on content integrity, links, metadata, and artifacts."
+      }],
+      "residualRisk": "Authorship or generated-content concerns require provenance and editorial review rather than a probabilistic detector."
     },
     {
       "id": "AP-T-72",
@@ -2021,13 +2097,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-72. Citation Count as Trust Score”?",
-      "scope": null,
+      "reviewQuestion": "Evaluate source authority, relevance, and claim coverage rather than citation count alone.",
+      "scope": "Repository evidence-quality policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["scripts/audit-cited-symbols.py", "scripts/audit-suspect-claims.sh", "scripts/verify-release.mjs"],
+        "verification": "npm run verify:release",
+        "result": "Available source audits identify claims and symbols for review; the release gate does not assign trust from a raw citation count."
+      }],
+      "residualRisk": "A cited claim can still be weak or stale, while a correct explanation may need few sources; human source evaluation remains required."
     },
     {
       "id": "AP-T-73",
@@ -2040,13 +2120,17 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-73. Environment Section Presence Only”?",
-      "scope": null,
+      "reviewQuestion": "Review reproducibility details for relevance and correctness, not merely presence of an environment heading.",
+      "scope": "Repository reproducibility editorial policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{
+        "files": ["scripts/audit-content-readiness.mjs", "scripts/audit-prose-staleness.py", "scripts/verify-release.mjs"],
+        "verification": "npm run audit:content-readiness && npm run verify:release",
+        "result": "Readiness checks provide review signals without declaring an article reproducible merely because an environment section exists."
+      }],
+      "residualRisk": "Environment claims can be incomplete or obsolete despite good structure; technical/editorial verification remains required."
     },
     {
       "id": "AP-T-74",
@@ -2088,13 +2172,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-75. Broken Claim Detection by Keyword”?",
-      "scope": null,
+      "reviewQuestion": "Use keyword signals only to route claims for source review; never treat a keyword match as proof of a broken claim.",
+      "scope": "Repository claim-review policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/audit-suspect-claims.sh","scripts/audit-cited-symbols.py","scripts/verify-release.mjs"],"verification":"npm run verify:release","result":"Claim and symbol audits are review queues, not automatic factual verdicts or publish blockers."}],
+      "residualRisk": "Keyword heuristics can miss nuanced errors or flag valid claims; primary-source and editorial review remain required."
     },
     {
       "id": "AP-T-76",
@@ -2194,13 +2278,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-79. Invalid Inverse Relation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess relation direction and inverse semantics if bidirectional relation kinds are introduced.",
+      "scope": "Repository editorial relation model; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["src/lib/content/relations.ts","scripts/verify-content-relations.mjs","scripts/verify-release.mjs"],"verification":"npm run test:relations && npm run verify:release","result":"The current model defines directed source-to-target relations and validates targets, publication status, self-links, kinds, and duplicates; inverse semantics are not silently inferred."}],
+      "residualRisk": "An inverse relationship may be editorially expected but is not represented unless explicitly modeled; review new relation kinds before use."
     },
     {
       "id": "AP-T-80",
@@ -2213,13 +2297,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-80. Circular Supersession”?",
-      "scope": null,
+      "reviewQuestion": "Reassess supersession graph cycles whenever lifecycle relations or publication curation rules change.",
+      "scope": "Repository lifecycle relation policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/audit-content-lifecycle.mjs","src/lib/content/curation.ts","scripts/verify-release.mjs"],"verification":"npm run audit:lifecycle && npm run verify:release","result":"Lifecycle and curation audits provide publication-state review signals; no automatic supersession cycle is inferred or silently repaired."}],
+      "residualRisk": "A future supersession graph could contain a cycle without a dedicated graph invariant; add one before introducing automated supersession traversal."
     },
     {
       "id": "AP-T-81",
@@ -2261,13 +2345,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-82. Missing Series Member”?",
-      "scope": null,
+      "reviewQuestion": "Reassess series gaps after adding, renaming, or reordering chapters.",
+      "scope": "Repository series integrity contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/audit-series-integrity.py","scripts/verify-release.mjs","reports/quality/series.md"],"verification":"npm run audit:series && npm run verify:release","result":"Series integrity audits inspect ordering, gaps, draft mixing, date order, and duplicate seriesOrder across the corpus."}],
+      "residualRisk": "A semantically missing chapter cannot always be inferred from numeric order; editorial series review remains required."
     },
     {
       "id": "AP-T-83",
@@ -2309,13 +2393,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-84. Superseded Article Remains Featured”?",
-      "scope": null,
+      "reviewQuestion": "Reassess featured and hub curation when publication lifecycle statuses or supersession rules change.",
+      "scope": "Repository publication curation contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["src/lib/content/curation.ts","src/lib/content/publication.ts","scripts/audit-quality-contracts.mjs","scripts/verify-release.mjs"],"verification":"npm run audit:quality-contracts && npm run verify:release","result":"Curation uses publication decisions to exclude non-renderable or superseded content from published hubs and related surfaces."}],
+      "residualRisk": "Editorial prominence can still be inappropriate for a technically current article; human curation remains necessary."
     },
     {
       "id": "AP-T-85",
@@ -2357,13 +2441,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-86. Asset Exists Means Correct”?",
-      "scope": null,
+      "reviewQuestion": "Reassess asset semantics and visual quality when generated assets or references change.",
+      "scope": "Repository asset correctness contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/audit-diagram-assets.mjs","scripts/audit-diagram-quality.mjs","scripts/audit-svg-accessibility.mjs","scripts/verify-release.mjs"],"verification":"npm run audit:diagrams && npm run audit:diagram-quality && npm run audit:diagram-accessibility && npm run verify:release","result":"Asset checks cover references, SVG structure, accessibility metadata, and quality candidates rather than existence alone."}],
+      "residualRisk": "A structurally valid asset can still be semantically wrong or visually misleading; ranked human review remains required."
     },
     {
       "id": "AP-T-87",
@@ -2376,13 +2460,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-87. Image Reference Without Dimension Check”?",
-      "scope": null,
+      "reviewQuestion": "Add dimension/aspect-ratio assertions when a layout contract depends on fixed image geometry.",
+      "scope": "Repository image layout assurance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/audit-image-coverage.py","scripts/audit-diagram-assets.mjs","scripts/verify-release.mjs"],"verification":"npm run audit:images && npm run audit:diagrams && npm run verify:release","result":"Image coverage and diagram asset checks validate references and structure; they do not claim universal intrinsic-dimension assertions."}],
+      "residualRisk": "Unexpected dimensions can cause layout shift or cropping; add targeted dimension checks for fixed-ratio components."
     },
     {
       "id": "AP-T-88",
@@ -2395,13 +2479,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-88. SVG Syntax Only Validation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess semantic and accessibility checks when SVG generation or embedding changes.",
+      "scope": "Repository SVG validation contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/audit-diagram-assets.mjs","scripts/audit-svg-accessibility.mjs","scripts/audit-svg-overlap.mjs","scripts/verify-release.mjs"],"verification":"npm run audit:diagrams && npm run audit:diagram-accessibility && npm run verify:release","result":"SVG validation covers structure, accessibility metadata, and selected overlap/layout checks rather than syntax alone."}],
+      "residualRisk": "Automated SVG checks cannot prove visual meaning or readability; human diagram review remains required."
     },
     {
       "id": "AP-T-89",
@@ -2414,13 +2498,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-89. OG Text Overflow Untested”?",
-      "scope": null,
+      "reviewQuestion": "Reassess representative OG title/description lengths after theme, font, or layout changes.",
+      "scope": "Repository OG visual assurance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/build-og.mjs","scripts/audit-product-experience.mjs","scripts/verify-release.mjs"],"verification":"npm run build && npm run verify:release","result":"OG generation is part of the build and uses escaped, bounded markup paths; a full screenshot/overflow oracle is not claimed."}],
+      "residualRisk": "Long localized titles can still overflow or wrap poorly; representative OG visual review remains required."
     },
     {
       "id": "AP-T-90",
@@ -2433,13 +2517,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-90. Missing Font Fallback in Generator”?",
-      "scope": null,
+      "reviewQuestion": "Reassess generator font fallback when adding new scripts, languages, or font assets.",
+      "scope": "Repository OG font contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/build-og.mjs","public/fonts/Pretendard-Bold.otf","scripts/verify-release.mjs"],"verification":"npm run build && npm run verify:release","result":"The OG generator loads a repository-pinned Pretendard font and passes font data to the renderer; failures abort generation instead of silently using an unknown fallback."}],
+      "residualRisk": "The single bundled weight may not cover every glyph or weight; add explicit fallback assets when new scripts require them."
     },
     {
       "id": "AP-T-91",
@@ -2626,13 +2710,13 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-97. CSP Header Presence Only”?",
-      "scope": null,
+      "reviewQuestion": "Reassess CSP directives against actual asset and admin behavior; header presence alone is insufficient.",
+      "scope": "Repository CSP assurance policy; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [{"files":["scripts/security-admin-gate.mjs","scripts/audit-ci-security.mjs",".github/workflows/deploy.yml","scripts/verify-release.mjs"],"verification":"npm run gate:security-admin -- --artifact dist && npm run gate:ci-security && npm run verify:release","result":"Security gates inspect static admin boundaries, workflow permissions, and generated artifacts; no CSP header's mere presence is treated as complete security proof."}],
+      "residualRisk": "CSP effectiveness depends on directive precision, browser behavior, and runtime endpoints; periodic security review remains required."
     },
     {
       "id": "AP-T-98",

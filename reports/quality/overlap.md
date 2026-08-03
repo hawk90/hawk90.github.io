@@ -1,7 +1,7 @@
 # Quality evidence overlap audit
 
-- Decided AP items: 68
-- Shared evidence profiles: 2
+- Decided AP items: 100
+- Shared evidence profiles: 5
 - Duplicate AP IDs: 0
 
 Shared evidence is not itself an anti-pattern duplicate. Keep atomic AP IDs for traceability; update the shared control once and rerun this report.
@@ -16,9 +16,27 @@ Shared evidence is not itself an anti-pattern duplicate. Keep atomic AP IDs for 
 
 ### Profile 02 — 2 AP items
 
+- Verification: `npm run audit:content-readiness && npm run verify:release`
+- Files: `scripts/audit-content-readiness.mjs`, `scripts/audit-prose-staleness.py`, `scripts/verify-release.mjs`
+- AP items: AP-T-67 (accepted) T-67. Minimum Word Count Rule; AP-T-73 (accepted) T-73. Environment Section Presence Only
+
+### Profile 03 — 2 AP items
+
 - Verification: `npm run audit:product-experience && npm run audit:diagram-quality && npm run verify:release`
 - Files: `scripts/audit-diagram-quality.mjs`, `scripts/audit-product-experience.mjs`, `scripts/build-diagram-review-index.mjs`, `scripts/verify-release.mjs`
 - AP items: AP-T-46 (accepted) T-46. Screenshot Every Page; AP-T-47 (accepted) T-47. No Visual Regression Test
+
+### Profile 04 — 2 AP items
+
+- Verification: `npm run audit:product-experience && npm run verify:release`
+- Files: `scripts/audit-product-experience.mjs`, `scripts/verify-release.mjs`, `src/components/admin/AdminGuard.astro`, `src/components/common/SearchModal.astro`
+- AP items: AP-T-60 (accepted) T-60. Focus Order Follows DOM Accidentally; AP-T-64 (accepted) T-64. Screen Reader Label Snapshot
+
+### Profile 05 — 2 AP items
+
+- Verification: `npm run verify:release`
+- Files: `scripts/audit-cited-symbols.py`, `scripts/audit-suspect-claims.sh`, `scripts/verify-release.mjs`
+- AP items: AP-T-72 (accepted) T-72. Citation Count as Trust Score; AP-T-75 (accepted) T-75. Broken Claim Detection by Keyword
 
 ## Review rule
 
