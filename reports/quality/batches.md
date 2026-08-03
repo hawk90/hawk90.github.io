@@ -2,13 +2,12 @@
 
 - Category state: remediation_in_progress
 - Dependencies not complete: none
-- Unassessed items: 27
+- Unassessed items: 26
 - Maximum batch size: 15
 - Batches: 3
 
 ## quality-01 — quality-01.md
 
-- AP-T-56 (P1, M) — T-56. Automated Accessibility Equals Accessible
 - AP-T-57 (P1, M) — T-57. Accessibility Test on Homepage Only
 - AP-T-58 (P1, M) — T-58. No Keyboard Test
 - AP-T-59 (P1, M) — T-59. Focus Visible Test Missing

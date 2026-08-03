@@ -1675,13 +1675,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-56. Automated Accessibility Equals Accessible”?",
-      "scope": null,
+      "reviewQuestion": "Reassess with manual keyboard, screen-reader, contrast, and reduced-motion review when accessible UI surfaces change.",
+      "scope": "Repository accessibility-assurance boundary; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/audit-product-experience.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:diagram-accessibility && npm run audit:quality-contracts && npm run verify:release",
+          "result": "Automated checks cover structural SVG metadata and selected UI contracts; the repository explicitly treats these as complementary checks, not proof of complete human accessibility."
+        }
+      ],
+      "residualRisk": "Automated checks can miss focus order, screen-reader comprehension, contrast context, touch targets, and cognitive accessibility; manual review remains required."
     },
     {
       "id": "AP-T-57",
