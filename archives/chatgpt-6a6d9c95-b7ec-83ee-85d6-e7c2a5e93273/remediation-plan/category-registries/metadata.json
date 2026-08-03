@@ -559,13 +559,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-16. Semantic Migration by Regex”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-16. semantic migration by regex after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Topic migration parses YAML frontmatter and compares semantic arrays; it does not use regex to rewrite document meaning."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-17",
@@ -578,13 +592,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-17. Path Migration Without Redirects”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-17. path migration without redirects after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Public URLs derive from stable content IDs and are independent of taxonomy paths; path changes do not silently rewrite URLs."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-18",
@@ -597,13 +625,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-18. Migration Without Validation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-18. migration without validation after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Migration emits conflicts/unclassified results and post-change classification audits before a release can pass."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-19",
@@ -616,13 +658,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-19. One Script per Symptom”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-19. one script per symptom after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "The repository keeps focused tools with explicit scopes; overlap and shared evidence are audited rather than forcing unrelated concerns into one command."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-20",
@@ -635,13 +691,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-20. Every Script Parses Markdown Differently”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-20. every script parses markdown differently after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Content tools use the Astro schema or js-yaml portability parser according to scope; no universal parser equivalence is claimed."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-21",
@@ -654,13 +724,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-21. Script as Undocumented Tribal Knowledge”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-21. script as undocumented tribal knowledge after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Scripts expose usage comments, package commands, README entries, and evidence reports rather than relying on undocumented tribal knowledge."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-22",
@@ -673,13 +757,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-22. Hidden Script Side Effects”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-22. hidden script side effects after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Mutating scripts default to preview/dry-run and require explicit --apply; affected-file reports make side effects visible."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-23",
@@ -692,13 +790,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-23. Auto-Fix Without Confidence”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-23. auto-fix without confidence after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Auto-fix paths require explicit apply and refuse conflicts/unclassified records instead of guessing."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-24",
@@ -711,13 +823,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-24. No Fixture Tests for Content Tools”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-24. no fixture tests for content tools after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Representative regression commands exist, while exhaustive fixtures for every content tool remain a targeted follow-up rather than an implied guarantee."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-25",
@@ -730,13 +856,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-25. Full Repository Scan for Every Command”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-25. full repository scan for every command after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Scans are scoped per command and report their corpus; a full repository scan is not treated as universally necessary for every rule."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-26",
@@ -749,13 +889,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-26. Tool Output as Unstructured Text”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-26. tool output as unstructured text after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Machine-readable JSON and human-readable Markdown reports are emitted for migration and audit commands."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-27",
@@ -768,13 +922,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-27. No Severity Model”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-27. no severity model after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "The remediation triage and category registries carry priority/effort scales and disposition fields."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-28",
@@ -787,13 +955,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-28. Rule Without Rationale”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-28. rule without rationale after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Rules retain source IDs, scope, review questions, evidence, and rationale; a new rule still requires semantic review."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-29",
@@ -806,13 +988,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-29. Rule Explosion”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-29. rule explosion after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "The registry preserves atomic IDs for traceability while overlap audits identify shared evidence without silently merging distinct claims."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-30",
@@ -825,13 +1021,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-30. Linter as Editorial Authority”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-30. linter as editorial authority after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Lint/audit output is a review signal; editorial decisions remain explicit metadata/governance decisions and are not auto-published."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-31",

@@ -2,29 +2,11 @@
 
 - Category state: baseline_established
 - Dependencies not complete: none
-- Unassessed items: 75
+- Unassessed items: 60
 - Maximum batch size: 15
-- Batches: 5
+- Batches: 4
 
 ## metadata-01 — metadata-01.md
-
-- AP-M-16 (P1, L) — M-16. Semantic Migration by Regex
-- AP-M-17 (P1, L) — M-17. Path Migration Without Redirects
-- AP-M-18 (P1, L) — M-18. Migration Without Validation
-- AP-M-19 (P1, M) — M-19. One Script per Symptom
-- AP-M-20 (P1, M) — M-20. Every Script Parses Markdown Differently
-- AP-M-21 (P1, M) — M-21. Script as Undocumented Tribal Knowledge
-- AP-M-22 (P1, M) — M-22. Hidden Script Side Effects
-- AP-M-23 (P1, M) — M-23. Auto-Fix Without Confidence
-- AP-M-24 (P1, M) — M-24. No Fixture Tests for Content Tools
-- AP-M-25 (P1, M) — M-25. Full Repository Scan for Every Command
-- AP-M-26 (P1, M) — M-26. Tool Output as Unstructured Text
-- AP-M-27 (P1, M) — M-27. No Severity Model
-- AP-M-28 (P1, M) — M-28. Rule Without Rationale
-- AP-M-29 (P1, M) — M-29. Rule Explosion
-- AP-M-30 (P1, M) — M-30. Linter as Editorial Authority
-
-## metadata-02 — metadata-01.md
 
 - AP-M-31 (P1, M) — M-31. CI as the Only Reproducible Environment
 - AP-M-32 (P1, M) — M-32. Local and CI Command Divergence
@@ -42,7 +24,7 @@
 - AP-M-44 (P1, M) — M-44. Dependency for a Trivial Function
 - AP-M-45 (P1, M) — M-45. Multiple Libraries for the Same Job
 
-## metadata-03 — metadata-01.md
+## metadata-02 — metadata-01.md
 
 - AP-M-46 (P1, M) — M-46. Unbounded Plugin Stack
 - AP-M-47 (P1, M) — M-47. Major Upgrade by Habit
@@ -60,7 +42,7 @@
 - AP-M-59 (P1, M) — M-59. No Content Authoring Guide
 - AP-M-60 (P1, M) — M-60. Documentation Without Deletion
 
-## metadata-04 — metadata-02.md
+## metadata-03 — metadata-02.md
 
 - AP-M-61 (P1, M) — M-61. Source–Artifact Ambiguity
 - AP-M-62 (P1, M) — M-62. Generated File Modified Manually
@@ -78,7 +60,7 @@
 - AP-M-74 (P1, M) — M-74. New Content Before Existing Debt
 - AP-M-75 (P1, M) — M-75. No Merge Policy for Similar Articles
 
-## metadata-05 — metadata-02.md
+## metadata-04 — metadata-02.md
 
 - AP-M-76 (P1, M) — M-76. Deletion Aversion
 - AP-M-77 (P1, M) — M-77. Update Without Revalidation
