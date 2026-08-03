@@ -34,7 +34,7 @@ for (const item of items) {
   item.scope = 'Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.';
   item.evidence = [{
     files,
-    verification: 'npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability',
+    verification: 'npm run audit:repository-controls && npm run gate:repository && npm run audit:content-portability',
     result: lane === 'content_and_media_preservation'
       ? 'The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized.'
       : 'Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred.',

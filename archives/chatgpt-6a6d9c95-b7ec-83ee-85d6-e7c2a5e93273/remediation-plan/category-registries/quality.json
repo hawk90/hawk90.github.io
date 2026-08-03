@@ -389,7 +389,7 @@
             "scripts/audit-internal-links.py",
             "scripts/audit-quality-contracts.mjs"
           ],
-          "verification": "npm run verify:search && npm run test:relations && npm run audit:links && npm run audit:quality-contracts",
+          "verification": "npm run test:search && npm run test:relations && npm run audit:links && npm run audit:quality-contracts",
           "result": "The quality checks assert observable search, relation, link, and contract outcomes; they do not mock or assert private helper call order or internal implementation details."
         }
       ],
@@ -1536,7 +1536,7 @@
             "scripts/verify-search.mjs",
             "scripts/verify-release.mjs"
           ],
-          "verification": "npm run audit:product-experience && npm run audit:quality-contracts && npm run verify:search && npm run verify:release",
+          "verification": "npm run audit:product-experience && npm run audit:quality-contracts && npm run test:search && npm run verify:release",
           "result": "Static checks cover route, search, reduced-motion, escape-close, and artifact contracts; they do not claim to exercise every browser interaction through screenshots."
         }
       ],
@@ -1566,7 +1566,7 @@
             "src/pages/random.astro",
             "src/lib/admin/notifications.ts"
           ],
-          "verification": "npm run verify:search && npm run verify:release",
+          "verification": "npm run test:search && npm run verify:release",
           "result": "Static publishing and search checks use deterministic source data; runtime random, time, and notification surfaces are not treated as unseeded screenshot baselines."
         }
       ],
@@ -2350,7 +2350,7 @@
       "reviewQuestion": "Reassess series gaps after adding, renaming, or reordering chapters.",
       "scope": "Repository series integrity contract; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [{"files":["scripts/audit-series-integrity.py","scripts/verify-release.mjs","reports/quality/series.md"],"verification":"npm run audit:series && npm run verify:release","result":"Series integrity audits inspect ordering, gaps, draft mixing, date order, and duplicate seriesOrder across the corpus."}],
+      "evidence": [{"files":["scripts/audit-series-integrity.py","scripts/verify-release.mjs","reports/content-readiness/series.json"],"verification":"npm run audit:series && npm run verify:release","result":"Series integrity audits inspect ordering, gaps, draft mixing, date order, and duplicate seriesOrder across the corpus."}],
       "residualRisk": "A semantically missing chapter cannot always be inferred from numeric order; editorial series review remains required."
     },
     {
