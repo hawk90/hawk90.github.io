@@ -12,297 +12,6 @@
       "source": "security-01.md",
       "items": [
         {
-          "id": "AP-SEC-01",
-          "title": "SEC-01. Static Means Secure",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-01",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-01. Static Means Secure”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-02",
-          "title": "SEC-02. No Backend, No Sensitive Data",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-02",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-02. No Backend, No Sensitive Data”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-03",
-          "title": "SEC-03. Public Repository as a Secret Store",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-03",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-03. Public Repository as a Secret Store”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-04",
-          "title": "SEC-04. Security by Obscurity",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-04",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-04. Security by Obscurity”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-05",
-          "title": "SEC-05. Development Feature in Production",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-05",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-05. Development Feature in Production”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-06",
-          "title": "SEC-06. Trust Every Third-Party Script",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-06",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-06. Trust Every Third-Party Script”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-07",
-          "title": "SEC-07. Third-Party Script Accumulation",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-07",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-07. Third-Party Script Accumulation”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-08",
-          "title": "SEC-08. Third-Party Script in Critical Path",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-08",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-08. Third-Party Script in Critical Path”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-09",
-          "title": "SEC-09. No Content Security Policy",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-09",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-09. No Content Security Policy”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-10",
-          "title": "SEC-10. CSP Added After Everything",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-10",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-10. CSP Added After Everything”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-11",
-          "title": "SEC-11. CSP with `unsafe-inline` Everywhere",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-11",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-11. CSP with `unsafe-inline` Everywhere”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-12",
-          "title": "SEC-12. CSP Report Ignored",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-12",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-12. CSP Report Ignored”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-13",
-          "title": "SEC-13. No Subresource Integrity",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-13",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-13. No Subresource Integrity”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-14",
-          "title": "SEC-14. SRI Without `crossorigin`",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-14",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-14. SRI Without `crossorigin`”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-15",
-          "title": "SEC-15. Script Version Floating",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-15",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-15. Script Version Floating”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        }
-      ]
-    },
-    {
-      "id": "security-02",
-      "source": "security-01.md",
-      "items": [
-        {
           "id": "AP-SEC-16",
           "title": "SEC-16. Same-Origin Proxy as Automatic Trust",
           "priority": "P0",
@@ -590,7 +299,7 @@
       ]
     },
     {
-      "id": "security-03",
+      "id": "security-02",
       "source": "security-01.md",
       "items": [
         {
@@ -881,7 +590,7 @@
       ]
     },
     {
-      "id": "security-04",
+      "id": "security-03",
       "source": "security-01.md",
       "items": [
         {
@@ -1172,7 +881,7 @@
       ]
     },
     {
-      "id": "security-05",
+      "id": "security-04",
       "source": "security-02.md",
       "items": [
         {
@@ -1463,7 +1172,7 @@
       ]
     },
     {
-      "id": "security-06",
+      "id": "security-05",
       "source": "security-02.md",
       "items": [
         {
@@ -1754,7 +1463,7 @@
       ]
     },
     {
-      "id": "security-07",
+      "id": "security-06",
       "source": "security-02.md",
       "items": [
         {

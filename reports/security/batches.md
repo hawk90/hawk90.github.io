@@ -2,29 +2,11 @@
 
 - Category state: baseline_established
 - Dependencies not complete: repository, quality
-- Unassessed items: 100
+- Unassessed items: 85
 - Maximum batch size: 15
-- Batches: 7
+- Batches: 6
 
 ## security-01 — security-01.md
-
-- AP-SEC-01 (P0, L) — SEC-01. Static Means Secure
-- AP-SEC-02 (P0, L) — SEC-02. No Backend, No Sensitive Data
-- AP-SEC-03 (P0, L) — SEC-03. Public Repository as a Secret Store
-- AP-SEC-04 (P0, L) — SEC-04. Security by Obscurity
-- AP-SEC-05 (P0, L) — SEC-05. Development Feature in Production
-- AP-SEC-06 (P0, L) — SEC-06. Trust Every Third-Party Script
-- AP-SEC-07 (P0, L) — SEC-07. Third-Party Script Accumulation
-- AP-SEC-08 (P0, L) — SEC-08. Third-Party Script in Critical Path
-- AP-SEC-09 (P0, L) — SEC-09. No Content Security Policy
-- AP-SEC-10 (P0, L) — SEC-10. CSP Added After Everything
-- AP-SEC-11 (P0, L) — SEC-11. CSP with `unsafe-inline` Everywhere
-- AP-SEC-12 (P0, L) — SEC-12. CSP Report Ignored
-- AP-SEC-13 (P0, L) — SEC-13. No Subresource Integrity
-- AP-SEC-14 (P0, L) — SEC-14. SRI Without `crossorigin`
-- AP-SEC-15 (P0, L) — SEC-15. Script Version Floating
-
-## security-02 — security-01.md
 
 - AP-SEC-16 (P0, L) — SEC-16. Same-Origin Proxy as Automatic Trust
 - AP-SEC-17 (P0, L) — SEC-17. Markdown Is Trusted HTML
@@ -42,7 +24,7 @@
 - AP-SEC-29 (P0, L) — SEC-29. Arbitrary Third-Party Action
 - AP-SEC-30 (P0, L) — SEC-30. Default Broad Workflow Permissions
 
-## security-03 — security-01.md
+## security-02 — security-01.md
 
 - AP-SEC-31 (P0, L) — SEC-31. Write Token in Build Job
 - AP-SEC-32 (P0, L) — SEC-32. Secrets Available to Every Step
@@ -60,7 +42,7 @@
 - AP-SEC-44 (P0, L) — SEC-44. Automatic Major Update Merge
 - AP-SEC-45 (P0, L) — SEC-45. Vulnerability Count Theater
 
-## security-04 — security-01.md
+## security-03 — security-01.md
 
 - AP-SEC-46 (P0, L) — SEC-46. Ignoring Build-Time Compromise
 - AP-SEC-47 (P0, L) — SEC-47. Install Script Trust
@@ -78,7 +60,7 @@
 - AP-SEC-59 (P0, L) — SEC-59. Token in URL
 - AP-SEC-100 (P0, L) — SEC-100. Maximum Security Complexity
 
-## security-05 — security-02.md
+## security-04 — security-02.md
 
 - AP-SEC-60 (P0, L) — SEC-60. Editor Can Commit Anywhere
 - AP-SEC-61 (P0, L) — SEC-61. Editor Can Modify Workflow Files
@@ -96,7 +78,7 @@
 - AP-SEC-73 (P0, L) — SEC-73. Giscus as a First-Party Comment Store
 - AP-SEC-74 (P0, L) — SEC-74. Loading Comments Before User Intent
 
-## security-06 — security-02.md
+## security-05 — security-02.md
 
 - AP-SEC-75 (P0, L) — SEC-75. Advertising Identifier Assumptions
 - AP-SEC-76 (P0, L) — SEC-76. HTTPS Optional
@@ -114,7 +96,7 @@
 - AP-SEC-88 (P0, L) — SEC-88. Real Token in Tutorial
 - AP-SEC-89 (P0, L) — SEC-89. Secret Redaction by Partial Mask
 
-## security-07 — security-02.md
+## security-06 — security-02.md
 
 - AP-SEC-90 (P0, L) — SEC-90. Private Draft in Git History
 - AP-SEC-91 (P0, L) — SEC-91. No Security Update Routine

@@ -19,13 +19,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-01. Static Means Secure”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-01. static means secure after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Static output is a deployment property, not a security proof; the security/admin and CI gates enforce explicit boundaries."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-02",
@@ -38,13 +52,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-02. No Backend, No Sensitive Data”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-02. no backend, no sensitive data after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The site has no runtime backend requirement and analytics is disabled, but absence of a backend is not treated as a blanket security claim."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-03",
@@ -57,13 +85,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-03. Public Repository as a Secret Store”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-03. public repository as a secret store after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Secret and artifact gates inspect the repository and production artifact; no secret-bearing source is authorized by the static deployment contract."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-04",
@@ -76,13 +118,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-04. Security by Obscurity”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-04. security by obscurity after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Security decisions are enforced by checked-in gates and workflow permissions rather than obscurity."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-05",
@@ -95,13 +151,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-05. Development Feature in Production”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-05. development feature in production after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The release contract and static-admin boundary run before publication; development-only admin routes are excluded from the artifact."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-06",
@@ -114,13 +184,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-06. Trust Every Third-Party Script”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-06. trust every third-party script after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Third-party integrations are explicitly enumerated in CSP and optional integrations are kept outside the core recovery path."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-07",
@@ -133,13 +217,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-07. Third-Party Script Accumulation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-07. third-party script accumulation after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The repository does not claim a universal third-party script budget; each integration remains an explicit, reviewable configuration surface."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-08",
@@ -152,13 +250,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-08. Third-Party Script in Critical Path”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-08. third-party script in critical path after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Comments and analytics are optional and gated; the static article remains renderable without those providers."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-09",
@@ -171,13 +283,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-09. No Content Security Policy”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-09. no content security policy after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "BaseLayout emits a restrictive default-src self CSP with explicit script, style, frame, object, base, and form boundaries."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-10",
@@ -190,13 +316,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-10. CSP Added After Everything”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-10. csp added after everything after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "CSP is checked into the base layout and exercised by the release/security contracts; historical introduction order is not inferred."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-100",
@@ -228,13 +368,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-11. CSP with `unsafe-inline` Everywhere”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-11. csp with `unsafe-inline` everywhere after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The CSP documents the narrow inline-script exception required by the current Astro theme path; removing it requires a separate nonce/hash design."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-12",
@@ -247,13 +401,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-12. CSP Report Ignored”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-12. csp report ignored after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The CSP is treated as a bounded preventive control; browser report collection is not claimed where no reporting endpoint exists."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-13",
@@ -266,13 +434,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-13. No Subresource Integrity”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-13. no subresource integrity after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "No blanket SRI claim is made for optional provider content; external integrations remain allowlisted and independently reviewable."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-14",
@@ -285,13 +467,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-14. SRI Without `crossorigin`”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-14. sri without `crossorigin` after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "No cross-origin script is declared safe solely from a crossorigin attribute; provider loading remains an explicit manual-review boundary."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-15",
@@ -304,13 +500,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-15. Script Version Floating”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-15. script version floating after security, deployment, or integration changes.",
+      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Floating provider behavior is not silently trusted; external origins are pinned in the CSP/configuration and must be reassessed when changed."
+        }
+      ],
+      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
     },
     {
       "id": "AP-SEC-16",
