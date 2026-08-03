@@ -349,13 +349,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-100. Maximum Security Complexity”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-100. maximum security complexity after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "The program keeps explicit scope, dependency ordering, residual-risk fields, and manual-review boundaries instead of claiming maximal security complexity is desirable."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-11",
@@ -3079,13 +3096,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-90. Private Draft in Git History”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-90. private draft in git history after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "Private draft exposure in historical Git objects requires repository-history review; current source and artifact secret gates do not prove historical absence."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-91",
@@ -3098,13 +3132,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-91. No Security Update Routine”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-91. no security update routine after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "CI runs a scheduled weekly verification in addition to pull-request/push checks and the release contract includes security gates."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-92",
@@ -3117,13 +3168,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-92. Alert Fatigue”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-92. alert fatigue after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "Findings are reported by control and priority; scanner output is treated as a review signal rather than an undifferentiated alert stream."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-93",
@@ -3136,13 +3204,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-93. Security Scanner as Proof of Safety”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-93. security scanner as proof of safety after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "Security gates explicitly document their bounded scope and are combined with build, artifact, dependency, and manual review controls."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-94",
@@ -3155,13 +3240,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-94. No Integration Inventory”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-94. no integration inventory after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "Integrations are represented in checked-in config, CSP, privacy documentation, and product-experience audits."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-95",
@@ -3174,13 +3276,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-95. No Secret Rotation Plan”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-95. no secret rotation plan after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "Secret rotation depends on external account/provider operations; repository scans cannot attest to token age or revocation."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-96",
@@ -3193,13 +3312,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-96. Incident Means Site Defacement Only”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-96. incident means site defacement only after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "The recovery runbook classifies incidents beyond defacement and documents readable-site recovery priority; external incident response remains manual."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-97",
@@ -3212,13 +3348,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-97. No Deployment Provenance”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-97. no deployment provenance after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "Deployment provenance is bounded by main-only workflow execution and immutable action pins; cryptographic attestation is not claimed."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-98",
@@ -3231,13 +3384,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-98. Manual Emergency Edit”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-98. manual emergency edit after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "Emergency edits are constrained by the additive preservation policy and release gates; no emergency host/account exercise is inferred."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     },
     {
       "id": "AP-SEC-99",
@@ -3250,13 +3420,30 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-99. Security Controls Without Tests”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-99. security controls without tests after lifecycle, incident, or release-process changes.",
+      "scope": "Repository-controlled security lifecycle boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/audit-ci-security.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-quality-contracts.mjs",
+            "scripts/verify-release.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "src/consts/config.ts",
+            "src/layouts/BaseLayout.astro"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run audit:quality-contracts",
+          "result": "Security controls are wired into CI/release and quality contracts, with zero findings from the current security and artifact gates."
+        }
+      ],
+      "residualRisk": "Historical Git objects, provider/account rotation, cryptographic provenance, and emergency-host exercises require external or targeted manual evidence."
     }
   ]
 }
