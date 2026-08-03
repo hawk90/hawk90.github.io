@@ -37,272 +37,6 @@
       "source": "security-02.md",
       "items": [
         {
-          "id": "AP-SEC-61",
-          "title": "SEC-61. Editor Can Modify Workflow Files",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-61",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-61. Editor Can Modify Workflow Files”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-62",
-          "title": "SEC-62. Unsanitized Commit Message",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-62",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-62. Unsanitized Commit Message”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-63",
-          "title": "SEC-63. No Conflict Detection",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-63",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-63. No Conflict Detection”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-64",
-          "title": "SEC-64. Analytics Without Data Inventory",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-64",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-64. Analytics Without Data Inventory”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-65",
-          "title": "SEC-65. Privacy Policy by Template",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-65",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-65. Privacy Policy by Template”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-66",
-          "title": "SEC-66. Privacy Policy Drift",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-66",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-66. Privacy Policy Drift”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-67",
-          "title": "SEC-67. Consent Banner Theater",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-67",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-67. Consent Banner Theater”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-68",
-          "title": "SEC-68. Consent for Everything",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-68",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-68. Consent for Everything”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-69",
-          "title": "SEC-69. Local Storage Without Disclosure",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-69",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-69. Local Storage Without Disclosure”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-70",
-          "title": "SEC-70. Persistent Search History",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-70",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-70. Persistent Search History”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-71",
-          "title": "SEC-71. Full URL Analytics Leakage",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-71",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-71. Full URL Analytics Leakage”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-72",
-          "title": "SEC-72. Error Logging with Page Content",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-72",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-72. Error Logging with Page Content”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-73",
-          "title": "SEC-73. Giscus as a First-Party Comment Store",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-73",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-73. Giscus as a First-Party Comment Store”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-74",
-          "title": "SEC-74. Loading Comments Before User Intent",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-74",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-74. Loading Comments Before User Intent”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
           "id": "AP-SEC-75",
           "title": "SEC-75. Advertising Identifier Assumptions",
           "priority": "P0",
@@ -320,13 +54,7 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        }
-      ]
-    },
-    {
-      "id": "security-03",
-      "source": "security-02.md",
-      "items": [
+        },
         {
           "id": "AP-SEC-76",
           "title": "SEC-76. HTTPS Optional",
@@ -592,7 +320,13 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        },
+        }
+      ]
+    },
+    {
+      "id": "security-03",
+      "source": "security-02.md",
+      "items": [
         {
           "id": "AP-SEC-90",
           "title": "SEC-90. Private Draft in Git History",
@@ -611,13 +345,7 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        }
-      ]
-    },
-    {
-      "id": "security-04",
-      "source": "security-02.md",
-      "items": [
+        },
         {
           "id": "AP-SEC-91",
           "title": "SEC-91. No Security Update Routine",

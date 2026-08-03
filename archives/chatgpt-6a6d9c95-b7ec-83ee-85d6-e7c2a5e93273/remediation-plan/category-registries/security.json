@@ -2093,13 +2093,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-61. Editor Can Modify Workflow Files”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-61. editor can modify workflow files after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Workflow files are outside the content editor path; GitHub branch/repository permissions remain the authoritative external control."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-62",
@@ -2112,13 +2127,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-62. Unsanitized Commit Message”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-62. unsanitized commit message after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Commit messages are generated from editor inputs and remain a reviewable GitHub API boundary; no shell execution is performed."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-63",
@@ -2131,13 +2161,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-63. No Conflict Detection”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-63. no conflict detection after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Edit flow fetches the current file SHA before update and refuses stale writes through the GitHub contents API contract."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-64",
@@ -2150,13 +2195,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-64. Analytics Without Data Inventory”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-64. analytics without data inventory after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Analytics is disabled in checked-in config, while the privacy page remains an explicit content-policy review surface."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-65",
@@ -2169,13 +2229,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-65. Privacy Policy by Template”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-65. privacy policy by template after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The privacy page is a maintained project document, not a generated legal guarantee; provider-specific claims require manual review."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-66",
@@ -2188,13 +2263,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-66. Privacy Policy Drift”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-66. privacy policy drift after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Privacy text carries a last-updated marker; configuration changes require a targeted policy review rather than silent template assumptions."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-67",
@@ -2207,13 +2297,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-67. Consent Banner Theater”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-67. consent banner theater after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "No consent banner is claimed for disabled first-party analytics; any future tracking provider requires a separate consent design."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-68",
@@ -2226,13 +2331,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-68. Consent for Everything”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-68. consent for everything after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Consent scope is not generalized across services; optional comments and provider integrations are documented separately."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-69",
@@ -2245,13 +2365,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-69. Local Storage Without Disclosure”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-69. local storage without disclosure after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Local storage is limited to UI/admin draft or notification state; disclosure and retention remain a manual privacy review boundary."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-70",
@@ -2264,13 +2399,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-70. Persistent Search History”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-70. persistent search history after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Search does not persist query history; local storage is used for bounded UI settings and comment notification state only."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-71",
@@ -2283,13 +2433,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-71. Full URL Analytics Leakage”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-71. full url analytics leakage after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Analytics is disabled, so the site does not intentionally send full URL telemetry; hosted GitHub Pages logs remain external."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-72",
@@ -2302,13 +2467,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-72. Error Logging with Page Content”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-72. error logging with page content after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Client error handling does not publish page content to a repository-controlled logging service; provider diagnostics remain external."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-73",
@@ -2321,13 +2501,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-73. Giscus as a First-Party Comment Store”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-73. giscus as a first-party comment store after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Privacy copy identifies Giscus as GitHub Discussions-backed third-party comments, and the component does not treat it as first-party storage."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-74",
@@ -2340,13 +2535,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-74. Loading Comments Before User Intent”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-74. loading comments before user intent after admin, privacy, storage, or integration changes.",
+      "scope": "Static admin, privacy, storage, and optional-comment boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/admin/edit.astro",
+            "src/lib/admin/github-api.ts",
+            "src/pages/privacy.astro",
+            "src/consts/config.ts",
+            "src/components/blog/Giscus.astro",
+            "src/lib/admin/notifications.ts",
+            "src/components/common/SearchModal.astro",
+            "scripts/audit-product-experience.mjs"
+          ],
+          "verification": "npm run audit:product-experience && npm run gate:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Giscus loading is deferred behind IntersectionObserver and configuration checks instead of loading before user intent/viewport relevance."
+        }
+      ],
+      "residualRisk": "Account permissions, legal accuracy, hosted provider processing, and future analytics/configuration changes require targeted manual review."
     },
     {
       "id": "AP-SEC-75",

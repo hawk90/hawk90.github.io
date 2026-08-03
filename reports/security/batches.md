@@ -2,9 +2,9 @@
 
 - Category state: baseline_established
 - Dependencies not complete: repository, quality
-- Unassessed items: 40
+- Unassessed items: 26
 - Maximum batch size: 15
-- Batches: 4
+- Batches: 3
 
 ## security-01 — security-01.md
 
@@ -12,24 +12,7 @@
 
 ## security-02 — security-02.md
 
-- AP-SEC-61 (P0, L) — SEC-61. Editor Can Modify Workflow Files
-- AP-SEC-62 (P0, L) — SEC-62. Unsanitized Commit Message
-- AP-SEC-63 (P0, L) — SEC-63. No Conflict Detection
-- AP-SEC-64 (P0, L) — SEC-64. Analytics Without Data Inventory
-- AP-SEC-65 (P0, L) — SEC-65. Privacy Policy by Template
-- AP-SEC-66 (P0, L) — SEC-66. Privacy Policy Drift
-- AP-SEC-67 (P0, L) — SEC-67. Consent Banner Theater
-- AP-SEC-68 (P0, L) — SEC-68. Consent for Everything
-- AP-SEC-69 (P0, L) — SEC-69. Local Storage Without Disclosure
-- AP-SEC-70 (P0, L) — SEC-70. Persistent Search History
-- AP-SEC-71 (P0, L) — SEC-71. Full URL Analytics Leakage
-- AP-SEC-72 (P0, L) — SEC-72. Error Logging with Page Content
-- AP-SEC-73 (P0, L) — SEC-73. Giscus as a First-Party Comment Store
-- AP-SEC-74 (P0, L) — SEC-74. Loading Comments Before User Intent
 - AP-SEC-75 (P0, L) — SEC-75. Advertising Identifier Assumptions
-
-## security-03 — security-02.md
-
 - AP-SEC-76 (P0, L) — SEC-76. HTTPS Optional
 - AP-SEC-77 (P0, L) — SEC-77. Mixed Content
 - AP-SEC-78 (P0, L) — SEC-78. Dangling Custom Domain
@@ -44,10 +27,10 @@
 - AP-SEC-87 (P0, L) — SEC-87. Personal Path Leakage
 - AP-SEC-88 (P0, L) — SEC-88. Real Token in Tutorial
 - AP-SEC-89 (P0, L) — SEC-89. Secret Redaction by Partial Mask
+
+## security-03 — security-02.md
+
 - AP-SEC-90 (P0, L) — SEC-90. Private Draft in Git History
-
-## security-04 — security-02.md
-
 - AP-SEC-91 (P0, L) — SEC-91. No Security Update Routine
 - AP-SEC-92 (P0, L) — SEC-92. Alert Fatigue
 - AP-SEC-93 (P0, L) — SEC-93. Security Scanner as Proof of Safety
