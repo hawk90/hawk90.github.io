@@ -20,4 +20,6 @@
 - Findings: 1
 - repository: external recovery evidence is deferred; AP-R closure is prohibited by the runbook
 
+- User-approved external-risk deferral recorded: yes
+- Deferral closure impact: This is not evidence of recovery completion and does not complete AP-R.
 - External recovery: deferred until non-secret evidence records are supplied.

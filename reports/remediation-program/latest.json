@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-03T02:43:22.944Z",
+  "generatedAt": "2026-08-03T02:49:59.221Z",
   "categories": [
     {
       "id": "methodology",
@@ -278,5 +278,7 @@
   "findings": [
     "repository: external recovery evidence is deferred; AP-R closure is prohibited by the runbook"
   ],
-  "externalRecoveryDeferred": true
+  "externalRecoveryDeferred": true,
+  "externalRiskDeferralRecorded": true,
+  "externalRiskDeferralClosureImpact": "This is not evidence of recovery completion and does not complete AP-R."
 }
