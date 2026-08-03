@@ -12,297 +12,6 @@
       "source": "security-01.md",
       "items": [
         {
-          "id": "AP-SEC-16",
-          "title": "SEC-16. Same-Origin Proxy as Automatic Trust",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-16",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-16. Same-Origin Proxy as Automatic Trust”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-17",
-          "title": "SEC-17. Markdown Is Trusted HTML",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-17",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-17. Markdown Is Trusted HTML”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-18",
-          "title": "SEC-18. Raw HTML Everywhere",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-18",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-18. Raw HTML Everywhere”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-19",
-          "title": "SEC-19. Unsafe HTML Injection",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-19",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-19. Unsafe HTML Injection”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-20",
-          "title": "SEC-20. Search Highlight via String Replacement",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-20",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-20. Search Highlight via String Replacement”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-21",
-          "title": "SEC-21. Unescaped Front Matter",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-21",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-21. Unescaped Front Matter”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-22",
-          "title": "SEC-22. Trusting Generated Content",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-22",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-22. Trusting Generated Content”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-23",
-          "title": "SEC-23. Unsafe URL Scheme",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-23",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-23. Unsafe URL Scheme”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-24",
-          "title": "SEC-24. Unrestricted Iframe Embedding",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-24",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-24. Unrestricted Iframe Embedding”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-25",
-          "title": "SEC-25. Overpowered Iframe Sandbox",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-25",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-25. Overpowered Iframe Sandbox”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-26",
-          "title": "SEC-26. Untrusted SVG as Image",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-26",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-26. Untrusted SVG as Image”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-27",
-          "title": "SEC-27. Generated SVG Injection",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-27",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-27. Generated SVG Injection”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-28",
-          "title": "SEC-28. Actions Pinned by Mutable Tag",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-28",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-28. Actions Pinned by Mutable Tag”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-29",
-          "title": "SEC-29. Arbitrary Third-Party Action",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-29",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-29. Arbitrary Third-Party Action”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-30",
-          "title": "SEC-30. Default Broad Workflow Permissions",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-30",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-30. Default Broad Workflow Permissions”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        }
-      ]
-    },
-    {
-      "id": "security-02",
-      "source": "security-01.md",
-      "items": [
-        {
           "id": "AP-SEC-31",
           "title": "SEC-31. Write Token in Build Job",
           "priority": "P0",
@@ -590,7 +299,7 @@
       ]
     },
     {
-      "id": "security-03",
+      "id": "security-02",
       "source": "security-01.md",
       "items": [
         {
@@ -881,7 +590,7 @@
       ]
     },
     {
-      "id": "security-04",
+      "id": "security-03",
       "source": "security-02.md",
       "items": [
         {
@@ -1172,7 +881,7 @@
       ]
     },
     {
-      "id": "security-05",
+      "id": "security-04",
       "source": "security-02.md",
       "items": [
         {
@@ -1463,7 +1172,7 @@
       ]
     },
     {
-      "id": "security-06",
+      "id": "security-05",
       "source": "security-02.md",
       "items": [
         {

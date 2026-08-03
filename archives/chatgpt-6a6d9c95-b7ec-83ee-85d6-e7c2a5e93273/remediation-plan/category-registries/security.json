@@ -533,13 +533,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-16. Same-Origin Proxy as Automatic Trust”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-16. same-origin proxy as automatic trust after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Search and content data are site-owned static artifacts; no same-origin proxy is treated as an automatic trust boundary."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-17",
@@ -552,13 +568,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-17. Markdown Is Trusted HTML”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-17. markdown is trusted html after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Markdown is independently parsed and release-checked; source content is not treated as executable HTML by policy."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-18",
@@ -571,13 +603,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-18. Raw HTML Everywhere”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-18. raw html everywhere after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Raw HTML usage is a reviewed theme/content boundary rather than an assumption that every Markdown fragment is safe."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-19",
@@ -590,13 +638,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-19. Unsafe HTML Injection”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-19. unsafe html injection after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The security/admin gate scans for innerHTML sinks and the current artifact passes with zero open P0 findings."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-20",
@@ -609,13 +673,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-20. Search Highlight via String Replacement”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-20. search highlight via string replacement after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Search highlighting escapes every non-match and query fragment before producing the bounded mark wrapper; it does not insert raw query text."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-21",
@@ -628,13 +708,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-21. Unescaped Front Matter”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-21. unescaped front matter after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Frontmatter is independently parsed with js-yaml and validated through the Astro schema before publication."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-22",
@@ -647,13 +743,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-22. Trusting Generated Content”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-22. trusting generated content after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Generated JSON-LD escapes the less-than character before inline emission and release verification covers the generated artifact."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-23",
@@ -666,13 +778,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-23. Unsafe URL Scheme”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-23. unsafe url scheme after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "URL safety is bounded by schema, internal-link, and release checks; no universal trust claim is made for arbitrary external schemes."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-24",
@@ -685,13 +813,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-24. Unrestricted Iframe Embedding”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-24. unrestricted iframe embedding after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The only supported iframe provider is explicitly allowlisted in CSP and the optional comments integration is isolated from article rendering."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-25",
@@ -704,13 +848,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-25. Overpowered Iframe Sandbox”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-25. overpowered iframe sandbox after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Iframe sandbox strength is provider-specific and is retained as a manual review boundary rather than inferred from the existence of an iframe."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-26",
@@ -723,13 +883,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-26. Untrusted SVG as Image”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-26. untrusted svg as image after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "SVG assets are repository-owned and audited for structure/accessibility; external SVG trust is not inferred."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-27",
@@ -742,13 +918,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-27. Generated SVG Injection”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-27. generated svg injection after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Generated diagram output is covered by structural/quality audits; arbitrary user SVG injection is outside the static content contract."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-28",
@@ -761,13 +953,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-28. Actions Pinned by Mutable Tag”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-28. actions pinned by mutable tag after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "CI security rejects mutable GitHub Action references and requires immutable 40-character commit pins."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-29",
@@ -780,13 +988,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-29. Arbitrary Third-Party Action”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-29. arbitrary third-party action after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "CI security audits the complete workflow set and enforces read-only contents permissions plus the release contract."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-30",
@@ -799,13 +1023,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-30. Default Broad Workflow Permissions”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-30. default broad workflow permissions after parser, renderer, asset, or workflow changes.",
+      "scope": "Static-site parsing, rendering, and CI security boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/search.ts",
+            "scripts/audit-frontmatter-portability.mjs",
+            "scripts/security-admin-gate.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "src/layouts/BaseLayout.astro",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:frontmatter-portability && npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Both workflows declare least-privilege contents: read permissions and the CI security gate fails missing permissions."
+        }
+      ],
+      "residualRisk": "Evidence covers checked-in code and generated artifacts; browser parser behavior, provider-hosted content, and novel input paths still require targeted review."
     },
     {
       "id": "AP-SEC-31",

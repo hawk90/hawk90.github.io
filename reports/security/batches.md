@@ -2,29 +2,11 @@
 
 - Category state: baseline_established
 - Dependencies not complete: repository, quality
-- Unassessed items: 85
+- Unassessed items: 70
 - Maximum batch size: 15
-- Batches: 6
+- Batches: 5
 
 ## security-01 — security-01.md
-
-- AP-SEC-16 (P0, L) — SEC-16. Same-Origin Proxy as Automatic Trust
-- AP-SEC-17 (P0, L) — SEC-17. Markdown Is Trusted HTML
-- AP-SEC-18 (P0, L) — SEC-18. Raw HTML Everywhere
-- AP-SEC-19 (P0, L) — SEC-19. Unsafe HTML Injection
-- AP-SEC-20 (P0, L) — SEC-20. Search Highlight via String Replacement
-- AP-SEC-21 (P0, L) — SEC-21. Unescaped Front Matter
-- AP-SEC-22 (P0, L) — SEC-22. Trusting Generated Content
-- AP-SEC-23 (P0, L) — SEC-23. Unsafe URL Scheme
-- AP-SEC-24 (P0, L) — SEC-24. Unrestricted Iframe Embedding
-- AP-SEC-25 (P0, L) — SEC-25. Overpowered Iframe Sandbox
-- AP-SEC-26 (P0, L) — SEC-26. Untrusted SVG as Image
-- AP-SEC-27 (P0, L) — SEC-27. Generated SVG Injection
-- AP-SEC-28 (P0, L) — SEC-28. Actions Pinned by Mutable Tag
-- AP-SEC-29 (P0, L) — SEC-29. Arbitrary Third-Party Action
-- AP-SEC-30 (P0, L) — SEC-30. Default Broad Workflow Permissions
-
-## security-02 — security-01.md
 
 - AP-SEC-31 (P0, L) — SEC-31. Write Token in Build Job
 - AP-SEC-32 (P0, L) — SEC-32. Secrets Available to Every Step
@@ -42,7 +24,7 @@
 - AP-SEC-44 (P0, L) — SEC-44. Automatic Major Update Merge
 - AP-SEC-45 (P0, L) — SEC-45. Vulnerability Count Theater
 
-## security-03 — security-01.md
+## security-02 — security-01.md
 
 - AP-SEC-46 (P0, L) — SEC-46. Ignoring Build-Time Compromise
 - AP-SEC-47 (P0, L) — SEC-47. Install Script Trust
@@ -60,7 +42,7 @@
 - AP-SEC-59 (P0, L) — SEC-59. Token in URL
 - AP-SEC-100 (P0, L) — SEC-100. Maximum Security Complexity
 
-## security-04 — security-02.md
+## security-03 — security-02.md
 
 - AP-SEC-60 (P0, L) — SEC-60. Editor Can Commit Anywhere
 - AP-SEC-61 (P0, L) — SEC-61. Editor Can Modify Workflow Files
@@ -78,7 +60,7 @@
 - AP-SEC-73 (P0, L) — SEC-73. Giscus as a First-Party Comment Store
 - AP-SEC-74 (P0, L) — SEC-74. Loading Comments Before User Intent
 
-## security-05 — security-02.md
+## security-04 — security-02.md
 
 - AP-SEC-75 (P0, L) — SEC-75. Advertising Identifier Assumptions
 - AP-SEC-76 (P0, L) — SEC-76. HTTPS Optional
@@ -96,7 +78,7 @@
 - AP-SEC-88 (P0, L) — SEC-88. Real Token in Tutorial
 - AP-SEC-89 (P0, L) — SEC-89. Secret Redaction by Partial Mask
 
-## security-06 — security-02.md
+## security-05 — security-02.md
 
 - AP-SEC-90 (P0, L) — SEC-90. Private Draft in Git History
 - AP-SEC-91 (P0, L) — SEC-91. No Security Update Routine
