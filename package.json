@@ -146,7 +146,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^5.2.2",
     "typescript": "^5.9.3"
   }
 }
