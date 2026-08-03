@@ -1058,13 +1058,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-31. Write Token in Build Job”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-31. write token in build job after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "The build job declares contents: read and the deploy write permissions are isolated to the deployment job."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-32",
@@ -1077,13 +1092,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-32. Secrets Available to Every Step”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-32. secrets available to every step after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "Workflow secrets are not used by the static build contract; secret availability is reviewed as a workflow-specific concern."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-33",
@@ -1096,13 +1126,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-33. Secret Printed Through Debug Logging”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-33. secret printed through debug logging after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "The release secret scan runs against source and dist and fails credential-shaped output rather than printing secrets."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-34",
@@ -1115,13 +1160,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-34. Secret in Build Artifact”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-34. secret in build artifact after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "The production artifact is scanned by gate:secrets before upload/deploy."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-35",
@@ -1134,13 +1194,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-35. Pull Request Workflow with Secrets”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-35. pull request workflow with secrets after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "CI is pull-request safe and does not expose deployment credentials; deployment is isolated to main."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-36",
@@ -1153,13 +1228,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-36. Unsafe `pull_request_target`”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-36. unsafe `pull_request_target` after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "No pull_request_target workflow is present; CI uses ordinary pull_request and read-only permissions."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-37",
@@ -1172,13 +1262,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-37. Branch Name Injection”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-37. branch name injection after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "Branch/ref values are not treated as shell code by the checked-in workflows; future dynamic workflow interpolation remains review-required."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-38",
@@ -1191,13 +1296,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-38. Untrusted Markdown Executed During Build”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-38. untrusted markdown executed during build after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "Markdown is consumed by Astro build tooling under the release contract; arbitrary shell execution from content is not inferred."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-39",
@@ -1210,13 +1330,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-39. Build Tool with Repository Write Access”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-39. build tool with repository write access after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "Build and deploy permissions are job-scoped; the build job has read-only repository access."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-40",
@@ -1229,13 +1364,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-40. Deployment From Unreviewed Commit”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-40. deployment from unreviewed commit after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "Deployment is triggered only from main and runs the canonical release verification before artifact upload."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-41",
@@ -1248,13 +1398,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-41. Blind Dependency Installation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-41. blind dependency installation after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "CI and deployment use npm ci against the lockfile instead of an unconstrained install."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-42",
@@ -1267,13 +1432,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-42. Dependency for Minor Convenience”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-42. dependency for minor convenience after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "Dependency necessity is reviewed through the checked-in package manifest and tooling audit; no blanket “small convenience” exemption is claimed."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-43",
@@ -1286,13 +1466,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-43. Transitive Dependency Blindness”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-43. transitive dependency blindness after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "npm audit and lockfile-based installation provide a bounded transitive-dependency signal, not proof of zero supply-chain risk."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-44",
@@ -1305,13 +1500,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-44. Automatic Major Update Merge”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-44. automatic major update merge after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "No automatic major-update merge workflow is present; dependency updates remain reviewable repository changes."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-45",
@@ -1324,13 +1534,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-45. Vulnerability Count Theater”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-45. vulnerability count theater after workflow or dependency changes.",
+      "scope": "Checked-in workflow and dependency boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "package.json",
+            "package-lock.json",
+            "scripts/audit-ci-security.mjs",
+            "scripts/scan-secrets.mjs",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs"
+          ],
+          "verification": "npm run gate:ci-security && npm run gate:secrets && npm run gate:dependencies && npm run verify:release",
+          "result": "Vulnerability counts are treated as signals; release gates combine dependency, secret, artifact, and build checks."
+        }
+      ],
+      "residualRisk": "Evidence covers repository-controlled jobs and manifests; hosted runner behavior, transitive package intent, and external provider state still require targeted review."
     },
     {
       "id": "AP-SEC-46",

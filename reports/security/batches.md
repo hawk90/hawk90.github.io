@@ -2,29 +2,11 @@
 
 - Category state: baseline_established
 - Dependencies not complete: repository, quality
-- Unassessed items: 70
+- Unassessed items: 55
 - Maximum batch size: 15
-- Batches: 5
+- Batches: 4
 
 ## security-01 — security-01.md
-
-- AP-SEC-31 (P0, L) — SEC-31. Write Token in Build Job
-- AP-SEC-32 (P0, L) — SEC-32. Secrets Available to Every Step
-- AP-SEC-33 (P0, L) — SEC-33. Secret Printed Through Debug Logging
-- AP-SEC-34 (P0, L) — SEC-34. Secret in Build Artifact
-- AP-SEC-35 (P0, L) — SEC-35. Pull Request Workflow with Secrets
-- AP-SEC-36 (P0, L) — SEC-36. Unsafe `pull_request_target`
-- AP-SEC-37 (P0, L) — SEC-37. Branch Name Injection
-- AP-SEC-38 (P0, L) — SEC-38. Untrusted Markdown Executed During Build
-- AP-SEC-39 (P0, L) — SEC-39. Build Tool with Repository Write Access
-- AP-SEC-40 (P0, L) — SEC-40. Deployment From Unreviewed Commit
-- AP-SEC-41 (P0, L) — SEC-41. Blind Dependency Installation
-- AP-SEC-42 (P0, L) — SEC-42. Dependency for Minor Convenience
-- AP-SEC-43 (P0, L) — SEC-43. Transitive Dependency Blindness
-- AP-SEC-44 (P0, L) — SEC-44. Automatic Major Update Merge
-- AP-SEC-45 (P0, L) — SEC-45. Vulnerability Count Theater
-
-## security-02 — security-01.md
 
 - AP-SEC-46 (P0, L) — SEC-46. Ignoring Build-Time Compromise
 - AP-SEC-47 (P0, L) — SEC-47. Install Script Trust
@@ -42,7 +24,7 @@
 - AP-SEC-59 (P0, L) — SEC-59. Token in URL
 - AP-SEC-100 (P0, L) — SEC-100. Maximum Security Complexity
 
-## security-03 — security-02.md
+## security-02 — security-02.md
 
 - AP-SEC-60 (P0, L) — SEC-60. Editor Can Commit Anywhere
 - AP-SEC-61 (P0, L) — SEC-61. Editor Can Modify Workflow Files
@@ -60,7 +42,7 @@
 - AP-SEC-73 (P0, L) — SEC-73. Giscus as a First-Party Comment Store
 - AP-SEC-74 (P0, L) — SEC-74. Loading Comments Before User Intent
 
-## security-04 — security-02.md
+## security-03 — security-02.md
 
 - AP-SEC-75 (P0, L) — SEC-75. Advertising Identifier Assumptions
 - AP-SEC-76 (P0, L) — SEC-76. HTTPS Optional
@@ -78,7 +60,7 @@
 - AP-SEC-88 (P0, L) — SEC-88. Real Token in Tutorial
 - AP-SEC-89 (P0, L) — SEC-89. Secret Redaction by Partial Mask
 
-## security-05 — security-02.md
+## security-04 — security-02.md
 
 - AP-SEC-90 (P0, L) — SEC-90. Private Draft in Git History
 - AP-SEC-91 (P0, L) — SEC-91. No Security Update Routine
